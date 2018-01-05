@@ -1,0 +1,403 @@
+// Microsoft Visual C++ generated resource script.
+//
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include "utl/resource.h"
+#include "afxres.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// English (U.S.) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+#ifdef _WIN32
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+#pragma code_page(1252)
+#endif //_WIN32
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_CAPITALIZE_OPTIONS DIALOGEX 0, 0, 229, 250
+STYLE DS_SETFONT | WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME
+CAPTION "Capitalize Options"
+FONT 8, "MS Sans Serif", 0, 0, 0x0
+BEGIN
+    LTEXT           "Word-&break characters:",IDC_STATIC,7,7,78,8
+    EDITTEXT        IDC_WORD_BREAK_CHARS_EDIT,7,17,215,12,ES_AUTOHSCROLL
+    LTEXT           "Word-break prefi&xes:",IDC_STATIC,7,35,70,8
+    EDITTEXT        IDC_WORD_BREAK_PREFIXES_EDIT,7,44,215,12,ES_AUTOHSCROLL | ES_WANTRETURN
+    LTEXT           "Words always &preserved:",IDC_STATIC,7,61,83,8
+    EDITTEXT        IDC_WORDS_PRESERVED_EDIT,7,71,215,12,ES_AUTOHSCROLL | ES_WANTRETURN
+    LTEXT           "Words always in &upper case:",IDC_STATIC,7,88,93,8
+    EDITTEXT        IDC_WORDS_UPPERCASE_EDIT,7,98,215,12,ES_AUTOHSCROLL | ES_WANTRETURN
+    LTEXT           "Words always in &lower case:",IDC_STATIC,7,115,92,8
+    EDITTEXT        IDC_WORDS_LOWERCASE_EDIT,7,125,215,12,ES_AUTOHSCROLL | ES_WANTRETURN
+    GROUPBOX        "Title Case Rules",IDC_GROUP_BOX_1,7,144,215,74,WS_GROUP
+    CONTROL         "Ignore &numeric prefix from the title",IDC_SKIP_NUMERIC_PREFIX_CHECK,
+                    "Button",BS_AUTOCHECKBOX | WS_GROUP | WS_TABSTOP,13,156,128,10
+    RTEXT           "&Articles:",IDC_STATIC,10,173,45,8
+    EDITTEXT        IDC_ARTICLES_EDIT,58,171,93,12,ES_AUTOHSCROLL
+    COMBOBOX        IDC_ARTICLES_COMBO,154,170,63,55,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    RTEXT           "&Conjunctions:",IDC_STATIC,10,187,45,8
+    EDITTEXT        IDC_CONJUNCTIONS_EDIT,58,185,93,12,ES_AUTOHSCROLL
+    COMBOBOX        IDC_CONJUNCTIONS_COMBO,154,185,63,51,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    RTEXT           "P&repositions:",IDC_STATIC,10,203,45,8
+    EDITTEXT        IDC_PREPOSITIONS_EDIT,58,200,93,12,ES_AUTOHSCROLL
+    COMBOBOX        IDC_PREPOSITIONS_COMBO,154,200,63,55,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    DEFPUSHBUTTON   "OK",IDOK,64,229,50,14,WS_GROUP
+    PUSHBUTTON      "Cancel",IDCANCEL,118,229,50,14
+    PUSHBUTTON      "&Defaults",IDC_SET_DEFAULT_ALL,172,229,50,14
+END
+
+IDD_RENAME_FILES_DIALOG DIALOGEX 0, 0, 339, 238
+STYLE DS_SETFONT | WS_MAXIMIZEBOX | WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME
+CAPTION "Rename Files"
+FONT 8, "MS Sans Serif", 0, 0, 0x0
+BEGIN
+    RTEXT           "Re&name format (fn.ext):",IDC_STATIC,5,9,74,8
+    COMBOBOX        IDC_FORMAT_COMBO,82,6,101,95,CBS_DROPDOWN | CBS_AUTOHSCROLL | WS_VSCROLL | WS_GROUP | WS_TABSTOP
+    RTEXT           "&Sequence counter:",IDC_COUNTER_LABEL,17,25,62,8
+    EDITTEXT        IDC_SEQ_COUNTER_EDIT,82,24,61,12,ES_AUTOHSCROLL | ES_NUMBER | WS_GROUP
+    PUSHBUTTON      "&1",IDC_RESET_SEQ_COUNTER_BUTTON,144,24,12,12,NOT WS_TABSTOP
+    LTEXT           "&Files to rename:",IDC_STATIC,5,47,50,8
+    CONTROL         "List1",IDC_FILE_RENAME_LIST,"SysListView32",LVS_REPORT | LVS_SINGLESEL | LVS_SHOWSELALWAYS | WS_BORDER | WS_GROUP | WS_TABSTOP,5,57,329,123
+    GROUPBOX        "Source files",IDC_SOURCE_FILES_GROUP,5,183,63,31,BS_LEFT | WS_GROUP
+    PUSHBUTTON      "&Copy",IDC_COPY_SOURCE_PATHS_BUTTON,11,194,50,14,WS_GROUP
+    PUSHBUTTON      "&Paste",IDC_PASTE_FILES_BUTTON,81,194,50,14
+    PUSHBUTTON      "Clear",IDC_CLEAR_FILES_BUTTON,135,194,50,14
+    PUSHBUTTON      " C&apitalize|...",IDC_CAPITALIZE_BUTTON,190,194,50,14
+    PUSHBUTTON      "C&hange Case",IDC_CHANGE_CASE_BUTTON,244,194,84,14
+    PUSHBUTTON      "&Replace...",IDC_REPLACE_FILES_BUTTON,81,212,50,14
+    PUSHBUTTON      "Replace &All:",IDC_REPLACE_DELIMS_BUTTON,135,212,50,14
+    COMBOBOX        IDC_DELIMITER_SET_COMBO,190,213,50,95,CBS_DROPDOWN | CBS_AUTOHSCROLL | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "->",IDC_DELIMITER_STATIC,241,213,13,12
+    EDITTEXT        IDC_NEW_DELIMITER_EDIT,255,213,41,12,ES_AUTOHSCROLL
+    CTEXT           "<TA>",IDC_PICK_RENAME_ACTIONS,309,213,18,12,SS_NOTIFY | SS_CENTERIMAGE
+    GROUPBOX        "Destination files",IDC_DESTINATION_FILES_GROUP,75,183,258,50,BS_LEFT | WS_GROUP
+    DEFPUSHBUTTON   "&Make Names",IDOK,284,5,50,14,WS_GROUP
+    PUSHBUTTON      "&Undo",IDC_UNDO_BUTTON,284,21,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,284,37,50,14
+    LTEXT           "<strip1>",IDC_STRIP_BAR_1,185,6,33,12,SS_CENTERIMAGE | WS_CLIPSIBLINGS | WS_BORDER
+END
+
+IDD_REPLACE_DIALOG DIALOGEX 0, 0, 241, 94
+STYLE DS_SETFONT | WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME
+CAPTION "Replace in Filename"
+FONT 8, "MS Sans Serif", 0, 0, 0x0
+BEGIN
+    LTEXT           "&Find what:",IDC_STATIC,8,11,34,8
+    COMBOBOX        IDC_FIND_WHAT_COMBO,55,8,85,95,CBS_DROPDOWN | CBS_AUTOHSCROLL | WS_VSCROLL | WS_GROUP | WS_TABSTOP
+    LTEXT           "<strip1>",IDC_STRIP_BAR_1,142,8,33,12,SS_CENTERIMAGE | WS_CLIPSIBLINGS | WS_BORDER
+    LTEXT           "&Replace with:",IDC_STATIC,8,27,44,8
+    COMBOBOX        IDC_REPLACE_WITH_COMBO,55,26,85,95,CBS_DROPDOWN | CBS_AUTOHSCROLL | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "<strip2>",IDC_STRIP_BAR_2,142,26,33,12,SS_CENTERIMAGE | WS_CLIPSIBLINGS | WS_BORDER
+    GROUPBOX        "Find options",IDC_GROUP_BOX_1,8,44,165,41,WS_GROUP
+    CONTROL         "Match &case",IDC_MATCH_CASE_CHECK,"Button",BS_AUTOCHECKBOX | WS_GROUP | WS_TABSTOP,14,56,53,10
+    CONTROL         "Replace &text",IDC_TEXT_RADIO,"Button",BS_AUTORADIOBUTTON | WS_GROUP | WS_TABSTOP,84,56,56,10
+    CONTROL         "Replace c&haracters",IDC_CHARACTERS_RADIO,"Button",BS_AUTORADIOBUTTON,84,70,78,10
+    DEFPUSHBUTTON   "Replace &All",IDOK,183,8,50,14,WS_GROUP
+    PUSHBUTTON      "Cancel",IDCANCEL,183,25,50,14
+    PUSHBUTTON      "Clear",IDC_CLEAR_FILES_BUTTON,183,72,50,14
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO 
+BEGIN
+    IDD_CAPITALIZE_OPTIONS, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 222
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 243
+    END
+
+    IDD_RENAME_FILES_DIALOG, DIALOG
+    BEGIN
+        LEFTMARGIN, 5
+        RIGHTMARGIN, 334
+        TOPMARGIN, 5
+        BOTTOMMARGIN, 233
+    END
+
+    IDD_REPLACE_DIALOG, DIALOG
+    BEGIN
+        LEFTMARGIN, 8
+        RIGHTMARGIN, 233
+        TOPMARGIN, 8
+        BOTTOMMARGIN, 86
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE 
+BEGIN
+    "#include ""utl/resource.h""\r\n"
+    "#include ""afxres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE 
+BEGIN
+    "#include ""afxres.rc""         // standard components: need it for CFileException::GetErrorMessage()\r\n"
+    "#include ""utl/utl_ui.rc""\r\n"
+    "\r\n"
+    "1 TYPELIB ""FileRenShell.tlb""\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Version
+//
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION 5,1,0,3
+ PRODUCTVERSION 5,1,0,3
+ FILEFLAGSMASK 0x3fL
+#ifdef _DEBUG
+ FILEFLAGS 0x1L
+#else
+ FILEFLAGS 0x0L
+#endif
+ FILEOS 0x4L
+ FILETYPE 0x2L
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904b0"
+        BEGIN
+            VALUE "Comments", "Source highlighting"
+            VALUE "CompanyName", "Paul Cocoveanu"
+            VALUE "Email", "phc.2nd@gmail.com"
+            VALUE "FileDescription", "Shell extension for renaming files and folders"
+            VALUE "FileVersion", "5, 1, 0, 3"
+            VALUE "InternalName", "FileRenShell"
+            VALUE "LegalCopyright", "Copyright © 2001-2016"
+            VALUE "OriginalFilename", "FileRenShell64.dll"
+            VALUE "ProductName", "FileRenShell Shell Extension DLL"
+            VALUE "ProductVersion", "5, 1, 0, 3"
+            VALUE "WrittenBy", "Written by Paul Cocoveanu"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x409, 1200
+    END
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// REGISTRY
+//
+
+IDR_FILERENAMESHELL     REGISTRY                "FileRenameShell.rgs"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Icon
+//
+
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+IDD_RENAME_FILES_DIALOG ICON                    "res\\Application.ico"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Menu
+//
+
+IDR_CONTEXT_MENU_MENU MENU 
+BEGIN
+    POPUP "<format picker>"
+    BEGIN
+        MENUITEM "&2 Digits Numeric Sequence ##\t(01, 02, ...)", ID_NUMERIC_SEQUENCE_2DIGITS
+        MENUITEM "&3 Digits Numeric Sequence ###\t(001, 002, ...)", ID_NUMERIC_SEQUENCE_3DIGITS
+        MENUITEM "&4 Digits Numeric Sequence ####\t(0001, 0002, ...)", ID_NUMERIC_SEQUENCE_4DIGITS
+        MENUITEM "&5 Digits Numeric Sequence #####\t(00001, 00002, ...)", ID_NUMERIC_SEQUENCE_5DIGITS
+        MENUITEM SEPARATOR
+        MENUITEM "&Numeric Sequence #\t(1, 2, 17, 283...)", ID_NUMERIC_SEQUENCE
+        MENUITEM SEPARATOR
+        MENUITEM "&Wildcard\t*",                ID_WILDCARD
+        MENUITEM "E&xtension Separator\t.",     ID_EXTENSION_SEPARATOR
+    END
+    POPUP "<more text actions>"
+    BEGIN
+        MENUITEM "&Single Whitespace\t""   "" to "" """, ID_SINGLE_WHITESPACE
+        MENUITEM "&Remove Whitespace\t""    "" to """"", ID_REMOVE_WHITESPACE
+        MENUITEM SEPARATOR
+        MENUITEM "&Dash to Space\t""-"" to "" """, ID_DASH_TO_SPACE
+        MENUITEM "Space to Dash\t"" "" to ""-""", ID_SPACE_TO_DASH
+        MENUITEM "&Underbar to Space\t""_"" to "" """, ID_UNDERBAR_TO_SPACE
+        MENUITEM "Space to Underbar\t"" "" to ""_""", ID_SPACE_TO_UNDERBAR
+    END
+    POPUP "<text tools>"
+    BEGIN
+        MENUITEM "&Title Case",                 ID_TEXT_TITLE_CASE
+        MENUITEM "&lower case",                 ID_TEXT_LOWER_CASE
+        MENUITEM "&UPPER CASE",                 ID_TEXT_UPPER_CASE
+        MENUITEM SEPARATOR
+        MENUITEM "Replace &Delimiters",         ID_TEXT_REPLACE_DELIMS
+        MENUITEM "&Single Whitespace\t""   "" to "" """, ID_TEXT_SINGLE_WHITESPACE
+        MENUITEM "&Remove Whitespace\t""    "" to """"", ID_TEXT_REMOVE_WHITESPACE
+        MENUITEM SEPARATOR
+        MENUITEM "&Dash to Space\t""-"" to "" """, ID_TEXT_DASH_TO_SPACE
+        MENUITEM "Space to Dash\t"" "" to ""-""", ID_TEXT_SPACE_TO_DASH
+        MENUITEM "&Underbar to Space\t""_"" to "" """, ID_TEXT_UNDERBAR_TO_SPACE
+        MENUITEM "Space to Underbar\t"" "" to ""_""", ID_TEXT_SPACE_TO_UNDERBAR
+    END
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Toolbar
+//
+
+IDR_IMAGE_STRIP TOOLBAR  16, 16
+BEGIN
+    BUTTON      IDI_SEND_TO_CLIP
+    BUTTON      IDD_CAPITALIZE_OPTIONS
+    BUTTON      IDC_CHANGE_CASE_BUTTON
+    SEPARATOR
+    BUTTON      ID_SHELL_SUBMENU
+    SEPARATOR
+    BUTTON      ID_RENAME_AND_COPY
+    SEPARATOR
+    BUTTON      ID_PICK_FORMAT_TOKEN
+    BUTTON      ID_PICK_TEXT_TOOLS
+    BUTTON      ID_TOGGLE_AUTO_GENERATE
+    SEPARATOR
+    BUTTON      ID_PICK_FILENAME
+    BUTTON      ID_COPY_FIND_TO_REPLACE
+    BUTTON      ID_PICK_DIR_PATH
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Bitmap
+//
+
+IDR_IMAGE_STRIP         BITMAP                  "res\\ImageStrip.bmp"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// PNG
+//
+
+IDR_IMAGE_STRIP         PNG                     "res\\ImageStrip.png"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// String Table
+//
+
+STRINGTABLE 
+BEGIN
+    IDS_INVALID_FORMAT      "Invalid rename format: %s\n\nIt should contain *, ? or %% formatting characters\nin order to generate a sequence of unique filenames."
+    IDS_NO_DELIMITER_SET    "Please enter the delimiters to replace!"
+    IDS_OK_BUTTON_LABELS    "&Make Names|Rena&me|R&ollback"
+    IDS_CHANGE_CASE_TAGS    "filename.ext|FILENAME.EXT|filename.*|FILENAME.*|*.ext|*.EXT|* (no ext)"
+    IDS_CASE_MODIFY_TAGS    "Preserve|Upper Case|Lower Case"
+    IDS_REPLACE_FILES_TIP_FORMAT "Ctrl+Click to replace ""%s"" with ""%s"""
+END
+
+STRINGTABLE 
+BEGIN
+    IDC_FILE_RENAME_LIST    "Source files=-50|Destination files=-50"
+    IDC_CAPITALIZE_BUTTON   "Capitalize filename using sentence case, make extension lower case"
+END
+
+STRINGTABLE 
+BEGIN
+    IDC_CLEAR_FILES_BUTTON  "Clear destination filenames"
+    IDC_UNDO_BUTTON         "Undo the last file rename operation"
+    IDC_EDITION_STATIC      "%d Edition%s%s"
+END
+
+STRINGTABLE 
+BEGIN
+    IDC_CHANGE_CASE_BUTTON  "Make lower case|Make upper case|Make filename lower case|Make filename upper case|Make extension lower case|Make extension upper case|Remove extension"
+    IDC_RESET_SEQ_COUNTER_BUTTON "Reset numeric sequence to 1"
+END
+
+STRINGTABLE 
+BEGIN
+    IDI_DETAILS             "Edit details"
+END
+
+STRINGTABLE 
+BEGIN
+    IDC_PICK_RENAME_ACTIONS "More Rename Actions"
+END
+
+STRINGTABLE 
+BEGIN
+    ID_PICK_FILENAME        "Pick common pattern among selected filenames (Ctrl+Click to pick the first filename)"
+    ID_PICK_DIR_PATH        "Pick a parent directory of the first file path (Ctrl+Click to pick the direct parent directory)"
+    ID_COPY_FIND_TO_REPLACE "Copy pattern to replace"
+END
+
+STRINGTABLE 
+BEGIN
+    ID_PICK_FORMAT_TOKEN    "Formatting tokens"
+    ID_PICK_TEXT_TOOLS      "Text tools"
+    ID_TOGGLE_AUTO_GENERATE "Make filenames automatically when changing format"
+END
+
+STRINGTABLE 
+BEGIN
+    ID_EDIT_CLEAR           "Clear"
+END
+
+#endif    // English (U.S.) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+#include "afxres.rc"         // standard components: need it for CFileException::GetErrorMessage()
+#include "utl/utl_ui.rc"
+
+1 TYPELIB "FileRenShell.tlb"
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+
