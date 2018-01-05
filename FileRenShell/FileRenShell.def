@@ -1,0 +1,11 @@
+; FileRenShell.def : Declares the module parameters.
+
+; comment-out since the dll filename is different in 32/64 bit builds
+; LIBRARY      "FileRenShell.DLL"
+; LIBRARY      "FileRenShell64.DLL"
+
+EXPORTS
+	DllCanUnloadNow PRIVATE
+	DllGetClassObject PRIVATE
+	DllRegisterServer PRIVATE
+    DllUnregisterServer PRIVATE

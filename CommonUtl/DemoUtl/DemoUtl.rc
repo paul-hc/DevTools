@@ -1,0 +1,865 @@
+// Microsoft Visual C++ generated resource script.
+//
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include "utl/resource.h"
+#include "afxres.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// English (U.S.) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+#ifdef _WIN32
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+#pragma code_page(1252)
+#endif //_WIN32
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE 
+BEGIN
+    "#include ""utl/resource.h""\r\n"
+    "#include ""afxres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE 
+BEGIN
+    "#include ""utl/utl_ui.rc""\r\n"
+    "#include ""res\\DemoUtl.rc2""       // non-Microsoft Visual C++ edited resources\r\n"
+    "\r\n"
+    "#define _AFX_NO_OLE_RESOURCES\r\n"
+    "#define _AFX_NO_TRACKER_RESOURCES\r\n"
+    "#define _AFX_NO_PROPERTY_RESOURCES\r\n"
+    "\r\n"
+    "#include ""afxres.rc""         // Standard components\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Icon
+//
+
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+IDR_MAINFRAME           ICON                    "res\\DemoUtl.ico"
+IDR_TEST_DOC_TYPE       ICON                    "res\\TestDoc.ico"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Bitmap
+//
+
+IDR_MAINFRAME           BITMAP                  "res\\Toolbar.bmp"
+IDR_LOW_COLOR_STRIP     BITMAP                  "res\\LowColorStrip.bmp"
+IDR_IMAGE_STRIP         BITMAP                  "res\\ImageStrip.bmp"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// PNG
+//
+
+IDR_MAINFRAME           PNG                     "res\\Toolbar.png"
+IDR_IMAGE_STRIP         PNG                     "res\\ImageStrip.png"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Toolbar
+//
+
+IDR_MAINFRAME TOOLBAR  16, 16
+BEGIN
+    BUTTON      ID_FILE_NEW
+    BUTTON      ID_FILE_OPEN
+    BUTTON      ID_FILE_SAVE
+    SEPARATOR
+    BUTTON      ID_EDIT_CUT
+    BUTTON      ID_EDIT_COPY
+    BUTTON      ID_EDIT_PASTE
+    SEPARATOR
+    BUTTON      ID_FILE_PRINT
+    SEPARATOR
+    BUTTON      ID_APP_ABOUT
+END
+
+IDR_LOW_COLOR_STRIP TOOLBAR  16, 16
+BEGIN
+    BUTTON      ID_RECORD_NEXT
+    BUTTON      ID_RECORD_PREV
+END
+
+IDR_IMAGE_STRIP TOOLBAR  16, 16
+BEGIN
+    BUTTON      ID_STUDY_IMAGE
+    SEPARATOR
+    BUTTON      ID_CHANGE_CASE
+    BUTTON      ID_SEND_TO_CLIPBOARD
+    BUTTON      ID_NUMERIC_SEQUENCE
+    SEPARATOR
+    BUTTON      ID_AUTO_TRANSP_TOOL
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Menu
+//
+
+IDR_MAINFRAME MENU 
+BEGIN
+    POPUP "&File"
+    BEGIN
+        MENUITEM "&New\tCtrl+N",                ID_FILE_NEW
+        MENUITEM "&Open...\tCtrl+O",            ID_FILE_OPEN
+        MENUITEM SEPARATOR
+        MENUITEM "Recent File",                 ID_FILE_MRU_FILE1, GRAYED
+        MENUITEM SEPARATOR
+        MENUITEM "&Close",                      ID_FILE_CLOSE
+        MENUITEM "E&xit",                       ID_APP_EXIT
+    END
+    POPUP "&View"
+    BEGIN
+        MENUITEM "&Toolbar",                    ID_VIEW_TOOLBAR
+        MENUITEM "&Status Bar",                 ID_VIEW_STATUS_BAR
+    END
+    POPUP "&Help"
+    BEGIN
+        MENUITEM "&About DemoUtl...",           ID_APP_ABOUT
+    END
+END
+
+IDR_TEST_DOC_TYPE MENU 
+BEGIN
+    POPUP "&File"
+    BEGIN
+        MENUITEM "&New\tCtrl+N",                ID_FILE_NEW
+        MENUITEM "&Open...\tCtrl+O",            ID_FILE_OPEN
+        MENUITEM "&Close",                      ID_FILE_CLOSE
+        MENUITEM "&Save\tCtrl+S",               ID_FILE_SAVE
+        MENUITEM "Save &As...",                 ID_FILE_SAVE_AS
+        MENUITEM SEPARATOR
+        MENUITEM "Recent File",                 ID_FILE_MRU_FILE1, GRAYED
+        MENUITEM SEPARATOR
+        MENUITEM "E&xit",                       ID_APP_EXIT
+    END
+    POPUP "&Edit"
+    BEGIN
+        MENUITEM "&Undo\tCtrl+Z",               ID_EDIT_UNDO
+        MENUITEM SEPARATOR
+        MENUITEM "Cu&t\tCtrl+X",                ID_EDIT_CUT
+        MENUITEM "&Copy\tCtrl+C",               ID_EDIT_COPY
+        MENUITEM "&Paste\tCtrl+V",              ID_EDIT_PASTE
+    END
+    POPUP "&View"
+    BEGIN
+        MENUITEM "&Toolbar",                    ID_VIEW_TOOLBAR
+        MENUITEM "&Status Bar",                 ID_VIEW_STATUS_BAR
+    END
+    POPUP "&Window"
+    BEGIN
+        MENUITEM "&New Window",                 ID_WINDOW_NEW
+        MENUITEM "&Cascade",                    ID_WINDOW_CASCADE
+        MENUITEM "&Tile",                       ID_WINDOW_TILE_HORZ
+        MENUITEM "&Arrange Icons",              ID_WINDOW_ARRANGE
+        MENUITEM "S&plit",                      ID_WINDOW_SPLIT
+    END
+    POPUP "&Help"
+    BEGIN
+        MENUITEM "&About DemoUtl...",           ID_APP_ABOUT
+    END
+END
+
+IDR_FORMAT_PICKER_MENU MENU 
+BEGIN
+    POPUP "<Format Picker>"
+    BEGIN
+        MENUITEM "&2 Digits Numeric Sequence\t(01, 02, ...)", ID_NUMERIC_SEQUENCE_2DIGITS
+        MENUITEM "&3 Digits Numeric Sequence\t(001, 002, ...)", ID_NUMERIC_SEQUENCE_3DIGITS
+        MENUITEM "&4 Digits Numeric Sequence\t(0001, 0002, ...)", ID_NUMERIC_SEQUENCE_4DIGITS
+        MENUITEM "&5 Digits Numeric Sequence\t(00001, 00002, ...)", ID_NUMERIC_SEQUENCE_5DIGITS
+        MENUITEM SEPARATOR
+        MENUITEM "&Numeric Sequence\t(1, 2, ...)", ID_NUMERIC_SEQUENCE
+        MENUITEM SEPARATOR
+        MENUITEM "&Wildcard\t*",                ID_WILDCARD
+        MENUITEM "E&xtension Separator\t.",     ID_EXTENSION_SEPARATOR
+    END
+    POPUP "<Checked Picker>"
+    BEGIN
+        MENUITEM "&2 Digits Numeric Sequence\t(01, 02, ...)", ID_NUMERIC_SEQUENCE_2DIGITS
+        MENUITEM "&3 Digits Numeric Sequence\t(001, 002, ...)", ID_NUMERIC_SEQUENCE_3DIGITS
+        MENUITEM "&4 Digits Numeric Sequence\t(0001, 0002, ...)", ID_NUMERIC_SEQUENCE_4DIGITS
+        MENUITEM "&5 Digits Numeric Sequence\t(00001, 00002, ...)", ID_NUMERIC_SEQUENCE_5DIGITS
+        MENUITEM SEPARATOR
+        MENUITEM "Drop Right",                  ID_WILDCARD
+        MENUITEM "Drop Down",                   ID_EXTENSION_SEPARATOR
+        MENUITEM "Drop Left",                   32782
+        MENUITEM "Drop Up",                     32783
+        MENUITEM SEPARATOR
+        POPUP "&File"
+        BEGIN
+            MENUITEM "&New\tCtrl+N",                ID_FILE_NEW
+            MENUITEM "&Open...\tCtrl+O",            ID_FILE_OPEN
+            MENUITEM "&Close",                      ID_FILE_CLOSE
+            MENUITEM "&Save\tCtrl+S",               ID_FILE_SAVE
+            MENUITEM "Save &As...",                 ID_FILE_SAVE_AS
+            MENUITEM SEPARATOR
+            MENUITEM "Recent File",                 ID_FILE_MRU_FILE1
+            MENUITEM SEPARATOR
+            MENUITEM "E&xit",                       ID_APP_EXIT
+        END
+        POPUP "&Edit"
+        BEGIN
+            MENUITEM "&Undo\tCtrl+Z",               ID_EDIT_UNDO
+            MENUITEM SEPARATOR
+            MENUITEM "Cu&t\tCtrl+X",                ID_EDIT_CUT
+            MENUITEM "&Copy\tCtrl+C",               ID_EDIT_COPY
+            MENUITEM "&Paste\tCtrl+V",              ID_EDIT_PASTE
+        END
+        MENUITEM "&About DemoUtl...",           ID_APP_ABOUT
+        MENUITEM SEPARATOR
+        MENUITEM "&Numeric Sequence\t(1, 2, ...)", ID_NUMERIC_SEQUENCE
+        MENUITEM SEPARATOR
+        MENUITEM "&Wildcard\t*",                ID_WILDCARD
+        MENUITEM "E&xtension Separator\t.",     ID_EXTENSION_SEPARATOR
+    END
+END
+
+IDR_CONTEXT_MENU MENU 
+BEGIN
+    POPUP "<Image Dialog>"
+    BEGIN
+        MENUITEM "Set Image Transparent Color\tCtrl+T", ID_SET_TRANSP_COLOR
+        MENUITEM "Set Auto Image Transparent Color", ID_SET_AUTO_TRANSP_COLOR
+        MENUITEM SEPARATOR
+        MENUITEM "Reset Image Transparent Color", ID_RESET_TRANSP_COLOR
+    END
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Accelerator
+//
+
+IDR_MAINFRAME ACCELERATORS 
+BEGIN
+    "C",            ID_EDIT_COPY,           VIRTKEY, CONTROL, NOINVERT
+    VK_INSERT,      ID_EDIT_COPY,           VIRTKEY, CONTROL, NOINVERT
+    VK_DELETE,      ID_EDIT_CUT,            VIRTKEY, SHIFT, NOINVERT
+    "X",            ID_EDIT_CUT,            VIRTKEY, CONTROL, NOINVERT
+    "V",            ID_EDIT_PASTE,          VIRTKEY, CONTROL, NOINVERT
+    VK_INSERT,      ID_EDIT_PASTE,          VIRTKEY, SHIFT, NOINVERT
+    VK_BACK,        ID_EDIT_UNDO,           VIRTKEY, ALT, NOINVERT
+    "Z",            ID_EDIT_UNDO,           VIRTKEY, CONTROL, NOINVERT
+    "N",            ID_FILE_NEW,            VIRTKEY, CONTROL, NOINVERT
+    "O",            ID_FILE_OPEN,           VIRTKEY, CONTROL, NOINVERT
+    "S",            ID_FILE_SAVE,           VIRTKEY, CONTROL, NOINVERT
+    VK_F6,          ID_NEXT_PANE,           VIRTKEY, NOINVERT
+    VK_F6,          ID_PREV_PANE,           VIRTKEY, SHIFT, NOINVERT
+    VK_F1,          ID_APP_ABOUT,           VIRTKEY, NOINVERT
+END
+
+IDD_IMAGE_DIALOG ACCELERATORS 
+BEGIN
+    VK_F5,          ID_REFRESH,             VIRTKEY, NOINVERT
+    "F",            ID_RESOLUTION_TOGGLE,   VIRTKEY, CONTROL, NOINVERT
+    "1",            ID_ZOOM_TOGGLE,         VIRTKEY, CONTROL, NOINVERT
+    "T",            ID_SET_TRANSP_COLOR,    VIRTKEY, CONTROL, NOINVERT
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_DEMO_FORM DIALOGEX 0, 0, 343, 279
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD
+FONT 8, "MS Shell Dlg", 0, 0, 0x1
+BEGIN
+    GROUPBOX        "Test",IDC_GROUP_BOX_1,7,7,329,30
+    PUSHBUTTON      "Run Unit &Tests",ID_RUN_TESTS,13,17,77,14
+    PUSHBUTTON      "Run &Image Tests",IDC_RUN_IMAGE_TESTS,95,17,77,14
+    PUSHBUTTON      "&Study Image...",ID_STUDY_IMAGE,177,17,77,14
+    DEFPUSHBUTTON   "&Dialog...",IDC_OPEN_DIALOG_BUTTON,274,45,62,14,WS_GROUP
+    PUSHBUTTON      "&Properties...",IDC_OPEN_PROPERTIES_BUTTON,274,61,62,14
+    PUSHBUTTON      "&Modeless",IDC_CREATE_PROPERTIES_BUTTON,274,77,62,14
+    CONTROL         "Disable Smooth Resizing",IDC_DISABLE_SMOOTH_RESIZE_TOGGLE,
+                    "Button",BS_AUTOCHECKBOX | WS_GROUP | WS_TABSTOP,175,64,93,10
+    CONTROL         "Disable T&hemes",IDC_DISABLE_THEMES_TOGGLE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,175,79,65,10
+    RTEXT           "Rename format:",IDC_STATIC,9,48,62,8
+    COMBOBOX        IDC_FORMAT_COMBO,75,47,98,95,CBS_DROPDOWN | CBS_AUTOHSCROLL | WS_VSCROLL | WS_GROUP | WS_TABSTOP
+    CTEXT           ">>",IDC_DROP_RIGHT_ARROW_STATIC,175,47,12,12,SS_NOTIFY | SS_CENTERIMAGE
+    CTEXT           "Checked",IDC_DROP_DOWN_STATIC,200,47,58,12,SS_NOTIFY | SS_CENTERIMAGE
+    RTEXT           "Sequence counter:",IDC_SEQ_COUNTER_LABEL,9,65,62,8
+    EDITTEXT        IDC_SEQ_COUNTER_EDIT,75,64,61,12,ES_AUTOHSCROLL | ES_NUMBER | WS_GROUP
+    PUSHBUTTON      "&1",IDC_SEQ_COUNTER_RESET_BUTTON,137,64,12,12,NOT WS_TABSTOP
+    LTEXT           "Static",IDC_DETAIL_SHEET_STATIC,7,96,329,123,WS_BORDER
+    GROUPBOX        "Source files",IDC_SOURCE_FILES_GROUP,7,223,63,50,BS_LEFT | WS_GROUP
+    PUSHBUTTON      "&Copy",IDC_COPY_SOURCE_PATHS_BUTTON,13,234,50,14,WS_GROUP
+    CTEXT           "filename.ext",IDC_FORMAT_LEGEND_LABEL,13,252,50,15,SS_CENTERIMAGE | WS_BORDER
+    GROUPBOX        "Destination files",IDC_DESTINATION_FILES_GROUP,77,223,258,50,BS_LEFT | WS_GROUP
+    PUSHBUTTON      "P&aste...",IDC_PASTE_FILES_BUTTON,83,234,50,14
+    PUSHBUTTON      "Clear",IDC_CLEAR_FILES_BUTTON,137,234,50,14
+    PUSHBUTTON      " Capitali&ze|...",IDC_CAPITALIZE_BUTTON,192,234,50,14
+    PUSHBUTTON      "Cha&nge Case",ID_CHANGE_CASE,246,234,84,14
+    PUSHBUTTON      "&Replace...",IDC_REPLACE_FILES_BUTTON,83,252,50,14
+    PUSHBUTTON      "Replace A&ll",IDC_REPLACE_DELIMS_BUTTON,137,252,50,14
+    COMBOBOX        IDC_DELIMITER_SET_COMBO,192,253,50,95,CBS_DROPDOWN | CBS_AUTOHSCROLL | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "->",IDC_DELIMITER_STATIC,244,253,14,12
+    EDITTEXT        IDC_NEW_DELIMITER_EDIT,259,253,41,12,ES_AUTOHSCROLL
+END
+
+IDD_DEMO_DIALOG DIALOGEX 0, 0, 337, 238
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME
+CAPTION "Properties"
+FONT 8, "MS Shell Dlg", 0, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "&Dialog...",IDC_OPEN_DIALOG_BUTTON,271,4,62,14,WS_GROUP
+    PUSHBUTTON      "&Properties...",IDC_OPEN_PROPERTIES_BUTTON,271,20,62,14
+    PUSHBUTTON      "&Modeless",IDC_CREATE_PROPERTIES_BUTTON,271,36,62,14
+    CONTROL         "Disable &Smooth Resizing",IDC_DISABLE_SMOOTH_RESIZE_TOGGLE,
+                    "Button",BS_AUTOCHECKBOX | WS_DISABLED | WS_GROUP | WS_TABSTOP,172,23,93,10
+    CONTROL         "Disable &Themes",IDC_DISABLE_THEMES_TOGGLE,"Button",BS_AUTOCHECKBOX | WS_DISABLED | WS_TABSTOP,172,39,65,10
+    RTEXT           "Re&name format:",IDC_STATIC,6,7,62,8
+    COMBOBOX        IDC_FORMAT_COMBO,72,7,98,95,CBS_DROPDOWN | CBS_AUTOHSCROLL | WS_VSCROLL | WS_GROUP | WS_TABSTOP
+    CTEXT           ">>",IDC_DROP_RIGHT_ARROW_STATIC,172,7,12,12,SS_NOTIFY | SS_CENTERIMAGE
+    CTEXT           "Checked",IDC_DROP_DOWN_STATIC,200,7,53,12,SS_NOTIFY | SS_CENTERIMAGE
+    RTEXT           "Sequence counter:",IDC_SEQ_COUNTER_LABEL,6,25,62,8
+    EDITTEXT        IDC_SEQ_COUNTER_EDIT,72,23,61,12,ES_AUTOHSCROLL | ES_NUMBER | WS_GROUP
+    PUSHBUTTON      "&1",IDC_SEQ_COUNTER_RESET_BUTTON,134,23,12,12,NOT WS_TABSTOP
+    LTEXT           "Static",IDC_DETAIL_SHEET_STATIC,4,55,329,123,WS_BORDER
+    GROUPBOX        "Source files",IDC_SOURCE_FILES_GROUP,4,183,63,50,BS_LEFT | WS_GROUP
+    PUSHBUTTON      "&Copy",IDC_COPY_SOURCE_PATHS_BUTTON,10,194,50,14,WS_GROUP
+    CTEXT           "filename.ext",IDC_FORMAT_LEGEND_LABEL,10,212,50,15,SS_CENTERIMAGE | WS_BORDER
+    GROUPBOX        "Destination files",IDC_DESTINATION_FILES_GROUP,74,183,258,50,BS_LEFT | WS_GROUP
+    PUSHBUTTON      "P&aste...",IDC_PASTE_FILES_BUTTON,80,194,50,14
+    PUSHBUTTON      "Clear",IDC_CLEAR_FILES_BUTTON,134,194,50,14
+    PUSHBUTTON      " Capitali&ze|...",IDC_CAPITALIZE_BUTTON,189,194,50,14
+    PUSHBUTTON      "C&hange Case",ID_CHANGE_CASE,243,194,84,14
+    PUSHBUTTON      "&Replace...",IDC_REPLACE_FILES_BUTTON,80,212,50,14
+    PUSHBUTTON      "Replace A&ll",IDC_REPLACE_DELIMS_BUTTON,134,212,50,14
+    COMBOBOX        IDC_DELIMITER_SET_COMBO,189,212,50,95,CBS_DROPDOWN | CBS_AUTOHSCROLL | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "->",IDC_DELIMITER_STATIC,241,212,14,12
+    EDITTEXT        IDC_NEW_DELIMITER_EDIT,256,212,41,12,ES_AUTOHSCROLL
+END
+
+IDD_LIST_PAGE DIALOGEX 0, 0, 176, 55
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "File list"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    LTEXT           "&Files to rename:",IDC_STATIC,3,3,70,8
+    CONTROL         "",IDC_FILE_RENAME_LIST,"SysListView32",LVS_REPORT | LVS_SINGLESEL | LVS_SHOWSELALWAYS | WS_BORDER | WS_GROUP | WS_TABSTOP,3,13,170,39
+END
+
+IDD_EDIT_PAGE DIALOGEX 0, 0, 176, 188
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Edit"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    GROUPBOX        "Albums",IDC_ALBUMS_GROUP,3,3,170,106,BS_CENTER
+    GROUPBOX        "&Source",IDC_SOURCE_GROUP,9,11,77,92
+    LTEXT           "&FLAC:",IDC_SOURCE_LABEL,13,22,20,8
+    EDITTEXT        IDC_SOURCE_EDIT,13,33,69,32,ES_MULTILINE | ES_AUTOHSCROLL | ES_WANTRETURN | WS_VSCROLL | WS_GROUP
+    COMBOBOX        IDC_SOURCE_COMBO,13,68,69,32,CBS_SIMPLE | WS_VSCROLL | WS_TABSTOP
+    GROUPBOX        "Destination",IDC_DEST_GROUP,90,11,77,92
+    LTEXT           "&MP3:",IDC_DEST_LABEL,94,22,17,8
+    EDITTEXT        IDC_DEST_EDIT,94,33,69,32,ES_MULTILINE | ES_AUTOHSCROLL | ES_WANTRETURN | WS_VSCROLL | WS_GROUP
+    COMBOBOX        IDC_DEST_COMBO,94,68,69,32,CBS_SIMPLE | WS_VSCROLL | WS_TABSTOP
+    GROUPBOX        "Group A",IDC_A_GROUP,3,115,170,32,WS_GROUP
+    PUSHBUTTON      "Button 1",IDC_BUTTON1,10,126,50,14
+    PUSHBUTTON      "Button 2",IDC_BUTTON2,63,126,50,14
+    PUSHBUTTON      "Button 3",IDC_BUTTON3,116,126,50,14
+    GROUPBOX        "Group B",IDC_B_GROUP,3,152,170,32,BS_CENTER | WS_GROUP
+    PUSHBUTTON      "Button 4",IDC_BUTTON4,10,163,50,14
+    PUSHBUTTON      "Button 5",IDC_BUTTON5,63,163,50,14
+    PUSHBUTTON      "Button 6",IDC_BUTTON6,116,163,50,14
+END
+
+IDD_DETAILS_PAGE DIALOGEX 0, 0, 176, 55
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Details"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    LTEXT           "Static",IDC_DETAIL_SHEET_STATIC,3,3,170,49,WS_BORDER
+END
+
+IDD_IMAGE_DIALOG DIALOGEX 0, 0, 345, 274
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_MAXIMIZEBOX | WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME
+CAPTION "Image Test"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    RTEXT           "&Image file:",IDC_STATIC,7,8,58,8
+    COMBOBOX        IDC_IMAGE_PATH_COMBO,68,7,172,139,CBS_DROPDOWN | WS_VSCROLL | WS_GROUP | WS_TABSTOP
+    RTEXT           "Image &API:",IDC_STATIC,7,26,58,8
+    COMBOBOX        IDC_IMAGE_API_COMBO,68,24,88,87,CBS_DROPDOWNLIST | WS_VSCROLL | WS_GROUP | WS_TABSTOP
+    LTEXT           "Frame no.",IDC_FRAME_POS_LABEL,162,26,34,8
+    EDITTEXT        IDC_FRAME_POS_EDIT,196,24,31,12,ES_RIGHT | ES_AUTOHSCROLL
+    LTEXT           "of x",IDC_FRAME_COUNT_STATIC,230,26,28,8
+    RTEXT           "&Force resolution:",IDC_FORCE_RESOLUTION_LABEL,7,43,58,8
+    COMBOBOX        IDC_FORCE_RESOLUTION_COMBO,68,41,107,87,CBS_DROPDOWNLIST | WS_VSCROLL | WS_GROUP | WS_TABSTOP
+    CONTROL         "S&kip &CopyImage()",IDC_FORCE_CVT_EQUAL_BPP_CHECK,
+                    "Button",BS_AUTOCHECKBOX | WS_GROUP | WS_TABSTOP,179,43,73,10
+    RTEXT           "&Background color:",IDC_STATIC,7,61,58,8
+    COMBOBOX        IDC_BK_COLOR_COMBO,68,59,107,105,CBS_DROPDOWN | WS_VSCROLL | WS_GROUP | WS_TABSTOP
+    LTEXT           "(HTML, RGB)",IDC_STATIC,179,61,42,8
+    DEFPUSHBUTTON   "Close",IDCANCEL,288,7,50,14
+    PUSHBUTTON      "Refresh",ID_REFRESH,288,23,50,14
+    CONTROL         "Show &guides",IDC_SHOW_GUIDES_CHECK,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,269,43,56,10
+    CONTROL         "Show &labels",IDC_SHOW_LABELS_CHECK,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,269,61,53,10
+    LTEXT           "Static",IDC_SAMPLE_MODE_SHEET,7,77,331,38,WS_BORDER
+    RTEXT           "&Zoom:",IDC_STATIC,7,120,21,8
+    COMBOBOX        IDC_ZOOM_COMBO,32,118,59,122,CBS_DROPDOWNLIST | WS_VSCROLL | WS_GROUP | WS_TABSTOP
+    RTEXT           "Stac&king:",IDC_STATIC,101,120,30,8
+    COMBOBOX        IDC_STACKING_COMBO,134,118,49,87,CBS_DROPDOWNLIST | WS_VSCROLL | WS_GROUP | WS_TABSTOP
+    RTEXT           "Spacing:",IDC_STATIC,193,120,28,8
+    EDITTEXT        IDC_SPACING_EDIT,223,118,31,12,ES_RIGHT | ES_AUTOHSCROLL | WS_GROUP
+    RTEXT           "S&tatus alpha:",IDC_STATIC,262,120,44,8
+    EDITTEXT        IDC_STATUS_ALPHA_EDIT,307,118,31,12,ES_RIGHT | ES_AUTOHSCROLL | WS_GROUP
+    LTEXT           "Static",IDC_IMAGE_INFO_STATIC,7,137,242,8
+    LTEXT           "<image sample>",IDC_IMAGE_SAMPLE,7,149,331,64,SS_SUNKEN
+    LTEXT           "Static",IDC_TRANSP_COLOR_SAMPLE,252,135,31,13,SS_CENTERIMAGE,WS_EX_CLIENTEDGE
+    LTEXT           "<tbar>",IDC_TOOLBAR_PLACEHOLDER,308,135,30,13,WS_BORDER
+    CTEXT           "<pixel color>",IDC_PIXEL_COLOR_SAMPLE,7,216,58,13,SS_CENTERIMAGE,WS_EX_STATICEDGE
+    LTEXT           "",IDC_PIXEL_INFO_STATIC,68,216,189,13,SS_CENTERIMAGE | SS_ENDELLIPSIS,WS_EX_STATICEDGE
+    CONTROL         "Show Color &Table",IDC_SHOW_COLOR_TABLE_CHECK,"Button",BS_AUTOCHECKBOX | WS_GROUP | WS_TABSTOP,267,218,71,10
+    LTEXT           "Color table style:",IDC_COLOR_TABLE_LABEL,7,235,56,8
+    COMBOBOX        IDC_COLOR_TABLE_MODE_COMBO,68,232,101,102,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    CONTROL         "&Unique Colors",IDC_UNIQUE_COLORS_CHECK,"Button",BS_AUTOCHECKBOX | WS_GROUP | WS_TABSTOP,202,234,60,10
+    CONTROL         "Labels",IDC_SHOW_COLOR_LABELS_CHECK,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,267,234,36,10
+    LTEXT           "Static",IDC_COLOR_TABLE_INFO_STATIC,307,235,28,8,SS_ENDELLIPSIS
+    LTEXT           "",IDC_COLOR_TABLE_SAMPLE,7,248,331,19,SS_CENTERIMAGE,WS_EX_STATICEDGE
+END
+
+IDD_IMAGE_PAGE_EMPTY DIALOGEX 0, 0, 92, 14
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "<empty>"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    LTEXT           "Static",IDC_STATIC,3,3,19,8,NOT WS_VISIBLE
+END
+
+IDD_IMAGE_PAGE_DISABLED DIALOGEX 0, 0, 196, 18
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Disabled"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    RTEXT           "Blend color:",IDC_STATIC,3,5,38,8
+    EDITTEXT        IDC_CHANNEL1_EDIT,44,3,40,12,ES_AUTOHSCROLL
+    RTEXT           "Disable alpha:",IDC_STATIC,103,4,46,8
+    EDITTEXT        IDC_CHANNEL2_EDIT,153,3,40,12,ES_AUTOHSCROLL
+END
+
+IDD_IMAGE_PAGE_ALPHA_BLEND DIALOGEX 0, 0, 249, 18
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Alpha Blend"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    RTEXT           "Source alpha:",IDC_STATIC,3,5,45,8
+    EDITTEXT        IDC_CHANNEL1_EDIT,51,3,40,12,ES_AUTOHSCROLL
+    RTEXT           "Pixel alpha:",IDC_STATIC,100,4,38,8
+    EDITTEXT        IDC_CHANNEL2_EDIT,140,3,40,12,ES_AUTOHSCROLL
+    CONTROL         "&Keep Equal",IDC_KEEP_EQUAL_CHECK,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,195,4,51,10
+END
+
+IDD_IMAGE_PAGE_BLEND_COLOR DIALOGEX 0, 0, 124, 18
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Blend Color"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    RTEXT           "Blend:",IDC_STATIC,3,5,21,8
+    EDITTEXT        IDC_CHANNEL1_EDIT,28,3,40,12,ES_AUTOHSCROLL
+END
+
+IDD_IMAGE_PAGE_CONVERT_IMAGE DIALOGEX 0, 0, 181, 18
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Convert Image"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    CONTROL         "Force CDibSection::CopyPixels()",IDC_FORCE_CVT_COPY_PIXELS_CHECK,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,3,4,119,10
+END
+
+IDD_IMAGE_PAGE_SHOW_IMAGE DIALOGEX 0, 0, 221, 18
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "<image>"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    LTEXT           "Static",IDC_TRANSP_COLOR_SAMPLE,66,3,32,12,SS_CENTERIMAGE,WS_EX_CLIENTEDGE
+    LTEXT           "Transparent color:",IDC_TRANSP_COLOR_LABEL,3,4,60,8
+    LTEXT           "Static",IDC_TRANSP_COLOR_INFO,103,3,115,12,SS_CENTERIMAGE | SS_ENDELLIPSIS
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Version
+//
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION 2,0,0,1
+ PRODUCTVERSION 2,0,0,1
+ FILEFLAGSMASK 0x3fL
+#ifdef _DEBUG
+ FILEFLAGS 0x1L
+#else
+ FILEFLAGS 0x0L
+#endif
+ FILEOS 0x4L
+ FILETYPE 0x1L
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904e4"
+        BEGIN
+            VALUE "CompanyName", "Paul Cocoveanu"
+            VALUE "FileDescription", "Test application for UTL mini-framework"
+            VALUE "FileVersion", "2.0.0.1"
+            VALUE "InternalName", "DemoUtl"
+            VALUE "LegalCopyright", "Copyleft ® 2015++"
+            VALUE "OriginalFilename", "DemoUtl.exe"
+            VALUE "ProductName", "Test application for UTL mini-framework"
+            VALUE "ProductVersion", "2.0.0.1"
+            VALUE "Email", "phc.2nd@gmail.com"
+            VALUE "WrittenBy", "Written by Paul Cocoveanu"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x409, 1252
+    END
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO 
+BEGIN
+    IDD_DEMO_FORM, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 336
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 273
+    END
+
+    IDD_DEMO_DIALOG, DIALOG
+    BEGIN
+        LEFTMARGIN, 4
+        RIGHTMARGIN, 333
+        TOPMARGIN, 4
+        BOTTOMMARGIN, 234
+    END
+
+    IDD_LIST_PAGE, DIALOG
+    BEGIN
+        LEFTMARGIN, 3
+        RIGHTMARGIN, 173
+        TOPMARGIN, 3
+        BOTTOMMARGIN, 52
+    END
+
+    IDD_EDIT_PAGE, DIALOG
+    BEGIN
+        LEFTMARGIN, 3
+        RIGHTMARGIN, 173
+        TOPMARGIN, 3
+        BOTTOMMARGIN, 185
+    END
+
+    IDD_DETAILS_PAGE, DIALOG
+    BEGIN
+        LEFTMARGIN, 3
+        RIGHTMARGIN, 173
+        TOPMARGIN, 3
+        BOTTOMMARGIN, 52
+    END
+
+    IDD_IMAGE_DIALOG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 338
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 267
+    END
+
+    IDD_IMAGE_PAGE_EMPTY, DIALOG
+    BEGIN
+        LEFTMARGIN, 3
+        RIGHTMARGIN, 89
+        TOPMARGIN, 3
+        BOTTOMMARGIN, 11
+    END
+
+    IDD_IMAGE_PAGE_DISABLED, DIALOG
+    BEGIN
+        LEFTMARGIN, 3
+        RIGHTMARGIN, 193
+        TOPMARGIN, 3
+        BOTTOMMARGIN, 15
+    END
+
+    IDD_IMAGE_PAGE_ALPHA_BLEND, DIALOG
+    BEGIN
+        LEFTMARGIN, 3
+        RIGHTMARGIN, 246
+        TOPMARGIN, 3
+        BOTTOMMARGIN, 15
+    END
+
+    IDD_IMAGE_PAGE_BLEND_COLOR, DIALOG
+    BEGIN
+        LEFTMARGIN, 3
+        RIGHTMARGIN, 121
+        TOPMARGIN, 3
+        BOTTOMMARGIN, 15
+    END
+
+    IDD_IMAGE_PAGE_CONVERT_IMAGE, DIALOG
+    BEGIN
+        LEFTMARGIN, 3
+        RIGHTMARGIN, 178
+        TOPMARGIN, 3
+        BOTTOMMARGIN, 15
+    END
+
+    IDD_IMAGE_PAGE_SHOW_IMAGE, DIALOG
+    BEGIN
+        LEFTMARGIN, 3
+        RIGHTMARGIN, 218
+        TOPMARGIN, 3
+        BOTTOMMARGIN, 15
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// String Table
+//
+
+STRINGTABLE 
+BEGIN
+    IDS_OLE_INIT_FAILED     "OLE initialization failed.  Make sure that the OLE libraries are the correct version."
+    IDS_CHANGE_CASE_TAGS    "filename.ext|FILENAME.EXT|filename.*|FILENAME.*|*.ext|*.EXT|* (no ext)"
+END
+
+STRINGTABLE 
+BEGIN
+    IDD_DEMO_DIALOG         "Full demo dialog embedded page"
+END
+
+STRINGTABLE 
+BEGIN
+    IDR_MAINFRAME           "DemoUtl"
+    IDR_TEST_DOC_TYPE       "\nDemoUtl\nDemoUtl\n\n\nDemoUtl.Document\nDemoUtl.Document"
+    IDD_LIST_PAGE           "List control page"
+    IDD_DETAILS_PAGE        "Embedded property sheet details page"
+END
+
+STRINGTABLE 
+BEGIN
+    AFX_IDS_APP_TITLE       "Demo Utl"
+    AFX_IDS_IDLEMESSAGE     "Ready"
+END
+
+STRINGTABLE 
+BEGIN
+    ID_INDICATOR_EXT        "EXT"
+    ID_INDICATOR_CAPS       "CAP"
+    ID_INDICATOR_NUM        "NUM"
+    ID_INDICATOR_SCRL       "SCRL"
+    ID_INDICATOR_OVR        "OVR"
+    ID_INDICATOR_REC        "REC"
+END
+
+STRINGTABLE 
+BEGIN
+    ID_FILE_NEW             "Create a new document\nNew"
+    ID_FILE_OPEN            "Open an existing document\nOpen"
+    ID_FILE_CLOSE           "Close the active document\nClose"
+    ID_FILE_SAVE            "Save the active document\nSave"
+    ID_FILE_SAVE_AS         "Save the active document with a new name\nSave As"
+END
+
+STRINGTABLE 
+BEGIN
+    ID_APP_ABOUT            "Display program information, version number and copyright\nAbout"
+    ID_APP_EXIT             "Quit the application; prompts to save documents\nExit"
+END
+
+STRINGTABLE 
+BEGIN
+    ID_FILE_MRU_FILE1       "Open this document"
+    ID_FILE_MRU_FILE2       "Open this document"
+    ID_FILE_MRU_FILE3       "Open this document"
+    ID_FILE_MRU_FILE4       "Open this document"
+    ID_FILE_MRU_FILE5       "Open this document"
+    ID_FILE_MRU_FILE6       "Open this document"
+    ID_FILE_MRU_FILE7       "Open this document"
+    ID_FILE_MRU_FILE8       "Open this document"
+    ID_FILE_MRU_FILE9       "Open this document"
+    ID_FILE_MRU_FILE10      "Open this document"
+    ID_FILE_MRU_FILE11      "Open this document"
+    ID_FILE_MRU_FILE12      "Open this document"
+    ID_FILE_MRU_FILE13      "Open this document"
+    ID_FILE_MRU_FILE14      "Open this document"
+    ID_FILE_MRU_FILE15      "Open this document"
+    ID_FILE_MRU_FILE16      "Open this document"
+END
+
+STRINGTABLE 
+BEGIN
+    ID_NEXT_PANE            "Switch to the next window pane\nNext Pane"
+    ID_PREV_PANE            "Switch back to the previous window pane\nPrevious Pane"
+END
+
+STRINGTABLE 
+BEGIN
+    ID_WINDOW_NEW           "Open another window for the active document\nNew Window"
+    ID_WINDOW_ARRANGE       "Arrange icons at the bottom of the window\nArrange Icons"
+    ID_WINDOW_CASCADE       "Arrange windows so they overlap\nCascade Windows"
+    ID_WINDOW_TILE_HORZ     "Arrange windows as non-overlapping tiles\nTile Windows"
+    ID_WINDOW_TILE_VERT     "Arrange windows as non-overlapping tiles\nTile Windows"
+    ID_WINDOW_SPLIT         "Split the active window into panes\nSplit"
+END
+
+STRINGTABLE 
+BEGIN
+    ID_EDIT_CLEAR           "Erase the selection\nErase"
+    ID_EDIT_CLEAR_ALL       "Erase everything\nErase All"
+    ID_EDIT_FIND            "Find the specified text\nFind"
+    ID_EDIT_REPEAT          "Repeat the last action\nRepeat"
+    ID_EDIT_REPLACE         "Replace specific text with different text\nReplace"
+    ID_EDIT_SELECT_ALL      "Select the entire document\nSelect All"
+END
+
+STRINGTABLE 
+BEGIN
+    ID_VIEW_TOOLBAR         "Show or hide the toolbar\nToggle ToolBar"
+    ID_VIEW_STATUS_BAR      "Show or hide the status bar\nToggle StatusBar"
+END
+
+STRINGTABLE 
+BEGIN
+    AFX_IDS_SCSIZE          "Change the window size"
+    AFX_IDS_SCMOVE          "Change the window position"
+    AFX_IDS_SCMINIMIZE      "Reduce the window to an icon"
+    AFX_IDS_SCMAXIMIZE      "Enlarge the window to full size"
+    AFX_IDS_SCNEXTWINDOW    "Switch to the next document window"
+    AFX_IDS_SCPREVWINDOW    "Switch to the previous document window"
+    AFX_IDS_SCCLOSE         "Close the active window and prompts to save the documents"
+END
+
+STRINGTABLE 
+BEGIN
+    AFX_IDS_SCRESTORE       "Restore the window to normal size"
+    AFX_IDS_SCTASKLIST      "Activate Task List"
+    AFX_IDS_MDICHILD        "Activate this window"
+END
+
+STRINGTABLE 
+BEGIN
+    ID_EDIT_DETAILS         "Edit details"
+    ID_REFRESH              "Press F5 to refresh"
+END
+
+STRINGTABLE 
+BEGIN
+    IDC_FILE_RENAME_LIST    "Source files=-35|Destination files=-65"
+END
+
+STRINGTABLE 
+BEGIN
+    IDC_SEQ_COUNTER_RESET_BUTTON "Reset numeric sequence to 1"
+    IDC_DETAIL_SHEET_STATIC "List control page|Edit, combo-boxes and button page|Embedded property sheet page|Embedded main demo page"
+    IDC_CAPITALIZE_BUTTON   "Capitalize filename using sentence case, make extension lower case"
+END
+
+STRINGTABLE 
+BEGIN
+    ID_CHANGE_CASE          "Make lower case|Make upper case|Make filename lower case|Make filename upper case|Make extension lower case|Make extension upper case|Remove extension"
+END
+
+STRINGTABLE 
+BEGIN
+    IDC_OPEN_DIALOG_BUTTON  "Resizable modal dialog|Horizontally resizable modal dialog|Vertically resizable modal dialog|Resizable with maximum size modal dialog"
+    IDC_OPEN_PROPERTIES_BUTTON "Run a modal resizable property sheet"
+    IDC_CREATE_PROPERTIES_BUTTON "Open a modeless resizable property sheet"
+    IDC_DROP_RIGHT_ARROW_STATIC "Formatting options"
+END
+
+STRINGTABLE 
+BEGIN
+    IDC_DROP_DOWN_STATIC    "Drop down menu with unchecked and checked images"
+    IDC_FORCE_RESOLUTION_COMBO 
+                            "Press Ctrl+F to toggle between original and 24 bit resolution"
+    IDC_ZOOM_COMBO          "Press Ctrl+1 to toggle zoom between 100% and Scale to Fit"
+END
+
+STRINGTABLE 
+BEGIN
+    IDC_STATUS_ALPHA_EDIT   "Opacity of the diagonal cross that signifies that the image has no alpha channel"
+END
+
+STRINGTABLE 
+BEGIN
+    IDC_TRANSP_COLOR_SAMPLE "Image transparent color"
+END
+
+STRINGTABLE 
+BEGIN
+    ID_SET_AUTO_TRANSP_COLOR "Set image auto-transparent color"
+    ID_RESET_TRANSP_COLOR   "Reset image transparent color"
+END
+
+#endif    // English (U.S.) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+#include "utl/utl_ui.rc"
+#include "res\DemoUtl.rc2"       // non-Microsoft Visual C++ edited resources
+
+#define _AFX_NO_OLE_RESOURCES
+#define _AFX_NO_TRACKER_RESOURCES
+#define _AFX_NO_PROPERTY_RESOURCES
+
+#include "afxres.rc"         // Standard components
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+

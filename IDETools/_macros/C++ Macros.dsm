@@ -1,0 +1,3540 @@
+''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+'	C++ Macros.dsm - a Visual Studio script that defines a set of useful macros for code editing.
+'
+'	Paul Cocoveanu, 1997-2004
+'	Copyri.... ah hell, just take it.
+'
+' - Some of the advanced macros use Automation objects provided by IDETools.dll. Make sure that
+'	IDETools.dll is registered as a COM component (with regsvr32) prior to using this macro file.
+'
+' - Some of the code generation macros are based on the code template definitions file (by default
+'	StdCodeTemplates.ctf) located in the same directory as this script.
+'	You can customize the sections from code template file in order to personalize code generation.
+'	You can also use multiple code template files for different purposes (e.g. a template for MFC
+'	projects and another template for QT projects). To change the active template file run the
+'	EditMacroOptions macro, and change "Code template file" field.
+'
+' - All the macros exposed contain a DESCRIPTION statement (as a comment) that is displayed when
+'	you select the macro in "Tools > Customize" dialog in Visual Studio.
+'	Macro descriptions begin with a rating with the following meaning:
+'		(***) Very useful
+'		 (**) Useful
+'		  (*) Rarely used
+'
+' - For more information on how to use the macros, go to the macros definition and read the notes.
+'
+''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+
+Option Explicit
+
+'------------------------------------------------------------------------------
+'KEY BINDINGS:
+'------------------------------------------------------------------------------
+
+'################# AddHotKeysForCppMacros #################
+Sub AddHotKeysForCppMacros
+'DESCRIPTION: (*) Register key bindings for commonly used macros in C++ Macros.dsm
+
+	' Visual Studio doesn't understand hot-keys for which the VK code != ANSI code
+	' Therefore, commented out key bindings cannot be automatically registered automatically,
+	' such as "Ctrl+~", "Ctrl+NumLock", etc.
+	' Workaround: assign the keys manually in dialog 'Tools > Customize > Keyboard'.
+	' * 'DN means "Don't Need" really
+
+	Application.AddKeyBinding "CTRL+9", "AutoMakeCode", "Text"
+	Application.AddKeyBinding "ALT+X", "ChooseOpenWindow", "Main"
+	Application.AddKeyBinding "CTRL+0", "ChooseProjectFile", "Main"
+	Application.AddKeyBinding "CTRL+ALT+X", "ChooseWorkingFolderFile", "Main"
+	Application.AddKeyBinding "CTRL+ALT+P", "CommentNextDefaultParameter", "Text"
+	Application.AddKeyBinding "CTRL+ALT+SHIFT+F", "CopyToClipboardRegExpFromMultiSel", "Text"
+	Application.AddKeyBinding "CTRL+ALT+F3", "DeleteTrailingWhitespaces", "Text"
+	Application.AddKeyBinding "CTRL+ENTER", "DuplicateLine", "Text"
+	Application.AddKeyBinding "CTRL+ALT+O", "EditMacroOptions", "Main"
+	Application.AddKeyBinding "CTRL+ALT+M", "EditThisMacroFile", "Main"
+	Application.AddKeyBinding "CTRL+1", "ExploreIncludedHeaders", "Text"
+	Application.AddKeyBinding "ALT+N", "FindNextUnsuccessfulUnitTest", "Text"
+	Application.AddKeyBinding "ALT+Z", "FormatCode", "Text"
+'DN	Application.AddKeyBinding "Ctrl+NumLock", "FormatCode", "Text"
+
+	Application.AddKeyBinding "CTRL+SHIFT+S", "GenerateConsecutiveNumbers", "Text"
+
+'	Application.AddKeyBinding "CTRL+~", "GoToComplementaryFile", "Main"
+	Application.AddKeyBinding "ALT+RIGHT ARROW", "GoToNextAssocFile", "Main"
+	Application.AddKeyBinding "ALT+LEFT ARROW", "GoToPrevAssocFile", "Main"
+'DN	Application.AddKeyBinding "CTRL+Shift+~", "GoToUnitTestFile", "Text"
+
+	Application.AddKeyBinding "CTRL+ALT+D", "ImplementMethod", "Text"
+'	Application.AddKeyBinding "CTRL+ALT+"", "IncludeBracketsToQuotes", "Text"
+	Application.AddKeyBinding "CTRL+ALT+B", "InsertBugBugComment", "Text"
+	Application.AddKeyBinding "CTRL+ALT+K", "InsertCppType", "Text"
+	Application.AddKeyBinding "CTRL+ALT+SHIFT+W", "InsertPragmaWarning", "Text"
+	Application.AddKeyBinding "CTRL+ALT+H", "InsertStdFileContent", "Text"
+	Application.AddKeyBinding "CTRL+SHIFT+1", "LocateFile", "Main"
+
+	Application.AddKeyBinding "ALT+SHIFT+0", "OpenActiveFileInExplorer", "Main"
+	Application.AddKeyBinding "SHIFT+ENTER", "SelectWord", "Text"
+	Application.AddKeyBinding "ALT+L", "ShowSelectionStatistics", "Text"
+
+	Application.AddKeyBinding "CTRL+SHIFT+3", "SortLinesAscending", "Text"
+	Application.AddKeyBinding "CTRL+ALT+SHIFT+3", "SortLinesDescending", "Text"
+
+	Application.AddKeyBinding "ALT+S", "SplitArgumentList", "Text"
+	Application.AddKeyBinding "CTRL+ALT+S", "SplitArgumentListAtCursorColumn", "Text"
+	Application.AddKeyBinding "CTRL+ALT+SHIFT+S", "SplitArgumentListCustom", "Text"
+'	Application.AddKeyBinding "Ctrl+_", "ToggleCapitalizationToUnderscoreSeparators", "Text"
+'DN	Application.AddKeyBinding "CTRL+/", "ToggleComment", "Text"					'[Ctrl+/]
+'	Application.AddKeyBinding "CTRL+o", "ToggleComment", "Text"					'[Ctrl+Num/]
+'	Application.AddKeyBinding "CTRL+SHIFT+\", "ToggleCppEscapeSequences", "Text"
+	Application.AddKeyBinding "CTRL+SHIFT+Q", "ToggleCppLineBreakToken", "Text"
+'	Application.AddKeyBinding "CTRL+SHIFT+'", "ToggleQuotedString", "Text"
+	Application.AddKeyBinding "CTRL+8", "TokenizeText", "Main"
+	Application.AddKeyBinding "CTRL+ALT+SHIFT+U", "UnusedAlways", "Text"
+	Application.AddKeyBinding "CTRL+ALT+U", "WrapStringToUnicodePortable", "Text"
+
+	'DevStudio key defs
+	Application.AddKeyBinding "CTRL+SHIFT+DOWN ARROW", "WBGoToNext", "Text"
+	Application.AddKeyBinding "CTRL+SHIFT+UP ARROW", "WBGoToPrevious", "Text"
+End Sub
+
+'################# AddHotKeysForMSDev #################
+Sub AddHotKeysForMSDev
+'DESCRIPTION: Register key bindings for modified keys of standard MSDev commands.
+	'EDIT
+	'----
+	Application.AddKeyBinding "CTRL+SHIFT+F", "FindInFiles", "Main"
+	Application.AddKeyBinding "CTRL+SHIFT+N", "NewText", "Main"
+	Application.AddKeyBinding "CTRL+2", "SelectColumn", "Text"
+	Application.AddKeyBinding "CTRL+ALT+DOWN ARROW", "SelectionLowercase", "Text"
+	Application.AddKeyBinding "CTRL+ALT+UP ARROW", "SelectionUppercase", "Text"
+	Application.AddKeyBinding "CTRL+3", "SelectSwapAnchor", "Text"
+	Application.AddKeyBinding "CTRL+R", "SetRepeatCount", "Text"
+	Application.AddKeyBinding "CTRL+ALT+TAB", "ToggleViewWhitespace", "Text"   'conflict with Vista shortcut -> button in toolbar
+	Application.AddKeyBinding "CTRL+PAGE DOWN", "WindowEnd", "Text"
+	Application.AddKeyBinding "ALT+DOWN ARROW", "WindowScrollToBottom", "Text"
+	Application.AddKeyBinding "ALT+UP ARROW", "WindowScrollToTop", "Text"
+	Application.AddKeyBinding "CTRL+PAGE UP", "WindowStart", "Text"
+	Application.AddKeyBinding "ALT+SHIFT+DOWN ARROW", "WordLowerCase", "Text"
+	Application.AddKeyBinding "ALT+SHIFT+UP ARROW", "WordUpperCase", "Text"
+
+	'TOOLS
+	'-----
+	Application.AddKeyBinding "ALT+M", "Macro", "Main"
+End Sub
+
+'------------------------------------------------------------------------------
+'EVENT HANDLERS:
+'------------------------------------------------------------------------------
+
+' ################# Application_NewDocument #################
+Private Sub Application_NewDocument( theDocument )
+	If parAutoCodeGeneration Then DoInsertStdFileContent( ActiveDocument )
+End Sub
+
+' ################# Application_DocumentOpen #################
+Private Sub Application_DocumentOpen( doc )
+	AdjustDocumentLanguage( doc )
+
+	'Change the tab size to 8 for QT source files
+	If ( InStr( LCase( doc.FullName ), "n:\qt" ) = 1 ) Or _
+	   ( InStr( LCase( doc.FullName ), "\versant\" ) <> 0 ) Or _
+	   ( InStr( LCase( doc.FullName ), "y:\" ) <> 0 ) Then
+		doc.TabSize = 8
+		doc.IndentSize = 8
+	End If
+End Sub
+
+'------------------------------------------------------------------------------
+' FILE DESCRIPTION: C++ General Formatting Macros
+'------------------------------------------------------------------------------
+
+' ################# AutoMakeCode #################
+Sub AutoMakeCode()
+'DESCRIPTION: (***) Generate for loops and such [Ctrl+9]
+    Dim doc
+    Dim sel
+
+	set doc = ActiveDocument
+	set sel = doc.Selection
+
+    sel.CharLeft()
+    'sel.LineDown()
+    sel.SelectLine()
+
+    'PushCursor()
+
+    Dim codeProcessor
+
+	set codeProcessor = CreateObject("IDETools.CodeProcessor")
+    codeProcessor.docLanguage = doc.Language
+    codeProcessor.tabSize = doc.TabSize
+
+    Dim codeText
+	codeText = sel.Text
+    Dim outcomeText
+	outcomeText = codeProcessor.AutoMakeCode(codeText)
+
+    'replace the selection with generated code
+    If Len(outcomeText) > 0 Then
+        If outcomeText <> codeText Then
+            sel.Text = outcomeText
+        End If
+    End If
+End Sub
+
+' ################# ChooseBrowseInfoFile #################
+' To modify the browse info files path run the EditMacroOptions macro and go to second tab.
+Sub ChooseBrowseInfoFile()
+'DESCRIPTION: (**) Picks a browse info file from the current browse path [Ctrl+Shift+0]
+	Dim fileAccess, pickedFile
+
+	Set fileAccess = CreateObject( "IDETools.FileAccess" )
+	fileAccess.UpdateIDECurrentBrowseFile( True )
+	pickedFile = BrowseForFile( parBrowsePath, fileAccess.GetIDECurrentBrowseFile(), _
+								"BrowseInfo", foRecurseFolders + foSortFolders, flAllFoldersExpanded )
+
+	If Len( pickedFile ) > 0 Then
+		fileAccess.ShellOpen( pickedFile )
+		fileAccess.UpdateIDECurrentBrowseFile( False )
+	End If
+	Set fileAccess = Nothing
+End Sub
+
+' ################# ChooseOpenWindow #################
+Sub ChooseOpenWindow()
+'DESCRIPTION: (***) Allows user to activate an opened window [ALT+X]
+	Dim windowPicker, window, currentWindow
+
+	On Error Resume Next
+
+	Set windowPicker = CreateObject( "IDETools.MenuFilePicker" )
+	windowPicker.OptionFlags = 0
+	Call windowPicker.AddSortOrder( pfDirName, True )
+	Call windowPicker.AddSortOrder( pfName, False )
+	Call windowPicker.AddSortOrder( pfExt, False )
+	Call windowPicker.SetProfileSection( "Window", True )
+
+	Dim fullPath, label
+
+	currentWindow = ""
+	For Each window In Application.Windows
+		fullPath = GetWindowFullName( window, label )
+		If window.Active Then currentWindow = fullPath
+		Call windowPicker.AddRootFile( fullPath, label )
+	Next
+	'Add common associations
+	fullPath = GetActiveFullPath()
+
+	If fullPath <> "" Then
+		Dim associations
+
+		associations = BuildAssociationsFolderItemArray( fullPath )
+		windowPicker.AddFolderArray( associations )
+	End If
+
+	windowPicker.CurrentFileName = currentWindow
+	If windowPicker.ChooseFile() Then
+		Dim pickedOK
+
+		pickedOK = False
+		currentWindow = windowPicker.CurrentFileName
+		For Each window In Application.Windows
+			If GetWindowFullName( window, label ) = currentWindow Then
+				window.Active = True
+				pickedOK = True
+				Exit For
+			End If
+		Next
+		'Not already opened -> open it !
+		If pickedOK <> True Then Application.Documents.Open currentWindow, "Text"
+	End If
+	Set windowPicker = Nothing
+	Exit Sub
+
+CatchException:
+	ErrorMessage "An exception occured on ChooseOpenWindow macro" & vbNeLine & _
+				 "Error Number=" & Err.Number & vbNewLine & "Error Message" & Err.Description
+	Err.Clear
+	Set windowPicker = Nothing
+End Sub
+
+' ################# ChooseProjectFile #################
+Sub ChooseProjectFile()
+'DESCRIPTION: (*) Opens a file within the current project
+	Dim folderItemFlatArray, currentFileName
+
+	If Projects.Count = 0 Then Exit Sub
+	folderItemFlatArray = BuildProjectFolderItemArray( ActiveProject.FullName, True )
+
+	If ActiveDocument Is Nothing Then
+		currentFileName = ""
+	Else
+		currentFileName = ActiveDocument.FullName
+
+		Dim assocItemFlatArray
+
+		assocItemFlatArray = BuildAssociationsFolderItemArray( currentFileName )
+		If assocItemFlatArray <> "" Then folderItemFlatArray = assocItemFlatArray & ";" & folderItemFlatArray
+	End If
+
+	Call ShellOpenBrowseForFile( folderItemFlatArray, currentFileName, "ProjectFiles", -1, -1 )
+End Sub
+
+' ################# ChooseWorkingFolderFile #################
+Sub ChooseWorkingFolderFile()
+'DESCRIPTION: (*) Picks a file from the folder where the active document is located [Ctrl+Alt+X]
+	If ActiveDocument Is Nothing Then Exit Sub
+
+	Dim doc
+	Set doc = ActiveDocument
+
+	If len( doc.FullName ) = 0 Then Exit Sub
+
+	Dim windowPicker, window, currentWindow
+
+	Set windowPicker = CreateObject( "IDETools.MenuFilePicker" )
+	windowPicker.OptionFlags = 0
+	Call windowPicker.AddSortOrder( pfDirName, True )
+	Call windowPicker.AddSortOrder( pfName, False )
+	Call windowPicker.AddSortOrder( pfExt, False )
+	Call windowPicker.SetProfileSection( "WorkingFolder", True )
+
+	Dim ext
+
+	ext = ExtractExtension( doc.FullName )
+
+'	PrintToOutputWindow "doc.FullName=" & doc.FullName & "   WindowType=" & ActiveWindow.Type & "   Ext=" & ext
+
+	Dim filter
+	filter = ""
+
+	Select Case lCase( ext )
+		Case ".h" ,".hxx", ".hpp", ".cxx", ".inl", ".c", ".cpp", ".idl", ".odl", ".t", ".tmpl", ".ctf"
+			filter = "*.h,*.hxx,*.hpp,*.cxx,*.inl,*.c,*.cpp,*.?dl,*.t,*.tmpl,*.ctf"
+		Case ".rc"
+			filter = "resource.h"
+		Case ".dsm", ".bas", ".vbs", ".bat", ".cmd"
+			filter = "*.dsm,*.bas,*.vbs,*.bat,*.cmd"
+		Case Else
+			If ActiveWindow.Type = "Text" Then
+				Select Case doc.Language
+					Case "Oracle PL/SQL", "ODBC SQL", "Microsoft SQL"
+						filter = "*.sql,*.ddl,*.tab,*.pk*,*.pac,*.ot*"
+					Case Else
+						If InStr( doc.Language, "HTML" ) = 1 Then filter = "*.htm*,*.xml,*.?dx,*.?gx"
+				End select
+			End If
+
+			' still empty filter -> use document extesion (if any)
+			If filter = "" Then
+				If len( ext ) > 0 Then
+					filter = "*" & ext
+				Else
+					filter = "*.*"
+				End If
+			End If
+	End Select
+
+	Dim filterPath
+	filterPath = ExtractDirPath( doc.FullName ) + filter
+
+'	PrintToOutputWindow "filterPath=" & filterPath
+
+	Call windowPicker.AddFolderArray( filterPath & "|Current Folder" )
+
+	windowPicker.CurrentFileName = doc.FullName
+	If windowPicker.ChooseFile() Then
+		Dim pickedOK, label
+
+		pickedOK = False
+		currentWindow = windowPicker.CurrentFileName
+		For Each window In Application.Windows
+			If GetWindowFullName( window, label ) = currentWindow Then
+				window.Active = True
+				pickedOK = True
+				Exit For
+			End If
+		Next
+		'Not already opened -> open it !
+		If pickedOK <> True Then Application.Documents.Open currentWindow, "Text"
+	End If
+	Set windowPicker = Nothing
+End Sub
+
+' ################# CommentNextDefaultParameter #################
+Sub CommentNextDefaultParameter()
+'DESCRIPTION: (*) Comments the Next occurence of a C++ function default argument (for function implementations) [Ctrl+Alt+P]
+	If Not IsActiveTextDocument() Then Exit Sub
+
+	Dim defMark, sel
+	Set sel = ActiveDocument.Selection
+
+	Select Case ActiveDocument.Language
+		Case "Oracle PL/SQL"
+			defMark = "\{:=\!default \}"
+		Case Else
+			defMark = "="
+	End Select
+	If Not sel.FindText( defMark, dsMatchRegExp ) Then
+		Exit Sub
+	End If
+	sel.CharLeft
+	PushCursor()
+	sel.CharRight , 2
+
+	Dim delimiters
+
+	delimiters = "[(\[" + Chr( 34 ) + Chr( 39 ) + ",)]"
+	Do While sel.FindText( delimiters, dsMatchRegExp )
+		Select Case sel.Text
+			Case ","
+				Exit Do
+			Case ")"
+				sel.CharLeft
+				Exit Do
+			Case "(", "[", "<"
+				sel.CharLeft
+				ExecuteCommand "GoToMatchBrace"
+				sel.CharRight
+		End Select
+	Loop
+	sel.CharLeft
+	PopCursorExtend()
+	sel.Text = "/*" & sel.Text & "*/"
+End Sub
+
+
+Sub CopyToClipboardRegExpFromMultiSel()
+'DESCRIPTION: (***) Searches for a regular expression containing selected identifiers on multiple lines [CTRL+ALT+SHIFT+F]
+	If Not IsActiveTextDocument() Then Exit Sub
+
+	Dim lines, line, searchSpec, token
+
+	lines = Split( ActiveDocument.Selection.Text, vbNewLine )
+	searchSpec = ""
+	For Each line In lines
+		token = Trim( line )
+		If Len( token ) > 0 Then
+			If searchSpec <> "" Then searchSpec = searchSpec & "\!"
+			searchSpec = searchSpec & token
+		End If
+	Next
+
+	searchSpec = "\{" & searchSpec & "\}"
+
+	Dim clipboard
+
+	Set clipboard = CreateObject( "IDETools.UserInterface" )
+	clipboard.SetClipboardText( searchSpec )
+	Set clipboard = Nothing
+End Sub
+
+
+' ################# DeleteTrailingWhitespaces #################
+Sub DeleteTrailingWhitespaces()
+'DESCRIPTION: (**) Deletes all trailing whitespaces [Ctrl+Alt+F3]
+	ActiveDocument.ReplaceText "\:b+$", "", dsMatchRegExp
+End Sub
+
+' ################# DuplicateLine #################
+Sub DuplicateLine()
+'DESCRIPTION: (***) Duplicates current line [Ctrl+Enter]
+	Dim textLine, sel
+	Set sel = ActiveDocument.Selection
+
+	PushCursor()
+	textLine = GetCurrentLine( False )
+	sel.Text = textLine & textLine
+	PopCursor()
+	If parDupLineMoveDown Then
+		sel.LineDown
+	End If
+End Sub
+
+' ################# EditMacroOptions #################
+Sub EditMacroOptions()
+'DESCRIPTION: (**) Edits the options of IDETools module [Ctrl+Alt+O]
+	Dim ideToolsOptions
+
+	Set ideToolsOptions = CreateObject("IDETools.ModuleOptions")
+	If ideToolsOptions Is Nothing Then Exit Sub
+	On Error Resume Next
+	If ideToolsOptions.EditOptions() Then SetupMacroParameters
+	Set ideToolsOptions = Nothing
+End Sub
+
+' ################# EditThisMacroFile #################
+Sub EditThisMacroFile()
+'DESCRIPTION: (*) Opens "C++ Macros.dsm" macro file [Ctrl+Alt+M]
+	Dim thisMacroFilePath
+
+	thisMacroFilePath = getVStudioMacrosDirPath() & "C++ Macros.dsm"
+	On Error Resume Next
+	Application.Documents.Open thisMacroFilePath, "Text"
+End Sub
+
+' ################# ExploreIncludedHeaders #################
+Sub ExploreIncludedHeaders()
+'DESCRIPTION: (**) Allows to explore through the tree of files included by the current file (C++ and IDL) [Ctrl+1]
+	If Not IsActiveTextDocument() Then Exit Sub
+
+	Dim includeBrowser
+
+	Set includeBrowser = CreateObject( "IDETools.IncludeFileTree" )
+	If includeBrowser.BrowseIncludeFiles( ActiveDocument.FullName ) Then
+		On Error Resume Next
+		Application.Documents.Open includeBrowser.PickedIncludeFile, "Text"
+		If Err.Number = 0 Then
+			If includeBrowser.PromptLineNo > 0 Then
+				ActiveDocument.Selection.GoToLine includeBrowser.PromptLineNo
+				ExecuteCommand "WindowScrollToCenter"
+			End If
+		Else
+			Err.Clear
+		End If
+	End If
+	Set includeBrowser = Nothing
+End Sub
+
+' ################# FindNextUnsuccessfulUnitTest #################
+Sub FindNextUnsuccessfulUnitTest()
+'DESCRIPTION: (**) Finds the next unsuccessful unit test in the Output Window [Alt+N]
+
+'	If Not ActiveWindow Is Nothing Then
+'		If ActiveWindow.type = "Text" Then
+'			If Not ActiveWindow.Selection Is Nothing Then
+'				ActiveWindow.Selection.FindText ": \~\{OK\}", dsMatchForward + dsMatchCase + dsMatchRegExp
+'			End If
+'		End If
+'	End If
+End Sub
+
+' ################# FormatCode #################
+Sub FormatCode()
+'DESCRIPTION: (***) Auto-formats selected lines of code by applying the current coding standards rules [Alt+Z, Ctrl+NumLock]
+	If Not IsActiveTextDocument() Then Exit Sub
+
+	Dim doc, sel
+	Set doc = ActiveDocument
+	Set sel = doc.Selection
+
+	PushSelection
+
+	Dim codeText
+	If Len( sel.Text ) = 0 Then sel.SelectLine	' Empty selection -> select the entire line
+	codeText = sel.Text
+
+	Dim formattedCodeText
+	formattedCodeText = ""
+
+	If Len( codeText ) > 0 Then
+		Dim codeProcessor
+
+		Set codeProcessor = CreateObject( "IDETools.CodeProcessor" )
+		codeProcessor.docLanguage = doc.Language
+		codeProcessor.tabSize = doc.TabSize
+
+		formattedCodeText = codeProcessor.AutoFormatCode( codeText )
+		Set codeProcessor = Nothing
+	End If
+
+	If Len( formattedCodeText ) > 0 Then
+		'Replace the selection with formatted code
+'		PrintToOutputWindow "formattedCodeText={" & formattedCodeText & "}"
+		If formattedCodeText <> codeText Then
+			sel.Text = formattedCodeText
+		End If
+		PopSelection
+	End If
+End Sub
+
+
+Sub GenerateConsecutiveNumbers()
+'DESCRIPTION: (***) Generates consecutive numbers on a multi-line selection by incrementing the number in the first line [CTRL+SHIFT+S]
+	If Not IsActiveTextDocument() Then Exit Sub
+
+	Dim sel
+	Set sel = ActiveDocument.Selection
+
+	PushSelection
+
+	Dim codeProcessor
+	Set codeProcessor = CreateObject( "IDETools.CodeProcessor" )
+	codeProcessor.docLanguage = ActiveDocument.Language
+	codeProcessor.tabSize = ActiveDocument.TabSize
+
+	Dim newText
+	newText = codeProcessor.GenerateConsecutiveNumbers( sel.Text )
+	Set codeProcessor = Nothing
+
+	sel.Text = newText
+	PopSelection
+End Sub
+
+' ################# GoToComplementaryFile #################
+Sub GoToComplementaryFile()
+'DESCRIPTION: (***) Opens the complementary file of the active file (same filename but complementary extension, if any) [Ctrl+~]
+	If Not OpenComplementaryDoc() Then
+		GoToNextAssocFile
+	End If
+End Sub
+
+' ################# GoToNextAssocFile #################
+Sub GoToNextAssocFile()
+'DESCRIPTION: (***) Opens the next circular association for the active document (h->hxx->cxx->cpp) [Alt+Right]
+	OpenNextDoc True, False
+End Sub
+
+' ################# GoToPrevAssocFile #################
+Sub GoToPrevAssocFile()
+'DESCRIPTION: (***) Opens the previous circular association for the active document (cpp->cxx->hxx->h) [Alt+Left]
+	OpenNextDoc False, False
+End Sub
+
+' ################# GoToUnitTestFile #################
+Sub GoToUnitTestFile()
+'DESCRIPTION: (***) Toggles between class file (header/source) and unit test file (header/source) [Ctrl+Shift+~]
+	Dim doc
+
+	Set doc = ActiveDocument
+	If ( doc Is Nothing ) Or ( doc.type <> "Text" ) Then Exit Sub
+
+	Dim dirPath, fname, ext, isTestFile
+
+	fname = ExtractFname( doc.FullName )
+	ext = ExtractExtension( doc.FullName )
+	dirPath = ExtractDirPath( doc.FullName )
+	isTestFile = ( Right( fname, 4 ) = "Test" )
+
+	Dim correspondingDocFullPath
+
+	correspondingDocFullPath = ""
+	If isTestFile Then
+		If Right( dirPath, 4 ) = "_ut\" Then
+			Dim altClassDirPath
+			altClassDirPath = Left( dirPath, Len( dirPath ) - Len( "_ut\" ) ) + "\"
+			If DirectoryExist( altClassDirPath ) Then dirPath = altClassDirPath
+		End If
+
+		Dim classFname
+
+		classFname = Left( fname, Len( fname ) - Len( "Test" ) )
+		correspondingDocFullPath = dirPath + classFname + ext
+	Else
+		Dim altTestDirPath
+		altTestDirPath = Left( dirPath, Len( dirPath ) - Len( "\" ) ) + "_ut\"
+		If DirectoryExist( altTestDirPath ) Then dirPath = altTestDirPath
+
+		correspondingDocFullPath = dirPath + fname + "Test" + ext
+	End If
+
+	If FileExist( correspondingDocFullPath ) Then ShellOpen correspondingDocFullPath, True
+'	PrintToOutputWindow ">> " & correspondingDocFullPath
+
+End Sub
+
+' ################# ImplementMethod #################
+' RULES:
+'	1) The type qualifier for method implementation is extracted from the next line(s) after the function prototype.
+'	   If no type qualifier can be found, user is prompted to specify a type qualifier.
+'	   Sample type qualifiers:
+'			"MyClass::"
+'			"MyClass::EmbeddedClass::"
+'			"template< typename T, typename Q > MyClass< T, Q >::"
+'	2) It also works for a multi-line block of selected method prototypes.
+'	3) If the method(s) are in a header file it generates an inline implementation.
+'	4) Any default values for method parameters are automatically commented out.
+'	5) Any modifier (e.g. virtual, static, friend, explicit, afx_msg), comment line or empty line are
+'	   removed from the implementation.
+'	6) A long parameter list is splitted using the maximum column option
+'	   (EditMacroOptions macro, General tab, "Max. text &column" field).
+'
+' USAGE:
+'	A) Single method - copy a method prototype line, paste it above an already implemented
+'	   method for that class, put the cursor on the pasted method, and finally run this macro.
+'	B) Multiple methods - copy a block of lines for the method prototypes to implement, paste
+'	   above an already implemented method for that class, select all the prototype lines,
+'	   and finally run this macro.
+'
+Sub ImplementMethod()
+'DESCRIPTION: (***) Implements the method prototype on the current line; type qualifier is parsed from the next line(s) [Ctrl+Alt+D]
+	If Not IsActiveTextDocument() Then Exit Sub
+
+	Dim doc, sel
+
+	Set doc = ActiveDocument
+	Set sel = doc.Selection
+
+	PushCursor()
+
+	Dim codeText, implementationCodeText, typeLine
+	implementationCodeText = ""
+	typeLine = ""
+
+	codeText = sel.Text
+	codeText = ExtractPrototypeToImplement( typeLine )
+
+	If Len( codeText ) > 0 Then
+		Dim codeProcessor
+
+		Set codeProcessor = CreateObject( "IDETools.CodeProcessor" )
+		codeProcessor.docLanguage = doc.Language
+		codeProcessor.tabSize = doc.TabSize
+
+		Dim typeDescriptor, isInlineImpl
+
+		typeDescriptor = codeProcessor.ExtractTypeDescriptor( typeLine, doc.Name )
+		If typeDescriptor <> codeProcessor.cancelTag Then
+'			PrintToOutputWindow "typeDescriptor={" & typeDescriptor & "}"
+
+			Select Case LCase( ExtractExtension( GetSafeDocFilePath( doc, null ) ) )
+				Case ".h", ".hxx", ".inl"
+					isInlineImpl = True
+				Case Else
+					isInlineImpl = False
+			End Select
+
+			implementationCodeText = codeProcessor.ImplementMethods( codeText, typeDescriptor, isInlineImpl )
+		End If
+
+		Set codeProcessor = Nothing
+	End If
+
+	If Len( implementationCodeText ) > 0 Then
+		'Replace the selection with new prototype:
+		If implementationCodeText <> codeText Then
+			sel.Text = implementationCodeText
+		End If
+	End If
+End Sub
+
+Sub IncludeBracketsToQuotes()
+'DESCRIPTION: (**) Converts next #include <...> with include "..." [Ctrl+Alt+"]
+	Dim sel
+	Set sel = ActiveDocument.Selection
+
+	If sel.FindText( "#.*include\:b+<.+>", dsMatchCase + dsMatchRegExp ) Then
+		Dim includeDirective
+
+		includeDirective = sel.Text
+		includeDirective = StrFindReplace( includeDirective, "<", """", False )
+		includeDirective = StrFindReplace( includeDirective, ">", """", False )
+
+		sel.Text = includeDirective
+		sel.StartOfLine dsFirstColumn
+		sel.LineDown
+	End If
+End Sub
+
+' ################# InsertBugBugComment #################
+Sub InsertBugBugComment()
+'DESCRIPTION: (**) Inserts a BUGBUG comment [Ctrl+Alt+B]
+	If Not IsActiveTextDocument() Then Exit Sub
+
+	Dim codeTemplateFile
+	Set codeTemplateFile = CreateObject( "IDETools.TextContent" )
+
+	Dim bugbugTemplateFileSection
+
+	Select Case ActiveDocument.Language
+		Case "", "None"
+			bugbugTemplateFileSection = "BUGBUG Comment UNKNOWN"
+		Case "C/C++", "ODL/IDL", "Oracle PL/SQL", "ODBC SQL", "Microsoft SQL"
+			bugbugTemplateFileSection = "BUGBUG Comment C/C++"
+		Case "VBS Macro"
+			bugbugTemplateFileSection = "BUGBUG Comment BASIC"
+		Case Else		' "HTML - IE 3.0", "HTML 2.0 (RFC 1866)", "HTML Server-Side Script"
+			Exit Sub
+	End Select
+
+	If codeTemplateFile.LoadFileSection( GetCurrentCodeTemplateFile(), bugbugTemplateFileSection ) Then
+		Dim sel, leadingSpaces
+
+		Set sel = ActiveDocument.Selection
+
+		sel.StartOfLine dsFirstText
+		sel.StartOfLine dsFirstColumn, dsExtend
+		leadingSpaces = sel.Text
+		sel.Cancel
+
+		codeTemplateFile.ReplaceText "%LeadingSpaces%", leadingSpaces, False
+		codeTemplateFile.ReplaceText "%SingleLineCommentToken%", parDefaultSingleLineCommentToken, False
+		codeTemplateFile.ReplaceText "%Comment%", parUserName & " " & GetCurrentDate() & ": ", False
+		sel.Text = codeTemplateFile.Text
+		If sel.FindText( parUserName, dsMatchBackward ) Then sel.EndOfLine
+
+		Set sel = Nothing
+	End If
+
+	Set codeTemplateFile = Nothing
+End Sub
+
+' ################# InsertClassToProject #################
+Sub InsertClassToProject()
+'DESCRIPTION: (**) Generates the file overhead based on source file type [Ctrl+Alt+H]
+	Dim classBaseName, targetProjectName
+
+	WarningMessage "Not implemented yet!"
+End Sub
+
+' ################# InsertCommentDecoration #################
+' Decorates using current selected typename (if any), otherwise it extracts comment core from the current line
+Sub InsertCommentDecoration()
+'DESCRIPTION: (*) Inserts a decoration line above a type or method definition [Ctrl+Shift+2]
+	If Not IsActiveTextDocument() Then Exit Sub
+
+	If Len( ActiveDocument.Selection.Text ) > 0 Then
+		InsertCommentLine( ConvertToWindowsNewLines( ActiveDocument.Selection.Text ) )
+	Else
+		InsertCommentDecorationLine()
+	End If
+End Sub
+
+' ################# InsertCppType #################
+Sub InsertCppType()
+'DESCRIPTION: (**) Inserts a C++ type body (class/struct/union/enum) prompting user for the type name [Ctrl+Alt+K]
+	If Not IsActiveTextDocument() Then Exit Sub
+
+	Dim classBody, sel
+
+	Set sel = ActiveDocument.Selection
+	classBody = GetClassBodyText( True, ActiveDocument.Name )
+	If Len( classBody ) > 0 Then
+		sel.Text = classBody
+		sel.FindText "{", dsMatchBackward
+		sel.LineUp
+	End If
+End Sub
+
+' ################# InsertPragmaWarning #################
+Sub InsertPragmaWarning()
+'DESCRIPTION: (*) Inserts a #pragma message( __WARN__ "Some warning message" ) statement [CTRL+ALT+SHIFT+W]
+	If Not IsActiveTextDocument() Then Exit Sub
+
+	Dim comment
+
+	comment = "#pragma message( __WARN__ """ + parUserName & " " & GetCurrentDate() & ": YOUR_COMMENT_HERE" + """ )"
+
+	ActiveDocument.Selection.StartOfLine
+	ActiveDocument.Selection = comment & vbNewLine
+End Sub
+
+' ################# InsertStdFileContent #################
+Sub InsertStdFileContent()
+'DESCRIPTION: (**) Generates the file overhead based on source file type [Ctrl+Alt+H]
+	If Not IsActiveTextDocument() Then Exit Sub
+
+	DoInsertStdFileContent( ActiveDocument )
+End Sub
+
+' ################# LocateFile #################
+Sub LocateFile()
+'DESCRIPTION: (**) Locates files using wildcard search through environment paths (include, source, library, binary) [Ctrl+Shift+1]
+	Dim fileLocator
+
+	Set fileLocator = CreateObject( "IDETools.FileLocator" )
+
+	' Try to assign the current file path as local path
+	If Not ActiveWindow Is Nothing Then
+		If ActiveWindow.type = "Text" Then
+			Dim doc
+
+			Set doc = ActiveWindow.Parent
+			If Not doc Is Nothing Then
+				fileLocator.LocalCurrentFile = doc.FullName
+			End If
+		End If
+	End If
+	' No local path so far -> try to assign the current project path
+	If Len( fileLocator.LocalDirPath ) = 0 Then
+		If Projects.count > 0 Then
+			If Not ActiveProject Is Nothing Then fileLocator.AssociatedProjectFile = ActiveProject.FullName
+		End If
+	End If
+	' If we have any associated project file and it's part of the loaded DSPs, try to assign the current configuration
+	If Len( fileLocator.AssociatedProjectFile ) > 0 Then
+		Dim prj
+
+		For Each prj In Application.Projects
+			If prj.FullName = fileLocator.AssociatedProjectFile Then
+				fileLocator.ProjectActiveConfiguration = ActiveConfiguration.Name
+				Exit For
+			End If
+		Next
+	End If
+
+	If fileLocator.LocateFile() Then
+		Dim i, selFileCount
+
+		selFileCount = fileLocator.SelectedCount
+		On Error Resume Next
+		For i = 0 to selFileCount - 1
+			Application.Documents.Open fileLocator.GetSelectedFile( i ), "Text"
+		Next
+	End If
+	Set fileLocator = Nothing
+End Sub
+
+' ################# OpenActiveFileInExplorer #################
+Sub OpenActiveFileInExplorer()
+'DESCRIPTION: (**) Opens Windows Explorer and selects the current file [Alt+Shift+0]
+	Dim currentFileName
+
+	currentFileName = GetActiveFullPath()
+	If currentFileName <> "" Then
+		Dim fileAccess
+
+		Set fileAccess = CreateObject( "IDETools.FileAccess" )
+		If Not fileAccess Is Nothing Then fileAccess.ExploreAndSelectFile( currentFileName )
+		Set fileAccess = Nothing
+	End If
+End Sub
+
+
+' ################# SelectWord #################
+Sub SelectWord()
+'DESCRIPTION: (***) Selects nearest C++ word identifier [Shift+Enter]
+	Dim sel
+
+	Set sel = ActiveDocument.Selection
+	sel.CharRight
+	sel.WordLeft
+	sel.FindText "[a-zA-Z0-9_$]+", dsMatchRegExp + dsMatchForward
+End Sub
+
+' ################# ShowSelectionStatistics #################
+Sub ShowSelectionStatistics()
+'DESCRIPTION: (**) Shows information about the current selection (counts characters and lines) [Alt+L].
+	If ActiveDocument Is Nothing Then Exit Sub
+
+	Dim				sel, colCount, lineCount, message
+	Set				sel = ActiveWindow.Selection
+
+	colCount = sel.CurrentColumn
+	lineCount = sel.CurrentLine
+	ExecuteCommand "SelectSwapAnchor"
+	colCount = Abs( sel.CurrentColumn - colCount )
+	lineCount = Abs( sel.CurrentLine - lineCount )
+	ExecuteCommand "SelectSwapAnchor"
+
+	message = Len( sel.Text ) & " characters length" & vbNewLine &_
+			  vbNewLine &_
+			  CStr( colCount ) & " Column(s)" & vbNewLine &_
+			  CStr( lineCount ) & " Line(s)"
+	Call MsgBox( message, vbOKOnly, "Selection Statistics" )
+End Sub
+
+
+Sub SortLinesAscending()
+'DESCRIPTION: (***) Sorts selected lines ascending [CTRL+SHIFT+3].
+	SortLines( True )
+End Sub
+
+
+Sub SortLinesDescending()
+'DESCRIPTION: (***) Sorts selected lines ascending [CTRL+ALT+SHIFT+3].
+	SortLines( False )
+End Sub
+
+
+' ################# SplitArgumentList #################
+' Splits long argument lists at the maximum column (specified IDETools Options)
+' i.e. "Max. text &column" field in IDETools Options dialog.
+Sub SplitArgumentList()
+'DESCRIPTION: (***) Splits the current function argument list recursively [Alt+S]
+	DoSplitArgumentList -1, -1
+End Sub
+
+' ################# SplitArgumentListAtCursorColumn #################
+' Same as SplitArgumentList macro, but splits at the cursor column
+Sub SplitArgumentListAtCursorColumn()
+'DESCRIPTION: (***) Splits function argument list recursively, at the cursor column position [Ctrl+Alt+S]
+	If Not ActiveDocument Is Nothing Then
+		DoSplitArgumentList ActiveDocument.Selection.CurrentColumn, -1
+	End If
+End Sub
+
+' ################# SplitArgumentListCustom #################
+' Same as SplitArgumentList macro, but prompts the user to input the split column and column level.
+Sub SplitArgumentListCustom()
+'DESCRIPTION: (*) Splits the current function argument list recursively, with user-defined split column and bracket level [Ctrl+Alt+Shift+S]
+	If Not IsActiveTextDocument() Then Exit Sub
+
+	Dim maxColumn, bracketLevel
+
+	maxColumn = InputBox( "Right Column Limit", "SplitArgumentListCustom", ActiveDocument.Selection.CurrentColumn )
+	If Len( maxColumn ) = 0 Then Exit Sub
+
+	bracketLevel = InputBox( "Split Bracket Level", "SplitArgumentListCustom", 1 )
+	If Len( bracketLevel ) = 0 Then Exit Sub
+
+	DoSplitArgumentList CInt( maxColumn ), CInt( bracketLevel )
+End Sub
+
+' ################# ToggleCapitalizationToUnderscoreSeparators #################
+Sub ToggleCapitalizationToUnderscoreSeparators()
+'DESCRIPTION: (***) Toggles current selected word from word capitalization to underscore separators [Ctrl+_]
+	If ActiveDocument Is Nothing Then Exit Sub
+
+	Dim sel, sourceWord, sourceLen
+	Set sel = ActiveDocument.Selection
+	If Len( sel.Text ) = 0 Then SelectWord()
+	sourceWord = sel.Text
+	sourceLen = Len( sourceWord )
+	If ( InStr( sourceWord, " " ) > 0 ) Or ( InStr( sourceWord, vbTab ) > 0 ) Then MsgBox "Selection is not a C++ identifier!" : Exit Sub
+
+	Dim usesUnderscore
+
+	usesUnderscore = ( sourceWord = UCase( sourceWord ) ) Or ( InStr( sourceWord, "_" ) > 0 )
+
+	Dim destWord, i
+
+	destWord = ""
+	i = 1
+
+	While i <= sourceLen
+		Dim letter
+
+		letter = Mid( sourceWord, i, 1 )
+
+		If usesUnderscore Then
+			' To capitalization
+			If i = 1 Then
+				letter = UCase( letter )
+			ElseIf letter = "_" Then
+				i = i + 1
+				letter = UCase( Mid( sourceWord, i, 1 ) )
+			Else
+				letter = LCase( letter )
+			End If
+		Else
+			' To underscore separator
+			If i > 1 Then If letter = UCase( letter ) Then letter = "_" & letter
+			letter = UCase( letter )
+		End If
+
+		destWord = destWord & letter
+		i = i + 1
+	Wend
+
+	sel.Text = destWord
+	sel.WordLeft
+End Sub
+
+' ##################### ToggleComment ###################
+Sub ToggleComment()
+'DESCRIPTION: (***) Comments/uncomments the current selection (if any), otherwise the current line [Ctrl+/, Ctrl+Num/]
+	If Not IsActiveTextDocument() Then Exit Sub
+
+	Dim selText, selTextLen, selLineCount
+	Dim slRem, slRemLen, useSlashStarRem, sel
+	Set sel = ActiveDocument.Selection
+
+	slRem = GetSingleLineCommentToken()
+	slRemLen = Len( slRem )
+	useSlashStarRem = False
+	If slRem = "//" Or slRem = "--" Then useSlashStarRem = True
+
+	selText = ConvertToWindowsNewLines( sel.Text )
+	selTextLen = Len( selText )
+	selLineCount = GetSelectionLineCount()
+
+	If selTextLen = 0 Then
+		PushCursor()
+		sel.SelectLine
+		selText = ConvertToWindowsNewLines( sel.Text )
+
+		Dim leadingReplaceableSpaces
+		leadingReplaceableSpaces = String( 4 - slRemLen, " " )
+
+		If Left( selText, slRemLen ) = slRem Then
+			selText = Mid( selText, slRemLen + 1 )
+			If Left( selText, Len( leadingReplaceableSpaces ) ) = leadingReplaceableSpaces Then selText = leadingReplaceableSpaces + selText
+			sel.Text = selText
+		Else
+			If Left( selText, 2 ) = "/*" Then ErrorMessage "ToggleComment() fatal error" : Exit Sub
+			If Left( selText, 4 ) = String( 4, " " ) Then selText = Mid( selText, Len( slRem ) + 1 )
+			selText = slRem & selText
+			sel.Text = selText
+		End If
+		PopCursor()
+	Else
+		Dim multiLineEntire
+
+		multiLineEntire = False
+		PushSelection()
+
+		If Right( selText, Len( vbNewLine ) ) = vbNewLine Then
+			NormalizeSelection()
+			sel.LineUp dsExtend
+			sel.EndOfLine dsExtend
+			multiLineEntire = True
+			'Re-fetch selection:
+			selText = ConvertToWindowsNewLines( sel.Text )
+			selTextLen = Len( selText )
+			selLineCount = GetSelectionLineCount()
+		End If
+
+		If selTextLen > 1 Then
+			Dim lead, trail
+
+			lead = Left( selText, slRemLen )
+			trail = Right( selText, 2 )
+
+			If lead = slRem Then
+				selText = Mid( selText, slRemLen + 1 )
+				selText = StrFindReplace( selText, vbNewLine & slRem, vbNewLine, True )
+				If useSlashStarRem Then selText = "/*" & selText & "*/"
+			ElseIf ( lead = "/*" ) And ( trail = "*/" ) Then
+				selText = StrFindReplace( selText, "/*", "", False )
+				selText = StrFindReplace( selText, "*/", "", False )
+			Else
+				If multiLineEntire Then
+					selText = slRem & selText
+					selText = StrFindReplaceAll( selText, vbNewLine, vbNewLine & slRem, "" )
+				ElseIf useSlashStarRem Then
+					selText = "/*" & selText & "*/"
+				End If
+			End If
+
+			ReplaceTextAndSelect( selText )
+		End If
+		If multiLineEntire Then PopSelection()
+	End If
+End Sub
+
+' ##################### ToggleCppEscapeSequences ###################
+Sub ToggleCppEscapeSequences()
+'DESCRIPTION: (***) Toggles C++ escape sequences (if any) for the string in the current selection - both single-line or multi-line selection [CTRL+SHIFT+\].
+	If Not IsActiveTextDocument() Then Exit Sub
+
+	Dim sel
+	Dim selText, convertedText
+
+	Set sel = ActiveDocument.Selection
+
+	Dim isSingleLine
+
+	PushSelection
+	isSingleLine = Not( glSelStartLine <> glSelEndLine )
+
+	selText = ConvertToWindowsNewLines( sel.Text )
+	convertedText = selText
+	If Len( selText ) = 0 Then Exit Sub
+
+	If HasAnyCppEscapeSequence( selText ) Then
+		'Replace C++ escape sequences with the special characters
+
+		convertedText = StrFindReplace( convertedText, "\t", Chr( 9 ) , True )
+		convertedText = StrFindReplace( convertedText, "\a", Chr( 7 ) , True )
+		convertedText = StrFindReplace( convertedText, "\b", Chr( 8 ) , True )
+		convertedText = StrFindReplace( convertedText, "\f", Chr( 12 ), True )
+		convertedText = StrFindReplace( convertedText, "\v", Chr( 11 ), True )
+		convertedText = StrFindReplace( convertedText, "\'", "'", True )
+		convertedText = StrFindReplace( convertedText, "\""", """", True )
+		convertedText = StrFindReplace( convertedText, "\?", "?", True )
+		convertedText = StrFindReplace( convertedText, "\\", "\", True )
+
+		convertedText = StrFindReplace( convertedText, "\n", "", True )
+	Else
+		'Replace special characters with the C++ escape sequences
+
+		convertedText = StrFindReplace( convertedText, "\", "\\", True )
+		convertedText = StrFindReplace( convertedText, Chr( 9 ) , "\t", True )
+		convertedText = StrFindReplace( convertedText, Chr( 7 ) , "\a", True )
+		convertedText = StrFindReplace( convertedText, Chr( 8 ) , "\b", True )
+		convertedText = StrFindReplace( convertedText, Chr( 12 ), "\f", True )
+		convertedText = StrFindReplace( convertedText, Chr( 11 ), "\v", True )
+		convertedText = StrFindReplace( convertedText, """", "\""", True )
+
+		convertedText = StrFindReplace( convertedText, vbCrLf, vbLf, True )
+		convertedText = StrFindReplace( convertedText, vbLf, "\n" & vbCrLf, True )
+	End If
+
+	If convertedText <> selText Then
+		sel.Text = convertedText
+
+		If isSingleLine Then
+			glSelEndColumn = glSelEndColumn + ( Len( convertedText ) - Len( selText ) )
+		End If
+		PopSelection
+	Else
+		WarningMessage "No escape sequence to convert in the selected text!"
+	End If
+End Sub
+
+' ################# ToggleCppLineBreakToken #################
+' Works for the current line if there is no selection, or for all selected lines.
+Sub ToggleCppLineBreakToken()
+'DESCRIPTION: (*) Toggles C++ pre-processor line break "\" [Ctrl+Shift+Q]
+	Dim sel, textBuffer, foundTrails
+
+	Set sel = ActiveDocument.Selection
+
+	PushTopCursor()
+
+	textBuffer = ConvertToWindowsNewLines( sel.Text )
+	If textBuffer = "" Then textBuffer = DoSelectFunctionPrototypeAtCursor( 0 )
+	If textBuffer = "" Then Exit Sub
+	foundTrails = InStr( textBuffer, "\" & vbNewLine ) > 0
+	textBuffer = StrFindReplace( textBuffer, "\" & vbNewLine, vbNewLine, True )
+	If textBuffer <> "" And Not foundTrails Then
+		textBuffer = StrFindReplace( textBuffer, vbNewLine, "\" & vbNewLine, True )
+	End If
+	If textBuffer <> "" Then
+		sel.Text = textBuffer
+		glColumn = 1
+		PopCursorExtend()
+	End If
+End Sub
+
+' ##################### ToggleQuotedString ###################
+Sub ToggleQuotedString()
+'DESCRIPTION: (***) Toggles the quotes around the selected text - both single-line or multi-line selection [CTRL+SHIFT+'].
+	If Not IsActiveTextDocument() Then Exit Sub
+
+	Dim sel, isSingleLine
+	Set sel = ActiveDocument.Selection
+
+	PushSelection
+	isSingleLine = Not( glSelStartLine <> glSelEndLine )
+
+	Dim selText, convertedText, selTextLen
+	selText = ConvertToWindowsNewLines( sel.Text )
+	selTextLen = Len( selText )
+	If selTextLen < 1 Then Exit Sub
+
+
+	Dim linesArray, line
+
+	linesArray = Split( selText, vbCrLf )
+	For Each line In linesArray
+		PrintToOutputWindow "{" + line + "}"
+	Next
+
+	Dim isQuoted
+
+	isQuoted = False
+	If Left( selText, 1 ) = """" Then isQuoted = True
+
+	If isQuoted Then
+		Dim rightChar, rightPos
+
+		rightPos = selTextLen
+		Do
+			rightChar = Mid( selText, rightPos, 1 )
+			rightPos = rightPos - 1
+		Loop While ( rightChar = vbCr ) Or ( rightChar = vbLf )
+
+		If rightChar <> """" Then
+			ErrorMessage "Uneven quotes in the selection!" & vbNewLine & vbNewLine & "ABORTING..."
+			Exit Sub
+		End If
+	End If
+
+	If isSingleLine Then
+		If isQuoted Then
+			convertedText = Mid( selText, 2, selTextLen - 2 )
+		Else
+			convertedText = """" & selText & """"
+		End If
+
+		If convertedText <> selText Then
+			sel.Text = convertedText
+
+			If isSingleLine Then
+				glSelEndColumn = glSelEndColumn + ( Len( convertedText ) - Len( selText ) )
+			End If
+			PopSelection
+		End If
+	Else
+		If isQuoted Then
+			sel.ReplaceText "^""", "", dsMatchForward + dsMatchRegExp
+			sel.ReplaceText """$", "", dsMatchForward + dsMatchRegExp
+		Else
+			sel.ReplaceText "^", """", dsMatchForward + dsMatchRegExp
+			sel.ReplaceText "$", """", dsMatchForward + dsMatchRegExp
+		End If
+	End If
+End Sub
+
+
+' ################# TokenizeText #################
+sub TokenizeText()
+'DESCRIPTION: Splits or unsplits the selected text using specified tokes and line ends [Ctrl+8]
+	dim codeProcessor
+	set codeProcessor = CreateObject("IDETools.CodeProcessor")
+
+    dim sel, codeText
+
+	if IsActiveTextDocument() Then
+		set sel = ActiveDocument.Selection
+		codeProcessor.docLanguage = ActiveDocument.Language
+		codeProcessor.tabSize = ActiveDocument.TabSize
+
+		codeText = sel.Text
+	else
+		set sel = nothing
+	end if
+
+    dim outcomeText
+	outcomeText = codeProcessor.TokenizeText( codeText )
+
+    'replace the selection with generated code
+	if not sel is nothing then
+		if len( outcomeText ) > 0 then
+			if outcomeText <> codeText then
+				sel.Text = outcomeText
+			end if
+		end if
+    end if
+end sub
+
+' ################# UnusedAlways #################
+Sub UnusedAlways()
+'DESCRIPTION: (*) Wraps selection like UNUSED_ALWAYS( selText ) [Ctrl+Alt+U]
+	If Not IsActiveTextDocument() Then Exit Sub
+
+	Dim sel
+	Set sel = ActiveDocument.Selection
+
+	If Len( sel.Text ) = 0 Then MsgBox "Please select the target parameter or variable": Exit Sub
+
+	sel.Text = "UNUSED_ALWAYS( " & sel.Text & " )"
+	sel.StartOfLine dsFirstText
+End Sub
+
+' ################# WrapStringToUnicodePortable #################
+Sub WrapStringToUnicodePortable()
+'DESCRIPTION: (*) Converts a string constant (or a character) to Unicode portable form _T("YourString") [Ctrl+Alt+U]
+	DoWrapStringToUnicodePortable( True )
+End Sub
+
+' ################# ZTestMacro #################
+Sub ZTestMacro()
+'DESCRIPTION: (*) Testing macro [Ctrl+Q]
+	DeleteTrailingWhitespaces
+	ActiveDocument.ReplaceText "    ", "	"
+
+	'RemoveDecorationLines
+End Sub
+
+'------------------------------------------------------------------------------
+' TEST MACROS
+'------------------------------------------------------------------------------
+
+
+Private Sub DoStuff()
+	Dim sel
+
+	Set sel = ActiveDocument.Selection
+
+	While sel.FindText( "std::map< CObjectID, CNmxObject* >& rOutMapOrigToNew", dsMatchCase )
+		sel.Text = "CReplicationReferenceBinder& rOutRefBinder"
+	Wend
+
+	While sel.FindText( "const std::map< CObjectID, CNmxObject* >& rMapOrigToNew", dsMatchCase )
+		sel.Text = "const CReplicationReferenceBinder& rRefBinder"
+	Wend
+
+	While sel.FindText( "rOutMapOrigToNew", dsMatchCase + dsMatchWord )
+		sel.Text = "rOutRefBinder"
+	Wend
+
+	While sel.FindText( "rMapOrigToNew", dsMatchCase + dsMatchWord )
+		sel.Text = "rRefBinder"
+	Wend
+
+	If sel.FindText( ":Replicate2", dsMatchCase ) Then sel.FindText "rRefBinder", dsMatchCase
+End Sub
+
+
+Private Sub SearchForUnusedResourceSymbols()
+	If Not IsActiveTextDocument() Then Exit Sub
+
+	Dim selResourceH, selRc
+
+	Set selResourceH = ActiveDocument.Selection
+	If LCase( ActiveDocument.Name ) <> "resource.h" Then MsgBox "You must open the desired resource.h document!" : Exit Sub
+
+	GoToComplementaryFile
+	If LCase( ExtractExtension( ActiveDocument.FullName ) ) <> ".rc" Then MsgBox "Cannot find the complementary *.rc document!" : Exit Sub
+	Set selRc = ActiveDocument.Selection
+	PrintToOutputWindow "Symbold unreferenced in " & ActiveDocument.FullName & ":"
+
+	GoToComplementaryFile
+
+	selResourceH.GoToLine 1
+
+	Dim prevLineNo
+
+	prevLineNo = 0
+	Do
+		If Not selResourceH.FindText( "#define\:b+", dsMatchForward + dsMatchRegExp + dsMatchCase ) Then Exit Do
+		If selResourceH.CurrentLine < prevLineNo Then Exit Do
+		prevLineNo = selResourceH.CurrentLine
+
+		selResourceH.CharRight
+		ExecuteCommand "FindNextWord"
+
+		Dim symbol
+
+		symbol = selResourceH.Text
+		If Left( symbol, 5 ) <> "_APS_" Then
+			If Not selRc.FindText( symbol, dsMatchForward + dsMatchCase + dsMatchWord ) Then
+				PrintToOutputWindow symbol
+				selResourceH.StartOfLine
+				selResourceH.Text = vbTab
+				selResourceH.EndOfLine
+			End If
+		End If
+	Loop
+End Sub
+
+Private Sub SearchForUnusedSymbols( resSymbolListPath, targetPath )
+	If Not IsActiveTextDocument() Then Exit Sub
+
+	Dim docSymbols, docTarget
+
+	Documents.Open resSymbolListPath, "Text"
+	Set docSymbols = ActiveDocument
+	Documents.Open targetPath, "Text"
+	Set docTarget = ActiveDocument
+
+	Dim selSymbols, selTarget
+
+	Set selSymbols = docSymbols.Selection
+	Set selTarget = docTarget.Selection
+
+	PrintToOutputWindow "Resources unreferenced in " & ActiveDocument.FullName & ":"
+
+	selSymbols.GoToLine 1
+
+	Dim prevLineNo
+
+	prevLineNo = 0
+	Do
+		If Not selSymbols.FindText( "^.+$", dsMatchForward + dsMatchRegExp ) Then Exit Do
+		If selSymbols.CurrentLine < prevLineNo Then Exit Do
+		prevLineNo = selSymbols.CurrentLine
+
+		Dim symbol
+
+		symbol = selSymbols.Text
+		If Not selTarget.FindText( symbol, dsMatchForward ) Then
+			PrintToOutputWindow symbol
+			selSymbols.StartOfLine
+			selSymbols.Text = vbTab
+			selSymbols.EndOfLine
+		End If
+	Loop
+
+End Sub
+
+Private Sub RemoveDecorationLines()
+	If Not IsActiveTextDocument() Then Exit Sub
+
+	Dim sel
+	Set sel = ActiveDocument.Selection
+
+	While sel.FindText( "//##########", dsMatchForward )
+		sel.SelectLine
+		sel.Delete
+	Wend
+End Sub
+
+Private Sub IndentAllXmlTags()
+	Dim doc
+	Set doc = ActiveDocument
+
+	If doc Is Nothing Then Exit Sub
+
+	Dim sel
+	Set sel = doc.Selection
+
+	IndentXmlElementContent( sel )
+End Sub
+
+Private Sub IndentXmlElementContent( ByRef sel )
+	If sel.FindText( "<\:i>", dsMatchRegExp ) Then
+		Dim startTag, endTag, endTagEmpty
+
+		startTag = sel.Text
+		endTag = Left( startTag, 1 ) & "/\:b*" & Mid( startTag, 2 )
+		endTagEmpty = Left( startTag, Len( startTag ) - 1 ) & "\:b*/" & Right( startTag, 1 )
+
+		Dim startLine, endLine
+
+		startLine = sel.CurrentLine
+		If sel.FindText( endTag, dsMatchRegExp ) Then
+			endLine = sel.CurrentLine
+
+			sel.MoveTo startLine + 1, 1
+
+			If endLine > startLine Then
+				sel.MoveTo endLine, 1, dsExtend
+
+				If Len( sel.Text ) > 0 Then
+					sel.Indent
+					sel.MoveTo startLine + 1, 1
+					IndentXmlElementContent( sel )
+					'sel.MoveTo sel.CurrentLine + 1, 1
+					While sel.CurrentLine < endLine
+						sel.MoveTo sel.CurrentLine + 1, 1
+						IndentXmlElementContent( sel )
+					Wend
+				End If
+			Else
+			End If
+
+		End If
+
+	End If
+End Sub
+
+'		PrintToOutputWindow " startTag: '" & startTag & "'"
+'		PrintToOutputWindow " endTag: '" & endTag & "'"
+'		PrintToOutputWindow " endTagEmpty: '" & endTagEmpty & "'"
+
+Private Sub ReplaceCopyrightHeaders( bPromptReplace, addIfNoHeader )
+	Dim copyrightHeader
+	copyrightHeader = "//" & vbCrLf &_
+					  "// Copyright [2005] PeopleSoft, Inc. and its subsidiaries. All rights reserved." & vbCrLf &_
+					  "// PeopleSoft Proprietary and Confidential." & vbCrLf &_
+					  "//" & vbCrLf
+
+	Do
+		Dim doc
+		Set doc = ActiveDocument
+
+		If doc Is Nothing Then Exit Do
+
+		Dim sel, succeeded
+		Set sel = doc.Selection
+
+		succeeded = False
+
+		If sel.FindText( "Copyright", dsMatchForward + dsMatchFromStart + dsMatchCase ) Then
+			Dim commentLineCount, lineText
+
+			commentLineCount = 0
+			Do
+				sel.SelectLine
+				lineText = sel.Text
+				sel.StartOfLine dsFirstColumn
+				If InStr( lineText, "//" ) = 1 Then
+					sel.LineDown
+					commentLineCount = commentLineCount + 1
+				Else
+					Exit Do
+				End If
+			Loop
+
+			If commentLineCount > 0 Then
+				sel.StartOfLine dsFirstColumn
+				sel.StartOfDocument dsExtend
+
+				If bPromptReplace Then If MsgBox( "Replace copyright header for this file?", vbOkCancel + vbQuestion ) = vbCancel Then Exit Do
+
+				If doc.ReadOnly Then
+					ExecuteCommand "CvsInEdit"
+					MsgBox "Non editable file -> make it editable and break here."
+					Exit Do
+				End If
+
+				sel.Text = copyrightHeader
+
+				doc.Close dsSaveChangesYes
+				succeeded = True
+			End If
+		Else
+			If addIfNoHeader Then
+				sel.StartOfDocument
+				sel.Text = copyrightHeader
+				doc.Close dsSaveChangesYes
+				succeeded = True
+			End If
+		End If
+
+		If Not succeeded Then
+			Dim message
+			message = "No copyright headers found in " & vbCrLf & doc.FullName
+			PrintToOutputWindow " (?) " & message
+			If MsgBox( message & vbCrLf & vbCrLf & "Continue to replace headers?", vbYesNo ) = vbNo Then Exit Do
+
+			doc.Close dsSaveChangesNo
+		End If
+	Loop
+End Sub
+
+Private Sub TestIDETools()
+	Dim doc, sel
+	Set doc = ActiveDocument
+	Set sel = doc.Selection
+
+	PushCursor()
+
+	Dim codeText, selWasEmpty
+	selWasEmpty = False
+
+	If Len( sel.Text ) = 0 Then sel.SelectLine : selWasEmpty = True	' Empty selection -> select the entire line
+	codeText = sel.Text
+
+	Dim newCodeText
+	newCodeText = ""
+
+	If Len( codeText ) > 0 Then
+		Dim codeProcessor
+
+		Set codeProcessor = CreateObject( "IDETools.CodeProcessor" )
+		codeProcessor.docLanguage = doc.Language
+		codeProcessor.tabSize = doc.TabSize
+		newCodeText = codeProcessor.ToggleComment( codeText )
+		Set codeProcessor = Nothing
+	End If
+
+	If Len( newCodeText ) > 0 Then
+		'Replace the selection with new prototype:
+'		PrintToOutputWindow "newCodeText={" & newCodeText & "}"
+		ReplaceTextAndSelect( newCodeText )
+	End If
+
+	If selWasEmpty Then sel.MoveTo glLine, glColumn
+End Sub
+
+'------------------------------------------------------------------------------
+' PRIVATE MACROS
+'------------------------------------------------------------------------------
+
+' ################# SetupMacroParameters #################
+Private Sub SetupMacroParameters()
+'DESCRIPTION: Reloads IDETools options from registry (HKEY_CURRENT_USER\Software\Paul H. Cocoveanu\IDETools\_LocalSettings).
+	Dim ideToolsOptions
+
+	Set ideToolsOptions = CreateObject( "IDETools.ModuleOptions" )
+	If ideToolsOptions Is Nothing Then Exit Sub
+
+	' Load the IDETools options
+	parUserName = ideToolsOptions.developerName
+	parDefaultSingleLineCommentToken = ideToolsOptions.singleLineCommentToken
+	parClassPrefix = ideToolsOptions.classPrefix
+	parStructPrefix = ideToolsOptions.structPrefix
+	parEnumPrefix = ideToolsOptions.enumPrefix
+
+	parAutoCodeGeneration = ideToolsOptions.autoCodeGeneration
+	parDisplayErrorMessages = ideToolsOptions.displayErrorMessages
+	parDupLineMoveDown = ideToolsOptions.duplicateLineMoveDown
+	parBrowsePath = ideToolsOptions.browseInfoPath
+	parAditionalAssocFolders = ideToolsOptions.additionalAssocFolders
+
+	Set ideToolsOptions = Nothing
+
+	parSingleLineDecoration = GetTemplateSection( "Single Line Decoration Core" )
+End Sub
+
+
+Private Sub SortLines( ascending )
+	If Not IsActiveTextDocument() Then Exit Sub
+
+	Dim sel
+	Set sel = ActiveDocument.Selection
+
+	PushSelection
+
+	Dim codeProcessor
+	Set codeProcessor = CreateObject( "IDETools.CodeProcessor" )
+	codeProcessor.docLanguage = ActiveDocument.Language
+	codeProcessor.tabSize = ActiveDocument.TabSize
+
+	Dim newText
+	newText = codeProcessor.SortLines( sel.Text, ascending )
+	Set codeProcessor = Nothing
+
+	sel.Text = newText
+	PopSelection
+End Sub
+
+
+' ################# GoToNextAssocFileVariation #################
+Private Sub GoToNextAssocFileVariation()
+'DESCRIPTION: Opens Next document file from current file [Ctrl+Shift+`]
+	Call OpenNextDoc( True, True )
+End Sub
+
+' ################# DoSplitArgumentList #################
+Private Function DoSplitArgumentList( maxColumn, targetBracketLevel )
+	DoSplitArgumentList = False
+
+	If ActiveDocument Is Nothing Then Exit Function
+
+	Dim doc, sel
+	Set doc = ActiveDocument
+	Set sel = doc.Selection
+
+	Dim orgCurrLine, orgCurrCol
+	orgCurrLine = sel.CurrentLine
+	orgCurrCol = sel.CurrentColumn
+
+	Dim codeText
+	codeText = DoSelectFunctionPrototypeAtCursor( 0 )	'Extract function prototype.
+
+	Dim splitCodeText
+	splitCodeText = ""
+
+	If Len( codeText ) > 0 Then
+		Dim codeProcessor
+
+		Set codeProcessor = CreateObject( "IDETools.CodeProcessor" )
+		codeProcessor.docLanguage = doc.Language
+		codeProcessor.tabSize = doc.TabSize
+
+		splitCodeText = codeProcessor.SplitArgumentList( codeText, maxColumn, -1 )
+		Set codeProcessor = Nothing
+	End If
+
+	If Len( splitCodeText ) > 0 Then
+		'Replace the selection with formatted code
+'		PrintToOutputWindow "splitCodeText={" & splitCodeText & "}"
+		If splitCodeText <> codeText Then
+			sel.Text = splitCodeText
+			DoSplitArgumentList = True
+		End If
+		sel.MoveTo orgCurrLine, orgCurrCol
+	End If
+End Function
+
+'------------------------------------------------------------------------------
+' HELPER FUNCTIONS
+'------------------------------------------------------------------------------
+
+' ################# ErrorMessage #################
+Function ErrorMessage( messageText )
+	If parDisplayErrorMessages Then
+		ErrorMessage = MsgBox( messageText, vbOKOnly, "C++ Macros Error" )
+	Else
+		ErrorMessage = vbCancel
+		PrintToOutputWindow " * ERROR: {" & messageText & "}"
+	End If
+End Function
+
+' ################# WarningMessage #################
+Function WarningMessage( messageText )
+	If parDisplayErrorMessages Then
+		WarningMessage = MsgBox( messageText, vbOKOnly, "C++ Macros Warning" )
+	Else
+		WarningMessage = vbCancel
+		PrintToOutputWindow " * WARNING: {" & messageText & "}"
+	End If
+End Function
+
+' ################# GetCurrentDate #################
+Function GetCurrentDate()
+	Dim textContent
+
+	Set textContent = CreateObject( "IDETools.TextContent" )
+	GetCurrentDate = UCase( textContent.FormatTimestamp( Date, "" ) )
+	Set textContent = Nothing
+End Function
+
+' ################# AdjustDocumentLanguage #################
+' Adjust the language for proper syntax highlighting for uncertain file types.
+Function AdjustDocumentLanguage( doc )
+	AdjustDocumentLanguage = False
+	If ( doc Is Nothing ) Or ( doc.type <> "Text" ) Then Exit Function
+
+	Dim docFileName, fExt, preExt, cursor, prefixCursor, syntaxLanguage
+
+	syntaxLanguage = ""
+	fExt = ""
+	preExt = ""
+	docFileName = doc.Name
+	cursor = InStrRev( docFileName, "." )
+	If cursor > 0 Then
+		fExt = Mid( docFileName, cursor )
+		If cursor > 1 Then
+			prefixCursor = InStrRev( docFileName, ".", cursor - 1 )
+		Else
+			prefixCursor = 0
+		End If
+		If prefixCursor > 0 Then
+			preExt = Mid( docFileName, prefixCursor, cursor - prefixCursor )
+		End If
+	End If
+	Select Case LCase( fExt )
+		Case ".t", ".tmpl", ".lcc", ".ppc", ".opp", ".imp", ".tp", ".java", ".py", ".ctf", ".test", ".tcl", ".dsp"
+			doc.Language = dsCPP
+		Case ".ksh", ".sh", ".awk"
+			doc.Language = dsCPP
+		Case ".bas", ".vbs", ".bat", ".cmd", ".reg"
+			doc.Language = dsVBSMacro
+		Case ".xml", ".cdx", ".dcx", ".mdx", ".odx", ".fdx", ".dgx", ".cgx"
+			doc.Language = dsHTML_IE3
+		Case ".sql", ".ddl", ".pk", ".pkb", ".pkg", ".pks", ".pac", ".ot", ".otb", ".tab"
+			doc.Language = "Oracle PL/SQL"
+			If preExt <> "" And LCase( preExt ) = ".fpu" Then
+				doc.TabSize = 2
+				doc.IndentSize = 2
+			End If
+		Case ".ora"
+			doc.Language = dsIDL	'Funny, isn't it?
+		Case Else
+			Exit Function
+	End Select
+	AdjustDocumentLanguage = True
+End Function
+
+' ################# IsActiveTextDocument #################
+Function IsActiveTextDocument()
+	IsActiveTextDocument = False
+
+	If Not ActiveDocument Is Nothing Then
+		If ActiveDocument.type = "Text" Then
+			IsActiveTextDocument = True
+		End If
+	End If
+End Function
+
+' ################# FileExist #################
+Function FileExist( fullPath )
+	FileExist = False
+
+	Dim fileAccess
+
+	Set fileAccess = CreateObject( "IDETools.FileAccess" )
+	If Not fileAccess Is Nothing Then FileExist = fileAccess.FileExist( fullPath )
+	Set fileAccess = Nothing
+End Function
+
+' ################# DirectoryExist #################
+Function DirectoryExist( ByVal directory )
+	DirectoryExist = False
+
+	Dim trail
+
+	If Len( directory ) = 0 Then Exit Function
+	trail = Right( directory, 1 )
+	If trail <> "\" And trail <> "/" Then directory = directory & "\"
+	directory = directory & "nul"
+	DirectoryExist = FileExist( directory )
+End Function
+
+' ################# RunProgram #################
+Function RunProgram( fullPath )
+	RunProgram = False
+
+	Dim fileAccess
+
+	Set fileAccess = CreateObject( "IDETools.FileAccess" )
+	If Not fileAccess Is Nothing Then RunProgram = fileAccess.Execute( fullPath )
+	Set fileAccess = Nothing
+End Function
+
+' ################# ShellOpen #################
+Function ShellOpen( docFullPath, smartMode )
+	ShellOpen = False
+
+	Dim docExt, pos
+
+	pos = InStrRev( docFullPath, "." )
+	If pos > 0 Then
+		docExt = LCase( Mid( docFullPath, pos + 1 ) )
+	Else
+		docExt = ""
+	End If
+
+	Dim openInIDE
+
+	openInIDE = False
+	If smartMode = True Then
+		Select Case docExt
+			Case "h", "hxx", "hpp", "inl", "c", "cpp", "cxx"
+				openInIDE = True
+			Case "rc", "res", "rct", "dsm", "txt"
+				openInIDE = True
+			Case "clw", "def", "odl", "idl", "tli", "tlh", "sql", "sqt", "ssq"
+				openInIDE = True
+			Case "ini", "reg"
+				openInIDE = True
+			Case "bsc"
+				openInIDE = False	' Avoid hanging !
+		End Select
+	End If
+	'Avoid shell-open deadlocks if debugger is in break state !
+'	If Application.Debugger.State = dsBreak Then openInIDE = True
+
+	If openInIDE = False Then
+		Dim fileAccess
+
+		Set fileAccess = CreateObject( "IDETools.FileAccess" )
+		If Not fileAccess Is Nothing Then ShellOpen = fileAccess.ShellOpen( docFullPath )
+		Set fileAccess = Nothing
+	End If
+
+	If ShellOpen = False Then
+		Application.Documents.Open docFullPath, "Text"
+		ShellOpen = True
+	End If
+End Function
+
+' ################# HasAnyCppEscapeSequence #################
+Function HasAnyCppEscapeSequence( ByRef text )
+	HasAnyCppEscapeSequence = False
+
+	Const cppEscapedCharacters = "nrtabfv'""?\"
+
+	Dim pos, textLength
+
+	textLength = Len( text )
+
+	pos = 0
+	Do
+		pos = InStr( pos + 1, text, "\" )
+		If pos > 0 Then
+			If pos < textLength Then
+				If InStr( cppEscapedCharacters, Mid( text, pos + 1, 1 ) ) > 0 Then
+					HasAnyCppEscapeSequence = True
+					Exit Do
+				End If
+			End If
+		Else
+			Exit Do
+		End If
+	Loop
+End Function
+
+' ################# BrowseForFile #################
+Function BrowseForFile( folderItemFlatArray, currentFileName, sectionPostfix, optionFlags, folderLayout )
+'Allows you to browse for a file, and returns the full file path if selected, else Nothing.
+	BrowseForFile = ""
+
+	Dim filePicker
+
+	Set filePicker = CreateObject( "IDETools.MenuFilePicker" )
+	'PrintToOutputWindow filePicker.GetHelpMessage()
+	'Setup the default options
+	If optionFlags <> -1 Then filePicker.OptionFlags = optionFlags
+	If folderLayout <> -1 Then filePicker.FolderLayout = folderLayout
+	If filePicker.TrackPosX = -1 And filePicker.TrackPosY = -1 Then filePicker.StoreTrackPos()
+	'Setup the INI section for current browsing context
+	If sectionPostfix <> "" Then Call filePicker.SetProfileSection( sectionPostfix, True )
+	filePicker.AddFolderArray( folderItemFlatArray )
+	filePicker.CurrentFileName = currentFileName
+	If filePicker.ChooseFile() Then
+		BrowseForFile = filePicker.CurrentFileName
+	End If
+	Set filePicker = Nothing
+End Function
+
+' ################# ShellOpenBrowseForFile #################
+'Calls 'BrowseForFile()' to pick a file, and performs shell open if any file is picked
+Function ShellOpenBrowseForFile( folderItemFlatArray, currentFileName, sectionPostfix, _
+								 optionFlags, folderLayout )
+	ShellOpenBrowseForFile = ""
+
+	Dim pickedFile
+
+	pickedFile = BrowseForFile( folderItemFlatArray, currentFileName, sectionPostfix, optionFlags, folderLayout )
+	If pickedFile <> "" Then Call ShellOpen( pickedFile, True )
+	ShellOpenBrowseForFile = pickedFile
+End Function
+
+' ################# BuildProjectFolderItemArray #################
+Function BuildProjectFolderItemArray( fileFullPath, addAllFiles )
+	BuildProjectFolderItemArray = ""
+
+	If fileFullPath = "" Then Exit Function
+
+	Dim pos, lastPos
+	Dim projectDir, projectName
+
+	pos = InStrRev( fileFullPath, "\" )
+	If pos = 0 Then Exit Function
+	projectDir = Left( fileFullPath, pos )
+	'Assume project name is same with project folder name !
+	projectName = ""
+	lastPos = Len( projectDir ) - 1
+	pos = InStrRev( projectDir, "\", lastPos )
+	If pos > 0 Then projectName = Mid( projectDir, pos + 1, lastPos - pos )
+
+	Dim projectStuffFilters, knownExtArray, ext
+
+	knownExtArray = Split( ".rc,.h,.cpp,.clw,.?dl, *.*,_*.*,.ds?", "," )
+	projectStuffFilters = "resource.h"
+	For Each ext In knownExtArray
+		projectStuffFilters = projectStuffFilters & "," & projectName & ext
+	Next
+	projectStuffFilters = projectStuffFilters & ",EXP_*.h,LINK_TO_*.h,StdAfx.h,*.txt,*.doc"
+
+	Dim projectFolderItemArray
+
+	projectFolderItemArray = _
+		projectDir & "*_??p.h|INTERFACES;" &_
+		projectDir & projectStuffFilters & "|PROJECT STUFF;" &_
+		projectDir & "res\*.*|RESOURCES"
+
+	If addAllFiles = True Then
+		projectFolderItemArray = projectFolderItemArray & ";" &_
+			projectDir & "*.h|Headers;" &_
+			projectDir & "*.cpp|Sources;" &_
+			projectDir & "*.hxx,*.hpp,*.cxx|Inlines and Templates"
+	Else
+		If Len( parAditionalAssocFolders ) <> 0 Then
+			projectFolderItemArray = projectFolderItemArray & ";" & parAditionalAssocFolders
+		End If
+	End If
+
+	BuildProjectFolderItemArray = projectFolderItemArray
+End Function
+
+' ################# BuildAssociationsFolderItemArray #################
+Function BuildAssociationsFolderItemArray( fileFullPath )
+	BuildAssociationsFolderItemArray = ""
+
+	Dim pos, lastPos
+	Dim fileDir, fileDirName, fileNameExt, fileName, fileExt
+
+	pos = InStrRev( fileFullPath, "\" )
+	If pos = 0 Then Exit Function
+	fileDir = Left( fileFullPath, pos )
+	fileNameExt = Mid( fileFullPath, pos + 1 )
+
+	fileDirName = ""
+	lastPos = Len( fileDir ) - 1
+	pos = InStrRev( fileDir, "\", lastPos )
+	If pos > 0 Then fileDirName = LCase( Mid( fileDir, pos + 1, lastPos - pos ) )
+
+	pos = InStrRev( fileNameExt, "." )
+	If pos > 0 Then
+		fileName = Left( fileNameExt, pos - 1 )
+		fileExt = LCase( Mid( fileNameExt, pos + 1 ) )
+	Else
+		fileName = fileNameExt
+		fileExt = ""
+	End If
+
+	Dim assocFilters
+
+	assocFilters = ""
+	If fileExt = "dsm" Then
+		assocFilters = "*.dsm"
+	Else
+		Dim knownExtArray, ext
+
+		knownExtArray = Split( ".h,.hxx,.hpp,.cxx,.inl,.c,.cpp,.idl", "," )
+		For Each ext In knownExtArray
+			If ext <> fileExt Then
+				assocFilters = addToStringList( assocFilters, fileName & ext, "," )
+			End If
+		Next
+
+		Dim fnCommonPrefix, fnCommonSuffix
+
+		Call breakFileNameIntoComponents( fileName, fnCommonPrefix, fnCommonSuffix, "_" )
+		If Len( fnCommonPrefix ) > 0 Then assocFilters = addToStringList( assocFilters, fnCommonPrefix & "*.idl", "," )
+		If Len( fnCommonSuffix ) > 0 Then
+			assocFilters = addToStringList( assocFilters, "*" & fnCommonSuffix & ".*", "," )
+			' If this is a feature file, associate the bootstrap file as well
+			Dim bspDirPath, bspDirName
+
+			bspDirPath = findBootstrapDir( fileDir & "..\BSP*", bspDirName )
+			If Len( bspDirPath ) > 0 Then
+				Dim suffixRadical
+
+				suffixRadical = fnCommonSuffix
+				pos = InStr( UCase( suffixRadical ), "FEATURE" )
+				If pos > 1 Then suffixRadical = Left( suffixRadical, pos - 1 )
+				assocFilters = addToStringList(assocFilters, "..\" & bspDirName & "\*" & suffixRadical & ".*", ",")
+			End If
+		End If
+	End If
+
+	BuildAssociationsFolderItemArray = fileDir & assocFilters & "|ASSOCIATIONS"
+
+	If InStr( fileDirName, "desc" ) = 0 Then
+		Dim factoryBaseFN
+
+		factoryBaseFN = fileDir & fileDirName & " Desc\"
+		BuildAssociationsFolderItemArray = BuildAssociationsFolderItemArray & ";" & _
+										   factoryBaseFN & fileName & "_Factory.*," & fileName & "_Tags.*|FACTORY"
+	End If
+
+'	PrintToOutputWindow BuildAssociationsFolderItemArray
+End Function
+
+' ################# addToStringList #################
+Function addToStringList( stringList, elementToAdd, separator )
+	addToStringList = stringList
+	If Len( elementToAdd ) > 0 Then
+		If Len( addToStringList ) > 0 Then addToStringList = addToStringList & separator
+		addToStringList = addToStringList & elementToAdd
+	End If
+End Function
+
+' ################# breakFileNameIntoComponents #################
+Private Sub breakFileNameIntoComponents( ByVal fileName, ByRef fnCommonPrefix, ByRef fnCommonSuffix, separator )
+	Dim components, index, lowerBound, upperBound
+
+	fnCommonPrefix = ""
+	fnCommonSuffix = ""
+
+	components = Split( fileName, separator )
+
+	lowerBound = LBound( components )
+	upperBound = UBound( components )
+	'Get the prefix (by skipping the empty components)
+	index = lowerBound
+	Do While index < upperBound
+		If Len( components( index ) ) > 0 Then fnCommonPrefix = components( index ): Exit Do
+		index = index + 1
+	Loop
+	'Get the sufprefix (by skipping the empty components)
+	index = upperBound
+	Do While index > lowerBound
+		If Len( components( index ) ) > 0 Then fnCommonSuffix = components( index ): Exit Do
+		index = index + 1
+	Loop
+	'Eliminate both prefix and suffix if they are the same
+	If Len( fnCommonPrefix ) > 0 And Len( fnCommonSuffix ) > 0 And fnCommonPrefix = fnCommonSuffix Then
+		fnCommonPrefix = ""
+		fnCommonSuffix = ""
+	End If
+End Sub
+
+' ################# findBootstrapDir #################
+Function findBootstrapDir( bspDirSearchPattern, outDirName )
+	findBootstrapDir = ""
+	outDirName = ""
+
+	Dim dirFinder, found
+
+	Set dirFinder = CreateObject( "IDETools.FileSearch" )
+	dirFinder.FileAttrFilterStrict = FILE_ATTRIBUTE_DIRECTORY
+	dirFinder.ExcludeDirDots = True
+	found = dirFinder.FindFile( bspDirSearchPattern )
+	If found Then findBootstrapDir = dirFinder.FilePath : outDirName = dirFinder.FileName
+	Set dirFinder = Nothing
+End Function
+
+' ################# GetCurrentCodeTemplateFile #################
+Function GetCurrentCodeTemplateFile()
+	Dim ideToolsOptions
+
+	Set ideToolsOptions = CreateObject( "IDETools.ModuleOptions" )
+	GetCurrentCodeTemplateFile = ideToolsOptions.codeTemplateFile
+	Set ideToolsOptions = Nothing
+End Function
+
+' ################# openFileList #################
+Private Function openFileList( fileList, separator )
+	openFileList = 0
+
+	On Error Resume Next
+
+	Dim fileArray, fileFullPath
+
+	fileArray = Split( fileList, ";" )
+	For Each fileFullPath In fileArray
+		If Len( fileFullPath ) > 0 Then
+			Application.Documents.Open fileFullPath, "Text"
+			openFileList = openFileList + 1
+		End If
+	Next
+End Function
+
+' ################# getVStudioMacrosDirPath #################
+Function getVStudioMacrosDirPath()
+	Dim ideToolsOptions
+
+	Set ideToolsOptions = CreateObject( "IDETools.ModuleOptions" )
+	getVStudioMacrosDirPath = ideToolsOptions.GetVStudioMacrosDirPath( True )
+	Set ideToolsOptions = Nothing
+End Function
+
+'------------------------------------------------------------------------------
+'TEXT SELECTION FUNCTIONS:
+'------------------------------------------------------------------------------
+
+Dim glLine, glColumn
+Dim glSelStartLine, glSelStartColumn, glSelEndLine, glSelEndColumn
+Dim glSelLen, glSelLineCount, glSelInverted
+Dim glTopLine
+
+' ################# PushCursor #################
+Private Sub PushCursor()
+	glLine = ActiveDocument.Selection.CurrentLine
+	glColumn = ActiveDocument.Selection.CurrentColumn
+End Sub
+
+' ################# PushTopCursor #################
+Private Sub PushTopCursor()
+	glLine = ActiveDocument.Selection.TopLine
+	glColumn = ActiveDocument.Selection.CurrentColumn
+End Sub
+
+' ################# PopCursor #################
+Private Sub PopCursor()
+	ActiveDocument.Selection.MoveTo glLine, glColumn
+End Sub
+
+' ################# PopCursorExtend #################
+Private Sub PopCursorExtend()
+'Returns the length of new selection.
+	ActiveDocument.Selection.MoveTo glLine, glColumn, dsExtend
+End Sub
+
+' ################# PushSelection #################
+Private Sub PushSelection()
+'Saves the current selection properties in normalized way, and returns
+'True if selection is inverted (from right to left or down to up).
+	Dim sel
+	Set sel = ActiveDocument.Selection
+
+	glSelLen = Len( ConvertToWindowsNewLines( sel.Text ) )
+	glSelLineCount = sel.BottomLine - sel.TopLine
+	glSelInverted = False
+
+	glSelEndLine = sel.CurrentLine
+	glSelEndColumn = sel.CurrentColumn
+
+	If glSelLen = 0 Then
+		'Empty selection -> optimization
+		glSelStartLine = glSelEndLine
+		glSelStartColumn = glSelEndColumn
+	Else
+		ExecuteCommand "SelectSwapAnchor"
+		If glSelLineCount > 0 Then
+			If sel.CurrentLine > glSelEndLine Then glSelInverted = True
+		Else
+			If sel.CurrentColumn > glSelEndColumn Then glSelInverted = True
+		End If
+
+		If glSelInverted Then
+			glSelStartLine = glSelEndLine
+			glSelStartColumn = glSelEndColumn
+			glSelEndLine = sel.CurrentLine
+			glSelEndColumn = sel.CurrentColumn
+		Else
+			glSelStartLine = sel.CurrentLine
+			glSelStartColumn = sel.CurrentColumn
+		End If
+		ExecuteCommand "SelectSwapAnchor"
+	End If
+End Sub
+
+' ################# PopSelection #################
+Private Sub PopSelection()
+	Dim sel
+	Set sel = ActiveDocument.Selection
+
+	If glSelLen = 0 Then
+		sel.MoveTo glSelStartLine, glSelStartColumn
+	ElseIf glSelInverted Then
+		sel.MoveTo glSelEndLine, glSelEndColumn
+		sel.MoveTo glSelStartLine, glSelStartColumn, dsExtend
+	Else
+		sel.MoveTo glSelStartLine, glSelStartColumn
+		sel.MoveTo glSelEndLine, glSelEndColumn, dsExtend
+	End If
+End Sub
+
+' ################# IsSelectionInverted #################
+Function IsSelectionInverted()
+'Returns True if selection's anchor is greater than cursor.
+	IsSelectionInverted = False
+
+	Set sel = ActiveDocument.Selection
+
+	If Len( sel ) > 0 Then
+		If sel.BottomLine > sel.TopLine Then
+			IsSelectionInverted = ( sel.CurrentLine <> sel.BottomLine )
+		Else
+			Dim orgCol
+
+			orgCol = sel.CurrentColumn
+			ExecuteCommand "SelectSwapAnchor"
+			IsSelectionInverted = ( sel.CurrentColumn > orgCol )
+			ExecuteCommand "SelectSwapAnchor"
+		End If
+	End If
+End Function
+
+' ################# NormalizeSelection #################
+Function NormalizeSelection()
+'If selection is inverted, it swaps it and returns True,
+'else does nothing and returns False.
+	NormalizeSelection = False
+
+	Dim sel
+	Set sel = ActiveDocument.Selection
+
+	If Len( sel ) > 0 Then
+		If sel.BottomLine > sel.TopLine Then
+			If sel.CurrentLine = sel.TopLine Then
+				ExecuteCommand "SelectSwapAnchor"
+				NormalizeSelection = True
+			End If
+		Else
+			Dim orgCol
+
+			orgCol = sel.CurrentColumn
+			ExecuteCommand "SelectSwapAnchor"
+			If sel.CurrentColumn > orgCol Then
+				NormalizeSelection = True
+			Else
+				ExecuteCommand "SelectSwapAnchor"
+			End If
+		End If
+	End If
+End Function
+
+' ################# InvertSelection #################
+'If selection is not inverted, it swaps it and returns True,
+'else does Nothing and returns False.
+Function InvertSelection()
+	InvertSelection = False
+
+	Dim sel
+	Set sel = ActiveDocument.Selection
+
+	If Len( sel ) > 0 Then
+		If sel.BottomLine > sel.TopLine Then
+			If sel.CurrentLine = sel.BottomLine Then
+				ExecuteCommand "SelectSwapAnchor"
+				InvertSelection = True
+			End If
+		Else
+			Dim orgCol
+
+			orgCol = sel.CurrentColumn
+			ExecuteCommand "SelectSwapAnchor"
+			If sel.CurrentColumn < orgCol Then
+				InvertSelection = True
+			Else
+				ExecuteCommand "SelectSwapAnchor"
+			End If
+		End If
+	End If
+End Function
+
+' ################# GetSelLen #################
+Function GetSelLen()
+'Returns the length of new selection.
+	GetSelLen = Len( ConvertToWindowsNewLines( ActiveDocument.Selection.Text ) )
+End Function
+
+' ################# GetSelectionLineCount #################
+Function GetSelectionLineCount()
+	Dim sel
+	Set sel = ActiveDocument.Selection
+
+	GetSelectionLineCount = sel.BottomLine - sel.TopLine + 1
+End Function
+
+' ################# GetCurrentLine #################
+Function GetCurrentLine( doCancel )
+'Return the string containing the prompted line.
+	Dim textLine, sel
+
+	Set sel = ActiveDocument.Selection
+	sel.SelectLine
+	textLine = ConvertToWindowsNewLines( sel.Text )
+	If doCancel Then sel.Cancel
+	GetCurrentLine = textLine
+End Function
+
+' ################# ReplaceTextAndSelect #################
+Private Function ReplaceTextAndSelect( ByRef textToInsert )
+	ReplaceTextAndSelect = False
+
+	Set sel = ActiveDocument.Selection
+
+	If textToInsert <> sel.Text Then
+		Dim line, column, sel
+
+		InvertSelection()
+		line = sel.CurrentLine
+		column = sel.CurrentColumn
+		sel.Text = textToInsert
+		sel.MoveTo line, column, dsExtend
+		ExecuteCommand "SelectSwapAnchor"
+
+		ReplaceTextAndSelect = True
+	End If
+End Function
+
+' ################# GetLeadingWS #################
+Function GetLeadingWS()
+	Dim sel
+
+	Set sel = ActiveDocument.Selection
+	sel.StartOfLine dsFirstColumn
+	sel.StartOfLine dsFirstText, dsExtend
+	GetLeadingWS = sel.text
+End Function
+
+'------------------------------------------------------------------------------
+'SCRIPT FUNCTIONS:
+'------------------------------------------------------------------------------
+
+' ################# GetSingleLineCommentToken #################
+Function GetSingleLineCommentToken()
+	GetSingleLineCommentToken = ""
+
+	Dim docFileType
+
+	docFileType = GetActiveDocumentType()
+	Select Case ActiveDocument.Language
+		Case "Oracle PL/SQL", "ODBC SQL", "Microsoft SQL"
+			GetSingleLineCommentToken = "--"
+		Case dsCPP, dsIDL
+			GetSingleLineCommentToken = "//"
+		Case dsVBSMacro
+			If docFileType = ftBAT Then
+				GetSingleLineCommentToken = "REM "
+			Else
+				GetSingleLineCommentToken = "'"
+			End If
+		Case Else
+			Select Case docFileType
+				Case ftUnknown
+					GetSingleLineCommentToken = parDefaultSingleLineCommentToken
+				Case ftSQL
+					GetSingleLineCommentToken = "--"
+				Case ftORA
+					GetSingleLineCommentToken = "#"
+				Case ftUNIXShellScript, ftAWK
+					GetSingleLineCommentToken = "##"
+				Case Else
+					GetSingleLineCommentToken = "//"
+			End Select
+	End Select
+End Function
+
+' ################# GetActiveDocumentType #################
+Function GetActiveDocumentType()
+	GetActiveDocumentType = ftUnknown
+
+	Dim docFileName, fExt, cursor, doc
+	Set doc = ActiveDocument
+
+	If doc Is Nothing Then Exit Function
+	docFileName = doc.Name
+	cursor = InStrRev( docFileName, "." )
+	If cursor > 0 Then
+		fExt = Mid( docFileName, cursor )
+	Else
+		fExt = ""
+	End If
+	Select Case LCase( fExt )
+		Case ".h"
+			If LCase( docFileName ) = "resource.h" Then
+				GetActiveDocumentType = ftRH
+			Else
+				GetActiveDocumentType = ftH
+			End If
+		Case ".hxx"
+			GetActiveDocumentType = ftHXX
+		Case ".cpp", ".c"
+			GetActiveDocumentType = ftCPP
+		Case ".cxx"
+			GetActiveDocumentType = ftCXX
+		Case ".rc"
+			GetActiveDocumentType = ftRC
+		Case ".h.tmpl"
+			If LCase( docFileName ) = "resource.h.tmpl" Then
+				GetActiveDocumentType = ftRH_tmpl
+			Else
+				GetActiveDocumentType = ftH_tmpl
+			End If
+		Case ".hxx.tmpl"
+			GetActiveDocumentType = ftHXX_tmpl
+		Case ".cpp.tmpl", ".c.tmpl", ".t"
+			GetActiveDocumentType = ftCPP_tmpl
+		Case ".cxx.tmpl"
+			GetActiveDocumentType = ftCXX_tmpl
+		Case ".rc"
+			GetActiveDocumentType = ftRC_tmpl
+		Case ".bas", ".dsm", ".vbs"
+			GetActiveDocumentType = ftBAS
+		Case ".odl", ".idl"
+			GetActiveDocumentType = ftIDL
+		Case ".sql", ".ddl", ".tab", ".ssq", ".dsq", ".pk", ".pkg", "pks", ".pkb", ".pac", ".ot", ".otb"
+			GetActiveDocumentType = ftSQL
+		Case ".ora"
+			GetActiveDocumentType = ftORA
+		Case ".bat", ".cmd"
+			GetActiveDocumentType = ftBAT
+		Case ".ksh", ".sh"
+			GetActiveDocumentType = ftUNIXShellScript
+		Case ".awk"
+			GetActiveDocumentType = ftAWK
+		Case Else
+			GetActiveDocumentType = ftUnknown
+	End Select
+End Function
+
+' ################# ExtractDirPath #################
+Function ExtractDirPath( ByRef sFullPath )
+	ExtractDirPath = ""
+
+	If len( sFullPath ) > 0 Then
+		Dim posWinPathSep, posUnixPathSep
+
+		posWinPathSep = InStrRev( sFullPath, "\" )
+		posUnixPathSep = InStrRev( sFullPath, "/" )
+		If posUnixPathSep > posWinPathSep Then posWinPathSep = posUnixPathSep
+
+		If posWinPathSep > 0 Then ExtractDirPath = left( sFullPath, posWinPathSep ) ' including trailing slash
+	End If
+
+'	PrintToOutputWindow "ExtractDirPath(" & sFullPath & ")=" & ExtractDirPath
+End Function
+
+' ################# ExtractDirPathNoTrailingSlash #################
+Function ExtractDirPathNoTrailingSlash( ByRef sFullPath )
+	ExtractDirPathNoTrailingSlash = ""
+
+	If len( sFullPath ) > 0 Then
+		Dim posPathSep, posUnixPathSep
+
+		posPathSep = InStrRev( sFullPath, "\" )
+		posUnixPathSep = InStrRev( sFullPath, "/" )
+		If posUnixPathSep > posPathSep Then posPathSep = posUnixPathSep
+
+		If posPathSep > 0 Then ExtractDirPathNoTrailingSlash = left( sFullPath, posPathSep - 1 ) ' including trailing slash
+	End If
+
+'	PrintToOutputWindow "ExtractDirPathNoTrailingSlash(" & sFullPath & ")=" & ExtractDirPath
+End Function
+
+' ################# ExtractFnameExt #################
+Function ExtractFnameExt( ByRef sFullPath )
+	ExtractFnameExt = ""
+
+	If len( sFullPath ) > 0 Then
+		Dim posWinPathSep, posUnixPathSep
+
+		posWinPathSep = InStrRev( sFullPath, "\" )
+		posUnixPathSep = InStrRev( sFullPath, "/" )
+		If posUnixPathSep > posWinPathSep Then posWinPathSep = posUnixPathSep
+		If posWinPathSep > 0 Then ExtractFnameExt = mid( sFullPath, posWinPathSep + 1 )
+	End If
+
+'	PrintToOutputWindow "ExtractFnameExt(" & sFullPath & ")=" & ExtractFnameExt
+End Function
+
+' ################# ExtractFname #################
+Function ExtractFname( ByRef sFullPath )
+	ExtractFname = ""
+
+	Dim fnameExt
+	fnameExt = ExtractFnameExt( sFullPath )
+
+	If len( fnameExt ) > 0 Then
+		Dim posDot
+		posDot = InStrRev( fnameExt, "." )
+
+		If posDot > 0 Then ExtractFname = Left( fnameExt, posDot - 1 )
+	End If
+End Function
+
+' ################# ExtractExtension #################
+Function ExtractExtension( ByRef sFullPath )
+	ExtractExtension = ""
+
+	Dim fnameExt
+	fnameExt = ExtractFnameExt( sFullPath )
+
+	If len( fnameExt ) > 0 Then
+		Dim posDot
+		posDot = InStrRev( fnameExt, "." )
+
+		If posDot > 0 Then ExtractExtension = Mid( fnameExt, posDot )
+	End If
+End Function
+
+' ################# GetSafeDocFullPath #################
+Function GetSafeDocFilePath( ByRef doc, altDocFilePath )
+	GetSafeDocFilePath = ""
+
+	If Not doc Is Nothing Then
+		GetSafeDocFilePath = doc.FullName
+	ElseIf Len( altFileName ) > 0 Then
+		GetSafeDocFilePath = altDocFilePath
+	End If
+End Function
+
+' ################# InsertCommentDecorationLine #################
+'Inserts a decoration on a type/function/method definition (by case)
+Function InsertCommentDecorationLine()
+	InsertCommentDecorationLine = True
+
+	If Not IsActiveTextDocument() Then Exit Function
+
+	Dim lineText, isTemplate, sel
+	Set sel = ActiveDocument.Selection
+
+	lineText = GetCurrentLine( True )
+	isTemplate = False
+	If InStr( lineText, "template" ) > 0 Then
+		PushCursor()
+		sel.LineDown
+		lineText = GetCurrentLine( True )
+		PopCursor()
+		isTemplate = True
+	End If
+
+	Dim tag
+
+	If InStr( lineText, "(" ) > 0 Then
+		'function definition:
+		lineText = ExtractMethodWithScope( lineText )
+		If Len( lineText ) > 0 Then
+			InsertCommentLine( lineText )
+		Else
+			ErrorMessage "Bad Scope"
+			InsertCommentDecorationLine = False
+		End If
+	ElseIf InStr( lineText, "typedef" ) > 0 Then
+		tag = ""
+		PushCursor()
+		If sel.FindText( ";" ) Then
+			If sel.CurrentLine >= glLine Then
+				sel.CharLeft
+				sel.WordLeft dsExtend
+				tag = ConvertToWindowsNewLines( sel.Text )
+			End If
+		End If
+		PopCursor()
+		If Len( tag ) > 0 Then
+			InsertCommentLine( tag )
+		Else
+			InsertCommentDecorationLine = False
+		End If
+	Else
+		'Type definition:
+		If isTemplate Then sel.LineDown
+		sel.StartOfLine dsFirstText
+		Do
+			sel.WordRight
+			SelectWord()
+		Loop While InStr( sel.Text, "EXP_" )
+		tag = ConvertToWindowsNewLines( sel.Text )
+		If isTemplate Then sel.LineUp
+		InsertCommentLine( tag )
+	End If
+End Function
+
+' ################# InsertCommentLine #################
+Function InsertCommentLine( tag )
+'Inserts a comment line with specified tag (or current selection).
+	InsertCommentLine = False
+
+	If Not IsActiveTextDocument() Then Exit Function
+
+	Dim decorationLine, leadingWS
+
+	If Len( tag ) = 0 Then ErrorMessage "No comment label specified !" : Exit Function
+	decorationLine = BuildCommentLine( tag )
+
+	leadingWS = GetLeadingWS()
+'	PrintToOutputWindow "decorationLine=" & decorationLine & "     leadingWS=" & leadingWS
+	decorationLine = decorationLine & vbNewLine & leadingWS
+
+	Dim sel
+
+	Set sel = ActiveDocument.Selection
+	sel.StartOfLine dsFirstText
+	sel.StartOfLine dsFirstText
+	sel.Text = decorationLine
+
+	InsertCommentLine = True
+End Function
+
+' ################# BuildCommentLine #################
+Function BuildCommentLine( commentTag )
+'Builds the string for a comment line.
+	Dim slToken, decoratedLine
+
+	slToken = GetSingleLineCommentToken()
+	If Len( slToken ) = 1 Then slToken = slToken & " "
+
+	decoratedLine = parSingleLineDecoration
+	If Len( decoratedLine ) > 0 Then
+		decoratedLine = slToken & decoratedLine
+		decoratedLine = StrFindReplace( decoratedLine, "%TypeName%", commentTag, 1 )
+	End If
+
+	BuildCommentLine = decoratedLine
+End Function
+
+' ################# OpenNextDoc #################
+Function OpenNextDoc( inForwardDir, tryVariation )
+'Opens/activates Next/previous file associated with active document (if any).
+	OpenNextDoc = False
+
+	If ActiveDocument Is Nothing Then Exit Function
+
+	Dim fileAccess, nextDocFullPath
+
+	Set fileAccess = CreateObject( "IDETools.FileAccess" )
+	If fileAccess Is Nothing Then Exit Function
+	If tryVariation Then
+		nextDocFullPath = fileAccess.GetNextVariationDoc( ActiveDocument.FullName, inForwardDir )
+	Else
+		nextDocFullPath = fileAccess.GetNextAssocDoc( ActiveDocument.FullName, inForwardDir )
+	End If
+	Set fileAccess = Nothing
+	If nextDocFullPath = "" Then Exit Function
+
+	'Open/activate target document if not already:
+	On Error Resume Next
+	Application.Documents.Open nextDocFullPath, "Text"
+	If Err.Number <> 0 Then Err.Clear : Exit Function
+	OpenNextDoc = True
+End Function
+
+' ################# OpenComplementaryDoc #################
+Function OpenComplementaryDoc()
+'Opens/activates complementary file associated with active document (if any).
+	OpenComplementaryDoc = False
+
+	If ActiveDocument Is Nothing Then Exit Function
+
+	Dim fileAccess, complDocFullPath
+
+	Set fileAccess = CreateObject( "IDETools.FileAccess" )
+	If fileAccess Is Nothing Then Exit Function
+	complDocFullPath = fileAccess.GetComplementaryDoc( ActiveDocument.FullName )
+	Set fileAccess = Nothing
+	If complDocFullPath = "" Then Exit Function
+
+	'Open/activate target document if not already:
+	On Error Resume Next
+	Application.Documents.Open complDocFullPath, "Text"
+	If Err.Number <> 0 Then Err.Clear : Exit Function
+	OpenComplementaryDoc = True
+End Function
+
+' ################# GetClassBodyText #################
+'Inserts a class/struct/union/enum body prompting for type and name.
+'	docFileName = ActiveDocument.Name
+Function GetClassBodyText( doPrompt, docFileName )
+	GetClassBodyText = ""
+
+	Dim cursor, className
+
+	If Len( docFileName ) > 0 Then
+		cursor = InStr( docFileName, "." )
+		If cursor > 0 Then
+			className = fileToIdentifier( Left( docFileName, cursor - 1 ) )
+		Else
+			className = fileToIdentifier( docFileName )
+		End If
+	End If
+	className = "class " & className
+
+	Dim info, cppType
+
+	cppType = "class"
+	If doPrompt Then
+		info = InputBox( "Enter C++ type and type name, separated by 1 space", _
+						 "Generate class declaration (ESC for cancel):", _
+						 className )
+		If Len( info ) = 0 Then Exit Function
+
+		cursor = InStr( info, " " )
+		If cursor > 0 Then
+			cppType = Left( info, cursor - 1 )
+			className = Mid( info, cursor + 1 )
+		Else
+			className = info
+		End If
+	End If
+
+	If Len( className ) = 0 Then ErrorMessage "Bad type name !" : Exit Function
+	If Len( cppType ) = 0 Then ErrorMessage "Bad C++ Type !" : Exit Function
+
+	Dim sectionName
+
+	Select Case cppType
+		Case "class"
+			sectionName = "Class Body"
+		Case "struct"
+			sectionName = "Struct Body"
+		Case "enum"
+			sectionName = "Enum Body"
+		Case Else
+			Exit Function
+	End Select
+
+	Dim codeTemplateFile
+
+	Set codeTemplateFile = CreateObject( "IDETools.TextContent" )
+
+	If codeTemplateFile.LoadFileSection( GetCurrentCodeTemplateFile(), sectionName ) Then
+		Call codeTemplateFile.ReplaceText( "%TypeName%", className, True )
+		Call codeTemplateFile.ReplaceText( "%StgClassModifier%", "", True )
+		GetClassBodyText = codeTemplateFile.Text
+	End If
+
+	Set codeTemplateFile = Nothing
+End Function
+
+' ################# ExtractPrototypeToImplement #################
+Function ExtractPrototypeToImplement( ByRef typeLine )
+	Dim sel
+
+	Set sel = ActiveDocument.Selection
+
+	typeLine = ""
+	If Len( sel.Text ) = 0 Then
+		ExtractPrototypeToImplement = DoSelectFunctionPrototypeAtCursor( 0 )
+	Else
+		ExtractPrototypeToImplement = sel.Text
+	End If
+
+	If Len( ExtractPrototypeToImplement ) > 0 Then
+		PushSelection
+
+		sel.MoveTo glSelEndLine, glSelEndColumn
+		sel.SelectLine
+
+		While InStr( sel.Text, "//" ) = 1
+			sel.Cancel
+			sel.LineDown
+			sel.SelectLine
+		Wend
+
+		If InStr( sel.Text, "/*" ) = 1 Then
+			sel.FindText "*/"
+			sel.Cancel
+			sel.LineDown
+			sel.SelectLine
+		End If
+
+		Dim templateLine, returnValueLine, typeDescriptorLine, trailingScopeAccess
+		templateLine = ""
+		returnValueLine = ""
+		typeDescriptorLine = ""
+
+		If InStr( sel.Text, "template" ) = 1 Then
+			If IsLineImplementationTypeDescriptor( sel.Text ) Then
+				typeDescriptorLine = sel.Text
+			Else
+				templateLine = sel.Text
+			End If
+			sel.Cancel
+			sel.LineDown
+			sel.SelectLine
+		End If
+
+		If InStr( sel.Text, "(" ) = 0 Then
+			' No '(' on this line, it might be type descriptor line ("SomeClass::") or return value line
+			If IsLineImplementationTypeDescriptor( sel.Text ) Then
+				typeDescriptorLine = sel.Text
+			Else
+				returnValueLine = sel.Text
+			End If
+			sel.Cancel
+			sel.LineDown
+			sel.SelectLine
+		End If
+
+		If InStr( sel.Text, "(" ) > 0 Then
+			typeLine = templateLine + returnValueLine + sel.Text
+		End If
+
+		If typeLine = "" Then typeLine = typeDescriptorLine
+
+		PrintToOutputWindow "typeLine={" & typeLine & "}"
+
+		PopSelection
+	End If
+
+	Set sel = Nothing
+End Function
+
+' ################# DoSelectFunctionPrototypeAtCursor #################
+Function DoSelectFunctionPrototypeAtCursor( extraLineCount )
+	DoSelectFunctionPrototypeAtCursor = ""
+
+	Dim sel
+	Set sel = ActiveDocument.Selection
+
+	If Len( sel.Text ) > 0 Then sel.CharLeft
+	PushCursor()
+	sel.StartOfLine
+	If sel.FindText( "(" ) Then
+		If sel.CurrentLine = glLine Then
+			Dim lastLine
+
+			sel.CharLeft
+			ExecuteCommand "GoToMatchBrace"
+			lastLine = sel.CurrentLine + 1 + extraLineCount
+			sel.MoveTo glLine, 1
+			sel.MoveTo lastLine, 1, dsExtend
+			DoSelectFunctionPrototypeAtCursor = ConvertToWindowsNewLines( sel.Text )
+		End If
+	End If
+
+	If Len( DoSelectFunctionPrototypeAtCursor ) = 0 Then
+		PopCursor()
+	End If
+End Function
+
+' ################# IsLineImplementationTypeDescriptor #################
+Function IsLineImplementationTypeDescriptor( ByVal text )
+	Dim trailingScopeAccess
+
+	trailingScopeAccess = "::" + vbNewLine
+	ConvertToWindowsNewLines( text )
+	If Right( text, 4 ) = trailingScopeAccess Then
+		IsLineImplementationTypeDescriptor = True
+	Else
+		IsLineImplementationTypeDescriptor = False
+	End If
+End Function
+
+' ################# DoWrapStringToUnicodePortable #################
+Function DoWrapStringToUnicodePortable( skipIfAllready )
+'Convert a string or character to Unicode portable form.
+	DoWrapStringToUnicodePortable = True
+
+	Dim sel, quotedString
+
+	Set sel = ActiveDocument.Selection
+
+	If Not sel.FindText( "\:q", dsMatchRegExp ) Then Exit Function
+
+	quotedString = ConvertToWindowsNewLines( sel.Text )
+	sel.CharLeft
+	If skipIfAllready = True Then
+		sel.CharLeft dsExtend, 4
+		If InStr( sel.Text, "_T" ) > 0 Then
+			sel.FindText "\:q", dsMatchRegExp
+			Exit Function
+		End If
+		sel.CharRight
+	End If
+
+	sel.FindText "\:q", dsMatchRegExp
+	sel.Text = "_T(" & quotedString & ")"
+End Function
+
+' ################# DoInsertStdFileContent #################
+' Builds the file content based on file type.
+' File type contents are described into the current text pattern file.
+' Returns True if there is a valid content for the specified file type, otherwise False.
+Function DoInsertStdFileContent( ByRef doc )
+	DoInsertStdFileContent = False
+
+	Dim docFileName, fName, extPos, fileTypeSection
+
+	docFileName = doc.Name
+	fName = docFileName
+	fileTypeSection = ""
+	extPos = InStrRev( docFileName, "." )
+	If extPos > 0 Then
+		fName = Left( docFileName, extPos - 1 )
+		fileTypeSection = Mid( docFileName, extPos + 1 )
+	End If
+	If Len( fileTypeSection ) = 0 Then Exit Function
+
+	fName = fileToIdentifier( fName )
+	fileTypeSection = "File Template." & UCase( fileTypeSection )
+
+	Dim fileContent
+
+	fileContent = GetTemplateFileContent( fName, fileTypeSection )
+	If Len( fileContent ) = 0 Then Exit Function
+
+	doc.Selection.Text = fileContent
+	DoInsertStdFileContent = True
+End Function
+
+' ################# GetTemplateFileContent #################
+Function GetTemplateFileContent( fName, fileTypeSection )
+	GetTemplateFileContent = ""
+
+	PrintToOutputWindow "fName=" & fName & "  fileTypeSection=" & fileTypeSection
+
+	Dim codeTemplateFile
+
+	Set codeTemplateFile = CreateObject("IDETools.TextContent")
+
+	Dim typeName
+
+	typeName = parClassPrefix & fName
+	' Pre processing -> register the standard field replacements:
+	Call codeTemplateFile.AddFieldReplacement( "%FileName%", fName )
+	Call codeTemplateFile.AddFieldReplacement( "%ProjectName%", GetCurrProjectLabel() )
+	Call codeTemplateFile.AddFieldReplacement( "%TypeName%", typeName )
+	Call codeTemplateFile.AddFieldReplacement( "%StgClassModifier%", "" )
+
+	If codeTemplateFile.LoadFileSection( GetCurrentCodeTemplateFile(), fileTypeSection ) Then
+		GetTemplateFileContent = codeTemplateFile.Text
+	End If
+	Set codeTemplateFile = Nothing
+End Function
+
+' ################# GetTemplateSection #################
+'Loads and returns the content of the specified section into the current template file.
+Function GetTemplateSection( section )
+	Dim codeTemplateFile
+
+	Set codeTemplateFile = CreateObject( "IDETools.TextContent" )
+	If codeTemplateFile.LoadFileSection( GetCurrentCodeTemplateFile(), section ) Then
+		GetTemplateSection = codeTemplateFile.Text
+	Else
+		GetTemplateSection = ""
+	End If
+	Set codeTemplateFile = Nothing
+End Function
+
+'################# fileToIdentifier #################
+Function fileToIdentifier( ByVal fileName )
+	fileName = StrReplaceWhiteSpaces( fileName, "_", ctOtherSyntax, False, False )
+	fileToIdentifier = StrFindReplace( fileName, ".", "_", 1 )
+	fileToIdentifier = StrFindReplace( fileName, "-", "_", 1 )
+	fileToIdentifier = StrFindReplace( fileName, "+", "_", 1 )
+End Function
+
+'################# FullPathToDirPath #################
+Function FullPathToDirPath( ByRef fileFullPath, includeTrailSlash )
+	FullPathToDirPath = ""
+
+	Dim pos
+
+	pos = InStrRev( fileFullPath, "\" )
+	If pos > 0 Then
+		If includeTrailSlash = False Then pos = pos - 1
+		FullPathToDirPath = Left( fileFullPath, pos )
+	End If
+End Function
+
+'################# FullPathToFileName #################
+Function FullPathToFileName( ByRef fileFullPath )
+' By ex, for fileFullPath="D:\COSWIN CS Development\Windows Motor\GroupBox.h" returns "GroupBox.h"
+	FullPathToFileName = ""
+
+	Dim pos
+
+	pos = InStrRev( fileFullPath, "\" )
+	If pos > 0 Then FullPathToFileName = Mid( fileFullPath, pos + 1 )
+End Function
+
+'################# FileToProjectName #################
+Function FileToProjectName( ByRef fileFullPath )
+' Retrieves the project name based on 'fileFullPath', assuming that
+' file folder name is the same with it's project name;
+' By ex, for fileFullPath="D:\COSWIN CS Development\Windows Motor\GroupBox.h" returns "Windows Motor"
+	FileToProjectName = FullPathToFileName( FullPathToDirPath( fileFullPath, False ) )
+End Function
+
+'################# GetActiveFullPath #################
+Function GetActiveFullPath()
+	GetActiveFullPath = ""
+	If Not ActiveDocument Is Nothing Then
+		GetActiveFullPath = ActiveDocument.FullName
+	Else
+		If Application.Projects.Count > 0 Then GetActiveFullPath = ActiveProject.FullName
+	End If
+End Function
+
+'################# GetCurrProjectName #################
+Function GetCurrProjectName()
+	GetCurrProjectName = FileToProjectName( GetActiveFullPath() )
+End Function
+
+'################# GetCurrProjectLabel #################
+Function GetCurrProjectLabel()
+	GetCurrProjectLabel = fileToIdentifier( GetCurrProjectName() )
+End Function
+
+' ################# GetWindowFullName #################
+Function GetWindowFullName( window, ByRef label )
+	GetWindowFullName = ""
+	label = ""
+
+	If window.type = "Text" Then
+		Dim doc
+
+		' Warning: accessing window.Parent property for Disassembly Window (and possibly for other windows
+		' of type different than "Text") causes a severe crash when a breakpoint is hit into debugger !!!
+		' That's why we only do this only for "Text" window types.
+		Set doc = window.Parent
+		If Not doc Is Nothing Then
+			GetWindowFullName = doc.FullName
+		End If
+	End If
+
+	If Len( GetWindowFullName ) = 0 Then
+		GetWindowFullName = window.Caption
+		label = window.Caption
+	End If
+End Function
+
+' ################# ExtractMethodWithScope #################
+Function ExtractMethodWithScope( source )
+'Exctracts the line scope.
+	ExtractMethodWithScope = ""
+
+	Dim startPos, endPos, templateLevel
+
+	If source = "" Then Exit Function			'Line is empty.
+	endPos = InStr( source, "(" )
+	'If no function arglist found -> seek backward for scope.
+	If endPos = 0 Then Exit Function			'No function delimiter.
+	startPos = InStrRev( source, "operator", endPos )
+	If startPos = 0 Then startPos = endPos
+	templateLevel = 0
+	Do While startPos > 1
+		Select Case Mid( source, startPos, 1 )
+			Case " ", vbTab, "*", "&"
+				If templateLevel = 0 Then startPos = startPos + 1 : Exit Do
+			Case ">"
+				templateLevel = templateLevel + 1
+			Case "<"
+				templateLevel = templateLevel - 1
+		End Select
+		startPos = startPos - 1
+	Loop
+	If templateLevel <> 0 Then ErrorMessage "Bad template bracket parity !" : Exit Function
+	If startPos > endPos Then Exit Function
+	ExtractMethodWithScope = Mid( source, startPos, endPos - startPos )
+End Function
+
+'------------------------------------------------------------------------------
+'STRING HELPER FUNCTIONS:
+'------------------------------------------------------------------------------
+
+' ################# ConvertToUnixNewLines #################
+Function ConvertToUnixNewLines( ByVal text )
+	text = StrFindReplace( text, vbCrLf, vbLf, True )
+
+	ConvertToUnixNewLines = text
+End Function
+
+' ################# ConvertToWindowsNewLines #################
+Function ConvertToWindowsNewLines( ByVal text )
+	text = StrFindReplace( text, vbCrLf, vbLf, True )
+	text = StrFindReplace( text, vbLf, vbCrLf, True )
+
+	ConvertToWindowsNewLines = text
+End Function
+
+' ################# StrReplace #################
+Function StrReplace( source, cursor, cutLength, replacer )
+	Dim tempCut
+
+	If cutLength = -1 Then cutLength = Len( Mid( source, cursor ) )
+	tempCut = Mid( source, cursor + cutLength )
+	StrReplace = Left( source, cursor - 1 ) & replacer & tempCut
+End Function
+
+' ################# StrInsert #################
+Function StrInsert( source, cursor, label )
+	Dim tempCut
+
+	tempCut = Mid( source, cursor )
+	StrInsert = Left( source, cursor - 1 ) & label & tempCut
+End Function
+
+' ################# StrFindReplace #################
+Function StrFindReplace( ByVal source, match, replacer, doForAll )
+'String: replaces in 'source' occurences of 'match' with 'replacer', depending of 'doForAll'
+	Dim tempCut
+	Dim sourceLen, matchLen, replacerLen, cursor
+
+	sourceLen = Len( source )
+	matchLen = Len( match )
+	replacerLen = Len( replacer )
+
+	cursor = 1
+	Do
+		cursor = InStr( cursor, source, match )
+		If cursor = 0 Then Exit Do
+		tempCut = Mid( source, cursor + matchLen )
+		source = Left( source, cursor - 1 ) & replacer & tempCut
+		cursor = cursor + replacerLen
+	Loop While doForAll
+
+	StrFindReplace = source
+End Function
+
+' ################# StrFindReplaceAll #################
+Function StrFindReplaceAll( source, match, replacer, exceptMatchTrail )
+'String: replaces in 'source' occurences of 'match' with 'replacer'
+'if 'exceptMatchTrail' specified, skips replacing 'exceptMatchTrail' follows the match.
+	Dim tempCut
+	Dim sourceLen, matchLen, replacerLen, exceptLen, cursor, skip
+
+	StrFindReplaceAll = ""
+	sourceLen = Len( source )
+	matchLen = Len( match )
+	replacerLen = Len( replacer )
+	exceptLen = Len( exceptMatchTrail )
+	cursor = 1
+	Do
+		cursor = InStr( cursor, source, match )
+		If cursor = 0 Then Exit Do
+		skip = False
+		If ( exceptLen > 0 ) And ( exceptLen <= ( Len( source ) - matchLen - cursor + 1 ) ) Then
+			skip = Mid( source, cursor + matchLen, exceptLen ) = exceptMatchTrail
+		End If
+		If skip Then
+			cursor = cursor + matchLen
+		Else
+			tempCut = Mid( source, cursor + matchLen )
+			source = Left( source, cursor - 1 ) & replacer & tempCut
+			cursor = cursor + replacerLen
+		End If
+	Loop
+	StrFindReplaceAll = source
+End Function
+
+' ################# StrIsWhiteSpace #################
+Function StrIsWhiteSpace( ByRef source, position )
+'Returns 'True' if current character is a white-space (space, tab, CR, LF).
+	Select Case Mid( source, position, 1 )
+		Case " ", vbTab
+			StrIsWhiteSpace = 1
+		Case vbCr
+			If Mid( source, position + 1, 1 ) = vbLf Then
+				StrIsWhiteSpace = 2		'CR/LF sequence
+			Else
+				StrIsWhiteSpace = 1		'CR only (Unix line-end)
+			End If
+		Case vbLf
+			StrIsWhiteSpace = 1
+		Case Else
+			StrIsWhiteSpace = 0
+	End Select
+End Function
+
+' ################# StrGetWhiteSpaceCount #################
+Function StrGetWhiteSpaceCount( source, position )
+	Dim wsDelta, cursor
+
+	wsDelta = 0
+	cursor = position
+	Do
+		wsDelta = StrIsWhiteSpace( source, cursor )
+		cursor = cursor + wsDelta
+	Loop While wsDelta > 0
+	StrGetWhiteSpaceCount = cursor - position
+	If StrGetWhiteSpaceCount = 0 Then ErrorMessage "StrGetWhiteSpaceCount() called on non white-space"
+End Function
+
+' ################# StrCutLineComments #################
+Function StrCutLineComments( source )
+'String: Cuts line comments ("//...") from 'source'.
+	Dim dest
+	Dim cursor, endOfLine
+
+	dest = source
+	cursor = 1
+	Do
+		cursor = InStr( cursor, dest, "//" )
+		If cursor > 0 Then
+			endOfLine = InStr( cursor, dest, vbNewLine )
+			If endOfLine = 0 Then
+				dest = StrReplace( dest, cursor, -1, "" )
+				Exit Do
+			Else
+				dest = StrReplace( dest, cursor, endOfLine - cursor, "" )
+				cursor = endOfLine + Len( vbNewLine )
+			End If
+		End If
+	Loop While cursor > 0
+	StrCutLineComments = dest
+End Function
+
+Dim ctMacroEOL, ctDSMEOL
+ctMacroEOL = "\" & vbCr
+ctDSMEOL = " _" & vbCr
+
+' ################# StrReplaceWhiteSpaces #################
+Function StrReplaceWhiteSpaces( source, replacer, syntaxType, cutLeading, cutLineRem )
+'String: replaces consecutive spaces, tabs and returns with 'replacer'.
+	StrReplaceWhiteSpaces = ""
+
+	Dim dest, char
+	Dim cursor, wsCount, matchPos, sourceLen, prevWasWhiteSpace
+
+	If cutLineRem Then source = StrCutLineComments( source )
+	cursor = 1
+	dest = ""
+	sourceLen = Len( source )
+	prevWasWhiteSpace = cutLeading
+	Do While cursor <= sourceLen
+		char = Mid( source, cursor, 1 )
+
+		If cursor < sourceLen Then
+			If syntaxType = ctCPPSyntax Then
+				If Mid( source, cursor, 2 ) = ctMacroEOL Then
+					cursor = cursor + 1
+					char = ""
+				ElseIf IsStrikeOpenChar( char ) Then
+					matchPos = GotoForwardMatchingPos( source, cursor )
+					If matchPos = 0 Then Exit Do
+					dest = dest & Mid( source, cursor, matchPos - cursor + 1 )
+					cursor = matchPos + 1
+					prevWasWhiteSpace = False
+					char = ""
+				End If
+			ElseIf syntaxType = ctDSMSyntax Then
+				If Mid( source, cursor, 3 ) = ctDSMEOL Then
+					cursor = cursor + 2
+					char = ""
+				End If
+			End If
+		End If
+		If char <> "" Then
+			If StrIsWhiteSpace( source, cursor ) > 0 Then
+				wsCount = StrGetWhiteSpaceCount( source, cursor )
+				cursor = cursor + wsCount
+				If prevWasWhiteSpace = False And cursor <= sourceLen And dest <> "" Then
+					dest = dest & replacer
+				End If
+				prevWasWhiteSpace = True
+				char = ""
+			Else
+				dest = dest & char
+				cursor = cursor + 1
+				prevWasWhiteSpace = False
+			End If
+		End If
+	Loop
+	StrReplaceWhiteSpaces = dest
+End Function
+
+Public Const bracketOpen  = "([{<"
+Public Const bracketClose = ")]}>"
+Public Const bracketArrayMax = 3
+
+' ################# GotoForwardMatchingPos #################
+Function GotoForwardMatchingPos( source, position )
+	GotoForwardMatchingPos = position
+
+	Dim B( 3 ), S(1)
+	Dim sourceLen, cursor, arrayIndex
+	Dim char
+
+	S(0) = False : S(1) = False
+	B(0) = 0 : B(1) = 0 : B(2) = 0 : B(3) = 0
+	cursor = position
+	sourceLen = Len( source )
+	char = Mid( source, cursor, 1 )
+	Do While cursor > 0 And cursor <= sourceLen
+		Dim char2, increment
+
+		increment = 1
+		char = Mid( source, cursor, 1 )
+		char2 = char
+		If cursor < sourceLen Then char2 = Mid( source, cursor, 2 )
+		If char2 = "/*" Then
+			'Found open comment -> seek to closing comment:
+			cursor = InStr( cursor, source, "*/" )
+			If cursor = 0 Then Exit Do		'Error !!!
+			cursor = cursor + 1
+		ElseIf char2 = "//" Then
+			'Found open line comment -> seek to End of line:
+			cursor = InStr( cursor, source, vbNewLine )
+			If cursor = 0 Then cursor = sourceLen
+			increment = 0
+		ElseIf S(0) Then
+			If char = Chr(34) Then S(0) = False
+		ElseIf S(1) Then
+			If char = "'" Then S(1) = False
+		ElseIf char = Chr(34) Then
+			S(0) = True
+		ElseIf char = "'" Then
+			S(1) = True
+		ElseIf IsBracketChar( char ) Then
+			arrayIndex = GetBracketIndexInArray( source, cursor )
+			If IsOpenBracketChar( char ) Then
+				B( arrayIndex ) = B( arrayIndex ) + 1
+			ElseIf B( arrayIndex ) > 0 Then		'Avoid closing a not opened brace, i.e. "->"
+				B( arrayIndex ) = B( arrayIndex ) - 1
+			End If
+		End If
+		If Not S(0) And Not S(1) Then
+			If B(0) = 0 And B(1) = 0 And B(2) = 0 And B(3) = 0 Then
+				GotoForwardMatchingPos = cursor
+				Exit Function
+			End If
+		End If
+		cursor = cursor + increment
+	Loop
+
+	Dim errorTrail, i
+
+	errorTrail = ""
+	For i = 0 to 1
+		If S(i) <> False Then errorTrail = "quote(" & i & ")=" & S(i) : Exit For
+	Next
+	If errorTrail = "" Then
+		For i = 0 to bracketArrayMax
+			If B(i) <> 0 Then errorTrail = "bracket(" & i & ")=" & B(i) : Exit For
+		Next
+	End If
+	If errorTrail = "" Then errorTrail = "comment"
+	GotoForwardMatchingPos = 0
+	'PrintToOutputWindow "Input:" & Mid( source, position )
+	ErrorMessage "Syntax Error in source:" & vbNewLine & vbNewLine &_
+				 "Wrong " & errorTrail & " parity !"
+End Function
+
+' ################# GetBracketIndexInArray #################
+Function GetBracketIndexInArray( source, cursor )
+	GetBracketIndexInArray = -1
+
+	Dim brkChar, index
+
+	brkChar = Mid( source, cursor, 1 )
+	index = InStr( bracketOpen, brkChar )
+	If index = 0 Then index = InStr( bracketClose, brkChar )
+	If index = 0 Then ErrorMessage "GetBracketIndex(): not a valid bracket !" : Exit Function
+	GetBracketIndexInArray = index - 1
+End Function
+
+' ################# IsStrikeChar #################
+Function IsStrikeChar( char )
+	IsStrikeChar = InStr( bracketOpen & bracketClose & Chr(34) & "'/", char ) > 0
+End Function
+
+' ################# IsStrikeOpenChar #################
+Function IsStrikeOpenChar( char )
+	IsStrikeOpenChar = InStr( bracketOpen & Chr(34) & "'/", char ) > 0
+End Function
+
+' ################# IsBracketChar #################
+Function IsBracketChar( char )
+	IsBracketChar = InStr( bracketOpen & bracketClose, char ) > 0
+End Function
+
+' ################# IsOpenBracketChar #################
+Function IsOpenBracketChar( char )
+	IsOpenBracketChar = InStr( bracketOpen, char ) > 0
+End Function
+
+'------------------------------------------------------------------------------
+'GLOBAL DEFINES & CONSTANTS:
+'------------------------------------------------------------------------------
+
+'***** BrowseForFile() option flags *****
+
+' Be careful to maintain with enum TFolderOptions (Public Types.h)
+Public Const foUsePopups		= &H00000001
+Public Const foRecurseFolders	= &H00000002
+Public Const foCutDuplicates	= &H00000004
+Public Const foHideExtension	= &H00000010
+Public Const foRightJustifyExt	= &H00000020
+Public Const foDirNamePrefix	= &H00000040
+Public Const foNoOptionsPopup	= &H00000100
+Public Const foSortFolders		= &H00001000
+
+' Be careful to maintain with enum FolderLayout (Public Types.h)
+Public Const flFoldersAsPopups		= 0
+Public Const flFoldersAsRootPopups	= 1
+Public Const flRootFoldersExpanded	= 2
+Public Const flAllFoldersExpanded	= 3
+
+' Be careful to maintain with enum PathField (Public Types.h)
+Public Const pfDrive		= 0
+Public Const pfDir			= 1
+Public Const pfName			= 2
+Public Const pfExt			= 3
+Public Const pfDirName		= 4
+Public Const pfFullPath		= 5
+Public Const pfDirPath		= 6
+Public Const pfDirNameExt	= 7
+Public Const pfNameExt		= 8
+Public Const pfCoreExt		= 9
+
+Public Const FILE_ATTRIBUTE_ARCHIVE = &H20
+Public Const FILE_ATTRIBUTE_COMPRESSED = &H800
+Public Const FILE_ATTRIBUTE_DIRECTORY = &H10
+Public Const FILE_ATTRIBUTE_HIDDEN = &H2
+Public Const FILE_ATTRIBUTE_NORMAL = &H80
+Public Const FILE_ATTRIBUTE_READONLY = &H1
+Public Const FILE_ATTRIBUTE_SYSTEM = &H4
+Public Const FILE_ATTRIBUTE_TEMPORARY = &H100
+
+' Be careful to maintain with enum FileType (Public Types.h)
+Public Const ftUnknown	= 0
+Public Const ftExtless	= 1
+Public Const ftH		= 2
+Public Const ftCPP		= 3
+Public Const ftC		= 4
+Public Const ftHXX		= 5
+Public Const ftCXX		= 6
+Public Const ftIDL		= 7
+Public Const ftTLB		= 8
+Public Const ftRC		= 9
+Public Const ftRES		= 10
+Public Const ftDEF		= 11
+Public Const ftDSP		= 12
+Public Const ftDSW		= 13
+Public Const ftDSM		= 14
+Public Const ftBAS		= 15
+Public Const ftDLL		= 16
+Public Const ftEXE		= 17
+Public Const ftLIB		= 18
+Public Const ftSQL		= 19
+Public Const ftTAB		= 20
+Public Const ftPK		= 21
+Public Const ftPKG		= 22
+Public Const ftPKB		= 23
+Public Const ftPKS		= 24
+Public Const ftPAC		= 25
+Public Const ftOT		= 26
+Public Const ftOTB		= 27
+' Extra script constants - not defined in enum FileType (Public Types.h)
+Public Const ftRH		= 50
+Public Const ftH_tmpl	= 51
+Public Const ftHXX_tmpl	= 52
+Public Const ftCXX_tmpl	= 53
+Public Const ftCPP_tmpl	= 54
+Public Const ftRC_tmpl	= 55
+Public Const ftRH_tmpl	= 56
+Public Const ftBAT		= 57
+Public Const ftORA		= 58
+Public Const ftUNIXShellScript = 59
+Public Const ftAWK		= 60
+
+'------------------------------------------------------------------------------
+'GLOBAL PARAMETERS:
+'------------------------------------------------------------------------------
+
+Public Const ctOtherSyntax = 0
+Public Const ctCPPSyntax = 1
+Public Const ctDSMSyntax = 2
+
+'------------------------------------------------------------------------------
+' IDETools Options PARAMETERS:
+'------------------------------------------------------------------------------
+
+Dim parUserName, parDefaultSingleLineCommentToken, parSingleLineDecoration
+Dim parClassPrefix, parStructPrefix, parEnumPrefix
+
+parUserName = ""
+parDefaultSingleLineCommentToken = ";"
+parSingleLineDecoration = ""
+parClassPrefix = ""
+parStructPrefix = ""
+parEnumPrefix = ""
+
+Dim parAutoCodeGeneration, parDisplayErrorMessages, parDupLineMoveDown
+
+parAutoCodeGeneration = True
+parDisplayErrorMessages = True
+parDupLineMoveDown = False
+
+Dim parBrowsePath, parAditionalAssocFolders
+
+parBrowsePath = ""
+parAditionalAssocFolders = ""
+
+SetupMacroParameters()

@@ -1,0 +1,288 @@
+
+#include "stdafx.h"
+#include "PathGeneratorTests.h"
+#include "PathGenerator.h"
+#include "resource.h"
+#include "Path.h"
+
+#ifdef _DEBUG
+#define new DEBUG_NEW
+#endif
+
+
+#ifdef _DEBUG		// no UT code in release builds
+
+
+namespace ut
+{
+	bool GeneratePairs( ut::CPathPairPool& rPool, const std::tstring& format, UINT seqCount = 1 )
+	{
+		CPathGenerator gen( rPool.m_pathPairs, format, seqCount );
+		return gen.GeneratePairs();
+	}
+
+	UINT FindNextAvailSeqCount( const ut::CPathPairPool& pool, const std::tstring& format )
+	{
+		CPathGenerator gen( pool.m_pathPairs, format, 1, false );
+		return gen.FindNextAvailSeqCount();
+	}
+}
+
+
+CPathGeneratorTests::CPathGeneratorTests( void )
+{
+	ut::CTestSuite::Instance().RegisterTestCase( this );		// self-registration
+}
+
+CPathGeneratorTests& CPathGeneratorTests::Instance( void )
+{
+	static CPathGeneratorTests testCase;
+	return testCase;
+}
+
+void CPathGeneratorTests::TestPathMaker( void )
+{
+	{
+		ut::CPathPairPool pool( _T("C:\\Tools\\My\\Batch\\a.txt"), true );
+		CPathMaker gen( &pool.m_pathPairs );
+
+		ASSERT_EQUAL( _T("C:\\Tools\\My\\Batch"), gen.FindSrcCommonPrefix() );
+
+		ASSERT( !gen.MakeDestRelative( _T("C:\\Tools\\Other") ) );
+
+		ASSERT( gen.MakeDestRelative( _T("C:\\Tools\\My\\Batch") ) );
+		ASSERT_EQUAL( _T("a.txt"), pool.UnsplitDest() );
+
+		ASSERT( gen.MakeDestRelative( _T("C:\\Tools\\My\\Batch\\") ) );
+		ASSERT_EQUAL( _T("a.txt"), pool.UnsplitDest() );
+
+		ASSERT( gen.MakeDestRelative( _T("C:/Tools/My") ) );
+		ASSERT_EQUAL( _T("Batch\\a.txt"), pool.UnsplitDest() );
+
+		ASSERT( gen.MakeDestStripCommonPrefix() );
+		ASSERT_EQUAL( _T("a.txt"), pool.UnsplitDest() );
+	}
+	{
+		ut::CPathPairPool pool( _T("C:/Tools/Other/a.txt|C:\\Tools\\My\\Batch\\b.txt|C:\\Tools\\My\\Utils\\c.txt"), true );
+		CPathMaker gen( &pool.m_pathPairs );
+
+		ASSERT_EQUAL( _T("C:\\Tools"), gen.FindSrcCommonPrefix() );
+
+		ASSERT( !gen.MakeDestRelative( _T("C:\\Tools\\Other") ) );
+
+		ASSERT( gen.MakeDestRelative( _T("C:\\") ) );
+		ASSERT_EQUAL( _T("Tools/Other/a.txt|Tools\\My\\Batch\\b.txt|Tools\\My\\Utils\\c.txt"), pool.UnsplitDest() );
+
+		ASSERT( gen.MakeDestStripCommonPrefix() );
+		ASSERT_EQUAL( _T("Other/a.txt|My\\Batch\\b.txt|My\\Utils\\c.txt"), pool.UnsplitDest() );
+	}
+	{
+		ut::CPathPairPool pool( _T("C:\\Tools\\a.txt|D:\\b.txt"), true );
+		CPathMaker gen( &pool.m_pathPairs );
+
+		ASSERT( !gen.MakeDestStripCommonPrefix() );
+	}
+}
+
+void CPathGeneratorTests::TestPathFormatter( void )
+{
+	{
+		bool syntaxOk;
+		ASSERT_EQUAL( _T("foo 05"), CPathFormatter::FormatPart( _T("foo ##"), _T("filename"), 5, &syntaxOk ) );
+		ASSERT( syntaxOk );
+
+		ASSERT_EQUAL( _T("foo 17"), CPathFormatter::FormatPart( _T("foo ##"), _T("filename"), 17, &syntaxOk ) );
+		ASSERT( syntaxOk );
+
+		ASSERT_EQUAL( _T("foo_filename_end"), CPathFormatter::FormatPart( _T("foo_*_end"), _T("filename"), 5, &syntaxOk ) );
+		ASSERT( syntaxOk );
+	}
+	{
+		UINT seqCount;
+
+		ASSERT( CPathFormatter::ParsePart( seqCount, _T("foo #"), _T("foo 5") ) );
+		ASSERT_EQUAL( 5, seqCount );
+
+		ASSERT( CPathFormatter::ParsePart( seqCount, _T("foo ###x"), _T("foo 73x") ) );
+		ASSERT_EQUAL( 73, seqCount );
+
+		ASSERT( CPathFormatter::ParsePart( seqCount, _T("foo #?xyz"), _T("foo 28 xyz") ) );
+		ASSERT_EQUAL( 28, seqCount );
+
+		ASSERT( CPathFormatter::ParsePart( seqCount, _T("* #"), _T("foo 19") ) );
+		ASSERT_EQUAL( 19, seqCount );
+
+		ASSERT( CPathFormatter::ParsePart( seqCount, _T("f*b #"), _T("fab 17") ) );
+		ASSERT_EQUAL( 17, seqCount );
+	}
+	{
+		// wildcard
+		ASSERT_EQUAL( _T("foo.txt"), CPathFormatter( _T("*") ).FormatPath( _T("foo.txt"), 1 ).Get() );
+		ASSERT_EQUAL( _T("foo.txt"), CPathFormatter( _T("*.*") ).FormatPath( _T("foo.txt"), 1 ).Get() );
+		ASSERT_EQUAL( _T("foo.txt"), CPathFormatter( _T("*.*") ).FormatPath( _T("foo.txt"), 1, 1 ).Get() );
+		ASSERT_EQUAL( _T("foo"), CPathFormatter( _T("*.") ).FormatPath( _T("foo.txt"), 1 ).Get() );
+		ASSERT_EQUAL( _T(".txt"), CPathFormatter( _T(".*") ).FormatPath( _T("foo.txt"), 1 ).Get() );
+
+		ASSERT_EQUAL( _T("foo.txt"), CPathFormatter( _T("*.txt") ).FormatPath( _T("foo"), 1 ).Get() );
+		ASSERT_EQUAL( _T("foo.uk"), CPathFormatter( _T("*.uk") ).FormatPath( _T("foo"), 1 ).Get() );
+		ASSERT_EQUAL( _T("foo.co.uk"), CPathFormatter( _T("*.co.uk") ).FormatPath( _T("foo"), 1 ).Get() );
+		ASSERT_EQUAL( _T("foo.co.uk"), CPathFormatter( _T("??*.co.uk") ).FormatPath( _T("foo"), 1 ).Get() );
+		ASSERT_EQUAL( _T("fxy.co.uk"), CPathFormatter( _T("?xy.co.uk") ).FormatPath( _T("foo"), 1 ).Get() );
+
+		ASSERT_EQUAL( _T("foo_$(3).txt"), CPathFormatter( _T("*.*") ).FormatPath( _T("foo.txt"), 1, 3 ).Get() );
+
+		// numeric
+		ASSERT_EQUAL( _T("foo 1.txt"), CPathFormatter( _T("foo #.txt") ).FormatPath( _T("fname.doc"), 1 ).Get() );
+		ASSERT_EQUAL( _T("foo 001.txt"), CPathFormatter( _T("foo ###.*") ).FormatPath( _T("fname.txt"), 1 ).Get() );
+		ASSERT_EQUAL( _T("foo 010.txt"), CPathFormatter( _T("foo ###.*") ).FormatPath( _T("fname.txt"), 10 ).Get() );
+		ASSERT_EQUAL( _T("foo 100.txt"), CPathFormatter( _T("foo ###.*") ).FormatPath( _T("fname.txt"), 100 ).Get() );
+		ASSERT_EQUAL( _T("foo 100.txt"), CPathFormatter( _T("foo ###.*") ).FormatPath( _T("fname.txt"), 100, 1 ).Get() );
+		ASSERT_EQUAL( _T("foo 100_$(2).txt"), CPathFormatter( _T("foo ###.*") ).FormatPath( _T("fname.txt"), 100, 2 ).Get() );
+
+		ASSERT_EQUAL( _T("foo 050 fname_$(3).txt"), CPathFormatter( _T("foo ### *.*") ).FormatPath( _T("fname.txt"), 50, 3 ).Get() );
+		ASSERT_EQUAL( _T("foo 050 fname_$(3).txt"), CPathFormatter( _T("foo %03d *.*") ).FormatPath( _T("fname.txt"), 50, 3 ).Get() );
+		ASSERT_EQUAL( _T("foo 50 fname_$(3).txt"), CPathFormatter( _T("foo %d *.*") ).FormatPath( _T("fname.txt"), 50, 3 ).Get() );
+	}
+	{
+		UINT seqCount;
+
+		ASSERT( CPathFormatter( _T("foo ###x.jpg") ).ParseSeqCount( seqCount, _T("C:\\my\\foo 73x.jpg") ) );
+		ASSERT_EQUAL( 73, seqCount );
+
+		ASSERT( !CPathFormatter( _T("foo ###Y.jpg") ).ParseSeqCount( seqCount, _T("C:\\my\\foo 73X.jpg") ) );
+	}
+}
+
+void CPathGeneratorTests::TestNumSeqGeneration( void )
+{
+	static const std::tstring numFmt = _T("foo ##.txt");
+	{
+		ut::CPathPairPool pool( _T("a.txt|b.txt|c.txt") );
+		ut::GeneratePairs( pool, numFmt, 3 );
+		ASSERT_EQUAL( _T("foo 03.txt|foo 04.txt|foo 05.txt"), pool.UnsplitDest() );
+	}
+	{
+		ut::CPathPairPool pool( _T("foo 03.txt|foo 04.txt|foo 05.txt") );
+		ut::GeneratePairs( pool, numFmt, 3 );
+		ASSERT_EQUAL( _T("foo 03.txt|foo 04.txt|foo 05.txt"), pool.UnsplitDest() );
+	}
+	{
+		ut::CPathPairPool pool( _T("foo 03.txt|foo 05.txt|foo 07.txt") );
+		ut::GeneratePairs( pool, numFmt, 3 );
+		ASSERT_EQUAL( _T("foo 03.txt|foo 04.txt|foo 05.txt"), pool.UnsplitDest() );
+	}
+}
+
+void CPathGeneratorTests::TestNumSeqFileGeneration( void )
+{
+	static const std::tstring numFmt = _T("foo ##.txt");
+
+	// test with physical files pool
+	{
+		ut::CTempFilePairPool pool( _T("a.txt|b.txt|c.txt") );
+		ut::GeneratePairs( pool, numFmt, 3 );
+		ASSERT_EQUAL( _T("foo 03.txt|foo 04.txt|foo 05.txt"), pool.UnsplitDest() );
+	}
+	{
+		ut::CTempFilePairPool pool( _T("foo 03.txt|foo 04.txt|foo 05.txt") );
+		ut::GeneratePairs( pool, numFmt, 3 );
+		ASSERT_EQUAL( _T("foo 03.txt|foo 04.txt|foo 05.txt"), pool.UnsplitDest() );
+	}
+	{
+		ut::CTempFilePairPool pool( _T("foo 04.txt|foo 06.txt|foo 08.txt") );
+		ut::GeneratePairs( pool, numFmt, 3 );
+		ASSERT_EQUAL( _T("foo 03.txt|foo 04.txt|foo 05.txt"), pool.UnsplitDest() );
+	}
+}
+
+void CPathGeneratorTests::TestFindNextAvailSeqCount( void )
+{
+	static const std::tstring numFmt = _T("foo #.txt");
+	{
+		ut::CTempFilePairPool pool( _T("foo 03.txt|foo 04.txt|foo 05.txt") );
+		ASSERT_EQUAL( 6, ut::FindNextAvailSeqCount( pool, numFmt ) );
+	}
+	{
+		ut::CTempFilePairPool pool( _T("foo 04.txt|foo 06.txt|foo 08.txt") );
+		ASSERT_EQUAL( 9, ut::FindNextAvailSeqCount( pool, numFmt ) );
+	}
+	{
+		ut::CTempFilePairPool poolBase( _T("foo 3.txt|foo 4.txt|foo 5.txt") );
+		ut::CTempFilePairPool poolMore( _T("foo 7.txt|foo 9.txt|foo 11.txt") );
+		ASSERT_EQUAL( 12, ut::FindNextAvailSeqCount( poolBase, numFmt ) );			// should skip all existing files
+	}
+	{
+		ut::CTempFilePairPool pool( _T("foo 04.txt|foo 06.txt|pix_500|Xfoo 08.txt") );
+		ASSERT_EQUAL( 7, ut::FindNextAvailSeqCount( pool, numFmt ) );
+	}
+	{
+		ut::CTempFilePairPool pool( _T("xFoo 04.txt|xFoo 06.txt|xFoo 08.txt") );
+		ASSERT_EQUAL( 9, ut::FindNextAvailSeqCount( pool, _T("x* #.txt") ) );
+	}
+}
+
+void CPathGeneratorTests::TestWildcardGeneration( void )
+{
+	{
+		ut::CPathPairPool pool( _T("a.txt|b.txt|c.txt") );
+		ut::GeneratePairs( pool, _T("foo *.*") );
+		ASSERT_EQUAL( _T("foo a.txt|foo b.txt|foo c.txt"), pool.UnsplitDest() );
+	}
+	{
+		ut::CPathPairPool pool( _T("a.txt|b.txt|c.txt") );
+		ut::GeneratePairs( pool, _T("foo *.do?") );
+		ASSERT_EQUAL( _T("foo a.dot|foo b.dot|foo c.dot"), pool.UnsplitDest() );
+	}
+	{
+		ut::CPathPairPool pool( _T("a.txt|b.txt|c.txt") );
+		ut::GeneratePairs( pool, _T("foo *.doc") );
+		ASSERT_EQUAL( _T("foo a.doc|foo b.doc|foo c.doc"), pool.UnsplitDest() );
+	}
+	{
+		ut::CPathPairPool pool( _T("a.txt|b.txt|c.txt") );
+		ut::GeneratePairs( pool, _T("*.H") );
+		ASSERT_EQUAL( _T("a.H|b.H|c.H"), pool.UnsplitDest() );
+	}
+}
+
+void CPathGeneratorTests::TestWildcardFileGeneration( void )
+{
+	// test with physical files pool
+	{
+		ut::CTempFilePairPool pool( _T("a.txt|b.txt|c.txt") );
+		ut::GeneratePairs( pool, _T("foo *.*") );
+		ASSERT_EQUAL( _T("foo a.txt|foo b.txt|foo c.txt"), pool.UnsplitDest() );
+	}
+	{
+		ut::CTempFilePairPool pool( _T("a.txt|b.txt|c.txt") );
+		ut::GeneratePairs( pool, _T("foo *.do?") );
+		ASSERT_EQUAL( _T("foo a.dot|foo b.dot|foo c.dot"), pool.UnsplitDest() );
+	}
+	{
+		ut::CTempFilePairPool pool( _T("a.txt|b.txt|c.txt") );
+		ut::GeneratePairs( pool, _T("foo *.doc") );
+		ASSERT_EQUAL( _T("foo a.doc|foo b.doc|foo c.doc"), pool.UnsplitDest() );
+	}
+	{
+		ut::CTempFilePairPool pool( _T("a.txt|b.txt|c.txt") );
+		ut::GeneratePairs( pool, _T("*.H") );
+		ASSERT_EQUAL( _T("a.H|b.H|c.H"), pool.UnsplitDest() );
+	}
+}
+
+
+void CPathGeneratorTests::Run( void )
+{
+	TRACE( _T("-- UTL PathGenerator tests --\n") );
+
+	TestPathMaker();
+	TestPathFormatter();
+	TestNumSeqGeneration();
+	TestNumSeqFileGeneration();
+	TestFindNextAvailSeqCount();
+	TestWildcardGeneration();
+	TestWildcardFileGeneration();
+}
+
+
+#endif //_DEBUG

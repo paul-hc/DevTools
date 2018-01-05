@@ -1,0 +1,1376 @@
+// Microsoft Visual C++ generated resource script.
+//
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include "utl/resource.h"
+#include "afxres.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// English (U.S.) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+#ifdef _WIN32
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+#pragma code_page(1252)
+#endif //_WIN32
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE 
+BEGIN
+    "#include ""utl/resource.h""\r\n"
+    "#include ""afxres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE 
+BEGIN
+    "#include ""utl/utl_ui.rc""\r\n"
+    "#include ""res\\Slider.rc2""  // non-Microsoft Visual C++ edited resources\r\n"
+    "\r\n"
+    "\r\n"
+    "#define _AFX_NO_SPLITTER_RESOURCES\r\n"
+    "#define _AFX_NO_OLE_RESOURCES\r\n"
+    "#define _AFX_NO_TRACKER_RESOURCES\r\n"
+    "#define _AFX_NO_PROPERTY_RESOURCES\r\n"
+    "\r\n"
+    "#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)\r\n"
+    "#ifdef _WIN32\r\n"
+    "LANGUAGE 9, 1\r\n"
+    "#pragma code_page(1252)\r\n"
+    "#endif //_WIN32\r\n"
+    "#include ""afxres.rc""         // Standard components\r\n"
+    "#include ""afxprint.rc""       // printing/print preview resources\r\n"
+    "#endif\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Icon
+//
+
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+IDR_MAINFRAME           ICON                    "res\\Slider.ico"
+IDR_ALBUMTYPE           ICON                    "res\\AlbumDoc.ico"
+IDR_IMAGETYPE           ICON                    "res\\ImageDoc.ico"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Bitmap
+//
+
+IDR_MAINFRAME           BITMAP                  "res\\Toolbar.bmp"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// PNG
+//
+
+IDR_MAINFRAME           PNG                     "res\\Toolbar.png"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Toolbar
+//
+
+IDR_MAINFRAME TOOLBAR  16, 16
+BEGIN
+    BUTTON      CK_FULL_SCREEN
+    BUTTON      CK_SHOW_THUMB_VIEW
+    SEPARATOR
+    BUTTON      CM_ZOOM_NORMAL
+    BUTTON      CM_ZOOM_IN
+    BUTTON      CM_ZOOM_OUT
+    SEPARATOR
+    BUTTON      CM_NAV_PLAY
+    SEPARATOR
+    BUTTON      CM_NAV_BEGIN
+    BUTTON      CM_NAV_PREV
+    BUTTON      CM_NAV_NEXT
+    BUTTON      CM_NAV_END
+    SEPARATOR
+    BUTTON      CM_NAV_DIR_REV
+    BUTTON      CM_NAV_DIR_FWD
+    SEPARATOR
+    BUTTON      CM_NAV_CIRCULAR
+    SEPARATOR
+    BUTTON      CM_ARCHIVE_IMAGES
+    BUTTON      CM_REGENERATE_ALBUM
+    BUTTON      CM_AUTO_DROP_UNDO
+    BUTTON      CM_AUTO_DROP_REDO
+    BUTTON      CM_CLEAR_IMAGE_CACHE
+    BUTTON      CM_EDIT_WORKSPACE
+    BUTTON      CM_MOVE_FILE
+    BUTTON      CM_EXPLORE_IMAGE
+    BUTTON      CM_EDIT_BK_COLOR
+    BUTTON      ID_EDIT_ARCHIVE_PASSWORD
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Menu
+//
+
+IDR_MAINFRAME MENU 
+BEGIN
+    POPUP "&File"
+    BEGIN
+        MENUITEM "&New\tCtrl+N",                ID_FILE_NEW
+        MENUITEM "&Open...\tCtrl+O",            ID_FILE_OPEN
+        MENUITEM "Open Folder...\tCtrl+Shift+O", ID_FILE_OPEN_ALBUM_FOLDER
+        MENUITEM SEPARATOR
+        MENUITEM "Save &Workspace\tCtrl+Shift+S", CM_SAVE_WORKSPACE
+        MENUITEM "&Logger Options...",          CM_LOGGER_OPTIONS
+        MENUITEM SEPARATOR
+        MENUITEM "Clear Image Cache",           CM_CLEAR_IMAGE_CACHE
+        MENUITEM "Clear Temporary Embedded Clones", CM_CLEAR_TEMP_EMBEDDED_CLONES
+        MENUITEM SEPARATOR
+        MENUITEM "P&rint Setup...",             ID_FILE_PRINT_SETUP
+        MENUITEM SEPARATOR
+        MENUITEM "Recent File",                 ID_FILE_MRU_FILE1, GRAYED
+        MENUITEM SEPARATOR
+        MENUITEM "E&xit",                       ID_APP_EXIT
+    END
+    POPUP "&Edit"
+    BEGIN
+        MENUITEM "Wor&kspace Preferences...\tCtrl+W", CM_EDIT_WORKSPACE
+    END
+    POPUP "&View"
+    BEGIN
+        MENUITEM "&Toolbar",                    ID_VIEW_TOOLBAR
+        MENUITEM "&Status Bar",                 ID_VIEW_STATUS_BAR
+        MENUITEM SEPARATOR
+        MENUITEM "&Full Screen\tF11",           CK_FULL_SCREEN
+        MENUITEM SEPARATOR
+        MENUITEM "Refresh Content\tF5",         CM_REFRESH_CONTENT
+        MENUITEM "Clear Image Cache\tCtrl+F5",  CM_CLEAR_IMAGE_CACHE
+    END
+    POPUP "&Help"
+    BEGIN
+        MENUITEM "&About Slider...",            ID_APP_ABOUT
+    END
+END
+
+IDR_ALBUMTYPE MENU 
+BEGIN
+    POPUP "&File"
+    BEGIN
+        MENUITEM "&New\tCtrl+N",                ID_FILE_NEW
+        MENUITEM "&Open...\tCtrl+O",            ID_FILE_OPEN
+        MENUITEM "Open Folder...\tCtrl+Shift+O", ID_FILE_OPEN_ALBUM_FOLDER
+        MENUITEM "&Close",                      ID_FILE_CLOSE
+        MENUITEM "&Save\tCtrl+S",               ID_FILE_SAVE
+        MENUITEM "Save &As...",                 ID_FILE_SAVE_AS
+        MENUITEM SEPARATOR
+        MENUITEM "Save &Workspace\tCtrl+Shift+S", CM_SAVE_WORKSPACE
+        MENUITEM "&Logger Options...",          CM_LOGGER_OPTIONS
+        POPUP "&Image File"
+        BEGIN
+            MENUITEM "&Open\tCtrl+Shift+O",         CM_OPEN_IMAGE_FILE
+            MENUITEM SEPARATOR
+            MENUITEM "&Delete...\tDelete",          CM_DELETE_FILE
+            MENUITEM "&Permanent Delete...\tShift+Delete", CM_DELETE_FILE_NO_UNDO
+            MENUITEM "&Move...\tCtrl+M",            CM_MOVE_FILE
+            MENUITEM SEPARATOR
+            MENUITEM "&Explore Image\tCtrl+E",      CM_EXPLORE_IMAGE
+        END
+        MENUITEM SEPARATOR
+        MENUITEM "Clear Image Cache",           CM_CLEAR_IMAGE_CACHE
+        MENUITEM "Clear Temporary Embedded Clones", CM_CLEAR_TEMP_EMBEDDED_CLONES
+        MENUITEM SEPARATOR
+        MENUITEM "&Print...\tCtrl+P",           ID_FILE_PRINT
+        MENUITEM "Print Pre&view",              ID_FILE_PRINT_PREVIEW
+        MENUITEM "P&rint Setup...",             ID_FILE_PRINT_SETUP
+        MENUITEM SEPARATOR
+        MENUITEM "Recent File",                 ID_FILE_MRU_FILE1
+        MENUITEM SEPARATOR
+        MENUITEM "E&xit",                       ID_APP_EXIT
+    END
+    POPUP "&Edit"
+    BEGIN
+        MENUITEM "&Undo <TEXT_FROM_CODE>\tAlt+Bksp", CM_CUSTOM_ORDER_UNDO
+        MENUITEM "&Redo <TEXT_FROM_CODE>\tAlt+Ins", CM_CUSTOM_ORDER_REDO
+        MENUITEM SEPARATOR
+        MENUITEM "&Clear Undo Buffer",          CM_CLEAR_CUSTOM_ORDER_UNDO_REDO_STACKS
+        MENUITEM SEPARATOR
+        MENUITEM "Store Undo Information",      CK_SAVE_CU_UNDO_REDO_BUFFER
+        MENUITEM SEPARATOR
+        MENUITEM "Archive Images...\tCtrl+Shift+A", CM_ARCHIVE_IMAGES
+        MENUITEM "Password...",                 ID_EDIT_ARCHIVE_PASSWORD
+        MENUITEM SEPARATOR
+        MENUITEM "Wor&kspace Preferences...\tCtrl+W", CM_EDIT_WORKSPACE
+    END
+    POPUP "&Album"
+    BEGIN
+        MENUITEM "&Play\tSpace",                CM_NAV_PLAY
+        MENUITEM SEPARATOR
+        MENUITEM "Goto &Begin\tHome",           CM_NAV_BEGIN
+        MENUITEM "Goto Pre&vious\tUp",          CM_NAV_PREV
+        MENUITEM "Goto &Next\tDown",            CM_NAV_NEXT
+        MENUITEM "Goto &End\tEnd",              CM_NAV_END
+        MENUITEM SEPARATOR
+        MENUITEM "&Forward Direction",          CM_NAV_DIR_FWD
+        MENUITEM "&Reverse Direction",          CM_NAV_DIR_REV
+        MENUITEM SEPARATOR
+        MENUITEM "Navigate &Circular",          CM_NAV_CIRCULAR
+        MENUITEM SEPARATOR
+        MENUITEM "Bac&kground Color...\tCtrl+K", CM_EDIT_BK_COLOR
+        MENUITEM SEPARATOR
+        POPUP "&Auto-Drop Recipient"
+        BEGIN
+            MENUITEM "&Defragment Files",           CM_AUTO_DROP_DEFRAGMENT
+            MENUITEM SEPARATOR
+            MENUITEM "&Undo File Operation",        CM_AUTO_DROP_UNDO
+            MENUITEM "&Redo File Operation",        CM_AUTO_DROP_REDO
+            MENUITEM SEPARATOR
+            MENUITEM "&Clear Undo/Redo Buffer",     CM_AUTO_DROP_CLEAR_UNDO_REDO_STACKS
+            MENUITEM SEPARATOR
+            MENUITEM "&Auto Drop Recipient",        CM_IS_AUTO_DROP
+        END
+        MENUITEM SEPARATOR
+        MENUITEM "Regenerate Album\tCtrl+Shift+F5", CM_REGENERATE_ALBUM
+        MENUITEM "Album &Settings...\tCtrl+Space", CM_EDIT_ALBUM
+    END
+    POPUP "&View"
+    BEGIN
+        MENUITEM "&Toolbar",                    ID_VIEW_TOOLBAR
+        MENUITEM "&Status Bar",                 ID_VIEW_STATUS_BAR
+        MENUITEM SEPARATOR
+        MENUITEM "&Album Info Bar\tCtrl+B",     ID_VIEW_ALBUMDIALOGBAR
+        MENUITEM "T&humbnails\tCtrl+Shift+T",   CK_SHOW_THUMB_VIEW
+        MENUITEM SEPARATOR
+        MENUITEM "&Full Screen\tF11",           CK_FULL_SCREEN
+        MENUITEM SEPARATOR
+        POPUP "&Auto Image Size"
+        BEGIN
+            MENUITEM "Actual Size (Zoom to 100%)\tCtrl+1", CM_IMAGE_SIZE_ACTUAL_SIZE
+            MENUITEM "Best Fit (Large Only)\tCtrl+0", CM_IMAGE_SIZE_AUTO_FIT_LARGE
+            MENUITEM "Best Fit (All)\tCtrl+Shift+0", CM_IMAGE_SIZE_AUTO_FIT_ALL
+            MENUITEM "Fit Width",                   CM_IMAGE_SIZE_FIT_WIDTH
+            MENUITEM "Fit Height",                  CM_IMAGE_SIZE_FIT_HEIGHT
+        END
+        MENUITEM SEPARATOR
+        MENUITEM "Zoom Normal",                 CM_ZOOM_NORMAL
+        MENUITEM "Zoom &In\tCtrl+Add",          CM_ZOOM_IN
+        MENUITEM "Zoom Out\tCtrl+Sub",          CM_ZOOM_OUT
+        MENUITEM SEPARATOR
+        MENUITEM "Resize View to Fit\tCtrl+Shift+F", CM_RESIZE_VIEW_TO_FIT
+        MENUITEM SEPARATOR
+        MENUITEM "Refresh Content\tF5",         CM_REFRESH_CONTENT
+        MENUITEM "Clear Image Cache\tCtrl+F5",  CM_CLEAR_IMAGE_CACHE
+    END
+    POPUP "&Window"
+    BEGIN
+        MENUITEM "&New Window\tCtrl+Shift+N",   ID_WINDOW_NEW
+        MENUITEM "&Split",                      ID_WINDOW_SPLIT
+        MENUITEM SEPARATOR
+        MENUITEM "&Cascade",                    ID_WINDOW_CASCADE
+        MENUITEM "Tile &Vertical",              ID_WINDOW_TILE_VERT
+        MENUITEM "Tile &Horizontal",            ID_WINDOW_TILE_HORZ
+        MENUITEM "&Arrange Icons",              ID_WINDOW_ARRANGE
+        MENUITEM SEPARATOR
+        MENUITEM "C&lose All\tAlt+X",           CM_MDI_CLOSE_ALL
+    END
+    POPUP "&Help"
+    BEGIN
+        MENUITEM "&About Slider...",            ID_APP_ABOUT
+    END
+END
+
+IDR_IMAGETYPE MENU 
+BEGIN
+    POPUP "&File"
+    BEGIN
+        MENUITEM "&New\tCtrl+N",                ID_FILE_NEW
+        MENUITEM "&Open...\tCtrl+O",            ID_FILE_OPEN
+        MENUITEM "Open Folder...\tCtrl+Shift+O", ID_FILE_OPEN_ALBUM_FOLDER
+        MENUITEM "&Close",                      ID_FILE_CLOSE
+        MENUITEM "&Save\tCtrl+S",               ID_FILE_SAVE
+        MENUITEM "Save &As...",                 ID_FILE_SAVE_AS
+        MENUITEM SEPARATOR
+        MENUITEM "Save &Workspace\tCtrl+Shift+S", CM_SAVE_WORKSPACE
+        MENUITEM "&Logger Options...",          CM_LOGGER_OPTIONS
+        POPUP "&Image File"
+        BEGIN
+            MENUITEM "Delete...\tDelete",           CM_DELETE_FILE
+            MENUITEM "Permanent Delete...\tShift+Delete", CM_DELETE_FILE_NO_UNDO
+            MENUITEM "Move...\tCtrl+M",             CM_MOVE_FILE
+            MENUITEM SEPARATOR
+            MENUITEM "&Explore Image\tCtrl+E",      CM_EXPLORE_IMAGE
+        END
+        MENUITEM SEPARATOR
+        MENUITEM "Clear Image Cache",           CM_CLEAR_IMAGE_CACHE
+        MENUITEM "Clear Temporary Embedded Clones", CM_CLEAR_TEMP_EMBEDDED_CLONES
+        MENUITEM SEPARATOR
+        MENUITEM "&Print...\tCtrl+P",           ID_FILE_PRINT
+        MENUITEM "Print Pre&view",              ID_FILE_PRINT_PREVIEW
+        MENUITEM "P&rint Setup...",             ID_FILE_PRINT_SETUP
+        MENUITEM SEPARATOR
+        MENUITEM "Recent File",                 ID_FILE_MRU_FILE1, GRAYED
+        MENUITEM SEPARATOR
+        MENUITEM "E&xit",                       ID_APP_EXIT
+    END
+    POPUP "&Edit"
+    BEGIN
+        MENUITEM "Cu&t\tCtrl+X",                ID_EDIT_CUT
+        MENUITEM "&Copy\tCtrl+C",               ID_EDIT_COPY
+        MENUITEM "&Paste\tCtrl+V",              ID_EDIT_PASTE
+        MENUITEM SEPARATOR
+        MENUITEM "Bac&kground Color...\tCtrl+K", CM_EDIT_BK_COLOR
+        MENUITEM SEPARATOR
+        MENUITEM "Wor&kspace Preferences...\tCtrl+W", CM_EDIT_WORKSPACE
+    END
+    POPUP "&View"
+    BEGIN
+        MENUITEM "&Toolbar",                    ID_VIEW_TOOLBAR
+        MENUITEM "&Status Bar",                 ID_VIEW_STATUS_BAR
+        MENUITEM SEPARATOR
+        MENUITEM "&Full Screen\tF11",           CK_FULL_SCREEN
+        MENUITEM SEPARATOR
+        POPUP "&Auto Image Size"
+        BEGIN
+            MENUITEM "Actual Size (Zoom to 100%)\tCtrl+1", CM_IMAGE_SIZE_ACTUAL_SIZE
+            MENUITEM "Best Fit (Large Only)\tCtrl+0", CM_IMAGE_SIZE_AUTO_FIT_LARGE
+            MENUITEM "Best Fit (All)\tCtrl+Shift+0", CM_IMAGE_SIZE_AUTO_FIT_ALL
+            MENUITEM "Fit Width",                   CM_IMAGE_SIZE_FIT_WIDTH
+            MENUITEM "Fit Height",                  CM_IMAGE_SIZE_FIT_HEIGHT
+        END
+        MENUITEM SEPARATOR
+        MENUITEM "Zoom Normal",                 CM_ZOOM_NORMAL
+        MENUITEM "Zoom &In\tCtrl+Add",          CM_ZOOM_IN
+        MENUITEM "Zoom Out\tCtrl+Sub",          CM_ZOOM_OUT
+        MENUITEM SEPARATOR
+        MENUITEM "Resize View to Fit\tCtrl+Shift+F", CM_RESIZE_VIEW_TO_FIT
+        MENUITEM SEPARATOR
+        MENUITEM "Refresh Content\tF5",         CM_REFRESH_CONTENT
+        MENUITEM "Clear Image Cache\tCtrl+F5",  CM_CLEAR_IMAGE_CACHE
+    END
+    POPUP "&Window"
+    BEGIN
+        MENUITEM "&New Window\tCtrl+Shift+N",   ID_WINDOW_NEW
+        MENUITEM SEPARATOR
+        MENUITEM "&Cascade",                    ID_WINDOW_CASCADE
+        MENUITEM "Tile &Vertical",              ID_WINDOW_TILE_VERT
+        MENUITEM "Tile &Horizontal",            ID_WINDOW_TILE_HORZ
+        MENUITEM "&Arrange Icons",              ID_WINDOW_ARRANGE
+        MENUITEM SEPARATOR
+        MENUITEM "C&lose All\tAlt+X",           CM_MDI_CLOSE_ALL
+    END
+    POPUP "&Help"
+    BEGIN
+        MENUITEM "&About Slider...",            ID_APP_ABOUT
+    END
+END
+
+IDR_CONTEXT_MENU MENU 
+BEGIN
+    POPUP "<image>"
+    BEGIN
+        MENUITEM "Actual Size (Zoom to 100%)\tCtrl+1", CM_IMAGE_SIZE_ACTUAL_SIZE
+        MENUITEM "Best Fit (Large Only)\tCtrl+0", CM_IMAGE_SIZE_AUTO_FIT_LARGE
+        MENUITEM "Best Fit (All)\tCtrl+Shift+0", CM_IMAGE_SIZE_AUTO_FIT_ALL
+        MENUITEM "Fit Width",                   CM_IMAGE_SIZE_FIT_WIDTH
+        MENUITEM "Fit Height",                  CM_IMAGE_SIZE_FIT_HEIGHT
+        MENUITEM SEPARATOR
+        MENUITEM "Resize View to Fit\tCtrl+Shift+F", CM_RESIZE_VIEW_TO_FIT
+        MENUITEM SEPARATOR
+        MENUITEM "Zoom In\tCtrl+Add",           CM_ZOOM_IN
+        MENUITEM "Zoom Out\tCtrl+Sub",          CM_ZOOM_OUT
+        MENUITEM SEPARATOR
+        MENUITEM "Bac&kground Color...\tCtrl+K", CM_EDIT_BK_COLOR
+        MENUITEM SEPARATOR
+        POPUP "&Image File"
+        BEGIN
+            MENUITEM "Delete...\tDelete",           CM_DELETE_FILE
+            MENUITEM "Permanent Delete...\tShift+Delete", CM_DELETE_FILE_NO_UNDO
+            MENUITEM "Move...\tCtrl+M",             CM_MOVE_FILE
+            MENUITEM SEPARATOR
+            MENUITEM "&Explore Image\tCtrl+E",      CM_EXPLORE_IMAGE
+        END
+    END
+    POPUP "<album>"
+    BEGIN
+        MENUITEM "&Play\tSpace",                CM_NAV_PLAY
+        MENUITEM SEPARATOR
+        POPUP "&Goto"
+        BEGIN
+            MENUITEM "Pre&vious\tUp",               CM_NAV_PREV
+            MENUITEM "&Next\tDown",                 CM_NAV_NEXT
+            MENUITEM SEPARATOR
+            MENUITEM "&Begin\tHome",                CM_NAV_BEGIN
+            MENUITEM "&End\tEnd",                   CM_NAV_END
+        END
+        MENUITEM SEPARATOR
+        MENUITEM "For&ward Direction",          CM_NAV_DIR_FWD
+        MENUITEM "&Reverse Direction",          CM_NAV_DIR_REV
+        MENUITEM SEPARATOR
+        MENUITEM "Navigate &Circular",          CM_NAV_CIRCULAR
+        MENUITEM SEPARATOR
+        MENUITEM "Actual Size (Zoom to 100%)\tCtrl+1", CM_IMAGE_SIZE_ACTUAL_SIZE
+        MENUITEM "Best Fit (Large Only)\tCtrl+0", CM_IMAGE_SIZE_AUTO_FIT_LARGE
+        MENUITEM "Best Fit (All)\tCtrl+Shift+0", CM_IMAGE_SIZE_AUTO_FIT_ALL
+        MENUITEM "Fit Width",                   CM_IMAGE_SIZE_FIT_WIDTH
+        MENUITEM "Fit Height",                  CM_IMAGE_SIZE_FIT_HEIGHT
+        MENUITEM SEPARATOR
+        MENUITEM "Resize View to Fit\tCtrl+Shift+F", CM_RESIZE_VIEW_TO_FIT
+        MENUITEM SEPARATOR
+        MENUITEM "Zoom In\tCtrl+Add",           CM_ZOOM_IN
+        MENUITEM "Zoom Out\tCtrl+Sub",          CM_ZOOM_OUT
+        MENUITEM SEPARATOR
+        MENUITEM "Bac&kground Color...\tCtrl+K", CM_EDIT_BK_COLOR
+        MENUITEM SEPARATOR
+        POPUP "&Image File"
+        BEGIN
+            MENUITEM "&Open\tCtrl+Shift+O",         CM_OPEN_IMAGE_FILE
+            MENUITEM SEPARATOR
+            MENUITEM "&Delete...\tDelete",          CM_DELETE_FILE
+            MENUITEM "&Permanent Delete...\tShift+Delete", CM_DELETE_FILE_NO_UNDO
+            MENUITEM "&Move...\tCtrl+M",            CM_MOVE_FILE
+            MENUITEM SEPARATOR
+            MENUITEM "&Explore Image\tCtrl+E",      CM_EXPLORE_IMAGE
+        END
+        POPUP "&Edit"
+        BEGIN
+            MENUITEM "&Undo <TEXT_FROM_CODE>\tAlt+Bksp", CM_CUSTOM_ORDER_UNDO
+            MENUITEM "&Redo <TEXT_FROM_CODE>\tAlt+Ins", CM_CUSTOM_ORDER_REDO
+            MENUITEM SEPARATOR
+            MENUITEM "&Clear Undo Buffer",          CM_CLEAR_CUSTOM_ORDER_UNDO_REDO_STACKS
+            MENUITEM SEPARATOR
+            MENUITEM "Archive Images...\tCtrl+Shift+A", CM_ARCHIVE_IMAGES
+            MENUITEM "Password...",                 ID_EDIT_ARCHIVE_PASSWORD
+            MENUITEM SEPARATOR
+            MENUITEM "Store Undo Information",      CK_SAVE_CU_UNDO_REDO_BUFFER
+        END
+        POPUP "&View"
+        BEGIN
+            MENUITEM "Album Info Bar\tCtrl+B",      ID_VIEW_ALBUMDIALOGBAR
+            MENUITEM "T&humbnails\tCtrl+Shift+T",   CK_SHOW_THUMB_VIEW
+        END
+        POPUP "&Auto-Drop Recipient"
+        BEGIN
+            MENUITEM "&Defragment Files",           CM_AUTO_DROP_DEFRAGMENT
+            MENUITEM SEPARATOR
+            MENUITEM "&Undo File Operation",        CM_AUTO_DROP_UNDO
+            MENUITEM "&Redo File Operation",        CM_AUTO_DROP_REDO
+            MENUITEM SEPARATOR
+            MENUITEM "&Clear Undo/Redo Buffer",     CM_AUTO_DROP_CLEAR_UNDO_REDO_STACKS
+            MENUITEM SEPARATOR
+            MENUITEM "&Auto Drop Recipient",        CM_IS_AUTO_DROP
+        END
+        MENUITEM SEPARATOR
+        MENUITEM "Regenerate Album\tCtrl+Shift+F5", CM_REGENERATE_ALBUM
+        MENUITEM "Album &Settings...\tCtrl+Space", CM_EDIT_ALBUM
+    END
+    POPUP "<album thumbs>"
+    BEGIN
+        MENUITEM "&Play\tSpace",                CM_NAV_PLAY
+        MENUITEM SEPARATOR
+        POPUP "&Image File"
+        BEGIN
+            MENUITEM "&Open\tCtrl+Shift+O",         CM_OPEN_IMAGE_FILE
+            MENUITEM SEPARATOR
+            MENUITEM "&Delete...\tDelete",          CM_DELETE_FILE
+            MENUITEM "&Permanent Delete...\tShift+Delete", CM_DELETE_FILE_NO_UNDO
+            MENUITEM "&Move...\tCtrl+M",            CM_MOVE_FILE
+            MENUITEM SEPARATOR
+            MENUITEM "&Explore Image\tCtrl+E",      CM_EXPLORE_IMAGE
+        END
+        POPUP "&Edit"
+        BEGIN
+            MENUITEM "&Undo <TEXT_FROM_CODE>\tAlt+Bksp", CM_CUSTOM_ORDER_UNDO
+            MENUITEM "&Redo <TEXT_FROM_CODE>\tAlt+Ins", CM_CUSTOM_ORDER_REDO
+            MENUITEM SEPARATOR
+            MENUITEM "&Clear Undo Buffer",          CM_CLEAR_CUSTOM_ORDER_UNDO_REDO_STACKS
+            MENUITEM SEPARATOR
+            MENUITEM "Archive Images...\tCtrl+Shift+A", CM_ARCHIVE_IMAGES
+            MENUITEM SEPARATOR
+            MENUITEM "Store Undo Information",      CK_SAVE_CU_UNDO_REDO_BUFFER
+        END
+        POPUP "&View"
+        BEGIN
+            MENUITEM "Album Info Bar\tCtrl+B",      ID_VIEW_ALBUMDIALOGBAR
+            MENUITEM "T&humbnails\tCtrl+Shift+T",   CK_SHOW_THUMB_VIEW
+        END
+        POPUP "&Auto-Drop Recipient"
+        BEGIN
+            MENUITEM "&Defragment Files",           CM_AUTO_DROP_DEFRAGMENT
+            MENUITEM SEPARATOR
+            MENUITEM "&Undo File Operation",        CM_AUTO_DROP_UNDO
+            MENUITEM "&Redo File Operation",        CM_AUTO_DROP_REDO
+            MENUITEM SEPARATOR
+            MENUITEM "&Clear Undo/Redo Buffer",     CM_AUTO_DROP_CLEAR_UNDO_REDO_STACKS
+            MENUITEM SEPARATOR
+            MENUITEM "&Auto Drop Recipient",        CM_IS_AUTO_DROP
+        END
+        MENUITEM SEPARATOR
+        MENUITEM "Regenerate Album\tCtrl+Shift+F5", CM_REGENERATE_ALBUM
+        MENUITEM "Album &Settings...\tCtrl+Space", CM_EDIT_ALBUM
+    END
+    POPUP "<album found list>"
+    BEGIN
+        MENUITEM "&Open\tCtrl+Shift+O",         CM_OPEN_IMAGE_FILE
+        MENUITEM SEPARATOR
+        MENUITEM "&Delete...\tDelete",          CM_DELETE_FILE
+        MENUITEM "&Permanent Delete...\tShift+Delete", CM_DELETE_FILE_NO_UNDO
+        MENUITEM "&Move...\tCtrl+M",            CM_MOVE_FILE
+        MENUITEM SEPARATOR
+        MENUITEM "&Explore Image\tCtrl+E",      CM_EXPLORE_IMAGE
+    END
+    POPUP "<drop>"
+    BEGIN
+        MENUITEM "&Move Image to Auto-Drop Folder", CM_DROP_MOVE_IMAGE
+        MENUITEM "&Copy Image to Auto-Drop Folder", CM_DROP_COPY_IMAGE
+        MENUITEM SEPARATOR
+        MENUITEM "Cancel &Drop",                CM_CANCEL_DROP
+    END
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Accelerator
+//
+
+IDR_MAINFRAME ACCELERATORS 
+BEGIN
+    VK_F11,         CK_FULL_SCREEN,         VIRTKEY, NOINVERT
+    VK_F5,          CM_CLEAR_IMAGE_CACHE,   VIRTKEY, CONTROL, NOINVERT
+    VK_DELETE,      CM_DELETE_FILE,         VIRTKEY, NOINVERT
+    VK_DELETE,      CM_DELETE_FILE_NO_UNDO, VIRTKEY, SHIFT, NOINVERT
+    "K",            CM_EDIT_BK_COLOR,       VIRTKEY, CONTROL, NOINVERT
+    "W",            CM_EDIT_WORKSPACE,      VIRTKEY, CONTROL, NOINVERT
+    VK_ESCAPE,      CM_ESCAPE_KEY,          VIRTKEY, NOINVERT
+    "E",            CM_EXPLORE_IMAGE,       VIRTKEY, CONTROL, NOINVERT
+    "Z",            CM_FOCUS_ZOOM,          VIRTKEY, CONTROL, NOINVERT
+    "1",            CM_IMAGE_SIZE_ACTUAL_SIZE, VIRTKEY, CONTROL, NOINVERT
+    "0",            CM_IMAGE_SIZE_AUTO_FIT_LARGE, VIRTKEY, CONTROL, NOINVERT
+    "W",            CM_LOAD_WORKSPACE_DOCS, VIRTKEY, SHIFT, CONTROL, ALT, NOINVERT
+    "X",            CM_MDI_CLOSE_ALL,       VIRTKEY, ALT, NOINVERT
+    "M",            CM_MOVE_FILE,           VIRTKEY, CONTROL, NOINVERT
+    VK_F5,          CM_REFRESH_CONTENT,     VIRTKEY, NOINVERT
+    "F",            CM_RESIZE_VIEW_TO_FIT,  VIRTKEY, SHIFT, CONTROL, NOINVERT
+    "S",            CM_SAVE_WORKSPACE,      VIRTKEY, SHIFT, CONTROL, NOINVERT
+    VK_F8,          CM_TOGGLE_MAXIMIZE,     VIRTKEY, NOINVERT
+    VK_ADD,         CM_ZOOM_IN,             VIRTKEY, CONTROL, NOINVERT
+    VK_SUBTRACT,    CM_ZOOM_OUT,            VIRTKEY, CONTROL, NOINVERT
+    "C",            ID_EDIT_COPY,           VIRTKEY, CONTROL, NOINVERT
+    VK_INSERT,      ID_EDIT_COPY,           VIRTKEY, CONTROL, NOINVERT
+    "X",            ID_EDIT_CUT,            VIRTKEY, CONTROL, NOINVERT
+    "V",            ID_EDIT_PASTE,          VIRTKEY, CONTROL, NOINVERT
+    VK_INSERT,      ID_EDIT_PASTE,          VIRTKEY, SHIFT, NOINVERT
+    VK_BACK,        ID_EDIT_UNDO,           VIRTKEY, ALT, NOINVERT
+    "1",            ID_FILE_MRU_FILE1,      VIRTKEY, ALT, NOINVERT
+    "2",            ID_FILE_MRU_FILE2,      VIRTKEY, ALT, NOINVERT
+    "3",            ID_FILE_MRU_FILE3,      VIRTKEY, ALT, NOINVERT
+    "4",            ID_FILE_MRU_FILE4,      VIRTKEY, ALT, NOINVERT
+    "5",            ID_FILE_MRU_FILE5,      VIRTKEY, ALT, NOINVERT
+    "6",            ID_FILE_MRU_FILE6,      VIRTKEY, ALT, NOINVERT
+    "7",            ID_FILE_MRU_FILE7,      VIRTKEY, ALT, NOINVERT
+    "8",            ID_FILE_MRU_FILE8,      VIRTKEY, ALT, NOINVERT
+    "9",            ID_FILE_MRU_FILE9,      VIRTKEY, ALT, NOINVERT
+    "N",            ID_FILE_NEW,            VIRTKEY, CONTROL, NOINVERT
+    "O",            ID_FILE_OPEN,           VIRTKEY, CONTROL, NOINVERT
+    "P",            ID_FILE_PRINT,          VIRTKEY, CONTROL, NOINVERT
+    "S",            ID_FILE_SAVE,           VIRTKEY, CONTROL, NOINVERT
+    VK_F6,          ID_NEXT_PANE,           VIRTKEY, NOINVERT
+    VK_F6,          ID_PREV_PANE,           VIRTKEY, SHIFT, NOINVERT
+    "T",            ID_VIEW_TOOLBAR,        VIRTKEY, CONTROL, NOINVERT
+    "0",            CM_IMAGE_SIZE_AUTO_FIT_ALL, VIRTKEY, SHIFT, CONTROL, NOINVERT
+END
+
+IDR_IMAGEVIEW ACCELERATORS 
+BEGIN
+    VK_DOWN,        CM_SCROLL_DOWN,         VIRTKEY, CONTROL, NOINVERT
+    VK_DOWN,        CM_SCROLL_PAGE_DOWN,    VIRTKEY, ALT, NOINVERT
+    VK_LEFT,        CM_SCROLL_LEFT,         VIRTKEY, CONTROL, NOINVERT
+    VK_LEFT,        CM_SCROLL_PAGE_LEFT,    VIRTKEY, ALT, NOINVERT
+    VK_NEXT,        CM_SCROLL_PAGE_RIGHT,   VIRTKEY, CONTROL, NOINVERT
+    VK_NEXT,        CM_SCROLL_PAGE_DOWN,    VIRTKEY, SHIFT, NOINVERT
+    VK_PRIOR,       CM_SCROLL_PAGE_LEFT,    VIRTKEY, CONTROL, NOINVERT
+    VK_PRIOR,       CM_SCROLL_PAGE_UP,      VIRTKEY, SHIFT, NOINVERT
+    VK_RIGHT,       CM_SCROLL_RIGHT,        VIRTKEY, CONTROL, NOINVERT
+    VK_RIGHT,       CM_SCROLL_PAGE_RIGHT,   VIRTKEY, ALT, NOINVERT
+    VK_UP,          CM_SCROLL_UP,           VIRTKEY, CONTROL, NOINVERT
+    VK_UP,          CM_SCROLL_PAGE_UP,      VIRTKEY, ALT, NOINVERT
+END
+
+IDR_COMMAND_BAR_ACCEL ACCELERATORS 
+BEGIN
+    VK_ESCAPE,      CM_ESCAPE_KEY,          VIRTKEY, NOINVERT
+    "O",            ID_FILE_OPEN_ALBUM_FOLDER, VIRTKEY, SHIFT, CONTROL, NOINVERT
+END
+
+IDR_ALBUMTYPE ACCELERATORS 
+BEGIN
+    "A",            CM_SELECT_ALL_THUMBS,   VIRTKEY, CONTROL, NOINVERT
+    "A",            CM_ARCHIVE_IMAGES,      VIRTKEY, SHIFT, CONTROL, NOINVERT
+    "B",            ID_VIEW_ALBUMDIALOGBAR, VIRTKEY, CONTROL, NOINVERT
+    "N",            ID_WINDOW_NEW,          VIRTKEY, SHIFT, CONTROL, NOINVERT
+    "O",            CM_OPEN_IMAGE_FILE,     VIRTKEY, SHIFT, CONTROL, NOINVERT
+    "Q",            CM_FOCUS_SLIDER,        VIRTKEY, CONTROL, NOINVERT
+    "T",            CK_SHOW_THUMB_VIEW,     VIRTKEY, SHIFT, CONTROL, NOINVERT
+    VK_BACK,        CM_CUSTOM_ORDER_UNDO,   VIRTKEY, ALT, NOINVERT
+    VK_BACK,        CM_CUSTOM_ORDER_REDO,   VIRTKEY, SHIFT, ALT, NOINVERT
+    VK_F5,          CM_REGENERATE_ALBUM,    VIRTKEY, SHIFT, CONTROL, NOINVERT
+    VK_INSERT,      CM_CUSTOM_ORDER_REDO,   VIRTKEY, ALT, NOINVERT
+    VK_SPACE,       CM_NAV_PLAY,            VIRTKEY, NOINVERT
+    VK_SPACE,       CM_EDIT_ALBUM,          VIRTKEY, CONTROL, NOINVERT
+    VK_TAB,         CM_TOGGLE_SIBLING_VIEW, VIRTKEY, NOINVERT
+    "Y",            CM_CUSTOM_ORDER_REDO,   VIRTKEY, CONTROL, NOINVERT
+END
+
+IDR_IMAGETYPE ACCELERATORS 
+BEGIN
+    "N",            ID_WINDOW_NEW,          VIRTKEY, SHIFT, CONTROL, NOINVERT
+    VK_F1,          ID_APP_ABOUT,           VIRTKEY, SHIFT, CONTROL, ALT, NOINVERT
+END
+
+IDR_ALBUM_DLG_SEARCH_SPEC_ACCEL ACCELERATORS 
+BEGIN
+    VK_DELETE,      CM_DELETE_SEARCH_SPEC,  VIRTKEY, NOINVERT
+    VK_DELETE,      CM_DELETE_SEARCH_SPEC,  VIRTKEY, SHIFT, NOINVERT
+    VK_DOWN,        CM_MOVE_DOWN_SEARCH_SPEC, VIRTKEY, CONTROL, NOINVERT
+    VK_UP,          CM_MOVE_UP_SEARCH_SPEC, VIRTKEY, CONTROL, NOINVERT
+END
+
+IDR_ALBUM_DLG_ACCEL ACCELERATORS 
+BEGIN
+    "E",            IDC_EXPLORE_IMAGE,      VIRTKEY, CONTROL, NOINVERT
+    VK_F4,          IDC_OPEN_IMAGE,         VIRTKEY, NOINVERT
+    VK_F5,          CM_SEARCH_FOR_FILES,    VIRTKEY, NOINVERT
+END
+
+IDR_ALBUMTYPE_NAV ACCELERATORS 
+BEGIN
+    VK_DOWN,        CM_NAV_NEXT,            VIRTKEY, NOINVERT
+    VK_END,         CM_NAV_END,             VIRTKEY, NOINVERT
+    VK_HOME,        CM_NAV_BEGIN,           VIRTKEY, NOINVERT
+    VK_UP,          CM_NAV_PREV,            VIRTKEY, NOINVERT
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_WORKSPACE_DIALOG DIALOGEX 0, 0, 346, 202
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Workspace Preferences"
+FONT 8, "MS Sans Serif", 0, 0, 0x1
+BEGIN
+    GROUPBOX        "General",IDC_STATIC,7,7,169,162
+    CONTROL         "&Automatically save workspace",CK_AUTOSAVE,"Button",BS_AUTOCHECKBOX | WS_GROUP | WS_TABSTOP,13,18,108,10
+    CONTROL         "&Restore opened documents",CK_PERSIST_OPEN_DOCS,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,13,30,108,10
+    CONTROL         "Restore zoom and scroll state in albums",CK_PERSIST_ALBUM_IMAGE_STATE,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,13,42,140,10
+    CONTROL         "Show the information bar in albums",ID_VIEW_ALBUMDIALOGBAR,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,13,54,145,10
+    CONTROL         "Save custom order undo/redo buffer",IDC_SAVECUSTOMORDERUNDOREDO_CHECK,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,13,66,131,10
+    CONTROL         "Prefix deep image stream paths",IDC_PREFIX_DEEP_STREAM_NAMES_CHECK,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,13,78,114,10
+    CONTROL         "Allow embedded image files transfers",IDC_ALLOW_EMBEDDED_FILE_TRANFERS_CHECK,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,13,90,131,10
+    CONTROL         "Use Vista-style file open dialogs",IDC_VISTA_STYLE_FILE_DLG_CHECK,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,13,102,115,10
+    CONTROL         "Use smooting when enlarging images",IDC_ENLARGE_SMOOTHING_CHECK,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,13,115,133,10
+    RTEXT           "Auto Image Size:",IDC_STATIC,20,135,54,8
+    COMBOBOX        IDW_AUTO_IMAGE_SIZE_COMBO,76,132,90,114,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    RTEXT           "Recent files (0-16):",IDC_STATIC,13,153,61,8
+    EDITTEXT        IDC_MAX_MRU_COUNT_EDIT,76,151,36,12,ES_AUTOHSCROLL | ES_NUMBER | WS_GROUP
+    GROUPBOX        "Colours",IDC_STATIC,186,7,153,62
+    RTEXT           "Default background colour:",IDC_STATIC,188,18,90,8
+    CONTROL         "Bk Color",CM_EDIT_BK_COLOR,"Button",BS_OWNERDRAW,282,16,36,14,WS_EX_DLGMODALFRAME | WS_EX_CLIENTEDGE
+    RTEXT           "Image selection colour:",IDC_STATIC,188,34,90,8
+    CONTROL         "Selection Color",CM_EDIT_IMAGE_SEL_COLOR,"Button",BS_OWNERDRAW,282,32,36,14,WS_EX_DLGMODALFRAME | WS_EX_CLIENTEDGE
+    RTEXT           "Image selection text colour:",IDC_STATIC,188,50,90,8
+    CONTROL         "Selection Text Color",CM_EDIT_IMAGE_SEL_TEXT_COLOR,
+                    "Button",BS_OWNERDRAW,282,48,36,14,WS_EX_DLGMODALFRAME | WS_EX_CLIENTEDGE
+    GROUPBOX        "Thumbnails",IDC_STATIC,186,77,153,92
+    LTEXT           "Thumbnail size:",IDC_STATIC,217,89,50,8
+    COMBOBOX        IDC_THUMB_BOUNDS_SIZE_COMBO,268,87,46,30,CBS_DROPDOWN | WS_VSCROLL | WS_GROUP | WS_TABSTOP
+    LTEXT           "Thumbnail list columns:",IDC_STATIC,193,105,74,8
+    EDITTEXT        IDC_THUMB_COL_COUNT_EDIT,268,103,36,12,ES_AUTOHSCROLL | ES_NUMBER
+    CONTROL         "Display thumbnails list",CK_SHOW_THUMB_VIEW,"Button",BS_AUTOCHECKBOX | WS_GROUP | WS_TABSTOP,193,121,82,10
+    CONTROL         "Regenerate small archived thumbnails",IDC_AUTO_REGEN_SMALL_STG_THUMBS_CHECK,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,193,134,135,10
+    PUSHBUTTON      "Clear Thumbnail Cache...",IDC_CLEAR_THUMB_CACHE_BUTTON,192,148,89,14,BS_CENTER | BS_VCENTER | BS_MULTILINE | WS_GROUP
+    PUSHBUTTON      "&Save",CM_SAVE_WORKSPACE,7,181,50,14
+    DEFPUSHBUTTON   "OK",IDOK,235,181,50,14,WS_GROUP
+    PUSHBUTTON      "Cancel",IDCANCEL,289,181,50,14
+END
+
+IDD_ALBUMDIALOGBAR DIALOGEX 0, 0, 530, 16
+STYLE DS_SETFONT | WS_CHILD
+FONT 8, "MS Sans Serif", 0, 0, 0x0
+BEGIN
+    COMBOBOX        IDC_PLAY_DELAY_COMBO,2,2,33,129,CBS_DROPDOWN | WS_VSCROLL | WS_GROUP | WS_TABSTOP
+    EDITTEXT        IDC_SCROLL_POS_EDIT,38,2,37,12,ES_RIGHT | ES_AUTOHSCROLL | ES_NUMBER | WS_GROUP
+    CONTROL         "Spin1",IDC_SCROLL_POS_SPIN,"msctls_updown32",UDS_SETBUDDYINT | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS,67,2,10,12
+    LTEXT           "10000 image(s)",IDC_NAV_COUNT_STATIC,79,4,53,8
+    EDITTEXT        IDC_CURR_FILE_EDIT,135,4,367,8,ES_AUTOHSCROLL | ES_READONLY | NOT WS_BORDER | WS_GROUP
+END
+
+IDD_ALBUM_SETTINGS_DIALOG DIALOGEX 0, 0, 367, 260
+STYLE DS_SETFONT | WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME
+CAPTION "Album Settings"
+FONT 8, "MS Sans Serif", 0, 0, 0x0
+BEGIN
+    CONTROL         "",IDC_FOUND_FILES_GAP,"Static",SS_ETCHEDHORZ,7,122,353,1
+    LTEXT           "&Found files:",IDC_FOUND_FILES_STATIC,7,130,59,8
+    CONTROL         "List1",IDC_FOUND_FILES_LISTVIEW,"SysListView32",LVS_REPORT | LVS_SHOWSELALWAYS | WS_BORDER | WS_GROUP | WS_TABSTOP,7,143,353,87
+    LTEXT           "<toolbar>",IDC_TOOLBAR_PLACEHOLDER,69,130,99,8
+    LTEXT           "File &Order:",IDC_LIST_ORDER_STATIC,171,130,33,8
+    COMBOBOX        IDC_LIST_ORDER_COMBO,207,127,153,177,CBS_DROPDOWNLIST | WS_VSCROLL | WS_GROUP | WS_TABSTOP
+    GROUPBOX        "Search &Path Specifiers:",IDC_SEARCH_SPEC_STATIC,7,2,232,83
+    LISTBOX         IDC_SEARCH_SPEC_LIST,12,12,221,52,WS_VSCROLL | WS_HSCROLL | WS_GROUP | WS_TABSTOP
+    PUSHBUTTON      "&Add...",CM_ADD_SEARCH_SPEC,12,66,42,14,WS_GROUP
+    PUSHBUTTON      "&Modify...",CM_MODIFY_SEARCH_SPEC,59,66,42,14
+    PUSHBUTTON      "&Delete",CM_DELETE_SEARCH_SPEC,106,66,42,14
+    PUSHBUTTON      "ñ",CM_MOVE_UP_SEARCH_SPEC,201,66,14,14,WS_GROUP | NOT WS_TABSTOP
+    PUSHBUTTON      "ò",CM_MOVE_DOWN_SEARCH_SPEC,218,66,14,14,NOT WS_TABSTOP
+    CONTROL         "Mi&nimum file size (KB):",IDC_MIN_FILE_SIZE_CHECK,
+                    "Button",BS_AUTOCHECKBOX | WS_GROUP | WS_TABSTOP,12,92,82,10
+    EDITTEXT        IDC_MIN_FILE_SIZE_EDIT,98,91,48,12,ES_AUTOHSCROLL | ES_NUMBER | WS_GROUP
+    CONTROL         "Ma&ximum file size (KB):",IDC_MAX_FILE_SIZE_CHECK,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,12,106,86,10
+    EDITTEXT        IDC_MAX_FILE_SIZE_EDIT,98,105,48,12,ES_AUTOHSCROLL | ES_NUMBER | WS_GROUP
+    CONTROL         "Auto file &search",IDC_AUTO_REGENERATE_CHECK,"Button",BS_AUTO3STATE | WS_TABSTOP,159,92,65,10
+    CHECKBOX        "Auto drop &recipient",IDC_AUTO_DROP_CHECK,159,106,75,10
+    DEFPUSHBUTTON   "OK",IDOK,256,239,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,310,239,50,14
+    LTEXT           "",IDC_THUMB_PREVIEW_STATIC,248,6,112,104,SS_SUNKEN
+END
+
+IDD_SEARCH_SPEC_DIALOG DIALOG  0, 0, 266, 105
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "File Search Attributes"
+FONT 8, "MS Sans Serif"
+BEGIN
+    GROUPBOX        "Search Folder or Image File Path",IDC_STATIC,7,5,190,47
+    LTEXT           "&Path:",IDC_STATIC,13,19,18,8
+    COMBOBOX        IDC_SEARCH_FOLDER_COMBO,44,16,147,110,CBS_DROPDOWN | CBS_AUTOHSCROLL | WS_VSCROLL | WS_GROUP | WS_TABSTOP
+    PUSHBUTTON      "&Browse Folder...",IDC_BROWSE_FOLDER_BUTTON,57,32,64,14,NOT WS_TABSTOP
+    PUSHBUTTON      "Browse &File..",IDC_BROWSE_FILE_BUTTON,126,32,64,14,NOT WS_TABSTOP
+    GROUPBOX        "Search Attributes",IDC_STATIC,7,55,190,43
+    LTEXT           "F&ilter(s):",IDC_STATIC,13,67,25,8
+    COMBOBOX        IDC_SEARCH_FILTERS_COMBO,44,64,147,110,CBS_DROPDOWN | CBS_AUTOHSCROLL | WS_VSCROLL | WS_GROUP | WS_TABSTOP
+    LTEXT           "&Options:",IDC_STATIC,13,83,27,8
+    COMBOBOX        IDC_SEARCH_OPTIONS_COMBO,44,80,147,65,CBS_DROPDOWNLIST | WS_VSCROLL | WS_GROUP | WS_TABSTOP
+    DEFPUSHBUTTON   "OK",IDOK,209,8,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,209,24,50,14
+END
+
+IDD_FILE_MOVE_DIALOG DIALOG  0, 0, 278, 124
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Move Image File(s)"
+FONT 8, "MS Sans Serif"
+BEGIN
+    LTEXT           "&To folder:",IDC_STATIC,7,29,31,8
+    COMBOBOX        IDC_DEST_FOLDER_COMBO,7,39,249,57,CBS_SIMPLE | CBS_AUTOHSCROLL | WS_VSCROLL | WS_GROUP | WS_TABSTOP
+    DEFPUSHBUTTON   "OK",IDOK,164,103,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,221,103,50,14
+    LTEXT           "&Move file(s):",IDC_STATIC,7,5,39,8
+    EDITTEXT        IDC_SOURCE_EDIT,7,14,264,12,ES_AUTOHSCROLL | ES_READONLY | NOT WS_BORDER | WS_GROUP
+END
+
+IDD_LOGGER_DIALOG DIALOG  0, 0, 213, 66
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Logger Setup"
+FONT 8, "MS Sans Serif"
+BEGIN
+    LTEXT           "&Select logger:",IDC_STATIC,7,7,44,8
+    COMBOBOX        IDC_LOGGER_COMBO,7,17,112,65,CBS_DROPDOWNLIST | WS_VSCROLL | WS_GROUP | WS_TABSTOP
+    CONTROL         "Logging &Enabled",CK_LOGGER_ENABLED,"Button",BS_AUTOCHECKBOX | WS_GROUP | WS_TABSTOP,7,36,73,10
+    CONTROL         "&Prepend timestamp to each line",CK_PREPEND_TIMESTAMP,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,49,115,10
+    DEFPUSHBUTTON   "Close",IDOK,149,7,57,14
+    PUSHBUTTON      "&View Log File...",IDC_VIEW_LOG_FILE_BUTTON,149,26,57,14
+    PUSHBUTTON      "&Clear Log File",IDC_CLEAR_LOG_FILE_BUTTON,149,45,57,14
+    PUSHBUTTON      "Cancel",IDCANCEL,273,7,57,14,WS_GROUP | NOT WS_TABSTOP
+END
+
+IDD_LAYOUT_DIALOG DIALOG  0, 0, 186, 95
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Layout Dialog"
+FONT 8, "MS Sans Serif"
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,129,7,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,129,24,50,14
+END
+
+IDD_UNDO_REDO_DIALOG DIALOG  0, 0, 200, 191
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Undo/Redo Auto-Drop Operations"
+FONT 8, "MS Sans Serif"
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,143,7,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,143,24,50,14
+    LISTBOX         IDC_STACK_STEP_LIST,7,7,101,40,LBS_SORT | LBS_NOINTEGRALHEIGHT | WS_VSCROLL | WS_TABSTOP
+END
+
+IDD_ARCHIVE_IMAGES_DIALOG DIALOGEX 0, 0, 303, 223
+STYLE DS_SETFONT | WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME
+CAPTION "Archive Image Files"
+FONT 8, "MS Sans Serif", 0, 0, 0x0
+BEGIN
+    LTEXT           "Destination Filename.Ext &format:",IDC_STATIC,7,7,102,8
+    COMBOBOX        IDC_FORMAT_COMBO,7,16,140,95,CBS_DROPDOWN | CBS_AUTOHSCROLL | WS_VSCROLL | WS_GROUP | WS_TABSTOP
+    LTEXT           "&Numeric counter:",IDC_STATIC,158,7,55,8
+    EDITTEXT        IDC_COUNTER_EDIT,158,16,54,12,ES_AUTOHSCROLL | ES_NUMBER | WS_GROUP
+    PUSHBUTTON      "1",IDC_RESETNUMCOUNTER_BUTTON,212,16,7,12
+    GROUPBOX        "File Operation",IDC_STATIC,7,42,58,36
+    CONTROL         "&Copy",IDC_COPY_FILES_RADIO,"Button",BS_AUTORADIOBUTTON | WS_GROUP | WS_TABSTOP,13,53,31,10
+    CONTROL         "&Move",IDC_RENAME_FILES_RADIO,"Button",BS_AUTORADIOBUTTON,13,64,33,10
+    GROUPBOX        "Destination",IDC_STATIC,73,42,71,36
+    CONTROL         "To folder",IDC_TO_FOLDER_RADIO,"Button",BS_AUTORADIOBUTTON | WS_GROUP | WS_TABSTOP,78,53,44,10
+    CONTROL         "Compound file",IDC_TO_COMPOUND_FILE_RADIO,"Button",BS_AUTORADIOBUTTON,78,64,61,10
+    GROUPBOX        "Target",IDC_TARGET_GROUP,152,42,143,36
+    CONTROL         "Selected files",IDC_SELECTED_FILES_RADIO,"Button",BS_AUTORADIOBUTTON | WS_GROUP | WS_TABSTOP,157,53,58,10
+    CONTROL         "All files",IDC_ALL_FILES_RADIO,"Button",BS_AUTORADIOBUTTON,157,64,37,10
+    LTEXT           "Static",IDC_TARGET_FILE_COUNT_STATIC,227,49,65,24,SS_CENTERIMAGE
+    LTEXT           "Destination folder/compound file:",IDC_STATIC,7,85,105,8
+    EDITTEXT        IDC_DEST_DIR_PATH_EDIT,7,95,201,12,ES_AUTOHSCROLL | WS_GROUP
+    PUSHBUTTON      ".&..",IDC_BROWSE_DEST_FOLDER_BUTTON,209,95,11,12,NOT WS_TABSTOP
+    PUSHBUTTON      "Create Folder",CM_CREATE_DEST_FOLDER,227,94,68,14,WS_GROUP | NOT WS_TABSTOP
+    PUSHBUTTON      "&Password...",ID_EDIT_ARCHIVE_PASSWORD,227,111,68,14,WS_GROUP
+    LTEXT           "Fi&les:",IDC_STATIC,7,118,17,8
+    CONTROL         "List1",IDC_FILE_PATHS_LIST,"SysListView32",LVS_REPORT | LVS_SHOWSELALWAYS | WS_BORDER | WS_GROUP | WS_TABSTOP,7,129,288,87
+    DEFPUSHBUTTON   "OK",IDOK,227,7,68,14,WS_GROUP
+    PUSHBUTTON      "Cancel",IDCANCEL,227,24,68,14
+END
+
+IDD_INPUT_PASSWORD_DIALOG DIALOG  0, 0, 186, 71
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Password"
+FONT 8, "MS Sans Serif"
+BEGIN
+    LTEXT           "'%s' is protected.",IDC_FILE_PROTECTED_STATIC,7,7,172,19
+    LTEXT           "&Password:",IDC_STATIC,7,32,34,8
+    EDITTEXT        IDC_PASSWORD_EDIT,43,30,136,12,ES_PASSWORD | ES_AUTOHSCROLL | WS_GROUP
+    DEFPUSHBUTTON   "OK",IDOK,73,50,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,129,50,50,14
+END
+
+IDD_DEFINE_PASSWORD_DIALOG DIALOG  0, 0, 186, 87
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Password"
+FONT 8, "MS Sans Serif"
+BEGIN
+    LTEXT           "Protect file '%s'.",IDC_FILE_PROTECTED_STATIC,7,7,172,19
+    LTEXT           "&Password:",IDC_STATIC,7,32,34,8
+    EDITTEXT        IDC_PASSWORD_EDIT,43,30,136,12,ES_PASSWORD | ES_AUTOHSCROLL | WS_GROUP
+    LTEXT           "&Confirm:",IDC_STATIC,7,48,26,8
+    EDITTEXT        IDC_CONFIRM_PASSWORD_EDIT,43,46,136,12,ES_PASSWORD | ES_AUTOHSCROLL | WS_GROUP
+    DEFPUSHBUTTON   "OK",IDOK,73,66,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,129,66,50,14
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Version
+//
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION 3,9,0,0
+ PRODUCTVERSION 3,9,0,0
+ FILEFLAGSMASK 0x3fL
+#ifdef _DEBUG
+ FILEFLAGS 0x1L
+#else
+ FILEFLAGS 0x0L
+#endif
+ FILEOS 0x4L
+ FILETYPE 0x1L
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904b0"
+        BEGIN
+            VALUE "Comments", "Image viewer with slide albums: [3.8] use image path keys; [3.9] ui::AutoImageSize"
+            VALUE "CompanyName", "Paul Cocoveanu"
+            VALUE "Email", "phc.2nd@gmail.com"
+            VALUE "FileDescription", "Slider Application"
+            VALUE "FileVersion", "3, 9, 0, 0"
+            VALUE "InternalName", "Slider"
+            VALUE "LegalCopyright", "Copyright (C) 2000-2017"
+            VALUE "LegalTrademarks", "Enjoy it mate."
+            VALUE "OriginalFilename", "Slider.exe"
+            VALUE "ProductName", "Slider Application"
+            VALUE "ProductVersion", "3, 9, 0, 0"
+            VALUE "WrittenBy", "Written by Paul Cocoveanu"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x409, 1200
+    END
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO 
+BEGIN
+    IDD_WORKSPACE_DIALOG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 339
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 195
+    END
+
+    IDD_ALBUMDIALOGBAR, DIALOG
+    BEGIN
+        LEFTMARGIN, 2
+        RIGHTMARGIN, 529
+        TOPMARGIN, 2
+        BOTTOMMARGIN, 14
+    END
+
+    IDD_ALBUM_SETTINGS_DIALOG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 360
+        TOPMARGIN, 2
+        BOTTOMMARGIN, 253
+    END
+
+    IDD_SEARCH_SPEC_DIALOG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 259
+        TOPMARGIN, 5
+        BOTTOMMARGIN, 98
+    END
+
+    IDD_FILE_MOVE_DIALOG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 271
+        TOPMARGIN, 5
+        BOTTOMMARGIN, 117
+    END
+
+    IDD_LOGGER_DIALOG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 206
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 59
+    END
+
+    IDD_LAYOUT_DIALOG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 179
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 88
+    END
+
+    IDD_UNDO_REDO_DIALOG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 193
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 184
+    END
+
+    IDD_ARCHIVE_IMAGES_DIALOG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 296
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 216
+    END
+
+    IDD_INPUT_PASSWORD_DIALOG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 179
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 64
+    END
+
+    IDD_DEFINE_PASSWORD_DIALOG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 179
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 80
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog Info
+//
+
+IDD_LOGGER_DIALOG DLGINIT
+BEGIN
+    IDC_LOGGER_COMBO, 0x403, 18, 0
+0x6d49, 0x6761, 0x2065, 0x6966, 0x656c, 0x6c20, 0x676f, 0x6567, 0x0072, 
+
+    IDC_LOGGER_COMBO, 0x403, 13, 0
+0x7645, 0x6e65, 0x2074, 0x6f6c, 0x6767, 0x7265, "\000" 
+    0
+END
+
+IDD_SEARCH_SPEC_DIALOG DLGINIT
+BEGIN
+    IDC_SEARCH_OPTIONS_COMBO, 0x403, 7, 0
+0x6f4e, 0x6d72, 0x6c61, "\000" 
+    IDC_SEARCH_OPTIONS_COMBO, 0x403, 24, 0
+0x6e49, 0x6c63, 0x6475, 0x2065, 0x7573, 0x2d62, 0x6964, 0x6572, 0x7463, 
+0x726f, 0x6569, 0x0073, 
+    IDC_SEARCH_OPTIONS_COMBO, 0x403, 44, 0
+0x7541, 0x6f74, 0x642d, 0x6f72, 0x2070, 0x6572, 0x6963, 0x6970, 0x6e65, 
+0x2074, 0x6628, 0x726f, 0x6e20, 0x6d75, 0x7265, 0x6369, 0x6620, 0x6c69, 
+0x6e65, 0x6d61, 0x7365, 0x0029, 
+    0
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// String Table
+//
+
+STRINGTABLE 
+BEGIN
+    IDR_MAINFRAME           "Slider"
+    IDR_ALBUMTYPE           "\nAlbum\nAlbum\nAlbums (*.sld;*.ias)\n.sld;.ias\nSliderAlbum.Document\nSlider Album Document"
+    IDR_IMAGETYPE           "\nImage\nImage\nImages (*.bmp)\n.bmp\nSliderImage.Document\nSlider Image Document"
+END
+
+STRINGTABLE 
+BEGIN
+    AFX_IDS_APP_TITLE       "Slider"
+    AFX_IDS_IDLEMESSAGE     "Ready"
+END
+
+STRINGTABLE 
+BEGIN
+    ID_INDICATOR_EXT        "EXT"
+    ID_INDICATOR_CAPS       "CAP"
+    ID_INDICATOR_NUM        "NUM"
+    ID_INDICATOR_SCRL       "SCRL"
+    ID_INDICATOR_OVR        "OVR"
+    ID_INDICATOR_REC        "REC"
+END
+
+STRINGTABLE 
+BEGIN
+    ID_FILE_NEW             "Create a new document\nNew Album (Ctrl+N)"
+    ID_FILE_OPEN            "Open an existing document\nOpen (Ctrl+O)"
+    ID_FILE_CLOSE           "Close the active document\nClose"
+    ID_FILE_SAVE            "Save the active document\nSave (Ctrl+S)"
+    ID_FILE_SAVE_AS         "Save the active document with a new name\nSave As"
+    ID_FILE_PAGE_SETUP      "Change the printing options\nPage Setup"
+    ID_FILE_PRINT_SETUP     "Change the printer and printing options\nPrint Setup"
+    ID_FILE_PRINT           "Print the active document\nPrint"
+    ID_FILE_PRINT_PREVIEW   "Display full pages\nPrint Preview"
+END
+
+STRINGTABLE 
+BEGIN
+    ID_APP_ABOUT            "Display program information, version number and copyright\nAbout"
+    ID_APP_EXIT             "Quit the application; prompts to save documents\nExit"
+END
+
+STRINGTABLE 
+BEGIN
+    ID_FILE_MRU_FILE1       "Open this document"
+    ID_FILE_MRU_FILE2       "Open this document"
+    ID_FILE_MRU_FILE3       "Open this document"
+    ID_FILE_MRU_FILE4       "Open this document"
+    ID_FILE_MRU_FILE5       "Open this document"
+    ID_FILE_MRU_FILE6       "Open this document"
+    ID_FILE_MRU_FILE7       "Open this document"
+    ID_FILE_MRU_FILE8       "Open this document"
+    ID_FILE_MRU_FILE9       "Open this document"
+    ID_FILE_MRU_FILE10      "Open this document"
+    ID_FILE_MRU_FILE11      "Open this document"
+    ID_FILE_MRU_FILE12      "Open this document"
+    ID_FILE_MRU_FILE13      "Open this document"
+    ID_FILE_MRU_FILE14      "Open this document"
+    ID_FILE_MRU_FILE15      "Open this document"
+    ID_FILE_MRU_FILE16      "Open this document"
+END
+
+STRINGTABLE 
+BEGIN
+    ID_NEXT_PANE            "Switch to the next window pane\nNext Pane"
+    ID_PREV_PANE            "Switch back to the previous window pane\nPrevious Pane"
+END
+
+STRINGTABLE 
+BEGIN
+    ID_WINDOW_NEW           "Open another window for the active document\nNew Window (Ctrl+Shift+N)"
+    ID_WINDOW_ARRANGE       "Arrange icons at the bottom of the window\nArrange Icons"
+    ID_WINDOW_CASCADE       "Arrange windows so they overlap\nCascade Windows"
+    ID_WINDOW_TILE_HORZ     "Arrange windows as non-overlapping tiles\nTile Windows"
+    ID_WINDOW_TILE_VERT     "Arrange windows as non-overlapping tiles\nTile Windows"
+    ID_WINDOW_SPLIT         "Split the active window into panes\nSplit"
+END
+
+STRINGTABLE 
+BEGIN
+    ID_EDIT_CLEAR           "Erase the selection\nErase"
+    ID_EDIT_CLEAR_ALL       "Erase everything\nErase All"
+    ID_EDIT_FIND            "Find the specified text\nFind"
+    ID_EDIT_REPEAT          "Repeat the last action\nRepeat"
+    ID_EDIT_REPLACE         "Replace specific text with different text\nReplace"
+    ID_EDIT_SELECT_ALL      "Select the entire document\nSelect All"
+END
+
+STRINGTABLE 
+BEGIN
+    ID_VIEW_TOOLBAR         "Show or hide the toolbar\nToggle ToolBar"
+    ID_VIEW_STATUS_BAR      "Show or hide the status bar\nToggle StatusBar"
+END
+
+STRINGTABLE 
+BEGIN
+    AFX_IDS_SCSIZE          "Change the window size"
+    AFX_IDS_SCMOVE          "Change the window position"
+    AFX_IDS_SCMINIMIZE      "Reduce the window to an icon"
+    AFX_IDS_SCMAXIMIZE      "Enlarge the window to full size"
+    AFX_IDS_SCNEXTWINDOW    "Switch to the next document window"
+    AFX_IDS_SCPREVWINDOW    "Switch to the previous document window"
+    AFX_IDS_SCCLOSE         "Close the active window and prompts to save the documents"
+END
+
+STRINGTABLE 
+BEGIN
+    AFX_IDS_SCRESTORE       "Restore the window to normal size"
+    AFX_IDS_SCTASKLIST      "Activate Task List"
+    AFX_IDS_MDICHILD        "Activate this window"
+END
+
+STRINGTABLE 
+BEGIN
+    AFX_IDS_PREVIEW_CLOSE   "Close print preview mode\nCancel Preview"
+END
+
+STRINGTABLE 
+BEGIN
+    IDW_SB_PROGRESS_CAPTION "<progress bar caption field>"
+    IDW_SB_PROGRESS_BAR     "<progress bar text>"
+    IDW_AUTO_IMAGE_SIZE_COMBO "Edit the auto image size mode\nAuto Image Size"
+    IDW_ZOOM_COMBO          "Zoom\nZoom (Ctrl+Z)"
+    IDW_NAV_SLIDER          "Navigation slider\nNavigation Slider"
+    CM_MDI_CLOSE_ALL        "Close all opened documents\nClose All"
+    CM_MDI_WINDOWS          "View opened window list\nView Windows"
+    ID_VIEW_ALBUMDIALOGBAR  "Show or hide album information bar\nToggle Album Info Bar"
+    CM_IMAGE_SIZE_AUTO_FIT_LARGE 
+                            "Shrink large images to best fit the view\nBest Fit (Large Only)"
+    CM_IMAGE_SIZE_AUTO_FIT_ALL 
+                            "Scale image for best fit in the view\nBest Fit (All)"
+    CM_IMAGE_SIZE_FIT_WIDTH "Scale image to fit the entire width in the view\nFit Width"
+    CM_IMAGE_SIZE_FIT_HEIGHT 
+                            "Scale image to fit the entire heigh in the view\nFit Height"
+END
+
+STRINGTABLE 
+BEGIN
+    CM_IMAGE_SIZE_ACTUAL_SIZE 
+                            "Display the image with the actual dimensions (using scroll bars)\nActual Size"
+    CM_IMAGE_SIZE_USE_ZOOM_PCT 
+                            "Scale the image with the current zoom level (using scroll bars)\nUse Zoom Level"
+    CM_ZOOM_NORMAL          "Zoom to actual image dimension (100%)\nZoom to 100%"
+    CM_ZOOM_IN              "Increase zoom factor\nZoom In"
+    CM_ZOOM_OUT             "Decrease zoom factor\nZoom Out"
+    CM_RESIZE_VIEW_TO_FIT   "Resize current view to fit entire image\nResize View to Fit"
+    CM_EDIT_ALBUM           "Edit album settings\nEdit Album Settings"
+    CM_NAV_PLAY             "Toggle auto sliding\nToggle Play (Space)"
+    CM_NAV_DIR_FWD          "Play in forward direction\nForward Direction"
+    CM_NAV_DIR_REV          "Play in reverse direction\nReverse Direction"
+    CM_NAV_BEGIN            "Move to first image\nFirst Image (Home)"
+END
+
+STRINGTABLE 
+BEGIN
+    CM_NAV_PREV             "Move to previous image\nPrevious Image (Up/Left Arrow)"
+    CM_NAV_NEXT             "Move to next image\nNext Image (Down/Right Arrow)"
+    CM_NAV_END              "Move to last image\nLast Image (End)"
+    CM_NAV_CIRCULAR         "Toggle circular navigation mode\nCircular Navigation"
+END
+
+STRINGTABLE 
+BEGIN
+    CM_SAVE_WORKSPACE       "Save current workspace to the workspace file\nSave Workspace"
+    CM_EDIT_WORKSPACE       "Edit current workspace settings\nWorkspace Settings"
+    CK_FULL_SCREEN          "Toggle between normal and full screen mode\nToggle Full Screen (F11)"
+    CM_TOGGLE_MAXIMIZE      "Toggle between maximize and restore modes\nMaximize/Restore"
+    CM_EDIT_BK_COLOR        "Edit image view background color\nBackground Color"
+    CK_SHOW_THUMB_VIEW      "Displays the thumbnail view\nShow Thumbnail View (Ctrl+Shift+T)"
+    CM_OPEN_IMAGE_FILE      "Opens the selected image file(s) as standalone images\nOpen Selected Images"
+    CM_DELETE_FILE          "Delete the file using shell operation\nDelete"
+    CM_DELETE_FILE_NO_UNDO  "Delete the file permanently using shell operation\nPermanent Delete"
+    CM_MOVE_FILE            "Move current image file to another folder\nMove File"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_ERROR_CANNOTEXPLORE "Cannot explore the selected file '%s'!\n\nFile does not exist."
+    IDS_ERROR_NOSELECTION   "No file currently selected!"
+    IDS_DROPONLYONEFOLDER   "You can only drop one destination folder into this dialog!"
+    IDS_PROMPT_KEEPTHUMBFILE 
+                            "The image folder no longer exist:\n%s\n\nDelete the associated folder thumbnail file?\n%s"
+    IDS_PROMPT_CORRUPTTHUMBFILE 
+                            "The thumbnail file ""%1"" is corrupt!\n\nDo you want to delete the thumbnail file?"
+    IDS_ERROR_INVALID_DEST_DIR "Invalid destination directory!"
+    IDS_PROMPT_SWITCHTOCUSTOMORDER 
+                            "Dou you want to switch to custom order for drop re-ordering?"
+    IDS_ERROR_FILE_COMMIT   "An error occured while %s files:\nfrom:\n%s\n\nto:\n%s\n\n\n""%s"""
+    IDS_PROMPT_INVALID_FOLDER 
+                            "Folder %s does not exist!\n\nDo you want to create it?"
+    IDS_PROMPT_REGENERATE_ALBUM "Do you want to regenerate the album?"
+    IDS_PROMPT_CANT_CREATE_DEST_FOLDER 
+                            "Cannot create destination folder:\n\n%s"
+    IDS_PROMPT_CREATED_DEST_FOLDER 
+                            "Destination folder successfully created!\n\n%s"
+    IDS_PROMPT_COPYMOVEFILEOP "Do you want to %s the file %s operation?"
+    IDS_FORMAT_PARSING_ERROR 
+                            "An error occured while parsing the format: %s!\n\n%s"
+    IDS_UNDOREDO_INVALID_FILE_PAIRS 
+                            "Unable to %s the %d %s operations out of %d due to file inconsistencies!\n\nDo you still want to perform the operation?"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_SLIDE_ALBUM_FILTER_SPEC "Slide Albums|*.sld"
+    IDS_ARCHIVE_STG_FILTER_SPEC "Archive Storages|*.ias;*.cid;*.icf"
+END
+
+STRINGTABLE 
+BEGIN
+    CM_EXPLORE_IMAGE        "Open Windows Explorer and select the current image file name\nExplore Image"
+    CM_CLEAR_IMAGE_CACHE    "Clear the image and thumbnail cache\nClear Image and Thumbnail Cache (Ctrl+F5)"
+    CM_REFRESH_CONTENT      "Refresh current content\nRefresh Content (F5)"
+    CM_DROP_MOVE_IMAGE      "Move and rename the dropped image file\nMove and Rename Image File"
+    CM_DROP_COPY_IMAGE      "Copy and rename the dropped image file\nCopy and Rename Image File"
+    CM_CANCEL_DROP          "Cancel the drop operation\nCancel Drop"
+    CM_AUTO_DROP_DEFRAGMENT "Renames files in an auto-drop recipient to ensure contiguos numeric filename\nDefragment Image Files"
+    CM_AUTO_DROP_UNDO       "Undo the last set of file operations\nUndo File Operation"
+    CM_AUTO_DROP_REDO       "Redo the last set of undone file operations\nRedo File Operation"
+    CM_AUTO_DROP_CLEAR_UNDO_REDO_STACKS 
+                            "Clear the Undo and Redo buffer\nClear Undo/Redo Buffer"
+    CM_REGENERATE_ALBUM     "Regenerates the files in the current album using the search specifiers' criteria\nRegenerate Album"
+    CM_IS_AUTO_DROP         "Toggle this album as auto-drop recipient (four digit numeric filenames only)\tAuto Drop Recipient"
+    CM_ARCHIVE_IMAGES       "Archive the image files in an album\nArchive Images"
+END
+
+STRINGTABLE 
+BEGIN
+    IDC_SCROLL_POS_EDIT     "Index of the current slide image\nSlide Image Index"
+    IDC_CURR_FILE_EDIT      "Full path name of the current image file\nImage File Path"
+    IDC_NAV_COUNT_STATIC    "The total number of images in this album\nTotal Image Count"
+    IDC_PLAY_DELAY_COMBO    "Set the delay in seconds for animated album play\nPlay Animation Delay (seconds)"
+END
+
+STRINGTABLE 
+BEGIN
+    IDC_FOUND_FILES_LISTVIEW 
+                            "File Name=-1|In Folder=200|Dimensions=75|Size=55|Date=120"
+END
+
+STRINGTABLE 
+BEGIN
+    CM_CUSTOM_ORDER_UNDO    "Undo the last drop reorder operation\nUndo Custom Order Operation"
+    CM_CUSTOM_ORDER_REDO    "Redo the last drop reorder operation\nRedo Custom Order Operation"
+    CM_CLEAR_CUSTOM_ORDER_UNDO_REDO_STACKS 
+                            "Clear the file operation undo and redo buffer\nClear File Operation Undo Buffer"
+    CK_SAVE_CU_UNDO_REDO_BUFFER 
+                            "Stores in album file the undo/redo information for file re-ordering, copying and moving\nStore Undo/Redo Buffer"
+    ID_FILE_OPEN_ALBUM_FOLDER 
+                            "Open folder in a new album\nOpen Album Folder (Ctrl+Shift+O)"
+    ID_EDIT_ARCHIVE_PASSWORD 
+                            "Edit password in image archive storage\nEdit Password"
+END
+
+STRINGTABLE 
+BEGIN
+    IDC_FILE_PATHS_LIST     "Source Folder|Source Filename|Destination Filename"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_DELETE_ATTR_PROMPT  "Are you sure you want to delete the path below ?\n\n%s"
+    IDS_REPLACE_DUP_PROMPT  "The search attribute path already exists!\n%s\n\nDo you want to replace it ?"
+    IDS_HELP_MESSAGE        "Slider command line options:\n\nslider [/R[-]] [/F[-]] [/X[-]] [/T[-]] [/S[-]] [/?] [image_file] [image_folder]\n\n    /R\tRegister slider additional shell extensions.\n    /F\tOpen slider window in full screen mode.\n    /X\tOpen slider window maximized.\n    /T\tOpen slider window with toolbar displayed.\n    /S\tOpen slider window with status-bar displayed.\n    /?\tDisplay this help message.\n\n    image_file\tOne or many image file(s).\n    image_folder\tFolder to search images for.\n\n    Note:\tIf [-] suffix is specified, than the specified option is switched off.\n"
+    IDS_NO_DIR_SEARCH_SPEC  "In order to enable the ""Auto Drop Recipient"" feature, you must have one valid directory search path specifier ""Auto-drop numeric filenames"" option selected!"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_OVERWRITE_PROMPT    "The file ""%s"" already exists!\n\nDo you want to overwrite it?"
+    IDS_INVALID_FORMAT_FMT  "Invalid format: %s\n\nA valid format must contain numeric or wildcards specs in the filename part."
+    IDS_PROMPT_FILE_OP      "Are you sure you want to %s %d files to destination:\n\n%s ?\n\n"
+END
+
+#endif    // English (U.S.) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+#include "utl/utl_ui.rc"
+#include "res\Slider.rc2"  // non-Microsoft Visual C++ edited resources
+
+
+#define _AFX_NO_SPLITTER_RESOURCES
+#define _AFX_NO_OLE_RESOURCES
+#define _AFX_NO_TRACKER_RESOURCES
+#define _AFX_NO_PROPERTY_RESOURCES
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+#ifdef _WIN32
+LANGUAGE 9, 1
+#pragma code_page(1252)
+#endif //_WIN32
+#include "afxres.rc"         // Standard components
+#include "afxprint.rc"       // printing/print preview resources
+#endif
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+

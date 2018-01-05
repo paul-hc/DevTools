@@ -1,0 +1,794 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd;cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="utl">
+      <UniqueIdentifier>{d38ded75-f931-46b5-946b-d748d5cc9d7e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="utl_ui">
+      <UniqueIdentifier>{61186fd2-c4b4-47e0-a20b-730dd0c6e32e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="utl_ut">
+      <UniqueIdentifier>{024ac24f-2026-4af9-8be8-1b2e0e607b41}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="utl\File System">
+      <UniqueIdentifier>{f79bb196-8c2a-4f5f-8c61-122350cd8913}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="utl_ui\Shell %28Explorer API%29">
+      <UniqueIdentifier>{b530b84d-3d32-4f43-a00b-3bf7ac6592a8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="utl_ui\Drag and Drop %28OLE%29">
+      <UniqueIdentifier>{e524d267-e1cc-448d-b600-668002f0c086}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="utl_ui\Imaging">
+      <UniqueIdentifier>{13069f16-0c88-4408-85f8-7d098b146615}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="stdafx.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="targetver.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="AboutBox.h">
+      <Filter>utl_ui</Filter>
+    </ClInclude>
+    <ClInclude Include="AccelTable.h">
+      <Filter>utl_ui</Filter>
+    </ClInclude>
+    <ClInclude Include="BaseApp.h">
+      <Filter>utl_ui</Filter>
+    </ClInclude>
+    <ClInclude Include="BaseApp.hxx">
+      <Filter>utl_ui</Filter>
+    </ClInclude>
+    <ClInclude Include="BaseDetailHostCtrl.h">
+      <Filter>utl_ui</Filter>
+    </ClInclude>
+    <ClInclude Include="BaseMainDialog.h">
+      <Filter>utl_ui</Filter>
+    </ClInclude>
+    <ClInclude Include="BasePopupDialog.h">
+      <Filter>utl_ui</Filter>
+    </ClInclude>
+    <ClInclude Include="BaseSplitButton.h">
+      <Filter>utl_ui</Filter>
+    </ClInclude>
+    <ClInclude Include="BaseStatic.h">
+      <Filter>utl_ui</Filter>
+    </ClInclude>
+    <ClInclude Include="BaseToolbar.h">
+      <Filter>utl_ui</Filter>
+    </ClInclude>
+    <ClInclude Include="BatchTransactions.h">
+      <Filter>utl_ui</Filter>
+    </ClInclude>
+    <ClInclude Include="CmdInfoStore.h">
+      <Filter>utl_ui</Filter>
+    </ClInclude>
+    <ClInclude Include="CommonWinDefs.h">
+      <Filter>utl_ui</Filter>
+    </ClInclude>
+    <ClInclude Include="CtrlUiState.h">
+      <Filter>utl_ui</Filter>
+    </ClInclude>
+    <ClInclude Include="DesktopDC.h">
+      <Filter>utl_ui</Filter>
+    </ClInclude>
+    <ClInclude Include="Dialog_fwd.h">
+      <Filter>utl_ui</Filter>
+    </ClInclude>
+    <ClInclude Include="DialogToolBar.h">
+      <Filter>utl_ui</Filter>
+    </ClInclude>
+    <ClInclude Include="EnumSplitButton.h">
+      <Filter>utl_ui</Filter>
+    </ClInclude>
+    <ClInclude Include="GroupIcon.h">
+      <Filter>utl_ui</Filter>
+    </ClInclude>
+    <ClInclude Include="HistoryComboBox.h">
+      <Filter>utl_ui</Filter>
+    </ClInclude>
+    <ClInclude Include="IconButton.h">
+      <Filter>utl_ui</Filter>
+    </ClInclude>
+    <ClInclude Include="InternalChange.h">
+      <Filter>utl_ui</Filter>
+    </ClInclude>
+    <ClInclude Include="ItemContent.h">
+      <Filter>utl_ui</Filter>
+    </ClInclude>
+    <ClInclude Include="ItemContentEdit.h">
+      <Filter>utl_ui</Filter>
+    </ClInclude>
+    <ClInclude Include="ItemListDialog.h">
+      <Filter>utl_ui</Filter>
+    </ClInclude>
+    <ClInclude Include="LayoutBasePropertySheet.h">
+      <Filter>utl_ui</Filter>
+    </ClInclude>
+    <ClInclude Include="LayoutChildPropertySheet.h">
+      <Filter>utl_ui</Filter>
+    </ClInclude>
+    <ClInclude Include="LayoutDialog.h">
+      <Filter>utl_ui</Filter>
+    </ClInclude>
+    <ClInclude Include="LayoutEngine.h">
+      <Filter>utl_ui</Filter>
+    </ClInclude>
+    <ClInclude Include="LayoutFormView.h">
+      <Filter>utl_ui</Filter>
+    </ClInclude>
+    <ClInclude Include="LayoutMetrics.h">
+      <Filter>utl_ui</Filter>
+    </ClInclude>
+    <ClInclude Include="LayoutPropertyPage.h">
+      <Filter>utl_ui</Filter>
+    </ClInclude>
+    <ClInclude Include="LayoutPropertySheet.h">
+      <Filter>utl_ui</Filter>
+    </ClInclude>
+    <ClInclude Include="LogPalette.h">
+      <Filter>utl_ui</Filter>
+    </ClInclude>
+    <ClInclude Include="MemoryDC.h">
+      <Filter>utl_ui</Filter>
+    </ClInclude>
+    <ClInclude Include="MenuUtilities.h">
+      <Filter>utl_ui</Filter>
+    </ClInclude>
+    <ClInclude Include="NumericEdit.h">
+      <Filter>utl_ui</Filter>
+    </ClInclude>
+    <ClInclude Include="PopupSplitButton.h">
+      <Filter>utl_ui</Filter>
+    </ClInclude>
+    <ClInclude Include="Registry.h">
+      <Filter>utl_ui</Filter>
+    </ClInclude>
+    <ClInclude Include="ReportListControl.h">
+      <Filter>utl_ui</Filter>
+    </ClInclude>
+    <ClInclude Include="ResourceData.h">
+      <Filter>utl_ui</Filter>
+    </ClInclude>
+    <ClInclude Include="ScopedGdi.h">
+      <Filter>utl_ui</Filter>
+    </ClInclude>
+    <ClInclude Include="ShellUtilities.h">
+      <Filter>utl_ui</Filter>
+    </ClInclude>
+    <ClInclude Include="SpinEdit.h">
+      <Filter>utl_ui</Filter>
+    </ClInclude>
+    <ClInclude Include="SpinTargetButton.h">
+      <Filter>utl_ui</Filter>
+    </ClInclude>
+    <ClInclude Include="SplitPushButton.h">
+      <Filter>utl_ui</Filter>
+    </ClInclude>
+    <ClInclude Include="TextEdit.h">
+      <Filter>utl_ui</Filter>
+    </ClInclude>
+    <ClInclude Include="Color.h">
+      <Filter>utl</Filter>
+    </ClInclude>
+    <ClInclude Include="CommonDefs.h">
+      <Filter>utl</Filter>
+    </ClInclude>
+    <ClInclude Include="ComparePredicates.h">
+      <Filter>utl</Filter>
+    </ClInclude>
+    <ClInclude Include="ContainerUtilities.h">
+      <Filter>utl</Filter>
+    </ClInclude>
+    <ClInclude Include="EnumTags.h">
+      <Filter>utl</Filter>
+    </ClInclude>
+    <ClInclude Include="ISubject.h">
+      <Filter>utl</Filter>
+    </ClInclude>
+    <ClInclude Include="Logger.h">
+      <Filter>utl</Filter>
+    </ClInclude>
+    <ClInclude Include="Path.h">
+      <Filter>utl</Filter>
+    </ClInclude>
+    <ClInclude Include="Range.h">
+      <Filter>utl</Filter>
+    </ClInclude>
+    <ClInclude Include="RuntimeException.h">
+      <Filter>utl</Filter>
+    </ClInclude>
+    <ClInclude Include="ScopedValue.h">
+      <Filter>utl</Filter>
+    </ClInclude>
+    <ClInclude Include="StdColors.h">
+      <Filter>utl</Filter>
+    </ClInclude>
+    <ClInclude Include="StdStl.h">
+      <Filter>utl</Filter>
+    </ClInclude>
+    <ClInclude Include="StringBase.h">
+      <Filter>utl</Filter>
+    </ClInclude>
+    <ClInclude Include="StringUtilities.h">
+      <Filter>utl</Filter>
+    </ClInclude>
+    <ClInclude Include="SubjectPredicates.h">
+      <Filter>utl</Filter>
+    </ClInclude>
+    <ClInclude Include="TextFileParser.h">
+      <Filter>utl</Filter>
+    </ClInclude>
+    <ClInclude Include="Timer.h">
+      <Filter>utl</Filter>
+    </ClInclude>
+    <ClInclude Include="TokenIterator.h">
+      <Filter>utl</Filter>
+    </ClInclude>
+    <ClInclude Include="utl.h">
+      <Filter>utl</Filter>
+    </ClInclude>
+    <ClInclude Include="ThemeItem.h">
+      <Filter>utl_ui</Filter>
+    </ClInclude>
+    <ClInclude Include="ThemeStatic.h">
+      <Filter>utl_ui</Filter>
+    </ClInclude>
+    <ClInclude Include="ToolStrip.h">
+      <Filter>utl_ui</Filter>
+    </ClInclude>
+    <ClInclude Include="TooltipsHook.h">
+      <Filter>utl_ui</Filter>
+    </ClInclude>
+    <ClInclude Include="TrackStatic.h">
+      <Filter>utl_ui</Filter>
+    </ClInclude>
+    <ClInclude Include="TreeControl.h">
+      <Filter>utl_ui</Filter>
+    </ClInclude>
+    <ClInclude Include="Utilities.h">
+      <Filter>utl_ui</Filter>
+    </ClInclude>
+    <ClInclude Include="UtilitiesEx.h">
+      <Filter>utl_ui</Filter>
+    </ClInclude>
+    <ClInclude Include="VersionInfo.h">
+      <Filter>utl_ui</Filter>
+    </ClInclude>
+    <ClInclude Include="VisualTheme.h">
+      <Filter>utl_ui</Filter>
+    </ClInclude>
+    <ClInclude Include="VisualThemeFallback.h">
+      <Filter>utl_ui</Filter>
+    </ClInclude>
+    <ClInclude Include="vsstyle.h">
+      <Filter>utl_ui</Filter>
+    </ClInclude>
+    <ClInclude Include="WindowHook.h">
+      <Filter>utl_ui</Filter>
+    </ClInclude>
+    <ClInclude Include="WindowTimer.h">
+      <Filter>utl_ui</Filter>
+    </ClInclude>
+    <ClInclude Include="GpUtilities.h">
+      <Filter>utl_ui</Filter>
+    </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>Resource Files</Filter>
+    </ClInclude>
+    <ClInclude Include="UnitTest.h">
+      <Filter>utl_ut</Filter>
+    </ClInclude>
+    <ClInclude Include="BaseDetailHostCtrl.hxx">
+      <Filter>utl_ui</Filter>
+    </ClInclude>
+    <ClInclude Include="ItemContentHistoryCombo.h">
+      <Filter>utl_ui</Filter>
+    </ClInclude>
+    <ClInclude Include="MultiZone.h">
+      <Filter>utl_ui</Filter>
+    </ClInclude>
+    <ClInclude Include="Pixel.h">
+      <Filter>utl_ui</Filter>
+    </ClInclude>
+    <ClInclude Include="SampleView.h">
+      <Filter>utl_ui</Filter>
+    </ClInclude>
+    <ClInclude Include="ScopedBitmapMemDC.h">
+      <Filter>utl_ui</Filter>
+    </ClInclude>
+    <ClInclude Include="TextEditor.h">
+      <Filter>utl_ui</Filter>
+    </ClInclude>
+    <ClInclude Include="ui_fwd.h">
+      <Filter>utl_ui</Filter>
+    </ClInclude>
+    <ClInclude Include="UtlTests.h">
+      <Filter>utl_ut</Filter>
+    </ClInclude>
+    <ClInclude Include="BaseImageTestCase.h">
+      <Filter>utl_ut</Filter>
+    </ClInclude>
+    <ClInclude Include="FileSystemTests.h">
+      <Filter>utl_ut</Filter>
+    </ClInclude>
+    <ClInclude Include="PathGeneratorTests.h">
+      <Filter>utl_ut</Filter>
+    </ClInclude>
+    <ClInclude Include="ResequenceTests.h">
+      <Filter>utl_ut</Filter>
+    </ClInclude>
+    <ClInclude Include="TestToolWnd.h">
+      <Filter>utl_ut</Filter>
+    </ClInclude>
+    <ClInclude Include="WicImageTests.h">
+      <Filter>utl_ut</Filter>
+    </ClInclude>
+    <ClInclude Include="FileSystem.h">
+      <Filter>utl\File System</Filter>
+    </ClInclude>
+    <ClInclude Include="FlagTags.h">
+      <Filter>utl</Filter>
+    </ClInclude>
+    <ClInclude Include="StructuredStorage.h">
+      <Filter>utl_ui\Shell %28Explorer API%29</Filter>
+    </ClInclude>
+    <ClInclude Include="PathFormatter.h">
+      <Filter>utl\File System</Filter>
+    </ClInclude>
+    <ClInclude Include="PathGenerator.h">
+      <Filter>utl\File System</Filter>
+    </ClInclude>
+    <ClInclude Include="PathMaker.h">
+      <Filter>utl\File System</Filter>
+    </ClInclude>
+    <ClInclude Include="Clipboard.h">
+      <Filter>utl_ui\Drag and Drop %28OLE%29</Filter>
+    </ClInclude>
+    <ClInclude Include="OleDataSource.h">
+      <Filter>utl_ui\Drag and Drop %28OLE%29</Filter>
+    </ClInclude>
+    <ClInclude Include="OleDragDrop_fwd.h">
+      <Filter>utl_ui\Drag and Drop %28OLE%29</Filter>
+    </ClInclude>
+    <ClInclude Include="OleDropSource.h">
+      <Filter>utl_ui\Drag and Drop %28OLE%29</Filter>
+    </ClInclude>
+    <ClInclude Include="OleDropTarget.h">
+      <Filter>utl_ui\Drag and Drop %28OLE%29</Filter>
+    </ClInclude>
+    <ClInclude Include="OleUtils.h">
+      <Filter>utl_ui\Drag and Drop %28OLE%29</Filter>
+    </ClInclude>
+    <ClInclude Include="Shell_fwd.h">
+      <Filter>utl_ui\Shell %28Explorer API%29</Filter>
+    </ClInclude>
+    <ClInclude Include="ShellDragImager.h">
+      <Filter>utl_ui\Shell %28Explorer API%29</Filter>
+    </ClInclude>
+    <ClInclude Include="ShellDropTip.h">
+      <Filter>utl_ui\Shell %28Explorer API%29</Filter>
+    </ClInclude>
+    <ClInclude Include="ShellFileDialog.h">
+      <Filter>utl_ui\Shell %28Explorer API%29</Filter>
+    </ClInclude>
+    <ClInclude Include="WinExplorer.h">
+      <Filter>utl_ui\Shell %28Explorer API%29</Filter>
+    </ClInclude>
+    <ClInclude Include="FlexPath.h">
+      <Filter>utl\File System</Filter>
+    </ClInclude>
+    <ClInclude Include="UserReport.h">
+      <Filter>utl_ui</Filter>
+    </ClInclude>
+    <ClInclude Include="MfcUtilities.h">
+      <Filter>utl_ui</Filter>
+    </ClInclude>
+    <ClInclude Include="ImagePathKey.h">
+      <Filter>utl_ui\Imaging</Filter>
+    </ClInclude>
+    <ClInclude Include="DibDraw.h">
+      <Filter>utl_ui\Imaging</Filter>
+    </ClInclude>
+    <ClInclude Include="DibPixels.h">
+      <Filter>utl_ui\Imaging</Filter>
+    </ClInclude>
+    <ClInclude Include="DibSection.h">
+      <Filter>utl_ui\Imaging</Filter>
+    </ClInclude>
+    <ClInclude Include="Icon.h">
+      <Filter>utl_ui\Imaging</Filter>
+    </ClInclude>
+    <ClInclude Include="Image_fwd.h">
+      <Filter>utl_ui\Imaging</Filter>
+    </ClInclude>
+    <ClInclude Include="ImageProxy.h">
+      <Filter>utl_ui\Imaging</Filter>
+    </ClInclude>
+    <ClInclude Include="ImageStore.h">
+      <Filter>utl_ui\Imaging</Filter>
+    </ClInclude>
+    <ClInclude Include="Imaging.h">
+      <Filter>utl_ui\Imaging</Filter>
+    </ClInclude>
+    <ClInclude Include="ImagingDirect2D.h">
+      <Filter>utl_ui\Imaging</Filter>
+    </ClInclude>
+    <ClInclude Include="ImagingGdiPlus.h">
+      <Filter>utl_ui\Imaging</Filter>
+    </ClInclude>
+    <ClInclude Include="ImagingWic.h">
+      <Filter>utl_ui\Imaging</Filter>
+    </ClInclude>
+    <ClInclude Include="ImagingWic_fwd.h">
+      <Filter>utl_ui\Imaging</Filter>
+    </ClInclude>
+    <ClInclude Include="ThrowMode.h">
+      <Filter>utl</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="stdafx.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="AboutBox.cpp">
+      <Filter>utl_ui</Filter>
+    </ClCompile>
+    <ClCompile Include="AccelTable.cpp">
+      <Filter>utl_ui</Filter>
+    </ClCompile>
+    <ClCompile Include="BaseDetailHostCtrl.cpp">
+      <Filter>utl_ui</Filter>
+    </ClCompile>
+    <ClCompile Include="BaseMainDialog.cpp">
+      <Filter>utl_ui</Filter>
+    </ClCompile>
+    <ClCompile Include="BasePopupDialog.cpp">
+      <Filter>utl_ui</Filter>
+    </ClCompile>
+    <ClCompile Include="BaseSplitButton.cpp">
+      <Filter>utl_ui</Filter>
+    </ClCompile>
+    <ClCompile Include="BaseStatic.cpp">
+      <Filter>utl_ui</Filter>
+    </ClCompile>
+    <ClCompile Include="BaseToolbar.cpp">
+      <Filter>utl_ui</Filter>
+    </ClCompile>
+    <ClCompile Include="BatchTransactions.cpp">
+      <Filter>utl_ui</Filter>
+    </ClCompile>
+    <ClCompile Include="CmdInfoStore.cpp">
+      <Filter>utl_ui</Filter>
+    </ClCompile>
+    <ClCompile Include="CtrlUiState.cpp">
+      <Filter>utl_ui</Filter>
+    </ClCompile>
+    <ClCompile Include="DesktopDC.cpp">
+      <Filter>utl_ui</Filter>
+    </ClCompile>
+    <ClCompile Include="DialogToolBar.cpp">
+      <Filter>utl_ui</Filter>
+    </ClCompile>
+    <ClCompile Include="EnumSplitButton.cpp">
+      <Filter>utl_ui</Filter>
+    </ClCompile>
+    <ClCompile Include="GroupIcon.cpp">
+      <Filter>utl_ui</Filter>
+    </ClCompile>
+    <ClCompile Include="HistoryComboBox.cpp">
+      <Filter>utl_ui</Filter>
+    </ClCompile>
+    <ClCompile Include="IconButton.cpp">
+      <Filter>utl_ui</Filter>
+    </ClCompile>
+    <ClCompile Include="ItemContent.cpp">
+      <Filter>utl_ui</Filter>
+    </ClCompile>
+    <ClCompile Include="ItemContentEdit.cpp">
+      <Filter>utl_ui</Filter>
+    </ClCompile>
+    <ClCompile Include="ItemListDialog.cpp">
+      <Filter>utl_ui</Filter>
+    </ClCompile>
+    <ClCompile Include="LayoutBasePropertySheet.cpp">
+      <Filter>utl_ui</Filter>
+    </ClCompile>
+    <ClCompile Include="LayoutChildPropertySheet.cpp">
+      <Filter>utl_ui</Filter>
+    </ClCompile>
+    <ClCompile Include="LayoutDialog.cpp">
+      <Filter>utl_ui</Filter>
+    </ClCompile>
+    <ClCompile Include="LayoutEngine.cpp">
+      <Filter>utl_ui</Filter>
+    </ClCompile>
+    <ClCompile Include="LayoutFormView.cpp">
+      <Filter>utl_ui</Filter>
+    </ClCompile>
+    <ClCompile Include="LayoutMetrics.cpp">
+      <Filter>utl_ui</Filter>
+    </ClCompile>
+    <ClCompile Include="LayoutPropertyPage.cpp">
+      <Filter>utl_ui</Filter>
+    </ClCompile>
+    <ClCompile Include="LayoutPropertySheet.cpp">
+      <Filter>utl_ui</Filter>
+    </ClCompile>
+    <ClCompile Include="LogPalette.cpp">
+      <Filter>utl_ui</Filter>
+    </ClCompile>
+    <ClCompile Include="MemoryDC.cpp">
+      <Filter>utl_ui</Filter>
+    </ClCompile>
+    <ClCompile Include="MenuUtilities.cpp">
+      <Filter>utl_ui</Filter>
+    </ClCompile>
+    <ClCompile Include="PopupSplitButton.cpp">
+      <Filter>utl_ui</Filter>
+    </ClCompile>
+    <ClCompile Include="Registry.cpp">
+      <Filter>utl_ui</Filter>
+    </ClCompile>
+    <ClCompile Include="ReportListControl.cpp">
+      <Filter>utl_ui</Filter>
+    </ClCompile>
+    <ClCompile Include="ResourceData.cpp">
+      <Filter>utl_ui</Filter>
+    </ClCompile>
+    <ClCompile Include="ShellUtilities.cpp">
+      <Filter>utl_ui</Filter>
+    </ClCompile>
+    <ClCompile Include="SpinEdit.cpp">
+      <Filter>utl_ui</Filter>
+    </ClCompile>
+    <ClCompile Include="SpinTargetButton.cpp">
+      <Filter>utl_ui</Filter>
+    </ClCompile>
+    <ClCompile Include="SplitPushButton.cpp">
+      <Filter>utl_ui</Filter>
+    </ClCompile>
+    <ClCompile Include="TextEdit.cpp">
+      <Filter>utl_ui</Filter>
+    </ClCompile>
+    <ClCompile Include="Color.cpp">
+      <Filter>utl</Filter>
+    </ClCompile>
+    <ClCompile Include="EnumTags.cpp">
+      <Filter>utl</Filter>
+    </ClCompile>
+    <ClCompile Include="Logger.cpp">
+      <Filter>utl</Filter>
+    </ClCompile>
+    <ClCompile Include="Path.cpp">
+      <Filter>utl</Filter>
+    </ClCompile>
+    <ClCompile Include="RuntimeException.cpp">
+      <Filter>utl</Filter>
+    </ClCompile>
+    <ClCompile Include="StringBase.cpp">
+      <Filter>utl</Filter>
+    </ClCompile>
+    <ClCompile Include="StringIntuitiveCompare.cpp">
+      <Filter>utl</Filter>
+    </ClCompile>
+    <ClCompile Include="StringUtilities.cpp">
+      <Filter>utl</Filter>
+    </ClCompile>
+    <ClCompile Include="TextFileParser.cpp">
+      <Filter>utl</Filter>
+    </ClCompile>
+    <ClCompile Include="TokenIterator.cpp">
+      <Filter>utl</Filter>
+    </ClCompile>
+    <ClCompile Include="ThemeItem.cpp">
+      <Filter>utl_ui</Filter>
+    </ClCompile>
+    <ClCompile Include="ThemeStatic.cpp">
+      <Filter>utl_ui</Filter>
+    </ClCompile>
+    <ClCompile Include="ToolStrip.cpp">
+      <Filter>utl_ui</Filter>
+    </ClCompile>
+    <ClCompile Include="TooltipsHook.cpp">
+      <Filter>utl_ui</Filter>
+    </ClCompile>
+    <ClCompile Include="TrackStatic.cpp">
+      <Filter>utl_ui</Filter>
+    </ClCompile>
+    <ClCompile Include="TreeControl.cpp">
+      <Filter>utl_ui</Filter>
+    </ClCompile>
+    <ClCompile Include="Utilities.cpp">
+      <Filter>utl_ui</Filter>
+    </ClCompile>
+    <ClCompile Include="UtilitiesEx.cpp">
+      <Filter>utl_ui</Filter>
+    </ClCompile>
+    <ClCompile Include="VersionInfo.cpp">
+      <Filter>utl_ui</Filter>
+    </ClCompile>
+    <ClCompile Include="VisualTheme.cpp">
+      <Filter>utl_ui</Filter>
+    </ClCompile>
+    <ClCompile Include="VisualThemeFallback.cpp">
+      <Filter>utl_ui</Filter>
+    </ClCompile>
+    <ClCompile Include="WindowHook.cpp">
+      <Filter>utl_ui</Filter>
+    </ClCompile>
+    <ClCompile Include="WindowTimer.cpp">
+      <Filter>utl_ui</Filter>
+    </ClCompile>
+    <ClCompile Include="UnitTest.cpp">
+      <Filter>utl_ut</Filter>
+    </ClCompile>
+    <ClCompile Include="ItemContentHistoryCombo.cpp">
+      <Filter>utl_ui</Filter>
+    </ClCompile>
+    <ClCompile Include="MultiZone.cpp">
+      <Filter>utl_ui</Filter>
+    </ClCompile>
+    <ClCompile Include="SampleView.cpp">
+      <Filter>utl_ui</Filter>
+    </ClCompile>
+    <ClCompile Include="TextEditor.cpp">
+      <Filter>utl_ui</Filter>
+    </ClCompile>
+    <ClCompile Include="UtlTests.cpp">
+      <Filter>utl_ut</Filter>
+    </ClCompile>
+    <ClCompile Include="BaseImageTestCase.cpp">
+      <Filter>utl_ut</Filter>
+    </ClCompile>
+    <ClCompile Include="FileSystemTests.cpp">
+      <Filter>utl_ut</Filter>
+    </ClCompile>
+    <ClCompile Include="PathGeneratorTests.cpp">
+      <Filter>utl_ut</Filter>
+    </ClCompile>
+    <ClCompile Include="ResequenceTests.cpp">
+      <Filter>utl_ut</Filter>
+    </ClCompile>
+    <ClCompile Include="TestToolWnd.cpp">
+      <Filter>utl_ut</Filter>
+    </ClCompile>
+    <ClCompile Include="WicImageTests.cpp">
+      <Filter>utl_ut</Filter>
+    </ClCompile>
+    <ClCompile Include="BaseApp.cpp">
+      <Filter>utl_ui</Filter>
+    </ClCompile>
+    <ClCompile Include="FileSystem.cpp">
+      <Filter>utl\File System</Filter>
+    </ClCompile>
+    <ClCompile Include="FlagTags.cpp">
+      <Filter>utl</Filter>
+    </ClCompile>
+    <ClCompile Include="StructuredStorage.cpp">
+      <Filter>utl_ui\Shell %28Explorer API%29</Filter>
+    </ClCompile>
+    <ClCompile Include="PathFormatter.cpp">
+      <Filter>utl\File System</Filter>
+    </ClCompile>
+    <ClCompile Include="PathGenerator.cpp">
+      <Filter>utl\File System</Filter>
+    </ClCompile>
+    <ClCompile Include="PathMaker.cpp">
+      <Filter>utl\File System</Filter>
+    </ClCompile>
+    <ClCompile Include="Clipboard.cpp">
+      <Filter>utl_ui\Drag and Drop %28OLE%29</Filter>
+    </ClCompile>
+    <ClCompile Include="OleDataSource.cpp">
+      <Filter>utl_ui\Drag and Drop %28OLE%29</Filter>
+    </ClCompile>
+    <ClCompile Include="OleDragDrop_fwd.cpp">
+      <Filter>utl_ui\Drag and Drop %28OLE%29</Filter>
+    </ClCompile>
+    <ClCompile Include="OleDropSource.cpp">
+      <Filter>utl_ui\Drag and Drop %28OLE%29</Filter>
+    </ClCompile>
+    <ClCompile Include="OleDropTarget.cpp">
+      <Filter>utl_ui\Drag and Drop %28OLE%29</Filter>
+    </ClCompile>
+    <ClCompile Include="OleUtils.cpp">
+      <Filter>utl_ui\Drag and Drop %28OLE%29</Filter>
+    </ClCompile>
+    <ClCompile Include="ShellDragImager.cpp">
+      <Filter>utl_ui\Shell %28Explorer API%29</Filter>
+    </ClCompile>
+    <ClCompile Include="ShellDropTip.cpp">
+      <Filter>utl_ui\Shell %28Explorer API%29</Filter>
+    </ClCompile>
+    <ClCompile Include="ShellFileDialog.cpp">
+      <Filter>utl_ui\Shell %28Explorer API%29</Filter>
+    </ClCompile>
+    <ClCompile Include="WinExplorer.cpp">
+      <Filter>utl_ui\Shell %28Explorer API%29</Filter>
+    </ClCompile>
+    <ClCompile Include="FlexPath.cpp">
+      <Filter>utl\File System</Filter>
+    </ClCompile>
+    <ClCompile Include="UserReport.cpp">
+      <Filter>utl_ui</Filter>
+    </ClCompile>
+    <ClCompile Include="MfcUtilities.cpp">
+      <Filter>utl_ui</Filter>
+    </ClCompile>
+    <ClCompile Include="DibDraw.cpp">
+      <Filter>utl_ui\Imaging</Filter>
+    </ClCompile>
+    <ClCompile Include="DibPixels.cpp">
+      <Filter>utl_ui\Imaging</Filter>
+    </ClCompile>
+    <ClCompile Include="DibSection.cpp">
+      <Filter>utl_ui\Imaging</Filter>
+    </ClCompile>
+    <ClCompile Include="Icon.cpp">
+      <Filter>utl_ui\Imaging</Filter>
+    </ClCompile>
+    <ClCompile Include="Image_fwd.cpp">
+      <Filter>utl_ui\Imaging</Filter>
+    </ClCompile>
+    <ClCompile Include="ImageProxy.cpp">
+      <Filter>utl_ui\Imaging</Filter>
+    </ClCompile>
+    <ClCompile Include="ImageStore.cpp">
+      <Filter>utl_ui\Imaging</Filter>
+    </ClCompile>
+    <ClCompile Include="Imaging.cpp">
+      <Filter>utl_ui\Imaging</Filter>
+    </ClCompile>
+    <ClCompile Include="ImagingDirect2D.cpp">
+      <Filter>utl_ui\Imaging</Filter>
+    </ClCompile>
+    <ClCompile Include="ImagingGdiPlus.cpp">
+      <Filter>utl_ui\Imaging</Filter>
+    </ClCompile>
+    <ClCompile Include="ImagingWic.cpp">
+      <Filter>utl_ui\Imaging</Filter>
+    </ClCompile>
+    <ClCompile Include="ThrowMode.cpp">
+      <Filter>utl</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="utl_ui.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="res\ItemListStrip.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\StdStrip.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\ItemListStrip.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\StdStrip.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="res\Scrollable.cur">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\ScrollDrag.cur">
+      <Filter>Resource Files</Filter>
+    </None>
+  </ItemGroup>
+</Project>

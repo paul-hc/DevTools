@@ -3,6 +3,13 @@
 ##
 ## Get latest from https://github.com/github/gitignore/blob/master/VisualStudio.gitignore
 
+
+# My Ignore
+[Bb]in_vc*/
+*.res
+*.tlog/
+
+
 # User-specific files
 *.suo
 *.user

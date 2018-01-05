@@ -1,0 +1,55 @@
+==================================================================================================================
+    STATIC LIBRARY : utl_ui Project Overview
+
+    The use of UTL as a static library is motivated by:
+		Independence from MFC dlls;
+		No need for binary redistributables (DLL hell).
+
+    For example, when a program using MFC (same or other version) is debugged, the Wintruder app gets
+    locked (frozen) while the program hits a breakpoint.
+
+==================================================================================================================
+
+Linking to UTL library:
+----------------------
+
+* For Visual Studio 2008 solutions:
+	- Add the utl/utl_ui_vc9.vcproj project to the solution and set a dependency to it.
+
+* For Visual Studio 2013++ solutions:
+	- There is no UTL solution for Visual Studio 2013.
+	- Build utl/utl_vc9.sln in Visual Studio 2008 for all configurations and platforms.
+	- In Solution Explorer right click the client project and add Linker > Additional Library Directories: ../CommonUtl/utl/bin
+	- In the client project include "utl/utl.h" in stdafx.h. This will link to the right library, which is binary compatible with Visual Studio 2013.
+
+
+UTL Environment Variables:
+==========================
+Example on on T440p:
+UTL_INCLUDE=C:\dev\Toolkit\boost\boost_1_63_0
+UTL_TESTDATA_PATH=C:\dev\DevTools\TestDataUtl
+UTL_THUMB_SRC_IMAGE_PATH=E:\Capture\Photos\2014\2014-07 Barcelona
+
+
+BOOST (headers only):
+--------------------
+* To add Boost support in Utl and Utl-based projects:
+	Define environment variable:
+		For example on T440p MyThinkPad:
+			UTL_INCLUDE=C:\dev\Toolkit\boost\boost_1_63_0
+		T470:
+			UTL_INCLUDE=todo...
+
+* Add UTL_INCLUDE references for INCLUDE and LIBARY for all projects:
+	Solution Explorer > MyProject > Properties
+		C++ > General (executables and libraries):
+			[All Configurations, All Platforms]
+				Additional Include Directories=.;../CommonUtl;$(UTL_INCLUDE)
+		Linker > General (executables only):
+			[All Configurations, Win32]
+				Additional Library Directories=$(UTL_INCLUDE)\lib\32
+			[All Configurations, x64]
+				Additional Library Directories=$(UTL_INCLUDE)\lib\64
+
+* (!) Do not use legacy "Tools > Options > Project and Solutions > Visual C++ Directories" directory settings in Visual Studio 2008 (VC9),
+  because project specific settings a better solution since are are portable across different Git local repositories.

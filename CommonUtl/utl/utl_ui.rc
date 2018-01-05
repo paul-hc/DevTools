@@ -1,0 +1,418 @@
+// Microsoft Visual C++ generated resource script.
+//
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include "afxres.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// English (U.S.) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+#ifdef _WIN32
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+#pragma code_page(1252)
+#endif //_WIN32
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_ABOUT_BOX DIALOGEX 0, 0, 237, 181
+STYLE DS_SETFONT | WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME
+CAPTION "About [ProductName]"
+FONT 8, "MS Sans Serif", 0, 0, 0x0
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,182,159,50,14,WS_GROUP
+    ICON            "",IDC_ABOUT_ICON_STATIC,5,8,20,20
+    LTEXT           "[InternalName] version [ProductVersion]",IDC_ABOUT_NAME_VERSION_STATIC,46,8,186,8,SS_NOPREFIX
+    LTEXT           "[LegalCopyright]",IDC_ABOUT_COPYRIGHT_STATIC,46,22,186,8
+    LTEXT           "[WrittenBy]",IDC_ABOUT_WRITTEN_BY_STATIC,46,36,186,8
+    LTEXT           "[Email]",IDC_ABOUT_EMAIL_STATIC,46,54,186,12,SS_CENTERIMAGE
+    LTEXT           "Build Information:",IDC_STATIC,6,72,55,8
+    CONTROL         "",IDC_ABOUT_BUILD_INFO_LIST,"SysListView32",LVS_REPORT | LVS_SINGLESEL | LVS_ALIGNLEFT | LVS_NOCOLUMNHEADER | WS_BORDER | WS_GROUP | WS_TABSTOP,6,82,225,68
+    PUSHBUTTON      "E&xplore...",IDC_ABOUT_EXPLORE_EXECUTABLE,5,159,50,14
+END
+
+IDD_LIST_EDIT_DIALOG DIALOGEX 0, 0, 211, 135
+STYLE DS_SETFONT | WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME
+CAPTION "Edit List"
+FONT 8, "MS Sans Serif", 0, 0, 0x0
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,100,114,50,14,WS_GROUP
+    PUSHBUTTON      "Cancel",IDCANCEL,155,114,50,14
+    EDITTEXT        IDC_LEDIT_ITEM_LIST_EDIT,7,7,197,101,ES_MULTILINE | ES_AUTOVSCROLL | ES_AUTOHSCROLL | ES_NOHIDESEL | ES_WANTRETURN | WS_VSCROLL | WS_HSCROLL | WS_GROUP
+    PUSHBUTTON      "DN",ID_MOVE_DOWN_ITEM,7,114,14,14,BS_CENTER | BS_VCENTER | WS_GROUP | NOT WS_TABSTOP
+    PUSHBUTTON      "UP",ID_MOVE_UP_ITEM,23,114,14,14,BS_CENTER | BS_VCENTER | NOT WS_TABSTOP
+    PUSHBUTTON      "&Browse...",IDC_LEDIT_BROWSE,39,114,50,14
+END
+
+IDD_ITEM_LIST_DIALOG DIALOGEX 0, 0, 209, 87
+STYLE DS_SETFONT | WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME
+CAPTION "Edit Items"
+FONT 8, "Tahoma", 0, 0, 0x0
+BEGIN
+    CONTROL         "List1",IDC_ITEMS_LIST,"SysListView32",LVS_REPORT | LVS_SINGLESEL | LVS_SHOWSELALWAYS | LVS_NOLABELWRAP | LVS_EDITLABELS | LVS_NOCOLUMNHEADER | LVS_NOSORTHEADER | WS_BORDER | WS_GROUP | WS_TABSTOP,7,23,136,57
+    DEFPUSHBUTTON   "OK",IDOK,152,7,50,14,WS_GROUP
+    PUSHBUTTON      "Cancel",IDCANCEL,152,24,50,14
+    LTEXT           "<toolbar>",IDC_TOOLBAR_PLACEHOLDER,7,7,136,16,SS_CENTERIMAGE | WS_CLIPSIBLINGS | WS_BORDER
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Toolbar
+//
+
+IDR_ITEM_LIST_STRIP TOOLBAR  16, 16
+BEGIN
+    BUTTON      ID_ADD_ITEM
+    BUTTON      ID_REMOVE_ITEM
+    BUTTON      ID_REMOVE_ALL_ITEMS
+    SEPARATOR
+    BUTTON      ID_EDIT_ITEM
+    SEPARATOR
+    BUTTON      ID_MOVE_UP_ITEM
+    BUTTON      ID_MOVE_DOWN_ITEM
+    SEPARATOR
+    BUTTON      ID_EDIT_COPY
+    BUTTON      ID_EDIT_PASTE
+END
+
+IDR_STD_STRIP TOOLBAR  16, 16
+BEGIN
+    BUTTON      ID_ADD_ITEM
+    BUTTON      ID_REMOVE_ITEM
+    BUTTON      ID_REMOVE_ALL_ITEMS
+    SEPARATOR
+    BUTTON      ID_RENAME_ITEM
+    BUTTON      ID_EDIT_ITEM
+    SEPARATOR
+    BUTTON      ID_MOVE_UP_ITEM
+    BUTTON      ID_MOVE_DOWN_ITEM
+    BUTTON      ID_MOVE_TOP_ITEM
+    BUTTON      ID_MOVE_BOTTOM_ITEM
+    SEPARATOR
+    BUTTON      ID_SHUTTLE_UP
+    BUTTON      ID_SHUTTLE_DOWN
+    BUTTON      ID_SHUTTLE_TOP
+    BUTTON      ID_SHUTTLE_BOTTOM
+    SEPARATOR
+    BUTTON      ID_EDIT_COPY
+    BUTTON      ID_EDIT_PASTE
+    BUTTON      ID_EDIT_CUT
+    SEPARATOR
+    BUTTON      ID_EDIT_UNDO
+    BUTTON      ID_EDIT_REDO
+    SEPARATOR
+    BUTTON      ID_EDIT_FIND
+    BUTTON      ID_EDIT_REPLACE
+    BUTTON      ID_EDIT_SELECT_ALL
+    SEPARATOR
+    BUTTON      ID_FILE_NEW
+    BUTTON      ID_FILE_OPEN
+    BUTTON      ID_FILE_SAVE
+    BUTTON      ID_FILE_PRINT
+    BUTTON      ID_APP_ABOUT
+    SEPARATOR
+    BUTTON      ID_EXPAND
+    BUTTON      ID_COLLAPSE
+    SEPARATOR
+    BUTTON      ID_EDIT_DETAILS
+    BUTTON      ID_EDIT_LIST_ITEMS
+    BUTTON      ID_BROWSE_FILE
+    BUTTON      ID_BROWSE_FOLDER
+    BUTTON      ID_RESET_DEFAULT
+    SEPARATOR
+    BUTTON      ID_REFRESH
+    BUTTON      ID_OPTIONS
+    SEPARATOR
+    BUTTON      ID_RUN_TESTS
+    SEPARATOR
+    BUTTON      ID_LIST_VIEW_ICON_LARGE
+    BUTTON      ID_LIST_VIEW_ICON_SMALL
+    BUTTON      ID_LIST_VIEW_LIST
+    BUTTON      ID_LIST_VIEW_REPORT
+    BUTTON      ID_LIST_VIEW_TILE
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Bitmap
+//
+
+IDR_ITEM_LIST_STRIP     BITMAP                  "res\\ItemListStrip.bmp"
+IDR_STD_STRIP           BITMAP                  "res\\StdStrip.bmp"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// PNG
+//
+
+IDR_ITEM_LIST_STRIP     PNG                     "res\\ItemListStrip.png"
+IDR_STD_STRIP           PNG                     "res\\StdStrip.png"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Accelerator
+//
+
+IDR_ITEM_LIST_ACCEL ACCELERATORS 
+BEGIN
+    VK_DELETE,      ID_REMOVE_ITEM,         VIRTKEY, NOINVERT
+    VK_DOWN,        ID_MOVE_DOWN_ITEM,      VIRTKEY, CONTROL, NOINVERT
+    VK_F2,          ID_EDIT_ITEM,           VIRTKEY, NOINVERT
+    VK_INSERT,      ID_ADD_ITEM,            VIRTKEY, NOINVERT
+    VK_UP,          ID_MOVE_UP_ITEM,        VIRTKEY, CONTROL, NOINVERT
+    "C",            ID_EDIT_COPY,           VIRTKEY, CONTROL, NOINVERT
+    VK_INSERT,      ID_EDIT_COPY,           VIRTKEY, CONTROL, NOINVERT
+    "V",            ID_EDIT_PASTE,          VIRTKEY, CONTROL, NOINVERT
+    VK_INSERT,      ID_EDIT_PASTE,          VIRTKEY, SHIFT, NOINVERT
+END
+
+IDR_APP_SHARED_ACCEL ACCELERATORS 
+BEGIN
+    VK_F1,          ID_APP_ABOUT,           VIRTKEY, NOINVERT
+    "T",            ID_RUN_TESTS,           VIRTKEY, CONTROL, NOINVERT
+END
+
+IDR_TEXT_EDITOR_ACCEL ACCELERATORS 
+BEGIN
+    VK_DOWN,        ID_EDIT_NUM_DECREMENT,  VIRTKEY, SHIFT, CONTROL, NOINVERT
+    VK_UP,          ID_EDIT_NUM_INCREMENT,  VIRTKEY, SHIFT, CONTROL, NOINVERT
+    VK_DOWN,        ID_EDIT_TO_LOWER_CASE,  VIRTKEY, CONTROL, ALT, NOINVERT
+    VK_UP,          ID_EDIT_TO_UPPER_CASE,  VIRTKEY, CONTROL, ALT, NOINVERT
+    VK_LEFT,        ID_EDIT_WORD_LEFT,      VIRTKEY, CONTROL, NOINVERT
+    VK_LEFT,        ID_EDIT_WORD_LEFT_EXTEND, VIRTKEY, SHIFT, CONTROL, NOINVERT
+    VK_RIGHT,       ID_EDIT_WORD_RIGHT,     VIRTKEY, CONTROL, NOINVERT
+    VK_RIGHT,       ID_EDIT_WORD_RIGHT_EXTEND, VIRTKEY, SHIFT, CONTROL, NOINVERT
+    "W",            ID_EDIT_WORD_SELECT,    VIRTKEY, CONTROL, NOINVERT
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO 
+BEGIN
+    IDD_ABOUT_BOX, DIALOG
+    BEGIN
+        LEFTMARGIN, 5
+        RIGHTMARGIN, 232
+        TOPMARGIN, 5
+        BOTTOMMARGIN, 174
+    END
+
+    IDD_LIST_EDIT_DIALOG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 205
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 128
+    END
+
+    IDD_ITEM_LIST_DIALOG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 202
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 80
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE 
+BEGIN
+    "#include ""afxres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE 
+BEGIN
+    "\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Cursor
+//
+
+IDR_SCROLLABLE_CURSOR   CURSOR                  "res\\Scrollable.cur"
+IDR_SCROLL_DRAG_CURSOR  CURSOR                  "res\\ScrollDrag.cur"
+IDR_DROP_NONE_CURSOR    CURSOR                  "res\\DragDrop-None.cur"
+IDR_DROP_MOVE_CURSOR    CURSOR                  "res\\DragDrop-Move.cur"
+IDR_DROP_COPY_CURSOR    CURSOR                  "res\\DragDrop-Copy.cur"
+IDR_TRACK_SCROLL_CURSOR CURSOR                  "res\\TrackScroll.cur"
+IDR_TRACK_ZOOM_CURSOR   CURSOR                  "res\\TrackZoom.cur"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Menu
+//
+
+IDR_STD_CONTEXT_MENU MENU 
+BEGIN
+    POPUP "<text editor>"
+    BEGIN
+        MENUITEM "lower case\tCtrl+Alt+Down Arrow", ID_EDIT_TO_LOWER_CASE
+        MENUITEM "UPPER CASE\tCtrl+Alt+Up Arrow", ID_EDIT_TO_UPPER_CASE
+        MENUITEM SEPARATOR
+        MENUITEM "Increment Number\tCtrl+Shift+Up Arrow", ID_EDIT_NUM_INCREMENT
+        MENUITEM "Decrement Number\tCtrl+Shift+Down Arrow", ID_EDIT_NUM_DECREMENT
+    END
+    POPUP "<history combo>"
+    BEGIN
+        MENUITEM "&Delete Item\tDelete",        ID_REMOVE_ITEM
+        MENUITEM "Delete &All Items",           ID_REMOVE_ALL_ITEMS
+        MENUITEM SEPARATOR
+        MENUITEM "&Edit Items...",              ID_EDIT_LIST_ITEMS
+        MENUITEM SEPARATOR
+        MENUITEM "S&tore Item\tCtrl+Enter",     ID_ADD_ITEM
+        MENUITEM SEPARATOR
+        MENUITEM "&Save Items",                 ID_FILE_SAVE
+    END
+    POPUP "<list view selection>"
+    BEGIN
+        MENUITEM "&Copy\tCtrl+C",               ID_EDIT_COPY
+        MENUITEM SEPARATOR
+        MENUITEM "Select All\tCtrl+A",          ID_EDIT_SELECT_ALL
+    END
+    POPUP "<list view nowhere>"
+    BEGIN
+        MENUITEM "&Large Icons",                ID_LIST_VIEW_ICON_LARGE
+        MENUITEM "&Small Icons",                ID_LIST_VIEW_ICON_SMALL
+        MENUITEM "&List",                       ID_LIST_VIEW_LIST
+        MENUITEM SEPARATOR
+        MENUITEM "&Report",                     ID_LIST_VIEW_REPORT
+        MENUITEM SEPARATOR
+        MENUITEM "&Tiles",                      ID_LIST_VIEW_TILE
+        MENUITEM SEPARATOR
+        MENUITEM "&Horizontal Stacking\tLeft to Right", ID_LIST_VIEW_STACK_LEFTTORIGHT
+        MENUITEM "&Vertical Stacking\tTop to Bottom", ID_LIST_VIEW_STACK_TOPTOBOTTOM
+    END
+    POPUP "<debug>"
+    BEGIN
+        MENUITEM "Run Unit Tests",              ID_RUN_TESTS
+    END
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// String Table
+//
+
+STRINGTABLE 
+BEGIN
+    IDC_ITEMS_LIST          "Separators=-1"
+END
+
+STRINGTABLE 
+BEGIN
+    ID_ADD_ITEM             "Add a new item\nAdd (Ins)"
+    ID_REMOVE_ITEM          "Remove the selected item\nRemove (Delete)"
+    ID_REMOVE_ALL_ITEMS     "Remove all items\nRemove All"
+    ID_EDIT_ITEM            "Edit selected item\nEdit (F2)"
+    ID_MOVE_UP_ITEM         "Move up selected item\nMove Up"
+    ID_MOVE_DOWN_ITEM       "Move down selected item\nMove Down"
+END
+
+STRINGTABLE 
+BEGIN
+    ID_EDIT_COPY            "Copy to clipboard\nCopy to Clipboard (Ctrl+C)"
+    ID_EDIT_CUT             "Cut to clipboard\nCut to Clipboard (Ctrl+X)"
+    ID_EDIT_PASTE           "Paste from clipboard\nPaste from Clipboard (Ctrl+V)"
+    ID_EDIT_UNDO            "Undo\nUndo (Ctrl+Z)"
+    ID_EDIT_REDO            "Redo\nRedo (Ctrl+Y)"
+END
+
+STRINGTABLE 
+BEGIN
+    ID_MOVE_TOP_ITEM        "Move selected item to the top\nMove to Top"
+    ID_MOVE_BOTTOM_ITEM     "Move selected item to the bottom\nMove to Bottom"
+    ID_RESET_DEFAULT        "Reset to default"
+END
+
+STRINGTABLE 
+BEGIN
+    ID_RUN_TESTS            "Run unit tests"
+    ID_TRANSPARENT          "Transparent item"
+    ID_LIST_VIEW_ICON_LARGE "Large Icons"
+    ID_LIST_VIEW_ICON_SMALL "Small Icons"
+    ID_LIST_VIEW_LIST       "List"
+    ID_LIST_VIEW_REPORT     "Details Report"
+    ID_LIST_VIEW_TILE       "Tiles"
+    ID_LIST_VIEW_STACK_LEFTTORIGHT 
+                            "Arrange list items from left to right\nHorizontal Stacking"
+END
+
+STRINGTABLE 
+BEGIN
+    ID_LIST_VIEW_STACK_TOPTOBOTTOM 
+                            "Arrange list items from top to bottom\nVertical Stacking"
+END
+
+#endif    // English (U.S.) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+/////////////////////////////////////////////////////////////////////////////
+// English (U.K.) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENG)
+#ifdef _WIN32
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_UK
+#pragma code_page(1252)
+#endif //_WIN32
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Icon
+//
+
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+ID_TRANSPARENT          ICON                    "res\\Transparent.ico"
+#endif    // English (U.K.) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+

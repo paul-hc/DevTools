@@ -1,0 +1,10 @@
+; IDETools.def : Declares the module parameters for the DLL.
+
+LIBRARY      "IDETools"
+
+EXPORTS
+    ; Explicit exports can go here
+	DllCanUnloadNow     PRIVATE
+	DllGetClassObject   PRIVATE
+	DllRegisterServer   PRIVATE
+	DllUnregisterServer PRIVATE

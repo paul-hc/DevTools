@@ -1,0 +1,217 @@
+// Microsoft Visual C++ generated resource script.
+//
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include "utl/resource.h"
+#include "afxres.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// English (U.S.) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+#ifdef _WIN32
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+#pragma code_page(1252)
+#endif //_WIN32
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Icon
+//
+
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+IDD_MAIN_DIALOG         ICON                    "res\\SpyFindWindow.ico"
+IDI_TRACK_ICON          ICON                    "res\\Track.ico"
+IDI_TRACKING_ICON       ICON                    "res\\Tracking.ico"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_MAIN_DIALOG DIALOGEX 0, 0, 243, 207
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_POPUP | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME
+EXSTYLE WS_EX_APPWINDOW
+CAPTION "Track Window (Spy++ style)"
+FONT 8, "MS Shell Dlg", 0, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,186,7,50,14
+    LTEXT           "Search for a window by pressing the left-mouse button on the Finder Tool and then dragging it over a window and then releasing the mouse button to select the window.",IDC_STATIC,7,7,118,43
+    LTEXT           "Finder Tool:",IDC_STATIC,7,55,43,8
+    ICON            IDI_TRACK_ICON,IDC_TRACK_TOOL_ICON,7,66,21,20,SS_NOTIFY | SS_REALSIZEIMAGE | WS_GROUP
+    LTEXT           "pos:\nclient:",IDC_TRACKING_POS_STATIC,31,67,79,18
+    PUSHBUTTON      "Highlight (F4)",ID_HIGHLIGHT_WINDOW,6,90,50,14
+    EDITTEXT        IDC_FOUND_WINDOW_INFO_EDIT,7,109,229,91,ES_MULTILINE | ES_AUTOHSCROLL | ES_READONLY | WS_GROUP
+    CONTROL         "Ignore &Hidden",IDC_IGNORE_HIDDEN_CHECK,"Button",BS_AUTOCHECKBOX | WS_GROUP | WS_TABSTOP,159,25,61,10
+    CONTROL         "Ignore &Disabled",IDC_IGNORE_DISABLED_CHECK,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,159,37,66,10
+    CONTROL         "&Cache Desktop DC",IDC_CACHE_DESTOP_DC_CHECK,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,159,49,75,10
+    CONTROL         "Final &Redraw",IDC_REDRAW_AT_END_CHECK,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,159,61,57,10
+    LTEXT           "Frame &style:",IDC_STATIC,117,77,41,8
+    COMBOBOX        IDC_FRAME_STYLE_COMBO,165,75,71,30,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Frame si&ze:",IDC_STATIC,120,93,38,8
+    EDITTEXT        IDC_FRAME_SIZE_EDIT,159,91,44,12,ES_AUTOHSCROLL | ES_NUMBER
+    CONTROL         "",IDC_FRAME_SIZE_SPIN,"msctls_updown32",UDS_SETBUDDYINT | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS,207,92,11,9
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Version
+//
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION 2,0,0,1
+ PRODUCTVERSION 2,0,0,1
+ FILEFLAGSMASK 0x3fL
+#ifdef _DEBUG
+ FILEFLAGS 0x1L
+#else
+ FILEFLAGS 0x0L
+#endif
+ FILEOS 0x4L
+ FILETYPE 0x1L
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904e4"
+        BEGIN
+            VALUE "CompanyName", "Paul Cocoveanu"
+            VALUE "Email", "phc.2nd@gmail.com"
+            VALUE "FileDescription", "SpyFindWindow Application"
+            VALUE "FileVersion", "2, 0, 0, 1"
+            VALUE "InternalName", "SpyFindWindow"
+            VALUE "LegalCopyright", "Copyright (C) 2014-2015"
+            VALUE "OriginalFilename", "SpyFindWindow.exe"
+            VALUE "ProductName", "SpyFindWindow"
+            VALUE "ProductVersion", "2, 0, 0, 1"
+            VALUE "WrittenBy", "Written by Paul Cocoveanu"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x409, 1252
+    END
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO 
+BEGIN
+    IDD_MAIN_DIALOG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 236
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 200
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Cursor
+//
+
+IDR_TRACKING_CURSOR     CURSOR                  "res\\FindWindow.cur"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Accelerator
+//
+
+IDD_MAIN_DIALOG ACCELERATORS 
+BEGIN
+    VK_F4,          ID_HIGHLIGHT_WINDOW,    VIRTKEY, NOINVERT
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog Info
+//
+
+IDD_MAIN_DIALOG DLGINIT
+BEGIN
+    IDC_FRAME_STYLE_COMBO, 0x403, 6, 0
+0x7246, 0x6d61, 0x0065, 
+    IDC_FRAME_STYLE_COMBO, 0x403, 16, 0
+0x6f4e, 0x2d6e, 0x6c63, 0x6569, 0x746e, 0x6120, 0x6572, 0x0061, 
+    IDC_FRAME_STYLE_COMBO, 0x403, 14, 0
+0x6e45, 0x6974, 0x6572, 0x7720, 0x6e69, 0x6f64, 0x0077, 
+    0
+END
+
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE 
+BEGIN
+    "#include ""utl/resource.h""\r\n"
+    "#include ""afxres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE 
+BEGIN
+    "#include ""utl/utl_ui.rc""\r\n"
+    "#include ""res\\SpyFindWindow.rc2""  // non-Microsoft Visual C++ edited resources\r\n"
+    "\r\n"
+    "#define _AFX_NO_SPLITTER_RESOURCES\r\n"
+    "#define _AFX_NO_OLE_RESOURCES\r\n"
+    "#define _AFX_NO_TRACKER_RESOURCES\r\n"
+    "#define _AFX_NO_PROPERTY_RESOURCES\r\n"
+    "\r\n"
+    "#include ""afxres.rc""     // Standard components\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+#endif    // English (U.S.) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+#include "utl/utl_ui.rc"
+#include "res\SpyFindWindow.rc2"  // non-Microsoft Visual C++ edited resources
+
+#define _AFX_NO_SPLITTER_RESOURCES
+#define _AFX_NO_OLE_RESOURCES
+#define _AFX_NO_TRACKER_RESOURCES
+#define _AFX_NO_PROPERTY_RESOURCES
+
+#include "afxres.rc"     // Standard components
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+

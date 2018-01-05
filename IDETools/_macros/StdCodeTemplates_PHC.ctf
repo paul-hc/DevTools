@@ -1,0 +1,179 @@
+
+//=========================================================
+// FILE TYPES SECTION DESCRIPTIONS
+//=========================================================
+
+[[File Template.H]]
+<<Copyright>>$
+<<Include Once>>$
+<<Class Body>>$
+[[EOS]]
+
+[[File Template.HXX]]
+<<Copyright>>$
+;<<CVS Header>>$
+
+/**
+	%TypeName% inline code
+*/
+[[EOS]]
+
+[[File Template.INL]]
+<<File Template.HXX>>[[EOS]]
+
+[[File Template.CXX]]
+<<Copyright>>$
+;<<CVS Header>>$
+
+/**
+	%TypeName% template implementation
+*/
+[[EOS]]
+
+[[File Template.TMPL]]
+<<File Template.CXX>>[[EOS]]
+
+[[File Template.T]]
+<<File Template.CXX>>[[EOS]]
+
+[[File Template.CPP]]
+<<Copyright>>$
+;<<CVS Header>>$
+<<CPP STD Include>>$
+<<?MFC DEBUG_NEW Definition>>
+/**
+	%TypeName% implementation
+*/
+[[EOS]]
+
+[[File Template.C]]
+<<File Template.CPP>>[[EOS]]
+
+//=========================================================
+// SECTION DEFINITIONS
+//=========================================================
+
+[[Copyright]]
+// Copyleft 2005 Paul H. Cocoveanu
+//
+[[EOS]]
+
+[[Include Once]]
+#ifndef %FileName%_H
+#define %FileName%_H
+#pragma once
+
+%CORE%$
+// inline code
+// #include "%FileName%.hxx"
+
+#endif // %FileName%_H
+[[EOS]]
+
+[[Single Line Decoration Core]]
+################# %TypeName% #################[[EOS]]
+
+[[Single Line Decoration]]
+//<<Single Line Decoration Core>>[[EOS]]
+
+[[void Function Body]]
+{
+	// TODO...
+}
+[[EOS]]
+
+[[return Function Body]]
+{
+	return // TODO...
+}
+[[EOS]]
+
+[[Class Body]]
+class %StgClassModifier%%TypeName%
+{
+public:
+	%TypeName%( void );
+	virtual ~%TypeName%();
+private:
+};
+[[EOS]]
+
+[[Decorated Class Body]]
+<<Single Line Decoration>>
+class %StgClassModifier%%TypeName%
+{
+public:
+	%TypeName%( void );
+	virtual ~%TypeName%();
+private:
+};
+[[EOS]]
+
+[[Struct Body]]
+
+<<Single Line Decoration>>
+struct %StgClassModifier%%TypeName%
+{
+	%TypeName%( void );
+public:
+};
+[[EOS]]
+
+[[Enum Body]]
+
+<<Single Line Decoration>>
+enum %TypeName%
+{
+	__const__,
+};
+[[EOS]]
+
+[[CPP STD Include]]
+#include "StdAfx.h"
+
+#include "%FileName%.h"
+[[EOS]]
+
+[[MFC DEBUG_NEW Definition]]
+
+#ifdef _DEBUG
+#define new DEBUG_NEW
+#endif
+[[EOS]]
+
+[[CVS Header]]
+// $Header: $
+[[EOS]]
+
+[[Implementation Block Decoration]]
+/**
+	%Comment%
+*/
+
+[[EOS]]
+
+[[Implementation SubBlock Decoration]]
+/**
+	%Comment%
+*/
+
+[[EOS]]
+
+
+[[BUGBUG Comment UNKNOWN]]
+%LeadingSpaces%%SingleLineCommentToken%
+%LeadingSpaces%%SingleLineCommentToken%	\BUGBUG: %Comment%
+%LeadingSpaces%%SingleLineCommentToken%
+[[EOS]]
+
+[[BUGBUG Comment C/C++]]
+%LeadingSpaces%/**
+%LeadingSpaces%	\BUGBUG: %Comment%
+%LeadingSpaces%*/
+[[EOS]]
+
+[[BUGBUG Comment BASIC]]
+%LeadingSpaces%'
+%LeadingSpaces%'	\BUGBUG: %Comment%
+%LeadingSpaces%'
+[[EOS]]

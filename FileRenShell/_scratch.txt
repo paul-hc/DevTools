@@ -1,0 +1,162 @@
+
+
+_MSC_VER == 1800 MSVC++ 12.0 (Visual Studio 2013)
+_MSC_VER == 1700 MSVC++ 11.0 (Visual Studio 2012)
+_MSC_VER == 1600 MSVC++ 10.0 (Visual Studio 2010)
+_MSC_VER == 1500 MSVC++ 9.0  (Visual Studio 2008)
+_MSC_VER == 1400 MSVC++ 8.0  (Visual Studio 2005)
+_MSC_VER == 1310 MSVC++ 7.1  (Visual Studio 2003)
+_MSC_VER == 1300 MSVC++ 7.0  
+_MSC_VER == 1200 MSVC++ 6.0  
+_MSC_VER == 1100 MSVC++ 5.0  
+
+
+BeginBufferedPaint
+HPAINTBUFFER _AfxBeginBufferedPaint(HDC hdcTarget, const RECT *prcTarget, BP_BUFFERFORMAT dwFormat, __in BP_PAINTPARAMS *pPaintParams, __out HDC *phdc)
+CMemDC::CMemDC(CDC& dc, const CRect& rect)		// C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\atlmfc\src\mfc\afxglobals.cpp
+
+
+#if _MSC_VER < 1700			// MSVC++ 11.0 (Visual Studio 2012)
+	#include <hash_map>
+#else
+#endif
+
+
+filename.ext|FILENAME.EXT|filename.*|FILENAME.*|*.ext|*.EXT|* (no ext)
+enum ChangeCase { LowerCase, UpperCase, FnameLowerCase, FnameUpperCase, ExtLowerCase, ExtUpperCase, NoExt };
+
+Make lower case|Make upper case|Make filename lower case|Make filename upper case|Make extension lower case|Make extension upper case|Remove extension
+
+
+#FFFFFF (White);#FFE5B4 (Peach);#ACE1AF (Celadon);#D1E231 (Pear);#F5DEB3 (Wheat);#C19A6B (Lion);#F4A460 (Sandy Brown)
+
+
+Lower Case;Upper Case;Filename: Lower Case;Filename: Upper Case;Extension: Lower Case;Extension: Upper Case
+
+filename.ext;FILENAME.EXT;filename.*;FILENAME.*;*.ext;*.EXT
+
+IDC_WORD_BREAK_CHARS_EDIT
+IDC_WORD_BREAK_PREFIXES_EDIT
+IDC_WORDS_PRESERVED_EDIT
+IDC_WORDS_UPPERCASE_EDIT
+IDC_WORDS_LOWERCASE_EDIT
+
+IDC_SET_DEFAULT_WORD_BREAK_CHARS
+IDC_SET_DEFAULT_WORD_BREAK_PREFIXES
+IDC_SET_DEFAULT_ALWAYS_PRESERVE_WORDS
+IDC_SET_DEFAULT_ALWAYS_UPPERCASE_WORDS
+IDC_SET_DEFAULT_ALWAYS_LOWERCASE_WORDS
+IDC_SET_DEFAULT_ALL
+
+
+04 - Six Blade Knife.txt
+05 - Southbound Again.txt
+06 - Sultans Of Swing.txt
+
+
+void f()
+{
+	HICON hICON = /*your code here*/
+
+	ICONINFOEX iconInfo;
+
+	// 1. From HICON to HBITMAP for color and mask separately
+	//.cbSize required
+	//memset((void*)&iconInfo, 0, sizeof(ICONINFOEX));
+	iconInfo.cbSize = sizeof( ICONINFOEX );
+	GeticonInfoEx( hICON, &iconInfo );
+
+	//HBITMAP iconInfo.hbmColor is 32bit per pxl, however alpha bytes can be zeroed or can be not.
+	//HBITMAP iconInfo.hbmMask is 1bit per pxl
+
+	// 2. From HBITMAP to BITMAP for color
+	//    (HBITMAP without raw data -> HBITMAP with raw data)
+	//         LR_CREATEDIBSECTION - DIB section will be created,
+	//         so .bmBits pointer will not be null
+	HBITMAP hBitmapColors = (HBITMAP)CopyImage( iconInfo.hbmColor, IMAGE_BITMAP, 0, 0, LR_CREATEDIBSECTION );
+
+	//    (HBITMAP to BITMAP)
+	BITMAP bitmapInfo32bpp;
+	GetObject( hBitmapColors, sizeof( BITMAP ), &bitmapInfo32bpp );
+	//Now: bitmapInfo32bpp.bmBits pointing to BGRA data.(.bmWidth * .bmHeight * (.bmBitsPixel/8))
+
+	// 3. From HBITMAP to BITMAP for mask
+	HBITMAP hBitmapMask = (HBITMAP)CopyImage( iconInfo.hbmMask, IMAGE_BITMAP, 0, 0, LR_CREATEDIBSECTION );
+
+	BITMAP bitmapInfoMask1bpp;
+	GetObject( hBitmapMask, sizeof( BITMAP ), &bitmapInfoMask1bpp );
+	// bitmapInfoMask1bpp.bmBits pointing to mask data (.bmWidth * .bmHeight Bits!)
+}
+
+
+static LRESULT TOOLBAR_EraseBackground( TOOLBAR_INFO* infoPtr, WPARAM wParam, LPARAM lParam )
+{
+	NMTBCUSTOMDRAW tbcd;
+	INT ret = FALSE;
+	DWORD ntfret;
+	HTHEME theme = GetWindowTheme( infoPtr->hwndSelf );
+	DWORD dwEraseCustDraw = 0;
+
+	/* the app has told us not to redraw the toolbar */
+	if ( !infoPtr->bDoRedraw )
+		return FALSE;
+
+	if ( infoPtr->dwStyle & TBSTYLE_CUSTOMERASE )
+	{
+		ZeroMemory( &tbcd, sizeof( NMTBCUSTOMDRAW ) );
+		tbcd.nmcd.dwDrawStage = CDDS_PREERASE;
+		tbcd.nmcd.hdc = (HDC)wParam;
+		ntfret = TOOLBAR_SendNotify( &tbcd.nmcd.hdr, infoPtr, NM_CUSTOMDRAW );
+		dwEraseCustDraw = ntfret & 0xffff;
+
+		// FIXME: in general the return flags *can* be or'ed together
+		switch ( dwEraseCustDraw )
+		{
+			case CDRF_DODEFAULT:
+				break;
+			case CDRF_SKIPDEFAULT:
+				return TRUE;
+			default:
+				FIXME("[%p] response %d not handled to NM_CUSTOMDRAW (CDDS_PREERASE)\n", infoPtr->hwndSelf, ntfret);
+		}
+	}
+
+	// if the toolbar is "transparent" then pass the WM_ERASEBKGND up to parent for processing
+
+	if ( theme || ( infoPtr->dwStyle & TBSTYLE_TRANSPARENT ) )
+	{
+		POINT pt, ptorig;
+		HDC hdc = (HDC)wParam;
+		HWND parent;
+
+		pt.x = 0;
+		pt.y = 0;
+		parent = GetParent( infoPtr->hwndSelf );
+		MapWindowPoints( infoPtr->hwndSelf, parent, &pt, 1 );
+		OffsetWindowOrgEx( hdc, pt.x, pt.y, &ptorig );
+		ret = SendMessage( parent, WM_ERASEBKGND, wParam, lParam );
+		SetWindowOrgEx( hdc, ptorig.x, ptorig.y, 0 );
+	}
+	if ( !ret )
+		ret = DefWindowProcW( infoPtr->hwndSelf, WM_ERASEBKGND, wParam, lParam );
+
+	if ( dwEraseCustDraw & CDRF_NOTIFYPOSTERASE )
+	{
+		ZeroMemory( &tbcd, sizeof( NMTBCUSTOMDRAW ) );
+		tbcd.nmcd.dwDrawStage = CDDS_POSTERASE;
+		tbcd.nmcd.hdc = (HDC)wParam;
+		ntfret = TOOLBAR_SendNotify( &tbcd.nmcd.hdr, infoPtr, NM_CUSTOMDRAW );
+		dwEraseCustDraw = ntfret & 0xffff;
+
+		switch ( dwEraseCustDraw )
+		{
+			case CDRF_DODEFAULT:
+				break;
+			case CDRF_SKIPDEFAULT:
+				return TRUE;
+			default:
+				FIXME("[%p] response %d not handled to NM_CUSTOMDRAW (CDDS_POSTERASE)\n", infoPtr->hwndSelf, ntfret);
+		}
+	}
+	return ret;
+}

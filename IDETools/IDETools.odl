@@ -1,0 +1,531 @@
+// IDETools.odl : type library source for IDETools.dll
+
+// This file will be processed by the MIDL compiler to produce the
+// type library (IDETools.tlb).
+
+[ uuid(690D31A0-1AC3-11D2-A26A-006097B8DD84), version(1.0) ]
+library IDETools
+{
+	importlib("stdole32.tlb");
+
+	//  Primary dispatch interface for IncludeFileTree
+
+	[ uuid(1006E3E6-1F6F-11D2-A275-006097B8DD84) ]
+	dispinterface IIncludeFileTree
+	{
+		properties:
+			// NOTE - ClassWizard will maintain property information here.
+			//    Use extreme caution when editing this section.
+			//{{AFX_ODL_PROP(IncludeFileTree)
+			[id(1)] BSTR PickedIncludeFile;
+			[id(2)] long PromptLineNo;
+			//}}AFX_ODL_PROP
+
+		methods:
+			// NOTE - ClassWizard will maintain method information here.
+			//    Use extreme caution when editing this section.
+			//{{AFX_ODL_METHOD(IncludeFileTree)
+			[id(3)] boolean BrowseIncludeFiles(BSTR targetFileName);
+			//}}AFX_ODL_METHOD
+
+	};
+
+	//  Class information for IncludeFileTree
+
+	[ uuid(1006E3E7-1F6F-11D2-A275-006097B8DD84) ]
+	coclass IncludeFileTree
+	{
+		[default] dispinterface IIncludeFileTree;
+	};
+
+
+
+	//  Primary dispatch interface for FileAccess
+
+	[ uuid(1556FB24-22DB-11D2-A278-006097B8DD84) ]
+	dispinterface IFileAccess
+	{
+		properties:
+			// NOTE - ClassWizard will maintain property information here.
+			//    Use extreme caution when editing this section.
+			//{{AFX_ODL_PROP(FileAccess)
+			//}}AFX_ODL_PROP
+
+		methods:
+			// NOTE - ClassWizard will maintain method information here.
+			//    Use extreme caution when editing this section.
+			//{{AFX_ODL_METHOD(FileAccess)
+			[id(1)] boolean FileExist(BSTR fullPath);
+			[id(2)] long GetFileAttributes(BSTR fullPath);
+			[id(3)] boolean IsDirectoryFile(BSTR fullPath);
+			[id(4)] boolean IsCompressedFile(BSTR fullPath);
+			[id(5)] boolean IsReadOnlyFile(BSTR fullPath);
+			[id(7)] boolean SetReadOnlyFile(BSTR fullPath, boolean readOnly);
+			[id(8)] boolean Execute(BSTR fullPath);
+			[id(6)] boolean ShellOpen(BSTR docFullPath);
+			[id(9)] boolean ExploreAndSelectFile(BSTR fileFullPath);
+			[id(10)] BSTR GetNextAssocDoc(BSTR docFullPath, boolean forward);
+			[id(11)] BSTR GetComplementaryDoc(BSTR docFullPath);
+			[id(12)] boolean OutputWndActivateTab(BSTR tabCaption);
+			[id(13)] BSTR GetNextVariationDoc(BSTR docFullPath, boolean forward);
+			[id(14)] BSTR GetIDECurrentBrowseFile();
+			[id(15)] boolean UpdateIDECurrentBrowseFile(boolean doItNow);
+			//}}AFX_ODL_METHOD
+
+	};
+
+	//  Class information for FileAccess
+
+	[ uuid(1556FB25-22DB-11D2-A278-006097B8DD84) ]
+	coclass FileAccess
+	{
+		[default] dispinterface IFileAccess;
+	};
+
+	//  *** MenuFilePicker stuff ***
+	//
+
+	// Also defined in "PublicEnums.h"
+	typedef
+		[ v1_enum, uuid(4F24B8C0-CD4D-11D4-B57C-00D0B74ECB52), helpstring("enum TFolderOptions") ]
+		enum tagTFolderOptions
+		{
+			foUsePopups			= 0x00000001,
+			foRecurseFolders	= 0x00000002,
+			foCutDuplicates		= 0x00000004,
+			foHideExtension		= 0x00000010,
+			foRightJustifyExt	= 0x00000020,
+			foDirNamePrefix		= 0x00000040,
+			foNoOptionsPopup	= 0x00000100,
+			foSortFolders		= 0x00001000,
+
+			foDefault			= foUsePopups
+		} TFolderOptions;
+
+	// Also defined in "PublicEnums.h"
+	typedef
+		[ v1_enum, uuid(F9662B50-CD4E-11D4-B57C-00D0B74ECB52), helpstring("enum FolderLayout") ]
+		enum tagFolderLayout
+		{
+			flFoldersAsPopups,
+			flFoldersAsRootPopups,
+			flRootFoldersExpanded,
+			flAllFoldersExpanded,
+		} FolderLayout;
+
+	// Also defined in "PublicEnums.h"
+	typedef
+		[ v1_enum, uuid(35DC2F00-CD50-11D4-B57C-00D0B74ECB52), helpstring("enum PathField") ]
+		enum tagPathField
+		{
+			pfDrive,
+			pfDir,
+			pfName,
+			pfExt,
+			pfDirName,
+			pfFullPath,
+			pfDirPath,
+			pfDirNameExt,
+			pfNameExt,
+			pfCoreExt,
+
+			pfBaseFieldCount = pfFullPath,
+			pfFieldCount,
+		} PathField;
+
+
+	//  Primary dispatch interface for MenuFilePicker
+
+	[ uuid(4DFA7BE1-8484-11D2-A2C3-006097B8DD84) ]
+	dispinterface IMenuFilePicker
+	{
+		properties:
+			// NOTE - ClassWizard will maintain property information here.
+			//    Use extreme caution when editing this section.
+			//{{AFX_ODL_PROP(MenuFilePicker)
+			[id(1)] long TrackPosX;
+			[id(2)] long TrackPosY;
+			[id(3)] long OptionFlags;
+			[id(4)] long FolderLayout;
+			[id(5)] BSTR CurrentFileName;
+			//}}AFX_ODL_PROP
+
+		methods:
+			// NOTE - ClassWizard will maintain method information here.
+			//    Use extreme caution when editing this section.
+			//{{AFX_ODL_METHOD(MenuFilePicker)
+			[id(6)] BSTR SetProfileSection(BSTR sectionPostfix, boolean loadNow);
+			[id(7)] boolean AddFolder(BSTR folderPathSpec, BSTR folderAlias, BSTR fileFilter);
+			[id(8)] boolean AddFolderArray(BSTR folderItemFlatArray);
+			[id(9)] boolean AddRootFile(BSTR filePath, BSTR label);
+			[id(10)] void AddSortOrder(long pathField, boolean exclusive);
+			[id(11)] void ClearSortOrder();
+			[id(12)] void StoreTrackPos();
+			[id(13)] boolean ChooseFile();
+			[id(14)] boolean OverallExcludeFile(BSTR filePathFilter);
+			[id(15)] boolean ExcludeFileFromFolder(BSTR folderPath, BSTR fileFilter);
+			//}}AFX_ODL_METHOD
+
+	};
+
+	//  Class information for MenuFilePicker
+
+	[ uuid(4DFA7BE2-8484-11D2-A2C3-006097B8DD84) ]
+	coclass MenuFilePicker
+	{
+		[default] dispinterface IMenuFilePicker;
+	};
+
+
+	//  Primary dispatch interface for WorkspaceProfile
+
+	[ uuid(0E44AB06-90E1-11D2-A2C9-006097B8DD84) ]
+	dispinterface IWorkspaceProfile
+	{
+		properties:
+			// NOTE - ClassWizard will maintain property information here.
+			//    Use extreme caution when editing this section.
+			//{{AFX_ODL_PROP(WorkspaceProfile)
+			[id(1)] boolean MustCloseAll;
+			//}}AFX_ODL_PROP
+
+		methods:
+			// NOTE - ClassWizard will maintain method information here.
+			//    Use extreme caution when editing this section.
+			//{{AFX_ODL_METHOD(WorkspaceProfile)
+			[id(2)] boolean AddFile(BSTR fileFullPath);
+			[id(3)] boolean AddProjectName(BSTR projectName);
+			[id(4)] long GetFileCount();
+			[id(5)] BSTR GetFileName(long index);
+			[id(6)] boolean Save(BSTR section, BSTR currProjectName);
+			[id(7)] boolean Load(BSTR section, BSTR currProjectName);
+			//}}AFX_ODL_METHOD
+
+	};
+
+	//  Class information for WorkspaceProfile
+
+	[ uuid(0E44AB07-90E1-11D2-A2C9-006097B8DD84) ]
+	coclass WorkspaceProfile
+	{
+		[default] dispinterface IWorkspaceProfile;
+	};
+
+
+	//  Primary dispatch interface for UserInterface
+
+	[ uuid(216EF194-4C10-11D3-A3C8-006097B8DD84) ]
+	dispinterface IUserInterface
+	{
+		properties:
+			// NOTE - ClassWizard will maintain property information here.
+			//    Use extreme caution when editing this section.
+			//{{AFX_ODL_PROP(UserInterface)
+			[id(1)] BSTR IDEToolsRegistryKey;
+			//}}AFX_ODL_PROP
+
+		methods:
+			// NOTE - ClassWizard will maintain method information here.
+			//    Use extreme caution when editing this section.
+			//{{AFX_ODL_METHOD(UserInterface)
+			[id(2)] BSTR InputBox(BSTR title, BSTR prompt, BSTR initialValue);
+			[id(3)] BSTR GetClipboardText();
+			[id(4)] void SetClipboardText(BSTR text);
+			[id(5)] boolean IsClipFormatAvailable(long clipFormat);
+			[id(6)] boolean IsClipFormatNameAvailable(BSTR formatName);
+			[id(7)] boolean IsKeyPath(BSTR keyFullPath);
+			[id(8)] boolean CreateKeyPath(BSTR keyFullPath);
+			[id(9)] BSTR RegReadString(BSTR keyFullPath, BSTR valueName, BSTR defaultString);
+			[id(10)] long RegReadNumber(BSTR keyFullPath, BSTR valueName, long defaultNumber);
+			[id(11)] boolean RegWriteString(BSTR keyFullPath, BSTR valueName, BSTR strValue);
+			[id(12)] boolean RegWriteNumber(BSTR keyFullPath, BSTR valueName, long numValue);
+			[id(13)] boolean EnsureStringValue(BSTR keyFullPath, BSTR valueName, BSTR defaultString);
+			[id(14)] boolean EnsureNumberValue(BSTR keyFullPath, BSTR valueName, long defaultNumber);
+			[id(15)] BSTR GetEnvironmentVariable(BSTR varName);
+			[id(16)] boolean SetEnvironmentVariable(BSTR varName, BSTR varValue);
+			[id(17)] BSTR ExpandEnvironmentVariables(BSTR sourceString);
+			[id(18)] BSTR LocateFile(BSTR localDirPath);
+			//}}AFX_ODL_METHOD
+
+	};
+
+	//  Class information for UserInterface
+
+	[ uuid(216EF195-4C10-11D3-A3C8-006097B8DD84) ]
+	coclass UserInterface
+	{
+		[default] dispinterface IUserInterface;
+	};
+
+
+	//  Primary dispatch interface for TextContent
+
+	[ uuid(E37FE176-CBB7-11D4-B57C-00D0B74ECB52) ]
+	dispinterface ITextContent
+	{
+		properties:
+			// NOTE - ClassWizard will maintain property information here.
+			//    Use extreme caution when editing this section.
+			//{{AFX_ODL_PROP(TextContent)
+			[id(1)] boolean ShowErrors;
+			[id(2)] BSTR Text;
+			[id(3)] long TextLen;
+			//}}AFX_ODL_PROP
+
+		methods:
+			// NOTE - ClassWizard will maintain method information here.
+			//    Use extreme caution when editing this section.
+			//{{AFX_ODL_METHOD(TextContent)
+			[id(4)] boolean LoadFile(BSTR textFilePath);
+			[id(5)] boolean LoadFileSection(BSTR compoundFilePath, BSTR sectionName);
+			[id(6)] long LoadCompoundFileSections(BSTR compoundFilePath, BSTR sectionFilter, boolean caseSensitive);
+			[id(7)] long FindText(BSTR match, long startPos, boolean caseSensitive);
+			[id(8)] long ReplaceText(BSTR match, BSTR replacement, boolean caseSensitive);
+			[id(9)] boolean AddEmbeddedContent(BSTR matchCoreID, BSTR embeddedContent, boolean caseSensitive);
+			[id(10)] BSTR Tokenize(BSTR separatorCharSet);
+			[id(11)] BSTR GetNextToken();
+			[id(12)] long MultiLinesToSingleParagraph(BSTR multiLinesText, boolean doTrimTrailingSpaces);
+			[id(13)] void AddFieldReplacement(BSTR fieldText, BSTR replaceWith);
+			[id(14)] void ClearFieldReplacements();
+			[id(15)] BSTR FormatTimestamp(DATE timestamp, BSTR strftimeFormat);
+			//}}AFX_ODL_METHOD
+
+	};
+
+	//  Class information for TextContent
+
+	[ uuid(E37FE177-CBB7-11D4-B57C-00D0B74ECB52) ]
+	coclass TextContent
+	{
+		[default] dispinterface ITextContent;
+	};
+
+
+	//  Primary dispatch interface for FileSearch
+
+	[ uuid(C722D0B5-1E2D-11D5-B59B-00D0B74ECB52) ]
+	dispinterface IFileSearch
+	{
+		properties:
+			// NOTE - ClassWizard will maintain property information here.
+			//    Use extreme caution when editing this section.
+			//{{AFX_ODL_PROP(FileSearch)
+			[id(1)] long FileAttrFilterStrict;
+			[id(2)] long FileAttrFilterStrictNot;
+			[id(3)] long FileAttrFilterOr;
+			[id(4)] boolean ExcludeDirDots;
+			[id(5)] long FileAttributes;
+			[id(6)] BSTR FileName;
+			[id(7)] BSTR FilePath;
+			[id(8)] BSTR FileTitle;
+			[id(9)] BSTR FileURL;
+			[id(10)] BSTR Root;
+			[id(11)] long Length;
+			[id(12)] boolean IsDots;
+			[id(13)] boolean IsReadOnly;
+			[id(14)] boolean IsDirectory;
+			[id(15)] boolean IsCompressed;
+			[id(16)] boolean IsSystem;
+			[id(17)] boolean IsHidden;
+			[id(18)] boolean IsTemporary;
+			[id(19)] boolean IsNormal;
+			[id(20)] boolean IsArchived;
+			//}}AFX_ODL_PROP
+
+		methods:
+			// NOTE - ClassWizard will maintain method information here.
+			//    Use extreme caution when editing this section.
+			//{{AFX_ODL_METHOD(FileSearch)
+			[id(21)] boolean FindFile(BSTR filePattern);
+			[id(22)] boolean FindNextFile();
+			[id(23)] BSTR FindAllFiles(BSTR filePattern, BSTR separator, long* outFileCount, boolean recurseSubDirs);
+			[id(24)] void Close();
+			[id(25)] boolean MatchesMask(long mask);
+			[id(26)] BSTR BuildSubDirFilePattern(BSTR filePattern);
+			[id(27)] BSTR SetupForSubDirSearch(BSTR parentFilePattern);
+			//}}AFX_ODL_METHOD
+
+	};
+
+	//  Class information for FileSearch
+
+	[ uuid(C722D0B6-1E2D-11D5-B59B-00D0B74ECB52) ]
+	coclass FileSearch
+	{
+		[default] dispinterface IFileSearch;
+	};
+
+
+	//  Primary dispatch interface for FileLocator
+
+	[ uuid(A0580B95-3350-11D5-B5A4-00D0B74ECB52) ]
+	dispinterface IFileLocator
+	{
+		properties:
+			// NOTE - ClassWizard will maintain property information here.
+			//    Use extreme caution when editing this section.
+			//{{AFX_ODL_PROP(FileLocator)
+			[id(1)] BSTR LocalDirPath;
+			[id(2)] BSTR LocalCurrentFile;
+			[id(3)] BSTR AssociatedProjectFile;
+			[id(4)] BSTR ProjectActiveConfiguration;
+			[id(5)] BSTR ProjectAdditionalIncludePath;
+			[id(6)] BSTR SelectedFiles;
+			[id(7)] long SelectedCount;
+			//}}AFX_ODL_PROP
+
+		methods:
+			// NOTE - ClassWizard will maintain method information here.
+			//    Use extreme caution when editing this section.
+			//{{AFX_ODL_METHOD(FileLocator)
+			[id(8)] BSTR GetSelectedFile(long index);
+			[id(9)] boolean LocateFile();
+			//}}AFX_ODL_METHOD
+
+	};
+
+	//  Class information for FileLocator
+
+	[ uuid(A0580B96-3350-11D5-B5A4-00D0B74ECB52) ]
+	coclass FileLocator
+	{
+		[default] dispinterface IFileLocator;
+	};
+
+
+	//  Primary dispatch interface for ModuleOptions
+
+	[ uuid(4804CCBD-E60C-45C9-A6C0-3E1E96DA3725) ]
+	dispinterface IModuleOptions
+	{
+		properties:
+			// NOTE - ClassWizard will maintain property information here.
+			//    Use extreme caution when editing this section.
+			//{{AFX_ODL_PROP(ModuleOptions)
+			[id(1)] BSTR developerName;
+			[id(2)] BSTR codeTemplateFile;
+			[id(3)] long splitMaxColumn;
+			[id(4)] long menuVertSplitCount;
+			[id(5)] BSTR singleLineCommentToken;
+			[id(6)] BSTR classPrefix;
+			[id(7)] BSTR structPrefix;
+			[id(8)] BSTR enumPrefix;
+			[id(9)] boolean autoCodeGeneration;
+			[id(10)] boolean displayErrorMessages;
+			[id(11)] boolean useCommentDecoration;
+			[id(12)] boolean duplicateLineMoveDown;
+			[id(13)] BSTR browseInfoPath;
+			[id(14)] BSTR additionalIncludePath;
+			[id(15)] BSTR additionalAssocFolders;
+			[id(16)] long linesBetweenFunctionImpls;
+			[id(17)] boolean returnTypeOnSeparateLine;
+			//}}AFX_ODL_PROP
+
+		methods:
+			// NOTE - ClassWizard will maintain method information here.
+			//    Use extreme caution when editing this section.
+			//{{AFX_ODL_METHOD(ModuleOptions)
+			[id(18)] BSTR GetVStudioCommonDirPath(boolean addTrailingSlash);
+			[id(19)] BSTR GetVStudioMacrosDirPath(boolean addTrailingSlash);
+			[id(20)] BSTR GetVStudioVC98DirPath(boolean addTrailingSlash);
+			[id(21)] boolean EditOptions();
+			[id(22)] void LoadOptions();
+			[id(23)] void SaveOptions();
+			//}}AFX_ODL_METHOD
+
+	};
+
+	//  Class information for ModuleOptions
+
+	[ uuid(4064259A-55DC-4CD5-8A17-DD1CC7B59673) ]
+	coclass ModuleOptions
+	{
+		[default] dispinterface IModuleOptions;
+	};
+
+
+	//  Primary dispatch interface for DspProject
+
+	[ uuid(9C88D6AC-E3AE-43D6-AE96-500CB8B5E1A9) ]
+	dispinterface IDspProject
+	{
+		properties:
+			// NOTE - ClassWizard will maintain property information here.
+			//    Use extreme caution when editing this section.
+			//{{AFX_ODL_PROP(DspProject)
+			[id(1)] BSTR DspProjectFilePath;
+			//}}AFX_ODL_PROP
+
+		methods:
+			// NOTE - ClassWizard will maintain method information here.
+			//    Use extreme caution when editing this section.
+			//{{AFX_ODL_METHOD(DspProject)
+			[id(2)] long GetFileFilterCount();
+			[id(3)] BSTR GetFileFilterAt(long index);
+			[id(4)] void AddFileFilter(BSTR sourceFileFilter);
+			[id(5)] void ClearAllFileFilters();
+			[id(6)] long GetProjectFileCount();
+			[id(7)] BSTR GetProjectFileAt(long index);
+			[id(8)] boolean ContainsSourceFile(BSTR sourceFilePath);
+			[id(9)] long GetFilesToAddCount();
+			[id(10)] BSTR GetFileToAddAt(long index);
+			[id(11)] long GetFilesToRemoveCount();
+			[id(12)] BSTR GetFileToRemoveAt(long index);
+			[id(13)] BSTR GetAdditionalIncludePath( [defaultvalue("")] BSTR configurationName);
+			//}}AFX_ODL_METHOD
+
+	};
+
+	//  Class information for DspProject
+
+	[ uuid(C60E380C-3DE3-4D69-9120-D76A23ECDC8D) ]
+	coclass DspProject
+	{
+		[default] dispinterface IDspProject;
+	};
+
+
+	//  Primary dispatch interface for CCodeProcessor
+
+	[ uuid(397B64A6-EF38-4E9E-8343-D1A9102284D6) ]
+	dispinterface ICodeProcessor
+	{
+		properties:
+			// NOTE - ClassWizard will maintain property information here.
+			//    Use extreme caution when editing this section.
+			//{{AFX_ODL_PROP(CCodeProcessor)
+			[id(1)] BSTR docLanguage;
+			[id(2)] long tabSize;
+			[id(3)] boolean useTabs;
+			[id(4)] BSTR cancelTag;
+			//}}AFX_ODL_PROP
+
+		methods:
+			// NOTE - ClassWizard will maintain method information here.
+			//    Use extreme caution when editing this section.
+			//{{AFX_ODL_METHOD(CCodeProcessor)
+			[id(5)] BSTR AutoFormatCode(BSTR codeText);
+			[id(6)] BSTR SplitArgumentList(BSTR codeText, long splitAtColumn, long targetBracketLevel);
+			[id(7)] BSTR ExtractTypeDescriptor(BSTR functionImplLine, BSTR docFileExt);
+			[id(8)] BSTR ImplementMethods(BSTR methodPrototypes, BSTR typeDescriptor, boolean isInline);
+			[id(9)] BSTR ToggleComment(BSTR codeText);
+			[id(10)] BSTR FormatWhitespaces(BSTR codeText);
+			[id(11)] BSTR GenerateConsecutiveNumbers(BSTR codeText);
+			[id(12)] BSTR SortLines(BSTR codeText, boolean ascending);
+			[id(13)] BSTR AutoMakeCode(BSTR codeText);
+			[id(14)] BSTR TokenizeText(BSTR codeText);
+			//}}AFX_ODL_METHOD
+
+	};
+
+	//  Class information for CCodeProcessor
+
+	[ uuid(F70182C0-AE07-4DEB-AFEB-31BCC6BB244C) ]
+	coclass CodeProcessor
+	{
+		[default] dispinterface ICodeProcessor;
+	};
+
+	//{{AFX_APPEND_ODL}}
+	//}}AFX_APPEND_ODL}}
+};

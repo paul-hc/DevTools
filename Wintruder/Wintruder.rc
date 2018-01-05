@@ -1,0 +1,695 @@
+// Microsoft Visual C++ generated resource script.
+//
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include "utl/resource.h"
+#include "afxres.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// English (U.S.) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+#ifdef _WIN32
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+#pragma code_page(1252)
+#endif //_WIN32
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Icon
+//
+
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+IDD_MAIN_DIALOG         ICON                    "res\\Wintruder.ico"
+IDI_APP_SMALL_ICON      ICON                    "res\\WintruderSmall.ico"
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE 
+BEGIN
+    "#include ""utl/resource.h""\r\n"
+    "#include ""afxres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE 
+BEGIN
+    "#include ""utl/utl_ui.rc""\r\n"
+    "#include ""res\\Wintruder.rc2""      // non-Microsoft Visual C++ edited resources\r\n"
+    "\r\n"
+    "#define _AFX_NO_OLE_RESOURCES\r\n"
+    "#define _AFX_NO_TRACKER_RESOURCES\r\n"
+    "#define _AFX_NO_PROPERTY_RESOURCES\r\n"
+    "\r\n"
+    "#include ""afxres.rc""         // Standard components\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_MAIN_DIALOG DIALOGEX 0, 0, 221, 271
+STYLE DS_SETFONT | WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_CLIPSIBLINGS | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME
+EXSTYLE WS_EX_APPWINDOW
+CAPTION "Window Intruder"
+FONT 8, "MS Sans Serif", 0, 0, 0x1
+BEGIN
+    LTEXT           "<top pages>",IDC_MAIN_SHEET,0,1,220,97,WS_BORDER
+    ICON            IDD_MAIN_DIALOG,IDC_TRACK_TOOL_ICON,0,102,21,20,SS_NOTIFY | SS_SUNKEN
+    CONTROL         " &Highlight",CM_HIGHLIGHT_WINDOW,"Button",BS_AUTOCHECKBOX | BS_PUSHLIKE | WS_GROUP | WS_TABSTOP,25,105,41,14
+    PUSHBUTTON      "&Refresh",CM_REFRESH,68,105,41,14
+    PUSHBUTTON      "&Find...",CM_FIND_WINDOW,111,105,51,14
+    PUSHBUTTON      "&Details",IDC_EXPAND_DETAILS,167,105,51,14,WS_GROUP
+    CTEXT           "pos:\tclient:",IDC_TRACKING_POS_STATIC,8,125,203,8
+    EDITTEXT        IDC_BRIEF_INFO_EDIT,8,146,156,12,ES_AUTOHSCROLL | ES_READONLY | WS_GROUP | NOT WS_TABSTOP
+    DEFPUSHBUTTON   " &Apply|...",ID_APPLY_NOW,172,145,41,14,WS_GROUP
+    LTEXT           "<attribute pages>",IDC_DETAILS_SHEET,8,160,205,104,WS_BORDER | NOT WS_GROUP
+    GROUPBOX        "Window Details",IDC_WINDOW_DETAILS_GROUP,3,136,214,133,WS_GROUP
+END
+
+IDD_GENERAL_PAGE DIALOGEX 0, 0, 210, 74
+STYLE DS_SETFONT | DS_MODALFRAME | WS_CHILD | WS_CAPTION | WS_SYSMENU
+CAPTION "General"
+FONT 8, "MS Sans Serif", 0, 0, 0x0
+BEGIN
+    PUSHBUTTON      "···",IDC_FIELD_EDIT_BUTTON,219,0,12,8,NOT WS_VISIBLE | WS_GROUP | NOT WS_TABSTOP
+    RTEXT           "Handle:\nWindow Class:\nCaption:\nID:\nStyle:\nExtended Style:\nWindow Rect:\nClient Rect:",IDC_STATIC,0,0,54,74
+    EDITTEXT        IDC_GENERAL_INFO_EDIT,55,0,154,74,ES_MULTILINE | ES_AUTOHSCROLL | ES_NOHIDESEL | ES_READONLY | NOT WS_BORDER | WS_GROUP
+END
+
+IDD_TREE_WND_PAGE DIALOGEX 0, 0, 210, 76
+STYLE DS_SETFONT | DS_MODALFRAME | WS_CHILD | WS_CAPTION
+CAPTION "Windows"
+FONT 8, "MS Sans Serif", 0, 0, 0x0
+BEGIN
+    CONTROL         "Tree1",IDC_WINDOW_TREE,"SysTreeView32",TVS_HASBUTTONS | TVS_HASLINES | TVS_DISABLEDRAGDROP | TVS_SHOWSELALWAYS | TVS_TRACKSELECT | WS_BORDER | WS_HSCROLL | WS_GROUP | WS_TABSTOP,0,0,209,75
+END
+
+IDD_OPTIONS_PAGE DIALOGEX 0, 0, 210, 78
+STYLE DS_SETFONT | DS_MODALFRAME | WS_CHILD | WS_CAPTION
+CAPTION "Options"
+FONT 8, "MS Sans Serif", 0, 0, 0x0
+BEGIN
+    CONTROL         "Always on &Top",IDC_TOP_MOST_CHECK,"Button",BS_AUTOCHECKBOX | WS_GROUP | WS_TABSTOP,2,1,66,10
+    CONTROL         "Hide On Trac&k",IDC_AUTO_HIDE_CHECK,"Button",BS_AUTOCHECKBOX | WS_GROUP | WS_TABSTOP,2,14,66,10
+    CONTROL         "Auto &Highlight",IDC_AUTO_HILIGHT_CHECK,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,2,27,66,10
+    COMBOBOX        IDC_FRAME_STYLE_COMBO,5,48,70,116,CBS_DROPDOWNLIST | WS_VSCROLL | WS_GROUP | WS_TABSTOP
+    EDITTEXT        IDC_FRAME_SIZE_EDIT,77,48,26,12,ES_AUTOHSCROLL | ES_NUMBER
+    CONTROL         "",IDC_FRAME_SIZE_SPIN,"msctls_updown32",UDS_SETBUDDYINT | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS | UDS_NOTHOUSANDS | UDS_HOTTRACK,96,48,10,12
+    GROUPBOX        "Highlight frame:",IDC_STATIC,2,39,105,26
+    CONTROL         "Ignore H&idden",IDC_IGNORE_HIDDEN_CHECK,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,2,68,61,10
+    CONTROL         "Ignore &Disabled",IDC_IGNORE_DISABLED_CHECK,"Button",BS_AUTOCHECKBOX | WS_GROUP | WS_TABSTOP,68,68,66,10
+    CONTROL         "Display flags of &0",IDC_DISPLAY_ZERO_FLAGS_CHECK,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,139,68,69,10
+    GROUPBOX        "    ",IDC_STATIC,110,2,98,63
+    CONTROL         "Auto &Update:",IDC_AUTO_UPDATE_CHECK,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,117,1,56,10
+    LTEXT           "Timeout (sec):",IDC_STATIC,117,13,47,8
+    EDITTEXT        IDC_AUTO_UPDATE_TIMEOUT_EDIT,166,12,27,12,ES_AUTOHSCROLL | ES_NUMBER | WS_GROUP
+    CONTROL         "Spin1",IDC_AUTO_UPDATE_TIMEOUT_SPIN,"msctls_updown32",UDS_SETBUDDYINT | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS,194,12,11,12
+    LTEXT           "Target &Window:",IDC_STATIC,117,26,87,8
+    COMBOBOX        IDC_AUTO_UPDATE_TARGET_COMBO,117,36,85,116,CBS_DROPDOWNLIST | WS_VSCROLL | WS_GROUP | WS_TABSTOP
+    CONTROL         "&Refresh All",IDC_AUTO_UPDATE_REFRESH_CHECK,"Button",BS_AUTOCHECKBOX | WS_GROUP | WS_TABSTOP,117,51,85,10
+END
+
+IDD_FIND_WND_DIALOG DIALOGEX 0, 0, 218, 120
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Find Window"
+FONT 8, "MS Sans Serif", 0, 0, 0x1
+BEGIN
+    RTEXT           "Window &handle:",IDC_STATIC,5,8,56,8
+    EDITTEXT        IDC_HANDLE_EDIT,63,6,72,12,ES_AUTOHSCROLL | WS_GROUP
+    LTEXT           "",IDC_TRACK_TOOL_ICON,135,6,13,12,SS_SUNKEN
+    RTEXT           "Window class:",IDC_STATIC,5,24,56,8
+    COMBOBOX        IDC_WCLASS_COMBO,63,22,85,106,CBS_DROPDOWN | CBS_AUTOHSCROLL | WS_VSCROLL | WS_GROUP | WS_TABSTOP
+    RTEXT           "C&aption:",IDC_STATIC,5,40,56,8
+    EDITTEXT        IDC_CAPTION_EDIT,63,38,85,12,ES_AUTOHSCROLL | WS_GROUP
+    RTEXT           "&ID:",IDC_STATIC,5,56,56,8
+    EDITTEXT        IDC_ID_EDIT,63,54,85,12,ES_AUTOHSCROLL | WS_GROUP
+    GROUPBOX        "From",IDC_STATIC,5,75,57,40,WS_GROUP
+    CONTROL         "&Beginning",IDC_FROM_BEGINING_RADIO,"Button",BS_AUTORADIOBUTTON | WS_GROUP | WS_TABSTOP,11,87,47,10
+    CONTROL         "C&urrent",IDC_FROM_CURRENT_RADIO,"Button",BS_AUTORADIOBUTTON,11,100,39,10
+    GROUPBOX        "Direction",IDC_STATIC,71,75,57,40,WS_GROUP
+    CONTROL         "&Forward",IDC_DIR_FORWARD_RADIO,"Button",BS_AUTORADIOBUTTON | WS_GROUP | WS_TABSTOP,77,87,41,10
+    CONTROL         "Bac&kward",IDC_DIR_BACKWARD_RADIO,"Button",BS_AUTORADIOBUTTON,77,100,48,10
+    GROUPBOX        "Compare",IDC_STATIC,138,75,75,40,WS_GROUP
+    CONTROL         "Match &Case",IDC_MATCH_CASE_CHECK,"Button",BS_AUTOCHECKBOX | WS_GROUP | WS_TABSTOP,145,87,59,10
+    CONTROL         "Match &Whole",IDC_MATCH_WHOLE_CHECK,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,145,100,59,10
+    DEFPUSHBUTTON   "&Search",IDOK,163,5,50,14,WS_GROUP
+    PUSHBUTTON      "Reset",IDC_RESET_DEFAULT,163,21,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,163,37,50,14
+    CONTROL         "&Refresh Now",IDC_REFRESH_NOW,"Button",BS_AUTOCHECKBOX | WS_GROUP | WS_TABSTOP,157,54,56,12
+END
+
+IDD_APPLY_CHANGES_DIALOG DIALOGEX 0, 0, 199, 110
+STYLE DS_SETFONT | DS_MODALFRAME | DS_CENTER | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Modify Window Properties"
+FONT 8, "MS Sans Serif", 0, 0, 0x0
+BEGIN
+    DEFPUSHBUTTON   "Yes",IDOK,51,91,50,14,WS_GROUP
+    PUSHBUTTON      "No",IDCANCEL,105,91,50,14
+    ICON            "",IDC_QUESTION_ICON,7,5,20,20
+    LTEXT           "<window>",IDC_PROMPT_STATIC,35,16,162,8,SS_NOPREFIX | SS_ENDELLIPSIS
+    LTEXT           "Altered attributes:",IDC_STATIC,2,29,56,8
+    CTEXT           "",IDC_CHANGED_FIELDS_STATIC,2,37,195,8
+    GROUPBOX        "                                      ",IDC_STATIC,2,48,195,38
+    CONTROL         "&Call SetWindowPos",IDC_USE_SETWINDOWPOS_CHECK,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,9,48,76,10
+    CONTROL         "&Redraw Frame",IDC_SWP_DRAWFRAME_CHECK,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,9,60,65,10
+    CONTROL         "&Frame Changed",IDC_SWP_FRAMECHANGED_CHECK,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,9,72,65,10
+    CONTROL         "&No Redraw",IDC_SWP_NOREDRAW_CHECK,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,77,60,51,10
+    CONTROL         "No &Activate",IDC_SWP_NOACTIVATE_CHECK,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,77,72,51,10
+    CONTROL         "&Show Window",IDC_SWP_SHOWWINDOW_CHECK,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,132,60,60,10
+    CONTROL         "&Hide Window",IDC_SWP_HIDEWINDOW_CHECK,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,132,72,60,10
+    LTEXT           "Do you want to modify attributes for window:",IDC_STATIC,35,6,140,8
+END
+
+IDD_EDIT_CAPTION_PAGE DIALOG  0, 0, 192, 82
+STYLE DS_SETFONT | DS_MODALFRAME | WS_CHILD | WS_CAPTION
+CAPTION "Caption"
+FONT 8, "MS Sans Serif"
+BEGIN
+    EDITTEXT        IDC_EDIT_CAPTION_EDIT,0,1,192,81,ES_MULTILINE | ES_AUTOVSCROLL | ES_AUTOHSCROLL | ES_NOHIDESEL | WS_VSCROLL | WS_HSCROLL | WS_GROUP
+END
+
+IDD_EDIT_IDENT_PAGE DIALOGEX 0, 0, 143, 53
+STYLE DS_SETFONT | DS_MODALFRAME | WS_CHILD | WS_CAPTION
+CAPTION "Identifier"
+FONT 8, "MS Sans Serif", 0, 0, 0x0
+BEGIN
+    RTEXT           "&Decimal id:",IDC_IDENT_DEC_LABEL,0,7,59,8
+    EDITTEXT        IDC_IDENT_DEC_EDIT,63,4,66,12,ES_AUTOHSCROLL | WS_GROUP
+    CONTROL         "",IDC_IDENT_DEC_SPIN,"msctls_updown32",UDS_SETBUDDYINT | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS | UDS_NOTHOUSANDS | UDS_HOTTRACK,129,4,10,12
+    RTEXT           "&Hexadecimal id:",IDC_IDENT_HEX_LABEL,0,23,59,8
+    EDITTEXT        IDC_IDENT_HEX_EDIT,63,20,66,12,ES_AUTOHSCROLL | WS_GROUP
+    RTEXT           "&Stock id:",IDC_STATIC,0,42,59,8
+    COMBOBOX        IDC_IDENT_LITERAL_COMBO,63,40,76,176,CBS_DROPDOWN | WS_VSCROLL | WS_TABSTOP
+END
+
+IDD_EDIT_PLACEMENT_PAGE DIALOGEX 0, 0, 192, 84
+STYLE DS_SETFONT | DS_MODALFRAME | WS_CHILD | WS_CAPTION
+CAPTION "Placement"
+FONT 8, "MS Sans Serif", 0, 0, 0x0
+BEGIN
+    GROUPBOX        "",IDC_STATIC,19,1,153,37
+    GROUPBOX        "",IDC_STATIC,19,33,153,37
+    LTEXT           "",ID_MOVE_TOOL,89,9,13,12
+    LTEXT           "",ID_SIZE_TOOL,89,23,13,12
+    LTEXT           "",ID_SIZE_TOP_LEFT_TOOL,89,41,13,12
+    LTEXT           "",ID_SIZE_BOTTOM_RIGHT_TOOL,89,56,13,12
+    RTEXT           "&X Origin",IDC_STATIC,22,10,26,8
+    EDITTEXT        IDC_ORG_X_EDIT,50,8,38,12,ES_RIGHT | ES_NUMBER | WS_GROUP
+    CONTROL         "Spin1",IDC_ORG_X_SPIN,"msctls_updown32",UDS_SETBUDDYINT | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS,48,8,11,12
+    LTEXT           "&Y Origin",IDC_STATIC,142,10,26,8
+    EDITTEXT        IDC_ORG_Y_EDIT,102,8,38,12,ES_NUMBER | WS_GROUP
+    CONTROL         "Spin1",IDC_ORG_Y_SPIN,"msctls_updown32",UDS_SETBUDDYINT | UDS_ALIGNLEFT | UDS_AUTOBUDDY | UDS_ARROWKEYS,132,8,11,12
+    RTEXT           "&Width",IDC_STATIC,22,24,26,8
+    EDITTEXT        IDC_WIDTH_EDIT,50,22,38,12,ES_RIGHT | ES_NUMBER | WS_GROUP
+    CONTROL         "Spin1",IDC_WIDTH_SPIN,"msctls_updown32",UDS_SETBUDDYINT | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS,48,22,11,12
+    LTEXT           "&Height",IDC_STATIC,142,24,26,8
+    EDITTEXT        IDC_HEIGHT_EDIT,102,22,38,12,ES_NUMBER | WS_GROUP
+    CONTROL         "Spin1",IDC_HEIGHT_SPIN,"msctls_updown32",UDS_SETBUDDYINT | UDS_ALIGNLEFT | UDS_AUTOBUDDY | UDS_ARROWKEYS,132,22,11,12
+    RTEXT           "&Left",IDC_STATIC,22,43,26,8
+    EDITTEXT        IDC_LEFT_EDIT,50,40,38,12,ES_RIGHT | ES_NUMBER | WS_GROUP
+    CONTROL         "Spin1",IDC_LEFT_SPIN,"msctls_updown32",UDS_SETBUDDYINT | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS,48,40,11,12
+    LTEXT           "&Top",IDC_STATIC,142,43,26,8
+    EDITTEXT        IDC_TOP_EDIT,102,40,38,12,ES_NUMBER | WS_GROUP
+    CONTROL         "Spin1",IDC_TOP_SPIN,"msctls_updown32",UDS_SETBUDDYINT | UDS_ALIGNLEFT | UDS_AUTOBUDDY | UDS_ARROWKEYS,132,40,11,12
+    RTEXT           "&Right",IDC_STATIC,22,57,26,8
+    EDITTEXT        IDC_RIGHT_EDIT,50,55,38,12,ES_RIGHT | ES_NUMBER | WS_GROUP
+    CONTROL         "Spin1",IDC_RIGHT_SPIN,"msctls_updown32",UDS_SETBUDDYINT | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS,48,55,11,12
+    LTEXT           "&Bottom",IDC_STATIC,142,57,26,8
+    EDITTEXT        IDC_BOTTOM_EDIT,102,55,38,12,ES_NUMBER | WS_GROUP
+    CONTROL         "Spin1",IDC_BOTTOM_SPIN,"msctls_updown32",UDS_SETBUDDYINT | UDS_ALIGNLEFT | UDS_AUTOBUDDY | UDS_ARROWKEYS,132,55,11,12
+    CONTROL         "&Auto-apply placement",IDC_AUTO_APPLY_PLACEMENT_CHECK,
+                    "Button",BS_AUTOCHECKBOX | WS_GROUP | WS_TABSTOP,19,73,84,10
+END
+
+IDD_EDIT_FLAGS_PAGE DIALOGEX 0, 0, 192, 82
+STYLE DS_SETFONT | DS_MODALFRAME | WS_CHILD | WS_CAPTION
+CAPTION "<flags/extended-flags>"
+FONT 8, "MS Sans Serif", 0, 0, 0x0
+BEGIN
+    RTEXT           "&Overall:",IDC_STATIC,1,3,25,8
+    EDITTEXT        IDC_TOTAL_FLAGS_EDIT,28,1,57,12,ES_AUTOHSCROLL
+    RTEXT           "&Unknown:",IDC_UNKNOWN_FLAGS_LABEL,96,3,34,8
+    EDITTEXT        IDC_UNKNOWN_FLAGS_EDIT,132,1,57,12,ES_AUTOHSCROLL | WS_GROUP
+    LTEXT           "<general/class pages>",IDC_DETAILS_SHEET,0,15,192,67,NOT WS_VISIBLE | WS_BORDER
+END
+
+IDD_FLAG_LIST_PAGE DIALOGEX 0, 0, 100, 42
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "General"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    CONTROL         "",IDC_FLAGS_EDITOR_LIST,"SysListView32",LVS_REPORT | LVS_SHOWSELALWAYS | LVS_SHAREIMAGELISTS | LVS_ALIGNLEFT | LVS_NOCOLUMNHEADER | WS_BORDER | WS_GROUP | WS_TABSTOP,0,0,100,42
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Version
+//
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION 4,0,0,1
+ PRODUCTVERSION 4,0,0,1
+ FILEFLAGSMASK 0x3fL
+#ifdef _DEBUG
+ FILEFLAGS 0x1L
+#else
+ FILEFLAGS 0x0L
+#endif
+ FILEOS 0x4L
+ FILETYPE 0x1L
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904b0"
+        BEGIN
+            VALUE "Comments", "Valuable hacking tool"
+            VALUE "CompanyName", "Paul Cocoveanu"
+            VALUE "Email", "phc.2nd@gmail.com"
+            VALUE "FileDescription", "Wintruder Application"
+            VALUE "FileVersion", "4, 0, 0, 1"
+            VALUE "InternalName", "Wintruder"
+            VALUE "LegalCopyright", "Copyright © 1998-2016"
+            VALUE "LegalTrademarks", "Use it responsibly"
+            VALUE "OriginalFilename", "Wintruder64.exe"
+            VALUE "ProductName", "Wintruder"
+            VALUE "ProductVersion", "4, 0, 0, 1"
+            VALUE "WrittenBy", "Written by Paul Cocoveanu"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x409, 1200
+    END
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO 
+BEGIN
+    IDD_MAIN_DIALOG, DIALOG
+    BEGIN
+        RIGHTMARGIN, 220
+        TOPMARGIN, 1
+        BOTTOMMARGIN, 269
+    END
+
+    IDD_OPTIONS_PAGE, DIALOG
+    BEGIN
+        LEFTMARGIN, 2
+        RIGHTMARGIN, 208
+        TOPMARGIN, 1
+    END
+
+    IDD_FIND_WND_DIALOG, DIALOG
+    BEGIN
+        LEFTMARGIN, 5
+        RIGHTMARGIN, 213
+        TOPMARGIN, 5
+        BOTTOMMARGIN, 115
+    END
+
+    IDD_APPLY_CHANGES_DIALOG, DIALOG
+    BEGIN
+        LEFTMARGIN, 2
+        RIGHTMARGIN, 197
+        TOPMARGIN, 5
+        BOTTOMMARGIN, 105
+    END
+
+    IDD_EDIT_CAPTION_PAGE, DIALOG
+    BEGIN
+        TOPMARGIN, 1
+    END
+
+    IDD_EDIT_IDENT_PAGE, DIALOG
+    BEGIN
+        RIGHTMARGIN, 139
+        TOPMARGIN, 4
+    END
+
+    IDD_EDIT_PLACEMENT_PAGE, DIALOG
+    BEGIN
+        TOPMARGIN, 1
+        BOTTOMMARGIN, 83
+    END
+
+    IDD_EDIT_FLAGS_PAGE, DIALOG
+    BEGIN
+        TOPMARGIN, 1
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Cursor
+//
+
+IDR_POINTER_CURSOR      CURSOR                  "res\\WindowPointer.cur"
+ID_MOVE_TOOL            CURSOR                  "res\\Move.cur"
+ID_SIZE_TOP_LEFT_TOOL   CURSOR                  "res\\SizeTopLeft.cur"
+ID_SIZE_BOTTOM_RIGHT_TOOL CURSOR                  "res\\SizeBottomRight.cur"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Accelerator
+//
+
+IDD_GENERAL_PAGE ACCELERATORS 
+BEGIN
+    VK_RETURN,      IDC_FIELD_EDIT_BUTTON,  VIRTKEY, NOINVERT
+END
+
+IDR_MAIN_SHARED_ACCEL ACCELERATORS 
+BEGIN
+    "A",            CM_ACTIVATE_WINDOW,     VIRTKEY, SHIFT, CONTROL, NOINVERT
+    "1",            CM_EDIT_CAPTION,        VIRTKEY, CONTROL, NOINVERT
+    "2",            CM_EDIT_IDENT,          VIRTKEY, CONTROL, NOINVERT
+    "5",            CM_EDIT_PLACE,          VIRTKEY, CONTROL, NOINVERT
+    "3",            CM_EDIT_STYLE,          VIRTKEY, CONTROL, NOINVERT
+    "4",            CM_EDIT_STYLE_EX,       VIRTKEY, CONTROL, NOINVERT
+    VK_F3,          CM_FIND_NEXT_WINDOW,    VIRTKEY, NOINVERT
+    VK_F3,          CM_FIND_PREV_WINDOW,    VIRTKEY, SHIFT, NOINVERT
+    "F",            CM_FIND_WINDOW,         VIRTKEY, CONTROL, NOINVERT
+    "H",            CM_HIDE_WINDOW,         VIRTKEY, SHIFT, CONTROL, NOINVERT
+    VK_F4,          CM_HIGHLIGHT_WINDOW,    VIRTKEY, NOINVERT
+    VK_ESCAPE,      CM_MINIMIZE,            VIRTKEY, NOINVERT
+    "R",            CM_REDRAW_DESKTOP,      VIRTKEY, SHIFT, CONTROL, NOINVERT
+    VK_F5,          CM_REFRESH,             VIRTKEY, NOINVERT
+    "S",            CM_SHOW_WINDOW,         VIRTKEY, SHIFT, CONTROL, NOINVERT
+    "E",            CM_TOGGLE_ENABLE_WINDOW, VIRTKEY, SHIFT, CONTROL, NOINVERT
+    "T",            CM_TOGGLE_TOPMOST_WINDOW, VIRTKEY, SHIFT, CONTROL, NOINVERT
+    VK_F5,          CM_UPDATE_TICK,         VIRTKEY, CONTROL, NOINVERT
+    "1",            CM_VIEW_GENERAL,        VIRTKEY, ALT, NOINVERT
+    VK_F2,          CM_VIEW_GENERAL,        VIRTKEY, CONTROL, NOINVERT
+    "3",            CM_VIEW_OPTIONS,        VIRTKEY, ALT, NOINVERT
+    "2",            CM_VIEW_WND_TREE,       VIRTKEY, ALT, NOINVERT
+    VK_RETURN,      ID_APPLY_NOW,           VIRTKEY, NOINVERT
+    VK_F2,          IDC_EXPAND_DETAILS,     VIRTKEY, NOINVERT
+END
+
+IDR_FLAGS_CONTROL_ACCEL ACCELERATORS 
+BEGIN
+    VK_SUBTRACT,    CM_COLLAPSE_GROUPS,     VIRTKEY, CONTROL, NOINVERT
+    "C",            CM_COPY_FORMATTED,      VIRTKEY, CONTROL, NOINVERT
+    VK_INSERT,      CM_COPY_FORMATTED,      VIRTKEY, CONTROL, NOINVERT
+    "C",            CM_COPY_SELECTED,       VIRTKEY, SHIFT, CONTROL, NOINVERT
+    VK_ADD,         CM_EXPAND_GROUPS,       VIRTKEY, CONTROL, NOINVERT
+    "A",            ID_EDIT_SELECT_ALL,     VIRTKEY, CONTROL, NOINVERT
+END
+
+IDD_TREE_WND_PAGE ACCELERATORS 
+BEGIN
+    VK_DOWN,        CM_MOVE_WINDOW_DOWN,    VIRTKEY, SHIFT, CONTROL, NOINVERT
+    VK_END,         CM_MOVE_WINDOW_TO_BOTTOM, VIRTKEY, SHIFT, CONTROL, NOINVERT
+    VK_HOME,        CM_MOVE_WINDOW_TO_TOP,  VIRTKEY, SHIFT, CONTROL, NOINVERT
+    VK_UP,          CM_MOVE_WINDOW_UP,      VIRTKEY, SHIFT, CONTROL, NOINVERT
+    "C",            ID_COPY_TREE_ANCESTORS, VIRTKEY, CONTROL, NOINVERT
+    VK_INSERT,      ID_COPY_TREE_ANCESTORS, VIRTKEY, CONTROL, NOINVERT
+    "C",            ID_COPY_TREE_CHILDREN,  VIRTKEY, SHIFT, CONTROL, NOINVERT
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Menu
+//
+
+IDR_CONTEXT_MENU MENU 
+BEGIN
+    POPUP "<sys-tray icon>"
+    BEGIN
+        MENUITEM "Always on Top",               IDC_TOP_MOST_CHECK
+        MENUITEM "Highlight\tF4",               CM_HIGHLIGHT_WINDOW
+        MENUITEM SEPARATOR
+        MENUITEM "Restore",                     CM_RESTORE
+        MENUITEM "Close",                       ID_FILE_CLOSE
+        MENUITEM SEPARATOR
+        MENUITEM "About Wintruder...\tF1",      ID_APP_ABOUT
+    END
+    POPUP "<tree>"
+    BEGIN
+        MENUITEM "&Highlight\tF4",              CM_HIGHLIGHT_WINDOW
+        MENUITEM SEPARATOR
+        MENUITEM "E&xpand Branch\tCtrl+Plus",   CM_EXPAND_BRANCH
+        MENUITEM "&Colapse Branch\tCtrl+Minus", CM_COLAPSE_BRANCH
+        MENUITEM SEPARATOR
+        MENUITEM "&Refresh\tF5",                CM_REFRESH
+        MENUITEM SEPARATOR
+        MENUITEM "Move &Up\tCtrl+Shift+Up Arrow", CM_MOVE_WINDOW_UP
+        MENUITEM "Move &Down\tCtrl+Shift+Down Arrow", CM_MOVE_WINDOW_DOWN
+        MENUITEM SEPARATOR
+        MENUITEM "Move to &Top\tCtrl+Shift+Home", CM_MOVE_WINDOW_TO_TOP
+        MENUITEM "Move to &Bottom\tCtrl+Shift+End", CM_MOVE_WINDOW_TO_BOTTOM
+        MENUITEM SEPARATOR
+        MENUITEM "Copy Ancestors\tCtrl+C",      ID_COPY_TREE_ANCESTORS
+        MENUITEM "Copy Children\tCtrl+Shift+C", ID_COPY_TREE_CHILDREN
+        MENUITEM SEPARATOR
+        POPUP "Edit &Attributes"
+        BEGIN
+            MENUITEM "&Caption...\tCtrl+C",         CM_EDIT_CAPTION
+            MENUITEM "&Identifier...\tCtrl+I",      CM_EDIT_IDENT
+            MENUITEM "&Style...\tCtrl+S",           CM_EDIT_STYLE
+            MENUITEM "&Extended Style...\tCtrl+E",  CM_EDIT_STYLE_EX
+            MENUITEM "&Placement...\tCtrl+P",       CM_EDIT_PLACE
+        END
+    END
+    POPUP "<details split-button>"
+    BEGIN
+        MENUITEM "&Activate Window\tCtrl+Shift+A", CM_ACTIVATE_WINDOW
+        MENUITEM SEPARATOR
+        MENUITEM "&Show Window\tCtrl+Shift+S",  CM_SHOW_WINDOW
+        MENUITEM "&Hide Window\tCtrl+Shift+H",  CM_HIDE_WINDOW
+        MENUITEM SEPARATOR
+        MENUITEM "&Enable|Disable| Window\tCtrl+Shift+E", CM_TOGGLE_ENABLE_WINDOW
+        MENUITEM "Toggle Top-&most Window\tCtrl+Shift+T", CM_TOGGLE_TOPMOST_WINDOW
+        MENUITEM SEPARATOR
+        MENUITEM "Move &Up",                    CM_MOVE_WINDOW_UP
+        MENUITEM "Move &Down",                  CM_MOVE_WINDOW_DOWN
+        MENUITEM SEPARATOR
+        MENUITEM "Move to &Top",                CM_MOVE_WINDOW_TO_TOP
+        MENUITEM "Move to &Bottom",             CM_MOVE_WINDOW_TO_BOTTOM
+        MENUITEM SEPARATOR
+        MENUITEM "&Redraw Desktop\tCtrl+Shift+R", CM_REDRAW_DESKTOP
+    END
+    POPUP "<find split>"
+    BEGIN
+        MENUITEM "Find &Next Window\tF3",       CM_FIND_NEXT_WINDOW
+        MENUITEM "Find &Previous Window\tShift+F3", CM_FIND_PREV_WINDOW
+    END
+    POPUP "<reset split>"
+    BEGIN
+        MENUITEM "Use current &window",         CM_COPY_TARGET_WND
+        MENUITEM SEPARATOR
+        MENUITEM "Copy window &class",          CM_COPY_WND_CLASS
+        MENUITEM "Copy window c&aption",        CM_COPY_WND_CAPTION
+        MENUITEM "Copy window &identifier",     CM_COPY_WND_IDENT
+    END
+    POPUP "<flags list>"
+    BEGIN
+        MENUITEM "Copy\tCtrl+C",                CM_COPY_FORMATTED
+        MENUITEM "Copy &Selection\tCtrl+Shift+C", CM_COPY_SELECTED
+        MENUITEM SEPARATOR
+        MENUITEM "E&xpand Groups\tCtrl+Plus",   CM_EXPAND_GROUPS
+        MENUITEM "&Collapse Groups\tCtrl+Minus", CM_COLLAPSE_GROUPS
+        MENUITEM SEPARATOR
+        MENUITEM "Select &All\tCtrl+A",         ID_EDIT_SELECT_ALL
+    END
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Bitmap
+//
+
+IDR_IMAGE_STRIP         BITMAP                  "res\\ImageStrip.bmp"
+IDR_WND_TYPES_STRIP     BITMAP                  "res\\WndTypesStrip.bmp"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// PNG
+//
+
+IDR_IMAGE_STRIP         PNG                     "res\\ImageStrip.png"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Toolbar
+//
+
+IDR_IMAGE_STRIP TOOLBAR  16, 16
+BEGIN
+    BUTTON      ID_MOVE_TOOL
+    BUTTON      ID_SIZE_TOOL
+    BUTTON      ID_SIZE_TOP_LEFT_TOOL
+    BUTTON      ID_SIZE_BOTTOM_RIGHT_TOOL
+    SEPARATOR
+    BUTTON      CM_FIND_NEXT_WINDOW
+    BUTTON      CM_FIND_PREV_WINDOW
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// String Table
+//
+
+STRINGTABLE 
+BEGIN
+    IDS_WND_EXPIRED_FMT     "Window with handle %08X does no longer exist."
+    IDS_WND_NOT_FOUND       "Cannot find window with:"
+    IDS_EDIT_STYLE_PAGE     "Style\nCtrl+3"
+    IDS_EDIT_STYLE_EX_PAGE  "Extended Style\nCtrl+4"
+    IDS_STYLE_PROMPTTITLE   "Modify Window Style"
+    IDS_STYLE_EX_PROMPTTITLE "Modify Extended Window Style"
+    IDS_CAPTION_PROMPTTITLE "Modify Window Caption"
+    IDS_IDENT_PROMPTTITLE   "Modify Child Window Identifier"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_PLACE_PROMPTTITLE   "Modify Window Placement"
+END
+
+STRINGTABLE 
+BEGIN
+    IDC_TRACK_TOOL_ICON     "Track Select Window"
+    IDC_EXPAND_DETAILS      "Toggle window detail properties (F2)"
+END
+
+STRINGTABLE 
+BEGIN
+    CM_EDIT_CAPTION         "Edit Window Caption (Ctrl+1)"
+    CM_EDIT_IDENT           "Edit Child Window Identifier (Ctrl+2)"
+    CM_EDIT_STYLE           "Edit Window Style (Ctrl+3)"
+    CM_EDIT_STYLE_EX        "Edit Window Extended Style (Ctrl+4)"
+    CM_EDIT_PLACE           "Edit Window Placement (Ctrl+5)"
+    CM_HIGHLIGHT_WINDOW     "Highlight Current Window (F4)"
+    CM_REFRESH              "Refresh Window Tree (F5)"
+    CM_FIND_WINDOW          "Find Window (Ctrl+F)"
+END
+
+STRINGTABLE 
+BEGIN
+    CM_UPDATE_TICK          "Update Tick (Ctrl+F5)"
+    CM_COPY_WND_CLASS       "Copy the window class of selected window handle"
+    CM_COPY_WND_CAPTION     "Copy the caption of selected window handle"
+    CM_COPY_WND_IDENT       "Copy the identifier of selected window handle"
+    CM_ACTIVATE_WINDOW      "Activate current window"
+    CM_SHOW_WINDOW          "Show current window"
+    CM_HIDE_WINDOW          "Hide current window"
+    CM_TOGGLE_TOPMOST_WINDOW "Toggle current window top-most state"
+    CM_TOGGLE_ENABLE_WINDOW "Toggle current window enabled state"
+END
+
+STRINGTABLE 
+BEGIN
+    IDD_MAIN_DIALOG         "About (F1), Toggle Details (F2), Find Next (F3), Find Previous (Shift+F3)"
+    IDD_GENERAL_PAGE        "Alt+1"
+    IDD_TREE_WND_PAGE       "Alt+2"
+    IDD_OPTIONS_PAGE        "Alt+3"
+    IDD_EDIT_CAPTION_PAGE   "Ctrl+1"
+    IDD_EDIT_IDENT_PAGE     "Ctrl+2"
+    IDD_EDIT_PLACEMENT_PAGE "Ctrl+5"
+END
+
+STRINGTABLE 
+BEGIN
+    IDC_FLAGS_EDITOR_LIST   "Style Name=-1|Value=75"
+END
+
+STRINGTABLE 
+BEGIN
+    ID_MOVE_TOOL            "Track position"
+    ID_SIZE_TOOL            "Track size"
+    ID_SIZE_TOP_LEFT_TOOL   "Track top-left corner"
+    ID_SIZE_BOTTOM_RIGHT_TOOL "Track bottom-right corner"
+END
+
+STRINGTABLE 
+BEGIN
+    IDC_TOP_MOST_CHECK      "\nKeep Wintruder windows topmost"
+    IDC_AUTO_HIDE_CHECK     "\nHides Wintruder application when tracking"
+    IDC_AUTO_HILIGHT_CHECK  "\nHighlight each time a new window is selected"
+    IDC_IGNORE_DISABLED_CHECK 
+                            "\nAllow disabled windows to be selected by track finder"
+    IDC_IGNORE_HIDDEN_CHECK "\nAllow hidden windows to be selected by track finder"
+    IDC_FRAME_STYLE_COMBO   "\nHighlight the entire non-client area of the current window"
+END
+
+STRINGTABLE 
+BEGIN
+    IDC_AUTO_UPDATE_CHECK   "\nPerform automatic updates with the specified timeout"
+    IDC_AUTO_UPDATE_REFRESH_CHECK "\nAuto-update all windows"
+    IDC_AUTO_UPDATE_TIMEOUT_EDIT 
+                            "\nEnter the auto-update timer timeout in seconds"
+    IDC_AUTO_UPDATE_TARGET_COMBO 
+                            "\nChoose what actions to follow on auto-updates"
+END
+
+STRINGTABLE 
+BEGIN
+    ID_APPLY_NOW            "Apply Modified Attributes"
+END
+
+STRINGTABLE 
+BEGIN
+    AFX_IDS_APP_TITLE       "Wintruder"
+END
+
+#endif    // English (U.S.) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+#include "utl/utl_ui.rc"
+#include "res\Wintruder.rc2"      // non-Microsoft Visual C++ edited resources
+
+#define _AFX_NO_OLE_RESOURCES
+#define _AFX_NO_TRACKER_RESOURCES
+#define _AFX_NO_PROPERTY_RESOURCES
+
+#include "afxres.rc"         // Standard components
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+

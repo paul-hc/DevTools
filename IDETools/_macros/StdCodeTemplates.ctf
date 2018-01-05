@@ -1,0 +1,190 @@
+
+//=========================================================
+// FILE TYPES SECTION DESCRIPTIONS
+//=========================================================
+
+[[File Template.H]]
+;<<CVS Header>>$
+<<Copyright>>$
+<<Include Once>>$
+<<Class Body>>$
+[[EOS]]
+
+[[File Template.HXX]]
+;<<CVS Header>>$
+<<Copyright>>$
+
+<<Include Once hxx>>$
+[[EOS]]
+
+[[File Template.INL]]
+<<File Template.HXX>>[[EOS]]
+
+[[File Template.CXX]]
+;<<CVS Header>>$
+<<Copyright>>$
+
+[[EOS]]
+
+[[File Template.TMPL]]
+<<File Template.CXX>>[[EOS]]
+
+[[File Template.T]]
+<<File Template.CXX>>[[EOS]]
+
+[[File Template.CPP]]
+;<<CVS Header>>$
+<<Copyright>>
+<<CPP STD Include>>$
+;<<Doxygen Class Description>>
+[[EOS]]
+
+[[File Template.C]]
+<<File Template.CPP>>[[EOS]]
+
+//=========================================================
+// SECTION DEFINITIONS
+//=========================================================
+
+[[Copyright]]
+[[EOS]]
+
+[[Include Once]]
+#ifndef %FileName%_h
+#define %FileName%_h
+#pragma once
+
+%CORE%$
+
+#endif // %FileName%_h
+[[EOS]]
+
+[[Include Once hxx]]
+#ifndef %FileName%_hxx
+#define %FileName%_hxx
+
+
+
+%CORE%$
+
+#endif // %FileName%_hxx
+[[EOS]]
+
+[[Single Line Decoration Core]]
+################# %TypeName% #################[[EOS]]
+
+[[Single Line Decoration]]
+//<<Single Line Decoration Core>>[[EOS]]
+
+[[void Function Body]]
+{
+}
+[[EOS]]
+
+[[return Function Body]]
+{
+	return ;
+}
+[[EOS]]
+
+[[Class Body]]
+
+class %StgClassModifier%%TypeName%
+{
+public:
+	%TypeName%( void );
+	~%TypeName%();
+private:
+};
+[[EOS]]
+
+[[Struct Body]]
+
+struct %StgClassModifier%%TypeName%
+{
+	%TypeName%( void );
+	~%TypeName%();
+public:
+};
+[[EOS]]
+
+[[Enum Body]]
+
+<<Single Line Decoration>>
+enum %TypeName%
+{
+	YourConst1,
+	YourConst2
+};
+[[EOS]]
+
+[[CPP STD Include]]
+#include "StdAfx.h"
+#include "%FileName%.h"
+
+#ifdef _DEBUG
+#define new DEBUG_NEW
+#endif
+[[EOS]]
+
+[[Doxygen Class Description]]
+
+/**
+    \class %StgClassModifier%%TypeName% %FileName%.h
+    \brief .
+*/
+
+[[EOS]]
+
+[[CVS Header]]
+// $Header: $
+[[EOS]]
+
+[[Implementation Block Decoration]]
+// %Comment%
+
+[[EOS]]
+
+[[Implementation SubBlock Decoration]]
+// %Comment%
+
+[[EOS]]
+
+
+[[BUGBUG Comment UNKNOWN]]
+%LeadingSpaces%%SingleLineCommentToken%
+%LeadingSpaces%%SingleLineCommentToken%	\BUGBUG: %Comment%
+%LeadingSpaces%%SingleLineCommentToken%
+[[EOS]]
+
+[[BUGBUG Comment C/C++]]
+%LeadingSpaces%/**
+%LeadingSpaces%	\BUGBUG: %Comment%
+%LeadingSpaces%*/
+[[EOS]]
+
+[[BUGBUG Comment BASIC]]
+%LeadingSpaces%'
+%LeadingSpaces%'	\BUGBUG: %Comment%
+%LeadingSpaces%'
+[[EOS]]
+
+[[ForLoopIterator]]
+%LeadingSpaces%for ( %ContainerType%::%IteratorType% it%IteratorName% = %Container%%Selector%begin();
+%LeadingSpaces%	  it%IteratorName% != %Container%%Selector%end(); ++it%IteratorName% )
+%LeadingSpaces%{
+%LeadingSpaces%}
+[[EOS]]
+
+[[ForLoopIndex]]
+%LeadingSpaces%for ( %IndexType% %Index% = 0; %Index% != %Container%%Selector%%GetSizeMethod%(); ++%Index% )
+%LeadingSpaces%{
+%LeadingSpaces%}
+[[EOS]]
+
+[[ForLoopPosition]]
+%LeadingSpaces%for ( POSITION pos = %Container%%Selector%GetHeadPosition(); pos != NULL; )
+%LeadingSpaces%{
+%LeadingSpaces%	%ObjectType% p%ObjectName% = %Container%%Selector%GetNext( pos );
+%LeadingSpaces%}
+[[EOS]]

@@ -1,0 +1,10 @@
+@echo off
+
+REM VStudio6 looks like C:\Program Files\Microsoft Visual Studio
+
+if exist "C:\Program Files\Microsoft Visual Studio\Common\MSDev98\Macros\" xcopy "C:\Program Files\Microsoft Visual Studio\Common\MSDev98\Macros\*.*" /u /f /y
+
+if exist "D:\Development\Misc\VS.NET\VSMacros71\Cpp\" xcopy "D:\Development\Misc\VS.NET\VSMacros71\Cpp\CppMacros.vsmacros" /u /f /y
+if exist "D:\Development\My\VS.NET\VSMacros71\CppMacros\" xcopy "D:\Development\My\VS.NET\VSMacros71\CppMacros\CppMacros.vsmacros" /u /f /y
+
+pause

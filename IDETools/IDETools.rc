@@ -1,0 +1,831 @@
+// Microsoft Visual C++ generated resource script.
+//
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include "utl/resource.h"
+#include "afxres.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// English (U.S.) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+#ifdef _WIN32
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+#pragma code_page(1252)
+#endif //_WIN32
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE 
+BEGIN
+    "#include ""utl/resource.h""\r\n"
+    "#include ""afxres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE 
+BEGIN
+    "#include ""utl/utl_ui.rc""\r\n"
+    "#include ""res\\IDETools.rc2""  // non-Microsoft Visual C++ edited resources\r\n"
+    "\r\n"
+    "1 TYPELIB ""IDETools.tlb""\r\n"
+    "\r\n"
+    "#define _AFX_NO_OLE_RESOURCES\r\n"
+    "#define _AFX_NO_TRACKER_RESOURCES\r\n"
+    "#define _AFX_NO_PROPERTY_RESOURCES\r\n"
+    "\r\n"
+    "#include ""afxres.rc""         // Standard components\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Version
+//
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION 5,1,2,117
+ PRODUCTVERSION 5,1,2,117
+ FILEFLAGSMASK 0x3fL
+#ifdef _DEBUG
+ FILEFLAGS 0x1L
+#else
+ FILEFLAGS 0x0L
+#endif
+ FILEOS 0x4L
+ FILETYPE 0x2L
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904b0"
+        BEGIN
+            VALUE "CompanyName", "Paul Cocoveanu"
+            VALUE "Email", "phc.2nd@gmail.com"
+            VALUE "FileDescription", "IDETools DLL"
+            VALUE "FileVersion", "5, 1, 2, 117"
+            VALUE "InternalName", "IDETools"
+            VALUE "LegalCopyright", "Copyright © 1998-2016"
+            VALUE "OriginalFilename", "IDETools.dll"
+            VALUE "ProductName", "IDETools Automation DLL"
+            VALUE "ProductVersion", "5, 1, 2, 117"
+            VALUE "WrittenBy", "Written by Paul Cocoveanu"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x409, 1200
+    END
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_FILE_TREE_DIALOG DIALOGEX 0, 0, 289, 182
+STYLE DS_SETFONT | WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME
+CAPTION "Included Files"
+FONT 8, "Tahoma", 0, 0, 0x0
+BEGIN
+    CONTROL         "Tree1",IDC_FILE_TREE,"SysTreeView32",TVS_HASBUTTONS | TVS_HASLINES | TVS_LINESATROOT | TVS_EDITLABELS | TVS_DISABLEDRAGDROP | TVS_SHOWSELALWAYS | TVS_INFOTIP | WS_BORDER | WS_HSCROLL | WS_GROUP | WS_TABSTOP,4,4,217,95
+    LTEXT           "S&elected file:",IDC_FULLPATH_STATIC,5,109,42,8
+    EDITTEXT        IDC_FULLPATH_EDIT,4,118,280,12,ES_AUTOHSCROLL | ES_READONLY | WS_GROUP
+    CONTROL         "La&zy parsing",IDC_LAZY_PARSING_CHECK,"Button",BS_AUTOCHECKBOX | WS_GROUP | WS_TABSTOP,4,143,76,10
+    CONTROL         "No file &duplicates",IDC_REMOVE_DUPLICATES_CHECK,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,100,143,76,10
+    LTEXT           "Ma&ximum depth level:",IDC_DEPTH_LEVEL_STATIC,4,156,75,8
+    COMBOBOX        IDC_DEPTH_LEVEL_COMBO,4,166,88,161,CBS_DROPDOWNLIST | WS_VSCROLL | WS_GROUP | WS_TABSTOP
+    LTEXT           "&View:",IDC_VIEW_MODE_STATIC,100,156,18,8
+    COMBOBOX        IDC_VIEW_MODE_COMBO,100,166,88,90,CBS_DROPDOWNLIST | WS_VSCROLL | WS_GROUP | WS_TABSTOP
+    LTEXT           "&Sort order:",IDC_ORDER_STATIC,196,156,34,8
+    COMBOBOX        IDC_ORDER_COMBO,196,166,88,90,CBS_DROPDOWNLIST | WS_VSCROLL | WS_GROUP | WS_TABSTOP
+    DEFPUSHBUTTON   "OK",IDOK,231,4,54,14,WS_GROUP
+    PUSHBUTTON      "Cancel",IDCANCEL,231,20,54,14
+    PUSHBUTTON      "&Locate...",IDC_LOCATE_FILE,231,36,54,14
+    PUSHBUTTON      "&Browse...",IDC_BROWSE_FILE,231,52,54,14
+    PUSHBUTTON      "&Options...",ID_OPTIONS,231,68,54,14
+    PUSHBUTTON      "Copy All",ID_EDIT_COPY,231,85,54,14
+END
+
+IDD_INCLUDE_OPTIONS_DIALOG DIALOGEX 0, 0, 223, 151
+STYLE DS_SETFONT | WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME
+CAPTION "Include Files Options"
+FONT 8, "Tahoma", 0, 0, 0x0
+BEGIN
+    RTEXT           "Max. &recursion level:",IDC_STATIC,5,8,67,8
+    COMBOBOX        IDC_DEPTH_LEVEL_COMBO,75,5,52,161,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    RTEXT           "Max. &parsed lines:",IDC_STATIC,5,26,67,8
+    EDITTEXT        IDC_MAX_PARSED_LINES_EDIT,75,24,52,12,ES_AUTOHSCROLL | WS_GROUP
+    CONTROL         "La&zy parsing",IDC_LAZY_PARSING_CHECK,"Button",BS_AUTOCHECKBOX,5,44,78,10
+    CONTROL         "&No file duplicates",IDC_REMOVE_DUPLICATES_CHECK,"Button",BS_AUTOCHECKBOX | WS_GROUP | WS_TABSTOP,5,57,78,10
+    CONTROL         "Preserve &selection",IDC_SELECTION_RECOVER_CHECK,"Button",BS_AUTOCHECKBOX,89,44,78,10
+    CONTROL         "Full expand at &open",IDC_OPEN_BLOWN_UP_CHECK,"Button",BS_AUTOCHECKBOX,89,57,78,10
+    LTEXT           "E&xclude files (';' as list separator):",IDC_STATIC,5,73,213,8
+    EDITTEXT        IDC_EXCLUDED_FN_EDIT,5,83,213,12,ES_MULTILINE | ES_AUTOHSCROLL | WS_GROUP
+    LTEXT           "&Also include files (';' as list separator):",IDC_STATIC,5,99,213,8
+    EDITTEXT        IDC_MORE_FN_EDIT,5,109,213,12,ES_MULTILINE | ES_AUTOHSCROLL | WS_GROUP
+    LTEXT           "Additional &include path (';' as list separator):",IDC_STATIC,5,125,213,8
+    EDITTEXT        IDC_ADDITIONAL_INC_PATH_EDIT,5,134,213,12,ES_MULTILINE | ES_AUTOHSCROLL | WS_GROUP
+    DEFPUSHBUTTON   "OK",IDOK,168,5,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,168,22,50,14
+END
+
+IDD_WORKSPACE_LOAD_DIALOG DIALOGEX 0, 0, 233, 138
+STYLE DS_SETFONT | WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME
+CAPTION "Load Custom Workspace"
+FONT 8, "Tahoma", 0, 0, 0x1
+BEGIN
+    LTEXT           "Source &profile:",IDC_PROJECT_NAME_STATIC,5,5,91,8
+    COMBOBOX        IDC_PROJECT_NAME_COMBO,5,14,161,164,CBS_DROPDOWNLIST | CBS_SORT | WS_VSCROLL | WS_GROUP | WS_TABSTOP
+    LTEXT           "&File list:",IDC_FILES_STATIC,5,32,24,8
+    LISTBOX         IDC_FILES_LIST,5,42,161,72,LBS_MULTIPLESEL | LBS_NOINTEGRALHEIGHT | WS_VSCROLL | WS_GROUP | WS_TABSTOP
+    CONTROL         "Show full &path",IDC_SHOW_FULL_PATH_CHECK,"Button",BS_AUTOCHECKBOX | BS_RIGHT | WS_GROUP | WS_TABSTOP,107,30,59,10
+    LTEXT           "&Full path:",IDC_FULLPATH_STATIC,5,122,31,8
+    EDITTEXT        IDC_FULLPATH_EDIT,38,122,189,12,ES_AUTOHSCROLL | ES_READONLY | NOT WS_BORDER | WS_GROUP | NOT WS_TABSTOP
+    DEFPUSHBUTTON   "&Load",IDOK,173,5,54,14,WS_GROUP
+    PUSHBUTTON      "Cancel",IDCANCEL,173,22,54,14
+    LTEXT           "Before Open:",IDC_BEFORE_OPEN_STATIC,173,90,54,25,0,WS_EX_DLGMODALFRAME
+    CONTROL         "Close &All",IDC_CLOSE_ALL_BEFORE_OPEN_CHECK,"Button",BS_AUTOCHECKBOX | WS_GROUP | WS_TABSTOP,177,102,43,10
+END
+
+IDD_WORKSPACE_SAVE_DIALOG DIALOGEX 0, 0, 233, 141
+STYLE DS_SETFONT | WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME
+CAPTION "Save Custom Workspace"
+FONT 8, "Tahoma", 0, 0, 0x0
+BEGIN
+    LTEXT           "Destination &profile:",IDC_PROJECT_NAME_STATIC,5,5,91,8
+    COMBOBOX        IDC_PROJECT_NAME_COMBO,5,14,161,164,CBS_DROPDOWN | CBS_SORT | WS_VSCROLL | WS_GROUP | WS_TABSTOP
+    LTEXT           "&File list:",IDC_FILES_STATIC,5,33,24,8
+    LISTBOX         IDC_FILES_LIST,5,43,161,72,LBS_NOINTEGRALHEIGHT | WS_VSCROLL | WS_GROUP | WS_TABSTOP
+    CONTROL         "Show full &path",IDC_SHOW_FULL_PATH_CHECK,"Button",BS_AUTOCHECKBOX | BS_RIGHT | WS_GROUP | WS_TABSTOP,109,31,57,10
+    LTEXT           "&Full path:",IDC_FULLPATH_STATIC,5,123,30,8
+    EDITTEXT        IDC_FULLPATH_EDIT,38,123,190,12,ES_AUTOHSCROLL | ES_READONLY | NOT WS_BORDER | WS_GROUP | NOT WS_TABSTOP
+    DEFPUSHBUTTON   "&Save",IDOK,178,5,50,14,WS_GROUP
+    PUSHBUTTON      "&Delete...",IDC_DELETE_PROJECT_ENTRY,178,21,50,14
+    PUSHBUTTON      "Delete &All...",IDC_DELETE_ALL_PROJECTS,178,37,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,178,53,50,14
+    PUSHBUTTON      "Sort &By >>",IDC_SORTBY_FILES,178,101,50,14,WS_GROUP
+END
+
+IDD_INPUT_BOX_DIALOG DIALOG  0, 0, 283, 89
+STYLE DS_SETFONT | WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME
+CAPTION "Input Box"
+FONT 8, "Tahoma"
+BEGIN
+    LTEXT           "Enter &string:",IDC_INPUT_STRING_LABEL,2,5,41,8
+    EDITTEXT        IDC_INPUT_EDIT,2,15,279,48,ES_MULTILINE | ES_AUTOHSCROLL | WS_VSCROLL | WS_GROUP
+    DEFPUSHBUTTON   "OK",IDOK,194,72,39,14,WS_GROUP
+    PUSHBUTTON      "Cancel",IDCANCEL,242,72,39,14
+END
+
+IDD_FILE_LOCATOR_DIALOG DIALOGEX 0, 0, 273, 212
+STYLE DS_SETFONT | WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME
+CAPTION "File Locator"
+FONT 8, "Tahoma", 0, 0, 0x0
+BEGIN
+    RTEXT           "#&include",IDC_TAG_STATIC,3,5,29,8
+    COMBOBOX        IDC_INPUT_INCLUDE_TAG_COMBO,34,3,100,68,CBS_SIMPLE | CBS_AUTOHSCROLL | WS_VSCROLL | WS_GROUP | WS_TABSTOP
+    GROUPBOX        "Search in path",IDC_SEARCH_IN_STATIC,143,19,126,47,WS_GROUP
+    CONTROL         "I&nclude",IDC_SEARCH_INCLUDE_PATH_CHECK,"Button",BS_AUTOCHECKBOX | WS_GROUP | WS_TABSTOP,149,30,39,10
+    CONTROL         "L&ocal include",IDC_SEARCH_LOCAL_PATH_CHECK,"Button",BS_AUTOCHECKBOX,149,41,58,10
+    CONTROL         "&Additional include",IDC_SEARCH_ADDITIONAL_PATH_CHECK,
+                    "Button",BS_AUTOCHECKBOX,149,52,71,10
+    CONTROL         "&Source",IDC_SEARCH_SOURCE_PATH_CHECK,"Button",BS_AUTOCHECKBOX,224,30,39,10
+    CONTROL         "Lib&rary",IDC_SEARCH_LIBRARY_PATH_CHECK,"Button",BS_AUTOCHECKBOX,224,41,37,10
+    CONTROL         "&Binary",IDC_SEARCH_BINARY_PATH_CHECK,"Button",BS_AUTOCHECKBOX,224,52,35,10
+    LTEXT           "&Local path:",IDC_LOCAL_PATH_STATIC,19,72,36,8
+    EDITTEXT        IDC_LOCAL_DIR_EDIT,55,71,214,12,ES_AUTOHSCROLL | ES_READONLY | WS_GROUP | NOT WS_TABSTOP
+    LTEXT           "Project file:",IDC_PROJECT_FILE_STATIC,17,86,38,8
+    EDITTEXT        IDC_PROJECT_FILE_EDIT,55,84,214,12,ES_AUTOHSCROLL | ES_READONLY | WS_GROUP | NOT WS_TABSTOP
+    LTEXT           "Additional path:",IDC_ADDITIONAL_INC_PATH_STATIC,3,99,52,8
+    EDITTEXT        IDC_ADDITIONAL_INC_PATH_EDIT,55,98,214,12,ES_AUTOHSCROLL | ES_READONLY | WS_GROUP | NOT WS_TABSTOP
+    LTEXT           "&Found %d file(s):",IDC_FOUND_FILES_STATIC,3,120,109,8
+    CONTROL         "List1",IDC_FOUND_FILES_LISTCTRL,"SysListView32",LVS_REPORT | LVS_SHOWSELALWAYS | LVS_SHAREIMAGELISTS | LVS_EDITLABELS | LVS_NOSORTHEADER | WS_BORDER | WS_GROUP | WS_TABSTOP,3,130,266,53
+    DEFPUSHBUTTON   "Open",IDOK,3,192,50,14,WS_GROUP
+    PUSHBUTTON      "View Te&xt...",CM_TEXT_VIEW_FILE,57,192,50,14
+    PUSHBUTTON      "&Explore...",CM_EXPLORE_FILE,111,192,50,14
+    PUSHBUTTON      "S&tore",ID_FILE_SAVE,165,192,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,219,192,50,14
+    CONTROL         "#include <...>",IDC_SYSTEM_TAG_RADIO,"Button",BS_AUTORADIOBUTTON | BS_MULTILINE | WS_GROUP | WS_TABSTOP,143,6,63,10
+    CONTROL         "#include ""...""",IDC_LOCAL_TAG_RADIO,"Button",BS_AUTORADIOBUTTON | BS_MULTILINE,211,6,58,10
+END
+
+IDD_OPTIONS_GENERAL_PAGE DIALOGEX 0, 0, 312, 133
+STYLE DS_SETFONT | WS_CHILD | WS_DISABLED | WS_CAPTION
+CAPTION "General"
+FONT 8, "Tahoma", 0, 0, 0x0
+BEGIN
+    RTEXT           "&User name:",IDC_STATIC,55,9,38,8
+    EDITTEXT        IDC_USER_NAME_EDIT,96,7,110,12,ES_AUTOHSCROLL | WS_GROUP
+    RTEXT           "&Code template file:",IDC_STATIC,26,25,67,8
+    EDITTEXT        IDC_TEXT_TEMPLATE_FILE_EDIT,96,23,204,12,ES_AUTOHSCROLL | WS_GROUP
+    RTEXT           "Max. vertical menu items:",IDC_STATIC,10,41,83,8
+    EDITTEXT        IDC_MENU_VERT_SPLIT_COUNT_EDIT,96,39,38,12,ES_AUTOHSCROLL | ES_NUMBER | WS_GROUP
+    CONTROL         "Spin1",IDC_MENU_VERT_SPLIT_COUNT_SPIN,"msctls_updown32",UDS_SETBUDDYINT | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS | UDS_HOTTRACK,134,39,11,12
+    RTEXT           "Default comment to&ken:",IDC_STATIC,15,56,78,8
+    EDITTEXT        IDC_DEFAULT_COMMENT_COLUMN_EDIT,96,54,38,12,ES_AUTOHSCROLL | WS_GROUP
+    RTEXT           "Class standard prefix:",IDC_STATIC,187,41,72,8
+    EDITTEXT        IDC_CLASS_PREFIX_EDIT,262,39,38,12,ES_AUTOHSCROLL | WS_GROUP
+    RTEXT           "Struct standard prefix:",IDC_STATIC,185,56,74,8
+    EDITTEXT        IDC_STRUCT_PREFIX_EDIT,262,54,38,12,ES_AUTOHSCROLL
+    RTEXT           "Enum standard prefix:",IDC_STATIC,187,71,72,8
+    EDITTEXT        IDC_ENUM_PREFIX_EDIT,262,69,38,12,ES_AUTOHSCROLL
+    CONTROL         "",IDC_STATIC,"Static",SS_ETCHEDHORZ,7,89,298,1
+    CONTROL         "&Generate code for new files",IDC_AUTO_CODE_GENERATION_CHECK,
+                    "Button",BS_AUTOCHECKBOX | WS_GROUP | WS_TABSTOP,13,98,103,10
+    CONTROL         "Display &warning and error messages",IDC_DISPLAY_ERROR_MESSAGES_CHECK,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,13,112,131,10
+    CONTROL         "&Decorate types and methods",IDC_USE_COMMENT_DECORATION_CHECK,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,147,98,107,10
+    CONTROL         "Mo&ve cursor down on 'Duplicate Line'",IDC_DUPLICATE_LINE_MOVE_DOWN_CHECK,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,147,112,135,10
+END
+
+IDD_OPTIONS_BSC_PATH_PAGE DIALOGEX 0, 0, 312, 133
+STYLE DS_SETFONT | WS_CHILD | WS_DISABLED | WS_CAPTION
+CAPTION "Browse Files"
+FONT 8, "Tahoma", 0, 0, 0x0
+BEGIN
+    LTEXT           "&Browse Files Folders:",IDC_STATIC,7,13,68,8
+    LISTBOX         IDC_BROWSE_FILES_PATH_LIST,7,23,298,74,WS_VSCROLL | WS_GROUP | WS_TABSTOP
+    RTEXT           "<toolbar>",IDC_TOOLBAR_PLACEHOLDER,162,7,143,16,SS_CENTERIMAGE | WS_CLIPSIBLINGS | WS_BORDER
+    GROUPBOX        "Details",IDC_STATIC,7,94,298,32
+    LTEXT           "&Search specifier:",IDC_STATIC,13,107,54,8
+    EDITTEXT        IDC_SEARCH_FILTER_EDIT,69,105,72,12,ES_AUTOHSCROLL | WS_GROUP
+    LTEXT           "Display &tag:",IDC_STATIC,163,107,39,8
+    EDITTEXT        IDC_DISPLAY_TAG_EDIT,205,105,92,12,ES_AUTOHSCROLL | WS_GROUP
+END
+
+IDD_CODE_MESSAGE_BOX_DIALOG DIALOGEX 0, 0, 289, 169
+STYLE DS_SETFONT | WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME
+CAPTION "Dialog"
+FONT 8, "Tahoma", 0, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "&Yes",IDOK,174,148,50,14,WS_GROUP
+    PUSHBUTTON      "&No",IDCANCEL,232,148,50,14
+    ICON            "",IDC_ICON_STATIC,7,7,20,20
+    LTEXT           "<Message>",IDC_MESSAGE_STATIC,37,7,245,20,SS_CENTERIMAGE
+    EDITTEXT        IDC_CODE_FIELD_EDIT,37,28,245,110,ES_MULTILINE | ES_NOHIDESEL | ES_READONLY | NOT WS_BORDER | WS_VSCROLL | WS_HSCROLL | WS_GROUP,WS_EX_STATICEDGE
+END
+
+IDD_INPUT_TYPE_QUALIFIER_DIALOG DIALOG  0, 0, 130, 22
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP
+FONT 8, "Tahoma"
+BEGIN
+    LTEXT           "Type qualifier:",IDC_STATIC,0,0,47,8
+    EDITTEXT        IDC_TYPE_QUALIFIER_EDIT,0,9,130,12,ES_AUTOHSCROLL | WS_GROUP
+    DEFPUSHBUTTON   "OK",IDOK,144,-1,50,14,NOT WS_TABSTOP
+    PUSHBUTTON      "Cancel",IDCANCEL,199,-1,50,14,NOT WS_TABSTOP
+END
+
+IDD_OPTIONS_CODE_FORMATTING_PAGE DIALOGEX 0, 0, 312, 133
+STYLE DS_SETFONT | WS_CHILD | WS_DISABLED | WS_CAPTION
+CAPTION "Coding Standards"
+FONT 8, "Tahoma", 0, 0, 0x0
+BEGIN
+    GROUPBOX        "Formatting",IDC_STATIC,7,3,120,40,WS_GROUP
+    CONTROL         "&Preserve multiple white-space",IDC_PRESERVE_MULTIPLE_WHITESPACES_CHECK,
+                    "Button",BS_AUTOCHECKBOX | WS_GROUP | WS_TABSTOP,13,14,111,10
+    CONTROL         "&Delete trailing white-space",IDC_DELETE_TRAILING_WHITESPACES_CHECK,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,13,28,100,10
+    GROUPBOX        "Line splitter",IDC_STATIC,136,3,169,40
+    RTEXT           "Maximum text &column:",IDC_STATIC,146,14,72,8
+    EDITTEXT        IDC_SPLIT_MAX_COLUMN_EDIT,221,12,38,12,ES_AUTOHSCROLL | ES_NUMBER | WS_GROUP
+    RTEXT           "&Split Separators:",IDC_STATIC,146,28,72,8
+    EDITTEXT        IDC_BREAK_SEPARATORS_EDIT,221,27,80,12,ES_AUTOHSCROLL
+    GROUPBOX        "Bracket spacing rules",IDC_STATIC,7,47,120,80,WS_GROUP
+    LTEXT           "&Brackets:",IDC_STATIC,16,60,31,8
+    COMBOBOX        IDC_BRACKETS_RULES_COMBO,48,58,62,173,CBS_DROPDOWNLIST | WS_VSCROLL | WS_GROUP | WS_TABSTOP
+    CONTROL         "A&rgument list brackets",IDC_IS_ARGUMENT_LIST_BRACKET_CHECK,
+                    "Button",BS_AUTOCHECKBOX | BS_MULTILINE | WS_GROUP | WS_TABSTOP,15,73,100,10
+    CONTROL         "Remove spaces",IDC_REMOVE_SPACES_RADIO,"Button",BS_AUTORADIOBUTTON | WS_GROUP | WS_TABSTOP,15,88,67,10
+    CONTROL         "Insert one space",IDC_INSERT_ONE_SPACE_RADIO,"Button",BS_AUTORADIOBUTTON,15,99,69,10
+    CONTROL         "Preserve existing spaces",IDC_PRESERVE_SPACES_RADIO,
+                    "Button",BS_AUTORADIOBUTTON,15,110,94,10
+    GROUPBOX        "Operators spacing rules",IDC_STATIC,136,47,169,80,WS_GROUP
+    LTEXT           "&Operator:",IDC_STATIC,142,59,33,8
+    COMBOBOX        IDC_OPERATORS_RULES_COMBO,176,57,124,173,CBS_DROPDOWNLIST | WS_VSCROLL | WS_GROUP | WS_TABSTOP
+    LTEXT           "Spaces be&fore:",IDC_STATIC,146,75,49,8
+    CONTROL         "Remove",IDC_OP_BEFORE_REMOVE_SPACES_RADIO,"Button",BS_AUTORADIOBUTTON | WS_GROUP | WS_TABSTOP,145,88,43,10
+    CONTROL         "Insert one",IDC_OP_BEFORE_INSERT_ONE_SPACE_RADIO,"Button",BS_AUTORADIOBUTTON,145,99,47,10
+    CONTROL         "Preserve existing",IDC_OP_BEFORE_PRESERVE_SPACES_RADIO,
+                    "Button",BS_AUTORADIOBUTTON,145,110,69,10
+    LTEXT           "Spaces &after:",IDC_STATIC,226,76,49,8
+    CONTROL         "Remove",IDC_OP_AFTER_REMOVE_SPACES_RADIO,"Button",BS_AUTORADIOBUTTON | WS_GROUP | WS_TABSTOP,225,88,43,10
+    CONTROL         "Insert one",IDC_OP_AFTER_INSERT_ONE_SPACE_RADIO,"Button",BS_AUTORADIOBUTTON,225,99,47,10
+    CONTROL         "Preserve existing",IDC_OP_AFTER_PRESERVE_SPACES_RADIO,
+                    "Button",BS_AUTORADIOBUTTON,225,110,69,10
+END
+
+IDD_OPTIONS_CPP_IMPL_FORMATTING_PAGE DIALOG  0, 0, 312, 133
+STYLE DS_SETFONT | WS_CHILD | WS_DISABLED | WS_CAPTION
+CAPTION "C++ Implementation"
+FONT 8, "Tahoma"
+BEGIN
+    GROUPBOX        "C++ Implementation Formatting",-1,7,7,298,119,WS_GROUP
+    CONTROL         "Return type on separate line",IDC_RETURN_TYPE_ON_SEPARATE_LINE_CHECK,
+                    "Button",BS_AUTOCHECKBOX | WS_GROUP | WS_TABSTOP,13,20,105,10
+    CONTROL         "Comment-out default parameter values",IDC_COMMENT_OUT_DEFAULT_PARAMS_CHECK,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,13,34,137,10
+    RTEXT           "Count of empty lines between two functions:",-1,12,53,145,8
+    EDITTEXT        IDC_LINES_BETWEEN_FUNCTION_IMPLS_EDIT,159,51,25,12,ES_AUTOHSCROLL | ES_NUMBER | WS_GROUP
+    CONTROL         "Spin1",IDC_LINES_BETWEEN_FUNCTION_IMPLS_SPIN,
+                    "msctls_updown32",UDS_SETBUDDYINT | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS | UDS_HOTTRACK,185,51,11,12
+END
+
+IDD_TOKENIZE_TEXT_DIALOG DIALOGEX 0, 0, 257, 306
+STYLE DS_SETFONT | WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME
+CAPTION "Tokenize"
+FONT 8, "MS Sans Serif", 0, 0, 0x0
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,145,286,50,14,WS_GROUP
+    PUSHBUTTON      "Cancel",IDCANCEL,200,286,50,14
+    LTEXT           "So&urce:",IDC_SOURCE_TEXT_LABEL,7,7,243,8
+    EDITTEXT        IDC_SOURCE_TEXT_EDIT,7,16,243,57,ES_MULTILINE | ES_AUTOHSCROLL | ES_NOHIDESEL | ES_WANTRETURN | WS_VSCROLL | WS_HSCROLL | WS_GROUP
+    GROUPBOX        "Action",IDC_GROUP_BOX_1,7,78,118,119,WS_GROUP
+    RADIOBUTTON     "S&plit into multiple lines",IDC_SPLIT_ACTION_RADIO,12,90,84,10,WS_GROUP | WS_TABSTOP
+    RADIOBUTTON     "To&kenize into multiple lines",IDC_TOKENIZE_ACTION_RADIO,12,103,100,10
+    RADIOBUTTON     "&Merge to a single line",IDC_MERGE_ACTION_RADIO,12,116,83,10
+    CONTROL         "Reverse lines",IDC_REVERSE_ACTION_RADIO,"Button",BS_AUTORADIOBUTTON,12,129,59,10
+    RADIOBUTTON     "Sort lines in &ascending order",IDC_SORT_ASC_ACTION_RADIO,12,142,105,10
+    RADIOBUTTON     "Sort lines in &descending order",IDC_SORT_DESC_ACTION_RADIO,12,155,109,10
+    RADIOBUTTON     "&Filter unique lines",IDC_FILTER_UNIQUE_ACTION_RADIO,12,168,70,10
+    CONTROL         "&Case sensitive compare",IDC_CASE_SENSITIVE_CHECK,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,23,181,91,10
+    RTEXT           "&Input Tokens:",IDC_INPUT_TOKENS_LABEL,136,90,57,8
+    EDITTEXT        IDC_INPUT_TOKENS_EDIT,195,88,41,12,ES_AUTOHSCROLL | WS_GROUP
+    PUSHBUTTON      "<",IDC_INPUT_TOKENS_DEFAULT,238,88,12,12,NOT WS_TABSTOP
+    RTEXT           "Output S&eparator:",IDC_OUTPUT_SEPARATOR_LABEL,136,104,57,8
+    EDITTEXT        IDC_OUTPUT_SEPARATOR_EDIT,195,102,41,12,ES_AUTOHSCROLL | WS_GROUP
+    PUSHBUTTON      "<",IDC_OUTPUT_SEPARATOR_DEFAULT,238,102,12,12,NOT WS_TABSTOP
+    GROUPBOX        "Line Filter",IDC_GROUP_BOX_2,136,132,114,64
+    CONTROL         "&Remove empty lines",IDC_REMOVE_EMPTY_LINES_CHECK,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,142,143,79,10
+    CONTROL         "Trim &lines:",IDC_TRIM_LINES_CHECK,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,142,156,47,10
+    EDITTEXT        IDC_TRIM_CHARS_EDIT,194,155,41,12,ES_AUTOHSCROLL
+    PUSHBUTTON      "<",IDC_TRIM_CHARS_DEFAULT,235,154,12,12,NOT WS_TABSTOP
+    CONTROL         "Filter source lines",IDC_FILTER_SOURCE_LINES_CHECK,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,142,169,70,10
+    CONTROL         "Filter output lines",IDC_FILTER_OUTPUT_LINES_CHECK,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,142,182,69,10
+    LTEXT           "&Output:",IDC_OUTPUT_TEXT_LABEL,7,209,190,8
+    EDITTEXT        IDC_OUTPUT_TEXT_EDIT,7,220,243,57,ES_MULTILINE | ES_AUTOHSCROLL | ES_NOHIDESEL | ES_READONLY | ES_WANTRETURN | WS_VSCROLL | WS_HSCROLL | WS_GROUP
+    PUSHBUTTON      "&To Source",IDC_COPY_OUTPUT_TO_SOURCE,200,205,50,14,WS_GROUP
+    CONTROL         "Show &white-space (source/output)",IDC_SHOW_WHITESPACE_CHECK,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,288,126,10
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO 
+BEGIN
+    IDD_FILE_TREE_DIALOG, DIALOG
+    BEGIN
+        LEFTMARGIN, 4
+        RIGHTMARGIN, 285
+        TOPMARGIN, 4
+        BOTTOMMARGIN, 178
+    END
+
+    IDD_INCLUDE_OPTIONS_DIALOG, DIALOG
+    BEGIN
+        LEFTMARGIN, 5
+        RIGHTMARGIN, 218
+        TOPMARGIN, 5
+        BOTTOMMARGIN, 146
+    END
+
+    IDD_WORKSPACE_LOAD_DIALOG, DIALOG
+    BEGIN
+        LEFTMARGIN, 5
+        RIGHTMARGIN, 228
+        TOPMARGIN, 5
+        BOTTOMMARGIN, 133
+    END
+
+    IDD_WORKSPACE_SAVE_DIALOG, DIALOG
+    BEGIN
+        LEFTMARGIN, 5
+        RIGHTMARGIN, 228
+        TOPMARGIN, 5
+        BOTTOMMARGIN, 136
+    END
+
+    IDD_INPUT_BOX_DIALOG, DIALOG
+    BEGIN
+        LEFTMARGIN, 2
+        RIGHTMARGIN, 281
+        TOPMARGIN, 2
+        BOTTOMMARGIN, 86
+    END
+
+    IDD_FILE_LOCATOR_DIALOG, DIALOG
+    BEGIN
+        LEFTMARGIN, 3
+        RIGHTMARGIN, 270
+        TOPMARGIN, 3
+        BOTTOMMARGIN, 206
+    END
+
+    IDD_OPTIONS_GENERAL_PAGE, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 305
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 126
+    END
+
+    IDD_OPTIONS_BSC_PATH_PAGE, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 305
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 126
+    END
+
+    IDD_CODE_MESSAGE_BOX_DIALOG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 282
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 162
+    END
+
+    IDD_OPTIONS_CODE_FORMATTING_PAGE, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 305
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 128
+    END
+
+    IDD_OPTIONS_CPP_IMPL_FORMATTING_PAGE, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 305
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 126
+    END
+
+    IDD_TOKENIZE_TEXT_DIALOG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 250
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 299
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Icon
+//
+
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+IDR_IDE_TOOLS_APP       ICON                    "res\\IDETools.ico"
+IDI_INCBROWSER_ICON     ICON                    "res\\IncBrowser.ico"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Accelerator
+//
+
+IDR_FILETREE_ACCEL ACCELERATORS 
+BEGIN
+    "E",            CM_EXPLORE_FILE,        VIRTKEY, CONTROL, NOINVERT
+    "O",            IDC_BROWSE_FILE,        VIRTKEY, CONTROL, NOINVERT
+    "O",            IDC_BROWSE_FILE,        VIRTKEY, SHIFT, CONTROL, NOINVERT
+    "Q",            CM_DEBUG_SHOW_STATE,    VIRTKEY, CONTROL, NOINVERT
+    "T",            CM_TEXT_VIEW_FILE,      VIRTKEY, CONTROL, NOINVERT
+    "T",            CM_VIEW_FILE,           VIRTKEY, SHIFT, CONTROL, NOINVERT
+    VK_ADD,         CM_EXPAND_BRANCH,       VIRTKEY, CONTROL, NOINVERT
+    VK_F2,          CM_EDIT_LABEL,          VIRTKEY, NOINVERT
+    VK_F3,          CM_FIND_NEXT,           VIRTKEY, NOINVERT
+    VK_F3,          CM_FIND_ORIGIN,         VIRTKEY, CONTROL, NOINVERT
+    VK_F3,          CM_FIND_PREV,           VIRTKEY, SHIFT, NOINVERT
+    VK_F4,          ID_OPTIONS,             VIRTKEY, NOINVERT
+    VK_F5,          ID_REFRESH,             VIRTKEY, NOINVERT
+    VK_RETURN,      CM_OPEN_COMPLEMENTARY,  VIRTKEY, CONTROL, NOINVERT
+    VK_RETURN,      CM_OPEN_INCLUDE_LINE,   VIRTKEY, SHIFT, NOINVERT
+    VK_SUBTRACT,    CM_COLAPSE_BRANCH,      VIRTKEY, CONTROL, NOINVERT
+END
+
+IDR_WKSPLOAD_ACCEL ACCELERATORS 
+BEGIN
+    VK_ADD,         CM_MULTISEL_SELECT_ALL, VIRTKEY, NOINVERT
+    VK_DIVIDE,      CM_MULTISEL_TOGGLE_SEL, VIRTKEY, NOINVERT
+    VK_MULTIPLY,    CM_MULTISEL_TOGGLE_SEL, VIRTKEY, NOINVERT
+    VK_SUBTRACT,    CM_MULTISEL_CLEAR_ALL,  VIRTKEY, NOINVERT
+END
+
+IDR_FILETREEFOCUS_ACCEL ACCELERATORS 
+BEGIN
+    "C",            ID_EDIT_COPY,           VIRTKEY, CONTROL, NOINVERT
+    VK_INSERT,      ID_EDIT_COPY,           VIRTKEY, CONTROL, NOINVERT
+    VK_MULTIPLY,    CM_EXPAND_BRANCH,       VIRTKEY, NOINVERT
+END
+
+IDR_LOCATE_FILE_ACCEL ACCELERATORS 
+BEGIN
+    "E",            CM_EXPLORE_FILE,        VIRTKEY, CONTROL, NOINVERT
+    "T",            CM_TEXT_VIEW_FILE,      VIRTKEY, CONTROL, NOINVERT
+    "T",            CM_VIEW_FILE,           VIRTKEY, SHIFT, CONTROL, NOINVERT
+END
+
+IDR_LOCATE_FILE_LISTFOCUS_ACCEL ACCELERATORS 
+BEGIN
+    "S",            ID_FILE_SAVE,           VIRTKEY, CONTROL, NOINVERT
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Menu
+//
+
+IDR_CONTEXT_MENU MENU 
+BEGIN
+    POPUP "<IncludeTree>"
+    BEGIN
+        MENUITEM "&Next Occurence\tF3",         CM_FIND_NEXT
+        MENUITEM "&Previous Occurence\tShift+F3", CM_FIND_PREV
+        MENUITEM "First Occ&urence\tCtrl+F3",   CM_FIND_ORIGIN
+        MENUITEM SEPARATOR
+        MENUITEM "E&xpand Branch\tCtrl+Add",    CM_EXPAND_BRANCH
+        MENUITEM "&Colapse Branch\tCtrl+Sub",   CM_COLAPSE_BRANCH
+        MENUITEM SEPARATOR
+        MENUITEM "Refres&h\tF5",                ID_REFRESH
+        MENUITEM SEPARATOR
+        MENUITEM "Open &File\tEnter",           ID_FILE_OPEN
+        MENUITEM "&Open %s\tCtrl+Enter",        CM_OPEN_COMPLEMENTARY
+        MENUITEM "Open #include &statement\tShift+Enter", CM_OPEN_INCLUDE_LINE
+        MENUITEM SEPARATOR
+        MENUITEM "View as &Text...\tCtrl+T",    CM_TEXT_VIEW_FILE
+        MENUITEM "&Run File...\tCtrl+Shift+T",  CM_VIEW_FILE
+        MENUITEM "&Explore File...\tCtrl+E",    CM_EXPLORE_FILE
+        MENUITEM "Copy Path\tCtrl+C",           ID_EDIT_COPY
+        MENUITEM SEPARATOR
+        MENUITEM "&Browse From Here",           CM_BROWSE_FROM_SEL
+    END
+    POPUP "<IncludeTree_NoDups>"
+    BEGIN
+        MENUITEM "E&xpand Branch\tCtrl+Add",    CM_EXPAND_BRANCH
+        MENUITEM "&Colapse Branch\tCtrl+Sub",   CM_COLAPSE_BRANCH
+        MENUITEM SEPARATOR
+        MENUITEM "Refres&h\tF5",                ID_REFRESH
+        MENUITEM SEPARATOR
+        MENUITEM "Open &File\tEnter",           ID_FILE_OPEN
+        MENUITEM "&Open %s\tCtrl+Enter",        CM_OPEN_COMPLEMENTARY
+        MENUITEM "Open Reference &Line\tShift+Enter", CM_OPEN_INCLUDE_LINE
+        MENUITEM SEPARATOR
+        MENUITEM "View as &Text...\tCtrl+T",    CM_TEXT_VIEW_FILE
+        MENUITEM "&Run File...\tCtrl+Shift+T",  CM_VIEW_FILE
+        MENUITEM "&Explore File...\tCtrl+E",    CM_EXPLORE_FILE
+        MENUITEM "Copy Path\tCtrl+C",           ID_EDIT_COPY
+        MENUITEM SEPARATOR
+        MENUITEM "&Browse From Here",           CM_BROWSE_FROM_SEL
+    END
+    POPUP "Menu Browser Options"
+    BEGIN
+        MENUITEM "All Folders As Popups",       CM_FILEBROWSER_FOLDERSASPOPUPS
+        MENUITEM "All Folders As Root Popups",  CM_FILEBROWSER_FOLDERSASROOTPOPUPS
+        MENUITEM "Root Folders Expanded",       CM_FILEBROWSER_ROOTFOLDERSEXPANDED
+        MENUITEM "All Folders Expanded",        CM_FILEBROWSER_ALLFOLDERSEXPANDED
+        MENUITEM SEPARATOR
+        MENUITEM "&Recurse Folders",            CK_FILEBROWSER_RECURSEFOLDERS
+        MENUITEM "Remove &Duplicated Files",    CK_FILEBROWSER_CUTDUPLICATES
+        MENUITEM SEPARATOR
+        MENUITEM "Hide File E&xtension",        CK_FILEBROWSER_HIDEEXT
+        MENUITEM "Right &Justify Extension",    CK_FILEBROWSER_RIGHTJUSTIFYEXT
+        MENUITEM "&Prefix by Directory Name",   CK_FILEBROWSER_DIRNAMEPREFIX
+        MENUITEM SEPARATOR
+        MENUITEM "Sort &Folders",               CK_FILEBROWSER_SORTFOLDERS
+        MENUITEM SEPARATOR
+        POPUP "&Sort Files By"
+        BEGIN
+            MENUITEM "Dri&ve",                      CK_FILEBROWSER_SORTBY_DRIVE
+            MENUITEM "Directory &Path",             CK_FILEBROWSER_SORTBY_DIR
+            MENUITEM "&Directory Name",             CK_FILEBROWSER_SORTBY_DIRNAME
+            MENUITEM "File &Name",                  CK_FILEBROWSER_SORTBY_NAME
+            MENUITEM "File &Extension",             CK_FILEBROWSER_SORTBY_EXT
+            MENUITEM SEPARATOR
+            MENUITEM "&File Full Path",             CK_FILEBROWSER_SORTBY_FULLPATH
+        END
+    END
+    POPUP "<SortFiles>"
+    BEGIN
+        MENUITEM "Dri&ve",                      CK_FILEBROWSER_SORTBY_DRIVE
+        MENUITEM "Directory &Path",             CK_FILEBROWSER_SORTBY_DIR
+        MENUITEM "&Directory Name",             CK_FILEBROWSER_SORTBY_DIRNAME
+        MENUITEM "File &Name",                  CK_FILEBROWSER_SORTBY_NAME
+        MENUITEM "File &Extension",             CK_FILEBROWSER_SORTBY_EXT
+        MENUITEM SEPARATOR
+        MENUITEM "&File Full Path",             CK_FILEBROWSER_SORTBY_FULLPATH
+    END
+    POPUP "<ProfileListContext>"
+    BEGIN
+        MENUITEM "&Select All\t+",              CM_MULTISEL_SELECT_ALL
+        MENUITEM "&Clear All\t-",               CM_MULTISEL_CLEAR_ALL
+        MENUITEM SEPARATOR
+        MENUITEM "&Invert Selection\t*",        CM_MULTISEL_TOGGLE_SEL
+    END
+    POPUP "<FoundListContext>"
+    BEGIN
+        MENUITEM "&Open\tEnter",                ID_FILE_OPEN
+        MENUITEM SEPARATOR
+        MENUITEM "View as &Text...\tCtrl+T",    CM_TEXT_VIEW_FILE
+        MENUITEM "&Run...\tCtrl+Shift+T",       CM_VIEW_FILE
+        MENUITEM "&Explore...\tCtrl+E",         CM_EXPLORE_FILE
+        MENUITEM SEPARATOR
+        MENUITEM "&Store Path\tCtrl+S",         ID_FILE_SAVE
+    END
+    POPUP "<AutoMakeCode>"
+    BEGIN
+        MENUITEM "for loop: const_iterator",    CM_MAKE_LOOP_const_iterator
+        MENUITEM "for loop: &iterator",         CM_MAKE_LOOP_iterator
+        MENUITEM SEPARATOR
+        MENUITEM "for loop: i&ndex/position",   CM_MAKE_LOOP_index
+        MENUITEM SEPARATOR
+        MENUITEM "Cancel\tEsc",                 IDCANCEL
+    END
+    POPUP "<unused>"
+    BEGIN
+        MENUITEM "File Browser Setup...",       CM_FILEBROWSER_SETUP
+        MENUITEM "<First File Item>",           CM_FILEBROWSER_FILEITEM
+        MENUITEM SEPARATOR
+        MENUITEM "Update dialog title",         CM_UPDATE_DIALOG_TITLE
+        MENUITEM "&Copy Path\tCtrl+C",          ID_EDIT_COPY
+    END
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Toolbar
+//
+
+IDR_IMAGE_STRIP TOOLBAR  16, 16
+BEGIN
+    BUTTON      IDD_FILE_LOCATOR_DIALOG
+    BUTTON      IDD_WORKSPACE_SAVE_DIALOG
+    BUTTON      IDD_WORKSPACE_LOAD_DIALOG
+    SEPARATOR
+    BUTTON      IDC_COPY_OUTPUT_TO_SOURCE
+    BUTTON      IDC_FULLPATH_EDIT
+END
+
+IDR_BSC_PATH_STRIP TOOLBAR  16, 16
+BEGIN
+    BUTTON      CM_ADD_BSC_DIR_PATH
+    BUTTON      CM_REMOVE_BSC_DIR_PATH
+    BUTTON      CM_EDIT_BSC_DIR_PATH
+    SEPARATOR
+    BUTTON      CM_MOVE_UP_BSC_DIR_PATH
+    BUTTON      CM_MOVE_DOWN_BSC_DIR_PATH
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Bitmap
+//
+
+IDR_BSC_PATH_STRIP      BITMAP                  "res\\BscPathStrip.bmp"
+IDB_FILE_TYPE_STRIP     BITMAP                  "res\\FileTypeStrip.bmp"
+IDR_IMAGE_STRIP         BITMAP                  "res\\ImageStrip.bmp"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// PNG
+//
+
+IDR_BSC_PATH_STRIP      PNG                     "res\\BscPathStrip.png"
+IDR_IMAGE_STRIP         PNG                     "res\\ImageStrip.png"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// String Table
+//
+
+STRINGTABLE 
+BEGIN
+    IDS_OPTIONS_PROPERTY_SHEET_CAPTION "IDETools Options"
+    IDS_QUERY_DELETE_PROJECT_MESSAGE 
+                            "There are no files avaiable for '%s' project !\n\nDo you want to remove it's entry?"
+    IDS_EMPTY_CURR_PROJECT_MESSAGE "No project name is specified!"
+    IDS_CODE_GENERATOR_CAPTION "IDETools - Code Generator"
+    IDS_PROMPTINCLUDESECTION "Do you want to include the section ""%s""?"
+    IDS_PROMPT_DEBUG_BREAK  "Do you want to debug IDETools.dll ?"
+    IDS_ERR_READONLY_PROPERTY "Attempt to set the read only property '%s'."
+    IDS_ERR_CANNOT_CREATE_REGKEY "Cannot create registry key: %s"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_ERR_SECTIONNOTCLOSED 
+                            "Syntax error:\n\nSection '%1' is not properly closed."
+END
+
+STRINGTABLE 
+BEGIN
+    IDC_DELETE_PROJECT_ENTRY "Project '%s' entry will be deleted."
+    IDC_DELETE_ALL_PROJECTS "All project entries will be deleted!"
+    IDC_REMOVE_SELECTED_FILE "Remove selected file?\n\n%s"
+END
+
+STRINGTABLE 
+BEGIN
+    CM_OPEN_COMPLEMENTARY   "Open Complementary\nOpen Complementary"
+    CM_OPEN_INCLUDE_LINE    "Open Reference\nOpen Reference"
+END
+
+STRINGTABLE 
+BEGIN
+    IDC_FOUND_FILES_LISTCTRL "File Name=140|Directory=-1|Location=90"
+END
+
+STRINGTABLE 
+BEGIN
+    CM_ADD_BSC_DIR_PATH     "Add a new browse files folder entry\nNew Browse Folder"
+    CM_REMOVE_BSC_DIR_PATH  "Delete the selected browse files folder entry\nDelete Browse Folder"
+END
+
+STRINGTABLE 
+BEGIN
+    CM_EDIT_BSC_DIR_PATH    "Modify the selected browse files folder\nModify Browse Folder"
+    CM_MOVE_UP_BSC_DIR_PATH "Moves the selected folder up one position\nMove Folder Up"
+    CM_MOVE_DOWN_BSC_DIR_PATH 
+                            "Moves the selected folder down one position\nMove Folder Down"
+END
+
+STRINGTABLE 
+BEGIN
+    IDC_INPUT_TOKENS_DEFAULT "Set default input tokens"
+    IDC_OUTPUT_SEPARATOR_DEFAULT "Set default output separators"
+END
+
+STRINGTABLE 
+BEGIN
+    IDC_COPY_OUTPUT_TO_SOURCE "Copy output text to source text"
+END
+
+STRINGTABLE 
+BEGIN
+    IDC_DEPTH_LEVEL_COMBO   "No limit|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15"
+    IDC_VIEW_MODE_COMBO     "File name|Relative path file name|#include directive|File full path"
+    IDC_ORDER_COMBO         "Parsing Order|Descending|Ascending|File name ascending"
+END
+
+#endif    // English (U.S.) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+#include "utl/utl_ui.rc"
+#include "res\IDETools.rc2"  // non-Microsoft Visual C++ edited resources
+
+1 TYPELIB "IDETools.tlb"
+
+#define _AFX_NO_OLE_RESOURCES
+#define _AFX_NO_TRACKER_RESOURCES
+#define _AFX_NO_PROPERTY_RESOURCES
+
+#include "afxres.rc"         // Standard components
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+

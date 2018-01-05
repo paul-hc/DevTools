@@ -1,0 +1,1146 @@
+
+'------------------------------------------------------------------------------
+' FILE DESCRIPTION: Common key bindings for PaulC
+'------------------------------------------------------------------------------
+
+'################# AddHotKeysForCppMacrosHC #################
+Sub AddHotKeysForCppMacrosHC
+'DESCRIPTION: Register my own key bindings for macros in C++ macros.dsm
+	Application.AddKeyBinding "CTRL+SHIFT+V", "EmptyBracesInsertVoid", "Text"
+'	Application.AddKeyBinding "CTRL+SHIFT+L", "FilterLinesFindInFiles", "Main"
+
+	Application.AddKeyBinding "CTRL+SHIFT+5", "IndentLineToPrevArgList", "Text"
+	Application.AddKeyBinding "CTRL+5", "IndentNextLineTheSame", "Text"
+	Application.AddKeyBinding "CTRL+ALT+5", "IndentNextLineToCursorColumn", "Text"
+
+	Application.AddKeyBinding "CTRL+ALT+I", "InsertCommentImplementationBlock", "Text"
+	Application.AddKeyBinding "CTRL+ALT+SHIFT+I", "InsertCommentImplementationSubBlock", "Text"
+	Application.AddKeyBinding "CTRL+\", "MakeFileWritable", "Main"
+	Application.AddKeyBinding "CTRL+E", "RemoveEmptyLines", "Text"
+	Application.AddKeyBinding "ALT+A", "ReplaceAgain", "Text"
+
+	Application.AddKeyBinding "CTRL+Q", "ZTestMacro", "Text"
+
+	'Worker Macros
+	Application.AddKeyBinding "CTRL+ALT+1", "ZWorker01", "Main"
+	Application.AddKeyBinding "CTRL+ALT+2", "ZWorker02", "Main"
+	Application.AddKeyBinding "CTRL+ALT+3", "ZWorker03", "Main"
+	Application.AddKeyBinding "CTRL+ALT+4", "ZWorker04", "Main"
+	Application.AddKeyBinding "CTRL+ALT+6", "ZWorker06", "Main"
+	Application.AddKeyBinding "CTRL+ALT+7", "ZWorker07", "Main"
+	Application.AddKeyBinding "CTRL+ALT+8", "ZWorker08", "Main"
+	Application.AddKeyBinding "CTRL+ALT+9", "ZWorker09", "Main"
+End Sub
+
+
+'################# AddHotKeysForMSDev #################
+private Sub AddHotKeysForMSDevObsolete
+'DESCRIPTION: Register key bindings for modified keys of standard MSDev commands.
+
+	' ** OBSOLETE **
+	'    --------
+
+	'FILE
+	'----
+'	Application.AddKeyBinding "ALT+SHIFT+G", "FileGoTo", "Text"
+
+	'EDIT
+	'----
+'	Application.AddKeyBinding "CTRL+SHIFT+C", "WordCapitalize", "Text"
+'	Application.AddKeyBinding "CTRL+SHIFT+O", "WorkspaceOpen", "Main"
+'	Application.AddKeyBinding "CTRL+ALT+INS", "EditToggleOvertype", "Text"
+
+
+'	Application.AddKeyBinding "ALT+F5", "DebugAttachToActive", "Main"		'Attach to process
+'	Application.AddKeyBinding "ALT+INS", "Redo", "Main"
+'	Application.AddKeyBinding "ALT+SHIFT+BACKSPACE", "Redo", "Main"
+'	Application.AddKeyBinding "CTRL+Y", "LineDelete", "Text"
+'	Application.AddKeyBinding "CTRL+SHIFT+A", "SelectAll", "Main"
+'	Application.AddKeyBinding "CTRL+DOWN ARROW", "WindowScrollDown", "Text"
+'	Application.AddKeyBinding "CTRL+UP ARROW", "WindowScrollUp", "Text"
+
+'	Application.AddKeyBinding "ALT+SHIFT+6", "ActivateMemoryWindow", "Main"
+'	Application.AddKeyBinding "ALT+2", "ActivateOutputWindow", "Main"
+'	Application.AddKeyBinding "ALT+SHIFT+5", "ActivateRegistersWindow", "Main"
+'	Application.AddKeyBinding "ALT+SHIFT+4", "ActivateVariablesWindow", "Main"
+'	Application.AddKeyBinding "ALT+SHIFT+3", "ActivateWatchWindow", "Main"
+'	Application.AddKeyBinding "CTRL+F8", "ToggleFullScreen", "Main"
+'	Application.AddKeyBinding "ALT+6", "ToggleMemoryWindow", "Main"
+'	Application.AddKeyBinding "ALT+1", "ToggleOutputWindow", "Main"
+'	Application.AddKeyBinding "ALT+5", "ToggleRegistersWindow", "Main"
+'	Application.AddKeyBinding "ALT+4", "ToggleVariablesWindow", "Main"
+'	Application.AddKeyBinding "ALT+3", "ToggleWatchWindow", "Main"
+'	Application.AddKeyBinding "ALT+SHIFT+0", "ToggleWorkspaceWindow", "Main"
+'	Application.AddKeyBinding "ALT+SHIFT+S", "SourceControlExplorer", "Main"
+End Sub
+
+'------------------------------------------------------------------------------
+' EVENT HANDLERS
+'------------------------------------------------------------------------------
+
+' ################# Application_WindowActivate #################
+private sub Application_WindowActivate_Disabled( theWindow )
+'Skips VSS header (if any) only if cursor is on the first line.
+	If theWindow.Type <> "Text" Then Exit Sub
+	If ActiveDocument Is Nothing Then Exit Sub
+
+	If ActiveDocument.Type = "Text" Then
+		If ActiveDocument.Selection Is Nothing Then Exit Sub
+		If ActiveDocument.Selection.CurrentLine > 1 Then Exit Sub
+
+'		PrintToOutputWindow "Language=" & ActiveDocument.Language
+'		If ActiveDocument.Language = dsCPP Then DoPromptAfterVSSHeader()
+	End If
+end sub
+
+'------------------------------------------------------------------------------
+' SPECIFIC MACROS (HC)
+'------------------------------------------------------------------------------
+
+Public Const ctDefSectionWorkspaceProfile = "WorkspaceProfiles"
+Public Const ctDefProjectName = "<Default>"
+
+Sub UntabifyAllOpenDocuments()
+'DESCRIPTION: converts tabs into spaces fo all open documents
+	MakeAllOpenDocumentsWritable
+
+	Do While Not ActiveDocument Is Nothing
+		Dim doc
+		Set doc = ActiveDocument
+
+		Dim sel
+		Set sel = doc.Selection
+
+		sel.SelectAll
+		sel.Untabify
+		doc.Save
+		ActiveWindow.Close
+	Loop
+End Sub
+
+' ################# CustomWorkspaceLoad #################
+Sub CustomWorkspaceLoad()
+'DESCRIPTION: Loads a previously saved custom workspace with the specified name
+	Dim workspaceObject
+
+	Set workspaceObject = CreateObject( "IDETools.WorkspaceProfile" )
+	If workspaceObject Is Nothing Then Exit Sub
+
+	Dim currProjectName
+
+	currProjectName = ctDefProjectName
+	If Projects.Count > 0 Then currProjectName = Application.ActiveProject.Name
+
+	If workspaceObject.Load( ctDefSectionWorkspaceProfile, currProjectName ) Then
+		Dim maxIndex, index, fileFullPath
+
+		If workspaceObject.MustCloseAll Then Application.Windows.CloseAll
+		maxIndex = workspaceObject.GetFileCount() - 1
+		For index = 0 To maxIndex
+			fileFullPath = workspaceObject.GetFileName( index )
+			Application.Documents.Open fileFullPath, "Text"
+		Next
+	End If
+
+	Set workspaceObject = Nothing
+End Sub
+
+' ################# CustomWorkspaceSave #################
+Sub CustomWorkspaceSave()
+'DESCRIPTION: Saves a named custom workspace consisting (so far) of all opened documents
+	Dim workspaceObject
+
+	Set workspaceObject = CreateObject( "IDETools.WorkspaceProfile" )
+	If workspaceObject Is Nothing Then Exit Sub
+
+	Dim currProjectName
+
+	currProjectName = ctDefProjectName
+	If Projects.Count > 0 Then currProjectName = Application.ActiveProject.Name
+
+	Dim doc, project
+
+	For Each doc In Application.Documents
+		If doc.Type = "Text" Then Call workspaceObject.AddFile( doc.FullName )
+	Next
+
+	For Each project In Application.Projects
+		Call workspaceObject.AddProjectName( project.Name )
+	Next
+
+	Call workspaceObject.Save( ctDefSectionWorkspaceProfile, currProjectName )
+
+	Set workspaceObject = Nothing
+End Sub
+
+' ################# EmptyBracesInsertVoid #################
+sub EmptyBracesInsertVoid()
+'DESCRIPTION: Inserts 'void' on empty brackets (function declaration) [Ctrl+Shift+V].
+	if ActiveDocument.Selection.FindText( "()" ) then
+		ActiveDocument.Selection.Text = "( void )"
+	end if
+end sub
+
+' ################# FileGoToSmart #################
+sub FileGoToSmart()
+'DESCRIPTION: Opens the file, seeking for first "*.*" or <*.*> [Ctrl+Shift+G].
+	if Not ActiveWindow Is Nothing then
+		if ActiveWindow.Type = "Text" then
+			if Len( ActiveWindow.Selection.Text ) = 0 then
+				ActiveWindow.Selection.StartOfLine dsFirstText
+				if ActiveWindow.Selection.FindText( ctSearchForIncludeFile, dsMatchRegExp ) then
+					ActiveWindow.Selection.CharRight
+				end if
+			end if
+		end if
+	end if
+	ExecuteCommand "FileGoTo"
+end sub
+
+' ################# FilterLinesFindInFiles #################
+sub FilterLinesFindInFiles()
+'DESCRIPTION: Filters only first line on each file dumped by FindInFiles in output window [Ctrl+Shift+L].
+	ExecuteCommand "SelectAll"
+	ExecuteCommand "Copy"
+	ExecuteCommand "UserTool1"
+end sub
+
+' ################# IndentLineToPrevArgList #################
+Sub IndentLineToPrevArgList()
+'DESCRIPTION: (*) Indents the current line to first argument in the previous argument list [Ctrl+Shift+5]
+	If Not IsActiveTextDocument() Then Exit Sub
+
+	Dim sel
+	Set sel = ActiveDocument.Selection
+
+	PushCursor()
+	sel.MoveTo glLine - 1, 1
+	If sel.FindText( "( " ) Then
+		If sel.CurrentLine = ( glLine - 1 ) Then
+			sel.CharRight
+			IndentNextLineToCursorColumn
+			Exit Sub
+		End If
+	End If
+	PopCursor()
+End Sub
+
+' ################# IndentNextLineTheSame #################
+Sub IndentNextLineTheSame()
+'DESCRIPTION: (*) Indents the next line to the same level as the current line [Ctrl+5]
+	If Not IsActiveTextDocument() Then Exit Sub
+
+	ActiveDocument.Selection.StartOfLine dsFirstText
+	IndentNextLineToCursorColumn
+End Sub
+
+' ################# IndentNextLineToCursorColumn #################
+Sub IndentNextLineToCursorColumn()
+'DESCRIPTION: (*) Indents the next line at current horizontal cursor column [Ctrl+Alt+5]
+	Dim splitEditIndex, sel
+	Set sel = ActiveDocument.Selection
+
+	PushCursor()
+	splitEditIndex = glColumn - 1
+	sel.LineDown
+	sel.SelectLine
+
+	Dim lineCoreText, firstNonSpacePos
+	lineCoreText = ConvertToWindowsNewLines( sel.Text )
+	firstNonSpacePos = 1
+	'Cut leading whitespaces (if any).
+	Do
+		Select Case Mid( lineCoreText, firstNonSpacePos, 1 )
+			Case " ", vbTab
+				firstNonSpacePos = firstNonSpacePos + 1
+			Case Else
+				Exit Do
+		End Select
+	Loop
+
+	lineCoreText = Mid( lineCoreText, firstNonSpacePos )
+	sel.Text = BuildEditorSpaceBar( splitEditIndex ) & lineCoreText
+	sel.MoveTo glLine + 1, glColumn
+End Sub
+
+' ################# InsertCommentImplementationBlock #################
+Sub InsertCommentImplementationBlock()
+'DESCRIPTION: (*) Inserts an implementation comment block correlated with current document file type [Ctrl+Alt+I]
+	Dim selToken, fExt, suffix, sel
+	Set sel = ActiveDocument.Selection
+
+	selToken = ConvertToWindowsNewLines( sel.Text )
+	If Len( selToken ) = 0 Then
+		selToken = InputBox( "Entity Name", "Insert Comment Block", GetStrFileName( ActiveDocument, Null ) )
+	End If
+
+	suffix = "implementation"
+	fExt = LCase( GetStrFileExtension( ActiveDocument, Null ) )
+	Select Case fExt
+		Case ".cpp", ".c"
+			If Len( selToken ) > 0 Then
+				If Left( selToken, 1 ) = "X" Then suffix = "component " & suffix
+			End If
+		Case ".h", ".hxx", ".inl"
+			suffix = "inline code"
+		Case ".cxx", ".t", ".tmpl"
+			suffix = "template " & suffix
+		Case ".sql"
+			suffix = "package " & suffix
+		Case Else
+			suffix = ""
+	End Select
+
+	Call InsertCommentBlock( selToken & " " & suffix, "Implementation Block Decoration" )
+End Sub
+
+' ################# InsertCommentImplementationSubBlock #################
+Sub InsertCommentImplementationSubBlock()
+'DESCRIPTION: (*) Inserts an sub-implementation comment block for sentence on current line [Ctrl+Alt+Shift+I]
+	Dim lineBuffer
+
+	lineBuffer = StrFindReplace( GetCurrentLine( False ), vbNewLine, "", False )
+	ActiveDocument.Selection.Delete
+	Call InsertCommentBlock( lineBuffer, "Implementation SubBlock Decoration" )
+End Sub
+
+' ################# MakeFileWritable #################
+Sub MakeFileWritable()
+	Dim doc
+	Set doc = ActiveDocument
+
+	If Not doc Is Nothing Then
+		If doc.ReadOnly Then
+			Dim fileAccess
+
+			Set fileAccess = CreateObject( "IDETools.FileAccess" )
+			fileAccess.SetReadOnlyFile doc.FullName, False
+			Set fileAccess = Nothing
+		End If
+	End If
+End Sub
+
+' ################# MoveToEndOfWord #################
+sub MoveToEndOfWord()
+'DESCRIPTION: Move cursor to end of word [Ctrl+Alt+Right].
+	if ActiveDocument Is Nothing then exit sub
+
+	dim sel, crtLine
+
+	set sel = ActiveDocument.Selection
+	crtLine = sel.CurrentLine
+
+	sel.FindText "[a-zA-Z0-9_$]", dsMatchRegExp + dsMatchForward
+	sel.FindText "[^a-zA-Z0-9_$]", dsMatchRegExp + dsMatchForward
+	sel.CharLeft
+	if sel.CurrentLine <> crtLine then
+		sel.MoveTo crtLine, 1
+		sel.EndOfLine
+	end if
+end sub
+
+' ################# PasteMSDev6 #################
+Sub PasteMSDev6()
+'DESCRIPTION: Replaces built-in text paste command in order to avoid crashes in version 6 [Ctrl+Shift+Insert].
+	If ActiveDocument Is Nothing Then Exit Sub
+
+	Set clipboardObject = CreateObject( "IDETools.UserInterface" )
+	Dim clipText
+
+	On Error Resume Next
+	clipText = clipboardObject.GetClipboardText()
+	If Err.Number = 0 Then
+		If clipboardObject.IsClipFormatNameAvailable( "MSDEVColumnSelect" ) <> 0 then
+			ActiveDocument.Selection.Paste
+		Else
+			ActiveDocument.Selection.Text = clipText
+		End If
+	Else
+		Err.Clear
+		ActiveDocument.Selection.Paste
+	End If
+	Set clipboardObject = Nothing
+End Sub
+
+Sub RemoveEmptyLines()
+	If Not IsActiveTextDocument() Then Exit Sub
+
+	Dim sel
+	Set sel = ActiveDocument.Selection
+
+	If Len( sel.Text ) = 0 Then sel.SelectLine
+
+	Dim lines, line
+
+	lines = Split( sel.Text, vbNewLine )
+
+	Dim destText
+	destText = ""
+
+	For Each line In lines
+		line = RightTrim( line )
+		If Len( line ) > 0 Then
+			destText = destText + line + vbNewLine
+		End If
+	Next
+
+	sel.Text = destText
+End Sub
+
+' ################# ReplaceAgain #################
+sub ReplaceAgain()
+'DESCRIPTION: Repeats last replace command [Alt+A].
+	Dim doc
+	Set doc = ActiveDocument
+
+	If Not doc Is Nothing Then
+		If doc.ReadOnly Then
+			Dim fileAccess
+
+			Set fileAccess = CreateObject( "IDETools.FileAccess" )
+			fileAccess.SetReadOnlyFile doc.FullName, False
+			Set fileAccess = Nothing
+		End If
+		doc.Selection.Cancel
+		ExecuteCommand "FindRepeat"
+		ExecuteCommand "FindReplace"
+	End If
+end sub
+
+' ################# PromptAfterVSSHeader #################
+sub PromptAfterVSSHeader()
+'DESCRIPTION: Moves cursor after the VSS header [Ctrl+Alt+Home].
+	if Not DoPromptAfterVSSHeader() then
+		if ActiveDocument Is Nothing then exit sub
+		ActiveDocument.Selection.StartOfDocument
+	end if
+end sub
+
+' ################# SelectNextMultiLineComment #################
+Sub SelectNextMultiLineComment()
+'DESCRIPTION: Selects the comment that wraps the current position, in forward direction [Shift+Num/]
+	Dim sel, remEndLine, remEndColumn
+	Set sel = ActiveDocument.Selection
+
+	PushCursor()
+	If Len( sel.Text ) > 0 Then sel.CharRight
+	If Not sel.FindText( "*/", dsMatchForward ) Then PopCursor() : Exit Sub
+	sel.CharRight
+	remEndLine = sel.CurrentLine
+	remEndColumn = sel.CurrentColumn
+	If Not sel.FindText( "/*", dsMatchBackward ) Then PopCursor() : Exit Sub
+	sel.CharLeft
+	sel.MoveTo remEndLine, remEndColumn, dsExtend
+End Sub
+
+' ################# SelectPrevMultiLineComment #################
+Sub SelectPrevMultiLineComment()
+'DESCRIPTION: Selects the comment that wraps the current position, in backward direction [Ctrl+Shift+Num/]
+	Dim sel, remStartLine, remStartColumn
+	Set sel = ActiveDocument.Selection
+
+	PushCursor()
+	If Len( sel.Text ) > 0 Then sel.CharLeft
+	If Not sel.FindText( "/*", dsMatchBackward ) Then PopCursor() : Exit Sub
+	sel.CharLeft
+	remStartLine = sel.CurrentLine
+	remStartColumn = sel.CurrentColumn
+	If Not sel.FindText( "*/", dsMatchForward ) Then PopCursor() : Exit Sub
+	sel.CharRight
+	sel.MoveTo remStartLine, remStartColumn, dsExtend
+End Sub
+
+'------------------------------------------------------------------------------
+' CUSTOM WORKER MACROS
+'------------------------------------------------------------------------------
+
+' ################# ZWorker01 #################
+Sub ZWorker01()
+'DESCRIPTION: Worker Macro [Ctrl+Alt+1].
+	FixNextFunctionSuffixSpaceSpaces
+End Sub
+
+' ################# ZWorker02 #################
+Sub ZWorker02()
+'DESCRIPTION: Worker Macro [Ctrl+Alt+2].
+	ExecuteCommand "ToggleQuotedString"
+End Sub
+
+' ################# ZWorker03 #################
+Sub ZWorker03()
+'DESCRIPTION: Worker Macro [Ctrl+Alt+3].
+	If ActiveDocument Is Nothing Then Exit Sub
+	Exit Sub
+
+	If MsgBox( "Are you sure you wanna make SOURCE CONVERSION ???", vbYesNo + vbDefaultButton2 ) <> vbYes Then Exit Sub
+
+	Set				doc = ActiveDocument
+	Set				sel = ActiveDocument.Selection
+
+	'If sel Is Nothing Then Exit Sub
+	Call doc.ReplaceText( "^\/\*...\*\/\:b+", "", dsMatchCase + dsMatchRegExp )
+	Call doc.ReplaceText( "^\:b+#", "#", dsMatchCase + dsMatchRegExp )
+	Call doc.ReplaceText( " +{", "{", dsMatchCase + dsMatchRegExp )
+	Call doc.ReplaceText( " +}", "}", dsMatchCase + dsMatchRegExp )
+	Call doc.ReplaceText( "      \~\:b+", vbTab & vbTab & vbTab, dsMatchCase + dsMatchRegExp )
+	Call doc.ReplaceText( "    \~\:b+", vbTab & vbTab, dsMatchCase + dsMatchRegExp )
+	Call doc.ReplaceText( "  \~\:b+", vbTab, dsMatchCase + dsMatchRegExp )
+	Call doc.ReplaceText( "\:b+(", "(", dsMatchCase + dsMatchRegExp )
+
+	Call doc.ReplaceText( "(\~\:b+", "( ", dsMatchCase + dsMatchRegExp )
+	'Call doc.ReplaceText( "(\~[\:b+\!)]", "( ", dsMatchCase + dsMatchRegExp )
+
+	Call doc.ReplaceText( "\~ )", " )", dsMatchCase + dsMatchRegExp )
+	Call doc.ReplaceText( "(\:b+)", "()", dsMatchCase + dsMatchRegExp )
+	Call doc.ReplaceText( "\:b+)", " )", dsMatchCase + dsMatchRegExp )
+	Call doc.ReplaceText( "(\:b+", "( ", dsMatchCase + dsMatchRegExp )
+	Call doc.ReplaceText( "if(", "if (", dsMatchCase )
+	Call doc.ReplaceText( "for(", "for (", dsMatchCase )
+	Call doc.ReplaceText( "while(", "while (", dsMatchCase )
+	Call doc.ReplaceText( "switch(", "switch (", dsMatchCase )
+	Call doc.ReplaceText( "\[\~ ", "\[ ", dsMatchCase + dsMatchRegExp )
+	Call doc.ReplaceText( "\~ \]", " \]", dsMatchCase + dsMatchRegExp )
+	Call doc.ReplaceText( "\[\:b+\]", "\[\]", dsMatchCase + dsMatchRegExp )
+
+	Call doc.ReplaceText( ",\~\:b+", ", ", dsMatchCase + dsMatchRegExp )
+
+	Call doc.ReplaceText( vbTab & ":\~\:b+", vbTab & ": ", dsMatchCase + dsMatchRegExp )
+
+	Call doc.ReplaceText( "==\~\:b+", " == ", dsMatchCase + dsMatchRegExp )
+	Call doc.ReplaceText( "=\~\:b+", " = ", dsMatchCase + dsMatchRegExp )
+	Call doc.ReplaceText( "\:b+=\:b+", " = ", dsMatchCase + dsMatchRegExp )
+	Call ReplaceMatches( "=\:b+=", "==", dsMatchRegExp )
+
+	Call doc.ReplaceText( "||\~\:b+", " || ", dsMatchCase + dsMatchRegExp )
+	Call doc.ReplaceText( "|\~\:b+", " | ", dsMatchCase + dsMatchRegExp )
+	Call doc.ReplaceText( "\:b+|\:b+", " | ", dsMatchCase + dsMatchRegExp )
+	Call ReplaceMatches( "|\:b+|", "||", dsMatchRegExp )
+
+	Call doc.ReplaceText( "\+\+\~\:b+", " ++ ", dsMatchCase + dsMatchRegExp )
+	Call doc.ReplaceText( "\+\~\:b+", " + ", dsMatchCase + dsMatchRegExp )
+	Call doc.ReplaceText( "\:b+\+\:b+", " + ", dsMatchCase + dsMatchRegExp )
+	Call ReplaceMatches( "\+\:b+\+", "++", dsMatchRegExp )
+	Call ReplaceMatches( "\+\+\:b+", "++", dsMatchRegExp )
+	' Finally Delete trailing whitespaces
+	Call doc.ReplaceText( "\:b+$", "", dsMatchRegExp )
+
+	MsgBox "ZWorker03" & vbNewLine & vbNewLine & "Sorry, no bananas today !"
+End Sub
+
+' ################# ZWorker04 #################
+Sub ZWorker04()
+'DESCRIPTION: Worker Macro [Ctrl+Alt+4].
+
+	Dim myString, myArray, token
+
+'	myString = " class   CMyClass"
+'	myString = "template < typename T > class   CMyClass"
+	myString = "template<typename T> class CMyClass"
+	myArray = Split( myString, " ", -1, vbBinaryCompare )
+	For Each token In myArray
+		PrintToOutputWindow "<" & token & ">"
+	Next
+
+	Exit Sub
+
+	Set	sel = ActiveDocument.Selection
+	Dim textObject
+
+	Set textObject = CreateObject( "IDETools.TextContent" )
+
+	if textObject is nothing then exit sub
+
+	if textObject.LoadFileSection( "C:\MyProjects\Add-Ins\IDE Helpers\#CompoundTextFile.txt", "Section no 1" ) then
+		'textObject.ReplaceText vbCrLf, "++", false
+		sel.text = textObject.Text
+	end if
+
+	Set textObject = Nothing
+
+'	FormatClassWizardSourceImpl()
+End Sub
+
+' ################# ZWorker06 #################
+Sub ZWorker06()
+'DESCRIPTION: Worker Macro [Ctrl+Alt+6].
+'	MsgBox "ZWorker06" & vbNewLine & vbNewLine & "Sorry, no bananas today !"
+	Set				sel = ActiveDocument.Selection
+	Dim				tableName
+
+	sel.StartOfLine
+	sel.WordRight
+	ExecuteCommand "SelectWord"
+	tableName = sel.Text
+	sel.StartOfLine
+	sel.Text = "PROMPT Create table " & tableName & vbNewLine & vbNewLine
+End Sub
+
+' ################# ZWorker07 #################
+Sub ZWorker07()
+'DESCRIPTION: Worker Macro [Ctrl+Alt+7].
+	Set				sel = ActiveDocument.Selection
+
+	If sel.FindText( "\:b+,\:b+/\*\:b+", dsMatchRegExp ) Then
+		sel.Text = "," & String( 3, vbTab ) & "-- "
+		if sel.FindText( "\:b+\*/", dsMatchRegExp ) Then sel.Delete
+	End If
+End Sub
+
+' ################# ZWorker08 #################
+Sub ZWorker08()
+'DESCRIPTION: Worker Macro [Ctrl+Alt+8].
+	Dim				selString
+	Set				sel = ActiveDocument.Selection
+
+	selString = sel.Text
+
+	Dim				userInterface, itemTemplate
+
+	Set userInterface = CreateObject( "IDETools.UserInterface" )
+	itemTemplate = userInterface.InputBox( "Token Paste Replacer", "Set Item Template (%% will be replaced)", "" )
+	Set userInterface = Nothing
+
+	If itemTemplate = "" Then Exit Sub
+
+	Dim				destination, itemDest
+	Dim				itemArray, item
+
+	destination = ""
+	itemArray = Split( selString, vbNewLine )
+
+	For Each item In itemArray
+		If item <> "" Then
+			itemDest = itemTemplate
+			itemDest = StrFindReplace( itemDest, "%%", item, 1 )
+			destination = destination & itemDest
+		End If
+	Next
+
+	sel.Text = destination
+End Sub
+
+' ################# ZWorker09 #################
+Sub ZWorker09()
+'DESCRIPTION: Worker Macro [Ctrl+Alt+9].
+
+	'RemoveAllXmlElements "GroupSet\:i>"
+
+	ListProjectFiles
+End Sub
+
+'------------------------------------------------------------------------------
+' SCBM MIGRATION MACROS:
+'------------------------------------------------------------------------------
+
+Sub FixNextFunctionSuffixSpaceSpaces()
+	If Not IsActiveTextDocument() Then Exit Sub
+
+	Dim sel
+	Set sel = ActiveDocument.Selection
+
+	Const searchExpr = "\{if (\!for (\!while (\!switch (\!catch (\!return (\!throw (\! (\}"
+
+	If Len( sel.Text ) = 0 Then
+		sel.FindText searchExpr, dsMatchCase + dsMatchRegExp
+	Else
+		If sel.Text = " (" Then
+			sel.Text = "("
+			ExecuteCommand "FormatCode"
+		Else
+			sel.Cancel
+
+			Dim startLine
+
+			startLine = sel.CurrentLine
+			Do While sel.FindText( searchExpr, dsMatchCase + dsMatchRegExp )
+				If sel.CurrentLine < startLine Then Exit Do
+				If sel.Text = " (" Then Exit Do
+			Loop
+		End If
+	End If
+
+End Sub
+
+private sub ListProjectFiles()
+	dim dspProject
+
+	set dspProject = CreateObject( "IDETools.DspProject" )
+
+	dspProject.ClearAllFileFilters
+	dspProject.AddFileFilter "*.h"
+	dspProject.AddFileFilter "*.hxx"
+	dspProject.AddFileFilter "*.hpp"
+	dspProject.AddFileFilter "*.inl"
+	dspProject.AddFileFilter "*.t"
+	dspProject.AddFileFilter "*.c"
+	dspProject.AddFileFilter "*.cpp"
+	dspProject.AddFileFilter "*.cxx"
+	dspProject.AddFileFilter "*.idl"
+	dspProject.AddFileFilter "*.odl"
+	dspProject.AddFileFilter "*.rc"
+	dspProject.AddFileFilter "*.rc2"
+
+	for each project In Application.Projects
+		if project.Type = "Build" then
+			dspProject.DspProjectFilePath = project.FullName
+
+			dim filesToAddCount, filesToRemoveCount
+
+			filesToAddCount = dspProject.GetFilesToAddCount()
+			filesToRemoveCount = dspProject.GetFilesToRemoveCount()
+			if ( filesToAddCount > 0 ) or ( filesToRemoveCount > 0 ) then
+				PrintToOutputWindow project.Name
+
+				dim index
+
+				if filesToAddCount > 0 then
+					PrintToOutputWindow "  *NEW FILES:"
+					for index = 0 to filesToAddCount - 1
+						PrintToOutputWindow "   " & dspProject.GetFileToAddAt( index )
+					next
+				end if
+
+				if filesToRemoveCount > 0 then
+					PrintToOutputWindow "  *REMOVED FILES:"
+					for index = 0 to filesToRemoveCount - 1
+						PrintToOutputWindow "   " & dspProject.GetFileToRemoveAt( index )
+					next
+				end if
+			end if
+		end if
+	next
+
+	set dspProject = nothing
+end sub
+
+private function RemoveAllXmlElements( matchElement )
+	RemoveAllXmlElements = true
+
+	while not ActiveDocument is nothing
+		dim doc
+
+		set doc = ActiveDocument
+
+		if not doc.ReadOnly then
+			while RemoveXmlElementContaining( matchElement )
+			wend
+
+			doc.Save
+			doc.Close
+		else
+			msgbox "Active document is not editable: " & doc.Name
+			RemoveAllXmlElements = false
+			exit function
+		end if
+
+		set doc = nothing
+	wend
+end function
+
+private function RemoveXmlElementContaining( matchElement )
+	RemoveXmlElementContaining = false
+
+	dim sel, startLine
+
+	set sel = ActiveDocument.Selection
+
+	if sel.FindText( matchElement, dsMatchCase + dsMatchRegExp ) then
+		ExecuteCommand "SelectSwapAnchor"
+		sel.WordLeft dsExtend
+		startLine = sel.CurrentLine
+
+		dim elementEndingTag
+
+		elementEndingTag = sel.Text
+
+		if sel.FindText( elementEndingTag, dsMatchCase ) then
+			sel.LineDown
+			sel.StartOfLine dsFirstColumn
+			sel.MoveTo startLine, 1, dsExtend
+
+			sel.Delete
+
+			RemoveXmlElementContaining = true
+		end if
+	end if
+
+	set sel = Nothing
+end function
+
+'------------------------------------------------------------------------------
+' Procedures & Functions:
+'------------------------------------------------------------------------------
+
+dim glLine, glColumn
+
+' ################# PushCursor #################
+private sub PushCursor()
+	glLine = ActiveDocument.Selection.CurrentLine
+	glColumn = ActiveDocument.Selection.CurrentColumn
+end sub
+
+' ################# PopCursor #################
+private sub PopCursor()
+	ActiveDocument.Selection.MoveTo glLine, glColumn
+end sub
+
+' ################# ConvertToWindowsNewLines #################
+Function ConvertToWindowsNewLines( ByVal text )
+	text = StrFindReplace( text, vbCrLf, vbLf, True )
+	text = StrFindReplace( text, vbLf, vbCrLf, True )
+
+	ConvertToWindowsNewLines = text
+End Function
+
+' ################# IsActiveTextDocument #################
+Function IsActiveTextDocument()
+	IsActiveTextDocument = False
+
+	If Not ActiveDocument Is Nothing Then
+		If ActiveDocument.type = "Text" Then
+			IsActiveTextDocument = True
+		End If
+	End If
+End Function
+
+' ################# DoPromptAfterVSSHeader #################
+function DoPromptAfterVSSHeader()
+'Moves cursor after the VSS header [Ctrl+Alt+Home].
+	DoPromptAfterVSSHeader = False
+	if ActiveDocument Is Nothing then exit function
+
+	dim vssMarker, sel
+
+	vssMarker = "*$Wor" & "kfile:"
+	set sel = ActiveDocument.Selection
+	PushCursor()
+	if sel.FindText( vssMarker ) then
+		if sel.FindText( "*/" ) then
+			sel.LineDown
+			sel.StartOfLine
+			ExecuteCommand "WindowScrollToTop"
+			DoPromptAfterVSSHeader = True
+			exit function
+		end if
+	end if
+	PopCursor()
+end function
+
+'################# ReplaceMatches #################
+Private Function ReplaceMatches( match, replacer, searchOptions )
+	ReplaceMatches = False
+
+	Set				sel = ActiveDocument.Selection
+
+	sel.StartOfDocument
+	While sel.FindText( match, searchOptions )
+		sel.Text = replacer
+		ReplaceMatches = True
+	Wend
+End Function
+
+' ################# BuildEditorSpaceBar #################
+'Builds white-space bar (tabs + spaces), according to editor settings; editorIndex is zero-based
+Function BuildEditorSpaceBar( editorIndex )
+	Dim tbSize
+
+	tbSize = ActiveDocument.TabSize
+	BuildEditorSpaceBar = String( editorIndex \ tbSize, vbTab ) &_
+						  String( editorIndex mod tbSize, " " )
+End Function
+
+'################# GetActiveFullPath #################
+Function GetActiveFullPath()
+	GetActiveFullPath = ""
+	If Not ActiveDocument Is Nothing Then
+		GetActiveFullPath = ActiveDocument.FullName
+	Else
+		If Application.Projects.Count > 0 Then GetActiveFullPath = ActiveProject.FullName
+	End If
+End Function
+
+' ################# GetCurrentCodeTemplateFile #################
+Function GetCurrentCodeTemplateFile()
+	Dim ideToolsOptions
+
+	Set ideToolsOptions = CreateObject( "IDETools.ModuleOptions" )
+	GetCurrentCodeTemplateFile = ideToolsOptions.codeTemplateFile
+	Set ideToolsOptions = Nothing
+End Function
+
+' ################# InsertCommentBlock #################
+Private Sub InsertCommentBlock( commentText, commentSectionName )
+'Inserts a comment block, using 'fillString' as pattern.
+	Dim codeTemplateFile, commentBlock
+
+	Set codeTemplateFile = CreateObject( "IDETools.TextContent" )
+
+	commentBlock = ""
+	If codeTemplateFile.LoadFileSection( GetCurrentCodeTemplateFile(), commentSectionName ) Then
+		Call codeTemplateFile.ReplaceText( "%Comment%", commentText, False )
+		commentBlock = codeTemplateFile.Text
+	End If
+	Set codeTemplateFile = Nothing
+
+	If Len( commentBlock ) = 0 Then
+		ErrorMessage "Cannot load section '" & commentSectionName & vbNewLine & _
+					 "' from the current template file '" & GetCurrentCodeTemplateFile() & "' !"
+		Exit Sub
+	End If
+
+	Dim sel
+	Set sel = ActiveDocument.Selection
+
+	PushCursor()
+	sel.StartOfLine
+	sel.Text = commentBlock
+	sel.MoveTo glLine, 1
+ 	If sel.FindText( "\:b+", dsMatchRegExp ) Then sel.CharRight
+End Sub
+
+' ################# GetCurrentLine #################
+Function GetCurrentLine( doCancel )
+'Return the string containing the prompted line.
+	Dim textLine, sel
+
+	Set sel = ActiveDocument.Selection
+	sel.SelectLine
+	textLine = ConvertToWindowsNewLines( sel.Text )
+	If doCancel Then sel.Cancel
+	GetCurrentLine = textLine
+End Function
+
+' ################# GetStrFileExtension #################
+Function GetStrFileExtension( ByRef doc, altFileName )
+'Returns the extension of current document filename.
+	GetStrFileExtension = ""
+
+	Dim fileName
+
+	If Not doc Is Nothing Then
+		fileName = doc.Name
+	ElseIf Len( altFileName ) > 0 Then
+		fileName = altFileName
+	End If
+
+	If Len( fileName ) > 0 Then
+		Dim extensionPos, fExt
+
+		extensionPos = InStrRev( fileName, "." )
+		If extensionPos > 0 Then GetStrFileExtension = Mid( fileName, extensionPos )
+	End If
+End Function
+
+' ################# GetStrFileName #################
+Function GetStrFileName( ByRef doc, altFileName )
+'Returns the extension of current document filename.
+	GetStrFileName = ""
+
+	Dim fileName
+
+	If Not doc Is Nothing Then
+		fileName = doc.Name
+	ElseIf Len( altFileName ) > 0 Then
+		fileName = altFileName
+	End If
+
+	If Len( fileName ) > 0 Then
+		Dim extensionPos, fExt
+
+		extensionPos = InStrRev( fileName, "." )
+		If extensionPos > 0 Then GetStrFileName = Left( fileName, extensionPos - 1 )
+	End If
+End Function
+
+' ################# FormatClassWizardSourceImpl #################
+Private Sub FormatClassWizardSourceImpl()
+'DESCRIPTION: formats an already Class Wizard generated C++ source file.
+
+	If MsgBox( "Proceed to format ClassWizard document ?", vbOKCancel ) <> vbOK Then Exit Sub
+
+	Set				sel = ActiveDocument.Selection
+	Dim				className, extPos, classCtor
+
+	'Go to ctor
+	className = sel.Parent.Name
+	extPos = InStrRev( className, "." )
+	if extPos > 0 Then className = Left( className, extPos - 1 )
+	if className = "" Then Exit Sub
+	classCtor = className & "::" & className
+	sel.FindText classCtor, dsMatchFromStart + dsMatchCase
+	sel.StartOfLine dsFirstColumn
+	'Select and delete back to start of document
+	sel.StartOfDocument dsExtend
+	sel.Delete
+	'Insert file overhead
+	ExecuteCommand "InsertFileOverhead"
+	'Format ctor and dtor
+	EmptyBracesInsertVoid()
+'	ExecuteCommand "SmartRemark"
+	ExecuteCommand "EmptyBracesInsertVoid"
+'	ExecuteCommand "SmartRemark"
+	'Format message map
+	sel.FindText "BEGIN_MESSAGE_MAP", dsMatchCase
+	sel.StartOfLine dsFirstColumn
+	sel.Backspace
+	sel.LineDown dsMove, 2
+	sel.LineDown dsExtend
+	sel.Delete
+	sel.LineDown dsMove, 2
+	sel.LineDown dsExtend, 2
+	sel.WordRight dsExtend
+	sel.Text = "'"
+	sel.WordRight
+	sel.CharLeft
+	sel.Text = "'"
+	sel.StartOfLine dsFirstText
+	sel.LineDown dsExtend
+	sel.Cut
+	sel.LineUp dsMove, 4
+	sel.Paste
+	sel.LineUp
+	sel.EndOfLine dsExtend
+	ExecuteCommand "InsertCommentImplementationSubBlock"
+	'Go back to ctor position
+	sel.FindText classCtor, dsMatchFromStart + dsMatchCase
+	sel.StartOfLine dsFirstColumn
+	sel.LineDown
+End Sub
+
+' ################# StrFindReplace #################
+Function StrFindReplace( source, match, replacer, doForAll )
+'String: replaces in 'source' occurences of 'match' with 'replacer', depending of 'doForAll'
+	Dim				tempCut
+	Dim				sourceLen, matchLen, replacerLen, cursor
+
+	sourceLen = Len( source )
+	matchLen = Len( match )
+	replacerLen = Len( replacer )
+	cursor = 1
+	Do
+		cursor = InStr( cursor, source, match )
+		If cursor = 0 Then Exit Do
+		tempCut = Mid( source, cursor + matchLen )
+		source = Left( source, cursor - 1 ) & replacer & tempCut
+		cursor = cursor + replacerLen
+	Loop While doForAll
+	StrFindReplace = source
+End Function
+
+' ################# DoHandleCutLineFirstWordDuplicates #################
+Private Sub DoHandleCutLineFirstWordDuplicates()
+' Cut to distinct lines based on the first word as unique criteria
+	Dim theWord
+	Set sel = ActiveDocument.Selection
+
+	Do
+		sel.StartOfLine
+		ExecuteCommand "SelectWord"
+		theWord = sel.Text
+		If theWord = "GATA" Then Exit Do
+		sel.CharLeft
+		sel.CharRight
+		sel.Text = "_"
+		while sel.FindText( "^" + theWord, dsMatchForward + dsMatchRegExp )
+			ExecuteCommand "LineDelete"
+		wend
+		sel.LineUp
+		ExecuteCommand "SelectWord"
+		sel.Text = theWord
+		sel.LineDown
+	Loop
+End Sub
+
+' ################# DoUnwrapSelection #################
+private sub DoUnwrapSelection()
+	if ActiveDocument is nothing then exit sub
+	if ActiveDocument.Type <> "Text" then exit sub
+
+	dim				sel, lineCount
+
+	set sel = ActiveDocument.Selection
+	lineCount = sel.CurrentLine
+	ExecuteCommand "SelectSwapAnchor"
+	lineCount = abs( sel.CurrentLine - lineCount )
+	ExecuteCommand "SelectSwapAnchor"
+
+	if lineCount > 1 then
+		dim				posStart, posEnd, newText, currLine
+
+		newText = ""
+		posStart = 1
+		do
+			posEnd = InStr( posStart, sel.Text, vbNewLine )
+			if posEnd > 0 then
+				currLine = mid( sel.Text, posStart, posEnd - posStart )
+				posStart = posEnd + len( vbNewLine )
+			else
+				currLine = mid( sel.Text, posStart )
+			end if
+			currLine = LeftTrim( RightTrim( currLine ) )
+			if len( currLine ) > 0 then
+				if len( newText ) > 0 then newText = newText & " "
+				newText = newText & currLine
+			end if
+		loop while posEnd > 0
+
+		sel.Text = newText & vbNewLine
+	end if
+end sub
+
+' ################# DoUnwrapSelection2 #################
+private sub DoUnwrapSelection2()
+	if ActiveDocument is nothing then exit sub
+	if ActiveDocument.Type <> "Text" then exit sub
+
+	dim textObject, sel
+
+	set sel = ActiveDocument.Selection
+	set textObject = CreateObject( "IDETools.TextContent" )
+	if textObject.MultiLinesToSingleParagraph( sel.Text, true ) >= 1 then
+		sel.Text = textObject.Text
+		sel.LineUp
+		sel.SelectLine
+	end if
+
+	set textObject = nothing
+end sub
+
+' ################# LeftTrim #################
+Function LeftTrim( ByRef text )
+	dim				length, start
+
+	length = Len( text )
+	start = 1
+	do while start < length
+		select case mid( text, start, 1 )
+			case " ", vbTab
+				start = start + 1
+			case vbNewLine
+				start = start + len( vbNewLine )
+			case else
+				exit do
+		end select
+	loop
+
+	LeftTrim = mid( text, start )
+end function
+
+' ################# RightTrim #################
+Function RightTrim( ByRef text )
+	dim length
+
+	length = Len( text )
+	do while length > 0
+		select case mid( text, length, 1 )
+			case " ", vbTab
+				length = length - 1
+			case vbNewLine
+				length = length - len( vbNewLine )
+			case else
+				exit do
+		end select
+	loop
+
+	RightTrim = left( text, length )
+end function

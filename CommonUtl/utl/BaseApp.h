@@ -1,0 +1,79 @@
+#ifndef BaseApp_h
+#define BaseApp_h
+#pragma once
+
+#ifndef __AFXWIN_H__
+#error "include 'stdafx.h' before including this file for PCH"
+#endif
+
+
+#include "AccelTable.h"
+#include "ResourcePool.h"
+
+
+class CLogger;
+class CImageStore;
+namespace utl { class CResourcePool; }
+
+
+// UTL global trace categories
+//DECLARE_AFX_TRACE_CATEGORY( traceThumbs )
+
+
+namespace app
+{
+	interface IGlobalResources
+	{
+		virtual utl::CResourcePool& GetSharedResources( void ) = 0;
+		virtual CLogger& GetLogger( void ) = 0;
+	};
+}
+
+
+template< typename BaseClass = CWinApp >		// could use CWinAppEx base for new MFC app support (ribbons, etc)
+class CBaseApp : public BaseClass, public app::IGlobalResources
+{
+protected:
+	CBaseApp( const TCHAR* pAppName = NULL );
+	virtual ~CBaseApp();
+
+	void StoreProfileSuffix( const std::tstring& profileSuffix ) { m_profileSuffix = profileSuffix; }	// call just before InitInstance
+public:
+	// app::IGlobalResources interface
+	virtual utl::CResourcePool& GetSharedResources( void ) { return *safe_ptr( m_pSharedResources.get() ); }
+	virtual CLogger& GetLogger( void ) { return *safe_ptr( m_pLogger.get() ); }
+private:
+	std::auto_ptr< utl::CResourcePool > m_pSharedResources;		// application shared resources, released on ExitInstance()
+	std::auto_ptr< CLogger > m_pLogger;
+	std::auto_ptr< CImageStore > m_pImageStore;					// control the lifetime of shared resources
+	CAccelTable m_appAccel;
+	std::tstring m_profileSuffix;								// could be set to "_v2" when required
+
+	// generated overrides
+	public:
+	virtual BOOL InitInstance( void );
+	virtual int ExitInstance( void );
+	virtual BOOL PreTranslateMessage( MSG* pMsg );
+protected:
+	// generated message map
+	afx_msg void OnAppAbout( void );
+	afx_msg void OnUpdateAppAbout( CCmdUI* pCmdUI );
+	afx_msg void OnRunUnitTests( void );
+	afx_msg void OnUpdateRunUnitTests( CCmdUI* pCmdUI );
+
+	DECLARE_MESSAGE_MAP()
+};
+
+
+namespace app
+{
+	inline IGlobalResources* GetGlobalResources( void ) { return safe_ptr( dynamic_cast< IGlobalResources* >( AfxGetApp() ) ); }
+
+	void TrackUnitTestMenu( CWnd* pTargetWnd, const CPoint& screenPos );
+
+	void TraceException( const std::exception& exc );
+	void TraceException( const CException& exc );
+}
+
+
+#endif // BaseApp_h

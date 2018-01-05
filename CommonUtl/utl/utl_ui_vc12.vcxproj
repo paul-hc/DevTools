@@ -1,0 +1,450 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="DebugU|Win32">
+      <Configuration>DebugU</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="DebugU|x64">
+      <Configuration>DebugU</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="ReleaseU|Win32">
+      <Configuration>ReleaseU</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="ReleaseU|x64">
+      <Configuration>ReleaseU</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{FA759613-6A3A-46DC-9CE8-A60B10EB5986}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>utl_ui_vc12</RootNamespace>
+    <ProjectName>utl_ui</ProjectName>
+    <SccProjectName>
+    </SccProjectName>
+    <SccLocalPath>
+    </SccLocalPath>
+    <SccProvider>
+    </SccProvider>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugU|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+    <UseOfMfc>Static</UseOfMfc>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugU|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+    <UseOfMfc>Static</UseOfMfc>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseU|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+    <UseOfMfc>Static</UseOfMfc>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseU|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+    <UseOfMfc>Static</UseOfMfc>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='DebugU|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='DebugU|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='ReleaseU|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseU|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugU|Win32'">
+    <OutDir>$(ProjectDir)bin_vc12\</OutDir>
+    <IntDir>bin_vc12\$(PlatformName)_$(Configuration)\</IntDir>
+    <TargetName>$(ProjectName)_ud</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseU|Win32'">
+    <OutDir>$(ProjectDir)bin_vc12\</OutDir>
+    <IntDir>bin_vc12\$(PlatformName)_$(Configuration)\</IntDir>
+    <TargetName>$(ProjectName)_u</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugU|x64'">
+    <OutDir>$(ProjectDir)bin_vc12\</OutDir>
+    <IntDir>bin_vc12\$(PlatformName)_$(Configuration)\</IntDir>
+    <TargetName>$(ProjectName)_ud64</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseU|x64'">
+    <OutDir>$(ProjectDir)bin_vc12\</OutDir>
+    <IntDir>bin_vc12\$(PlatformName)_$(Configuration)\</IntDir>
+    <TargetName>$(ProjectName)_u64</TargetName>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugU|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <WarningLevel>Level4</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <SDLCheck>false</SDLCheck>
+      <AdditionalIncludeDirectories>..;$(UTL_INCLUDE)</AdditionalIncludeDirectories>
+      <DisableSpecificWarnings>4996</DisableSpecificWarnings>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+    <Lib>
+      <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
+      <TargetMachine>MachineX86</TargetMachine>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugU|x64'">
+    <ClCompile>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <WarningLevel>Level4</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <SDLCheck>false</SDLCheck>
+      <AdditionalIncludeDirectories>..;$(UTL_INCLUDE)</AdditionalIncludeDirectories>
+      <DisableSpecificWarnings>4996</DisableSpecificWarnings>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+    <Lib>
+      <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseU|Win32'">
+    <ClCompile>
+      <WarningLevel>Level4</WarningLevel>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <SDLCheck>false</SDLCheck>
+      <AdditionalIncludeDirectories>..;$(UTL_INCLUDE)</AdditionalIncludeDirectories>
+      <DisableSpecificWarnings>4996</DisableSpecificWarnings>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+    <Lib>
+      <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
+      <TargetMachine>MachineX86</TargetMachine>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseU|x64'">
+    <ClCompile>
+      <WarningLevel>Level4</WarningLevel>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <SDLCheck>false</SDLCheck>
+      <AdditionalIncludeDirectories>..;$(UTL_INCLUDE)</AdditionalIncludeDirectories>
+      <DisableSpecificWarnings>4996</DisableSpecificWarnings>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+    <Lib>
+      <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="AboutBox.h" />
+    <ClInclude Include="AccelTable.h" />
+    <ClInclude Include="BaseApp.h" />
+    <ClInclude Include="BaseApp.hxx" />
+    <ClInclude Include="BaseDetailHostCtrl.h" />
+    <ClInclude Include="BaseDetailHostCtrl.hxx" />
+    <ClInclude Include="BaseImageTestCase.h" />
+    <ClInclude Include="BaseMainDialog.h" />
+    <ClInclude Include="BasePopupDialog.h" />
+    <ClInclude Include="BaseSplitButton.h" />
+    <ClInclude Include="BaseStatic.h" />
+    <ClInclude Include="BaseToolbar.h" />
+    <ClInclude Include="BatchTransactions.h" />
+    <ClInclude Include="Clipboard.h" />
+    <ClInclude Include="CmdInfoStore.h" />
+    <ClInclude Include="Color.h" />
+    <ClInclude Include="CommonDefs.h" />
+    <ClInclude Include="CommonWinDefs.h" />
+    <ClInclude Include="ComparePredicates.h" />
+    <ClInclude Include="ContainerUtilities.h" />
+    <ClInclude Include="CtrlUiState.h" />
+    <ClInclude Include="DesktopDC.h" />
+    <ClInclude Include="DialogToolBar.h" />
+    <ClInclude Include="Dialog_fwd.h" />
+    <ClInclude Include="DibDraw.h" />
+    <ClInclude Include="DibPixels.h" />
+    <ClInclude Include="DibSection.h" />
+    <ClInclude Include="EnumSplitButton.h" />
+    <ClInclude Include="EnumTags.h" />
+    <ClInclude Include="FileSystem.h" />
+    <ClInclude Include="FileSystemTests.h" />
+    <ClInclude Include="FlagTags.h" />
+    <ClInclude Include="FlexPath.h" />
+    <ClInclude Include="ImagePathKey.h" />
+    <ClInclude Include="Image_fwd.h" />
+    <ClInclude Include="GpUtilities.h" />
+    <ClInclude Include="GroupIcon.h" />
+    <ClInclude Include="HistoryComboBox.h" />
+    <ClInclude Include="Icon.h" />
+    <ClInclude Include="IconButton.h" />
+    <ClInclude Include="ImageProxy.h" />
+    <ClInclude Include="ImageStore.h" />
+    <ClInclude Include="Imaging.h" />
+    <ClInclude Include="ImagingDirect2D.h" />
+    <ClInclude Include="ImagingGdiPlus.h" />
+    <ClInclude Include="ImagingWic.h" />
+    <ClInclude Include="ImagingWic_fwd.h" />
+    <ClInclude Include="InternalChange.h" />
+    <ClInclude Include="ISubject.h" />
+    <ClInclude Include="ItemContent.h" />
+    <ClInclude Include="ItemContentEdit.h" />
+    <ClInclude Include="ItemContentHistoryCombo.h" />
+    <ClInclude Include="ItemListDialog.h" />
+    <ClInclude Include="LayoutBasePropertySheet.h" />
+    <ClInclude Include="LayoutChildPropertySheet.h" />
+    <ClInclude Include="LayoutDialog.h" />
+    <ClInclude Include="LayoutEngine.h" />
+    <ClInclude Include="LayoutFormView.h" />
+    <ClInclude Include="LayoutMetrics.h" />
+    <ClInclude Include="LayoutPropertyPage.h" />
+    <ClInclude Include="LayoutPropertySheet.h" />
+    <ClInclude Include="Logger.h" />
+    <ClInclude Include="LogPalette.h" />
+    <ClInclude Include="MemoryDC.h" />
+    <ClInclude Include="MenuUtilities.h" />
+    <ClInclude Include="MfcUtilities.h" />
+    <ClInclude Include="MultiZone.h" />
+    <ClInclude Include="NumericEdit.h" />
+    <ClInclude Include="OleDataSource.h" />
+    <ClInclude Include="OleDragDrop_fwd.h" />
+    <ClInclude Include="OleDropSource.h" />
+    <ClInclude Include="OleDropTarget.h" />
+    <ClInclude Include="OleUtils.h" />
+    <ClInclude Include="Path.h" />
+    <ClInclude Include="PathFormatter.h" />
+    <ClInclude Include="PathGenerator.h" />
+    <ClInclude Include="PathGeneratorTests.h" />
+    <ClInclude Include="PathMaker.h" />
+    <ClInclude Include="Pixel.h" />
+    <ClInclude Include="PopupSplitButton.h" />
+    <ClInclude Include="Range.h" />
+    <ClInclude Include="Registry.h" />
+    <ClInclude Include="ReportListControl.h" />
+    <ClInclude Include="ResequenceTests.h" />
+    <ClInclude Include="resource.h" />
+    <ClInclude Include="ResourceData.h" />
+    <ClInclude Include="RuntimeException.h" />
+    <ClInclude Include="SampleView.h" />
+    <ClInclude Include="ScopedBitmapMemDC.h" />
+    <ClInclude Include="ScopedGdi.h" />
+    <ClInclude Include="ScopedValue.h" />
+    <ClInclude Include="ShellDragImager.h" />
+    <ClInclude Include="ShellDropTip.h" />
+    <ClInclude Include="ShellFileDialog.h" />
+    <ClInclude Include="ShellUtilities.h" />
+    <ClInclude Include="Shell_fwd.h" />
+    <ClInclude Include="SpinEdit.h" />
+    <ClInclude Include="SpinTargetButton.h" />
+    <ClInclude Include="SplitPushButton.h" />
+    <ClInclude Include="stdafx.h" />
+    <ClInclude Include="StdColors.h" />
+    <ClInclude Include="StdStl.h" />
+    <ClInclude Include="StringBase.h" />
+    <ClInclude Include="StringUtilities.h" />
+    <ClInclude Include="StructuredStorage.h" />
+    <ClInclude Include="SubjectPredicates.h" />
+    <ClInclude Include="targetver.h" />
+    <ClInclude Include="TestToolWnd.h" />
+    <ClInclude Include="TextEdit.h" />
+    <ClInclude Include="TextEditor.h" />
+    <ClInclude Include="TextFileParser.h" />
+    <ClInclude Include="ThemeItem.h" />
+    <ClInclude Include="ThemeStatic.h" />
+    <ClInclude Include="ThrowMode.h" />
+    <ClInclude Include="Timer.h" />
+    <ClInclude Include="TokenIterator.h" />
+    <ClInclude Include="ToolStrip.h" />
+    <ClInclude Include="TooltipsHook.h" />
+    <ClInclude Include="TrackStatic.h" />
+    <ClInclude Include="TreeControl.h" />
+    <ClInclude Include="ui_fwd.h" />
+    <ClInclude Include="UnitTest.h" />
+    <ClInclude Include="UserReport.h" />
+    <ClInclude Include="Utilities.h" />
+    <ClInclude Include="UtilitiesEx.h" />
+    <ClInclude Include="utl.h" />
+    <ClInclude Include="UtlTests.h" />
+    <ClInclude Include="VersionInfo.h" />
+    <ClInclude Include="VisualTheme.h" />
+    <ClInclude Include="VisualThemeFallback.h" />
+    <ClInclude Include="vsstyle.h" />
+    <ClInclude Include="WicImageTests.h" />
+    <ClInclude Include="WindowHook.h" />
+    <ClInclude Include="WindowTimer.h" />
+    <ClInclude Include="WinExplorer.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="AboutBox.cpp" />
+    <ClCompile Include="AccelTable.cpp" />
+    <ClCompile Include="BaseApp.cpp" />
+    <ClCompile Include="BaseDetailHostCtrl.cpp" />
+    <ClCompile Include="BaseImageTestCase.cpp" />
+    <ClCompile Include="BaseMainDialog.cpp" />
+    <ClCompile Include="BasePopupDialog.cpp" />
+    <ClCompile Include="BaseSplitButton.cpp" />
+    <ClCompile Include="BaseStatic.cpp" />
+    <ClCompile Include="BaseToolbar.cpp" />
+    <ClCompile Include="BatchTransactions.cpp" />
+    <ClCompile Include="Clipboard.cpp" />
+    <ClCompile Include="CmdInfoStore.cpp" />
+    <ClCompile Include="Color.cpp" />
+    <ClCompile Include="CtrlUiState.cpp" />
+    <ClCompile Include="DesktopDC.cpp" />
+    <ClCompile Include="DialogToolBar.cpp" />
+    <ClCompile Include="DibDraw.cpp" />
+    <ClCompile Include="DibPixels.cpp" />
+    <ClCompile Include="DibSection.cpp" />
+    <ClCompile Include="EnumSplitButton.cpp" />
+    <ClCompile Include="EnumTags.cpp" />
+    <ClCompile Include="FileSystem.cpp" />
+    <ClCompile Include="FileSystemTests.cpp" />
+    <ClCompile Include="FlagTags.cpp" />
+    <ClCompile Include="FlexPath.cpp" />
+    <ClCompile Include="Image_fwd.cpp" />
+    <ClCompile Include="GroupIcon.cpp" />
+    <ClCompile Include="HistoryComboBox.cpp" />
+    <ClCompile Include="Icon.cpp" />
+    <ClCompile Include="IconButton.cpp" />
+    <ClCompile Include="ImageProxy.cpp" />
+    <ClCompile Include="ImageStore.cpp" />
+    <ClCompile Include="Imaging.cpp" />
+    <ClCompile Include="ImagingDirect2D.cpp" />
+    <ClCompile Include="ImagingGdiPlus.cpp" />
+    <ClCompile Include="ImagingWic.cpp" />
+    <ClCompile Include="ItemContent.cpp" />
+    <ClCompile Include="ItemContentEdit.cpp" />
+    <ClCompile Include="ItemContentHistoryCombo.cpp" />
+    <ClCompile Include="ItemListDialog.cpp" />
+    <ClCompile Include="LayoutBasePropertySheet.cpp" />
+    <ClCompile Include="LayoutChildPropertySheet.cpp" />
+    <ClCompile Include="LayoutDialog.cpp" />
+    <ClCompile Include="LayoutEngine.cpp" />
+    <ClCompile Include="LayoutFormView.cpp" />
+    <ClCompile Include="LayoutMetrics.cpp" />
+    <ClCompile Include="LayoutPropertyPage.cpp" />
+    <ClCompile Include="LayoutPropertySheet.cpp" />
+    <ClCompile Include="Logger.cpp" />
+    <ClCompile Include="LogPalette.cpp" />
+    <ClCompile Include="MemoryDC.cpp" />
+    <ClCompile Include="MenuUtilities.cpp" />
+    <ClCompile Include="MfcUtilities.cpp" />
+    <ClCompile Include="MultiZone.cpp" />
+    <ClCompile Include="OleDataSource.cpp" />
+    <ClCompile Include="OleDragDrop_fwd.cpp" />
+    <ClCompile Include="OleDropSource.cpp" />
+    <ClCompile Include="OleDropTarget.cpp" />
+    <ClCompile Include="OleUtils.cpp" />
+    <ClCompile Include="Path.cpp" />
+    <ClCompile Include="PathFormatter.cpp" />
+    <ClCompile Include="PathGenerator.cpp" />
+    <ClCompile Include="PathGeneratorTests.cpp" />
+    <ClCompile Include="PathMaker.cpp" />
+    <ClCompile Include="PopupSplitButton.cpp" />
+    <ClCompile Include="Registry.cpp" />
+    <ClCompile Include="ReportListControl.cpp" />
+    <ClCompile Include="ResequenceTests.cpp" />
+    <ClCompile Include="ResourceData.cpp" />
+    <ClCompile Include="RuntimeException.cpp" />
+    <ClCompile Include="SampleView.cpp" />
+    <ClCompile Include="ShellDragImager.cpp" />
+    <ClCompile Include="ShellDropTip.cpp" />
+    <ClCompile Include="ShellFileDialog.cpp" />
+    <ClCompile Include="ShellUtilities.cpp" />
+    <ClCompile Include="SpinEdit.cpp" />
+    <ClCompile Include="SpinTargetButton.cpp" />
+    <ClCompile Include="SplitPushButton.cpp" />
+    <ClCompile Include="stdafx.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='DebugU|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='DebugU|x64'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='ReleaseU|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='ReleaseU|x64'">Create</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="StringBase.cpp" />
+    <ClCompile Include="StringIntuitiveCompare.cpp" />
+    <ClCompile Include="StringUtilities.cpp" />
+    <ClCompile Include="StructuredStorage.cpp" />
+    <ClCompile Include="TestToolWnd.cpp" />
+    <ClCompile Include="TextEdit.cpp" />
+    <ClCompile Include="TextEditor.cpp" />
+    <ClCompile Include="TextFileParser.cpp" />
+    <ClCompile Include="ThemeItem.cpp" />
+    <ClCompile Include="ThemeStatic.cpp" />
+    <ClCompile Include="ThrowMode.cpp" />
+    <ClCompile Include="TokenIterator.cpp" />
+    <ClCompile Include="ToolStrip.cpp" />
+    <ClCompile Include="TooltipsHook.cpp" />
+    <ClCompile Include="TrackStatic.cpp" />
+    <ClCompile Include="TreeControl.cpp" />
+    <ClCompile Include="UnitTest.cpp" />
+    <ClCompile Include="UserReport.cpp" />
+    <ClCompile Include="Utilities.cpp" />
+    <ClCompile Include="UtilitiesEx.cpp" />
+    <ClCompile Include="UtlTests.cpp" />
+    <ClCompile Include="VersionInfo.cpp" />
+    <ClCompile Include="VisualTheme.cpp" />
+    <ClCompile Include="VisualThemeFallback.cpp" />
+    <ClCompile Include="WicImageTests.cpp" />
+    <ClCompile Include="WindowHook.cpp" />
+    <ClCompile Include="WindowTimer.cpp" />
+    <ClCompile Include="WinExplorer.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="utl_ui.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="res\ItemListStrip.bmp" />
+    <Image Include="res\ItemListStrip.png" />
+    <Image Include="res\StdStrip.bmp" />
+    <Image Include="res\StdStrip.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="res\Scrollable.cur" />
+    <None Include="res\ScrollDrag.cur" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
