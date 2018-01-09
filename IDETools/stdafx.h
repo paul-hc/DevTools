@@ -6,23 +6,18 @@
 
 #include "utl/targetver.h"
 
-#include <afxwin.h>							// MFC core and standard components
-#include "utl/StdStl.h"						// Standard C++ Library
-#include "utl/CommonWinDefs.h"				// min/max
+#include <afxwin.h>					// MFC core and standard components
+#include "utl/StdStl.h"				// Standard C++ Library
+#include "utl/CommonWinDefs.h"		// min/max
 
-#include <afxext.h>         // MFC extensions
-#include <afxdisp.h>        // MFC OLE automation classes
-#include <afxcmn.h>			// MFC support for Windows Common Controls
-
-
-// include manifest for common controls
-#pragma comment( linker, "/manifestdependency:\"type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"" )
-
+#include <afxext.h>         		// MFC extensions
+#include <afxdisp.h>        		// MFC OLE automation classes
+#include <afxcmn.h>					// MFC support for Windows Common Controls
 
 // Warning Level 4 STL disables:
-#pragma warning( disable: 4018 )			// signed/unsigned mismatch
+#pragma warning( disable: 4018 )	// signed/unsigned mismatch
 
-
+#include "utl/StdManifest.h"		// include manifest for common controls
 #include "utl/CommonDefs.h"
 
 

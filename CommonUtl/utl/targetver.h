@@ -13,7 +13,7 @@
 #define _AFX_ALL_WARNINGS					// turns off MFC's hiding of some common and often safely ignored warning messages
 
 
-/* Original code:
+/* { original code:
 
 // The following macros define the minimum required platform.  The minimum required platform
 // is the earliest version of Windows, Internet Explorer etc. that has the necessary features to run 
@@ -22,7 +22,7 @@
 
 // Modify the following defines if you have to target a platform prior to the ones specified below.
 // Refer to MSDN for the latest info on corresponding values for different platforms.
-#ifndef WINVER                          // Specifies that the minimum required platform is Windows Vista.
+#ifndef WINVER                  // Specifies that the minimum required platform is Windows Vista.
 #define WINVER 0x0600           // Change this to the appropriate value to target other versions of Windows.
 #endif
 
@@ -34,8 +34,8 @@
 #define _WIN32_WINDOWS 0x0410 // Change this to the appropriate value to target Windows Me or later.
 #endif
 
-#ifndef _WIN32_IE                       // Specifies that the minimum required platform is Internet Explorer 7.0.
+#ifndef _WIN32_IE               // Specifies that the minimum required platform is Internet Explorer 7.0.
 #define _WIN32_IE 0x0700        // Change this to the appropriate value to target other versions of IE.
 #endif
 
-*/
+   original code } */
