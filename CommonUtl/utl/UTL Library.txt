@@ -53,3 +53,22 @@ BOOST (headers only):
 
 * (!) Do not use legacy "Tools > Options > Project and Solutions > Visual C++ Directories" directory settings in Visual Studio 2008 (VC9),
   because project specific settings a better solution since are are portable across different Git local repositories.
+
+
+DirectX development:
+-------------------
+- Must install Windows 7 SDK: D:\my\kit\Oracle\C++ DevTools\Visual Studio 2008 [VC9]\Windows SDK for Windows 7 and .NET Framework 3.5 SP1 winsdk_web.exe
+- Required for building DirectX applications (headers and libraries).
+- Run "Windows SDK Configuration Tool" to switch to "v7.1A" (was "v6.0A"), press Make Current.
+	Result in Visual Studio 2008:
+		FrameworkSDKDir=C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A			(was C:\Program Files (x86)\Microsoft SDKs\Windows\v6.0A)
+- Windows 7 SDK installed the following components:
+	Name																Installed	Size	Version					Location
+	Microsoft Windows SDK for Windows 7(7.0)							9-Jan-18			7.0.7600.16385.40715	C:\Program Files\Microsoft SDKs\Windows\v7.0\
+	Microsoft Visual C++ Compilers 2008 Standard Edition - enu - x64	9-Jan-18	127 MB	9.0.30729	
+	Microsoft Visual C++ 2008 Redistributable - x649.0.30729			9-Jan-18	242 KB	9.0.30729	
+	Microsoft Visual C++ Compilers 2008 Standard Edition - enu - x86	9-Jan-18	321 MB	9.0.30729	
+	Microsoft Visual C++ 2008 Redistributable - x869.0.30729			9-Jan-18	230 KB	9.0.30729	
+	Debugging Tools for Windows (x64)									9-Jan-18	35.9 MB	6.11.1.404	
+	Application Verifier (x64)											9-Jan-18	48.2 MB	4.0.917	
+	Microsoft Document Explorer 2008									9-Jan-18	7.95 MB							C:\Program Files (x86)\Common Files\Microsoft Shared\Help 9\
