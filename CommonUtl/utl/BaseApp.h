@@ -73,6 +73,22 @@ namespace app
 
 	void TraceException( const std::exception& exc );
 	void TraceException( const CException& exc );
+
+	void TraceOsVersion( void );
+}
+
+
+class CEnumTags;
+
+
+namespace win
+{
+	enum OsVersion { NotAvailable, Win2K, WinXP, WinVista, Win7, Win8, Win10, WinBeyond };
+
+	const CEnumTags& GetTags_OsVersion( void );
+
+	OsVersion GetOsVersion( void );
+	inline bool IsVersionOrGreater( OsVersion refOsVersion ) { return GetOsVersion() >= refOsVersion; }
 }
 
 
