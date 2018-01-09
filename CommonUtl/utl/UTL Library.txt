@@ -57,7 +57,11 @@ BOOST (headers only):
 
 DirectX development:
 -------------------
+https://social.msdn.microsoft.com/Forums/windowsdesktop/en-US/35c1a7da-123a-4c95-ac50-134e765088cb/released-windows-sdk-for-windows-7-and-net-framework-35-sp1-rtm-version?forum=windowssdk
 - Must install Windows 7 SDK: D:\my\kit\Oracle\C++ DevTools\Visual Studio 2008 [VC9]\Windows SDK for Windows 7 and .NET Framework 3.5 SP1 winsdk_web.exe
+	If web setup fails (broken link, no support), download the ISO for "Windows 7 SDK (x64) GRMSDKX_EN_DVD.iso" from:
+		http://download.microsoft.com/download/2/E/9/2E911956-F90F-4BFB-8231-E292A7B6F287/GRMSDKX_EN_DVD.iso	AMD64 (!)
+		http://download.microsoft.com/download/2/E/9/2E911956-F90F-4BFB-8231-E292A7B6F287/GRMSDK_EN_DVD.iso		X86
 - Required for building DirectX applications (headers and libraries).
 - Run "Windows SDK Configuration Tool" to switch to "v7.1A" (was "v6.0A"), press Make Current.
 	Result in Visual Studio 2008:
