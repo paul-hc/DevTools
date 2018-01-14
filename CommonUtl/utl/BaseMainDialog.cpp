@@ -106,6 +106,7 @@ BOOL CBaseMainDialog::OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERI
 BEGIN_MESSAGE_MAP( CBaseMainDialog, CLayoutDialog )
 	ON_WM_DESTROY()
 	ON_WM_CONTEXTMENU()
+	ON_WM_SYSCOMMAND()
 	ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
 	ON_REGISTERED_MESSAGE( WM_TRAYICONNOTIFY, OnTrayIconNotify )
@@ -141,6 +142,15 @@ void CBaseMainDialog::OnContextMenu( CWnd* pWnd, CPoint screenPos )
 	}
 
 	CLayoutDialog::OnContextMenu( pWnd, screenPos );
+}
+
+void CBaseMainDialog::OnSysCommand( UINT cmdId, LPARAM lParam )
+{
+	CLayoutDialog::OnSysCommand( cmdId, lParam );
+
+	if ( UseSysTrayMinimize() )
+		if ( SC_MINIMIZE == GET_SC_WPARAM( cmdId ) )
+			ShowWindow( SW_HIDE );			// IMP: hide window post-minimize so that it vanishes from the taskbar
 }
 
 void CBaseMainDialog::OnPaint( void )

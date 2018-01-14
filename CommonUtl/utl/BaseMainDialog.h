@@ -40,6 +40,7 @@ protected:
 	virtual BOOL OnInitDialog( void );
 	afx_msg void OnDestroy( void );
 	afx_msg void OnContextMenu( CWnd* pWnd, CPoint screenPos );
+	afx_msg void OnSysCommand( UINT cmdId, LPARAM lParam );
 	afx_msg void OnPaint( void );
 	afx_msg HCURSOR OnQueryDragIcon( void );
 	afx_msg LRESULT OnTrayIconNotify( WPARAM wParam, LPARAM lParam );
