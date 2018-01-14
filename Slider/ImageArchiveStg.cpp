@@ -23,7 +23,7 @@ namespace pwd
 	{
 		// straight conversion through unsigned char - not using MultiByteToWideChar()
 		const unsigned char* pAnsi = (const unsigned char*)pAnsiPwd;			// (!) cast to unsigned char for proper negative sign chars
-		return std::tstring( pAnsi, pAnsi + str::length( pAnsiPwd ) );
+		return std::tstring( pAnsi, pAnsi + str::GetLength( pAnsiPwd ) );
 	}
 
 	std::tstring ToString( const wchar_t* pWidePwd )

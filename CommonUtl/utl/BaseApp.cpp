@@ -16,6 +16,20 @@
 
 namespace app
 {
+	CLogger* GetLoggerPtr( void )
+	{
+		static CLogger* s_pLogger = NULL;
+		static bool firstInit = true;
+		if ( firstInit )
+		{
+			if ( IGlobalResources* pGlobalRes = GetGlobalResources() )
+				s_pLogger = &pGlobalRes->GetLogger();
+
+			firstInit = false;
+		}
+		return s_pLogger;
+	}
+
 	void TrackUnitTestMenu( CWnd* pTargetWnd, const CPoint& screenPos )
 	{
 	#ifdef _DEBUG
@@ -42,8 +56,7 @@ namespace app
 
 	void TraceOsVersion( void )
 	{
-		win::OsVersion osVer = win::GetOsVersion();
-		TRACE( _T(" > Running on OS: %s\n"), win::GetTags_OsVersion().FormatUi( osVer ).c_str() );
+		TRACE( _T(" > Running on OS: %s\n"), win::GetTags_OsVersion().FormatUi( win::GetOsVersion() ).c_str() );
 	}
 }
 

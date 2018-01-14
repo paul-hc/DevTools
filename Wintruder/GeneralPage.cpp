@@ -9,6 +9,7 @@
 #include "utl/LayoutBasePropertySheet.h"
 #include "utl/StringUtilities.h"
 #include "utl/Utilities.h"
+#include "wnd/WndUtils.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -288,7 +289,7 @@ void CGeneralPage::OnTargetWndChanged( const CWndSpot& targetWnd )
 			_T("(L=%d, T=%d) (R=%d, B=%d),  W=%d, H=%d"),
 			 targetWnd.m_hWnd,
 			 wc::FormatClassName( targetWnd ).c_str(),
-			 ui::GetWindowText( targetWnd ).c_str(),
+			 wnd::FormatWindowTextLine( targetWnd ).c_str(),
 			 hlp::FormatIdent( targetWnd ).c_str(),
 			 style,
 			 styleEx,

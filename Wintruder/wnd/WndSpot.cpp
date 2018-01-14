@@ -8,6 +8,47 @@
 #endif
 
 
+#include "utl/Guards.h"
+#include "WndUtils.h"
+
+		DWORD CWndSpot::GetStyle( void ) const
+		{
+			utl::CSlowSectionGuard slowGuard( str::Format( _T("CWndSpot::GetStyle() for window hWnd=%s"), wnd::FormatWindowHandle( m_hWnd ).c_str() ) );
+			return CWnd::GetStyle();
+		}
+
+		DWORD CWndSpot::GetExStyle( void ) const
+		{
+			utl::CSlowSectionGuard slowGuard( str::Format( _T("CWndSpot::GetExStyle() for window hWnd=%s"), wnd::FormatWindowHandle( m_hWnd ).c_str() ) );
+			return CWnd::GetExStyle();
+		}
+
+		int CWndSpot::GetDlgCtrlID( void ) const
+		{
+			utl::CSlowSectionGuard slowGuard( str::Format( _T("CWndSpot::GetDlgCtrlID() for window hWnd=%s"), wnd::FormatWindowHandle( m_hWnd ).c_str() ) );
+			return CWnd::GetDlgCtrlID();
+		}
+
+		int CWndSpot::SetDlgCtrlID( int ctrlId )
+		{
+			utl::CSlowSectionGuard slowGuard( str::Format( _T("CWndSpot::SetDlgCtrlID() for window hWnd=%s"), wnd::FormatWindowHandle( m_hWnd ).c_str() ) );
+			return CWnd::SetDlgCtrlID( ctrlId );
+		}
+
+		BOOL CWndSpot::IsWindowVisible( void ) const
+		{
+			utl::CSlowSectionGuard slowGuard( str::Format( _T("CWndSpot::IsWindowVisible() for window hWnd=%s"), wnd::FormatWindowHandle( m_hWnd ).c_str() ) );
+			return CWnd::IsWindowVisible();
+		}
+
+		void CWndSpot::GetClientRect( LPRECT lpRect ) const
+		{
+			utl::CSlowSectionGuard slowGuard( str::Format( _T("CWndSpot::GetClientRect() for window hWnd=%s"), wnd::FormatWindowHandle( m_hWnd ).c_str() ) );
+			CWnd::GetClientRect( lpRect );
+		}
+
+
+
 const CPoint CWndSpot::m_nullPos( INT_MAX, INT_MAX );
 const CWndSpot CWndSpot::m_nullWnd;
 

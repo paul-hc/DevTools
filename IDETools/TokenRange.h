@@ -34,9 +34,9 @@ public:
 	void setEmpty( int startAndEnd ) { m_start = m_end = startAndEnd; }
 	void setWithLength( int start, int length );
 
-	static TokenRange endOfString( const TCHAR* pText ) { return TokenRange( (int)str::length( pText ) ); }
+	static TokenRange endOfString( const TCHAR* pText ) { return TokenRange( (int)str::GetLength( pText ) ); }
 
-	void gotoEnd( const TCHAR* pText ) { ASSERT_PTR( pText ); setEmpty( (int)str::length( pText ) ); }
+	void gotoEnd( const TCHAR* pText ) { ASSERT_PTR( pText ); setEmpty( (int)str::GetLength( pText ) ); }
 
 	void extendToEnd( const TCHAR* pText );
 
@@ -82,7 +82,7 @@ inline void TokenRange::setWithLength( int start, int length )
 inline void TokenRange::extendToEnd( const TCHAR* pText )
 {
 	ASSERT( pText != NULL && m_start >= 0 );
-	m_end = (int)str::length( pText );
+	m_end = (int)str::GetLength( pText );
 }
 
 inline void TokenRange::inflateBy( int delta )

@@ -110,7 +110,7 @@ namespace ui
 			int pos = static_cast< int >( posTag + 1 );
 			BYTE r, g, b;
 
-			if ( str::length( &text[ pos ] ) >= MinLength &&
+			if ( str::GetLength( &text[ pos ] ) >= MinLength &&
 				 hlp::ParseHexDigit( &r, text, pos + PosR ) &&
 				 hlp::ParseHexDigit( &g, text, pos + PosG ) &&
 				 hlp::ParseHexDigit( &b, text, pos + PosB ) )

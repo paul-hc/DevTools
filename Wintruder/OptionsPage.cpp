@@ -4,6 +4,7 @@
 #include "AppService.h"
 #include "MainDialog.h"
 #include "Application.h"
+#include "wnd/WndUtils.h"
 #include "utl/EnumTags.h"
 #include "utl/Utilities.h"
 #include "resource.h"
@@ -49,6 +50,7 @@ void COptionsPage::DoDataExchange( CDataExchange* pDX )
 		ui::SetSpinRange( this, IDC_AUTO_UPDATE_TIMEOUT_SPIN, 1, 50 );
 		ui::WriteComboItems( m_frameStyleCombo, opt::GetTags_FrameStyle().GetUiTags() );
 		ui::WriteComboItems( m_autoUpdateTargetCombo, opt::GetTags_AutoUpdate().GetUiTags() );
+		ui::EnableControl( m_hWnd, IDC_AUTO_UPDATE_CHECK, !wnd::HasUIPI() );		// enabled for Windows 7-
 	}
 
 	ui::DDX_Bool( pDX, IDC_TOP_MOST_CHECK, m_pOptions->m_keepTopmost );

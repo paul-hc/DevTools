@@ -44,7 +44,7 @@ namespace wt
 		ASSERT( IsWindow( hWnd ) );
 
 		if ( -1 == image )
-			if ( HICON hIcon = wnd::GetIcon( hWnd ) )
+			if ( HICON hIcon = wnd::GetWindowIcon( hWnd ) )
 				image = Image_Transparent;
 			else
 				image = CWndImageRepository::Instance().LookupImage( hWnd );
@@ -132,6 +132,7 @@ namespace layout
 
 CTreeWndPage::CTreeWndPage( void )
 	: CLayoutPropertyPage( IDD_TREE_WND_PAGE )
+	, m_destroying( false )
 {
 	RegisterCtrlLayout( layout::styles, COUNT_OF( layout::styles ) );
 	app::GetSvc().AddObserver( this );
@@ -306,6 +307,7 @@ void CTreeWndPage::DoDataExchange( CDataExchange* pDX )
 // message handlers
 
 BEGIN_MESSAGE_MAP( CTreeWndPage, CLayoutPropertyPage )
+	ON_WM_DESTROY()
 	ON_WM_CONTEXTMENU()
 	ON_NOTIFY( TVN_SELCHANGED, IDC_WINDOW_TREE, OnTvnSelChanged_WndTree )
 	ON_NOTIFY( NM_SETFOCUS, IDC_WINDOW_TREE, OnTvnSerFocus_WndTree )
@@ -323,6 +325,12 @@ BOOL CTreeWndPage::OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO
 	return
 		CLayoutPropertyPage::OnCmdMsg( id, code, pExtra, pHandlerInfo ) ||
 		GetParentOwner()->OnCmdMsg( id, code, pExtra, pHandlerInfo );
+}
+
+void CTreeWndPage::OnDestroy( void )
+{
+	m_destroying = true;		// speed up destruction caused by CDDS_ITEMPOSTPAINT for slow windows
+	CLayoutPropertyPage::OnDestroy();
 }
 
 void CTreeWndPage::OnContextMenu( CWnd* pWnd, CPoint point )
@@ -382,9 +390,10 @@ void CTreeWndPage::OnTvnCustomDraw_WndTree( NMHDR* pNmHdr, LRESULT* pResult )
 			*pResult |= CDRF_NOTIFYPOSTPAINT;
 			break;
 		case CDDS_ITEMPOSTPAINT:
-			if ( ui::IsValidWindow( hWnd ) )
-				if ( HICON hIcon = wnd::GetIcon( hWnd ) )
-					m_treeCtrl.CustomDrawItemIcon( pDraw, hIcon );		// works with transparent item image
+			if ( !m_destroying )											// speed up tree destruction for slow windows in Windows 10 due to UIPI
+				if ( ui::IsValidWindow( hWnd ) )
+					if ( HICON hIcon = wnd::GetWindowIcon( hWnd ) )
+						m_treeCtrl.CustomDrawItemIcon( pDraw, hIcon );		// works with transparent item image
 			break;
 	}
 }

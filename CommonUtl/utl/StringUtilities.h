@@ -8,12 +8,20 @@
 
 namespace str
 {
+	extern const TCHAR g_ellipsis[];
+	extern const TCHAR g_paragraph[];
+
+
 	int Tokenize( std::vector< std::tstring >& rTokens, const TCHAR* pSource, const TCHAR* pDelims = _T(" \t") );
 
 
-	bool StripPrefix( std::tstring& rText, const TCHAR* pPrefix );
-	bool StripSuffix( std::tstring& rText, const TCHAR* pSuffix );
-	std::tstring Truncate( const std::tstring& text, size_t maxLength, bool useEllipsis = true );
+	bool StripPrefix( std::tstring& rText, const TCHAR prefix[] );
+	bool StripSuffix( std::tstring& rText, const TCHAR suffix[] );
+	std::tstring& Truncate( std::tstring& rText, size_t maxLen, const TCHAR suffix[] = g_ellipsis );
+	std::tstring& SingleLine( std::tstring& rText, size_t maxLen = utl::npos, const TCHAR sepLineEnd[] = g_paragraph );
+
+	inline std::tstring FormatTruncate( std::tstring text, size_t maxLen, const TCHAR suffix[] = g_ellipsis ) { return Truncate( text, maxLen, suffix ); }
+	inline std::tstring FormatSingleLine( std::tstring text, size_t maxLen = utl::npos, const TCHAR sepLineEnd[] = g_paragraph ) { return SingleLine( text, maxLen, sepLineEnd ); }
 
 
 	// search & replace
@@ -77,7 +85,7 @@ namespace str
 			}
 		}
 		else
-			matchLen = str::length( pLeft );
+			matchLen = str::GetLength( pLeft );
 
 		return std::make_pair( pred::ToCompareResult( firstMismatch ), matchLen );
 	}
@@ -173,7 +181,7 @@ namespace str
 	template< str::CaseType caseType, typename CharType >
 	size_t Find( const CharType* pText, CharType chr, size_t startPos = 0 )
 	{
-		ASSERT( pText != 0 && startPos <= length( pText ) );
+		ASSERT( pText != 0 && startPos <= GetLength( pText ) );
 
 		const CharType* itEnd = end( pText );
 		const CharType* itFound = std::find_if( begin( pText ) + startPos, itEnd, pred::CharMatch< CharType, caseType >( chr ) );
@@ -183,7 +191,7 @@ namespace str
 	template< str::CaseType caseType, typename CharType >
 	size_t Find( const CharType* pText, const CharType* pPart, size_t startPos = 0 )
 	{
-		ASSERT( pText != 0 && startPos <= length( pText ) );
+		ASSERT( pText != 0 && startPos <= GetLength( pText ) );
 		ASSERT( !str::IsEmpty( pPart ) );
 
 		const CharType* itEnd = end( pText );
@@ -216,7 +224,7 @@ namespace str
 		if ( NULL == pSepEnd )
 			pSepEnd = pSepStart;
 
-		const size_t sepStartLen = str::length( pSepStart ), sepEndLen = str::length( pSepEnd );
+		const size_t sepStartLen = str::GetLength( pSepStart ), sepEndLen = str::GetLength( pSepEnd );
 
 		for ( str::const_iterator itStart = str::begin( pSource ), itEnd = str::end( pSource ); ; )
 		{
@@ -250,8 +258,8 @@ namespace str
 		if ( NULL == pSepEnd )
 			pSepEnd = pSepStart;
 
-		std::basic_string< CharType > output; output.reserve( str::length( pSource ) * 2 );
-		const size_t sepStartLen = str::length( pSepStart ), sepEndLen = str::length( pSepEnd );
+		std::basic_string< CharType > output; output.reserve( str::GetLength( pSource ) * 2 );
+		const size_t sepStartLen = str::GetLength( pSepStart ), sepEndLen = str::GetLength( pSepEnd );
 
 		for ( str::const_iterator itStart = str::begin( pSource ), itEnd = str::end( pSource ); ; )
 		{
@@ -391,34 +399,12 @@ namespace num
 }
 
 
-
 namespace str
 {
-	inline std::string& ToWindowsLineEnds( std::string& rText )
-	{
-		str::Replace( rText, "\r\n", "\n" );
-		str::Replace( rText, "\n", "\r\n" );
-		return rText;
-	}
-
-	inline std::wstring& ToWindowsLineEnds( std::wstring& rText )
-	{
-		str::Replace( rText, L"\r\n", L"\n" );
-		str::Replace( rText, L"\n", L"\r\n" );
-		return rText;
-	}
-
-	inline std::string& ToUnixLineEnds( std::string& rText )
-	{
-		str::Replace( rText, "\r\n", "\n" );
-		return rText;
-	}
-
-	inline std::wstring& ToUnixLineEnds( std::wstring& rText )
-	{
-		str::Replace( rText, L"\r\n", L"\n" );
-		return rText;
-	}
+	std::string& ToWindowsLineEnds( std::string& rText );
+	std::wstring& ToWindowsLineEnds( std::wstring& rText );
+	std::string& ToUnixLineEnds( std::string& rText );
+	std::wstring& ToUnixLineEnds( std::wstring& rText );
 }
 
 

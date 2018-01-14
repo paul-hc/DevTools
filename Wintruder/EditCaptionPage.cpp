@@ -5,6 +5,7 @@
 #include "AppService.h"
 #include "resource.h"
 #include "wnd/WindowClass.h"
+#include "wnd/WndUtils.h"
 #include "utl/Utilities.h"
 
 #ifdef _DEBUG
@@ -34,9 +35,9 @@ CEditCaptionPage::~CEditCaptionPage()
 
 bool CEditCaptionPage::IsDirty( void ) const
 {
-	if ( CWnd* pTargetWnd = app::GetValidTargetWnd() )
+	if ( CWndSpot* pTargetWnd = app::GetValidTargetWnd() )
 		if ( wc::CaptionText == m_contentType )
-			if ( m_textContent != ui::GetWindowText( pTargetWnd ) )
+			if ( m_textContent != wnd::GetWindowText( *pTargetWnd ) )
 				return true;
 
 	return false;
@@ -48,7 +49,7 @@ void CEditCaptionPage::OnTargetWndChanged( const CWndSpot& targetWnd )
 	ui::EnableWindow( *this, valid );
 
 	std::tostringstream oss;
-	m_contentType = valid ? wc::FormatTextContent( oss, &targetWnd ) : wc::CaptionText;
+	m_contentType = valid ? wc::FormatTextContent( oss, targetWnd.GetBaseWnd() ) : wc::CaptionText;
 	m_textContent = oss.str();
 
 	m_contentEdit.SetWritable( wc::CaptionText == m_contentType );
@@ -58,7 +59,7 @@ void CEditCaptionPage::OnTargetWndChanged( const CWndSpot& targetWnd )
 
 void CEditCaptionPage::ApplyPageChanges( void ) throws_( CRuntimeException )
 {
-	if ( CWnd* pTargetWnd = app::GetValidTargetWnd() )
+	if ( CWndSpot* pTargetWnd = app::GetValidTargetWnd() )
 		if ( m_contentEdit.GetModify() && wc::CaptionText == m_contentType )
 		{
 			m_textContent = m_contentEdit.GetText();
@@ -87,7 +88,7 @@ void CEditCaptionPage::OnEnChange_Caption( void )
 {
 	if ( wc::CaptionText == m_contentType )
 	{
-		m_textContent = ui::GetWindowText( m_contentEdit );
+		m_textContent = wnd::GetWindowText( m_contentEdit );
 		OnFieldModified();
 	}
 }

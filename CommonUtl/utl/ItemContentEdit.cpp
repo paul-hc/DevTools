@@ -310,7 +310,7 @@ void CListEditDialog::OnMoveUpDown( UINT cmdId )
 		line[ lineCharCount ] = _T('\0');
 
 		if ( start != -1 )
-			m_itemsEdit.SetSel( start, start + (int)str::length( line ) );
+			m_itemsEdit.SetSel( start, start + (int)str::GetLength( line ) );
 	}
 }
 
@@ -324,7 +324,7 @@ void CListEditDialog::OnBrowseButton( void )
 
 	int start = m_itemsEdit.LineIndex();
 	if ( start != -1 )
-		m_itemsEdit.SetSel( start, start + (int)str::length( line ) );
+		m_itemsEdit.SetSel( start, start + (int)str::GetLength( line ) );
 
 	std::tstring newItem = m_content.EditItem( line, this );
 	if ( !newItem.empty() )

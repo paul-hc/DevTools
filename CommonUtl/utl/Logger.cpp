@@ -74,11 +74,16 @@ void CLogger::Log( const TCHAR* pFormat, ... )
 
 void CLogger::LogV( const TCHAR* pFormat, va_list argList )
 {
-	if ( !m_enabled )
-		return;
-
 	CString entry;
 	entry.FormatV( pFormat, argList );
+	LogLine( entry );
+}
+
+void CLogger::LogLine( const TCHAR* pText, bool useTimestamp /*= true*/ )
+{
+	ASSERT_PTR( pText );
+	if ( !m_enabled )
+		return;
 
 	CSingleLock logLocker( &m_cs, true );		// serialize access to log file
 
@@ -89,10 +94,10 @@ void CLogger::LogV( const TCHAR* pFormat, va_list argList )
 	std::ofstream output( str::ToUtf8( GetLogFilePath().c_str() ).c_str(), std::ios_base::out | std::ios_base::app );
 	if ( output.is_open() )
 	{
-		if ( m_prependTimestamp )
+		if ( m_prependTimestamp && useTimestamp )
 			output << CTime::GetCurrentTime().Format( _T("[%d-%b-%Y %H:%M:%S]> ") ).GetString();
 
-		output << entry.GetString() << std::endl;
+		output << pText << std::endl;
 		output.close();
 	}
 	else

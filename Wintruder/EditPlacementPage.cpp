@@ -127,7 +127,7 @@ void CEditPlacementPage::OutputEdits( void )
 
 bool CEditPlacementPage::RepositionWnd( void )
 {
-	CWnd* pTargetWnd = app::GetValidTargetWnd( app::Beep );
+	CWndSpot* pTargetWnd = app::GetValidTargetWnd( app::Beep );
 	if ( NULL == pTargetWnd )
 		return false;
 
@@ -136,7 +136,7 @@ bool CEditPlacementPage::RepositionWnd( void )
 
 	bool changed = !( wndRect == ui::GetControlRect( pTargetWnd->GetSafeHwnd() ) );
 	if ( changed )
-		pTargetWnd->MoveWindow( &wndRect, pTargetWnd->IsWindowVisible() );
+		pTargetWnd->GetBaseWnd()->MoveWindow( &wndRect, pTargetWnd->IsWindowVisible() );
 
 	if ( IsAutoApply() && IsDirty() )
 	{
@@ -161,9 +161,9 @@ void CEditPlacementPage::HandleInput( void )
 
 void CEditPlacementPage::ApplyPageChanges( void ) throws_( CRuntimeException )
 {
-	if ( CWnd* pTargetWnd = app::GetValidTargetWnd() )
+	if ( CWndSpot* pTargetWnd = app::GetValidTargetWnd() )
 		if ( IsDirty() )
-			pTargetWnd->MoveWindow( m_oldRect = m_wndRect, pTargetWnd->IsWindowVisible() );
+			pTargetWnd->GetBaseWnd()->MoveWindow( m_oldRect = m_wndRect, pTargetWnd->IsWindowVisible() );
 }
 
 bool CEditPlacementPage::IsAutoApply( void ) const

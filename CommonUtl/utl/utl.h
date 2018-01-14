@@ -3,9 +3,10 @@
 #pragma once
 
 
-// In Visual Studio 2013++ there is no UTL solution.
-// Build the library in Visual Studio 2008 using utl/utl_vc9.sln.
-// Include this header in Visual Studio 2013 project in stdafx.h to link to utl_ui_XX.lib
+// OBSOLETE header:
+//		In Visual Studio 2013++ there is no UTL solution.
+//		Build the library in Visual Studio 2008 using utl/utl_vc9.sln.
+//		Include this header in Visual Studio 2013 project in stdafx.h to link to utl_ui_XX.lib
 
 
 #ifndef _UNICODE

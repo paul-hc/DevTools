@@ -69,7 +69,7 @@ namespace str
 		{
 			if ( !AtEnd() )
 			{
-				size_t tokenLen = str::length( pToken );
+				size_t tokenLen = str::GetLength( pToken );
 				typename StringType::const_iterator itFound = std::search( m_text.begin() + m_pos, m_text.end(), pToken, pToken + tokenLen, m_compare );
 				if ( itFound != m_text.end() )
 				{
@@ -95,7 +95,7 @@ namespace str
 		bool Matches( const CharType* pToken )
 		{
 			ASSERT_PTR( pToken );
-			size_t tokenLen = str::length( pToken );
+			size_t tokenLen = str::GetLength( pToken );
 			if ( 0 == tokenLen || m_compare( m_text.c_str() + m_pos, pToken, tokenLen ) != pred::Equal )
 				return false;
 			m_pos += tokenLen;

@@ -7,8 +7,24 @@
 // works with NULL pattern;
 // accounts for windows that span on multiple monitors, such as destop window.
 
-class CWndSpot : public CWnd
+class CWndSpot : private CWnd
 {
+public:
+	using CWnd::m_hWnd;
+
+	operator HWND() const { return m_hWnd; }
+	HWND GetSafeHwnd( void ) const { return m_hWnd; }
+
+	const CWnd* GetBaseWnd( void ) const { return this; }
+	CWnd* GetBaseWnd( void ) { return this; }
+
+	// guarded methods
+	DWORD GetStyle( void ) const;
+	DWORD GetExStyle( void ) const;
+	int GetDlgCtrlID( void ) const;
+    int SetDlgCtrlID( int ctrlId );
+	BOOL IsWindowVisible( void ) const;
+    void GetClientRect( LPRECT lpRect ) const;
 public:
 	CWndSpot( void );
 	CWndSpot( HWND hWnd, const CPoint& screenPoint = m_nullPos );

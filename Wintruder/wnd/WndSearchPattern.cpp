@@ -2,6 +2,7 @@
 #include "stdafx.h"
 #include "WndSearchPattern.h"
 #include "WindowClass.h"
+#include "wnd/WndUtils.h"
 #include "utl/Utilities.h"
 
 #ifdef _DEBUG
@@ -80,7 +81,7 @@ bool CWndSearchPattern::Matches( HWND hWnd ) const
 	}
 
 	if ( !m_caption.empty() )
-		if ( !IsMatch( ui::GetWindowText( hWnd ), m_caption ) )
+		if ( !IsMatch( wnd::GetWindowText( hWnd ), m_caption ) )
 			return false;
 
 	return true;

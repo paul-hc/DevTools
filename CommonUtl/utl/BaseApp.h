@@ -48,7 +48,7 @@ private:
 	std::auto_ptr< CImageStore > m_pImageStore;					// control the lifetime of shared resources
 	CAccelTable m_appAccel;
 	std::tstring m_profileSuffix;								// could be set to "_v2" when required
-
+protected:
 	// generated overrides
 	public:
 	virtual BOOL InitInstance( void );
@@ -68,6 +68,7 @@ protected:
 namespace app
 {
 	inline IGlobalResources* GetGlobalResources( void ) { return safe_ptr( dynamic_cast< IGlobalResources* >( AfxGetApp() ) ); }
+	CLogger* GetLoggerPtr( void );
 
 	void TrackUnitTestMenu( CWnd* pTargetWnd, const CPoint& screenPos );
 

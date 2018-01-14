@@ -1,6 +1,7 @@
 
 #include "stdafx.h"
 #include "Options.h"
+#include "wnd/WndUtils.h"
 #include "utl/EnumTags.h"
 
 #ifdef _DEBUG
@@ -76,6 +77,13 @@ void COptions::Load( void )
 	m_autoUpdateRefresh = pApp->GetProfileInt( reg::section_options, reg::entry_autoUpdateRefresh, m_autoUpdateRefresh ) != FALSE;
 	m_autoUpdateTimeout = pApp->GetProfileInt( reg::section_options, reg::entry_autoUpdateTimeout, m_autoUpdateTimeout );
 	m_updateTarget = (opt::UpdateTarget)pApp->GetProfileInt( reg::section_options, reg::entry_updateTarget, m_updateTarget );
+
+	if ( wnd::HasUIPI() )
+	{
+		// disable auto-update since UIPI can cause severe delays
+		m_autoUpdate = false;
+		pApp->WriteProfileInt( reg::section_options, reg::entry_autoUpdate, m_autoUpdate );
+	}
 }
 
 void COptions::Save( void ) const

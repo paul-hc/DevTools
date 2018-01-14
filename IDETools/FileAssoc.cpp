@@ -122,7 +122,7 @@ bool CFileAssoc::IsResourceHeaderFile( const fs::CPathParts& parts )
 	if ( path::Equal( parts.m_ext.c_str(), _T(".h") ) || path::Equal( parts.m_ext.c_str(), _T(".rh") ) )
 	{
 		static const TCHAR prefix[] = _T("Res");
-		const size_t prefixLen = str::length( prefix );
+		const size_t prefixLen = str::GetLength( prefix );
 
 		if ( pred::Equal == str::CharTraits::CompareN_NoCase( parts.m_fname.c_str(), prefix, prefixLen ) )
 		{

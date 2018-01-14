@@ -89,14 +89,14 @@ namespace str
 	// string to STL iterators conversions
 	typedef const TCHAR* const_iterator;
 
-	inline size_t length( const char* pText ) { return pText != NULL ? strlen( pText ) : 0; }
-	inline size_t length( const wchar_t* pText ) { return pText != NULL ? wcslen( pText ) : 0; }
+	inline size_t GetLength( const char* pText ) { return pText != NULL ? strlen( pText ) : 0; }
+	inline size_t GetLength( const wchar_t* pText ) { return pText != NULL ? wcslen( pText ) : 0; }
 
 	inline const char* begin( const char* pText ) { return pText; }
 	inline const wchar_t* begin( const wchar_t* pText ) { return pText; }
 
-	inline const char* end( const char* pText ) { return pText + length( pText ); }
-	inline const wchar_t* end( const wchar_t* pText ) { return pText + length( pText ); }
+	inline const char* end( const char* pText ) { return pText + GetLength( pText ); }
+	inline const wchar_t* end( const wchar_t* pText ) { return pText + GetLength( pText ); }
 
 	template< typename CharType > bool IsEmpty( const CharType* pText ) { return NULL == pText || _T('\0') == *pText; }
 
@@ -214,7 +214,7 @@ namespace str
 
 		if ( !str::IsEmpty( pSearch ) )
 		{
-			const size_t searchLen = str::length( pSearch ), replaceLen = str::length( pReplace );
+			const size_t searchLen = str::GetLength( pSearch ), replaceLen = str::GetLength( pReplace );
 
 			for ( size_t pos = 0; ( pos = rText.find( pSearch, pos ) ) != std::basic_string< CharType >::npos; ++count, pos += replaceLen )
 				rText.replace( pos, searchLen, pReplace );
@@ -231,7 +231,7 @@ namespace str
 
 		if ( !str::IsEmpty( pSource ) )
 		{
-			const size_t sepLen = str::length( pSep );
+			const size_t sepLen = str::GetLength( pSep );
 			typedef const CharType* const_iterator;
 
 			for ( const_iterator itItemStart = str::begin( pSource ), itEnd = str::end( pSource ); ; )

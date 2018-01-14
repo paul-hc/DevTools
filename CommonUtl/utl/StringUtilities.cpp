@@ -11,6 +11,9 @@
 
 namespace str
 {
+	const TCHAR g_ellipsis[] = _T("...");
+	const TCHAR g_paragraph[] = _T("\xB6");
+
 	int Tokenize( std::vector< std::tstring >& rTokens, const TCHAR* pSource, const TCHAR* pDelims /*= _T(" \t")*/ )
 	{
 		ASSERT( pSource != NULL && pDelims != NULL );
@@ -48,11 +51,10 @@ namespace str
 	}
 
 
-	bool StripPrefix( std::tstring& rText, const TCHAR* pPrefix )
+	bool StripPrefix( std::tstring& rText, const TCHAR prefix[] )
 	{
-		ASSERT_PTR( pPrefix );
-		if ( size_t prefixLen = _tcslen( pPrefix ) )
-			if ( pred::Equal == rText.compare( 0, prefixLen, pPrefix ) )
+		if ( size_t prefixLen = _tcslen( prefix ) )
+			if ( pred::Equal == rText.compare( 0, prefixLen, prefix ) )
 			{
 				rText.erase( 0, prefixLen );
 				return true;		// changed
@@ -61,16 +63,15 @@ namespace str
 		return false;
 	}
 
-	bool StripSuffix( std::tstring& rText, const TCHAR* pSuffix )
+	bool StripSuffix( std::tstring& rText, const TCHAR suffix[] )
 	{
-		ASSERT_PTR( pSuffix );
-		if ( size_t suffixLen = _tcslen( pSuffix ) )
+		if ( size_t suffixLen = GetLength( suffix ) )
 		{
 			size_t suffixPos = rText.length();
 			if ( suffixPos >= suffixLen )
 			{
 				suffixPos -= suffixLen;
-				if ( pred::Equal == rText.compare( suffixPos, suffixLen, pSuffix ) )
+				if ( pred::Equal == rText.compare( suffixPos, suffixLen, suffix ) )
 				{
 					rText.erase( suffixPos, suffixLen );
 					return true;		// changed
@@ -81,22 +82,26 @@ namespace str
 		return false;
 	}
 
-	std::tstring Truncate( const std::tstring& text, size_t maxLength, bool useEllipsis /*= true*/ )
+	std::tstring& Truncate( std::tstring& rText, size_t maxLen, const TCHAR suffix[] /*= g_ellipsis*/ )
 	{
-		static const TCHAR ellipsis[] = _T("...");
-		static const size_t ellipsisLength = _tcslen( ellipsis );
+		size_t suffixLen = str::GetLength( suffix );
+		ASSERT( suffixLen <= maxLen );
 
-		if ( text.size() <= maxLength )
-			return text;
-
-		if ( useEllipsis )
+		if ( rText.length() + suffixLen > maxLen )
 		{
-			size_t truncateLength = maxLength - ( maxLength > ellipsisLength ? ellipsisLength : 0 );
-			return text.substr( 0, truncateLength ) + ellipsis;
+			rText.resize( maxLen - suffixLen );
+			rText += suffix;
 		}
-		else
-			return text.substr( 0, maxLength );
+		return rText;
 	}
+
+	std::tstring& SingleLine( std::tstring& rText, size_t maxLen /*= utl::npos*/, const TCHAR sepLineEnd[] /*= g_paragraph*/ )
+	{
+		str::Replace( rText, _T("\r\n"), sepLineEnd );
+		str::Replace( rText, _T("\n"), sepLineEnd );
+		return Truncate( rText, maxLen );
+	}
+
 
 	size_t ReplaceDelimiters( std::tstring& rText, const TCHAR* pDelimiters, const TCHAR* pNewDelimiter )
 	{
@@ -261,6 +266,36 @@ namespace num
 			}
 
 		return digitWidths.size();
+	}
+}
+
+
+namespace str
+{
+	std::string& ToWindowsLineEnds( std::string& rText )
+	{
+		str::Replace( rText, "\r\n", "\n" );
+		str::Replace( rText, "\n", "\r\n" );
+		return rText;
+	}
+
+	std::wstring& ToWindowsLineEnds( std::wstring& rText )
+	{
+		str::Replace( rText, L"\r\n", L"\n" );
+		str::Replace( rText, L"\n", L"\r\n" );
+		return rText;
+	}
+
+	std::string& ToUnixLineEnds( std::string& rText )
+	{
+		str::Replace( rText, "\r\n", "\n" );
+		return rText;
+	}
+
+	std::wstring& ToUnixLineEnds( std::wstring& rText )
+	{
+		str::Replace( rText, L"\r\n", L"\n" );
+		return rText;
 	}
 }
 
@@ -460,7 +495,7 @@ namespace arg
 
 	bool StartsWith( const TCHAR* pArg, const TCHAR* pPrefix, size_t count /*= std::tstring::npos*/ )
 	{
-		return pred::Equal == str::CompareN( pArg, pPrefix, func::ToUpper(), count != std::tstring::npos ? count : str::length( pPrefix ) );
+		return pred::Equal == str::CompareN( pArg, pPrefix, func::ToUpper(), count != std::tstring::npos ? count : str::GetLength( pPrefix ) );
 	}
 
 	bool StartsWithAnyOf( const TCHAR* pArg, const TCHAR* pPrefixList, const TCHAR* pListDelims )

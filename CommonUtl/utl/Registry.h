@@ -110,7 +110,7 @@ namespace reg
 		// assignment
 		void Assign( DWORD srcType, const void* srcBuffer, DWORD srcBufferSize );
 		void SetDword( DWORD dword );
-		void SetString( const TCHAR* pText ) { Assign( REG_SZ, (const BYTE*)pText, ( (DWORD)str::length( pText ) + 1 ) * sizeof( TCHAR ) ); }
+		void SetString( const TCHAR* pText ) { Assign( REG_SZ, (const BYTE*)pText, ( (DWORD)str::GetLength( pText ) + 1 ) * sizeof( TCHAR ) ); }
 	protected:
 		bool ensureBuffer( DWORD requiredSize );
 	public:

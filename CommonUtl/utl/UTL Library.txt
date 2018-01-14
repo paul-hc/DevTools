@@ -76,3 +76,14 @@ https://social.msdn.microsoft.com/Forums/windowsdesktop/en-US/35c1a7da-123a-4c95
 	Debugging Tools for Windows (x64)									9-Jan-18	35.9 MB	6.11.1.404	
 	Application Verifier (x64)											9-Jan-18	48.2 MB	4.0.917	
 	Microsoft Document Explorer 2008									9-Jan-18	7.95 MB							C:\Program Files (x86)\Common Files\Microsoft Shared\Help 9\
+
+
+Registering COM dlls and shell extensions:
+-----------------------------------------
+Start Visual Studio as Administrator. This is IMPORTANT since it ensures proper registration of the DLL.
+Build the solution, switch to ReleaseU configuration.
+Tools > "Copy to Tools/mine/"
+Tools > "Register DLL to Tools/mine/"
+Repeat for multiple platforms (32/64 bit).
+	D:\my\Tools\mine\FileRenShell32.dll
+	D:\my\Tools\mine\FileRenShell64.dll

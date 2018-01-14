@@ -17,6 +17,8 @@ public:
 
 	void Log( const TCHAR* pFormat, ... );
 	void LogV( const TCHAR* pFormat, va_list argList );
+	void LogLine( const TCHAR* pText, bool useTimestamp = true );
+
 	void Clear( void );
 	void SetOverwrite( void );
 protected:

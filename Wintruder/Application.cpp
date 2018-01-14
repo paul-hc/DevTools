@@ -6,6 +6,7 @@
 #include "resource.h"
 #include "utl/CmdInfoStore.h"
 #include "utl/MenuUtilities.h"
+#include "utl/Process.h"
 #include "wnd/WndUtils.h"
 
 #ifdef _DEBUG
@@ -52,6 +53,9 @@ BOOL CApplication::InitInstance( void )
 {
 	if ( !CBaseApp< CWinApp >::InitInstance() )
 		return FALSE;
+
+	if ( utl::IsProcessElevated() )
+		GetLogger().Log( _T("* RUN ELEVATED (ADMIN) *") );
 
 	app::GetOptions()->Load();
 	ui::CCmdInfoStore::m_autoPopDuration = 30000;			// 30 sec popup display time for MFC tooltips
@@ -229,10 +233,7 @@ void CApplication::OnUpdateActivateWindow( CCmdUI* pCmdUI )
 void CApplication::CmShowWindow( void )
 {
 	const CWndSpot& targetWnd = app::GetTargetWnd();
-	CScopedAttachThreadInput scopedThreadAccess( targetWnd );
-
-	::ShowWindow( targetWnd, SW_SHOWNA );
-	ui::RedrawWnd( targetWnd );
+	wnd::ShowWindow( targetWnd, SW_SHOWNA );
 	app::GetSvc().PublishEvent( app::WndStateChanged );
 }
 

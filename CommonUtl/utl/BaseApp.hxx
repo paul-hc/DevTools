@@ -69,6 +69,8 @@ BOOL CBaseApp< BaseClass >::InitInstance( void )
 	m_pSharedResources->AddAutoPtr( &m_pLogger );
 	m_pSharedResources->AddAutoPtr( &m_pImageStore );
 
+	GetLogger().LogLine( _T(""), false );					// new-line as session separator
+
 	CToolStrip::RegisterStripButtons( IDR_STD_STRIP );		// register stock images
 
 	// activate "Windows Native" visual manager for enabling themes in MFC controls

@@ -12,15 +12,15 @@
 bool TokenRange::InStringBounds( const TCHAR* pText ) const
 {
 	ASSERT_PTR( pText );
-	return IsValid() && IsNormalized() && m_end <= (int)str::length( pText );
+	return IsValid() && IsNormalized() && m_end <= (int)str::GetLength( pText );
 }
 
 void TokenRange::setString( const TCHAR* pText, int startPos /*= 0*/ )
 {
 	if ( pText != NULL )
 	{
-		ASSERT( startPos >= 0 && startPos <= (int)str::length( pText ) );
-		assign( startPos, (int)str::length( pText ) );
+		ASSERT( startPos >= 0 && startPos <= (int)str::GetLength( pText ) );
+		assign( startPos, (int)str::GetLength( pText ) );
 	}
 	else
 		setEmpty( -1 );
@@ -42,7 +42,7 @@ void TokenRange::normalize( void )
 void TokenRange::normalize( const TCHAR* pText )
 {
 	if ( m_start >= 0 && m_end == -1 )
-		m_end = (int)str::length( pText );
+		m_end = (int)str::GetLength( pText );
 	else
 		normalize();
 }
@@ -88,7 +88,7 @@ bool TokenRange::isTokenMatch( const TCHAR* pText, const TCHAR* pToken, str::Cas
 
 	if ( IsValid() && IsNormalized() )
 	{
-		int tokenLength = (int)str::length( pToken );
+		int tokenLength = (int)str::GetLength( pToken );
 
 		if ( getLength() == tokenLength )
 			if ( caseType == str::Case )
@@ -109,7 +109,7 @@ TokenRange& TokenRange::replaceWithToken( CString& targetString, const TCHAR* pT
 
 	targetString.Delete( m_start, getLength() );
 	targetString.Insert( m_start, pToken );
-	m_end = m_start + (int)str::length( pToken );
+	m_end = m_start + (int)str::GetLength( pToken );
 
 	return *this;
 }

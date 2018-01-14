@@ -26,7 +26,7 @@ namespace path
 			return true;
 
 		return
-			str::length( pLeftPath ) == str::length( pRightPath ) &&
+			str::GetLength( pLeftPath ) == str::GetLength( pRightPath ) &&
 			std::equal( str::begin( pLeftPath ), str::end( pLeftPath ), str::begin( pRightPath ), pred::EquivalentPathChar() );
 	}
 
@@ -109,7 +109,7 @@ namespace path
 				else if ( DoMatchFilenameWildcard( pFilename, pWild, pMultiSpecDelims ) )			// recursive call spec by spec
 					return true;
 				else
-					pWild += str::length( pWild );
+					pWild += str::GetLength( pWild );
 
 			return false;
 		}
@@ -433,7 +433,7 @@ namespace path
 		if ( str::IsEmpty( pPrefix ) )
 			return true;					// nothing to strip, not an error
 
-		if ( size_t prefixLen = str::length( pPrefix ) )
+		if ( size_t prefixLen = str::GetLength( pPrefix ) )
 			if ( pred::Equal == CompareNPtr( rPath.c_str(), pPrefix, prefixLen ) )
 			{
 				if ( IsSlash( rPath.c_str()[ prefixLen ] ) )

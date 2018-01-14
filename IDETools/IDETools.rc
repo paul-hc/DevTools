@@ -64,8 +64,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 5,1,2,117
- PRODUCTVERSION 5,1,2,117
+ FILEVERSION 5,2,0,1
+ PRODUCTVERSION 5,2,0,1
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -83,12 +83,12 @@ BEGIN
             VALUE "CompanyName", "Paul Cocoveanu"
             VALUE "Email", "phc.2nd@gmail.com"
             VALUE "FileDescription", "IDETools DLL"
-            VALUE "FileVersion", "5, 1, 2, 117"
+            VALUE "FileVersion", "5, 2, 0, 1"
             VALUE "InternalName", "IDETools"
-            VALUE "LegalCopyright", "Copyright © 1998-2016"
+            VALUE "LegalCopyright", "Copyright © 1998-2018"
             VALUE "OriginalFilename", "IDETools.dll"
             VALUE "ProductName", "IDETools Automation DLL"
-            VALUE "ProductVersion", "5, 1, 2, 117"
+            VALUE "ProductVersion", "5, 2, 0, 1"
             VALUE "WrittenBy", "Written by Paul Cocoveanu"
         END
     END

@@ -186,7 +186,7 @@ void CFindWndDialog::OnUpdateCopyWndClass( CCmdUI* pCmdUI )
 void CFindWndDialog::OnCopyWndCaption( void )
 {
 	UpdateData( DialogSaveChanges );
-	m_pPattern->m_caption = ui::GetWindowText( m_pPattern->m_handle );
+	m_pPattern->m_caption = wnd::GetWindowText( m_pPattern->m_handle );
 	UpdateData( DialogOutput );
 }
 
@@ -205,7 +205,7 @@ void CFindWndDialog::OnUpdateCopyWndCaption( CCmdUI* pCmdUI )
 		itemText << baseItemText;
 		if ( enable )
 		{
-			std::tstring caption = ui::GetWindowText( m_pPattern->m_handle );
+			std::tstring caption = wnd::GetWindowText( m_pPattern->m_handle );
 			if ( !caption.empty() )
 				itemText << _T('\t') << caption;
 		}

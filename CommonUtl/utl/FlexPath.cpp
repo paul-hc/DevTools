@@ -14,17 +14,17 @@ namespace path
 	{
 		// pFullPath could refer to a dir, file, or a sub-path
 		fs::CFlexPath shortFullPath( pFullPath );
-		if ( str::length( shortFullPath.GetNameExt() ) > maxFnameExtLen )
+		if ( str::GetLength( shortFullPath.GetNameExt() ) > maxFnameExtLen )
 		{
 			fs::CPathParts parts( shortFullPath.Get() );
 
-			const size_t prefixLen = maxFnameExtLen - str::length( _T("_ABCDEFAB") ) - parts.m_ext.length();
+			const size_t prefixLen = maxFnameExtLen - str::GetLength( _T("_ABCDEFAB") ) - parts.m_ext.length();
 			const UINT hashKey = ToHashValue( pFullPath );				// hash key is unique for the whole path
 
 			parts.m_fname = str::Format( _T("%s_%08X"), parts.m_fname.substr( 0, prefixLen ).c_str(), hashKey );	// "prefix_hexHashKey"
 			shortFullPath.Set( parts.MakePath() );
 
-			ENSURE( str::length( path::FindFilename( shortFullPath.GetPtr() ) ) <= maxFnameExtLen );
+			ENSURE( str::GetLength( path::FindFilename( shortFullPath.GetPtr() ) ) <= maxFnameExtLen );
 		}
 		return shortFullPath.Get();
 	}

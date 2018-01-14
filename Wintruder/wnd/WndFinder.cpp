@@ -77,14 +77,16 @@ CWndSpot CWndFinder::WindowFromPoint( const CPoint& screenPos ) const
 		int cwpFlags = CWP_ALL;
 
 		if ( app::GetOptions()->m_ignoreHidden )
-			cwpFlags |= CWP_SKIPINVISIBLE;
+			SetFlag( cwpFlags, CWP_SKIPINVISIBLE );
 		if ( app::GetOptions()->m_ignoreDisabled )
-			cwpFlags |= CWP_SKIPDISABLED;
+			SetFlag( cwpFlags, CWP_SKIPDISABLED );
 
-		wndSpot.m_hWnd = ::ChildWindowFromPointEx( hParentWnd, clientPoint, cwpFlags );
-		ASSERT_PTR( wndSpot.m_hWnd );
-		hitRect = wndSpot.GetWindowRect();
-		wndSpot.m_hWnd = FindBestFitSibling( wndSpot.m_hWnd, hitRect, screenPos );
+		if ( HWND hChildWnd = ::ChildWindowFromPointEx( hParentWnd, clientPoint, cwpFlags ) )		// found and not ignored?
+		{
+			wndSpot.m_hWnd = hChildWnd;
+			hitRect = wndSpot.GetWindowRect();
+			wndSpot.m_hWnd = FindBestFitSibling( wndSpot.m_hWnd, hitRect, screenPos );
+		}
 	}
 
 	ASSERT( wndSpot.IsValid() );

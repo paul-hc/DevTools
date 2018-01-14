@@ -13,7 +13,7 @@ public:
 
 	void Restart( void ) { m_startTime = std::clock(); }
 private:
-	std::clock_t m_startTime;
+	std::clock_t m_startTime;			// miliseconds resolution (CLOCKS_PER_SEC=1000)
 };
 
 

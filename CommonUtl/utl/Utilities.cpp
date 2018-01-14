@@ -464,19 +464,37 @@ namespace ui
 		return processId;
 	}
 
-	void GetWindowText( std::tstring& rText, HWND hWnd )
+	void _GetWindowText( std::tstring& rText, HWND hWnd )
 	{
-		ASSERT_PTR( hWnd );
+		int length = ::GetWindowTextLength( hWnd );
+		std::vector< TCHAR > buffer( length + 1 );
+		TCHAR* pBuffer = &buffer.front();
 
+		::GetWindowText( hWnd, pBuffer, length + 1 );
+		buffer[ length ] = 0;
+		rText = pBuffer;
+	}
+
+	void _GetChildWindowText( std::tstring& rText, HWND hWnd )
+	{
 		// note: GetWindowTextLength() and GetWindowText() fail for edits running in a different process
 		// we use WM_GETTEXTLENGTH and WM_GETTEXT instead
+
 		int length = static_cast< int >( ::SendMessage( hWnd, WM_GETTEXTLENGTH, 0, 0 ) );	// ::GetWindowTextLength( hWnd );
-		CString text;
-		TCHAR* pBuffer = text.GetBufferSetLength( length );
+		std::vector< TCHAR > buffer( length + 1 );
+		TCHAR* pBuffer = &buffer.front();
 
 		::SendMessage( hWnd, WM_GETTEXT, length + 1, (LPARAM)pBuffer );						// ::GetWindowText( hWnd, pBuffer, length + 1 );
-		text.ReleaseBuffer();
-		rText = text.GetString();
+		buffer[ length ] = 0;
+		rText = pBuffer;
+	}
+
+	void GetWindowText( std::tstring& rText, HWND hWnd )
+	{
+		if ( IsChild( hWnd ) )
+			_GetChildWindowText( rText, hWnd );
+		else
+			_GetWindowText( rText, hWnd );
 	}
 
 	bool SetWindowText( HWND hWnd, const std::tstring& text )

@@ -32,6 +32,7 @@ private:
 	HWND FindValidParentItem( HTREEITEM hItem ) const;
 private:
 	CFont m_italicFont;
+	bool m_destroying;
 
 	// enum { IDD = IDD_TREE_WND_PAGE };
 	CTreeControl m_treeCtrl;
@@ -41,6 +42,7 @@ public:
 protected:
 	virtual void DoDataExchange( CDataExchange* pDX );
 protected:
+	afx_msg void OnDestroy( void );
 	afx_msg void OnContextMenu( CWnd* pWnd, CPoint point );
 	afx_msg void OnTvnSelChanged_WndTree( NMHDR* pNmHdr, LRESULT* pResult );
 	afx_msg void OnTvnSerFocus_WndTree( NMHDR* pNmHdr, LRESULT* pResult );
@@ -85,6 +87,8 @@ namespace wt
 	{
 	public:
 		CWndTreeBuilder( CTreeControl* pTreeCtrl, CLogger* pLogger = NULL );
+
+		size_t GetCount( void ) const { return m_wndToItemMap.size(); }
 	protected:
 		// base overrides
 		virtual void AddWndItem( HWND hWnd );

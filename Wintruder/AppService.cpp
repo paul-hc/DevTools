@@ -1,6 +1,7 @@
 
 #include "stdafx.h"
 #include "AppService.h"
+#include "Application.h"
 #include "Observers.h"
 #include "resource.h"
 #include "wnd/WindowClass.h"
@@ -18,6 +19,11 @@
 namespace app
 {
 	CLogger& GetLogger( void )
+	{
+		return *GetLoggerPtr();
+	}
+
+	CLogger& GetPrivateLogger( void )
 	{
 		static CLogger logger;
 		static bool init = false;
@@ -62,7 +68,7 @@ namespace ui
 
 		if ( ui::IsValidWindow( hWnd ) )
 		{
-			stream::Tag( info, str::Format( _T("\"%s\" %s"), ui::GetWindowText( hWnd ).c_str(), wc::FormatClassName( hWnd ).c_str() ), sep );
+			stream::Tag( info, str::Format( _T("\"%s\" %s"), wnd::FormatWindowTextLine( hWnd ).c_str(), wc::FormatClassName( hWnd ).c_str() ), sep );
 
 			DWORD style = ui::GetStyle( hWnd );
 			std::tstring status;

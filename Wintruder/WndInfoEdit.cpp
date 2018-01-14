@@ -33,7 +33,7 @@ void CWndInfoEdit::SetCurrentWnd( HWND hCurrentWnd )
 	if ( ui::IsValidWindow( m_hCurrentWnd ) )
 	{
 		briefInfo = ui::FormatBriefWndInfo( m_hCurrentWnd );
-		if ( NULL == wnd::GetIcon( m_hCurrentWnd ) )			// otherwise the custom icon will be drawn over transparent
+		if ( NULL == wnd::GetWindowIcon( m_hCurrentWnd ) )			// otherwise the custom icon will be drawn over transparent
 			imageIndex = CWndImageRepository::Instance().LookupImage( m_hCurrentWnd );
 	}
 	else
@@ -49,6 +49,6 @@ void CWndInfoEdit::DrawImage( CDC* pDC, const CRect& imageRect )
 
 	if ( Image_Transparent == GetImageIndex() )
 		if ( ui::IsValidWindow( m_hCurrentWnd ) )
-			if ( HICON hIcon = wnd::GetIcon( m_hCurrentWnd ) )
+			if ( HICON hIcon = wnd::GetWindowIcon( m_hCurrentWnd ) )
 				::DrawIconEx( *pDC, imageRect.left, imageRect.top, hIcon, imageRect.Width(), imageRect.Height(), 0, NULL, DI_NORMAL | DI_COMPAT );
 }

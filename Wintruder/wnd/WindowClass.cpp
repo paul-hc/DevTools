@@ -1,6 +1,7 @@
 
 #include "stdafx.h"
 #include "WindowClass.h"
+#include "WndUtils.h"
 #include "utl/StringUtilities.h"
 #include "utl/Utilities.h"
 
@@ -13,7 +14,7 @@ namespace wc
 {
 	std::tstring GetClassName( HWND hWnd )
 	{
-		ASSERT( hWnd == NULL || ::IsWindow( hWnd ) );		// null or valid, not stale
+		ASSERT( NULL == hWnd || ::IsWindow( hWnd ) );		// null or valid, not stale
 
 		std::tstring className;
 		if ( hWnd != NULL )
@@ -225,7 +226,7 @@ namespace wc
 	bool FormatContent_ListBox( std::tostringstream& ross, const CListBox& listBox )
 	{
 		DWORD style = listBox.GetStyle();
-		if ( ( style & ( LBS_OWNERDRAWFIXED | LBS_OWNERDRAWVARIABLE ) ) && !( style & LBS_HASSTRINGS ) )
+		if ( HasFlag( style, LBS_OWNERDRAWFIXED | LBS_OWNERDRAWVARIABLE ) && !HasFlag( style, LBS_HASSTRINGS ) )
 			return false;
 
 		CString itemText;
@@ -397,7 +398,7 @@ namespace wc
 			}
 		}
 
-		ross << ui::GetWindowText( pWnd );		// normal text caption window
+		ross << wnd::GetWindowText( pWnd->m_hWnd );		// normal text caption window
 		return CaptionText;
 	}
 

@@ -146,12 +146,12 @@ namespace app
 	bool CSharedDocTemplate::SetRegKey( const TCHAR* pKey, const TCHAR* pValue, const TCHAR* pValueName )
 	{
 		if ( NULL == pValueName )
-			return ERROR_SUCCESS == AfxRegSetValue( HKEY_CLASSES_ROOT, pKey, REG_SZ, pValue, (DWORD)( str::length( pValue ) * sizeof( TCHAR ) ) );
+			return ERROR_SUCCESS == AfxRegSetValue( HKEY_CLASSES_ROOT, pKey, REG_SZ, pValue, (DWORD)( str::GetLength( pValue ) * sizeof( TCHAR ) ) );
 
 		HKEY hKey;
 		if ( ERROR_SUCCESS == AfxRegCreateKey( HKEY_CLASSES_ROOT, pKey, &hKey ) )
 		{
-			long result = ::RegSetValueEx( hKey, pValueName, 0, REG_SZ, (const BYTE*)pValue, (DWORD)( str::length( pValue ) + 1 ) * sizeof( TCHAR ) );
+			long result = ::RegSetValueEx( hKey, pValueName, 0, REG_SZ, (const BYTE*)pValue, (DWORD)( str::GetLength( pValue ) + 1 ) * sizeof( TCHAR ) );
 			if ( ERROR_SUCCESS == ::RegCloseKey( hKey ) && ERROR_SUCCESS == result )
 				return true;
 		}

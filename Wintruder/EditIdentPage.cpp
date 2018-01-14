@@ -35,13 +35,13 @@ CEditIdentPage::~CEditIdentPage()
 
 bool CEditIdentPage::UseWndId( void ) const
 {
-	CWnd* pTargetWnd = app::GetValidTargetWnd();
+	CWndSpot* pTargetWnd = app::GetValidTargetWnd();
 	return pTargetWnd != NULL && HasFlag( pTargetWnd->GetStyle(), WS_CHILD );
 }
 
 bool CEditIdentPage::IsDirty( void ) const
 {
-	if ( CWnd* pTargetWnd = app::GetValidTargetWnd() )
+	if ( CWndSpot* pTargetWnd = app::GetValidTargetWnd() )
 		if ( HasFlag( pTargetWnd->GetStyle(), WS_CHILD ) )
 			if ( m_id != pTargetWnd->GetDlgCtrlID() )
 				return true;
@@ -81,7 +81,7 @@ void CEditIdentPage::OnTargetWndChanged( const CWndSpot& targetWnd )
 
 void CEditIdentPage::ApplyPageChanges( void ) throws_( CRuntimeException )
 {
-	if ( CWnd* pTargetWnd = app::GetValidTargetWnd() )
+	if ( CWndSpot* pTargetWnd = app::GetValidTargetWnd() )
 		if ( UseWndId() )
 			if ( m_decIdentEdit.GetValue( &m_id ) )
 				pTargetWnd->SetDlgCtrlID( m_id );
@@ -136,7 +136,7 @@ END_MESSAGE_MAP()
 void CEditIdentPage::OnEnChange_DecimalEdit( void )
 {
 	if ( m_decIdentEdit.m_hWnd != NULL )			// subclassed
-		if ( CWnd* pTargetWnd = app::GetValidTargetWnd() )
+		if ( app::GetValidTargetWnd() != NULL )
 			if ( UseWndId() )
 				if ( m_decIdentEdit.GetValue( &m_id ) )
 				{
@@ -149,7 +149,7 @@ void CEditIdentPage::OnEnChange_DecimalEdit( void )
 
 void CEditIdentPage::OnEnChange_HexEdit( void )
 {
-	if ( CWnd* pTargetWnd = app::GetValidTargetWnd() )
+	if ( app::GetValidTargetWnd() != NULL )
 		if ( UseWndId() )
 		{
 			unsigned short id;
@@ -166,7 +166,7 @@ void CEditIdentPage::OnEnChange_HexEdit( void )
 
 void CEditIdentPage::OnCbnSelChange_Literal( void )
 {
-	if ( CWnd* pTargetWnd = app::GetValidTargetWnd() )
+	if ( app::GetValidTargetWnd() != NULL )
 		if ( UseWndId() )
 		{
 			int selIndex = m_literalCombo.GetCurSel();
