@@ -175,7 +175,7 @@ namespace fs
 	const std::tstring& CFilterJoiner::GetKey( void ) const
 	{
 		if ( m_key.empty() && !m_classTags.empty() )
-			m_key = str::Unsplit( m_classTags, CFilterStore::s_filterSep );
+			m_key = str::Join( m_classTags, CFilterStore::s_filterSep );
 		return m_key;
 	}
 

@@ -24,7 +24,7 @@ std::tstring CLineSet::FormatText( const TCHAR* pLineEnd /*= m_winLineEnd*/ ) co
 {
 	ASSERT_PTR( pLineEnd );
 
-	std::tstring outputText = str::Unsplit( m_lines, pLineEnd );
+	std::tstring outputText = str::Join( m_lines, pLineEnd );
 	if ( m_lastEmptyLine )
 		outputText += pLineEnd;
 	return outputText;

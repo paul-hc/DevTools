@@ -357,7 +357,7 @@ void CImageTranspColors::Save( const TCHAR* pSection ) const
 		if ( itImage->first.FileExist() && itImage->second != CLR_NONE )
 			items.push_back( str::Format( _T("%s|%s"), itImage->first.GetPtr(), ui::FormatHtml( itImage->second ).c_str() ) );
 
-	AfxGetApp()->WriteProfileString( pSection, s_entry, str::Unsplit( items, _T(";") ).c_str() );
+	AfxGetApp()->WriteProfileString( pSection, s_entry, str::Join( items, _T(";") ).c_str() );
 }
 
 COLORREF CImageTranspColors::Lookup( const fs::CPath& imagePath ) const

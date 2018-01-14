@@ -128,7 +128,7 @@ void CMainDialog::ParseInput( void )
 		pPrevInfo = &*itInfo;
 	}
 
-	SetResultsText( str::Unsplit( outputLines, lineEnd ) );
+	SetResultsText( str::Join( outputLines, lineEnd ) );
 }
 
 void CMainDialog::ReadInputSelLine( void )

@@ -136,11 +136,11 @@ namespace ut
 		CPathPairPool( void ) : m_fullDestPaths( false ) {}
 		CPathPairPool( const TCHAR* pSourceFilenames, bool fullDestPaths = false );
 
-		std::tstring UnsplitDest( void );
+		std::tstring JoinDest( void );
 		void CopySrc( void );
 	public:
 		fs::PathPairMap m_pathPairs;
-		bool m_fullDestPaths;				// format DEST in UnsplitDest using full paths
+		bool m_fullDestPaths;				// format DEST in JoinDest using full paths
 	};
 
 
@@ -152,8 +152,8 @@ namespace ut
 	};
 
 
-	inline std::tstring UnsplitFiles( const fs::CEnumerator& enumerator ) { return str::Unsplit( enumerator.m_filePaths, ut::CTempFilePool::m_sep ); }
-	inline std::tstring UnsplitSubDirs( const fs::CEnumerator& enumerator ) { return str::Unsplit( enumerator.m_subDirPaths, ut::CTempFilePool::m_sep ); }
+	inline std::tstring JoinFiles( const fs::CEnumerator& enumerator ) { return str::Join( enumerator.m_filePaths, ut::CTempFilePool::m_sep ); }
+	inline std::tstring JoinSubDirs( const fs::CEnumerator& enumerator ) { return str::Join( enumerator.m_subDirPaths, ut::CTempFilePool::m_sep ); }
 
 } //namespace ut
 

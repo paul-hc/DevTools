@@ -1123,7 +1123,7 @@ namespace ui
 		if ( items.size() > maxCount )
 			items.erase( items.begin() + maxCount, items.end() );
 
-		AfxGetApp()->WriteProfileString( pSection, pEntry, str::Unsplit( items, pSep ).c_str() );
+		AfxGetApp()->WriteProfileString( pSection, pEntry, str::Join( items, pSep ).c_str() );
 	}
 
 

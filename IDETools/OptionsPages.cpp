@@ -332,7 +332,7 @@ void CBscPathPage::DoDataExchange( CDataExchange* pDX )
 		}
 
 		m_folderContent.FilterItems( items );
-		m_browseInfoPath = str::Unsplit( items, EDIT_SEP );
+		m_browseInfoPath = str::Join( items, EDIT_SEP );
 	}
 
 	CLayoutPropertyPage::DoDataExchange( pDX );

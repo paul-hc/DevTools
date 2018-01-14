@@ -161,13 +161,13 @@ namespace ut
 		ENSURE( m_pathPairs.size() == srcFilenames.size() );
 	}
 
-	std::tstring CPathPairPool::UnsplitDest( void )
+	std::tstring CPathPairPool::JoinDest( void )
 	{
 		std::vector< std::tstring > destFilenames; destFilenames.reserve( m_pathPairs.size() );
 		for ( fs::PathPairMap::const_iterator it = m_pathPairs.begin(); it != m_pathPairs.end(); ++it )
 			destFilenames.push_back( m_fullDestPaths ? it->second.Get() : fs::CPathParts( it->second.Get() ).GetNameExt() );
 
-		return str::Unsplit( destFilenames, ut::CTempFilePool::m_sep );
+		return str::Join( destFilenames, ut::CTempFilePool::m_sep );
 	}
 
 	void CPathPairPool::CopySrc( void )

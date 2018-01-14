@@ -101,7 +101,7 @@ bool CFileWorkingSet::CopyClipSourcePaths( PathType pathType, CWnd* pWnd ) const
 	for ( std::vector< fs::CPath >::const_iterator itFile = m_sourceFiles.begin(); itFile != m_sourceFiles.end(); ++itFile )
 		sourcePaths.push_back( FilenameExt == pathType ? itFile->GetNameExt() : itFile->Get() );
 
-	std::tstring multiPath = str::Unsplit( sourcePaths, _T("\r\n") );
+	std::tstring multiPath = str::Join( sourcePaths, _T("\r\n") );
 	return CClipboard::CopyText( multiPath, pWnd );
 }
 
@@ -164,7 +164,7 @@ void CFileWorkingSet::CheckPathCollisions( void ) throws_( CRuntimeException )
 {
 	std::vector< std::tstring > dupDestPaths;
 	if ( !CheckPathCollisions( dupDestPaths ) )
-		throw CRuntimeException( str::Format( _T("Detected duplicate file name collisions:\r\n%s"), str::Unsplit( dupDestPaths, _T("\r\n") ).c_str() ) );
+		throw CRuntimeException( str::Format( _T("Detected duplicate file name collisions:\r\n%s"), str::Join( dupDestPaths, _T("\r\n") ).c_str() ) );
 }
 
 bool CFileWorkingSet::FileExistOutsideWorkingSet( const fs::CPath& filePath ) const

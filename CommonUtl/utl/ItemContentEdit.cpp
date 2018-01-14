@@ -101,7 +101,7 @@ void CItemListEdit::DDX_Items( CDataExchange* pDX, std::tstring& rFlatItems, int
 	{
 		std::vector< std::tstring > items;
 		m_content.SplitItems( items, GetText().c_str(), m_pSeparator );		// trim, remove empty, ensure unique
-		rFlatItems = str::Unsplit( items, m_pSeparator );
+		rFlatItems = str::Join( items, m_pSeparator );
 	}
 }
 
@@ -111,7 +111,7 @@ void CItemListEdit::DDX_Items( CDataExchange* pDX, std::vector< std::tstring >& 
 		DDX_Control( pDX, ctrlId, *this );
 
 	if ( DialogOutput == pDX->m_bSaveAndValidate )
-		SetText( str::Unsplit( rItems, m_pSeparator ) );
+		SetText( str::Join( rItems, m_pSeparator ) );
 	else
 		m_content.SplitItems( rItems, GetText().c_str(), m_pSeparator );
 }
@@ -127,7 +127,7 @@ void CItemListEdit::DDX_ItemsUiEscapeSeqs( CDataExchange* pDX, std::tstring& rFl
 	{
 		std::vector< std::tstring > items;
 		m_content.SplitItems( items, GetText().c_str(), m_pSeparator );		// trim, remove empty, ensure unique
-		rFlatItems = ui::ParseEscapeSeqs( str::Unsplit( items, m_pSeparator ) );
+		rFlatItems = ui::ParseEscapeSeqs( str::Join( items, m_pSeparator ) );
 	}
 }
 
@@ -137,7 +137,7 @@ void CItemListEdit::DDX_ItemsUiEscapeSeqs( CDataExchange* pDX, std::vector< std:
 		DDX_Control( pDX, ctrlId, *this );
 
 	if ( DialogOutput == pDX->m_bSaveAndValidate )
-		SetText( ui::FormatEscapeSeq( str::Unsplit( rItems, m_pSeparator ) ) );
+		SetText( ui::FormatEscapeSeq( str::Join( rItems, m_pSeparator ) ) );
 	else
 		m_content.SplitItems( rItems, ui::ParseEscapeSeqs( GetText() ).c_str(), m_pSeparator );
 }
@@ -154,7 +154,7 @@ void CItemListEdit::OnBuddyCommand( UINT cmdId )
 				dialog.m_readOnly = true;
 			if ( dialog.DoModal() != IDOK )
 				return;
-			ui::SetWindowText( m_hWnd, str::Unsplit( dialog.m_items, m_pSeparator ) );
+			ui::SetWindowText( m_hWnd, str::Join( dialog.m_items, m_pSeparator ) );
 			break;
 		}
 		case ListEditDialog:
@@ -272,7 +272,7 @@ void CListEditDialog::OnOK( void )
 	std::vector< std::tstring > items;
 	str::Split( items, ui::GetWindowText( m_itemsEdit ).c_str(), lineEnd );
 	str::RemoveEmptyItems( items );
-	m_flatItems = str::Unsplit( items, m_pSeparator );
+	m_flatItems = str::Join( items, m_pSeparator );
 
 	CLayoutDialog::OnOK();
 }
@@ -300,7 +300,7 @@ void CListEditDialog::OnMoveUpDown( UINT cmdId )
 	{
 		std::swap( items[ newLineIndex ], items[ currentLineIndex ] );
 
-		ui::SetWindowText( m_itemsEdit, str::Unsplit( items, lineEnd ) );
+		ui::SetWindowText( m_itemsEdit, str::Join( items, lineEnd ) );
 		m_itemsEdit.SetFocus();
 
 		int start = m_itemsEdit.LineIndex( newLineIndex );

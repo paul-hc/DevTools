@@ -145,7 +145,7 @@ std::tstring CTokenizeTextDialog::GenerateOutputText( void )
 				str::Split( parts, sourceText.c_str(), inputSeparator.c_str() );
 				m_tokenCount = parts.size();
 
-				CLineSet lineSet( str::Unsplit( parts, outputSeparator.c_str() ) );
+				CLineSet lineSet( str::Join( parts, outputSeparator.c_str() ) );
 				return FormatOutputText( lineSet );
 			}
 			case TokenizeAction:
@@ -153,7 +153,7 @@ std::tstring CTokenizeTextDialog::GenerateOutputText( void )
 				str::Tokenize( parts, sourceText.c_str(), inputSeparator.c_str() );
 				m_tokenCount = parts.size();
 
-				CLineSet lineSet( str::Unsplit( parts, outputSeparator.c_str() ) );
+				CLineSet lineSet( str::Join( parts, outputSeparator.c_str() ) );
 				return FormatOutputText( lineSet );
 			}
 			case MergeAction:
@@ -170,7 +170,7 @@ std::tstring CTokenizeTextDialog::GenerateOutputText( void )
 					--m_tokenCount;
 				}
 
-				CLineSet lineSet( str::Unsplit( parts, outputSeparator.c_str() ) + lastLineEnd );
+				CLineSet lineSet( str::Join( parts, outputSeparator.c_str() ) + lastLineEnd );
 				return FormatOutputText( lineSet );
 			}
 		}

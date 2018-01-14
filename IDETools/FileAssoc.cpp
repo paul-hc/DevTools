@@ -170,10 +170,10 @@ void CFileAssoc::QueryComplementaryParentDirs( std::vector< std::tstring >& rCom
 			std::tstring orgToken = dirTokens[ i ];
 
 			dirTokens[ i ] = _T("source");
-			rComplementaryDirs.push_back( str::Unsplit( dirTokens, _T("\\") ) );
+			rComplementaryDirs.push_back( str::Join( dirTokens, _T("\\") ) );
 
 			dirTokens[ i ] = _T("src");
-			rComplementaryDirs.push_back( str::Unsplit( dirTokens, _T("\\") ) );
+			rComplementaryDirs.push_back( str::Join( dirTokens, _T("\\") ) );
 
 			dirTokens[ i ] = orgToken;
 		}
@@ -182,10 +182,10 @@ void CFileAssoc::QueryComplementaryParentDirs( std::vector< std::tstring >& rCom
 			std::tstring orgToken = dirTokens[ i ];
 
 			dirTokens[ i ] = _T("include");
-			rComplementaryDirs.push_back( str::Unsplit( dirTokens, _T("\\") ) );
+			rComplementaryDirs.push_back( str::Join( dirTokens, _T("\\") ) );
 
 			dirTokens[ i ] = _T("inc");
-			rComplementaryDirs.push_back( str::Unsplit( dirTokens, _T("\\") ) );
+			rComplementaryDirs.push_back( str::Join( dirTokens, _T("\\") ) );
 
 			dirTokens[ i ] = orgToken;
 		}

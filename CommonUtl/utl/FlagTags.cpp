@@ -77,7 +77,7 @@ std::tstring CFlagTags::Format( int flags, const std::vector< std::tstring >& ta
 			if ( HasBitFlag( flags, static_cast< int >( pos ) ) )
 				flagsOn.push_back( tags[ pos ] );
 
-	return str::Unsplit( flagsOn, pSep );
+	return str::Join( flagsOn, pSep );
 }
 
 void CFlagTags::Parse( int* pFlags, const std::tstring& text, const std::vector< std::tstring >& tags, const TCHAR* pSep )

@@ -114,7 +114,7 @@ namespace time_utl
 		if ( seconds != 0 || components.empty() )
 			components.push_back( str::Format( _T("%d seconds"), seconds ) );
 
-		return sign + str::Unsplit( components, _T(", ") );
+		return sign + str::Join( components, _T(", ") );
 	}
 
 } //namespace time_utl

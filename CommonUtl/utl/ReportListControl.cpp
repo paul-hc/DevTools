@@ -1130,7 +1130,7 @@ bool CReportListControl::CacheSelectionData( ole::CDataSource* pDataSource, int 
 				codes.push_back( GetItemText( *itSelIndex, Code ).GetString() );
 
 	if ( HasFlag( sourceFlags, ds::ItemsText ) )
-		ole_utl::CacheTextData( pDataSource, str::Unsplit( codes, _T("\r\n") ) );
+		ole_utl::CacheTextData( pDataSource, str::Join( codes, _T("\r\n") ) );
 
 	if ( HasFlag( sourceFlags, ds::ShellFiles ) )
 		pDataSource->CacheShellFilePaths( codes );

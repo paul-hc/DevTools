@@ -51,16 +51,16 @@ void CPathGeneratorTests::TestPathMaker( void )
 		ASSERT( !gen.MakeDestRelative( _T("C:\\Tools\\Other") ) );
 
 		ASSERT( gen.MakeDestRelative( _T("C:\\Tools\\My\\Batch") ) );
-		ASSERT_EQUAL( _T("a.txt"), pool.UnsplitDest() );
+		ASSERT_EQUAL( _T("a.txt"), pool.JoinDest() );
 
 		ASSERT( gen.MakeDestRelative( _T("C:\\Tools\\My\\Batch\\") ) );
-		ASSERT_EQUAL( _T("a.txt"), pool.UnsplitDest() );
+		ASSERT_EQUAL( _T("a.txt"), pool.JoinDest() );
 
 		ASSERT( gen.MakeDestRelative( _T("C:/Tools/My") ) );
-		ASSERT_EQUAL( _T("Batch\\a.txt"), pool.UnsplitDest() );
+		ASSERT_EQUAL( _T("Batch\\a.txt"), pool.JoinDest() );
 
 		ASSERT( gen.MakeDestStripCommonPrefix() );
-		ASSERT_EQUAL( _T("a.txt"), pool.UnsplitDest() );
+		ASSERT_EQUAL( _T("a.txt"), pool.JoinDest() );
 	}
 	{
 		ut::CPathPairPool pool( _T("C:/Tools/Other/a.txt|C:\\Tools\\My\\Batch\\b.txt|C:\\Tools\\My\\Utils\\c.txt"), true );
@@ -71,10 +71,10 @@ void CPathGeneratorTests::TestPathMaker( void )
 		ASSERT( !gen.MakeDestRelative( _T("C:\\Tools\\Other") ) );
 
 		ASSERT( gen.MakeDestRelative( _T("C:\\") ) );
-		ASSERT_EQUAL( _T("Tools/Other/a.txt|Tools\\My\\Batch\\b.txt|Tools\\My\\Utils\\c.txt"), pool.UnsplitDest() );
+		ASSERT_EQUAL( _T("Tools/Other/a.txt|Tools\\My\\Batch\\b.txt|Tools\\My\\Utils\\c.txt"), pool.JoinDest() );
 
 		ASSERT( gen.MakeDestStripCommonPrefix() );
-		ASSERT_EQUAL( _T("Other/a.txt|My\\Batch\\b.txt|My\\Utils\\c.txt"), pool.UnsplitDest() );
+		ASSERT_EQUAL( _T("Other/a.txt|My\\Batch\\b.txt|My\\Utils\\c.txt"), pool.JoinDest() );
 	}
 	{
 		ut::CPathPairPool pool( _T("C:\\Tools\\a.txt|D:\\b.txt"), true );
@@ -159,17 +159,17 @@ void CPathGeneratorTests::TestNumSeqGeneration( void )
 	{
 		ut::CPathPairPool pool( _T("a.txt|b.txt|c.txt") );
 		ut::GeneratePairs( pool, numFmt, 3 );
-		ASSERT_EQUAL( _T("foo 03.txt|foo 04.txt|foo 05.txt"), pool.UnsplitDest() );
+		ASSERT_EQUAL( _T("foo 03.txt|foo 04.txt|foo 05.txt"), pool.JoinDest() );
 	}
 	{
 		ut::CPathPairPool pool( _T("foo 03.txt|foo 04.txt|foo 05.txt") );
 		ut::GeneratePairs( pool, numFmt, 3 );
-		ASSERT_EQUAL( _T("foo 03.txt|foo 04.txt|foo 05.txt"), pool.UnsplitDest() );
+		ASSERT_EQUAL( _T("foo 03.txt|foo 04.txt|foo 05.txt"), pool.JoinDest() );
 	}
 	{
 		ut::CPathPairPool pool( _T("foo 03.txt|foo 05.txt|foo 07.txt") );
 		ut::GeneratePairs( pool, numFmt, 3 );
-		ASSERT_EQUAL( _T("foo 03.txt|foo 04.txt|foo 05.txt"), pool.UnsplitDest() );
+		ASSERT_EQUAL( _T("foo 03.txt|foo 04.txt|foo 05.txt"), pool.JoinDest() );
 	}
 }
 
@@ -181,17 +181,17 @@ void CPathGeneratorTests::TestNumSeqFileGeneration( void )
 	{
 		ut::CTempFilePairPool pool( _T("a.txt|b.txt|c.txt") );
 		ut::GeneratePairs( pool, numFmt, 3 );
-		ASSERT_EQUAL( _T("foo 03.txt|foo 04.txt|foo 05.txt"), pool.UnsplitDest() );
+		ASSERT_EQUAL( _T("foo 03.txt|foo 04.txt|foo 05.txt"), pool.JoinDest() );
 	}
 	{
 		ut::CTempFilePairPool pool( _T("foo 03.txt|foo 04.txt|foo 05.txt") );
 		ut::GeneratePairs( pool, numFmt, 3 );
-		ASSERT_EQUAL( _T("foo 03.txt|foo 04.txt|foo 05.txt"), pool.UnsplitDest() );
+		ASSERT_EQUAL( _T("foo 03.txt|foo 04.txt|foo 05.txt"), pool.JoinDest() );
 	}
 	{
 		ut::CTempFilePairPool pool( _T("foo 04.txt|foo 06.txt|foo 08.txt") );
 		ut::GeneratePairs( pool, numFmt, 3 );
-		ASSERT_EQUAL( _T("foo 03.txt|foo 04.txt|foo 05.txt"), pool.UnsplitDest() );
+		ASSERT_EQUAL( _T("foo 03.txt|foo 04.txt|foo 05.txt"), pool.JoinDest() );
 	}
 }
 
@@ -226,22 +226,22 @@ void CPathGeneratorTests::TestWildcardGeneration( void )
 	{
 		ut::CPathPairPool pool( _T("a.txt|b.txt|c.txt") );
 		ut::GeneratePairs( pool, _T("foo *.*") );
-		ASSERT_EQUAL( _T("foo a.txt|foo b.txt|foo c.txt"), pool.UnsplitDest() );
+		ASSERT_EQUAL( _T("foo a.txt|foo b.txt|foo c.txt"), pool.JoinDest() );
 	}
 	{
 		ut::CPathPairPool pool( _T("a.txt|b.txt|c.txt") );
 		ut::GeneratePairs( pool, _T("foo *.do?") );
-		ASSERT_EQUAL( _T("foo a.dot|foo b.dot|foo c.dot"), pool.UnsplitDest() );
+		ASSERT_EQUAL( _T("foo a.dot|foo b.dot|foo c.dot"), pool.JoinDest() );
 	}
 	{
 		ut::CPathPairPool pool( _T("a.txt|b.txt|c.txt") );
 		ut::GeneratePairs( pool, _T("foo *.doc") );
-		ASSERT_EQUAL( _T("foo a.doc|foo b.doc|foo c.doc"), pool.UnsplitDest() );
+		ASSERT_EQUAL( _T("foo a.doc|foo b.doc|foo c.doc"), pool.JoinDest() );
 	}
 	{
 		ut::CPathPairPool pool( _T("a.txt|b.txt|c.txt") );
 		ut::GeneratePairs( pool, _T("*.H") );
-		ASSERT_EQUAL( _T("a.H|b.H|c.H"), pool.UnsplitDest() );
+		ASSERT_EQUAL( _T("a.H|b.H|c.H"), pool.JoinDest() );
 	}
 }
 
@@ -251,22 +251,22 @@ void CPathGeneratorTests::TestWildcardFileGeneration( void )
 	{
 		ut::CTempFilePairPool pool( _T("a.txt|b.txt|c.txt") );
 		ut::GeneratePairs( pool, _T("foo *.*") );
-		ASSERT_EQUAL( _T("foo a.txt|foo b.txt|foo c.txt"), pool.UnsplitDest() );
+		ASSERT_EQUAL( _T("foo a.txt|foo b.txt|foo c.txt"), pool.JoinDest() );
 	}
 	{
 		ut::CTempFilePairPool pool( _T("a.txt|b.txt|c.txt") );
 		ut::GeneratePairs( pool, _T("foo *.do?") );
-		ASSERT_EQUAL( _T("foo a.dot|foo b.dot|foo c.dot"), pool.UnsplitDest() );
+		ASSERT_EQUAL( _T("foo a.dot|foo b.dot|foo c.dot"), pool.JoinDest() );
 	}
 	{
 		ut::CTempFilePairPool pool( _T("a.txt|b.txt|c.txt") );
 		ut::GeneratePairs( pool, _T("foo *.doc") );
-		ASSERT_EQUAL( _T("foo a.doc|foo b.doc|foo c.doc"), pool.UnsplitDest() );
+		ASSERT_EQUAL( _T("foo a.doc|foo b.doc|foo c.doc"), pool.JoinDest() );
 	}
 	{
 		ut::CTempFilePairPool pool( _T("a.txt|b.txt|c.txt") );
 		ut::GeneratePairs( pool, _T("*.H") );
-		ASSERT_EQUAL( _T("a.H|b.H|c.H"), pool.UnsplitDest() );
+		ASSERT_EQUAL( _T("a.H|b.H|c.H"), pool.JoinDest() );
 	}
 }
 

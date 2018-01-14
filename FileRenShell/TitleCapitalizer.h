@@ -19,7 +19,7 @@ namespace cap
 	{
 		CWordList( const TCHAR* pWords ) { SetFlatList( pWords ); }
 
-		std::tstring GetFlatList( void ) const { return str::Unsplit( m_words, m_listSep ); }
+		std::tstring GetFlatList( void ) const { return str::Join( m_words, m_listSep ); }
 		void SetFlatList( const TCHAR* pWords ) { str::Split( m_words, pWords, m_listSep ); }
 
 		template< typename TokenIterator >

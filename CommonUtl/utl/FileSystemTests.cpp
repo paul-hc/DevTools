@@ -376,7 +376,7 @@ void CFileSystemTests::TestFlexPath( void )
 		pathSet.insert( fs::CFlexPath( _T("FILE 1") ) );
 		pathSet.insert( fs::CFlexPath( _T("FILE 3") ) );
 		
-		ASSERT_EQUAL( _T("file 1,file 3,File 7,File 10"), str::Unsplit( pathSet.begin(), pathSet.end(), comma ) );
+		ASSERT_EQUAL( _T("file 1,file 3,File 7,File 10"), str::Join( pathSet.begin(), pathSet.end(), comma ) );
 	}
 
 	// split/make with complex path
@@ -422,38 +422,38 @@ void CFileSystemTests::TestFileEnum( void )
 	{
 		fs::CEnumerator found( pTempDirPath );
 		fs::EnumFiles( &found, pTempDirPath, _T("*.*"), Shallow );
-		ASSERT_EQUAL( _T("a|a.doc|a.txt"), ut::UnsplitFiles( found ) );
+		ASSERT_EQUAL( _T("a|a.doc|a.txt"), ut::JoinFiles( found ) );
 	}
 	{
 		fs::CEnumerator found( pTempDirPath );
 		fs::EnumFiles( &found, pTempDirPath, _T("*.*"), Deep );
-		ASSERT_EQUAL( _T("a|a.doc|a.txt|d1\\b|d1\\b.doc|d1\\b.txt|d1\\d2\\c|d1\\d2\\c.doc|d1\\d2\\c.txt"), ut::UnsplitFiles( found ) );
+		ASSERT_EQUAL( _T("a|a.doc|a.txt|d1\\b|d1\\b.doc|d1\\b.txt|d1\\d2\\c|d1\\d2\\c.doc|d1\\d2\\c.txt"), ut::JoinFiles( found ) );
 	}
 	{
 		fs::CEnumerator found( pTempDirPath );
 		fs::EnumFiles( &found, pTempDirPath, _T("*."), Deep );
-		ASSERT_EQUAL( _T("a|d1\\b|d1\\d2\\c"), ut::UnsplitFiles( found ) );
+		ASSERT_EQUAL( _T("a|d1\\b|d1\\d2\\c"), ut::JoinFiles( found ) );
 	}
 	{
 		fs::CEnumerator found( pTempDirPath );
 		fs::EnumFiles( &found, pTempDirPath, _T("*.doc"), Deep );
-		ASSERT_EQUAL( _T("a.doc|d1\\b.doc|d1\\d2\\c.doc"), ut::UnsplitFiles( found ) );
+		ASSERT_EQUAL( _T("a.doc|d1\\b.doc|d1\\d2\\c.doc"), ut::JoinFiles( found ) );
 	}
 	{
 		fs::CEnumerator found( pTempDirPath );
 		fs::EnumFiles( &found, pTempDirPath, _T("*.doc;*.txt"), Deep );
-		ASSERT_EQUAL( _T("a.doc|a.txt|d1\\b.doc|d1\\b.txt|d1\\d2\\c.doc|d1\\d2\\c.txt"), ut::UnsplitFiles( found ) );
-		ASSERT_EQUAL( _T("d1|d1\\d2"), ut::UnsplitSubDirs( found ) );
+		ASSERT_EQUAL( _T("a.doc|a.txt|d1\\b.doc|d1\\b.txt|d1\\d2\\c.doc|d1\\d2\\c.txt"), ut::JoinFiles( found ) );
+		ASSERT_EQUAL( _T("d1|d1\\d2"), ut::JoinSubDirs( found ) );
 	}
 	{
 		fs::CEnumerator found( pTempDirPath );
 		fs::EnumFiles( &found, pTempDirPath, _T("*.?oc;*.t?t"), Deep );
-		ASSERT_EQUAL( _T("a.doc|a.txt|d1\\b.doc|d1\\b.txt|d1\\d2\\c.doc|d1\\d2\\c.txt"), ut::UnsplitFiles( found ) );
+		ASSERT_EQUAL( _T("a.doc|a.txt|d1\\b.doc|d1\\b.txt|d1\\d2\\c.doc|d1\\d2\\c.txt"), ut::JoinFiles( found ) );
 	}
 	{
 		fs::CEnumerator found( pTempDirPath );
 		fs::EnumFiles( &found, pTempDirPath, _T("*.exe;*.bat"), Deep );
-		ASSERT_EQUAL( _T(""), ut::UnsplitFiles( found ) );
+		ASSERT_EQUAL( _T(""), ut::JoinFiles( found ) );
 	}
 }
 
@@ -478,12 +478,12 @@ void CFileSystemTests::TestTempFilePool( void )
 	{
 		ut::CTempFilePairPool pool( _T("a.txt|b.txt|c.txt") );
 		pool.CopySrc();
-		ASSERT_EQUAL( _T("a.txt|b.txt|c.txt"), pool.UnsplitDest() );
+		ASSERT_EQUAL( _T("a.txt|b.txt|c.txt"), pool.JoinDest() );
 	}
 	{
 		ut::CTempFilePairPool pool( _T("a.txt|d1\\b.txt|d1\\d2\\c.txt") );
 		pool.CopySrc();
-		ASSERT_EQUAL( _T("a.txt|b.txt|c.txt"), pool.UnsplitDest() );
+		ASSERT_EQUAL( _T("a.txt|b.txt|c.txt"), pool.JoinDest() );
 	}
 }
 

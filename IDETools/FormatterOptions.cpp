@@ -92,7 +92,7 @@ namespace code
 		m_returnTypeOnSeparateLine = AfxGetApp()->GetProfileInt( reg::section_formatting, reg::entry_returnTypeOnSeparateLine, m_returnTypeOnSeparateLine ) != FALSE;
 		m_commentOutDefaultParams = AfxGetApp()->GetProfileInt( reg::section_formatting, reg::entry_commentOutDefaultParams, m_commentOutDefaultParams ) != FALSE;
 
-		str::Split( m_breakSeparators, (LPCTSTR)AfxGetApp()->GetProfileString( reg::section_formatting, reg::entry_breakSeparators, str::Unsplit( m_breakSeparators, slashSep ).c_str() ), slashSep );
+		str::Split( m_breakSeparators, (LPCTSTR)AfxGetApp()->GetProfileString( reg::section_formatting, reg::entry_breakSeparators, str::Join( m_breakSeparators, slashSep ).c_str() ), slashSep );
 
 		for ( std::vector< CBraceRule >::iterator itBrace = m_braceRules.begin(); itBrace != m_braceRules.end(); ++itBrace )
 			( *itBrace ).LoadFromRegistry();
@@ -103,7 +103,7 @@ namespace code
 
 	void CFormatterOptions::SaveToRegistry( void ) const
 	{
-		AfxGetApp()->WriteProfileString( reg::section_formatting, reg::entry_breakSeparators, str::Unsplit( m_breakSeparators, slashSep ).c_str() );
+		AfxGetApp()->WriteProfileString( reg::section_formatting, reg::entry_breakSeparators, str::Join( m_breakSeparators, slashSep ).c_str() );
 		AfxGetApp()->WriteProfileInt( reg::section_formatting, reg::entry_preserveMultipleWhiteSpace, m_preserveMultipleWhiteSpace );
 		AfxGetApp()->WriteProfileInt( reg::section_formatting, reg::entry_deleteTrailingWhiteSpace, m_deleteTrailingWhiteSpace );
 		AfxGetApp()->WriteProfileInt( reg::section_formatting, reg::entry_linesBetweenFunctionImpls, m_linesBetweenFunctionImpls );

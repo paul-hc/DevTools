@@ -46,7 +46,7 @@ A\\C\\x2.mp3\
 	{
 		fs::CEnumerator found( pTempDirPath );
 		fs::EnumFiles( &found, pTempDirPath, _T("*.*"), Deep );
-		ASSERT_EQUAL( pSrcFiles, ut::UnsplitFiles( found ) );
+		ASSERT_EQUAL( pSrcFiles, ut::JoinFiles( found ) );
 	}
 }
 

@@ -17,13 +17,17 @@ public:
 	// ut::ITestCase interface
 	virtual void Run( void );
 private:
-	void TestStringUtilities( void );
+	void TestStringSplit( void );
+	void TestStringTokenize( void );
+	void TestStringConversion( void );
+	void TestStringSearch( void );
 	void TestArgUtilities( void );
 	void TestEnumTags( void );
 	void TestFlagTags( void );
 	void TestExpandKeysToValues( void );
 	void TestWordSelection( void );
 	void TestEnsureUniformNumPadding( void );
+	void Test_vector_map( void );
 
 	void TestNestedLocking( void );			// OS sync objects
 	void TestFunctional( void );			// <functional>

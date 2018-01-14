@@ -341,7 +341,7 @@ void CItemListDialog::OnUpdateMoveDownItem( CCmdUI* pCmdUI )
 
 void CItemListDialog::OnCopyItems( void )
 {
-	std::tstring items = str::Unsplit( m_items, _T("\r\n") );
+	std::tstring items = str::Join( m_items, _T("\r\n") );
 	CClipboard::CopyText( items, this );
 }
 

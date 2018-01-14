@@ -82,16 +82,20 @@ namespace str
 		return false;
 	}
 
-	std::tstring& Truncate( std::tstring& rText, size_t maxLen, const TCHAR suffix[] /*= g_ellipsis*/ )
+	std::tstring& Truncate( std::tstring& rText, size_t maxLen, const TCHAR suffix[] /*= g_ellipsis*/, bool atEnd /*= true*/ )
 	{
 		size_t suffixLen = str::GetLength( suffix );
 		ASSERT( suffixLen <= maxLen );
 
 		if ( rText.length() + suffixLen > maxLen )
-		{
-			rText.resize( maxLen - suffixLen );
-			rText += suffix;
-		}
+			if ( atEnd )
+			{
+				rText.resize( maxLen - suffixLen );			// "something..."
+				rText += suffix;
+			}
+			else
+				rText = suffix + rText.substr( rText.length() - maxLen + suffixLen );	// "...sentence"
+
 		return rText;
 	}
 
@@ -107,7 +111,7 @@ namespace str
 	{
 		std::vector< std::tstring > items;
 		Tokenize( items, rText.c_str(), pDelimiters );
-		rText = Unsplit( items, pNewDelimiter );
+		rText = Join( items, pNewDelimiter );
 		return items.size();
 	}
 

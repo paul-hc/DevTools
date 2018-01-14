@@ -281,7 +281,7 @@ namespace str
 
 
 	template< typename Iterator, typename CharType >
-	std::basic_string< CharType > Unsplit( Iterator itFirstToken, Iterator itLastToken, const CharType* pSep )
+	std::basic_string< CharType > Join( Iterator itFirstToken, Iterator itLastToken, const CharType* pSep )
 	{	// works with any forward/reverse iterator
 		std::basic_ostringstream< CharType > oss;
 		for ( Iterator itItem = itFirstToken; itItem != itLastToken; ++itItem )
@@ -296,9 +296,9 @@ namespace str
 	// works with container of any value type that has stream insertor defined
 	//
 	template< typename ContainerType, typename CharType >
-	inline std::basic_string< CharType > Unsplit( const ContainerType& items, const CharType* pSep )
+	inline std::basic_string< CharType > Join( const ContainerType& items, const CharType* pSep )
 	{
-		return Unsplit( items.begin(), items.end(), pSep );
+		return Join( items.begin(), items.end(), pSep );
 	}
 
 
@@ -307,7 +307,7 @@ namespace str
 	template< typename ContainerType >
 	inline std::tstring FormatSet( const ContainerType& items, const TCHAR* pSep = _T(",") )
 	{
-		return str::Format( _T("{%s}:count=%d"), Unsplit( items.begin(), items.end(), pSep ).c_str(), items.size() );
+		return str::Format( _T("{%s}:count=%d"), Join( items.begin(), items.end(), pSep ).c_str(), items.size() );
 	}
 }
 

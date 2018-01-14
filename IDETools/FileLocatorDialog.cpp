@@ -141,7 +141,7 @@ void CFileLocatorDialog::SaveHistory( void )
 	ui::ReadComboItems( items, m_includeTagCombo );
 	str::RemoveEmptyItems( items );
 
-	AfxGetApp()->WriteProfileString( m_regSection.c_str(), ENTRY_OF( tagHistory ), str::Unsplit( items, _T(";") ).c_str() );
+	AfxGetApp()->WriteProfileString( m_regSection.c_str(), ENTRY_OF( tagHistory ), str::Join( items, _T(";") ).c_str() );
 }
 
 void CFileLocatorDialog::UpdateHistory( const std::tstring& selFile, bool doSave /*= true*/ )

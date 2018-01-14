@@ -5,6 +5,7 @@
 #include "FlagTags.h"
 #include "MfcUtilities.h"
 #include "StringUtilities.h"
+#include "vector_map.h"
 #include <boost/thread.hpp>
 
 #ifdef _DEBUG
@@ -20,6 +21,40 @@ namespace str
 	inline std::tostream& operator<<( std::tostream& oss, const fs::CPath& path )
 	{
 		return oss << path.Get();
+	}
+}
+
+
+namespace ut
+{
+	template< typename Container >
+	std::string JoinKeys( const Container& items, const TCHAR sep[] )
+	{
+		std::ostringstream oss;
+		size_t count = 0;
+		for ( typename Container::const_iterator itItem = items.begin(); itItem != items.end(); ++itItem )
+		{
+			if ( count++ != 0 )
+				oss << sep;
+
+			oss << itItem->first;
+		}
+		return oss.str();
+	}
+
+	template< typename Container >
+	std::string JoinValues( const Container& items, const TCHAR sep[] )
+	{
+		std::ostringstream oss;
+		size_t count = 0;
+		for ( typename Container::const_iterator itItem = items.begin(); itItem != items.end(); ++itItem )
+		{
+			if ( count++ != 0 )
+				oss << sep;
+
+			oss << itItem->second;
+		}
+		return oss.str();
 	}
 }
 
@@ -53,7 +88,7 @@ CUtlTests& CUtlTests::Instance( void )
 	return testCase;
 }
 
-void CUtlTests::TestStringUtilities( void )
+void CUtlTests::TestStringSplit( void )
 {
 	static const TCHAR whitespaceText[] = _T("	  ab c 		");
 	std::tstring text;
@@ -118,7 +153,54 @@ void CUtlTests::TestStringUtilities( void )
 		ASSERT_EQUAL( "", items[ 1 ] );
 		ASSERT_EQUAL( "", items[ 2 ] );
 	}
+}
 
+void CUtlTests::TestStringTokenize( void )
+{
+	static const TCHAR seps[] = _T(";,\n \t");
+	std::vector< std::tstring > tokens;
+	ASSERT_EQUAL( 0, str::Tokenize( tokens, _T(""), seps ) );
+	ASSERT_EQUAL( 6, str::Tokenize( tokens, _T("\n\t,apple,grape;plum pear\tkiwi\nbanana \n\t"), seps ) );
+	ASSERT_EQUAL_STR( _T("apple|grape|plum|pear|kiwi|banana"), str::Join( tokens, _T("|") ) );
+}
+
+void CUtlTests::TestStringConversion( void )
+{
+	std::tstring io;
+
+	io = _T("preFix");
+	ASSERT( !str::StripPrefix( io, _T("PRE") ) );
+	ASSERT( str::StripPrefix( io, _T("pre") ) );
+	ASSERT_EQUAL_STR( _T("Fix"), io );
+
+	io = _T("preFix");
+	ASSERT( !str::StripSuffix( io, _T("fix") ) );
+	ASSERT( str::StripSuffix( io, _T("Fix") ) );
+	ASSERT_EQUAL_STR( _T("pre"), io );
+
+	ASSERT_EQUAL_STR( _T("proposition"), str::FormatTruncate( _T("proposition"), 256 ) );
+	ASSERT_EQUAL_STR( _T("prop..."), str::FormatTruncate( _T("proposition"), 7 ) );
+	ASSERT_EQUAL_STR( _T("...tion"), str::FormatTruncate( _T("proposition"), 7, _T("..."), false ) );
+	ASSERT_EQUAL_STR( _T("propETC"), str::FormatTruncate( _T("proposition"), 7, _T("ETC") ) );
+	ASSERT_EQUAL_STR( _T("ETCtion"), str::FormatTruncate( _T("proposition"), 7, _T("ETC"), false ) );
+
+	ASSERT_EQUAL_STR( _T("i1\xB6i2\xB6i3\xB6"), str::FormatSingleLine( _T("i1\ni2\r\ni3\n") ) );
+	ASSERT_EQUAL_STR( _T("i1|i2|i3|"), str::FormatSingleLine( _T("i1\ni2\r\ni3\n"), utl::npos, _T("|") ) );
+	ASSERT_EQUAL_STR( _T("i1..."), str::FormatSingleLine( _T("i1\ni2\r\ni3\n"), 5, _T("|") ) );
+
+	io = _T("a1b1c1d1");
+	ASSERT_EQUAL( 0, str::Replace( io, _T(""), _T(",") ) );
+	ASSERT_EQUAL_STR( io, _T("a1b1c1d1") );
+
+	ASSERT_EQUAL( 4, str::Replace( io, _T("1"), _T("3,") ) );
+	ASSERT_EQUAL_STR( io, _T("a3,b3,c3,d3,") );
+
+	ASSERT_EQUAL( 4, str::Replace( io, _T("3,"), _T("") ) );
+	ASSERT_EQUAL_STR( io, _T("abcd") );
+}
+
+void CUtlTests::TestStringSearch( void )
+{
 	ASSERT_EQUAL_STR( _T(";mn"), str::FindTokenEnd( _T("abc;mn"), _T(",;") ) );
 	ASSERT_EQUAL_STR( _T(",xy"), str::FindTokenEnd( _T("abc;mn,xy"), _T(",") ) );
 	ASSERT_EQUAL_STR( _T(""), str::FindTokenEnd( _T("abc;mn,xy"), _T(">") ) );
@@ -321,38 +403,52 @@ void CUtlTests::TestEnsureUniformNumPadding( void )
 		std::vector< std::tstring > items;
 		str::Split( items, _T("a,b"), comma );
 		ASSERT_EQUAL( 0, num::EnsureUniformZeroPadding( items ) );
-		ASSERT_EQUAL( _T("a,b"), str::Unsplit( items, comma ) );
+		ASSERT_EQUAL( _T("a,b"), str::Join( items, comma ) );
 	}
 	{
 		std::vector< std::tstring > items;
 		str::Split( items, _T("a1,b"), comma );
 		ASSERT_EQUAL( 1, num::EnsureUniformZeroPadding( items ) );
-		ASSERT_EQUAL( _T("a1,b"), str::Unsplit( items, comma ) );
+		ASSERT_EQUAL( _T("a1,b"), str::Join( items, comma ) );
 	}
 	{
 		std::vector< std::tstring > items;
 		str::Split( items, _T("a1x,bcd23"), comma );
 		ASSERT_EQUAL( 1, num::EnsureUniformZeroPadding( items ) );
-		ASSERT_EQUAL( _T("a01x,bcd23"), str::Unsplit( items, comma ) );
+		ASSERT_EQUAL( _T("a01x,bcd23"), str::Join( items, comma ) );
 	}
 	{
 		std::vector< std::tstring > items;
 		str::Split( items, _T(" 1 19 ,   23 "), comma );
 		ASSERT_EQUAL( 2, num::EnsureUniformZeroPadding( items ) );
-		ASSERT_EQUAL( _T(" 01 19 ,   23 "), str::Unsplit( items, comma ) );
+		ASSERT_EQUAL( _T(" 01 19 ,   23 "), str::Join( items, comma ) );
 	}
 	{
 		std::vector< std::tstring > items;
 		str::Split( items, _T("1 19,23 7-00"), comma );
 		ASSERT_EQUAL( 3, num::EnsureUniformZeroPadding( items ) );
-		ASSERT_EQUAL( _T("01 19,23 07-0"), str::Unsplit( items, comma ) );
+		ASSERT_EQUAL( _T("01 19,23 07-0"), str::Join( items, comma ) );
 	}
 	{
 		std::vector< std::tstring > items;
 		str::Split( items, _T("1 19 3, 23 000007 1289 ,0-0-0-0"), comma );
 		ASSERT_EQUAL( 4, num::EnsureUniformZeroPadding( items ) );
-		ASSERT_EQUAL( _T("01 19 0003, 23 07 1289 ,00-00-0000-0"), str::Unsplit( items, comma ) );
+		ASSERT_EQUAL( _T("01 19 0003, 23 07 1289 ,00-00-0000-0"), str::Join( items, comma ) );
 	}
+}
+
+void CUtlTests::Test_vector_map( void )
+{
+	utl::vector_map< char, std::tstring > items;
+	items[ '7' ] = _T("i7");
+	items[ '9' ] = _T("i9");
+	items[ '3' ] = _T("i3");
+	items[ '1' ] = _T("i1");
+	ASSERT_EQUAL( "1 3 7 9", ut::JoinKeys( items, _T(" ") ) );
+	ASSERT_EQUAL( "i1,i3,i7,i9", ut::JoinValues( items, _T(",") ) );
+
+	items.EraseKey( '3' );
+	ASSERT_EQUAL( "1 7 9", ut::JoinKeys( items, _T(" ") ) );
 }
 
 void CUtlTests::TestNestedLocking( void )
@@ -398,13 +494,17 @@ void CUtlTests::Run( void )
 {
 	TRACE( _T("-- UTL tests --\n") );
 
-	TestStringUtilities();
+	TestStringSplit();
+	TestStringTokenize();
+	TestStringConversion();
+	TestStringSearch();
 	TestArgUtilities();
 	TestEnumTags();
 	TestFlagTags();
 	TestExpandKeysToValues();
 	TestWordSelection();
 	TestEnsureUniformNumPadding();
+	Test_vector_map();
 
 //	TestNestedLocking();
 //	TestFunctional();
