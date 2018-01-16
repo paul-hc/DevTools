@@ -108,30 +108,33 @@ BEGIN
     CONTROL         "Tree1",IDC_WINDOW_TREE,"SysTreeView32",TVS_HASBUTTONS | TVS_HASLINES | TVS_DISABLEDRAGDROP | TVS_SHOWSELALWAYS | TVS_TRACKSELECT | WS_BORDER | WS_HSCROLL | WS_GROUP | WS_TABSTOP,0,0,209,75
 END
 
-IDD_OPTIONS_PAGE DIALOGEX 0, 0, 210, 78
+IDD_OPTIONS_PAGE DIALOGEX 0, 0, 210, 129
 STYLE DS_SETFONT | DS_MODALFRAME | WS_CHILD | WS_CAPTION
 CAPTION "Options"
 FONT 8, "MS Sans Serif", 0, 0, 0x0
 BEGIN
-    CONTROL         "Always on &Top",IDC_TOP_MOST_CHECK,"Button",BS_AUTOCHECKBOX | WS_GROUP | WS_TABSTOP,2,1,66,10
-    CONTROL         "Hide On Trac&k",IDC_AUTO_HIDE_CHECK,"Button",BS_AUTOCHECKBOX | WS_GROUP | WS_TABSTOP,2,14,66,10
-    CONTROL         "Auto &Highlight",IDC_AUTO_HILIGHT_CHECK,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,2,27,66,10
-    COMBOBOX        IDC_FRAME_STYLE_COMBO,5,48,70,116,CBS_DROPDOWNLIST | WS_VSCROLL | WS_GROUP | WS_TABSTOP
-    EDITTEXT        IDC_FRAME_SIZE_EDIT,77,48,26,12,ES_AUTOHSCROLL | ES_NUMBER
-    CONTROL         "",IDC_FRAME_SIZE_SPIN,"msctls_updown32",UDS_SETBUDDYINT | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS | UDS_NOTHOUSANDS | UDS_HOTTRACK,96,48,10,12
-    GROUPBOX        "Highlight frame:",IDC_STATIC,2,39,105,26
-    CONTROL         "Ignore H&idden",IDC_IGNORE_HIDDEN_CHECK,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,2,68,61,10
-    CONTROL         "Ignore &Disabled",IDC_IGNORE_DISABLED_CHECK,"Button",BS_AUTOCHECKBOX | WS_GROUP | WS_TABSTOP,68,68,66,10
-    CONTROL         "Display flags of &0",IDC_DISPLAY_ZERO_FLAGS_CHECK,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,139,68,69,10
-    GROUPBOX        "    ",IDC_STATIC,110,2,98,63
-    CONTROL         "Auto &Update:",IDC_AUTO_UPDATE_CHECK,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,117,1,56,10
-    LTEXT           "Timeout (sec):",IDC_STATIC,117,13,47,8
-    EDITTEXT        IDC_AUTO_UPDATE_TIMEOUT_EDIT,166,12,27,12,ES_AUTOHSCROLL | ES_NUMBER | WS_GROUP
-    CONTROL         "Spin1",IDC_AUTO_UPDATE_TIMEOUT_SPIN,"msctls_updown32",UDS_SETBUDDYINT | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS,194,12,11,12
-    LTEXT           "Target &Window:",IDC_STATIC,117,26,87,8
-    COMBOBOX        IDC_AUTO_UPDATE_TARGET_COMBO,117,36,85,116,CBS_DROPDOWNLIST | WS_VSCROLL | WS_GROUP | WS_TABSTOP
-    CONTROL         "&Refresh All",IDC_AUTO_UPDATE_REFRESH_CHECK,"Button",BS_AUTOCHECKBOX | WS_GROUP | WS_TABSTOP,117,51,85,10
+    CONTROL         "Always on &Top",ID_TOP_MOST_CHECK,"Button",BS_AUTOCHECKBOX | WS_GROUP | WS_TABSTOP,2,4,66,10
+    CONTROL         "Hide On Trac&k",ID_AUTO_HIDE_CHECK,"Button",BS_AUTOCHECKBOX | WS_GROUP | WS_TABSTOP,2,17,66,10
+    CONTROL         "Auto &Highlight",ID_AUTO_HILIGHT_CHECK,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,2,30,66,10
+    COMBOBOX        ID_FRAME_STYLE_COMBO,5,51,70,116,CBS_DROPDOWNLIST | WS_VSCROLL | WS_GROUP | WS_TABSTOP
+    EDITTEXT        ID_FRAME_SIZE_EDIT,77,51,26,12,ES_AUTOHSCROLL | ES_NUMBER
+    CONTROL         "",ID_FRAME_SIZE_SPIN,"msctls_updown32",UDS_SETBUDDYINT | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS | UDS_NOTHOUSANDS | UDS_HOTTRACK,96,51,10,12
+    GROUPBOX        "Window Filter",IDC_STATIC,2,71,206,56
+    LTEXT           "Show private icons:",IDC_STATIC,8,86,63,8
+    COMBOBOX        ID_QUERY_WND_ICONS_COMBO,73,83,130,116,CBS_DROPDOWNLIST | WS_VSCROLL | WS_GROUP | WS_TABSTOP
+    CONTROL         "Ignore H&idden Windows",ID_IGNORE_HIDDEN_CHECK,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,8,100,92,10
+    CONTROL         "Ignore &Disabled Windows",ID_IGNORE_DISABLED_CHECK,
+                    "Button",BS_AUTOCHECKBOX | WS_GROUP | WS_TABSTOP,109,100,94,10
+    CONTROL         "Display flags with 0 values",ID_DISPLAY_ZERO_FLAGS_CHECK,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,8,113,99,10
+    GROUPBOX        "    ",IDC_STATIC,110,5,98,63
+    CONTROL         "Auto &Update:",ID_AUTO_UPDATE_CHECK,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,117,4,56,10
+    LTEXT           "Timeout (sec):",IDC_STATIC,117,16,47,8
+    EDITTEXT        ID_AUTO_UPDATE_TIMEOUT_EDIT,166,15,27,12,ES_AUTOHSCROLL | ES_NUMBER | WS_GROUP
+    CONTROL         "Spin1",ID_AUTO_UPDATE_TIMEOUT_SPIN,"msctls_updown32",UDS_SETBUDDYINT | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS,194,15,11,12
+    LTEXT           "Target &Window:",IDC_STATIC,117,29,87,8
+    COMBOBOX        ID_AUTO_UPDATE_TARGET_COMBO,117,39,85,116,CBS_DROPDOWNLIST | WS_VSCROLL | WS_GROUP | WS_TABSTOP
+    CONTROL         "&Refresh All",ID_AUTO_UPDATE_REFRESH_CHECK,"Button",BS_AUTOCHECKBOX | WS_GROUP | WS_TABSTOP,117,54,85,10
 END
 
 IDD_FIND_WND_DIALOG DIALOGEX 0, 0, 218, 120
@@ -329,7 +332,8 @@ BEGIN
     BEGIN
         LEFTMARGIN, 2
         RIGHTMARGIN, 208
-        TOPMARGIN, 1
+        TOPMARGIN, 2
+        BOTTOMMARGIN, 127
     END
 
     IDD_FIND_WND_DIALOG, DIALOG
@@ -452,7 +456,7 @@ IDR_CONTEXT_MENU MENU
 BEGIN
     POPUP "<sys-tray icon>"
     BEGIN
-        MENUITEM "Always on Top",               IDC_TOP_MOST_CHECK
+        MENUITEM "Always on Top",               ID_TOP_MOST_CHECK
         MENUITEM "Highlight\tF4",               CM_HIGHLIGHT_WINDOW
         MENUITEM SEPARATOR
         MENUITEM "Restore",                     CM_RESTORE
@@ -642,22 +646,22 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDC_TOP_MOST_CHECK      "\nKeep Wintruder windows topmost"
-    IDC_AUTO_HIDE_CHECK     "\nHides Wintruder application when tracking"
-    IDC_AUTO_HILIGHT_CHECK  "\nHighlight each time a new window is selected"
-    IDC_IGNORE_DISABLED_CHECK 
-                            "\nAllow disabled windows to be selected by track finder"
-    IDC_IGNORE_HIDDEN_CHECK "\nAllow hidden windows to be selected by track finder"
-    IDC_FRAME_STYLE_COMBO   "\nHighlight the entire non-client area of the current window"
+    ID_TOP_MOST_CHECK       "\nKeep Wintruder windows topmost"
+    ID_AUTO_HIDE_CHECK      "\nHides Wintruder application when tracking"
+    ID_AUTO_HILIGHT_CHECK   "\nHighlight each time a new window is selected"
+    ID_FRAME_STYLE_COMBO    "\nHighlight the entire non-client area of the current window"
+    ID_IGNORE_HIDDEN_CHECK  "\nAllow hidden windows to be selected by track finder"
 END
 
 STRINGTABLE 
 BEGIN
-    IDC_AUTO_UPDATE_CHECK   "\nPerform automatic updates with the specified timeout"
-    IDC_AUTO_UPDATE_REFRESH_CHECK "\nAuto-update all windows"
-    IDC_AUTO_UPDATE_TIMEOUT_EDIT 
+    ID_IGNORE_DISABLED_CHECK 
+                            "\nAllow disabled windows to be selected by track finder"
+    ID_AUTO_UPDATE_CHECK    "\nPerform automatic updates with the specified timeout"
+    ID_AUTO_UPDATE_REFRESH_CHECK "\nAuto-update all windows"
+    ID_AUTO_UPDATE_TIMEOUT_EDIT 
                             "\nEnter the auto-update timer timeout in seconds"
-    IDC_AUTO_UPDATE_TARGET_COMBO 
+    ID_AUTO_UPDATE_TARGET_COMBO 
                             "\nChoose what actions to follow on auto-updates"
 END
 

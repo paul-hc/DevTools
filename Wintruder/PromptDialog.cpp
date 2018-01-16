@@ -3,6 +3,7 @@
 #include "PromptDialog.h"
 #include "AppService.h"
 #include "resource.h"
+#include "wnd/WndUtils.h"
 #include "utl/StdColors.h"
 #include "utl/Utilities.h"
 
@@ -83,7 +84,7 @@ void CPromptDialog::DoDataExchange( CDataExchange* pDX )
 	{
 		ui::GetDlgItemAs< CStatic >( this, IDC_QUESTION_ICON )->SetIcon( ::LoadIcon( NULL, IDI_QUESTION ) );
 
-		ui::SetDlgItemText( this, IDC_PROMPT_STATIC, ui::FormatBriefWndInfo( m_hWndTarget ) );
+		ui::SetDlgItemText( this, IDC_PROMPT_STATIC, wnd::FormatBriefWndInfo( m_hWndTarget ) );
 		ui::SetDlgItemText( this, IDC_CHANGED_FIELDS_STATIC, m_changedFields );
 
 		CkUseSetWindowPos();

@@ -448,25 +448,20 @@ int CAlbumSettingsDialog::GetCheckStateAutoRegen( void ) const
 void CAlbumSettingsDialog::DoDataExchange( CDataExchange* pDX )
 {
 	bool firstInit = NULL == m_foundFilesListCtrl.m_hWnd;
+	CFileList::Order fileOrder = m_fileList.GetFileOrder();
 
 	DDX_Control( pDX, IDC_MIN_FILE_SIZE_EDIT, m_minSizeEdit );
 	DDX_Control( pDX, IDC_MAX_FILE_SIZE_EDIT, m_maxSizeEdit );
 	DDX_Control( pDX, CM_MOVE_DOWN_SEARCH_SPEC, m_moveDownButton );
 	DDX_Control( pDX, CM_MOVE_UP_SEARCH_SPEC, m_moveUpButton );
 	DDX_Control( pDX, IDC_SEARCH_SPEC_LIST, m_searchSpecListBox );
-	DDX_Control( pDX, IDC_LIST_ORDER_COMBO, m_sortOrderCombo );
+	ui::DDX_EnumCombo( pDX, IDC_LIST_ORDER_COMBO, m_sortOrderCombo, fileOrder, CFileList::GetTags_Order() );
 	DDX_Control( pDX, IDC_FOUND_FILES_LISTVIEW, m_foundFilesListCtrl );
 	DDX_Control( pDX, IDC_THUMB_PREVIEW_STATIC, m_thumbPreviewCtrl );
 	m_toolbar.DDX_Placeholder( pDX, IDC_TOOLBAR_PLACEHOLDER, H_AlignRight | V_AlignCenter );
 
 	if ( firstInit )
-	{
-		ui::WriteComboItems( m_sortOrderCombo, CFileList::GetTags_Order().GetUiTags() );
 		m_foundFilesListCtrl.SetCompactIconSpacing();
-	}
-
-	CFileList::Order fileOrder = m_fileList.GetFileOrder();
-	ui::DDX_EnumCombo( pDX, IDC_LIST_ORDER_COMBO, fileOrder );
 
 	switch ( pDX->m_bSaveAndValidate )
 	{

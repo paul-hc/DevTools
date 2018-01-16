@@ -8,7 +8,7 @@
 #endif
 
 
-namespace utl
+namespace proc
 {
 	bool IsProcessElevated( HANDLE hProcess /*= ::GetCurrentProcess()*/ )
 	{

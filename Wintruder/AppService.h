@@ -14,7 +14,7 @@ class CLogger;
 namespace app { enum Event; }
 
 
-enum { HotFieldColor = color::Blue, StaleWndColor = color::Red };
+enum { HotFieldColor = color::Blue, StaleWndColor = color::Red, SlowWndColor = color::html::PaleVioletRed2 };
 
 
 class CAppService
@@ -60,13 +60,6 @@ namespace app
 
 	bool CheckValidTargetWnd( Feedback feedback = Report );
 	inline CWndSpot* GetValidTargetWnd( Feedback feedback = Silent ) { return CheckValidTargetWnd( feedback ) ? &GetTargetWnd() : NULL; }
-}
-
-
-namespace ui
-{
-	std::tstring FormatBriefWndInfo( HWND hWnd );
-	CRect GetCaptionRect( HWND hWnd );
 }
 
 

@@ -4,6 +4,8 @@
 #include "Application.h"
 #include "AppService.h"
 #include "resource.h"
+#include "wnd/WndImageRepository.h"
+#include "wnd/WndUtils.h"
 #include "utl/AccelTable.h"
 #include "utl/Clipboard.h"
 #include "utl/Icon.h"
@@ -12,8 +14,6 @@
 #include "utl/Timer.h"
 #include "utl/StringUtilities.h"
 #include "utl/UtilitiesEx.h"
-#include "wnd/WndImageRepository.h"
-#include "wnd/WndUtils.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -38,7 +38,7 @@ namespace wt
 	// CItemInfo implementation
 
 	CItemInfo::CItemInfo( HWND hWnd, int image /*= -1*/ )
-		: m_text( ui::FormatBriefWndInfo( hWnd ) )
+		: m_text( wnd::FormatBriefWndInfo( hWnd ) )
 	{
 		Construct();
 		ASSERT( IsWindow( hWnd ) );
@@ -114,7 +114,7 @@ namespace wt
 	void CWndTreeBuilder::LogWnd( HWND hWnd, int indent ) const
 	{
 		if ( m_pLogger != NULL )
-			app::GetLogger().Log( _T("%swnd: %s"), std::tstring( indent * 2, _T(' ') ).c_str(), ui::FormatBriefWndInfo( hWnd ).c_str() );
+			app::GetLogger().Log( _T("%swnd: %s"), std::tstring( indent * 2, _T(' ') ).c_str(), wnd::FormatBriefWndInfo( hWnd ).c_str() );
 	}
 }
 
@@ -162,9 +162,10 @@ void CTreeWndPage::OnTargetWndChanged( const CWndSpot& targetWnd )
 		if ( NULL == hTargetItem || !m_treeCtrl.RefreshItem( hTargetItem ) )		// refresh item text, state
 			ui::BeepSignal( MB_ICONWARNING );		// window not found or stale
 
-		//bool stale = hTargetItem != NULL && !ui::IsValidWindow( m_treeCtrl.GetItemDataAs< HWND >( hTargetItem ) );
+		bool stale = hTargetItem != NULL && !ui::IsValidWindow( m_treeCtrl.GetItemDataAs< HWND >( hTargetItem ) );
 
-		if ( NULL == hTargetItem /*|| ( stale && app::GetOptions()->m_autoUpdateRefresh )*/ )
+		if ( ( NULL == hTargetItem && !wnd::HasSlowWindows() ) ||
+			 ( stale && app::GetOptions()->m_autoUpdateRefresh ) )
 		{
 			app::GetSvc().PublishEvent( app::RefreshWndTree );		// content refresh and target selection
 			hTargetItem = m_treeCtrl.GetSelectedItem();				// should be the currently selected
@@ -210,6 +211,7 @@ void CTreeWndPage::SetupTreeItems( void )
 {
 	enum BuildMethod { EnumWindows, LoopWindowsOld } buildMethod = EnumWindows;
 	CTimer timer;
+	CWaitCursor wait;
 
 	if ( EnumWindows == buildMethod )
 	{	// enum windows
@@ -249,7 +251,7 @@ HWND CTreeWndPage::FindValidParentItem( HTREEITEM hItem ) const
 
 HTREEITEM CTreeWndPage::InsertWndItem( HTREEITEM hItemParent, HWND hWnd, int indent, int image /*= -1*/ )
 {
-//	app::GetLogger().Log( _T("%swnd: %s"), std::tstring( indent * 2, _T(' ') ).c_str(), ui::FormatBriefWndInfo( hWnd ).c_str() );
+//	app::GetLogger().Log( _T("%swnd: %s"), std::tstring( indent * 2, _T(' ') ).c_str(), wnd::FormatBriefWndInfo( hWnd ).c_str() );
 
 	wt::CItemInfo info( hWnd, image );
 	HTREEITEM hItem = m_treeCtrl.InsertItem( info.m_item.mask, info.m_item.pszText,
@@ -384,6 +386,11 @@ void CTreeWndPage::OnTvnCustomDraw_WndTree( NMHDR* pNmHdr, LRESULT* pResult )
 				if ( ui::IsDisabled( hWnd ) )
 				{
 					pDraw->clrText = color::Grey60;
+					*pResult = CDRF_NEWFONT;
+				}
+				if ( wnd::IsSlowWindow( hWnd ) )
+				{
+					pDraw->clrText = SlowWndColor;
 					*pResult = CDRF_NEWFONT;
 				}
 			}

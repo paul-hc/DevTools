@@ -12,7 +12,10 @@ namespace opt
 	const CEnumTags& GetTags_FrameStyle( void );
 
 	enum UpdateTarget { CurrentWnd, AtMouseWnd, ForegroundWnd, ActiveWnd, FocusWnd, TopmostWnd, TopmostPopupWnd, TopmostVisibleWnd };
-	const CEnumTags& GetTags_AutoUpdate( void );
+	const CEnumTags& GetTags_AutoUpdateTarget( void );
+
+	enum QueryWndIcons { NoWndIcons, TopWndIcons, AllWndIcons };
+	const CEnumTags& GetTags_QueryWndIcons( void );
 }
 
 
@@ -32,6 +35,7 @@ public:
 
 	opt::FrameStyle m_frameStyle;
 	int m_frameSize;
+	opt::QueryWndIcons m_queryWndIcons;		// allows control over icon access deadlocks
 
 	bool m_autoUpdate;
 	bool m_autoUpdateRefresh;

@@ -24,6 +24,7 @@ private:
 
 	// enum { IDD = IDD_OPTIONS_PAGE };
 	CComboBox m_frameStyleCombo;
+	CComboBox m_queryWndIconsCombo;
 	CComboBox m_autoUpdateTargetCombo;
 protected:
 	virtual void DoDataExchange( CDataExchange* pDX );

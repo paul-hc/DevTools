@@ -54,7 +54,7 @@ BOOL CApplication::InitInstance( void )
 	if ( !CBaseApp< CWinApp >::InitInstance() )
 		return FALSE;
 
-	if ( utl::IsProcessElevated() )
+	if ( proc::IsProcessElevated() )
 		GetLogger().Log( _T("* RUN ELEVATED (ADMIN) *") );
 
 	app::GetOptions()->Load();
@@ -153,8 +153,8 @@ BEGIN_MESSAGE_MAP( CApplication, CBaseApp< CWinApp > )
 	ON_COMMAND( CM_RESTORE, CmRestore )
 	ON_COMMAND( CM_MINIMIZE, CmMinimize )
 	ON_COMMAND( CM_REFRESH, CmRefresh )
-	ON_COMMAND( IDC_TOP_MOST_CHECK, OnToggleKeepTopmost )
-	ON_UPDATE_COMMAND_UI( IDC_TOP_MOST_CHECK, OnUpdateKeepTopmost )
+	ON_COMMAND( ID_TOP_MOST_CHECK, OnToggleKeepTopmost )
+	ON_UPDATE_COMMAND_UI( ID_TOP_MOST_CHECK, OnUpdateKeepTopmost )
 	ON_COMMAND( CM_ACTIVATE_WINDOW, CmActivateWindow )
 	ON_UPDATE_COMMAND_UI( CM_ACTIVATE_WINDOW, OnUpdateActivateWindow )
 	ON_COMMAND( CM_SHOW_WINDOW, CmShowWindow )

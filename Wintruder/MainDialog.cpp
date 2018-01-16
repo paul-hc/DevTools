@@ -16,6 +16,7 @@
 #include "resource.h"
 #include "wnd/WndFinder.h"
 #include "wnd/WndHighlighter.h"
+#include "wnd/WndUtils.h"
 #include "utl/EnumTags.h"
 #include "utl/ImageStore.h"
 #include "utl/LayoutEngine.h"
@@ -146,7 +147,7 @@ void CMainDialog::QueryTooltipText( std::tstring& rText, UINT cmdId, CToolTipCtr
 	switch ( cmdId )
 	{
 		case IDC_BRIEF_INFO_EDIT:
-			rText = ui::FormatBriefWndInfo( app::GetTargetWnd().GetSafeHwnd() );
+			rText = wnd::FormatBriefWndInfo( app::GetTargetWnd().GetSafeHwnd() );
 			break;
 		case ID_APPLY_NOW:
 		{
@@ -290,7 +291,7 @@ void CMainDialog::DoDataExchange( CDataExchange* pDX )
 	{
 		m_detailsButton.SetIconId( GetLayoutEngine().IsCollapsed() ? ID_EXPAND : ID_COLLAPSE );
 		m_detailsSheet.SetSingleLineTab();
-		app::GetMainTooltip()->AddTool( this, IDD_MAIN_DIALOG, ui::GetCaptionRect( *this ), IDD_MAIN_DIALOG );
+		app::GetMainTooltip()->AddTool( this, IDD_MAIN_DIALOG, wnd::GetCaptionRect( *this ), IDD_MAIN_DIALOG );
 		m_detailsSheet.GetTabControl()->GetToolTips()->ModifyStyle( 0, TTS_ALWAYSTIP );
 	}
 

@@ -40,33 +40,30 @@ void COptionsPage::DoDataExchange( CDataExchange* pDX )
 {
 	bool firstInit = NULL == m_autoUpdateTargetCombo.m_hWnd;
 
-	DDX_Control( pDX, IDC_FRAME_STYLE_COMBO, m_frameStyleCombo );
-	DDX_Control( pDX, IDC_AUTO_UPDATE_TARGET_COMBO, m_autoUpdateTargetCombo );
+	ui::DDX_EnumCombo( pDX, ID_FRAME_STYLE_COMBO, m_frameStyleCombo, m_pOptions->m_frameStyle, opt::GetTags_FrameStyle() );
+	ui::DDX_EnumCombo( pDX, ID_QUERY_WND_ICONS_COMBO, m_queryWndIconsCombo, m_pOptions->m_queryWndIcons, opt::GetTags_QueryWndIcons() );
+	ui::DDX_EnumCombo( pDX, ID_AUTO_UPDATE_TARGET_COMBO, m_autoUpdateTargetCombo, m_pOptions->m_updateTarget, opt::GetTags_AutoUpdateTarget() );
 
 	if ( firstInit )
 	{
 		EnableToolTips( TRUE );
-		ui::SetSpinRange( this, IDC_FRAME_SIZE_SPIN, 1, 50 );
-		ui::SetSpinRange( this, IDC_AUTO_UPDATE_TIMEOUT_SPIN, 1, 50 );
-		ui::WriteComboItems( m_frameStyleCombo, opt::GetTags_FrameStyle().GetUiTags() );
-		ui::WriteComboItems( m_autoUpdateTargetCombo, opt::GetTags_AutoUpdate().GetUiTags() );
-		ui::EnableControl( m_hWnd, IDC_AUTO_UPDATE_CHECK, !wnd::HasUIPI() );		// enabled for Windows 7-
+		ui::SetSpinRange( this, ID_FRAME_SIZE_SPIN, 1, 50 );
+		ui::SetSpinRange( this, ID_AUTO_UPDATE_TIMEOUT_SPIN, 1, 50 );
+		ui::EnableControl( m_hWnd, ID_AUTO_UPDATE_REFRESH_CHECK, !wnd::HasUIPI() );		// enabled for Windows 7-
 	}
 
-	ui::DDX_Bool( pDX, IDC_TOP_MOST_CHECK, m_pOptions->m_keepTopmost );
-	ui::DDX_Bool( pDX, IDC_AUTO_HIDE_CHECK, m_pOptions->m_hideOnTrack );
-	ui::DDX_Bool( pDX, IDC_AUTO_HILIGHT_CHECK, m_pOptions->m_autoHighlight );
-	ui::DDX_Bool( pDX, IDC_IGNORE_DISABLED_CHECK, m_pOptions->m_ignoreDisabled );
-	ui::DDX_Bool( pDX, IDC_IGNORE_HIDDEN_CHECK, m_pOptions->m_ignoreHidden );
-	ui::DDX_Bool( pDX, IDC_DISPLAY_ZERO_FLAGS_CHECK, m_pOptions->m_displayZeroFlags );
+	ui::DDX_Bool( pDX, ID_TOP_MOST_CHECK, m_pOptions->m_keepTopmost );
+	ui::DDX_Bool( pDX, ID_AUTO_HIDE_CHECK, m_pOptions->m_hideOnTrack );
+	ui::DDX_Bool( pDX, ID_AUTO_HILIGHT_CHECK, m_pOptions->m_autoHighlight );
+	ui::DDX_Number( pDX, ID_FRAME_SIZE_EDIT, m_pOptions->m_frameSize );
 
-	DDX_CBIndex( pDX, IDC_FRAME_STYLE_COMBO, (int&)m_pOptions->m_frameStyle );
-	DDX_Text( pDX, IDC_FRAME_SIZE_EDIT, m_pOptions->m_frameSize );
+	ui::DDX_Bool( pDX, ID_IGNORE_DISABLED_CHECK, m_pOptions->m_ignoreDisabled );
+	ui::DDX_Bool( pDX, ID_IGNORE_HIDDEN_CHECK, m_pOptions->m_ignoreHidden );
+	ui::DDX_Bool( pDX, ID_DISPLAY_ZERO_FLAGS_CHECK, m_pOptions->m_displayZeroFlags );
 
-	ui::DDX_Bool( pDX, IDC_AUTO_UPDATE_CHECK, m_pOptions->m_autoUpdate );
-	ui::DDX_Bool( pDX, IDC_AUTO_UPDATE_REFRESH_CHECK, m_pOptions->m_autoUpdateRefresh );
-	DDX_Text( pDX, IDC_AUTO_UPDATE_TIMEOUT_EDIT, m_pOptions->m_autoUpdateTimeout );
-	DDX_CBIndex( pDX, IDC_AUTO_UPDATE_TARGET_COMBO, (int&)m_pOptions->m_updateTarget );
+	ui::DDX_Bool( pDX, ID_AUTO_UPDATE_CHECK, m_pOptions->m_autoUpdate );
+	ui::DDX_Bool( pDX, ID_AUTO_UPDATE_REFRESH_CHECK, m_pOptions->m_autoUpdateRefresh );
+	ui::DDX_Number( pDX, ID_AUTO_UPDATE_TIMEOUT_EDIT, m_pOptions->m_autoUpdateTimeout );
 
 	if ( DialogSaveChanges == pDX->m_bSaveAndValidate )
 		m_pOptions->Save();			// save right away so that new app instances read the current state
@@ -78,10 +75,11 @@ void COptionsPage::DoDataExchange( CDataExchange* pDX )
 // message handlers
 
 BEGIN_MESSAGE_MAP( COptionsPage, CLayoutPropertyPage )
-	ON_COMMAND_RANGE( IDC_TOP_MOST_CHECK, IDC_AUTO_UPDATE_TARGET_COMBO, OnFieldModified )
-	ON_CBN_SELCHANGE( IDC_FRAME_STYLE_COMBO, OnFieldModified )
-	ON_CBN_SELCHANGE( IDC_AUTO_UPDATE_TARGET_COMBO, OnFieldModified )
-	ON_EN_CHANGE( IDC_AUTO_UPDATE_TIMEOUT_EDIT, OnEnChange_AutoUpdateRate )
+	ON_COMMAND_RANGE( ID_TOP_MOST_CHECK, ID_AUTO_UPDATE_TARGET_COMBO, OnFieldModified )
+	ON_CBN_SELCHANGE( ID_FRAME_STYLE_COMBO, OnFieldModified )
+	ON_CBN_SELCHANGE( ID_QUERY_WND_ICONS_COMBO, OnFieldModified )
+	ON_CBN_SELCHANGE( ID_AUTO_UPDATE_TARGET_COMBO, OnFieldModified )
+	ON_EN_CHANGE( ID_AUTO_UPDATE_TIMEOUT_EDIT, OnEnChange_AutoUpdateRate )
 END_MESSAGE_MAP()
 
 void COptionsPage::OnFieldModified( void )
@@ -95,10 +93,10 @@ void COptionsPage::OnFieldModified( UINT ctrlId )
 
 	switch ( ctrlId )
 	{
-		case IDC_TOP_MOST_CHECK:
+		case ID_TOP_MOST_CHECK:
 			ui::SetTopMost( AfxGetMainWnd()->GetSafeHwnd(), m_pOptions->m_keepTopmost );
 			break;
-		case IDC_AUTO_UPDATE_CHECK:
+		case ID_AUTO_UPDATE_CHECK:
 			app::GetMainDialog()->GetAutoUpdateTimer()->SetStarted( m_pOptions->m_autoUpdate );
 			break;
 	}

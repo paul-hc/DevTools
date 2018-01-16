@@ -4,7 +4,6 @@
 #include "Application.h"
 #include "Observers.h"
 #include "resource.h"
-#include "wnd/WindowClass.h"
 #include "wnd/WndUtils.h"
 #include "utl/ContainerUtilities.h"
 #include "utl/Logger.h"
@@ -53,69 +52,6 @@ namespace app
 			AfxMessageBox( str::Format( IDS_WND_EXPIRED_FMT, targetWnd.m_hWnd ).c_str(), MB_OK | MB_ICONSTOP );
 
 		return false;
-	}
-}
-
-
-namespace ui
-{
-	std::tstring FormatBriefWndInfo( HWND hWnd )
-	{
-		std::tstring info; info.reserve( 128 );
-		static const TCHAR sep[] = _T(" "), commaSep[] = _T(", ");
-
-		stream::Tag( info, wnd::FormatWindowHandle( hWnd ), sep );
-
-		if ( ui::IsValidWindow( hWnd ) )
-		{
-			stream::Tag( info, str::Format( _T("\"%s\" %s"), wnd::FormatWindowTextLine( hWnd ).c_str(), wc::FormatClassName( hWnd ).c_str() ), sep );
-
-			DWORD style = ui::GetStyle( hWnd );
-			std::tstring status;
-
-			if ( ui::IsTopMost( hWnd ) )
-				stream::Tag( status, _T("Top-most"), commaSep );
-			if ( !HasFlag( style, WS_VISIBLE ) )
-				stream::Tag( status, _T("Hidden"), commaSep );
-			if ( HasFlag( style, WS_DISABLED ) )
-				stream::Tag( status, _T("Disabled"), commaSep );
-
-			if ( !status.empty() )
-				stream::Tag( info, str::Format( _T("(%s)"), status.c_str() ), sep );
-		}
-		else
-			stream::Tag( info, _T("<EXPIRED>"), sep );
-
-		return info;
-	}
-
-	CRect GetCaptionRect( HWND hWnd )
-	{	// returns the caption rect in client coordinates
-		CRect captionRect;
-		::GetWindowRect( hWnd, &captionRect );
-		ScreenToClient( hWnd, captionRect );
-
-		DWORD style = GetStyle( hWnd );
-		int edgeExtent = ::GetSystemMetrics( HasFlag( style, WS_THICKFRAME ) ? SM_CXSIZEFRAME : SM_CYDLGFRAME );
-		int captionExtent = ::GetSystemMetrics( HasFlag( GetStyleEx( hWnd ), WS_EX_TOOLWINDOW ) ? SM_CYSMCAPTION : SM_CYCAPTION );
-
-		//enum { MinMaxButtonWidth = 27, CloseButtonWidth = 47 };		// Win7 magic numbers
-		// reliable on themed UI?
-		NONCLIENTMETRICS ncm = { sizeof( NONCLIENTMETRICS ) };
-		VERIFY( SystemParametersInfo( SPI_GETNONCLIENTMETRICS, sizeof( NONCLIENTMETRICS ), &ncm, 0 ) );
-		ncm.iCaptionWidth; // 35
-
-		int buttonsWidth = 0;
-		if ( HasFlag( style, WS_SYSMENU ) )
-			buttonsWidth += ncm.iCaptionWidth;
-		if ( HasFlag( style, WS_MINIMIZEBOX ) )
-			buttonsWidth += ncm.iCaptionWidth;
-		if ( HasFlag( style, WS_MAXIMIZEBOX ) )
-			buttonsWidth += ncm.iCaptionWidth;
-
-		captionRect.DeflateRect( edgeExtent, edgeExtent, edgeExtent + captionExtent + buttonsWidth, 0 );
-		captionRect.bottom = captionRect.top + captionExtent;
-		return captionRect;
 	}
 }
 

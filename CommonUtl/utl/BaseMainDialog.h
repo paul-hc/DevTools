@@ -21,6 +21,8 @@ public:
 protected:
 	// base overrides
 	virtual void PostRestorePlacement( int showCmd );
+private:
+	void _Minimize( void );
 protected:
 	struct CSysTrayInfo
 	{

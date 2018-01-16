@@ -35,7 +35,7 @@ private:
 };
 
 
-namespace utl
+namespace proc
 {
 	bool IsProcessElevated( HANDLE hProcess = ::GetCurrentProcess() );
 	bool IsProcessElevated( DWORD processId, DWORD access = SYNCHRONIZE );

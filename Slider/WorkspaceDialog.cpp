@@ -50,7 +50,7 @@ void CWorkspaceDialog::DoDataExchange( CDataExchange* pDX )
 
 	ui::DDX_Flag( pDX, IDC_AUTO_REGEN_SMALL_STG_THUMBS_CHECK, m_thumbnailerFlags, CThumbnailer::AutoRegenSmallStgThumbs );
 
-	DDX_Control( pDX, IDW_AUTO_IMAGE_SIZE_COMBO, m_autoImageSizeCombo );
+	ui::DDX_EnumCombo( pDX, IDW_AUTO_IMAGE_SIZE_COMBO, m_autoImageSizeCombo, m_data.m_autoImageSize, ui::GetTags_AutoImageSize() );
 
 	m_mruCountEdit.DDX_Number( pDX, m_data.m_mruCount, IDC_MAX_MRU_COUNT_EDIT );
 	m_thumbListColCountEdit.DDX_Number( pDX, m_data.m_thumbListColCount, IDC_THUMB_COL_COUNT_EDIT );
@@ -58,11 +58,9 @@ void CWorkspaceDialog::DoDataExchange( CDataExchange* pDX )
 
 	if ( firstInit )
 	{
-		ui::WriteComboItems( m_autoImageSizeCombo, ui::GetTags_AutoImageSize().GetUiTags() );
 		ui::WriteComboItems( m_thumbBoundsSizeCombo, thumb::GetTags_StdBoundsSize().GetUiTags() );
 	}
 
-	ui::DDX_EnumCombo( pDX, IDW_AUTO_IMAGE_SIZE_COMBO, m_data.m_autoImageSize );
 	ui::DDX_Number( pDX, IDC_THUMB_BOUNDS_SIZE_COMBO, m_data.m_thumbBoundsSize );
 	ui::DDV_NumberMinMax( pDX, IDC_THUMB_BOUNDS_SIZE_COMBO, m_data.m_thumbBoundsSize, thumb::MinBoundsSize, thumb::MaxBoundsSize );
 

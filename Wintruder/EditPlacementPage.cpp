@@ -136,7 +136,7 @@ bool CEditPlacementPage::RepositionWnd( void )
 
 	bool changed = !( wndRect == ui::GetControlRect( pTargetWnd->GetSafeHwnd() ) );
 	if ( changed )
-		pTargetWnd->GetBaseWnd()->MoveWindow( &wndRect, pTargetWnd->IsWindowVisible() );
+		pTargetWnd->GetWnd()->MoveWindow( &wndRect, pTargetWnd->IsWindowVisible() );
 
 	if ( IsAutoApply() && IsDirty() )
 	{
@@ -163,7 +163,7 @@ void CEditPlacementPage::ApplyPageChanges( void ) throws_( CRuntimeException )
 {
 	if ( CWndSpot* pTargetWnd = app::GetValidTargetWnd() )
 		if ( IsDirty() )
-			pTargetWnd->GetBaseWnd()->MoveWindow( m_oldRect = m_wndRect, pTargetWnd->IsWindowVisible() );
+			pTargetWnd->GetWnd()->MoveWindow( m_oldRect = m_wndRect, pTargetWnd->IsWindowVisible() );
 }
 
 bool CEditPlacementPage::IsAutoApply( void ) const

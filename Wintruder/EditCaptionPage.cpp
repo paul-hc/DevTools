@@ -49,7 +49,7 @@ void CEditCaptionPage::OnTargetWndChanged( const CWndSpot& targetWnd )
 	ui::EnableWindow( *this, valid );
 
 	std::tostringstream oss;
-	m_contentType = valid ? wc::FormatTextContent( oss, targetWnd.GetBaseWnd() ) : wc::CaptionText;
+	m_contentType = valid ? wc::FormatTextContent( oss, targetWnd.GetWnd() ) : wc::CaptionText;
 	m_textContent = oss.str();
 
 	m_contentEdit.SetWritable( wc::CaptionText == m_contentType );

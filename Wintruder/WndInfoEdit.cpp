@@ -32,7 +32,7 @@ void CWndInfoEdit::SetCurrentWnd( HWND hCurrentWnd )
 
 	if ( ui::IsValidWindow( m_hCurrentWnd ) )
 	{
-		briefInfo = ui::FormatBriefWndInfo( m_hCurrentWnd );
+		briefInfo = wnd::FormatBriefWndInfo( m_hCurrentWnd );
 		if ( NULL == wnd::GetWindowIcon( m_hCurrentWnd ) )			// otherwise the custom icon will be drawn over transparent
 			imageIndex = CWndImageRepository::Instance().LookupImage( m_hCurrentWnd );
 	}

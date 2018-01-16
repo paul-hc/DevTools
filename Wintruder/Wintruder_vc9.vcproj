@@ -631,6 +631,14 @@
 					>
 				</File>
 				<File
+					RelativePath=".\wnd\WindowInfoStore.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\wnd\WindowInfoStore.h"
+					>
+				</File>
+				<File
 					RelativePath=".\wnd\WndEnumerator.cpp"
 					>
 				</File>

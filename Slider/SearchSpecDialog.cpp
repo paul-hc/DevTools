@@ -37,7 +37,7 @@ void CSearchSpecDialog::DoDataExchange( CDataExchange* pDX )
 
 	DDX_Control( pDX, IDC_SEARCH_FOLDER_COMBO, m_searchPathCombo );
 	DDX_Control( pDX, IDC_SEARCH_FILTERS_COMBO, m_searchFiltersCombo );
-	ui::DDX_EnumCombo( pDX, IDC_SEARCH_OPTIONS_COMBO, m_searchSpec.m_options );
+	ui::DDX_EnumSelValue( pDX, IDC_SEARCH_OPTIONS_COMBO, m_searchSpec.m_options );
 
 	if ( !pDX->m_bSaveAndValidate )
 	{

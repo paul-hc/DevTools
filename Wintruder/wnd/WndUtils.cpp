@@ -1,10 +1,11 @@
 
 #include "stdafx.h"
 #include "WndUtils.h"
+#include "WindowClass.h"
+#include "WindowInfoStore.h"
 #include "utl/BaseApp.h"
-#include "utl/Guards.h"
+#include "utl/Process.h"
 #include "utl/StringUtilities.h"
-#include <hash_map>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -13,9 +14,26 @@
 
 namespace wnd
 {
+	bool HasUIPI( void )
+	{
+		static const bool s_hasUIPI = win::IsVersionOrGreater( win::Win8 );
+		return s_hasUIPI;
+	}
+
+	bool HasSlowWindows( void )
+	{
+		return !CWindowInfoStore::Instance().IsEmpty();
+	}
+
+	bool IsSlowWindow( HWND hWnd )
+	{
+		return CWindowInfoStore::Instance().IsSlowWindow( hWnd );
+	}
+
+
 	std::tstring GetWindowText( HWND hWnd )
 	{
-		return wnd::CWindowInfoStore::Instance().LookupCaption( hWnd );
+		return CWindowInfoStore::Instance().LookupCaption( hWnd );
 	}
 
 	std::tstring FormatWindowTextLine( HWND hWnd, size_t maxLen /*= 64*/ )
@@ -26,8 +44,70 @@ namespace wnd
 
 	HICON GetWindowIcon( HWND hWnd )
 	{
-		return wnd::CWindowInfoStore::Instance().LookupIcon( hWnd );
+		return CWindowInfoStore::Instance().LookupIcon( hWnd );
 	}
+
+	std::tstring FormatBriefWndInfo( HWND hWnd )
+	{
+		std::tstring info; info.reserve( 128 );
+		static const TCHAR sep[] = _T(" "), commaSep[] = _T(", ");
+
+		stream::Tag( info, wnd::FormatWindowHandle( hWnd ), sep );
+
+		if ( ui::IsValidWindow( hWnd ) )
+		{
+			stream::Tag( info, str::Format( _T("\"%s\" %s"), wnd::FormatWindowTextLine( hWnd ).c_str(), wc::FormatClassName( hWnd ).c_str() ), sep );
+
+			DWORD style = ui::GetStyle( hWnd );
+			std::tstring status;
+
+			if ( ui::IsTopMost( hWnd ) )
+				stream::Tag( status, _T("Top-most"), commaSep );
+			if ( !HasFlag( style, WS_VISIBLE ) )
+				stream::Tag( status, _T("Hidden"), commaSep );
+			if ( HasFlag( style, WS_DISABLED ) )
+				stream::Tag( status, _T("Disabled"), commaSep );
+			if ( IsSlowWindow( hWnd ) )
+				stream::Tag( status, _T("Slow Access"), commaSep );
+
+			if ( !status.empty() )
+				stream::Tag( info, str::Format( _T("(%s)"), status.c_str() ), sep );
+		}
+		else
+			stream::Tag( info, _T("<EXPIRED>"), sep );
+
+		return info;
+	}
+
+	CRect GetCaptionRect( HWND hWnd )
+	{	// returns the caption rect in client coordinates
+		CRect captionRect;
+		::GetWindowRect( hWnd, &captionRect );
+		ui::ScreenToClient( hWnd, captionRect );
+
+		DWORD style = ui::GetStyle( hWnd );
+		int edgeExtent = ::GetSystemMetrics( HasFlag( style, WS_THICKFRAME ) ? SM_CXSIZEFRAME : SM_CYDLGFRAME );
+		int captionExtent = ::GetSystemMetrics( HasFlag( ui::GetStyleEx( hWnd ), WS_EX_TOOLWINDOW ) ? SM_CYSMCAPTION : SM_CYCAPTION );
+
+		//enum { MinMaxButtonWidth = 27, CloseButtonWidth = 47 };		// Win7 magic numbers
+		// reliable on themed UI?
+		NONCLIENTMETRICS ncm = { sizeof( NONCLIENTMETRICS ) };
+		VERIFY( SystemParametersInfo( SPI_GETNONCLIENTMETRICS, sizeof( NONCLIENTMETRICS ), &ncm, 0 ) );
+		ncm.iCaptionWidth; // 35
+
+		int buttonsWidth = 0;
+		if ( HasFlag( style, WS_SYSMENU ) )
+			buttonsWidth += ncm.iCaptionWidth;
+		if ( HasFlag( style, WS_MINIMIZEBOX ) )
+			buttonsWidth += ncm.iCaptionWidth;
+		if ( HasFlag( style, WS_MAXIMIZEBOX ) )
+			buttonsWidth += ncm.iCaptionWidth;
+
+		captionRect.DeflateRect( edgeExtent, edgeExtent, edgeExtent + captionExtent + buttonsWidth, 0 );
+		captionRect.bottom = captionRect.top + captionExtent;
+		return captionRect;
+	}
+
 
 	HWND GetTopLevelParent( HWND hWnd )
 	{
@@ -44,7 +124,11 @@ namespace wnd
 
 		return hTopLevelWnd;
 	}
+}
 
+
+namespace wnd
+{
     bool ShowWindow( HWND hWnd, int cmdShow )
     {
 		CScopedAttachThreadInput scopedThreadAccess( hWnd );
@@ -94,94 +178,5 @@ namespace wnd
 	bool MoveWindowToBottom( HWND hWnd )
 	{
 		return ::SetWindowPos( hWnd, HWND_BOTTOM, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE | SWP_NOACTIVATE ) != FALSE;
-	}
-}
-
-
-namespace wnd
-{
-	bool HasUIPI( void )
-	{
-		static const bool s_hasUIPI = win::IsVersionOrGreater( win::Win8 );
-		return s_hasUIPI;
-	}
-
-	// CWindowInfoStore implementation
-
-	double CWindowInfoStore::s_timeoutSecs = 0.5;
-
-	CWindowInfoStore& CWindowInfoStore::Instance( void )
-	{
-		static CWindowInfoStore store;
-		return store;
-	}
-
-	std::tstring CWindowInfoStore::LookupCaption( HWND hWnd )
-	{
-		if ( !ui::IsValidWindow( hWnd ) )
-			return NULL;
-
-		if ( const CWindowInfo* pCached = FindInfo( hWnd ) )
-			return pCached->m_caption;
-
-		// extract caption
-		utl::CSlowSectionGuard slowGuard( FormatContext( hWnd, _T("LookupCaption()") ), s_timeoutSecs );
-		std::tstring caption = ui::GetWindowText( hWnd );
-
-		if ( slowGuard.IsTimeout() )		// slow window?
-			m_slowCache[ hWnd ] = CWindowInfo( caption, ExtractIcon( hWnd ) );				// cache the caption/icon (including NULL icon)
-
-		return caption;
-	}
-
-	HICON CWindowInfoStore::LookupIcon( HWND hWnd )
-	{
-		if ( !ui::IsValidWindow( hWnd ) )
-			return NULL;
-
-		if ( const CWindowInfo* pCached = FindInfo( hWnd ) )
-			return pCached->m_hIcon;
-
-		// extract icon
-		utl::CSlowSectionGuard slowGuard( FormatContext( hWnd, _T("LookupIcon()") ), s_timeoutSecs );
-		HICON hIcon = ExtractIcon( hWnd );
-
-		if ( slowGuard.IsTimeout() )		// slow window?
-			m_slowCache[ hWnd ] = CWindowInfo( ui::GetWindowText( hWnd ), hIcon );			// cache the caption/icon (including NULL icon)
-
-		return hIcon;
-	}
-
-	const CWindowInfoStore::CWindowInfo* CWindowInfoStore::FindInfo( HWND hWnd ) const
-	{
-		ASSERT_PTR( hWnd );
-		stdext::hash_map< HWND, CWindowInfo >::const_iterator itCached = m_slowCache.find( hWnd );
-		return itCached != m_slowCache.end() ? &itCached->second : NULL;
-	}
-
-	std::tstring CWindowInfoStore::FormatContext( HWND hWnd, const TCHAR sectionName[] )
-	{
-		return str::Format( _T("%s for hWnd=%s sameElevation=%d"), sectionName, wnd::FormatWindowHandle( hWnd ).c_str(), utl::HasCurrentElevation( hWnd ) );
-	}
-
-	HICON CWindowInfoStore::ExtractIcon( HWND hWnd )
-	{
-		ASSERT( ::IsWindow( hWnd ) );
-		if ( HasUIPI() )
-			if ( ui::IsChild( hWnd ) )
-				return NULL;				// don't even bother with icons for child windows
-
-		HICON hIcon = (HICON)::SendMessage( hWnd, WM_GETICON, ICON_SMALL, 0 );
-		if ( NULL == hIcon )
-			hIcon = (HICON)::SendMessage( hWnd, WM_GETICON, ICON_SMALL2, 0 );
-		if ( NULL == hIcon )
-			hIcon = (HICON)::SendMessage( hWnd, WM_GETICON, ICON_BIG, 0 );
-
-		if ( NULL == hIcon )
-			hIcon = (HICON)::GetClassLongPtr( hWnd, GCLP_HICONSM );
-		if ( NULL == hIcon )
-			hIcon = (HICON)::GetClassLongPtr( hWnd, GCLP_HICON );
-
-		return hIcon;
 	}
 }

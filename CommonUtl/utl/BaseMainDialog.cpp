@@ -7,6 +7,7 @@
 #include "StringUtilities.h"
 #include "Utilities.h"
 #include "resource.h"
+#include "utl/PostCall.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -55,7 +56,11 @@ void CBaseMainDialog::PostRestorePlacement( int showCmd )
 {
 	if ( UseSysTrayMinimize() )
 		if ( SW_SHOWMINIMIZED == showCmd )
-			PostMessage( WM_SYSCOMMAND, SC_MINIMIZE );
+		{
+			// IMP: for some reason in Windows 10 WM_SYSCOMMAND message doesn't post properly, but CBasePostCall::WM_DELAYED_CALL posts fine
+			ui::PostCall( this, &CBaseMainDialog::_Minimize );
+			//PostMessage( WM_SYSCOMMAND, SC_MINIMIZE );
+		}
 		else if ( -1 == showCmd )			// use command line show option
 			switch ( AfxGetApp()->m_nCmdShow )
 			{
@@ -63,9 +68,14 @@ void CBaseMainDialog::PostRestorePlacement( int showCmd )
 				case SW_SHOWMINIMIZED:
 				case SW_MINIMIZE:
 					ModifyStyle( 0, WS_VISIBLE );			// prevents modal dialog loop to show this window, whithout actually showing the window (no startup flicker)
-					PostMessage( WM_SYSCOMMAND, SC_MINIMIZE );
+					SendMessage( WM_SYSCOMMAND, SC_MINIMIZE );
 					break;
 			}
+}
+
+void CBaseMainDialog::_Minimize( void )
+{
+	SendMessage( WM_SYSCOMMAND, SC_MINIMIZE );
 }
 
 bool CBaseMainDialog::NotifyTrayIcon( int notifyCode )
@@ -148,9 +158,9 @@ void CBaseMainDialog::OnSysCommand( UINT cmdId, LPARAM lParam )
 {
 	CLayoutDialog::OnSysCommand( cmdId, lParam );
 
-	if ( UseSysTrayMinimize() )
-		if ( SC_MINIMIZE == GET_SC_WPARAM( cmdId ) )
-			ShowWindow( SW_HIDE );			// IMP: hide window post-minimize so that it vanishes from the taskbar
+	if ( SC_MINIMIZE == GET_SC_WPARAM( cmdId ) )
+		if ( UseSysTrayMinimize() )
+			ShowWindow( SW_HIDE );			// IMP: hide window post-minimize so that it vanishes from the taskbar into the system tray
 }
 
 void CBaseMainDialog::OnPaint( void )

@@ -314,15 +314,15 @@ void CGeneralPage::OnTargetWndChanged( const CWndSpot& targetWnd )
 		const TCHAR sep[] = _T(", ");
 
 		if ( HWND hParent = ::GetParent( targetWnd ) )
-			stream::Tag( textBuffer, str::Format( _T("Parent=%s"), ui::FormatBriefWndInfo( hParent ).c_str() ), sep );
+			stream::Tag( textBuffer, str::Format( _T("Parent=%s"), wnd::FormatBriefWndInfo( hParent ).c_str() ), sep );
 		if ( HWND hOwner = ::GetWindow( targetWnd, GW_OWNER ) )
-			stream::Tag( textBuffer, str::Format( _T("Owner=%s"), ui::FormatBriefWndInfo( hOwner ).c_str() ), sep );
+			stream::Tag( textBuffer, str::Format( _T("Owner=%s"), wnd::FormatBriefWndInfo( hOwner ).c_str() ), sep );
 		if ( HWND hNext = ::GetWindow( targetWnd, GW_HWNDNEXT ) )
-			stream::Tag( textBuffer, str::Format( _T("Next=%s"), ui::FormatBriefWndInfo( hNext ).c_str() ), sep );
+			stream::Tag( textBuffer, str::Format( _T("Next=%s"), wnd::FormatBriefWndInfo( hNext ).c_str() ), sep );
 		if ( HWND hPrevious = ::GetWindow( targetWnd, GW_HWNDPREV ) )
-			stream::Tag( textBuffer, str::Format( _T("Previous=%s"), ui::FormatBriefWndInfo( hPrevious ).c_str() ), sep );
+			stream::Tag( textBuffer, str::Format( _T("Previous=%s"), wnd::FormatBriefWndInfo( hPrevious ).c_str() ), sep );
 		if ( HWND hChild = ::GetWindow( targetWnd, GW_CHILD ) )
-			stream::Tag( textBuffer, str::Format( _T("First Child=%s"), ui::FormatBriefWndInfo( hChild ).c_str() ), sep );
+			stream::Tag( textBuffer, str::Format( _T("First Child=%s"), wnd::FormatBriefWndInfo( hChild ).c_str() ), sep );
 		toolInfos.push_back( textBuffer );
 
 		toolInfos.push_back( std::tstring() );

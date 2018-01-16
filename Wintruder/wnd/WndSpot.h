@@ -7,31 +7,18 @@
 // works with NULL pattern;
 // accounts for windows that span on multiple monitors, such as destop window.
 
-class CWndSpot : private CWnd
+class CWndSpot : public CWnd
 {
 public:
-	using CWnd::m_hWnd;
-
-	operator HWND() const { return m_hWnd; }
-	HWND GetSafeHwnd( void ) const { return m_hWnd; }
-
-	const CWnd* GetBaseWnd( void ) const { return this; }
-	CWnd* GetBaseWnd( void ) { return this; }
-
-	// guarded methods
-	DWORD GetStyle( void ) const;
-	DWORD GetExStyle( void ) const;
-	int GetDlgCtrlID( void ) const;
-    int SetDlgCtrlID( int ctrlId );
-	BOOL IsWindowVisible( void ) const;
-    void GetClientRect( LPRECT lpRect ) const;
-public:
-	CWndSpot( void );
-	CWndSpot( HWND hWnd, const CPoint& screenPoint = m_nullPos );
-	CWndSpot( const CWndSpot& right );
+	CWndSpot( void ) : m_screenPoint( m_nullPos ) {}
+	CWndSpot( HWND hWnd, const CPoint& screenPoint = m_nullPos ) : m_screenPoint( screenPoint ) { m_hWnd = hWnd; }
+	CWndSpot( const CWndSpot& right ) : m_screenPoint( right.m_screenPoint ) { m_hWnd = right.m_hWnd; }
 	~CWndSpot();
 
 	CWndSpot& operator=( const CWndSpot& right );
+
+	const CWnd* GetWnd( void ) const { return this; }
+	CWnd* GetWnd( void ) { return this; }
 	void SetWnd( HWND hWnd, const CPoint& screenPoint = m_nullPos );
 
 	bool IsNull( void ) const { return NULL == m_hWnd; }
@@ -48,6 +35,7 @@ public:
 	bool IsChildWindow( void ) const;
 public:
 	CPoint m_screenPoint;
+
 	static const CPoint m_nullPos;
 	static const CWndSpot m_nullWnd;
 };

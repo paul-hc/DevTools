@@ -346,9 +346,22 @@ namespace ui
 	}
 
 	template< typename EnumType >
-	inline void DDX_EnumCombo( CDataExchange* pDX, int comboId, EnumType value )
+	inline void DDX_EnumSelValue( CDataExchange* pDX, int comboId, EnumType& rValue )
 	{
-		DDX_CBIndex( pDX, comboId, (int&)value );
+		DDX_CBIndex( pDX, comboId, (int&)rValue );
+	}
+
+	template< typename EnumType >
+	inline void DDX_EnumCombo( CDataExchange* pDX, int comboId, CComboBox& rCombo, EnumType& rValue, const CEnumTags& enumTags )
+	{
+		bool firstInit = NULL == rCombo.m_hWnd;
+		::DDX_Control( pDX, comboId, rCombo );
+		if ( firstInit )
+		{
+			ASSERT( DialogOutput == pDX->m_bSaveAndValidate );
+			ui::WriteComboItems( rCombo, enumTags.GetUiTags() );
+		}
+		DDX_EnumSelValue( pDX, comboId, rValue );
 	}
 
 	template< typename IntType >

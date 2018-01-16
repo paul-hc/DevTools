@@ -6,6 +6,7 @@
 #include "WndUtils.h"
 #include "AppService.h"
 #include "utl/ContainerUtilities.h"
+#include "utl/Process.h"
 #include "utl/Utilities.h"
 
 #ifdef _DEBUG
@@ -178,7 +179,8 @@ CWndSpot CWndFinder::FindUpdateTarget( void ) const
 	CWndSpot foundWnd;
 	switch ( app::GetOptions()->m_updateTarget )
 	{
-		default: ASSERT( false );
+		default:
+			ASSERT( false );
 		case opt::CurrentWnd:
 			if ( CWndSpot* pCurrentWnd = GetValidTargetWnd( app::Beep ) )
 				foundWnd = *pCurrentWnd;

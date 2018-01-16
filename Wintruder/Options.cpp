@@ -20,6 +20,7 @@ namespace reg
 	static const TCHAR entry_displayZeroFlags[] = _T("DisplayZeroFlags");
 	static const TCHAR entry_frameStyle[] = _T("FrameStyle");
 	static const TCHAR entry_frameSize[] = _T("FrameSize");
+	static const TCHAR entry_queryWndIcons[] = _T("QueryWndIcons");
 	static const TCHAR entry_autoUpdate[] = _T("AutoUpdate");
 	static const TCHAR entry_autoUpdateRefresh[] = _T("AutoUpdateRefresh");
 	static const TCHAR entry_autoUpdateTimeout[] = _T("AutoUpdateTimeout");
@@ -35,9 +36,15 @@ namespace opt
 		return tags;
 	}
 
-	const CEnumTags& GetTags_AutoUpdate( void )
+	const CEnumTags& GetTags_AutoUpdateTarget( void )
 	{
 		static const CEnumTags tags( _T("Current|At Mouse|Foreground|Active|Focus|Topmost|Topmost Non-Child|Topmost Visible") );
+		return tags;
+	}
+
+	const CEnumTags& GetTags_QueryWndIcons( void )
+	{
+		static const CEnumTags tags( _T("None (avoid UIPI deadlocks)|Top Windows|All Windows") );
 		return tags;
 	}
 }
@@ -54,11 +61,14 @@ COptions::COptions( void )
 	, m_displayZeroFlags( false )
 	, m_frameStyle( opt::NonClient )
 	, m_frameSize( ::GetSystemMetrics( SM_CXFIXEDFRAME ) )
+	, m_queryWndIcons( opt::AllWndIcons )
 	, m_autoUpdate( false )
 	, m_autoUpdateRefresh( true )
 	, m_autoUpdateTimeout( 3 )
 	, m_updateTarget( opt::CurrentWnd )
 {
+	if ( wnd::HasUIPI() )
+		m_queryWndIcons = opt::NoWndIcons;
 }
 
 void COptions::Load( void )
@@ -71,8 +81,9 @@ void COptions::Load( void )
 	m_ignoreHidden = pApp->GetProfileInt( reg::section_options, reg::entry_ignoreHidden, m_ignoreHidden ) != FALSE;
 	m_ignoreDisabled = pApp->GetProfileInt( reg::section_options, reg::entry_ignoreDisabled, m_ignoreDisabled ) != FALSE;
 	m_displayZeroFlags = pApp->GetProfileInt( reg::section_options, reg::entry_displayZeroFlags, m_displayZeroFlags ) != FALSE;
-	m_frameStyle = (opt::FrameStyle)pApp->GetProfileInt( reg::section_options, reg::entry_frameStyle, m_frameStyle );
+	m_frameStyle = static_cast< opt::FrameStyle >( pApp->GetProfileInt( reg::section_options, reg::entry_frameStyle, m_frameStyle ) );
 	m_frameSize = pApp->GetProfileInt( reg::section_options, reg::entry_frameSize, m_frameSize );
+	m_queryWndIcons = static_cast< opt::QueryWndIcons >( pApp->GetProfileInt( reg::section_options, reg::entry_queryWndIcons, m_queryWndIcons ) );
 	m_autoUpdate = pApp->GetProfileInt( reg::section_options, reg::entry_autoUpdate, m_autoUpdate ) != FALSE;
 	m_autoUpdateRefresh = pApp->GetProfileInt( reg::section_options, reg::entry_autoUpdateRefresh, m_autoUpdateRefresh ) != FALSE;
 	m_autoUpdateTimeout = pApp->GetProfileInt( reg::section_options, reg::entry_autoUpdateTimeout, m_autoUpdateTimeout );
@@ -80,9 +91,9 @@ void COptions::Load( void )
 
 	if ( wnd::HasUIPI() )
 	{
-		// disable auto-update since UIPI can cause severe delays
-		m_autoUpdate = false;
-		pApp->WriteProfileInt( reg::section_options, reg::entry_autoUpdate, m_autoUpdate );
+		// disable auto-refresh since UIPI can cause deadlocks or severe delays
+		m_autoUpdateRefresh = false;
+		pApp->WriteProfileInt( reg::section_options, reg::entry_autoUpdateRefresh, m_autoUpdateRefresh );
 	}
 }
 
@@ -98,6 +109,7 @@ void COptions::Save( void ) const
 	pApp->WriteProfileInt( reg::section_options, reg::entry_displayZeroFlags, m_displayZeroFlags );
 	pApp->WriteProfileInt( reg::section_options, reg::entry_frameStyle, m_frameStyle );
 	pApp->WriteProfileInt( reg::section_options, reg::entry_frameSize, m_frameSize );
+	pApp->WriteProfileInt( reg::section_options, reg::entry_queryWndIcons, m_queryWndIcons );
 	pApp->WriteProfileInt( reg::section_options, reg::entry_autoUpdate, m_autoUpdate );
 	pApp->WriteProfileInt( reg::section_options, reg::entry_autoUpdateRefresh, m_autoUpdateRefresh );
 	pApp->WriteProfileInt( reg::section_options, reg::entry_autoUpdateTimeout, m_autoUpdateTimeout );
