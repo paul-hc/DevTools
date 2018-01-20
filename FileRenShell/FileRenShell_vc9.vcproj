@@ -244,7 +244,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="1"
-				InlineFunctionExpansion="1"
+				InlineFunctionExpansion="2"
 				WholeProgramOptimization="true"
 				AdditionalIncludeDirectories="../CommonUtl"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL"
@@ -256,6 +256,7 @@
 				AssemblerListingLocation=".\ReleaseU/"
 				WarningLevel="4"
 				SuppressStartupBanner="true"
+				DebugInformationFormat="3"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -276,6 +277,7 @@
 				SuppressStartupBanner="true"
 				AdditionalLibraryDirectories="$(UTL_INCLUDE)\lib\32"
 				ModuleDefinitionFile=".\FileRenShell.def"
+				GenerateDebugInformation="true"
 				SubSystem="2"
 				OptimizeReferences="2"
 				LinkTimeCodeGeneration="1"
@@ -341,7 +343,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="1"
-				InlineFunctionExpansion="1"
+				InlineFunctionExpansion="2"
 				WholeProgramOptimization="true"
 				AdditionalIncludeDirectories=".;../CommonUtl"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL"
