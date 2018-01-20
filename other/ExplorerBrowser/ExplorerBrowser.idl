@@ -1,0 +1,18 @@
+// ExplorerBrowser.idl : IDL source for ExplorerBrowser
+//
+
+// This file will be processed by the MIDL tool to
+// produce the type library (ExplorerBrowser.tlb) and marshalling code.
+
+import "oaidl.idl";
+import "ocidl.idl";
+
+[
+	uuid(52137FD1-F82B-43B3-A641-1330CD1CEADE),
+	version(1.0),
+	helpstring("ExplorerBrowser 1.0 Type Library")
+]
+library ExplorerBrowserLib
+{
+	importlib("stdole2.tlb");
+};
