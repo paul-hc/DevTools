@@ -23,13 +23,13 @@ namespace layout
 {
 	static const CLayoutStyle styles[] =
 	{
-		{ IDC_SEARCH_SPEC_STATIC, StretchX | DoRepaint },
-		{ IDC_SEARCH_SPEC_LIST, StretchX },
+		{ IDC_SEARCH_SPEC_STATIC, SizeX | DoRepaint },
+		{ IDC_SEARCH_SPEC_LIST, SizeX },
 		{ CM_ADD_SEARCH_SPEC, None },
 		{ CM_MODIFY_SEARCH_SPEC, None },
 		{ CM_DELETE_SEARCH_SPEC, None },
-		{ CM_MOVE_UP_SEARCH_SPEC, OffsetX },
-		{ CM_MOVE_DOWN_SEARCH_SPEC, OffsetX },
+		{ CM_MOVE_UP_SEARCH_SPEC, MoveX },
+		{ CM_MOVE_DOWN_SEARCH_SPEC, MoveX },
 		{ IDC_MIN_FILE_SIZE_CHECK, None },
 		{ IDC_MIN_FILE_SIZE_EDIT, None },
 		{ IDC_MAX_FILE_SIZE_CHECK, None },
@@ -38,17 +38,17 @@ namespace layout
 		{ IDC_AUTO_REGENERATE_CHECK, None },
 		{ IDC_AUTO_DROP_CHECK, None },
 
-		{ IDC_FOUND_FILES_GAP, StretchX | DoRepaint },
+		{ IDC_FOUND_FILES_GAP, SizeX | DoRepaint },
 
 		{ IDC_FOUND_FILES_STATIC, None },
-		{ IDC_FOUND_FILES_LISTVIEW, Stretch },
-		{ IDC_TOOLBAR_PLACEHOLDER, OffsetX },
-		{ IDC_LIST_ORDER_STATIC, OffsetX },
-		{ IDC_LIST_ORDER_COMBO, OffsetX },
+		{ IDC_FOUND_FILES_LISTVIEW, Size },
+		{ IDC_TOOLBAR_PLACEHOLDER, MoveX },
+		{ IDC_LIST_ORDER_STATIC, MoveX },
+		{ IDC_LIST_ORDER_COMBO, MoveX },
 
-		{ IDOK, Offset },
-		{ IDCANCEL, Offset },
-		{ IDC_THUMB_PREVIEW_STATIC, OffsetX }
+		{ IDOK, Move },
+		{ IDCANCEL, Move },
+		{ IDC_THUMB_PREVIEW_STATIC, MoveX }
 	};
 }
 

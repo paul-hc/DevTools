@@ -12,8 +12,8 @@ namespace layout
 {
 	static const CLayoutStyle styles[] =
 	{
-		{ IDOK, OffsetX },
-		{ IDCANCEL, OffsetX }
+		{ IDOK, MoveX },
+		{ IDCANCEL, MoveX }
 	};
 }
 

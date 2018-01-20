@@ -23,7 +23,7 @@ namespace reg
 
 static struct { UINT ckID; int spFlag; } idToSPFlags[] =
 {
-	{ IDC_SEARCH_INCLUDE_PATH_CHECK   , sp::StandardPath	},
+	{ IDC_SEARCH_INCLUDE_PATH_CHECK   , sp::StandardPath },
 	{ IDC_SEARCH_LOCAL_PATH_CHECK	 , sp::LocalPath },
 	{ IDC_SEARCH_ADDITIONAL_PATH_CHECK, sp::AdditionalPath },
 	{ IDC_SEARCH_SOURCE_PATH_CHECK	, sp::SourcePath },
@@ -36,25 +36,25 @@ namespace layout
 {
 	static const CLayoutStyle styles[] =
 	{
-		{ IDC_INPUT_INCLUDE_TAG_COMBO, StretchX },
-		{ IDC_SYSTEM_TAG_RADIO, OffsetX },
-		{ IDC_LOCAL_TAG_RADIO, OffsetX },
-		{ IDC_SEARCH_IN_STATIC, OffsetX | DoRepaint },
-		{ IDC_SEARCH_INCLUDE_PATH_CHECK, OffsetX },
-		{ IDC_SEARCH_LOCAL_PATH_CHECK, OffsetX },
-		{ IDC_SEARCH_ADDITIONAL_PATH_CHECK, OffsetX },
-		{ IDC_SEARCH_SOURCE_PATH_CHECK, OffsetX },
-		{ IDC_SEARCH_LIBRARY_PATH_CHECK, OffsetX },
-		{ IDC_SEARCH_BINARY_PATH_CHECK, OffsetX },
-		{ IDC_LOCAL_DIR_EDIT, StretchX },
-		{ IDC_PROJECT_FILE_EDIT, StretchX },
-		{ IDC_ADDITIONAL_INC_PATH_EDIT, StretchX },
-		{ IDC_FOUND_FILES_LISTCTRL, StretchX | StretchY },
-		{ IDOK, Offset },
-		{ CM_TEXT_VIEW_FILE, Offset },
-		{ CM_EXPLORE_FILE, Offset },
-		{ ID_FILE_SAVE, Offset },
-		{ IDCANCEL, Offset }
+		{ IDC_INPUT_INCLUDE_TAG_COMBO, SizeX },
+		{ IDC_SYSTEM_TAG_RADIO, MoveX },
+		{ IDC_LOCAL_TAG_RADIO, MoveX },
+		{ IDC_SEARCH_IN_STATIC, MoveX | DoRepaint },
+		{ IDC_SEARCH_INCLUDE_PATH_CHECK, MoveX },
+		{ IDC_SEARCH_LOCAL_PATH_CHECK, MoveX },
+		{ IDC_SEARCH_ADDITIONAL_PATH_CHECK, MoveX },
+		{ IDC_SEARCH_SOURCE_PATH_CHECK, MoveX },
+		{ IDC_SEARCH_LIBRARY_PATH_CHECK, MoveX },
+		{ IDC_SEARCH_BINARY_PATH_CHECK, MoveX },
+		{ IDC_LOCAL_DIR_EDIT, SizeX },
+		{ IDC_PROJECT_FILE_EDIT, SizeX },
+		{ IDC_ADDITIONAL_INC_PATH_EDIT, SizeX },
+		{ IDC_FOUND_FILES_LISTCTRL, SizeX | SizeY },
+		{ IDOK, Move },
+		{ CM_TEXT_VIEW_FILE, Move },
+		{ CM_EXPLORE_FILE, Move },
+		{ ID_FILE_SAVE, Move },
+		{ IDCANCEL, Move }
 	};
 }
 

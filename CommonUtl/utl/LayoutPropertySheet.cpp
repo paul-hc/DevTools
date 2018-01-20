@@ -25,11 +25,11 @@ namespace reg
 
 static CLayoutStyle layoutStyles[] =
 {
-	{ AFX_IDC_TAB_CONTROL, layout::Stretch },
-	{ IDOK, layout::Offset },
-	{ IDCANCEL, layout::Offset },
-	{ ID_APPLY_NOW, layout::Offset },
-	{ IDHELP, layout::Offset }
+	{ AFX_IDC_TAB_CONTROL, layout::Size },
+	{ IDOK, layout::Move },
+	{ IDCANCEL, layout::Move },
+	{ ID_APPLY_NOW, layout::Move },
+	{ IDHELP, layout::Move }
 };
 
 CLayoutPropertySheet::CLayoutPropertySheet( const std::tstring& title, CWnd* pParent, UINT selPageIndex /*= 0*/ )

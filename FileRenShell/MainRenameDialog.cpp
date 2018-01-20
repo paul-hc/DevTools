@@ -47,30 +47,30 @@ namespace layout
 {
 	static CLayoutStyle styles[] =
 	{
-		{ IDC_FORMAT_COMBO, StretchX },
-		{ IDC_STRIP_BAR_1, OffsetX },
+		{ IDC_FORMAT_COMBO, SizeX },
+		{ IDC_STRIP_BAR_1, MoveX },
 
-		{ IDC_FILE_RENAME_LIST, Stretch },
+		{ IDC_FILE_RENAME_LIST, Size },
 
-		{ IDC_SOURCE_FILES_GROUP, OffsetY },
-		{ IDC_COPY_SOURCE_PATHS_BUTTON, OffsetY },
+		{ IDC_SOURCE_FILES_GROUP, MoveY },
+		{ IDC_COPY_SOURCE_PATHS_BUTTON, MoveY },
 
-		{ IDC_DESTINATION_FILES_GROUP, Offset },
-		{ IDC_PASTE_FILES_BUTTON, Offset },
-		{ IDC_CLEAR_FILES_BUTTON, Offset },
-		{ IDC_CAPITALIZE_BUTTON, Offset },
-		{ IDC_CHANGE_CASE_BUTTON, Offset },
+		{ IDC_DESTINATION_FILES_GROUP, Move },
+		{ IDC_PASTE_FILES_BUTTON, Move },
+		{ IDC_CLEAR_FILES_BUTTON, Move },
+		{ IDC_CAPITALIZE_BUTTON, Move },
+		{ IDC_CHANGE_CASE_BUTTON, Move },
 
-		{ IDC_REPLACE_FILES_BUTTON, Offset },
-		{ IDC_REPLACE_DELIMS_BUTTON, Offset },
-		{ IDC_DELIMITER_SET_COMBO, Offset },
-		{ IDC_DELIMITER_STATIC, Offset },
-		{ IDC_NEW_DELIMITER_EDIT, Offset },
-		{ IDC_PICK_RENAME_ACTIONS, Offset },
+		{ IDC_REPLACE_FILES_BUTTON, Move },
+		{ IDC_REPLACE_DELIMS_BUTTON, Move },
+		{ IDC_DELIMITER_SET_COMBO, Move },
+		{ IDC_DELIMITER_STATIC, Move },
+		{ IDC_NEW_DELIMITER_EDIT, Move },
+		{ IDC_PICK_RENAME_ACTIONS, Move },
 
-		{ IDOK, OffsetX },
-		{ IDC_UNDO_BUTTON, OffsetX },
-		{ IDCANCEL, OffsetX }
+		{ IDOK, MoveX },
+		{ IDC_UNDO_BUTTON, MoveX },
+		{ IDCANCEL, MoveX }
 	};
 }
 

@@ -936,70 +936,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\LayoutBasePropertySheet.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\LayoutBasePropertySheet.h"
-				>
-			</File>
-			<File
-				RelativePath=".\LayoutChildPropertySheet.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\LayoutChildPropertySheet.h"
-				>
-			</File>
-			<File
-				RelativePath=".\LayoutDialog.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\LayoutDialog.h"
-				>
-			</File>
-			<File
-				RelativePath=".\LayoutEngine.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\LayoutEngine.h"
-				>
-			</File>
-			<File
-				RelativePath=".\LayoutFormView.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\LayoutFormView.h"
-				>
-			</File>
-			<File
-				RelativePath=".\LayoutMetrics.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\LayoutMetrics.h"
-				>
-			</File>
-			<File
-				RelativePath=".\LayoutPropertyPage.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\LayoutPropertyPage.h"
-				>
-			</File>
-			<File
-				RelativePath=".\LayoutPropertySheet.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\LayoutPropertySheet.h"
-				>
-			</File>
-			<File
 				RelativePath=".\LogPalette.cpp"
 				>
 			</File>
@@ -1528,6 +1464,74 @@
 				</File>
 				<File
 					RelativePath=".\WinExplorer.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="Layout"
+				>
+				<File
+					RelativePath=".\LayoutBasePropertySheet.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\LayoutBasePropertySheet.h"
+					>
+				</File>
+				<File
+					RelativePath=".\LayoutChildPropertySheet.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\LayoutChildPropertySheet.h"
+					>
+				</File>
+				<File
+					RelativePath=".\LayoutDialog.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\LayoutDialog.h"
+					>
+				</File>
+				<File
+					RelativePath=".\LayoutEngine.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\LayoutEngine.h"
+					>
+				</File>
+				<File
+					RelativePath=".\LayoutFormView.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\LayoutFormView.h"
+					>
+				</File>
+				<File
+					RelativePath=".\LayoutMetrics.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\LayoutMetrics.h"
+					>
+				</File>
+				<File
+					RelativePath=".\LayoutPropertyPage.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\LayoutPropertyPage.h"
+					>
+				</File>
+				<File
+					RelativePath=".\LayoutPropertySheet.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\LayoutPropertySheet.h"
 					>
 				</File>
 			</Filter>

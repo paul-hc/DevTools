@@ -24,7 +24,14 @@ struct CDualLayoutStyle
 struct CLayoutPlacement
 {
 	CLayoutPlacement( bool useWindowPlacement )
-		: m_useWindowPlacement( useWindowPlacement ), m_initialSize( -1, -1 ), m_pos( -1, -1 ), m_size( -1, -1 ), m_showCmd( -1 ), m_collapsed( false ) {}
+		: m_useWindowPlacement( useWindowPlacement )
+		, m_initialSize( -1, -1 )
+		, m_pos( -1, -1 )
+		, m_size( -1, -1 )
+		, m_showCmd( -1 )
+		, m_collapsed( false )
+	{
+	}
 public:
 	const bool m_useWindowPlacement;	// for top level dialogs with maximize/minimize box; if true m_pos is in workspace coords, otherwise in screen coords
 	CSize m_initialSize;				// the original size in dialog template
@@ -87,15 +94,15 @@ namespace layout
 			PercentBitCount	= 7,
 			MaskPercentage	= ( 1 << PercentBitCount ) - 1,
 
-			ShiftOffsetX	= 0,
-			ShiftOffsetY	= PercentBitCount,
-			ShiftStretchX	= PercentBitCount * 2,
-			ShiftStretchY	= PercentBitCount * 3,
+			Shift_MoveX		= 0,
+			Shift_MoveY		= PercentBitCount,
+			Shift_SizeX		= PercentBitCount * 2,
+			Shift_SizeY		= PercentBitCount * 3,
 
-			MaskOffsetX		= MaskPercentage << ShiftOffsetX,
-			MaskOffsetY		= MaskPercentage << ShiftOffsetY,
-			MaskStretchX	= MaskPercentage << ShiftStretchX,
-			MaskStretchY	= MaskPercentage << ShiftStretchY,
+			Mask_MoveX		= MaskPercentage << Shift_MoveX,
+			Mask_MoveY		= MaskPercentage << Shift_MoveY,
+			Mask_SizeX		= MaskPercentage << Shift_SizeX,
+			Mask_SizeY		= MaskPercentage << Shift_SizeY,
 
 			DoRepaint		= 1 << ( 4 * PercentBitCount ),
 			CollapsedLeft	= DoRepaint << 1,
@@ -104,10 +111,10 @@ namespace layout
 	public:
 		struct Fields
 		{
-			unsigned int m_offsetX : PercentBitCount;		// percent horizontal offset (0 -> 100)
-			unsigned int m_offsetY : PercentBitCount;		// percent vertical offset (0 -> 100)
-			unsigned int m_stretchX : PercentBitCount;		// percent horizontal stretch (0 -> 100)
-			unsigned int m_stretchY : PercentBitCount;		// percent vertical stretch (0 -> 100)
+			unsigned int m_moveX : PercentBitCount;			// percent horizontal move (0 -> 100)
+			unsigned int m_moveY : PercentBitCount;			// percent vertical move (0 -> 100)
+			unsigned int m_sizeX : PercentBitCount;			// percent horizontal size (0 -> 100)
+			unsigned int m_sizeY : PercentBitCount;			// percent vertical size (0 -> 100)
 			unsigned int m_doRepaint : 1;					// control must be repaint when resized
 			unsigned int m_collapsedLeft : 1;				// control is a left edge collapsed marker
 			unsigned int m_collapsedTop : 1;				// control is a top edge collapsed marker
@@ -122,16 +129,16 @@ namespace layout
 	{
 		None		= 0,
 
-		// offset & stretch 100%
-		OffsetX		= 100 << Metrics::ShiftOffsetX,
-		OffsetY		= 100 << Metrics::ShiftOffsetY,
-		StretchX	= 100 << Metrics::ShiftStretchX,
-		StretchY	= 100 << Metrics::ShiftStretchY,
+		// move & size 100%
+		MoveX		= 100 << Metrics::Shift_MoveX,
+		MoveY		= 100 << Metrics::Shift_MoveY,
+		SizeX		= 100 << Metrics::Shift_SizeX,
+		SizeY		= 100 << Metrics::Shift_SizeY,
 
-		Offset		= OffsetX | OffsetY,
-		Stretch		= StretchX | StretchY,
+		Move		= MoveX | MoveY,
+		Size		= SizeX | SizeY,
 
-		DoRepaint	= Metrics::DoRepaint,			// repaint on resize
+		DoRepaint	= Metrics::DoRepaint,		// repaint on resize
 
 		CollapsedLeft = Metrics::CollapsedLeft,
 		CollapsedTop = Metrics::CollapsedTop,
@@ -143,28 +150,28 @@ namespace layout
 
 	// percentage layout functions
 
-	inline int offsetX( int byPercentage )
+	inline int pctMoveX( int byPercentage )
 	{
 		ASSERT( byPercentage >= 0 && byPercentage <= 100 );
-		return byPercentage << Metrics::ShiftOffsetX;
+		return byPercentage << Metrics::Shift_MoveX;
 	}
 
-	inline int offsetY( int byPercentage )
+	inline int pctMoveY( int byPercentage )
 	{
 		ASSERT( byPercentage >= 0 && byPercentage <= 100 );
-		return byPercentage << Metrics::ShiftOffsetY;
+		return byPercentage << Metrics::Shift_MoveY;
 	}
 
-	inline int stretchX( int byPercentage )
+	inline int pctSizeX( int byPercentage )
 	{
 		ASSERT( byPercentage >= 0 && byPercentage <= 100 );
-		return byPercentage << Metrics::ShiftStretchX;
+		return byPercentage << Metrics::Shift_SizeX;
 	}
 
-	inline int stretchY( int byPercentage )
+	inline int pctSizeY( int byPercentage )
 	{
 		ASSERT( byPercentage >= 0 && byPercentage <= 100 );
-		return byPercentage << Metrics::ShiftStretchY;
+		return byPercentage << Metrics::Shift_SizeY;
 	}
 
 

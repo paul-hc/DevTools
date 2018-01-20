@@ -23,10 +23,10 @@ namespace layout
 {
 	static CLayoutStyle styles[] =
 	{
-		{ IDC_TOOLBAR_PLACEHOLDER, StretchX },
-		{ IDC_ITEMS_LIST, Stretch },
-		{ IDOK, OffsetX },
-		{ IDCANCEL, OffsetX }
+		{ IDC_TOOLBAR_PLACEHOLDER, SizeX },
+		{ IDC_ITEMS_LIST, Size },
+		{ IDOK, MoveX },
+		{ IDCANCEL, MoveX }
 	};
 }
 

@@ -5,6 +5,7 @@
 #include "ModuleSession.h"
 #include "SafeForScripting.h"
 #include "resource.h"
+#include "utl/VersionInfo.h"
 #include "utl/resource.h"
 
 #ifdef _DEBUG

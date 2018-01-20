@@ -17,7 +17,7 @@ namespace layout
 {
 	static const CLayoutStyle styles[] =
 	{
-		{ IDC_EDIT_CAPTION_EDIT, Stretch }
+		{ IDC_EDIT_CAPTION_EDIT, Size }
 	};
 }
 

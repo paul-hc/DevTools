@@ -15,7 +15,7 @@ namespace layout
 {
 	static const CLayoutStyle styles[] =
 	{
-		{ IDC_IDENT_LITERAL_COMBO, StretchX }
+		{ IDC_IDENT_LITERAL_COMBO, SizeX }
 	};
 }
 

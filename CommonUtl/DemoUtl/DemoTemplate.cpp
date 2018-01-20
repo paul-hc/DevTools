@@ -22,33 +22,33 @@ namespace layout
 {
 	CLayoutStyle templateStyles[] =
 	{
-		{ IDC_OPEN_DIALOG_BUTTON, OffsetX },
-		{ IDC_OPEN_PROPERTIES_BUTTON, OffsetX },
-		{ IDC_CREATE_PROPERTIES_BUTTON, OffsetX },
-		{ IDC_DISABLE_SMOOTH_RESIZE_TOGGLE, OffsetX },
-		{ IDC_DISABLE_THEMES_TOGGLE, OffsetX },
+		{ IDC_OPEN_DIALOG_BUTTON, MoveX },
+		{ IDC_OPEN_PROPERTIES_BUTTON, MoveX },
+		{ IDC_CREATE_PROPERTIES_BUTTON, MoveX },
+		{ IDC_DISABLE_SMOOTH_RESIZE_TOGGLE, MoveX },
+		{ IDC_DISABLE_THEMES_TOGGLE, MoveX },
 
-		{ IDC_FORMAT_COMBO, StretchX },
-		{ IDC_DROP_RIGHT_ARROW_STATIC, OffsetX },
-		{ IDC_DROP_DOWN_STATIC, OffsetX },
-		{ IDC_DETAIL_SHEET_STATIC, Stretch },
+		{ IDC_FORMAT_COMBO, SizeX },
+		{ IDC_DROP_RIGHT_ARROW_STATIC, MoveX },
+		{ IDC_DROP_DOWN_STATIC, MoveX },
+		{ IDC_DETAIL_SHEET_STATIC, Size },
 
-		{ IDC_SOURCE_FILES_GROUP, OffsetY | stretchX( 25 ) },
-		{ IDC_COPY_SOURCE_PATHS_BUTTON, OffsetY | stretchX( 25 ) },
-		{ IDC_FORMAT_LEGEND_LABEL, OffsetY | stretchX( 25 ) },
+		{ IDC_SOURCE_FILES_GROUP, MoveY | pctSizeX( 25 ) },
+		{ IDC_COPY_SOURCE_PATHS_BUTTON, MoveY | pctSizeX( 25 ) },
+		{ IDC_FORMAT_LEGEND_LABEL, MoveY | pctSizeX( 25 ) },
 
-		{ IDC_DESTINATION_FILES_GROUP, Offset },
-		{ IDC_PASTE_FILES_BUTTON, Offset },
-		{ IDC_CLEAR_FILES_BUTTON, Offset },
-		{ IDC_CAPITALIZE_BUTTON, Offset },
-		{ ID_CHANGE_CASE, Offset },
+		{ IDC_DESTINATION_FILES_GROUP, Move },
+		{ IDC_PASTE_FILES_BUTTON, Move },
+		{ IDC_CLEAR_FILES_BUTTON, Move },
+		{ IDC_CAPITALIZE_BUTTON, Move },
+		{ ID_CHANGE_CASE, Move },
 
-		{ IDC_REPLACE_FILES_BUTTON, Offset },
-		{ IDC_REPLACE_DELIMS_BUTTON, Offset },
-		{ IDC_DELIMITER_SET_COMBO, Offset },
-		{ IDC_DELIMITER_STATIC, Offset },
-		{ IDC_NEW_DELIMITER_EDIT, Offset },
-		{ IDC_GROUP_BOX_1, StretchX }
+		{ IDC_REPLACE_FILES_BUTTON, Move },
+		{ IDC_REPLACE_DELIMS_BUTTON, Move },
+		{ IDC_DELIMITER_SET_COMBO, Move },
+		{ IDC_DELIMITER_STATIC, Move },
+		{ IDC_NEW_DELIMITER_EDIT, Move },
+		{ IDC_GROUP_BOX_1, SizeX }
 	};
 }
 
@@ -274,7 +274,7 @@ namespace layout
 {
 	CLayoutStyle listPageStyles[] =
 	{
-		{ IDC_FILE_RENAME_LIST, Stretch }
+		{ IDC_FILE_RENAME_LIST, Size }
 	};
 }
 
@@ -314,27 +314,27 @@ namespace layout
 {
 	CLayoutStyle editPageStyles[] =
 	{
-		{ IDC_ALBUMS_GROUP, StretchX | stretchY( 70 ) },
+		{ IDC_ALBUMS_GROUP, SizeX | pctSizeY( 70 ) },
 
-		{ IDC_SOURCE_GROUP, stretchX( 50 ) | stretchY( 70 ) },
-		{ IDC_SOURCE_LABEL, stretchX( 50 ) },
-		{ IDC_SOURCE_EDIT, stretchX( 50 ) | stretchY( 35 ) },
-		{ IDC_SOURCE_COMBO, stretchX( 50 ) | offsetY( 35 ) | stretchY( 35 ) | DoRepaint },
+		{ IDC_SOURCE_GROUP, pctSizeX( 50 ) | pctSizeY( 70 ) },
+		{ IDC_SOURCE_LABEL, pctSizeX( 50 ) },
+		{ IDC_SOURCE_EDIT, pctSizeX( 50 ) | pctSizeY( 35 ) },
+		{ IDC_SOURCE_COMBO, pctSizeX( 50 ) | pctMoveY( 35 ) | pctSizeY( 35 ) | DoRepaint },
 
-		{ IDC_DEST_GROUP, offsetX( 50 ) | stretchX( 50 ) | stretchY( 70 ) },
-		{ IDC_DEST_LABEL, offsetX( 50 ) | stretchX( 50 ) },
-		{ IDC_DEST_EDIT, offsetX( 50 ) | stretchX( 50 ) | stretchY( 35 ) },
-		{ IDC_DEST_COMBO, offsetX( 50 ) | stretchX( 50 ) | offsetY( 35 ) | stretchY( 35 ) | DoRepaint },
+		{ IDC_DEST_GROUP, pctMoveX( 50 ) | pctSizeX( 50 ) | pctSizeY( 70 ) },
+		{ IDC_DEST_LABEL, pctMoveX( 50 ) | pctSizeX( 50 ) },
+		{ IDC_DEST_EDIT, pctMoveX( 50 ) | pctSizeX( 50 ) | pctSizeY( 35 ) },
+		{ IDC_DEST_COMBO, pctMoveX( 50 ) | pctSizeX( 50 ) | pctMoveY( 35 ) | pctSizeY( 35 ) | DoRepaint },
 
-		{ IDC_A_GROUP, StretchX | offsetY( 70 ) | stretchY( 15 ) },
-		{ IDC_BUTTON1, offsetX( 0 ) | offsetY( 70 ) | stretchX( 25 ) | stretchY( 15 ) },
-		{ IDC_BUTTON2, offsetX( 25 ) | offsetY( 70 ) | stretchY( 15 ) | stretchX( 50 ) },
-		{ IDC_BUTTON3, offsetX( 75 ) | offsetY( 70 ) | stretchY( 15 ) | stretchX( 25 ) },
+		{ IDC_A_GROUP, SizeX | pctMoveY( 70 ) | pctSizeY( 15 ) },
+		{ IDC_BUTTON1, pctMoveX( 0 ) | pctMoveY( 70 ) | pctSizeX( 25 ) | pctSizeY( 15 ) },
+		{ IDC_BUTTON2, pctMoveX( 25 ) | pctMoveY( 70 ) | pctSizeY( 15 ) | pctSizeX( 50 ) },
+		{ IDC_BUTTON3, pctMoveX( 75 ) | pctMoveY( 70 ) | pctSizeY( 15 ) | pctSizeX( 25 ) },
 
-		{ IDC_B_GROUP, StretchX | offsetY( 85 ) | stretchY( 15 ) },
-		{ IDC_BUTTON4, offsetX( 0 ) | offsetY( 85 ) | stretchX( 33 ) | stretchY( 15 ) },
-		{ IDC_BUTTON5, offsetX( 33 ) | offsetY( 85 ) | stretchX( 34 ) | stretchY( 15 ) },
-		{ IDC_BUTTON6, offsetX( 67 ) | offsetY( 85 ) | stretchX( 33 ) | stretchY( 15 ) }
+		{ IDC_B_GROUP, SizeX | pctMoveY( 85 ) | pctSizeY( 15 ) },
+		{ IDC_BUTTON4, pctMoveX( 0 ) | pctMoveY( 85 ) | pctSizeX( 33 ) | pctSizeY( 15 ) },
+		{ IDC_BUTTON5, pctMoveX( 33 ) | pctMoveY( 85 ) | pctSizeX( 34 ) | pctSizeY( 15 ) },
+		{ IDC_BUTTON6, pctMoveX( 67 ) | pctMoveY( 85 ) | pctSizeX( 33 ) | pctSizeY( 15 ) }
 	};
 }
 
@@ -420,7 +420,7 @@ namespace layout
 {
 	CLayoutStyle detailsPageStyles[] =
 	{
-		{ IDC_DETAIL_SHEET_STATIC, Stretch }
+		{ IDC_DETAIL_SHEET_STATIC, Size }
 	};
 }
 

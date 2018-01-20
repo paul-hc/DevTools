@@ -177,7 +177,7 @@ namespace layout
 {
 	static const CLayoutStyle styles[] =
 	{
-		{ IDC_GENERAL_INFO_EDIT, Stretch }
+		{ IDC_GENERAL_INFO_EDIT, Size }
 	};
 }
 

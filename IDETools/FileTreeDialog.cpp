@@ -26,23 +26,23 @@ namespace layout
 {
 	static CLayoutStyle styles[] =
 	{
-		{ IDC_FILE_TREE, Stretch },
-		{ IDC_FULLPATH_STATIC, OffsetY },
-		{ IDC_FULLPATH_EDIT, OffsetY | StretchX },
-		{ IDC_LAZY_PARSING_CHECK, OffsetY },
-		{ IDC_REMOVE_DUPLICATES_CHECK, OffsetY },
-		{ IDC_DEPTH_LEVEL_STATIC, OffsetY },
-		{ IDC_DEPTH_LEVEL_COMBO, OffsetY },
-		{ IDC_VIEW_MODE_STATIC, OffsetY },
-		{ IDC_VIEW_MODE_COMBO, OffsetY },
-		{ IDC_ORDER_STATIC, OffsetY },
-		{ IDC_ORDER_COMBO, OffsetY },
-		{ IDOK, OffsetX },
-		{ IDCANCEL, OffsetX },
-		{ IDC_LOCATE_FILE, OffsetX },
-		{ IDC_BROWSE_FILE, OffsetX },
-		{ ID_OPTIONS, OffsetX },
-		{ ID_EDIT_COPY, OffsetX }
+		{ IDC_FILE_TREE, Size },
+		{ IDC_FULLPATH_STATIC, MoveY },
+		{ IDC_FULLPATH_EDIT, MoveY | SizeX },
+		{ IDC_LAZY_PARSING_CHECK, MoveY },
+		{ IDC_REMOVE_DUPLICATES_CHECK, MoveY },
+		{ IDC_DEPTH_LEVEL_STATIC, MoveY },
+		{ IDC_DEPTH_LEVEL_COMBO, MoveY },
+		{ IDC_VIEW_MODE_STATIC, MoveY },
+		{ IDC_VIEW_MODE_COMBO, MoveY },
+		{ IDC_ORDER_STATIC, MoveY },
+		{ IDC_ORDER_COMBO, MoveY },
+		{ IDOK, MoveX },
+		{ IDCANCEL, MoveX },
+		{ IDC_LOCATE_FILE, MoveX },
+		{ IDC_BROWSE_FILE, MoveX },
+		{ ID_OPTIONS, MoveX },
+		{ ID_EDIT_COPY, MoveX }
 	};
 }
 

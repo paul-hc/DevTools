@@ -194,12 +194,12 @@ namespace layout
 {
 	static CLayoutStyle styles[] =
 	{
-		{ IDC_LEDIT_ITEM_LIST_EDIT, Stretch },
-		{ ID_MOVE_DOWN_ITEM, OffsetY },
-		{ ID_MOVE_UP_ITEM, OffsetY },
-		{ IDOK, Offset },
-		{ IDC_LEDIT_BROWSE, Offset },
-		{ IDCANCEL, Offset }
+		{ IDC_LEDIT_ITEM_LIST_EDIT, Size },
+		{ ID_MOVE_DOWN_ITEM, MoveY },
+		{ ID_MOVE_UP_ITEM, MoveY },
+		{ IDOK, Move },
+		{ IDC_LEDIT_BROWSE, Move },
+		{ IDCANCEL, Move }
 	};
 }
 

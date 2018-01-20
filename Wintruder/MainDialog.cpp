@@ -39,22 +39,25 @@ namespace reg
 
 enum { TopPct = 50, BottomPct = 50 };
 
-static const CDualLayoutStyle dualLayoutStyles[] =
+namespace layout
 {
-	{ IDC_MAIN_SHEET, layout::StretchX | layout::stretchY( TopPct ), layout::StretchX | layout::StretchY },
-	{ IDC_TRACK_TOOL_ICON, layout::offsetY( TopPct ), layout::OffsetY },
-	{ IDC_TRACKING_POS_STATIC, layout::StretchX | layout::offsetY( TopPct ), layout::StretchX | layout::OffsetY },
+	static const CDualLayoutStyle dualLayoutStyles[] =
+	{
+		{ IDC_MAIN_SHEET, SizeX | pctSizeY( TopPct ), SizeX | SizeY },
+		{ IDC_TRACK_TOOL_ICON, pctMoveY( TopPct ), MoveY },
+		{ IDC_TRACKING_POS_STATIC, SizeX | pctMoveY( TopPct ), SizeX | MoveY },
 
-	{ CM_HIGHLIGHT_WINDOW, layout::offsetY( TopPct ), layout::OffsetY },
-	{ CM_REFRESH, layout::offsetY( TopPct ), layout::OffsetY },
-	{ CM_FIND_WINDOW, layout::offsetY( TopPct ), layout::OffsetY },
-	{ IDC_EXPAND_DETAILS, layout::OffsetX | layout::offsetY( TopPct ), layout::OffsetX | layout::OffsetY },
+		{ CM_HIGHLIGHT_WINDOW, pctMoveY( TopPct ), MoveY },
+		{ CM_REFRESH, pctMoveY( TopPct ), MoveY },
+		{ CM_FIND_WINDOW, pctMoveY( TopPct ), MoveY },
+		{ IDC_EXPAND_DETAILS, MoveX | pctMoveY( TopPct ), MoveX | MoveY },
 
-	{ IDC_BRIEF_INFO_EDIT, layout::StretchX | layout::offsetY( TopPct ), layout::StretchX | layout::OffsetY },
-	{ ID_APPLY_NOW, layout::OffsetX | layout::offsetY( TopPct ), layout::OffsetX | layout::OffsetY },
-	{ IDC_DETAILS_SHEET, layout::StretchX | layout::offsetY( TopPct ) | layout::stretchY( BottomPct ), layout::StretchX | layout::OffsetY | layout::StretchY },
-	{ IDC_WINDOW_DETAILS_GROUP, layout::StretchX | layout::offsetY( TopPct ) | layout::stretchY( BottomPct ) | layout::CollapsedTop, layout::StretchX | layout::OffsetY | layout::StretchY }
-};
+		{ IDC_BRIEF_INFO_EDIT, SizeX | pctMoveY( TopPct ), SizeX | MoveY },
+		{ ID_APPLY_NOW, MoveX | pctMoveY( TopPct ), MoveX | MoveY },
+		{ IDC_DETAILS_SHEET, SizeX | pctMoveY( TopPct ) | pctSizeY( BottomPct ), SizeX | MoveY | SizeY },
+		{ IDC_WINDOW_DETAILS_GROUP, SizeX | pctMoveY( TopPct ) | pctSizeY( BottomPct ) | CollapsedTop, SizeX | MoveY | SizeY }
+	};
+}
 
 
 CMainDialog::CMainDialog( void )
@@ -62,7 +65,7 @@ CMainDialog::CMainDialog( void )
 	, m_autoUpdateTimer( this, TimerAutoUpdate, app::GetOptions()->m_autoUpdateTimeout * 1000 )
 	, m_refreshTimer( this, TimerResetRefreshButton, 150 )
 {
-	GetLayoutEngine().RegisterDualCtrlLayout( dualLayoutStyles, COUNT_OF( dualLayoutStyles ) );
+	GetLayoutEngine().RegisterDualCtrlLayout( layout::dualLayoutStyles, COUNT_OF( layout::dualLayoutStyles ) );
 	m_regSection = reg::section;
 	m_initCollapsed = true;
 	m_pSystemTrayInfo.reset( new CSysTrayInfo );

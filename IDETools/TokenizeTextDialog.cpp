@@ -41,21 +41,21 @@ namespace layout
 {
 	static CLayoutStyle styles[] =
 	{
-		{ IDC_SOURCE_TEXT_LABEL, StretchX },
-		{ IDC_SOURCE_TEXT_EDIT, StretchX },
-		{ IDC_INPUT_TOKENS_EDIT, StretchX },
-		{ IDC_INPUT_TOKENS_DEFAULT, OffsetX },
-		{ IDC_OUTPUT_SEPARATOR_EDIT, StretchX },
-		{ IDC_OUTPUT_SEPARATOR_DEFAULT, OffsetX },
-		{ IDC_GROUP_BOX_2, StretchX },
-		{ IDC_TRIM_CHARS_EDIT, StretchX },
-		{ IDC_TRIM_CHARS_DEFAULT, OffsetX },
-		{ IDC_OUTPUT_TEXT_LABEL, StretchX },
-		{ IDC_OUTPUT_TEXT_EDIT, Stretch },
-		{ IDC_COPY_OUTPUT_TO_SOURCE, OffsetX },
-		{ IDC_SHOW_WHITESPACE_CHECK, OffsetY },
-		{ IDOK, Offset },
-		{ IDCANCEL, Offset }
+		{ IDC_SOURCE_TEXT_LABEL, SizeX },
+		{ IDC_SOURCE_TEXT_EDIT, SizeX },
+		{ IDC_INPUT_TOKENS_EDIT, SizeX },
+		{ IDC_INPUT_TOKENS_DEFAULT, MoveX },
+		{ IDC_OUTPUT_SEPARATOR_EDIT, SizeX },
+		{ IDC_OUTPUT_SEPARATOR_DEFAULT, MoveX },
+		{ IDC_GROUP_BOX_2, SizeX },
+		{ IDC_TRIM_CHARS_EDIT, SizeX },
+		{ IDC_TRIM_CHARS_DEFAULT, MoveX },
+		{ IDC_OUTPUT_TEXT_LABEL, SizeX },
+		{ IDC_OUTPUT_TEXT_EDIT, Size },
+		{ IDC_COPY_OUTPUT_TO_SOURCE, MoveX },
+		{ IDC_SHOW_WHITESPACE_CHECK, MoveY },
+		{ IDOK, Move },
+		{ IDCANCEL, Move }
 	};
 }
 

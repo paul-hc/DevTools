@@ -16,15 +16,15 @@ namespace layout
 {
 	static CLayoutStyle styles[] =
 	{
-		{ IDC_PROJECT_NAME_COMBO, StretchX },
-		{ IDC_FILES_LIST, Stretch },
-		{ IDC_SHOW_FULL_PATH_CHECK, OffsetX },
-		{ IDC_FULLPATH_STATIC, OffsetY },
-		{ IDC_FULLPATH_EDIT, OffsetY | StretchX },
-		{ IDOK, OffsetX },
-		{ IDCANCEL, OffsetX },
-		{ IDC_BEFORE_OPEN_STATIC, Offset },
-		{ IDC_CLOSE_ALL_BEFORE_OPEN_CHECK, Offset }
+		{ IDC_PROJECT_NAME_COMBO, SizeX },
+		{ IDC_FILES_LIST, Size },
+		{ IDC_SHOW_FULL_PATH_CHECK, MoveX },
+		{ IDC_FULLPATH_STATIC, MoveY },
+		{ IDC_FULLPATH_EDIT, MoveY | SizeX },
+		{ IDOK, MoveX },
+		{ IDCANCEL, MoveX },
+		{ IDC_BEFORE_OPEN_STATIC, Move },
+		{ IDC_CLOSE_ALL_BEFORE_OPEN_CHECK, Move }
 	};
 }
 

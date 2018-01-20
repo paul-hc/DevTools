@@ -125,7 +125,7 @@ namespace layout
 {
 	static const CLayoutStyle styles[] =
 	{
-		{ IDC_WINDOW_TREE, Stretch }
+		{ IDC_WINDOW_TREE, Size }
 	};
 }
 

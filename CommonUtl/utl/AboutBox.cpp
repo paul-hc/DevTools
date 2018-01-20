@@ -90,13 +90,13 @@ namespace layout
 {
 	static const CLayoutStyle styles[] =
 	{
-		{ IDC_ABOUT_NAME_VERSION_STATIC, StretchX },
-		{ IDC_ABOUT_COPYRIGHT_STATIC, StretchX },
-		{ IDC_ABOUT_WRITTEN_BY_STATIC, StretchX },
-		{ IDC_ABOUT_EMAIL_STATIC, StretchX },
-		{ IDC_ABOUT_BUILD_INFO_LIST, Stretch },
-		{ IDC_ABOUT_EXPLORE_EXECUTABLE, OffsetY },
-		{ IDOK, Offset }
+		{ IDC_ABOUT_NAME_VERSION_STATIC, SizeX },
+		{ IDC_ABOUT_COPYRIGHT_STATIC, SizeX },
+		{ IDC_ABOUT_WRITTEN_BY_STATIC, SizeX },
+		{ IDC_ABOUT_EMAIL_STATIC, SizeX },
+		{ IDC_ABOUT_BUILD_INFO_LIST, Size },
+		{ IDC_ABOUT_EXPLORE_EXECUTABLE, MoveY },
+		{ IDOK, Move }
 	};
 }
 

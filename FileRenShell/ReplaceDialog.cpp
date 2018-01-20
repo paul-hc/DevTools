@@ -34,13 +34,13 @@ namespace layout
 {
 	static CLayoutStyle styles[] =
 	{
-		{ IDC_FIND_WHAT_COMBO, StretchX },
-		{ IDC_REPLACE_WITH_COMBO, StretchX },
-		{ IDC_STRIP_BAR_1, OffsetX },
-		{ IDC_STRIP_BAR_2, OffsetX },
-		{ IDOK, OffsetX },
-		{ IDCANCEL, OffsetX },
-		{ IDC_CLEAR_FILES_BUTTON, Offset }
+		{ IDC_FIND_WHAT_COMBO, SizeX },
+		{ IDC_REPLACE_WITH_COMBO, SizeX },
+		{ IDC_STRIP_BAR_1, MoveX },
+		{ IDC_STRIP_BAR_2, MoveX },
+		{ IDOK, MoveX },
+		{ IDCANCEL, MoveX },
+		{ IDC_CLEAR_FILES_BUTTON, Move }
 	};
 }
 

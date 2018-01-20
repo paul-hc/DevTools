@@ -12,9 +12,9 @@ namespace layout
 {
 	static CLayoutStyle styles[] =
 	{
-		{ IDC_INPUT_EDIT, Stretch },
-		{ IDOK, Offset },
-		{ IDCANCEL, Offset }
+		{ IDC_INPUT_EDIT, Size },
+		{ IDOK, Move },
+		{ IDCANCEL, Move }
 	};
 }
 

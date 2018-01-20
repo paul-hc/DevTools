@@ -17,10 +17,10 @@ namespace layout
 {
 	static const CLayoutStyle styles[] =
 	{
-		{ IDC_TOTAL_FLAGS_EDIT, stretchX( 50 ) },
-		{ IDC_UNKNOWN_FLAGS_LABEL, offsetX( 50 ) },
-		{ IDC_UNKNOWN_FLAGS_EDIT, offsetX( 50 ) | stretchX( 50 ) },
-		{ IDC_DETAILS_SHEET, Stretch }
+		{ IDC_TOTAL_FLAGS_EDIT, pctSizeX( 50 ) },
+		{ IDC_UNKNOWN_FLAGS_LABEL, pctMoveX( 50 ) },
+		{ IDC_UNKNOWN_FLAGS_EDIT, pctMoveX( 50 ) | pctSizeX( 50 ) },
+		{ IDC_DETAILS_SHEET, Size }
 	};
 }
 

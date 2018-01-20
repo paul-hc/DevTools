@@ -52,16 +52,16 @@ namespace layout
 {
 	static const CLayoutStyle styles[] =
 	{
-		{ IDC_SOURCE_TEXT_EDIT, StretchY },
-		{ IDC_DATE_TIME_RESULTS_LABEL, StretchX },
-		{ IDC_DATE_TIME_RESULTS_EDIT, Stretch },
-		{ IDC_CURRLINE_STATIC, OffsetY },
-		{ IDC_CURRLINE_PICKER, OffsetY },
-		{ IDC_LINE_FORMAT_STATIC, OffsetY },
-		{ IDC_LINE_FORMAT_COMBO, OffsetY },
-		{ IDC_CURRLINE_APPLY_BUTTON, OffsetY },
-		{ IDC_CLEAR_BUTTON, Offset },
-		{ IDOK, Offset }
+		{ IDC_SOURCE_TEXT_EDIT, SizeY },
+		{ IDC_DATE_TIME_RESULTS_LABEL, SizeX },
+		{ IDC_DATE_TIME_RESULTS_EDIT, Size },
+		{ IDC_CURRLINE_STATIC, MoveY },
+		{ IDC_CURRLINE_PICKER, MoveY },
+		{ IDC_LINE_FORMAT_STATIC, MoveY },
+		{ IDC_LINE_FORMAT_COMBO, MoveY },
+		{ IDC_CURRLINE_APPLY_BUTTON, MoveY },
+		{ IDC_CLEAR_BUTTON, Move },
+		{ IDOK, Move }
 	};
 }
 

@@ -37,16 +37,16 @@ namespace layout
 	{
 		return
 			m_layoutStyle != UINT_MAX &&
-			m_fields.m_offsetX >= 0 && m_fields.m_offsetX <= 100 &&
-			m_fields.m_offsetY >= 0 && m_fields.m_offsetY <= 100 &&
-			m_fields.m_stretchX >= 0 && m_fields.m_stretchX <= 100 &&
-			m_fields.m_stretchY >= 0 && m_fields.m_stretchY <= 100;
+			m_fields.m_moveX >= 0 && m_fields.m_moveX <= 100 &&
+			m_fields.m_moveY >= 0 && m_fields.m_moveY <= 100 &&
+			m_fields.m_sizeX >= 0 && m_fields.m_sizeX <= 100 &&
+			m_fields.m_sizeY >= 0 && m_fields.m_sizeY <= 100;
 	}
 
 	bool Metrics::HasEffect( void ) const
 	{
 		ASSERT( IsValid() );
-		return m_fields.m_offsetX != 0 || m_fields.m_offsetY != 0 || m_fields.m_stretchX != 0 || m_fields.m_stretchY != 0;
+		return m_fields.m_moveX != 0 || m_fields.m_moveY != 0 || m_fields.m_sizeX != 0 || m_fields.m_sizeY != 0;
 	}
 
 
@@ -121,14 +121,14 @@ namespace layout
 		// proportional layout for control's origin
 		CPoint origin = m_initialOrigin;
 
-		origin.x += MulDiv( delta.cx, metrics.m_fields.m_offsetX, 100 );
-		origin.y += MulDiv( delta.cy, metrics.m_fields.m_offsetY, 100 );
+		origin.x += MulDiv( delta.cx, metrics.m_fields.m_moveX, 100 );
+		origin.y += MulDiv( delta.cy, metrics.m_fields.m_moveY, 100 );
 
 		// proportional layout for control's size
 		CSize size = m_initialSize;
 
-		size.cx += MulDiv( delta.cx, metrics.m_fields.m_stretchX, 100 );
-		size.cy += MulDiv( delta.cy, metrics.m_fields.m_stretchY, 100 );
+		size.cx += MulDiv( delta.cx, metrics.m_fields.m_sizeX, 100 );
+		size.cy += MulDiv( delta.cy, metrics.m_fields.m_sizeY, 100 );
 
 		// set output parameters
 		rCtrlRect = CRect( origin, size );

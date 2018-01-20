@@ -19,10 +19,10 @@ namespace layout
 {
 	static const CLayoutStyle styles[] =
 	{
-		{ IDC_MESSAGE_STATIC, StretchX },
-		{ IDC_CODE_FIELD_EDIT, Stretch },
-		{ IDOK, Offset },
-		{ IDCANCEL, Offset }
+		{ IDC_MESSAGE_STATIC, SizeX },
+		{ IDC_CODE_FIELD_EDIT, Size },
+		{ IDOK, Move },
+		{ IDCANCEL, Move }
 	};
 }
 

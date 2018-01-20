@@ -19,21 +19,21 @@ namespace layout
 {
 	static CLayoutStyle styles[] =
 	{
-		{ IDC_WORD_BREAK_CHARS_EDIT, StretchX },
-		{ IDC_WORD_BREAK_PREFIXES_EDIT, StretchX },
-		{ IDC_WORDS_PRESERVED_EDIT, StretchX },
-		{ IDC_WORDS_UPPERCASE_EDIT, StretchX },
-		{ IDC_WORDS_LOWERCASE_EDIT, StretchX },
-		{ IDC_GROUP_BOX_1, StretchX },
-		{ IDC_ARTICLES_EDIT, StretchX },
-		{ IDC_ARTICLES_COMBO, OffsetX },
-		{ IDC_CONJUNCTIONS_EDIT, StretchX },
-		{ IDC_CONJUNCTIONS_COMBO, OffsetX },
-		{ IDC_PREPOSITIONS_EDIT, StretchX },
-		{ IDC_PREPOSITIONS_COMBO, OffsetX },
-		{ IDOK, Offset },
-		{ IDCANCEL, Offset },
-		{ IDC_SET_DEFAULT_ALL, Offset }
+		{ IDC_WORD_BREAK_CHARS_EDIT, SizeX },
+		{ IDC_WORD_BREAK_PREFIXES_EDIT, SizeX },
+		{ IDC_WORDS_PRESERVED_EDIT, SizeX },
+		{ IDC_WORDS_UPPERCASE_EDIT, SizeX },
+		{ IDC_WORDS_LOWERCASE_EDIT, SizeX },
+		{ IDC_GROUP_BOX_1, SizeX },
+		{ IDC_ARTICLES_EDIT, SizeX },
+		{ IDC_ARTICLES_COMBO, MoveX },
+		{ IDC_CONJUNCTIONS_EDIT, SizeX },
+		{ IDC_CONJUNCTIONS_COMBO, MoveX },
+		{ IDC_PREPOSITIONS_EDIT, SizeX },
+		{ IDC_PREPOSITIONS_COMBO, MoveX },
+		{ IDOK, Move },
+		{ IDCANCEL, Move },
+		{ IDC_SET_DEFAULT_ALL, Move }
 	};
 }
 

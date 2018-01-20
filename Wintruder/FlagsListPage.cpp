@@ -15,7 +15,7 @@ namespace layout
 {
 	static const CLayoutStyle styles[] =
 	{
-		{ IDC_FLAGS_EDITOR_LIST, Stretch }
+		{ IDC_FLAGS_EDITOR_LIST, Size }
 	};
 }
 

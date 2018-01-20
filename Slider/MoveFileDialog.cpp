@@ -23,10 +23,10 @@ namespace layout
 {
 	static const CLayoutStyle styles[] =
 	{
-		{ IDC_SOURCE_EDIT, StretchX },
-		{ IDC_DEST_FOLDER_COMBO, Stretch },
-		{ IDOK, Offset },
-		{ IDCANCEL, Offset }
+		{ IDC_SOURCE_EDIT, SizeX },
+		{ IDC_DEST_FOLDER_COMBO, Size },
+		{ IDOK, Move },
+		{ IDCANCEL, Move }
 	};
 }
 

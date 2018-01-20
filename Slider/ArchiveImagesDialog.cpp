@@ -27,15 +27,15 @@ namespace layout
 {
 	static const CLayoutStyle styles[] =
 	{
-		{ IDC_DEST_DIR_PATH_EDIT, StretchX },
-		{ IDC_BROWSE_DEST_FOLDER_BUTTON, OffsetX },
-		{ CM_CREATE_DEST_FOLDER, OffsetX },
-		{ ID_EDIT_ARCHIVE_PASSWORD, OffsetX },
-		{ IDC_FILE_PATHS_LIST, Stretch },
-		{ IDC_TARGET_GROUP, StretchX | DoRepaint },
-		{ IDC_TARGET_FILE_COUNT_STATIC, StretchX },
-		{ IDOK, OffsetX },
-		{ IDCANCEL, OffsetX }
+		{ IDC_DEST_DIR_PATH_EDIT, SizeX },
+		{ IDC_BROWSE_DEST_FOLDER_BUTTON, MoveX },
+		{ CM_CREATE_DEST_FOLDER, MoveX },
+		{ ID_EDIT_ARCHIVE_PASSWORD, MoveX },
+		{ IDC_FILE_PATHS_LIST, Size },
+		{ IDC_TARGET_GROUP, SizeX | DoRepaint },
+		{ IDC_TARGET_FILE_COUNT_STATIC, SizeX },
+		{ IDOK, MoveX },
+		{ IDCANCEL, MoveX }
 	};
 }
 

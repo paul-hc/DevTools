@@ -19,11 +19,11 @@ namespace layout
 {
 	static CLayoutStyle styles[] =
 	{
-		{ IDOK, OffsetX },
-		{ IDCANCEL, OffsetX },
-		{ IDC_EXCLUDED_FN_EDIT, StretchX },
-		{ IDC_MORE_FN_EDIT, StretchX },
-		{ IDC_ADDITIONAL_INC_PATH_EDIT, StretchX }
+		{ IDOK, MoveX },
+		{ IDCANCEL, MoveX },
+		{ IDC_EXCLUDED_FN_EDIT, SizeX },
+		{ IDC_MORE_FN_EDIT, SizeX },
+		{ IDC_ADDITIONAL_INC_PATH_EDIT, SizeX }
 	};
 }
 

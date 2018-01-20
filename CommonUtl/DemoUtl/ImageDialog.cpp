@@ -51,33 +51,33 @@ enum { ImagePct = 80, ColorTablePct = 100 - ImagePct };
 
 namespace layout
 {
-	#define Lay_StretchImageY stretchY( ImagePct )
-	#define Lay_OffsetTableY offsetY( ImagePct )
-	#define Lay_StretchTableY stretchY( ColorTablePct )
+	#define Lay_SizeImageY pctSizeY( ImagePct )
+	#define Lay_MoveTableY pctMoveY( ImagePct )
+	#define Lay_SizeTableY pctSizeY( ColorTablePct )
 
 	static CDualLayoutStyle dualStyles[] =
 	{
-		{ IDC_IMAGE_PATH_COMBO, StretchX, UseExpanded },
-		{ IDC_SAMPLE_MODE_SHEET, StretchX, UseExpanded },
-		{ IDC_IMAGE_INFO_STATIC, StretchX, UseExpanded },
-		{ IDC_TRANSP_COLOR_SAMPLE, OffsetX, UseExpanded },
-		{ ID_RESET_TRANSP_COLOR, OffsetX, UseExpanded },
-		{ IDC_TOOLBAR_PLACEHOLDER, OffsetX, UseExpanded },
+		{ IDC_IMAGE_PATH_COMBO, SizeX, UseExpanded },
+		{ IDC_SAMPLE_MODE_SHEET, SizeX, UseExpanded },
+		{ IDC_IMAGE_INFO_STATIC, SizeX, UseExpanded },
+		{ IDC_TRANSP_COLOR_SAMPLE, MoveX, UseExpanded },
+		{ ID_RESET_TRANSP_COLOR, MoveX, UseExpanded },
+		{ IDC_TOOLBAR_PLACEHOLDER, MoveX, UseExpanded },
 
-		{ IDC_IMAGE_SAMPLE, StretchX | Lay_StretchImageY, StretchX | StretchY },
-		{ IDC_PIXEL_COLOR_SAMPLE, Lay_OffsetTableY, OffsetY },
-		{ IDC_PIXEL_INFO_STATIC, StretchX | Lay_OffsetTableY, StretchX | OffsetY },
-		{ IDC_SHOW_COLOR_TABLE_CHECK, OffsetX | Lay_OffsetTableY, OffsetX | OffsetY },
+		{ IDC_IMAGE_SAMPLE, SizeX | Lay_SizeImageY, SizeX | SizeY },
+		{ IDC_PIXEL_COLOR_SAMPLE, Lay_MoveTableY, MoveY },
+		{ IDC_PIXEL_INFO_STATIC, SizeX | Lay_MoveTableY, SizeX | MoveY },
+		{ IDC_SHOW_COLOR_TABLE_CHECK, MoveX | Lay_MoveTableY, MoveX | MoveY },
 
-		{ IDC_COLOR_TABLE_LABEL, Lay_OffsetTableY, OffsetY },
-		{ IDC_COLOR_TABLE_MODE_COMBO, Lay_OffsetTableY | CollapsedTop, OffsetY },
-		{ IDC_UNIQUE_COLORS_CHECK, Lay_OffsetTableY, OffsetY },
-		{ IDC_SHOW_COLOR_LABELS_CHECK, Lay_OffsetTableY, OffsetY },
-		{ IDC_COLOR_TABLE_INFO_STATIC, StretchX | Lay_OffsetTableY, StretchX | OffsetY },
-		{ IDC_COLOR_TABLE_SAMPLE, StretchX | Lay_OffsetTableY | Lay_StretchTableY, StretchX | OffsetY },
+		{ IDC_COLOR_TABLE_LABEL, Lay_MoveTableY, MoveY },
+		{ IDC_COLOR_TABLE_MODE_COMBO, Lay_MoveTableY | CollapsedTop, MoveY },
+		{ IDC_UNIQUE_COLORS_CHECK, Lay_MoveTableY, MoveY },
+		{ IDC_SHOW_COLOR_LABELS_CHECK, Lay_MoveTableY, MoveY },
+		{ IDC_COLOR_TABLE_INFO_STATIC, SizeX | Lay_MoveTableY, SizeX | MoveY },
+		{ IDC_COLOR_TABLE_SAMPLE, SizeX | Lay_MoveTableY | Lay_SizeTableY, SizeX | MoveY },
 
-		{ IDCANCEL, OffsetX, UseExpanded },
-		{ ID_REFRESH, OffsetX, UseExpanded }
+		{ IDCANCEL, MoveX, UseExpanded },
+		{ ID_REFRESH, MoveX, UseExpanded }
 	};
 }
 
@@ -885,7 +885,7 @@ CShowImagePage::CShowImagePage( CImageDialog* pDialog )
 	: CModePage( pDialog, CImageDialog::ShowImage, IDD_IMAGE_PAGE_SHOW_IMAGE )
 	, m_transpColorSample( pDialog )
 {
-	static const CLayoutStyle styles[] = { { IDC_TRANSP_COLOR_INFO, layout::StretchX } };
+	static const CLayoutStyle styles[] = { { IDC_TRANSP_COLOR_INFO, layout::SizeX } };
 	RegisterCtrlLayout( styles, COUNT_OF( styles ) );
 }
 
