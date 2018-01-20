@@ -363,19 +363,35 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath=".\ChildFrm.cpp"
+				RelativePath=".\Application.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\ChildFrm.h"
+				RelativePath=".\Application.h"
 				>
 			</File>
 			<File
-				RelativePath=".\ExplorerBrowser.cpp"
+				RelativePath=".\BrowserDoc.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\ExplorerBrowser.h"
+				RelativePath=".\BrowserDoc.h"
+				>
+			</File>
+			<File
+				RelativePath=".\BrowserView.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\BrowserView.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ChildFrame.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\ChildFrame.h"
 				>
 			</File>
 			<File
@@ -439,27 +455,11 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath=".\ExplorerBrowserDoc.cpp"
+				RelativePath=".\MainFrame.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\ExplorerBrowserDoc.h"
-				>
-			</File>
-			<File
-				RelativePath=".\ExplorerBrowserView.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\ExplorerBrowserView.h"
-				>
-			</File>
-			<File
-				RelativePath=".\MainFrm.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\MainFrm.h"
+				RelativePath=".\MainFrame.h"
 				>
 			</File>
 			<File
@@ -502,12 +502,28 @@
 				RelativePath=".\stdafx.h"
 				>
 			</File>
+			<File
+				RelativePath=".\StdStl.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Utilities.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Utilities.h"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Resource Files"
 			Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav"
 			UniqueIdentifier="{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}"
 			>
+			<File
+				RelativePath=".\res\BrowserDoc.ico"
+				>
+			</File>
 			<File
 				RelativePath=".\res\ExplorerBrowser.ico"
 				>
@@ -525,7 +541,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\res\ExplorerBrowserDoc.ico"
+				RelativePath=".\res\ExplorerBrowser.rgs"
 				>
 			</File>
 			<File

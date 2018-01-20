@@ -2,12 +2,12 @@
 //
 
 #include "stdafx.h"
-#include "ExplorerBrowser.h"
-#include "MainFrm.h"
-
-#include "ChildFrm.h"
-#include "ExplorerBrowserDoc.h"
-#include "ExplorerBrowserView.h"
+#include "Application.h"
+#include "MainFrame.h"
+#include "ChildFrame.h"
+#include "BrowserDoc.h"
+#include "BrowserView.h"
+#include "resource.h"
 #include <initguid.h>
 #include "ExplorerBrowser_i.c"
 
@@ -16,23 +16,19 @@
 #endif
 
 
-// CExplorerBrowserApp
-
-class CExplorerBrowserModule : public CAtlMfcModule
+class CApplicationModule : public CAtlMfcModule
 {
 public:
-	DECLARE_LIBID(LIBID_ExplorerBrowserLib);
-	DECLARE_REGISTRY_APPID_RESOURCEID(IDR_EXPLORERBROWSER, "{522D862B-C396-4C42-B9D4-1A188C9E9189}");
+	DECLARE_LIBID( LIBID_ExplorerBrowserLib );
+	DECLARE_REGISTRY_APPID_RESOURCEID( IDR_EXPLORERBROWSER_REGISTRY, "{522D862B-C396-4C42-B9D4-1A188C9E9189}" );
 };
 
-CExplorerBrowserModule g_atlModule;
 
-CExplorerBrowserApp g_theApp;		// the one and only CExplorerBrowserApp object
+CApplicationModule g_atlModule;
+CApplication g_theApp;		// the one and only CApplication object
 
 
-// CExplorerBrowserApp class
-
-BOOL CExplorerBrowserApp::InitInstance( void )
+BOOL CApplication::InitInstance( void )
 {
 	// InitCommonControlsEx() is required on Windows XP if an application
 	// manifest specifies use of ComCtl32.dll version 6 or later to enable
@@ -46,10 +42,9 @@ BOOL CExplorerBrowserApp::InitInstance( void )
 
 	CWinApp::InitInstance();
 
-	// Initialize OLE libraries
-	if (!AfxOleInit())
+	if ( !AfxOleInit() )		// initialize OLE libraries
 	{
-		AfxMessageBox(IDP_OLE_INIT_FAILED);
+		AfxMessageBox( _T("OLE initialization failed.  Make sure that the OLE libraries are the correct version.") );
 		return FALSE;
 	}
 	AfxEnableControlContainer();
@@ -60,14 +55,14 @@ BOOL CExplorerBrowserApp::InitInstance( void )
 	// Change the registry key under which our settings are stored
 	// TODO: You should modify this string to be something appropriate
 	// such as the name of your company or organization
-	SetRegistryKey( _T("Local AppWizard-Generated Applications") );
-	LoadStdProfileSettings(4);  // Load standard INI file options (including MRU)
+	SetRegistryKey( _T("Paul Cocoveanu\\other") );			// change the registry key under which our settings are stored
+	LoadStdProfileSettings(10);  // Load standard INI file options (including MRU)
 	// Register the application's document templates.  Document templates
 	//  serve as the connection between documents, frame windows and views
-	AddDocTemplate( new CMultiDocTemplate( IDR_ExplorerBrowserTYPE,
-		RUNTIME_CLASS( CExplorerBrowserDoc ),
+	AddDocTemplate( new CMultiDocTemplate( IDR_XBrowserTYPE,
+		RUNTIME_CLASS( CBrowserDoc ),
 		RUNTIME_CLASS( CChildFrame ),
-		RUNTIME_CLASS( CExplorerBrowserView ) ) );
+		RUNTIME_CLASS( CBrowserView ) ) );
 
 	// create main MDI Frame window
 	CMainFrame* pMainFrame = new CMainFrame;
@@ -120,7 +115,7 @@ BOOL CExplorerBrowserApp::InitInstance( void )
 	return TRUE;
 }
 
-BOOL CExplorerBrowserApp::ExitInstance( void )
+BOOL CApplication::ExitInstance( void )
 {
 #if !defined(_WIN32_WCE) || defined(_CE_DCOM)
 	g_atlModule.RevokeClassObjects();
@@ -131,7 +126,7 @@ BOOL CExplorerBrowserApp::ExitInstance( void )
 
 // command handlers
 
-BEGIN_MESSAGE_MAP( CExplorerBrowserApp, CWinApp )
+BEGIN_MESSAGE_MAP( CApplication, CWinApp )
 	ON_COMMAND( ID_FILE_NEW, OnFileNew )
 	ON_COMMAND( ID_FILE_PRINT_SETUP, OnFilePrintSetup )
 	ON_COMMAND( ID_VIEW_EXPLORER_SHOW_FRAME, OnToggleShowFrames )
@@ -140,17 +135,17 @@ BEGIN_MESSAGE_MAP( CExplorerBrowserApp, CWinApp )
 	ON_COMMAND( ID_APP_ABOUT, OnAppAbout )
 END_MESSAGE_MAP()
 
-void CExplorerBrowserApp::OnToggleShowFrames( void )
+void CApplication::OnToggleShowFrames( void )
 {
 	m_showFrames = !m_showFrames;
 }
 
-void CExplorerBrowserApp::OnUpdateShowFrames( CCmdUI* pCmdUI )
+void CApplication::OnUpdateShowFrames( CCmdUI* pCmdUI )
 {
 	pCmdUI->SetCheck( m_showFrames );
 }
 
-void CExplorerBrowserApp::OnAppAbout( void )
+void CApplication::OnAppAbout( void )
 {
 	CDialog dlg( IDD_ABOUTBOX );
 	dlg.DoModal();

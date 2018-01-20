@@ -8,7 +8,6 @@
 // Generated from the TEXTINCLUDE 2 resource.
 //
 #include "afxres.h"
-
 /////////////////////////////////////////////////////////////////////////////
 #undef APSTUDIO_READONLY_SYMBOLS
 
@@ -34,7 +33,7 @@ END
 
 2 TEXTINCLUDE 
 BEGIN
-    "#include ""afxres.h""\r\0"
+    "#include ""afxres.h""\0"
 END
 
 3 TEXTINCLUDE 
@@ -52,7 +51,8 @@ BEGIN
     "#include ""afxprint.rc""       // printing/print preview resources\r\n"
     "#endif\r\n"
     "\r\n"
-    "1 TYPELIB ""ExplorerBrowser.tlb""\r\0"
+    "1 TYPELIB ""ExplorerBrowser.tlb""\r\n"
+    "\0"
 END
 
 #endif    // APSTUDIO_INVOKED
@@ -66,7 +66,7 @@ END
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
 IDR_MAINFRAME           ICON                    "res\\ExplorerBrowser.ico"
-IDR_ExplorerBrowserTYPE ICON                    "res\\ExplorerBrowserDoc.ico"
+IDR_XBrowserTYPE        ICON                    "res\\BrowserDoc.ico"
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -127,7 +127,7 @@ BEGIN
     END
 END
 
-IDR_ExplorerBrowserTYPE MENU 
+IDR_XBrowserTYPE MENU 
 BEGIN
     POPUP "&File"
     BEGIN
@@ -160,21 +160,25 @@ BEGIN
         MENUITEM SEPARATOR
         MENUITEM "Explorer Show &Frames",       ID_VIEW_EXPLORER_SHOW_FRAME
         MENUITEM SEPARATOR
-        MENUITEM "Large Icons",                 ID_VIEW_LARGEICON
-        MENUITEM "Small Icons",                 ID_VIEW_SMALLICON
-        MENUITEM "List",                        ID_VIEW_LIST
-        MENUITEM "Tiles",                       ID_VIEW_TILES
-        MENUITEM "Thumbnails",                  ID_VIEW_THUMBNAILS
-        MENUITEM "Thumb Strip",                 ID_VIEW_THUMBSTRIP
-        MENUITEM "Details",                     ID_VIEW_DETAILS
+        POPUP "View &Mode"
+        BEGIN
+            MENUITEM "Large Icons",                 ID_VIEW_LARGEICON
+            MENUITEM "Small Icons\t(goes to Large Icons)", ID_VIEW_SMALLICON
+            MENUITEM "List",                        ID_VIEW_LIST
+            MENUITEM "Details",                     ID_VIEW_DETAILS
+            MENUITEM SEPARATOR
+            MENUITEM "Tiles",                       ID_VIEW_TILES
+            MENUITEM "Thumbnails\t(goes to Large Icons)", ID_VIEW_THUMBNAILS
+            MENUITEM "Thumb Strip\t(goes to Large Icons)", ID_VIEW_THUMBSTRIP
+        END
         MENUITEM SEPARATOR
         MENUITEM "Back",                        ID_VIEW_BACK
         MENUITEM "Forward",                     ID_VIEW_FORWARD
         MENUITEM SEPARATOR
-        MENUITEM "Frames",                      ID_VIEW_FRAMES
+        MENUITEM "Frames (crashes)",            ID_VIEW_FRAMES
         MENUITEM SEPARATOR
-        MENUITEM "Show Selection",              ID_VIEW_SHOWSELECTION
-        MENUITEM "Go To User Profile",          ID_VIEW_GOTOUSERPROFILE
+        MENUITEM "Show Selected Files...",      ID_VIEW_SHOWSELECTION
+        MENUITEM "Browse User Folder",          ID_VIEW_GOTOUSERPROFILE
     END
     POPUP "&Window"
     BEGIN
@@ -301,7 +305,7 @@ END
 // REGISTRY
 //
 
-IDR_EXPLORERBROWSER     REGISTRY                "res\\ExplorerBrowser.rgs"
+IDR_EXPLORERBROWSER_REGISTRY REGISTRY                "res\\ExplorerBrowser.rgs"
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -310,15 +314,8 @@ IDR_EXPLORERBROWSER     REGISTRY                "res\\ExplorerBrowser.rgs"
 
 STRINGTABLE 
 BEGIN
-    IDP_OLE_INIT_FAILED     "OLE initialization failed.  Make sure that the OLE libraries are the correct version."
-    IDP_NAVIGATION_FAILED   "Navigation failed!"
-    IDS_SELECTEDFILES       "List of %d selected file(s):\n"
-END
-
-STRINGTABLE 
-BEGIN
     IDR_MAINFRAME           "Explorer Browser"
-    IDR_ExplorerBrowserTYPE "\nExplorerBrowser\nExplorerBrowser\n\n\nExplorerBrowser.Document\nExplorerBrowser.Document"
+    IDR_XBrowserTYPE        "\nBrowser\nXBrowser\n\n\nXBrowser.Document\nXBrowser.Document"
 END
 
 STRINGTABLE 

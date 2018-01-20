@@ -1,7 +1,8 @@
 
 #include "stdafx.h"
-#include "ChildFrm.h"
-#include "ExplorerBrowser.h"
+#include "ChildFrame.h"
+#include "Application.h"
+#include "resource.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
