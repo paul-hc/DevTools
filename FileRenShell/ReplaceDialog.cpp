@@ -1,7 +1,7 @@
 
 #include "stdafx.h"
 #include "ReplaceDialog.h"
-#include "FileRenameDialog.h"
+#include "MainRenameDialog.h"
 #include "FileWorkingSet.h"
 #include "FileSetUi.h"
 #include "PathFunctors.h"
@@ -45,7 +45,7 @@ namespace layout
 }
 
 
-CReplaceDialog::CReplaceDialog( CFileRenameDialog* pParent )
+CReplaceDialog::CReplaceDialog( CMainRenameDialog* pParent )
 	: CLayoutDialog( IDD_REPLACE_DIALOG, pParent )
 	, m_pParent( pParent )
 	, m_findWhat( LoadFindWhat() )

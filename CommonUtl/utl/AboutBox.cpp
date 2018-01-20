@@ -35,7 +35,9 @@ namespace hlp
 			{ 1500, _T("Visual Studio 2008"), _T("VC++ 9") },
 			{ 1600, _T("Visual Studio 2010"), _T("VC++ 10") },
 			{ 1700, _T("Visual Studio 2012"), _T("VC++ 11") },
-			{ 1800, _T("Visual Studio 2013"), _T("VC++ 12") }
+			{ 1800, _T("Visual Studio 2013"), _T("VC++ 12") },
+			{ 1900, _T("Visual Studio 2015"), _T("VC++ 14") },
+			{ 1910, _T("Visual Studio 2017"), _T("VC++ 14.1") }
 		};
 
 		for ( unsigned int i = 0, last = COUNT_OF( compilers ) - 1; i != last; ++i )
@@ -44,6 +46,7 @@ namespace hlp
 
 		return compilers[ COUNT_OF( compilers ) - 1 ];
 	}
+
 
 	inline bool IsDebug( void )
 	{
@@ -122,7 +125,6 @@ CAboutBox::~CAboutBox()
 void CAboutBox::SetupBuildInfoList( void )
 {
 	DWORD mscVer = _MSC_VER;
-	DWORD platBits = sizeof( void* ) * 8;
 
 	CScopedInternalChange internalChange( m_pBuildInfoList.get() );
 	m_pBuildInfoList->DeleteAllItems();
@@ -132,7 +134,7 @@ void CAboutBox::SetupBuildInfoList( void )
 	int pos = -1;
 
 	m_pBuildInfoList->InsertItem( ++pos, _T("Platform") );
-	m_pBuildInfoList->SetItemText( pos, Value, str::Format( _T("%d bit"), platBits ).c_str() );
+	m_pBuildInfoList->SetItemText( pos, Value, str::Format( _T("%d bit"), utl::GetPlatformBits() ).c_str() );
 
 	m_pBuildInfoList->InsertItem( ++pos, _T("Build") );
 	m_pBuildInfoList->SetItemText( pos, Value, hlp::IsDebug() ? _T("debug") : _T("RELEASE") );

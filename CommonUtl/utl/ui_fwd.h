@@ -27,7 +27,7 @@ namespace ui
 
 	enum PopupAlign { DropRight, DropDown, DropLeft, DropUp };
 	enum { HistoryMaxSize = 20 };
-	enum StdPopup { TextEditorPopup, HistoryComboPopup, ListViewSelectionPopup, ListViewNowherePopup, DebugPopup };
+	enum StdPopup { AppMainPopup, AppDebugPopup, TextEditorPopup, HistoryComboPopup, ListViewSelectionPopup, ListViewNowherePopup };
 }
 
 

@@ -3,6 +3,7 @@
 #include "MenuUtilities.h"
 #include "ContainerUtilities.h"
 #include "ImageStore.h"
+#include "VersionInfo.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -352,28 +353,45 @@ namespace ui
 	}
 
 
-	void SetRadio( CCmdUI* pCmdUi, BOOL checked )
+	void SetRadio( CCmdUI* pCmdUI, BOOL checked )
 	{
-		ASSERT_PTR( pCmdUi );
-
-		if ( NULL == pCmdUi->m_pMenu )
+		ASSERT_PTR( pCmdUI );
+		if ( NULL == pCmdUI->m_pMenu )
 		{
-			pCmdUi->SetRadio( checked );		// normal processing for toolbar buttons, etc
+			pCmdUI->SetRadio( checked );		// normal processing for toolbar buttons, etc
 			return;
 		}
 
 		// CCmdUI::SetRadio() uses an ugly radio checkmark;
 		// we put the standard nice radio checkmark using CheckMenuRadioItem()
 		if ( !checked )
-			pCmdUi->SetCheck( checked );
+			pCmdUI->SetCheck( checked );
 		else
 		{
-			if ( pCmdUi->m_pSubMenu != NULL )
+			if ( pCmdUI->m_pSubMenu != NULL )
 				return;							// don't change popup submenus indirectly
 
-			UINT pos = pCmdUi->m_nIndex;
-			pCmdUi->m_pMenu->CheckMenuRadioItem( pos, pos, pos, MF_BYPOSITION );		// place radio checkmark
+			UINT pos = pCmdUI->m_nIndex;
+			pCmdUI->m_pMenu->CheckMenuRadioItem( pos, pos, pos, MF_BYPOSITION );		// place radio checkmark
 		}
+	}
+
+	bool ExpandVersionInfoTags( CCmdUI* pCmdUI )
+	{
+		ASSERT_PTR( pCmdUI );
+		if ( pCmdUI->m_pMenu != NULL && NULL == pCmdUI->m_pSubMenu )		// a menu but not sub-menu (don't change submenus indirectly, wait for their expansion)
+		{
+			static CVersionInfo s_versionInfo;
+			std::tstring menuItemText = GetMenuItemText( *pCmdUI->m_pMenu, pCmdUI->m_nID );
+			std::tstring newMenuItemText = s_versionInfo.ExpandValues( menuItemText.c_str() );
+
+			if ( newMenuItemText != menuItemText )
+			{
+				pCmdUI->SetText( newMenuItemText.c_str() );
+				return true;
+			}
+		}
+		return false;
 	}
 
 	void UpdateMenuUI( CWnd* pWindow, CMenu* pPopupMenu, bool autoMenuEnable /*= true*/ )

@@ -7,9 +7,9 @@
 #include "ImageStore.h"
 #include "ResourcePool.h"
 #include "Logger.h"
+#include "MenuUtilities.h"
 #include "ToolStrip.h"
 #include "Utilities.h"
-#include "VersionInfo.h"
 #include "resource.h"
 #include <afxcontrolbars.h>			// MFC support for ribbons and control bars
 
@@ -53,13 +53,11 @@ BOOL CBaseApp< BaseClass >::InitInstance( void )
 
 	SetRegistryKey( _T("Paul Cocoveanu") );			// change the registry key under which our settings are stored
 
-	if ( !m_profileSuffix.empty() )
-	{
-		std::tstring profileName = m_pszProfileName + m_profileSuffix;
+	if ( !m_appNameSuffix.empty() )
+		AfxGetAppModuleState()->m_lpszCurrentAppName = AssignStringCopy( m_pszAppName, m_pszAppName + m_appNameSuffix );
 
-		free( (void*)m_pszProfileName );
-		m_pszProfileName = _tcsdup( profileName.c_str() );
-	}
+	if ( !m_profileSuffix.empty() )
+		AssignStringCopy( m_pszProfileName, m_pszProfileName + m_profileSuffix );
 
 	m_pSharedResources.reset( new utl::CResourcePool );
 	m_pLogger.reset( new CLogger );
@@ -126,6 +124,7 @@ void CBaseApp< BaseClass >::OnUpdateAppAbout( CCmdUI* pCmdUI )
 {
 	CWnd* pForegroundWnd = CWnd::GetForegroundWindow();
 	pCmdUI->Enable( pForegroundWnd != NULL && !is_a< CAboutBox >( pForegroundWnd ) );
+	ui::ExpandVersionInfoTags( pCmdUI );		// expand "[InternalName]"
 }
 
 template< typename BaseClass >

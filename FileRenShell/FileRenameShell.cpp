@@ -2,7 +2,7 @@
 #include "stdafx.h"
 #include "FileRenShell.h"
 #include "FileRenameShell.h"
-#include "FileRenameDialog.h"
+#include "MainRenameDialog.h"
 #include "utl/ImageStore.h"
 #include "utl/Utilities.h"
 #include "utl/resource.h"
@@ -82,7 +82,7 @@ size_t CFileRenameShell::ExtractDropInfo( IDataObject* pDropInfo )
 	HRESULT hResult = pDropInfo->GetData( &format, &storageMedium );		// make the data transfer
 	if ( FAILED( hResult ) )
 	{
-		//TRACE( _T("CFileRenameShell::ExtractDropInfo() failed, hResult=0x%08X\n"), hResult );
+		TRACE( _T("CFileRenameShell::ExtractDropInfo() failed: hResult=0x%08X\n"), hResult );
 		return 0;
 	}
 
@@ -217,7 +217,7 @@ STDMETHODIMP CFileRenameShell::InvokeCommand( LPCMINVOKECOMMANDINFO pCmi )
 				{
 					m_fileData.LoadUndoLog();
 
-					CFileRenameDialog dlg( menuCmd, &m_fileData, scopedMainWnd.m_pParentOwner );
+					CMainRenameDialog dlg( menuCmd, &m_fileData, scopedMainWnd.m_pParentOwner );
 					if ( IDOK == dlg.DoModal() )
 						m_fileData.SaveUndoLog();
 

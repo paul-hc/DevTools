@@ -1,5 +1,4 @@
 
-
 _MSC_VER == 1800 MSVC++ 12.0 (Visual Studio 2013)
 _MSC_VER == 1700 MSVC++ 11.0 (Visual Studio 2012)
 _MSC_VER == 1600 MSVC++ 10.0 (Visual Studio 2010)
@@ -34,24 +33,6 @@ Make lower case|Make upper case|Make filename lower case|Make filename upper cas
 Lower Case;Upper Case;Filename: Lower Case;Filename: Upper Case;Extension: Lower Case;Extension: Upper Case
 
 filename.ext;FILENAME.EXT;filename.*;FILENAME.*;*.ext;*.EXT
-
-IDC_WORD_BREAK_CHARS_EDIT
-IDC_WORD_BREAK_PREFIXES_EDIT
-IDC_WORDS_PRESERVED_EDIT
-IDC_WORDS_UPPERCASE_EDIT
-IDC_WORDS_LOWERCASE_EDIT
-
-IDC_SET_DEFAULT_WORD_BREAK_CHARS
-IDC_SET_DEFAULT_WORD_BREAK_PREFIXES
-IDC_SET_DEFAULT_ALWAYS_PRESERVE_WORDS
-IDC_SET_DEFAULT_ALWAYS_UPPERCASE_WORDS
-IDC_SET_DEFAULT_ALWAYS_LOWERCASE_WORDS
-IDC_SET_DEFAULT_ALL
-
-
-04 - Six Blade Knife.txt
-05 - Southbound Again.txt
-06 - Sultans Of Swing.txt
 
 
 void f()

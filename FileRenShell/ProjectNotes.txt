@@ -1,0 +1,31 @@
+
+BUILD the shell extension
+=========================
+- If already loaded, cannot link the dll: kill the explorer.exe process from Task Manager.
+- Windows 10: run Visual Studio 2008 as administrator:
+	- This allows proper registration of the shell extension dll.
+	- For proper registration in the final location use "Tools > Copy to Tools/mine/" and "Tools > Register DLL to Tools/mine/" while running as administrator.
+
+
+DEBUG the shell extension (FileRenameShell64.dll/FileRenameShell32.dll)
+=========================
+1) Use ExplorerBrowser tool from CodeProject
+- this works like a charm for 32/64 bit shell extension.
+- it doesn't lock the dll, you can set breakpoints in the code for Debug or Release builds.
+	Solution > FileRenShell > Properties > Debugging:
+		For 32-bit:
+			command: C:\my\Tools\mine\ExplorerBrowser32.exe
+			working directory: C:\my\download\
+		For 64-bit:
+			command: C:\my\Tools\mine\ExplorerBrowser64.exe
+			working directory: C:\my\download\
+
+2) Using Windows Explorer - not so good, there are many issues with breaking the program in the debugger, after which the Explorer window becomes inaccessible.
+	Explorer: Tools > Folder Options > View:
+		[ ] Launch folder windows in a separate process
+		- easier to unload the dll due to not having multiple copies of explorer.exe
+	Solution > FileRenShell > Properties > Debugging:
+		command: C:\Windows\explorer.exe
+		command arguments: /select,"C:\my\download\env.txt"
+		attach: No
+	Explorer: load the FileRenameShell shell extension (right click on a file), the attach the debugger to the corresponding explorer.exe process instance.

@@ -7,14 +7,14 @@
 #include "utl/LayoutDialog.h"
 
 
-class CFileRenameDialog;
+class CMainRenameDialog;
 class CFileSetUi;
 
 
 class CReplaceDialog : public CLayoutDialog
 {
 public:
-	CReplaceDialog( CFileRenameDialog* pParent );
+	CReplaceDialog( CMainRenameDialog* pParent );
 	virtual ~CReplaceDialog();
 
 	bool Execute( void );
@@ -32,13 +32,14 @@ private:
 
 	void StoreFindWhatText( const std::tstring& text, const std::vector< std::tstring >* pDestFnames = NULL );
 private:
-	CFileRenameDialog* m_pParent;
+	CMainRenameDialog* m_pParent;
 	std::tstring m_findWhat;
 	std::tstring m_replaceWith;
 	bool m_matchCase;
 	FindType m_findType;
 private:
 	// enum { IDD = IDD_REPLACE_DIALOG };
+
 	CHistoryComboBox m_findWhatCombo;
 	CHistoryComboBox m_replaceWithCombo;
 	CDialogToolBar m_findToolbar;

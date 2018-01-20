@@ -34,7 +34,8 @@
 #define ASSERT_PTR( x ) ASSERT( ( x ) != NULL )
 #define ASSERT_NULL( x ) ASSERT( ( x ) == NULL )
 
-#define DEBUG_BREAK ASSERT( false );
+#define DEBUG_BREAK ASSERT( false )
+#define DEBUG_BREAK_IF( cond ) ASSERT( !cond )
 
 
 #define abstract
@@ -47,7 +48,6 @@
 
 
 #ifdef _DEBUG
-
 	#define HR_AUDIT( expr ) utl::Audit( (expr), (#expr) )
 	#define HR_OK( expr ) utl::Check( (expr), (#expr) )
 
@@ -230,6 +230,9 @@ namespace utl
 {
 	__declspec( selectany ) extern const size_t npos = std::tstring::npos;
 
+	inline unsigned int GetPlatformBits( void ) { return sizeof( void* ) * 8; }
+	inline unsigned int Is32bitPlatform( void ) { return 32 == GetPlatformBits(); }
+	inline unsigned int Is64bitPlatform( void ) { return 64 == GetPlatformBits(); }
 
 	template< typename Type >
 	inline bool ModifyValue( Type& rValue, const Type& newValue )

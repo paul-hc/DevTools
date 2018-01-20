@@ -8,10 +8,9 @@
 
 class CApplication : public CBaseApp< CWinApp >
 {
+public:
 	CApplication( void );
-public:
-	static CApplication m_theApp;
-public:
+
     virtual BOOL InitInstance( void );
     virtual int ExitInstance( void );
 protected:
@@ -19,9 +18,15 @@ protected:
 };
 
 
+extern CComModule g_comModule;	// _Module original name
+extern CApplication g_app;
+
+
 namespace app
 {
-	inline CLogger& GetLogger( void ) { return CApplication::m_theApp.GetLogger(); }
+	inline CLogger& GetLogger( void ) { return g_app.GetLogger(); }
+
+	void InitModule( HINSTANCE hInstance );
 }
 
 

@@ -32,14 +32,14 @@ namespace app
 
 	void TrackUnitTestMenu( CWnd* pTargetWnd, const CPoint& screenPos )
 	{
+		ui::StdPopup popup = ui::AppMainPopup;
 	#ifdef _DEBUG
-		CMenu contextMenu;
-		ui::LoadPopupMenu( contextMenu, IDR_STD_CONTEXT_MENU, ui::DebugPopup );
-		ui::TrackPopupMenu( contextMenu, pTargetWnd, screenPos, TPM_RIGHTBUTTON );
-	#else
-		pTargetWnd;
-		screenPos;
+		popup = ui::AppDebugPopup;
 	#endif
+
+		CMenu contextMenu;
+		ui::LoadPopupMenu( contextMenu, IDR_STD_CONTEXT_MENU, popup );
+		ui::TrackPopupMenu( contextMenu, pTargetWnd, screenPos, TPM_RIGHTBUTTON );
 	}
 
 	void TraceException( const std::exception& exc )

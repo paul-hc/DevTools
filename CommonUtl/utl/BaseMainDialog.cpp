@@ -125,6 +125,10 @@ END_MESSAGE_MAP()
 
 BOOL CBaseMainDialog::OnInitDialog( void )
 {
+	const std::tstring& appNameSuffix = checked_static_cast< CBaseApp< CWinApp >* >( AfxGetApp() )->GetAppNameSuffix();
+	if ( !appNameSuffix.empty() )
+		ui::SetWindowText( m_hWnd, ui::GetWindowText( m_hWnd ) + appNameSuffix );
+
 	if ( NULL == AfxGetMainWnd() )
 		AfxGetApp()->m_pMainWnd = this;
 

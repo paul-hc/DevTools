@@ -37,17 +37,27 @@ protected:
 	CBaseApp( const TCHAR* pAppName = NULL );
 	virtual ~CBaseApp();
 
-	void StoreProfileSuffix( const std::tstring& profileSuffix ) { m_profileSuffix = profileSuffix; }	// call just before InitInstance
+	// call just before InitInstance:
+	void StoreAppNameSuffix( const std::tstring& appNameSuffix ) { m_appNameSuffix = appNameSuffix; }
+	void StoreProfileSuffix( const std::tstring& profileSuffix ) { m_profileSuffix = profileSuffix; }
 public:
+	const std::tstring& GetAppNameSuffix( void ) const { return m_appNameSuffix; }
+
 	// app::IGlobalResources interface
 	virtual utl::CResourcePool& GetSharedResources( void ) { return *safe_ptr( m_pSharedResources.get() ); }
 	virtual CLogger& GetLogger( void ) { return *safe_ptr( m_pLogger.get() ); }
+protected:
+	static const TCHAR* AssignStringCopy( const TCHAR*& rpAppString, const std::tstring& value )
+	{
+		free( (void*)rpAppString );
+		return rpAppString = _tcsdup( value.c_str() );
+	}
 private:
 	std::auto_ptr< utl::CResourcePool > m_pSharedResources;		// application shared resources, released on ExitInstance()
 	std::auto_ptr< CLogger > m_pLogger;
 	std::auto_ptr< CImageStore > m_pImageStore;					// control the lifetime of shared resources
 	CAccelTable m_appAccel;
-	std::tstring m_profileSuffix;								// could be set to "_v2" when required
+	std::tstring m_appNameSuffix, m_profileSuffix;								// could be set to "_v2" when required
 protected:
 	// generated overrides
 	public:

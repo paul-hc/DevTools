@@ -396,6 +396,11 @@ BEGIN
     ID_EDIT_CLEAR           "Clear"
 END
 
+STRINGTABLE 
+BEGIN
+    AFX_IDS_APP_TITLE       "FileRenShell"
+END
+
 #endif    // English (U.S.) resources
 /////////////////////////////////////////////////////////////////////////////
 

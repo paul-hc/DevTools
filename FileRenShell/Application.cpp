@@ -2,25 +2,26 @@
 #include "stdafx.h"
 #include "Application.h"
 #include "resource.h"
+#include "utl/BaseApp.hxx"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
 
-#include "utl/BaseApp.hxx"
 
+CComModule g_comModule;
+CApplication g_app;
 
-void InitModule( HINSTANCE hInstance );
-
-CApplication CApplication::m_theApp;
 
 CApplication::CApplication( void )
 {
+	// use AFX_IDS_APP_TITLE="FileRenShell" - same app registry key for 32/64 bit executables
+	StoreAppNameSuffix( str::Format( _T(" [%d-bit]"), utl::GetPlatformBits() ) );		// identify the primary target platform
 }
 
 BOOL CApplication::InitInstance( void )
 {
-	InitModule( m_hInstance );
+	app::InitModule( m_hInstance );
 	AfxSetResourceHandle( m_hInstance );
 
 	if ( !CBaseApp< CWinApp >::InitInstance() )
@@ -35,7 +36,7 @@ BOOL CApplication::InitInstance( void )
 
 int CApplication::ExitInstance( void )
 {
-	_Module.Term();
+	g_comModule.Term();
 	return CBaseApp< CWinApp >::ExitInstance();
 }
 

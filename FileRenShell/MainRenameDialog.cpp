@@ -1,6 +1,6 @@
 
 #include "stdafx.h"
-#include "FileRenameDialog.h"
+#include "MainRenameDialog.h"
 #include "Application.h"
 #include "FileWorkingSet.h"
 #include "FileSetUi.h"
@@ -75,7 +75,7 @@ namespace layout
 }
 
 
-CFileRenameDialog::CFileRenameDialog( MenuCommand menuCmd, CFileWorkingSet* pFileData, CWnd* pParent )
+CMainRenameDialog::CMainRenameDialog( MenuCommand menuCmd, CFileWorkingSet* pFileData, CWnd* pParent )
 	: CBaseMainDialog( IDD_RENAME_FILES_DIALOG, pParent )
 	, m_menuCmd( menuCmd )
 	, m_pFileData( pFileData )
@@ -111,12 +111,12 @@ CFileRenameDialog::CFileRenameDialog( MenuCommand menuCmd, CFileWorkingSet* pFil
 	//m_fileListView.SetUseExplorerTheme( false );			// ...testing
 }
 
-CFileRenameDialog::~CFileRenameDialog()
+CMainRenameDialog::~CMainRenameDialog()
 {
 	utl::ClearOwningContainer( m_displayItems );
 }
 
-void CFileRenameDialog::SetupFileListView( void )
+void CMainRenameDialog::SetupFileListView( void )
 {
 	int orgSel = m_fileListView.GetCurSel();
 
@@ -157,7 +157,7 @@ void CFileRenameDialog::SetupFileListView( void )
 	}
 }
 
-int CFileRenameDialog::FindItemPos( const fs::CPath& sourcePath ) const
+int CMainRenameDialog::FindItemPos( const fs::CPath& sourcePath ) const
 {
 	for ( unsigned int pos = 0; pos != m_displayItems.size(); ++pos )
 		if ( m_displayItems[ pos ]->m_srcPath.Equal( sourcePath ) )
@@ -166,7 +166,7 @@ int CFileRenameDialog::FindItemPos( const fs::CPath& sourcePath ) const
 	return -1;
 }
 
-void CFileRenameDialog::SwitchMode( Mode mode )
+void CMainRenameDialog::SwitchMode( Mode mode )
 {
 	m_mode = mode;
 
@@ -183,7 +183,7 @@ void CFileRenameDialog::SwitchMode( Mode mode )
 	ui::EnableControl( *this, IDC_UNDO_BUTTON, m_mode != UndoRollbackMode && m_pFileData->CanUndo() );
 }
 
-void CFileRenameDialog::PostMakeDest( bool silent /*= false*/ )
+void CMainRenameDialog::PostMakeDest( bool silent /*= false*/ )
 {
 	m_pBatchTransaction.reset();
 
@@ -211,7 +211,7 @@ void CFileRenameDialog::PostMakeDest( bool silent /*= false*/ )
 	}
 }
 
-void CFileRenameDialog::ListItem_DrawTextDiffs( const NMLVCUSTOMDRAW* pCustomDraw )
+void CMainRenameDialog::ListItem_DrawTextDiffs( const NMLVCUSTOMDRAW* pCustomDraw )
 {
 	ASSERT_PTR( pCustomDraw );
 
@@ -237,7 +237,7 @@ void CFileRenameDialog::ListItem_DrawTextDiffs( const NMLVCUSTOMDRAW* pCustomDra
 	}
 }
 
-void CFileRenameDialog::ListItem_DrawTextDiffs( CDC* pDC, const CRect& textRect, int itemIndex, Column column )
+void CMainRenameDialog::ListItem_DrawTextDiffs( CDC* pDC, const CRect& textRect, int itemIndex, Column column )
 {
 	enum { TextStyle = DT_SINGLELINE | DT_LEFT | DT_VCENTER | DT_END_ELLIPSIS | DT_NOPREFIX };	// DT_NOCLIP
 
@@ -300,7 +300,7 @@ void CFileRenameDialog::ListItem_DrawTextDiffs( CDC* pDC, const CRect& textRect,
 	pDC->SelectObject( pOriginalFont );
 }
 
-CRect CFileRenameDialog::MakeItemTextRect( const NMLVCUSTOMDRAW* pCustomDraw )
+CRect CMainRenameDialog::MakeItemTextRect( const NMLVCUSTOMDRAW* pCustomDraw )
 {
 	CRect textRect = pCustomDraw->nmcd.rc;
 
@@ -309,7 +309,7 @@ CRect CFileRenameDialog::MakeItemTextRect( const NMLVCUSTOMDRAW* pCustomDraw )
 	return textRect;
 }
 
-bool CFileRenameDialog::ListItem_FillBkgnd( NMLVCUSTOMDRAW* pCustomDraw ) const
+bool CMainRenameDialog::ListItem_FillBkgnd( NMLVCUSTOMDRAW* pCustomDraw ) const
 {
 	ASSERT_PTR( pCustomDraw );
 
@@ -332,7 +332,7 @@ bool CFileRenameDialog::ListItem_FillBkgnd( NMLVCUSTOMDRAW* pCustomDraw ) const
 	return true;
 }
 
-bool CFileRenameDialog::ListItem_IsSelectedInvert( int itemIndex ) const
+bool CMainRenameDialog::ListItem_IsSelectedInvert( int itemIndex ) const
 {
 	// with "Explorer" visual theme background is bright (white) for selected and unselected state -> ignore selected state to keep text colour dark
 	if ( !m_fileListView.UseExplorerTheme() )
@@ -341,7 +341,7 @@ bool CFileRenameDialog::ListItem_IsSelectedInvert( int itemIndex ) const
 	return false;
 }
 
-CFont* CFileRenameDialog::SelectBoldFont( CDC* pDC )
+CFont* CMainRenameDialog::SelectBoldFont( CDC* pDC )
 {
 	static CFont boldFont;
 
@@ -356,17 +356,17 @@ CFont* CFileRenameDialog::SelectBoldFont( CDC* pDC )
 	return pDC->SelectObject( &boldFont );
 }
 
-CWnd* CFileRenameDialog::GetWnd( void )
+CWnd* CMainRenameDialog::GetWnd( void )
 {
 	return this;
 }
 
-CLogger* CFileRenameDialog::GetLogger( void )
+CLogger* CMainRenameDialog::GetLogger( void )
 {
 	return &app::GetLogger();
 }
 
-fs::UserFeedback CFileRenameDialog::HandleFileError( const fs::CPath& sourcePath, const std::tstring& message )
+fs::UserFeedback CMainRenameDialog::HandleFileError( const fs::CPath& sourcePath, const std::tstring& message )
 {
 	int pos = FindItemPos( sourcePath );
 	if ( pos != -1 )
@@ -382,7 +382,7 @@ fs::UserFeedback CFileRenameDialog::HandleFileError( const fs::CPath& sourcePath
 	}
 }
 
-void CFileRenameDialog::AutoGenerateFiles( void )
+void CMainRenameDialog::AutoGenerateFiles( void )
 {
 	std::tstring renameFormat = m_formatCombo.GetCurrentText();
 	UINT seqCount = m_seqCountEdit.GetNumericValue();
@@ -395,7 +395,7 @@ void CFileRenameDialog::AutoGenerateFiles( void )
 	m_formatCombo.SetFrameColor( succeeded ? CLR_NONE : color::Error );
 }
 
-bool CFileRenameDialog::RenameFiles( void )
+bool CMainRenameDialog::RenameFiles( void )
 {
 	m_pBatchTransaction.reset( new fs::CBatchRename( this ) );
 	if ( !m_pBatchTransaction->Rename( m_pFileData->GetRenamePairs() ) )
@@ -404,7 +404,7 @@ bool CFileRenameDialog::RenameFiles( void )
 	return true;
 }
 
-bool CFileRenameDialog::ChangeSeqCount( UINT seqCount )
+bool CMainRenameDialog::ChangeSeqCount( UINT seqCount )
 {
 	if ( m_seqCountEdit.GetNumber< UINT >() == seqCount )
 		return false;
@@ -414,7 +414,7 @@ bool CFileRenameDialog::ChangeSeqCount( UINT seqCount )
 	return true;
 }
 
-void CFileRenameDialog::QueryTooltipText( std::tstring& rText, UINT cmdId, CToolTipCtrl* /*pTooltip*/ ) const
+void CMainRenameDialog::QueryTooltipText( std::tstring& rText, UINT cmdId, CToolTipCtrl* /*pTooltip*/ ) const
 {
 	switch ( cmdId )
 	{
@@ -438,7 +438,7 @@ void CFileRenameDialog::QueryTooltipText( std::tstring& rText, UINT cmdId, CTool
 	}
 }
 
-void CFileRenameDialog::DoDataExchange( CDataExchange* pDX )
+void CMainRenameDialog::DoDataExchange( CDataExchange* pDX )
 {
 	DDX_Control( pDX, IDC_FORMAT_COMBO, m_formatCombo );
 	m_formatToolbar.DDX_Placeholder( pDX, IDC_STRIP_BAR_1, H_AlignLeft | V_AlignCenter );
@@ -482,7 +482,7 @@ void CFileRenameDialog::DoDataExchange( CDataExchange* pDX )
 
 // message handlers
 
-BEGIN_MESSAGE_MAP( CFileRenameDialog, CBaseMainDialog )
+BEGIN_MESSAGE_MAP( CMainRenameDialog, CBaseMainDialog )
 	ON_WM_DESTROY()
 	ON_CBN_EDITCHANGE( IDC_FORMAT_COMBO, OnChanged_Format )
 	ON_CBN_SELCHANGE( IDC_FORMAT_COMBO, OnChanged_Format )
@@ -525,7 +525,7 @@ BEGIN_MESSAGE_MAP( CFileRenameDialog, CBaseMainDialog )
 	ON_COMMAND( ID_ENSURE_UNIFORM_NUM_PADDING, OnEnsureUniformNumPadding )
 END_MESSAGE_MAP()
 
-BOOL CFileRenameDialog::OnInitDialog( void )
+BOOL CMainRenameDialog::OnInitDialog( void )
 {
 	BOOL defaultFocus = CBaseMainDialog::OnInitDialog();
 	if ( m_autoGenerate )
@@ -563,7 +563,7 @@ BOOL CFileRenameDialog::OnInitDialog( void )
 	return defaultFocus;
 }
 
-void CFileRenameDialog::OnOK( void )
+void CMainRenameDialog::OnOK( void )
 {
 	switch ( m_mode )
 	{
@@ -619,7 +619,7 @@ void CFileRenameDialog::OnOK( void )
 	}
 }
 
-void CFileRenameDialog::OnDestroy( void )
+void CMainRenameDialog::OnDestroy( void )
 {
 	AfxGetApp()->WriteProfileInt( reg::section_mainDialog, reg::entry_autoGenerate, m_autoGenerate );
 	AfxGetApp()->WriteProfileInt( reg::section_mainDialog, reg::entry_seqCountAutoAdvance, m_seqCountAutoAdvance );
@@ -628,7 +628,7 @@ void CFileRenameDialog::OnDestroy( void )
 	CBaseMainDialog::OnDestroy();
 }
 
-void CFileRenameDialog::OnChanged_Format( void )
+void CMainRenameDialog::OnChanged_Format( void )
 {
 	OnFieldChanged();
 
@@ -639,47 +639,47 @@ void CFileRenameDialog::OnChanged_Format( void )
 		AutoGenerateFiles();
 }
 
-void CFileRenameDialog::OnSeqCountReset( void )
+void CMainRenameDialog::OnSeqCountReset( void )
 {
 	ChangeSeqCount( 1 );
 	GotoDlgCtrl( &m_seqCountEdit );
 }
 
-void CFileRenameDialog::OnUpdateSeqCountReset( CCmdUI* pCmdUI )
+void CMainRenameDialog::OnUpdateSeqCountReset( CCmdUI* pCmdUI )
 {
 	pCmdUI->Enable( m_seqCountEdit.GetNumericValue() != 1 );
 }
 
-void CFileRenameDialog::OnSeqCountFindNext( void )
+void CMainRenameDialog::OnSeqCountFindNext( void )
 {
 	UINT seqCount = m_pFileData->FindNextAvailSeqCount( m_formatCombo.GetCurrentText() );
 	ChangeSeqCount( seqCount );
 	GotoDlgCtrl( &m_seqCountEdit );
 }
 
-void CFileRenameDialog::OnUpdateSeqCountFindNext( CCmdUI* pCmdUI )
+void CMainRenameDialog::OnUpdateSeqCountFindNext( CCmdUI* pCmdUI )
 {
 	CPathFormatter format( m_formatCombo.GetCurrentText() );
 	pCmdUI->Enable( format.m_isNumericFormat );
 }
 
-void CFileRenameDialog::OnSeqCountAutoAdvance( void )
+void CMainRenameDialog::OnSeqCountAutoAdvance( void )
 {
 	m_seqCountAutoAdvance = !m_seqCountAutoAdvance;
 }
 
-void CFileRenameDialog::OnUpdateSeqCountAutoAdvance( CCmdUI* pCmdUI )
+void CMainRenameDialog::OnUpdateSeqCountAutoAdvance( CCmdUI* pCmdUI )
 {
 	pCmdUI->SetCheck( m_seqCountAutoAdvance );
 }
 
-void CFileRenameDialog::OnBnClicked_CopySourceFiles( void )
+void CMainRenameDialog::OnBnClicked_CopySourceFiles( void )
 {
 	if ( !m_pFileData->CopyClipSourcePaths( FilenameExt, this ) )
 		AfxMessageBox( _T("Couldn't copy source files to clipboard!"), MB_ICONERROR | MB_OK );
 }
 
-void CFileRenameDialog::OnBnClicked_ClearDestFiles( void )
+void CMainRenameDialog::OnBnClicked_ClearDestFiles( void )
 {
 	m_pFileData->ClearDestinationFiles();
 
@@ -687,7 +687,7 @@ void CFileRenameDialog::OnBnClicked_ClearDestFiles( void )
 	SwitchMode( MakeMode );
 }
 
-void CFileRenameDialog::OnBnClicked_PasteDestFiles( void )
+void CMainRenameDialog::OnBnClicked_PasteDestFiles( void )
 {
 	try
 	{
@@ -700,33 +700,33 @@ void CFileRenameDialog::OnBnClicked_PasteDestFiles( void )
 	}
 }
 
-void CFileRenameDialog::OnBnClicked_CapitalizeDestFiles( void )
+void CMainRenameDialog::OnBnClicked_CapitalizeDestFiles( void )
 {
 	CTitleCapitalizer capitalizer;
 	m_pFileData->ForEachDestination( func::CapitalizeWords( &capitalizer ) );
 	PostMakeDest();
 }
 
-void CFileRenameDialog::OnBnClicked_CapitalizeOptions( void )
+void CMainRenameDialog::OnBnClicked_CapitalizeOptions( void )
 {
 	CCapitalizeOptionsDialog dialog( this );
 	dialog.DoModal();
 	GotoDlgCtrl( GetDlgItem( IDC_CAPITALIZE_BUTTON ) );
 }
 
-void CFileRenameDialog::OnBnClicked_ChangeCase( void )
+void CMainRenameDialog::OnBnClicked_ChangeCase( void )
 {
 	m_pFileData->ForEachDestination( func::MakeCase( m_changeCaseButton.GetSelEnum< ChangeCase >() ) );
 	PostMakeDest();
 }
 
-void CFileRenameDialog::OnBnClicked_ReplaceDestFiles( void )
+void CMainRenameDialog::OnBnClicked_ReplaceDestFiles( void )
 {
 	CReplaceDialog dlg( this );
 	dlg.Execute();
 }
 
-void CFileRenameDialog::OnBnClicked_ReplaceAllDelimitersDestFiles( void )
+void CMainRenameDialog::OnBnClicked_ReplaceAllDelimitersDestFiles( void )
 {
 	std::tstring delimiterSet = m_delimiterSetCombo.GetCurrentText();
 	if ( delimiterSet.empty() )
@@ -740,7 +740,7 @@ void CFileRenameDialog::OnBnClicked_ReplaceAllDelimitersDestFiles( void )
 	PostMakeDest();
 }
 
-void CFileRenameDialog::OnBnClicked_Undo( void )
+void CMainRenameDialog::OnBnClicked_Undo( void )
 {
 	ASSERT( m_mode != UndoRollbackMode && m_pFileData->CanUndo() );
 
@@ -750,13 +750,13 @@ void CFileRenameDialog::OnBnClicked_Undo( void )
 	SetupFileListView();
 }
 
-void CFileRenameDialog::OnFieldChanged( void )
+void CMainRenameDialog::OnFieldChanged( void )
 {
 	if ( m_mode != Uninit )
 		SwitchMode( MakeMode );
 }
 
-void CFileRenameDialog::OnPickFormatToken( void )
+void CMainRenameDialog::OnPickFormatToken( void )
 {
 	CMenu popupMenu;
 	ui::LoadPopupMenu( popupMenu, IDR_CONTEXT_MENU_MENU, popup::FormatPicker );
@@ -764,7 +764,7 @@ void CFileRenameDialog::OnPickFormatToken( void )
 	m_formatToolbar.TrackButtonMenu( ID_PICK_FORMAT_TOKEN, this, &popupMenu, ui::DropDown );
 }
 
-void CFileRenameDialog::OnPickDirPath( void )
+void CMainRenameDialog::OnPickDirPath( void )
 {
 	// single command or pick menu
 	UINT singleCmdId;
@@ -781,7 +781,7 @@ void CFileRenameDialog::OnPickDirPath( void )
 		}
 }
 
-void CFileRenameDialog::OnDirPathPicked( UINT cmdId )
+void CMainRenameDialog::OnDirPathPicked( UINT cmdId )
 {
 	CFileSetUi fileSetUi( m_pFileData );
 	std::tstring selDir = fileSetUi.GetPickedDirectory( cmdId );
@@ -792,7 +792,7 @@ void CFileRenameDialog::OnDirPathPicked( UINT cmdId )
 	}
 }
 
-void CFileRenameDialog::OnPickTextTools( void )
+void CMainRenameDialog::OnPickTextTools( void )
 {
 	CMenu popupMenu;
 	ui::LoadPopupMenu( popupMenu, IDR_CONTEXT_MENU_MENU, popup::TextTools );
@@ -800,7 +800,7 @@ void CFileRenameDialog::OnPickTextTools( void )
 	m_formatToolbar.TrackButtonMenu( ID_PICK_TEXT_TOOLS, this, &popupMenu, ui::DropDown );
 }
 
-void CFileRenameDialog::OnFormatTextToolPicked( UINT cmdId )
+void CMainRenameDialog::OnFormatTextToolPicked( UINT cmdId )
 {
 	GotoDlgCtrl( &m_formatCombo );
 	std::tstring oldFormat = m_formatCombo.GetCurrentText();
@@ -810,20 +810,20 @@ void CFileRenameDialog::OnFormatTextToolPicked( UINT cmdId )
 		ui::SetComboEditText( m_formatCombo, format, str::Case );
 }
 
-void CFileRenameDialog::OnToggleAutoGenerate( void )
+void CMainRenameDialog::OnToggleAutoGenerate( void )
 {
 	m_autoGenerate = !m_autoGenerate;
 	if ( m_autoGenerate )
 		AutoGenerateFiles();
 }
 
-void CFileRenameDialog::OnUpdateAutoGenerate( CCmdUI* pCmdUI )
+void CMainRenameDialog::OnUpdateAutoGenerate( CCmdUI* pCmdUI )
 {
 	pCmdUI->Enable( m_mode != UndoRollbackMode );
 	pCmdUI->SetCheck( m_autoGenerate );
 }
 
-void CFileRenameDialog::OnNumericSequence( UINT cmdId )
+void CMainRenameDialog::OnNumericSequence( UINT cmdId )
 {
 	const TCHAR* pInsertFmt = NULL;
 
@@ -843,7 +843,7 @@ void CFileRenameDialog::OnNumericSequence( UINT cmdId )
 	pComboEdit->ReplaceSel( pInsertFmt, TRUE );
 }
 
-void CFileRenameDialog::OnEnChange_SeqCounter( void )
+void CMainRenameDialog::OnEnChange_SeqCounter( void )
 {
 	if ( m_autoGenerate )
 		AutoGenerateFiles();
@@ -851,54 +851,54 @@ void CFileRenameDialog::OnEnChange_SeqCounter( void )
 		SwitchMode( MakeMode );
 }
 
-void CFileRenameDialog::OnBnClicked_PickRenameActions( void )
+void CMainRenameDialog::OnBnClicked_PickRenameActions( void )
 {
 	m_pickRenameActionsStatic.TrackMenu( this, IDR_CONTEXT_MENU_MENU, popup::MoreRenameActions );
 }
 
-void CFileRenameDialog::OnSingleWhitespace( void )
+void CMainRenameDialog::OnSingleWhitespace( void )
 {
 	m_pFileData->ForEachDestination( func::SingleWhitespace() );
 	PostMakeDest();
 }
 
-void CFileRenameDialog::OnRemoveWhitespace( void )
+void CMainRenameDialog::OnRemoveWhitespace( void )
 {
 	m_pFileData->ForEachDestination( func::RemoveWhitespace() );
 	PostMakeDest();
 }
 
-void CFileRenameDialog::OnDashToSpace( void )
+void CMainRenameDialog::OnDashToSpace( void )
 {
 	m_pFileData->ForEachDestination( func::ReplaceDelimiterSet( _T("-"), _T(" ") ) );
 	PostMakeDest();
 }
 
-void CFileRenameDialog::OnSpaceToDash( void )
+void CMainRenameDialog::OnSpaceToDash( void )
 {
 	m_pFileData->ForEachDestination( func::ReplaceDelimiterSet( _T(" "), _T("-") ) );
 	PostMakeDest();
 }
 
-void CFileRenameDialog::OnUnderbarToSpace( void )
+void CMainRenameDialog::OnUnderbarToSpace( void )
 {
 	m_pFileData->ForEachDestination( func::ReplaceDelimiterSet( _T("_"), _T(" ") ) );
 	PostMakeDest();
 }
 
-void CFileRenameDialog::OnSpaceToUnderbar( void )
+void CMainRenameDialog::OnSpaceToUnderbar( void )
 {
 	m_pFileData->ForEachDestination( func::ReplaceDelimiterSet( _T(" "), _T("_") ) );
 	PostMakeDest();
 }
 
-void CFileRenameDialog::OnEnsureUniformNumPadding( void )
+void CMainRenameDialog::OnEnsureUniformNumPadding( void )
 {
 	m_pFileData->EnsureUniformNumPadding();
 	PostMakeDest();
 }
 
-void CFileRenameDialog::OnCustomDrawFileRenameList( NMHDR* pNmHdr, LRESULT* pResult )
+void CMainRenameDialog::OnCustomDrawFileRenameList( NMHDR* pNmHdr, LRESULT* pResult )
 {
 	NMLVCUSTOMDRAW* pCustomDraw = (NMLVCUSTOMDRAW*)pNmHdr;
 
@@ -952,9 +952,9 @@ void CFileRenameDialog::OnCustomDrawFileRenameList( NMHDR* pNmHdr, LRESULT* pRes
 }
 
 
-// CFileRenameDialog::CDisplayItem implementation
+// CMainRenameDialog::CDisplayItem implementation
 
-void CFileRenameDialog::CDisplayItem::ComputeMatchSeq( void )
+void CMainRenameDialog::CDisplayItem::ComputeMatchSeq( void )
 {
 	m_srcMatchSeq.clear();
 	m_destMatchSeq.clear();

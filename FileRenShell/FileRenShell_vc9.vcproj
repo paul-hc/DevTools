@@ -499,14 +499,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\FileRenameDialog.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\FileRenameDialog.h"
-				>
-			</File>
-			<File
 				RelativePath=".\FileRenameShell.cpp"
 				>
 			</File>
@@ -591,6 +583,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\MainRenameDialog.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\MainRenameDialog.h"
+				>
+			</File>
+			<File
 				RelativePath=".\MenuCommand.h"
 				>
 			</File>
@@ -671,6 +671,10 @@
 				>
 			</File>
 		</Filter>
+		<File
+			RelativePath=".\ProjectNotes.txt"
+			>
+		</File>
 	</Files>
 	<Globals>
 		<Global

@@ -24,10 +24,9 @@
 
 #include "stdafx.h"
 #include "FileRenShell.h"
+#include "Application.h"
 #include "resource.h"
-
 #include <initguid.h>
-//#include "dlldatax.h"		// VC9 generates dlldata.c, no dlldata.h - no longer required; dlldata.c is not part of the project, but it gets linked properly
 
 #include "FileRenShell_i.c"
 #include "FileRenameShell.h"
@@ -37,19 +36,20 @@ extern "C" HINSTANCE hProxyDll;
 #endif
 
 
-CComModule _Module;
-
-BEGIN_OBJECT_MAP( ObjectMap )
+BEGIN_OBJECT_MAP( s_objectMap )
 	OBJECT_ENTRY( CLSID_FileRenameShell, CFileRenameShell )
 END_OBJECT_MAP()
 
 
-void InitModule( HINSTANCE hInstance )
+namespace app
 {
-#ifdef _MERGE_PROXYSTUB
-    hProxyDll = hInstance;
-#endif
-	_Module.Init( ObjectMap, hInstance, &LIBID_FILERENSHELLLib );
+	void InitModule( HINSTANCE hInstance )
+	{
+	#ifdef _MERGE_PROXYSTUB
+		hProxyDll = hInstance;
+	#endif
+		g_comModule.Init( s_objectMap, hInstance, &LIBID_FILERENSHELLLib );
+	}
 }
 
 
@@ -63,8 +63,9 @@ STDAPI DllCanUnloadNow( void )
         return S_FALSE;
 #endif
     AFX_MANAGE_STATE(AfxGetStaticModuleState());
-    return ( S_OK == AfxDllCanUnloadNow() && 0 == _Module.GetLockCount() ) ? S_OK : S_FALSE;
+    return ( S_OK == AfxDllCanUnloadNow() && 0 == g_comModule.GetLockCount() ) ? S_OK : S_FALSE;
 }
+
 
 /////////////////////////////////////////////////////////////////////////////
 // Returns a class factory to create an object of the requested type
@@ -72,10 +73,10 @@ STDAPI DllCanUnloadNow( void )
 STDAPI DllGetClassObject( REFCLSID rclsid, REFIID riid, LPVOID* ppv )
 {
 #ifdef _MERGE_PROXYSTUB
-    if (PrxDllGetClassObject(rclsid, riid, ppv) == S_OK)
+	if ( S_OK == PrxDllGetClassObject( rclsid, riid, ppv ) )
         return S_OK;
 #endif
-    return _Module.GetClassObject(rclsid, riid, ppv);
+    return g_comModule.GetClassObject(rclsid, riid, ppv);
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -85,11 +86,10 @@ STDAPI DllRegisterServer( void )
 {
 #ifdef _MERGE_PROXYSTUB
     HRESULT hRes = PrxDllRegisterServer();
-    if (FAILED(hRes))
+	if ( FAILED( hRes ) )
         return hRes;
 #endif
-    // registers object, typelib and all interfaces in typelib
-	return _Module.RegisterServer( TRUE );
+	return g_comModule.RegisterServer( TRUE );		// registers object, typelib and all interfaces in typelib
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -100,5 +100,5 @@ STDAPI DllUnregisterServer( void )
 #ifdef _MERGE_PROXYSTUB
     PrxDllUnregisterServer();
 #endif
-	return _Module.UnregisterServer( TRUE );
+	return g_comModule.UnregisterServer( TRUE );
 }

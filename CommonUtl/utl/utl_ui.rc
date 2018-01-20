@@ -280,6 +280,16 @@ IDR_TRACK_ZOOM_CURSOR   CURSOR                  "res\\TrackZoom.cur"
 
 IDR_STD_CONTEXT_MENU MENU 
 BEGIN
+    POPUP "<app-main>"
+    BEGIN
+        MENUITEM "&About [InternalName]...\tF1", ID_APP_ABOUT
+    END
+    POPUP "<app-debug>"
+    BEGIN
+        MENUITEM "Run Unit Tests",              ID_RUN_TESTS
+        MENUITEM SEPARATOR
+        MENUITEM "&About [InternalName]...\tF1", ID_APP_ABOUT
+    END
     POPUP "<text editor>"
     BEGIN
         MENUITEM "lower case\tCtrl+Alt+Down Arrow", ID_EDIT_TO_LOWER_CASE
@@ -317,10 +327,6 @@ BEGIN
         MENUITEM SEPARATOR
         MENUITEM "&Horizontal Stacking\tLeft to Right", ID_LIST_VIEW_STACK_LEFTTORIGHT
         MENUITEM "&Vertical Stacking\tTop to Bottom", ID_LIST_VIEW_STACK_TOPTOBOTTOM
-    END
-    POPUP "<debug>"
-    BEGIN
-        MENUITEM "Run Unit Tests",              ID_RUN_TESTS
     END
 END
 

@@ -57,7 +57,8 @@ namespace ui
 	bool JoinMenuItems( CMenu& rDestMenu, const CMenu& srcMenu, MenuInsert menuInsert = AppendSrc, bool addSep = true, UseMenuImages useMenuImages = NormalMenuImages );
 
 
-	void SetRadio( CCmdUI* pCmdUi, BOOL checked = BST_CHECKED );
+	void SetRadio( CCmdUI* pCmdUI, BOOL checked = BST_CHECKED );
+	bool ExpandVersionInfoTags( CCmdUI* pCmdUI );				// based on CVersionInfo
 	void UpdateMenuUI( CWnd* pWindow, CMenu* pPopupMenu, bool autoMenuEnable = true );
 };
 

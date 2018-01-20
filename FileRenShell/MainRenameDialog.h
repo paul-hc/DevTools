@@ -1,5 +1,5 @@
-#ifndef FileRenameDialog_h
-#define FileRenameDialog_h
+#ifndef MainRenameDialog_h
+#define MainRenameDialog_h
 #pragma once
 
 #include "utl/BatchTransactions.h"
@@ -26,12 +26,12 @@ namespace popup
 }
 
 
-class CFileRenameDialog : public CBaseMainDialog
+class CMainRenameDialog : public CBaseMainDialog
 						, private fs::IBatchTransactionCallback
 {
 public:
-	CFileRenameDialog( MenuCommand menuCmd, CFileWorkingSet* pFileData, CWnd* pParent );
-	virtual ~CFileRenameDialog();
+	CMainRenameDialog( MenuCommand menuCmd, CFileWorkingSet* pFileData, CWnd* pParent );
+	virtual ~CMainRenameDialog();
 
 	// ui::ICmdCallback interface
 	virtual void QueryTooltipText( std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const;
@@ -157,4 +157,4 @@ protected:
 };
 
 
-#endif // FileRenameDialog_h
+#endif // MainRenameDialog_h

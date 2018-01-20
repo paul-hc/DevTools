@@ -25,7 +25,3 @@
 
 #include "utl/StdManifest.h"		// include manifest for common controls
 #include "utl/CommonDefs.h"
-
-
-// you may derive a class from CComModule and use it if you want to override something, but do not change the name of _Module
-extern CComModule _Module;

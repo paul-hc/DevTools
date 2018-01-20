@@ -42,7 +42,9 @@ CApplication theApp;
 CApplication::CApplication( void )
 	: CBaseApp< CWinApp >()
 {
-	// use AFX_IDS_APP_TITLE="Wintruder" - avoid Wintruder64 in registry key for the 64 bit build
+	// use AFX_IDS_APP_TITLE="Wintruder" - use same app registry key for 32/64 bit executables
+
+	StoreAppNameSuffix( str::Format( _T(" [%d-bit]"), utl::GetPlatformBits() ) );		// identify the primary target platform
 }
 
 CApplication::~CApplication()
