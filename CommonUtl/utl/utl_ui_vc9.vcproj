@@ -484,6 +484,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\LongestCommonDuplicate.h"
+				>
+			</File>
+			<File
 				RelativePath=".\LongestCommonSubsequence.h"
 				>
 			</File>
@@ -1568,14 +1572,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\LcsTests.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\LcsTests.h"
-				>
-			</File>
-			<File
 				RelativePath=".\PathGeneratorTests.cpp"
 				>
 			</File>
@@ -1589,6 +1585,14 @@
 			</File>
 			<File
 				RelativePath=".\ResequenceTests.h"
+				>
+			</File>
+			<File
+				RelativePath=".\StringSequenceTests.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\StringSequenceTests.h"
 				>
 			</File>
 			<File

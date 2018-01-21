@@ -1,7 +1,8 @@
 
 #include "stdafx.h"
-#include "LcsTests.h"
+#include "StringSequenceTests.h"
 #include "LongestCommonSubsequence.h"
+#include "LongestCommonDuplicate.h"
 #include "StringUtilities.h"
 
 #ifdef _DEBUG
@@ -98,18 +99,18 @@ namespace ut
 }
 
 
-CLcsTests::CLcsTests( void )
+CStringSequenceTests::CStringSequenceTests( void )
 {
 	ut::CTestSuite::Instance().RegisterTestCase( this );		// self-registration
 }
 
-CLcsTests& CLcsTests::Instance( void )
+CStringSequenceTests& CStringSequenceTests::Instance( void )
 {
-	static CLcsTests testCase;
+	static CStringSequenceTests testCase;
 	return testCase;
 }
 
-void CLcsTests::TestCompareSimple( void )
+void CStringSequenceTests::TestCompareSimpleLCS( void )
 {
 	static const std::string src = "what ABC around", dest = "what XY around";
 
@@ -117,7 +118,6 @@ void CLcsTests::TestCompareSimple( void )
 
 	std::vector< lcs::CResult< char > > results;
 	comparator.Process( results );
-	//ASSERT_EQUAL( ?, comparator.GetLcsLength() );
 
 	std::vector< ut::MatchTriplet > triplets;
 
@@ -130,7 +130,7 @@ void CLcsTests::TestCompareSimple( void )
 	ASSERT_EQUAL( ut::MatchTriplet( str::MatchEqual, " around", " around" ), triplets[ 2 ] );
 }
 
-void CLcsTests::TestCompareDiffCase( void )
+void CStringSequenceTests::TestCompareDiffCaseLCS( void )
 {
 	static const std::string src = "what ABC around", dest = "what abc around";
 
@@ -138,7 +138,6 @@ void CLcsTests::TestCompareDiffCase( void )
 
 	std::vector< lcs::CResult< char > > results;
 	comparator.Process( results );
-	//ASSERT_EQUAL( ?, comparator.GetLcsLength() );
 
 	std::vector< ut::MatchTriplet > triplets;
 
@@ -151,7 +150,7 @@ void CLcsTests::TestCompareDiffCase( void )
 	ASSERT_EQUAL( ut::MatchTriplet( str::MatchEqual, " around", " around" ), triplets[ 2 ] );
 }
 
-void CLcsTests::TestCompareDiffOverlap( void )
+void CStringSequenceTests::TestCompareMidSubseqLCS( void )
 {
 	static const std::string src = "what goes around", dest = "what comes around";
 
@@ -159,7 +158,6 @@ void CLcsTests::TestCompareDiffOverlap( void )
 
 	std::vector< lcs::CResult< char > > results;
 	comparator.Process( results );
-	//ASSERT_EQUAL( ?, comparator.GetLcsLength() );
 
 	std::vector< ut::MatchTriplet > triplets;
 
@@ -169,18 +167,37 @@ void CLcsTests::TestCompareDiffOverlap( void )
 	ASSERT_EQUAL( 5, triplets.size() );
 	ASSERT_EQUAL( ut::MatchTriplet( str::MatchEqual, "what ", "what " ), triplets[ 0 ] );
 	ASSERT_EQUAL( ut::MatchTriplet( str::MatchNotEqual, "g", "c" ), triplets[ 1 ] );
-	ASSERT_EQUAL( ut::MatchTriplet( str::MatchEqual, "o", "o" ), triplets[ 2 ] );
+	ASSERT_EQUAL( ut::MatchTriplet( str::MatchEqual, "o", "o" ), triplets[ 2 ] );			// innner common sequence
 	ASSERT_EQUAL( ut::MatchTriplet( str::MatchNotEqual, "", "m" ), triplets[ 3 ] );
 	ASSERT_EQUAL( ut::MatchTriplet( str::MatchEqual, "es around", "es around" ), triplets[ 4 ] );
 }
 
-void CLcsTests::Run( void )
+void CStringSequenceTests::TestFindLongestDuplicatedString( void )
 {
-	TRACE( _T("-- LCS tests (LongestCommonSubsequence) --\n") );
+	ASSERT_EQUAL( "", str::FindLongestDuplicatedString( std::string(), pred::CompareCase() ) );
+	ASSERT_EQUAL( " the people, ", str::FindLongestDuplicatedString( std::string( "of the people, by the people, for the people," ), pred::CompareCase() ) );
+	ASSERT_EQUAL( "he people, ", str::FindLongestDuplicatedString( std::string( "of the people, by The people, for tHE people," ), pred::CompareCase() ) );
+	ASSERT_EQUAL( " THE people, ", str::FindLongestDuplicatedString( std::string( "of THE people, by The people, for tHE people," ), pred::CompareNoCase() ) );		// first match wins
+}
 
-	TestCompareSimple();
-	TestCompareDiffCase();
-	TestCompareDiffOverlap();
+void CStringSequenceTests::TestFindLongestDuplicatedMultiSource( void )
+{
+	std::vector< std::wstring > items;
+	items.push_back( L"of the people from Italy" );
+	items.push_back( L"by the people of Italy" );
+	items.push_back( L"for the people in Italy" );
+	ASSERT_EQUAL( L" the people ", str::FindLongestCommonSubstring( items, pred::CompareCase() ) );
+}
+
+void CStringSequenceTests::Run( void )
+{
+	TRACE( _T("-- UTL String Sequence tests (LongestCommonSubsequence) --\n") );
+
+	TestCompareSimpleLCS();
+	TestCompareDiffCaseLCS();
+	TestCompareMidSubseqLCS();
+	TestFindLongestDuplicatedString();
+	TestFindLongestDuplicatedMultiSource();
 }
 
 

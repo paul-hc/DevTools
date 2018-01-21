@@ -10,7 +10,7 @@
 #include <afxcontrolbars.h>			// MFC support for ribbons and control bars
 
 #include "UtlTests.h"
-#include "LcsTests.h"
+#include "StringSequenceTests.h"
 #include "FileSystemTests.h"
 #include "PathGeneratorTests.h"
 #include "ResequenceTests.h"
@@ -79,7 +79,7 @@ BOOL CBaseApp< BaseClass >::InitInstance( void )
 #ifdef _DEBUG
 	// register UTL tests
 	CUtlTests::Instance();
-	CLcsTests::Instance();
+	CStringSequenceTests::Instance();
 	CFileSystemTests::Instance();
 	CPathGeneratorTests::Instance();
 	CResequenceTests::Instance();
