@@ -2,16 +2,7 @@
 #define ComparePredicates_h
 #pragma once
 
-#include <locale>
-
-
-namespace str
-{
-	const std::locale& GetUserLocale( void );
-
-	template< typename StringType >
-	inline pred::CompareResult IntuitiveCompare( const StringType& left, const StringType& right );
-}
+#include "Compare_fwd.h"
 
 
 namespace func
@@ -38,122 +29,6 @@ namespace func
 		}
 	};
 }
-
-
-namespace pred
-{
-	template< typename DiffType >
-	inline CompareResult ToCompareResult( DiffType difference )
-	{
-		if ( difference < 0 )
-			return Less;
-		else if ( difference > 0 )
-			return Greater;
-		else
-			return Equal;
-	}
-
-
-	inline CompareResult GetResultInOrder( CompareResult result, bool ascendingOrder )
-	{	// controls the direction of the compare result (for ascending/descending sorting)
-		return ascendingOrder ? result : static_cast< CompareResult >( -(int)result );
-	}
-
-
-	// function version
-
-	template< typename Type >
-	inline CompareResult Compare_Scalar( const Type& left, const Type& right )
-	{
-		if ( left < right )
-			return Less;
-		else if ( left > right )
-			return Greater;
-		return Equal;
-	}
-
-	template<>
-	inline CompareResult Compare_Scalar< std::string >( const std::string& left, const std::string& right )
-	{
-		return str::IntuitiveCompare( left, right );
-	}
-
-	template<>
-	inline CompareResult Compare_Scalar< std::wstring >( const std::wstring& left, const std::wstring& right )
-	{
-		return str::IntuitiveCompare( left, right );
-	}
-
-
-	// functor version
-	struct CompareValue
-	{
-		template< typename T >
-		CompareResult operator()( const T& left, const T& right ) const
-		{
-			return Compare_Scalar( left, right );
-		}
-	};
-
-
-	// string compare policies
-
-	struct CompareCase
-	{
-		template< typename CharType >
-		CompareResult operator()( CharType left, CharType right ) const
-		{
-			return Compare_Scalar( left, right );
-		}
-
-		template< typename CharType >
-		CompareResult operator()( const CharType* pLeft, const CharType* pRight, size_t count = std::string::npos ) const
-		{
-			ASSERT( pLeft != NULL && pRight != NULL );
-			CompareResult result = Equal;
-			if ( pLeft != pRight )
-				while ( count-- != 0 &&
-						Equal == ( result = operator()( *pLeft, *pRight ) ) &&
-						*pLeft != 0 && *pRight != 0 )
-				{
-					++pLeft; ++pRight;
-				}
-
-			return result;
-		}
-	};
-
-
-	struct CompareNoCase
-	{
-		CompareNoCase( const std::locale& loc = str::GetUserLocale() ) : m_locale( loc ) {}
-
-		template< typename CharType >
-		CompareResult operator()( CharType left, CharType right ) const
-		{
-			return Compare_Scalar( std::tolower( left, m_locale ), std::tolower( right, m_locale ) );
-		}
-
-		template< typename CharType >
-		CompareResult operator()( const CharType* pLeft, const CharType* pRight, size_t count = std::string::npos ) const
-		{
-			ASSERT( pLeft != NULL && pRight != NULL );
-			CompareResult result = Equal;
-			if ( pLeft != pRight )
-				while ( count-- != 0 &&
-						Equal == ( result = operator()( *pLeft, *pRight ) ) &&
-						*pLeft != 0 && *pRight != 0 )
-				{
-					++pLeft; ++pRight;
-				}
-
-			return result;
-		}
-	private:
-		const std::locale& m_locale;
-	};
-
-} //namespace pred
 
 
 namespace pred
@@ -370,8 +245,7 @@ namespace pred
 			return result;
 		}
 	};
-
-} //namespace pred
+}
 
 
 namespace pred
@@ -395,8 +269,7 @@ namespace pred
 	{
 		return OrderBy< Compare >( compare, ascendingOrder );
 	}
-
-} //namespace pred
+}
 
 
 #endif // ComparePredicates_h

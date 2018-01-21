@@ -2,7 +2,7 @@
 #define TokenIterator_h
 #pragma once
 
-#include "ComparePredicates.h"
+#include "StringCompare.h"
 
 
 namespace str

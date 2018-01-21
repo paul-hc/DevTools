@@ -6,6 +6,7 @@
 #include <map>
 #include <set>
 #include <xhash>
+#include "ComparePredicates.h"
 #include "StringUtilities.h"
 
 

@@ -48,15 +48,10 @@ BOOL CApplication::InitInstance( void )
 		return FALSE;
 	}
 	AfxEnableControlContainer();
-	// Standard initialization
-	// If you are not using these features and wish to reduce the size
-	// of your final executable, you should remove from the following
-	// the specific initialization routines you do not need
-	// Change the registry key under which our settings are stored
-	// TODO: You should modify this string to be something appropriate
-	// such as the name of your company or organization
+
 	SetRegistryKey( _T("Paul Cocoveanu\\other") );			// change the registry key under which our settings are stored
-	LoadStdProfileSettings(10);  // Load standard INI file options (including MRU)
+	LoadStdProfileSettings( 10 );  // Load standard INI file options (including MRU)
+
 	// Register the application's document templates.  Document templates
 	//  serve as the connection between documents, frame windows and views
 	AddDocTemplate( new CMultiDocTemplate( IDR_XBrowserTYPE,

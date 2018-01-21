@@ -254,22 +254,6 @@ namespace str
 		TCHAR lowerMatch;
 	};
 
-	struct CharMatch
-	{
-		CharMatch( TCHAR _match, str::CaseType _caseType ) : match( _match ), caseType( _caseType ) {}
-
-		bool operator()( TCHAR chr ) const
-		{
-			return caseType == str::Case
-				? ( chr == match )
-				: ( _totlower( chr ) == _totlower( match ) );
-		}
-	public:
-		TCHAR match;
-		str::CaseType caseType;
-	};
-
-
 
 	// inline code
 

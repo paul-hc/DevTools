@@ -1,6 +1,6 @@
 
 #include "stdafx.h"
-#include "StringUtilities.h"
+#include "StringCompare.h"
 #include "ComparePredicates.h"
 
 
@@ -90,9 +90,7 @@ namespace str
 	}
 
 
-	/**
-		case insensitive intuitive comparison - sequences of digits are compared numerically
-	*/
+	// case insensitive intuitive comparison - sequences of digits are compared numerically
 
 	pred::CompareResult IntuitiveCompare( const char* pLeft, const char* pRight )
 	{

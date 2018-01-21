@@ -101,12 +101,6 @@ enum
 enum RecursionDepth { Shallow, Deep };
 
 
-namespace pred
-{
-	enum CompareResult { Less = -1, Equal, Greater };
-}
-
-
 template< typename Type >
 inline Type* safe_ptr( Type* ptr )
 {
@@ -264,8 +258,9 @@ void AFXAPI AfxCancelModes( HWND hWndRcvr );						// <src/mfc/afximpl.h>
 BOOL AFXAPI AfxFullPath( _Pre_notnull_ _Post_z_ LPTSTR lpszPathOut, LPCTSTR lpszFileIn );		// <src/mfc/afximpl.h>
 
 
-#include "StdColors.h"
+#include "Compare_fwd.h"
 #include "StringBase.h"
+#include "StdColors.h"
 
 
 #endif // CommonDefs_h
