@@ -32,24 +32,24 @@ namespace lcs
 		basic data provider template class for integral types
 		example:
 			const TCHAR* str = "a string to compare";
-			lcs::CDataBlock< TCHAR > compare_data1( str, strlen( str ) );
+			lcs::CBlock< TCHAR > compare_data1( str, strlen( str ) );
 	*/
 	template< typename T >
-	class CDataBlock
+	class CBlock
 	{
 	public:
-		CDataBlock( const T* pData, size_t size ) : m_pData( pData ), m_size( static_cast< UINT >( size ) ) { ASSERT_PTR( m_pData ); }
+		CBlock( const T* pData, size_t size ) : m_pData( pData ), m_size( size ) { ASSERT( m_pData != NULL || 0 == m_size ); }
 
 		const T* Get( void ) const { return m_pData; }
-		UINT GetSize( void ) const { return m_size; }
+		size_t GetSize( void ) const { return m_size; }
 
-		const T* GetAt( UINT index ) const
+		const T* GetAt( size_t pos ) const
 		{
-			ASSERT( index <= m_size );		// might get past end one position -> return NULL
-			return index < m_size ? &m_pData[ index ] : NULL;
+			ASSERT( pos <= m_size );		// might get past end one position -> return NULL
+			return pos < m_size ? &m_pData[ pos ] : NULL;
 		}
 
-		bool operator==( const CDataBlock& rRight ) const
+		bool operator==( const CBlock& rRight ) const
 		{
 			if ( m_pData == rRight.m_pData )
 				return true;
@@ -59,10 +59,10 @@ namespace lcs
 				0 == memcmp( m_pData, rRight.m_pData, m_size * sizeof( T ) );
 		}
 
-		bool operator!=( const CDataBlock& rRight ) const { return !operator==( rRight ); }
+		bool operator!=( const CBlock& rRight ) const { return !operator==( rRight ); }
 	private:
 		const T* m_pData;	// pointer to the data block
-		UINT m_size;		// length of the data block
+		size_t m_size;		// length of the data block
 	};
 
 
@@ -78,11 +78,11 @@ namespace lcs
 	template< typename T >
 	struct CResult
 	{
-		CResult( void ) : m_index( UINT_MAX ), m_matchType( Equal ), m_srcValue(), m_destValue() {}
-		CResult( UINT index, MatchType matchType, const T& value ) : m_index( index ), m_matchType( matchType ), m_srcValue( value ), m_destValue( value ) {}
-		CResult( UINT index, MatchType matchType, const T& srcValue, const T& destValue ) : m_index( index ), m_matchType( matchType ), m_srcValue( srcValue ), m_destValue( destValue ) {}
+		CResult( void ) : m_index( utl::npos ), m_matchType( Equal ), m_srcValue(), m_destValue() {}
+		CResult( size_t index, MatchType matchType, const T& value ) : m_index( index ), m_matchType( matchType ), m_srcValue( value ), m_destValue( value ) {}
+		CResult( size_t index, MatchType matchType, const T& srcValue, const T& destValue ) : m_index( index ), m_matchType( matchType ), m_srcValue( srcValue ), m_destValue( destValue ) {}
 	public:
-		UINT m_index;
+		size_t m_index;
 		MatchType m_matchType;
 		T m_srcValue;
 		T m_destValue;
@@ -104,8 +104,8 @@ namespace lcs
 		void Process( std::vector< CResult< T > >& rOutSeq );
 		size_t GetLcsLength( void ) const { return static_cast< size_t >( LcsAt( 0, 0 ) ); }
 	private:
-		short& LcsAt( UINT col, UINT row );
-		const short& LcsAt( UINT col, UINT row ) const { return const_cast< Comparator* >( this )->LcsAt( col, row ); }
+		short& LcsAt( size_t col, size_t row );
+		const short& LcsAt( size_t col, size_t row ) const { return const_cast< Comparator* >( this )->LcsAt( col, row ); }
 
 		void QueryResults( std::vector< CResult< T > >& rOutSeq ) const;
 
@@ -121,8 +121,8 @@ namespace lcs
 			return str::MatchNotEqual;
 		}
 	private:
-		CDataBlock< T > m_src;
-		CDataBlock< T > m_dest;
+		CBlock< T > m_src;
+		CBlock< T > m_dest;
 		MatchFunc m_getMatchFunc;
 		std::vector< short > m_lcsArray;		// LCS working array
 	};
@@ -134,9 +134,9 @@ namespace lcs
 	// Comparator< T, MatchFunc > template code
 
 	template< typename T, typename MatchFunc >
-	inline short& Comparator< T, MatchFunc >::LcsAt( UINT col, UINT row )
+	inline short& Comparator< T, MatchFunc >::LcsAt( size_t col, size_t row )
 	{
-		UINT index = ( row * (UINT)m_src.GetSize() ) + col;
+		size_t index = ( row * m_src.GetSize() ) + col;
 		ASSERT( index < m_lcsArray.size() );
 		return m_lcsArray[ index ];
 	}
@@ -148,14 +148,14 @@ namespace lcs
 		if ( m_src == m_dest )
 		{
 			rOutSeq.resize( m_dest.GetSize() );
-			for ( UINT i = 0; i != rOutSeq.size(); ++i )
+			for ( size_t i = 0; i != rOutSeq.size(); ++i )
 				rOutSeq[ i ] = CResult< T >( i, Equal, *m_dest.GetAt( i ) );
 
 			return;
 		}
 
 		// calculate the size of the LCS working array
-		UINT lcsSize = ( 1 + m_src.GetSize() ) * ( 1 + m_dest.GetSize() );
+		size_t lcsSize = ( 1 + m_src.GetSize() ) * ( 1 + m_dest.GetSize() );
 
 		m_lcsArray.resize( lcsSize, -1 );	// initialise to -1
 		if ( lcsSize > 1 )
@@ -196,7 +196,7 @@ namespace lcs
 	template< typename T, typename MatchFunc >
 	void Comparator< T, MatchFunc >::QueryResults( std::vector< CResult< T > >& rOutSeq ) const
 	{
-		for ( UINT col = 0, row = 0; col < m_src.GetSize() || row < m_dest.GetSize(); )
+		for ( size_t col = 0, row = 0; col < m_src.GetSize() || row < m_dest.GetSize(); )
 		{
 			const T* pSrcData = m_src.GetAt( col );
 			const T* pDestData = m_dest.GetAt( row );
