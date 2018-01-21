@@ -45,14 +45,14 @@ namespace lcs
 
 		const T* GetAt( size_t pos ) const
 		{
-			ASSERT( pos <= m_size );		// might get past end one position -> return NULL
+			ASSERT( pos <= m_size );		// may get past end one position -> return NULL
 			return pos < m_size ? &m_pData[ pos ] : NULL;
 		}
 
 		bool operator==( const CBlock& rRight ) const
 		{
 			if ( m_pData == rRight.m_pData )
-				return true;
+				return m_size == rRight.m_size;
 
 			return
 				m_size == rRight.m_size &&
