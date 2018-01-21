@@ -4,6 +4,7 @@
 #include "Registry.h"
 #include "ShellUtilities.h"
 #include "ShellFileDialog.h"
+#include "StringUtilities.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

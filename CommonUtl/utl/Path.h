@@ -7,7 +7,7 @@
 #include <set>
 #include <xhash>
 #include "ComparePredicates.h"
-#include "StringUtilities.h"
+#include "StringCompare.h"
 
 
 namespace path
@@ -33,21 +33,17 @@ namespace path
 	}
 
 
-	enum PathMatch { MatchEqual, MatchEqualDiffCase, MatchNotEqual };
-
-	PathMatch Match( const TCHAR* pLeftPath, const TCHAR* pRightPath );
-
-	template< typename CharType >
-	PathMatch MatchChar( CharType left, CharType right )
+	struct ToNormal
 	{
-		if ( ToNormalChar( left ) == ToNormalChar( right ) )
-			return MatchEqual;
+		TCHAR operator()( TCHAR ch ) const { return ToNormalChar( ch ); }
+	};
 
-		if ( ToEquivalentChar( left ) == ToEquivalentChar( right ) )
-			return MatchEqualDiffCase;
+	struct ToEquivalent
+	{
+		TCHAR operator()( TCHAR ch ) const { return ToEquivalentChar( ch ); }
+	};
 
-		return MatchNotEqual;
-	}
+	typedef str::EvalMatch< ToNormal, ToEquivalent > GetMatch;
 
 
 	const TCHAR* Wildcards( void );

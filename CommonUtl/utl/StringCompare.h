@@ -227,6 +227,39 @@ namespace str
 			? ( str::Find< str::Case >( pText, pPart ) != std::tstring::npos )
 			: ( str::Find< str::IgnoreCase >( pText, pPart ) != std::tstring::npos );
 	}
+
+
+	enum Match { MatchEqual, MatchEqualDiffCase, MatchNotEqual };
+
+
+	template< typename ToNormalFunc, typename ToEquivFunc >
+	struct EvalMatch
+	{
+		template< typename CharType >
+		Match operator()( CharType leftCh, CharType rightCh ) const
+		{
+			if ( m_toNormalFunc( leftCh ) == m_toNormalFunc( rightCh ) )				// case sensitive match?
+				return MatchEqual;
+			if ( m_toEquivFunc( leftCh ) == m_toEquivFunc( rightCh ) )					// case insensitive match?
+				return MatchEqualDiffCase;
+			return MatchNotEqual;
+		}
+
+		template< typename CharType >
+		Match operator()( const CharType* pLeft, const CharType* pRight ) const
+		{
+			if ( pred::Equal == str::CompareN( pLeft, pRight, m_toNormalFunc ) )		// case sensitive match?
+				return MatchEqual;
+			if ( pred::Equal == str::CompareN( pLeft, pRight, m_toEquivFunc ) )			// case insensitive match?
+				return MatchEqualDiffCase;
+			return MatchNotEqual;
+		}
+	private:
+		ToNormalFunc m_toNormalFunc;		// for case-sensitive matching (with specialization for paths)
+		ToEquivFunc m_toEquivFunc;			// for case-insensitive matching (with specialization for paths)
+	};
+
+	typedef EvalMatch< func::ToChar, func::ToLower > GetMatch;
 }
 
 

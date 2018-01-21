@@ -46,14 +46,14 @@ namespace path
 	}
 
 
-	PathMatch Match( const TCHAR* pLeftPath, const TCHAR* pRightPath )
+/*	str::Match GetMatch( const TCHAR* pLeftPath, const TCHAR* pRightPath )
 	{
 		if ( pred::Equal == str::CompareN( pLeftPath, pRightPath, &path::ToNormalChar ) )			// case sensitive
-			return MatchEqual;
+			return str::MatchEqual;
 		if ( pred::Equal == str::CompareN( pLeftPath, pRightPath, &path::ToEquivalentChar ) )		// case insensitive
-			return MatchEqualDiffCase;
-		return MatchNotEqual;
-	}
+			return str::MatchEqualDiffCase;
+		return str::MatchNotEqual;
+	}*/
 
 
 	struct CFnameExt

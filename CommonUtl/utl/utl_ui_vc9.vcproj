@@ -484,6 +484,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\LongestCommonSubsequence.h"
+				>
+			</File>
+			<File
 				RelativePath=".\Process.cpp"
 				>
 			</File>

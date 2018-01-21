@@ -21,6 +21,7 @@ private:
 	void TestStringTokenize( void );
 	void TestStringConversion( void );
 	void TestStringSearch( void );
+	void TestStringMatch( void );
 	void TestArgUtilities( void );
 	void TestEnumTags( void );
 	void TestFlagTags( void );

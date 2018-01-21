@@ -17,7 +17,7 @@
 
 
 class CFileWorkingSet;
-namespace path { enum PathMatch; }
+namespace str { enum Match; }
 enum MenuCommand;
 
 namespace popup
@@ -72,21 +72,21 @@ private:
 			: m_srcPath( srcPath )
 			, m_srcFnameExt( m_srcPath.GetNameExt() )
 			, m_destFnameExt( destPath.GetNameExt() )
-			, m_match( path::Match( m_srcFnameExt.c_str(), m_destFnameExt.c_str() ) )
+			, m_match( path::GetMatch()( m_srcFnameExt.c_str(), m_destFnameExt.c_str() ) )
 		{
 			ComputeMatchSeq();
 		}
 
-		bool HasMisMatch( void ) const { return !m_destFnameExt.empty() && m_match != path::MatchEqual; }
+		bool HasMisMatch( void ) const { return !m_destFnameExt.empty() && m_match != str::MatchEqual; }
 	private:
 		void ComputeMatchSeq( void );
 	public:
 		const fs::CPath m_srcPath;
 		std::tstring m_srcFnameExt;
 		std::tstring m_destFnameExt;
-		path::PathMatch m_match;
-		std::vector< path::PathMatch > m_srcMatchSeq;		// same size with m_srcFnameExt
-		std::vector< path::PathMatch > m_destMatchSeq;		// same size with m_destFnameExt
+		str::Match m_match;
+		std::vector< str::Match > m_srcMatchSeq;		// same size with m_srcFnameExt
+		std::vector< str::Match > m_destMatchSeq;		// same size with m_destFnameExt
 	};
 private:
 	MenuCommand m_menuCmd;

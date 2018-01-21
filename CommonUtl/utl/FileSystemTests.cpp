@@ -213,9 +213,10 @@ void CFileSystemTests::TestPathCompareFind( void )
 		ASSERT_EQUAL( pred::Less, path::CompareNPtr( _T("name 05.ext"), _T("name 10.ext") ) );
 	}
 	{
-		ASSERT_EQUAL( path::MatchEqual, path::Match( _T("x:\\dir\\sub\\name.ext"), _T("x:/dir/sub/name.ext") ) );
-		ASSERT_EQUAL( path::MatchEqualDiffCase, path::Match( _T("X:\\dir\\sub\\NAME.ext"), _T("x:/dir/sub/name.ext") ) );
-		ASSERT_EQUAL( path::MatchNotEqual, path::Match( _T("X:\\dir\\sub\\NAME.txt"), _T("x:/dir/sub/name.jpg") ) );
+		path::GetMatch getMatchFunc;
+		ASSERT_EQUAL( str::MatchEqual, getMatchFunc( _T("x:\\dir\\sub\\name.ext"), _T("x:/dir/sub/name.ext") ) );
+		ASSERT_EQUAL( str::MatchEqualDiffCase, getMatchFunc( _T("X:\\dir\\sub\\NAME.ext"), _T("x:/dir/sub/name.ext") ) );
+		ASSERT_EQUAL( str::MatchNotEqual, getMatchFunc( _T("X:\\dir\\sub\\NAME.txt"), _T("x:/dir/sub/name.jpg") ) );
 	}
 	{
 		ASSERT_EQUAL( _T("\\name.ext"), std::tstring( path::Find( _T("X:\\Dir\\Sub\\name.ext"), _T("/Name.EXT") ) ) );

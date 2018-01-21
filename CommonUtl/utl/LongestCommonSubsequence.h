@@ -2,7 +2,7 @@
 #define LongestCommonSubsequence_h
 #pragma once
 
-#include "utl/Path.h"
+#include "StringCompare.h"
 
 
 namespace lcs
@@ -10,13 +10,13 @@ namespace lcs
 	template< typename T >
 	inline bool IsEmpty( const T* pObject )
 	{
-		return pObject == NULL || *pObject == T();
+		return NULL == pObject || T() == *pObject;
 	}
 
 	template<>
 	inline bool IsEmpty< std::tstring >( const std::tstring* pString )
 	{
-		return pString == NULL || pString->length() == 0;
+		return NULL == pString || 0 == pString->length();
 	}
 
 	template< typename T >
@@ -25,18 +25,6 @@ namespace lcs
 		return
 			pLeft == pRight ||
 			( pLeft != NULL && pRight != NULL && *pLeft == *pRight );
-	}
-
-	template< typename T >
-	inline path::PathMatch GetMatch( const T* pLeft, const T* pRight )
-	{
-		if ( pLeft == pRight )
-			return path::MatchEqual;
-
-		if ( pLeft != NULL && pRight != NULL )
-			return path::MatchChar( *pLeft, *pRight );
-
-		return path::MatchNotEqual;
 	}
 
 
@@ -102,7 +90,7 @@ namespace lcs
 	// LCS: Longest Common Subsequence
 	// it does the comparison between source and destination
 
-	template< typename T >
+	template< typename T, typename MatchFunc >
 	class Comparator
 	{
 	public:
@@ -112,12 +100,25 @@ namespace lcs
 		int GetLcsLength( void ) const { return LcsAt( 0, 0 ); }
 	private:
 		short& LcsAt( UINT col, UINT row );
-		const short& LcsAt( UINT col, UINT row ) const { return const_cast< Comparator< T >* >( this )->LcsAt( col, row ); }
+		const short& LcsAt( UINT col, UINT row ) const { return const_cast< Comparator* >( this )->LcsAt( col, row ); }
 
 		void QueryResults( std::vector< CResult< T > >& rOutSeq ) const;
+
+		template< typename T >
+		str::Match GetPtrMatch( const T* pLeft, const T* pRight ) const
+		{
+			if ( pLeft == pRight )
+				return str::MatchEqual;							// works for NULL pointers
+
+			if ( pLeft != NULL && pRight != NULL )
+				return m_getMatchFunc( *pLeft, *pRight );		// first character matching
+
+			return str::MatchNotEqual;
+		}
 	private:
 		CDataBlock< T > m_source;
 		CDataBlock< T > m_dest;
+		MatchFunc m_getMatchFunc;
 		std::vector< short > m_lcsArray;		// LCS working array
 	};
 }
@@ -125,10 +126,10 @@ namespace lcs
 
 namespace lcs
 {
-	// Comparator< T > template code
+	// Comparator< T, MatchFunc > template code
 
-	template< typename T >
-	inline short& Comparator< T >::LcsAt( UINT col, UINT row )
+	template< typename T, typename MatchFunc >
+	inline short& Comparator< T, MatchFunc >::LcsAt( UINT col, UINT row )
 	{
 		UINT index = ( row * (UINT)m_source.GetSize() ) + col;
 		ASSERT( index < m_lcsArray.size() );
@@ -136,8 +137,8 @@ namespace lcs
 	}
 
 	// we calculate the LCS array and return the LCS length
-	template< typename T >
-	void Comparator< T >::Process( std::vector< CResult< T > >& rOutSeq )
+	template< typename T, typename MatchFunc >
+	void Comparator< T, MatchFunc >::Process( std::vector< CResult< T > >& rOutSeq )
 	{
 		if ( m_source == m_dest )
 		{
@@ -187,20 +188,20 @@ namespace lcs
 	}
 
 
-	template< typename T >
-	void Comparator< T >::QueryResults( std::vector< CResult< T > >& rOutSeq ) const
+	template< typename T, typename MatchFunc >
+	void Comparator< T, MatchFunc >::QueryResults( std::vector< CResult< T > >& rOutSeq ) const
 	{
 		for ( UINT col = 0, row = 0; col < m_source.GetSize() || row < m_dest.GetSize(); )
 		{
 			const T* pSourceData = m_source.GetAt( col );
 			const T* pDestData = m_dest.GetAt( row );
 
-			path::PathMatch match = GetMatch( pSourceData, pDestData );
+			str::Match match = GetPtrMatch( pSourceData, pDestData );
 
-			if ( path::MatchEqual == match || path::MatchEqualDiffCase == match )
+			if ( str::MatchEqual == match || str::MatchEqualDiffCase == match )
 			{
 				// if the data is equal, then mark the record to be kept
-				rOutSeq.push_back( CResult< T >( ++col, path::MatchEqual == match ? lcs::Equal : lcs::EqualDiffCase, *pSourceData ) );
+				rOutSeq.push_back( CResult< T >( ++col, str::MatchEqual == match ? lcs::Equal : lcs::EqualDiffCase, *pSourceData ) );
 				++row;
 			}
 			else if ( !lcs::IsEmpty( pSourceData ) && ( lcs::IsEmpty( pDestData ) || LcsAt( col + 1, row ) >= LcsAt( col, row + 1 ) ) )

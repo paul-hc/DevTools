@@ -581,10 +581,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\LongestCommonSubsequence.h"
-				>
-			</File>
-			<File
 				RelativePath=".\MainRenameDialog.cpp"
 				>
 			</File>

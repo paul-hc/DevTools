@@ -5,13 +5,13 @@
 #include "FileWorkingSet.h"
 #include "FileSetUi.h"
 #include "MenuCommand.h"
-#include "LongestCommonSubsequence.h"
 #include "PathFunctors.h"
 #include "ReplaceDialog.h"
 #include "CapitalizeOptionsDialog.h"
 #include "resource.h"
 #include "utl/ContainerUtilities.h"
 #include "utl/CmdInfoStore.h"
+#include "utl/LongestCommonSubsequence.h"
 #include "utl/MenuUtilities.h"
 #include "utl/PathGenerator.h"
 #include "utl/RuntimeException.h"
@@ -139,7 +139,7 @@ void CMainRenameDialog::SetupFileListView( void )
 		m_fileListView.InsertItem( LVIF_TEXT | LVIF_PARAM, pos, (LPTSTR)pItem->m_srcFnameExt.c_str(), 0, 0, 0, (LPARAM)pItem );		// Source
 
 		//if ( !it->second.IsEmpty() )
-		//	if ( pItem->m_match == path::MatchEqual )	// don't set the sub-item text if custom drawn, since is hard to erase the text printed by default
+		//	if ( pItem->m_match == str::MatchEqual )	// don't set the sub-item text if custom drawn, since is hard to erase the text printed by default
 		m_fileListView.SetItemText( pos, Destination, pItem->m_destFnameExt.c_str() );											// Destination
 	}
 
@@ -260,7 +260,7 @@ void CMainRenameDialog::ListItem_DrawTextDiffs( CDC* pDC, const CRect& textRect,
 	COLORREF stdTextColor = GetSysColor( selInvert ? COLOR_HIGHLIGHTTEXT : COLOR_WINDOWTEXT );		// if not focused, selection is light gray in background and normal in text
 
 	if ( Destination == column )
-		if ( path::MatchEqual == pItem->m_match )
+		if ( str::MatchEqual == pItem->m_match )
 			stdTextColor = GetSysColor( COLOR_GRAYTEXT );		// gray-out text of unmodified dest files
 
 	COLORREF oldTextColor = pDC->SetTextColor( stdTextColor );
@@ -270,9 +270,9 @@ void CMainRenameDialog::ListItem_DrawTextDiffs( CDC* pDC, const CRect& textRect,
 	CRect itemRect = textRect;
 	COLORREF highlightColor = Source == column ? ColorDeletedText : ColorModifiedText;
 
-	const std::vector< path::PathMatch >& matchSeq = Source == column ? pItem->m_srcMatchSeq : pItem->m_destMatchSeq;
+	const std::vector< str::Match >& matchSeq = Source == column ? pItem->m_srcMatchSeq : pItem->m_destMatchSeq;
 
-	if ( path::MatchEqual == pItem->m_match || matchSeq.empty() )
+	if ( str::MatchEqual == pItem->m_match || matchSeq.empty() )
 		pDC->DrawText( pText, -1, &itemRect, TextStyle );			// straight text without highlighting
 	else
 		for ( size_t i = 0, size = matchSeq.size(); i != size && itemRect.left < itemRect.right; )
@@ -282,8 +282,8 @@ void CMainRenameDialog::ListItem_DrawTextDiffs( CDC* pDC, const CRect& textRect,
 			while ( i + matchLen != size && matchSeq[ i ] == matchSeq[ i + matchLen ] )
 				++matchLen;
 
-			pDC->SetTextColor( path::MatchEqual == matchSeq[ i ] || selInvert ? stdTextColor : highlightColor );
-			if ( path::MatchNotEqual == matchSeq[ i ] )
+			pDC->SetTextColor( str::MatchEqual == matchSeq[ i ] || selInvert ? stdTextColor : highlightColor );
+			if ( str::MatchNotEqual == matchSeq[ i ] )
 				SelectBoldFont( pDC );
 			else
 				pDC->SelectObject( pOriginalFont );
@@ -933,7 +933,7 @@ void CMainRenameDialog::OnCustomDrawFileRenameList( NMHDR* pNmHdr, LRESULT* pRes
 				}
 			}
 			else if ( Destination == pCustomDraw->iSubItem )					// && !pItem->m_destFnameExt.empty()
-				if ( useDefaultDraw && path::MatchEqual == pItem->m_match )
+				if ( useDefaultDraw && str::MatchEqual == pItem->m_match )
 				{
 					pCustomDraw->clrText = GetSysColor( COLOR_GRAYTEXT );		// gray-out text of unmodified dest files
 					*pResult |= CDRF_NEWFONT;
@@ -958,11 +958,11 @@ void CMainRenameDialog::CDisplayItem::ComputeMatchSeq( void )
 {
 	m_srcMatchSeq.clear();
 	m_destMatchSeq.clear();
-	if ( m_destFnameExt.empty() || path::MatchEqual == m_match )
+	if ( m_destFnameExt.empty() || str::MatchEqual == m_match )
 		return;
 
 	std::vector< lcs::CResult< TCHAR > > lcsSeq;
-	lcs::Comparator< TCHAR > comparator( m_srcFnameExt.c_str(), m_srcFnameExt.size(), m_destFnameExt.c_str(), m_destFnameExt.size() );
+	lcs::Comparator< TCHAR, path::GetMatch > comparator( m_srcFnameExt.c_str(), m_srcFnameExt.size(), m_destFnameExt.c_str(), m_destFnameExt.size() );
 
 	comparator.Process( lcsSeq );
 
@@ -973,19 +973,19 @@ void CMainRenameDialog::CDisplayItem::ComputeMatchSeq( void )
 		switch ( it->m_matchType )
 		{
 			case lcs::Equal:
-				m_srcMatchSeq.push_back( path::MatchEqual );
-				m_destMatchSeq.push_back( path::MatchEqual );
+				m_srcMatchSeq.push_back( str::MatchEqual );
+				m_destMatchSeq.push_back( str::MatchEqual );
 				break;
 			case lcs::EqualDiffCase:
-				m_srcMatchSeq.push_back( path::MatchEqualDiffCase );
-				m_destMatchSeq.push_back( path::MatchEqualDiffCase );
+				m_srcMatchSeq.push_back( str::MatchEqualDiffCase );
+				m_destMatchSeq.push_back( str::MatchEqualDiffCase );
 				break;
 			case lcs::Insert:
-				m_destMatchSeq.push_back( path::MatchNotEqual );
+				m_destMatchSeq.push_back( str::MatchNotEqual );
 				// discard SRC
 				break;
 			case lcs::Remove:
-				m_srcMatchSeq.push_back( path::MatchNotEqual );
+				m_srcMatchSeq.push_back( str::MatchNotEqual );
 				// discard DEST
 				break;
 		}

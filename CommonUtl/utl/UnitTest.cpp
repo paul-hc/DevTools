@@ -3,6 +3,7 @@
 #include "UnitTest.h"
 #include "ContainerUtilities.h"
 #include "Path.h"
+#include "StringUtilities.h"
 #include <math.h>
 #include <fstream>
 

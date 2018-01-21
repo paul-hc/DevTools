@@ -1,6 +1,7 @@
 
 #include "stdafx.h"
 #include "BaseImageTestCase.h"
+#include "StringUtilities.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

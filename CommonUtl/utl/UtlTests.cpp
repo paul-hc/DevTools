@@ -206,6 +206,15 @@ void CUtlTests::TestStringSearch( void )
 	ASSERT_EQUAL_STR( _T(""), str::FindTokenEnd( _T("abc;mn,xy"), _T(">") ) );
 }
 
+void CUtlTests::TestStringMatch( void )
+{
+	str::GetMatch getMatchFunc;
+	ASSERT_EQUAL( str::MatchEqual, getMatchFunc( _T(""), _T("") ) );
+	ASSERT_EQUAL( str::MatchEqual, getMatchFunc( _T("SomeText"), _T("SomeText") ) );
+	ASSERT_EQUAL( str::MatchEqualDiffCase, getMatchFunc( _T("SomeText"), _T("sometext") ) );
+	ASSERT_EQUAL( str::MatchNotEqual, getMatchFunc( _T("Some"), _T("Text") ) );
+}
+
 void CUtlTests::TestArgUtilities( void )
 {
 	ASSERT( arg::Equals( _T("apple"), _T("apple") ) );
@@ -498,6 +507,7 @@ void CUtlTests::Run( void )
 	TestStringTokenize();
 	TestStringConversion();
 	TestStringSearch();
+	TestStringMatch();
 	TestArgUtilities();
 	TestEnumTags();
 	TestFlagTags();

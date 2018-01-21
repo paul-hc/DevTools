@@ -4,6 +4,7 @@
 #include "ContainerUtilities.h"
 #include "FileSystem.h"
 #include "ShellUtilities.h"
+#include "StringUtilities.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
