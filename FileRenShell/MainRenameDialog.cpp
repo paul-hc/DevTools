@@ -961,15 +961,15 @@ void CMainRenameDialog::CDisplayItem::ComputeMatchSeq( void )
 	if ( m_destFnameExt.empty() || str::MatchEqual == m_match )
 		return;
 
-	std::vector< lcs::CResult< TCHAR > > lcsSeq;
 	lcs::Comparator< TCHAR, path::GetMatch > comparator( m_srcFnameExt.c_str(), m_srcFnameExt.size(), m_destFnameExt.c_str(), m_destFnameExt.size() );
 
+	std::vector< lcs::CResult< TCHAR > > lcsSeq;
 	comparator.Process( lcsSeq );
 
 	m_srcMatchSeq.reserve( m_srcFnameExt.size() );
 	m_destMatchSeq.reserve( m_destFnameExt.size() );
 
-	for ( std::vector< lcs::CResult< TCHAR > >::iterator it = lcsSeq.begin(); it != lcsSeq.end(); ++it )
+	for ( std::vector< lcs::CResult< TCHAR > >::const_iterator it = lcsSeq.begin(); it != lcsSeq.end(); ++it )
 		switch ( it->m_matchType )
 		{
 			case lcs::Equal:

@@ -99,6 +99,40 @@ namespace ut
 	do { std::tstring msg; _ASSERT_EXPR( ( ut::AssertEquals( (pExpected), std::tstring( (pActual) ), msg ) ), msg.c_str() ); } while( false )
 
 
+namespace ut
+{
+	template< typename Container >
+	std::string JoinKeys( const Container& items, const TCHAR sep[] )
+	{
+		std::ostringstream oss;
+		size_t count = 0;
+		for ( typename Container::const_iterator itItem = items.begin(); itItem != items.end(); ++itItem )
+		{
+			if ( count++ != 0 )
+				oss << sep;
+
+			oss << itItem->first;
+		}
+		return oss.str();
+	}
+
+	template< typename Container >
+	std::string JoinValues( const Container& items, const TCHAR sep[] )
+	{
+		std::ostringstream oss;
+		size_t count = 0;
+		for ( typename Container::const_iterator itItem = items.begin(); itItem != items.end(); ++itItem )
+		{
+			if ( count++ != 0 )
+				oss << sep;
+
+			oss << itItem->second;
+		}
+		return oss.str();
+	}
+}
+
+
 #include "FileSystem.h"
 
 

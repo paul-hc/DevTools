@@ -118,7 +118,7 @@ BOOL CApplication::InitInstance( void )
 
 #ifdef _DEBUG
 	// register unit tests
-	CImageTests::Instance();
+//	CImageTests::Instance();		will be run on IDC_RUN_IMAGE_TESTS button
 #endif
 
 	// parse command line for standard shell commands, DDE, file open

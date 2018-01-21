@@ -1568,6 +1568,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\LcsTests.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\LcsTests.h"
+				>
+			</File>
+			<File
 				RelativePath=".\PathGeneratorTests.cpp"
 				>
 			</File>

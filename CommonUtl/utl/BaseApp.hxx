@@ -1,9 +1,5 @@
 
 #include "AboutBox.h"
-#include "UtlTests.h"
-#include "FileSystemTests.h"
-#include "PathGeneratorTests.h"
-#include "ResequenceTests.h"
 #include "ImageStore.h"
 #include "ResourcePool.h"
 #include "Logger.h"
@@ -12,6 +8,12 @@
 #include "Utilities.h"
 #include "resource.h"
 #include <afxcontrolbars.h>			// MFC support for ribbons and control bars
+
+#include "UtlTests.h"
+#include "LcsTests.h"
+#include "FileSystemTests.h"
+#include "PathGeneratorTests.h"
+#include "ResequenceTests.h"
 
 
 // CBaseApp template code
@@ -77,6 +79,7 @@ BOOL CBaseApp< BaseClass >::InitInstance( void )
 #ifdef _DEBUG
 	// register UTL tests
 	CUtlTests::Instance();
+	CLcsTests::Instance();
 	CFileSystemTests::Instance();
 	CPathGeneratorTests::Instance();
 	CResequenceTests::Instance();
