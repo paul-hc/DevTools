@@ -50,7 +50,7 @@ namespace ut
 
 	std::tstring MakeNotEqualMessage( const std::tstring& expectedValue, const std::tstring& actualValue )
 	{
-		return str::Format( _T("* Equality Assertion Failed *\r\n\r\n  expected: '%s'\r\n  actual:   '%s'\r\n"), expectedValue.c_str(), actualValue.c_str() );
+		return str::Format( _T("* Equality Assertion Failed *\r\n\r\n  expect:\t'%s'\r\n  actual:\t'%s'\r\n"), expectedValue.c_str(), actualValue.c_str() );
 	}
 
 
