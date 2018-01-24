@@ -170,6 +170,8 @@ void CImageTests::TestImageList( void )
 
 void CImageTests::Run( void )
 {
+	__super::Run();
+
 	TestGroupIcon();
 	TestIcon();
 	TestImageList();

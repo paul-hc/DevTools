@@ -464,7 +464,7 @@ namespace ui
 	std::pair< bool, ComboField > SetComboEditText( CComboBox& rCombo, const std::tstring& currText, str::CaseType caseType = str::Case );		// <changed, by_field>
 	std::pair< bool, ComboField > ReplaceComboEditText( CComboBox& rCombo, const std::tstring& currText, str::CaseType caseType = str::Case );
 
-	bool UpdateHistoryCombo( CComboBox& rCombo, size_t maxCount, str::CaseType caseType = str::Case );
+	void UpdateHistoryCombo( CComboBox& rCombo, size_t maxCount, str::CaseType caseType = str::Case );
 
 	void LoadHistoryCombo( CComboBox& rHistoryCombo, const TCHAR* pSection, const TCHAR* pEntry,
 						   const TCHAR* pDefaultText, const TCHAR* pSep = _T(";") );

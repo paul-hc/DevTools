@@ -98,7 +98,7 @@ void CWicImageTests::TestImageCache( ut::CTestDevice* pTestDev )
 
 void CWicImageTests::Run( void )
 {
-	TRACE( _T("-- WIC image Tests --\n") );
+	__super::Run();
 
 	ut::CTestDevice testDev( ut::CTestToolWnd::AcquireWnd( 10 ), ut::TileRight );
 	testDev.GotoOrigin();

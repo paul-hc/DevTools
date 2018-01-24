@@ -7,6 +7,7 @@
 #include "utl/Serialization.h"
 #include "utl/SerializeStdTypes.h"
 #include "utl/ShellUtilities.h"
+#include "utl/StringUtilities.h"
 #include "utl/WicImage.h"
 
 #ifdef _DEBUG

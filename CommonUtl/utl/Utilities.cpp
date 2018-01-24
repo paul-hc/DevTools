@@ -1061,7 +1061,7 @@ namespace ui
 		return result;
 	}
 
-	bool UpdateHistoryCombo( CComboBox& rCombo, size_t maxCount, str::CaseType caseType /*= str::Case*/ )
+	void UpdateHistoryCombo( CComboBox& rCombo, size_t maxCount, str::CaseType caseType /*= str::Case*/ )
 	{
 		int selIndex = rCombo.GetCurSel();
 		CString currText;
@@ -1095,8 +1095,6 @@ namespace ui
 		for ( size_t count = rCombo.GetCount(); count > maxCount; )
 			rCombo.DeleteString( (unsigned int)--count );
 		rCombo.SetCurSel( 0 );
-
-		return true;
 	}
 
 	void LoadHistoryCombo( CComboBox& rHistoryCombo, const TCHAR* pSection, const TCHAR* pEntry, const TCHAR* pDefaultText, const TCHAR* pSep /*= _T(";")*/ )

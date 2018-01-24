@@ -9,7 +9,7 @@
 #include "UnitTest.h"
 
 
-class CBaseImageTestCase : public ut::ITestCase
+class CBaseImageTestCase : public ut::CGraphicTestCase
 {
 protected:
 	CBaseImageTestCase( void ) {}

@@ -3,28 +3,28 @@
 #pragma once
 
 
-namespace numeric
-{
-	const double dEpsilon = 0.000000001;
-
-	bool DoublesEqual( double left, double right );
-}
-
-
 #ifdef _DEBUG		// no UT code in release builds
 
 
 namespace ut
 {
-	const std::tstring& GetTestDataDirPath( void );
-
-
-	std::tstring CombinePath( const std::tstring& parentDirPath, const TCHAR* pSubPath );
-
-
 	interface ITestCase
 	{
 		virtual void Run( void ) = 0;
+	};
+
+	abstract class CConsoleTestCase : public ITestCase
+	{
+	public:
+		// base overrides
+		virtual void Run( void ) = 0;		// pure with implementation; must be called for tracing execution
+	};
+
+	abstract class CGraphicTestCase : public ITestCase
+	{
+	public:
+		// base overrides
+		virtual void Run( void ) = 0;		// pure with implementation; must be called for tracing execution
 	};
 
 
@@ -44,10 +44,26 @@ namespace ut
 }
 
 
+namespace ut
+{
+	const std::tstring& GetTestDataDirPath( void );
+
+	std::tstring CombinePath( const std::tstring& parentDirPath, const TCHAR* pSubPath );
+}
+
+
 template< typename Type1, typename Type2 >
 std::wostream& operator<<( std::wostream& os, const std::pair< Type1, Type2 >& rPair )
 {
 	return os << L"pair<" << rPair.first << L", " << rPair.second << L">";
+}
+
+
+namespace numeric
+{
+	const double dEpsilon = 0.000000001;
+
+	bool DoublesEqual( double left, double right );
 }
 
 

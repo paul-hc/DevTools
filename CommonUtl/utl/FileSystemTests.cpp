@@ -490,7 +490,7 @@ void CFileSystemTests::TestTempFilePool( void )
 
 void CFileSystemTests::Run( void )
 {
-	TRACE( _T("-- UTL File System tests --\n") );
+	__super::Run();
 
 	TestPathUtilities();
 	TestPathCompareFind();

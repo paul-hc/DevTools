@@ -273,7 +273,7 @@ void CPathGeneratorTests::TestWildcardFileGeneration( void )
 
 void CPathGeneratorTests::Run( void )
 {
-	TRACE( _T("-- UTL PathGenerator tests --\n") );
+	__super::Run();
 
 	TestPathMaker();
 	TestPathFormatter();

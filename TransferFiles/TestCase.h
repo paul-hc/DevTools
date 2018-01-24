@@ -8,7 +8,7 @@
 #include "utl/UnitTest.h"
 
 
-class CTestCase : public ut::ITestCase
+class CTestCase : public ut::CConsoleTestCase
 {
 	CTestCase( void );
 public:

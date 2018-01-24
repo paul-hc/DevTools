@@ -8,7 +8,7 @@
 #include "UnitTest.h"
 
 
-class CResequenceTests : public ut::ITestCase
+class CResequenceTests : public ut::CConsoleTestCase
 {
 	CResequenceTests( void );
 public:

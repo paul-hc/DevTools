@@ -24,7 +24,7 @@ namespace str
 		bool inQuotes = false;
 		std::tstring token;
 
-		for ( size_t pos = 0, length = _tcslen( pSource ); pos < length; ++pos )
+		for ( size_t pos = 0, length = GetLength( pSource ); pos < length; ++pos )
 		{
 			TCHAR nextChar = pSource[ pos ];
 
@@ -48,38 +48,6 @@ namespace str
 		}
 
 		return tokenCount;
-	}
-
-
-	bool StripPrefix( std::tstring& rText, const TCHAR prefix[] )
-	{
-		if ( size_t prefixLen = _tcslen( prefix ) )
-			if ( pred::Equal == rText.compare( 0, prefixLen, prefix ) )
-			{
-				rText.erase( 0, prefixLen );
-				return true;		// changed
-			}
-
-		return false;
-	}
-
-	bool StripSuffix( std::tstring& rText, const TCHAR suffix[] )
-	{
-		if ( size_t suffixLen = GetLength( suffix ) )
-		{
-			size_t suffixPos = rText.length();
-			if ( suffixPos >= suffixLen )
-			{
-				suffixPos -= suffixLen;
-				if ( pred::Equal == rText.compare( suffixPos, suffixLen, suffix ) )
-				{
-					rText.erase( suffixPos, suffixLen );
-					return true;		// changed
-				}
-			}
-		}
-
-		return false;
 	}
 
 	std::tstring& Truncate( std::tstring& rText, size_t maxLen, const TCHAR suffix[] /*= g_ellipsis*/, bool atEnd /*= true*/ )

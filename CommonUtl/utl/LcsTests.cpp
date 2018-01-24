@@ -1,6 +1,6 @@
 
 #include "stdafx.h"
-#include "StringSequenceTests.h"
+#include "LcsTests.h"
 #include "LongestCommonSubsequence.h"
 #include "LongestCommonDuplicate.h"
 #include "StringUtilities.h"
@@ -99,18 +99,41 @@ namespace ut
 }
 
 
-CStringSequenceTests::CStringSequenceTests( void )
+// CLcsTests implementation
+
+CLcsTests::CLcsTests( void )
 {
 	ut::CTestSuite::Instance().RegisterTestCase( this );		// self-registration
 }
 
-CStringSequenceTests& CStringSequenceTests::Instance( void )
+CLcsTests& CLcsTests::Instance( void )
 {
-	static CStringSequenceTests testCase;
+	static CLcsTests testCase;
 	return testCase;
 }
 
-void CStringSequenceTests::TestCompareSimpleLCS( void )
+void CLcsTests::TestFindLongestDuplicatedString( void )
+{
+	ASSERT_EQUAL( "", str::FindLongestDuplicatedString( std::string(), pred::CompareCase() ) );
+	ASSERT_EQUAL( " the people, ", str::FindLongestDuplicatedString( std::string( "of the people, by the people, for the people," ), pred::CompareCase() ) );
+	ASSERT_EQUAL( "he people, ", str::FindLongestDuplicatedString( std::string( "of the people, by The people, for tHE people," ), pred::CompareCase() ) );
+	ASSERT_EQUAL( " THE people, ", str::FindLongestDuplicatedString( std::string( "of THE people, by The people, for tHE people," ), pred::CompareNoCase() ) );		// first match wins
+}
+
+void CLcsTests::TestFindLongestCommonSubstring( void )
+{
+	std::vector< std::wstring > items;
+	ASSERT_EQUAL( L"", str::FindLongestCommonSubstring( items, pred::CompareCase() ) );
+
+	items.push_back( L"of the people from Italy" );
+	ASSERT_EQUAL( L"of the people from Italy", str::FindLongestCommonSubstring( items, pred::CompareCase() ) );
+
+	items.push_back( L"by the people of Italy" );
+	items.push_back( L"for the people in Italy" );
+	ASSERT_EQUAL( L" the people ", str::FindLongestCommonSubstring( items, pred::CompareCase() ) );
+}
+
+void CLcsTests::TestMatchingSequenceSimple( void )
 {
 	static const std::string src = "what ABC around", dest = "what XY around";
 
@@ -130,7 +153,7 @@ void CStringSequenceTests::TestCompareSimpleLCS( void )
 	ASSERT_EQUAL( ut::MatchTriplet( str::MatchEqual, " around", " around" ), triplets[ 2 ] );
 }
 
-void CStringSequenceTests::TestCompareDiffCaseLCS( void )
+void CLcsTests::TestMatchingSequenceDiffCase( void )
 {
 	static const std::string src = "what ABC around", dest = "what abc around";
 
@@ -150,7 +173,7 @@ void CStringSequenceTests::TestCompareDiffCaseLCS( void )
 	ASSERT_EQUAL( ut::MatchTriplet( str::MatchEqual, " around", " around" ), triplets[ 2 ] );
 }
 
-void CStringSequenceTests::TestCompareMidSubseqLCS( void )
+void CLcsTests::TestMatchingSequenceMidCommon( void )
 {
 	static const std::string src = "what goes around", dest = "what comes around";
 
@@ -172,32 +195,16 @@ void CStringSequenceTests::TestCompareMidSubseqLCS( void )
 	ASSERT_EQUAL( ut::MatchTriplet( str::MatchEqual, "es around", "es around" ), triplets[ 4 ] );
 }
 
-void CStringSequenceTests::TestFindLongestDuplicatedString( void )
+void CLcsTests::Run( void )
 {
-	ASSERT_EQUAL( "", str::FindLongestDuplicatedString( std::string(), pred::CompareCase() ) );
-	ASSERT_EQUAL( " the people, ", str::FindLongestDuplicatedString( std::string( "of the people, by the people, for the people," ), pred::CompareCase() ) );
-	ASSERT_EQUAL( "he people, ", str::FindLongestDuplicatedString( std::string( "of the people, by The people, for tHE people," ), pred::CompareCase() ) );
-	ASSERT_EQUAL( " THE people, ", str::FindLongestDuplicatedString( std::string( "of THE people, by The people, for tHE people," ), pred::CompareNoCase() ) );		// first match wins
-}
+	__super::Run();
 
-void CStringSequenceTests::TestFindLongestDuplicatedMultiSource( void )
-{
-	std::vector< std::wstring > items;
-	items.push_back( L"of the people from Italy" );
-	items.push_back( L"by the people of Italy" );
-	items.push_back( L"for the people in Italy" );
-	ASSERT_EQUAL( L" the people ", str::FindLongestCommonSubstring( items, pred::CompareCase() ) );
-}
-
-void CStringSequenceTests::Run( void )
-{
-	TRACE( _T("-- UTL String Sequence tests (LongestCommonSubsequence) --\n") );
-
-	TestCompareSimpleLCS();
-	TestCompareDiffCaseLCS();
-	TestCompareMidSubseqLCS();
 	TestFindLongestDuplicatedString();
-	TestFindLongestDuplicatedMultiSource();
+	TestFindLongestCommonSubstring();
+
+	TestMatchingSequenceSimple();
+	TestMatchingSequenceDiffCase();
+	TestMatchingSequenceMidCommon();
 }
 
 

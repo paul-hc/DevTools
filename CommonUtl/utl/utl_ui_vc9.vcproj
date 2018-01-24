@@ -1572,6 +1572,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\LcsTests.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\LcsTests.h"
+				>
+			</File>
+			<File
 				RelativePath=".\PathGeneratorTests.cpp"
 				>
 			</File>
@@ -1588,11 +1596,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\StringSequenceTests.cpp"
+				RelativePath=".\StringTests.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\StringSequenceTests.h"
+				RelativePath=".\StringTests.h"
 				>
 			</File>
 			<File
@@ -1604,6 +1612,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\ThreadingTests.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\ThreadingTests.h"
+				>
+			</File>
+			<File
 				RelativePath=".\UnitTest.cpp"
 				>
 			</File>
@@ -1612,11 +1628,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\UtlTests.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\UtlTests.h"
+				RelativePath=".\UtlConsoleTests.h"
 				>
 			</File>
 			<File

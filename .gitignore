@@ -294,3 +294,4 @@ __pycache__/
 *.odx.cs
 *.xsd.cs
 FileRenShell/FileRenShell.h
+TestDataUtl/images/thumbnails/myThumbs.stg

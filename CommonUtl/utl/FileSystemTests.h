@@ -8,7 +8,7 @@
 #include "UnitTest.h"
 
 
-class CFileSystemTests : public ut::ITestCase
+class CFileSystemTests : public ut::CConsoleTestCase
 {
 	CFileSystemTests( void );
 public:

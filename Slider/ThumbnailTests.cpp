@@ -177,7 +177,7 @@ void CThumbnailTests::TestThumbnailCache( void )
 
 void CThumbnailTests::Run( void )
 {
-	TRACE( _T("-- Thumbnail Tests --\n") );
+	__super::Run();
 
 	TestThumbConversion();
 //	TestImageThumbs();

@@ -8,7 +8,7 @@
 #include "utl/UnitTest.h"
 
 
-class CImageTests : public ut::ITestCase
+class CImageTests : public ut::CGraphicTestCase
 {
 	CImageTests( void );
 public:

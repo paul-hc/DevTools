@@ -15,8 +15,40 @@ namespace str
 	int Tokenize( std::vector< std::tstring >& rTokens, const TCHAR* pSource, const TCHAR* pDelims = _T(" \t") );
 
 
-	bool StripPrefix( std::tstring& rText, const TCHAR prefix[] );
-	bool StripSuffix( std::tstring& rText, const TCHAR suffix[] );
+	template< typename CharType >
+	bool StripPrefix( std::basic_string< CharType >& rText, const CharType prefix[] )
+	{
+		if ( size_t prefixLen = GetLength( prefix ) )
+			if ( pred::Equal == rText.compare( 0, prefixLen, prefix ) )
+			{
+				rText.erase( 0, prefixLen );
+				return true;		// changed
+			}
+
+		return false;
+	}
+
+	template< typename CharType >
+	bool StripSuffix( std::basic_string< CharType >& rText, const CharType suffix[] )
+	{
+		if ( size_t suffixLen = GetLength( suffix ) )
+		{
+			size_t suffixPos = rText.length();
+			if ( suffixPos >= suffixLen )
+			{
+				suffixPos -= suffixLen;
+				if ( pred::Equal == rText.compare( suffixPos, suffixLen, suffix ) )
+				{
+					rText.erase( suffixPos, suffixLen );
+					return true;		// changed
+				}
+			}
+		}
+
+		return false;
+	}
+
+
 	std::tstring& Truncate( std::tstring& rText, size_t maxLen, const TCHAR suffix[] = g_ellipsis, bool atEnd = true );
 	std::tstring& SingleLine( std::tstring& rText, size_t maxLen = utl::npos, const TCHAR sepLineEnd[] = g_paragraph );
 

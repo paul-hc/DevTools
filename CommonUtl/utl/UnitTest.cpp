@@ -15,6 +15,30 @@
 #ifdef _DEBUG		// no UT code in release builds
 
 
+namespace ut
+{
+	const std::string& GetTestCaseName( const ITestCase* pTestCase )
+	{
+		ASSERT_PTR( pTestCase );
+
+		static std::string testName;
+		testName = typeid( *pTestCase ).name();		// name of the derived concrete class (dereferenced pointer)
+		str::StripPrefix( testName, "class " );
+		return testName;
+	}
+
+	void CConsoleTestCase::Run( void )
+	{
+		TRACE( "-- %s console test case --\n", GetTestCaseName( this ).c_str() );
+	}
+
+	void CGraphicTestCase::Run( void )
+	{
+		TRACE( "-- %s graphic test case --\n", GetTestCaseName( this ).c_str() );
+	}
+}
+
+
 namespace numeric
 {
 	bool DoublesEqual( double left, double right )
@@ -187,8 +211,7 @@ namespace ut
 			for ( std::vector< std::tstring >::const_iterator itSrcPath = GetFilePaths().begin(); itSrcPath != GetFilePaths().end(); ++itSrcPath )
 				m_pathPairs[ *itSrcPath ] = fs::CPath();
 	}
-
-} //namespace ut
+}
 
 
 #endif //_DEBUG

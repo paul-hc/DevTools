@@ -1,5 +1,5 @@
-#ifndef UtlTests_h
-#define UtlTests_h
+#ifndef StringTests_h
+#define StringTests_h
 #pragma once
 
 
@@ -8,11 +8,11 @@
 #include "UnitTest.h"
 
 
-class CUtlTests : public ut::ITestCase
+class CStringTests : public ut::CConsoleTestCase
 {
-	CUtlTests( void );
+	CStringTests( void );
 public:
-	static CUtlTests& Instance( void );
+	static CStringTests& Instance( void );
 
 	// ut::ITestCase interface
 	virtual void Run( void );
@@ -30,7 +30,6 @@ private:
 	void TestEnsureUniformNumPadding( void );
 	void Test_vector_map( void );
 
-	void TestNestedLocking( void );			// OS sync objects
 	void TestFunctional( void );			// <functional>
 };
 
@@ -38,4 +37,4 @@ private:
 #endif //_DEBUG
 
 
-#endif // UtlTests_h
+#endif // StringTests_h

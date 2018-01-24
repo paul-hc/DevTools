@@ -128,7 +128,7 @@ void CResequenceTests::TestDropMove( void )
 
 void CResequenceTests::Run( void )
 {
-	TRACE( _T("-- UTL Resequence tests --\n") );
+	__super::Run();
 
 	TestCanMove();
 	TestResequence();

@@ -8,6 +8,7 @@
 #include "resource.h"
 #include "utl/CmdInfoStore.h"
 #include "utl/EnumTags.h"
+#include "utl/StringUtilities.h"
 #include "utl/Utilities.h"
 #include "utl/resource.h"
 

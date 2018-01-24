@@ -92,7 +92,7 @@ void CImagingD2DTests::TestImageAnimation( ut::CTestDevice* pTestDev, d2d::CDCRe
 
 void CImagingD2DTests::Run( void )
 {
-	TRACE( _T("-- Imaging Direct2D Tests --\n") );
+	__super::Run();
 
 	ut::CTestDevice testDev( ut::CTestToolWnd::AcquireWnd( 10 ) );
 	testDev.GotoOrigin();

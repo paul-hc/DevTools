@@ -52,6 +52,8 @@ A\\C\\x2.mp3\
 
 void CTestCase::Run( void )
 {
+	__super::Run();
+
 	TestPullLossy();
 }
 

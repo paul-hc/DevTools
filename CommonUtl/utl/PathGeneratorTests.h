@@ -8,7 +8,7 @@
 #include "UnitTest.h"
 
 
-class CPathGeneratorTests : public ut::ITestCase
+class CPathGeneratorTests : public ut::CConsoleTestCase
 {
 	CPathGeneratorTests( void );
 public:

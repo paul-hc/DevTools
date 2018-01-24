@@ -1,12 +1,10 @@
 
 #include "stdafx.h"
-#include "UtlTests.h"
+#include "StringTests.h"
 #include "EnumTags.h"
 #include "FlagTags.h"
-#include "MfcUtilities.h"
 #include "StringUtilities.h"
 #include "vector_map.h"
-#include <boost/thread.hpp>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -43,18 +41,18 @@ namespace func
 }
 
 
-CUtlTests::CUtlTests( void )
+CStringTests::CStringTests( void )
 {
 	ut::CTestSuite::Instance().RegisterTestCase( this );		// self-registration
 }
 
-CUtlTests& CUtlTests::Instance( void )
+CStringTests& CStringTests::Instance( void )
 {
-	static CUtlTests testCase;
+	static CStringTests testCase;
 	return testCase;
 }
 
-void CUtlTests::TestStringSplit( void )
+void CStringTests::TestStringSplit( void )
 {
 	static const TCHAR whitespaceText[] = _T("	  ab c 		");
 	std::tstring text;
@@ -121,7 +119,7 @@ void CUtlTests::TestStringSplit( void )
 	}
 }
 
-void CUtlTests::TestStringTokenize( void )
+void CStringTests::TestStringTokenize( void )
 {
 	static const TCHAR seps[] = _T(";,\n \t");
 	std::vector< std::tstring > tokens;
@@ -130,7 +128,7 @@ void CUtlTests::TestStringTokenize( void )
 	ASSERT_EQUAL_STR( _T("apple|grape|plum|pear|kiwi|banana"), str::Join( tokens, _T("|") ) );
 }
 
-void CUtlTests::TestStringConversion( void )
+void CStringTests::TestStringConversion( void )
 {
 	std::tstring io;
 
@@ -165,14 +163,14 @@ void CUtlTests::TestStringConversion( void )
 	ASSERT_EQUAL_STR( io, _T("abcd") );
 }
 
-void CUtlTests::TestStringSearch( void )
+void CStringTests::TestStringSearch( void )
 {
 	ASSERT_EQUAL_STR( _T(";mn"), str::FindTokenEnd( _T("abc;mn"), _T(",;") ) );
 	ASSERT_EQUAL_STR( _T(",xy"), str::FindTokenEnd( _T("abc;mn,xy"), _T(",") ) );
 	ASSERT_EQUAL_STR( _T(""), str::FindTokenEnd( _T("abc;mn,xy"), _T(">") ) );
 }
 
-void CUtlTests::TestStringMatch( void )
+void CStringTests::TestStringMatch( void )
 {
 	str::GetMatch getMatchFunc;
 	ASSERT_EQUAL( str::MatchEqual, getMatchFunc( _T(""), _T("") ) );
@@ -181,7 +179,7 @@ void CUtlTests::TestStringMatch( void )
 	ASSERT_EQUAL( str::MatchNotEqual, getMatchFunc( _T("Some"), _T("Text") ) );
 }
 
-void CUtlTests::TestArgUtilities( void )
+void CStringTests::TestArgUtilities( void )
 {
 	ASSERT( arg::Equals( _T("apple"), _T("apple") ) );
 	ASSERT( arg::Equals( _T("apple"), _T("APPLE") ) );
@@ -218,7 +216,7 @@ void CUtlTests::TestArgUtilities( void )
 	ASSERT( !arg::ParseValuePair( value, _T("Source=Value3"), _T("source"), _T('>') ) );
 }
 
-void CUtlTests::TestEnumTags( void )
+void CStringTests::TestEnumTags( void )
 {
 	enum Fruit { Plum, Apple, Peach };
 	CEnumTags tags( _T("Plums|Apples|Peaches"), _T("plum|apple|peach"), Apple );
@@ -241,7 +239,7 @@ void CUtlTests::TestEnumTags( void )
 	ASSERT_EQUAL( Apple, tags.ParseUi( _T("grapes") ) );
 }
 
-void CUtlTests::TestFlagTags( void )
+void CStringTests::TestFlagTags( void )
 {
 	// continuous tags
 	{
@@ -312,7 +310,7 @@ void CUtlTests::TestFlagTags( void )
 	}
 }
 
-void CUtlTests::TestExpandKeysToValues( void )
+void CStringTests::TestExpandKeysToValues( void )
 {
 	ASSERT_EQUAL( _T(""),
 		str::ExpandKeysToValues( _T(""), _T("["), _T("]"), func::KeyToValue() ) );
@@ -327,7 +325,7 @@ void CUtlTests::TestExpandKeysToValues( void )
 		str::ExpandKeysToValues( _T("About [NAME] vesion [MAJOR].[MINOR] release [FOO]."), _T("["), _T("]"), func::KeyToValue() ) );
 }
 
-void CUtlTests::TestWordSelection( void )
+void CStringTests::TestWordSelection( void )
 {
 	static const std::tstring text = _T("some  'STUFF'?! ");
 
@@ -371,7 +369,7 @@ void CUtlTests::TestWordSelection( void )
 	ASSERT_EQUAL( 16, word::FindNextWordBreak( text, 16 ) );
 }
 
-void CUtlTests::TestEnsureUniformNumPadding( void )
+void CStringTests::TestEnsureUniformNumPadding( void )
 {
 	static const TCHAR comma[] = _T(",");
 	{
@@ -412,7 +410,7 @@ void CUtlTests::TestEnsureUniformNumPadding( void )
 	}
 }
 
-void CUtlTests::Test_vector_map( void )
+void CStringTests::Test_vector_map( void )
 {
 	utl::vector_map< char, std::tstring > items;
 	items[ '7' ] = _T("i7");
@@ -426,28 +424,7 @@ void CUtlTests::Test_vector_map( void )
 	ASSERT_EQUAL( "1 7 9", ut::JoinKeys( items, _T(" ") ) );
 }
 
-void CUtlTests::TestNestedLocking( void )
-{
-	// code demo - not a real unit test
-	{
-		CCriticalSection cs;				// serialize cache access for thread safety
-
-		mt::CAutoLock lock1( &cs );
-		TRACE( _T(" CCriticalSection: aquire 1st lock...") );
-		{
-			mt::CAutoLock lock2( &cs );
-			TRACE( _T(" aquired nested lock!\n") );
-		}
-	}
-
-	{
-		boost::mutex mtx;
-		boost::lock_guard< boost::mutex > lock1( mtx );
-		TRACE( _T(" boost::mutex: aquire lock\n") );
-	}
-}
-
-void CUtlTests::TestFunctional( void )
+void CStringTests::TestFunctional( void )
 {
 	// code demo - not a real unit test
 	fs::CPath path( _T("C:\\Fruit\\apple.jpg") );
@@ -465,9 +442,9 @@ void CUtlTests::TestFunctional( void )
 	ASSERT_EQUAL_STR( _T("orange.png"), getNameExtMethod() );
 }
 
-void CUtlTests::Run( void )
+void CStringTests::Run( void )
 {
-	TRACE( _T("-- UTL tests --\n") );
+	__super::Run();
 
 	TestStringSplit();
 	TestStringTokenize();
@@ -482,7 +459,6 @@ void CUtlTests::Run( void )
 	TestEnsureUniformNumPadding();
 	Test_vector_map();
 
-//	TestNestedLocking();
 //	TestFunctional();
 }
 
