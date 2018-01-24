@@ -35,6 +35,7 @@ void CItemContentHistoryCombo::OnBuddyCommand( UINT cmdId )
 			return;					// cancelled by user
 
 		ui::SetComboEditText( *this, newItem );
+		StoreCurrentEditItem();		// store edit text in combo list (with validation)
 	}
 
 	SetFocus();

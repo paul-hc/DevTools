@@ -81,7 +81,7 @@ BOOL CApplication::InitInstance( void )
 	CVisualTheme::SetEnabled( !GetProfileInt( reg::section, reg::entry_disableThemes, FALSE ) );
 
 	std::tstring imagePath;
-	if ( app::HasCommandLineOption( _T("image"), &imagePath ) )
+	if ( app::HasCommandLineOption( _T("image"), &imagePath ) )		// "-image=<img_path>"
 	{
 		CImageDialog dlg( AfxGetMainWnd() );
 		m_pMainWnd = &dlg;
@@ -90,7 +90,7 @@ BOOL CApplication::InitInstance( void )
 		dlg.DoModal();
 		return FALSE;					// no app loop
 	}
-	else if ( app::HasCommandLineOption( _T("ut") ) )
+	else if ( app::HasCommandLineOption( _T("ut") ) )				// "-ut"
 	{
 		OnRunUnitTests();
 		return FALSE;					// no app msg loop

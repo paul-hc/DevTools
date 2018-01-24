@@ -91,6 +91,11 @@ std::tstring CHistoryComboBox::GetCurrentText( void ) const
 	return ui::GetComboSelText( *this );
 }
 
+void CHistoryComboBox::StoreCurrentEditItem( void )
+{
+	ui::UpdateHistoryCombo( *this, m_maxCount, m_caseType );		// store edit item in the list (with validation)
+}
+
 bool CHistoryComboBox::SetFrameColor( COLORREF frameColor )
 {
 	if ( m_frameColor == frameColor )
@@ -234,7 +239,7 @@ void CHistoryComboBox::OnDeleteListItem( void )
 
 void CHistoryComboBox::OnStoreEditItem( void )
 {
-	ui::UpdateHistoryCombo( *this, m_maxCount, m_caseType );		// store edit item in the list (with validation)
+	StoreCurrentEditItem();
 }
 
 void CHistoryComboBox::OnDeleteAllListItems( void )

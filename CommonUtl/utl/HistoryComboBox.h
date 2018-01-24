@@ -34,6 +34,7 @@ public:
 	void LoadHistory( const TCHAR* pSection, const TCHAR* pEntry, const TCHAR* pDefaultText = NULL );
 
 	std::tstring GetCurrentText( void ) const;
+	void StoreCurrentEditItem( void );
 
 	bool SetFrameColor( COLORREF frameColor );
 
