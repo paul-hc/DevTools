@@ -104,6 +104,18 @@ namespace ut
 		TRACE( _T("%s\n"), rMsg.c_str() );
 		return false;
 	}
+
+
+	template< typename ExpectedType, typename ActualType >
+	bool AssertEqualsIgnoreCase( const ExpectedType& expected, const ActualType& actual, std::tstring& rMsg )
+	{
+		if ( str::EqualString< str::IgnoreCase >( static_cast< ActualType >( expected ), actual ) )
+			return true;
+
+		rMsg = MakeNotEqualMessage( ToString( static_cast< ActualType >( expected ) ), ToString( actual ) );
+		TRACE( _T("%s\n"), rMsg.c_str() );
+		return false;
+	}
 }
 
 
@@ -113,6 +125,10 @@ namespace ut
 
 #define ASSERT_EQUAL_STR( pExpected, pActual )\
 	do { std::tstring msg; _ASSERT_EXPR( ( ut::AssertEquals( (pExpected), std::tstring( (pActual) ), msg ) ), msg.c_str() ); } while( false )
+
+
+#define ASSERT_EQUAL_IGNORECASE( expected, actual )\
+	do { std::tstring msg; _ASSERT_EXPR( ( ut::AssertEqualsIgnoreCase( (expected), (actual), msg ) ), msg.c_str() ); } while( false )
 
 
 namespace ut

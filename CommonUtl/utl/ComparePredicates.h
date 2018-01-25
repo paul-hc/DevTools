@@ -105,6 +105,21 @@ namespace pred
 	};
 
 
+	template< typename Compare >
+	struct IsEqual
+	{
+		IsEqual( Compare compare = Compare() ) : m_compare( compare ) {}
+
+		template< typename T >
+		bool operator()( const T& left, const T& right ) const		// containers of values
+		{
+			return Equal == m_compare( left, right );
+		}
+	private:
+		Compare m_compare;
+	};
+
+
 	// adapts Compare defined for an object to a new object via Adapter functor; example CompareAdapter< CompareRequestDate, func::ToWorkOrder >
 
 	template< typename Compare, typename Adapter >

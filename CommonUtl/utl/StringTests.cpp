@@ -52,6 +52,19 @@ CStringTests& CStringTests::Instance( void )
 	return testCase;
 }
 
+void CStringTests::TestIgnoreCase( void )
+{
+	std::string s( "bcd" );
+	ASSERT( "BCD" != s );
+	ASSERT( s != "BCD" );
+
+	using namespace str::ignore_case;
+
+	ASSERT( "BCD" == s );
+	ASSERT( s == "BCD" );
+	ASSERT( s != "xy" );
+}
+
 void CStringTests::TestStringSplit( void )
 {
 	static const TCHAR whitespaceText[] = _T("	  ab c 		");
@@ -177,6 +190,34 @@ void CStringTests::TestStringMatch( void )
 	ASSERT_EQUAL( str::MatchEqual, getMatchFunc( _T("SomeText"), _T("SomeText") ) );
 	ASSERT_EQUAL( str::MatchEqualDiffCase, getMatchFunc( _T("SomeText"), _T("sometext") ) );
 	ASSERT_EQUAL( str::MatchNotEqual, getMatchFunc( _T("Some"), _T("Text") ) );
+}
+
+void CStringTests::TestStringPart( void )
+{
+	ASSERT_EQUAL( std::tstring::npos, str::FindPart( "", str::CPart< char >( "a text", 1 ) ) );
+	ASSERT_EQUAL( 2, str::FindPart( L"a line", str::CPart< wchar_t >( L"liquid", 2 ) ) );
+	ASSERT_EQUAL( std::tstring::npos, str::FindPart( L"a line", str::CPart< wchar_t >( L"liquid", 3 ) ) );
+
+	ASSERT_EQUAL( 2, str::FindPart( "a line", str::CPart< char >( "LIQUID", 2 ), pred::CompareNoCase() ) );
+	ASSERT_EQUAL( 2, str::FindPart( L"a line", str::CPart< wchar_t >( L"LIQUID", 2 ), pred::CompareNoCase() ) );
+	ASSERT_EQUAL( std::tstring::npos, str::FindPart( "a line", str::CPart< char >( "LIQUID", 2 ), pred::CompareCase() ) );
+	ASSERT_EQUAL( std::tstring::npos, str::FindPart( "a line", str::CPart< char >( "LIQUID", 2 ) ) );
+
+	std::vector< std::string > items;
+	ASSERT( !AllContain( items, str::CPart< char >( "liquid", 2 ) ) );
+
+	items.push_back( "a line" );
+	ASSERT( AllContain( items, str::CPart< char >( "liquid", 2 ) ) );
+	ASSERT( !AllContain( items, str::CPart< char >( "LIQUID", 2 ) ) );
+	ASSERT( AllContain( items, str::CPart< char >( "LIQUID", 2 ), pred::CompareNoCase() ) );
+
+	items.push_back( "OS linux" );
+	ASSERT( AllContain( items, str::CPart< char >( "liquid", 2 ) ) );
+	ASSERT( !AllContain( items, str::CPart< char >( "LIQUID", 2 ) ) );
+	ASSERT( AllContain( items, str::CPart< char >( "LIQUID", 2 ), pred::CompareNoCase() ) );
+
+	items.push_back( "Red Hat Linux" );
+	ASSERT( AllContain( items, str::CPart< char >( "LIQUID", 2 ), pred::CompareNoCase() ) );
 }
 
 void CStringTests::TestArgUtilities( void )
@@ -446,11 +487,13 @@ void CStringTests::Run( void )
 {
 	__super::Run();
 
+	TestIgnoreCase();
 	TestStringSplit();
 	TestStringTokenize();
 	TestStringConversion();
 	TestStringSearch();
 	TestStringMatch();
+	TestStringPart();
 	TestArgUtilities();
 	TestEnumTags();
 	TestFlagTags();

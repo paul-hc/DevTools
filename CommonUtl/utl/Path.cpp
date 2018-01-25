@@ -191,8 +191,8 @@ namespace path
 	const TCHAR* Find( const TCHAR* pPath, const TCHAR* pSubString )
 	{
 		return std::search( str::begin( pPath ), str::end( pPath ),
-                            str::begin( pSubString ), str::end( pSubString ),
-                            pred::EquivalentPathChar() );
+							str::begin( pSubString ), str::end( pSubString ),
+							pred::EquivalentPathChar() );
 	}
 
 	const TCHAR* FindFilename( const TCHAR* pPath )
@@ -564,7 +564,7 @@ namespace fs
 	{
 		return pred::Less_EquivalentPath()( *this, right );
 	}
-	
+
 	void CPath::Set( const std::tstring& filePath )
 	{
 		m_filePath = filePath;

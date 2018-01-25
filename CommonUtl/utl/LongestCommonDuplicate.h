@@ -2,21 +2,26 @@
 #define LongestCommonDuplicate_h
 #pragma once
 
+#include "StringBase.h"
+#include "ComparePredicates.h"
+
 
 namespace lcs
 {
 	// use suffix trees to find the Longest Common Duplicate (LCD)
 
-	template< typename CharType, typename Compare = pred::CompareCase() >
+	template< typename CharType, typename Compare = pred::CompareCase >
 	class CSuffixTree
 	{
 		typedef std::basic_string< CharType > StringType;
 	public:
-		CSuffixTree( const StringType& source, Compare compareStr )
+		CSuffixTree( Compare compareStr = Compare() ) : m_compareStr( compareStr ) {}
+
+		CSuffixTree( const StringType& source, Compare compareStr = Compare() )
 			: m_compareStr( compareStr )
 			, m_source( source )
 		{
-			BuildSortedSuffixTree();
+			BuildSuffixTree();
 		}
 
 		StringType FindLongestDuplicate( size_t dupTimes = 1 ) const
@@ -40,8 +45,42 @@ namespace lcs
 			}
 			return StringType( m_suffixes[ maxPos ], maxLen );
 		}
+
+		StringType FindLongestCommonSubstring( const std::vector< std::basic_string< CharType > >& items )
+		{
+			ASSERT( m_source.empty() && m_suffixes.empty() );		// instantiated with default constructor
+			switch ( items.size() )
+			{
+				case 0:	return StringType();						// no common substring
+				case 1:	return items.front();						// single item: the entire string is common
+			}
+
+			const CharType empty[] = { '\0' };
+			m_source = str::Join( items, empty );					// concatenate all items (no separator) and find multiple occurences
+			BuildSuffixTree();
+
+			// find longest common prefix
+			str::CPart< CharType > lcPrefix( empty );				// start empty
+
+			if ( !m_suffixes.empty() )
+				for ( size_t i = 0; i != m_suffixes.size() - 1; ++i )
+				{
+					const CharType* pPrefix = m_suffixes[ i ];
+					const CharType* pNextPrefix = m_suffixes[ i + 1 ];
+
+					if ( size_t commonLen = GetCommonLength( pPrefix, pNextPrefix ) )
+						if ( commonLen > lcPrefix.m_count )
+						{
+							str::CPart< CharType > prefix( pPrefix, commonLen );
+							if ( str::AllContain( items, prefix, m_compareStr ) )
+								lcPrefix = prefix;
+						}
+				}
+
+			return lcPrefix.ToString();
+		}
 	private:
-		void BuildSortedSuffixTree( void )
+		void BuildSuffixTree( void )
 		{
 			m_suffixes.reserve( m_source.length() );
 			for ( size_t pos = 0; pos != m_source.length(); ++pos )
@@ -72,7 +111,7 @@ namespace lcs
 		};
 	private:
 		Compare m_compareStr;
-		const StringType& m_source;
+		StringType m_source;								// keep a copy of source
 		std::vector< const CharType* > m_suffixes;			// suffix tree as sorted array: pointers to each character in the source string
 	};
 }
@@ -85,7 +124,7 @@ namespace str
 	template< typename CharType >
 	std::basic_string< CharType > FindLongestDuplicatedString( const std::basic_string< CharType >& source, size_t dupTimes = 1 )
 	{
-		lcs::CSuffixTree< CharType > suffixTree( source, compareStr );
+		lcs::CSuffixTree< CharType > suffixTree( source );
 		return suffixTree.FindLongestDuplicate( dupTimes );
 	}
 
@@ -100,29 +139,17 @@ namespace str
 	// string set common occurence
 
 	template< typename CharType >
-	std::basic_string< CharType > FindLongestCommonSubstring( const std::vector< std::basic_string< CharType > >& srcItems )
+	std::basic_string< CharType > FindLongestCommonSubstring( const std::vector< std::basic_string< CharType > >& items )
 	{
-		switch ( srcItems.size() )
-		{
-			case 0:	return std::basic_string< CharType >();		// no common substring
-			case 1:	return srcItems.front();					// single item: the entire string is common
-		}
-
-		const CharType sep[] = { 0 };
-		return FindLongestDuplicatedString( str::Join( srcItems, sep ) );		// concatenate all items and find multiple occurences
+		lcs::CSuffixTree< CharType > suffixTree;
+		return suffixTree.FindLongestCommonSubstring( items );
 	}
 
 	template< typename CharType, typename Compare >
-	std::basic_string< CharType > FindLongestCommonSubstring( const std::vector< std::basic_string< CharType > >& srcItems, Compare compareStr )
+	std::basic_string< CharType > FindLongestCommonSubstring( const std::vector< std::basic_string< CharType > >& items, Compare compareStr )
 	{
-		switch ( srcItems.size() )
-		{
-			case 0:	return std::basic_string< CharType >();		// no common substring
-			case 1:	return srcItems.front();					// single item: the entire string is common
-		}
-
-		const CharType sep[] = { 0 };
-		return FindLongestDuplicatedString( str::Join( srcItems, sep ), compareStr );
+		lcs::CSuffixTree< CharType, Compare > suffixTree( compareStr );
+		return suffixTree.FindLongestCommonSubstring( items );
 	}
 }
 

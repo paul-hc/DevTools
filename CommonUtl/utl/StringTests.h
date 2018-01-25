@@ -17,11 +17,13 @@ public:
 	// ut::ITestCase interface
 	virtual void Run( void );
 private:
+	void TestIgnoreCase( void );
 	void TestStringSplit( void );
 	void TestStringTokenize( void );
 	void TestStringConversion( void );
 	void TestStringSearch( void );
 	void TestStringMatch( void );
+	void TestStringPart( void );
 	void TestArgUtilities( void );
 	void TestEnumTags( void );
 	void TestFlagTags( void );

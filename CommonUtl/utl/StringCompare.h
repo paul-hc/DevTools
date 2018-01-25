@@ -154,8 +154,8 @@ namespace pred
 	private:
 		CharCasePolicy m_casePolicy;
 	};
-	
-	
+
+
 	typedef CompareString< func::ToChar > CompareCase;
 	typedef CompareString< func::ToLower > CompareNoCase;
 
@@ -194,6 +194,63 @@ namespace pred
 
 namespace str
 {
+	// part (sub-string) search
+
+	template< typename CharType >
+	size_t FindPart( const CharType* pText, const CPart< CharType >& part )
+	{
+		ASSERT( pText != 0 );
+		ASSERT( !part.IsEmpty() );
+
+		const CharType* pEnd = str::end( pText );
+		const CharType* pFound = std::search( pText, pEnd, part.m_pString, part.m_pString + part.m_count );
+		return pFound != pEnd ? std::distance( pText, pFound ) : std::tstring::npos;
+	}
+
+	template< typename CharType, typename Compare >
+	size_t FindPart( const CharType* pText, const CPart< CharType >& part, Compare compareStr )				// e.g. pred::CompareNoCase
+	{
+		ASSERT( pText != 0 );
+		ASSERT( !part.IsEmpty() );
+
+		const CharType* pEnd = str::end( pText );
+		const CharType* pFound = std::search( pText, pEnd, part.m_pString, part.m_pString + part.m_count, pred::IsEqual< Compare >( compareStr ) );
+		return pFound != pEnd ? std::distance( pText, pFound ) : std::tstring::npos;
+	}
+
+	template< typename CharType >
+	inline bool ContainsPart( const CharType* pText, const CPart< CharType >& part ) { return FindPart( pText, part ) != std::tstring::npos; }
+
+	template< typename CharType, typename Compare >
+	inline bool ContainsPart( const CharType* pText, const CPart< CharType >& part, Compare compareStr ) { return FindPart( pText, part, compareStr ) != std::tstring::npos; }
+
+
+	template< typename CharType, typename ContainerType >
+	bool AllContain( const ContainerType& items, const str::CPart< CharType >& part )
+	{
+		for ( typename ContainerType::const_iterator itItem = items.begin(); itItem != items.end(); ++itItem )
+			if ( std::tstring::npos == FindPart( itItem->c_str(), part ) )
+				return false;			// not a match for this item
+
+		return !items.empty();
+	}
+
+	template< typename CharType, typename ContainerType, typename Compare >
+	bool AllContain( const ContainerType& items, const str::CPart< CharType >& part, Compare compareStr )		// e.g. pred::CompareNoCase
+	{
+		for ( typename ContainerType::const_iterator itItem = items.begin(); itItem != items.end(); ++itItem )
+			if ( std::tstring::npos == FindPart( itItem->c_str(), part, compareStr ) )
+				return false;			// not a match for this item
+
+		return !items.empty();
+	}
+}
+
+
+namespace str
+{
+	// custom case type
+
 	template< str::CaseType caseType, typename CharType >
 	size_t Find( const CharType* pText, CharType chr, size_t startPos = 0 )
 	{

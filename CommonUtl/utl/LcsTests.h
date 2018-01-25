@@ -20,6 +20,7 @@ private:
 	// common substring
 	void TestFindLongestDuplicatedString( void );		// single string multiple occurence
 	void TestFindLongestCommonSubstring( void );		// string set common occurence
+	void TestRandomLongestCommonSubstring( void );
 
 	// matching sequence
 	void TestMatchingSequenceSimple( void );

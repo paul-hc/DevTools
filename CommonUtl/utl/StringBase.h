@@ -98,16 +98,79 @@ namespace str
 	inline const char* end( const char* pText ) { return pText + GetLength( pText ); }
 	inline const wchar_t* end( const wchar_t* pText ) { return pText + GetLength( pText ); }
 
-	template< typename CharType > bool IsEmpty( const CharType* pText ) { return NULL == pText || _T('\0') == *pText; }
+	template< typename CharType > bool IsEmpty( const CharType* pText ) { return NULL == pText || 0 == *pText; }
 
 	inline char* Copy( char* pBuffer, const std::string& text ) { return strcpy( pBuffer, text.c_str() ); }
 	inline wchar_t* Copy( wchar_t* pBuffer, const std::wstring& text ) { return wcscpy( pBuffer, text.c_str() ); }
 
 	template< typename CharType >
-	inline const CharType* FindTokenEnd( const CharType* pText, const CharType* pDelims )
+	inline const CharType* FindTokenEnd( const CharType* pText, const CharType delims[] )
 	{
 		const TCHAR* pTextEnd = str::end( pText );
-		return std::find_first_of( pText, pTextEnd, pDelims, str::end( pDelims ) );
+		return std::find_first_of( pText, pTextEnd, delims, str::end( delims ) );
+	}
+
+
+	template< typename CharType >
+	struct CPart
+	{
+		CPart( const CharType* pString = NULL, size_t count = 0 ) : m_pString( pString ), m_count( count ) { ASSERT_PTR( m_pString ); }
+
+		bool IsEmpty( void ) const { return 0 == m_count; }
+		std::basic_string< CharType > ToString( void ) const { ASSERT_PTR( m_pString ); return std::basic_string< CharType >( m_pString, m_count ); }
+	public:
+		const CharType* m_pString;
+		size_t m_count;
+	};
+
+	template< typename CharType >
+	CPart< CharType > MakePart( const CharType* pString, size_t count = std::tstring::npos )
+	{
+		return CPart< CharType >( pString, count != std::tstring::npos ? count : GetLength( pString ) );
+	}
+}
+
+
+namespace str
+{
+	namespace ignore_case
+	{
+		template< typename CharType >
+		inline bool operator==( const std::basic_string< CharType >& left, const std::basic_string< CharType >& right )
+		{
+			return str::Equals< IgnoreCase >( left.c_str(), right.c_str() );
+		}
+
+		template< typename CharType >
+		inline bool operator==( const CharType* pLeft, const std::basic_string< CharType >& right )
+		{
+			return str::Equals< IgnoreCase >( pLeft, right.c_str() );
+		}
+
+		template< typename CharType >
+		inline bool operator==( const std::basic_string< CharType >& left, const CharType* pRight )
+		{
+			return str::Equals< IgnoreCase >( left.c_str(), pRight );
+		}
+
+
+		template< typename CharType >
+		inline bool operator!=( const std::basic_string< CharType >& left, const std::basic_string< CharType >& right )
+		{
+			return !operator==( left, right );
+		}
+
+		template< typename CharType >
+		inline bool operator!=( const CharType* pLeft, const std::basic_string< CharType >& right )
+		{
+			return !operator==( pLeft, right );
+		}
+
+		template< typename CharType >
+		inline bool operator!=( const std::basic_string< CharType >& left, const CharType* pRight )
+		{
+			return !operator==( left, pRight );
+		}
 	}
 }
 
@@ -280,7 +343,7 @@ namespace str
 	}
 
 
-	template< typename Iterator, typename CharType >
+	template< typename CharType, typename Iterator >
 	std::basic_string< CharType > Join( Iterator itFirstToken, Iterator itLastToken, const CharType* pSep )
 	{	// works with any forward/reverse iterator
 		std::basic_ostringstream< CharType > oss;
@@ -295,7 +358,7 @@ namespace str
 
 	// works with container of any value type that has stream insertor defined
 	//
-	template< typename ContainerType, typename CharType >
+	template< typename CharType, typename ContainerType >
 	inline std::basic_string< CharType > Join( const ContainerType& items, const CharType* pSep )
 	{
 		return Join( items.begin(), items.end(), pSep );
