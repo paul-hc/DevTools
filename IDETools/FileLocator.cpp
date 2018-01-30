@@ -120,12 +120,15 @@ void FileLocator::SetProjectActiveConfiguration( LPCTSTR lpszNewValue )
 
 BSTR FileLocator::GetProjectAdditionalIncludePath( void )
 {
-	return str::AllocSysString( m_projCtx.GetProjectAdditionalIncludePath() );
+	// OBSOLETE:
+	return str::AllocSysString( std::tstring() );
 }
 
 void FileLocator::SetProjectAdditionalIncludePath( LPCTSTR lpszNewValue )
 {
-	m_projCtx.SetProjectAdditionalIncludePath( lpszNewValue );
+	lpszNewValue;
+	// OBSOLETE:
+//	m_projCtx.SetProjectAdditionalIncludePath( lpszNewValue );
 }
 
 BSTR FileLocator::GetSelectedFiles( void )
@@ -142,7 +145,7 @@ BSTR FileLocator::GetSelectedFile( long index )
 {
 	CString result;
 	if ( index >= 0 && index < m_selectedFiles.size() )
-		result = m_selectedFiles[ index ].first.c_str();
+		result = m_selectedFiles[ index ].first.GetPtr();
 	else
 		TRACE( _T("FileLocator::GetSelectedFile(): invalid index: %d from valid range [0, %d]\n"), index, m_selectedFiles.size() );
 	return result.AllocSysString();
@@ -151,9 +154,6 @@ BSTR FileLocator::GetSelectedFile( long index )
 BOOL FileLocator::LocateFile( void )
 {
 	CFileLocatorDialog dialog( ide::getRootWindow() );
-
-	dialog.setProjectContext( m_projCtx );
-
 	if ( dialog.DoModal() != IDOK )
 		return FALSE;
 

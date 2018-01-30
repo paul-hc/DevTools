@@ -219,12 +219,12 @@ void ModuleOptions::SetBrowseInfoPath( LPCTSTR lpszNewValue )
 
 BSTR ModuleOptions::GetAdditionalIncludePath( void )
 {
-	return str::AllocSysString( app::GetModuleSession().GetAdditionalIncludePath() );
+	return str::AllocSysString( app::GetModuleSession().m_moreAdditionalIncludePath.Join() );
 }
 
 void ModuleOptions::SetAdditionalIncludePath( LPCTSTR lpszNewValue )
 {
-	app::GetModuleSession().SetAdditionalIncludePath( lpszNewValue );
+	app::GetModuleSession().m_moreAdditionalIncludePath.Store( lpszNewValue );
 }
 
 BSTR ModuleOptions::GetAdditionalAssocFolders( void )

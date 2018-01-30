@@ -2,6 +2,7 @@
 #include "stdafx.h"
 #include "IdeUtilities.h"
 #include "Application.h"
+#include "utl/Registry.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -10,18 +11,26 @@
 
 namespace ide
 {
-	bool isVC6( void )
+	bool IsVC6( void )
 	{
 		CWnd* pRootWindow = getRootWindow();
-
 		return pRootWindow != NULL && getWindowClassName( pRootWindow->m_hWnd ).Left( 4 ) == _T("Afx:");
 	}
 
-	bool isVC71( void )
+	bool IsVC_71to90( void )
 	{
 		CWnd* pRootWindow = getRootWindow();
-
 		return pRootWindow != NULL && getWindowClassName( pRootWindow->m_hWnd ) == _T("wndclass_desked_gsk");
+	}
+
+	IdeType FindIdeType( void )
+	{
+		if ( IsVC6() )
+			return VC_60;
+		if ( IsVC_71to90() )
+			return VC_71to90;
+
+		return VC_110plus;
 	}
 
 	CWnd* getRootWindow( void )
@@ -231,4 +240,63 @@ namespace ide
 		return pTrackingFrame;
 	}
 
-} //namespace ide
+
+	// VC registry access
+
+	std::tstring GetRegistryPath_VC6( const TCHAR entry[] )
+	{
+		// Visual C++ 6 'Directories' key path
+		static const TCHAR regKeyPathVC6[] = _T("HKEY_CURRENT_USER\\Software\\Microsoft\\DevStudio\\6.0\\Build System\\Components\\Platforms\\Win32 (x86)\\Directories");
+		std::tstring path;
+		reg::CKey regKey( regKeyPathVC6, false );
+		if ( regKey.IsValid() )
+		{
+			path = regKey.ReadString( entry );
+			DEBUG_LOG( _T("VC6 %s: %s\n"), entry, path.c_str() );
+		}
+		else
+			TRACE( _T("# Error accessing the registry: %s\n"), regKeyPathVC6 );
+
+		return path;
+	}
+
+	std::tstring GetRegistryPath_VC71( const TCHAR entry[] )
+	{
+		// Visual C++ 7.1 'Directories' key path
+		static const TCHAR regKeyPathVC71[] = _T("HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\7.1\\VC\\VC_OBJECTS_PLATFORM_INFO\\Win32\\Directories");
+
+		std::tstring path;
+		reg::CKey regKey( regKeyPathVC71, false );
+
+		if ( regKey.IsValid() )
+		{
+			path = regKey.ReadString( entry );
+			const std::tstring& vc71InstallDir = GetVC71InstallDir();
+
+			if ( !vc71InstallDir.empty() )
+				str::Replace( path, _T("$(VCInstallDir)"), vc71InstallDir.c_str() );
+
+			DEBUG_LOG( _T("VC71 %s: %s\n"), entry, path.c_str() );
+		}
+		else
+			TRACE( _T("# Error accessing the registry: %s\n"), regKeyPathVC71 );
+
+		return path;
+	}
+
+	const std::tstring& GetVC71InstallDir( void )
+	{
+		static std::tstring vc71InstallDir;
+		if ( vc71InstallDir.empty() )
+		{
+			reg::CKey regKey( _T("HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\7.1"), false );
+			if ( regKey.IsValid() )
+			{
+				vc71InstallDir = regKey.ReadString( _T("InstallDir") );
+				str::Replace( vc71InstallDir, _T("Common7\\IDE\\"), _T("Vc7\\") );
+			}
+		}
+
+		return vc71InstallDir;
+	}
+}

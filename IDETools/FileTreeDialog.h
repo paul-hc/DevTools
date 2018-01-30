@@ -10,7 +10,8 @@
 #include "utl/TreeControl.h"
 #include "FileAssoc.h"
 #include "IncludeOptions.h"
-#include "SearchPathEngine.h"
+#include "IncludeNode.h"
+#include "SearchPathEngine_fwd.h"
 
 
 struct CIncludeNode;
@@ -38,12 +39,12 @@ public:
 };
 
 
-class CFileTreeDialog : public CLayoutDialog, public CIncludeOptions
+class CFileTreeDialog : public CLayoutDialog
 {
 public:
 	typedef void (*IterFunc)( CTreeControl* pTreeCtrl, HTREEITEM hItem, void* pArgs, int nestingLevel );
 
-	CFileTreeDialog( const std::tstring& rootPath, bool autoSave, CWnd* pParent );
+	CFileTreeDialog( const std::tstring& rootPath, CWnd* pParent );
 	virtual ~CFileTreeDialog();
 
 	const fs::CPath& GetRootPath( void ) const { return m_rootPath; }
@@ -91,9 +92,10 @@ private:
 	void UpdateOptionCtrl( void );
 private:
 	fs::CPath m_rootPath;
-	int m_sourceLineNo;
-	bool m_autoSave;
+	CIncludeOptions& m_rOpt;
+
 	std::vector< CIncludeNode* > m_treeItems;				// has ownership
+	int m_sourceLineNo;
 
 	typedef std::map< std::tstring, HTREEITEM, pred::LessPath > PathToItemMap;
 	PathToItemMap m_originalItems;
@@ -103,8 +105,6 @@ private:
 	std::tstring m_titlePrefix;
 
 	int m_nestingLevel;
-private:
-	CSearchPathEngine m_searchPathEngine;
 public:
 	// enum { IDD = IDD_FILE_TREE_DIALOG };
 

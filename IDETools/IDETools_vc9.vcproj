@@ -873,11 +873,23 @@
 					>
 				</File>
 				<File
+					RelativePath=".\PathGroup.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\PathGroup.h"
+					>
+				</File>
+				<File
 					RelativePath=".\SearchPathEngine.cpp"
 					>
 				</File>
 				<File
 					RelativePath=".\SearchPathEngine.h"
+					>
+				</File>
+				<File
+					RelativePath=".\SearchPathEngine_fwd.h"
 					>
 				</File>
 				<File
@@ -1167,7 +1179,7 @@
 			</Filter>
 		</Filter>
 		<Filter
-			Name="Automation"
+			Name="automation"
 			>
 			<File
 				RelativePath="CodeProcessor.cpp"
@@ -1507,5 +1519,9 @@
 		</File>
 	</Files>
 	<Globals>
+		<Global
+			Name="RESOURCE_FILE"
+			Value="IDETools.rc"
+		/>
 	</Globals>
 </VisualStudioProject>

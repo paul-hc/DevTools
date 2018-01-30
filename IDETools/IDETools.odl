@@ -369,7 +369,7 @@ library IDETools
 			[id(2)] BSTR LocalCurrentFile;
 			[id(3)] BSTR AssociatedProjectFile;
 			[id(4)] BSTR ProjectActiveConfiguration;
-			[id(5)] BSTR ProjectAdditionalIncludePath;
+			[id(5)] BSTR ProjectAdditionalIncludePath;		// OBSOLETE
 			[id(6)] BSTR SelectedFiles;
 			[id(7)] long SelectedCount;
 			//}}AFX_ODL_PROP

@@ -21,14 +21,15 @@ private:
 
 	CComboBox m_depthLevelCombo;
 	CSpinEdit m_maxParseLinesEdit;
-	CItemListEdit m_excludedEdit;
-	CItemListEdit m_includedEdit;
-	CItemListEdit m_additionalIncPathEdit;
+	CItemListEdit m_ignoredEdit;				// CIncludeOptions::m_fnIgnored
+	CItemListEdit m_addedEdit;					// CIncludeOptions::m_fnAdded
+	CItemListEdit m_additionalIncPathEdit;		// CModuleSession::m_additionalIncludePath
 
 	protected:
 	virtual void DoDataExchange( CDataExchange* pDX );
+	virtual void OnOK( void );
 protected:
-	afx_msg void CkDelayedParsing( void );
+	afx_msg void OnToggle_DelayedParsing( void );
 
 	DECLARE_MESSAGE_MAP()
 };

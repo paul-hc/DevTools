@@ -35,7 +35,6 @@ namespace reg
 	const TCHAR entry_enumPrefix[] = _T("Enum prefix");
 
 	const TCHAR section_settings_Additional[] = _T("Settings\\IncludeOptions\\Additional");
-	const TCHAR entry_additionalIncludePath[] = _T("Include path");
 	const TCHAR entry_additionalAssocFolders[] = _T("Associated folders");
 }
 
@@ -56,6 +55,7 @@ CModuleSession::CModuleSession( void )
 	, m_vsTabSizeCpp( 4 )
 	, m_vsKeepTabsCpp( true )
 	, m_vsUseStandardWindowsMenu( false )
+	, m_moreAdditionalIncludePath( inc::AdditionalPath )
 {
 	TCHAR developerName[ 128 ];
 	::GetEnvironmentVariable( _T("UserName"), developerName, COUNT_OF( developerName ) );
@@ -98,11 +98,6 @@ bool CModuleSession::IsDebugBreakEnabled( void )
 	}
 }
 
-std::tstring CModuleSession::GetExpandedAdditionalIncludePath( void ) const
-{
-	return str::ExpandEnvironmentStrings( m_additionalIncludePath.c_str() );
-}
-
 void CModuleSession::LoadFromRegistry( void )
 {
 	CWinApp* pApp = AfxGetApp();
@@ -125,7 +120,6 @@ void CModuleSession::LoadFromRegistry( void )
 	m_structPrefix = pApp->GetProfileString( reg::section_settings_prefixes, reg::entry_structPrefix, m_structPrefix.c_str() );
 	m_enumPrefix = pApp->GetProfileString( reg::section_settings_prefixes, reg::entry_enumPrefix, m_enumPrefix.c_str() );
 
-	m_additionalIncludePath = (LPCTSTR)pApp->GetProfileString( reg::section_settings_Additional, reg::entry_additionalIncludePath, m_additionalIncludePath.c_str() );
 	m_additionalAssocFolders = (LPCTSTR)pApp->GetProfileString( reg::section_settings_Additional, reg::entry_additionalAssocFolders, m_additionalAssocFolders.c_str() );
 
 	{
@@ -165,7 +159,6 @@ void CModuleSession::SaveToRegistry( void ) const
 	pApp->WriteProfileString( reg::section_settings_prefixes, reg::entry_structPrefix, m_structPrefix.c_str() );
 	pApp->WriteProfileString( reg::section_settings_prefixes, reg::entry_enumPrefix, m_enumPrefix.c_str() );
 
-	pApp->WriteProfileString( reg::section_settings_Additional, reg::entry_additionalIncludePath, m_additionalIncludePath.c_str() );
 	pApp->WriteProfileString( reg::section_settings_Additional, reg::entry_additionalAssocFolders, m_additionalAssocFolders.c_str() );
 }
 

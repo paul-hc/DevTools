@@ -1,8 +1,7 @@
 
-** Use VS_60 as debug target - newer VS_80+ use a different arhitecture, so it doesn't hit the breakpoints
-
-DEBUG TARGET - VS_60 (1998):
-	C:\Program Files\Microsoft Visual Studio\Common\MSDev98\Bin\MSDEV.EXE
+** DEBUGGING:
+	Use Visual Studio 6.0 as debug target - newer VS 2005+ uses a different arhitecture, so it doesn't hit the breakpoints.
+	Command: C:\Program Files (x86)\Microsoft Visual Studio\Common\MSDev98\Bin\MSDEV.EXE
 
 Registration:
 	regsvr32.exe

@@ -8,7 +8,6 @@
 
 
 class CModuleSession;
-class CIncludePaths;
 
 
 class CApplication : public CBaseApp< CWinApp >
@@ -18,12 +17,10 @@ public:
 	virtual ~CApplication();
 
 	CModuleSession& GetModuleSession( void ) { ASSERT_PTR( m_pModuleSession.get() ); return *m_pModuleSession; }
-	CIncludePaths& GetIncludePaths( void ) const { ASSERT_PTR( m_pIncludePaths.get() ); return *m_pIncludePaths; }
 
 	static CApplication* GetApp( void ) { return checked_static_cast< CApplication* >( AfxGetApp() ); }
 private:
 	std::auto_ptr< CModuleSession > m_pModuleSession;
-	std::auto_ptr< CIncludePaths > m_pIncludePaths;
 public:
 	// generated overrides
 	public:
@@ -35,11 +32,15 @@ private:
 };
 
 
+class CIncludePaths;
+
+
 namespace app
 {
 	inline CLogger& GetLogger( void ) { return CApplication::GetApp()->GetLogger(); }
 	inline CModuleSession& GetModuleSession( void ) { return CApplication::GetApp()->GetModuleSession(); }
-	inline CIncludePaths& GetIncludePaths( void ) { return CApplication::GetApp()->GetIncludePaths(); }
+
+	CIncludePaths& GetIncludePaths( void );
 
 	bool IsDebugBreakEnabled( void );
 

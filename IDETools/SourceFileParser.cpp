@@ -11,9 +11,8 @@
 #endif
 
 
-CSourceFileParser::CSourceFileParser( const CSearchPathEngine* pSearchPath, const fs::CPath& rootFilePath )
-	: m_pSearchPath( pSearchPath )
-	, m_rootFilePath( path::MakeCanonical( rootFilePath.GetPtr() ) )
+CSourceFileParser::CSourceFileParser( const fs::CPath& rootFilePath )
+	: m_rootFilePath( path::MakeCanonical( rootFilePath.GetPtr() ) )
 	, m_fileType( ft::FindFileType( m_rootFilePath.GetPtr() ) )
 	, m_localDirPath( m_rootFilePath.GetDirPath( false ) )
 {
@@ -159,8 +158,9 @@ CIncludeNode* CSourceFileParser::AddIncludeFile( const CIncludeTag& includeTag, 
 			break;
 	}
 
-	PathLocationPair foundFile;
-	if ( !m_pSearchPath->FindFirstIncludeFile( foundFile, includeTag, m_localDirPath, searchInPath ) )
+	inc::CSearchPathEngine searchEngine( m_localDirPath, searchInPath );
+	inc::TPathLocPair foundFile = searchEngine.FindFirstIncludeFile( includeTag );
+	if ( foundFile.first.IsEmpty() )
 	{
 		//TRACE( _T(" - include file not found in the specified path: %s\n"), includeTag.GetSafeFileName().c_str() );
 		return NULL;

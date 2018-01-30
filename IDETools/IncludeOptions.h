@@ -4,18 +4,19 @@
 
 #include "utl/EnumTags.h"
 #include "PublicEnums.h"
+#include "PathGroup.h"
 
 
 struct CIncludeOptions
 {
+private:
 	CIncludeOptions( void );
 	~CIncludeOptions();
+public:
+	static CIncludeOptions& Instance( void );
 
-	void ReadProfile( void );
-	void WriteProfile( void ) const;
-
-	void SetupArrayExclude( const TCHAR* pFnExclude, const TCHAR* pSep );
-	void SetupArrayMore( const TCHAR* pFnMore, const TCHAR* pSep );
+	void Load( void );
+	void Save( void ) const;
 
 	static const CEnumTags& GetTags_DepthLevel( void );
 	static const CEnumTags& GetTags_ViewMode( void );
@@ -31,12 +32,10 @@ public:
 	bool m_selRecover;
 	bool m_lazyParsing;
 	std::tstring m_lastBrowsedFile;
-	std::tstring m_fnExclude, m_fnMore;
-public:
-	std::vector< std::tstring > m_fnArrayExclude;
-	std::vector< std::tstring > m_fnArrayMore;
-public:
-	static const TCHAR m_sectionName[];
+
+	TFilePathGroup m_fnIgnored;					// "Exclude files": force out
+	TFilePathGroup m_fnAdded;					// "Also include files": force in
+	inc::CDirPathGroup m_additionalIncludePath;
 };
 
 

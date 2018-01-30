@@ -47,11 +47,12 @@ namespace layout
 }
 
 
-CFileTreeDialog::CFileTreeDialog( const std::tstring& rootPath, bool autoSave, CWnd* pParent )
+CFileTreeDialog::CFileTreeDialog( const std::tstring& rootPath, CWnd* pParent )
 	: CLayoutDialog( IDD_FILE_TREE_DIALOG, pParent )
 	, m_rootPath( rootPath )
+	, m_rOpt( CIncludeOptions::Instance() )
+
 	, m_sourceLineNo( 0 )
-	, m_autoSave( autoSave )
 	, m_nestingLevel( 0 )
 	, m_selFilePathEdit( ui::FilePath )
 	, m_accelTreeFocus( IDR_FILETREEFOCUS_ACCEL )
@@ -62,21 +63,20 @@ CFileTreeDialog::CFileTreeDialog( const std::tstring& rootPath, bool autoSave, C
 	m_accelPool.AddAccelTable( new CAccelTable( IDR_FILETREE_ACCEL ) );
 
 	m_selFilePathEdit.GetDetailButton()->SetIconId( IDC_FULLPATH_EDIT );
-	m_lastBrowsedFile = m_rootPath.Get();
-	if ( m_autoSave )
-		ReadProfile();
+
+	m_rOpt.m_lastBrowsedFile = m_rootPath.Get();
 }
 
 CFileTreeDialog::~CFileTreeDialog()
 {
+	m_rOpt.Save();
+
 	Clear();
-	if ( m_autoSave )
-		WriteProfile();
 }
 
 void CFileTreeDialog::SetRootPath( const std::tstring& rootPath )
 {
-	bool restoreTreeUi = m_hWnd != NULL && m_selRecover && m_rootPath.Equivalent( rootPath );
+	bool restoreTreeUi = m_hWnd != NULL && m_rOpt.m_selRecover && m_rootPath.Equivalent( rootPath );
 	CTreeCtrlUiState treeState;
 
 	if ( restoreTreeUi )
@@ -101,16 +101,10 @@ void CFileTreeDialog::BuildIncludeTree( void )
 	CWaitCursor busyCursor;
 	Clear();
 
-	// associate the root file's project additional include file
-	CProjectContext projectContext;
-	projectContext.SetLocalCurrentFile( m_rootPath.Get() );
-	m_searchPathEngine.SetDspAdditionalIncludePath( projectContext.GetLocalDirPath(), projectContext.GetProjectAdditionalIncludePath(), EDIT_SEP );
-
-	CSourceFileParser rootParser( &m_searchPathEngine, m_rootPath );		// add the root file path
+	CSourceFileParser rootParser( m_rootPath );		// add the root file path
 
 	// add always desired source paths
-	for ( std::vector< std::tstring >::const_iterator itMoreSource = m_fnArrayMore.begin(); itMoreSource != m_fnArrayMore.end(); ++itMoreSource )
-		rootParser.AddSourceFile( *itMoreSource );
+	rootParser.AddSourceFiles( m_rOpt.m_fnAdded.GetPaths() );
 
 	// fill-in the tree control
 	CScopedLockRedraw freeze( &m_treeCtrl );
@@ -128,7 +122,7 @@ void CFileTreeDialog::BuildIncludeTree( void )
 		if ( itemPair.first != NULL )
 		{
 			if ( originalItem )
-				AddIncludedChildren( itemPair, !m_lazyParsing );		// insert children
+				AddIncludedChildren( itemPair, !m_rOpt.m_lazyParsing );		// insert children
 		}
 		else
 			delete *itItem;
@@ -136,7 +130,7 @@ void CFileTreeDialog::BuildIncludeTree( void )
 	ReorderChildren();
 
 	if ( HTREEITEM hRootItem = m_treeCtrl.GetRootItem() )
-		if ( m_openBlownUp )
+		if ( m_rOpt.m_openBlownUp )
 			m_treeCtrl.ExpandBranch( hRootItem );
 		else
 			m_treeCtrl.Expand( hRootItem, TVE_EXPAND );
@@ -147,7 +141,7 @@ void CFileTreeDialog::BuildIncludeTree( void )
 bool CFileTreeDialog::AddIncludedChildren( TreeItemPair& rParentPair, bool doRecurse /*= true*/, bool avoidCircularDependency /*= false*/ )
 {
 	// check for nesting level overflow if we make full (non-delayed) parsing
-	if ( !m_lazyParsing && ( m_maxNestingLevel > 0 && ( m_nestingLevel + 1 ) >= m_maxNestingLevel ) )
+	if ( !m_rOpt.m_lazyParsing && ( m_rOpt.m_maxNestingLevel > 0 && ( m_nestingLevel + 1 ) >= m_rOpt.m_maxNestingLevel ) )
 		return false;
 
 	if ( avoidCircularDependency && IsCircularDependency( rParentPair ) )
@@ -158,8 +152,8 @@ bool CFileTreeDialog::AddIncludedChildren( TreeItemPair& rParentPair, bool doRec
 
 	++m_nestingLevel;
 
-	CSourceFileParser fileParser( &m_searchPathEngine, rParentPair.second->m_path );
-	fileParser.ParseRootFile( m_maxParseLines );
+	CSourceFileParser fileParser( rParentPair.second->m_path );
+	fileParser.ParseRootFile( m_rOpt.m_maxParseLines );
 
 	int addedCount = 0, orderIndex = 0;
 	std::vector< CIncludeNode* > treeItems;
@@ -198,7 +192,7 @@ TreeItemPair CFileTreeDialog::AddTreeItem( HTREEITEM hParent, CIncludeNode* pIte
 	PathToItemMap::const_iterator itFound = m_originalItems.find( uniqueFilePath );
 	rOriginalItem = itFound == m_originalItems.end();
 
-	if ( m_noDuplicates && !rOriginalItem )
+	if ( m_rOpt.m_noDuplicates && !rOriginalItem )
 		return nullPair;
 
 	m_treeItems.push_back( pItemInfo );				// give ownership to the tree control
@@ -218,7 +212,7 @@ TreeItemPair CFileTreeDialog::AddTreeItem( HTREEITEM hParent, CIncludeNode* pIte
 	is.item.lParam = (LPARAM)pItemInfo;
     is.item.state = rOriginalItem ? 0 : TVIS_CUT;
     is.item.stateMask = TVIS_CUT;
-	if ( m_lazyParsing && rOriginalItem )
+	if ( m_rOpt.m_lazyParsing && rOriginalItem )
 	{
 		// display the "+" expand button (lazy binding);
 		// in order to avoid infinite recursion, we only do this for first occurences of the included files (original items).
@@ -280,10 +274,10 @@ bool CFileTreeDialog::UpdateCurrentSelection( void )
 
 bool CFileTreeDialog::SetViewMode( ViewMode viewMode )
 {
-	if ( viewMode == m_viewMode )
+	if ( viewMode == m_rOpt.m_viewMode )
 		return false;	// nothing changed
 
-	m_viewMode = viewMode;
+	m_rOpt.m_viewMode = viewMode;
 	RefreshItemsText();
 	return true;
 }
@@ -302,7 +296,7 @@ void CFileTreeDialog::RefreshItemsText( HTREEITEM hItem /*= TVI_ROOT*/ )
 std::tstring CFileTreeDialog::BuildItemText( const CIncludeNode* pItemInfo, ViewMode viewMode /*= vmDefaultMode*/ ) const
 {
 	ASSERT_PTR( pItemInfo );
-	switch ( viewMode == vmDefaultMode ? m_viewMode : viewMode )
+	switch ( viewMode == vmDefaultMode ? m_rOpt.m_viewMode : viewMode )
 	{
 		case vmFileName:
 			return pItemInfo->m_path.GetNameExt();
@@ -383,9 +377,9 @@ HTREEITEM CFileTreeDialog::FindOriginalItem( HTREEITEM hStartItem )
 
 bool CFileTreeDialog::SetOrder( Ordering ordering )
 {
-	if ( ordering == m_ordering )
+	if ( ordering == m_rOpt.m_ordering )
 		return false;
-	m_ordering = ordering;
+	m_rOpt.m_ordering = ordering;
 	m_treeCtrl.SetRedraw( FALSE );
 	ReorderChildren();
 	m_treeCtrl.SetRedraw( TRUE );
@@ -396,7 +390,7 @@ bool CFileTreeDialog::SetOrder( Ordering ordering )
 int CALLBACK SortCallback( const CIncludeNode* pLeft, const CIncludeNode* pRight, CFileTreeDialog* pDialog )
 {
 	ASSERT( pLeft != NULL && pRight != NULL );
-	switch ( pDialog->m_ordering )
+	switch ( pDialog->m_rOpt.m_ordering )
 	{
 		case ordNormal:
 			return pLeft->GetOrderIndex() - pRight->GetOrderIndex();
@@ -439,13 +433,7 @@ bool CFileTreeDialog::IsFileExcluded( const fs::CPath& path ) const
 	if ( path == m_rootPath )
 		return false;		// never exclude m_rootPath itself
 
-	std::tstring stdFullPath = path::MakeCanonical( path.GetPtr() );
-
-	for ( unsigned int i = 0; i != m_fnArrayExclude.size(); ++i )
-		if ( stdFullPath.find( m_fnArrayExclude[ i ].c_str() ) != std::tstring::npos )
-			return true;
-
-	return false;
+	return m_rOpt.m_fnIgnored.AnyIsPartOf( path );
 }
 
 bool CFileTreeDialog::HasValidComplementary( void ) const		// true if the selected file has a valid complementary
@@ -468,12 +456,12 @@ TreeItemPair CFileTreeDialog::GetSelectedItem( void ) const
 
 void CFileTreeDialog::UpdateOptionCtrl( void )
 {
-	CheckDlgButton( IDC_LAZY_PARSING_CHECK, m_lazyParsing );
-	CheckDlgButton( IDC_REMOVE_DUPLICATES_CHECK, m_noDuplicates );
+	CheckDlgButton( IDC_LAZY_PARSING_CHECK, m_rOpt.m_lazyParsing );
+	CheckDlgButton( IDC_REMOVE_DUPLICATES_CHECK, m_rOpt.m_noDuplicates );
 
-	ui::EnableWindow( m_depthLevelCombo, !m_lazyParsing );
-	if ( !m_lazyParsing )
-		m_depthLevelCombo.SetCurSel( m_maxNestingLevel );
+	ui::EnableWindow( m_depthLevelCombo, !m_rOpt.m_lazyParsing );
+	if ( !m_rOpt.m_lazyParsing )
+		m_depthLevelCombo.SetCurSel( m_rOpt.m_maxNestingLevel );
 }
 
 void CFileTreeDialog::DoDataExchange( CDataExchange* pDX )
@@ -490,8 +478,8 @@ void CFileTreeDialog::DoDataExchange( CDataExchange* pDX )
 	ui::DDX_ButtonIcon( pDX, ID_OPTIONS );
 	ui::DDX_ButtonIcon( pDX, ID_EDIT_COPY );
 
-	ui::DDX_Bool( pDX, IDC_LAZY_PARSING_CHECK, m_lazyParsing );
-	ui::DDX_Bool( pDX, IDC_REMOVE_DUPLICATES_CHECK, m_noDuplicates );
+	ui::DDX_Bool( pDX, IDC_LAZY_PARSING_CHECK, m_rOpt.m_lazyParsing );
+	ui::DDX_Bool( pDX, IDC_REMOVE_DUPLICATES_CHECK, m_rOpt.m_noDuplicates );
 
 	if ( firstInit )
 	{
@@ -504,14 +492,14 @@ void CFileTreeDialog::DoDataExchange( CDataExchange* pDX )
 			pTreeTooltip->SetDelayTime( TTDT_INITIAL, 500 );		// modify the initial delay for item hover
 
 		m_depthLevelCombo.SetExtendedUI();
-		ui::WriteComboItems( m_depthLevelCombo, GetTags_DepthLevel().GetUiTags() );
-		ui::WriteComboItems( m_viewModeCombo, GetTags_ViewMode().GetUiTags() );
-		ui::WriteComboItems( m_orderCombo, GetTags_Ordering().GetUiTags() );
+		ui::WriteComboItems( m_depthLevelCombo, CIncludeOptions::GetTags_DepthLevel().GetUiTags() );
+		ui::WriteComboItems( m_viewModeCombo, CIncludeOptions::GetTags_ViewMode().GetUiTags() );
+		ui::WriteComboItems( m_orderCombo, CIncludeOptions::GetTags_Ordering().GetUiTags() );
 
 		UpdateOptionCtrl();
 		OnToggle_LazyParsing();
-		m_viewModeCombo.SetCurSel( m_viewMode );
-		m_orderCombo.SetCurSel( m_ordering );
+		m_viewModeCombo.SetCurSel( m_rOpt.m_viewMode );
+		m_orderCombo.SetCurSel( m_rOpt.m_ordering );
 
 		BuildIncludeTree();
 	}
@@ -584,7 +572,7 @@ void CFileTreeDialog::OnContextMenu( CWnd* pWnd, CPoint screenPos )
 	if ( pWnd == &m_treeCtrl )
 	{
 		CMenu contextMenu;
-		ui::LoadPopupMenu( contextMenu, IDR_CONTEXT_MENU, m_noDuplicates ? app_popup::IncludeTree_NoDups : app_popup::IncludeTree );
+		ui::LoadPopupMenu( contextMenu, IDR_CONTEXT_MENU, m_rOpt.m_noDuplicates ? app_popup::IncludeTree_NoDups : app_popup::IncludeTree );
 		ui::TrackPopupMenu( contextMenu, this, screenPos );
 	}
 }
@@ -622,7 +610,7 @@ void CFileTreeDialog::TVnItemExpanding_FileTree( NMHDR* pNmHdr, LRESULT* pResult
 	NM_TREEVIEW* pNmTreeView = (NM_TREEVIEW*)pNmHdr;
 
 	*pResult = 0;					// validate item expansion
-	if ( m_lazyParsing )
+	if ( m_rOpt.m_lazyParsing )
 		if ( m_treeCtrl.IsExpandLazyChildren( pNmTreeView ) )
 		{
 			SafeBindItem( pNmTreeView->itemNew.hItem, reinterpret_cast< CIncludeNode* >( pNmTreeView->itemNew.lParam ) );
@@ -661,23 +649,23 @@ void CFileTreeDialog::TVnCustomDraw_FileTree( NMHDR* pNmHdr, LRESULT* pResult )
 			}
 			else
 			{
-				switch ( pTreeItem->m_locationType )
+				switch ( pTreeItem->m_location )
 				{
-					case loc::AdditionalPath:
+					case inc::AdditionalPath:
 						pDraw->clrText = color::Blue;
 						break;
-					case loc::StandardPath:
+					case inc::StandardPath:
 						pDraw->clrText = color::Green;
 						break;
-					case loc::SourcePath:
+					case inc::SourcePath:
 						pDraw->clrText = color::DarkRed;
 						break;
-					case loc::LibraryPath:
-					case loc::BinaryPath:
+					case inc::LibraryPath:
+					case inc::BinaryPath:
 						pDraw->clrText = color::Red;
 						break;
-					case loc::LocalPath:
-					case loc::AbsolutePath:
+					case inc::LocalPath:
+					case inc::AbsolutePath:
 					default:
 						return;
 				}
@@ -710,7 +698,7 @@ void CFileTreeDialog::TVnGetInfoTip_FileTree( NMHDR* pNmHdr, LRESULT* pResult )
 		tooltipTextBuffer = str::Format( _T("%s%s - %s"),
 			pTreeItem->m_path.GetPtr(),
 			isDup ? _T(" (duplicate item)") : _T(""),
-			CIncludePaths::GetLocationTag( pTreeItem->m_locationType ) );
+			inc::GetTags_Location().FormatUi( pTreeItem->m_location ).c_str() );
 
 		// modify the tooltip text color according to duplicate state of this item
 		if ( CToolTipCtrl* pTreeTooltip = m_treeCtrl.GetToolTips() )
@@ -758,23 +746,23 @@ void CFileTreeDialog::TVnDblclk_FileTree( NMHDR* pNmHdr, LRESULT* pResult )
 
 void CFileTreeDialog::CBnCloseupDepthLevel( void )
 {
-	int maxNestingLevelOrg = m_maxNestingLevel;
+	int maxNestingLevelOrg = m_rOpt.m_maxNestingLevel;
 
-	m_maxNestingLevel = m_depthLevelCombo.GetCurSel();
-	if ( m_maxNestingLevel != maxNestingLevelOrg )
+	m_rOpt.m_maxNestingLevel = m_depthLevelCombo.GetCurSel();
+	if ( m_rOpt.m_maxNestingLevel != maxNestingLevelOrg )
 		OutputRootPath();
 }
 
 void CFileTreeDialog::OnToggle_LazyParsing( void )
 {
-	m_lazyParsing = IsDlgButtonChecked( IDC_LAZY_PARSING_CHECK ) != FALSE;
-	ui::EnableWindow( m_depthLevelCombo, !m_lazyParsing );
-	m_depthLevelCombo.SetCurSel( m_lazyParsing ? 0 : m_maxNestingLevel );
+	m_rOpt.m_lazyParsing = IsDlgButtonChecked( IDC_LAZY_PARSING_CHECK ) != FALSE;
+	ui::EnableWindow( m_depthLevelCombo, !m_rOpt.m_lazyParsing );
+	m_depthLevelCombo.SetCurSel( m_rOpt.m_lazyParsing ? 0 : m_rOpt.m_maxNestingLevel );
 }
 
 void CFileTreeDialog::OnToggle_NoDuplicates( void )
 {
-	m_noDuplicates = IsDlgButtonChecked( IDC_REMOVE_DUPLICATES_CHECK ) != FALSE;
+	m_rOpt.m_noDuplicates = IsDlgButtonChecked( IDC_REMOVE_DUPLICATES_CHECK ) != FALSE;
 	OutputRootPath();
 }
 
@@ -794,7 +782,7 @@ void CFileTreeDialog::CBnSelChangeOrder( void )
 
 void CFileTreeDialog::CmOptions( void )
 {
-	CIncludeOptionsDialog dlg( this, this );
+	CIncludeOptionsDialog dlg( &m_rOpt, this );
 	if ( IDOK == dlg.DoModal() )
 	{
 		OutputRootPath();
@@ -815,10 +803,10 @@ void CFileTreeDialog::CmFileOpen( void )
 
 	if ( !ui::IsKeyPressed( VK_SHIFT ) )		// SHIFT down -> open from current selected
 		if ( HTREEITEM hSelItem = m_treeCtrl.GetSelectedItem() )
-			m_lastBrowsedFile = GetItemInfo( hSelItem )->m_path.Get();
+			m_rOpt.m_lastBrowsedFile = GetItemInfo( hSelItem )->m_path.Get();
 
-	if ( shell::BrowseForFile( m_lastBrowsedFile, this, shell::FileOpen, sourceFileFilter ) )
-		SetRootPath( m_lastBrowsedFile );
+	if ( shell::BrowseForFile( m_rOpt.m_lastBrowsedFile, this, shell::FileOpen, sourceFileFilter ) )
+		SetRootPath( m_rOpt.m_lastBrowsedFile );
 }
 
 void CFileTreeDialog::CmUpdateDialogTitle( void )
@@ -828,7 +816,7 @@ void CFileTreeDialog::CmUpdateDialogTitle( void )
 	if ( incCount >= 0 )
 	{
 		int uniqueIncCount = (int)m_originalItems.size() - 1, dupCount = incCount - uniqueIncCount;
-		title = str::Format( m_noDuplicates || 0 == dupCount ? _T("%s - [%s] - %d files") : _T("%s - [%s] - %d items: %d files + %d duplicates"),
+		title = str::Format( m_rOpt.m_noDuplicates || 0 == dupCount ? _T("%s - [%s] - %d files") : _T("%s - [%s] - %d items: %d files + %d duplicates"),
 			m_titlePrefix.c_str(),
 			m_rootPath.GetNameExt(),
 			incCount, uniqueIncCount, dupCount );
@@ -864,8 +852,8 @@ void CFileTreeDialog::UUI_FindDupOccurences( CCmdUI* pCmdUI )
 {
 	bool doEnable = false;
 
-	if ( !m_noDuplicates )
-		if ( m_lazyParsing )
+	if ( !m_rOpt.m_noDuplicates )
+		if ( m_rOpt.m_lazyParsing )
 			doEnable = true;		// avoid costly processing (since findNextItem will bind everything) -> assume there are dups
 		else
 		{	// we may have dups

@@ -8,17 +8,22 @@
 #include "IncludeTag.h"
 
 
-class CSearchPathEngine;
 struct CIncludeNode;
 
 
 struct CSourceFileParser : private ILineParserCallback
 {
-	CSourceFileParser( const CSearchPathEngine* pSearchPath, const fs::CPath& rootFilePath );
+	CSourceFileParser( const fs::CPath& rootFilePath );
 	~CSourceFileParser();
 
 	bool IsValidFile( void ) const { return m_rootFilePath.FileExist( fs::Read ); }
 	void AddSourceFile( const fs::CPath& sourceFilePath );
+
+	template< typename Container >
+	void AddSourceFiles( const Container& srcPaths )
+	{
+		std::for_each( srcPaths.begin(), srcPaths.end(), std::bind( &CSourceFileParser::AddSourceFile, this, std::placeholders::_1 ) );
+	}
 
 	void ParseRootFile( int m_maxParseLines = 1000 );
 
@@ -35,11 +40,10 @@ private:
 
 	bool IsIDLFile( void ) const { return ft::IDL == m_fileType; }
 private:
-	const CSearchPathEngine* m_pSearchPath;
 	fs::CPath m_rootFilePath;							// "D:\My\Tools\Iterable.h"
 	ft::FileType m_fileType;
-	std::tstring m_localDirPath;						// "D:\My\Tools"
-	std::vector< CIncludeNode* > m_includeNodes;			// has ownership
+	fs::CPath m_localDirPath;							// "D:\My\Tools"
+	std::vector< CIncludeNode* > m_includeNodes;		// has ownership
 };
 
 

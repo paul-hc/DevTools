@@ -6,8 +6,8 @@
 #include "utl/ReportListControl.h"
 #include "utl/LayoutDialog.h"
 #include "utl/ItemContentEdit.h"
+#include "IncludePaths.h"
 #include "ProjectContext.h"
-#include "SearchPathEngine.h"
 
 
 class CFileLocatorDialog : public CLayoutDialog
@@ -16,9 +16,9 @@ class CFileLocatorDialog : public CLayoutDialog
 public:
 	CFileLocatorDialog( CWnd* pParent );
 	virtual ~CFileLocatorDialog();
-
-	CProjectContext& setProjectContext( const CProjectContext& src );
 private:
+	static std::tstring GetAdditionalIncludePaths( void );
+
 	int SearchForTag( const std::tstring& includeTag );
 	bool EnableCommandButtons( void );
 
@@ -41,18 +41,16 @@ protected:
 	virtual void OnLocalDirPathChanged( void );
 	virtual void OnAssociatedProjectFileChanged( void );
 	virtual void OnProjectActiveConfigurationChanged( void );
-	virtual void OnProjectAdditionalIncludePathChanged( void );
 public:
 	int m_tagHistoryMaxCount;
 	int m_searchInPath;
 
 	// output properties
 	std::tstring m_selectedFilePath;
-	std::vector< PathLocationPair > m_selectedFiles;
+	std::vector< inc::TPathLocPair > m_selectedFiles;
 private:
 	std::tstring m_foundFilesFormat;
-	CSearchPathEngine m_searchPathEngine;
-	std::vector< PathLocationPair > m_foundFiles;
+	std::vector< inc::TPathLocPair > m_foundFiles;
 	int m_intrinsic;
 	bool m_closedOK;
 	std::tstring m_defaultExt;

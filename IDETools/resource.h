@@ -34,9 +34,9 @@
 #define IDC_REMOVE_DUPLICATES_CHECK     1015
 #define IDC_OPEN_BLOWN_UP_CHECK         1016
 #define IDC_MAX_PARSED_LINES_EDIT       1017
-#define IDC_EXCLUDED_FN_EDIT            1019
+#define IDC_FN_IGNORED_EDIT             1019
 #define IDC_SELECTION_RECOVER_CHECK     1020
-#define IDC_MORE_FN_EDIT                1021
+#define IDC_FN_ADDED_EDIT               1021
 #define IDC_FULLPATH_STATIC             1022
 #define IDC_ADDITIONAL_INC_PATH_EDIT    1023
 #define IDC_VIEW_MODE_STATIC            1024

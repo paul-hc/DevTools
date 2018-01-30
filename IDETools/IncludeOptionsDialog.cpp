@@ -21,8 +21,8 @@ namespace layout
 	{
 		{ IDOK, MoveX },
 		{ IDCANCEL, MoveX },
-		{ IDC_EXCLUDED_FN_EDIT, SizeX },
-		{ IDC_MORE_FN_EDIT, SizeX },
+		{ IDC_FN_IGNORED_EDIT, SizeX },
+		{ IDC_FN_ADDED_EDIT, SizeX },
 		{ IDC_ADDITIONAL_INC_PATH_EDIT, SizeX }
 	};
 }
@@ -39,8 +39,8 @@ CIncludeOptionsDialog::CIncludeOptionsDialog( CIncludeOptions* pOptions, CWnd* p
 	LoadDlgIcon( ID_OPTIONS );
 
 	m_maxParseLinesEdit.SetValidRange( Range< int >( 5, 50000 ) );
-	m_excludedEdit.SetContentType( ui::FilePath );
-	m_includedEdit.SetContentType( ui::FilePath );
+	m_ignoredEdit.SetContentType( ui::FilePath );
+	m_addedEdit.SetContentType( ui::FilePath );
 	m_additionalIncPathEdit.SetContentType( ui::DirPath );
 }
 
@@ -50,8 +50,8 @@ void CIncludeOptionsDialog::DoDataExchange( CDataExchange* pDX )
 
 	DDX_Control( pDX, IDC_DEPTH_LEVEL_COMBO, m_depthLevelCombo );
 	DDX_Control( pDX, IDC_MAX_PARSED_LINES_EDIT, m_maxParseLinesEdit );
-	DDX_Control( pDX, IDC_EXCLUDED_FN_EDIT, m_excludedEdit );
-	DDX_Control( pDX, IDC_MORE_FN_EDIT, m_includedEdit );
+	DDX_Control( pDX, IDC_FN_IGNORED_EDIT, m_ignoredEdit );
+	DDX_Control( pDX, IDC_FN_ADDED_EDIT, m_addedEdit );
 	DDX_Control( pDX, IDC_ADDITIONAL_INC_PATH_EDIT, m_additionalIncPathEdit );
 
 	if ( firstInit )
@@ -69,23 +69,17 @@ void CIncludeOptionsDialog::DoDataExchange( CDataExchange* pDX )
 	if ( DialogOutput == pDX->m_bSaveAndValidate )
 	{
 		// change UI separators from PROF_SEP to EDIT_SEP
-		std::tstring fnExclude = m_pOptions->m_fnExclude;
-		str::Replace( fnExclude, PROF_SEP, EDIT_SEP );
-		ui::SetWindowText( m_excludedEdit, fnExclude );
+		ui::SetWindowText( m_ignoredEdit, m_pOptions->m_fnIgnored.Join( EDIT_SEP ) );
+		ui::SetWindowText( m_addedEdit, m_pOptions->m_fnAdded.Join( EDIT_SEP ) );
+		ui::SetWindowText( m_additionalIncPathEdit, m_pOptions->m_additionalIncludePath.Join( EDIT_SEP ) );
 
-		std::tstring fnMore = m_pOptions->m_fnMore;
-		str::Replace( fnMore, PROF_SEP, EDIT_SEP );
-		ui::SetWindowText( m_includedEdit, fnMore );
-
-		ui::SetWindowText( m_additionalIncPathEdit, app::GetModuleSession().GetAdditionalIncludePath() );
-
-		CkDelayedParsing();
+		OnToggle_DelayedParsing();
 	}
 	else
 	{
-		m_pOptions->SetupArrayExclude( ui::GetWindowText( m_excludedEdit ).c_str(), EDIT_SEP );
-		m_pOptions->SetupArrayMore( ui::GetWindowText( m_includedEdit ).c_str(), EDIT_SEP );
-		app::GetIncludePaths().SetMoreAdditionalIncludePath( ui::GetWindowText( m_additionalIncPathEdit ) );
+		m_pOptions->m_fnIgnored.Store( ui::GetWindowText( m_ignoredEdit ).c_str(), EDIT_SEP );
+		m_pOptions->m_fnAdded.Store( ui::GetWindowText( m_addedEdit ).c_str(), EDIT_SEP );
+		m_pOptions->m_additionalIncludePath.Store( ui::GetWindowText( m_additionalIncPathEdit ).c_str(), EDIT_SEP );
 	}
 
 	CLayoutDialog::DoDataExchange( pDX );
@@ -95,10 +89,16 @@ void CIncludeOptionsDialog::DoDataExchange( CDataExchange* pDX )
 // message handlers
 
 BEGIN_MESSAGE_MAP( CIncludeOptionsDialog, CLayoutDialog )
-	ON_BN_CLICKED( IDC_LAZY_PARSING_CHECK, CkDelayedParsing )
+	ON_BN_CLICKED( IDC_LAZY_PARSING_CHECK, OnToggle_DelayedParsing )
 END_MESSAGE_MAP()
 
-void CIncludeOptionsDialog::CkDelayedParsing( void )
+void CIncludeOptionsDialog::OnOK( void )
+{
+	m_pOptions->Save();
+	CLayoutDialog::OnOK();
+}
+
+void CIncludeOptionsDialog::OnToggle_DelayedParsing( void )
 {
 	bool isDelayedParsing = IsDlgButtonChecked( IDC_LAZY_PARSING_CHECK ) != FALSE;
 	int indexToSelect = isDelayedParsing ? 0 : m_pOptions->m_maxNestingLevel;

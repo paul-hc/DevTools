@@ -7,15 +7,15 @@
 #include "IncludeTag.h"
 
 
-namespace loc { enum IncludeLocation; }
+namespace inc { enum Location; }
 
 
 struct CIncludeNode
 {
-	CIncludeNode( const CIncludeTag& includeTag, const fs::CPath& path, loc::IncludeLocation locationType, unsigned int lineNo )
+	CIncludeNode( const CIncludeTag& includeTag, const fs::CPath& path, inc::Location location, unsigned int lineNo )
 		: m_path( path )
 		, m_fileType( ft::FindFileType( m_path.GetPtr() ) )
-		, m_locationType( locationType )
+		, m_location( location )
 		, m_includeTag( includeTag )
 		, m_lineNo( lineNo )
 		, m_orderIndex( -1 )
@@ -34,7 +34,7 @@ struct CIncludeNode
 public:
 	const fs::CPath m_path;
 	const ft::FileType m_fileType;
-	const loc::IncludeLocation m_locationType;
+	const inc::Location m_location;
 	const CIncludeTag m_includeTag;
 	const unsigned int m_lineNo;			// parent source file: line where the #include statement is
 private:

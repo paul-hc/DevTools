@@ -2,6 +2,7 @@
 #define AFX_FILELOCATOR_H__A0580B97_3350_11D5_B5A4_00D0B74ECB52__INCLUDED_
 #pragma once
 
+#include "PathGroup.h"
 #include "ProjectContext.h"
 
 
@@ -13,7 +14,7 @@ protected:
 	virtual ~FileLocator();
 private:
 	std::tstring m_selectedFilesFlat;
-	std::vector< PathLocationPair > m_selectedFiles;
+	std::vector< inc::TPathLocPair > m_selectedFiles;
 	CProjectContext m_projCtx;
 public:
 // Overrides
@@ -40,8 +41,8 @@ protected:
 	afx_msg void SetAssociatedProjectFile(LPCTSTR lpszNewValue);
 	afx_msg BSTR GetProjectActiveConfiguration();
 	afx_msg void SetProjectActiveConfiguration(LPCTSTR lpszNewValue);
-	afx_msg BSTR GetProjectAdditionalIncludePath();
-	afx_msg void SetProjectAdditionalIncludePath(LPCTSTR lpszNewValue);
+	afx_msg BSTR GetProjectAdditionalIncludePath();							// OBSOLETE
+	afx_msg void SetProjectAdditionalIncludePath(LPCTSTR lpszNewValue);		// OBSOLETE
 	afx_msg BSTR GetSelectedFiles();
 	afx_msg long GetSelectedCount();
 	afx_msg BSTR GetSelectedFile(long index);

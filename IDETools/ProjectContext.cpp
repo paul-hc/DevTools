@@ -36,45 +36,6 @@ bool CProjectContext::FindProjectFile( void )
 		else if ( !m_localDirPath.empty() )
 			searchPathDSP.assignDirPath( m_localDirPath.c_str() );
 		searchPathDSP.assignNameExt( _T("*.dsp") );
-
-		CFileFind finder;
-		BOOL isDspFile = finder.FindFile( searchPathDSP.Get() );
-		bool foundAssoc = false;
-		ULONGLONG maxDspFileSize = 0;
-		std::tstring targetDspFilePath;
-
-		while ( isDspFile )
-		{
-			isDspFile = finder.FindNextFile();
-			// If local file is specified, search for a DSP referencing it
-			if ( !m_localCurrentFile.empty() )
-			{
-				DspParser dspParser( finder.GetFilePath() );
-
-				if ( dspParser.findFile( m_localCurrentFile.c_str() ) )
-				{	// The project contains a reference to the local file ->
-					std::tstring additionalIncludePath = ExtractAdditionalIncludePath( finder.GetFilePath(), m_projectActiveConfiguration.c_str() );
-
-					if ( !additionalIncludePath.empty() )
-					{
-						m_associatedProjectFile = finder.GetFilePath();
-						foundAssoc = true;
-						break;
-					}
-				}
-			}
-
-			ULONGLONG dspFileSize = finder.GetLength();
-
-			if ( dspFileSize > maxDspFileSize )
-			{
-				maxDspFileSize = dspFileSize;
-				targetDspFilePath = finder.GetFilePath();
-			}
-		}
-
-		if ( !foundAssoc && !targetDspFilePath.empty() )
-			m_associatedProjectFile = targetDspFilePath;		// heuristic criteria: choose the biggest DSP file :o)
 	}
 	OnAssociatedProjectFileChanged();			// notify the changes
 	return !m_associatedProjectFile.empty();
@@ -108,24 +69,8 @@ void CProjectContext::OnLocalCurrentFileChanged( void )
 	}
 }
 
-std::tstring CProjectContext::ExtractAdditionalIncludePath( const TCHAR* dspFullPath, const TCHAR* activeConfiguration /*= NULL*/ )
-{
-	try
-	{
-		DspParser dspParser( dspFullPath );
-		return (LPCTSTR)dspParser.GetAdditionalIncludePath( activeConfiguration );
-	}
-	catch ( CException* exc )
-	{
-		app::TraceException( *exc );
-		exc->Delete();
-	}
-	return std::tstring();
-}
-
 void CProjectContext::OnAssociatedProjectFileChanged( void )
 {
-	m_projectAdditionalIncludePath.clear();
 	if ( !m_associatedProjectFile.empty() )
 	{
 		PathInfoEx projectFullPath( m_associatedProjectFile.c_str() );
@@ -140,16 +85,10 @@ void CProjectContext::OnAssociatedProjectFileChanged( void )
 				CScopedInternalChange internalChange( this );
 				SetLocalDirPath( (LPCTSTR)projectFullPath.getDirPath( false ) );
 			}
-			m_projectAdditionalIncludePath = ExtractAdditionalIncludePath( m_associatedProjectFile.c_str(), m_projectActiveConfiguration.c_str() );
 		}
 	}
-	OnProjectAdditionalIncludePathChanged();
 }
 
 void CProjectContext::OnProjectActiveConfigurationChanged( void )
-{
-}
-
-void CProjectContext::OnProjectAdditionalIncludePathChanged( void )
 {
 }

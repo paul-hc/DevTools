@@ -52,7 +52,6 @@ CApplication::CApplication( void )
 CApplication::~CApplication()
 {
 	ASSERT_NULL( m_pModuleSession.get() );
-	ASSERT_NULL( m_pIncludePaths.get() );
 }
 
 BOOL CApplication::InitInstance( void )
@@ -67,7 +66,6 @@ BOOL CApplication::InitInstance( void )
 	CAboutBox::m_appIconId = IDR_IDE_TOOLS_APP;
 
 	m_pModuleSession.reset( new CModuleSession );
-	m_pIncludePaths.reset( new CIncludePaths );
 	m_pModuleSession->LoadFromRegistry();
 
 	// register all OLE server (factories) as running; this enables the OLE libraries to create objects from other applications.
@@ -78,7 +76,6 @@ BOOL CApplication::InitInstance( void )
 int CApplication::ExitInstance( void )
 {
 	m_pModuleSession->SaveToRegistry();
-	m_pIncludePaths.reset();
 	m_pModuleSession.reset();
 
 	return CBaseApp< CWinApp >::ExitInstance();
@@ -103,6 +100,18 @@ END_MESSAGE_MAP()
 
 namespace app
 {
+	CIncludePaths& GetIncludePaths( void )
+	{
+		static CIncludePaths singleton;
+		static bool firstInit = true;
+		if ( firstInit )
+		{
+			singleton.InitFromIde();
+			firstInit = false;
+		}
+		return singleton;
+	}
+
 	bool IsDebugBreakEnabled( void )
 	{
 		return CModuleSession::IsDebugBreakEnabled();

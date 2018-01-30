@@ -3,6 +3,7 @@
 #pragma once
 
 #include "FormatterOptions.h"
+#include "PathGroup.h"
 
 
 enum DebugBreakType { NoBreak, Break, PromptBreak };
@@ -41,10 +42,6 @@ public:
 	static std::tstring GetVStudioVC98DirPath( bool trailSlash = true );
 
 	// accessors
-	std::tstring GetExpandedAdditionalIncludePath( void ) const;
-	const std::tstring& GetAdditionalIncludePath( void ) const { return m_additionalIncludePath; }
-	void SetAdditionalIncludePath( const std::tstring& additionalIncludePath ) { m_additionalIncludePath = additionalIncludePath; }
-
 	const std::tstring& GetAdditionalAssocFolders( void ) const { return m_additionalAssocFolders; }
 	void SetAdditionalAssocFolders( const std::tstring& additionalAssocFolders ) { m_additionalAssocFolders = additionalAssocFolders; }
 public:
@@ -72,9 +69,10 @@ public:
 	int m_vsTabSizeCpp;
 	bool m_vsKeepTabsCpp;
 	bool m_vsUseStandardWindowsMenu;
-private:
+
 	// additional paths
-	std::tstring m_additionalIncludePath;
+	inc::CDirPathGroup m_moreAdditionalIncludePath;		// from vbscript, transient
+private:
 	std::tstring m_additionalAssocFolders;
 private:
 	// code formatting options (lazy registry)

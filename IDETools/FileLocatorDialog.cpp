@@ -1,10 +1,13 @@
 
 #include "stdafx.h"
 #include "FileLocatorDialog.h"
+#include "IncludeOptions.h"
+#include "SearchPathEngine.h"
 #include "ModuleSession.h"
-#include "Application_fwd.h"
+#include "Application.h"
 #include "resource.h"
 #include "utl/Clipboard.h"
+#include "utl/EnumTags.h"
 #include "utl/FileSystem.h"
 #include "utl/MenuUtilities.h"
 #include "utl/ShellUtilities.h"
@@ -93,13 +96,12 @@ CFileLocatorDialog::~CFileLocatorDialog()
 {
 }
 
-CProjectContext& CFileLocatorDialog::setProjectContext( const CProjectContext& src )
+std::tstring CFileLocatorDialog::GetAdditionalIncludePaths( void )
 {
-	CProjectContext& base = *this;
-
-	base = src;
-	OnProjectAdditionalIncludePathChanged();		// notify since additional include path may have changed
-	return base;
+	std::vector< std::tstring > additionalIncludePaths;
+	additionalIncludePaths.push_back( CIncludeOptions::Instance().m_additionalIncludePath.Join() );
+	additionalIncludePaths.push_back( app::GetModuleSession().m_moreAdditionalIncludePath.Join() );
+	return str::Join( additionalIncludePaths, CPathGroup::s_sep );
 }
 
 void CFileLocatorDialog::readProfile( void )
@@ -247,7 +249,12 @@ int CFileLocatorDialog::SearchForTag( const std::tstring& includeTag )
 
 	m_foundFiles.clear();
 	if ( !tag.IsEmpty() )
-		m_searchPathEngine.QueryIncludeFiles( m_foundFiles, tag, m_localDirPath, m_searchInPath );
+	{
+		inc::CFoundPaths foundResults;
+		inc::CSearchPathEngine searchEngine( m_localDirPath, m_searchInPath );
+		searchEngine.QueryIncludeFiles( foundResults, tag );
+		foundResults.Swap( m_foundFiles );		// store the found files
+	}
 
 	{
 		CScopedLockRedraw freeze( &m_foundFilesListCtrl );
@@ -257,11 +264,11 @@ int CFileLocatorDialog::SearchForTag( const std::tstring& includeTag )
 
 		for ( int i = 0; i < (int)m_foundFiles.size(); ++i )
 		{
-			fs::CPathParts parts( m_foundFiles[ i ].first );
+			fs::CPathParts parts( m_foundFiles[ i ].first.Get() );
 
 			m_foundFilesListCtrl.InsertItem( i, parts.GetNameExt().c_str(), ft::FindTypeOfExtension( parts.m_ext.c_str() ) );
 			m_foundFilesListCtrl.SetSubItemText( i, Directory, parts.GetDirPath( false ).c_str() );
-			m_foundFilesListCtrl.SetSubItemText( i, Location, CIncludePaths::GetLocationTag( m_foundFiles[ i ].second ) );
+			m_foundFilesListCtrl.SetSubItemText( i, Location, inc::GetTags_Location().FormatUi( m_foundFiles[ i ].second ) );
 		}
 	}
 
@@ -335,7 +342,7 @@ int CFileLocatorDialog::getSelectedFoundFiles( std::vector< int >& selFiles )
 {
 	POSITION pos = m_foundFilesListCtrl.GetFirstSelectedItemPosition();
 	int selIndex = -1;
-	std::vector< PathLocationPair >::const_iterator itFoundBase = m_foundFiles.begin();
+	std::vector< inc::TPathLocPair >::const_iterator itFoundBase = m_foundFiles.begin();
 
 	while ( pos != NULL )
 	{
@@ -356,7 +363,7 @@ std::tstring CFileLocatorDialog::getSelectedFoundFilesFlat( const std::vector< i
 	{
 		if ( i > 0 )
 			selFilesFlat += sep;
-		selFilesFlat += m_foundFiles[ selFiles[ i ] ].first;
+		selFilesFlat += m_foundFiles[ selFiles[ i ] ].first.Get();
 	}
 	return selFilesFlat;
 }
@@ -391,19 +398,6 @@ void CFileLocatorDialog::OnAssociatedProjectFileChanged( void )
 void CFileLocatorDialog::OnProjectActiveConfigurationChanged( void )
 {
 	CProjectContext::OnProjectActiveConfigurationChanged();
-}
-
-void CFileLocatorDialog::OnProjectAdditionalIncludePathChanged( void )
-{
-	CProjectContext::OnProjectAdditionalIncludePathChanged();
-
-	m_searchPathEngine.SetDspAdditionalIncludePath( m_localDirPath, m_projectAdditionalIncludePath, EDIT_SEP );
-
-	if ( 0 == m_intrinsic && m_hWnd != NULL )
-	{
-		ui::SetDlgItemText( this, IDC_ADDITIONAL_INC_PATH_EDIT, m_projectAdditionalIncludePath );
-		SearchForTag( ui::GetComboSelText( m_includeTagCombo ) );
-	}
 }
 
 void CFileLocatorDialog::DoDataExchange( CDataExchange* pDX )
@@ -457,15 +451,15 @@ BOOL CFileLocatorDialog::OnInitDialog( void )
 	// setup
 	readProfile();
 	for ( int i = 0; i < COUNT_OF( idToSPFlags ); ++i )
-		CheckDlgButton( idToSPFlags[ i ].ckID, ( m_searchInPath & idToSPFlags[ i ].spFlag ) != 0 );
+		CheckDlgButton( idToSPFlags[ i ].ckID, HasFlag( m_searchInPath, idToSPFlags[ i ].spFlag ) );
 
 	m_foundFilesFormat = ui::GetDlgItemText( this, IDC_FOUND_FILES_STATIC );
 
 	ui::SetWindowText( m_localDirPathEdit, m_localDirPath );
 	ui::SetWindowText( m_projectFileEdit, m_associatedProjectFile );
-	ui::SetDlgItemText( this, IDC_ADDITIONAL_INC_PATH_EDIT, m_projectAdditionalIncludePath );
+	ui::SetDlgItemText( this, IDC_ADDITIONAL_INC_PATH_EDIT, GetAdditionalIncludePaths() );
 
-	CIncludeTag intialTag( m_defaultExt, IsDlgButtonChecked( IDC_SYSTEM_TAG_RADIO ) == FALSE );
+	CIncludeTag intialTag( m_defaultExt, !IsDlgButtonChecked( IDC_SYSTEM_TAG_RADIO ) );
 
 	SetComboTag( intialTag.GetTag() );
 	m_includeTagCombo.SetEditSel( 1, 1 );
@@ -490,7 +484,7 @@ void CFileLocatorDialog::OnOK( void )
 	if ( storeSelection() > 0 )
 	{
 		m_closedOK = true;
-		UpdateHistory( m_selectedFiles[ 0 ].first );
+		UpdateHistory( m_selectedFiles[ 0 ].first.Get() );
 		CLayoutDialog::OnOK();
 	}
 }
@@ -613,8 +607,8 @@ void CFileLocatorDialog::CmExploreFile( void )
 
 	if ( selIndex != -1 )
 	{
-		UpdateHistory( m_foundFiles[ selIndex ].first );
-		shell::ExploreAndSelectFile( m_foundFiles[ selIndex ].first.c_str() );
+		UpdateHistory( m_foundFiles[ selIndex ].first.Get() );
+		shell::ExploreAndSelectFile( m_foundFiles[ selIndex ].first.GetPtr() );
 	}
 }
 
@@ -625,7 +619,7 @@ void CFileLocatorDialog::CmViewFile( UINT cmdId )
 	getSelectedFoundFiles( selFiles );
 	for ( int i = 0; i < selFiles.size(); ++i )
 	{
-		std::tstring fileFullPath = m_foundFiles[ selFiles[ i ] ].first;
+		std::tstring fileFullPath = m_foundFiles[ selFiles[ i ] ].first.Get();
 
 		if ( i == 0 )
 			UpdateHistory( fileFullPath );
@@ -649,7 +643,7 @@ void CFileLocatorDialog::OnStoreFullPath( void )
 
 		if ( selFiles.size() > 1 )
 			selFilesFlat += sep;
-		UpdateHistory( m_foundFiles[ selFiles[ 0 ] ].first );
+		UpdateHistory( m_foundFiles[ selFiles[ 0 ] ].first.Get() );
 
 		CClipboard::CopyText( selFilesFlat );
 	}
