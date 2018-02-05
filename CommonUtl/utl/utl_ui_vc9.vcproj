@@ -45,7 +45,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..;$(UTL_INCLUDE)"
+				AdditionalIncludeDirectories=".;..;$(UTL_INCLUDE)"
 				PreprocessorDefinitions="WIN32;_DEBUG;_LIB;_ATL_DEBUG_INTERFACES"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -112,7 +112,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..;$(UTL_INCLUDE)"
+				AdditionalIncludeDirectories=".;..;$(UTL_INCLUDE)"
 				PreprocessorDefinitions="WIN32;_DEBUG;_LIB"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -181,7 +181,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
-				AdditionalIncludeDirectories="..;$(UTL_INCLUDE)"
+				AdditionalIncludeDirectories=".;..;$(UTL_INCLUDE)"
 				PreprocessorDefinitions="WIN32;NDEBUG;_LIB"
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="true"
@@ -249,7 +249,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
-				AdditionalIncludeDirectories="..;$(UTL_INCLUDE)"
+				AdditionalIncludeDirectories=".;..;$(UTL_INCLUDE)"
 				PreprocessorDefinitions="WIN32;NDEBUG;_LIB"
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="true"
@@ -492,11 +492,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\Process.cpp"
+				RelativePath=".\Process_.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\Process.h"
+				RelativePath=".\Process_.h"
 				>
 			</File>
 			<File
@@ -717,7 +717,7 @@
 			</Filter>
 		</Filter>
 		<Filter
-			Name="utl_ui"
+			Name="utl-UI"
 			>
 			<File
 				RelativePath=".\AboutBox.cpp"
@@ -1557,90 +1557,98 @@
 			</Filter>
 		</Filter>
 		<Filter
-			Name="utl_ut"
+			Name="utl-UnitTest"
 			>
 			<File
-				RelativePath=".\BaseImageTestCase.cpp"
+				RelativePath=".\ut\BaseImageTestCase.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\BaseImageTestCase.h"
+				RelativePath=".\ut\BaseImageTestCase.h"
 				>
 			</File>
 			<File
-				RelativePath=".\FileSystemTests.cpp"
+				RelativePath=".\ut\FileSystemTests.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\FileSystemTests.h"
+				RelativePath=".\ut\FileSystemTests.h"
 				>
 			</File>
 			<File
-				RelativePath=".\LcsTests.cpp"
+				RelativePath=".\ut\LcsTests.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\LcsTests.h"
+				RelativePath=".\ut\LcsTests.h"
 				>
 			</File>
 			<File
-				RelativePath=".\PathGeneratorTests.cpp"
+				RelativePath=".\ut\PathGeneratorTests.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\PathGeneratorTests.h"
+				RelativePath=".\ut\PathGeneratorTests.h"
 				>
 			</File>
 			<File
-				RelativePath=".\ResequenceTests.cpp"
+				RelativePath=".\ut\PathTests.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\ResequenceTests.h"
+				RelativePath=".\ut\PathTests.h"
 				>
 			</File>
 			<File
-				RelativePath=".\StringTests.cpp"
+				RelativePath=".\ut\ResequenceTests.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\StringTests.h"
+				RelativePath=".\ut\ResequenceTests.h"
 				>
 			</File>
 			<File
-				RelativePath=".\TestToolWnd.cpp"
+				RelativePath=".\ut\StringTests.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\TestToolWnd.h"
+				RelativePath=".\ut\StringTests.h"
 				>
 			</File>
 			<File
-				RelativePath=".\ThreadingTests.cpp"
+				RelativePath=".\ut\TestToolWnd.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\ThreadingTests.h"
+				RelativePath=".\ut\TestToolWnd.h"
 				>
 			</File>
 			<File
-				RelativePath=".\UnitTest.cpp"
+				RelativePath=".\ut\ThreadingTests.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\UnitTest.h"
+				RelativePath=".\ut\ThreadingTests.h"
 				>
 			</File>
 			<File
-				RelativePath=".\UtlConsoleTests.h"
+				RelativePath=".\ut\UnitTest.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\WicImageTests.cpp"
+				RelativePath=".\ut\UnitTest.h"
 				>
 			</File>
 			<File
-				RelativePath=".\WicImageTests.h"
+				RelativePath=".\ut\UtlConsoleTests.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ut\WicImageTests.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\ut\WicImageTests.h"
 				>
 			</File>
 		</Filter>

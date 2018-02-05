@@ -272,7 +272,7 @@ void CLayoutDialog::LayoutDialog( void )
 
 void CLayoutDialog::OnIdleUpdateControls( void )
 {
-	SendMessageToDescendants( WM_IDLEUPDATECMDUI, (WPARAM)TRUE, 0, FALSE, TRUE );			// update dialog toolbars
+	SendMessageToDescendants( WM_IDLEUPDATECMDUI, (WPARAM)TRUE, 0, m_idleUpdateDeep, TRUE );			// update dialog toolbars
 }
 
 void CLayoutDialog::DoDataExchange( CDataExchange* pDX )

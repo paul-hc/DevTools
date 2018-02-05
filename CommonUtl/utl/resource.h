@@ -7,9 +7,7 @@
 #define IDD_ABOUT_BOX                   28002
 #define IDR_STD_STRIP                   28003
 #define IDR_ITEM_LIST_STRIP             28004
-#define IDD_LIST_EDIT_DIALOG            28005
 #define IDD_ITEM_LIST_DIALOG            28006
-#define IDR_ITEM_LIST_ACCEL             28007
 #define IDR_SCROLLABLE_CURSOR           28008
 #define IDR_SCROLL_DRAG_CURSOR          28009
 #define IDR_STD_CONTEXT_MENU            28010
@@ -18,7 +16,9 @@
 #define IDR_DROP_MOVE_CURSOR            28013
 #define IDR_DROP_COPY_CURSOR            28014
 #define IDR_TRACK_SCROLL_CURSOR         28015
+#define IDD_ITEMS_LIST_PAGE             28015
 #define IDR_TRACK_ZOOM_CURSOR           28016
+#define IDD_ITEMS_EDIT_PAGE             28016
 #define UTL_MIN_COMMAND_VALUE           28200
 #define ID_ADD_ITEM                     28201
 #define ID_REMOVE_ITEM                  28202
@@ -73,8 +73,8 @@
 #define IDC_ABOUT_BUILD_INFO_LIST       28510
 #define IDC_ABOUT_EXPLORE_EXECUTABLE    28511
 #define IDC_ABOUT_DIVIDER_STATIC        28512
-#define IDC_LEDIT_ITEM_LIST_EDIT        28513
-#define IDC_LEDIT_BROWSE                28514
+#define IDC_ITEMS_EDIT                  28513
+#define IDC_ITEMS_SHEET                 28513
 #define IDC_TOOLBAR_PLACEHOLDER         28515
 #define IDC_ITEMS_LIST                  28516
 #define UTL_MIN_SYMED_VALUE             28800
@@ -83,9 +83,9 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        28015
+#define _APS_NEXT_RESOURCE_VALUE        28017
 #define _APS_NEXT_COMMAND_VALUE         28241
-#define _APS_NEXT_CONTROL_VALUE         28513
+#define _APS_NEXT_CONTROL_VALUE         28514
 #define _APS_NEXT_SYMED_VALUE           28801
 #endif
 #endif

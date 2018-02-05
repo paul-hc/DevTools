@@ -2,6 +2,7 @@
 #include "stdafx.h"
 #include "ItemContent.h"
 #include "ContainerUtilities.h"
+#include "EnumTags.h"
 #include "FileSystem.h"
 #include "ShellUtilities.h"
 #include "StringUtilities.h"
@@ -13,11 +14,18 @@
 
 namespace ui
 {
+	const CEnumTags& GetTags_ContentType( void )
+	{
+		static const CEnumTags tags( _T("Text|Folder|File") );
+		return tags;
+	}
+
+
 	// CItemContent implementation
 
-	void CItemContent::SplitItems( std::vector< std::tstring >& rItems, const std::tstring& source, const TCHAR* pSep ) const
+	void CItemContent::SplitItems( std::vector< std::tstring >& rItems, const std::tstring& source, const TCHAR sep[] ) const
 	{
-		str::Split( rItems, source.c_str(), pSep );
+		str::Split( rItems, source.c_str(), sep );
 		FilterItems( rItems );
 	}
 

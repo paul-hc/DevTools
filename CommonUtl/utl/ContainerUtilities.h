@@ -148,6 +148,32 @@ namespace utl
 	}
 
 
+	// map find
+
+	template< typename MapType >
+	inline typename MapType::mapped_type FindValue( const MapType& objectMap, const typename MapType::key_type& key )
+	{
+		typename MapType::const_iterator itFound = objectMap.find( key );
+		if ( itFound == objectMap.end() )
+			return typename MapType::mapped_type( 0 );
+		return itFound->second;
+	}
+
+	template< typename MapType >
+	inline const typename MapType::mapped_type* FindValuePtr( const MapType& objectMap, const typename MapType::key_type& key )
+	{
+		typename MapType::const_iterator itFound = objectMap.find( key );
+		return itFound != objectMap.end() ? &itFound->second : NULL;
+	}
+
+	template< typename MapType >
+	inline typename MapType::mapped_type* FindValuePtr( MapType& rObjectMap, const typename MapType::key_type& key )
+	{
+		typename MapType::iterator itFound = rObjectMap.find( key );
+		return itFound != rObjectMap.end() ? &itFound->second : NULL;
+	}
+
+
 	template< typename Type, typename ItemType >
 	inline void AddSorted( std::vector< Type >& rDest, ItemType item )
 	{

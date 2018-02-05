@@ -42,6 +42,7 @@ public:
 	bool m_hideSysMenuIcon;		// hide dialog sys-menu icon
 	bool m_noAboutMenuItem;		// avoid adding "About..." item to system menu icon
 protected:
+	bool m_idleUpdateDeep;		// send WM_IDLEUPDATECMDUI to all descendants
 	CAccelPool m_accelPool;
 private:
 	UINT m_dlgIconId;

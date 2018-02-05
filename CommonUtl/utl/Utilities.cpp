@@ -731,6 +731,17 @@ namespace ui
 
 namespace ui
 {
+	std::tstring GetModuleFileName( HINSTANCE hInstance /*= AfxGetApp()->m_hInstance*/ )
+	{
+		ASSERT_PTR( hInstance );
+		TCHAR exePath[ _MAX_PATH ];
+		::GetModuleFileName( hInstance, exePath, COUNT_OF( exePath ) );			// may return short path, depending on how it was invoked
+
+		TCHAR longExePath[ _MAX_PATH ];
+		::GetLongPathName( exePath, longExePath, COUNT_OF( longExePath ) );		// convert to long path
+		return longExePath;
+	}
+
 	bool& RefAsyncApiEnabled( void )			// some modes require disabling of asynchronous API calls due to interference (e.g. CDesktopDC)
 	{
 		static bool asyncApiEnabled = true;
@@ -744,15 +755,10 @@ namespace ui
 		return false;
 	}
 
-	std::tstring GetModuleFileName( HINSTANCE hInstance /*= AfxGetApp()->m_hInstance*/ )
+	bool ReportError( const std::tstring& message, UINT mbFlags /*= MB_OK | MB_ICONERROR*/ )
 	{
-		ASSERT_PTR( hInstance );
-		TCHAR exePath[ _MAX_PATH ];
-		::GetModuleFileName( hInstance, exePath, COUNT_OF( exePath ) );			// may return short path, depending on how it was invoked
-
-		TCHAR longExePath[ _MAX_PATH ];
-		::GetLongPathName( exePath, longExePath, COUNT_OF( longExePath ) );		// convert to long path
-		return longExePath;
+		AfxMessageBox( message.c_str(), mbFlags );
+		return false;
 	}
 
 	int ReportException( const std::exception& e, UINT mbFlags /*= MB_OK | MB_ICONERROR*/ )

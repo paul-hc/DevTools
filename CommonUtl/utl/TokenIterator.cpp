@@ -21,9 +21,10 @@ namespace str
 			else
 				++it;
 	}
+
 	void g( const std::string& text )
 	{
-		for ( str::CTokenIterator< pred::CompareNoCase, std::string > it( text ); !it.AtEnd(); )
+		for ( str::CTokenIterator< pred::CompareNoCase, char > it( text ); !it.AtEnd(); )
 			if ( it.Matches( 'x' ) )
 			{
 			}

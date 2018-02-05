@@ -26,6 +26,7 @@ CBasePopupDialog::CBasePopupDialog( void )
 	, m_initCentered( true )
 	, m_hideSysMenuIcon( true )
 	, m_noAboutMenuItem( false )
+	, m_idleUpdateDeep( false )
 	, m_dlgIconId( 0 )
 {
 	m_accelPool.AddAccelTable( new CAccelTable( keys, COUNT_OF( keys ) ) );

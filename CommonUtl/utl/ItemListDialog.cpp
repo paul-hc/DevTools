@@ -2,9 +2,12 @@
 #include "stdafx.h"
 #include "ItemListDialog.h"
 #include "Clipboard.h"
+#include "EnumTags.h"
+#include "StringCompare.h"
 #include "TextEdit.h"
 #include "Utilities.h"
 #include "resource.h"
+#include <afxpriv.h>		// for WM_IDLEUPDATECMDUI
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -16,7 +19,6 @@ namespace reg
 	static const TCHAR section_settings[] = _T("Settings");
 	static const TCHAR section_dialog[] = _T("ItemListDialog");
 	static const TCHAR section_list[] = _T("ItemListDialog\\list");
-	static const TCHAR entry_selectedItem[] = _T("Selected item text");
 }
 
 namespace layout
@@ -24,9 +26,9 @@ namespace layout
 	static CLayoutStyle styles[] =
 	{
 		{ IDC_TOOLBAR_PLACEHOLDER, SizeX },
-		{ IDC_ITEMS_LIST, Size },
-		{ IDOK, MoveX },
-		{ IDCANCEL, MoveX }
+		{ IDC_ITEMS_SHEET, Size },
+		{ IDOK, Move },
+		{ IDCANCEL, Move }
 	};
 }
 
@@ -35,81 +37,104 @@ CItemListDialog::CItemListDialog( CWnd* pParent, const ui::CItemContent& content
 	, m_readOnly( false )
 	, m_content( content )
 	, m_pTitle( pTitle )
-	, m_addingItem( false )
-	, m_sepListCtrl( IDC_ITEMS_LIST )
-	, m_accel( IDR_ITEM_LIST_ACCEL )
+	, m_selItemPos( utl::npos )
 {
-	m_regSection = reg::section_dialog;
+	m_regSection = m_childSheet.m_regSection = reg::section_dialog;
 	RegisterCtrlLayout( layout::styles, COUNT_OF( layout::styles ) );
 	LoadDlgIcon( ID_EDIT_LIST_ITEMS );
-	m_sepListCtrl.SetSection( reg::section_list );
+	m_idleUpdateDeep = true;				// for CItemsEditPage::OnSelectedLinesChanged
+
+	m_childSheet.AddPage( new CItemsListPage( this ) );
+	m_childSheet.AddPage( new CItemsEditPage( this ) );
 }
 
-bool CItemListDialog::EditItem( int itemIndex )
+void CItemListDialog::SetSelItemPos( size_t selItemPos )
 {
-	if ( m_readOnly )
+	m_selItemPos = std::min( selItemPos, m_items.size() - 1 );		// limit to bounds
+}
+
+bool CItemListDialog::InEditMode( void ) const
+{
+	return m_internal.IsInternalChange() || GetActivePage()->InEditMode();
+}
+
+bool CItemListDialog::EditSelItem( void )
+{
+	if ( !m_readOnly )
+		if ( detail::IContentPage* pActivePage = GetActivePage() )
+			return pActivePage->EditSelItem();
+
+	return false;
+}
+
+bool CItemListDialog::InputItem( size_t itemPos, const std::tstring& newItem )
+{
+	if ( itemPos >= m_items.size() )
 		return false;
 
-	if ( ui::String == m_content.m_type )
-		m_sepListCtrl.EditLabel( itemIndex );
-	else
+	if ( newItem.empty() )
 	{
-		std::tstring newItem = m_content.EditItem( m_sepListCtrl.GetItemText( itemIndex, Item ), this );
-		if ( newItem.empty() )
-			return false;
-
-		m_sepListCtrl.SetItemText( itemIndex, Item, newItem.c_str() );
-		UpdateData( DialogSaveChanges );
+		ui::ReportError( _T("Input error: the item cannot be empty.") );
+		UpdateData( DialogOutput );					// rollback to old item value
+		return false;
 	}
+
+	std::vector< std::tstring > items = m_items;
+	items[ itemPos ] = newItem;
+	m_content.FilterItems( items );					// rely on content-specific validation
+	if ( items.size() != m_items.size() )
+	{
+		ui::ReportError( _T("Input error: the item must be unique.") );
+		UpdateData( DialogOutput );					// rollback to old item value
+		return false;
+	}
+
+	m_items[ itemPos ] = items[ itemPos ];			// do the validated input (trimmed, etc)
+	UpdateData( DialogOutput );
+	return true;
+}
+
+bool CItemListDialog::InputAllItems( const std::vector< std::tstring >& items )
+{
+	m_items = items;
+	m_content.FilterItems( m_items );				// rely on content-specific validation
+	SetSelItemPos( m_selItemPos );
+	if ( m_items.size() != items.size() )
+	{
+		ui::ReportError( _T("Input error: items must be unique and not empty.") );
+		UpdateData( DialogOutput );					// rollback to old item value
+		return false;
+	}
+	UpdateData( DialogOutput );
 	return true;
 }
 
 void CItemListDialog::DoDataExchange( CDataExchange* pDX )
 {
-	bool firstInit = NULL == m_sepListCtrl.m_hWnd;
+	bool firstInit = NULL == m_toolbar.m_hWnd;
 
-	DDX_Control( pDX, IDC_ITEMS_LIST, m_sepListCtrl );
 	m_toolbar.DDX_Placeholder( pDX, IDC_TOOLBAR_PLACEHOLDER, H_AlignLeft | V_AlignCenter, IDR_ITEM_LIST_STRIP );
 
-	if ( DialogOutput == pDX->m_bSaveAndValidate )
+	if ( firstInit )
 	{
-		if ( firstInit )
-		{
-			m_sepListCtrl.SetFont( CTextEdit::GetFixedFont( ui::String == m_content.m_type ? CTextEdit::Large : CTextEdit::Normal ) );
-			if ( m_pTitle != NULL )
-				SetWindowText( m_pTitle );
-			ui::EnableControl( m_hWnd, IDOK, !m_readOnly );
-		}
+		if ( m_pTitle != NULL )
+			SetWindowText( m_pTitle );
+		else
+			ui::SetWindowText( m_hWnd, str::Format( _T("Edit %s Items"), ui::GetTags_ContentType().FormatUi( m_content.m_type ).c_str() ) );
 
-		{
-			CScopedInternalChange internalChange( &m_sepListCtrl );
-			m_sepListCtrl.DeleteAllItems();
-			for ( unsigned int i = 0; i != m_items.size(); ++i )
-				m_sepListCtrl.InsertItem( i, m_items[ i ].c_str() );
-		}
+		ui::EnableControl( m_hWnd, IDOK, !m_readOnly );
 
-		if ( !m_items.empty() )
-		{
-			int selIndex = m_sepListCtrl.FindItemIndex( AfxGetApp()->GetProfileString( reg::section_settings, reg::entry_selectedItem ).GetString() );
-			if ( -1 == selIndex )
-				selIndex = 0;
-
-			m_sepListCtrl.SetCurSel( selIndex );
-		}
-
-		m_toolbar.UpdateCmdUI();
+		m_selItemPos = !m_items.empty() ? 0 : utl::npos;
 	}
+
+	m_childSheet.DDX_DetailSheet( pDX, IDC_ITEMS_SHEET );
+
+	if ( DialogOutput == pDX->m_bSaveAndValidate )
+		m_childSheet.OutputPages();
 	else
 	{
-		m_items.clear();
-
-		for ( int i = 0, itemCount = m_sepListCtrl.GetItemCount(); i != itemCount; ++i )
-		{
-			std::tstring itemText = m_sepListCtrl.GetItemText( i, 0 );
-			if ( !itemText.empty() )
-				if ( std::find( m_items.begin(), m_items.end(), itemText ) == m_items.end() )
-					m_items.push_back( itemText );
-		}
+		m_childSheet.SetSheetModified();
+		m_childSheet.ApplyChanges();
 	}
 
 	CLayoutDialog::DoDataExchange( pDX );
@@ -119,10 +144,6 @@ void CItemListDialog::DoDataExchange( CDataExchange* pDX )
 // message handlers
 
 BEGIN_MESSAGE_MAP( CItemListDialog, CLayoutDialog )
-	ON_WM_DESTROY()
-	ON_NOTIFY( LVN_ITEMCHANGED, IDC_ITEMS_LIST, OnLvnItemChanged_Items )
-	ON_NOTIFY( LVN_BEGINLABELEDIT, IDC_ITEMS_LIST, OnLvnBeginLabelEdit_Items )
-	ON_NOTIFY( LVN_ENDLABELEDIT, IDC_ITEMS_LIST, OnLvnEndLabelEdit_Items )
 	ON_COMMAND( ID_ADD_ITEM, OnAddItem )
 	ON_UPDATE_COMMAND_UI( ID_ADD_ITEM, OnUpdateAddItem )
 	ON_COMMAND( ID_REMOVE_ITEM, OnRemoveItem )
@@ -141,140 +162,45 @@ BEGIN_MESSAGE_MAP( CItemListDialog, CLayoutDialog )
 	ON_UPDATE_COMMAND_UI( ID_EDIT_PASTE, OnUpdatePasteItems )
 END_MESSAGE_MAP()
 
-BOOL CItemListDialog::PreTranslateMessage( MSG* pMsg )
-{
-	return
-		m_accel.Translate( pMsg, m_hWnd, m_sepListCtrl ) ||
-		CLayoutDialog::PreTranslateMessage( pMsg );
-}
-
-void CItemListDialog::OnDestroy( void )
-{
-	std::tstring selItemText;
-	int selIndex = m_sepListCtrl.GetCurSel();
-	if ( selIndex != -1 )
-		selItemText = m_sepListCtrl.GetItemText( selIndex, 0 );
-
-	AfxGetApp()->WriteProfileString( reg::section_settings, reg::entry_selectedItem, selItemText.c_str() );
-
-	CLayoutDialog::OnDestroy();
-}
-
-BOOL CItemListDialog::OnCommand( WPARAM wParam, LPARAM lParam )
-{
-	BOOL outcome = CLayoutDialog::OnCommand( wParam, lParam );
-	m_toolbar.UpdateCmdUI();
-	return outcome;
-}
-
-BOOL CItemListDialog::OnNotify( WPARAM wParam, LPARAM lParam, LRESULT* pResult )
-{
-	BOOL outcome = CLayoutDialog::OnNotify( wParam, lParam, pResult );
-	m_toolbar.UpdateCmdUI();
-	return outcome;
-}
-
-void CItemListDialog::OnLvnItemChanged_Items( NMHDR* pNmHdr, LRESULT* pResult )
-{
-	NM_LISTVIEW* pNmListView = (NM_LISTVIEW*)pNmHdr;
-	static const UINT selMask = LVIS_SELECTED | LVIS_FOCUSED;
-
-	if ( ( pNmListView->uNewState & selMask ) != ( pNmListView->uOldState & selMask ) )
-		m_toolbar.UpdateCmdUI();
-
-	*pResult = 0;
-}
-
-void CItemListDialog::OnLvnBeginLabelEdit_Items( NMHDR* pNmHdr, LRESULT* pResult )
-{
-	LV_DISPINFO* pDispInfo = (LV_DISPINFO*)pNmHdr;
-	pDispInfo;
-	*pResult = 0;
-}
-
-void CItemListDialog::OnLvnEndLabelEdit_Items( NMHDR* pNmHdr, LRESULT* pResult )
-{
-	LV_DISPINFO* pDispInfo = (LV_DISPINFO*)pNmHdr;
-
-	bool fieldEntered = pDispInfo->item.pszText != NULL;
-	bool fieldValid = false;
-	std::tstring newItemText;
-	if ( pDispInfo->item.pszText != NULL )
-		newItemText = pDispInfo->item.pszText;
-
-	if ( !newItemText.empty() )
-	{
-		int foundIndex = m_sepListCtrl.FindItemIndex( newItemText );
-		fieldValid = foundIndex == -1 || foundIndex == pDispInfo->item.iItem;
-	}
-
-	*pResult = fieldValid;
-
-	if ( fieldEntered && !fieldValid )
-	{
-		std::tstring message = _T("Error.\n\nItem cannot be empty.");
-		if ( !newItemText.empty() )
-			message = str::Format( _T("Error.\n\nItem '%s' must be unique."), newItemText.c_str() );
-		AfxMessageBox( message.c_str(), MB_ICONERROR | MB_OK );
-	}
-
-	if ( !fieldValid && m_addingItem )
-	{
-		int targetIndex = pDispInfo->item.iItem;
-		{
-			CScopedInternalChange internalChange( &m_sepListCtrl );
-			m_sepListCtrl.DeleteItem( targetIndex );
-		}
-		--targetIndex;
-		targetIndex = std::max( targetIndex, 0 );
-		targetIndex = std::min( targetIndex, m_sepListCtrl.GetItemCount() - 1 );
-		if ( targetIndex  >= 0 )
-			m_sepListCtrl.SetCurSel( targetIndex );
-	}
-
-	if ( fieldEntered && fieldValid )
-		UpdateData( DialogSaveChanges );
-
-	m_addingItem = false;
-}
-
 void CItemListDialog::OnAddItem( void )
 {
-	int insertIndex = m_sepListCtrl.GetCurSel();
+	CScopedInternalChange internalChange( &m_internal );
+	m_toolbar.UpdateCmdUI();		// update the buttons state since during label edit modal loop there are no idle UI updates
 
-	if ( insertIndex != -1 )
-		++insertIndex;
+	size_t addingPos = m_selItemPos;
+
+	if ( addingPos != utl::npos )
+		++addingPos;
 	else
-		insertIndex = m_sepListCtrl.GetItemCount();
+		addingPos = m_items.size();
 
-	m_addingItem = true;
-	m_sepListCtrl.InsertItem( insertIndex, _T("") );
-	m_sepListCtrl.SetCurSel( insertIndex );
-	if ( !EditItem( insertIndex ) )
-		ui::SendCommand( m_hWnd, ID_REMOVE_ITEM );
+	m_items.insert( m_items.begin() + addingPos, std::tstring() );
+	m_selItemPos = addingPos;
+	UpdateData( DialogOutput );
+
+	if ( !EditSelItem() )
+	{	// remove added item
+		m_items.erase( m_items.begin() + addingPos );
+		SetSelItemPos( --addingPos );
+		UpdateData( DialogOutput );
+	}
 }
 
 void CItemListDialog::OnUpdateAddItem( CCmdUI* pCmdUI )
 {
-	pCmdUI->Enable( !m_readOnly && NULL == m_sepListCtrl.GetEditControl() );
+	pCmdUI->Enable( !m_readOnly && !InEditMode() );
 }
 
 void CItemListDialog::OnRemoveItem( void )
 {
-	int delIndex = m_sepListCtrl.GetCurSel();
-	ASSERT( delIndex != -1 );
-
-	CScopedInternalChange internalChange( &m_sepListCtrl );
-	m_sepListCtrl.DeleteItem( delIndex );
-	delIndex = std::min( delIndex, m_sepListCtrl.GetItemCount() - 1 );
-	m_sepListCtrl.SetCurSel( delIndex );
-
-	UpdateData( DialogSaveChanges );
+	m_items.erase( m_items.begin() + m_selItemPos );
+	m_selItemPos = std::min( m_selItemPos, m_items.size() - 1 );
+	UpdateData( DialogOutput );
 }
 
 void CItemListDialog::OnUpdateRemoveItem( CCmdUI* pCmdUI )
 {
-	pCmdUI->Enable( !m_readOnly && m_sepListCtrl.GetCurSel() != -1 );
+	pCmdUI->Enable( !m_readOnly && m_selItemPos != -1 && !InEditMode() );
 }
 
 void CItemListDialog::OnRemoveAll( void )
@@ -282,61 +208,53 @@ void CItemListDialog::OnRemoveAll( void )
 	if ( IDOK == AfxMessageBox( _T("Delete all items in the list?"), MB_OKCANCEL | MB_ICONQUESTION ) )
 	{
 		m_items.clear();
+		m_selItemPos = utl::npos;
 		UpdateData( DialogOutput );
 	}
 }
 
 void CItemListDialog::OnUpdateRemoveAll( CCmdUI* pCmdUI )
 {
-	pCmdUI->Enable( !m_readOnly && m_sepListCtrl.GetItemCount() != 0 );
+	pCmdUI->Enable( !m_readOnly && !m_items.empty() && !InEditMode() );
 }
 
 void CItemListDialog::OnEditItem( void )
 {
-	int selIndex = m_sepListCtrl.GetCurSel();
-	if ( selIndex != -1 )
-		EditItem( selIndex );
+	ASSERT( m_selItemPos != utl::npos );
+	EditSelItem();
 }
 
 void CItemListDialog::OnUpdateEditItem( CCmdUI* pCmdUI )
 {
-	pCmdUI->Enable( !m_readOnly && m_sepListCtrl.GetCurSel() != -1 && NULL == m_sepListCtrl.GetEditControl() );
+	pCmdUI->Enable( !m_readOnly && m_selItemPos != utl::npos && !InEditMode() );
 }
 
 void CItemListDialog::OnMoveUpItem( void )
 {
-	int selIndex = m_sepListCtrl.GetCurSel();
-	ASSERT( selIndex != -1 );
+	REQUIRE( m_selItemPos > 0 && m_selItemPos < m_items.size() );
 
-	CScopedInternalChange internalChange( &m_sepListCtrl );
-
-	CString itemText = m_sepListCtrl.GetItemText( selIndex, Item );
-	m_sepListCtrl.DeleteItem( selIndex );
-	m_sepListCtrl.InsertItem( --selIndex, itemText );
-	m_sepListCtrl.SetCurSel( selIndex );
+	std::swap( m_items[ m_selItemPos ], m_items[ m_selItemPos - 1 ] );
+	--m_selItemPos;
+	UpdateData( DialogOutput );
 }
 
 void CItemListDialog::OnUpdateMoveUpItem( CCmdUI* pCmdUI )
 {
-	pCmdUI->Enable( !m_readOnly && m_sepListCtrl.GetCurSel() > 0 );
+	pCmdUI->Enable( !m_readOnly && m_selItemPos > 0 && m_selItemPos < m_items.size() && !InEditMode() );
 }
 
 void CItemListDialog::OnMoveDownItem( void )
 {
-	int selIndex = m_sepListCtrl.GetCurSel();
-	ASSERT( selIndex != -1 );
+	REQUIRE( m_selItemPos < m_items.size() - 1 );
 
-	CScopedInternalChange internalChange( &m_sepListCtrl );
-
-	CString itemText = m_sepListCtrl.GetItemText( selIndex, Item );
-	m_sepListCtrl.DeleteItem( selIndex );
-	m_sepListCtrl.InsertItem( ++selIndex, itemText );
-	m_sepListCtrl.SetCurSel( selIndex );
+	std::swap( m_items[ m_selItemPos ], m_items[ m_selItemPos + 1 ] );
+	++m_selItemPos;
+	UpdateData( DialogOutput );
 }
 
 void CItemListDialog::OnUpdateMoveDownItem( CCmdUI* pCmdUI )
 {
-	pCmdUI->Enable( !m_readOnly && m_sepListCtrl.GetCurSel() < static_cast<int>( m_items.size() - 1 ) );
+	pCmdUI->Enable( !m_readOnly && m_selItemPos < ( m_items.size() - 1 ) && !InEditMode() );
 }
 
 void CItemListDialog::OnCopyItems( void )
@@ -347,7 +265,13 @@ void CItemListDialog::OnCopyItems( void )
 
 void CItemListDialog::OnUpdateCopyItems( CCmdUI* pCmdUI )
 {
-	pCmdUI->Enable( !m_items.empty() );
+	pCmdUI->Enable( !m_items.empty() && !InEditMode() );
+}
+
+const TCHAR* CItemListDialog::FindSeparatorMostUsed( const std::tstring& text )
+{
+	static const TCHAR* sepArray[] = { _T(";"), _T("|"), _T("\r\n"), _T("\n") };
+	return *std::max_element( sepArray, sepArray + COUNT_OF( sepArray ), pred::LessPartCount< TCHAR >( text.c_str() ) );
 }
 
 void CItemListDialog::OnPasteItems( void )
@@ -355,12 +279,287 @@ void CItemListDialog::OnPasteItems( void )
 	std::tstring text;
 	if ( CClipboard::PasteText( text, this ) )
 	{
-		m_content.SplitItems( m_items, text, _T("\r\n") );
+		m_content.SplitItems( m_items, text, FindSeparatorMostUsed( text ) );
+		m_selItemPos = std::min( m_selItemPos, m_items.size() - 1 );
 		UpdateData( DialogOutput );
 	}
 }
 
 void CItemListDialog::OnUpdatePasteItems( CCmdUI* pCmdUI )
 {
-	pCmdUI->Enable( CClipboard::CanPasteText() );
+	pCmdUI->Enable( CClipboard::CanPasteText() && !InEditMode() );
+}
+
+
+// CItemsListPage class
+
+namespace layout
+{
+	static CLayoutStyle listPageStyles[] =
+	{
+		{ IDC_ITEMS_LIST, Size }
+	};
+}
+
+CItemsListPage::CItemsListPage( CItemListDialog* pDialog )
+	: CLayoutPropertyPage( IDD_ITEMS_LIST_PAGE )
+	, m_pDialog( pDialog )
+	, m_rContent( m_pDialog->GetContent() )
+	, m_listCtrl( IDC_ITEMS_LIST )
+	, m_accel( IDD_ITEMS_LIST_PAGE )
+{
+	RegisterCtrlLayout( layout::listPageStyles, COUNT_OF( layout::listPageStyles ) );
+	SetUseLazyUpdateData();			// call UpdateData on page activation change
+	m_listCtrl.SetSection( reg::section_list );
+}
+
+bool CItemsListPage::InEditMode( void ) const
+{
+	return m_listCtrl.GetEditControl() != NULL;
+}
+
+bool CItemsListPage::EditSelItem( void )
+{
+	int selIndex = m_pDialog->GetSelItemIndex();
+	std::tstring newItem;
+
+	if ( ui::String == m_rContent.m_type )
+	{
+		if ( const CReportListControl::CLabelEdit* pLabelEdit = m_listCtrl.EditLabelModal( selIndex ) )
+			newItem = pLabelEdit->m_newLabel;
+		else
+			return false;
+	}
+	else
+	{
+		newItem = m_rContent.EditItem( m_listCtrl.GetItemText( selIndex, Item ), this );
+		if ( !newItem.empty() )
+			m_listCtrl.SetItemText( selIndex, Item, newItem.c_str() );
+		else
+			return false;			// canceled by user
+	}
+
+	return m_pDialog->InputItem( selIndex, newItem );
+}
+
+void CItemsListPage::QueryListItems( std::vector< std::tstring >& rItems ) const
+{
+	unsigned int count = m_listCtrl.GetItemCount();
+	rItems.clear();
+	rItems.reserve( count );
+	for ( unsigned int i = 0; i != count; ++i )
+		rItems.push_back( m_listCtrl.GetItemText( i, 0 ).GetString() );
+}
+
+void CItemsListPage::OutputList( void )
+{
+	std::vector< std::tstring > listItems;
+	QueryListItems( listItems );
+
+	CScopedInternalChange internalChange( &m_listCtrl );
+
+	if ( m_pDialog->m_items != listItems )
+	{
+		m_listCtrl.DeleteAllItems();
+		for ( unsigned int i = 0; i != m_pDialog->m_items.size(); ++i )
+			m_listCtrl.InsertItem( i, m_pDialog->m_items[ i ].c_str() );
+	}
+
+	int selIndex = m_pDialog->GetSelItemIndex();
+	if ( selIndex != -1 )
+	{
+		m_listCtrl.SetCurSel( selIndex );
+		m_listCtrl.EnsureVisible( selIndex, false );
+	}
+}
+
+void CItemsListPage::DoDataExchange( CDataExchange* pDX )
+{
+	bool firstInit = NULL == m_listCtrl.m_hWnd;
+	DDX_Control( pDX, IDC_ITEMS_LIST, m_listCtrl );
+
+	if ( firstInit )
+		m_listCtrl.SetFont( CTextEdit::GetFixedFont( ui::String == m_rContent.m_type ? CTextEdit::Large : CTextEdit::Normal ) );
+
+	if ( DialogOutput == pDX->m_bSaveAndValidate )
+		OutputList();
+
+	CLayoutPropertyPage::DoDataExchange( pDX );
+}
+
+BEGIN_MESSAGE_MAP( CItemsListPage, CLayoutPropertyPage )
+	ON_NOTIFY( LVN_ITEMCHANGED, IDC_ITEMS_LIST, OnLvnItemChanged_Items )
+END_MESSAGE_MAP()
+
+BOOL CItemsListPage::PreTranslateMessage( MSG* pMsg )
+{
+	return
+		m_accel.Translate( pMsg, m_pDialog->m_hWnd, m_listCtrl ) ||
+		CLayoutPropertyPage::PreTranslateMessage( pMsg );
+}
+
+void CItemsListPage::OnLvnItemChanged_Items( NMHDR* pNmHdr, LRESULT* pResult )
+{
+	NM_LISTVIEW* pNmList = (NM_LISTVIEW*)pNmHdr;
+	if ( CReportListControl::IsSelectionChangedNotify( pNmList, LVIS_SELECTED | LVIS_FOCUSED ) )
+	{
+		int selIndex = m_listCtrl.GetCurSel();
+		if ( selIndex != -1 )
+			m_pDialog->SetSelItemPos( selIndex );
+	}
+
+	*pResult = 0;
+}
+
+
+// CItemsEditPage class
+
+namespace layout
+{
+	static CLayoutStyle editPageStyles[] =
+	{
+		{ IDC_ITEMS_EDIT, Size }
+	};
+}
+
+const TCHAR CItemsEditPage::s_lineEnd[] = _T("\r\n");
+
+CItemsEditPage::CItemsEditPage( CItemListDialog* pDialog )
+	: CLayoutPropertyPage( IDD_ITEMS_EDIT_PAGE )
+	, m_pDialog( pDialog )
+	, m_rContent( m_pDialog->GetContent() )
+	, m_selLineRange( -1 )
+	, m_accel( IDD_ITEMS_EDIT_PAGE )
+{
+	RegisterCtrlLayout( layout::editPageStyles, COUNT_OF( layout::editPageStyles ) );
+	SetUseLazyUpdateData();			// call UpdateData on page activation change
+	m_mlEdit.SetKeepSelOnFocus();
+}
+
+//	int currentLineIndex = m_mlEdit.LineFromChar();
+
+bool CItemsEditPage::InEditMode( void ) const
+{
+	return false;
+}
+
+bool CItemsEditPage::EditSelItem( void )
+{
+	std::tstring currLine = m_mlEdit.GetLineTextAt();
+	int startPos = m_mlEdit.LineIndex();
+	if ( startPos != -1 )
+		m_mlEdit.SetSel( startPos, startPos + static_cast< int >( currLine.length() ) );
+
+	int selIndex = m_pDialog->GetSelItemIndex();
+	std::tstring newItem;
+
+	if ( ui::String == m_rContent.m_type )
+		return true;
+
+	newItem = m_rContent.EditItem( currLine.c_str(), this );
+	if ( newItem.empty() )
+		return false;			// canceled by user
+
+	m_mlEdit.ReplaceSel( newItem.c_str(), TRUE );
+	m_mlEdit.SetFocus();
+
+	if ( startPos != -1 )
+		m_mlEdit.SetSel( startPos, startPos + static_cast< int >( newItem.length() ) );
+
+	return m_pDialog->InputItem( selIndex, newItem );
+}
+
+Range< int > CItemsEditPage::GetLineRange( int linePos ) const
+{
+	Range< int > lineRange( m_mlEdit.LineIndex( linePos ) );
+	lineRange.m_end += m_mlEdit.LineLength( lineRange.m_start );
+	return lineRange;
+}
+
+Range< int > CItemsEditPage::SelectLine( int linePos )
+{
+	Range< int > lineRange = GetLineRange( linePos );
+	if ( lineRange.m_start != -1 )
+		m_mlEdit.SetSel( lineRange.m_start, lineRange.m_end );
+	return lineRange;
+}
+
+void CItemsEditPage::QueryEditItems( std::vector< std::tstring >& rItems ) const
+{
+	str::Split( rItems, m_mlEdit.GetText().c_str(), s_lineEnd );
+}
+
+void CItemsEditPage::OutputEdit( void )
+{
+	std::vector< std::tstring > editItems;
+	QueryEditItems( editItems );
+
+	CScopedInternalChange internalChange( &m_mlEdit );
+
+	if ( m_pDialog->m_items != editItems )
+		m_mlEdit.SetText( str::Join( m_pDialog->m_items, s_lineEnd ) );
+
+	int selIndex = m_pDialog->GetSelItemIndex();
+	if ( selIndex != -1 )
+	{
+		SelectLine( selIndex );
+	}
+}
+
+void CItemsEditPage::OnSelectedLinesChanged( void )
+{
+	int selIndex = m_mlEdit.LineFromChar();
+	if ( selIndex != -1 )
+		m_pDialog->SetSelItemPos( selIndex );
+
+	TRACE( _T(" - ml-edit sel lines[%d]: {%d, %d}\n"), selIndex, m_selLineRange.m_start, m_selLineRange.m_end );
+}
+
+void CItemsEditPage::DoDataExchange( CDataExchange* pDX )
+{
+	bool firstInit = NULL == m_mlEdit.m_hWnd;
+
+	DDX_Control( pDX, IDC_ITEMS_EDIT, m_mlEdit );
+	if ( firstInit )
+		m_mlEdit.SetLimitText( 100 * MAX_PATH );		// 100 lines
+
+	if ( DialogSaveChanges == pDX->m_bSaveAndValidate )
+	{
+		std::vector< std::tstring > items;
+		QueryEditItems( items );
+		m_pDialog->InputAllItems( items );
+	}
+	else
+		OutputEdit();			// always output, even on dialog input, since invalid items may get removed
+
+	CLayoutPropertyPage::DoDataExchange( pDX );
+}
+
+BEGIN_MESSAGE_MAP( CItemsEditPage, CLayoutPropertyPage )
+	ON_MESSAGE( WM_IDLEUPDATECMDUI, OnIdleUpdateCmdUI )
+	ON_COMMAND( ID_EDIT_SELECT_ALL, OnEditSelectAll )
+END_MESSAGE_MAP()
+
+BOOL CItemsEditPage::PreTranslateMessage( MSG* pMsg )
+{
+	return
+		m_accel.Translate( pMsg, m_pDialog->m_hWnd, m_mlEdit ) ||
+		CLayoutPropertyPage::PreTranslateMessage( pMsg );
+}
+
+LRESULT CItemsEditPage::OnIdleUpdateCmdUI( WPARAM wParam, LPARAM lParam )
+{
+	wParam, lParam;
+	Range< int > selLineRange = m_mlEdit.GetLineRangeAt();
+	if ( selLineRange != m_selLineRange )
+	{
+		m_selLineRange = selLineRange;
+		OnSelectedLinesChanged();
+	}
+	return 0L;
+}
+
+void CItemsEditPage::OnEditSelectAll( void )
+{
+	m_mlEdit.SetSel( 0, -1, TRUE );
 }

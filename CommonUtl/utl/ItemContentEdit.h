@@ -29,7 +29,8 @@ public:
 	CItemListEdit( const TCHAR* pSeparator = _T(";") );
 	virtual ~CItemListEdit();
 
-	enum ListEditor { ListDialog, ListEditDialog, Custom };
+	enum ListEditor { ListDialog, Custom };
+
 	void SetListEditor( ListEditor listEditor ) { m_listEditor = listEditor; }
 
 	void DDX_Items( CDataExchange* pDX, std::tstring& rFlatItems, int ctrlId = 0 );

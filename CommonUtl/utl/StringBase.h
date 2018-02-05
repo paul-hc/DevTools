@@ -221,14 +221,12 @@ namespace func
 
 namespace str
 {
-	inline void EnsureStdWhiteSpace( const char*& rpWhiteSpace ) { if ( NULL == rpWhiteSpace ) rpWhiteSpace = " \t"; }
-	inline void EnsureStdWhiteSpace( const wchar_t*& rpWhiteSpace ) { if ( NULL == rpWhiteSpace ) rpWhiteSpace = L" \t"; }
+	template< typename CharType > const CharType* StdWhitespace( void );	// " \t\r\n"
 
 
 	template< typename CharType >
-	std::basic_string< CharType >& Trim( std::basic_string< CharType >& rText, const CharType* pWhiteSpace = NULL )
+	std::basic_string< CharType >& Trim( std::basic_string< CharType >& rText, const CharType* pWhiteSpace = StdWhitespace< CharType >() )
 	{
-		EnsureStdWhiteSpace( pWhiteSpace );
 		size_t startPos = rText.find_first_not_of( pWhiteSpace ), endPos = rText.find_last_not_of( pWhiteSpace );
 
 		if ( std::tstring::npos == startPos || std::tstring::npos == endPos || startPos > endPos )
@@ -239,9 +237,8 @@ namespace str
 	}
 
 	template< typename CharType >
-	std::basic_string< CharType >& TrimRight( std::basic_string< CharType >& rText, const TCHAR* pWhiteSpace = NULL )
+	std::basic_string< CharType >& TrimRight( std::basic_string< CharType >& rText, const TCHAR* pWhiteSpace = StdWhitespace< CharType >() )
 	{
-		EnsureStdWhiteSpace( pWhiteSpace );
 		size_t endPos = rText.find_last_not_of( pWhiteSpace );
 		if ( std::basic_string< CharType >::npos == endPos )
 			rText.clear();
@@ -251,9 +248,8 @@ namespace str
 	}
 
 	template< typename CharType >
-	std::basic_string< CharType >& TrimLeft( std::basic_string< CharType >& rText, const TCHAR* pWhiteSpace = NULL )
+	std::basic_string< CharType >& TrimLeft( std::basic_string< CharType >& rText, const TCHAR* pWhiteSpace = StdWhitespace< CharType >() )
 	{
-		EnsureStdWhiteSpace( pWhiteSpace );
 		size_t startPos = rText.find_first_not_of( pWhiteSpace );
 		if ( std::basic_string< CharType >::npos == startPos )
 			rText.clear();

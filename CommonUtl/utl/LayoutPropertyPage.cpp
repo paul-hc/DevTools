@@ -20,6 +20,7 @@ CLayoutPropertyPage::CLayoutPropertyPage( UINT templateId, UINT titleId /*= 0*/ 
 	, m_templateId( templateId )
 	, m_pLayoutEngine( new CLayoutEngine )
 	, m_useLazyUpdateData( false )				// don't output on each page activation - contrary to CPropertyPage default behaviour
+	, m_idleUpdateDeep( false )
 {
 	m_psp.dwFlags &= ~PSP_HASHELP;				// don't show the help button by default
 }
@@ -84,7 +85,7 @@ void CLayoutPropertyPage::SetModified( bool changed )
 
 void CLayoutPropertyPage::OnIdleUpdateControls( void )
 {
-	SendMessageToDescendants( WM_IDLEUPDATECMDUI, (WPARAM)TRUE, 0, FALSE, TRUE );		// update dialog toolbars
+	SendMessageToDescendants( WM_IDLEUPDATECMDUI, (WPARAM)TRUE, 0, m_idleUpdateDeep, TRUE );		// update dialog toolbars
 }
 
 void CLayoutPropertyPage::DoDataExchange( CDataExchange* pDX )

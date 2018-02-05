@@ -3,9 +3,14 @@
 #pragma once
 
 
+class CEnumTags;
+
+
 namespace ui
 {
 	enum ContentType { String, DirPath, FilePath };
+
+	const CEnumTags& GetTags_ContentType( void );
 
 
 	struct CItemContent
@@ -24,7 +29,7 @@ namespace ui
 
 		std::tstring EditItem( const TCHAR* pItem, CWnd* pParent ) const;
 
-		void SplitItems( std::vector< std::tstring >& rItems, const std::tstring& source, const TCHAR* pSep ) const;
+		void SplitItems( std::vector< std::tstring >& rItems, const std::tstring& source, const TCHAR sep[] ) const;
 		void FilterItems( std::vector< std::tstring >& rItems ) const;
 	public:
 		ui::ContentType m_type;

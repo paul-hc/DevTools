@@ -43,7 +43,7 @@ bool CTextEdit::NormalizeText( void )
 }
 
 enum Whitespace { Tab, LineEnd };
-static const struct { LPCWSTR m_pText, m_pEdit; } whitespaces[] =
+static const struct { LPCWSTR m_pText, m_pEdit; } s_whitespaces[] =
 {
 	{ L"\t", L"\x2192\t" },
 	{ L"\r\n", L"¤\r\n" }
@@ -55,8 +55,8 @@ std::tstring CTextEdit::GetText( void ) const
 	ui::GetWindowText( text, m_hWnd );		// avoid an extra copy
 
 	if ( m_visibleWhiteSpace )
-		for ( int i = 0; i != COUNT_OF( whitespaces ); ++i )
-			str::Replace( text, whitespaces[ i ].m_pEdit, whitespaces[ i ].m_pText );
+		for ( int i = 0; i != COUNT_OF( s_whitespaces ); ++i )
+			str::Replace( text, s_whitespaces[ i ].m_pEdit, s_whitespaces[ i ].m_pText );
 
 	return text;
 }
@@ -69,8 +69,8 @@ bool CTextEdit::SetText( const std::tstring& text )
 	if ( m_visibleWhiteSpace )
 	{
 		std::tstring editText = text;
-		for ( int i = 0; i != COUNT_OF( whitespaces ); ++i )
-			str::Replace( editText, whitespaces[ i ].m_pText, whitespaces[ i ].m_pEdit );
+		for ( int i = 0; i != COUNT_OF( s_whitespaces ); ++i )
+			str::Replace( editText, s_whitespaces[ i ].m_pText, s_whitespaces[ i ].m_pEdit );
 
 		return ui::SetWindowText( m_hWnd, editText );
 	}
@@ -145,7 +145,7 @@ CFont* CTextEdit::GetFixedFont( FontSize fontSize /*= Normal*/ )
 {
 	static CFont fixedFont[ 2 ];
 	if ( NULL == fixedFont[ fontSize ].GetSafeHandle() )
-		ui::MakeStandardControlFont( fixedFont[ fontSize ], ui::CFontInfo( _T("Courier New"), false, false, Normal == fontSize ? 100 : 120 ) );
+		ui::MakeStandardControlFont( fixedFont[ fontSize ], ui::CFontInfo( _T("Consolas"), false, false, Normal == fontSize ? 100 : 120 ) );		// "Courier New"
 	return &fixedFont[ fontSize ];
 }
 

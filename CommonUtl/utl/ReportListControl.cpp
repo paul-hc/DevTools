@@ -440,12 +440,12 @@ void CReportListControl::QueryAllItemsText( std::vector< std::tstring >& rItemsT
 		rItemsText.push_back( GetItemText( i, subItem ).GetString() );
 }
 
-bool CReportListControl::IsSelectionChangedNotify( NMLISTVIEW* pNmList )
+bool CReportListControl::IsSelectionChangedNotify( const NMLISTVIEW* pNmList, UINT selMask /*= LVIS_SELECTED | LVIS_FOCUSED*/ )
 {
 	ASSERT_PTR( pNmList );
 
-	if ( pNmList->uChanged & LVIF_STATE )
-		if ( ( pNmList->uNewState & ( LVIS_SELECTED ) ) != ( pNmList->uOldState & ( LVIS_SELECTED ) ) )
+	if ( HasFlag( pNmList->uChanged, LVIF_STATE ) )
+		if ( ( pNmList->uNewState & selMask ) != ( pNmList->uOldState & selMask ) )
 			return true;
 
 	return false;
@@ -859,6 +859,24 @@ void CReportListControl::InsertItemDataAt( const CItemData& itemData, int index 
 		SetItem( index, subItem, LVIF_TEXT | LVIF_IMAGE,
 				 itemData.m_subItems[ subItem ].first.c_str(), itemData.m_subItems[ subItem ].second,
 				 0, 0, 0 );
+}
+
+const CReportListControl::CLabelEdit* CReportListControl::EditLabelModal( int index )
+{
+	m_pLabelEdit.reset();
+
+	HWND hEdit = EditLabel( index )->GetSafeHwnd();
+	MSG msg;
+
+	while ( ui::IsValidWindow( hEdit ) && m_pLabelEdit.get() != NULL && !m_pLabelEdit->m_done )
+		if ( ::PeekMessage( &msg, NULL, 0, 0, PM_NOREMOVE ) )
+			if ( !AfxGetThread()->PumpMessage() )
+			{
+				::PostQuitMessage( 0 );
+				return NULL;
+			}
+
+	return m_pLabelEdit.get();
 }
 
 void CReportListControl::SwapItems( int index1, int index2 )
@@ -1385,6 +1403,8 @@ BEGIN_MESSAGE_MAP( CReportListControl, CListCtrl )
 	ON_NOTIFY_REFLECT_EX( HDN_ITEMCHANGING, OnHdnItemChanging_Reflect )
 	ON_NOTIFY_REFLECT_EX( HDN_ITEMCHANGED, OnHdnItemChanged_Reflect )
 	ON_NOTIFY_REFLECT_EX( LVN_COLUMNCLICK, OnLvnColumnClick_Reflect )
+	ON_NOTIFY_REFLECT_EX( LVN_BEGINLABELEDIT, OnLvnBeginLabelEdit_Reflect )
+	ON_NOTIFY_REFLECT_EX( LVN_ENDLABELEDIT, OnLvnEndLabelEdit_Reflect )
 	ON_NOTIFY_REFLECT_EX( NM_CUSTOMDRAW, OnNmCustomDraw_Reflect )
 	ON_COMMAND_RANGE( ID_LIST_VIEW_ICON_LARGE, ID_LIST_VIEW_TILE, OnListViewMode )
 	ON_UPDATE_COMMAND_UI_RANGE( ID_LIST_VIEW_ICON_LARGE, ID_LIST_VIEW_TILE, OnUpdateListViewMode )
@@ -1532,6 +1552,34 @@ BOOL CReportListControl::OnLvnColumnClick_Reflect( NMHDR* pNmHdr, LRESULT* pResu
 			if ( sortByColumn != -1 )
 				SetSortByColumn( sortByColumn, !m_sortAscending );		// toggle ascending/descending on the same column
 	}
+
+	return FALSE;			// raise the notification to parent
+}
+
+BOOL CReportListControl::OnLvnBeginLabelEdit_Reflect( NMHDR* pNmHdr, LRESULT* pResult )
+{
+	LV_DISPINFO* pDispInfo = (LV_DISPINFO*)pNmHdr;
+
+	m_pLabelEdit.reset( new CLabelEdit( pDispInfo->item.iItem, GetItemText( pDispInfo->item.iItem, 0 ).GetString() ) );
+	*pResult = 0;
+	return FALSE;			// raise the notification to parent
+}
+
+BOOL CReportListControl::OnLvnEndLabelEdit_Reflect( NMHDR* pNmHdr, LRESULT* pResult )
+{
+	LV_DISPINFO* pDispInfo = (LV_DISPINFO*)pNmHdr;
+	*pResult = 0;
+
+	if ( m_pLabelEdit.get() != NULL )
+		if ( pDispInfo->item.pszText != NULL )
+		{
+			m_pLabelEdit->m_done = true;
+			m_pLabelEdit->m_newLabel = pDispInfo->item.pszText;
+			*pResult = TRUE;		// assume valid input
+			return TRUE;
+		}
+		else
+			m_pLabelEdit.reset();
 
 	return FALSE;			// raise the notification to parent
 }

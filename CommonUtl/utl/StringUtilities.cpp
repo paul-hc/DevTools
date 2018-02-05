@@ -14,41 +14,9 @@ namespace str
 	const TCHAR g_ellipsis[] = _T("...");
 	const TCHAR g_paragraph[] = _T("\xB6");
 
-	int Tokenize( std::vector< std::tstring >& rTokens, const TCHAR* pSource, const TCHAR* pDelims /*= _T(" \t")*/ )
-	{
-		ASSERT( pSource != NULL && pDelims != NULL );
-		rTokens.clear();
+	template<> const char* StdDelimiters< char >( void ) { return " \t"; }
+	template<> const wchar_t* StdDelimiters< wchar_t >( void ) { return L" \t"; }
 
-		int tokenCount = 0;
-
-		bool inQuotes = false;
-		std::tstring token;
-
-		for ( size_t pos = 0, length = GetLength( pSource ); pos < length; ++pos )
-		{
-			TCHAR nextChar = pSource[ pos ];
-
-			if ( nextChar == _T('\"') )
-				inQuotes = !inQuotes;
-
-			if ( std::find( begin( pDelims ), end( pDelims ), nextChar ) == end( pDelims ) || inQuotes )
-				token += nextChar;
-			else if ( !token.empty() )
-			{
-				rTokens.push_back( token );
-				++tokenCount;
-				token.clear();
-			}
-		}
-
-		if ( !token.empty() )
-		{	// do the last token...
-			rTokens.push_back( token );
-			++tokenCount;
-		}
-
-		return tokenCount;
-	}
 
 	std::tstring& Truncate( std::tstring& rText, size_t maxLen, const TCHAR suffix[] /*= g_ellipsis*/, bool atEnd /*= true*/ )
 	{
@@ -108,8 +76,7 @@ namespace str
 		rValues.clear();
 		rValues.reserve( rVariables.size() );
 
-		for ( std::vector< std::tstring >::const_iterator itVariable = rVariables.begin();
-			  itVariable != rVariables.end(); ++itVariable )
+		for ( std::vector< std::tstring >::const_iterator itVariable = rVariables.begin(); itVariable != rVariables.end(); ++itVariable )
 			rValues.push_back( str::ExpandEnvironmentStrings( itVariable->c_str() ) );
 	}
 

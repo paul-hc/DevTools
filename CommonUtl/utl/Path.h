@@ -63,6 +63,8 @@ namespace path
 	bool IsNameExt( const TCHAR* pPath );
 
 	const TCHAR* Find( const TCHAR* pPath, const TCHAR* pSubString );
+	inline bool Contains( const TCHAR* pPath, const TCHAR* pSubString ) { return !str::IsEmpty( Find( pPath, pSubString ) ); }
+
 	const TCHAR* FindFilename( const TCHAR* pPath );
 	const TCHAR* FindExt( const TCHAR* pPath );
 
@@ -70,7 +72,7 @@ namespace path
 	inline bool MatchExt( const TCHAR* pPath, const TCHAR* pExt ) { return EquivalentPtr( FindExt( pPath ), pExt ); }		// pExt: ".txt"
 
 	// complex path
-	extern const TCHAR s_complexPathSep;				// character that separates the storage file path from the stream/storage embedded sub-path
+	extern const TCHAR s_complexPathSep;						// '>' character that separates the storage file path from the stream/storage embedded sub-path
 
 	inline bool IsComplex( const TCHAR* pPath ) { return pPath != NULL && _tcschr( pPath, s_complexPathSep ) != NULL; }
 	bool IsWellFormed( const TCHAR* pFilePath );
@@ -98,7 +100,7 @@ namespace path
 	std::tstring MakeCanonical( const TCHAR* pPath );						// relative to absolute normalized: "X:/A\./B\..\C" -> "X:\A\C"
 	inline std::tstring& Canonicalize( std::tstring& rPath ) { return rPath = MakeCanonical( rPath.c_str() ); }
 
-	std::tstring Combine( const TCHAR* pDirPath, const TCHAR* pFile );		// canonic merge, pFile could be a relative path, name.ext, or other combinations
+	std::tstring Combine( const TCHAR* pDirPath, const TCHAR* pRightPath );	// canonic merge, pRightPath could be a relative path, name.ext, sub-dir path, or other combinations
 
 
 	bool IsRoot( const TCHAR* pPath );
@@ -181,6 +183,12 @@ namespace fs
 
 		void Normalize( void ) { path::Normalize( m_filePath ); }
 		void Canonicalize( void ) { path::Canonicalize( m_filePath ); }
+
+		CPath GetParentPath( bool trailSlash = false ) const;		// always a directory path
+		CPath& SetBackslash( bool trailSlash = true );
+
+		CPath operator/( const CPath& right ) const { return CPath( path::Combine( GetPtr(), right.GetPtr() ) ); }
+		CPath& operator/=( const CPath& right );
 
 		bool operator==( const CPath& right ) const { return path::Equivalent( m_filePath, right.m_filePath ); }
 		bool operator!=( const CPath& right ) const { return !operator==( right ); }
@@ -327,6 +335,19 @@ namespace fs
 	// orders path keys using path equivalence (rather than CPath::operator< intuitive ordering)
 	typedef std::map< fs::CPath, fs::CPath, pred::Less_EquivalentPath > PathPairMap;
 	typedef std::set< fs::CPath, pred::Less_EquivalentPath > PathSet;
+}
+
+
+#include <iosfwd>
+
+inline std::ostream& operator<<( std::ostream& os, const fs::CPath& path )
+{
+	return os << path.GetPtr();
+}
+
+inline std::wostream& operator<<( std::wostream& os, const fs::CPath& path )
+{
+	return os << path.GetPtr();
 }
 
 

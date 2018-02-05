@@ -190,6 +190,8 @@ namespace path
 
 	const TCHAR* Find( const TCHAR* pPath, const TCHAR* pSubString )
 	{
+		ASSERT_PTR( pPath );
+
 		return std::search( str::begin( pPath ), str::end( pPath ),
 							str::begin( pSubString ), str::end( pSubString ),
 							pred::EquivalentPathChar() );
@@ -314,6 +316,7 @@ namespace path
 	std::tstring MakeNormal( const TCHAR* pPath )
 	{
 		std::tstring normalPath = pPath;
+		str::Trim( normalPath );
 		std::replace( normalPath.begin(), normalPath.end(), _T('/'), _T('\\') );
 		return normalPath;
 	}
@@ -588,6 +591,25 @@ namespace fs
 		CPathParts parts( m_filePath );
 		parts.SetDirPath( dirPath );
 		m_filePath = parts.MakePath();
+	}
+
+	CPath CPath::GetParentPath( bool trailSlash /*= false*/ ) const
+	{
+		ASSERT( !IsEmpty() );
+		return path::GetDirPath( GetPtr(), trailSlash ? path::AddSlash : path::RemoveSlash );
+	}
+
+	CPath& CPath::SetBackslash( bool trailSlash /*= true*/ )
+	{
+		path::SetBackslash( m_filePath, trailSlash ? path::AddSlash : path::RemoveSlash );
+		return *this;
+	}
+
+	CPath& CPath::operator/=( const CPath& right )
+	{
+		if ( &right != this )
+			Set( path::Combine( GetPtr(), right.GetPtr() ) );
+		return *this;
 	}
 
 	CPath CPath::ExtractExistingFilePath( void ) const

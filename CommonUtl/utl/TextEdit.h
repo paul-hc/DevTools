@@ -66,7 +66,7 @@ private:
 	bool m_visibleWhiteSpace;
 	CAccelTable m_accel;
 protected:
-	CInternalChange m_userChange;				// allow derived classes to forces user change mode (when spinning, etc)
+	CInternalChange m_userChange;				// allow derived classes to force user change mode (when spinning, etc)
 
 	// generated function overrides
 	public:

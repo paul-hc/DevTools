@@ -2,15 +2,16 @@
 #define TokenIterator_h
 #pragma once
 
+#include "Range.h"
 #include "StringCompare.h"
 
 
 namespace str
 {
-	template< typename Compare = pred::CompareCase, typename StringType = std::tstring >
+	template< typename Compare = pred::CompareCase, typename CharType = TCHAR >
 	struct CTokenIterator
 	{
-		typedef typename StringType::value_type CharType;
+		typedef std::basic_string< CharType > StringType;
 
 		explicit CTokenIterator( const StringType& text, size_t pos = 0, Compare compare = Compare() )
 			: m_text( text )
@@ -19,6 +20,7 @@ namespace str
 			, m_compare( compare )
 		{
 			ASSERT( m_pos <= m_length );
+			SetWhiteSpace( str::StdWhitespace< CharType >() );
 		}
 
 		bool IsEmpty( void ) const { ASSERT( m_pos <= m_length ); return 0 == m_length; }
@@ -43,6 +45,9 @@ namespace str
 		StringType MakePrevToken( size_t tokenLen ) const { ASSERT( tokenLen < m_pos ); return m_text.substr( m_pos - tokenLen, tokenLen ); }
 		StringType MakeToken( size_t tokenLen ) const { ASSERT( tokenLen < m_pos ); return m_text.substr( m_pos, tokenLen ); }
 
+		const CharType* GetWhiteSpace( void ) const { return m_whiteSpace.m_start; }
+		void SetWhiteSpace( const CharType whiteSpace[] ) { ASSERT( !str::IsEmpty( whiteSpace ) ); m_whiteSpace.SetRange( whiteSpace, str::end( whiteSpace ) ); }
+
 
 		// advance
 
@@ -56,11 +61,9 @@ namespace str
 
 		// search
 
-		CTokenIterator& SkipWhiteSpace( const CharType* pWhiteSpace = NULL )
+		CTokenIterator& SkipWhiteSpace( void )
 		{
-			str::EnsureStdWhiteSpace( pWhiteSpace );
-			const CharType* pWhiteSpaceEnd = str::end( pWhiteSpace );
-			while ( !AtEnd() && std::find( pWhiteSpace, pWhiteSpaceEnd, Current() ) != pWhiteSpaceEnd )
+			while ( !AtEnd() && std::find( m_whiteSpace.m_start, m_whiteSpace.m_end, Current() ) != m_whiteSpace.m_end )
 				++m_pos;
 			return *this;
 		}
@@ -153,6 +156,7 @@ namespace str
 		}
 	private:
 		const StringType& m_text;
+		Range< const CharType* > m_whiteSpace;
 	public:
 		const size_t m_length;
 		size_t m_pos;

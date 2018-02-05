@@ -109,7 +109,7 @@ public:
 
 	pred::CompareResult CompareSubItems( LPARAM leftParam, LPARAM rightParam ) const;
 
-	static bool IsSelectionChangedNotify( NMLISTVIEW* pNmList );
+	static bool IsSelectionChangedNotify( const NMLISTVIEW* pNmList, UINT selMask = LVIS_SELECTED | LVIS_FOCUSED );
 private:
 	void UpdateColumnSortHeader( void );
 
@@ -270,6 +270,18 @@ public:
 	void GetItemDataAt( CItemData& rItemData, int index ) const;
 	void SetItemDataAt( const CItemData& itemData, int index );
 	void InsertItemDataAt( const CItemData& itemData, int index );
+
+	struct CLabelEdit
+	{
+		CLabelEdit( int index, const std::tstring& oldLabel ) : m_index( index ), m_done( false ), m_oldLabel( oldLabel ) {}
+	public:
+		int m_index;
+		bool m_done;
+		std::tstring m_oldLabel, m_newLabel;
+	};
+
+	const CLabelEdit* EditLabelModal( int index );
+	const CLabelEdit* GetLabelEdit( void ) const { return m_pLabelEdit.get(); }
 public:
 	// groups: rows not assigned to a group will not show in group-view
 
@@ -317,6 +329,7 @@ private:
 	CImageList* m_pLargeImageList;
 	CMenu* m_pPopupMenu[ _PopupTypeCount ];				// used when right clicking nowhere - on header or no list item
 	bool m_useTriStateAutoCheck;						// extended check state: allows toggling LVIS_UNCHECKED -> LVIS_CHECKED -> LVIS_CHECKEDGRAY
+	std::auto_ptr< CLabelEdit > m_pLabelEdit;			// stores the label info during inline editing
 
 	CAccelTable m_listAccel;
 	ole::IDataSourceFactory* m_pDataSourceFactory;		// creates ole::CDataSource for clipboard and drag-drop
@@ -352,6 +365,8 @@ protected:
 	afx_msg BOOL OnHdnItemChanging_Reflect( NMHDR* pNmHdr, LRESULT* pResult );
 	afx_msg BOOL OnHdnItemChanged_Reflect( NMHDR* pNmHdr, LRESULT* pResult );
 	afx_msg BOOL OnLvnColumnClick_Reflect( NMHDR* pNmHdr, LRESULT* pResult );
+	afx_msg BOOL OnLvnBeginLabelEdit_Reflect( NMHDR* pNmHdr, LRESULT* pResult );
+	virtual BOOL OnLvnEndLabelEdit_Reflect( NMHDR* pNmHdr, LRESULT* pResult );
 	virtual BOOL OnNmCustomDraw_Reflect( NMHDR* pNmHdr, LRESULT* pResult );
 public:
 	afx_msg void OnListViewMode( UINT cmdId );

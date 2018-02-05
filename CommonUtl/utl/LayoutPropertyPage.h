@@ -57,8 +57,9 @@ private:
 private:
 	UINT m_templateId;
 	std::auto_ptr< CLayoutEngine > m_pLayoutEngine;
-	bool m_useLazyUpdateData;		// default true, call UpdateData on page activation change
+	bool m_useLazyUpdateData;		// call UpdateData on page activation change
 protected:
+	bool m_idleUpdateDeep;			// send WM_IDLEUPDATECMDUI to all descendants
 	CAccelPool m_accelPool;
 private:
 	// virtual function overrides

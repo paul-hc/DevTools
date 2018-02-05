@@ -197,24 +197,24 @@ namespace str
 	// part (sub-string) search
 
 	template< typename CharType >
-	size_t FindPart( const CharType* pText, const CPart< CharType >& part )
+	size_t FindPart( const CharType* pText, const CPart< CharType >& part, size_t offset = 0 )
 	{
-		ASSERT( pText != 0 );
+		ASSERT( pText != 0 && offset <= GetLength( pText ) );
 		ASSERT( !part.IsEmpty() );
 
 		const CharType* pEnd = str::end( pText );
-		const CharType* pFound = std::search( pText, pEnd, part.m_pString, part.m_pString + part.m_count );
+		const CharType* pFound = std::search( pText + offset, pEnd, part.m_pString, part.m_pString + part.m_count );
 		return pFound != pEnd ? std::distance( pText, pFound ) : std::tstring::npos;
 	}
 
 	template< typename CharType, typename Compare >
-	size_t FindPart( const CharType* pText, const CPart< CharType >& part, Compare compareStr )				// e.g. pred::CompareNoCase
+	size_t FindPart( const CharType* pText, const CPart< CharType >& part, Compare compareStr, size_t offset = 0 )				// e.g. pred::CompareNoCase
 	{
-		ASSERT( pText != 0 );
+		ASSERT( pText != 0 && offset <= GetLength( pText ) );
 		ASSERT( !part.IsEmpty() );
 
 		const CharType* pEnd = str::end( pText );
-		const CharType* pFound = std::search( pText, pEnd, part.m_pString, part.m_pString + part.m_count, pred::IsEqual< Compare >( compareStr ) );
+		const CharType* pFound = std::search( pText + offset, pEnd, part.m_pString, part.m_pString + part.m_count, pred::IsEqual< Compare >( compareStr ) );
 		return pFound != pEnd ? std::distance( pText, pFound ) : std::tstring::npos;
 	}
 
@@ -244,6 +244,18 @@ namespace str
 
 		return !items.empty();
 	}
+
+	template< typename CharType >
+	size_t GetPartCount( const CharType* pText, const CPart< CharType >& part )
+	{
+		size_t count = 0;
+
+		if ( !part.IsEmpty() )
+			for ( size_t offset = str::FindPart( pText, part ); offset != std::string::npos; offset = str::FindPart( pText, part, offset + part.m_count ) )
+				++count;
+
+		return count;
+	}
 }
 
 
@@ -252,24 +264,36 @@ namespace str
 	// custom case type
 
 	template< str::CaseType caseType, typename CharType >
-	size_t Find( const CharType* pText, CharType chr, size_t startPos = 0 )
+	size_t Find( const CharType* pText, CharType chr, size_t offset = 0 )
 	{
-		ASSERT( pText != 0 && startPos <= GetLength( pText ) );
+		ASSERT( pText != 0 && offset <= GetLength( pText ) );
 
 		const CharType* itEnd = end( pText );
-		const CharType* itFound = std::find_if( begin( pText ) + startPos, itEnd, pred::CharMatch< CharType, caseType >( chr ) );
-		return itFound != itEnd ? ( itFound - begin( pText ) ) : std::tstring::npos;
+		const CharType* itFound = std::find_if( begin( pText ) + offset, itEnd, pred::CharMatch< CharType, caseType >( chr ) );
+		return itFound != itEnd ? std::distance( begin( pText ), itFound ) : std::tstring::npos;
 	}
 
 	template< str::CaseType caseType, typename CharType >
-	size_t Find( const CharType* pText, const CharType* pPart, size_t startPos = 0 )
+	size_t Find( const CharType* pText, const CharType* pPart, size_t offset = 0 )
 	{
-		ASSERT( pText != 0 && startPos <= GetLength( pText ) );
+		ASSERT( pText != 0 && offset <= GetLength( pText ) );
 		ASSERT( !str::IsEmpty( pPart ) );
 
 		const CharType* itEnd = end( pText );
-		const CharType* itFound = std::search( begin( pText ) + startPos, itEnd, begin( pPart ), end( pPart ), pred::CharEqual< caseType >() );
-		return itFound != itEnd ? ( itFound - begin( pText ) ) : std::tstring::npos;
+		const CharType* itFound = std::search( begin( pText ) + offset, itEnd, begin( pPart ), end( pPart ), pred::CharEqual< caseType >() );
+		return itFound != itEnd ? std::distance( begin( pText ), itFound ) : std::tstring::npos;
+	}
+
+	template< str::CaseType caseType, typename CharType >
+	size_t GetCountOf( const CharType* pText, const CharType* pPart )
+	{
+		size_t count = 0, matchLen = str::GetLength( pPart );
+
+		if ( !str::IsEmpty( pPart ) )
+			for ( size_t offset = str::Find< caseType >( pText, pPart ); offset != std::string::npos; offset = str::Find< caseType >( pText, pPart, offset + matchLen ) )
+				++count;
+
+		return count;
 	}
 
 	template< typename CharType >
@@ -317,6 +341,29 @@ namespace str
 	};
 
 	typedef EvalMatch< func::ToChar, func::ToLower > GetMatch;
+}
+
+
+namespace pred
+{
+	// to find most occurences in a string from an array of a parts
+	template< typename CharType >
+	struct LessPartCount
+	{
+		LessPartCount( const CharType* pText ) : m_pText( pText ) { ASSERT_PTR( m_pText ); }
+
+		bool operator()( const str::CPart< CharType >& left, const str::CPart< CharType >& right ) const
+		{
+			return Less == Compare_Scalar( str::GetPartCount( m_pText, left ), str::GetPartCount( m_pText, right ) );
+		}
+
+		bool operator()( const CharType* pLeftPart, const CharType* pRightPart ) const
+		{
+			return operator()( str::MakePart( pLeftPart ), str::MakePart( pRightPart ) );
+		}
+	private:
+		const CharType* m_pText;
+	};
 }
 
 

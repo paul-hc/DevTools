@@ -11,8 +11,43 @@ namespace str
 	extern const TCHAR g_ellipsis[];
 	extern const TCHAR g_paragraph[];
 
+	template< typename CharType > const CharType* StdDelimiters( void );	// " \t"
 
-	int Tokenize( std::vector< std::tstring >& rTokens, const TCHAR* pSource, const TCHAR* pDelims = _T(" \t") );
+
+	template< typename CharType, typename ContainerType >
+	size_t Tokenize( ContainerType& rTokens, const CharType* pSource, const CharType delims[] = StdDelimiters< CharType >() )
+	{
+		ASSERT( pSource != NULL && delims != NULL );
+		rTokens.clear();
+
+		const CharType* pDelimsEnd = str::end( delims );
+		size_t tokenCount = 0;
+		bool inQuotes = false;
+		std::tstring token;
+
+		for ( const CharType* pChr = pSource; *pChr != '\0'; ++pChr )
+		{
+			if ( '\"' == *pChr )
+				inQuotes = !inQuotes;
+
+			if ( inQuotes || std::find( delims, pDelimsEnd, *pChr ) == pDelimsEnd )
+				token += *pChr;
+			else if ( !token.empty() )
+			{
+				rTokens.push_back( token );
+				++tokenCount;
+				token.clear();
+			}
+		}
+
+		if ( !token.empty() )
+		{	// do the last token...
+			rTokens.push_back( token );
+			++tokenCount;
+		}
+
+		return tokenCount;
+	}
 
 
 	template< typename CharType >

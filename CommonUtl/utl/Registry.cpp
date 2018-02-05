@@ -9,6 +9,23 @@
 
 namespace reg
 {
+	void QuerySubKeyNames( std::vector< std::tstring >& rSubKeyNames, const reg::CKey& key )
+	{
+		if ( !key.IsValid() )
+			return;
+
+		reg::CKeyIterator itSubKey( &key );
+		if ( 0 == itSubKey.GetCount() )
+			return;
+
+		for ( ; itSubKey.IsValid(); ++itSubKey )
+			rSubKeyNames.push_back( itSubKey.GetName() );
+	}
+}
+
+
+namespace reg
+{
 	CKey::CKey( HKEY hParentKey, const TCHAR* pKeyName, bool forceCreate /*= false*/ )
 		: m_hKey( NULL )
 	{

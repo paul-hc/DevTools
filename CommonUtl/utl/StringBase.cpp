@@ -55,6 +55,10 @@ std::wostream& operator<<( std::wostream& os, const char* pUtf8 )
 
 namespace str
 {
+	template<> const char* StdWhitespace< char >( void ) { return " \t\r\n"; }
+	template<> const wchar_t* StdWhitespace< wchar_t >( void ) { return L" \t\r\n"; }
+
+
 	const std::locale& GetUserLocale( void )
 	{
 		static const std::locale userLocale( "" );		// user-specific locale

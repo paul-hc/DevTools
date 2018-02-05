@@ -308,8 +308,10 @@ namespace fs { class CPath; }
 
 namespace ui
 {
-	bool BeepSignal( UINT beep = MB_OK );
 	std::tstring GetModuleFileName( HINSTANCE hInstance = AfxGetApp()->m_hInstance );
+
+	bool BeepSignal( UINT beep = MB_OK );														// returns false for convenience
+	bool ReportError( const std::tstring& message, UINT mbFlags = MB_OK | MB_ICONERROR );		// returns false for convenience
 	int ReportException( const std::exception& e, UINT mbFlags = MB_OK | MB_ICONERROR );
 
 	bool& RefAsyncApiEnabled( void );
@@ -343,6 +345,21 @@ namespace ui
 			ddx::SetItemText( pDX, ctrlId, num::FormatNumber( rValue, loc ) );
 		else
 			num::ParseNumber( rValue, ddx::GetItemText( pDX, ctrlId ), loc );
+	}
+
+	inline void DDX_ComboSelPos( CDataExchange* pDX, int comboId, size_t& rSelPos )
+	{
+		if ( DialogOutput == pDX->m_bSaveAndValidate )
+		{
+			int selIndex = static_cast< int >( rSelPos );
+			DDX_CBIndex( pDX, comboId, selIndex );
+		}
+		else
+		{
+			int selIndex;
+			DDX_CBIndex( pDX, comboId, selIndex );
+			rSelPos = static_cast< size_t >( selIndex );
+		}
 	}
 
 	template< typename EnumType >

@@ -47,7 +47,7 @@ namespace reg
 		bool HasSubKey( const TCHAR* pSubKeyName ) const { return CKey( m_hKey, pSubKeyName, false ).IsValid(); }
 
 		CKey OpenSubKey( const TCHAR* pSubKeyName, bool forceCreate = false ) { return CKey( m_hKey, pSubKeyName, forceCreate ); }
-		bool RemoveSubKey( const TCHAR* pSubKeyName ) { ASSERT( IsValid() && str::IsEmpty( pSubKeyName ) ); return ERROR_SUCCESS == ::RegDeleteKey( m_hKey, pSubKeyName ); }
+		bool RemoveSubKey( const TCHAR* pSubKeyName ) { ASSERT( IsValid() && !str::IsEmpty( pSubKeyName ) ); return ERROR_SUCCESS == ::RegDeleteKey( m_hKey, pSubKeyName ); }
 
 		// values access
 		int GetValueCount( void ) const { return CInfo( m_hKey ).m_valueCount; }
@@ -168,7 +168,7 @@ namespace reg
 		CValueIterator& operator++( void ) { ++m_pos; SeekToPos(); return *this; }
 		CValueIterator& operator--( void ) { --m_pos; SeekToPos(); return *this; }
 
-		CValueIterator& Seek( int _valueIndex ) { m_pos = _valueIndex; SeekToPos(); return *this; }
+		CValueIterator& Seek( int valueIndex ) { m_pos = valueIndex; SeekToPos(); return *this; }
 		CValueIterator& Restart( SeekBound bound = SB_First );
 	protected:
 		bool SeekToPos( void );
@@ -183,6 +183,9 @@ namespace reg
 		DWORD m_valueType;
 		DWORD m_valueBuffSize;
 	};
+
+
+	void QuerySubKeyNames( std::vector< std::tstring >& rSubKeyNames, const reg::CKey& key );
 }
 
 
