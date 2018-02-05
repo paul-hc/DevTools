@@ -4,7 +4,7 @@
 #include "MainRenameDialog.h"
 #include "FileWorkingSet.h"
 #include "FileSetUi.h"
-#include "PathFunctors.h"
+#include "PathAlgorithms.h"
 #include "resource.h"
 #include "utl/ImageStore.h"
 #include "utl/LayoutEngine.h"

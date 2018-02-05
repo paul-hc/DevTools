@@ -1,6 +1,6 @@
 
 #include "stdafx.h"
-#include "PathFunctors.h"
+#include "PathAlgorithms.h"
 #include "utl/EnumTags.h"
 #include "utl/StringUtilities.h"
 #include "resource.h"

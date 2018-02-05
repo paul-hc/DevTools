@@ -5,7 +5,7 @@
 #include "FileWorkingSet.h"
 #include "FileSetUi.h"
 #include "MenuCommand.h"
-#include "PathFunctors.h"
+#include "PathAlgorithms.h"
 #include "ReplaceDialog.h"
 #include "CapitalizeOptionsDialog.h"
 #include "resource.h"

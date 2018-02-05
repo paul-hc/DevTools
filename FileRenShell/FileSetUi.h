@@ -25,8 +25,6 @@ public:
 	void QueryDestFilenames( std::vector< std::tstring >& rDestFnames ) const;
 	void QuerySubDirs( std::vector< std::tstring >& rSubDirs ) const;
 
-	std::tstring ExtractLongestCommonPrefix( const std::vector< std::tstring >& destFnames ) const;
-
 	void MakePickFnamePatternMenu( std::tstring* pSinglePattern, CMenu* pPopupMenu, const TCHAR* pSelFname = NULL ) const;		// single pattern or pick menu
 	bool MakePickDirPathMenu( UINT* pSingleCmdId, CMenu* pPopupMenu ) const;													// single command or pick menu
 
@@ -39,8 +37,10 @@ public:
 
 	// text tools
 	static std::tstring ApplyTextTool( UINT cmdId, const std::tstring& text );
+
+	static std::tstring ExtractLongestCommonPrefix( const std::vector< std::tstring >& destFnames );
 private:
-	bool AllHavePrefix( const std::vector< std::tstring >& destFnames, size_t prefixLen ) const;
+	static bool AllHavePrefix( const std::vector< std::tstring >& destFnames, size_t prefixLen );
 private:
 	const fs::PathPairMap& m_renamePairs;
 };

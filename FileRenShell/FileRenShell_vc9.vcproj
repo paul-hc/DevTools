@@ -149,7 +149,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories=".;../CommonUtl"
+				AdditionalIncludeDirectories="../CommonUtl"
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_USRDLL"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -345,7 +345,7 @@
 				Optimization="1"
 				InlineFunctionExpansion="2"
 				WholeProgramOptimization="true"
-				AdditionalIncludeDirectories=".;../CommonUtl"
+				AdditionalIncludeDirectories="../CommonUtl"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL"
 				StringPooling="true"
 				RuntimeLibrary="0"
@@ -593,11 +593,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\PathFunctors.cpp"
+				RelativePath=".\PathAlgorithms.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\PathFunctors.h"
+				RelativePath=".\PathAlgorithms.h"
 				>
 			</File>
 			<File

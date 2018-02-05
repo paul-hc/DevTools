@@ -1,5 +1,5 @@
-#ifndef PathFunctors_h
-#define PathFunctors_h
+#ifndef PathAlgorithms_h
+#define PathAlgorithms_h
 #pragma once
 
 #include "utl/Path.h"
@@ -174,8 +174,7 @@ namespace func
 			str::ToLower( rDestParts.m_ext );
 		}
 	};
+}
 
-} // namespace func
 
-
-#endif // PathFunctors_h
+#endif // PathAlgorithms_h

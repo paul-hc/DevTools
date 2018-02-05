@@ -55,7 +55,7 @@ void CFileSetUi::QuerySubDirs( std::vector< std::tstring >& rSubDirs ) const
 		rSubDirs.erase( rSubDirs.begin(), rSubDirs.begin() + rSubDirs.size() - PickDirPathMaxCount );
 }
 
-std::tstring CFileSetUi::ExtractLongestCommonPrefix( const std::vector< std::tstring >& destFnames ) const
+std::tstring CFileSetUi::ExtractLongestCommonPrefix( const std::vector< std::tstring >& destFnames )
 {
 	ASSERT( !destFnames.empty() );
 
@@ -73,7 +73,7 @@ std::tstring CFileSetUi::ExtractLongestCommonPrefix( const std::vector< std::tst
 	return std::tstring();
 }
 
-bool CFileSetUi::AllHavePrefix( const std::vector< std::tstring >& destFnames, size_t prefixLen ) const
+bool CFileSetUi::AllHavePrefix( const std::vector< std::tstring >& destFnames, size_t prefixLen )
 {
 	ASSERT( prefixLen != 0 );
 
