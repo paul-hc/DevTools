@@ -2,6 +2,8 @@
 #define IdeUtilities_h
 #pragma once
 
+#include "utl/Path.h"
+
 
 namespace ide
 {
@@ -32,6 +34,14 @@ namespace ide
 	std::tstring GetRegistryPath_VC6( const TCHAR entry[] );
 	std::tstring GetRegistryPath_VC71( const TCHAR entry[] );
 	const std::tstring& GetVC71InstallDir( void );
+
+
+	namespace vs6
+	{
+		fs::CPath GetCommonDirPath( bool trailSlash = true );
+		fs::CPath GetMacrosDirPath( bool trailSlash = true );
+		fs::CPath GetVC98DirPath( bool trailSlash = true );
+	}
 }
 
 

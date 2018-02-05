@@ -4,10 +4,10 @@
 
 #include <vector>
 #include "FormatterOptions.h"
-#include "utl/Path.h"
 #include "utl/DialogToolBar.h"
 #include "utl/ItemContentEdit.h"
 #include "utl/LayoutPropertyPage.h"
+#include "utl/Path.h"
 #include "utl/SpinEdit.h"
 
 
@@ -20,7 +20,7 @@ public:
 	virtual ~CGeneralOptionsPage();
 
 	std::tstring m_developerName;
-	std::tstring m_codeTemplateFile;
+	fs::CPath m_codeTemplatePath;
 	UINT m_menuVertSplitCount;
 	CSpinButtonCtrl m_menuVertSplitCountSpin;
 	std::tstring m_singleLineCommentToken;
@@ -35,11 +35,10 @@ private:
 	// enum { IDD = IDD_OPTIONS_GENERAL_PAGE };
 	CItemContentEdit m_templateFileEdit;
 
-	// generated overrides
+	// generated stuff
 	protected:
 	virtual void DoDataExchange( CDataExchange* pDX );
 protected:
-	// generated message map
 	DECLARE_MESSAGE_MAP()
 };
 
@@ -64,12 +63,11 @@ private:
 	CComboBox m_operatorRulesCombo;
 
 	static const TCHAR m_breakSep[];
-public:
-	// generated overrides
+
+	// generated stuff
 	protected:
 	virtual void DoDataExchange( CDataExchange* pDX );
 protected:
-	// generated message map
 	afx_msg void CBnSelChange_BraceRules( void );
 	afx_msg void CBnSelChange_OperatorRules( void );
 	afx_msg void BnClicked_BraceRulesButton( UINT cmdId );
@@ -91,11 +89,10 @@ public:
 	UINT m_linesBetweenFunctionImpls;
 	CSpinButtonCtrl m_linesBetweenFunctionImplsSpin;
 
-	// generated overrides
+	// generated stuff
 	protected:
 	virtual void DoDataExchange( CDataExchange* pDX );
 protected:
-	// generated message map
 	DECLARE_MESSAGE_MAP()
 };
 
@@ -143,7 +140,7 @@ private:
 		std::tstring m_displayName;
 	};
 public:
-	std::tstring m_browseInfoPath;
+	fs::CPath m_browseInfoPath;
 private:
 	std::vector< CDirPathItem > m_pathItems;
 	ui::CItemContent m_folderContent;
@@ -156,11 +153,10 @@ public:
 	CEdit m_searchFilterEdit;
 	CEdit m_displayTagEdit;
 
-	// generated overrides
+	// generated stuff
 	protected:
 	virtual void DoDataExchange( CDataExchange* pDX );
 protected:
-	// generated message map
 	afx_msg void LBnSelChange_BrowseFilesPath( void );
 	afx_msg void LBnDblClk_BrowseFilesPath( void );
 	afx_msg void EnChange_DisplayTag( void );
@@ -179,6 +175,44 @@ protected:
 };
 
 
+class CIncludeDirectories;
+
+
+class CDirectoriesPage : public CLayoutPropertyPage
+{
+public:
+	CDirectoriesPage( void );
+	virtual ~CDirectoriesPage();
+
+	// base overrides
+	virtual void ApplyPageChanges( void ) throws_( CRuntimeException );
+private:
+	std::tstring MakeNewUniqueName( void ) const;
+private:
+	std::auto_ptr< CIncludeDirectories > m_pDirSets;			// a working copy, so user can cancel with no modification
+
+	// enum { IDD = IDD_OPTIONS_DIRECTORIES_PAGE };
+	CComboBox m_dirSetsCombo;
+	CItemListEdit m_includePathEdit;
+	CItemListEdit m_sourcePathEdit;
+	CItemListEdit m_libraryPathEdit;
+	CItemListEdit m_binaryPathEdit;
+	CDialogToolBar m_toolbar;
+
+	// generated stuff
+	protected:
+	virtual void DoDataExchange( CDataExchange* pDX );
+protected:
+	afx_msg void CBnSelChange_DirSets( void );
+	afx_msg void OnAddDirSet( void );
+	afx_msg void OnRemoveDirSet( void );
+	afx_msg void OnRenameDirSet( void );
+	afx_msg void OnResetDefault( void );
+
+	DECLARE_MESSAGE_MAP()
+};
+
+
 #include "utl/LayoutPropertySheet.h"
 
 
@@ -187,13 +221,20 @@ class COptionsSheet : public CLayoutPropertySheet
 public:
 	COptionsSheet( CWnd* pParent );
 	virtual ~COptionsSheet();
-private:
-	bool m_savedActivePage;
 public:
 	CGeneralOptionsPage m_generalPage;
 	CCodingStandardPage m_formattingPage;
 	CCppImplFormattingPage m_cppImplFormattingPage;
 	CBscPathPage m_bscPathPage;
+	CDirectoriesPage m_directoriesPage;
+
+	// generated stuff
+public:
+	virtual BOOL OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo );
+protected:
+	afx_msg void OnContextMenu( CWnd* pWnd, CPoint screenPos );
+
+	DECLARE_MESSAGE_MAP()
 };
 
 

@@ -99,7 +99,7 @@ namespace code
 		m_commentDecorationTemplate.Empty();
 
 		TextContent codeTemplateFile;
-		std::tstring codeTemplateFilePath = app::GetModuleSession().m_codeTemplateFile;
+		std::tstring codeTemplateFilePath = app::GetModuleSession().m_codeTemplatePath.Get();
 
 		if ( app::GetModuleSession().m_useCommentDecoration )
 		{
@@ -535,7 +535,7 @@ namespace code
 		TextContent codeTemplateFile;
 		CString outcome;
 
-		if ( codeTemplateFile.LoadFileSection( app::GetModuleSession().m_codeTemplateFile.c_str(), _T("ForLoopIterator") ) )
+		if ( codeTemplateFile.LoadFileSection( app::GetModuleSession().m_codeTemplatePath.GetPtr(), _T("ForLoopIterator") ) )
 		{
 			codeTemplateFile.ReplaceText( _T("%ContainerType%"), components.m_containerType.getString( codeText ), TRUE );
 			codeTemplateFile.ReplaceText( _T("%IteratorType%"), isConstIterator ? _T("const_iterator") : _T("iterator"), TRUE );
@@ -556,7 +556,7 @@ namespace code
 		TextContent codeTemplateFile;
 		CString outcome;
 
-		if ( codeTemplateFile.LoadFileSection( app::GetModuleSession().m_codeTemplateFile.c_str(), components.m_isMfcList ? _T("ForLoopPosition") : _T("ForLoopIndex") ) )
+		if ( codeTemplateFile.LoadFileSection( app::GetModuleSession().m_codeTemplatePath.GetPtr(), components.m_isMfcList ? _T("ForLoopPosition") : _T("ForLoopIndex") ) )
 		{
 			codeTemplateFile.ReplaceText( _T("%IndexType%"), STL == components.m_libraryType ? _T("size_t") : _T("int"), TRUE );
 			codeTemplateFile.ReplaceText( _T("%ObjectType%"), components.m_objectType.getString( codeText ), TRUE );

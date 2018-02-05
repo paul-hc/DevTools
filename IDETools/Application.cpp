@@ -1,10 +1,12 @@
 
 #include "stdafx.h"
 #include "Application.h"
-#include "IncludePaths.h"
+#include "IdeUtilities.h"
+#include "IncludeDirectories.h"
 #include "ModuleSession.h"
 #include "SafeForScripting.h"
 #include "resource.h"
+#include "utl/FileSystem.h"
 #include "utl/VersionInfo.h"
 #include "utl/resource.h"
 
@@ -75,6 +77,9 @@ BOOL CApplication::InitInstance( void )
 
 int CApplication::ExitInstance( void )
 {
+	if ( CIncludeDirectories::Created() )			// was it loaded?
+		CIncludeDirectories::Instance().Save();
+
 	m_pModuleSession->SaveToRegistry();
 	m_pModuleSession.reset();
 
@@ -100,21 +105,30 @@ END_MESSAGE_MAP()
 
 namespace app
 {
-	CIncludePaths& GetIncludePaths( void )
+	const CIncludePaths* GetIncludePaths( void )
 	{
-		static CIncludePaths singleton;
-		static bool firstInit = true;
-		if ( firstInit )
-		{
-			singleton.InitFromIde();
-			firstInit = false;
-		}
-		return singleton;
+		return CIncludeDirectories::Instance().GetCurrentPaths();
 	}
 
-	bool IsDebugBreakEnabled( void )
+	const fs::CPath& GetDefaultConfigDirPath( void )
 	{
-		return CModuleSession::IsDebugBreakEnabled();
+		static fs::CPath configDirPath;
+		if ( configDirPath.IsEmpty() )
+		{
+			fs::CPath exeDirPath = fs::CPath( ui::GetModuleFileName() ).GetParentPath();
+
+			configDirPath = exeDirPath / fs::CPath( _T("mine\\config") );
+
+			if ( !fs::IsValidDirectory( configDirPath.GetPtr() ) )
+				configDirPath = ide::vs6::GetMacrosDirPath();
+
+			if ( !fs::IsValidDirectory( configDirPath.GetPtr() ) )
+				configDirPath = exeDirPath;
+
+			ENSURE( fs::IsValidDirectory( configDirPath.GetPtr() ) );
+		}
+
+		return configDirPath;
 	}
 
 	void TraceMenu( HMENU hMenu, size_t indentLevel /*= 0*/ )

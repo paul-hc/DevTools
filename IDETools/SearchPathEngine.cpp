@@ -1,9 +1,8 @@
 
 #include "stdafx.h"
 #include "SearchPathEngine.h"
-#include "IncludeOptions.h"
-#include "ModuleSession.h"
-#include "Application.h"
+#include "IncludeDirectories.h"
+#include "IncludeNode.h"
 #include "utl/StringUtilities.h"
 #include <set>
 
@@ -40,8 +39,8 @@ namespace inc
 			rResults.AddValidPath( includeTag.GetFilePath().Get(), AbsolutePath );				// add absolute path without searching any include path
 		else	// #include <stdio.h>, #include <atl/stdio.h>, #include "Options.h", #include "utl/Icon.h"
 		{
-			if ( includeTag.IsLocalInclude() && HasFlag( m_searchInPath, sp::LocalPath ) )		// local directory?
-				rResults.AddValidPath( path::Combine( m_localDirPath.GetPtr(), includeTag.GetFilePath().GetPtr() ), LocalPath );
+			if ( includeTag.IsLocalInclude() && HasFlag( m_searchFlags, Flag_LocalPath ) )		// local directory?
+				rResults.AddValidPath( m_localDirPath / includeTag.GetFilePath(), LocalPath );
 
 			if ( !rResults.IsFull() )
 				SearchIncludePaths( rResults, includeTag );				// search in the specified dir-paths
@@ -60,41 +59,27 @@ namespace inc
 		return foundResults.Get().front();
 	}
 
+	fs::CPath CSearchPathEngine::MakeDirPath( const fs::CPath& srcDirPath ) const
+	{
+		if ( path::IsRelative( srcDirPath.GetPtr() ) )
+			return m_localDirPath / srcDirPath;
+
+		return srcDirPath;
+	}
+
 	void CSearchPathEngine::SearchIncludePaths( CFoundPaths& rResults, const CIncludeTag& includeTag ) const
 	{
-		const std::vector< CSearchPathEngine::DirSearchPair >& specs = GetSearchSpecs();
+		const std::vector< TDirSearchPair >& specs = CIncludeDirectories::Instance().GetSearchSpecs();
 
-		for ( std::vector< CSearchPathEngine::DirSearchPair >::const_iterator itSpec = specs.begin(); itSpec != specs.end(); ++itSpec )
-			if ( HasFlag( m_searchInPath, itSpec->second ) )		// location selected?
+		for ( std::vector< TDirSearchPair >::const_iterator itSpec = specs.begin(); itSpec != specs.end(); ++itSpec )
+			if ( HasFlag( m_searchFlags, itSpec->second ) )			// location selected?
 				for ( std::vector< fs::CPath >::const_iterator itDirPath = itSpec->first->GetPaths().begin(); itDirPath != itSpec->first->GetPaths().end(); ++itDirPath )
 				{
-					fs::CPath dirPath = path::IsRelative( itDirPath->GetPtr() )
-						? path::Combine( m_localDirPath.GetPtr(), itDirPath->GetPtr() )
-						: *itDirPath;
+					fs::CPath fullPath = MakeDirPath( *itDirPath ) / includeTag.GetFilePath();
 
-					rResults.AddValidPath( path::Combine( dirPath.GetPtr(), includeTag.GetFilePath().GetPtr() ), itSpec->first->GetLocation() );
+					rResults.AddValidPath( fullPath, itSpec->first->GetLocation() );
 					if ( rResults.IsFull() )
 						return;
 				}
-	}
-
-	const std::vector< CSearchPathEngine::DirSearchPair >& CSearchPathEngine::GetSearchSpecs( void )
-	{
-		static std::vector< DirSearchPair > groupSepcs;
-		if ( groupSepcs.empty() )
-		{
-			const CIncludePaths& includePaths = app::GetIncludePaths();
-
-			groupSepcs.push_back( DirSearchPair( &includePaths.GetStandard(), sp::StandardPath ) );
-			groupSepcs.push_back( DirSearchPair( &CIncludePaths::Get_INCLUDE(), sp::StandardPath ) );
-			groupSepcs.push_back( DirSearchPair( &CIncludeOptions::Instance().m_additionalIncludePath, sp::AdditionalPath ) );
-			groupSepcs.push_back( DirSearchPair( &app::GetModuleSession().m_moreAdditionalIncludePath, sp::AdditionalPath ) );
-			groupSepcs.push_back( DirSearchPair( &includePaths.GetSource(), sp::SourcePath ) );
-			groupSepcs.push_back( DirSearchPair( &includePaths.GetLibrary(), sp::LibraryPath ) );
-			groupSepcs.push_back( DirSearchPair( &CIncludePaths::Get_LIB(), sp::LibraryPath ) );
-			groupSepcs.push_back( DirSearchPair( &includePaths.GetBinary(), sp::BinaryPath ) );
-			groupSepcs.push_back( DirSearchPair( &CIncludePaths::Get_PATH(), sp::BinaryPath ) );
-		}
-		return groupSepcs;
 	}
 }

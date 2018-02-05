@@ -2,6 +2,7 @@
 #include "stdafx.h"
 #include "ModuleSession.h"
 #include "ModuleOptions.h"
+#include "IdeUtilities.h"
 #include "Application.h"
 
 #ifdef _DEBUG
@@ -99,12 +100,12 @@ void ModuleOptions::SetDeveloperName( LPCTSTR lpszNewValue )
 
 BSTR ModuleOptions::GetCodeTemplateFile( void )
 {
-	return str::AllocSysString( app::GetModuleSession().m_codeTemplateFile );
+	return str::AllocSysString( app::GetModuleSession().m_codeTemplatePath.Get() );
 }
 
 void ModuleOptions::SetCodeTemplateFile( LPCTSTR lpszNewValue )
 {
-	app::GetModuleSession().m_codeTemplateFile = lpszNewValue;
+	app::GetModuleSession().m_codeTemplatePath.Set( lpszNewValue );
 }
 
 long ModuleOptions::GetSplitMaxColumn( void )
@@ -209,12 +210,12 @@ void ModuleOptions::SetDuplicateLineMoveDown( BOOL bNewValue )
 
 BSTR ModuleOptions::GetBrowseInfoPath( void )
 {
-	return str::AllocSysString( app::GetModuleSession().m_browseInfoPath );
+	return str::AllocSysString( app::GetModuleSession().m_browseInfoPath.Get() );
 }
 
 void ModuleOptions::SetBrowseInfoPath( LPCTSTR lpszNewValue )
 {
-	app::GetModuleSession().m_browseInfoPath = lpszNewValue;
+	app::GetModuleSession().m_browseInfoPath.Set( lpszNewValue );
 }
 
 BSTR ModuleOptions::GetAdditionalIncludePath( void )
@@ -249,20 +250,17 @@ BOOL ModuleOptions::GetReturnTypeOnSeparateLine( void )
 
 BSTR ModuleOptions::GetVStudioCommonDirPath( BOOL addTrailingSlash )
 {
-	std::tstring vStudioCommonDirPath = CModuleSession::GetVStudioCommonDirPath( addTrailingSlash != FALSE );
-	return str::AllocSysString( vStudioCommonDirPath );
+	return str::AllocSysString( ide::vs6::GetCommonDirPath( addTrailingSlash != FALSE ).Get() );
 }
 
 BSTR ModuleOptions::GetVStudioMacrosDirPath( BOOL addTrailingSlash )
 {
-	std::tstring vStudioMacrosDir = CModuleSession::GetVStudioMacrosDirPath( addTrailingSlash != FALSE );
-	return str::AllocSysString( vStudioMacrosDir );
+	return str::AllocSysString( ide::vs6::GetMacrosDirPath( addTrailingSlash != FALSE ).Get() );
 }
 
 BSTR ModuleOptions::GetVStudioVC98DirPath( BOOL addTrailingSlash )
 {
-	std::tstring vStudioVC98Dir = CModuleSession::GetVStudioVC98DirPath( addTrailingSlash != FALSE );
-	return str::AllocSysString( vStudioVC98Dir );
+	return str::AllocSysString( ide::vs6::GetVC98DirPath( addTrailingSlash != FALSE ).Get() );
 }
 
 BOOL ModuleOptions::EditOptions( void )

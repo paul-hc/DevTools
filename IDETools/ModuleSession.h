@@ -6,9 +6,6 @@
 #include "PathGroup.h"
 
 
-enum DebugBreakType { NoBreak, Break, PromptBreak };
-
-
 namespace reg
 {
 	extern const TCHAR section_settings[];
@@ -24,10 +21,6 @@ public:
 	CModuleSession( void );
 	virtual ~CModuleSession();
 
-	static DebugBreakType GetDebugBreakType( void );
-	static void StoreDebugBreakType( DebugBreakType debugBreakType );
-	static bool IsDebugBreakEnabled( void );
-
 	void LoadFromRegistry( void );
 	void SaveToRegistry( void ) const;
 
@@ -36,18 +29,15 @@ public:
 	// lazy registry persistence
 	code::CFormatterOptions& GetCodeFormatterOptions( void );
 
-	// helpers
-	static std::tstring GetVStudioCommonDirPath( bool trailSlash = true );
-	static std::tstring GetVStudioMacrosDirPath( bool trailSlash = true );
-	static std::tstring GetVStudioVC98DirPath( bool trailSlash = true );
-
 	// accessors
 	const std::tstring& GetAdditionalAssocFolders( void ) const { return m_additionalAssocFolders; }
 	void SetAdditionalAssocFolders( const std::tstring& additionalAssocFolders ) { m_additionalAssocFolders = additionalAssocFolders; }
+private:
+	static fs::CPath GetDefaultCodeTemplatePath( void );
 public:
 	// general options
 	std::tstring m_developerName;
-	std::tstring m_codeTemplateFile;
+	fs::CPath m_codeTemplatePath;
 	UINT m_splitMaxColumn;
 	int m_menuVertSplitCount;
 	std::tstring m_singleLineCommentToken;
@@ -58,7 +48,7 @@ public:
 	bool m_duplicateLineMoveDown;
 
 	// browse files path options
-	std::tstring m_browseInfoPath;
+	fs::CPath m_browseInfoPath;
 
 	// prefixes
 	std::tstring m_classPrefix;
@@ -76,12 +66,10 @@ private:
 	std::tstring m_additionalAssocFolders;
 private:
 	// code formatting options (lazy registry)
-	std::auto_ptr< code::CFormatterOptions > m_codeFormatterOptionsPtr;
-public:
-	// generated overrides
-protected:
-	// generated message map functions
+	std::auto_ptr< code::CFormatterOptions > m_pCodeFormatterOptions;
 
+	// generated stuff
+protected:
 	DECLARE_MESSAGE_MAP()
 };
 

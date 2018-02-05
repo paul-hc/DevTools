@@ -829,6 +829,14 @@
 					>
 				</File>
 				<File
+					RelativePath=".\IncludeDirectories.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\IncludeDirectories.h"
+					>
+				</File>
+				<File
 					RelativePath=".\IncludeNode.h"
 					>
 				</File>
@@ -886,10 +894,6 @@
 				</File>
 				<File
 					RelativePath=".\SearchPathEngine.h"
-					>
-				</File>
-				<File
-					RelativePath=".\SearchPathEngine_fwd.h"
 					>
 				</File>
 				<File

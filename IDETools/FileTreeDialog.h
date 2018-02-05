@@ -11,7 +11,6 @@
 #include "FileAssoc.h"
 #include "IncludeOptions.h"
 #include "IncludeNode.h"
-#include "SearchPathEngine_fwd.h"
 
 
 struct CIncludeNode;

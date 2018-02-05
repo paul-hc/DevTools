@@ -301,12 +301,12 @@ BSTR UserInterface::ExpandEnvironmentVariables( LPCTSTR sourceString )
 BSTR UserInterface::LocateFile( LPCTSTR localDirPath )
 {
 	std::tstring includeFilePath;
-	CFileLocatorDialog dialog( ide::getRootWindow() );
+	CFileLocatorDialog dlg( ide::getRootWindow() );
 
-	dialog.SetLocalDirPath( localDirPath );
+	dlg.SetLocalDirPath( localDirPath );
 
-	if ( IDOK == dialog.DoModal() )
-		includeFilePath = dialog.m_selectedFilePath;
+	if ( IDOK == dlg.DoModal() )
+		includeFilePath = dlg.m_selectedFilePath;
 
 	return str::AllocSysString( includeFilePath );
 }

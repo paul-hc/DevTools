@@ -1,6 +1,7 @@
 
 #include "stdafx.h"
 #include "FileLocatorDialog.h"
+#include "IncludeNode.h"
 #include "IncludeOptions.h"
 #include "SearchPathEngine.h"
 #include "ModuleSession.h"
@@ -24,14 +25,14 @@ namespace reg
 	static const TCHAR section_list[] = _T("FileLocatorDialog\\list");
 }
 
-static struct { UINT ckID; int spFlag; } idToSPFlags[] =
+static struct { UINT m_ckID; inc::SearchFlag m_searchFlag; } s_idToSPFlags[] =
 {
-	{ IDC_SEARCH_INCLUDE_PATH_CHECK   , sp::StandardPath },
-	{ IDC_SEARCH_LOCAL_PATH_CHECK	 , sp::LocalPath },
-	{ IDC_SEARCH_ADDITIONAL_PATH_CHECK, sp::AdditionalPath },
-	{ IDC_SEARCH_SOURCE_PATH_CHECK	, sp::SourcePath },
-	{ IDC_SEARCH_LIBRARY_PATH_CHECK, sp::LibraryPath },
-	{ IDC_SEARCH_BINARY_PATH_CHECK	, sp::BinaryPath }
+	{ IDC_SEARCH_INCLUDE_PATH_CHECK, inc::Flag_StandardPath },
+	{ IDC_SEARCH_LOCAL_PATH_CHECK, inc::Flag_LocalPath },
+	{ IDC_SEARCH_ADDITIONAL_PATH_CHECK, inc::Flag_AdditionalPath },
+	{ IDC_SEARCH_SOURCE_PATH_CHECK, inc::Flag_SourcePath },
+	{ IDC_SEARCH_LIBRARY_PATH_CHECK, inc::Flag_LibraryPath },
+	{ IDC_SEARCH_BINARY_PATH_CHECK, inc::Flag_BinaryPath }
 };
 
 
@@ -67,7 +68,7 @@ namespace layout
 CFileLocatorDialog::CFileLocatorDialog( CWnd* pParent )
 	: CLayoutDialog( IDD_FILE_LOCATOR_DIALOG, pParent )
 	, m_tagHistoryMaxCount( 15 )
-	, m_searchInPath( sp::AllIncludePaths )
+	, m_searchFlags( inc::Mask_AllIncludePaths )
 	, m_intrinsic( 0 )
 	, m_closedOK( false )
 	, m_defaultExt( _T(".h") )
@@ -114,7 +115,7 @@ void CFileLocatorDialog::readProfile( void )
 	str::Split( tagHistoryArray, (LPCTSTR)pApp->GetProfileString( m_regSection.c_str(), ENTRY_OF( tagHistory ), _T("") ), _T(";") );
 	ui::WriteComboItems( m_includeTagCombo, tagHistoryArray );
 
-	m_searchInPath = pApp->GetProfileInt( m_regSection.c_str(), ENTRY_OF( m_searchInPath ), m_searchInPath );
+	m_searchFlags = pApp->GetProfileInt( m_regSection.c_str(), ENTRY_OF( m_searchFlags ), m_searchFlags );
 	m_defaultExt = pApp->GetProfileString( m_regSection.c_str(), ENTRY_OF( m_defaultExt ), m_defaultExt.c_str() );
 }
 
@@ -128,7 +129,7 @@ void CFileLocatorDialog::saveProfile( void )
 		pApp->WriteProfileInt( m_regSection.c_str(), ENTRY_OF( isLocalTag ), !IsDlgButtonChecked( IDC_SYSTEM_TAG_RADIO ) );
 		pApp->WriteProfileString( m_regSection.c_str(), ENTRY_OF( m_defaultExt ), m_defaultExt.c_str() );
 	}
-	pApp->WriteProfileInt( m_regSection.c_str(), ENTRY_OF( m_searchInPath ), m_searchInPath );
+	pApp->WriteProfileInt( m_regSection.c_str(), ENTRY_OF( m_searchFlags ), m_searchFlags );
 
 	// avoid saving empty location entries since these are used only as initial states for the two input dialogs
 	if ( !m_localDirPath.empty() )
@@ -251,7 +252,7 @@ int CFileLocatorDialog::SearchForTag( const std::tstring& includeTag )
 	if ( !tag.IsEmpty() )
 	{
 		inc::CFoundPaths foundResults;
-		inc::CSearchPathEngine searchEngine( m_localDirPath, m_searchInPath );
+		inc::CSearchPathEngine searchEngine( m_localDirPath, m_searchFlags );
 		searchEngine.QueryIncludeFiles( foundResults, tag );
 		foundResults.Swap( m_foundFiles );		// store the found files
 	}
@@ -450,14 +451,14 @@ BOOL CFileLocatorDialog::OnInitDialog( void )
 
 	// setup
 	readProfile();
-	for ( int i = 0; i < COUNT_OF( idToSPFlags ); ++i )
-		CheckDlgButton( idToSPFlags[ i ].ckID, HasFlag( m_searchInPath, idToSPFlags[ i ].spFlag ) );
+	for ( size_t i = 0; i != COUNT_OF( s_idToSPFlags ); ++i )
+		CheckDlgButton( s_idToSPFlags[ i ].m_ckID, HasFlag( m_searchFlags, s_idToSPFlags[ i ].m_searchFlag ) );
 
 	m_foundFilesFormat = ui::GetDlgItemText( this, IDC_FOUND_FILES_STATIC );
 
 	ui::SetWindowText( m_localDirPathEdit, m_localDirPath );
-	ui::SetWindowText( m_projectFileEdit, m_associatedProjectFile );
 	ui::SetDlgItemText( this, IDC_ADDITIONAL_INC_PATH_EDIT, GetAdditionalIncludePaths() );
+	ui::SetWindowText( m_projectFileEdit, m_associatedProjectFile );
 
 	CIncludeTag intialTag( m_defaultExt, !IsDlgButtonChecked( IDC_SYSTEM_TAG_RADIO ) );
 
@@ -570,13 +571,10 @@ void CFileLocatorDialog::LVnItemChangedFoundFiles( NMHDR* pNmHdr, LRESULT* pResu
 
 void CFileLocatorDialog::CkSearchPath( UINT ckID )
 {
-	for ( int i = 0; i != COUNT_OF( idToSPFlags ); ++i )
-		if ( ckID == idToSPFlags[ i ].ckID )
+	for ( size_t i = 0; i != COUNT_OF( s_idToSPFlags ); ++i )
+		if ( ckID == s_idToSPFlags[ i ].m_ckID )
 		{
-			if ( IsDlgButtonChecked( ckID ) )
-				m_searchInPath |= idToSPFlags[ i ].spFlag;
-			else
-				m_searchInPath &= ~idToSPFlags[ i ].spFlag;
+			SetFlag( m_searchFlags, s_idToSPFlags[ i ].m_searchFlag, IsDlgButtonChecked( ckID ) != FALSE );
 			break;
 		}
 

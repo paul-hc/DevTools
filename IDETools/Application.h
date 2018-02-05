@@ -4,6 +4,7 @@
 
 #include "utl/BaseApp.h"
 #include "utl/Logger.h"
+#include "utl/Path.h"
 #include "Application_fwd.h"
 
 
@@ -32,7 +33,7 @@ private:
 };
 
 
-class CIncludePaths;
+struct CIncludePaths;
 
 
 namespace app
@@ -40,9 +41,9 @@ namespace app
 	inline CLogger& GetLogger( void ) { return CApplication::GetApp()->GetLogger(); }
 	inline CModuleSession& GetModuleSession( void ) { return CApplication::GetApp()->GetModuleSession(); }
 
-	CIncludePaths& GetIncludePaths( void );
+	const CIncludePaths* GetIncludePaths( void );
 
-	bool IsDebugBreakEnabled( void );
+	const fs::CPath& GetDefaultConfigDirPath( void );
 
 	void TraceMenu( HMENU hMenu, size_t indentLevel = 0 );
 }
@@ -53,9 +54,6 @@ namespace app
 #else
 	#define DEBUG_LOG __noop
 #endif
-
-
-#define CHECK_DEBUG_BREAK	ASSERT( !app::IsDebugBreakEnabled() )
 
 
 #endif // Application_h

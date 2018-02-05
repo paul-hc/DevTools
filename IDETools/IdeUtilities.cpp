@@ -2,6 +2,7 @@
 #include "stdafx.h"
 #include "IdeUtilities.h"
 #include "Application.h"
+#include "utl/Path.h"
 #include "utl/Registry.h"
 
 #ifdef _DEBUG
@@ -298,5 +299,47 @@ namespace ide
 		}
 
 		return vc71InstallDir;
+	}
+
+
+	namespace vs6
+	{
+		fs::CPath GetCommonDirPath( bool trailSlash /*= true*/ )
+		{
+			reg::CKey key( HKEY_LOCAL_MACHINE, _T("SOFTWARE\\Microsoft\\VisualStudio\\6.0\\Setup") );
+			std::tstring vsCommonDirPath;
+
+			if ( key.IsValid() )
+			{
+				vsCommonDirPath = key.ReadString( _T("VsCommonDir") );
+				path::SetBackslash( vsCommonDirPath, trailSlash );
+			}
+			return vsCommonDirPath;
+		}
+
+		fs::CPath GetMacrosDirPath( bool trailSlash /*= true*/ )
+		{
+			fs::CPath vsMacrosDirPath = GetCommonDirPath();
+			if ( !vsMacrosDirPath.IsEmpty() )
+			{
+				vsMacrosDirPath /= fs::CPath( _T("MSDev98\\Macros") );
+				vsMacrosDirPath.SetBackslash( trailSlash );
+			}
+			return vsMacrosDirPath;
+		}
+
+		fs::CPath GetVC98DirPath( bool trailSlash /*= true*/ )
+		{
+			reg::CKey key( HKEY_LOCAL_MACHINE, _T("SOFTWARE\\Microsoft\\VisualStudio\\6.0\\Setup\\Microsoft Visual C++") );
+			//reg::CKey key( HKEY_LOCAL_MACHINE, _T("SOFTWARE\\Microsoft\\DevStudio\\6.0\\Products\\Microsoft Visual C++") );
+			std::tstring vsVC98DirPath;
+
+			if ( key.IsValid() )
+			{
+				vsVC98DirPath = key.ReadString( _T("ProductDir") );
+				path::SetBackslash( vsVC98DirPath, trailSlash );
+			}
+			return vsVC98DirPath;
+		}
 	}
 }

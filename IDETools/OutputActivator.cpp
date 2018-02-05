@@ -55,11 +55,14 @@ void OutputActivator::waitForCaptionChange( const TCHAR* origCaption )
 	TCHAR caption[ 128 ];
 
 	while( !seenOurMessage )
-	{	while( PeekMessage( &m, NULL, 0, 0, PM_REMOVE ) )
-		{	TranslateMessage( &m );
+	{
+		while( PeekMessage( &m, NULL, 0, 0, PM_REMOVE ) )
+		{
+			TranslateMessage( &m );
 			DispatchMessage( &m );
 		}
 		Sleep( 0 );
+
 		if ( ::GetWindowText( hWndTab, caption, COUNT_OF( caption ) ) > 0 )
 			if ( _tcsicmp( caption, origCaption ) )
 				seenOurMessage = true;

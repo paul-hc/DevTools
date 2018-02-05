@@ -23,7 +23,7 @@ private:
 	CSpinEdit m_maxParseLinesEdit;
 	CItemListEdit m_ignoredEdit;				// CIncludeOptions::m_fnIgnored
 	CItemListEdit m_addedEdit;					// CIncludeOptions::m_fnAdded
-	CItemListEdit m_additionalIncPathEdit;		// CModuleSession::m_additionalIncludePath
+	CItemListEdit m_additionalIncPathEdit;		// CIncludeOptions::m_additionalIncludePath
 
 	protected:
 	virtual void DoDataExchange( CDataExchange* pDX );

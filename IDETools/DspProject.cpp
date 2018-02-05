@@ -182,8 +182,6 @@ void DspProject::SetDspProjectFilePath( LPCTSTR dspProjectFilePath )
 {
 	clear();
 
-	ASSERT( !AfxGetApp()->GetProfileInt( _T("Settings\\DebugBreak"), _T("DspProject::SetDspProjectFilePath"), FALSE ) );
-
 	try
 	{
 		m_parserPtr = std::auto_ptr< DspParser >( new DspParser( dspProjectFilePath ) );

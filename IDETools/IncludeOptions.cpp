@@ -81,18 +81,18 @@ void CIncludeOptions::Save( void ) const
 
 const CEnumTags& CIncludeOptions::GetTags_DepthLevel( void )
 {
-	static const CEnumTags& tags( str::Load( IDC_DEPTH_LEVEL_COMBO ) );
+	static const CEnumTags tags( str::Load( IDC_DEPTH_LEVEL_COMBO ) );
 	return tags;
 }
 
 const CEnumTags& CIncludeOptions::GetTags_ViewMode( void )
 {
-	static const CEnumTags& tags( str::Load( IDC_VIEW_MODE_COMBO ) );
+	static const CEnumTags tags( str::Load( IDC_VIEW_MODE_COMBO ) );
 	return tags;
 }
 
 const CEnumTags& CIncludeOptions::GetTags_Ordering( void )
 {
-	static const CEnumTags& tags( str::Load( IDC_ORDER_COMBO ) );
+	static const CEnumTags tags( str::Load( IDC_ORDER_COMBO ) );
 	return tags;
 }

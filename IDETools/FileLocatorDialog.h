@@ -43,7 +43,7 @@ protected:
 	virtual void OnProjectActiveConfigurationChanged( void );
 public:
 	int m_tagHistoryMaxCount;
-	int m_searchInPath;
+	inc::TSearchFlags m_searchFlags;
 
 	// output properties
 	std::tstring m_selectedFilePath;

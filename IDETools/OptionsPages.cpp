@@ -1,6 +1,7 @@
 
 #include "stdafx.h"
 #include "OptionsPages.h"
+#include "IncludeDirectories.h"
 #include "ModuleSession.h"
 #include "UserInterfaceUtilities.h"
 #include "Application.h"
@@ -40,7 +41,7 @@ void CGeneralOptionsPage::DoDataExchange( CDataExchange* pDX )
 
 	DDX_Control( pDX, IDC_TEXT_TEMPLATE_FILE_EDIT, m_templateFileEdit );
 	ui::DDX_Text( pDX, IDC_USER_NAME_EDIT, m_developerName );
-	ui::DDX_Text( pDX, IDC_TEXT_TEMPLATE_FILE_EDIT, m_codeTemplateFile );
+	ui::DDX_Path( pDX, IDC_TEXT_TEMPLATE_FILE_EDIT, m_codeTemplatePath );
 	DDX_Text( pDX, IDC_MENU_VERT_SPLIT_COUNT_EDIT, m_menuVertSplitCount );
 	DDX_Control( pDX, IDC_MENU_VERT_SPLIT_COUNT_SPIN, m_menuVertSplitCountSpin );
 	ui::DDX_Text( pDX, IDC_DEFAULT_COMMENT_COLUMN_EDIT, m_singleLineCommentToken );
@@ -310,7 +311,7 @@ void CBscPathPage::DoDataExchange( CDataExchange* pDX )
 
 	if ( DialogOutput == pDX->m_bSaveAndValidate )
 	{	// load controls
-		str::Split( items, m_browseInfoPath.c_str(), EDIT_SEP );
+		str::Split( items, m_browseInfoPath.GetPtr(), EDIT_SEP );
 
 		m_pathItems.resize( items.size() );
 		for ( unsigned int i = 0; i != items.size(); ++i )
@@ -332,11 +333,12 @@ void CBscPathPage::DoDataExchange( CDataExchange* pDX )
 		}
 
 		m_folderContent.FilterItems( items );
-		m_browseInfoPath = str::Join( items, EDIT_SEP );
+		m_browseInfoPath.Set( str::Join( items, EDIT_SEP ) );
 	}
 
 	CLayoutPropertyPage::DoDataExchange( pDX );
 }
+
 
 BEGIN_MESSAGE_MAP( CBscPathPage, CLayoutPropertyPage )
 	ON_LBN_SELCHANGE( IDC_BROWSE_FILES_PATH_LIST, LBnSelChange_BrowseFilesPath )
@@ -539,11 +541,168 @@ void CBscPathPage::CDirPathItem::SetFromString( const std::tstring& itemText )
 }
 
 
+class CDirSetDialog : public CDialog
+{
+public:
+	CDirSetDialog( CWnd* pParent ) : CDialog( IDD_DIRECTORY_SET_DIALOG, pParent ) {}
+public:
+	std::tstring m_name;
+protected:
+	virtual void DoDataExchange( CDataExchange* pDX )
+	{
+		ui::DDX_Text( pDX, IDC_DIR_SET_NAME_EDIT, m_name, true );
+		CDialog::DoDataExchange( pDX );
+	}
+};
+
+namespace hlp
+{
+	void DDX_DirPath( CDataExchange* pDX, int ctrlId, CItemListEdit& rEdit, inc::CDirPathGroup& rDirPaths )
+	{
+		DDX_Control( pDX, ctrlId, rEdit );
+
+		if ( DialogOutput == pDX->m_bSaveAndValidate )
+			rEdit.SetText( rDirPaths.Join() );
+		else
+			rDirPaths.Store( rEdit.GetText().c_str() );
+	}
+}
+
+
+// CDirectoriesPage property page
+
+CDirectoriesPage::CDirectoriesPage( void )
+	: CLayoutPropertyPage( IDD_OPTIONS_DIRECTORIES_PAGE )
+	, m_pDirSets( new CIncludeDirectories( CIncludeDirectories::Instance() ) )
+{
+	m_includePathEdit.SetContentType( ui::DirPath );
+	m_sourcePathEdit.SetContentType( ui::DirPath );
+	m_libraryPathEdit.SetContentType( ui::DirPath );
+	m_binaryPathEdit.SetContentType( ui::DirPath );
+
+	m_toolbar.GetStrip()
+		.AddButton( ID_ADD_ITEM )
+		.AddButton( ID_REMOVE_ITEM )
+		.AddSeparator()
+		.AddButton( ID_RENAME_ITEM )
+		.AddSeparator()
+		.AddButton( ID_RESET_DEFAULT );
+}
+
+CDirectoriesPage::~CDirectoriesPage()
+{
+}
+
+std::tstring CDirectoriesPage::MakeNewUniqueName( void ) const
+{
+	std::tstring baseName = _T("Directory Set"), name = baseName;
+
+	for ( size_t dupCount = 2; m_pDirSets->Get().Contains( name ); ++dupCount )
+		name = baseName + str::Format( _T(" (%d)"), dupCount );
+
+	return name;
+}
+
+void CDirectoriesPage::ApplyPageChanges( void ) throws_( CRuntimeException )
+{
+	CIncludeDirectories& rDestDirSets = CIncludeDirectories::Instance();
+	rDestDirSets.Assign( *m_pDirSets );
+	rDestDirSets.Save();
+}
+
+void CDirectoriesPage::DoDataExchange( CDataExchange* pDX )
+{
+	DDX_Control( pDX, IDC_DIR_SETS_COMBO, m_dirSetsCombo );
+	m_toolbar.DDX_Placeholder( pDX, IDC_TOOLBAR_PLACEHOLDER, H_AlignLeft | V_AlignCenter );
+
+	if ( DialogOutput == pDX->m_bSaveAndValidate )
+	{
+		std::vector< std::tstring > setNames; setNames.reserve( m_pDirSets->Get().size() );
+		for ( utl::vector_map< std::tstring, CIncludePaths* > ::const_iterator itPathSet = m_pDirSets->Get().begin(); itPathSet != m_pDirSets->Get().end(); ++itPathSet )
+			setNames.push_back( itPathSet->first );
+
+		ui::WriteComboItems( m_dirSetsCombo, setNames );
+		m_dirSetsCombo.SetCurSel( m_pDirSets->GetCurrentPos() );
+	}
+	else
+		m_pDirSets->SetCurrentPos( m_dirSetsCombo.GetCurSel() );
+
+	CIncludePaths* pIncludePaths = m_pDirSets->RefCurrentPaths();
+
+	hlp::DDX_DirPath( pDX, IDC_INCLUDE_PATH_EDIT, m_includePathEdit, pIncludePaths->m_standard );
+	hlp::DDX_DirPath( pDX, IDC_SOURCE_PATH_EDIT, m_sourcePathEdit, pIncludePaths->m_source );
+	hlp::DDX_DirPath( pDX, IDC_LIBRARY_PATH_EDIT, m_libraryPathEdit, pIncludePaths->m_library );
+	hlp::DDX_DirPath( pDX, IDC_BINARY_PATH_EDIT, m_binaryPathEdit, pIncludePaths->m_binary );
+
+	CLayoutPropertyPage::DoDataExchange( pDX );
+}
+
+
+BEGIN_MESSAGE_MAP( CDirectoriesPage, CLayoutPropertyPage )
+	ON_CBN_SELCHANGE( IDC_DIR_SETS_COMBO, CBnSelChange_DirSets )
+	ON_COMMAND( ID_ADD_ITEM, OnAddDirSet )
+	ON_COMMAND( ID_REMOVE_ITEM, OnRemoveDirSet )
+	ON_COMMAND( ID_RENAME_ITEM, OnRenameDirSet )
+	ON_COMMAND( ID_RESET_DEFAULT, OnResetDefault )
+END_MESSAGE_MAP()
+
+void CDirectoriesPage::CBnSelChange_DirSets( void )
+{
+	m_pDirSets->SetCurrentPos( m_dirSetsCombo.GetCurSel() );
+	SetModified( true );
+	UpdateData( DialogOutput );
+}
+
+void CDirectoriesPage::OnAddDirSet( void )
+{
+	CDirSetDialog dlg( this );
+	dlg.m_name = MakeNewUniqueName();
+
+	if ( IDOK == dlg.DoModal() )
+		if ( !dlg.m_name.empty() && !m_pDirSets->Get().Contains( dlg.m_name ) )
+		{
+			m_pDirSets->Add( dlg.m_name );
+			UpdateData( DialogOutput );
+		}
+		else
+			AfxMessageBox( _T("Invalid directory set name!\n\nIt must me non-empty and unique."), MB_ICONERROR );
+}
+
+void CDirectoriesPage::OnRemoveDirSet( void )
+{
+	m_pDirSets->RemoveCurrent();
+	UpdateData( DialogOutput );
+}
+
+void CDirectoriesPage::OnRenameDirSet( void )
+{
+	CDirSetDialog dlg( this );
+	dlg.m_name = m_pDirSets->GetCurrentName();
+
+	if ( IDOK == dlg.DoModal() )
+		if ( !dlg.m_name.empty() && !m_pDirSets->Get().Contains( dlg.m_name ) )
+		{
+			m_pDirSets->RenameCurrent( dlg.m_name );
+			UpdateData( DialogOutput );
+		}
+		else if ( dlg.m_name != m_pDirSets->GetCurrentName() )
+			AfxMessageBox( _T("Invalid directory set name!\n\nIt must me non-empty and unique."), MB_ICONERROR );
+}
+
+void CDirectoriesPage::OnResetDefault( void )
+{
+	if ( IDYES == AfxMessageBox( _T("Are you sure you want to delete all working sets and initialize to the default one?"), MB_YESNO | MB_ICONQUESTION ) )
+	{
+		m_pDirSets->Reset();
+		UpdateData( DialogOutput );
+	}
+}
+
+
 // COptionsSheet implementation
 
 COptionsSheet::COptionsSheet( CWnd* pParent )
 	: CLayoutPropertySheet( str::Load( IDS_OPTIONS_PROPERTY_SHEET_CAPTION ), pParent )
-	, m_savedActivePage( false )
 {
 	m_regSection = _T("OptionsSheet");
 	m_resizable = false;
@@ -555,8 +714,35 @@ COptionsSheet::COptionsSheet( CWnd* pParent )
 	AddPage( &m_formattingPage );
 	AddPage( &m_cppImplFormattingPage );
 	AddPage( &m_bscPathPage );
+	AddPage( &m_directoriesPage );
 }
 
 COptionsSheet::~COptionsSheet()
 {
+}
+
+BOOL COptionsSheet::OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo )
+{
+	if ( CLayoutPropertySheet::OnCmdMsg( id, code, pExtra, pHandlerInfo ) )
+		return TRUE;
+
+	if ( CWinThread* pCurrThread = AfxGetThread() )								// dialog may be hosted by a process with different architecture (e.g. Explorer.exe)
+		return pCurrThread->OnCmdMsg( id, code, pExtra, pHandlerInfo );			// some commands may handled by the CWinApp, e.g. ID_RUN_TESTS
+
+	return FALSE;
+}
+
+
+// message handlers
+
+BEGIN_MESSAGE_MAP( COptionsSheet, CLayoutPropertySheet )
+	ON_WM_CONTEXTMENU()
+END_MESSAGE_MAP()
+
+void COptionsSheet::OnContextMenu( CWnd* pWnd, CPoint screenPos )
+{
+	if ( this == pWnd )
+		app::TrackUnitTestMenu( this, screenPos );
+	else
+		CLayoutPropertySheet::OnContextMenu( pWnd, screenPos );
 }

@@ -8,15 +8,20 @@
 #endif
 
 
+namespace reg
+{
+	const TCHAR entry_Include[] = _T("Include");
+	const TCHAR entry_Source[] = _T("Source");
+	const TCHAR entry_Library[] = _T("Library");
+	const TCHAR entry_Binary[] = _T("Binary");
+}
+
+
 CIncludePaths::CIncludePaths( void )
 	: m_standard( inc::StandardPath )
 	, m_source( inc::SourcePath )
 	, m_library( inc::LibraryPath )
 	, m_binary( inc::BinaryPath )
-{
-}
-
-CIncludePaths::~CIncludePaths()
 {
 }
 
@@ -36,6 +41,22 @@ const inc::CDirPathGroup& CIncludePaths::Get_PATH( void )
 {
 	static const inc::CDirPathGroup include( _T("PATH"), inc::BinaryPath );
 	return include;
+}
+
+void CIncludePaths::Load( const TCHAR section[] )
+{
+	m_standard.Load( section, reg::entry_Include );
+	m_source.Load( section, reg::entry_Source );
+	m_library.Load( section, reg::entry_Library );
+	m_binary.Load( section, reg::entry_Binary );
+}
+
+void CIncludePaths::Save( const TCHAR section[] ) const
+{
+	m_standard.Save( section, reg::entry_Include );
+	m_source.Save( section, reg::entry_Source );
+	m_library.Save( section, reg::entry_Library );
+	m_binary.Save( section, reg::entry_Binary );
 }
 
 void CIncludePaths::InitFromIde( void )

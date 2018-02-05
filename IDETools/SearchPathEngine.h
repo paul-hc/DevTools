@@ -4,8 +4,9 @@
 
 #include "utl/Path.h"
 #include "IncludePaths.h"
-#include "IncludeNode.h"
-#include "SearchPathEngine_fwd.h"
+
+
+class CIncludeTag;
 
 
 namespace inc
@@ -31,19 +32,16 @@ namespace inc
 	class CSearchPathEngine
 	{
 	public:
-		CSearchPathEngine( const fs::CPath& localDirPath, int searchInPath = sp::AllIncludePaths ) : m_localDirPath( localDirPath ), m_searchInPath( searchInPath ) {}
+		CSearchPathEngine( const fs::CPath& localDirPath, TSearchFlags searchFlags = Mask_AllIncludePaths ) : m_localDirPath( localDirPath ), m_searchFlags( searchFlags ) {}
 
 		void QueryIncludeFiles( CFoundPaths& rResults, const CIncludeTag& includeTag ) const;
 		TPathLocPair FindFirstIncludeFile( const CIncludeTag& includeTag ) const;
 	private:
+		fs::CPath MakeDirPath( const fs::CPath& srcDirPath ) const;
 		void SearchIncludePaths( CFoundPaths& rResults, const CIncludeTag& includeTag ) const;
-
-		typedef std::pair< const CDirPathGroup*, sp::SearchInPath > DirSearchPair;
-
-		static const std::vector< DirSearchPair >& GetSearchSpecs( void );
 	private:
 		fs::CPath m_localDirPath;
-		int m_searchInPath;
+		inc::TSearchFlags m_searchFlags;
 	};
 }
 

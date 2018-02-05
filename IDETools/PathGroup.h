@@ -71,6 +71,25 @@ namespace inc
 	private:
 		const inc::Location m_location;
 	};
+
+
+	enum SearchFlag
+	{
+		Flag_StandardPath	= 1 << StandardPath,		// standard INCLUDE path <...>
+		Flag_LocalPath		= 1 << LocalPath,			// local path "..."
+		Flag_AdditionalPath	= 1 << AdditionalPath,		// additional include path
+
+		Flag_SourcePath		= 1 << SourcePath,			// standard SOURCE path
+		Flag_LibraryPath	= 1 << LibraryPath,			// standard LIBRARY path
+		Flag_BinaryPath		= 1 << BinaryPath,			// standard BINARY path
+
+			Mask_AllIncludePaths	= Flag_StandardPath | Flag_LocalPath | Flag_AdditionalPath,
+			Mask_AllPaths			= Mask_AllIncludePaths | Flag_SourcePath | Flag_LibraryPath | Flag_BinaryPath
+	};
+
+	typedef int TSearchFlags;
+
+	typedef std::pair< const CDirPathGroup*, SearchFlag > TDirSearchPair;
 }
 
 

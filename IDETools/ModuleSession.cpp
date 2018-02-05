@@ -3,6 +3,7 @@
 #include "ModuleSession.h"
 #include "IdeUtilities.h"
 #include "OptionsPages.h"
+#include "Application.h"
 #include "resource.h"
 #include "utl/Path.h"
 #include "utl/Registry.h"
@@ -16,7 +17,6 @@
 namespace reg
 {
 	const TCHAR section_settings[] = _T("Settings");
-	const TCHAR entry_debugBreak[] = _T("DebugBreak");
 	const TCHAR entry_developerName[] = _T("Developer name");
 	const TCHAR entry_codeTemplateFile[] = _T("Code template file");
 	const TCHAR entry_splitMaxColumn[] = _T("Split max column");
@@ -43,7 +43,7 @@ IMPLEMENT_DYNCREATE( CModuleSession, CCmdTarget )
 
 CModuleSession::CModuleSession( void )
 	: CCmdTarget()
-	, m_codeTemplateFile( CModuleSession::GetVStudioMacrosDirPath() + _T("StdCodeTemplates.ctf") )
+	, m_codeTemplatePath( GetDefaultCodeTemplatePath() )
 	, m_splitMaxColumn( 140 )
 	, m_menuVertSplitCount( 40 )
 	, m_singleLineCommentToken( _T("#") )
@@ -63,39 +63,25 @@ CModuleSession::CModuleSession( void )
 	if ( m_developerName.empty() )
 		m_developerName = _T("<YourName>");
 
-	std::tstring mfcSrcFolderPath = CModuleSession::GetVStudioVC98DirPath();
-
-	if ( !mfcSrcFolderPath.empty() )
-		m_browseInfoPath = mfcSrcFolderPath + _T("MFC\\SRC\\*.bsc|MFC");
+	fs::CPath mfcSrcFolderPath = ide::vs6::GetVC98DirPath();
+	if ( !mfcSrcFolderPath.IsEmpty() )
+		m_browseInfoPath = mfcSrcFolderPath / fs::CPath( _T("MFC\\SRC\\*.bsc|MFC") );
 }
 
 CModuleSession::~CModuleSession()
 {
 }
 
-DebugBreakType CModuleSession::GetDebugBreakType( void )
+fs::CPath CModuleSession::GetDefaultCodeTemplatePath( void )
 {
-	return (DebugBreakType)AfxGetApp()->GetProfileInt( reg::section_settings, reg::entry_debugBreak, NoBreak );
-}
+	static const std::tstring nameExt = _T("StdCodeTemplates.ctf");
 
-void CModuleSession::StoreDebugBreakType( DebugBreakType debugBreakType )
-{
-	AfxGetApp()->WriteProfileInt( reg::section_settings, reg::entry_debugBreak, debugBreakType );
-}
+	fs::CPath codeTemplatePath = app::GetDefaultConfigDirPath() / nameExt;
 
-bool CModuleSession::IsDebugBreakEnabled( void )
-{
-	switch ( GetDebugBreakType() )
-	{
-		case NoBreak:
-			return false;
-		case Break:
-			return true;
-		default:
-			ASSERT( false );
-		case PromptBreak:
-			return IDYES == AfxMessageBox( IDS_PROMPT_DEBUG_BREAK, MB_YESNO | MB_ICONQUESTION );
-	}
+	if ( !codeTemplatePath.FileExist() )
+		codeTemplatePath = ide::vs6::GetMacrosDirPath() / nameExt;
+
+	return codeTemplatePath;
 }
 
 void CModuleSession::LoadFromRegistry( void )
@@ -103,7 +89,7 @@ void CModuleSession::LoadFromRegistry( void )
 	CWinApp* pApp = AfxGetApp();
 
 	m_developerName = pApp->GetProfileString( reg::section_settings, reg::entry_developerName, m_developerName.c_str() );
-	m_codeTemplateFile = pApp->GetProfileString( reg::section_settings, reg::entry_codeTemplateFile, m_codeTemplateFile.c_str() );
+	m_codeTemplatePath.Set( pApp->GetProfileString( reg::section_settings, reg::entry_codeTemplateFile, m_codeTemplatePath.GetPtr() ).GetString() );
 	m_splitMaxColumn = pApp->GetProfileInt( reg::section_settings, reg::entry_splitMaxColumn, m_splitMaxColumn );
 	m_menuVertSplitCount = pApp->GetProfileInt( reg::section_settings, reg::entry_menuVertSplitCount, m_menuVertSplitCount );
 	m_menuVertSplitCount = __max( m_menuVertSplitCount, 1 );
@@ -114,7 +100,7 @@ void CModuleSession::LoadFromRegistry( void )
 	m_useCommentDecoration = pApp->GetProfileInt( reg::section_settings, reg::entry_useCommentDecoration, m_useCommentDecoration ) != FALSE;
 	m_duplicateLineMoveDown = pApp->GetProfileInt( reg::section_settings, reg::entry_duplicateLineMoveDown, m_duplicateLineMoveDown ) != FALSE;
 
-	m_browseInfoPath = pApp->GetProfileString( reg::section_settings, reg::entry_browseInfoPath, m_browseInfoPath.c_str() );
+	m_browseInfoPath.Set( pApp->GetProfileString( reg::section_settings, reg::entry_browseInfoPath, m_browseInfoPath.GetPtr() ).GetString() );
 
 	m_classPrefix = pApp->GetProfileString( reg::section_settings_prefixes, reg::entry_classPrefix, m_classPrefix.c_str() );
 	m_structPrefix = pApp->GetProfileString( reg::section_settings_prefixes, reg::entry_structPrefix, m_structPrefix.c_str() );
@@ -139,7 +125,7 @@ void CModuleSession::SaveToRegistry( void ) const
 	CWinApp* pApp = AfxGetApp();
 
 	pApp->WriteProfileString( reg::section_settings, reg::entry_developerName, m_developerName.c_str() );
-	pApp->WriteProfileString( reg::section_settings, reg::entry_codeTemplateFile, m_codeTemplateFile.c_str() );
+	pApp->WriteProfileString( reg::section_settings, reg::entry_codeTemplateFile, m_codeTemplatePath.GetPtr() );
 	pApp->WriteProfileInt( reg::section_settings, reg::entry_splitMaxColumn, m_splitMaxColumn );
 	pApp->WriteProfileInt( reg::section_settings, reg::entry_menuVertSplitCount, m_menuVertSplitCount );
 	pApp->WriteProfileString( reg::section_settings, reg::entry_singleLineCommentToken, m_singleLineCommentToken.c_str() );
@@ -150,10 +136,10 @@ void CModuleSession::SaveToRegistry( void ) const
 	pApp->WriteProfileInt( reg::section_settings, reg::entry_duplicateLineMoveDown, m_duplicateLineMoveDown );
 
 	// save it only when modified (options dialog)
-//	if ( m_codeFormatterOptionsPtr.get() != NULL )
-//		m_codeFormatterOptionsPtr->SaveToRegistry();
+//	if ( m_pCodeFormatterOptions.get() != NULL )
+//		m_pCodeFormatterOptions->SaveToRegistry();
 
-	pApp->WriteProfileString( reg::section_settings, reg::entry_browseInfoPath, m_browseInfoPath.c_str() );
+	pApp->WriteProfileString( reg::section_settings, reg::entry_browseInfoPath, m_browseInfoPath.GetPtr() );
 
 	pApp->WriteProfileString( reg::section_settings_prefixes, reg::entry_classPrefix, m_classPrefix.c_str() );
 	pApp->WriteProfileString( reg::section_settings_prefixes, reg::entry_structPrefix, m_structPrefix.c_str() );
@@ -164,112 +150,74 @@ void CModuleSession::SaveToRegistry( void ) const
 
 code::CFormatterOptions& CModuleSession::GetCodeFormatterOptions( void )
 {
-	if ( m_codeFormatterOptionsPtr.get() == NULL )
+	if ( NULL == m_pCodeFormatterOptions.get() )
 	{	// lazy creation/registry loading
-		m_codeFormatterOptionsPtr = std::auto_ptr< code::CFormatterOptions >( new code::CFormatterOptions );
-		m_codeFormatterOptionsPtr->LoadFromRegistry();
+		m_pCodeFormatterOptions.reset( new code::CFormatterOptions );
+		m_pCodeFormatterOptions->LoadFromRegistry();
 	}
 
-	return *m_codeFormatterOptionsPtr;
+	return *m_pCodeFormatterOptions;
 }
 
 bool CModuleSession::EditOptions( void )
 {
-	COptionsSheet optionsSheet( ide::getRootWindow() );
+	COptionsSheet sheet( ide::getRootWindow() );
 
-	optionsSheet.m_generalPage.m_developerName = m_developerName.c_str();
-	optionsSheet.m_generalPage.m_codeTemplateFile = m_codeTemplateFile.c_str();
-	optionsSheet.m_generalPage.m_menuVertSplitCount = m_menuVertSplitCount;
-	optionsSheet.m_generalPage.m_singleLineCommentToken = m_singleLineCommentToken.c_str();
+	sheet.m_generalPage.m_developerName = m_developerName;
+	sheet.m_generalPage.m_codeTemplatePath = m_codeTemplatePath;
+	sheet.m_generalPage.m_menuVertSplitCount = m_menuVertSplitCount;
+	sheet.m_generalPage.m_singleLineCommentToken = m_singleLineCommentToken;
 
-	optionsSheet.m_generalPage.m_autoCodeGeneration = m_autoCodeGeneration;
-	optionsSheet.m_generalPage.m_displayErrorMessages = m_displayErrorMessages;
-	optionsSheet.m_generalPage.m_useCommentDecoration = m_useCommentDecoration;
-	optionsSheet.m_generalPage.m_duplicateLineMoveDown = m_duplicateLineMoveDown;
+	sheet.m_generalPage.m_autoCodeGeneration = m_autoCodeGeneration;
+	sheet.m_generalPage.m_displayErrorMessages = m_displayErrorMessages;
+	sheet.m_generalPage.m_useCommentDecoration = m_useCommentDecoration;
+	sheet.m_generalPage.m_duplicateLineMoveDown = m_duplicateLineMoveDown;
 
-	optionsSheet.m_generalPage.m_classPrefix = m_classPrefix.c_str();
-	optionsSheet.m_generalPage.m_structPrefix = m_structPrefix.c_str();
-	optionsSheet.m_generalPage.m_enumPrefix = m_enumPrefix.c_str();
+	sheet.m_generalPage.m_classPrefix = m_classPrefix.c_str();
+	sheet.m_generalPage.m_structPrefix = m_structPrefix.c_str();
+	sheet.m_generalPage.m_enumPrefix = m_enumPrefix.c_str();
 
-	optionsSheet.m_formattingPage.m_splitMaxColumn = m_splitMaxColumn;
+	sheet.m_formattingPage.m_splitMaxColumn = m_splitMaxColumn;
 
-	optionsSheet.m_bscPathPage.m_browseInfoPath = m_browseInfoPath.c_str();
+	sheet.m_bscPathPage.m_browseInfoPath = m_browseInfoPath;
 
-	if ( optionsSheet.DoModal() != IDOK )
+	if ( sheet.DoModal() != IDOK )
 		return FALSE;
 
-	m_developerName = optionsSheet.m_generalPage.m_developerName;
-	m_codeTemplateFile = optionsSheet.m_generalPage.m_codeTemplateFile;
-	m_menuVertSplitCount = optionsSheet.m_generalPage.m_menuVertSplitCount;
-	m_singleLineCommentToken = optionsSheet.m_generalPage.m_singleLineCommentToken;
+	m_developerName = sheet.m_generalPage.m_developerName;
+	m_codeTemplatePath = sheet.m_generalPage.m_codeTemplatePath;
+	m_menuVertSplitCount = sheet.m_generalPage.m_menuVertSplitCount;
+	m_singleLineCommentToken = sheet.m_generalPage.m_singleLineCommentToken;
 
-	m_autoCodeGeneration = optionsSheet.m_generalPage.m_autoCodeGeneration;
-	m_displayErrorMessages = optionsSheet.m_generalPage.m_displayErrorMessages;
-	m_useCommentDecoration = optionsSheet.m_generalPage.m_useCommentDecoration;
-	m_duplicateLineMoveDown = optionsSheet.m_generalPage.m_duplicateLineMoveDown;
+	m_autoCodeGeneration = sheet.m_generalPage.m_autoCodeGeneration;
+	m_displayErrorMessages = sheet.m_generalPage.m_displayErrorMessages;
+	m_useCommentDecoration = sheet.m_generalPage.m_useCommentDecoration;
+	m_duplicateLineMoveDown = sheet.m_generalPage.m_duplicateLineMoveDown;
 
-	m_classPrefix = optionsSheet.m_generalPage.m_classPrefix;
-	m_structPrefix = optionsSheet.m_generalPage.m_structPrefix;
-	m_enumPrefix = optionsSheet.m_generalPage.m_enumPrefix;
+	m_classPrefix = sheet.m_generalPage.m_classPrefix;
+	m_structPrefix = sheet.m_generalPage.m_structPrefix;
+	m_enumPrefix = sheet.m_generalPage.m_enumPrefix;
 
 	code::CFormatterOptions& formattingOptions = GetCodeFormatterOptions();
 
-	formattingOptions.m_preserveMultipleWhiteSpace = optionsSheet.m_formattingPage.m_preserveMultipleWhiteSpace;
-	formattingOptions.m_deleteTrailingWhiteSpace = optionsSheet.m_formattingPage.m_deleteTrailingWhiteSpace;
-	formattingOptions.m_breakSeparators = optionsSheet.m_formattingPage.m_breakSeparators;
-	formattingOptions.m_braceRules = optionsSheet.m_formattingPage.m_braceRules;
-	formattingOptions.m_operatorRules = optionsSheet.m_formattingPage.m_operatorRules;
-	m_splitMaxColumn = optionsSheet.m_formattingPage.m_splitMaxColumn;
+	formattingOptions.m_preserveMultipleWhiteSpace = sheet.m_formattingPage.m_preserveMultipleWhiteSpace;
+	formattingOptions.m_deleteTrailingWhiteSpace = sheet.m_formattingPage.m_deleteTrailingWhiteSpace;
+	formattingOptions.m_breakSeparators = sheet.m_formattingPage.m_breakSeparators;
+	formattingOptions.m_braceRules = sheet.m_formattingPage.m_braceRules;
+	formattingOptions.m_operatorRules = sheet.m_formattingPage.m_operatorRules;
+	m_splitMaxColumn = sheet.m_formattingPage.m_splitMaxColumn;
 
-	formattingOptions.m_returnTypeOnSeparateLine = optionsSheet.m_cppImplFormattingPage.m_returnTypeOnSeparateLine;
-	formattingOptions.m_commentOutDefaultParams = optionsSheet.m_cppImplFormattingPage.m_commentOutDefaultParams;
-	formattingOptions.m_linesBetweenFunctionImpls = optionsSheet.m_cppImplFormattingPage.m_linesBetweenFunctionImpls;
+	formattingOptions.m_returnTypeOnSeparateLine = sheet.m_cppImplFormattingPage.m_returnTypeOnSeparateLine;
+	formattingOptions.m_commentOutDefaultParams = sheet.m_cppImplFormattingPage.m_commentOutDefaultParams;
+	formattingOptions.m_linesBetweenFunctionImpls = sheet.m_cppImplFormattingPage.m_linesBetweenFunctionImpls;
 
-	m_browseInfoPath = optionsSheet.m_bscPathPage.m_browseInfoPath;
+	m_browseInfoPath = sheet.m_bscPathPage.m_browseInfoPath;
 
 	// save right away
 	SaveToRegistry();
 	GetCodeFormatterOptions().SaveToRegistry();
 
 	return TRUE;
-}
-
-std::tstring CModuleSession::GetVStudioCommonDirPath( bool trailSlash /*= true*/ )
-{
-	reg::CKey key( HKEY_LOCAL_MACHINE, _T("SOFTWARE\\Microsoft\\VisualStudio\\6.0\\Setup") );
-	std::tstring vStudioCommonDirPath;
-
-	if ( key.IsValid() )
-	{
-		vStudioCommonDirPath = key.ReadString( _T("VsCommonDir") );
-		path::SetBackslash( vStudioCommonDirPath, trailSlash );
-	}
-	return vStudioCommonDirPath;
-}
-
-std::tstring CModuleSession::GetVStudioMacrosDirPath( bool trailSlash /*= true*/ )
-{
-	std::tstring vStudioMacrosDir( GetVStudioCommonDirPath() );
-	if ( !vStudioMacrosDir.empty() )
-	{
-		vStudioMacrosDir += _T("MSDev98\\Macros");
-		path::SetBackslash( vStudioMacrosDir, trailSlash );
-	}
-	return vStudioMacrosDir;
-}
-
-std::tstring CModuleSession::GetVStudioVC98DirPath( bool trailSlash /*= true*/ )
-{
-	reg::CKey key( HKEY_LOCAL_MACHINE, _T("SOFTWARE\\Microsoft\\VisualStudio\\6.0\\Setup\\Microsoft Visual C++") );
-	//reg::CKey key( HKEY_LOCAL_MACHINE, _T("SOFTWARE\\Microsoft\\DevStudio\\6.0\\Products\\Microsoft Visual C++") );
-	std::tstring vStudioVC98DirPath;
-
-	if ( key.IsValid() )
-	{
-		vStudioVC98DirPath = key.ReadString( _T("ProductDir") );
-		path::SetBackslash( vStudioVC98DirPath, trailSlash );
-	}
-	return vStudioVC98DirPath;
 }
 
 

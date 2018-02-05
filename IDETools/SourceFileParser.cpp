@@ -148,17 +148,17 @@ bool CSourceFileParser::ParseIncludeStatement( CIncludeTag* pIncludeTag, const s
 CIncludeNode* CSourceFileParser::AddIncludeFile( const CIncludeTag& includeTag, int lineNo )
 {
 	// returns the full path for the file specified by includeTag if file successfully located (empty string if not)
-	int searchInPath = sp::AllIncludePaths;
+	inc::TSearchFlags searchFlags = inc::Mask_AllIncludePaths;
 
 	switch ( includeTag.GetFileType() )
 	{
 		case ft::TLB:
 		case ft::DLL:
-			searchInPath = sp::BinaryPath;		// search for type libraries only in binary path
+			searchFlags = inc::Flag_BinaryPath;		// search for type libraries only in binary path
 			break;
 	}
 
-	inc::CSearchPathEngine searchEngine( m_localDirPath, searchInPath );
+	inc::CSearchPathEngine searchEngine( m_localDirPath, searchFlags );
 	inc::TPathLocPair foundFile = searchEngine.FindFirstIncludeFile( includeTag );
 	if ( foundFile.first.IsEmpty() )
 	{

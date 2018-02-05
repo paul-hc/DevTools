@@ -89,7 +89,6 @@ IMPLEMENT_OLECREATE(FileAccess, "IDETools.FileAccess", 0x1556fb25, 0x22db, 0x11d
 
 BOOL FileAccess::FileExist( LPCTSTR fullPath )
 {
-CHECK_DEBUG_BREAK;
 	return fs::IsValidFile( fullPath );
 }
 
@@ -136,8 +135,6 @@ BOOL FileAccess::SetReadOnlyFile( LPCTSTR fullPath, BOOL readOnly )
 
 BOOL FileAccess::Execute( LPCTSTR fullPath )
 {
-CHECK_DEBUG_BREAK;
-
 	HINSTANCE hInstExec = (HINSTANCE)(UINT_PTR)WinExec( str::ToUtf8( fullPath ).c_str(), SW_SHOWNORMAL );
 
 	if ( (UINT_PTR)hInstExec >= HINSTANCE_ERROR )
@@ -148,8 +145,6 @@ CHECK_DEBUG_BREAK;
 
 BOOL FileAccess::ShellOpen( LPCTSTR docFullPath )
 {
-CHECK_DEBUG_BREAK;
-
 	HINSTANCE hInstExec = shell::Execute( docFullPath );
 
 	return (UINT_PTR)hInstExec >= HINSTANCE_ERROR;
@@ -157,15 +152,11 @@ CHECK_DEBUG_BREAK;
 
 BOOL FileAccess::ExploreAndSelectFile( LPCTSTR fileFullPath )
 {
-CHECK_DEBUG_BREAK;
-
 	return shell::ExploreAndSelectFile( fileFullPath );
 }
 
 BSTR FileAccess::GetNextAssocDoc( LPCTSTR docFullPath, BOOL forward )
 {
-CHECK_DEBUG_BREAK;
-
 	CFileAssoc fileAssoc( docFullPath );
 	CString nextDocFullPath;
 
@@ -176,8 +167,6 @@ CHECK_DEBUG_BREAK;
 
 BSTR FileAccess::GetNextVariationDoc( LPCTSTR docFullPath, BOOL forward )
 {
-CHECK_DEBUG_BREAK;
-
 	CFileAssoc fileAssoc( docFullPath );
 	CString nextDocFullPath;
 
@@ -188,8 +177,6 @@ CHECK_DEBUG_BREAK;
 
 BSTR FileAccess::GetComplementaryDoc( LPCTSTR docFullPath )
 {
-CHECK_DEBUG_BREAK;
-
 	CFileAssoc fileAssoc( docFullPath );
 	CString complDocFullPath;
 
@@ -220,8 +207,6 @@ BOOL FileAccess::OutputWndActivateTab( LPCTSTR tabCaption )
 
 BSTR FileAccess::GetIDECurrentBrowseFile( void )
 {
-CHECK_DEBUG_BREAK;
-
 	std::pair< HMENU, int > foundPopup = ide::findPopupMenuWithCommand( ide::getRootWindow()->GetSafeHwnd(), CM_IDE_CLOSEBROWSEFILE );
 
 	if ( foundPopup.first == NULL )
@@ -254,8 +239,6 @@ CHECK_DEBUG_BREAK;
 
 BOOL FileAccess::UpdateIDECurrentBrowseFile( BOOL doItNow )
 {
-CHECK_DEBUG_BREAK;
-
 	if ( app::GetModuleSession().m_vsUseStandardWindowsMenu )
 	{	// This feature is supported only for Visual C++ using "screen reader compatible menus".
 		HWND hWndIde = ide::getRootWindow()->GetSafeHwnd();
