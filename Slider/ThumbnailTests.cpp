@@ -3,8 +3,8 @@
 #include "ThumbnailTests.h"
 #include "Application.h"
 #include "utl/StructuredStorage.h"
-#include "utl/TestToolWnd.h"
 #include "utl/Thumbnailer.h"
+#include "utl/ut/TestToolWnd.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

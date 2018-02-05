@@ -8,7 +8,8 @@
 
 namespace lcs
 {
-	// use suffix trees to find the Longest Common Duplicate (LCD)
+	// Use a suffix array to find the Longest Common Duplicate (LCD).
+	// The sorted suffix array is iterated as a balanced suffix tree using Compare.
 
 	template< typename CharType, typename Compare = pred::CompareCase >
 	class CSuffixTree

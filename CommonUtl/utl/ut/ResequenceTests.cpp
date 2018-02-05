@@ -1,6 +1,6 @@
 
 #include "stdafx.h"
-#include "ResequenceTests.h"
+#include "ut/ResequenceTests.h"
 #include "Resequence.hxx"
 #include "StringUtilities.h"
 

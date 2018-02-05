@@ -1,6 +1,6 @@
 
 #include "stdafx.h"
-#include "PathGeneratorTests.h"
+#include "ut/PathGeneratorTests.h"
 #include "PathGenerator.h"
 #include "resource.h"
 #include "Path.h"

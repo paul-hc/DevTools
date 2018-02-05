@@ -18,7 +18,7 @@
 #include "utl/UtilitiesEx.h"
 #include "utl/Thumbnailer.h"
 #include "utl/WicImageCache.h"
-#include "utl/WicImageTests.h"
+#include "utl/ut/WicImageTests.h"
 #include <io.h>
 
 #ifdef _DEBUG

@@ -7,6 +7,7 @@
 #include "utl/ContainerUtilities.h"
 #include "utl/FlagTags.h"
 #include "utl/RuntimeException.h"
+#include "utl/StringUtilities.h"
 #include <iostream>
 #include <algorithm>
 

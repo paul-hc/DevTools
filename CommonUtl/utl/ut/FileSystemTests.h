@@ -5,7 +5,7 @@
 
 #ifdef _DEBUG		// no UT code in release builds
 
-#include "UnitTest.h"
+#include "ut/UnitTest.h"
 
 
 class CFileSystemTests : public ut::CConsoleTestCase
@@ -17,11 +17,6 @@ public:
 	// ut::ITestCase interface
 	virtual void Run( void );
 private:
-	void TestPathUtilities( void );
-	void TestPathCompareFind( void );
-	void TestPathWildcardMatch( void );
-	void TestComplexPath( void );
-	void TestFlexPath( void );
 	void TestFileSystem( void );
 	void TestFileEnum( void );
 	void TestStgShortFilenames( void );

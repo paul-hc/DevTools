@@ -5,7 +5,7 @@
 
 #ifdef _DEBUG		// no UT code in release builds
 
-#include "utl/BaseImageTestCase.h"
+#include "utl/ut/BaseImageTestCase.h"
 
 
 namespace ut { class CTestDevice; }

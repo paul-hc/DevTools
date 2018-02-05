@@ -1,6 +1,6 @@
 
 #include "stdafx.h"
-#include "StringTests.h"
+#include "ut/StringTests.h"
 #include "EnumTags.h"
 #include "FlagTags.h"
 #include "StringUtilities.h"
@@ -218,6 +218,26 @@ void CStringTests::TestStringPart( void )
 
 	items.push_back( "Red Hat Linux" );
 	ASSERT( AllContain( items, str::CPart< char >( "LIQUID", 2 ), pred::CompareNoCase() ) );
+}
+
+void CStringTests::TestStringOccurenceCount( void )
+{
+	ASSERT_EQUAL( 0, str::GetCountOf< str::Case >( "abcde", "" ) );
+	ASSERT_EQUAL( 0, str::GetCountOf< str::Case >( "abcde", " " ) );
+	ASSERT_EQUAL( 1, str::GetCountOf< str::Case >( "abcde", "a" ) );
+	ASSERT_EQUAL( 1, str::GetCountOf< str::Case >( "abcdeABC", "a" ) );
+	ASSERT_EQUAL( 2, str::GetCountOf< str::IgnoreCase >( "abcdeABC", "a" ) );
+	ASSERT_EQUAL( 2, str::GetCountOf< str::IgnoreCase >( _T("abcdeABC"), _T("a") ) );
+
+	ASSERT_EQUAL( 0, str::GetPartCount( "abc", str::MakePart( "" ) ) );
+	ASSERT_EQUAL( 1, str::GetPartCount( _T("abc"), str::MakePart( _T("b") ) ) );
+	ASSERT_EQUAL( 1, str::GetPartCount( _T("abcA"), str::MakePart( _T("a") ) ) );
+
+	static const TCHAR* sepArray[] = { _T(";"), _T("|"), _T("\r\n"), _T("\n") };
+	ASSERT_EQUAL_STR( _T(";"), *std::max_element( sepArray, sepArray + COUNT_OF( sepArray ), pred::LessPartCount< TCHAR >( _T("ABC") ) ) );
+	ASSERT_EQUAL_STR( _T("\n"), *std::max_element( sepArray, sepArray + COUNT_OF( sepArray ), pred::LessPartCount< TCHAR >( _T("A\nB\nC") ) ) );
+	ASSERT_EQUAL_STR( _T("\r\n"), *std::max_element( sepArray, sepArray + COUNT_OF( sepArray ), pred::LessPartCount< TCHAR >( _T("A\r\nB\r\nC") ) ) );
+	ASSERT_EQUAL_STR( _T(";"), *std::max_element( sepArray, sepArray + COUNT_OF( sepArray ), pred::LessPartCount< TCHAR >( _T("A|B;C|D;E;F") ) ) );
 }
 
 void CStringTests::TestArgUtilities( void )
@@ -494,6 +514,7 @@ void CStringTests::Run( void )
 	TestStringSearch();
 	TestStringMatch();
 	TestStringPart();
+	TestStringOccurenceCount();
 	TestArgUtilities();
 	TestEnumTags();
 	TestFlagTags();

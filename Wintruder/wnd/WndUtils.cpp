@@ -4,7 +4,7 @@
 #include "WindowClass.h"
 #include "WindowInfoStore.h"
 #include "utl/BaseApp.h"
-#include "utl/Process.h"
+#include "utl/Process_.h"
 #include "utl/StringUtilities.h"
 
 #ifdef _DEBUG

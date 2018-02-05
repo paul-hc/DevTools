@@ -9,7 +9,7 @@
 #include "resource.h"
 #include <afxcontrolbars.h>			// MFC support for ribbons and control bars
 
-#include "UtlConsoleTests.h"
+#include "ut/UtlConsoleTests.h"
 
 
 // CBaseApp template code

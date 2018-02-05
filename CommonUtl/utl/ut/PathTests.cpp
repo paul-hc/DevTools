@@ -1,6 +1,6 @@
 
 #include "stdafx.h"
-#include "FileSystemTests.h"
+#include "ut/PathTests.h"
 #include "Path.h"
 #include "FlexPath.h"
 #include "Resequence.hxx"
@@ -24,18 +24,18 @@ namespace str
 }
 
 
-CFileSystemTests::CFileSystemTests( void )
+CPathTests::CPathTests( void )
 {
 	ut::CTestSuite::Instance().RegisterTestCase( this );		// self-registration
 }
 
-CFileSystemTests& CFileSystemTests::Instance( void )
+CPathTests& CPathTests::Instance( void )
 {
-	static CFileSystemTests testCase;
+	static CPathTests testCase;
 	return testCase;
 }
 
-void CFileSystemTests::TestPathUtilities( void )
+void CPathTests::TestPathUtilities( void )
 {
 	// "\", , "\\server\share", or "\\server\"; paths such as "..\path2"
 	ASSERT( path::IsRoot( _T("\\") ) );
@@ -115,6 +115,10 @@ void CFileSystemTests::TestPathUtilities( void )
 	}
 
 	{
+		// (!) path::GetDirPath is the main interface for GET PARENT PATH
+		//	TODO:
+		//		remove path::GetParentDirPath()
+		//		rename path::GetDirPath to path::GetParentPath
 		ASSERT_EQUAL( _T("X:\\Dir\\Sub\\"), path::GetDirPath( _T("X:\\Dir\\Sub\\name.ext"), path::PreserveSlash ) );
 		ASSERT_EQUAL( _T("X:\\"), path::GetDirPath( _T("X:\\name.ext"), path::PreserveSlash ) );
 		ASSERT_EQUAL( _T("/"), path::GetDirPath( _T("/name.ext"), path::PreserveSlash ) );
@@ -125,7 +129,10 @@ void CFileSystemTests::TestPathUtilities( void )
 
 		ASSERT_EQUAL( _T(""), path::GetDirPath( _T("name.ext"), path::AddSlash ) );
 
+
 		ASSERT_EQUAL( _T("X:\\Dir"), path::GetParentDirPath( _T("X:\\Dir\\Sub\\name.ext"), path::RemoveSlash ) );
+		ASSERT_EQUAL( _T("X:\\Dir"), path::GetParentDirPath( _T("X:\\Dir\\Sub\\"), path::RemoveSlash ) );
+		ASSERT_EQUAL( _T("X:\\Dir\\"), path::GetParentDirPath( _T("X:\\Dir\\Sub\\"), path::PreserveSlash ) );
 		ASSERT_EQUAL( _T("X:\\"), path::GetParentDirPath( _T("X:\\Dir\\name.ext"), path::RemoveSlash ) );
 		ASSERT_EQUAL( _T("\\"), path::GetParentDirPath( _T("\\Dir\\name.ext"), path::RemoveSlash ) );
 		ASSERT_EQUAL( _T(""), path::GetParentDirPath( _T("name.ext"), path::RemoveSlash ) );
@@ -200,7 +207,7 @@ void CFileSystemTests::TestPathUtilities( void )
 	}
 }
 
-void CFileSystemTests::TestPathCompareFind( void )
+void CPathTests::TestPathCompareFind( void )
 {
 	{
 		ASSERT( path::EquivalentPtr( _T("X:\\DIR\\SUB\\NAME.EXT"), _T("x:/dir/sub/name.ext") ) );
@@ -227,7 +234,7 @@ void CFileSystemTests::TestPathCompareFind( void )
 	}
 }
 
-void CFileSystemTests::TestPathWildcardMatch( void )
+void CPathTests::TestPathWildcardMatch( void )
 {
 	ASSERT( path::MatchWildcard( _T("a"), _T("*") ) );
 	ASSERT( path::MatchWildcard( _T("a"), _T("*.*") ) );
@@ -278,7 +285,7 @@ void CFileSystemTests::TestPathWildcardMatch( void )
 	ASSERT( path::MatchWildcard( _T("image.JPEG"), _T("*.doc;*.jp*") ) );
 }
 
-void CFileSystemTests::TestComplexPath( void )
+void CPathTests::TestComplexPath( void )
 {
 	ASSERT( !path::IsComplex( _T("C:\\Images\\Fruit/apple.jpg") ) );
 	ASSERT( path::IsComplex( _T("C:\\Images\\fruit.stg>apple.jpg") ) );
@@ -316,7 +323,7 @@ void CFileSystemTests::TestComplexPath( void )
 	ASSERT_EQUAL( _T(""), embeddedPath );
 }
 
-void CFileSystemTests::TestFlexPath( void )
+void CPathTests::TestFlexPath( void )
 {
 	// complex path
 	{
@@ -402,93 +409,7 @@ void CFileSystemTests::TestFlexPath( void )
 	}
 }
 
-void CFileSystemTests::TestFileSystem( void )
-{
-	std::tstring tempDirPath = fs::GetTempDirPath();
-	ASSERT( fs::IsValidDirectory( tempDirPath.c_str() ) );
-	ASSERT( !fs::IsValidFile( tempDirPath.c_str() ) );
-
-	path::SetBackslash( tempDirPath, path::RemoveSlash );
-	ASSERT( fs::IsValidDirectory( tempDirPath.c_str() ) );
-
-	path::SetBackslash( tempDirPath, path::AddSlash );
-	ASSERT( fs::IsValidDirectory( tempDirPath.c_str() ) );
-}
-
-void CFileSystemTests::TestFileEnum( void )
-{
-	ut::CTempFilePairPool pool( _T("a|a.doc|a.txt|d1\\b|d1\\b.doc|d1\\b.txt|d1\\d2\\c|d1/d2/c.doc|d1\\d2\\c.txt") );
-	const TCHAR* pTempDirPath = pool.GetTempDirPath().c_str();
-
-	{
-		fs::CEnumerator found( pTempDirPath );
-		fs::EnumFiles( &found, pTempDirPath, _T("*.*"), Shallow );
-		ASSERT_EQUAL( _T("a|a.doc|a.txt"), ut::JoinFiles( found ) );
-	}
-	{
-		fs::CEnumerator found( pTempDirPath );
-		fs::EnumFiles( &found, pTempDirPath, _T("*.*"), Deep );
-		ASSERT_EQUAL( _T("a|a.doc|a.txt|d1\\b|d1\\b.doc|d1\\b.txt|d1\\d2\\c|d1\\d2\\c.doc|d1\\d2\\c.txt"), ut::JoinFiles( found ) );
-	}
-	{
-		fs::CEnumerator found( pTempDirPath );
-		fs::EnumFiles( &found, pTempDirPath, _T("*."), Deep );
-		ASSERT_EQUAL( _T("a|d1\\b|d1\\d2\\c"), ut::JoinFiles( found ) );
-	}
-	{
-		fs::CEnumerator found( pTempDirPath );
-		fs::EnumFiles( &found, pTempDirPath, _T("*.doc"), Deep );
-		ASSERT_EQUAL( _T("a.doc|d1\\b.doc|d1\\d2\\c.doc"), ut::JoinFiles( found ) );
-	}
-	{
-		fs::CEnumerator found( pTempDirPath );
-		fs::EnumFiles( &found, pTempDirPath, _T("*.doc;*.txt"), Deep );
-		ASSERT_EQUAL( _T("a.doc|a.txt|d1\\b.doc|d1\\b.txt|d1\\d2\\c.doc|d1\\d2\\c.txt"), ut::JoinFiles( found ) );
-		ASSERT_EQUAL( _T("d1|d1\\d2"), ut::JoinSubDirs( found ) );
-	}
-	{
-		fs::CEnumerator found( pTempDirPath );
-		fs::EnumFiles( &found, pTempDirPath, _T("*.?oc;*.t?t"), Deep );
-		ASSERT_EQUAL( _T("a.doc|a.txt|d1\\b.doc|d1\\b.txt|d1\\d2\\c.doc|d1\\d2\\c.txt"), ut::JoinFiles( found ) );
-	}
-	{
-		fs::CEnumerator found( pTempDirPath );
-		fs::EnumFiles( &found, pTempDirPath, _T("*.exe;*.bat"), Deep );
-		ASSERT_EQUAL( _T(""), ut::JoinFiles( found ) );
-	}
-}
-
-void CFileSystemTests::TestStgShortFilenames( void )
-{
-	ASSERT_EQUAL( _T(""), fs::CStructuredStorage::MakeShortFilename( _T("") ) );
-	ASSERT_EQUAL( _T("Not a long filename"), fs::CStructuredStorage::MakeShortFilename( _T("Not a long filename") ) );				// 19 chars
-	ASSERT_EQUAL( _T("Not a long filename ABCDEFG.txt"), fs::CStructuredStorage::MakeShortFilename( _T("Not a long filename ABCDEFG.txt") ) );		// 31 chars
-	ASSERT_EQUAL( _T("Documents\\Business\\Payroll\\Not a long filename.txt"), fs::CStructuredStorage::MakeShortFilename( _T("Documents\\Business\\Payroll\\Not a long filename.txt") ) );		// 23 chars
-
-	// fs::CStructuredStorage::MaxFilenameLen overflow
-	ASSERT_EQUAL( _T("This is a long fil_A7A42533.txt"), fs::CStructuredStorage::MakeShortFilename( _T("This is a long filename ABCD.txt") ) );		// 32 chars
-	ASSERT_EQUAL( _T("ThisIsASuperLongFi_3B36D197.jpg"), fs::CStructuredStorage::MakeShortFilename( _T("ThisIsASuperLongFilenameOfAnUnknownImageFileThatKeepsGoing.jpg") ) );	// 62 chars
-	ASSERT_EQUAL( _T("thisisasuperlongfi_3B36D197.JPG"), fs::CStructuredStorage::MakeShortFilename( _T("thisisasuperlongfilenameofanunknownimagefilethatkeepsgoing.JPG") ) );	// 62 chars
-
-	// sub-paths
-	ASSERT( fs::CStructuredStorage::MakeShortFilename( _T("my\\docs\\This is a long filename ABCDxy.txt") ) != fs::CStructuredStorage::MakeShortFilename( _T("This is a long filename ABCDxy.txt") ) );	// 34 chars
-}
-
-void CFileSystemTests::TestTempFilePool( void )
-{
-	{
-		ut::CTempFilePairPool pool( _T("a.txt|b.txt|c.txt") );
-		pool.CopySrc();
-		ASSERT_EQUAL( _T("a.txt|b.txt|c.txt"), pool.JoinDest() );
-	}
-	{
-		ut::CTempFilePairPool pool( _T("a.txt|d1\\b.txt|d1\\d2\\c.txt") );
-		pool.CopySrc();
-		ASSERT_EQUAL( _T("a.txt|b.txt|c.txt"), pool.JoinDest() );
-	}
-}
-
-void CFileSystemTests::Run( void )
+void CPathTests::Run( void )
 {
 	__super::Run();
 
@@ -497,10 +418,6 @@ void CFileSystemTests::Run( void )
 	TestPathWildcardMatch();
 	TestComplexPath();
 	TestFlexPath();
-	TestFileSystem();
-	TestFileEnum();
-	TestStgShortFilenames();
-	TestTempFilePool();
 }
 
 

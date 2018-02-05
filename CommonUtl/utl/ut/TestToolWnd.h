@@ -4,8 +4,8 @@
 
 #ifdef _DEBUG		// no UT code in release builds
 
-#include "ui_fwd.h"
-#include "WindowTimer.h"
+#include "utl/ui_fwd.h"
+#include "utl/WindowTimer.h"
 
 
 interface IWICBitmapSource;

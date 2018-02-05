@@ -5,7 +5,7 @@
 
 #ifdef _DEBUG		// no UT code in release builds
 
-#include "UnitTest.h"
+#include "ut/UnitTest.h"
 
 
 class CStringTests : public ut::CConsoleTestCase
@@ -24,6 +24,7 @@ private:
 	void TestStringSearch( void );
 	void TestStringMatch( void );
 	void TestStringPart( void );
+	void TestStringOccurenceCount( void );
 	void TestArgUtilities( void );
 	void TestEnumTags( void );
 	void TestFlagTags( void );

@@ -1,10 +1,10 @@
 
 #include "stdafx.h"
-#include "WicImageTests.h"
+#include "ut/WicImageTests.h"
+#include "ut/TestToolWnd.h"
 #include "WicImage.h"
 #include "WicImageCache.h"
-#include "utl/TestToolWnd.h"
-#include "utl/CacheLoader.hxx"		// WaitPendingQueue()
+#include "CacheLoader.hxx"		// WaitPendingQueue()
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

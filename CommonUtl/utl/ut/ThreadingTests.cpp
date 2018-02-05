@@ -1,6 +1,6 @@
 
 #include "stdafx.h"
-#include "ThreadingTests.h"
+#include "ut/ThreadingTests.h"
 #include "MfcUtilities.h"
 #include <boost/thread.hpp>
 

@@ -6,7 +6,7 @@
 #include "resource.h"
 #include "utl/CmdInfoStore.h"
 #include "utl/MenuUtilities.h"
-#include "utl/Process.h"
+#include "utl/Process_.h"
 #include "wnd/WndUtils.h"
 
 #ifdef _DEBUG

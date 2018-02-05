@@ -4,8 +4,8 @@
 #include "utl/ImagingWic.h"
 #include "utl/ImagingDirect2D.h"
 #include "utl/Utilities.h"
-#include "utl/TestToolWnd.h"
 #include "utl/WindowTimer.h"
+#include "utl/ut/TestToolWnd.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

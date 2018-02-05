@@ -1,6 +1,6 @@
 
 #include "stdafx.h"
-#include "LcsTests.h"
+#include "ut/LcsTests.h"
 #include "LongestCommonSubsequence.h"
 #include "LongestCommonDuplicate.h"
 #include "RandomUtilities.h"
@@ -127,6 +127,10 @@ namespace ut
 CLcsTests::CLcsTests( void )
 {
 	ut::CTestSuite::Instance().RegisterTestCase( this );		// self-registration
+}
+
+CLcsTests::~CLcsTests()
+{
 }
 
 CLcsTests& CLcsTests::Instance( void )

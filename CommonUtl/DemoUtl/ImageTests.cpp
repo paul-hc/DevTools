@@ -8,9 +8,9 @@
 #include "utl/GroupIcon.h"
 #include "utl/Icon.h"
 #include "utl/ImageStore.h"
-#include "utl/TestToolWnd.h"
 #include "utl/Utilities.h"
 #include "utl/resource.h"
+#include "utl/ut/TestToolWnd.h"
 #include <sstream>
 
 #ifdef _DEBUG

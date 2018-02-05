@@ -5,8 +5,8 @@
 
 #ifdef _DEBUG		// no UT code in release builds
 
-#include "FlexPath.h"
-#include "UnitTest.h"
+#include "utl/FlexPath.h"
+#include "ut/UnitTest.h"
 
 
 class CBaseImageTestCase : public ut::CGraphicTestCase

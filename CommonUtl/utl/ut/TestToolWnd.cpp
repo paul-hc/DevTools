@@ -1,6 +1,7 @@
 
 #include "stdafx.h"
-#include "TestToolWnd.h"
+#include "ut/TestToolWnd.h"
+#include "ut/UnitTest.h"
 #include "GpUtilities.h"
 #include "Image_fwd.h"
 #include "ImagingDirect2D.h"
@@ -8,7 +9,6 @@
 #include "WicDibSection.h"
 #include "ScopedGdi.h"
 #include "UtilitiesEx.h"
-#include "UnitTest.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

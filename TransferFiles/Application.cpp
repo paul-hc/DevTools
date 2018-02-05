@@ -7,7 +7,7 @@
 #include "FileTransfer.h"
 #include "InputOutput.h"
 #include "TestCase.h"
-#include "utl/UnitTest.h"
+#include "utl/ut/UnitTest.h"
 #include <iostream>
 
 #ifdef _DEBUG

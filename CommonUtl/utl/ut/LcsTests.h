@@ -5,12 +5,13 @@
 
 #ifdef _DEBUG		// no UT code in release builds
 
-#include "UnitTest.h"
+#include "ut/UnitTest.h"
 
 
 class CLcsTests : public ut::CConsoleTestCase
 {
 	CLcsTests( void );
+	~CLcsTests();
 public:
 	static CLcsTests& Instance( void );
 

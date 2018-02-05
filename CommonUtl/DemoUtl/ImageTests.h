@@ -5,7 +5,7 @@
 
 #ifdef _DEBUG		// no UT code in release builds
 
-#include "utl/UnitTest.h"
+#include "utl/ut/UnitTest.h"
 
 
 class CImageTests : public ut::CGraphicTestCase

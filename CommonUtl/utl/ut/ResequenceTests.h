@@ -5,7 +5,7 @@
 
 #ifdef _DEBUG		// no UT code in release builds
 
-#include "UnitTest.h"
+#include "ut/UnitTest.h"
 
 
 class CResequenceTests : public ut::CConsoleTestCase
