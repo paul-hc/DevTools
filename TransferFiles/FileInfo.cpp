@@ -67,5 +67,5 @@ bool CFileInfo::Exist( void ) const
 
 bool CFileInfo::DirPathExist( void ) const
 {
-	return fs::IsValidDirectory( m_fullPath.GetDirPath().c_str() );
+	return fs::IsValidDirectory( m_fullPath.GetParentPath().GetPtr() );
 }

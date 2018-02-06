@@ -97,11 +97,11 @@ BOOL CMoveFileDialog::OnInitDialog( void )
 		filesToMoveText = m_filesToMove.front().Get();
 	else
 	{
-		fs::CPath refDirPath( m_filesToMove.front().GetDirPath() );
+		fs::CPath refDirPath = m_filesToMove.front().GetParentPath();
 
 		for ( std::vector< fs::CPath >::const_iterator itSrc = m_filesToMove.begin(); itSrc != m_filesToMove.end(); ++itSrc )
 		{
-			fs::CPath dirPath( itSrc->GetDirPath() );
+			fs::CPath dirPath = itSrc->GetParentPath();
 
 			if ( !filesToMoveText.empty() )
 				filesToMoveText += _T("; ");

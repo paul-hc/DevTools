@@ -90,10 +90,10 @@ UINT CPathGenerator::FindNextAvailSeqCount( void ) const
 	if ( m_formatter.m_isNumericFormat && !m_pRenamePairs->empty() )
 	{
 		// sweep existing files (source + outside) that match current format for the lowest seq count that is not used
-		std::tstring dirPath = m_pRenamePairs->begin()->first.GetDirPath();			// use first source file dir path
+		fs::CPath dirPath = m_pRenamePairs->begin()->first.GetParentPath();			// use first source file dir path
 
 		std::vector< std::tstring > existingFilePaths;
-		fs::EnumFiles( existingFilePaths, dirPath.c_str() );
+		fs::EnumFiles( existingFilePaths, dirPath.GetPtr() );
 
 		for ( std::vector< std::tstring >::const_iterator itFilePath = existingFilePaths.begin(); itFilePath != existingFilePaths.end(); ++itFilePath )
 		{

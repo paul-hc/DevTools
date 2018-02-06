@@ -183,7 +183,7 @@ bool CArchiveImagesContext::GenerateDestPaths( const fs::CPath& destPath, const 
 
 	switch ( destType )
 	{
-		case ToDirectory:	generator.SetMoveDestDirPath( destPath.GetDirPath( true ) ); break;
+		case ToDirectory:	generator.SetMoveDestDirPath( destPath.GetParentPath( true ).Get() ); break;
 		case ToArchiveStg:	generator.SetMoveDestDirPath( std::tstring() ); break;					// flat embedded streams use no dir path
 		default: ASSERT( false );
 	}

@@ -90,8 +90,7 @@ namespace path
 	std::tstring& SetBackslash( std::tstring& rDirPath, TrailSlash trailSlash = AddSlash );
 	inline std::tstring& SetBackslash( std::tstring& rDirPath, bool set ) { return SetBackslash( rDirPath, set ? AddSlash : RemoveSlash ); }
 
-	std::tstring GetDirPath( const TCHAR* pPath, TrailSlash trailSlash = PreserveSlash );
-	std::tstring GetParentDirPath( const TCHAR* pPath, TrailSlash trailSlash = PreserveSlash );
+	std::tstring GetParentPath( const TCHAR* pPath, TrailSlash trailSlash = PreserveSlash );
 
 
 	std::tstring MakeNormal( const TCHAR* pPath );							// backslashes only
@@ -175,17 +174,16 @@ namespace fs
 		const TCHAR* GetPtr( void ) const { return m_filePath.c_str(); }
 		void Set( const std::tstring& filePath );
 
+		CPath GetParentPath( bool trailSlash = false ) const;		// always a directory path
+		CPath& SetBackslash( bool trailSlash = true );
+
 		const TCHAR* GetNameExt( void ) const { return path::FindFilename( m_filePath.c_str() ); }
 		void SetNameExt( const std::tstring& nameExt );
 
-		std::tstring GetDirPath( bool trailSlash = false ) const;
 		void SetDirPath( const std::tstring& dirPath );
 
 		void Normalize( void ) { path::Normalize( m_filePath ); }
 		void Canonicalize( void ) { path::Canonicalize( m_filePath ); }
-
-		CPath GetParentPath( bool trailSlash = false ) const;		// always a directory path
-		CPath& SetBackslash( bool trailSlash = true );
 
 		CPath operator/( const CPath& right ) const { return CPath( path::Combine( GetPtr(), right.GetPtr() ) ); }
 		CPath& operator/=( const CPath& right );

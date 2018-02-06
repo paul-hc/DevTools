@@ -115,27 +115,20 @@ void CPathTests::TestPathUtilities( void )
 	}
 
 	{
-		// (!) path::GetDirPath is the main interface for GET PARENT PATH
-		//	TODO:
-		//		remove path::GetParentDirPath()
-		//		rename path::GetDirPath to path::GetParentPath
-		ASSERT_EQUAL( _T("X:\\Dir\\Sub\\"), path::GetDirPath( _T("X:\\Dir\\Sub\\name.ext"), path::PreserveSlash ) );
-		ASSERT_EQUAL( _T("X:\\"), path::GetDirPath( _T("X:\\name.ext"), path::PreserveSlash ) );
-		ASSERT_EQUAL( _T("/"), path::GetDirPath( _T("/name.ext"), path::PreserveSlash ) );
+		ASSERT_EQUAL( _T("X:\\Dir\\Sub\\"), path::GetParentPath( _T("X:\\Dir\\Sub\\name.ext"), path::PreserveSlash ) );
+		ASSERT_EQUAL( _T("X:\\Dir\\"), path::GetParentPath( _T("X:\\Dir\\Sub\\"), path::PreserveSlash ) );
+		ASSERT_EQUAL( _T("X:\\Dir/"), path::GetParentPath( _T("X:\\Dir/Sub/"), path::PreserveSlash ) );
+		ASSERT_EQUAL( _T("X:\\Dir/"), path::GetParentPath( _T("X:\\Dir/Sub\\"), path::PreserveSlash ) );
+		ASSERT_EQUAL( _T("X:\\Dir"), path::GetParentPath( _T("X:\\Dir\\Sub\\"), path::RemoveSlash ) );
+		ASSERT_EQUAL( _T("X:\\"), path::GetParentPath( _T("X:\\name.ext"), path::PreserveSlash ) );
+		ASSERT_EQUAL( _T("/"), path::GetParentPath( _T("/name.ext"), path::PreserveSlash ) );
+		ASSERT_EQUAL( _T(""), path::GetParentPath( _T("name.ext"), path::PreserveSlash ) );
 
-		ASSERT_EQUAL( _T("X:\\Dir\\Sub"), path::GetDirPath( _T("X:\\Dir\\Sub\\name.ext"), path::RemoveSlash ) );
-		ASSERT_EQUAL( _T("X:\\"), path::GetDirPath( _T("X:\\name.ext"), path::RemoveSlash ) );
-		ASSERT_EQUAL( _T("/"), path::GetDirPath( _T("/name.ext"), path::RemoveSlash ) );
+		ASSERT_EQUAL( _T("X:\\Dir\\Sub"), path::GetParentPath( _T("X:\\Dir\\Sub\\name.ext"), path::RemoveSlash ) );
+		ASSERT_EQUAL( _T("X:\\"), path::GetParentPath( _T("X:\\name.ext"), path::RemoveSlash ) );
+		ASSERT_EQUAL( _T("/"), path::GetParentPath( _T("/name.ext"), path::RemoveSlash ) );
 
-		ASSERT_EQUAL( _T(""), path::GetDirPath( _T("name.ext"), path::AddSlash ) );
-
-
-		ASSERT_EQUAL( _T("X:\\Dir"), path::GetParentDirPath( _T("X:\\Dir\\Sub\\name.ext"), path::RemoveSlash ) );
-		ASSERT_EQUAL( _T("X:\\Dir"), path::GetParentDirPath( _T("X:\\Dir\\Sub\\"), path::RemoveSlash ) );
-		ASSERT_EQUAL( _T("X:\\Dir\\"), path::GetParentDirPath( _T("X:\\Dir\\Sub\\"), path::PreserveSlash ) );
-		ASSERT_EQUAL( _T("X:\\"), path::GetParentDirPath( _T("X:\\Dir\\name.ext"), path::RemoveSlash ) );
-		ASSERT_EQUAL( _T("\\"), path::GetParentDirPath( _T("\\Dir\\name.ext"), path::RemoveSlash ) );
-		ASSERT_EQUAL( _T(""), path::GetParentDirPath( _T("name.ext"), path::RemoveSlash ) );
+		ASSERT_EQUAL( _T(""), path::GetParentPath( _T("name.ext"), path::AddSlash ) );
 	}
 	{
 		const fs::CPathParts parts( _T("X:\\Dir\\Sub/name.ext") );
@@ -161,8 +154,8 @@ void CPathTests::TestPathUtilities( void )
 	}
 	{
 		const fs::CPath path( _T("X:\\Dir\\Sub/name.ext") );
-		ASSERT_EQUAL( _T("X:\\Dir\\Sub"), path.GetDirPath() );
-		ASSERT_EQUAL( _T("X:\\Dir\\Sub/"), path.GetDirPath( true ) );
+		ASSERT_EQUAL( _T("X:\\Dir\\Sub"), path.GetParentPath() );
+		ASSERT_EQUAL( _T("X:\\Dir\\Sub/"), path.GetParentPath( true ) );
 
 		ASSERT_EQUAL_STR( _T("name.ext"), path.GetNameExt() );
 	}
@@ -348,6 +341,9 @@ void CPathTests::TestFlexPath( void )
 		ASSERT_EQUAL_STR( _T("Europe\\apple.jpg"), path.GetEmbeddedPath() );
 		ASSERT_EQUAL( _T("C:\\Images\\fruit.stg"), path.GetParentPath() );
 		ASSERT_EQUAL_STR( _T("apple.jpg"), path.GetNameExt() );
+
+		ASSERT_EQUAL_STR( _T("Europe\\apple.jpg"), path.GetLeafSubPath() );
+		ASSERT_EQUAL( _T("C:\\Images\\fruit.stg"), path.GetOriginParentPath() );
 
 		std::tstring physicalPath, embeddedPath;
 		ASSERT( path.SplitComplexPath( physicalPath, embeddedPath ) );

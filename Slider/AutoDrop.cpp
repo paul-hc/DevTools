@@ -43,7 +43,7 @@ namespace auto_drop
 		bool imageWasMovedOrg = m_imageWasMoved;
 
 		if ( !m_imageWasMoved )
-			if ( path::EquivalentPtr( path::GetDirPath( m_srcFullPath.c_str() ).c_str(), destDirPath.c_str() ) )
+			if ( path::EquivalentPtr( path::GetParentPath( m_srcFullPath.c_str() ).c_str(), destDirPath.c_str() ) )
 				m_imageWasMoved = true;			// COPY operation specified -> change to MOVE since source and dest dirs are the same
 
 		ASSERT( !path::EquivalentPtr( m_srcFullPath.c_str(), GetDestFullPath( destDirPath ).c_str() ) );
@@ -157,7 +157,7 @@ namespace auto_drop
 			bool allSameSrcDestDir = true;
 
 			for ( std::vector< std::tstring >::const_iterator itDrop = m_droppedSrcFiles.begin(); allSameSrcDestDir && itDrop != m_droppedSrcFiles.end(); ++itDrop )
-				allSameSrcDestDir = m_destSearchSpec.m_searchPath == path::GetDirPath( itDrop->c_str() );
+				allSameSrcDestDir = m_destSearchSpec.m_searchPath == path::GetParentPath( itDrop->c_str() );
 
 			if ( allSameSrcDestDir )
 				m_dropOperation = FileMove;		// automatically set the MOVE operation

@@ -254,7 +254,7 @@ void CXferOptions::PostProcessArguments( void ) throws_( CRuntimeException )
 	else
 	{
 		m_searchSpecs = path::FindFilename( m_sourceDirPath.c_str() );
-		m_sourceDirPath = path::GetDirPath( m_sourceDirPath.c_str(), path::AddSlash );
+		m_sourceDirPath = path::GetParentPath( m_sourceDirPath.c_str(), path::AddSlash );
 	}
 	if ( m_searchSpecs.empty() )
 		m_searchSpecs = _T("*.*");

@@ -293,7 +293,7 @@ namespace path
 		return rDirPath;
 	}
 
-	std::tstring GetDirPath( const TCHAR* pPath, TrailSlash trailSlash /*= PreserveSlash*/ )
+	std::tstring GetParentPath( const TCHAR* pPath, TrailSlash trailSlash /*= PreserveSlash*/ )
 	{
 		const TCHAR* pFilename = FindFilename( pPath );
 		ASSERT_PTR( pFilename );
@@ -301,15 +301,6 @@ namespace path
 
 		SetBackslash( dirPath, trailSlash );
 		return dirPath;
-	}
-
-	std::tstring GetParentDirPath( const TCHAR* pPath, TrailSlash trailSlash /*= PreserveSlash*/ )
-	{
-		std::tstring parentDirPath;
-		std::tstring dirPath = GetDirPath( pPath, RemoveSlash );
-		if ( dirPath.empty() || IsRoot( dirPath.c_str() ) )
-			return std::tstring();
-		return GetDirPath( dirPath.c_str(), trailSlash );
 	}
 
 
@@ -574,6 +565,18 @@ namespace fs
 		str::Trim( m_filePath );
 	}
 
+	CPath CPath::GetParentPath( bool trailSlash /*= false*/ ) const
+	{
+		ASSERT( !IsEmpty() );
+		return path::GetParentPath( GetPtr(), trailSlash ? path::AddSlash : path::RemoveSlash );
+	}
+
+	CPath& CPath::SetBackslash( bool trailSlash /*= true*/ )
+	{
+		path::SetBackslash( m_filePath, trailSlash ? path::AddSlash : path::RemoveSlash );
+		return *this;
+	}
+
 	void CPath::SetNameExt( const std::tstring& nameExt )
 	{
 		CPathParts parts( m_filePath );
@@ -581,28 +584,11 @@ namespace fs
 		m_filePath = parts.MakePath();
 	}
 
-	std::tstring CPath::GetDirPath( bool trailSlash /*= false*/ ) const
-	{
-		return path::GetDirPath( m_filePath.c_str(), trailSlash ? path::AddSlash : path::RemoveSlash );
-	}
-
 	void CPath::SetDirPath( const std::tstring& dirPath )
 	{
 		CPathParts parts( m_filePath );
 		parts.SetDirPath( dirPath );
 		m_filePath = parts.MakePath();
-	}
-
-	CPath CPath::GetParentPath( bool trailSlash /*= false*/ ) const
-	{
-		ASSERT( !IsEmpty() );
-		return path::GetDirPath( GetPtr(), trailSlash ? path::AddSlash : path::RemoveSlash );
-	}
-
-	CPath& CPath::SetBackslash( bool trailSlash /*= true*/ )
-	{
-		path::SetBackslash( m_filePath, trailSlash ? path::AddSlash : path::RemoveSlash );
-		return *this;
 	}
 
 	CPath& CPath::operator/=( const CPath& right )

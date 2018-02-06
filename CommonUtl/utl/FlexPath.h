@@ -13,8 +13,11 @@ namespace path
 
 namespace fs
 {
-	// path that works uniformly with normal paths or structured storage complex paths to embedded storages and streams;
-	// complex path: "physical_path>stg_embedded_path"; example "C:\Images\fruit.stg>apple.jpg": physical_path="C:\Images\fruit.stg", stg_embedded_path="apple.jpg"
+	// Path that works uniformly with normal paths or structured storage complex paths to embedded storages and streams.
+	// Complex path: "physical_path>stg_embedded_path".
+	// Examples:
+	//	 "C:\Images\fruit.stg>apple.jpg": physical_path="C:\Images\fruit.stg", stg_embedded_path="apple.jpg"
+	//	 "C:\Images\colors.stg>Pastel\lime.jpg": physical_path="C:\Images\colors.stg", stg_embedded_path="Pastel\lime.jpg"
 
 	class CFlexPath : public CPath
 	{
@@ -29,7 +32,7 @@ namespace fs
 		const TCHAR* GetEmbeddedPath( void ) const { return path::GetEmbedded( GetPtr() ); }
 
 		const TCHAR* GetLeafSubPath( void ) const { return IsComplexPath() ? GetEmbeddedPath() : GetNameExt(); }
-		std::tstring GetParentPath( void ) const { return IsComplexPath() ? GetPhysicalPath() : GetDirPath(); }
+		fs::CPath GetOriginParentPath( void ) const { return IsComplexPath() ? GetPhysicalPath() : GetParentPath().Get(); }		// storage path or parent directory path
 
 		std::tstring FormatPretty( void ) const;		// "C:\Images\fruit.stg>StgDir/apple.jpg" <- "C:\Images/fruit.stg>StgDir\apple.jpg"
 		std::tstring FormatPrettyLeaf( void ) const;	// "StgDir/apple.jpg";  "C:\Images\orange.png" -> "orange.png" <- "C:\Images/fruit.stg>StgDir\apple.jpg"

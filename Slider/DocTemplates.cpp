@@ -205,7 +205,11 @@ namespace app
 	void CAlbumDocTemplate::AlterSaveAsPath( CString& rFilePath ) const
 	{
 		if ( fs::IsValidDirectory( rFilePath ) )				// most likely
-			rFilePath = str::traits::GetStr( path::Combine( path::GetParentDirPath( rFilePath ).c_str(), path::FindFilename( rFilePath ) ) + _T(".sld") );
+		{
+			std::tstring fnameExt = std::tstring( path::FindFilename( rFilePath ) ) + _T(".sld");
+			fs::CPath albumPath = fs::CPath( rFilePath.GetString() ).GetParentPath() / fnameExt;
+			rFilePath = albumPath.GetPtr();
+		}
 	}
 
 	void CAlbumDocTemplate::RegisterAlbumShellDirectory( bool doRegister )

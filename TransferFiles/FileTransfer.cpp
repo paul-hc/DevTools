@@ -148,7 +148,7 @@ bool CFileTransfer::CanAlterTargetFile( const CTransferItem& node )
 		std::tstring targetDirPath = node.m_targetFileInfo.m_fullPath.Get();
 
 		if ( node.m_sourceFileInfo.IsRegularFile() )
-			targetDirPath = path::GetDirPath( targetDirPath.c_str(), path::RemoveSlash );
+			targetDirPath = path::GetParentPath( targetDirPath.c_str(), path::RemoveSlash );
 
 		if ( m_failedTargetDirs.find( targetDirPath ) == m_failedTargetDirs.end() )
 		{

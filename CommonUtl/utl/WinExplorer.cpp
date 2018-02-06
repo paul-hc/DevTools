@@ -52,7 +52,7 @@ namespace shell
 
 	HBITMAP CWinExplorer::ExtractThumbnail( const fs::CPath& filePath, const CSize& boundsSize, DWORD flags /*= 0*/ ) const
 	{
-		CComPtr< IShellFolder > pDirFolder = FindShellFolder( filePath.GetDirPath().c_str() );
+		CComPtr< IShellFolder > pDirFolder = FindShellFolder( filePath.GetParentPath().GetPtr() );
 		if ( pDirFolder != NULL )
 		{
 			CComPtr< IExtractImage > pExtractImage = BindFileTo< IExtractImage >( pDirFolder, filePath.GetNameExt() );

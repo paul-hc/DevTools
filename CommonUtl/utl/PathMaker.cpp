@@ -56,7 +56,7 @@ std::tstring CPathMaker::FindSrcCommonPrefix( void ) const
 	if ( !m_pRenamePairs->empty() )
 	{
 		fs::PathPairMap::const_iterator it = m_pRenamePairs->begin();
-		commonPrefix = it->first.GetDirPath();
+		commonPrefix = it->first.GetParentPath().Get();
 
 		for ( ++it; it != m_pRenamePairs->end(); ++it )
 		{

@@ -98,7 +98,7 @@ bool CArchiveImagesDialog::SetDefaultDestPath( void )
 		return false;
 	}
 
-	std::tstring firstDirPath = m_pFileList->GetFileAttr( 0 ).GetPath().GetDirPath();
+	std::tstring firstDirPath = m_pFileList->GetFileAttr( 0 ).GetPath().GetParentPath().Get();
 	switch ( m_destType )
 	{
 		default: ASSERT( false );
@@ -134,7 +134,7 @@ void CArchiveImagesDialog::SetupFilesView( bool firstTimeInit /*= false*/ )
 			{
 				const fs::CFlexPath& srcPath = m_pFileList->GetFileAttr( i ).GetPath();
 
-				m_filesListCtrl.InsertItem( LVIF_TEXT, i, (LPTSTR)srcPath.GetParentPath().c_str(), 0, 0, 0, 0 );
+				m_filesListCtrl.InsertItem( LVIF_TEXT, i, (LPTSTR)srcPath.GetOriginParentPath().GetPtr(), 0, 0, 0, 0 );
 				m_filesListCtrl.SetSubItemText( i, SrcFilename, srcPath.GetNameExt() );
 				m_filesListCtrl.SetSubItemText( i, DestFilename, _T("") );		// clear the dest fname-ext field
 			}

@@ -14,7 +14,7 @@
 CSourceFileParser::CSourceFileParser( const fs::CPath& rootFilePath )
 	: m_rootFilePath( path::MakeCanonical( rootFilePath.GetPtr() ) )
 	, m_fileType( ft::FindFileType( m_rootFilePath.GetPtr() ) )
-	, m_localDirPath( m_rootFilePath.GetDirPath( false ) )
+	, m_localDirPath( m_rootFilePath.GetParentPath( false ) )
 {
 	AddSourceFile( m_rootFilePath );
 }

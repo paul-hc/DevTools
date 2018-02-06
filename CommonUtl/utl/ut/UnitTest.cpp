@@ -160,7 +160,7 @@ namespace ut
 		if ( fs::IsValidFile( pFilePath ) )
 			return true;
 
-		if ( !fs::CreateDirPath( fs::CPath( pFilePath ).GetDirPath().c_str() ) )
+		if ( !fs::CreateDirPath( fs::CPath( pFilePath ).GetParentPath().GetPtr() ) )
 			return false;			// error creating sub dir
 
 		std::ofstream output( str::ToUtf8( pFilePath ).c_str(), std::ios_base::out | std::ios_base::trunc );
