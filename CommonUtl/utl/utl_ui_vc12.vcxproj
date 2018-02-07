@@ -104,7 +104,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>false</SDLCheck>
-      <AdditionalIncludeDirectories>..;$(UTL_INCLUDE)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.;..;$(UTL_INCLUDE)</AdditionalIncludeDirectories>
       <DisableSpecificWarnings>4996</DisableSpecificWarnings>
     </ClCompile>
     <Link>
@@ -123,7 +123,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>false</SDLCheck>
-      <AdditionalIncludeDirectories>..;$(UTL_INCLUDE)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.;..;$(UTL_INCLUDE)</AdditionalIncludeDirectories>
       <DisableSpecificWarnings>4996</DisableSpecificWarnings>
     </ClCompile>
     <Link>
@@ -143,7 +143,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>false</SDLCheck>
-      <AdditionalIncludeDirectories>..;$(UTL_INCLUDE)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.;..;$(UTL_INCLUDE)</AdditionalIncludeDirectories>
       <DisableSpecificWarnings>4996</DisableSpecificWarnings>
     </ClCompile>
     <Link>
@@ -166,7 +166,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>false</SDLCheck>
-      <AdditionalIncludeDirectories>..;$(UTL_INCLUDE)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.;..;$(UTL_INCLUDE)</AdditionalIncludeDirectories>
       <DisableSpecificWarnings>4996</DisableSpecificWarnings>
     </ClCompile>
     <Link>
@@ -182,23 +182,27 @@
   <ItemGroup>
     <ClInclude Include="AboutBox.h" />
     <ClInclude Include="AccelTable.h" />
+    <ClInclude Include="AnimatedFrameComposer.h" />
     <ClInclude Include="BaseApp.h" />
     <ClInclude Include="BaseApp.hxx" />
     <ClInclude Include="BaseDetailHostCtrl.h" />
     <ClInclude Include="BaseDetailHostCtrl.hxx" />
-    <ClInclude Include="BaseImageTestCase.h" />
     <ClInclude Include="BaseMainDialog.h" />
     <ClInclude Include="BasePopupDialog.h" />
     <ClInclude Include="BaseSplitButton.h" />
     <ClInclude Include="BaseStatic.h" />
     <ClInclude Include="BaseToolbar.h" />
+    <ClInclude Include="BaseZoomView.h" />
     <ClInclude Include="BatchTransactions.h" />
+    <ClInclude Include="CacheLoader.h" />
+    <ClInclude Include="CacheLoader.hxx" />
     <ClInclude Include="Clipboard.h" />
     <ClInclude Include="CmdInfoStore.h" />
     <ClInclude Include="Color.h" />
     <ClInclude Include="CommonDefs.h" />
     <ClInclude Include="CommonWinDefs.h" />
     <ClInclude Include="ComparePredicates.h" />
+    <ClInclude Include="Compare_fwd.h" />
     <ClInclude Include="ContainerUtilities.h" />
     <ClInclude Include="CtrlUiState.h" />
     <ClInclude Include="DesktopDC.h" />
@@ -207,13 +211,19 @@
     <ClInclude Include="DibDraw.h" />
     <ClInclude Include="DibPixels.h" />
     <ClInclude Include="DibSection.h" />
+    <ClInclude Include="DragListCtrl.h" />
     <ClInclude Include="EnumSplitButton.h" />
     <ClInclude Include="EnumTags.h" />
+    <ClInclude Include="FileObjectCache.h" />
+    <ClInclude Include="FileObjectCache.hxx" />
     <ClInclude Include="FileSystem.h" />
-    <ClInclude Include="FileSystemTests.h" />
+    <ClInclude Include="FilterStore.h" />
     <ClInclude Include="FlagTags.h" />
     <ClInclude Include="FlexPath.h" />
+    <ClInclude Include="GdiPlus_fwd.h" />
+    <ClInclude Include="Guards.h" />
     <ClInclude Include="ImagePathKey.h" />
+    <ClInclude Include="ImageZoomViewD2D.h" />
     <ClInclude Include="Image_fwd.h" />
     <ClInclude Include="GpUtilities.h" />
     <ClInclude Include="GroupIcon.h" />
@@ -233,6 +243,7 @@
     <ClInclude Include="ItemContentEdit.h" />
     <ClInclude Include="ItemContentHistoryCombo.h" />
     <ClInclude Include="ItemListDialog.h" />
+    <ClInclude Include="IZoomBar.h" />
     <ClInclude Include="LayoutBasePropertySheet.h" />
     <ClInclude Include="LayoutChildPropertySheet.h" />
     <ClInclude Include="LayoutDialog.h" />
@@ -243,6 +254,8 @@
     <ClInclude Include="LayoutPropertySheet.h" />
     <ClInclude Include="Logger.h" />
     <ClInclude Include="LogPalette.h" />
+    <ClInclude Include="LongestCommonDuplicate.h" />
+    <ClInclude Include="LongestCommonSubsequence.h" />
     <ClInclude Include="MemoryDC.h" />
     <ClInclude Include="MenuUtilities.h" />
     <ClInclude Include="MfcUtilities.h" />
@@ -256,21 +269,28 @@
     <ClInclude Include="Path.h" />
     <ClInclude Include="PathFormatter.h" />
     <ClInclude Include="PathGenerator.h" />
-    <ClInclude Include="PathGeneratorTests.h" />
+    <ClInclude Include="PathGroup.h" />
     <ClInclude Include="PathMaker.h" />
     <ClInclude Include="Pixel.h" />
     <ClInclude Include="PopupSplitButton.h" />
+    <ClInclude Include="PostCall.h" />
+    <ClInclude Include="Process_.h" />
+    <ClInclude Include="RandomUtilities.h" />
     <ClInclude Include="Range.h" />
     <ClInclude Include="Registry.h" />
     <ClInclude Include="ReportListControl.h" />
-    <ClInclude Include="ResequenceTests.h" />
+    <ClInclude Include="Resequence.h" />
+    <ClInclude Include="Resequence.hxx" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="ResourceData.h" />
+    <ClInclude Include="ResourcePool.h" />
     <ClInclude Include="RuntimeException.h" />
     <ClInclude Include="SampleView.h" />
     <ClInclude Include="ScopedBitmapMemDC.h" />
     <ClInclude Include="ScopedGdi.h" />
     <ClInclude Include="ScopedValue.h" />
+    <ClInclude Include="Serialization.h" />
+    <ClInclude Include="SerializeStdTypes.h" />
     <ClInclude Include="ShellDragImager.h" />
     <ClInclude Include="ShellDropTip.h" />
     <ClInclude Include="ShellFileDialog.h" />
@@ -282,36 +302,56 @@
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="StdColors.h" />
     <ClInclude Include="StdStl.h" />
+    <ClInclude Include="StreamStdTypes.h" />
     <ClInclude Include="StringBase.h" />
+    <ClInclude Include="StringCompare.h" />
+    <ClInclude Include="StringCvt.h" />
     <ClInclude Include="StringUtilities.h" />
     <ClInclude Include="StructuredStorage.h" />
     <ClInclude Include="SubjectPredicates.h" />
     <ClInclude Include="targetver.h" />
-    <ClInclude Include="TestToolWnd.h" />
     <ClInclude Include="TextEdit.h" />
     <ClInclude Include="TextEditor.h" />
     <ClInclude Include="TextFileParser.h" />
     <ClInclude Include="ThemeItem.h" />
     <ClInclude Include="ThemeStatic.h" />
     <ClInclude Include="ThrowMode.h" />
+    <ClInclude Include="Thumbnailer.h" />
+    <ClInclude Include="Thumbnailer_fwd.h" />
     <ClInclude Include="Timer.h" />
+    <ClInclude Include="TimeUtl.h" />
     <ClInclude Include="TokenIterator.h" />
     <ClInclude Include="ToolStrip.h" />
     <ClInclude Include="TooltipsHook.h" />
     <ClInclude Include="TrackStatic.h" />
     <ClInclude Include="TreeControl.h" />
     <ClInclude Include="ui_fwd.h" />
-    <ClInclude Include="UnitTest.h" />
     <ClInclude Include="UserReport.h" />
     <ClInclude Include="Utilities.h" />
     <ClInclude Include="UtilitiesEx.h" />
     <ClInclude Include="utl.h" />
-    <ClInclude Include="UtlTests.h" />
+    <ClInclude Include="ut\BaseImageTestCase.h" />
+    <ClInclude Include="ut\FileSystemTests.h" />
+    <ClInclude Include="ut\LcsTests.h" />
+    <ClInclude Include="ut\PathGeneratorTests.h" />
+    <ClInclude Include="ut\PathTests.h" />
+    <ClInclude Include="ut\ResequenceTests.h" />
+    <ClInclude Include="ut\StringTests.h" />
+    <ClInclude Include="ut\TestToolWnd.h" />
+    <ClInclude Include="ut\ThreadingTests.h" />
+    <ClInclude Include="ut\UnitTest.h" />
+    <ClInclude Include="ut\UtlConsoleTests.h" />
+    <ClInclude Include="ut\WicImageTests.h" />
+    <ClInclude Include="vector_map.h" />
     <ClInclude Include="VersionInfo.h" />
     <ClInclude Include="VisualTheme.h" />
     <ClInclude Include="VisualThemeFallback.h" />
     <ClInclude Include="vsstyle.h" />
-    <ClInclude Include="WicImageTests.h" />
+    <ClInclude Include="WicAnimatedImage.h" />
+    <ClInclude Include="WicBitmap.h" />
+    <ClInclude Include="WicDibSection.h" />
+    <ClInclude Include="WicImage.h" />
+    <ClInclude Include="WicImageCache.h" />
     <ClInclude Include="WindowHook.h" />
     <ClInclude Include="WindowTimer.h" />
     <ClInclude Include="WinExplorer.h" />
@@ -319,14 +359,15 @@
   <ItemGroup>
     <ClCompile Include="AboutBox.cpp" />
     <ClCompile Include="AccelTable.cpp" />
+    <ClCompile Include="AnimatedFrameComposer.cpp" />
     <ClCompile Include="BaseApp.cpp" />
     <ClCompile Include="BaseDetailHostCtrl.cpp" />
-    <ClCompile Include="BaseImageTestCase.cpp" />
     <ClCompile Include="BaseMainDialog.cpp" />
     <ClCompile Include="BasePopupDialog.cpp" />
     <ClCompile Include="BaseSplitButton.cpp" />
     <ClCompile Include="BaseStatic.cpp" />
     <ClCompile Include="BaseToolbar.cpp" />
+    <ClCompile Include="BaseZoomView.cpp" />
     <ClCompile Include="BatchTransactions.cpp" />
     <ClCompile Include="Clipboard.cpp" />
     <ClCompile Include="CmdInfoStore.cpp" />
@@ -337,12 +378,16 @@
     <ClCompile Include="DibDraw.cpp" />
     <ClCompile Include="DibPixels.cpp" />
     <ClCompile Include="DibSection.cpp" />
+    <ClCompile Include="DragListCtrl.cpp" />
     <ClCompile Include="EnumSplitButton.cpp" />
     <ClCompile Include="EnumTags.cpp" />
+    <ClCompile Include="FileObjectCache.cpp" />
     <ClCompile Include="FileSystem.cpp" />
-    <ClCompile Include="FileSystemTests.cpp" />
+    <ClCompile Include="FilterStore.cpp" />
     <ClCompile Include="FlagTags.cpp" />
     <ClCompile Include="FlexPath.cpp" />
+    <ClCompile Include="Guards.cpp" />
+    <ClCompile Include="ImageZoomViewD2D.cpp" />
     <ClCompile Include="Image_fwd.cpp" />
     <ClCompile Include="GroupIcon.cpp" />
     <ClCompile Include="HistoryComboBox.cpp" />
@@ -358,6 +403,7 @@
     <ClCompile Include="ItemContentEdit.cpp" />
     <ClCompile Include="ItemContentHistoryCombo.cpp" />
     <ClCompile Include="ItemListDialog.cpp" />
+    <ClCompile Include="IZoomBar.cpp" />
     <ClCompile Include="LayoutBasePropertySheet.cpp" />
     <ClCompile Include="LayoutChildPropertySheet.cpp" />
     <ClCompile Include="LayoutDialog.cpp" />
@@ -380,12 +426,13 @@
     <ClCompile Include="Path.cpp" />
     <ClCompile Include="PathFormatter.cpp" />
     <ClCompile Include="PathGenerator.cpp" />
-    <ClCompile Include="PathGeneratorTests.cpp" />
+    <ClCompile Include="PathGroup.cpp" />
     <ClCompile Include="PathMaker.cpp" />
     <ClCompile Include="PopupSplitButton.cpp" />
+    <ClCompile Include="PostCall.cpp" />
+    <ClCompile Include="Process_.cpp" />
     <ClCompile Include="Registry.cpp" />
     <ClCompile Include="ReportListControl.cpp" />
-    <ClCompile Include="ResequenceTests.cpp" />
     <ClCompile Include="ResourceData.cpp" />
     <ClCompile Include="RuntimeException.cpp" />
     <ClCompile Include="SampleView.cpp" />
@@ -403,30 +450,43 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='ReleaseU|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="StringBase.cpp" />
-    <ClCompile Include="StringIntuitiveCompare.cpp" />
+    <ClCompile Include="StringCompare.cpp" />
     <ClCompile Include="StringUtilities.cpp" />
     <ClCompile Include="StructuredStorage.cpp" />
-    <ClCompile Include="TestToolWnd.cpp" />
     <ClCompile Include="TextEdit.cpp" />
     <ClCompile Include="TextEditor.cpp" />
     <ClCompile Include="TextFileParser.cpp" />
     <ClCompile Include="ThemeItem.cpp" />
     <ClCompile Include="ThemeStatic.cpp" />
     <ClCompile Include="ThrowMode.cpp" />
+    <ClCompile Include="Thumbnailer.cpp" />
+    <ClCompile Include="TimeUtl.cpp" />
     <ClCompile Include="TokenIterator.cpp" />
     <ClCompile Include="ToolStrip.cpp" />
     <ClCompile Include="TooltipsHook.cpp" />
     <ClCompile Include="TrackStatic.cpp" />
     <ClCompile Include="TreeControl.cpp" />
-    <ClCompile Include="UnitTest.cpp" />
     <ClCompile Include="UserReport.cpp" />
     <ClCompile Include="Utilities.cpp" />
     <ClCompile Include="UtilitiesEx.cpp" />
-    <ClCompile Include="UtlTests.cpp" />
+    <ClCompile Include="ut\BaseImageTestCase.cpp" />
+    <ClCompile Include="ut\FileSystemTests.cpp" />
+    <ClCompile Include="ut\LcsTests.cpp" />
+    <ClCompile Include="ut\PathGeneratorTests.cpp" />
+    <ClCompile Include="ut\PathTests.cpp" />
+    <ClCompile Include="ut\ResequenceTests.cpp" />
+    <ClCompile Include="ut\StringTests.cpp" />
+    <ClCompile Include="ut\TestToolWnd.cpp" />
+    <ClCompile Include="ut\ThreadingTests.cpp" />
+    <ClCompile Include="ut\UnitTest.cpp" />
+    <ClCompile Include="ut\WicImageTests.cpp" />
     <ClCompile Include="VersionInfo.cpp" />
     <ClCompile Include="VisualTheme.cpp" />
     <ClCompile Include="VisualThemeFallback.cpp" />
-    <ClCompile Include="WicImageTests.cpp" />
+    <ClCompile Include="WicAnimatedImage.cpp" />
+    <ClCompile Include="WicDibSection.cpp" />
+    <ClCompile Include="WicImage.cpp" />
+    <ClCompile Include="WicImageCache.cpp" />
     <ClCompile Include="WindowHook.cpp" />
     <ClCompile Include="WindowTimer.cpp" />
     <ClCompile Include="WinExplorer.cpp" />

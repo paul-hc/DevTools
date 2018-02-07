@@ -3,36 +3,39 @@
 #pragma once
 
 
-class CHandle : private utl::noncopyable
+namespace utl
 {
-public:
-	CHandle( HANDLE handle = NULL ) : m_handle( handle ) {}
-	~CHandle() { Close(); }
-
-	HANDLE Get( void ) const { return m_handle; }
-	HANDLE* GetPtr( void ) { return &m_handle; }
-
-	void Reset( HANDLE handle )
+	class CHandle : private utl::noncopyable
 	{
-		Close();
-		m_handle = handle;
-	}
+	public:
+		CHandle( HANDLE handle = NULL ) : m_handle( handle ) {}
+		~CHandle() { Close(); }
 
-	HANDLE Release( void )
-	{
-		HANDLE handle = m_handle;
-		m_handle = NULL;
-		return handle;
-	}
+		HANDLE Get( void ) const { return m_handle; }
+		HANDLE* GetPtr( void ) { return &m_handle; }
 
-	void Close( void )
-	{
-		if ( m_handle != NULL )
-			::CloseHandle( m_handle );
-	}
-private:
-	HANDLE m_handle;
-};
+		void Reset( HANDLE handle )
+		{
+			Close();
+			m_handle = handle;
+		}
+
+		HANDLE Release( void )
+		{
+			HANDLE handle = m_handle;
+			m_handle = NULL;
+			return handle;
+		}
+
+		void Close( void )
+		{
+			if ( m_handle != NULL )
+				::CloseHandle( m_handle );
+		}
+	private:
+		HANDLE m_handle;
+	};
+}
 
 
 namespace proc

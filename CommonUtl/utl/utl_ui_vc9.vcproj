@@ -744,14 +744,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\AnimatedFrameComposer.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\AnimatedFrameComposer.h"
-				>
-			</File>
-			<File
 				RelativePath=".\BaseApp.cpp"
 				>
 			</File>
@@ -1008,10 +1000,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\Pixel.h"
-				>
-			</File>
-			<File
 				RelativePath=".\PopupSplitButton.cpp"
 				>
 			</File>
@@ -1243,6 +1231,14 @@
 				Name="Imaging"
 				>
 				<File
+					RelativePath=".\AnimatedFrameComposer.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\AnimatedFrameComposer.h"
+					>
+				</File>
+				<File
 					RelativePath=".\DibDraw.cpp"
 					>
 				</File>
@@ -1336,6 +1332,10 @@
 				</File>
 				<File
 					RelativePath=".\ImagingWic_fwd.h"
+					>
+				</File>
+				<File
+					RelativePath=".\Pixel.h"
 					>
 				</File>
 				<File

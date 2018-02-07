@@ -13,7 +13,7 @@ namespace proc
 	bool IsProcessElevated( HANDLE hProcess /*= ::GetCurrentProcess()*/ )
 	{
 		ASSERT_PTR( hProcess );
-		CHandle token;
+		utl::CHandle token;
 		if ( ::OpenProcessToken( hProcess, TOKEN_QUERY, token.GetPtr() ) )
 		{
 			TOKEN_ELEVATION elevation;
@@ -26,7 +26,7 @@ namespace proc
 
 	bool IsProcessElevated( DWORD processId, DWORD access /*= SYNCHRONIZE*/ )
 	{
-		CHandle process( ::OpenProcess( access, FALSE, processId ) );
+		utl::CHandle process( ::OpenProcess( access, FALSE, processId ) );
 		return IsProcessElevated( process.Get() );
 	}
 
@@ -39,7 +39,7 @@ namespace proc
 	{
 		ASSERT( ui::IsValidWindow( hWnd ) );
 
-		CHandle wndProcess( ::OpenProcess( access, FALSE, ui::GetWindowProcessId( hWnd ) ) );
+		utl::CHandle wndProcess( ::OpenProcess( access, FALSE, ui::GetWindowProcessId( hWnd ) ) );
 		return HasCurrentElevation( wndProcess.Get() );
 	}
 }

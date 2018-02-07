@@ -36,27 +36,31 @@ namespace reg
 	static const TCHAR entry_partsFilter[] = _T("PartsFilter");
 }
 
-enum { StretchSamplesPct = 25, OffsetSamplesPct = StretchSamplesPct * 15 / 10 /* x1.5 */ };
 
-static CLayoutStyle layoutStyles[] =
+namespace layout
 {
-	{ IDC_CLASS_COMBO, layout::DoRepaint },
-	{ IDC_PARTS_AND_STATES_TREE, layout::StretchY },
-	{ IDC_SMALL_SAMPLE_STATIC, layout::offsetX( OffsetSamplesPct ) | layout::stretchX( StretchSamplesPct ) },
-	{ IDC_TINY_SAMPLE_STATIC, layout::OffsetX },
-	{ IDC_MEDIUM_SAMPLE_STATIC, layout::offsetX( OffsetSamplesPct ) | layout::stretchX( StretchSamplesPct ) },
-	{ IDC_CORE_SIZE_STATIC, layout::OffsetX },
-	{ IDC_LARGE_SAMPLE_LABEL, layout::StretchY },
-	{ IDC_LARGE_SAMPLE_STATIC, layout::Stretch },
-	{ IDC_OPTIONS_GROUP, layout::OffsetY | layout::StretchX },
-	{ IDC_BK_COLOR_STATIC, layout::OffsetY },
-	{ IDC_BK_COLOR_COMBO, layout::OffsetY },
-	{ IDC_USE_BORDER_CHECK, layout::OffsetY },
-	{ IDC_PRE_BK_GUIDES_CHECK, layout::OffsetY },
-	{ IDC_POST_BK_GUIDES_CHECK, layout::OffsetY },
-	{ IDC_DISABLE_THEMES_CHECK, layout::OffsetY },
-	{ IDCANCEL, layout::Offset }
-};
+	enum { SizeSamplesPct = 25, MoveSamplesPct = SizeSamplesPct * 15 / 10 /* x1.5 */ };
+
+	static CLayoutStyle layoutStyles[] =
+	{
+		{ IDC_CLASS_COMBO, DoRepaint },
+		{ IDC_PARTS_AND_STATES_TREE, SizeY },
+		{ IDC_SMALL_SAMPLE_STATIC, pctMoveX( MoveSamplesPct ) | pctSizeX( SizeSamplesPct ) },
+		{ IDC_TINY_SAMPLE_STATIC, MoveX },
+		{ IDC_MEDIUM_SAMPLE_STATIC, pctMoveX( MoveSamplesPct ) | pctSizeX( SizeSamplesPct ) },
+		{ IDC_CORE_SIZE_STATIC, MoveX },
+		{ IDC_LARGE_SAMPLE_LABEL, SizeY },
+		{ IDC_LARGE_SAMPLE_STATIC, Size },
+		{ IDC_OPTIONS_GROUP, MoveY | SizeX },
+		{ IDC_BK_COLOR_STATIC, MoveY },
+		{ IDC_BK_COLOR_COMBO, MoveY },
+		{ IDC_USE_BORDER_CHECK, MoveY },
+		{ IDC_PRE_BK_GUIDES_CHECK, MoveY },
+		{ IDC_POST_BK_GUIDES_CHECK, MoveY },
+		{ IDC_DISABLE_THEMES_CHECK, MoveY },
+		{ IDCANCEL, Move }
+	};
+}
 
 
 CMainDialog::CMainDialog( void )
@@ -65,7 +69,7 @@ CMainDialog::CMainDialog( void )
 	, m_internalChange( 0 )
 {
 	m_regSection = reg::section;
-	RegisterCtrlLayout( layoutStyles, COUNT_OF( layoutStyles ) );
+	RegisterCtrlLayout( layout::layoutStyles, COUNT_OF( layout::layoutStyles ) );
 	m_themeStore.SetupNotImplementedThemes();				// mark not implemented themes as NotImplemented
 
 	for ( int i = 0; i != SampleCount; ++i )
