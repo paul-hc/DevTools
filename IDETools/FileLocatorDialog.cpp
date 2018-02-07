@@ -99,10 +99,7 @@ CFileLocatorDialog::~CFileLocatorDialog()
 
 std::tstring CFileLocatorDialog::GetAdditionalIncludePaths( void )
 {
-	std::vector< std::tstring > additionalIncludePaths;
-	additionalIncludePaths.push_back( CIncludeOptions::Instance().m_additionalIncludePath.Join() );
-	additionalIncludePaths.push_back( app::GetModuleSession().m_moreAdditionalIncludePath.Join() );
-	return str::Join( additionalIncludePaths, CPathGroup::s_sep );
+	return ( CIncludeOptions::Instance().m_additionalIncludePath + app::GetModuleSession().m_moreAdditionalIncludePath ).Join();
 }
 
 void CFileLocatorDialog::readProfile( void )

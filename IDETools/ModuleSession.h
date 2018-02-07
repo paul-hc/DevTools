@@ -3,7 +3,7 @@
 #pragma once
 
 #include "FormatterOptions.h"
-#include "PathGroup.h"
+#include "DirPathGroup.h"
 
 
 namespace reg

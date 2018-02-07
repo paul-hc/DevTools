@@ -225,7 +225,7 @@ BSTR ModuleOptions::GetAdditionalIncludePath( void )
 
 void ModuleOptions::SetAdditionalIncludePath( LPCTSTR lpszNewValue )
 {
-	app::GetModuleSession().m_moreAdditionalIncludePath.Store( lpszNewValue );
+	app::GetModuleSession().m_moreAdditionalIncludePath.Split( lpszNewValue );
 }
 
 BSTR ModuleOptions::GetAdditionalAssocFolders( void )

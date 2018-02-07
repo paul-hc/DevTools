@@ -109,15 +109,18 @@ namespace str
 		const TCHAR* pTextEnd = str::end( pText );
 		return std::find_first_of( pText, pTextEnd, delims, str::end( delims ) );
 	}
+}
 
 
+namespace str
+{
 	template< typename CharType >
 	struct CPart
 	{
-		CPart( const CharType* pString = NULL, size_t count = 0 ) : m_pString( pString ), m_count( count ) { ASSERT_PTR( m_pString ); }
+		CPart( const CharType* pString = NULL, size_t count = 0 ) : m_pString( pString ), m_count( count ) {}
 
-		bool IsEmpty( void ) const { return 0 == m_count; }
-		std::basic_string< CharType > ToString( void ) const { ASSERT_PTR( m_pString ); return std::basic_string< CharType >( m_pString, m_count ); }
+		bool IsEmpty( void ) const { return NULL == m_pString || 0 == m_count; }
+		std::basic_string< CharType > ToString( void ) const { return !IsEmpty() ? std::basic_string< CharType >( m_pString, m_count ) : std::basic_string< CharType >(); }
 	public:
 		const CharType* m_pString;
 		size_t m_count;
@@ -127,6 +130,24 @@ namespace str
 	CPart< CharType > MakePart( const CharType* pString, size_t count = std::tstring::npos )
 	{
 		return CPart< CharType >( pString, count != std::tstring::npos ? count : GetLength( pString ) );
+	}
+
+	template< typename CharType >
+	std::basic_string< CharType > FormatNameValueSpec( const std::basic_string< CharType >& tag, const std::basic_string< CharType >& value, CharType sep = '=' )
+	{
+		return tag + sep + value;
+	}
+
+	template< typename CharType >
+	bool ParseNameValuePair( std::pair< CPart< CharType >, CPart< CharType > >& rPartsPair, const std::basic_string< CharType >& spec, CharType sep = '=' )
+	{
+		size_t sepPos = spec.find( sep );
+		if ( std::tstring::npos == sepPos )
+			return false;
+
+		rPartsPair.first = MakePart( spec.c_str(), sepPos );
+		rPartsPair.second = MakePart( spec.c_str() + sepPos + 1 );
+		return true;
 	}
 }
 

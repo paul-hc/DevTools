@@ -2,7 +2,7 @@
 #define AFX_FILELOCATOR_H__A0580B97_3350_11D5_B5A4_00D0B74ECB52__INCLUDED_
 #pragma once
 
-#include "PathGroup.h"
+#include "DirPathGroup.h"
 #include "ProjectContext.h"
 
 

@@ -2,7 +2,7 @@
 #define IncludePaths_h
 #pragma once
 
-#include "PathGroup.h"
+#include "DirPathGroup.h"
 
 
 struct CIncludePaths
@@ -15,6 +15,9 @@ public:
 	void Load( const TCHAR section[] );
 	void Save( const TCHAR section[] ) const;
 
+	std::tstring FormatLines( const TCHAR lineSep[] = s_lineSep ) const;
+	bool ParseLines( const std::tstring& linesSpec, const TCHAR lineSep[] = s_lineSep );
+
 	// from environment variables
 	static const inc::CDirPathGroup& Get_INCLUDE( void );
 	static const inc::CDirPathGroup& Get_LIB( void );
@@ -24,6 +27,8 @@ public:
 	inc::CDirPathGroup m_source;			// SOURCE path directories
 	inc::CDirPathGroup m_library;			// LIBRARY path directories + LIB environment variable
 	inc::CDirPathGroup m_binary;			// BINARY path directories
+
+	static const TCHAR s_lineSep[];
 };
 
 

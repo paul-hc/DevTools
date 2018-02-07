@@ -813,6 +813,14 @@
 				Name="include"
 				>
 				<File
+					RelativePath=".\DirPathGroup.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\DirPathGroup.h"
+					>
+				</File>
+				<File
 					RelativePath=".\FileAssoc.cpp"
 					>
 				</File>
@@ -878,14 +886,6 @@
 				</File>
 				<File
 					RelativePath=".\IncludeTag.h"
-					>
-				</File>
-				<File
-					RelativePath=".\PathGroup.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\PathGroup.h"
 					>
 				</File>
 				<File

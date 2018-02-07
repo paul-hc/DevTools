@@ -208,6 +208,10 @@ protected:
 	afx_msg void OnRemoveDirSet( void );
 	afx_msg void OnRenameDirSet( void );
 	afx_msg void OnResetDefault( void );
+	afx_msg void OnCopyPaths( void );
+	afx_msg void OnUpdateCopyPaths( CCmdUI* pCmdUI );
+	afx_msg void OnPastePaths( void );
+	afx_msg void OnUpdatePastePaths( CCmdUI* pCmdUI );
 
 	DECLARE_MESSAGE_MAP()
 };

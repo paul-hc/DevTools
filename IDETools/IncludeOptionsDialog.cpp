@@ -77,9 +77,9 @@ void CIncludeOptionsDialog::DoDataExchange( CDataExchange* pDX )
 	}
 	else
 	{
-		m_pOptions->m_fnIgnored.Store( ui::GetWindowText( m_ignoredEdit ).c_str(), EDIT_SEP );
-		m_pOptions->m_fnAdded.Store( ui::GetWindowText( m_addedEdit ).c_str(), EDIT_SEP );
-		m_pOptions->m_additionalIncludePath.Store( ui::GetWindowText( m_additionalIncPathEdit ).c_str(), EDIT_SEP );
+		m_pOptions->m_fnIgnored.Split( ui::GetWindowText( m_ignoredEdit ).c_str(), EDIT_SEP );
+		m_pOptions->m_fnAdded.Split( ui::GetWindowText( m_addedEdit ).c_str(), EDIT_SEP );
+		m_pOptions->m_additionalIncludePath.Split( ui::GetWindowText( m_additionalIncPathEdit ).c_str(), EDIT_SEP );
 	}
 
 	CLayoutDialog::DoDataExchange( pDX );

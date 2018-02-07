@@ -190,6 +190,60 @@ namespace stream
 #include "Range.h"
 
 
+namespace str
+{
+	template< typename CharType, typename ValueType >
+	std::basic_string< CharType > FormatValue( const ValueType& value )
+	{
+		std::basic_ostringstream< CharType > oss;
+		oss << value;
+		return oss.str();
+	}
+
+	template< typename CharType, typename ValueType >
+	bool ParseValue( ValueType& rValue, const std::basic_string< CharType >& text )
+	{
+		std::basic_istringstream< CharType > iss( text );
+		iss >> std::noskipws >> rValue;		// read the entire string, including whitespaces
+		return !iss.fail();
+	}
+
+
+	// specializations
+
+	template< typename CharType >
+	inline std::basic_string< CharType > FormatValue( const std::basic_string< CharType >& value )
+	{
+		return value;
+	}
+
+	template< typename CharType >
+	inline bool ParseValue( std::basic_string< CharType >& rValue, const std::basic_string< CharType >& text )
+	{
+		rValue = text;
+		return true;
+	}
+
+
+	template< typename CharType, typename ValueType >
+	inline std::basic_string< CharType > FormatNameValue( const std::basic_string< CharType >& name, const ValueType& value, CharType sep = '=' )
+	{
+		return FormatNameValueSpec< CharType >( name, FormatValue< CharType >( value ), sep );
+	}
+
+	template< typename CharType, typename ValueType >
+	bool ParseNameValue( std::basic_string< CharType >& rName, ValueType& rValue, const std::basic_string< CharType >& spec, CharType sep = '=' )
+	{
+		std::pair< CPart< CharType >, CPart< CharType > > partsPair;
+		if ( !ParseNameValuePair< CharType >( partsPair, spec, sep ) )
+			return false;
+
+		rName = partsPair.first.ToString();
+		return ParseValue< CharType >( rValue, partsPair.second.ToString() );
+	}
+}
+
+
 namespace num
 {
 	const std::locale& GetEmptyLocale( void );		// empty locale (devoid of facets)

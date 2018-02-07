@@ -6,9 +6,11 @@
 #include "UserInterfaceUtilities.h"
 #include "Application.h"
 #include "resource.h"
+#include "utl/Clipboard.h"
 #include "utl/FileSystem.h"
 #include "utl/UtilitiesEx.h"
 #include "utl/resource.h"
+#include <sstream>
 #include <afxpriv.h>		// for WM_IDLEUPDATECMDUI
 
 #ifdef _DEBUG
@@ -564,7 +566,7 @@ namespace hlp
 		if ( DialogOutput == pDX->m_bSaveAndValidate )
 			rEdit.SetText( rDirPaths.Join() );
 		else
-			rDirPaths.Store( rEdit.GetText().c_str() );
+			rDirPaths.Split( rEdit.GetText().c_str() );
 	}
 }
 
@@ -586,7 +588,10 @@ CDirectoriesPage::CDirectoriesPage( void )
 		.AddSeparator()
 		.AddButton( ID_RENAME_ITEM )
 		.AddSeparator()
-		.AddButton( ID_RESET_DEFAULT );
+		.AddButton( ID_RESET_DEFAULT )
+		.AddSeparator()
+		.AddButton( ID_EDIT_COPY )
+		.AddButton( ID_EDIT_PASTE );
 }
 
 CDirectoriesPage::~CDirectoriesPage()
@@ -595,10 +600,13 @@ CDirectoriesPage::~CDirectoriesPage()
 
 std::tstring CDirectoriesPage::MakeNewUniqueName( void ) const
 {
-	std::tstring baseName = _T("Directory Set"), name = baseName;
-
-	for ( size_t dupCount = 2; m_pDirSets->Get().Contains( name ); ++dupCount )
-		name = baseName + str::Format( _T(" (%d)"), dupCount );
+	std::tstring name;
+	for ( size_t count = 1; ; ++count )
+	{
+		name = str::Format( _T("Folder Set #%d"), count );
+		if ( !m_pDirSets->Get().Contains( name ) )
+			break;
+	}
 
 	return name;
 }
@@ -644,6 +652,10 @@ BEGIN_MESSAGE_MAP( CDirectoriesPage, CLayoutPropertyPage )
 	ON_COMMAND( ID_REMOVE_ITEM, OnRemoveDirSet )
 	ON_COMMAND( ID_RENAME_ITEM, OnRenameDirSet )
 	ON_COMMAND( ID_RESET_DEFAULT, OnResetDefault )
+	ON_COMMAND( ID_EDIT_COPY, OnCopyPaths )
+	ON_UPDATE_COMMAND_UI( ID_EDIT_COPY, OnUpdateCopyPaths )
+	ON_COMMAND( ID_EDIT_PASTE, OnPastePaths )
+	ON_UPDATE_COMMAND_UI( ID_EDIT_PASTE, OnUpdatePastePaths )
 END_MESSAGE_MAP()
 
 void CDirectoriesPage::CBnSelChange_DirSets( void )
@@ -696,6 +708,35 @@ void CDirectoriesPage::OnResetDefault( void )
 		m_pDirSets->Reset();
 		UpdateData( DialogOutput );
 	}
+}
+
+void CDirectoriesPage::OnCopyPaths( void )
+{
+	const CIncludePaths* pIncludePaths = m_pDirSets->GetCurrentPaths();
+	CClipboard::CopyText( pIncludePaths->FormatLines(), this );
+}
+
+void CDirectoriesPage::OnUpdateCopyPaths( CCmdUI* pCmdUI )
+{
+	pCmdUI->Enable( m_pDirSets->GetCurrentPaths() != NULL );
+}
+
+void CDirectoriesPage::OnPastePaths( void )
+{
+	std::tstring linesSpec;
+	if ( CClipboard::PasteText( linesSpec, this ) )
+	{
+		CIncludePaths* pIncludePaths = m_pDirSets->RefCurrentPaths();
+		if ( pIncludePaths->ParseLines( linesSpec ) )
+			UpdateData( DialogOutput );
+		else
+			ui::ReportError( str::Format( _T("Error parsing input text:\n\n%s"), linesSpec.c_str() ) );
+	}
+}
+
+void CDirectoriesPage::OnUpdatePastePaths( CCmdUI* pCmdUI )
+{
+	pCmdUI->Enable( CClipboard::CanPasteText() && m_pDirSets->GetCurrentPaths() != NULL );
 }
 
 

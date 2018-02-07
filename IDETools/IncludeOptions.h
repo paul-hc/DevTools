@@ -4,7 +4,7 @@
 
 #include "utl/EnumTags.h"
 #include "PublicEnums.h"
-#include "PathGroup.h"
+#include "DirPathGroup.h"
 
 
 struct CIncludeOptions
@@ -33,8 +33,8 @@ public:
 	bool m_lazyParsing;
 	std::tstring m_lastBrowsedFile;
 
-	TFilePathGroup m_fnIgnored;					// "Exclude files": force out
-	TFilePathGroup m_fnAdded;					// "Also include files": force in
+	fs::TFilePathGroup m_fnIgnored;					// "Exclude files": force out
+	fs::TFilePathGroup m_fnAdded;					// "Also include files": force in
 	inc::CDirPathGroup m_additionalIncludePath;
 };
 
