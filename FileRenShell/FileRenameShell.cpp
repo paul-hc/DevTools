@@ -48,7 +48,9 @@ public:
 const CFileRenameShell::CMenuCmdInfo CFileRenameShell::m_commands[] =
 {
 	{ Cmd_RenameFiles, _T("&Rename Files..."), _T("Rename selected files in the dialog"), ID_RENAME_ITEM, false },
-	{ Cmd_SendToCliboard, _T("&Send To Clipboard"), _T("Send the selected files path to clipboard"), IDI_SEND_TO_CLIP, false },
+	{ Cmd_SendToCliboard, _T("&Send To Clipboard"), _T("Send the selected files path to clipboard"), ID_SEND_TO_CLIP, false },
+	{ Cmd_TouchFiles, _T("&Touch Files..."), _T("Modify the timestamp of selected files"), ID_TOUCH_FILES, false },
+
 	{ Cmd_RenameAndCopy, _T("C&opy..."), _T("Rename selected files and copy source paths to clipboard"), ID_RENAME_AND_COPY, false },
 	{ Cmd_RenameAndCapitalize, _T("&Capitalize..."), _T("Rename selected files and capitalize filenames"), IDD_CAPITALIZE_OPTIONS, false },
 	{ Cmd_RenameAndLowCaseExt, _T("&Low case extension..."), _T("Rename selected files and make extensions lower case"), IDC_CHANGE_CASE_BUTTON, false },
@@ -212,6 +214,9 @@ STDMETHODIMP CFileRenameShell::InvokeCommand( LPCMINVOKECOMMANDINFO pCmi )
 			{
 				case Cmd_SendToCliboard:
 					m_fileData.CopyClipSourcePaths( GetKeyState( VK_SHIFT ) & 0x8000 ? FilenameExt : FullPath, scopedMainWnd.m_pParentOwner );
+					return S_OK;
+				case Cmd_TouchFiles:
+					//m_fileData.CopyClipSourcePaths( GetKeyState( VK_SHIFT ) & 0x8000 ? FilenameExt : FullPath, scopedMainWnd.m_pParentOwner );
 					return S_OK;
 				default:
 				{

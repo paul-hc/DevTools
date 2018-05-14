@@ -371,8 +371,6 @@ namespace fs
 
 namespace fs
 {
-
-
 	bool MakeFileStatus( CFileStatus& rStatus, const STATSTG& statStg )
 	{
 		if ( !CTime::IsValidFILETIME( statStg.mtime ) ||

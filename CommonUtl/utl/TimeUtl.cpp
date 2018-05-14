@@ -116,5 +116,96 @@ namespace time_utl
 
 		return sign + str::Join( components, _T(", ") );
 	}
+}
 
-} //namespace time_utl
+
+namespace time_utl
+{
+	enum CalendarMonth { January =  1, February, March, April, May, June, July, August, September, October, November, December };
+
+	enum ConversionUnit
+	{
+		SecondsPerMinute = 60,
+		MinutesPerHour   = 60,
+		HoursPerDay      = 24,
+
+		SecondsPerHour   = SecondsPerMinute * MinutesPerHour,
+		MinutesPerDay    = MinutesPerHour * HoursPerDay,
+		SecondsPerDay    = SecondsPerMinute * MinutesPerHour * HoursPerDay,
+
+		DaysPerWeek		 =  7,
+		MonthsPerYear	 = 12
+	};
+
+
+	bool IsLeapYear( const int year )
+	{
+        return ( ( year % 4 == 0 ) && ( year % 100 != 0 ) || ( year % 400 == 0 ) );
+	}
+
+	int DaysInMonth( const int year, const int month )
+	{
+		ASSERT( month >= January && month <= December );
+
+		switch ( month )
+		{
+            case January:
+            case March:
+            case May:
+            case July:
+            case August:
+            case October:
+            case December:
+                return 31;
+            case April:
+            case June:
+            case September:
+            case November:
+                return 30;
+            case February:
+                return IsLeapYear( year ) ? 29 : 28;
+            default:
+                ASSERT( false );
+                return -1;
+        }
+	}
+}
+
+
+namespace time_utl
+{
+	const TCHAR s_outFormat[] = _T("%d-%m-%Y %H:%M:%S");				// example: "27-12-2017 19:54:20"
+	const TCHAR s_parseFormat[] = _T("%2u-%2u-%4u %2u:%2u:%2u");		// example: "27-12-2017 19:54:20"
+
+	std::tstring FormatTimestamp( const CTime& dt, const TCHAR format[] /*= s_outFormat*/ )
+	{
+		std::tstring text;
+		if ( dt.GetTime() != 0 )
+			text = dt.Format( format ).GetString();
+		return text;
+	}
+
+	CTime ParseTimestamp( const std::tstring& text, const TCHAR format[] /*= s_parseFormat*/ )
+	{
+		// this fails in non-US locale
+		int year,
+			month,		// 1-based, compatible with CalendarMonth enumeration constants
+			day,		// 1-based, 1 .. 28/29/30/31
+			hour,		// 0-based, 0 .. 23
+			minute,		// 0-based, 0 .. 59
+			second;		// 0-based, 0 .. 59
+
+		if ( 6 == _stscanf( text.c_str(), format, &month, &day, &year, &hour, &minute, &second ) &&
+			 year >= 1900 &&
+			 ( month >= January && month <= December ) &&
+			 ( day >= 1 && day <= DaysInMonth( year, month ) ) &&
+			 ( hour >= 0 && hour < HoursPerDay ) &&
+			 ( minute >= 0 && minute < MinutesPerHour ) &&
+			 ( second >= 0 && second < SecondsPerMinute ) )
+		{
+			return CTime( year, month, day, hour, minute, second );
+		}
+
+		return CTime();
+	}
+}

@@ -32,6 +32,7 @@ private:
 	void TestWordSelection( void );
 	void TestEnsureUniformNumPadding( void );
 	void Test_vector_map( void );
+	void TestTimeFormatting( void );
 
 	void TestFunctional( void );			// <functional>
 };

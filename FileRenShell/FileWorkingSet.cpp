@@ -10,6 +10,7 @@
 
 
 CFileWorkingSet::CFileWorkingSet( void )
+	: m_pUndoChangeLog( new CUndoChangeLog() )
 {
 }
 
@@ -27,47 +28,47 @@ void CFileWorkingSet::ClearDestinationFiles( void )
 
 void CFileWorkingSet::LoadUndoLog( void )
 {
-	CUndoChangeLog::Load( m_undoStack );
+	m_pUndoChangeLog->Load();
 }
 
 void CFileWorkingSet::SaveUndoLog( void )
 {
-	CUndoChangeLog::Save( m_undoStack );
+	m_pUndoChangeLog->Save();
+}
+
+bool CFileWorkingSet::CanUndo( void ) const
+{
+	return m_pUndoChangeLog->CanUndoRename();
 }
 
 void CFileWorkingSet::SaveUndoInfo( const fs::PathSet& renamedKeys )
 {
-	m_undoStack.push_back( fs::PathPairMap() );
-
 	// push in the undo stack only pairs that were successfully renamed
-	fs::PathPairMap& rRenamePairs = m_undoStack.back();
+	fs::PathPairMap& rRenamePairs = m_pUndoChangeLog->PushRename();
 
-	for ( fs::PathPairMap::const_iterator itRenamePair = m_renamePairs.begin();
-		  itRenamePair != m_renamePairs.end(); ++itRenamePair )
+	for ( fs::PathPairMap::const_iterator itRenamePair = m_renamePairs.begin(); itRenamePair != m_renamePairs.end(); ++itRenamePair )
 		if ( renamedKeys.find( itRenamePair->first ) != renamedKeys.end() )		// successfully renamed
 			rRenamePairs[ itRenamePair->first ] = itRenamePair->second;
 
 	m_renamePairs.clear();
-
-	if ( m_undoStack.size() > MaxUndoSize )
-		m_undoStack.pop_front();
 }
 
 void CFileWorkingSet::RetrieveUndoInfo( void )
 {
 	ASSERT( CanUndo() );
 
-	const fs::PathPairMap& topRenamePairs = m_undoStack.back();	// stack top is last
+	const fs::PathPairMap* pTopRenamePairs = m_pUndoChangeLog->GetTopRename();	// stack top is last
+	ASSERT_PTR( pTopRenamePairs );
 
 	m_renamePairs.clear();
-	for ( fs::PathPairMap::const_iterator it = topRenamePairs.begin(); it != topRenamePairs.end(); ++it )
+	for ( fs::PathPairMap::const_iterator it = pTopRenamePairs->begin(); it != pTopRenamePairs->end(); ++it )
 		m_renamePairs[ it->second ] = it->first;	// for undo swap source and destination
 }
 
 void CFileWorkingSet::CommitUndoInfo( void )
 {
 	ASSERT( CanUndo() );
-	m_undoStack.pop_back();
+	m_pUndoChangeLog->PopRename();
 }
 
 size_t CFileWorkingSet::SetupFromDropInfo( HDROP hDropInfo )

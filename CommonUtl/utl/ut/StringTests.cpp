@@ -4,6 +4,7 @@
 #include "EnumTags.h"
 #include "FlagTags.h"
 #include "StringUtilities.h"
+#include "TimeUtl.h"
 #include "vector_map.h"
 
 #ifdef _DEBUG
@@ -485,6 +486,17 @@ void CStringTests::Test_vector_map( void )
 	ASSERT_EQUAL( "1 7 9", ut::JoinKeys( items, _T(" ") ) );
 }
 
+void CStringTests::TestTimeFormatting( void )
+{
+	static const std::tstring text = _T("27-12-2017 19:54:20");
+
+	using namespace str;
+
+	CTime dt = time_utl::ParseTimestamp( text );
+	ASSERT_EQUAL( CTime( 2017, 12, 27, 19, 54, 20 ), dt );
+	ASSERT_EQUAL( _T("27-12-2017 19:54:20"), time_utl::FormatTimestamp( dt ) );
+}
+
 void CStringTests::TestFunctional( void )
 {
 	// code demo - not a real unit test
@@ -522,6 +534,7 @@ void CStringTests::Run( void )
 	TestWordSelection();
 	TestEnsureUniformNumPadding();
 	Test_vector_map();
+	TestTimeFormatting();
 
 //	TestFunctional();
 }

@@ -10,6 +10,7 @@
 
 
 enum PathType { FullPath, FilenameExt };
+class CUndoChangeLog;
 
 
 class CFileWorkingSet
@@ -38,7 +39,7 @@ public:
 	UINT FindNextAvailSeqCount( const std::tstring& format ) const;
 	void EnsureUniformNumPadding( void );
 
-	bool CanUndo( void ) const { return !m_undoStack.empty(); }
+	bool CanUndo( void ) const;
 	void SaveUndoInfo( const fs::PathSet& renamedKeys );
 	void RetrieveUndoInfo( void );		// fills rename pairs from undo stack
 	void CommitUndoInfo( void );		// pops last from undo stack (when Undo-Rename OK is pressed)
@@ -55,11 +56,9 @@ public:
 	const std::set< size_t >& GetErrorIndexes( void ) const { return m_errorIndexes; }
 	void ClearErrors( void ) { m_errorIndexes.clear(); }
 private:
-	enum { MaxUndoSize = 20 };
-private:
 	std::vector< fs::CPath > m_sourceFiles;
 	fs::PathPairMap m_renamePairs;
-	std::list< fs::PathPairMap > m_undoStack;
+	std::auto_ptr< CUndoChangeLog > m_pUndoChangeLog;
 
 	std::set< size_t > m_errorIndexes;
 };

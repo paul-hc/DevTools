@@ -8,7 +8,7 @@
 #define IDD_CAPITALIZE_OPTIONS          103
 #define IDR_IMAGE_STRIP                 104
 #define IDR_CONTEXT_MENU_MENU           105
-#define IDI_SEND_TO_CLIP                108
+#define ID_SEND_TO_CLIP                 108
 #define IDI_DETAILS                     109
 #define IDC_FILE_RENAME_LIST            1000
 #define IDC_FORMAT_COMBO                1001
@@ -93,13 +93,14 @@
 #define ID_SEQ_COUNT_RESET              32804
 #define ID_SEQ_COUNT_FIND_NEXT          32805
 #define ID_SEQ_COUNT_AUTO_ADVANCE       32806
+#define ID_TOUCH_FILES                  32807
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        110
-#define _APS_NEXT_COMMAND_VALUE         32807
+#define _APS_NEXT_COMMAND_VALUE         32808
 #define _APS_NEXT_CONTROL_VALUE         1046
 #define _APS_NEXT_SYMED_VALUE           5004
 #endif
