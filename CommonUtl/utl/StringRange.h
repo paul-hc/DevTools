@@ -22,6 +22,8 @@ namespace str
 
 	namespace range
 	{
+		// range based algorithms based on string position: for fast and efficient parsing of text content
+
 		template< typename CharType >
 		inline bool InBounds( const Range< size_t >& pos, const std::basic_string< CharType >& text )
 		{
@@ -60,11 +62,11 @@ namespace str
 			bool IsEmpty( void ) const { return 0 == GetLength(); }
 			size_t GetLength( void ) const { ASSERT( InBounds() ); return m_pos.GetSpan< size_t >(); }
 
-			const StringType& GetText( void ) const { return m_text; }
-
 			const Range< size_t >& GetPos( void ) const { return m_pos; }
 			Range< size_t >& RefPos( void ) { return m_pos; }
 			void SetPos( const Range< size_t >& pos ) { m_pos = pos; ENSURE( InBounds() ); }
+
+			const StringType& GetText( void ) const { return m_text; }
 
 			void Reset( void ) { m_pos = MakeBounds( m_text ); }
 
