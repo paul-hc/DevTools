@@ -76,8 +76,8 @@ namespace fs
 	protected:
 		std::tstring m_refDirPath;						// to remove if common prefix
 	public:
-		fs::PathSet m_filePaths;						// sorted intuitively
-		fs::PathSet m_subDirPaths;
+		fs::TPathSet m_filePaths;						// sorted intuitively
+		fs::TPathSet m_subDirPaths;
 	};
 
 

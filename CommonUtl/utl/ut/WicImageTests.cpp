@@ -53,7 +53,7 @@ void CWicImageTests::TestImageCache( ut::CTestDevice* pTestDev )
 	fs::CPathEnumerator imageEnum;
 	fs::EnumFiles( &imageEnum, GetImageSourceDirPath().c_str(), _T("*.*") );
 
-	fs::PathSet::const_iterator itFilePath = imageEnum.m_filePaths.begin();
+	fs::TPathSet::const_iterator itFilePath = imageEnum.m_filePaths.begin();
 
 	enum { MaxSize = 10u, N5 = 5u, N15 = 15u };
 

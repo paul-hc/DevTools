@@ -171,8 +171,10 @@ namespace fs
 		bool IsComplexPath( void ) const { return path::IsComplex( GetPtr() ); }
 
 		const std::tstring& Get( void ) const { return m_filePath; }
-		const TCHAR* GetPtr( void ) const { return m_filePath.c_str(); }
 		void Set( const std::tstring& filePath );
+
+		const TCHAR* GetPtr( void ) const { return m_filePath.c_str(); }
+		std::string GetUtf8( void ) const { return str::ToUtf8( GetPtr() ); }
 
 		CPath GetParentPath( bool trailSlash = false ) const;		// always a directory path
 		CPath& SetBackslash( bool trailSlash = true );
@@ -331,8 +333,8 @@ namespace fs
 
 
 	// orders path keys using path equivalence (rather than CPath::operator< intuitive ordering)
-	typedef std::map< fs::CPath, fs::CPath, pred::Less_EquivalentPath > PathPairMap;
-	typedef std::set< fs::CPath, pred::Less_EquivalentPath > PathSet;
+	typedef std::map< fs::CPath, fs::CPath, pred::Less_EquivalentPath > TPathPairMap;
+	typedef std::set< fs::CPath, pred::Less_EquivalentPath > TPathSet;
 }
 
 

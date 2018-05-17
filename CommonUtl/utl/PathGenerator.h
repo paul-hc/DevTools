@@ -12,8 +12,8 @@ class CPathGenerator : public CPathMaker
 {
 public:
 	CPathGenerator( const std::tstring& format, UINT seqCount, bool avoidDups = true );			// allocates internal file map, with ownership
-	CPathGenerator( fs::PathPairMap& rRenamePairs, const std::tstring& format, UINT seqCount, bool avoidDups = true );
-	CPathGenerator( const fs::PathPairMap& renamePairs, const std::tstring& format, UINT seqCount = 1, bool avoidDups = true );		// read-only; for FindNextAvailSeqCount()
+	CPathGenerator( fs::TPathPairMap& rRenamePairs, const std::tstring& format, UINT seqCount, bool avoidDups = true );
+	CPathGenerator( const fs::TPathPairMap& renamePairs, const std::tstring& format, UINT seqCount = 1, bool avoidDups = true );		// read-only; for FindNextAvailSeqCount()
 
 	const CPathFormatter& GetFormat( void ) const { return m_formatter; }
 	void SetMoveDestDirPath( const std::tstring& moveDestDirPath );		// generate for moving to destDirPath
@@ -36,7 +36,7 @@ private:
 	bool m_avoidDups;						// attempts to generate a unique path using a dupCount
 	bool m_mutablePairs;
 private:
-	fs::PathSet m_destSet;					// transient during generation
+	fs::TPathSet m_destSet;					// transient during generation
 };
 
 

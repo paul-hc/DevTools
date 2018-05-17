@@ -345,14 +345,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\TestCase.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\TestCase.h"
-				>
-			</File>
-			<File
 				RelativePath=".\TransferItem.cpp"
 				>
 				<FileConfiguration
@@ -426,12 +418,24 @@
 				</FileConfiguration>
 			</File>
 		</Filter>
+		<Filter
+			Name="Unit Tests"
+			>
+			<File
+				RelativePath=".\test.bat"
+				>
+			</File>
+			<File
+				RelativePath=".\TestCase.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\TestCase.h"
+				>
+			</File>
+		</Filter>
 		<File
 			RelativePath="ReadMe.txt"
-			>
-		</File>
-		<File
-			RelativePath=".\test.bat"
 			>
 		</File>
 	</Files>

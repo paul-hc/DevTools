@@ -224,6 +224,13 @@ namespace utl
 {
 	__declspec( selectany ) extern const size_t npos = std::tstring::npos;
 
+	template< typename ValueType >
+	inline void AssignPtr( ValueType* pField, const ValueType& value )
+	{
+		if ( pField != NULL )
+			*pField = value;
+	}
+
 	inline unsigned int GetPlatformBits( void ) { return sizeof( void* ) * 8; }
 	inline unsigned int Is32bitPlatform( void ) { return 32 == GetPlatformBits(); }
 	inline unsigned int Is64bitPlatform( void ) { return 64 == GetPlatformBits(); }

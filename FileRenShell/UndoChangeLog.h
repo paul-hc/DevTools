@@ -4,74 +4,105 @@
 
 #include <list>
 #include <map>
+#include <iosfwd>
+#include "utl/FileState.h"
 #include "utl/Path.h"
-#include "utl/FileInfo.h"
 
 
 class CEnumTags;
 
+namespace str
+{
+	namespace range
+	{
+		template< typename CharType >
+		class CStringRange;
+	}
+
+	typedef str::range::CStringRange< TCHAR > TStringRange;
+}
+
 
 class CUndoChangeLog : private utl::noncopyable
 {
+	friend class CUndoChangeLogTests;
 public:
 	CUndoChangeLog( void ) {}
-
-	// RENAME undo stack (top at the back)
-	bool CanUndoRename( void ) const { return !m_renameUndoStack.empty(); }
-	fs::PathPairMap* GetTopRename( void ) { return !m_renameUndoStack.empty() ? &m_renameUndoStack.back().m_batch : NULL; }
-	fs::PathPairMap& PushRename( void ) { PushBatch( m_renameUndoStack ); return m_renameUndoStack.back().m_batch; }
-	void PopRename( void ) { ASSERT( CanUndoRename() ); m_renameUndoStack.pop_back(); }
-
-	// TOUCH undo stack (top at the back)
-	bool CanUndoTouch( void ) const { return !m_touchUndoStack.empty(); }
-	fs::TFileInfoSet* GetTopTouch( void ) { return !m_touchUndoStack.empty() ? &m_touchUndoStack.back().m_batch : NULL; }
-	fs::TFileInfoSet& PushTouch( void ) { PushBatch( m_touchUndoStack ); return m_touchUndoStack.back().m_batch; }
-	void PopTouch( void ) { ASSERT( CanUndoTouch() ); m_touchUndoStack.pop_back(); }
 
 	bool Save( void ) const;
 	bool Load( void );
 
-	static const std::tstring& GetFilePath( void );
-private:
-	enum { MaxUndoSize = 20 };
-	enum Action { Rename, Touch };
-
-	static const CEnumTags& GetTags_Action( void );
-	static bool ParseActionTag( Action& rAction, CTime& rTimestamp, const std::string& text );
-	static std::tstring FormatActionTag( Action action, const CTime& timestamp );
-
-	static bool ParseRenameLine( fs::PathPairMap& rBatchRename, const std::tstring& line );
-	static bool ParseTouchLine( fs::TFileInfoSet& rBatchTouch, const std::tstring& line );
-
-	void SaveRenameBatches( std::ostream& output ) const;
-	void SaveTouchBatches( std::ostream& output ) const;
-
-
+	static const fs::CPath& GetFilePath( void );
+public:
 	template< typename BatchType >
 	struct CBatch
 	{
 		CBatch( const CTime& timestamp = CTime::GetCurrentTime() ) : m_timestamp( timestamp ) {}
+
+		bool operator==( const CBatch& right ) const { return m_timestamp == right.m_timestamp && m_batch == right.m_batch; }	// UT only
 	public:
 		CTime m_timestamp;
 		BatchType m_batch;		// batch entries
 	};
 
-
 	template< typename BatchType >
-	static void PushBatch( std::list< CBatch< BatchType > >& rUndoStack );
+	class CUndoStack
+	{
+	public:
+		CUndoStack( void ) {}
+
+		const std::list< CBatch< BatchType > >& Get( void ) const { return m_stack; }
+
+		bool CanUndo( void ) const { return !m_stack.empty(); }
+
+		BatchType* GetTop( void ) { return !m_stack.empty() ? &m_stack.back().m_batch : NULL; }
+		BatchType& Push( const CTime& timestamp = CTime::GetCurrentTime() );
+		void Pop( void ) { ASSERT( CanUndo() ); m_stack.pop_back(); }
+
+		void Clear( void ) { m_stack.clear(); }
+	private:
+		std::list< CBatch< BatchType > > m_stack;
+
+		enum { MaxUndoSize = 20 };
+	};
+
+	CUndoStack< fs::TPathPairMap >& GetRenameUndoStack( void ) { return m_renameUndoStack; }
+	CUndoStack< fs::TFileStatePairMap >& GetTouchUndoStack( void ) { return m_touchUndoStack; }
 private:
-	std::list< CBatch< fs::PathPairMap > > m_renameUndoStack;
-	std::list< CBatch< fs::TFileInfoSet > > m_touchUndoStack;
+	void Clear( void );
+
+	void Save( std::ostream& os ) const;
+	void Load( std::istream& is );
+
+	void SaveRenameBatches( std::ostream& os ) const;
+	void SaveTouchBatches( std::ostream& os ) const;
+
+	static bool AddRenameLine( fs::TPathPairMap& rBatchRename, const str::TStringRange& textRange );
+	static bool AddTouchLine( fs::TFileStatePairMap& rBatchTouch, const str::TStringRange& textRange );
+
+	enum Action { Rename, Touch };
+
+	static const CEnumTags& GetTags_Action( void );
+	static std::tstring FormatActionTag( Action action, const CTime& timestamp );
+	static bool ParseActionTag( Action& rAction, CTime& rTimestamp, const str::TStringRange& tagRange );
+private:
+	CUndoStack< fs::TPathPairMap > m_renameUndoStack;
+	CUndoStack< fs::TFileStatePairMap > m_touchUndoStack;
 };
 
 
+// template code
+
 template< typename BatchType >
-void CUndoChangeLog::PushBatch( std::list< CBatch< BatchType > >& rUndoStack )
+BatchType& CUndoChangeLog::CUndoStack< BatchType >::Push( const CTime& timestamp /*= CTime::GetCurrentTime()*/ )
 {
-	rUndoStack.push_back( CBatch< BatchType >() );
-	if ( rUndoStack.size() > MaxUndoSize )
-		rUndoStack.pop_front();
-	ENSURE( rUndoStack.size() <= MaxUndoSize );
+	m_stack.push_back( CBatch< BatchType >( timestamp ) );
+
+	if ( m_stack.size() > MaxUndoSize )
+		m_stack.pop_front();				// remove expired
+	ENSURE( m_stack.size() <= MaxUndoSize );
+
+	return m_stack.back().m_batch;
 }
 
 

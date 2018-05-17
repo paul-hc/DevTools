@@ -19,7 +19,7 @@ CPathGenerator::CPathGenerator( const std::tstring& format, UINT seqCount, bool 
 	ASSERT( m_seqCount < MaxSeqCount );
 }
 
-CPathGenerator::CPathGenerator( fs::PathPairMap& rRenamePairs, const std::tstring& format, UINT seqCount, bool avoidDups /*= true*/ )
+CPathGenerator::CPathGenerator( fs::TPathPairMap& rRenamePairs, const std::tstring& format, UINT seqCount, bool avoidDups /*= true*/ )
 	: CPathMaker( &rRenamePairs )
 	, m_formatter( format )
 	, m_seqCount( seqCount )
@@ -29,8 +29,8 @@ CPathGenerator::CPathGenerator( fs::PathPairMap& rRenamePairs, const std::tstrin
 	ASSERT( m_seqCount < MaxSeqCount );
 }
 
-CPathGenerator::CPathGenerator( const fs::PathPairMap& renamePairs, const std::tstring& format, UINT seqCount /*= 1*/, bool avoidDups /*= true*/ )
-	: CPathMaker( const_cast< fs::PathPairMap* >( &renamePairs ) )
+CPathGenerator::CPathGenerator( const fs::TPathPairMap& renamePairs, const std::tstring& format, UINT seqCount /*= 1*/, bool avoidDups /*= true*/ )
+	: CPathMaker( const_cast< fs::TPathPairMap* >( &renamePairs ) )
 	, m_formatter( format )
 	, m_seqCount( seqCount )
 	, m_avoidDups( avoidDups )
@@ -70,7 +70,7 @@ bool CPathGenerator::Generate( std::vector< fs::CPath >& rDestPaths )
 	std::vector< fs::CPath > destPaths;
 	destPaths.reserve( m_pRenamePairs->size() );
 
-	for ( fs::PathPairMap::const_iterator it = m_pRenamePairs->begin(); it != m_pRenamePairs->end(); ++it )
+	for ( fs::TPathPairMap::const_iterator it = m_pRenamePairs->begin(); it != m_pRenamePairs->end(); ++it )
 	{
 		fs::CPath newPath;
 		if ( GeneratePath( newPath, it->first ) )

@@ -1,6 +1,7 @@
 
 #include "stdafx.h"
 #include "Application.h"
+#include "ut/UndoChangeLogTests.h"
 #include "resource.h"
 #include "utl/BaseApp.hxx"
 
@@ -11,6 +12,17 @@
 
 CComModule g_comModule;
 CApplication g_app;
+
+
+namespace ut
+{
+	void RegisterAppUnitTests( void )
+	{
+	#ifdef _DEBUG
+		CUndoChangeLogTests::Instance();
+	#endif
+	}
+}
 
 
 CApplication::CApplication( void )
@@ -30,6 +42,8 @@ BOOL CApplication::InitInstance( void )
 	CAboutBox::m_appIconId = IDD_RENAME_FILES_DIALOG;				// will use HugeIcon
 	CToolStrip::RegisterStripButtons( IDR_IMAGE_STRIP );			// register stock images
 	CImageStore::SharedStore()->RegisterAlias( ID_EDIT_CLEAR, ID_REMOVE_ITEM );
+
+	ut::RegisterAppUnitTests();
 
 	return TRUE;
 }

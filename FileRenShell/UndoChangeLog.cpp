@@ -3,6 +3,7 @@
 #include "UndoChangeLog.h"
 #include "utl/EnumTags.h"
 #include "utl/RuntimeException.h"
+#include "utl/StringRange.h"
 #include "utl/StringUtilities.h"
 #include "utl/Utilities.h"
 #include "utl/TimeUtl.h"
@@ -13,25 +14,172 @@
 #endif
 
 
+namespace fmt
+{
+	static const TCHAR s_sep[] = _T("|");
+
+	enum { Attributes, CreationTime, ModifTime, AccessTime, _FieldCount };
+
+	std::tstring DoFormatFileState( const fs::CFileState& state )
+	{
+		std::vector< std::tstring > parts;
+		if ( !state.IsEmpty() )
+		{
+			parts.push_back( str::Format( _T("0x%08X"), state.m_attributes ) );
+			parts.push_back( time_utl::FormatTimestamp( state.m_creationTime ) );
+			parts.push_back( time_utl::FormatTimestamp( state.m_modifTime ) );
+			parts.push_back( time_utl::FormatTimestamp( state.m_accessTime ) );
+		}
+		return str::Join( parts, s_sep );
+	}
+
+	bool DoParseFileState( fs::CFileState& rState, const std::tstring& text )
+	{
+		std::vector< std::tstring > parts;
+		str::Split( parts, text.c_str(), s_sep );
+		if ( parts.size() != _FieldCount )
+		{
+			rState.Clear();
+			return false;
+		}
+
+		unsigned int attributes;
+		str::TStringRange attrRange( parts[ Attributes ] );
+		if ( attrRange.StripPrefix( _T("0x") ) )
+			if ( 1 == _stscanf( attrRange.Extract().c_str(), _T("%X"), &attributes ) )
+				rState.m_attributes = static_cast< BYTE >( attributes );
+
+		rState.m_creationTime = time_utl::ParseTimestamp( parts[ CreationTime ] );
+		rState.m_modifTime = time_utl::ParseTimestamp( parts[ ModifTime ] );
+		rState.m_accessTime = time_utl::ParseTimestamp( parts[ AccessTime ] );
+		return true;
+	}
+
+	std::tstring FormatBraces( const TCHAR core[], const TCHAR braces[] )
+	{
+		ASSERT( str::GetLength( braces ) >= 2 );
+		return str::Format( _T("%c%s%c"), braces[ 0 ], core, braces[ 1 ] );
+	}
+
+	bool ParseBraces( str::TStringRange& rTextRange, const TCHAR braces[] )
+	{
+		ASSERT( str::GetLength( braces ) >= 2 );
+		rTextRange.Trim();
+		return rTextRange.Strip( braces[ 0 ], braces[ 1 ] );
+	}
+}
+
+
+namespace fmt
+{
+	static const TCHAR s_pairSep[] = _T(" -> ");
+	static const TCHAR s_touchSep[] = _T(" :: ");
+	static const TCHAR s_stateBraces[] = { _T("{}") };
+
+	std::tstring FormatFileState( const fs::CFileState& fileState )
+	{
+		return FormatBraces( DoFormatFileState( fileState ).c_str(), s_stateBraces );
+	}
+
+	bool ParseFileState( fs::CFileState& rState, str::TStringRange& rTextRange )
+	{
+		if ( ParseBraces( rTextRange, s_stateBraces ) )
+			if ( DoParseFileState( rState, rTextRange.Extract() ) )
+				return true;
+
+		return false;
+	}
+
+	std::tstring FormatRenameEntry( const fs::CPath& srcPath, const fs::CPath& destPath )
+	{
+		return srcPath.Get() + s_pairSep + destPath.Get();
+	}
+
+	bool ParseRenameEntry( fs::CPath& rSrcPath, fs::CPath& rDestPath, const str::TStringRange& textRange )
+	{
+		Range< size_t > sepPos;
+		if ( textRange.Find( sepPos, s_pairSep ) )
+		{
+			str::TStringRange srcRange = textRange.MakeLead( sepPos.m_start );
+			str::TStringRange destRange = textRange.MakeTrail( sepPos.m_end );
+			srcRange.Trim();
+			destRange.Trim();
+
+			rSrcPath = srcRange.Extract();
+			rDestPath = destRange.Extract();
+			return !rSrcPath.IsEmpty() && !rDestPath.IsEmpty();
+		}
+		return false;
+	}
+
+	std::tstring FormatTouchEntry( const fs::CFileState& srcState, const fs::CFileState& destState )
+	{
+		ASSERT( srcState.m_fullPath == destState.m_fullPath );
+		return
+			srcState.m_fullPath.Get() + s_touchSep + FormatFileState( srcState ) + s_pairSep + FormatFileState( destState );
+	}
+
+	bool ParseTouchEntry( fs::CFileState& rSrcState, fs::CFileState& rDestState, const str::TStringRange& textRange )
+	{
+		Range< size_t > sepPos;
+		if ( textRange.Find( sepPos, s_touchSep ) )
+		{
+			rSrcState.m_fullPath = rDestState.m_fullPath = textRange.ExtractLead( sepPos.m_start );
+			str::TStringRange nextRange = textRange.MakeTrail( sepPos.m_end );
+
+			if ( nextRange.Find( sepPos, s_pairSep ) )
+			{
+				str::TStringRange srcRange = nextRange.MakeLead( sepPos.m_start );
+				str::TStringRange destRange = nextRange.MakeTrail( sepPos.m_end );
+
+				if ( ParseFileState( rSrcState, srcRange ) )
+					if ( ParseFileState( rDestState, destRange ) )
+						return true;
+			}
+		}
+		return false;
+	}
+}
+
+
+namespace fmt
+{
+	static const TCHAR s_tagSeps[] = _T("<>");		// "<tag>"
+	static const TCHAR s_tagEndOfBatch[] = _T("END OF BATCH");
+
+	std::tstring FormatTag( const TCHAR tag[] )
+	{
+		ASSERT( !str::IsEmpty( tag ) );
+		return FormatBraces( tag, s_tagSeps );
+	}
+
+	bool ParseTag( str::TStringRange& rTextRange )
+	{
+		return ParseBraces( rTextRange, s_tagSeps );
+	}
+}
+
+
 // CUndoChangeLog implementation
 
-static const TCHAR s_undoFnSuffix[] = _T("_undo");
-static const TCHAR s_actionTagFormat[] = _T("<%s %s>");		// <ACTION TIMESTAMP>
-static const std::tstring s_filePairSep = _T(" -> ");
-static const std::string s_endOfBatchSep = "<END OF BATCH>";
-
-const std::tstring& CUndoChangeLog::GetFilePath( void )
+void CUndoChangeLog::Clear( void )
 {
-	static std::tstring undoLogPath;
-	if ( undoLogPath.empty() )
+	m_renameUndoStack.Clear();
+	m_touchUndoStack.Clear();
+}
+
+const fs::CPath& CUndoChangeLog::GetFilePath( void )
+{
+	static fs::CPath undoLogPath;
+	if ( undoLogPath.IsEmpty() )
 	{
 		TCHAR fullPath[ _MAX_PATH ];
 		::GetModuleFileName( AfxGetApp()->m_hInstance, fullPath, COUNT_OF( fullPath ) );
 
 		fs::CPathParts parts( fullPath );
-		parts.m_fname += s_undoFnSuffix;
+		parts.m_fname += _T("_undo");
 		parts.m_ext = _T(".log");
-		undoLogPath = parts.MakePath();
+		undoLogPath.Set( parts.MakePath() );
 	}
 
 	return undoLogPath;
@@ -39,19 +187,17 @@ const std::tstring& CUndoChangeLog::GetFilePath( void )
 
 bool CUndoChangeLog::Save( void ) const
 {
-	const std::tstring& undoLogPath = GetFilePath();
-	std::ofstream output( str::ToUtf8( undoLogPath.c_str() ).c_str(), std::ios_base::out | std::ios_base::trunc );
+	const fs::CPath& undoLogPath = GetFilePath();
+	std::ofstream output( undoLogPath.GetUtf8().c_str(), std::ios_base::out | std::ios_base::trunc );
 
 	if ( output.is_open() )
 	{
-		SaveRenameBatches( output );
-		SaveTouchBatches( output );
-
+		Save( output );
 		output.close();
 	}
 	if ( output.fail() )
 	{
-		TRACE( _T(" * CUndoChangeLog::Save(): error saving undo change log file: %s\n"), undoLogPath.c_str() );
+		TRACE( _T(" * CUndoChangeLog::Save(): error saving undo change log file: %s\n"), undoLogPath.GetPtr() );
 		ui::BeepSignal( MB_ICONERROR );
 		return false;
 	}
@@ -60,136 +206,143 @@ bool CUndoChangeLog::Save( void ) const
 
 bool CUndoChangeLog::Load( void )
 {
-	const std::tstring& undoLogPath = GetFilePath();
-	std::ifstream input( str::ToUtf8( undoLogPath.c_str() ).c_str() );
+	const fs::CPath& undoLogPath = GetFilePath();
+	std::ifstream input( undoLogPath.GetUtf8().c_str() );
 
 	if ( !input.is_open() )
 		return false;
 
+	Load( input );
+
+	input.close();
+	return true;
+}
+
+void CUndoChangeLog::Save( std::ostream& os ) const
+{
+	SaveRenameBatches( os );
+	SaveTouchBatches( os );
+}
+
+void CUndoChangeLog::Load( std::istream& is )
+{
+	Clear();
+
 	Action action = Rename;
 	CTime timestamp;
-	fs::PathPairMap batchRename;
-	fs::TFileInfoSet batchTouch;
+	fs::TPathPairMap batchRename;
+	fs::TFileStatePairMap batchTouch;
 
 	// note: most recent rename batch is the last in the undo log
-	for ( unsigned int parseLineNo = 1; !input.eof(); ++parseLineNo )
+	for ( unsigned int parseLineNo = 1; !is.eof(); ++parseLineNo )
 	{
-		std::string line;
-		std::getline( input, line );
-		if ( line.empty() )		// ignore empty lines
-			continue;
+		std::tstring line = stream::InputLine( is );
+		str::TStringRange textRange( line );
+		textRange.Trim();
+		if ( textRange.IsEmpty() )
+			continue;			// ignore empty lines
 
-		bool validActionTag = ParseActionTag( action, timestamp, line );
-		if ( validActionTag )
-			continue;			// consume the tag line
-
-		if ( str::EqualString< str::IgnoreCase >( line, s_endOfBatchSep ) )
+		if ( fmt::ParseTag( textRange ) )
 		{
-			switch ( action )
+			if ( textRange.Equals( fmt::s_tagEndOfBatch ) )
 			{
-				case Rename:
-					if ( !batchRename.empty() )
-					{
-						m_renameUndoStack.push_back( CBatch< fs::PathPairMap >( timestamp ) );
-						m_renameUndoStack.back().m_batch.swap( batchRename );
-					}
-					break;
-				case Touch:
-					if ( !batchTouch.empty() )
-					{
-						m_touchUndoStack.push_back( CBatch< fs::TFileInfoSet >( timestamp ) );
-						m_touchUndoStack.back().m_batch.swap( batchTouch );
-					}
-					break;
-				default:
-					ASSERT( false );
+				switch ( action )
+				{
+					case Rename:
+						if ( !batchRename.empty() )
+							m_renameUndoStack.Push( timestamp ).swap( batchRename );
+						break;
+					case Touch:
+						if ( !batchTouch.empty() )
+							m_touchUndoStack.Push( timestamp ).swap( batchTouch );
+						break;
+					default: ASSERT( false );
+				}
+				timestamp = CTime();
+				continue;			// consume the tag line
 			}
+			else if ( ParseActionTag( action, timestamp, textRange ) )
+				continue;			// consume the tag line
 		}
 		else
 		{
 			switch ( action )
 			{
 				case Rename:
-					if ( ParseRenameLine( batchRename, str::FromUtf8( line.c_str() ) ) )
+					if ( AddRenameLine( batchRename, textRange ) )
 						continue;
 					break;
 				case Touch:
-					if ( ParseTouchLine( batchTouch, str::FromUtf8( line.c_str() ) ) )
+					if ( AddTouchLine( batchTouch, textRange ) )
 						continue;
 					break;
-				default:
-					ASSERT( false );
+				default: ASSERT( false );
 			}
-
-			TRACE( _T(" * CUndoChangeLog::Load(): %s - ignore badly formed %s line: %s\n"), undoLogPath.c_str(), GetTags_Action().GetUiTags()[ action ].c_str(), line.c_str() );
 		}
+
+		TRACE( _T(" * CUndoChangeLog::Load(): ignore badly formed line: '%s'\n"), line.c_str() );
 	}
-	input.close();
-	return true;
 }
 
-bool CUndoChangeLog::ParseRenameLine( fs::PathPairMap& rBatchRename, const std::tstring& line )
+void CUndoChangeLog::SaveRenameBatches( std::ostream& os ) const
 {
-	static const size_t sepLength = s_filePairSep.length();
-	size_t sepPos = line.find( s_filePairSep );
-	if ( sepPos != std::string::npos )
+	for ( std::list< CBatch< fs::TPathPairMap > >::const_iterator itBatch = m_renameUndoStack.Get().begin(), itFirst = itBatch; itBatch != m_renameUndoStack.Get().end(); ++itBatch )
 	{
-		fs::CPath sourcePath( line.substr( 0, sepPos ) );
-		fs::CPath destPath( line.substr( sepPos + sepLength ) );
+		if ( itBatch != itFirst )
+			os << std::endl;		// inner batch extra line-end separator
 
-		if ( !sourcePath.IsEmpty() && !destPath.IsEmpty() )
+		os << FormatActionTag( Rename, itBatch->m_timestamp ) << std::endl;		// add action tag
+
+		for ( fs::TPathPairMap::const_iterator itPair = itBatch->m_batch.begin(); itPair != itBatch->m_batch.end(); ++itPair )
 		{
-			rBatchRename[ sourcePath ] = destPath;
-			return true;
+			ASSERT( !itPair->first.IsEmpty() && !itPair->second.IsEmpty() );
+			os << fmt::FormatRenameEntry( itPair->first, itPair->second ) << std::endl;
 		}
+		os << fmt::FormatTag( fmt::s_tagEndOfBatch ) << std::endl;
 	}
+}
 
+void CUndoChangeLog::SaveTouchBatches( std::ostream& os ) const
+{
+	if ( !m_renameUndoStack.Get().empty() && !m_touchUndoStack.Get().empty() )
+		os << std::endl;			// extra line-end separator between RENAME and TOUCH sections
+
+	for ( std::list< CBatch< fs::TFileStatePairMap > >::const_iterator itBatch = m_touchUndoStack.Get().begin(), itFirst = itBatch; itBatch != m_touchUndoStack.Get().end(); ++itBatch )
+	{
+		if ( itBatch != itFirst )
+			os << std::endl;		// inner batch extra line-end separator
+
+		os << FormatActionTag( Touch, itBatch->m_timestamp ) << std::endl;		// add action tag
+
+		for ( fs::TFileStatePairMap::const_iterator itPair = itBatch->m_batch.begin(); itPair != itBatch->m_batch.end(); ++itPair )
+			os << fmt::FormatTouchEntry( itPair->first, itPair->second ) << std::endl;
+
+		os << fmt::FormatTag( fmt::s_tagEndOfBatch ) << std::endl;
+	}
+}
+
+bool CUndoChangeLog::AddRenameLine( fs::TPathPairMap& rBatchRename, const str::TStringRange& textRange )
+{
+	fs::CPath srcPath, destPath;
+	if ( fmt::ParseRenameEntry( srcPath, destPath, textRange ) )
+	{
+		rBatchRename[ srcPath ] = destPath;
+		return true;
+	}
 	return false;
 }
 
-bool CUndoChangeLog::ParseTouchLine( fs::TFileInfoSet& rBatchTouch, const std::tstring& line )
+bool CUndoChangeLog::AddTouchLine( fs::TFileStatePairMap& rBatchTouch, const str::TStringRange& textRange )
 {
-	fs::CFileInfo fileInfo;
-	if ( !fileInfo.Parse( line ) )
-		return false;
-
-	rBatchTouch.insert( fileInfo );
-	return true;
-}
-
-void CUndoChangeLog::SaveRenameBatches( std::ostream& output ) const
-{
-	for ( std::list< CBatch< fs::PathPairMap > >::const_iterator itBatch = m_renameUndoStack.begin(), itFirst = itBatch; itBatch != m_renameUndoStack.end(); ++itBatch )
+	fs::CFileState srcFileState, destFileState;
+	if ( fmt::ParseTouchEntry( srcFileState, destFileState, textRange ) )
 	{
-		if ( itBatch != itFirst )
-			output << std::endl;		// inner batch extra line-end separator
-
-		output << FormatActionTag( Rename, itBatch->m_timestamp ) << std::endl;		// add action tag
-
-		for ( fs::PathPairMap::const_iterator itPair = itBatch->m_batch.begin(); itPair != itBatch->m_batch.end(); ++itPair )
-		{
-			ASSERT( !itPair->first.IsEmpty() && !itPair->second.IsEmpty() );
-			output << itPair->first.Get() << s_filePairSep << itPair->second.Get() << std::endl;
-		}
-		output << s_endOfBatchSep << std::endl;
+		rBatchTouch[ srcFileState ] = destFileState;
+		return true;
 	}
+	return false;
 }
 
-void CUndoChangeLog::SaveTouchBatches( std::ostream& output ) const
-{
-	for ( std::list< CBatch< fs::TFileInfoSet > >::const_iterator itBatch = m_touchUndoStack.begin(), itFirst = itBatch; itBatch != m_touchUndoStack.end(); ++itBatch )
-	{
-		if ( itBatch != itFirst )
-			output << std::endl;		// inner batch extra line-end separator
-
-		output << FormatActionTag( Touch, itBatch->m_timestamp ) << std::endl;		// add action tag
-
-		for ( fs::TFileInfoSet::const_iterator itPair = itBatch->m_batch.begin(); itPair != itBatch->m_batch.end(); ++itPair )
-			output << itPair->Format() << std::endl;
-
-		output << s_endOfBatchSep << std::endl;
-	}
-}
 
 const CEnumTags& CUndoChangeLog::GetTags_Action( void )
 {
@@ -197,30 +350,33 @@ const CEnumTags& CUndoChangeLog::GetTags_Action( void )
 	return tags;
 }
 
-bool CUndoChangeLog::ParseActionTag( Action& rAction, CTime& rTimestamp, const std::string& text )
+std::tstring CUndoChangeLog::FormatActionTag( Action action, const CTime& timestamp )
 {
-	std::vector< std::tstring > parts;
-	str::Tokenize( parts, str::FromAnsi( text.c_str() ).c_str(), _T("<> ") );
+	std::tstring text; text.reserve( 64 );
+	text = GetTags_Action().GetUiTags()[ action ];
+	if ( timestamp.GetTime() != 0 )
+		text += _T(' ') + time_utl::FormatTimestamp( timestamp );
 
-	if ( parts.size() <= 2 )
+	return fmt::FormatTag( text.c_str() );
+}
+
+bool CUndoChangeLog::ParseActionTag( Action& rAction, CTime& rTimestamp, const str::TStringRange& tagRange )
+{
+	if ( !tagRange.IsEmpty() )
 	{
-		rAction = static_cast< Action >( GetTags_Action().ParseUi( parts[ 0 ] ) );
-		if ( rAction != GetTags_Action().GetDefaultValue< Action >() )
+		std::tstring actionTag, timestampText;
+
+		Range< size_t > sepPos;
+		if ( tagRange.Find( sepPos, _T(' ') ) )
+			tagRange.SplitPair( actionTag, timestampText, sepPos );
+		else
+			actionTag = tagRange.Extract();
+
+		if ( GetTags_Action().ParseUiAs( rAction, actionTag ) )
 		{
-			if ( 2 == parts.size() )
-				rTimestamp = time_utl::ParseTimestamp( parts[ 1 ] );
+			rTimestamp = time_utl::ParseTimestamp( timestampText );
 			return true;
 		}
 	}
-
-	rAction = Rename;			// backwards compatible with no action tags
-	rTimestamp = CTime();
-	return false;				// not an action tag - a content tag
-}
-
-std::tstring CUndoChangeLog::FormatActionTag( Action action, const CTime& timestamp )
-{
-	return str::Format( s_actionTagFormat,
-		GetTags_Action().GetUiTags()[ action ].c_str(),
-		timestamp.GetTime() != 0 ? time_utl::FormatTimestamp( timestamp ).c_str() : _T("-") );
+	return false;				// not an action tag, therefore a content tag
 }

@@ -3,6 +3,7 @@
 #pragma once
 
 #include "StringTests.h"
+#include "StringRangeTests.h"
 #include "LcsTests.h"
 #include "ResequenceTests.h"
 #include "FileSystemTests.h"
@@ -17,6 +18,7 @@ namespace ut
 	#ifdef _DEBUG
 		// register UTL tests
 		CStringTests::Instance();
+		CStringRangeTests::Instance();
 		CLcsTests::Instance();
 		CResequenceTests::Instance();
 		CFileSystemTests::Instance();

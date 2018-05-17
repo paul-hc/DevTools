@@ -195,7 +195,7 @@ namespace time_utl
 			minute,		// 0-based, 0 .. 59
 			second;		// 0-based, 0 .. 59
 
-		if ( 6 == _stscanf( text.c_str(), format, &month, &day, &year, &hour, &minute, &second ) &&
+		if ( 6 == _stscanf( text.c_str(), format, &day, &month, &year, &hour, &minute, &second ) &&
 			 year >= 1900 &&
 			 ( month >= January && month <= December ) &&
 			 ( day >= 1 && day <= DaysInMonth( year, month ) ) &&

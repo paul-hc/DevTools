@@ -22,7 +22,7 @@ void CFileWorkingSet::ClearDestinationFiles( void )
 {
 	ClearErrors();
 
-	for ( fs::PathPairMap::iterator it = m_renamePairs.begin(); it != m_renamePairs.end(); ++it )
+	for ( fs::TPathPairMap::iterator it = m_renamePairs.begin(); it != m_renamePairs.end(); ++it )
 		it->second = fs::CPath();
 }
 
@@ -38,15 +38,15 @@ void CFileWorkingSet::SaveUndoLog( void )
 
 bool CFileWorkingSet::CanUndo( void ) const
 {
-	return m_pUndoChangeLog->CanUndoRename();
+	return m_pUndoChangeLog->GetRenameUndoStack().CanUndo();
 }
 
-void CFileWorkingSet::SaveUndoInfo( const fs::PathSet& renamedKeys )
+void CFileWorkingSet::SaveUndoInfo( const fs::TPathSet& renamedKeys )
 {
 	// push in the undo stack only pairs that were successfully renamed
-	fs::PathPairMap& rRenamePairs = m_pUndoChangeLog->PushRename();
+	fs::TPathPairMap& rRenamePairs = m_pUndoChangeLog->GetRenameUndoStack().Push();
 
-	for ( fs::PathPairMap::const_iterator itRenamePair = m_renamePairs.begin(); itRenamePair != m_renamePairs.end(); ++itRenamePair )
+	for ( fs::TPathPairMap::const_iterator itRenamePair = m_renamePairs.begin(); itRenamePair != m_renamePairs.end(); ++itRenamePair )
 		if ( renamedKeys.find( itRenamePair->first ) != renamedKeys.end() )		// successfully renamed
 			rRenamePairs[ itRenamePair->first ] = itRenamePair->second;
 
@@ -57,18 +57,18 @@ void CFileWorkingSet::RetrieveUndoInfo( void )
 {
 	ASSERT( CanUndo() );
 
-	const fs::PathPairMap* pTopRenamePairs = m_pUndoChangeLog->GetTopRename();	// stack top is last
+	const fs::TPathPairMap* pTopRenamePairs = m_pUndoChangeLog->GetRenameUndoStack().GetTop();	// stack top is last
 	ASSERT_PTR( pTopRenamePairs );
 
 	m_renamePairs.clear();
-	for ( fs::PathPairMap::const_iterator it = pTopRenamePairs->begin(); it != pTopRenamePairs->end(); ++it )
+	for ( fs::TPathPairMap::const_iterator it = pTopRenamePairs->begin(); it != pTopRenamePairs->end(); ++it )
 		m_renamePairs[ it->second ] = it->first;	// for undo swap source and destination
 }
 
 void CFileWorkingSet::CommitUndoInfo( void )
 {
 	ASSERT( CanUndo() );
-	m_pUndoChangeLog->PopRename();
+	m_pUndoChangeLog->GetRenameUndoStack().Pop();
 }
 
 size_t CFileWorkingSet::SetupFromDropInfo( HDROP hDropInfo )
@@ -134,7 +134,7 @@ void CFileWorkingSet::PasteClipDestinationPaths( CWnd* pWnd ) throws_( CRuntimeE
 
 	int pos = 0;
 
-	for ( fs::PathPairMap::iterator it = m_renamePairs.begin(); it != m_renamePairs.end(); ++it, ++pos )
+	for ( fs::TPathPairMap::iterator it = m_renamePairs.begin(); it != m_renamePairs.end(); ++it, ++pos )
 	{
 		fs::CPath newFilePath( destPaths[ pos ] );
 
@@ -145,10 +145,10 @@ void CFileWorkingSet::PasteClipDestinationPaths( CWnd* pWnd ) throws_( CRuntimeE
 
 bool CFileWorkingSet::CheckPathCollisions( std::vector< std::tstring >& rDestDuplicates )
 {
-	fs::PathSet destPaths;
+	fs::TPathSet destPaths;
 	size_t pos = 0, emptyCount = 0;
 
-	for ( fs::PathPairMap::const_iterator it = m_renamePairs.begin(); it != m_renamePairs.end(); ++it, ++pos )
+	for ( fs::TPathPairMap::const_iterator it = m_renamePairs.begin(); it != m_renamePairs.end(); ++it, ++pos )
 		if ( it->second.IsEmpty() )									// ignore empty dest paths
 			++emptyCount;
 		else if ( !destPaths.insert( it->second ).second ||			// not unique in the working set
@@ -201,13 +201,13 @@ void CFileWorkingSet::EnsureUniformNumPadding( void )
 {
 	std::vector< std::tstring > fnames; fnames.reserve( fnames.size() );
 
-	for ( fs::PathPairMap::const_iterator it = m_renamePairs.begin(); it != m_renamePairs.end(); ++it )
+	for ( fs::TPathPairMap::const_iterator it = m_renamePairs.begin(); it != m_renamePairs.end(); ++it )
 		fnames.push_back( CFileSetUi::GetDestFname( it ) );
 
 	num::EnsureUniformZeroPadding( fnames );
 
 	size_t pos = 0;
-	for ( fs::PathPairMap::iterator it = m_renamePairs.begin(); it != m_renamePairs.end(); ++it, ++pos )
+	for ( fs::TPathPairMap::iterator it = m_renamePairs.begin(); it != m_renamePairs.end(); ++it, ++pos )
 	{
 		fs::CPathParts destParts( CFileSetUi::GetDestPath( it ) );
 		destParts.m_fname = fnames[ pos ];

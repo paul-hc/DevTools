@@ -127,10 +127,10 @@ void CMainRenameDialog::SetupFileListView( void )
 
 	utl::ClearOwningContainer( m_displayItems );
 
-	const fs::PathPairMap& renamePairs = m_pFileData->GetRenamePairs();
+	const fs::TPathPairMap& renamePairs = m_pFileData->GetRenamePairs();
 	int pos = 0;
 
-	for ( fs::PathPairMap::const_iterator it = renamePairs.begin();
+	for ( fs::TPathPairMap::const_iterator it = renamePairs.begin();
 		  it != renamePairs.end(); ++it, ++pos )
 	{
 		CDisplayItem* pItem = new CDisplayItem( it->first, it->second );

@@ -25,7 +25,7 @@ namespace inc
 	private:
 		size_t m_maxCount;
 		std::vector< TPathLocPair > m_foundFiles;
-		fs::PathSet m_uniquePaths;
+		fs::TPathSet m_uniquePaths;
 	};
 
 

@@ -29,23 +29,23 @@ namespace fs
 		CBatchRename( IBatchTransactionCallback* pCallback );
 		~CBatchRename();
 
-		const fs::PathSet& GetRenamedKeys( void ) const { ASSERT_PTR( this ); return m_renamed; }
+		const fs::TPathSet& GetRenamedKeys( void ) const { ASSERT_PTR( this ); return m_renamed; }
 
 		bool HasErrors( void ) const { return !m_errorMap.empty(); }
 		bool ContainsError( const fs::CPath& sourcePath ) const { return m_errorMap.find( sourcePath ) != m_errorMap.end(); }
 
-		bool Rename( const fs::PathPairMap& renamePairs );
+		bool Rename( const fs::TPathPairMap& renamePairs );
 	private:
-		bool RenameSrcToInterm( const fs::PathPairMap& renamePairs );
-		bool RenameIntermToDest( const fs::PathPairMap& renamePairs );
+		bool RenameSrcToInterm( const fs::TPathPairMap& renamePairs );
+		bool RenameIntermToDest( const fs::TPathPairMap& renamePairs );
 
-		void MakeIntermPaths( const fs::PathPairMap& renamePairs );
-		void LogTransaction( const fs::PathPairMap& renamePairs ) const;
+		void MakeIntermPaths( const fs::TPathPairMap& renamePairs );
+		void LogTransaction( const fs::TPathPairMap& renamePairs ) const;
 		static std::tstring ExtractMessage( const fs::CPath& path, CException* pExc );
 	private:
 		IBatchTransactionCallback* m_pCallback;
 		std::vector< fs::CPath > m_intermPaths;				// intermediate paths in the rename cycle SRC -> INTERM -> DEST
-		fs::PathSet m_renamed;								// renamed successfuly
+		fs::TPathSet m_renamed;								// renamed successfuly
 		std::map< fs::CPath, std::tstring > m_errorMap;		// source-path -> error
 	};
 }

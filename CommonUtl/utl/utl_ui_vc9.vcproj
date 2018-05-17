@@ -51,6 +51,7 @@
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
 				UsePrecompiledHeader="2"
+				BrowseInformation="0"
 				WarningLevel="4"
 				DebugInformationFormat="4"
 			/>
@@ -118,7 +119,7 @@
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
 				UsePrecompiledHeader="2"
-				BrowseInformation="1"
+				BrowseInformation="0"
 				WarningLevel="4"
 				DebugInformationFormat="3"
 			/>
@@ -186,6 +187,7 @@
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="2"
+				BrowseInformation="0"
 				WarningLevel="4"
 				DebugInformationFormat="3"
 			/>
@@ -254,6 +256,7 @@
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="2"
+				BrowseInformation="0"
 				WarningLevel="4"
 				DebugInformationFormat="3"
 			/>
@@ -572,6 +575,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\StringRange.h"
+				>
+			</File>
+			<File
 				RelativePath=".\StringUtilities.cpp"
 				>
 			</File>
@@ -647,14 +654,6 @@
 					>
 				</File>
 				<File
-					RelativePath=".\FileInfo.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\FileInfo.h"
-					>
-				</File>
-				<File
 					RelativePath=".\FileObjectCache.cpp"
 					>
 				</File>
@@ -664,6 +663,14 @@
 				</File>
 				<File
 					RelativePath=".\FileObjectCache.hxx"
+					>
+				</File>
+				<File
+					RelativePath=".\FileState.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\FileState.h"
 					>
 				</File>
 				<File
@@ -1621,6 +1628,14 @@
 			</File>
 			<File
 				RelativePath=".\ut\ResequenceTests.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ut\StringRangeTests.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\ut\StringRangeTests.h"
 				>
 			</File>
 			<File

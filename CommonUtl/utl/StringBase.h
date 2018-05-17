@@ -127,7 +127,7 @@ namespace str
 	};
 
 	template< typename CharType >
-	CPart< CharType > MakePart( const CharType* pString, size_t count = std::tstring::npos )
+	inline CPart< CharType > MakePart( const CharType* pString, size_t count = std::tstring::npos )
 	{
 		return CPart< CharType >( pString, count != std::tstring::npos ? count : GetLength( pString ) );
 	}

@@ -189,7 +189,7 @@ namespace ut
 	std::tstring CPathPairPool::JoinDest( void )
 	{
 		std::vector< std::tstring > destFilenames; destFilenames.reserve( m_pathPairs.size() );
-		for ( fs::PathPairMap::const_iterator it = m_pathPairs.begin(); it != m_pathPairs.end(); ++it )
+		for ( fs::TPathPairMap::const_iterator it = m_pathPairs.begin(); it != m_pathPairs.end(); ++it )
 			destFilenames.push_back( m_fullDestPaths ? it->second.Get() : fs::CPathParts( it->second.Get() ).GetNameExt() );
 
 		return str::Join( destFilenames, ut::CTempFilePool::m_sep );
@@ -197,7 +197,7 @@ namespace ut
 
 	void CPathPairPool::CopySrc( void )
 	{
-		for ( fs::PathPairMap::iterator it = m_pathPairs.begin(); it != m_pathPairs.end(); ++it )
+		for ( fs::TPathPairMap::iterator it = m_pathPairs.begin(); it != m_pathPairs.end(); ++it )
 			it->second = it->first;
 	}
 

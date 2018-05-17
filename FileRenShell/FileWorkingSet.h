@@ -23,7 +23,7 @@ public:
 	bool IsEmpty( void ) const { return m_sourceFiles.empty(); }
 
 	const std::vector< fs::CPath >& GetSourceFiles( void ) const { return m_sourceFiles; }
-	const fs::PathPairMap& GetRenamePairs( void ) const { return m_renamePairs; }
+	const fs::TPathPairMap& GetRenamePairs( void ) const { return m_renamePairs; }
 
 	size_t SetupFromDropInfo( HDROP hDropInfo );
 
@@ -40,7 +40,7 @@ public:
 	void EnsureUniformNumPadding( void );
 
 	bool CanUndo( void ) const;
-	void SaveUndoInfo( const fs::PathSet& renamedKeys );
+	void SaveUndoInfo( const fs::TPathSet& renamedKeys );
 	void RetrieveUndoInfo( void );		// fills rename pairs from undo stack
 	void CommitUndoInfo( void );		// pops last from undo stack (when Undo-Rename OK is pressed)
 
@@ -57,7 +57,7 @@ public:
 	void ClearErrors( void ) { m_errorIndexes.clear(); }
 private:
 	std::vector< fs::CPath > m_sourceFiles;
-	fs::PathPairMap m_renamePairs;
+	fs::TPathPairMap m_renamePairs;
 	std::auto_ptr< CUndoChangeLog > m_pUndoChangeLog;
 
 	std::set< size_t > m_errorIndexes;
@@ -67,7 +67,7 @@ private:
 template< typename Func >
 void CFileWorkingSet::ForEachDestination( const Func& func )
 {
-	for ( fs::PathPairMap::iterator it = m_renamePairs.begin(); it != m_renamePairs.end(); ++it )
+	for ( fs::TPathPairMap::iterator it = m_renamePairs.begin(); it != m_renamePairs.end(); ++it )
 	{
 		fs::CPathParts destParts( !it->second.IsEmpty() ? it->second.Get() : it->first.Get() );		// use source if dest emty
 		func( destParts );

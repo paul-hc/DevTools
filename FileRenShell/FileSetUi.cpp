@@ -37,7 +37,7 @@ void CFileSetUi::QueryDestFilenames( std::vector< std::tstring >& rDestFnames ) 
 	rDestFnames.clear();
 	rDestFnames.reserve( m_renamePairs.size() );
 
-	for ( fs::PathPairMap::const_iterator itPair = m_renamePairs.begin(); itPair != m_renamePairs.end(); ++itPair )
+	for ( fs::TPathPairMap::const_iterator itPair = m_renamePairs.begin(); itPair != m_renamePairs.end(); ++itPair )
 		rDestFnames.push_back( GetDestFname( itPair ) );
 
 	if ( rDestFnames.size() > PickFilenameMaxCount )
@@ -196,12 +196,12 @@ std::tstring CFileSetUi::GetPickedDirectory( UINT cmdId ) const
 	return std::tstring();
 }
 
-std::tstring CFileSetUi::GetDestPath( fs::PathPairMap::const_iterator itPair )
+std::tstring CFileSetUi::GetDestPath( fs::TPathPairMap::const_iterator itPair )
 {
 	return itPair->second.IsEmpty() ? itPair->first.Get() : itPair->second.Get();
 }
 
-std::tstring CFileSetUi::GetDestFname( fs::PathPairMap::const_iterator itPair )
+std::tstring CFileSetUi::GetDestFname( fs::TPathPairMap::const_iterator itPair )
 {
 	return fs::CPathParts( GetDestPath( itPair ) ).m_fname;		// DEST (if not empty) or SRC
 }

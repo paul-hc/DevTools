@@ -21,7 +21,7 @@ namespace fs
 	{
 	}
 
-	bool CBatchRename::Rename( const fs::PathPairMap& renamePairs )
+	bool CBatchRename::Rename( const fs::TPathPairMap& renamePairs )
 	{
 		CWaitCursor wait;
 
@@ -36,11 +36,11 @@ namespace fs
 		return !aborted;
 	}
 
-	bool CBatchRename::RenameSrcToInterm( const fs::PathPairMap& renamePairs )
+	bool CBatchRename::RenameSrcToInterm( const fs::TPathPairMap& renamePairs )
 	{
 		// step 1: rename SOURCE -> INTERMEDIATE
 		std::vector< fs::CPath >::const_iterator itInterm = m_intermPaths.begin();
-		for ( fs::PathPairMap::const_iterator it = renamePairs.begin(); it != renamePairs.end(); )
+		for ( fs::TPathPairMap::const_iterator it = renamePairs.begin(); it != renamePairs.end(); )
 		{
 			try
 			{
@@ -64,11 +64,11 @@ namespace fs
 		return true;
 	}
 
-	bool CBatchRename::RenameIntermToDest( const fs::PathPairMap& renamePairs )
+	bool CBatchRename::RenameIntermToDest( const fs::TPathPairMap& renamePairs )
 	{
 		// step 2: rename INTERMEDIATE -> DESTINATION
 		std::vector< fs::CPath >::const_iterator itInterm = m_intermPaths.begin();
-		for ( fs::PathPairMap::const_iterator it = renamePairs.begin(); it != renamePairs.end(); )
+		for ( fs::TPathPairMap::const_iterator it = renamePairs.begin(); it != renamePairs.end(); )
 		{
 			if ( m_renamed.find( it->first ) != m_renamed.end() )
 			{
@@ -96,12 +96,12 @@ namespace fs
 		return true;
 	}
 
-	void CBatchRename::MakeIntermPaths( const fs::PathPairMap& renamePairs )
+	void CBatchRename::MakeIntermPaths( const fs::TPathPairMap& renamePairs )
 	{
 		const std::tstring intermSuffix = str::Format( _T("_%x"), GetTickCount() );		// random fname sufffix
 
 		m_intermPaths.clear();
-		for ( fs::PathPairMap::const_iterator it = renamePairs.begin(); it != renamePairs.end(); ++it )
+		for ( fs::TPathPairMap::const_iterator it = renamePairs.begin(); it != renamePairs.end(); ++it )
 		{
 			fs::CPathParts parts( it->second.Get() );
 			parts.m_fname += intermSuffix;
@@ -120,10 +120,10 @@ namespace fs
 		return message;
 	}
 
-	void CBatchRename::LogTransaction( const fs::PathPairMap& renamePairs ) const
+	void CBatchRename::LogTransaction( const fs::TPathPairMap& renamePairs ) const
 	{
 		if ( CLogger* pLogger = m_pCallback->GetLogger() )
-			for ( fs::PathPairMap::const_iterator it = renamePairs.begin(); it != renamePairs.end(); ++it )
+			for ( fs::TPathPairMap::const_iterator it = renamePairs.begin(); it != renamePairs.end(); ++it )
 			{
 				std::map< fs::CPath, std::tstring >::const_iterator itError = m_errorMap.find( it->first );
 				if ( itError != m_errorMap.end() )

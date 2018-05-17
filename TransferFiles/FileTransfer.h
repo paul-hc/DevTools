@@ -42,7 +42,7 @@ private:
 	size_t m_fileCount;
 	size_t m_createdDirCount;
 
-	fs::PathSet m_failedTargetDirs;
+	fs::TPathSet m_failedTargetDirs;
 };
 
 

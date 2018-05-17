@@ -23,7 +23,7 @@ class CPathMaker : private utl::noncopyable
 {
 public:
 	CPathMaker( void );									// allocates internal file map, with ownership
-	CPathMaker( fs::PathPairMap* pRenamePairs );		// reference external file map
+	CPathMaker( fs::TPathPairMap* pRenamePairs );		// reference external file map
 	~CPathMaker();
 
 	bool MakeDestRelative( const std::tstring& prefixDirPath );		// SRC path -> relative DEST path
@@ -51,7 +51,7 @@ protected:
 	void CopyDestPaths( const std::vector< fs::CPath >& destPaths );
 	void ResetDestPaths( void );
 protected:
-	fs::PathPairMap* m_pRenamePairs;
+	fs::TPathPairMap* m_pRenamePairs;
 private:
 	bool m_mapOwnership;					// internal built map, deleted on destructor
 };
@@ -82,7 +82,7 @@ void CPathMaker::QueryDestToPairs( PairContainer& rDestPairs ) const
 
 	for ( typename PairContainer::iterator itDestPair = rDestPairs.begin(); itDestPair != rDestPairs.end(); ++itDestPair )
 	{
-		fs::PathPairMap::const_iterator itFound = m_pRenamePairs->find( itDestPair->first );
+		fs::TPathPairMap::const_iterator itFound = m_pRenamePairs->find( itDestPair->first );
 		ASSERT( itFound != m_pRenamePairs->end() );
 		itDestPair->second.Set( itFound->second.Get() );			// may convert from fs::CPath to fs::CFlexPath, if PairContainer uses fs::CFlexPath
 	}
@@ -95,7 +95,7 @@ void CPathMaker::QueryDestToPaths( Container& rDestPaths ) const
 
 	for ( typename Container::iterator itDestPath = rDestPaths.begin(); itDestPath != rDestPaths.end(); ++itDestPath )
 	{
-		fs::PathPairMap::const_iterator itFound = m_pRenamePairs->find( fs::traits::GetPath( *itDestPath ) );
+		fs::TPathPairMap::const_iterator itFound = m_pRenamePairs->find( fs::traits::GetPath( *itDestPath ) );
 		ASSERT( itFound != m_pRenamePairs->end() );
 		fs::traits::SetPath( *itDestPath, itFound->second );
 	}
@@ -104,7 +104,7 @@ void CPathMaker::QueryDestToPaths( Container& rDestPaths ) const
 template< typename Func > inline
 Func CPathMaker::ForEachDestPath( Func func )
 {
-	for ( fs::PathPairMap::iterator it = m_pRenamePairs->begin(); it != m_pRenamePairs->end(); ++it )
+	for ( fs::TPathPairMap::iterator it = m_pRenamePairs->begin(); it != m_pRenamePairs->end(); ++it )
 		func( it->second );
 
 	return func;

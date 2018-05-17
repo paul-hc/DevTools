@@ -53,7 +53,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="../CommonUtl"
+				AdditionalIncludeDirectories=".;../CommonUtl"
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_USRDLL"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -61,7 +61,7 @@
 				UsePrecompiledHeader="2"
 				PrecompiledHeaderThrough="StdAfx.h"
 				AssemblerListingLocation=".\DebugU/"
-				BrowseInformation="1"
+				BrowseInformation="0"
 				WarningLevel="4"
 				SuppressStartupBanner="true"
 				DebugInformationFormat="4"
@@ -149,7 +149,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="../CommonUtl"
+				AdditionalIncludeDirectories=".;../CommonUtl"
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_USRDLL"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -157,7 +157,7 @@
 				UsePrecompiledHeader="2"
 				PrecompiledHeaderThrough="StdAfx.h"
 				AssemblerListingLocation=""
-				BrowseInformation="1"
+				BrowseInformation="0"
 				WarningLevel="4"
 				SuppressStartupBanner="true"
 				DebugInformationFormat="3"
@@ -246,7 +246,7 @@
 				Optimization="1"
 				InlineFunctionExpansion="2"
 				WholeProgramOptimization="true"
-				AdditionalIncludeDirectories="../CommonUtl"
+				AdditionalIncludeDirectories=".;../CommonUtl"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL"
 				StringPooling="true"
 				RuntimeLibrary="0"
@@ -254,6 +254,7 @@
 				UsePrecompiledHeader="2"
 				PrecompiledHeaderThrough="StdAfx.h"
 				AssemblerListingLocation=".\ReleaseU/"
+				BrowseInformation="0"
 				WarningLevel="4"
 				SuppressStartupBanner="true"
 				DebugInformationFormat="3"
@@ -345,7 +346,7 @@
 				Optimization="1"
 				InlineFunctionExpansion="2"
 				WholeProgramOptimization="true"
-				AdditionalIncludeDirectories="../CommonUtl"
+				AdditionalIncludeDirectories=".;../CommonUtl"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL"
 				StringPooling="true"
 				RuntimeLibrary="0"
@@ -353,6 +354,7 @@
 				UsePrecompiledHeader="2"
 				PrecompiledHeaderThrough="StdAfx.h"
 				AssemblerListingLocation=""
+				BrowseInformation="0"
 				WarningLevel="4"
 				SuppressStartupBanner="true"
 				DebugInformationFormat="3"
@@ -666,6 +668,18 @@
 			</File>
 			<File
 				RelativePath=".\UndoChangeLog.h"
+				>
+			</File>
+		</Filter>
+		<Filter
+			Name="Unit Tests"
+			>
+			<File
+				RelativePath=".\ut\UndoChangeLogTests.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\ut\UndoChangeLogTests.h"
 				>
 			</File>
 		</Filter>

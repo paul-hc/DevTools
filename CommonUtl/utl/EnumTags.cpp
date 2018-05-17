@@ -38,21 +38,24 @@ std::tstring CEnumTags::Format( int value, const std::vector< std::tstring >& ta
 	return tags[ value ];
 }
 
-int CEnumTags::Parse( const std::tstring& text, const std::vector< std::tstring >& tags ) const
+bool CEnumTags::Parse( int& rValue, const std::tstring& text, const std::vector< std::tstring >& tags ) const
 {
 	ASSERT( !tags.empty() );
 
 	for ( unsigned int value = 0; value != tags.size(); ++value )
-		if ( pred::Equal == str::CompareNoCase( tags[ value ], text ) )
-			return value;
+		if ( str::EqualString< str::IgnoreCase >( tags[ value ], text ) )
+		{
+			rValue = value;
+			return true;
+		}
 
-	return m_defaultValue;
+	rValue = m_defaultValue;
+	return false;
 }
 
 bool CEnumTags::Contains( const std::vector< std::tstring >& strings, const std::tstring& value )
 {
-	for ( std::vector< std::tstring >::const_iterator itString = strings.begin();
-		  itString != strings.end(); ++itString )
+	for ( std::vector< std::tstring >::const_iterator itString = strings.begin(); itString != strings.end(); ++itString )
 		if ( pred::Equal == str::CompareNoCase( *itString, value ) )
 			return true;
 

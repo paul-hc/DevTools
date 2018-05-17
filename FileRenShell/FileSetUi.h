@@ -31,8 +31,8 @@ public:
 	std::tstring GetPickedFname( UINT cmdId, std::vector< std::tstring >* pDestFnames = NULL ) const;
 	std::tstring GetPickedDirectory( UINT cmdId ) const;
 
-	static std::tstring GetDestPath( fs::PathPairMap::const_iterator itPair );
-	static std::tstring GetDestFname( fs::PathPairMap::const_iterator itPair );
+	static std::tstring GetDestPath( fs::TPathPairMap::const_iterator itPair );
+	static std::tstring GetDestFname( fs::TPathPairMap::const_iterator itPair );
 	static std::tstring& EscapeAmpersand( std::tstring& rText );
 
 	// text tools
@@ -42,7 +42,7 @@ public:
 private:
 	static bool AllHavePrefix( const std::vector< std::tstring >& destFnames, size_t prefixLen );
 private:
-	const fs::PathPairMap& m_renamePairs;
+	const fs::TPathPairMap& m_renamePairs;
 };
 
 

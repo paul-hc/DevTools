@@ -8,13 +8,13 @@
 
 
 CPathMaker::CPathMaker( void )
-	: m_pRenamePairs( new fs::PathPairMap )
+	: m_pRenamePairs( new fs::TPathPairMap )
 	, m_mapOwnership( true )
 {
 	ASSERT_PTR( m_pRenamePairs );
 }
 
-CPathMaker::CPathMaker( fs::PathPairMap* pRenamePairs )
+CPathMaker::CPathMaker( fs::TPathPairMap* pRenamePairs )
 	: m_pRenamePairs( pRenamePairs )
 	, m_mapOwnership( false )
 {
@@ -31,7 +31,7 @@ bool CPathMaker::MakeDestRelative( const std::tstring& prefixDirPath )
 {
 	// for each copy SRC path to DEST path, and make relative DEST path by removing the reference dir path suffix.
 
-	for ( fs::PathPairMap::iterator it = m_pRenamePairs->begin(); it != m_pRenamePairs->end(); ++it )
+	for ( fs::TPathPairMap::iterator it = m_pRenamePairs->begin(); it != m_pRenamePairs->end(); ++it )
 	{
 		std::tstring destRelPath = it->first.GetPtr();
 
@@ -55,7 +55,7 @@ std::tstring CPathMaker::FindSrcCommonPrefix( void ) const
 
 	if ( !m_pRenamePairs->empty() )
 	{
-		fs::PathPairMap::const_iterator it = m_pRenamePairs->begin();
+		fs::TPathPairMap::const_iterator it = m_pRenamePairs->begin();
 		commonPrefix = it->first.GetParentPath().Get();
 
 		for ( ++it; it != m_pRenamePairs->end(); ++it )
@@ -73,12 +73,12 @@ void CPathMaker::CopyDestPaths( const std::vector< fs::CPath >& destPaths )
 	REQUIRE( m_pRenamePairs->size() == destPaths.size() );
 
 	size_t pos = 0;
-	for ( fs::PathPairMap::iterator it = m_pRenamePairs->begin(); it != m_pRenamePairs->end(); ++it, ++pos )
+	for ( fs::TPathPairMap::iterator it = m_pRenamePairs->begin(); it != m_pRenamePairs->end(); ++it, ++pos )
 		it->second = destPaths[ pos ];
 }
 
 void CPathMaker::ResetDestPaths( void )
 {
-	for ( fs::PathPairMap::iterator it = m_pRenamePairs->begin(); it != m_pRenamePairs->end(); ++it )
+	for ( fs::TPathPairMap::iterator it = m_pRenamePairs->begin(); it != m_pRenamePairs->end(); ++it )
 		it->second = fs::CPath();
 }

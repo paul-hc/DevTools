@@ -205,7 +205,7 @@ namespace ut
 		std::tstring JoinDest( void );
 		void CopySrc( void );
 	public:
-		fs::PathPairMap m_pathPairs;
+		fs::TPathPairMap m_pathPairs;
 		bool m_fullDestPaths;				// format DEST in JoinDest using full paths
 	};
 

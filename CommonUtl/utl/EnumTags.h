@@ -12,10 +12,16 @@ public:
 	const std::vector< std::tstring >& GetUiTags( void ) const { return m_uiTags; }
 
 	std::tstring FormatUi( int value ) const { return Format( value, m_uiTags ); }
-	int ParseUi( const std::tstring& text ) const { return Parse( text, m_uiTags ); }
+	int ParseUi( const std::tstring& text ) const { int value; Parse( value, text, m_uiTags ); return value; }
 
 	std::tstring FormatKey( int value ) const { return Format( value, m_keyTags ); }
-	int ParseKey( const std::tstring& text ) const { return Parse( text, m_keyTags ); }
+	int ParseKey( const std::tstring& text ) const { int value; Parse( value, text, m_keyTags ); return value; }
+
+	template< typename EnumType >
+	bool ParseUiAs( EnumType& rValue, const std::tstring& text ) const { return Parse( (int&)rValue, text, m_uiTags ); }
+
+	template< typename EnumType >
+	bool ParseKeyAs( EnumType& rValue, const std::tstring& text ) const { return Parse( (int&)rValue, text, m_keyTags ); }
 
 	enum TagType { KeyTag, UiTag };
 
@@ -28,7 +34,7 @@ public:
 	}
 private:
 	void Construct( const std::tstring& uiTags, const TCHAR* pKeyTags );
-	int Parse( const std::tstring& text, const std::vector< std::tstring >& tags ) const;
+	bool Parse( int& rValue, const std::tstring& text, const std::vector< std::tstring >& tags ) const;
 	static std::tstring Format( int value, const std::vector< std::tstring >& tags );
 	static bool Contains( const std::vector< std::tstring >& strings, const std::tstring& value );
 private:

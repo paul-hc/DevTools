@@ -269,7 +269,7 @@ namespace fs
 		ASSERT_PTR( pEnumerator );
 		ASSERT_PTR( pDirPath );
 
-		fs::PathSet subDirPaths;			// sorted intuitively
+		fs::TPathSet subDirPaths;			// sorted intuitively
 		std::tstring dirPathSpecAll = path::Combine( pDirPath, _T("*") );
 
 		CFileFind finder;
@@ -295,7 +295,7 @@ namespace fs
 		}
 
 		if ( Deep == depth )
-			for ( fs::PathSet::const_iterator itSubDirPath = subDirPaths.begin(); itSubDirPath != subDirPaths.end(); ++itSubDirPath )
+			for ( fs::TPathSet::const_iterator itSubDirPath = subDirPaths.begin(); itSubDirPath != subDirPaths.end(); ++itSubDirPath )
 				EnumFiles( pEnumerator, itSubDirPath->GetPtr(), pWildSpec, depth );
 	}
 
