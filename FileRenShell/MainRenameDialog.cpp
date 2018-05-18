@@ -4,7 +4,6 @@
 #include "Application.h"
 #include "FileWorkingSet.h"
 #include "FileSetUi.h"
-#include "MenuCommand.h"
 #include "PathAlgorithms.h"
 #include "ReplaceDialog.h"
 #include "CapitalizeOptionsDialog.h"
@@ -75,7 +74,7 @@ namespace layout
 }
 
 
-CMainRenameDialog::CMainRenameDialog( MenuCommand menuCmd, CFileWorkingSet* pFileData, CWnd* pParent )
+CMainRenameDialog::CMainRenameDialog( app::MenuCommand menuCmd, CFileWorkingSet* pFileData, CWnd* pParent )
 	: CBaseMainDialog( IDD_RENAME_FILES_DIALOG, pParent )
 	, m_menuCmd( menuCmd )
 	, m_pFileData( pFileData )
@@ -535,17 +534,17 @@ BOOL CMainRenameDialog::OnInitDialog( void )
 
 	switch ( m_menuCmd )
 	{
-		case Cmd_RenameAndCopy:				cmdId = flashId = IDC_COPY_SOURCE_PATHS_BUTTON; break;
-		case Cmd_RenameAndCapitalize:		cmdId = flashId = IDC_CAPITALIZE_BUTTON; break;
-		case Cmd_RenameAndLowCaseExt:		cmdId = flashId = IDC_CHANGE_CASE_BUTTON; m_changeCaseButton.SetSelValue( ExtLowerCase ); break;
-		case Cmd_RenameAndReplace:			cmdId = flashId = IDC_REPLACE_FILES_BUTTON; break;
-		case Cmd_RenameAndReplaceDelims:	cmdId = flashId = IDC_REPLACE_DELIMS_BUTTON; break;
-		case Cmd_RenameAndSingleWhitespace:	cmdId = ID_SINGLE_WHITESPACE; flashId = IDC_PICK_RENAME_ACTIONS; break;
-		case Cmd_RenameAndRemoveWhitespace:	cmdId = ID_REMOVE_WHITESPACE; flashId = IDC_PICK_RENAME_ACTIONS; break;
-		case Cmd_RenameAndDashToSpace:		cmdId = ID_DASH_TO_SPACE; flashId = IDC_PICK_RENAME_ACTIONS; break;
-		case Cmd_RenameAndUnderbarToSpace:	cmdId = ID_UNDERBAR_TO_SPACE; flashId = IDC_PICK_RENAME_ACTIONS; break;
-		case Cmd_RenameAndSpaceToUnderbar:	cmdId = ID_SPACE_TO_UNDERBAR; flashId = IDC_PICK_RENAME_ACTIONS; break;
-		case Cmd_UndoRename:				cmdId = flashId = IDC_UNDO_BUTTON; break;
+		case app::Cmd_RenameAndCopy:				cmdId = flashId = IDC_COPY_SOURCE_PATHS_BUTTON; break;
+		case app::Cmd_RenameAndCapitalize:			cmdId = flashId = IDC_CAPITALIZE_BUTTON; break;
+		case app::Cmd_RenameAndLowCaseExt:			cmdId = flashId = IDC_CHANGE_CASE_BUTTON; m_changeCaseButton.SetSelValue( ExtLowerCase ); break;
+		case app::Cmd_RenameAndReplace:				cmdId = flashId = IDC_REPLACE_FILES_BUTTON; break;
+		case app::Cmd_RenameAndReplaceDelims:		cmdId = flashId = IDC_REPLACE_DELIMS_BUTTON; break;
+		case app::Cmd_RenameAndSingleWhitespace:	cmdId = ID_SINGLE_WHITESPACE; flashId = IDC_PICK_RENAME_ACTIONS; break;
+		case app::Cmd_RenameAndRemoveWhitespace:	cmdId = ID_REMOVE_WHITESPACE; flashId = IDC_PICK_RENAME_ACTIONS; break;
+		case app::Cmd_RenameAndDashToSpace:			cmdId = ID_DASH_TO_SPACE; flashId = IDC_PICK_RENAME_ACTIONS; break;
+		case app::Cmd_RenameAndUnderbarToSpace:		cmdId = ID_UNDERBAR_TO_SPACE; flashId = IDC_PICK_RENAME_ACTIONS; break;
+		case app::Cmd_RenameAndSpaceToUnderbar:		cmdId = ID_SPACE_TO_UNDERBAR; flashId = IDC_PICK_RENAME_ACTIONS; break;
+		case app::Cmd_UndoRename:					cmdId = flashId = IDC_UNDO_BUTTON; break;
 	}
 
 	if ( cmdId != 0 )

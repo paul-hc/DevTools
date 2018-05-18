@@ -47,23 +47,23 @@ public:
 
 const CFileRenameShell::CMenuCmdInfo CFileRenameShell::m_commands[] =
 {
-	{ Cmd_RenameFiles, _T("&Rename Files..."), _T("Rename selected files in the dialog"), ID_RENAME_ITEM, false },
-	{ Cmd_SendToCliboard, _T("&Send To Clipboard"), _T("Send the selected files path to clipboard"), ID_SEND_TO_CLIP, false },
-	{ Cmd_TouchFiles, _T("&Touch Files..."), _T("Modify the timestamp of selected files"), ID_TOUCH_FILES, false },
+	{ app::Cmd_RenameFiles, _T("&Rename Files..."), _T("Rename selected files in the dialog"), ID_RENAME_ITEM, false },
+	{ app::Cmd_SendToCliboard, _T("&Send To Clipboard"), _T("Send the selected files path to clipboard"), ID_SEND_TO_CLIP, false },
+	{ app::Cmd_TouchFiles, _T("&Touch Files..."), _T("Modify the timestamp of selected files"), ID_TOUCH_FILES, false },
 
-	{ Cmd_RenameAndCopy, _T("C&opy..."), _T("Rename selected files and copy source paths to clipboard"), ID_RENAME_AND_COPY, false },
-	{ Cmd_RenameAndCapitalize, _T("&Capitalize..."), _T("Rename selected files and capitalize filenames"), IDD_CAPITALIZE_OPTIONS, false },
-	{ Cmd_RenameAndLowCaseExt, _T("&Low case extension..."), _T("Rename selected files and make extensions lower case"), IDC_CHANGE_CASE_BUTTON, false },
-	{ Cmd_RenameAndReplace, _T("Re&place..."), _T("Rename selected files and replace text in filenames"), ID_EDIT_REPLACE, false },
-	{ Cmd_RenameAndReplaceDelims, _T("Replace &Delimiters..."), _T("Rename selected files and replace all delimiters with spaces"), 0, false },
+	{ app::Cmd_RenameAndCopy, _T("C&opy..."), _T("Rename selected files and copy source paths to clipboard"), ID_RENAME_AND_COPY, false },
+	{ app::Cmd_RenameAndCapitalize, _T("&Capitalize..."), _T("Rename selected files and capitalize filenames"), IDD_CAPITALIZE_OPTIONS, false },
+	{ app::Cmd_RenameAndLowCaseExt, _T("&Low case extension..."), _T("Rename selected files and make extensions lower case"), IDC_CHANGE_CASE_BUTTON, false },
+	{ app::Cmd_RenameAndReplace, _T("Re&place..."), _T("Rename selected files and replace text in filenames"), ID_EDIT_REPLACE, false },
+	{ app::Cmd_RenameAndReplaceDelims, _T("Replace &Delimiters..."), _T("Rename selected files and replace all delimiters with spaces"), 0, false },
 
-	{ Cmd_RenameAndSingleWhitespace, _T("&Single Whitespace...\t\"   \" to \" \""), _T("Rename selected files and replace multiple to single whitespace"), 0, true },
-	{ Cmd_RenameAndRemoveWhitespace, _T("&Remove Whitespace...\t\"    \" to \"\""), _T("Rename selected files and remove whitespace"), 0, false },
-	{ Cmd_RenameAndDashToSpace, _T("&Dash to Space...\t\"-\" to \" \""), _T("Rename selected files and replace dashes with spaces"), 0, false },
-	{ Cmd_RenameAndUnderbarToSpace, _T("&Underbar to Space...\t\"_\" to \" \""), _T("Rename selected files and replace underbars to spaces"), 0, false },
-	{ Cmd_RenameAndSpaceToUnderbar, _T("Space to Underbar...\t\" \" to \"_\""), _T("Rename selected files and replace spaces with underbars"), 0, false },
+	{ app::Cmd_RenameAndSingleWhitespace, _T("&Single Whitespace...\t\"   \" to \" \""), _T("Rename selected files and replace multiple to single whitespace"), 0, true },
+	{ app::Cmd_RenameAndRemoveWhitespace, _T("&Remove Whitespace...\t\"    \" to \"\""), _T("Rename selected files and remove whitespace"), 0, false },
+	{ app::Cmd_RenameAndDashToSpace, _T("&Dash to Space...\t\"-\" to \" \""), _T("Rename selected files and replace dashes with spaces"), 0, false },
+	{ app::Cmd_RenameAndUnderbarToSpace, _T("&Underbar to Space...\t\"_\" to \" \""), _T("Rename selected files and replace underbars to spaces"), 0, false },
+	{ app::Cmd_RenameAndSpaceToUnderbar, _T("Space to Underbar...\t\" \" to \"_\""), _T("Rename selected files and replace spaces with underbars"), 0, false },
 
-	{ Cmd_UndoRename, _T("&Undo Last Rename..."), _T("Undo last renamed files..."), IDD_CAPITALIZE_OPTIONS, true }
+	{ app::Cmd_UndoRename, _T("&Undo Last Rename..."), _T("Undo last renamed files..."), IDD_CAPITALIZE_OPTIONS, true }
 };
 
 
@@ -91,13 +91,40 @@ size_t CFileRenameShell::ExtractDropInfo( IDataObject* pDropInfo )
 	return m_fileData.SetupFromDropInfo( (HDROP)storageMedium.hGlobal );
 }
 
-const CFileRenameShell::CMenuCmdInfo* CFileRenameShell::FindCmd( MenuCommand cmd )
+const CFileRenameShell::CMenuCmdInfo* CFileRenameShell::FindCmd( app::MenuCommand cmd )
 {
 	for ( int i = 0; i != COUNT_OF( m_commands ); ++i )
 		if ( cmd == m_commands[ i ].m_cmd )
 			return &m_commands[ i ];
 
 	return NULL;
+}
+
+void CFileRenameShell::ExecuteCommand( app::MenuCommand menuCmd, CWnd* pParentOwner )
+{
+	if ( app::Cmd_SendToCliboard == menuCmd )
+	{
+		m_fileData.CopyClipSourcePaths( GetKeyState( VK_SHIFT ) & 0x8000 ? FilenameExt : FullPath, pParentOwner );
+		return;
+	}
+
+	// file operations commands
+	m_fileData.LoadUndoLog();
+	bool committed = false;
+	switch ( menuCmd )
+	{
+		case app::Cmd_TouchFiles:
+		{
+			break;
+		}
+		default:
+		{
+			CMainRenameDialog dlg( menuCmd, &m_fileData, pParentOwner );
+			committed = IDOK == dlg.DoModal();
+		}
+	}
+	if ( committed )
+		m_fileData.SaveUndoLog();
 }
 
 void CFileRenameShell::AugmentMenuItems( HMENU hMenu, UINT indexMenu, UINT idBaseCmd )
@@ -109,7 +136,7 @@ void CFileRenameShell::AugmentMenuItems( HMENU hMenu, UINT indexMenu, UINT idBas
 
 	for ( int i = 0; i != COUNT_OF( m_commands ); ++i )
 	{
-		if ( m_commands[ i ].m_cmd < _CmdFirstSubMenu )
+		if ( m_commands[ i ].m_cmd < app::_CmdFirstSubMenu )
 			::InsertMenu( hMenu, indexMenu++, MF_STRING | MF_BYPOSITION, idBaseCmd + m_commands[ i ].m_cmd, m_commands[ i ].m_pTitle );
 		else
 		{
@@ -120,7 +147,7 @@ void CFileRenameShell::AugmentMenuItems( HMENU hMenu, UINT indexMenu, UINT idBas
 		}
 
 		if ( CBitmap* pMenuBitmap = pImageStore->RetrieveBitmap( m_commands[ i ].m_iconId, menuColor ) )
-			SetMenuItemBitmaps( m_commands[ i ].m_cmd < _CmdFirstSubMenu ? hMenu : hSubMenu,
+			SetMenuItemBitmaps( m_commands[ i ].m_cmd < app::_CmdFirstSubMenu ? hMenu : hSubMenu,
 				idBaseCmd + m_commands[ i ].m_cmd,
 				MF_BYCOMMAND,
 				*pMenuBitmap,
@@ -180,7 +207,7 @@ STDMETHODIMP CFileRenameShell::QueryContextMenu( HMENU hMenu, UINT indexMenu, UI
 		if ( !m_fileData.IsEmpty() )
 		{
 			AugmentMenuItems( hMenu, indexMenu, idCmdFirst );
-			return MAKE_HRESULT( SEVERITY_SUCCESS, FACILITY_NULL, _CmdCount );
+			return MAKE_HRESULT( SEVERITY_SUCCESS, FACILITY_NULL, app::_CmdCount );
 		}
 	}
 
@@ -201,34 +228,14 @@ STDMETHODIMP CFileRenameShell::InvokeCommand( LPCMINVOKECOMMANDINFO pCmi )
 		{
 			//TRACE( _T("CFileRenameShell::InvokeCommand(): selFileCount=%d\n"), m_fileData.GetFileCount() );
 
-			MenuCommand menuCmd = static_cast< MenuCommand >( LOWORD( pCmi->lpVerb ) );
+			app::MenuCommand menuCmd = static_cast< app::MenuCommand >( LOWORD( pCmi->lpVerb ) );
 			CScopedMainWnd scopedMainWnd( pCmi->hwnd );
 
 			if ( !scopedMainWnd.HasValidParentOwner() )
-			{
 				ui::BeepSignal( MB_ICONERROR );
-				return S_OK;
-			}
-
-			switch ( menuCmd )
-			{
-				case Cmd_SendToCliboard:
-					m_fileData.CopyClipSourcePaths( GetKeyState( VK_SHIFT ) & 0x8000 ? FilenameExt : FullPath, scopedMainWnd.m_pParentOwner );
-					return S_OK;
-				case Cmd_TouchFiles:
-					//m_fileData.CopyClipSourcePaths( GetKeyState( VK_SHIFT ) & 0x8000 ? FilenameExt : FullPath, scopedMainWnd.m_pParentOwner );
-					return S_OK;
-				default:
-				{
-					m_fileData.LoadUndoLog();
-
-					CMainRenameDialog dlg( menuCmd, &m_fileData, scopedMainWnd.m_pParentOwner );
-					if ( IDOK == dlg.DoModal() )
-						m_fileData.SaveUndoLog();
-
-					return S_OK;
-				}
-			}
+			else
+				ExecuteCommand( menuCmd, scopedMainWnd.m_pParentOwner );
+			return S_OK;
 		}
 
 	//TRACE( _T("CFileRenameShell::InvokeCommand(): Unrecognized command: %d\n") );
@@ -244,7 +251,7 @@ STDMETHODIMP CFileRenameShell::GetCommandString( UINT_PTR idCmd, UINT flags, UIN
 
 	if ( !m_fileData.IsEmpty() )
 		if ( flags == GCS_HELPTEXTA || flags == GCS_HELPTEXTW )
-			if ( const CMenuCmdInfo* pCmdInfo = FindCmd( static_cast< MenuCommand >( idCmd ) ) )
+			if ( const CMenuCmdInfo* pCmdInfo = FindCmd( static_cast< app::MenuCommand >( idCmd ) ) )
 			{
 				_bstr_t statusInfo( pCmdInfo->m_pStatusBarInfo );
 				switch ( flags )

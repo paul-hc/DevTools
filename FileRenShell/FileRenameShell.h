@@ -2,8 +2,8 @@
 #define FileRenameShell_h
 #pragma once
 
+#include "Application_fwd.h"
 #include "FileWorkingSet.h"
-#include "MenuCommand.h"
 #include "resource.h"
 
 
@@ -23,14 +23,15 @@ private:
 private:
 	struct CMenuCmdInfo
 	{
-		MenuCommand m_cmd;
+		app::MenuCommand m_cmd;
 		const TCHAR* m_pTitle;
 		const TCHAR* m_pStatusBarInfo;
 		UINT m_iconId;
 		bool m_addSep;
 	};
 
-	static const CMenuCmdInfo* FindCmd( MenuCommand cmd );
+	static const CMenuCmdInfo* FindCmd( app::MenuCommand cmd );
+	void ExecuteCommand( app::MenuCommand menuCmd, CWnd* pParentOwner );
 	void AugmentMenuItems( HMENU hMenu, UINT indexMenu, UINT idBaseCmd );
 private:
 	CFileWorkingSet m_fileData;

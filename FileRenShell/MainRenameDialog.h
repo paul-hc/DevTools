@@ -14,11 +14,11 @@
 #include "utl/SpinEdit.h"
 #include "utl/TextEdit.h"
 #include "utl/ThemeStatic.h"
+#include "Application_fwd.h"
 
 
 class CFileWorkingSet;
 namespace str { enum Match; }
-enum MenuCommand;
 
 namespace popup
 {
@@ -30,7 +30,7 @@ class CMainRenameDialog : public CBaseMainDialog
 						, private fs::IBatchTransactionCallback
 {
 public:
-	CMainRenameDialog( MenuCommand menuCmd, CFileWorkingSet* pFileData, CWnd* pParent );
+	CMainRenameDialog( app::MenuCommand menuCmd, CFileWorkingSet* pFileData, CWnd* pParent );
 	virtual ~CMainRenameDialog();
 
 	// ui::ICmdCallback interface
@@ -89,7 +89,7 @@ private:
 		std::vector< str::Match > m_destMatchSeq;		// same size with m_destFnameExt
 	};
 private:
-	MenuCommand m_menuCmd;
+	app::MenuCommand m_menuCmd;
 	CFileWorkingSet* m_pFileData;
 	std::vector< CDisplayItem* > m_displayItems;
 	bool m_autoGenerate;

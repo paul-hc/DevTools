@@ -595,10 +595,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\MenuCommand.h"
-				>
-			</File>
-			<File
 				RelativePath=".\PathAlgorithms.cpp"
 				>
 			</File>
