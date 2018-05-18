@@ -9,6 +9,17 @@
 #include "utl/StringUtilities.h"
 
 
+namespace hlp
+{
+	template< typename DataMapType >
+	void ClearDestination( DataMapType& rMap )
+	{
+		for ( typename DataMapType::iterator itPair = rMap.begin(); itPair != rMap.end(); ++itPair )
+			itPair->second.Clear();
+	}
+}
+
+
 CFileWorkingSet::CFileWorkingSet( void )
 	: m_pUndoChangeLog( new CUndoChangeLog() )
 {
@@ -18,12 +29,12 @@ CFileWorkingSet::~CFileWorkingSet()
 {
 }
 
-void CFileWorkingSet::ClearDestinationFiles( void )
+void CFileWorkingSet::ClearDestinationPaths( void )
 {
 	ClearErrors();
 
-	for ( fs::TPathPairMap::iterator it = m_renamePairs.begin(); it != m_renamePairs.end(); ++it )
-		it->second = fs::CPath();
+	hlp::ClearDestination( m_renamePairs );
+	hlp::ClearDestination( m_touchPairs );
 }
 
 void CFileWorkingSet::LoadUndoLog( void )
@@ -36,58 +47,89 @@ void CFileWorkingSet::SaveUndoLog( void )
 	m_pUndoChangeLog->Save();
 }
 
-bool CFileWorkingSet::CanUndo( void ) const
+bool CFileWorkingSet::CanUndo( app::Action action ) const
 {
-	return m_pUndoChangeLog->GetRenameUndoStack().CanUndo();
+	switch ( action )
+	{
+		default: ASSERT( false );
+		case app::RenameFiles:	return m_pUndoChangeLog->GetRenameUndoStack().CanUndo();
+		case app::TouchFiles:	return m_pUndoChangeLog->GetTouchUndoStack().CanUndo();
+	}
 }
 
-void CFileWorkingSet::SaveUndoInfo( const fs::TPathSet& renamedKeys )
+void CFileWorkingSet::SaveUndoInfo( app::Action action, const fs::TPathSet& keyPaths )
 {
-	// push in the undo stack only pairs that were successfully renamed
-	fs::TPathPairMap& rRenamePairs = m_pUndoChangeLog->GetRenameUndoStack().Push();
-
-	for ( fs::TPathPairMap::const_iterator itRenamePair = m_renamePairs.begin(); itRenamePair != m_renamePairs.end(); ++itRenamePair )
-		if ( renamedKeys.find( itRenamePair->first ) != renamedKeys.end() )		// successfully renamed
-			rRenamePairs[ itRenamePair->first ] = itRenamePair->second;
-
-	m_renamePairs.clear();
+	switch ( action )
+	{
+		case app::RenameFiles:	_SaveUndoInfo( m_pUndoChangeLog->GetRenameUndoStack().Push(), m_renamePairs, keyPaths ); break;
+		case app::TouchFiles:	_SaveUndoInfo( m_pUndoChangeLog->GetTouchUndoStack().Push(), m_touchPairs, keyPaths ); break;
+		default: ASSERT( false );
+	}
 }
 
-void CFileWorkingSet::RetrieveUndoInfo( void )
+template< typename UndoMapType, typename DataMapType >
+void CFileWorkingSet::_SaveUndoInfo( UndoMapType& rUndoPairs, DataMapType& rDataMemberPairs, const fs::TPathSet& keyPaths )
 {
-	ASSERT( CanUndo() );
+	// push in the undo stack only the pairs that were successfully committed
+	for ( typename DataMapType::const_iterator itDataPair = rDataMemberPairs.begin(); itDataPair != rDataMemberPairs.end(); ++itDataPair )
+		if ( keyPaths.find( func::PathOf( itDataPair->first ) ) != keyPaths.end() )		// successfully renamed
+			rUndoPairs[ itDataPair->first ] = itDataPair->second;
 
-	const fs::TPathPairMap* pTopRenamePairs = m_pUndoChangeLog->GetRenameUndoStack().GetTop();	// stack top is last
-	ASSERT_PTR( pTopRenamePairs );
-
-	m_renamePairs.clear();
-	for ( fs::TPathPairMap::const_iterator it = pTopRenamePairs->begin(); it != pTopRenamePairs->end(); ++it )
-		m_renamePairs[ it->second ] = it->first;	// for undo swap source and destination
+	rDataMemberPairs.clear();		// this action was committed, we're done
 }
 
-void CFileWorkingSet::CommitUndoInfo( void )
+void CFileWorkingSet::RetrieveUndoInfo( app::Action action )
 {
-	ASSERT( CanUndo() );
-	m_pUndoChangeLog->GetRenameUndoStack().Pop();
+	ASSERT( CanUndo( action ) );
+
+	switch ( action )
+	{
+		case app::RenameFiles:	_RetrieveUndoInfo( m_renamePairs, m_pUndoChangeLog->GetRenameUndoStack().GetTop() ); break;
+		case app::TouchFiles:	_RetrieveUndoInfo( m_touchPairs, m_pUndoChangeLog->GetTouchUndoStack().GetTop() ); break;
+		default: ASSERT( false );
+	}
+}
+
+template< typename DataMapType, typename UndoMapType >
+void CFileWorkingSet::_RetrieveUndoInfo( DataMapType& rDataMemberPairs, const UndoMapType* pTopUndoPairs )
+{
+	ASSERT_PTR( pTopUndoPairs );
+
+	rDataMemberPairs.clear();
+	for ( typename UndoMapType::const_iterator itUndo = pTopUndoPairs->begin(); itUndo != pTopUndoPairs->end(); ++itUndo )
+		rDataMemberPairs[ itUndo->second ] = itUndo->first;		// for undo swap source and destination
+}
+
+void CFileWorkingSet::CommitUndoInfo( app::Action action )
+{
+	ASSERT( CanUndo( action ) );
+
+	switch ( action )
+	{
+		case app::RenameFiles:	m_pUndoChangeLog->GetRenameUndoStack().Pop(); break;
+		case app::TouchFiles:	m_pUndoChangeLog->GetTouchUndoStack().Pop(); break;
+		default: ASSERT( false );
+	}
 }
 
 size_t CFileWorkingSet::SetupFromDropInfo( HDROP hDropInfo )
 {
 	m_sourceFiles.clear();
 	m_renamePairs.clear();
+	m_touchPairs.clear();
 
 	if ( hDropInfo != NULL )
 	{
-		fs::CPath selFile;
-
 		for ( int i = 0, fileCount = ::DragQueryFile( hDropInfo, UINT_MAX, NULL, 0 ); i < fileCount; ++i )
 		{
-			TCHAR filePath[ _MAX_PATH ];
-			::DragQueryFile( hDropInfo, i, filePath, COUNT_OF( filePath ) );
-			selFile.Set( filePath );
+			TCHAR pathBuffer[ _MAX_PATH ];
+			::DragQueryFile( hDropInfo, i, pathBuffer, COUNT_OF( pathBuffer ) );
 
-			m_sourceFiles.push_back( selFile );
-			m_renamePairs[ selFile ] = fs::CPath();
+			fs::CPath fullPath( pathBuffer );
+
+			m_sourceFiles.push_back( fullPath );
+			m_renamePairs[ fullPath ] = fs::CPath();
+			m_touchPairs[ fs::CFileState( fullPath ) ] = fs::CFileState();
 		}
 
 		std::sort( m_sourceFiles.begin(), m_sourceFiles.end() );
@@ -181,7 +223,7 @@ bool CFileWorkingSet::FileExistOutsideWorkingSet( const fs::CPath& filePath ) co
 bool CFileWorkingSet::GenerateDestPaths( const std::tstring& format, UINT* pSeqCount )
 {
 	ASSERT_PTR( pSeqCount );
-	ClearDestinationFiles();
+	ClearDestinationPaths();
 
 	CPathGenerator generator( m_renamePairs, format, *pSeqCount );
 	if ( !generator.GeneratePairs() )

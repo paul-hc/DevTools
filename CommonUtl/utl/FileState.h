@@ -9,12 +9,14 @@ namespace fs
 {
 	struct CFileState
 	{
-		CFileState( void ) : m_attributes( 0 ) {}
-		CFileState( const CFileStatus& fileStatus );
+		CFileState( void ) : m_attributes( s_invalidAttributes ) {}
+		CFileState( const ::CFileStatus* pFileStatus );
+		explicit CFileState( const fs::CPath& fullPath );
 
 		void Clear( void ) { *this = CFileState(); }
 
 		bool IsEmpty( void ) const { return m_fullPath.IsEmpty(); }
+		bool IsValid( void ) const { return !IsEmpty() && m_attributes != s_invalidAttributes; }
 		bool FileExist( AccessMode accessMode = Exist ) { return m_fullPath.FileExist( accessMode ); }
 
 		bool operator==( const CFileState& right ) const;
@@ -28,11 +30,19 @@ namespace fs
 		CTime m_creationTime;		// creation time of file
 		CTime m_modifTime;			// last modification time of file
 		CTime m_accessTime;			// last access time of file
+	private:
+		static const BYTE s_invalidAttributes = 0xFF;
 	};
 
 
 	typedef std::map< fs::CFileState, fs::CFileState > TFileStatePairMap;
 	typedef std::set< fs::CFileState > TFileStateSet;
+}
+
+
+namespace func
+{
+	inline const fs::CPath& PathOf( const fs::CFileState& keyFileState ) { return keyFileState.m_fullPath; }		// for uniform path algorithms
 }
 
 

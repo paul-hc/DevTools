@@ -74,6 +74,8 @@ struct CCapitalizeOptions
 {
 	CCapitalizeOptions( void );
 
+	static CCapitalizeOptions& Instance( void );	// shared instance
+
 	void LoadFromRegistry( void );
 	void SaveToRegistry( void ) const;
 public:
@@ -92,14 +94,14 @@ public:
 class CTitleCapitalizer
 {
 public:
-	CTitleCapitalizer( void );
+	CTitleCapitalizer( const CCapitalizeOptions* pOptions = &CCapitalizeOptions::Instance() );
 	~CTitleCapitalizer();
 
 	std::tstring GetCapitalized( const std::tstring& text ) const;
 	void Capitalize( std::tstring& rText ) const { rText = GetCapitalized( rText ); }
 private:
 	const std::locale& m_locale;
-	CCapitalizeOptions m_options;
+	const CCapitalizeOptions* m_pOptions;
 };
 
 

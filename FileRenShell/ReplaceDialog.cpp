@@ -136,7 +136,7 @@ bool CReplaceDialog::ReplaceItems( bool commit /*= true*/ ) const
 	if ( Find_Text == m_findType )
 	{
 		func::ReplaceText functor( m_findWhat, m_replaceWith, m_matchCase, commit );
-		pFileData->ForEachDestination( functor );
+		pFileData->ForEachRenameDestination( functor );
 		if ( 0 == functor.m_matchCount )
 			return false;
 	}
@@ -145,7 +145,7 @@ bool CReplaceDialog::ReplaceItems( bool commit /*= true*/ ) const
 		ASSERT( Find_Characters == m_findType );
 
 		func::ReplaceCharacters functor( m_findWhat, m_replaceWith, m_matchCase, commit );
-		pFileData->ForEachDestination( functor );
+		pFileData->ForEachRenameDestination( functor );
 		if ( 0 == functor.m_matchCount )
 			return false;
 	}

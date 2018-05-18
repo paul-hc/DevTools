@@ -83,11 +83,10 @@ namespace func
 
 		void operator()( fs::CPathParts& rDestParts ) const
 		{
-			std::tstring fname; fname.reserve( rDestParts.m_fname.size() );
+			std::tstring fname; fname.reserve( rDestParts.m_fname.size() * 2 );
 
 			for ( const TCHAR* pSource = rDestParts.m_fname.c_str(); *pSource != _T('\0'); )
-				if ( pred::Equal == ( m_matchCase ? _tcsncmp( pSource, m_pattern.c_str(), m_patternLen )
-												  : _tcsnicmp( pSource, m_pattern.c_str(), m_patternLen ) ) )
+				if ( str::EqualsN( pSource, m_pattern.c_str(), m_patternLen, m_matchCase ) )
 				{
 					fname += m_replaceWith;
 					pSource += m_patternLen;
@@ -112,10 +111,10 @@ namespace func
 
 	struct ReplaceCharacters
 	{
-		ReplaceCharacters( const std::tstring& findCharSet, const std::tstring& replaceWith, BOOL matchCase, bool commit = true )
+		ReplaceCharacters( const std::tstring& findCharSet, const std::tstring& replaceWith, bool matchCase, bool commit = true )
 			: m_findCharSet( findCharSet )
 			, m_replaceWith( replaceWith )
-			, m_matchCase( matchCase != FALSE )
+			, m_matchCase( matchCase )
 			, m_commit( commit )
 			, m_matchCount( 0 )
 		{

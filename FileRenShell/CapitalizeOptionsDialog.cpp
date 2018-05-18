@@ -40,6 +40,7 @@ namespace layout
 
 CCapitalizeOptionsDialog::CCapitalizeOptionsDialog( CWnd* pParent /*= NULL*/ )
 	: CLayoutDialog( IDD_CAPITALIZE_OPTIONS, pParent )
+	, m_options( CCapitalizeOptions::Instance() )				// copy by value
 	, m_wordBreakPrefixesEdit( cap::CWordList::m_listSep )
 	, m_alwaysPreserveWordsEdit( cap::CWordList::m_listSep )
 	, m_alwaysUppercaseWordsEdit( cap::CWordList::m_listSep )
@@ -52,7 +53,6 @@ CCapitalizeOptionsDialog::CCapitalizeOptionsDialog( CWnd* pParent /*= NULL*/ )
 	RegisterCtrlLayout( layout::styles, COUNT_OF( layout::styles ) );
 	GetLayoutEngine().MaxClientSize().cy = -1;
 	LoadDlgIcon( IDD_CAPITALIZE_OPTIONS );
-	m_options.LoadFromRegistry();
 }
 
 CCapitalizeOptionsDialog::~CCapitalizeOptionsDialog()
@@ -96,7 +96,8 @@ void CCapitalizeOptionsDialog::DoDataExchange( CDataExchange* pDX )
 		m_options.m_conjunctions.m_caseModify = static_cast< cap::CaseModify >( m_conjunctionsCombo.GetCurSel() );
 		m_options.m_prepositions.m_caseModify = static_cast< cap::CaseModify >( m_prepositionsCombo.GetCurSel() );
 
-		m_options.SaveToRegistry();
+		CCapitalizeOptions::Instance() = m_options;				// copy by value
+		CCapitalizeOptions::Instance().SaveToRegistry();
 	}
 	CLayoutDialog::DoDataExchange( pDX );
 }

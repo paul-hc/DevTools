@@ -85,7 +85,7 @@ namespace fmt
 	bool ParseFileState( fs::CFileState& rState, str::TStringRange& rTextRange )
 	{
 		return
-			ParseBraces( rTextRange, s_stateBraces ) ) &&
+			ParseBraces( rTextRange, s_stateBraces ) &&
 			DoParseFileState( rState, rTextRange.Extract() );
 	}
 
@@ -230,7 +230,7 @@ void CUndoChangeLog::Load( std::istream& is )
 
 	Clear();
 
-	Action action = Rename;
+	app::Action action = app::RenameFiles;
 	CTime timestamp;
 	fs::TPathPairMap batchRename;
 	fs::TFileStatePairMap batchTouch;
@@ -250,11 +250,11 @@ void CUndoChangeLog::Load( std::istream& is )
 			{
 				switch ( action )
 				{
-					case Rename:
+					case app::RenameFiles:
 						if ( !batchRename.empty() )
 							m_renameUndoStack.Push( timestamp ).swap( batchRename );
 						break;
-					case Touch:
+					case app::TouchFiles:
 						if ( !batchTouch.empty() )
 							m_touchUndoStack.Push( timestamp ).swap( batchTouch );
 						break;
@@ -270,11 +270,11 @@ void CUndoChangeLog::Load( std::istream& is )
 		{
 			switch ( action )
 			{
-				case Rename:
+				case app::RenameFiles:
 					if ( AddRenameLine( batchRename, textRange ) )
 						continue;
 					break;
-				case Touch:
+				case app::TouchFiles:
 					if ( AddTouchLine( batchTouch, textRange ) )
 						continue;
 					break;
@@ -293,7 +293,7 @@ void CUndoChangeLog::SaveRenameBatches( std::ostream& os ) const
 		if ( itBatch != itFirst )
 			os << std::endl;		// inner batch extra line-end separator
 
-		os << FormatActionTag( Rename, itBatch->m_timestamp ) << std::endl;		// add action tag
+		os << FormatActionTag( app::RenameFiles, itBatch->m_timestamp ) << std::endl;		// add action tag
 
 		for ( fs::TPathPairMap::const_iterator itPair = itBatch->m_batch.begin(); itPair != itBatch->m_batch.end(); ++itPair )
 		{
@@ -314,7 +314,7 @@ void CUndoChangeLog::SaveTouchBatches( std::ostream& os ) const
 		if ( itBatch != itFirst )
 			os << std::endl;		// inner batch extra line-end separator
 
-		os << FormatActionTag( Touch, itBatch->m_timestamp ) << std::endl;		// add action tag
+		os << FormatActionTag( app::TouchFiles, itBatch->m_timestamp ) << std::endl;		// add action tag
 
 		for ( fs::TFileStatePairMap::const_iterator itPair = itBatch->m_batch.begin(); itPair != itBatch->m_batch.end(); ++itPair )
 			os << fmt::FormatTouchEntry( itPair->first, itPair->second ) << std::endl;
@@ -346,23 +346,17 @@ bool CUndoChangeLog::AddTouchLine( fs::TFileStatePairMap& rBatchTouch, const str
 }
 
 
-const CEnumTags& CUndoChangeLog::GetTags_Action( void )
-{
-	static const CEnumTags tags( _T("RENAME|TOUCH") );
-	return tags;
-}
-
-std::tstring CUndoChangeLog::FormatActionTag( Action action, const CTime& timestamp )
+std::tstring CUndoChangeLog::FormatActionTag( app::Action action, const CTime& timestamp )
 {
 	std::tstring text; text.reserve( 64 );
-	text = GetTags_Action().GetUiTags()[ action ];
+	text = app::GetTags_Action().FormatKey( action );
 	if ( timestamp.GetTime() != 0 )
 		text += _T(' ') + time_utl::FormatTimestamp( timestamp );
 
 	return fmt::FormatTag( text.c_str() );
 }
 
-bool CUndoChangeLog::ParseActionTag( Action& rAction, CTime& rTimestamp, const str::TStringRange& tagRange )
+bool CUndoChangeLog::ParseActionTag( app::Action& rAction, CTime& rTimestamp, const str::TStringRange& tagRange )
 {
 	if ( !tagRange.IsEmpty() )
 	{
@@ -374,7 +368,7 @@ bool CUndoChangeLog::ParseActionTag( Action& rAction, CTime& rTimestamp, const s
 		else
 			actionTag = tagRange.Extract();
 
-		if ( GetTags_Action().ParseUiAs( rAction, actionTag ) )
+		if ( app::GetTags_Action().ParseKeyAs( rAction, actionTag ) )
 		{
 			rTimestamp = time_utl::ParseTimestamp( timestampText );
 			return true;

@@ -42,8 +42,8 @@ namespace str
 
 		StringType GetLeadSubstr( void ) const { return m_text.substr( 0, m_pos ); }
 		StringType GetCurrentSubstr( void ) const { return m_text.substr( m_pos ); }
-		StringType MakePrevToken( size_t tokenLen ) const { ASSERT( tokenLen < m_pos ); return m_text.substr( m_pos - tokenLen, tokenLen ); }
-		StringType MakeToken( size_t tokenLen ) const { ASSERT( tokenLen < m_pos ); return m_text.substr( m_pos, tokenLen ); }
+		StringType MakePrevToken( size_t tokenLen ) const { ASSERT( tokenLen <= m_pos ); return m_text.substr( m_pos - tokenLen, tokenLen ); }
+		StringType MakeToken( size_t tokenLen ) const { ASSERT( tokenLen <= m_pos ); return m_text.substr( m_pos, tokenLen ); }
 
 		const CharType* GetWhiteSpace( void ) const { return m_whiteSpace.m_start; }
 		void SetWhiteSpace( const CharType whiteSpace[] ) { ASSERT( !str::IsEmpty( whiteSpace ) ); m_whiteSpace.SetRange( whiteSpace, str::end( whiteSpace ) ); }

@@ -84,6 +84,18 @@ CCapitalizeOptions::CCapitalizeOptions( void )
 {
 }
 
+CCapitalizeOptions& CCapitalizeOptions::Instance( void )
+{
+	static CCapitalizeOptions options;
+	static bool loaded = false;
+	if ( !loaded )
+	{
+		options.LoadFromRegistry();
+		loaded = true;
+	}
+	return options;
+}
+
 void CCapitalizeOptions::LoadFromRegistry( void )
 {
 	CWinApp* pApp = AfxGetApp();
@@ -116,10 +128,11 @@ void CCapitalizeOptions::SaveToRegistry( void ) const
 
 // CTitleCapitalizer implementation
 
-CTitleCapitalizer::CTitleCapitalizer( void )
+CTitleCapitalizer::CTitleCapitalizer( const CCapitalizeOptions* pOptions /*= &CCapitalizeOptions::Instance()*/ )
 	: m_locale( str::GetUserLocale() )
+	, m_pOptions( pOptions )
 {
-	m_options.LoadFromRegistry();
+	ASSERT_PTR( m_pOptions );
 }
 
 CTitleCapitalizer::~CTitleCapitalizer()
@@ -130,11 +143,11 @@ std::tstring CTitleCapitalizer::GetCapitalized( const std::tstring& text ) const
 {
 	std::tostringstream oss;
 	enum WordStatus { TitleStart, WordBreak, WordStart, WordCore } prevStatus = TitleStart;		// was WordBreak
-	const pred::IsWordBreakChar wordBreakPred( m_options.m_wordBreakChars );
+	const pred::IsWordBreakChar wordBreakPred( m_pOptions->m_wordBreakChars );
 
 	str::CTokenIterator< pred::CompareNoCase > it( text );
 
-	if ( m_options.m_skipNumericPrefix )
+	if ( m_pOptions->m_skipNumericPrefix )
 		if ( !it.AtEnd() && _istdigit( *it ) )
 			while ( !it.AtEnd() && pred::IsNumericPrefix( *it ) )
 			{
@@ -142,7 +155,7 @@ std::tstring CTitleCapitalizer::GetCapitalized( const std::tstring& text ) const
 				++it;
 			}
 
-	for ( ; !it.AtEnd(); )
+	while ( !it.AtEnd() )
 		if ( wordBreakPred( *it ) )
 		{
 			prevStatus = WordBreak;
@@ -157,23 +170,23 @@ std::tstring CTitleCapitalizer::GetCapitalized( const std::tstring& text ) const
 			std::tstring token;
 
 			size_t foundPos;
-			if ( ( foundPos = m_options.m_wordBreakPrefixes.FindMatch( it ) ) != std::tstring::npos )
+			if ( ( foundPos = m_pOptions->m_wordBreakPrefixes.FindMatch( it ) ) != std::tstring::npos )
 			{
-				m_options.m_wordBreakPrefixes.FormatAt( token, foundPos );
+				m_pOptions->m_wordBreakPrefixes.FormatAt( token, foundPos );
 				prevStatus = WordBreak;
 			}
-			else if ( ( foundPos = m_options.m_alwaysPreserveWords.FindWordMatch( it, wordBreakPred ) ) != std::tstring::npos )
-				m_options.m_alwaysPreserveWords.FormatWordAt( token, foundPos, it, m_locale );
-			else if ( ( foundPos = m_options.m_alwaysUppercaseWords.FindWordMatch( it, wordBreakPred ) ) != std::tstring::npos )
-				m_options.m_alwaysUppercaseWords.FormatWordAt( token, foundPos, it, m_locale );
-			else if ( ( foundPos = m_options.m_alwaysLowercaseWords.FindWordMatch( it, wordBreakPred ) ) != std::tstring::npos )
-				m_options.m_alwaysLowercaseWords.FormatWordAt( token, foundPos, it, m_locale );
-			else if ( ( foundPos = m_options.m_articles.FindWordMatch( it, wordBreakPred ) ) != std::tstring::npos )
-				m_options.m_articles.FormatWordAt( token, foundPos, it, m_locale );
-			else if ( ( foundPos = m_options.m_conjunctions.FindWordMatch( it, wordBreakPred ) ) != std::tstring::npos )
-				m_options.m_conjunctions.FormatWordAt( token, foundPos, it, m_locale );
-			else if ( ( foundPos = m_options.m_prepositions.FindWordMatch( it, wordBreakPred ) ) != std::tstring::npos )
-				m_options.m_prepositions.FormatWordAt( token, foundPos, it, m_locale );
+			else if ( ( foundPos = m_pOptions->m_alwaysPreserveWords.FindWordMatch( it, wordBreakPred ) ) != std::tstring::npos )
+				m_pOptions->m_alwaysPreserveWords.FormatWordAt( token, foundPos, it, m_locale );
+			else if ( ( foundPos = m_pOptions->m_alwaysUppercaseWords.FindWordMatch( it, wordBreakPred ) ) != std::tstring::npos )
+				m_pOptions->m_alwaysUppercaseWords.FormatWordAt( token, foundPos, it, m_locale );
+			else if ( ( foundPos = m_pOptions->m_alwaysLowercaseWords.FindWordMatch( it, wordBreakPred ) ) != std::tstring::npos )
+				m_pOptions->m_alwaysLowercaseWords.FormatWordAt( token, foundPos, it, m_locale );
+			else if ( ( foundPos = m_pOptions->m_articles.FindWordMatch( it, wordBreakPred ) ) != std::tstring::npos )
+				m_pOptions->m_articles.FormatWordAt( token, foundPos, it, m_locale );
+			else if ( ( foundPos = m_pOptions->m_conjunctions.FindWordMatch( it, wordBreakPred ) ) != std::tstring::npos )
+				m_pOptions->m_conjunctions.FormatWordAt( token, foundPos, it, m_locale );
+			else if ( ( foundPos = m_pOptions->m_prepositions.FindWordMatch( it, wordBreakPred ) ) != std::tstring::npos )
+				m_pOptions->m_prepositions.FormatWordAt( token, foundPos, it, m_locale );
 			else
 			{
 				token = func::toupper( *it, m_locale );

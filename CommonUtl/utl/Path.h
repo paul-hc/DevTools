@@ -221,6 +221,8 @@ namespace stdext
 
 namespace func
 {
+	inline const fs::CPath& PathOf( const fs::CPath& keyPath ) { return keyPath; }		// for uniform path algorithms
+
 	struct ToNameExt
 	{
 		const TCHAR* operator()( const fs::CPath& fullPath ) const { return fullPath.GetNameExt(); }
@@ -238,9 +240,10 @@ namespace pred
 			return fs::FileExist( pFilePath );
 		}
 
-		bool operator()( const fs::CPath& path ) const
+		template< typename PathKey >
+		bool operator()( const PathKey& pathKey ) const
 		{
-			return path.FileExist();
+			return func::PathOf( path ).FileExist();
 		}
 	};
 

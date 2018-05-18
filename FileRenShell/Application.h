@@ -4,6 +4,7 @@
 
 #include "utl/BaseApp.h"
 #include "utl/Logger.h"
+#include "Application_fwd.h"
 
 
 class CApplication : public CBaseApp< CWinApp >

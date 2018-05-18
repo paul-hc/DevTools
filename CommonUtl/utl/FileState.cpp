@@ -13,13 +13,25 @@ namespace fs
 {
 	// CFileState implementation
 
-	CFileState::CFileState( const CFileStatus& fileStatus )
-		: m_fullPath( fileStatus.m_szFullName )
-		, m_attributes( fileStatus.m_attribute )
-		, m_creationTime( fileStatus.m_ctime )
-		, m_modifTime( fileStatus.m_mtime )
-		, m_accessTime( fileStatus.m_atime )
+	CFileState::CFileState( const ::CFileStatus* pFileStatus )
+		: m_fullPath( pFileStatus->m_szFullName )
+		, m_attributes( pFileStatus->m_attribute )
+		, m_creationTime( pFileStatus->m_ctime )
+		, m_modifTime( pFileStatus->m_mtime )
+		, m_accessTime( pFileStatus->m_atime )
 	{
+	}
+
+	CFileState::CFileState( const fs::CPath& fullPath )
+	{
+		CFileState source;
+		if ( source.GetFileState( fullPath.GetPtr() ) )
+			*this = source;			// assign valid state
+		else
+		{	// assign path with invalid state
+			m_fullPath = fullPath;
+			m_attributes = s_invalidAttributes;
+		}
 	}
 
 	bool CFileState::GetFileState( const TCHAR* pSrcFilePath )
@@ -31,7 +43,7 @@ namespace fs
 		if ( !CFile::GetStatus( pSrcFilePath, fileStatus ) )
 			return false;
 
-		*this = CFileState( fileStatus );
+		*this = CFileState( &fileStatus );
 		return true;
 	}
 

@@ -7,9 +7,8 @@
 #include <iosfwd>
 #include "utl/FileState.h"
 #include "utl/Path.h"
+#include "Application_fwd.h"
 
-
-class CEnumTags;
 
 namespace str
 {
@@ -80,11 +79,8 @@ private:
 	static bool AddRenameLine( fs::TPathPairMap& rBatchRename, const str::TStringRange& textRange );
 	static bool AddTouchLine( fs::TFileStatePairMap& rBatchTouch, const str::TStringRange& textRange );
 
-	enum Action { Rename, Touch };
-
-	static const CEnumTags& GetTags_Action( void );
-	static std::tstring FormatActionTag( Action action, const CTime& timestamp );
-	static bool ParseActionTag( Action& rAction, CTime& rTimestamp, const str::TStringRange& tagRange );
+	static std::tstring FormatActionTag( app::Action action, const CTime& timestamp );
+	static bool ParseActionTag( app::Action& rAction, CTime& rTimestamp, const str::TStringRange& tagRange );
 private:
 	CUndoStack< fs::TPathPairMap > m_renameUndoStack;
 	CUndoStack< fs::TFileStatePairMap > m_touchUndoStack;

@@ -180,7 +180,7 @@ void CMainRenameDialog::SwitchMode( Mode mode )
 		IDC_REPLACE_FILES_BUTTON, IDC_REPLACE_DELIMS_BUTTON, IDC_DELIMITER_SET_COMBO, IDC_NEW_DELIMITER_EDIT
 	};
 	ui::EnableControls( *this, ctrlIds, COUNT_OF( ctrlIds ), m_mode != UndoRollbackMode );
-	ui::EnableControl( *this, IDC_UNDO_BUTTON, m_mode != UndoRollbackMode && m_pFileData->CanUndo() );
+	ui::EnableControl( *this, IDC_UNDO_BUTTON, m_mode != UndoRollbackMode && m_pFileData->CanUndo( app::RenameFiles ) );
 }
 
 void CMainRenameDialog::PostMakeDest( bool silent /*= false*/ )
@@ -389,7 +389,7 @@ void CMainRenameDialog::AutoGenerateFiles( void )
 	bool succeeded = m_pFileData->GenerateDestPaths( renameFormat, &seqCount );
 
 	if ( !succeeded )
-		m_pFileData->ClearDestinationFiles();
+		m_pFileData->ClearDestinationPaths();
 
 	PostMakeDest( true );							// silent mode, no modal messages
 	m_formatCombo.SetFrameColor( succeeded ? CLR_NONE : color::Error );
@@ -592,7 +592,7 @@ void CMainRenameDialog::OnOK( void )
 		case RenameMode:
 			if ( RenameFiles() )
 			{
-				m_pFileData->SaveUndoInfo( m_pBatchTransaction->GetRenamedKeys() );
+				m_pFileData->SaveUndoInfo( app::RenameFiles, m_pBatchTransaction->GetRenamedKeys() );
 
 				m_formatCombo.SaveHistory( m_regSection.c_str(), reg::entry_formatHistory );
 				m_delimiterSetCombo.SaveHistory( m_regSection.c_str(), reg::entry_delimiterSetHistory );
@@ -603,14 +603,14 @@ void CMainRenameDialog::OnOK( void )
 			}
 			else
 			{
-				m_pFileData->SaveUndoInfo( m_pBatchTransaction->GetRenamedKeys() );
+				m_pFileData->SaveUndoInfo( app::RenameFiles, m_pBatchTransaction->GetRenamedKeys() );
 				SwitchMode( MakeMode );
 			}
 			break;
 		case UndoRollbackMode:
 			if ( RenameFiles() )
 			{
-				m_pFileData->CommitUndoInfo();
+				m_pFileData->CommitUndoInfo( app::RenameFiles );
 				CBaseMainDialog::OnOK();
 			}
 			else
@@ -681,7 +681,7 @@ void CMainRenameDialog::OnBnClicked_CopySourceFiles( void )
 
 void CMainRenameDialog::OnBnClicked_ClearDestFiles( void )
 {
-	m_pFileData->ClearDestinationFiles();
+	m_pFileData->ClearDestinationPaths();
 
 	SetupFileListView();	// fill in and select the found files list
 	SwitchMode( MakeMode );
@@ -703,7 +703,7 @@ void CMainRenameDialog::OnBnClicked_PasteDestFiles( void )
 void CMainRenameDialog::OnBnClicked_CapitalizeDestFiles( void )
 {
 	CTitleCapitalizer capitalizer;
-	m_pFileData->ForEachDestination( func::CapitalizeWords( &capitalizer ) );
+	m_pFileData->ForEachRenameDestination( func::CapitalizeWords( &capitalizer ) );
 	PostMakeDest();
 }
 
@@ -716,7 +716,7 @@ void CMainRenameDialog::OnBnClicked_CapitalizeOptions( void )
 
 void CMainRenameDialog::OnBnClicked_ChangeCase( void )
 {
-	m_pFileData->ForEachDestination( func::MakeCase( m_changeCaseButton.GetSelEnum< ChangeCase >() ) );
+	m_pFileData->ForEachRenameDestination( func::MakeCase( m_changeCaseButton.GetSelEnum< ChangeCase >() ) );
 	PostMakeDest();
 }
 
@@ -736,16 +736,16 @@ void CMainRenameDialog::OnBnClicked_ReplaceAllDelimitersDestFiles( void )
 		return;
 	}
 
-	m_pFileData->ForEachDestination( func::ReplaceDelimiterSet( delimiterSet, ui::GetWindowText( &m_newDelimiterEdit ) ) );
+	m_pFileData->ForEachRenameDestination( func::ReplaceDelimiterSet( delimiterSet, ui::GetWindowText( &m_newDelimiterEdit ) ) );
 	PostMakeDest();
 }
 
 void CMainRenameDialog::OnBnClicked_Undo( void )
 {
-	ASSERT( m_mode != UndoRollbackMode && m_pFileData->CanUndo() );
+	ASSERT( m_mode != UndoRollbackMode && m_pFileData->CanUndo( app::RenameFiles ) );
 
 	GotoDlgCtrl( GetDlgItem( IDOK ) );
-	m_pFileData->RetrieveUndoInfo();
+	m_pFileData->RetrieveUndoInfo( app::RenameFiles );
 	SwitchMode( UndoRollbackMode );
 	SetupFileListView();
 }
@@ -858,37 +858,37 @@ void CMainRenameDialog::OnBnClicked_PickRenameActions( void )
 
 void CMainRenameDialog::OnSingleWhitespace( void )
 {
-	m_pFileData->ForEachDestination( func::SingleWhitespace() );
+	m_pFileData->ForEachRenameDestination( func::SingleWhitespace() );
 	PostMakeDest();
 }
 
 void CMainRenameDialog::OnRemoveWhitespace( void )
 {
-	m_pFileData->ForEachDestination( func::RemoveWhitespace() );
+	m_pFileData->ForEachRenameDestination( func::RemoveWhitespace() );
 	PostMakeDest();
 }
 
 void CMainRenameDialog::OnDashToSpace( void )
 {
-	m_pFileData->ForEachDestination( func::ReplaceDelimiterSet( _T("-"), _T(" ") ) );
+	m_pFileData->ForEachRenameDestination( func::ReplaceDelimiterSet( _T("-"), _T(" ") ) );
 	PostMakeDest();
 }
 
 void CMainRenameDialog::OnSpaceToDash( void )
 {
-	m_pFileData->ForEachDestination( func::ReplaceDelimiterSet( _T(" "), _T("-") ) );
+	m_pFileData->ForEachRenameDestination( func::ReplaceDelimiterSet( _T(" "), _T("-") ) );
 	PostMakeDest();
 }
 
 void CMainRenameDialog::OnUnderbarToSpace( void )
 {
-	m_pFileData->ForEachDestination( func::ReplaceDelimiterSet( _T("_"), _T(" ") ) );
+	m_pFileData->ForEachRenameDestination( func::ReplaceDelimiterSet( _T("_"), _T(" ") ) );
 	PostMakeDest();
 }
 
 void CMainRenameDialog::OnSpaceToUnderbar( void )
 {
-	m_pFileData->ForEachDestination( func::ReplaceDelimiterSet( _T(" "), _T("_") ) );
+	m_pFileData->ForEachRenameDestination( func::ReplaceDelimiterSet( _T(" "), _T("_") ) );
 	PostMakeDest();
 }
 

@@ -495,6 +495,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Application_fwd.h"
+				>
+			</File>
+			<File
 				RelativePath=".\CapitalizeOptionsDialog.cpp"
 				>
 			</File>
@@ -674,6 +678,14 @@
 		<Filter
 			Name="Unit Tests"
 			>
+			<File
+				RelativePath=".\ut\PathAlgorithmsTests.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\ut\PathAlgorithmsTests.h"
+				>
+			</File>
 			<File
 				RelativePath=".\ut\UndoChangeLogTests.cpp"
 				>
