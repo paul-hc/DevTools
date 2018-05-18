@@ -65,7 +65,8 @@ BOOL CBaseApp< BaseClass >::InitInstance( void )
 	m_pSharedResources->AddAutoPtr( &m_pLogger );
 	m_pSharedResources->AddAutoPtr( &m_pImageStore );
 
-	GetLogger().LogLine( _T(""), false );					// new-line as session separator
+	// Rely on CLogger::m_addSessionNewLine to add a delayed new line on first log entry
+	//GetLogger().LogLine( _T(""), false );					// new-line as session separator
 
 	CToolStrip::RegisterStripButtons( IDR_STD_STRIP );		// register stock images
 

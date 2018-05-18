@@ -32,6 +32,8 @@ public:
 	int m_logFileMaxSize;
 	int m_checkLogLineCount;		// count of logs when the file overflow is checked
 	int m_logCount;
+
+	bool m_addSessionNewLine;		// adds a new line on first log entry; prevents adding consecutive empty session lines if no logging
 private:
 	CCriticalSection m_cs;
 	mutable std::tstring m_logFilePath;

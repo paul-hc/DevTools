@@ -2,6 +2,7 @@
 #include "stdafx.h"
 #include "UndoChangeLog.h"
 #include "utl/EnumTags.h"
+#include "utl/Guards.h"
 #include "utl/RuntimeException.h"
 #include "utl/StringRange.h"
 #include "utl/StringUtilities.h"
@@ -83,11 +84,9 @@ namespace fmt
 
 	bool ParseFileState( fs::CFileState& rState, str::TStringRange& rTextRange )
 	{
-		if ( ParseBraces( rTextRange, s_stateBraces ) )
-			if ( DoParseFileState( rState, rTextRange.Extract() ) )
-				return true;
-
-		return false;
+		return
+			ParseBraces( rTextRange, s_stateBraces ) ) &&
+			DoParseFileState( rState, rTextRange.Extract() );
 	}
 
 	std::tstring FormatRenameEntry( const fs::CPath& srcPath, const fs::CPath& destPath )
@@ -115,8 +114,7 @@ namespace fmt
 	std::tstring FormatTouchEntry( const fs::CFileState& srcState, const fs::CFileState& destState )
 	{
 		ASSERT( srcState.m_fullPath == destState.m_fullPath );
-		return
-			srcState.m_fullPath.Get() + s_touchSep + FormatFileState( srcState ) + s_pairSep + FormatFileState( destState );
+		return srcState.m_fullPath.Get() + s_touchSep + FormatFileState( srcState ) + s_pairSep + FormatFileState( destState );
 	}
 
 	bool ParseTouchEntry( fs::CFileState& rSrcState, fs::CFileState& rDestState, const str::TStringRange& textRange )
@@ -220,12 +218,16 @@ bool CUndoChangeLog::Load( void )
 
 void CUndoChangeLog::Save( std::ostream& os ) const
 {
+	//utl::CSlowSectionGuard slowGuard( _T("CUndoChangeLog::Save()"), 0.2 );
+
 	SaveRenameBatches( os );
 	SaveTouchBatches( os );
 }
 
 void CUndoChangeLog::Load( std::istream& is )
 {
+	//utl::CSlowSectionGuard slowGuard( _T("CUndoChangeLog::Load()"), 0.2 );
+
 	Clear();
 
 	Action action = Rename;

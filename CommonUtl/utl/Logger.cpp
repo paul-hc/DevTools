@@ -13,6 +13,7 @@ CLogger::CLogger( const TCHAR* pFnameFmt /*= NULL*/ )
 	, m_logFileMaxSize( DefaultSize )
 	, m_checkLogLineCount( 100 )
 	, m_logCount( 0 )
+	, m_addSessionNewLine( true )
 {
 }
 
@@ -94,6 +95,14 @@ void CLogger::LogLine( const TCHAR* pText, bool useTimestamp /*= true*/ )
 	std::ofstream output( str::ToUtf8( GetLogFilePath().c_str() ).c_str(), std::ios_base::out | std::ios_base::app );
 	if ( output.is_open() )
 	{
+		if ( m_addSessionNewLine )
+		{
+			if ( !str::IsEmpty( pText ) )
+				output << std::endl;
+
+			m_addSessionNewLine = false;
+		}
+
 		if ( m_prependTimestamp && useTimestamp )
 			output << CTime::GetCurrentTime().Format( _T("[%d-%b-%Y %H:%M:%S]> ") ).GetString();
 
