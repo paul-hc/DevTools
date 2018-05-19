@@ -7,8 +7,8 @@
 
 namespace utl
 {
-	template< typename Container >
-	inline size_t ByteSize( const Container& items ) { return items.size() * sizeof( Container::value_type ); }		// for vector, deque
+	template< typename ContainerT >
+	inline size_t ByteSize( const ContainerT& items ) { return items.size() * sizeof( ContainerT::value_type ); }		// for vector, deque
 
 	template< typename InputIterator, class OutputIterT >
 	OutputIterT Copy( InputIterator itFirst, InputIterator itLast, OutputIterT itDest )
@@ -103,36 +103,27 @@ namespace func
 
 namespace utl
 {
-	// generic algoritms
+	// linear search
 
-	template< typename Container, typename Predicate >
-	void QueryThat( std::vector< typename Container::value_type >& rSubset, const Container& objects, Predicate pred )
+	template< typename ContainerT, typename Predicate >
+	inline typename ContainerT::value_type Find( const ContainerT& objects, Predicate pred )
 	{
-		// additive
-		for ( typename Container::const_iterator itObject = objects.begin(); itObject != objects.end(); ++itObject )
-			if ( pred( *itObject ) )
-				rSubset.push_back( *itObject );
-	}
-
-	template< typename Container, typename Predicate >
-	inline typename Container::value_type Find( const Container& objects, Predicate pred )
-	{
-		typename Container::const_iterator itFound = std::find_if( objects.begin(), objects.end(), pred );
+		typename ContainerT::const_iterator itFound = std::find_if( objects.begin(), objects.end(), pred );
 		if ( itFound == objects.end() )
-			return typename Container::value_type( 0 );
+			return typename ContainerT::value_type( 0 );
 		return *itFound;
 	}
 
 
-	template< typename Container, typename Predicate >
-	inline bool Any( const Container& objects, Predicate pred )
+	template< typename ContainerT, typename Predicate >
+	inline bool Any( const ContainerT& objects, Predicate pred )
 	{
 		return std::find_if( objects.begin(), objects.end(), pred ) != objects.end();
 	}
 
 
-	template< typename Iterator, typename Predicate >
-	Iterator FindIfNot( Iterator itFirst, Iterator itEnd, Predicate pred )
+	template< typename IteratorT, typename Predicate >
+	IteratorT FindIfNot( IteratorT itFirst, IteratorT itEnd, Predicate pred )
 	{	// std::find_if_not() is missing on most Unix platforms
 		for ( ; itFirst != itEnd; ++itFirst )
 			if ( !pred( *itFirst ) )
@@ -140,11 +131,118 @@ namespace utl
 		return itFirst;
 	}
 
+	template< typename ContainerT, typename ItemType >
+	inline bool Contains( const ContainerT& container, ItemType item )
+	{
+		return std::find( container.begin(), container.end(), item ) != container.end();
+	}
 
-	template< typename Container, typename Predicate >
-	inline bool All( const Container& objects, Predicate pred )
+	template< typename ContainerT, typename Predicate >
+	inline bool All( const ContainerT& objects, Predicate pred )
 	{
 		return !objects.empty() && FindIfNot( objects.begin(), objects.end(), pred ) == objects.end();
+	}
+
+	template< typename DiffType, typename IteratorT >
+	inline DiffType Distance( IteratorT itFirst, IteratorT itLast )
+	{
+		return static_cast< DiffType >( std::distance( itFirst, itLast ) );
+	}
+
+	template< typename PosType, typename IteratorT, typename ValueType >
+	inline PosType FindPos( IteratorT itStart, IteratorT itEnd, const ValueType& rValue )
+	{
+		IteratorT itFound = std::find( itStart, itEnd, rValue );
+		return itFound != itEnd ? static_cast< PosType >( itFound - itStart ) : PosType( -1 );
+	}
+
+	template< typename PosType, typename ContainerT, typename ValueType >
+	inline PosType FindPos( const ContainerT& container, const ValueType& rValue )
+	{
+		return FindPos< PosType >( container.begin(), container.end(), rValue );
+	}
+
+	template< typename PosType, typename IteratorT, typename ValueType >
+	inline PosType LookupPos( IteratorT itStart, IteratorT itEnd, const ValueType& rValue )
+	{
+		IteratorT itFound = std::find( itStart, itEnd, rValue );
+
+		ASSERT( itFound != itEnd );
+		return static_cast< PosType >( itFound - itStart );
+	}
+
+	template< typename PosType, typename ContainerT, typename ValueType >
+	inline PosType LookupPos( const ContainerT& container, const ValueType& rValue )
+	{
+		return LookupPos< PosType >( container.begin(), container.end(), rValue );
+	}
+
+
+	// vector of pairs
+
+	template< typename IteratorT, typename KeyType >
+	IteratorT FindPair( IteratorT itStart, IteratorT itEnd, const KeyType& key )
+	{
+		for ( ; itStart != itEnd; ++itStart )
+			if ( key == itStart->first )
+				break;
+
+		return itStart;
+	}
+
+
+	// find first satisfying binary predicate equalPred
+	template< typename IteratorT, typename ValueType, typename EqualBinaryPred >
+	inline IteratorT FindIfEqual( IteratorT iter, IteratorT itEnd, const ValueType& value, EqualBinaryPred equalPred )
+	{
+		for ( ; iter != itEnd; ++iter )
+			if ( equalPred( *iter, value ) )
+				break;
+
+		return iter;
+	}
+}
+
+
+namespace utl
+{
+	// binary search in ordered containers
+
+	template< typename IteratorT, typename KeyType, typename ToKeyFunc >
+	IteratorT BinaryFind( IteratorT itStart, IteratorT itEnd, const KeyType& key, ToKeyFunc toKeyFunc )
+	{
+		IteratorT itFound = std::lower_bound( itStart, itEnd, key, pred::MakeLessKey( toKeyFunc ) );
+		if ( itFound != itEnd )						// loose match?
+			if ( toKeyFunc( *itFound ) == key )		// exact match?
+				return itFound;
+
+		return itEnd;
+	}
+
+	template< typename ContainerT, typename KeyType, typename ToKeyFunc >
+	typename ContainerT::const_iterator BinaryFind( const ContainerT& container, const KeyType& key, ToKeyFunc toKeyFunc )
+	{
+		return BinaryFind( container.begin(), container.end(), key, toKeyFunc );
+	}
+
+	template< typename ContainerT, typename KeyType, typename ToKeyFunc >
+	typename ContainerT::iterator BinaryFind( ContainerT& container, const KeyType& key, ToKeyFunc toKeyFunc )
+	{
+		return BinaryFind( container.begin(), container.end(), key, toKeyFunc );
+	}
+
+	template< typename ContainerT, typename KeyType, typename ToKeyFunc >
+	typename size_t BinaryFindPos( const ContainerT& container, const KeyType& key, ToKeyFunc toKeyFunc )
+	{
+		typename ContainerT::const_iterator itFound = BinaryFind( container.begin(), container.end(), key, toKeyFunc );
+		return itFound != container.end() ? std::distance( container.begin(), itFound ) : std::tstring::npos;
+	}
+
+	template< typename ContainerT, typename KeyType, typename ToKeyFunc >
+	typename bool BinaryContains( const ContainerT& container, const KeyType& key, ToKeyFunc toKeyFunc )
+	{
+		typename ContainerT::const_iterator itFound = BinaryFind( container.begin(), container.end(), key, toKeyFunc );
+		return itFound != container.end();
 	}
 
 
@@ -172,7 +270,21 @@ namespace utl
 		typename MapType::iterator itFound = rObjectMap.find( key );
 		return itFound != rObjectMap.end() ? &itFound->second : NULL;
 	}
+}
 
+
+namespace utl
+{
+	// generic algoritms
+
+	template< typename ContainerT, typename Predicate >
+	void QueryThat( std::vector< typename ContainerT::value_type >& rSubset, const ContainerT& objects, Predicate pred )
+	{
+		// additive
+		for ( typename ContainerT::const_iterator itObject = objects.begin(); itObject != objects.end(); ++itObject )
+			if ( pred( *itObject ) )
+				rSubset.push_back( *itObject );
+	}
 
 	template< typename Type, typename ItemType >
 	inline void AddSorted( std::vector< Type >& rDest, ItemType item )
@@ -186,15 +298,15 @@ namespace utl
 		rDest.insert( std::upper_bound( rDest.begin(), rDest.end(), item, orderPred ), item );
 	}
 
-	template< typename Type, typename Iterator, typename OrderPredicate >
-	void AddSorted( std::vector< Type >& rDest, Iterator itFirst, Iterator itEnd, OrderPredicate orderPred ) // sequence with predicate version
+	template< typename Type, typename IteratorT, typename OrderPredicate >
+	void AddSorted( std::vector< Type >& rDest, IteratorT itFirst, IteratorT itEnd, OrderPredicate orderPred ) // sequence with predicate version
 	{
 		for ( ; itFirst != itEnd; ++itFirst )
 			AddSorted( rDest, *itFirst, orderPred );
 	}
 
-	template< typename Container, typename ItemType >
-	inline bool AddUnique( Container& rDest, ItemType item )
+	template< typename ContainerT, typename ItemType >
+	inline bool AddUnique( ContainerT& rDest, ItemType item )
 	{
 		if ( std::find( rDest.begin(), rDest.end(), item ) != rDest.end() )
 			return false;
@@ -203,38 +315,32 @@ namespace utl
 		return true;
 	}
 
-	template< typename Type, typename Iterator >
-	inline void JoinUnique( std::vector< Type >& rDest, Iterator itStart, Iterator itEnd )
+	template< typename Type, typename IteratorT >
+	inline void JoinUnique( std::vector< Type >& rDest, IteratorT itStart, IteratorT itEnd )
 	{
 		for ( ; itStart != itEnd; ++itStart )
 			AddUnique( rDest, *itStart );
 	}
 
-	template< typename Container, typename ItemType >
-	inline bool Contains( const Container& container, ItemType item )
-	{
-		return std::find( container.begin(), container.end(), item ) != container.end();
-	}
-
-	template< typename Container, typename ItemType >
-	inline void PushUnique( Container& rContainer, ItemType item, size_t pos = std::tstring::npos )
+	template< typename ContainerT, typename ItemType >
+	inline void PushUnique( ContainerT& rContainer, ItemType item, size_t pos = std::tstring::npos )
 	{
 		ASSERT( !Contains( rContainer, item ) );
 		rContainer.insert( std::tstring::npos == pos ? rContainer.end() : ( rContainer.begin() + pos ), item );
 	}
 
-	template< typename Container >
-	inline void RemoveExisting( Container& rContainer, const typename Container::value_type& rItem )
+	template< typename ContainerT >
+	inline void RemoveExisting( ContainerT& rContainer, const typename ContainerT::value_type& rItem )
 	{
-		typename Container::iterator itFound = std::find( rContainer.begin(), rContainer.end(), rItem );
+		typename ContainerT::iterator itFound = std::find( rContainer.begin(), rContainer.end(), rItem );
 		ASSERT( itFound != rContainer.end() );
 		rContainer.erase( itFound );
 	}
 
-	template< typename Container >
-	inline bool RemoveValue( Container& rContainer, const typename Container::value_type& rValue )
+	template< typename ContainerT >
+	inline bool RemoveValue( ContainerT& rContainer, const typename ContainerT::value_type& rValue )
 	{
-		typename Container::iterator itFound = std::find( rContainer.begin(), rContainer.end(), rValue );
+		typename ContainerT::iterator itFound = std::find( rContainer.begin(), rContainer.end(), rValue );
 
 		if ( itFound == rContainer.end() )
 			return false;
@@ -332,18 +438,6 @@ namespace utl
 		algorithms
 	*/
 
-	// find first satisfying binary predicate equalPred
-	template< typename Iterator, typename ValueType, typename EqualBinaryPred >
-	inline Iterator FindIfEqual( Iterator iter, Iterator itEnd, const ValueType& value, EqualBinaryPred equalPred )
-	{
-		for ( ; iter != itEnd; ++iter )
-			if ( equalPred( *iter, value ) )
-				break;
-
-		return iter;
-	}
-
-
 	// returns true if containers have the same elements, eventually in different order
 	template< typename LeftIterator, typename RightIterator >
 	bool SameContents( LeftIterator itLeftStart, LeftIterator itLeftEnd, RightIterator itRightStart, RightIterator itRightEnd )
@@ -382,41 +476,6 @@ namespace utl
 	}
 
 
-	template< typename DiffType, typename Iterator >
-	inline DiffType Distance( Iterator itFirst, Iterator itLast )
-	{
-		return static_cast< DiffType >( std::distance( itFirst, itLast ) );
-	}
-
-	template< typename PosType, typename Iterator, typename ValueType >
-	inline PosType FindPos( Iterator itStart, Iterator itEnd, const ValueType& rValue )
-	{
-		Iterator itFound = std::find( itStart, itEnd, rValue );
-		return itFound != itEnd ? static_cast< PosType >( itFound - itStart ) : PosType( -1 );
-	}
-
-	template< typename PosType, typename Container, typename ValueType >
-	inline PosType FindPos( const Container& container, const ValueType& rValue )
-	{
-		return FindPos< PosType >( container.begin(), container.end(), rValue );
-	}
-
-
-	template< typename PosType, typename Iterator, typename ValueType >
-	inline PosType LookupPos( Iterator itStart, Iterator itEnd, const ValueType& rValue )
-	{
-		Iterator itFound = std::find( itStart, itEnd, rValue );
-
-		ASSERT( itFound != itEnd );
-		return static_cast< PosType >( itFound - itStart );
-	}
-
-	template< typename PosType, typename Container, typename ValueType >
-	inline PosType LookupPos( const Container& container, const ValueType& rValue )
-	{
-		return LookupPos< PosType >( container.begin(), container.end(), rValue );
-	}
-
 	template< typename PosType >
 	PosType CircularAdvance( PosType pos, PosType count, bool next = true )
 	{
@@ -434,16 +493,16 @@ namespace utl
 		return pos;
 	}
 
-	template< typename Iterator, typename Value, typename Pred >
-	Value CircularFind( Iterator itFirst, Iterator itLast, Value startValue, Pred pred )
+	template< typename IteratorT, typename Value, typename Pred >
+	Value CircularFind( IteratorT itFirst, IteratorT itLast, Value startValue, Pred pred )
 	{
-		Iterator itStart = std::find( itFirst, itLast, startValue );
+		IteratorT itStart = std::find( itFirst, itLast, startValue );
 		if ( itStart != itLast )
 			++itStart;
 		else
 			itStart = itFirst;
 
-		Iterator itMatch = std::find_if( itStart, itLast, pred );
+		IteratorT itMatch = std::find_if( itStart, itLast, pred );
 		if ( itMatch == itLast && itStart != itFirst )
 			itMatch = std::find_if( itFirst, itStart - 1, pred );
 
@@ -498,14 +557,14 @@ namespace utl
 	}
 
 
-	template< typename UnaryPred, typename Container >
-	void RemoveDuplicates( Container& rItems, Container* pDuplicates = NULL )
+	template< typename UnaryPred, typename ContainerT >
+	void RemoveDuplicates( ContainerT& rItems, ContainerT* pDuplicates = NULL )
 	{
-		Container sourceItems;
+		ContainerT sourceItems;
 		sourceItems.swap( rItems );
 		rItems.reserve( sourceItems.size() );
 
-		for ( Container::const_iterator itItem = sourceItems.begin(); itItem != sourceItems.end(); ++itItem )
+		for ( ContainerT::const_iterator itItem = sourceItems.begin(); itItem != sourceItems.end(); ++itItem )
 			if ( std::find_if( rItems.begin(), rItems.end(), UnaryPred( *itItem ) ) == rItems.end() )
 				rItems.push_back( *itItem );
 			else if ( pDuplicates != NULL )
@@ -549,22 +608,6 @@ namespace utl
 				itLeft = rOutLeft.erase( itLeft );
 			else
 				++itLeft;
-	}
-}
-
-
-namespace utl
-{
-	// vector of pairs
-
-	template< typename Iterator, typename KeyType >
-	Iterator FindPair( Iterator itStart, Iterator itEnd, const KeyType& key )
-	{
-		for ( ; itStart != itEnd; ++itStart )
-			if ( key == itStart->first )
-				break;
-
-		return itStart;
 	}
 }
 

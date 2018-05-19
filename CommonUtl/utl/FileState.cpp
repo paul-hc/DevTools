@@ -22,46 +22,45 @@ namespace fs
 	{
 	}
 
-	CFileState::CFileState( const fs::CPath& fullPath )
+	CFileState::CFileState( const fs::CPath& path )
 	{
 		CFileState source;
-		if ( source.GetFileState( fullPath.GetPtr() ) )
+		if ( source.ReadFromFile( path ) )
 			*this = source;			// assign valid state
 		else
 		{	// assign path with invalid state
-			m_fullPath = fullPath;
+			m_fullPath = path;
 			m_attributes = s_invalidAttributes;
 		}
 	}
 
-	bool CFileState::GetFileState( const TCHAR* pSrcFilePath )
+	bool CFileState::ReadFromFile( const fs::CPath& path )
 	{
-		CFileStatus fileStatus;
+		::CFileStatus fileStatus;
 
 		Clear();
-		m_fullPath.Set( pSrcFilePath );
-		if ( !CFile::GetStatus( pSrcFilePath, fileStatus ) )
+		m_fullPath = path;
+		if ( !CFile::GetStatus( path.GetPtr(), fileStatus ) )
 			return false;
 
 		*this = CFileState( &fileStatus );
 		return true;
 	}
 
-	void CFileState::SetFileState( const TCHAR* pDestFilePath /*= NULL*/ ) const throws_( CFileException, mfc::CRuntimeException )
+	void CFileState::WriteToFile( void ) const throws_( CFileException, mfc::CRuntimeException )
 	{
-		if ( NULL == pDestFilePath )
-			pDestFilePath = m_fullPath.GetPtr();
+		REQUIRE( IsValid() );
 
-		CFileStatus fileStatus;
-		if ( !CFile::GetStatus( pDestFilePath, fileStatus ) )
-			throw new mfc::CRuntimeException( str::Format( _T("Cannot acces file status for file: %s"), pDestFilePath ) );
+		::CFileStatus fileStatus;
+		if ( !CFile::GetStatus( m_fullPath.GetPtr(), fileStatus ) )
+			throw new mfc::CRuntimeException( str::Format( _T("Cannot acces file status for file: %s"), m_fullPath.GetPtr() ) );
 
 		fileStatus.m_attribute = m_attributes;
 		fileStatus.m_ctime = m_creationTime;
 		fileStatus.m_mtime = m_modifTime;
 		fileStatus.m_atime = m_accessTime;
 
-		CFile::SetStatus( pDestFilePath, fileStatus );
+		CFile::SetStatus( m_fullPath.GetPtr(), fileStatus );
 	}
 
 	bool CFileState::operator==( const CFileState& right ) const

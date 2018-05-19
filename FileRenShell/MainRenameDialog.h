@@ -7,7 +7,6 @@
 #include "utl/DialogToolBar.h"
 #include "utl/EnumSplitButton.h"
 #include "utl/HistoryComboBox.h"
-#include "utl/Logger.h"
 #include "utl/Path.h"
 #include "utl/ReportListControl.h"
 #include "utl/SplitPushButton.h"
@@ -17,6 +16,7 @@
 #include "Application_fwd.h"
 
 
+class CLogger;
 class CFileWorkingSet;
 namespace str { enum Match; }
 

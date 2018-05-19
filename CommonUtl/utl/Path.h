@@ -341,6 +341,26 @@ namespace fs
 }
 
 
+namespace utl
+{
+	template< typename PathMapType >
+	bool HasMultipleDirPaths( const PathMapType& pathMap )
+	{
+		if ( !pathMap.empty() )
+		{
+			typename PathMapType::const_iterator it = pathMap.begin();
+			const fs::CPath dirPath = func::PathOf( it->first ).GetParentPath();
+
+			for ( ; it != pathMap.end(); ++it )
+				if ( func::PathOf( it->first ).GetParentPath() != dirPath )
+					return true;
+		}
+
+		return false;
+	}
+}
+
+
 #include <iosfwd>
 
 inline std::ostream& operator<<( std::ostream& os, const fs::CPath& path )

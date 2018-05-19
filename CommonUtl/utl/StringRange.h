@@ -8,18 +8,6 @@
 
 namespace str
 {
-	template< typename CharType >
-	bool ContainsAnyOf( const CharType* pCharSet, CharType ch )
-	{
-		ASSERT_PTR( pCharSet );
-		for ( ; *pCharSet != 0; ++pCharSet )
-			if ( ch == *pCharSet )
-				return true;
-
-		return false;
-	}
-
-
 	namespace range
 	{
 		// range based algorithms based on string position pair: for fast and efficient parsing of text content

@@ -120,20 +120,6 @@ namespace num
 		return oss.str();
 	}
 
-	const TCHAR* SkipHexPrefix( const TCHAR* pText )
-	{
-		ASSERT_PTR( pText );
-
-		while ( _T(' ') == *pText || _T('\t') == *pText )
-			++pText;
-
-		static const std::tstring hexPrefix = _T("0x");
-		if ( pred::Equal == str::CharTraits::CompareN_NoCase( pText, hexPrefix.c_str(), hexPrefix.length() ) )
-			pText += hexPrefix.length();
-
-		return pText;
-	}
-
 
 	Range< size_t > FindNumericSequence( const std::tstring& text, size_t pos /*= 0*/ )
 	{

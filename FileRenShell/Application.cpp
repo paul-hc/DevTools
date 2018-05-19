@@ -52,6 +52,8 @@ BOOL CApplication::InitInstance( void )
 	if ( !CBaseApp< CWinApp >::InitInstance() )
 		return FALSE;
 
+	app::GetLogger().m_logFileMaxSize = -1;		// unlimited log size
+
 	CAboutBox::m_appIconId = IDD_RENAME_FILES_DIALOG;				// will use HugeIcon
 	CToolStrip::RegisterStripButtons( IDR_IMAGE_STRIP );			// register stock images
 	CImageStore::SharedStore()->RegisterAlias( ID_EDIT_CLEAR, ID_REMOVE_ITEM );

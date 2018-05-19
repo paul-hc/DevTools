@@ -663,6 +663,22 @@
 				>
 			</File>
 			<File
+				RelativePath=".\TouchFilesDialog.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\TouchFilesDialog.h"
+				>
+			</File>
+			<File
+				RelativePath=".\TouchItem.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\TouchItem.h"
+				>
+			</File>
+			<File
 				RelativePath=".\UndoChangeLog.cpp"
 				>
 			</File>

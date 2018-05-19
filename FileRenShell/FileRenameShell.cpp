@@ -3,6 +3,7 @@
 #include "FileRenShell.h"
 #include "FileRenameShell.h"
 #include "MainRenameDialog.h"
+#include "TouchFilesDialog.h"
 #include "utl/ImageStore.h"
 #include "utl/Utilities.h"
 #include "utl/resource.h"
@@ -91,42 +92,6 @@ size_t CFileRenameShell::ExtractDropInfo( IDataObject* pDropInfo )
 	return m_fileData.SetupFromDropInfo( (HDROP)storageMedium.hGlobal );
 }
 
-const CFileRenameShell::CMenuCmdInfo* CFileRenameShell::FindCmd( app::MenuCommand cmd )
-{
-	for ( int i = 0; i != COUNT_OF( m_commands ); ++i )
-		if ( cmd == m_commands[ i ].m_cmd )
-			return &m_commands[ i ];
-
-	return NULL;
-}
-
-void CFileRenameShell::ExecuteCommand( app::MenuCommand menuCmd, CWnd* pParentOwner )
-{
-	if ( app::Cmd_SendToCliboard == menuCmd )
-	{
-		m_fileData.CopyClipSourcePaths( GetKeyState( VK_SHIFT ) & 0x8000 ? FilenameExt : FullPath, pParentOwner );
-		return;
-	}
-
-	// file operations commands
-	m_fileData.LoadUndoLog();
-	bool committed = false;
-	switch ( menuCmd )
-	{
-		case app::Cmd_TouchFiles:
-		{
-			break;
-		}
-		default:
-		{
-			CMainRenameDialog dlg( menuCmd, &m_fileData, pParentOwner );
-			committed = IDOK == dlg.DoModal();
-		}
-	}
-	if ( committed )
-		m_fileData.SaveUndoLog();
-}
-
 void CFileRenameShell::AugmentMenuItems( HMENU hMenu, UINT indexMenu, UINT idBaseCmd )
 {
 	HMENU hSubMenu = ::CreatePopupMenu();
@@ -159,6 +124,44 @@ void CFileRenameShell::AugmentMenuItems( HMENU hMenu, UINT indexMenu, UINT idBas
 
 	if ( CBitmap* pMenuBitmap = pImageStore->RetrieveBitmap( ID_SHELL_SUBMENU, menuColor ) )
 		SetMenuItemBitmaps( hMenu, (UINT)hSubMenu, MF_BYCOMMAND, *pMenuBitmap, *pMenuBitmap );
+}
+
+void CFileRenameShell::ExecuteCommand( app::MenuCommand menuCmd, CWnd* pParentOwner )
+{
+	if ( app::Cmd_SendToCliboard == menuCmd )
+	{
+		m_fileData.CopyClipSourcePaths( GetKeyState( VK_SHIFT ) & 0x8000 ? FilenameExt : FullPath, pParentOwner );
+		return;
+	}
+
+	// file operations commands
+	m_fileData.LoadUndoLog();
+	bool committed = false;
+	switch ( menuCmd )
+	{
+		case app::Cmd_TouchFiles:
+		{
+			CTouchFilesDialog dlg( &m_fileData, pParentOwner );
+			committed = IDOK == dlg.DoModal();
+			break;
+		}
+		default:
+		{
+			CMainRenameDialog dlg( menuCmd, &m_fileData, pParentOwner );
+			committed = IDOK == dlg.DoModal();
+		}
+	}
+	if ( committed )
+		m_fileData.SaveUndoLog();
+}
+
+const CFileRenameShell::CMenuCmdInfo* CFileRenameShell::FindCmd( app::MenuCommand cmd )
+{
+	for ( int i = 0; i != COUNT_OF( m_commands ); ++i )
+		if ( cmd == m_commands[ i ].m_cmd )
+			return &m_commands[ i ];
+
+	return NULL;
 }
 
 

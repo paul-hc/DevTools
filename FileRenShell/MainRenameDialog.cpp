@@ -92,8 +92,6 @@ CMainRenameDialog::CMainRenameDialog( app::MenuCommand menuCmd, CFileWorkingSet*
 	m_regSection = reg::section_mainDialog;
 	RegisterCtrlLayout( layout::styles, COUNT_OF( layout::styles ) );
 
-	app::GetLogger().m_logFileMaxSize = -1;		// unlimited
-
 	m_changeCaseButton.SetSelValue( AfxGetApp()->GetProfileInt( reg::section_mainDialog, reg::entry_changeCase, ExtLowerCase ) );
 
 	m_formatToolbar.GetStrip()
@@ -344,7 +342,7 @@ CFont* CMainRenameDialog::SelectBoldFont( CDC* pDC )
 {
 	static CFont boldFont;
 
-	if ( (HFONT)boldFont == NULL )
+	if ( NULL == boldFont.GetSafeHandle() )
 	{
 		LOGFONT logFont;
 		pDC->GetCurrentFont()->GetLogFont( &logFont );
@@ -388,7 +386,7 @@ void CMainRenameDialog::AutoGenerateFiles( void )
 	bool succeeded = m_pFileData->GenerateDestPaths( renameFormat, &seqCount );
 
 	if ( !succeeded )
-		m_pFileData->ClearDestinationPaths();
+		m_pFileData->ClearDestinations();
 
 	PostMakeDest( true );							// silent mode, no modal messages
 	m_formatCombo.SetFrameColor( succeeded ? CLR_NONE : color::Error );
@@ -396,8 +394,8 @@ void CMainRenameDialog::AutoGenerateFiles( void )
 
 bool CMainRenameDialog::RenameFiles( void )
 {
-	m_pBatchTransaction.reset( new fs::CBatchRename( this ) );
-	if ( !m_pBatchTransaction->Rename( m_pFileData->GetRenamePairs() ) )
+	m_pBatchTransaction.reset( new fs::CBatchRename( m_pFileData->GetRenamePairs(), this ) );
+	if ( !m_pBatchTransaction->RenameFiles() )
 		return false;
 
 	return true;
@@ -591,7 +589,7 @@ void CMainRenameDialog::OnOK( void )
 		case RenameMode:
 			if ( RenameFiles() )
 			{
-				m_pFileData->SaveUndoInfo( app::RenameFiles, m_pBatchTransaction->GetRenamedKeys() );
+				m_pFileData->SaveUndoInfo( app::RenameFiles, m_pBatchTransaction->GetCommittedKeys() );
 
 				m_formatCombo.SaveHistory( m_regSection.c_str(), reg::entry_formatHistory );
 				m_delimiterSetCombo.SaveHistory( m_regSection.c_str(), reg::entry_delimiterSetHistory );
@@ -602,7 +600,7 @@ void CMainRenameDialog::OnOK( void )
 			}
 			else
 			{
-				m_pFileData->SaveUndoInfo( app::RenameFiles, m_pBatchTransaction->GetRenamedKeys() );
+				m_pFileData->SaveUndoInfo( app::RenameFiles, m_pBatchTransaction->GetCommittedKeys() );
 				SwitchMode( MakeMode );
 			}
 			break;
@@ -680,7 +678,7 @@ void CMainRenameDialog::OnBnClicked_CopySourceFiles( void )
 
 void CMainRenameDialog::OnBnClicked_ClearDestFiles( void )
 {
-	m_pFileData->ClearDestinationPaths();
+	m_pFileData->ClearDestinations();
 
 	SetupFileListView();	// fill in and select the found files list
 	SwitchMode( MakeMode );

@@ -26,12 +26,26 @@ public:
 
 	const std::vector< fs::CPath >& GetSourceFiles( void ) const { return m_sourceFiles; }
 	const fs::TPathPairMap& GetRenamePairs( void ) const { return m_renamePairs; }
-	const fs::TFileStatePairMap& GetTouchPairs( void ) const { return m_touchPairs; }
+	fs::TFileStatePairMap& GetTouchPairs( void ) { return m_touchPairs; }
 
 	size_t SetupFromDropInfo( HDROP hDropInfo );
 
-	void ClearDestinationPaths( void );
+	void ClearDestinations( void );
 
+	void LoadUndoLog( void );
+	void SaveUndoLog( void );
+
+	bool CanUndo( app::Action action ) const;
+	void SaveUndoInfo( app::Action action, const fs::TPathSet& keyPaths );
+	void RetrieveUndoInfo( app::Action action );		// fills action pairs from undo stack
+	void CommitUndoInfo( app::Action action );			// pops last from undo stack (when Undo-Rename OK is pressed)
+
+	bool HasErrors( void ) const { return !m_errorIndexes.empty(); }
+	bool IsErrorAt( unsigned int index ) const { return m_errorIndexes.find( index ) != m_errorIndexes.end(); }
+	const std::set< size_t >& GetErrorIndexes( void ) const { return m_errorIndexes; }
+	void ClearErrors( void ) { m_errorIndexes.clear(); }
+
+	// RENAME
 	bool CopyClipSourcePaths( PathType pathType, CWnd* pWnd ) const;
 	void PasteClipDestinationPaths( CWnd* pWnd ) throws_( CRuntimeException );
 
@@ -42,22 +56,9 @@ public:
 	UINT FindNextAvailSeqCount( const std::tstring& format ) const;
 	void EnsureUniformNumPadding( void );
 
-	bool CanUndo( app::Action action ) const;
-	void SaveUndoInfo( app::Action action, const fs::TPathSet& keyPaths );
-	void RetrieveUndoInfo( app::Action action );		// fills action pairs from undo stack
-	void CommitUndoInfo( app::Action action );			// pops last from undo stack (when Undo-Rename OK is pressed)
-
-	void LoadUndoLog( void );
-	void SaveUndoLog( void );
-
 	bool CheckPathCollisions( std::vector< std::tstring >& rDestDuplicates );
 	void CheckPathCollisions( void ) throws_( CRuntimeException );
 	bool FileExistOutsideWorkingSet( const fs::CPath& filePath ) const;		// collision with an existing file/dir outside working set (selected files)
-
-	bool HasErrors( void ) const { return !m_errorIndexes.empty(); }
-	bool IsErrorAt( unsigned int index ) const { return m_errorIndexes.find( index ) != m_errorIndexes.end(); }
-	const std::set< size_t >& GetErrorIndexes( void ) const { return m_errorIndexes; }
-	void ClearErrors( void ) { m_errorIndexes.clear(); }
 private:
 	template< typename UndoMapType, typename DataMapType >
 	static void _SaveUndoInfo( UndoMapType& rUndoPairs, DataMapType& rDataMemberPairs, const fs::TPathSet& keyPaths );

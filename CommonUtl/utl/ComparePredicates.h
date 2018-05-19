@@ -28,6 +28,12 @@ namespace func
 			return dynamic_cast< const SubType* >( pObject );
 		}
 	};
+
+	struct ToKeyDefault
+	{
+		template< typename KeyType >
+		const KeyType& operator()( const KeyType& key ) const { return key; }
+	};
 }
 
 
@@ -65,6 +71,20 @@ namespace pred
 		}
 	private:
 		ComparePtr m_comparePtr;
+	};
+
+	template< typename ToKeyFunc >
+	struct LessKey					// order by keys; ToKeyFunc must provide all conversions to key
+	{
+		LessKey( ToKeyFunc toKey = ToKeyFunc() ) : m_toKey( toKey ) {}
+
+		template< typename T1, typename T2 >
+		bool operator()( const T1& left, const T2& right ) const
+		{
+			return m_toKey( left ) < m_toKey( right );
+		}
+	private:
+		ToKeyFunc m_toKey;
 	};
 
 
@@ -278,6 +298,9 @@ namespace pred
 	{
 		return LessPtr< Compare >( compare );
 	}
+
+	template< typename ToKeyFunc >
+	inline LessKey< ToKeyFunc > MakeLessKey( ToKeyFunc toKeyFunc ) { return LessKey< ToKeyFunc >( toKeyFunc ); }
 
 	template< typename Compare >
 	inline OrderBy< Compare > MakeOrderBy( Compare compare, bool ascendingOrder = true )

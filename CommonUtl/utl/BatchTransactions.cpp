@@ -1,6 +1,7 @@
 
 #include "stdafx.h"
 #include "BatchTransactions.h"
+#include "FmtUtils.h"
 #include "Logger.h"
 #include "Utilities.h"
 
@@ -11,52 +12,72 @@
 
 namespace fs
 {
-	CBatchRename::CBatchRename( IBatchTransactionCallback* pCallback )
-		: m_pCallback( pCallback )
+	// CBaseBatchOperation implementation
+
+	const TCHAR CBaseBatchOperation::s_fmtError[] = _T("* %s\n ERROR: %s");
+
+	void CBaseBatchOperation::Clear( void )
 	{
-		ASSERT_PTR( m_pCallback );
+		m_committed.clear();
+		m_errorMap.clear();
 	}
 
-	CBatchRename::~CBatchRename()
+	std::tstring CBaseBatchOperation::ExtractMessage( const fs::CPath& path, CException* pExc )
+	{
+		std::tstring message = ui::GetErrorMessage( pExc );
+		pExc->Delete();
+
+		if ( !path.FileExist() )
+			return str::Format( _T("Cannot find file:\n%s\n%s"), path.GetPtr(), message.c_str() );
+		return message;
+	}
+
+
+	// CBatchRename implementation
+
+	CBatchRename::CBatchRename( const fs::TPathPairMap& renamePairs, IBatchTransactionCallback* pCallback )
+		: CBaseBatchOperation( pCallback )
+		, m_rRenamePairs( renamePairs )
 	{
 	}
 
-	bool CBatchRename::Rename( const fs::TPathPairMap& renamePairs )
+	bool CBatchRename::RenameFiles( void )
 	{
 		CWaitCursor wait;
 
-		MakeIntermPaths( renamePairs );
-		m_renamed.clear();
-		m_errorMap.clear();
+		Clear();
+		MakeIntermPaths();
 
 		// rename in 2 steps to avoid colissions of new paths within the range of original paths (overlapping reallocation)
 		// SRC -> INTERM -> DEST
-		bool aborted = !RenameSrcToInterm( renamePairs ) || !RenameIntermToDest( renamePairs );
-		LogTransaction( renamePairs );
+		bool aborted = !RenameSrcToInterm() || !RenameIntermToDest();
+		LogTransaction();
 		return !aborted;
 	}
 
-	bool CBatchRename::RenameSrcToInterm( const fs::TPathPairMap& renamePairs )
+	bool CBatchRename::RenameSrcToInterm( void )
 	{
 		// step 1: rename SOURCE -> INTERMEDIATE
 		std::vector< fs::CPath >::const_iterator itInterm = m_intermPaths.begin();
-		for ( fs::TPathPairMap::const_iterator it = renamePairs.begin(); it != renamePairs.end(); )
+		for ( fs::TPathPairMap::const_iterator it = m_rRenamePairs.begin(); it != m_rRenamePairs.end(); )
 		{
 			try
 			{
 				CFile::Rename( it->first.GetPtr(), itInterm->GetPtr() );
-				m_renamed.insert( it->first );				// mark as done
+				m_committed.insert( it->first );				// mark as done
 			}
 			catch ( CException* pExc )
 			{
 				std::tstring message = ExtractMessage( it->first, pExc );
 				m_errorMap[ it->first ] = message;			// mark as error
-				switch ( m_pCallback->HandleFileError( it->first, message ) )
-				{
-					case Abort:	 return false;
-					case Retry:	 continue;
-					case Ignore: break;
-				}
+
+				if ( m_pCallback != NULL )
+					switch ( m_pCallback->HandleFileError( it->first, message ) )
+					{
+						case Abort:	 return false;
+						case Retry:	 continue;
+						case Ignore: break;
+					}
 			}
 
 			++it; ++itInterm;
@@ -64,13 +85,13 @@ namespace fs
 		return true;
 	}
 
-	bool CBatchRename::RenameIntermToDest( const fs::TPathPairMap& renamePairs )
+	bool CBatchRename::RenameIntermToDest( void )
 	{
 		// step 2: rename INTERMEDIATE -> DESTINATION
 		std::vector< fs::CPath >::const_iterator itInterm = m_intermPaths.begin();
-		for ( fs::TPathPairMap::const_iterator it = renamePairs.begin(); it != renamePairs.end(); )
+		for ( fs::TPathPairMap::const_iterator it = m_rRenamePairs.begin(); it != m_rRenamePairs.end(); )
 		{
-			if ( m_renamed.find( it->first ) != m_renamed.end() )
+			if ( m_committed.find( it->first ) != m_committed.end() )
 			{
 				try
 				{
@@ -78,16 +99,18 @@ namespace fs
 				}
 				catch ( CException* pExc )
 				{
-					m_renamed.erase( it->first );		// exclude erroneous from done
+					m_committed.erase( it->first );		// exclude erroneous from done
 
 					std::tstring message = ExtractMessage( *itInterm, pExc );
 					m_errorMap[ it->first ] = message;
-					switch ( m_pCallback->HandleFileError( it->first, message ) )
-					{
-						case Abort:	 return false;
-						case Retry:	 continue;
-						case Ignore: break;
-					}
+
+					if ( m_pCallback != NULL )
+						switch ( m_pCallback->HandleFileError( it->first, message ) )
+						{
+							case Abort:	 return false;
+							case Retry:	 continue;
+							case Ignore: break;
+						}
 				}
 			}
 
@@ -96,41 +119,108 @@ namespace fs
 		return true;
 	}
 
-	void CBatchRename::MakeIntermPaths( const fs::TPathPairMap& renamePairs )
+	void CBatchRename::MakeIntermPaths( void )
 	{
-		const std::tstring intermSuffix = str::Format( _T("_%x"), GetTickCount() );		// random fname sufffix
+		const std::tstring intermSuffix = str::Format( _T("_(%x)"), ::GetTickCount() );		// random fname sufffix
 
 		m_intermPaths.clear();
-		for ( fs::TPathPairMap::const_iterator it = renamePairs.begin(); it != renamePairs.end(); ++it )
+		for ( fs::TPathPairMap::const_iterator it = m_rRenamePairs.begin(); it != m_rRenamePairs.end(); ++it )
 		{
 			fs::CPathParts parts( it->second.Get() );
 			parts.m_fname += intermSuffix;
 			m_intermPaths.push_back( parts.MakePath() );
 		}
 
-		ENSURE( m_intermPaths.size() == renamePairs.size() );
+		ENSURE( m_intermPaths.size() == m_rRenamePairs.size() );
 	}
 
-	std::tstring CBatchRename::ExtractMessage( const fs::CPath& path, CException* pExc )
+	void CBatchRename::LogTransaction( void ) const
 	{
-		std::tstring message = ui::GetErrorMessage( pExc );
-		pExc->Delete();
-		if ( !path.FileExist() )
-			message = str::Format( _T("Cannot find file:\n%s"), path.GetPtr() );
-		return message;
-	}
+		CLogger* pLogger = m_pCallback != NULL ? m_pCallback->GetLogger() : NULL;
+		if ( NULL == pLogger )
+			return;
 
-	void CBatchRename::LogTransaction( const fs::TPathPairMap& renamePairs ) const
-	{
-		if ( CLogger* pLogger = m_pCallback->GetLogger() )
-			for ( fs::TPathPairMap::const_iterator it = renamePairs.begin(); it != renamePairs.end(); ++it )
-			{
-				std::map< fs::CPath, std::tstring >::const_iterator itError = m_errorMap.find( it->first );
-				if ( itError != m_errorMap.end() )
-					pLogger->Log( _T("%s -> ERROR: %s\n* %s"), it->first.Get().c_str(), it->second.GetNameExt(), itError->second.c_str() );
-				else if ( m_renamed.find( it->first ) != m_renamed.end() )
-					pLogger->Log( _T("%s -> %s"), it->first.Get().c_str(), it->second.GetNameExt() );
-				// else: not processed because transaction was aborted on error
+		for ( fs::TPathPairMap::const_iterator itPair = m_rRenamePairs.begin(); itPair != m_rRenamePairs.end(); ++itPair )
+		{
+			std::tstring entryText = fmt::FormatRenameEntry( itPair->first, itPair->second );
+
+			std::map< fs::CPath, std::tstring >::const_iterator itError = m_errorMap.find( itPair->first );
+			if ( itError != m_errorMap.end() )
+				pLogger->Log( s_fmtError, entryText.c_str(), itError->second.c_str() );
+			else if ( m_committed.find( itPair->first ) != m_committed.end() )
+				pLogger->Log( entryText.c_str() );
+			else
+			{	// ignore not processed because transaction was aborted on error
 			}
+		}
+	}
+
+
+	// CBatchTouch implementation
+
+	CBatchTouch::CBatchTouch( const fs::TFileStatePairMap& touchMap, IBatchTransactionCallback* pCallback )
+		: CBaseBatchOperation( pCallback )
+		, m_rTouchMap( touchMap )
+	{
+	}
+
+	bool CBatchTouch::TouchFiles( void )
+	{
+		CWaitCursor wait;
+
+		Clear();
+
+		bool aborted = !_TouchFiles();
+		LogTransaction();
+		return !aborted;
+	}
+
+	bool CBatchTouch::_TouchFiles( void )
+	{
+		for ( fs::TFileStatePairMap::const_iterator itPair = m_rTouchMap.begin(); itPair != m_rTouchMap.end(); )
+		{
+			try
+			{
+				itPair->second.WriteToFile();
+				m_committed.insert( itPair->first.m_fullPath );		// mark as done
+			}
+			catch ( CException* pExc )
+			{
+				std::tstring message = ExtractMessage( itPair->second.m_fullPath, pExc );
+				m_errorMap[ itPair->first.m_fullPath ] = message;	// mark as error
+
+				if ( m_pCallback != NULL )
+					switch ( m_pCallback->HandleFileError( itPair->first.m_fullPath, message ) )
+					{
+						case Abort:	 return false;
+						case Retry:	 continue;
+						case Ignore: break;
+					}
+			}
+
+			++itPair;			// advance to next file if no Retry
+		}
+		return true;
+	}
+
+	void CBatchTouch::LogTransaction( void ) const
+	{
+		CLogger* pLogger = m_pCallback != NULL ? m_pCallback->GetLogger() : NULL;
+		if ( NULL == pLogger )
+			return;
+
+		for ( fs::TFileStatePairMap::const_iterator itPair = m_rTouchMap.begin(); itPair != m_rTouchMap.end(); )
+		{
+			std::tstring entryText = fmt::FormatTouchEntry( itPair->first, itPair->second );
+
+			std::map< fs::CPath, std::tstring >::const_iterator itError = m_errorMap.find( itPair->first.m_fullPath );
+			if ( itError != m_errorMap.end() )
+				pLogger->Log( s_fmtError, entryText.c_str(), itError->second.c_str() );
+			else if ( m_committed.find( itPair->first.m_fullPath ) != m_committed.end() )
+				pLogger->Log( entryText.c_str() );
+			else
+			{	// ignore not processed because transaction was aborted on error
+			}
+		}
 	}
 }

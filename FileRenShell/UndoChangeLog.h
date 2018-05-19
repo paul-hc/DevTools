@@ -7,19 +7,8 @@
 #include <iosfwd>
 #include "utl/FileState.h"
 #include "utl/Path.h"
+#include "utl/StringRange_fwd.h"
 #include "Application_fwd.h"
-
-
-namespace str
-{
-	namespace range
-	{
-		template< typename CharType >
-		class CStringRange;
-	}
-
-	typedef str::range::CStringRange< TCHAR > TStringRange;
-}
 
 
 class CUndoChangeLog : private utl::noncopyable

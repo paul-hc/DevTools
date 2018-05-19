@@ -467,6 +467,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\FmtUtils.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\FmtUtils.h"
+				>
+			</File>
+			<File
 				RelativePath=".\Guards.cpp"
 				>
 			</File>
@@ -576,6 +584,10 @@
 			</File>
 			<File
 				RelativePath=".\StringRange.h"
+				>
+			</File>
+			<File
+				RelativePath=".\StringRange_fwd.h"
 				>
 			</File>
 			<File

@@ -20,7 +20,10 @@ public:
 	~CFileRenameShell();
 private:
 	size_t ExtractDropInfo( IDataObject* pDropInfo );
-private:
+	void AugmentMenuItems( HMENU hMenu, UINT indexMenu, UINT idBaseCmd );
+
+	void ExecuteCommand( app::MenuCommand menuCmd, CWnd* pParentOwner );
+
 	struct CMenuCmdInfo
 	{
 		app::MenuCommand m_cmd;
@@ -31,8 +34,6 @@ private:
 	};
 
 	static const CMenuCmdInfo* FindCmd( app::MenuCommand cmd );
-	void ExecuteCommand( app::MenuCommand menuCmd, CWnd* pParentOwner );
-	void AugmentMenuItems( HMENU hMenu, UINT indexMenu, UINT idBaseCmd );
 private:
 	CFileWorkingSet m_fileData;
 	static const CMenuCmdInfo m_commands[];

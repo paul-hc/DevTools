@@ -107,6 +107,34 @@ namespace str
 }
 
 
+namespace str
+{
+	template< typename CharType >
+	const CharType* SkipWhitespace( const CharType* pText, const CharType* pWhiteSpace = StdWhitespace< CharType >() )
+	{
+		ASSERT_PTR( pText );
+		while ( ContainsAnyOf( pWhiteSpace, *pText ) )
+			++pText;
+
+		return pText;
+	}
+
+	template< typename CharType >
+	const CharType* SkipHexPrefix( const CharType* pText, CaseType caseType = str::Case )
+	{
+		pText = SkipWhitespace( pText );
+
+		const CharType hexPrefix[] = { '0', 'x', 0 };
+		enum { HexPrefixLen = 2 };
+
+		if ( str::EqualsN( pText, hexPrefix, HexPrefixLen, str::Case == caseType ) )
+			pText += HexPrefixLen;
+
+		return pText;
+	}
+}
+
+
 namespace func
 {
 	struct ToChar

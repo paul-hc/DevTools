@@ -303,8 +303,6 @@ namespace num
 	}
 
 
-	const TCHAR* SkipHexPrefix( const TCHAR* pText );
-
 	template< typename ValueType >
 	std::tstring FormatHexNumber( ValueType value, const TCHAR* pFormat = _T("0x%X") )
 	{
@@ -314,9 +312,13 @@ namespace num
 	template< typename ValueType >
 	bool ParseHexNumber( ValueType& rNumber, const std::tstring& text )
 	{
-		std::tistringstream iss( SkipHexPrefix( text.c_str() ) );
-		iss >> std::hex >> rNumber;
-		return !iss.fail();
+		std::tistringstream iss( str::SkipHexPrefix( text.c_str(), str::IgnoreCase ) );
+		size_t number;
+		iss >> std::hex >> number;
+		if ( iss.fail() )
+			return false;
+		rNumber = static_cast< ValueType >( number );
+		return true;
 	}
 }
 

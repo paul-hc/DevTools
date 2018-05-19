@@ -11,19 +11,20 @@ namespace fs
 	{
 		CFileState( void ) : m_attributes( s_invalidAttributes ) {}
 		CFileState( const ::CFileStatus* pFileStatus );
-		explicit CFileState( const fs::CPath& fullPath );
+		explicit CFileState( const fs::CPath& path );
 
 		void Clear( void ) { *this = CFileState(); }
 
 		bool IsEmpty( void ) const { return m_fullPath.IsEmpty(); }
 		bool IsValid( void ) const { return !IsEmpty() && m_attributes != s_invalidAttributes; }
-		bool FileExist( AccessMode accessMode = Exist ) { return m_fullPath.FileExist( accessMode ); }
+		bool FileExist( AccessMode accessMode = Exist ) const { return m_fullPath.FileExist( accessMode ); }
 
-		bool operator==( const CFileState& right ) const;
 		bool operator<( const CFileState& right ) const { return pred::Less == pred::CompareEquivalentPath()( m_fullPath, right.m_fullPath ); }		// order by path
+		bool operator==( const CFileState& right ) const;
+		bool operator!=( const CFileState& right ) const { return !operator==( right ); }
 
-		bool GetFileState( const TCHAR* pSrcFilePath );
-		void SetFileState( const TCHAR* pDestFilePath = NULL ) const throws_( CFileException, mfc::CRuntimeException );
+		bool ReadFromFile( const fs::CPath& path );		// could be relative path, will be stored as absolute
+		void WriteToFile( void ) const throws_( CFileException, mfc::CRuntimeException );
 	public:
 		CPath m_fullPath;
 		BYTE m_attributes;			// CFile::Attribute enum values (low-byte)

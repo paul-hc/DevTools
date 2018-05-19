@@ -115,6 +115,21 @@ namespace str
 namespace str
 {
 	template< typename CharType >
+	bool ContainsAnyOf( const CharType* pCharSet, CharType ch )
+	{
+		ASSERT_PTR( pCharSet );
+		for ( ; *pCharSet != 0; ++pCharSet )
+			if ( ch == *pCharSet )
+				return true;
+
+		return false;
+	}
+}
+
+
+namespace str
+{
+	template< typename CharType >
 	struct CPart
 	{
 		CPart( const CharType* pString = NULL, size_t count = 0 ) : m_pString( pString ), m_count( count ) {}

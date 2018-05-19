@@ -7,6 +7,7 @@
 #define IDD_REPLACE_DIALOG              102
 #define IDD_CAPITALIZE_OPTIONS          103
 #define IDR_IMAGE_STRIP                 104
+#define IDD_TOUCH_FILES_DIALOG          104
 #define IDR_CONTEXT_MENU_MENU           105
 #define ID_SEND_TO_CLIP                 108
 #define IDI_DETAILS                     109
@@ -51,6 +52,7 @@
 #define IDC_PICK_RENAME_ACTIONS         1043
 #define IDC_STRIP_BAR_1                 1044
 #define IDC_STRIP_BAR_2                 1045
+#define IDC_FILE_TOUCH_LIST             1046
 #define IDS_INVALID_FORMAT              5000
 #define IDS_NO_DELIMITER_SET            5001
 #define IDS_OK_BUTTON_LABELS            5002
@@ -101,7 +103,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        110
 #define _APS_NEXT_COMMAND_VALUE         32808
-#define _APS_NEXT_CONTROL_VALUE         1046
+#define _APS_NEXT_CONTROL_VALUE         1047
 #define _APS_NEXT_SYMED_VALUE           5004
 #endif
 #endif

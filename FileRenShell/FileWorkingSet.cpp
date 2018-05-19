@@ -29,7 +29,7 @@ CFileWorkingSet::~CFileWorkingSet()
 {
 }
 
-void CFileWorkingSet::ClearDestinationPaths( void )
+void CFileWorkingSet::ClearDestinations( void )
 {
 	ClearErrors();
 
@@ -223,7 +223,7 @@ bool CFileWorkingSet::FileExistOutsideWorkingSet( const fs::CPath& filePath ) co
 bool CFileWorkingSet::GenerateDestPaths( const std::tstring& format, UINT* pSeqCount )
 {
 	ASSERT_PTR( pSeqCount );
-	ClearDestinationPaths();
+	ClearDestinations();
 
 	CPathGenerator generator( m_renamePairs, format, *pSeqCount );
 	if ( !generator.GeneratePairs() )

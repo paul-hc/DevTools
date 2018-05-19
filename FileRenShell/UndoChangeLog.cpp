@@ -2,6 +2,7 @@
 #include "stdafx.h"
 #include "UndoChangeLog.h"
 #include "utl/EnumTags.h"
+#include "utl/FmtUtils.h"
 #include "utl/Guards.h"
 #include "utl/RuntimeException.h"
 #include "utl/StringRange.h"
@@ -13,131 +14,6 @@
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
-
-
-namespace fmt
-{
-	static const TCHAR s_sep[] = _T("|");
-
-	enum { Attributes, CreationTime, ModifTime, AccessTime, _FieldCount };
-
-	std::tstring DoFormatFileState( const fs::CFileState& state )
-	{
-		std::vector< std::tstring > parts;
-		if ( !state.IsEmpty() )
-		{
-			parts.push_back( str::Format( _T("0x%08X"), state.m_attributes ) );
-			parts.push_back( time_utl::FormatTimestamp( state.m_creationTime ) );
-			parts.push_back( time_utl::FormatTimestamp( state.m_modifTime ) );
-			parts.push_back( time_utl::FormatTimestamp( state.m_accessTime ) );
-		}
-		return str::Join( parts, s_sep );
-	}
-
-	bool DoParseFileState( fs::CFileState& rState, const std::tstring& text )
-	{
-		std::vector< std::tstring > parts;
-		str::Split( parts, text.c_str(), s_sep );
-		if ( parts.size() != _FieldCount )
-		{
-			rState.Clear();
-			return false;
-		}
-
-		unsigned int attributes;
-		str::TStringRange attrRange( parts[ Attributes ] );
-		if ( attrRange.StripPrefix( _T("0x") ) )
-			if ( 1 == _stscanf( attrRange.Extract().c_str(), _T("%X"), &attributes ) )
-				rState.m_attributes = static_cast< BYTE >( attributes );
-
-		rState.m_creationTime = time_utl::ParseTimestamp( parts[ CreationTime ] );
-		rState.m_modifTime = time_utl::ParseTimestamp( parts[ ModifTime ] );
-		rState.m_accessTime = time_utl::ParseTimestamp( parts[ AccessTime ] );
-		return true;
-	}
-
-	std::tstring FormatBraces( const TCHAR core[], const TCHAR braces[] )
-	{
-		ASSERT( str::GetLength( braces ) >= 2 );
-		return str::Format( _T("%c%s%c"), braces[ 0 ], core, braces[ 1 ] );
-	}
-
-	bool ParseBraces( str::TStringRange& rTextRange, const TCHAR braces[] )
-	{
-		ASSERT( str::GetLength( braces ) >= 2 );
-		rTextRange.Trim();
-		return rTextRange.Strip( braces[ 0 ], braces[ 1 ] );
-	}
-}
-
-
-namespace fmt
-{
-	static const TCHAR s_pairSep[] = _T(" -> ");
-	static const TCHAR s_touchSep[] = _T(" :: ");
-	static const TCHAR s_stateBraces[] = { _T("{}") };
-
-	std::tstring FormatFileState( const fs::CFileState& fileState )
-	{
-		return FormatBraces( DoFormatFileState( fileState ).c_str(), s_stateBraces );
-	}
-
-	bool ParseFileState( fs::CFileState& rState, str::TStringRange& rTextRange )
-	{
-		return
-			ParseBraces( rTextRange, s_stateBraces ) &&
-			DoParseFileState( rState, rTextRange.Extract() );
-	}
-
-	std::tstring FormatRenameEntry( const fs::CPath& srcPath, const fs::CPath& destPath )
-	{
-		return srcPath.Get() + s_pairSep + destPath.Get();
-	}
-
-	bool ParseRenameEntry( fs::CPath& rSrcPath, fs::CPath& rDestPath, const str::TStringRange& textRange )
-	{
-		Range< size_t > sepPos;
-		if ( textRange.Find( sepPos, s_pairSep ) )
-		{
-			str::TStringRange srcRange = textRange.MakeLead( sepPos.m_start );
-			str::TStringRange destRange = textRange.MakeTrail( sepPos.m_end );
-			srcRange.Trim();
-			destRange.Trim();
-
-			rSrcPath = srcRange.Extract();
-			rDestPath = destRange.Extract();
-			return !rSrcPath.IsEmpty() && !rDestPath.IsEmpty();
-		}
-		return false;
-	}
-
-	std::tstring FormatTouchEntry( const fs::CFileState& srcState, const fs::CFileState& destState )
-	{
-		ASSERT( srcState.m_fullPath == destState.m_fullPath );
-		return srcState.m_fullPath.Get() + s_touchSep + FormatFileState( srcState ) + s_pairSep + FormatFileState( destState );
-	}
-
-	bool ParseTouchEntry( fs::CFileState& rSrcState, fs::CFileState& rDestState, const str::TStringRange& textRange )
-	{
-		Range< size_t > sepPos;
-		if ( textRange.Find( sepPos, s_touchSep ) )
-		{
-			rSrcState.m_fullPath = rDestState.m_fullPath = textRange.ExtractLead( sepPos.m_start );
-			str::TStringRange nextRange = textRange.MakeTrail( sepPos.m_end );
-
-			if ( nextRange.Find( sepPos, s_pairSep ) )
-			{
-				str::TStringRange srcRange = nextRange.MakeLead( sepPos.m_start );
-				str::TStringRange destRange = nextRange.MakeTrail( sepPos.m_end );
-
-				if ( ParseFileState( rSrcState, srcRange ) )
-					if ( ParseFileState( rDestState, destRange ) )
-						return true;
-			}
-		}
-		return false;
-	}
-}
 
 
 namespace fmt
