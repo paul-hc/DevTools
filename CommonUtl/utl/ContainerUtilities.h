@@ -206,7 +206,7 @@ namespace utl
 
 namespace utl
 {
-	// binary search in ordered containers
+	// binary search for ordered containers
 
 	template< typename IteratorT, typename KeyType, typename ToKeyFunc >
 	IteratorT BinaryFind( IteratorT itStart, IteratorT itEnd, const KeyType& key, ToKeyFunc toKeyFunc )
@@ -220,29 +220,28 @@ namespace utl
 	}
 
 	template< typename ContainerT, typename KeyType, typename ToKeyFunc >
-	typename ContainerT::const_iterator BinaryFind( const ContainerT& container, const KeyType& key, ToKeyFunc toKeyFunc )
+	inline typename ContainerT::const_iterator BinaryFind( const ContainerT& container, const KeyType& key, ToKeyFunc toKeyFunc )
 	{
 		return BinaryFind( container.begin(), container.end(), key, toKeyFunc );
 	}
 
 	template< typename ContainerT, typename KeyType, typename ToKeyFunc >
-	typename ContainerT::iterator BinaryFind( ContainerT& container, const KeyType& key, ToKeyFunc toKeyFunc )
+	inline typename ContainerT::iterator BinaryFind( ContainerT& container, const KeyType& key, ToKeyFunc toKeyFunc )
 	{
 		return BinaryFind( container.begin(), container.end(), key, toKeyFunc );
 	}
 
 	template< typename ContainerT, typename KeyType, typename ToKeyFunc >
-	typename size_t BinaryFindPos( const ContainerT& container, const KeyType& key, ToKeyFunc toKeyFunc )
+	inline typename size_t BinaryFindPos( const ContainerT& container, const KeyType& key, ToKeyFunc toKeyFunc )
 	{
 		typename ContainerT::const_iterator itFound = BinaryFind( container.begin(), container.end(), key, toKeyFunc );
 		return itFound != container.end() ? std::distance( container.begin(), itFound ) : std::tstring::npos;
 	}
 
 	template< typename ContainerT, typename KeyType, typename ToKeyFunc >
-	typename bool BinaryContains( const ContainerT& container, const KeyType& key, ToKeyFunc toKeyFunc )
+	inline typename bool BinaryContains( const ContainerT& container, const KeyType& key, ToKeyFunc toKeyFunc )
 	{
-		typename ContainerT::const_iterator itFound = BinaryFind( container.begin(), container.end(), key, toKeyFunc );
-		return itFound != container.end();
+		return BinaryFind( container.begin(), container.end(), key, toKeyFunc ) != container.end();
 	}
 
 

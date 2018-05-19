@@ -29,10 +29,10 @@ namespace func
 		}
 	};
 
-	struct ToKeyDefault
+	struct ToSelf
 	{
-		template< typename KeyType >
-		const KeyType& operator()( const KeyType& key ) const { return key; }
+		template< typename ValueType >
+		const ValueType& operator()( const ValueType& value ) const { return value; }
 	};
 }
 
