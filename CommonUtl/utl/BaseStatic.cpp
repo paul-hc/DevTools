@@ -38,7 +38,7 @@ CFont* CBaseStatic::GetMarlettFont( void )
 {
 	static CFont marlettFont;
 	if ( NULL == marlettFont.GetSafeHandle() )
-		ui::MakeStandardControlFont( marlettFont, ui::CFontInfo( _T("Marlett"), false, false, 120 ) );
+		ui::MakeStandardControlFont( marlettFont, ui::CFontInfo( _T("Marlett"), ui::Regular, 120 ) );
 	return &marlettFont;
 }
 

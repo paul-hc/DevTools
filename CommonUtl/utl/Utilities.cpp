@@ -680,8 +680,36 @@ namespace ui
 		else									// hWnd is a dialog's child
 			return (HBRUSH)::SendMessage( ::GetParent( hWnd ), message, (WPARAM)hDC, (LPARAM)hWnd );
 	}
+}
 
 
+// import from <afximpl.h>
+const AFX_MSGMAP_ENTRY* AFXAPI AfxFindMessageEntry( const AFX_MSGMAP_ENTRY* lpEntry, UINT message, UINT notifyCode, UINT id );
+
+namespace ui
+{
+	struct FriendlyCmdTarget : public CCmdTarget
+	{
+		using CCmdTarget::GetMessageMap;
+
+		static const AFX_MSGMAP* _GetMessageMap( const CCmdTarget* pCmdTarget ) { return ( (const FriendlyCmdTarget*)pCmdTarget )->GetMessageMap(); }
+	};
+
+	const AFX_MSGMAP_ENTRY* FindMessageHandler( const CCmdTarget* pCmdTarget, UINT message, UINT notifyCode, UINT id )
+	{
+		notifyCode = LOWORD( notifyCode );			// translate to WORD for proper identification in AfxFindMessageEntry
+
+		for ( const AFX_MSGMAP* pMessageMap = FriendlyCmdTarget::_GetMessageMap( pCmdTarget ); pMessageMap->pfnGetBaseMap != NULL; pMessageMap = (*pMessageMap->pfnGetBaseMap)() )
+			if ( const AFX_MSGMAP_ENTRY* pEntry = AfxFindMessageEntry( pMessageMap->lpEntries, message, notifyCode, id ) )
+				return pEntry;		// found it
+
+		return NULL;
+	}
+}
+
+
+namespace ui
+{
 	bool IsGroupBox( HWND hWnd )
 	{
 		if ( ( GetStyle( hWnd ) & BS_TYPEMASK ) == BS_GROUPBOX )
@@ -1143,14 +1171,15 @@ namespace ui
 	}
 
 
-	void MakeStandardControlFont( CFont& rOutFont, const ui::CFontInfo& fontInfo /*= ui::CFontInfo( false )*/, int stockFontType /*= DEFAULT_GUI_FONT*/ )
+	void MakeStandardControlFont( CFont& rOutFont, const ui::CFontInfo& fontInfo /*= ui::CFontInfo()*/, int stockFontType /*= DEFAULT_GUI_FONT*/ )
 	{
 		if ( NULL == rOutFont.m_hObject )			// create font once (friendly with static font data members)
 		{
 			CFont* pStockFont = CFont::FromHandle( (HFONT)::GetStockObject( stockFontType ) );
 			ASSERT_PTR( pStockFont );
 
-			LOGFONT logFont; memset( &logFont, 0, sizeof( LOGFONT ) );
+			LOGFONT logFont;
+			memset( &logFont, 0, sizeof( LOGFONT ) );
 			pStockFont->GetLogFont( &logFont );
 
 			if ( fontInfo.m_pFaceName != NULL )
@@ -1158,15 +1187,74 @@ namespace ui
 				logFont.lfCharSet = DEFAULT_CHARSET;
 				_tcscpy( logFont.lfFaceName, fontInfo.m_pFaceName );
 			}
-			if ( fontInfo.m_bold )
-				logFont.lfWeight = FW_BOLD;
-			if ( fontInfo.m_italic )
-				logFont.lfItalic = TRUE;
+
 			if ( fontInfo.m_heightPct != 100 )
 				logFont.lfHeight = MulDiv( logFont.lfHeight, fontInfo.m_heightPct, 100 );
+			if ( HasFlag( fontInfo.m_effect, Bold ) )
+				logFont.lfWeight = FW_BOLD;
+			if ( HasFlag( fontInfo.m_effect, Italic ) )
+				logFont.lfItalic = TRUE;
+			if ( HasFlag( fontInfo.m_effect, Underline ) )
+				logFont.lfUnderline = TRUE;
 
 			rOutFont.CreateFontIndirect( &logFont );
 		}
+	}
+
+	void MakeEffectControlFont( CFont& rOutFont, CFont* pSourceFont, TFontEffect fontEffect /*= ui::Regular*/, int heightPct /*= 100*/ )
+	{
+		if ( rOutFont.m_hObject != NULL )
+			return;				// create once
+
+		if ( NULL == pSourceFont )
+			pSourceFont = CFont::FromHandle( (HFONT)::GetStockObject( DEFAULT_GUI_FONT ) );
+		ASSERT_PTR( pSourceFont->GetSafeHandle() );
+
+		LOGFONT logFont;
+		memset( &logFont, 0, sizeof( LOGFONT ) );
+		pSourceFont->GetLogFont( &logFont );
+
+		if ( heightPct != 100 )
+			logFont.lfHeight = MulDiv( logFont.lfHeight, heightPct, 100 );
+
+		if ( HasFlag( fontEffect, Bold ) )
+			logFont.lfWeight = FW_BOLD;
+		if ( HasFlag( fontEffect, Italic ) )
+			logFont.lfItalic = TRUE;
+		if ( HasFlag( fontEffect, Underline ) )
+			logFont.lfUnderline = TRUE;
+
+		rOutFont.CreateFontIndirect( &logFont );
+	}
+
+
+	// CFontEffectCache implementation
+
+	CFontEffectCache::CFontEffectCache( CFont* pSourceFont )
+	{
+		ASSERT_PTR( pSourceFont->GetSafeHandle() );
+		m_sourceFont.Attach( pSourceFont->GetSafeHandle() );
+	}
+
+	CFontEffectCache::~CFontEffectCache()
+	{
+		m_sourceFont.Detach();		// no ownership
+		utl::ClearOwningAssocContainerValues( m_effectFonts );
+	}
+
+	CFont* CFontEffectCache::Lookup( TFontEffect fontEffect )
+	{
+		if ( ui::Regular == fontEffect )
+			return &m_sourceFont;
+
+		CFont*& rpFount = m_effectFonts[ fontEffect ];
+		if ( NULL == rpFount )
+		{
+			rpFount = new CFont();
+			MakeEffectControlFont( *rpFount, &m_sourceFont, fontEffect );
+		}
+		ASSERT_PTR( rpFount->GetSafeHandle() );
+		return rpFount;
 	}
 
 

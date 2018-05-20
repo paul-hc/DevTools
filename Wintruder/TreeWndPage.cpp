@@ -294,7 +294,7 @@ void CTreeWndPage::DoDataExchange( CDataExchange* pDX )
 		CImageList* pImageList = CWndImageRepository::Instance().GetImageList();
 		m_treeCtrl.SetImageList( pImageList, TVSIL_NORMAL );
 		m_treeCtrl.SetImageList( pImageList, TVSIL_STATE );
-		ui::MakeStandardControlFont( m_italicFont, ui::CFontInfo( false, true ) );
+		ui::MakeStandardControlFont( m_italicFont, ui::CFontInfo( ui::Italic ) );
 
 		RefreshTreeContents();				// first init
 	}

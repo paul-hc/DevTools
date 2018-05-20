@@ -93,6 +93,7 @@ CReportListControl::CReportListControl( UINT columnLayoutId /*= 0*/, DWORD listS
 	, m_useTriStateAutoCheck( false )
 	, m_listAccel( keys, COUNT_OF( keys ) )
 	, m_pDataSourceFactory( ole::GetStdDataSourceFactory() )
+	, m_parentHandlesCustomDraw( -1 )
 {
 	m_pPopupMenu[ OnSelection ] = &GetStdPopupMenu( OnSelection );
 	m_pPopupMenu[ Nowhere ] = &GetStdPopupMenu( Nowhere );
@@ -124,8 +125,16 @@ CMenu& CReportListControl::GetStdPopupMenu( PopupType popupType )
 	return rMenu;
 }
 
+ui::CFontEffectCache* CReportListControl::GetFontEffectCache( void )
+{
+	if ( NULL == m_pFontCache.get() )
+		m_pFontCache.reset( new ui::CFontEffectCache( GetFont() ) );
+	return m_pFontCache.get();
+}
+
 void CReportListControl::SetupControl( void )
 {
+
 	if ( m_listStyleEx != 0 )
 		SetExtendedStyle( m_listStyleEx );
 
@@ -315,7 +324,7 @@ bool CReportListControl::IsItemFullyVisible( int index ) const
 	return ( clipItemRect == itemRect ) != FALSE;		// true if item is fully visible
 }
 
-void CReportListControl::SetSortByColumn( int sortByColumn, bool sortAscending /*= true*/ )
+void CReportListControl::SetSortByColumn( TColumn sortByColumn, bool sortAscending /*= true*/ )
 {
 	m_sortByColumn = sortByColumn;
 	m_sortAscending = sortAscending;
@@ -1217,6 +1226,96 @@ CRect CReportListControl::GetFrameBounds( const std::vector< int >& indexes ) co
 }
 
 
+// cell text effects (custom draw)
+
+void CReportListControl::MarkCellAt( int index, TColumn subItem, const ui::CTextEffect& textEfect )
+{
+	utl::ISubject* pSubject = GetObjectAt( index );
+	ASSERT_PTR( pSubject );
+
+	if ( subItem != EntireRecord )
+		m_markedCells[ std::make_pair( pSubject, subItem ) ] = textEfect;
+	else
+		for ( TColumn subItem = 0; subItem != (TColumn)m_columnInfos.size(); ++subItem )
+			MarkCellAt( index, subItem, textEfect );
+}
+
+void CReportListControl::UnmarkCellAt( int index, TColumn subItem )
+{
+	if ( subItem != EntireRecord )
+	{
+		stdext::hash_map< TCellPair, ui::CTextEffect >::iterator itFound = m_markedCells.find( std::make_pair( GetObjectAt( index ), subItem ) );
+		if ( itFound != m_markedCells.end() )
+			m_markedCells.erase( itFound );
+	}
+	else
+	{
+		for ( TColumn subItem = 0; subItem != (TColumn)m_columnInfos.size(); ++subItem )
+			UnmarkCellAt( index, subItem );
+	}
+}
+
+void CReportListControl::ClearMarkedCells( void )
+{
+	m_markedCells.clear();
+	Invalidate();
+}
+
+const ui::CTextEffect* CReportListControl::FindTextEffectAt( utl::ISubject* pSubject, TColumn subItem ) const
+{
+	return utl::FindValuePtr( m_markedCells, std::make_pair( pSubject, subItem ) );
+}
+
+const ui::CTextEffect& CReportListControl::LookupTextEffectAt( utl::ISubject* pSubject, TColumn subItem ) const
+{
+	if ( const ui::CTextEffect* pFoundEffect = FindTextEffectAt( pSubject, subItem ) )
+		return *pFoundEffect;
+
+	// since we do sub-item level custom drawing, we need to rollback to default text effect for the subsequent sub-items
+	static const ui::CTextEffect defaultEffect;
+	return defaultEffect;
+}
+
+bool CReportListControl::ApplyTextEffectAt( NMLVCUSTOMDRAW* pDraw, utl::ISubject* pSubject, TColumn subItem )
+{
+	ASSERT_PTR( pDraw );
+	int index = static_cast< int >( pDraw->nmcd.dwItemSpec ); index;		// for debugging
+
+	if ( m_markedCells.empty() )
+		return false;
+
+	const ui::CTextEffect& textEffect = LookupTextEffectAt( pSubject, subItem );
+	bool modified = false;
+
+	if ( CFont* pFont = GetFontEffectCache()->Lookup( textEffect.m_fontEffect ) )
+		if ( ::SelectObject( pDraw->nmcd.hdc, *pFont ) != *pFont )
+			modified = true;
+
+	// when assigning CLR_NONE, the list view uses the default colour properly: this->GetTextColor(), this->GetBkColor()
+	if ( textEffect.m_textColor != pDraw->clrText )
+	{
+		pDraw->clrText = textEffect.m_textColor;
+		modified = true;
+	}
+
+	if ( textEffect.m_bkColor != pDraw->clrTextBk )
+	{
+		pDraw->clrTextBk = textEffect.m_bkColor;
+		modified = true;
+	}
+
+	return modified;
+}
+
+bool CReportListControl::ParentHandlesCustomDraw( void )
+{
+	if ( -1 == m_parentHandlesCustomDraw )
+		m_parentHandlesCustomDraw = ui::ParentContainsMessageHandler( this, WM_NOTIFY, NM_CUSTOMDRAW );
+
+	return m_parentHandlesCustomDraw != FALSE;
+}
+
+
 // groups
 
 #if ( _WIN32_WINNT >= 0x0600 ) && defined( UNICODE )
@@ -1591,37 +1690,45 @@ BOOL CReportListControl::OnNmCustomDraw_Reflect( NMHDR* pNmHdr, LRESULT* pResult
 
 	*pResult = CDRF_DODEFAULT;
 
-	if ( m_useAlternateRowColoring || m_pCustomImager.get() != NULL )
-		switch ( pDraw->nmcd.dwDrawStage )
-		{
-			case CDDS_PREPAINT:
-				*pResult = CDRF_NOTIFYITEMDRAW;
-				return TRUE;					// handled
-			case CDDS_ITEMPREPAINT:
-				if ( m_useAlternateRowColoring )
-					if ( pDraw->nmcd.dwItemSpec & 0x01 )
-					{
-						pDraw->clrTextBk = color::GhostWhite;
-						*pResult = CDRF_NEWFONT;
-					}
-
-				if ( m_pCustomImager.get() != NULL )
-					if ( IsItemVisible( index ) )
-						*pResult |= CDRF_NOTIFYPOSTPAINT;		// will superimpose the thumbnails on top of transparent image
-
-				return TRUE;					// handled
-			case CDDS_ITEMPOSTPAINT:
-				if ( m_pCustomImager.get() != NULL )
+	switch ( pDraw->nmcd.dwDrawStage )
+	{
+		case CDDS_PREPAINT:
+			*pResult = CDRF_NOTIFYITEMDRAW;
+			break;
+		case CDDS_ITEMPREPAINT:
+			if ( m_useAlternateRowColoring )
+				if ( index & 0x01 )
 				{
-					CRect itemImageRect;
-					if ( GetItemRect( index, itemImageRect, LVIR_ICON ) )		// item is visible?
-						if ( m_pCustomImager->m_pRenderer->CustomDrawItemImage( &pDraw->nmcd, itemImageRect ) )
-							return TRUE;		// handled
+					pDraw->clrTextBk = color::GhostWhite;
+					*pResult = CDRF_NEWFONT;
 				}
-				break;
-		}
 
-	return FALSE;					// continue handling by parent
+			*pResult = CDRF_NEWFONT | CDRF_NOTIFYSUBITEMDRAW;
+
+			if ( m_pCustomImager.get() != NULL )
+				if ( IsItemVisible( index ) )
+					*pResult |= CDRF_NOTIFYPOSTPAINT;		// will superimpose the thumbnails on top of transparent image
+
+			break;
+		case CDDS_SUBITEM | CDDS_ITEMPREPAINT:
+			if ( ApplyTextEffectAt( pDraw, AsPtr< utl::ISubject >( pDraw->nmcd.lItemlParam ), pDraw->iSubItem ) )
+				*pResult |= CDRF_NEWFONT;
+			break;
+		case CDDS_ITEMPOSTPAINT:
+			if ( m_pCustomImager.get() != NULL )
+			{
+				CRect itemImageRect;
+				if ( GetItemRect( index, itemImageRect, LVIR_ICON ) )		// item is visible?
+					if ( m_pCustomImager->m_pRenderer->CustomDrawItemImage( &pDraw->nmcd, itemImageRect ) )
+						return TRUE;		// handled
+			}
+			break;
+	}
+
+	if ( !ParentHandlesCustomDraw() )
+		return TRUE;			// mark as handled so changes are applied
+
+	return FALSE;				// continue handling by parent, even if changed (additive logic)
 }
 
 void CReportListControl::OnListViewMode( UINT cmdId )

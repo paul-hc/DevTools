@@ -8,11 +8,14 @@
 #include "Image_fwd.h"
 #include "OleUtils.h"
 #include "Resequence.h"
+#include "ui_fwd.h"
 #include <vector>
+#include <hash_map>
 #include <afxcmn.h>
 
 
 class CListSelectionData;
+namespace ui { class CFontEffectCache; }
 namespace ole { class CDataSource; }
 
 namespace ds
@@ -72,6 +75,7 @@ public:
 	void SetSection( const std::tstring& regSection ) { m_regSection = regSection; }
 public:
 	typedef int ImageListPos;
+
 	void SetCustomImageDraw( ui::ICustomImageDraw* pCustomImageDraw, ImageListPos transpImgPos = -1 );
 
 	enum PopupType { OnSelection, Nowhere, _PopupTypeCount };
@@ -95,9 +99,13 @@ public:
 	int GetDropIndexAtPoint( const CPoint& point ) const;
 	bool IsItemFullyVisible( int index ) const;
 public:
+	typedef int TColumn;
+
+	enum { EntireRecord = (TColumn)-1 };
+
 	// sorting
-	std::pair< int, bool > GetSortByColumn( void ) const { return std::make_pair( m_sortByColumn, m_sortAscending ); }
-	void SetSortByColumn( int sortByColumn, bool sortAscending = true );
+	std::pair< TColumn, bool > GetSortByColumn( void ) const { return std::make_pair( m_sortByColumn, m_sortAscending ); }
+	void SetSortByColumn( TColumn sortByColumn, bool sortAscending = true );
 
 	void SetSortInternally( bool sortInternally ) { m_sortInternally = sortInternally; }
 
@@ -256,6 +264,20 @@ public:
 
 	CRect GetFrameBounds( const std::vector< int >& indexes ) const;
 public:
+	// custom cell marking: color, bold, italic, underline
+	void MarkCellAt( int index, TColumn subItem, const ui::CTextEffect& textEfect );
+	void MarkRowAt( int index, const ui::CTextEffect& textEfect ) { MarkCellAt( index, EntireRecord, textEfect ); }
+	void UnmarkCellAt( int index, TColumn subItem );
+	void ClearMarkedCells( void );
+
+	const ui::CTextEffect* FindTextEffectAt( utl::ISubject* pSubject, TColumn subItem ) const;
+	const ui::CTextEffect& LookupTextEffectAt( utl::ISubject* pSubject, TColumn subItem ) const;
+protected:
+	virtual bool ApplyTextEffectAt( NMLVCUSTOMDRAW* pDraw, utl::ISubject* pSubject, TColumn subItem );
+
+	ui::CFontEffectCache* GetFontEffectCache( void );
+	bool ParentHandlesCustomDraw( void );
+public:
 	enum SortOrder { NotSorted, Ascending, Descending };				// column sort image index
 
 	struct CItemData
@@ -313,6 +335,8 @@ public:
 private:
 	void AddTransparentImage( void );
 private:
+	typedef std::pair< utl::ISubject*, TColumn > TCellPair;			// store pointers instead of indexes to be invariant to sorting
+private:
 	DWORD m_listStyleEx;
 	std::tstring m_regSection;
 	std::vector< CColumnInfo > m_columnInfos;
@@ -320,10 +344,13 @@ private:
 	bool m_useExplorerTheme;
 	bool m_useAlternateRowColoring;
 
-	int m_sortByColumn;
+	TColumn m_sortByColumn;
 	bool m_sortAscending;
 	bool m_sortInternally;
 	PFNLVCOMPARE m_pCompareFunc;
+
+	stdext::hash_map< TCellPair, ui::CTextEffect > m_markedCells;
+	std::auto_ptr< ui::CFontEffectCache > m_pFontCache;		// self-encapsulated
 
 	CImageList* m_pImageList;
 	CImageList* m_pLargeImageList;
@@ -345,6 +372,8 @@ private:
 	};
 
 	std::auto_ptr< CCustomImager > m_pCustomImager;
+
+	BOOL m_parentHandlesCustomDraw;			// self-encapsulated
 public:
 	static const TCHAR m_columnLayoutFormat[];
 public:

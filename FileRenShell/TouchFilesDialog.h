@@ -37,8 +37,8 @@ private:
 	enum Column
 	{
 		Filename,
-		SrcAttributes, SrcModifyTime, SrcCreationTime, SrcAccessTime,
-		DestAttributes, DestModifyTime, DestCreationTime, DestAccessTime
+		DestAttributes, DestModifyTime, DestCreationTime, DestAccessTime,
+		SrcAttributes, SrcModifyTime, SrcCreationTime, SrcAccessTime
 	};
 
 	// fs::IBatchTransactionCallback interface

@@ -69,7 +69,7 @@ void CTouchFilesDialog::SetupFileListView( void )
 	int orgSel = m_fileListCtrl.GetCurSel();
 
 	{
-		CScopedLockRedraw freeze( this );
+		CScopedLockRedraw freeze( &m_fileListCtrl );
 		//CScopedListTextSelection selection( &m_fileListCtrl );
 		CScopedInternalChange internalChange( &m_fileListCtrl );
 
@@ -87,15 +87,15 @@ void CTouchFilesDialog::SetupFileListView( void )
 			m_displayItems.push_back( pItem );
 			m_fileListCtrl.InsertObjectItem( pos, pItem );		// Filename
 
-			m_fileListCtrl.SetSubItemText( pos, SrcAttributes, num::FormatHexNumber( itPair->first.m_attributes ) );
-			m_fileListCtrl.SetSubItemText( pos, SrcModifyTime, time_utl::FormatTimestamp( itPair->first.m_modifTime ) );
-			m_fileListCtrl.SetSubItemText( pos, SrcCreationTime, time_utl::FormatTimestamp( itPair->first.m_creationTime ) );
-			m_fileListCtrl.SetSubItemText( pos, SrcAccessTime, time_utl::FormatTimestamp( itPair->first.m_accessTime ) );
-
 			m_fileListCtrl.SetSubItemText( pos, DestAttributes, num::FormatHexNumber( itPair->second.m_attributes ) );
 			m_fileListCtrl.SetSubItemText( pos, DestModifyTime, time_utl::FormatTimestamp( itPair->second.m_modifTime ) );
 			m_fileListCtrl.SetSubItemText( pos, DestCreationTime, time_utl::FormatTimestamp( itPair->second.m_creationTime ) );
 			m_fileListCtrl.SetSubItemText( pos, DestAccessTime, time_utl::FormatTimestamp( itPair->second.m_accessTime ) );
+
+			m_fileListCtrl.SetSubItemText( pos, SrcAttributes, num::FormatHexNumber( itPair->first.m_attributes ) );
+			m_fileListCtrl.SetSubItemText( pos, SrcModifyTime, time_utl::FormatTimestamp( itPair->first.m_modifTime ) );
+			m_fileListCtrl.SetSubItemText( pos, SrcCreationTime, time_utl::FormatTimestamp( itPair->first.m_creationTime ) );
+			m_fileListCtrl.SetSubItemText( pos, SrcAccessTime, time_utl::FormatTimestamp( itPair->first.m_accessTime ) );
 		}
 	}
 
@@ -104,6 +104,17 @@ void CTouchFilesDialog::SetupFileListView( void )
 		m_fileListCtrl.EnsureVisible( orgSel, FALSE );
 		m_fileListCtrl.SetCurSel( orgSel );
 	}
+
+m_fileListCtrl.MarkCellAt( 1, Filename, ui::CTextEffect( ui::Bold ) );
+m_fileListCtrl.MarkCellAt( 2, SrcModifyTime, ui::CTextEffect( ui::Bold | ui::Italic | ui::Underline ) );
+m_fileListCtrl.MarkCellAt( 3, CReportListControl::EntireRecord, ui::CTextEffect( ui::Italic | ui::Underline, color::Red, color::LightGreenish ) );
+m_fileListCtrl.MarkCellAt( 3, Filename, ui::CTextEffect( ui::Bold, color::Red ) );
+m_fileListCtrl.MarkCellAt( 3, SrcCreationTime, ui::CTextEffect( ui::Bold, color::Blue ) );
+
+m_fileListCtrl.MarkCellAt( 5, CReportListControl::EntireRecord, ui::CTextEffect( ui::Underline, color::Green, color::PastelPink ) );
+m_fileListCtrl.MarkCellAt( 5, SrcCreationTime, ui::CTextEffect() );
+
+m_fileListCtrl.Invalidate();
 }
 
 int CTouchFilesDialog::FindItemPos( const fs::CPath& keyPath ) const
@@ -255,6 +266,8 @@ void CTouchFilesDialog::OnBnClicked_CopySourceFiles( void )
 
 void CTouchFilesDialog::OnBnClicked_ResetDestFiles( void )
 {
+m_fileListCtrl.Invalidate();
+return;
 	ASSERT( TO_DO );
 	m_pFileData->ClearDestinations();
 

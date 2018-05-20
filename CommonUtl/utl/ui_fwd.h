@@ -28,6 +28,22 @@ namespace ui
 	enum PopupAlign { DropRight, DropDown, DropLeft, DropUp };
 	enum { HistoryMaxSize = 20 };
 	enum StdPopup { AppMainPopup, AppDebugPopup, TextEditorPopup, HistoryComboPopup, ListViewSelectionPopup, ListViewNowherePopup };
+
+	enum FontEffect { Regular = 0, Bold = 1 << 0, Italic = 1 << 1, Underline = 1 << 2 };
+	typedef int TFontEffect;
+
+
+	struct CTextEffect
+	{
+		explicit CTextEffect( ui::TFontEffect fontEffect = ui::Regular, COLORREF textColor = CLR_NONE, COLORREF bkColor = CLR_NONE )
+			: m_fontEffect( fontEffect ), m_textColor( textColor ), m_bkColor( bkColor ) {}
+
+		static CTextEffect MakeColor( COLORREF textColor, COLORREF bkColor = CLR_NONE, ui::TFontEffect fontEffect = ui::Regular ) { return CTextEffect( fontEffect, textColor, bkColor ); }
+	public:
+		ui::TFontEffect m_fontEffect;
+		COLORREF m_textColor;
+		COLORREF m_bkColor;
+	};
 }
 
 

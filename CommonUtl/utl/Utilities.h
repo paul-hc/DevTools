@@ -6,6 +6,7 @@
 #include "Image_fwd.h"
 #include "Range.h"
 #include "ui_fwd.h"
+#include <hash_map>
 
 
 namespace ui
@@ -273,6 +274,18 @@ namespace ui
 
 	HBRUSH SendCtlColor( HWND hWnd, HDC hDC, UINT message = WM_CTLCOLORSTATIC );
 
+	const AFX_MSGMAP_ENTRY* FindMessageHandler( const CCmdTarget* pCmdTarget, UINT message, UINT notifyCode, UINT id );
+
+	inline bool ContainsMessageHandler( const CCmdTarget* pCmdTarget, UINT message, UINT notifyCode, UINT id )
+	{
+		return FindMessageHandler( pCmdTarget, message, notifyCode, id ) != NULL;
+	}
+
+	inline bool ParentContainsMessageHandler( const CWnd* pChild, UINT message, UINT notifyCode )
+	{
+		return ContainsMessageHandler( pChild->GetParent(), message, notifyCode, pChild->GetDlgCtrlID() );
+	}
+
 
 	bool IsGroupBox( HWND hWnd );
 	bool IsDialogBox( HWND hWnd );
@@ -493,20 +506,32 @@ namespace ui
 
 	struct CFontInfo
 	{
-		CFontInfo( const TCHAR* pFaceName, bool bold = false, bool italic = false, int heightPct = 100 )
-			: m_pFaceName( pFaceName ), m_bold( bold ), m_italic( italic ), m_heightPct( heightPct ) {}
+		CFontInfo( TFontEffect effect = Regular, int heightPct = 100 )
+			: m_pFaceName( NULL ), m_effect( effect ), m_heightPct( heightPct ) {}
 
-		CFontInfo( bool bold, bool italic = false, int heightPct = 100 )
-			: m_pFaceName( NULL ), m_bold( bold ), m_italic( italic ), m_heightPct( heightPct ) {}
+		CFontInfo( const TCHAR* pFaceName, TFontEffect effect = Regular, int heightPct = 100 )
+			: m_pFaceName( pFaceName ), m_effect( effect ), m_heightPct( heightPct ) {}
 	public:
 		const TCHAR* m_pFaceName;
-		bool m_bold;
-		bool m_italic;
+		TFontEffect m_effect;
 		int m_heightPct;
 	};
 
-	void MakeStandardControlFont( CFont& rOutFont, const ui::CFontInfo& fontInfo = ui::CFontInfo( false ), int stockFontType = DEFAULT_GUI_FONT );
+	void MakeStandardControlFont( CFont& rOutFont, const ui::CFontInfo& fontInfo = ui::CFontInfo(), int stockFontType = DEFAULT_GUI_FONT );
+	void MakeEffectControlFont( CFont& rOutFont, CFont* pSourceFont, TFontEffect fontEffect = ui::Regular, int heightPct = 100 );
 
+
+	class CFontEffectCache
+	{
+	public:
+		CFontEffectCache( CFont* pSourceFont );
+		~CFontEffectCache();
+
+		CFont* Lookup( TFontEffect fontEffect );
+	private:
+		CFont m_sourceFont;
+		stdext::hash_map< TFontEffect, CFont* > m_effectFonts;
+	};
 
 	inline COLORREF GetInverseColor( COLORREF color ) { return RGB( 255 - GetRValue( color ), 255 - GetGValue( color ), 255 - GetBValue( color ) ); }
 	void AddSysColors( std::vector< COLORREF >& rColors, const int sysIndexes[], size_t count );

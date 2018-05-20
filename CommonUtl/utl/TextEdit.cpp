@@ -145,7 +145,7 @@ CFont* CTextEdit::GetFixedFont( FontSize fontSize /*= Normal*/ )
 {
 	static CFont fixedFont[ 2 ];
 	if ( NULL == fixedFont[ fontSize ].GetSafeHandle() )
-		ui::MakeStandardControlFont( fixedFont[ fontSize ], ui::CFontInfo( _T("Consolas"), false, false, Normal == fontSize ? 100 : 120 ) );		// "Courier New"
+		ui::MakeStandardControlFont( fixedFont[ fontSize ], ui::CFontInfo( _T("Consolas"), ui::Regular, Normal == fontSize ? 100 : 120 ) );		// "Courier New"
 	return &fixedFont[ fontSize ];
 }
 

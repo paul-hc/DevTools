@@ -152,7 +152,7 @@ namespace ut
 	{
 		static CFont font;
 		if ( NULL == font.GetSafeHandle() )
-			ui::MakeStandardControlFont( font, ui::CFontInfo( false ) );
+			ui::MakeStandardControlFont( font, ui::CFontInfo() );
 		return font;
 	}
 
