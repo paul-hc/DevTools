@@ -18,6 +18,10 @@
 #include "utl/VisualTheme.h"
 #include "utl/resource.h"
 
+#ifdef _DEBUG
+#define new DEBUG_NEW
+#endif
+
 
 static bool dbgGuides = false;
 static bool useDefaultDraw = false;

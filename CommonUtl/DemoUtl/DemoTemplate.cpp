@@ -8,7 +8,7 @@
 #include "utl/LayoutEngine.h"
 #include "utl/MenuUtilities.h"
 #include "utl/StringUtilities.h"
-#include "utl/Utilities.h"
+#include "utl/UtilitiesEx.h"
 #include "utl/VisualTheme.h"
 #include "utl/resource.h"
 #include "resource.h"
@@ -94,6 +94,8 @@ const std::vector< std::pair< std::tstring, std::tstring > >& CDemoTemplate::Get
 		items.push_back( std::make_pair( _T("Tinsel Town Rebellion"), _T("Feeding the Monkies at Ma Maison") ) );
 		items.push_back( std::make_pair( _T("Shut Up 'n Play Yer Guitar"), _T("Roxy by Proxy") ) );
 		items.push_back( std::make_pair( _T("Return of the Son of Shut Up 'n Play Yer Guitar"), _T("Dance Me This") ) );
+		items.push_back( std::make_pair( _T("Playground Psychotics"), _T("1992") ) );
+		items.push_back( std::make_pair( _T("Cucamonga"), _T("1998") ) );
 	}
 	return items;
 }
@@ -291,17 +293,27 @@ void CListPage::DoDataExchange( CDataExchange* pDX )
 	DDX_Control( pDX, IDC_FILE_RENAME_LIST, m_fileListView );
 	if ( firstInit )
 	{	// fill in the files list (Source|Destination)
+		CScopedLockRedraw freeze( &m_fileListView );
+		CScopedInternalChange internalChange( &m_fileListView );
+
 		const std::vector< std::pair< std::tstring, std::tstring > >& items = CDemoTemplate::GetItems();
 		int pos = 0;
 
-		m_fileListView.AddInternalChange();
 		for ( std::vector< std::pair< std::tstring, std::tstring > >::const_iterator itItem = items.begin();
 			  itItem != items.end(); ++itItem, ++pos )
 		{
-			m_fileListView.InsertItem( LVIF_TEXT, pos, (LPTSTR)itItem->first.c_str(), 0, 0, 0, (LPARAM)0 );
+			m_fileListView.InsertItem( LVIF_TEXT | LVIF_PARAM, pos, (LPTSTR)itItem->first.c_str(), 0, 0, 0, (LPARAM)itItem->first.c_str() );
 			m_fileListView.SetItemText( pos, Destination, itItem->second.c_str() );
 		}
-		m_fileListView.ReleaseInternalChange();
+
+		// cell text effects
+		m_fileListView.MarkCellAt( 1, Source, ui::CTextEffect( ui::Bold ) );
+		m_fileListView.MarkCellAt( 2, Destination, ui::CTextEffect( ui::Bold | ui::Italic | ui::Underline ) );
+		m_fileListView.MarkCellAt( 3, CReportListControl::EntireRecord, ui::CTextEffect( ui::Bold | ui::Underline, color::Red, color::LightGreenish ) );
+		m_fileListView.MarkCellAt( 5, CReportListControl::EntireRecord, ui::CTextEffect( ui::Bold | ui::Underline, color::Red, color::PaleYellow ) );
+		m_fileListView.MarkCellAt( 5, Destination, ui::CTextEffect( ui::Bold, color::Blue ) );
+		m_fileListView.MarkCellAt( 6, Destination, ui::CTextEffect( ui::Bold, color::Red ) );
+		m_fileListView.MarkCellAt( 7, CReportListControl::EntireRecord, ui::CTextEffect( ui::Underline, color::Green, color::PastelPink ) );
 	}
 
 	CLayoutPropertyPage::DoDataExchange( pDX );

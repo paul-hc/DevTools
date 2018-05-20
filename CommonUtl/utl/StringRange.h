@@ -49,6 +49,8 @@ namespace str
 			void SetPos( const Range< size_t >& pos ) { m_pos = pos; ENSURE( InBounds() ); }
 
 			const StringType& GetText( void ) const { return m_text; }
+			const CharType* GetStartPtr( void ) const { REQUIRE( InBounds() ); return m_text.c_str() + m_pos.m_start; }
+			const CharType* GetEndPtr( void ) const { REQUIRE( InBounds() ); return m_text.c_str() + m_pos.m_end; }
 
 			void Reset( void ) { m_pos = MakeBounds( m_text ); }
 

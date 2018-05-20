@@ -49,7 +49,7 @@ bool CSpinEdit::HasInvalidText( void ) const
 int CSpinEdit::GetNumericValue( bool* pValid /*= NULL*/ ) const
 {
 	int value;
-	bool valid = num::ParseNumber( value, GetText(), m_locale );
+	bool valid = num::ParseNumber( value, GetText(), NULL, m_locale );
 	if ( valid && !CheckValidNumber( value ) )
 	{
 		valid = false;

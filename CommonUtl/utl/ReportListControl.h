@@ -136,11 +136,12 @@ public:
 	// column layout
 	struct CColumnInfo
 	{
-		CColumnInfo( void ) : m_defaultWidth( 0 ), m_alignment( LVCFMT_LEFT ) {}
+		CColumnInfo( void ) : m_alignment( LVCFMT_LEFT ), m_defaultWidth( 0 ), m_minWidth( MinColumnWidth ) {}
 	public:
 		std::tstring m_label;
-		int m_defaultWidth;
 		int m_alignment;
+		int m_defaultWidth;
+		int m_minWidth;
 	};
 
 	static void ParseColumnLayout( std::vector< CColumnInfo >& rColumnInfos, const std::vector< std::tstring >& columnSpecs );
@@ -150,13 +151,18 @@ public:
 	void SetLayoutInfo( const std::vector< std::tstring >& columnSpecs );
 
 	CReportListControl& AddTileColumn( UINT tileColumn );
+
+	unsigned int GetColumnCount( void ) const;
+
+	int GetMinColumnWidth( TColumn column ) const { ASSERT( HasLayoutInfo() ); return m_columnInfos[ column ].m_minWidth; }
+	void SetMinColumnWidth( TColumn column, int minWidth ) { ASSERT( HasLayoutInfo() ); m_columnInfos[ column ].m_minWidth = minWidth; }
 private:
 	void InsertAllColumns( void );
 	void DeleteAllColumns( void );
 
-	void SetupColumnLayout( const std::vector< std::tstring >& columnLayoutStrings );
+	void SetupColumnLayout( const std::vector< std::tstring >* pRegColumnLayoutItems );
 	void PostColumnLayout( void );
-	void InputColumnLayout( std::vector< std::tstring >& rColumnLayoutStrings );
+	void InputColumnLayout( std::vector< std::tstring >& rRegColumnLayoutItems );
 protected:
 	virtual void SetupControl( void );
 	virtual bool CacheSelectionData( ole::CDataSource* pDataSource, int sourceFlags, const CListSelectionData& selData ) const;
@@ -337,6 +343,7 @@ private:
 private:
 	typedef std::pair< utl::ISubject*, TColumn > TCellPair;			// store pointers instead of indexes to be invariant to sorting
 private:
+	UINT m_columnLayoutId;
 	DWORD m_listStyleEx;
 	std::tstring m_regSection;
 	std::vector< CColumnInfo > m_columnInfos;
@@ -375,7 +382,7 @@ private:
 
 	BOOL m_parentHandlesCustomDraw;			// self-encapsulated
 public:
-	static const TCHAR m_columnLayoutFormat[];
+	static const TCHAR s_fmtRegColumnLayout[];
 public:
 	// generated stuff
 	public:
@@ -402,6 +409,8 @@ public:
 	afx_msg void OnUpdateListViewMode( CCmdUI* pCmdUI );
 	afx_msg void OnListViewStacking( UINT cmdId );
 	afx_msg void OnUpdateListViewStacking( CCmdUI* pCmdUI );
+	afx_msg void OnResetColumnLayout( void );
+	afx_msg void OnUpdateResetColumnLayout( CCmdUI* pCmdUI );
 	afx_msg void OnCopy( void );
 	afx_msg void OnUpdateCopy( CCmdUI* pCmdUI );
 	afx_msg void OnSelectAll( void );

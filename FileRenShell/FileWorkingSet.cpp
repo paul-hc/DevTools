@@ -8,6 +8,10 @@
 #include "utl/RuntimeException.h"
 #include "utl/StringUtilities.h"
 
+#ifdef _DEBUG
+#define new DEBUG_NEW
+#endif
+
 
 namespace hlp
 {

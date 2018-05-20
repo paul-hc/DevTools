@@ -16,23 +16,23 @@
 namespace ut
 {
 	static const std::string s_inputLog =
-		" C:\\my\\download\\scan\\doctor.pdf  -> \tC:\\my\\download\\scan\\Dr. Metz.pdf  \t\n"
-		"C:\\my\\download\\scan\\doctor2.pdf -> C:\\my\\download\\scan\\Dr. Metz2.pdf\n"
+		" C:\\my\\download\\scan\\doctor.pdf  -> \tDr. Metz.pdf  \t\n"
+		"C:\\my\\download\\scan\\doctor2.pdf -> Dr. Metz2.pdf\n"
 		"<END OF BATCH>\n"
 		"\n"
-		"C:\\my\\download\\scan\\doctor3.pdf -> C:\\my\\download\\scan\\Dr. Metz3.pdf\n"
+		"C:\\my\\download\\scan\\doctor3.pdf -> Dr. Metz3.pdf\n"
 		"<END OF BATCH>\n"
 		"\n"
 		"<RENAME>\n"
-		"C:\\my\\download\\kierkegaard_works.PDF -> C:\\my\\download\\Kierkegaard Works.pdf\n"
-		"C:\\my\\download\\water tax.Doc -> C:\\my\\download\\Water Tax.Doc\n"
+		"C:\\my\\download\\kierkegaard_works.PDF -> Kierkegaard Works.pdf\n"
+		"C:\\my\\download\\water tax.Doc -> Water Tax.Doc\n"
 		"<END OF BATCH>\n"
 		" <RENAME 8-06-1996 14:30:00>\t \t\n"
-		"C:\\my\\download\\Apt Barbu.PDF -> C:\\my\\download\\Apt Barbu - confirmation.pdf\n"
+		"C:\\my\\download\\Apt Barbu.PDF -> Apt Barbu - confirmation.pdf\n"
 		"<END OF BATCH>\n"
 		"\n"
 		"<RENAME 16-05-2018 19:21:02>\n"
-		"C:\\my\\download\\BA Itinerary.pdf -> C:\\my\\download\\BA My Itinerary.pdf\n"
+		"C:\\my\\download\\BA Itinerary.pdf -> BA My Itinerary.pdf\n"
 		"<END OF BATCH>\n"
 		"\n"
 		"<TOUCH 01-07-2017 8:00:00>\n"
@@ -42,29 +42,29 @@ namespace ut
 
 	static const std::string s_outputLog =
 		"<RENAME>\n"
-		"C:\\my\\download\\scan\\doctor.pdf -> C:\\my\\download\\scan\\Dr. Metz.pdf\n"
-		"C:\\my\\download\\scan\\doctor2.pdf -> C:\\my\\download\\scan\\Dr. Metz2.pdf\n"
+		"C:\\my\\download\\scan\\doctor.pdf -> Dr. Metz.pdf\n"
+		"C:\\my\\download\\scan\\doctor2.pdf -> Dr. Metz2.pdf\n"
 		"<END OF BATCH>\n"
 		"\n"
 		"<RENAME>\n"
-		"C:\\my\\download\\scan\\doctor3.pdf -> C:\\my\\download\\scan\\Dr. Metz3.pdf\n"
+		"C:\\my\\download\\scan\\doctor3.pdf -> Dr. Metz3.pdf\n"
 		"<END OF BATCH>\n"
 		"\n"
 		"<RENAME>\n"
-		"C:\\my\\download\\kierkegaard_works.PDF -> C:\\my\\download\\Kierkegaard Works.pdf\n"
-		"C:\\my\\download\\water tax.Doc -> C:\\my\\download\\Water Tax.Doc\n"
+		"C:\\my\\download\\kierkegaard_works.PDF -> Kierkegaard Works.pdf\n"
+		"C:\\my\\download\\water tax.Doc -> Water Tax.Doc\n"
 		"<END OF BATCH>\n"
 		"\n"
 		"<RENAME 08-06-1996 14:30:00>\n"
-		"C:\\my\\download\\Apt Barbu.PDF -> C:\\my\\download\\Apt Barbu - confirmation.pdf\n"
+		"C:\\my\\download\\Apt Barbu.PDF -> Apt Barbu - confirmation.pdf\n"
 		"<END OF BATCH>\n"
 		"\n"
 		"<RENAME 16-05-2018 19:21:02>\n"
-		"C:\\my\\download\\BA Itinerary.pdf -> C:\\my\\download\\BA My Itinerary.pdf\n"
+		"C:\\my\\download\\BA Itinerary.pdf -> BA My Itinerary.pdf\n"
 		"<END OF BATCH>\n"
 		"\n"
 		"<TOUCH 01-07-2017 08:00:00>\n"
-		"C:\\my\\download\\exams.png :: {0x00000020|17-07-1992 09:21:17||} -> {0x00000021||17-07-1992 09:30:00|}\n"
+		"C:\\my\\download\\exams.png :: {0x20|17-07-1992 09:21:17||} -> {0x21||17-07-1992 09:30:00|}\n"
 		"<END OF BATCH>\n"
 		;
 }
@@ -189,6 +189,7 @@ void CUndoChangeLogTests::TestSaveLog( void )
 	{
 		std::ostringstream oss;
 		log.Save( oss );
+
 		ASSERT( oss.str() == ut::s_outputLog );
 	}
 

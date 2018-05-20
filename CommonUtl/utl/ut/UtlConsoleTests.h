@@ -4,6 +4,7 @@
 
 #include "StringTests.h"
 #include "StringRangeTests.h"
+#include "NumericTests.h"
 #include "LcsTests.h"
 #include "ResequenceTests.h"
 #include "FileSystemTests.h"
@@ -19,6 +20,7 @@ namespace ut
 		// register UTL tests
 		CStringTests::Instance();
 		CStringRangeTests::Instance();
+		CNumericTests::Instance();
 		CLcsTests::Instance();
 		CResequenceTests::Instance();
 		CFileSystemTests::Instance();

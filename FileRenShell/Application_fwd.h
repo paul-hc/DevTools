@@ -11,6 +11,7 @@ namespace app
 	enum MenuCommand
 	{
 		Cmd_RenameFiles, Cmd_SendToCliboard, Cmd_TouchFiles,
+		Cmd_RunUnitTests,
 
 		// sub-menu additional commands:
 		Cmd_RenameAndCopy, Cmd_RenameAndCapitalize, Cmd_RenameAndLowCaseExt, Cmd_RenameAndReplace, Cmd_RenameAndReplaceDelims,

@@ -284,23 +284,24 @@ namespace num
 	std::tstring FormatNumber( double value, const std::locale& loc = GetEmptyLocale() );
 
 	template< typename ValueType >
-	bool ParseNumber( ValueType& rNumber, const std::tstring& text, const std::locale& loc = GetEmptyLocale() )
+	bool ParseNumber( ValueType& rNumber, const std::tstring& text, size_t* pSkipLength = NULL, const std::locale& loc = GetEmptyLocale() )
 	{
 		std::tistringstream iss( text );
 		iss.imbue( loc );
 		iss >> rNumber;
-		return !iss.fail();
+		if ( iss.fail() )
+			return false;
+
+		if ( pSkipLength != NULL )
+			*pSkipLength = iss.tellg();
+		return true;
 	}
 
 	template<>
-	inline bool ParseNumber< BYTE >( BYTE& rNumber, const std::tstring& text, const std::locale& loc )
-	{
-		UINT number;
-		if ( !ParseNumber( number, text, loc ) || number > 255 )
-			return false;
-		rNumber = static_cast< BYTE >( number );
-		return true;
-	}
+	bool ParseNumber< BYTE >( BYTE& rNumber, const std::tstring& text, size_t* pSkipLength, const std::locale& loc );
+
+	template<>
+	bool ParseNumber< signed char >( signed char& rNumber, const std::tstring& text, size_t* pSkipLength, const std::locale& loc );
 
 
 	template< typename ValueType >
@@ -310,16 +311,21 @@ namespace num
 	}
 
 	template< typename ValueType >
-	bool ParseHexNumber( ValueType& rNumber, const std::tstring& text )
+	bool ParseHexNumber( ValueType& rNumber, const std::tstring& text, size_t* pSkipLength = NULL )
 	{
 		std::tistringstream iss( str::SkipHexPrefix( text.c_str(), str::IgnoreCase ) );
 		size_t number;
 		iss >> std::hex >> number;
 		if ( iss.fail() )
 			return false;
+
 		rNumber = static_cast< ValueType >( number );
+		if ( pSkipLength != NULL )
+			*pSkipLength = iss.tellg();
 		return true;
 	}
+
+	bool StripFractionalZeros( std::tstring& rText, const std::locale& loc = str::GetUserLocale() );
 }
 
 

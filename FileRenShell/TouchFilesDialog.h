@@ -55,7 +55,9 @@ private:
 	CReportListControl m_fileListCtrl;
 
 	// generated stuff
-	protected:
+public:
+	virtual BOOL OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo );
+protected:
 	virtual void DoDataExchange( CDataExchange* pDX );
 	virtual BOOL OnInitDialog( void );
 protected:

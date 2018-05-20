@@ -25,6 +25,7 @@ extern CApplication g_app;
 
 namespace app
 {
+	inline CApplication& GetApp( void ) { return g_app; }
 	inline CLogger& GetLogger( void ) { return g_app.GetLogger(); }
 
 	void InitModule( HINSTANCE hInstance );

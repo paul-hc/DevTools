@@ -4,9 +4,14 @@
 #include "FileRenameShell.h"
 #include "MainRenameDialog.h"
 #include "TouchFilesDialog.h"
+#include "Application.h"
 #include "utl/ImageStore.h"
 #include "utl/Utilities.h"
 #include "utl/resource.h"
+
+#ifdef _DEBUG
+#define new DEBUG_NEW
+#endif
 
 
 struct CScopedMainWnd
@@ -51,6 +56,10 @@ const CFileRenameShell::CMenuCmdInfo CFileRenameShell::m_commands[] =
 	{ app::Cmd_RenameFiles, _T("&Rename Files..."), _T("Rename selected files in the dialog"), ID_RENAME_ITEM, false },
 	{ app::Cmd_SendToCliboard, _T("&Send To Clipboard"), _T("Send the selected files path to clipboard"), ID_SEND_TO_CLIP, false },
 	{ app::Cmd_TouchFiles, _T("&Touch Files..."), _T("Modify the timestamp of selected files"), ID_TOUCH_FILES, false },
+
+#ifdef _DEBUG
+	{ app::Cmd_RunUnitTests, _T("# Run Unit Tests (FileRenameShell)"), _T("Modify the timestamp of selected files"), ID_RUN_TESTS, true },
+#endif
 
 	{ app::Cmd_RenameAndCopy, _T("C&opy..."), _T("Rename selected files and copy source paths to clipboard"), ID_RENAME_AND_COPY, false },
 	{ app::Cmd_RenameAndCapitalize, _T("&Capitalize..."), _T("Rename selected files and capitalize filenames"), IDD_CAPITALIZE_OPTIONS, false },
@@ -128,10 +137,14 @@ void CFileRenameShell::AugmentMenuItems( HMENU hMenu, UINT indexMenu, UINT idBas
 
 void CFileRenameShell::ExecuteCommand( app::MenuCommand menuCmd, CWnd* pParentOwner )
 {
-	if ( app::Cmd_SendToCliboard == menuCmd )
+	switch ( menuCmd )
 	{
-		m_fileData.CopyClipSourcePaths( GetKeyState( VK_SHIFT ) & 0x8000 ? FilenameExt : FullPath, pParentOwner );
-		return;
+		case app::Cmd_SendToCliboard:
+			m_fileData.CopyClipSourcePaths( GetKeyState( VK_SHIFT ) & 0x8000 ? FilenameExt : FullPath, pParentOwner );
+			return;
+		case app::Cmd_RunUnitTests:
+			app::GetApp().RunUnitTests();
+			return;
 	}
 
 	// file operations commands

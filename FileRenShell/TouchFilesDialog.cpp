@@ -13,6 +13,10 @@
 #include "utl/TimeUtl.h"
 #include "utl/resource.h"
 
+#ifdef _DEBUG
+#define new DEBUG_NEW
+#endif
+
 
 //enum CustomColors { ColorDeletedText = color::Red, ColorModifiedText = color::Blue, ColorErrorBk = color::PastelPink };
 static const bool TO_DO = false;
@@ -104,17 +108,6 @@ void CTouchFilesDialog::SetupFileListView( void )
 		m_fileListCtrl.EnsureVisible( orgSel, FALSE );
 		m_fileListCtrl.SetCurSel( orgSel );
 	}
-
-m_fileListCtrl.MarkCellAt( 1, Filename, ui::CTextEffect( ui::Bold ) );
-m_fileListCtrl.MarkCellAt( 2, SrcModifyTime, ui::CTextEffect( ui::Bold | ui::Italic | ui::Underline ) );
-m_fileListCtrl.MarkCellAt( 3, CReportListControl::EntireRecord, ui::CTextEffect( ui::Italic | ui::Underline, color::Red, color::LightGreenish ) );
-m_fileListCtrl.MarkCellAt( 3, Filename, ui::CTextEffect( ui::Bold, color::Red ) );
-m_fileListCtrl.MarkCellAt( 3, SrcCreationTime, ui::CTextEffect( ui::Bold, color::Blue ) );
-
-m_fileListCtrl.MarkCellAt( 5, CReportListControl::EntireRecord, ui::CTextEffect( ui::Underline, color::Green, color::PastelPink ) );
-m_fileListCtrl.MarkCellAt( 5, SrcCreationTime, ui::CTextEffect() );
-
-m_fileListCtrl.Invalidate();
 }
 
 int CTouchFilesDialog::FindItemPos( const fs::CPath& keyPath ) const
@@ -180,6 +173,13 @@ bool CTouchFilesDialog::TouchFiles( void )
 {
 	m_pBatchTransaction.reset( new fs::CBatchTouch( m_pFileData->GetTouchPairs(), this ) );
 	return m_pBatchTransaction->TouchFiles();
+}
+
+BOOL CTouchFilesDialog::OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo )
+{
+	return
+		CBaseMainDialog::OnCmdMsg( id, code, pExtra, pHandlerInfo ) ||
+		m_fileListCtrl.OnCmdMsg( id, code, pExtra, pHandlerInfo );
 }
 
 void CTouchFilesDialog::DoDataExchange( CDataExchange* pDX )

@@ -1619,6 +1619,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\ut\NumericTests.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\ut\NumericTests.h"
+				>
+			</File>
+			<File
 				RelativePath=".\ut\PathGeneratorTests.cpp"
 				>
 			</File>

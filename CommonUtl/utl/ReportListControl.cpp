@@ -8,6 +8,7 @@
 #include "ShellDragImager.h"
 #include "OleDataSource.h"
 #include "StringUtilities.h"
+#include "StringRange.h"
 #include "ThemeItem.h"
 #include "Utilities.h"
 #include "VisualTheme.h"
@@ -76,11 +77,12 @@ static ACCEL keys[] =
 	{ FVIRTKEY | FCONTROL, VK_INSERT, ID_EDIT_COPY }
 };
 
-const TCHAR CReportListControl::m_columnLayoutFormat[] = _T("Width=%d, Order=%d");
+const TCHAR CReportListControl::s_fmtRegColumnLayout[] = _T("Width=%d, Order=%d");
 
 
 CReportListControl::CReportListControl( UINT columnLayoutId /*= 0*/, DWORD listStyleEx /*= DefaultStyleEx*/ )
 	: CListCtrl()
+	, m_columnLayoutId( 0 )
 	, m_listStyleEx( listStyleEx )
 	, m_useExplorerTheme( true )
 	, m_useAlternateRowColoring( false )
@@ -134,7 +136,6 @@ ui::CFontEffectCache* CReportListControl::GetFontEffectCache( void )
 
 void CReportListControl::SetupControl( void )
 {
-
 	if ( m_listStyleEx != 0 )
 		SetExtendedStyle( m_listStyleEx );
 
@@ -153,7 +154,7 @@ void CReportListControl::SetupControl( void )
 	if ( !m_regSection.empty() )
 		LoadFromRegistry();
 	else
-		SetupColumnLayout( std::vector< std::tstring >() );
+		SetupColumnLayout( NULL );
 
 	UpdateColumnSortHeader();		// update current sorting order
 }
@@ -462,6 +463,8 @@ bool CReportListControl::IsSelectionChangedNotify( const NMLISTVIEW* pNmList, UI
 
 void CReportListControl::SetLayoutInfo( UINT columnLayoutId )
 {
+	REQUIRE( columnLayoutId != 0 );
+	m_columnLayoutId = columnLayoutId;
 	SetLayoutInfo( str::LoadStrings( columnLayoutId ) );
 }
 
@@ -480,31 +483,57 @@ void CReportListControl::ParseColumnLayout( std::vector< CColumnInfo >& rColumnI
 {
 	ASSERT( !columnSpecs.empty() );
 
+	/*	format examples:
+			"Label"
+			"Label=120" - 120 is the default column width;
+			"Label=-1" - stretchable column width;
+			"Label=-1/50" - stretchable column width, 50 minimum stretchable width;
+			"Label=120<>" - 120 default column width, center align;
+		if -1 is used (just for one column), that column stretches to the available column space.
+	*/
+
+	rColumnInfos.clear();
 	rColumnInfos.resize( columnSpecs.size() );
+
 	for ( UINT i = 0; i != columnSpecs.size(); ++i )
-	{	// format: "Label", "Label=120", "Label=120<>", where 120 is the default column width;
-		// if -1 is used (just for one column), that column stretches to the available column space.
+	{
 		const std::tstring& columnSpec = columnSpecs[ i ];
-		size_t eqPos = columnSpec.rfind( _T('=') );
+		CColumnInfo& rColInfo = rColumnInfos[ i ];
 
-		if ( eqPos != std::tstring::npos )
+		str::TStringRange specRange( columnSpec );
+		Range< size_t > sepPos;
+		if ( specRange.Find( sepPos, _T('=') ) )
 		{
-			rColumnInfos[ i ].m_label = columnSpec.substr( 0, eqPos ).c_str();
-			rColumnInfos[ i ].m_defaultWidth = _ttoi( columnSpec.substr( eqPos + 1 ).c_str() );
+			rColInfo.m_label = specRange.ExtractLead( sepPos.m_start );
+			specRange.RefPos().m_start = sepPos.m_end;
 
-			// alignment of the column header and the subitem text in the column;
-			// the alignment of the leftmost column is always LVCFMT_LEFT; it can't be changed.
-			if ( columnSpec.rfind( _T("<>") ) != std::tstring::npos )
-				rColumnInfos[ i ].m_alignment = LVCFMT_CENTER;
-			else if ( columnSpec.rfind( _T(">") ) != std::tstring::npos )
-				rColumnInfos[ i ].m_alignment = LVCFMT_RIGHT;
+			size_t skipLength;
+			if ( num::ParseNumber( rColInfo.m_defaultWidth, specRange.GetStartPtr(), &skipLength ) )
+				specRange.RefPos().m_start += skipLength;
+
+			if ( specRange.StripPrefix( _T('/') ) )
+				if ( !num::ParseNumber( rColInfo.m_minWidth, specRange.GetStartPtr(), &skipLength ) )
+					ASSERT( false );
+
+			if ( specRange.StripPrefix( _T("<>") ) )
+				rColInfo.m_alignment = LVCFMT_CENTER;
+			else if ( specRange.StripPrefix( _T('>') ) )
+				rColInfo.m_alignment = LVCFMT_RIGHT;
+			else if ( specRange.StripPrefix( _T('<') ) )
+				rColInfo.m_alignment = LVCFMT_LEFT;
 		}
 		else
 		{
-			rColumnInfos[ i ].m_label = columnSpec.c_str();
-			rColumnInfos[ i ].m_defaultWidth = ColumnWidth_AutoSize;
+			rColInfo.m_label = columnSpec;
+			rColInfo.m_defaultWidth = ColumnWidth_AutoSize;
 		}
 	}
+}
+
+unsigned int CReportListControl::GetColumnCount( void ) const
+{
+	CHeaderCtrl* pHeaderCtrl = GetHeaderCtrl();
+	return pHeaderCtrl != NULL ? pHeaderCtrl->GetItemCount() : 0;
 }
 
 void CReportListControl::DeleteAllColumns( void )
@@ -548,12 +577,13 @@ void CReportListControl::InsertAllColumns( void )
 	PostColumnLayout();
 }
 
-void CReportListControl::SetupColumnLayout( const std::vector< std::tstring >& columnLayoutStrings )
+void CReportListControl::SetupColumnLayout( const std::vector< std::tstring >* pRegColumnLayoutItems )
 {
 	if ( !HasLayoutInfo() )
 		return;
 
-	bool ignoreSavedLayout = columnLayoutStrings.size() != m_columnInfos.size();
+	bool insertMode = 0 == GetColumnCount();
+	bool ignoreSavedLayout = !insertMode || NULL == pRegColumnLayoutItems || pRegColumnLayoutItems->size() != m_columnInfos.size();
 
 	LVCOLUMN columnInfo;
 	ZeroMemory( &columnInfo, sizeof( columnInfo ) );
@@ -579,12 +609,15 @@ void CReportListControl::SetupColumnLayout( const std::vector< std::tstring >& c
 		// superimpose saved column layout from registry
 		if ( !ignoreSavedLayout )
 		{
-			const std::tstring& columnLayout = columnLayoutStrings[ i ];
+			const std::tstring& columnLayout = pRegColumnLayoutItems->at( i );
 			if ( !columnLayout.empty() )
-				_stscanf( columnLayout.c_str(), m_columnLayoutFormat, &columnInfo.cx, &columnInfo.iOrder );
+				_stscanf( columnLayout.c_str(), s_fmtRegColumnLayout, &columnInfo.cx, &columnInfo.iOrder );
 		}
 
-		VERIFY( InsertColumn( i, &columnInfo ) != -1 );
+		if ( insertMode )
+			VERIFY( InsertColumn( i, &columnInfo ) != -1 );
+		else
+			VERIFY( SetColumn( i, &columnInfo ) );
 	}
 	PostColumnLayout();
 }
@@ -615,9 +648,8 @@ bool CReportListControl::ResizeFlexColumns( void )
 {
 	if ( NULL == m_hWnd )
 		return false;
-	if ( CHeaderCtrl* pHeader = GetHeaderCtrl() )
-		if ( 0 == pHeader->GetItemCount() )
-			return false;			// columns not initialized yet
+	if ( 0 == GetColumnCount() )
+		return false;			// columns not initialized yet
 
 	LVCOLUMN columnInfo;
 	ZeroMemory( &columnInfo, sizeof( columnInfo ) );
@@ -645,7 +677,8 @@ bool CReportListControl::ResizeFlexColumns( void )
 
 	for ( UINT i = 0, s = 0, remainderWidth = stretchableWidth; i != m_columnInfos.size(); ++i )
 	{
-		int defaultWidth = m_columnInfos[ i ].m_defaultWidth;
+		const CColumnInfo& colInfo = m_columnInfos[ i ];
+		int defaultWidth = colInfo.m_defaultWidth;
 		if ( defaultWidth < 0 )
 		{
 			int fitWidth;
@@ -660,7 +693,8 @@ bool CReportListControl::ResizeFlexColumns( void )
 
 			if ( ++s == stretchableCount )
 				fitWidth = remainderWidth;		// last flex column takes all the remainder width
-			fitWidth = std::max< int >( MinColumnWidth, fitWidth );
+
+			fitWidth = std::max< int >( colInfo.m_minWidth, fitWidth );
 			SetColumnWidth( i, fitWidth );
 
 			remainderWidth -= fitWidth;
@@ -680,7 +714,7 @@ void CReportListControl::OnFinalReleaseInternalChange( void )
 	ResizeFlexColumns();		// layout flexible columns after list content has changed
 }
 
-void CReportListControl::InputColumnLayout( std::vector< std::tstring >& rColumnLayoutStrings )
+void CReportListControl::InputColumnLayout( std::vector< std::tstring >& rRegColumnLayoutItems )
 {
 	if ( !HasLayoutInfo() )
 	{
@@ -693,11 +727,11 @@ void CReportListControl::InputColumnLayout( std::vector< std::tstring >& rColumn
 	ZeroMemory( &columnInfo, sizeof( columnInfo ) );
 	columnInfo.mask = LVCF_WIDTH | LVCF_ORDER;
 
-	rColumnLayoutStrings.resize( m_columnInfos.size() );
+	rRegColumnLayoutItems.resize( m_columnInfos.size() );
 	for ( UINT i = 0; i != m_columnInfos.size(); ++i )
 	{
 		VERIFY( GetColumn( i, &columnInfo ) );
-		rColumnLayoutStrings[ i ] = str::Format( m_columnLayoutFormat, columnInfo.cx, columnInfo.iOrder ).c_str();
+		rRegColumnLayoutItems[ i ] = str::Format( s_fmtRegColumnLayout, columnInfo.cx, columnInfo.iOrder ).c_str();
 	}
 }
 
@@ -705,8 +739,8 @@ bool CReportListControl::LoadFromRegistry( void )
 {
 	ASSERT( HasLayoutInfo() && !m_regSection.empty() );
 
-	std::vector< std::tstring > columnLayoutStrings;
-	columnLayoutStrings.reserve( m_columnInfos.size() );
+	std::vector< std::tstring > regColumnLayoutItems;
+	regColumnLayoutItems.reserve( m_columnInfos.size() );
 
 	CWinApp* pApp = AfxGetApp();
 
@@ -718,10 +752,10 @@ bool CReportListControl::LoadFromRegistry( void )
 		for ( UINT i = 0; i != m_columnInfos.size(); ++i )
 		{
 			std::tstring columnLayout = pApp->GetProfileString( m_regSection.c_str(), m_columnInfos[ i ].m_label.c_str() ).GetString();
-			columnLayoutStrings.push_back( columnLayout );
+			regColumnLayoutItems.push_back( columnLayout );
 		}
 
-	SetupColumnLayout( columnLayoutStrings );
+	SetupColumnLayout( &regColumnLayoutItems );
 
 	if ( validSavedState )
 	{
@@ -750,12 +784,12 @@ void CReportListControl::SaveToRegistry( void )
 	CWinApp* pApp = AfxGetApp();
 	pApp->WriteProfileInt( m_regSection.c_str(), _T(""), (int)m_columnInfos.size() ); // saved column count
 
-	std::vector< std::tstring > columnLayoutStrings;
-	InputColumnLayout( columnLayoutStrings );
-	ASSERT( columnLayoutStrings.size() == m_columnInfos.size() );
+	std::vector< std::tstring > regColumnLayoutItems;
+	InputColumnLayout( regColumnLayoutItems );
+	ASSERT( regColumnLayoutItems.size() == m_columnInfos.size() );
 
 	for ( UINT i = 0; i != m_columnInfos.size(); ++i )
-		pApp->WriteProfileString( m_regSection.c_str(), m_columnInfos[ i ].m_label.c_str(), columnLayoutStrings[ i ].c_str() );
+		pApp->WriteProfileString( m_regSection.c_str(), m_columnInfos[ i ].m_label.c_str(), regColumnLayoutItems[ i ].c_str() );
 
 	pApp->WriteProfileInt( m_regSection.c_str(), reg::entry_viewMode, GetView() );
 	pApp->WriteProfileInt( m_regSection.c_str(), reg::entry_viewStacking, GetStyle() & LVS_ALIGNMASK );
@@ -1509,6 +1543,8 @@ BEGIN_MESSAGE_MAP( CReportListControl, CListCtrl )
 	ON_UPDATE_COMMAND_UI_RANGE( ID_LIST_VIEW_ICON_LARGE, ID_LIST_VIEW_TILE, OnUpdateListViewMode )
 	ON_COMMAND_RANGE( ID_LIST_VIEW_STACK_LEFTTORIGHT, ID_LIST_VIEW_STACK_TOPTOBOTTOM, OnListViewStacking )
 	ON_UPDATE_COMMAND_UI_RANGE( ID_LIST_VIEW_STACK_LEFTTORIGHT, ID_LIST_VIEW_STACK_TOPTOBOTTOM, OnUpdateListViewStacking )
+	ON_COMMAND( ID_RESET_DEFAULT, OnResetColumnLayout )
+	ON_UPDATE_COMMAND_UI( ID_RESET_DEFAULT, OnUpdateResetColumnLayout )
 	ON_COMMAND( ID_EDIT_COPY, OnCopy )
 	ON_UPDATE_COMMAND_UI( ID_EDIT_COPY, OnUpdateCopy )
 	ON_COMMAND( ID_EDIT_SELECT_ALL, OnSelectAll )
@@ -1766,6 +1802,19 @@ void CReportListControl::OnUpdateListViewStacking( CCmdUI* pCmdUI )
 
 	pCmdUI->Enable( viewMode != LV_VIEW_DETAILS );
 	ui::SetRadio( pCmdUI, stackingStyle == ( GetStyle() & LVS_ALIGNMASK ) );
+}
+
+void CReportListControl::OnResetColumnLayout( void )
+{
+	std::vector< std::tstring > columnSpecs = str::LoadStrings( m_columnLayoutId );
+	ParseColumnLayout( m_columnInfos, columnSpecs );
+
+	SetupColumnLayout( NULL );
+}
+
+void CReportListControl::OnUpdateResetColumnLayout( CCmdUI* pCmdUI )
+{
+	pCmdUI->Enable( m_columnLayoutId != 0 && LV_VIEW_DETAILS == GetView() );
 }
 
 void CReportListControl::OnCopy( void )

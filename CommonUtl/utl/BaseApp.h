@@ -46,6 +46,8 @@ public:
 	// app::IGlobalResources interface
 	virtual utl::CResourcePool& GetSharedResources( void ) { return *safe_ptr( m_pSharedResources.get() ); }
 	virtual CLogger& GetLogger( void ) { return *safe_ptr( m_pLogger.get() ); }
+
+	void RunUnitTests( void ) { OnRunUnitTests(); }
 protected:
 	static const TCHAR* AssignStringCopy( const TCHAR*& rpAppString, const std::tstring& value )
 	{

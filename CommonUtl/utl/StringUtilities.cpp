@@ -112,12 +112,55 @@ namespace num
 		return emptyLocale;
 	}
 
+	bool StripFractionalZeros( std::tstring& rText, const std::locale& loc /*= str::GetUserLocale()*/ )
+	{
+		const TCHAR decimalPoint = std::use_facet< std::numpunct< TCHAR > >( loc ).decimal_point();
+		std::tstring::reverse_iterator itStart = rText.rbegin();
+		std::tstring::reverse_iterator itPoint = std::find( itStart, rText.rend(), decimalPoint );
+		if ( itPoint != rText.rend() )
+		{
+			while ( itStart != itPoint && _T('0') == *itStart )
+				++itStart;
+
+			if ( itStart == itPoint )
+				++itStart;
+		}
+		if ( itStart == rText.rbegin() )
+			return false;
+
+		rText.erase( std::distance( itStart, rText.rend() ) );
+		return true;					// changed
+	}
+
 	std::tstring FormatNumber( double value, const std::locale& loc /*= GetEmptyLocale()*/ )
 	{
 		std::tostringstream oss;
 		oss.imbue( loc );
 		oss << std::setiosflags( std::ios::fixed ) << value;			// << std::setprecision( 7 )
-		return oss.str();
+
+		std::tstring text = oss.str();
+		StripFractionalZeros( text, loc );
+		return text;
+	}
+
+	template<>
+	bool ParseNumber< BYTE >( BYTE& rNumber, const std::tstring& text, size_t* pSkipLength, const std::locale& loc )
+	{
+		unsigned int number;
+		if ( !ParseNumber( number, text, pSkipLength, loc ) || number > 255 )
+			return false;
+		rNumber = static_cast< BYTE >( number );
+		return true;
+	}
+
+	template<>
+	bool ParseNumber< signed char >( signed char& rNumber, const std::tstring& text, size_t* pSkipLength, const std::locale& loc )
+	{
+		int number;
+		if ( !ParseNumber( number, text, pSkipLength, loc ) || number > 255 )
+			return false;
+		rNumber = static_cast< signed char >( number );
+		return true;
 	}
 
 

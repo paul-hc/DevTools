@@ -8,6 +8,10 @@
 #include "utl/resource.h"
 #include "resource.h"
 
+#ifdef _DEBUG
+#define new DEBUG_NEW
+#endif
+
 
 namespace reg
 {

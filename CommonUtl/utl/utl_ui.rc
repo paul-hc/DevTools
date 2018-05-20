@@ -335,6 +335,8 @@ BEGIN
     END
     POPUP "<list view nowhere>"
     BEGIN
+        MENUITEM "Reset Column Layout",         ID_RESET_DEFAULT
+        MENUITEM SEPARATOR
         MENUITEM "&Large Icons",                ID_LIST_VIEW_ICON_LARGE
         MENUITEM "&Small Icons",                ID_LIST_VIEW_ICON_SMALL
         MENUITEM "&List",                       ID_LIST_VIEW_LIST
