@@ -64,7 +64,7 @@ namespace ut
 		"<END OF BATCH>\n"
 		"\n"
 		"<TOUCH 01-07-2017 08:00:00>\n"
-		"C:\\my\\download\\exams.png :: {0x20|17-07-1992 09:21:17||} -> {0x21||17-07-1992 09:30:00|}\n"
+		"C:\\my\\download\\exams.png :: {A|17-07-1992 09:21:17||} -> {RA||17-07-1992 09:30:00|}\n"
 		"<END OF BATCH>\n"
 		;
 }

@@ -151,7 +151,7 @@ void CColorTable::Build( CDibSection* pDib )
 
 bool CColorTable::SelectColor( COLORREF color )
 {
-	m_selPos = utl::FindPos< size_t >( m_colors, color );
+	m_selPos = utl::FindPos( m_colors, color );
 	return m_selPos != std::tstring::npos;
 }
 

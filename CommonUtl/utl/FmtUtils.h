@@ -5,6 +5,8 @@
 #include "StringRange_fwd.h"
 
 
+class CFlagTags;
+
 namespace fs
 {
 	class CPath;
@@ -23,6 +25,16 @@ namespace fmt
 	bool ParseFromTo( std::tstring& rSrc, std::tstring& rDest, const str::TStringRange& textRange );
 
 
+	enum PathFormat { NoPath, FullPath, FilenameExt };
+
+	const TCHAR* FormatPath( const fs::CPath& fullPath, PathFormat format );
+
+
+	std::tstring FormatFileAttributes( DWORD fileAttr, bool uiFormat = false );
+	DWORD ParseFileAttributes( const std::tstring& text, bool uiFormat = false );
+	const CFlagTags& GetTags_FileAttributes( void );
+
+
 	std::tstring FormatFileState( const fs::CFileState& fileState );
 	bool ParseFileState( fs::CFileState& rState, str::TStringRange& rTextRange );
 
@@ -35,8 +47,8 @@ namespace fmt
 
 	namespace impl
 	{
-		std::tstring FormatFileState( const fs::CFileState& state, bool withFullPath = true );
-		bool ParseFileState( fs::CFileState& rState, const std::tstring& text, bool withFullPath = true );
+		std::tstring FormatFileState( const fs::CFileState& state, PathFormat pathFormat );
+		bool ParseFileState( fs::CFileState& rState, const std::tstring& text, PathFormat pathFormat );
 	}
 }
 

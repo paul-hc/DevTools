@@ -88,9 +88,9 @@ bool CClipboard::ReadString( std::tstring& rOutText ) const
 
 	if ( IsFormatAvailable( CF_TEXT ) )
 		if ( HGLOBAL hBuffer = ::GetClipboardData( CF_TEXT ) )
-			if ( const char* pAnsiString = (const char*)GlobalLock( hBuffer ) )
+			if ( const char* pUtf8String = (const char*)GlobalLock( hBuffer ) )
 			{
-				rOutText = str::FromAnsi( pAnsiString );
+				rOutText = str::FromUtf8( pUtf8String );
 				::GlobalUnlock( hBuffer );
 				return true;
 			}
@@ -120,6 +120,6 @@ bool CClipboard::CopyText( const std::tstring& text, CWnd* pWnd /*= AfxGetMainWn
 	pClipboard->Clear();
 
 	return
-		pClipboard->WriteString( str::ToAnsi( text.c_str() ) ) &&		// ANSI
+		pClipboard->WriteString( str::ToUtf8( text.c_str() ) ) &&		// UTF8
 		pClipboard->WriteString( text );								// UNICODE
 }

@@ -50,9 +50,9 @@ struct CColorTable : public CColorTableOptions
 	void Build( CDibSection* pDib );
 
 	bool IsDuplicateAt( size_t pos ) const { return utl::Contains( m_dupColorsPos, pos ); }
-	size_t FindUniqueColorPos( size_t pos ) const { return utl::FindPos< size_t >( m_colors, m_colors[ pos ] ); }
+	size_t FindUniqueColorPos( size_t pos ) const { return utl::FindPos( m_colors, m_colors[ pos ] ); }
 
-	size_t FindColorPos( COLORREF color ) const { return utl::FindPos< size_t >( m_colors, color ); }
+	size_t FindColorPos( COLORREF color ) const { return utl::FindPos( m_colors, color ); }
 
 	bool HasSelectedColor( void ) const { return m_selPos != std::tstring::npos; }
 	bool SelectColor( COLORREF color );

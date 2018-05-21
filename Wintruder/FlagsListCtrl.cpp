@@ -333,7 +333,7 @@ BOOL CFlagsListCtrl::OnGroupTaskClick_Reflect( NMHDR* pNmHdr, LRESULT* pResult )
 		{
 			if ( const CFlagInfo* pValueOn = pFlagGroup->FindOnValue( flags ) )
 			{	// toggle to next value (previous if SHIFT is down)
-				int pos = utl::LookupPos< int >( pFlagGroup->GetFlags(), pValueOn );
+				int pos = static_cast< int >( utl::LookupPos( pFlagGroup->GetFlags(), pValueOn ) );
 				pos = utl::CircularAdvance( pos, static_cast< int >( pFlagGroup->GetFlags().size() ), !ui::IsKeyPressed( VK_SHIFT ) );
 				pFlagGroup->GetFlags()[ pos ]->SetTo( &flags, true );
 			}

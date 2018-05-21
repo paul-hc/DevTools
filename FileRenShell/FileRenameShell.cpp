@@ -5,6 +5,7 @@
 #include "MainRenameDialog.h"
 #include "TouchFilesDialog.h"
 #include "Application.h"
+#include "utl/FmtUtils.h"
 #include "utl/ImageStore.h"
 #include "utl/Utilities.h"
 #include "utl/resource.h"
@@ -140,7 +141,7 @@ void CFileRenameShell::ExecuteCommand( app::MenuCommand menuCmd, CWnd* pParentOw
 	switch ( menuCmd )
 	{
 		case app::Cmd_SendToCliboard:
-			m_fileData.CopyClipSourcePaths( GetKeyState( VK_SHIFT ) & 0x8000 ? FilenameExt : FullPath, pParentOwner );
+			m_fileData.CopyClipSourcePaths( GetKeyState( VK_SHIFT ) & 0x8000 ? fmt::FilenameExt : fmt::FullPath, pParentOwner );
 			return;
 		case app::Cmd_RunUnitTests:
 			app::GetApp().RunUnitTests();
@@ -218,7 +219,7 @@ STDMETHODIMP CFileRenameShell::QueryContextMenu( HMENU hMenu, UINT indexMenu, UI
 
 	if ( !( flags & CMF_DEFAULTONLY ) )
 	{	// kind of CMF_NORMAL
-		//TRACE( _T("CFileRenameShell::QueryContextMenu(): selFileCount=%d\n"), m_fileData.GetFileCount() );
+		//TRACE( _T("CFileRenameShell::QueryContextMenu(): selFileCount=%d\n"), m_fileData.GetSourceFiles().size() );
 
 		if ( !m_fileData.IsEmpty() )
 		{
@@ -242,7 +243,7 @@ STDMETHODIMP CFileRenameShell::InvokeCommand( LPCMINVOKECOMMANDINFO pCmi )
 	if ( !m_fileData.IsEmpty() )
 		if ( 0 == HIWORD( pCmi->lpVerb ) )
 		{
-			//TRACE( _T("CFileRenameShell::InvokeCommand(): selFileCount=%d\n"), m_fileData.GetFileCount() );
+			//TRACE( _T("CFileRenameShell::InvokeCommand(): selFileCount=%d\n"), m_fileData.GetSourceFiles().size() );
 
 			app::MenuCommand menuCmd = static_cast< app::MenuCommand >( LOWORD( pCmi->lpVerb ) );
 			CScopedMainWnd scopedMainWnd( pCmi->hwnd );

@@ -10,6 +10,7 @@
 #include "resource.h"
 #include "utl/ContainerUtilities.h"
 #include "utl/CmdInfoStore.h"
+#include "utl/FmtUtils.h"
 #include "utl/LongestCommonSubsequence.h"
 #include "utl/MenuUtilities.h"
 #include "utl/PathGenerator.h"
@@ -25,8 +26,6 @@
 
 static bool dbgGuides = false;
 static bool useDefaultDraw = false;
-
-enum CustomColors { ColorDeletedText = color::Red, ColorModifiedText = color::Blue, ColorErrorBk = color::PastelPink };
 
 
 namespace reg
@@ -252,7 +251,7 @@ void CMainRenameDialog::ListItem_DrawTextDiffs( CDC* pDC, const CRect& textRect,
 		{
 			CRect rect = textRect;
 			rect.InflateRect( 2, 0 );
-			ui::FillRect( *pDC, rect, ColorErrorBk );
+			ui::FillRect( *pDC, rect, app::ColorErrorBk );
 		}
 
 	// with "Explorer" visual theme background is bright (white) for selected and unselected state -> ignore selected state to keep text colour dark
@@ -269,7 +268,7 @@ void CMainRenameDialog::ListItem_DrawTextDiffs( CDC* pDC, const CRect& textRect,
 
 	const TCHAR* pText = Source == column ? pItem->m_srcFnameExt.c_str() : pItem->m_destFnameExt.c_str();
 	CRect itemRect = textRect;
-	COLORREF highlightColor = Source == column ? ColorDeletedText : ColorModifiedText;
+	COLORREF highlightColor = Source == column ? app::ColorDeletedText : app::ColorModifiedText;
 
 	const std::vector< str::Match >& matchSeq = Source == column ? pItem->m_srcMatchSeq : pItem->m_destMatchSeq;
 
@@ -321,7 +320,7 @@ bool CMainRenameDialog::ListItem_FillBkgnd( NMLVCUSTOMDRAW* pCustomDraw ) const
 	if ( !m_fileListView.UseExplorerTheme() && m_fileListView.HasItemState( itemIndex, LVIS_SELECTED ) )
 		bkColor = GetSysColor( ::GetFocus() == m_fileListView.m_hWnd ? COLOR_HIGHLIGHT : COLOR_INACTIVECAPTION );
 	else if ( m_pBatchTransaction.get() != NULL && m_pBatchTransaction->ContainsError( pItem->m_srcPath ) )
-		bkColor = ColorErrorBk;									// item with error
+		bkColor = app::ColorErrorBk;									// item with error
 	else if ( itemIndex & 0x01 )
 		bkColor = color::GhostWhite;							// alternate row background
 
@@ -390,7 +389,7 @@ void CMainRenameDialog::AutoGenerateFiles( void )
 	bool succeeded = m_pFileData->GenerateDestPaths( renameFormat, &seqCount );
 
 	if ( !succeeded )
-		m_pFileData->ClearDestinations();
+		m_pFileData->ResetDestinations();
 
 	PostMakeDest( true );							// silent mode, no modal messages
 	m_formatCombo.SetFrameColor( succeeded ? CLR_NONE : color::Error );
@@ -676,13 +675,13 @@ void CMainRenameDialog::OnUpdateSeqCountAutoAdvance( CCmdUI* pCmdUI )
 
 void CMainRenameDialog::OnBnClicked_CopySourceFiles( void )
 {
-	if ( !m_pFileData->CopyClipSourcePaths( FilenameExt, this ) )
+	if ( !m_pFileData->CopyClipSourcePaths( fmt::FilenameExt, this ) )
 		AfxMessageBox( _T("Couldn't copy source files to clipboard!"), MB_ICONERROR | MB_OK );
 }
 
 void CMainRenameDialog::OnBnClicked_ClearDestFiles( void )
 {
-	m_pFileData->ClearDestinations();
+	m_pFileData->ResetDestinations();
 
 	SetupFileListView();	// fill in and select the found files list
 	SwitchMode( MakeMode );

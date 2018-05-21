@@ -78,10 +78,10 @@ public:
 
 	void SetCustomImageDraw( ui::ICustomImageDraw* pCustomImageDraw, ImageListPos transpImgPos = -1 );
 
-	enum PopupType { OnSelection, Nowhere, _PopupTypeCount };
+	enum ListPopup { OnSelection, Nowhere, _ListPopupCount };
 
-	void SetPopupMenu( PopupType popupType, CMenu* pPopupMenu ) { m_pPopupMenu[ popupType ] = pPopupMenu; }
-	static CMenu& GetStdPopupMenu( PopupType popupType );
+	void SetPopupMenu( ListPopup popupType, CMenu* pPopupMenu ) { m_pPopupMenu[ popupType ] = pPopupMenu; }
+	static CMenu& GetStdPopupMenu( ListPopup popupType );
 
 	ole::IDataSourceFactory* GetDataSourceFactory( void ) const { return m_pDataSourceFactory; }
 	void SetDataSourceFactory( ole::IDataSourceFactory* pDataSourceFactory ) { ASSERT_PTR( pDataSourceFactory ); m_pDataSourceFactory = pDataSourceFactory; }
@@ -187,6 +187,8 @@ public:
 	utl::ISubject* GetObjectAt( int index ) const { return ToSubject( GetItemData( index ) ); }
 	static inline utl::ISubject* ToSubject( LPARAM data ) { return checked_static_cast< utl::ISubject* >( (utl::ISubject*)data ); }
 
+	bool DeleteAllItems( void );
+
 	enum Column { Code };
 
 	virtual int InsertObjectItem( int index, utl::ISubject* pObject, int imageIndex = No_Image );
@@ -278,6 +280,13 @@ public:
 
 	const ui::CTextEffect* FindTextEffectAt( utl::ISubject* pSubject, TColumn subItem ) const;
 	const ui::CTextEffect& LookupTextEffectAt( utl::ISubject* pSubject, TColumn subItem ) const;
+
+	interface ITextEffectCallback
+	{
+		virtual void CombineTextEffectAt( ui::CTextEffect& rTextEffect, utl::ISubject* pSubject, TColumn subItem ) const = 0;
+	};
+
+	void SetTextEffectCallback( ITextEffectCallback* pTextEffectCallback ) { m_pTextEffectCallback = pTextEffectCallback; }
 protected:
 	virtual bool ApplyTextEffectAt( NMLVCUSTOMDRAW* pDraw, utl::ISubject* pSubject, TColumn subItem );
 
@@ -358,10 +367,12 @@ private:
 
 	stdext::hash_map< TCellPair, ui::CTextEffect > m_markedCells;
 	std::auto_ptr< ui::CFontEffectCache > m_pFontCache;		// self-encapsulated
+	ITextEffectCallback* m_pTextEffectCallback;
 
 	CImageList* m_pImageList;
 	CImageList* m_pLargeImageList;
-	CMenu* m_pPopupMenu[ _PopupTypeCount ];				// used when right clicking nowhere - on header or no list item
+
+	CMenu* m_pPopupMenu[ _ListPopupCount ];				// used when right clicking nowhere - on header or no list item
 	bool m_useTriStateAutoCheck;						// extended check state: allows toggling LVIS_UNCHECKED -> LVIS_CHECKED -> LVIS_CHECKEDGRAY
 	std::auto_ptr< CLabelEdit > m_pLabelEdit;			// stores the label info during inline editing
 

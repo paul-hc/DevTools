@@ -221,7 +221,7 @@ namespace path
 
 	size_t FindComplexSepPos( const TCHAR* pPath )
 	{
-		return utl::FindPos< size_t >( str::begin( pPath ), str::end( pPath ), s_complexPathSep );
+		return utl::FindPos( str::begin( pPath ), str::end( pPath ), s_complexPathSep );
 	}
 
 	std::tstring GetPhysical( const std::tstring& filePath )

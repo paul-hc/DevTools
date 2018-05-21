@@ -39,6 +39,11 @@ namespace ui
 			: m_fontEffect( fontEffect ), m_textColor( textColor ), m_bkColor( bkColor ) {}
 
 		static CTextEffect MakeColor( COLORREF textColor, COLORREF bkColor = CLR_NONE, ui::TFontEffect fontEffect = ui::Regular ) { return CTextEffect( fontEffect, textColor, bkColor ); }
+
+		CTextEffect& operator|=( const CTextEffect& right ) { CombineWith( right ); return *this; }
+		CTextEffect operator|( const CTextEffect& right ) const { CTextEffect effect = *this; effect.CombineWith( right ); return effect; }
+
+		void CombineWith( const CTextEffect& right );
 	public:
 		ui::TFontEffect m_fontEffect;
 		COLORREF m_textColor;

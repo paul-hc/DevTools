@@ -10,7 +10,7 @@
 #include "StringUtilities.h"
 #include "StringRange.h"
 #include "ThemeItem.h"
-#include "Utilities.h"
+#include "UtilitiesEx.h"
 #include "VisualTheme.h"
 #include "ComparePredicates.h"
 #include "ContainerUtilities.h"
@@ -90,6 +90,7 @@ CReportListControl::CReportListControl( UINT columnLayoutId /*= 0*/, DWORD listS
 	, m_sortAscending( true )
 	, m_sortInternally( true )
 	, m_pCompareFunc( NULL )		// use text compare by default
+	, m_pTextEffectCallback( NULL )
 	, m_pImageList( NULL )
 	, m_pLargeImageList( NULL )
 	, m_useTriStateAutoCheck( false )
@@ -108,6 +109,12 @@ CReportListControl::~CReportListControl()
 {
 }
 
+bool CReportListControl::DeleteAllItems( void )
+{
+	m_markedCells.clear();
+	return CListCtrl::DeleteAllItems() != FALSE;
+}
+
 void CReportListControl::SetCustomImageDraw( ui::ICustomImageDraw* pCustomImageDraw, ImageListPos transpImgPos /*= -1*/ )
 {
 	ASSERT_NULL( m_hWnd );
@@ -118,9 +125,9 @@ void CReportListControl::SetCustomImageDraw( ui::ICustomImageDraw* pCustomImageD
 		m_pCustomImager.reset();
 }
 
-CMenu& CReportListControl::GetStdPopupMenu( PopupType popupType )
+CMenu& CReportListControl::GetStdPopupMenu( ListPopup popupType )
 {
-	static CMenu stdPopupMenu[ _PopupTypeCount ];
+	static CMenu stdPopupMenu[ _ListPopupCount ];
 	CMenu& rMenu = stdPopupMenu[ popupType ];
 	if ( NULL == rMenu.GetSafeHmenu() )
 		ui::LoadPopupMenu( rMenu, IDR_STD_CONTEXT_MENU, OnSelection == popupType ? ui::ListViewSelectionPopup : ui::ListViewNowherePopup );
@@ -1315,10 +1322,14 @@ bool CReportListControl::ApplyTextEffectAt( NMLVCUSTOMDRAW* pDraw, utl::ISubject
 	ASSERT_PTR( pDraw );
 	int index = static_cast< int >( pDraw->nmcd.dwItemSpec ); index;		// for debugging
 
-	if ( m_markedCells.empty() )
+	if ( m_markedCells.empty() && NULL == m_pTextEffectCallback )
 		return false;
 
-	const ui::CTextEffect& textEffect = LookupTextEffectAt( pSubject, subItem );
+	ui::CTextEffect textEffect = LookupTextEffectAt( pSubject, subItem );				// cell effect
+
+	if ( m_pTextEffectCallback != NULL )
+		m_pTextEffectCallback->CombineTextEffectAt( textEffect, pSubject, subItem );	// combine with calback effect
+
 	bool modified = false;
 
 	if ( CFont* pFont = GetFontEffectCache()->Lookup( textEffect.m_fontEffect ) )
@@ -1806,6 +1817,8 @@ void CReportListControl::OnUpdateListViewStacking( CCmdUI* pCmdUI )
 
 void CReportListControl::OnResetColumnLayout( void )
 {
+	CScopedLockRedraw freeze( this );
+
 	std::vector< std::tstring > columnSpecs = str::LoadStrings( m_columnLayoutId );
 	ParseColumnLayout( m_columnInfos, columnSpecs );
 

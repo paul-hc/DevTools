@@ -9,6 +9,7 @@
 #include "utl/ReportListControl.h"
 #include "utl/vector_map.h"
 #include "Application_fwd.h"
+#include "FileWorkingSet_fwd.h"
 
 
 class CLogger;
@@ -18,6 +19,7 @@ class CTouchItem;
 
 class CTouchFilesDialog : public CBaseMainDialog
 						, private fs::IBatchTransactionCallback
+						, private CReportListControl::ITextEffectCallback
 {
 public:
 	CTouchFilesDialog( CFileWorkingSet* pFileData, CWnd* pParent );
@@ -45,8 +47,12 @@ private:
 	virtual CWnd* GetWnd( void );
 	virtual CLogger* GetLogger( void );
 	virtual fs::UserFeedback HandleFileError( const fs::CPath& sourcePath, const std::tstring& message );
+
+	// CReportListControl::ITextEffectCallback interface
+	virtual void CombineTextEffectAt( ui::CTextEffect& rTextEffect, utl::ISubject* pSubject, int subItem ) const;
 private:
 	CFileWorkingSet* m_pFileData;
+	const fmt::PathFormat m_pathFormat;
 	Mode m_mode;
 	std::vector< CTouchItem* > m_displayItems;
 	std::auto_ptr< fs::CBatchTouch > m_pBatchTransaction;
@@ -69,7 +75,6 @@ protected:
 	afx_msg void OnBnClicked_PasteDestStates( void );
 	afx_msg void OnBnClicked_ResetDestFiles( void );
 	afx_msg void OnBnClicked_Undo( void );
-	afx_msg void OnNmCustomDraw_FileList( NMHDR* pNmHdr, LRESULT* pResult );
 
 	DECLARE_MESSAGE_MAP()
 };

@@ -4,8 +4,10 @@
 #include "FileSetUi.h"
 #include "UndoChangeLog.h"
 #include "utl/Clipboard.h"
+#include "utl/FmtUtils.h"
 #include "utl/PathGenerator.h"
 #include "utl/RuntimeException.h"
+#include "utl/StringRange.h"
 #include "utl/StringUtilities.h"
 
 #ifdef _DEBUG
@@ -13,19 +15,50 @@
 #endif
 
 
-namespace hlp
+namespace fmt
 {
-	template< typename DataMapType >
-	void ClearDestination( DataMapType& rMap )
+	static const TCHAR s_clipSep[] = _T("\t");
+
+	std::tstring FormatTouchSrc( const TFileStatePair& fileStatePair, fmt::PathFormat pathFormat )
 	{
-		for ( typename DataMapType::iterator itPair = rMap.begin(); itPair != rMap.end(); ++itPair )
-			itPair->second.Clear();
+		return std::tstring( FormatPath( fileStatePair.first.m_fullPath, pathFormat ) ) + s_clipSep + fmt::FormatFileState( fileStatePair.first );
+	}
+
+	void ParseTouchDest( TFileStatePair& rFileStatePair, const str::TStringRange& textRange ) throws_( CRuntimeException )
+	{
+		Range< size_t > sepPos;
+		if ( textRange.Find( sepPos, s_clipSep ) )
+		{
+			fs::CFileState destFileState;
+			destFileState.m_fullPath = textRange.ExtractLead( sepPos.m_start );
+
+			if ( path::IsNameExt( destFileState.m_fullPath.GetPtr() ) )
+				destFileState.m_fullPath = rFileStatePair.first.m_fullPath.GetParentPath() / destFileState.m_fullPath;		// convert to full path
+
+			if ( destFileState.m_fullPath != rFileStatePair.first.m_fullPath )
+				throw CRuntimeException( str::Format( _T("Pasted destination file name is inconsistent with source path.\n\nSource: %s\nDestination: %s"),
+					rFileStatePair.first.m_fullPath.GetPtr(), destFileState.m_fullPath.GetPtr() ) );
+
+			str::TStringRange stateRange = textRange.MakeTrail( sepPos.m_end );
+			if ( ParseFileState( destFileState, stateRange ) )
+			{
+				rFileStatePair.second = destFileState;
+				return;
+			}
+		}
+
+		throw CRuntimeException( str::Format( _T("Pasted destination file status is not valid: %s"), textRange.GetText().c_str() ) );
 	}
 }
 
 
+// CFileWorkingSet implementation
+
+const TCHAR CFileWorkingSet::s_lineEnd[] = _T("\r\n");
+
 CFileWorkingSet::CFileWorkingSet( void )
 	: m_pUndoChangeLog( new CUndoChangeLog() )
+	, m_mixedDirPaths( false )
 {
 }
 
@@ -33,12 +66,45 @@ CFileWorkingSet::~CFileWorkingSet()
 {
 }
 
-void CFileWorkingSet::ClearDestinations( void )
+void CFileWorkingSet::ResetDestinations( void )
 {
 	ClearErrors();
 
-	hlp::ClearDestination( m_renamePairs );
-	hlp::ClearDestination( m_touchPairs );
+	for ( fs::TPathPairMap::iterator itPair = m_renamePairs.begin(); itPair != m_renamePairs.end(); ++itPair )
+		itPair->second.Clear();
+
+	for ( fs::TFileStatePairMap::iterator itPair = m_touchPairs.begin(); itPair != m_touchPairs.end(); ++itPair )
+		itPair->second = itPair->first;
+}
+
+size_t CFileWorkingSet::SetupFromDropInfo( HDROP hDropInfo )
+{
+	m_sourceFiles.clear();
+	m_renamePairs.clear();
+	m_touchPairs.clear();
+	m_mixedDirPaths = false;
+
+	if ( hDropInfo != NULL )
+	{
+		for ( int i = 0, fileCount = ::DragQueryFile( hDropInfo, UINT_MAX, NULL, 0 ); i < fileCount; ++i )
+		{
+			TCHAR pathBuffer[ _MAX_PATH ];
+			::DragQueryFile( hDropInfo, i, pathBuffer, COUNT_OF( pathBuffer ) );
+
+			fs::CPath fullPath( pathBuffer );
+
+			m_sourceFiles.push_back( fullPath );
+			m_renamePairs[ fullPath ] = fs::CPath();
+
+			fs::CFileState fileState = fs::CFileState::ReadFromFile( fullPath );
+			m_touchPairs[ fileState ] = fileState;
+		}
+
+		std::sort( m_sourceFiles.begin(), m_sourceFiles.end() );
+	}
+	m_mixedDirPaths = utl::HasMultipleDirPaths( m_renamePairs ) || utl::HasMultipleDirPaths( m_touchPairs );
+
+	return m_sourceFiles.size();
 }
 
 void CFileWorkingSet::LoadUndoLog( void )
@@ -80,6 +146,7 @@ void CFileWorkingSet::_SaveUndoInfo( UndoMapType& rUndoPairs, DataMapType& rData
 			rUndoPairs[ itDataPair->first ] = itDataPair->second;
 
 	rDataMemberPairs.clear();		// this action was committed, we're done
+	m_mixedDirPaths = false;
 }
 
 void CFileWorkingSet::RetrieveUndoInfo( app::Action action )
@@ -102,6 +169,8 @@ void CFileWorkingSet::_RetrieveUndoInfo( DataMapType& rDataMemberPairs, const Un
 	rDataMemberPairs.clear();
 	for ( typename UndoMapType::const_iterator itUndo = pTopUndoPairs->begin(); itUndo != pTopUndoPairs->end(); ++itUndo )
 		rDataMemberPairs[ itUndo->second ] = itUndo->first;		// for undo swap source and destination
+
+	m_mixedDirPaths = utl::HasMultipleDirPaths( rDataMemberPairs );
 }
 
 void CFileWorkingSet::CommitUndoInfo( app::Action action )
@@ -116,37 +185,11 @@ void CFileWorkingSet::CommitUndoInfo( app::Action action )
 	}
 }
 
-size_t CFileWorkingSet::SetupFromDropInfo( HDROP hDropInfo )
-{
-	m_sourceFiles.clear();
-	m_renamePairs.clear();
-	m_touchPairs.clear();
-
-	if ( hDropInfo != NULL )
-	{
-		for ( int i = 0, fileCount = ::DragQueryFile( hDropInfo, UINT_MAX, NULL, 0 ); i < fileCount; ++i )
-		{
-			TCHAR pathBuffer[ _MAX_PATH ];
-			::DragQueryFile( hDropInfo, i, pathBuffer, COUNT_OF( pathBuffer ) );
-
-			fs::CPath fullPath( pathBuffer );
-
-			m_sourceFiles.push_back( fullPath );
-			m_renamePairs[ fullPath ] = fs::CPath();
-			m_touchPairs[ fs::CFileState( fullPath ) ] = fs::CFileState();
-		}
-
-		std::sort( m_sourceFiles.begin(), m_sourceFiles.end() );
-	}
-
-	return GetFileCount();
-}
-
-bool CFileWorkingSet::CopyClipSourcePaths( PathType pathType, CWnd* pWnd ) const
+bool CFileWorkingSet::CopyClipSourcePaths( fmt::PathFormat format, CWnd* pWnd ) const
 {
 	std::vector< std::tstring > sourcePaths;
 	for ( std::vector< fs::CPath >::const_iterator itFile = m_sourceFiles.begin(); itFile != m_sourceFiles.end(); ++itFile )
-		sourcePaths.push_back( FilenameExt == pathType ? itFile->GetNameExt() : itFile->Get() );
+		sourcePaths.push_back( fmt::FilenameExt == format ? itFile->GetNameExt() : itFile->Get() );
 
 	std::tstring multiPath = str::Join( sourcePaths, _T("\r\n") );
 	return CClipboard::CopyText( multiPath, pWnd );
@@ -176,7 +219,7 @@ void CFileWorkingSet::PasteClipDestinationPaths( CWnd* pWnd ) throws_( CRuntimeE
 		throw CRuntimeException( _T("No destination file paths available to paste.") );
 	else if ( m_renamePairs.size() != destPaths.size() )
 		throw CRuntimeException( str::Format( _T("Destination file count of %d doesn't match source file count of %d."),
-											  destPaths.size(), m_renamePairs.size() ).c_str() );
+											  destPaths.size(), m_renamePairs.size() ) );
 
 	int pos = 0;
 
@@ -227,7 +270,7 @@ bool CFileWorkingSet::FileExistOutsideWorkingSet( const fs::CPath& filePath ) co
 bool CFileWorkingSet::GenerateDestPaths( const std::tstring& format, UINT* pSeqCount )
 {
 	ASSERT_PTR( pSeqCount );
-	ClearDestinations();
+	ResetDestinations();
 
 	CPathGenerator generator( m_renamePairs, format, *pSeqCount );
 	if ( !generator.GeneratePairs() )
@@ -259,4 +302,47 @@ void CFileWorkingSet::EnsureUniformNumPadding( void )
 		destParts.m_fname = fnames[ pos ];
 		it->second = destParts.MakePath();
 	}
+}
+
+
+// TOUCH
+
+bool CFileWorkingSet::CopyClipSourceFileStates( CWnd* pWnd ) const
+{
+	std::vector< std::tstring > sourcePaths; sourcePaths.reserve( m_touchPairs.size() );
+
+	for ( fs::TFileStatePairMap::const_iterator itTouchPair = m_touchPairs.begin(); itTouchPair != m_touchPairs.end(); ++itTouchPair )
+		sourcePaths.push_back( fmt::FormatTouchSrc( *itTouchPair, m_mixedDirPaths ? fmt::FullPath : fmt::FilenameExt ) );
+
+	std::tstring text = str::Join( sourcePaths, _T("\r\n") );
+	return CClipboard::CopyText( text, pWnd );
+}
+
+void CFileWorkingSet::PasteClipDestinationFileStates( CWnd* pWnd ) throws_( CRuntimeException )
+{
+	ClearErrors();
+
+	std::vector< std::tstring > lines;
+	std::tstring text;
+	if ( CClipboard::CanPasteText() && CClipboard::PasteText( text, pWnd ) )
+		str::Split( lines, text.c_str(), _T("\r\n") );
+
+	for ( std::vector< std::tstring >::iterator itLine = lines.begin(); itLine != lines.end(); )
+	{
+		str::Trim( *itLine );
+		if ( itLine->empty() )
+			itLine = lines.erase( itLine );
+		else
+			++itLine;
+	}
+
+	if ( lines.empty() )
+		throw CRuntimeException( _T("No destination file states available to paste.") );
+	else if ( m_touchPairs.size() != lines.size() )
+		throw CRuntimeException( str::Format( _T("Destination file state count of %d doesn't match source file count of %d."),
+											  lines.size(), m_touchPairs.size() ) );
+
+	int pos = 0;
+	for ( fs::TFileStatePairMap::iterator itTouchPair = m_touchPairs.begin(); itTouchPair != m_touchPairs.end(); ++itTouchPair, ++pos )
+		fmt::ParseTouchDest( *itTouchPair, str::TStringRange( lines[ pos ] ) );
 }

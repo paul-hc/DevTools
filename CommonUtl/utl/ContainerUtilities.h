@@ -149,32 +149,32 @@ namespace utl
 		return static_cast< DiffType >( std::distance( itFirst, itLast ) );
 	}
 
-	template< typename PosType, typename IteratorT, typename ValueType >
-	inline PosType FindPos( IteratorT itStart, IteratorT itEnd, const ValueType& rValue )
+	template< typename IteratorT, typename ValueType >
+	inline size_t FindPos( IteratorT itStart, IteratorT itEnd, const ValueType& rValue )
 	{
 		IteratorT itFound = std::find( itStart, itEnd, rValue );
-		return itFound != itEnd ? static_cast< PosType >( itFound - itStart ) : PosType( -1 );
+		return itFound != itEnd ? std::distance( itStart, itFound ) : size_t( -1 );
 	}
 
-	template< typename PosType, typename ContainerT, typename ValueType >
-	inline PosType FindPos( const ContainerT& container, const ValueType& rValue )
+	template< typename ContainerT, typename ValueType >
+	inline size_t FindPos( const ContainerT& container, const ValueType& rValue )
 	{
-		return FindPos< PosType >( container.begin(), container.end(), rValue );
+		return FindPos( container.begin(), container.end(), rValue );
 	}
 
-	template< typename PosType, typename IteratorT, typename ValueType >
-	inline PosType LookupPos( IteratorT itStart, IteratorT itEnd, const ValueType& rValue )
+	template< typename IteratorT, typename ValueType >
+	inline size_t LookupPos( IteratorT itStart, IteratorT itEnd, const ValueType& rValue )
 	{
 		IteratorT itFound = std::find( itStart, itEnd, rValue );
 
 		ASSERT( itFound != itEnd );
-		return static_cast< PosType >( itFound - itStart );
+		return std::distance( itStart, itFound );
 	}
 
-	template< typename PosType, typename ContainerT, typename ValueType >
-	inline PosType LookupPos( const ContainerT& container, const ValueType& rValue )
+	template< typename ContainerT, typename ValueType >
+	inline size_t LookupPos( const ContainerT& container, const ValueType& rValue )
 	{
-		return LookupPos< PosType >( container.begin(), container.end(), rValue );
+		return LookupPos( container.begin(), container.end(), rValue );
 	}
 
 
@@ -552,7 +552,7 @@ namespace utl
 		rIndexes.resize( subset.size() );
 
 		for ( size_t i = 0; i != subset.size(); ++i )
-			rIndexes[ i ] = utl::LookupPos< IndexType >( source.begin(), source.end(), subset[ i ] );
+			rIndexes[ i ] = static_cast< IndexType >( utl::LookupPos( source.begin(), source.end(), subset[ i ] ) );
 	}
 
 

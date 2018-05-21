@@ -772,7 +772,7 @@ void CFolderOptions::updateSortOrderMenu( CMenu& rSortOrderPopup )
 			basicText = basicText.Left( suffixPos - 1 );
 
 		CString itemText;
-		size_t foundPos = utl::FindPos< size_t >( m_fileSortOrder.m_fields, sortLayout[ i ].field );
+		size_t foundPos = utl::FindPos( m_fileSortOrder.m_fields, sortLayout[ i ].field );
 		if ( foundPos != std::tstring::npos )
 		{
 			itemText.Format( _T("%s\t(%d)"), (LPCTSTR)basicText, foundPos + 1 );

@@ -9,9 +9,9 @@
 #include "utl/FileState.h"
 #include "utl/Path.h"
 #include "Application_fwd.h"
+#include "FileWorkingSet_fwd.h"
 
 
-enum PathType { FullPath, FilenameExt };
 class CUndoChangeLog;
 
 
@@ -21,8 +21,8 @@ public:
 	CFileWorkingSet( void );
 	~CFileWorkingSet();
 
-	size_t GetFileCount( void ) const { return m_sourceFiles.size(); }
-	bool IsEmpty( void ) const { return m_sourceFiles.empty(); }
+	bool IsEmpty( void ) const { return m_sourceFiles.empty() && m_touchPairs.empty(); }
+	bool HasMixedDirPaths( void ) const { return m_mixedDirPaths; }
 
 	const std::vector< fs::CPath >& GetSourceFiles( void ) const { return m_sourceFiles; }
 	const fs::TPathPairMap& GetRenamePairs( void ) const { return m_renamePairs; }
@@ -30,7 +30,7 @@ public:
 
 	size_t SetupFromDropInfo( HDROP hDropInfo );
 
-	void ClearDestinations( void );
+	void ResetDestinations( void );
 
 	void LoadUndoLog( void );
 	void SaveUndoLog( void );
@@ -46,7 +46,7 @@ public:
 	void ClearErrors( void ) { m_errorIndexes.clear(); }
 
 	// RENAME
-	bool CopyClipSourcePaths( PathType pathType, CWnd* pWnd ) const;
+	bool CopyClipSourcePaths( fmt::PathFormat format, CWnd* pWnd ) const;
 	void PasteClipDestinationPaths( CWnd* pWnd ) throws_( CRuntimeException );
 
 	template< typename Func >
@@ -59,19 +59,26 @@ public:
 	bool CheckPathCollisions( std::vector< std::tstring >& rDestDuplicates );
 	void CheckPathCollisions( void ) throws_( CRuntimeException );
 	bool FileExistOutsideWorkingSet( const fs::CPath& filePath ) const;		// collision with an existing file/dir outside working set (selected files)
+
+	// TOUCH
+	bool CopyClipSourceFileStates( CWnd* pWnd ) const;
+	void PasteClipDestinationFileStates( CWnd* pWnd ) throws_( CRuntimeException );
 private:
 	template< typename UndoMapType, typename DataMapType >
-	static void _SaveUndoInfo( UndoMapType& rUndoPairs, DataMapType& rDataMemberPairs, const fs::TPathSet& keyPaths );
+	void _SaveUndoInfo( UndoMapType& rUndoPairs, DataMapType& rDataMemberPairs, const fs::TPathSet& keyPaths );
 
 	template< typename DataMapType, typename UndoMapType >
-	static void _RetrieveUndoInfo( DataMapType& rDataMemberPairs, const UndoMapType* pTopUndoPairs );
+	void _RetrieveUndoInfo( DataMapType& rDataMemberPairs, const UndoMapType* pTopUndoPairs );
 private:
 	std::vector< fs::CPath > m_sourceFiles;
 	fs::TPathPairMap m_renamePairs;
 	fs::TFileStatePairMap m_touchPairs;
 	std::auto_ptr< CUndoChangeLog > m_pUndoChangeLog;
+	bool m_mixedDirPaths;			// refers to SRC paths
 
 	std::set< size_t > m_errorIndexes;
+
+	static const TCHAR s_lineEnd[];
 };
 
 

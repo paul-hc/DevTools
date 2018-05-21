@@ -1,15 +1,16 @@
 
 #include "stdafx.h"
 #include "TouchItem.h"
+#include "utl/FmtUtils.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
 
 
-CTouchItem::CTouchItem( TFileStatePair* pStatePair, bool showFullPath )
+CTouchItem::CTouchItem( TFileStatePair* pStatePair, fmt::PathFormat pathFormat )
 	: m_pStatePair( safe_ptr( pStatePair ) )
-	, m_displayPath( showFullPath ? pStatePair->first.m_fullPath.GetPtr() : pStatePair->first.m_fullPath.GetNameExt() )
+	, m_displayPath( fmt::FormatPath( pStatePair->first.m_fullPath, pathFormat ) )
 {
 }
 
@@ -29,8 +30,5 @@ std::tstring CTouchItem::GetDisplayCode( void ) const
 
 bool CTouchItem::IsModified( void ) const
 {
-	if ( m_pStatePair->second.IsValid() )
-		return m_pStatePair->second != m_pStatePair->first;
-
-	return false;
+	return m_pStatePair->second.IsValid() && m_pStatePair->second != m_pStatePair->first;
 }

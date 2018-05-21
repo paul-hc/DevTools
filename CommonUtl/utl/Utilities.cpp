@@ -1258,6 +1258,23 @@ namespace ui
 	}
 
 
+	// CTextEffect implementation
+
+	void CTextEffect::CombineWith( const CTextEffect& right )
+	{
+		if ( &right != this )
+		{
+			m_fontEffect |= right.m_fontEffect;
+
+			if ( right.m_textColor != CLR_NONE )
+				m_textColor = right.m_textColor;
+
+			if ( right.m_bkColor != CLR_NONE )
+				m_bkColor = right.m_bkColor;
+		}
+	}
+
+
 	void AddSysColors( std::vector< COLORREF >& rColors, const int sysIndexes[], size_t count )
 	{
 		rColors.reserve( rColors.size() + count );

@@ -22,29 +22,17 @@ namespace fs
 	{
 	}
 
-	CFileState::CFileState( const fs::CPath& path )
-	{
-		CFileState source;
-		if ( source.ReadFromFile( path ) )
-			*this = source;			// assign valid state
-		else
-		{	// assign path with invalid state
-			m_fullPath = path;
-			m_attributes = s_invalidAttributes;
-		}
-	}
-
-	bool CFileState::ReadFromFile( const fs::CPath& path )
+	CFileState CFileState::ReadFromFile( const fs::CPath& path )
 	{
 		::CFileStatus fileStatus;
-
-		Clear();
-		m_fullPath = path;
 		if ( !CFile::GetStatus( path.GetPtr(), fileStatus ) )
-			return false;
+		{
+			CFileState badFileState;
+			badFileState.m_fullPath = path;
+			return badFileState;
+		}
 
-		*this = CFileState( &fileStatus );
-		return true;
+		return CFileState( &fileStatus );
 	}
 
 	void CFileState::WriteToFile( void ) const throws_( CFileException, mfc::CRuntimeException )
@@ -53,7 +41,7 @@ namespace fs
 
 		::CFileStatus fileStatus;
 		if ( !CFile::GetStatus( m_fullPath.GetPtr(), fileStatus ) )
-			throw new mfc::CRuntimeException( str::Format( _T("Cannot acces file status for file: %s"), m_fullPath.GetPtr() ) );
+			throw new mfc::CRuntimeException( str::Format( _T("Cannot access file status for file: %s"), m_fullPath.GetPtr() ) );
 
 		fileStatus.m_attribute = m_attributes;
 		fileStatus.m_ctime = m_creationTime;

@@ -11,7 +11,6 @@ namespace fs
 	{
 		CFileState( void ) : m_attributes( s_invalidAttributes ) {}
 		CFileState( const ::CFileStatus* pFileStatus );
-		explicit CFileState( const fs::CPath& path );
 
 		void Clear( void ) { *this = CFileState(); }
 
@@ -23,7 +22,7 @@ namespace fs
 		bool operator==( const CFileState& right ) const;
 		bool operator!=( const CFileState& right ) const { return !operator==( right ); }
 
-		bool ReadFromFile( const fs::CPath& path );		// could be relative path, will be stored as absolute
+		static CFileState ReadFromFile( const fs::CPath& path );		// could be relative path, will be stored as absolute
 		void WriteToFile( void ) const throws_( CFileException, mfc::CRuntimeException );
 	public:
 		CPath m_fullPath;

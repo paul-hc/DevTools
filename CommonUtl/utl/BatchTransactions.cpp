@@ -177,20 +177,23 @@ namespace fs
 
 	bool CBatchTouch::_TouchFiles( void )
 	{
-		for ( fs::TFileStatePairMap::const_iterator itPair = m_rTouchMap.begin(); itPair != m_rTouchMap.end(); )
+		for ( fs::TFileStatePairMap::const_iterator itStatePair = m_rTouchMap.begin(); itStatePair != m_rTouchMap.end(); )
 		{
 			try
 			{
-				itPair->second.WriteToFile();
-				m_committed.insert( itPair->first.m_fullPath );		// mark as done
+				if ( itStatePair->second != itStatePair->first )
+				{
+					itStatePair->second.WriteToFile();
+					m_committed.insert( itStatePair->first.m_fullPath );		// mark as done
+				}
 			}
 			catch ( CException* pExc )
 			{
-				std::tstring message = ExtractMessage( itPair->second.m_fullPath, pExc );
-				m_errorMap[ itPair->first.m_fullPath ] = message;	// mark as error
+				std::tstring message = ExtractMessage( itStatePair->second.m_fullPath, pExc );
+				m_errorMap[ itStatePair->first.m_fullPath ] = message;	// mark as error
 
 				if ( m_pCallback != NULL )
-					switch ( m_pCallback->HandleFileError( itPair->first.m_fullPath, message ) )
+					switch ( m_pCallback->HandleFileError( itStatePair->first.m_fullPath, message ) )
 					{
 						case Abort:	 return false;
 						case Retry:	 continue;
@@ -198,7 +201,7 @@ namespace fs
 					}
 			}
 
-			++itPair;			// advance to next file if no Retry
+			++itStatePair;			// advance to next file if no Retry
 		}
 		return true;
 	}
@@ -209,14 +212,14 @@ namespace fs
 		if ( NULL == pLogger )
 			return;
 
-		for ( fs::TFileStatePairMap::const_iterator itPair = m_rTouchMap.begin(); itPair != m_rTouchMap.end(); )
+		for ( fs::TFileStatePairMap::const_iterator itStatePair = m_rTouchMap.begin(); itStatePair != m_rTouchMap.end(); ++itStatePair )
 		{
-			std::tstring entryText = fmt::FormatTouchEntry( itPair->first, itPair->second );
+			std::tstring entryText = fmt::FormatTouchEntry( itStatePair->first, itStatePair->second );
 
-			std::map< fs::CPath, std::tstring >::const_iterator itError = m_errorMap.find( itPair->first.m_fullPath );
+			std::map< fs::CPath, std::tstring >::const_iterator itError = m_errorMap.find( itStatePair->first.m_fullPath );
 			if ( itError != m_errorMap.end() )
 				pLogger->Log( s_fmtError, entryText.c_str(), itError->second.c_str() );
-			else if ( m_committed.find( itPair->first.m_fullPath ) != m_committed.end() )
+			else if ( m_committed.find( itStatePair->first.m_fullPath ) != m_committed.end() )
 				pLogger->Log( entryText.c_str() );
 			else
 			{	// ignore not processed because transaction was aborted on error

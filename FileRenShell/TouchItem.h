@@ -4,13 +4,13 @@
 
 #include "utl/ISubject.h"
 #include "utl/FileState.h"
+#include "FileWorkingSet_fwd.h"
 
 
 class CTouchItem : public utl::ISubject
 {
-	typedef std::pair< const fs::CFileState, fs::CFileState > TFileStatePair;		// ptr stored in m_fileListCtrl
 public:
-	CTouchItem( TFileStatePair* pStatePair, bool showFullPath );
+	CTouchItem( TFileStatePair* pStatePair, fmt::PathFormat pathFormat );
 	virtual ~CTouchItem();
 
 	const fs::CPath& GetKeyPath( void ) const { return GetSrcState().m_fullPath; }

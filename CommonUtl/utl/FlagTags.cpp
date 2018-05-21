@@ -86,7 +86,16 @@ void CFlagTags::Parse( int* pFlags, const std::tstring& text, const std::vector<
 	ASSERT_PTR( pFlags );
 
 	std::vector< std::tstring > flagsOn;
-	str::Split( flagsOn, text.c_str(), pSep );
+	if ( !str::IsEmpty( pSep ) )
+		str::Split( flagsOn, text.c_str(), pSep );
+	else
+	{	// assume tag is single character
+		ASSERT( text.length() <= tags.size() );
+		flagsOn.reserve( text.length() );
+
+		for ( std::tstring::const_iterator itCh = text.begin(); itCh != text.end(); ++itCh )
+			flagsOn.push_back( std::tstring( 1, *itCh ) );
+	}
 
 	// preserve unknown bits: set each known flag individually
 	for ( size_t pos = 0; pos != tags.size(); ++pos )

@@ -587,6 +587,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\FileWorkingSet_fwd.h"
+				>
+			</File>
+			<File
 				RelativePath=".\MainRenameDialog.cpp"
 				>
 			</File>
