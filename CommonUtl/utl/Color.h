@@ -3,6 +3,7 @@
 #pragma once
 
 #include "StdColors.h"
+#include "Range.h"
 
 
 #define HTML_COLOR( htmlLiteral ) ( ui::ParseHtmlLiteral( #htmlLiteral ) )
@@ -55,6 +56,40 @@ namespace ui
 		pDC->SetPixel( 0, 0, originColor );						// restore pixel at origin
 		return mappedColor;
 	}
+}
+
+
+namespace ui
+{
+	// accurate colour algorithms
+
+	BYTE GetAverageComponent( UINT component1, UINT component2 );
+	COLORREF GetBlendedColor( COLORREF color1, COLORREF color2 );
+	inline COLORREF& BlendWithColor( COLORREF& rColor1, COLORREF color2 ) { return rColor1 = GetBlendedColor( rColor1, color2 ); }
+
+
+	struct CHslColor
+	{
+	public:
+		CHslColor( void ) : m_hue( 0 ), m_luminance( 0 ), m_saturation( 100 ) {}
+		CHslColor( WORD hue, WORD luminance, WORD saturation ) : m_hue( hue ), m_luminance( luminance ), m_saturation( saturation ) {}
+		CHslColor( COLORREF rgbColor );
+
+		bool IsValid( void ) const { return s_validRange.Contains( m_hue ) && s_validRange.Contains( m_luminance ) && s_validRange.Contains( m_saturation ); }
+		COLORREF GetRGB( void ) const;
+
+		CHslColor& ScaleHue( int byPct ) { m_hue = ModifyBy( m_hue, byPct ); return *this; }
+		CHslColor& ScaleLuminance( int byPct ) { m_luminance = ModifyBy( m_luminance, byPct ); return *this; }
+		CHslColor& ScaleSaturation( int byPct ) { m_saturation = ModifyBy( m_saturation, byPct ); return *this; }
+
+		static WORD ModifyBy( WORD component, int byPercentage );
+	public:
+		WORD m_hue;
+		WORD m_luminance;
+		WORD m_saturation;
+
+		static const Range< WORD > s_validRange;
+	};
 }
 
 

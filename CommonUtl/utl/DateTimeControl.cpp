@@ -109,6 +109,18 @@ bool CDateTimeControl::IsNullDateTime( void ) const
 	return false;
 }
 
+bool CDateTimeControl::UserSetDateTime( const CTime& dateTime )
+{
+	CTime oldDateTime = GetDateTime();
+
+	bool succeeded = SetDateTime( dateTime );
+
+	if ( GetDateTime() != oldDateTime )
+		SendNotifyDateTimeChange();
+
+	return succeeded;
+}
+
 bool CDateTimeControl::FlipFormat( bool isValid )
 {
 	const TCHAR* pDesiredFormat = isValid ? m_pValidFormat : m_pNullFormat;
@@ -121,6 +133,18 @@ bool CDateTimeControl::FlipFormat( bool isValid )
 
 	m_pLastFormat = pDesiredFormat;
 	return true;
+}
+
+bool CDateTimeControl::SendNotifyDateTimeChange( void )
+{
+	NMDATETIMECHANGE changeInfo;
+
+	CTime dateTime;
+	changeInfo.dwFlags = GetTime( dateTime );
+	dateTime.GetAsSystemTime( changeInfo.st );
+
+	// notify parent of date-time value change
+	return 0 == ui::SendNotifyToParent( m_hWnd, DTN_DATETIMECHANGE, &changeInfo.nmhdr );		// false if an error occured
 }
 
 void CDateTimeControl::PreSubclassWindow( void )
@@ -216,7 +240,7 @@ void CDateTimeControl::OnPaste( void )
 {
 	std::tstring text;
 	if ( CClipboard::PasteText( text, this ) )
-		if ( !SetDateTime( time_utl::ParseTimestamp( text ) ) )
+		if ( !UserSetDateTime( time_utl::ParseTimestamp( text ) ) )
 			ui::BeepSignal( MB_ICONWARNING );
 }
 
@@ -232,12 +256,12 @@ void CDateTimeControl::OnUpdatePaste( CCmdUI* pCmdUI )
 
 void CDateTimeControl::OnSetNow( void )
 {
-	SetDateTime( CTime::GetCurrentTime() );
+	UserSetDateTime( CTime::GetCurrentTime() );
 }
 
 void CDateTimeControl::OnClear( void )
 {
-	SetNullDateTime();
+	UserSetDateTime( CTime() );
 }
 
 void CDateTimeControl::OnUpdateValid( CCmdUI* pCmdUI )

@@ -2,6 +2,7 @@
 #include "stdafx.h"
 #include "Color.h"
 #include "StringUtilities.h"
+#include <shlwapi.h>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -145,5 +146,68 @@ namespace ui
 			*pColor = CLR_NONE;
 
 		return false;
+	}
+}
+
+
+namespace ui
+{
+	// accurate colour algorithms
+
+	BYTE GetAverageComponent( UINT component1, UINT component2 )		// cast to UINT to allow squaring
+	{
+		// Average by extracting square root of sum of square components.
+		// Details: check arntjw's entry at:
+		//	https://stackoverflow.com/questions/649454/what-is-the-best-way-to-average-two-colors-that-define-a-linear-gradient?utm_medium=organic&utm_source=google_rich_qa&utm_campaign=google_rich_qa
+
+		return static_cast< BYTE >( sqrt( ( static_cast< double >( component1 * component1 ) + static_cast< double >( component2 * component2 ) ) / 2 ) );
+	}
+
+	COLORREF GetBlendedColor( COLORREF color1, COLORREF color2 )
+	{
+		if ( CLR_NONE == color1 )
+			return color2;
+		else if ( CLR_NONE == color2 )
+			return color1;
+
+		return RGB(
+			GetAverageComponent( GetRValue( color1 ), GetRValue( color2 ) ),
+			GetAverageComponent( GetGValue( color1 ), GetGValue( color2 ) ),
+			GetAverageComponent( GetBValue( color1 ), GetBValue( color2 ) )
+		);
+	}
+
+
+	// CHslColor implementation
+
+	const Range< WORD > CHslColor::s_validRange( 0, 240 );
+
+	CHslColor::CHslColor( COLORREF rgbColor )
+	{
+		::ColorRGBToHLS( rgbColor, &m_hue, &m_luminance, &m_saturation );
+	}
+
+	COLORREF CHslColor::GetRGB( void ) const
+	{
+		ASSERT( IsValid() );
+		return ::ColorHLSToRGB( m_hue, m_luminance, m_saturation );
+	}
+
+	WORD CHslColor::ModifyBy( WORD component, int byPercentage )
+	{
+		ASSERT( byPercentage >= -100 && byPercentage <= 100 );
+
+		const double byFactor = (double)byPercentage / 100.0;
+		double newComponent = component;
+
+		if ( byFactor > 0.0 )
+			newComponent += ( ( 255.0 - newComponent ) * byFactor );
+		else if ( byFactor < 0.0 )
+			newComponent *= ( 1.0 + byFactor );
+
+		static const Range< double > s_dValidRange( s_validRange );
+		s_dValidRange.Constrain( newComponent );
+
+		return static_cast< WORD >( newComponent );
 	}
 }

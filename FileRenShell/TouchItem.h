@@ -56,6 +56,7 @@ namespace multi
 
 		bool CanApply( void ) const { REQUIRE( m_dateTimeState != s_invalid ); return m_dateTimeState.GetTime() != 0; }
 		void Apply( CTouchItem* pTouchItem ) const { REQUIRE( CanApply() ); pTouchItem->SetDestTime( m_field, m_dateTimeState ); }
+		bool WouldModify( const CTouchItem* pTouchItem ) const;
 	public:
 		UINT m_ctrlId;
 		app::DateTimeField m_field;
@@ -74,6 +75,7 @@ namespace multi
 		void SetInvalid( void ) { m_checkState = s_invalid; }
 
 		void Accumulate( BYTE attributes );
+		bool ApplyToAttributes( BYTE& rAttributes ) const;
 
 		void UpdateCtrl( CWnd* pDlg ) const;
 		bool InputCtrl( CWnd* pDlg );
@@ -111,6 +113,8 @@ namespace multi
 
 		return NULL;
 	}
+
+	BYTE EvalWouldBeAttributes( const std::vector< multi::CAttribCheckState >& attribCheckStates, const CTouchItem* pTouchItem );
 }
 
 

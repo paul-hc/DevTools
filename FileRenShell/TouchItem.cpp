@@ -72,6 +72,13 @@ namespace multi
 		return CanApply();
 	}
 
+	bool CDateTimeState::WouldModify( const CTouchItem* pTouchItem ) const
+	{
+		return
+			CanApply() &&
+			app::GetTimeField( pTouchItem->GetDestState(), m_field ) != m_dateTimeState;
+	}
+
 
 	// CAttribCheckState implementation
 
@@ -88,6 +95,15 @@ namespace multi
 				m_checkState = BST_INDETERMINATE;				// switch to indeterminate
 	}
 
+	bool CAttribCheckState::ApplyToAttributes( BYTE& rAttributes ) const
+	{
+		if ( !CanApply() )
+			return false;
+
+		SetFlag( rAttributes, m_attrFlag, BST_CHECKED == m_checkState );
+		return true;
+	}
+
 	void CAttribCheckState::UpdateCtrl( CWnd* pDlg ) const
 	{
 		REQUIRE( m_checkState != s_invalid );		// accumulated?
@@ -99,5 +115,18 @@ namespace multi
 	{
 		m_checkState = GetChecked( pDlg );
 		return CanApply();
+	}
+
+
+	// algorithms
+
+	BYTE EvalWouldBeAttributes( const std::vector< multi::CAttribCheckState >& attribCheckStates, const CTouchItem* pTouchItem )
+	{
+		BYTE attributes = pTouchItem->GetDestState().m_attributes;		// start with existing value
+
+		for ( std::vector< multi::CAttribCheckState >::const_iterator itAttribState = attribCheckStates.begin(); itAttribState != attribCheckStates.end(); ++itAttribState )
+			itAttribState->ApplyToAttributes( attributes );
+
+		return attributes;
 	}
 }

@@ -5,6 +5,7 @@
 #include "FileWorkingSet.h"
 #include "Application.h"
 #include "resource.h"
+#include "utl/Color.h"
 #include "utl/ContainerUtilities.h"
 #include "utl/CmdInfoStore.h"
 #include "utl/FmtUtils.h"
@@ -52,6 +53,8 @@ CTouchFilesDialog::CTouchFilesDialog( CFileWorkingSet* pFileData, CWnd* pParent 
 	, m_fileListCtrl( IDC_FILE_TOUCH_LIST, LVS_EX_GRIDLINES | CReportListControl::DefaultStyleEx )
 	, m_anyChanges( false )
 {
+	Construct();
+
 	ASSERT_PTR( m_pFileData );
 	m_regSection = reg::section_dialog;
 	RegisterCtrlLayout( layout::styles, COUNT_OF( layout::styles ) );
@@ -64,7 +67,7 @@ CTouchFilesDialog::CTouchFilesDialog( CFileWorkingSet* pFileData, CWnd* pParent 
 	m_dateTimeCtrls[ app::CreatedDate ].SetNullFormat( s_mixedFormat );
 	m_dateTimeCtrls[ app::AccessedDate ].SetNullFormat( s_mixedFormat );
 
-	Construct();
+	InitDisplayItems();
 }
 
 CTouchFilesDialog::~CTouchFilesDialog()
@@ -74,11 +77,6 @@ CTouchFilesDialog::~CTouchFilesDialog()
 
 void CTouchFilesDialog::Construct( void )
 {
-	fs::TFileStatePairMap& rTouchPairs = m_pFileData->GetTouchPairs();
-	m_displayItems.reserve( rTouchPairs.size() );
-	for ( fs::TFileStatePairMap::iterator itPair = rTouchPairs.begin(); itPair != rTouchPairs.end(); ++itPair )
-		m_displayItems.push_back( new CTouchItem( &*itPair, m_pathFormat ) );
-
 	m_dateTimeStates.reserve( app::_DateTimeFieldCount );
 	m_dateTimeStates.push_back( multi::CDateTimeState( IDC_MODIFIED_DATE, app::ModifiedDate ) );
 	m_dateTimeStates.push_back( multi::CDateTimeState( IDC_CREATED_DATE, app::CreatedDate ) );
@@ -87,14 +85,24 @@ void CTouchFilesDialog::Construct( void )
 	m_attribCheckStates.push_back( multi::CAttribCheckState( IDC_ATTRIB_READONLY_CHECK, CFile::readOnly ) );
 	m_attribCheckStates.push_back( multi::CAttribCheckState( IDC_ATTRIB_HIDDEN_CHECK, CFile::hidden ) );
 	m_attribCheckStates.push_back( multi::CAttribCheckState( IDC_ATTRIB_SYSTEM_CHECK , CFile::system ) );
-	m_attribCheckStates.push_back( multi::CAttribCheckState( IDC_ATTRIB_ARCHIVE_CHECK, CFile::volume ) );
+	m_attribCheckStates.push_back( multi::CAttribCheckState( IDC_ATTRIB_ARCHIVE_CHECK, CFile::archive ) );
 	m_attribCheckStates.push_back( multi::CAttribCheckState( IDC_ATTRIB_DIRECTORY_CHECK, CFile::directory ) );
-	m_attribCheckStates.push_back( multi::CAttribCheckState( IDC_ATTRIB_VOLUME_CHECK, CFile::archive ) );
+	m_attribCheckStates.push_back( multi::CAttribCheckState( IDC_ATTRIB_VOLUME_CHECK, CFile::volume ) );
+}
+
+void CTouchFilesDialog::InitDisplayItems( void )
+{
+	utl::ClearOwningContainer( m_displayItems );
+
+	fs::TFileStatePairMap& rTouchPairs = m_pFileData->GetTouchPairs();
+	m_displayItems.reserve( rTouchPairs.size() );
+	for ( fs::TFileStatePairMap::iterator itPair = rTouchPairs.begin(); itPair != rTouchPairs.end(); ++itPair )
+		m_displayItems.push_back( new CTouchItem( &*itPair, m_pathFormat ) );
 }
 
 void CTouchFilesDialog::SwitchMode( Mode mode )
 {
-	static const CEnumTags modeTags( _T("&Touch|&Rollback") );
+	static const CEnumTags modeTags( _T("&Make|&Touch|&Rollback") );
 
 	m_mode = mode;
 	ASSERT( m_mode != Uninit );
@@ -111,6 +119,14 @@ void CTouchFilesDialog::SwitchMode( Mode mode )
 
 	m_anyChanges = utl::Any( m_displayItems, std::mem_fun( &CTouchItem::IsModified ) );
 	ui::EnableControl( *this, IDOK, m_mode != TouchMode || m_anyChanges );
+
+	m_fileListCtrl.Invalidate();			// do some custom draw magic
+}
+
+bool CTouchFilesDialog::TouchFiles( void )
+{
+	m_pBatchTransaction.reset( new fs::CBatchTouch( m_pFileData->GetTouchPairs(), this ) );
+	return m_pBatchTransaction->TouchFiles();
 }
 
 void CTouchFilesDialog::PostMakeDest( bool silent /*= false*/ )
@@ -120,15 +136,15 @@ void CTouchFilesDialog::PostMakeDest( bool silent /*= false*/ )
 	if ( !silent )
 		GotoDlgCtrl( GetDlgItem( IDOK ) );
 
-	SetupFileListView();							// fill in and select the found files list
-	UpdateFieldControls();
+	SetupDialog();
 	SwitchMode( TouchMode );
 }
 
-bool CTouchFilesDialog::TouchFiles( void )
+void CTouchFilesDialog::SetupDialog( void )
 {
-	m_pBatchTransaction.reset( new fs::CBatchTouch( m_pFileData->GetTouchPairs(), this ) );
-	return m_pBatchTransaction->TouchFiles();
+	AccumulateCommonStates();
+	SetupFileListView();							// fill in and select the found files list
+	UpdateFieldControls();
 }
 
 void CTouchFilesDialog::SetupFileListView( void )
@@ -253,10 +269,12 @@ void CTouchFilesDialog::ApplyFields( void )
 		CTouchItem* pTouchItem = m_displayItems[ i ];
 
 		for ( std::vector< multi::CDateTimeState >::const_iterator itDateTimeState = m_dateTimeStates.begin(); itDateTimeState != m_dateTimeStates.end(); ++itDateTimeState )
-			itDateTimeState->Apply( pTouchItem );
+			if ( itDateTimeState->CanApply() )
+				itDateTimeState->Apply( pTouchItem );
 
 		for ( std::vector< multi::CAttribCheckState >::const_iterator itAttribState = m_attribCheckStates.begin(); itAttribState != m_attribCheckStates.end(); ++itAttribState )
-			itAttribState->Apply( pTouchItem );
+			if ( itAttribState->CanApply() )
+				itAttribState->Apply( pTouchItem );
 	}
 }
 
@@ -345,6 +363,29 @@ void CTouchFilesDialog::CombineTextEffectAt( ui::CTextEffect& rTextEffect, utl::
 		rTextEffect |= *pTextEffect;
 	else if ( isModified )
 		rTextEffect |= isSrc ? modSrc : modDest;
+
+	if ( MakeMode == m_mode )
+	{
+		bool wouldModify = false;
+		switch ( subItem )
+		{
+			case DestAttributes:
+				wouldModify = pTouchItem->GetDestState().m_attributes != multi::EvalWouldBeAttributes( m_attribCheckStates, pTouchItem );
+				break;
+			case DestModifyTime:
+				wouldModify = m_dateTimeStates[ app::ModifiedDate ].WouldModify( pTouchItem );
+				break;
+			case DestCreationTime:
+				wouldModify = m_dateTimeStates[ app::CreatedDate ].WouldModify( pTouchItem );
+				break;
+			case DestAccessTime:
+				wouldModify = m_dateTimeStates[ app::AccessedDate ].WouldModify( pTouchItem );
+				break;
+		}
+
+		if ( wouldModify )
+			rTextEffect.m_textColor = ui::GetBlendedColor( rTextEffect.m_textColor != CLR_NONE ? rTextEffect.m_textColor : m_fileListCtrl.GetTextColor(), color::White );		// blend to gray
+	}
 }
 
 BOOL CTouchFilesDialog::OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo )
@@ -372,13 +413,10 @@ void CTouchFilesDialog::DoDataExchange( CDataExchange* pDX )
 	{
 		if ( Uninit == m_mode )
 		{
-			AccumulateCommonStates();
-
-			SetupFileListView();			// fill in and select the found files list
-			UpdateFieldControls();
+			SetupDialog();
 			CheckDlgButton( IDC_SHOW_SOURCE_INFO_CHECK, VisibleAllSrcColumns() );
 
-			SwitchMode( ApplyFieldsMode );
+			SwitchMode( TouchMode );
 		}
 	}
 
@@ -409,7 +447,7 @@ void CTouchFilesDialog::OnOK( void )
 {
 	switch ( m_mode )
 	{
-		case ApplyFieldsMode:
+		case MakeMode:
 			InputFields();
 			ApplyFields();
 			PostMakeDest();
@@ -430,6 +468,14 @@ void CTouchFilesDialog::OnOK( void )
 			if ( TouchFiles() )
 			{
 				m_pFileData->CommitUndoInfo( app::TouchFiles );
+
+				if ( m_pFileData->CanUndo( app::TouchFiles ) )
+					if ( IDOK == AfxMessageBox( _T("Do you want to undo another step?"), MB_ICONWARNING | MB_OKCANCEL ) )
+					{
+						OnBnClicked_Undo();			// rollback another step
+						return;						// keep the dialog open
+					}
+
 				CBaseMainDialog::OnOK();
 			}
 			else
@@ -441,17 +487,19 @@ void CTouchFilesDialog::OnOK( void )
 void CTouchFilesDialog::OnFieldChanged( void )
 {
 	if ( m_mode != Uninit )
-		SwitchMode( ApplyFieldsMode );
+		SwitchMode( MakeMode );
 }
 
 void CTouchFilesDialog::OnBnClicked_Undo( void )
 {
-	ASSERT( m_mode != UndoRollbackMode && m_pFileData->CanUndo( app::TouchFiles ) );
+	ASSERT( m_pFileData->CanUndo( app::TouchFiles ) );
 
 	GotoDlgCtrl( GetDlgItem( IDOK ) );
 	m_pFileData->RetrieveUndoInfo( app::TouchFiles );
+
+	InitDisplayItems();
 	SwitchMode( UndoRollbackMode );
-	SetupFileListView();
+	SetupDialog();
 }
 
 void CTouchFilesDialog::OnBnClicked_CopySourceFiles( void )
@@ -493,14 +541,10 @@ void CTouchFilesDialog::OnBnClicked_ShowSrcColumns( void )
 void CTouchFilesDialog::OnToggle_Attribute( UINT checkId )
 {
 	if ( multi::CAttribCheckState* pAttribState = multi::FindWithCtrlId( m_attribCheckStates, checkId ) )
-	{
-		UINT checkState = pAttribState->GetChecked( this );
-		if ( checkState != BST_INDETERMINATE )
-		{
+		if ( pAttribState->InputCtrl( this ) )				// input the checked state so that custom draw can evaluate would-modify
 			OnFieldChanged();
+		else
 			m_fileListCtrl.Invalidate();
-		}
-	}
 }
 
 void CTouchFilesDialog::OnLvnItemChanged_TouchList( NMHDR* pNmHdr, LRESULT* pResult )
@@ -518,5 +562,13 @@ void CTouchFilesDialog::OnDtnDateTimeChange_DateTimeCtrl( UINT dtId, NMHDR* pNmH
 	pChange, dtId;
 	*pResult = 0L;
 
-	OnFieldChanged();
+	TRACE( _T(" - CTouchFilesDialog::OnDtnDateTimeChange_DateTimeCtrl for dtId=%d\n"), dtId );
+
+	// Cannot break into the debugger due to a mouse hook set in CDateTimeCtrl implementation (Windows).
+	//	https://stackoverflow.com/questions/18621575/are-there-issues-with-dtn-datetimechange-breakpoints-and-the-date-time-picker-co
+	if ( multi::CDateTimeState* pDateTimeState = multi::FindWithCtrlId( m_dateTimeStates, dtId ) )
+		if ( pDateTimeState->InputCtrl( this ) )			// input the checked state so that custom draw can evaluate would-modify
+			OnFieldChanged();
+		else
+			m_fileListCtrl.Invalidate();
 }

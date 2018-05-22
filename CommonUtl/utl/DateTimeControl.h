@@ -30,8 +30,11 @@ public:
 	bool SetNullDateTime( void ) { return SetDateTime( CTime() ); }
 
 	static bool IsNullDateTime( const CTime& dateTime ) { return 0 == dateTime.GetTime(); }
+protected:
+	bool UserSetDateTime( const CTime& dateTime );
 private:
 	bool FlipFormat( bool isValid );
+	bool SendNotifyDateTimeChange( void );
 
 	static CAccelTable& GetAccelTable( void );
 private:

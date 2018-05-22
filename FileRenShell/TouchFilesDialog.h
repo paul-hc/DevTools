@@ -32,14 +32,14 @@ public:
 	virtual ~CTouchFilesDialog();
 private:
 	void Construct( void );
+	void InitDisplayItems( void );
 
-	CFileWorkingSet* GetWorkingSet( void ) const { return m_pFileData; }
-	void PostMakeDest( bool silent = false );
-
-	enum Mode { Uninit = -1, ApplyFieldsMode, TouchMode, UndoRollbackMode };		// reflects the OK button label
+	enum Mode { Uninit = -1, MakeMode, TouchMode, UndoRollbackMode };		// reflects the OK button label
 	void SwitchMode( Mode mode );
 
 	bool TouchFiles( void );
+	void PostMakeDest( bool silent = false );
+	void SetupDialog( void );
 
 	// data
 	void AccumulateCommonStates( void );
