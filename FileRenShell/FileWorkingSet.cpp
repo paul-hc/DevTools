@@ -15,6 +15,21 @@
 #endif
 
 
+namespace app
+{
+	const CTime& GetTimeField( const fs::CFileState& fileState, DateTimeField field )
+	{
+		switch ( field )
+		{
+			default: ASSERT( false );
+			case ModifiedDate:	return fileState.m_modifTime;
+			case CreatedDate:	return fileState.m_creationTime;
+			case AccessedDate:	return fileState.m_accessTime;
+		}
+	}
+}
+
+
 namespace fmt
 {
 	static const TCHAR s_clipSep[] = _T("\t");

@@ -863,6 +863,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\DateTimeControl.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\DateTimeControl.h"
+				>
+			</File>
+			<File
 				RelativePath=".\DesktopDC.cpp"
 				>
 			</File>

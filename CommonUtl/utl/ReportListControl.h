@@ -153,6 +153,7 @@ public:
 	CReportListControl& AddTileColumn( UINT tileColumn );
 
 	unsigned int GetColumnCount( void ) const;
+	void ResetColumnLayout( void );
 
 	int GetMinColumnWidth( TColumn column ) const { ASSERT( HasLayoutInfo() ); return m_columnInfos[ column ].m_minWidth; }
 	void SetMinColumnWidth( TColumn column, int minWidth ) { ASSERT( HasLayoutInfo() ); m_columnInfos[ column ].m_minWidth = minWidth; }

@@ -543,6 +543,16 @@ unsigned int CReportListControl::GetColumnCount( void ) const
 	return pHeaderCtrl != NULL ? pHeaderCtrl->GetItemCount() : 0;
 }
 
+void CReportListControl::ResetColumnLayout( void )
+{
+	CScopedLockRedraw freeze( this );
+
+	std::vector< std::tstring > columnSpecs = str::LoadStrings( m_columnLayoutId );
+	ParseColumnLayout( m_columnInfos, columnSpecs );
+
+	SetupColumnLayout( NULL );
+}
+
 void CReportListControl::DeleteAllColumns( void )
 {
 	if ( CHeaderCtrl* pHeader = GetHeaderCtrl() )
@@ -1817,12 +1827,7 @@ void CReportListControl::OnUpdateListViewStacking( CCmdUI* pCmdUI )
 
 void CReportListControl::OnResetColumnLayout( void )
 {
-	CScopedLockRedraw freeze( this );
-
-	std::vector< std::tstring > columnSpecs = str::LoadStrings( m_columnLayoutId );
-	ParseColumnLayout( m_columnInfos, columnSpecs );
-
-	SetupColumnLayout( NULL );
+	ResetColumnLayout();
 }
 
 void CReportListControl::OnUpdateResetColumnLayout( CCmdUI* pCmdUI )

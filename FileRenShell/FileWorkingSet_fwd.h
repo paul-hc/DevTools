@@ -17,6 +17,12 @@ namespace fmt
 
 namespace app
 {
+	enum DateTimeField { ModifiedDate, CreatedDate, AccessedDate, _DateTimeFieldCount };
+
+	const CTime& GetTimeField( const fs::CFileState& fileState, DateTimeField field );
+	inline CTime& RefTimeField( fs::CFileState& rFileState, DateTimeField field ) { return const_cast< CTime& >( GetTimeField( rFileState, field ) ); }
+
+
 	enum CustomColors
 	{
 		ColorDeletedText = color::Red,

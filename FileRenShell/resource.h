@@ -53,6 +53,16 @@
 #define IDC_STRIP_BAR_1                 1044
 #define IDC_STRIP_BAR_2                 1045
 #define IDC_FILE_TOUCH_LIST             1046
+#define IDC_SHOW_SOURCE_INFO_CHECK      1048
+#define IDC_MODIFIED_DATE               1049
+#define IDC_CREATED_DATE                1050
+#define IDC_ACCESSED_DATE               1051
+#define IDC_ATTRIB_READONLY_CHECK       1052
+#define IDC_ATTRIB_HIDDEN_CHECK         1053
+#define IDC_ATTRIB_SYSTEM_CHECK         1054
+#define IDC_ATTRIB_ARCHIVE_CHECK        1055
+#define IDC_ATTRIB_DIRECTORY_CHECK      1056
+#define IDC_ATTRIB_VOLUME_CHECK         1057
 #define IDS_INVALID_FORMAT              5000
 #define IDS_NO_DELIMITER_SET            5001
 #define IDS_OK_BUTTON_LABELS            5002
@@ -103,7 +113,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        110
 #define _APS_NEXT_COMMAND_VALUE         32808
-#define _APS_NEXT_CONTROL_VALUE         1047
+#define _APS_NEXT_CONTROL_VALUE         1055
 #define _APS_NEXT_SYMED_VALUE           5004
 #endif
 #endif
