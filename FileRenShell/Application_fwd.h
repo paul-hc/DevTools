@@ -28,4 +28,10 @@ namespace app
 }
 
 
+namespace popup
+{
+	enum PopupBar { FormatPicker, MoreRenameActions, TextTools, TouchList };
+}
+
+
 #endif // Application_fwd_h

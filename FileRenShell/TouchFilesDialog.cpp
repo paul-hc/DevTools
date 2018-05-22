@@ -5,17 +5,19 @@
 #include "FileWorkingSet.h"
 #include "Application.h"
 #include "resource.h"
+#include "utl/Clipboard.h"
 #include "utl/Color.h"
 #include "utl/ContainerUtilities.h"
 #include "utl/CmdInfoStore.h"
 #include "utl/FmtUtils.h"
 #include "utl/EnumTags.h"
 #include "utl/RuntimeException.h"
+#include "utl/MenuUtilities.h"
 #include "utl/StringUtilities.h"
 #include "utl/UtilitiesEx.h"
 #include "utl/TimeUtl.h"
-#include "utl/vector_map.h"
 #include "utl/resource.h"
+#include "resource.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -61,8 +63,9 @@ CTouchFilesDialog::CTouchFilesDialog( CFileWorkingSet* pFileData, CWnd* pParent 
 
 	m_fileListCtrl.SetSection( m_regSection + _T("\\List") );
 	m_fileListCtrl.SetTextEffectCallback( this );
+	m_fileListCtrl.SetPopupMenu( CReportListControl::OnSelection, NULL );			// let us track a custom menu
 
-	static const TCHAR s_mixedFormat[] = _T("'(mixed)'");
+	static const TCHAR s_mixedFormat[] = _T("'(multiple values)'");
 	m_dateTimeCtrls[ app::ModifiedDate ].SetNullFormat( s_mixedFormat );
 	m_dateTimeCtrls[ app::CreatedDate ].SetNullFormat( s_mixedFormat );
 	m_dateTimeCtrls[ app::AccessedDate ].SetNullFormat( s_mixedFormat );
@@ -320,7 +323,7 @@ fs::UserFeedback CTouchFilesDialog::HandleFileError( const fs::CPath& sourcePath
 
 void CTouchFilesDialog::CombineTextEffectAt( ui::CTextEffect& rTextEffect, utl::ISubject* pSubject, int subItem ) const
 {
-	static const ui::CTextEffect modPathName( ui::Bold ), modDest( ui::Bold, app::ColorModifiedText ), modSrc( ui::Regular, app::ColorDeletedText ), errorBk( ui::Regular, CLR_NONE, app::ColorErrorBk );
+	static const ui::CTextEffect modPathName( ui::Bold ), modDest( ui::Regular, app::ColorModifiedText ), modSrc( ui::Regular, app::ColorDeletedText ), errorBk( ui::Regular, CLR_NONE, app::ColorErrorBk );
 
 	const CTouchItem* pTouchItem = checked_static_cast< const CTouchItem* >( pSubject );
 	const ui::CTextEffect* pTextEffect = NULL;
@@ -427,11 +430,18 @@ void CTouchFilesDialog::DoDataExchange( CDataExchange* pDX )
 // message handlers
 
 BEGIN_MESSAGE_MAP( CTouchFilesDialog, CBaseMainDialog )
+	ON_WM_CONTEXTMENU()
 	ON_BN_CLICKED( IDC_UNDO_BUTTON, OnBnClicked_Undo )
 	ON_BN_CLICKED( IDC_COPY_SOURCE_PATHS_BUTTON, OnBnClicked_CopySourceFiles )
 	ON_BN_CLICKED( IDC_PASTE_FILES_BUTTON, OnBnClicked_PasteDestStates )
 	ON_BN_CLICKED( IDC_CLEAR_FILES_BUTTON, OnBnClicked_ResetDestFiles )
 	ON_BN_CLICKED( IDC_SHOW_SOURCE_INFO_CHECK, OnBnClicked_ShowSrcColumns )
+	ON_COMMAND_RANGE( ID_COPY_MODIFIED_DATE, ID_COPY_ACCESSED_DATE, OnCopyDateCell )
+	ON_UPDATE_COMMAND_UI_RANGE( ID_COPY_MODIFIED_DATE, ID_COPY_ACCESSED_DATE, OnUpdateSelListItem )
+	ON_COMMAND( ID_PUSH_TO_ATTRIBUTE_FIELDS, OnPushToAttributeFields )
+	ON_UPDATE_COMMAND_UI( ID_PUSH_TO_ATTRIBUTE_FIELDS, OnUpdateSelListItem )
+	ON_COMMAND( ID_PUSH_TO_ALL_FIELDS, OnPushToAllFields )
+	ON_UPDATE_COMMAND_UI( ID_PUSH_TO_ALL_FIELDS, OnUpdateSelListItem )
 	ON_COMMAND_RANGE( IDC_ATTRIB_READONLY_CHECK, IDC_ATTRIB_VOLUME_CHECK, OnToggle_Attribute )
 	ON_NOTIFY( LVN_ITEMCHANGED, IDC_FILE_TOUCH_LIST, OnLvnItemChanged_TouchList )
 	ON_NOTIFY_RANGE( DTN_DATETIMECHANGE, IDC_MODIFIED_DATE, IDC_ACCESSED_DATE, OnDtnDateTimeChange_DateTimeCtrl )
@@ -482,6 +492,19 @@ void CTouchFilesDialog::OnOK( void )
 				SwitchMode( TouchMode );
 			break;
 	}
+}
+
+void CTouchFilesDialog::OnContextMenu( CWnd* pWnd, CPoint screenPos )
+{
+	if ( &m_fileListCtrl == pWnd )
+	{
+		CMenu popupMenu;
+		ui::LoadPopupMenu( popupMenu, IDR_CONTEXT_MENU, popup::TouchList );
+		ui::TrackPopupMenu( popupMenu, this, screenPos );
+		return;					// supress rising WM_CONTEXTMENU to the parent
+	}
+
+	CBaseMainDialog::OnContextMenu( pWnd, screenPos );
 }
 
 void CTouchFilesDialog::OnFieldChanged( void )
@@ -538,6 +561,49 @@ void CTouchFilesDialog::OnBnClicked_ShowSrcColumns( void )
 		m_fileListCtrl.ResetColumnLayout();					// show all columns with default layout
 }
 
+void CTouchFilesDialog::OnCopyDateCell( UINT cmdId )
+{
+	app::DateTimeField dateField;
+	switch ( cmdId )
+	{
+		case ID_COPY_MODIFIED_DATE:	dateField = app::ModifiedDate; break;
+		case ID_COPY_CREATED_DATE:	dateField = app::CreatedDate; break;
+		case ID_COPY_ACCESSED_DATE:	dateField = app::AccessedDate; break;
+		default:
+			ASSERT( false );
+			return;
+	}
+
+	const CTouchItem* pTouchItem = m_fileListCtrl.GetPtrAt< CTouchItem >( m_fileListCtrl.GetCurSel() );
+	ASSERT_PTR( pTouchItem );
+	CClipboard::CopyText( time_utl::FormatTimestamp( app::GetTimeField( pTouchItem->GetSrcState(), dateField ) ), this );
+}
+
+void CTouchFilesDialog::OnPushToAttributeFields( void )
+{
+	BYTE attributes = m_fileListCtrl.GetPtrAt< CTouchItem >( m_fileListCtrl.GetCurSel() )->GetSrcState().m_attributes;
+
+	multi::SetInvalidAll( m_attribCheckStates );
+	for ( std::vector< multi::CAttribCheckState >::iterator itAttribState = m_attribCheckStates.begin(); itAttribState != m_attribCheckStates.end(); ++itAttribState )
+	{
+		itAttribState->Accumulate( attributes );
+		itAttribState->UpdateCtrl( this );
+	}
+
+	OnFieldChanged();
+}
+
+void CTouchFilesDialog::OnPushToAllFields( void )
+{
+	UpdateFieldsFromSel( m_fileListCtrl.GetCurSel() );
+	OnFieldChanged();
+}
+
+void CTouchFilesDialog::OnUpdateSelListItem( CCmdUI* pCmdUI )
+{
+	pCmdUI->Enable( m_fileListCtrl.GetCurSel() != -1 );
+}
+
 void CTouchFilesDialog::OnToggle_Attribute( UINT checkId )
 {
 	if ( multi::CAttribCheckState* pAttribState = multi::FindWithCtrlId( m_attribCheckStates, checkId ) )
@@ -550,8 +616,11 @@ void CTouchFilesDialog::OnToggle_Attribute( UINT checkId )
 void CTouchFilesDialog::OnLvnItemChanged_TouchList( NMHDR* pNmHdr, LRESULT* pResult )
 {
 	NM_LISTVIEW* pNmList = (NM_LISTVIEW*)pNmHdr;
+
 	if ( CReportListControl::IsSelectionChangedNotify( pNmList, LVIS_SELECTED | LVIS_FOCUSED ) )
-		UpdateFieldsFromSel( m_fileListCtrl.GetCurSel() );
+	{
+		//UpdateFieldsFromSel( m_fileListCtrl.GetCurSel() );
+	}
 
 	*pResult = 0;
 }
@@ -562,7 +631,7 @@ void CTouchFilesDialog::OnDtnDateTimeChange_DateTimeCtrl( UINT dtId, NMHDR* pNmH
 	pChange, dtId;
 	*pResult = 0L;
 
-	TRACE( _T(" - CTouchFilesDialog::OnDtnDateTimeChange_DateTimeCtrl for dtId=%d\n"), dtId );
+	//TRACE( _T(" - CTouchFilesDialog::OnDtnDateTimeChange_DateTimeCtrl for dtId=%d\n"), dtId );
 
 	// Cannot break into the debugger due to a mouse hook set in CDateTimeCtrl implementation (Windows).
 	//	https://stackoverflow.com/questions/18621575/are-there-issues-with-dtn-datetimechange-breakpoints-and-the-date-time-picker-co

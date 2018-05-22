@@ -759,7 +759,7 @@ void CMainRenameDialog::OnFieldChanged( void )
 void CMainRenameDialog::OnPickFormatToken( void )
 {
 	CMenu popupMenu;
-	ui::LoadPopupMenu( popupMenu, IDR_CONTEXT_MENU_MENU, popup::FormatPicker );
+	ui::LoadPopupMenu( popupMenu, IDR_CONTEXT_MENU, popup::FormatPicker );
 
 	m_formatToolbar.TrackButtonMenu( ID_PICK_FORMAT_TOKEN, this, &popupMenu, ui::DropDown );
 }
@@ -795,7 +795,7 @@ void CMainRenameDialog::OnDirPathPicked( UINT cmdId )
 void CMainRenameDialog::OnPickTextTools( void )
 {
 	CMenu popupMenu;
-	ui::LoadPopupMenu( popupMenu, IDR_CONTEXT_MENU_MENU, popup::TextTools );
+	ui::LoadPopupMenu( popupMenu, IDR_CONTEXT_MENU, popup::TextTools );
 
 	m_formatToolbar.TrackButtonMenu( ID_PICK_TEXT_TOOLS, this, &popupMenu, ui::DropDown );
 }
@@ -853,7 +853,7 @@ void CMainRenameDialog::OnEnChange_SeqCounter( void )
 
 void CMainRenameDialog::OnBnClicked_PickRenameActions( void )
 {
-	m_pickRenameActionsStatic.TrackMenu( this, IDR_CONTEXT_MENU_MENU, popup::MoreRenameActions );
+	m_pickRenameActionsStatic.TrackMenu( this, IDR_CONTEXT_MENU, popup::MoreRenameActions );
 }
 
 void CMainRenameDialog::OnSingleWhitespace( void )

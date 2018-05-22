@@ -97,12 +97,17 @@ protected:
 	virtual BOOL OnInitDialog( void );
 protected:
 	virtual void OnOK( void );
+	afx_msg void OnContextMenu( CWnd* pWnd, CPoint screenPos );
 	afx_msg void OnFieldChanged( void );
 	afx_msg void OnBnClicked_Undo( void );
 	afx_msg void OnBnClicked_CopySourceFiles( void );
 	afx_msg void OnBnClicked_PasteDestStates( void );
 	afx_msg void OnBnClicked_ResetDestFiles( void );
 	afx_msg void OnBnClicked_ShowSrcColumns( void );
+	afx_msg void OnCopyDateCell( UINT cmdId );
+	afx_msg void OnPushToAttributeFields( void );
+	afx_msg void OnPushToAllFields( void );
+	afx_msg void OnUpdateSelListItem( CCmdUI* pCmdUI );
 	afx_msg void OnToggle_Attribute( UINT checkId );
 	afx_msg void OnLvnItemChanged_TouchList( NMHDR* pNmHdr, LRESULT* pResult );
 	afx_msg void OnDtnDateTimeChange_DateTimeCtrl( UINT dtId, NMHDR* pNmHdr, LRESULT* pResult );

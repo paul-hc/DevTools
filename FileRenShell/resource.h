@@ -8,7 +8,7 @@
 #define IDD_CAPITALIZE_OPTIONS          103
 #define IDR_IMAGE_STRIP                 104
 #define IDD_TOUCH_FILES_DIALOG          104
-#define IDR_CONTEXT_MENU_MENU           105
+#define IDR_CONTEXT_MENU                105
 #define ID_SEND_TO_CLIP                 108
 #define IDI_DETAILS                     109
 #define IDC_FILE_RENAME_LIST            1000
@@ -106,13 +106,18 @@
 #define ID_SEQ_COUNT_FIND_NEXT          32805
 #define ID_SEQ_COUNT_AUTO_ADVANCE       32806
 #define ID_TOUCH_FILES                  32807
+#define ID_COPY_MODIFIED_DATE           32808
+#define ID_COPY_CREATED_DATE            32809
+#define ID_COPY_ACCESSED_DATE           32810
+#define ID_PUSH_TO_ATTRIBUTE_FIELDS     32811
+#define ID_PUSH_TO_ALL_FIELDS           32812
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        110
-#define _APS_NEXT_COMMAND_VALUE         32808
+#define _APS_NEXT_COMMAND_VALUE         32813
 #define _APS_NEXT_CONTROL_VALUE         1055
 #define _APS_NEXT_SYMED_VALUE           5004
 #endif

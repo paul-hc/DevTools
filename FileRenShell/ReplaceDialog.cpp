@@ -307,7 +307,7 @@ void CReplaceDialog::OnDirPathPicked( UINT cmdId )
 void CReplaceDialog::OnPickTextTools( void )
 {
 	CMenu popupMenu;
-	ui::LoadPopupMenu( popupMenu, IDR_CONTEXT_MENU_MENU, popup::TextTools );
+	ui::LoadPopupMenu( popupMenu, IDR_CONTEXT_MENU, popup::TextTools );
 
 	m_replaceToolbar.TrackButtonMenu( ID_PICK_TEXT_TOOLS, this, &popupMenu, ui::DropDown );
 }

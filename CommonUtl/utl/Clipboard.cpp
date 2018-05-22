@@ -111,7 +111,7 @@ bool CClipboard::PasteText( std::tstring& rText, CWnd* pWnd /*= AfxGetMainWnd()*
 
 bool CClipboard::CopyText( const std::tstring& text, CWnd* pWnd /*= AfxGetMainWnd()*/ )
 {
-	std::string narrowText = str::ToUtf8( text.c_str() );
+	std::string utf8Text = str::ToUtf8( text.c_str() );
 
 	std::auto_ptr< CClipboard > pClipboard( Open( pWnd ) );
 	if ( NULL == pClipboard.get() )
@@ -120,6 +120,6 @@ bool CClipboard::CopyText( const std::tstring& text, CWnd* pWnd /*= AfxGetMainWn
 	pClipboard->Clear();
 
 	return
-		pClipboard->WriteString( str::ToUtf8( text.c_str() ) ) &&		// UTF8
-		pClipboard->WriteString( text );								// UNICODE
+		pClipboard->WriteString( utf8Text.c_str() ) &&		// UTF8 (UNICODE)
+		pClipboard->WriteString( text );					// WIDE (UNICODE)
 }

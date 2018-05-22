@@ -20,11 +20,6 @@ class CLogger;
 class CFileWorkingSet;
 namespace str { enum Match; }
 
-namespace popup
-{
-	enum PopupBar { FormatPicker, MoreRenameActions, TextTools };
-}
-
 
 class CMainRenameDialog : public CBaseMainDialog
 						, private fs::IBatchTransactionCallback
