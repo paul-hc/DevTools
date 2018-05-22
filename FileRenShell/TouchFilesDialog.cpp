@@ -635,6 +635,7 @@ void CTouchFilesDialog::OnDtnDateTimeChange_DateTimeCtrl( UINT dtId, NMHDR* pNmH
 
 	// Cannot break into the debugger due to a mouse hook set in CDateTimeCtrl implementation (Windows).
 	//	https://stackoverflow.com/questions/18621575/are-there-issues-with-dtn-datetimechange-breakpoints-and-the-date-time-picker-co
+
 	if ( multi::CDateTimeState* pDateTimeState = multi::FindWithCtrlId( m_dateTimeStates, dtId ) )
 		if ( pDateTimeState->InputCtrl( this ) )			// input the checked state so that custom draw can evaluate would-modify
 			OnFieldChanged();
