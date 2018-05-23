@@ -24,8 +24,8 @@
 #endif
 
 
-static bool dbgGuides = false;
-static bool useDefaultDraw = false;
+static bool s_dbgGuides = false;
+static bool s_useDefaultDraw = false;
 
 
 namespace reg
@@ -79,13 +79,13 @@ namespace layout
 
 CMainRenameDialog::CMainRenameDialog( app::MenuCommand menuCmd, CFileWorkingSet* pFileData, CWnd* pParent )
 	: CBaseMainDialog( IDD_RENAME_FILES_DIALOG, pParent )
-	, m_menuCmd( menuCmd )
 	, m_pFileData( pFileData )
+	, m_menuCmd( menuCmd )
 	, m_autoGenerate( AfxGetApp()->GetProfileInt( reg::section_mainDialog, reg::entry_autoGenerate, false ) != FALSE )
 	, m_seqCountAutoAdvance( AfxGetApp()->GetProfileInt( reg::section_mainDialog, reg::entry_seqCountAutoAdvance, true ) != FALSE )
 	, m_mode( Uninit )
 	, m_formatCombo( ui::HistoryMaxSize, specialSep )
-	, m_fileListView( IDC_FILE_RENAME_LIST, LVS_EX_GRIDLINES | CReportListControl::DefaultStyleEx )
+	, m_fileListCtrl( IDC_FILE_RENAME_LIST, LVS_EX_GRIDLINES | CReportListControl::DefaultStyleEx )
 	, m_changeCaseButton( &GetTags_ChangeCase() )
 	, m_delimiterSetCombo( ui::HistoryMaxSize, specialSep )
 	, m_delimStatic( CThemeItem( L"EXPLORERBAR", vt::EBP_IEBARMENU, vt::EBM_NORMAL ) )
@@ -107,8 +107,6 @@ CMainRenameDialog::CMainRenameDialog( app::MenuCommand menuCmd, CFileWorkingSet*
 		.AddButton( ID_SEQ_COUNT_RESET )
 		.AddButton( ID_SEQ_COUNT_FIND_NEXT )
 		.AddButton( ID_SEQ_COUNT_AUTO_ADVANCE );
-
-	//m_fileListView.SetUseExplorerTheme( false );			// ...testing
 }
 
 CMainRenameDialog::~CMainRenameDialog()
@@ -116,51 +114,54 @@ CMainRenameDialog::~CMainRenameDialog()
 	utl::ClearOwningContainer( m_displayItems );
 }
 
-void CMainRenameDialog::SetupFileListView( void )
+void CMainRenameDialog::InitDisplayItems( void )
 {
-	int orgSel = m_fileListView.GetCurSel();
-
-	m_fileListView.AddInternalChange();
-
-	m_fileListView.SetRedraw( FALSE );
-	m_fileListView.DeleteAllItems();
-
 	utl::ClearOwningContainer( m_displayItems );
 
-	const fs::TPathPairMap& renamePairs = m_pFileData->GetRenamePairs();
-	int pos = 0;
+	const fs::TPathPairMap& rRenamePairs = m_pFileData->GetRenamePairs();
 
-	for ( fs::TPathPairMap::const_iterator it = renamePairs.begin();
-		  it != renamePairs.end(); ++it, ++pos )
+	m_displayItems.reserve( rRenamePairs.size() );
+	for ( fs::TPathPairMap::const_iterator itPair = rRenamePairs.begin(); itPair != rRenamePairs.end(); ++itPair )
+		m_displayItems.push_back( new CDisplayItem( &*itPair ) );
+}
+
+void CMainRenameDialog::SetupFileListView( void )
+{
+	int orgSel = m_fileListCtrl.GetCurSel();
+
 	{
-		CDisplayItem* pItem = new CDisplayItem( it->first, it->second );
-		m_displayItems.push_back( pItem );
+		CScopedLockRedraw freeze( &m_fileListCtrl );
+		CScopedInternalChange internalChange( &m_fileListCtrl );
 
-		m_fileListView.InsertItem( LVIF_TEXT | LVIF_PARAM, pos, (LPTSTR)pItem->m_srcFnameExt.c_str(), 0, 0, 0, (LPARAM)pItem );		// Source
+		m_fileListCtrl.DeleteAllItems();
+		InitDisplayItems();
 
-		//if ( !it->second.IsEmpty() )
-		//	if ( pItem->m_match == str::MatchEqual )	// don't set the sub-item text if custom drawn, since is hard to erase the text printed by default
-		m_fileListView.SetItemText( pos, Destination, pItem->m_destFnameExt.c_str() );											// Destination
+		for ( unsigned int pos = 0; pos != m_displayItems.size(); ++pos )
+		{
+			CDisplayItem* pItem = m_displayItems[ pos ];
+
+			m_fileListCtrl.InsertObjectItem( pos, pItem );		// Source
+
+			// (!) don't set the sub-item text if custom drawn, since is hard to erase the text printed by default
+			// if ( !itPair->second.IsEmpty() )
+			//	if ( pItem->m_match == str::MatchEqual )
+
+			m_fileListCtrl.SetItemText( pos, Destination, pItem->m_destFnameExt.c_str() );
+		}
 	}
-
-	m_fileListView.ReleaseInternalChange();
-
-	m_fileListView.SetRedraw( TRUE );
-	m_fileListView.Invalidate();
-	m_fileListView.UpdateWindow();
 
 	// restore the selection (if any)
 	if ( orgSel != -1 )
 	{
-		m_fileListView.EnsureVisible( orgSel, FALSE );
-		m_fileListView.SetCurSel( orgSel );
+		m_fileListCtrl.EnsureVisible( orgSel, FALSE );
+		m_fileListCtrl.SetCurSel( orgSel );
 	}
 }
 
 int CMainRenameDialog::FindItemPos( const fs::CPath& sourcePath ) const
 {
 	for ( unsigned int pos = 0; pos != m_displayItems.size(); ++pos )
-		if ( m_displayItems[ pos ]->m_srcPath.Equal( sourcePath ) )
+		if ( m_displayItems[ pos ]->GetSrcPath().Equal( sourcePath ) )
 			return pos;
 
 	return -1;
@@ -201,8 +202,8 @@ void CMainRenameDialog::PostMakeDest( bool silent /*= false*/ )
 	{
 		if ( m_pFileData->HasErrors() )
 		{
-			m_fileListView.EnsureVisible( (int)*m_pFileData->GetErrorIndexes().begin(), FALSE );
-			m_fileListView.Invalidate();
+			m_fileListCtrl.EnsureVisible( (int)*m_pFileData->GetErrorIndexes().begin(), FALSE );
+			m_fileListCtrl.Invalidate();
 		}
 		SwitchMode( MakeMode );
 
@@ -211,43 +212,45 @@ void CMainRenameDialog::PostMakeDest( bool silent /*= false*/ )
 	}
 }
 
-void CMainRenameDialog::ListItem_DrawTextDiffs( const NMLVCUSTOMDRAW* pCustomDraw )
+void CMainRenameDialog::ListItem_DrawTextDiffs( const NMLVCUSTOMDRAW* pDraw )
 {
-	ASSERT_PTR( pCustomDraw );
+	ASSERT_PTR( pDraw );
 
-	ListItem_DrawTextDiffs( CDC::FromHandle( pCustomDraw->nmcd.hdc ),
-		MakeItemTextRect( pCustomDraw ),
-		static_cast< int >( pCustomDraw->nmcd.dwItemSpec ),
-		static_cast< Column >( pCustomDraw->iSubItem ) );
+	int index = static_cast< int >( pDraw->nmcd.dwItemSpec );
 
-	if ( Destination == pCustomDraw->iSubItem )
+	ListItem_DrawTextDiffs( CDC::FromHandle( pDraw->nmcd.hdc ),
+		MakeItemTextRect( pDraw ),
+		index,
+		static_cast< Column >( pDraw->iSubItem ) );
+
+	if ( Destination == pDraw->iSubItem )
 	{
-		if ( HasFlag( pCustomDraw->nmcd.uItemState, CDIS_FOCUS ) )
+		if ( HasFlag( pDraw->nmcd.uItemState, CDIS_FOCUS ) )
 		{
 			CRect focusRect;
-			m_fileListView.GetItemRect( static_cast< int >( pCustomDraw->nmcd.dwItemSpec ), &focusRect, LVIR_BOUNDS );
+			m_fileListCtrl.GetItemRect( index, &focusRect, LVIR_BOUNDS );
 
-			if ( m_fileListView.UseExplorerTheme() )
+			if ( m_fileListCtrl.UseExplorerTheme() )
 				focusRect.DeflateRect( 1, 1 );
 			else
 				focusRect.DeflateRect( 4, 0, 1, 1 );
 
-			::DrawFocusRect( pCustomDraw->nmcd.hdc, &focusRect );
+			::DrawFocusRect( pDraw->nmcd.hdc, &focusRect );
 		}
 	}
 }
 
-void CMainRenameDialog::ListItem_DrawTextDiffs( CDC* pDC, const CRect& textRect, int itemIndex, Column column )
+void CMainRenameDialog::ListItem_DrawTextDiffs( CDC* pDC, const CRect& textRect, int index, Column column )
 {
 	enum { TextStyle = DT_SINGLELINE | DT_LEFT | DT_VCENTER | DT_END_ELLIPSIS | DT_NOPREFIX };	// DT_NOCLIP
 
-	const CDisplayItem* pItem = m_displayItems[ itemIndex ];
+	const CDisplayItem* pItem = m_displayItems[ index ];
 
-	if ( dbgGuides )
+	if ( s_dbgGuides )
 		ui::FrameRect( *pDC, textRect, Source == column ? color::Lime : color::Orange );
 
 	if ( Destination == column )
-		if ( m_pFileData->IsErrorAt( itemIndex ) )
+		if ( m_pFileData->IsErrorAt( index ) )
 		{
 			CRect rect = textRect;
 			rect.InflateRect( 2, 0 );
@@ -255,7 +258,7 @@ void CMainRenameDialog::ListItem_DrawTextDiffs( CDC* pDC, const CRect& textRect,
 		}
 
 	// with "Explorer" visual theme background is bright (white) for selected and unselected state -> ignore selected state to keep text colour dark
-	bool selInvert = ListItem_IsSelectedInvert( itemIndex );
+	bool selInvert = ListItem_IsSelectedInvert( index );
 
 	COLORREF stdTextColor = GetSysColor( selInvert ? COLOR_HIGHLIGHTTEXT : COLOR_WINDOWTEXT );		// if not focused, selection is light gray in background and normal in text
 
@@ -264,7 +267,7 @@ void CMainRenameDialog::ListItem_DrawTextDiffs( CDC* pDC, const CRect& textRect,
 			stdTextColor = GetSysColor( COLOR_GRAYTEXT );		// gray-out text of unmodified dest files
 
 	COLORREF oldTextColor = pDC->SetTextColor( stdTextColor );
-	CFont* pOriginalFont = pDC->GetCurrentFont();
+	CFont* pOldFont = pDC->GetCurrentFont();
 
 	const TCHAR* pText = Source == column ? pItem->m_srcFnameExt.c_str() : pItem->m_destFnameExt.c_str();
 	CRect itemRect = textRect;
@@ -286,7 +289,7 @@ void CMainRenameDialog::ListItem_DrawTextDiffs( CDC* pDC, const CRect& textRect,
 			if ( str::MatchNotEqual == matchSeq[ i ] )
 				SelectBoldFont( pDC );
 			else
-				pDC->SelectObject( pOriginalFont );
+				pDC->SelectObject( pOldFont );
 
 			pDC->DrawText( pText, matchLen, &itemRect, TextStyle );
 
@@ -297,46 +300,46 @@ void CMainRenameDialog::ListItem_DrawTextDiffs( CDC* pDC, const CRect& textRect,
 		}
 
 	pDC->SetTextColor( oldTextColor );
-	pDC->SelectObject( pOriginalFont );
+	pDC->SelectObject( pOldFont );
 }
 
-CRect CMainRenameDialog::MakeItemTextRect( const NMLVCUSTOMDRAW* pCustomDraw )
+CRect CMainRenameDialog::MakeItemTextRect( const NMLVCUSTOMDRAW* pDraw )
 {
-	CRect textRect = pCustomDraw->nmcd.rc;
+	CRect textRect = pDraw->nmcd.rc;
 
 	// requires larger spacing for sub-item: 2 for item, 6 for sub-item
-	textRect.left += Source == pCustomDraw->iSubItem ? CReportListControl::ItemSpacingX : CReportListControl::SubItemSpacingX;
+	textRect.left += Source == pDraw->iSubItem ? CReportListControl::ItemSpacingX : CReportListControl::SubItemSpacingX;
 	return textRect;
 }
 
-bool CMainRenameDialog::ListItem_FillBkgnd( NMLVCUSTOMDRAW* pCustomDraw ) const
+bool CMainRenameDialog::ListItem_FillBkgnd( NMLVCUSTOMDRAW* pDraw ) const
 {
-	ASSERT_PTR( pCustomDraw );
+	ASSERT_PTR( pDraw );
 
-	const CDisplayItem* pItem = reinterpret_cast< const CDisplayItem* >( pCustomDraw->nmcd.lItemlParam );
-	int itemIndex = static_cast< int >( pCustomDraw->nmcd.dwItemSpec );
+	const CDisplayItem* pItem = reinterpret_cast< const CDisplayItem* >( pDraw->nmcd.lItemlParam );
+	int index = static_cast< int >( pDraw->nmcd.dwItemSpec );
 
 	COLORREF bkColor = CLR_NONE;
-	if ( !m_fileListView.UseExplorerTheme() && m_fileListView.HasItemState( itemIndex, LVIS_SELECTED ) )
-		bkColor = GetSysColor( ::GetFocus() == m_fileListView.m_hWnd ? COLOR_HIGHLIGHT : COLOR_INACTIVECAPTION );
-	else if ( m_pBatchTransaction.get() != NULL && m_pBatchTransaction->ContainsError( pItem->m_srcPath ) )
-		bkColor = app::ColorErrorBk;									// item with error
-	else if ( itemIndex & 0x01 )
+	if ( !m_fileListCtrl.UseExplorerTheme() && m_fileListCtrl.HasItemState( index, LVIS_SELECTED ) )
+		bkColor = GetSysColor( ::GetFocus() == m_fileListCtrl.m_hWnd ? COLOR_HIGHLIGHT : COLOR_INACTIVECAPTION );
+	else if ( m_pBatchTransaction.get() != NULL && m_pBatchTransaction->ContainsError( pItem->GetSrcPath() ) )
+		bkColor = app::ColorErrorBk;							// item with error
+	else if ( index & 0x01 )
 		bkColor = color::GhostWhite;							// alternate row background
 
 	if ( CLR_NONE == bkColor )
 		return false;
 
-	ui::FillRect( pCustomDraw->nmcd.hdc, pCustomDraw->nmcd.rc, bkColor );
-	pCustomDraw->clrTextBk = bkColor;							// just in case not using CDRF_SKIPDEFAULT
+	ui::FillRect( pDraw->nmcd.hdc, pDraw->nmcd.rc, bkColor );
+	pDraw->clrTextBk = bkColor;							// just in case not using CDRF_SKIPDEFAULT
 	return true;
 }
 
-bool CMainRenameDialog::ListItem_IsSelectedInvert( int itemIndex ) const
+bool CMainRenameDialog::ListItem_IsSelectedInvert( int index ) const
 {
 	// with "Explorer" visual theme background is bright (white) for selected and unselected state -> ignore selected state to keep text colour dark
-	if ( !m_fileListView.UseExplorerTheme() )
-		return m_fileListView.HasItemState( itemIndex, LVIS_SELECTED ) && ::GetFocus() == m_fileListView.m_hWnd;
+	if ( !m_fileListCtrl.UseExplorerTheme() )
+		return m_fileListCtrl.HasItemState( index, LVIS_SELECTED ) && ::GetFocus() == m_fileListCtrl.m_hWnd;
 
 	return false;
 }
@@ -370,8 +373,8 @@ fs::UserFeedback CMainRenameDialog::HandleFileError( const fs::CPath& sourcePath
 {
 	int pos = FindItemPos( sourcePath );
 	if ( pos != -1 )
-		m_fileListView.EnsureVisible( pos, FALSE );
-	m_fileListView.Invalidate();
+		m_fileListCtrl.EnsureVisible( pos, FALSE );
+	m_fileListCtrl.Invalidate();
 
 	switch ( AfxMessageBox( message.c_str(), MB_ICONWARNING | MB_ABORTRETRYIGNORE ) )
 	{
@@ -444,7 +447,7 @@ void CMainRenameDialog::DoDataExchange( CDataExchange* pDX )
 	m_formatToolbar.DDX_Placeholder( pDX, IDC_STRIP_BAR_1, H_AlignLeft | V_AlignCenter );
 	DDX_Control( pDX, IDC_SEQ_COUNT_EDIT, m_seqCountEdit );
 	m_seqCountToolbar.DDX_Placeholder( pDX, IDC_STRIP_BAR_2, H_AlignLeft | V_AlignCenter );
-	DDX_Control( pDX, IDC_FILE_RENAME_LIST, m_fileListView );
+	DDX_Control( pDX, IDC_FILE_RENAME_LIST, m_fileListCtrl );
 	DDX_Control( pDX, IDC_CAPITALIZE_BUTTON, m_capitalizeButton );
 	DDX_Control( pDX, IDC_CHANGE_CASE_BUTTON, m_changeCaseButton );
 	DDX_Control( pDX, IDC_DELIMITER_SET_COMBO, m_delimiterSetCombo );
@@ -502,7 +505,6 @@ BEGIN_MESSAGE_MAP( CMainRenameDialog, CBaseMainDialog )
 	ON_UPDATE_COMMAND_UI( ID_SEQ_COUNT_FIND_NEXT, OnUpdateSeqCountFindNext )
 	ON_COMMAND( ID_SEQ_COUNT_AUTO_ADVANCE, OnSeqCountAutoAdvance )
 	ON_UPDATE_COMMAND_UI( ID_SEQ_COUNT_AUTO_ADVANCE, OnUpdateSeqCountAutoAdvance )
-	ON_NOTIFY( NM_CUSTOMDRAW, IDC_FILE_RENAME_LIST, OnCustomDrawFileRenameList )
 	ON_BN_CLICKED( IDC_COPY_SOURCE_PATHS_BUTTON, OnBnClicked_CopySourceFiles )
 	ON_BN_CLICKED( IDC_PASTE_FILES_BUTTON, OnBnClicked_PasteDestFiles )
 	ON_BN_CLICKED( IDC_CLEAR_FILES_BUTTON, OnBnClicked_ClearDestFiles )
@@ -523,6 +525,7 @@ BEGIN_MESSAGE_MAP( CMainRenameDialog, CBaseMainDialog )
 	ON_COMMAND( ID_UNDERBAR_TO_SPACE, OnUnderbarToSpace )
 	ON_COMMAND( ID_SPACE_TO_UNDERBAR, OnSpaceToUnderbar )
 	ON_COMMAND( ID_ENSURE_UNIFORM_NUM_PADDING, OnEnsureUniformNumPadding )
+	ON_NOTIFY( NM_CUSTOMDRAW, IDC_FILE_RENAME_LIST, OnCustomDraw_FileRenameList )
 END_MESSAGE_MAP()
 
 BOOL CMainRenameDialog::OnInitDialog( void )
@@ -898,61 +901,80 @@ void CMainRenameDialog::OnEnsureUniformNumPadding( void )
 	PostMakeDest();
 }
 
-void CMainRenameDialog::OnCustomDrawFileRenameList( NMHDR* pNmHdr, LRESULT* pResult )
+void CMainRenameDialog::OnCustomDraw_FileRenameList( NMHDR* pNmHdr, LRESULT* pResult )
 {
-	NMLVCUSTOMDRAW* pCustomDraw = (NMLVCUSTOMDRAW*)pNmHdr;
+	NMLVCUSTOMDRAW* pDraw = (NMLVCUSTOMDRAW*)pNmHdr;
 
 	*pResult = CDRF_DODEFAULT;
 
 	static const CRect emptyRect( 0, 0, 0, 0 );
-	if ( emptyRect == pCustomDraw->nmcd.rc )
+	if ( emptyRect == pDraw->nmcd.rc )
 		return;			// IMP: avoid custom drawing for tooltips
 
 	// scope these variables so that are visible in the debugger
-	const CDisplayItem* pItem = reinterpret_cast< const CDisplayItem* >( pCustomDraw->nmcd.lItemlParam );
+	const CDisplayItem* pItem = reinterpret_cast< const CDisplayItem* >( pDraw->nmcd.lItemlParam );
 
-	switch ( pCustomDraw->nmcd.dwDrawStage )
+	switch ( pDraw->nmcd.dwDrawStage )
 	{
 		case CDDS_PREPAINT:
 			*pResult = CDRF_NOTIFYITEMDRAW;
 			break;
-		case CDDS_ITEM | CDDS_ITEMPREPAINT:
+		case /*CDDS_ITEM |*/ CDDS_ITEMPREPAINT:
 			*pResult = CDRF_NOTIFYSUBITEMDRAW;
 
-			if ( ListItem_FillBkgnd( pCustomDraw ) )
+			if ( ListItem_FillBkgnd( pDraw ) )
 				*pResult |= CDRF_NEWFONT;
 			break;
 		case CDDS_SUBITEM | CDDS_ITEMPREPAINT:
-			if ( Source == pCustomDraw->iSubItem )
+			if ( Source == pDraw->iSubItem )
 			{
-				if ( !useDefaultDraw || pItem->HasMisMatch() )
+				if ( !s_useDefaultDraw || pItem->HasMisMatch() )
 				{
 					//*pResult |= CDRF_NOTIFYPOSTPAINT;		custom draw now, skip default text drawing & post-paint stage
 					*pResult |= CDRF_SKIPDEFAULT;
-					ListItem_DrawTextDiffs( pCustomDraw );
+					ListItem_DrawTextDiffs( pDraw );
 				}
 			}
-			else if ( Destination == pCustomDraw->iSubItem )					// && !pItem->m_destFnameExt.empty()
-				if ( useDefaultDraw && str::MatchEqual == pItem->m_match )
+			else if ( Destination == pDraw->iSubItem )					// && !pItem->m_destFnameExt.empty()
+				if ( s_useDefaultDraw && str::MatchEqual == pItem->m_match )
 				{
-					pCustomDraw->clrText = GetSysColor( COLOR_GRAYTEXT );		// gray-out text of unmodified dest files
+					pDraw->clrText = GetSysColor( COLOR_GRAYTEXT );		// gray-out text of unmodified dest files
 					*pResult |= CDRF_NEWFONT;
 				}
 				else
 				{
 					//*pResult |= CDRF_NOTIFYPOSTPAINT;		custom draw now, skip default text drawing & post-paint stage
 					*pResult |= CDRF_SKIPDEFAULT;
-					ListItem_DrawTextDiffs( pCustomDraw );
+					ListItem_DrawTextDiffs( pDraw );
 				}
 			break;
 		case CDDS_SUBITEM | CDDS_ITEMPOSTPAINT:		// doesn't get called when using CDRF_SKIPDEFAULT in CDDS_ITEMPREPAINT draw stage
-			//ListItem_DrawTextDiffs( pCustomDraw );
+			//ListItem_DrawTextDiffs( pDraw );
 			break;
 	}
 }
 
 
 // CMainRenameDialog::CDisplayItem implementation
+
+CMainRenameDialog::CDisplayItem::CDisplayItem( const TPathPair* pPathPair )
+	: m_pPathPair( pPathPair )
+	, m_srcFnameExt( m_pPathPair->first.GetNameExt() )
+	, m_destFnameExt( m_pPathPair->second.GetNameExt() )
+	, m_match( path::GetMatch()( m_srcFnameExt.c_str(), m_destFnameExt.c_str() ) )
+{
+	ComputeMatchSeq();
+}
+
+std::tstring CMainRenameDialog::CDisplayItem::GetCode( void ) const
+{
+	return m_pPathPair->first.Get();
+}
+
+std::tstring CMainRenameDialog::CDisplayItem::GetDisplayCode( void ) const
+{
+	return m_srcFnameExt;
+}
 
 void CMainRenameDialog::CDisplayItem::ComputeMatchSeq( void )
 {

@@ -2,13 +2,16 @@
 #define FileWorkingSet_fwd_h
 #pragma once
 
+#include "utl/ISubject.h"
 #include "utl/Path.h"
 #include "utl/FileState.h"
 
 
 class CEnumTags;
+class CFileWorkingSet;
 
-typedef std::pair< const fs::CFileState, fs::CFileState > TFileStatePair;		// ptr stored in m_fileListCtrl
+typedef std::pair< const fs::CPath, fs::CPath > TPathPair;
+typedef std::pair< const fs::CFileState, fs::CFileState > TFileStatePair;
 
 
 namespace fmt

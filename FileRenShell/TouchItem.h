@@ -2,7 +2,6 @@
 #define TouchItem_h
 #pragma once
 
-#include "utl/ISubject.h"
 #include "utl/FileState.h"
 #include "FileWorkingSet_fwd.h"
 

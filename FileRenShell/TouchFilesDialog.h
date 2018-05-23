@@ -13,7 +13,6 @@
 
 
 class CLogger;
-class CFileWorkingSet;
 class CTouchItem;
 
 namespace multi
@@ -68,7 +67,6 @@ private:
 	virtual void CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARAM rowKey, int subItem ) const;
 private:
 	CFileWorkingSet* m_pFileData;
-	const fmt::PathFormat m_pathFormat;
 	Mode m_mode;
 	std::vector< CTouchItem* > m_displayItems;
 	std::auto_ptr< fs::CBatchTouch > m_pBatchTransaction;

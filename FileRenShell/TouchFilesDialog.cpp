@@ -50,7 +50,6 @@ namespace layout
 CTouchFilesDialog::CTouchFilesDialog( CFileWorkingSet* pFileData, CWnd* pParent )
 	: CBaseMainDialog( IDD_TOUCH_FILES_DIALOG, pParent )
 	, m_pFileData( pFileData )
-	, m_pathFormat( m_pFileData->HasMixedDirPaths() ? fmt::FullPath : fmt::FilenameExt )
 	, m_mode( Uninit )
 	, m_fileListCtrl( IDC_FILE_TOUCH_LIST, LVS_EX_GRIDLINES | CReportListControl::DefaultStyleEx )
 	, m_anyChanges( false )
@@ -98,9 +97,11 @@ void CTouchFilesDialog::InitDisplayItems( void )
 	utl::ClearOwningContainer( m_displayItems );
 
 	fs::TFileStatePairMap& rTouchPairs = m_pFileData->GetTouchPairs();
+	const fmt::PathFormat pathFormat = m_pFileData->HasMixedDirPaths() ? fmt::FullPath : fmt::FilenameExt;
+
 	m_displayItems.reserve( rTouchPairs.size() );
 	for ( fs::TFileStatePairMap::iterator itPair = rTouchPairs.begin(); itPair != rTouchPairs.end(); ++itPair )
-		m_displayItems.push_back( new CTouchItem( &*itPair, m_pathFormat ) );
+		m_displayItems.push_back( new CTouchItem( &*itPair, pathFormat ) );
 }
 
 void CTouchFilesDialog::SwitchMode( Mode mode )

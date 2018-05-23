@@ -7,17 +7,18 @@
 #include "utl/DialogToolBar.h"
 #include "utl/EnumSplitButton.h"
 #include "utl/HistoryComboBox.h"
+#include "utl/ISubject.h"
 #include "utl/Path.h"
 #include "utl/ReportListControl.h"
 #include "utl/SplitPushButton.h"
 #include "utl/SpinEdit.h"
 #include "utl/TextEdit.h"
 #include "utl/ThemeStatic.h"
+#include "FileWorkingSet_fwd.h"
 #include "Application_fwd.h"
 
 
 class CLogger;
-class CFileWorkingSet;
 namespace str { enum Match; }
 
 
@@ -34,6 +35,8 @@ public:
 	CFileWorkingSet* GetWorkingSet( void ) const { return m_pFileData; }
 	void PostMakeDest( bool silent = false );
 private:
+	void InitDisplayItems( void );
+
 	void SetupFileListView( void );
 	int FindItemPos( const fs::CPath& sourcePath ) const;
 
@@ -52,31 +55,31 @@ private:
 	virtual fs::UserFeedback HandleFileError( const fs::CPath& sourcePath, const std::tstring& message );
 
 	// custom draw list
-	void ListItem_DrawTextDiffs( const NMLVCUSTOMDRAW* pCustomDraw );
+	void ListItem_DrawTextDiffs( const NMLVCUSTOMDRAW* pDraw );
 	void ListItem_DrawTextDiffs( CDC* pDC, const CRect& textRect, int itemIndex, Column column );
-	bool ListItem_FillBkgnd( NMLVCUSTOMDRAW* pCustomDraw ) const;
+	bool ListItem_FillBkgnd( NMLVCUSTOMDRAW* pDraw ) const;
 
 	bool ListItem_IsSelectedInvert( int itemIndex ) const;
 
-	static CRect MakeItemTextRect( const NMLVCUSTOMDRAW* pCustomDraw );
+	static CRect MakeItemTextRect( const NMLVCUSTOMDRAW* pDraw );
 	static CFont* SelectBoldFont( CDC* pDC );
 private:
-	struct CDisplayItem
+	struct CDisplayItem : public utl::ISubject
 	{
-		CDisplayItem( const fs::CPath& srcPath, const fs::CPath& destPath )
-			: m_srcPath( srcPath )
-			, m_srcFnameExt( m_srcPath.GetNameExt() )
-			, m_destFnameExt( destPath.GetNameExt() )
-			, m_match( path::GetMatch()( m_srcFnameExt.c_str(), m_destFnameExt.c_str() ) )
-		{
-			ComputeMatchSeq();
-		}
+		CDisplayItem( const TPathPair* pPathPair );
+
+		const fs::CPath& GetSrcPath( void ) const { return m_pPathPair->first; }
 
 		bool HasMisMatch( void ) const { return !m_destFnameExt.empty() && m_match != str::MatchEqual; }
+
+		// utl::ISubject interface
+		virtual std::tstring GetCode( void ) const;
+		virtual std::tstring GetDisplayCode( void ) const;
 	private:
 		void ComputeMatchSeq( void );
+	private:
+		const TPathPair* m_pPathPair;
 	public:
-		const fs::CPath m_srcPath;
 		std::tstring m_srcFnameExt;
 		std::tstring m_destFnameExt;
 		str::Match m_match;
@@ -84,8 +87,8 @@ private:
 		std::vector< str::Match > m_destMatchSeq;		// same size with m_destFnameExt
 	};
 private:
-	app::MenuCommand m_menuCmd;
 	CFileWorkingSet* m_pFileData;
+	app::MenuCommand m_menuCmd;
 	std::vector< CDisplayItem* > m_displayItems;
 	bool m_autoGenerate;
 	bool m_seqCountAutoAdvance;
@@ -97,7 +100,7 @@ private:
 	CDialogToolBar m_formatToolbar;
 	CSpinEdit m_seqCountEdit;
 	CDialogToolBar m_seqCountToolbar;
-	CReportListControl m_fileListView;
+	CReportListControl m_fileListCtrl;
 	CSplitPushButton m_capitalizeButton;
 	CEnumSplitButton m_changeCaseButton;
 	CHistoryComboBox m_delimiterSetCombo;
@@ -146,7 +149,7 @@ protected:
 	afx_msg void OnUnderbarToSpace( void );
 	afx_msg void OnSpaceToUnderbar( void );
 	afx_msg void OnEnsureUniformNumPadding( void );
-	afx_msg void OnCustomDrawFileRenameList( NMHDR* pNmHdr, LRESULT* pResult );
+	afx_msg void OnCustomDraw_FileRenameList( NMHDR* pNmHdr, LRESULT* pResult );
 
 	DECLARE_MESSAGE_MAP()
 };
