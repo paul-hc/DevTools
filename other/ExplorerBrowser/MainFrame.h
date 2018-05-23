@@ -7,6 +7,9 @@ public:
 	CMainFrame( void );
 	virtual ~CMainFrame();
 private:
+	void SaveWindowPlacement( void );
+	void LoadWindowPlacement( CREATESTRUCT& rCreateStruct );
+private:
 	// embedded control bars
 	CStatusBar m_wndStatusBar;
 	CToolBar m_wndToolBar;
@@ -15,9 +18,10 @@ private:
 
 	// generated stuff
 public:
-	virtual BOOL PreCreateWindow( CREATESTRUCT& cs );
+	virtual BOOL PreCreateWindow( CREATESTRUCT& rCreateStruct );
 protected:
 	afx_msg int OnCreate( CREATESTRUCT* pCreateStruct );
+	afx_msg void OnClose( void );
 
 	DECLARE_MESSAGE_MAP()
 };

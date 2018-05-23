@@ -8,6 +8,17 @@
 #endif
 
 
+namespace reg
+{
+	static const TCHAR section_mainFrame[] = _T("Desktop\\MainWindow");
+	static const TCHAR entry_cmdShow[] = _T("CmdShow");
+	static const TCHAR entry_top[] = _T("Top");
+	static const TCHAR entry_left[] = _T("Left");
+	static const TCHAR entry_bottom[] = _T("Bottom");
+	static const TCHAR entry_right[] = _T("Right");
+}
+
+
 static UINT indicators[] =
 {
 	ID_SEPARATOR,		   // status line indicator
@@ -25,12 +36,57 @@ CMainFrame::~CMainFrame()
 {
 }
 
-BOOL CMainFrame::PreCreateWindow( CREATESTRUCT& cs )
+void CMainFrame::SaveWindowPlacement( void )
 {
-	if ( !CMDIFrameWnd::PreCreateWindow( cs ) )
+	// save main window position and status to the registry
+	WINDOWPLACEMENT wp;
+	GetWindowPlacement( &wp );
+
+	CWinApp* pApp = AfxGetApp();
+	pApp->WriteProfileInt( reg::section_mainFrame, reg::entry_cmdShow, wp.showCmd );
+	pApp->WriteProfileInt( reg::section_mainFrame, reg::entry_top, wp.rcNormalPosition.top );
+	pApp->WriteProfileInt( reg::section_mainFrame, reg::entry_left, wp.rcNormalPosition.left );
+	pApp->WriteProfileInt( reg::section_mainFrame, reg::entry_bottom, wp.rcNormalPosition.bottom );
+	pApp->WriteProfileInt( reg::section_mainFrame, reg::entry_right, wp.rcNormalPosition.right );
+}
+
+void CMainFrame::LoadWindowPlacement( CREATESTRUCT& rCreateStruct )
+{
+	CWinApp* pApp = AfxGetApp();
+
+	pApp->m_nCmdShow = pApp->GetProfileInt( reg::section_mainFrame, reg::entry_cmdShow, pApp->m_nCmdShow );
+
+	CRect normalRect( pApp->GetProfileInt( reg::section_mainFrame, reg::entry_left, -1 ),
+					  pApp->GetProfileInt( reg::section_mainFrame, reg::entry_top, -1 ),
+					  pApp->GetProfileInt( reg::section_mainFrame, reg::entry_right, -1 ),
+					  pApp->GetProfileInt( reg::section_mainFrame, reg::entry_bottom, -1 ) );
+
+	if ( normalRect != CRect( -1, -1, -1, -1 ) )		// previously saved position?
+	{
+		rCreateStruct.cx = normalRect.Width();
+		rCreateStruct.cy = normalRect.Height();
+
+		// the following correction is needed when the taskbar is at the left or top and it is not "auto-hidden"
+		CRect workAreaRect;
+		SystemParametersInfo( SPI_GETWORKAREA, 0, &workAreaRect, 0 );
+
+		normalRect.TopLeft() += workAreaRect.TopLeft();
+
+		// make sure the window is not completely out of sight
+		CPoint maxBottomRight( GetSystemMetrics( SM_CXSCREEN ) - GetSystemMetrics( SM_CXICON ),
+							   GetSystemMetrics( SM_CYSCREEN ) - GetSystemMetrics( SM_CYICON ) );
+
+		rCreateStruct.x = (std::min)( normalRect.left, maxBottomRight.x );
+		rCreateStruct.y = (std::min)( normalRect.top, maxBottomRight.y );
+	}
+}
+
+BOOL CMainFrame::PreCreateWindow( CREATESTRUCT& rCreateStruct )
+{
+	if ( !CMDIFrameWnd::PreCreateWindow( rCreateStruct ) )
 		return FALSE;
 
-	// TODO: Modify the Window class or styles here by modifying the CREATESTRUCT cs
+	LoadWindowPlacement( rCreateStruct );
 	return TRUE;
 }
 
@@ -39,6 +95,7 @@ BOOL CMainFrame::PreCreateWindow( CREATESTRUCT& cs )
 
 BEGIN_MESSAGE_MAP( CMainFrame, CMDIFrameWnd )
 	ON_WM_CREATE()
+	ON_WM_CLOSE()
 END_MESSAGE_MAP()
 
 int CMainFrame::OnCreate( CREATESTRUCT* pCreateStruct )
@@ -73,4 +130,11 @@ int CMainFrame::OnCreate( CREATESTRUCT* pCreateStruct )
 
 	m_wndToolBar.SetBarStyle( m_wndToolBar.GetBarStyle() | CBRS_TOOLTIPS | CBRS_FLYBY );		// display tool tips
 	return 0;
+}
+
+void CMainFrame::OnClose( void )
+{
+	SaveWindowPlacement();
+
+	__super::OnClose();
 }
