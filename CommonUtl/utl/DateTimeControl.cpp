@@ -58,29 +58,14 @@ void CDateTimeControl::SetNullFormat( const TCHAR* pNullFormat )
 		SetNullDateTime();
 }
 
-Range< CTime > CDateTimeControl::GetDateRange( void ) const
-{
-	Range< CTime > dtRange;
-	DWORD result = GetRange( &dtRange.m_start, &dtRange.m_end );
-
-	if ( !HasFlag( result, GDTR_MIN ) )
-		dtRange.m_start = CTime();
-
-	if ( !HasFlag( result, GDTR_MAX ) )
-		dtRange.m_end = CTime();
-
-	return dtRange;
-}
-
-bool CDateTimeControl::SetDateRange( const Range< CTime >& dateTimeRange )
-{
-	return SetRange( &dateTimeRange.m_start, &dateTimeRange.m_end ) != FALSE;
-}
-
 CTime CDateTimeControl::GetDateTime( void ) const
 {
 	CTime dateTime;
-	if ( m_pLastFormat != m_pNullFormat )
+
+	// Issue: when the user picks a date from the month calendar drop-down, DTN_CLOSEUP is received after DTN_DATETIMECHANGE (sent twice) by the common control.
+	// Since we flip to a normal format only later on receiving DTN_CLOSEUP, we need to return the actual current time while month calendar is visible, regardless of current format.
+
+	if ( m_pLastFormat != m_pNullFormat || GetMonthCalCtrl() != NULL )
 		if ( GetTime( dateTime ) != GDT_VALID )
 			dateTime = CTime();
 
@@ -119,6 +104,25 @@ bool CDateTimeControl::UserSetDateTime( const CTime& dateTime )
 		SendNotifyDateTimeChange();
 
 	return succeeded;
+}
+
+Range< CTime > CDateTimeControl::GetDateRange( void ) const
+{
+	Range< CTime > dtRange;
+	DWORD result = GetRange( &dtRange.m_start, &dtRange.m_end );
+
+	if ( !HasFlag( result, GDTR_MIN ) )
+		dtRange.m_start = CTime();
+
+	if ( !HasFlag( result, GDTR_MAX ) )
+		dtRange.m_end = CTime();
+
+	return dtRange;
+}
+
+bool CDateTimeControl::SetDateRange( const Range< CTime >& dateTimeRange )
+{
+	return SetRange( &dateTimeRange.m_start, &dateTimeRange.m_end ) != FALSE;
 }
 
 bool CDateTimeControl::FlipFormat( bool isValid )
@@ -217,6 +221,7 @@ BOOL CDateTimeControl::OnDtnCloseup_Reflect( NMHDR* pNmHdr, LRESULT* pResult )
 {
 	pNmHdr;
 
+	//TRACE( _T(" - CDateTimeControl::OnDtnCloseup_Reflect\n") );
 	if ( IsNullDateTime() )
 		FlipFormat( true );
 

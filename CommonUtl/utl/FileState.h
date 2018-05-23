@@ -5,6 +5,9 @@
 #include "Path.h"
 
 
+class CFlagTags;
+
+
 namespace fs
 {
 	struct CFileState
@@ -37,6 +40,9 @@ namespace fs
 
 	typedef std::map< fs::CFileState, fs::CFileState > TFileStatePairMap;
 	typedef std::set< fs::CFileState > TFileStateSet;
+
+
+	const CFlagTags& GetTags_FileAttributes( void );
 }
 
 

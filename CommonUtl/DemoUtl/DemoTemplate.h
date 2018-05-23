@@ -27,7 +27,7 @@ public:
 	virtual void DoDataExchange( CDataExchange* pDX );
 	virtual BOOL OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo );
 
-	static const std::vector< std::pair< std::tstring, std::tstring > >& GetItems( void );
+	static const std::vector< std::tstring >& GetTextItems( void );
 private:
 	enum { MaxDemoDepth = 3 };
 	static ResizeStyle m_dialogResizeStyle;
@@ -73,11 +73,15 @@ class CListPage : public CLayoutPropertyPage
 public:
 	CListPage( void );
 	virtual ~CListPage() {}
+private:
+	enum Column { Source, Destination, Notes };
+	CReportListControl m_fileListView;
 protected:
 	virtual void DoDataExchange( CDataExchange* pDX );
-private:
-	enum Column { Source, Destination };
-	CReportListControl m_fileListView;
+	afx_msg void OnToggle_UseAlternateRows( void );
+	afx_msg void OnToggle_UseTextEffects( void );
+
+	DECLARE_MESSAGE_MAP()
 };
 
 

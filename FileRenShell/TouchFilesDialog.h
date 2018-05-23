@@ -34,7 +34,7 @@ private:
 	void Construct( void );
 	void InitDisplayItems( void );
 
-	enum Mode { Uninit = -1, MakeMode, TouchMode, UndoRollbackMode };		// reflects the OK button label
+	enum Mode { Uninit = -1, StoreMode, TouchMode, UndoRollbackMode };		// reflects the OK button label
 	void SwitchMode( Mode mode );
 
 	bool TouchFiles( void );
@@ -65,7 +65,7 @@ private:
 	virtual fs::UserFeedback HandleFileError( const fs::CPath& sourcePath, const std::tstring& message );
 
 	// CReportListControl::ITextEffectCallback interface
-	virtual void CombineTextEffectAt( ui::CTextEffect& rTextEffect, utl::ISubject* pSubject, int subItem ) const;
+	virtual void CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARAM rowKey, int subItem ) const;
 private:
 	CFileWorkingSet* m_pFileData;
 	const fmt::PathFormat m_pathFormat;
@@ -110,7 +110,7 @@ protected:
 	afx_msg void OnUpdateSelListItem( CCmdUI* pCmdUI );
 	afx_msg void OnToggle_Attribute( UINT checkId );
 	afx_msg void OnLvnItemChanged_TouchList( NMHDR* pNmHdr, LRESULT* pResult );
-	afx_msg void OnDtnDateTimeChange_DateTimeCtrl( UINT dtId, NMHDR* pNmHdr, LRESULT* pResult );
+	afx_msg void OnDtnDateTimeChange( NMHDR* pNmHdr, LRESULT* pResult );
 
 	DECLARE_MESSAGE_MAP()
 };

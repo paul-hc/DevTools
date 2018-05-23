@@ -1,6 +1,7 @@
 
 #include "stdafx.h"
 #include "FileState.h"
+#include "FlagTags.h"
 #include "RuntimeException.h"
 #include "TimeUtl.h"
 
@@ -11,6 +12,32 @@
 
 namespace fs
 {
+	const CFlagTags& GetTags_FileAttributes( void )
+	{
+		static const CFlagTags::FlagDef flagDefs[] =
+		{
+			{ FILE_ATTRIBUTE_READONLY, _T("R") },		// CFile::readOnly
+			{ FILE_ATTRIBUTE_HIDDEN, _T("H") },			// CFile::hidden
+			{ FILE_ATTRIBUTE_SYSTEM, _T("S") },			// CFile::system
+			{ CFile::volume, _T("V") },
+			{ FILE_ATTRIBUTE_DIRECTORY, _T("D") },		// CFile::directory
+			{ FILE_ATTRIBUTE_ARCHIVE, _T("A") },		// CFile::archive
+			{ FILE_ATTRIBUTE_DEVICE, _T("d") },
+			{ FILE_ATTRIBUTE_NORMAL, _T("N") },
+			{ FILE_ATTRIBUTE_TEMPORARY, _T("t") },
+			{ FILE_ATTRIBUTE_SPARSE_FILE, _T("s") },
+			{ FILE_ATTRIBUTE_REPARSE_POINT, _T("r") },
+			{ FILE_ATTRIBUTE_COMPRESSED, _T("c") },
+			{ FILE_ATTRIBUTE_OFFLINE, _T("o") },
+			{ FILE_ATTRIBUTE_NOT_CONTENT_INDEXED, _T("n") },
+			{ FILE_ATTRIBUTE_ENCRYPTED, _T("e") },
+		};
+		static const std::tstring uiTags = _T("READ-ONLY|HIDDEN|SYSTEM|VOLUME|DIRECTORY|ARCHIVE|Device|NORMAL|Temporary|Sparse File|Reparse Point|Compressed|Offline|Not Content Indexed|Encrypted");
+		static const CFlagTags tags( flagDefs, COUNT_OF( flagDefs ), uiTags );
+		return tags;
+	}
+
+
 	// CFileState implementation
 
 	CFileState::CFileState( const ::CFileStatus* pFileStatus )

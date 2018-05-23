@@ -105,7 +105,7 @@ void CTouchFilesDialog::InitDisplayItems( void )
 
 void CTouchFilesDialog::SwitchMode( Mode mode )
 {
-	static const CEnumTags modeTags( _T("&Make|&Touch|&Rollback") );
+	static const CEnumTags modeTags( _T("&Store|&Touch|&Rollback") );
 
 	m_mode = mode;
 	ASSERT( m_mode != Uninit );
@@ -321,11 +321,11 @@ fs::UserFeedback CTouchFilesDialog::HandleFileError( const fs::CPath& sourcePath
 	}
 }
 
-void CTouchFilesDialog::CombineTextEffectAt( ui::CTextEffect& rTextEffect, utl::ISubject* pSubject, int subItem ) const
+void CTouchFilesDialog::CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARAM rowKey, int subItem ) const
 {
 	static const ui::CTextEffect modPathName( ui::Bold ), modDest( ui::Regular, app::ColorModifiedText ), modSrc( ui::Regular, app::ColorDeletedText ), errorBk( ui::Regular, CLR_NONE, app::ColorErrorBk );
 
-	const CTouchItem* pTouchItem = checked_static_cast< const CTouchItem* >( pSubject );
+	const CTouchItem* pTouchItem = CReportListControl::AsPtr< CTouchItem >( rowKey );
 	const ui::CTextEffect* pTextEffect = NULL;
 	bool isModified = false, isSrc = false;
 
@@ -367,7 +367,7 @@ void CTouchFilesDialog::CombineTextEffectAt( ui::CTextEffect& rTextEffect, utl::
 	else if ( isModified )
 		rTextEffect |= isSrc ? modSrc : modDest;
 
-	if ( MakeMode == m_mode )
+	if ( StoreMode == m_mode )
 	{
 		bool wouldModify = false;
 		switch ( subItem )
@@ -444,7 +444,9 @@ BEGIN_MESSAGE_MAP( CTouchFilesDialog, CBaseMainDialog )
 	ON_UPDATE_COMMAND_UI( ID_PUSH_TO_ALL_FIELDS, OnUpdateSelListItem )
 	ON_COMMAND_RANGE( IDC_ATTRIB_READONLY_CHECK, IDC_ATTRIB_VOLUME_CHECK, OnToggle_Attribute )
 	ON_NOTIFY( LVN_ITEMCHANGED, IDC_FILE_TOUCH_LIST, OnLvnItemChanged_TouchList )
-	ON_NOTIFY_RANGE( DTN_DATETIMECHANGE, IDC_MODIFIED_DATE, IDC_ACCESSED_DATE, OnDtnDateTimeChange_DateTimeCtrl )
+	ON_NOTIFY( DTN_DATETIMECHANGE, IDC_MODIFIED_DATE, OnDtnDateTimeChange )
+	ON_NOTIFY( DTN_DATETIMECHANGE, IDC_CREATED_DATE, OnDtnDateTimeChange )
+	ON_NOTIFY( DTN_DATETIMECHANGE, IDC_ACCESSED_DATE, OnDtnDateTimeChange )
 END_MESSAGE_MAP()
 
 BOOL CTouchFilesDialog::OnInitDialog( void )
@@ -457,7 +459,7 @@ void CTouchFilesDialog::OnOK( void )
 {
 	switch ( m_mode )
 	{
-		case MakeMode:
+		case StoreMode:
 			InputFields();
 			ApplyFields();
 			PostMakeDest();
@@ -480,7 +482,7 @@ void CTouchFilesDialog::OnOK( void )
 				m_pFileData->CommitUndoInfo( app::TouchFiles );
 
 				if ( m_pFileData->CanUndo( app::TouchFiles ) )
-					if ( IDOK == AfxMessageBox( _T("Do you want to undo another step?"), MB_ICONWARNING | MB_OKCANCEL ) )
+					if ( IDYES == AfxMessageBox( _T("Do you want to undo another step?"), MB_ICONWARNING | MB_YESNO | MB_DEFBUTTON2 ) )
 					{
 						OnBnClicked_Undo();			// rollback another step
 						return;						// keep the dialog open
@@ -510,7 +512,7 @@ void CTouchFilesDialog::OnContextMenu( CWnd* pWnd, CPoint screenPos )
 void CTouchFilesDialog::OnFieldChanged( void )
 {
 	if ( m_mode != Uninit )
-		SwitchMode( MakeMode );
+		SwitchMode( StoreMode );
 }
 
 void CTouchFilesDialog::OnBnClicked_Undo( void )
@@ -625,18 +627,19 @@ void CTouchFilesDialog::OnLvnItemChanged_TouchList( NMHDR* pNmHdr, LRESULT* pRes
 	*pResult = 0;
 }
 
-void CTouchFilesDialog::OnDtnDateTimeChange_DateTimeCtrl( UINT dtId, NMHDR* pNmHdr, LRESULT* pResult )
+void CTouchFilesDialog::OnDtnDateTimeChange( NMHDR* pNmHdr, LRESULT* pResult )
 {
-	NMDATETIMECHANGE* pChange = (NMDATETIMECHANGE*)pNmHdr;
-	pChange, dtId;
+	NMDATETIMECHANGE* pChange = (NMDATETIMECHANGE*)pNmHdr; pChange;
 	*pResult = 0L;
 
-	//TRACE( _T(" - CTouchFilesDialog::OnDtnDateTimeChange_DateTimeCtrl for dtId=%d\n"), dtId );
+	CDateTimeControl* pCtrl = checked_static_cast< CDateTimeControl* >( FromHandle( pNmHdr->hwndFrom ) );
+	app::DateTimeField field = static_cast< app::DateTimeField >( utl::FindPos( m_dateTimeCtrls, END_OF( m_dateTimeCtrls ), *pCtrl ) );
+	TRACE( _T(" - CTouchFilesDialog::OnDtnDateTimeChange for: %s = <%s>\n"), app::GetTags_DateTimeField().FormatUi( field ).c_str(), time_utl::FormatTimestamp( pCtrl->GetDateTime() ).c_str() );
 
 	// Cannot break into the debugger due to a mouse hook set in CDateTimeCtrl implementation (Windows).
 	//	https://stackoverflow.com/questions/18621575/are-there-issues-with-dtn-datetimechange-breakpoints-and-the-date-time-picker-co
 
-	if ( multi::CDateTimeState* pDateTimeState = multi::FindWithCtrlId( m_dateTimeStates, dtId ) )
+	if ( multi::CDateTimeState* pDateTimeState = multi::FindWithCtrlId( m_dateTimeStates, static_cast< UINT >( pNmHdr->idFrom ) ) )
 		if ( pDateTimeState->InputCtrl( this ) )			// input the checked state so that custom draw can evaluate would-modify
 			OnFieldChanged();
 		else

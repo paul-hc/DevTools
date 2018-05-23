@@ -5,8 +5,6 @@
 #include "StringRange_fwd.h"
 
 
-class CFlagTags;
-
 namespace fs
 {
 	class CPath;
@@ -32,7 +30,6 @@ namespace fmt
 
 	std::tstring FormatFileAttributes( DWORD fileAttr, bool uiFormat = false );
 	DWORD ParseFileAttributes( const std::tstring& text, bool uiFormat = false );
-	const CFlagTags& GetTags_FileAttributes( void );
 
 
 	std::tstring FormatFileState( const fs::CFileState& fileState );

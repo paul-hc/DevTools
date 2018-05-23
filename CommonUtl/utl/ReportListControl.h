@@ -71,6 +71,8 @@ public:
 	bool UseAlternateRowColoring( void ) const { return m_useAlternateRowColoring; }
 	void SetUseAlternateRowColoring( bool useAlternateRowColoring = true ) { m_useAlternateRowColoring = useAlternateRowColoring; }
 
+	ui::CTextEffect& RefTextEffect( void ) { return m_defaultTextEffect; }
+
 	const std::tstring& GetSection( void ) const { return m_regSection; }
 	void SetSection( const std::tstring& regSection ) { m_regSection = regSection; }
 public:
@@ -185,7 +187,7 @@ public:
 
 	bool SetPtrAt( int index, const void* pData ) { return SetItemData( index, (DWORD_PTR)pData ) != FALSE; }
 
-	utl::ISubject* GetObjectAt( int index ) const { return ToSubject( GetItemData( index ) ); }
+	utl::ISubject* GetObjectAt( int index ) const;
 	static inline utl::ISubject* ToSubject( LPARAM data ) { return checked_static_cast< utl::ISubject* >( (utl::ISubject*)data ); }
 
 	bool DeleteAllItems( void );
@@ -279,17 +281,23 @@ public:
 	void UnmarkCellAt( int index, TColumn subItem );
 	void ClearMarkedCells( void );
 
-	const ui::CTextEffect* FindTextEffectAt( utl::ISubject* pSubject, TColumn subItem ) const;
-	const ui::CTextEffect& LookupTextEffectAt( utl::ISubject* pSubject, TColumn subItem ) const;
+	typedef LPARAM TRowKey;								// row keys are invariant to sorting
+
+	TRowKey MakeRowKeyAt( int index ) const;			// favour item data (LPARAM), or fall back to index (int)
+
+	const ui::CTextEffect* FindTextEffectAt( TRowKey rowKey, TColumn subItem ) const;
 
 	interface ITextEffectCallback
 	{
-		virtual void CombineTextEffectAt( ui::CTextEffect& rTextEffect, utl::ISubject* pSubject, TColumn subItem ) const = 0;
+		virtual void CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARAM rowKey, int subItem ) const = 0;
 	};
 
 	void SetTextEffectCallback( ITextEffectCallback* pTextEffectCallback ) { m_pTextEffectCallback = pTextEffectCallback; }
+
+	static ui::CTextEffect ExtractTextEffects( const NMLVCUSTOMDRAW* pDraw );
 protected:
-	virtual bool ApplyTextEffectAt( NMLVCUSTOMDRAW* pDraw, utl::ISubject* pSubject, TColumn subItem );
+	virtual bool ApplyTextEffectAt( NMLVCUSTOMDRAW* pDraw, TRowKey rowKey, TColumn subItem );
+	bool ApplyTextEffect( NMLVCUSTOMDRAW* pDraw, const ui::CTextEffect& textEffect );
 
 	ui::CFontEffectCache* GetFontEffectCache( void );
 	bool ParentHandlesCustomDraw( void );
@@ -351,8 +359,6 @@ public:
 private:
 	void AddTransparentImage( void );
 private:
-	typedef std::pair< utl::ISubject*, TColumn > TCellPair;			// store pointers instead of indexes to be invariant to sorting
-private:
 	UINT m_columnLayoutId;
 	DWORD m_listStyleEx;
 	std::tstring m_regSection;
@@ -360,15 +366,19 @@ private:
 	std::vector< UINT > m_tileColumns;					// columns to be displayed as tile additional text (in gray)
 	bool m_useExplorerTheme;
 	bool m_useAlternateRowColoring;
+	bool m_subjectBased;								// objects stored as pointers are derived from utl::ISubject (polymorphic type)
 
 	TColumn m_sortByColumn;
 	bool m_sortAscending;
 	bool m_sortInternally;
 	PFNLVCOMPARE m_pCompareFunc;
 
+	typedef std::pair< TRowKey, TColumn > TCellPair;	// invariant to sorting: favour LPARAMs instead of indexes
+
 	stdext::hash_map< TCellPair, ui::CTextEffect > m_markedCells;
 	std::auto_ptr< ui::CFontEffectCache > m_pFontCache;		// self-encapsulated
 	ITextEffectCallback* m_pTextEffectCallback;
+	ui::CTextEffect m_defaultTextEffect;				// for all items in the list
 
 	CImageList* m_pImageList;
 	CImageList* m_pLargeImageList;

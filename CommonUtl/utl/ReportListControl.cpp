@@ -86,6 +86,7 @@ CReportListControl::CReportListControl( UINT columnLayoutId /*= 0*/, DWORD listS
 	, m_listStyleEx( listStyleEx )
 	, m_useExplorerTheme( true )
 	, m_useAlternateRowColoring( false )
+	, m_subjectBased( false )
 	, m_sortByColumn( -1 )			// no sorting by default
 	, m_sortAscending( true )
 	, m_sortInternally( true )
@@ -817,11 +818,31 @@ void CReportListControl::SaveToRegistry( void )
 	}
 }
 
+utl::ISubject* CReportListControl::GetObjectAt( int index ) const
+{
+	if ( utl::ISubject* pObject = ToSubject( GetItemData( index ) ) )
+		if ( !m_subjectBased )
+			return NULL;
+		else
+		{
+			pObject = dynamic_cast< utl::ISubject* >( pObject );
+			ASSERT_PTR( pObject );			// really a dynamic subject?
+			return pObject;
+		}
+
+	return NULL;
+}
+
 int CReportListControl::InsertObjectItem( int index, utl::ISubject* pObject, int imageIndex /*= No_Image*/ )
 {
 	std::tstring displayCode;
 	if ( pObject != NULL )
+	{
 		displayCode = pObject->GetDisplayCode();
+
+		if ( !m_subjectBased )
+			m_subjectBased = true;
+	}
 
 	if ( Transparent_Image == imageIndex )
 		imageIndex = safe_ptr( m_pCustomImager.get() )->m_transpPos;
@@ -1203,7 +1224,7 @@ bool CReportListControl::CacheSelectionData( ole::CDataSource* pDataSource, int 
 	if ( HasFlag( sourceFlags, ds::ItemsText | ds::ShellFiles ) )
 		for ( std::vector< int >::const_iterator itSelIndex = selData.m_selIndexes.begin(); itSelIndex != selData.m_selIndexes.end(); ++itSelIndex )
 			if ( utl::ISubject* pObject = GetObjectAt( *itSelIndex ) )
-				codes.push_back( pObject->GetCode() );		// assume GetCode() represents a full path
+				codes.push_back( pObject->GetCode() );		// assume GetCode() represents a full path, and GetDisplayCode() represents a fname.ext
 			else
 				codes.push_back( GetItemText( *itSelIndex, Code ).GetString() );
 
@@ -1281,29 +1302,14 @@ CRect CReportListControl::GetFrameBounds( const std::vector< int >& indexes ) co
 
 void CReportListControl::MarkCellAt( int index, TColumn subItem, const ui::CTextEffect& textEfect )
 {
-	utl::ISubject* pSubject = GetObjectAt( index );
-	ASSERT_PTR( pSubject );
-
-	if ( subItem != EntireRecord )
-		m_markedCells[ std::make_pair( pSubject, subItem ) ] = textEfect;
-	else
-		for ( TColumn subItem = 0; subItem != (TColumn)m_columnInfos.size(); ++subItem )
-			MarkCellAt( index, subItem, textEfect );
+	m_markedCells[ TCellPair( MakeRowKeyAt( index ), subItem ) ] = textEfect;			// also works with EntireRecord
 }
 
 void CReportListControl::UnmarkCellAt( int index, TColumn subItem )
 {
-	if ( subItem != EntireRecord )
-	{
-		stdext::hash_map< TCellPair, ui::CTextEffect >::iterator itFound = m_markedCells.find( std::make_pair( GetObjectAt( index ), subItem ) );
-		if ( itFound != m_markedCells.end() )
-			m_markedCells.erase( itFound );
-	}
-	else
-	{
-		for ( TColumn subItem = 0; subItem != (TColumn)m_columnInfos.size(); ++subItem )
-			UnmarkCellAt( index, subItem );
-	}
+	stdext::hash_map< TCellPair, ui::CTextEffect >::iterator itFound = m_markedCells.find( TCellPair( MakeRowKeyAt( index ), subItem ) );
+	if ( itFound != m_markedCells.end() )
+		m_markedCells.erase( itFound );
 }
 
 void CReportListControl::ClearMarkedCells( void )
@@ -1312,38 +1318,52 @@ void CReportListControl::ClearMarkedCells( void )
 	Invalidate();
 }
 
-const ui::CTextEffect* CReportListControl::FindTextEffectAt( utl::ISubject* pSubject, TColumn subItem ) const
+CReportListControl::TRowKey CReportListControl::MakeRowKeyAt( int index ) const
 {
-	return utl::FindValuePtr( m_markedCells, std::make_pair( pSubject, subItem ) );
+	TRowKey rowKey = static_cast< TRowKey >( GetItemData( index ) );
+	return rowKey != 0 ? rowKey : static_cast< TRowKey >( index );
 }
 
-const ui::CTextEffect& CReportListControl::LookupTextEffectAt( utl::ISubject* pSubject, TColumn subItem ) const
+const ui::CTextEffect* CReportListControl::FindTextEffectAt( TRowKey rowKey, TColumn subItem ) const
 {
-	if ( const ui::CTextEffect* pFoundEffect = FindTextEffectAt( pSubject, subItem ) )
-		return *pFoundEffect;
-
-	// since we do sub-item level custom drawing, we need to rollback to default text effect for the subsequent sub-items
-	static const ui::CTextEffect defaultEffect;
-	return defaultEffect;
+	return utl::FindValuePtr( m_markedCells, TCellPair( rowKey, subItem ) );
 }
 
-bool CReportListControl::ApplyTextEffectAt( NMLVCUSTOMDRAW* pDraw, utl::ISubject* pSubject, TColumn subItem )
+bool CReportListControl::ApplyTextEffectAt( NMLVCUSTOMDRAW* pDraw, TRowKey rowKey, TColumn subItem )
 {
 	ASSERT_PTR( pDraw );
-	int index = static_cast< int >( pDraw->nmcd.dwItemSpec ); index;		// for debugging
 
-	if ( m_markedCells.empty() && NULL == m_pTextEffectCallback )
-		return false;
+	const std::pair< int, utl::ISubject* > info( static_cast< int >( pDraw->nmcd.dwItemSpec ), ToSubject( pDraw->nmcd.lItemlParam ) );
 
-	ui::CTextEffect textEffect = LookupTextEffectAt( pSubject, subItem );				// cell effect
+	ui::CTextEffect textEffect = m_defaultTextEffect;					// start with list effect
+	textEffect.AssignPtr( FindTextEffectAt( rowKey, EntireRecord ) );	// assign entire record
+
+	if ( subItem != EntireRecord )
+		textEffect.AssignPtr( FindTextEffectAt( rowKey, subItem ) );	// set individual cell
 
 	if ( m_pTextEffectCallback != NULL )
-		m_pTextEffectCallback->CombineTextEffectAt( textEffect, pSubject, subItem );	// combine with calback effect
+		m_pTextEffectCallback->CombineTextEffectAt( textEffect, rowKey, subItem );		// combine with calback effect (additive effect)
+
+	if ( m_useAlternateRowColoring )
+		if ( HasFlag( info.first, 0x01 ) )
+			if ( CLR_NONE == textEffect.m_bkColor )
+				textEffect.m_bkColor = color::GhostWhite;
+
+	return ApplyTextEffect( pDraw, textEffect );
+}
+
+bool CReportListControl::ApplyTextEffect( NMLVCUSTOMDRAW* pDraw, const ui::CTextEffect& textEffect )
+{
+	ASSERT_PTR( pDraw );
+
+// must reset previous cell effects
+//	if ( textEffect.IsNull() )
+//		return false;
 
 	bool modified = false;
 
-	if ( CFont* pFont = GetFontEffectCache()->Lookup( textEffect.m_fontEffect ) )
-		if ( ::SelectObject( pDraw->nmcd.hdc, *pFont ) != *pFont )
+	if ( HGDIOBJ hFont = GetFontEffectCache()->Lookup( textEffect.m_fontEffect )->GetSafeHandle() )
+		if ( ::SelectObject( pDraw->nmcd.hdc, hFont ) != hFont )
 			modified = true;
 
 	// when assigning CLR_NONE, the list view uses the default colour properly: this->GetTextColor(), this->GetBkColor()
@@ -1360,6 +1380,25 @@ bool CReportListControl::ApplyTextEffectAt( NMLVCUSTOMDRAW* pDraw, utl::ISubject
 	}
 
 	return modified;
+}
+
+ui::CTextEffect CReportListControl::ExtractTextEffects( const NMLVCUSTOMDRAW* pDraw )
+{
+	ui::CTextEffect textEffect;
+	if ( HGDIOBJ hFont = ::GetCurrentObject( pDraw->nmcd.hdc, OBJ_FONT ) )
+	{
+		LOGFONT logFont;
+		memset( &logFont, 0, sizeof( LOGFONT ) );
+		::GetObject( hFont, sizeof( LOGFONT ), &logFont );
+
+		SetFlag( textEffect.m_fontEffect, ui::Bold, FW_BOLD == logFont.lfWeight );
+		SetFlag( textEffect.m_fontEffect, ui::Italic, TRUE == logFont.lfItalic );
+		SetFlag( textEffect.m_fontEffect, ui::Underline, TRUE == logFont.lfUnderline );
+	}
+
+	textEffect.m_textColor = pDraw->clrText;
+	textEffect.m_bkColor = pDraw->clrTextBk;
+	return textEffect;
 }
 
 bool CReportListControl::ParentHandlesCustomDraw( void )
@@ -1753,13 +1792,6 @@ BOOL CReportListControl::OnNmCustomDraw_Reflect( NMHDR* pNmHdr, LRESULT* pResult
 			*pResult = CDRF_NOTIFYITEMDRAW;
 			break;
 		case CDDS_ITEMPREPAINT:
-			if ( m_useAlternateRowColoring )
-				if ( index & 0x01 )
-				{
-					pDraw->clrTextBk = color::GhostWhite;
-					*pResult = CDRF_NEWFONT;
-				}
-
 			*pResult = CDRF_NEWFONT | CDRF_NOTIFYSUBITEMDRAW;
 
 			if ( m_pCustomImager.get() != NULL )
@@ -1768,7 +1800,7 @@ BOOL CReportListControl::OnNmCustomDraw_Reflect( NMHDR* pNmHdr, LRESULT* pResult
 
 			break;
 		case CDDS_SUBITEM | CDDS_ITEMPREPAINT:
-			if ( ApplyTextEffectAt( pDraw, AsPtr< utl::ISubject >( pDraw->nmcd.lItemlParam ), pDraw->iSubItem ) )
+			if ( ApplyTextEffectAt( pDraw, pDraw->nmcd.lItemlParam != 0 ? pDraw->nmcd.lItemlParam : pDraw->nmcd.dwItemSpec, pDraw->iSubItem ) )
 				*pResult |= CDRF_NEWFONT;
 			break;
 		case CDDS_ITEMPOSTPAINT:

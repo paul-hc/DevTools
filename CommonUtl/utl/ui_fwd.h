@@ -40,14 +40,37 @@ namespace ui
 
 		static CTextEffect MakeColor( COLORREF textColor, COLORREF bkColor = CLR_NONE, ui::TFontEffect fontEffect = ui::Regular ) { return CTextEffect( fontEffect, textColor, bkColor ); }
 
-		CTextEffect& operator|=( const CTextEffect& right ) { CombineWith( right ); return *this; }
-		CTextEffect operator|( const CTextEffect& right ) const { CTextEffect effect = *this; effect.CombineWith( right ); return effect; }
+		bool IsNull( void ) const { return ui::Regular == m_fontEffect && CLR_NONE == m_textColor && CLR_NONE == m_bkColor; }
 
-		void CombineWith( const CTextEffect& right );
+		bool AssignPtr( const CTextEffect* pRight )
+		{
+			if ( NULL == pRight )
+				return false;
+
+			if ( pRight != this )
+				*this = *pRight;
+			return true;
+		}
+
+		CTextEffect& operator|=( const CTextEffect& right ) { Combine( right ); return *this; }
+		CTextEffect operator|( const CTextEffect& right ) const { CTextEffect effect = *this; effect.Combine( right ); return effect; }
+
+		void Combine( const CTextEffect& right );
+
+		bool CombinePtr( const CTextEffect* pRight )
+		{
+			if ( NULL == pRight )
+				return false;
+
+			Combine( *pRight );
+			return true;
+		}
 	public:
 		ui::TFontEffect m_fontEffect;
 		COLORREF m_textColor;
 		COLORREF m_bkColor;
+
+		static const ui::CTextEffect s_null;
 	};
 }
 

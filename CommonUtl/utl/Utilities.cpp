@@ -1260,7 +1260,9 @@ namespace ui
 
 	// CTextEffect implementation
 
-	void CTextEffect::CombineWith( const CTextEffect& right )
+	const ui::CTextEffect CTextEffect::s_null;
+
+	void CTextEffect::Combine( const CTextEffect& right )
 	{
 		if ( &right != this )
 		{

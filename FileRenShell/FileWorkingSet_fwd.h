@@ -6,6 +6,8 @@
 #include "utl/FileState.h"
 
 
+class CEnumTags;
+
 typedef std::pair< const fs::CFileState, fs::CFileState > TFileStatePair;		// ptr stored in m_fileListCtrl
 
 
@@ -18,6 +20,8 @@ namespace fmt
 namespace app
 {
 	enum DateTimeField { ModifiedDate, CreatedDate, AccessedDate, _DateTimeFieldCount };
+
+	const CEnumTags& GetTags_DateTimeField( void );
 
 	const CTime& GetTimeField( const fs::CFileState& fileState, DateTimeField field );
 	inline CTime& RefTimeField( fs::CFileState& rFileState, DateTimeField field ) { return const_cast< CTime& >( GetTimeField( rFileState, field ) ); }

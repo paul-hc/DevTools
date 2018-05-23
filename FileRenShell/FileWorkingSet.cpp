@@ -4,6 +4,7 @@
 #include "FileSetUi.h"
 #include "UndoChangeLog.h"
 #include "utl/Clipboard.h"
+#include "utl/EnumTags.h"
 #include "utl/FmtUtils.h"
 #include "utl/PathGenerator.h"
 #include "utl/RuntimeException.h"
@@ -17,6 +18,12 @@
 
 namespace app
 {
+	const CEnumTags& GetTags_DateTimeField( void )
+	{
+		static const CEnumTags tags( _T("Modified Date|Created Date|Accessed Date") );
+		return tags;
+	}
+
 	const CTime& GetTimeField( const fs::CFileState& fileState, DateTimeField field )
 	{
 		switch ( field )

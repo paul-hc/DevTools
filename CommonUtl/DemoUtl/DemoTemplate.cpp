@@ -82,20 +82,20 @@ CDemoTemplate::~CDemoTemplate()
 {
 }
 
-const std::vector< std::pair< std::tstring, std::tstring > >& CDemoTemplate::GetItems( void )
+const std::vector< std::tstring >& CDemoTemplate::GetTextItems( void )
 {
-	static std::vector< std::pair< std::tstring, std::tstring > > items;
+	static std::vector< std::tstring > items;
 	if ( items.empty() )
 	{
-		items.push_back( std::make_pair( _T("Zoot Allures"), _T("The Dub Room Special") ) );
-		items.push_back( std::make_pair( _T("Sheik Yerbouti"), _T("Joe's Menage") ) );
-		items.push_back( std::make_pair( _T("Orchestral Favorites"), _T("Lumpy Money") ) );
-		items.push_back( std::make_pair( _T("Joe's Garage"), _T("Joe's Camouflage") ) );
-		items.push_back( std::make_pair( _T("Tinsel Town Rebellion"), _T("Feeding the Monkies at Ma Maison") ) );
-		items.push_back( std::make_pair( _T("Shut Up 'n Play Yer Guitar"), _T("Roxy by Proxy") ) );
-		items.push_back( std::make_pair( _T("Return of the Son of Shut Up 'n Play Yer Guitar"), _T("Dance Me This") ) );
-		items.push_back( std::make_pair( _T("Playground Psychotics"), _T("1992") ) );
-		items.push_back( std::make_pair( _T("Cucamonga"), _T("1998") ) );
+		items.push_back( _T("Zoot Allures|1976|55 MB (57 767 672 bytes)") );
+		items.push_back( _T("Sheik Yerbouti|1979|90 MB (94 384 896 bytes)") );
+		items.push_back( _T("Orchestral Favorites|1979|42.9 MB (45 031 523 bytes)") );
+		items.push_back( _T("Joe's Garage|1979|146 MB (153 933 796 bytes)") );
+		items.push_back( _T("Tinsel Town Rebellion|1981|79.7 MB (83 671 231 bytes)") );
+		items.push_back( _T("Shut Up 'n Play Yer Guitar|1981|44.1 MB (46 268 558 bytes)") );
+		items.push_back( _T("Return of the Son of Shut Up 'n Play Yer Guitar|1982|46.8 MB (49 152 810 bytes)") );
+		items.push_back( _T("Baby Snakes|1983|49.1 MB (51 529 533 bytes)") );
+		items.push_back( _T("Them or Us|1984|90 MB (94 419 467 bytes)") );
 	}
 	return items;
 }
@@ -272,11 +272,20 @@ void CDemoTemplate::OnUpdateDropAlignCheckedPicker( CCmdUI* pCmdUI )
 
 // CListPage implementation
 
+namespace reg
+{
+	static const TCHAR section_listPage[] = _T("ListPage");
+	static const TCHAR entry_useAlternateRows[] = _T("UseAlternateRows");
+	static const TCHAR entry_useTextEffects[] = _T("UseTextEffects");
+}
+
 namespace layout
 {
 	CLayoutStyle listPageStyles[] =
 	{
-		{ IDC_FILE_RENAME_LIST, Size }
+		{ IDC_FILE_RENAME_LIST, Size },
+		{ IDC_USE_ALTERNATE_ROWS_CHECK, MoveX },
+		{ IDC_USE_TEXT_EFFECTS_CHECK, MoveX }
 	};
 }
 
@@ -296,27 +305,75 @@ void CListPage::DoDataExchange( CDataExchange* pDX )
 		CScopedLockRedraw freeze( &m_fileListView );
 		CScopedInternalChange internalChange( &m_fileListView );
 
-		const std::vector< std::pair< std::tstring, std::tstring > >& items = CDemoTemplate::GetItems();
-		int pos = 0;
+		const std::vector< std::tstring >& srcItems = CDemoTemplate::GetTextItems();
 
-		for ( std::vector< std::pair< std::tstring, std::tstring > >::const_iterator itItem = items.begin();
-			  itItem != items.end(); ++itItem, ++pos )
+		int pos = 0;
+		for ( std::vector< std::tstring >::const_iterator itSrc = srcItems.begin(); itSrc != srcItems.end(); ++itSrc, ++pos )
 		{
-			m_fileListView.InsertItem( LVIF_TEXT | LVIF_PARAM, pos, (LPTSTR)itItem->first.c_str(), 0, 0, 0, (LPARAM)itItem->first.c_str() );
-			m_fileListView.SetItemText( pos, Destination, itItem->second.c_str() );
+			std::vector< std::tstring > subItems;
+			str::Split( subItems, itSrc->c_str(), _T("|") );
+			ASSERT( !subItems.empty() );
+
+			std::vector< std::tstring >::const_iterator itSubItem = subItems.begin();
+
+			m_fileListView.InsertItem( LVIF_TEXT | LVIF_PARAM, pos, (LPTSTR)itSubItem->c_str(), 0, 0, 0, (LPARAM)itSrc->c_str() );
+			if ( ++itSubItem != subItems.end() )
+				m_fileListView.SetItemText( pos, Destination, itSubItem->c_str() );
+			if ( ++itSubItem != subItems.end() )
+				m_fileListView.SetItemText( pos, Notes, itSubItem->c_str() );
 		}
 
-		// cell text effects
-		m_fileListView.MarkCellAt( 1, Source, ui::CTextEffect( ui::Bold ) );
-		m_fileListView.MarkCellAt( 2, Destination, ui::CTextEffect( ui::Bold | ui::Italic | ui::Underline ) );
-		m_fileListView.MarkCellAt( 3, CReportListControl::EntireRecord, ui::CTextEffect( ui::Bold | ui::Underline, color::Red, color::LightGreenish ) );
-		m_fileListView.MarkCellAt( 5, CReportListControl::EntireRecord, ui::CTextEffect( ui::Bold | ui::Underline, color::Red, color::PaleYellow ) );
-		m_fileListView.MarkCellAt( 5, Destination, ui::CTextEffect( ui::Bold, color::Blue ) );
-		m_fileListView.MarkCellAt( 6, Destination, ui::CTextEffect( ui::Bold, color::Red ) );
-		m_fileListView.MarkCellAt( 7, CReportListControl::EntireRecord, ui::CTextEffect( ui::Underline, color::Green, color::PastelPink ) );
+		CheckDlgButton( IDC_USE_ALTERNATE_ROWS_CHECK, AfxGetApp()->GetProfileInt( reg::section_listPage, reg::entry_useAlternateRows, true ) );
+		CheckDlgButton( IDC_USE_TEXT_EFFECTS_CHECK, AfxGetApp()->GetProfileInt( reg::section_listPage, reg::entry_useTextEffects, true ) );
+
+		OnToggle_UseAlternateRows();
+		OnToggle_UseTextEffects();
 	}
 
 	CLayoutPropertyPage::DoDataExchange( pDX );
+}
+
+BEGIN_MESSAGE_MAP( CListPage, CLayoutPropertyPage )
+	ON_BN_CLICKED( IDC_USE_ALTERNATE_ROWS_CHECK, OnToggle_UseAlternateRows )
+	ON_BN_CLICKED( IDC_USE_TEXT_EFFECTS_CHECK, OnToggle_UseTextEffects )
+END_MESSAGE_MAP()
+
+void CListPage::OnToggle_UseAlternateRows( void )
+{
+	bool useAlternateRows = IsDlgButtonChecked( IDC_USE_ALTERNATE_ROWS_CHECK ) != FALSE;
+	AfxGetApp()->WriteProfileInt( reg::section_listPage, reg::entry_useAlternateRows, useAlternateRows );
+
+	m_fileListView.SetUseAlternateRowColoring( useAlternateRows );
+	m_fileListView.Invalidate();
+}
+
+void CListPage::OnToggle_UseTextEffects( void )
+{
+	bool useTextEffects = IsDlgButtonChecked( IDC_USE_TEXT_EFFECTS_CHECK ) != FALSE;
+	AfxGetApp()->WriteProfileInt( reg::section_listPage, reg::entry_useTextEffects, useTextEffects );
+
+	if ( useTextEffects )
+	{
+		// list global text effects
+		m_fileListView.RefTextEffect().m_textColor = color::Violet;
+
+		// rows/cells text effects
+		m_fileListView.MarkCellAt( 0, Source, ui::CTextEffect( ui::Bold ) );
+		m_fileListView.MarkCellAt( 2, Destination, ui::CTextEffect( ui::Bold | ui::Italic | ui::Underline ) );
+		m_fileListView.MarkCellAt( 3, CReportListControl::EntireRecord, ui::CTextEffect( ui::Bold | ui::Underline, color::Red, color::PaleYellow ) );
+		m_fileListView.MarkCellAt( 5, CReportListControl::EntireRecord, ui::CTextEffect( ui::Bold | ui::Underline, color::Magenta, color::LightGreenish ) );
+		m_fileListView.MarkCellAt( 5, Destination, ui::CTextEffect( ui::Bold, color::Blue ) );
+		m_fileListView.MarkCellAt( 6, Destination, ui::CTextEffect( ui::Bold, color::Red ) );
+		m_fileListView.MarkCellAt( 7, CReportListControl::EntireRecord, ui::CTextEffect( ui::Regular, color::Black ) );
+		m_fileListView.MarkCellAt( 8, CReportListControl::EntireRecord, ui::CTextEffect( ui::Underline, color::Green, color::PastelPink ) );
+	}
+	else
+	{
+		m_fileListView.RefTextEffect() = ui::CTextEffect::s_null;
+		m_fileListView.ClearMarkedCells();
+	}
+
+	m_fileListView.Invalidate();
 }
 
 
@@ -376,19 +433,25 @@ void CEditPage::DoDataExchange( CDataExchange* pDX )
 		static const TCHAR lineEnd[] = _T("\r\n");
 		std::tostringstream src, dest;
 
-		const std::vector< std::pair< std::tstring, std::tstring > >& items = CDemoTemplate::GetItems();
-		for ( std::vector< std::pair< std::tstring, std::tstring > >::const_iterator itItem = items.begin();
-			  itItem != items.end(); ++itItem )
+		const std::vector< std::tstring >& srcItems = CDemoTemplate::GetTextItems();
+		for ( std::vector< std::tstring >::const_iterator itSrc = srcItems.begin(); itSrc != srcItems.end(); ++itSrc )
 		{
-			if ( itItem != items.begin() )
+			if ( itSrc != srcItems.begin() )
 			{
 				src << lineEnd;
 				dest << lineEnd;
 			}
-			src << itItem->first;
-			dest << itItem->second;
-			m_sourceCombo.AddString( itItem->first.c_str() );
-			m_destCombo.AddString( itItem->second.c_str() );
+
+			std::vector< std::tstring > subItems;
+			str::Split( subItems, itSrc->c_str(), _T("|") );
+			ASSERT( !subItems.empty() );
+
+			std::vector< std::tstring >::const_iterator itSubItem = subItems.begin();
+			src << *itSubItem;
+			m_sourceCombo.AddString( itSubItem->c_str() );
+
+			dest << *++itSubItem;
+			m_destCombo.AddString( itSubItem->c_str() );
 		}
 		ui::SetWindowText( m_sourceEdit, src.str() );
 		ui::SetWindowText( m_destEdit, dest.str() );

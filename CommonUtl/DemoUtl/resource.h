@@ -98,6 +98,8 @@
 #define IDC_FORCE_CVT_EQUAL_BPP_CHECK   1084
 #define IDC_FORCE_CVT_COPY_PIXELS_CHECK 1085
 #define IDC_RUN_IMAGE_TESTS             1086
+#define IDC_USE_ALTERNATE_ROWS_CHECK    1087
+#define IDC_USE_TEXT_EFFECTS_CHECK      1088
 #define IDS_OLE_INIT_FAILED             5000
 #define IDS_CHANGE_CASE_TAGS            5001
 #define ID_STUDY_IMAGE                  32772
@@ -127,7 +129,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        145
 #define _APS_NEXT_COMMAND_VALUE         32798
-#define _APS_NEXT_CONTROL_VALUE         1087
+#define _APS_NEXT_CONTROL_VALUE         1089
 #define _APS_NEXT_SYMED_VALUE           5002
 #endif
 #endif
