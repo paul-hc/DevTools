@@ -82,7 +82,7 @@ namespace fmt
 
 		if ( !parsedHex )
 			if ( uiFormat )
-				fs::GetTags_FileAttributes().ParseKey( reinterpret_cast< int* >( &fileAttr ), text, _T(", ") );
+				fs::GetTags_FileAttributes().ParseUi( reinterpret_cast< int* >( &fileAttr ), text, _T(", ") );
 			else
 				fs::GetTags_FileAttributes().ParseKey( reinterpret_cast< int* >( &fileAttr ), text, _T("") );
 

@@ -98,6 +98,8 @@ CReportListControl::CReportListControl( UINT columnLayoutId /*= 0*/, DWORD listS
 	, m_listAccel( keys, COUNT_OF( keys ) )
 	, m_pDataSourceFactory( ole::GetStdDataSourceFactory() )
 	, m_parentHandlesCustomDraw( -1 )
+	, m_removedTextEffect( ui::Bold, s_removedTextColor )
+	, m_modifiedTextEffect( ui::Bold, s_modifiedTextColor )
 {
 	m_pPopupMenu[ OnSelection ] = &GetStdPopupMenu( OnSelection );
 	m_pPopupMenu[ Nowhere ] = &GetStdPopupMenu( Nowhere );
@@ -833,7 +835,7 @@ utl::ISubject* CReportListControl::GetObjectAt( int index ) const
 	return NULL;
 }
 
-int CReportListControl::InsertObjectItem( int index, utl::ISubject* pObject, int imageIndex /*= No_Image*/ )
+int CReportListControl::InsertObjectItem( int index, const utl::ISubject* pObject, int imageIndex /*= No_Image*/ )
 {
 	std::tstring displayCode;
 	if ( pObject != NULL )

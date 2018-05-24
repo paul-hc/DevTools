@@ -27,10 +27,10 @@ public:
 	const std::vector< std::tstring >& GetUiTags( void ) const { return m_uiTags; }
 
 	std::tstring FormatKey( int flags, const TCHAR* pSep = m_tagSep ) const { return Format( flags, m_keyTags, pSep ); }
-	void ParseKey( int* pFlags, const std::tstring& text, const TCHAR* pSep = m_tagSep ) const { Parse( pFlags, text, m_keyTags, pSep ); }
+	void ParseKey( int* pFlags, const std::tstring& text, const TCHAR* pSep = m_tagSep ) const { Parse( pFlags, text, m_keyTags, pSep, str::Case ); }
 
 	std::tstring FormatUi( int flags, const TCHAR* pSep = m_tagSep ) const { return Format( flags, m_uiTags, pSep ); }
-	void ParseUi( int* pFlags, const std::tstring& text, const TCHAR* pSep = m_tagSep ) const { Parse( pFlags, text, m_uiTags, pSep ); }
+	void ParseUi( int* pFlags, const std::tstring& text, const TCHAR* pSep = m_tagSep ) const { Parse( pFlags, text, m_uiTags, pSep, str::IgnoreCase ); }
 
 	enum TagType { KeyTag, UiTag };
 
@@ -42,8 +42,8 @@ private:
 	int LookupBitPos( unsigned int flag ) const { int pos = FindBitPos( flag ); ENSURE( pos < (int)m_uiTags.size() ); return pos; }
 
 	static std::tstring Format( int flags, const std::vector< std::tstring >& tags, const TCHAR* pSep );
-	static void Parse( int* pFlags, const std::tstring& text, const std::vector< std::tstring >& tags, const TCHAR* pSep );
-	static bool Contains( const std::vector< std::tstring >& strings, const std::tstring& value );
+	static void Parse( int* pFlags, const std::tstring& text, const std::vector< std::tstring >& tags, const TCHAR* pSep, str::CaseType caseType );
+	static bool Contains( const std::vector< std::tstring >& strings, const std::tstring& value, str::CaseType caseType );
 private:
 	enum { MaxBits = 8 * sizeof( int ) };
 

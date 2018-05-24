@@ -389,6 +389,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\FileStatesDialog.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\FileStatesDialog.h"
+				>
+			</File>
+			<File
 				RelativePath=".\ImageDialog.cpp"
 				>
 			</File>

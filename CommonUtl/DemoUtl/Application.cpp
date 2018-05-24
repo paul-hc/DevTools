@@ -4,6 +4,7 @@
 #include "MainFrame.h"
 #include "ChildFrame.h"
 #include "ImageDialog.h"
+#include "FileStatesDialog.h"
 #include "ImageTests.h"
 #include "TestDoc.h"
 #include "TestFormView.h"
@@ -87,6 +88,13 @@ BOOL CApplication::InitInstance( void )
 		m_pMainWnd = &dlg;
 		if ( !imagePath.empty() )
 			dlg.SetImagePath( imagePath );
+		dlg.DoModal();
+		return FALSE;					// no app loop
+	}
+	else if ( app::HasCommandLineOption( _T("diffs") ) )		// "-diffs"
+	{
+		CFileStatesDialog dlg( AfxGetMainWnd() );
+		m_pMainWnd = &dlg;
 		dlg.DoModal();
 		return FALSE;					// no app loop
 	}

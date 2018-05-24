@@ -299,6 +299,7 @@ CListPage::CListPage( void )
 void CListPage::DoDataExchange( CDataExchange* pDX )
 {
 	bool firstInit = NULL == m_fileListView.m_hWnd;
+
 	DDX_Control( pDX, IDC_FILE_RENAME_LIST, m_fileListView );
 	if ( firstInit )
 	{	// fill in the files list (Source|Destination)
@@ -355,7 +356,7 @@ void CListPage::OnToggle_UseTextEffects( void )
 	if ( useTextEffects )
 	{
 		// list global text effects
-		m_fileListView.RefTextEffect().m_textColor = color::Violet;
+		m_fileListView.m_defaultTextEffect.m_textColor = color::Violet;
 
 		// rows/cells text effects
 		m_fileListView.MarkCellAt( 0, Source, ui::CTextEffect( ui::Bold ) );
@@ -369,7 +370,7 @@ void CListPage::OnToggle_UseTextEffects( void )
 	}
 	else
 	{
-		m_fileListView.RefTextEffect() = ui::CTextEffect::s_null;
+		m_fileListView.m_defaultTextEffect = ui::CTextEffect::s_null;
 		m_fileListView.ClearMarkedCells();
 	}
 

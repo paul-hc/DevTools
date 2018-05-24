@@ -35,6 +35,7 @@ protected:
 	// message map functions
 	afx_msg void OnRunImageUnitTests( void );
 	afx_msg void OnStudyImage( void );
+	afx_msg void OnStudyListDiffs( void );
 
 	DECLARE_MESSAGE_MAP()
 };

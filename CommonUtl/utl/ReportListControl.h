@@ -71,8 +71,6 @@ public:
 	bool UseAlternateRowColoring( void ) const { return m_useAlternateRowColoring; }
 	void SetUseAlternateRowColoring( bool useAlternateRowColoring = true ) { m_useAlternateRowColoring = useAlternateRowColoring; }
 
-	ui::CTextEffect& RefTextEffect( void ) { return m_defaultTextEffect; }
-
 	const std::tstring& GetSection( void ) const { return m_regSection; }
 	void SetSection( const std::tstring& regSection ) { m_regSection = regSection; }
 public:
@@ -194,7 +192,7 @@ public:
 
 	enum Column { Code };
 
-	virtual int InsertObjectItem( int index, utl::ISubject* pObject, int imageIndex = No_Image );
+	virtual int InsertObjectItem( int index, const utl::ISubject* pObject, int imageIndex = No_Image );
 
 	void SetSubItemText( int index, int subItem, const std::tstring& text, int imageIndex = No_Image );
 	void SetSubItemImage( int index, int subItem, int imageIndex );
@@ -378,7 +376,6 @@ private:
 	stdext::hash_map< TCellPair, ui::CTextEffect > m_markedCells;
 	std::auto_ptr< ui::CFontEffectCache > m_pFontCache;		// self-encapsulated
 	ITextEffectCallback* m_pTextEffectCallback;
-	ui::CTextEffect m_defaultTextEffect;				// for all items in the list
 
 	CImageList* m_pImageList;
 	CImageList* m_pLargeImageList;
@@ -402,8 +399,14 @@ private:
 
 	std::auto_ptr< CCustomImager > m_pCustomImager;
 
-	BOOL m_parentHandlesCustomDraw;			// self-encapsulated
+	BOOL m_parentHandlesCustomDraw;						// self-encapsulated
 public:
+	ui::CTextEffect m_defaultTextEffect;				// for all items in the list
+	ui::CTextEffect m_removedTextEffect;				// for item diffs: text removed from source
+	ui::CTextEffect m_modifiedTextEffect;				// for item diffs: text modified in dest
+
+	static const COLORREF s_removedTextColor = color::Red;
+	static const COLORREF s_modifiedTextColor = color::Blue;
 	static const TCHAR s_fmtRegColumnLayout[];
 public:
 	// generated stuff

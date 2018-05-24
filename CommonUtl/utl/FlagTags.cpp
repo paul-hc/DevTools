@@ -80,7 +80,7 @@ std::tstring CFlagTags::Format( int flags, const std::vector< std::tstring >& ta
 	return str::Join( flagsOn, pSep );
 }
 
-void CFlagTags::Parse( int* pFlags, const std::tstring& text, const std::vector< std::tstring >& tags, const TCHAR* pSep )
+void CFlagTags::Parse( int* pFlags, const std::tstring& text, const std::vector< std::tstring >& tags, const TCHAR* pSep, str::CaseType caseType )
 {
 	ASSERT( !tags.empty() );
 	ASSERT_PTR( pFlags );
@@ -100,14 +100,13 @@ void CFlagTags::Parse( int* pFlags, const std::tstring& text, const std::vector<
 	// preserve unknown bits: set each known flag individually
 	for ( size_t pos = 0; pos != tags.size(); ++pos )
 		if ( !tags[ pos ].empty() )					// flag is defined
-			SetBitFlag( *pFlags, static_cast< int >( pos ), Contains( flagsOn, tags[ pos ] ) );
+			SetBitFlag( *pFlags, static_cast< int >( pos ), Contains( flagsOn, tags[ pos ], caseType ) );
 }
 
-bool CFlagTags::Contains( const std::vector< std::tstring >& strings, const std::tstring& value )
+bool CFlagTags::Contains( const std::vector< std::tstring >& strings, const std::tstring& value, str::CaseType caseType )
 {
-	for ( std::vector< std::tstring >::const_iterator itString = strings.begin();
-		  itString != strings.end(); ++itString )
-		if ( pred::Equal == str::CompareNoCase( *itString, value ) )
+	for ( std::vector< std::tstring >::const_iterator itString = strings.begin(); itString != strings.end(); ++itString )
+		if ( str::EqualsN( itString->c_str(), value.c_str(), utl::npos, str::Case == caseType ) )
 			return true;
 
 	return false;

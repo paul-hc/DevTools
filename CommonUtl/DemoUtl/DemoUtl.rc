@@ -299,9 +299,10 @@ STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD
 FONT 8, "MS Shell Dlg", 0, 0, 0x1
 BEGIN
     GROUPBOX        "Test",IDC_GROUP_BOX_1,7,7,329,30
-    PUSHBUTTON      "Run Unit &Tests",ID_RUN_TESTS,13,17,77,14
-    PUSHBUTTON      "Run &Image Tests",IDC_RUN_IMAGE_TESTS,95,17,77,14
-    PUSHBUTTON      "&Study Image...",ID_STUDY_IMAGE,177,17,77,14
+    PUSHBUTTON      "Run Unit &Tests",ID_RUN_TESTS,13,17,63,14
+    PUSHBUTTON      "Run &Image Tests",IDC_RUN_IMAGE_TESTS,81,17,63,14
+    PUSHBUTTON      "&Study Image...",ID_STUDY_IMAGE,149,17,63,14
+    PUSHBUTTON      "&Study List Diffs...",ID_STUDY_LIST_DIFFS,217,17,63,14
     DEFPUSHBUTTON   "&Dialog...",IDC_OPEN_DIALOG_BUTTON,274,45,62,14,WS_GROUP
     PUSHBUTTON      "&Properties...",IDC_OPEN_PROPERTIES_BUTTON,274,61,62,14
     PUSHBUTTON      "&Modeless",IDC_CREATE_PROPERTIES_BUTTON,274,77,62,14
@@ -514,6 +515,20 @@ BEGIN
     LTEXT           "Static",IDC_TRANSP_COLOR_INFO,103,3,115,12,SS_CENTERIMAGE | SS_ENDELLIPSIS
 END
 
+IDD_FILE_STATES_DIALOG DIALOGEX 0, 0, 316, 167
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "List Control with Differences"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,205,146,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,259,146,50,14
+    CONTROL         "",IDC_FILE_STATE_LIST,"SysListView32",LVS_REPORT | LVS_SINGLESEL | LVS_SHOWSELALWAYS | WS_BORDER | WS_GROUP | WS_TABSTOP,7,34,302,102
+    CONTROL         "&Alternate rows",IDC_USE_ALTERNATE_ROWS_CHECK,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,182,7,63,10
+    CONTROL         "&Text effects",IDC_USE_TEXT_EFFECTS_CHECK,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,254,7,55,10
+    LTEXT           "File states:",IDC_STATIC,7,23,36,8
+    CONTROL         "&Different items mode",IDC_USE_DIFFS_CHECK,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,7,83,10
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -658,6 +673,14 @@ BEGIN
         RIGHTMARGIN, 218
         TOPMARGIN, 3
         BOTTOMMARGIN, 15
+    END
+
+    IDD_FILE_STATES_DIALOG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 309
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 160
     END
 END
 #endif    // APSTUDIO_INVOKED
@@ -841,6 +864,11 @@ STRINGTABLE
 BEGIN
     ID_SET_AUTO_TRANSP_COLOR "Set image auto-transparent color"
     ID_RESET_TRANSP_COLOR   "Reset image transparent color"
+END
+
+STRINGTABLE 
+BEGIN
+    IDC_FILE_STATE_LIST     "File name=150|DEST File name=150|Attributes|DEST Attributes|Created Date=125|DEST Created Date=125|Notes=-1/150"
 END
 
 #endif    // English (U.S.) resources

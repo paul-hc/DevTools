@@ -4,6 +4,7 @@
 #include "TestFormView.h"
 #include "DemoTemplate.h"
 #include "ImageDialog.h"
+#include "FileStatesDialog.h"
 #include "ImageTests.h"
 #include "utl/Utilities.h"
 #include "resource.h"
@@ -67,6 +68,7 @@ void CTestFormView::OnInitialUpdate( void )
 BEGIN_MESSAGE_MAP( CTestFormView, CLayoutFormView )
 	ON_BN_CLICKED( IDC_RUN_IMAGE_TESTS, OnRunImageUnitTests )
 	ON_BN_CLICKED( ID_STUDY_IMAGE, OnStudyImage )
+	ON_BN_CLICKED( ID_STUDY_LIST_DIFFS, OnStudyListDiffs )
 END_MESSAGE_MAP()
 
 void CTestFormView::OnRunImageUnitTests( void )
@@ -79,5 +81,11 @@ void CTestFormView::OnRunImageUnitTests( void )
 void CTestFormView::OnStudyImage( void )
 {
 	CImageDialog dlg( AfxGetMainWnd() );
+	dlg.DoModal();
+}
+
+void CTestFormView::OnStudyListDiffs( void )
+{
+	CFileStatesDialog dlg( AfxGetMainWnd() );
 	dlg.DoModal();
 }

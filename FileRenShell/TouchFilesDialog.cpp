@@ -324,7 +324,10 @@ fs::UserFeedback CTouchFilesDialog::HandleFileError( const fs::CPath& sourcePath
 
 void CTouchFilesDialog::CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARAM rowKey, int subItem ) const
 {
-	static const ui::CTextEffect modPathName( ui::Bold ), modDest( ui::Regular, app::ColorModifiedText ), modSrc( ui::Regular, app::ColorDeletedText ), errorBk( ui::Regular, CLR_NONE, app::ColorErrorBk );
+	static const ui::CTextEffect s_modPathName( ui::Bold );
+	static const ui::CTextEffect s_modDest( ui::Regular, CReportListControl::s_modifiedTextColor );
+	static const ui::CTextEffect s_modSrc( ui::Regular, CReportListControl::s_removedTextColor );
+	static const ui::CTextEffect s_errorBk( ui::Regular, CLR_NONE, app::ColorErrorBk );
 
 	const CTouchItem* pTouchItem = CReportListControl::AsPtr< CTouchItem >( rowKey );
 	const ui::CTextEffect* pTextEffect = NULL;
@@ -335,7 +338,7 @@ void CTouchFilesDialog::CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARA
 		case PathName:
 			isModified = pTouchItem->IsModified();
 			if ( isModified )
-				pTextEffect = &modPathName;
+				pTextEffect = &s_modPathName;
 			break;
 		case SrcAttributes:
 			isSrc = true;		// fall-through
@@ -361,12 +364,12 @@ void CTouchFilesDialog::CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARA
 
 	if ( !isSrc && m_pBatchTransaction.get() != NULL )
 		if ( m_pBatchTransaction->ContainsError( pTouchItem->GetKeyPath() ) )
-			rTextEffect |= errorBk;
+			rTextEffect |= s_errorBk;
 
 	if ( pTextEffect != NULL )
 		rTextEffect |= *pTextEffect;
 	else if ( isModified )
-		rTextEffect |= isSrc ? modSrc : modDest;
+		rTextEffect |= isSrc ? s_modSrc : s_modDest;
 
 	if ( StoreMode == m_mode )
 	{

@@ -421,7 +421,7 @@ END
 STRINGTABLE 
 BEGIN
     IDC_PICK_RENAME_ACTIONS "More Rename Actions"
-    IDC_FILE_TOUCH_LIST     "File name=-1/150|Attributes|Last Modified Date=116|Created Date=116|Accessed Date=116|SRC Attributes|SRC Last Modified Date=116|SRC Created Date=116|SRC Accessed Date=116"
+    IDC_FILE_TOUCH_LIST     "File name=-1/150|Attributes|Last Modified Date=125|Created Date=125|Accessed Date=125|SRC Attributes|SRC Last Modified Date=125|SRC Created Date=125|SRC Accessed Date=125"
 END
 
 STRINGTABLE 

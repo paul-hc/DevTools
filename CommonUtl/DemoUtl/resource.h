@@ -20,6 +20,7 @@
 #define IDR_CONTEXT_MENU                144
 #define IDD_IMAGE_PAGE_CONVERT_IMAGE    145
 #define IDD_IMAGE_PAGE_SHOW_IMAGE       146
+#define IDD_FILE_STATES_DIALOG          147
 #define IDC_OPEN_DIALOG_BUTTON          1000
 #define IDC_OPEN_PROPERTIES_BUTTON      1001
 #define IDC_CREATE_PROPERTIES_BUTTON    1002
@@ -100,11 +101,14 @@
 #define IDC_RUN_IMAGE_TESTS             1086
 #define IDC_USE_ALTERNATE_ROWS_CHECK    1087
 #define IDC_USE_TEXT_EFFECTS_CHECK      1088
+#define IDC_FILE_STATE_LIST             1089
+#define IDC_USE_DIFFS_CHECK             1090
 #define IDS_OLE_INIT_FAILED             5000
 #define IDS_CHANGE_CASE_TAGS            5001
 #define ID_STUDY_IMAGE                  32772
 #define ID_CHANGE_CASE                  32773
 #define ID_SEND_TO_CLIPBOARD            32774
+#define ID_STUDY_LIST_DIFFS             32774
 #define ID_NUMERIC_SEQUENCE             32775
 #define ID_NUMERIC_SEQUENCE_2DIGITS     32776
 #define ID_NUMERIC_SEQUENCE_3DIGITS     32777
@@ -127,9 +131,9 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        145
+#define _APS_NEXT_RESOURCE_VALUE        148
 #define _APS_NEXT_COMMAND_VALUE         32798
-#define _APS_NEXT_CONTROL_VALUE         1089
+#define _APS_NEXT_CONTROL_VALUE         1091
 #define _APS_NEXT_SYMED_VALUE           5002
 #endif
 #endif
