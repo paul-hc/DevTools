@@ -1,6 +1,7 @@
 
 #include "stdafx.h"
 #include "ReportListControl.h"
+#include "ReportListCustomDraw.h"
 #include "ui_fwd.h"
 #include "Image_fwd.h"
 #include "ImageStore.h"
@@ -1331,78 +1332,6 @@ const ui::CTextEffect* CReportListControl::FindTextEffectAt( TRowKey rowKey, TCo
 	return utl::FindValuePtr( m_markedCells, TCellPair( rowKey, subItem ) );
 }
 
-bool CReportListControl::ApplyTextEffectAt( NMLVCUSTOMDRAW* pDraw, TRowKey rowKey, TColumn subItem )
-{
-	ASSERT_PTR( pDraw );
-
-	const std::pair< int, utl::ISubject* > info( static_cast< int >( pDraw->nmcd.dwItemSpec ), ToSubject( pDraw->nmcd.lItemlParam ) );
-
-	ui::CTextEffect textEffect = m_defaultTextEffect;					// start with list effect
-	textEffect.AssignPtr( FindTextEffectAt( rowKey, EntireRecord ) );	// assign entire record
-
-	if ( subItem != EntireRecord )
-		textEffect.AssignPtr( FindTextEffectAt( rowKey, subItem ) );	// set individual cell
-
-	if ( m_pTextEffectCallback != NULL )
-		m_pTextEffectCallback->CombineTextEffectAt( textEffect, rowKey, subItem );		// combine with calback effect (additive effect)
-
-	if ( m_useAlternateRowColoring )
-		if ( HasFlag( info.first, 0x01 ) )
-			if ( CLR_NONE == textEffect.m_bkColor )
-				textEffect.m_bkColor = color::GhostWhite;
-
-	return ApplyTextEffect( pDraw, textEffect );
-}
-
-bool CReportListControl::ApplyTextEffect( NMLVCUSTOMDRAW* pDraw, const ui::CTextEffect& textEffect )
-{
-	ASSERT_PTR( pDraw );
-
-// must reset previous cell effects
-//	if ( textEffect.IsNull() )
-//		return false;
-
-	bool modified = false;
-
-	if ( HGDIOBJ hFont = GetFontEffectCache()->Lookup( textEffect.m_fontEffect )->GetSafeHandle() )
-		if ( ::SelectObject( pDraw->nmcd.hdc, hFont ) != hFont )
-			modified = true;
-
-	// when assigning CLR_NONE, the list view uses the default colour properly: this->GetTextColor(), this->GetBkColor()
-	if ( textEffect.m_textColor != pDraw->clrText )
-	{
-		pDraw->clrText = textEffect.m_textColor;
-		modified = true;
-	}
-
-	if ( textEffect.m_bkColor != pDraw->clrTextBk )
-	{
-		pDraw->clrTextBk = textEffect.m_bkColor;
-		modified = true;
-	}
-
-	return modified;
-}
-
-ui::CTextEffect CReportListControl::ExtractTextEffects( const NMLVCUSTOMDRAW* pDraw )
-{
-	ui::CTextEffect textEffect;
-	if ( HGDIOBJ hFont = ::GetCurrentObject( pDraw->nmcd.hdc, OBJ_FONT ) )
-	{
-		LOGFONT logFont;
-		memset( &logFont, 0, sizeof( LOGFONT ) );
-		::GetObject( hFont, sizeof( LOGFONT ), &logFont );
-
-		SetFlag( textEffect.m_fontEffect, ui::Bold, FW_BOLD == logFont.lfWeight );
-		SetFlag( textEffect.m_fontEffect, ui::Italic, TRUE == logFont.lfItalic );
-		SetFlag( textEffect.m_fontEffect, ui::Underline, TRUE == logFont.lfUnderline );
-	}
-
-	textEffect.m_textColor = pDraw->clrText;
-	textEffect.m_bkColor = pDraw->clrTextBk;
-	return textEffect;
-}
-
 bool CReportListControl::ParentHandlesCustomDraw( void )
 {
 	if ( -1 == m_parentHandlesCustomDraw )
@@ -1802,9 +1731,12 @@ BOOL CReportListControl::OnNmCustomDraw_Reflect( NMHDR* pNmHdr, LRESULT* pResult
 
 			break;
 		case CDDS_SUBITEM | CDDS_ITEMPREPAINT:
-			if ( ApplyTextEffectAt( pDraw, pDraw->nmcd.lItemlParam != 0 ? pDraw->nmcd.lItemlParam : pDraw->nmcd.dwItemSpec, pDraw->iSubItem ) )
+		{
+			CReportListCustomDraw draw( pDraw, this );
+			if ( draw.ApplyCellTextEffect() )
 				*pResult |= CDRF_NEWFONT;
 			break;
+		}
 		case CDDS_ITEMPOSTPAINT:
 			if ( m_pCustomImager.get() != NULL )
 			{

@@ -137,7 +137,7 @@ void CAboutBox::SetupBuildInfoList( void )
 	m_pBuildInfoList->SetItemText( pos, Value, str::Format( _T("%d bit"), utl::GetPlatformBits() ).c_str() );
 
 	m_pBuildInfoList->InsertItem( ++pos, _T("Build") );
-	m_pBuildInfoList->SetItemText( pos, Value, hlp::IsDebug() ? _T("debug") : _T("RELEASE") );
+	m_pBuildInfoList->SetItemText( pos, Value, hlp::IsDebug() ? _T("DEBUG") : _T("RELEASE") );
 
 	m_pBuildInfoList->InsertItem( ++pos, _T("Character Set") );
 	m_pBuildInfoList->SetItemText( pos, Value, hlp::IsUnicode() ? _T("Unicode") : _T("ANSI") );

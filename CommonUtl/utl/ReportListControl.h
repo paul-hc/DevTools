@@ -15,6 +15,7 @@
 
 
 class CListSelectionData;
+class CReportListCustomDraw;
 namespace ui { class CFontEffectCache; }
 namespace ole { class CDataSource; }
 
@@ -46,6 +47,7 @@ enum CheckState
 class CReportListControl : public CListCtrl
 						 , public CInternalChange
 {
+	friend class CReportListCustomDraw;
 public:
 	enum
 	{
@@ -291,12 +293,7 @@ public:
 	};
 
 	void SetTextEffectCallback( ITextEffectCallback* pTextEffectCallback ) { m_pTextEffectCallback = pTextEffectCallback; }
-
-	static ui::CTextEffect ExtractTextEffects( const NMLVCUSTOMDRAW* pDraw );
 protected:
-	virtual bool ApplyTextEffectAt( NMLVCUSTOMDRAW* pDraw, TRowKey rowKey, TColumn subItem );
-	bool ApplyTextEffect( NMLVCUSTOMDRAW* pDraw, const ui::CTextEffect& textEffect );
-
 	ui::CFontEffectCache* GetFontEffectCache( void );
 	bool ParentHandlesCustomDraw( void );
 public:
@@ -401,7 +398,7 @@ private:
 
 	BOOL m_parentHandlesCustomDraw;						// self-encapsulated
 public:
-	ui::CTextEffect m_defaultTextEffect;				// for all items in the list
+	ui::CTextEffect m_listTextEffect;					// for all items in the list
 	ui::CTextEffect m_removedTextEffect;				// for item diffs: text removed from source
 	ui::CTextEffect m_modifiedTextEffect;				// for item diffs: text modified in dest
 

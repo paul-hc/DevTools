@@ -1067,6 +1067,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\ReportListCustomDraw.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\ReportListCustomDraw.h"
+				>
+			</File>
+			<File
 				RelativePath=".\ResourceData.cpp"
 				>
 			</File>

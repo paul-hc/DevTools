@@ -2,8 +2,8 @@
 #define FileStatesDialog_h
 #pragma once
 
-#include "utl/LayoutDialog.h"
 #include "utl/FileState.h"
+#include "utl/LayoutDialog.h"
 #include "utl/ReportListControl.h"
 
 
@@ -28,7 +28,6 @@ private:
 
 	static const fs::TFileStatePairMap& GetStatePairs( bool useDiffsMode );
 	static const std::tstring& GetNotesAt( size_t pos );
-
 
 	class CDisplayObject : public utl::ISubject
 	{

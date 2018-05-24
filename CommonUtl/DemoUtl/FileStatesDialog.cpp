@@ -72,7 +72,7 @@ CFileStatesDialog::CFileStatesDialog( CWnd* pParent )
 	m_fileListCtrl.SetTextEffectCallback( this );
 
 	m_fileListCtrl.SetUseAlternateRowColoring( m_useAlternateRows );
-	m_fileListCtrl.m_defaultTextEffect.m_textColor = m_useTextEffects ? color::Violet : CLR_NONE;	// list global text effects
+	m_fileListCtrl.m_listTextEffect.m_textColor = m_useTextEffects ? color::Violet : CLR_NONE;	// list global text effects
 }
 
 CFileStatesDialog::~CFileStatesDialog()
@@ -273,7 +273,7 @@ void CFileStatesDialog::OnToggle_UseTextEffects( void )
 	m_useTextEffects = IsDlgButtonChecked( IDC_USE_TEXT_EFFECTS_CHECK ) != FALSE;
 	AfxGetApp()->WriteProfileInt( reg::section_dialog, reg::entry_useTextEffects, m_useTextEffects );
 
-	m_fileListCtrl.m_defaultTextEffect.m_textColor = m_useTextEffects ? color::Violet : CLR_NONE;
+	m_fileListCtrl.m_listTextEffect.m_textColor = m_useTextEffects ? color::Violet : CLR_NONE;
 	m_fileListCtrl.Invalidate();
 }
 
