@@ -96,7 +96,7 @@ namespace lcs
 	class Comparator
 	{
 	public:
-		Comparator( const T* pSrc, size_t srcSize, const T* pDest, size_t destSize ) : m_src( pSrc, srcSize ), m_dest( pDest, destSize ) {}
+		Comparator( const T* pSrc, size_t srcSize, const T* pDest, size_t destSize, MatchFunc getMatchFunc = MatchFunc() ) : m_src( pSrc, srcSize ), m_dest( pDest, destSize ), m_getMatchFunc( getMatchFunc ) {}
 
 		template< typename StringType >
 		explicit Comparator( const StringType& src, const StringType& dest ) : m_src( src.c_str(), src.length() ), m_dest( dest.c_str(), dest.length() ) {}
@@ -126,6 +126,22 @@ namespace lcs
 		MatchFunc m_getMatchFunc;
 		std::vector< short > m_lcsArray;		// LCS working array
 	};
+
+
+	template< typename StringType, typename MatchFunc >
+	void CompareStrings( std::vector< CResult< typename StringType::value_type > >& rLcsSequence, const StringType& srcText, const StringType& destText, MatchFunc getMatchFunc )
+	{
+		typedef typename StringType::value_type CharType;
+
+		Comparator< CharType, MatchFunc > comparator( srcText.c_str(), srcText.size(), destText.c_str(), destText.size(), getMatchFunc );
+		comparator.Process( rLcsSequence );
+	}
+
+	template< typename StringType, typename MatchFunc >
+	inline void CompareStringPair( std::vector< CResult< typename StringType::value_type > >& rLcsSequence, const std::pair< StringType, StringType >& textPair, MatchFunc getMatchFunc )
+	{
+		CompareStrings( rLcsSequence, textPair.first, textPair.second, getMatchFunc );
+	}
 }
 
 

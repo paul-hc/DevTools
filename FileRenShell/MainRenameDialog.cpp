@@ -907,8 +907,8 @@ void CMainRenameDialog::OnCustomDraw_FileRenameList( NMHDR* pNmHdr, LRESULT* pRe
 
 	*pResult = CDRF_DODEFAULT;
 
-	static const CRect emptyRect( 0, 0, 0, 0 );
-	if ( emptyRect == pDraw->nmcd.rc )
+	static const CRect s_emptyRect( 0, 0, 0, 0 );
+	if ( s_emptyRect == pDraw->nmcd.rc )
 		return;			// IMP: avoid custom drawing for tooltips
 
 	// scope these variables so that are visible in the debugger
@@ -983,10 +983,11 @@ void CMainRenameDialog::CDisplayItem::ComputeMatchSeq( void )
 	if ( m_destFnameExt.empty() || str::MatchEqual == m_match )
 		return;
 
-	lcs::Comparator< TCHAR, path::GetMatch > comparator( m_srcFnameExt.c_str(), m_srcFnameExt.size(), m_destFnameExt.c_str(), m_destFnameExt.size() );
-
 	std::vector< lcs::CResult< TCHAR > > lcsSeq;
-	comparator.Process( lcsSeq );
+	{
+		lcs::Comparator< TCHAR, path::GetMatch > comparator( m_srcFnameExt.c_str(), m_srcFnameExt.size(), m_destFnameExt.c_str(), m_destFnameExt.size() );
+		comparator.Process( lcsSeq );
+	}
 
 	m_srcMatchSeq.reserve( m_srcFnameExt.size() );
 	m_destMatchSeq.reserve( m_destFnameExt.size() );

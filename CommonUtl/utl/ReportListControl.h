@@ -7,9 +7,11 @@
 #include "ISubject.h"
 #include "Image_fwd.h"
 #include "OleUtils.h"
+#include "MatchSequence.h"
 #include "Resequence.h"
 #include "ui_fwd.h"
 #include <vector>
+#include <list>
 #include <hash_map>
 #include <afxcmn.h>
 
@@ -167,6 +169,8 @@ private:
 	void PostColumnLayout( void );
 	void InputColumnLayout( std::vector< std::tstring >& rRegColumnLayoutItems );
 protected:
+	void ClearData( void );
+
 	virtual void SetupControl( void );
 	virtual bool CacheSelectionData( ole::CDataSource* pDataSource, int sourceFlags, const CListSelectionData& selData ) const;
 
@@ -293,6 +297,10 @@ public:
 	};
 
 	void SetTextEffectCallback( ITextEffectCallback* pTextEffectCallback ) { m_pTextEffectCallback = pTextEffectCallback; }
+
+	// diff columns
+	template< typename MatchFunc >
+	void SetupDiffColumns( TColumn srcColumn, TColumn destColumn, MatchFunc getMatchFunc );		// call after the list items are set up
 protected:
 	ui::CFontEffectCache* GetFontEffectCache( void );
 	bool ParentHandlesCustomDraw( void );
@@ -353,6 +361,15 @@ public:
 
 private:
 	void AddTransparentImage( void );
+
+	struct CDiffColumns
+	{
+		CDiffColumns( TColumn srcColumn = -1, TColumn destColumn = -1 ) : m_srcColumn( srcColumn ), m_destColumn( destColumn ) {}
+	public:
+		TColumn m_srcColumn;
+		TColumn m_destColumn;
+		stdext::hash_map< TRowKey, str::TMatchSequence > m_rowSequences;		// TRowKey is invariant to sorting
+	};
 private:
 	UINT m_columnLayoutId;
 	DWORD m_listStyleEx;
@@ -373,6 +390,8 @@ private:
 	stdext::hash_map< TCellPair, ui::CTextEffect > m_markedCells;
 	std::auto_ptr< ui::CFontEffectCache > m_pFontCache;		// self-encapsulated
 	ITextEffectCallback* m_pTextEffectCallback;
+
+	std::list< CDiffColumns > m_diffColumns;
 
 	CImageList* m_pImageList;
 	CImageList* m_pLargeImageList;
@@ -597,6 +616,21 @@ void CReportListControl::SelectItems( const std::vector< Type* >& rPtrs )
 		SetSelection( selIndexes, selIndexes.front(), false );
 	else
 		ClearSelection( false );
+}
+
+template< typename MatchFunc >
+void CReportListControl::SetupDiffColumns( TColumn srcColumn, TColumn destColumn, MatchFunc getMatchFunc )
+{
+	m_diffColumns.push_back( CDiffColumns( srcColumn, destColumn ) );
+
+	stdext::hash_map< TRowKey, str::TMatchSequence >& rRowSequences = m_diffColumns.back().m_rowSequences;
+
+	for ( int index = 0, itemCount = GetItemCount(); index != itemCount; ++index )
+	{
+		str::TMatchSequence& rMatchSequence = rRowSequences[ MakeRowKeyAt( index ) ];
+
+		rMatchSequence.Init( GetItemText( index, srcColumn ).GetString(), GetItemText( index, destColumn ).GetString(), getMatchFunc );
+	}
 }
 
 

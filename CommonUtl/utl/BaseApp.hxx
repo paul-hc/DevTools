@@ -88,7 +88,7 @@ int CBaseApp< BaseClass >::ExitInstance( void )
 template< typename BaseClass >
 BOOL CBaseApp< BaseClass >::PreTranslateMessage( MSG* pMsg )
 {
-	if ( CWnd* pActiveWnd = dynamic_cast< CWnd* >( CWnd::GetForegroundWindow() ) )
+	if ( CWnd* pActiveWnd = CWnd::FromHandlePermanent( ::GetForegroundWindow() ) )		// prevent crash in FileRenameShell due to Explorer.exe being multi-threaded
 		if ( m_appAccel.Translate( pMsg, pActiveWnd->GetSafeHwnd() ) )
 			return TRUE;
 

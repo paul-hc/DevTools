@@ -13,20 +13,25 @@ class CReportListCustomDraw
 public:
 	CReportListCustomDraw( NMLVCUSTOMDRAW* pDraw, CReportListControl* pList );
 
+	static bool IsTooltipDraw( const NMLVCUSTOMDRAW* pDraw );
+
 	bool ApplyCellTextEffect( void );
 	bool ApplyTextEffect( const ui::CTextEffect& textEffect );
 
 	ui::CTextEffect ExtractTextEffects( void ) const;
 private:
+	CDC* EnsureDC( void );
+
+	CRect MakeItemTextRect( void ) const;
+private:
 	NMLVCUSTOMDRAW* m_pDraw;
 	CReportListControl* m_pList;
-
-	int m_index;
-	TColumn m_subItem;
-	TRowKey m_rowKey;
-	utl::ISubject* m_pObject;
-
-	CDC* m_pDC;
+	CDC* m_pDC;			// lazy init on EnsureDC()
+public:
+	const int m_index;
+	const TColumn m_subItem;
+	const TRowKey m_rowKey;
+	const utl::ISubject* m_pObject;
 };
 
 

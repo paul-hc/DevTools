@@ -111,12 +111,19 @@ CReportListControl::CReportListControl( UINT columnLayoutId /*= 0*/, DWORD listS
 
 CReportListControl::~CReportListControl()
 {
+	ClearData();
 }
 
 bool CReportListControl::DeleteAllItems( void )
 {
-	m_markedCells.clear();
+	ClearData();
 	return CListCtrl::DeleteAllItems() != FALSE;
+}
+
+void CReportListControl::ClearData( void )
+{
+	m_markedCells.clear();
+	m_diffColumns.clear();
 }
 
 void CReportListControl::SetCustomImageDraw( ui::ICustomImageDraw* pCustomImageDraw, ImageListPos transpImgPos /*= -1*/ )
@@ -1713,7 +1720,10 @@ BOOL CReportListControl::OnLvnEndLabelEdit_Reflect( NMHDR* pNmHdr, LRESULT* pRes
 BOOL CReportListControl::OnNmCustomDraw_Reflect( NMHDR* pNmHdr, LRESULT* pResult )
 {
 	NMLVCUSTOMDRAW* pDraw = (NMLVCUSTOMDRAW*)pNmHdr;
-	int index = static_cast< int >( pDraw->nmcd.dwItemSpec );
+	if ( CReportListCustomDraw::IsTooltipDraw( pDraw ) )
+		return TRUE;		// IMP: avoid crash on custom drawing for tooltips
+
+	CReportListCustomDraw draw( pDraw, this );
 
 	*pResult = CDRF_DODEFAULT;
 
@@ -1726,22 +1736,19 @@ BOOL CReportListControl::OnNmCustomDraw_Reflect( NMHDR* pNmHdr, LRESULT* pResult
 			*pResult = CDRF_NEWFONT | CDRF_NOTIFYSUBITEMDRAW;
 
 			if ( m_pCustomImager.get() != NULL )
-				if ( IsItemVisible( index ) )
+				if ( IsItemVisible( draw.m_index ) )
 					*pResult |= CDRF_NOTIFYPOSTPAINT;		// will superimpose the thumbnails on top of transparent image
 
 			break;
 		case CDDS_SUBITEM | CDDS_ITEMPREPAINT:
-		{
-			CReportListCustomDraw draw( pDraw, this );
 			if ( draw.ApplyCellTextEffect() )
 				*pResult |= CDRF_NEWFONT;
 			break;
-		}
 		case CDDS_ITEMPOSTPAINT:
 			if ( m_pCustomImager.get() != NULL )
 			{
 				CRect itemImageRect;
-				if ( GetItemRect( index, itemImageRect, LVIR_ICON ) )		// item is visible?
+				if ( GetItemRect( draw.m_index, itemImageRect, LVIR_ICON ) )		// visible item?
 					if ( m_pCustomImager->m_pRenderer->CustomDrawItemImage( &pDraw->nmcd, itemImageRect ) )
 						return TRUE;		// handled
 			}
