@@ -11,7 +11,7 @@
 CReportListCustomDraw::CReportListCustomDraw( NMLVCUSTOMDRAW* pDraw, CReportListControl* pList )
 	: m_pDraw( safe_ptr( pDraw ) )
 	, m_pList( safe_ptr( pList ) )
-	, m_pDC( NULL )
+	, m_pDC( CDC::FromHandle( m_pDraw->nmcd.hdc ) )
 	, m_index( static_cast< int >( m_pDraw->nmcd.dwItemSpec ) )
 	, m_subItem( m_pDraw->iSubItem )
 	, m_rowKey( m_pDraw->nmcd.lItemlParam != 0 ? m_pDraw->nmcd.lItemlParam : m_index )
@@ -24,13 +24,6 @@ bool CReportListCustomDraw::IsTooltipDraw( const NMLVCUSTOMDRAW* pDraw )
 	ASSERT_PTR( pDraw );
 	static const CRect s_emptyRect( 0, 0, 0, 0 );
 	return ( s_emptyRect == pDraw->nmcd.rc ) != FALSE;
-}
-
-CDC* CReportListCustomDraw::EnsureDC( void )
-{
-	if ( NULL == m_pDC )
-		m_pDC = CDC::FromHandle( m_pDraw->nmcd.hdc );
-	return m_pDC;
 }
 
 bool CReportListCustomDraw::ApplyCellTextEffect( void )
@@ -55,11 +48,10 @@ bool CReportListCustomDraw::ApplyCellTextEffect( void )
 bool CReportListCustomDraw::ApplyTextEffect( const ui::CTextEffect& textEffect )
 {
 	// handle even if textEffect.IsNull() since it must reset previous cell effects
-
 	bool modified = false;
 
-	if ( HGDIOBJ hFont = m_pList->GetFontEffectCache()->Lookup( textEffect.m_fontEffect )->GetSafeHandle() )
-		if ( ::SelectObject( *m_pDC, hFont ) != hFont )
+	if ( CFont* pFont = m_pList->GetFontEffectCache()->Lookup( textEffect.m_fontEffect ) )
+		if ( m_pDC->SelectObject( pFont ) != pFont )
 			modified = true;
 
 	// when assigning CLR_NONE, the list view uses the default colour properly: this->GetTextColor(), this->GetBkColor()

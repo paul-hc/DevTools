@@ -138,6 +138,11 @@ void CAboutBox::SetupBuildInfoList( void )
 
 	m_pBuildInfoList->InsertItem( ++pos, _T("Build") );
 	m_pBuildInfoList->SetItemText( pos, Value, hlp::IsDebug() ? _T("DEBUG") : _T("RELEASE") );
+	if ( hlp::IsDebug() )
+	{
+		static const ui::CTextEffect s_debugEffect( ui::Bold, color::Red );
+		m_pBuildInfoList->MarkCellAt( pos, Value, s_debugEffect );
+	}
 
 	m_pBuildInfoList->InsertItem( ++pos, _T("Character Set") );
 	m_pBuildInfoList->SetItemText( pos, Value, hlp::IsUnicode() ? _T("Unicode") : _T("ANSI") );

@@ -1721,7 +1721,7 @@ BOOL CReportListControl::OnNmCustomDraw_Reflect( NMHDR* pNmHdr, LRESULT* pResult
 {
 	NMLVCUSTOMDRAW* pDraw = (NMLVCUSTOMDRAW*)pNmHdr;
 	if ( CReportListCustomDraw::IsTooltipDraw( pDraw ) )
-		return TRUE;		// IMP: avoid crash on custom drawing for tooltips
+		return TRUE;		// IMP: avoid custom drawing for tooltips
 
 	CReportListCustomDraw draw( pDraw, this );
 

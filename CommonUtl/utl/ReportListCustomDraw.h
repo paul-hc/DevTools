@@ -20,13 +20,11 @@ public:
 
 	ui::CTextEffect ExtractTextEffects( void ) const;
 private:
-	CDC* EnsureDC( void );
-
 	CRect MakeItemTextRect( void ) const;
 private:
 	NMLVCUSTOMDRAW* m_pDraw;
 	CReportListControl* m_pList;
-	CDC* m_pDC;			// lazy init on EnsureDC()
+	CDC* m_pDC;
 public:
 	const int m_index;
 	const TColumn m_subItem;

@@ -91,8 +91,8 @@ const fs::TFileStatePairMap& CFileStatesDialog::GetStatePairs( bool useDiffsMode
 	static fs::TFileStatePairMap s_statePairs, s_diffStatePairs;
 	if ( s_diffStatePairs.empty() )
 	{
-		hlp::RegisterNoDiffs( s_diffStatePairs, hlp::MakeFileState( _T("A Rain Song.gp"), _T("A"), _T("09-12-2012 14:17:13") ) );
-		hlp::RegisterNoDiffs( s_diffStatePairs, hlp::MakeFileState( _T("All Along The Watchtower.gp"), _T("A"), _T("23-01-2009 04:35:30") ) );
+//		hlp::RegisterNoDiffs( s_diffStatePairs, hlp::MakeFileState( _T("A Rain Song.gp"), _T("A"), _T("09-12-2012 14:17:13") ) );
+//		hlp::RegisterNoDiffs( s_diffStatePairs, hlp::MakeFileState( _T("All Along The Watchtower.gp"), _T("A"), _T("23-01-2009 04:35:30") ) );
 
 		s_diffStatePairs[ hlp::MakeFileState( _T("Back in Black.gp"), _T("A"), _T("17-10-2005 22:33:38") ) ] =
 			hlp::MakeFileState( _T("Back with BLACK.gp"), _T("A"), _T("17-10-2005 23:17:38") );

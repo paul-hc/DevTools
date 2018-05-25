@@ -300,7 +300,7 @@ public:
 
 	// diff columns
 	template< typename MatchFunc >
-	void SetupDiffColumns( TColumn srcColumn, TColumn destColumn, MatchFunc getMatchFunc );		// call after the list items are set up
+	void SetupDiffColumns( TColumn srcColumn, TColumn destColumn, MatchFunc getMatchFunc );		// call after the list items are set up; by default pass str::GetMatch()
 protected:
 	ui::CFontEffectCache* GetFontEffectCache( void );
 	bool ParentHandlesCustomDraw( void );
