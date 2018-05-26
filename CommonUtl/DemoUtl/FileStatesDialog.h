@@ -26,9 +26,6 @@ private:
 	// CReportListControl::ITextEffectCallback interface
 	virtual void CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARAM rowKey, int subItem ) const;
 
-	static const fs::TFileStatePairMap& GetStatePairs( bool useDiffsMode );
-	static const std::tstring& GetNotesAt( size_t pos );
-
 	class CDisplayObject : public utl::ISubject
 	{
 	public:
@@ -51,6 +48,7 @@ private:
 	bool m_useDiffsMode;
 	bool m_useAlternateRows;
 	bool m_useTextEffects;
+	bool m_useExplorerTheme;
 	std::vector< CDisplayObject* > m_displayItems;
 private:
 	// enum { IDD = IDD_FILE_STATES_DIALOG };
@@ -65,9 +63,13 @@ public:
 protected:
 	virtual void DoDataExchange( CDataExchange* pDX );
 protected:
+	afx_msg void OnDestroy( void );
 	afx_msg void OnToggle_UseDiffsCheck( void );
 	afx_msg void OnToggle_UseAlternateRows( void );
 	afx_msg void OnToggle_UseTextEffects( void );
+	afx_msg void OnToggle_UseExplorerTheme( void );
+	afx_msg void OnToggle_UseDefaultDraw( void );
+	afx_msg void OnToggle_UseDbgGuides( void );
 
 	DECLARE_MESSAGE_MAP()
 };

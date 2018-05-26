@@ -1228,6 +1228,25 @@ namespace ui
 	}
 
 
+	// CTextEffect implementation
+
+	const ui::CTextEffect CTextEffect::s_null;
+
+	void CTextEffect::Combine( const CTextEffect& right )
+	{
+		if ( &right != this )
+		{
+			m_fontEffect |= right.m_fontEffect;
+
+			if ( right.m_textColor != CLR_NONE )
+				m_textColor = right.m_textColor;
+
+			if ( right.m_bkColor != CLR_NONE )
+				m_bkColor = right.m_bkColor;
+		}
+	}
+
+
 	// CFontEffectCache implementation
 
 	CFontEffectCache::CFontEffectCache( CFont* pSourceFont )
@@ -1255,25 +1274,6 @@ namespace ui
 		}
 		ASSERT_PTR( rpFount->GetSafeHandle() );
 		return rpFount;
-	}
-
-
-	// CTextEffect implementation
-
-	const ui::CTextEffect CTextEffect::s_null;
-
-	void CTextEffect::Combine( const CTextEffect& right )
-	{
-		if ( &right != this )
-		{
-			m_fontEffect |= right.m_fontEffect;
-
-			if ( right.m_textColor != CLR_NONE )
-				m_textColor = right.m_textColor;
-
-			if ( right.m_bkColor != CLR_NONE )
-				m_bkColor = right.m_bkColor;
-		}
 	}
 
 

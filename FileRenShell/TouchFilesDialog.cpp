@@ -325,8 +325,8 @@ fs::UserFeedback CTouchFilesDialog::HandleFileError( const fs::CPath& sourcePath
 void CTouchFilesDialog::CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARAM rowKey, int subItem ) const
 {
 	static const ui::CTextEffect s_modPathName( ui::Bold );
-	static const ui::CTextEffect s_modDest( ui::Regular, CReportListControl::s_modifiedTextColor );
-	static const ui::CTextEffect s_modSrc( ui::Regular, CReportListControl::s_removedTextColor );
+	static const ui::CTextEffect s_modDest( ui::Regular, CReportListControl::s_mismatchDestTextColor );
+	static const ui::CTextEffect s_modSrc( ui::Regular, CReportListControl::s_deleteSrcTextColor );
 	static const ui::CTextEffect s_errorBk( ui::Regular, CLR_NONE, app::ColorErrorBk );
 
 	const CTouchItem* pTouchItem = CReportListControl::AsPtr< CTouchItem >( rowKey );

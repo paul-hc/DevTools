@@ -84,7 +84,7 @@ BOOL CApplication::InitInstance( void )
 	std::tstring imagePath;
 	if ( app::HasCommandLineOption( _T("image"), &imagePath ) )		// "-image=<img_path>"
 	{
-		CImageDialog dlg( AfxGetMainWnd() );
+		CImageDialog dlg( NULL );
 		m_pMainWnd = &dlg;
 		if ( !imagePath.empty() )
 			dlg.SetImagePath( imagePath );
@@ -93,7 +93,7 @@ BOOL CApplication::InitInstance( void )
 	}
 	else if ( app::HasCommandLineOption( _T("diffs") ) )		// "-diffs"
 	{
-		CFileStatesDialog dlg( AfxGetMainWnd() );
+		CFileStatesDialog dlg( NULL );
 		m_pMainWnd = &dlg;
 		dlg.DoModal();
 		return FALSE;					// no app loop

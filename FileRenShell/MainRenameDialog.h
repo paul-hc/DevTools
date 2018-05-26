@@ -70,7 +70,7 @@ private:
 
 		const fs::CPath& GetSrcPath( void ) const { return m_pPathPair->first; }
 
-		bool HasMisMatch( void ) const { return !m_destFnameExt.empty() && m_match != str::MatchEqual; }
+		bool HasMismatch( void ) const { return m_match != str::MatchEqual && !m_destFnameExt.empty(); }
 
 		// utl::ISubject interface
 		virtual std::tstring GetCode( void ) const;

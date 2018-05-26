@@ -4,6 +4,7 @@
 #include "utl/Color.h"
 #include "utl/FmtUtils.h"
 #include "utl/LongestCommonSubsequence.h"
+#include "utl/ReportListCustomDraw.h"
 #include "utl/StringUtilities.h"
 #include "utl/UtilitiesEx.h"
 #include "utl/TimeUtl.h"
@@ -41,6 +42,60 @@ namespace hlp
 	{
 		rStatePairs[ fileState ] = fileState;
 	}
+
+	const fs::TFileStatePairMap& GetStatePairs( bool useDiffsMode )
+	{
+		static fs::TFileStatePairMap s_statePairs, s_diffStatePairs;
+		if ( s_diffStatePairs.empty() )
+		{
+			RegisterNoDiffs( s_diffStatePairs, MakeFileState( _T("A Rain Song.gp"), _T("A"), _T("09-12-2012 14:17:13") ) );
+			RegisterNoDiffs( s_diffStatePairs, MakeFileState( _T("All Along The Watchtower.gp"), _T("A"), _T("23-01-2009 04:35:30") ) );
+
+			s_diffStatePairs[ MakeFileState( _T("Back in Black.gp"), _T("A"), _T("17-10-2005 22:33:38") ) ] =
+				MakeFileState( _T("Back with BLACK.gp"), _T("A"), _T("17-10-2005 23:17:38") );
+
+			s_diffStatePairs[ MakeFileState( _T("BaseMainDialog.cpp"), _T("RA"), _T("03-10-2008 14:59:48") ) ] =
+				MakeFileState( _T("BasicallyMainMonolog.cpp"), _T("RA"), _T("03-10-2019 14:59:48") );
+
+			s_diffStatePairs[ MakeFileState( _T("BaseMainDialog.h"), _T("RHSDA"), _T("06-03-2010 23:07:46") ) ] =
+				MakeFileState( _T("BasicallyMainMonolog.h"), _T("RHSVA"), _T("10-12-2010 23:07:46") );
+
+			s_diffStatePairs[ MakeFileState( _T("Canon Rock (band).gp"), _T("SDA"), _T("23-01-2009 04:59:26") ) ] =
+				MakeFileState( _T("Canon Rock (group).gp"), _T("SDA"), _T("23-01-2009 05:59:00") );
+
+			s_diffStatePairs[ MakeFileState( _T("Deep Purple - Lazy.gp"), _T("HSDA"), _T("10-06-2013 11:53:54") ) ] =
+				MakeFileState( _T("Deep Red - Lazy.gp"), _T("HA"), _T("10-11-2013 11:53:00") );
+
+			s_diffStatePairs[ MakeFileState( _T("Focus - Hocus Pocus.gp"), _T("RA"), _T("27-08-2017 11:43:09") ) ] =
+				MakeFileState( _T("Focus - HOCUS POCUS.gp"), _T("HSA"), _T("27-08-2017 11:43:09") );
+
+			s_diffStatePairs[ MakeFileState( _T("Little Wing.gp"), _T("RHSDA"), _T("25-07-2009 06:06:36") ) ] =
+				MakeFileState( _T("Little More Wing.gp"), _T("HSA"), _T("25-07-1989 06:23:36") );
+
+			s_statePairs = s_diffStatePairs;
+			std::for_each( s_statePairs.begin(), s_statePairs.end(), ResetDest() );
+		}
+
+		return useDiffsMode ? s_diffStatePairs : s_statePairs;
+	}
+
+	const std::tstring& GetNotesAt( size_t pos )
+	{
+		static std::vector< std::tstring > s_noteItems;
+		if ( s_noteItems.empty() )
+		{
+			s_noteItems.push_back( _T("Empire (2003)") );
+			s_noteItems.push_back( _T("American Colossus (2004)") );
+			s_noteItems.push_back( _T("The War of the World (2006)") );
+			s_noteItems.push_back( _T("The Ascent of Money (2008)") );
+			s_noteItems.push_back( _T("Civilization: Is the West History? (2011)") );
+			s_noteItems.push_back( _T("China: Triumph and Turmoil (2012)") );
+			s_noteItems.push_back( _T("The Pity of War (2014)") );
+			s_noteItems.push_back( _T("The Square and the Tower") );
+		}
+
+		return s_noteItems[ pos % s_noteItems.size() ];
+	}
 }
 
 
@@ -50,6 +105,7 @@ namespace reg
 	static const TCHAR entry_useDiffsMode[] = _T("UseDiffsMode");
 	static const TCHAR entry_useAlternateRows[] = _T("UseAlternateRows");
 	static const TCHAR entry_useTextEffects[] = _T("UseTextEffects");
+	static const TCHAR entry_useExplorerTheme[] = _T("UseExplorerTheme");
 }
 
 namespace layout
@@ -59,6 +115,11 @@ namespace layout
 		{ IDC_FILE_STATE_LIST, Size },
 		{ IDC_USE_ALTERNATE_ROWS_CHECK, MoveX },
 		{ IDC_USE_TEXT_EFFECTS_CHECK, MoveX },
+		{ IDC_USE_EXPLORER_THEME_CHECK, MoveX },
+
+		{ IDC_USE_DEFAULT_DRAW_CHECK, MoveY },
+		{ IDC_USE_DBG_GUIDES_CHECK, MoveY },
+
 		{ IDOK, Move },
 		{ IDCANCEL, Move }
 	};
@@ -70,6 +131,7 @@ CFileStatesDialog::CFileStatesDialog( CWnd* pParent )
 	, m_useDiffsMode( AfxGetApp()->GetProfileInt( reg::section_dialog, reg::entry_useDiffsMode, true ) != FALSE )
 	, m_useAlternateRows( AfxGetApp()->GetProfileInt( reg::section_dialog, reg::entry_useAlternateRows, true ) != FALSE )
 	, m_useTextEffects( AfxGetApp()->GetProfileInt( reg::section_dialog, reg::entry_useTextEffects, false ) != FALSE )
+	, m_useExplorerTheme( AfxGetApp()->GetProfileInt( reg::section_dialog, reg::entry_useExplorerTheme, true ) != FALSE )
 {
 	m_regSection = reg::section_dialog;
 	RegisterCtrlLayout( layout::styles, COUNT_OF( layout::styles ) );
@@ -78,6 +140,7 @@ CFileStatesDialog::CFileStatesDialog( CWnd* pParent )
 	m_fileListCtrl.SetTextEffectCallback( this );
 
 	m_fileListCtrl.SetUseAlternateRowColoring( m_useAlternateRows );
+	m_fileListCtrl.SetUseExplorerTheme( m_useExplorerTheme );
 	m_fileListCtrl.m_listTextEffect.m_textColor = m_useTextEffects ? color::Violet : CLR_NONE;	// list global text effects
 }
 
@@ -86,62 +149,9 @@ CFileStatesDialog::~CFileStatesDialog()
 	utl::ClearOwningContainer( m_displayItems );
 }
 
-const fs::TFileStatePairMap& CFileStatesDialog::GetStatePairs( bool useDiffsMode )
-{
-	static fs::TFileStatePairMap s_statePairs, s_diffStatePairs;
-	if ( s_diffStatePairs.empty() )
-	{
-//		hlp::RegisterNoDiffs( s_diffStatePairs, hlp::MakeFileState( _T("A Rain Song.gp"), _T("A"), _T("09-12-2012 14:17:13") ) );
-//		hlp::RegisterNoDiffs( s_diffStatePairs, hlp::MakeFileState( _T("All Along The Watchtower.gp"), _T("A"), _T("23-01-2009 04:35:30") ) );
-
-		s_diffStatePairs[ hlp::MakeFileState( _T("Back in Black.gp"), _T("A"), _T("17-10-2005 22:33:38") ) ] =
-			hlp::MakeFileState( _T("Back with BLACK.gp"), _T("A"), _T("17-10-2005 23:17:38") );
-
-		s_diffStatePairs[ hlp::MakeFileState( _T("BaseMainDialog.cpp"), _T("RA"), _T("03-10-2008 14:59:48") ) ] =
-			hlp::MakeFileState( _T("BasicallyMainMonolog.cpp"), _T("RA"), _T("03-10-2019 14:59:48") );
-
-		s_diffStatePairs[ hlp::MakeFileState( _T("BaseMainDialog.h"), _T("RHSDA"), _T("06-03-2010 23:07:46") ) ] =
-			hlp::MakeFileState( _T("BasicallyMainMonolog.h"), _T("RHSVA"), _T("10-12-2010 23:07:46") );
-
-		s_diffStatePairs[ hlp::MakeFileState( _T("Canon Rock (band).gp"), _T("SDA"), _T("23-01-2009 04:59:26") ) ] =
-			hlp::MakeFileState( _T("Canon Rock (group).gp"), _T("SDA"), _T("23-01-2009 05:59:00") );
-
-		s_diffStatePairs[ hlp::MakeFileState( _T("Deep Purple - Lazy.gp"), _T("HSDA"), _T("10-06-2013 11:53:54") ) ] =
-			hlp::MakeFileState( _T("Deep Red - Lazy.gp"), _T("HA"), _T("10-11-2013 11:53:00") );
-
-		s_diffStatePairs[ hlp::MakeFileState( _T("Focus - Hocus Pocus.gp"), _T("RA"), _T("27-08-2017 11:43:09") ) ] =
-			hlp::MakeFileState( _T("Focus - Pocus Hocus.gp"), _T("HSA"), _T("27-08-2017 11:43:09") );
-
-		s_diffStatePairs[ hlp::MakeFileState( _T("Little Wing.gp"), _T("RHSDA"), _T("25-07-2009 06:06:36") ) ] =
-			hlp::MakeFileState( _T("Little More Wing.gp"), _T("HSA"), _T("25-07-1989 06:23:36") );
-
-		s_statePairs = s_diffStatePairs;
-		std::for_each( s_statePairs.begin(), s_statePairs.end(), hlp::ResetDest() );
-	}
-
-	return useDiffsMode ? s_diffStatePairs : s_statePairs;
-}
-
-const std::tstring& CFileStatesDialog::GetNotesAt( size_t pos )
-{
-	static std::vector< std::tstring > s_noteItems;
-	if ( s_noteItems.empty() )
-	{
-		s_noteItems.push_back( _T("Empire (2003)") );
-		s_noteItems.push_back( _T("American Colossus (2004)") );
-		s_noteItems.push_back( _T("The War of the World (2006)") );
-		s_noteItems.push_back( _T("The Ascent of Money (2008)") );
-		s_noteItems.push_back( _T("Civilization: Is the West History? (2011)") );
-		s_noteItems.push_back( _T("China: Triumph and Turmoil (2012)") );
-		s_noteItems.push_back( _T("The Pity of War (2014)") );
-	}
-
-	return s_noteItems[ pos % s_noteItems.size() ];
-}
-
 void CFileStatesDialog::InitDisplayItems( void )
 {
-	const fs::TFileStatePairMap& rStatePairs = GetStatePairs( m_useDiffsMode );
+	const fs::TFileStatePairMap& rStatePairs = hlp::GetStatePairs( m_useDiffsMode );
 
 	utl::ClearOwningContainer( m_displayItems );
 	m_displayItems.reserve( rStatePairs.size() );
@@ -174,11 +184,11 @@ void CFileStatesDialog::SetupFileListView( void )
 			m_fileListCtrl.SetSubItemText( pos, SrcCreationDate, time_utl::FormatTimestamp( pObject->GetSrcState().m_creationTime ) );
 			m_fileListCtrl.SetSubItemText( pos, DestCreationDate, time_utl::FormatTimestamp( pObject->GetDestState().m_creationTime ) );
 
-			m_fileListCtrl.SetSubItemText( pos, Notes, GetNotesAt( pos ) );
+			m_fileListCtrl.SetSubItemText( pos, Notes, hlp::GetNotesAt( pos ) );
 		}
 
-		m_fileListCtrl.SetupDiffColumns( SrcFileName, DestFileName, str::GetMatch() );
-		m_fileListCtrl.SetupDiffColumns( SrcAttributes, DestAttributes, path::GetMatch() );
+		m_fileListCtrl.SetupDiffColumnPair( SrcFileName, DestFileName, path::GetMatch() );
+		m_fileListCtrl.SetupDiffColumnPair( SrcAttributes, DestAttributes, str::GetMatch() );
 	}
 
 	if ( orgSel != -1 )		// restore selection?
@@ -190,9 +200,12 @@ void CFileStatesDialog::SetupFileListView( void )
 
 void CFileStatesDialog::CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARAM rowKey, int subItem ) const
 {
+	if ( !m_useTextEffects )
+		return;
+
 	static const ui::CTextEffect s_modFileName( ui::Bold );
-	static const ui::CTextEffect s_modDest( ui::Regular, CReportListControl::s_modifiedTextColor );
-	static const ui::CTextEffect s_modSrc( ui::Regular, CReportListControl::s_removedTextColor );
+	static const ui::CTextEffect s_modDest( ui::Regular, CReportListControl::s_mismatchDestTextColor );
+	static const ui::CTextEffect s_modSrc( ui::Regular, CReportListControl::s_deleteSrcTextColor );
 	static const ui::CTextEffect s_errorBk( ui::Regular, CLR_NONE, ColorErrorBk );
 
 	const CDisplayObject* pObject = CReportListControl::AsPtr< CDisplayObject >( rowKey );
@@ -246,6 +259,9 @@ void CFileStatesDialog::DoDataExchange( CDataExchange* pDX )
 			CheckDlgButton( IDC_USE_DIFFS_CHECK, m_useDiffsMode );
 			CheckDlgButton( IDC_USE_ALTERNATE_ROWS_CHECK, m_useAlternateRows );
 			CheckDlgButton( IDC_USE_TEXT_EFFECTS_CHECK, m_useTextEffects );
+			CheckDlgButton( IDC_USE_EXPLORER_THEME_CHECK, m_useExplorerTheme );
+			CheckDlgButton( IDC_USE_DEFAULT_DRAW_CHECK, CReportListCustomDraw::s_useDefaultDraw );
+			CheckDlgButton( IDC_USE_DBG_GUIDES_CHECK, CReportListCustomDraw::s_dbgGuides );
 
 			SetupFileListView();
 		}
@@ -258,15 +274,28 @@ void CFileStatesDialog::DoDataExchange( CDataExchange* pDX )
 // message handlers
 
 BEGIN_MESSAGE_MAP( CFileStatesDialog, CLayoutDialog )
+	ON_WM_DESTROY()
 	ON_BN_CLICKED( IDC_USE_DIFFS_CHECK, OnToggle_UseDiffsCheck )
 	ON_BN_CLICKED( IDC_USE_ALTERNATE_ROWS_CHECK, OnToggle_UseAlternateRows )
 	ON_BN_CLICKED( IDC_USE_TEXT_EFFECTS_CHECK, OnToggle_UseTextEffects )
+	ON_BN_CLICKED( IDC_USE_EXPLORER_THEME_CHECK, OnToggle_UseExplorerTheme )
+	ON_BN_CLICKED( IDC_USE_DEFAULT_DRAW_CHECK, OnToggle_UseDefaultDraw )
+	ON_BN_CLICKED( IDC_USE_DBG_GUIDES_CHECK, OnToggle_UseDbgGuides )
 END_MESSAGE_MAP()
+
+void CFileStatesDialog::OnDestroy( void )
+{
+	AfxGetApp()->WriteProfileInt( reg::section_dialog, reg::entry_useDiffsMode, m_useDiffsMode );
+	AfxGetApp()->WriteProfileInt( reg::section_dialog, reg::entry_useAlternateRows, m_useAlternateRows );
+	AfxGetApp()->WriteProfileInt( reg::section_dialog, reg::entry_useTextEffects, m_useTextEffects );
+	AfxGetApp()->WriteProfileInt( reg::section_dialog, reg::entry_useExplorerTheme, m_useExplorerTheme );
+
+	__super::OnDestroy();
+}
 
 void CFileStatesDialog::OnToggle_UseDiffsCheck( void )
 {
 	m_useDiffsMode = IsDlgButtonChecked( IDC_USE_DIFFS_CHECK ) != FALSE;
-	AfxGetApp()->WriteProfileInt( reg::section_dialog, reg::entry_useDiffsMode, m_useDiffsMode );
 
 	SetupFileListView();
 }
@@ -274,7 +303,6 @@ void CFileStatesDialog::OnToggle_UseDiffsCheck( void )
 void CFileStatesDialog::OnToggle_UseAlternateRows( void )
 {
 	m_useAlternateRows = IsDlgButtonChecked( IDC_USE_ALTERNATE_ROWS_CHECK ) != FALSE;
-	AfxGetApp()->WriteProfileInt( reg::section_dialog, reg::entry_useAlternateRows, m_useAlternateRows );
 
 	m_fileListCtrl.SetUseAlternateRowColoring( m_useAlternateRows );
 	m_fileListCtrl.Invalidate();
@@ -283,9 +311,28 @@ void CFileStatesDialog::OnToggle_UseAlternateRows( void )
 void CFileStatesDialog::OnToggle_UseTextEffects( void )
 {
 	m_useTextEffects = IsDlgButtonChecked( IDC_USE_TEXT_EFFECTS_CHECK ) != FALSE;
-	AfxGetApp()->WriteProfileInt( reg::section_dialog, reg::entry_useTextEffects, m_useTextEffects );
 
 	m_fileListCtrl.m_listTextEffect.m_textColor = m_useTextEffects ? color::Violet : CLR_NONE;
+	m_fileListCtrl.Invalidate();
+}
+
+void CFileStatesDialog::OnToggle_UseExplorerTheme( void )
+{
+	m_useExplorerTheme = IsDlgButtonChecked( IDC_USE_EXPLORER_THEME_CHECK ) != FALSE;
+
+	if ( UpdateData( DialogSaveChanges ) )
+		EndDialog( IDRETRY );
+}
+
+void CFileStatesDialog::OnToggle_UseDefaultDraw( void )
+{
+	CReportListCustomDraw::s_useDefaultDraw = IsDlgButtonChecked( IDC_USE_DEFAULT_DRAW_CHECK ) != FALSE;
+	m_fileListCtrl.Invalidate();
+}
+
+void CFileStatesDialog::OnToggle_UseDbgGuides( void )
+{
+	CReportListCustomDraw::s_dbgGuides = IsDlgButtonChecked( IDC_USE_DBG_GUIDES_CHECK ) != FALSE;
 	m_fileListCtrl.Invalidate();
 }
 

@@ -177,6 +177,17 @@ namespace utl
 		return LookupPos( container.begin(), container.end(), rValue );
 	}
 
+	template< typename IteratorT >
+	size_t GetMatchingLength( IteratorT itStart, IteratorT itEnd )
+	{
+		if ( itStart != itEnd )
+			for ( IteratorT itMismatch = itStart + 1; ; ++itMismatch )
+				if ( itMismatch == itEnd || *itMismatch != *itStart )
+					return std::distance( itStart, itMismatch );
+
+		return 0;
+	}
+
 
 	// vector of pairs
 

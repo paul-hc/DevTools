@@ -99,8 +99,9 @@ CReportListControl::CReportListControl( UINT columnLayoutId /*= 0*/, DWORD listS
 	, m_listAccel( keys, COUNT_OF( keys ) )
 	, m_pDataSourceFactory( ole::GetStdDataSourceFactory() )
 	, m_parentHandlesCustomDraw( -1 )
-	, m_removedTextEffect( ui::Bold, s_removedTextColor )
-	, m_modifiedTextEffect( ui::Bold, s_modifiedTextColor )
+	, m_deleteSrc_DiffEffect( ui::Bold, s_deleteSrcTextColor )
+	, m_mismatchDest_DiffEffect( ui::Bold, s_mismatchDestTextColor )
+	, m_matchDest_DiffEffect( ui::Regular, GetSysColor( COLOR_GRAYTEXT ) )
 {
 	m_pPopupMenu[ OnSelection ] = &GetStdPopupMenu( OnSelection );
 	m_pPopupMenu[ Nowhere ] = &GetStdPopupMenu( Nowhere );
@@ -123,7 +124,7 @@ bool CReportListControl::DeleteAllItems( void )
 void CReportListControl::ClearData( void )
 {
 	m_markedCells.clear();
-	m_diffColumns.clear();
+	m_diffColumnPairs.clear();
 }
 
 void CReportListControl::SetCustomImageDraw( ui::ICustomImageDraw* pCustomImageDraw, ImageListPos transpImgPos /*= -1*/ )
@@ -1339,6 +1340,15 @@ const ui::CTextEffect* CReportListControl::FindTextEffectAt( TRowKey rowKey, TCo
 	return utl::FindValuePtr( m_markedCells, TCellPair( rowKey, subItem ) );
 }
 
+const CReportListControl::CDiffColumnPair* CReportListControl::FindDiffColumnPair( TColumn column ) const
+{
+	for ( std::list< CDiffColumnPair >::const_iterator itDiffPair = m_diffColumnPairs.begin(); itDiffPair != m_diffColumnPairs.end(); ++itDiffPair )
+		if ( itDiffPair->m_srcColumn == column || itDiffPair->m_destColumn == column )
+			return &*itDiffPair;
+
+	return NULL;
+}
+
 bool CReportListControl::ParentHandlesCustomDraw( void )
 {
 	if ( -1 == m_parentHandlesCustomDraw )
@@ -1737,12 +1747,18 @@ BOOL CReportListControl::OnNmCustomDraw_Reflect( NMHDR* pNmHdr, LRESULT* pResult
 
 			if ( m_pCustomImager.get() != NULL )
 				if ( IsItemVisible( draw.m_index ) )
-					*pResult |= CDRF_NOTIFYPOSTPAINT;		// will superimpose the thumbnails on top of transparent image
+					*pResult |= CDRF_NOTIFYPOSTPAINT;				// will superimpose the thumbnail on top of transparent image
+
+			if ( draw.EraseRowBkgndDiffs() )
+				*pResult |= CDRF_NEWFONT;
 
 			break;
 		case CDDS_SUBITEM | CDDS_ITEMPREPAINT:
 			if ( draw.ApplyCellTextEffect() )
 				*pResult |= CDRF_NEWFONT;
+
+			if ( draw.DrawCellTextDiffs() )
+				*pResult |= CDRF_SKIPDEFAULT;
 			break;
 		case CDDS_ITEMPOSTPAINT:
 			if ( m_pCustomImager.get() != NULL )
@@ -1839,6 +1855,14 @@ void CReportListControl::OnUpdateMoveTo( CCmdUI* pCmdUI )
 	GetSelection( selIndexes );
 
 	pCmdUI->Enable( seq::CanMoveSelection( GetItemCount(), selIndexes, lv::CmdIdToMoveTo( pCmdUI->m_nID ) ) );
+}
+
+
+// CReportListControl::CDiffColumnPair implementation
+
+const str::TMatchSequence* CReportListControl::CDiffColumnPair::FindRowSequence( TRowKey rowKey ) const
+{
+	return utl::FindValuePtr( m_rowSequences, rowKey );
 }
 
 

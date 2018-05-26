@@ -103,6 +103,10 @@
 #define IDC_USE_TEXT_EFFECTS_CHECK      1088
 #define IDC_FILE_STATE_LIST             1089
 #define IDC_USE_DIFFS_CHECK             1090
+#define IDC_USE_EXPLORER_THEME_CHECK    1091
+#define IDC_USE_DEFAULT_DRAW_CHECK      1092
+#define IDC_USE_DEFAULT_DRAW_CHECK2     1093
+#define IDC_USE_DBG_GUIDES_CHECK        1093
 #define IDS_OLE_INIT_FAILED             5000
 #define IDS_CHANGE_CASE_TAGS            5001
 #define ID_STUDY_IMAGE                  32772

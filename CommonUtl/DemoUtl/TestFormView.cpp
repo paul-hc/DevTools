@@ -86,6 +86,9 @@ void CTestFormView::OnStudyImage( void )
 
 void CTestFormView::OnStudyListDiffs( void )
 {
-	CFileStatesDialog dlg( AfxGetMainWnd() );
-	dlg.DoModal();
+	for ( INT_PTR btnId = IDRETRY; IDRETRY == btnId; )
+	{
+		CFileStatesDialog dlg( AfxGetMainWnd() );
+		btnId = dlg.DoModal();
+	}
 }

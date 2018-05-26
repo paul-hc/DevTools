@@ -300,8 +300,21 @@ public:
 
 	// diff columns
 	template< typename MatchFunc >
-	void SetupDiffColumns( TColumn srcColumn, TColumn destColumn, MatchFunc getMatchFunc );		// call after the list items are set up; by default pass str::GetMatch()
+	void SetupDiffColumnPair( TColumn srcColumn, TColumn destColumn, MatchFunc getMatchFunc );		// call after the list items are set up; by default pass str::GetMatch()
 protected:
+	struct CDiffColumnPair
+	{
+		CDiffColumnPair( TColumn srcColumn = -1, TColumn destColumn = -1 ) : m_srcColumn( srcColumn ), m_destColumn( destColumn ) {}
+
+		const str::TMatchSequence* FindRowSequence( TRowKey rowKey ) const;
+	public:
+		TColumn m_srcColumn;
+		TColumn m_destColumn;
+		stdext::hash_map< TRowKey, str::TMatchSequence > m_rowSequences;		// TRowKey is invariant to sorting
+	};
+
+	const CDiffColumnPair* FindDiffColumnPair( TColumn column ) const;
+
 	ui::CFontEffectCache* GetFontEffectCache( void );
 	bool ParentHandlesCustomDraw( void );
 public:
@@ -361,15 +374,6 @@ public:
 
 private:
 	void AddTransparentImage( void );
-
-	struct CDiffColumns
-	{
-		CDiffColumns( TColumn srcColumn = -1, TColumn destColumn = -1 ) : m_srcColumn( srcColumn ), m_destColumn( destColumn ) {}
-	public:
-		TColumn m_srcColumn;
-		TColumn m_destColumn;
-		stdext::hash_map< TRowKey, str::TMatchSequence > m_rowSequences;		// TRowKey is invariant to sorting
-	};
 private:
 	UINT m_columnLayoutId;
 	DWORD m_listStyleEx;
@@ -391,7 +395,7 @@ private:
 	std::auto_ptr< ui::CFontEffectCache > m_pFontCache;		// self-encapsulated
 	ITextEffectCallback* m_pTextEffectCallback;
 
-	std::list< CDiffColumns > m_diffColumns;
+	std::list< CDiffColumnPair > m_diffColumnPairs;
 
 	CImageList* m_pImageList;
 	CImageList* m_pLargeImageList;
@@ -418,11 +422,13 @@ private:
 	BOOL m_parentHandlesCustomDraw;						// self-encapsulated
 public:
 	ui::CTextEffect m_listTextEffect;					// for all items in the list
-	ui::CTextEffect m_removedTextEffect;				// for item diffs: text removed from source
-	ui::CTextEffect m_modifiedTextEffect;				// for item diffs: text modified in dest
 
-	static const COLORREF s_removedTextColor = color::Red;
-	static const COLORREF s_modifiedTextColor = color::Blue;
+	ui::CTextEffect m_deleteSrc_DiffEffect;				// text diffs: text removed from SRC (red)
+	ui::CTextEffect m_mismatchDest_DiffEffect;			// text diffs: text mismatched in DEST (blue)
+	ui::CTextEffect m_matchDest_DiffEffect;				// text diffs: text matched in DEST (gray)
+
+	static const COLORREF s_deleteSrcTextColor = color::Red;
+	static const COLORREF s_mismatchDestTextColor = color::Blue;
 	static const TCHAR s_fmtRegColumnLayout[];
 public:
 	// generated stuff
@@ -619,11 +625,11 @@ void CReportListControl::SelectItems( const std::vector< Type* >& rPtrs )
 }
 
 template< typename MatchFunc >
-void CReportListControl::SetupDiffColumns( TColumn srcColumn, TColumn destColumn, MatchFunc getMatchFunc )
+void CReportListControl::SetupDiffColumnPair( TColumn srcColumn, TColumn destColumn, MatchFunc getMatchFunc )
 {
-	m_diffColumns.push_back( CDiffColumns( srcColumn, destColumn ) );
+	m_diffColumnPairs.push_back( CDiffColumnPair( srcColumn, destColumn ) );
 
-	stdext::hash_map< TRowKey, str::TMatchSequence >& rRowSequences = m_diffColumns.back().m_rowSequences;
+	stdext::hash_map< TRowKey, str::TMatchSequence >& rRowSequences = m_diffColumnPairs.back().m_rowSequences;
 
 	for ( int index = 0, itemCount = GetItemCount(); index != itemCount; ++index )
 	{

@@ -46,7 +46,7 @@ namespace str
 		m_matchSeqPair.first.clear();
 		m_matchSeqPair.second.clear();
 
-		if ( m_textPair.second.empty() || MatchEqual == m_match )
+		if ( MatchEqual == m_match || m_textPair.second.empty() )
 			return;
 
 		std::vector< lcs::CResult< CharType > > lcsSequence;

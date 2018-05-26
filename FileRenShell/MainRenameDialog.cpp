@@ -928,7 +928,7 @@ void CMainRenameDialog::OnCustomDraw_FileRenameList( NMHDR* pNmHdr, LRESULT* pRe
 		case CDDS_SUBITEM | CDDS_ITEMPREPAINT:
 			if ( Source == pDraw->iSubItem )
 			{
-				if ( !s_useDefaultDraw || pItem->HasMisMatch() )
+				if ( !s_useDefaultDraw || pItem->HasMismatch() )
 				{
 					//*pResult |= CDRF_NOTIFYPOSTPAINT;		custom draw now, skip default text drawing & post-paint stage
 					*pResult |= CDRF_SKIPDEFAULT;
