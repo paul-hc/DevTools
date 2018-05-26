@@ -146,8 +146,8 @@ void CReportListCustomDraw::DrawCellTextDiffs( DiffColumn diffColumn, const str:
 	if ( s_dbgGuides )
 		gp::FrameRect( m_pDC, textRect, color::Orange, 50 );
 
-	std::vector< ui::CTextEffect > textEffects;			// indexed by str::Match constants
-	BuildTextMatchEffects( textEffects, diffColumn );
+	std::vector< ui::CTextEffect > matchEffects;			// indexed by str::Match constants
+	BuildTextMatchEffects( matchEffects, diffColumn );
 
 	CFont* pOldFont = m_pDC->GetCurrentFont();
 	COLORREF oldTextColor = m_pDC->GetTextColor();
@@ -162,7 +162,7 @@ void CReportListCustomDraw::DrawCellTextDiffs( DiffColumn diffColumn, const str:
 	{
 		unsigned int matchLen = static_cast< unsigned int >( utl::GetMatchingLength( matchSeq.begin() + pos, matchSeq.end() ) );
 
-		SelectTextEffect( textEffects[ matchSeq[ pos ] ] );
+		SelectTextEffect( matchEffects[ matchSeq[ pos ] ] );
 		m_pDC->DrawText( pText, matchLen, &itemRect, TextStyle );
 		itemRect.left += m_pDC->GetTextExtent( pText, matchLen ).cx;
 
@@ -176,20 +176,23 @@ void CReportListCustomDraw::DrawCellTextDiffs( DiffColumn diffColumn, const str:
 	m_pDC->SetBkMode( oldBkMode );
 }
 
-void CReportListCustomDraw::BuildTextMatchEffects( std::vector< ui::CTextEffect >& rTextEffects, DiffColumn diffColumn ) const
+void CReportListCustomDraw::BuildTextMatchEffects( std::vector< ui::CTextEffect >& rMatchEffects, DiffColumn diffColumn ) const
 {
 	enum { LastMatch = str::MatchNotEqual, _MatchCount };
 
-	rTextEffects.resize( _MatchCount );
-	rTextEffects[ str::MatchEqual ] = MakeCellEffect();
-	rTextEffects[ str::MatchEqual ].m_textColor = ui::GetActualColor( m_pList->m_listTextEffect.m_textColor, GetSysColor( COLOR_WINDOWTEXT ) );		// realize to reset existing text highlighting
+	rMatchEffects.resize( _MatchCount );
+	rMatchEffects[ str::MatchEqual ] = MakeCellEffect();
+	rMatchEffects[ str::MatchEqual ].m_textColor = ui::GetActualColor( m_pList->m_listTextEffect.m_textColor, GetSysColor( COLOR_WINDOWTEXT ) );		// realize to reset existing text highlighting
 
-	rTextEffects[ str::MatchNotEqual ] = rTextEffects[ str::MatchEqual ];
-	rTextEffects[ str::MatchNotEqual ].Combine( SrcColumn == diffColumn ? m_pList->m_deleteSrc_DiffEffect : m_pList->m_mismatchDest_DiffEffect );
+	rMatchEffects[ str::MatchNotEqual ] = rMatchEffects[ str::MatchEqual ];
+	rMatchEffects[ str::MatchNotEqual ].Combine( SrcColumn == diffColumn ? m_pList->m_deleteSrc_DiffEffect : m_pList->m_mismatchDest_DiffEffect );
 
-	rTextEffects[ str::MatchEqualDiffCase ] = rTextEffects[ str::MatchNotEqual ];
-	ClearFlag( rTextEffects[ str::MatchEqualDiffCase ].m_fontEffect, ui::Bold );
-	SetFlag( rTextEffects[ str::MatchEqualDiffCase ].m_fontEffect, ui::Underline );
+	rMatchEffects[ str::MatchEqualDiffCase ] = rMatchEffects[ str::MatchNotEqual ];
+	ClearFlag( rMatchEffects[ str::MatchEqualDiffCase ].m_fontEffect, ui::Bold );
+	SetFlag( rMatchEffects[ str::MatchEqualDiffCase ].m_fontEffect, ui::Underline );
+
+	if ( m_pList->m_pTextEffectCallback != NULL )
+		m_pList->m_pTextEffectCallback->ModifyDiffTextEffectAt( rMatchEffects, m_rowKey, m_subItem );		// resert ui::Bold, etc
 }
 
 bool CReportListCustomDraw::SelectTextEffect( const ui::CTextEffect& textEffect )

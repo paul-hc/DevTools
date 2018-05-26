@@ -7,6 +7,7 @@
 #include "utl/ReportListControl.h"
 
 
+class CDisplayObject;
 class CLogger;
 typedef std::pair< const fs::CFileState, fs::CFileState > TFileStatePair;
 
@@ -25,25 +26,7 @@ private:
 
 	// CReportListControl::ITextEffectCallback interface
 	virtual void CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARAM rowKey, int subItem ) const;
-
-	class CDisplayObject : public utl::ISubject
-	{
-	public:
-		CDisplayObject( const TFileStatePair* pStatePair ) : m_pStatePair( safe_ptr( pStatePair ) ), m_displayPath( pStatePair->first.m_fullPath.GetNameExt() ) {}
-
-		const fs::CPath& GetKeyPath( void ) const { return GetSrcState().m_fullPath; }
-		const fs::CFileState& GetSrcState( void ) const { return m_pStatePair->first; }
-		const fs::CFileState& GetDestState( void ) const { return m_pStatePair->second; }
-
-		bool IsModified( void ) const { return m_pStatePair->second.IsValid() && m_pStatePair->second != m_pStatePair->first; }
-
-		// utl::ISubject interface
-		virtual std::tstring GetCode( void ) const;
-		virtual std::tstring GetDisplayCode( void ) const;
-	private:
-		const TFileStatePair* m_pStatePair;
-		const std::tstring m_displayPath;
-	};
+	virtual void ModifyDiffTextEffectAt( std::vector< ui::CTextEffect >& rMatchEffects, LPARAM rowKey, int subItem ) const;
 private:
 	bool m_useDiffsMode;
 	bool m_useAlternateRows;
@@ -72,6 +55,26 @@ protected:
 	afx_msg void OnToggle_UseDbgGuides( void );
 
 	DECLARE_MESSAGE_MAP()
+};
+
+
+class CDisplayObject : public utl::ISubject
+{
+public:
+	CDisplayObject( const TFileStatePair* pStatePair ) : m_pStatePair( safe_ptr( pStatePair ) ), m_displayPath( pStatePair->first.m_fullPath.GetNameExt() ) {}
+
+	const fs::CPath& GetKeyPath( void ) const { return GetSrcState().m_fullPath; }
+	const fs::CFileState& GetSrcState( void ) const { return m_pStatePair->first; }
+	const fs::CFileState& GetDestState( void ) const { return m_pStatePair->second; }
+
+	bool IsModified( void ) const { return m_pStatePair->second.IsValid() && m_pStatePair->second != m_pStatePair->first; }
+
+	// utl::ISubject interface
+	virtual std::tstring GetCode( void ) const;
+	virtual std::tstring GetDisplayCode( void ) const;
+private:
+	const TFileStatePair* m_pStatePair;
+	const std::tstring m_displayPath;
 };
 
 

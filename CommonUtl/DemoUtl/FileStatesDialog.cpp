@@ -187,6 +187,7 @@ void CFileStatesDialog::SetupFileListView( void )
 
 		m_fileListCtrl.SetupDiffColumnPair( SrcFileName, DestFileName, path::GetMatch() );
 		m_fileListCtrl.SetupDiffColumnPair( SrcAttributes, DestAttributes, str::GetMatch() );
+		m_fileListCtrl.SetupDiffColumnPair( SrcCreationDate, DestCreationDate, str::GetMatch() );
 	}
 
 	if ( orgSel != -1 )		// restore selection?
@@ -236,6 +237,18 @@ void CFileStatesDialog::CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARA
 		rTextEffect |= *pTextEffect;
 	else if ( isModified )
 		rTextEffect |= isSrc ? s_modSrc : s_modDest;
+}
+
+void CFileStatesDialog::ModifyDiffTextEffectAt( std::vector< ui::CTextEffect >& rMatchEffects, LPARAM rowKey, int subItem ) const
+{
+	rowKey;
+	switch ( subItem )
+	{
+		case SrcCreationDate:
+		case DestCreationDate:
+			ClearFlag( rMatchEffects[ str::MatchNotEqual ].m_fontEffect, ui::Bold );		// line-up date columns nicely
+			break;
+	}
 }
 
 BOOL CFileStatesDialog::OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo )
@@ -341,12 +354,12 @@ void CFileStatesDialog::OnToggle_UseDbgGuides( void )
 
 // CDisplayObject implementation
 
-std::tstring CFileStatesDialog::CDisplayObject::GetCode( void ) const
+std::tstring CDisplayObject::GetCode( void ) const
 {
 	return m_pStatePair->first.m_fullPath.Get();
 }
 
-std::tstring CFileStatesDialog::CDisplayObject::GetDisplayCode( void ) const
+std::tstring CDisplayObject::GetDisplayCode( void ) const
 {
 	return m_displayPath;
 }

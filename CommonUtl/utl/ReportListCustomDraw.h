@@ -34,7 +34,7 @@ private:
 	void DrawCellTextDiffs( DiffColumn diffColumn, const str::TMatchSequence& cellSeq, const CRect& textRect );
 
 	CRect MakeCellTextRect( void ) const;
-	void BuildTextMatchEffects( std::vector< ui::CTextEffect >& rTextEffects, DiffColumn diffColumn ) const;
+	void BuildTextMatchEffects( std::vector< ui::CTextEffect >& rMatchEffects, DiffColumn diffColumn ) const;
 	bool SelectTextEffect( const ui::CTextEffect& textEffect );		// to m_pDC
 
 	static bool HasMismatch( const str::TMatchSequence& cellSeq );

@@ -294,6 +294,7 @@ public:
 	interface ITextEffectCallback
 	{
 		virtual void CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARAM rowKey, int subItem ) const = 0;
+		virtual void ModifyDiffTextEffectAt( std::vector< ui::CTextEffect >& rMatchEffects, LPARAM rowKey, int subItem ) const { rMatchEffects, rowKey, subItem; }
 	};
 
 	void SetTextEffectCallback( ITextEffectCallback* pTextEffectCallback ) { m_pTextEffectCallback = pTextEffectCallback; }
