@@ -1761,7 +1761,7 @@ BOOL CReportListControl::OnNmCustomDraw_Reflect( NMHDR* pNmHdr, LRESULT* pResult
 				*pResult |= CDRF_NEWFONT;
 
 			break;
-		case CDDS_SUBITEM | CDDS_ITEMPREPAINT:
+		case CDDS_ITEMPREPAINT | CDDS_SUBITEM:
 			if ( draw.ApplyCellTextEffect() )
 				*pResult |= CDRF_NEWFONT;
 

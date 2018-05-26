@@ -31,11 +31,11 @@ private:
 	// text diffs
 	enum DiffColumn { SrcColumn, DestColumn };
 
-	void DrawCellTextDiffs( DiffColumn diffColumn, const str::TMatchSequence& cellSeq );
 	void DrawCellTextDiffs( DiffColumn diffColumn, const str::TMatchSequence& cellSeq, const CRect& textRect );
 
-	bool SelectTextEffect( const ui::CTextEffect& textEffect );		// to m_pDC
 	CRect MakeCellTextRect( void ) const;
+	void BuildTextMatchEffects( std::vector< ui::CTextEffect >& rTextEffects, DiffColumn diffColumn ) const;
+	bool SelectTextEffect( const ui::CTextEffect& textEffect );		// to m_pDC
 
 	static bool HasMismatch( const str::TMatchSequence& cellSeq );
 private:
