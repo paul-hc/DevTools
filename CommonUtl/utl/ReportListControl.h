@@ -70,7 +70,7 @@ public:
 	bool IsMultiSelectionList( void ) const { return !HasFlag( GetStyle(), LVS_SINGLESEL ); }
 
 	bool UseExplorerTheme( void ) const { return m_useExplorerTheme; }
-	void SetUseExplorerTheme( bool useExplorerTheme = true ) { m_useExplorerTheme = useExplorerTheme; }
+	void SetUseExplorerTheme( bool useExplorerTheme = true );
 
 	bool UseAlternateRowColoring( void ) const { return m_useAlternateRowColoring; }
 	void SetUseAlternateRowColoring( bool useAlternateRowColoring = true ) { m_useAlternateRowColoring = useAlternateRowColoring; }

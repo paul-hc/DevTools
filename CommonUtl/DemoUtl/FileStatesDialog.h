@@ -48,7 +48,6 @@ private:
 	bool m_useDiffsMode;
 	bool m_useAlternateRows;
 	bool m_useTextEffects;
-	bool m_useExplorerTheme;
 	std::vector< CDisplayObject* > m_displayItems;
 private:
 	// enum { IDD = IDD_FILE_STATES_DIALOG };
@@ -64,6 +63,7 @@ protected:
 	virtual void DoDataExchange( CDataExchange* pDX );
 protected:
 	afx_msg void OnDestroy( void );
+	afx_msg void OnBnClicked_OpenDialog( void );
 	afx_msg void OnToggle_UseDiffsCheck( void );
 	afx_msg void OnToggle_UseAlternateRows( void );
 	afx_msg void OnToggle_UseTextEffects( void );

@@ -28,6 +28,12 @@ namespace ui
 	bool ParseColor( COLORREF* pColor, const std::tstring& text );
 
 
+	inline BYTE GetColorFlags( COLORREF color ) { return LOBYTE( color >> 24 ); }				// highest BYTE
+
+	inline bool IsActualColor( COLORREF color ) { return 0 == GetColorFlags( color ); }			// not CLR_NONE, CLR_DEFAULT, other
+	inline COLORREF GetActualColor( COLORREF color, COLORREF defaultColor ) { return IsActualColor( color ) ? color : defaultColor; }
+
+
 	inline BYTE GetLuminance( BYTE red, BYTE green, BYTE blue )
 	{	// luminance (gray level) of a color (Y component) = 0.3*R + 0.59*G + 0.11*B
 		if ( red == green && red == blue )

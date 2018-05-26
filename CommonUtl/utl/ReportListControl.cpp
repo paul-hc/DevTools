@@ -127,6 +127,14 @@ void CReportListControl::ClearData( void )
 	m_diffColumnPairs.clear();
 }
 
+void CReportListControl::SetUseExplorerTheme( bool useExplorerTheme /*= true*/ )
+{
+	m_useExplorerTheme = useExplorerTheme;
+
+	if ( m_hWnd != NULL )
+		CVisualTheme::SetWindowTheme( m_hWnd, m_useExplorerTheme ? L"Explorer" : L"", NULL );		// enable Explorer vs classic theme
+}
+
 void CReportListControl::SetCustomImageDraw( ui::ICustomImageDraw* pCustomImageDraw, ImageListPos transpImgPos /*= -1*/ )
 {
 	ASSERT_NULL( m_hWnd );
@@ -351,25 +359,7 @@ void CReportListControl::SetSortByColumn( TColumn sortByColumn, bool sortAscendi
 
 	if ( m_hWnd != NULL )
 		if ( IsSortingEnabled() )
-			UpdateColumnSortHeader();
-}
-
-bool CReportListControl::SortList( void )
-{
-	UpdateColumnSortHeader();
-	if ( -1 == m_sortByColumn )
-		return false;
-
-	if ( m_sortInternally )										// otherwise was sorted externally, just update sort header
-		if ( m_pCompareFunc != NULL )
-			SortItems( m_pCompareFunc, (LPARAM)this );			// passes item LPARAMs as left/right
-		else
-			SortItemsEx( m_pCompareFunc, (LPARAM)this );		// passes item indexes as left/right LPARAMs
-
-	int caretIndex = GetCaretIndex();
-	if ( caretIndex != -1 )
-		EnsureVisible( caretIndex, FALSE );
-	return true;
+			SortList();
 }
 
 void CReportListControl::UpdateColumnSortHeader( void )
@@ -392,6 +382,24 @@ void CReportListControl::UpdateColumnSortHeader( void )
 			VERIFY( pColumnHeader->SetItem( i, &headerItem ) );
 		}
 	}
+}
+
+bool CReportListControl::SortList( void )
+{
+	UpdateColumnSortHeader();
+	if ( -1 == m_sortByColumn )
+		return false;
+
+	if ( m_sortInternally )										// otherwise was sorted externally, just update sort header
+		if ( m_pCompareFunc != NULL )
+			SortItems( m_pCompareFunc, (LPARAM)this );			// passes item LPARAMs as left/right
+		else
+			SortItemsEx( (PFNLVCOMPARE)&TextCompareProc, (LPARAM)this );		// passes item indexes as left/right LPARAMs
+
+	int caretIndex = GetCaretIndex();
+	if ( caretIndex != -1 )
+		EnsureVisible( caretIndex, FALSE );
+	return true;
 }
 
 int CALLBACK CReportListControl::TextCompareProc( LPARAM leftParam, LPARAM rightParam, CReportListControl* pListCtrl )

@@ -1,6 +1,7 @@
 
 #include "stdafx.h"
 #include "FileStatesDialog.h"
+#include "TestDialog.h"
 #include "utl/Color.h"
 #include "utl/FmtUtils.h"
 #include "utl/LongestCommonSubsequence.h"
@@ -113,15 +114,13 @@ namespace layout
 	static CLayoutStyle styles[] =
 	{
 		{ IDC_FILE_STATE_LIST, Size },
-		{ IDC_USE_ALTERNATE_ROWS_CHECK, MoveX },
-		{ IDC_USE_TEXT_EFFECTS_CHECK, MoveX },
-		{ IDC_USE_EXPLORER_THEME_CHECK, MoveX },
+		{ IDC_OPEN_DIALOG_BUTTON, MoveX },
 
 		{ IDC_USE_DEFAULT_DRAW_CHECK, MoveY },
 		{ IDC_USE_DBG_GUIDES_CHECK, MoveY },
 
-		{ IDOK, Move },
-		{ IDCANCEL, Move }
+		{ IDOK, MoveX },
+		{ IDCANCEL, MoveX }
 	};
 }
 
@@ -131,7 +130,6 @@ CFileStatesDialog::CFileStatesDialog( CWnd* pParent )
 	, m_useDiffsMode( AfxGetApp()->GetProfileInt( reg::section_dialog, reg::entry_useDiffsMode, true ) != FALSE )
 	, m_useAlternateRows( AfxGetApp()->GetProfileInt( reg::section_dialog, reg::entry_useAlternateRows, true ) != FALSE )
 	, m_useTextEffects( AfxGetApp()->GetProfileInt( reg::section_dialog, reg::entry_useTextEffects, false ) != FALSE )
-	, m_useExplorerTheme( AfxGetApp()->GetProfileInt( reg::section_dialog, reg::entry_useExplorerTheme, true ) != FALSE )
 {
 	m_regSection = reg::section_dialog;
 	RegisterCtrlLayout( layout::styles, COUNT_OF( layout::styles ) );
@@ -140,7 +138,7 @@ CFileStatesDialog::CFileStatesDialog( CWnd* pParent )
 	m_fileListCtrl.SetTextEffectCallback( this );
 
 	m_fileListCtrl.SetUseAlternateRowColoring( m_useAlternateRows );
-	m_fileListCtrl.SetUseExplorerTheme( m_useExplorerTheme );
+	m_fileListCtrl.SetUseExplorerTheme( AfxGetApp()->GetProfileInt( reg::section_dialog, reg::entry_useExplorerTheme, true ) != FALSE );
 	m_fileListCtrl.m_listTextEffect.m_textColor = m_useTextEffects ? color::Violet : CLR_NONE;	// list global text effects
 }
 
@@ -259,7 +257,7 @@ void CFileStatesDialog::DoDataExchange( CDataExchange* pDX )
 			CheckDlgButton( IDC_USE_DIFFS_CHECK, m_useDiffsMode );
 			CheckDlgButton( IDC_USE_ALTERNATE_ROWS_CHECK, m_useAlternateRows );
 			CheckDlgButton( IDC_USE_TEXT_EFFECTS_CHECK, m_useTextEffects );
-			CheckDlgButton( IDC_USE_EXPLORER_THEME_CHECK, m_useExplorerTheme );
+			CheckDlgButton( IDC_USE_EXPLORER_THEME_CHECK, m_fileListCtrl.UseExplorerTheme() );
 			CheckDlgButton( IDC_USE_DEFAULT_DRAW_CHECK, CReportListCustomDraw::s_useDefaultDraw );
 			CheckDlgButton( IDC_USE_DBG_GUIDES_CHECK, CReportListCustomDraw::s_dbgGuides );
 
@@ -275,6 +273,7 @@ void CFileStatesDialog::DoDataExchange( CDataExchange* pDX )
 
 BEGIN_MESSAGE_MAP( CFileStatesDialog, CLayoutDialog )
 	ON_WM_DESTROY()
+	ON_BN_CLICKED( IDC_OPEN_DIALOG_BUTTON, OnBnClicked_OpenDialog )
 	ON_BN_CLICKED( IDC_USE_DIFFS_CHECK, OnToggle_UseDiffsCheck )
 	ON_BN_CLICKED( IDC_USE_ALTERNATE_ROWS_CHECK, OnToggle_UseAlternateRows )
 	ON_BN_CLICKED( IDC_USE_TEXT_EFFECTS_CHECK, OnToggle_UseTextEffects )
@@ -288,9 +287,15 @@ void CFileStatesDialog::OnDestroy( void )
 	AfxGetApp()->WriteProfileInt( reg::section_dialog, reg::entry_useDiffsMode, m_useDiffsMode );
 	AfxGetApp()->WriteProfileInt( reg::section_dialog, reg::entry_useAlternateRows, m_useAlternateRows );
 	AfxGetApp()->WriteProfileInt( reg::section_dialog, reg::entry_useTextEffects, m_useTextEffects );
-	AfxGetApp()->WriteProfileInt( reg::section_dialog, reg::entry_useExplorerTheme, m_useExplorerTheme );
+	AfxGetApp()->WriteProfileInt( reg::section_dialog, reg::entry_useExplorerTheme, m_fileListCtrl.UseExplorerTheme() );
 
 	__super::OnDestroy();
+}
+
+void CFileStatesDialog::OnBnClicked_OpenDialog( void )
+{
+	CTestDialog dialog( this );
+	dialog.DoModal();
 }
 
 void CFileStatesDialog::OnToggle_UseDiffsCheck( void )
@@ -318,10 +323,7 @@ void CFileStatesDialog::OnToggle_UseTextEffects( void )
 
 void CFileStatesDialog::OnToggle_UseExplorerTheme( void )
 {
-	m_useExplorerTheme = IsDlgButtonChecked( IDC_USE_EXPLORER_THEME_CHECK ) != FALSE;
-
-	if ( UpdateData( DialogSaveChanges ) )
-		EndDialog( IDRETRY );
+	m_fileListCtrl.SetUseExplorerTheme( IsDlgButtonChecked( IDC_USE_EXPLORER_THEME_CHECK ) != FALSE );
 }
 
 void CFileStatesDialog::OnToggle_UseDefaultDraw( void )

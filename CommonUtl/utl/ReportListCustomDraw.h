@@ -34,10 +34,8 @@ private:
 	void DrawCellTextDiffs( DiffColumn diffColumn, const str::TMatchSequence& cellSeq );
 	void DrawCellTextDiffs( DiffColumn diffColumn, const str::TMatchSequence& cellSeq, const CRect& textRect );
 
-	void StrongOverrideEffect( ui::CTextEffect& rTextEffect ) const;			// strong overrides
 	bool SelectTextEffect( const ui::CTextEffect& textEffect );		// to m_pDC
-	CRect MakeItemTextRect( void ) const;
-	bool IsContrastRow( void ) const;		// dark background for selected item?
+	CRect MakeCellTextRect( void ) const;
 
 	static bool HasMismatch( const str::TMatchSequence& cellSeq );
 private:
