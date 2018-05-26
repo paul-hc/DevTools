@@ -16,6 +16,10 @@ namespace fs
 
 	const TCHAR CBaseBatchOperation::s_fmtError[] = _T("* %s\n ERROR: %s");
 
+	CBaseBatchOperation::~CBaseBatchOperation()
+	{
+	}
+
 	void CBaseBatchOperation::Clear( void )
 	{
 		m_committed.clear();

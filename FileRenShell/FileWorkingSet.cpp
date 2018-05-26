@@ -149,26 +149,29 @@ bool CFileWorkingSet::CanUndo( app::Action action ) const
 	}
 }
 
-void CFileWorkingSet::SaveUndoInfo( app::Action action, const fs::TPathSet& keyPaths )
+void CFileWorkingSet::SaveUndoInfo( app::Action action, const fs::TPathSet& keyPaths, bool clearMap /*= true*/ )
 {
 	switch ( action )
 	{
-		case app::RenameFiles:	_SaveUndoInfo( m_pUndoChangeLog->GetRenameUndoStack().Push(), m_renamePairs, keyPaths ); break;
-		case app::TouchFiles:	_SaveUndoInfo( m_pUndoChangeLog->GetTouchUndoStack().Push(), m_touchPairs, keyPaths ); break;
+		case app::RenameFiles:	_SaveUndoInfo( m_pUndoChangeLog->GetRenameUndoStack().Push(), m_renamePairs, keyPaths, clearMap ); break;
+		case app::TouchFiles:	_SaveUndoInfo( m_pUndoChangeLog->GetTouchUndoStack().Push(), m_touchPairs, keyPaths, clearMap ); break;
 		default: ASSERT( false );
 	}
 }
 
 template< typename UndoMapType, typename DataMapType >
-void CFileWorkingSet::_SaveUndoInfo( UndoMapType& rUndoPairs, DataMapType& rDataMemberPairs, const fs::TPathSet& keyPaths )
+void CFileWorkingSet::_SaveUndoInfo( UndoMapType& rUndoPairs, DataMapType& rDataMemberPairs, const fs::TPathSet& keyPaths, bool clearMap )
 {
 	// push in the undo stack only the pairs that were successfully committed
 	for ( typename DataMapType::const_iterator itDataPair = rDataMemberPairs.begin(); itDataPair != rDataMemberPairs.end(); ++itDataPair )
 		if ( keyPaths.find( func::PathOf( itDataPair->first ) ) != keyPaths.end() )		// successfully renamed
 			rUndoPairs[ itDataPair->first ] = itDataPair->second;
 
-	rDataMemberPairs.clear();		// this action was committed, we're done
-	m_mixedDirPaths = false;
+	if ( clearMap )
+	{
+		rDataMemberPairs.clear();		// this action was committed, we're done
+		m_mixedDirPaths = false;
+	}
 }
 
 void CFileWorkingSet::RetrieveUndoInfo( app::Action action )

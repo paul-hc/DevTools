@@ -487,6 +487,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\ICommand.h"
+				>
+			</File>
+			<File
 				RelativePath=".\ISubject.h"
 				>
 			</File>

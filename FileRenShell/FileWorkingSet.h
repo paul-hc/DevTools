@@ -36,7 +36,7 @@ public:
 	void SaveUndoLog( void );
 
 	bool CanUndo( app::Action action ) const;
-	void SaveUndoInfo( app::Action action, const fs::TPathSet& keyPaths );
+	void SaveUndoInfo( app::Action action, const fs::TPathSet& keyPaths, bool clearMap = true );
 	void RetrieveUndoInfo( app::Action action );		// fills action pairs from undo stack
 	void CommitUndoInfo( app::Action action );			// pops last from undo stack (when Undo-Rename OK is pressed)
 
@@ -65,7 +65,7 @@ public:
 	void PasteClipDestinationFileStates( CWnd* pWnd ) throws_( CRuntimeException );
 private:
 	template< typename UndoMapType, typename DataMapType >
-	void _SaveUndoInfo( UndoMapType& rUndoPairs, DataMapType& rDataMemberPairs, const fs::TPathSet& keyPaths );
+	void _SaveUndoInfo( UndoMapType& rUndoPairs, DataMapType& rDataMemberPairs, const fs::TPathSet& keyPaths, bool clearMap );
 
 	template< typename DataMapType, typename UndoMapType >
 	void _RetrieveUndoInfo( DataMapType& rDataMemberPairs, const UndoMapType* pTopUndoPairs );

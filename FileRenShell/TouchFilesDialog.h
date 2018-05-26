@@ -4,7 +4,6 @@
 
 #include "utl/BatchTransactions.h"
 #include "utl/BaseMainDialog.h"
-//#include "utl/DialogToolBar.h"
 #include "utl/FileState.h"
 #include "utl/ReportListControl.h"
 #include "utl/DateTimeControl.h"
@@ -65,6 +64,7 @@ private:
 
 	// CReportListControl::ITextEffectCallback interface
 	virtual void CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARAM rowKey, int subItem ) const;
+	virtual void ModifyDiffTextEffectAt( std::vector< ui::CTextEffect >& rMatchEffects, LPARAM rowKey, int subItem ) const;
 private:
 	CFileWorkingSet* m_pFileData;
 	Mode m_mode;

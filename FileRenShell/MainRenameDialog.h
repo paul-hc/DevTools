@@ -24,6 +24,7 @@ namespace str { enum Match; }
 
 class CMainRenameDialog : public CBaseMainDialog
 						, private fs::IBatchTransactionCallback
+						, private CReportListControl::ITextEffectCallback
 {
 public:
 	CMainRenameDialog( app::MenuCommand menuCmd, CFileWorkingSet* pFileData, CWnd* pParent );
@@ -54,37 +55,22 @@ private:
 	virtual CLogger* GetLogger( void );
 	virtual fs::UserFeedback HandleFileError( const fs::CPath& sourcePath, const std::tstring& message );
 
-	// custom draw list
-	void ListItem_DrawTextDiffs( const NMLVCUSTOMDRAW* pDraw );
-	void ListItem_DrawTextDiffs( CDC* pDC, const CRect& textRect, int itemIndex, Column column );
-	bool ListItem_FillBkgnd( NMLVCUSTOMDRAW* pDraw ) const;
-
-	bool ListItem_IsSelectedInvert( int itemIndex ) const;
-
-	static CRect MakeItemTextRect( const NMLVCUSTOMDRAW* pDraw );
-	static CFont* SelectBoldFont( CDC* pDC );
+	// CReportListControl::ITextEffectCallback interface
+	virtual void CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARAM rowKey, int subItem ) const;
 private:
 	struct CDisplayItem : public utl::ISubject
 	{
-		CDisplayItem( const TPathPair* pPathPair );
+		CDisplayItem( const TPathPair* pPathPair ) : m_pPathPair( pPathPair ) {}
 
-		const fs::CPath& GetSrcPath( void ) const { return m_pPathPair->first; }
-
-		bool HasMismatch( void ) const { return m_match != str::MatchEqual && !m_destFnameExt.empty(); }
+		const fs::CPath& GetSrcPath( void ) const { return m_pPathPair->first; }		// AKA key path
+		const fs::CPath& GetDestPath( void ) const { return m_pPathPair->second; }
 
 		// utl::ISubject interface
 		virtual std::tstring GetCode( void ) const;
 		virtual std::tstring GetDisplayCode( void ) const;
 	private:
-		void ComputeMatchSeq( void );
-	private:
 		const TPathPair* m_pPathPair;
-	public:
-		std::tstring m_srcFnameExt;
-		std::tstring m_destFnameExt;
-		str::Match m_match;
-		std::vector< str::Match > m_srcMatchSeq;		// same size with m_srcFnameExt
-		std::vector< str::Match > m_destMatchSeq;		// same size with m_destFnameExt
+		const std::tstring m_srcFnameExt;
 	};
 private:
 	CFileWorkingSet* m_pFileData;
@@ -149,7 +135,6 @@ protected:
 	afx_msg void OnUnderbarToSpace( void );
 	afx_msg void OnSpaceToUnderbar( void );
 	afx_msg void OnEnsureUniformNumPadding( void );
-	afx_msg void OnCustomDraw_FileRenameList( NMHDR* pNmHdr, LRESULT* pResult );
 
 	DECLARE_MESSAGE_MAP()
 };

@@ -28,6 +28,7 @@ namespace fs
 	{
 	protected:
 		CBaseBatchOperation( IBatchTransactionCallback* pCallback ) : m_pCallback( pCallback ) {}
+		~CBaseBatchOperation();
 
 		static std::tstring ExtractMessage( const fs::CPath& path, CException* pExc );
 	public:

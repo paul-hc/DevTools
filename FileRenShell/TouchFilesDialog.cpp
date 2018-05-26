@@ -11,6 +11,7 @@
 #include "utl/CmdInfoStore.h"
 #include "utl/FmtUtils.h"
 #include "utl/EnumTags.h"
+#include "utl/LongestCommonSubsequence.h"
 #include "utl/RuntimeException.h"
 #include "utl/MenuUtilities.h"
 #include "utl/StringUtilities.h"
@@ -61,6 +62,7 @@ CTouchFilesDialog::CTouchFilesDialog( CFileWorkingSet* pFileData, CWnd* pParent 
 	RegisterCtrlLayout( layout::styles, COUNT_OF( layout::styles ) );
 
 	m_fileListCtrl.SetSection( m_regSection + _T("\\List") );
+	m_fileListCtrl.SetUseAlternateRowColoring();
 	m_fileListCtrl.SetTextEffectCallback( this );
 	m_fileListCtrl.SetPopupMenu( CReportListControl::OnSelection, NULL );			// let us track a custom menu
 
@@ -163,7 +165,8 @@ void CTouchFilesDialog::SetupFileListView( void )
 
 		for ( unsigned int pos = 0; pos != m_displayItems.size(); ++pos )
 		{
-			CTouchItem* pTouchItem = m_displayItems[ pos ];
+			const CTouchItem* pTouchItem = m_displayItems[ pos ];
+
 			m_fileListCtrl.InsertObjectItem( pos, pTouchItem );		// PathName
 
 			m_fileListCtrl.SetSubItemText( pos, DestAttributes, fmt::FormatFileAttributes( pTouchItem->GetDestState().m_attributes ) );
@@ -176,6 +179,10 @@ void CTouchFilesDialog::SetupFileListView( void )
 			m_fileListCtrl.SetSubItemText( pos, SrcCreationTime, time_utl::FormatTimestamp( pTouchItem->GetSrcState().m_creationTime ) );
 			m_fileListCtrl.SetSubItemText( pos, SrcAccessTime, time_utl::FormatTimestamp( pTouchItem->GetSrcState().m_accessTime ) );
 		}
+		m_fileListCtrl.SetupDiffColumnPair( SrcAttributes, DestAttributes, str::GetMatch() );
+		m_fileListCtrl.SetupDiffColumnPair( SrcModifyTime, DestModifyTime, str::GetMatch() );
+		m_fileListCtrl.SetupDiffColumnPair( SrcCreationTime, DestCreationTime, str::GetMatch() );
+		m_fileListCtrl.SetupDiffColumnPair( SrcAccessTime, DestAccessTime, str::GetMatch() );
 	}
 
 	if ( orgSel != -1 )		// restore selection?
@@ -392,6 +399,22 @@ void CTouchFilesDialog::CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARA
 
 		if ( wouldModify )
 			rTextEffect.m_textColor = ui::GetBlendedColor( rTextEffect.m_textColor != CLR_NONE ? rTextEffect.m_textColor : m_fileListCtrl.GetTextColor(), color::White );		// blend to gray
+	}
+}
+
+void CTouchFilesDialog::ModifyDiffTextEffectAt( std::vector< ui::CTextEffect >& rMatchEffects, LPARAM rowKey, int subItem ) const
+{
+	rowKey;
+	switch ( subItem )
+	{
+		case SrcModifyTime:
+		case DestModifyTime:
+		case SrcCreationTime:
+		case DestCreationTime:
+		case SrcAccessTime:
+		case DestAccessTime:
+			ClearFlag( rMatchEffects[ str::MatchNotEqual ].m_fontEffect, ui::Bold );		// line-up date columns nicely
+			break;
 	}
 }
 
