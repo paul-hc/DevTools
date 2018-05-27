@@ -21,9 +21,11 @@ namespace fs
 
 	bool CreateDir( const TCHAR* pDirPath );
 	bool CreateDirPath( const TCHAR* pDirPath );								// creates deep directory path, returns true if a valid directory path
-	void EnsureDirPath( const TCHAR* pDirPath ) throws_( CFileException );		// same as CreateDirPath() but throws on error
 	bool DeleteDir( const TCHAR* pDirPath );
 	bool DeleteAllFiles( const TCHAR* pDirPath );
+
+	void EnsureDirPath( const TCHAR* pDirPath ) throws_( CRuntimeException );	// same as CreateDirPath() but throws on error
+	void EnsureDirPath_Mfc( const TCHAR* pDirPath ) throws_( CFileException );	// throws CFileException on error
 
 
 	ULONGLONG BufferedCopy( CFile& rDestFile, CFile& srcFile, size_t chunkSize = 4 * KiloByte );		// 4096 works well because it's quicker to allocate

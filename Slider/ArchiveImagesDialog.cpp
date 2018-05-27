@@ -196,7 +196,7 @@ bool CArchiveImagesDialog::CheckDestFolder( void )
 
 	try
 	{
-		fs::EnsureDirPath( m_destPath.GetPtr() );
+		fs::EnsureDirPath_Mfc( m_destPath.GetPtr() );
 		return true;
 	}
 	catch ( CException* pExc )

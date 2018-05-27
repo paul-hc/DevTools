@@ -357,7 +357,7 @@ namespace ui
 		if ( DialogOutput == pDX->m_bSaveAndValidate )
 			ddx::SetItemText( pDX, ctrlId, num::FormatNumber( rValue, loc ) );
 		else
-			num::ParseNumber( rValue, ddx::GetItemText( pDX, ctrlId ), loc );
+			num::ParseNumber( rValue, ddx::GetItemText( pDX, ctrlId ), NULL, loc );
 	}
 
 	inline void DDX_ComboSelPos( CDataExchange* pDX, int comboId, size_t& rSelPos )

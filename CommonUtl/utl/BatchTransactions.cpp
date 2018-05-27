@@ -59,6 +59,21 @@ namespace fs
 		return !aborted;
 	}
 
+	void CBatchRename::MakeIntermPaths( void )
+	{
+		const std::tstring intermSuffix = str::Format( _T("_(%x)"), ::GetTickCount() );		// random fname sufffix
+
+		m_intermPaths.clear();
+		for ( fs::TPathPairMap::const_iterator it = m_rRenamePairs.begin(); it != m_rRenamePairs.end(); ++it )
+		{
+			fs::CPathParts parts( it->second.Get() );
+			parts.m_fname += intermSuffix;
+			m_intermPaths.push_back( parts.MakePath() );
+		}
+
+		ENSURE( m_intermPaths.size() == m_rRenamePairs.size() );
+	}
+
 	bool CBatchRename::RenameSrcToInterm( void )
 	{
 		// step 1: rename SOURCE -> INTERMEDIATE
@@ -121,21 +136,6 @@ namespace fs
 			++it; ++itInterm;
 		}
 		return true;
-	}
-
-	void CBatchRename::MakeIntermPaths( void )
-	{
-		const std::tstring intermSuffix = str::Format( _T("_(%x)"), ::GetTickCount() );		// random fname sufffix
-
-		m_intermPaths.clear();
-		for ( fs::TPathPairMap::const_iterator it = m_rRenamePairs.begin(); it != m_rRenamePairs.end(); ++it )
-		{
-			fs::CPathParts parts( it->second.Get() );
-			parts.m_fname += intermSuffix;
-			m_intermPaths.push_back( parts.MakePath() );
-		}
-
-		ENSURE( m_intermPaths.size() == m_rRenamePairs.size() );
 	}
 
 	void CBatchRename::LogTransaction( void ) const

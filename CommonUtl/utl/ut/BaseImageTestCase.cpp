@@ -11,24 +11,24 @@
 #ifdef _DEBUG
 
 
-const std::tstring& CBaseImageTestCase::GetImageSourceDirPath( void )
+const fs::CPath& CBaseImageTestCase::GetImageSourceDirPath( void )
 {
-	static std::tstring imagesDirPath = str::ExpandEnvironmentStrings( _T("%UTL_THUMB_SRC_IMAGE_PATH%") );
-	if ( !imagesDirPath.empty() && !fs::IsValidDirectory( imagesDirPath.c_str() ) )
+	static fs::CPath imagesDirPath = str::ExpandEnvironmentStrings( _T("%UTL_THUMB_SRC_IMAGE_PATH%") );
+	if ( !imagesDirPath.IsEmpty() && !fs::IsValidDirectory( imagesDirPath.GetPtr() ) )
 	{
-		TRACE( _T("\n # Cannot find unit test images dir path: %s #\n"), imagesDirPath.c_str() );
-		imagesDirPath.clear();
+		TRACE( _T("\n # Cannot find unit test images dir path: %s #\n"), imagesDirPath.GetPtr() );
+		imagesDirPath.Clear();
 	}
 	return imagesDirPath;
 }
 
-const std::tstring& CBaseImageTestCase::GetTestImagesDirPath( void )
+const fs::CPath& CBaseImageTestCase::GetTestImagesDirPath( void )
 {
-	static std::tstring dirPath = ut::CombinePath( ut::GetTestDataDirPath(), _T("images") );
-	if ( !dirPath.empty() && !fs::IsValidDirectory( dirPath.c_str() ) )
+	static fs::CPath dirPath = ut::GetTestDataDirPath() / fs::CPath( _T("images") );
+	if ( !dirPath.IsEmpty() && !fs::IsValidDirectory( dirPath.GetPtr() ) )
 	{
-		TRACE( _T("\n * Cannot find the local test images dir path: %s\n"), dirPath.c_str() );
-		dirPath.clear();
+		TRACE( _T("\n * Cannot find the local test images dir path: %s\n"), dirPath.GetPtr() );
+		dirPath.Clear();
 	}
 	return dirPath;
 }
@@ -43,7 +43,9 @@ const TCHAR* CBaseImageTestCase::GetImageFilename( SrcImage srcImage )
 
 fs::CFlexPath CBaseImageTestCase::MakeTestImageFilePath( SrcImage srcImage )
 {
-	fs::CFlexPath imagePath( ut::CombinePath( GetTestImagesDirPath(), GetImageFilename( srcImage ) ) );
+	fs::CFlexPath imagePath(
+		( GetTestImagesDirPath() / fs::CPath( GetImageFilename( srcImage ) ) ).Get()
+	);
 	if ( !imagePath.IsEmpty() && !imagePath.FileExist() )
 	{
 		TRACE( _T("\n * Cannot find the local test image file: %s\n"), imagePath.GetPtr() );

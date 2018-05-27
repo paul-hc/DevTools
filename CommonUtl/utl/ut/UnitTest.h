@@ -44,14 +44,6 @@ namespace ut
 }
 
 
-namespace ut
-{
-	const std::tstring& GetTestDataDirPath( void );
-
-	std::tstring CombinePath( const std::tstring& parentDirPath, const TCHAR* pSubPath );
-}
-
-
 template< typename Type1, typename Type2 >
 std::wostream& operator<<( std::wostream& os, const std::pair< Type1, Type2 >& rPair )
 {
@@ -170,25 +162,32 @@ namespace ut
 
 namespace ut
 {
+	const fs::CPath& GetTestDataDirPath( void ) throws_( CRuntimeException );
+
+	const fs::CPath& GetTempUt_DirPath( void ) throws_( CRuntimeException );
+	fs::CPath MakeTempUt_DirPath( const fs::CPath& subPath, bool createDir ) throws_( CRuntimeException );
+
+
 	class CTempFilePool : private utl::noncopyable
 	{
 	public:
 		CTempFilePool( const TCHAR* pFlatPaths = NULL );
 		~CTempFilePool();
 
-		bool IsValidDir( void ) const { return path::IsValid( m_tempDirPath ) && fs::IsValidDirectory( m_tempDirPath.c_str() ); }
+		bool IsValidDir( void ) const { return path::IsValid( m_poolDirPath.Get() ) && fs::IsValidDirectory( m_poolDirPath.GetPtr() ); }
 		bool IsValidPool( void ) const { return IsValidDir() && !m_filePaths.empty() && !m_hasFileErrors; }
-		const std::tstring& GetTempDirPath( void ) const { return m_tempDirPath; }
-		const std::vector< std::tstring >& GetFilePaths( void ) const { return m_filePaths; }
-		std::tstring QualifyPath( const TCHAR* pRelativePath ) const { return path::Combine( m_tempDirPath.c_str(), pRelativePath ); }
+		const fs::CPath& GetPoolDirPath( void ) const { return m_poolDirPath; }
+
+		const std::vector< fs::CPath >& GetFilePaths( void ) const { return m_filePaths; }
+		fs::CPath QualifyPath( const TCHAR* pRelativePath ) const { return m_poolDirPath / fs::CPath( pRelativePath ); }
 
 		bool DeleteAllFiles( void );
 		bool SplitCreateFiles( const TCHAR* pFlatPaths = NULL );			// can contain subdirectories
 	private:
 		static bool CreateFile( const TCHAR* pFilePath );
 	private:
-		std::tstring m_tempDirPath;
-		std::vector< std::tstring > m_filePaths;
+		fs::CPath m_poolDirPath;							// temorary directory
+		std::vector< fs::CPath > m_filePaths;
 		bool m_hasFileErrors;								// file creation errors
 	public:
 		static const TCHAR m_sep[];

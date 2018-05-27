@@ -9,6 +9,11 @@
 *.res
 *.tlog/
 
+# DevTools Ignore:
+FileRenShell/FileRenShell.h
+TestDataUtl/images/thumbnails/myThumbs.stg
+TestDataUtl/temp_ut/
+
 
 # User-specific files
 *.suo
@@ -293,5 +298,3 @@ __pycache__/
 *.btm.cs
 *.odx.cs
 *.xsd.cs
-FileRenShell/FileRenShell.h
-TestDataUtl/images/thumbnails/myThumbs.stg

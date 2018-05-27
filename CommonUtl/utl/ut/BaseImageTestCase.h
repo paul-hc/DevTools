@@ -14,8 +14,8 @@ class CBaseImageTestCase : public ut::CGraphicTestCase
 protected:
 	CBaseImageTestCase( void ) {}
 public:
-	static const std::tstring& GetImageSourceDirPath( void );		// %UTL_THUMB_SRC_IMAGE_PATH%
-	static const std::tstring& GetTestImagesDirPath( void );		// %UTL_TESTDATA_PATH%\images
+	static const fs::CPath& GetImageSourceDirPath( void );		// %UTL_THUMB_SRC_IMAGE_PATH%
+	static const fs::CPath& GetTestImagesDirPath( void );		// %UTL_TESTDATA_PATH%\images
 
 	enum SrcImage { Flamingos_jpg, Dice_png, Animated_gif, Scissors_ico, _ImageCount };
 

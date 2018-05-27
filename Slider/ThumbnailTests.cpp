@@ -29,15 +29,15 @@ namespace ut
 
 	bool SaveThumbnailToFiles( IWICBitmapSource* pThumbBitmap, const TCHAR* pSrcFnameExt )
 	{
-		if ( CThumbnailTests::GetThumbSaveDirPath().empty() )
+		if ( CThumbnailTests::GetThumbSaveDirPath().IsEmpty() )
 			return false;
 
 		static const TCHAR* extensions[] = { _T(".bmp"), _T(".jpg"), _T(".png"), _T(".tif"), _T(".gif") };
 
 		for ( UINT i = 0; i != COUNT_OF( extensions ); ++i )
 		{
-			std::tstring destFilePath = path::Combine( CThumbnailTests::GetThumbSaveDirPath().c_str(), str::Format( _T("thumb %s_%d%s"), pSrcFnameExt, i + 1, extensions[ i ] ).c_str() );
-			if ( !wic::SaveBitmapToFile( pThumbBitmap, destFilePath.c_str() ) )
+			fs::CPath destFilePath = CThumbnailTests::GetThumbSaveDirPath() / str::Format( _T("thumb %s_%d%s"), pSrcFnameExt, i + 1, extensions[ i ] );
+			if ( !wic::SaveBitmapToFile( pThumbBitmap, destFilePath.GetPtr() ) )
 				return false;
 		}
 		return true;
@@ -45,13 +45,13 @@ namespace ut
 
 	bool SaveThumbnailToDocStorage( IWICBitmapSource* pThumbBitmap, const TCHAR* pSrcFnameExt )
 	{
-		if ( CThumbnailTests::GetThumbSaveDirPath().empty() )
+		if ( CThumbnailTests::GetThumbSaveDirPath().IsEmpty() )
 			return false;
 
 		static const TCHAR* extensions[] = { _T(".bmp"), _T(".jpg"), _T(".png"), _T(".tif"), _T(".gif") };
 
 		fs::CStructuredStorage docStg;
-		VERIFY( docStg.Create( path::Combine( CThumbnailTests::GetThumbSaveDirPath().c_str(), _T("myThumbs.stg") ).c_str() ) );
+		VERIFY( docStg.Create( path::Combine( CThumbnailTests::GetThumbSaveDirPath().GetPtr(), _T("myThumbs.stg") ).c_str() ) );
 
 		for ( UINT i = 0; i != COUNT_OF( extensions ); ++i )
 		{
@@ -81,13 +81,13 @@ CThumbnailTests& CThumbnailTests::Instance( void )
 	return testCase;
 }
 
-const std::tstring& CThumbnailTests::GetThumbSaveDirPath( void )
+const fs::CPath& CThumbnailTests::GetThumbSaveDirPath( void )
 {
-	static std::tstring dirPath = ut::CombinePath( GetTestImagesDirPath(), _T("thumbnails") );
-	if ( !dirPath.empty() && !fs::CreateDirPath( dirPath.c_str() ) )
+	static fs::CPath dirPath = GetTestImagesDirPath() / fs::CPath( _T("thumbnails") );
+	if ( !dirPath.IsEmpty() && !fs::CreateDirPath( dirPath.GetPtr() ) )
 	{
-		TRACE( _T("\n * Cannot create the local save directory for thumbs: %s\n"), dirPath.c_str() );
-		dirPath.clear();
+		TRACE( _T("\n * Cannot create the local save directory for thumbs: %s\n"), dirPath.GetPtr() );
+		dirPath.Clear();
 	}
 	return dirPath;
 }
@@ -126,11 +126,11 @@ void CThumbnailTests::TestThumbConversion( void )
 
 void CThumbnailTests::TestImageThumbs( void )
 {
-	if ( GetImageSourceDirPath().empty() )
+	if ( GetImageSourceDirPath().IsEmpty() )
 		return;
 
 	fs::CPathEnumerator imageEnum;
-	fs::EnumFiles( &imageEnum, GetImageSourceDirPath().c_str(), _T("*.*") );
+	fs::EnumFiles( &imageEnum, GetImageSourceDirPath().GetPtr(), _T("*.*") );
 
 	std::vector< CBitmap* > thumbs;
 	thumbs.reserve( MaxImageFiles );
@@ -156,11 +156,11 @@ void CThumbnailTests::TestImageThumbs( void )
 
 void CThumbnailTests::TestThumbnailCache( void )
 {
-	if ( GetImageSourceDirPath().empty() )
+	if ( GetImageSourceDirPath().IsEmpty() )
 		return;
 
 	fs::CPathEnumerator imageEnum;
-	fs::EnumFiles( &imageEnum, GetImageSourceDirPath().c_str(), _T("*.*") );
+	fs::EnumFiles( &imageEnum, GetImageSourceDirPath().GetPtr(), _T("*.*") );
 
 	std::vector< CBitmap* > thumbs;
 	thumbs.reserve( MaxImageFiles );

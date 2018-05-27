@@ -1,6 +1,7 @@
 
 #include "stdafx.h"
 #include "FileSystem.h"
+#include "RuntimeException.h"
 #include <shlwapi.h>
 #include <stdexcept>
 
@@ -120,7 +121,13 @@ namespace fs
 		return fs::IsValidDirectory( dirPath.c_str() );
 	}
 
-	void EnsureDirPath( const TCHAR* pDirPath ) throws_( CFileException )
+	void EnsureDirPath( const TCHAR* pDirPath ) throws_( CRuntimeException )
+	{
+		if ( !CreateDirPath( pDirPath ) )
+			throw CRuntimeException( str::Format( _T("Cannot create directory path: %s"), pDirPath ) );
+	}
+
+	void EnsureDirPath_Mfc( const TCHAR* pDirPath ) throws_( CFileException )
 	{
 		if ( !CreateDirPath( pDirPath ) )
 			AfxThrowFileException( CFileException::badPath, -1, pDirPath );
@@ -318,6 +325,5 @@ namespace fs
 		EnumFiles( &singleEnumer, pDirPath, pWildSpec, depth );
 		return singleEnumer.GetFoundPath();
 	}
-
 
 } //namespace fs

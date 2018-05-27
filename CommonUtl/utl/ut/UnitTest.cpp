@@ -3,6 +3,7 @@
 #include "ut/UnitTest.h"
 #include "ContainerUtilities.h"
 #include "Path.h"
+#include "RuntimeException.h"
 #include "StringUtilities.h"
 #include <math.h>
 #include <fstream>
@@ -50,28 +51,6 @@ namespace numeric
 
 namespace ut
 {
-	const std::tstring& GetTestDataDirPath( void )
-	{
-		static std::tstring dirPath = str::ExpandEnvironmentStrings( _T("%UTL_TESTDATA_PATH%") );
-		if ( !dirPath.empty() && !fs::IsValidDirectory( dirPath.c_str() ) )
-		{
-			TRACE( _T("\n * Cannot find the local test directory path: %s - define envirnoment variable UTL_TESTDATA_PATH\n"), dirPath.c_str() );
-			dirPath.clear();
-		}
-		return dirPath;
-	}
-
-	std::tstring CombinePath( const std::tstring& parentDirPath, const TCHAR* pSubPath )
-	{
-		std::tstring newPath;
-		if ( !parentDirPath.empty() && !str::IsEmpty( pSubPath ) )
-			if ( fs::IsValidDirectory( parentDirPath.c_str() ) )
-				newPath = path::Combine( parentDirPath.c_str(), pSubPath );
-
-		return newPath;
-	}
-
-
 	std::tstring MakeNotEqualMessage( const std::tstring& expectedValue, const std::tstring& actualValue )
 	{
 		return str::Format( _T("* Equality Assertion Failed *\r\n\r\n  expect:\t'%s'\r\n  actual:\t'%s'\r\n"), expectedValue.c_str(), actualValue.c_str() );
@@ -107,28 +86,61 @@ namespace ut
 
 namespace ut
 {
+	const fs::CPath& GetTestDataDirPath( void ) throws_( CRuntimeException )
+	{
+		static const fs::CPath dirPath = str::ExpandEnvironmentStrings( _T("%UTL_TESTDATA_PATH%") );
+		if ( !dirPath.IsEmpty() && !fs::IsValidDirectory( dirPath.GetPtr() ) )
+			throw CRuntimeException( str::Format( _T("Cannot find the local test directory path: %s\n\nTODO: define envirnoment variable UTL_TESTDATA_PATH."), dirPath.GetPtr() ) );
+
+		return dirPath;
+	}
+
+	const fs::CPath& GetTempUt_DirPath( void ) throws_( CRuntimeException )
+	{
+		static fs::CPath tempUtDirPath;
+
+		if ( tempUtDirPath.IsEmpty() )
+		{
+			tempUtDirPath = GetTestDataDirPath() / fs::CPath( _T("temp_ut") );
+			fs::EnsureDirPath( tempUtDirPath.GetPtr() );
+		}
+		return tempUtDirPath;
+	}
+
+	fs::CPath MakeTempUt_DirPath( const fs::CPath& subPath, bool createDir ) throws_( CRuntimeException )
+	{
+		fs::CPath fullPath = GetTempUt_DirPath() / subPath;
+		if ( createDir )
+			fs::EnsureDirPath( fullPath.GetPtr() );
+		return fullPath;
+	}
+
+}
+
+
+namespace ut
+{
 	// CTempFilePool implementation
 
 	const TCHAR CTempFilePool::m_sep[] = _T("|");
 
 	CTempFilePool::CTempFilePool( const TCHAR* pFlatPaths /*= NULL*/ )
-		: m_tempDirPath( fs::MakeTempDirPath( _T("_UT") ) )
+		: m_poolDirPath( MakeTempUt_DirPath( fs::CPath( _T("_UT") ), true ) )
 		, m_hasFileErrors( false )
 	{
-		fs::CreateDir( m_tempDirPath.c_str() );
 		if ( !str::IsEmpty( pFlatPaths ) )
 			SplitCreateFiles( pFlatPaths );
 	}
 
 	CTempFilePool::~CTempFilePool()
 	{
-		fs::DeleteDir( m_tempDirPath.c_str() );
+		fs::DeleteDir( m_poolDirPath.GetPtr() );
 	}
 
 	bool CTempFilePool::SplitCreateFiles( const TCHAR* pFlatPaths /*= NULL*/ )
 	{
 		m_filePaths.clear();
-		if ( !fs::IsValidDirectory( m_tempDirPath.c_str() ) )
+		if ( !IsValidDir() )
 			return false;
 
 		m_hasFileErrors = false;
@@ -138,7 +150,7 @@ namespace ut
 
 		for ( std::vector< std::tstring >::iterator itSrcPath = filePaths.begin(); itSrcPath != filePaths.end(); ++itSrcPath )
 		{
-			*itSrcPath = path::Combine( m_tempDirPath.c_str(), itSrcPath->c_str() );		// convert to absolute path
+			*itSrcPath = path::Combine( m_poolDirPath.GetPtr(), itSrcPath->c_str() );		// convert to absolute path
 			if ( !CreateFile( itSrcPath->c_str() ) )
 			{
 				m_hasFileErrors = true;
@@ -169,7 +181,7 @@ namespace ut
 
 	bool CTempFilePool::DeleteAllFiles( void )
 	{
-		return fs::DeleteAllFiles( m_tempDirPath.c_str() );
+		return fs::DeleteAllFiles( m_poolDirPath.GetPtr() );
 	}
 
 
@@ -208,7 +220,7 @@ namespace ut
 		: CTempFilePool( pSourceFilenames )
 	{
 		if ( IsValidPool() )
-			for ( std::vector< std::tstring >::const_iterator itSrcPath = GetFilePaths().begin(); itSrcPath != GetFilePaths().end(); ++itSrcPath )
+			for ( std::vector< fs::CPath >::const_iterator itSrcPath = GetFilePaths().begin(); itSrcPath != GetFilePaths().end(); ++itSrcPath )
 				m_pathPairs[ *itSrcPath ] = fs::CPath();
 	}
 }
