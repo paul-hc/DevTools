@@ -9,8 +9,8 @@
 #include "utl/Color.h"
 #include "utl/ContainerUtilities.h"
 #include "utl/CmdInfoStore.h"
-#include "utl/FmtUtils.h"
 #include "utl/EnumTags.h"
+#include "utl/FmtUtils.h"
 #include "utl/LongestCommonSubsequence.h"
 #include "utl/RuntimeException.h"
 #include "utl/MenuUtilities.h"
@@ -67,9 +67,9 @@ CTouchFilesDialog::CTouchFilesDialog( CFileWorkingSet* pFileData, CWnd* pParent 
 	m_fileListCtrl.SetPopupMenu( CReportListControl::OnSelection, NULL );			// let us track a custom menu
 
 	static const TCHAR s_mixedFormat[] = _T("'(multiple values)'");
-	m_dateTimeCtrls[ app::ModifiedDate ].SetNullFormat( s_mixedFormat );
-	m_dateTimeCtrls[ app::CreatedDate ].SetNullFormat( s_mixedFormat );
-	m_dateTimeCtrls[ app::AccessedDate ].SetNullFormat( s_mixedFormat );
+	m_modifiedDateCtrl.SetNullFormat( s_mixedFormat );
+	m_createdDateCtrl.SetNullFormat( s_mixedFormat );
+	m_accessedDateCtrl.SetNullFormat( s_mixedFormat );
 
 	InitDisplayItems();
 }
@@ -414,7 +414,25 @@ void CTouchFilesDialog::ModifyDiffTextEffectAt( std::vector< ui::CTextEffect >& 
 		case SrcAccessTime:
 		case DestAccessTime:
 			ClearFlag( rMatchEffects[ str::MatchNotEqual ].m_fontEffect, ui::Bold );		// line-up date columns nicely
+			SetFlag( rMatchEffects[ str::MatchNotEqual ].m_fontEffect, ui::Underline );
 			break;
+	}
+}
+
+const CEnumTags& CTouchFilesDialog::GetTags_DateTimeField( void )
+{
+	static const CEnumTags tags( _T("Modified Date|Created Date|Accessed Date") );
+	return tags;
+}
+
+app::DateTimeField CTouchFilesDialog::GetDateTimeField( UINT dtId )
+{
+	switch ( dtId )
+	{
+		default: ASSERT( false );
+		case IDC_MODIFIED_DATE:	return app::ModifiedDate;
+		case IDC_CREATED_DATE:	return app::CreatedDate;
+		case IDC_ACCESSED_DATE:	return app::AccessedDate;
 	}
 }
 
@@ -427,12 +445,10 @@ BOOL CTouchFilesDialog::OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLE
 
 void CTouchFilesDialog::DoDataExchange( CDataExchange* pDX )
 {
-	ASSERT( COUNT_OF( m_dateTimeCtrls ) == m_dateTimeStates.size() );
-
 	DDX_Control( pDX, IDC_FILE_TOUCH_LIST, m_fileListCtrl );
-
-	for ( size_t i = 0; i != m_dateTimeStates.size(); ++i )
-		DDX_Control( pDX, m_dateTimeStates[ i ].m_ctrlId, m_dateTimeCtrls[ i ] );
+	DDX_Control( pDX, IDC_MODIFIED_DATE, m_modifiedDateCtrl );
+	DDX_Control( pDX, IDC_CREATED_DATE, m_createdDateCtrl );
+	DDX_Control( pDX, IDC_ACCESSED_DATE, m_accessedDateCtrl );
 
 	ui::DDX_ButtonIcon( pDX, IDC_COPY_SOURCE_PATHS_BUTTON, ID_EDIT_COPY );
 	ui::DDX_ButtonIcon( pDX, IDC_PASTE_FILES_BUTTON, ID_EDIT_PASTE );
@@ -659,12 +675,14 @@ void CTouchFilesDialog::OnDtnDateTimeChange( NMHDR* pNmHdr, LRESULT* pResult )
 	NMDATETIMECHANGE* pChange = (NMDATETIMECHANGE*)pNmHdr; pChange;
 	*pResult = 0L;
 
-	CDateTimeControl* pCtrl = checked_static_cast< CDateTimeControl* >( FromHandle( pNmHdr->hwndFrom ) );
-	app::DateTimeField field = static_cast< app::DateTimeField >( utl::FindPos( m_dateTimeCtrls, END_OF( m_dateTimeCtrls ), *pCtrl ) );
-	TRACE( _T(" - CTouchFilesDialog::OnDtnDateTimeChange for: %s = <%s>\n"), app::GetTags_DateTimeField().FormatUi( field ).c_str(), time_utl::FormatTimestamp( pCtrl->GetDateTime() ).c_str() );
-
+#ifdef _DEBUG
 	// Cannot break into the debugger due to a mouse hook set in CDateTimeCtrl implementation (Windows).
 	//	https://stackoverflow.com/questions/18621575/are-there-issues-with-dtn-datetimechange-breakpoints-and-the-date-time-picker-co
+
+	app::DateTimeField field = GetDateTimeField( static_cast< UINT >( pNmHdr->idFrom ) );
+	CDateTimeControl* pCtrl = checked_static_cast< CDateTimeControl* >( FromHandle( pNmHdr->hwndFrom ) );
+	TRACE( _T(" - CTouchFilesDialog::OnDtnDateTimeChange for: %s = <%s>\n"), GetTags_DateTimeField().FormatUi( field ).c_str(), time_utl::FormatTimestamp( pCtrl->GetDateTime() ).c_str() );
+#endif
 
 	if ( multi::CDateTimeState* pDateTimeState = multi::FindWithCtrlId( m_dateTimeStates, static_cast< UINT >( pNmHdr->idFrom ) ) )
 		if ( pDateTimeState->InputCtrl( this ) )			// input the checked state so that custom draw can evaluate would-modify

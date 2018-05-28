@@ -354,7 +354,7 @@ void CFileStatesDialog::OnToggle_UseDbgGuides( void )
 
 // CDisplayObject implementation
 
-std::tstring CDisplayObject::GetCode( void ) const
+const std::tstring& CDisplayObject::GetCode( void ) const
 {
 	return m_pStatePair->first.m_fullPath.Get();
 }

@@ -25,6 +25,12 @@ namespace app
 	enum Action { RenameFiles, TouchFiles };
 
 	const CEnumTags& GetTags_Action( void );
+
+
+	enum CustomColors
+	{
+		ColorErrorBk = color::PastelPink
+	};
 }
 
 

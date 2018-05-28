@@ -3,25 +3,29 @@
 #pragma once
 
 #include "utl/FileState.h"
-#include "utl/Subject.h"
+#include "BasePathItem.h"
 #include "FileWorkingSet_fwd.h"
 
 
-class CTouchItem : public CSubject
+namespace app
+{
+	enum DateTimeField { ModifiedDate, CreatedDate, AccessedDate, _DateTimeFieldCount };
+
+	const CTime& GetTimeField( const fs::CFileState& fileState, DateTimeField field );
+	inline CTime& RefTimeField( fs::CFileState& rFileState, DateTimeField field ) { return const_cast< CTime& >( GetTimeField( rFileState, field ) ); }
+}
+
+
+class CTouchItem : public CBasePathItem
 {
 public:
-	CTouchItem( TFileStatePair* pStatePair, fmt::PathFormat pathFormat );
+	CTouchItem( TFileStatePair* pStatePair, fmt::PathFormat fmtDisplayPath );
 	virtual ~CTouchItem();
 
-	const fs::CPath& GetKeyPath( void ) const { return GetSrcState().m_fullPath; }
 	const fs::CFileState& GetSrcState( void ) const { return m_pStatePair->first; }
 	const fs::CFileState& GetDestState( void ) const { return m_pStatePair->second; }
 
 	bool IsModified( void ) const { return m_pStatePair->second.IsValid() && m_pStatePair->second != m_pStatePair->first; }
-
-	// utl::ISubject interface
-	virtual std::tstring GetCode( void ) const;
-	virtual std::tstring GetDisplayCode( void ) const;
 
 	void SetDestTime( app::DateTimeField field, const CTime& dateTime );
 	void SetDestAttributeFlag( CFile::Attribute attrFlag, bool on ) { SetFlag( m_pStatePair->second.m_attributes, attrFlag, on ); }
@@ -33,7 +37,6 @@ public:
 	};
 private:
 	TFileStatePair* m_pStatePair;
-	const std::tstring m_displayPath;
 };
 
 

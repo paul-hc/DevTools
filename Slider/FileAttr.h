@@ -31,7 +31,7 @@ struct CFileAttr : public CSubject
 	std::tstring FormatLastModifTime( LPCTSTR format = _T("%d-%m-%Y %H:%M:%S") ) const { return CTime( m_lastModifTime ).Format( format ).GetString(); }
 
 	// utl::ISubject interface
-	virtual std::tstring GetCode( void ) const;
+	virtual const std::tstring& GetCode( void ) const;
 	virtual std::tstring GetDisplayCode( void ) const;
 
 	static FileType LookupFileType( const TCHAR* pFilePath );

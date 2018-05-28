@@ -18,6 +18,8 @@
 #include "Application_fwd.h"
 
 
+class CRenameItem;
+class CFileWorkingSet;
 class CLogger;
 namespace str { enum Match; }
 
@@ -58,24 +60,9 @@ private:
 	// CReportListControl::ITextEffectCallback interface
 	virtual void CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARAM rowKey, int subItem ) const;
 private:
-	struct CDisplayItem : public CSubject
-	{
-		CDisplayItem( const TPathPair* pPathPair ) : m_pPathPair( pPathPair ) {}
-
-		const fs::CPath& GetSrcPath( void ) const { return m_pPathPair->first; }		// AKA key path
-		const fs::CPath& GetDestPath( void ) const { return m_pPathPair->second; }
-
-		// utl::ISubject interface
-		virtual std::tstring GetCode( void ) const;
-		virtual std::tstring GetDisplayCode( void ) const;
-	private:
-		const TPathPair* m_pPathPair;
-		const std::tstring m_srcFnameExt;
-	};
-private:
 	CFileWorkingSet* m_pFileData;
 	app::MenuCommand m_menuCmd;
-	std::vector< CDisplayItem* > m_displayItems;
+	std::vector< CRenameItem* > m_displayItems;
 	bool m_autoGenerate;
 	bool m_seqCountAutoAdvance;
 	Mode m_mode;

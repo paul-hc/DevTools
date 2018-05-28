@@ -1,12 +1,13 @@
 
 #include "stdafx.h"
 #include "MainRenameDialog.h"
-#include "Application.h"
+#include "RenameItem.h"
 #include "FileWorkingSet.h"
 #include "FileSetUi.h"
 #include "PathAlgorithms.h"
 #include "ReplaceDialog.h"
 #include "CapitalizeOptionsDialog.h"
+#include "Application.h"
 #include "resource.h"
 #include "utl/ContainerUtilities.h"
 #include "utl/CmdInfoStore.h"
@@ -125,7 +126,7 @@ void CMainRenameDialog::InitDisplayItems( void )
 
 	m_displayItems.reserve( rRenamePairs.size() );
 	for ( fs::TPathPairMap::const_iterator itPair = rRenamePairs.begin(); itPair != rRenamePairs.end(); ++itPair )
-		m_displayItems.push_back( new CDisplayItem( &*itPair ) );
+		m_displayItems.push_back( new CRenameItem( &*itPair ) );
 }
 
 void CMainRenameDialog::SetupFileListView( void )
@@ -141,7 +142,7 @@ void CMainRenameDialog::SetupFileListView( void )
 
 		for ( unsigned int pos = 0; pos != m_displayItems.size(); ++pos )
 		{
-			CDisplayItem* pItem = m_displayItems[ pos ];
+			CRenameItem* pItem = m_displayItems[ pos ];
 
 			m_fileListCtrl.InsertObjectItem( pos, pItem );		// Source
 			m_fileListCtrl.SetItemText( pos, Destination, pItem->GetDestPath().GetNameExt() );
@@ -244,7 +245,7 @@ void CMainRenameDialog::CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARA
 
 	static const ui::CTextEffect s_errorBk( ui::Regular, CLR_NONE, app::ColorErrorBk );
 
-	const CDisplayItem* pItem = CReportListControl::AsPtr< CDisplayItem >( rowKey );
+	const CRenameItem* pItem = CReportListControl::AsPtr< CRenameItem >( rowKey );
 
 	if ( m_pBatchTransaction.get() != NULL && m_pBatchTransaction->ContainsError( pItem->GetSrcPath() ) )
 		rTextEffect.Combine( s_errorBk );
@@ -763,17 +764,4 @@ void CMainRenameDialog::OnEnsureUniformNumPadding( void )
 {
 	m_pFileData->EnsureUniformNumPadding();
 	PostMakeDest();
-}
-
-
-// CMainRenameDialog::CDisplayItem implementation
-
-std::tstring CMainRenameDialog::CDisplayItem::GetCode( void ) const
-{
-	return m_pPathPair->first.Get();
-}
-
-std::tstring CMainRenameDialog::CDisplayItem::GetDisplayCode( void ) const
-{
-	return m_pPathPair->first.GetNameExt();
 }

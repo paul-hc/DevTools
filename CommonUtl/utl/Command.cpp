@@ -144,7 +144,7 @@ void CCommandModel::RemoveExpiredCommands( size_t maxSize )
 
 	// UNDO takes 2/3 and REDO 1/3 of the history size. We expire oldest commands (at front).
 
-	const size_t redoMaxSize = std::min( m_redoStack.size(), std::max( maxSize / 3, 1ull ) );
+	const size_t redoMaxSize = std::min( m_redoStack.size(), std::max( maxSize / 3, (size_t)1 ) );
 
 	while ( m_redoStack.size() > redoMaxSize )
 	{

@@ -9,26 +9,31 @@
 #endif
 
 
+namespace app
+{
+	const CTime& GetTimeField( const fs::CFileState& fileState, DateTimeField field )
+	{
+		switch ( field )
+		{
+			default: ASSERT( false );
+			case ModifiedDate:	return fileState.m_modifTime;
+			case CreatedDate:	return fileState.m_creationTime;
+			case AccessedDate:	return fileState.m_accessTime;
+		}
+	}
+}
+
+
 // CTouchItem implementation
 
-CTouchItem::CTouchItem( TFileStatePair* pStatePair, fmt::PathFormat pathFormat )
-	: m_pStatePair( safe_ptr( pStatePair ) )
-	, m_displayPath( fmt::FormatPath( pStatePair->first.m_fullPath, pathFormat ) )
+CTouchItem::CTouchItem( TFileStatePair* pStatePair, fmt::PathFormat fmtDisplayPath )
+	: CBasePathItem( pStatePair->first.m_fullPath, fmtDisplayPath )
+	, m_pStatePair( safe_ptr( pStatePair ) )
 {
 }
 
 CTouchItem::~CTouchItem()
 {
-}
-
-std::tstring CTouchItem::GetCode( void ) const
-{
-	return m_pStatePair->first.m_fullPath.Get();
-}
-
-std::tstring CTouchItem::GetDisplayCode( void ) const
-{
-	return m_displayPath;
 }
 
 void CTouchItem::SetDestTime( app::DateTimeField field, const CTime& dateTime )

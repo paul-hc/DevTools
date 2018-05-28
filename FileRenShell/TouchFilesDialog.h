@@ -11,8 +11,12 @@
 #include "FileWorkingSet_fwd.h"
 
 
-class CLogger;
 class CTouchItem;
+class CFileWorkingSet;
+class CLogger;
+class CEnumTags;
+
+namespace app { enum DateTimeField; }
 
 namespace multi
 {
@@ -65,6 +69,9 @@ private:
 	// CReportListControl::ITextEffectCallback interface
 	virtual void CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARAM rowKey, int subItem ) const;
 	virtual void ModifyDiffTextEffectAt( std::vector< ui::CTextEffect >& rMatchEffects, LPARAM rowKey, int subItem ) const;
+
+	static const CEnumTags& GetTags_DateTimeField( void );
+	static app::DateTimeField GetDateTimeField( UINT dtId );
 private:
 	CFileWorkingSet* m_pFileData;
 	Mode m_mode;
@@ -85,7 +92,7 @@ private:
 	};
 
 	CReportListControl m_fileListCtrl;
-	CDateTimeControl m_dateTimeCtrls[ app::_DateTimeFieldCount ];
+	CDateTimeControl m_modifiedDateCtrl, m_createdDateCtrl, m_accessedDateCtrl;
 
 	// generated stuff
 public:

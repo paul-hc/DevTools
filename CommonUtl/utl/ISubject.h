@@ -39,7 +39,7 @@ namespace utl
 
 	interface ISubject
 	{
-		virtual std::tstring GetCode( void ) const = 0;
+		virtual const std::tstring& GetCode( void ) const = 0;
 		virtual std::tstring GetDisplayCode( void ) const { return GetCode(); }
 
 		virtual void AddObserver( IObserver* pObserver ) = 0;

@@ -483,10 +483,6 @@
 			Filter="h;hpp;hxx;hm;inl;cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
 			>
 			<File
-				RelativePath=".\_scratch.txt"
-				>
-			</File>
-			<File
 				RelativePath=".\Application.cpp"
 				>
 			</File>
@@ -579,18 +575,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\FileWorkingSet.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\FileWorkingSet.h"
-				>
-			</File>
-			<File
-				RelativePath=".\FileWorkingSet_fwd.h"
-				>
-			</File>
-			<File
 				RelativePath=".\MainRenameDialog.cpp"
 				>
 			</File>
@@ -675,14 +659,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\TouchItem.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\TouchItem.h"
-				>
-			</File>
-			<File
 				RelativePath=".\UndoChangeLog.cpp"
 				>
 			</File>
@@ -690,6 +666,46 @@
 				RelativePath=".\UndoChangeLog.h"
 				>
 			</File>
+			<Filter
+				Name="model"
+				>
+				<File
+					RelativePath=".\BasePathItem.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\BasePathItem.h"
+					>
+				</File>
+				<File
+					RelativePath=".\FileWorkingSet.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\FileWorkingSet.h"
+					>
+				</File>
+				<File
+					RelativePath=".\FileWorkingSet_fwd.h"
+					>
+				</File>
+				<File
+					RelativePath=".\RenameItem.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\RenameItem.h"
+					>
+				</File>
+				<File
+					RelativePath=".\TouchItem.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\TouchItem.h"
+					>
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="Unit Tests"
@@ -711,6 +727,10 @@
 				>
 			</File>
 		</Filter>
+		<File
+			RelativePath=".\_scratch.txt"
+			>
+		</File>
 		<File
 			RelativePath=".\ProjectNotes.txt"
 			>

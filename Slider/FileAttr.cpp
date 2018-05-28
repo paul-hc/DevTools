@@ -106,7 +106,7 @@ const CSize& CFileAttr::GetImageDim( void ) const
 	return m_imageDim;
 }
 
-std::tstring CFileAttr::GetCode( void ) const
+const std::tstring& CFileAttr::GetCode( void ) const
 {
 	return GetPath().Get();
 }

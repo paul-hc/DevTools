@@ -1647,14 +1647,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\ut\BatchTransactionTests.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\ut\BatchTransactionTests.h"
-				>
-			</File>
-			<File
 				RelativePath=".\ut\FileSystemTests.cpp"
 				>
 			</File>

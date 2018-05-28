@@ -4,7 +4,6 @@
 #include "FileSetUi.h"
 #include "UndoChangeLog.h"
 #include "utl/Clipboard.h"
-#include "utl/EnumTags.h"
 #include "utl/FmtUtils.h"
 #include "utl/PathGenerator.h"
 #include "utl/RuntimeException.h"
@@ -14,27 +13,6 @@
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
-
-
-namespace app
-{
-	const CEnumTags& GetTags_DateTimeField( void )
-	{
-		static const CEnumTags tags( _T("Modified Date|Created Date|Accessed Date") );
-		return tags;
-	}
-
-	const CTime& GetTimeField( const fs::CFileState& fileState, DateTimeField field )
-	{
-		switch ( field )
-		{
-			default: ASSERT( false );
-			case ModifiedDate:	return fileState.m_modifTime;
-			case CreatedDate:	return fileState.m_creationTime;
-			case AccessedDate:	return fileState.m_accessTime;
-		}
-	}
-}
 
 
 namespace fmt

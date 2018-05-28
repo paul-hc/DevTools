@@ -73,7 +73,7 @@ public:
 	bool IsModified( void ) const { return m_pStatePair->second.IsValid() && m_pStatePair->second != m_pStatePair->first; }
 
 	// utl::ISubject interface
-	virtual std::tstring GetCode( void ) const;
+	virtual const std::tstring& GetCode( void ) const;
 	virtual std::tstring GetDisplayCode( void ) const;
 private:
 	const TFileStatePair* m_pStatePair;
