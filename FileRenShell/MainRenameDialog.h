@@ -7,7 +7,7 @@
 #include "utl/DialogToolBar.h"
 #include "utl/EnumSplitButton.h"
 #include "utl/HistoryComboBox.h"
-#include "utl/ISubject.h"
+#include "utl/Subject.h"
 #include "utl/Path.h"
 #include "utl/ReportListControl.h"
 #include "utl/SplitPushButton.h"
@@ -58,7 +58,7 @@ private:
 	// CReportListControl::ITextEffectCallback interface
 	virtual void CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARAM rowKey, int subItem ) const;
 private:
-	struct CDisplayItem : public utl::ISubject
+	struct CDisplayItem : public CSubject
 	{
 		CDisplayItem( const TPathPair* pPathPair ) : m_pPathPair( pPathPair ) {}
 

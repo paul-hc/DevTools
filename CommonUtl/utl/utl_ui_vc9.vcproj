@@ -487,14 +487,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\ICommand.h"
-				>
-			</File>
-			<File
-				RelativePath=".\ISubject.h"
-				>
-			</File>
-			<File
 				RelativePath=".\Logger.cpp"
 				>
 			</File>
@@ -755,6 +747,34 @@
 				</File>
 				<File
 					RelativePath=".\PathMaker.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="Pattern"
+				>
+				<File
+					RelativePath=".\Command.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Command.h"
+					>
+				</File>
+				<File
+					RelativePath=".\ICommand.h"
+					>
+				</File>
+				<File
+					RelativePath=".\ISubject.h"
+					>
+				</File>
+				<File
+					RelativePath=".\Subject.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Subject.h"
 					>
 				</File>
 			</Filter>
@@ -1624,6 +1644,14 @@
 			</File>
 			<File
 				RelativePath=".\ut\BaseImageTestCase.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ut\BatchTransactionTests.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\ut\BatchTransactionTests.h"
 				>
 			</File>
 			<File

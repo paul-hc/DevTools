@@ -20,10 +20,36 @@ inline IMemoryManaged::~IMemoryManaged()
 
 namespace utl
 {
+	interface IMessage
+	{
+		virtual unsigned int GetTypeID( void ) const = 0;
+		virtual std::tstring Format( bool detailed ) const = 0;
+	};
+
+	interface ICommand : public IMemoryManaged
+					   , public IMessage
+	{
+		virtual bool Execute( void ) = 0;
+		virtual bool Unexecute( void ) = 0;
+		virtual bool IsUndoable( void ) const = 0;
+	};
+
+
+	interface IObserver;
+
 	interface ISubject
 	{
 		virtual std::tstring GetCode( void ) const = 0;
 		virtual std::tstring GetDisplayCode( void ) const { return GetCode(); }
+
+		virtual void AddObserver( IObserver* pObserver ) = 0;
+		virtual void RemoveObserver( IObserver* pObserver ) = 0;
+		virtual void UpdateAllObservers( IMessage* pMessage ) = 0;
+	};
+
+	interface IObserver
+	{
+		virtual void OnUpdate( ISubject* pSubject, IMessage* pMessage ) = 0;
 	};
 }
 

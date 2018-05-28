@@ -58,7 +58,10 @@ protected:
 };
 
 
-class CDisplayObject : public utl::ISubject
+#include "utl/Subject.h"
+
+
+class CDisplayObject : public CSubject
 {
 public:
 	CDisplayObject( const TFileStatePair* pStatePair ) : m_pStatePair( safe_ptr( pStatePair ) ), m_displayPath( pStatePair->first.m_fullPath.GetNameExt() ) {}

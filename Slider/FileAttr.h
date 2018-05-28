@@ -4,13 +4,13 @@
 
 #include "utl/ComparePredicates.h"
 #include "utl/ImagePathKey.h"
-#include "utl/ISubject.h"
+#include "utl/Subject.h"
 
 
 enum FileType { FT_Generic, FT_BMP, FT_JPEG, FT_GIFF, FT_TIFF };
 
 
-struct CFileAttr : public utl::ISubject
+struct CFileAttr : public CSubject
 {
 	CFileAttr( void );
 	CFileAttr( const fs::CPath& filePath );				// only for concrete files

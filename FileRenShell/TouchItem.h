@@ -3,10 +3,11 @@
 #pragma once
 
 #include "utl/FileState.h"
+#include "utl/Subject.h"
 #include "FileWorkingSet_fwd.h"
 
 
-class CTouchItem : public utl::ISubject
+class CTouchItem : public CSubject
 {
 public:
 	CTouchItem( TFileStatePair* pStatePair, fmt::PathFormat pathFormat );
