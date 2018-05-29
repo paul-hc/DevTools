@@ -8,6 +8,7 @@
 #include "LcsTests.h"
 #include "ResequenceTests.h"
 #include "FileSystemTests.h"
+#include "PathTests.h"
 #include "PathGeneratorTests.h"
 #include "ThreadingTests.h"
 
@@ -24,6 +25,7 @@ namespace ut
 		CLcsTests::Instance();
 		CResequenceTests::Instance();
 		CFileSystemTests::Instance();
+		CPathTests::Instance();
 		CPathGeneratorTests::Instance();
 		//CThreadingTests::Instance();
 	#endif

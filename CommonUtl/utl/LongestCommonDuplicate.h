@@ -2,7 +2,7 @@
 #define LongestCommonDuplicate_h
 #pragma once
 
-#include "StringBase.h"
+#include "StringCompare.h"
 #include "ComparePredicates.h"
 
 
@@ -92,11 +92,7 @@ namespace lcs
 
 		size_t GetCommonLength( const CharType* pLeft, const CharType* pRight ) const
 		{
-			size_t len = 0;
-			while ( *pLeft != 0 && pred::Equal == m_compareStr( *pLeft++, *pRight++ ) )
-				len++;
-
-			return len;
+			return str::GetCommonLength( pLeft, pRight, m_compareStr );
 		}
 
 		struct LessRefPtr

@@ -275,7 +275,7 @@ namespace path
 
 	std::tstring& SetBackslash( std::tstring& rDirPath, TrailSlash trailSlash /*= AddSlash*/ )
 	{
-		if ( PreserveSlash == trailSlash || IsComplex( rDirPath.c_str() ) )		// if complex path leave it alone
+		if ( PreserveSlash == trailSlash /*|| IsComplex( rDirPath.c_str() )*/ )		// if complex path leave it alone
 			return rDirPath;
 
 		TCHAR dirPath[ _MAX_PATH ];

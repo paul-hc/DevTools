@@ -51,9 +51,12 @@ namespace str
 
 
 	template< typename CharType >
-	bool StripPrefix( std::basic_string< CharType >& rText, const CharType prefix[] )
+	bool StripPrefix( std::basic_string< CharType >& rText, const CharType prefix[], size_t prefixLen = std::string::npos )
 	{
-		if ( size_t prefixLen = GetLength( prefix ) )
+		if ( std::string::npos == prefixLen )
+			prefixLen = GetLength( prefix );
+
+		if ( prefixLen != 0 )
 			if ( pred::Equal == rText.compare( 0, prefixLen, prefix ) )
 			{
 				rText.erase( 0, prefixLen );
@@ -64,9 +67,12 @@ namespace str
 	}
 
 	template< typename CharType >
-	bool StripSuffix( std::basic_string< CharType >& rText, const CharType suffix[] )
+	bool StripSuffix( std::basic_string< CharType >& rText, const CharType suffix[], size_t suffixLen = std::string::npos )
 	{
-		if ( size_t suffixLen = GetLength( suffix ) )
+		if ( std::string::npos == suffixLen )
+			suffixLen = GetLength( suffix );
+
+		if ( suffixLen != 0 )
 		{
 			size_t suffixPos = rText.length();
 			if ( suffixPos >= suffixLen )

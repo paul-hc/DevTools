@@ -15,15 +15,6 @@
 #ifdef _DEBUG		// no UT code in release builds
 
 
-namespace str
-{
-	inline std::tostream& operator<<( std::tostream& oss, const fs::CPath& path )
-	{
-		return oss << path.Get();
-	}
-}
-
-
 CPathTests::CPathTests( void )
 {
 	ut::CTestSuite::Instance().RegisterTestCase( this );		// self-registration
@@ -278,6 +269,97 @@ void CPathTests::TestPathWildcardMatch( void )
 	ASSERT( path::MatchWildcard( _T("image.JPEG"), _T("*.doc;*.jp*") ) );
 }
 
+namespace ut
+{
+	struct CPathItem
+	{
+		CPathItem( const TCHAR* pPath, int avgLength = 0 ) : m_path( pPath ), m_avgLength( avgLength ) {}
+	public:
+		fs::CPath m_path;
+		int m_avgLength;
+	};
+}
+
+namespace func
+{
+	inline const fs::CPath& PathOf( const std::pair< const ut::CPathItem*, std::string >& mapItem ) { return mapItem.first->m_path; }
+}
+
+void CPathTests::TestHasMultipleDirPaths( void )
+{
+	{
+		std::vector< fs::CPath > paths;
+		ASSERT( !path::HasMultipleDirPaths( paths ) );
+
+		paths.push_back( fs::CPath( _T("C:\\Images\\Fruit\\apple.jpg") ) );
+		ASSERT( !path::HasMultipleDirPaths( paths ) );
+
+		paths.push_back( fs::CPath( _T("C:\\Images/Fruit/orange.jpg") ) );
+		ASSERT( !path::HasMultipleDirPaths( paths ) );
+
+		paths.push_back( fs::CPath( _T("C:\\Images\\Drink\\coffee.jpg") ) );
+		ASSERT( path::HasMultipleDirPaths( paths ) );
+	}
+
+	{
+		#pragma warning( disable: 4709 )	// comma operator within array index expression
+
+		std::map< ut::CPathItem*, std::string > pathMap;
+
+		pathMap[ new ut::CPathItem( _T("C:\\Images/Fruit/apple.jpg"), 10 ) ] = "A";
+		pathMap[ new ut::CPathItem( _T("C:\\Images\\Fruit\\orange.jpg"), 20 ) ] = "B";
+		ASSERT( !path::HasMultipleDirPaths( pathMap ) );
+
+		pathMap[ new ut::CPathItem( _T("C:\\Images\\Drink\\coffee.jpg"), 30 ) ] = "Odd";
+		ASSERT( path::HasMultipleDirPaths( pathMap ) );
+
+		utl::ClearOwningAssocContainerKeys( pathMap );
+	}
+}
+
+void CPathTests::TestCommonSubpath( void )
+{
+	{
+		std::vector< fs::CPath > paths;
+		ASSERT_EQUAL( _T(""), path::ExtractCommonParentPath( paths ) );
+
+		paths.push_back( fs::CPath( _T("C:\\Images\\Fruit\\apple.jpg") ) );
+		ASSERT_EQUAL( _T("C:\\Images\\Fruit"), path::ExtractCommonParentPath( paths ) );
+
+		paths.push_back( fs::CPath( _T("C:\\Images/Fruit/orange.jpg") ) );
+		ASSERT_EQUAL( _T("C:\\Images\\Fruit"), path::ExtractCommonParentPath( paths ) );
+
+		paths.push_back( fs::CPath( _T("C:\\Images\\Drink\\coffee.jpg") ) );
+		ASSERT_EQUAL( _T("C:\\Images"), path::ExtractCommonParentPath( paths ) );
+
+		paths.push_back( fs::CPath( _T("C:\\Show\\bill.jpg") ) );
+		ASSERT_EQUAL( _T("C:\\"), path::ExtractCommonParentPath( paths ) );
+
+		paths.push_back( fs::CPath( _T("D:\\Eat\\cheese.jpg") ) );
+		ASSERT_EQUAL( _T(""), path::ExtractCommonParentPath( paths ) );
+	}
+
+	{
+		std::vector< fs::CPath > paths;
+		paths.push_back( fs::CPath( _T("C:\\Images\\Fruit\\apple.jpg") ) );
+		paths.push_back( fs::CPath( _T("C:\\Images/Fruit/orange.jpg") ) );
+		paths.push_back( fs::CPath( _T("C:\\Images\\Drink\\coffee.jpg") ) );
+
+		fs::CPath commonDirPath = path::ExtractCommonParentPath( paths );
+
+		for ( std::vector< fs::CPath >::iterator itPath = paths.begin(); itPath != paths.end(); ++itPath )
+		{
+			std::tstring relPath = itPath->Get();
+			path::StripPrefix( relPath, commonDirPath.GetPtr() );
+			*itPath = relPath;
+		}
+
+		ASSERT_EQUAL( _T("Fruit\\apple.jpg"), paths[ 0 ] );
+		ASSERT_EQUAL( _T("Fruit\\orange.jpg"), paths[ 1 ] );
+		ASSERT_EQUAL( _T("Drink\\coffee.jpg"), paths[ 2 ] );
+	}
+}
+
 void CPathTests::TestComplexPath( void )
 {
 	ASSERT( !path::IsComplex( _T("C:\\Images\\Fruit/apple.jpg") ) );
@@ -324,7 +406,7 @@ void CPathTests::TestFlexPath( void )
 		ASSERT( path.IsComplexPath() );
 		ASSERT_EQUAL( _T("C:\\Images\\fruit.stg"), path.GetPhysicalPath() );
 		ASSERT_EQUAL_STR( _T("apple.jpg"), path.GetEmbeddedPath() );
-		ASSERT_EQUAL( _T("C:\\Images\\fruit.stg"), path.GetParentPath() );
+		ASSERT_EQUAL( _T("C:\\Images\\fruit.stg"), path.GetParentFlexPath() );
 		ASSERT_EQUAL_STR( _T("apple.jpg"), path.GetNameExt() );
 
 		std::tstring physicalPath, embeddedPath;
@@ -339,7 +421,7 @@ void CPathTests::TestFlexPath( void )
 		ASSERT( path.IsComplexPath() );
 		ASSERT_EQUAL( _T("C:\\Images\\fruit.stg"), path.GetPhysicalPath() );
 		ASSERT_EQUAL_STR( _T("Europe\\apple.jpg"), path.GetEmbeddedPath() );
-		ASSERT_EQUAL( _T("C:\\Images\\fruit.stg"), path.GetParentPath() );
+		ASSERT_EQUAL( _T("C:\\Images\\fruit.stg>Europe"), path.GetParentFlexPath() );
 		ASSERT_EQUAL_STR( _T("apple.jpg"), path.GetNameExt() );
 
 		ASSERT_EQUAL_STR( _T("Europe\\apple.jpg"), path.GetLeafSubPath() );
@@ -357,7 +439,7 @@ void CPathTests::TestFlexPath( void )
 		ASSERT( !path.IsComplexPath() );
 		ASSERT_EQUAL( _T("C:\\Images\\orange.png"), path.GetPhysicalPath() );
 		ASSERT_EQUAL_STR( _T(""), path.GetEmbeddedPath() );
-		ASSERT_EQUAL( _T("C:\\Images"), path.GetParentPath() );
+		ASSERT_EQUAL( _T("C:\\Images"), path.GetParentFlexPath() );
 		ASSERT_EQUAL_STR( _T("orange.png"), path.GetNameExt() );
 
 		std::tstring physicalPath, embeddedPath;
@@ -412,6 +494,8 @@ void CPathTests::Run( void )
 	TestPathUtilities();
 	TestPathCompareFind();
 	TestPathWildcardMatch();
+	TestHasMultipleDirPaths();
+	TestCommonSubpath();
 	TestComplexPath();
 	TestFlexPath();
 }

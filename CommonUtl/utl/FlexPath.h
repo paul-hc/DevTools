@@ -32,7 +32,9 @@ namespace fs
 		const TCHAR* GetEmbeddedPath( void ) const { return path::GetEmbedded( GetPtr() ); }
 
 		const TCHAR* GetLeafSubPath( void ) const { return IsComplexPath() ? GetEmbeddedPath() : GetNameExt(); }
-		fs::CPath GetOriginParentPath( void ) const { return IsComplexPath() ? GetPhysicalPath() : GetParentPath().Get(); }		// storage path or parent directory path
+		fs::CPath GetOriginParentPath( void ) const { return IsComplexPath() ? GetPhysicalPath() : GetParentPath(); }		// storage path or parent directory path
+
+		CFlexPath GetParentFlexPath( bool trailSlash = false ) const;
 
 		std::tstring FormatPretty( void ) const;		// "C:\Images\fruit.stg>StgDir/apple.jpg" <- "C:\Images/fruit.stg>StgDir\apple.jpg"
 		std::tstring FormatPrettyLeaf( void ) const;	// "StgDir/apple.jpg";  "C:\Images\orange.png" -> "orange.png" <- "C:\Images/fruit.stg>StgDir\apple.jpg"

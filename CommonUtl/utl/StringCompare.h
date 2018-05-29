@@ -289,6 +289,17 @@ namespace str
 
 namespace str
 {
+	template< typename CharType, typename CompareFunc >
+	size_t GetCommonLength( const CharType* pLeft, const CharType* pRight, CompareFunc compareStr /*= pred::CompareCase()*/ )
+	{
+		size_t len = 0;
+		while ( *pLeft != 0 && pred::Equal == compareStr( *pLeft++, *pRight++ ) )
+			len++;
+
+		return len;
+	}
+
+
 	// custom case type
 
 	template< str::CaseType caseType, typename CharType >

@@ -20,6 +20,8 @@ private:
 	void TestPathUtilities( void );
 	void TestPathCompareFind( void );
 	void TestPathWildcardMatch( void );
+	void TestHasMultipleDirPaths( void );
+	void TestCommonSubpath( void );
 	void TestComplexPath( void );
 	void TestFlexPath( void );
 };

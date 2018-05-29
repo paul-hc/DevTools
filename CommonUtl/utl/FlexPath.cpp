@@ -2,6 +2,7 @@
 #include "stdafx.h"
 #include "FlexPath.h"
 #include "StructuredStorage.h"
+#include "StringUtilities.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -35,6 +36,14 @@ namespace path
 namespace fs
 {
 	// CFlexPath implementation
+
+	CFlexPath CFlexPath::GetParentFlexPath( bool trailSlash /*= false*/ ) const
+	{
+		std::tstring parentPath = GetParentPath( trailSlash ).Get();
+
+		str::StripSuffix( parentPath, &path::s_complexPathSep, 1 );
+		return CFlexPath( parentPath );
+	}
 
 	std::tstring CFlexPath::FormatPretty( void ) const
 	{

@@ -341,22 +341,42 @@ namespace fs
 }
 
 
-namespace utl
+namespace path
 {
-	template< typename PathMapType >
-	bool HasMultipleDirPaths( const PathMapType& pathMap )
+	template< typename ContainerT >
+	bool HasMultipleDirPaths( const ContainerT& paths )			// uses func::PathOf() to extract path of element - for container versatility (map, vector, etc)
 	{
-		if ( !pathMap.empty() )
+		if ( !paths.empty() )
 		{
-			typename PathMapType::const_iterator it = pathMap.begin();
-			const fs::CPath dirPath = func::PathOf( it->first ).GetParentPath();
+			typename ContainerT::const_iterator it = paths.begin();
+			const fs::CPath dirPath = func::PathOf( *it ).GetParentPath();
 
-			for ( ; it != pathMap.end(); ++it )
-				if ( func::PathOf( it->first ).GetParentPath() != dirPath )
+			for ( ; it != paths.end(); ++it )
+				if ( func::PathOf( *it ).GetParentPath() != dirPath )
 					return true;
 		}
 
 		return false;
+	}
+
+	template< typename ContainerT >
+	fs::CPath ExtractCommonParentPath( const ContainerT& paths )	// uses func::PathOf() to extract path of element - for container versatility (map, vector, etc)
+	{
+		std::tstring commonPrefix;
+		if ( !paths.empty() )
+		{
+			typename ContainerT::const_iterator it = paths.begin();
+			commonPrefix = func::PathOf( *it ).GetParentPath().Get();
+
+			for ( ; it != paths.end(); ++it )
+			{
+				commonPrefix = path::FindCommonPrefix( func::PathOf( *it ).GetParentPath().GetPtr(), commonPrefix.c_str() );
+				if ( commonPrefix.empty() )
+					break;						// no common prefix, abort search
+			}
+		}
+
+		return commonPrefix;
 	}
 }
 
