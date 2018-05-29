@@ -15,6 +15,13 @@
 #endif
 
 
+namespace func
+{
+	template< typename KeyT, typename ValueT >
+	const fs::CPath& PathOf( const std::pair< const KeyT, ValueT >& mapItem ) { return PathOf( mapItem.first ); }		// for uniform path algorithms
+}
+
+
 namespace fmt
 {
 	static const TCHAR s_clipSep[] = _T("\t");
@@ -102,7 +109,7 @@ size_t CFileWorkingSet::SetupFromDropInfo( HDROP hDropInfo )
 
 		std::sort( m_sourceFiles.begin(), m_sourceFiles.end() );
 	}
-	m_mixedDirPaths = utl::HasMultipleDirPaths( m_renamePairs ) || utl::HasMultipleDirPaths( m_touchPairs );
+	m_mixedDirPaths = path::HasMultipleDirPaths( m_renamePairs ) || path::HasMultipleDirPaths( m_touchPairs );
 
 	return m_sourceFiles.size();
 }
@@ -173,7 +180,7 @@ void CFileWorkingSet::_RetrieveUndoInfo( DataMapType& rDataMemberPairs, const Un
 	for ( typename UndoMapType::const_iterator itUndo = pTopUndoPairs->begin(); itUndo != pTopUndoPairs->end(); ++itUndo )
 		rDataMemberPairs[ itUndo->second ] = itUndo->first;		// for undo swap source and destination
 
-	m_mixedDirPaths = utl::HasMultipleDirPaths( rDataMemberPairs );
+	m_mixedDirPaths = path::HasMultipleDirPaths( rDataMemberPairs );
 }
 
 void CFileWorkingSet::CommitUndoInfo( app::Action action )
