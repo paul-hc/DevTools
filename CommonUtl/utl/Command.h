@@ -5,11 +5,14 @@
 #include "ISubject.h"
 
 
+class CEnumTags;
+
+
 abstract class CCommand : public utl::ICommand
 						, private utl::noncopyable
 {
 protected:
-	CCommand( unsigned int cmdId, utl::ISubject* pSubject );
+	CCommand( unsigned int cmdId, utl::ISubject* pSubject, const CEnumTags* pCmdTags = NULL );
 public:
 	virtual ~CCommand();
 
@@ -27,6 +30,7 @@ protected:
 private:
 	unsigned int m_cmdId;
 	utl::ISubject* m_pSubject;		// no ownership
+	const CEnumTags* m_pCmdTags;
 };
 
 

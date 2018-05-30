@@ -1,6 +1,7 @@
 
 #include "stdafx.h"
 #include "Command.h"
+#include "EnumTags.h"
 #include "ContainerUtilities.h"
 
 #ifdef _DEBUG
@@ -10,9 +11,10 @@
 
 // CCommand implementation
 
-CCommand::CCommand( unsigned int cmdId, utl::ISubject* pSubject )
+CCommand::CCommand( unsigned int cmdId, utl::ISubject* pSubject, const CEnumTags* pCmdTags /*= NULL*/ )
 	: m_cmdId( cmdId )
 	, m_pSubject( pSubject )
+	, m_pCmdTags( pCmdTags )
 {
 	ASSERT( cmdId != 0 );
 }
@@ -28,8 +30,8 @@ unsigned int CCommand::GetTypeID( void ) const
 
 std::tstring CCommand::Format( bool detailed ) const
 {
-	detailed;
-	return str::Load( m_cmdId );
+	ASSERT_PTR( m_pCmdTags );
+	return m_pCmdTags->Format( m_cmdId, detailed ? CEnumTags::UiTag : CEnumTags::KeyTag );
 }
 
 bool CCommand::Unexecute( void )

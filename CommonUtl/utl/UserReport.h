@@ -43,7 +43,8 @@ namespace ui
 	class CIssueStore : private utl::noncopyable
 	{
 	public:
-		CIssueStore( const std::tstring& header = std::tstring() ) : m_header( header ) {}
+		CIssueStore( void ) {}
+		CIssueStore( const std::tstring& header ) : m_header( header ) {}
 		~CIssueStore() { Clear(); }
 
 		void Clear( void );

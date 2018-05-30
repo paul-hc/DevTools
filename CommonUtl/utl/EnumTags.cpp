@@ -12,8 +12,9 @@ const TCHAR CEnumTags::m_listSep[] = _T("|");
 const TCHAR CEnumTags::m_tagSep[] = _T("|");
 
 
-CEnumTags::CEnumTags( const std::tstring& uiTags, const TCHAR* pKeyTags /*= NULL*/, int defaultValue /*= -1*/ )
+CEnumTags::CEnumTags( const std::tstring& uiTags, const TCHAR* pKeyTags /*= NULL*/, int defaultValue /*= -1*/, int baseValue /*= 0*/ )
 	: m_defaultValue( defaultValue )
+	, m_baseValue( baseValue )
 {
 	Construct( uiTags, pKeyTags );
 }
@@ -32,20 +33,26 @@ void CEnumTags::Construct( const std::tstring& uiTags, const TCHAR* pKeyTags )
 	ENSURE( m_keyTags.empty() || m_keyTags.size() == m_uiTags.size() );
 }
 
-std::tstring CEnumTags::Format( int value, const std::vector< std::tstring >& tags )
+size_t CEnumTags::TagIndex( int value, const std::vector< std::tstring >& tags ) const
 {
-	ASSERT( value >= 0 && value < (int)tags.size() );
-	return tags[ value ];
+	size_t tagIndex = value - m_baseValue;
+	ENSURE( tagIndex < tags.size() );
+	return tagIndex;
 }
 
-bool CEnumTags::Parse( int& rValue, const std::tstring& text, const std::vector< std::tstring >& tags ) const
+std::tstring CEnumTags::_Format( int value, const std::vector< std::tstring >& tags ) const
+{
+	return tags[ TagIndex( value, tags ) ];
+}
+
+bool CEnumTags::_Parse( int& rValue, const std::tstring& text, const std::vector< std::tstring >& tags ) const
 {
 	ASSERT( !tags.empty() );
 
 	for ( unsigned int value = 0; value != tags.size(); ++value )
 		if ( str::EqualString< str::IgnoreCase >( tags[ value ], text ) )
 		{
-			rValue = value;
+			rValue = value + m_baseValue;
 			return true;
 		}
 
