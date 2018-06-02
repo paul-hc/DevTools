@@ -188,9 +188,9 @@ namespace str
 
 namespace stream
 {
-	std::tstring InputLine( std::istream& is );
-
 	void Tag( std::tstring& rOutput, const std::tstring& tag, const TCHAR* pSep );
+
+	std::tstring InputLine( std::istream& is );
 }
 
 

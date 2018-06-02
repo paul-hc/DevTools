@@ -57,7 +57,7 @@ public:
 	virtual bool Execute( void );
 	virtual bool Unexecute( void );
 	virtual bool IsUndoable( void ) const;
-private:
+protected:
 	std::tstring m_userInfo;
 	std::vector< utl::ICommand* > m_subCommands;		// with ownership
 	utl::ICommand* m_pMainCmd;

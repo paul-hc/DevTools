@@ -85,13 +85,6 @@ namespace str
 
 namespace stream
 {
-	std::tstring InputLine( std::istream& is )
-	{
-		std::string line;
-		std::getline( is, line );
-		return str::FromUtf8( line.c_str() );
-	}
-
 	void Tag( std::tstring& rOutput, const std::tstring& tag, const TCHAR* pSep )
 	{
 		if ( !tag.empty() )
@@ -100,6 +93,13 @@ namespace stream
 				rOutput += pSep;
 			rOutput += tag;
 		}
+	}
+
+	std::tstring InputLine( std::istream& is )
+	{
+		std::string line;
+		std::getline( is, line );
+		return str::FromUtf8( line.c_str() );
 	}
 }
 
