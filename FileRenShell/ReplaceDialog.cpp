@@ -2,8 +2,9 @@
 #include "stdafx.h"
 #include "ReplaceDialog.h"
 #include "MainRenameDialog.h"
-#include "FileWorkingSet.h"
-#include "FileSetUi.h"
+#include "RenameService.h"
+#include "FileModel.h"
+#include "RenameItem.h"
 #include "PathAlgorithms.h"
 #include "resource.h"
 #include "utl/ImageStore.h"
@@ -45,16 +46,16 @@ namespace layout
 }
 
 
-CReplaceDialog::CReplaceDialog( CMainRenameDialog* pParent )
+CReplaceDialog::CReplaceDialog( CMainRenameDialog* pParent, const CRenameService* pRenSvc )
 	: CLayoutDialog( IDD_REPLACE_DIALOG, pParent )
 	, m_pParent( pParent )
+	, m_pRenSvc( pRenSvc )
 	, m_findWhat( LoadFindWhat() )
 	, m_replaceWith( LoadReplaceWith() )
 	, m_matchCase( AfxGetApp()->GetProfileInt( reg::section, reg::entry_matchCase, TRUE ) != FALSE )
 	, m_findType( static_cast< FindType >( AfxGetApp()->GetProfileInt( reg::section, reg::entry_findType, Find_Text ) ) )
 	, m_findWhatCombo( ui::HistoryMaxSize, specialSep, m_matchCase ? str::Case : str::IgnoreCase )
 	, m_replaceWithCombo( ui::HistoryMaxSize, specialSep, m_matchCase ? str::Case : str::IgnoreCase )
-	, m_pFileSetUi( new CFileSetUi( m_pParent->GetWorkingSet() ) )
 {
 	ASSERT_PTR( m_pParent );
 
@@ -119,7 +120,7 @@ void CReplaceDialog::StoreFindWhatText( const std::tstring& text, const std::vec
 
 	if ( pDestFnames != NULL )
 	{
-		std::tstring maxCommonPrefix = m_pFileSetUi->ExtractLongestCommonPrefix( *pDestFnames );
+		std::tstring maxCommonPrefix = CRenameService::ExtractLongestCommonPrefix( *pDestFnames );
 		if ( !maxCommonPrefix.empty() )
 			m_findWhatCombo.SetEditSel( (int)maxCommonPrefix.length(), -1 );
 	}
@@ -132,11 +133,11 @@ bool CReplaceDialog::ReplaceItems( bool commit /*= true*/ ) const
 	if ( m_findWhat.empty() )
 		return false;				// no pattern to search for
 
-	CFileWorkingSet* pFileData = m_pParent->GetWorkingSet();
+	CFileModel* pFileModel = m_pParent->GetFileModel();
 	if ( Find_Text == m_findType )
 	{
 		func::ReplaceText functor( m_findWhat, m_replaceWith, m_matchCase, commit );
-		pFileData->ForEachRenameDestination( functor );
+		pFileModel->ForEachRenameDestination( functor );
 		if ( 0 == functor.m_matchCount )
 			return false;
 	}
@@ -145,7 +146,7 @@ bool CReplaceDialog::ReplaceItems( bool commit /*= true*/ ) const
 		ASSERT( Find_Characters == m_findType );
 
 		func::ReplaceCharacters functor( m_findWhat, m_replaceWith, m_matchCase, commit );
-		pFileData->ForEachRenameDestination( functor );
+		pFileModel->ForEachRenameDestination( functor );
 		if ( 0 == functor.m_matchCount )
 			return false;
 	}
@@ -260,7 +261,7 @@ void CReplaceDialog::OnPickFilename( void )
 {
 	std::tstring singlePattern;
 	CMenu popupMenu;
-	m_pFileSetUi->MakePickFnamePatternMenu( &singlePattern, &popupMenu, m_findWhat.c_str() );		// single pattern or pick menu
+	m_pRenSvc->MakePickFnamePatternMenu( &singlePattern, &popupMenu, m_findWhat.c_str() );		// single pattern or pick menu
 
 	if ( !singlePattern.empty() )
 		StoreFindWhatText( singlePattern );
@@ -274,7 +275,7 @@ void CReplaceDialog::OnPickFilename( void )
 void CReplaceDialog::OnFilenamePicked( UINT cmdId )
 {
 	std::vector< std::tstring > destFnames;
-	std::tstring selFname = m_pFileSetUi->GetPickedFname( cmdId, &destFnames );
+	std::tstring selFname = m_pRenSvc->GetPickedFname( cmdId, &destFnames );
 	StoreFindWhatText( selFname, &destFnames );
 }
 
@@ -284,7 +285,7 @@ void CReplaceDialog::OnPickDirPath( void )
 	UINT singleCmdId;
 	CMenu popupMenu;
 
-	if ( m_pFileSetUi->MakePickDirPathMenu( &singleCmdId, &popupMenu ) )
+	if ( m_pRenSvc->MakePickDirPathMenu( &singleCmdId, &popupMenu ) )
 		if ( singleCmdId != 0 )
 			OnDirPathPicked( singleCmdId );
 		else
@@ -296,7 +297,7 @@ void CReplaceDialog::OnPickDirPath( void )
 
 void CReplaceDialog::OnDirPathPicked( UINT cmdId )
 {
-	std::tstring selDir = m_pFileSetUi->GetPickedDirectory( cmdId );
+	std::tstring selDir = m_pRenSvc->GetPickedDirectory( cmdId );
 	if ( CEdit* pComboEdit = (CEdit*)m_replaceWithCombo.GetWindow( GW_CHILD ) )
 	{
 		pComboEdit->SetFocus();
@@ -329,7 +330,7 @@ void CReplaceDialog::OnFormatTextToolPicked( UINT cmdId )
 	if ( startPos != endPos )						// has selected text
 		text = text.substr( startPos, endPos - startPos );
 
-	std::tstring newText = CFileSetUi::ApplyTextTool( cmdId, text );
+	std::tstring newText = CRenameService::ApplyTextTool( cmdId, text );
 
 	if ( newText != text )
 		ui::ReplaceComboEditText( m_replaceWithCombo, newText, str::Case );

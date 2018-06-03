@@ -12,7 +12,7 @@ class CPathGenerator : public CPathMaker
 {
 public:
 	CPathGenerator( const std::tstring& format, UINT seqCount, bool avoidDups = true );			// allocates internal file map, with ownership
-	CPathGenerator( fs::TPathPairMap& rRenamePairs, const std::tstring& format, UINT seqCount, bool avoidDups = true );
+	CPathGenerator( fs::TPathPairMap* pOutRenamePairs, const std::tstring& format, UINT seqCount, bool avoidDups = true );
 	CPathGenerator( const fs::TPathPairMap& renamePairs, const std::tstring& format, UINT seqCount = 1, bool avoidDups = true );		// read-only; for FindNextAvailSeqCount()
 
 	const CPathFormatter& GetFormat( void ) const { return m_formatter; }

@@ -567,14 +567,6 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath=".\FileSetUi.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\FileSetUi.h"
-				>
-			</File>
-			<File
 				RelativePath=".\MainRenameDialog.cpp"
 				>
 			</File>
@@ -588,6 +580,14 @@
 			</File>
 			<File
 				RelativePath=".\PathAlgorithms.h"
+				>
+			</File>
+			<File
+				RelativePath=".\RenameService.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\RenameService.h"
 				>
 			</File>
 			<File
@@ -658,14 +658,6 @@
 				RelativePath=".\TouchFilesDialog.h"
 				>
 			</File>
-			<File
-				RelativePath=".\UndoChangeLog.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\UndoChangeLog.h"
-				>
-			</File>
 			<Filter
 				Name="model"
 				>
@@ -678,15 +670,31 @@
 					>
 				</File>
 				<File
-					RelativePath=".\FileWorkingSet.cpp"
+					RelativePath=".\FileCommands.cpp"
 					>
 				</File>
 				<File
-					RelativePath=".\FileWorkingSet.h"
+					RelativePath=".\FileCommands.h"
 					>
 				</File>
 				<File
-					RelativePath=".\FileWorkingSet_fwd.h"
+					RelativePath=".\FileCommands_fwd.h"
+					>
+				</File>
+				<File
+					RelativePath=".\FileModel.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\FileModel.h"
+					>
+				</File>
+				<File
+					RelativePath=".\FileService.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\FileService.h"
 					>
 				</File>
 				<File
@@ -705,6 +713,14 @@
 					RelativePath=".\TouchItem.h"
 					>
 				</File>
+				<File
+					RelativePath=".\UndoLogSerializer.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\UndoLogSerializer.h"
+					>
+				</File>
 			</Filter>
 		</Filter>
 		<Filter
@@ -719,11 +735,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\ut\UndoChangeLogTests.cpp"
+				RelativePath=".\ut\UndoLogSerializerTests.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\ut\UndoChangeLogTests.h"
+				RelativePath=".\ut\UndoLogSerializerTests.h"
 				>
 			</File>
 		</Filter>

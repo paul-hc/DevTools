@@ -11,7 +11,7 @@
 
 // CCommand implementation
 
-CCommand::CCommand( unsigned int cmdId, utl::ISubject* pSubject, const CEnumTags* pCmdTags /*= NULL*/ )
+CCommand::CCommand( int cmdId, utl::ISubject* pSubject, const CEnumTags* pCmdTags /*= NULL*/ )
 	: m_cmdId( cmdId )
 	, m_pSubject( pSubject )
 	, m_pCmdTags( pCmdTags )
@@ -23,7 +23,7 @@ CCommand::~CCommand()
 {
 }
 
-unsigned int CCommand::GetTypeID( void ) const
+int CCommand::GetTypeID( void ) const
 {
 	return m_cmdId;
 }
@@ -54,8 +54,9 @@ void CCommand::NotifyObservers( void )
 
 // CMacroCommand implementation
 
-CMacroCommand::CMacroCommand( const std::tstring& userInfo /*= std::tstring()*/ )
+CMacroCommand::CMacroCommand( const std::tstring& userInfo /*= std::tstring()*/, int cmdId /*= MacroCmdId*/ )
 	: m_userInfo( userInfo )
+	, m_cmdId( cmdId )
 	, m_pMainCmd( NULL )
 {
 }
@@ -73,9 +74,9 @@ void CMacroCommand::AddCmd( utl::ICommand* pSubCmd )
 	m_subCommands.push_back( pSubCmd );
 }
 
-unsigned int CMacroCommand::GetTypeID( void ) const
+int CMacroCommand::GetTypeID( void ) const
 {
-	return MacroCmdId;
+	return m_cmdId;
 }
 
 std::tstring CMacroCommand::Format( bool detailed ) const

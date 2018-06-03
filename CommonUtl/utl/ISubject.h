@@ -22,7 +22,7 @@ namespace utl
 {
 	interface IMessage
 	{
-		virtual unsigned int GetTypeID( void ) const = 0;
+		virtual int GetTypeID( void ) const = 0;
 		virtual std::tstring Format( bool detailed ) const = 0;
 	};
 

@@ -18,9 +18,10 @@ public:
 	virtual void Run( void );
 private:
 	void TestInit( void );
+	void TestFind( void );
 	void TestTrim( void );
 	void TestStrip( void );
-	void TestFind( void );
+	void TestSplit( void );
 };
 
 

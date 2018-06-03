@@ -19,8 +19,8 @@ CPathGenerator::CPathGenerator( const std::tstring& format, UINT seqCount, bool 
 	ASSERT( m_seqCount < MaxSeqCount );
 }
 
-CPathGenerator::CPathGenerator( fs::TPathPairMap& rRenamePairs, const std::tstring& format, UINT seqCount, bool avoidDups /*= true*/ )
-	: CPathMaker( &rRenamePairs )
+CPathGenerator::CPathGenerator( fs::TPathPairMap* pOutRenamePairs, const std::tstring& format, UINT seqCount, bool avoidDups /*= true*/ )
+	: CPathMaker( pOutRenamePairs )
 	, m_formatter( format )
 	, m_seqCount( seqCount )
 	, m_avoidDups( avoidDups )

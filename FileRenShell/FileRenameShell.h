@@ -3,8 +3,10 @@
 #pragma once
 
 #include "Application_fwd.h"
-#include "FileWorkingSet.h"
 #include "resource.h"
+
+
+class CFileModel;
 
 
 class ATL_NO_VTABLE CFileRenameShell :
@@ -35,7 +37,7 @@ private:
 
 	static const CMenuCmdInfo* FindCmd( app::MenuCommand cmd );
 private:
-	CFileWorkingSet m_fileData;
+	std::auto_ptr< CFileModel > m_pFileModel;
 	static const CMenuCmdInfo m_commands[];
 public:
 	DECLARE_REGISTRY_RESOURCEID( IDR_FILERENAMESHELL )

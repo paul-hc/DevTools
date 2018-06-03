@@ -2,13 +2,15 @@
 #include "stdafx.h"
 #include "TouchFilesDialog.h"
 #include "TouchItem.h"
-#include "FileWorkingSet.h"
+#include "FileModel.h"
+#include "FileService.h"
 #include "Application.h"
 #include "resource.h"
 #include "utl/Clipboard.h"
 #include "utl/Color.h"
 #include "utl/ContainerUtilities.h"
 #include "utl/CmdInfoStore.h"
+#include "utl/Command.h"
 #include "utl/EnumTags.h"
 #include "utl/FmtUtils.h"
 #include "utl/LongestCommonSubsequence.h"
@@ -48,16 +50,19 @@ namespace layout
 }
 
 
-CTouchFilesDialog::CTouchFilesDialog( CFileWorkingSet* pFileData, CWnd* pParent )
+CTouchFilesDialog::CTouchFilesDialog( CFileModel* pFileModel, CWnd* pParent )
 	: CBaseMainDialog( IDD_TOUCH_FILES_DIALOG, pParent )
-	, m_pFileData( pFileData )
+	, m_pFileModel( pFileModel )
+	, m_rTouchItems( m_pFileModel->LazyInitTouchItems() )
 	, m_mode( Uninit )
 	, m_fileListCtrl( IDC_FILE_TOUCH_LIST, LVS_EX_GRIDLINES | CReportListControl::DefaultStyleEx )
 	, m_anyChanges( false )
 {
 	Construct();
+	REQUIRE( !m_rTouchItems.empty() );
+	m_pFileModel->AddObserver( this );
 
-	ASSERT_PTR( m_pFileData );
+	ASSERT_PTR( m_pFileModel );
 	m_regSection = reg::section_dialog;
 	RegisterCtrlLayout( layout::styles, COUNT_OF( layout::styles ) );
 
@@ -70,13 +75,11 @@ CTouchFilesDialog::CTouchFilesDialog( CFileWorkingSet* pFileData, CWnd* pParent 
 	m_modifiedDateCtrl.SetNullFormat( s_mixedFormat );
 	m_createdDateCtrl.SetNullFormat( s_mixedFormat );
 	m_accessedDateCtrl.SetNullFormat( s_mixedFormat );
-
-	InitDisplayItems();
 }
 
 CTouchFilesDialog::~CTouchFilesDialog()
 {
-	utl::ClearOwningContainer( m_displayItems );
+	m_pFileModel->RemoveObserver( this );
 }
 
 void CTouchFilesDialog::Construct( void )
@@ -94,18 +97,6 @@ void CTouchFilesDialog::Construct( void )
 	m_attribCheckStates.push_back( multi::CAttribCheckState( IDC_ATTRIB_VOLUME_CHECK, CFile::volume ) );
 }
 
-void CTouchFilesDialog::InitDisplayItems( void )
-{
-	utl::ClearOwningContainer( m_displayItems );
-
-	fs::TFileStatePairMap& rTouchPairs = m_pFileData->GetTouchPairs();
-	const fmt::PathFormat pathFormat = m_pFileData->HasMixedDirPaths() ? fmt::FullPath : fmt::FilenameExt;
-
-	m_displayItems.reserve( rTouchPairs.size() );
-	for ( fs::TFileStatePairMap::iterator itPair = rTouchPairs.begin(); itPair != rTouchPairs.end(); ++itPair )
-		m_displayItems.push_back( new CTouchItem( &*itPair, pathFormat ) );
-}
-
 void CTouchFilesDialog::SwitchMode( Mode mode )
 {
 	static const CEnumTags modeTags( _T("&Store|&Touch|&Rollback") );
@@ -121,9 +112,9 @@ void CTouchFilesDialog::SwitchMode( Mode mode )
 		IDC_ATTRIB_READONLY_CHECK, IDC_ATTRIB_HIDDEN_CHECK, IDC_ATTRIB_SYSTEM_CHECK, IDC_ATTRIB_ARCHIVE_CHECK
 	};
 	ui::EnableControls( *this, ctrlIds, COUNT_OF( ctrlIds ), m_mode != UndoRollbackMode );
-	ui::EnableControl( *this, IDC_UNDO_BUTTON, m_mode != UndoRollbackMode && m_pFileData->CanUndo( app::TouchFiles ) );
+	ui::EnableControl( *this, IDC_UNDO_BUTTON, m_mode != UndoRollbackMode && m_pFileModel->CanUndo( cmd::TouchFile ) );
 
-	m_anyChanges = utl::Any( m_displayItems, std::mem_fun( &CTouchItem::IsModified ) );
+	m_anyChanges = utl::Any( m_rTouchItems, std::mem_fun( &CTouchItem::IsModified ) );
 	ui::EnableControl( *this, IDOK, m_mode != TouchMode || m_anyChanges );
 
 	m_fileListCtrl.Invalidate();			// do some custom draw magic
@@ -131,18 +122,23 @@ void CTouchFilesDialog::SwitchMode( Mode mode )
 
 bool CTouchFilesDialog::TouchFiles( void )
 {
-	m_pBatchTransaction.reset( new fs::CBatchTouch( m_pFileData->GetTouchPairs(), this ) );
-	return m_pBatchTransaction->TouchFiles();
+	m_errorItems.clear();
+
+	CFileService svc( this );
+	if ( CMacroCommand* pTouchMacroCmd = svc.MakeTouchCmds( m_rTouchItems ) )
+		return m_pFileModel->GetCommandModel()->Execute( pTouchMacroCmd );
+
+	return false;
 }
 
 void CTouchFilesDialog::PostMakeDest( bool silent /*= false*/ )
 {
-	m_pBatchTransaction.reset();
+	m_errorItems.clear();
 
 	if ( !silent )
 		GotoDlgCtrl( GetDlgItem( IDOK ) );
 
-	SetupDialog();
+//	SetupDialog();
 	SwitchMode( TouchMode );
 }
 
@@ -163,9 +159,9 @@ void CTouchFilesDialog::SetupFileListView( void )
 
 		m_fileListCtrl.DeleteAllItems();
 
-		for ( unsigned int pos = 0; pos != m_displayItems.size(); ++pos )
+		for ( unsigned int pos = 0; pos != m_rTouchItems.size(); ++pos )
 		{
-			const CTouchItem* pTouchItem = m_displayItems[ pos ];
+			const CTouchItem* pTouchItem = m_rTouchItems[ pos ];
 
 			m_fileListCtrl.InsertObjectItem( pos, pTouchItem );		// PathName
 
@@ -194,14 +190,14 @@ void CTouchFilesDialog::SetupFileListView( void )
 
 void CTouchFilesDialog::UpdateFileListViewDest( void )
 {
-	REQUIRE( m_displayItems.size() == (size_t)m_fileListCtrl.GetItemCount() );
+	REQUIRE( m_rTouchItems.size() == (size_t)m_fileListCtrl.GetItemCount() );
 	{
 		CScopedLockRedraw freeze( &m_fileListCtrl );
 		CScopedInternalChange internalChange( &m_fileListCtrl );
 
 		for ( int pos = 0, count = m_fileListCtrl.GetItemCount(); pos != count; ++pos )
 		{
-			CTouchItem* pTouchItem = m_displayItems[ pos ];
+			CTouchItem* pTouchItem = m_rTouchItems[ pos ];
 
 			m_fileListCtrl.SetSubItemText( pos, DestAttributes, fmt::FormatFileAttributes( pTouchItem->GetDestState().m_attributes ) );
 			m_fileListCtrl.SetSubItemText( pos, DestModifyTime, time_utl::FormatTimestamp( pTouchItem->GetDestState().m_modifTime ) );
@@ -213,14 +209,14 @@ void CTouchFilesDialog::UpdateFileListViewDest( void )
 
 void CTouchFilesDialog::AccumulateCommonStates( void )
 {
-	ASSERT( !m_displayItems.empty() );
+	ASSERT( !m_rTouchItems.empty() );
 
 	// accumulate common values among multiple items, starting with an invalid value, i.e. uninitialized
 	multi::SetInvalidAll( m_dateTimeStates );
 	multi::SetInvalidAll( m_attribCheckStates );
 
-	for ( size_t i = 0; i != m_displayItems.size(); ++i )
-		AccumulateItemStates( m_displayItems[ i ] );
+	for ( size_t i = 0; i != m_rTouchItems.size(); ++i )
+		AccumulateItemStates( m_rTouchItems[ i ] );
 }
 
 void CTouchFilesDialog::AccumulateItemStates( const CTouchItem* pTouchItem )
@@ -275,9 +271,9 @@ void CTouchFilesDialog::InputFields( void )
 void CTouchFilesDialog::ApplyFields( void )
 {
 	// apply valid edits, i.e. if not null
-	for ( size_t i = 0; i != m_displayItems.size(); ++i )
+	for ( size_t i = 0; i != m_rTouchItems.size(); ++i )
 	{
-		CTouchItem* pTouchItem = m_displayItems[ i ];
+		CTouchItem* pTouchItem = m_rTouchItems[ i ];
 
 		for ( std::vector< multi::CDateTimeState >::const_iterator itDateTimeState = m_dateTimeStates.begin(); itDateTimeState != m_dateTimeStates.end(); ++itDateTimeState )
 			if ( itDateTimeState->CanApply() )
@@ -300,33 +296,34 @@ bool CTouchFilesDialog::VisibleAllSrcColumns( void ) const
 
 int CTouchFilesDialog::FindItemPos( const fs::CPath& keyPath ) const
 {
-	return static_cast< int >( utl::BinaryFindPos( m_displayItems, keyPath, CTouchItem::ToKeyPath() ) );
+	return static_cast< int >( utl::BinaryFindPos( m_rTouchItems, keyPath, CBasePathItem::ToKeyPath() ) );
 }
 
-CWnd* CTouchFilesDialog::GetWnd( void )
+void CTouchFilesDialog::OnUpdate( utl::ISubject* pSubject, utl::IMessage* pMessage )
 {
-	return this;
+	pMessage;
+
+	if ( m_pFileModel == pSubject )
+		SetupDialog();
 }
 
-CLogger* CTouchFilesDialog::GetLogger( void )
+void CTouchFilesDialog::OnFileError( const fs::CPath& srcPath, const std::tstring& errMsg )
 {
-	return &app::GetLogger();
-}
+	errMsg;
 
-fs::UserFeedback CTouchFilesDialog::HandleFileError( const fs::CPath& sourcePath, const std::tstring& message )
-{
-	int pos = FindItemPos( sourcePath );
+	int pos = FindItemPos( srcPath );
 	if ( pos != -1 )
-		m_fileListCtrl.EnsureVisible( pos, FALSE );
-	m_fileListCtrl.Invalidate();
-
-	switch ( AfxMessageBox( message.c_str(), MB_ICONWARNING | MB_ABORTRETRYIGNORE ) )
 	{
-		default: ASSERT( false );
-		case IDIGNORE:	return fs::Ignore;
-		case IDRETRY:	return fs::Retry;
-		case IDABORT:	return fs::Abort;
+		m_errorItems.push_back( m_rTouchItems[ pos ] );
+		m_fileListCtrl.EnsureVisible( pos, FALSE );
 	}
+	m_fileListCtrl.Invalidate();
+}
+
+void CTouchFilesDialog::ClearFileErrors( void )
+{
+	m_errorItems.clear();
+	m_fileListCtrl.Invalidate();
 }
 
 void CTouchFilesDialog::CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARAM rowKey, int subItem ) const
@@ -369,8 +366,8 @@ void CTouchFilesDialog::CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARA
 			break;
 	}
 
-	if ( !isSrc && m_pBatchTransaction.get() != NULL )
-		if ( m_pBatchTransaction->ContainsError( pTouchItem->GetKeyPath() ) )
+	if ( !isSrc )
+		if ( utl::Contains( m_errorItems, pTouchItem ) )
 			rTextEffect |= s_errorBk;
 
 	if ( pTextEffect != NULL )
@@ -459,10 +456,9 @@ void CTouchFilesDialog::DoDataExchange( CDataExchange* pDX )
 	{
 		if ( Uninit == m_mode )
 		{
-			SetupDialog();
-			CheckDlgButton( IDC_SHOW_SOURCE_INFO_CHECK, VisibleAllSrcColumns() );
-
+			OnUpdate( m_pFileModel, NULL );
 			SwitchMode( TouchMode );
+			CheckDlgButton( IDC_SHOW_SOURCE_INFO_CHECK, VisibleAllSrcColumns() );
 		}
 	}
 
@@ -509,27 +505,15 @@ void CTouchFilesDialog::OnOK( void )
 			break;
 		case TouchMode:
 			if ( TouchFiles() )
-			{
-				m_pFileData->SaveUndoInfo( app::TouchFiles, m_pBatchTransaction->GetCommittedKeys() );
 				CBaseMainDialog::OnOK();
-			}
 			else
-			{
-				m_pFileData->SaveUndoInfo( app::TouchFiles, m_pBatchTransaction->GetCommittedKeys() );
 				SwitchMode( TouchMode );
-			}
 			break;
 		case UndoRollbackMode:
-			if ( TouchFiles() )
+//			if ( TouchFiles() )
+			if ( m_pFileModel->GetCommandModel()->Undo() )
 			{
-				m_pFileData->CommitUndoInfo( app::TouchFiles );
-
-				if ( m_pFileData->CanUndo( app::TouchFiles ) )
-					if ( IDYES == AfxMessageBox( _T("Do you want to undo another step?"), MB_ICONWARNING | MB_YESNO | MB_DEFBUTTON2 ) )
-					{
-						OnBnClicked_Undo();			// rollback another step
-						return;						// keep the dialog open
-					}
+//				m_pFileModel->CommitUndoInfo( app::TouchFiles );
 
 				CBaseMainDialog::OnOK();
 			}
@@ -560,19 +544,20 @@ void CTouchFilesDialog::OnFieldChanged( void )
 
 void CTouchFilesDialog::OnBnClicked_Undo( void )
 {
-	ASSERT( m_pFileData->CanUndo( app::TouchFiles ) );
+	ASSERT( m_pFileModel->CanUndo( cmd::TouchFile ) );
 
 	GotoDlgCtrl( GetDlgItem( IDOK ) );
-	m_pFileData->RetrieveUndoInfo( app::TouchFiles );
+//	m_pFileModel->RetrieveUndoInfo( app::TouchFiles );
 
-	InitDisplayItems();
+	ClearFileErrors();
+	m_pFileModel->PopUndo();				// fetches data set from undo stack (macro command)
 	SwitchMode( UndoRollbackMode );
-	SetupDialog();
+//	SetupDialog();
 }
 
 void CTouchFilesDialog::OnBnClicked_CopySourceFiles( void )
 {
-	if ( !m_pFileData->CopyClipSourceFileStates( this ) )
+	if ( !m_pFileModel->CopyClipSourceFileStates( this ) )
 		AfxMessageBox( _T("Cannot copy source file states to clipboard!"), MB_ICONERROR | MB_OK );
 }
 
@@ -580,7 +565,7 @@ void CTouchFilesDialog::OnBnClicked_PasteDestStates( void )
 {
 	try
 	{
-		m_pFileData->PasteClipDestinationFileStates( this );
+		m_pFileModel->PasteClipDestinationFileStates( this );
 		PostMakeDest();
 	}
 	catch ( CRuntimeException& e )
@@ -591,7 +576,7 @@ void CTouchFilesDialog::OnBnClicked_PasteDestStates( void )
 
 void CTouchFilesDialog::OnBnClicked_ResetDestFiles( void )
 {
-	m_pFileData->ResetDestinations();
+	m_pFileModel->ResetDestinations();
 	PostMakeDest();
 }
 

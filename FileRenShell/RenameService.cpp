@@ -1,9 +1,11 @@
 
 #include "stdafx.h"
-#include "FileSetUi.h"
+#include "RenameService.h"
+#include "RenameItem.h"
 #include "TitleCapitalizer.h"
 #include "resource.h"
 #include "utl/MenuUtilities.h"
+#include "utl/PathGenerator.h"
 #include "utl/StringUtilities.h"
 #include "utl/Utilities.h"
 #include "utl/resource.h"
@@ -26,13 +28,53 @@ namespace pred
 }
 
 
-CFileSetUi::CFileSetUi( CFileWorkingSet* pFileWorkingSet )
-	: m_renamePairs( pFileWorkingSet->GetRenamePairs() )
+CRenameService::CRenameService( const std::vector< CRenameItem* >& renameItems )
 {
-	ASSERT( !m_renamePairs.empty() );
+	ASSERT( !renameItems.empty() );
+
+	for ( std::vector< CRenameItem* >::const_iterator itItem = renameItems.begin(); itItem != renameItems.end(); ++itItem )
+		m_renamePairs[ ( *itItem )->GetSrcPath() ] = ( *itItem )->GetDestPath();
+
+	ENSURE( m_renamePairs.size() == renameItems.size() );			// all SRC keys unique?
 }
 
-void CFileSetUi::QueryDestFilenames( std::vector< std::tstring >& rDestFnames ) const
+UINT CRenameService::FindNextAvailSeqCount( const std::tstring& format ) const
+{
+	CPathGenerator generator( m_renamePairs, format );
+	return generator.FindNextAvailSeqCount();
+}
+
+bool CRenameService::CheckPathCollisions( cmd::IErrorObserver* pErrorObserver )
+{
+	if ( pErrorObserver != NULL )
+		pErrorObserver->ClearFileErrors();
+
+	fs::TPathSet destPaths;
+	size_t dupCount = 0, emptyCount = 0;
+
+	for ( fs::TPathPairMap::const_iterator itPair = m_renamePairs.begin(); itPair != m_renamePairs.end(); ++itPair )
+		if ( itPair->second.IsEmpty() )									// ignore empty dest paths
+			++emptyCount;
+		else if ( !destPaths.insert( itPair->second ).second ||			// not unique in the working set
+				  FileExistOutsideWorkingSet( itPair->second ) )		// collides with an existing file/dir outside of the working set
+		{
+			static const std::tstring s_errMsg = _T("Destination file collision");
+			if ( pErrorObserver != NULL )
+				pErrorObserver->OnFileError( itPair->first, s_errMsg );
+			++dupCount;
+		}
+
+	return 0 == dupCount;
+}
+
+bool CRenameService::FileExistOutsideWorkingSet( const fs::CPath& filePath ) const
+{
+	return
+		m_renamePairs.find( filePath ) == m_renamePairs.end() &&
+		filePath.FileExist();
+}
+
+void CRenameService::QueryDestFilenames( std::vector< std::tstring >& rDestFnames ) const
 {
 	rDestFnames.clear();
 	rDestFnames.reserve( m_renamePairs.size() );
@@ -46,7 +88,7 @@ void CFileSetUi::QueryDestFilenames( std::vector< std::tstring >& rDestFnames ) 
 	ENSURE( !rDestFnames.empty() );
 }
 
-void CFileSetUi::QuerySubDirs( std::vector< std::tstring >& rSubDirs ) const
+void CRenameService::QuerySubDirs( std::vector< std::tstring >& rSubDirs ) const
 {
 	fs::CPathParts parts( GetDestPath( m_renamePairs.begin() ) );			// use the first path
 	str::Tokenize( rSubDirs, parts.m_dir.c_str(), _T("\\/") );
@@ -55,7 +97,7 @@ void CFileSetUi::QuerySubDirs( std::vector< std::tstring >& rSubDirs ) const
 		rSubDirs.erase( rSubDirs.begin(), rSubDirs.begin() + rSubDirs.size() - PickDirPathMaxCount );
 }
 
-std::tstring CFileSetUi::ExtractLongestCommonPrefix( const std::vector< std::tstring >& destFnames )
+std::tstring CRenameService::ExtractLongestCommonPrefix( const std::vector< std::tstring >& destFnames )
 {
 	ASSERT( !destFnames.empty() );
 
@@ -73,7 +115,7 @@ std::tstring CFileSetUi::ExtractLongestCommonPrefix( const std::vector< std::tst
 	return std::tstring();
 }
 
-bool CFileSetUi::AllHavePrefix( const std::vector< std::tstring >& destFnames, size_t prefixLen )
+bool CRenameService::AllHavePrefix( const std::vector< std::tstring >& destFnames, size_t prefixLen )
 {
 	ASSERT( prefixLen != 0 );
 
@@ -90,7 +132,7 @@ bool CFileSetUi::AllHavePrefix( const std::vector< std::tstring >& destFnames, s
 	return true;		// all strings match the prefix
 }
 
-void CFileSetUi::MakePickFnamePatternMenu( std::tstring* pSinglePattern, CMenu* pPopupMenu, const TCHAR* pSelFname /*= NULL*/ ) const
+void CRenameService::MakePickFnamePatternMenu( std::tstring* pSinglePattern, CMenu* pPopupMenu, const TCHAR* pSelFname /*= NULL*/ ) const
 {
 	ASSERT_PTR( pSinglePattern );
 	ASSERT_PTR( pPopupMenu );
@@ -135,7 +177,7 @@ void CFileSetUi::MakePickFnamePatternMenu( std::tstring* pSinglePattern, CMenu* 
 		pPopupMenu->CheckMenuRadioItem( IDC_PICK_FILENAME_BASE, selId, selId, MF_BYCOMMAND );
 }
 
-bool CFileSetUi::MakePickDirPathMenu( UINT* pSingleCmdId, CMenu* pPopupMenu ) const
+bool CRenameService::MakePickDirPathMenu( UINT* pSingleCmdId, CMenu* pPopupMenu ) const
 {
 	ASSERT_PTR( pSingleCmdId );
 	ASSERT_PTR( pPopupMenu );
@@ -165,7 +207,7 @@ bool CFileSetUi::MakePickDirPathMenu( UINT* pSingleCmdId, CMenu* pPopupMenu ) co
 	return true;
 }
 
-std::tstring CFileSetUi::GetPickedFname( UINT cmdId, std::vector< std::tstring >* pDestFnames /*= NULL*/ ) const
+std::tstring CRenameService::GetPickedFname( UINT cmdId, std::vector< std::tstring >* pDestFnames /*= NULL*/ ) const
 {
 	std::vector< std::tstring > destFnames;
 	QueryDestFilenames( destFnames );
@@ -183,7 +225,7 @@ std::tstring CFileSetUi::GetPickedFname( UINT cmdId, std::vector< std::tstring >
 	return selFname;
 }
 
-std::tstring CFileSetUi::GetPickedDirectory( UINT cmdId ) const
+std::tstring CRenameService::GetPickedDirectory( UINT cmdId ) const
 {
 	std::vector< std::tstring > subDirs;
 	QuerySubDirs( subDirs );
@@ -196,23 +238,23 @@ std::tstring CFileSetUi::GetPickedDirectory( UINT cmdId ) const
 	return std::tstring();
 }
 
-std::tstring CFileSetUi::GetDestPath( fs::TPathPairMap::const_iterator itPair )
+std::tstring CRenameService::GetDestPath( fs::TPathPairMap::const_iterator itPair )
 {
 	return itPair->second.IsEmpty() ? itPair->first.Get() : itPair->second.Get();
 }
 
-std::tstring CFileSetUi::GetDestFname( fs::TPathPairMap::const_iterator itPair )
+std::tstring CRenameService::GetDestFname( fs::TPathPairMap::const_iterator itPair )
 {
 	return fs::CPathParts( GetDestPath( itPair ) ).m_fname;		// DEST (if not empty) or SRC
 }
 
-std::tstring& CFileSetUi::EscapeAmpersand( std::tstring& rText )
+std::tstring& CRenameService::EscapeAmpersand( std::tstring& rText )
 {
 	str::Replace( rText, _T("&"), _T("&&") );
 	return rText;
 }
 
-std::tstring CFileSetUi::ApplyTextTool( UINT cmdId, const std::tstring& text )
+std::tstring CRenameService::ApplyTextTool( UINT cmdId, const std::tstring& text )
 {
 	std::tstring output = text;
 	static const TCHAR defaultDelimiterSet[] = _T(".;-_ \t");

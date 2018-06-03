@@ -1,21 +1,26 @@
 
 #include "stdafx.h"
 #include "BasePathItem.h"
-#include "utl/FmtUtils.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
 
 
-CBasePathItem::CBasePathItem( const fs::CPath& keyPath, fmt::PathFormat fmtDisplayPath )
+CBasePathItem::CBasePathItem( const fs::CPath& keyPath )
 	: m_keyPath( keyPath )
-	, m_displayPath( fmt::FormatPath( m_keyPath, fmtDisplayPath ) )
+	, m_displayPath( m_keyPath.GetNameExt() )
 {
 }
 
 CBasePathItem::~CBasePathItem()
 {
+}
+
+void CBasePathItem::StripDisplayCode( const fs::CPath& commonParentPath )
+{
+	m_displayPath = m_keyPath.Get();
+	path::StripPrefix( m_displayPath, commonParentPath.GetPtr() );
 }
 
 const std::tstring& CBasePathItem::GetCode( void ) const

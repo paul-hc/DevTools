@@ -6,25 +6,42 @@
 #include "utl/Path.h"
 
 
-namespace fmt { enum PathFormat; }
-
-
 abstract class CBasePathItem : public CSubject
 {
 protected:
-	CBasePathItem( const fs::CPath& keyPath, fmt::PathFormat fmtDisplayPath );
+	CBasePathItem( const fs::CPath& keyPath );
 public:
 	virtual ~CBasePathItem();
 
 	const fs::CPath& GetKeyPath( void ) const { return m_keyPath; }
+	void StripDisplayCode( const fs::CPath& commonParentPath );
 
 	// utl::ISubject interface
 	virtual const std::tstring& GetCode( void ) const;
 	virtual std::tstring GetDisplayCode( void ) const;
+
+	struct ToKeyPath
+	{
+		const fs::CPath& operator()( const fs::CPath& path ) const { return path; }
+		const fs::CPath& operator()( const CBasePathItem* pItem ) const { return pItem->GetKeyPath(); }
+	};
 private:
 	fs::CPath m_keyPath;
-	const std::tstring m_displayPath;
+	std::tstring m_displayPath;
 };
+
+
+namespace func
+{
+	struct ResetItem
+	{
+		template< typename ItemType >
+		void operator()( ItemType* pItem )
+		{
+			pItem->Reset();
+		}
+	};
+}
 
 
 #endif // BasePathItem_h

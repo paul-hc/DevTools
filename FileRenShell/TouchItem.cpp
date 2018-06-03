@@ -26,9 +26,10 @@ namespace app
 
 // CTouchItem implementation
 
-CTouchItem::CTouchItem( TFileStatePair* pStatePair, fmt::PathFormat fmtDisplayPath )
-	: CBasePathItem( pStatePair->first.m_fullPath, fmtDisplayPath )
-	, m_pStatePair( safe_ptr( pStatePair ) )
+CTouchItem::CTouchItem( const fs::CFileState& srcState )
+	: CBasePathItem( srcState.m_fullPath )
+	, m_srcState( srcState )
+	, m_destState( m_srcState )
 {
 }
 
@@ -38,7 +39,7 @@ CTouchItem::~CTouchItem()
 
 void CTouchItem::SetDestTime( app::DateTimeField field, const CTime& dateTime )
 {
-	app::RefTimeField( m_pStatePair->second, field ) = dateTime;
+	app::RefTimeField( m_destState, field ) = dateTime;
 }
 
 

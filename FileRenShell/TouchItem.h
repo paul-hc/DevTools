@@ -4,7 +4,6 @@
 
 #include "utl/FileState.h"
 #include "BasePathItem.h"
-#include "FileWorkingSet_fwd.h"
 
 
 namespace app
@@ -19,24 +18,22 @@ namespace app
 class CTouchItem : public CBasePathItem
 {
 public:
-	CTouchItem( TFileStatePair* pStatePair, fmt::PathFormat fmtDisplayPath );
+	CTouchItem( const fs::CFileState& srcState );
 	virtual ~CTouchItem();
 
-	const fs::CFileState& GetSrcState( void ) const { return m_pStatePair->first; }
-	const fs::CFileState& GetDestState( void ) const { return m_pStatePair->second; }
+	const fs::CFileState& GetSrcState( void ) const { return m_srcState; }
+	const fs::CFileState& GetDestState( void ) const { return m_destState; }
 
-	bool IsModified( void ) const { return m_pStatePair->second.IsValid() && m_pStatePair->second != m_pStatePair->first; }
+	bool IsModified( void ) const { return m_destState.IsValid() && m_destState != m_srcState; }
+
+	fs::CFileState& RefDestState( void ) { return m_destState; }
+	void Reset( void ) { m_destState = m_srcState; }
 
 	void SetDestTime( app::DateTimeField field, const CTime& dateTime );
-	void SetDestAttributeFlag( CFile::Attribute attrFlag, bool on ) { SetFlag( m_pStatePair->second.m_attributes, attrFlag, on ); }
-
-	struct ToKeyPath
-	{
-		const fs::CPath& operator()( const fs::CPath& path ) const { return path; }
-		const fs::CPath& operator()( const CTouchItem* pItem ) const { return pItem->GetKeyPath(); }
-	};
+	void SetDestAttributeFlag( CFile::Attribute attrFlag, bool on ) { SetFlag( m_destState.m_attributes, attrFlag, on ); }
 private:
-	TFileStatePair* m_pStatePair;
+	const fs::CFileState m_srcState;
+	fs::CFileState m_destState;
 };
 
 

@@ -8,13 +8,13 @@
 
 
 class CMainRenameDialog;
-class CFileSetUi;
+class CRenameService;
 
 
 class CReplaceDialog : public CLayoutDialog
 {
 public:
-	CReplaceDialog( CMainRenameDialog* pParent );
+	CReplaceDialog( CMainRenameDialog* pParent, const CRenameService* pRenSvc );
 	virtual ~CReplaceDialog();
 
 	bool Execute( void );
@@ -33,6 +33,8 @@ private:
 	void StoreFindWhatText( const std::tstring& text, const std::vector< std::tstring >* pDestFnames = NULL );
 private:
 	CMainRenameDialog* m_pParent;
+	const CRenameService* m_pRenSvc;
+
 	std::tstring m_findWhat;
 	std::tstring m_replaceWith;
 	bool m_matchCase;
@@ -44,7 +46,6 @@ private:
 	CHistoryComboBox m_replaceWithCombo;
 	CDialogToolBar m_findToolbar;
 	CDialogToolBar m_replaceToolbar;
-	std::auto_ptr< CFileSetUi > m_pFileSetUi;
 public:
 	// generated overrides
 	protected:

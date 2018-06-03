@@ -2,6 +2,7 @@
 #include "stdafx.h"
 #include "FileRenShell.h"
 #include "FileRenameShell.h"
+#include "FileModel.h"
 #include "MainRenameDialog.h"
 #include "TouchFilesDialog.h"
 #include "Application.h"
@@ -99,7 +100,8 @@ size_t CFileRenameShell::ExtractDropInfo( IDataObject* pDropInfo )
 		return 0;
 	}
 
-	return m_fileData.SetupFromDropInfo( (HDROP)storageMedium.hGlobal );
+	m_pFileModel.reset( new CFileModel );
+	return m_pFileModel->SetupFromDropInfo( (HDROP)storageMedium.hGlobal );
 }
 
 void CFileRenameShell::AugmentMenuItems( HMENU hMenu, UINT indexMenu, UINT idBaseCmd )
@@ -141,7 +143,7 @@ void CFileRenameShell::ExecuteCommand( app::MenuCommand menuCmd, CWnd* pParentOw
 	switch ( menuCmd )
 	{
 		case app::Cmd_SendToCliboard:
-			m_fileData.CopyClipSourcePaths( GetKeyState( VK_SHIFT ) & 0x8000 ? fmt::FilenameExt : fmt::FullPath, pParentOwner );
+			m_pFileModel->CopyClipSourcePaths( GetKeyState( VK_SHIFT ) & 0x8000 ? fmt::FilenameExt : fmt::FullPath, pParentOwner );
 			return;
 		case app::Cmd_RunUnitTests:
 			app::GetApp().RunUnitTests();
@@ -149,24 +151,24 @@ void CFileRenameShell::ExecuteCommand( app::MenuCommand menuCmd, CWnd* pParentOw
 	}
 
 	// file operations commands
-	m_fileData.LoadUndoLog();
+	m_pFileModel->LoadUndoLog();
 	bool committed = false;
 	switch ( menuCmd )
 	{
 		case app::Cmd_TouchFiles:
 		{
-			CTouchFilesDialog dlg( &m_fileData, pParentOwner );
+			CTouchFilesDialog dlg( m_pFileModel.get(), pParentOwner );
 			committed = IDOK == dlg.DoModal();
 			break;
 		}
 		default:
 		{
-			CMainRenameDialog dlg( menuCmd, &m_fileData, pParentOwner );
+			CMainRenameDialog dlg( m_pFileModel.get(), pParentOwner, menuCmd );
 			committed = IDOK == dlg.DoModal();
 		}
 	}
 	if ( committed )
-		m_fileData.SaveUndoLog();
+		m_pFileModel->SaveUndoLog();
 }
 
 const CFileRenameShell::CMenuCmdInfo* CFileRenameShell::FindCmd( app::MenuCommand cmd )
@@ -221,7 +223,7 @@ STDMETHODIMP CFileRenameShell::QueryContextMenu( HMENU hMenu, UINT indexMenu, UI
 	{	// kind of CMF_NORMAL
 		//TRACE( _T("CFileRenameShell::QueryContextMenu(): selFileCount=%d\n"), m_fileData.GetSourceFiles().size() );
 
-		if ( !m_fileData.IsEmpty() )
+		if ( m_pFileModel.get() != NULL )
 		{
 			AugmentMenuItems( hMenu, indexMenu, idCmdFirst );
 			return MAKE_HRESULT( SEVERITY_SUCCESS, FACILITY_NULL, app::_CmdCount );
@@ -240,10 +242,10 @@ STDMETHODIMP CFileRenameShell::InvokeCommand( LPCMINVOKECOMMANDINFO pCmi )
 	// and lpVerb is a command that should be invoked.	Otherwise, the shell
 	// has called us, and LOWORD( pCmi->lpVerb ) is the menu ID the user has
 	// selected.  Actually, it's (menu ID - idCmdFirst) from QueryContextMenu().
-	if ( !m_fileData.IsEmpty() )
+	if ( m_pFileModel.get() != NULL )
 		if ( 0 == HIWORD( pCmi->lpVerb ) )
 		{
-			//TRACE( _T("CFileRenameShell::InvokeCommand(): selFileCount=%d\n"), m_fileData.GetSourceFiles().size() );
+			//TRACE( _T("CFileRenameShell::InvokeCommand(): selFileCount=%d\n"), m_pFileModel->GetSourcePaths().size() );
 
 			app::MenuCommand menuCmd = static_cast< app::MenuCommand >( LOWORD( pCmi->lpVerb ) );
 			CScopedMainWnd scopedMainWnd( pCmi->hwnd );
@@ -266,7 +268,7 @@ STDMETHODIMP CFileRenameShell::GetCommandString( UINT_PTR idCmd, UINT flags, UIN
 
 	//TRACE( _T("CFileRenameShell::GetCommandString(): flags=0x%08X, cchMax=%d\n"), flags, cchMax );
 
-	if ( !m_fileData.IsEmpty() )
+	if ( m_pFileModel.get() != NULL )
 		if ( flags == GCS_HELPTEXTA || flags == GCS_HELPTEXTW )
 			if ( const CMenuCmdInfo* pCmdInfo = FindCmd( static_cast< app::MenuCommand >( idCmd ) ) )
 			{

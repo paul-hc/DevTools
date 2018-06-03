@@ -12,14 +12,14 @@ abstract class CCommand : public utl::ICommand
 						, private utl::noncopyable
 {
 protected:
-	CCommand( unsigned int cmdId, utl::ISubject* pSubject, const CEnumTags* pCmdTags = NULL );
+	CCommand( int cmdId, utl::ISubject* pSubject, const CEnumTags* pCmdTags = NULL );
 public:
 	virtual ~CCommand();
 
 	utl::ISubject* GetSubject( void ) const { return m_pSubject; }
 
 	// utl::IMessage interface implementation
-	virtual unsigned int GetTypeID( void ) const;
+	virtual int GetTypeID( void ) const;
 	virtual std::tstring Format( bool detailed ) const;			// override for special formatting
 
 	// utl::ICommand interface implementation
@@ -28,7 +28,7 @@ public:
 protected:
 	void NotifyObservers( void );
 private:
-	unsigned int m_cmdId;
+	int m_cmdId;
 	utl::ISubject* m_pSubject;		// no ownership
 	const CEnumTags* m_pCmdTags;
 };
@@ -39,7 +39,7 @@ class CMacroCommand : public utl::ICommand
 {
 	enum { MacroCmdId = 0xFFFF };
 public:
-	CMacroCommand( const std::tstring& userInfo = std::tstring() );
+	CMacroCommand( const std::tstring& userInfo = std::tstring(), int cmdId = MacroCmdId );
 	virtual ~CMacroCommand();
 
 	// composite command
@@ -50,7 +50,7 @@ public:
 	void AddMainCmd( utl::ICommand* pMainCmd ) { m_pMainCmd = pMainCmd; AddCmd( pMainCmd ); }
 
 	// utl::IMessage interface implementation
-	virtual unsigned int GetTypeID( void ) const;
+	virtual int GetTypeID( void ) const;
 	virtual std::tstring Format( bool detailed ) const;
 
 	// utl::ICommand interface implementation
@@ -59,6 +59,7 @@ public:
 	virtual bool IsUndoable( void ) const;
 protected:
 	std::tstring m_userInfo;
+	int m_cmdId;
 	std::vector< utl::ICommand* > m_subCommands;		// with ownership
 	utl::ICommand* m_pMainCmd;
 };
@@ -73,6 +74,7 @@ public:
 	CCommandModel( void ) {}
 	~CCommandModel();
 
+	bool IsUndoEmpty( void ) const { return m_undoStack.empty(); }
 	void Clear( void );
 	void RemoveExpiredCommands( size_t maxSize );
 
@@ -84,6 +86,11 @@ public:
 
 	bool CanUndo( void ) const;
 	bool CanRedo( void ) const;
+
+	utl::ICommand* PeekUndo( void ) const { return !m_undoStack.empty() ? m_undoStack.back() : NULL; }
+
+	const std::deque< utl::ICommand* >& GetUndoStack( void ) const { return m_undoStack; }
+	std::deque< utl::ICommand* >& RefUndoStack( void ) { return m_undoStack; }
 private:
 	// commands stored in UNDO and REDO must keep their objects alive
 	std::deque< utl::ICommand* > m_undoStack;			// stack top at end

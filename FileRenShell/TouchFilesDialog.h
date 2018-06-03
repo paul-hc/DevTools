@@ -2,18 +2,16 @@
 #define TouchFilesDialog_h
 #pragma once
 
-#include "utl/BatchTransactions.h"
 #include "utl/BaseMainDialog.h"
 #include "utl/FileState.h"
+#include "utl/ISubject.h"
 #include "utl/ReportListControl.h"
 #include "utl/DateTimeControl.h"
-#include "Application_fwd.h"
-#include "FileWorkingSet_fwd.h"
+#include "FileCommands_fwd.h"
 
 
+class CFileModel;
 class CTouchItem;
-class CFileWorkingSet;
-class CLogger;
 class CEnumTags;
 
 namespace app { enum DateTimeField; }
@@ -26,15 +24,15 @@ namespace multi
 
 
 class CTouchFilesDialog : public CBaseMainDialog
-						, private fs::IBatchTransactionCallback
+						, private utl::IObserver
+						, private cmd::IErrorObserver
 						, private CReportListControl::ITextEffectCallback
 {
 public:
-	CTouchFilesDialog( CFileWorkingSet* pFileData, CWnd* pParent );
+	CTouchFilesDialog( CFileModel* pFileModel, CWnd* pParent );
 	virtual ~CTouchFilesDialog();
 private:
 	void Construct( void );
-	void InitDisplayItems( void );
 
 	enum Mode { Uninit = -1, StoreMode, TouchMode, UndoRollbackMode };		// reflects the OK button label
 	void SwitchMode( Mode mode );
@@ -61,10 +59,12 @@ private:
 
 	int FindItemPos( const fs::CPath& keyPath ) const;
 
-	// fs::IBatchTransactionCallback interface
-	virtual CWnd* GetWnd( void );
-	virtual CLogger* GetLogger( void );
-	virtual fs::UserFeedback HandleFileError( const fs::CPath& sourcePath, const std::tstring& message );
+	// utl::IObserver interface
+	virtual void OnUpdate( utl::ISubject* pSubject, utl::IMessage* pMessage );
+
+	// cmd::IErrorObserver interface
+	virtual void OnFileError( const fs::CPath& srcPath, const std::tstring& errMsg );
+	virtual void ClearFileErrors( void );
 
 	// CReportListControl::ITextEffectCallback interface
 	virtual void CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARAM rowKey, int subItem ) const;
@@ -73,10 +73,10 @@ private:
 	static const CEnumTags& GetTags_DateTimeField( void );
 	static app::DateTimeField GetDateTimeField( UINT dtId );
 private:
-	CFileWorkingSet* m_pFileData;
+	CFileModel* m_pFileModel;
+	const std::vector< CTouchItem* >& m_rTouchItems;
+	std::vector< CTouchItem* > m_errorItems;
 	Mode m_mode;
-	std::vector< CTouchItem* > m_displayItems;
-	std::auto_ptr< fs::CBatchTouch > m_pBatchTransaction;
 	bool m_anyChanges;
 
 	// multiple states accumulators for edit fields

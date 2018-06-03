@@ -1,8 +1,12 @@
-#ifndef FileSetUi_h
-#define FileSetUi_h
+#ifndef RenameService_h
+#define RenameService_h
 #pragma once
 
-#include "FileWorkingSet.h"
+#include "utl/Path.h"
+#include "FileCommands_fwd.h"
+
+
+class CRenameItem;
 
 
 enum
@@ -17,10 +21,16 @@ enum
 };
 
 
-class CFileSetUi
+class CRenameService
 {
 public:
-	CFileSetUi( CFileWorkingSet* pFileWorkingSet );
+	CRenameService( const std::vector< CRenameItem* >& renameItems );
+
+	fs::TPathPairMap& RefRenamePairs( void ) { return m_renamePairs; }
+
+	UINT FindNextAvailSeqCount( const std::tstring& format ) const;
+
+	bool CheckPathCollisions( cmd::IErrorObserver* pErrorObserver );
 
 	void QueryDestFilenames( std::vector< std::tstring >& rDestFnames ) const;
 	void QuerySubDirs( std::vector< std::tstring >& rSubDirs ) const;
@@ -30,7 +40,7 @@ public:
 
 	std::tstring GetPickedFname( UINT cmdId, std::vector< std::tstring >* pDestFnames = NULL ) const;
 	std::tstring GetPickedDirectory( UINT cmdId ) const;
-
+public:
 	static std::tstring GetDestPath( fs::TPathPairMap::const_iterator itPair );
 	static std::tstring GetDestFname( fs::TPathPairMap::const_iterator itPair );
 	static std::tstring& EscapeAmpersand( std::tstring& rText );
@@ -41,9 +51,27 @@ public:
 	static std::tstring ExtractLongestCommonPrefix( const std::vector< std::tstring >& destFnames );
 private:
 	static bool AllHavePrefix( const std::vector< std::tstring >& destFnames, size_t prefixLen );
+
+	bool FileExistOutsideWorkingSet( const fs::CPath& filePath ) const;		// collision with an existing file/dir outside working set (selected files)
 private:
-	const fs::TPathPairMap& m_renamePairs;
+	fs::TPathPairMap m_renamePairs;
 };
 
 
-#endif // FileSetUi_h
+namespace func
+{
+	struct AssignFname
+	{
+		AssignFname( std::vector< std::tstring >::const_iterator itFnames ) : m_itFnames( itFnames ) {}
+
+		void operator()( fs::CPathParts& rDestParts ) const
+		{
+			rDestParts.m_fname = *m_itFnames++;
+		}
+	private:
+		mutable std::vector< std::tstring >::const_iterator m_itFnames;
+	};
+}
+
+
+#endif // RenameService_h

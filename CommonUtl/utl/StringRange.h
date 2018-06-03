@@ -194,12 +194,12 @@ namespace str
 
 				typedef typename const CharType* iterator;
 
-				iterator itBegin = m_text.c_str(), itEnd = itBegin + m_text.length();
-				iterator itFound = std::search( itBegin + m_pos.m_start, itEnd, part.m_pString, part.m_pString + part.m_count, pred::CharEqual< caseType >() );
+				iterator itBegin = m_text.c_str() + m_pos.m_start, itEnd = m_text.c_str() + m_pos.m_end;
+				iterator itFound = std::search( itBegin, itEnd, part.m_pString, part.m_pString + part.m_count, pred::CharEqual< caseType >() );
 				if ( itFound == itEnd )
 					return false;
 
-				rFoundPos.m_start = std::distance( itBegin, itFound );
+				rFoundPos.m_start = std::distance( m_text.c_str(), itFound );
 				rFoundPos.m_end = rFoundPos.m_start + part.m_count;
 				return true;
 			}

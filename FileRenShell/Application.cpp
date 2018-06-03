@@ -2,7 +2,7 @@
 #include "stdafx.h"
 #include "Application.h"
 #include "ut/PathAlgorithmsTests.h"
-#include "ut/UndoChangeLogTests.h"
+#include "ut/UndoLogSerializerTests.h"
 #include "resource.h"
 #include "utl/EnumTags.h"
 #include "utl/BaseApp.hxx"
@@ -16,23 +16,13 @@ CComModule g_comModule;
 CApplication g_app;
 
 
-namespace app
-{
-	const CEnumTags& GetTags_Action( void )
-	{
-		static const CEnumTags tags( _T("Rename Files|Touch Files"), _T("RENAME|TOUCH") );
-		return tags;
-	}
-}
-
-
 namespace ut
 {
 	void RegisterAppUnitTests( void )
 	{
 	#ifdef _DEBUG
 		CPathAlgorithmsTests::Instance();
-		CUndoChangeLogTests::Instance();
+		CUndoLogSerializerTests::Instance();
 	#endif
 	}
 }

@@ -2,7 +2,6 @@
 #define MainRenameDialog_h
 #pragma once
 
-#include "utl/BatchTransactions.h"
 #include "utl/BaseMainDialog.h"
 #include "utl/DialogToolBar.h"
 #include "utl/EnumSplitButton.h"
@@ -14,34 +13,32 @@
 #include "utl/SpinEdit.h"
 #include "utl/TextEdit.h"
 #include "utl/ThemeStatic.h"
-#include "FileWorkingSet_fwd.h"
 #include "Application_fwd.h"
+#include "FileCommands_fwd.h"
 
 
+class CFileModel;
 class CRenameItem;
-class CFileWorkingSet;
-class CLogger;
+class CRenameService;
 namespace str { enum Match; }
 
 
 class CMainRenameDialog : public CBaseMainDialog
-						, private fs::IBatchTransactionCallback
+						, private utl::IObserver
+						, private cmd::IErrorObserver
 						, private CReportListControl::ITextEffectCallback
 {
 public:
-	CMainRenameDialog( app::MenuCommand menuCmd, CFileWorkingSet* pFileData, CWnd* pParent );
+	CMainRenameDialog( CFileModel* pFileModel, CWnd* pParent, app::MenuCommand menuCmd = app::Cmd_RenameFiles );
 	virtual ~CMainRenameDialog();
 
 	// ui::ICmdCallback interface
 	virtual void QueryTooltipText( std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const;
 
-	CFileWorkingSet* GetWorkingSet( void ) const { return m_pFileData; }
+	CFileModel* GetFileModel( void ) const { return m_pFileModel; }
 	void PostMakeDest( bool silent = false );
 private:
-	void InitDisplayItems( void );
-
 	void SetupFileListView( void );
-	int FindItemPos( const fs::CPath& sourcePath ) const;
 
 	enum Mode { Uninit = -1, MakeMode, RenameMode, UndoRollbackMode };		// same as OK button label
 	void SwitchMode( Mode mode );
@@ -52,21 +49,31 @@ private:
 
 	enum Column { Source, Destination };
 
-	// fs::IBatchTransactionCallback interface
-	virtual CWnd* GetWnd( void );
-	virtual CLogger* GetLogger( void );
-	virtual fs::UserFeedback HandleFileError( const fs::CPath& sourcePath, const std::tstring& message );
+	size_t FindItemPos( const fs::CPath& srcPath ) const;
+	std::tstring JoinErrorDestPaths( void ) const;
+
+	// utl::IObserver interface
+	virtual void OnUpdate( utl::ISubject* pSubject, utl::IMessage* pMessage );
+
+	// cmd::IErrorObserver interface
+	virtual void OnFileError( const fs::CPath& srcPath, const std::tstring& errMsg );
+	virtual void ClearFileErrors( void );
 
 	// CReportListControl::ITextEffectCallback interface
 	virtual void CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARAM rowKey, int subItem ) const;
+
+	bool GenerateDestPaths( const std::tstring& format, UINT* pSeqCount );
+	void EnsureUniformNumPadding( void );
 private:
-	CFileWorkingSet* m_pFileData;
+	CFileModel* m_pFileModel;
+	const std::vector< CRenameItem* >& m_rRenameItems;
+	std::vector< CRenameItem* > m_errorItems;
+	std::auto_ptr< CRenameService > m_pRenSvc;
+
 	app::MenuCommand m_menuCmd;
-	std::vector< CRenameItem* > m_displayItems;
 	bool m_autoGenerate;
 	bool m_seqCountAutoAdvance;
 	Mode m_mode;
-	std::auto_ptr< fs::CBatchRename > m_pBatchTransaction;
 private:
 	// enum { IDD = IDD_RENAME_FILES_DIALOG };
 	CHistoryComboBox m_formatCombo;

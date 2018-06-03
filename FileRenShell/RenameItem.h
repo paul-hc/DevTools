@@ -3,19 +3,24 @@
 #pragma once
 
 #include "BasePathItem.h"
-#include "FileWorkingSet_fwd.h"
 
 
 class CRenameItem : public CBasePathItem
 {
 public:
-	CRenameItem( const TPathPair* pPathPair );
+	CRenameItem( const fs::CPath& srcPath );
 	virtual ~CRenameItem();
 
-	const fs::CPath& GetSrcPath( void ) const { return m_pPathPair->first; }		// AKA key path
-	const fs::CPath& GetDestPath( void ) const { return m_pPathPair->second; }
+	const fs::CPath& GetSrcPath( void ) const { return GetKeyPath(); }
+	const fs::CPath& GetDestPath( void ) const { return m_destPath; }
+	const fs::CPath& GetSafeDestPath( void ) const { return !m_destPath.IsEmpty() ? m_destPath : GetSrcPath(); }	// use SRC if DEST emty
+
+	bool IsModified( void ) const { return !m_destPath.IsEmpty() && m_destPath.Get() != GetKeyPath().Get(); }		// case sensitive compare strings (not paths)
+
+	void Reset( void ) { m_destPath.Clear(); }
+	fs::CPath& RefDestPath( void ) { return m_destPath; }
 private:
-	const TPathPair* m_pPathPair;
+	fs::CPath m_destPath;
 };
 
 

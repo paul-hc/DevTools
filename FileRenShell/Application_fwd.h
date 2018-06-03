@@ -3,9 +3,6 @@
 #pragma once
 
 
-class CEnumTags;
-
-
 namespace app
 {
 	enum MenuCommand
@@ -22,15 +19,7 @@ namespace app
 	};
 
 
-	enum Action { RenameFiles, TouchFiles };
-
-	const CEnumTags& GetTags_Action( void );
-
-
-	enum CustomColors
-	{
-		ColorErrorBk = color::PastelPink
-	};
+	enum CustomColors { ColorErrorBk = color::PastelPink };
 }
 
 

@@ -1,5 +1,5 @@
-#ifndef UndoChangeLogTests_h
-#define UndoChangeLogTests_h
+#ifndef UndoLogSerializerTests_h
+#define UndoLogSerializerTests_h
 #pragma once
 
 
@@ -8,11 +8,11 @@
 #include "utl/ut/UnitTest.h"
 
 
-class CUndoChangeLogTests : public ut::CConsoleTestCase
+class CUndoLogSerializerTests : public ut::CConsoleTestCase
 {
-	CUndoChangeLogTests( void );
+	CUndoLogSerializerTests( void );
 public:
-	static CUndoChangeLogTests& Instance( void );
+	static CUndoLogSerializerTests& Instance( void );
 
 	// ut::ITestCase interface
 	virtual void Run( void );
@@ -25,4 +25,4 @@ private:
 #endif //_DEBUG
 
 
-#endif // UndoChangeLogTests_h
+#endif // UndoLogSerializerTests_h
