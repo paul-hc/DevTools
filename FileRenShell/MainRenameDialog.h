@@ -49,18 +49,19 @@ private:
 
 	enum Column { Source, Destination };
 
-	size_t FindItemPos( const fs::CPath& srcPath ) const;
-	std::tstring JoinErrorDestPaths( void ) const;
-
 	// utl::IObserver interface
 	virtual void OnUpdate( utl::ISubject* pSubject, utl::IMessage* pMessage );
 
 	// cmd::IErrorObserver interface
-	virtual void OnFileError( const fs::CPath& srcPath, const std::tstring& errMsg );
 	virtual void ClearFileErrors( void );
+	virtual void OnFileError( const fs::CPath& srcPath, const std::tstring& errMsg );
 
 	// CReportListControl::ITextEffectCallback interface
 	virtual void CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARAM rowKey, int subItem ) const;
+
+	size_t FindItemPos( const fs::CPath& srcPath ) const;
+	void MarkInvalidSrcItems( void );
+	std::tstring JoinErrorDestPaths( void ) const;
 
 	bool GenerateDestPaths( const std::tstring& format, UINT* pSeqCount );
 	void EnsureUniformNumPadding( void );

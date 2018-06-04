@@ -57,18 +57,19 @@ private:
 	void ApplyFields( void );
 	bool VisibleAllSrcColumns( void ) const;
 
-	int FindItemPos( const fs::CPath& keyPath ) const;
-
 	// utl::IObserver interface
 	virtual void OnUpdate( utl::ISubject* pSubject, utl::IMessage* pMessage );
 
 	// cmd::IErrorObserver interface
-	virtual void OnFileError( const fs::CPath& srcPath, const std::tstring& errMsg );
 	virtual void ClearFileErrors( void );
+	virtual void OnFileError( const fs::CPath& srcPath, const std::tstring& errMsg );
 
 	// CReportListControl::ITextEffectCallback interface
 	virtual void CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARAM rowKey, int subItem ) const;
 	virtual void ModifyDiffTextEffectAt( std::vector< ui::CTextEffect >& rMatchEffects, LPARAM rowKey, int subItem ) const;
+
+	size_t FindItemPos( const fs::CPath& keyPath ) const;
+	void MarkInvalidSrcItems( void );
 
 	static const CEnumTags& GetTags_DateTimeField( void );
 	static app::DateTimeField GetDateTimeField( UINT dtId );

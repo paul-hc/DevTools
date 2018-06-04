@@ -4,6 +4,7 @@
 #include "TouchItem.h"
 #include "FileModel.h"
 #include "FileService.h"
+#include "FileCommands.h"
 #include "Application.h"
 #include "resource.h"
 #include "utl/Clipboard.h"
@@ -97,6 +98,20 @@ void CTouchFilesDialog::Construct( void )
 	m_attribCheckStates.push_back( multi::CAttribCheckState( IDC_ATTRIB_VOLUME_CHECK, CFile::volume ) );
 }
 
+bool CTouchFilesDialog::TouchFiles( void )
+{
+	ClearFileErrors();
+
+	CFileService svc;
+	if ( CMacroCommand* pTouchMacroCmd = svc.MakeTouchCmds( m_rTouchItems ) )
+	{
+		cmd::CScopedErrorObserver observe( this );
+		return m_pFileModel->GetCommandModel()->Execute( pTouchMacroCmd );
+	}
+
+	return false;
+}
+
 void CTouchFilesDialog::SwitchMode( Mode mode )
 {
 	static const CEnumTags modeTags( _T("&Store|&Touch|&Rollback") );
@@ -120,25 +135,11 @@ void CTouchFilesDialog::SwitchMode( Mode mode )
 	m_fileListCtrl.Invalidate();			// do some custom draw magic
 }
 
-bool CTouchFilesDialog::TouchFiles( void )
-{
-	m_errorItems.clear();
-
-	CFileService svc( this );
-	if ( CMacroCommand* pTouchMacroCmd = svc.MakeTouchCmds( m_rTouchItems ) )
-		return m_pFileModel->GetCommandModel()->Execute( pTouchMacroCmd );
-
-	return false;
-}
-
 void CTouchFilesDialog::PostMakeDest( bool silent /*= false*/ )
 {
-	m_errorItems.clear();
-
 	if ( !silent )
 		GotoDlgCtrl( GetDlgItem( IDOK ) );
 
-//	SetupDialog();
 	SwitchMode( TouchMode );
 }
 
@@ -270,6 +271,8 @@ void CTouchFilesDialog::InputFields( void )
 
 void CTouchFilesDialog::ApplyFields( void )
 {
+	ClearFileErrors();
+
 	// apply valid edits, i.e. if not null
 	for ( size_t i = 0; i != m_rTouchItems.size(); ++i )
 	{
@@ -283,6 +286,8 @@ void CTouchFilesDialog::ApplyFields( void )
 			if ( itAttribState->CanApply() )
 				itAttribState->Apply( pTouchItem );
 	}
+
+	m_pFileModel->UpdateAllObservers( NULL );
 }
 
 bool CTouchFilesDialog::VisibleAllSrcColumns( void ) const
@@ -294,11 +299,6 @@ bool CTouchFilesDialog::VisibleAllSrcColumns( void ) const
 	return true;
 }
 
-int CTouchFilesDialog::FindItemPos( const fs::CPath& keyPath ) const
-{
-	return static_cast< int >( utl::BinaryFindPos( m_rTouchItems, keyPath, CBasePathItem::ToKeyPath() ) );
-}
-
 void CTouchFilesDialog::OnUpdate( utl::ISubject* pSubject, utl::IMessage* pMessage )
 {
 	pMessage;
@@ -307,22 +307,22 @@ void CTouchFilesDialog::OnUpdate( utl::ISubject* pSubject, utl::IMessage* pMessa
 		SetupDialog();
 }
 
+void CTouchFilesDialog::ClearFileErrors( void )
+{
+	m_errorItems.clear();
+	m_fileListCtrl.Invalidate();
+}
+
 void CTouchFilesDialog::OnFileError( const fs::CPath& srcPath, const std::tstring& errMsg )
 {
 	errMsg;
 
-	int pos = FindItemPos( srcPath );
-	if ( pos != -1 )
+	size_t pos = FindItemPos( srcPath );
+	if ( pos != utl::npos )
 	{
-		m_errorItems.push_back( m_rTouchItems[ pos ] );
-		m_fileListCtrl.EnsureVisible( pos, FALSE );
+		utl::AddUnique( m_errorItems, m_rTouchItems[ pos ] );
+		m_fileListCtrl.EnsureVisible( static_cast< int >( pos ), FALSE );
 	}
-	m_fileListCtrl.Invalidate();
-}
-
-void CTouchFilesDialog::ClearFileErrors( void )
-{
-	m_errorItems.clear();
 	m_fileListCtrl.Invalidate();
 }
 
@@ -414,6 +414,18 @@ void CTouchFilesDialog::ModifyDiffTextEffectAt( std::vector< ui::CTextEffect >& 
 			SetFlag( rMatchEffects[ str::MatchNotEqual ].m_fontEffect, ui::Underline );
 			break;
 	}
+}
+
+size_t CTouchFilesDialog::FindItemPos( const fs::CPath& keyPath ) const
+{
+	return utl::BinaryFindPos( m_rTouchItems, keyPath, CBasePathItem::ToKeyPath() );
+}
+
+void CTouchFilesDialog::MarkInvalidSrcItems( void )
+{
+	for ( std::vector< CTouchItem* >::const_iterator itTouchItem = m_rTouchItems.begin(); itTouchItem != m_rTouchItems.end(); ++itTouchItem )
+		if ( !( *itTouchItem )->GetKeyPath().FileExist() )
+			utl::AddUnique( m_errorItems, *itTouchItem );
 }
 
 const CEnumTags& CTouchFilesDialog::GetTags_DateTimeField( void )
@@ -510,16 +522,15 @@ void CTouchFilesDialog::OnOK( void )
 				SwitchMode( TouchMode );
 			break;
 		case UndoRollbackMode:
-//			if ( TouchFiles() )
-			if ( m_pFileModel->GetCommandModel()->Undo() )
-			{
-//				m_pFileModel->CommitUndoInfo( app::TouchFiles );
+		{
+			cmd::CScopedErrorObserver observe( this );
 
+			if ( m_pFileModel->GetCommandModel()->Undo() )
 				CBaseMainDialog::OnOK();
-			}
 			else
 				SwitchMode( TouchMode );
 			break;
+		}
 	}
 }
 
@@ -547,12 +558,11 @@ void CTouchFilesDialog::OnBnClicked_Undo( void )
 	ASSERT( m_pFileModel->CanUndo( cmd::TouchFile ) );
 
 	GotoDlgCtrl( GetDlgItem( IDOK ) );
-//	m_pFileModel->RetrieveUndoInfo( app::TouchFiles );
 
 	ClearFileErrors();
 	m_pFileModel->PopUndo();				// fetches data set from undo stack (macro command)
+	MarkInvalidSrcItems();
 	SwitchMode( UndoRollbackMode );
-//	SetupDialog();
 }
 
 void CTouchFilesDialog::OnBnClicked_CopySourceFiles( void )
@@ -565,6 +575,7 @@ void CTouchFilesDialog::OnBnClicked_PasteDestStates( void )
 {
 	try
 	{
+		ClearFileErrors();
 		m_pFileModel->PasteClipDestinationFileStates( this );
 		PostMakeDest();
 	}
@@ -576,6 +587,7 @@ void CTouchFilesDialog::OnBnClicked_PasteDestStates( void )
 
 void CTouchFilesDialog::OnBnClicked_ResetDestFiles( void )
 {
+	ClearFileErrors();
 	m_pFileModel->ResetDestinations();
 	PostMakeDest();
 }

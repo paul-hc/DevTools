@@ -117,7 +117,7 @@ void CUndoLogSerializerTests::TestLoadLog( void )
 		pMacro = checked_static_cast< const cmd::CFileMacroCmd* >( *itStackCmd++ );
 		itSubCmd = pMacro->GetSubCommands().begin();
 		ASSERT_EQUAL( cmd::RenameFile, pMacro->GetTypeID() );
-		ASSERT_EQUAL( CTime(), pMacro->m_timestamp );
+		ASSERT_EQUAL( CTime(), pMacro->GetTimestamp() );
 		ASSERT_EQUAL( 2, pMacro->GetSubCommands().size() );
 
 		pRenameCmd = checked_static_cast< const CRenameFileCmd* >( *itSubCmd++ );
@@ -133,7 +133,7 @@ void CUndoLogSerializerTests::TestLoadLog( void )
 		pMacro = checked_static_cast< const cmd::CFileMacroCmd* >( *itStackCmd++ );
 		itSubCmd = pMacro->GetSubCommands().begin();
 		ASSERT_EQUAL( cmd::RenameFile, pMacro->GetTypeID() );
-		ASSERT_EQUAL( CTime(), pMacro->m_timestamp );
+		ASSERT_EQUAL( CTime(), pMacro->GetTimestamp() );
 		ASSERT_EQUAL( 1, pMacro->GetSubCommands().size() );
 
 		pRenameCmd = checked_static_cast< const CRenameFileCmd* >( *itSubCmd++ );
@@ -144,7 +144,7 @@ void CUndoLogSerializerTests::TestLoadLog( void )
 		pMacro = checked_static_cast< const cmd::CFileMacroCmd* >( *itStackCmd++ );
 		itSubCmd = pMacro->GetSubCommands().begin();
 		ASSERT_EQUAL( cmd::TouchFile, pMacro->GetTypeID() );
-		ASSERT_EQUAL( CTime( 2005, 10, 17, 8, 0, 0 ), pMacro->m_timestamp );
+		ASSERT_EQUAL( CTime( 2005, 10, 17, 8, 0, 0 ), pMacro->GetTimestamp() );
 		ASSERT_EQUAL( 2, pMacro->GetSubCommands().size() );
 
 		{
@@ -187,7 +187,7 @@ void CUndoLogSerializerTests::TestLoadLog( void )
 		pMacro = checked_static_cast< const cmd::CFileMacroCmd* >( *itStackCmd++ );
 		itSubCmd = pMacro->GetSubCommands().begin();
 		ASSERT_EQUAL( cmd::RenameFile, pMacro->GetTypeID() );
-		ASSERT_EQUAL( CTime( 2008, 10, 3, 13, 0, 0 ), pMacro->m_timestamp );
+		ASSERT_EQUAL( CTime( 2008, 10, 3, 13, 0, 0 ), pMacro->GetTimestamp() );
 		ASSERT_EQUAL( 2, pMacro->GetSubCommands().size() );
 
 		pRenameCmd = checked_static_cast< const CRenameFileCmd* >( *itSubCmd++ );
@@ -202,7 +202,7 @@ void CUndoLogSerializerTests::TestLoadLog( void )
 		pMacro = checked_static_cast< const cmd::CFileMacroCmd* >( *itStackCmd++ );
 		itSubCmd = pMacro->GetSubCommands().begin();
 		ASSERT_EQUAL( cmd::RenameFile, pMacro->GetTypeID() );
-		ASSERT_EQUAL( CTime( 2010, 6, 8, 14, 30, 0 ), pMacro->m_timestamp );
+		ASSERT_EQUAL( CTime( 2010, 6, 8, 14, 30, 0 ), pMacro->GetTimestamp() );
 		ASSERT_EQUAL( 1, pMacro->GetSubCommands().size() );
 
 		pRenameCmd = checked_static_cast< const CRenameFileCmd* >( *itSubCmd++ );
@@ -213,7 +213,7 @@ void CUndoLogSerializerTests::TestLoadLog( void )
 		pMacro = checked_static_cast< const cmd::CFileMacroCmd* >( *itStackCmd++ );
 		itSubCmd = pMacro->GetSubCommands().begin();
 		ASSERT_EQUAL( cmd::RenameFile, pMacro->GetTypeID() );
-		ASSERT_EQUAL( CTime( 2012, 5, 16, 19, 21, 2 ), pMacro->m_timestamp );
+		ASSERT_EQUAL( CTime( 2012, 5, 16, 19, 21, 2 ), pMacro->GetTimestamp() );
 		ASSERT_EQUAL( 1, pMacro->GetSubCommands().size() );
 
 		pRenameCmd = checked_static_cast< const CRenameFileCmd* >( *itSubCmd++ );
@@ -224,7 +224,7 @@ void CUndoLogSerializerTests::TestLoadLog( void )
 		pMacro = checked_static_cast< const cmd::CFileMacroCmd* >( *itStackCmd++ );
 		itSubCmd = pMacro->GetSubCommands().begin();
 		ASSERT_EQUAL( cmd::TouchFile, pMacro->GetTypeID() );
-		ASSERT_EQUAL( CTime( 2018, 7, 1, 8, 0, 0 ), pMacro->m_timestamp );
+		ASSERT_EQUAL( CTime( 2018, 7, 1, 8, 0, 0 ), pMacro->GetTimestamp() );
 		ASSERT_EQUAL( 1, pMacro->GetSubCommands().size() );
 
 		{

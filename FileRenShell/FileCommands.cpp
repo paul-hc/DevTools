@@ -22,7 +22,25 @@ namespace cmd
 	}
 
 
+	// CUserFeedbackException implementation
+
+	CUserFeedbackException::CUserFeedbackException( UserFeedback feedback )
+		: CRuntimeException( GetTags_Feedback().FormatUi( feedback ) )
+		, m_feedback( feedback )
+	{
+	}
+
+	const CEnumTags& CUserFeedbackException::GetTags_Feedback( void )
+	{
+		static const CEnumTags tags( _T("Abort|Retry|Ignore") );
+		return tags;
+	}
+
+
 	// CFileCmd implementation
+
+	const TCHAR CFileCmd::s_fmtError[] = _T("* %s\n ERROR: %s");
+	IErrorObserver* CFileCmd::s_pErrorObserver = NULL;
 
 	CFileCmd::CFileCmd( Command command, const fs::CPath& srcPath )
 		: CCommand( command, NULL, &cmd::GetTags_Command() )
@@ -30,15 +48,63 @@ namespace cmd
 	{
 	}
 
+	void CFileCmd::ExecuteHandle( void ) throws_( CUserFeedbackException )
+	{
+		try
+		{
+			Execute();
+
+			app::GetLogger().LogString( Format( true ) );
+		}
+		catch ( CException* pExc )
+		{
+			throw CUserFeedbackException( HandleFileError( pExc ) );
+		}
+	}
+
+	bool CFileCmd::Unexecute( void )
+	{
+		std::auto_ptr< CFileCmd > pUndoCmd( MakeUnexecuteCmd() );
+
+		return pUndoCmd.get() != NULL && pUndoCmd->Execute();
+	}
+
+	UserFeedback CFileCmd::HandleFileError( CException* pExc ) const
+	{
+		std::tstring errMsg = ExtractMessage( pExc );
+
+		if ( s_pErrorObserver != NULL )
+			s_pErrorObserver->OnFileError( m_srcPath, errMsg );
+
+		UserFeedback feedback;
+		switch ( AfxMessageBox( errMsg.c_str(), MB_ICONWARNING | MB_ABORTRETRYIGNORE ) )
+		{
+			default: ASSERT( false );
+			case IDRETRY:	return Retry;				// no logging on retry, give it another chance to fix the problem
+			case IDABORT:	feedback = Abort; break;
+			case IDIGNORE:	feedback = Ignore; break;
+		}
+
+		app::GetLogger().Log( s_fmtError, Format( true ).c_str(), errMsg.c_str() );
+		return feedback;
+	}
+
+	std::tstring CFileCmd::ExtractMessage( CException* pExc ) const
+	{
+		std::tstring message = ui::GetErrorMessage( pExc );
+		pExc->Delete();
+
+		if ( !m_srcPath.FileExist() )
+			return str::Format( _T("Cannot find file: %s"), m_srcPath.GetPtr() );
+		return message;
+	}
+
 
 	// CFileMacroCmd implementation
 
-	const TCHAR CFileMacroCmd::s_fmtError[] = _T("* %s\n ERROR: %s");
-
-	CFileMacroCmd::CFileMacroCmd( Command subCmdType, IErrorObserver* pErrorObserver, const CTime& timestamp /*= CTime::GetCurrentTime()*/ )
+	CFileMacroCmd::CFileMacroCmd( Command subCmdType, const CTime& timestamp /*= CTime::GetCurrentTime()*/ )
 		: CMacroCommand( GetTags_Command().FormatKey( subCmdType ), subCmdType )
 		, m_timestamp( timestamp )
-		, m_pErrorObserver( pErrorObserver )
 	{
 	}
 
@@ -54,122 +120,50 @@ namespace cmd
 
 	bool CFileMacroCmd::Execute( void )
 	{
-		size_t doneCmdCount = ExecuteMacro( ExecuteMode );
-		if ( doneCmdCount != m_subCommands.size() )				// aborted by user?
-		{
-			RollbackMacro( doneCmdCount, UnexecuteMode );
-			return false;
-		}
-
-		return doneCmdCount != 0;								// any executed?
+		ExecuteMacro( ExecuteMode );			// removes commands that failed
+		return !m_subCommands.empty();			// any succeeeded?
 	}
 
 	bool CFileMacroCmd::Unexecute( void )
 	{
-		size_t doneCmdCount = ExecuteMacro( UnexecuteMode );
-		if ( doneCmdCount != m_subCommands.size() )				// aborted by user?
-		{
-			RollbackMacro( doneCmdCount, ExecuteMode );
-			return false;
-		}
-
-		return doneCmdCount != 0;								// any unexecuted?
+		ExecuteMacro( UnexecuteMode );			// removes commands that failed
+		return !m_subCommands.empty();			// any succeeeded?
 	}
 
-	size_t CFileMacroCmd::ExecuteMacro( Mode mode )
+	void CFileMacroCmd::ExecuteMacro( Mode mode )
 	{
-		if ( m_pErrorObserver != NULL )
-			m_pErrorObserver->ClearFileErrors();
-
-		for ( size_t pos = 0; pos != m_subCommands.size(); )
+		for ( std::vector< utl::ICommand* >::iterator itCmd = m_subCommands.begin(); itCmd != m_subCommands.end(); )
 		{
-			utl::ICommand* pCmd = m_subCommands[ pos ];
+			CFileCmd* pCmd = checked_static_cast< CFileCmd* >( *itCmd );
 
 			try
 			{
 				if ( ExecuteMode == mode )
-					pCmd->Execute();
+					pCmd->ExecuteHandle();
 				else
-					pCmd->Unexecute();
-
-				app::GetLogger().LogString( pCmd->Format( true ) );
+					pCmd->MakeUnexecuteCmd()->ExecuteHandle();
 			}
-			catch ( CException* pExc )
+			catch ( CUserFeedbackException& exc )
 			{
-				switch ( HandleFileError( checked_static_cast< const CFileCmd* >( pCmd ), pExc ) )
+				switch ( exc.m_feedback )
 				{
-					case Retry:	 continue;
+					case Retry:
+						continue;
 					case Ignore:
-						RemoveCmdAt( pos );		// discard command since cannot un-execute it
+						// discard command since cannot unexecute
+						delete *itCmd;
+						itCmd = m_subCommands.erase( itCmd );
 						continue;
 					case Abort:
-						RemoveCmdAt( pos );		// discard command since cannot un-execute it
-						return pos;
+						// discard remaining commands since will not be unexecuted
+						std::for_each( itCmd, m_subCommands.end(), func::Delete() );
+						itCmd = m_subCommands.erase( itCmd, m_subCommands.end() );
+						return;
 				}
 			}
 
-			++pos;
+			++itCmd;
 		}
-
-		return m_subCommands.size();
-	}
-
-	void CFileMacroCmd::RollbackMacro( size_t doneCmdCount, Mode mode )
-	{
-		// rollback silently the commands that succeeded
-		for ( size_t pos = 0; pos != doneCmdCount; ++pos )
-		{
-			utl::ICommand* pCmd = m_subCommands[ pos ];
-			try
-			{
-				if ( ExecuteMode == mode )
-					pCmd->Execute();
-				else
-					pCmd->Unexecute();
-			}
-			catch ( CException* pExc )
-			{
-				std::tstring errMsg = ExtractMessage( checked_static_cast< const CFileCmd* >( pCmd )->m_srcPath, pExc ); errMsg;
-				TRACE( _T(" * Error rolling back %s macro command: %s\n"), Format( false ).c_str(), errMsg.c_str() );
-			}
-		}
-	}
-
-	void CFileMacroCmd::RemoveCmdAt( size_t pos )
-	{
-		REQUIRE( pos < m_subCommands.size() );
-		delete m_subCommands[ pos ];
-		m_subCommands.erase( m_subCommands.begin() + pos );
-	}
-
-
-	CFileMacroCmd::UserFeedback CFileMacroCmd::HandleFileError( const CFileCmd* pCmd, CException* pExc ) const
-	{
-		std::tstring errMsg = ExtractMessage( pCmd->m_srcPath, pExc );
-		if ( m_pErrorObserver != NULL )
-			m_pErrorObserver->OnFileError( pCmd->m_srcPath, errMsg );
-
-		UserFeedback feedback;
-		switch ( AfxMessageBox( errMsg.c_str(), MB_ICONWARNING | MB_ABORTRETRYIGNORE ) )
-		{
-			default: ASSERT( false );
-			case IDRETRY:	return Retry;				// no logging on retry, give it another chance to fix the problem
-			case IDABORT:	feedback = Abort; break;
-			case IDIGNORE:	feedback = Ignore; break;
-		}
-
-		app::GetLogger().Log( s_fmtError, pCmd->Format( true ).c_str(), errMsg.c_str() );
-		return feedback;
-	}
-
-	std::tstring CFileMacroCmd::ExtractMessage( const fs::CPath& srcPath, CException* pExc )
-	{
-		std::tstring message = ui::GetErrorMessage( pExc );
-		pExc->Delete();
-
-		if ( !srcPath.FileExist() )
-			return str::Format( _T("Cannot find file:\n%s\n%s"), srcPath.GetPtr(), message.c_str() );
-		return message;
 	}
 }
 
@@ -203,9 +197,9 @@ bool CRenameFileCmd::Execute( void )
 	return true;
 }
 
-bool CRenameFileCmd::Unexecute( void )
+std::auto_ptr< cmd::CFileCmd > CRenameFileCmd::MakeUnexecuteCmd( void ) const
 {
-	return CRenameFileCmd( m_destPath, m_srcPath ).Execute();
+	return std::auto_ptr< cmd::CFileCmd >( new CRenameFileCmd( m_destPath, m_srcPath ) );
 }
 
 bool CRenameFileCmd::IsUndoable( void ) const
@@ -250,9 +244,9 @@ bool CTouchFileCmd::Execute( void )
 	return true;
 }
 
-bool CTouchFileCmd::Unexecute( void )
+std::auto_ptr< cmd::CFileCmd > CTouchFileCmd::MakeUnexecuteCmd( void ) const
 {
-	return CTouchFileCmd( m_destState, m_srcState ).Execute();
+	return std::auto_ptr< cmd::CFileCmd >( new CTouchFileCmd( m_destState, m_srcState ) );
 }
 
 bool CTouchFileCmd::IsUndoable( void ) const

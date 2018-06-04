@@ -104,7 +104,7 @@ utl::ICommand* CUndoLogSerializer::LoadMacroCmd( std::istream& is, const str::TS
 
 	if ( fmt::ParseCommandTag( command, timestamp, tagRange ) )
 	{
-		std::auto_ptr< cmd::CFileMacroCmd > pMacroCmd( new cmd::CFileMacroCmd( command, NULL, timestamp ) );
+		std::auto_ptr< cmd::CFileMacroCmd > pMacroCmd( new cmd::CFileMacroCmd( command, timestamp ) );
 
 		for ( ; !is.eof(); ++m_parseLineNo )
 		{

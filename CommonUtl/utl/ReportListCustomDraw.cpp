@@ -182,7 +182,8 @@ void CReportListCustomDraw::BuildTextMatchEffects( std::vector< ui::CTextEffect 
 
 	rMatchEffects.resize( _MatchCount );
 	rMatchEffects[ str::MatchEqual ] = MakeCellEffect();
-	rMatchEffects[ str::MatchEqual ].m_textColor = ui::GetActualColor( m_pList->m_listTextEffect.m_textColor, GetSysColor( COLOR_WINDOWTEXT ) );		// realize to reset existing text highlighting
+	//if ( !ui::IsActualColor( rMatchEffects[ str::MatchEqual ].m_textColor ) )
+		rMatchEffects[ str::MatchEqual ].m_textColor = ui::GetActualColor( m_pList->m_listTextEffect.m_textColor, GetSysColor( COLOR_WINDOWTEXT ) );		// realize to reset existing text highlighting
 
 	rMatchEffects[ str::MatchNotEqual ] = rMatchEffects[ str::MatchEqual ];
 	rMatchEffects[ str::MatchNotEqual ].Combine( SrcColumn == diffColumn ? m_pList->m_deleteSrc_DiffEffect : m_pList->m_mismatchDest_DiffEffect );

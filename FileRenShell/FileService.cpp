@@ -11,8 +11,7 @@
 #endif
 
 
-CFileService::CFileService( cmd::IErrorObserver* pErrorObserver )
-	: m_pErrorObserver( pErrorObserver )
+CFileService::CFileService( void )
 {
 }
 
@@ -24,7 +23,7 @@ CMacroCommand* CFileService::MakeRenameCmds( const std::vector< CRenameItem* >& 
 		return NULL;
 	}
 
-	std::auto_ptr< CMacroCommand > pBatchMacro( new cmd::CFileMacroCmd( cmd::RenameFile, m_pErrorObserver ) );
+	std::auto_ptr< CMacroCommand > pBatchMacro( new cmd::CFileMacroCmd( cmd::RenameFile ) );
 	std::vector< utl::ICommand* > laterCmds;
 	std::set< fs::CPath > destToBeSet;
 
@@ -58,7 +57,7 @@ CMacroCommand* CFileService::MakeRenameCmds( const std::vector< CRenameItem* >& 
 
 CMacroCommand* CFileService::MakeTouchCmds( const std::vector< CTouchItem* >& touchItems ) const
 {
-	std::auto_ptr< CMacroCommand > pBatchMacro( new cmd::CFileMacroCmd( cmd::TouchFile, m_pErrorObserver ) );
+	std::auto_ptr< CMacroCommand > pBatchMacro( new cmd::CFileMacroCmd( cmd::TouchFile ) );
 
 	for ( std::vector< CTouchItem* >::const_iterator itItem = touchItems.begin(); itItem != touchItems.end(); ++itItem )
 		if ( ( *itItem )->IsModified() )

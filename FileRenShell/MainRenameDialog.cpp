@@ -3,6 +3,7 @@
 #include "MainRenameDialog.h"
 #include "FileModel.h"
 #include "FileService.h"
+#include "FileCommands.h"
 #include "RenameService.h"
 #include "RenameItem.h"
 #include "PathAlgorithms.h"
@@ -118,6 +119,20 @@ CMainRenameDialog::~CMainRenameDialog()
 	m_pFileModel->RemoveObserver( this );
 }
 
+bool CMainRenameDialog::RenameFiles( void )
+{
+	m_errorItems.clear();
+
+	CFileService svc;
+	if ( CMacroCommand* pRenameMacroCmd = svc.MakeRenameCmds( m_rRenameItems ) )
+	{
+		cmd::CScopedErrorObserver observe( this );
+		return m_pFileModel->GetCommandModel()->Execute( pRenameMacroCmd );
+	}
+
+	return false;
+}
+
 void CMainRenameDialog::SetupFileListView( void )
 {
 	int orgSel = m_fileListCtrl.GetCurSel();
@@ -188,32 +203,22 @@ void CMainRenameDialog::PostMakeDest( bool silent /*= false*/ )
 	}
 }
 
-size_t CMainRenameDialog::FindItemPos( const fs::CPath& srcPath ) const
-{
-	return utl::BinaryFindPos( m_rRenameItems, srcPath, CBasePathItem::ToKeyPath() );
-}
-
-std::tstring CMainRenameDialog::JoinErrorDestPaths( void ) const
-{
-	std::vector< fs::CPath > destPaths; destPaths.reserve( m_errorItems.size() );
-
-	for ( std::vector< CRenameItem* >::const_iterator itErrorItem = m_errorItems.begin(); itErrorItem != m_errorItems.end(); ++itErrorItem )
-		destPaths.push_back( ( *itErrorItem )->GetDestPath() );
-
-	return str::Join( destPaths, _T("\r\n") );
-}
-
 void CMainRenameDialog::OnUpdate( utl::ISubject* pSubject, utl::IMessage* pMessage )
 {
 	pMessage;
 
 	if ( m_pFileModel == pSubject )
 	{
-//		ClearFileErrors();
 		m_pRenSvc.reset( new CRenameService( m_rRenameItems ) );
 
 		SetupFileListView();
 	}
+}
+
+void CMainRenameDialog::ClearFileErrors( void )
+{
+	m_errorItems.clear();
+	m_fileListCtrl.Invalidate();
 }
 
 void CMainRenameDialog::OnFileError( const fs::CPath& srcPath, const std::tstring& errMsg )
@@ -223,15 +228,9 @@ void CMainRenameDialog::OnFileError( const fs::CPath& srcPath, const std::tstrin
 	size_t pos = FindItemPos( srcPath );
 	if ( pos != utl::npos )
 	{
-		m_errorItems.push_back( m_rRenameItems[ pos ] );
+		utl::AddUnique( m_errorItems, m_rRenameItems[ pos ] );
 		m_fileListCtrl.EnsureVisible( static_cast< int >( pos ), FALSE );
 	}
-	m_fileListCtrl.Invalidate();
-}
-
-void CMainRenameDialog::ClearFileErrors( void )
-{
-	m_errorItems.clear();
 	m_fileListCtrl.Invalidate();
 }
 
@@ -247,6 +246,28 @@ void CMainRenameDialog::CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARA
 		rTextEffect.Combine( s_errorBk );
 }
 
+size_t CMainRenameDialog::FindItemPos( const fs::CPath& srcPath ) const
+{
+	return utl::BinaryFindPos( m_rRenameItems, srcPath, CBasePathItem::ToKeyPath() );
+}
+
+void CMainRenameDialog::MarkInvalidSrcItems( void )
+{
+	for ( std::vector< CRenameItem* >::const_iterator itRenameItem = m_rRenameItems.begin(); itRenameItem != m_rRenameItems.end(); ++itRenameItem )
+		if ( !( *itRenameItem )->GetKeyPath().FileExist() )
+			utl::AddUnique( m_errorItems, *itRenameItem );
+}
+
+std::tstring CMainRenameDialog::JoinErrorDestPaths( void ) const
+{
+	std::vector< fs::CPath > destPaths; destPaths.reserve( m_errorItems.size() );
+
+	for ( std::vector< CRenameItem* >::const_iterator itErrorItem = m_errorItems.begin(); itErrorItem != m_errorItems.end(); ++itErrorItem )
+		destPaths.push_back( ( *itErrorItem )->GetDestPath() );
+
+	return str::Join( destPaths, _T("\r\n") );
+}
+
 void CMainRenameDialog::AutoGenerateFiles( void )
 {
 	std::tstring renameFormat = m_formatCombo.GetCurrentText();
@@ -255,17 +276,6 @@ void CMainRenameDialog::AutoGenerateFiles( void )
 
 	PostMakeDest( true );							// silent mode, no modal messages
 	m_formatCombo.SetFrameColor( succeeded ? CLR_NONE : color::Error );
-}
-
-bool CMainRenameDialog::RenameFiles( void )
-{
-	m_errorItems.clear();
-
-	CFileService svc( this );
-	if ( CMacroCommand* pRenameMacroCmd = svc.MakeRenameCmds( m_rRenameItems ) )
-		return m_pFileModel->GetCommandModel()->Execute( pRenameMacroCmd );
-
-	return false;
 }
 
 bool CMainRenameDialog::GenerateDestPaths( const std::tstring& format, UINT* pSeqCount )
@@ -489,8 +499,6 @@ void CMainRenameDialog::OnOK( void )
 		case RenameMode:
 			if ( RenameFiles() )
 			{
-//				m_pFileModel->SaveUndoInfo( app::RenameFiles, m_pBatchTransaction->GetCommittedKeys() );
-
 				m_formatCombo.SaveHistory( m_regSection.c_str(), reg::entry_formatHistory );
 				m_delimiterSetCombo.SaveHistory( m_regSection.c_str(), reg::entry_delimiterSetHistory );
 				AfxGetApp()->WriteProfileString( m_regSection.c_str(), reg::entry_newDelimiterHistory, ui::GetWindowText( &m_newDelimiterEdit ).c_str() );
@@ -499,21 +507,18 @@ void CMainRenameDialog::OnOK( void )
 				CBaseMainDialog::OnOK();
 			}
 			else
-			{
-//				m_pFileModel->SaveUndoInfo( app::RenameFiles, m_pBatchTransaction->GetCommittedKeys(), false );		// keep the rename pairs to allow inspecting for errors, or Undo
 				SwitchMode( MakeMode );
-			}
 			break;
 		case UndoRollbackMode:
-//			if ( RenameFiles() )
+		{
+			cmd::CScopedErrorObserver observe( this );
+
 			if ( m_pFileModel->GetCommandModel()->Undo() )
-			{
-//				m_pFileModel->CommitUndoInfo( app::RenameFiles );
 				CBaseMainDialog::OnOK();
-			}
 			else
 				SwitchMode( MakeMode );
 			break;
+		}
 	}
 }
 
@@ -648,6 +653,7 @@ void CMainRenameDialog::OnBnClicked_Undo( void )
 
 	ClearFileErrors();
 	m_pFileModel->PopUndo();				// fetches data set from undo stack (macro command)
+	MarkInvalidSrcItems();
 	SwitchMode( UndoRollbackMode );
 }
 

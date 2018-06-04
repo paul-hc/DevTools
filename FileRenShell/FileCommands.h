@@ -2,31 +2,67 @@
 #define FileCommands_h
 #pragma once
 
+#include "utl/RuntimeException.h"
 #include "FileCommands_fwd.h"
 #include "BasePathItem.h"
 
 
-class CUndoLogSerializerTests;
-
-
 namespace cmd
 {
+	enum UserFeedback { Abort, Retry, Ignore };
+
+
+	class CUserFeedbackException : public CRuntimeException
+	{
+	public:
+		CUserFeedbackException( UserFeedback feedback );
+	private:
+		static const CEnumTags& GetTags_Feedback( void );
+	public:
+		const UserFeedback m_feedback;
+	};
+
+
 	abstract class CFileCmd : public CCommand
 	{
 	protected:
 		CFileCmd( Command command, const fs::CPath& srcPath );
 	public:
+		void ExecuteHandle( void ) throws_( CUserFeedbackException );
+
+		// base overrides
+		virtual bool Unexecute( void );
+		virtual std::auto_ptr< CFileCmd > MakeUnexecuteCmd( void ) const = 0;
+
+		static IErrorObserver* GetErrorObserver( void ) { return s_pErrorObserver; }
+		static void SetErrorObserver( IErrorObserver* pErrorObserver ) { s_pErrorObserver = pErrorObserver; }
+	private:
+		UserFeedback HandleFileError( CException* pExc ) const;
+		std::tstring ExtractMessage( CException* pExc ) const;
+	public:
 		const fs::CPath m_srcPath;
+	private:
+		static const TCHAR s_fmtError[];
+		static IErrorObserver* s_pErrorObserver;
+	};
+
+
+	class CScopedErrorObserver
+	{
+	public:
+		CScopedErrorObserver( IErrorObserver* pErrorObserver ) : m_pOldErrorObserver( CFileCmd::GetErrorObserver() ) { CFileCmd::SetErrorObserver( pErrorObserver ); }
+		~CScopedErrorObserver() { CFileCmd::SetErrorObserver( m_pOldErrorObserver ); }
+	private:
+		IErrorObserver* m_pOldErrorObserver;
 	};
 
 
 	class CFileMacroCmd : public CMacroCommand
 	{
-		friend class CUndoLogSerializerTests;
 	public:
-		CFileMacroCmd( Command subCmdType, IErrorObserver* pErrorObserver, const CTime& timestamp = CTime::GetCurrentTime() );
+		CFileMacroCmd( Command subCmdType, const CTime& timestamp = CTime::GetCurrentTime() );
 
-		IErrorObserver* SetErrorObserver( IErrorObserver* pErrorObserver ) { m_pErrorObserver = pErrorObserver; }
+		const CTime& GetTimestamp( void ) const { return m_timestamp; }
 
 		// base overrides
 		virtual std::tstring Format( bool detailed ) const;
@@ -35,19 +71,9 @@ namespace cmd
 	private:
 		enum Mode { ExecuteMode, UnexecuteMode };
 
-		size_t ExecuteMacro( Mode mode );
-		void RollbackMacro( size_t doneCmdCount, Mode mode );
-		void RemoveCmdAt( size_t pos );
-
-		enum UserFeedback { Abort, Retry, Ignore };
-
-		UserFeedback HandleFileError( const CFileCmd* pCmd, CException* pExc ) const;
-		static std::tstring ExtractMessage( const fs::CPath& srcPath, CException* pExc );
+		void ExecuteMacro( Mode mode );
 	private:
 		CTime m_timestamp;
-		IErrorObserver* m_pErrorObserver;
-
-		static const TCHAR s_fmtError[];
 	};
 }
 
@@ -61,8 +87,8 @@ public:
 	// ICommand interface
 	virtual std::tstring Format( bool detailed ) const;
 	virtual bool Execute( void );
-	virtual bool Unexecute( void );
 	virtual bool IsUndoable( void ) const;
+	virtual std::auto_ptr< CFileCmd > MakeUnexecuteCmd( void ) const;
 public:
 	const fs::CPath m_destPath;
 };
@@ -80,8 +106,8 @@ public:
 	// ICommand interface
 	virtual std::tstring Format( bool detailed ) const;
 	virtual bool Execute( void );
-	virtual bool Unexecute( void );
 	virtual bool IsUndoable( void ) const;
+	virtual std::auto_ptr< CFileCmd > MakeUnexecuteCmd( void ) const;
 public:
 	const fs::CFileState m_srcState;
 	const fs::CFileState m_destState;
