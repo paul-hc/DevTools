@@ -24,4 +24,11 @@ private:
 };
 
 
+namespace ren
+{
+	bool MakePairsFromItems( fs::TPathPairMap& rOutRenamePairs, const std::vector< CRenameItem* >& renameItems );
+	void AssignPairsToItems( const std::vector< CRenameItem* >& rOutRenameItems, const fs::TPathPairMap& renamePairs );
+}
+
+
 #endif // RenameItem_h

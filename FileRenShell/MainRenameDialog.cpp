@@ -274,24 +274,19 @@ bool CMainRenameDialog::GenerateDestPaths( const std::tstring& format, UINT* pSe
 	ASSERT_PTR( m_pRenSvc.get() );
 
 	ClearFileErrors();
-	bool succeeded = false;
-	{
-		CScopedInternalChange changing( m_pFileModel );
 
-		m_pFileModel->ResetDestinations();
+	fs::TPathPairMap renamePairs;
+	ren::MakePairsFromItems( renamePairs, m_rRenameItems );
 
-		CPathGenerator generator( &m_pRenSvc->RefRenamePairs(), format, *pSeqCount );
-		if ( generator.GeneratePairs() )
-		{
-			succeeded = true;
-			*pSeqCount = generator.GetSeqCount();
-		}
-		else
-			m_pFileModel->ResetDestinations();
-	}
+	CPathGenerator generator( &renamePairs, format, *pSeqCount );
+	if ( !generator.GeneratePairs() )
+		return false;
+
+	ren::AssignPairsToItems( m_rRenameItems, renamePairs );
+	*pSeqCount = generator.GetSeqCount();
+
 	m_pFileModel->UpdateAllObservers( NULL );
-
-	return succeeded;
+	return true;
 }
 
 void CMainRenameDialog::EnsureUniformNumPadding( void )

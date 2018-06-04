@@ -26,8 +26,6 @@ class CRenameService
 public:
 	CRenameService( const std::vector< CRenameItem* >& renameItems );
 
-	fs::TPathPairMap& RefRenamePairs( void ) { return m_renamePairs; }
-
 	UINT FindNextAvailSeqCount( const std::tstring& format ) const;
 
 	bool CheckPathCollisions( cmd::IErrorObserver* pErrorObserver );

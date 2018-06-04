@@ -210,7 +210,9 @@ bool CRenameFileCmd::Unexecute( void )
 
 bool CRenameFileCmd::IsUndoable( void ) const
 {
-	return m_destPath.FileExist( fs::Write ) && !m_srcPath.FileExist();
+	return
+		m_destPath.FileExist() &&
+		!m_srcPath.FileExist();
 }
 
 
@@ -255,5 +257,7 @@ bool CTouchFileCmd::Unexecute( void )
 
 bool CTouchFileCmd::IsUndoable( void ) const
 {
-	return m_srcState.FileExist( fs::Write ) && m_srcState != fs::CFileState::ReadFromFile( m_srcState.m_fullPath );
+	return
+		m_srcState.FileExist() &&
+		m_srcState != fs::CFileState::ReadFromFile( m_srcState.m_fullPath );
 }

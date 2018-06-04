@@ -172,19 +172,13 @@ bool CFileModel::LoadUndoLog( void )
 	const fs::CPath& undoLogPath = GetUndoLogPath();
 	std::ifstream input( undoLogPath.GetUtf8().c_str() );
 
-	if ( input.is_open() )
-	{
-		CUndoLogSerializer loader( &GetCommandModel()->RefUndoStack() );
+	if ( !input.is_open() )
+		return false;				// undo log file doesn't exist
 
-		loader.Load( input );
-		input.close();
-	}
-	else
-	{
-		TRACE( _T(" * CFileModel::LoadUndoLog(): error loading undo changes log file: %s\n"), undoLogPath.GetPtr() );
-		ASSERT( false );
-		return false;
-	}
+	CUndoLogSerializer loader( &GetCommandModel()->RefUndoStack() );
+
+	loader.Load( input );
+	input.close();
 	return true;
 }
 
@@ -233,7 +227,7 @@ const fs::CPath& CFileModel::GetUndoLogPath( void )
 		::GetModuleFileName( AfxGetApp()->m_hInstance, fullPath, COUNT_OF( fullPath ) );
 
 		fs::CPathParts parts( fullPath );
-		parts.m_fname += _T("_undo_");
+		parts.m_fname += _T("_undo");
 		parts.m_ext = _T(".log");
 		undoLogPath.Set( parts.MakePath() );
 	}

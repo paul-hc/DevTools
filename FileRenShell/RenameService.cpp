@@ -30,11 +30,8 @@ namespace pred
 
 CRenameService::CRenameService( const std::vector< CRenameItem* >& renameItems )
 {
-	ASSERT( !renameItems.empty() );
-
-	for ( std::vector< CRenameItem* >::const_iterator itItem = renameItems.begin(); itItem != renameItems.end(); ++itItem )
-		m_renamePairs[ ( *itItem )->GetSrcPath() ] = ( *itItem )->GetDestPath();
-
+	REQUIRE( !renameItems.empty() );
+	ren::MakePairsFromItems( m_renamePairs, renameItems );
 	ENSURE( m_renamePairs.size() == renameItems.size() );			// all SRC keys unique?
 }
 
