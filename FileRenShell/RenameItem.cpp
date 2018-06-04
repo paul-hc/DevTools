@@ -19,6 +19,19 @@ namespace ren
 		return rOutRenamePairs.size() == renameItems.size();			// all SRC keys unique?
 	}
 
+	void MakePairsToItems( std::vector< CRenameItem* >& rOutRenameItems, const fs::TPathPairMap& renamePairs )
+	{
+		REQUIRE( rOutRenameItems.empty() );
+
+		for ( fs::TPathPairMap::const_iterator itPair = renamePairs.begin(); itPair != renamePairs.end(); ++itPair )
+		{
+			CRenameItem* pItem = new CRenameItem( itPair->first );
+
+			pItem->RefDestPath() = itPair->second;
+			rOutRenameItems.push_back( pItem );
+		}
+	}
+
 	void AssignPairsToItems( const std::vector< CRenameItem* >& rOutRenameItems, const fs::TPathPairMap& renamePairs )
 	{
 		REQUIRE( rOutRenameItems.size() == renamePairs.size() );

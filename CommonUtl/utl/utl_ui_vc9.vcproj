@@ -650,14 +650,6 @@
 				Name="File System"
 				>
 				<File
-					RelativePath=".\BatchTransactions.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\BatchTransactions.h"
-					>
-				</File>
-				<File
 					RelativePath=".\CacheLoader.h"
 					>
 				</File>

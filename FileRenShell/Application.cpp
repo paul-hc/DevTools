@@ -2,6 +2,7 @@
 #include "stdafx.h"
 #include "Application.h"
 #include "ut/PathAlgorithmsTests.h"
+#include "ut/RenameFilesTests.h"
 #include "ut/UndoLogSerializerTests.h"
 #include "resource.h"
 #include "utl/EnumTags.h"
@@ -22,6 +23,7 @@ namespace ut
 	{
 	#ifdef _DEBUG
 		CPathAlgorithmsTests::Instance();
+		CRenameFilesTests::Instance();
 		CUndoLogSerializerTests::Instance();
 	#endif
 	}

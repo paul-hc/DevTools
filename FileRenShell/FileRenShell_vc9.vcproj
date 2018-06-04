@@ -735,6 +735,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\ut\RenameFilesTests.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\ut\RenameFilesTests.h"
+				>
+			</File>
+			<File
 				RelativePath=".\ut\UndoLogSerializerTests.cpp"
 				>
 			</File>
