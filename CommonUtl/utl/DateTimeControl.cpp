@@ -5,7 +5,7 @@
 #include "Clipboard.h"
 #include "MenuUtilities.h"
 #include "Utilities.h"
-#include "TimeUtl.h"
+#include "TimeUtils.h"
 #include "resource.h"
 
 #ifdef _DEBUG

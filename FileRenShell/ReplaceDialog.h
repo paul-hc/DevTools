@@ -7,14 +7,14 @@
 #include "utl/LayoutDialog.h"
 
 
-class CMainRenameDialog;
+interface IFileEditor;
 class CRenameService;
 
 
 class CReplaceDialog : public CLayoutDialog
 {
 public:
-	CReplaceDialog( CMainRenameDialog* pParent, const CRenameService* pRenSvc );
+	CReplaceDialog( IFileEditor* pParentEditor, const CRenameService* pRenSvc );
 	virtual ~CReplaceDialog();
 
 	bool Execute( void );
@@ -32,7 +32,7 @@ private:
 
 	void StoreFindWhatText( const std::tstring& text, const std::vector< std::tstring >* pDestFnames = NULL );
 private:
-	CMainRenameDialog* m_pParent;
+	IFileEditor* m_pParentEditor;
 	const CRenameService* m_pRenSvc;
 
 	std::tstring m_findWhat;

@@ -4,7 +4,7 @@
 #include "FileCommands.h"
 #include "utl/EnumTags.h"
 #include "utl/FmtUtils.h"
-#include "utl/TimeUtl.h"
+#include "utl/TimeUtils.h"
 #include "utl/StringRange.h"
 #include "utl/StringUtilities.h"
 
@@ -69,7 +69,7 @@ void CUndoLogSerializer::Save( std::ostream& os ) const
 		if ( i != 0 )
 			os << std::endl;		// inner batch extra line-end separator
 
-		os << fmt::FormatTag( pMacroCmd->Format( true ).c_str() ) << std::endl;		// action tag line
+		os << fmt::FormatTag( pMacroCmd->Format( false ).c_str() ) << std::endl;	// action tag line
 
 		for ( std::vector< utl::ICommand* >::const_iterator itSubCmd = pMacroCmd->GetSubCommands().begin(); itSubCmd != pMacroCmd->GetSubCommands().end(); ++itSubCmd )
 			os << ( *itSubCmd )->Format( false ) << std::endl;						// no action tag
@@ -78,8 +78,12 @@ void CUndoLogSerializer::Save( std::ostream& os ) const
 	}
 }
 
+#include "utl/Timer.h"
+
 void CUndoLogSerializer::Load( std::istream& is )
 {
+	CTimer timer;
+
 	m_parseLineNo = 1;
 	for ( ; !is.eof(); ++m_parseLineNo )
 	{
@@ -95,6 +99,8 @@ void CUndoLogSerializer::Load( std::istream& is )
 					continue;
 				}
 	}
+
+	TRACE( _T("- CUndoLogSerializer::Load(): takes %.3f seconds\n"), timer.ElapsedSeconds() );
 }
 
 utl::ICommand* CUndoLogSerializer::LoadMacroCmd( std::istream& is, const str::TStringRange& tagRange )

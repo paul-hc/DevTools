@@ -58,9 +58,6 @@ CFileModel::CFileModel( void )
 
 CFileModel::~CFileModel()
 {
-	if ( m_pCommandModel.get() != NULL )		// undo log loaded?
-		SaveUndoLog();
-
 	Clear();
 }
 
@@ -85,6 +82,9 @@ size_t CFileModel::SetupFromDropInfo( HDROP hDropInfo )
 
 		sourcePaths.push_back( fs::CPath( pathBuffer ) );
 	}
+
+// to test multiple paths:
+//str::Split( sourcePaths, _T("C:\\dev\\DevTools\\CommonUtl\\DemoUtl\\DemoUtl.rc|C:\\dev\\DevTools\\CommonUtl\\utl\\utl_ui.rc|C:\\dev\\DevTools\\FileRenShell\\FileRenShell.rc"), _T("|") );
 
 	StoreSourcePaths( sourcePaths );
 	return m_sourcePaths.size();
@@ -132,10 +132,12 @@ void CFileModel::PopUndo( void )
 
 		switch ( pTopMacroCmd->GetTypeID() )
 		{
-			case cmd::RenameFile:	std::for_each( pTopMacroCmd->GetSubCommands().begin(), pTopMacroCmd->GetSubCommands().end(), AddRenameItemFromCmd( this ) ); break;
-			case cmd::TouchFile:	std::for_each( pTopMacroCmd->GetSubCommands().begin(), pTopMacroCmd->GetSubCommands().end(), AddTouchItemFromCmd( this ) ); break;
+			case cmd::RenameFile:	utl::for_each( pTopMacroCmd->GetSubCommands(), AddRenameItemFromCmd( this ) ); break;
+			case cmd::TouchFile:	utl::for_each( pTopMacroCmd->GetSubCommands(), AddTouchItemFromCmd( this ) ); break;
 		}
 		m_commonParentPath = path::ExtractCommonParentPath( m_sourcePaths );
+		//utl::for_each( m_renameItems, func::StripDisplayCode( m_commonParentPath ) );		// use always filename.ext for path diffs
+		utl::for_each( m_touchItems, func::StripDisplayCode( m_commonParentPath ) );
 
 		UpdateAllObservers( NULL );				// items changed
 	}
@@ -169,6 +171,9 @@ bool CFileModel::SaveUndoLog( void ) const
 
 bool CFileModel::LoadUndoLog( void )
 {
+	if ( m_pCommandModel.get() != NULL )
+		return false;				// loaded once
+
 	const fs::CPath& undoLogPath = GetUndoLogPath();
 	std::ifstream input( undoLogPath.GetUtf8().c_str() );
 
@@ -192,7 +197,7 @@ std::vector< CRenameItem* >& CFileModel::LazyInitRenameItems( void )
 		{
 			CRenameItem* pNewItem = new CRenameItem( *itSource );
 
-			pNewItem->StripDisplayCode( m_commonParentPath );
+			//pNewItem->StripDisplayCode( m_commonParentPath );		// use always filename.ext for path diffs
 			m_renameItems.push_back( pNewItem );
 		}
 	}
@@ -249,8 +254,8 @@ void CFileModel::UpdateAllObservers( utl::IMessage* pMessage )
 
 void CFileModel::ResetDestinations( void )
 {
-	std::for_each( m_renameItems.begin(), m_renameItems.end(), func::ResetItem() );
-	std::for_each( m_touchItems.begin(), m_touchItems.end(), func::ResetItem() );
+	utl::for_each( m_renameItems, func::ResetItem() );
+	utl::for_each( m_touchItems, func::ResetItem() );
 
 	UpdateAllObservers( NULL );				// path items changed
 }
@@ -296,9 +301,8 @@ void CFileModel::PasteClipDestinationPaths( CWnd* pWnd ) throws_( CRuntimeExcept
 		throw CRuntimeException( str::Format( _T("Destination file count of %d doesn't match source file count of %d."),
 											  destPaths.size(), m_sourcePaths.size() ) );
 
-	int pos = 0;
-
-	for ( std::vector< CRenameItem* >::iterator itItem = m_renameItems.begin(); itItem != m_renameItems.end(); ++itItem )
+	size_t pos = 0;
+	for ( std::vector< CRenameItem* >::iterator itItem = m_renameItems.begin(); itItem != m_renameItems.end(); ++itItem, ++pos )
 	{
 		fs::CPath newFilePath( destPaths[ pos ] );
 
@@ -367,8 +371,8 @@ void CFileModel::AddRenameItemFromCmd::operator()( const utl::ICommand* pCmd )
 	CRenameItem* pRenameItem = new CRenameItem( pRenameCmd->m_destPath );
 	pRenameItem->RefDestPath() = pRenameCmd->m_srcPath;
 
-	m_pFileModel->m_renameItems.push_back( pRenameItem );
 	m_pFileModel->m_sourcePaths.push_back( pRenameItem->GetKeyPath() );
+	m_pFileModel->m_renameItems.push_back( pRenameItem );
 }
 
 
@@ -382,6 +386,6 @@ void CFileModel::AddTouchItemFromCmd::operator()( const utl::ICommand* pCmd )
 	CTouchItem* pTouchItem = new CTouchItem( pTouchCmd->m_destState );
 	pTouchItem->RefDestState() = pTouchCmd->m_srcState;
 
-	m_pFileModel->m_touchItems.push_back( pTouchItem );
 	m_pFileModel->m_sourcePaths.push_back( pTouchItem->GetKeyPath() );
+	m_pFileModel->m_touchItems.push_back( pTouchItem );
 }

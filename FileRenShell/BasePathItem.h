@@ -41,6 +41,19 @@ namespace func
 			pItem->Reset();
 		}
 	};
+
+
+	struct StripDisplayCode
+	{
+		StripDisplayCode( const fs::CPath& commonParentPath ) : m_commonParentPath( commonParentPath ) {}
+
+		void operator()( CBasePathItem* pItem ) const
+		{
+			pItem->StripDisplayCode( m_commonParentPath );
+		}
+	private:
+		const fs::CPath& m_commonParentPath;			// to be stripped
+	};
 }
 
 

@@ -160,8 +160,13 @@ namespace ut
 #include "utl/FileSystem.h"
 
 
+class CLogger;
+
+
 namespace ut
 {
+	CLogger& GetTestLogger( void );
+
 	const fs::CPath& GetTestDataDirPath( void ) throws_( CRuntimeException );
 
 	const fs::CPath& GetTempUt_DirPath( void ) throws_( CRuntimeException );

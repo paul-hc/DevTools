@@ -698,6 +698,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\IFileEditor.h"
+					>
+				</File>
+				<File
 					RelativePath=".\RenameItem.cpp"
 					>
 				</File>

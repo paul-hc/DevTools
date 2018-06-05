@@ -220,8 +220,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 6,1,0,1
- PRODUCTVERSION 6,1,0,1
+ FILEVERSION 7,0,0,1
+ PRODUCTVERSION 7,0,0,1
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -240,12 +240,12 @@ BEGIN
             VALUE "CompanyName", "Paul Cocoveanu"
             VALUE "Email", "phc.2nd@gmail.com"
             VALUE "FileDescription", "Shell extension for renaming files and folders"
-            VALUE "FileVersion", "6, 1, 0, 1"
+            VALUE "FileVersion", "7, 0, 0, 1"
             VALUE "InternalName", "FileRenShell"
             VALUE "LegalCopyright", "Copyright © 2001-2018"
             VALUE "OriginalFilename", "FileRenShell64.dll"
             VALUE "ProductName", "FileRenShell Shell Extension DLL"
-            VALUE "ProductVersion", "6, 1, 0, 1"
+            VALUE "ProductVersion", "7, 0, 0, 1"
             VALUE "WrittenBy", "Written by Paul Cocoveanu"
         END
     END

@@ -6,7 +6,7 @@
 #include "utl/FmtUtils.h"
 #include "utl/StringUtilities.h"
 #include "utl/Utilities.h"
-#include "utl/TimeUtl.h"
+#include "utl/TimeUtils.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -41,11 +41,14 @@ namespace cmd
 
 	const TCHAR CFileCmd::s_fmtError[] = _T("* %s\n ERROR: %s");
 	IErrorObserver* CFileCmd::s_pErrorObserver = NULL;
+	CLogger* CFileCmd::s_pLogger = (CLogger*)-1;
 
 	CFileCmd::CFileCmd( Command command, const fs::CPath& srcPath )
 		: CCommand( command, NULL, &cmd::GetTags_Command() )
 		, m_srcPath( srcPath )
 	{
+		if ( (CLogger*)-1 == s_pLogger )
+			s_pLogger = &app::GetLogger();
 	}
 
 	void CFileCmd::ExecuteHandle( void ) throws_( CUserFeedbackException )
@@ -54,7 +57,8 @@ namespace cmd
 		{
 			Execute();
 
-			app::GetLogger().LogString( Format( true ) );
+			if ( s_pLogger != NULL )
+				s_pLogger->LogString( Format( true ) );
 		}
 		catch ( CException* pExc )
 		{
@@ -85,7 +89,8 @@ namespace cmd
 			case IDIGNORE:	feedback = Ignore; break;
 		}
 
-		app::GetLogger().Log( s_fmtError, Format( true ).c_str(), errMsg.c_str() );
+		if ( s_pLogger != NULL )
+			s_pLogger->Log( s_fmtError, Format( true ).c_str(), errMsg.c_str() );
 		return feedback;
 	}
 
@@ -110,11 +115,11 @@ namespace cmd
 
 	std::tstring CFileMacroCmd::Format( bool detailed ) const
 	{
-		detailed;
-		std::tstring text = m_userInfo;
+		std::tstring text = GetTags_Command().Format( GetTypeID(), detailed ? CEnumTags::UiTag : CEnumTags::KeyTag );
 
 		if ( m_timestamp.GetTime() != 0 )
-			stream::Tag( text, time_utl::FormatTimestamp( m_timestamp ), _T(" ") );
+			stream::Tag( text, time_utl::FormatTimestamp( m_timestamp, detailed ? time_utl::s_outFormatUi : time_utl::s_outFormat ), _T(" ") );
+
 		return text;
 	}
 
@@ -204,9 +209,8 @@ std::auto_ptr< cmd::CFileCmd > CRenameFileCmd::MakeUnexecuteCmd( void ) const
 
 bool CRenameFileCmd::IsUndoable( void ) const
 {
-	return
-		m_destPath.FileExist() &&
-		!m_srcPath.FileExist();
+	//return m_destPath.FileExist() && !m_srcPath.FileExist();
+	return true;		// let it unexecute with error rather than being skipped in UNDO
 }
 
 
@@ -251,7 +255,6 @@ std::auto_ptr< cmd::CFileCmd > CTouchFileCmd::MakeUnexecuteCmd( void ) const
 
 bool CTouchFileCmd::IsUndoable( void ) const
 {
-	return
-		m_srcState.FileExist() &&
-		m_srcState != fs::CFileState::ReadFromFile( m_srcState.m_fullPath );
+	//return m_srcState.FileExist() && m_srcState != fs::CFileState::ReadFromFile( m_srcState.m_fullPath );
+	return true;		// let it unexecute with error rather than being skipped in UNDO
 }

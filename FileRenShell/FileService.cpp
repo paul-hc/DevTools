@@ -24,7 +24,7 @@ CMacroCommand* CFileService::MakeRenameCmds( const std::vector< CRenameItem* >& 
 	}
 
 	std::auto_ptr< CMacroCommand > pBatchMacro( new cmd::CFileMacroCmd( cmd::RenameFile ) );
-	std::vector< utl::ICommand* > laterCmds;
+	std::vector< utl::ICommand* > finalCmds;
 	std::set< fs::CPath > destToBeSet;
 
 	for ( std::vector< CRenameItem* >::const_iterator itItem = renameItems.begin(); itItem != renameItems.end(); ++itItem )
@@ -33,13 +33,14 @@ CMacroCommand* CFileService::MakeRenameCmds( const std::vector< CRenameItem* >& 
 			const fs::CPath& srcPath = ( *itItem )->GetSrcPath();
 			fs::CPath destPath = ( *itItem )->GetDestPath();
 
-			if ( destPath.FileExist() || destToBeSet.find( destPath ) != destToBeSet.end() )		// collision with an existing or future file (not from this rename pair)?
+			if ( ( destPath.FileExist() && destPath != srcPath ) ||			// collision with an existing file (not of this pair)?
+				 destToBeSet.find( destPath ) != destToBeSet.end() )		// collision with a future file?
 			{
 				// avoid rename collisions: rename in 2 steps using an unique intermediate file path
 				fs::CPath intermPath = MakeUniqueIntermPath( destPath, destToBeSet );
 
 				pBatchMacro->AddCmd( new CRenameFileCmd( srcPath, intermPath ) );					// SRC -> INTERM
-				laterCmds.push_back( new CRenameFileCmd( intermPath, destPath ) );					// INTERM -> DEST (later)
+				finalCmds.push_back( new CRenameFileCmd( intermPath, destPath ) );					// INTERM -> DEST (later)
 
 				destToBeSet.insert( intermPath );
 			}
@@ -49,7 +50,8 @@ CMacroCommand* CFileService::MakeRenameCmds( const std::vector< CRenameItem* >& 
 			destToBeSet.insert( destPath );
 		}
 
-	for ( std::vector< utl::ICommand* >::const_iterator itLateCmd = laterCmds.begin(); itLateCmd != laterCmds.end(); ++itLateCmd )
+	// add final commands: INTERM -> DEST
+	for ( std::vector< utl::ICommand* >::const_iterator itLateCmd = finalCmds.begin(); itLateCmd != finalCmds.end(); ++itLateCmd )
 		pBatchMacro->AddCmd( *itLateCmd );
 
 	return !pBatchMacro->IsEmpty() ? pBatchMacro.release() : NULL;

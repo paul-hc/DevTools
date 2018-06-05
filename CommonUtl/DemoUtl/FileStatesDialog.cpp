@@ -8,7 +8,7 @@
 #include "utl/ReportListCustomDraw.h"
 #include "utl/StringUtilities.h"
 #include "utl/UtilitiesEx.h"
-#include "utl/TimeUtl.h"
+#include "utl/TimeUtils.h"
 #include "utl/resource.h"
 #include "resource.h"
 

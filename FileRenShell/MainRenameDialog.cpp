@@ -76,14 +76,13 @@ namespace layout
 }
 
 
-CMainRenameDialog::CMainRenameDialog( CFileModel* pFileModel, CWnd* pParent, app::MenuCommand menuCmd /*= app::Cmd_RenameFiles*/ )
+CMainRenameDialog::CMainRenameDialog( CFileModel* pFileModel, CWnd* pParent )
 	: CBaseMainDialog( IDD_RENAME_FILES_DIALOG, pParent )
 	, m_pFileModel( pFileModel )
 	, m_rRenameItems( m_pFileModel->LazyInitRenameItems() )
-	, m_menuCmd( menuCmd )
+	, m_mode( MakeMode )
 	, m_autoGenerate( AfxGetApp()->GetProfileInt( reg::section_mainDialog, reg::entry_autoGenerate, false ) != FALSE )
 	, m_seqCountAutoAdvance( AfxGetApp()->GetProfileInt( reg::section_mainDialog, reg::entry_seqCountAutoAdvance, true ) != FALSE )
-	, m_mode( Uninit )
 	, m_formatCombo( ui::HistoryMaxSize, specialSep )
 	, m_fileListCtrl( IDC_FILE_RENAME_LIST, LVS_EX_GRIDLINES | CReportListControl::DefaultStyleEx )
 	, m_changeCaseButton( &GetTags_ChangeCase() )
@@ -165,6 +164,8 @@ void CMainRenameDialog::SetupFileListView( void )
 void CMainRenameDialog::SwitchMode( Mode mode )
 {
 	m_mode = mode;
+	if ( NULL == m_hWnd )
+		return;
 
 	static const std::vector< std::tstring > labels = str::LoadStrings( IDS_OK_BUTTON_LABELS );	// &Make Names|Rena&me|R&ollback
 	ui::SetWindowText( ::GetDlgItem( m_hWnd, IDOK ), labels[ m_mode ] );
@@ -177,6 +178,16 @@ void CMainRenameDialog::SwitchMode( Mode mode )
 	};
 	ui::EnableControls( *this, ctrlIds, COUNT_OF( ctrlIds ), m_mode != UndoRollbackMode );
 	ui::EnableControl( *this, IDC_UNDO_BUTTON, m_mode != UndoRollbackMode && m_pFileModel->CanUndo( cmd::RenameFile ) );
+}
+
+CFileModel* CMainRenameDialog::GetFileModel( void ) const
+{
+	return m_pFileModel;
+}
+
+CDialog* CMainRenameDialog::GetDialog( void )
+{
+	return this;
 }
 
 void CMainRenameDialog::PostMakeDest( bool silent /*= false*/ )
@@ -203,6 +214,17 @@ void CMainRenameDialog::PostMakeDest( bool silent /*= false*/ )
 	}
 }
 
+void CMainRenameDialog::PopUndoTop( void )
+{
+	ASSERT( m_mode != UndoRollbackMode );
+	ASSERT( m_pFileModel->CanUndo( cmd::RenameFile ) );
+
+	ClearFileErrors();
+	m_pFileModel->PopUndo();				// fetches data set from undo stack (macro command)
+	MarkInvalidSrcItems();
+	SwitchMode( UndoRollbackMode );
+}
+
 void CMainRenameDialog::OnUpdate( utl::ISubject* pSubject, utl::IMessage* pMessage )
 {
 	pMessage;
@@ -211,14 +233,17 @@ void CMainRenameDialog::OnUpdate( utl::ISubject* pSubject, utl::IMessage* pMessa
 	{
 		m_pRenSvc.reset( new CRenameService( m_rRenameItems ) );
 
-		SetupFileListView();
+		if ( m_hWnd != NULL )
+			SetupFileListView();
 	}
 }
 
 void CMainRenameDialog::ClearFileErrors( void )
 {
 	m_errorItems.clear();
-	m_fileListCtrl.Invalidate();
+
+	if ( m_hWnd != NULL )
+		m_fileListCtrl.Invalidate();
 }
 
 void CMainRenameDialog::OnFileError( const fs::CPath& srcPath, const std::tstring& errMsg )
@@ -347,6 +372,8 @@ void CMainRenameDialog::QueryTooltipText( std::tstring& rText, UINT cmdId, CTool
 
 void CMainRenameDialog::DoDataExchange( CDataExchange* pDX )
 {
+	const bool firstInit = NULL == m_fileListCtrl.m_hWnd;
+
 	DDX_Control( pDX, IDC_FORMAT_COMBO, m_formatCombo );
 	m_formatToolbar.DDX_Placeholder( pDX, IDC_STRIP_BAR_1, H_AlignLeft | V_AlignCenter );
 	DDX_Control( pDX, IDC_SEQ_COUNT_EDIT, m_seqCountEdit );
@@ -366,7 +393,7 @@ void CMainRenameDialog::DoDataExchange( CDataExchange* pDX )
 
 	if ( DialogOutput == pDX->m_bSaveAndValidate )
 	{
-		if ( Uninit == m_mode )
+		if ( firstInit )
 		{
 			m_formatCombo.LimitText( _MAX_PATH );
 			CTextEdit::SetFixedFont( &m_delimiterSetCombo );
@@ -380,7 +407,7 @@ void CMainRenameDialog::DoDataExchange( CDataExchange* pDX )
 			m_seqCountEdit.SetNumericValue( AfxGetApp()->GetProfileInt( m_regSection.c_str(), reg::entry_seqCount, 1 ) );
 
 			OnUpdate( m_pFileModel, NULL );			// initialize the dialog
-			SwitchMode( MakeMode );
+			SwitchMode( m_mode );					// normally MakeMode
 		}
 	}
 
@@ -439,22 +466,6 @@ BOOL CMainRenameDialog::OnInitDialog( void )
 		AutoGenerateFiles();
 
 	UINT cmdId = 0, flashId = 0;
-
-	switch ( m_menuCmd )
-	{
-		case app::Cmd_RenameAndCopy:				cmdId = flashId = IDC_COPY_SOURCE_PATHS_BUTTON; break;
-		case app::Cmd_RenameAndCapitalize:			cmdId = flashId = IDC_CAPITALIZE_BUTTON; break;
-		case app::Cmd_RenameAndLowCaseExt:			cmdId = flashId = IDC_CHANGE_CASE_BUTTON; m_changeCaseButton.SetSelValue( ExtLowerCase ); break;
-		case app::Cmd_RenameAndReplace:				cmdId = flashId = IDC_REPLACE_FILES_BUTTON; break;
-		case app::Cmd_RenameAndReplaceDelims:		cmdId = flashId = IDC_REPLACE_DELIMS_BUTTON; break;
-		case app::Cmd_RenameAndSingleWhitespace:	cmdId = ID_SINGLE_WHITESPACE; flashId = IDC_PICK_RENAME_ACTIONS; break;
-		case app::Cmd_RenameAndRemoveWhitespace:	cmdId = ID_REMOVE_WHITESPACE; flashId = IDC_PICK_RENAME_ACTIONS; break;
-		case app::Cmd_RenameAndDashToSpace:			cmdId = ID_DASH_TO_SPACE; flashId = IDC_PICK_RENAME_ACTIONS; break;
-		case app::Cmd_RenameAndUnderbarToSpace:		cmdId = ID_UNDERBAR_TO_SPACE; flashId = IDC_PICK_RENAME_ACTIONS; break;
-		case app::Cmd_RenameAndSpaceToUnderbar:		cmdId = ID_SPACE_TO_UNDERBAR; flashId = IDC_PICK_RENAME_ACTIONS; break;
-		case app::Cmd_UndoRename:					cmdId = flashId = IDC_UNDO_BUTTON; break;
-	}
-
 	if ( cmdId != 0 )
 	{
 		PostMessage( WM_COMMAND, MAKEWPARAM( cmdId, BN_CLICKED ), 0 );
@@ -586,6 +597,7 @@ void CMainRenameDialog::OnBnClicked_CopySourceFiles( void )
 
 void CMainRenameDialog::OnBnClicked_ClearDestFiles( void )
 {
+	ClearFileErrors();
 	m_pFileModel->ResetDestinations();
 
 	SetupFileListView();	// fill in and select the found files list
@@ -596,6 +608,7 @@ void CMainRenameDialog::OnBnClicked_PasteDestFiles( void )
 {
 	try
 	{
+		ClearFileErrors();
 		m_pFileModel->PasteClipDestinationPaths( this );
 		PostMakeDest();
 	}
@@ -647,20 +660,13 @@ void CMainRenameDialog::OnBnClicked_ReplaceAllDelimitersDestFiles( void )
 
 void CMainRenameDialog::OnBnClicked_Undo( void )
 {
-	ASSERT( m_mode != UndoRollbackMode && m_pFileModel->CanUndo( cmd::RenameFile ) );
-
+	PopUndoTop();
 	GotoDlgCtrl( GetDlgItem( IDOK ) );
-
-	ClearFileErrors();
-	m_pFileModel->PopUndo();				// fetches data set from undo stack (macro command)
-	MarkInvalidSrcItems();
-	SwitchMode( UndoRollbackMode );
 }
 
 void CMainRenameDialog::OnFieldChanged( void )
 {
-	if ( m_mode != Uninit )
-		SwitchMode( MakeMode );
+	SwitchMode( MakeMode );
 }
 
 void CMainRenameDialog::OnPickFormatToken( void )
@@ -756,7 +762,7 @@ void CMainRenameDialog::OnEnChange_SeqCounter( void )
 {
 	if ( m_autoGenerate )
 		AutoGenerateFiles();
-	else if ( m_mode != Uninit )
+	else
 		SwitchMode( MakeMode );
 }
 

@@ -3,19 +3,20 @@
 #pragma once
 
 #include "Application_fwd.h"
+#include "FileCommands_fwd.h"
 #include "resource.h"
 
 
 class CFileModel;
+interface IFileEditor;
 
-
-class ATL_NO_VTABLE CFileRenameShell :
-	public CComObjectRootEx< CComSingleThreadModel >,
-	public CComCoClass< CFileRenameShell, &CLSID_FileRenameShell >,
-	public ISupportErrorInfo,
-	public IDispatchImpl< IFileRenameShell, &IID_IFileRenameShell, &LIBID_FILERENSHELLLib >,
-	public IShellExtInit,
-	public IContextMenu
+class ATL_NO_VTABLE CFileRenameShell
+	: public CComObjectRootEx< CComSingleThreadModel >
+	, public CComCoClass< CFileRenameShell, &CLSID_FileRenameShell >
+	, public ISupportErrorInfo
+	, public IDispatchImpl< IFileRenameShell, &IID_IFileRenameShell, &LIBID_FILERENSHELLLib >
+	, public IShellExtInit
+	, public IContextMenu
 {
 public:
 	CFileRenameShell( void );
@@ -25,6 +26,7 @@ private:
 	void AugmentMenuItems( HMENU hMenu, UINT indexMenu, UINT idBaseCmd );
 
 	void ExecuteCommand( app::MenuCommand menuCmd, CWnd* pParentOwner );
+	IFileEditor* MakeFileEditor( cmd::Command cmdType, CWnd* pParentOwner );
 
 	struct CMenuCmdInfo
 	{
@@ -35,6 +37,7 @@ private:
 		bool m_addSep;
 	};
 
+	std::tstring FormatCmdText( const CMenuCmdInfo& cmdInfo );
 	static const CMenuCmdInfo* FindCmd( app::MenuCommand cmd );
 private:
 	std::auto_ptr< CFileModel > m_pFileModel;

@@ -7,6 +7,9 @@
 #include "BasePathItem.h"
 
 
+class CLogger;
+
+
 namespace cmd
 {
 	enum UserFeedback { Abort, Retry, Ignore };
@@ -33,9 +36,6 @@ namespace cmd
 		// base overrides
 		virtual bool Unexecute( void );
 		virtual std::auto_ptr< CFileCmd > MakeUnexecuteCmd( void ) const = 0;
-
-		static IErrorObserver* GetErrorObserver( void ) { return s_pErrorObserver; }
-		static void SetErrorObserver( IErrorObserver* pErrorObserver ) { s_pErrorObserver = pErrorObserver; }
 	private:
 		UserFeedback HandleFileError( CException* pExc ) const;
 		std::tstring ExtractMessage( CException* pExc ) const;
@@ -43,15 +43,26 @@ namespace cmd
 		const fs::CPath m_srcPath;
 	private:
 		static const TCHAR s_fmtError[];
+	public:
+		static CLogger* s_pLogger;
 		static IErrorObserver* s_pErrorObserver;
 	};
 
 
+	class CScopedLogger
+	{
+	public:
+		CScopedLogger( CLogger* pLogger ) : m_pOldLogger( CFileCmd::s_pLogger ) { CFileCmd::s_pLogger = pLogger; }
+		~CScopedLogger() { CFileCmd::s_pLogger = m_pOldLogger; }
+	private:
+		CLogger* m_pOldLogger;
+	};
+
 	class CScopedErrorObserver
 	{
 	public:
-		CScopedErrorObserver( IErrorObserver* pErrorObserver ) : m_pOldErrorObserver( CFileCmd::GetErrorObserver() ) { CFileCmd::SetErrorObserver( pErrorObserver ); }
-		~CScopedErrorObserver() { CFileCmd::SetErrorObserver( m_pOldErrorObserver ); }
+		CScopedErrorObserver( IErrorObserver* pErrorObserver ) : m_pOldErrorObserver( CFileCmd::s_pErrorObserver ) { CFileCmd::s_pErrorObserver = pErrorObserver; }
+		~CScopedErrorObserver() { CFileCmd::s_pErrorObserver = m_pOldErrorObserver; }
 	private:
 		IErrorObserver* m_pOldErrorObserver;
 	};

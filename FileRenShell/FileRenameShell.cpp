@@ -55,27 +55,14 @@ public:
 
 const CFileRenameShell::CMenuCmdInfo CFileRenameShell::m_commands[] =
 {
-	{ app::Cmd_RenameFiles, _T("&Rename Files..."), _T("Rename selected files in the dialog"), ID_RENAME_ITEM, false },
 	{ app::Cmd_SendToCliboard, _T("&Send To Clipboard"), _T("Send the selected files path to clipboard"), ID_SEND_TO_CLIP, false },
+	{ app::Cmd_RenameFiles, _T("&Rename Files..."), _T("Rename selected files in the dialog"), ID_RENAME_ITEM, false },
 	{ app::Cmd_TouchFiles, _T("&Touch Files..."), _T("Modify the timestamp of selected files"), ID_TOUCH_FILES, false },
+	{ app::Cmd_Undo, _T("&Undo %s..."), _T("Undo last command on files"), ID_EDIT_UNDO, false },
 
 #ifdef _DEBUG
-	{ app::Cmd_RunUnitTests, _T("# Run Unit Tests (FileRenameShell)"), _T("Modify the timestamp of selected files"), ID_RUN_TESTS, true },
+	{ app::Cmd_RunUnitTests, _T("# Run Unit Tests (FileRenameShell)"), _T("Modify the timestamp of selected files"), ID_RUN_TESTS, true }
 #endif
-
-	{ app::Cmd_RenameAndCopy, _T("C&opy..."), _T("Rename selected files and copy source paths to clipboard"), ID_RENAME_AND_COPY, false },
-	{ app::Cmd_RenameAndCapitalize, _T("&Capitalize..."), _T("Rename selected files and capitalize filenames"), IDD_CAPITALIZE_OPTIONS, false },
-	{ app::Cmd_RenameAndLowCaseExt, _T("&Low case extension..."), _T("Rename selected files and make extensions lower case"), IDC_CHANGE_CASE_BUTTON, false },
-	{ app::Cmd_RenameAndReplace, _T("Re&place..."), _T("Rename selected files and replace text in filenames"), ID_EDIT_REPLACE, false },
-	{ app::Cmd_RenameAndReplaceDelims, _T("Replace &Delimiters..."), _T("Rename selected files and replace all delimiters with spaces"), 0, false },
-
-	{ app::Cmd_RenameAndSingleWhitespace, _T("&Single Whitespace...\t\"   \" to \" \""), _T("Rename selected files and replace multiple to single whitespace"), 0, true },
-	{ app::Cmd_RenameAndRemoveWhitespace, _T("&Remove Whitespace...\t\"    \" to \"\""), _T("Rename selected files and remove whitespace"), 0, false },
-	{ app::Cmd_RenameAndDashToSpace, _T("&Dash to Space...\t\"-\" to \" \""), _T("Rename selected files and replace dashes with spaces"), 0, false },
-	{ app::Cmd_RenameAndUnderbarToSpace, _T("&Underbar to Space...\t\"_\" to \" \""), _T("Rename selected files and replace underbars to spaces"), 0, false },
-	{ app::Cmd_RenameAndSpaceToUnderbar, _T("Space to Underbar...\t\" \" to \"_\""), _T("Rename selected files and replace spaces with underbars"), 0, false },
-
-	{ app::Cmd_UndoRename, _T("&Undo Last Rename..."), _T("Undo last renamed files..."), IDD_CAPITALIZE_OPTIONS, true }
 };
 
 
@@ -106,36 +93,46 @@ size_t CFileRenameShell::ExtractDropInfo( IDataObject* pDropInfo )
 
 void CFileRenameShell::AugmentMenuItems( HMENU hMenu, UINT indexMenu, UINT idBaseCmd )
 {
-	HMENU hSubMenu = ::CreatePopupMenu();
 	COLORREF menuColor = GetSysColor( COLOR_MENU );
 	CImageStore* pImageStore = CImageStore::GetSharedStore();
 	ASSERT_PTR( pImageStore );
 
+	::InsertMenu( hMenu, indexMenu++, MF_SEPARATOR | MF_BYPOSITION, 0, NULL );
+
 	for ( int i = 0; i != COUNT_OF( m_commands ); ++i )
 	{
-		if ( m_commands[ i ].m_cmd < app::_CmdFirstSubMenu )
-			::InsertMenu( hMenu, indexMenu++, MF_STRING | MF_BYPOSITION, idBaseCmd + m_commands[ i ].m_cmd, m_commands[ i ].m_pTitle );
-		else
+		std::tstring itemText = FormatCmdText( m_commands[ i ] );
+		if ( !itemText.empty() )
 		{
 			if ( m_commands[ i ].m_addSep )
-				::AppendMenu( hSubMenu, MF_SEPARATOR, 0, NULL );
+				::InsertMenu( hMenu, indexMenu++, MF_SEPARATOR | MF_BYPOSITION, 0, NULL );
 
-			::AppendMenu( hSubMenu, MF_STRING, idBaseCmd + m_commands[ i ].m_cmd, m_commands[ i ].m_pTitle );
+			::InsertMenu( hMenu, indexMenu++, MF_STRING | MF_BYPOSITION, idBaseCmd + m_commands[ i ].m_cmd, itemText.c_str() );
+
+			if ( CBitmap* pMenuBitmap = pImageStore->RetrieveBitmap( m_commands[ i ].m_iconId, menuColor ) )
+				SetMenuItemBitmaps( hMenu,
+					idBaseCmd + m_commands[ i ].m_cmd,
+					MF_BYCOMMAND,
+					*pMenuBitmap, *pMenuBitmap );
 		}
-
-		if ( CBitmap* pMenuBitmap = pImageStore->RetrieveBitmap( m_commands[ i ].m_iconId, menuColor ) )
-			SetMenuItemBitmaps( m_commands[ i ].m_cmd < app::_CmdFirstSubMenu ? hMenu : hSubMenu,
-				idBaseCmd + m_commands[ i ].m_cmd,
-				MF_BYCOMMAND,
-				*pMenuBitmap,
-				*pMenuBitmap );
 	}
 
-	// add sub-menu popup
-	::InsertMenu( hMenu, indexMenu++, MF_POPUP | MF_STRING | MF_BYPOSITION, (UINT_PTR)hSubMenu, _T("Rename And") );
+	::InsertMenu( hMenu, indexMenu++, MF_SEPARATOR | MF_BYPOSITION, 0, NULL );
+}
 
-	if ( CBitmap* pMenuBitmap = pImageStore->RetrieveBitmap( ID_SHELL_SUBMENU, menuColor ) )
-		SetMenuItemBitmaps( hMenu, (UINT)hSubMenu, MF_BYCOMMAND, *pMenuBitmap, *pMenuBitmap );
+std::tstring CFileRenameShell::FormatCmdText( const CMenuCmdInfo& cmdInfo )
+{
+	if ( app::Cmd_Undo == cmdInfo.m_cmd )
+	{
+		m_pFileModel->LoadUndoLog();
+
+		if ( CCommandModel* pCommandModel = m_pFileModel->GetCommandModel() )
+			if ( utl::ICommand* pTopCmd = pCommandModel->PeekUndo() )
+				return str::Format( cmdInfo.m_pTitle, pTopCmd->Format( true ).c_str() );
+		return std::tstring();
+	}
+
+	return cmdInfo.m_pTitle;
 }
 
 void CFileRenameShell::ExecuteCommand( app::MenuCommand menuCmd, CWnd* pParentOwner )
@@ -152,23 +149,49 @@ void CFileRenameShell::ExecuteCommand( app::MenuCommand menuCmd, CWnd* pParentOw
 
 	// file operations commands
 	m_pFileModel->LoadUndoLog();
-	bool committed = false;
+
+	std::auto_ptr< IFileEditor > pFileEditor;
 	switch ( menuCmd )
 	{
-		case app::Cmd_TouchFiles:
-		{
-			CTouchFilesDialog dlg( m_pFileModel.get(), pParentOwner );
-			committed = IDOK == dlg.DoModal();
+		case app::Cmd_RenameFiles:
+			pFileEditor.reset( MakeFileEditor( cmd::RenameFile, pParentOwner ) );
 			break;
-		}
+		case app::Cmd_TouchFiles:
+			pFileEditor.reset( MakeFileEditor( cmd::TouchFile, pParentOwner ) );
+			break;
+		case app::Cmd_Undo:
+			if ( CCommandModel* pCommandModel = m_pFileModel->GetCommandModel() )
+				if ( utl::ICommand* pTopCmd = pCommandModel->PeekUndo() )
+					switch ( pTopCmd->GetTypeID() )
+					{
+						case cmd::RenameFile:
+						case cmd::TouchFile:
+							pFileEditor.reset( MakeFileEditor( static_cast< cmd::Command >( pTopCmd->GetTypeID() ), pParentOwner ) );
+							pFileEditor->PopUndoTop();
+							break;
+					}
+
+			if ( NULL == pFileEditor.get() )
+				ui::ReportError( _T("No command available to undo."), MB_OK | MB_ICONINFORMATION );
+			break;
 		default:
-		{
-			CMainRenameDialog dlg( m_pFileModel.get(), pParentOwner, menuCmd );
-			committed = IDOK == dlg.DoModal();
-		}
+			ASSERT( false );
 	}
-	if ( committed )
-		m_pFileModel->SaveUndoLog();
+
+	if ( pFileEditor.get() != NULL )
+		if ( IDOK == pFileEditor->GetDialog()->DoModal() )
+			m_pFileModel->SaveUndoLog();
+}
+
+IFileEditor* CFileRenameShell::MakeFileEditor( cmd::Command cmdType, CWnd* pParentOwner )
+{
+	switch ( cmdType )
+	{
+		case cmd::RenameFile:	return new CMainRenameDialog( m_pFileModel.get(), pParentOwner );
+		case cmd::TouchFile:	return new CTouchFilesDialog( m_pFileModel.get(), pParentOwner );
+	}
+	ASSERT( false );
+	return NULL;
 }
 
 const CFileRenameShell::CMenuCmdInfo* CFileRenameShell::FindCmd( app::MenuCommand cmd )

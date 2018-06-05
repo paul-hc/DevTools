@@ -5,7 +5,7 @@
 #include "FlagTags.h"
 #include "StringRange.h"
 #include "StringUtilities.h"
-#include "TimeUtl.h"
+#include "TimeUtils.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

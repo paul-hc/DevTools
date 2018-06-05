@@ -3,7 +3,7 @@
 #include "DateTimeInfo.h"
 #include <sstream>
 #include "utl/StringUtilities.h"
-#include "utl/TimeUtl.h"
+#include "utl/TimeUtils.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

@@ -2,6 +2,7 @@
 #include "stdafx.h"
 #include "ut/UnitTest.h"
 #include "ContainerUtilities.h"
+#include "Logger.h"
 #include "Path.h"
 #include "RuntimeException.h"
 #include "StringUtilities.h"
@@ -86,6 +87,12 @@ namespace ut
 
 namespace ut
 {
+	CLogger& GetTestLogger( void )
+	{
+		static CLogger testLogger( _T("%s_tests") );
+		return testLogger;
+	}
+
 	const fs::CPath& GetTestDataDirPath( void ) throws_( CRuntimeException )
 	{
 		static const fs::CPath dirPath = str::ExpandEnvironmentStrings( _T("%UTL_TESTDATA_PATH%") );

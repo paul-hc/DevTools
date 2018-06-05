@@ -4,7 +4,7 @@
 #include "MainDialog.h"
 #include "resource.h"
 #include "utl/StringUtilities.h"
-#include "utl/TimeUtl.h"
+#include "utl/TimeUtils.h"
 #include "utl/Utilities.h"
 
 #ifdef _DEBUG

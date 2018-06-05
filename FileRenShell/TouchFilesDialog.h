@@ -7,7 +7,7 @@
 #include "utl/ISubject.h"
 #include "utl/ReportListControl.h"
 #include "utl/DateTimeControl.h"
-#include "FileCommands_fwd.h"
+#include "IFileEditor.h"
 
 
 class CFileModel;
@@ -24,21 +24,37 @@ namespace multi
 
 
 class CTouchFilesDialog : public CBaseMainDialog
-						, private utl::IObserver
-						, private cmd::IErrorObserver
+						, public IFileEditor
 						, private CReportListControl::ITextEffectCallback
 {
 public:
 	CTouchFilesDialog( CFileModel* pFileModel, CWnd* pParent );
 	virtual ~CTouchFilesDialog();
 private:
+	// IFileEditor interface
+	virtual CFileModel* GetFileModel( void ) const;
+	virtual CDialog* GetDialog( void );
+	virtual void PostMakeDest( bool silent = false );
+	virtual void PopUndoTop( void );
+
+	// utl::IObserver interface (via IFileEditor)
+	virtual void OnUpdate( utl::ISubject* pSubject, utl::IMessage* pMessage );
+
+	// cmd::IErrorObserver interface (via IFileEditor)
+	virtual void ClearFileErrors( void );
+	virtual void OnFileError( const fs::CPath& srcPath, const std::tstring& errMsg );
+
+	// CReportListControl::ITextEffectCallback interface
+	virtual void CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARAM rowKey, int subItem ) const;
+	virtual void ModifyDiffTextEffectAt( std::vector< ui::CTextEffect >& rMatchEffects, LPARAM rowKey, int subItem ) const;
+private:
 	void Construct( void );
 
-	enum Mode { Uninit = -1, StoreMode, TouchMode, UndoRollbackMode };		// reflects the OK button label
+	enum Mode { StoreMode, TouchMode, UndoRollbackMode };		// reflects the OK button label
+
 	void SwitchMode( Mode mode );
 
 	bool TouchFiles( void );
-	void PostMakeDest( bool silent = false );
 	void SetupDialog( void );
 
 	// data
@@ -56,17 +72,6 @@ private:
 	void InputFields( void );
 	void ApplyFields( void );
 	bool VisibleAllSrcColumns( void ) const;
-
-	// utl::IObserver interface
-	virtual void OnUpdate( utl::ISubject* pSubject, utl::IMessage* pMessage );
-
-	// cmd::IErrorObserver interface
-	virtual void ClearFileErrors( void );
-	virtual void OnFileError( const fs::CPath& srcPath, const std::tstring& errMsg );
-
-	// CReportListControl::ITextEffectCallback interface
-	virtual void CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARAM rowKey, int subItem ) const;
-	virtual void ModifyDiffTextEffectAt( std::vector< ui::CTextEffect >& rMatchEffects, LPARAM rowKey, int subItem ) const;
 
 	size_t FindItemPos( const fs::CPath& keyPath ) const;
 	void MarkInvalidSrcItems( void );

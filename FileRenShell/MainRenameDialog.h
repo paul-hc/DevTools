@@ -14,7 +14,7 @@
 #include "utl/TextEdit.h"
 #include "utl/ThemeStatic.h"
 #include "Application_fwd.h"
-#include "FileCommands_fwd.h"
+#include "IFileEditor.h"
 
 
 class CFileModel;
@@ -24,23 +24,35 @@ namespace str { enum Match; }
 
 
 class CMainRenameDialog : public CBaseMainDialog
-						, private utl::IObserver
-						, private cmd::IErrorObserver
+						, public IFileEditor
 						, private CReportListControl::ITextEffectCallback
 {
 public:
-	CMainRenameDialog( CFileModel* pFileModel, CWnd* pParent, app::MenuCommand menuCmd = app::Cmd_RenameFiles );
+	CMainRenameDialog( CFileModel* pFileModel, CWnd* pParent );
 	virtual ~CMainRenameDialog();
+private:
+	// IFileEditor interface
+	virtual CFileModel* GetFileModel( void ) const;
+	virtual CDialog* GetDialog( void );
+	virtual void PostMakeDest( bool silent = false );
+	virtual void PopUndoTop( void );
+
+	// utl::IObserver interface (via IFileEditor)
+	virtual void OnUpdate( utl::ISubject* pSubject, utl::IMessage* pMessage );
+
+	// cmd::IErrorObserver interface (via IFileEditor)
+	virtual void ClearFileErrors( void );
+	virtual void OnFileError( const fs::CPath& srcPath, const std::tstring& errMsg );
+
+	// CReportListControl::ITextEffectCallback interface
+	virtual void CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARAM rowKey, int subItem ) const;
 
 	// ui::ICmdCallback interface
 	virtual void QueryTooltipText( std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const;
-
-	CFileModel* GetFileModel( void ) const { return m_pFileModel; }
-	void PostMakeDest( bool silent = false );
 private:
 	void SetupFileListView( void );
 
-	enum Mode { Uninit = -1, MakeMode, RenameMode, UndoRollbackMode };		// same as OK button label
+	enum Mode { MakeMode, RenameMode, UndoRollbackMode };		// same as OK button label
 	void SwitchMode( Mode mode );
 
 	void AutoGenerateFiles( void );
@@ -48,16 +60,6 @@ private:
 	bool ChangeSeqCount( UINT seqCount );
 
 	enum Column { Source, Destination };
-
-	// utl::IObserver interface
-	virtual void OnUpdate( utl::ISubject* pSubject, utl::IMessage* pMessage );
-
-	// cmd::IErrorObserver interface
-	virtual void ClearFileErrors( void );
-	virtual void OnFileError( const fs::CPath& srcPath, const std::tstring& errMsg );
-
-	// CReportListControl::ITextEffectCallback interface
-	virtual void CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARAM rowKey, int subItem ) const;
 
 	size_t FindItemPos( const fs::CPath& srcPath ) const;
 	void MarkInvalidSrcItems( void );
@@ -71,10 +73,9 @@ private:
 	std::vector< CRenameItem* > m_errorItems;
 	std::auto_ptr< CRenameService > m_pRenSvc;
 
-	app::MenuCommand m_menuCmd;
+	Mode m_mode;
 	bool m_autoGenerate;
 	bool m_seqCountAutoAdvance;
-	Mode m_mode;
 private:
 	// enum { IDD = IDD_RENAME_FILES_DIALOG };
 	CHistoryComboBox m_formatCombo;

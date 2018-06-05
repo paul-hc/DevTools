@@ -64,8 +64,10 @@ namespace stdext
 namespace func
 {
 	/** usage:
-		std::vector< Element* > elements;
-		std::for_each( elements.begin(), elements.end(), func::Delete() );
+			std::vector< Element* > elements;
+			std::for_each( elements.begin(), elements.end(), func::Delete() );
+		or
+			utl::for_each( elements, func::Delete() );
 	*/
 	struct Delete
 	{
@@ -103,6 +105,19 @@ namespace func
 
 namespace utl
 {
+	template< typename ContainerT, typename FuncT >
+	inline FuncT for_each( ContainerT& rObjects, FuncT func )
+	{
+		return std::for_each( rObjects.begin(), rObjects.end(), func );
+	}
+
+	template< typename ContainerT, typename FuncT >
+	inline FuncT for_each( const ContainerT& objects, FuncT func )
+	{
+		return std::for_each( objects.begin(), objects.end(), func );
+	}
+
+
 	// linear search
 
 	template< typename ContainerT, typename Predicate >
@@ -638,14 +653,14 @@ namespace utl
 	template< typename PtrContainer >
 	void ClearOwningContainer( PtrContainer& rContainer )
 	{
-		std::for_each( rContainer.begin(), rContainer.end(), func::Delete() );
+		for_each( rContainer, func::Delete() );
 		rContainer.clear();
 	}
 
 	template< typename PtrContainer, typename ClearFunctor >
 	void ClearOwningContainer( PtrContainer& rContainer, ClearFunctor clearFunctor )
 	{
-		std::for_each( rContainer.begin(), rContainer.end(), clearFunctor );
+		for_each( rContainer, clearFunctor );
 		rContainer.clear();
 	}
 

@@ -19,6 +19,7 @@ public:
 private:
 	void TestRenameSimple( void );
 	void TestRenameCollisionExisting( void );
+	void TestRenameChangeCase( void );
 };
 
 

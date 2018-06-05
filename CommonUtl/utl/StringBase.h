@@ -319,8 +319,8 @@ namespace str
 	}
 
 
-	template< typename CharType >
-	void SplitAdd( std::vector< std::basic_string< CharType > >& rItems, const CharType* pSource, const CharType* pSep )
+	template< typename CharType, typename StringType >
+	void SplitAdd( std::vector< StringType >& rItems, const CharType* pSource, const CharType* pSep )
 	{
 		ASSERT( !str::IsEmpty( pSep ) );
 
@@ -339,15 +339,15 @@ namespace str
 				}
 				else
 				{
-					rItems.push_back( itItemStart );			// last item
+					rItems.push_back( std::basic_string< CharType >( itItemStart ) );			// last item
 					break;
 				}
 			}
 		}
 	}
 
-	template< typename CharType >
-	inline void Split( std::vector< std::basic_string< CharType > >& rItems, const CharType* pSource, const CharType* pSep )
+	template< typename CharType, typename StringType >
+	inline void Split( std::vector< StringType >& rItems, const CharType* pSource, const CharType* pSep )
 	{
 		rItems.clear();
 		SplitAdd( rItems, pSource, pSep );

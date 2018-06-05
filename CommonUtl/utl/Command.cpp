@@ -191,15 +191,12 @@ bool CCommandModel::Undo( size_t stepCount /*= 1*/ )
 
 	bool succeeded = false;
 
-	while ( stepCount != 0 && !m_undoStack.empty() )
+	while ( stepCount-- != 0 && !m_undoStack.empty() )
 	{
 		utl::ICommand* pCmd = m_undoStack.back();
 
 		if ( pCmd->IsUndoable() )
-		{
 			succeeded = pCmd->Unexecute();
-			--stepCount;
-		}
 
 		if ( utl::Contains( m_undoStack, pCmd ) )		// not already removed?
 		{
@@ -217,7 +214,7 @@ bool CCommandModel::Redo( size_t stepCount /*= 1*/ )
 
 	bool succeeded = true;
 
-	while ( stepCount-- > 0 && !m_redoStack.empty() )
+	while ( stepCount-- != 0 && !m_redoStack.empty() )
 	{
 		utl::ICommand* pCmd = m_redoStack.back();
 

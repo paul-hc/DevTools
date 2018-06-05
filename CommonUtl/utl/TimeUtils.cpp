@@ -1,6 +1,6 @@
 
 #include "stdafx.h"
-#include "TimeUtl.h"
+#include "TimeUtils.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -175,6 +175,7 @@ namespace time_utl
 namespace time_utl
 {
 	const TCHAR s_outFormat[] = _T("%d-%m-%Y %H:%M:%S");				// example: "27-12-2017 19:54:20"
+	const TCHAR s_outFormatUi[] = _T("%#d-%b-%Y %#H:%M:%S");			// example: "3-Dec-2017 17:30:00"
 	const TCHAR s_parseFormat[] = _T("%2u-%2u-%4u %2u:%2u:%2u");		// example: "27-12-2017 19:54:20"
 
 	std::tstring FormatTimestamp( const CTime& dt, const TCHAR format[] /*= s_outFormat*/ )

@@ -19,7 +19,7 @@
 #include "utl/MenuUtilities.h"
 #include "utl/StringUtilities.h"
 #include "utl/UtilitiesEx.h"
-#include "utl/TimeUtl.h"
+#include "utl/TimeUtils.h"
 #include "utl/resource.h"
 #include "resource.h"
 
@@ -55,7 +55,7 @@ CTouchFilesDialog::CTouchFilesDialog( CFileModel* pFileModel, CWnd* pParent )
 	: CBaseMainDialog( IDD_TOUCH_FILES_DIALOG, pParent )
 	, m_pFileModel( pFileModel )
 	, m_rTouchItems( m_pFileModel->LazyInitTouchItems() )
-	, m_mode( Uninit )
+	, m_mode( TouchMode )
 	, m_fileListCtrl( IDC_FILE_TOUCH_LIST, LVS_EX_GRIDLINES | CReportListControl::DefaultStyleEx )
 	, m_anyChanges( false )
 {
@@ -117,7 +117,9 @@ void CTouchFilesDialog::SwitchMode( Mode mode )
 	static const CEnumTags modeTags( _T("&Store|&Touch|&Rollback") );
 
 	m_mode = mode;
-	ASSERT( m_mode != Uninit );
+	if ( NULL == m_hWnd )
+		return;
+
 	ui::SetDlgItemText( m_hWnd, IDOK, modeTags.FormatUi( m_mode ) );
 
 	static const UINT ctrlIds[] =
@@ -135,12 +137,33 @@ void CTouchFilesDialog::SwitchMode( Mode mode )
 	m_fileListCtrl.Invalidate();			// do some custom draw magic
 }
 
+CFileModel* CTouchFilesDialog::GetFileModel( void ) const
+{
+	return m_pFileModel;
+}
+
+CDialog* CTouchFilesDialog::GetDialog( void )
+{
+	return this;
+}
+
 void CTouchFilesDialog::PostMakeDest( bool silent /*= false*/ )
 {
 	if ( !silent )
 		GotoDlgCtrl( GetDlgItem( IDOK ) );
 
 	SwitchMode( TouchMode );
+}
+
+void CTouchFilesDialog::PopUndoTop( void )
+{
+	ASSERT( m_mode != UndoRollbackMode );
+	ASSERT( m_pFileModel->CanUndo( cmd::TouchFile ) );
+
+	ClearFileErrors();
+	m_pFileModel->PopUndo();				// fetches data set from undo stack (macro command)
+	MarkInvalidSrcItems();
+	SwitchMode( UndoRollbackMode );
 }
 
 void CTouchFilesDialog::SetupDialog( void )
@@ -303,14 +326,17 @@ void CTouchFilesDialog::OnUpdate( utl::ISubject* pSubject, utl::IMessage* pMessa
 {
 	pMessage;
 
-	if ( m_pFileModel == pSubject )
-		SetupDialog();
+	if ( m_hWnd != NULL )
+		if ( m_pFileModel == pSubject )
+			SetupDialog();
 }
 
 void CTouchFilesDialog::ClearFileErrors( void )
 {
 	m_errorItems.clear();
-	m_fileListCtrl.Invalidate();
+
+	if ( m_hWnd != NULL )
+		m_fileListCtrl.Invalidate();
 }
 
 void CTouchFilesDialog::OnFileError( const fs::CPath& srcPath, const std::tstring& errMsg )
@@ -454,6 +480,8 @@ BOOL CTouchFilesDialog::OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLE
 
 void CTouchFilesDialog::DoDataExchange( CDataExchange* pDX )
 {
+	const bool firstInit = NULL == m_fileListCtrl.m_hWnd;
+
 	DDX_Control( pDX, IDC_FILE_TOUCH_LIST, m_fileListCtrl );
 	DDX_Control( pDX, IDC_MODIFIED_DATE, m_modifiedDateCtrl );
 	DDX_Control( pDX, IDC_CREATED_DATE, m_createdDateCtrl );
@@ -466,10 +494,10 @@ void CTouchFilesDialog::DoDataExchange( CDataExchange* pDX )
 
 	if ( DialogOutput == pDX->m_bSaveAndValidate )
 	{
-		if ( Uninit == m_mode )
+		if ( firstInit )
 		{
 			OnUpdate( m_pFileModel, NULL );
-			SwitchMode( TouchMode );
+			SwitchMode( m_mode );
 			CheckDlgButton( IDC_SHOW_SOURCE_INFO_CHECK, VisibleAllSrcColumns() );
 		}
 	}
@@ -549,20 +577,13 @@ void CTouchFilesDialog::OnContextMenu( CWnd* pWnd, CPoint screenPos )
 
 void CTouchFilesDialog::OnFieldChanged( void )
 {
-	if ( m_mode != Uninit )
-		SwitchMode( StoreMode );
+	SwitchMode( StoreMode );
 }
 
 void CTouchFilesDialog::OnBnClicked_Undo( void )
 {
-	ASSERT( m_pFileModel->CanUndo( cmd::TouchFile ) );
-
+	PopUndoTop();
 	GotoDlgCtrl( GetDlgItem( IDOK ) );
-
-	ClearFileErrors();
-	m_pFileModel->PopUndo();				// fetches data set from undo stack (macro command)
-	MarkInvalidSrcItems();
-	SwitchMode( UndoRollbackMode );
 }
 
 void CTouchFilesDialog::OnBnClicked_CopySourceFiles( void )

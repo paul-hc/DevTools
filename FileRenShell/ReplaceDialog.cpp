@@ -1,11 +1,12 @@
 
 #include "stdafx.h"
 #include "ReplaceDialog.h"
-#include "MainRenameDialog.h"
+#include "IFileEditor.h"
 #include "RenameService.h"
 #include "FileModel.h"
 #include "RenameItem.h"
 #include "PathAlgorithms.h"
+#include "Application_fwd.h"
 #include "resource.h"
 #include "utl/ImageStore.h"
 #include "utl/LayoutEngine.h"
@@ -46,9 +47,9 @@ namespace layout
 }
 
 
-CReplaceDialog::CReplaceDialog( CMainRenameDialog* pParent, const CRenameService* pRenSvc )
-	: CLayoutDialog( IDD_REPLACE_DIALOG, pParent )
-	, m_pParent( pParent )
+CReplaceDialog::CReplaceDialog( IFileEditor* pParentEditor, const CRenameService* pRenSvc )
+	: CLayoutDialog( IDD_REPLACE_DIALOG, pParentEditor->GetDialog() )
+	, m_pParentEditor( pParentEditor )
 	, m_pRenSvc( pRenSvc )
 	, m_findWhat( LoadFindWhat() )
 	, m_replaceWith( LoadReplaceWith() )
@@ -57,7 +58,7 @@ CReplaceDialog::CReplaceDialog( CMainRenameDialog* pParent, const CRenameService
 	, m_findWhatCombo( ui::HistoryMaxSize, specialSep, m_matchCase ? str::Case : str::IgnoreCase )
 	, m_replaceWithCombo( ui::HistoryMaxSize, specialSep, m_matchCase ? str::Case : str::IgnoreCase )
 {
-	ASSERT_PTR( m_pParent );
+	ASSERT_PTR( m_pParentEditor );
 
 	m_initCentered = false;
 	m_regSection = reg::section;
@@ -133,7 +134,7 @@ bool CReplaceDialog::ReplaceItems( bool commit /*= true*/ ) const
 	if ( m_findWhat.empty() )
 		return false;				// no pattern to search for
 
-	CFileModel* pFileModel = m_pParent->GetFileModel();
+	CFileModel* pFileModel = m_pParentEditor->GetFileModel();
 	if ( Find_Text == m_findType )
 	{
 		func::ReplaceText functor( m_findWhat, m_replaceWith, m_matchCase, commit );
@@ -152,7 +153,7 @@ bool CReplaceDialog::ReplaceItems( bool commit /*= true*/ ) const
 	}
 
 	if ( commit )
-		m_pParent->PostMakeDest();
+		m_pParentEditor->PostMakeDest();
 	return true;
 }
 

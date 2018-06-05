@@ -1,5 +1,5 @@
-#ifndef TimeUtl_h
-#define TimeUtl_h
+#ifndef TimeUtils_h
+#define TimeUtils_h
 #pragma once
 
 #include "Range.h"
@@ -50,6 +50,7 @@ namespace time_utl
 namespace time_utl
 {
 	extern const TCHAR s_outFormat[];			// example: "27-12-2017 19:54:20"
+	extern const TCHAR s_outFormatUi[];			// example: "3-Dec-2017 17:30:00"
 	extern const TCHAR s_parseFormat[];			// example: "27-12-2017 19:54:20"
 
 	std::tstring FormatTimestamp( const CTime& dt, const TCHAR format[] = s_outFormat );
@@ -68,4 +69,4 @@ inline std::tostream& operator<<( std::wostream& oss, const CTime& dt )
 }
 
 
-#endif // TimeUtl_h
+#endif // TimeUtils_h
