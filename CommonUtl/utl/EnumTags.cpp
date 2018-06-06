@@ -36,7 +36,7 @@ void CEnumTags::Construct( const std::tstring& uiTags, const TCHAR* pKeyTags )
 size_t CEnumTags::TagIndex( int value, const std::vector< std::tstring >& tags ) const
 {
 	size_t tagIndex = value - m_baseValue;
-	ENSURE( tagIndex < tags.size() );
+	ENSURE( tagIndex < tags.size() ); tags;
 	return tagIndex;
 }
 
