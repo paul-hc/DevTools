@@ -29,7 +29,7 @@ public:
 private:
 	// IFileEditor interface (partial)
 	virtual void PostMakeDest( bool silent = false );
-	virtual void PopUndoRedoTop( cmd::UndoRedo undoRedo );
+	virtual void PopStackTop( cmd::StackType stackType );
 
 	// utl::IObserver interface (via IFileEditor)
 	virtual void OnUpdate( utl::ISubject* pSubject, utl::IMessage* pMessage );

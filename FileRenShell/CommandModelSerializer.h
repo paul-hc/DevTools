@@ -19,7 +19,7 @@ public:
 	void Save( std::ostream& os, const CCommandModel& commandModel ) const;
 	void Load( std::istream& is, CCommandModel* pOutCommandModel );
 private:
-	void SaveStack( std::ostream& os, cmd::UndoRedo section, const std::deque< utl::ICommand* >& cmdStack ) const;
+	void SaveStack( std::ostream& os, cmd::StackType section, const std::deque< utl::ICommand* >& cmdStack ) const;
 
 	utl::ICommand* LoadMacroCmd( std::istream& is, const str::TStringRange& tagRange );
 	utl::ICommand* LoadSubCmd( cmd::CommandType cmdType, const str::TStringRange& textRange );

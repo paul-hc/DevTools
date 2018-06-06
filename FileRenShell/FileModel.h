@@ -12,7 +12,7 @@ class CRenameItem;
 class CTouchItem;
 interface IFileEditor;
 namespace fmt { enum PathFormat; }
-namespace cmd { enum CommandType; enum UndoRedo; }
+namespace cmd { enum CommandType; enum StackType; }
 
 
 class CFileModel : public CSubject
@@ -32,12 +32,12 @@ public:
 	bool SaveCommandModel( void ) const;
 	bool LoadCommandModel( void );
 
-	bool CanUndoRedo( cmd::UndoRedo undoRedo, int typeId = 0 ) const;
-	bool UndoRedo( cmd::UndoRedo undoRedo );
-	void FetchFromStack( cmd::UndoRedo undoRedo );				// fetches data set from undo stack (macro command)
+	bool CanUndoRedo( cmd::StackType stackType, int typeId = 0 ) const;
+	bool UndoRedo( cmd::StackType stackType );
+	void FetchFromStack( cmd::StackType stackType );				// fetches data set from undo stack (macro command)
 
 	template< typename CmdType >
-	CmdType* PeekCmdAs( cmd::UndoRedo undoRedo ) const;
+	CmdType* PeekCmdAs( cmd::StackType stackType ) const;
 
 	// utl::ISubject interface
 	virtual const std::tstring& GetCode( void ) const;
@@ -71,9 +71,9 @@ private:
 
 	struct AddRenameItemFromCmd
 	{
-		AddRenameItemFromCmd( CFileModel* pFileModel, cmd::UndoRedo undoRedo )
+		AddRenameItemFromCmd( CFileModel* pFileModel, cmd::StackType stackType )
 			: m_pFileModel( pFileModel )
-			, m_undoRedo( undoRedo )
+			, m_stackType( stackType )
 		{
 			ASSERT( m_pFileModel != NULL && m_pFileModel->m_sourcePaths.empty() );
 		}
@@ -81,14 +81,14 @@ private:
 		void operator()( const utl::ICommand* pCmd );
 	private:
 		CFileModel* m_pFileModel;
-		cmd::UndoRedo m_undoRedo;
+		cmd::StackType m_stackType;
 	};
 
 	struct AddTouchItemFromCmd
 	{
-		AddTouchItemFromCmd( CFileModel* pFileModel, cmd::UndoRedo undoRedo )
+		AddTouchItemFromCmd( CFileModel* pFileModel, cmd::StackType stackType )
 			: m_pFileModel( pFileModel )
-			, m_undoRedo( undoRedo )
+			, m_stackType( stackType )
 		{
 			ASSERT( m_pFileModel != NULL && m_pFileModel->m_sourcePaths.empty() );
 		}
@@ -96,7 +96,7 @@ private:
 		void operator()( const utl::ICommand* pCmd );
 	private:
 		CFileModel* m_pFileModel;
-		cmd::UndoRedo m_undoRedo;
+		cmd::StackType m_stackType;
 	};
 
 	friend struct AddRenameItemFromCmd;
@@ -115,10 +115,10 @@ private:
 // template code
 
 template< typename CmdType >
-CmdType* CFileModel::PeekCmdAs( cmd::UndoRedo undoRedo ) const
+CmdType* CFileModel::PeekCmdAs( cmd::StackType stackType ) const
 {
 	if ( m_pCommandModel.get() != NULL )
-		return dynamic_cast< CmdType* >( cmd::Undo == undoRedo ? m_pCommandModel->PeekUndo() : m_pCommandModel->PeekRedo() );
+		return dynamic_cast< CmdType* >( cmd::Undo == stackType ? m_pCommandModel->PeekUndo() : m_pCommandModel->PeekRedo() );
 
 	return NULL;
 }

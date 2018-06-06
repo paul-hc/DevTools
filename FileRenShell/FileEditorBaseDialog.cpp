@@ -41,11 +41,11 @@ void CFileEditorBaseDialog::QueryTooltipText( std::tstring& rText, UINT cmdId, C
 		case IDC_UNDO_BUTTON:
 		case IDC_REDO_BUTTON:
 		{
-			cmd::UndoRedo undoRedo = IDC_UNDO_BUTTON == cmdId ? cmd::Undo : cmd::Redo;
-			if ( utl::ICommand* pTopCmd = m_pFileModel->PeekCmdAs< utl::ICommand >( undoRedo ) )
-				rText = str::Format( _T("%s: %s"), cmd::GetTags_UndoRedo().FormatUi( undoRedo ).c_str(), pTopCmd->Format( true ).c_str() );
+			cmd::StackType stackType = IDC_UNDO_BUTTON == cmdId ? cmd::Undo : cmd::Redo;
+			if ( utl::ICommand* pTopCmd = m_pFileModel->PeekCmdAs< utl::ICommand >( stackType ) )
+				rText = str::Format( _T("%s: %s"), cmd::GetTags_StackType().FormatUi( stackType ).c_str(), pTopCmd->Format( true ).c_str() );
 			else
-				rText = str::Format( _T("%s the file operation"), cmd::GetTags_UndoRedo().FormatUi( undoRedo ).c_str() );
+				rText = str::Format( _T("%s the file operation"), cmd::GetTags_StackType().FormatUi( stackType ).c_str() );
 			break;
 		}
 		default:
@@ -53,12 +53,12 @@ void CFileEditorBaseDialog::QueryTooltipText( std::tstring& rText, UINT cmdId, C
 	}
 }
 
-int CFileEditorBaseDialog::PopStackRunCrossEditor( cmd::UndoRedo undoRedo )
+int CFileEditorBaseDialog::PopStackRunCrossEditor( cmd::StackType stackType )
 {
 	// end this dialog and spawn the foreign dialog editor
-	cmd::CommandType foreignCmdType = static_cast< cmd::CommandType >( m_pFileModel->PeekCmdAs< utl::ICommand >( undoRedo )->GetTypeID() );
+	cmd::CommandType foreignCmdType = static_cast< cmd::CommandType >( m_pFileModel->PeekCmdAs< utl::ICommand >( stackType )->GetTypeID() );
 	ASSERT( foreignCmdType != m_nativeCmdType );
-	ASSERT( m_pFileModel->CanUndoRedo( undoRedo, foreignCmdType ) );
+	ASSERT( m_pFileModel->CanUndoRedo( stackType, foreignCmdType ) );
 
 	m_pFileModel->RemoveObserver( this );		// reject further updates
 
@@ -66,7 +66,7 @@ int CFileEditorBaseDialog::PopStackRunCrossEditor( cmd::UndoRedo undoRedo )
 	OnCancel();									// end this dialog
 
 	std::auto_ptr< IFileEditor > pFileEditor( m_pFileModel->MakeFileEditor( foreignCmdType, pParent ) );
-	pFileEditor->PopUndoRedoTop( undoRedo );
+	pFileEditor->PopStackTop( stackType );
 
 	m_nModalResult = static_cast< int >( pFileEditor->GetDialog()->DoModal() );		// pass the modal result from the spawned editor dialog
 	return m_nModalResult;
@@ -90,5 +90,5 @@ END_MESSAGE_MAP()
 void CFileEditorBaseDialog::OnBnClicked_UndoRedo( UINT btnId )
 {
 	GotoDlgCtrl( GetDlgItem( IDOK ) );
-	PopUndoRedoTop( IDC_UNDO_BUTTON == btnId ? cmd::Undo : cmd::Redo );
+	PopStackTop( IDC_UNDO_BUTTON == btnId ? cmd::Undo : cmd::Redo );
 }

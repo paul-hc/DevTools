@@ -111,34 +111,34 @@ CCommandModel* CFileModel::GetCommandModel( void )
 	return m_pCommandModel.get();
 }
 
-bool CFileModel::CanUndoRedo( cmd::UndoRedo undoRedo, int typeId /*= 0*/ ) const
+bool CFileModel::CanUndoRedo( cmd::StackType stackType, int typeId /*= 0*/ ) const
 {
-	if ( utl::ICommand* pTopCmd = PeekCmdAs< utl::ICommand >( undoRedo ) )
+	if ( utl::ICommand* pTopCmd = PeekCmdAs< utl::ICommand >( stackType ) )
 		if ( 0 == typeId || typeId == pTopCmd->GetTypeID() )
 			return m_pCommandModel->CanUndo();
 
 	return false;
 }
 
-bool CFileModel::UndoRedo( cmd::UndoRedo undoRedo )
+bool CFileModel::UndoRedo( cmd::StackType stackType )
 {
-	return cmd::Undo == undoRedo ? GetCommandModel()->Undo() : GetCommandModel()->Redo();
+	return cmd::Undo == stackType ? GetCommandModel()->Undo() : GetCommandModel()->Redo();
 }
 
-void CFileModel::FetchFromStack( cmd::UndoRedo undoRedo )
+void CFileModel::FetchFromStack( cmd::StackType stackType )
 {
 	// fills the data set from undo stack
 	ASSERT_PTR( m_pCommandModel.get() );
-	ASSERT( cmd::Undo == undoRedo ? m_pCommandModel->CanUndo() : m_pCommandModel->CanRedo() );
+	ASSERT( cmd::Undo == stackType ? m_pCommandModel->CanUndo() : m_pCommandModel->CanRedo() );
 
-	if ( const cmd::CFileMacroCmd* pTopMacroCmd = dynamic_cast< const cmd::CFileMacroCmd* >( cmd::Undo == undoRedo ? m_pCommandModel->PeekUndo() : m_pCommandModel->PeekRedo() ) )
+	if ( const cmd::CFileMacroCmd* pTopMacroCmd = dynamic_cast< const cmd::CFileMacroCmd* >( cmd::Undo == stackType ? m_pCommandModel->PeekUndo() : m_pCommandModel->PeekRedo() ) )
 	{
 		Clear();
 
 		switch ( pTopMacroCmd->GetTypeID() )
 		{
-			case cmd::RenameFile:	utl::for_each( pTopMacroCmd->GetSubCommands(), AddRenameItemFromCmd( this, undoRedo ) ); break;
-			case cmd::TouchFile:	utl::for_each( pTopMacroCmd->GetSubCommands(), AddTouchItemFromCmd( this, undoRedo ) ); break;
+			case cmd::RenameFile:	utl::for_each( pTopMacroCmd->GetSubCommands(), AddRenameItemFromCmd( this, stackType ) ); break;
+			case cmd::TouchFile:	utl::for_each( pTopMacroCmd->GetSubCommands(), AddTouchItemFromCmd( this, stackType ) ); break;
 		}
 		m_commonParentPath = path::ExtractCommonParentPath( m_sourcePaths );
 		//utl::for_each( m_renameItems, func::StripDisplayCode( m_commonParentPath ) );		// use always filename.ext for path diffs
@@ -373,7 +373,7 @@ void CFileModel::AddRenameItemFromCmd::operator()( const utl::ICommand* pCmd )
 	const CRenameFileCmd* pRenameCmd = checked_static_cast< const CRenameFileCmd* >( pCmd );
 
 	fs::CPath srcPath = pRenameCmd->m_srcPath, destPath = pRenameCmd->m_destPath;
-	if ( cmd::Undo == m_undoRedo )
+	if ( cmd::Undo == m_stackType )
 		std::swap( srcPath, destPath );			// swap DEST and SRC for undo
 
 	CRenameItem* pRenameItem = new CRenameItem( srcPath );
@@ -391,7 +391,7 @@ void CFileModel::AddTouchItemFromCmd::operator()( const utl::ICommand* pCmd )
 	const CTouchFileCmd* pTouchCmd = checked_static_cast< const CTouchFileCmd* >( pCmd );
 
 	fs::CFileState srcState = pTouchCmd->m_srcState, destState = pTouchCmd->m_destState;
-	if ( cmd::Undo == m_undoRedo )
+	if ( cmd::Undo == m_stackType )
 		std::swap( srcState, destState );			// swap DEST and SRC for undo
 
 	CTouchItem* pTouchItem = new CTouchItem( srcState );

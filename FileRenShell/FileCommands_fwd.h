@@ -16,9 +16,9 @@ namespace cmd
 	const CEnumTags& GetTags_CommandType( void );
 
 
-	enum UndoRedo { Undo, Redo };
+	enum StackType { Undo, Redo };
 
-	const CEnumTags& GetTags_UndoRedo( void );
+	const CEnumTags& GetTags_StackType( void );
 
 
 	interface IErrorObserver

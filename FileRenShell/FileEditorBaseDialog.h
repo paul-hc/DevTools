@@ -24,7 +24,7 @@ protected:
 	// ui::ICmdCallback interface
 	virtual void QueryTooltipText( std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const;
 
-	int PopStackRunCrossEditor( cmd::UndoRedo undoRedo );
+	int PopStackRunCrossEditor( cmd::StackType stackType );
 protected:
 	CFileModel* m_pFileModel;
 	cmd::CommandType m_nativeCmdType;

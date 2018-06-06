@@ -31,7 +31,7 @@ void CCommandModelSerializer::Save( std::ostream& os, const CCommandModel& comma
 	SaveStack( os, cmd::Redo, commandModel.GetRedoStack() );
 }
 
-void CCommandModelSerializer::SaveStack( std::ostream& os, cmd::UndoRedo section, const std::deque< utl::ICommand* >& cmdStack ) const
+void CCommandModelSerializer::SaveStack( std::ostream& os, cmd::StackType section, const std::deque< utl::ICommand* >& cmdStack ) const
 {
 	if ( cmdStack.empty() )
 		return;
@@ -76,7 +76,7 @@ void CCommandModelSerializer::Load( std::istream& is, CCommandModel* pOutCommand
 		if ( !textRange.IsEmpty() )		// ignore empty lines
 			if ( ParseSectionTag( textRange ) )
 			{
-				cmd::UndoRedo section;
+				cmd::StackType section;
 				if ( GetTags_Section().ParseUiAs( section, textRange.Extract() ) )
 					pStack = cmd::Undo == section ? &undoStack : &redoStack;
 			}

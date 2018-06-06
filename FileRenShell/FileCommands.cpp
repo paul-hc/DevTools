@@ -21,7 +21,7 @@ namespace cmd
 		return tags;
 	}
 
-	const CEnumTags& GetTags_UndoRedo( void )
+	const CEnumTags& GetTags_StackType( void )
 	{
 		static const CEnumTags tags( _T("Undo|Redo") );
 		return tags;

@@ -143,19 +143,19 @@ void CTouchFilesDialog::PostMakeDest( bool silent /*= false*/ )
 	SwitchMode( TouchMode );
 }
 
-void CTouchFilesDialog::PopUndoRedoTop( cmd::UndoRedo undoRedo )
+void CTouchFilesDialog::PopStackTop( cmd::StackType stackType )
 {
 	ASSERT( m_mode != RollBackMode && m_mode != RollForwardMode );
 
-	if ( m_pFileModel->CanUndoRedo( undoRedo, cmd::TouchFile ) )
+	if ( m_pFileModel->CanUndoRedo( stackType, cmd::TouchFile ) )
 	{
 		ClearFileErrors();
-		m_pFileModel->FetchFromStack( undoRedo );		// fetch dataset from the stack top macro command
+		m_pFileModel->FetchFromStack( stackType );		// fetch dataset from the stack top macro command
 		MarkInvalidSrcItems();
-		SwitchMode( cmd::Undo == undoRedo ? RollBackMode : RollForwardMode );
+		SwitchMode( cmd::Undo == stackType ? RollBackMode : RollForwardMode );
 	}
 	else
-		PopStackRunCrossEditor( undoRedo );				// end this dialog and execute the target dialog editor
+		PopStackRunCrossEditor( stackType );			// end this dialog and execute the target dialog editor
 }
 
 void CTouchFilesDialog::SetupDialog( void )

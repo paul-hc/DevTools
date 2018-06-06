@@ -204,19 +204,19 @@ void CMainRenameDialog::PostMakeDest( bool silent /*= false*/ )
 	}
 }
 
-void CMainRenameDialog::PopUndoRedoTop( cmd::UndoRedo undoRedo )
+void CMainRenameDialog::PopStackTop( cmd::StackType stackType )
 {
 	ASSERT( m_mode != RollBackMode && m_mode != RollForwardMode );
 
-	if ( m_pFileModel->CanUndoRedo( undoRedo, cmd::RenameFile ) )		// is this the proper dialog editor?
+	if ( m_pFileModel->CanUndoRedo( stackType, cmd::RenameFile ) )		// is this the proper dialog editor?
 	{
 		ClearFileErrors();
-		m_pFileModel->FetchFromStack( undoRedo );		// fetch dataset from the stack top macro command
+		m_pFileModel->FetchFromStack( stackType );		// fetch dataset from the stack top macro command
 		MarkInvalidSrcItems();
-		SwitchMode( cmd::Undo == undoRedo ? RollBackMode : RollForwardMode );
+		SwitchMode( cmd::Undo == stackType ? RollBackMode : RollForwardMode );
 	}
 	else
-		PopStackRunCrossEditor( undoRedo );				// end this dialog and execute the target dialog editor
+		PopStackRunCrossEditor( stackType );			// end this dialog and execute the target dialog editor
 }
 
 void CMainRenameDialog::OnUpdate( utl::ISubject* pSubject, utl::IMessage* pMessage )

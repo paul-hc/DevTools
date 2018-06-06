@@ -168,7 +168,7 @@ void CFileRenameShell::ExecuteCommand( MenuCommand menuCmd, CWnd* pParentOwner )
 						case cmd::RenameFile:
 						case cmd::TouchFile:
 							pFileEditor.reset( m_pFileModel->MakeFileEditor( static_cast< cmd::CommandType >( pTopCmd->GetTypeID() ), pParentOwner ) );
-							pFileEditor->PopUndoRedoTop( Cmd_Undo == menuCmd ? cmd::Undo : cmd::Redo );
+							pFileEditor->PopStackTop( Cmd_Undo == menuCmd ? cmd::Undo : cmd::Redo );
 							break;
 					}
 

@@ -17,7 +17,7 @@ interface IFileEditor : public IMemoryManaged
 	virtual CDialog* GetDialog( void ) = 0;
 	virtual void PostMakeDest( bool silent = false ) = 0;
 
-	virtual void PopUndoRedoTop( cmd::UndoRedo undoRedo ) = 0;
+	virtual void PopStackTop( cmd::StackType stackType ) = 0;
 };
 
 
