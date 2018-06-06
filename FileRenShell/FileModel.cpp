@@ -1,7 +1,7 @@
 
 #include "stdafx.h"
 #include "FileModel.h"
-#include "UndoLogSerializer.h"
+#include "CommandModelSerializer.h"
 #include "FileCommands.h"
 #include "RenameItem.h"
 #include "TouchItem.h"
@@ -111,29 +111,34 @@ CCommandModel* CFileModel::GetCommandModel( void )
 	return m_pCommandModel.get();
 }
 
-bool CFileModel::CanUndo( cmd::Command cmdType ) const
+bool CFileModel::CanUndoRedo( cmd::UndoRedo undoRedo, int typeId /*= 0*/ ) const
 {
-	if ( utl::ICommand* pTopCmd = PeekUndoCmdAs< utl::ICommand >() )
-		if ( cmdType == pTopCmd->GetTypeID() )
+	if ( utl::ICommand* pTopCmd = PeekCmdAs< utl::ICommand >( undoRedo ) )
+		if ( 0 == typeId || typeId == pTopCmd->GetTypeID() )
 			return m_pCommandModel->CanUndo();
 
 	return false;
 }
 
-void CFileModel::PopUndo( void )
+bool CFileModel::UndoRedo( cmd::UndoRedo undoRedo )
+{
+	return cmd::Undo == undoRedo ? GetCommandModel()->Undo() : GetCommandModel()->Redo();
+}
+
+void CFileModel::FetchFromStack( cmd::UndoRedo undoRedo )
 {
 	// fills the data set from undo stack
 	ASSERT_PTR( m_pCommandModel.get() );
-	ASSERT( m_pCommandModel->CanUndo() );
+	ASSERT( cmd::Undo == undoRedo ? m_pCommandModel->CanUndo() : m_pCommandModel->CanRedo() );
 
-	if ( const cmd::CFileMacroCmd* pTopMacroCmd = dynamic_cast< const cmd::CFileMacroCmd* >( m_pCommandModel->PeekUndo() ) )
+	if ( const cmd::CFileMacroCmd* pTopMacroCmd = dynamic_cast< const cmd::CFileMacroCmd* >( cmd::Undo == undoRedo ? m_pCommandModel->PeekUndo() : m_pCommandModel->PeekRedo() ) )
 	{
 		Clear();
 
 		switch ( pTopMacroCmd->GetTypeID() )
 		{
-			case cmd::RenameFile:	utl::for_each( pTopMacroCmd->GetSubCommands(), AddRenameItemFromCmd( this ) ); break;
-			case cmd::TouchFile:	utl::for_each( pTopMacroCmd->GetSubCommands(), AddTouchItemFromCmd( this ) ); break;
+			case cmd::RenameFile:	utl::for_each( pTopMacroCmd->GetSubCommands(), AddRenameItemFromCmd( this, undoRedo ) ); break;
+			case cmd::TouchFile:	utl::for_each( pTopMacroCmd->GetSubCommands(), AddTouchItemFromCmd( this, undoRedo ) ); break;
 		}
 		m_commonParentPath = path::ExtractCommonParentPath( m_sourcePaths );
 		//utl::for_each( m_renameItems, func::StripDisplayCode( m_commonParentPath ) );		// use always filename.ext for path diffs
@@ -145,7 +150,7 @@ void CFileModel::PopUndo( void )
 		ASSERT( false );
 }
 
-bool CFileModel::SaveUndoLog( void ) const
+bool CFileModel::SaveCommandModel( void ) const
 {
 	if ( NULL == m_pCommandModel.get() )
 		return false;
@@ -155,21 +160,21 @@ bool CFileModel::SaveUndoLog( void ) const
 
 	if ( output.is_open() )
 	{
-		CUndoLogSerializer saver( &m_pCommandModel->RefUndoStack() );
+		CCommandModelSerializer saver;
 
-		saver.Save( output );
+		saver.Save( output, *m_pCommandModel );
 		output.close();
 	}
 	if ( output.fail() )
 	{
-		TRACE( _T(" * CFileModel::SaveUndoLog(): error saving undo changes log file: %s\n"), undoLogPath.GetPtr() );
+		TRACE( _T(" * CFileModel::SaveCommandModel(): error saving undo changes log file: %s\n"), undoLogPath.GetPtr() );
 		ASSERT( false );
 		return false;
 	}
 	return true;
 }
 
-bool CFileModel::LoadUndoLog( void )
+bool CFileModel::LoadCommandModel( void )
 {
 	if ( m_pCommandModel.get() != NULL )
 		return false;				// loaded once
@@ -180,9 +185,9 @@ bool CFileModel::LoadUndoLog( void )
 	if ( !input.is_open() )
 		return false;				// undo log file doesn't exist
 
-	CUndoLogSerializer loader( &GetCommandModel()->RefUndoStack() );
+	CCommandModelSerializer loader;
 
-	loader.Load( input );
+	loader.Load( input, GetCommandModel() );
 	input.close();
 	return true;
 }
@@ -367,9 +372,12 @@ void CFileModel::AddRenameItemFromCmd::operator()( const utl::ICommand* pCmd )
 {
 	const CRenameFileCmd* pRenameCmd = checked_static_cast< const CRenameFileCmd* >( pCmd );
 
-	// swap DEST and SRC with undo semantics
-	CRenameItem* pRenameItem = new CRenameItem( pRenameCmd->m_destPath );
-	pRenameItem->RefDestPath() = pRenameCmd->m_srcPath;
+	fs::CPath srcPath = pRenameCmd->m_srcPath, destPath = pRenameCmd->m_destPath;
+	if ( cmd::Undo == m_undoRedo )
+		std::swap( srcPath, destPath );			// swap DEST and SRC for undo
+
+	CRenameItem* pRenameItem = new CRenameItem( srcPath );
+	pRenameItem->RefDestPath() = destPath;
 
 	m_pFileModel->m_sourcePaths.push_back( pRenameItem->GetKeyPath() );
 	m_pFileModel->m_renameItems.push_back( pRenameItem );
@@ -382,10 +390,28 @@ void CFileModel::AddTouchItemFromCmd::operator()( const utl::ICommand* pCmd )
 {
 	const CTouchFileCmd* pTouchCmd = checked_static_cast< const CTouchFileCmd* >( pCmd );
 
-	// swap DEST and SRC with undo semantics
-	CTouchItem* pTouchItem = new CTouchItem( pTouchCmd->m_destState );
-	pTouchItem->RefDestState() = pTouchCmd->m_srcState;
+	fs::CFileState srcState = pTouchCmd->m_srcState, destState = pTouchCmd->m_destState;
+	if ( cmd::Undo == m_undoRedo )
+		std::swap( srcState, destState );			// swap DEST and SRC for undo
+
+	CTouchItem* pTouchItem = new CTouchItem( srcState );
+	pTouchItem->RefDestState() = destState;
 
 	m_pFileModel->m_sourcePaths.push_back( pTouchItem->GetKeyPath() );
 	m_pFileModel->m_touchItems.push_back( pTouchItem );
+}
+
+
+#include "MainRenameDialog.h"
+#include "TouchFilesDialog.h"
+
+IFileEditor* CFileModel::MakeFileEditor( cmd::CommandType cmdType, CWnd* pParent )
+{
+	switch ( cmdType )
+	{
+		case cmd::RenameFile:	return new CMainRenameDialog( this, pParent );
+		case cmd::TouchFile:	return new CTouchFilesDialog( this, pParent );
+	}
+	ASSERT( false );
+	return NULL;
 }

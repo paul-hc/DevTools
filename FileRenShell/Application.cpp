@@ -3,7 +3,7 @@
 #include "Application.h"
 #include "ut/PathAlgorithmsTests.h"
 #include "ut/RenameFilesTests.h"
-#include "ut/UndoLogSerializerTests.h"
+#include "ut/CommandModelSerializerTests.h"
 #include "resource.h"
 #include "utl/EnumTags.h"
 #include "utl/BaseApp.hxx"
@@ -24,7 +24,7 @@ namespace ut
 	#ifdef _DEBUG
 		CPathAlgorithmsTests::Instance();
 		CRenameFilesTests::Instance();
-		CUndoLogSerializerTests::Instance();
+		CCommandModelSerializerTests::Instance();
 	#endif
 	}
 }

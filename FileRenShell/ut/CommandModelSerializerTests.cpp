@@ -1,7 +1,7 @@
 
 #include "stdafx.h"
-#include "UndoLogSerializerTests.h"
-#include "UndoLogSerializer.h"
+#include "CommandModelSerializerTests.h"
+#include "CommandModelSerializer.h"
 #include "FileCommands.h"
 #include "utl/ContainerUtilities.h"
 #include "utl/FileSystem.h"
@@ -48,9 +48,15 @@ namespace ut
 		"<TOUCH 01-07-2018 8:00:00>\n"
 		"C:\\my\\download\\exams.png :: {0x20|17-07-1992 9:21:17||} -> {0x21||17-07-1992 9:30:00|}\n"
 		"<END OF BATCH>\n"
+		"\n"
+		"[REDO SECTION]\n"
+		"<RENAME 17-07-2018 17:00:00>\n"
+		"  C:\\my\\download\\How to Talk.pdf ->  How to Talk to Anyone.pdf.pdf \n"
+		"<END OF BATCH>\n"
 		;
 
 	static const std::string s_outputLog =
+		"[UNDO SECTION]\n"
 		"<RENAME>\n"
 		"C:\\my\\download\\scan\\doctor.pdf -> Dr. Metz.pdf\n"
 		"C:\\my\\download\\scan\\doctor2.pdf -> Dr. Metz2.pdf\n"
@@ -81,32 +87,39 @@ namespace ut
 		"<TOUCH 01-07-2018 08:00:00>\n"
 		"C:\\my\\download\\exams.png :: {A|17-07-1992 09:21:17||} -> {RA||17-07-1992 09:30:00|}\n"
 		"<END OF BATCH>\n"
+		"\n"
+		"[REDO SECTION]\n"
+		"\n"
+		"<RENAME 17-07-2018 17:17:17>\n"
+		"C:\\my\\download\\How to Talk.pdf -> How to Talk to Anyone.pdf.pdf\n"
+		"<END OF BATCH>\n"
 		;
 }
 
 
-CUndoLogSerializerTests::CUndoLogSerializerTests( void )
+CCommandModelSerializerTests::CCommandModelSerializerTests( void )
 {
 	ut::CTestSuite::Instance().RegisterTestCase( this );		// self-registration
 }
 
-CUndoLogSerializerTests& CUndoLogSerializerTests::Instance( void )
+CCommandModelSerializerTests& CCommandModelSerializerTests::Instance( void )
 {
-	static CUndoLogSerializerTests testCase;
+	static CCommandModelSerializerTests testCase;
 	return testCase;
 }
 
-void CUndoLogSerializerTests::TestLoadLog( void )
+void CCommandModelSerializerTests::TestLoadLog( void )
 {
-	std::deque< utl::ICommand* > undoStack;
-	CUndoLogSerializer serializer( &undoStack );
+	CCommandModelSerializer serializer;
+	CCommandModel model;
 
 	std::istringstream iss( ut::s_inputLog );
-	serializer.Load( iss );
+	serializer.Load( iss, &model );
 
-	ASSERT_EQUAL( 7, undoStack.size() );
+	// UNDO section:
+	ASSERT_EQUAL( 7, model.GetUndoStack().size() );
 
-	std::deque< utl::ICommand* >::const_iterator itStackCmd = undoStack.begin();
+	std::deque< utl::ICommand* >::const_iterator itStackCmd = model.GetUndoStack().begin();
 	std::vector< utl::ICommand* >::const_iterator itSubCmd;
 
 	const cmd::CFileMacroCmd* pMacro;
@@ -246,45 +259,57 @@ void CUndoLogSerializerTests::TestLoadLog( void )
 		}
 	}
 
-	utl::ClearOwningContainer( undoStack );
+
+	// REDO section:
+	ASSERT_EQUAL( 1, model.GetRedoStack().size() );
+	itStackCmd = model.GetRedoStack().begin();
+
+	{
+		pMacro = checked_static_cast< const cmd::CFileMacroCmd* >( *itStackCmd++ );
+		itSubCmd = pMacro->GetSubCommands().begin();
+		ASSERT_EQUAL( cmd::RenameFile, pMacro->GetTypeID() );
+		ASSERT_EQUAL( CTime( 2018, 7, 17, 17, 17, 17 ), pMacro->GetTimestamp() );
+		ASSERT_EQUAL( 1, pMacro->GetSubCommands().size() );
+
+		pRenameCmd = checked_static_cast< const CRenameFileCmd* >( *itSubCmd++ );
+		ASSERT_EQUAL( cmd::RenameFile, pRenameCmd->GetTypeID() );
+		ASSERT_EQUAL( _T("C:\\my\\download\\How to Talk.pdf"), pRenameCmd->m_srcPath );
+		ASSERT_EQUAL( _T("How to Talk to Anyone.pdf.pdf"), pRenameCmd->m_destPath );
+	}
 }
 
-void CUndoLogSerializerTests::TestSaveLog( void )
+void CCommandModelSerializerTests::TestSaveLog( void )
 {
-	std::deque< utl::ICommand* > undoStack;
-	CUndoLogSerializer serializer( &undoStack );
+	CCommandModelSerializer serializer;
+	CCommandModel model;
 
 	{
 		std::istringstream iss( ut::s_inputLog );
-		serializer.Load( iss );
+		serializer.Load( iss, &model );
 
-		ASSERT_EQUAL( 7, undoStack.size() );
+		ASSERT_EQUAL( 7, model.GetUndoStack().size() );
 	}
 
 	{
 		std::ostringstream oss;
-		serializer.Save( oss );
+		serializer.Save( oss, model );
 
 		ASSERT( oss.str() == ut::s_outputLog );
 	}
 
-	// the ultimate roundtrip test
+	// roundtrip test
 	{
-		std::deque< utl::ICommand* > newUndoStack;
-		CUndoLogSerializer newSerializer( &newUndoStack );
+		CCommandModelSerializer newSerializer;
+		CCommandModel newModel;
 
 		std::istringstream iss( ut::s_outputLog );
-		newSerializer.Load( iss );
+		newSerializer.Load( iss, &newModel );
 
-		ASSERT( undoStack.size() == newUndoStack.size() );
-
-		utl::ClearOwningContainer( newUndoStack );
+		ASSERT( model.GetUndoStack().size() == newModel.GetUndoStack().size() );
 	}
-
-	utl::ClearOwningContainer( undoStack );
 }
 
-void CUndoLogSerializerTests::Run( void )
+void CCommandModelSerializerTests::Run( void )
 {
 	__super::Run();
 

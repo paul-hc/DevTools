@@ -28,20 +28,21 @@
 #define IDC_MATCH_CASE_CHECK            1015
 #define IDC_FORMAT_LEGEND_LABEL         1016
 #define IDC_UNDO_BUTTON                 1017
-#define IDC_REPLACE_DELIMS_BUTTON       1018
-#define IDC_DELIMITER_STATIC            1019
-#define IDC_NEW_DELIMITER_EDIT          1020
-#define IDC_FIND_WHAT_COMBO             1021
-#define IDC_REPLACE_WITH_COMBO          1022
-#define IDC_EDITION_STATIC              1023
-#define IDC_WORD_BREAK_CHARS_EDIT       1024
-#define IDC_WORD_BREAK_PREFIXES_EDIT    1025
-#define IDC_WORDS_PRESERVED_EDIT        1026
-#define IDC_WORDS_UPPERCASE_EDIT        1027
-#define IDC_WORDS_LOWERCASE_EDIT        1028
-#define IDC_SET_DEFAULT_ALL             1029
-#define IDC_UPPER_CASE_EXT_BUTTON       1030
-#define IDC_CHANGE_CASE_BUTTON          1031
+#define IDC_REDO_BUTTON                 1018
+#define IDC_REPLACE_DELIMS_BUTTON       1019
+#define IDC_DELIMITER_STATIC            1020
+#define IDC_NEW_DELIMITER_EDIT          1021
+#define IDC_FIND_WHAT_COMBO             1022
+#define IDC_REPLACE_WITH_COMBO          1023
+#define IDC_EDITION_STATIC              1024
+#define IDC_WORD_BREAK_CHARS_EDIT       1025
+#define IDC_WORD_BREAK_PREFIXES_EDIT    1026
+#define IDC_WORDS_PRESERVED_EDIT        1027
+#define IDC_WORDS_UPPERCASE_EDIT        1028
+#define IDC_WORDS_LOWERCASE_EDIT        1029
+#define IDC_SET_DEFAULT_ALL             1030
+#define IDC_UPPER_CASE_EXT_BUTTON       1031
+#define IDC_CHANGE_CASE_BUTTON          1032
 #define IDC_ARTICLES_EDIT               1035
 #define IDC_ARTICLES_COMBO              1036
 #define IDC_CONJUNCTIONS_EDIT           1037
@@ -65,7 +66,6 @@
 #define IDC_ATTRIB_VOLUME_CHECK         1057
 #define IDS_INVALID_FORMAT              5000
 #define IDS_NO_DELIMITER_SET            5001
-#define IDS_OK_BUTTON_LABELS            5002
 #define IDS_CHANGE_CASE_TAGS            5003
 #define IDS_CASE_MODIFY_TAGS            5004
 #define IDS_REPLACE_FILES_TIP_FORMAT    5005
@@ -118,7 +118,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        110
 #define _APS_NEXT_COMMAND_VALUE         32813
-#define _APS_NEXT_CONTROL_VALUE         1055
+#define _APS_NEXT_CONTROL_VALUE         1059
 #define _APS_NEXT_SYMED_VALUE           5004
 #endif
 #endif

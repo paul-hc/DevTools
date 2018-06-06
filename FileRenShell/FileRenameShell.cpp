@@ -52,16 +52,16 @@ public:
 
 // CFileRenameShell implementation
 
-
 const CFileRenameShell::CMenuCmdInfo CFileRenameShell::m_commands[] =
 {
-	{ app::Cmd_SendToCliboard, _T("&Send To Clipboard"), _T("Send the selected files path to clipboard"), ID_SEND_TO_CLIP, false },
-	{ app::Cmd_RenameFiles, _T("&Rename Files..."), _T("Rename selected files in the dialog"), ID_RENAME_ITEM, false },
-	{ app::Cmd_TouchFiles, _T("&Touch Files..."), _T("Modify the timestamp of selected files"), ID_TOUCH_FILES, false },
-	{ app::Cmd_Undo, _T("&Undo %s..."), _T("Undo last command on files"), ID_EDIT_UNDO, false },
+	{ Cmd_SendToCliboard, _T("&Send To Clipboard"), _T("Send the selected files path to clipboard"), ID_SEND_TO_CLIP, false },
+	{ Cmd_RenameFiles, _T("&Rename Files..."), _T("Rename selected files in the dialog"), ID_RENAME_ITEM, false },
+	{ Cmd_TouchFiles, _T("&Touch Files..."), _T("Modify the timestamp of selected files"), ID_TOUCH_FILES, false },
+	{ Cmd_Undo, _T("&Undo %s..."), _T("Undo last operation on files"), ID_EDIT_UNDO, false },
+	{ Cmd_Redo, _T("&Redo %s..."), _T("Redo last undo operation on files"), ID_EDIT_REDO, false },
 
 #ifdef _DEBUG
-	{ app::Cmd_RunUnitTests, _T("# Run Unit Tests (FileRenameShell)"), _T("Modify the timestamp of selected files"), ID_RUN_TESTS, true }
+	{ Cmd_RunUnitTests, _T("# Run Unit Tests (FileRenameShell)"), _T("Modify the timestamp of selected files"), ID_RUN_TESTS, true }
 #endif
 };
 
@@ -122,52 +122,53 @@ void CFileRenameShell::AugmentMenuItems( HMENU hMenu, UINT indexMenu, UINT idBas
 
 std::tstring CFileRenameShell::FormatCmdText( const CMenuCmdInfo& cmdInfo )
 {
-	if ( app::Cmd_Undo == cmdInfo.m_cmd )
+	if ( Cmd_Undo == cmdInfo.m_cmd || Cmd_Redo == cmdInfo.m_cmd )
 	{
-		m_pFileModel->LoadUndoLog();
+		m_pFileModel->LoadCommandModel();
 
-		if ( CCommandModel* pCommandModel = m_pFileModel->GetCommandModel() )
-			if ( utl::ICommand* pTopCmd = pCommandModel->PeekUndo() )
-				return str::Format( cmdInfo.m_pTitle, pTopCmd->Format( true ).c_str() );
+		if ( utl::ICommand* pTopCmd = m_pFileModel->PeekCmdAs< utl::ICommand >( Cmd_Undo == cmdInfo.m_cmd ? cmd::Undo : cmd::Redo ) )
+			return str::Format( cmdInfo.m_pTitle, pTopCmd->Format( true ).c_str() );
+
 		return std::tstring();
 	}
 
 	return cmdInfo.m_pTitle;
 }
 
-void CFileRenameShell::ExecuteCommand( app::MenuCommand menuCmd, CWnd* pParentOwner )
+void CFileRenameShell::ExecuteCommand( MenuCommand menuCmd, CWnd* pParentOwner )
 {
 	switch ( menuCmd )
 	{
-		case app::Cmd_SendToCliboard:
+		case Cmd_SendToCliboard:
 			m_pFileModel->CopyClipSourcePaths( GetKeyState( VK_SHIFT ) & 0x8000 ? fmt::FilenameExt : fmt::FullPath, pParentOwner );
 			return;
-		case app::Cmd_RunUnitTests:
+		case Cmd_RunUnitTests:
 			app::GetApp().RunUnitTests();
 			return;
 	}
 
 	// file operations commands
-	m_pFileModel->LoadUndoLog();
+	m_pFileModel->LoadCommandModel();
 
 	std::auto_ptr< IFileEditor > pFileEditor;
 	switch ( menuCmd )
 	{
-		case app::Cmd_RenameFiles:
-			pFileEditor.reset( MakeFileEditor( cmd::RenameFile, pParentOwner ) );
+		case Cmd_RenameFiles:
+			pFileEditor.reset( m_pFileModel->MakeFileEditor( cmd::RenameFile, pParentOwner ) );
 			break;
-		case app::Cmd_TouchFiles:
-			pFileEditor.reset( MakeFileEditor( cmd::TouchFile, pParentOwner ) );
+		case Cmd_TouchFiles:
+			pFileEditor.reset( m_pFileModel->MakeFileEditor( cmd::TouchFile, pParentOwner ) );
 			break;
-		case app::Cmd_Undo:
+		case Cmd_Undo:
+		case Cmd_Redo:
 			if ( CCommandModel* pCommandModel = m_pFileModel->GetCommandModel() )
-				if ( utl::ICommand* pTopCmd = pCommandModel->PeekUndo() )
+				if ( utl::ICommand* pTopCmd = Cmd_Undo == menuCmd ? pCommandModel->PeekUndo() : pCommandModel->PeekRedo() )
 					switch ( pTopCmd->GetTypeID() )
 					{
 						case cmd::RenameFile:
 						case cmd::TouchFile:
-							pFileEditor.reset( MakeFileEditor( static_cast< cmd::Command >( pTopCmd->GetTypeID() ), pParentOwner ) );
-							pFileEditor->PopUndoTop();
+							pFileEditor.reset( m_pFileModel->MakeFileEditor( static_cast< cmd::CommandType >( pTopCmd->GetTypeID() ), pParentOwner ) );
+							pFileEditor->PopUndoRedoTop( Cmd_Undo == menuCmd ? cmd::Undo : cmd::Redo );
 							break;
 					}
 
@@ -180,21 +181,10 @@ void CFileRenameShell::ExecuteCommand( app::MenuCommand menuCmd, CWnd* pParentOw
 
 	if ( pFileEditor.get() != NULL )
 		if ( IDOK == pFileEditor->GetDialog()->DoModal() )
-			m_pFileModel->SaveUndoLog();
+			m_pFileModel->SaveCommandModel();
 }
 
-IFileEditor* CFileRenameShell::MakeFileEditor( cmd::Command cmdType, CWnd* pParentOwner )
-{
-	switch ( cmdType )
-	{
-		case cmd::RenameFile:	return new CMainRenameDialog( m_pFileModel.get(), pParentOwner );
-		case cmd::TouchFile:	return new CTouchFilesDialog( m_pFileModel.get(), pParentOwner );
-	}
-	ASSERT( false );
-	return NULL;
-}
-
-const CFileRenameShell::CMenuCmdInfo* CFileRenameShell::FindCmd( app::MenuCommand cmd )
+const CFileRenameShell::CMenuCmdInfo* CFileRenameShell::FindCmd( MenuCommand cmd )
 {
 	for ( int i = 0; i != COUNT_OF( m_commands ); ++i )
 		if ( cmd == m_commands[ i ].m_cmd )
@@ -249,7 +239,7 @@ STDMETHODIMP CFileRenameShell::QueryContextMenu( HMENU hMenu, UINT indexMenu, UI
 		if ( m_pFileModel.get() != NULL )
 		{
 			AugmentMenuItems( hMenu, indexMenu, idCmdFirst );
-			return MAKE_HRESULT( SEVERITY_SUCCESS, FACILITY_NULL, app::_CmdCount );
+			return MAKE_HRESULT( SEVERITY_SUCCESS, FACILITY_NULL, _CmdCount );
 		}
 	}
 
@@ -270,7 +260,7 @@ STDMETHODIMP CFileRenameShell::InvokeCommand( LPCMINVOKECOMMANDINFO pCmi )
 		{
 			//TRACE( _T("CFileRenameShell::InvokeCommand(): selFileCount=%d\n"), m_pFileModel->GetSourcePaths().size() );
 
-			app::MenuCommand menuCmd = static_cast< app::MenuCommand >( LOWORD( pCmi->lpVerb ) );
+			MenuCommand menuCmd = static_cast< MenuCommand >( LOWORD( pCmi->lpVerb ) );
 			CScopedMainWnd scopedMainWnd( pCmi->hwnd );
 
 			if ( !scopedMainWnd.HasValidParentOwner() )
@@ -293,7 +283,7 @@ STDMETHODIMP CFileRenameShell::GetCommandString( UINT_PTR idCmd, UINT flags, UIN
 
 	if ( m_pFileModel.get() != NULL )
 		if ( flags == GCS_HELPTEXTA || flags == GCS_HELPTEXTW )
-			if ( const CMenuCmdInfo* pCmdInfo = FindCmd( static_cast< app::MenuCommand >( idCmd ) ) )
+			if ( const CMenuCmdInfo* pCmdInfo = FindCmd( static_cast< MenuCommand >( idCmd ) ) )
 			{
 				_bstr_t statusInfo( pCmdInfo->m_pStatusBarInfo );
 				switch ( flags )

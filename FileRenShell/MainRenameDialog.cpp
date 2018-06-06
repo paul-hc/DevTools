@@ -13,6 +13,7 @@
 #include "resource.h"
 #include "utl/ContainerUtilities.h"
 #include "utl/CmdInfoStore.h"
+#include "utl/EnumTags.h"
 #include "utl/FmtUtils.h"
 #include "utl/LongestCommonSubsequence.h"
 #include "utl/MenuUtilities.h"
@@ -71,6 +72,7 @@ namespace layout
 
 		{ IDOK, MoveX },
 		{ IDC_UNDO_BUTTON, MoveX },
+		{ IDC_REDO_BUTTON, MoveX },
 		{ IDCANCEL, MoveX }
 	};
 }
@@ -167,8 +169,8 @@ void CMainRenameDialog::SwitchMode( Mode mode )
 	if ( NULL == m_hWnd )
 		return;
 
-	static const std::vector< std::tstring > labels = str::LoadStrings( IDS_OK_BUTTON_LABELS );	// &Make Names|Rena&me|R&ollback
-	ui::SetWindowText( ::GetDlgItem( m_hWnd, IDOK ), labels[ m_mode ] );
+	static const CEnumTags modeTags( _T("&Make Names|Rena&me|Roll &Back|Roll &Forward") );
+	ui::SetWindowText( ::GetDlgItem( m_hWnd, IDOK ), modeTags.FormatUi( m_mode ) );
 
 	static const UINT ctrlIds[] =
 	{
@@ -176,8 +178,9 @@ void CMainRenameDialog::SwitchMode( Mode mode )
 		IDC_PASTE_FILES_BUTTON, IDC_CLEAR_FILES_BUTTON, IDC_CAPITALIZE_BUTTON, IDC_CHANGE_CASE_BUTTON,
 		IDC_REPLACE_FILES_BUTTON, IDC_REPLACE_DELIMS_BUTTON, IDC_DELIMITER_SET_COMBO, IDC_NEW_DELIMITER_EDIT
 	};
-	ui::EnableControls( *this, ctrlIds, COUNT_OF( ctrlIds ), m_mode != UndoRollbackMode );
-	ui::EnableControl( *this, IDC_UNDO_BUTTON, m_mode != UndoRollbackMode && m_pFileModel->CanUndo( cmd::RenameFile ) );
+	ui::EnableControls( *this, ctrlIds, COUNT_OF( ctrlIds ), m_mode != RollBackMode );
+	ui::EnableControl( *this, IDC_UNDO_BUTTON, m_mode != RollBackMode && m_mode != RollForwardMode && m_pFileModel->CanUndoRedo( cmd::Undo ) );
+	ui::EnableControl( *this, IDC_REDO_BUTTON, m_mode != RollForwardMode && m_mode != RollBackMode && m_pFileModel->CanUndoRedo( cmd::Redo ) );
 }
 
 CFileModel* CMainRenameDialog::GetFileModel( void ) const
@@ -214,15 +217,31 @@ void CMainRenameDialog::PostMakeDest( bool silent /*= false*/ )
 	}
 }
 
-void CMainRenameDialog::PopUndoTop( void )
+void CMainRenameDialog::PopUndoRedoTop( cmd::UndoRedo undoRedo )
 {
-	ASSERT( m_mode != UndoRollbackMode );
-	ASSERT( m_pFileModel->CanUndo( cmd::RenameFile ) );
+	ASSERT( m_mode != RollBackMode && m_mode != RollForwardMode );
 
-	ClearFileErrors();
-	m_pFileModel->PopUndo();				// fetches data set from undo stack (macro command)
-	MarkInvalidSrcItems();
-	SwitchMode( UndoRollbackMode );
+	if ( m_pFileModel->CanUndoRedo( undoRedo, cmd::RenameFile ) )		// is this the proper dialog editor?
+	{
+		ClearFileErrors();
+		m_pFileModel->FetchFromStack( undoRedo );		// fetch dataset from the stack top macro command
+		MarkInvalidSrcItems();
+		SwitchMode( cmd::Undo == undoRedo ? RollBackMode : RollForwardMode );
+	}
+	else
+	{	// end this dialog and spawn the proper target dialog editor
+		cmd::CommandType cmdType = static_cast< cmd::CommandType >( m_pFileModel->PeekCmdAs< utl::ICommand >( undoRedo )->GetTypeID() );
+		ASSERT( m_pFileModel->CanUndoRedo( undoRedo, cmdType ) );
+
+		CWnd* pParent = GetParent();
+		OnCancel();			// end this dialog
+		m_pFileModel->RemoveObserver( this );
+
+		std::auto_ptr< IFileEditor > pFileEditor( m_pFileModel->MakeFileEditor( cmdType, pParent ) );
+		pFileEditor->PopUndoRedoTop( undoRedo );
+
+		m_nModalResult = static_cast< int >( pFileEditor->GetDialog()->DoModal() );		// pass the modal result from the spawned editor dialog
+	}
 }
 
 void CMainRenameDialog::OnUpdate( utl::ISubject* pSubject, utl::IMessage* pMessage )
@@ -269,6 +288,39 @@ void CMainRenameDialog::CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARA
 
 	if ( utl::Contains( m_errorItems, pItem ) )
 		rTextEffect.Combine( s_errorBk );
+}
+
+void CMainRenameDialog::QueryTooltipText( std::tstring& rText, UINT cmdId, CToolTipCtrl* /*pTooltip*/ ) const
+{
+	switch ( cmdId )
+	{
+		case IDC_UNDO_BUTTON:
+		case IDC_REDO_BUTTON:
+		{
+			cmd::UndoRedo undoRedo = IDC_UNDO_BUTTON == cmdId ? cmd::Undo : cmd::Redo;
+			rText = str::Format( _T("%s the last file operation"), cmd::GetTags_UndoRedo().FormatUi( undoRedo ).c_str() );
+			if ( utl::ICommand* pTopCmd = m_pFileModel->PeekCmdAs< utl::ICommand >( undoRedo ) )
+				stream::Tag( rText, pTopCmd->Format( true ), _T(": ") );
+			break;
+		}
+		case IDC_CHANGE_CASE_BUTTON:
+		{
+			static const std::vector< std::tstring > tooltips = str::LoadStrings( IDC_CHANGE_CASE_BUTTON );
+			ChangeCase changeCase = m_changeCaseButton.GetSelEnum< ChangeCase >();
+			rText = tooltips.at( changeCase );
+			break;
+		}
+		case IDC_CAPITALIZE_BUTTON:
+			if ( m_capitalizeButton.GetRhsPartRect().PtInRect( ui::GetCursorPos( m_capitalizeButton ) ) )
+			{
+				static const std::tstring details = str::Load( IDI_DETAILS );
+				rText = details;
+			}
+			break;
+		case IDC_REPLACE_FILES_BUTTON:
+			rText = CReplaceDialog::FormatTooltipMessage();
+			break;
+	}
 }
 
 size_t CMainRenameDialog::FindItemPos( const fs::CPath& srcPath ) const
@@ -346,30 +398,6 @@ bool CMainRenameDialog::ChangeSeqCount( UINT seqCount )
 	return true;
 }
 
-void CMainRenameDialog::QueryTooltipText( std::tstring& rText, UINT cmdId, CToolTipCtrl* /*pTooltip*/ ) const
-{
-	switch ( cmdId )
-	{
-		case IDC_CHANGE_CASE_BUTTON:
-		{
-			static const std::vector< std::tstring > tooltips = str::LoadStrings( IDC_CHANGE_CASE_BUTTON );
-			ChangeCase changeCase = m_changeCaseButton.GetSelEnum< ChangeCase >();
-			rText = tooltips.at( changeCase );
-			break;
-		}
-		case IDC_CAPITALIZE_BUTTON:
-			if ( m_capitalizeButton.GetRhsPartRect().PtInRect( ui::GetCursorPos( m_capitalizeButton ) ) )
-			{
-				static const std::tstring details = str::Load( IDI_DETAILS );
-				rText = details;
-			}
-			break;
-		case IDC_REPLACE_FILES_BUTTON:
-			rText = CReplaceDialog::FormatTooltipMessage();
-			break;
-	}
-}
-
 void CMainRenameDialog::DoDataExchange( CDataExchange* pDX )
 {
 	const bool firstInit = NULL == m_fileListCtrl.m_hWnd;
@@ -389,7 +417,8 @@ void CMainRenameDialog::DoDataExchange( CDataExchange* pDX )
 	ui::DDX_ButtonIcon( pDX, IDC_PASTE_FILES_BUTTON, ID_EDIT_PASTE );
 	ui::DDX_ButtonIcon( pDX, IDC_CLEAR_FILES_BUTTON, ID_REMOVE_ALL_ITEMS );
 	ui::DDX_ButtonIcon( pDX, IDC_REPLACE_FILES_BUTTON, ID_EDIT_REPLACE );
-	ui::DDX_ButtonIcon( pDX, IDC_UNDO_BUTTON, ID_EDIT_UNDO );
+	ui::DDX_ButtonIcon( pDX, IDC_UNDO_BUTTON, ID_EDIT_UNDO, false );
+	ui::DDX_ButtonIcon( pDX, IDC_REDO_BUTTON, ID_EDIT_REDO, false );
 
 	if ( DialogOutput == pDX->m_bSaveAndValidate )
 	{
@@ -429,7 +458,7 @@ BEGIN_MESSAGE_MAP( CMainRenameDialog, CBaseMainDialog )
 	ON_COMMAND( ID_TOGGLE_AUTO_GENERATE, OnToggleAutoGenerate )
 	ON_UPDATE_COMMAND_UI( ID_TOGGLE_AUTO_GENERATE, OnUpdateAutoGenerate )
 	ON_COMMAND_RANGE( ID_NUMERIC_SEQUENCE_2DIGITS, ID_EXTENSION_SEPARATOR, OnNumericSequence )
-	ON_BN_CLICKED( IDC_UNDO_BUTTON, OnBnClicked_Undo )
+	ON_CONTROL_RANGE( BN_CLICKED, IDC_UNDO_BUTTON, IDC_REDO_BUTTON, OnBnClicked_UndoRedo )
 	ON_EN_CHANGE( IDC_SEQ_COUNT_EDIT, OnEnChange_SeqCounter )
 	ON_COMMAND( ID_SEQ_COUNT_RESET, OnSeqCountReset )
 	ON_UPDATE_COMMAND_UI( ID_SEQ_COUNT_RESET, OnUpdateSeqCountReset )
@@ -520,11 +549,12 @@ void CMainRenameDialog::OnOK( void )
 			else
 				SwitchMode( MakeMode );
 			break;
-		case UndoRollbackMode:
+		case RollBackMode:
+		case RollForwardMode:
 		{
 			cmd::CScopedErrorObserver observe( this );
 
-			if ( m_pFileModel->GetCommandModel()->Undo() )
+			if ( m_pFileModel->UndoRedo( RollBackMode == m_mode ? cmd::Undo : cmd::Redo ) )
 				CBaseMainDialog::OnOK();
 			else
 				SwitchMode( MakeMode );
@@ -658,10 +688,10 @@ void CMainRenameDialog::OnBnClicked_ReplaceAllDelimitersDestFiles( void )
 	PostMakeDest();
 }
 
-void CMainRenameDialog::OnBnClicked_Undo( void )
+void CMainRenameDialog::OnBnClicked_UndoRedo( UINT btnId )
 {
-	PopUndoTop();
 	GotoDlgCtrl( GetDlgItem( IDOK ) );
+	PopUndoRedoTop( IDC_UNDO_BUTTON == btnId ? cmd::Undo : cmd::Redo );
 }
 
 void CMainRenameDialog::OnFieldChanged( void )
@@ -734,7 +764,7 @@ void CMainRenameDialog::OnToggleAutoGenerate( void )
 
 void CMainRenameDialog::OnUpdateAutoGenerate( CCmdUI* pCmdUI )
 {
-	pCmdUI->Enable( m_mode != UndoRollbackMode );
+	pCmdUI->Enable( m_mode != RollBackMode );
 	pCmdUI->SetCheck( m_autoGenerate );
 }
 

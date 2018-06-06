@@ -15,9 +15,15 @@
 
 namespace cmd
 {
-	const CEnumTags& GetTags_Command( void )
+	const CEnumTags& GetTags_CommandType( void )
 	{
 		static const CEnumTags tags( _T("Rename Files|Touch Files"), _T("RENAME|TOUCH"), -1, RenameFile );
+		return tags;
+	}
+
+	const CEnumTags& GetTags_UndoRedo( void )
+	{
+		static const CEnumTags tags( _T("Undo|Redo") );
 		return tags;
 	}
 
@@ -43,8 +49,8 @@ namespace cmd
 	IErrorObserver* CFileCmd::s_pErrorObserver = NULL;
 	CLogger* CFileCmd::s_pLogger = (CLogger*)-1;
 
-	CFileCmd::CFileCmd( Command command, const fs::CPath& srcPath )
-		: CCommand( command, NULL, &cmd::GetTags_Command() )
+	CFileCmd::CFileCmd( CommandType cmdType, const fs::CPath& srcPath )
+		: CCommand( cmdType, NULL, &GetTags_CommandType() )
 		, m_srcPath( srcPath )
 	{
 		if ( (CLogger*)-1 == s_pLogger )
@@ -107,15 +113,15 @@ namespace cmd
 
 	// CFileMacroCmd implementation
 
-	CFileMacroCmd::CFileMacroCmd( Command subCmdType, const CTime& timestamp /*= CTime::GetCurrentTime()*/ )
-		: CMacroCommand( GetTags_Command().FormatKey( subCmdType ), subCmdType )
+	CFileMacroCmd::CFileMacroCmd( CommandType subCmdType, const CTime& timestamp /*= CTime::GetCurrentTime()*/ )
+		: CMacroCommand( GetTags_CommandType().FormatKey( subCmdType ), subCmdType )
 		, m_timestamp( timestamp )
 	{
 	}
 
 	std::tstring CFileMacroCmd::Format( bool detailed ) const
 	{
-		std::tstring text = GetTags_Command().Format( GetTypeID(), detailed ? CEnumTags::UiTag : CEnumTags::KeyTag );
+		std::tstring text = GetTags_CommandType().Format( GetTypeID(), detailed ? CEnumTags::UiTag : CEnumTags::KeyTag );
 
 		if ( m_timestamp.GetTime() != 0 )
 			stream::Tag( text, time_utl::FormatTimestamp( m_timestamp, detailed ? time_utl::s_outFormatUi : time_utl::s_outFormat ), _T(" ") );

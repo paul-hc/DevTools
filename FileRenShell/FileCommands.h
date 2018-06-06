@@ -29,7 +29,7 @@ namespace cmd
 	abstract class CFileCmd : public CCommand
 	{
 	protected:
-		CFileCmd( Command command, const fs::CPath& srcPath );
+		CFileCmd( CommandType cmdType, const fs::CPath& srcPath );
 	public:
 		void ExecuteHandle( void ) throws_( CUserFeedbackException );
 
@@ -71,7 +71,7 @@ namespace cmd
 	class CFileMacroCmd : public CMacroCommand
 	{
 	public:
-		CFileMacroCmd( Command subCmdType, const CTime& timestamp = CTime::GetCurrentTime() );
+		CFileMacroCmd( CommandType subCmdType, const CTime& timestamp = CTime::GetCurrentTime() );
 
 		const CTime& GetTimestamp( void ) const { return m_timestamp; }
 

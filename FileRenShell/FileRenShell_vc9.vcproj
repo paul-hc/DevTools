@@ -670,6 +670,14 @@
 					>
 				</File>
 				<File
+					RelativePath=".\CommandModelSerializer.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\CommandModelSerializer.h"
+					>
+				</File>
+				<File
 					RelativePath=".\FileCommands.cpp"
 					>
 				</File>
@@ -717,19 +725,19 @@
 					RelativePath=".\TouchItem.h"
 					>
 				</File>
-				<File
-					RelativePath=".\UndoLogSerializer.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\UndoLogSerializer.h"
-					>
-				</File>
 			</Filter>
 		</Filter>
 		<Filter
 			Name="Unit Tests"
 			>
+			<File
+				RelativePath=".\ut\CommandModelSerializerTests.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\ut\CommandModelSerializerTests.h"
+				>
+			</File>
 			<File
 				RelativePath=".\ut\PathAlgorithmsTests.cpp"
 				>
@@ -744,14 +752,6 @@
 			</File>
 			<File
 				RelativePath=".\ut\RenameFilesTests.h"
-				>
-			</File>
-			<File
-				RelativePath=".\ut\UndoLogSerializerTests.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\ut\UndoLogSerializerTests.h"
 				>
 			</File>
 		</Filter>

@@ -11,9 +11,14 @@ namespace fs { class CPath; }
 
 namespace cmd
 {
-	enum Command { RenameFile = 100, TouchFile };
+	enum CommandType { RenameFile = 100, TouchFile };
 
-	const CEnumTags& GetTags_Command( void );
+	const CEnumTags& GetTags_CommandType( void );
+
+
+	enum UndoRedo { Undo, Redo };
+
+	const CEnumTags& GetTags_UndoRedo( void );
 
 
 	interface IErrorObserver

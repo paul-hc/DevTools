@@ -35,7 +35,7 @@ private:
 	virtual CFileModel* GetFileModel( void ) const;
 	virtual CDialog* GetDialog( void );
 	virtual void PostMakeDest( bool silent = false );
-	virtual void PopUndoTop( void );
+	virtual void PopUndoRedoTop( cmd::UndoRedo undoRedo );
 
 	// utl::IObserver interface (via IFileEditor)
 	virtual void OnUpdate( utl::ISubject* pSubject, utl::IMessage* pMessage );
@@ -52,7 +52,7 @@ private:
 private:
 	void SetupFileListView( void );
 
-	enum Mode { MakeMode, RenameMode, UndoRollbackMode };		// same as OK button label
+	enum Mode { MakeMode, RenameMode, RollBackMode, RollForwardMode };		// same as OK button label
 	void SwitchMode( Mode mode );
 
 	void AutoGenerateFiles( void );
@@ -122,7 +122,7 @@ protected:
 	afx_msg void OnToggleAutoGenerate( void );
 	afx_msg void OnUpdateAutoGenerate( CCmdUI* pCmdUI );
 	afx_msg void OnNumericSequence( UINT cmdId );
-	afx_msg void OnBnClicked_Undo( void );
+	afx_msg void OnBnClicked_UndoRedo( UINT btnId );
 	afx_msg void OnBnClicked_PickRenameActions( void );
 	afx_msg void OnSingleWhitespace( void );
 	afx_msg void OnRemoveWhitespace( void );

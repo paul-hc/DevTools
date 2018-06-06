@@ -5,14 +5,6 @@
 
 namespace app
 {
-	enum MenuCommand
-	{
-		Cmd_SendToCliboard, Cmd_RenameFiles, Cmd_TouchFiles, Cmd_Undo,
-		Cmd_RunUnitTests,
-			_CmdCount
-	};
-
-
 	enum CustomColors { ColorErrorBk = color::PastelPink };
 }
 

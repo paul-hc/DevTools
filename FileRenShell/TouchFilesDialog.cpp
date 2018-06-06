@@ -46,6 +46,7 @@ namespace layout
 
 		{ IDOK, MoveX },
 		{ IDC_UNDO_BUTTON, MoveX },
+		{ IDC_REDO_BUTTON, MoveX },
 		{ IDCANCEL, MoveX }
 	};
 }
@@ -114,12 +115,11 @@ bool CTouchFilesDialog::TouchFiles( void )
 
 void CTouchFilesDialog::SwitchMode( Mode mode )
 {
-	static const CEnumTags modeTags( _T("&Store|&Touch|&Rollback") );
-
 	m_mode = mode;
 	if ( NULL == m_hWnd )
 		return;
 
+	static const CEnumTags modeTags( _T("&Store|&Touch|Roll &Back|Roll &Forward") );
 	ui::SetDlgItemText( m_hWnd, IDOK, modeTags.FormatUi( m_mode ) );
 
 	static const UINT ctrlIds[] =
@@ -128,8 +128,9 @@ void CTouchFilesDialog::SwitchMode( Mode mode )
 		IDC_MODIFIED_DATE, IDC_CREATED_DATE, IDC_ACCESSED_DATE,
 		IDC_ATTRIB_READONLY_CHECK, IDC_ATTRIB_HIDDEN_CHECK, IDC_ATTRIB_SYSTEM_CHECK, IDC_ATTRIB_ARCHIVE_CHECK
 	};
-	ui::EnableControls( *this, ctrlIds, COUNT_OF( ctrlIds ), m_mode != UndoRollbackMode );
-	ui::EnableControl( *this, IDC_UNDO_BUTTON, m_mode != UndoRollbackMode && m_pFileModel->CanUndo( cmd::TouchFile ) );
+	ui::EnableControls( *this, ctrlIds, COUNT_OF( ctrlIds ), m_mode != RollBackMode );
+	ui::EnableControl( *this, IDC_UNDO_BUTTON, m_mode != RollBackMode && m_mode != RollForwardMode && m_pFileModel->CanUndoRedo( cmd::Undo ) );
+	ui::EnableControl( *this, IDC_REDO_BUTTON, m_mode != RollForwardMode && m_mode != RollBackMode && m_pFileModel->CanUndoRedo( cmd::Redo ) );
 
 	m_anyChanges = utl::Any( m_rTouchItems, std::mem_fun( &CTouchItem::IsModified ) );
 	ui::EnableControl( *this, IDOK, m_mode != TouchMode || m_anyChanges );
@@ -155,15 +156,31 @@ void CTouchFilesDialog::PostMakeDest( bool silent /*= false*/ )
 	SwitchMode( TouchMode );
 }
 
-void CTouchFilesDialog::PopUndoTop( void )
+void CTouchFilesDialog::PopUndoRedoTop( cmd::UndoRedo undoRedo )
 {
-	ASSERT( m_mode != UndoRollbackMode );
-	ASSERT( m_pFileModel->CanUndo( cmd::TouchFile ) );
+	ASSERT( m_mode != RollBackMode && m_mode != RollForwardMode );
 
-	ClearFileErrors();
-	m_pFileModel->PopUndo();				// fetches data set from undo stack (macro command)
-	MarkInvalidSrcItems();
-	SwitchMode( UndoRollbackMode );
+	if ( m_pFileModel->CanUndoRedo( undoRedo, cmd::TouchFile ) )
+	{
+		ClearFileErrors();
+		m_pFileModel->FetchFromStack( undoRedo );		// fetch dataset from the stack top macro command
+		MarkInvalidSrcItems();
+		SwitchMode( cmd::Undo == undoRedo ? RollBackMode : RollForwardMode );
+	}
+	else
+	{	// end this dialog and spawn the proper target dialog editor
+		cmd::CommandType cmdType = static_cast< cmd::CommandType >( m_pFileModel->PeekCmdAs< utl::ICommand >( undoRedo )->GetTypeID() );
+		ASSERT( m_pFileModel->CanUndoRedo( undoRedo, cmdType ) );
+
+		CWnd* pParent = GetParent();
+		OnCancel();			// end this dialog
+		m_pFileModel->RemoveObserver( this );
+
+		std::auto_ptr< IFileEditor > pFileEditor( m_pFileModel->MakeFileEditor( cmdType, pParent ) );
+		pFileEditor->PopUndoRedoTop( undoRedo );
+
+		m_nModalResult = static_cast< int >( pFileEditor->GetDialog()->DoModal() );		// pass the modal result from the spawned editor dialog
+	}
 }
 
 void CTouchFilesDialog::SetupDialog( void )
@@ -442,6 +459,22 @@ void CTouchFilesDialog::ModifyDiffTextEffectAt( std::vector< ui::CTextEffect >& 
 	}
 }
 
+void CTouchFilesDialog::QueryTooltipText( std::tstring& rText, UINT cmdId, CToolTipCtrl* /*pTooltip*/ ) const
+{
+	switch ( cmdId )
+	{
+		case IDC_UNDO_BUTTON:
+		case IDC_REDO_BUTTON:
+		{
+			cmd::UndoRedo undoRedo = IDC_UNDO_BUTTON == cmdId ? cmd::Undo : cmd::Redo;
+			rText = str::Format( _T("%s the last file operation"), cmd::GetTags_UndoRedo().FormatUi( undoRedo ).c_str() );
+			if ( utl::ICommand* pTopCmd = m_pFileModel->PeekCmdAs< utl::ICommand >( undoRedo ) )
+				stream::Tag( rText, pTopCmd->Format( true ), _T(": ") );
+			break;
+		}
+	}
+}
+
 size_t CTouchFilesDialog::FindItemPos( const fs::CPath& keyPath ) const
 {
 	return utl::BinaryFindPos( m_rTouchItems, keyPath, CBasePathItem::ToKeyPath() );
@@ -490,7 +523,8 @@ void CTouchFilesDialog::DoDataExchange( CDataExchange* pDX )
 	ui::DDX_ButtonIcon( pDX, IDC_COPY_SOURCE_PATHS_BUTTON, ID_EDIT_COPY );
 	ui::DDX_ButtonIcon( pDX, IDC_PASTE_FILES_BUTTON, ID_EDIT_PASTE );
 	ui::DDX_ButtonIcon( pDX, IDC_CLEAR_FILES_BUTTON, ID_REMOVE_ALL_ITEMS );
-	ui::DDX_ButtonIcon( pDX, IDC_UNDO_BUTTON, ID_EDIT_UNDO );
+	ui::DDX_ButtonIcon( pDX, IDC_UNDO_BUTTON, ID_EDIT_UNDO, false );
+	ui::DDX_ButtonIcon( pDX, IDC_REDO_BUTTON, ID_EDIT_REDO, false );
 
 	if ( DialogOutput == pDX->m_bSaveAndValidate )
 	{
@@ -510,7 +544,7 @@ void CTouchFilesDialog::DoDataExchange( CDataExchange* pDX )
 
 BEGIN_MESSAGE_MAP( CTouchFilesDialog, CBaseMainDialog )
 	ON_WM_CONTEXTMENU()
-	ON_BN_CLICKED( IDC_UNDO_BUTTON, OnBnClicked_Undo )
+	ON_CONTROL_RANGE( BN_CLICKED, IDC_UNDO_BUTTON, IDC_REDO_BUTTON, OnBnClicked_UndoRedo )
 	ON_BN_CLICKED( IDC_COPY_SOURCE_PATHS_BUTTON, OnBnClicked_CopySourceFiles )
 	ON_BN_CLICKED( IDC_PASTE_FILES_BUTTON, OnBnClicked_PasteDestStates )
 	ON_BN_CLICKED( IDC_CLEAR_FILES_BUTTON, OnBnClicked_ResetDestFiles )
@@ -549,11 +583,12 @@ void CTouchFilesDialog::OnOK( void )
 			else
 				SwitchMode( TouchMode );
 			break;
-		case UndoRollbackMode:
+		case RollBackMode:
+		case RollForwardMode:
 		{
 			cmd::CScopedErrorObserver observe( this );
 
-			if ( m_pFileModel->GetCommandModel()->Undo() )
+			if ( m_pFileModel->UndoRedo( RollBackMode == m_mode ? cmd::Undo : cmd::Redo ) )
 				CBaseMainDialog::OnOK();
 			else
 				SwitchMode( TouchMode );
@@ -580,10 +615,10 @@ void CTouchFilesDialog::OnFieldChanged( void )
 	SwitchMode( StoreMode );
 }
 
-void CTouchFilesDialog::OnBnClicked_Undo( void )
+void CTouchFilesDialog::OnBnClicked_UndoRedo( UINT btnId )
 {
-	PopUndoTop();
 	GotoDlgCtrl( GetDlgItem( IDOK ) );
+	PopUndoRedoTop( IDC_UNDO_BUTTON == btnId ? cmd::Undo : cmd::Redo );
 }
 
 void CTouchFilesDialog::OnBnClicked_CopySourceFiles( void )

@@ -10,8 +10,9 @@
 class CCommandModel;
 class CRenameItem;
 class CTouchItem;
+interface IFileEditor;
 namespace fmt { enum PathFormat; }
-namespace cmd { enum Command; }
+namespace cmd { enum CommandType; enum UndoRedo; }
 
 
 class CFileModel : public CSubject
@@ -28,14 +29,15 @@ public:
 	const std::vector< fs::CPath >& GetSourcePaths( void ) const { return m_sourcePaths; }
 	CCommandModel* GetCommandModel( void );
 
-	bool SaveUndoLog( void ) const;
-	bool LoadUndoLog( void );
+	bool SaveCommandModel( void ) const;
+	bool LoadCommandModel( void );
 
-	bool CanUndo( cmd::Command cmdType ) const;
-	void PopUndo( void );				// fetches data set from undo stack (macro command)
+	bool CanUndoRedo( cmd::UndoRedo undoRedo, int typeId = 0 ) const;
+	bool UndoRedo( cmd::UndoRedo undoRedo );
+	void FetchFromStack( cmd::UndoRedo undoRedo );				// fetches data set from undo stack (macro command)
 
 	template< typename CmdType >
-	CmdType* PeekUndoCmdAs( void ) const;
+	CmdType* PeekCmdAs( cmd::UndoRedo undoRedo ) const;
 
 	// utl::ISubject interface
 	virtual const std::tstring& GetCode( void ) const;
@@ -48,6 +50,8 @@ public:
 	const std::vector< CTouchItem* >& GetTouchItems( void ) const { ASSERT( !m_touchItems.empty() ); return m_touchItems; }
 
 	void ResetDestinations( void );
+
+	IFileEditor* MakeFileEditor( cmd::CommandType cmdType, CWnd* pParent );
 
 	// RENAME
 	bool CopyClipSourcePaths( fmt::PathFormat format, CWnd* pWnd ) const;
@@ -67,20 +71,32 @@ private:
 
 	struct AddRenameItemFromCmd
 	{
-		AddRenameItemFromCmd( CFileModel* pFileModel ) : m_pFileModel( pFileModel ) { ASSERT( m_pFileModel != NULL && m_pFileModel->m_sourcePaths.empty() ); }
+		AddRenameItemFromCmd( CFileModel* pFileModel, cmd::UndoRedo undoRedo )
+			: m_pFileModel( pFileModel )
+			, m_undoRedo( undoRedo )
+		{
+			ASSERT( m_pFileModel != NULL && m_pFileModel->m_sourcePaths.empty() );
+		}
 
 		void operator()( const utl::ICommand* pCmd );
 	private:
 		CFileModel* m_pFileModel;
+		cmd::UndoRedo m_undoRedo;
 	};
 
 	struct AddTouchItemFromCmd
 	{
-		AddTouchItemFromCmd( CFileModel* pFileModel ) : m_pFileModel( pFileModel ) { ASSERT( m_pFileModel != NULL && m_pFileModel->m_sourcePaths.empty() ); }
+		AddTouchItemFromCmd( CFileModel* pFileModel, cmd::UndoRedo undoRedo )
+			: m_pFileModel( pFileModel )
+			, m_undoRedo( undoRedo )
+		{
+			ASSERT( m_pFileModel != NULL && m_pFileModel->m_sourcePaths.empty() );
+		}
 
 		void operator()( const utl::ICommand* pCmd );
 	private:
 		CFileModel* m_pFileModel;
+		cmd::UndoRedo m_undoRedo;
 	};
 
 	friend struct AddRenameItemFromCmd;
@@ -99,10 +115,10 @@ private:
 // template code
 
 template< typename CmdType >
-CmdType* CFileModel::PeekUndoCmdAs( void ) const
+CmdType* CFileModel::PeekCmdAs( cmd::UndoRedo undoRedo ) const
 {
 	if ( m_pCommandModel.get() != NULL )
-		return dynamic_cast< CmdType* >( m_pCommandModel->PeekUndo() );
+		return dynamic_cast< CmdType* >( cmd::Undo == undoRedo ? m_pCommandModel->PeekUndo() : m_pCommandModel->PeekRedo() );
 
 	return NULL;
 }

@@ -35,7 +35,7 @@ private:
 	virtual CFileModel* GetFileModel( void ) const;
 	virtual CDialog* GetDialog( void );
 	virtual void PostMakeDest( bool silent = false );
-	virtual void PopUndoTop( void );
+	virtual void PopUndoRedoTop( cmd::UndoRedo undoRedo );
 
 	// utl::IObserver interface (via IFileEditor)
 	virtual void OnUpdate( utl::ISubject* pSubject, utl::IMessage* pMessage );
@@ -47,10 +47,13 @@ private:
 	// CReportListControl::ITextEffectCallback interface
 	virtual void CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARAM rowKey, int subItem ) const;
 	virtual void ModifyDiffTextEffectAt( std::vector< ui::CTextEffect >& rMatchEffects, LPARAM rowKey, int subItem ) const;
+
+	// ui::ICmdCallback interface
+	virtual void QueryTooltipText( std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const;
 private:
 	void Construct( void );
 
-	enum Mode { StoreMode, TouchMode, UndoRollbackMode };		// reflects the OK button label
+	enum Mode { StoreMode, TouchMode, RollBackMode, RollForwardMode };		// reflects the OK button label
 
 	void SwitchMode( Mode mode );
 
@@ -110,7 +113,7 @@ protected:
 	virtual void OnOK( void );
 	afx_msg void OnContextMenu( CWnd* pWnd, CPoint screenPos );
 	afx_msg void OnFieldChanged( void );
-	afx_msg void OnBnClicked_Undo( void );
+	afx_msg void OnBnClicked_UndoRedo( UINT btnId );
 	afx_msg void OnBnClicked_CopySourceFiles( void );
 	afx_msg void OnBnClicked_PasteDestStates( void );
 	afx_msg void OnBnClicked_ResetDestFiles( void );

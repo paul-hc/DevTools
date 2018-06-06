@@ -12,7 +12,7 @@ abstract class CCommand : public utl::ICommand
 						, private utl::noncopyable
 {
 protected:
-	CCommand( int cmdId, utl::ISubject* pSubject, const CEnumTags* pCmdTags = NULL );
+	CCommand( int typeId, utl::ISubject* pSubject, const CEnumTags* pCmdTags = NULL );
 public:
 	virtual ~CCommand();
 
@@ -28,7 +28,7 @@ public:
 protected:
 	void NotifyObservers( void );
 private:
-	int m_cmdId;
+	int m_typeId;
 	utl::ISubject* m_pSubject;		// no ownership
 	const CEnumTags* m_pCmdTags;
 };
@@ -39,7 +39,7 @@ class CMacroCommand : public utl::ICommand
 {
 	enum { MacroCmdId = 0xFFFF };
 public:
-	CMacroCommand( const std::tstring& userInfo = std::tstring(), int cmdId = MacroCmdId );
+	CMacroCommand( const std::tstring& userInfo = std::tstring(), int typeId = MacroCmdId );
 	virtual ~CMacroCommand();
 
 	// composite command
@@ -59,7 +59,7 @@ public:
 	virtual bool IsUndoable( void ) const;
 protected:
 	std::tstring m_userInfo;
-	int m_cmdId;
+	int m_typeId;
 	std::vector< utl::ICommand* > m_subCommands;		// with ownership
 	utl::ICommand* m_pMainCmd;
 };
@@ -88,9 +88,13 @@ public:
 	bool CanRedo( void ) const;
 
 	utl::ICommand* PeekUndo( void ) const { return !m_undoStack.empty() ? m_undoStack.back() : NULL; }
+	utl::ICommand* PeekRedo( void ) const { return !m_redoStack.empty() ? m_redoStack.back() : NULL; }
 
 	const std::deque< utl::ICommand* >& GetUndoStack( void ) const { return m_undoStack; }
-	std::deque< utl::ICommand* >& RefUndoStack( void ) { return m_undoStack; }
+	const std::deque< utl::ICommand* >& GetRedoStack( void ) const { return m_redoStack; }
+
+	void SwapUndoStack( std::deque< utl::ICommand* >& rUndoStack ) { m_undoStack.swap( rUndoStack ); }
+	void SwapRedoStack( std::deque< utl::ICommand* >& rRedoStack ) { m_redoStack.swap( rRedoStack ); }
 private:
 	// commands stored in UNDO and REDO must keep their objects alive
 	std::deque< utl::ICommand* > m_undoStack;			// stack top at end

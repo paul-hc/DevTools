@@ -25,20 +25,26 @@ private:
 	size_t ExtractDropInfo( IDataObject* pDropInfo );
 	void AugmentMenuItems( HMENU hMenu, UINT indexMenu, UINT idBaseCmd );
 
-	void ExecuteCommand( app::MenuCommand menuCmd, CWnd* pParentOwner );
-	IFileEditor* MakeFileEditor( cmd::Command cmdType, CWnd* pParentOwner );
+	enum MenuCommand
+	{
+		Cmd_SendToCliboard, Cmd_RenameFiles, Cmd_TouchFiles, Cmd_Undo, Cmd_Redo,
+		Cmd_RunUnitTests,
+			_CmdCount
+	};
 
 	struct CMenuCmdInfo
 	{
-		app::MenuCommand m_cmd;
+		MenuCommand m_cmd;
 		const TCHAR* m_pTitle;
 		const TCHAR* m_pStatusBarInfo;
 		UINT m_iconId;
 		bool m_addSep;
 	};
 
+	void ExecuteCommand( MenuCommand menuCmd, CWnd* pParentOwner );
+
 	std::tstring FormatCmdText( const CMenuCmdInfo& cmdInfo );
-	static const CMenuCmdInfo* FindCmd( app::MenuCommand cmd );
+	static const CMenuCmdInfo* FindCmd( MenuCommand cmd );
 private:
 	std::auto_ptr< CFileModel > m_pFileModel;
 	static const CMenuCmdInfo m_commands[];

@@ -40,7 +40,7 @@ size_t CEnumTags::TagIndex( int value, const std::vector< std::tstring >& tags )
 	return tagIndex;
 }
 
-std::tstring CEnumTags::_Format( int value, const std::vector< std::tstring >& tags ) const
+const std::tstring& CEnumTags::_Format( int value, const std::vector< std::tstring >& tags ) const
 {
 	return tags[ TagIndex( value, tags ) ];
 }

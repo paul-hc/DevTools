@@ -11,10 +11,10 @@ public:
 
 	const std::vector< std::tstring >& GetUiTags( void ) const { return m_uiTags; }
 
-	std::tstring FormatUi( int value ) const { return _Format( value, m_uiTags ); }
+	const std::tstring& FormatUi( int value ) const { return _Format( value, m_uiTags ); }
 	int ParseUi( const std::tstring& text ) const { int value; _Parse( value, text, m_uiTags ); return value; }
 
-	std::tstring FormatKey( int value ) const { return _Format( value, m_keyTags ); }
+	const std::tstring& FormatKey( int value ) const { return _Format( value, m_keyTags ); }
 	int ParseKey( const std::tstring& text ) const { int value; _Parse( value, text, m_keyTags ); return value; }
 
 	template< typename EnumType >
@@ -25,7 +25,7 @@ public:
 
 	enum TagType { UiTag, KeyTag };
 
-	std::tstring Format( int value, TagType tagType ) const { return _Format( value, UiTag == tagType ? m_uiTags : m_keyTags ); }
+	const std::tstring& Format( int value, TagType tagType ) const { return _Format( value, UiTag == tagType ? m_uiTags : m_keyTags ); }
 
 	template< typename EnumType >
 	bool ParseAs( EnumType& rValue, const std::tstring& text ) const { return UiTag == tagType ? ParseUiAs< EnumType >( rValue, text ) : ParseKeyAs< EnumType >( rValue, text ); }
@@ -42,7 +42,7 @@ private:
 	size_t TagIndex( int value, const std::vector< std::tstring >& tags ) const;
 	bool _Parse( int& rValue, const std::tstring& text, const std::vector< std::tstring >& tags ) const;
 
-	std::tstring _Format( int value, const std::vector< std::tstring >& tags ) const;
+	const std::tstring& _Format( int value, const std::vector< std::tstring >& tags ) const;
 	static bool Contains( const std::vector< std::tstring >& strings, const std::tstring& value );
 private:
 	const int m_defaultValue;
