@@ -3,7 +3,7 @@
 #pragma once
 
 #include "utl/FileState.h"
-#include "BasePathItem.h"
+#include "PathItemBase.h"
 
 
 namespace app
@@ -15,7 +15,7 @@ namespace app
 }
 
 
-class CTouchItem : public CBasePathItem
+class CTouchItem : public CPathItemBase
 {
 public:
 	CTouchItem( const fs::CFileState& srcState );

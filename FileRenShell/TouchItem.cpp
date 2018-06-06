@@ -27,7 +27,7 @@ namespace app
 // CTouchItem implementation
 
 CTouchItem::CTouchItem( const fs::CFileState& srcState )
-	: CBasePathItem( srcState.m_fullPath )
+	: CPathItemBase( srcState.m_fullPath )
 	, m_srcState( srcState )
 	, m_destState( m_srcState )
 {

@@ -53,8 +53,7 @@ namespace layout
 
 
 CTouchFilesDialog::CTouchFilesDialog( CFileModel* pFileModel, CWnd* pParent )
-	: CBaseMainDialog( IDD_TOUCH_FILES_DIALOG, pParent )
-	, m_pFileModel( pFileModel )
+	: CFileEditorBaseDialog( pFileModel, cmd::TouchFile, IDD_TOUCH_FILES_DIALOG, pParent )
 	, m_rTouchItems( m_pFileModel->LazyInitTouchItems() )
 	, m_mode( TouchMode )
 	, m_fileListCtrl( IDC_FILE_TOUCH_LIST, LVS_EX_GRIDLINES | CReportListControl::DefaultStyleEx )
@@ -62,7 +61,6 @@ CTouchFilesDialog::CTouchFilesDialog( CFileModel* pFileModel, CWnd* pParent )
 {
 	Construct();
 	REQUIRE( !m_rTouchItems.empty() );
-	m_pFileModel->AddObserver( this );
 
 	ASSERT_PTR( m_pFileModel );
 	m_regSection = reg::section_dialog;
@@ -81,7 +79,6 @@ CTouchFilesDialog::CTouchFilesDialog( CFileModel* pFileModel, CWnd* pParent )
 
 CTouchFilesDialog::~CTouchFilesDialog()
 {
-	m_pFileModel->RemoveObserver( this );
 }
 
 void CTouchFilesDialog::Construct( void )
@@ -138,16 +135,6 @@ void CTouchFilesDialog::SwitchMode( Mode mode )
 	m_fileListCtrl.Invalidate();			// do some custom draw magic
 }
 
-CFileModel* CTouchFilesDialog::GetFileModel( void ) const
-{
-	return m_pFileModel;
-}
-
-CDialog* CTouchFilesDialog::GetDialog( void )
-{
-	return this;
-}
-
 void CTouchFilesDialog::PostMakeDest( bool silent /*= false*/ )
 {
 	if ( !silent )
@@ -168,19 +155,7 @@ void CTouchFilesDialog::PopUndoRedoTop( cmd::UndoRedo undoRedo )
 		SwitchMode( cmd::Undo == undoRedo ? RollBackMode : RollForwardMode );
 	}
 	else
-	{	// end this dialog and spawn the proper target dialog editor
-		cmd::CommandType cmdType = static_cast< cmd::CommandType >( m_pFileModel->PeekCmdAs< utl::ICommand >( undoRedo )->GetTypeID() );
-		ASSERT( m_pFileModel->CanUndoRedo( undoRedo, cmdType ) );
-
-		CWnd* pParent = GetParent();
-		OnCancel();			// end this dialog
-		m_pFileModel->RemoveObserver( this );
-
-		std::auto_ptr< IFileEditor > pFileEditor( m_pFileModel->MakeFileEditor( cmdType, pParent ) );
-		pFileEditor->PopUndoRedoTop( undoRedo );
-
-		m_nModalResult = static_cast< int >( pFileEditor->GetDialog()->DoModal() );		// pass the modal result from the spawned editor dialog
-	}
+		PopStackRunCrossEditor( undoRedo );				// end this dialog and execute the target dialog editor
 }
 
 void CTouchFilesDialog::SetupDialog( void )
@@ -459,25 +434,9 @@ void CTouchFilesDialog::ModifyDiffTextEffectAt( std::vector< ui::CTextEffect >& 
 	}
 }
 
-void CTouchFilesDialog::QueryTooltipText( std::tstring& rText, UINT cmdId, CToolTipCtrl* /*pTooltip*/ ) const
-{
-	switch ( cmdId )
-	{
-		case IDC_UNDO_BUTTON:
-		case IDC_REDO_BUTTON:
-		{
-			cmd::UndoRedo undoRedo = IDC_UNDO_BUTTON == cmdId ? cmd::Undo : cmd::Redo;
-			rText = str::Format( _T("%s the last file operation"), cmd::GetTags_UndoRedo().FormatUi( undoRedo ).c_str() );
-			if ( utl::ICommand* pTopCmd = m_pFileModel->PeekCmdAs< utl::ICommand >( undoRedo ) )
-				stream::Tag( rText, pTopCmd->Format( true ), _T(": ") );
-			break;
-		}
-	}
-}
-
 size_t CTouchFilesDialog::FindItemPos( const fs::CPath& keyPath ) const
 {
-	return utl::BinaryFindPos( m_rTouchItems, keyPath, CBasePathItem::ToKeyPath() );
+	return utl::BinaryFindPos( m_rTouchItems, keyPath, CPathItemBase::ToKeyPath() );
 }
 
 void CTouchFilesDialog::MarkInvalidSrcItems( void )
@@ -507,7 +466,7 @@ app::DateTimeField CTouchFilesDialog::GetDateTimeField( UINT dtId )
 BOOL CTouchFilesDialog::OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo )
 {
 	return
-		CBaseMainDialog::OnCmdMsg( id, code, pExtra, pHandlerInfo ) ||
+		__super::OnCmdMsg( id, code, pExtra, pHandlerInfo ) ||
 		m_fileListCtrl.OnCmdMsg( id, code, pExtra, pHandlerInfo );
 }
 
@@ -523,8 +482,6 @@ void CTouchFilesDialog::DoDataExchange( CDataExchange* pDX )
 	ui::DDX_ButtonIcon( pDX, IDC_COPY_SOURCE_PATHS_BUTTON, ID_EDIT_COPY );
 	ui::DDX_ButtonIcon( pDX, IDC_PASTE_FILES_BUTTON, ID_EDIT_PASTE );
 	ui::DDX_ButtonIcon( pDX, IDC_CLEAR_FILES_BUTTON, ID_REMOVE_ALL_ITEMS );
-	ui::DDX_ButtonIcon( pDX, IDC_UNDO_BUTTON, ID_EDIT_UNDO, false );
-	ui::DDX_ButtonIcon( pDX, IDC_REDO_BUTTON, ID_EDIT_REDO, false );
 
 	if ( DialogOutput == pDX->m_bSaveAndValidate )
 	{
@@ -536,15 +493,14 @@ void CTouchFilesDialog::DoDataExchange( CDataExchange* pDX )
 		}
 	}
 
-	CBaseMainDialog::DoDataExchange( pDX );
+	__super::DoDataExchange( pDX );
 }
 
 
 // message handlers
 
-BEGIN_MESSAGE_MAP( CTouchFilesDialog, CBaseMainDialog )
+BEGIN_MESSAGE_MAP( CTouchFilesDialog, CFileEditorBaseDialog )
 	ON_WM_CONTEXTMENU()
-	ON_CONTROL_RANGE( BN_CLICKED, IDC_UNDO_BUTTON, IDC_REDO_BUTTON, OnBnClicked_UndoRedo )
 	ON_BN_CLICKED( IDC_COPY_SOURCE_PATHS_BUTTON, OnBnClicked_CopySourceFiles )
 	ON_BN_CLICKED( IDC_PASTE_FILES_BUTTON, OnBnClicked_PasteDestStates )
 	ON_BN_CLICKED( IDC_CLEAR_FILES_BUTTON, OnBnClicked_ResetDestFiles )
@@ -562,12 +518,6 @@ BEGIN_MESSAGE_MAP( CTouchFilesDialog, CBaseMainDialog )
 	ON_NOTIFY( DTN_DATETIMECHANGE, IDC_ACCESSED_DATE, OnDtnDateTimeChange )
 END_MESSAGE_MAP()
 
-BOOL CTouchFilesDialog::OnInitDialog( void )
-{
-	BOOL defaultFocus = CBaseMainDialog::OnInitDialog();
-	return defaultFocus;
-}
-
 void CTouchFilesDialog::OnOK( void )
 {
 	switch ( m_mode )
@@ -579,7 +529,7 @@ void CTouchFilesDialog::OnOK( void )
 			break;
 		case TouchMode:
 			if ( TouchFiles() )
-				CBaseMainDialog::OnOK();
+				__super::OnOK();
 			else
 				SwitchMode( TouchMode );
 			break;
@@ -589,7 +539,7 @@ void CTouchFilesDialog::OnOK( void )
 			cmd::CScopedErrorObserver observe( this );
 
 			if ( m_pFileModel->UndoRedo( RollBackMode == m_mode ? cmd::Undo : cmd::Redo ) )
-				CBaseMainDialog::OnOK();
+				__super::OnOK();
 			else
 				SwitchMode( TouchMode );
 			break;
@@ -607,18 +557,12 @@ void CTouchFilesDialog::OnContextMenu( CWnd* pWnd, CPoint screenPos )
 		return;					// supress rising WM_CONTEXTMENU to the parent
 	}
 
-	CBaseMainDialog::OnContextMenu( pWnd, screenPos );
+	__super::OnContextMenu( pWnd, screenPos );
 }
 
 void CTouchFilesDialog::OnFieldChanged( void )
 {
 	SwitchMode( StoreMode );
-}
-
-void CTouchFilesDialog::OnBnClicked_UndoRedo( UINT btnId )
-{
-	GotoDlgCtrl( GetDlgItem( IDOK ) );
-	PopUndoRedoTop( IDC_UNDO_BUTTON == btnId ? cmd::Undo : cmd::Redo );
 }
 
 void CTouchFilesDialog::OnBnClicked_CopySourceFiles( void )

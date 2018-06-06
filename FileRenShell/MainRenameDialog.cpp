@@ -79,8 +79,7 @@ namespace layout
 
 
 CMainRenameDialog::CMainRenameDialog( CFileModel* pFileModel, CWnd* pParent )
-	: CBaseMainDialog( IDD_RENAME_FILES_DIALOG, pParent )
-	, m_pFileModel( pFileModel )
+	: CFileEditorBaseDialog( pFileModel, cmd::RenameFile, IDD_RENAME_FILES_DIALOG, pParent )
 	, m_rRenameItems( m_pFileModel->LazyInitRenameItems() )
 	, m_mode( MakeMode )
 	, m_autoGenerate( AfxGetApp()->GetProfileInt( reg::section_mainDialog, reg::entry_autoGenerate, false ) != FALSE )
@@ -93,7 +92,6 @@ CMainRenameDialog::CMainRenameDialog( CFileModel* pFileModel, CWnd* pParent )
 	, m_pickRenameActionsStatic( ui::DropDown )
 {
 	REQUIRE( !m_rRenameItems.empty() );
-	m_pFileModel->AddObserver( this );
 
 	m_regSection = reg::section_mainDialog;
 	RegisterCtrlLayout( layout::styles, COUNT_OF( layout::styles ) );
@@ -117,7 +115,6 @@ CMainRenameDialog::CMainRenameDialog( CFileModel* pFileModel, CWnd* pParent )
 
 CMainRenameDialog::~CMainRenameDialog()
 {
-	m_pFileModel->RemoveObserver( this );
 }
 
 bool CMainRenameDialog::RenameFiles( void )
@@ -183,16 +180,6 @@ void CMainRenameDialog::SwitchMode( Mode mode )
 	ui::EnableControl( *this, IDC_REDO_BUTTON, m_mode != RollForwardMode && m_mode != RollBackMode && m_pFileModel->CanUndoRedo( cmd::Redo ) );
 }
 
-CFileModel* CMainRenameDialog::GetFileModel( void ) const
-{
-	return m_pFileModel;
-}
-
-CDialog* CMainRenameDialog::GetDialog( void )
-{
-	return this;
-}
-
 void CMainRenameDialog::PostMakeDest( bool silent /*= false*/ )
 {
 	if ( !silent )
@@ -208,7 +195,7 @@ void CMainRenameDialog::PostMakeDest( bool silent /*= false*/ )
 	{
 		ASSERT( !m_errorItems.empty() );
 
-		m_fileListCtrl.EnsureVisible( static_cast< int >( FindItemPos( m_errorItems.front()->GetSrcPath() ) ), FALSE );
+		m_fileListCtrl.EnsureVisible( static_cast< int >( FindItemPos( m_errorItems.front()->GetKeyPath() ) ), FALSE );
 		m_fileListCtrl.Invalidate();
 
 		SwitchMode( MakeMode );
@@ -229,19 +216,7 @@ void CMainRenameDialog::PopUndoRedoTop( cmd::UndoRedo undoRedo )
 		SwitchMode( cmd::Undo == undoRedo ? RollBackMode : RollForwardMode );
 	}
 	else
-	{	// end this dialog and spawn the proper target dialog editor
-		cmd::CommandType cmdType = static_cast< cmd::CommandType >( m_pFileModel->PeekCmdAs< utl::ICommand >( undoRedo )->GetTypeID() );
-		ASSERT( m_pFileModel->CanUndoRedo( undoRedo, cmdType ) );
-
-		CWnd* pParent = GetParent();
-		OnCancel();			// end this dialog
-		m_pFileModel->RemoveObserver( this );
-
-		std::auto_ptr< IFileEditor > pFileEditor( m_pFileModel->MakeFileEditor( cmdType, pParent ) );
-		pFileEditor->PopUndoRedoTop( undoRedo );
-
-		m_nModalResult = static_cast< int >( pFileEditor->GetDialog()->DoModal() );		// pass the modal result from the spawned editor dialog
-	}
+		PopStackRunCrossEditor( undoRedo );				// end this dialog and execute the target dialog editor
 }
 
 void CMainRenameDialog::OnUpdate( utl::ISubject* pSubject, utl::IMessage* pMessage )
@@ -249,12 +224,11 @@ void CMainRenameDialog::OnUpdate( utl::ISubject* pSubject, utl::IMessage* pMessa
 	pMessage;
 
 	if ( m_pFileModel == pSubject )
-	{
-		m_pRenSvc.reset( new CRenameService( m_rRenameItems ) );
-
 		if ( m_hWnd != NULL )
+		{
+			m_pRenSvc.reset( new CRenameService( m_rRenameItems ) );
 			SetupFileListView();
-	}
+		}
 }
 
 void CMainRenameDialog::ClearFileErrors( void )
@@ -283,26 +257,16 @@ void CMainRenameDialog::CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARA
 	subItem;
 
 	static const ui::CTextEffect s_errorBk( ui::Regular, CLR_NONE, app::ColorErrorBk );
-
 	const CRenameItem* pItem = CReportListControl::AsPtr< CRenameItem >( rowKey );
 
 	if ( utl::Contains( m_errorItems, pItem ) )
 		rTextEffect.Combine( s_errorBk );
 }
 
-void CMainRenameDialog::QueryTooltipText( std::tstring& rText, UINT cmdId, CToolTipCtrl* /*pTooltip*/ ) const
+void CMainRenameDialog::QueryTooltipText( std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const
 {
 	switch ( cmdId )
 	{
-		case IDC_UNDO_BUTTON:
-		case IDC_REDO_BUTTON:
-		{
-			cmd::UndoRedo undoRedo = IDC_UNDO_BUTTON == cmdId ? cmd::Undo : cmd::Redo;
-			rText = str::Format( _T("%s the last file operation"), cmd::GetTags_UndoRedo().FormatUi( undoRedo ).c_str() );
-			if ( utl::ICommand* pTopCmd = m_pFileModel->PeekCmdAs< utl::ICommand >( undoRedo ) )
-				stream::Tag( rText, pTopCmd->Format( true ), _T(": ") );
-			break;
-		}
 		case IDC_CHANGE_CASE_BUTTON:
 		{
 			static const std::vector< std::tstring > tooltips = str::LoadStrings( IDC_CHANGE_CASE_BUTTON );
@@ -320,12 +284,14 @@ void CMainRenameDialog::QueryTooltipText( std::tstring& rText, UINT cmdId, CTool
 		case IDC_REPLACE_FILES_BUTTON:
 			rText = CReplaceDialog::FormatTooltipMessage();
 			break;
+		default:
+			__super::QueryTooltipText( rText, cmdId, pTooltip );
 	}
 }
 
 size_t CMainRenameDialog::FindItemPos( const fs::CPath& srcPath ) const
 {
-	return utl::BinaryFindPos( m_rRenameItems, srcPath, CBasePathItem::ToKeyPath() );
+	return utl::BinaryFindPos( m_rRenameItems, srcPath, CPathItemBase::ToKeyPath() );
 }
 
 void CMainRenameDialog::MarkInvalidSrcItems( void )
@@ -339,8 +305,8 @@ std::tstring CMainRenameDialog::JoinErrorDestPaths( void ) const
 {
 	std::vector< fs::CPath > destPaths; destPaths.reserve( m_errorItems.size() );
 
-	for ( std::vector< CRenameItem* >::const_iterator itErrorItem = m_errorItems.begin(); itErrorItem != m_errorItems.end(); ++itErrorItem )
-		destPaths.push_back( ( *itErrorItem )->GetDestPath() );
+	for ( std::vector< CPathItemBase* >::const_iterator itErrorItem = m_errorItems.begin(); itErrorItem != m_errorItems.end(); ++itErrorItem )
+		destPaths.push_back( checked_static_cast< const CRenameItem* >( *itErrorItem )->GetDestPath() );
 
 	return str::Join( destPaths, _T("\r\n") );
 }
@@ -417,8 +383,6 @@ void CMainRenameDialog::DoDataExchange( CDataExchange* pDX )
 	ui::DDX_ButtonIcon( pDX, IDC_PASTE_FILES_BUTTON, ID_EDIT_PASTE );
 	ui::DDX_ButtonIcon( pDX, IDC_CLEAR_FILES_BUTTON, ID_REMOVE_ALL_ITEMS );
 	ui::DDX_ButtonIcon( pDX, IDC_REPLACE_FILES_BUTTON, ID_EDIT_REPLACE );
-	ui::DDX_ButtonIcon( pDX, IDC_UNDO_BUTTON, ID_EDIT_UNDO, false );
-	ui::DDX_ButtonIcon( pDX, IDC_REDO_BUTTON, ID_EDIT_REDO, false );
 
 	if ( DialogOutput == pDX->m_bSaveAndValidate )
 	{
@@ -440,13 +404,13 @@ void CMainRenameDialog::DoDataExchange( CDataExchange* pDX )
 		}
 	}
 
-	CBaseMainDialog::DoDataExchange( pDX );
+	__super::DoDataExchange( pDX );
 }
 
 
 // message handlers
 
-BEGIN_MESSAGE_MAP( CMainRenameDialog, CBaseMainDialog )
+BEGIN_MESSAGE_MAP( CMainRenameDialog, CFileEditorBaseDialog )
 	ON_WM_DESTROY()
 	ON_CBN_EDITCHANGE( IDC_FORMAT_COMBO, OnChanged_Format )
 	ON_CBN_SELCHANGE( IDC_FORMAT_COMBO, OnChanged_Format )
@@ -458,7 +422,6 @@ BEGIN_MESSAGE_MAP( CMainRenameDialog, CBaseMainDialog )
 	ON_COMMAND( ID_TOGGLE_AUTO_GENERATE, OnToggleAutoGenerate )
 	ON_UPDATE_COMMAND_UI( ID_TOGGLE_AUTO_GENERATE, OnUpdateAutoGenerate )
 	ON_COMMAND_RANGE( ID_NUMERIC_SEQUENCE_2DIGITS, ID_EXTENSION_SEPARATOR, OnNumericSequence )
-	ON_CONTROL_RANGE( BN_CLICKED, IDC_UNDO_BUTTON, IDC_REDO_BUTTON, OnBnClicked_UndoRedo )
 	ON_EN_CHANGE( IDC_SEQ_COUNT_EDIT, OnEnChange_SeqCounter )
 	ON_COMMAND( ID_SEQ_COUNT_RESET, OnSeqCountReset )
 	ON_UPDATE_COMMAND_UI( ID_SEQ_COUNT_RESET, OnUpdateSeqCountReset )
@@ -490,7 +453,7 @@ END_MESSAGE_MAP()
 
 BOOL CMainRenameDialog::OnInitDialog( void )
 {
-	BOOL defaultFocus = CBaseMainDialog::OnInitDialog();
+	BOOL defaultFocus = __super::OnInitDialog();
 	if ( m_autoGenerate )
 		AutoGenerateFiles();
 
@@ -544,7 +507,7 @@ void CMainRenameDialog::OnOK( void )
 				AfxGetApp()->WriteProfileString( m_regSection.c_str(), reg::entry_newDelimiterHistory, ui::GetWindowText( &m_newDelimiterEdit ).c_str() );
 				AfxGetApp()->WriteProfileInt( m_regSection.c_str(), reg::entry_seqCount, m_seqCountEdit.GetNumericValue() );
 
-				CBaseMainDialog::OnOK();
+				__super::OnOK();
 			}
 			else
 				SwitchMode( MakeMode );
@@ -555,7 +518,7 @@ void CMainRenameDialog::OnOK( void )
 			cmd::CScopedErrorObserver observe( this );
 
 			if ( m_pFileModel->UndoRedo( RollBackMode == m_mode ? cmd::Undo : cmd::Redo ) )
-				CBaseMainDialog::OnOK();
+				__super::OnOK();
 			else
 				SwitchMode( MakeMode );
 			break;
@@ -569,7 +532,7 @@ void CMainRenameDialog::OnDestroy( void )
 	AfxGetApp()->WriteProfileInt( reg::section_mainDialog, reg::entry_seqCountAutoAdvance, m_seqCountAutoAdvance );
 	AfxGetApp()->WriteProfileInt( reg::section_mainDialog, reg::entry_changeCase, m_changeCaseButton.GetSelValue() );
 
-	CBaseMainDialog::OnDestroy();
+	__super::OnDestroy();
 }
 
 void CMainRenameDialog::OnChanged_Format( void )
@@ -686,12 +649,6 @@ void CMainRenameDialog::OnBnClicked_ReplaceAllDelimitersDestFiles( void )
 
 	m_pFileModel->ForEachRenameDestination( func::ReplaceDelimiterSet( delimiterSet, ui::GetWindowText( &m_newDelimiterEdit ) ) );
 	PostMakeDest();
-}
-
-void CMainRenameDialog::OnBnClicked_UndoRedo( UINT btnId )
-{
-	GotoDlgCtrl( GetDlgItem( IDOK ) );
-	PopUndoRedoTop( IDC_UNDO_BUTTON == btnId ? cmd::Undo : cmd::Redo );
 }
 
 void CMainRenameDialog::OnFieldChanged( void )

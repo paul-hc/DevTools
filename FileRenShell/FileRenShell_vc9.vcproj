@@ -503,6 +503,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\FileEditorBaseDialog.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\FileEditorBaseDialog.h"
+				>
+			</File>
+			<File
 				RelativePath=".\FileRenameShell.cpp"
 				>
 			</File>
@@ -662,14 +670,6 @@
 				Name="model"
 				>
 				<File
-					RelativePath=".\BasePathItem.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\BasePathItem.h"
-					>
-				</File>
-				<File
 					RelativePath=".\CommandModelSerializer.cpp"
 					>
 				</File>
@@ -707,6 +707,14 @@
 				</File>
 				<File
 					RelativePath=".\IFileEditor.h"
+					>
+				</File>
+				<File
+					RelativePath=".\PathItemBase.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\PathItemBase.h"
 					>
 				</File>
 				<File

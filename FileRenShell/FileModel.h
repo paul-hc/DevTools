@@ -4,7 +4,7 @@
 
 #include "utl/Subject.h"
 #include "utl/InternalChange.h"
-#include "BasePathItem.h"
+#include "PathItemBase.h"
 
 
 class CCommandModel;

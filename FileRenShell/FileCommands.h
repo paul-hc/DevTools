@@ -4,7 +4,7 @@
 
 #include "utl/RuntimeException.h"
 #include "FileCommands_fwd.h"
-#include "BasePathItem.h"
+#include "PathItemBase.h"
 
 
 class CLogger;

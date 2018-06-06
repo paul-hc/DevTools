@@ -2,10 +2,10 @@
 #define RenameItem_h
 #pragma once
 
-#include "BasePathItem.h"
+#include "PathItemBase.h"
 
 
-class CRenameItem : public CBasePathItem
+class CRenameItem : public CPathItemBase
 {
 public:
 	CRenameItem( const fs::CPath& srcPath );

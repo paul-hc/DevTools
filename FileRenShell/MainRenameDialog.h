@@ -2,7 +2,6 @@
 #define MainRenameDialog_h
 #pragma once
 
-#include "utl/BaseMainDialog.h"
 #include "utl/DialogToolBar.h"
 #include "utl/EnumSplitButton.h"
 #include "utl/HistoryComboBox.h"
@@ -14,26 +13,21 @@
 #include "utl/TextEdit.h"
 #include "utl/ThemeStatic.h"
 #include "Application_fwd.h"
-#include "IFileEditor.h"
+#include "FileEditorBaseDialog.h"
 
 
-class CFileModel;
 class CRenameItem;
 class CRenameService;
-namespace str { enum Match; }
 
 
-class CMainRenameDialog : public CBaseMainDialog
-						, public IFileEditor
+class CMainRenameDialog : public CFileEditorBaseDialog
 						, private CReportListControl::ITextEffectCallback
 {
 public:
 	CMainRenameDialog( CFileModel* pFileModel, CWnd* pParent );
 	virtual ~CMainRenameDialog();
 private:
-	// IFileEditor interface
-	virtual CFileModel* GetFileModel( void ) const;
-	virtual CDialog* GetDialog( void );
+	// IFileEditor interface (partial)
 	virtual void PostMakeDest( bool silent = false );
 	virtual void PopUndoRedoTop( cmd::UndoRedo undoRedo );
 
@@ -68,9 +62,7 @@ private:
 	bool GenerateDestPaths( const std::tstring& format, UINT* pSeqCount );
 	void EnsureUniformNumPadding( void );
 private:
-	CFileModel* m_pFileModel;
 	const std::vector< CRenameItem* >& m_rRenameItems;
-	std::vector< CRenameItem* > m_errorItems;
 	std::auto_ptr< CRenameService > m_pRenSvc;
 
 	Mode m_mode;
@@ -122,7 +114,6 @@ protected:
 	afx_msg void OnToggleAutoGenerate( void );
 	afx_msg void OnUpdateAutoGenerate( CCmdUI* pCmdUI );
 	afx_msg void OnNumericSequence( UINT cmdId );
-	afx_msg void OnBnClicked_UndoRedo( UINT btnId );
 	afx_msg void OnBnClicked_PickRenameActions( void );
 	afx_msg void OnSingleWhitespace( void );
 	afx_msg void OnRemoveWhitespace( void );

@@ -1,17 +1,17 @@
-#ifndef BasePathItem_h
-#define BasePathItem_h
+#ifndef PathItemBase_h
+#define PathItemBase_h
 #pragma once
 
 #include "utl/Subject.h"
 #include "utl/Path.h"
 
 
-abstract class CBasePathItem : public CSubject
+abstract class CPathItemBase : public CSubject
 {
 protected:
-	CBasePathItem( const fs::CPath& keyPath );
+	CPathItemBase( const fs::CPath& keyPath );
 public:
-	virtual ~CBasePathItem();
+	virtual ~CPathItemBase();
 
 	const fs::CPath& GetKeyPath( void ) const { return m_keyPath; }
 	void StripDisplayCode( const fs::CPath& commonParentPath );
@@ -23,7 +23,7 @@ public:
 	struct ToKeyPath
 	{
 		const fs::CPath& operator()( const fs::CPath& path ) const { return path; }
-		const fs::CPath& operator()( const CBasePathItem* pItem ) const { return pItem->GetKeyPath(); }
+		const fs::CPath& operator()( const CPathItemBase* pItem ) const { return pItem->GetKeyPath(); }
 	};
 private:
 	fs::CPath m_keyPath;
@@ -47,7 +47,7 @@ namespace func
 	{
 		StripDisplayCode( const fs::CPath& commonParentPath ) : m_commonParentPath( commonParentPath ) {}
 
-		void operator()( CBasePathItem* pItem ) const
+		void operator()( CPathItemBase* pItem ) const
 		{
 			pItem->StripDisplayCode( m_commonParentPath );
 		}
@@ -57,4 +57,4 @@ namespace func
 }
 
 
-#endif // BasePathItem_h
+#endif // PathItemBase_h

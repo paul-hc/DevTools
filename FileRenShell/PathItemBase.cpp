@@ -1,34 +1,34 @@
 
 #include "stdafx.h"
-#include "BasePathItem.h"
+#include "PathItemBase.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
 
 
-CBasePathItem::CBasePathItem( const fs::CPath& keyPath )
+CPathItemBase::CPathItemBase( const fs::CPath& keyPath )
 	: m_keyPath( keyPath )
 	, m_displayPath( m_keyPath.GetNameExt() )
 {
 }
 
-CBasePathItem::~CBasePathItem()
+CPathItemBase::~CPathItemBase()
 {
 }
 
-void CBasePathItem::StripDisplayCode( const fs::CPath& commonParentPath )
+void CPathItemBase::StripDisplayCode( const fs::CPath& commonParentPath )
 {
 	m_displayPath = m_keyPath.Get();
 	path::StripPrefix( m_displayPath, commonParentPath.GetPtr() );
 }
 
-const std::tstring& CBasePathItem::GetCode( void ) const
+const std::tstring& CPathItemBase::GetCode( void ) const
 {
 	return m_keyPath.Get();
 }
 
-std::tstring CBasePathItem::GetDisplayCode( void ) const
+std::tstring CPathItemBase::GetDisplayCode( void ) const
 {
 	return m_displayPath;
 }

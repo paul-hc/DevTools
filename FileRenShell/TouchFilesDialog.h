@@ -7,10 +7,9 @@
 #include "utl/ISubject.h"
 #include "utl/ReportListControl.h"
 #include "utl/DateTimeControl.h"
-#include "IFileEditor.h"
+#include "FileEditorBaseDialog.h"
 
 
-class CFileModel;
 class CTouchItem;
 class CEnumTags;
 
@@ -23,8 +22,7 @@ namespace multi
 }
 
 
-class CTouchFilesDialog : public CBaseMainDialog
-						, public IFileEditor
+class CTouchFilesDialog : public CFileEditorBaseDialog
 						, private CReportListControl::ITextEffectCallback
 {
 public:
@@ -32,8 +30,6 @@ public:
 	virtual ~CTouchFilesDialog();
 private:
 	// IFileEditor interface
-	virtual CFileModel* GetFileModel( void ) const;
-	virtual CDialog* GetDialog( void );
 	virtual void PostMakeDest( bool silent = false );
 	virtual void PopUndoRedoTop( cmd::UndoRedo undoRedo );
 
@@ -47,9 +43,6 @@ private:
 	// CReportListControl::ITextEffectCallback interface
 	virtual void CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARAM rowKey, int subItem ) const;
 	virtual void ModifyDiffTextEffectAt( std::vector< ui::CTextEffect >& rMatchEffects, LPARAM rowKey, int subItem ) const;
-
-	// ui::ICmdCallback interface
-	virtual void QueryTooltipText( std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const;
 private:
 	void Construct( void );
 
@@ -82,9 +75,7 @@ private:
 	static const CEnumTags& GetTags_DateTimeField( void );
 	static app::DateTimeField GetDateTimeField( UINT dtId );
 private:
-	CFileModel* m_pFileModel;
 	const std::vector< CTouchItem* >& m_rTouchItems;
-	std::vector< CTouchItem* > m_errorItems;
 	Mode m_mode;
 	bool m_anyChanges;
 
@@ -108,12 +99,10 @@ public:
 	virtual BOOL OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo );
 protected:
 	virtual void DoDataExchange( CDataExchange* pDX );
-	virtual BOOL OnInitDialog( void );
 protected:
 	virtual void OnOK( void );
 	afx_msg void OnContextMenu( CWnd* pWnd, CPoint screenPos );
 	afx_msg void OnFieldChanged( void );
-	afx_msg void OnBnClicked_UndoRedo( UINT btnId );
 	afx_msg void OnBnClicked_CopySourceFiles( void );
 	afx_msg void OnBnClicked_PasteDestStates( void );
 	afx_msg void OnBnClicked_ResetDestFiles( void );

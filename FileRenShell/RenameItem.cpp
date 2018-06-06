@@ -54,7 +54,7 @@ namespace ren
 
 
 CRenameItem::CRenameItem( const fs::CPath& srcPath )
-	: CBasePathItem( srcPath )
+	: CPathItemBase( srcPath )
 {
 }
 
