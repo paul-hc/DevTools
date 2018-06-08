@@ -30,6 +30,21 @@ namespace str
 
 namespace ui
 {
+	bool EnsureVisibleRect( CRect& rDest, const CRect& anchor, bool horiz = true, bool vert = true );
+
+	// multiple monitors
+	enum MonitorArea { Monitor, Workspace };	// Workspace means Desktop or work area
+
+	CRect FindMonitorRect( HWND hWnd, MonitorArea area );
+	CRect FindMonitorRectAt( const POINT& screenPoint, MonitorArea area );
+	CRect FindMonitorRectAt( const RECT& screenRect, MonitorArea area );
+
+	inline bool EnsureVisibleDesktopRect( CRect& rScreenRect, MonitorArea area = Workspace )
+	{	// pull rScreenRect to the monitor desktop with most area
+		return ui::EnsureVisibleRect( rScreenRect, FindMonitorRectAt( rScreenRect, area ) );
+	}
+
+
 	void SetRadio( CCmdUI* pCmdUI, BOOL checked );
 }
 

@@ -1,6 +1,7 @@
 
 #include "stdafx.h"
 #include "MainFrame.h"
+#include "Utilities.h"
 #include "resource.h"
 
 #ifdef _DEBUG
@@ -63,21 +64,12 @@ void CMainFrame::LoadWindowPlacement( CREATESTRUCT& rCreateStruct )
 
 	if ( normalRect != CRect( -1, -1, -1, -1 ) )		// previously saved position?
 	{
+		ui::EnsureVisibleDesktopRect( normalRect );
+
+		rCreateStruct.x = normalRect.left;
+		rCreateStruct.y = normalRect.top;
 		rCreateStruct.cx = normalRect.Width();
 		rCreateStruct.cy = normalRect.Height();
-
-		// the following correction is needed when the taskbar is at the left or top and it is not "auto-hidden"
-		CRect workAreaRect;
-		SystemParametersInfo( SPI_GETWORKAREA, 0, &workAreaRect, 0 );
-
-		normalRect.TopLeft() += workAreaRect.TopLeft();
-
-		// make sure the window is not completely out of sight
-		CPoint maxBottomRight( GetSystemMetrics( SM_CXSCREEN ) - GetSystemMetrics( SM_CXICON ),
-							   GetSystemMetrics( SM_CYSCREEN ) - GetSystemMetrics( SM_CYICON ) );
-
-		rCreateStruct.x = (std::min)( normalRect.left, maxBottomRight.x );
-		rCreateStruct.y = (std::min)( normalRect.top, maxBottomRight.y );
 	}
 }
 
