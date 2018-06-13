@@ -102,6 +102,7 @@ bool CReplaceDialog::Execute( void )
 {
 	if ( SkipDialog() )
 		return ReplaceItems();
+
 	return DoModal() != IDCANCEL;
 }
 
@@ -114,19 +115,24 @@ bool CReplaceDialog::SkipDialog( void ) const
 	return false;
 }
 
-void CReplaceDialog::StoreFindWhatText( const std::tstring& text, const std::vector< std::tstring >* pDestFnames /*= NULL*/ )
+void CReplaceDialog::StoreFindWhatText( const std::tstring& text, const std::tstring& commonPrefix )
 {
 	GotoDlgCtrl( &m_findWhatCombo );
 	ui::SetComboEditText( m_findWhatCombo, text, m_matchCase ? str::Case : str::IgnoreCase );
 
-	if ( pDestFnames != NULL )
-	{
-		std::tstring maxCommonPrefix = CRenameService::ExtractLongestCommonPrefix( *pDestFnames );
-		if ( !maxCommonPrefix.empty() )
-			m_findWhatCombo.SetEditSel( (int)maxCommonPrefix.length(), -1 );
-	}
+	if ( !commonPrefix.empty() )
+		m_findWhatCombo.SetEditSel( static_cast< int >( commonPrefix.length() ), -1 );
 
 	OnChanged_FindWhat();
+}
+
+void CReplaceDialog::StoreReplaceWithText( const std::tstring& text )
+{
+	if ( CEdit* pComboEdit = (CEdit*)m_replaceWithCombo.GetWindow( GW_CHILD ) )
+	{
+		pComboEdit->SetFocus();
+		pComboEdit->ReplaceSel( text.c_str(), TRUE );
+	}
 }
 
 bool CReplaceDialog::ReplaceItems( bool commit /*= true*/ ) const
@@ -260,50 +266,45 @@ void CReplaceDialog::OnBnClicked_ClearDestFiles( void )
 
 void CReplaceDialog::OnPickFilename( void )
 {
-	std::tstring singlePattern;
-	CMenu popupMenu;
-	m_pRenSvc->MakePickFnamePatternMenu( &singlePattern, &popupMenu, m_findWhat.c_str() );		// single pattern or pick menu
+	m_pPickDataset = m_pRenSvc->MakeFnamePickDataset();
 
-	if ( !singlePattern.empty() )
-		StoreFindWhatText( singlePattern );
+	if ( m_pPickDataset->HasCommonPrefix() && ui::IsKeyPressed( VK_CONTROL ) )
+		StoreFindWhatText( m_pPickDataset->GetCommonPrefix(), m_pPickDataset->GetCommonPrefix() );		// write the common prefix directly as find pattern
 	else
 	{
-		ASSERT_PTR( popupMenu.GetSafeHmenu() );
+		CMenu popupMenu;
+		m_pPickDataset->MakePickFnameMenu( &popupMenu, m_findWhat.c_str() );
 		m_findToolbar.TrackButtonMenu( ID_PICK_FILENAME, this, &popupMenu, ui::DropRight );
 	}
 }
 
 void CReplaceDialog::OnFilenamePicked( UINT cmdId )
 {
-	std::vector< std::tstring > destFnames;
-	std::tstring selFname = m_pRenSvc->GetPickedFname( cmdId, &destFnames );
-	StoreFindWhatText( selFname, &destFnames );
+	ASSERT_PTR( m_pPickDataset.get() );
+
+	StoreFindWhatText( m_pPickDataset->GetPickedFname( cmdId ), m_pPickDataset->GetCommonPrefix() );
 }
 
 void CReplaceDialog::OnPickDirPath( void )
 {
-	// single command or pick menu
-	UINT singleCmdId;
-	CMenu popupMenu;
+	m_pPickDataset = m_pRenSvc->MakeDirPickDataset();
 
-	if ( m_pRenSvc->MakePickDirPathMenu( &singleCmdId, &popupMenu ) )
-		if ( singleCmdId != 0 )
-			OnDirPathPicked( singleCmdId );
+	if ( m_pPickDataset->HasSubDirs() )
+		if ( ui::IsKeyPressed( VK_CONTROL ) )
+			StoreReplaceWithText( m_pPickDataset->GetSubDirs().back() );		// pick the parent directory
 		else
 		{
-			ASSERT_PTR( popupMenu.GetSafeHmenu() );
+			CMenu popupMenu;
+			m_pPickDataset->MakePickDirMenu( &popupMenu );
 			m_replaceToolbar.TrackButtonMenu( ID_PICK_DIR_PATH, this, &popupMenu, ui::DropRight );
 		}
 }
 
 void CReplaceDialog::OnDirPathPicked( UINT cmdId )
 {
-	std::tstring selDir = m_pRenSvc->GetPickedDirectory( cmdId );
-	if ( CEdit* pComboEdit = (CEdit*)m_replaceWithCombo.GetWindow( GW_CHILD ) )
-	{
-		pComboEdit->SetFocus();
-		pComboEdit->ReplaceSel( selDir.c_str(), TRUE );
-	}
+	ASSERT_PTR( m_pPickDataset.get() );
+	StoreReplaceWithText( m_pPickDataset->GetPickedDirectory( cmdId ) );
+	m_pPickDataset.reset();
 }
 
 void CReplaceDialog::OnPickTextTools( void )

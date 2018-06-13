@@ -18,6 +18,7 @@
 
 class CRenameItem;
 class CRenameService;
+class CPickDataset;
 
 
 class CMainRenameDialog : public CFileEditorBaseDialog
@@ -61,6 +62,7 @@ private:
 
 	bool GenerateDestPaths( const std::tstring& format, UINT* pSeqCount );
 	void EnsureUniformNumPadding( void );
+	void ReplaceFormatEditText( const std::tstring& text );
 private:
 	const std::vector< CRenameItem* >& m_rRenameItems;
 	std::auto_ptr< CRenameService > m_pRenSvc;
@@ -68,6 +70,8 @@ private:
 	Mode m_mode;
 	bool m_autoGenerate;
 	bool m_seqCountAutoAdvance;
+
+	std::auto_ptr< CPickDataset > m_pPickDataset;
 private:
 	// enum { IDD = IDD_RENAME_FILES_DIALOG };
 	CHistoryComboBox m_formatCombo;

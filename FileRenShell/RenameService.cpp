@@ -4,6 +4,7 @@
 #include "RenameItem.h"
 #include "TitleCapitalizer.h"
 #include "resource.h"
+#include "utl/ContainerUtilities.h"
 #include "utl/MenuUtilities.h"
 #include "utl/PathGenerator.h"
 #include "utl/StringUtilities.h"
@@ -28,10 +29,13 @@ namespace pred
 }
 
 
-CRenameService::CRenameService( const std::vector< CRenameItem* >& renameItems )
+void CRenameService::StoreRenameItems( const std::vector< CRenameItem* >& renameItems )
 {
 	REQUIRE( !renameItems.empty() );
+
+	m_renamePairs.clear();
 	ren::MakePairsFromItems( m_renamePairs, renameItems );
+
 	ENSURE( m_renamePairs.size() == renameItems.size() );			// all SRC keys unique?
 }
 
@@ -85,170 +89,27 @@ void CRenameService::QueryDestFilenames( std::vector< std::tstring >& rDestFname
 	ENSURE( !rDestFnames.empty() );
 }
 
-void CRenameService::QuerySubDirs( std::vector< std::tstring >& rSubDirs ) const
-{
-	fs::CPathParts parts( GetDestPath( m_renamePairs.begin() ) );			// use the first path
-	str::Tokenize( rSubDirs, parts.m_dir.c_str(), _T("\\/") );
-
-	if ( rSubDirs.size() > PickDirPathMaxCount )
-		rSubDirs.erase( rSubDirs.begin(), rSubDirs.begin() + rSubDirs.size() - PickDirPathMaxCount );
-}
-
-std::tstring CRenameService::ExtractLongestCommonPrefix( const std::vector< std::tstring >& destFnames )
-{
-	ASSERT( !destFnames.empty() );
-
-	if ( 1 == destFnames.size() )
-		return destFnames.front();
-	else
-	{
-		size_t maxLen = std::max_element( destFnames.begin(), destFnames.end(), pred::LessBy< pred::CompareLength >() )->length();
-
-		for ( size_t prefixLen = 1; prefixLen <= maxLen; ++prefixLen )
-			if ( !AllHavePrefix( destFnames, prefixLen ) )
-				return destFnames.front().substr( 0, prefixLen - 1 );		// previous max common prefix
-	}
-
-	return std::tstring();
-}
-
-bool CRenameService::AllHavePrefix( const std::vector< std::tstring >& destFnames, size_t prefixLen )
-{
-	ASSERT( prefixLen != 0 );
-
-	if ( destFnames.empty() )
-		return false;
-
-	std::vector< std::tstring >::const_iterator itFirstFname = destFnames.begin();
-
-	if ( destFnames.size() > 1 )
-		for ( std::vector< std::tstring >::const_iterator itFname = itFirstFname + 1; itFname != destFnames.end(); ++itFname )
-			if ( !str::EqualsN( itFname->c_str(), itFirstFname->c_str(), prefixLen, false ) )
-				return false;
-
-	return true;		// all strings match the prefix
-}
-
-void CRenameService::MakePickFnamePatternMenu( std::tstring* pSinglePattern, CMenu* pPopupMenu, const TCHAR* pSelFname /*= NULL*/ ) const
-{
-	ASSERT_PTR( pSinglePattern );
-	ASSERT_PTR( pPopupMenu );
-	pSinglePattern->clear();
-	pPopupMenu->DestroyMenu();
-
-	std::vector< std::tstring > destFnames;
-	QueryDestFilenames( destFnames );
-
-	if ( 1 == destFnames.size() || ui::IsKeyPressed( VK_CONTROL ) )
-	{
-		std::tstring singlePattern = destFnames.front();
-		if ( destFnames.size() != 1 )
-		{
-			std::tstring maxCommonPrefix = ExtractLongestCommonPrefix( destFnames );
-			str::Trim( maxCommonPrefix );				// remove trailing spaces
-			if ( !maxCommonPrefix.empty() )
-				singlePattern = maxCommonPrefix;
-		}
-
-		if ( !singlePattern.empty() )
-		{
-			*pSinglePattern = singlePattern;
-			return;								// found single pattern, no menu
-		}
-	}
-
-	// multiple pick menu
-	pPopupMenu->CreatePopupMenu();
-	UINT cmdId = IDC_PICK_FILENAME_BASE, selId = 0;
-
-	for ( std::vector< std::tstring >::iterator itFname = destFnames.begin(); itFname != destFnames.end(); ++itFname, ++cmdId )
-	{
-		EscapeAmpersand( *itFname );
-		pPopupMenu->AppendMenu( MF_STRING, cmdId, itFname->c_str() );
-
-		if ( pSelFname != NULL && str::Matches( itFname->c_str(), pSelFname, false, false ) )
-			selId = cmdId;
-	}
-
-	if ( selId != 0 )
-		pPopupMenu->CheckMenuRadioItem( IDC_PICK_FILENAME_BASE, selId, selId, MF_BYCOMMAND );
-}
-
-bool CRenameService::MakePickDirPathMenu( UINT* pSingleCmdId, CMenu* pPopupMenu ) const
-{
-	ASSERT_PTR( pSingleCmdId );
-	ASSERT_PTR( pPopupMenu );
-	*pSingleCmdId = 0;
-	pPopupMenu->DestroyMenu();
-
-	std::vector< std::tstring > subDirs;
-	QuerySubDirs( subDirs );
-	if ( subDirs.empty() )
-		return false;															// root path, no sub-dirs to pick
-
-	if ( 1 == subDirs.size() || ui::IsKeyPressed( VK_CONTROL ) )
-		*pSingleCmdId = IDC_PICK_DIR_PATH_BASE + (UINT)subDirs.size() - 1;		// pick the parent directory
-	else
-	{
-		// multiple pick menu
-		pPopupMenu->CreatePopupMenu();
-		UINT cmdId = IDC_PICK_DIR_PATH_BASE;
-
-		for ( std::vector< std::tstring >::iterator itSubDir = subDirs.begin(), itLast = subDirs.end() - 1; itSubDir != subDirs.end(); ++itSubDir, ++cmdId )
-		{
-			EscapeAmpersand( *itSubDir );
-			pPopupMenu->AppendMenu( MF_STRING, cmdId, itSubDir->c_str() );
-			ui::SetMenuItemImage( *pPopupMenu, cmdId, itSubDir != itLast ? ID_BROWSE_FILE : ID_PARENT_FOLDER );
-		}
-	}
-	return true;
-}
-
-std::tstring CRenameService::GetPickedFname( UINT cmdId, std::vector< std::tstring >* pDestFnames /*= NULL*/ ) const
+std::auto_ptr< CPickDataset > CRenameService::MakeFnamePickDataset( void ) const
 {
 	std::vector< std::tstring > destFnames;
 	QueryDestFilenames( destFnames );
 
-	size_t pos = cmdId - IDC_PICK_FILENAME_BASE;
-	std::tstring selFname;
-	if ( pos < destFnames.size() )
-		selFname = destFnames[ pos ];
-	else
-		ASSERT( false );
-
-	if ( pDestFnames != NULL )
-		pDestFnames->swap( destFnames );
-
-	return selFname;
+	return std::auto_ptr< CPickDataset >( new CPickDataset( &destFnames ) );
 }
 
-std::tstring CRenameService::GetPickedDirectory( UINT cmdId ) const
+std::auto_ptr< CPickDataset > CRenameService::MakeDirPickDataset( void ) const
 {
-	std::vector< std::tstring > subDirs;
-	QuerySubDirs( subDirs );
-
-	size_t pos = cmdId - IDC_PICK_DIR_PATH_BASE;
-	if ( pos < subDirs.size() )
-		return subDirs[ pos ];
-
-	ASSERT( false );
-	return std::tstring();
+	return std::auto_ptr< CPickDataset >( new CPickDataset( GetDestPath( m_renamePairs.begin() ) ) );
 }
 
-std::tstring CRenameService::GetDestPath( fs::TPathPairMap::const_iterator itPair )
+fs::CPath CRenameService::GetDestPath( fs::TPathPairMap::const_iterator itPair )
 {
-	return itPair->second.IsEmpty() ? itPair->first.Get() : itPair->second.Get();
+	return itPair->second.IsEmpty() ? itPair->first : itPair->second;
 }
 
 std::tstring CRenameService::GetDestFname( fs::TPathPairMap::const_iterator itPair )
 {
-	return fs::CPathParts( GetDestPath( itPair ) ).m_fname;		// DEST (if not empty) or SRC
-}
-
-std::tstring& CRenameService::EscapeAmpersand( std::tstring& rText )
-{
-	str::Replace( rText, _T("&"), _T("&&") );
-	return rText;
+	return fs::CPathParts( GetDestPath( itPair ).Get() ).m_fname;		// DEST (if not empty) or SRC
 }
 
 std::tstring CRenameService::ApplyTextTool( UINT cmdId, const std::tstring& text )
@@ -294,4 +155,143 @@ std::tstring CRenameService::ApplyTextTool( UINT cmdId, const std::tstring& text
 			break;
 	}
 	return output;
+}
+
+
+// CPickDataset implementation
+
+CPickDataset::CPickDataset( std::vector< std::tstring >* pDestFnames )
+{
+	ASSERT_PTR( pDestFnames );
+	m_destFnames.swap( *pDestFnames );
+
+	if ( m_destFnames.size() > 1 )			// multiple files?
+	{
+		m_commonPrefix = ExtractLongestCommonPrefix();
+		str::Trim( m_commonPrefix );				// remove trailing spaces
+	}
+
+	ENSURE( !m_destFnames.empty() );
+}
+
+CPickDataset::CPickDataset( const fs::CPath& firstDestPath )
+{
+	fs::CPathParts parts( firstDestPath.Get() );
+	str::Tokenize( m_subDirs, parts.m_dir.c_str(), _T("\\/") );
+
+	if ( m_subDirs.size() > PickDirPathMaxCount )
+		m_subDirs.erase( m_subDirs.begin(), m_subDirs.begin() + m_subDirs.size() - PickDirPathMaxCount );
+}
+
+std::tstring CPickDataset::ExtractLongestCommonPrefix( void ) const
+{
+	REQUIRE( m_destFnames.size() > 1 );
+
+	size_t maxLen = std::max_element( m_destFnames.begin(), m_destFnames.end(), pred::LessBy< pred::CompareLength >() )->length();
+
+	for ( size_t prefixLen = 1; prefixLen <= maxLen; ++prefixLen )
+		if ( !AllHavePrefix( prefixLen ) )
+			return m_destFnames.front().substr( 0, prefixLen - 1 );		// previous max common prefix
+
+	return std::tstring();
+}
+
+bool CPickDataset::AllHavePrefix( size_t prefixLen ) const
+{
+	REQUIRE( prefixLen != 0 );
+	REQUIRE( m_destFnames.size() > 1 );
+
+	std::vector< std::tstring >::const_iterator itFirstFname = m_destFnames.begin();
+
+	if ( m_destFnames.size() > 1 )
+		for ( std::vector< std::tstring >::const_iterator itFname = itFirstFname + 1; itFname != m_destFnames.end(); ++itFname )
+			if ( !str::EqualsN( itFname->c_str(), itFirstFname->c_str(), prefixLen, false ) )
+				return false;
+
+	return true;		// all strings match the prefix
+}
+
+void CPickDataset::MakePickFnameMenu( CMenu* pPopupMenu, const TCHAR* pSelFname /*= NULL*/ ) const
+{
+	REQUIRE( !m_destFnames.empty() );
+
+	ASSERT_PTR( pPopupMenu );
+	pPopupMenu->DestroyMenu();
+
+	pPopupMenu->CreatePopupMenu();						// multiple pick menu
+	UINT cmdId = IDC_PICK_FILENAME_BASE, selId = 0;
+
+	if ( HasCommonPrefix() )
+	{
+		pPopupMenu->AppendMenu( MF_STRING, cmdId++, EscapeAmpersand( m_commonPrefix ) );
+		pPopupMenu->AppendMenu( MF_SEPARATOR );
+	}
+
+	for ( std::vector< std::tstring >::const_iterator itFname = m_destFnames.begin(); itFname != m_destFnames.end(); ++itFname, ++cmdId )
+	{
+		pPopupMenu->AppendMenu( MF_STRING, cmdId, EscapeAmpersand( *itFname ) );
+
+		if ( 0 == selId )
+			if ( pSelFname != NULL && str::Matches( itFname->c_str(), pSelFname, false, false ) )
+				selId = cmdId;
+	}
+
+	if ( selId != 0 )
+		pPopupMenu->CheckMenuRadioItem( IDC_PICK_FILENAME_BASE, selId, selId, MF_BYCOMMAND );
+}
+
+std::tstring CPickDataset::GetPickedFname( UINT cmdId ) const
+{
+	REQUIRE( !m_destFnames.empty() );
+
+	size_t pos = cmdId - IDC_PICK_FILENAME_BASE;
+
+	if ( HasCommonPrefix() )
+		if ( 0 == pos )				// picked the common prefix?
+			return m_commonPrefix;
+		else
+			--pos;					// index in m_destFnames
+
+	if ( pos < m_destFnames.size() )
+		return m_destFnames[ pos ];
+
+	ASSERT( false );
+	return std::tstring();
+}
+
+void CPickDataset::MakePickDirMenu( CMenu* pPopupMenu ) const
+{
+	REQUIRE( !m_subDirs.empty() );
+
+	ASSERT_PTR( pPopupMenu );
+	pPopupMenu->DestroyMenu();
+
+	pPopupMenu->CreatePopupMenu();
+	UINT cmdId = IDC_PICK_DIR_PATH_BASE;
+
+	for ( std::vector< std::tstring >::const_iterator itSubDir = m_subDirs.begin(), itLast = m_subDirs.end() - 1; itSubDir != m_subDirs.end(); ++itSubDir, ++cmdId )
+	{
+		pPopupMenu->AppendMenu( MF_STRING, cmdId, EscapeAmpersand( *itSubDir ) );
+		ui::SetMenuItemImage( *pPopupMenu, cmdId, itSubDir != itLast ? ID_BROWSE_FILE : ID_PARENT_FOLDER );
+	}
+}
+
+std::tstring CPickDataset::GetPickedDirectory( UINT cmdId ) const
+{
+	REQUIRE( !m_subDirs.empty() );
+
+	size_t pos = cmdId - IDC_PICK_DIR_PATH_BASE;
+	if ( pos < m_subDirs.size() )
+		return m_subDirs[ pos ];
+
+	ASSERT( false );
+	return std::tstring();
+}
+
+const TCHAR* CPickDataset::EscapeAmpersand( const std::tstring& text )
+{
+	static std::tstring s_uiText;
+	s_uiText = text;
+	str::Replace( s_uiText, _T("&"), _T("&&") );
+	return s_uiText.c_str();
 }

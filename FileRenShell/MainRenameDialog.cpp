@@ -226,7 +226,11 @@ void CMainRenameDialog::OnUpdate( utl::ISubject* pSubject, utl::IMessage* pMessa
 	if ( m_pFileModel == pSubject )
 		if ( m_hWnd != NULL )
 		{
-			m_pRenSvc.reset( new CRenameService( m_rRenameItems ) );
+			if ( NULL == m_pRenSvc.get() )
+				m_pRenSvc.reset( new CRenameService( m_rRenameItems ) );		// lazy init
+			else
+				m_pRenSvc->StoreRenameItems( m_rRenameItems );					// update the current object since it may be referenced in CReplaceDialog
+
 			SetupFileListView();
 		}
 }
@@ -362,6 +366,15 @@ bool CMainRenameDialog::ChangeSeqCount( UINT seqCount )
 	m_seqCountEdit.SetNumericValue( seqCount );
 	OnEnChange_SeqCounter();
 	return true;
+}
+
+void CMainRenameDialog::ReplaceFormatEditText( const std::tstring& text )
+{
+	if ( CEdit* pComboEdit = (CEdit*)m_formatCombo.GetWindow( GW_CHILD ) )
+	{
+		pComboEdit->SetFocus();
+		pComboEdit->ReplaceSel( text.c_str(), TRUE );
+	}
 }
 
 void CMainRenameDialog::DoDataExchange( CDataExchange* pDX )
@@ -668,30 +681,24 @@ void CMainRenameDialog::OnPickDirPath( void )
 {
 	ASSERT_PTR( m_pRenSvc.get() );
 
-	// single command or pick menu
-	UINT singleCmdId;
-	CMenu popupMenu;
+	m_pPickDataset = m_pRenSvc->MakeDirPickDataset();
 
-	if ( m_pRenSvc->MakePickDirPathMenu( &singleCmdId, &popupMenu ) )
-		if ( singleCmdId != 0 )
-			OnDirPathPicked( singleCmdId );
+	if ( m_pPickDataset->HasSubDirs() )
+		if ( ui::IsKeyPressed( VK_CONTROL ) )
+			ReplaceFormatEditText( m_pPickDataset->GetSubDirs().back() );		// pick the parent directory
 		else
 		{
-			ASSERT_PTR( popupMenu.GetSafeHmenu() );
+			CMenu popupMenu;
+			m_pPickDataset->MakePickDirMenu( &popupMenu );
 			m_formatToolbar.TrackButtonMenu( ID_PICK_DIR_PATH, this, &popupMenu, ui::DropRight );
 		}
 }
 
 void CMainRenameDialog::OnDirPathPicked( UINT cmdId )
 {
-	ASSERT_PTR( m_pRenSvc.get() );
-
-	std::tstring selDir = m_pRenSvc->GetPickedDirectory( cmdId );
-	if ( CEdit* pComboEdit = (CEdit*)m_formatCombo.GetWindow( GW_CHILD ) )
-	{
-		pComboEdit->SetFocus();
-		pComboEdit->ReplaceSel( selDir.c_str(), TRUE );
-	}
+	ASSERT_PTR( m_pPickDataset.get() );
+	ReplaceFormatEditText( m_pPickDataset->GetPickedDirectory( cmdId ) );
+	m_pPickDataset.reset();
 }
 
 void CMainRenameDialog::OnPickTextTools( void )

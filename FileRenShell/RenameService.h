@@ -7,6 +7,34 @@
 
 
 class CRenameItem;
+class CPickDataset;
+
+
+class CRenameService
+{
+public:
+	CRenameService( const std::vector< CRenameItem* >& renameItems ) { StoreRenameItems( renameItems ); }
+
+	void StoreRenameItems( const std::vector< CRenameItem* >& renameItems );
+
+	UINT FindNextAvailSeqCount( const std::tstring& format ) const;
+
+	bool CheckPathCollisions( cmd::IErrorObserver* pErrorObserver );
+
+	std::auto_ptr< CPickDataset > MakeFnamePickDataset( void ) const;
+	std::auto_ptr< CPickDataset > MakeDirPickDataset( void ) const;
+public:
+	void QueryDestFilenames( std::vector< std::tstring >& rDestFnames ) const;
+	bool FileExistOutsideWorkingSet( const fs::CPath& filePath ) const;		// collision with an existing file/dir outside working set (selected files)
+
+	static fs::CPath GetDestPath( fs::TPathPairMap::const_iterator itPair );
+	static std::tstring GetDestFname( fs::TPathPairMap::const_iterator itPair );
+
+	// text tools
+	static std::tstring ApplyTextTool( UINT cmdId, const std::tstring& text );
+private:
+	fs::TPathPairMap m_renamePairs;
+};
 
 
 enum
@@ -21,38 +49,40 @@ enum
 };
 
 
-class CRenameService
+class CPickDataset
 {
 public:
-	CRenameService( const std::vector< CRenameItem* >& renameItems );
+	CPickDataset( std::vector< std::tstring >* pDestFnames );		// for fnames
+	CPickDataset( const fs::CPath& firstDestPath );					// for parent subdirs
 
-	UINT FindNextAvailSeqCount( const std::tstring& format ) const;
+	// filenames
+	bool IsSingleFile( void ) const { return 1 == m_destFnames.size(); }
+	bool HasCommonPrefix( void ) const { return !m_commonPrefix.empty(); }
 
-	bool CheckPathCollisions( cmd::IErrorObserver* pErrorObserver );
+	const std::vector< std::tstring >& GetDestFnames( void ) const { ASSERT( !m_destFnames.empty() ); return m_destFnames; }
+	const std::tstring& GetCommonPrefix( void ) const { return m_commonPrefix; }
 
-	void QueryDestFilenames( std::vector< std::tstring >& rDestFnames ) const;
-	void QuerySubDirs( std::vector< std::tstring >& rSubDirs ) const;
+	void MakePickFnameMenu( CMenu* pPopupMenu, const TCHAR* pSelFname = NULL ) const;
+	std::tstring GetPickedFname( UINT cmdId ) const;
 
-	void MakePickFnamePatternMenu( std::tstring* pSinglePattern, CMenu* pPopupMenu, const TCHAR* pSelFname = NULL ) const;		// single pattern or pick menu
-	bool MakePickDirPathMenu( UINT* pSingleCmdId, CMenu* pPopupMenu ) const;													// single command or pick menu
+	// parent subdirs
+	bool HasSubDirs( void ) const { return !m_subDirs.empty(); }
+	const std::vector< std::tstring >& GetSubDirs( void ) const { ASSERT( !m_subDirs.empty() ); return m_subDirs; }
 
-	std::tstring GetPickedFname( UINT cmdId, std::vector< std::tstring >* pDestFnames = NULL ) const;
+	void MakePickDirMenu( CMenu* pPopupMenu ) const;								// single command or pick menu
 	std::tstring GetPickedDirectory( UINT cmdId ) const;
-public:
-	static std::tstring GetDestPath( fs::TPathPairMap::const_iterator itPair );
-	static std::tstring GetDestFname( fs::TPathPairMap::const_iterator itPair );
-	static std::tstring& EscapeAmpersand( std::tstring& rText );
-
-	// text tools
-	static std::tstring ApplyTextTool( UINT cmdId, const std::tstring& text );
-
-	static std::tstring ExtractLongestCommonPrefix( const std::vector< std::tstring >& destFnames );
 private:
-	static bool AllHavePrefix( const std::vector< std::tstring >& destFnames, size_t prefixLen );
+	std::tstring ExtractLongestCommonPrefix( void ) const;
+	bool AllHavePrefix( size_t prefixLen ) const;
 
-	bool FileExistOutsideWorkingSet( const fs::CPath& filePath ) const;		// collision with an existing file/dir outside working set (selected files)
+	static const TCHAR* EscapeAmpersand( const std::tstring& text );
 private:
-	fs::TPathPairMap m_renamePairs;
+	// filenames
+	std::vector< std::tstring > m_destFnames;
+	std::tstring m_commonPrefix;
+
+	// parent subdirs
+	std::vector< std::tstring > m_subDirs;
 };
 
 

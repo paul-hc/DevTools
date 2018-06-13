@@ -9,6 +9,7 @@
 
 interface IFileEditor;
 class CRenameService;
+class CPickDataset;
 
 
 class CReplaceDialog : public CLayoutDialog
@@ -30,7 +31,8 @@ private:
 	static std::tstring LoadFindWhat( void );
 	static std::tstring LoadReplaceWith( void );
 
-	void StoreFindWhatText( const std::tstring& text, const std::vector< std::tstring >* pDestFnames = NULL );
+	void StoreFindWhatText( const std::tstring& text, const std::tstring& commonPrefix );
+	void StoreReplaceWithText( const std::tstring& text );
 private:
 	IFileEditor* m_pParentEditor;
 	const CRenameService* m_pRenSvc;
@@ -39,6 +41,8 @@ private:
 	std::tstring m_replaceWith;
 	bool m_matchCase;
 	FindType m_findType;
+
+	std::auto_ptr< CPickDataset > m_pPickDataset;
 private:
 	// enum { IDD = IDD_REPLACE_DIALOG };
 
