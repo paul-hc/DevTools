@@ -59,7 +59,6 @@ private:
 
 	// output
 	void SetupFileListView( void );
-	void UpdateFileListViewDest( void );
 
 	void UpdateFieldControls( void );
 	void UpdateFieldsFromSel( int selIndex );

@@ -15,11 +15,11 @@ public:
 
 	const std::tstring& GetLogFilePath( void ) const;
 
-	void Log( const TCHAR* pFormat, ... );
-	void LogV( const TCHAR* pFormat, va_list argList );
-	void LogLine( const TCHAR* pText, bool useTimestamp = true );
+	void Log( const TCHAR format[], ... );
+	void LogV( const TCHAR format[], va_list argList );
+	void LogLine( const TCHAR text[], bool useTimestamp = true );
 
-	void LogString( const std::tstring& text ) { Log( text.c_str() ); }
+	void LogString( const std::tstring& text ) { LogLine( text.c_str() ); }
 
 	void Clear( void );
 	void SetOverwrite( void );

@@ -204,25 +204,6 @@ void CTouchFilesDialog::SetupFileListView( void )
 	}
 }
 
-void CTouchFilesDialog::UpdateFileListViewDest( void )
-{
-	REQUIRE( m_rTouchItems.size() == (size_t)m_fileListCtrl.GetItemCount() );
-	{
-		CScopedLockRedraw freeze( &m_fileListCtrl );
-		CScopedInternalChange internalChange( &m_fileListCtrl );
-
-		for ( int pos = 0, count = m_fileListCtrl.GetItemCount(); pos != count; ++pos )
-		{
-			CTouchItem* pTouchItem = m_rTouchItems[ pos ];
-
-			m_fileListCtrl.SetSubItemText( pos, DestAttributes, fmt::FormatFileAttributes( pTouchItem->GetDestState().m_attributes ) );
-			m_fileListCtrl.SetSubItemText( pos, DestModifyTime, time_utl::FormatTimestamp( pTouchItem->GetDestState().m_modifTime ) );
-			m_fileListCtrl.SetSubItemText( pos, DestCreationTime, time_utl::FormatTimestamp( pTouchItem->GetDestState().m_creationTime ) );
-			m_fileListCtrl.SetSubItemText( pos, DestAccessTime, time_utl::FormatTimestamp( pTouchItem->GetDestState().m_accessTime ) );
-		}
-	}
-}
-
 void CTouchFilesDialog::AccumulateCommonStates( void )
 {
 	ASSERT( !m_rTouchItems.empty() );

@@ -64,25 +64,25 @@ std::tstring CLogger::MakeBackupLogFilePath( void ) const
 	return parts.MakePath();
 }
 
-void CLogger::Log( const TCHAR* pFormat, ... )
+void CLogger::Log( const TCHAR format[], ... )
 {
 	va_list argList;
 
-	va_start( argList, pFormat );
-	LogV( pFormat, argList );
+	va_start( argList, format );
+	LogV( format, argList );
 	va_end( argList );
 }
 
-void CLogger::LogV( const TCHAR* pFormat, va_list argList )
+void CLogger::LogV( const TCHAR format[], va_list argList )
 {
 	CString entry;
-	entry.FormatV( pFormat, argList );
+	entry.FormatV( format, argList );
 	LogLine( entry );
 }
 
-void CLogger::LogLine( const TCHAR* pText, bool useTimestamp /*= true*/ )
+void CLogger::LogLine( const TCHAR text[], bool useTimestamp /*= true*/ )
 {
-	ASSERT_PTR( pText );
+	ASSERT_PTR( text );
 	if ( !m_enabled )
 		return;
 
@@ -97,7 +97,7 @@ void CLogger::LogLine( const TCHAR* pText, bool useTimestamp /*= true*/ )
 	{
 		if ( m_addSessionNewLine )
 		{
-			if ( !str::IsEmpty( pText ) )
+			if ( !str::IsEmpty( text ) )
 				output << std::endl;
 
 			m_addSessionNewLine = false;
@@ -106,7 +106,7 @@ void CLogger::LogLine( const TCHAR* pText, bool useTimestamp /*= true*/ )
 		if ( m_prependTimestamp && useTimestamp )
 			output << CTime::GetCurrentTime().Format( _T("[%d-%b-%Y %H:%M:%S]> ") ).GetString();
 
-		output << pText << std::endl;
+		output << text << std::endl;
 		output.close();
 	}
 	else

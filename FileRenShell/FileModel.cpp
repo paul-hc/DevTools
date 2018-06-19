@@ -115,7 +115,9 @@ bool CFileModel::CanUndoRedo( cmd::StackType stackType, int typeId /*= 0*/ ) con
 {
 	if ( utl::ICommand* pTopCmd = PeekCmdAs< utl::ICommand >( stackType ) )
 		if ( 0 == typeId || typeId == pTopCmd->GetTypeID() )
-			return m_pCommandModel->CanUndo();
+			return cmd::Undo == stackType
+				? m_pCommandModel->CanUndo()
+				: m_pCommandModel->CanRedo();
 
 	return false;
 }
