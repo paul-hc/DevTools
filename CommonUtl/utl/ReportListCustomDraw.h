@@ -21,7 +21,6 @@ public:
 	bool ApplyCellTextEffect( void );
 
 	// text diffs
-	bool EraseRowBkgndDiffs( void );
 	bool DrawCellTextDiffs( void );
 private:
 	// cell text effects
@@ -34,10 +33,9 @@ private:
 	void DrawCellTextDiffs( DiffColumn diffColumn, const str::TMatchSequence& cellSeq, const CRect& textRect );
 
 	CRect MakeCellTextRect( void ) const;
-	void BuildTextMatchEffects( std::vector< ui::CTextEffect >& rMatchEffects, DiffColumn diffColumn ) const;
+	void BuildTextMatchEffects( std::vector< ui::CTextEffect >& rMatchEffects, DiffColumn diffColumn, const str::TMatchSequence& cellSeq ) const;
+	COLORREF GetRealizedTextColor( DiffColumn diffColumn, const str::TMatchSequence& cellSeq ) const;
 	bool SelectTextEffect( const ui::CTextEffect& textEffect );		// to m_pDC
-
-	static bool HasMismatch( const str::TMatchSequence& cellSeq );
 private:
 	NMLVCUSTOMDRAW* m_pDraw;
 	CReportListControl* m_pList;
@@ -52,6 +50,12 @@ public:
 private:
 	CDC* m_pDC;
 };
+
+
+namespace dbg
+{
+	const TCHAR* FormatDrawStage( DWORD dwDrawStage );
+}
 
 
 #endif // ReportListCustomDraw_h

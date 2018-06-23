@@ -91,7 +91,7 @@ BOOL CApplication::InitInstance( void )
 		dlg.DoModal();
 		return FALSE;					// no app loop
 	}
-	else if ( app::HasCommandLineOption( _T("diffs") ) )		// "-diffs"
+	else if ( app::HasCommandLineOption( _T("diffs") ) )			// "-diffs"
 	{
 		CFileStatesDialog dlg( NULL );
 		m_pMainWnd = &dlg;

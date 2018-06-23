@@ -191,6 +191,7 @@ void CTouchFilesDialog::SetupFileListView( void )
 			m_fileListCtrl.SetSubItemText( pos, SrcCreationTime, time_utl::FormatTimestamp( pTouchItem->GetSrcState().m_creationTime ) );
 			m_fileListCtrl.SetSubItemText( pos, SrcAccessTime, time_utl::FormatTimestamp( pTouchItem->GetSrcState().m_accessTime ) );
 		}
+
 		m_fileListCtrl.SetupDiffColumnPair( SrcAttributes, DestAttributes, str::GetMatch() );
 		m_fileListCtrl.SetupDiffColumnPair( SrcModifyTime, DestModifyTime, str::GetMatch() );
 		m_fileListCtrl.SetupDiffColumnPair( SrcCreationTime, DestCreationTime, str::GetMatch() );
@@ -365,9 +366,8 @@ void CTouchFilesDialog::CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARA
 			break;
 	}
 
-	if ( !isSrc )
-		if ( utl::Contains( m_errorItems, pTouchItem ) )
-			rTextEffect |= s_errorBk;
+	if ( utl::Contains( m_errorItems, pTouchItem ) )
+		rTextEffect |= s_errorBk;							// highlight error row background
 
 	if ( pTextEffect != NULL )
 		rTextEffect |= *pTextEffect;

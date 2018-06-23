@@ -46,8 +46,9 @@ namespace str
 		m_matchSeqPair.first.clear();
 		m_matchSeqPair.second.clear();
 
-		if ( MatchEqual == m_match || m_textPair.second.empty() )
-			return;
+		// note: customize SRC draw for empty DEST in drawing code
+		//if ( MatchEqual == m_match || m_textPair.second.empty() )
+		//	return;
 
 		std::vector< lcs::CResult< CharType > > lcsSequence;
 		lcs::CompareStringPair( lcsSequence, m_textPair, getMatchFunc );

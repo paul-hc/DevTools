@@ -135,6 +135,7 @@ public:
 		ColumnSpacing = HalfColumnSpacing * 2,
 		MinColumnWidth = ColumnSpacing
 	};
+
 	enum CustomDrawTextMetrics { ItemSpacingX = 2, SubItemSpacingX = HalfColumnSpacing };
 
 	// column layout
@@ -204,6 +205,8 @@ public:
 	void SetSubItemImage( int index, int subItem, int imageIndex );
 
 	bool SetItemTileInfo( int index );
+
+	CString GetItemText( int index, int subItem ) const;		// override CListCtrl for stored diff-items text
 
 	void SwapItems( int index1, int index2 );
 	void DropMoveItems( int destIndex, const std::vector< int >& selIndexes );
@@ -315,6 +318,7 @@ protected:
 	};
 
 	const CDiffColumnPair* FindDiffColumnPair( TColumn column ) const;
+	bool IsDiffColumn( TColumn column ) const { return FindDiffColumnPair( column ) != NULL; }
 
 	ui::CFontEffectCache* GetFontEffectCache( void );
 	bool ParentHandlesCustomDraw( void );
@@ -430,7 +434,9 @@ public:
 
 	static const COLORREF s_deleteSrcTextColor = color::Red;
 	static const COLORREF s_mismatchDestTextColor = color::Blue;
+private:
 	static const TCHAR s_fmtRegColumnLayout[];
+	static const TCHAR s_diffColumnTextPlaceholder[];
 public:
 	// generated stuff
 	public:
@@ -605,7 +611,7 @@ bool CReportListControl::QuerySelectionAs( std::vector< Type* >& rSelPtrs ) cons
 		if ( Type* pSelObject = GetPtrAt< Type >( *itSelIndex ) )
 			rSelPtrs.push_back( pSelObject );
 
-	return !rSelPtrs.empty() && rSelPtrs.size() == selCount; // homogenous selection?
+	return !rSelPtrs.empty() && rSelPtrs.size() == selCount;		// homogenous selection?
 }
 
 template< typename Type >
@@ -637,6 +643,11 @@ void CReportListControl::SetupDiffColumnPair( TColumn srcColumn, TColumn destCol
 		str::TMatchSequence& rMatchSequence = rRowSequences[ MakeRowKeyAt( index ) ];
 
 		rMatchSequence.Init( GetItemText( index, srcColumn ).GetString(), GetItemText( index, destColumn ).GetString(), getMatchFunc );
+
+		// Replace with empty text to allow custom draw without default sub-item draw interference (on CDDS_ITEMPOSTPAINT | CDDS_SUBITEM).
+		// Sub-item text still accessible with GetItemText() method.
+		VERIFY( SetItemText( index, srcColumn, s_diffColumnTextPlaceholder ) );
+		VERIFY( SetItemText( index, destColumn, s_diffColumnTextPlaceholder ) );
 	}
 }
 

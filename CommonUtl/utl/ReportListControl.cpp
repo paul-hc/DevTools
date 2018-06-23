@@ -79,6 +79,7 @@ static ACCEL keys[] =
 };
 
 const TCHAR CReportListControl::s_fmtRegColumnLayout[] = _T("Width=%d, Order=%d");
+const TCHAR CReportListControl::s_diffColumnTextPlaceholder[] = _T("");
 
 
 CReportListControl::CReportListControl( UINT columnLayoutId /*= 0*/, DWORD listStyleEx /*= DefaultStyleEx*/ )
@@ -410,7 +411,7 @@ int CALLBACK CReportListControl::TextCompareProc( LPARAM leftParam, LPARAM right
 
 pred::CompareResult CReportListControl::CompareSubItems( LPARAM leftParam, LPARAM rightParam ) const
 {
-	REQUIRE( m_sortByColumn != -1 ); // must be sorted by one column
+	REQUIRE( m_sortByColumn != -1 );		// must be sorted by one column
 
 	int leftIndex = static_cast< int >( leftParam ), rightIndex = static_cast< int >( rightParam );
 	ASSERT( leftIndex != -1 && rightIndex != -1 );
@@ -420,7 +421,7 @@ pred::CompareResult CReportListControl::CompareSubItems( LPARAM leftParam, LPARA
 
 	pred::CompareResult result = str::IntuitiveCompare( leftText.GetString(), rightText.GetString() );
 
-	enum { CodeColumn = 0 }; // first column, the one with the icon
+	enum { CodeColumn = 0 };				// first column, the one with the icon
 
 	if ( pred::Equal == result && m_sortByColumn != CodeColumn )
 	{	// equal by a secondary column -> compare by "code" column (first column)
@@ -904,6 +905,22 @@ bool CReportListControl::SetItemTileInfo( int index )
 	tileInfo.piColFmt = NULL;
 
 	return SetTileInfo( &tileInfo ) != FALSE;
+}
+
+CString CReportListControl::GetItemText( int index, int subItem ) const
+{
+	CString subItemText = CListCtrl::GetItemText( index, subItem );
+
+	if ( subItemText.IsEmpty() )
+		if ( const CDiffColumnPair* pDiffPair = FindDiffColumnPair( subItem ) )
+			if ( const str::TMatchSequence* pMatchSeq = utl::FindValuePtr( pDiffPair->m_rowSequences, MakeRowKeyAt( index ) ) )
+				subItemText = pDiffPair->m_srcColumn == subItem
+					? pMatchSeq->m_textPair.first.c_str()
+					: pMatchSeq->m_textPair.second.c_str();
+			else
+				ASSERT( false );
+
+	return subItemText;
 }
 
 void CReportListControl::GetItemDataAt( CItemData& rItemData, int index ) const
@@ -1741,10 +1758,11 @@ BOOL CReportListControl::OnNmCustomDraw_Reflect( NMHDR* pNmHdr, LRESULT* pResult
 	if ( CReportListCustomDraw::IsTooltipDraw( pDraw ) )
 		return TRUE;		// IMP: avoid custom drawing for tooltips
 
+	//TRACE( _T("-DrawStage: %s\n"), dbg::FormatDrawStage( pDraw->nmcd.dwDrawStage ) );
+
 	CReportListCustomDraw draw( pDraw, this );
 
 	*pResult = CDRF_DODEFAULT;
-
 	switch ( pDraw->nmcd.dwDrawStage )
 	{
 		case CDDS_PREPAINT:
@@ -1754,28 +1772,29 @@ BOOL CReportListControl::OnNmCustomDraw_Reflect( NMHDR* pNmHdr, LRESULT* pResult
 			*pResult = CDRF_NEWFONT | CDRF_NOTIFYSUBITEMDRAW;
 
 			if ( m_pCustomImager.get() != NULL )
-				if ( IsItemVisible( draw.m_index ) )
-					*pResult |= CDRF_NOTIFYPOSTPAINT;				// will superimpose the thumbnail on top of transparent image
-
-			if ( draw.EraseRowBkgndDiffs() )
-				*pResult |= CDRF_NEWFONT;
+				*pResult |= CDRF_NOTIFYPOSTPAINT;				// will superimpose the thumbnail on top of transparent image (on CDDS_ITEMPOSTPAINT drawing stage)
 
 			break;
 		case CDDS_ITEMPREPAINT | CDDS_SUBITEM:
 			if ( draw.ApplyCellTextEffect() )
 				*pResult |= CDRF_NEWFONT;
 
-			if ( draw.DrawCellTextDiffs() )
-				*pResult |= CDRF_SKIPDEFAULT;
+			if ( !m_diffColumnPairs.empty() )
+				*pResult |= CDRF_NOTIFYPOSTPAINT;				// will draw diff sub-item text (on CDDS_ITEMPOSTPAINT | CDDS_SUBITEM drawing stage)
 			break;
+
 		case CDDS_ITEMPOSTPAINT:
 			if ( m_pCustomImager.get() != NULL )
-			{
-				CRect itemImageRect;
-				if ( GetItemRect( draw.m_index, itemImageRect, LVIR_ICON ) )		// visible item?
-					if ( m_pCustomImager->m_pRenderer->CustomDrawItemImage( &pDraw->nmcd, itemImageRect ) )
-						return TRUE;		// handled
-			}
+				if ( IsItemVisible( draw.m_index ) )
+				{
+					CRect itemImageRect;
+					if ( GetItemRect( draw.m_index, itemImageRect, LVIR_ICON ) )		// visible item?
+						if ( m_pCustomImager->m_pRenderer->CustomDrawItemImage( &pDraw->nmcd, itemImageRect ) )
+							return TRUE;		// handled
+				}
+			break;
+		case CDDS_ITEMPOSTPAINT | CDDS_SUBITEM:
+			draw.DrawCellTextDiffs();
 			break;
 	}
 
