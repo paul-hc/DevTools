@@ -92,7 +92,7 @@ CReportListControl::CReportListControl( UINT columnLayoutId /*= 0*/, DWORD listS
 	, m_sortByColumn( -1 )			// no sorting by default
 	, m_sortAscending( true )
 	, m_sortInternally( true )
-	, m_pCompareFunc( NULL )		// use text compare by default
+	, m_pComparePtrFunc( NULL )		// use text compare by default
 	, m_pTextEffectCallback( NULL )
 	, m_pImageList( NULL )
 	, m_pLargeImageList( NULL )
@@ -114,6 +114,9 @@ CReportListControl::CReportListControl( UINT columnLayoutId /*= 0*/, DWORD listS
 CReportListControl::~CReportListControl()
 {
 	ClearData();
+
+	for ( std::vector< CColumnComparator >::const_iterator itColComparator = m_comparators.begin(); itColComparator != m_comparators.end(); ++itColComparator )
+		delete itColComparator->m_pComparator;
 }
 
 bool CReportListControl::DeleteAllItems( void )
@@ -124,6 +127,7 @@ bool CReportListControl::DeleteAllItems( void )
 
 void CReportListControl::ClearData( void )
 {
+	m_initialItemsOrder.clear();
 	m_markedCells.clear();
 	m_diffColumnPairs.clear();
 }
@@ -388,14 +392,19 @@ void CReportListControl::UpdateColumnSortHeader( void )
 bool CReportListControl::SortList( void )
 {
 	UpdateColumnSortHeader();
-	if ( -1 == m_sortByColumn )
-		return false;
 
-	if ( m_sortInternally )										// otherwise was sorted externally, just update sort header
-		if ( m_pCompareFunc != NULL )
-			SortItems( m_pCompareFunc, (LPARAM)this );			// passes item LPARAMs as left/right
+	if ( -1 == m_sortByColumn )
+	{
+		if ( m_initialItemsOrder.empty() )
+			return false;
 		else
-			SortItemsEx( (PFNLVCOMPARE)&TextCompareProc, (LPARAM)this );		// passes item indexes as left/right LPARAMs
+			SortItems( (PFNLVCOMPARE)&InitialOrderCompareProc, (LPARAM)this );		// restore initial item order; passes item LPARAMs (i.e. TRowKey) as left/right
+	}
+	else if ( m_sortInternally )													// otherwise was sorted externally, just update sort header
+		if ( m_pComparePtrFunc != NULL )
+			SortItems( m_pComparePtrFunc, (LPARAM)this );					// passes item LPARAMs as left/right
+		else
+			SortItemsEx( (PFNLVCOMPARE)&TextCompareProc, (LPARAM)this );	// passes item indexes as left/right LPARAMs
 
 	int caretIndex = GetCaretIndex();
 	if ( caretIndex != -1 )
@@ -403,35 +412,132 @@ bool CReportListControl::SortList( void )
 	return true;
 }
 
+void CReportListControl::InitialSortList( void )
+{
+	REQUIRE( IsSortingEnabled() );
+
+	// store initial items order so that we can restore it when list will be switched to unsorted
+	const unsigned int itemCount = GetItemCount();
+
+	m_initialItemsOrder.clear();
+	m_initialItemsOrder.reserve( itemCount );
+
+	for ( unsigned int index = 0; index != itemCount; ++index )
+		m_initialItemsOrder[ MakeRowKeyAt( index ) ] = index;
+
+	if ( m_sortByColumn != -1 )			// has a previously saved column sort order?
+		SortList();
+}
+
+void CReportListControl::AddColumnCompare( TColumn column, const pred::IComparator* pComparator, bool defaultAscending /*= true*/ )
+{
+	ASSERT_PTR( pComparator );
+	ASSERT( column >= 0 || EntireRecord == column );
+
+	if ( NULL == m_pComparePtrFunc )
+		SetCompareFunc( (PFNLVCOMPARE)&ObjectCompareProc );
+
+	m_comparators.push_back( CColumnComparator( column, defaultAscending, pComparator ) );
+}
+
+const pred::IComparator* CReportListControl::FindCompare( TColumn column ) const
+{
+	for ( std::vector< CColumnComparator >::const_iterator itColComparator = m_comparators.begin(); itColComparator != m_comparators.end(); ++itColComparator )
+		if ( column == itColComparator->m_column )
+			return itColComparator->m_pComparator;
+
+	return NULL;
+}
+
+bool CReportListControl::IsDefaultAscending( TColumn column ) const
+{
+	for ( std::vector< CColumnComparator >::const_iterator itColComparator = m_comparators.begin(); itColComparator != m_comparators.end(); ++itColComparator )
+		if ( column == itColComparator->m_column )
+			return itColComparator->m_defaultAscending;
+
+	return true;
+}
+
+pred::CompareResult CALLBACK CReportListControl::ObjectCompareProc( LPARAM leftParam, LPARAM rightParam, CReportListControl* pListCtrl )
+{
+	ASSERT_PTR( pListCtrl );
+	// called by SortItems() that passes item LPARAMs as left/right
+	return pListCtrl->CompareSubItems( AsPtr< utl::ISubject >( leftParam ), AsPtr< utl::ISubject >( rightParam ) );
+}
+
+pred::CompareResult CReportListControl::CompareSubItems( const utl::ISubject* pLeft, const utl::ISubject* pRight ) const
+{
+	if ( const pred::IComparator* pComparator = FindCompare( m_sortByColumn ) )
+	{
+		pred::CompareResult result = pComparator->CompareObjects( pLeft, pRight );
+		if ( result != pred::Equal )
+			return pred::GetResultInOrder( result, m_sortAscending );
+	}
+	else
+	{	// default sub-item text comparison
+		pred::CompareResult result = CompareSubItemsText( FindItemIndex( (LPARAM)pLeft ), FindItemIndex( (LPARAM)pRight ), m_sortByColumn );
+		if ( result != pred::Equal )
+			return pred::GetResultInOrder( result, m_sortAscending );
+	}
+
+	if ( const pred::IComparator* pRecordComparator = FindCompare( EntireRecord ) )		// default record comparator
+	{
+		pred::CompareResult result = pRecordComparator->CompareObjects( pLeft, pRight );
+		if ( result != pred::Equal )
+			return result;					// never use DESC order for default comparison
+	}
+
+	return CompareSubItemsByIndex( FindItemIndex( (LPARAM)pLeft ), FindItemIndex( (LPARAM)pRight ) );
+}
+
+pred::CompareResult CALLBACK CReportListControl::InitialOrderCompareProc( LPARAM leftParam, LPARAM rightParam, CReportListControl* pListCtrl )
+{
+	ASSERT_PTR( pListCtrl );
+	// called by SortItems() that passes item LPARAMs as left/right
+	return pListCtrl->CompareInitialOrder( static_cast< TRowKey >( leftParam ), static_cast< TRowKey >( rightParam ) );
+}
+
+pred::CompareResult CReportListControl::CompareInitialOrder( TRowKey leftKey, TRowKey rightKey ) const
+{
+	REQUIRE( -1 == m_sortByColumn );			// unsorted: it means restore initial order
+
+	if ( const int* pLeftIndex = utl::FindValuePtr( m_initialItemsOrder, leftKey ) )
+		if ( const int* pRightIndex = utl::FindValuePtr( m_initialItemsOrder, rightKey ) )
+			return pred::ToCompareResult( *pLeftIndex - *pRightIndex );
+
+	ASSERT( false );			// item not accounted for in m_initialItemsOrder
+	return pred::Equal;
+}
+
 int CALLBACK CReportListControl::TextCompareProc( LPARAM leftParam, LPARAM rightParam, CReportListControl* pListCtrl )
 {
 	ASSERT_PTR( pListCtrl );
-	return pListCtrl->CompareSubItems( leftParam, rightParam );
+	return pListCtrl->CompareSubItemsByIndex( static_cast< UINT >( leftParam ), static_cast< UINT >( rightParam ) );
 }
 
-pred::CompareResult CReportListControl::CompareSubItems( LPARAM leftParam, LPARAM rightParam ) const
+pred::CompareResult CReportListControl::CompareSubItemsByIndex( UINT leftIndex, UINT rightIndex ) const
 {
-	REQUIRE( m_sortByColumn != -1 );		// must be sorted by one column
+	REQUIRE( m_sortByColumn != -1 );		// must be sorted by a column
 
-	int leftIndex = static_cast< int >( leftParam ), rightIndex = static_cast< int >( rightParam );
-	ASSERT( leftIndex != -1 && rightIndex != -1 );
-
-	CString leftText = GetItemText( leftIndex, m_sortByColumn );
-	CString rightText = GetItemText( rightIndex, m_sortByColumn );
-
-	pred::CompareResult result = str::IntuitiveCompare( leftText.GetString(), rightText.GetString() );
+	pred::CompareResult result = pred::GetResultInOrder( CompareSubItemsText( leftIndex, rightIndex, m_sortByColumn ), m_sortAscending );
 
 	enum { CodeColumn = 0 };				// first column, the one with the icon
 
-	if ( pred::Equal == result && m_sortByColumn != CodeColumn )
-	{	// equal by a secondary column -> compare by "code" column (first column)
-		leftText = GetItemText( leftIndex, CodeColumn );
-		rightText = GetItemText( rightIndex, CodeColumn );
+	if ( pred::Equal == result && m_sortByColumn != CodeColumn )				// equal by a secondary column?
+		result = CompareSubItemsText( leftIndex, rightIndex, CodeColumn );		// compare by "code" column (first column); never use DESC order for default comparison
 
-		result = str::IntuitiveCompare( leftText.GetString(), rightText.GetString() );
-	}
+	return result;
+}
 
-	return pred::GetResultInOrder( result, m_sortAscending );
+pred::CompareResult CReportListControl::CompareSubItemsText( UINT leftIndex, UINT rightIndex, TColumn byColumn ) const
+{
+	REQUIRE( byColumn != -1 );		// valid column?
+	ASSERT( leftIndex != -1 && rightIndex != -1 );
+
+	CString leftText = GetItemText( leftIndex, byColumn );
+	CString rightText = GetItemText( rightIndex, byColumn );
+
+	return str::IntuitiveCompare( leftText.GetString(), rightText.GetString() );
 }
 
 int CReportListControl::FindItemIndex( const std::tstring& itemText ) const
@@ -1711,11 +1817,11 @@ BOOL CReportListControl::OnLvnColumnClick_Reflect( NMHDR* pNmHdr, LRESULT* pResu
 		SetSortByColumn( -1 );											// switch to no sorting
 	else
 	{
-		int sortByColumn = pNmListView->iSubItem;
+		TColumn sortByColumn = pNmListView->iSubItem;
 
 		// switch sorting
 		if ( sortByColumn != m_sortByColumn )
-			SetSortByColumn( sortByColumn );							// sort ascending by a new column
+			SetSortByColumn( sortByColumn, IsDefaultAscending( sortByColumn ) );		// sort by a new column (ascending/descending depending on column data)
 		else
 			if ( sortByColumn != -1 )
 				SetSortByColumn( sortByColumn, !m_sortAscending );		// toggle ascending/descending on the same column

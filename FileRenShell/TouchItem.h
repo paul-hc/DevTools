@@ -118,4 +118,39 @@ namespace multi
 }
 
 
+namespace func
+{
+	struct AsSrcCreationTime
+	{
+		const CTime& operator()( const CTouchItem* pTouchItem ) const { return pTouchItem->GetSrcState().m_creationTime; }
+	};
+
+	struct AsSrcModifyTime
+	{
+		const CTime& operator()( const CTouchItem* pTouchItem ) const { return pTouchItem->GetSrcState().m_modifTime; }
+	};
+
+	struct AsSrcAccessTime
+	{
+		const CTime& operator()( const CTouchItem* pTouchItem ) const { return pTouchItem->GetSrcState().m_accessTime; }
+	};
+
+
+	struct AsDestCreationTime
+	{
+		const CTime& operator()( const CTouchItem* pTouchItem ) const { return pTouchItem->GetDestState().m_creationTime; }
+	};
+
+	struct AsDestModifyTime
+	{
+		const CTime& operator()( const CTouchItem* pTouchItem ) const { return pTouchItem->GetDestState().m_modifTime; }
+	};
+
+	struct AsDestAccessTime
+	{
+		const CTime& operator()( const CTouchItem* pTouchItem ) const { return pTouchItem->GetDestState().m_accessTime; }
+	};
+}
+
+
 #endif // TouchItem_h

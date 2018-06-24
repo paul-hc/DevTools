@@ -18,12 +18,22 @@ namespace func
 			return pObject != NULL ? pObject->GetCode() : std::tstring();
 		}
 	};
+
+	struct AsDisplayCode
+	{
+		template< typename ObjectType >
+		std::tstring operator()( const ObjectType* pObject ) const
+		{
+			return pObject != NULL ? pObject->GetDisplayCode() : std::tstring();
+		}
+	};
 }
 
 
 namespace pred
 {
 	typedef CompareScalarAdapterPtr< func::AsCode > CompareCode;
+	typedef CompareScalarAdapterPtr< func::AsDisplayCode > CompareDisplayCode;
 	typedef CompareAdapterPtr< CompareCode, func::DynamicAs< utl::ISubject > > CompareSubjectCode;
 
 	typedef LessPtr< CompareCode > LessCode;
@@ -75,6 +85,43 @@ namespace pred
 	private:
 		const IComparator* m_pComparator;
 	};
+
+
+	// implements pred::IComparator in terms of GetPropFunc
+
+	template< typename ObjectType, typename GetPropFunc, typename Compare = CompareValue >
+	struct PropertyComparator : public IComparator
+	{
+		PropertyComparator( GetPropFunc getPropFunc, Compare compare = Compare() )
+			: m_getPropFunc( getPropFunc )
+			, m_compare( compare )
+		{
+		}
+
+		// IComparator interface
+		virtual CompareResult CompareObjects( const utl::ISubject* pLeft, const utl::ISubject* pRight ) const
+		{
+			return m_compare( m_getPropFunc( AsObject( pLeft ) ), m_getPropFunc( AsObject( pRight ) ) );
+		}
+	private:
+		static const ObjectType* AsObject( const utl::ISubject* pSubject ) { return checked_static_cast< const ObjectType* >( pSubject ); }
+	private:
+		GetPropFunc m_getPropFunc;
+		Compare m_compare;
+	};
+
+
+	template< typename ObjectType, typename GetPropFunc >
+	IComparator* NewPropertyComparator( GetPropFunc getPropFunc )
+	{
+		return new PropertyComparator< ObjectType, GetPropFunc >( getPropFunc );		// use default CompareValue
+	}
+
+	template< typename ObjectType, typename Compare, typename GetPropFunc >
+	IComparator* NewPropertyComparator( GetPropFunc getPropFunc )
+	{
+		return new PropertyComparator< ObjectType, GetPropFunc, Compare >( getPropFunc );
+	}
 }
 
 

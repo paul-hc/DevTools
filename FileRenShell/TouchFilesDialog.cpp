@@ -51,7 +51,6 @@ namespace layout
 	};
 }
 
-
 CTouchFilesDialog::CTouchFilesDialog( CFileModel* pFileModel, CWnd* pParent )
 	: CFileEditorBaseDialog( pFileModel, cmd::TouchFile, IDD_TOUCH_FILES_DIALOG, pParent )
 	, m_rTouchItems( m_pFileModel->LazyInitTouchItems() )
@@ -69,7 +68,16 @@ CTouchFilesDialog::CTouchFilesDialog( CFileModel* pFileModel, CWnd* pParent )
 	m_fileListCtrl.SetSection( m_regSection + _T("\\List") );
 	m_fileListCtrl.SetUseAlternateRowColoring();
 	m_fileListCtrl.SetTextEffectCallback( this );
-	m_fileListCtrl.SetPopupMenu( CReportListControl::OnSelection, NULL );			// let us track a custom menu
+	m_fileListCtrl.SetPopupMenu( CReportListControl::OnSelection, NULL );				// let us track a custom menu
+
+	m_fileListCtrl.AddRecordCompare( pred::NewComparator( pred::CompareCode() ) );		// default row item comparator
+	m_fileListCtrl.AddColumnCompare( PathName, pred::NewComparator( pred::CompareDisplayCode() ) );
+	m_fileListCtrl.AddColumnCompare( DestModifyTime, pred::NewPropertyComparator< CTouchItem >( func::AsDestModifyTime() ), false );		// order date-time descending by default
+	m_fileListCtrl.AddColumnCompare( DestCreationTime, pred::NewPropertyComparator< CTouchItem >( func::AsDestCreationTime() ), false );
+	m_fileListCtrl.AddColumnCompare( DestAccessTime, pred::NewPropertyComparator< CTouchItem >( func::AsDestAccessTime() ), false );
+	m_fileListCtrl.AddColumnCompare( SrcModifyTime, pred::NewPropertyComparator< CTouchItem >( func::AsSrcModifyTime() ), false );
+	m_fileListCtrl.AddColumnCompare( SrcCreationTime, pred::NewPropertyComparator< CTouchItem >( func::AsSrcCreationTime() ), false );
+	m_fileListCtrl.AddColumnCompare( SrcAccessTime, pred::NewPropertyComparator< CTouchItem >( func::AsSrcAccessTime() ), false );
 
 	static const TCHAR s_mixedFormat[] = _T("'(multiple values)'");
 	m_modifiedDateCtrl.SetNullFormat( s_mixedFormat );
@@ -196,6 +204,8 @@ void CTouchFilesDialog::SetupFileListView( void )
 		m_fileListCtrl.SetupDiffColumnPair( SrcModifyTime, DestModifyTime, str::GetMatch() );
 		m_fileListCtrl.SetupDiffColumnPair( SrcCreationTime, DestCreationTime, str::GetMatch() );
 		m_fileListCtrl.SetupDiffColumnPair( SrcAccessTime, DestAccessTime, str::GetMatch() );
+
+		m_fileListCtrl.InitialSortList();
 	}
 
 	if ( orgSel != -1 )		// restore selection?

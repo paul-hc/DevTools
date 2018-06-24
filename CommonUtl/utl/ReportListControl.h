@@ -5,10 +5,12 @@
 #include "AccelTable.h"
 #include "InternalChange.h"
 #include "ISubject.h"
+#include "SubjectPredicates.h"
 #include "Image_fwd.h"
 #include "OleUtils.h"
 #include "MatchSequence.h"
 #include "Resequence.h"
+#include "vector_map.h"
 #include "ui_fwd.h"
 #include <vector>
 #include <list>
@@ -102,10 +104,15 @@ public:
 	int HitTest( CPoint pos, UINT* pFlags = NULL ) const;
 	int GetDropIndexAtPoint( const CPoint& point ) const;
 	bool IsItemFullyVisible( int index ) const;
+
+	static bool IsSelectionChangedNotify( const NMLISTVIEW* pNmList, UINT selMask = LVIS_SELECTED | LVIS_FOCUSED );
 public:
 	typedef int TColumn;
+	typedef LPARAM TRowKey;								// row keys are invariant to sorting
 
 	enum { EntireRecord = (TColumn)-1 };
+
+	TRowKey MakeRowKeyAt( int index ) const;			// favour item data (LPARAM), or fall back to index (int)
 
 	// sorting
 	std::pair< TColumn, bool > GetSortByColumn( void ) const { return std::make_pair( m_sortByColumn, m_sortAscending ); }
@@ -113,19 +120,40 @@ public:
 
 	void SetSortInternally( bool sortInternally ) { m_sortInternally = sortInternally; }
 
-	PFNLVCOMPARE GetCompareFunc( void ) const { return m_pCompareFunc; }
-	void SetCompareFunc( PFNLVCOMPARE pCompareFunc ) { m_pCompareFunc = pCompareFunc; }
+	PFNLVCOMPARE GetCompareFunc( void ) const { return m_pComparePtrFunc; }
+	void SetCompareFunc( PFNLVCOMPARE pComparePtrFunc ) { m_pComparePtrFunc = pComparePtrFunc; }
 
 	bool IsSortingEnabled( void ) const { return !HasFlag( GetStyle(), LVS_NOSORTHEADER ); }
 	bool SortList( void );
+	void InitialSortList( void );
 
-	pred::CompareResult CompareSubItems( LPARAM leftParam, LPARAM rightParam ) const;
-
-	static bool IsSelectionChangedNotify( const NMLISTVIEW* pNmList, UINT selMask = LVIS_SELECTED | LVIS_FOCUSED );
+	void AddColumnCompare( TColumn column, const pred::IComparator* pComparator, bool defaultAscending = true );
+	void AddRecordCompare( const pred::IComparator* pComparator ) { AddColumnCompare( EntireRecord, pComparator ); }	// default record comparator
+	const pred::IComparator* FindCompare( TColumn column ) const;
+protected:
+	virtual pred::CompareResult CompareSubItems( const utl::ISubject* pLeft, const utl::ISubject* pRight ) const;
 private:
 	void UpdateColumnSortHeader( void );
+	bool IsDefaultAscending( TColumn column ) const;				// e.g. allows date-time descending ordering by default
+
+	static pred::CompareResult CALLBACK ObjectCompareProc( LPARAM leftParam, LPARAM rightParam, CReportListControl* pListCtrl );
+
+	static pred::CompareResult CALLBACK InitialOrderCompareProc( LPARAM leftParam, LPARAM rightParam, CReportListControl* pListCtrl );
+	pred::CompareResult CompareInitialOrder( TRowKey leftKey, TRowKey rightKey ) const;
 
 	static int CALLBACK TextCompareProc( LPARAM leftParam, LPARAM rightParam, CReportListControl* pListCtrl );
+	pred::CompareResult CompareSubItemsByIndex( UINT leftIndex, UINT rightIndex ) const;
+	pred::CompareResult CompareSubItemsText( UINT leftIndex, UINT rightIndex, TColumn byColumn ) const;
+
+	struct CColumnComparator 							// compare sub-item values per columns using object accessors
+	{
+		CColumnComparator( void ) {}
+		CColumnComparator( TColumn column, bool defaultAscending, const pred::IComparator* pComparator ) : m_column( column ), m_defaultAscending( defaultAscending ), m_pComparator( pComparator ) {}
+	public:
+		TColumn m_column;
+		bool m_defaultAscending;						// allows descending ordering by default (e.g. for date-time)
+		const pred::IComparator* m_pComparator;
+	};
 public:
 	enum ColumnWidth
 	{
@@ -288,10 +316,6 @@ public:
 	void UnmarkCellAt( int index, TColumn subItem );
 	void ClearMarkedCells( void );
 
-	typedef LPARAM TRowKey;								// row keys are invariant to sorting
-
-	TRowKey MakeRowKeyAt( int index ) const;			// favour item data (LPARAM), or fall back to index (int)
-
 	const ui::CTextEffect* FindTextEffectAt( TRowKey rowKey, TColumn subItem ) const;
 
 	interface ITextEffectCallback
@@ -392,10 +416,12 @@ private:
 	TColumn m_sortByColumn;
 	bool m_sortAscending;
 	bool m_sortInternally;
-	PFNLVCOMPARE m_pCompareFunc;
+	PFNLVCOMPARE m_pComparePtrFunc;						// compare by object ptr such as: static CompareResult CALLBACK CompareObjects( const CFoo* pLeft, const CFoo* pRight, CReportListControl* pListCtrl );
+
+	std::vector< CColumnComparator > m_comparators;
+	utl::vector_map< TRowKey, int > m_initialItemsOrder;	// stores items initial order just after list set-up
 
 	typedef std::pair< TRowKey, TColumn > TCellPair;	// invariant to sorting: favour LPARAMs instead of indexes
-
 	stdext::hash_map< TCellPair, ui::CTextEffect > m_markedCells;
 	std::auto_ptr< ui::CFontEffectCache > m_pFontCache;		// self-encapsulated
 	ITextEffectCallback* m_pTextEffectCallback;
