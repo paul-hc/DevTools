@@ -6,6 +6,7 @@
 #include "ut/CommandModelSerializerTests.h"
 #include "resource.h"
 #include "utl/EnumTags.h"
+#include "utl/Thumbnailer.h"
 #include "utl/BaseApp.hxx"
 
 #ifdef _DEBUG
@@ -36,6 +37,10 @@ CApplication::CApplication( void )
 	StoreAppNameSuffix( str::Format( _T(" [%d-bit]"), utl::GetPlatformBits() ) );		// identify the primary target platform
 }
 
+CApplication::~CApplication()
+{
+}
+
 BOOL CApplication::InitInstance( void )
 {
 	app::InitModule( m_hInstance );
@@ -44,7 +49,11 @@ BOOL CApplication::InitInstance( void )
 	if ( !CBaseApp< CWinApp >::InitInstance() )
 		return FALSE;
 
-	app::GetLogger().m_logFileMaxSize = -1;		// unlimited log size
+	app::GetLogger().m_logFileMaxSize = -1;				// unlimited log size
+
+	m_pThumbnailer.reset( new CThumbnailer );
+	GetSharedResources().AddAutoPtr( &m_pThumbnailer );
+	m_pThumbnailer->SetOptimizeExtractIcons();			// for more accurate icon scaling that favours the best fitting image size present
 
 	CAboutBox::m_appIconId = IDD_RENAME_FILES_DIALOG;				// will use HugeIcon
 	CToolStrip::RegisterStripButtons( IDR_IMAGE_STRIP );			// register stock images

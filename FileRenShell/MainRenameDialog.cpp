@@ -19,6 +19,7 @@
 #include "utl/MenuUtilities.h"
 #include "utl/PathGenerator.h"
 #include "utl/RuntimeException.h"
+#include "utl/Thumbnailer.h"
 #include "utl/UtilitiesEx.h"
 #include "utl/VisualTheme.h"
 #include "utl/resource.h"
@@ -85,7 +86,7 @@ CMainRenameDialog::CMainRenameDialog( CFileModel* pFileModel, CWnd* pParent )
 	, m_autoGenerate( AfxGetApp()->GetProfileInt( reg::section_mainDialog, reg::entry_autoGenerate, false ) != FALSE )
 	, m_seqCountAutoAdvance( AfxGetApp()->GetProfileInt( reg::section_mainDialog, reg::entry_seqCountAutoAdvance, true ) != FALSE )
 	, m_formatCombo( ui::HistoryMaxSize, specialSep )
-	, m_fileListCtrl( IDC_FILE_RENAME_LIST, LVS_EX_GRIDLINES | CReportListControl::DefaultStyleEx )
+	, m_fileListCtrl( IDC_FILE_RENAME_LIST )
 	, m_changeCaseButton( &GetTags_ChangeCase() )
 	, m_delimiterSetCombo( ui::HistoryMaxSize, specialSep )
 	, m_delimStatic( CThemeItem( L"EXPLORERBAR", vt::EBP_IEBARMENU, vt::EBM_NORMAL ) )
@@ -96,8 +97,11 @@ CMainRenameDialog::CMainRenameDialog( CFileModel* pFileModel, CWnd* pParent )
 	m_regSection = reg::section_mainDialog;
 	RegisterCtrlLayout( layout::styles, COUNT_OF( layout::styles ) );
 
+	m_fileListCtrl.ModifyListStyleEx( LVS_EX_DOUBLEBUFFER, LVS_EX_GRIDLINES );		// remove double buffering for better drawing accuracy on thumb scaling
+	m_fileListCtrl.SetSection( m_regSection + _T("\\List") );
 	m_fileListCtrl.SetUseAlternateRowColoring();
 	m_fileListCtrl.SetTextEffectCallback( this );
+	m_fileListCtrl.SetCustomIconDraw( app::GetThumbnailer(), SmallIcon, HugeIcon );
 
 	m_changeCaseButton.SetSelValue( AfxGetApp()->GetProfileInt( reg::section_mainDialog, reg::entry_changeCase, ExtLowerCase ) );
 
@@ -133,31 +137,23 @@ bool CMainRenameDialog::RenameFiles( void )
 
 void CMainRenameDialog::SetupFileListView( void )
 {
-	int orgSel = m_fileListCtrl.GetCurSel();
+	CScopedListTextSelection sel( &m_fileListCtrl );
 
+	CScopedLockRedraw freeze( &m_fileListCtrl );
+	CScopedInternalChange internalChange( &m_fileListCtrl );
+
+	m_fileListCtrl.DeleteAllItems();
+
+	for ( unsigned int pos = 0; pos != m_rRenameItems.size(); ++pos )
 	{
-		CScopedLockRedraw freeze( &m_fileListCtrl );
-		CScopedInternalChange internalChange( &m_fileListCtrl );
+		CRenameItem* pItem = m_rRenameItems[ pos ];
 
-		m_fileListCtrl.DeleteAllItems();
-
-		for ( unsigned int pos = 0; pos != m_rRenameItems.size(); ++pos )
-		{
-			CRenameItem* pItem = m_rRenameItems[ pos ];
-
-			m_fileListCtrl.InsertObjectItem( pos, pItem );		// Source
-			m_fileListCtrl.SetItemText( pos, Destination, pItem->GetDestPath().GetNameExt() );
-		}
-
-		m_fileListCtrl.SetupDiffColumnPair( Source, Destination, path::GetMatch() );
+		m_fileListCtrl.InsertObjectItem( pos, pItem );		// Source
+		m_fileListCtrl.SetSubItemText( pos, Destination, pItem->GetDestPath().GetNameExt() );
 	}
 
-	// restore the selection (if any)
-	if ( orgSel != -1 )
-	{
-		m_fileListCtrl.EnsureVisible( orgSel, FALSE );
-		m_fileListCtrl.SetCurSel( orgSel );
-	}
+	m_fileListCtrl.SetupDiffColumnPair( Source, Destination, path::GetMatch() );
+	m_fileListCtrl.InitialSortList();
 }
 
 void CMainRenameDialog::SwitchMode( Mode mode )

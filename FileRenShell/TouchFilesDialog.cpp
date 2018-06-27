@@ -19,6 +19,7 @@
 #include "utl/MenuUtilities.h"
 #include "utl/StringUtilities.h"
 #include "utl/UtilitiesEx.h"
+#include "utl/Thumbnailer.h"
 #include "utl/TimeUtils.h"
 #include "utl/resource.h"
 #include "resource.h"
@@ -55,7 +56,7 @@ CTouchFilesDialog::CTouchFilesDialog( CFileModel* pFileModel, CWnd* pParent )
 	: CFileEditorBaseDialog( pFileModel, cmd::TouchFile, IDD_TOUCH_FILES_DIALOG, pParent )
 	, m_rTouchItems( m_pFileModel->LazyInitTouchItems() )
 	, m_mode( TouchMode )
-	, m_fileListCtrl( IDC_FILE_TOUCH_LIST, LVS_EX_GRIDLINES | CReportListControl::DefaultStyleEx )
+	, m_fileListCtrl( IDC_FILE_TOUCH_LIST )
 	, m_anyChanges( false )
 {
 	Construct();
@@ -65,10 +66,12 @@ CTouchFilesDialog::CTouchFilesDialog( CFileModel* pFileModel, CWnd* pParent )
 	m_regSection = reg::section_dialog;
 	RegisterCtrlLayout( layout::styles, COUNT_OF( layout::styles ) );
 
+	m_fileListCtrl.ModifyListStyleEx( 0, LVS_EX_GRIDLINES );
 	m_fileListCtrl.SetSection( m_regSection + _T("\\List") );
 	m_fileListCtrl.SetUseAlternateRowColoring();
 	m_fileListCtrl.SetTextEffectCallback( this );
 	m_fileListCtrl.SetPopupMenu( CReportListControl::OnSelection, NULL );				// let us track a custom menu
+	m_fileListCtrl.SetCustomIconDraw( app::GetThumbnailer(), SmallIcon, HugeIcon );
 
 	m_fileListCtrl.AddRecordCompare( pred::NewComparator( pred::CompareCode() ) );		// default row item comparator
 	m_fileListCtrl.AddColumnCompare( PathName, pred::NewComparator( pred::CompareDisplayCode() ) );
@@ -175,44 +178,36 @@ void CTouchFilesDialog::SetupDialog( void )
 
 void CTouchFilesDialog::SetupFileListView( void )
 {
-	int orgSel = m_fileListCtrl.GetCurSel();
+	CScopedListTextSelection sel( &m_fileListCtrl );
 
+	CScopedLockRedraw freeze( &m_fileListCtrl );
+	CScopedInternalChange internalChange( &m_fileListCtrl );
+
+	m_fileListCtrl.DeleteAllItems();
+
+	for ( unsigned int pos = 0; pos != m_rTouchItems.size(); ++pos )
 	{
-		CScopedLockRedraw freeze( &m_fileListCtrl );
-		CScopedInternalChange internalChange( &m_fileListCtrl );
+		const CTouchItem* pTouchItem = m_rTouchItems[ pos ];
 
-		m_fileListCtrl.DeleteAllItems();
+		m_fileListCtrl.InsertObjectItem( pos, pTouchItem );		// PathName
 
-		for ( unsigned int pos = 0; pos != m_rTouchItems.size(); ++pos )
-		{
-			const CTouchItem* pTouchItem = m_rTouchItems[ pos ];
+		m_fileListCtrl.SetSubItemText( pos, DestAttributes, fmt::FormatFileAttributes( pTouchItem->GetDestState().m_attributes ) );
+		m_fileListCtrl.SetSubItemText( pos, DestModifyTime, time_utl::FormatTimestamp( pTouchItem->GetDestState().m_modifTime ) );
+		m_fileListCtrl.SetSubItemText( pos, DestCreationTime, time_utl::FormatTimestamp( pTouchItem->GetDestState().m_creationTime ) );
+		m_fileListCtrl.SetSubItemText( pos, DestAccessTime, time_utl::FormatTimestamp( pTouchItem->GetDestState().m_accessTime ) );
 
-			m_fileListCtrl.InsertObjectItem( pos, pTouchItem );		// PathName
-
-			m_fileListCtrl.SetSubItemText( pos, DestAttributes, fmt::FormatFileAttributes( pTouchItem->GetDestState().m_attributes ) );
-			m_fileListCtrl.SetSubItemText( pos, DestModifyTime, time_utl::FormatTimestamp( pTouchItem->GetDestState().m_modifTime ) );
-			m_fileListCtrl.SetSubItemText( pos, DestCreationTime, time_utl::FormatTimestamp( pTouchItem->GetDestState().m_creationTime ) );
-			m_fileListCtrl.SetSubItemText( pos, DestAccessTime, time_utl::FormatTimestamp( pTouchItem->GetDestState().m_accessTime ) );
-
-			m_fileListCtrl.SetSubItemText( pos, SrcAttributes, fmt::FormatFileAttributes( pTouchItem->GetSrcState().m_attributes ) );
-			m_fileListCtrl.SetSubItemText( pos, SrcModifyTime, time_utl::FormatTimestamp( pTouchItem->GetSrcState().m_modifTime ) );
-			m_fileListCtrl.SetSubItemText( pos, SrcCreationTime, time_utl::FormatTimestamp( pTouchItem->GetSrcState().m_creationTime ) );
-			m_fileListCtrl.SetSubItemText( pos, SrcAccessTime, time_utl::FormatTimestamp( pTouchItem->GetSrcState().m_accessTime ) );
-		}
-
-		m_fileListCtrl.SetupDiffColumnPair( SrcAttributes, DestAttributes, str::GetMatch() );
-		m_fileListCtrl.SetupDiffColumnPair( SrcModifyTime, DestModifyTime, str::GetMatch() );
-		m_fileListCtrl.SetupDiffColumnPair( SrcCreationTime, DestCreationTime, str::GetMatch() );
-		m_fileListCtrl.SetupDiffColumnPair( SrcAccessTime, DestAccessTime, str::GetMatch() );
-
-		m_fileListCtrl.InitialSortList();
+		m_fileListCtrl.SetSubItemText( pos, SrcAttributes, fmt::FormatFileAttributes( pTouchItem->GetSrcState().m_attributes ) );
+		m_fileListCtrl.SetSubItemText( pos, SrcModifyTime, time_utl::FormatTimestamp( pTouchItem->GetSrcState().m_modifTime ) );
+		m_fileListCtrl.SetSubItemText( pos, SrcCreationTime, time_utl::FormatTimestamp( pTouchItem->GetSrcState().m_creationTime ) );
+		m_fileListCtrl.SetSubItemText( pos, SrcAccessTime, time_utl::FormatTimestamp( pTouchItem->GetSrcState().m_accessTime ) );
 	}
 
-	if ( orgSel != -1 )		// restore selection?
-	{
-		m_fileListCtrl.EnsureVisible( orgSel, FALSE );
-		m_fileListCtrl.SetCurSel( orgSel );
-	}
+	m_fileListCtrl.SetupDiffColumnPair( SrcAttributes, DestAttributes, str::GetMatch() );
+	m_fileListCtrl.SetupDiffColumnPair( SrcModifyTime, DestModifyTime, str::GetMatch() );
+	m_fileListCtrl.SetupDiffColumnPair( SrcCreationTime, DestCreationTime, str::GetMatch() );
+	m_fileListCtrl.SetupDiffColumnPair( SrcAccessTime, DestAccessTime, str::GetMatch() );
+
+	m_fileListCtrl.InitialSortList();
 }
 
 void CTouchFilesDialog::AccumulateCommonStates( void )
