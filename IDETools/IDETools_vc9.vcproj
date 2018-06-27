@@ -596,7 +596,7 @@
 				>
 			</File>
 			<File
-				RelativePath="OptionsPages.cpp"
+				RelativePath=".\OptionsSheet.cpp"
 				>
 				<FileConfiguration
 					Name="ReleaseU|Win32"
@@ -616,7 +616,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="OptionsPages.h"
+				RelativePath=".\OptionsSheet.h"
 				>
 			</File>
 			<File

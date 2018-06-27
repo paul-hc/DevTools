@@ -2,7 +2,7 @@
 #include "stdafx.h"
 #include "ModuleSession.h"
 #include "IdeUtilities.h"
-#include "OptionsPages.h"
+#include "OptionsSheet.h"
 #include "Application.h"
 #include "resource.h"
 #include "utl/Path.h"
@@ -163,55 +163,61 @@ bool CModuleSession::EditOptions( void )
 {
 	COptionsSheet sheet( ide::getRootWindow() );
 
-	sheet.m_generalPage.m_developerName = m_developerName;
-	sheet.m_generalPage.m_codeTemplatePath = m_codeTemplatePath;
-	sheet.m_generalPage.m_menuVertSplitCount = m_menuVertSplitCount;
-	sheet.m_generalPage.m_singleLineCommentToken = m_singleLineCommentToken;
+	CGeneralOptionsPage* pGeneralPage = sheet.GetPageAs< CGeneralOptionsPage >( COptionsSheet::GeneralPage );
 
-	sheet.m_generalPage.m_autoCodeGeneration = m_autoCodeGeneration;
-	sheet.m_generalPage.m_displayErrorMessages = m_displayErrorMessages;
-	sheet.m_generalPage.m_useCommentDecoration = m_useCommentDecoration;
-	sheet.m_generalPage.m_duplicateLineMoveDown = m_duplicateLineMoveDown;
+	pGeneralPage->m_developerName = m_developerName;
+	pGeneralPage->m_codeTemplatePath = m_codeTemplatePath;
+	pGeneralPage->m_menuVertSplitCount = m_menuVertSplitCount;
+	pGeneralPage->m_singleLineCommentToken = m_singleLineCommentToken;
 
-	sheet.m_generalPage.m_classPrefix = m_classPrefix.c_str();
-	sheet.m_generalPage.m_structPrefix = m_structPrefix.c_str();
-	sheet.m_generalPage.m_enumPrefix = m_enumPrefix.c_str();
+	pGeneralPage->m_autoCodeGeneration = m_autoCodeGeneration;
+	pGeneralPage->m_displayErrorMessages = m_displayErrorMessages;
+	pGeneralPage->m_useCommentDecoration = m_useCommentDecoration;
+	pGeneralPage->m_duplicateLineMoveDown = m_duplicateLineMoveDown;
 
-	sheet.m_formattingPage.m_splitMaxColumn = m_splitMaxColumn;
+	pGeneralPage->m_classPrefix = m_classPrefix.c_str();
+	pGeneralPage->m_structPrefix = m_structPrefix.c_str();
+	pGeneralPage->m_enumPrefix = m_enumPrefix.c_str();
 
-	sheet.m_bscPathPage.m_browseInfoPath = m_browseInfoPath;
+	CCodingStandardPage* pCodingStandardPage = sheet.GetPageAs< CCodingStandardPage >( COptionsSheet::CodingStandardPage );
+
+	pCodingStandardPage->m_splitMaxColumn = m_splitMaxColumn;
+
+	CBscPathPage* pBscPathPage = sheet.GetPageAs< CBscPathPage >( COptionsSheet::BscPathPage );
+	pBscPathPage->m_browseInfoPath = m_browseInfoPath;
 
 	if ( sheet.DoModal() != IDOK )
 		return FALSE;
 
-	m_developerName = sheet.m_generalPage.m_developerName;
-	m_codeTemplatePath = sheet.m_generalPage.m_codeTemplatePath;
-	m_menuVertSplitCount = sheet.m_generalPage.m_menuVertSplitCount;
-	m_singleLineCommentToken = sheet.m_generalPage.m_singleLineCommentToken;
+	m_developerName = pGeneralPage->m_developerName;
+	m_codeTemplatePath = pGeneralPage->m_codeTemplatePath;
+	m_menuVertSplitCount = pGeneralPage->m_menuVertSplitCount;
+	m_singleLineCommentToken = pGeneralPage->m_singleLineCommentToken;
 
-	m_autoCodeGeneration = sheet.m_generalPage.m_autoCodeGeneration;
-	m_displayErrorMessages = sheet.m_generalPage.m_displayErrorMessages;
-	m_useCommentDecoration = sheet.m_generalPage.m_useCommentDecoration;
-	m_duplicateLineMoveDown = sheet.m_generalPage.m_duplicateLineMoveDown;
+	m_autoCodeGeneration = pGeneralPage->m_autoCodeGeneration;
+	m_displayErrorMessages = pGeneralPage->m_displayErrorMessages;
+	m_useCommentDecoration = pGeneralPage->m_useCommentDecoration;
+	m_duplicateLineMoveDown = pGeneralPage->m_duplicateLineMoveDown;
 
-	m_classPrefix = sheet.m_generalPage.m_classPrefix;
-	m_structPrefix = sheet.m_generalPage.m_structPrefix;
-	m_enumPrefix = sheet.m_generalPage.m_enumPrefix;
+	m_classPrefix = pGeneralPage->m_classPrefix;
+	m_structPrefix = pGeneralPage->m_structPrefix;
+	m_enumPrefix = pGeneralPage->m_enumPrefix;
 
 	code::CFormatterOptions& formattingOptions = GetCodeFormatterOptions();
 
-	formattingOptions.m_preserveMultipleWhiteSpace = sheet.m_formattingPage.m_preserveMultipleWhiteSpace;
-	formattingOptions.m_deleteTrailingWhiteSpace = sheet.m_formattingPage.m_deleteTrailingWhiteSpace;
-	formattingOptions.m_breakSeparators = sheet.m_formattingPage.m_breakSeparators;
-	formattingOptions.m_braceRules = sheet.m_formattingPage.m_braceRules;
-	formattingOptions.m_operatorRules = sheet.m_formattingPage.m_operatorRules;
-	m_splitMaxColumn = sheet.m_formattingPage.m_splitMaxColumn;
+	formattingOptions.m_preserveMultipleWhiteSpace = pCodingStandardPage->m_preserveMultipleWhiteSpace;
+	formattingOptions.m_deleteTrailingWhiteSpace = pCodingStandardPage->m_deleteTrailingWhiteSpace;
+	formattingOptions.m_breakSeparators = pCodingStandardPage->m_breakSeparators;
+	formattingOptions.m_braceRules = pCodingStandardPage->m_braceRules;
+	formattingOptions.m_operatorRules = pCodingStandardPage->m_operatorRules;
+	m_splitMaxColumn = pCodingStandardPage->m_splitMaxColumn;
 
-	formattingOptions.m_returnTypeOnSeparateLine = sheet.m_cppImplFormattingPage.m_returnTypeOnSeparateLine;
-	formattingOptions.m_commentOutDefaultParams = sheet.m_cppImplFormattingPage.m_commentOutDefaultParams;
-	formattingOptions.m_linesBetweenFunctionImpls = sheet.m_cppImplFormattingPage.m_linesBetweenFunctionImpls;
+	CCppImplFormattingPage* pCppFormattingPage = sheet.GetPageAs< CCppImplFormattingPage >( COptionsSheet::CppFormattingPage );
+	formattingOptions.m_returnTypeOnSeparateLine = pCppFormattingPage->m_returnTypeOnSeparateLine;
+	formattingOptions.m_commentOutDefaultParams = pCppFormattingPage->m_commentOutDefaultParams;
+	formattingOptions.m_linesBetweenFunctionImpls = pCppFormattingPage->m_linesBetweenFunctionImpls;
 
-	m_browseInfoPath = sheet.m_bscPathPage.m_browseInfoPath;
+	m_browseInfoPath = pBscPathPage->m_browseInfoPath;
 
 	// save right away
 	SaveToRegistry();

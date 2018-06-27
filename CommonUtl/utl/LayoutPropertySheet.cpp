@@ -6,6 +6,7 @@
 #include "MenuUtilities.h"
 #include "Utilities.h"
 #include "StringUtilities.h"
+#include "BaseApp.h"
 #include <afxpriv.h>
 
 #ifdef _DEBUG
@@ -312,6 +313,7 @@ void CLayoutPropertySheet::LayoutSheet( void )
 BEGIN_MESSAGE_MAP( CLayoutPropertySheet, CLayoutBasePropertySheet )
 	ON_WM_NCCREATE()
 	ON_WM_GETMINMAXINFO()
+	ON_WM_CONTEXTMENU()
 	ON_WM_INITMENUPOPUP()
 	ON_WM_NCHITTEST()
 	ON_WM_PAINT()
@@ -385,6 +387,14 @@ void CLayoutPropertySheet::OnGetMinMaxInfo( MINMAXINFO* pMinMaxInfo )
 
 	CPoint minWindowSize = m_pLayoutEngine->GetMinWindowSize();
 	pMinMaxInfo->ptMinTrackSize = minWindowSize;
+}
+
+void CLayoutPropertySheet::OnContextMenu( CWnd* pWnd, CPoint screenPos )
+{
+	if ( this == pWnd )
+		app::TrackUnitTestMenu( this, screenPos );
+	else
+		__super::OnContextMenu( pWnd, screenPos );
 }
 
 void CLayoutPropertySheet::OnInitMenuPopup( CMenu* pPopupMenu, UINT index, BOOL isSysMenu )

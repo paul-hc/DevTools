@@ -1,6 +1,6 @@
 
 #include "stdafx.h"
-#include "OptionsPages.h"
+#include "OptionsSheet.h"
 #include "IncludeDirectories.h"
 #include "ModuleSession.h"
 #include "UserInterfaceUtilities.h"
@@ -18,13 +18,51 @@
 #endif
 
 
-static const TCHAR codeTemplateFilter[] = _T("Code template Files (*.ctf)|*.ctf|")
-										  _T("All Files (*.*)|*.*||");
+// COptionsSheet implementation
+
+COptionsSheet::COptionsSheet( CWnd* pParent )
+	: CLayoutPropertySheet( str::Load( IDS_OPTIONS_PROPERTY_SHEET_CAPTION ), pParent )
+{
+	m_regSection = _T("OptionsSheet");
+	m_resizable = false;
+	m_alwaysModified = true;
+	SetSingleTransaction();
+	LoadDlgIcon( ID_OPTIONS );
+
+	AddPage( new CGeneralOptionsPage );
+	AddPage( new CCodingStandardPage );
+	AddPage( new CCppImplFormattingPage );
+	AddPage( new CBscPathPage );
+	AddPage( new CDirectoriesPage );
+}
+
+COptionsSheet::~COptionsSheet()
+{
+	DeleteAllPages();
+}
+
+BOOL COptionsSheet::OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo )
+{
+	if ( CLayoutPropertySheet::OnCmdMsg( id, code, pExtra, pHandlerInfo ) )
+		return TRUE;
+
+	if ( CWinThread* pCurrThread = AfxGetThread() )								// dialog may be hosted by a process with different architecture (e.g. Explorer.exe)
+		return pCurrThread->OnCmdMsg( id, code, pExtra, pHandlerInfo );			// some commands may handled by the CWinApp, e.g. ID_RUN_TESTS
+
+	return FALSE;
+}
+
+
+// CGeneralOptionsPage implementation
+
+static const TCHAR s_codeTemplateFilter[] =
+	_T("Code template Files (*.ctf)|*.ctf|")
+	_T("All Files (*.*)|*.*||");
 
 
 CGeneralOptionsPage::CGeneralOptionsPage( void )
 	: CLayoutPropertyPage( IDD_OPTIONS_GENERAL_PAGE )
-	, m_templateFileEdit( ui::FilePath, codeTemplateFilter )
+	, m_templateFileEdit( ui::FilePath, s_codeTemplateFilter )
 {
 	m_menuVertSplitCount = 1;
 	m_autoCodeGeneration = false;
@@ -737,53 +775,4 @@ void CDirectoriesPage::OnPastePaths( void )
 void CDirectoriesPage::OnUpdatePastePaths( CCmdUI* pCmdUI )
 {
 	pCmdUI->Enable( CClipboard::CanPasteText() && m_pDirSets->GetCurrentPaths() != NULL );
-}
-
-
-// COptionsSheet implementation
-
-COptionsSheet::COptionsSheet( CWnd* pParent )
-	: CLayoutPropertySheet( str::Load( IDS_OPTIONS_PROPERTY_SHEET_CAPTION ), pParent )
-{
-	m_regSection = _T("OptionsSheet");
-	m_resizable = false;
-	m_alwaysModified = true;
-	SetSingleTransaction();
-	LoadDlgIcon( ID_OPTIONS );
-
-	AddPage( &m_generalPage );
-	AddPage( &m_formattingPage );
-	AddPage( &m_cppImplFormattingPage );
-	AddPage( &m_bscPathPage );
-	AddPage( &m_directoriesPage );
-}
-
-COptionsSheet::~COptionsSheet()
-{
-}
-
-BOOL COptionsSheet::OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo )
-{
-	if ( CLayoutPropertySheet::OnCmdMsg( id, code, pExtra, pHandlerInfo ) )
-		return TRUE;
-
-	if ( CWinThread* pCurrThread = AfxGetThread() )								// dialog may be hosted by a process with different architecture (e.g. Explorer.exe)
-		return pCurrThread->OnCmdMsg( id, code, pExtra, pHandlerInfo );			// some commands may handled by the CWinApp, e.g. ID_RUN_TESTS
-
-	return FALSE;
-}
-
-
-// message handlers
-
-BEGIN_MESSAGE_MAP( COptionsSheet, CLayoutPropertySheet )
-	ON_WM_CONTEXTMENU()
-END_MESSAGE_MAP()
-
-void COptionsSheet::OnContextMenu( CWnd* pWnd, CPoint screenPos )
-{
-	if ( this == pWnd )
-		app::TrackUnitTestMenu( this, screenPos );
-	else
-		CLayoutPropertySheet::OnContextMenu( pWnd, screenPos );
 }

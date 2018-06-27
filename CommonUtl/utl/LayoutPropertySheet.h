@@ -67,6 +67,7 @@ protected:
 	// message map functions
 	afx_msg BOOL OnNcCreate( CREATESTRUCT* pCreate );
 	afx_msg void OnGetMinMaxInfo( MINMAXINFO* pMinMaxInfo );
+	afx_msg void OnContextMenu( CWnd* pWnd, CPoint screenPos );
 	afx_msg void OnInitMenuPopup( CMenu* pPopupMenu, UINT index, BOOL isSysMenu );
 	afx_msg LRESULT OnNcHitTest( CPoint point );
 	afx_msg void OnPaint( void );

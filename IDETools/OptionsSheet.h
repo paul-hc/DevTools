@@ -1,5 +1,5 @@
-#ifndef OptionsPages_h
-#define OptionsPages_h
+#ifndef OptionsSheet_h
+#define OptionsSheet_h
 #pragma once
 
 #include <vector>
@@ -7,8 +7,23 @@
 #include "utl/DialogToolBar.h"
 #include "utl/ItemContentEdit.h"
 #include "utl/LayoutPropertyPage.h"
+#include "utl/LayoutPropertySheet.h"
 #include "utl/Path.h"
 #include "utl/SpinEdit.h"
+
+
+class COptionsSheet : public CLayoutPropertySheet
+{
+public:
+	COptionsSheet( CWnd* pParent );
+	virtual ~COptionsSheet();
+
+	enum Page { GeneralPage, CodingStandardPage, CppFormattingPage, BscPathPage, DirectoriesPage };
+
+	// generated stuff
+public:
+	virtual BOOL OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo );
+};
 
 
 // property pages owned by COptionsSheet
@@ -217,29 +232,4 @@ protected:
 };
 
 
-#include "utl/LayoutPropertySheet.h"
-
-
-class COptionsSheet : public CLayoutPropertySheet
-{
-public:
-	COptionsSheet( CWnd* pParent );
-	virtual ~COptionsSheet();
-public:
-	CGeneralOptionsPage m_generalPage;
-	CCodingStandardPage m_formattingPage;
-	CCppImplFormattingPage m_cppImplFormattingPage;
-	CBscPathPage m_bscPathPage;
-	CDirectoriesPage m_directoriesPage;
-
-	// generated stuff
-public:
-	virtual BOOL OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo );
-protected:
-	afx_msg void OnContextMenu( CWnd* pWnd, CPoint screenPos );
-
-	DECLARE_MESSAGE_MAP()
-};
-
-
-#endif // OptionsPages_h
+#endif // OptionsSheet_h
