@@ -60,11 +60,12 @@ CTouchFilesDialog::CTouchFilesDialog( CFileModel* pFileModel, CWnd* pParent )
 	, m_anyChanges( false )
 {
 	Construct();
+	ASSERT_PTR( m_pFileModel );
 	REQUIRE( !m_rTouchItems.empty() );
 
-	ASSERT_PTR( m_pFileModel );
 	m_regSection = reg::section_dialog;
 	RegisterCtrlLayout( layout::styles, COUNT_OF( layout::styles ) );
+	LoadDlgIcon( ID_TOUCH_FILES );
 
 	m_fileListCtrl.ModifyListStyleEx( 0, LVS_EX_GRIDLINES );
 	m_fileListCtrl.SetSection( m_regSection + _T("\\List") );

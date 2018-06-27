@@ -24,7 +24,7 @@ static const TCHAR specialSep[] = _T("\n");
 
 namespace reg
 {
-	const TCHAR section[] = _T("Replace Dialog");
+	const TCHAR section[] = _T("ReplaceDialog");
 	const TCHAR entry_findWhat[] = _T("Find What");
 	const TCHAR entry_replaceWith[] = _T("Replace With");
 	const TCHAR entry_matchCase[] = _T("Match Case");

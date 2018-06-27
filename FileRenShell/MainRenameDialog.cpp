@@ -31,7 +31,7 @@
 
 namespace reg
 {
-	static const TCHAR section_mainDialog[] = _T("Main Dialog");
+	static const TCHAR section_mainDialog[] = _T("RenameDialog");
 	static const TCHAR entry_formatHistory[] = _T("Format History");
 	static const TCHAR entry_autoGenerate[] = _T("Auto Generate");
 	static const TCHAR entry_seqCount[] = _T("Sequence Count");

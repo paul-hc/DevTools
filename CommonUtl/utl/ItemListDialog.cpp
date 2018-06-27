@@ -16,9 +16,8 @@
 
 namespace reg
 {
-	static const TCHAR section_settings[] = _T("Settings");
-	static const TCHAR section_dialog[] = _T("ItemListDialog");
-	static const TCHAR section_list[] = _T("ItemListDialog\\list");
+	static const TCHAR section_dialog[] = _T("utl\\ItemListDialog");
+	static const TCHAR section_list[] = _T("utl\\ItemListDialog\\list");
 }
 
 namespace layout
