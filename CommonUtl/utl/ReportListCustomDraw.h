@@ -44,6 +44,7 @@ public:
 	const TColumn m_subItem;
 	const TRowKey m_rowKey;
 	const utl::ISubject* m_pObject;
+	const bool m_isReportMode;
 
 	static bool s_useDefaultDraw;
 	static bool s_dbgGuides;

@@ -119,6 +119,27 @@ CReportListControl::~CReportListControl()
 		delete itColComparator->m_pComparator;
 }
 
+bool CReportListControl::ModifyListStyleEx( DWORD dwRemove, DWORD dwAdd, UINT swpFlags /*= 0*/ )
+{
+	DWORD listStyleEx = m_hWnd != NULL ? GetExtendedStyle() : m_listStyleEx;
+	DWORD newListStyleEx = ( listStyleEx & ~dwRemove ) | dwAdd;
+
+	if ( listStyleEx == newListStyleEx )
+		return false;
+
+	m_listStyleEx = newListStyleEx;
+
+	if ( m_hWnd != NULL )
+	{
+		SetExtendedStyle( m_listStyleEx );
+
+		if ( swpFlags != 0 )
+			SetWindowPos( NULL, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE | SWP_NOZORDER | SWP_NOACTIVATE | swpFlags );
+	}
+
+	return true;
+}
+
 bool CReportListControl::DeleteAllItems( void )
 {
 	ClearData();
@@ -140,14 +161,24 @@ void CReportListControl::SetUseExplorerTheme( bool useExplorerTheme /*= true*/ )
 		CVisualTheme::SetWindowTheme( m_hWnd, m_useExplorerTheme ? L"Explorer" : L"", NULL );		// enable Explorer vs classic theme
 }
 
-void CReportListControl::SetCustomImageDraw( ui::ICustomImageDraw* pCustomImageDraw, ImageListPos transpImgPos /*= -1*/ )
+void CReportListControl::SetCustomImageDraw( ui::ICustomImageDraw* pCustomImageDraw, const CSize& smallImageSize /*= CSize( 0, 0 )*/, const CSize& largeImageSize /*= CSize( 0, 0 )*/ )
 {
 	ASSERT_NULL( m_hWnd );
 
 	if ( pCustomImageDraw != NULL )
-		m_pCustomImager.reset( new CCustomImager( pCustomImageDraw, transpImgPos ) );
+	{
+		m_pCustomImager.reset( new CCustomImager( pCustomImageDraw, smallImageSize, largeImageSize ) );
+
+		m_pImageList = &m_pCustomImager->m_smallImageList;
+		m_pLargeImageList = &m_pCustomImager->m_largeImageList;
+	}
 	else
 		m_pCustomImager.reset();
+}
+
+void CReportListControl::SetCustomIconDraw( ui::ICustomImageDraw* pCustomIconDraw, IconStdSize smallIconStdSize /*= SmallIcon*/, IconStdSize largeIconStdSize /*= LargeIcon*/ )
+{
+	SetCustomImageDraw( pCustomIconDraw, CIconId::GetStdSize( smallIconStdSize ), CIconId::GetStdSize( largeIconStdSize ) );
 }
 
 CMenu& CReportListControl::GetStdPopupMenu( ListPopup popupType )
@@ -174,10 +205,6 @@ void CReportListControl::SetupControl( void )
 	if ( m_useExplorerTheme )
 		CVisualTheme::SetWindowTheme( m_hWnd, L"Explorer", NULL );		// enable Explorer theme
 
-	if ( m_pCustomImager.get() != NULL )				// uses custom images?
-		if ( -1 == m_pCustomImager->m_transpPos )		// no transparent entry is part of the image lists?
-			AddTransparentImage();
-
 	if ( m_pImageList != NULL )
 		SetImageList( m_pImageList, LVSIL_SMALL );
 	if ( m_pLargeImageList != NULL )
@@ -188,30 +215,8 @@ void CReportListControl::SetupControl( void )
 	else
 		SetupColumnLayout( NULL );
 
+	UpdateCustomImagerBoundsSize();
 	UpdateColumnSortHeader();		// update current sorting order
-}
-
-void CReportListControl::AddTransparentImage( void )
-{
-	ASSERT_PTR( m_pCustomImager.get() );
-	ASSERT( -1 == m_pCustomImager->m_transpPos );
-
-	if ( NULL == m_pImageList )
-	{
-		CSize imageSize = m_pCustomImager->m_pRenderer->GetItemImageSize( ui::ICustomImageDraw::SmallImage );
-		m_pImageList = &m_pCustomImager->m_imageListSmall;
-		m_pImageList->Create( imageSize.cx, imageSize.cy, ILC_COLOR32 | ILC_MASK, 0, 1 );
-	}
-	if ( NULL == m_pLargeImageList )
-	{
-		CSize imageSize = m_pCustomImager->m_pRenderer->GetItemImageSize( ui::ICustomImageDraw::LargeImage );
-		m_pLargeImageList = &m_pCustomImager->m_imageListLarge;
-		m_pLargeImageList->Create( imageSize.cx, imageSize.cy, ILC_COLOR32 | ILC_MASK, 0, 1 );
-	}
-
-	const CIcon* pTranspIcon = CImageStore::SharedStore()->RetrieveIcon( ID_TRANSPARENT );
-	m_pCustomImager->m_transpPos = m_pImageList->Add( pTranspIcon->GetHandle() );
-	m_pLargeImageList->Add( pTranspIcon->GetHandle() );
 }
 
 void CReportListControl::ChangeListViewMode( DWORD viewMode )
@@ -231,8 +236,31 @@ void CReportListControl::ChangeListViewMode( DWORD viewMode )
 	SetView( viewMode );
 
 	if ( viewMode != oldViewMode )
+	{
+		UpdateCustomImagerBoundsSize();
+
 		if ( LV_VIEW_DETAILS == viewMode )
 			ResizeFlexColumns();			// restretch flex columns
+	}
+}
+
+bool CReportListControl::UpdateCustomImagerBoundsSize( void )
+{
+	if ( m_pCustomImager.get() != NULL )
+		switch ( GetView() )
+		{
+			case LV_VIEW_ICON:
+			case LV_VIEW_TILE:
+				return m_pCustomImager->UpdateImageSize( ui::ICustomImageDraw::LargeImage );
+			default:
+				ASSERT( false );
+			case LV_VIEW_DETAILS:
+			case LV_VIEW_SMALLICON:
+			case LV_VIEW_LIST:
+				return m_pCustomImager->UpdateImageSize( ui::ICustomImageDraw::SmallImage );
+		}
+
+	return false;			// no change
 }
 
 bool CReportListControl::SetCompactIconSpacing( int iconEdgeWidth /*= IconViewEdgeX*/ )
@@ -355,6 +383,19 @@ bool CReportListControl::IsItemFullyVisible( int index ) const
 	CRect clipItemRect = itemRect;
 	clipItemRect &= clientRect;
 	return ( clipItemRect == itemRect ) != FALSE;		// true if item is fully visible
+}
+
+bool CReportListControl::GetIconItemRect( CRect* pIconRect, int index ) const
+{
+	ASSERT_PTR( pIconRect );
+
+	if ( !GetItemRect( index, pIconRect, LVIR_ICON ) )
+		return false;				// item not visible
+
+	if ( ( pIconRect->Height() - 1 ) == pIconRect->Width() )
+		--pIconRect->bottom;		// reduce height since it has one extra pixel at the bottom (16x17); this allows proper icon drawing that fits vertically
+
+	return true;
 }
 
 void CReportListControl::SetSortByColumn( TColumn sortByColumn, bool sortAscending /*= true*/ )
@@ -542,6 +583,14 @@ pred::CompareResult CReportListControl::CompareSubItemsText( UINT leftIndex, UIN
 
 int CReportListControl::FindItemIndex( const std::tstring& itemText ) const
 {
+	if ( const CDiffColumnPair* pDiffPair = FindDiffColumnPair( Code ) )
+		if ( Code == pDiffPair->m_srcColumn )
+		{	// FindItem() fails to locate the item, so we search explicitly by code text
+			for ( int index = 0, count = GetItemCount(); index != count; ++index )
+				if ( GetItemText( index, Code ) == itemText.c_str() )
+					return index;
+		}
+
 	LVFINDINFO findInfo;
 	findInfo.flags = LVFI_STRING | LVFI_WRAP;
 	findInfo.psz = itemText.c_str();
@@ -971,7 +1020,7 @@ int CReportListControl::InsertObjectItem( int index, const utl::ISubject* pObjec
 	}
 
 	if ( Transparent_Image == imageIndex )
-		imageIndex = safe_ptr( m_pCustomImager.get() )->m_transpPos;
+		imageIndex = safe_ptr( m_pCustomImager.get() )->m_transpImgIndex;
 
 	int insertIndex = InsertItem( index, displayCode.c_str(), imageIndex );
 	ASSERT( insertIndex != -1 );
@@ -986,7 +1035,7 @@ void CReportListControl::SetSubItemText( int index, int subItem, const std::tstr
 	ASSERT( subItem > 0 );
 
 	if ( Transparent_Image == imageIndex )
-		imageIndex = safe_ptr( m_pCustomImager.get() )->m_transpPos;
+		imageIndex = safe_ptr( m_pCustomImager.get() )->m_transpImgIndex;
 	else if ( text.empty() )
 		imageIndex = No_Image;			// clear the image for empty text
 
@@ -1890,14 +1939,18 @@ BOOL CReportListControl::OnNmCustomDraw_Reflect( NMHDR* pNmHdr, LRESULT* pResult
 			break;
 
 		case CDDS_ITEMPOSTPAINT:
+			if ( !draw.m_isReportMode )
+				draw.DrawCellTextDiffs();				// draw text diffs since there is no CDDS_SUBITEM notification
+
 			if ( m_pCustomImager.get() != NULL )
 				if ( IsItemVisible( draw.m_index ) )
 				{
 					CRect itemImageRect;
-					if ( GetItemRect( draw.m_index, itemImageRect, LVIR_ICON ) )		// visible item?
+					if ( GetIconItemRect( &itemImageRect, draw.m_index ) )		// visible item?
 						if ( m_pCustomImager->m_pRenderer->CustomDrawItemImage( &pDraw->nmcd, itemImageRect ) )
-							return TRUE;		// handled
+							return TRUE;				// handled
 				}
+
 			break;
 		case CDDS_ITEMPOSTPAINT | CDDS_SUBITEM:
 			draw.DrawCellTextDiffs();
@@ -1996,6 +2049,47 @@ void CReportListControl::OnUpdateMoveTo( CCmdUI* pCmdUI )
 const str::TMatchSequence* CReportListControl::CDiffColumnPair::FindRowSequence( TRowKey rowKey ) const
 {
 	return utl::FindValuePtr( m_rowSequences, rowKey );
+}
+
+
+// CReportListControl::CCustomImager implementation
+
+CReportListControl::CCustomImager::CCustomImager( ui::ICustomImageDraw* pRenderer, const CSize& smallImageSize, const CSize& largeImageSize )
+	: m_pRenderer( pRenderer )
+	, m_listDrivesBoundsSize( smallImageSize != CSize( 0, 0 ) ? true : false )				// image-lists size drive thumbnailer bounds size?
+	, m_smallImageSize( m_listDrivesBoundsSize ? smallImageSize : m_pRenderer->GetItemImageSize( ui::ICustomImageDraw::SmallImage ) )
+	, m_largeImageSize( m_listDrivesBoundsSize ? largeImageSize : m_pRenderer->GetItemImageSize( ui::ICustomImageDraw::LargeImage ) )
+	, m_transpImgIndex( -1 )
+{
+	ASSERT_PTR( m_pRenderer );
+	InitImageLists();
+}
+
+void CReportListControl::CCustomImager::InitImageLists( void )
+{
+	REQUIRE( !IsInit() );
+
+	REQUIRE( m_smallImageSize.cx > 0 && m_smallImageSize.cy > 0 );
+	REQUIRE( m_largeImageSize.cx > 0 && m_largeImageSize.cy > 0 );
+	ASSERT_NULL( m_smallImageList.GetSafeHandle() );
+	ASSERT_NULL( m_largeImageList.GetSafeHandle() );
+
+	m_smallImageList.Create( m_smallImageSize.cx, m_smallImageSize.cy, ILC_COLOR32 | ILC_MASK, 0, 1 );
+	m_largeImageList.Create( m_largeImageSize.cx, m_largeImageSize.cy, ILC_COLOR32 | ILC_MASK, 0, 1 );
+
+	// add transparent image entry to image lists
+	const CIcon* pTranspIcon = CImageStore::SharedStore()->RetrieveIcon( ID_TRANSPARENT );
+	ASSERT_PTR( pTranspIcon );
+
+	m_transpImgIndex = m_smallImageList.Add( pTranspIcon->GetHandle() );
+	m_largeImageList.Add( pTranspIcon->GetHandle() );
+}
+
+bool CReportListControl::CCustomImager::UpdateImageSize( ui::ICustomImageDraw::ImageType imgSize )
+{
+	return
+		m_listDrivesBoundsSize &&
+		m_pRenderer->SetItemImageSize( ui::ICustomImageDraw::SmallImage == imgSize ? m_smallImageSize : m_largeImageSize );
 }
 
 

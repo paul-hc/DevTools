@@ -57,11 +57,15 @@ public:
 	{
 		DefaultStyleEx = LVS_EX_HEADERDRAGDROP | LVS_EX_FULLROWSELECT | LVS_EX_DOUBLEBUFFER |
 			LVS_EX_INFOTIP | LVS_EX_LABELTIP | LVS_EX_AUTOAUTOARRANGE /*| LVS_EX_JUSTIFYCOLUMNS*/
+
+		// note: LVS_EX_DOUBLEBUFFER causes problems of scaling artifacts with CustomImageDraw; remove this styleEx for accurate scaling.
 	};
 	enum Notification { LVN_ItemsReorder = 1000 };
 
 	CReportListControl( UINT columnLayoutId = 0, DWORD listStyleEx = DefaultStyleEx );
 	virtual ~CReportListControl();
+
+	bool ModifyListStyleEx( DWORD dwRemove, DWORD dwAdd, UINT swpFlags = 0 );
 
 	void SaveToRegistry( void );
 	bool LoadFromRegistry( void );
@@ -80,10 +84,6 @@ public:
 	const std::tstring& GetSection( void ) const { return m_regSection; }
 	void SetSection( const std::tstring& regSection ) { m_regSection = regSection; }
 public:
-	typedef int ImageListPos;
-
-	void SetCustomImageDraw( ui::ICustomImageDraw* pCustomImageDraw, ImageListPos transpImgPos = -1 );
-
 	enum ListPopup { OnSelection, Nowhere, _ListPopupCount };
 
 	void SetPopupMenu( ListPopup popupType, CMenu* pPopupMenu ) { m_pPopupMenu[ popupType ] = pPopupMenu; }
@@ -91,6 +91,15 @@ public:
 
 	ole::IDataSourceFactory* GetDataSourceFactory( void ) const { return m_pDataSourceFactory; }
 	void SetDataSourceFactory( ole::IDataSourceFactory* pDataSourceFactory ) { ASSERT_PTR( pDataSourceFactory ); m_pDataSourceFactory = pDataSourceFactory; }
+
+	typedef int ImageListIndex;
+
+	// To prevent icon scaling dithering when displaying shell item icon thumbnails, specify small/large image bounds size from the image list.
+	// Otherwise when displaying only image file thumbs, let the thumbnailer drives bounds sizes.
+	// Remove LVS_EX_DOUBLEBUFFER for accurate image scaling, especially for transparent PNGs.
+	//
+	void SetCustomImageDraw( ui::ICustomImageDraw* pCustomImageDraw, const CSize& smallImageSize = CSize( 0, 0 ), const CSize& largeImageSize = CSize( 0, 0 ) );
+	void SetCustomIconDraw( ui::ICustomImageDraw* pCustomIconDraw, IconStdSize smallIconStdSize = SmallIcon, IconStdSize largeIconStdSize = LargeIcon );
 
 	enum StdMetrics { IconViewEdgeX = 4 };
 
@@ -104,6 +113,7 @@ public:
 	int HitTest( CPoint pos, UINT* pFlags = NULL ) const;
 	int GetDropIndexAtPoint( const CPoint& point ) const;
 	bool IsItemFullyVisible( int index ) const;
+	bool GetIconItemRect( CRect* pIconRect, int index ) const;				// returns true if item visible
 
 	static bool IsSelectionChangedNotify( const NMLISTVIEW* pNmList, UINT selMask = LVIS_SELECTED | LVIS_FOCUSED );
 public:
@@ -402,26 +412,43 @@ public:
 #endif // Vista groups
 
 private:
-	void AddTransparentImage( void );
+	bool UpdateCustomImagerBoundsSize( void );
+
+	struct CCustomImager
+	{
+		CCustomImager( ui::ICustomImageDraw* pRenderer, const CSize& smallImageSize, const CSize& largeImageSize );
+
+		bool IsInit( void ) const { return m_transpImgIndex != -1; }
+		bool UpdateImageSize( ui::ICustomImageDraw::ImageType imgSize );
+	private:
+		void InitImageLists( void );
+	public:
+		ui::ICustomImageDraw* m_pRenderer;					// thumbnailer
+		const bool m_listDrivesBoundsSize;					// true if thumbnailer bounds size is driven by the list control; otherwise the thumbnailer drives image sizes
+		const CSize m_smallImageSize, m_largeImageSize;
+		CImageList m_smallImageList, m_largeImageList;
+
+		ImageListIndex m_transpImgIndex;					// pos of the transparent entry in the image list
+	};
 private:
 	UINT m_columnLayoutId;
 	DWORD m_listStyleEx;
 	std::tstring m_regSection;
 	std::vector< CColumnInfo > m_columnInfos;
-	std::vector< UINT > m_tileColumns;					// columns to be displayed as tile additional text (in gray)
+	std::vector< UINT > m_tileColumns;						// columns to be displayed as tile additional text (in gray)
 	bool m_useExplorerTheme;
 	bool m_useAlternateRowColoring;
-	bool m_subjectBased;								// objects stored as pointers are derived from utl::ISubject (polymorphic type)
+	bool m_subjectBased;									// objects stored as pointers are derived from utl::ISubject (polymorphic type)
 
 	TColumn m_sortByColumn;
 	bool m_sortAscending;
 	bool m_sortInternally;
-	PFNLVCOMPARE m_pComparePtrFunc;						// compare by object ptr such as: static CompareResult CALLBACK CompareObjects( const CFoo* pLeft, const CFoo* pRight, CReportListControl* pListCtrl );
+	PFNLVCOMPARE m_pComparePtrFunc;							// compare by object ptr such as: static CompareResult CALLBACK CompareObjects( const CFoo* pLeft, const CFoo* pRight, CReportListControl* pListCtrl );
 
 	std::vector< CColumnComparator > m_comparators;
 	utl::vector_map< TRowKey, int > m_initialItemsOrder;	// stores items initial order just after list set-up
 
-	typedef std::pair< TRowKey, TColumn > TCellPair;	// invariant to sorting: favour LPARAMs instead of indexes
+	typedef std::pair< TRowKey, TColumn > TCellPair;		// invariant to sorting: favour LPARAMs instead of indexes
 	stdext::hash_map< TCellPair, ui::CTextEffect > m_markedCells;
 	std::auto_ptr< ui::CFontEffectCache > m_pFontCache;		// self-encapsulated
 	ITextEffectCallback* m_pTextEffectCallback;
@@ -430,33 +457,22 @@ private:
 
 	CImageList* m_pImageList;
 	CImageList* m_pLargeImageList;
-
-	CMenu* m_pPopupMenu[ _ListPopupCount ];				// used when right clicking nowhere - on header or no list item
-	bool m_useTriStateAutoCheck;						// extended check state: allows toggling LVIS_UNCHECKED -> LVIS_CHECKED -> LVIS_CHECKEDGRAY
-	std::auto_ptr< CLabelEdit > m_pLabelEdit;			// stores the label info during inline editing
-
-	CAccelTable m_listAccel;
-	ole::IDataSourceFactory* m_pDataSourceFactory;		// creates ole::CDataSource for clipboard and drag-drop
-private:
-	struct CCustomImager
-	{
-		CCustomImager( ui::ICustomImageDraw* pRenderer, ImageListPos transpPos ) : m_pRenderer( pRenderer ), m_transpPos( transpPos ) {}
-	public:
-		ui::ICustomImageDraw* m_pRenderer;				// thumbnail renderer
-		ImageListPos m_transpPos;						// pos of the transparent entry in the image list
-		CImageList m_imageListSmall;
-		CImageList m_imageListLarge;
-	};
-
 	std::auto_ptr< CCustomImager > m_pCustomImager;
 
-	BOOL m_parentHandlesCustomDraw;						// self-encapsulated
-public:
-	ui::CTextEffect m_listTextEffect;					// for all items in the list
+	CMenu* m_pPopupMenu[ _ListPopupCount ];					// used when right clicking nowhere - on header or no list item
+	bool m_useTriStateAutoCheck;							// extended check state: allows toggling LVIS_UNCHECKED -> LVIS_CHECKED -> LVIS_CHECKEDGRAY
+	std::auto_ptr< CLabelEdit > m_pLabelEdit;				// stores the label info during inline editing
 
-	ui::CTextEffect m_deleteSrc_DiffEffect;				// text diffs: text removed from SRC (red)
-	ui::CTextEffect m_mismatchDest_DiffEffect;			// text diffs: text mismatched in DEST (blue)
-	ui::CTextEffect m_matchDest_DiffEffect;				// text diffs: text matched in DEST (gray)
+	CAccelTable m_listAccel;
+	ole::IDataSourceFactory* m_pDataSourceFactory;			// creates ole::CDataSource for clipboard and drag-drop
+private:
+	BOOL m_parentHandlesCustomDraw;							// self-encapsulated
+public:
+	ui::CTextEffect m_listTextEffect;						// for all items in the list
+
+	ui::CTextEffect m_deleteSrc_DiffEffect;					// text diffs: text removed from SRC (red)
+	ui::CTextEffect m_mismatchDest_DiffEffect;				// text diffs: text mismatched in DEST (blue)
+	ui::CTextEffect m_matchDest_DiffEffect;					// text diffs: text matched in DEST (gray)
 
 	static const COLORREF s_deleteSrcTextColor = color::Red;
 	static const COLORREF s_mismatchDestTextColor = color::Blue;

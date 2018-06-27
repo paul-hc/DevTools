@@ -299,27 +299,19 @@ namespace wic
 
 	const GUID& CBitmapOrigin::FindContainerFormatId( const TCHAR* pDestFilePath )
 	{
-		const TCHAR* pExt = path::FindExt( pDestFilePath );
-
-		if ( path::EquivalentPtr( _T(".jpg"), pExt ) ||
-			 path::EquivalentPtr( _T(".jpeg"), pExt ) ||
-			 path::EquivalentPtr( _T(".jpe"), pExt ) ||
-			 path::EquivalentPtr( _T(".jfif"), pExt ) )
-			return GUID_ContainerFormatJpeg;
-		else if ( path::EquivalentPtr( _T(".tif"), pExt ) ||
-				  path::EquivalentPtr( _T(".tiff"), pExt ) )
-			return GUID_ContainerFormatTiff;
-		else if ( path::EquivalentPtr( _T(".gif"), pExt ) )
-			return GUID_ContainerFormatGif;
-		else if ( path::EquivalentPtr( _T(".png"), pExt ) )
-			return GUID_ContainerFormatPng;
-		else if ( path::EquivalentPtr( _T(".wmp"), pExt ) )
-			return GUID_ContainerFormatWmp;
-		else if ( path::EquivalentPtr( _T(".ico"), pExt ) ||
-				  path::EquivalentPtr( _T(".cur"), pExt ) )
-			return GUID_ContainerFormatIco;
-
-		return GUID_ContainerFormatBmp;			// default is bitmap encoding
+		switch ( ui::FindImageFileFormat( pDestFilePath ) )
+		{
+			default:
+				ASSERT( false );
+			case ui::UnknownImageFormat:		// assume bitmap container by default
+			case ui::BitmapFormat:	return GUID_ContainerFormatBmp;
+			case ui::JpegFormat:	return GUID_ContainerFormatJpeg;
+			case ui::TiffFormat:	return GUID_ContainerFormatTiff;
+			case ui::GifFormat:		return GUID_ContainerFormatGif;
+			case ui::PngFormat:		return GUID_ContainerFormatPng;
+			case ui::WmpFormat:		return GUID_ContainerFormatWmp;
+			case ui::IconFormat:	return GUID_ContainerFormatIco;
+		}
 	}
 
 	const GUID& CBitmapOrigin::ResolveContainerFormatId( const GUID* pFormatId, const TCHAR* pDestFilePath )

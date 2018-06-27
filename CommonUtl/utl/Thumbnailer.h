@@ -34,6 +34,9 @@ public:
 	const CSize& GetBoundsSize( void ) const { return m_boundsSize; }
 	bool SetBoundsSize( const CSize& boundsSize );
 
+	void SetThumbExtractFlags( SIIGBF thumbExtractFlags ) { m_thumbExtractFlags = thumbExtractFlags; }
+	void SetOptimizeExtractIcons( bool optimizeExtractIcons = true ) { SetThumbExtractFlags( optimizeExtractIcons ? SIIGBF_ICONONLY : SIIGBF_BIGGERSIZEOK ); }
+
 	// called to chain thumbnail production externally
 	bool IsExternallyProduced( const fs::CFlexPath& filePath ) const { return m_pThumbProducer != NULL && m_pThumbProducer->ProducesThumbFor( filePath ); }
 	void SetExternalProducer( fs::IThumbProducer* pThumbProducer ) { m_pThumbProducer = pThumbProducer; }
@@ -56,6 +59,9 @@ private:
 	CComPtr< IThumbnailCache > m_pShellThumbCache;		// provides access to Windows system-wide thumbnail cache
 	fs::IThumbProducer* m_pThumbProducer;				// chains to external thumb producer
 	shell::CWinExplorer m_shellExplorer;
+	SIIGBF m_thumbExtractFlags;							// optimize for thumbnails or icons extraction (default for thumbnails)
+public:
+	static const CSize s_defaultBoundsSize;
 };
 
 
@@ -90,20 +96,20 @@ public:
 
 	// ui::ICustomImageDraw interface
 	virtual CSize GetItemImageSize( ui::ICustomImageDraw::ImageType imageType = ui::ICustomImageDraw::SmallImage ) const;
+	virtual bool SetItemImageSize( const CSize& imageBoundsSize );
 	virtual bool DrawItemImage( CDC* pDC, const utl::ISubject* pSubject, const CRect& itemImageRect );
 private:
 	enum { MaxSize = 500 };
 
 	fs::CFileObjectCache< fs::CFlexPath, CCachedThumbBitmap > m_thumbsCache;
 public:
+	int m_flags;
+	static const GUID& s_containerFormatId;			// GUID_ContainerFormatJpeg
+
 	enum Flags
 	{
 		AutoRegenSmallStgThumbs	= BIT_FLAG( 0 )		// for archive stg thumbs: regenerate if to small - this will slow down the process
 	};
-
-	int m_flags;
-
-	static const GUID& s_containerFormatId;			// GUID_ContainerFormatJpeg
 };
 
 

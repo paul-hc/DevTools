@@ -45,7 +45,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="../CommonUtl;../CommonUtl/utl;$(UTL_INCLUDE)"
+				AdditionalIncludeDirectories=".;../CommonUtl;$(UTL_INCLUDE)"
 				PreprocessorDefinitions="WIN32;_WINDOWS;_DEBUG;_ATL_DEBUG_INTERFACES"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -123,7 +123,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="../CommonUtl;../CommonUtl/utl;$(UTL_INCLUDE)"
+				AdditionalIncludeDirectories=".;../CommonUtl;$(UTL_INCLUDE)"
 				PreprocessorDefinitions="WIN32;_WINDOWS;_DEBUG;_ATL_DEBUG_INTERFACES"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -200,7 +200,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				WholeProgramOptimization="true"
-				AdditionalIncludeDirectories="../CommonUtl;../CommonUtl/utl;$(UTL_INCLUDE)"
+				AdditionalIncludeDirectories=".;../CommonUtl;$(UTL_INCLUDE)"
 				PreprocessorDefinitions="WIN32;_WINDOWS;NDEBUG"
 				RuntimeLibrary="0"
 				UsePrecompiledHeader="2"
@@ -279,7 +279,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				WholeProgramOptimization="true"
-				AdditionalIncludeDirectories="../CommonUtl;../CommonUtl/utl;$(UTL_INCLUDE)"
+				AdditionalIncludeDirectories=".;../CommonUtl;$(UTL_INCLUDE)"
 				PreprocessorDefinitions="WIN32;_WINDOWS;NDEBUG"
 				RuntimeLibrary="0"
 				UsePrecompiledHeader="2"
@@ -798,26 +798,26 @@
 					>
 				</File>
 			</Filter>
-			<Filter
-				Name="Unit Tests"
+		</Filter>
+		<Filter
+			Name="Unit Tests"
+			>
+			<File
+				RelativePath=".\UT\ImagingD2DTests.cpp"
 				>
-				<File
-					RelativePath=".\ImagingD2DTests.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\ImagingD2DTests.h"
-					>
-				</File>
-				<File
-					RelativePath=".\ThumbnailTests.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\ThumbnailTests.h"
-					>
-				</File>
-			</Filter>
+			</File>
+			<File
+				RelativePath=".\UT\ImagingD2DTests.h"
+				>
+			</File>
+			<File
+				RelativePath=".\UT\ThumbnailTests.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\UT\ThumbnailTests.h"
+				>
+			</File>
 		</Filter>
 		<File
 			RelativePath=".\ReadMe.txt"

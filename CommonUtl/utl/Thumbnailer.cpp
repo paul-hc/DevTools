@@ -34,9 +34,12 @@ namespace thumb
 
 // CShellThumbCache implementation
 
+const CSize CShellThumbCache::s_defaultBoundsSize( thumb::DefaultBoundsSize, thumb::DefaultBoundsSize );
+
 CShellThumbCache::CShellThumbCache( void )
-	: m_boundsSize( thumb::DefaultBoundsSize, thumb::DefaultBoundsSize )
+	: m_boundsSize( s_defaultBoundsSize )
 	, m_pThumbProducer( NULL )
+	, m_thumbExtractFlags( SIIGBF_BIGGERSIZEOK )
 {
 	// (*) COM must be initialized by now
 	m_pShellThumbCache.CoCreateInstance( CLSID_LocalThumbnailCache, NULL, CLSCTX_INPROC );
@@ -72,17 +75,28 @@ CCachedThumbBitmap* CShellThumbCache::ExtractThumb( const ShellItemPair& imagePa
 		return m_pThumbProducer->ExtractThumb( imagePair.first );			// chain to external thumb producer
 
 	if ( IsValidShellCache() && imagePair.second != NULL )		// valid physical shell item?
-	{
-		HBITMAP hSharedBitmap = NULL;				// note: shared bitmap cannot be selected into a DC - must either Detach() or copy to a WIC bitmap
-		CComPtr< ISharedBitmap > pSharedThumb;
-		WTS_CACHEFLAGS cacheFlags;
-		CThumbKey thumbKey;
+		switch ( ui::FindImageFileFormat( imagePair.first.GetPtr() ) )
+		{
+			case ui::IconFormat:				// better generate the icon for best fitting image (minimize icon scaling)
+			case ui::UnknownImageFormat:		// don't bother to extract thumbnail
+				break;
+			default:
+			{
+				CComPtr< ISharedBitmap > pSharedThumb;
+				WTS_CACHEFLAGS cacheFlags;
+				CThumbKey thumbKey;
 
-		// use IThumbnailCache to produce a usually larger thumb bitmap, which will be scaled
-		if ( HR_OK( m_pShellThumbCache->GetThumbnail( imagePair.second, m_boundsSize.cx, WTS_EXTRACT, &pSharedThumb, &cacheFlags, &thumbKey ) ) )
-			if ( HR_OK( pSharedThumb->GetSharedBitmap( &hSharedBitmap ) ) )
-				return NewScaledThumb( wic::cvt::ToWicBitmap( hSharedBitmap ), imagePair.first, &thumbKey );
-	}
+				// use IThumbnailCache to produce a usually larger thumb bitmap, which will be scaled
+				if ( HR_OK( m_pShellThumbCache->GetThumbnail( imagePair.second, m_boundsSize.cx, WTS_EXTRACT, &pSharedThumb, &cacheFlags, &thumbKey ) ) )
+				{
+					HBITMAP hSharedBitmap = NULL;				// note: shared bitmap cannot be selected into a DC - must either Detach() or copy to a WIC bitmap
+					if ( HR_OK( pSharedThumb->GetSharedBitmap( &hSharedBitmap ) ) )
+						return NewScaledThumb( wic::cvt::ToWicBitmap( hSharedBitmap ), imagePair.first, &thumbKey );
+				}
+				else
+					TRACE( _T("  for file: %s\n"), imagePair.first.GetPtr() );
+			}
+		}
 
 	return NULL;
 }
@@ -94,7 +108,7 @@ CCachedThumbBitmap* CShellThumbCache::GenerateThumb( const ShellItemPair& imageP
 
 	if ( imagePair.second != NULL )		// valid physical shell item?
 		// use IShellItemImageFactory to produce a usually larger thumb bitmap, which will be scaled
-		if ( HBITMAP hThumbBitmap = m_shellExplorer.ExtractThumbnail( imagePair.second, m_boundsSize, SIIGBF_BIGGERSIZEOK ) )
+		if ( HBITMAP hThumbBitmap = m_shellExplorer.ExtractThumbnail( imagePair.second, m_boundsSize, m_thumbExtractFlags ) )
 			if ( CComPtr< IWICBitmapSource > pUnscaledBitmap = wic::cvt::ToWicBitmap( hThumbBitmap ) )
 				return NewScaledThumb( pUnscaledBitmap, imagePair.first, NULL );
 
@@ -273,9 +287,14 @@ CSize CThumbnailer::GetItemImageSize( ui::ICustomImageDraw::ImageType imageType 
 	switch ( imageType )
 	{
 		default: ASSERT( false );
-		case ui::ICustomImageDraw::SmallImage:	return CIconId::GetStdSize( MediumIcon );
+		case ui::ICustomImageDraw::SmallImage:	return CIconId::GetStdSize( SmallIcon );
 		case ui::ICustomImageDraw::LargeImage:	return GetBoundsSize();
 	}
+}
+
+bool CThumbnailer::SetItemImageSize( const CSize& imageBoundsSize )
+{
+	return SetBoundsSize( imageBoundsSize );
 }
 
 bool CThumbnailer::DrawItemImage( CDC* pDC, const utl::ISubject* pSubject, const CRect& itemImageRect )

@@ -21,6 +21,7 @@ CReportListCustomDraw::CReportListCustomDraw( NMLVCUSTOMDRAW* pDraw, CReportList
 	, m_subItem( m_pDraw->iSubItem )
 	, m_rowKey( m_pDraw->nmcd.lItemlParam != 0 ? m_pDraw->nmcd.lItemlParam : m_index )
 	, m_pObject( CReportListControl::ToSubject( m_pDraw->nmcd.lItemlParam ) )
+	, m_isReportMode( LV_VIEW_DETAILS == m_pList->GetView() )
 	, m_pDC( CDC::FromHandle( m_pDraw->nmcd.hdc ) )
 {
 }
@@ -196,8 +197,19 @@ CRect CReportListCustomDraw::MakeCellTextRect( void ) const
 {
 	CRect textRect = m_pDraw->nmcd.rc;
 
+	if ( m_isReportMode )
+	{
+		CRect imageRect;
+		if ( m_pList->GetSubItemRect( m_index, m_subItem, LVIR_ICON, imageRect ) )		// item visible?
+			if ( imageRect.Width() != 0 )												// sub-item has image?
+				textRect.left = imageRect.right;										// shift text to the right of image
+	}
+	else
+		m_pList->GetItemRect( m_index, &textRect, LVIR_LABEL );
+
 	// requires larger spacing for sub-item: 2 for item, 6 for sub-item
 	textRect.left += ( 0 == m_subItem ? CReportListControl::ItemSpacingX : CReportListControl::SubItemSpacingX );		// DON'T TOUCH IT: lines up perfectly with default text draw
+
 	return textRect;
 }
 

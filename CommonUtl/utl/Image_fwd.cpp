@@ -6,6 +6,7 @@
 #include "DibPixels.h"
 #include "Pixel.h"
 #include "EnumTags.h"
+#include "Path.h"
 #include "ScopedGdi.h"
 #include "StreamStdTypes.h"
 #include "ContainerUtilities.h"
@@ -29,6 +30,35 @@ namespace ui
 		static const CEnumTags tags( _T("Use WIC API|Use GDI+ API (ATL)") );
 		return tags;
 	}
+
+	ImageFileFormat FindImageFileFormat( const TCHAR imageFilePath[] )
+	{
+		const TCHAR* pExt = path::FindExt( imageFilePath );
+
+		if ( str::Equals< str::IgnoreCase >( _T(".bmp"), pExt ) ||
+			 str::Equals< str::IgnoreCase >( _T(".dib"), pExt ) ||
+			 str::Equals< str::IgnoreCase >( _T(".rle"), pExt ) )
+			return BitmapFormat;
+		else if ( str::Equals< str::IgnoreCase >( _T(".jpg"), pExt ) ||
+			 str::Equals< str::IgnoreCase >( _T(".jpeg"), pExt ) ||
+			 str::Equals< str::IgnoreCase >( _T(".jpe"), pExt ) ||
+			 str::Equals< str::IgnoreCase >( _T(".jfif"), pExt ) )
+			return JpegFormat;
+		else if ( str::Equals< str::IgnoreCase >( _T(".tif"), pExt ) ||
+				  str::Equals< str::IgnoreCase >( _T(".tiff"), pExt ) )
+			return TiffFormat;
+		else if ( str::Equals< str::IgnoreCase >( _T(".gif"), pExt ) )
+			return GifFormat;
+		else if ( str::Equals< str::IgnoreCase >( _T(".png"), pExt ) )
+			return PngFormat;
+		else if ( str::Equals< str::IgnoreCase >( _T(".wmp"), pExt ) )
+			return WmpFormat;			// Windows Media Photo
+		else if ( str::Equals< str::IgnoreCase >( _T(".ico"), pExt ) ||
+				  str::Equals< str::IgnoreCase >( _T(".cur"), pExt ) )
+			return IconFormat;
+
+		return UnknownImageFormat;
+	}
 }
 
 
@@ -36,13 +66,14 @@ namespace ui
 
 CSize CIconId::GetStdSize( IconStdSize iconStdSize )
 {
+	// Note: Icon standard size must be invariant to Windows scaling, so we mustn't use GetSystemMetrics(SM_CXSMICON) which varies with scaling.
 	switch ( iconStdSize )
 	{
 		default:			ASSERT( false );
-		case DefaultSize:	return CSize( 0, 0 );			// load with existing icon size (cound be different than standard sizes)
-		case SmallIcon:		return CSize( GetSystemMetrics( SM_CXSMICON ), GetSystemMetrics( SM_CYSMICON ) );
+		case DefaultSize:	return CSize( 0, 0 );		// load with existing icon size (cound be different than standard sizes)
+		case SmallIcon:		return CSize( 16, 16 );		// invariant to scaling; old CSize( GetSystemMetrics( SM_CXSMICON ), GetSystemMetrics( SM_CYSMICON ) )
 		case MediumIcon:	return CSize( 24, 24 );
-		case LargeIcon:		return CSize( GetSystemMetrics( SM_CXICON ), GetSystemMetrics( SM_CYICON ) );
+		case LargeIcon:		return CSize( 32, 32 );		// invariant to scaling; old CSize( GetSystemMetrics( SM_CXICON ), GetSystemMetrics( SM_CYICON ) )
 		case HugeIcon:		return CSize( 48, 48 );
 		case EnormousIcon:	return CSize( 256, 256 );
 	}
@@ -52,9 +83,9 @@ IconStdSize CIconId::FindStdSize( const CSize& iconSize )
 {
 	switch ( iconSize.cx )
 	{
-		case 16:	return SmallIcon;		// SM_CXSMICON, SM_CYSMICON
+		case 16:	return SmallIcon;
 		case 24:	return MediumIcon;
-		case 32:	return LargeIcon;		// SM_CXICON, SM_CYICON
+		case 32:	return LargeIcon;
 		case 48:	return HugeIcon;
 		case 256:	return EnormousIcon;
 	}
