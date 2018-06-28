@@ -1,27 +1,119 @@
 
 #include "stdafx.h"
-#include "CapitalizeOptionsDialog.h"
+#include "OptionsSheet.h"
+#include "GeneralOptions.h"
+#include "resource.h"
 #include "utl/EnumTags.h"
-#include "utl/LayoutEngine.h"
 #include "utl/StringUtilities.h"
 #include "utl/Utilities.h"
 #include "utl/resource.h"
-#include "resource.h"
+#include <afxpriv.h>		// for WM_IDLEUPDATECMDUI
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
 
 
-namespace reg
+// COptionsSheet implementation
+
+COptionsSheet::COptionsSheet( CWnd* pParent, UINT initialPageIndex /*= UINT_MAX*/ )
+	: CLayoutPropertySheet( _T("Options"), pParent )
 {
-	static const TCHAR section_dialog[] = _T("CapitalizeOptionsDialog");
+	m_regSection = _T("OptionsSheet");
+	m_alwaysModified = true;
+	SetTopDlg();
+	SetSingleTransaction();
+	SetInitialPageIndex( initialPageIndex );
+	LoadDlgIcon( ID_OPTIONS );
+
+	AddPage( new CGeneralOptionsPage );
+	AddPage( new CCapitalizeOptionsPage );
 }
 
 
+// CGeneralOptionsPage implementation
+
 namespace layout
 {
-	static CLayoutStyle styles[] =
+	static CLayoutStyle stylesGen[] =
+	{
+		{ IDC_SET_DEFAULT_ALL, MoveY }
+	};
+}
+
+CGeneralOptionsPage::CGeneralOptionsPage( void )
+	: CLayoutPropertyPage( IDD_OPTIONS_GENERAL_PAGE )
+	, m_pOptions( new CGeneralOptions( CGeneralOptions::Instance() ) )
+{
+	RegisterCtrlLayout( layout::stylesGen, COUNT_OF( layout::stylesGen ) );
+}
+
+CGeneralOptionsPage::~CGeneralOptionsPage()
+{
+}
+
+const CEnumTags& CGeneralOptionsPage::GetTags_IconStdSize( void )
+{
+	static const CEnumTags tags( _T("16 x 16|24 x 24|32 x 32|48 x 48|96 x 96|128 x 128|256 x 256"), NULL, -1, SmallIcon );
+	return tags;
+}
+
+void CGeneralOptionsPage::DoDataExchange( CDataExchange* pDX )
+{
+	bool firstInit = NULL == m_smallIconSizeCombo.m_hWnd;
+
+	DDX_Control( pDX, IDC_SMALL_ICON_SIZE_COMBO, m_smallIconSizeCombo );
+	DDX_Control( pDX, IDC_LARGE_ICON_SIZE_COMBO, m_largeIconSizeCombo );
+
+	if ( DialogOutput == pDX->m_bSaveAndValidate )
+	{
+		if ( firstInit )
+		{
+			ui::WriteComboItems( m_smallIconSizeCombo, GetTags_IconStdSize().GetUiTags() );
+			ui::WriteComboItems( m_largeIconSizeCombo, GetTags_IconStdSize().GetUiTags() );
+		}
+
+		m_smallIconSizeCombo.SetCurSel( GetTags_IconStdSize().GetTagIndex( m_pOptions->m_smallIconStdSize ) );
+		m_largeIconSizeCombo.SetCurSel( GetTags_IconStdSize().GetTagIndex( m_pOptions->m_largeIconStdSize ) );
+	}
+	else
+	{
+		m_pOptions->m_smallIconStdSize = GetTags_IconStdSize().GetSelValue< IconStdSize >( m_smallIconSizeCombo.GetCurSel() );
+		m_pOptions->m_largeIconStdSize = GetTags_IconStdSize().GetSelValue< IconStdSize >( m_largeIconSizeCombo.GetCurSel() );
+
+		if ( *m_pOptions != CGeneralOptions::Instance() )
+		{
+			CGeneralOptions::Instance() = *m_pOptions;
+
+			CGeneralOptions::Instance().UpdateAllObservers( NULL );
+			CGeneralOptions::Instance().SaveToRegistry();
+		}
+	}
+
+	CLayoutPropertyPage::DoDataExchange( pDX );
+}
+
+BEGIN_MESSAGE_MAP( CGeneralOptionsPage, CLayoutPropertyPage )
+	ON_BN_CLICKED( IDC_SET_DEFAULT_ALL, OnBnClicked_ResetDefaultAll )
+END_MESSAGE_MAP()
+
+void CGeneralOptionsPage::OnBnClicked_ResetDefaultAll( void )
+{
+	*m_pOptions = CGeneralOptions();
+	UpdateData( DialogOutput );
+}
+
+
+// CCapitalizeOptionsPage property page
+
+namespace reg
+{
+	static const TCHAR section_capitalizePage[] = _T("CapitalizeOptionsPage");
+}
+
+namespace layout
+{
+	static CLayoutStyle stylesCap[] =
 	{
 		{ IDC_WORD_BREAK_CHARS_EDIT, SizeX },
 		{ IDC_WORD_BREAK_PREFIXES_EDIT, SizeX },
@@ -37,13 +129,12 @@ namespace layout
 		{ IDC_PREPOSITIONS_COMBO, MoveX },
 		{ IDOK, Move },
 		{ IDCANCEL, Move },
-		{ IDC_SET_DEFAULT_ALL, Move }
+		{ IDC_SET_DEFAULT_ALL, MoveY }
 	};
 }
 
-
-CCapitalizeOptionsDialog::CCapitalizeOptionsDialog( CWnd* pParent /*= NULL*/ )
-	: CLayoutDialog( IDD_CAPITALIZE_OPTIONS, pParent )
+CCapitalizeOptionsPage::CCapitalizeOptionsPage( void )
+	: CLayoutPropertyPage( IDD_CAPITALIZE_OPTIONS_PAGE )
 	, m_options( CCapitalizeOptions::Instance() )				// copy by value
 	, m_wordBreakPrefixesEdit( cap::CWordList::m_listSep )
 	, m_alwaysPreserveWordsEdit( cap::CWordList::m_listSep )
@@ -53,17 +144,14 @@ CCapitalizeOptionsDialog::CCapitalizeOptionsDialog( CWnd* pParent /*= NULL*/ )
 	, m_conjunctionsEdit( cap::CWordList::m_listSep )
 	, m_prepositionsEdit( cap::CWordList::m_listSep )
 {
-	m_regSection = reg::section_dialog;
-	RegisterCtrlLayout( layout::styles, COUNT_OF( layout::styles ) );
-	GetLayoutEngine().MaxClientSize().cy = -1;
-	LoadDlgIcon( IDD_CAPITALIZE_OPTIONS );
+	RegisterCtrlLayout( layout::stylesCap, COUNT_OF( layout::stylesCap ) );
 }
 
-CCapitalizeOptionsDialog::~CCapitalizeOptionsDialog()
+CCapitalizeOptionsPage::~CCapitalizeOptionsPage()
 {
 }
 
-void CCapitalizeOptionsDialog::DoDataExchange( CDataExchange* pDX )
+void CCapitalizeOptionsPage::DoDataExchange( CDataExchange* pDX )
 {
 	bool firstInit = NULL == m_wordBreakCharsEdit.GetSafeHwnd();
 
@@ -103,17 +191,15 @@ void CCapitalizeOptionsDialog::DoDataExchange( CDataExchange* pDX )
 		CCapitalizeOptions::Instance() = m_options;				// copy by value
 		CCapitalizeOptions::Instance().SaveToRegistry();
 	}
-	CLayoutDialog::DoDataExchange( pDX );
+
+	CLayoutPropertyPage::DoDataExchange( pDX );
 }
 
-
-// message handlers
-
-BEGIN_MESSAGE_MAP( CCapitalizeOptionsDialog, CLayoutDialog )
+BEGIN_MESSAGE_MAP( CCapitalizeOptionsPage, CLayoutPropertyPage )
 	ON_BN_CLICKED( IDC_SET_DEFAULT_ALL, OnBnClicked_ResetDefaultAll )
 END_MESSAGE_MAP()
 
-void CCapitalizeOptionsDialog::OnBnClicked_ResetDefaultAll( void )
+void CCapitalizeOptionsPage::OnBnClicked_ResetDefaultAll( void )
 {
 	m_options = CCapitalizeOptions();
 	UpdateData( DialogOutput );

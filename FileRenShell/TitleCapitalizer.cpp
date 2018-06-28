@@ -12,7 +12,7 @@
 
 namespace reg
 {
-	static const TCHAR section[] = _T("TitleCapitalization");
+	static const TCHAR section[] = _T("Settings\\TitleCapitalization");
 	static const TCHAR entry_wordBreakChars[] = _T("Word Break Symbols");
 	static const TCHAR entry_wordBreakPrefixes[] = _T("Word Break Prefixes");
 	static const TCHAR entry_alwaysPreserveWords[] = _T("Always Preserve Words");

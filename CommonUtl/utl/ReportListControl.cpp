@@ -163,8 +163,6 @@ void CReportListControl::SetUseExplorerTheme( bool useExplorerTheme /*= true*/ )
 
 void CReportListControl::SetCustomImageDraw( ui::ICustomImageDraw* pCustomImageDraw, const CSize& smallImageSize /*= CSize( 0, 0 )*/, const CSize& largeImageSize /*= CSize( 0, 0 )*/ )
 {
-	ASSERT_NULL( m_hWnd );
-
 	if ( pCustomImageDraw != NULL )
 	{
 		m_pCustomImager.reset( new CCustomImager( pCustomImageDraw, smallImageSize, largeImageSize ) );
@@ -173,12 +171,45 @@ void CReportListControl::SetCustomImageDraw( ui::ICustomImageDraw* pCustomImageD
 		m_pLargeImageList = &m_pCustomImager->m_largeImageList;
 	}
 	else
+	{
 		m_pCustomImager.reset();
+
+		m_pImageList = NULL;
+		m_pLargeImageList = NULL;
+	}
+
+	if ( m_hWnd != NULL )
+	{
+		SetImageList( m_pImageList, LVSIL_SMALL );
+		SetImageList( m_pLargeImageList, LVSIL_NORMAL );
+		UpdateCustomImagerBoundsSize();
+		Invalidate();
+	}
 }
 
 void CReportListControl::SetCustomIconDraw( ui::ICustomImageDraw* pCustomIconDraw, IconStdSize smallIconStdSize /*= SmallIcon*/, IconStdSize largeIconStdSize /*= LargeIcon*/ )
 {
 	SetCustomImageDraw( pCustomIconDraw, CIconId::GetStdSize( smallIconStdSize ), CIconId::GetStdSize( largeIconStdSize ) );
+}
+
+bool CReportListControl::GetCustomImageSizes( CSize& rSmallImageSize, CSize& rLargeImageSize ) const
+{
+	if ( NULL == m_pCustomImager.get() )
+		return false;			// no change
+
+	rSmallImageSize = m_pCustomImager->m_smallImageSize;
+	rLargeImageSize = m_pCustomImager->m_largeImageSize;
+	return true;
+}
+
+bool CReportListControl::SetCustomImageSizes( const CSize& smallImageSize, const CSize& largeImageSize )
+{
+	ASSERT_PTR( m_pCustomImager.get() );
+	if ( m_pCustomImager->m_smallImageSize == smallImageSize && m_pCustomImager->m_largeImageSize == largeImageSize )
+		return false;			// no change
+
+	SetCustomImageDraw( m_pCustomImager->m_pRenderer, smallImageSize, largeImageSize );
+	return true;
 }
 
 CMenu& CReportListControl::GetStdPopupMenu( ListPopup popupType )

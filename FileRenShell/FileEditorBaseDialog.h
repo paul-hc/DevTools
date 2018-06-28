@@ -4,6 +4,7 @@
 
 #include "IFileEditor.h"
 #include "utl/BaseMainDialog.h"
+#include "utl/DialogToolBar.h"
 
 
 class CFileModel;
@@ -30,11 +31,16 @@ protected:
 	cmd::CommandType m_nativeCmdType;
 	std::vector< CPathItemBase* > m_errorItems;
 
+	// controls
+	CDialogToolBar m_toolbar;
+
 	// generated stuff
 protected:
 	virtual void DoDataExchange( CDataExchange* pDX );
 protected:
-	afx_msg void OnBnClicked_UndoRedo( UINT btnId );
+	afx_msg void OnUndoRedo( UINT btnId );
+	afx_msg void OnOptions( void );
+	afx_msg void OnUpdateOptions( CCmdUI* pCmdUI );
 
 	DECLARE_MESSAGE_MAP()
 };

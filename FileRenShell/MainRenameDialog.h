@@ -93,6 +93,7 @@ private:
 protected:
 	virtual void OnOK( void );
 	afx_msg void OnDestroy( void );
+	afx_msg void OnUpdateUndoRedo( CCmdUI* pCmdUI );
 	afx_msg void OnFieldChanged( void );
 	afx_msg void OnChanged_Format( void );
 	afx_msg void OnEnChange_SeqCounter( void );

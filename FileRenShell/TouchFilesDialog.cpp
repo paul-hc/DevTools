@@ -5,6 +5,7 @@
 #include "FileModel.h"
 #include "FileService.h"
 #include "FileCommands.h"
+#include "GeneralOptions.h"
 #include "Application.h"
 #include "resource.h"
 #include "utl/Clipboard.h"
@@ -46,9 +47,8 @@ namespace layout
 		{ IDC_CLEAR_FILES_BUTTON, MoveY },
 
 		{ IDOK, MoveX },
-		{ IDC_UNDO_BUTTON, MoveX },
-		{ IDC_REDO_BUTTON, MoveX },
-		{ IDCANCEL, MoveX }
+		{ IDCANCEL, MoveX },
+		{ IDC_TOOLBAR_PLACEHOLDER, MoveX }
 	};
 }
 
@@ -72,7 +72,9 @@ CTouchFilesDialog::CTouchFilesDialog( CFileModel* pFileModel, CWnd* pParent )
 	m_fileListCtrl.SetUseAlternateRowColoring();
 	m_fileListCtrl.SetTextEffectCallback( this );
 	m_fileListCtrl.SetPopupMenu( CReportListControl::OnSelection, NULL );				// let us track a custom menu
-	m_fileListCtrl.SetCustomIconDraw( app::GetThumbnailer(), SmallIcon, HugeIcon );
+	m_fileListCtrl.SetCustomImageDraw( app::GetThumbnailer(),
+		CIconId::GetStdSize( CGeneralOptions::Instance().m_smallIconStdSize ),
+		CIconId::GetStdSize( CGeneralOptions::Instance().m_largeIconStdSize ) );
 
 	m_fileListCtrl.AddRecordCompare( pred::NewComparator( pred::CompareCode() ) );		// default row item comparator
 	m_fileListCtrl.AddColumnCompare( PathName, pred::NewComparator( pred::CompareDisplayCode() ) );
@@ -138,8 +140,6 @@ void CTouchFilesDialog::SwitchMode( Mode mode )
 		IDC_ATTRIB_READONLY_CHECK, IDC_ATTRIB_HIDDEN_CHECK, IDC_ATTRIB_SYSTEM_CHECK, IDC_ATTRIB_ARCHIVE_CHECK
 	};
 	ui::EnableControls( *this, ctrlIds, COUNT_OF( ctrlIds ), m_mode != RollBackMode );
-	ui::EnableControl( *this, IDC_UNDO_BUTTON, m_mode != RollBackMode && m_mode != RollForwardMode && m_pFileModel->CanUndoRedo( cmd::Undo ) );
-	ui::EnableControl( *this, IDC_REDO_BUTTON, m_mode != RollForwardMode && m_mode != RollBackMode && m_pFileModel->CanUndoRedo( cmd::Redo ) );
 
 	m_anyChanges = utl::Any( m_rTouchItems, std::mem_fun( &CTouchItem::IsModified ) );
 	ui::EnableControl( *this, IDOK, m_mode != TouchMode || m_anyChanges );
@@ -309,6 +309,8 @@ void CTouchFilesDialog::OnUpdate( utl::ISubject* pSubject, utl::IMessage* pMessa
 	if ( m_hWnd != NULL )
 		if ( m_pFileModel == pSubject )
 			SetupDialog();
+		else if ( &CGeneralOptions::Instance() == pSubject )
+			m_fileListCtrl.SetCustomImageSizes( CIconId::GetStdSize( CGeneralOptions::Instance().m_smallIconStdSize ), CIconId::GetStdSize( CGeneralOptions::Instance().m_largeIconStdSize ) );
 }
 
 void CTouchFilesDialog::ClearFileErrors( void )
@@ -488,6 +490,7 @@ void CTouchFilesDialog::DoDataExchange( CDataExchange* pDX )
 
 BEGIN_MESSAGE_MAP( CTouchFilesDialog, CFileEditorBaseDialog )
 	ON_WM_CONTEXTMENU()
+	ON_UPDATE_COMMAND_UI_RANGE( IDC_UNDO_BUTTON, IDC_REDO_BUTTON, OnUpdateUndoRedo )
 	ON_BN_CLICKED( IDC_COPY_SOURCE_PATHS_BUTTON, OnBnClicked_CopySourceFiles )
 	ON_BN_CLICKED( IDC_PASTE_FILES_BUTTON, OnBnClicked_PasteDestStates )
 	ON_BN_CLICKED( IDC_CLEAR_FILES_BUTTON, OnBnClicked_ResetDestFiles )
@@ -545,6 +548,19 @@ void CTouchFilesDialog::OnContextMenu( CWnd* pWnd, CPoint screenPos )
 	}
 
 	__super::OnContextMenu( pWnd, screenPos );
+}
+
+void CTouchFilesDialog::OnUpdateUndoRedo( CCmdUI* pCmdUI )
+{
+	switch ( pCmdUI->m_nID )
+	{
+		case IDC_UNDO_BUTTON:
+			pCmdUI->Enable( m_mode != RollBackMode && m_mode != RollForwardMode && m_pFileModel->CanUndoRedo( cmd::Undo ) );
+			break;
+		case IDC_REDO_BUTTON:
+			pCmdUI->Enable( m_mode != RollForwardMode && m_mode != RollBackMode && m_pFileModel->CanUndoRedo( cmd::Redo ) );
+			break;
+	}
 }
 
 void CTouchFilesDialog::OnFieldChanged( void )

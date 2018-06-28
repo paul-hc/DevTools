@@ -101,6 +101,7 @@ protected:
 protected:
 	virtual void OnOK( void );
 	afx_msg void OnContextMenu( CWnd* pWnd, CPoint screenPos );
+	afx_msg void OnUpdateUndoRedo( CCmdUI* pCmdUI );
 	afx_msg void OnFieldChanged( void );
 	afx_msg void OnBnClicked_CopySourceFiles( void );
 	afx_msg void OnBnClicked_PasteDestStates( void );

@@ -4,11 +4,12 @@
 #include "FileModel.h"
 #include "FileService.h"
 #include "FileCommands.h"
+#include "GeneralOptions.h"
 #include "RenameService.h"
 #include "RenameItem.h"
 #include "PathAlgorithms.h"
 #include "ReplaceDialog.h"
-#include "CapitalizeOptionsDialog.h"
+#include "OptionsSheet.h"
 #include "Application.h"
 #include "resource.h"
 #include "utl/ContainerUtilities.h"
@@ -72,9 +73,8 @@ namespace layout
 		{ IDC_PICK_RENAME_ACTIONS, Move },
 
 		{ IDOK, MoveX },
-		{ IDC_UNDO_BUTTON, MoveX },
-		{ IDC_REDO_BUTTON, MoveX },
-		{ IDCANCEL, MoveX }
+		{ IDCANCEL, MoveX },
+		{ IDC_TOOLBAR_PLACEHOLDER, MoveX }
 	};
 }
 
@@ -101,7 +101,9 @@ CMainRenameDialog::CMainRenameDialog( CFileModel* pFileModel, CWnd* pParent )
 	m_fileListCtrl.SetSection( m_regSection + _T("\\List") );
 	m_fileListCtrl.SetUseAlternateRowColoring();
 	m_fileListCtrl.SetTextEffectCallback( this );
-	m_fileListCtrl.SetCustomIconDraw( app::GetThumbnailer(), SmallIcon, HugeIcon );
+	m_fileListCtrl.SetCustomImageDraw( app::GetThumbnailer(),
+		CIconId::GetStdSize( CGeneralOptions::Instance().m_smallIconStdSize ),
+		CIconId::GetStdSize( CGeneralOptions::Instance().m_largeIconStdSize ) );
 
 	m_changeCaseButton.SetSelValue( AfxGetApp()->GetProfileInt( reg::section_mainDialog, reg::entry_changeCase, ExtLowerCase ) );
 
@@ -172,8 +174,6 @@ void CMainRenameDialog::SwitchMode( Mode mode )
 		IDC_REPLACE_FILES_BUTTON, IDC_REPLACE_DELIMS_BUTTON, IDC_DELIMITER_SET_COMBO, IDC_NEW_DELIMITER_EDIT
 	};
 	ui::EnableControls( *this, ctrlIds, COUNT_OF( ctrlIds ), m_mode != RollBackMode );
-	ui::EnableControl( *this, IDC_UNDO_BUTTON, m_mode != RollBackMode && m_mode != RollForwardMode && m_pFileModel->CanUndoRedo( cmd::Undo ) );
-	ui::EnableControl( *this, IDC_REDO_BUTTON, m_mode != RollForwardMode && m_mode != RollBackMode && m_pFileModel->CanUndoRedo( cmd::Redo ) );
 }
 
 void CMainRenameDialog::PostMakeDest( bool silent /*= false*/ )
@@ -219,8 +219,8 @@ void CMainRenameDialog::OnUpdate( utl::ISubject* pSubject, utl::IMessage* pMessa
 {
 	pMessage;
 
-	if ( m_pFileModel == pSubject )
-		if ( m_hWnd != NULL )
+	if ( m_hWnd != NULL )
+		if ( m_pFileModel == pSubject )
 		{
 			if ( NULL == m_pRenSvc.get() )
 				m_pRenSvc.reset( new CRenameService( m_rRenameItems ) );		// lazy init
@@ -229,6 +229,8 @@ void CMainRenameDialog::OnUpdate( utl::ISubject* pSubject, utl::IMessage* pMessa
 
 			SetupFileListView();
 		}
+		else if ( &CGeneralOptions::Instance() == pSubject )
+			m_fileListCtrl.SetCustomImageSizes( CIconId::GetStdSize( CGeneralOptions::Instance().m_smallIconStdSize ), CIconId::GetStdSize( CGeneralOptions::Instance().m_largeIconStdSize ) );
 }
 
 void CMainRenameDialog::ClearFileErrors( void )
@@ -421,6 +423,7 @@ void CMainRenameDialog::DoDataExchange( CDataExchange* pDX )
 
 BEGIN_MESSAGE_MAP( CMainRenameDialog, CFileEditorBaseDialog )
 	ON_WM_DESTROY()
+	ON_UPDATE_COMMAND_UI_RANGE( IDC_UNDO_BUTTON, IDC_REDO_BUTTON, OnUpdateUndoRedo )
 	ON_CBN_EDITCHANGE( IDC_FORMAT_COMBO, OnChanged_Format )
 	ON_CBN_SELCHANGE( IDC_FORMAT_COMBO, OnChanged_Format )
 	ON_COMMAND( ID_PICK_FORMAT_TOKEN, OnPickFormatToken )
@@ -544,6 +547,19 @@ void CMainRenameDialog::OnDestroy( void )
 	__super::OnDestroy();
 }
 
+void CMainRenameDialog::OnUpdateUndoRedo( CCmdUI* pCmdUI )
+{
+	switch ( pCmdUI->m_nID )
+	{
+		case IDC_UNDO_BUTTON:
+			pCmdUI->Enable( m_mode != RollBackMode && m_mode != RollForwardMode && m_pFileModel->CanUndoRedo( cmd::Undo ) );
+			break;
+		case IDC_REDO_BUTTON:
+			pCmdUI->Enable( m_mode != RollForwardMode && m_mode != RollBackMode && m_pFileModel->CanUndoRedo( cmd::Redo ) );
+			break;
+	}
+}
+
 void CMainRenameDialog::OnChanged_Format( void )
 {
 	OnFieldChanged();
@@ -629,9 +645,8 @@ void CMainRenameDialog::OnBnClicked_CapitalizeDestFiles( void )
 
 void CMainRenameDialog::OnBnClicked_CapitalizeOptions( void )
 {
-	CCapitalizeOptionsDialog dialog( this );
-	dialog.DoModal();
-	GotoDlgCtrl( GetDlgItem( IDC_CAPITALIZE_BUTTON ) );
+	COptionsSheet sheet( this, COptionsSheet::CapitalizePage );
+	sheet.DoModal();
 }
 
 void CMainRenameDialog::OnBnClicked_ChangeCase( void )

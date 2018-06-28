@@ -101,6 +101,9 @@ public:
 	void SetCustomImageDraw( ui::ICustomImageDraw* pCustomImageDraw, const CSize& smallImageSize = CSize( 0, 0 ), const CSize& largeImageSize = CSize( 0, 0 ) );
 	void SetCustomIconDraw( ui::ICustomImageDraw* pCustomIconDraw, IconStdSize smallIconStdSize = SmallIcon, IconStdSize largeIconStdSize = LargeIcon );
 
+	bool GetCustomImageSizes( CSize& rSmallImageSize, CSize& rLargeImageSize ) const;
+	bool SetCustomImageSizes( const CSize& smallImageSize, const CSize& largeImageSize );
+
 	enum StdMetrics { IconViewEdgeX = 4 };
 
 	bool SetCompactIconSpacing( int iconEdgeWidth = IconViewEdgeX );		// to compact items width in icon views

@@ -495,14 +495,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\CapitalizeOptionsDialog.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\CapitalizeOptionsDialog.h"
-				>
-			</File>
-			<File
 				RelativePath=".\FileEditorBaseDialog.cpp"
 				>
 			</File>
@@ -575,11 +567,27 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\GeneralOptions.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\GeneralOptions.h"
+				>
+			</File>
+			<File
 				RelativePath=".\MainRenameDialog.cpp"
 				>
 			</File>
 			<File
 				RelativePath=".\MainRenameDialog.h"
+				>
+			</File>
+			<File
+				RelativePath=".\OptionsSheet.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\OptionsSheet.h"
 				>
 			</File>
 			<File

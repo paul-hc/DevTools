@@ -2,9 +2,12 @@
 #include "stdafx.h"
 #include "FileEditorBaseDialog.h"
 #include "FileModel.h"
+#include "GeneralOptions.h"
+#include "OptionsSheet.h"
 #include "resource.h"
 #include "utl/EnumTags.h"
 #include "utl/Utilities.h"
+#include "utl/resource.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -17,11 +20,19 @@ CFileEditorBaseDialog::CFileEditorBaseDialog( CFileModel* pFileModel, cmd::Comma
 	, m_pFileModel( pFileModel )
 {
 	m_pFileModel->AddObserver( this );
+	CGeneralOptions::Instance().AddObserver( this );
+
+	m_toolbar.GetStrip()
+		.AddButton( IDC_UNDO_BUTTON, ID_EDIT_UNDO )
+		.AddButton( IDC_REDO_BUTTON, ID_EDIT_REDO )
+		.AddSeparator()
+		.AddButton( ID_OPTIONS );
 }
 
 CFileEditorBaseDialog::~CFileEditorBaseDialog()
 {
 	m_pFileModel->RemoveObserver( this );
+	CGeneralOptions::Instance().RemoveObserver( this );
 }
 
 CFileModel* CFileEditorBaseDialog::GetFileModel( void ) const
@@ -74,8 +85,7 @@ int CFileEditorBaseDialog::PopStackRunCrossEditor( cmd::StackType stackType )
 
 void CFileEditorBaseDialog::DoDataExchange( CDataExchange* pDX )
 {
-	ui::DDX_ButtonIcon( pDX, IDC_UNDO_BUTTON, ID_EDIT_UNDO, false );
-	ui::DDX_ButtonIcon( pDX, IDC_REDO_BUTTON, ID_EDIT_REDO, false );
+	m_toolbar.DDX_Placeholder( pDX, IDC_TOOLBAR_PLACEHOLDER, H_AlignRight | V_AlignCenter );
 
 	__super::DoDataExchange( pDX );
 }
@@ -84,11 +94,24 @@ void CFileEditorBaseDialog::DoDataExchange( CDataExchange* pDX )
 // message handlers
 
 BEGIN_MESSAGE_MAP( CFileEditorBaseDialog, CBaseMainDialog )
-	ON_CONTROL_RANGE( BN_CLICKED, IDC_UNDO_BUTTON, IDC_REDO_BUTTON, OnBnClicked_UndoRedo )
+	ON_CONTROL_RANGE( BN_CLICKED, IDC_UNDO_BUTTON, IDC_REDO_BUTTON, OnUndoRedo )
+	ON_COMMAND( ID_OPTIONS, OnOptions )
+	ON_UPDATE_COMMAND_UI( ID_OPTIONS, OnUpdateOptions )
 END_MESSAGE_MAP()
 
-void CFileEditorBaseDialog::OnBnClicked_UndoRedo( UINT btnId )
+void CFileEditorBaseDialog::OnUndoRedo( UINT btnId )
 {
 	GotoDlgCtrl( GetDlgItem( IDOK ) );
 	PopStackTop( IDC_UNDO_BUTTON == btnId ? cmd::Undo : cmd::Redo );
+}
+
+void CFileEditorBaseDialog::OnOptions( void )
+{
+	COptionsSheet sheet( this );
+	sheet.DoModal();
+}
+
+void CFileEditorBaseDialog::OnUpdateOptions( CCmdUI* pCmdUI )
+{
+	pCmdUI->Enable();
 }
