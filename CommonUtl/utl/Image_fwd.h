@@ -65,8 +65,10 @@ enum IconStdSize
 	SmallIcon,		// 16x16
 	MediumIcon,		// 24x24
 	LargeIcon,		// 32x32
-	HugeIcon,		// 48x48
-	EnormousIcon	// 256x256
+	HugeIcon_48,	// 48x48
+	HugeIcon_96,	// 96x96
+	HugeIcon_128,	// 128x128
+	HugeIcon_256	// 256x256
 };
 
 
@@ -78,7 +80,7 @@ struct CIconId
 
 	CSize GetStdSize( void ) const { return GetStdSize( m_stdSize ); }
 	static CSize GetStdSize( IconStdSize iconStdSize );
-	static IconStdSize FindStdSize( const CSize& iconSize );
+	static IconStdSize FindStdSize( const CSize& iconSize, IconStdSize defaultStdSize = DefaultSize );
 public:
 	UINT m_id;
 	IconStdSize m_stdSize;

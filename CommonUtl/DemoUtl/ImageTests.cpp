@@ -57,8 +57,8 @@ void CImageTests::TestGroupIcon( void )
 		ASSERT( groupIcon.ContainsSize( SmallIcon ) );
 		ASSERT( groupIcon.ContainsSize( MediumIcon ) );
 		ASSERT( groupIcon.ContainsSize( LargeIcon ) );
-		ASSERT( groupIcon.ContainsSize( HugeIcon ) );
-		ASSERT( !groupIcon.ContainsSize( EnormousIcon ) );
+		ASSERT( groupIcon.ContainsSize( HugeIcon_48 ) );
+		ASSERT( !groupIcon.ContainsSize( HugeIcon_256 ) );
 
 		ASSERT( groupIcon.ContainsBpp( ILC_MASK ) );
 		ASSERT( groupIcon.ContainsBpp( ILC_COLOR4 ) );
@@ -66,10 +66,10 @@ void CImageTests::TestGroupIcon( void )
 		ASSERT( groupIcon.ContainsBpp( ILC_COLOR32 ) );
 
 		ASSERT( groupIcon.Contains( ILC_MASK, LargeIcon ) );
-		ASSERT( groupIcon.Contains( ILC_COLOR32, HugeIcon ) );
+		ASSERT( groupIcon.Contains( ILC_COLOR32, HugeIcon_48 ) );
 
 		ASSERT_EQUAL( std::make_pair( ILC_COLOR32, SmallIcon ), groupIcon.FindSmallest() );
-		ASSERT_EQUAL( std::make_pair( ILC_COLOR32, HugeIcon ), groupIcon.FindLargest() );
+		ASSERT_EQUAL( std::make_pair( ILC_COLOR32, HugeIcon_48 ), groupIcon.FindLargest() );
 	}
 
 	{
@@ -78,8 +78,8 @@ void CImageTests::TestGroupIcon( void )
 		ASSERT( groupIcon.ContainsSize( SmallIcon ) );
 		ASSERT( !groupIcon.ContainsSize( MediumIcon ) );
 		ASSERT( groupIcon.ContainsSize( LargeIcon ) );
-		ASSERT( !groupIcon.ContainsSize( HugeIcon ) );
-		ASSERT( !groupIcon.ContainsSize( EnormousIcon ) );
+		ASSERT( !groupIcon.ContainsSize( HugeIcon_48 ) );
+		ASSERT( !groupIcon.ContainsSize( HugeIcon_256 ) );
 
 		ASSERT_EQUAL( std::make_pair( ILC_COLOR4, SmallIcon ), groupIcon.FindSmallest() );
 		ASSERT_EQUAL( std::make_pair( ILC_COLOR4, LargeIcon ), groupIcon.FindLargest() );

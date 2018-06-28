@@ -74,22 +74,26 @@ CSize CIconId::GetStdSize( IconStdSize iconStdSize )
 		case SmallIcon:		return CSize( 16, 16 );		// invariant to scaling; old CSize( GetSystemMetrics( SM_CXSMICON ), GetSystemMetrics( SM_CYSMICON ) )
 		case MediumIcon:	return CSize( 24, 24 );
 		case LargeIcon:		return CSize( 32, 32 );		// invariant to scaling; old CSize( GetSystemMetrics( SM_CXICON ), GetSystemMetrics( SM_CYICON ) )
-		case HugeIcon:		return CSize( 48, 48 );
-		case EnormousIcon:	return CSize( 256, 256 );
+		case HugeIcon_48:	return CSize( 48, 48 );
+		case HugeIcon_96:	return CSize( 96, 96 );
+		case HugeIcon_128:	return CSize( 128, 128 );
+		case HugeIcon_256:	return CSize( 256, 256 );
 	}
 }
 
-IconStdSize CIconId::FindStdSize( const CSize& iconSize )
+IconStdSize CIconId::FindStdSize( const CSize& iconSize, IconStdSize defaultStdSize /*= DefaultSize*/ )
 {
 	switch ( iconSize.cx )
 	{
 		case 16:	return SmallIcon;
 		case 24:	return MediumIcon;
 		case 32:	return LargeIcon;
-		case 48:	return HugeIcon;
-		case 256:	return EnormousIcon;
+		case 48:	return HugeIcon_48;
+		case 96:	return HugeIcon_96;
+		case 128:	return HugeIcon_128;
+		case 256:	return HugeIcon_256;
 	}
-	return DefaultSize;				// custom icon size
+	return defaultStdSize;				// if DefaultSize: use custom icon size
 }
 
 

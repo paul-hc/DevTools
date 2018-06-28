@@ -24,7 +24,7 @@ public:
 	CIcon* FindIcon( UINT cmdId, IconStdSize iconStdSize = SmallIcon ) const;
 
 	const CIcon* RetrieveIcon( const CIconId& cmdId );
-	const CIcon* RetrieveLargestIcon( UINT cmdId, IconStdSize maxIconStdSize = HugeIcon );
+	const CIcon* RetrieveLargestIcon( UINT cmdId, IconStdSize maxIconStdSize = HugeIcon_48 );
 	static const CIcon* RetrieveSharedIcon( const CIconId& cmdId );
 
 	CBitmap* RetrieveBitmap( const CIconId& cmdId, COLORREF transpColor );

@@ -89,7 +89,7 @@ const CIcon* CImageStore::RetrieveIcon( const CIconId& cmdId )
 	return NULL;
 }
 
-const CIcon* CImageStore::RetrieveLargestIcon( UINT cmdId, IconStdSize maxIconStdSize /*= HugeIcon*/ )
+const CIcon* CImageStore::RetrieveLargestIcon( UINT cmdId, IconStdSize maxIconStdSize /*= HugeIcon_48*/ )
 {
 	for ( ; maxIconStdSize >= DefaultSize; --(int&)maxIconStdSize )
 		if ( const CIcon* pIcon = RetrieveIcon( CIconId( cmdId, maxIconStdSize ) ) )
@@ -198,7 +198,7 @@ void CImageStore::RegisterButtonImages( const CImageList& imageList, const UINT 
 		case 16: iconKey.second = SmallIcon; break;
 		case 24: iconKey.second = MediumIcon; break;
 		case 32: iconKey.second = LargeIcon; break;
-		case 48: iconKey.second = HugeIcon; break;
+		case 48: iconKey.second = HugeIcon_48; break;
 	};
 
 	for ( UINT i = 0, imagePos = 0; i != buttonCount; ++i )
