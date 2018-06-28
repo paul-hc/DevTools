@@ -22,6 +22,7 @@ CBaseMainDialog::CBaseMainDialog( UINT templateId, CWnd* pParent /*= NULL*/ )
 	: CLayoutDialog( templateId, pParent )
 {
 	m_initCentered = false;			// so that it uses WINDOWPLACEMENT
+	SetTopDlg();
 	LoadDlgIcon( templateId );		// needs both small/large icons for main dialog (task switching needs the large one)
 }
 
@@ -97,17 +98,6 @@ bool CBaseMainDialog::NotifyTrayIcon( int notifyCode )
 		GetWindowText( niData.szTip, COUNT_OF( niData.szTip ) );
 	}
 	return ::Shell_NotifyIcon( notifyCode, &niData ) != FALSE;
-}
-
-BOOL CBaseMainDialog::OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo )
-{
-	if ( CLayoutDialog::OnCmdMsg( id, code, pExtra, pHandlerInfo ) )
-		return TRUE;
-
-	if ( CWinThread* pCurrThread = AfxGetThread() )								// dialog may be hosted by a process with different architecture (e.g. Explorer.exe)
-		return pCurrThread->OnCmdMsg( id, code, pExtra, pHandlerInfo );			// some commands may handled by the CWinApp
-
-	return FALSE;
 }
 
 

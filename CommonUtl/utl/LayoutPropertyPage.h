@@ -3,7 +3,7 @@
 #pragma once
 
 #include "Dialog_fwd.h"
-#include "BasePopupDialog.h"
+#include "PopupDlgBase.h"
 #include "LayoutMetrics.h"
 #include "RuntimeException.h"
 

@@ -1,5 +1,5 @@
-#ifndef BasePopupDialog_h
-#define BasePopupDialog_h
+#ifndef PopupDlgBase_h
+#define PopupDlgBase_h
 #pragma once
 
 
@@ -21,12 +21,16 @@ private:
 class CIcon;
 
 
-abstract class CBasePopupDialog
+abstract class CPopupDlgBase
 {
 protected:
-	CBasePopupDialog( void );
-	virtual ~CBasePopupDialog( void ) {}		// for dynamic casting
+	CPopupDlgBase( void );
+	virtual ~CPopupDlgBase( void ) {}		// for dynamic casting
+
+	virtual bool HandleCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo );		// called from derived OnCmdMsg()
 public:
+	void SetTopDlg( bool isTopDlg = true ) { m_isTopDlg = isTopDlg; }		// allows chaining command handling to the application/thread object for top dialogs
+
 	enum DlgIcon { DlgSmallIcon = ICON_SMALL, DlgLargeIcon = ICON_BIG };
 
 	virtual const CIcon* GetDlgIcon( DlgIcon dlgIcon = DlgSmallIcon ) const;
@@ -42,6 +46,7 @@ public:
 	bool m_hideSysMenuIcon;		// hide dialog sys-menu icon
 	bool m_noAboutMenuItem;		// avoid adding "About..." item to system menu icon
 protected:
+	bool m_isTopDlg;			// if true, chain command handling to the application/thread object
 	bool m_idleUpdateDeep;		// send WM_IDLEUPDATECMDUI to all descendants
 	CAccelPool m_accelPool;
 private:
@@ -49,4 +54,4 @@ private:
 };
 
 
-#endif // BasePopupDialog_h
+#endif // PopupDlgBase_h

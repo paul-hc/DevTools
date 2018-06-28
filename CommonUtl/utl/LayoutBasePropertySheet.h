@@ -26,6 +26,7 @@ public:
 	PageType* GetPageAs( int pageIndex ) const { return dynamic_cast< PageType* >( GetPage( pageIndex ) ); }	// dynamic so that it works with interfaces
 
 	CLayoutPropertyPage* GetActivePage( void ) const;
+	void SetInitialPageIndex( UINT initialPageIndex ) { REQUIRE( NULL == m_hWnd ); m_initialPageIndex = initialPageIndex; }
 
 	std::tstring GetPageTitle( int pageIndex ) const;
 	void SetPageTitle( int pageIndex, const std::tstring& pageTitle );
@@ -63,6 +64,8 @@ protected:
 	virtual bool IsPageResizable( const CLayoutPropertyPage* pPage ) const;
 
 	void RegisterTabTooltips( void );
+private:
+	UINT m_initialPageIndex;						// force initial page activation (otherwise uses the one saved in registry, or default)
 protected:
 	bool m_manageOkButtonState;						// enable OK button when modified, disable it when not modified
 	CImageList m_tabImageList;

@@ -26,6 +26,7 @@ COptionsSheet::COptionsSheet( CWnd* pParent )
 	m_regSection = _T("OptionsSheet");
 	m_resizable = false;
 	m_alwaysModified = true;
+	SetTopDlg();
 	SetSingleTransaction();
 	LoadDlgIcon( ID_OPTIONS );
 
@@ -39,17 +40,6 @@ COptionsSheet::COptionsSheet( CWnd* pParent )
 COptionsSheet::~COptionsSheet()
 {
 	DeleteAllPages();
-}
-
-BOOL COptionsSheet::OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo )
-{
-	if ( CLayoutPropertySheet::OnCmdMsg( id, code, pExtra, pHandlerInfo ) )
-		return TRUE;
-
-	if ( CWinThread* pCurrThread = AfxGetThread() )								// dialog may be hosted by a process with different architecture (e.g. Explorer.exe)
-		return pCurrThread->OnCmdMsg( id, code, pExtra, pHandlerInfo );			// some commands may handled by the CWinApp, e.g. ID_RUN_TESTS
-
-	return FALSE;
 }
 
 

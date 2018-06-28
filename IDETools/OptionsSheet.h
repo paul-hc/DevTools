@@ -19,10 +19,6 @@ public:
 	virtual ~COptionsSheet();
 
 	enum Page { GeneralPage, CodingStandardPage, CppFormattingPage, BscPathPage, DirectoriesPage };
-
-	// generated stuff
-public:
-	virtual BOOL OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo );
 };
 
 

@@ -4,7 +4,7 @@
 #pragma once
 
 #include "Dialog_fwd.h"
-#include "BasePopupDialog.h"
+#include "PopupDlgBase.h"
 #include "LayoutMetrics.h"
 
 #if _MSC_VER > 1500	// MSVC++ 9.0 (Visual Studio 2008)
@@ -18,7 +18,7 @@
 // base class for resizable dialogs with dynamic control layout
 
 class CLayoutDialog : public MfcBaseDialog
-					, public CBasePopupDialog
+					, public CPopupDlgBase
 					, public ui::ILayoutEngine
 					, public ui::ICustomCmdInfo
 {
@@ -67,6 +67,7 @@ public:
 	virtual void DoDataExchange( CDataExchange* pDX );
 	public:
 	virtual BOOL PreTranslateMessage( MSG* pMsg );
+	virtual BOOL OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo );
 protected:
 	afx_msg void OnDestroy( void );
 	afx_msg void OnSize( UINT sizeType, int cx, int cy );

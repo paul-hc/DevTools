@@ -2,7 +2,7 @@
 #define LayoutPropertySheet_h
 #pragma once
 
-#include "BasePopupDialog.h"
+#include "PopupDlgBase.h"
 #include "LayoutMetrics.h"
 #include "LayoutBasePropertySheet.h"
 
@@ -10,7 +10,7 @@
 // base class for top level modeless or modal property sheets
 
 abstract class CLayoutPropertySheet : public CLayoutBasePropertySheet
-									, public CBasePopupDialog
+									, public CPopupDlgBase
 									, public ui::ILayoutEngine
 {
 protected:
@@ -57,14 +57,14 @@ public:
 	DWORD m_styleMinMax;		// WS_MINIMIZEBOX, WS_MAXIMIZEBOX extra style to apply on initialization
 	bool m_alwaysModified;		// always enable the OK/APPLY buttons, pages don't need to call OnFieldModified()
 private:
-	// generated overrides
+	// generated stuff
 	public:
 	virtual BOOL Create( CWnd* pParent = NULL, DWORD style = UINT_MAX, DWORD styleEx = 0 ); // for modeless creation
 	virtual void PostNcDestroy( void );
 	virtual BOOL PreTranslateMessage( MSG* pMsg );
+	virtual BOOL OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo );
 	virtual BOOL OnInitDialog( void );
 protected:
-	// message map functions
 	afx_msg BOOL OnNcCreate( CREATESTRUCT* pCreate );
 	afx_msg void OnGetMinMaxInfo( MINMAXINFO* pMinMaxInfo );
 	afx_msg void OnContextMenu( CWnd* pWnd, CPoint screenPos );

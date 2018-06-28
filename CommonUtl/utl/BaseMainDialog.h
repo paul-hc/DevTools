@@ -36,8 +36,7 @@ public:
 	static const UINT WM_TASKBARCREATED;
 	static const UINT WM_TRAYICONNOTIFY;
 public:
-	// generated overrides
-	virtual BOOL OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo );
+	// generated stuff
 protected:
 	virtual BOOL OnInitDialog( void );
 	afx_msg void OnDestroy( void );

@@ -18,6 +18,7 @@ namespace reg
 
 CLayoutBasePropertySheet::CLayoutBasePropertySheet( const TCHAR* pTitle, CWnd* pParent, UINT selPageIndex )
 	: CPropertySheet( pTitle, pParent, selPageIndex )
+	, m_initialPageIndex( UINT_MAX )
 	, m_manageOkButtonState( false )
 {
 }
@@ -153,7 +154,9 @@ void CLayoutBasePropertySheet::RegisterTabTooltips( void )
 
 void CLayoutBasePropertySheet::LoadFromRegistry( void )
 {
-	if ( !m_regSection.empty() )
+	if ( m_initialPageIndex != UINT_MAX )
+		m_psh.nStartPage = m_initialPageIndex;
+	else if ( !m_regSection.empty() )
 		m_psh.nStartPage = AfxGetApp()->GetProfileInt( m_regSection.c_str(), reg::entry_activePage, m_psh.nStartPage );
 }
 

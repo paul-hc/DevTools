@@ -327,8 +327,15 @@ END_MESSAGE_MAP()
 BOOL CLayoutPropertySheet::PreTranslateMessage( MSG* pMsg )
 {
 	return
-		CLayoutBasePropertySheet::PreTranslateMessage( pMsg ) ||		// handle base first because it must relay tooltip events
+		CLayoutBasePropertySheet::PreTranslateMessage( pMsg ) ||				// handle base first because it must relay tooltip events
 		m_accelPool.TranslateAccels( pMsg, m_hWnd );
+}
+
+BOOL CLayoutPropertySheet::OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo )
+{
+	return
+		CLayoutBasePropertySheet::OnCmdMsg( id, code, pExtra, pHandlerInfo ) ||
+		HandleCmdMsg( id, code, pExtra, pHandlerInfo );							// some commands may handled by the CWinApp
 }
 
 BOOL CLayoutPropertySheet::OnInitDialog( void )

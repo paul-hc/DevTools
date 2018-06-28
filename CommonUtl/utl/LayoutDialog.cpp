@@ -322,6 +322,13 @@ BOOL CLayoutDialog::PreTranslateMessage( MSG* pMsg )
 		MfcBaseDialog::PreTranslateMessage( pMsg );
 }
 
+BOOL CLayoutDialog::OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo )
+{
+	return
+		MfcBaseDialog::OnCmdMsg( id, code, pExtra, pHandlerInfo ) ||
+		HandleCmdMsg( id, code, pExtra, pHandlerInfo );							// some commands may handled by the CWinApp
+}
+
 void CLayoutDialog::OnDestroy( void )
 {
 	SaveToRegistry();

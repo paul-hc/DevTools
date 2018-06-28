@@ -819,14 +819,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\BasePopupDialog.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\BasePopupDialog.h"
-				>
-			</File>
-			<File
 				RelativePath=".\BaseSplitButton.cpp"
 				>
 			</File>
@@ -1048,6 +1040,14 @@
 			</File>
 			<File
 				RelativePath=".\NumericEdit.h"
+				>
+			</File>
+			<File
+				RelativePath=".\PopupDlgBase.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\PopupDlgBase.h"
 				>
 			</File>
 			<File

@@ -1,6 +1,6 @@
 
 #include "stdafx.h"
-#include "BasePopupDialog.h"
+#include "PopupDlgBase.h"
 #include "AboutBox.h"
 #include "AccelTable.h"
 #include "ContainerUtilities.h"
@@ -19,27 +19,28 @@ static ACCEL keys[] =
 };
 
 
-// CBasePopupDialog implementation
+// CPopupDlgBase implementation
 
-CBasePopupDialog::CBasePopupDialog( void )
+CPopupDlgBase::CPopupDlgBase( void )
 	: m_resizable( true )
 	, m_initCentered( true )
 	, m_hideSysMenuIcon( true )
 	, m_noAboutMenuItem( false )
+	, m_isTopDlg( false )
 	, m_idleUpdateDeep( false )
 	, m_dlgIconId( 0 )
 {
 	m_accelPool.AddAccelTable( new CAccelTable( keys, COUNT_OF( keys ) ) );
 }
 
-const CIcon* CBasePopupDialog::GetDlgIcon( DlgIcon dlgIcon /*= DlgSmallIcon*/ ) const
+const CIcon* CPopupDlgBase::GetDlgIcon( DlgIcon dlgIcon /*= DlgSmallIcon*/ ) const
 {
 	if ( m_dlgIconId != 0 && CImageStore::HasSharedStore() )
 		return CImageStore::GetSharedStore()->RetrieveIcon( CIconId( m_dlgIconId, DlgSmallIcon == dlgIcon ? SmallIcon : LargeIcon ) );
 	return NULL;
 }
 
-void CBasePopupDialog::LoadDlgIcon( UINT dlgIconId )
+void CPopupDlgBase::LoadDlgIcon( UINT dlgIconId )
 {
 	// normally called prior to creation
 	CImageStore* pSharedStore = CImageStore::SharedStore();
@@ -54,7 +55,7 @@ void CBasePopupDialog::LoadDlgIcon( UINT dlgIconId )
 		m_hideSysMenuIcon = false;
 }
 
-void CBasePopupDialog::SetupDlgIcons( void )
+void CPopupDlgBase::SetupDlgIcons( void )
 {
 	// main dialogs need to manage both small and large icons at once
 	CWnd* pWnd = dynamic_cast< CWnd* >( this );
@@ -66,7 +67,7 @@ void CBasePopupDialog::SetupDlgIcons( void )
 		pWnd->SetIcon( pLargeIcon->GetHandle(), DlgLargeIcon );
 }
 
-bool CBasePopupDialog::CanAddAboutMenuItem( void ) const
+bool CPopupDlgBase::CanAddAboutMenuItem( void ) const
 {
 	if ( m_noAboutMenuItem )
 		return false;
@@ -76,7 +77,7 @@ bool CBasePopupDialog::CanAddAboutMenuItem( void ) const
 	return !is_a< CAboutBox >( pWnd ) && !is_a< CDialog >( pWnd->GetParent() );
 }
 
-void CBasePopupDialog::AddAboutMenuItem( CMenu* pMenu )
+void CPopupDlgBase::AddAboutMenuItem( CMenu* pMenu )
 {
 	ASSERT_PTR( pMenu );
 
@@ -86,6 +87,20 @@ void CBasePopupDialog::AddAboutMenuItem( CMenu* pMenu )
 	pMenu->AppendMenu( MF_SEPARATOR );
 	pMenu->AppendMenu( MF_STRING, ID_APP_ABOUT, menuItemText.c_str() );
 	ui::SetMenuItemImage( *pMenu, ID_APP_ABOUT );
+}
+
+bool CPopupDlgBase::HandleCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo )
+{
+	if ( m_isTopDlg )
+	{
+		// Note: AfxGetThread() returns CURRENT module's CWinApp singleton, whether a DLL or EXE module.
+		// The dialog may be hosted by a process with different architecture (e.g. Explorer.exe shell extension), with a different CWinApp singleton or none at all.
+
+		if ( CWinThread* pCurrThread = AfxGetThread() )
+			return pCurrThread->OnCmdMsg( id, code, pExtra, pHandlerInfo ) != FALSE;		// some commands may handled by the CWinApp
+	}
+
+	return false;
 }
 
 
