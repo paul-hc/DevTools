@@ -20,6 +20,7 @@ public:
 	virtual BOOL InitInstance( void );
 	BOOL ExitInstance( void );
 protected:
+	afx_msg void OnEscapeExit();
 	afx_msg void OnAppAbout( void );
 	afx_msg void OnToggleShowFrames( void );
 	afx_msg void OnUpdateShowFrames( CCmdUI* pCmdUI );

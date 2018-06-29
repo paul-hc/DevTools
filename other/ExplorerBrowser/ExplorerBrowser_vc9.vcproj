@@ -395,6 +395,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\ExplorerBrowser.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\ExplorerBrowser.h"
+				>
+			</File>
+			<File
 				RelativePath=".\ExplorerBrowser.idl"
 				>
 				<FileConfiguration
@@ -537,11 +545,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\ExplorerBrowser.rgs"
+				RelativePath=".\res\ExplorerBrowser.rgs"
 				>
 			</File>
 			<File
-				RelativePath=".\res\ExplorerBrowser.rgs"
+				RelativePath=".\ExplorerBrowser.rgs"
 				>
 			</File>
 			<File

@@ -3,6 +3,61 @@
 #pragma once
 
 
+template< typename FieldType >
+inline bool HasFlag( FieldType field, unsigned int flag )
+{
+	return ( field & flag ) != 0;
+}
+
+template< typename FieldType >
+inline bool EqFlag( FieldType field, unsigned int flag )
+{
+	return flag == ( field & flag );
+}
+
+template< typename FieldType >
+inline bool EqMaskedValue( FieldType field, unsigned int mask, unsigned int value )
+{
+	return value == ( field & mask );
+}
+
+template< typename FieldType >
+inline void ClearFlag( FieldType& rField, unsigned int flag )
+{
+	rField &= ~flag;
+}
+
+template< typename FieldType >
+inline void SetFlag( FieldType& rField, unsigned int flag, bool on = true )
+{
+	if ( on )
+		rField |= flag;
+	else
+		rField &= ~flag;
+}
+
+template< typename FieldType >
+inline void ToggleFlag( FieldType& rField, unsigned int flag )
+{
+	rField ^= flag;
+}
+
+template< typename FieldType >
+inline bool ModifyFlag( FieldType& rField, unsigned int clearFlags, unsigned int setFlags )
+{
+	FieldType oldField = rField;
+	rField &= ~clearFlags;
+	rField |= setFlags;
+	return rField != oldField;
+}
+
+template< typename FieldType >
+inline bool CopyFlags( FieldType& rField, unsigned int mask, unsigned int flags )
+{
+	return ModifyFlag( rField, mask, flags & mask );
+}
+
+
 namespace str
 {
 	template< typename Iterator, typename CharType >

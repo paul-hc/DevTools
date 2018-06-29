@@ -13,115 +13,6 @@
 #endif
 
 
-namespace shell
-{
-	bool NavigateTo( const TCHAR path[], IExplorerBrowser* pExplorerBrowser )
-	{
-		ASSERT_PTR( pExplorerBrowser );
-		LPITEMIDLIST pidlBrowse;
-		if ( SUCCEEDED( ::SHParseDisplayName( path, NULL, &pidlBrowse, 0, NULL ) ) )
-			if ( SUCCEEDED( pExplorerBrowser->BrowseToIDList( pidlBrowse, 0 ) ) )
-			{
-				::ILFree( pidlBrowse );
-				return true;
-			}
-
-		return false;
-	}
-
-	void QuerySelectedFiles( std::vector< std::tstring >& rSelPaths, IExplorerBrowser* pExplorerBrowser )
-	{
-		ASSERT_PTR( pExplorerBrowser );
-		CComPtr< IShellView > pShellView;
-		if ( SUCCEEDED( pExplorerBrowser->GetCurrentView( IID_PPV_ARGS( &pShellView ) ) ) )
-		{
-			CComPtr< IDataObject > pDataObject;
-			if ( SUCCEEDED( pShellView->GetItemObject( SVGIO_SELECTION, IID_PPV_ARGS( &pDataObject ) ) ) )
-			{
-				//Code adapted from http://www.codeproject.com/shell/shellextguide1.asp
-				FORMATETC fmt = { CF_HDROP, NULL, DVASPECT_CONTENT, -1, TYMED_HGLOBAL };
-				STGMEDIUM stg;
-				stg.tymed =  TYMED_HGLOBAL;
-
-				if ( SUCCEEDED( pDataObject->GetData( &fmt, &stg ) ) )
-				{
-					HDROP hDrop = (HDROP)::GlobalLock( stg.hGlobal );
-
-					for ( UINT i = 0, fileCount = DragQueryFile( hDrop, 0xFFFFFFFF, NULL, 0 ); i < fileCount; ++i )
-					{
-						TCHAR path[ _MAX_PATH ] = { '0' };
-						DragQueryFile( hDrop, i, path, MAX_PATH );
-
-						if ( path[ 0 ] != 0 )
-							rSelPaths.push_back( path );
-					}
-
-					::GlobalUnlock( stg.hGlobal );
-					::ReleaseStgMedium( &stg );
-				}
-			}
-		}
-	}
-
-	FOLDERVIEWMODE GetFolderViewMode( IExplorerBrowser* pExplorerBrowser, UINT* pFolderFlags /*= NULL*/ )
-	{
-		ASSERT_PTR( pExplorerBrowser );
-
-		CComPtr< IShellView > pShellView;
-		if ( SUCCEEDED( pExplorerBrowser->GetCurrentView( IID_PPV_ARGS( &pShellView ) ) ) )
-		{
-			FOLDERSETTINGS settings;
-			if ( SUCCEEDED( pShellView->GetCurrentInfo( &settings ) ) )
-			{
-				if ( pFolderFlags != NULL )
-					*pFolderFlags = settings.fFlags;
-
-				return static_cast< FOLDERVIEWMODE >( settings.ViewMode );
-			}
-		}
-		return FVM_AUTO;
-	}
-
-	std::tstring GetFolderDisplayName( PCIDLIST_ABSOLUTE pidlFolder )
-	{
-		std::tstring displayName;
-
-		CComPtr< IShellFolder > pDesktopFolder;
-		if ( SUCCEEDED( ::SHGetDesktopFolder( &pDesktopFolder ) ) )
-		{
-			STRRET sDisplayName;
-			if ( SUCCEEDED( pDesktopFolder->GetDisplayNameOf( pidlFolder, SHGDN_FORPARSING, &sDisplayName ) ) )
-			{
-				LPTSTR szDisplayName = NULL;
-				StrRetToStr( &sDisplayName, pidlFolder, &szDisplayName );
-				displayName = szDisplayName;
-				CoTaskMemFree( szDisplayName );
-			}
-		}
-
-		return displayName;
-	}
-
-	FOLDERVIEWMODE CmdToViewMode( UINT cmdId )
-	{
-		switch ( cmdId )
-		{
-			case ID_VIEW_SMALLICON:		return FVM_SMALLICON;
-			case ID_VIEW_LARGEICON:		return FVM_ICON;
-			case ID_VIEW_LIST:			return FVM_LIST;
-			case ID_VIEW_DETAILS:		return FVM_DETAILS;
-
-			case ID_VIEW_TILES:			return FVM_TILE;
-			case ID_VIEW_THUMBNAILS:	return FVM_THUMBNAIL;
-			case ID_VIEW_THUMBSTRIP:	return FVM_THUMBSTRIP;
-			default:
-				ASSERT( false );
-				return FVM_AUTO;
-		}
-	}
-}
-
-
 namespace reg
 {
 	static const TCHAR section_view[] = _T("View");
@@ -144,23 +35,42 @@ CBrowserView::~CBrowserView()
 
 HRESULT CBrowserView::OnNavigationPending( PCIDLIST_ABSOLUTE pidlFolder )
 {
-	TRACE( "OnNavigationPending %S\n", shell::GetFolderDisplayName( pidlFolder ).c_str() );
+	TRACE( _T("OnNavigationPending %s\n"), shell::GetFolderDisplayName( pidlFolder ).c_str() );
 	return S_OK;
 }
 
 void CBrowserView::OnNavigationComplete( PCIDLIST_ABSOLUTE pidlFolder )
 {
-	TRACE( "OnNavigationComplete %S\n", shell::GetFolderDisplayName( pidlFolder ).c_str() );
+	TRACE( _T("OnNavigationComplete %s\n"), shell::GetFolderDisplayName( pidlFolder ).c_str() );
 }
 
-void CBrowserView::OnViewCreated( IShellView *psv )
+void CBrowserView::OnViewCreated( IShellView* pShellView )
 {
-	TRACE( "OnViewCreated\n" );
+	pShellView;
+	TRACE( _T("OnViewCreated\n") );
 }
 
 void CBrowserView::OnNavigationFailed( PCIDLIST_ABSOLUTE pidlFolder )
 {
-	TRACE( "OnNavigationFailed %S\n", shell::GetFolderDisplayName( pidlFolder ).c_str() );
+	TRACE( _T("OnNavigationFailed %s\n"), shell::GetFolderDisplayName( pidlFolder ).c_str() );
+}
+
+FOLDERVIEWMODE CBrowserView::CmdToViewMode( UINT cmdId )
+{
+	switch ( cmdId )
+	{
+		case ID_VIEW_SMALLICON:		return FVM_SMALLICON;
+		case ID_VIEW_LARGEICON:		return FVM_ICON;
+		case ID_VIEW_LIST:			return FVM_LIST;
+		case ID_VIEW_DETAILS:		return FVM_DETAILS;
+
+		case ID_VIEW_TILES:			return FVM_TILE;
+		case ID_VIEW_THUMBNAILS:	return FVM_THUMBNAIL;
+		case ID_VIEW_THUMBSTRIP:	return FVM_THUMBSTRIP;
+		default:
+			ASSERT( false );
+			return FVM_AUTO;
+	}
 }
 
 BOOL CBrowserView::PreCreateWindow( CREATESTRUCT& cs )
@@ -179,6 +89,8 @@ BEGIN_MESSAGE_MAP( CBrowserView, CView )
 	ON_WM_CREATE()
 	ON_WM_DESTROY()
 	ON_WM_SIZE()
+	ON_COMMAND( ID_FILE_RENAME, OnFileRename )
+
 	ON_COMMAND( ID_VIEW_GOTOUSERPROFILE, OnBrowseToProfileFolder )
 	ON_COMMAND_RANGE( ID_VIEW_SMALLICON, ID_VIEW_DETAILS, OnViewMode )
 	ON_COMMAND_RANGE( ID_VIEW_TILES, ID_VIEW_THUMBSTRIP, OnViewMode )
@@ -187,11 +99,8 @@ BEGIN_MESSAGE_MAP( CBrowserView, CView )
 	ON_COMMAND( ID_VIEW_BACK, OnViewBack )
 	ON_COMMAND( ID_VIEW_FORWARD, OnViewForward )
 	ON_COMMAND( ID_VIEW_FRAMES, OnViewFrames )
+	ON_UPDATE_COMMAND_UI( ID_VIEW_FRAMES, OnUpdateViewFrames )
 	ON_COMMAND( ID_VIEW_SHOWSELECTION, OnViewShowselection )
-
-	ON_COMMAND( ID_FILE_PRINT, &CView::OnFilePrint )
-	ON_COMMAND( ID_FILE_PRINT_DIRECT, &CView::OnFilePrint )
-	ON_COMMAND( ID_FILE_PRINT_PREVIEW, &CView::OnFilePrintPreview )
 END_MESSAGE_MAP()
 
 int CBrowserView::OnCreate( CREATESTRUCT* pCreateStruct )
@@ -199,30 +108,21 @@ int CBrowserView::OnCreate( CREATESTRUCT* pCreateStruct )
 	if ( -1 == CView::OnCreate( pCreateStruct ) )
 		return -1;
 
-	CRect browserRect;
-	GetClientRect( &browserRect );
-	browserRect.DeflateRect( 10, 10 );		// no effect, really
+	FOLDERVIEWMODE filePaneViewMode = static_cast< FOLDERVIEWMODE >( AfxGetApp()->GetProfileInt( reg::section_view, reg::entry_viewMode, FVM_DETAILS ) );
 
-	if ( SUCCEEDED( ::SHCoCreateInstance( NULL, &CLSID_ExplorerBrowser, NULL, IID_PPV_ARGS( &m_pExplorerBrowser ) ) ) )
+	m_pBrowser.reset( new shell::CExplorerBrowser );
+	if ( m_pBrowser->Create( this, g_theApp.m_showFrames, filePaneViewMode ) )
 	{
-		if ( g_theApp.m_showFrames )
-			m_pExplorerBrowser->SetOptions( EBO_SHOWFRAMES );
-
-		FOLDERVIEWMODE folderViewMode = static_cast< FOLDERVIEWMODE >( AfxGetApp()->GetProfileInt( reg::section_view, reg::entry_viewMode, FVM_DETAILS ) );
-		FOLDERSETTINGS settings = { folderViewMode, 0 };
-		if ( SUCCEEDED( m_pExplorerBrowser->Initialize( m_hWnd, &browserRect, &settings ) ) )
+		CComObject< CExplorerBrowserEvents >* pExplorerEvents;
+		if ( SUCCEEDED( CComObject< CExplorerBrowserEvents >::CreateInstance( &pExplorerEvents ) ) )
 		{
-			CComObject< CExplorerBrowserEvents >* pExplorerEvents;
-			if ( SUCCEEDED( CComObject< CExplorerBrowserEvents >::CreateInstance( &pExplorerEvents ) ) )
-			{
-				pExplorerEvents->AddRef();
+			pExplorerEvents->AddRef();
 
-				pExplorerEvents->SetView( this );
-				m_pExplorerBrowser->Advise( pExplorerEvents, &m_dwAdviseCookie );
+			pExplorerEvents->SetView( this );
+			m_pBrowser->Get()->Advise( pExplorerEvents, &m_dwAdviseCookie );
 
-				pExplorerEvents->Release();
-				return 0;
-			}
+			pExplorerEvents->Release();
+			return 0;
 		}
 	}
 
@@ -231,13 +131,15 @@ int CBrowserView::OnCreate( CREATESTRUCT* pCreateStruct )
 
 void CBrowserView::OnDestroy( void )
 {
-	AfxGetApp()->WriteProfileInt( reg::section_view, reg::entry_viewMode, shell::GetFolderViewMode( m_pExplorerBrowser ) );
+	if ( m_pBrowser.get() != NULL )
+		AfxGetApp()->WriteProfileInt( reg::section_view, reg::entry_viewMode,  m_pBrowser->GetFilePaneViewMode() );
+
 	CView::OnDestroy();
 
-	if( m_dwAdviseCookie )
-		m_pExplorerBrowser->Unadvise( m_dwAdviseCookie );
+	if ( m_dwAdviseCookie )
+		m_pBrowser->Get()->Unadvise( m_dwAdviseCookie );
 
-	m_pExplorerBrowser->Destroy();
+	m_pBrowser.reset();
 }
 
 void CBrowserView::OnInitialUpdate( void )
@@ -248,17 +150,18 @@ void CBrowserView::OnInitialUpdate( void )
 	TCHAR currDirPath[ _MAX_PATH ] = { _T('\0') };
 
 	if ( GetCurrentDirectory( _MAX_PATH, currDirPath ) )
-		if ( shell::NavigateTo( currDirPath, m_pExplorerBrowser ) )
+		if ( m_pBrowser->NavigateTo( currDirPath ) )
 			return;
 
 	OnBrowseToProfileFolder();
 }
 
-void CBrowserView::OnSize( UINT nType, int cx, int cy )
+void CBrowserView::OnSize( UINT sizeType, int cx, int cy )
 {
-	CView::OnSize(nType, cx, cy);
+	CView::OnSize( sizeType, cx, cy );
 
-	m_pExplorerBrowser->SetRect(NULL, CRect(0, 0, cx, cy));
+	if ( sizeType != SIZE_MINIMIZED )
+		m_pBrowser->Get()->SetRect( NULL, CRect( 0, 0, cx, cy ) );
 }
 
 void CBrowserView::OnDraw( CDC* pDC )
@@ -266,17 +169,9 @@ void CBrowserView::OnDraw( CDC* pDC )
 	pDC;
 }
 
-BOOL CBrowserView::OnPreparePrinting( CPrintInfo* pInfo )
+void CBrowserView::OnFileRename( void )
 {
-	return DoPreparePrinting( pInfo );
-}
-
-void CBrowserView::OnBeginPrinting( CDC* /*pDC*/, CPrintInfo* /*pInfo*/ )
-{
-}
-
-void CBrowserView::OnEndPrinting( CDC* /*pDC*/, CPrintInfo* /*pInfo*/ )
-{
+	m_pBrowser->RenameFile();
 }
 
 void CBrowserView::OnBrowseToProfileFolder( void )
@@ -285,7 +180,7 @@ void CBrowserView::OnBrowseToProfileFolder( void )
 	LPITEMIDLIST pidlBrowse = NULL;
 	if ( SUCCEEDED( hr = SHGetFolderLocation( NULL, CSIDL_PROFILE, NULL, 0, &pidlBrowse ) ) )
 	{
-		if ( FAILED( hr = m_pExplorerBrowser->BrowseToIDList( pidlBrowse, 0 ) ) )
+		if ( FAILED( hr = m_pBrowser->Get()->BrowseToIDList( pidlBrowse, 0 ) ) )
 			TRACE( "BrowseToIDList Failed! hr = %d\n", hr );
 
 		ILFree( pidlBrowse );
@@ -299,42 +194,46 @@ void CBrowserView::OnBrowseToProfileFolder( void )
 
 void CBrowserView::OnViewMode( UINT cmdId )
 {
-	FOLDERVIEWMODE folderViewMode = shell::CmdToViewMode( cmdId );
-	FOLDERSETTINGS settings = { folderViewMode, 0 };
-
-	HRESULT hr = m_pExplorerBrowser->SetFolderSettings( &settings );
-	if ( FAILED( hr ) )
+	if ( !m_pBrowser->SetFilePaneViewMode( CmdToViewMode( cmdId ) ) )
 		AfxMessageBox( _T("SetFolderSettings() failed!") );
 }
 
 void CBrowserView::OnUpdateViewMode( CCmdUI* pCmdUI )
 {
 	UINT folderFlags;
-	FOLDERVIEWMODE selViewMode = shell::GetFolderViewMode( m_pExplorerBrowser, &folderFlags );
+	FOLDERVIEWMODE selViewMode = m_pBrowser->GetFilePaneViewMode( &folderFlags );
 
-	ui::SetRadio( pCmdUI, selViewMode == shell::CmdToViewMode( pCmdUI->m_nID ) );
+	ui::SetRadio( pCmdUI, selViewMode == CmdToViewMode( pCmdUI->m_nID ) );
 }
 
 void CBrowserView::OnViewBack( void )
 {
-	m_pExplorerBrowser->BrowseToIDList( NULL, SBSP_NAVIGATEBACK );
+	m_pBrowser->NavigateBack();
 }
 
 void CBrowserView::OnViewForward( void )
 {
-	m_pExplorerBrowser->BrowseToIDList( NULL, SBSP_NAVIGATEFORWARD );
+	m_pBrowser->NavigateForward();
 }
 
 void CBrowserView::OnViewFrames( void )
 {
 	m_showFrames = !m_showFrames;
-	m_pExplorerBrowser->SetOptions( m_showFrames ? EBO_SHOWFRAMES : EBO_NONE );
+	m_pBrowser->Get()->SetOptions( m_showFrames ? EBO_SHOWFRAMES : EBO_NONE );
+}
+
+void CBrowserView::OnUpdateViewFrames( CCmdUI* pCmdUI )
+{
+	EXPLORER_BROWSER_OPTIONS options = EBO_NONE;
+    m_pBrowser->Get()->GetOptions( &options );
+
+	pCmdUI->SetCheck( HasFlag( options, EBO_SHOWFRAMES ) );
 }
 
 void CBrowserView::OnViewShowselection( void )
 {
 	std::vector< std::tstring > selPaths;
-	shell::QuerySelectedFiles( selPaths, m_pExplorerBrowser );
+	m_pBrowser->QuerySelectedFiles( selPaths );
 
 	CString message;
 	message.Format( _T("Selected %d files:\n%s"), selPaths.size(), str::Join( selPaths, _T("\n") ).c_str() );

@@ -61,7 +61,7 @@ BOOL CApplication::InitInstance( void )
 
 	// create main MDI Frame window
 	CMainFrame* pMainFrame = new CMainFrame;
-	if (!pMainFrame || !pMainFrame->LoadFrame(IDR_MAINFRAME))
+	if ( NULL == pMainFrame || !pMainFrame->LoadFrame( IDR_MAINFRAME ) )
 	{
 		delete pMainFrame;
 		return FALSE;
@@ -122,13 +122,37 @@ BOOL CApplication::ExitInstance( void )
 // command handlers
 
 BEGIN_MESSAGE_MAP( CApplication, CWinApp )
+	ON_COMMAND( ID_ESCAPE_EXIT, OnEscapeExit )
+	ON_COMMAND( ID_APP_ABOUT, OnAppAbout )
 	ON_COMMAND( ID_FILE_NEW, OnFileNew )
 	ON_COMMAND( ID_FILE_PRINT_SETUP, OnFilePrintSetup )
 	ON_COMMAND( ID_VIEW_EXPLORER_SHOW_FRAME, OnToggleShowFrames )
 	ON_UPDATE_COMMAND_UI( ID_VIEW_EXPLORER_SHOW_FRAME, OnUpdateShowFrames )
 	ON_COMMAND( ID_FILE_NEW, OnFileNew )
-	ON_COMMAND( ID_APP_ABOUT, OnAppAbout )
 END_MESSAGE_MAP()
+
+void CApplication::OnEscapeExit( void )
+{
+	if ( HWND hFocusWnd = ::GetFocus() )
+	{
+		TCHAR className[ 256 ] = _T("");
+		::GetClassName( hFocusWnd, className, _countof( className ) );
+
+		if ( 0 == _tcsicmp( className, _T("Edit") ) )
+		{
+			::SetFocus( ::GetParent( hFocusWnd ) );		// exit inline edit
+			return;										// avoid closing the app
+		}
+	}
+
+	OnAppExit();
+}
+
+void CApplication::OnAppAbout( void )
+{
+	CDialog dlg( IDD_ABOUTBOX );
+	dlg.DoModal();
+}
 
 void CApplication::OnToggleShowFrames( void )
 {
@@ -138,10 +162,4 @@ void CApplication::OnToggleShowFrames( void )
 void CApplication::OnUpdateShowFrames( CCmdUI* pCmdUI )
 {
 	pCmdUI->SetCheck( m_showFrames );
-}
-
-void CApplication::OnAppAbout( void )
-{
-	CDialog dlg( IDD_ABOUTBOX );
-	dlg.DoModal();
 }

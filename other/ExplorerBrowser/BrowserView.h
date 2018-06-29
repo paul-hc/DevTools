@@ -1,13 +1,6 @@
 #pragma once
 
-
-namespace shell
-{
-	bool NavigateTo( const TCHAR path[], IExplorerBrowser* pExplorerBrowser );
-	void QuerySelectedFiles( std::vector< std::tstring >& rSelPaths, IExplorerBrowser* pExplorerBrowser );
-	FOLDERVIEWMODE GetFolderViewMode( IExplorerBrowser* pExplorerBrowser, UINT* pFolderFlags = NULL );
-	std::tstring GetFolderDisplayName( PCIDLIST_ABSOLUTE pidlFolder );
-}
+#include "ExplorerBrowser.h"
 
 
 class CBrowserDoc;
@@ -16,8 +9,8 @@ class CBrowserDoc;
 class CBrowserView : public CView
 {
 	DECLARE_DYNCREATE( CBrowserView )
-protected: // create from serialization only
-	CBrowserView();
+protected:
+	CBrowserView( void );
 	virtual ~CBrowserView();
 public:
 	CBrowserDoc* GetDocument( void ) const { return reinterpret_cast< CBrowserDoc* >( m_pDocument ); }
@@ -28,9 +21,11 @@ private:
 	void OnViewCreated( IShellView* psv );
 	void OnNavigationFailed( PCIDLIST_ABSOLUTE pidlFolder );
 
+	static FOLDERVIEWMODE CmdToViewMode( UINT cmdId );
+
 	friend class CExplorerBrowserEvents;
 private:
-	CComPtr< IExplorerBrowser > m_pExplorerBrowser;
+	std::auto_ptr< shell::CExplorerBrowser > m_pBrowser;
 	bool m_showFrames;
 	DWORD m_dwAdviseCookie;
 protected:
@@ -40,20 +35,19 @@ protected:
 	virtual void OnDraw( CDC* pDC );
 	protected:
 	virtual BOOL PreCreateWindow( CREATESTRUCT& cs );
-	virtual BOOL OnPreparePrinting( CPrintInfo* pInfo );
-	virtual void OnBeginPrinting( CDC* pDC, CPrintInfo* pInfo );
-	virtual void OnEndPrinting( CDC* pDC, CPrintInfo* pInfo );
 protected:
 	afx_msg int OnCreate( CREATESTRUCT* pCreateStruct );
 	afx_msg void OnDestroy( void );
-	afx_msg void OnSize( UINT nType, int cx, int cy );
-	afx_msg void OnBrowseToProfileFolder();
+	afx_msg void OnSize( UINT sizeType, int cx, int cy );
+	afx_msg void OnFileRename( void );
+	afx_msg void OnBrowseToProfileFolder( void );
 	afx_msg void OnViewMode( UINT cmdId );
 	afx_msg void OnUpdateViewMode( CCmdUI* pCmdUI );
-	afx_msg void OnViewBack();
-	afx_msg void OnViewForward();
-	afx_msg void OnViewFrames();
-	afx_msg void OnViewShowselection();
+	afx_msg void OnViewBack( void );
+	afx_msg void OnViewForward( void );
+	afx_msg void OnViewFrames( void );
+	afx_msg void OnUpdateViewFrames( CCmdUI* pCmdUI );
+	afx_msg void OnViewShowselection( void );
 
 	DECLARE_MESSAGE_MAP()
 };
@@ -63,9 +57,7 @@ class CExplorerBrowserEvents : public CComObjectRootEx< CComSingleThreadModel >
 							 , public IExplorerBrowserEvents
 {
 public:
-	CExplorerBrowserEvents( void )
-	{
-	}
+	CExplorerBrowserEvents( void ) {}
 
 	void SetView( CBrowserView* pView ) { m_pView = pView; }
 private:
@@ -77,7 +69,7 @@ public:
 public:
 	STDMETHOD( OnNavigationPending )( PCIDLIST_ABSOLUTE pidlFolder )
 	{
-		return m_pView ? m_pView->OnNavigationPending( pidlFolder ) : E_FAIL;
+		return m_pView != NULL ? m_pView->OnNavigationPending( pidlFolder ) : E_FAIL;
 	}
 
 	STDMETHOD( OnViewCreated )( IShellView* psv )
