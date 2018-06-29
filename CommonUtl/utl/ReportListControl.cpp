@@ -183,6 +183,13 @@ void CReportListControl::SetCustomImageDraw( ui::ICustomImageDraw* pCustomImageD
 		SetImageList( m_pImageList, LVSIL_SMALL );
 		SetImageList( m_pLargeImageList, LVSIL_NORMAL );
 		UpdateCustomImagerBoundsSize();
+
+		if ( NULL == m_pCustomImager.get() )
+		{	// hack: force the list to remove icon area for all items
+			ModifyStyle( LVS_TYPEMASK, LVS_ICON );
+			ChangeListViewMode( LV_VIEW_DETAILS );			// switch to report mode since other modes don't make sense without icons
+		}
+
 		Invalidate();
 	}
 }
@@ -1075,7 +1082,6 @@ void CReportListControl::SetSubItemText( int index, int subItem, const std::tstr
 
 void CReportListControl::SetSubItemImage( int index, int subItem, int imageIndex )
 {
-	ASSERT( subItem > 0 );
 	VERIFY( SetItem( index, subItem, LVIF_IMAGE, NULL, imageIndex, 0, 0, 0 ) );
 }
 
@@ -1971,7 +1977,7 @@ BOOL CReportListControl::OnNmCustomDraw_Reflect( NMHDR* pNmHdr, LRESULT* pResult
 
 		case CDDS_ITEMPOSTPAINT:
 			if ( !draw.m_isReportMode )
-				draw.DrawCellTextDiffs();				// draw text diffs since there is no CDDS_SUBITEM notification
+				draw.DrawCellTextDiffs();						// draw text diffs since there is no CDDS_SUBITEM notification
 
 			if ( m_pCustomImager.get() != NULL )
 				if ( IsItemVisible( draw.m_index ) )

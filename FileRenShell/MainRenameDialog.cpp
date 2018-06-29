@@ -101,9 +101,7 @@ CMainRenameDialog::CMainRenameDialog( CFileModel* pFileModel, CWnd* pParent )
 	m_fileListCtrl.SetSection( m_regSection + _T("\\List") );
 	m_fileListCtrl.SetUseAlternateRowColoring();
 	m_fileListCtrl.SetTextEffectCallback( this );
-	m_fileListCtrl.SetCustomImageDraw( app::GetThumbnailer(),
-		CIconId::GetStdSize( CGeneralOptions::Instance().m_smallIconStdSize ),
-		CIconId::GetStdSize( CGeneralOptions::Instance().m_largeIconStdSize ) );
+	CGeneralOptions::Instance().ApplyToListCtrl( &m_fileListCtrl );
 
 	m_changeCaseButton.SetSelValue( AfxGetApp()->GetProfileInt( reg::section_mainDialog, reg::entry_changeCase, ExtLowerCase ) );
 
@@ -230,7 +228,7 @@ void CMainRenameDialog::OnUpdate( utl::ISubject* pSubject, utl::IMessage* pMessa
 			SetupFileListView();
 		}
 		else if ( &CGeneralOptions::Instance() == pSubject )
-			m_fileListCtrl.SetCustomImageSizes( CIconId::GetStdSize( CGeneralOptions::Instance().m_smallIconStdSize ), CIconId::GetStdSize( CGeneralOptions::Instance().m_largeIconStdSize ) );
+			CGeneralOptions::Instance().ApplyToListCtrl( &m_fileListCtrl );
 }
 
 void CMainRenameDialog::ClearFileErrors( void )
@@ -445,7 +443,7 @@ BEGIN_MESSAGE_MAP( CMainRenameDialog, CFileEditorBaseDialog )
 	ON_BN_CLICKED( IDC_PASTE_FILES_BUTTON, OnBnClicked_PasteDestFiles )
 	ON_BN_CLICKED( IDC_CLEAR_FILES_BUTTON, OnBnClicked_ClearDestFiles )
 	ON_BN_CLICKED( IDC_CAPITALIZE_BUTTON, OnBnClicked_CapitalizeDestFiles )
-	ON_SBN_RIGHTCLICKED( IDC_CAPITALIZE_BUTTON, OnBnClicked_CapitalizeOptions )
+	ON_SBN_RIGHTCLICKED( IDC_CAPITALIZE_BUTTON, OnSbnRightClicked_CapitalizeOptions )
 	ON_BN_CLICKED( IDC_CHANGE_CASE_BUTTON, OnBnClicked_ChangeCase )
 	ON_BN_CLICKED( IDC_REPLACE_FILES_BUTTON, OnBnClicked_ReplaceDestFiles )
 	ON_BN_CLICKED( IDC_REPLACE_DELIMS_BUTTON, OnBnClicked_ReplaceAllDelimitersDestFiles )
@@ -643,7 +641,7 @@ void CMainRenameDialog::OnBnClicked_CapitalizeDestFiles( void )
 	PostMakeDest();
 }
 
-void CMainRenameDialog::OnBnClicked_CapitalizeOptions( void )
+void CMainRenameDialog::OnSbnRightClicked_CapitalizeOptions( void )
 {
 	COptionsSheet sheet( this, COptionsSheet::CapitalizePage );
 	sheet.DoModal();

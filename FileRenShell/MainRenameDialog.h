@@ -107,7 +107,7 @@ protected:
 	afx_msg void OnBnClicked_PasteDestFiles( void );
 	afx_msg void OnBnClicked_ClearDestFiles( void );
 	afx_msg void OnBnClicked_CapitalizeDestFiles( void );
-	afx_msg void OnBnClicked_CapitalizeOptions( void );
+	afx_msg void OnSbnRightClicked_CapitalizeOptions( void );
 	afx_msg void OnBnClicked_ChangeCase( void );
 	afx_msg void OnBnClicked_ReplaceDestFiles( void );
 	afx_msg void OnBnClicked_ReplaceAllDelimitersDestFiles( void );

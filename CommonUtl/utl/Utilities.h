@@ -391,7 +391,19 @@ namespace ui
 			ASSERT( DialogOutput == pDX->m_bSaveAndValidate );
 			ui::WriteComboItems( rCombo, enumTags.GetUiTags() );
 		}
-		DDX_EnumSelValue( pDX, comboId, rValue );
+
+		// offset by enum base value
+		if ( DialogOutput == pDX->m_bSaveAndValidate )
+		{
+			int selIndex = enumTags.GetTagIndex( rValue );
+			DDX_CBIndex( pDX, comboId, selIndex );
+		}
+		else
+		{
+			int selIndex;
+			DDX_CBIndex( pDX, comboId, selIndex );
+			rValue = enumTags.GetSelValue< EnumType >( selIndex );
+		}
 	}
 
 	template< typename IntType >

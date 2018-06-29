@@ -59,41 +59,39 @@ namespace ui
 
 		return UnknownImageFormat;
 	}
-}
 
 
-// CIconId implementation
-
-CSize CIconId::GetStdSize( IconStdSize iconStdSize )
-{
-	// Note: Icon standard size must be invariant to Windows scaling, so we mustn't use GetSystemMetrics(SM_CXSMICON) which varies with scaling.
-	switch ( iconStdSize )
+	int GetIconDimension( IconStdSize iconStdSize )
 	{
-		default:			ASSERT( false );
-		case DefaultSize:	return CSize( 0, 0 );		// load with existing icon size (cound be different than standard sizes)
-		case SmallIcon:		return CSize( 16, 16 );		// invariant to scaling; old CSize( GetSystemMetrics( SM_CXSMICON ), GetSystemMetrics( SM_CYSMICON ) )
-		case MediumIcon:	return CSize( 24, 24 );
-		case LargeIcon:		return CSize( 32, 32 );		// invariant to scaling; old CSize( GetSystemMetrics( SM_CXICON ), GetSystemMetrics( SM_CYICON ) )
-		case HugeIcon_48:	return CSize( 48, 48 );
-		case HugeIcon_96:	return CSize( 96, 96 );
-		case HugeIcon_128:	return CSize( 128, 128 );
-		case HugeIcon_256:	return CSize( 256, 256 );
+		// note: icon standard size must be invariant to Windows scaling, so we mustn't use GetSystemMetrics(SM_CXSMICON) which varies with scaling
+		switch ( iconStdSize )
+		{
+			default: ASSERT( false );
+			case DefaultSize:	return 0;		// load with existing icon size (cound be different than standard sizes)
+			case SmallIcon:		return 16;
+			case MediumIcon:	return 24;
+			case LargeIcon:		return 32;
+			case HugeIcon_48:	return 48;
+			case HugeIcon_96:	return 96;
+			case HugeIcon_128:	return 128;
+			case HugeIcon_256:	return 256;
+		}
 	}
-}
 
-IconStdSize CIconId::FindStdSize( const CSize& iconSize, IconStdSize defaultStdSize /*= DefaultSize*/ )
-{
-	switch ( iconSize.cx )
+	IconStdSize LookupIconStdSize( int iconDimension, IconStdSize defaultStdSize /*= DefaultSize*/ )
 	{
-		case 16:	return SmallIcon;
-		case 24:	return MediumIcon;
-		case 32:	return LargeIcon;
-		case 48:	return HugeIcon_48;
-		case 96:	return HugeIcon_96;
-		case 128:	return HugeIcon_128;
-		case 256:	return HugeIcon_256;
+		switch ( iconDimension )
+		{
+			case 16:	return SmallIcon;
+			case 24:	return MediumIcon;
+			case 32:	return LargeIcon;
+			case 48:	return HugeIcon_48;
+			case 96:	return HugeIcon_96;
+			case 128:	return HugeIcon_128;
+			case 256:	return HugeIcon_256;
+		}
+		return defaultStdSize;				// if DefaultSize: use custom icon size
 	}
-	return defaultStdSize;				// if DefaultSize: use custom icon size
 }
 
 

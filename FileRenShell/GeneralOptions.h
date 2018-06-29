@@ -3,7 +3,9 @@
 #pragma once
 
 #include "utl/Subject.h"
-#include "utl/Image_fwd.h"
+
+
+class CReportListControl;
 
 
 struct CGeneralOptions : public CSubject
@@ -21,9 +23,11 @@ struct CGeneralOptions : public CSubject
 
 	bool operator==( const CGeneralOptions& right ) const;
 	bool operator!=( const CGeneralOptions& right ) const { return !operator==( right ); }
+
+	void ApplyToListCtrl( CReportListControl* pListCtrl ) const;
 public:
-	IconStdSize m_smallIconStdSize;
-	IconStdSize m_largeIconStdSize;
+	bool m_useListThumbs;
+	int m_smallIconDim, m_largeIconDim;
 };
 
 

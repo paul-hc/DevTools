@@ -36,7 +36,7 @@ namespace cap
 
 	// CWordList implementation
 
-	const TCHAR CWordList::m_listSep[] = _T(",");
+	const TCHAR CWordList::s_listSep[] = _T(",");
 
 
 	// CWordCaseRule implementation
@@ -123,6 +123,20 @@ void CCapitalizeOptions::SaveToRegistry( void ) const
 	m_conjunctions.RegSave( reg::section, reg::entry_conjunctions );
 	m_prepositions.RegSave( reg::section, reg::entry_prepositions );
 	pApp->WriteProfileInt( reg::section, reg::entry_skipNumericPrefix, m_skipNumericPrefix );
+}
+
+bool CCapitalizeOptions::operator==( const CCapitalizeOptions& right ) const
+{
+	return
+		m_wordBreakChars == right.m_wordBreakChars &&
+		m_wordBreakPrefixes == right.m_wordBreakPrefixes &&
+		m_alwaysPreserveWords == right.m_alwaysPreserveWords &&
+		m_alwaysUppercaseWords == right.m_alwaysUppercaseWords &&
+		m_alwaysLowercaseWords == right.m_alwaysLowercaseWords &&
+		m_articles == right.m_articles &&
+		m_conjunctions == right.m_conjunctions &&
+		m_prepositions == right.m_prepositions &&
+		m_skipNumericPrefix == right.m_skipNumericPrefix;
 }
 
 

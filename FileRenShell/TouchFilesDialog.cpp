@@ -72,9 +72,7 @@ CTouchFilesDialog::CTouchFilesDialog( CFileModel* pFileModel, CWnd* pParent )
 	m_fileListCtrl.SetUseAlternateRowColoring();
 	m_fileListCtrl.SetTextEffectCallback( this );
 	m_fileListCtrl.SetPopupMenu( CReportListControl::OnSelection, NULL );				// let us track a custom menu
-	m_fileListCtrl.SetCustomImageDraw( app::GetThumbnailer(),
-		CIconId::GetStdSize( CGeneralOptions::Instance().m_smallIconStdSize ),
-		CIconId::GetStdSize( CGeneralOptions::Instance().m_largeIconStdSize ) );
+	CGeneralOptions::Instance().ApplyToListCtrl( &m_fileListCtrl );
 
 	m_fileListCtrl.AddRecordCompare( pred::NewComparator( pred::CompareCode() ) );		// default row item comparator
 	m_fileListCtrl.AddColumnCompare( PathName, pred::NewComparator( pred::CompareDisplayCode() ) );
@@ -310,7 +308,7 @@ void CTouchFilesDialog::OnUpdate( utl::ISubject* pSubject, utl::IMessage* pMessa
 		if ( m_pFileModel == pSubject )
 			SetupDialog();
 		else if ( &CGeneralOptions::Instance() == pSubject )
-			m_fileListCtrl.SetCustomImageSizes( CIconId::GetStdSize( CGeneralOptions::Instance().m_smallIconStdSize ), CIconId::GetStdSize( CGeneralOptions::Instance().m_largeIconStdSize ) );
+			CGeneralOptions::Instance().ApplyToListCtrl( &m_fileListCtrl );
 }
 
 void CTouchFilesDialog::ClearFileErrors( void )

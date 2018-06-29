@@ -583,7 +583,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\OptionsSheet.cpp"
+				RelativePath=".\OptionsPages.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\OptionsPages.h"
 				>
 			</File>
 			<File

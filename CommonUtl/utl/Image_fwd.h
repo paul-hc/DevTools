@@ -72,6 +72,13 @@ enum IconStdSize
 };
 
 
+namespace ui
+{
+	int GetIconDimension( IconStdSize iconStdSize );
+	IconStdSize LookupIconStdSize( int iconDimension, IconStdSize defaultStdSize = DefaultSize );
+}
+
+
 struct CIconId
 {
 	CIconId( UINT id = 0, IconStdSize stdSize = SmallIcon ) : m_id( id ), m_stdSize( stdSize ) {}
@@ -79,8 +86,9 @@ struct CIconId
 	bool IsValid( void ) const { return m_id != 0; }
 
 	CSize GetStdSize( void ) const { return GetStdSize( m_stdSize ); }
-	static CSize GetStdSize( IconStdSize iconStdSize );
-	static IconStdSize FindStdSize( const CSize& iconSize, IconStdSize defaultStdSize = DefaultSize );
+
+	static CSize GetStdSize( IconStdSize iconStdSize ) { int iconDimension = ui::GetIconDimension( iconStdSize ); return CSize( iconDimension, iconDimension ); }
+	static IconStdSize FindStdSize( const CSize& iconSize, IconStdSize defaultStdSize = DefaultSize ) { return ui::LookupIconStdSize( iconSize.cx, defaultStdSize ); }
 public:
 	UINT m_id;
 	IconStdSize m_stdSize;

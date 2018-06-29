@@ -67,6 +67,14 @@ bool CLayoutPropertySheet::HasControlLayout( void ) const
 	return m_pLayoutEngine->HasCtrlLayout();
 }
 
+void CLayoutPropertySheet::BuildPropPageArray( void )
+{
+	if ( !m_resizable )
+		m_resizable = AnyPageResizable();
+
+	__super::BuildPropPageArray();
+}
+
 void CLayoutPropertySheet::LoadFromRegistry( void )
 {
 	CLayoutBasePropertySheet::LoadFromRegistry();
@@ -272,9 +280,6 @@ void CLayoutPropertySheet::OnIdleUpdateControls( void )
 
 BOOL CLayoutPropertySheet::Create( CWnd* pParent /*= NULL*/, DWORD style /*= UINT_MAX*/, DWORD styleEx /*= 0*/ )
 {
-	if ( !m_resizable )
-		m_resizable = AnyPageResizable();
-
 	if ( UINT_MAX == style )
 	{
 		style = WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU | DS_3DLOOK | DS_CONTEXTHELP | DS_SETFONT;
@@ -359,10 +364,6 @@ BOOL CLayoutPropertySheet::OnInitDialog( void )
 
 BOOL CLayoutPropertySheet::OnNcCreate( CREATESTRUCT* pCreate )
 {
-	// for modal sheets
-	if ( !m_resizable )
-		m_resizable = AnyPageResizable();
-
 	if ( m_resizable )
 		if ( !HasFlag( pCreate->style, WS_THICKFRAME ) )
 		{

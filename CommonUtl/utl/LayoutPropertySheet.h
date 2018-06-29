@@ -59,6 +59,7 @@ public:
 private:
 	// generated stuff
 	public:
+	virtual void BuildPropPageArray( void );
 	virtual BOOL Create( CWnd* pParent = NULL, DWORD style = UINT_MAX, DWORD styleEx = 0 ); // for modeless creation
 	virtual void PostNcDestroy( void );
 	virtual BOOL PreTranslateMessage( MSG* pMsg );

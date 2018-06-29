@@ -8,7 +8,7 @@
 #define IDR_IMAGE_STRIP                 104
 #define IDD_TOUCH_FILES_DIALOG          104
 #define IDR_CONTEXT_MENU                105
-#define IDD_CAPITALIZE_OPTIONS_PAGE     105
+#define IDD_OPTIONS_CAPITALIZE_PAGE     105
 #define IDI_DETAILS                     109
 #define IDD_OPTIONS_GENERAL_PAGE        110
 #define IDC_FILE_RENAME_LIST            1000
@@ -67,6 +67,7 @@
 #define IDC_ATTRIB_VOLUME_CHECK         1053
 #define IDC_SMALL_ICON_SIZE_COMBO       1054
 #define IDC_LARGE_ICON_SIZE_COMBO       1055
+#define IDC_USE_LIST_THUMBS_CHECK       1056
 #define IDS_INVALID_FORMAT              5000
 #define IDS_NO_DELIMITER_SET            5001
 #define IDS_CHANGE_CASE_TAGS            5003
@@ -122,7 +123,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        111
 #define _APS_NEXT_COMMAND_VALUE         32816
-#define _APS_NEXT_CONTROL_VALUE         1056
+#define _APS_NEXT_CONTROL_VALUE         1057
 #define _APS_NEXT_SYMED_VALUE           5004
 #endif
 #endif

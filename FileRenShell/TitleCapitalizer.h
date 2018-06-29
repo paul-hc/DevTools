@@ -19,8 +19,8 @@ namespace cap
 	{
 		CWordList( const TCHAR* pWords ) { SetFlatList( pWords ); }
 
-		std::tstring GetFlatList( void ) const { return str::Join( m_words, m_listSep ); }
-		void SetFlatList( const TCHAR* pWords ) { str::Split( m_words, pWords, m_listSep ); }
+		std::tstring GetFlatList( void ) const { return str::Join( m_words, s_listSep ); }
+		void SetFlatList( const TCHAR* pWords ) { str::Split( m_words, pWords, s_listSep ); }
 
 		template< typename TokenIterator >
 		size_t FindMatch( TokenIterator& rIter ) const
@@ -33,9 +33,11 @@ namespace cap
 			ASSERT( pos < m_words.size() );
 			rToken = m_words[ pos ];
 		}
+
+		bool operator==( const CWordList& right ) const { return m_words == right.m_words; }
 	public:
 		std::vector< std::tstring > m_words;
-		static const TCHAR m_listSep[];
+		static const TCHAR s_listSep[];
 	};
 
 
@@ -63,9 +65,10 @@ namespace cap
 				case LowerCase: str::ToLower( rToken, loc ); break;
 			}
 		}
+
+		bool operator==( const CWordCaseRule& right ) const { return CWordList::operator==( right ) && m_caseModify == right.m_caseModify; }
 	public:
 		CaseModify m_caseModify;
-		static const TCHAR m_valueSep[];
 	};
 }
 
@@ -78,6 +81,9 @@ struct CCapitalizeOptions
 
 	void LoadFromRegistry( void );
 	void SaveToRegistry( void ) const;
+
+	bool operator==( const CCapitalizeOptions& right ) const;
+	bool operator!=( const CCapitalizeOptions& right ) const { return !operator==( right ); }
 public:
 	std::tstring m_wordBreakChars;
 	cap::CWordList m_wordBreakPrefixes;
