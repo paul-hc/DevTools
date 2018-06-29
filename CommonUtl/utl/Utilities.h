@@ -176,6 +176,8 @@ namespace ui
 	void MoveControlOver( HWND hDlg, UINT sourceCtrlId, UINT destCtrlId, bool hideDestCtrl = true );
 	CWnd* AlignToPlaceholder( int placeholderId, CWnd& rControl,
 							  const CSize* pCustomSize = NULL, int alignment = NoAlign, CSize addBottomRight = CSize( 0, 0 ) );
+
+	void RecalculateScrollbars( HWND hWnd );				// recalculates scrollbars and internal layout by forcing a resize
 }
 
 

@@ -176,11 +176,10 @@ void CMainRenameDialog::SwitchMode( Mode mode )
 
 void CMainRenameDialog::PostMakeDest( bool silent /*= false*/ )
 {
+	// note: the list is setup on OnUpdate()
+
 	if ( !silent )
 		GotoDlgCtrl( GetDlgItem( IDOK ) );
-
-// list is setup on OnUpdate()
-//	SetupFileListView();								// fill in and select the found files list
 
 	ASSERT_PTR( m_pRenSvc.get() );
 	if ( m_pRenSvc->CheckPathCollisions( this ) )		// stores erros in m_errorItems

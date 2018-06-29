@@ -190,7 +190,7 @@ void CReportListControl::SetCustomImageDraw( ui::ICustomImageDraw* pCustomImageD
 			ChangeListViewMode( LV_VIEW_DETAILS );			// switch to report mode since other modes don't make sense without icons
 		}
 
-		Invalidate();
+		ui::RecalculateScrollbars( m_hWnd );
 	}
 }
 
