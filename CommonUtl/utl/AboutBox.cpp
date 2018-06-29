@@ -88,13 +88,17 @@ namespace hlp
 
 namespace layout
 {
+	enum { CommentsPct = 75, ListPct = 100 - CommentsPct };
+
 	static const CLayoutStyle styles[] =
 	{
 		{ IDC_ABOUT_NAME_VERSION_STATIC, SizeX },
 		{ IDC_ABOUT_COPYRIGHT_STATIC, SizeX },
 		{ IDC_ABOUT_WRITTEN_BY_STATIC, SizeX },
 		{ IDC_ABOUT_EMAIL_STATIC, SizeX },
-		{ IDC_ABOUT_BUILD_INFO_LIST, Size },
+		{ IDC_ABOUT_COMMENTS_EDIT, SizeX | pctSizeY( CommentsPct ) },
+		{ IDC_ABOUT_BUILD_INFO_LABEL, pctMoveY( CommentsPct ) },
+		{ IDC_ABOUT_BUILD_INFO_LIST, pctMoveY( CommentsPct ) | SizeX | pctSizeY( ListPct ) },
 		{ IDC_ABOUT_EXPLORE_EXECUTABLE, MoveY },
 		{ IDOK, Move }
 	};
@@ -111,7 +115,7 @@ CAboutBox::CAboutBox( CWnd* pParent )
 {
 	m_regSection = _T("utl\\About");
 	RegisterCtrlLayout( layout::styles, COUNT_OF( layout::styles ) );
-	GetLayoutEngine().MaxClientSize() = CSize( 600, 360 );
+	GetLayoutEngine().MaxClientSize() = CSize( 600, 700 );
 
 	std::vector< std::tstring > columnSpecs;
 	str::Split( columnSpecs, _T("Property=85|Value=-1"), _T("|") );
@@ -186,6 +190,8 @@ void CAboutBox::DoDataExchange( CDataExchange* pDX )
 		static const UINT fieldIds[] = { IDC_ABOUT_NAME_VERSION_STATIC, IDC_ABOUT_COPYRIGHT_STATIC, IDC_ABOUT_WRITTEN_BY_STATIC, IDC_ABOUT_EMAIL_STATIC };
 		for ( unsigned int i = 0; i != COUNT_OF( fieldIds ); ++i )
 			ui::SetDlgItemText( this, fieldIds[ i ], version.ExpandValues( ui::GetDlgItemText( this, fieldIds[ i ] ).c_str() ) );
+
+		ui::SetDlgItemText( this, IDC_ABOUT_COMMENTS_EDIT, version.ExpandValues( _T("[Comments]") ) );
 	}
 
 	CLayoutDialog::DoDataExchange( pDX );

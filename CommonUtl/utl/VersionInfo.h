@@ -16,6 +16,7 @@ public:
 	std::tstring ExpandValues( const TCHAR* pSource ) const;
 	std::tstring FormatProductVersion( void ) const;
 	std::tstring FormatFileVersion( void ) const;
+	std::tstring FormatComments( void ) const;
 
 	std::tstring GetValue( const TCHAR* pKeyName ) const;
 	std::tstring FormatValue( const std::tstring& keyName ) const;
@@ -47,6 +48,8 @@ private:
 	std::vector< BYTE > m_versionInfo;		// a copy of the resource, required by VerQueryValue()
 	VS_FIXEDFILEINFO m_fileInfo;
 	CLanguage m_translation;
+public:
+	static const std::tstring s_bulletPrefix;
 };
 
 

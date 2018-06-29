@@ -11,6 +11,8 @@
 #endif
 
 
+const std::tstring CVersionInfo::s_bulletPrefix = _T("\x25CF ");
+
 CVersionInfo::CVersionInfo( UINT versionInfoId /*= VS_VERSION_INFO*/ )
 {
 	ZeroMemory( &m_fileInfo, sizeof( m_fileInfo ) );
@@ -69,6 +71,8 @@ std::tstring CVersionInfo::FormatValue( const std::tstring& keyName ) const
 		return FormatProductVersion();
 	else if ( keyName == _T("FileVersion") )
 		return FormatFileVersion();
+	else if ( keyName == _T("Comments") )
+		return FormatComments();
 
 	return GetValue( keyName.c_str() );
 }
@@ -93,6 +97,22 @@ std::tstring CVersionInfo::FormatFileVersion( void ) const
 	return IsValid()
 		? FormatVersion( m_fileInfo.dwFileVersionMS, m_fileInfo.dwFileVersionLS )
 		: std::tstring();
+}
+
+std::tstring CVersionInfo::FormatComments( void ) const
+{
+	std::vector< std::tstring > items;
+	str::Split( items, GetComments().c_str(), _T("|") );
+
+	for ( std::vector< std::tstring >::iterator itItem = items.begin(); itItem != items.end(); ++itItem )
+	{
+		str::Trim( *itItem );
+
+		if ( !itItem->empty() )
+			*itItem = s_bulletPrefix + *itItem;
+	}
+
+	return str::Join( items, _T("\r\n") );
 }
 
 

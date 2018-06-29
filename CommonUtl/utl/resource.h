@@ -75,7 +75,10 @@
 #define IDC_ABOUT_DIVIDER_STATIC        28512
 #define IDC_ITEMS_EDIT                  28513
 #define IDC_ITEMS_SHEET                 28513
+#define IDC_EDIT1                       28514
+#define IDC_ABOUT_COMMENTS_EDIT         28514
 #define IDC_TOOLBAR_PLACEHOLDER         28515
+#define IDC_ABOUT_BUILD_INFO_LABEL      28515
 #define IDC_ITEMS_LIST                  28516
 #define UTL_MIN_SYMED_VALUE             28800
 
@@ -85,7 +88,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        28017
 #define _APS_NEXT_COMMAND_VALUE         28241
-#define _APS_NEXT_CONTROL_VALUE         28514
+#define _APS_NEXT_CONTROL_VALUE         28516
 #define _APS_NEXT_SYMED_VALUE           28801
 #endif
 #endif
