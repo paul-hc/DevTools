@@ -18,7 +18,7 @@ private:
 	// event callbacks
 	HRESULT OnNavigationPending( PCIDLIST_ABSOLUTE pidlFolder );
 	void OnNavigationComplete( PCIDLIST_ABSOLUTE pidlFolder );
-	void OnViewCreated( IShellView* psv );
+	void OnViewCreated( IShellView* pShellView );
 	void OnNavigationFailed( PCIDLIST_ABSOLUTE pidlFolder );
 
 	static FOLDERVIEWMODE CmdToViewMode( UINT cmdId );

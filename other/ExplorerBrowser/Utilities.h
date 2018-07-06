@@ -83,6 +83,13 @@ namespace str
 }
 
 
+namespace fs
+{
+	bool IsValidFile( const TCHAR* pFilePath );
+	bool IsValidDirectory( const TCHAR* pDirPath );
+}
+
+
 namespace ui
 {
 	bool EnsureVisibleRect( CRect& rDest, const CRect& anchor, bool horiz = true, bool vert = true );

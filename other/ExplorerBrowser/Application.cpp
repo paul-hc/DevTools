@@ -74,34 +74,35 @@ BOOL CApplication::InitInstance( void )
 	// Parse command line for standard shell commands, DDE, file open
 	CCommandLineInfo cmdInfo;
 	ParseCommandLine( cmdInfo );
-	#if !defined( _WIN32_WCE ) || defined( _CE_DCOM )
-	// Register class factories via CoRegisterClassObject().
+
+#if !defined( _WIN32_WCE ) || defined( _CE_DCOM )
+	// register class factories via CoRegisterClassObject()
 	if ( FAILED( g_atlModule.RegisterClassObjects( CLSCTX_LOCAL_SERVER, REGCLS_MULTIPLEUSE ) ) )
 		return FALSE;
-	#endif // !defined(_WIN32_WCE) || defined(_CE_DCOM)
+#endif // !defined(_WIN32_WCE) || defined(_CE_DCOM)
+
 	// App was launched with /Embedding or /Automation switch.
 	// Run app as automation server.
 	if ( cmdInfo.m_bRunEmbedded || cmdInfo.m_bRunAutomated )
 		return TRUE;		// don't show the main window
 
-	if ( cmdInfo.m_nShellCommand == CCommandLineInfo::AppUnregister )		// app was launched with /Unregserver or /Unregister switch
+	switch ( cmdInfo.m_nShellCommand )
 	{
-		g_atlModule.UpdateRegistryAppId( FALSE );
-		g_atlModule.UnregisterServer( TRUE );
-		return FALSE;
-	}
-
-	if ( cmdInfo.m_nShellCommand == CCommandLineInfo::AppRegister )			// app was launched with /Register or /Regserver switch
-	{
-		g_atlModule.UpdateRegistryAppId(TRUE);
-		g_atlModule.RegisterServer(TRUE);
-		return FALSE;
+		case CCommandLineInfo::AppRegister:				// app was launched with /Register or /Regserver switch
+			g_atlModule.UpdateRegistryAppId(TRUE);
+			g_atlModule.RegisterServer(TRUE);
+			return FALSE;
+		case CCommandLineInfo::AppUnregister:			// app was launched with /Unregserver or /Unregister switch
+			g_atlModule.UpdateRegistryAppId( FALSE );
+			g_atlModule.UnregisterServer( TRUE );
+			return FALSE;
 	}
 
 	// Dispatch commands specified on the command line.  Will return FALSE if
 	// app was launched with /RegServer, /Register, /Unregserver or /Unregister.
 	if ( !ProcessShellCommand( cmdInfo ) )
 		return FALSE;
+
 	// The main window has been initialized, so show and update it
 	pMainFrame->ShowWindow( m_nCmdShow );
 	pMainFrame->UpdateWindow();

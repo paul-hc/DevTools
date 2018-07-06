@@ -13,13 +13,6 @@
 #endif
 
 
-namespace reg
-{
-	static const TCHAR section_view[] = _T("View");
-	static const TCHAR entry_viewMode[] = _T("ViewMode");
-}
-
-
 IMPLEMENT_DYNCREATE( CBrowserView, CView )
 
 CBrowserView::CBrowserView( void )
@@ -108,10 +101,8 @@ int CBrowserView::OnCreate( CREATESTRUCT* pCreateStruct )
 	if ( -1 == CView::OnCreate( pCreateStruct ) )
 		return -1;
 
-	FOLDERVIEWMODE filePaneViewMode = static_cast< FOLDERVIEWMODE >( AfxGetApp()->GetProfileInt( reg::section_view, reg::entry_viewMode, FVM_DETAILS ) );
-
 	m_pBrowser.reset( new shell::CExplorerBrowser );
-	if ( m_pBrowser->Create( this, g_theApp.m_showFrames, filePaneViewMode ) )
+	if ( m_pBrowser->Create( this, g_theApp.m_showFrames, GetDocument()->GetFilePaneViewMode() ) )
 	{
 		CComObject< CExplorerBrowserEvents >* pExplorerEvents;
 		if ( SUCCEEDED( CComObject< CExplorerBrowserEvents >::CreateInstance( &pExplorerEvents ) ) )
@@ -132,7 +123,12 @@ int CBrowserView::OnCreate( CREATESTRUCT* pCreateStruct )
 void CBrowserView::OnDestroy( void )
 {
 	if ( m_pBrowser.get() != NULL )
-		AfxGetApp()->WriteProfileInt( reg::section_view, reg::entry_viewMode,  m_pBrowser->GetFilePaneViewMode() );
+	{
+		CBrowserDoc* pDoc = GetDocument();
+
+		pDoc->SetFilePaneViewMode( m_pBrowser->GetFilePaneViewMode() );
+		pDoc->SetPathName( m_pBrowser->GetCurrentDirPath().c_str(), TRUE );
+	}
 
 	CView::OnDestroy();
 
@@ -146,11 +142,10 @@ void CBrowserView::OnInitialUpdate( void )
 {
 	CView::OnInitialUpdate();
 
-	// navigate to the current directory
-	TCHAR currDirPath[ _MAX_PATH ] = { _T('\0') };
+	const CString& dirPath = GetDocument()->GetPathName();
 
-	if ( GetCurrentDirectory( _MAX_PATH, currDirPath ) )
-		if ( m_pBrowser->NavigateTo( currDirPath ) )
+	if ( fs::IsValidDirectory( dirPath ) )
+		if ( m_pBrowser->NavigateTo( dirPath ) )			// navigate to document's directory
 			return;
 
 	OnBrowseToProfileFolder();
@@ -178,12 +173,12 @@ void CBrowserView::OnBrowseToProfileFolder( void )
 {
 	HRESULT hr = S_OK;
 	LPITEMIDLIST pidlBrowse = NULL;
-	if ( SUCCEEDED( hr = SHGetFolderLocation( NULL, CSIDL_PROFILE, NULL, 0, &pidlBrowse ) ) )
+	if ( SUCCEEDED( hr = ::SHGetFolderLocation( NULL, CSIDL_PROFILE, NULL, 0, &pidlBrowse ) ) )
 	{
 		if ( FAILED( hr = m_pBrowser->Get()->BrowseToIDList( pidlBrowse, 0 ) ) )
 			TRACE( "BrowseToIDList Failed! hr = %d\n", hr );
 
-		ILFree( pidlBrowse );
+		::ILFree( pidlBrowse );
 	}
 	else
 		TRACE("SHGetFolderLocation Failed! hr = %d\n", hr);

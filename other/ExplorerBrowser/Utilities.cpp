@@ -7,6 +7,22 @@
 #endif
 
 
+namespace fs
+{
+	bool IsValidFile( const TCHAR* pFilePath )
+	{
+		DWORD attr = ::GetFileAttributes( pFilePath );
+		return attr != INVALID_FILE_ATTRIBUTES && !HasFlag( attr, FILE_ATTRIBUTE_DIRECTORY );
+	}
+
+	bool IsValidDirectory( const TCHAR* pDirPath )
+	{
+		DWORD attr = ::GetFileAttributes( pDirPath );
+		return attr != INVALID_FILE_ATTRIBUTES && HasFlag( attr, FILE_ATTRIBUTE_DIRECTORY );
+	}
+}
+
+
 namespace ui
 {
 	bool EnsureVisibleRect( CRect& rDest, const CRect& anchor, bool horiz /*= true*/, bool vert /*= true*/ )
