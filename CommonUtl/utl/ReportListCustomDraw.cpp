@@ -86,23 +86,48 @@ bool CReportListCustomDraw::ApplyEffect( const ui::CTextEffect& textEffect )
 	return modified;
 }
 
+COLORREF CReportListCustomDraw::GetRealizedBkColor( void ) const
+{
+	if ( IsSelItemContrast() )
+		return GetSysColor( COLOR_HIGHLIGHT );
+
+	if ( ui::IsActualColor( m_pDraw->clrTextBk ) )
+		return m_pDraw->clrTextBk;
+
+	COLORREF bkColor = bkColor = m_pList->GetTextBkColor();
+	if ( ui::IsActualColor( bkColor ) )
+		return bkColor;
+
+	return ui::GetActualColorSysdef( m_pList->GetBkColor(), COLOR_WINDOW );
+}
+
+COLORREF CReportListCustomDraw::GetRealizedTextColor( DiffSide diffSide, const str::TMatchSequence* pCellSeq /*= NULL*/ ) const
+{
+	if ( IsSelItemContrast() )
+		return GetSysColor( COLOR_HIGHLIGHTTEXT );
+
+	if ( DestDiff == diffSide && pCellSeq != NULL && str::MatchEqual == pCellSeq->m_match )
+		return m_pList->m_matchDest_DiffEffect.m_textColor;				// gray-out text of unmodified DEST files, but continue with default drawing
+
+	return ui::GetActualColorSysdef( m_pList->m_listTextEffect.m_textColor, COLOR_WINDOWTEXT );
+}
+
 bool CReportListCustomDraw::DrawCellTextDiffs( void )
 {
 	if ( s_useDefaultDraw )
 		return false;
 
-	if ( const TDiffColumnPair* pDiffPair = m_pList->FindDiffColumnPair( m_subItem ) )
+	if ( const CDiffColumnPair* pDiffPair = m_pList->FindDiffColumnPair( m_subItem ) )
 		if ( const str::TMatchSequence* pCellSeq = pDiffPair->FindRowSequence( m_rowKey ) )
 		{
-			DiffColumn diffColumn = pDiffPair->m_srcColumn == m_subItem ? SrcColumn : DestColumn;
-			DrawCellTextDiffs( diffColumn, *pCellSeq, MakeCellTextRect() );
+			DrawCellTextDiffs( pDiffPair->GetDiffSide( m_subItem ), *pCellSeq, MakeCellTextRect() );
 			return true;		// drawn diff item text
 		}
 
 	return false;
 }
 
-void CReportListCustomDraw::DrawCellTextDiffs( DiffColumn diffColumn, const str::TMatchSequence& cellSeq, const CRect& textRect )
+void CReportListCustomDraw::DrawCellTextDiffs( DiffSide diffSide, const str::TMatchSequence& cellSeq, const CRect& textRect )
 {
 	enum { TextStyle = DT_SINGLELINE | DT_LEFT | DT_VCENTER | DT_END_ELLIPSIS | DT_NOPREFIX };	// DT_NOCLIP
 
@@ -110,15 +135,15 @@ void CReportListCustomDraw::DrawCellTextDiffs( DiffColumn diffColumn, const str:
 		gp::FrameRect( m_pDC, textRect, color::Orange, 50 );
 
 	std::vector< ui::CTextEffect > matchEffects;			// indexed by str::Match constants
-	BuildTextMatchEffects( matchEffects, diffColumn, cellSeq );
+	BuildTextMatchEffects( matchEffects, diffSide, cellSeq );
 
 	CFont* pOldFont = m_pDC->GetCurrentFont();
 	COLORREF oldTextColor = m_pDC->GetTextColor();
 	COLORREF oldBkColor = m_pDC->GetBkColor();
 	int oldBkMode = m_pDC->SetBkMode( TRANSPARENT );
 
-	const TCHAR* pText = SrcColumn == diffColumn ? cellSeq.m_textPair.first.c_str() : cellSeq.m_textPair.second.c_str();
-	const std::vector< str::Match >& matchSeq = SrcColumn == diffColumn ? cellSeq.m_matchSeqPair.first : cellSeq.m_matchSeqPair.second;
+	const TCHAR* pText = SrcDiff == diffSide ? cellSeq.m_textPair.first.c_str() : cellSeq.m_textPair.second.c_str();
+	const std::vector< str::Match >& matchSeq = SrcDiff == diffSide ? cellSeq.m_matchSeqPair.first : cellSeq.m_matchSeqPair.second;
 	CRect itemRect = textRect;
 
 	for ( size_t pos = 0; pos != matchSeq.size() && itemRect.left < itemRect.right; )
@@ -127,6 +152,7 @@ void CReportListCustomDraw::DrawCellTextDiffs( DiffColumn diffColumn, const str:
 
 		SelectTextEffect( matchEffects[ matchSeq[ pos ] ] );
 		m_pDC->DrawText( pText, matchLen, &itemRect, TextStyle );
+		//::GdiFlush();
 		itemRect.left += m_pDC->GetTextExtent( pText, matchLen ).cx;
 
 		pText += matchLen;
@@ -139,20 +165,20 @@ void CReportListCustomDraw::DrawCellTextDiffs( DiffColumn diffColumn, const str:
 	m_pDC->SetBkMode( oldBkMode );
 }
 
-void CReportListCustomDraw::BuildTextMatchEffects( std::vector< ui::CTextEffect >& rMatchEffects, DiffColumn diffColumn, const str::TMatchSequence& cellSeq ) const
+void CReportListCustomDraw::BuildTextMatchEffects( std::vector< ui::CTextEffect >& rMatchEffects, DiffSide diffSide, const str::TMatchSequence& cellSeq ) const
 {
 	enum { LastMatch = str::MatchNotEqual, _MatchCount };
 
 	rMatchEffects.resize( _MatchCount );
 	rMatchEffects[ str::MatchEqual ] = MakeCellEffect();
-	rMatchEffects[ str::MatchEqual ].m_textColor = GetRealizedTextColor( diffColumn, cellSeq );		// realize text colour to reset existing (prev sub-item) text highlighting
+	rMatchEffects[ str::MatchEqual ].m_textColor = GetRealizedTextColor( diffSide, &cellSeq );		// realize text colour to reset existing (prev sub-item) text highlighting
 
 	rMatchEffects[ str::MatchNotEqual ] = rMatchEffects[ str::MatchEqual ];
-	if ( SrcColumn == diffColumn && cellSeq.m_textPair.second.empty() )								// empty DEST?
+	if ( SrcDiff == diffSide && cellSeq.m_textPair.second.empty() )									// empty DEST?
 	{	// avoid highlighting SRC text
 	}
 	else
-		rMatchEffects[ str::MatchNotEqual ].Combine( SrcColumn == diffColumn ? m_pList->m_deleteSrc_DiffEffect : m_pList->m_mismatchDest_DiffEffect );
+		rMatchEffects[ str::MatchNotEqual ].Combine( SrcDiff == diffSide ? m_pList->m_deleteSrc_DiffEffect : m_pList->m_mismatchDest_DiffEffect );
 
 	rMatchEffects[ str::MatchEqualDiffCase ] = rMatchEffects[ str::MatchNotEqual ];
 	ClearFlag( rMatchEffects[ str::MatchEqualDiffCase ].m_fontEffect, ui::Bold );
@@ -160,17 +186,6 @@ void CReportListCustomDraw::BuildTextMatchEffects( std::vector< ui::CTextEffect 
 
 	if ( m_pList->m_pTextEffectCallback != NULL )
 		m_pList->m_pTextEffectCallback->ModifyDiffTextEffectAt( rMatchEffects, m_rowKey, m_subItem );		// resert ui::Bold, etc
-}
-
-COLORREF CReportListCustomDraw::GetRealizedTextColor( DiffColumn diffColumn, const str::TMatchSequence& cellSeq ) const
-{
-	if ( m_pList->HasItemState( m_index, LVIS_SELECTED ) && !m_pList->UseExplorerTheme() && ::GetFocus() == m_pList->m_hWnd )		// classic contrast selected item (not "Explorer" visual theme background)?
-		return GetSysColor( COLOR_HIGHLIGHTTEXT );
-
-	if ( str::MatchEqual == cellSeq.m_match && DestColumn == diffColumn )
-		return m_pList->m_matchDest_DiffEffect.m_textColor;						// gray-out text of unmodified DEST files, but continue with default drawing
-
-	return ui::GetActualColor( m_pList->m_listTextEffect.m_textColor, GetSysColor( COLOR_BTNTEXT ) );
 }
 
 bool CReportListCustomDraw::SelectTextEffect( const ui::CTextEffect& textEffect )
@@ -211,6 +226,12 @@ CRect CReportListCustomDraw::MakeCellTextRect( void ) const
 	textRect.left += ( 0 == m_subItem ? CReportListControl::ItemSpacingX : CReportListControl::SubItemSpacingX );		// DON'T TOUCH IT: lines up perfectly with default text draw
 
 	return textRect;
+}
+
+bool CReportListCustomDraw::IsSelItemContrast( void ) const
+{
+	// classic contrast selected item: blue backgound with white text (not "Explorer" visual theme background)?
+	return m_pList->HasItemState( m_index, LVIS_SELECTED ) && !m_pList->UseExplorerTheme() && ::GetFocus() == m_pList->m_hWnd;
 }
 
 

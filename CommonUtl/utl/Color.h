@@ -32,6 +32,7 @@ namespace ui
 
 	inline bool IsActualColor( COLORREF color ) { return 0 == GetColorFlags( color ); }			// not CLR_NONE, CLR_DEFAULT, other
 	inline COLORREF GetActualColor( COLORREF color, COLORREF defaultColor ) { return IsActualColor( color ) ? color : defaultColor; }
+	inline COLORREF GetActualColorSysdef( COLORREF color, int defaultSysIndex ) { return IsActualColor( color ) ? color : ::GetSysColor( defaultSysIndex ); }
 
 
 	inline BYTE GetLuminance( BYTE red, BYTE green, BYTE blue )

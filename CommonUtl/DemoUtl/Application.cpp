@@ -4,7 +4,7 @@
 #include "MainFrame.h"
 #include "ChildFrame.h"
 #include "ImageDialog.h"
-#include "FileStatesDialog.h"
+#include "FileListDialog.h"
 #include "ImageTests.h"
 #include "TestDoc.h"
 #include "TestFormView.h"
@@ -93,7 +93,7 @@ BOOL CApplication::InitInstance( void )
 	}
 	else if ( app::HasCommandLineOption( _T("diffs") ) )			// "-diffs"
 	{
-		CFileStatesDialog dlg( NULL );
+		CFileListDialog dlg( NULL );
 		m_pMainWnd = &dlg;
 		dlg.DoModal();
 		return FALSE;					// no app loop

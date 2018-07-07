@@ -79,7 +79,6 @@ static ACCEL keys[] =
 };
 
 const TCHAR CReportListControl::s_fmtRegColumnLayout[] = _T("Width=%d, Order=%d");
-const TCHAR CReportListControl::s_diffColumnTextPlaceholder[] = _T("");
 
 
 CReportListControl::CReportListControl( UINT columnLayoutId /*= 0*/, DWORD listStyleEx /*= DefaultStyleEx*/ )
@@ -99,13 +98,15 @@ CReportListControl::CReportListControl( UINT columnLayoutId /*= 0*/, DWORD listS
 	, m_useTriStateAutoCheck( false )
 	, m_listAccel( keys, COUNT_OF( keys ) )
 	, m_pDataSourceFactory( ole::GetStdDataSourceFactory() )
-	, m_parentHandlesCustomDraw( -1 )
+	, m_painting( false )
 	, m_deleteSrc_DiffEffect( ui::Bold, s_deleteSrcTextColor )
 	, m_mismatchDest_DiffEffect( ui::Bold, s_mismatchDestTextColor )
 	, m_matchDest_DiffEffect( ui::Regular, GetSysColor( COLOR_GRAYTEXT ) )
 {
 	m_pPopupMenu[ OnSelection ] = &GetStdPopupMenu( OnSelection );
 	m_pPopupMenu[ Nowhere ] = &GetStdPopupMenu( Nowhere );
+
+	std::fill_n( m_parentHandles, (int)_PN_Count, -1 );
 
 	if ( columnLayoutId != 0 )
 		SetLayoutInfo( columnLayoutId );
@@ -621,14 +622,6 @@ pred::CompareResult CReportListControl::CompareSubItemsText( UINT leftIndex, UIN
 
 int CReportListControl::FindItemIndex( const std::tstring& itemText ) const
 {
-	if ( const CDiffColumnPair* pDiffPair = FindDiffColumnPair( Code ) )
-		if ( Code == pDiffPair->m_srcColumn )
-		{	// FindItem() fails to locate the item, so we search explicitly by code text
-			for ( int index = 0, count = GetItemCount(); index != count; ++index )
-				if ( GetItemText( index, Code ) == itemText.c_str() )
-					return index;
-		}
-
 	LVFINDINFO findInfo;
 	findInfo.flags = LVFI_STRING | LVFI_WRAP;
 	findInfo.psz = itemText.c_str();
@@ -1046,12 +1039,16 @@ utl::ISubject* CReportListControl::GetObjectAt( int index ) const
 	return NULL;
 }
 
-int CReportListControl::InsertObjectItem( int index, const utl::ISubject* pObject, int imageIndex /*= No_Image*/ )
+int CReportListControl::InsertObjectItem( int index, const utl::ISubject* pObject, int imageIndex /*= No_Image*/, const TCHAR* pText /*= NULL*/ )
 {
 	std::tstring displayCode;
 	if ( pObject != NULL )
 	{
-		displayCode = pObject->GetDisplayCode();
+		if ( NULL == pText )
+		{
+			displayCode = pObject->GetDisplayCode();
+			pText = displayCode.c_str();
+		}
 
 		if ( !m_subjectBased )
 			m_subjectBased = true;
@@ -1060,24 +1057,25 @@ int CReportListControl::InsertObjectItem( int index, const utl::ISubject* pObjec
 	if ( Transparent_Image == imageIndex )
 		imageIndex = safe_ptr( m_pCustomImager.get() )->m_transpImgIndex;
 
-	int insertIndex = InsertItem( index, displayCode.c_str(), imageIndex );
+	int insertIndex = InsertItem( LVIF_TEXT | LVIF_IMAGE | LVIF_PARAM, index, pText, 0, 0, imageIndex, reinterpret_cast< LPARAM >( pObject ) );
 	ASSERT( insertIndex != -1 );
 
-	SetItemData( insertIndex, reinterpret_cast< DWORD_PTR >( pObject ) );
+	// set by InsertItem()
+	//SetItemData( insertIndex, reinterpret_cast< DWORD_PTR >( pObject ) );
 	SetItemTileInfo( insertIndex );
 	return insertIndex;
 }
 
-void CReportListControl::SetSubItemText( int index, int subItem, const std::tstring& text, int imageIndex /*= No_Image*/ )
-{	// it keeps 'text' argument alive
+void CReportListControl::SetSubItemTextPtr( int index, int subItem, const TCHAR* pText /*= LPSTR_TEXTCALLBACK*/, int imageIndex /*= No_Image*/ )
+{
 	ASSERT( subItem > 0 );
 
 	if ( Transparent_Image == imageIndex )
 		imageIndex = safe_ptr( m_pCustomImager.get() )->m_transpImgIndex;
-	else if ( text.empty() )
+	else if ( str::IsEmpty( pText ) )
 		imageIndex = No_Image;			// clear the image for empty text
 
-	VERIFY( SetItem( index, subItem, LVIF_TEXT | LVIF_IMAGE, text.c_str(), imageIndex, 0, 0, 0 ) );
+	VERIFY( SetItem( index, subItem, LVIF_TEXT | LVIF_IMAGE, pText, imageIndex, 0, 0, 0 ) );
 }
 
 void CReportListControl::SetSubItemImage( int index, int subItem, int imageIndex )
@@ -1099,20 +1097,10 @@ bool CReportListControl::SetItemTileInfo( int index )
 	return SetTileInfo( &tileInfo ) != FALSE;
 }
 
-CString CReportListControl::GetItemText( int index, int subItem ) const
+void CReportListControl::StoreDispInfoItemText( NMLVDISPINFO* pDispInfo, const std::tstring& text )
 {
-	CString subItemText = CListCtrl::GetItemText( index, subItem );
-
-	if ( subItemText.IsEmpty() )
-		if ( const CDiffColumnPair* pDiffPair = FindDiffColumnPair( subItem ) )
-			if ( const str::TMatchSequence* pMatchSeq = utl::FindValuePtr( pDiffPair->m_rowSequences, MakeRowKeyAt( index ) ) )
-				subItemText = pDiffPair->m_srcColumn == subItem
-					? pMatchSeq->m_textPair.first.c_str()
-					: pMatchSeq->m_textPair.second.c_str();
-			else
-				ASSERT( false );
-
-	return subItemText;
+	ASSERT_PTR( pDispInfo );
+	_tcsncpy( pDispInfo->item.pszText, text.c_str(), pDispInfo->item.cchTextMax );
 }
 
 void CReportListControl::GetItemDataAt( CItemData& rItemData, int index ) const
@@ -1560,18 +1548,29 @@ const ui::CTextEffect* CReportListControl::FindTextEffectAt( TRowKey rowKey, TCo
 const CReportListControl::CDiffColumnPair* CReportListControl::FindDiffColumnPair( TColumn column ) const
 {
 	for ( std::list< CDiffColumnPair >::const_iterator itDiffPair = m_diffColumnPairs.begin(); itDiffPair != m_diffColumnPairs.end(); ++itDiffPair )
-		if ( itDiffPair->m_srcColumn == column || itDiffPair->m_destColumn == column )
+		if ( itDiffPair->HasColumn( column ) )
 			return &*itDiffPair;
 
 	return NULL;
 }
 
-bool CReportListControl::ParentHandlesCustomDraw( void )
+bool CReportListControl::ParentHandles( ParentNotif notif )
 {
-	if ( -1 == m_parentHandlesCustomDraw )
-		m_parentHandlesCustomDraw = ui::ParentContainsMessageHandler( this, WM_NOTIFY, NM_CUSTOMDRAW );
+	ASSERT( notif < COUNT_OF( m_parentHandles ) );
+	if ( -1 == m_parentHandles[ notif ] )
+		switch ( notif )
+		{
+			case PN_DispInfo:
+				m_parentHandles[ notif ] = ui::ParentContainsMessageHandler( this, WM_NOTIFY, LVN_GETDISPINFO );
+				break;
+			case PN_CustomDraw:
+				m_parentHandles[ notif ] = ui::ParentContainsMessageHandler( this, WM_NOTIFY, NM_CUSTOMDRAW );
+				break;
+			default:
+				ASSERT( false );
+		}
 
-	return m_parentHandlesCustomDraw != FALSE;
+	return m_parentHandles[ notif ] != FALSE;
 }
 
 
@@ -1756,6 +1755,7 @@ BEGIN_MESSAGE_MAP( CReportListControl, CListCtrl )
 	ON_WM_NCLBUTTONDOWN()
 	ON_WM_CONTEXTMENU()
 	ON_WM_INITMENUPOPUP()
+	ON_WM_PAINT()
 	ON_NOTIFY_REFLECT_EX( LVN_ITEMCHANGING, OnLvnItemChanging_Reflect )
 	ON_NOTIFY_REFLECT_EX( LVN_ITEMCHANGED, OnLvnItemChanged_Reflect )
 	ON_NOTIFY_REFLECT_EX( HDN_ITEMCHANGING, OnHdnItemChanging_Reflect )
@@ -1763,6 +1763,7 @@ BEGIN_MESSAGE_MAP( CReportListControl, CListCtrl )
 	ON_NOTIFY_REFLECT_EX( LVN_COLUMNCLICK, OnLvnColumnClick_Reflect )
 	ON_NOTIFY_REFLECT_EX( LVN_BEGINLABELEDIT, OnLvnBeginLabelEdit_Reflect )
 	ON_NOTIFY_REFLECT_EX( LVN_ENDLABELEDIT, OnLvnEndLabelEdit_Reflect )
+	ON_NOTIFY_REFLECT_EX( LVN_GETDISPINFO, OnLvnGetDispInfo_Reflect )
 	ON_NOTIFY_REFLECT_EX( NM_CUSTOMDRAW, OnNmCustomDraw_Reflect )
 	ON_COMMAND_RANGE( ID_LIST_VIEW_ICON_LARGE, ID_LIST_VIEW_TILE, OnListViewMode )
 	ON_UPDATE_COMMAND_UI_RANGE( ID_LIST_VIEW_ICON_LARGE, ID_LIST_VIEW_TILE, OnUpdateListViewMode )
@@ -1851,6 +1852,15 @@ void CReportListControl::OnInitMenuPopup( CMenu* pPopupMenu, UINT index, BOOL is
 	CListCtrl::OnInitMenuPopup( pPopupMenu, index, isSysMenu );
 }
 
+void CReportListControl::OnPaint( void )
+{
+	REQUIRE( !m_painting );
+
+	m_painting = true;				// for diff text items: supress sub-item draw by the list (default list painting smudges the text due to font effects)
+	CListCtrl::OnPaint();
+	m_painting = false;
+}
+
 BOOL CReportListControl::OnLvnItemChanging_Reflect( NMHDR* pNmHdr, LRESULT* pResult )
 {
 	NMLISTVIEW* pListInfo = (NMLISTVIEW*)pNmHdr;
@@ -1918,7 +1928,7 @@ BOOL CReportListControl::OnLvnColumnClick_Reflect( NMHDR* pNmHdr, LRESULT* pResu
 
 BOOL CReportListControl::OnLvnBeginLabelEdit_Reflect( NMHDR* pNmHdr, LRESULT* pResult )
 {
-	LV_DISPINFO* pDispInfo = (LV_DISPINFO*)pNmHdr;
+	NMLVDISPINFO* pDispInfo = (NMLVDISPINFO*)pNmHdr;
 
 	m_pLabelEdit.reset( new CLabelEdit( pDispInfo->item.iItem, GetItemText( pDispInfo->item.iItem, 0 ).GetString() ) );
 	*pResult = 0;
@@ -1927,7 +1937,7 @@ BOOL CReportListControl::OnLvnBeginLabelEdit_Reflect( NMHDR* pNmHdr, LRESULT* pR
 
 BOOL CReportListControl::OnLvnEndLabelEdit_Reflect( NMHDR* pNmHdr, LRESULT* pResult )
 {
-	LV_DISPINFO* pDispInfo = (LV_DISPINFO*)pNmHdr;
+	NMLVDISPINFO* pDispInfo = (NMLVDISPINFO*)pNmHdr;
 	*pResult = 0;
 
 	if ( m_pLabelEdit.get() != NULL )
@@ -1942,6 +1952,26 @@ BOOL CReportListControl::OnLvnEndLabelEdit_Reflect( NMHDR* pNmHdr, LRESULT* pRes
 			m_pLabelEdit.reset();
 
 	return FALSE;			// raise the notification to parent
+}
+
+BOOL CReportListControl::OnLvnGetDispInfo_Reflect( NMHDR* pNmHdr, LRESULT* pResult )
+{
+	NMLVDISPINFO* pDispInfo = (NMLVDISPINFO*)pNmHdr;
+
+	if ( HasFlag( pDispInfo->item.mask, LVIF_TEXT ) )
+		if ( !m_painting )									// supress sub-item draw by the list (default list painting)
+			if ( const CDiffColumnPair* pDiffPair = FindDiffColumnPair( pDispInfo->item.iSubItem ) )
+				if ( const str::TMatchSequence* pMatchSeq = utl::FindValuePtr( pDiffPair->m_rowSequences, MakeRowKeyAt( pDispInfo->item.iItem ) ) )
+					pDispInfo->item.pszText = const_cast< TCHAR* >( SrcDiff == pDiffPair->GetDiffSide( pDispInfo->item.iSubItem )
+						? pMatchSeq->m_textPair.first.c_str()
+						: pMatchSeq->m_textPair.second.c_str() );
+
+	*pResult = 0;
+
+	if ( !ParentHandles( PN_DispInfo ) )
+		return TRUE;			// mark as handled so changes are applied
+
+	return FALSE;				// continue handling by parent, even if changed (additive logic)
 }
 
 BOOL CReportListControl::OnNmCustomDraw_Reflect( NMHDR* pNmHdr, LRESULT* pResult )
@@ -1994,7 +2024,7 @@ BOOL CReportListControl::OnNmCustomDraw_Reflect( NMHDR* pNmHdr, LRESULT* pResult
 			break;
 	}
 
-	if ( !ParentHandlesCustomDraw() )
+	if ( !ParentHandles( PN_CustomDraw ) )
 		return TRUE;			// mark as handled so changes are applied
 
 	return FALSE;				// continue handling by parent, even if changed (additive logic)

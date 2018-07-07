@@ -5,13 +5,8 @@
 #include "ReportListControl.h"
 
 
-class CReportListCustomDraw
+class CReportListCustomDraw : public CListTraits
 {
-	typedef LPARAM TRowKey;								// row keys are invariant to sorting
-	typedef int TColumn;
-	typedef CReportListControl::CDiffColumnPair TDiffColumnPair;
-
-	enum { EntireRecord = CReportListControl::EntireRecord };
 public:
 	CReportListCustomDraw( NMLVCUSTOMDRAW* pDraw, CReportListControl* pList );
 
@@ -19,23 +14,24 @@ public:
 
 	// cell text effects
 	bool ApplyCellTextEffect( void );
+	COLORREF GetRealizedBkColor( void ) const;
+	COLORREF GetRealizedTextColor( DiffSide diffSide, const str::TMatchSequence* pCellSeq = NULL ) const;
 
 	// text diffs
 	bool DrawCellTextDiffs( void );
 private:
 	// cell text effects
 	ui::CTextEffect MakeCellEffect( void ) const;
-	bool ApplyEffect( const ui::CTextEffect& textEffect );		// to m_pDraw
+	bool ApplyEffect( const ui::CTextEffect& textEffect );			// to m_pDraw
 
 	// text diffs
-	enum DiffColumn { SrcColumn, DestColumn };
-
-	void DrawCellTextDiffs( DiffColumn diffColumn, const str::TMatchSequence& cellSeq, const CRect& textRect );
+	void DrawCellTextDiffs( DiffSide diffSide, const str::TMatchSequence& cellSeq, const CRect& textRect );
 
 	CRect MakeCellTextRect( void ) const;
-	void BuildTextMatchEffects( std::vector< ui::CTextEffect >& rMatchEffects, DiffColumn diffColumn, const str::TMatchSequence& cellSeq ) const;
-	COLORREF GetRealizedTextColor( DiffColumn diffColumn, const str::TMatchSequence& cellSeq ) const;
+	void BuildTextMatchEffects( std::vector< ui::CTextEffect >& rMatchEffects, DiffSide diffSide, const str::TMatchSequence& cellSeq ) const;
 	bool SelectTextEffect( const ui::CTextEffect& textEffect );		// to m_pDC
+
+	bool IsSelItemContrast( void ) const;							// item is blue backgound with white text?
 private:
 	NMLVCUSTOMDRAW* m_pDraw;
 	CReportListControl* m_pList;

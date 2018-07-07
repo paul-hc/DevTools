@@ -20,7 +20,9 @@
 #define IDR_CONTEXT_MENU                144
 #define IDD_IMAGE_PAGE_CONVERT_IMAGE    145
 #define IDD_IMAGE_PAGE_SHOW_IMAGE       146
-#define IDD_FILE_STATES_DIALOG          147
+#define IDD_FILE_LIST_DIALOG            147
+#define IDB_PNG1                        148
+#define IDR_FLAG_STRIP_PNG              148
 #define IDC_OPEN_DIALOG_BUTTON          1000
 #define IDC_OPEN_PROPERTIES_BUTTON      1001
 #define IDC_CREATE_PROPERTIES_BUTTON    1002
@@ -107,6 +109,7 @@
 #define IDC_USE_DEFAULT_DRAW_CHECK      1092
 #define IDC_USE_DEFAULT_DRAW_CHECK2     1093
 #define IDC_USE_DBG_GUIDES_CHECK        1093
+#define IDC_USE_DOUBLEBUFFER_CHECK      1094
 #define IDS_OLE_INIT_FAILED             5000
 #define IDS_CHANGE_CASE_TAGS            5001
 #define ID_STUDY_IMAGE                  32772
@@ -135,7 +138,7 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        148
+#define _APS_NEXT_RESOURCE_VALUE        149
 #define _APS_NEXT_COMMAND_VALUE         32798
 #define _APS_NEXT_CONTROL_VALUE         1091
 #define _APS_NEXT_SYMED_VALUE           5002

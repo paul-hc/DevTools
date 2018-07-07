@@ -389,11 +389,15 @@
 				>
 			</File>
 			<File
-				RelativePath=".\FileStatesDialog.cpp"
+				RelativePath=".\FileListDialog.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\FileStatesDialog.h"
+				RelativePath=".\FileListDialog.h"
+				>
+			</File>
+			<File
+				RelativePath=".\FlagStrip.h"
 				>
 			</File>
 			<File
@@ -516,6 +520,10 @@
 			</File>
 			<File
 				RelativePath=".\res\DemoUtl.rc2"
+				>
+			</File>
+			<File
+				RelativePath=".\res\FlagStrip.png"
 				>
 			</File>
 			<File

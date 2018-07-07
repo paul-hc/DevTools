@@ -48,8 +48,35 @@ enum CheckState
 };
 
 
+abstract class CListTraits			// defines types shared between CReportListControl and CReportListCustomDraw classes
+{
+public:
+	typedef LPARAM TRowKey;			// row keys are invariant to sorting
+	typedef int TColumn;
+
+	enum StdColumn { Code, EntireRecord = (TColumn)-1 };
+protected:
+	enum DiffSide { SrcDiff, DestDiff };
+
+	struct CDiffColumnPair
+	{
+		CDiffColumnPair( TColumn srcColumn = -1, TColumn destColumn = -1 ) : m_srcColumn( srcColumn ), m_destColumn( destColumn ) {}
+
+		bool HasColumn( TColumn column ) const { return m_srcColumn == column || m_destColumn == column; }
+		const str::TMatchSequence* FindRowSequence( TRowKey rowKey ) const;
+
+		DiffSide GetDiffSide( TColumn subItem ) const { REQUIRE( m_srcColumn == subItem || m_destColumn == subItem ); return m_srcColumn == subItem ? SrcDiff : DestDiff; }
+	public:
+		TColumn m_srcColumn;
+		TColumn m_destColumn;
+		stdext::hash_map< TRowKey, str::TMatchSequence > m_rowSequences;		// TRowKey is invariant to sorting
+	};
+};
+
+
 class CReportListControl : public CListCtrl
 						 , public CInternalChange
+						 , public CListTraits
 {
 	friend class CReportListCustomDraw;
 public:
@@ -65,6 +92,7 @@ public:
 	CReportListControl( UINT columnLayoutId = 0, DWORD listStyleEx = DefaultStyleEx );
 	virtual ~CReportListControl();
 
+	DWORD& RefListStyleEx( void ) { return m_listStyleEx; }
 	bool ModifyListStyleEx( DWORD dwRemove, DWORD dwAdd, UINT swpFlags = 0 );
 
 	void SaveToRegistry( void );
@@ -120,11 +148,6 @@ public:
 
 	static bool IsSelectionChangedNotify( const NMLISTVIEW* pNmList, UINT selMask = LVIS_SELECTED | LVIS_FOCUSED );
 public:
-	typedef int TColumn;
-	typedef LPARAM TRowKey;								// row keys are invariant to sorting
-
-	enum { EntireRecord = (TColumn)-1 };
-
 	TRowKey MakeRowKeyAt( int index ) const;			// favour item data (LPARAM), or fall back to index (int)
 
 	// sorting
@@ -238,16 +261,15 @@ public:
 
 	bool DeleteAllItems( void );
 
-	enum Column { Code };
+	virtual int InsertObjectItem( int index, const utl::ISubject* pObject, int imageIndex = No_Image, const TCHAR* pText = NULL );		// pText could be LPSTR_TEXTCALLBACK
 
-	virtual int InsertObjectItem( int index, const utl::ISubject* pObject, int imageIndex = No_Image );
-
-	void SetSubItemText( int index, int subItem, const std::tstring& text, int imageIndex = No_Image );
+	void SetSubItemTextPtr( int index, int subItem, const TCHAR* pText = LPSTR_TEXTCALLBACK, int imageIndex = No_Image );
+	void SetSubItemText( int index, int subItem, const std::tstring& text, int imageIndex = No_Image ) { SetSubItemTextPtr( index, subItem, text.c_str(), imageIndex ); }
 	void SetSubItemImage( int index, int subItem, int imageIndex );
 
 	bool SetItemTileInfo( int index );
 
-	CString GetItemText( int index, int subItem ) const;		// override CListCtrl for stored diff-items text
+	static void StoreDispInfoItemText( NMLVDISPINFO* pDispInfo, const std::tstring& text );		// rarely used, normally client owns text buffers
 
 	void SwapItems( int index1, int index2 );
 	void DropMoveItems( int destIndex, const std::vector< int >& selIndexes );
@@ -343,22 +365,14 @@ public:
 	template< typename MatchFunc >
 	void SetupDiffColumnPair( TColumn srcColumn, TColumn destColumn, MatchFunc getMatchFunc );		// call after the list items are set up; by default pass str::GetMatch()
 protected:
-	struct CDiffColumnPair
-	{
-		CDiffColumnPair( TColumn srcColumn = -1, TColumn destColumn = -1 ) : m_srcColumn( srcColumn ), m_destColumn( destColumn ) {}
-
-		const str::TMatchSequence* FindRowSequence( TRowKey rowKey ) const;
-	public:
-		TColumn m_srcColumn;
-		TColumn m_destColumn;
-		stdext::hash_map< TRowKey, str::TMatchSequence > m_rowSequences;		// TRowKey is invariant to sorting
-	};
-
 	const CDiffColumnPair* FindDiffColumnPair( TColumn column ) const;
 	bool IsDiffColumn( TColumn column ) const { return FindDiffColumnPair( column ) != NULL; }
 
 	ui::CFontEffectCache* GetFontEffectCache( void );
-	bool ParentHandlesCustomDraw( void );
+
+	enum ParentNotif { PN_DispInfo, PN_CustomDraw, _PN_Count };
+
+	bool ParentHandles( ParentNotif notif );
 public:
 	enum SortOrder { NotSorted, Ascending, Descending };				// column sort image index
 
@@ -469,7 +483,8 @@ private:
 	CAccelTable m_listAccel;
 	ole::IDataSourceFactory* m_pDataSourceFactory;			// creates ole::CDataSource for clipboard and drag-drop
 private:
-	BOOL m_parentHandlesCustomDraw;							// self-encapsulated
+	bool m_painting;										// true during OnPaint() - supresses item text callback for diff columns to prevent default list sub-item draw (diffs are custom drawn)
+	BOOL m_parentHandles[ _PN_Count ];						// self-encapsulated 'parent handles' flags array
 public:
 	ui::CTextEffect m_listTextEffect;						// for all items in the list
 
@@ -481,7 +496,6 @@ public:
 	static const COLORREF s_mismatchDestTextColor = color::Blue;
 private:
 	static const TCHAR s_fmtRegColumnLayout[];
-	static const TCHAR s_diffColumnTextPlaceholder[];
 public:
 	// generated stuff
 	public:
@@ -495,6 +509,7 @@ protected:
 	afx_msg void OnNcLButtonDown( UINT hitTest, CPoint point );
 	afx_msg void OnContextMenu( CWnd* pWnd, CPoint screenPos );
 	afx_msg void OnInitMenuPopup( CMenu* pPopupMenu, UINT index, BOOL isSysMenu );
+	afx_msg void OnPaint( void );
 	virtual BOOL OnLvnItemChanging_Reflect( NMHDR* pNmHdr, LRESULT* pResult );
 	virtual BOOL OnLvnItemChanged_Reflect( NMHDR* pNmHdr, LRESULT* pResult );
 	afx_msg BOOL OnHdnItemChanging_Reflect( NMHDR* pNmHdr, LRESULT* pResult );
@@ -502,6 +517,7 @@ protected:
 	afx_msg BOOL OnLvnColumnClick_Reflect( NMHDR* pNmHdr, LRESULT* pResult );
 	afx_msg BOOL OnLvnBeginLabelEdit_Reflect( NMHDR* pNmHdr, LRESULT* pResult );
 	virtual BOOL OnLvnEndLabelEdit_Reflect( NMHDR* pNmHdr, LRESULT* pResult );
+	virtual BOOL OnLvnGetDispInfo_Reflect( NMHDR* pNmHdr, LRESULT* pResult );
 	virtual BOOL OnNmCustomDraw_Reflect( NMHDR* pNmHdr, LRESULT* pResult );
 public:
 	afx_msg void OnListViewMode( UINT cmdId );
@@ -689,10 +705,11 @@ void CReportListControl::SetupDiffColumnPair( TColumn srcColumn, TColumn destCol
 
 		rMatchSequence.Init( GetItemText( index, srcColumn ).GetString(), GetItemText( index, destColumn ).GetString(), getMatchFunc );
 
-		// Replace with empty text to allow custom draw without default sub-item draw interference (on CDDS_ITEMPOSTPAINT | CDDS_SUBITEM).
-		// Sub-item text still accessible with GetItemText() method.
-		VERIFY( SetItemText( index, srcColumn, s_diffColumnTextPlaceholder ) );
-		VERIFY( SetItemText( index, destColumn, s_diffColumnTextPlaceholder ) );
+		// Replace with LPSTR_TEXTCALLBACK to allow custom draw without default sub-item draw interference (on CDDS_ITEMPOSTPAINT | CDDS_SUBITEM).
+		// Sub-item text is still accessible with GetItemText() method.
+		//
+		VERIFY( SetItemText( index, srcColumn, LPSTR_TEXTCALLBACK ) );
+		VERIFY( SetItemText( index, destColumn, LPSTR_TEXTCALLBACK ) );
 	}
 }
 

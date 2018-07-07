@@ -1,6 +1,7 @@
 
 #include "stdafx.h"
-#include "FileStatesDialog.h"
+#include "FileListDialog.h"
+#include "FlagStrip.h"
 #include "TestDialog.h"
 #include "utl/Color.h"
 #include "utl/FmtUtils.h"
@@ -102,10 +103,11 @@ namespace hlp
 
 namespace reg
 {
-	static const TCHAR section_dialog[] = _T("FileStatesDialog");
+	static const TCHAR section_dialog[] = _T("FileListDialog");
 	static const TCHAR entry_useDiffsMode[] = _T("UseDiffsMode");
 	static const TCHAR entry_useAlternateRows[] = _T("UseAlternateRows");
 	static const TCHAR entry_useTextEffects[] = _T("UseTextEffects");
+	static const TCHAR entry_useDoubleBuffer[] = _T("UseDoubleBuffer");
 	static const TCHAR entry_useExplorerTheme[] = _T("UseExplorerTheme");
 }
 
@@ -124,12 +126,13 @@ namespace layout
 	};
 }
 
-CFileStatesDialog::CFileStatesDialog( CWnd* pParent )
-	: CLayoutDialog( IDD_FILE_STATES_DIALOG, pParent )
+CFileListDialog::CFileListDialog( CWnd* pParent )
+	: CLayoutDialog( IDD_FILE_LIST_DIALOG, pParent )
 	, m_fileListCtrl( IDC_FILE_STATE_LIST, LVS_EX_GRIDLINES | CReportListControl::DefaultStyleEx )
 	, m_useDiffsMode( AfxGetApp()->GetProfileInt( reg::section_dialog, reg::entry_useDiffsMode, true ) != FALSE )
 	, m_useAlternateRows( AfxGetApp()->GetProfileInt( reg::section_dialog, reg::entry_useAlternateRows, true ) != FALSE )
 	, m_useTextEffects( AfxGetApp()->GetProfileInt( reg::section_dialog, reg::entry_useTextEffects, false ) != FALSE )
+	, m_useDoubleBuffer( AfxGetApp()->GetProfileInt( reg::section_dialog, reg::entry_useDoubleBuffer, true ) != FALSE )
 {
 	m_regSection = reg::section_dialog;
 	RegisterCtrlLayout( layout::styles, COUNT_OF( layout::styles ) );
@@ -140,14 +143,18 @@ CFileStatesDialog::CFileStatesDialog( CWnd* pParent )
 	m_fileListCtrl.SetUseAlternateRowColoring( m_useAlternateRows );
 	m_fileListCtrl.SetUseExplorerTheme( AfxGetApp()->GetProfileInt( reg::section_dialog, reg::entry_useExplorerTheme, true ) != FALSE );
 	m_fileListCtrl.m_listTextEffect.m_textColor = m_useTextEffects ? color::Violet : CLR_NONE;	// list global text effects
+	SetFlag( m_fileListCtrl.RefListStyleEx(), LVS_EX_DOUBLEBUFFER, m_useDoubleBuffer );
+
+	VERIFY( res::LoadImageList( m_imageList, IDR_FLAG_STRIP_PNG, _FlagStripCount ) );
+	m_fileListCtrl.Set_ImageList( &m_imageList );
 }
 
-CFileStatesDialog::~CFileStatesDialog()
+CFileListDialog::~CFileListDialog()
 {
 	utl::ClearOwningContainer( m_displayItems );
 }
 
-void CFileStatesDialog::InitDisplayItems( void )
+void CFileListDialog::InitDisplayItems( void )
 {
 	const fs::TFileStatePairMap& rStatePairs = hlp::GetStatePairs( m_useDiffsMode );
 
@@ -158,7 +165,7 @@ void CFileStatesDialog::InitDisplayItems( void )
 		m_displayItems.push_back( new CDisplayObject( &*itPair ) );
 }
 
-void CFileStatesDialog::SetupFileListView( void )
+void CFileListDialog::SetupFileListView( void )
 {
 	int orgSel = m_fileListCtrl.GetCurSel();
 
@@ -173,7 +180,7 @@ void CFileStatesDialog::SetupFileListView( void )
 		{
 			const CDisplayObject* pObject = m_displayItems[ pos ];
 
-			m_fileListCtrl.InsertObjectItem( pos, pObject );		// SrcFileName
+			m_fileListCtrl.InsertObjectItem( pos, pObject, pos % _FlagStripCount );		// SrcFileName
 			m_fileListCtrl.SetSubItemText( pos, DestFileName, pObject->GetDestState().m_fullPath.GetNameExt() );
 
 			m_fileListCtrl.SetSubItemText( pos, SrcAttributes, fmt::FormatFileAttributes( pObject->GetSrcState().m_attributes ) );
@@ -197,7 +204,7 @@ void CFileStatesDialog::SetupFileListView( void )
 	}
 }
 
-void CFileStatesDialog::CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARAM rowKey, int subItem ) const
+void CFileListDialog::CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARAM rowKey, int subItem ) const
 {
 	if ( !m_useTextEffects )
 		return;
@@ -239,7 +246,7 @@ void CFileStatesDialog::CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARA
 		rTextEffect |= isSrc ? s_modSrc : s_modDest;
 }
 
-void CFileStatesDialog::ModifyDiffTextEffectAt( std::vector< ui::CTextEffect >& rMatchEffects, LPARAM rowKey, int subItem ) const
+void CFileListDialog::ModifyDiffTextEffectAt( std::vector< ui::CTextEffect >& rMatchEffects, LPARAM rowKey, int subItem ) const
 {
 	rowKey;
 	switch ( subItem )
@@ -251,14 +258,14 @@ void CFileStatesDialog::ModifyDiffTextEffectAt( std::vector< ui::CTextEffect >& 
 	}
 }
 
-BOOL CFileStatesDialog::OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo )
+BOOL CFileListDialog::OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo )
 {
 	return
 		CLayoutDialog::OnCmdMsg( id, code, pExtra, pHandlerInfo ) ||
 		m_fileListCtrl.OnCmdMsg( id, code, pExtra, pHandlerInfo );
 }
 
-void CFileStatesDialog::DoDataExchange( CDataExchange* pDX )
+void CFileListDialog::DoDataExchange( CDataExchange* pDX )
 {
 	bool firstInit = NULL == m_fileListCtrl.m_hWnd;
 	DDX_Control( pDX, IDC_FILE_STATE_LIST, m_fileListCtrl );
@@ -270,6 +277,7 @@ void CFileStatesDialog::DoDataExchange( CDataExchange* pDX )
 			CheckDlgButton( IDC_USE_DIFFS_CHECK, m_useDiffsMode );
 			CheckDlgButton( IDC_USE_ALTERNATE_ROWS_CHECK, m_useAlternateRows );
 			CheckDlgButton( IDC_USE_TEXT_EFFECTS_CHECK, m_useTextEffects );
+			CheckDlgButton( IDC_USE_DOUBLEBUFFER_CHECK, m_useDoubleBuffer );
 			CheckDlgButton( IDC_USE_EXPLORER_THEME_CHECK, m_fileListCtrl.UseExplorerTheme() );
 			CheckDlgButton( IDC_USE_DEFAULT_DRAW_CHECK, CReportListCustomDraw::s_useDefaultDraw );
 			CheckDlgButton( IDC_USE_DBG_GUIDES_CHECK, CReportListCustomDraw::s_dbgGuides );
@@ -284,41 +292,43 @@ void CFileStatesDialog::DoDataExchange( CDataExchange* pDX )
 
 // message handlers
 
-BEGIN_MESSAGE_MAP( CFileStatesDialog, CLayoutDialog )
+BEGIN_MESSAGE_MAP( CFileListDialog, CLayoutDialog )
 	ON_WM_DESTROY()
 	ON_BN_CLICKED( IDC_OPEN_DIALOG_BUTTON, OnBnClicked_OpenDialog )
 	ON_BN_CLICKED( IDC_USE_DIFFS_CHECK, OnToggle_UseDiffsCheck )
 	ON_BN_CLICKED( IDC_USE_ALTERNATE_ROWS_CHECK, OnToggle_UseAlternateRows )
 	ON_BN_CLICKED( IDC_USE_TEXT_EFFECTS_CHECK, OnToggle_UseTextEffects )
+	ON_BN_CLICKED( IDC_USE_DOUBLEBUFFER_CHECK, OnToggle_UseDoubleBuffer )
 	ON_BN_CLICKED( IDC_USE_EXPLORER_THEME_CHECK, OnToggle_UseExplorerTheme )
 	ON_BN_CLICKED( IDC_USE_DEFAULT_DRAW_CHECK, OnToggle_UseDefaultDraw )
 	ON_BN_CLICKED( IDC_USE_DBG_GUIDES_CHECK, OnToggle_UseDbgGuides )
 END_MESSAGE_MAP()
 
-void CFileStatesDialog::OnDestroy( void )
+void CFileListDialog::OnDestroy( void )
 {
 	AfxGetApp()->WriteProfileInt( reg::section_dialog, reg::entry_useDiffsMode, m_useDiffsMode );
 	AfxGetApp()->WriteProfileInt( reg::section_dialog, reg::entry_useAlternateRows, m_useAlternateRows );
 	AfxGetApp()->WriteProfileInt( reg::section_dialog, reg::entry_useTextEffects, m_useTextEffects );
+	AfxGetApp()->WriteProfileInt( reg::section_dialog, reg::entry_useDoubleBuffer, m_useDoubleBuffer );
 	AfxGetApp()->WriteProfileInt( reg::section_dialog, reg::entry_useExplorerTheme, m_fileListCtrl.UseExplorerTheme() );
 
 	__super::OnDestroy();
 }
 
-void CFileStatesDialog::OnBnClicked_OpenDialog( void )
+void CFileListDialog::OnBnClicked_OpenDialog( void )
 {
 	CTestDialog dialog( this );
 	dialog.DoModal();
 }
 
-void CFileStatesDialog::OnToggle_UseDiffsCheck( void )
+void CFileListDialog::OnToggle_UseDiffsCheck( void )
 {
 	m_useDiffsMode = IsDlgButtonChecked( IDC_USE_DIFFS_CHECK ) != FALSE;
 
 	SetupFileListView();
 }
 
-void CFileStatesDialog::OnToggle_UseAlternateRows( void )
+void CFileListDialog::OnToggle_UseAlternateRows( void )
 {
 	m_useAlternateRows = IsDlgButtonChecked( IDC_USE_ALTERNATE_ROWS_CHECK ) != FALSE;
 
@@ -326,7 +336,7 @@ void CFileStatesDialog::OnToggle_UseAlternateRows( void )
 	m_fileListCtrl.Invalidate();
 }
 
-void CFileStatesDialog::OnToggle_UseTextEffects( void )
+void CFileListDialog::OnToggle_UseTextEffects( void )
 {
 	m_useTextEffects = IsDlgButtonChecked( IDC_USE_TEXT_EFFECTS_CHECK ) != FALSE;
 
@@ -334,18 +344,30 @@ void CFileStatesDialog::OnToggle_UseTextEffects( void )
 	m_fileListCtrl.Invalidate();
 }
 
-void CFileStatesDialog::OnToggle_UseExplorerTheme( void )
+void CFileListDialog::OnToggle_UseDoubleBuffer( void )
+{
+	m_useDoubleBuffer = IsDlgButtonChecked( IDC_USE_DOUBLEBUFFER_CHECK ) != FALSE;
+
+	if ( m_useDoubleBuffer )
+		m_fileListCtrl.ModifyListStyleEx( 0, LVS_EX_DOUBLEBUFFER );
+	else
+		m_fileListCtrl.ModifyListStyleEx( LVS_EX_DOUBLEBUFFER, 0 );
+
+	m_fileListCtrl.Invalidate();
+}
+
+void CFileListDialog::OnToggle_UseExplorerTheme( void )
 {
 	m_fileListCtrl.SetUseExplorerTheme( IsDlgButtonChecked( IDC_USE_EXPLORER_THEME_CHECK ) != FALSE );
 }
 
-void CFileStatesDialog::OnToggle_UseDefaultDraw( void )
+void CFileListDialog::OnToggle_UseDefaultDraw( void )
 {
 	CReportListCustomDraw::s_useDefaultDraw = IsDlgButtonChecked( IDC_USE_DEFAULT_DRAW_CHECK ) != FALSE;
 	m_fileListCtrl.Invalidate();
 }
 
-void CFileStatesDialog::OnToggle_UseDbgGuides( void )
+void CFileListDialog::OnToggle_UseDbgGuides( void )
 {
 	CReportListCustomDraw::s_dbgGuides = IsDlgButtonChecked( IDC_USE_DBG_GUIDES_CHECK ) != FALSE;
 	m_fileListCtrl.Invalidate();

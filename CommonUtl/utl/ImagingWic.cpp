@@ -103,7 +103,7 @@ namespace wic
 	{
 		CComPtr< IWICMetadataQueryReader > pGlobalMetadata;
 		if ( HR_OK( m_pDecoder->GetMetadataQueryReader( &pGlobalMetadata ) ) )
-				return pGlobalMetadata;
+			return pGlobalMetadata;
 
 		return NULL;
 	}

@@ -1,5 +1,5 @@
-#ifndef FileStatesDialog_h
-#define FileStatesDialog_h
+#ifndef FileListDialog_h
+#define FileListDialog_h
 #pragma once
 
 #include "utl/FileState.h"
@@ -12,12 +12,12 @@ class CLogger;
 typedef std::pair< const fs::CFileState, fs::CFileState > TFileStatePair;
 
 
-class CFileStatesDialog : public CLayoutDialog
-						, private CReportListControl::ITextEffectCallback
+class CFileListDialog : public CLayoutDialog
+					  , private CReportListControl::ITextEffectCallback
 {
 public:
-	CFileStatesDialog( CWnd* pParent );
-	virtual ~CFileStatesDialog();
+	CFileListDialog( CWnd* pParent );
+	virtual ~CFileListDialog();
 private:
 	void InitDisplayItems( void );
 
@@ -31,13 +31,15 @@ private:
 	bool m_useDiffsMode;
 	bool m_useAlternateRows;
 	bool m_useTextEffects;
+	bool m_useDoubleBuffer;
 	std::vector< CDisplayObject* > m_displayItems;
 private:
-	// enum { IDD = IDD_FILE_STATES_DIALOG };
+	// enum { IDD = IDD_FILE_LIST_DIALOG };
 	enum Column { SrcFileName, DestFileName, SrcAttributes, DestAttributes, SrcCreationDate, DestCreationDate, Notes };
 	enum CustomColors { ColorErrorBk = color::PastelPink };
 
 	CReportListControl m_fileListCtrl;
+	CImageList m_imageList;
 
 	// generated stuff
 public:
@@ -50,6 +52,7 @@ protected:
 	afx_msg void OnToggle_UseDiffsCheck( void );
 	afx_msg void OnToggle_UseAlternateRows( void );
 	afx_msg void OnToggle_UseTextEffects( void );
+	afx_msg void OnToggle_UseDoubleBuffer( void );
 	afx_msg void OnToggle_UseExplorerTheme( void );
 	afx_msg void OnToggle_UseDefaultDraw( void );
 	afx_msg void OnToggle_UseDbgGuides( void );
@@ -81,4 +84,4 @@ private:
 };
 
 
-#endif // FileStatesDialog_h
+#endif // FileListDialog_h

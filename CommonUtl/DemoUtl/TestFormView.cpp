@@ -4,7 +4,7 @@
 #include "TestFormView.h"
 #include "DemoTemplate.h"
 #include "ImageDialog.h"
-#include "FileStatesDialog.h"
+#include "FileListDialog.h"
 #include "ImageTests.h"
 #include "utl/Utilities.h"
 #include "resource.h"
@@ -88,7 +88,7 @@ void CTestFormView::OnStudyListDiffs( void )
 {
 	for ( INT_PTR btnId = IDRETRY; IDRETRY == btnId; )
 	{
-		CFileStatesDialog dlg( AfxGetMainWnd() );
+		CFileListDialog dlg( AfxGetMainWnd() );
 		btnId = dlg.DoModal();
 	}
 }
