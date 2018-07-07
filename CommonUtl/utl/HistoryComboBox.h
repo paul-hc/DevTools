@@ -40,6 +40,7 @@ public:
 
 	virtual const ui::CItemContent& GetItemContent( void ) const { return m_itemContent; }
 	void SetItemContent( const ui::CItemContent& itemContent ) { m_itemContent = itemContent; }
+	ui::CItemContent& RefItemContent( void ) { return m_itemContent; }
 
 	CTextEditor* GetEdit( void ) const { return m_pEdit.get(); }
 

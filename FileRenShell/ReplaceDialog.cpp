@@ -66,6 +66,8 @@ CReplaceDialog::CReplaceDialog( IFileEditor* pParentEditor, const CRenameService
 	GetLayoutEngine().MaxClientSize().cy = 0;
 	LoadDlgIcon( ID_EDIT_REPLACE );
 
+	ClearFlag( m_replaceWithCombo.RefItemContent().m_itemsFlags, ui::CItemContent::RemoveEmpty );
+
 	m_findToolbar.GetStrip()
 		.AddButton( ID_PICK_FILENAME )
 		.AddButton( ID_COPY_FIND_TO_REPLACE );
