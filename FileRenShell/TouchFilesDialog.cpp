@@ -171,7 +171,7 @@ void CTouchFilesDialog::PopStackTop( cmd::StackType stackType )
 void CTouchFilesDialog::SetupDialog( void )
 {
 	AccumulateCommonStates();
-	SetupFileListView();							// fill in and select the found files list
+	SetupFileListView();								// fill in and select the found files list
 	UpdateFieldControls();
 }
 

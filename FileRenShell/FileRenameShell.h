@@ -49,7 +49,7 @@ private:
 	std::auto_ptr< CFileModel > m_pFileModel;
 	static const CMenuCmdInfo m_commands[];
 public:
-	DECLARE_REGISTRY_RESOURCEID( IDR_FILERENAMESHELL )
+	DECLARE_REGISTRY_RESOURCEID( IDR_FILERENAMESHELL_REG )
 
 	DECLARE_PROTECT_FINAL_CONSTRUCT()
 
@@ -71,7 +71,7 @@ public:
 
 	// IContextMenu
 	STDMETHOD( QueryContextMenu )( HMENU hMenu, UINT indexMenu, UINT idCmdFirst, UINT idCmdLast, UINT flags );
-	STDMETHOD( InvokeCommand )( LPCMINVOKECOMMANDINFO pCmi );
+	STDMETHOD( InvokeCommand )( CMINVOKECOMMANDINFO* pCmi );
 	STDMETHOD( GetCommandString )( UINT_PTR idCmd, UINT flags, UINT* pReserved, LPSTR pName, UINT cchMax );
 };
 

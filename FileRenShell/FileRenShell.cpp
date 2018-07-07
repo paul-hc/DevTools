@@ -25,7 +25,6 @@
 #include "stdafx.h"
 #include "FileRenShell.h"
 #include "Application.h"
-#include "resource.h"
 #include <initguid.h>
 
 #include "FileRenShell_i.c"

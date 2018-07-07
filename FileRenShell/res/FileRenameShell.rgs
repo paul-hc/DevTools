@@ -37,6 +37,17 @@ HKCR
 			}
 		}
 	}
+
+	lnkfile
+	{
+		shellex
+		{
+			ContextMenuHandlers
+			{
+				FileRenShell = s '{1D4EA504-89A1-11D5-A57D-0050BA0E2E4A}'
+			}
+		}
+	}
 }
 
 HKLM

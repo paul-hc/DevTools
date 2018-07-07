@@ -2,7 +2,7 @@
 // Microsoft Visual C++ generated include file.
 // Used by FileRenShell.rc
 //
-#define IDR_FILERENAMESHELL             100
+#define IDR_FILERENAMESHELL_REG         100
 #define IDD_RENAME_FILES_DIALOG         101
 #define IDD_REPLACE_DIALOG              102
 #define IDR_IMAGE_STRIP                 104

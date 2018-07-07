@@ -80,12 +80,8 @@ size_t CFileRenameShell::ExtractDropInfo( IDataObject* pDropInfo )
 
 	FORMATETC format = { CF_HDROP, NULL, DVASPECT_CONTENT, -1, TYMED_HGLOBAL };
 	STGMEDIUM storageMedium;
-	HRESULT hResult = pDropInfo->GetData( &format, &storageMedium );		// make the data transfer
-	if ( FAILED( hResult ) )
-	{
-		TRACE( _T("CFileRenameShell::ExtractDropInfo() failed: hResult=0x%08X\n"), hResult );
+	if ( !HR_OK( pDropInfo->GetData( &format, &storageMedium ) ) )		// make the data transfer
 		return 0;
-	}
 
 	m_pFileModel.reset( new CFileModel );
 	return m_pFileModel->SetupFromDropInfo( (HDROP)storageMedium.hGlobal );
@@ -198,10 +194,10 @@ const CFileRenameShell::CMenuCmdInfo* CFileRenameShell::FindCmd( MenuCommand cmd
 
 STDMETHODIMP CFileRenameShell::InterfaceSupportsErrorInfo( REFIID riid )
 {
-	static const IID* interfaces[] = { &IID_IFileRenameShell, &__uuidof( IShellExtInit ), &IID_IContextMenu /*__uuidof( IContextMenu )*/ };
+	static const IID* s_pInterfaceIds[] = { &IID_IFileRenameShell, &__uuidof( IShellExtInit ), &IID_IContextMenu /*__uuidof( IContextMenu )*/ };
 
-	for ( int i = 0; i != COUNT_OF( interfaces ); i++ )
-		if ( InlineIsEqualGUID( *interfaces[ i ], riid ) )
+	for ( unsigned int i = 0; i != COUNT_OF( s_pInterfaceIds ); ++i )
+		if ( ::InlineIsEqualGUID( *s_pInterfaceIds[ i ], riid ) )
 			return S_OK;
 
 	return S_FALSE;
@@ -218,7 +214,7 @@ STDMETHODIMP CFileRenameShell::Initialize( LPCITEMIDLIST pidlFolder, IDataObject
 	pidlFolder, hKeyProgId;
 	AFX_MANAGE_STATE( AfxGetStaticModuleState() )
 
-	TRACE( _T("CFileRenameShell::Initialize()\n") );
+	//TRACE( _T("CFileRenameShell::Initialize()\n") );
 	if ( pDropInfo != NULL )
 		ExtractDropInfo( pDropInfo );
 	return S_OK;
@@ -232,8 +228,13 @@ STDMETHODIMP CFileRenameShell::QueryContextMenu( HMENU hMenu, UINT indexMenu, UI
 	idCmdLast;
 	AFX_MANAGE_STATE( AfxGetStaticModuleState() )
 
-	if ( !( flags & CMF_DEFAULTONLY ) )
-	{	// kind of CMF_NORMAL
+	// res\FileRenameShell.rgs: this shell extension registers itself for both "*" and "lnkfile" types as ContextMenuHandlers.
+	//		http://microsoft.public.platformsdk.shell.narkive.com/yr1YoK9e/obtaining-selected-shortcut-lnk-files-inside-ishellextinit-initialize
+	//		https://stackoverflow.com/questions/21848694/windows-shell-extension-doesnt-give-exact-file-paths
+
+	if ( !HasFlag( flags, CMF_DEFAULTONLY ) &&			// kind of CMF_NORMAL
+		 !HasFlag( flags, CMF_VERBSONLY ) )				// for "lnkfile": prevent menu item duplication due to querying twice (* and lnkfile)
+	{
 		//TRACE( _T("CFileRenameShell::QueryContextMenu(): selFileCount=%d\n"), m_fileData.GetSourceFiles().size() );
 
 		if ( m_pFileModel.get() != NULL )
@@ -247,14 +248,14 @@ STDMETHODIMP CFileRenameShell::QueryContextMenu( HMENU hMenu, UINT indexMenu, UI
 	return S_OK;
 }
 
-STDMETHODIMP CFileRenameShell::InvokeCommand( LPCMINVOKECOMMANDINFO pCmi )
+STDMETHODIMP CFileRenameShell::InvokeCommand( CMINVOKECOMMANDINFO* pCmi )
 {
 	AFX_MANAGE_STATE( AfxGetStaticModuleState() )
 
-	// If HIWORD( pCmi->lpVerb ) then we have been called programmatically
-	// and lpVerb is a command that should be invoked.	Otherwise, the shell
-	// has called us, and LOWORD( pCmi->lpVerb ) is the menu ID the user has
-	// selected.  Actually, it's (menu ID - idCmdFirst) from QueryContextMenu().
+	// If HIWORD(pCmi->lpVerb) then we have been called programmatically and lpVerb is a command that should be invoked.
+	// Otherwise, the shell has called us, and LOWORD(pCmi->lpVerb) is the menu ID the user has selected.
+	// Actually, it's (menu ID - idCmdFirst) from QueryContextMenu().
+
 	if ( m_pFileModel.get() != NULL )
 		if ( 0 == HIWORD( pCmi->lpVerb ) )
 		{

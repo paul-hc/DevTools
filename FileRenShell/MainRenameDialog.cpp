@@ -97,11 +97,12 @@ CMainRenameDialog::CMainRenameDialog( CFileModel* pFileModel, CWnd* pParent )
 	m_regSection = reg::section_mainDialog;
 	RegisterCtrlLayout( layout::styles, COUNT_OF( layout::styles ) );
 
-	m_fileListCtrl.ModifyListStyleEx( LVS_EX_DOUBLEBUFFER, LVS_EX_GRIDLINES );		// remove double buffering for better drawing accuracy on thumb scaling
 	m_fileListCtrl.SetSection( m_regSection + _T("\\List") );
 	m_fileListCtrl.SetUseAlternateRowColoring();
 	m_fileListCtrl.SetTextEffectCallback( this );
 	CGeneralOptions::Instance().ApplyToListCtrl( &m_fileListCtrl );
+	// Note: focus retangle is not painted properly without double-buffering
+	//m_fileListCtrl.ModifyListStyleEx( LVS_EX_DOUBLEBUFFER, LVS_EX_GRIDLINES );		// remove double buffering for better drawing accuracy on thumb scaling
 
 	m_changeCaseButton.SetSelValue( AfxGetApp()->GetProfileInt( reg::section_mainDialog, reg::entry_changeCase, ExtLowerCase ) );
 

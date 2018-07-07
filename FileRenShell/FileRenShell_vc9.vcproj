@@ -422,7 +422,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\FileRenameShell.rgs"
+				RelativePath=".\res\FileRenameShell.rgs"
 				>
 			</File>
 			<File
