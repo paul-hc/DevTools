@@ -56,17 +56,20 @@ BOOL CBrowserDoc::OnOpenDocument( LPCTSTR pDirPath )
 		return false;
 
 	SetPathName( pDirPath, TRUE );
-	SetModifiedFlag( FALSE );     // start off with unmodified
+	SetModifiedFlag( FALSE );			// start off with unmodified
 	return TRUE;
 }
 
 void CBrowserDoc::OnCloseDocument( void )
 {
+	m_bAutoDelete = FALSE;				// we'll destroy the document at the end of this function
+	CDocument::OnCloseDocument();		// destroy all views; that will store current view mode and dirPath in this document
+
 	CWinApp* pApp = AfxGetApp();
 	pApp->WriteProfileString( reg::section_view, reg::entry_lastDirPath, GetPathName() );
 	pApp->WriteProfileInt( reg::section_view, reg::entry_viewMode, m_filePaneViewMode );
 
-	CDocument::OnCloseDocument();
+	delete this;
 }
 
 void CBrowserDoc::Serialize( CArchive& ar )
