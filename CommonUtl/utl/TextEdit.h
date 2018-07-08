@@ -5,14 +5,16 @@
 #include "AccelTable.h"
 #include "InternalChange.h"
 #include "Range.h"
+#include "BaseFrameHostCtrl.h"
 
 
 // inhibits EN_CHANGE notifications on internal changes;
 // resets the modify flag when setting text programatically.
 
-class CTextEdit : public CEdit
+class CTextEdit : public CBaseFrameHostCtrl< CEdit >
 				, public CInternalChange
 {
+	typedef CBaseFrameHostCtrl< CEdit > BaseClass;
 public:
 	CTextEdit( bool useFixedFont = true );
 	virtual ~CTextEdit();

@@ -55,11 +55,10 @@ static ACCEL dropDownKeys[] =
 
 
 CHistoryComboBox::CHistoryComboBox( unsigned int maxCount /*= ui::HistoryMaxSize*/, const TCHAR* pItemSep /*= _T(";")*/, str::CaseType caseType /*= str::Case*/ )
-	: CComboBox()
+	: CBaseFrameHostCtrl< CComboBox >()
 	, m_maxCount( maxCount )
 	, m_pItemSep( pItemSep )
 	, m_caseType( caseType )
-	, m_frameColor( CLR_NONE )
 	, m_accel( keys, COUNT_OF( keys ) )
 	, m_dropDownAccel( dropDownKeys, COUNT_OF( dropDownKeys ) )
 	, m_dropSelIndex( CB_ERR )
@@ -96,16 +95,6 @@ void CHistoryComboBox::StoreCurrentEditItem( void )
 	ui::UpdateHistoryCombo( *this, m_maxCount, m_caseType );		// store edit item in the list (with validation)
 }
 
-bool CHistoryComboBox::SetFrameColor( COLORREF frameColor )
-{
-	if ( m_frameColor == frameColor )
-		return false;
-
-	m_frameColor = frameColor;
-	Invalidate();
-	return true;
-}
-
 int CHistoryComboBox::GetCmdSelIndex( void ) const
 {
 	if ( GetDroppedState() )			// allow user to delete selected items when the combo list is dropped down
@@ -132,7 +121,7 @@ void CHistoryComboBox::ValidateContent( void )
 
 void CHistoryComboBox::PreSubclassWindow( void )
 {
-	CComboBox::PreSubclassWindow();
+	BaseClass::PreSubclassWindow();
 
 	COMBOBOXINFO cbInfo = { sizeof( COMBOBOXINFO ) };
 	if ( GetComboBoxInfo( &cbInfo ) )
@@ -140,6 +129,7 @@ void CHistoryComboBox::PreSubclassWindow( void )
 		if ( cbInfo.hwndList != NULL && NULL == m_pEdit.get() )
 		{
 			m_pEdit.reset( new CTextEditor );
+			m_pEdit->SetShowFocus();						// enable focus display automatically for edit-based combos
 			m_pEdit->SubclassWindow( cbInfo.hwndItem );
 		}
 		if ( cbInfo.hwndList != NULL && NULL == m_pDropList.get() )
@@ -155,21 +145,20 @@ BOOL CHistoryComboBox::PreTranslateMessage( MSG* pMsg )
 	if ( CAccelTable::IsKeyMessage( pMsg ) )
 	{
 		if ( GetDroppedState() )			// allow user to delete selected items when the combo list is dropped down
-		{
 			if ( GetCurSel() != CB_ERR && m_dropDownAccel.Translate( pMsg, m_hWnd ) )
 				return true;
-		}
+
 		if ( m_accel.Translate( pMsg, m_hWnd ) )
 			return true;
 	}
 
-	return CComboBox::PreTranslateMessage( pMsg );
+	return BaseClass::PreTranslateMessage( pMsg );
 }
 
 
 // message handlers
 
-BEGIN_MESSAGE_MAP( CHistoryComboBox, CComboBox )
+BEGIN_MESSAGE_MAP( CHistoryComboBox, BaseClass )
 	ON_WM_CONTEXTMENU()
 	ON_WM_PAINT()
 	ON_COMMAND( ID_ADD_ITEM, OnStoreEditItem )
@@ -206,21 +195,7 @@ void CHistoryComboBox::OnContextMenu( CWnd* pWnd, CPoint point )
 		return;
 	}
 
-	CComboBox::OnContextMenu( pWnd, point );
-}
-
-void CHistoryComboBox::OnPaint( void )
-{
-	CComboBox::OnPaint();
-
-	if ( m_frameColor != CLR_NONE )
-	{
-		CClientDC dc( this );
-		CBrush borderBrush( m_frameColor );
-		CRect rect;
-		GetClientRect( &rect );
-		dc.FrameRect( &rect, &borderBrush );
-	}
+	BaseClass::OnContextMenu( pWnd, point );
 }
 
 void CHistoryComboBox::OnUpdateSelectedListItem( CCmdUI* pCmdUI )

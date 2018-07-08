@@ -811,6 +811,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\BaseFrameHostCtrl.h"
+				>
+			</File>
+			<File
+				RelativePath=".\BaseFrameHostCtrl.hxx"
+				>
+			</File>
+			<File
 				RelativePath=".\BaseMainDialog.cpp"
 				>
 			</File>

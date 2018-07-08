@@ -11,8 +11,8 @@
 #include "utl/ImageStore.h"
 #include "utl/LayoutEngine.h"
 #include "utl/MenuUtilities.h"
-#include "utl/TextEdit.h"
-#include "utl/Utilities.h"
+#include "utl/TextEditor.h"
+#include "utl/UtilitiesEx.h"
 #include "utl/resource.h"
 
 #ifdef _DEBUG
@@ -29,6 +29,7 @@ namespace reg
 	const TCHAR entry_replaceWith[] = _T("Replace With");
 	const TCHAR entry_matchCase[] = _T("Match Case");
 	const TCHAR entry_findType[] = _T("Find Type");
+	const TCHAR entry_autoFillCommonPrefix[] = _T("AutoFillCommonPrefix");
 }
 
 
@@ -53,8 +54,9 @@ CReplaceDialog::CReplaceDialog( IFileEditor* pParentEditor, const CRenameService
 	, m_pRenSvc( pRenSvc )
 	, m_findWhat( LoadFindWhat() )
 	, m_replaceWith( LoadReplaceWith() )
-	, m_matchCase( AfxGetApp()->GetProfileInt( reg::section, reg::entry_matchCase, TRUE ) != FALSE )
+	, m_matchCase( AfxGetApp()->GetProfileInt( reg::section, reg::entry_matchCase, true ) != FALSE )
 	, m_findType( static_cast< FindType >( AfxGetApp()->GetProfileInt( reg::section, reg::entry_findType, Find_Text ) ) )
+	, m_autoFillCommonPrefix( AfxGetApp()->GetProfileInt( reg::section, reg::entry_autoFillCommonPrefix, true ) != FALSE )
 	, m_findWhatCombo( ui::HistoryMaxSize, specialSep, m_matchCase ? str::Case : str::IgnoreCase )
 	, m_replaceWithCombo( ui::HistoryMaxSize, specialSep, m_matchCase ? str::Case : str::IgnoreCase )
 {
@@ -66,11 +68,13 @@ CReplaceDialog::CReplaceDialog( IFileEditor* pParentEditor, const CRenameService
 	GetLayoutEngine().MaxClientSize().cy = 0;
 	LoadDlgIcon( ID_EDIT_REPLACE );
 
-	ClearFlag( m_replaceWithCombo.RefItemContent().m_itemsFlags, ui::CItemContent::RemoveEmpty );
+	ClearFlag( m_replaceWithCombo.RefItemContent().m_itemsFlags, ui::CItemContent::RemoveEmpty | ui::CItemContent::Trim );
 
 	m_findToolbar.GetStrip()
 		.AddButton( ID_PICK_FILENAME )
-		.AddButton( ID_COPY_FIND_TO_REPLACE );
+		.AddButton( ID_COPY_FIND_TO_REPLACE )
+		.AddSeparator()
+		.AddButton( ID_AUTO_FILL_COMMON_PREFIX_CK );
 
 	m_replaceToolbar.GetStrip()
 		.AddButton( ID_PICK_DIR_PATH )
@@ -165,6 +169,21 @@ bool CReplaceDialog::ReplaceItems( bool commit /*= true*/ ) const
 	return true;
 }
 
+bool CReplaceDialog::FillCommonPrefix( void )
+{
+	std::auto_ptr< CPickDataset > pPickDataset = m_pRenSvc->MakeFnamePickDataset();
+
+	if ( !pPickDataset->HasCommonPrefix() )
+	{
+		ui::FlashCtrlFrame( &m_findWhatCombo, color::Error );
+		return false;
+	}
+
+	StoreFindWhatText( pPickDataset->GetCommonPrefix(), pPickDataset->GetCommonPrefix() );
+	ui::FlashCtrlFrame( &m_findWhatCombo, color::AzureBlue );
+	return true;
+}
+
 void CReplaceDialog::DoDataExchange( CDataExchange* pDX )
 {
 	const bool firstInit = NULL == m_findWhatCombo.m_hWnd;
@@ -193,6 +212,9 @@ void CReplaceDialog::DoDataExchange( CDataExchange* pDX )
 
 			m_findWhatCombo.LoadHistory( reg::section, reg::entry_findWhat );
 			m_replaceWithCombo.LoadHistory( reg::section, reg::entry_replaceWith );
+
+			if ( m_autoFillCommonPrefix )
+				FillCommonPrefix();
 		}
 		OnChanged_FindWhat();
 	}
@@ -213,10 +235,13 @@ void CReplaceDialog::DoDataExchange( CDataExchange* pDX )
 // message handlers
 
 BEGIN_MESSAGE_MAP( CReplaceDialog, CLayoutDialog )
+	ON_WM_DESTROY()
 	ON_CBN_EDITCHANGE( IDC_FIND_WHAT_COMBO, OnChanged_FindWhat )
 	ON_CBN_SELCHANGE( IDC_FIND_WHAT_COMBO, OnChanged_FindWhat )
 	ON_BN_CLICKED( IDC_MATCH_CASE_CHECK, OnBnClicked_MatchCase )
 	ON_BN_CLICKED( IDC_CLEAR_FILES_BUTTON, OnBnClicked_ClearDestFiles )
+	ON_COMMAND( ID_AUTO_FILL_COMMON_PREFIX_CK, OnToggle_AutoFillCommonPrefix )
+	ON_UPDATE_COMMAND_UI( ID_AUTO_FILL_COMMON_PREFIX_CK, OnUpdate_AutoFillCommonPrefix )
 	ON_COMMAND( ID_PICK_FILENAME, OnPickFilename )
 	ON_COMMAND( ID_COPY_FIND_TO_REPLACE, OnCopyFindToReplace )
 	ON_COMMAND( ID_PICK_DIR_PATH, OnPickDirPath )
@@ -237,6 +262,13 @@ void CReplaceDialog::OnOK( void )
 			if ( !ui::IsKeyPressed( VK_CONTROL ) )			// keep dialog open if CTRL key is down
 				EndDialog( IDOK );
 		}
+}
+
+void CReplaceDialog::OnDestroy( void )
+{
+	AfxGetApp()->WriteProfileInt( reg::section, reg::entry_autoFillCommonPrefix, m_autoFillCommonPrefix );
+
+	__super::OnDestroy();
 }
 
 void CReplaceDialog::OnChanged_FindWhat( void )
@@ -264,6 +296,19 @@ void CReplaceDialog::OnBnClicked_ClearDestFiles( void )
 {
 	ui::SendCommand( GetParent()->GetSafeHwnd(), IDC_CLEAR_FILES_BUTTON );
 	OnChanged_FindWhat();			// update combo frame
+}
+
+void CReplaceDialog::OnToggle_AutoFillCommonPrefix( void )
+{
+	m_autoFillCommonPrefix = !m_autoFillCommonPrefix;
+
+	if ( m_autoFillCommonPrefix )
+		FillCommonPrefix();
+}
+
+void CReplaceDialog::OnUpdate_AutoFillCommonPrefix( CCmdUI* pCmdUI )
+{
+	pCmdUI->SetCheck( m_autoFillCommonPrefix );
 }
 
 void CReplaceDialog::OnPickFilename( void )

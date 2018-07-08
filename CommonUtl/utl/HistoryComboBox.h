@@ -5,6 +5,7 @@
 #include "ui_fwd.h"
 #include "AccelTable.h"
 #include "ItemContent.h"
+#include "BaseFrameHostCtrl.h"
 
 
 #define ON_HCN_VALIDATEITEMS( id, memberFxn )		ON_CONTROL( CHistoryComboBox::HCN_VALIDATEITEMS, id, memberFxn )
@@ -14,9 +15,10 @@ class CComboDropList;
 class CTextEditor;
 
 
-class CHistoryComboBox : public CComboBox
+class CHistoryComboBox : public CBaseFrameHostCtrl< CComboBox >
 					   , public ui::IContentValidator
 {
+	typedef CBaseFrameHostCtrl< CComboBox > BaseClass;
 public:
 	enum NotifCode { HCN_VALIDATEITEMS = CBN_SELENDCANCEL + 10 };		// note: notifications are suppressed during parent's UpdateData()
 	enum InternalCmds { Cmd_ResetDropSelIndex = 350 };
@@ -36,8 +38,6 @@ public:
 	std::tstring GetCurrentText( void ) const;
 	void StoreCurrentEditItem( void );
 
-	bool SetFrameColor( COLORREF frameColor );
-
 	virtual const ui::CItemContent& GetItemContent( void ) const { return m_itemContent; }
 	void SetItemContent( const ui::CItemContent& itemContent ) { m_itemContent = itemContent; }
 	ui::CItemContent& RefItemContent( void ) { return m_itemContent; }
@@ -52,7 +52,6 @@ protected:
 	unsigned int m_maxCount;
 	const TCHAR* m_pItemSep;
 	str::CaseType m_caseType;
-	COLORREF m_frameColor;
 private:
 	ui::CItemContent m_itemContent;			// self-encapsulated
 	CAccelTable m_accel, m_dropDownAccel;
@@ -67,7 +66,6 @@ private:
 	virtual BOOL PreTranslateMessage( MSG* pMsg );
 protected:
 	afx_msg void OnContextMenu( CWnd* pWnd, CPoint point );
-	afx_msg void OnPaint( void );
 	afx_msg void OnUpdateSelectedListItem( CCmdUI* pCmdUI );
 	afx_msg void OnDeleteListItem( void );
 	afx_msg void OnStoreEditItem( void );

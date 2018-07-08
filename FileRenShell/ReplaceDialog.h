@@ -26,6 +26,7 @@ private:
 	bool SkipDialog( void ) const;			// skip dialog and execute the last replace directly
 	bool ReplaceItems( bool commit = true ) const;
 	bool FindMatch( void ) const { return ReplaceItems( false ); }
+	bool FillCommonPrefix( void );
 
 	// last saved strings in history
 	static std::tstring LoadFindWhat( void );
@@ -41,6 +42,7 @@ private:
 	std::tstring m_replaceWith;
 	bool m_matchCase;
 	FindType m_findType;
+	bool m_autoFillCommonPrefix;
 
 	std::auto_ptr< CPickDataset > m_pPickDataset;
 private:
@@ -57,9 +59,12 @@ public:
 	virtual void OnOK( void );
 protected:
 	// generated message map
+	afx_msg void OnDestroy( void );
 	afx_msg void OnChanged_FindWhat( void );
 	afx_msg void OnBnClicked_MatchCase( void );
 	afx_msg void OnBnClicked_ClearDestFiles( void );
+	afx_msg void OnToggle_AutoFillCommonPrefix( void );
+	afx_msg void OnUpdate_AutoFillCommonPrefix( CCmdUI* pCmdUI );
 	afx_msg void OnPickFilename( void );
 	afx_msg void OnCopyFindToReplace( void );
 	afx_msg void OnFilenamePicked( UINT cmdId );

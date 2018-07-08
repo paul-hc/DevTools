@@ -64,11 +64,11 @@ CAPTION "Replace in Filename"
 FONT 8, "MS Sans Serif", 0, 0, 0x0
 BEGIN
     LTEXT           "&Find what:",IDC_STATIC,8,11,34,8
-    COMBOBOX        IDC_FIND_WHAT_COMBO,55,8,85,95,CBS_DROPDOWN | CBS_AUTOHSCROLL | WS_VSCROLL | WS_GROUP | WS_TABSTOP
-    LTEXT           "<strip1>",IDC_STRIP_BAR_1,142,8,33,12,SS_CENTERIMAGE | WS_CLIPSIBLINGS | WS_BORDER
+    COMBOBOX        IDC_FIND_WHAT_COMBO,55,8,71,95,CBS_DROPDOWN | CBS_AUTOHSCROLL | WS_VSCROLL | WS_GROUP | WS_TABSTOP
+    LTEXT           "<strip1>",IDC_STRIP_BAR_1,128,8,50,12,SS_CENTERIMAGE | WS_CLIPSIBLINGS | WS_BORDER
     LTEXT           "&Replace with:",IDC_STATIC,8,27,44,8
-    COMBOBOX        IDC_REPLACE_WITH_COMBO,55,26,85,95,CBS_DROPDOWN | CBS_AUTOHSCROLL | WS_VSCROLL | WS_TABSTOP
-    LTEXT           "<strip2>",IDC_STRIP_BAR_2,142,26,33,12,SS_CENTERIMAGE | WS_CLIPSIBLINGS | WS_BORDER
+    COMBOBOX        IDC_REPLACE_WITH_COMBO,55,26,71,95,CBS_DROPDOWN | CBS_AUTOHSCROLL | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "<strip2>",IDC_STRIP_BAR_2,128,26,50,12,SS_CENTERIMAGE | WS_CLIPSIBLINGS | WS_BORDER
     GROUPBOX        "Find options",IDC_GROUP_BOX_1,8,44,165,41,WS_GROUP
     CONTROL         "Match &case",IDC_MATCH_CASE_CHECK,"Button",BS_AUTOCHECKBOX | WS_GROUP | WS_TABSTOP,14,56,53,10
     CONTROL         "Replace &text",IDC_TEXT_RADIO,"Button",BS_AUTORADIOBUTTON | WS_GROUP | WS_TABSTOP,84,56,56,10
@@ -241,8 +241,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 7,5,0,2
- PRODUCTVERSION 7,5,0,2
+ FILEVERSION 7,6,0,2
+ PRODUCTVERSION 7,6,0,2
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -257,16 +257,16 @@ BEGIN
     BEGIN
         BLOCK "040904b0"
         BEGIN
-            VALUE "Comments", "Rename of .lnk shortcut files|Options properties|File list thumbnails|List sorting|Draw list diff sub-items on post-paint|Undo and Redo with commands|Touch files dialog"
+            VALUE "Comments", "Replace dialog auto-fill common prefix|Report list uses callback text for diff items text|Rename of .lnk shortcut files|Options properties|File list thumbnails|List sorting|Draw list diff sub-items on post-paint|Undo and Redo with commands|Touch files dialog"
             VALUE "CompanyName", "Paul Cocoveanu"
             VALUE "Email", "phc.2nd@gmail.com"
             VALUE "FileDescription", "Shell extension for renaming files and folders"
-            VALUE "FileVersion", "7, 5, 0, 2"
+            VALUE "FileVersion", "7, 6, 0, 2"
             VALUE "InternalName", "FileRenShell"
             VALUE "LegalCopyright", "Copyright © 2001-2018"
             VALUE "OriginalFilename", "FileRenShell64.dll"
             VALUE "ProductName", "FileRenShell Shell Extension DLL"
-            VALUE "ProductVersion", "7, 5, 0, 2"
+            VALUE "ProductVersion", "7, 6, 0, 2"
             VALUE "WrittenBy", "Written by Paul Cocoveanu"
         END
     END
@@ -382,6 +382,7 @@ BEGIN
     SEPARATOR
     BUTTON      ID_PICK_FILENAME
     BUTTON      ID_COPY_FIND_TO_REPLACE
+    BUTTON      ID_AUTO_FILL_COMMON_PREFIX_CK
     BUTTON      ID_PICK_DIR_PATH
     BUTTON      ID_PARENT_FOLDER
 END
@@ -470,6 +471,12 @@ END
 STRINGTABLE 
 BEGIN
     ID_OPTIONS              "Open the options property sheet dialog\nOptions"
+END
+
+STRINGTABLE 
+BEGIN
+    ID_AUTO_FILL_COMMON_PREFIX_CK 
+                            "Auto-fill pattern with the common prefix of the files"
 END
 
 #endif    // English (U.S.) resources

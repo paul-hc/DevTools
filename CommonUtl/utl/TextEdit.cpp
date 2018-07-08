@@ -19,7 +19,7 @@ static ACCEL editKeys[] =
 };
 
 CTextEdit::CTextEdit( bool useFixedFont /*= true*/ )
-	: CEdit()
+	: CBaseFrameHostCtrl< CEdit >()
 	, m_useFixedFont( useFixedFont )
 	, m_keepSelOnFocus( false )
 	, m_hookThumbTrack( true )
@@ -171,7 +171,7 @@ void CTextEdit::OnValueChanged( void )
 
 void CTextEdit::PreSubclassWindow( void )
 {
-	CEdit::PreSubclassWindow();
+	BaseClass::PreSubclassWindow();
 
 	if ( m_useFixedFont )
 		SetFixedFont( this );
@@ -183,7 +183,7 @@ BOOL CTextEdit::PreTranslateMessage( MSG* pMsg )
 }
 
 
-BEGIN_MESSAGE_MAP( CTextEdit, CEdit )
+BEGIN_MESSAGE_MAP( CTextEdit, BaseClass )
 	ON_WM_GETDLGCODE()
 	ON_WM_HSCROLL()
 	ON_WM_VSCROLL()
@@ -194,7 +194,7 @@ END_MESSAGE_MAP()
 
 UINT CTextEdit::OnGetDlgCode( void )
 {
-	UINT code = CEdit::OnGetDlgCode();
+	UINT code = BaseClass::OnGetDlgCode();
 	if ( m_keepSelOnFocus )
 		ClearFlag( code, DLGC_HASSETSEL );
 	return code;

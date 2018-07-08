@@ -75,7 +75,8 @@ static ACCEL keys[] =
 {
 	{ FVIRTKEY | FCONTROL, _T('A'), ID_EDIT_SELECT_ALL },
 	{ FVIRTKEY | FCONTROL, _T('C'), ID_EDIT_COPY },
-	{ FVIRTKEY | FCONTROL, VK_INSERT, ID_EDIT_COPY }
+	{ FVIRTKEY | FCONTROL, VK_INSERT, ID_EDIT_COPY },
+	{ FVIRTKEY, VK_F2, ID_RENAME_ITEM }
 };
 
 const TCHAR CReportListControl::s_fmtRegColumnLayout[] = _T("Width=%d, Order=%d");
@@ -1777,6 +1778,8 @@ BEGIN_MESSAGE_MAP( CReportListControl, CListCtrl )
 	ON_UPDATE_COMMAND_UI( ID_EDIT_SELECT_ALL, OnUpdateSelectAll )
 	ON_COMMAND_RANGE( ID_MOVE_UP_ITEM, ID_MOVE_BOTTOM_ITEM, OnMoveTo )
 	ON_UPDATE_COMMAND_UI_RANGE( ID_MOVE_UP_ITEM, ID_MOVE_BOTTOM_ITEM, OnUpdateMoveTo )
+	ON_COMMAND( ID_RENAME_ITEM, OnRename )
+	ON_UPDATE_COMMAND_UI( ID_RENAME_ITEM, OnUpdateRename )
 END_MESSAGE_MAP()
 
 int CReportListControl::OnCreate( CREATESTRUCT* pCreateStruct )
@@ -2108,6 +2111,16 @@ void CReportListControl::OnUpdateMoveTo( CCmdUI* pCmdUI )
 	GetSelection( selIndexes );
 
 	pCmdUI->Enable( seq::CanMoveSelection( GetItemCount(), selIndexes, lv::CmdIdToMoveTo( pCmdUI->m_nID ) ) );
+}
+
+void CReportListControl::OnRename( void )
+{
+	EditLabel( GetCurSel() );
+}
+
+void CReportListControl::OnUpdateRename( CCmdUI* pCmdUI )
+{
+	pCmdUI->Enable( HasFlag( GetStyle(), LVS_EDITLABELS ) && GetCurSel() != -1 );
 }
 
 

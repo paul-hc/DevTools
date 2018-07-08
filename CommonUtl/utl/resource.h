@@ -75,7 +75,6 @@
 #define IDC_ABOUT_DIVIDER_STATIC        28512
 #define IDC_ITEMS_EDIT                  28513
 #define IDC_ITEMS_SHEET                 28513
-#define IDC_EDIT1                       28514
 #define IDC_ABOUT_COMMENTS_EDIT         28514
 #define IDC_TOOLBAR_PLACEHOLDER         28515
 #define IDC_ABOUT_BUILD_INFO_LABEL      28515

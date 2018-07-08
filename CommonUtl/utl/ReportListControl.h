@@ -532,6 +532,8 @@ public:
 	afx_msg void OnUpdateSelectAll( CCmdUI* pCmdUI );
 	afx_msg void OnMoveTo( UINT cmdId );
 	afx_msg void OnUpdateMoveTo( CCmdUI* pCmdUI );
+	afx_msg void OnRename( void );
+	afx_msg void OnUpdateRename( CCmdUI* pCmdUI );
 
 	DECLARE_MESSAGE_MAP()
 };
