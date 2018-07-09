@@ -11,7 +11,7 @@ namespace fs { class CPath; }
 
 namespace cmd
 {
-	enum CommandType { RenameFile = 100, TouchFile };
+	enum CommandType { RenameFile = 100, TouchFile, DestPathChanged };
 
 	const CEnumTags& GetTags_CommandType( void );
 

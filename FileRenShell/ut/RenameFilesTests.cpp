@@ -4,7 +4,7 @@
 #include "RenameItem.h"
 #include "FileService.h"
 #include "FileCommands.h"
-#include "PathAlgorithms.h"
+#include "TextAlgorithms.h"
 #include "utl/ContainerUtilities.h"
 #include "utl/Logger.h"
 #include "utl/PathGenerator.h"

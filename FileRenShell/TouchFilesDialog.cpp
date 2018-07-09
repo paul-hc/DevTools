@@ -113,11 +113,15 @@ bool CTouchFilesDialog::TouchFiles( void )
 	ClearFileErrors();
 
 	CFileService svc;
-	if ( CMacroCommand* pTouchMacroCmd = svc.MakeTouchCmds( m_rTouchItems ) )
-	{
-		cmd::CScopedErrorObserver observe( this );
-		return m_pFileModel->GetCommandModel()->Execute( pTouchMacroCmd );
-	}
+	std::auto_ptr< CMacroCommand > pTouchMacroCmd = svc.MakeTouchCmds( m_rTouchItems );
+	if ( pTouchMacroCmd.get() != NULL )
+		if ( !pTouchMacroCmd->IsEmpty() )
+		{
+			cmd::CScopedErrorObserver observe( this );
+			return m_pFileModel->GetCommandModel()->Execute( pTouchMacroCmd.release() );
+		}
+		else
+			return IDOK == AfxMessageBox( _T("There are no changes to apply. Close the dialog?"), MB_OKCANCEL );
 
 	return false;
 }

@@ -29,7 +29,7 @@ namespace cap
 {
 	const CEnumTags& GetTags_CaseModify( void )
 	{
-		static const CEnumTags& tags( str::Load( IDS_CASE_MODIFY_TAGS ) );
+		static const CEnumTags tags( _T("Preserve|Upper Case|Lower Case") );
 		return tags;
 	}
 

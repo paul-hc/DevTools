@@ -2,7 +2,7 @@
 #include "stdafx.h"
 #include "Application.h"
 #include "GeneralOptions.h"
-#include "ut/PathAlgorithmsTests.h"
+#include "ut/TextAlgorithmsTests.h"
 #include "ut/RenameFilesTests.h"
 #include "ut/CommandModelSerializerTests.h"
 #include "utl/EnumTags.h"
@@ -24,7 +24,7 @@ namespace ut
 	void RegisterAppUnitTests( void )
 	{
 	#ifdef _DEBUG
-		CPathAlgorithmsTests::Instance();
+		CTextAlgorithmsTests::Instance();
 		CRenameFilesTests::Instance();
 		CCommandModelSerializerTests::Instance();
 	#endif

@@ -15,12 +15,12 @@ CFileService::CFileService( void )
 {
 }
 
-CMacroCommand* CFileService::MakeRenameCmds( const std::vector< CRenameItem* >& renameItems ) const
+std::auto_ptr< CMacroCommand > CFileService::MakeRenameCmds( const std::vector< CRenameItem* >& renameItems ) const
 {
 	if ( !IsDistinctWorkingSet( renameItems ) )
 	{
 		REQUIRE( false );			// all SRC and DEST paths must be a distinct working set (pre-validated)
-		return NULL;
+		return std::auto_ptr< CMacroCommand >();
 	}
 
 	std::auto_ptr< CMacroCommand > pBatchMacro( new cmd::CFileMacroCmd( cmd::RenameFile ) );
@@ -54,10 +54,10 @@ CMacroCommand* CFileService::MakeRenameCmds( const std::vector< CRenameItem* >& 
 	for ( std::vector< utl::ICommand* >::const_iterator itLateCmd = finalCmds.begin(); itLateCmd != finalCmds.end(); ++itLateCmd )
 		pBatchMacro->AddCmd( *itLateCmd );
 
-	return !pBatchMacro->IsEmpty() ? pBatchMacro.release() : NULL;
+	return pBatchMacro;
 }
 
-CMacroCommand* CFileService::MakeTouchCmds( const std::vector< CTouchItem* >& touchItems ) const
+std::auto_ptr< CMacroCommand > CFileService::MakeTouchCmds( const std::vector< CTouchItem* >& touchItems ) const
 {
 	std::auto_ptr< CMacroCommand > pBatchMacro( new cmd::CFileMacroCmd( cmd::TouchFile ) );
 
@@ -65,7 +65,7 @@ CMacroCommand* CFileService::MakeTouchCmds( const std::vector< CTouchItem* >& to
 		if ( ( *itItem )->IsModified() )
 			pBatchMacro->AddCmd( new CTouchFileCmd( ( *itItem )->GetSrcState(), ( *itItem )->GetDestState() ) );
 
-	return !pBatchMacro->IsEmpty() ? pBatchMacro.release() : NULL;
+	return pBatchMacro;
 }
 
 

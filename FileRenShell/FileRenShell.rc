@@ -28,9 +28,9 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 //
 
 IDD_RENAME_FILES_DIALOG DIALOGEX 0, 0, 339, 238
-STYLE DS_SETFONT | WS_MAXIMIZEBOX | WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_MAXIMIZEBOX | WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME
 CAPTION "Rename Files"
-FONT 8, "MS Sans Serif", 0, 0, 0x0
+FONT 8, "MS Shell Dlg", 0, 0, 0x0
 BEGIN
     RTEXT           "Re&name format (fn.ext):",IDC_STATIC,5,9,74,8
     COMBOBOX        IDC_FORMAT_COMBO,82,6,101,95,CBS_DROPDOWN | CBS_AUTOHSCROLL | WS_VSCROLL | WS_GROUP | WS_TABSTOP
@@ -59,9 +59,9 @@ BEGIN
 END
 
 IDD_REPLACE_DIALOG DIALOGEX 0, 0, 243, 95
-STYLE DS_SETFONT | WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME
 CAPTION "Replace in Filename"
-FONT 8, "MS Sans Serif", 0, 0, 0x0
+FONT 8, "MS Shell Dlg", 0, 0, 0x0
 BEGIN
     LTEXT           "&Find what:",IDC_STATIC,8,11,34,8
     COMBOBOX        IDC_FIND_WHAT_COMBO,55,8,71,95,CBS_DROPDOWN | CBS_AUTOHSCROLL | WS_VSCROLL | WS_GROUP | WS_TABSTOP
@@ -79,9 +79,9 @@ BEGIN
 END
 
 IDD_TOUCH_FILES_DIALOG DIALOGEX 0, 0, 393, 234
-STYLE DS_SETFONT | WS_MAXIMIZEBOX | WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_MAXIMIZEBOX | WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME
 CAPTION "Touch Files"
-FONT 8, "MS Sans Serif", 0, 0, 0x0
+FONT 8, "MS Shell Dlg", 0, 0, 0x0
 BEGIN
     GROUPBOX        "Modify Dates",IDC_STATIC,5,5,177,60,BS_LEFT | WS_GROUP
     RTEXT           "Last &Modified Date:",IDC_STATIC,11,17,62,8
@@ -109,9 +109,9 @@ BEGIN
 END
 
 IDD_OPTIONS_CAPITALIZE_PAGE DIALOGEX 0, 0, 229, 246
-STYLE DS_SETFONT | WS_CHILD | WS_CAPTION | WS_SYSMENU
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_CAPTION | WS_SYSMENU
 CAPTION "Capitalize"
-FONT 8, "MS Sans Serif", 0, 0, 0x0
+FONT 8, "MS Shell Dlg", 0, 0, 0x0
 BEGIN
     LTEXT           "Word-&break characters:",IDC_STATIC,7,7,78,8
     EDITTEXT        IDC_WORD_BREAK_CHARS_EDIT,7,17,215,12,ES_AUTOHSCROLL
@@ -314,16 +314,19 @@ BEGIN
     END
     POPUP "<more rename actions>"
     BEGIN
-        MENUITEM "&Single Whitespace\t""   "" to "" """, ID_SINGLE_WHITESPACE
+        MENUITEM "Replace All &Delimiters with Space", ID_REPLACE_DELIMS
+        MENUITEM "Replace Unicode with &ANSI Symbols\t""–"" to ""-""", ID_REPLACE_UNICODE_SYMBOLS
+        MENUITEM SEPARATOR
+        MENUITEM "Single &Whitespace\t""   "" to "" """, ID_SINGLE_WHITESPACE
         MENUITEM "&Remove Whitespace\t""    "" to """"", ID_REMOVE_WHITESPACE
         MENUITEM SEPARATOR
-        MENUITEM "&Dash to Space\t""-"" to "" """, ID_DASH_TO_SPACE
+        MENUITEM "Dash to Space\t""-"" to "" """, ID_DASH_TO_SPACE
         MENUITEM "Space to Dash\t"" "" to ""-""", ID_SPACE_TO_DASH
         MENUITEM SEPARATOR
         MENUITEM "&Underbar to Space\t""_"" to "" """, ID_UNDERBAR_TO_SPACE
         MENUITEM "Space to Underbar\t"" "" to ""_""", ID_SPACE_TO_UNDERBAR
         MENUITEM SEPARATOR
-        MENUITEM "Uniform Numeric Padding\t""9"", ""010"" to ""09"", ""10""", ID_ENSURE_UNIFORM_NUM_PADDING
+        MENUITEM "Uniform &Numeric Padding\t""9"", ""010"" to ""09"", ""10""", ID_ENSURE_UNIFORM_NUM_PADDING
     END
     POPUP "<text tools>"
     BEGIN
@@ -331,15 +334,16 @@ BEGIN
         MENUITEM "&lower case",                 ID_TEXT_LOWER_CASE
         MENUITEM "&UPPER CASE",                 ID_TEXT_UPPER_CASE
         MENUITEM SEPARATOR
-        MENUITEM "Replace &Delimiters",         ID_TEXT_REPLACE_DELIMS
+        MENUITEM "Replace All &Delimiters with Space", ID_TEXT_REPLACE_DELIMS
+        MENUITEM "Replace Unicode with &ANSI Symbols\t""–"" to ""-""", ID_TEXT_REPLACE_UNICODE_SYMBOLS
         MENUITEM SEPARATOR
         MENUITEM "&Single Whitespace\t""   "" to "" """, ID_TEXT_SINGLE_WHITESPACE
         MENUITEM "&Remove Whitespace\t""    "" to """"", ID_TEXT_REMOVE_WHITESPACE
         MENUITEM SEPARATOR
-        MENUITEM "&Dash to Space\t""-"" to "" """, ID_TEXT_DASH_TO_SPACE
+        MENUITEM "Dash to Space\t""-"" to "" """, ID_TEXT_DASH_TO_SPACE
         MENUITEM "Space to Dash\t"" "" to ""-""", ID_TEXT_SPACE_TO_DASH
         MENUITEM SEPARATOR
-        MENUITEM "&Underbar to Space\t""_"" to "" """, ID_TEXT_UNDERBAR_TO_SPACE
+        MENUITEM "Underbar to Space\t""_"" to "" """, ID_TEXT_UNDERBAR_TO_SPACE
         MENUITEM "Space to Underbar\t"" "" to ""_""", ID_TEXT_SPACE_TO_UNDERBAR
     END
     POPUP "<touch list selection>"
@@ -411,8 +415,6 @@ STRINGTABLE
 BEGIN
     IDS_INVALID_FORMAT      "Invalid rename format: %s\n\nIt should contain *, ? or %% formatting characters\nin order to generate a sequence of unique filenames."
     IDS_NO_DELIMITER_SET    "Please enter the delimiters to replace!"
-    IDS_CHANGE_CASE_TAGS    "filename.ext|FILENAME.EXT|filename.*|FILENAME.*|*.ext|*.EXT|* (no ext)"
-    IDS_CASE_MODIFY_TAGS    "Preserve|Upper Case|Lower Case"
     IDS_REPLACE_FILES_TIP_FORMAT "Ctrl+Click to replace ""%s"" with ""%s"""
 END
 

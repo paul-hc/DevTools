@@ -125,4 +125,17 @@ public:
 };
 
 
+// notification command; uses inline execution, not to be executed by the command model with undo/redo
+//
+class COnDestPathsChangeCmd : public CCommand
+{
+	COnDestPathsChangeCmd( void ) : CCommand( cmd::DestPathChanged, NULL, &cmd::GetTags_CommandType() ) {}
+public:
+	static COnDestPathsChangeCmd& Instance( void );
+
+	// base overrides
+	virtual bool Execute( void );
+};
+
+
 #endif // FileCommands_h

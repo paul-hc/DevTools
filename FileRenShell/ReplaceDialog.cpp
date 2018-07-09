@@ -5,7 +5,7 @@
 #include "RenameService.h"
 #include "FileModel.h"
 #include "RenameItem.h"
-#include "PathAlgorithms.h"
+#include "TextAlgorithms.h"
 #include "Application_fwd.h"
 #include "resource.h"
 #include "utl/ImageStore.h"
@@ -77,8 +77,8 @@ CReplaceDialog::CReplaceDialog( IFileEditor* pParentEditor, const CRenameService
 		.AddButton( ID_AUTO_FILL_COMMON_PREFIX_CK );
 
 	m_replaceToolbar.GetStrip()
-		.AddButton( ID_PICK_DIR_PATH )
-		.AddButton( ID_PICK_TEXT_TOOLS );
+		.AddButton( ID_PICK_TEXT_TOOLS )
+		.AddButton( ID_PICK_DIR_PATH );
 }
 
 CReplaceDialog::~CReplaceDialog()

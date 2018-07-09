@@ -61,7 +61,6 @@ private:
 	std::tstring JoinErrorDestPaths( void ) const;
 
 	bool GenerateDestPaths( const std::tstring& format, UINT* pSeqCount );
-	void EnsureUniformNumPadding( void );
 	void ReplaceFormatEditText( const std::tstring& text );
 private:
 	const std::vector< CRenameItem* >& m_rRenameItems;
@@ -115,18 +114,12 @@ protected:
 	afx_msg void OnPickDirPath( void );
 	afx_msg void OnDirPathPicked( UINT cmdId );
 	afx_msg void OnPickTextTools( void );
-	afx_msg void OnFormatTextToolPicked( UINT cmdId );
+	afx_msg void OnFormatTextToolPicked( UINT menuId );
 	afx_msg void OnToggleAutoGenerate( void );
 	afx_msg void OnUpdateAutoGenerate( CCmdUI* pCmdUI );
 	afx_msg void OnNumericSequence( UINT cmdId );
 	afx_msg void OnBnClicked_PickRenameActions( void );
-	afx_msg void OnSingleWhitespace( void );
-	afx_msg void OnRemoveWhitespace( void );
-	afx_msg void OnDashToSpace( void );
-	afx_msg void OnSpaceToDash( void );
-	afx_msg void OnUnderbarToSpace( void );
-	afx_msg void OnSpaceToUnderbar( void );
-	afx_msg void OnEnsureUniformNumPadding( void );
+	afx_msg void OnModifyDestTool( UINT menuId );
 
 	DECLARE_MESSAGE_MAP()
 };

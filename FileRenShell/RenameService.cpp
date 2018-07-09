@@ -2,7 +2,7 @@
 #include "stdafx.h"
 #include "RenameService.h"
 #include "RenameItem.h"
-#include "TitleCapitalizer.h"
+#include "TextAlgorithms.h"
 #include "resource.h"
 #include "utl/ContainerUtilities.h"
 #include "utl/MenuUtilities.h"
@@ -112,12 +112,11 @@ std::tstring CRenameService::GetDestFname( fs::TPathPairMap::const_iterator itPa
 	return fs::CPathParts( GetDestPath( itPair ).Get() ).m_fname;		// DEST (if not empty) or SRC
 }
 
-std::tstring CRenameService::ApplyTextTool( UINT cmdId, const std::tstring& text )
+std::tstring CRenameService::ApplyTextTool( UINT menuId, const std::tstring& text )
 {
 	std::tstring output = text;
-	static const TCHAR defaultDelimiterSet[] = _T(".;-_ \t");
 
-	switch ( cmdId )
+	switch ( menuId )
 	{
 		case ID_TEXT_TITLE_CASE:
 		{
@@ -132,27 +131,31 @@ std::tstring CRenameService::ApplyTextTool( UINT cmdId, const std::tstring& text
 			str::ToUpper( output );
 			break;
 		case ID_TEXT_REPLACE_DELIMS:
-			str::ReplaceDelimiters( output, defaultDelimiterSet, _T(" ") );
-			str::EnsureSingleSpace( output );
+			text_tool::ExecuteTextTool( output, func::ReplaceDelimiterSet( delim::GetAllDelimitersSet(), _T(" ") ) );
+			break;
+		case ID_TEXT_REPLACE_UNICODE_SYMBOLS:
+			text_tool::ExecuteTextTool( output, func::ReplaceMultiDelimiterSets( &text_tool::GetStdUnicodeToAnsiPairs() ) );
 			break;
 		case ID_TEXT_SINGLE_WHITESPACE:
-			str::EnsureSingleSpace( output );
+			text_tool::ExecuteTextTool( output, func::SingleWhitespace() );
 			break;
 		case ID_TEXT_REMOVE_WHITESPACE:
-			str::ReplaceDelimiters( output, _T(" \t"), _T("") );
+			text_tool::ExecuteTextTool( output, func::RemoveWhitespace() );
 			break;
 		case ID_TEXT_DASH_TO_SPACE:
-			str::ReplaceDelimiters( output, _T("-"), _T(" ") );
+			text_tool::ExecuteTextTool( output, func::ReplaceDelimiterSet( delim::s_dashes, _T(" ") ) );
 			break;
 		case ID_TEXT_SPACE_TO_DASH:
-			str::ReplaceDelimiters( output, _T(" "), _T("-") );
+			text_tool::ExecuteTextTool( output, func::ReplaceDelimiterSet( _T(" "), _T("-") ) );
 			break;
 		case ID_TEXT_UNDERBAR_TO_SPACE:
-			str::ReplaceDelimiters( output, _T("_"), _T(" ") );
+			text_tool::ExecuteTextTool( output, func::ReplaceDelimiterSet( _T("_"), _T(" ") ) );
 			break;
 		case ID_TEXT_SPACE_TO_UNDERBAR:
-			str::ReplaceDelimiters( output, _T(" "), _T("_") );
+			text_tool::ExecuteTextTool( output, func::ReplaceDelimiterSet( _T(" "), _T("_") ) );
 			break;
+		default:
+			ASSERT( false );
 	}
 	return output;
 }

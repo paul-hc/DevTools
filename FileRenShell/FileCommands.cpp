@@ -17,7 +17,7 @@ namespace cmd
 {
 	const CEnumTags& GetTags_CommandType( void )
 	{
-		static const CEnumTags tags( _T("Rename Files|Touch Files"), _T("RENAME|TOUCH"), -1, RenameFile );
+		static const CEnumTags tags( _T("Rename Files|Touch Files|DestPathChanged"), _T("RENAME|TOUCH|DEST_PATH_CHANGED"), -1, RenameFile );
 		return tags;
 	}
 
@@ -263,4 +263,19 @@ bool CTouchFileCmd::IsUndoable( void ) const
 {
 	//return m_srcState.FileExist() && m_srcState != fs::CFileState::ReadFromFile( m_srcState.m_fullPath );
 	return true;		// let it unexecute with error rather than being skipped in UNDO
+}
+
+
+// COnDestPathsChangeCmd implementation
+
+COnDestPathsChangeCmd& COnDestPathsChangeCmd::Instance( void )
+{
+	static COnDestPathsChangeCmd s_cmd;
+	return s_cmd;
+}
+
+bool COnDestPathsChangeCmd::Execute( void )
+{
+	NotifyObservers();
+	return true;
 }

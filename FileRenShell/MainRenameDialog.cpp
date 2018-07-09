@@ -7,7 +7,7 @@
 #include "GeneralOptions.h"
 #include "RenameService.h"
 #include "RenameItem.h"
-#include "PathAlgorithms.h"
+#include "TextAlgorithms.h"
 #include "ReplaceDialog.h"
 #include "OptionsSheet.h"
 #include "Application.h"
@@ -42,9 +42,8 @@ namespace reg
 	static const TCHAR entry_newDelimiterHistory[] = _T("New Delimiter History");
 }
 
-static const TCHAR defaultDelimiterSet[] = _T(".;-_ \t");
-static const TCHAR defaultNewDelimiter[] = _T(" ");
-static const TCHAR specialSep[] = _T("\n");
+static const TCHAR s_defaultNewDelimiter[] = _T(" ");
+static const TCHAR s_specialSep[] = _T("\n");
 
 
 namespace layout
@@ -85,10 +84,10 @@ CMainRenameDialog::CMainRenameDialog( CFileModel* pFileModel, CWnd* pParent )
 	, m_mode( MakeMode )
 	, m_autoGenerate( AfxGetApp()->GetProfileInt( reg::section_mainDialog, reg::entry_autoGenerate, false ) != FALSE )
 	, m_seqCountAutoAdvance( AfxGetApp()->GetProfileInt( reg::section_mainDialog, reg::entry_seqCountAutoAdvance, true ) != FALSE )
-	, m_formatCombo( ui::HistoryMaxSize, specialSep )
+	, m_formatCombo( ui::HistoryMaxSize, s_specialSep )
 	, m_fileListCtrl( IDC_FILE_RENAME_LIST )
 	, m_changeCaseButton( &GetTags_ChangeCase() )
-	, m_delimiterSetCombo( ui::HistoryMaxSize, specialSep )
+	, m_delimiterSetCombo( ui::HistoryMaxSize, s_specialSep )
 	, m_delimStatic( CThemeItem( L"EXPLORERBAR", vt::EBP_IEBARMENU, vt::EBM_NORMAL ) )
 	, m_pickRenameActionsStatic( ui::DropDown )
 {
@@ -108,13 +107,16 @@ CMainRenameDialog::CMainRenameDialog( CFileModel* pFileModel, CWnd* pParent )
 
 	m_formatToolbar.GetStrip()
 		.AddButton( ID_PICK_FORMAT_TOKEN )
-		.AddButton( ID_PICK_DIR_PATH )
+		.AddSeparator()
 		.AddButton( ID_PICK_TEXT_TOOLS )
+		.AddButton( ID_PICK_DIR_PATH )
+		.AddSeparator()
 		.AddButton( ID_TOGGLE_AUTO_GENERATE );
 
 	m_seqCountToolbar.GetStrip()
 		.AddButton( ID_SEQ_COUNT_RESET )
 		.AddButton( ID_SEQ_COUNT_FIND_NEXT )
+		.AddSeparator()
 		.AddButton( ID_SEQ_COUNT_AUTO_ADVANCE );
 }
 
@@ -127,11 +129,15 @@ bool CMainRenameDialog::RenameFiles( void )
 	m_errorItems.clear();
 
 	CFileService svc;
-	if ( CMacroCommand* pRenameMacroCmd = svc.MakeRenameCmds( m_rRenameItems ) )
-	{
-		cmd::CScopedErrorObserver observe( this );
-		return m_pFileModel->GetCommandModel()->Execute( pRenameMacroCmd );
-	}
+	std::auto_ptr< CMacroCommand > pRenameMacroCmd = svc.MakeRenameCmds( m_rRenameItems );
+	if ( pRenameMacroCmd.get() != NULL )
+		if ( !pRenameMacroCmd->IsEmpty() )
+		{
+			cmd::CScopedErrorObserver observe( this );
+			return m_pFileModel->GetCommandModel()->Execute( pRenameMacroCmd.release() );
+		}
+		else
+			return IDOK == AfxMessageBox( _T("There are no changes to apply. Close the dialog?"), MB_OKCANCEL );
 
 	return false;
 }
@@ -220,12 +226,19 @@ void CMainRenameDialog::OnUpdate( utl::ISubject* pSubject, utl::IMessage* pMessa
 	if ( m_hWnd != NULL )
 		if ( m_pFileModel == pSubject )
 		{
-			if ( NULL == m_pRenSvc.get() )
-				m_pRenSvc.reset( new CRenameService( m_rRenameItems ) );		// lazy init
-			else
-				m_pRenSvc->StoreRenameItems( m_rRenameItems );					// update the current object since it may be referenced in CReplaceDialog
+			switch ( utl::GetSafeTypeID( pMessage ) )
+			{
+				case cmd::DestPathChanged:
+					PostMakeDest();
+					break;
+				default:
+					if ( NULL == m_pRenSvc.get() )
+						m_pRenSvc.reset( new CRenameService( m_rRenameItems ) );		// lazy init
+					else
+						m_pRenSvc->StoreRenameItems( m_rRenameItems );					// update the current object since it may be referenced in CReplaceDialog
 
-			SetupFileListView();
+					SetupFileListView();
+			}
 		}
 		else if ( &CGeneralOptions::Instance() == pSubject )
 			CGeneralOptions::Instance().ApplyToListCtrl( &m_fileListCtrl );
@@ -342,18 +355,6 @@ bool CMainRenameDialog::GenerateDestPaths( const std::tstring& format, UINT* pSe
 	return true;
 }
 
-void CMainRenameDialog::EnsureUniformNumPadding( void )
-{
-	std::vector< std::tstring > fnames; fnames.reserve( m_rRenameItems.size() );
-
-	for ( std::vector< CRenameItem* >::const_iterator itItem = m_rRenameItems.begin(); itItem != m_rRenameItems.end(); ++itItem )
-		fnames.push_back( fs::CPathParts( ( *itItem )->GetSafeDestPath().Get() ).m_fname );
-
-	num::EnsureUniformZeroPadding( fnames );
-
-	m_pFileModel->ForEachRenameDestination( func::AssignFname( fnames.begin() ) );
-}
-
 bool CMainRenameDialog::ChangeSeqCount( UINT seqCount )
 {
 	if ( m_seqCountEdit.GetNumber< UINT >() == seqCount )
@@ -403,8 +404,8 @@ void CMainRenameDialog::DoDataExchange( CDataExchange* pDX )
 			m_newDelimiterEdit.LimitText( 64 );
 
 			m_formatCombo.LoadHistory( m_regSection.c_str(), reg::entry_formatHistory, _T("## - *.*") );
-			m_delimiterSetCombo.LoadHistory( m_regSection.c_str(), reg::entry_delimiterSetHistory, defaultDelimiterSet );
-			m_newDelimiterEdit.SetWindowText( AfxGetApp()->GetProfileString( m_regSection.c_str(), reg::entry_newDelimiterHistory, defaultNewDelimiter ) );
+			m_delimiterSetCombo.LoadHistory( m_regSection.c_str(), reg::entry_delimiterSetHistory, delim::s_defaultDelimiterSet.c_str() );
+			m_newDelimiterEdit.SetWindowText( AfxGetApp()->GetProfileString( m_regSection.c_str(), reg::entry_newDelimiterHistory, s_defaultNewDelimiter ) );
 
 			m_seqCountEdit.SetNumericValue( AfxGetApp()->GetProfileInt( m_regSection.c_str(), reg::entry_seqCount, 1 ) );
 
@@ -428,7 +429,7 @@ BEGIN_MESSAGE_MAP( CMainRenameDialog, CFileEditorBaseDialog )
 	ON_COMMAND( ID_PICK_DIR_PATH, OnPickDirPath )
 	ON_COMMAND_RANGE( IDC_PICK_DIR_PATH_BASE, IDC_PICK_DIR_PATH_MAX, OnDirPathPicked )
 	ON_COMMAND( ID_PICK_TEXT_TOOLS, OnPickTextTools )
-	ON_COMMAND_RANGE( ID_TEXT_TITLE_CASE, ID_TEXT_SPACE_TO_UNDERBAR, OnFormatTextToolPicked )
+	ON_COMMAND_RANGE( ID_TEXT_TITLE_CASE, ID_TEXT_SPACE_TO_UNDERBAR, OnFormatTextToolPicked )		// format combo pick text tool
 	ON_COMMAND( ID_TOGGLE_AUTO_GENERATE, OnToggleAutoGenerate )
 	ON_UPDATE_COMMAND_UI( ID_TOGGLE_AUTO_GENERATE, OnUpdateAutoGenerate )
 	ON_COMMAND_RANGE( ID_NUMERIC_SEQUENCE_2DIGITS, ID_EXTENSION_SEPARATOR, OnNumericSequence )
@@ -452,13 +453,7 @@ BEGIN_MESSAGE_MAP( CMainRenameDialog, CFileEditorBaseDialog )
 	ON_EN_CHANGE( IDC_NEW_DELIMITER_EDIT, OnFieldChanged )
 	ON_BN_CLICKED( IDC_PICK_RENAME_ACTIONS, OnBnClicked_PickRenameActions )
 	ON_BN_DOUBLECLICKED( IDC_PICK_RENAME_ACTIONS, OnBnClicked_PickRenameActions )
-	ON_COMMAND( ID_SINGLE_WHITESPACE, OnSingleWhitespace )
-	ON_COMMAND( ID_REMOVE_WHITESPACE, OnRemoveWhitespace )
-	ON_COMMAND( ID_DASH_TO_SPACE, OnDashToSpace )
-	ON_COMMAND( ID_SPACE_TO_DASH, OnSpaceToDash )
-	ON_COMMAND( ID_UNDERBAR_TO_SPACE, OnUnderbarToSpace )
-	ON_COMMAND( ID_SPACE_TO_UNDERBAR, OnSpaceToUnderbar )
-	ON_COMMAND( ID_ENSURE_UNIFORM_NUM_PADDING, OnEnsureUniformNumPadding )
+	ON_COMMAND_RANGE( ID_REPLACE_DELIMS, ID_ENSURE_UNIFORM_NUM_PADDING, OnModifyDestTool )		// bottom-right pick DEST tool
 END_MESSAGE_MAP()
 
 BOOL CMainRenameDialog::OnInitDialog( void )
@@ -718,11 +713,11 @@ void CMainRenameDialog::OnPickTextTools( void )
 	m_formatToolbar.TrackButtonMenu( ID_PICK_TEXT_TOOLS, this, &popupMenu, ui::DropDown );
 }
 
-void CMainRenameDialog::OnFormatTextToolPicked( UINT cmdId )
+void CMainRenameDialog::OnFormatTextToolPicked( UINT menuId )
 {
 	GotoDlgCtrl( &m_formatCombo );
 	std::tstring oldFormat = m_formatCombo.GetCurrentText();
-	std::tstring format = CRenameService::ApplyTextTool( cmdId, oldFormat );
+	std::tstring format = CRenameService::ApplyTextTool( menuId, oldFormat );
 
 	if ( format != oldFormat )
 		ui::SetComboEditText( m_formatCombo, format, str::Case );
@@ -774,44 +769,46 @@ void CMainRenameDialog::OnBnClicked_PickRenameActions( void )
 	m_pickRenameActionsStatic.TrackMenu( this, IDR_CONTEXT_MENU, popup::MoreRenameActions );
 }
 
-void CMainRenameDialog::OnSingleWhitespace( void )
+void CMainRenameDialog::OnModifyDestTool( UINT menuId )
 {
-	m_pFileModel->ForEachRenameDestination( func::SingleWhitespace() );
-	PostMakeDest();
-}
+	switch ( menuId )
+	{
+		case ID_REPLACE_DELIMS:
+			m_pFileModel->ForEachRenameDestination( func::ReplaceDelimiterSet( delim::GetAllDelimitersSet(), _T(" ") ) );
+			break;
+		case ID_REPLACE_UNICODE_SYMBOLS:
+			m_pFileModel->ForEachRenameDestination( func::ReplaceMultiDelimiterSets( &text_tool::GetStdUnicodeToAnsiPairs() ) );
+			break;
+		case ID_SINGLE_WHITESPACE:
+			m_pFileModel->ForEachRenameDestination( func::SingleWhitespace() );
+			break;
+		case ID_REMOVE_WHITESPACE:
+			m_pFileModel->ForEachRenameDestination( func::RemoveWhitespace() );
+			break;
+		case ID_DASH_TO_SPACE:
+			m_pFileModel->ForEachRenameDestination( func::ReplaceDelimiterSet( delim::s_dashes, _T(" ") ) );
+			break;
+		case ID_SPACE_TO_DASH:
+			m_pFileModel->ForEachRenameDestination( func::ReplaceDelimiterSet( _T(" "), _T("-") ) );
+			break;
+		case ID_UNDERBAR_TO_SPACE:
+			m_pFileModel->ForEachRenameDestination( func::ReplaceDelimiterSet( _T("_"), _T(" ") ) );
+			break;
+		case ID_SPACE_TO_UNDERBAR:
+			m_pFileModel->ForEachRenameDestination( func::ReplaceDelimiterSet( _T(" "), _T("_") ) );
+			break;
+		case ID_ENSURE_UNIFORM_NUM_PADDING:
+		{
+			std::vector< std::tstring > fnames; fnames.reserve( m_rRenameItems.size() );
+			for ( std::vector< CRenameItem* >::const_iterator itItem = m_rRenameItems.begin(); itItem != m_rRenameItems.end(); ++itItem )
+				fnames.push_back( fs::CPathParts( ( *itItem )->GetSafeDestPath().Get() ).m_fname );
 
-void CMainRenameDialog::OnRemoveWhitespace( void )
-{
-	m_pFileModel->ForEachRenameDestination( func::RemoveWhitespace() );
-	PostMakeDest();
-}
-
-void CMainRenameDialog::OnDashToSpace( void )
-{
-	m_pFileModel->ForEachRenameDestination( func::ReplaceDelimiterSet( _T("-"), _T(" ") ) );
-	PostMakeDest();
-}
-
-void CMainRenameDialog::OnSpaceToDash( void )
-{
-	m_pFileModel->ForEachRenameDestination( func::ReplaceDelimiterSet( _T(" "), _T("-") ) );
-	PostMakeDest();
-}
-
-void CMainRenameDialog::OnUnderbarToSpace( void )
-{
-	m_pFileModel->ForEachRenameDestination( func::ReplaceDelimiterSet( _T("_"), _T(" ") ) );
-	PostMakeDest();
-}
-
-void CMainRenameDialog::OnSpaceToUnderbar( void )
-{
-	m_pFileModel->ForEachRenameDestination( func::ReplaceDelimiterSet( _T(" "), _T("_") ) );
-	PostMakeDest();
-}
-
-void CMainRenameDialog::OnEnsureUniformNumPadding( void )
-{
-	EnsureUniformNumPadding();
+			num::EnsureUniformZeroPadding( fnames );
+			m_pFileModel->ForEachRenameDestination( func::AssignFname( fnames.begin() ) );
+			break;
+		}
+		default:
+			ASSERT( false );
+	}
 	PostMakeDest();
 }

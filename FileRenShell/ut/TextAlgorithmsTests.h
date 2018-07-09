@@ -1,5 +1,5 @@
-#ifndef PathAlgorithmsTests_h
-#define PathAlgorithmsTests_h
+#ifndef TextAlgorithmsTests_h
+#define TextAlgorithmsTests_h
 #pragma once
 
 
@@ -8,11 +8,11 @@
 #include "utl/ut/UnitTest.h"
 
 
-class CPathAlgorithmsTests : public ut::CConsoleTestCase
+class CTextAlgorithmsTests : public ut::CConsoleTestCase
 {
-	CPathAlgorithmsTests( void );
+	CTextAlgorithmsTests( void );
 public:
-	static CPathAlgorithmsTests& Instance( void );
+	static CTextAlgorithmsTests& Instance( void );
 
 	// ut::ITestCase interface
 	virtual void Run( void );
@@ -27,4 +27,4 @@ private:
 #endif //_DEBUG
 
 
-#endif // PathAlgorithmsTests_h
+#endif // TextAlgorithmsTests_h

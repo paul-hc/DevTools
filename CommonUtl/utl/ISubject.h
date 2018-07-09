@@ -63,6 +63,8 @@ namespace utl
 	{
 		return pObject != NULL ? pObject->GetCode() : std::tstring();
 	}
+
+	inline int GetSafeTypeID( const IMessage* pMessage ) { return pMessage != NULL ? pMessage->GetTypeID() : 0; }
 }
 
 

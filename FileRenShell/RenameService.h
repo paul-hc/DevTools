@@ -31,7 +31,7 @@ public:
 	static std::tstring GetDestFname( fs::TPathPairMap::const_iterator itPair );
 
 	// text tools
-	static std::tstring ApplyTextTool( UINT cmdId, const std::tstring& text );
+	static std::tstring ApplyTextTool( UINT menuId, const std::tstring& text );
 private:
 	fs::TPathPairMap m_renamePairs;
 };

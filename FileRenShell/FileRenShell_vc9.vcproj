@@ -595,14 +595,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\PathAlgorithms.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\PathAlgorithms.h"
-				>
-			</File>
-			<File
 				RelativePath=".\RenameService.cpp"
 				>
 			</File>
@@ -660,6 +652,14 @@
 			</File>
 			<File
 				RelativePath=".\stdafx.h"
+				>
+			</File>
+			<File
+				RelativePath=".\TextAlgorithms.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\TextAlgorithms.h"
 				>
 			</File>
 			<File
@@ -759,19 +759,19 @@
 				>
 			</File>
 			<File
-				RelativePath=".\ut\PathAlgorithmsTests.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\ut\PathAlgorithmsTests.h"
-				>
-			</File>
-			<File
 				RelativePath=".\ut\RenameFilesTests.cpp"
 				>
 			</File>
 			<File
 				RelativePath=".\ut\RenameFilesTests.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ut\TextAlgorithmsTests.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\ut\TextAlgorithmsTests.h"
 				>
 			</File>
 		</Filter>

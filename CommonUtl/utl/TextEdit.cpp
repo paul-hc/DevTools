@@ -153,7 +153,7 @@ void CTextEdit::SetFixedFont( CWnd* pWnd )
 {
 	pWnd->SetFont( GetFixedFont() );
 	if ( CEdit* pEdit = dynamic_cast< CEdit* >( pWnd ) )
-		pEdit->SetTabStops( 16 );			// default tab stop is 32 dialog base units (8 chars), reduce it to half (4 chars)
+		pEdit->SetTabStops( 16 );				// default tab stop is 32 dialog base units (8 chars), reduce it to half (4 chars)
 	pWnd->Invalidate();
 }
 
