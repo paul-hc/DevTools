@@ -8,6 +8,9 @@
 #include "utl/ut/UnitTest.h"
 
 
+class CCommandModelSerializer;
+
+
 class CCommandModelSerializerTests : public ut::CConsoleTestCase
 {
 	CCommandModelSerializerTests( void );

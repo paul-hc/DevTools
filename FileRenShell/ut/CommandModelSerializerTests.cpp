@@ -16,6 +16,9 @@
 #ifdef _DEBUG		// no UT code in release builds
 
 
+#include <fstream>
+
+
 namespace ut
 {
 	static const std::string s_inputLog =
@@ -50,8 +53,8 @@ namespace ut
 		"<END OF BATCH>\n"
 		"\n"
 		"[REDO SECTION]\n"
-		"<RENAME 17-07-2018 17:00:00>\n"
-		"  C:\\my\\download\\How to Talk.pdf ->  How to Talk to Anyone.pdf.pdf \n"
+		"<RENAME 17-07-2018 17:17:17>\n"
+		"  C:\\my\\download\\How to Talk.pdf ->  How to Talk to Anyone.pdf \n"
 		"<END OF BATCH>\n"
 		;
 
@@ -89,11 +92,38 @@ namespace ut
 		"<END OF BATCH>\n"
 		"\n"
 		"[REDO SECTION]\n"
-		"\n"
 		"<RENAME 17-07-2018 17:17:17>\n"
-		"C:\\my\\download\\How to Talk.pdf -> How to Talk to Anyone.pdf.pdf\n"
+		"C:\\my\\download\\How to Talk.pdf -> How to Talk to Anyone.pdf\n"
 		"<END OF BATCH>\n"
 		;
+
+
+	bool _dbgSaveToFile( const char destFilePath[], const std::string& logFullText )
+	{
+		std::ofstream ofs( destFilePath, std::ios_base::out | std::ios_base::trunc );
+		if ( !ofs.is_open() )
+			return false;
+
+		std::vector< std::string > lines;
+		str::Split( lines, logFullText.c_str(), "\n" );
+
+		for ( std::vector< std::string >::const_iterator itLine = lines.begin(); itLine != lines.end(); ++itLine )
+			ofs << *itLine << std::endl;
+
+		ofs.close();
+		return true;
+	}
+
+	bool _dbgSaveToFile( const char destFilePath[], const CCommandModelSerializer& serializer, const CCommandModel& cmdModel )
+	{
+		std::ofstream ofs( destFilePath, std::ios_base::out | std::ios_base::trunc );
+		if ( !ofs.is_open() )
+			return false;
+
+		serializer.Save( ofs, cmdModel );
+		ofs.close();
+		return true;
+	}
 }
 
 
@@ -274,7 +304,7 @@ void CCommandModelSerializerTests::TestLoadLog( void )
 		pRenameCmd = checked_static_cast< const CRenameFileCmd* >( *itSubCmd++ );
 		ASSERT_EQUAL( cmd::RenameFile, pRenameCmd->GetTypeID() );
 		ASSERT_EQUAL( _T("C:\\my\\download\\How to Talk.pdf"), pRenameCmd->m_srcPath );
-		ASSERT_EQUAL( _T("How to Talk to Anyone.pdf.pdf"), pRenameCmd->m_destPath );
+		ASSERT_EQUAL_STR( _T("How to Talk to Anyone.pdf"), pRenameCmd->m_destPath.GetNameExt() );
 	}
 }
 
@@ -295,6 +325,9 @@ void CCommandModelSerializerTests::TestSaveLog( void )
 		serializer.Save( oss, model );
 
 		ASSERT( oss.str() == ut::s_outputLog );
+
+		//ut::_dbgSaveToFile( "C:\\my\\download\\debug.txt", ut::s_outputLog );			// expected output
+		//ut::_dbgSaveToFile( "C:\\my\\download\\debug2.txt", serializer, model );		// actual log loaded
 	}
 
 	// roundtrip test
