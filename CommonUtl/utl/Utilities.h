@@ -347,11 +347,29 @@ namespace ui
 
 	void DDX_Int( CDataExchange* pDX, int ctrlId, int& rValue, const int nullValue = INT_MAX );		// empty text for nullValue
 	void DDX_Bool( CDataExchange* pDX, int ctrlId, bool& rValue );
+	void DDX_BoolRadio( CDataExchange* pDX, int radioFirstId, bool& rValue, bool firstRadioIsTrue );
 	void DDX_Flag( CDataExchange* pDX, int ctrlId, int& rValue, int flag );
 	inline void DDX_Flag( CDataExchange* pDX, int ctrlId, UINT& rValue, UINT flag ) { DDX_Flag( pDX, ctrlId, (int&)rValue, flag ); }
 
 	void DDX_ButtonIcon( CDataExchange* pDX, int ctrlId, const CIconId& iconId = CIconId( 0 ), bool useText = true, bool useTextSpacing = true );
 	void DDX_StaticIcon( CDataExchange* pDX, int ctrlId, const CIconId& iconId = CIconId( 0 ) );
+
+	template< typename EnumType >
+	inline void DDX_RadioEnum( CDataExchange* pDX, int radioFirstId, EnumType& rValue, int baseValue = 0 )		// works for bool when radioFirstId = false
+	{
+		// offset by enum base value
+		if ( DialogOutput == pDX->m_bSaveAndValidate )
+		{
+			int selIndex = rValue - baseValue;
+			::DDX_Radio( pDX, radioFirstId, selIndex );
+		}
+		else
+		{
+			int selIndex;
+			::DDX_Radio( pDX, radioFirstId, selIndex );
+			rValue = static_cast< EnumType >( selIndex + baseValue );
+		}
+	}
 
 	template< typename NumericType >
 	void DDX_Number( CDataExchange* pDX, int ctrlId, NumericType& rValue, const std::locale& loc = num::GetEmptyLocale() )

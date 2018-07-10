@@ -1,7 +1,7 @@
 
 #include "stdafx.h"
 #include "CommandModelSerializerTests.h"
-#include "CommandModelSerializer.h"
+#include "CommandModelService.h"
 #include "FileCommands.h"
 #include "utl/ContainerUtilities.h"
 #include "utl/FileSystem.h"
@@ -114,13 +114,13 @@ namespace ut
 		return true;
 	}
 
-	bool _dbgSaveToFile( const char destFilePath[], const CCommandModelSerializer& serializer, const CCommandModel& cmdModel )
+	bool _dbgSaveToFile( const char destFilePath[], const cmd::CTextLogSerializer& serializer )
 	{
 		std::ofstream ofs( destFilePath, std::ios_base::out | std::ios_base::trunc );
 		if ( !ofs.is_open() )
 			return false;
 
-		serializer.Save( ofs, cmdModel );
+		serializer.Save( ofs );
 		ofs.close();
 		return true;
 	}
@@ -140,11 +140,11 @@ CCommandModelSerializerTests& CCommandModelSerializerTests::Instance( void )
 
 void CCommandModelSerializerTests::TestLoadLog( void )
 {
-	CCommandModelSerializer serializer;
 	CCommandModel model;
+	cmd::CTextLogSerializer serializer( &model );
 
 	std::istringstream iss( ut::s_inputLog );
-	serializer.Load( iss, &model );
+	serializer.Load( iss );
 
 	// UNDO section:
 	ASSERT_EQUAL( 7, model.GetUndoStack().size() );
@@ -310,19 +310,19 @@ void CCommandModelSerializerTests::TestLoadLog( void )
 
 void CCommandModelSerializerTests::TestSaveLog( void )
 {
-	CCommandModelSerializer serializer;
 	CCommandModel model;
+	cmd::CTextLogSerializer serializer( &model );
 
 	{
 		std::istringstream iss( ut::s_inputLog );
-		serializer.Load( iss, &model );
+		serializer.Load( iss );
 
 		ASSERT_EQUAL( 7, model.GetUndoStack().size() );
 	}
 
 	{
 		std::ostringstream oss;
-		serializer.Save( oss, model );
+		serializer.Save( oss );
 
 		ASSERT( oss.str() == ut::s_outputLog );
 
@@ -332,11 +332,11 @@ void CCommandModelSerializerTests::TestSaveLog( void )
 
 	// roundtrip test
 	{
-		CCommandModelSerializer newSerializer;
 		CCommandModel newModel;
+		cmd::CTextLogSerializer newSerializer( &newModel );
 
 		std::istringstream iss( ut::s_outputLog );
-		newSerializer.Load( iss, &newModel );
+		newSerializer.Load( iss );
 
 		ASSERT( model.GetUndoStack().size() == newModel.GetUndoStack().size() );
 	}

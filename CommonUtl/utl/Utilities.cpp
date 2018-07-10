@@ -892,6 +892,21 @@ namespace ui
 		}
 	}
 
+	void DDX_BoolRadio( CDataExchange* pDX, int radioFirstId, bool& rValue, bool firstRadioIsTrue )
+	{
+		if ( DialogOutput == pDX->m_bSaveAndValidate )
+		{
+			int selIndex = firstRadioIsTrue ? !rValue : rValue;
+			::DDX_Radio( pDX, radioFirstId, selIndex );
+		}
+		else
+		{
+			int selIndex;
+			::DDX_Radio( pDX, radioFirstId, selIndex );
+			rValue = firstRadioIsTrue ? ( 1 == selIndex ) : ( 0 == selIndex );
+		}
+	}
+
 	void DDX_Flag( CDataExchange* pDX, int ctrlId, int& rValue, int flag )
 	{
 		ASSERT( flag != 0 );
@@ -907,6 +922,7 @@ namespace ui
 			SetFlag( rValue, flag, checked != FALSE );
 		}
 	}
+
 
 	void DDX_ButtonIcon( CDataExchange* pDX, int ctrlId, const CIconId& iconId /*= CIconId( 0 )*/, bool useText /*= true*/, bool useTextSpacing /*= true*/ )
 	{

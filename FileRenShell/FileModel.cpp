@@ -1,17 +1,17 @@
 
 #include "stdafx.h"
 #include "FileModel.h"
-#include "CommandModelSerializer.h"
+#include "CommandModelService.h"
 #include "FileCommands.h"
 #include "RenameItem.h"
 #include "TouchItem.h"
+#include "GeneralOptions.h"
 #include "utl/Clipboard.h"
 #include "utl/Command.h"
 #include "utl/ContainerUtilities.h"
 #include "utl/FmtUtils.h"
 #include "utl/RuntimeException.h"
 #include "utl/StringRange.h"
-#include <fstream>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -154,44 +154,20 @@ void CFileModel::FetchFromStack( cmd::StackType stackType )
 
 bool CFileModel::SaveCommandModel( void ) const
 {
-	if ( NULL == m_pCommandModel.get() )
-		return false;
-
-	const fs::CPath& undoLogPath = GetUndoLogPath();
-	std::ofstream output( undoLogPath.GetUtf8().c_str(), std::ios_base::out | std::ios_base::trunc );
-
-	if ( output.is_open() )
-	{
-		CCommandModelSerializer saver;
-
-		saver.Save( output, *m_pCommandModel );
-		output.close();
-	}
-	if ( output.fail() )
-	{
-		TRACE( _T(" * CFileModel::SaveCommandModel(): error saving undo changes log file: %s\n"), undoLogPath.GetPtr() );
-		ASSERT( false );
-		return false;
-	}
-	return true;
+	return
+		CGeneralOptions::Instance().m_undoRedoLogPersist &&
+		m_pCommandModel.get() != NULL &&
+		CCommandModelService::SaveUndoLog( *m_pCommandModel, CGeneralOptions::Instance().m_undoRedoLogFormat );
 }
 
 bool CFileModel::LoadCommandModel( void )
 {
 	if ( m_pCommandModel.get() != NULL )
-		return false;				// loaded once
+		return false;				// already loaded once
 
-	const fs::CPath& undoLogPath = GetUndoLogPath();
-	std::ifstream input( undoLogPath.GetUtf8().c_str() );
-
-	if ( !input.is_open() )
-		return false;				// undo log file doesn't exist
-
-	CCommandModelSerializer loader;
-
-	loader.Load( input, GetCommandModel() );
-	input.close();
-	return true;
+	return
+		CGeneralOptions::Instance().m_undoRedoLogPersist &&
+		CCommandModelService::LoadUndoLog( GetCommandModel() );			// load the most recently modified log file (regardless of CGeneralOptions::m_undoRedoLogFormat)
 }
 
 std::vector< CRenameItem* >& CFileModel::LazyInitRenameItems( void )
@@ -228,23 +204,6 @@ std::vector< CTouchItem* >& CFileModel::LazyInitTouchItems( void )
 	}
 
 	return m_touchItems;
-}
-
-const fs::CPath& CFileModel::GetUndoLogPath( void )
-{
-	static fs::CPath undoLogPath;
-	if ( undoLogPath.IsEmpty() )
-	{
-		TCHAR fullPath[ _MAX_PATH ];
-		::GetModuleFileName( AfxGetApp()->m_hInstance, fullPath, COUNT_OF( fullPath ) );
-
-		fs::CPathParts parts( fullPath );
-		parts.m_fname += _T("_undo");
-		parts.m_ext = _T(".log");
-		undoLogPath.Set( parts.MakePath() );
-	}
-
-	return undoLogPath;
 }
 
 const std::tstring& CFileModel::GetCode( void ) const

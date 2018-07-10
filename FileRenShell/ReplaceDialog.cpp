@@ -295,7 +295,11 @@ void CReplaceDialog::OnBnClicked_MatchCase( void )
 void CReplaceDialog::OnBnClicked_ClearDestFiles( void )
 {
 	ui::SendCommand( GetParent()->GetSafeHwnd(), IDC_CLEAR_FILES_BUTTON );
-	OnChanged_FindWhat();			// update combo frame
+
+	if ( m_autoFillCommonPrefix )
+		FillCommonPrefix();
+	else
+		OnChanged_FindWhat();			// update combo frame
 }
 
 void CReplaceDialog::OnToggle_AutoFillCommonPrefix( void )

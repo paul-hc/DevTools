@@ -3,6 +3,7 @@
 #pragma once
 
 #include "utl/Subject.h"
+#include "FileCommands_fwd.h"
 
 
 class CReportListControl;
@@ -26,8 +27,13 @@ struct CGeneralOptions : public CSubject
 
 	void ApplyToListCtrl( CReportListControl* pListCtrl ) const;
 public:
-	bool m_useListThumbs;
+	// file lists thumbs
 	int m_smallIconDim, m_largeIconDim;
+	bool m_useListThumbs;
+	bool m_useListDoubleBuffer;
+
+	bool m_undoRedoLogPersist;
+	cmd::FileFormat m_undoRedoLogFormat;
 };
 
 

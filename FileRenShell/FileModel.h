@@ -67,8 +67,6 @@ private:
 	template< typename ContainerT >
 	void StoreSourcePaths( const ContainerT& sourcePaths );
 
-	static const fs::CPath& GetUndoLogPath( void );
-
 	struct AddRenameItemFromCmd
 	{
 		AddRenameItemFromCmd( CFileModel* pFileModel, cmd::StackType stackType )

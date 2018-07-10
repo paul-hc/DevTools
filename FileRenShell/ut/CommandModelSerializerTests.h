@@ -8,7 +8,7 @@
 #include "utl/ut/UnitTest.h"
 
 
-class CCommandModelSerializer;
+class CCommandModelTextSerializer;
 
 
 class CCommandModelSerializerTests : public ut::CConsoleTestCase

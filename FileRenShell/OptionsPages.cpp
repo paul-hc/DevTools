@@ -34,6 +34,8 @@ namespace layout
 {
 	static CLayoutStyle stylesGen[] =
 	{
+		{ IDC_GROUP_BOX_1, SizeX },
+		{ IDC_GROUP_BOX_2, SizeX },
 		{ IDC_SET_DEFAULT_ALL, MoveY }
 	};
 }
@@ -79,7 +81,6 @@ void CGeneralOptionsPage::ApplyPageChanges( void ) throws_( CRuntimeException )
 void CGeneralOptionsPage::DoDataExchange( CDataExchange* pDX )
 {
 	ui::DDX_ButtonIcon( pDX, IDC_SET_DEFAULT_ALL, ID_RESET_DEFAULT );
-	ui::DDX_Bool( pDX, IDC_USE_LIST_THUMBS_CHECK, m_options.m_useListThumbs );
 
 	IconStdSize smallStdSize, largeStdSize;
 	if ( DialogOutput == pDX->m_bSaveAndValidate )
@@ -97,14 +98,23 @@ void CGeneralOptionsPage::DoDataExchange( CDataExchange* pDX )
 		m_options.m_largeIconDim = ui::GetIconDimension( largeStdSize );
 	}
 
+	ui::DDX_Bool( pDX, IDC_USE_LIST_THUMBS_CHECK, m_options.m_useListThumbs );
+	ui::DDX_Bool( pDX, IDC_USE_LIST_DOUBLE_BUFFER_CHECK, m_options.m_useListDoubleBuffer );
+	ui::DDX_Bool( pDX, IDC_UNDO_REDO_LOG_PERSIST_CHECK, m_options.m_undoRedoLogPersist );
+	ui::DDX_RadioEnum( pDX, IDC_UNDO_REDO_LOG_TEXTFMT_RADIO, m_options.m_undoRedoLogFormat );
+
 	UpdateStatus();
 	CLayoutPropertyPage::DoDataExchange( pDX );
 }
 
 BEGIN_MESSAGE_MAP( CGeneralOptionsPage, CLayoutPropertyPage )
-	ON_BN_CLICKED( IDC_USE_LIST_THUMBS_CHECK, OnFieldModified )
 	ON_CBN_SELCHANGE( IDC_SMALL_ICON_SIZE_COMBO, OnFieldModified )
 	ON_CBN_SELCHANGE( IDC_LARGE_ICON_SIZE_COMBO, OnFieldModified )
+	ON_BN_CLICKED( IDC_USE_LIST_THUMBS_CHECK, OnFieldModified )
+	ON_BN_CLICKED( IDC_USE_LIST_DOUBLE_BUFFER_CHECK, OnFieldModified )
+	ON_BN_CLICKED( IDC_UNDO_REDO_LOG_PERSIST_CHECK, OnFieldModified )
+	ON_BN_CLICKED( IDC_UNDO_REDO_LOG_TEXTFMT_RADIO, OnFieldModified )
+	ON_BN_CLICKED( IDC_UNDO_REDO_LOG_BINFMT_RADIO, OnFieldModified )
 	ON_BN_CLICKED( IDC_SET_DEFAULT_ALL, OnBnClicked_ResetDefaultAll )
 END_MESSAGE_MAP()
 

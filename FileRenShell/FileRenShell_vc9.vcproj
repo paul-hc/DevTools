@@ -682,11 +682,11 @@
 				Name="model"
 				>
 				<File
-					RelativePath=".\CommandModelSerializer.cpp"
+					RelativePath=".\CommandModelService.cpp"
 					>
 				</File>
 				<File
-					RelativePath=".\CommandModelSerializer.h"
+					RelativePath=".\CommandModelService.h"
 					>
 				</File>
 				<File

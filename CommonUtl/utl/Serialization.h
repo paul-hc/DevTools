@@ -30,7 +30,6 @@ namespace serial
 				Save( archive );
 		}
 	};
-
 }
 
 
@@ -45,7 +44,7 @@ namespace serial
 		{
 			archive << rItems.size();
 			// save each element in the vector
-			for ( Container::const_iterator it = rItems.begin(); it != rItems.end(); ++it )
+			for ( typename Container::const_iterator it = rItems.begin(); it != rItems.end(); ++it )
 				archive << *it;
 		}
 		else
@@ -55,7 +54,7 @@ namespace serial
 			archive >> size;
 			rItems.resize( size );
 			// load each element in the vector
-			for ( Container::iterator it = rItems.begin(); it != rItems.end(); ++it )
+			for ( typename Container::iterator it = rItems.begin(); it != rItems.end(); ++it )
 				archive >> *it;
 		}
 	}
@@ -71,7 +70,7 @@ namespace serial
 		{
 			archive.WriteCount( static_cast< DWORD_PTR >( rObjects.size() ) );
 
-			for ( Container::iterator itPtr = rObjects.begin(); itPtr != rObjects.end(); ++itPtr )
+			for ( typename Container::iterator itPtr = rObjects.begin(); itPtr != rObjects.end(); ++itPtr )
 				archive << *itPtr;
 		}
 		else
@@ -79,7 +78,7 @@ namespace serial
 			utl::ClearOwningContainer( rObjects );			// delete existing owned objects
 			rObjects.resize( archive.ReadCount() );
 
-			for ( Container::iterator itPtr = rObjects.begin(); itPtr != rObjects.end(); ++itPtr )
+			for ( typename Container::iterator itPtr = rObjects.begin(); itPtr != rObjects.end(); ++itPtr )
 				archive >> *itPtr;
 		}
 	}
@@ -100,7 +99,7 @@ namespace serial
 			rItems.resize( size );
 		}
 		// serialize (store/load) each element in the vector
-		for ( Container::iterator it = rItems.begin(); it != rItems.end(); ++it )
+		for ( typename Container::iterator it = rItems.begin(); it != rItems.end(); ++it )
 			it->Stream( archive );
 	}
 
@@ -141,18 +140,18 @@ namespace serial
 // standard archive insertors/extractors
 
 
-inline CArchive& operator<<( CArchive& archive, const std::string& ansiStr )
+inline CArchive& operator<<( CArchive& archive, const std::string& narrowStr )
 {
 	// as CStringA
-	return archive << CStringA( ansiStr.c_str() );
+	return archive << CStringA( narrowStr.c_str() );
 }
 
-inline CArchive& operator>>( CArchive& archive, std::string& rAnsiStr )
+inline CArchive& operator>>( CArchive& archive, std::string& rNarrowStr )
 {
 	// as CStringA
-	CStringA ansiStr;
-	archive >> ansiStr;
-	rAnsiStr = ansiStr.GetString();
+	CStringA narrowStr;
+	archive >> narrowStr;
+	rNarrowStr = narrowStr.GetString();
 	return archive;
 }
 
@@ -172,6 +171,21 @@ inline CArchive& operator>>( CArchive& archive, std::wstring& rWideStr )
 	return archive;
 }
 
+inline CArchive& operator<<( CArchive& archive, const std::wstring* pWideStr )		// Unicode string as UTF8 (for better readability in archive stream)
+{
+	ASSERT_PTR( pWideStr );
+	return archive << CStringA( str::ToUtf8( pWideStr->c_str() ).c_str() );
+}
+
+inline CArchive& operator>>( CArchive& archive, std::wstring* pOutWideStr )			// Unicode string as UTF8 (for better readability in archive stream)
+{
+	ASSERT_PTR( pOutWideStr );
+	CStringA utf8Str;
+	archive >> utf8Str;
+	*pOutWideStr = str::FromUtf8( utf8Str.GetString() );
+	return archive;
+}
+
 
 template< typename Type1, typename Type2 >
 inline CArchive& operator<<( CArchive& archive, const std::pair< Type1, Type2 >& srcPair )
@@ -183,6 +197,18 @@ template< typename Type1, typename Type2 >
 inline CArchive& operator>>( CArchive& archive, std::pair< Type1, Type2 >& destPair )
 {
 	return archive >> destPair.first >> destPair.second;
+}
+
+
+namespace serial
+{
+	inline void StreamUtf8( CArchive& archive, std::wstring& rString )
+	{
+		if ( archive.IsStoring() )
+			archive << &rString;
+		else
+			archive >> &rString;
+	}
 }
 
 

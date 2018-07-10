@@ -26,6 +26,8 @@ namespace cmd
 		virtual void ClearFileErrors( void ) = 0;
 		virtual void OnFileError( const fs::CPath& srcPath, const std::tstring& errMsg ) = 0;
 	};
+
+	enum FileFormat { TextFormat, BinaryFormat };
 }
 
 
