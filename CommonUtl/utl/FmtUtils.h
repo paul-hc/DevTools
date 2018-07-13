@@ -32,20 +32,23 @@ namespace fmt
 	DWORD ParseFileAttributes( const std::tstring& text, bool uiFormat = false );
 
 
-	std::tstring FormatFileState( const fs::CFileState& fileState );
-	bool ParseFileState( fs::CFileState& rState, str::TStringRange& rTextRange );
+	std::tstring FormatFileStateCore( const fs::CFileState& fileState, bool tagged = true );		// core: excluding fileState.m_fullPath
+	bool ParseFileStateCore( fs::CFileState& rFileState, str::TStringRange& rTextRange );
+
+	std::tstring FormatClipFileState( const fs::CFileState& fileState, PathFormat pathFormat = FullPath, bool tagged = true );
+	fs::CFileState& ParseClipFileState( fs::CFileState& rFileState, const std::tstring& text, const fs::CPath* pKeyPath = NULL ) throws_( CRuntimeException );
 
 	std::tstring FormatRenameEntry( const fs::CPath& srcPath, const fs::CPath& destPath );
 	bool ParseRenameEntry( fs::CPath& rSrcPath, fs::CPath& rDestPath, const str::TStringRange& textRange );
 
-	std::tstring FormatTouchEntry( const fs::CFileState& srcState, const fs::CFileState& destState );
+	std::tstring FormatTouchEntry( fs::CFileState srcState, fs::CFileState destState, bool tagged = true );
 	bool ParseTouchEntry( fs::CFileState& rSrcState, fs::CFileState& rDestState, const str::TStringRange& textRange );
 
 
 	namespace impl
 	{
-		std::tstring FormatFileState( const fs::CFileState& state, PathFormat pathFormat );
-		bool ParseFileState( fs::CFileState& rState, const std::tstring& text, PathFormat pathFormat );
+		std::tstring FormatFileState( const fs::CFileState& fileState, PathFormat pathFormat, bool tagged );
+		bool ParseFileState_Tagged( fs::CFileState& rFileState, const std::tstring& text, PathFormat pathFormat );		// time fields are optional; if missing will preserve existing ones
 	}
 }
 

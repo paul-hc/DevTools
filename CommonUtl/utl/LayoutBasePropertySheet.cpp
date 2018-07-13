@@ -3,11 +3,23 @@
 #include "LayoutBasePropertySheet.h"
 #include "LayoutPropertyPage.h"
 #include "CmdInfoStore.h"
+#include "Command.h"
+#include "CommandModel.h"
 #include "Utilities.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
+
+
+class CScopedApplyMacroCmd
+{
+public:
+	CScopedApplyMacroCmd( CLayoutBasePropertySheet* pSheet ) : m_pSheet( pSheet ) { m_pSheet->m_pApplyMacroCmd.reset( new CMacroCommand ); }
+	~CScopedApplyMacroCmd() { m_pSheet->m_pApplyMacroCmd.reset(); }
+private:
+	CLayoutBasePropertySheet* m_pSheet;
+};
 
 
 namespace reg
@@ -19,6 +31,7 @@ namespace reg
 CLayoutBasePropertySheet::CLayoutBasePropertySheet( const TCHAR* pTitle, CWnd* pParent, UINT selPageIndex )
 	: CPropertySheet( pTitle, pParent, selPageIndex )
 	, m_initialPageIndex( UINT_MAX )
+	, m_pCommandModel( NULL )
 	, m_manageOkButtonState( false )
 {
 }
@@ -279,40 +292,54 @@ void CLayoutBasePropertySheet::OutputPages( void )
 		OutputPage( i );
 }
 
+
 bool CLayoutBasePropertySheet::ApplyChanges( void )
 {
-	if ( IsSheetModified() )
-		for ( int i = 0, count = GetPageCount(); i != count; ++i )
+	if ( !IsSheetModified() )
+		return true;
+
+	CScopedApplyMacroCmd scopedApplyMacro( this );		// pages can get access through GetApplyMacroCmd()
+
+	for ( int i = 0, count = GetPageCount(); i != count; ++i )
+	{
+		CLayoutPropertyPage* pPage = GetPage( i );
+
+		if ( pPage->GetSafeHwnd() != NULL )
 		{
-			CLayoutPropertyPage* pPage = GetPage( i );
+			if ( !pPage->UpdateData( DialogSaveChanges ) )
+				return false;
 
-			if ( pPage->GetSafeHwnd() != NULL )
+			try
 			{
-				if ( !pPage->UpdateData( DialogSaveChanges ) )
-					return false;
-
-				try
-				{
-					pPage->ApplyPageChanges();
-					pPage->SetModified( false );
-				}
-				catch ( const CPageValidationException& pageExc )
-				{
-					pageExc.FocusErrorCtrl();
-					ui::ReportException( pageExc ); // activates the source of error (page and control)
-					return false;
-				}
-				catch ( const CRuntimeException& e )
-				{
-					if ( GetActivePage() != pPage )
-						SetActivePage( pPage );
-					ui::ReportException( e );
-					return false;
-				}
+				pPage->ApplyPageChanges();
+				pPage->SetModified( false );
+			}
+			catch ( const CPageValidationException& pageExc )
+			{
+				pageExc.FocusErrorCtrl();
+				ui::ReportException( pageExc );		// activates the source of error (page and control)
+				return false;
+			}
+			catch ( const CRuntimeException& e )
+			{
+				if ( GetActivePage() != pPage )
+					SetActivePage( pPage );
+				ui::ReportException( e );
+				return false;
 			}
 		}
+	}
 
+	if ( m_pCommandModel != NULL )
+		if ( m_pApplyMacroCmd.get() != NULL && !m_pApplyMacroCmd->IsEmpty() )
+			m_pCommandModel->Execute( m_pApplyMacroCmd.release() );
+
+	OnChangesApplied();
 	return true;
+}
+
+void CLayoutBasePropertySheet::OnChangesApplied( void )
+{
 }
 
 

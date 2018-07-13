@@ -11,7 +11,12 @@ namespace fs { class CPath; }
 
 namespace cmd
 {
-	enum CommandType { RenameFile = 100, TouchFile, DestPathChanged };
+	enum CommandType
+	{
+		RenameFile = 100, TouchFile,
+		ChangeDestPaths, ChangeDestFileStates, ResetDestinations,
+		EditOptions
+	};
 
 	const CEnumTags& GetTags_CommandType( void );
 
@@ -19,6 +24,9 @@ namespace cmd
 	enum StackType { Undo, Redo };
 
 	const CEnumTags& GetTags_StackType( void );
+
+
+	bool IsPersistentCmd( const utl::ICommand* pCmd );		// persistent commands are also editor-specific commands
 
 
 	interface IErrorObserver

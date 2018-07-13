@@ -96,6 +96,12 @@ CCapitalizeOptions& CCapitalizeOptions::Instance( void )
 	return options;
 }
 
+const std::tstring& CCapitalizeOptions::GetCode( void ) const
+{
+	static const std::tstring s_code = _T("Capitalize Options");
+	return s_code;
+}
+
 void CCapitalizeOptions::LoadFromRegistry( void )
 {
 	CWinApp* pApp = AfxGetApp();

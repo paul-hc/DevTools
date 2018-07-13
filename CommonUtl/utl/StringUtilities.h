@@ -186,14 +186,6 @@ namespace str
 }
 
 
-namespace stream
-{
-	void Tag( std::tstring& rOutput, const std::tstring& tag, const TCHAR* pSep );
-
-	std::tstring InputLine( std::istream& is );
-}
-
-
 #include <limits>
 #include "Range.h"
 

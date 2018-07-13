@@ -7,7 +7,6 @@
 #include "utl/HistoryComboBox.h"
 #include "utl/Subject.h"
 #include "utl/Path.h"
-#include "utl/ReportListControl.h"
 #include "utl/SplitPushButton.h"
 #include "utl/SpinEdit.h"
 #include "utl/TextEdit.h"
@@ -119,7 +118,7 @@ protected:
 	afx_msg void OnUpdateAutoGenerate( CCmdUI* pCmdUI );
 	afx_msg void OnNumericSequence( UINT cmdId );
 	afx_msg void OnBnClicked_PickRenameActions( void );
-	afx_msg void OnModifyDestTool( UINT menuId );
+	afx_msg void OnEnsureUniformNumPadding( void );
 
 	DECLARE_MESSAGE_MAP()
 };

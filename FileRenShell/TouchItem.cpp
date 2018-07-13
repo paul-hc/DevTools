@@ -9,21 +9,6 @@
 #endif
 
 
-namespace app
-{
-	const CTime& GetTimeField( const fs::CFileState& fileState, DateTimeField field )
-	{
-		switch ( field )
-		{
-			default: ASSERT( false );
-			case ModifiedDate:	return fileState.m_modifTime;
-			case CreatedDate:	return fileState.m_creationTime;
-			case AccessedDate:	return fileState.m_accessTime;
-		}
-	}
-}
-
-
 // CTouchItem implementation
 
 CTouchItem::CTouchItem( const fs::CFileState& srcState )
@@ -37,9 +22,9 @@ CTouchItem::~CTouchItem()
 {
 }
 
-void CTouchItem::SetDestTime( app::DateTimeField field, const CTime& dateTime )
+void CTouchItem::SetDestTime( fs::CFileState::TimeField field, const CTime& dateTime )
 {
-	app::RefTimeField( m_destState, field ) = dateTime;
+	m_destState.RefTimeField( field ) = dateTime;
 }
 
 
@@ -82,7 +67,7 @@ namespace multi
 	{
 		return
 			CanApply() &&
-			app::GetTimeField( pTouchItem->GetDestState(), m_field ) != m_dateTimeState;
+			pTouchItem->GetDestState().GetTimeField( m_field ) != m_dateTimeState;
 	}
 
 

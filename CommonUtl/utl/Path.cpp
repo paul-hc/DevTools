@@ -579,7 +579,7 @@ namespace fs
 
 	void CPath::SetNameExt( const std::tstring& nameExt )
 	{
-		CPathParts parts( m_filePath );
+		CPathParts parts( m_filePath );			// split into parts rather than use '/' operator in order to preserve fwd slashes
 		parts.SetNameExt( nameExt );
 		m_filePath = parts.MakePath();
 	}
@@ -607,21 +607,6 @@ namespace fs
 		finder.FindNextFile();
 
 		return CPath( (const TCHAR*)finder.GetFilePath() );
-	}
-
-	bool CPath::QualifyWithSameDirPathIfEmpty( CPath& rOutFilePath ) const
-	{
-		CPathParts outParts( rOutFilePath.Get() );
-		if ( outParts.m_drive.empty() && outParts.m_dir.empty() )
-		{
-			CPathParts theseParts( m_filePath );
-			outParts.m_drive = theseParts.m_drive;
-			outParts.m_dir = theseParts.m_dir;
-			rOutFilePath.Set( outParts.MakePath().c_str() );
-			return true;
-		}
-
-		return false;
 	}
 
 } //namespace fs

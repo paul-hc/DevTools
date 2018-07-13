@@ -7,6 +7,7 @@
 #include "NumericTests.h"
 #include "LcsTests.h"
 #include "ResequenceTests.h"
+#include "FmtUtilsTests.h"
 #include "FileSystemTests.h"
 #include "PathTests.h"
 #include "PathGeneratorTests.h"
@@ -24,6 +25,7 @@ namespace ut
 		CNumericTests::Instance();
 		CLcsTests::Instance();
 		CResequenceTests::Instance();
+		CFmtUtilsTests::Instance();
 		CFileSystemTests::Instance();
 		CPathTests::Instance();
 		CPathGeneratorTests::Instance();

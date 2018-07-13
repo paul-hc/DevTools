@@ -92,8 +92,8 @@ namespace cmd
 		virtual void Save( CArchive& archive ) throws_( CException* );
 		virtual void Load( CArchive& archive ) throws_( CException* );
 
-		void SaveStack( CArchive& archive, cmd::StackType section, const std::deque< utl::ICommand* >& cmdStack ) const;
-		void LoadStack( CArchive& archive, const std::deque< utl::ICommand* >& cmdStack ) const;
+		static void SaveStack( CArchive& archive, cmd::StackType section, const std::deque< utl::ICommand* >& cmdStack );
+		static void LoadStack( CArchive& archive, std::deque< utl::ICommand* >& rCmdStack );
 	};
 }
 

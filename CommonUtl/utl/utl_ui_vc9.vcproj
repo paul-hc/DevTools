@@ -754,6 +754,14 @@
 					>
 				</File>
 				<File
+					RelativePath=".\CommandModel.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\CommandModel.h"
+					>
+				</File>
+				<File
 					RelativePath=".\ISubject.h"
 					>
 				</File>
@@ -1648,6 +1656,14 @@
 			</File>
 			<File
 				RelativePath=".\ut\FileSystemTests.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ut\FmtUtilsTests.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\ut\FmtUtilsTests.h"
 				>
 			</File>
 			<File

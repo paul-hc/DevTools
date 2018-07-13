@@ -176,7 +176,8 @@ namespace fs
 		const TCHAR* GetPtr( void ) const { return m_filePath.c_str(); }
 		std::string GetUtf8( void ) const { return str::ToUtf8( GetPtr() ); }
 
-		CPath GetParentPath( bool trailSlash = false ) const;		// always a directory path
+		bool HasParentPath( void ) const { return GetNameExt() != GetPtr(); }		// has a directory path?
+		CPath GetParentPath( bool trailSlash = false ) const;			// always a directory path
 		CPath& SetBackslash( bool trailSlash = true );
 
 		const TCHAR* GetNameExt( void ) const { return path::FindFilename( m_filePath.c_str() ); }
@@ -201,7 +202,6 @@ namespace fs
 		bool FileExist( AccessMode accessMode = Exist ) const { return fs::FileExist( m_filePath.c_str(), accessMode ); }
 
 		CPath ExtractExistingFilePath( void ) const;
-		bool QualifyWithSameDirPathIfEmpty( CPath& rOutFilePath ) const;
 
 		inline size_t hash_value( void ) const { return stdext::hash_value( m_filePath ); }
 	protected:

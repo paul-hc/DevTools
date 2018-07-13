@@ -2,7 +2,9 @@
 #include "stdafx.h"
 #include "FmtUtils.h"
 #include "FileState.h"
+#include "EnumTags.h"
 #include "FlagTags.h"
+#include "RuntimeException.h"
 #include "StringRange.h"
 #include "StringUtilities.h"
 #include "TimeUtils.h"
@@ -14,6 +16,7 @@
 
 namespace fmt
 {
+	static const TCHAR s_clipSep[] = _T("\t");
 	static const TCHAR s_pairSep[] = _T(" -> ");
 	static const TCHAR s_touchSep[] = _T(" :: ");
 	static const TCHAR s_stateBraces[] = { _T("{}") };
@@ -90,16 +93,49 @@ namespace fmt
 	}
 
 
-	std::tstring FormatFileState( const fs::CFileState& fileState )
+	std::tstring FormatFileStateCore( const fs::CFileState& fileState, bool tagged /*= true*/ )
 	{
-		return FormatBraces( impl::FormatFileState( fileState, NoPath ).c_str(), s_stateBraces );
+		return FormatBraces( impl::FormatFileState( fileState, NoPath, tagged ).c_str(), s_stateBraces );
 	}
 
-	bool ParseFileState( fs::CFileState& rState, str::TStringRange& rTextRange )
+	bool ParseFileStateCore( fs::CFileState& rFileState, str::TStringRange& rTextRange )
 	{
 		return
 			ParseBraces( rTextRange, s_stateBraces ) &&
-			impl::ParseFileState( rState, rTextRange.Extract(), NoPath );
+			impl::ParseFileState_Tagged( rFileState, rTextRange.Extract(), NoPath );
+	}
+
+
+	std::tstring FormatClipFileState( const fs::CFileState& fileState, PathFormat pathFormat /*= FullPath*/, bool tagged /*= true*/ )
+	{
+		return std::tstring( FormatPath( fileState.m_fullPath, pathFormat ) ) + s_clipSep + FormatFileStateCore( fileState, tagged );
+	}
+
+	fs::CFileState& ParseClipFileState( fs::CFileState& rFileState, const std::tstring& text, const fs::CPath* pKeyPath /*= NULL*/ ) throws_( CRuntimeException )
+	{
+		str::TStringRange textRange( text );
+
+		Range< size_t > sepPos;
+		if ( textRange.Find( sepPos, s_clipSep ) )
+		{
+			rFileState.m_fullPath = textRange.ExtractLead( sepPos.m_start );
+
+			if ( pKeyPath != NULL )
+			{
+				if ( !rFileState.m_fullPath.HasParentPath() )
+					rFileState.m_fullPath.SetDirPath( pKeyPath->GetParentPath().Get() );		// qualify with SRC dir path
+
+				if ( rFileState.m_fullPath != *pKeyPath )
+					throw CRuntimeException( str::Format( _T("Pasted destination file path is inconsistent with source path.\n\nSource path: %s\nDestination path: %s"),
+						pKeyPath->GetPtr(), rFileState.m_fullPath.GetPtr() ) );
+			}
+
+			str::TStringRange stateRange = textRange.MakeTrail( sepPos.m_end );
+			if ( ParseFileStateCore( rFileState, stateRange ) )
+				return rFileState;
+		}
+
+		throw CRuntimeException( str::Format( _T("Pasted destination file status format is not valid: %s"), text.c_str() ) );
 	}
 
 
@@ -130,10 +166,23 @@ namespace fmt
 	}
 
 
-	std::tstring FormatTouchEntry( const fs::CFileState& srcState, const fs::CFileState& destState )
+	std::tstring FormatTouchEntry( fs::CFileState srcState, fs::CFileState destState, bool tagged /*= true*/ )
 	{
 		ASSERT( srcState.m_fullPath == destState.m_fullPath );
-		return srcState.m_fullPath.Get() + s_touchSep + FormatFileState( srcState ) + s_pairSep + FormatFileState( destState );
+
+		// net changes output: reset equal time-fields to NULL to minimize output
+		static const CTime s_nullTime( 0 );
+
+		if ( srcState.m_creationTime == destState.m_creationTime )
+			srcState.m_creationTime = destState.m_creationTime = s_nullTime;
+
+		if ( srcState.m_modifTime == destState.m_modifTime )
+			srcState.m_modifTime = destState.m_modifTime = s_nullTime;
+
+		if ( srcState.m_accessTime == destState.m_accessTime )
+			srcState.m_accessTime = destState.m_accessTime = s_nullTime;
+
+		return srcState.m_fullPath.Get() + s_touchSep + FormatFileStateCore( srcState, tagged ) + s_pairSep + FormatFileStateCore( destState, tagged );
 	}
 
 	bool ParseTouchEntry( fs::CFileState& rSrcState, fs::CFileState& rDestState, const str::TStringRange& textRange )
@@ -149,8 +198,8 @@ namespace fmt
 				str::TStringRange srcRange = nextRange.MakeLead( sepPos.m_start );
 				str::TStringRange destRange = nextRange.MakeTrail( sepPos.m_end );
 
-				if ( ParseFileState( rSrcState, srcRange ) )
-					if ( ParseFileState( rDestState, destRange ) )
+				if ( ParseFileStateCore( rSrcState, srcRange ) )
+					if ( ParseFileStateCore( rDestState, destRange ) )
 						return true;
 			}
 		}
@@ -161,24 +210,32 @@ namespace fmt
 	namespace impl
 	{
 		static const TCHAR s_fieldSep[] = _T("|");
+		static const TCHAR s_tagPrefixSep[] = _T("=");
 
-		std::tstring FormatFileState( const fs::CFileState& state, PathFormat pathFormat )
+
+		std::tstring FormatFileState_Tagged( const fs::CFileState& fileState, PathFormat pathFormat );
+
+
+		std::tstring FormatFileState( const fs::CFileState& fileState, PathFormat pathFormat, bool tagged )
 		{
+			if ( tagged )
+				return FormatFileState_Tagged( fileState, pathFormat );
+
 			std::vector< std::tstring > parts;
-			if ( !state.IsEmpty() )
+			if ( !fileState.IsEmpty() )
 			{
 				if ( pathFormat != NoPath )
-					parts.push_back( FormatPath( state.m_fullPath, pathFormat ) );
+					parts.push_back( FormatPath( fileState.m_fullPath, pathFormat ) );
 
-				parts.push_back( FormatFileAttributes( state.m_attributes, false ) );
-				parts.push_back( time_utl::FormatTimestamp( state.m_creationTime ) );
-				parts.push_back( time_utl::FormatTimestamp( state.m_modifTime ) );
-				parts.push_back( time_utl::FormatTimestamp( state.m_accessTime ) );
+				parts.push_back( FormatFileAttributes( fileState.m_attributes, false ) );
+				parts.push_back( time_utl::FormatTimestamp( fileState.m_creationTime ) );
+				parts.push_back( time_utl::FormatTimestamp( fileState.m_modifTime ) );
+				parts.push_back( time_utl::FormatTimestamp( fileState.m_accessTime ) );
 			}
 			return str::Join( parts, s_fieldSep );
 		}
 
-		bool ParseFileState( fs::CFileState& rState, const std::tstring& text, PathFormat pathFormat )
+		bool ParseFileState( fs::CFileState& rFileState, const std::tstring& text, PathFormat pathFormat )
 		{
 			std::vector< std::tstring > parts;
 			str::Split( parts, text.c_str(), s_fieldSep );
@@ -186,20 +243,111 @@ namespace fmt
 			const size_t fieldCount = NoPath == pathFormat ? 4 : 5;
 			if ( parts.size() != fieldCount )
 			{
-				rState.Clear();
+				rFileState.Clear();
 				return false;
 			}
 
 			size_t pos = 0;
 
 			if ( pathFormat != NoPath )
-				rState.m_fullPath.Set( parts[ pos++ ] );
+				rFileState.m_fullPath.Set( parts[ pos++ ] );
 
-			rState.m_attributes = static_cast< BYTE >( ParseFileAttributes( parts[ pos++ ], false ) );
-			rState.m_creationTime = time_utl::ParseTimestamp( parts[ pos++ ] );
-			rState.m_modifTime = time_utl::ParseTimestamp( parts[ pos++ ] );
-			rState.m_accessTime = time_utl::ParseTimestamp( parts[ pos++ ] );
+			rFileState.m_attributes = static_cast< BYTE >( ParseFileAttributes( parts[ pos++ ], false ) );
+			rFileState.m_creationTime = time_utl::ParseTimestamp( parts[ pos++ ] );
+			rFileState.m_modifTime = time_utl::ParseTimestamp( parts[ pos++ ] );
+			rFileState.m_accessTime = time_utl::ParseTimestamp( parts[ pos++ ] );
 			return true;
+		}
+
+
+		std::tstring _FormatTaggedTimeField( const CTime& time, fs::CFileState::TimeField field )
+		{
+			return fs::CFileState::GetTags_TimeField().FormatKey( field ) + s_tagPrefixSep + time_utl::FormatTimestamp( time );
+		}
+
+		bool _ParseTaggedTimeField( CTime& rTime, fs::CFileState::TimeField& rField, const std::tstring& text )
+		{
+			str::TStringRange textRange( text );
+			Range< size_t > sepPos;
+			if ( textRange.Find( sepPos, s_tagPrefixSep ) )
+			{
+				str::TStringRange tagRange = textRange.MakeLead( sepPos.m_start );
+				if ( fs::CFileState::GetTags_TimeField().ParseAs( rField, tagRange.Extract(), CEnumTags::KeyTag ) )
+				{
+					rTime = time_utl::ParseTimestamp( textRange.MakeTrail( sepPos.m_end ).Extract() );
+					return rTime.GetTime() != 0;
+				}
+			}
+
+			return false;
+		}
+
+		// tagged: time-fields prefixed with key tags: "M="
+		//
+		std::tstring FormatFileState_Tagged( const fs::CFileState& fileState, PathFormat pathFormat )
+		{
+			std::vector< std::tstring > parts;
+			if ( !fileState.IsEmpty() )
+			{
+				if ( pathFormat != NoPath )
+					parts.push_back( FormatPath( fileState.m_fullPath, pathFormat ) );
+
+				parts.push_back( FormatFileAttributes( fileState.m_attributes, false ) );
+
+				for ( fs::CFileState::TimeField field = fs::CFileState::TimeField( 0 ); field != fs::CFileState::_TimeFieldCount; ++(int&)field )
+				{
+					const CTime& time = fileState.GetTimeField( field );
+					if ( time.GetTime() != 0 )
+						parts.push_back( _FormatTaggedTimeField( time, field ) );		// only add defined time-fields
+				}
+			}
+			return str::Join( parts, s_fieldSep );
+		}
+
+		bool ParseFileState_Tagged( fs::CFileState& rFileState, const std::tstring& text, PathFormat pathFormat )
+		{
+			std::vector< std::tstring > parts;
+			str::Split( parts, text.c_str(), s_fieldSep );
+
+			std::vector< std::tstring >::iterator itPart = parts.begin();
+
+			if ( itPart == parts.end() )
+				return false;
+
+			if ( pathFormat != NoPath )
+				rFileState.m_fullPath.Set( *itPart++ );
+
+			if ( itPart == parts.end() )
+				return false;
+
+			rFileState.m_attributes = static_cast< BYTE >( ParseFileAttributes( *itPart++, false ) );
+
+			if ( 3 == std::distance( itPart, parts.end() ) && std::tstring::npos == itPart->find( s_tagPrefixSep ) )	// 3 time fields not tagged?
+			{	// backwards compatibility: parse untagged time fields (mandatory)
+				rFileState.m_creationTime = time_utl::ParseTimestamp( *itPart++ );
+				rFileState.m_modifTime = time_utl::ParseTimestamp( *itPart++ );
+				rFileState.m_accessTime = time_utl::ParseTimestamp( *itPart++ );
+			}
+			else
+			{
+				// optional tagged time fields: missing ones will preserve existing data-members
+				for ( ; itPart != parts.end(); ++itPart )
+				{
+					fs::CFileState::TimeField field;
+					CTime time;
+
+					if ( _ParseTaggedTimeField( time, field, *itPart ) )
+						rFileState.RefTimeField( field ) = time;
+				}
+			}
+
+			return true;
+		}
+
+		void ParseFileState_TaggedThrow( fs::CFileState& rFileState, const std::tstring& text, PathFormat pathFormat ) throws_( CRuntimeException )
+		{
+			if ( !ParseFileState_Tagged( rFileState, text, pathFormat ) )
+				throw CRuntimeException( str::Format( _T("Invalid format for file status: %s"), text.c_str() ) );
 		}
 	}
 }

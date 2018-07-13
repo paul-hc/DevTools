@@ -5,6 +5,7 @@
 #include "Path.h"
 
 
+class CEnumTags;
 class CFlagTags;
 
 
@@ -27,6 +28,14 @@ namespace fs
 
 		static CFileState ReadFromFile( const fs::CPath& path );		// could be relative path, will be stored as absolute
 		void WriteToFile( void ) const throws_( CFileException, mfc::CRuntimeException );
+
+		// time fields
+		enum TimeField { CreatedDate, ModifiedDate, AccessedDate, _TimeFieldCount };
+
+		static const CEnumTags& GetTags_TimeField( void );
+
+		const CTime& GetTimeField( TimeField field ) const;
+		CTime& RefTimeField( TimeField field ) { return const_cast< CTime& >( GetTimeField( field ) ); }
 	public:
 		CPath m_fullPath;
 		BYTE m_attributes;			// CFile::Attribute enum values (low-byte)

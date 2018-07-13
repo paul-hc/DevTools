@@ -123,7 +123,7 @@ std::tstring CFileRenameShell::FormatCmdText( const CMenuCmdInfo& cmdInfo )
 		m_pFileModel->LoadCommandModel();
 
 		if ( utl::ICommand* pTopCmd = m_pFileModel->PeekCmdAs< utl::ICommand >( Cmd_Undo == cmdInfo.m_cmd ? cmd::Undo : cmd::Redo ) )
-			return str::Format( cmdInfo.m_pTitle, pTopCmd->Format( true ).c_str() );
+			return str::Format( cmdInfo.m_pTitle, pTopCmd->Format( utl::Detailed ).c_str() );
 
 		return std::tstring();
 	}

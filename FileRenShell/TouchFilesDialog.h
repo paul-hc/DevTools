@@ -2,18 +2,14 @@
 #define TouchFilesDialog_h
 #pragma once
 
-#include "utl/BaseMainDialog.h"
 #include "utl/FileState.h"
 #include "utl/ISubject.h"
-#include "utl/ReportListControl.h"
 #include "utl/DateTimeControl.h"
 #include "FileEditorBaseDialog.h"
 
 
 class CTouchItem;
 class CEnumTags;
-
-namespace app { enum DateTimeField; }
 
 namespace multi
 {
@@ -71,8 +67,7 @@ private:
 	size_t FindItemPos( const fs::CPath& keyPath ) const;
 	void MarkInvalidSrcItems( void );
 
-	static const CEnumTags& GetTags_DateTimeField( void );
-	static app::DateTimeField GetDateTimeField( UINT dtId );
+	static fs::CFileState::TimeField GetTimeField( UINT dtId );
 private:
 	const std::vector< CTouchItem* >& m_rTouchItems;
 	Mode m_mode;

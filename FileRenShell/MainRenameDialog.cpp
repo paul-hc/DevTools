@@ -65,7 +65,7 @@ namespace layout
 		{ IDC_CHANGE_CASE_BUTTON, Move },
 
 		{ IDC_REPLACE_FILES_BUTTON, Move },
-		{ IDC_REPLACE_DELIMS_BUTTON, Move },
+		{ IDC_REPLACE_USER_DELIMS_BUTTON, Move },
 		{ IDC_DELIMITER_SET_COMBO, Move },
 		{ IDC_DELIMITER_STATIC, Move },
 		{ IDC_NEW_DELIMITER_EDIT, Move },
@@ -92,6 +92,8 @@ CMainRenameDialog::CMainRenameDialog( CFileModel* pFileModel, CWnd* pParent )
 	, m_pickRenameActionsStatic( ui::DropDown )
 {
 	REQUIRE( !m_rRenameItems.empty() );
+	m_nativeCmdTypes.push_back( cmd::ChangeDestPaths );
+	m_nativeCmdTypes.push_back( cmd::ResetDestinations );
 
 	m_regSection = reg::section_mainDialog;
 	RegisterCtrlLayout( layout::styles, COUNT_OF( layout::styles ) );
@@ -104,6 +106,7 @@ CMainRenameDialog::CMainRenameDialog( CFileModel* pFileModel, CWnd* pParent )
 	//m_fileListCtrl.ModifyListStyleEx( LVS_EX_DOUBLEBUFFER, LVS_EX_GRIDLINES );		// remove double buffering for better drawing accuracy on thumb scaling
 
 	m_changeCaseButton.SetSelValue( AfxGetApp()->GetProfileInt( reg::section_mainDialog, reg::entry_changeCase, ExtLowerCase ) );
+	ClearFlag( m_delimiterSetCombo.RefItemContent().m_itemsFlags, ui::CItemContent::RemoveEmpty | ui::CItemContent::Trim );
 
 	m_formatToolbar.GetStrip()
 		.AddButton( ID_PICK_FORMAT_TOKEN )
@@ -126,18 +129,18 @@ CMainRenameDialog::~CMainRenameDialog()
 
 bool CMainRenameDialog::RenameFiles( void )
 {
-	m_errorItems.clear();
-
 	CFileService svc;
 	std::auto_ptr< CMacroCommand > pRenameMacroCmd = svc.MakeRenameCmds( m_rRenameItems );
 	if ( pRenameMacroCmd.get() != NULL )
 		if ( !pRenameMacroCmd->IsEmpty() )
 		{
+			m_errorItems.clear();
+
 			cmd::CScopedErrorObserver observe( this );
 			return m_pFileModel->GetCommandModel()->Execute( pRenameMacroCmd.release() );
 		}
 		else
-			return IDOK == AfxMessageBox( _T("There are no changes to apply. Close the dialog?"), MB_OKCANCEL );
+			return PromptCloseDialog();
 
 	return false;
 }
@@ -176,27 +179,25 @@ void CMainRenameDialog::SwitchMode( Mode mode )
 	{
 		IDC_FORMAT_COMBO, IDC_STRIP_BAR_1, IDC_STRIP_BAR_2, IDC_COPY_SOURCE_PATHS_BUTTON,
 		IDC_PASTE_FILES_BUTTON, IDC_CLEAR_FILES_BUTTON, IDC_CAPITALIZE_BUTTON, IDC_CHANGE_CASE_BUTTON,
-		IDC_REPLACE_FILES_BUTTON, IDC_REPLACE_DELIMS_BUTTON, IDC_DELIMITER_SET_COMBO, IDC_NEW_DELIMITER_EDIT
+		IDC_REPLACE_FILES_BUTTON, IDC_REPLACE_USER_DELIMS_BUTTON, IDC_DELIMITER_SET_COMBO, IDC_NEW_DELIMITER_EDIT
 	};
 	ui::EnableControls( *this, ctrlIds, COUNT_OF( ctrlIds ), m_mode != RollBackMode );
 }
 
 void CMainRenameDialog::PostMakeDest( bool silent /*= false*/ )
 {
-	// note: the list is setup on OnUpdate()
+	// note: the list is set-up on OnUpdate()
 
 	if ( !silent )
 		GotoDlgCtrl( GetDlgItem( IDOK ) );
 
 	ASSERT_PTR( m_pRenSvc.get() );
+
 	if ( m_pRenSvc->CheckPathCollisions( this ) )		// stores erros in m_errorItems
 		SwitchMode( RenameMode );
 	else
 	{
-		ASSERT( !m_errorItems.empty() );
-
-		m_fileListCtrl.EnsureVisible( static_cast< int >( FindItemPos( m_errorItems.front()->GetKeyPath() ) ), FALSE );
-		m_fileListCtrl.Invalidate();
+		EnsureVisibleFirstError( &m_fileListCtrl );
 
 		SwitchMode( MakeMode );
 		if ( !silent )
@@ -208,15 +209,26 @@ void CMainRenameDialog::PopStackTop( cmd::StackType stackType )
 {
 	ASSERT( m_mode != RollBackMode && m_mode != RollForwardMode );
 
-	if ( m_pFileModel->CanUndoRedo( stackType, cmd::RenameFile ) )		// is this the proper dialog editor?
+	if ( utl::ICommand* pTopCmd = PeekCmdForDialog( stackType ) )		// comand that is target for this dialog editor?
 	{
+		bool isRenameMacro = cmd::RenameFile == pTopCmd->GetTypeID();
+
 		ClearFileErrors();
-		m_pFileModel->FetchFromStack( stackType );		// fetch dataset from the stack top macro command
+
+		if ( isRenameMacro )
+			m_pFileModel->FetchFromStack( stackType );		// fetch dataset from the stack top macro command
+		else
+			m_pFileModel->UndoRedo( stackType );
+
 		MarkInvalidSrcItems();
-		SwitchMode( cmd::Undo == stackType ? RollBackMode : RollForwardMode );
+
+		if ( isRenameMacro )						// file command?
+			SwitchMode( cmd::Undo == stackType ? RollBackMode : RollForwardMode );
+		else if ( IsNativeCmd( pTopCmd ) )			// path editing command?
+			SwitchMode( RenameMode );
 	}
 	else
-		PopStackRunCrossEditor( stackType );			// end this dialog and execute the target dialog editor
+		PopStackRunCrossEditor( stackType );		// end this dialog and execute the target dialog editor
 }
 
 void CMainRenameDialog::OnUpdate( utl::ISubject* pSubject, utl::IMessage* pMessage )
@@ -226,18 +238,18 @@ void CMainRenameDialog::OnUpdate( utl::ISubject* pSubject, utl::IMessage* pMessa
 	if ( m_hWnd != NULL )
 		if ( m_pFileModel == pSubject )
 		{
+			if ( NULL == m_pRenSvc.get() )
+				m_pRenSvc.reset( new CRenameService( m_rRenameItems ) );		// lazy init
+			else
+				m_pRenSvc->StoreRenameItems( m_rRenameItems );					// update the current object since it may be referenced in CReplaceDialog
+
+			SetupFileListView();
+
 			switch ( utl::GetSafeTypeID( pMessage ) )
 			{
-				case cmd::DestPathChanged:
+				case cmd::ChangeDestPaths:
 					PostMakeDest();
 					break;
-				default:
-					if ( NULL == m_pRenSvc.get() )
-						m_pRenSvc.reset( new CRenameService( m_rRenameItems ) );		// lazy init
-					else
-						m_pRenSvc->StoreRenameItems( m_rRenameItems );					// update the current object since it may be referenced in CReplaceDialog
-
-					SetupFileListView();
 			}
 		}
 		else if ( &CGeneralOptions::Instance() == pSubject )
@@ -447,13 +459,13 @@ BEGIN_MESSAGE_MAP( CMainRenameDialog, CFileEditorBaseDialog )
 	ON_SBN_RIGHTCLICKED( IDC_CAPITALIZE_BUTTON, OnSbnRightClicked_CapitalizeOptions )
 	ON_BN_CLICKED( IDC_CHANGE_CASE_BUTTON, OnBnClicked_ChangeCase )
 	ON_BN_CLICKED( IDC_REPLACE_FILES_BUTTON, OnBnClicked_ReplaceDestFiles )
-	ON_BN_CLICKED( IDC_REPLACE_DELIMS_BUTTON, OnBnClicked_ReplaceAllDelimitersDestFiles )
+	ON_BN_CLICKED( IDC_REPLACE_USER_DELIMS_BUTTON, OnBnClicked_ReplaceAllDelimitersDestFiles )
 	ON_CBN_EDITCHANGE( IDC_DELIMITER_SET_COMBO, OnFieldChanged )
 	ON_CBN_SELCHANGE( IDC_DELIMITER_SET_COMBO, OnFieldChanged )
 	ON_EN_CHANGE( IDC_NEW_DELIMITER_EDIT, OnFieldChanged )
 	ON_BN_CLICKED( IDC_PICK_RENAME_ACTIONS, OnBnClicked_PickRenameActions )
 	ON_BN_DOUBLECLICKED( IDC_PICK_RENAME_ACTIONS, OnBnClicked_PickRenameActions )
-	ON_COMMAND_RANGE( ID_REPLACE_DELIMS, ID_ENSURE_UNIFORM_NUM_PADDING, OnModifyDestTool )		// bottom-right pick DEST tool
+	ON_COMMAND( ID_ENSURE_UNIFORM_ZERO_PADDING, OnEnsureUniformNumPadding )		// bottom-right pick DEST tool
 END_MESSAGE_MAP()
 
 BOOL CMainRenameDialog::OnInitDialog( void )
@@ -606,22 +618,12 @@ void CMainRenameDialog::OnBnClicked_CopySourceFiles( void )
 		AfxMessageBox( _T("Couldn't copy source files to clipboard!"), MB_ICONERROR | MB_OK );
 }
 
-void CMainRenameDialog::OnBnClicked_ClearDestFiles( void )
-{
-	ClearFileErrors();
-	m_pFileModel->ResetDestinations();
-
-	SetupFileListView();	// fill in and select the found files list
-	SwitchMode( MakeMode );
-}
-
 void CMainRenameDialog::OnBnClicked_PasteDestFiles( void )
 {
 	try
 	{
 		ClearFileErrors();
-		m_pFileModel->PasteClipDestinationPaths( this );
-		PostMakeDest();
+		m_pFileModel->SafeExecuteCmd( m_pFileModel->MakeClipPasteDestPathsCmd( this ) );
 	}
 	catch ( CRuntimeException& exc )
 	{
@@ -629,23 +631,30 @@ void CMainRenameDialog::OnBnClicked_PasteDestFiles( void )
 	}
 }
 
+void CMainRenameDialog::OnBnClicked_ClearDestFiles( void )
+{
+	ClearFileErrors();
+	m_pFileModel->SafeExecuteCmd( new CResetDestinationsCmd( m_pFileModel ) );
+}
+
 void CMainRenameDialog::OnBnClicked_CapitalizeDestFiles( void )
 {
 	CTitleCapitalizer capitalizer;
-	m_pFileModel->ForEachRenameDestination( func::CapitalizeWords( &capitalizer ) );
-	PostMakeDest();
+	m_pFileModel->SafeExecuteCmd( m_pFileModel->MakeChangeDestPathsCmd( func::CapitalizeWords( &capitalizer ), _T("Title Case") ) );
 }
 
 void CMainRenameDialog::OnSbnRightClicked_CapitalizeOptions( void )
 {
-	COptionsSheet sheet( this, COptionsSheet::CapitalizePage );
+	COptionsSheet sheet( m_pFileModel, this, COptionsSheet::CapitalizePage );
 	sheet.DoModal();
 }
 
 void CMainRenameDialog::OnBnClicked_ChangeCase( void )
 {
-	m_pFileModel->ForEachRenameDestination( func::MakeCase( m_changeCaseButton.GetSelEnum< ChangeCase >() ) );
-	PostMakeDest();
+	ChangeCase selCase = m_changeCaseButton.GetSelEnum< ChangeCase >();
+	std::tstring cmdTag = str::Format( _T("Change case to: %s"), GetTags_ChangeCase().FormatUi( selCase ).c_str() );
+
+	m_pFileModel->SafeExecuteCmd( m_pFileModel->MakeChangeDestPathsCmd( func::MakeCase( selCase ), cmdTag ) );
 }
 
 void CMainRenameDialog::OnBnClicked_ReplaceDestFiles( void )
@@ -664,8 +673,8 @@ void CMainRenameDialog::OnBnClicked_ReplaceAllDelimitersDestFiles( void )
 		return;
 	}
 
-	m_pFileModel->ForEachRenameDestination( func::ReplaceDelimiterSet( delimiterSet, ui::GetWindowText( &m_newDelimiterEdit ) ) );
-	PostMakeDest();
+	m_pFileModel->SafeExecuteCmd(
+		m_pFileModel->MakeChangeDestPathsCmd( func::ReplaceDelimiterSet( delimiterSet, ui::GetWindowText( &m_newDelimiterEdit ) ), str::Load( IDC_REPLACE_USER_DELIMS_BUTTON ) ) );
 }
 
 void CMainRenameDialog::OnFieldChanged( void )
@@ -769,46 +778,13 @@ void CMainRenameDialog::OnBnClicked_PickRenameActions( void )
 	m_pickRenameActionsStatic.TrackMenu( this, IDR_CONTEXT_MENU, popup::MoreRenameActions );
 }
 
-void CMainRenameDialog::OnModifyDestTool( UINT menuId )
+void CMainRenameDialog::OnEnsureUniformNumPadding( void )
 {
-	switch ( menuId )
-	{
-		case ID_REPLACE_DELIMS:
-			m_pFileModel->ForEachRenameDestination( func::ReplaceDelimiterSet( delim::GetAllDelimitersSet(), _T(" ") ) );
-			break;
-		case ID_REPLACE_UNICODE_SYMBOLS:
-			m_pFileModel->ForEachRenameDestination( func::ReplaceMultiDelimiterSets( &text_tool::GetStdUnicodeToAnsiPairs() ) );
-			break;
-		case ID_SINGLE_WHITESPACE:
-			m_pFileModel->ForEachRenameDestination( func::SingleWhitespace() );
-			break;
-		case ID_REMOVE_WHITESPACE:
-			m_pFileModel->ForEachRenameDestination( func::RemoveWhitespace() );
-			break;
-		case ID_DASH_TO_SPACE:
-			m_pFileModel->ForEachRenameDestination( func::ReplaceDelimiterSet( delim::s_dashes, _T(" ") ) );
-			break;
-		case ID_SPACE_TO_DASH:
-			m_pFileModel->ForEachRenameDestination( func::ReplaceDelimiterSet( _T(" "), _T("-") ) );
-			break;
-		case ID_UNDERBAR_TO_SPACE:
-			m_pFileModel->ForEachRenameDestination( func::ReplaceDelimiterSet( _T("_"), _T(" ") ) );
-			break;
-		case ID_SPACE_TO_UNDERBAR:
-			m_pFileModel->ForEachRenameDestination( func::ReplaceDelimiterSet( _T(" "), _T("_") ) );
-			break;
-		case ID_ENSURE_UNIFORM_NUM_PADDING:
-		{
-			std::vector< std::tstring > fnames; fnames.reserve( m_rRenameItems.size() );
-			for ( std::vector< CRenameItem* >::const_iterator itItem = m_rRenameItems.begin(); itItem != m_rRenameItems.end(); ++itItem )
-				fnames.push_back( fs::CPathParts( ( *itItem )->GetSafeDestPath().Get() ).m_fname );
+	std::vector< std::tstring > fnames; fnames.reserve( m_rRenameItems.size() );
+	for ( std::vector< CRenameItem* >::const_iterator itItem = m_rRenameItems.begin(); itItem != m_rRenameItems.end(); ++itItem )
+		fnames.push_back( fs::CPathParts( ( *itItem )->GetSafeDestPath().Get() ).m_fname );
 
-			num::EnsureUniformZeroPadding( fnames );
-			m_pFileModel->ForEachRenameDestination( func::AssignFname( fnames.begin() ) );
-			break;
-		}
-		default:
-			ASSERT( false );
-	}
-	PostMakeDest();
+	num::EnsureUniformZeroPadding( fnames );
+
+	m_pFileModel->SafeExecuteCmd( m_pFileModel->MakeChangeDestPathsCmd( func::AssignFname( fnames.begin() ), str::Load( ID_ENSURE_UNIFORM_ZERO_PADDING ) ) );
 }

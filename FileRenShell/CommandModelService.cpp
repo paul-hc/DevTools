@@ -3,11 +3,13 @@
 #include "CommandModelService.h"
 #include "FileCommands.h"
 #include "utl/Command.h"
+#include "utl/CommandModel.h"
 #include "utl/ContainerUtilities.h"
 #include "utl/EnumTags.h"
 #include "utl/FmtUtils.h"
 #include "utl/Guards.h"
 #include "utl/MfcUtilities.h"
+#include "utl/Serialization.h"
 #include "utl/StringRange.h"
 #include "utl/StringUtilities.h"
 #include "utl/Timer.h"
@@ -163,20 +165,23 @@ namespace cmd
 		os << FormatSectionTag( GetTags_Section().FormatUi( section ).c_str() ) << std::endl;		// section tag
 
 		for ( size_t i = 0; i != cmdStack.size(); ++i )
-		{
-			const CMacroCommand* pMacroCmd = checked_static_cast< const CMacroCommand* >( cmdStack[ i ] );
-			ASSERT( !pMacroCmd->IsEmpty() );
+			if ( cmd::IsPersistentCmd( cmdStack[ i ] ) )
+			{
+				if ( i != 0 )
+					os << std::endl;		// inner batch extra line-end separator
 
-			if ( i != 0 )
-				os << std::endl;		// inner batch extra line-end separator
+				if ( const CMacroCommand* pMacroCmd = dynamic_cast< const CMacroCommand* >( cmdStack[ i ] ) )
+				{
+					os << FormatTag( pMacroCmd->Format( utl::Brief ).c_str() ) << std::endl;		// action tag line
 
-			os << FormatTag( pMacroCmd->Format( false ).c_str() ) << std::endl;			// action tag line
+					for ( std::vector< utl::ICommand* >::const_iterator itSubCmd = pMacroCmd->GetSubCommands().begin(); itSubCmd != pMacroCmd->GetSubCommands().end(); ++itSubCmd )
+						os << ( *itSubCmd )->Format( utl::Brief ) << std::endl;						// no action tag
 
-			for ( std::vector< utl::ICommand* >::const_iterator itSubCmd = pMacroCmd->GetSubCommands().begin(); itSubCmd != pMacroCmd->GetSubCommands().end(); ++itSubCmd )
-				os << ( *itSubCmd )->Format( false ) << std::endl;						// no action tag
-
-			os << FormatTag( s_tagEndOfBatch ) << std::endl;
-		}
+					os << FormatTag( s_tagEndOfBatch ) << std::endl;
+				}
+				else
+					ASSERT( false );		// TODO: write text serialization code for this command type
+			}
 	}
 
 	void CTextLogSerializer::Load( std::istream& is )
@@ -325,20 +330,28 @@ namespace cmd
 
 	void CBinaryLogSerializer::Load( CArchive& archive ) throws_( CException* )
 	{
-		LoadStack( archive, m_pCommandModel->GetUndoStack() );
-		LoadStack( archive, m_pCommandModel->GetRedoStack() );
+		std::deque< utl::ICommand* > undoStack, redoStack;
+		LoadStack( archive, undoStack );
+		LoadStack( archive, redoStack );
+
+		m_pCommandModel->SwapUndoStack( undoStack );
+		m_pCommandModel->SwapRedoStack( redoStack );
 	}
 
-	void CBinaryLogSerializer::SaveStack( CArchive& archive, cmd::StackType section, const std::deque< utl::ICommand* >& cmdStack ) const
+	void CBinaryLogSerializer::SaveStack( CArchive& archive, cmd::StackType section, const std::deque< utl::ICommand* >& cmdStack )
 	{
 		std::tstring sectionTag = FormatSectionTag( GetTags_Section().FormatUi( section ).c_str() );
-		archive << &sectionTag;			// as Utf8
+		archive << &sectionTag;			// as Utf8; just for inspection
+
+		serial::Save_CObjects( archive, cmdStack );
 	}
 
-	void CBinaryLogSerializer::LoadStack( CArchive& archive, const std::deque< utl::ICommand* >& cmdStack ) const
+	void CBinaryLogSerializer::LoadStack( CArchive& archive, std::deque< utl::ICommand* >& rCmdStack )
 	{
 		std::tstring sectionTag; sectionTag;
-		archive >> &sectionTag;			// as Utf8
+		archive >> &sectionTag;			// as Utf8; just discard it
+
+		serial::Load_CObjects( archive, rCmdStack );
 	}
 
 } //namespace cmd

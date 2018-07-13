@@ -8,17 +8,22 @@
 
 
 class CLayoutPropertyPage;
+class CMacroCommand;
+class CCommandModel;
+class CScopedApplyMacroCmd;
 
 
 abstract class CLayoutBasePropertySheet : public CPropertySheet
 										, public ui::ICustomCmdInfo
 {
+	friend class CScopedApplyMacroCmd;
 protected:
 	CLayoutBasePropertySheet( const TCHAR* pTitle, CWnd* pParent, UINT selPageIndex );
 public:
 	virtual ~CLayoutBasePropertySheet();
 
 	const std::tstring& GetSection( void ) const { return m_regSection; }
+	CMacroCommand* GetApplyMacroCmd( void ) const { return m_pApplyMacroCmd.get(); }
 
 	CLayoutPropertyPage* GetPage( int pageIndex ) const;
 
@@ -58,6 +63,7 @@ public:
 	virtual void LayoutPages( const CRect& rPageRect );
 protected:
 	virtual bool ApplyChanges( void );
+	virtual void OnChangesApplied( void );
 	virtual CButton* GetSheetButton( UINT buttonId ) const;
 
 	bool AnyPageResizable( void ) const;
@@ -66,8 +72,11 @@ protected:
 	void RegisterTabTooltips( void );
 private:
 	UINT m_initialPageIndex;						// force initial page activation (otherwise uses the one saved in registry, or default)
+	std::auto_ptr< CMacroCommand > m_pApplyMacroCmd;	// used optionally for Apply
 protected:
+	CCommandModel* m_pCommandModel;					// to execute Apply macro
 	bool m_manageOkButtonState;						// enable OK button when modified, disable it when not modified
+
 	CImageList m_tabImageList;
 	std::auto_ptr< CToolTipCtrl > m_pTooltipCtrl;
 	enum { TabItem_BaseToolId = 0xDFF0 };			// base id used to encode tool ids for tab item (page) indexes

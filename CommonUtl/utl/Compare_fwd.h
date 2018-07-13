@@ -47,6 +47,29 @@ namespace pred
 			return Compare_Scalar( left, right );
 		}
 	};
+
+
+	// functor versions of is_a
+
+	template< typename ObjectType >
+	struct IsA
+	{
+		template< typename AnyType >
+		bool operator()( const AnyType* pObject ) const
+		{
+			return is_a< ObjectType >( pObject );
+		}
+	};
+
+	template< typename ObjectType >
+	struct IsNotA
+	{
+		template< typename AnyType >
+		bool operator()( const AnyType* pObject ) const
+		{
+			return !is_a< ObjectType >( pObject );
+		}
+	};
 }
 
 

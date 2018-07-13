@@ -4,6 +4,7 @@
 #include "IFileEditor.h"
 #include "RenameService.h"
 #include "FileModel.h"
+#include "FileCommands.h"
 #include "RenameItem.h"
 #include "TextAlgorithms.h"
 #include "Application_fwd.h"
@@ -147,10 +148,13 @@ bool CReplaceDialog::ReplaceItems( bool commit /*= true*/ ) const
 		return false;				// no pattern to search for
 
 	CFileModel* pFileModel = m_pParentEditor->GetFileModel();
+	std::auto_ptr< utl::ICommand > pReplaceCmd;
+
 	if ( Find_Text == m_findType )
 	{
 		func::ReplaceText functor( m_findWhat, m_replaceWith, m_matchCase, commit );
-		pFileModel->ForEachRenameDestination( functor );
+		std::tstring cmdTag = str::Format( _T("Replace \"%s\" with \"%s\""), m_findWhat.c_str(), m_replaceWith.c_str() );
+		pReplaceCmd.reset( pFileModel->MakeChangeDestPathsCmd( functor, cmdTag ) );
 		if ( 0 == functor.m_matchCount )
 			return false;
 	}
@@ -159,14 +163,15 @@ bool CReplaceDialog::ReplaceItems( bool commit /*= true*/ ) const
 		ASSERT( Find_Characters == m_findType );
 
 		func::ReplaceCharacters functor( m_findWhat, m_replaceWith, m_matchCase, commit );
-		pFileModel->ForEachRenameDestination( functor );
+		std::tstring cmdTag = str::Format( _T("Replace characters '%s' with \"%s\""), m_findWhat.c_str(), m_replaceWith.c_str() );
+		pReplaceCmd.reset( pFileModel->MakeChangeDestPathsCmd( functor, cmdTag ) );
 		if ( 0 == functor.m_matchCount )
 			return false;
 	}
 
-	if ( commit )
-		m_pParentEditor->PostMakeDest();
-	return true;
+	return
+		!commit ||
+		pFileModel->SafeExecuteCmd( pReplaceCmd.release() );
 }
 
 bool CReplaceDialog::FillCommonPrefix( void )

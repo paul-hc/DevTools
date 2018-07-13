@@ -5,6 +5,7 @@
 #include "IFileEditor.h"
 #include "utl/BaseMainDialog.h"
 #include "utl/DialogToolBar.h"
+#include "utl/ReportListControl.h"
 
 
 class CFileModel;
@@ -27,15 +28,24 @@ protected:
 
 	int PopStackRunCrossEditor( cmd::StackType stackType );
 protected:
+	bool IsNativeCmd( const utl::ICommand* pCmd ) const;
+	bool IsForeignCmd( const utl::ICommand* pCmd ) const;		// must be handled by a different editor?
+	utl::ICommand* PeekCmdForDialog( cmd::StackType stackType ) const;
+	int EnsureVisibleFirstError( CReportListControl* pFileListCtrl ) const;
+
+	bool PromptCloseDialog( void );
+protected:
 	CFileModel* m_pFileModel;
-	cmd::CommandType m_nativeCmdType;
+	std::vector< cmd::CommandType > m_nativeCmdTypes;		// the first one always identifies the editor
 	std::vector< CPathItemBase* > m_errorItems;
 
 	// controls
 	CDialogToolBar m_toolbar;
 
 	// generated stuff
-protected:
+	public:
+	virtual BOOL OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo );
+	protected:
 	virtual void DoDataExchange( CDataExchange* pDX );
 protected:
 	afx_msg void OnUndoRedo( UINT btnId );

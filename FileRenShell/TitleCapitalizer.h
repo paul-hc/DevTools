@@ -73,11 +73,17 @@ namespace cap
 }
 
 
-struct CCapitalizeOptions
+#include "utl/Subject.h"
+
+
+struct CCapitalizeOptions : public CSubject
 {
 	CCapitalizeOptions( void );
 
 	static CCapitalizeOptions& Instance( void );	// shared instance
+
+	// utl::ISubject interface
+	virtual const std::tstring& GetCode( void ) const;
 
 	void LoadFromRegistry( void );
 	void SaveToRegistry( void ) const;

@@ -1,6 +1,7 @@
 
 #include "stdafx.h"
 #include "FileState.h"
+#include "EnumTags.h"
 #include "FlagTags.h"
 #include "RuntimeException.h"
 #include "TimeUtils.h"
@@ -86,5 +87,22 @@ namespace fs
 			m_creationTime == right.m_creationTime &&
 			m_modifTime == right.m_modifTime &&
 			m_accessTime == right.m_accessTime;
+	}
+
+	const CEnumTags& CFileState::GetTags_TimeField( void )
+	{
+		static const CEnumTags tags( _T("Created Date|Modified Date|Accessed Date"), _T("C|M|A") );
+		return tags;
+	}
+
+	const CTime& CFileState::GetTimeField( TimeField field ) const
+	{
+		switch ( field )
+		{
+			default: ASSERT( false );
+			case ModifiedDate:	return m_modifTime;
+			case CreatedDate:	return m_creationTime;
+			case AccessedDate:	return m_accessTime;
+		}
 	}
 }

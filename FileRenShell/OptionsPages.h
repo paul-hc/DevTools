@@ -10,7 +10,6 @@
 
 
 class CEnumTags;
-struct CGeneralOptions;
 
 
 #include "GeneralOptions.h"

@@ -83,27 +83,6 @@ namespace str
 } //namespace str
 
 
-namespace stream
-{
-	void Tag( std::tstring& rOutput, const std::tstring& tag, const TCHAR* pSep )
-	{
-		if ( !tag.empty() )
-		{
-			if ( !rOutput.empty() && pSep != NULL )
-				rOutput += pSep;
-			rOutput += tag;
-		}
-	}
-
-	std::tstring InputLine( std::istream& is )
-	{
-		std::string line;
-		std::getline( is, line );
-		return str::FromUtf8( line.c_str() );
-	}
-}
-
-
 namespace num
 {
 	const std::locale& GetEmptyLocale( void )

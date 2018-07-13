@@ -4,6 +4,7 @@
 #include "CommandModelService.h"
 #include "FileCommands.h"
 #include "utl/ContainerUtilities.h"
+#include "utl/CommandModel.h"
 #include "utl/FileSystem.h"
 #include "utl/FmtUtils.h"
 #include "utl/TimeUtils.h"
@@ -21,7 +22,7 @@
 
 namespace ut
 {
-	static const std::string s_inputLog =
+	static const std::string s_inputLog =			// uses legacy untagged time-fields
 		"  <RENAME> \t \n"
 		" C:\\my\\download\\scan\\doctor.pdf  -> \tDr. Metz.pdf  \t\n"
 		"C:\\my\\download\\scan\\doctor2.pdf -> Dr. Metz2.pdf\n"
@@ -58,7 +59,7 @@ namespace ut
 		"<END OF BATCH>\n"
 		;
 
-	static const std::string s_outputLog =
+	static const std::string s_outputLog =			// uses tagged time-fields
 		"[UNDO SECTION]\n"
 		"<RENAME>\n"
 		"C:\\my\\download\\scan\\doctor.pdf -> Dr. Metz.pdf\n"
@@ -70,8 +71,8 @@ namespace ut
 		"<END OF BATCH>\n"
 		"\n"
 		"<TOUCH 17-10-2005 08:00:00>\n"
-		"C:\\my\\download\\file.txt :: {RHSA|17-07-1992 09:21:17||} -> {RA||17-07-1992 09:30:00|}\n"
-		"C:\\my\\download\\info.txt :: {A|31-03-2004 07:30:00||} -> {HS|||01-04-2004 09:30:53}\n"
+		"C:\\my\\download\\file.txt :: {RHSA|C=17-07-1992 09:21:17} -> {RA|M=17-07-1992 09:30:00}\n"
+		"C:\\my\\download\\info.txt :: {A|C=31-03-2004 07:30:00} -> {HS|A=01-04-2004 09:30:53}\n"
 		"<END OF BATCH>\n"
 		"\n"
 		"<RENAME 03-10-2008 13:00:00>\n"
@@ -88,7 +89,7 @@ namespace ut
 		"<END OF BATCH>\n"
 		"\n"
 		"<TOUCH 01-07-2018 08:00:00>\n"
-		"C:\\my\\download\\exams.png :: {A|17-07-1992 09:21:17||} -> {RA||17-07-1992 09:30:00|}\n"
+		"C:\\my\\download\\exams.png :: {A|C=17-07-1992 09:21:17} -> {RA|M=17-07-1992 09:30:00}\n"
 		"<END OF BATCH>\n"
 		"\n"
 		"[REDO SECTION]\n"
@@ -326,8 +327,8 @@ void CCommandModelSerializerTests::TestSaveLog( void )
 
 		ASSERT( oss.str() == ut::s_outputLog );
 
-		//ut::_dbgSaveToFile( "C:\\my\\download\\debug.txt", ut::s_outputLog );			// expected output
-		//ut::_dbgSaveToFile( "C:\\my\\download\\debug2.txt", serializer, model );		// actual log loaded
+		ut::_dbgSaveToFile( "C:\\my\\download\\debug.txt", ut::s_outputLog );		// expected output
+		ut::_dbgSaveToFile( "C:\\my\\download\\debug2.txt", serializer );			// actual log loaded
 	}
 
 	// roundtrip test

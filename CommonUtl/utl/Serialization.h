@@ -35,71 +35,154 @@ namespace serial
 
 namespace serial
 {
-	// serialize a container of scalars with predefined CArchive& insertor and extractor
+	// for serializing pointers to types different than CObject-based, but are dynamically castable to CObject
 	//
-	template< typename Container >
-	void SerializeValues( CArchive& archive, Container& rItems )
+
+	template< typename ObjectType >
+	void Save_CObject( CArchive& archive, const ObjectType* pObject )
+	{
+		const CObject* pSerialObject = dynamic_cast< const CObject* >( pObject );
+		archive << pSerialObject;
+	}
+
+	template< typename ObjectType >
+	void Load_CObject( CArchive& archive, ObjectType*& rpObject )
+	{
+		CObject* pSerialObject = NULL;
+		archive >> pSerialObject;
+
+		rpObject = dynamic_cast< ObjectType* >( pSerialObject );
+	}
+
+	template< typename ObjectType >
+	inline void Serialize_CObject( CArchive& archive, ObjectType*& rpObject )
 	{
 		if ( archive.IsStoring() )
-		{
-			archive << rItems.size();
-			// save each element in the vector
-			for ( typename Container::const_iterator it = rItems.begin(); it != rItems.end(); ++it )
-				archive << *it;
-		}
+			Save_CObject( archive, rpObject );
 		else
-		{
-			Container::size_type size = 0;
+			Load_CObject( archive, rpObject );
+	}
 
-			archive >> size;
-			rItems.resize( size );
-			// load each element in the vector
-			for ( typename Container::iterator it = rItems.begin(); it != rItems.end(); ++it )
-				archive >> *it;
-		}
+
+	// serialize a container of scalars with predefined CArchive& insertor and extractor
+	//
+
+	template< typename ContainerT >
+	void SaveValues( CArchive& archive, const ContainerT& items )
+	{
+		archive << items.size();
+		for ( typename ContainerT::const_iterator it = items.begin(); it != items.end(); ++it )
+			archive << *it;			// save by value
+	}
+
+	template< typename ContainerT >
+	void LoadValues( CArchive& archive, ContainerT& rItems )
+	{
+		ContainerT::size_type size = 0;
+		archive >> size;
+
+		rItems.resize( size );
+		for ( typename ContainerT::iterator it = rItems.begin(); it != rItems.end(); ++it )
+			archive >> *it;			// load by value
+	}
+
+	template< typename ContainerT >
+	inline void SerializeValues( CArchive& archive, ContainerT& rItems )
+	{
+		if ( archive.IsStoring() )
+			SaveValues( archive, rItems );
+		else
+			LoadValues( archive, rItems );
 	}
 
 
 	// serialize container of pointers to CObject-based serializable dynamic objects
 	//
-	template< typename Container >
-	void SerializeObjects( CArchive& archive, Container& rObjects )
+
+	template< typename ContainerT >
+	void SaveObjects( CArchive& archive, const ContainerT& objects )
 	{
-		// NOTE: must use WriteCount() and ReadCount() for backwards compatibility
+		archive.WriteCount( static_cast< DWORD_PTR >( rObjects.size() ) );			// WriteCount() for backwards compatibility
+
+		for ( typename ContainerT::iterator itPtr = objects.begin(); itPtr != objects.end(); ++itPtr )
+			archive << *itPtr;
+	}
+
+	template< typename ContainerT >
+	void LoadObjects( CArchive& archive, ContainerT& rObjects )
+	{
+		utl::ClearOwningContainer( rObjects );			// delete existing owned objects
+		rObjects.resize( archive.ReadCount() );			// ReadCount() for backwards compatibility
+
+		for ( typename ContainerT::iterator itPtr = rObjects.begin(); itPtr != rObjects.end(); ++itPtr )
+			archive >> *itPtr;
+	}
+
+	template< typename ContainerT >
+	inline void SerializeObjects( CArchive& archive, ContainerT& rObjects )
+	{
 		if ( archive.IsStoring() )
-		{
-			archive.WriteCount( static_cast< DWORD_PTR >( rObjects.size() ) );
-
-			for ( typename Container::iterator itPtr = rObjects.begin(); itPtr != rObjects.end(); ++itPtr )
-				archive << *itPtr;
-		}
+			SaveObjects( archive, rObjects );
 		else
-		{
-			utl::ClearOwningContainer( rObjects );			// delete existing owned objects
-			rObjects.resize( archive.ReadCount() );
+			LoadObjects( archive, rObjects );
+	}
 
-			for ( typename Container::iterator itPtr = rObjects.begin(); itPtr != rObjects.end(); ++itPtr )
-				archive >> *itPtr;
+
+	// serialize container of pointers, some of which are CObject-based serializable dynamic objects and some are not serializable
+	//
+
+	template< typename ContainerT >
+	void Save_CObjects( CArchive& archive, const ContainerT& objects )
+	{
+		size_t mfcSerialCount = std::count_if( objects.begin(), objects.end(), pred::IsA< CObject >() );
+		archive.WriteCount( static_cast< DWORD_PTR >( mfcSerialCount ) );			// WriteCount() for backwards compatibility
+
+		for ( typename ContainerT::const_iterator itPtr = objects.begin(); itPtr != objects.end(); ++itPtr )
+			if ( CObject* pSerialObject = dynamic_cast< CObject* >( *itPtr ) )
+				archive << pSerialObject;
+	}
+
+	template< typename ContainerT >
+	void Load_CObjects( CArchive& archive, ContainerT& rObjects )
+	{
+		utl::ClearOwningContainer( rObjects );			// delete existing owned objects
+		rObjects.resize( archive.ReadCount() );			// ReadCount() for backwards compatibility
+
+		for ( typename ContainerT::iterator itPtr = rObjects.begin(); itPtr != rObjects.end(); ++itPtr )
+		{
+			CObject* pSerialObject = NULL;
+			archive >> pSerialObject;
+
+			*itPtr = dynamic_cast< typename ContainerT::value_type >( pSerialObject );
 		}
+	}
+
+	template< typename ContainerT >
+	inline void Serialize_CObjects( CArchive& archive, ContainerT& rObjects )
+	{
+		if ( archive.IsStoring() )
+			Save_CObjects( archive, rObjects );
+		else
+			Load_CObjects( archive, rObjects );
 	}
 
 
 	// serialize a container of scalar objects with method: void Type::Stream( CArchive& archive )
 	//
-	template< typename Container >
-	void StreamItems( CArchive& archive, Container& rItems )
+	template< typename ContainerT >
+	void StreamItems( CArchive& archive, ContainerT& rItems )
 	{
 		if ( archive.IsStoring() )
 			archive << rItems.size();
 		else
 		{
-			Container::size_type size = 0;
+			ContainerT::size_type size = 0;
 
 			archive >> size;
 			rItems.resize( size );
 		}
 		// serialize (store/load) each element in the vector
-		for ( typename Container::iterator it = rItems.begin(); it != rItems.end(); ++it )
+		for ( typename ContainerT::iterator it = rItems.begin(); it != rItems.end(); ++it )
 			it->Stream( archive );
 	}
 

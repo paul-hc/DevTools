@@ -3,11 +3,11 @@
 #pragma once
 
 #include "utl/Subject.h"
+#include "utl/CommandModel.h"
 #include "utl/InternalChange.h"
 #include "PathItemBase.h"
 
 
-class CCommandModel;
 class CRenameItem;
 class CTouchItem;
 interface IFileEditor;
@@ -15,7 +15,8 @@ namespace fmt { enum PathFormat; }
 namespace cmd { enum CommandType; enum StackType; }
 
 
-class CFileModel : public CSubject
+class CFileModel : public CCmdTarget
+				 , public CSubject
 				 , public CInternalChange
 				 , private utl::noncopyable
 {
@@ -25,12 +26,14 @@ public:
 
 	void Clear( void );
 	size_t SetupFromDropInfo( HDROP hDropInfo );
+	static CFileModel* Instance( void ) { return safe_ptr( s_pInstance ); }			// singleton access
 
 	const std::vector< fs::CPath >& GetSourcePaths( void ) const { return m_sourcePaths; }
 	CCommandModel* GetCommandModel( void );
 
 	bool SaveCommandModel( void ) const;
 	bool LoadCommandModel( void );
+	bool SafeExecuteCmd( utl::ICommand* pCmd );
 
 	bool CanUndoRedo( cmd::StackType stackType, int typeId = 0 ) const;
 	bool UndoRedo( cmd::StackType stackType );
@@ -46,23 +49,23 @@ public:
 	std::vector< CRenameItem* >& LazyInitRenameItems( void );
 	std::vector< CTouchItem* >& LazyInitTouchItems( void );
 
-	const std::vector< CRenameItem* >& GetRenameItems( void ) const { ASSERT( !m_renameItems.empty() ); return m_renameItems; }
-	const std::vector< CTouchItem* >& GetTouchItems( void ) const { ASSERT( !m_touchItems.empty() ); return m_touchItems; }
+	const std::vector< CRenameItem* >& GetRenameItems( void ) const { return m_renameItems; }
+	const std::vector< CTouchItem* >& GetTouchItems( void ) const { return m_touchItems; }
 
 	void ResetDestinations( void );
 
 	IFileEditor* MakeFileEditor( cmd::CommandType cmdType, CWnd* pParent );
 
 	// RENAME
-	bool CopyClipSourcePaths( fmt::PathFormat format, CWnd* pWnd ) const;
-	void PasteClipDestinationPaths( CWnd* pWnd ) throws_( CRuntimeException );
-
 	template< typename FuncType >
-	void ForEachRenameDestination( const FuncType& func );
+	utl::ICommand* MakeChangeDestPathsCmd( const FuncType& func, const std::tstring& cmdTag );
+
+	bool CopyClipSourcePaths( fmt::PathFormat format, CWnd* pWnd ) const;
+	utl::ICommand* MakeClipPasteDestPathsCmd( CWnd* pWnd ) throws_( CRuntimeException );
 
 	// TOUCH
 	bool CopyClipSourceFileStates( CWnd* pWnd ) const;
-	void PasteClipDestinationFileStates( CWnd* pWnd ) throws_( CRuntimeException );
+	utl::ICommand* MakeClipPasteDestFileStatesCmd( CWnd* pWnd ) throws_( CRuntimeException );
 private:
 	template< typename ContainerT >
 	void StoreSourcePaths( const ContainerT& sourcePaths );
@@ -107,6 +110,14 @@ private:
 	std::auto_ptr< CCommandModel > m_pCommandModel;		// self-encapsulated
 	std::vector< CRenameItem* > m_renameItems;
 	std::vector< CTouchItem* > m_touchItems;
+
+	static CFileModel* s_pInstance;						// for singleton access
+
+	// generated stuff
+protected:
+	afx_msg void OnChangeDestPathsTool( UINT menuId );
+
+	DECLARE_MESSAGE_MAP()
 };
 
 
@@ -122,18 +133,25 @@ CmdType* CFileModel::PeekCmdAs( cmd::StackType stackType ) const
 }
 
 template< typename FuncType >
-void CFileModel::ForEachRenameDestination( const FuncType& func )
+utl::ICommand* CFileModel::MakeChangeDestPathsCmd( const FuncType& func, const std::tstring& cmdTag )
 {
-	REQUIRE( !m_renameItems.empty() );		// should be initialized
+	REQUIRE( !m_renameItems.empty() );		// initialized?
+
+	bool anyChanges = false;
+	std::vector< fs::CPath > destPaths; destPaths.reserve( m_renameItems.size() );
 
 	for ( std::vector< CRenameItem* >::const_iterator itItem = m_renameItems.begin(); itItem != m_renameItems.end(); ++itItem )
 	{
 		fs::CPathParts destParts( ( *itItem )->GetSafeDestPath().Get() );
 		func( destParts );
-		( *itItem )->RefDestPath() = destParts.MakePath();
+
+		destPaths.push_back( destParts.MakePath() );
+
+		if ( destPaths.back().Get() != ( *itItem )->GetDestPath().Get() )		// case-sensitive string compare
+			anyChanges = true;
 	}
 
-	UpdateAllObservers( NULL );			// rename items changed
+	return anyChanges ? new CChangeDestPathsCmd( this, destPaths, cmdTag ) : NULL;
 }
 
 

@@ -6,6 +6,8 @@
 #include "RenameItem.h"
 #include "TouchItem.h"
 #include "GeneralOptions.h"
+#include "TextAlgorithms.h"
+#include "resource.h"
 #include "utl/Clipboard.h"
 #include "utl/Command.h"
 #include "utl/ContainerUtilities.h"
@@ -18,47 +20,22 @@
 #endif
 
 
-namespace fmt
-{
-	static const TCHAR s_clipSep[] = _T("\t");
-
-	void ParseTouchDest( CTouchItem* pTouchItem, const str::TStringRange& textRange ) throws_( CRuntimeException )
-	{
-		Range< size_t > sepPos;
-		if ( textRange.Find( sepPos, s_clipSep ) )
-		{
-			fs::CFileState destFileState;
-			destFileState.m_fullPath = textRange.ExtractLead( sepPos.m_start );
-
-			if ( path::IsNameExt( destFileState.m_fullPath.GetPtr() ) )
-				destFileState.m_fullPath = pTouchItem->GetKeyPath().GetParentPath() / destFileState.m_fullPath;		// convert to full path
-
-			if ( destFileState.m_fullPath != pTouchItem->GetKeyPath() )
-				throw CRuntimeException( str::Format( _T("Pasted destination file name is inconsistent with source path.\n\nSource: %s\nDestination: %s"),
-					pTouchItem->GetKeyPath().GetPtr(), destFileState.m_fullPath.GetPtr() ) );
-
-			str::TStringRange stateRange = textRange.MakeTrail( sepPos.m_end );
-			if ( ParseFileState( destFileState, stateRange ) )
-			{
-				pTouchItem->RefDestState() = destFileState;
-				return;
-			}
-		}
-
-		throw CRuntimeException( str::Format( _T("Pasted destination file status is not valid: %s"), textRange.GetText().c_str() ) );
-	}
-}
-
-
 // CFileModel implementation
+
+CFileModel* CFileModel::s_pInstance = NULL;
 
 CFileModel::CFileModel( void )
 {
+	ASSERT_NULL( s_pInstance );
+	s_pInstance = this;
 }
 
 CFileModel::~CFileModel()
 {
 	Clear();
+
+	ASSERT( s_pInstance == this );
+	s_pInstance = NULL;
 }
 
 void CFileModel::Clear( void )
@@ -111,6 +88,21 @@ CCommandModel* CFileModel::GetCommandModel( void )
 	return m_pCommandModel.get();
 }
 
+bool CFileModel::SafeExecuteCmd( utl::ICommand* pCmd )
+{
+	if ( NULL == pCmd )
+		return false;
+
+	if ( !CGeneralOptions::Instance().m_undoEditingCmds )
+		if ( !is_a< cmd::CFileMacroCmd >( pCmd ) )					// local editing command?
+		{
+			std::auto_ptr< utl::ICommand > pEditCmd( pCmd );		// take ownership
+			return pEditCmd->Execute();
+		}
+
+	return GetCommandModel()->Execute( pCmd );
+}
+
 bool CFileModel::CanUndoRedo( cmd::StackType stackType, int typeId /*= 0*/ ) const
 {
 	if ( utl::ICommand* pTopCmd = PeekCmdAs< utl::ICommand >( stackType ) )
@@ -133,14 +125,15 @@ void CFileModel::FetchFromStack( cmd::StackType stackType )
 	ASSERT_PTR( m_pCommandModel.get() );
 	ASSERT( cmd::Undo == stackType ? m_pCommandModel->CanUndo() : m_pCommandModel->CanRedo() );
 
-	if ( const cmd::CFileMacroCmd* pTopMacroCmd = dynamic_cast< const cmd::CFileMacroCmd* >( cmd::Undo == stackType ? m_pCommandModel->PeekUndo() : m_pCommandModel->PeekRedo() ) )
+	utl::ICommand* pTopCmd = PeekCmdAs< utl::ICommand >( stackType );
+	if ( const cmd::CFileMacroCmd* pFileMacroCmd = dynamic_cast< const cmd::CFileMacroCmd* >( pTopCmd ) )
 	{
 		Clear();
 
-		switch ( pTopMacroCmd->GetTypeID() )
+		switch ( pFileMacroCmd->GetTypeID() )
 		{
-			case cmd::RenameFile:	utl::for_each( pTopMacroCmd->GetSubCommands(), AddRenameItemFromCmd( this, stackType ) ); break;
-			case cmd::TouchFile:	utl::for_each( pTopMacroCmd->GetSubCommands(), AddTouchItemFromCmd( this, stackType ) ); break;
+			case cmd::RenameFile:	utl::for_each( pFileMacroCmd->GetSubCommands(), AddRenameItemFromCmd( this, stackType ) ); break;
+			case cmd::TouchFile:	utl::for_each( pFileMacroCmd->GetSubCommands(), AddTouchItemFromCmd( this, stackType ) ); break;
 		}
 		m_commonParentPath = path::ExtractCommonParentPath( m_sourcePaths );
 		//utl::for_each( m_renameItems, func::StripDisplayCode( m_commonParentPath ) );		// use always filename.ext for path diffs
@@ -149,15 +142,15 @@ void CFileModel::FetchFromStack( cmd::StackType stackType )
 		UpdateAllObservers( NULL );				// items changed
 	}
 	else
-		ASSERT( false );
+		UndoRedo( stackType );
 }
 
 bool CFileModel::SaveCommandModel( void ) const
 {
 	return
-		CGeneralOptions::Instance().m_undoRedoLogPersist &&
+		CGeneralOptions::Instance().m_undoLogPersist &&
 		m_pCommandModel.get() != NULL &&
-		CCommandModelService::SaveUndoLog( *m_pCommandModel, CGeneralOptions::Instance().m_undoRedoLogFormat );
+		CCommandModelService::SaveUndoLog( *m_pCommandModel, CGeneralOptions::Instance().m_undoLogFormat );
 }
 
 bool CFileModel::LoadCommandModel( void )
@@ -166,8 +159,8 @@ bool CFileModel::LoadCommandModel( void )
 		return false;				// already loaded once
 
 	return
-		CGeneralOptions::Instance().m_undoRedoLogPersist &&
-		CCommandModelService::LoadUndoLog( GetCommandModel() );			// load the most recently modified log file (regardless of CGeneralOptions::m_undoRedoLogFormat)
+		CGeneralOptions::Instance().m_undoLogPersist &&
+		CCommandModelService::LoadUndoLog( GetCommandModel() );			// load the most recently modified log file (regardless of CGeneralOptions::m_undoLogFormat)
 }
 
 std::vector< CRenameItem* >& CFileModel::LazyInitRenameItems( void )
@@ -235,13 +228,12 @@ bool CFileModel::CopyClipSourcePaths( fmt::PathFormat format, CWnd* pWnd ) const
 	for ( std::vector< fs::CPath >::const_iterator itSrcPath = m_sourcePaths.begin(); itSrcPath != m_sourcePaths.end(); ++itSrcPath )
 		sourcePaths.push_back( fmt::FormatPath( *itSrcPath, format ) );
 
-	std::tstring multiPath = str::Join( sourcePaths, _T("\r\n") );
-	return CClipboard::CopyText( multiPath, pWnd );
+	return CClipboard::CopyText( str::Join( sourcePaths, _T("\r\n") ), pWnd );
 }
 
-void CFileModel::PasteClipDestinationPaths( CWnd* pWnd ) throws_( CRuntimeException )
+utl::ICommand* CFileModel::MakeClipPasteDestPathsCmd( CWnd* pWnd ) throws_( CRuntimeException )
 {
-	REQUIRE( !m_renameItems.empty() );		// should be initialized
+	REQUIRE( !m_renameItems.empty() );		// initialized?
 
 	static const CRuntimeException s_noDestExc( _T("No destination file paths available to paste.") );
 
@@ -249,34 +241,42 @@ void CFileModel::PasteClipDestinationPaths( CWnd* pWnd ) throws_( CRuntimeExcept
 	if ( !CClipboard::CanPasteText() || !CClipboard::PasteText( text, pWnd ) )
 		throw s_noDestExc;
 
-	std::vector< std::tstring > destPaths;
-	str::Split( destPaths, text.c_str(), _T("\r\n") );
+	std::vector< std::tstring > textPaths;
+	str::Split( textPaths, text.c_str(), _T("\r\n") );
 
-	for ( std::vector< std::tstring >::iterator itPath = destPaths.begin(); itPath != destPaths.end(); )
+	for ( std::vector< std::tstring >::iterator itPath = textPaths.begin(); itPath != textPaths.end(); )
 	{
 		str::Trim( *itPath );
 		if ( itPath->empty() )
-			itPath = destPaths.erase( itPath );
+			itPath = textPaths.erase( itPath );
 		else
 			++itPath;
 	}
 
-	if ( destPaths.empty() )
+	if ( textPaths.empty() )
 		throw s_noDestExc;
-	else if ( m_sourcePaths.size() != destPaths.size() )
+	else if ( m_sourcePaths.size() != textPaths.size() )
 		throw CRuntimeException( str::Format( _T("Destination file count of %d doesn't match source file count of %d."),
-											  destPaths.size(), m_sourcePaths.size() ) );
+											  textPaths.size(), m_sourcePaths.size() ) );
 
-	size_t pos = 0;
-	for ( std::vector< CRenameItem* >::iterator itItem = m_renameItems.begin(); itItem != m_renameItems.end(); ++itItem, ++pos )
+	std::vector< fs::CPath > destPaths; destPaths.reserve( GetRenameItems().size() );
+	bool anyChanges = false;
+
+	for ( size_t i = 0; i != textPaths.size(); ++i )
 	{
-		fs::CPath newFilePath( destPaths[ pos ] );
+		const CRenameItem* pRenameItem = m_renameItems[ i ];
+		fs::CPath newFilePath( textPaths[ i ] );
 
-		( *itItem )->GetSrcPath().QualifyWithSameDirPathIfEmpty( newFilePath );
-		( *itItem )->RefDestPath() = newFilePath;
+		if ( !newFilePath.HasParentPath() )
+			newFilePath.SetDirPath( pRenameItem->GetSrcPath().GetParentPath().Get() );		// qualify with SRC dir path
+
+		if ( newFilePath.Get() != pRenameItem->GetDestPath().Get() )		// case-sensitive string compare
+			anyChanges = true;
+
+		destPaths.push_back( newFilePath );
 	}
 
-	UpdateAllObservers( NULL );			// rename items changed
+	return anyChanges ? new CChangeDestPathsCmd( this, destPaths, _T("Paste destination file paths from clipboard") ) : NULL;
 }
 
 
@@ -289,13 +289,12 @@ bool CFileModel::CopyClipSourceFileStates( CWnd* pWnd ) const
 	std::vector< std::tstring > sourcePaths; sourcePaths.reserve( m_sourcePaths.size() );
 
 	for ( std::vector< CTouchItem* >::const_iterator itTouchItem = m_touchItems.begin(); itTouchItem != m_touchItems.end(); ++itTouchItem )
-		sourcePaths.push_back( ( *itTouchItem )->GetDisplayCode() );
+		sourcePaths.push_back( fmt::FormatClipFileState( ( *itTouchItem )->GetSrcState(), fmt::FilenameExt ) );
 
-	std::tstring text = str::Join( sourcePaths, _T("\r\n") );
-	return CClipboard::CopyText( text, pWnd );
+	return CClipboard::CopyText( str::Join( sourcePaths, _T("\r\n") ), pWnd );
 }
 
-void CFileModel::PasteClipDestinationFileStates( CWnd* pWnd ) throws_( CRuntimeException )
+utl::ICommand* CFileModel::MakeClipPasteDestFileStatesCmd( CWnd* pWnd ) throws_( CRuntimeException )
 {
 	REQUIRE( !m_touchItems.empty() );		// should be initialized
 
@@ -319,11 +318,23 @@ void CFileModel::PasteClipDestinationFileStates( CWnd* pWnd ) throws_( CRuntimeE
 		throw CRuntimeException( str::Format( _T("Destination file state count of %d doesn't match source file count of %d."),
 											  lines.size(), m_touchItems.size() ) );
 
-	int pos = 0;
-	for ( std::vector< CTouchItem* >::iterator itTouchItem = m_touchItems.begin(); itTouchItem != m_touchItems.end(); ++itTouchItem, ++pos )
-		fmt::ParseTouchDest( *itTouchItem, str::TStringRange( lines[ pos ] ) );
+	std::vector< fs::CFileState > destFileStates; destFileStates.reserve( GetTouchItems().size() );
+	bool anyChanges = false;
 
-	UpdateAllObservers( NULL );			// touch items changed
+	for ( size_t i = 0; i != GetTouchItems().size(); ++i )
+	{
+		const CTouchItem* pTouchItem = m_touchItems[ i ];
+
+		fs::CFileState newFileState;
+		fmt::ParseClipFileState( newFileState, lines[ i ], &pTouchItem->GetKeyPath() );
+
+		if ( newFileState != pTouchItem->GetDestState() )
+			anyChanges = true;
+
+		destFileStates.push_back( newFileState );
+	}
+
+	return anyChanges ? new CChangeDestFileStatesCmd( this, destFileStates, _T("Paste destination file attribute states from clipboard") ) : NULL;
 }
 
 
@@ -370,9 +381,57 @@ IFileEditor* CFileModel::MakeFileEditor( cmd::CommandType cmdType, CWnd* pParent
 {
 	switch ( cmdType )
 	{
-		case cmd::RenameFile:	return new CMainRenameDialog( this, pParent );
-		case cmd::TouchFile:	return new CTouchFilesDialog( this, pParent );
+		case cmd::RenameFile:
+		case cmd::ChangeDestPaths:
+			return new CMainRenameDialog( this, pParent );
+		case cmd::TouchFile:
+			return new CTouchFilesDialog( this, pParent );
 	}
 	ASSERT( false );
 	return NULL;
+}
+
+
+// command handlers
+
+BEGIN_MESSAGE_MAP( CFileModel, CCmdTarget )
+	ON_COMMAND_RANGE( ID_REPLACE_ALL_DELIMS, ID_SPACE_TO_UNDERBAR, OnChangeDestPathsTool )
+END_MESSAGE_MAP()
+
+void CFileModel::OnChangeDestPathsTool( UINT menuId )
+{
+	utl::ICommand* pCmd = NULL;
+	std::tstring cmdTag = str::Load( menuId );
+
+	switch ( menuId )
+	{
+		case ID_REPLACE_ALL_DELIMS:
+			pCmd = MakeChangeDestPathsCmd( func::ReplaceDelimiterSet( delim::GetAllDelimitersSet(), _T(" ") ), cmdTag );
+			break;
+		case ID_REPLACE_UNICODE_SYMBOLS:
+			pCmd = MakeChangeDestPathsCmd( func::ReplaceMultiDelimiterSets( &text_tool::GetStdUnicodeToAnsiPairs() ), cmdTag );
+			break;
+		case ID_SINGLE_WHITESPACE:
+			pCmd = MakeChangeDestPathsCmd( func::SingleWhitespace(), cmdTag );
+			break;
+		case ID_REMOVE_WHITESPACE:
+			pCmd = MakeChangeDestPathsCmd( func::RemoveWhitespace(), cmdTag );
+			break;
+		case ID_DASH_TO_SPACE:
+			pCmd = MakeChangeDestPathsCmd( func::ReplaceDelimiterSet( delim::s_dashes, _T(" ") ), cmdTag );
+			break;
+		case ID_SPACE_TO_DASH:
+			pCmd = MakeChangeDestPathsCmd( func::ReplaceDelimiterSet( _T(" "), _T("-") ), cmdTag );
+			break;
+		case ID_UNDERBAR_TO_SPACE:
+			pCmd = MakeChangeDestPathsCmd( func::ReplaceDelimiterSet( delim::s_underscores, _T(" ") ), cmdTag );
+			break;
+		case ID_SPACE_TO_UNDERBAR:
+			pCmd = MakeChangeDestPathsCmd( func::ReplaceDelimiterSet( _T(" "), _T("_") ), cmdTag );
+			break;
+		default:
+			ASSERT( false );
+	}
+
+	SafeExecuteCmd( pCmd );
 }

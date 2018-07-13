@@ -2,6 +2,8 @@
 #include "stdafx.h"
 #include "OptionsSheet.h"
 #include "OptionsPages.h"
+#include "FileModel.h"
+#include "FileCommands.h"
 #include "resource.h"
 #include "utl/EnumTags.h"
 #include "utl/StringUtilities.h"
@@ -15,16 +17,24 @@
 
 // COptionsSheet implementation
 
-COptionsSheet::COptionsSheet( CWnd* pParent, UINT initialPageIndex /*= UINT_MAX*/ )
+COptionsSheet::COptionsSheet( CFileModel* pFileModel, CWnd* pParent, UINT initialPageIndex /*= UINT_MAX*/ )
 	: CLayoutPropertySheet( _T("Options"), pParent )
+	, m_pFileModel( pFileModel )
 {
 	m_regSection = _T("OptionsSheet");
 	SetTopDlg();
 	SetInitialPageIndex( initialPageIndex );
 	LoadDlgIcon( ID_OPTIONS );
+	m_pCommandModel = m_pFileModel->GetCommandModel();
 
 	AddPage( new CGeneralOptionsPage );
 	AddPage( new CCapitalizeOptionsPage );
+}
+
+void COptionsSheet::OnChangesApplied( void )
+{
+	if ( !CGeneralOptions::Instance().m_undoEditingCmds )
+		m_pFileModel->GetCommandModel()->RemoveCommandsThat( pred::IsNotA< cmd::CFileMacroCmd >() );
 }
 
 
@@ -70,12 +80,7 @@ void CGeneralOptionsPage::UpdateStatus( void )
 void CGeneralOptionsPage::ApplyPageChanges( void ) throws_( CRuntimeException )
 {
 	if ( m_options != CGeneralOptions::Instance() )
-	{
-		CGeneralOptions::Instance() = m_options;
-
-		CGeneralOptions::Instance().UpdateAllObservers( NULL );
-		CGeneralOptions::Instance().SaveToRegistry();
-	}
+		GetApplyMacroCmd()->AddCmd( new CEditOptionsCmd< CGeneralOptions >( &CGeneralOptions::Instance(), m_options ) );
 }
 
 void CGeneralOptionsPage::DoDataExchange( CDataExchange* pDX )
@@ -100,8 +105,9 @@ void CGeneralOptionsPage::DoDataExchange( CDataExchange* pDX )
 
 	ui::DDX_Bool( pDX, IDC_USE_LIST_THUMBS_CHECK, m_options.m_useListThumbs );
 	ui::DDX_Bool( pDX, IDC_USE_LIST_DOUBLE_BUFFER_CHECK, m_options.m_useListDoubleBuffer );
-	ui::DDX_Bool( pDX, IDC_UNDO_REDO_LOG_PERSIST_CHECK, m_options.m_undoRedoLogPersist );
-	ui::DDX_RadioEnum( pDX, IDC_UNDO_REDO_LOG_TEXTFMT_RADIO, m_options.m_undoRedoLogFormat );
+	ui::DDX_Bool( pDX, IDC_UNDO_LOG_PERSIST_CHECK, m_options.m_undoLogPersist );
+	ui::DDX_RadioEnum( pDX, IDC_UNDO_LOG_TEXT_FMT_RADIO, m_options.m_undoLogFormat );
+	ui::DDX_Bool( pDX, IDC_UNDO_EDITING_CMDS_CHECK, m_options.m_undoEditingCmds );
 
 	UpdateStatus();
 	CLayoutPropertyPage::DoDataExchange( pDX );
@@ -112,9 +118,10 @@ BEGIN_MESSAGE_MAP( CGeneralOptionsPage, CLayoutPropertyPage )
 	ON_CBN_SELCHANGE( IDC_LARGE_ICON_SIZE_COMBO, OnFieldModified )
 	ON_BN_CLICKED( IDC_USE_LIST_THUMBS_CHECK, OnFieldModified )
 	ON_BN_CLICKED( IDC_USE_LIST_DOUBLE_BUFFER_CHECK, OnFieldModified )
-	ON_BN_CLICKED( IDC_UNDO_REDO_LOG_PERSIST_CHECK, OnFieldModified )
-	ON_BN_CLICKED( IDC_UNDO_REDO_LOG_TEXTFMT_RADIO, OnFieldModified )
-	ON_BN_CLICKED( IDC_UNDO_REDO_LOG_BINFMT_RADIO, OnFieldModified )
+	ON_BN_CLICKED( IDC_UNDO_LOG_PERSIST_CHECK, OnFieldModified )
+	ON_BN_CLICKED( IDC_UNDO_LOG_TEXT_FMT_RADIO, OnFieldModified )
+	ON_BN_CLICKED( IDC_UNDO_LOG_BINARY_FMT_RADIO, OnFieldModified )
+	ON_BN_CLICKED( IDC_UNDO_EDITING_CMDS_CHECK, OnFieldModified )
 	ON_BN_CLICKED( IDC_SET_DEFAULT_ALL, OnBnClicked_ResetDefaultAll )
 END_MESSAGE_MAP()
 
@@ -190,10 +197,7 @@ void CCapitalizeOptionsPage::UpdateStatus( void )
 void CCapitalizeOptionsPage::ApplyPageChanges( void ) throws_( CRuntimeException )
 {
 	if ( m_options != CCapitalizeOptions::Instance() )
-	{
-		CCapitalizeOptions::Instance() = m_options;
-		CCapitalizeOptions::Instance().SaveToRegistry();
-	}
+		GetApplyMacroCmd()->AddCmd( new CEditOptionsCmd< CCapitalizeOptions >( &CCapitalizeOptions::Instance(), m_options ) );
 }
 
 void CCapitalizeOptionsPage::DoDataExchange( CDataExchange* pDX )

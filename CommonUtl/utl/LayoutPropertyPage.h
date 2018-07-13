@@ -10,6 +10,7 @@
 
 class CLayoutPropertyPage;
 class CLayoutBasePropertySheet;
+class CMacroCommand;
 
 
 // implemented by the parent of an embedded child page; routes deep control notifications to the parent
@@ -31,6 +32,8 @@ public:
 
 	CLayoutBasePropertySheet* GetParentSheet( void ) const;
 	CWnd* GetParentOwner( void ) const;
+
+	CMacroCommand* GetApplyMacroCmd( void ) const;
 
 	bool UseLazyUpdateData( void ) const { return m_useLazyUpdateData; }
 	void SetUseLazyUpdateData( bool useLazyUpdateData = true ) { m_useLazyUpdateData = useLazyUpdateData; }

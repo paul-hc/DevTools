@@ -2,26 +2,46 @@
 #define utl_SerializeStdTypes_h
 #pragma once
 
-#include "Path.h"
-#include "Range.h"
 #include "Serialization.h"
+#include "Range.h"
+#include "Path.h"
+#include "FileState.h"
 
 
 // custom types archive insertors/extractors
 
 inline CArchive& operator<<( CArchive& archive, const fs::CPath& path )
 {
-	// as std::tstring
 	return archive << path.Get();
 }
 
 inline CArchive& operator>>( CArchive& archive, fs::CPath& rPath )
 {
-	// as std::tstring
 	std::tstring filePath;
 	archive >> filePath;
 	rPath.Set( filePath );
 	return archive;
+}
+
+
+inline CArchive& operator<<( CArchive& archive, const fs::CFileState& fileState )
+{
+	return archive
+		<< fileState.m_fullPath
+		<< fileState.m_attributes
+		<< fileState.m_creationTime
+		<< fileState.m_modifTime
+		<< fileState.m_accessTime;
+}
+
+inline CArchive& operator>>( CArchive& archive, fs::CFileState& rFileState )
+{
+	return archive
+		>> rFileState.m_fullPath
+		>> rFileState.m_attributes
+		>> rFileState.m_creationTime
+		>> rFileState.m_modifTime
+		>> rFileState.m_accessTime;
 }
 
 
@@ -70,6 +90,15 @@ inline CArchive& operator&( CArchive& archive, FILETIME& rFileTime )
 		return archive << rFileTime.dwLowDateTime << rFileTime.dwHighDateTime;
 	else
 		return archive >> rFileTime.dwLowDateTime >> rFileTime.dwHighDateTime;
+}
+
+inline CArchive& operator&( CArchive& archive, std::wstring* pWideStr )
+{
+	if ( archive.IsStoring() )
+		archive << pWideStr;
+	else
+		archive >> pWideStr;
+	return archive;
 }
 
 

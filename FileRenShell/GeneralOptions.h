@@ -16,11 +16,11 @@ struct CGeneralOptions : public CSubject
 
 	static CGeneralOptions& Instance( void );	// shared instance
 
-	void LoadFromRegistry( void );
-	void SaveToRegistry( void ) const;
-
 	// utl::ISubject interface
 	virtual const std::tstring& GetCode( void ) const;
+
+	void LoadFromRegistry( void );
+	void SaveToRegistry( void ) const;
 
 	bool operator==( const CGeneralOptions& right ) const;
 	bool operator!=( const CGeneralOptions& right ) const { return !operator==( right ); }
@@ -32,8 +32,10 @@ public:
 	bool m_useListThumbs;
 	bool m_useListDoubleBuffer;
 
-	bool m_undoRedoLogPersist;
-	cmd::FileFormat m_undoRedoLogFormat;
+	// Undo/Redo
+	bool m_undoLogPersist;
+	cmd::FileFormat m_undoLogFormat;
+	bool m_undoEditingCmds;
 };
 
 

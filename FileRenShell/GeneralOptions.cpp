@@ -18,8 +18,9 @@ namespace reg
 	static const TCHAR entry_largeIconDim[] = _T("IconDimensionLarge");
 	static const TCHAR entry_useListThumbs[] = _T("UseListThumbs");
 	static const TCHAR entry_useListDoubleBuffer[] = _T("UseListDoubleBuffer");
-	static const TCHAR entry_undoRedoLogPersist[] = _T("UndoRedoLogPersist");
-	static const TCHAR entry_undoRedoLogFormat[] = _T("UndoRedoLogFormat");
+	static const TCHAR entry_undoLogPersist[] = _T("UndoLogPersist");
+	static const TCHAR entry_undoLogFormat[] = _T("UndoLogFormat");
+	static const TCHAR entry_undoEditingCmds[] = _T("UndoEditingCmds");
 }
 
 
@@ -28,8 +29,9 @@ CGeneralOptions::CGeneralOptions( void )
 	, m_largeIconDim( CIconId::GetStdSize( HugeIcon_48 ).cx )
 	, m_useListThumbs( true )
 	, m_useListDoubleBuffer( true )
-	, m_undoRedoLogPersist( true )
-	, m_undoRedoLogFormat( cmd::TextFormat )
+	, m_undoLogPersist( true )
+	, m_undoLogFormat( cmd::BinaryFormat )
+	, m_undoEditingCmds( true )
 {
 }
 
@@ -43,6 +45,12 @@ CGeneralOptions& CGeneralOptions::Instance( void )
 	return generalOptions;
 }
 
+const std::tstring& CGeneralOptions::GetCode( void ) const
+{
+	static const std::tstring s_code = _T("General Options");
+	return s_code;
+}
+
 void CGeneralOptions::LoadFromRegistry( void )
 {
 	CWinApp* pApp = AfxGetApp();
@@ -51,8 +59,9 @@ void CGeneralOptions::LoadFromRegistry( void )
 	m_largeIconDim = pApp->GetProfileInt( reg::section, reg::entry_largeIconDim, m_largeIconDim );
 	m_useListThumbs = pApp->GetProfileInt( reg::section, reg::entry_useListThumbs, m_useListThumbs ) != FALSE;
 	m_useListDoubleBuffer = pApp->GetProfileInt( reg::section, reg::entry_useListDoubleBuffer, m_useListDoubleBuffer ) != FALSE;
-	m_undoRedoLogPersist = pApp->GetProfileInt( reg::section, reg::entry_undoRedoLogPersist, m_undoRedoLogPersist ) != FALSE;
-	m_undoRedoLogFormat = static_cast< cmd::FileFormat >( pApp->GetProfileInt( reg::section, reg::entry_undoRedoLogFormat, m_undoRedoLogFormat ) );
+	m_undoLogPersist = pApp->GetProfileInt( reg::section, reg::entry_undoLogPersist, m_undoLogPersist ) != FALSE;
+	m_undoLogFormat = static_cast< cmd::FileFormat >( pApp->GetProfileInt( reg::section, reg::entry_undoLogFormat, m_undoLogFormat ) );
+	m_undoEditingCmds = pApp->GetProfileInt( reg::section, reg::entry_undoEditingCmds, m_undoEditingCmds ) != FALSE;
 }
 
 void CGeneralOptions::SaveToRegistry( void ) const
@@ -63,14 +72,9 @@ void CGeneralOptions::SaveToRegistry( void ) const
 	pApp->WriteProfileInt( reg::section, reg::entry_largeIconDim, m_largeIconDim );
 	pApp->WriteProfileInt( reg::section, reg::entry_useListThumbs, m_useListThumbs );
 	pApp->WriteProfileInt( reg::section, reg::entry_useListDoubleBuffer, m_useListDoubleBuffer );
-	pApp->WriteProfileInt( reg::section, reg::entry_undoRedoLogPersist, m_undoRedoLogPersist );
-	pApp->WriteProfileInt( reg::section, reg::entry_undoRedoLogFormat, m_undoRedoLogFormat );
-}
-
-const std::tstring& CGeneralOptions::GetCode( void ) const
-{
-	static const std::tstring s_code = _T("General");
-	return s_code;
+	pApp->WriteProfileInt( reg::section, reg::entry_undoLogPersist, m_undoLogPersist );
+	pApp->WriteProfileInt( reg::section, reg::entry_undoLogFormat, m_undoLogFormat );
+	pApp->WriteProfileInt( reg::section, reg::entry_undoEditingCmds, m_undoEditingCmds );
 }
 
 bool CGeneralOptions::operator==( const CGeneralOptions& right ) const
@@ -80,8 +84,10 @@ bool CGeneralOptions::operator==( const CGeneralOptions& right ) const
 		m_largeIconDim == right.m_largeIconDim &&
 		m_useListThumbs == right.m_useListThumbs &&
 		m_useListDoubleBuffer == right.m_useListDoubleBuffer &&
-		m_undoRedoLogPersist == right.m_undoRedoLogPersist &&
-		m_undoRedoLogFormat == right.m_undoRedoLogFormat;
+		m_undoLogPersist == right.m_undoLogPersist &&
+		m_undoLogFormat == right.m_undoLogFormat &&
+		m_undoEditingCmds == right.m_undoEditingCmds
+		;
 }
 
 void CGeneralOptions::ApplyToListCtrl( CReportListControl* pListCtrl ) const

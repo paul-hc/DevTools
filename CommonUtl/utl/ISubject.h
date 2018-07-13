@@ -20,10 +20,12 @@ inline IMemoryManaged::~IMemoryManaged()
 
 namespace utl
 {
+	enum Verbosity { Brief, Detailed, DetailedLine };
+
 	interface IMessage
 	{
 		virtual int GetTypeID( void ) const = 0;
-		virtual std::tstring Format( bool detailed ) const = 0;
+		virtual std::tstring Format( utl::Verbosity verbosity ) const = 0;
 	};
 
 	interface ICommand : public IMemoryManaged

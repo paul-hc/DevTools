@@ -17,13 +17,12 @@ CFileService::CFileService( void )
 
 std::auto_ptr< CMacroCommand > CFileService::MakeRenameCmds( const std::vector< CRenameItem* >& renameItems ) const
 {
-	if ( !IsDistinctWorkingSet( renameItems ) )
-	{
-		REQUIRE( false );			// all SRC and DEST paths must be a distinct working set (pre-validated)
-		return std::auto_ptr< CMacroCommand >();
-	}
+	std::auto_ptr< CMacroCommand > pBatchMacro;
+	if ( !IsDistinctWorkingSet( renameItems ) )			// all SRC and DEST paths must be a distinct working set (pre-validated)?
+		return pBatchMacro;
 
-	std::auto_ptr< CMacroCommand > pBatchMacro( new cmd::CFileMacroCmd( cmd::RenameFile ) );
+	pBatchMacro.reset( new cmd::CFileMacroCmd( cmd::RenameFile ) );
+
 	std::vector< utl::ICommand* > finalCmds;
 	std::set< fs::CPath > destToBeSet;
 

@@ -301,7 +301,7 @@ namespace str
 
 
 	template< typename CharType >
-	size_t Replace( std::basic_string< CharType >& rText, const CharType* pSearch, const CharType* pReplace )
+	size_t Replace( std::basic_string< CharType >& rText, const CharType* pSearch, const CharType* pReplace, size_t maxCount = utl::npos )
 	{
 		ASSERT_PTR( pSearch );
 		ASSERT_PTR( pReplace );
@@ -311,7 +311,9 @@ namespace str
 		{
 			const size_t searchLen = str::GetLength( pSearch ), replaceLen = str::GetLength( pReplace );
 
-			for ( size_t pos = 0; ( pos = rText.find( pSearch, pos ) ) != std::basic_string< CharType >::npos; ++count, pos += replaceLen )
+			for ( size_t pos = 0;
+				  count != maxCount && ( pos = rText.find( pSearch, pos ) ) != std::basic_string< CharType >::npos;
+				  ++count, pos += replaceLen )
 				rText.replace( pos, searchLen, pReplace );
 		}
 
@@ -479,6 +481,14 @@ namespace str
 		return pAnsi;
 	#endif
 	}
+}
+
+
+namespace stream
+{
+	bool Tag( std::tstring& rOutput, const std::tstring& tag, const TCHAR* pPrefixSep );
+
+	std::tstring InputLine( std::istream& is );
 }
 
 

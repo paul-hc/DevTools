@@ -57,6 +57,11 @@ CWnd* CLayoutPropertyPage::GetParentOwner( void ) const
 	return HasFlag( pSheet->GetStyle(), WS_CHILD ) ? pSheet->GetParent() : pSheet;
 }
 
+CMacroCommand* CLayoutPropertyPage::GetApplyMacroCmd( void ) const
+{
+	return GetParentSheet()->GetApplyMacroCmd();
+}
+
 void CLayoutPropertyPage::SetTitle( const std::tstring& pageTitle )
 {
 	if ( m_hWnd != NULL )

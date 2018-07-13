@@ -5,12 +5,20 @@
 #include "utl/LayoutPropertySheet.h"
 
 
+class CFileModel;
+
+
 class COptionsSheet : public CLayoutPropertySheet
 {
 public:
-	COptionsSheet( CWnd* pParent, UINT initialPageIndex = UINT_MAX );
+	COptionsSheet( CFileModel* pFileModel, CWnd* pParent, UINT initialPageIndex = UINT_MAX );
 
 	enum PageIndex { GeneralPage, CapitalizePage };
+protected:
+	// base overrides
+	virtual void OnChangesApplied( void );
+private:
+	CFileModel* m_pFileModel;
 };
 
 

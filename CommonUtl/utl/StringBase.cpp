@@ -262,3 +262,26 @@ namespace utl
 		return hResult;
 	}
 }
+
+
+namespace stream
+{
+	bool Tag( std::tstring& rOutput, const std::tstring& tag, const TCHAR* pPrefixSep )
+	{
+		if ( tag.empty() )
+			return false;
+
+		if ( !rOutput.empty() && pPrefixSep != NULL )
+			rOutput += pPrefixSep;
+
+		rOutput += tag;
+		return true;
+	}
+
+	std::tstring InputLine( std::istream& is )
+	{
+		std::string line;
+		std::getline( is, line );
+		return str::FromUtf8( line.c_str() );
+	}
+}

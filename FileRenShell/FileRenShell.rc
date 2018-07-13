@@ -47,7 +47,7 @@ BEGIN
     PUSHBUTTON      " Capitali&ze|...",IDC_CAPITALIZE_BUTTON,190,194,50,14
     PUSHBUTTON      "C&hange Case",IDC_CHANGE_CASE_BUTTON,244,194,84,14
     PUSHBUTTON      "&Replace...",IDC_REPLACE_FILES_BUTTON,81,212,50,14
-    PUSHBUTTON      "Replace &All:",IDC_REPLACE_DELIMS_BUTTON,135,212,50,14
+    PUSHBUTTON      "Replace &All >",IDC_REPLACE_USER_DELIMS_BUTTON,135,212,50,14
     COMBOBOX        IDC_DELIMITER_SET_COMBO,190,213,50,95,CBS_DROPDOWN | CBS_AUTOHSCROLL | WS_VSCROLL | WS_TABSTOP
     LTEXT           "->",IDC_DELIMITER_STATIC,241,213,13,12
     EDITTEXT        IDC_NEW_DELIMITER_EDIT,255,213,41,12,ES_AUTOHSCROLL
@@ -138,7 +138,7 @@ BEGIN
     PUSHBUTTON      "&Reset Default",IDC_SET_DEFAULT_ALL,7,225,63,14
 END
 
-IDD_OPTIONS_GENERAL_PAGE DIALOGEX 0, 0, 202, 183
+IDD_OPTIONS_GENERAL_PAGE DIALOGEX 0, 0, 202, 217
 STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_CAPTION | WS_SYSMENU
 CAPTION "General"
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
@@ -151,13 +151,15 @@ BEGIN
     CONTROL         "Display &thumbnails",IDC_USE_LIST_THUMBS_CHECK,"Button",BS_AUTOCHECKBOX | WS_GROUP | WS_TABSTOP,14,54,75,10
     CONTROL         "Use &double-buffering (turn off for smooth scaling)",IDC_USE_LIST_DOUBLE_BUFFER_CHECK,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,14,68,175,10
-    GROUPBOX        "Undo/Redo Log",IDC_GROUP_BOX_2,7,91,188,47
-    CONTROL         "Save Undo/Redo actions in a log file",IDC_UNDO_REDO_LOG_PERSIST_CHECK,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,14,105,131,10
-    LTEXT           "Log format:",IDC_STATIC,14,123,38,8
-    CONTROL         "Text (readable)",IDC_UNDO_REDO_LOG_TEXTFMT_RADIO,"Button",BS_AUTORADIOBUTTON | WS_GROUP,58,122,66,10
-    CONTROL         "Binary (faster)",IDC_UNDO_REDO_LOG_BINFMT_RADIO,"Button",BS_AUTORADIOBUTTON,130,122,63,10
-    PUSHBUTTON      "&Reset Default",IDC_SET_DEFAULT_ALL,7,162,63,14
+    GROUPBOX        "Undo/Redo Log",IDC_GROUP_BOX_2,7,91,188,46
+    CONTROL         "Save Undo/Redo actions in a log file",IDC_UNDO_LOG_PERSIST_CHECK,
+                    "Button",BS_AUTOCHECKBOX | WS_GROUP | WS_TABSTOP,14,105,131,10
+    LTEXT           "Log format:",IDC_STATIC,14,122,38,8
+    CONTROL         "Text (readable)",IDC_UNDO_LOG_TEXT_FMT_RADIO,"Button",BS_AUTORADIOBUTTON | WS_GROUP,58,121,66,10
+    CONTROL         "Binary (faster)",IDC_UNDO_LOG_BINARY_FMT_RADIO,"Button",BS_AUTORADIOBUTTON,130,121,63,10
+    PUSHBUTTON      "&Reset Default",IDC_SET_DEFAULT_ALL,7,196,63,14
+    CONTROL         "Undo/Redo local editing changes",IDC_UNDO_EDITING_CMDS_CHECK,
+                    "Button",BS_AUTOCHECKBOX | WS_GROUP | WS_TABSTOP,14,143,120,10
 END
 
 
@@ -206,7 +208,7 @@ BEGIN
         LEFTMARGIN, 7
         RIGHTMARGIN, 195
         TOPMARGIN, 7
-        BOTTOMMARGIN, 176
+        BOTTOMMARGIN, 210
     END
 END
 #endif    // APSTUDIO_INVOKED
@@ -248,8 +250,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 7,6,0,2
- PRODUCTVERSION 7,6,0,2
+ FILEVERSION 7,7,0,2
+ PRODUCTVERSION 7,7,0,2
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -264,16 +266,16 @@ BEGIN
     BEGIN
         BLOCK "040904b0"
         BEGIN
-            VALUE "Comments", "Replace dialog auto-fill common prefix|Report list uses callback text for diff items text|Rename of .lnk shortcut files|Options properties|File list thumbnails|List sorting|Draw list diff sub-items on post-paint|Undo and Redo with commands|Touch files dialog"
+            VALUE "Comments", "Undo log text/binary|Replace dialog auto-fill common prefix|Report list uses callback text for diff items text|Rename of .lnk shortcut files|Options properties|File list thumbnails|List sorting|Draw list diff sub-items on post-paint|Undo and Redo with commands|Touch files dialog"
             VALUE "CompanyName", "Paul Cocoveanu"
             VALUE "Email", "phc.2nd@gmail.com"
             VALUE "FileDescription", "Shell extension for renaming files and folders"
-            VALUE "FileVersion", "7, 6, 0, 2"
+            VALUE "FileVersion", "7, 7, 0, 2"
             VALUE "InternalName", "FileRenShell"
             VALUE "LegalCopyright", "Copyright © 2001-2018"
             VALUE "OriginalFilename", "FileRenShell64.dll"
             VALUE "ProductName", "FileRenShell Shell Extension DLL"
-            VALUE "ProductVersion", "7, 6, 0, 2"
+            VALUE "ProductVersion", "7, 7, 0, 2"
             VALUE "WrittenBy", "Written by Paul Cocoveanu"
         END
     END
@@ -319,9 +321,9 @@ BEGIN
         MENUITEM "&Wildcard\t*",                ID_WILDCARD
         MENUITEM "E&xtension Separator\t.",     ID_EXTENSION_SEPARATOR
     END
-    POPUP "<more rename actions>"
+    POPUP "<dest fname change>"
     BEGIN
-        MENUITEM "Replace All &Delimiters with Space", ID_REPLACE_DELIMS
+        MENUITEM "Replace All &Delimiters with Space", ID_REPLACE_ALL_DELIMS
         MENUITEM "Replace Unicode with &ANSI Symbols\t""–"" to ""-""", ID_REPLACE_UNICODE_SYMBOLS
         MENUITEM SEPARATOR
         MENUITEM "Single &Whitespace\t""   "" to "" """, ID_SINGLE_WHITESPACE
@@ -333,7 +335,7 @@ BEGIN
         MENUITEM "&Underbar to Space\t""_"" to "" """, ID_UNDERBAR_TO_SPACE
         MENUITEM "Space to Underbar\t"" "" to ""_""", ID_SPACE_TO_UNDERBAR
         MENUITEM SEPARATOR
-        MENUITEM "Uniform &Numeric Padding\t""9"", ""010"" to ""09"", ""10""", ID_ENSURE_UNIFORM_NUM_PADDING
+        MENUITEM "Uniform &Zero Padding\t""9"", ""010"" to ""09"", ""10""", ID_ENSURE_UNIFORM_ZERO_PADDING
     END
     POPUP "<text tools>"
     BEGIN
@@ -434,6 +436,7 @@ END
 STRINGTABLE 
 BEGIN
     IDC_CLEAR_FILES_BUTTON  "Clear destination filenames"
+    IDC_REPLACE_USER_DELIMS_BUTTON "Replace delimiters selected by user"
 END
 
 STRINGTABLE 
@@ -461,6 +464,7 @@ BEGIN
     ID_PICK_FORMAT_TOKEN    "Pick a formatting token"
     ID_PICK_TEXT_TOOLS      "Pick a text tool"
     ID_TOGGLE_AUTO_GENERATE "Make filenames automatically when changing format"
+    ID_ENSURE_UNIFORM_ZERO_PADDING "Pad numbers with zeros uniformly"
     ID_SEQ_COUNT_RESET      "Reset numeric sequence to 1"
     ID_SEQ_COUNT_FIND_NEXT  "Find next available numeric sequence start"
     ID_SEQ_COUNT_AUTO_ADVANCE 
@@ -486,6 +490,22 @@ STRINGTABLE
 BEGIN
     ID_AUTO_FILL_COMMON_PREFIX_CK 
                             "Auto-fill pattern with the common prefix of the files"
+END
+
+STRINGTABLE 
+BEGIN
+    ID_REPLACE_ALL_DELIMS   "Replace all delimiters with space"
+END
+
+STRINGTABLE 
+BEGIN
+    ID_REPLACE_UNICODE_SYMBOLS "Replace special Unicode with ANSI symbols"
+    ID_SINGLE_WHITESPACE    "Single whitespace"
+    ID_REMOVE_WHITESPACE    "Remove whitespace"
+    ID_DASH_TO_SPACE        "Replace dashes with space"
+    ID_SPACE_TO_DASH        "Replace spaces with dash"
+    ID_UNDERBAR_TO_SPACE    "Replace underbars with space"
+    ID_SPACE_TO_UNDERBAR    "Replace spaces with underbar"
 END
 
 #endif    // English (U.S.) resources

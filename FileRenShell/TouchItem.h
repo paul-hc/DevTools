@@ -6,15 +6,6 @@
 #include "PathItemBase.h"
 
 
-namespace app
-{
-	enum DateTimeField { ModifiedDate, CreatedDate, AccessedDate, _DateTimeFieldCount };
-
-	const CTime& GetTimeField( const fs::CFileState& fileState, DateTimeField field );
-	inline CTime& RefTimeField( fs::CFileState& rFileState, DateTimeField field ) { return const_cast< CTime& >( GetTimeField( rFileState, field ) ); }
-}
-
-
 class CTouchItem : public CPathItemBase
 {
 public:
@@ -29,7 +20,7 @@ public:
 	fs::CFileState& RefDestState( void ) { return m_destState; }
 	void Reset( void ) { m_destState = m_srcState; }
 
-	void SetDestTime( app::DateTimeField field, const CTime& dateTime );
+	void SetDestTime( fs::CFileState::TimeField field, const CTime& dateTime );
 	void SetDestAttributeFlag( CFile::Attribute attrFlag, bool on ) { SetFlag( m_destState.m_attributes, attrFlag, on ); }
 private:
 	const fs::CFileState m_srcState;
@@ -44,7 +35,8 @@ namespace multi
 	class CDateTimeState
 	{
 	public:
-		CDateTimeState( UINT ctrlId = 0, app::DateTimeField field = app::ModifiedDate, const CTime& dateTimeState = CTime() ) : m_ctrlId( ctrlId ), m_field( field ), m_dateTimeState( dateTimeState ) {}
+		CDateTimeState( UINT ctrlId = 0, fs::CFileState::TimeField field = fs::CFileState::ModifiedDate, const CTime& dateTimeState = CTime() )
+			: m_ctrlId( ctrlId ), m_field( field ), m_dateTimeState( dateTimeState ) {}
 
 		void Clear( void ) { m_dateTimeState = CTime(); }
 		void SetInvalid( void ) { m_dateTimeState = s_invalid; }
@@ -59,7 +51,7 @@ namespace multi
 		bool WouldModify( const CTouchItem* pTouchItem ) const;
 	public:
 		UINT m_ctrlId;
-		app::DateTimeField m_field;
+		fs::CFileState::TimeField m_field;
 	private:
 		CTime m_dateTimeState;
 		static const CTime s_invalid;
