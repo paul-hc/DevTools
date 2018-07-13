@@ -19,9 +19,6 @@ public:
 
 	fs::CFileState& RefDestState( void ) { return m_destState; }
 	void Reset( void ) { m_destState = m_srcState; }
-
-	void SetDestTime( fs::CFileState::TimeField field, const CTime& dateTime );
-	void SetDestAttributeFlag( CFile::Attribute attrFlag, bool on ) { SetFlag( m_destState.m_attributes, attrFlag, on ); }
 private:
 	const fs::CFileState m_srcState;
 	fs::CFileState m_destState;
@@ -35,8 +32,8 @@ namespace multi
 	class CDateTimeState
 	{
 	public:
-		CDateTimeState( UINT ctrlId = 0, fs::CFileState::TimeField field = fs::CFileState::ModifiedDate, const CTime& dateTimeState = CTime() )
-			: m_ctrlId( ctrlId ), m_field( field ), m_dateTimeState( dateTimeState ) {}
+		CDateTimeState( UINT ctrlId = 0, fs::CFileState::TimeField timeField = fs::CFileState::ModifiedDate, const CTime& dateTimeState = CTime() )
+			: m_ctrlId( ctrlId ), m_timeField( timeField ), m_dateTimeState( dateTimeState ) {}
 
 		void Clear( void ) { m_dateTimeState = CTime(); }
 		void SetInvalid( void ) { m_dateTimeState = s_invalid; }
@@ -47,11 +44,11 @@ namespace multi
 		bool InputCtrl( CWnd* pDlg );
 
 		bool CanApply( void ) const { REQUIRE( m_dateTimeState != s_invalid ); return m_dateTimeState.GetTime() != 0; }
-		void Apply( CTouchItem* pTouchItem ) const { REQUIRE( CanApply() ); pTouchItem->SetDestTime( m_field, m_dateTimeState ); }
+		void Apply( fs::CFileState& rFileState ) const { REQUIRE( CanApply() ); rFileState.SetTimeField( m_dateTimeState, m_timeField ); }
 		bool WouldModify( const CTouchItem* pTouchItem ) const;
 	public:
 		UINT m_ctrlId;
-		fs::CFileState::TimeField m_field;
+		fs::CFileState::TimeField m_timeField;
 	private:
 		CTime m_dateTimeState;
 		static const CTime s_invalid;
@@ -74,7 +71,7 @@ namespace multi
 		UINT GetChecked( CWnd* pDlg ) const { return pDlg->IsDlgButtonChecked( m_ctrlId ); }
 
 		bool CanApply( void ) const { REQUIRE( m_checkState != s_invalid ); return m_checkState != BST_INDETERMINATE; }
-		void Apply( CTouchItem* pTouchItem ) const { REQUIRE( CanApply() ); pTouchItem->SetDestAttributeFlag( m_attrFlag, BST_CHECKED == m_checkState ); }
+		void Apply( fs::CFileState& rFileState ) const { REQUIRE( CanApply() ); SetFlag( rFileState.m_attributes, m_attrFlag, BST_CHECKED == m_checkState ); }
 	public:
 		UINT m_ctrlId;
 		CFile::Attribute m_attrFlag;

@@ -62,6 +62,7 @@ private:
 	// input
 	void InputFields( void );
 	void ApplyFields( void );
+	utl::ICommand* MakeChangeDestFileStatesCmd( void );
 	bool VisibleAllSrcColumns( void ) const;
 
 	size_t FindItemPos( const fs::CPath& keyPath ) const;

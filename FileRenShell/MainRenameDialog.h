@@ -48,6 +48,7 @@ private:
 
 	enum Mode { MakeMode, RenameMode, RollBackMode, RollForwardMode };		// same as OK button label
 	void SwitchMode( Mode mode );
+	bool AnyChanges( void ) const;
 
 	void AutoGenerateFiles( void );
 	bool RenameFiles( void );

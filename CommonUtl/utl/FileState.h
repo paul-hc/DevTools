@@ -35,7 +35,9 @@ namespace fs
 		static const CEnumTags& GetTags_TimeField( void );
 
 		const CTime& GetTimeField( TimeField field ) const;
-		CTime& RefTimeField( TimeField field ) { return const_cast< CTime& >( GetTimeField( field ) ); }
+		void SetTimeField( const CTime& time, TimeField field ) { const_cast< CTime& >( GetTimeField( field ) ) = time; }
+
+		static const CFlagTags& GetTags_FileAttributes( void );
 	public:
 		CPath m_fullPath;
 		BYTE m_attributes;			// CFile::Attribute enum values (low-byte)
@@ -45,13 +47,6 @@ namespace fs
 	private:
 		static const BYTE s_invalidAttributes = 0xFF;
 	};
-
-
-	typedef std::map< fs::CFileState, fs::CFileState > TFileStatePairMap;
-	typedef std::set< fs::CFileState > TFileStateSet;
-
-
-	const CFlagTags& GetTags_FileAttributes( void );
 }
 
 

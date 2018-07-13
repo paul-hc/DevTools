@@ -22,7 +22,7 @@ namespace cmd
 	const CEnumTags& GetTags_CommandType( void )
 	{
 		static const CEnumTags tags(
-			_T("Rename Files|Touch Files|Change Destination Paths|Change Dest File States|Reset Destinations|Edit"),
+			_T("Rename Files|Touch Files|Change Destination Paths|Change Destination File States|Reset Destinations|Edit"),
 			_T("RENAME|TOUCH|CHANGE_DEST_PATHS|CHANGE_DEST_FILE_STATES|RESET_DESTINATIONS|EDIT"),
 			-1, RenameFile );
 

@@ -22,11 +22,6 @@ CTouchItem::~CTouchItem()
 {
 }
 
-void CTouchItem::SetDestTime( fs::CFileState::TimeField field, const CTime& dateTime )
-{
-	m_destState.RefTimeField( field ) = dateTime;
-}
-
 
 namespace multi
 {
@@ -67,7 +62,7 @@ namespace multi
 	{
 		return
 			CanApply() &&
-			pTouchItem->GetDestState().GetTimeField( m_field ) != m_dateTimeState;
+			pTouchItem->GetDestState().GetTimeField( m_timeField ) != m_dateTimeState;
 	}
 
 

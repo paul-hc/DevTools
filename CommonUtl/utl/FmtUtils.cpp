@@ -74,8 +74,8 @@ namespace fmt
 	std::tstring FormatFileAttributes( DWORD fileAttr, bool uiFormat /*= false*/ )
 	{
 		return uiFormat
-			? fs::GetTags_FileAttributes().FormatUi( fileAttr, _T(", ") )
-			: fs::GetTags_FileAttributes().FormatKey( fileAttr, _T("") );
+			? fs::CFileState::GetTags_FileAttributes().FormatUi( fileAttr, _T(", ") )
+			: fs::CFileState::GetTags_FileAttributes().FormatKey( fileAttr, _T("") );
 	}
 
 	DWORD ParseFileAttributes( const std::tstring& text, bool uiFormat /*= false*/ )
@@ -85,9 +85,9 @@ namespace fmt
 
 		if ( !parsedHex )
 			if ( uiFormat )
-				fs::GetTags_FileAttributes().ParseUi( reinterpret_cast< int* >( &fileAttr ), text, _T(", ") );
+				fs::CFileState::GetTags_FileAttributes().ParseUi( reinterpret_cast< int* >( &fileAttr ), text, _T(", ") );
 			else
-				fs::GetTags_FileAttributes().ParseKey( reinterpret_cast< int* >( &fileAttr ), text, _T("") );
+				fs::CFileState::GetTags_FileAttributes().ParseKey( reinterpret_cast< int* >( &fileAttr ), text, _T("") );
 
 		return static_cast< DWORD >( fileAttr );
 	}
@@ -337,7 +337,7 @@ namespace fmt
 					CTime time;
 
 					if ( _ParseTaggedTimeField( time, field, *itPart ) )
-						rFileState.RefTimeField( field ) = time;
+						rFileState.SetTimeField( time, field );
 				}
 			}
 

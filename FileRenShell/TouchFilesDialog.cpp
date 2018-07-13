@@ -177,7 +177,7 @@ void CTouchFilesDialog::PopStackTop( cmd::StackType stackType )
 
 		if ( isTouchMacro )							// file command?
 			SwitchMode( cmd::Undo == stackType ? RollBackMode : RollForwardMode );
-		else if ( IsNativeCmd( pTopCmd ) )			// path editing command?
+		else if ( IsNativeCmd( pTopCmd ) )			// file state editing command?
 			SwitchMode( TouchMode );
 	}
 	else
@@ -288,23 +288,40 @@ void CTouchFilesDialog::InputFields( void )
 
 void CTouchFilesDialog::ApplyFields( void )
 {
-	ClearFileErrors();
+	if ( utl::ICommand* pCmd = CTouchFilesDialog::MakeChangeDestFileStatesCmd() )
+	{
+		ClearFileErrors();
+		m_pFileModel->SafeExecuteCmd( pCmd );
+	}
+}
+
+utl::ICommand* CTouchFilesDialog::MakeChangeDestFileStatesCmd( void )
+{
+	std::vector< fs::CFileState > destFileStates; destFileStates.reserve( m_rTouchItems.size() );
+	bool anyChanges = false;
 
 	// apply valid edits, i.e. if not null
 	for ( size_t i = 0; i != m_rTouchItems.size(); ++i )
 	{
-		CTouchItem* pTouchItem = m_rTouchItems[ i ];
+		const CTouchItem* pTouchItem = m_rTouchItems[ i ];
+
+		fs::CFileState newFileState = pTouchItem->GetDestState();
 
 		for ( std::vector< multi::CDateTimeState >::const_iterator itDateTimeState = m_dateTimeStates.begin(); itDateTimeState != m_dateTimeStates.end(); ++itDateTimeState )
 			if ( itDateTimeState->CanApply() )
-				itDateTimeState->Apply( pTouchItem );
+				itDateTimeState->Apply( newFileState );
 
 		for ( std::vector< multi::CAttribCheckState >::const_iterator itAttribState = m_attribCheckStates.begin(); itAttribState != m_attribCheckStates.end(); ++itAttribState )
 			if ( itAttribState->CanApply() )
-				itAttribState->Apply( pTouchItem );
+				itAttribState->Apply( newFileState );
+
+		if ( newFileState != pTouchItem->GetDestState() )
+			anyChanges = true;
+
+		destFileStates.push_back( newFileState );
 	}
 
-	m_pFileModel->UpdateAllObservers( NULL );
+	return anyChanges ? new CChangeDestFileStatesCmd( m_pFileModel, destFileStates ) : NULL;
 }
 
 bool CTouchFilesDialog::VisibleAllSrcColumns( void ) const

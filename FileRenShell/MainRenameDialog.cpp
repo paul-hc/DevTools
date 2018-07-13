@@ -137,7 +137,7 @@ bool CMainRenameDialog::RenameFiles( void )
 			m_errorItems.clear();
 
 			cmd::CScopedErrorObserver observe( this );
-			return m_pFileModel->GetCommandModel()->Execute( pRenameMacroCmd.release() );
+			return m_pFileModel->SafeExecuteCmd( pRenameMacroCmd.release() );
 		}
 		else
 			return PromptCloseDialog();
@@ -182,6 +182,13 @@ void CMainRenameDialog::SwitchMode( Mode mode )
 		IDC_REPLACE_FILES_BUTTON, IDC_REPLACE_USER_DELIMS_BUTTON, IDC_DELIMITER_SET_COMBO, IDC_NEW_DELIMITER_EDIT
 	};
 	ui::EnableControls( *this, ctrlIds, COUNT_OF( ctrlIds ), m_mode != RollBackMode );
+
+	ui::EnableControl( *this, IDOK, m_mode != RenameMode || AnyChanges() );
+}
+
+bool CMainRenameDialog::AnyChanges( void ) const
+{
+	return utl::Any( m_rRenameItems, std::mem_fun( &CRenameItem::IsModified ) );
 }
 
 void CMainRenameDialog::PostMakeDest( bool silent /*= false*/ )
@@ -224,8 +231,8 @@ void CMainRenameDialog::PopStackTop( cmd::StackType stackType )
 
 		if ( isRenameMacro )						// file command?
 			SwitchMode( cmd::Undo == stackType ? RollBackMode : RollForwardMode );
-		else if ( IsNativeCmd( pTopCmd ) )			// path editing command?
-			SwitchMode( RenameMode );
+		else
+			SwitchMode( AnyChanges() ? RenameMode : MakeMode );
 	}
 	else
 		PopStackRunCrossEditor( stackType );		// end this dialog and execute the target dialog editor
