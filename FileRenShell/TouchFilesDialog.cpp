@@ -55,12 +55,12 @@ namespace layout
 CTouchFilesDialog::CTouchFilesDialog( CFileModel* pFileModel, CWnd* pParent )
 	: CFileEditorBaseDialog( pFileModel, cmd::TouchFile, IDD_TOUCH_FILES_DIALOG, pParent )
 	, m_rTouchItems( m_pFileModel->LazyInitTouchItems() )
-	, m_mode( TouchMode )
 	, m_fileListCtrl( IDC_FILE_TOUCH_LIST )
 	, m_anyChanges( false )
 {
 	Construct();
 	m_nativeCmdTypes.push_back( cmd::ResetDestinations );
+	m_mode = CommitFilesMode;
 	REQUIRE( !m_rTouchItems.empty() );
 
 	m_regSection = reg::section_dialog;
@@ -118,7 +118,7 @@ bool CTouchFilesDialog::TouchFiles( void )
 			ClearFileErrors();
 
 			cmd::CScopedErrorObserver observe( this );
-			return m_pFileModel->GetCommandModel()->Execute( pTouchMacroCmd.release() );
+			return m_pFileModel->SafeExecuteCmd( this, pTouchMacroCmd.release() );
 		}
 		else
 			return PromptCloseDialog();
@@ -141,10 +141,10 @@ void CTouchFilesDialog::SwitchMode( Mode mode )
 		IDC_MODIFIED_DATE, IDC_CREATED_DATE, IDC_ACCESSED_DATE,
 		IDC_ATTRIB_READONLY_CHECK, IDC_ATTRIB_HIDDEN_CHECK, IDC_ATTRIB_SYSTEM_CHECK, IDC_ATTRIB_ARCHIVE_CHECK
 	};
-	ui::EnableControls( *this, ctrlIds, COUNT_OF( ctrlIds ), m_mode != RollBackMode );
+	ui::EnableControls( *this, ctrlIds, COUNT_OF( ctrlIds ), !IsRollMode() );
 
 	m_anyChanges = utl::Any( m_rTouchItems, std::mem_fun( &CTouchItem::IsModified ) );
-	ui::EnableControl( *this, IDOK, m_mode != TouchMode || m_anyChanges );
+	ui::EnableControl( *this, IDOK, m_mode != CommitFilesMode || m_anyChanges );
 
 	m_fileListCtrl.Invalidate();			// do some custom draw magic
 }
@@ -155,12 +155,12 @@ void CTouchFilesDialog::PostMakeDest( bool silent /*= false*/ )
 		GotoDlgCtrl( GetDlgItem( IDOK ) );
 
 	EnsureVisibleFirstError( &m_fileListCtrl );
-	SwitchMode( TouchMode );
+	SwitchMode( CommitFilesMode );
 }
 
 void CTouchFilesDialog::PopStackTop( cmd::StackType stackType )
 {
-	ASSERT( m_mode != RollBackMode && m_mode != RollForwardMode );
+	ASSERT( !IsRollMode() );
 
 	if ( utl::ICommand* pTopCmd = PeekCmdForDialog( stackType ) )		// comand that is target for this dialog editor?
 	{
@@ -178,7 +178,7 @@ void CTouchFilesDialog::PopStackTop( cmd::StackType stackType )
 		if ( isTouchMacro )							// file command?
 			SwitchMode( cmd::Undo == stackType ? RollBackMode : RollForwardMode );
 		else if ( IsNativeCmd( pTopCmd ) )			// file state editing command?
-			SwitchMode( TouchMode );
+			SwitchMode( CommitFilesMode );
 	}
 	else
 		PopStackRunCrossEditor( stackType );		// end this dialog and execute the target dialog editor
@@ -291,7 +291,7 @@ void CTouchFilesDialog::ApplyFields( void )
 	if ( utl::ICommand* pCmd = CTouchFilesDialog::MakeChangeDestFileStatesCmd() )
 	{
 		ClearFileErrors();
-		m_pFileModel->SafeExecuteCmd( pCmd );
+		m_pFileModel->SafeExecuteCmd( this, pCmd );
 	}
 }
 
@@ -420,7 +420,7 @@ void CTouchFilesDialog::CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARA
 	else if ( isModified )
 		rTextEffect |= isSrc ? s_modSrc : s_modDest;
 
-	if ( StoreMode == m_mode )
+	if ( EditMode == m_mode )
 	{
 		bool wouldModify = false;
 		switch ( subItem )
@@ -544,16 +544,16 @@ void CTouchFilesDialog::OnOK( void )
 {
 	switch ( m_mode )
 	{
-		case StoreMode:
+		case EditMode:
 			InputFields();
 			ApplyFields();
 			PostMakeDest();
 			break;
-		case TouchMode:
+		case CommitFilesMode:
 			if ( TouchFiles() )
 				__super::OnOK();
 			else
-				SwitchMode( TouchMode );
+				SwitchMode( CommitFilesMode );
 			break;
 		case RollBackMode:
 		case RollForwardMode:
@@ -563,7 +563,7 @@ void CTouchFilesDialog::OnOK( void )
 			if ( m_pFileModel->UndoRedo( RollBackMode == m_mode ? cmd::Undo : cmd::Redo ) )
 				__super::OnOK();
 			else
-				SwitchMode( TouchMode );
+				SwitchMode( CommitFilesMode );
 			break;
 		}
 	}
@@ -587,17 +587,17 @@ void CTouchFilesDialog::OnUpdateUndoRedo( CCmdUI* pCmdUI )
 	switch ( pCmdUI->m_nID )
 	{
 		case IDC_UNDO_BUTTON:
-			pCmdUI->Enable( m_mode != RollBackMode && m_mode != RollForwardMode && m_pFileModel->CanUndoRedo( cmd::Undo ) );
+			pCmdUI->Enable( !IsRollMode() && m_pFileModel->CanUndoRedo( cmd::Undo ) );
 			break;
 		case IDC_REDO_BUTTON:
-			pCmdUI->Enable( m_mode != RollForwardMode && m_mode != RollBackMode && m_pFileModel->CanUndoRedo( cmd::Redo ) );
+			pCmdUI->Enable( !IsRollMode() && m_pFileModel->CanUndoRedo( cmd::Redo ) );
 			break;
 	}
 }
 
 void CTouchFilesDialog::OnFieldChanged( void )
 {
-	SwitchMode( StoreMode );
+	SwitchMode( EditMode );
 }
 
 void CTouchFilesDialog::OnBnClicked_CopySourceFiles( void )
@@ -611,7 +611,7 @@ void CTouchFilesDialog::OnBnClicked_PasteDestStates( void )
 	try
 	{
 		ClearFileErrors();
-		m_pFileModel->SafeExecuteCmd( m_pFileModel->MakeClipPasteDestFileStatesCmd( this ) );
+		m_pFileModel->SafeExecuteCmd( this, m_pFileModel->MakeClipPasteDestFileStatesCmd( this ) );
 	}
 	catch ( CRuntimeException& e )
 	{
@@ -622,7 +622,7 @@ void CTouchFilesDialog::OnBnClicked_PasteDestStates( void )
 void CTouchFilesDialog::OnBnClicked_ResetDestFiles( void )
 {
 	ClearFileErrors();
-	m_pFileModel->SafeExecuteCmd( new CResetDestinationsCmd( m_pFileModel ) );
+	m_pFileModel->SafeExecuteCmd( this, new CResetDestinationsCmd( m_pFileModel ) );
 }
 
 void CTouchFilesDialog::OnBnClicked_ShowSrcColumns( void )

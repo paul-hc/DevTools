@@ -15,7 +15,8 @@ public:
 	const fs::CPath& GetDestPath( void ) const { return m_destPath; }
 	const fs::CPath& GetSafeDestPath( void ) const { return !m_destPath.IsEmpty() ? m_destPath : GetSrcPath(); }	// use SRC if DEST emty
 
-	bool IsModified( void ) const { return !m_destPath.IsEmpty() && m_destPath.Get() != GetKeyPath().Get(); }		// case sensitive compare strings (not paths)
+	bool IsModified( void ) const { return HasDestPath() && m_destPath.Get() != GetKeyPath().Get(); }		// case-sensitive string compare (not paths)
+	bool HasDestPath( void ) const { return !m_destPath.IsEmpty(); }
 
 	void Reset( void ) { m_destPath.Clear(); }
 	fs::CPath& RefDestPath( void ) { return m_destPath; }

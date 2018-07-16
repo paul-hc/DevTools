@@ -6,6 +6,7 @@
 
 
 class CFileModel;
+interface IFileEditor;
 
 
 class COptionsSheet : public CLayoutPropertySheet
@@ -19,6 +20,7 @@ protected:
 	virtual void OnChangesApplied( void );
 private:
 	CFileModel* m_pFileModel;
+	IFileEditor* m_pFileEditor;
 };
 
 

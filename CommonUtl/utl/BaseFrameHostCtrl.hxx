@@ -32,6 +32,34 @@ bool CBaseFrameHostCtrl< BaseCtrl >::SetShowFocus( bool showFocus /*= true*/ )
 	return true;
 }
 
+template< typename BaseCtrl >
+CRect CBaseFrameHostCtrl< BaseCtrl >::GetFrameRect( FrameType frameType ) const
+{
+	CRect frameRect;
+	GetClientRect( &frameRect );
+
+	switch ( frameType )
+	{
+		case SolidFrame: frameRect.DeflateRect( m_frameMargins ); break;
+		case FocusFrame: frameRect.DeflateRect( m_focusMargins ); break;
+		default: ASSERT( false );
+	}
+	return frameRect;
+}
+
+template< typename BaseCtrl >
+void CBaseFrameHostCtrl< BaseCtrl >::InvalidateFrame( FrameType frameType )
+{
+	CRect frameRect = GetFrameRect( frameType );
+	CRgn frameRgn;
+	frameRgn.CreateRectRgnIndirect( &frameRect );
+
+	frameRect.DeflateRect( 1, 1 );
+	ui::CombineWithRegion( &frameRgn, frameRect, RGN_DIFF );
+
+	InvalidateRgn( &frameRgn );
+}
+
 BEGIN_TEMPLATE_MESSAGE_MAP( CBaseFrameHostCtrl, BaseCtrl, BaseCtrl )
 	ON_WM_PAINT()
 	ON_WM_SETFOCUS()
@@ -46,24 +74,18 @@ void CBaseFrameHostCtrl< BaseCtrl >::OnPaint( void )
 	if ( m_frameColor != CLR_NONE || m_showFocus )
 	{
 		CClientDC dc( this );
-		CRect clientRect;
-		GetClientRect( &clientRect );
 
 		if ( m_frameColor != CLR_NONE )
 		{
-			CRect rect = clientRect;
-			rect.DeflateRect( m_frameMargins );
-
+			CRect frameRect = GetFrameRect( SolidFrame );
 			CBrush borderBrush( m_frameColor );
-			dc.FrameRect( &rect, &borderBrush );
+			dc.FrameRect( &frameRect, &borderBrush );
 		}
 
 		if ( m_showFocus && ui::OwnsFocus( m_hWnd ) )
 		{
-			CRect rect = clientRect;
-			rect.DeflateRect( m_focusMargins );
-
-			dc.DrawFocusRect( &rect );
+			CRect frameRect = GetFrameRect( SolidFrame );
+			dc.DrawFocusRect( &frameRect );
 		}
 	}
 }

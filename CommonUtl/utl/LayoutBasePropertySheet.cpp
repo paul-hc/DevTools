@@ -31,7 +31,7 @@ namespace reg
 CLayoutBasePropertySheet::CLayoutBasePropertySheet( const TCHAR* pTitle, CWnd* pParent, UINT selPageIndex )
 	: CPropertySheet( pTitle, pParent, selPageIndex )
 	, m_initialPageIndex( UINT_MAX )
-	, m_pCommandModel( NULL )
+	, m_pCommandExecutor( NULL )
 	, m_manageOkButtonState( false )
 {
 }
@@ -330,9 +330,9 @@ bool CLayoutBasePropertySheet::ApplyChanges( void )
 		}
 	}
 
-	if ( m_pCommandModel != NULL )
+	if ( m_pCommandExecutor != NULL )
 		if ( m_pApplyMacroCmd.get() != NULL && !m_pApplyMacroCmd->IsEmpty() )
-			m_pCommandModel->Execute( m_pApplyMacroCmd.release() );
+			m_pCommandExecutor->Execute( m_pApplyMacroCmd.release() );
 
 	OnChangesApplied();
 	return true;

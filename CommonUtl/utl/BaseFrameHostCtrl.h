@@ -18,11 +18,19 @@ protected:
 	{
 	}
 public:
+	COLORREF GetFrameColor( void ) const { return frameColor; }
 	bool SetFrameColor( COLORREF frameColor );
+
+	bool GetShowFocus( void ) const { return m_showFocus; }
 	bool SetShowFocus( bool showFocus = true );
 
 	void SetFrameMargins( int cx = 0, int cy = 0 ) { ASSERT_NULL( m_hWnd ); m_frameMargins.cx = cx; m_frameMargins.cy = cy; }
 	void SetFocusMargins( int cx = 0, int cy = 0 ) { ASSERT_NULL( m_hWnd ); m_focusMargins.cx = cx; m_focusMargins.cy = cy; }
+
+	enum FrameType { SolidFrame, FocusFrame };
+
+	CRect GetFrameRect( FrameType frameType ) const;
+	void InvalidateFrame( FrameType frameType );
 private:
 	COLORREF m_frameColor;
 	bool m_showFocus;

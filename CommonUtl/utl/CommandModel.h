@@ -6,7 +6,8 @@
 #include <deque>
 
 
-class CCommandModel : private utl::noncopyable
+class CCommandModel : public utl::ICommandExecutor
+					, private utl::noncopyable
 {
 public:
 	CCommandModel( void ) {}
@@ -19,7 +20,9 @@ public:
 	template< typename FuncType >
 	void RemoveCommandsThat( FuncType func );
 
-	bool Execute( utl::ICommand* pCmd );
+	// utl::ICommandExecutor interface
+	virtual bool Execute( utl::ICommand* pCmd );
+
 	void Push( utl::ICommand* pCmd );					// already executed by the caller
 
 	bool Undo( size_t stepCount = 1 );

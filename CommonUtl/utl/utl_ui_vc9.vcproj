@@ -543,6 +543,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Serialization.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\Serialization.h"
 				>
 			</File>
@@ -1704,6 +1708,14 @@
 			</File>
 			<File
 				RelativePath=".\ut\ResequenceTests.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ut\SerializationTests.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\ut\SerializationTests.h"
 				>
 			</File>
 			<File

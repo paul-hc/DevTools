@@ -197,12 +197,17 @@ UINT CTextEdit::OnGetDlgCode( void )
 	UINT code = BaseClass::OnGetDlgCode();
 	if ( m_keepSelOnFocus )
 		ClearFlag( code, DLGC_HASSETSEL );
+
+	if ( GetShowFocus() )
+		InvalidateFrame( FocusFrame );			// one of the few reliable ways to keep the focus rect properly drawn, since the edit draws directly to DC oftenly (without WM_PAINT)
+
 	return code;
 }
 
 void CTextEdit::OnHScroll( UINT sbCode, UINT pos, CScrollBar* pScrollBar )
 {
 	__super::OnHScroll( sbCode, pos, pScrollBar );
+
 	if ( m_hookThumbTrack && SB_THUMBTRACK == sbCode )
 		ui::SendCommandToParent( m_hWnd, EN_HSCROLL );
 }
@@ -210,6 +215,7 @@ void CTextEdit::OnHScroll( UINT sbCode, UINT pos, CScrollBar* pScrollBar )
 void CTextEdit::OnVScroll( UINT sbCode, UINT pos, CScrollBar* pScrollBar )
 {
 	__super::OnVScroll( sbCode, pos, pScrollBar );
+
 	if ( m_hookThumbTrack && SB_THUMBTRACK == sbCode )
 		ui::SendCommandToParent( m_hWnd, EN_VSCROLL );
 }

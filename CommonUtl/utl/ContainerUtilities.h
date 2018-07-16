@@ -130,13 +130,6 @@ namespace utl
 	}
 
 
-	template< typename ContainerT, typename Predicate >
-	inline bool Any( const ContainerT& objects, Predicate pred )
-	{
-		return std::find_if( objects.begin(), objects.end(), pred ) != objects.end();
-	}
-
-
 	template< typename IteratorT, typename Predicate >
 	IteratorT FindIfNot( IteratorT itFirst, IteratorT itEnd, Predicate pred )
 	{	// std::find_if_not() is missing on most Unix platforms
@@ -146,16 +139,24 @@ namespace utl
 		return itFirst;
 	}
 
-	template< typename ContainerT, typename ItemType >
-	inline bool Contains( const ContainerT& container, ItemType item )
+
+	template< typename ContainerT, typename Predicate >
+	inline bool Any( const ContainerT& objects, Predicate pred )
 	{
-		return std::find( container.begin(), container.end(), item ) != container.end();
+		return std::find_if( objects.begin(), objects.end(), pred ) != objects.end();
 	}
 
 	template< typename ContainerT, typename Predicate >
 	inline bool All( const ContainerT& objects, Predicate pred )
 	{
 		return !objects.empty() && FindIfNot( objects.begin(), objects.end(), pred ) == objects.end();
+	}
+
+
+	template< typename ContainerT, typename ItemType >
+	inline bool Contains( const ContainerT& container, ItemType item )
+	{
+		return std::find( container.begin(), container.end(), item ) != container.end();
 	}
 
 	template< typename DiffType, typename IteratorT >

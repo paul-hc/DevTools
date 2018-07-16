@@ -42,8 +42,6 @@ private:
 private:
 	void Construct( void );
 
-	enum Mode { StoreMode, TouchMode, RollBackMode, RollForwardMode };		// reflects the OK button label
-
 	void SwitchMode( Mode mode );
 
 	bool TouchFiles( void );
@@ -71,7 +69,6 @@ private:
 	static fs::CFileState::TimeField GetTimeField( UINT dtId );
 private:
 	const std::vector< CTouchItem* >& m_rTouchItems;
-	Mode m_mode;
 	bool m_anyChanges;
 
 	// multiple states accumulators for edit fields

@@ -15,6 +15,7 @@ interface IFileEditor : public IMemoryManaged
 {
 	virtual CFileModel* GetFileModel( void ) const = 0;
 	virtual CDialog* GetDialog( void ) = 0;
+	virtual bool IsRollMode( void ) const = 0;						// about to undo/redo mode?
 	virtual void PostMakeDest( bool silent = false ) = 0;
 
 	virtual void PopStackTop( cmd::StackType stackType ) = 0;

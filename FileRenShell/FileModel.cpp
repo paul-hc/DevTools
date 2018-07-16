@@ -3,10 +3,10 @@
 #include "FileModel.h"
 #include "CommandModelService.h"
 #include "FileCommands.h"
+#include "IFileEditor.h"
 #include "RenameItem.h"
 #include "TouchItem.h"
 #include "GeneralOptions.h"
-#include "TextAlgorithms.h"
 #include "resource.h"
 #include "utl/Clipboard.h"
 #include "utl/Command.h"
@@ -88,17 +88,23 @@ CCommandModel* CFileModel::GetCommandModel( void )
 	return m_pCommandModel.get();
 }
 
-bool CFileModel::SafeExecuteCmd( utl::ICommand* pCmd )
+bool CFileModel::SafeExecuteCmd( IFileEditor* pEditor, utl::ICommand* pCmd )
 {
 	if ( NULL == pCmd )
 		return false;
 
-	if ( !CGeneralOptions::Instance().m_undoEditingCmds )
-		if ( !is_a< cmd::CFileMacroCmd >( pCmd ) )					// local editing command?
-		{
-			std::auto_ptr< utl::ICommand > pEditCmd( pCmd );		// take ownership
-			return pEditCmd->Execute();
-		}
+	bool executeInline = false;
+
+	if ( pEditor != NULL && pEditor->IsRollMode() )
+		executeInline = true;
+	else if ( !CGeneralOptions::Instance().m_undoEditingCmds )
+		executeInline = !cmd::IsPersistentCmd( pCmd );			// local editing command?
+
+	if ( executeInline )
+	{
+		std::auto_ptr< utl::ICommand > pEditCmd( pCmd );		// take ownership
+		return pEditCmd->Execute();
+	}
 
 	return GetCommandModel()->Execute( pCmd );
 }
@@ -395,43 +401,4 @@ IFileEditor* CFileModel::MakeFileEditor( cmd::CommandType cmdType, CWnd* pParent
 // command handlers
 
 BEGIN_MESSAGE_MAP( CFileModel, CCmdTarget )
-	ON_COMMAND_RANGE( ID_REPLACE_ALL_DELIMS, ID_SPACE_TO_UNDERBAR, OnChangeDestPathsTool )
 END_MESSAGE_MAP()
-
-void CFileModel::OnChangeDestPathsTool( UINT menuId )
-{
-	utl::ICommand* pCmd = NULL;
-	std::tstring cmdTag = str::Load( menuId );
-
-	switch ( menuId )
-	{
-		case ID_REPLACE_ALL_DELIMS:
-			pCmd = MakeChangeDestPathsCmd( func::ReplaceDelimiterSet( delim::GetAllDelimitersSet(), _T(" ") ), cmdTag );
-			break;
-		case ID_REPLACE_UNICODE_SYMBOLS:
-			pCmd = MakeChangeDestPathsCmd( func::ReplaceMultiDelimiterSets( &text_tool::GetStdUnicodeToAnsiPairs() ), cmdTag );
-			break;
-		case ID_SINGLE_WHITESPACE:
-			pCmd = MakeChangeDestPathsCmd( func::SingleWhitespace(), cmdTag );
-			break;
-		case ID_REMOVE_WHITESPACE:
-			pCmd = MakeChangeDestPathsCmd( func::RemoveWhitespace(), cmdTag );
-			break;
-		case ID_DASH_TO_SPACE:
-			pCmd = MakeChangeDestPathsCmd( func::ReplaceDelimiterSet( delim::s_dashes, _T(" ") ), cmdTag );
-			break;
-		case ID_SPACE_TO_DASH:
-			pCmd = MakeChangeDestPathsCmd( func::ReplaceDelimiterSet( _T(" "), _T("-") ), cmdTag );
-			break;
-		case ID_UNDERBAR_TO_SPACE:
-			pCmd = MakeChangeDestPathsCmd( func::ReplaceDelimiterSet( delim::s_underscores, _T(" ") ), cmdTag );
-			break;
-		case ID_SPACE_TO_UNDERBAR:
-			pCmd = MakeChangeDestPathsCmd( func::ReplaceDelimiterSet( _T(" "), _T("_") ), cmdTag );
-			break;
-		default:
-			ASSERT( false );
-	}
-
-	SafeExecuteCmd( pCmd );
-}

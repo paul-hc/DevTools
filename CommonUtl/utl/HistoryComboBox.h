@@ -57,7 +57,7 @@ private:
 	CAccelTable m_accel, m_dropDownAccel;
 	std::auto_ptr< CTextEditor > m_pEdit;
 	std::auto_ptr< CComboDropList > m_pDropList;
-	int m_dropSelIndex;				// used when tracking the context menu (highlighted item in LBox)
+	int m_dropSelIndex;						// used when tracking the context menu (highlighted item in LBox)
 	LPCTSTR m_pSection, m_pEntry;
 
 	// generated stuff

@@ -4,6 +4,7 @@
 #include "OptionsPages.h"
 #include "FileModel.h"
 #include "FileCommands.h"
+#include "IFileEditor.h"
 #include "resource.h"
 #include "utl/EnumTags.h"
 #include "utl/StringUtilities.h"
@@ -20,12 +21,12 @@
 COptionsSheet::COptionsSheet( CFileModel* pFileModel, CWnd* pParent, UINT initialPageIndex /*= UINT_MAX*/ )
 	: CLayoutPropertySheet( _T("Options"), pParent )
 	, m_pFileModel( pFileModel )
+	, m_pFileEditor( dynamic_cast< IFileEditor* >( pParent ) )
 {
 	m_regSection = _T("OptionsSheet");
 	SetTopDlg();
 	SetInitialPageIndex( initialPageIndex );
 	LoadDlgIcon( ID_OPTIONS );
-	m_pCommandModel = m_pFileModel->GetCommandModel();
 
 	AddPage( new CGeneralOptionsPage );
 	AddPage( new CCapitalizeOptionsPage );
@@ -33,6 +34,9 @@ COptionsSheet::COptionsSheet( CFileModel* pFileModel, CWnd* pParent, UINT initia
 
 void COptionsSheet::OnChangesApplied( void )
 {
+	if ( m_pApplyMacroCmd.get() != NULL && !m_pApplyMacroCmd->IsEmpty() )
+		m_pFileModel->SafeExecuteCmd( m_pFileEditor, m_pApplyMacroCmd.release() );
+
 	if ( !CGeneralOptions::Instance().m_undoEditingCmds )
 		m_pFileModel->GetCommandModel()->RemoveCommandsThat( pred::IsNotA< cmd::CFileMacroCmd >() );
 }

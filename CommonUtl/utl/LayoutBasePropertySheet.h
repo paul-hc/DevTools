@@ -9,8 +9,8 @@
 
 class CLayoutPropertyPage;
 class CMacroCommand;
-class CCommandModel;
 class CScopedApplyMacroCmd;
+namespace utl { interface ICommandExecutor; }
 
 
 abstract class CLayoutBasePropertySheet : public CPropertySheet
@@ -72,9 +72,10 @@ protected:
 	void RegisterTabTooltips( void );
 private:
 	UINT m_initialPageIndex;						// force initial page activation (otherwise uses the one saved in registry, or default)
-	std::auto_ptr< CMacroCommand > m_pApplyMacroCmd;	// used optionally for Apply
 protected:
-	CCommandModel* m_pCommandModel;					// to execute Apply macro
+	std::auto_ptr< CMacroCommand > m_pApplyMacroCmd;	// used optionally for Apply
+	utl::ICommandExecutor* m_pCommandExecutor;		// to execute Apply macro
+
 	bool m_manageOkButtonState;						// enable OK button when modified, disable it when not modified
 
 	CImageList m_tabImageList;

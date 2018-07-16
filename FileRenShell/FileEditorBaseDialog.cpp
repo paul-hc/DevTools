@@ -18,6 +18,7 @@
 CFileEditorBaseDialog::CFileEditorBaseDialog( CFileModel* pFileModel, cmd::CommandType nativeCmdType, UINT templateId, CWnd* pParent )
 	: CBaseMainDialog( templateId, pParent )
 	, m_pFileModel( pFileModel )
+	, m_mode( EditMode )
 {
 	m_nativeCmdTypes.push_back( nativeCmdType );
 
@@ -45,6 +46,11 @@ CFileModel* CFileEditorBaseDialog::GetFileModel( void ) const
 CDialog* CFileEditorBaseDialog::GetDialog( void )
 {
 	return this;
+}
+
+bool CFileEditorBaseDialog::IsRollMode( void ) const
+{
+	return RollBackMode == m_mode || RollForwardMode == m_mode;
 }
 
 void CFileEditorBaseDialog::QueryTooltipText( std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const

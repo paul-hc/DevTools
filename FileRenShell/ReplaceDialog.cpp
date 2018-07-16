@@ -69,6 +69,7 @@ CReplaceDialog::CReplaceDialog( IFileEditor* pParentEditor, const CRenameService
 	GetLayoutEngine().MaxClientSize().cy = 0;
 	LoadDlgIcon( ID_EDIT_REPLACE );
 
+	ClearFlag( m_findWhatCombo.RefItemContent().m_itemsFlags, ui::CItemContent::Trim );
 	ClearFlag( m_replaceWithCombo.RefItemContent().m_itemsFlags, ui::CItemContent::RemoveEmpty | ui::CItemContent::Trim );
 
 	m_findToolbar.GetStrip()
@@ -171,7 +172,7 @@ bool CReplaceDialog::ReplaceItems( bool commit /*= true*/ ) const
 
 	return
 		!commit ||
-		pFileModel->SafeExecuteCmd( pReplaceCmd.release() );
+		pFileModel->SafeExecuteCmd( m_pParentEditor, pReplaceCmd.release() );
 }
 
 bool CReplaceDialog::FillCommonPrefix( void )

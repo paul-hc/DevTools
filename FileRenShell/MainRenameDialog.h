@@ -46,9 +46,9 @@ private:
 private:
 	void SetupFileListView( void );
 
-	enum Mode { MakeMode, RenameMode, RollBackMode, RollForwardMode };		// same as OK button label
 	void SwitchMode( Mode mode );
-	bool AnyChanges( void ) const;
+
+	bool HasDestPaths( void ) const;
 
 	void AutoGenerateFiles( void );
 	bool RenameFiles( void );
@@ -66,7 +66,6 @@ private:
 	const std::vector< CRenameItem* >& m_rRenameItems;
 	std::auto_ptr< CRenameService > m_pRenSvc;
 
-	Mode m_mode;
 	bool m_autoGenerate;
 	bool m_seqCountAutoAdvance;
 
@@ -120,6 +119,7 @@ protected:
 	afx_msg void OnNumericSequence( UINT cmdId );
 	afx_msg void OnBnClicked_PickRenameActions( void );
 	afx_msg void OnEnsureUniformNumPadding( void );
+	afx_msg void OnChangeDestPathsTool( UINT menuId );
 
 	DECLARE_MESSAGE_MAP()
 };

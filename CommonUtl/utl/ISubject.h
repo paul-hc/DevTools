@@ -53,6 +53,12 @@ namespace utl
 	{
 		virtual void OnUpdate( ISubject* pSubject, IMessage* pMessage ) = 0;
 	};
+
+	interface ICommandExecutor
+	{
+		virtual bool Execute( ICommand* pCmd ) = 0;
+	};
+
 }
 
 

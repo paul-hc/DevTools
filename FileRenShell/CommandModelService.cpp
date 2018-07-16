@@ -25,7 +25,7 @@
 
 bool CCommandModelService::SaveUndoLog( const CCommandModel& commandModel, cmd::FileFormat fileFormat )
 {
-	utl::CSlowSectionGuard slow( _T("CCommandModelService::SaveUndoLog"), 0.01 );
+	//utl::CSlowSectionGuard slow( _T("CCommandModelService::SaveUndoLog"), 0.01 );
 
 	std::auto_ptr< cmd::CLogSerializer > pSerializer( CreateSerializer( const_cast< CCommandModel* >( &commandModel ), fileFormat ) );
 	return pSerializer->Save( GetUndoLogPath( fileFormat ) );
@@ -40,7 +40,7 @@ bool CCommandModelService::LoadUndoLog( CCommandModel* pOutCommandModel, cmd::Fi
 	if ( pOutFileFormat != NULL )
 		*pOutFileFormat = fileFormat;
 
-	utl::CSlowSectionGuard slow( _T("CCommandModelService::LoadUndoLog()"), 0.01 );
+	//utl::CSlowSectionGuard slow( _T("CCommandModelService::LoadUndoLog()"), 0.01 );
 	std::auto_ptr< cmd::CLogSerializer > pSerializer( CreateSerializer( pOutCommandModel, fileFormat ) );
 	return pSerializer->Load( GetUndoLogPath( fileFormat ) );
 }

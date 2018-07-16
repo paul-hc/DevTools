@@ -11,6 +11,7 @@
 #include "FileSystemTests.h"
 #include "PathTests.h"
 #include "PathGeneratorTests.h"
+#include "SerializationTests.h"
 #include "ThreadingTests.h"
 
 
@@ -29,6 +30,7 @@ namespace ut
 		CFileSystemTests::Instance();
 		CPathTests::Instance();
 		CPathGeneratorTests::Instance();
+		CSerializationTests::Instance();
 		//CThreadingTests::Instance();
 	#endif
 	}

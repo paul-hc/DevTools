@@ -220,6 +220,21 @@ namespace serial
 }
 
 
+namespace serial
+{
+	enum UnicodeEncoding { WideEncoding, Utf8Encoding };
+
+
+	struct CPolicy
+	{
+		static void ToUtf8String( CStringA& rUtf8Str, const std::wstring& wideStr );
+		static void FromUtf8String( std::wstring& rWideStr, const CStringA& utf8Str );
+	public:
+		static UnicodeEncoding s_strEncoding;
+	};
+}
+
+
 // standard archive insertors/extractors
 
 
@@ -239,35 +254,11 @@ inline CArchive& operator>>( CArchive& archive, std::string& rNarrowStr )
 }
 
 
-inline CArchive& operator<<( CArchive& archive, const std::wstring& wideStr )
-{
-	// as CStringW
-	return archive << CStringW( wideStr.c_str() );
-}
+CArchive& operator<<( CArchive& archive, const std::wstring& wideStr );
+CArchive& operator>>( CArchive& archive, std::wstring& rWideStr );
 
-inline CArchive& operator>>( CArchive& archive, std::wstring& rWideStr )
-{
-	// as CStringW
-	CStringW wideStr;
-	archive >> wideStr;
-	rWideStr = wideStr.GetString();
-	return archive;
-}
-
-inline CArchive& operator<<( CArchive& archive, const std::wstring* pWideStr )		// Unicode string as UTF8 (for better readability in archive stream)
-{
-	ASSERT_PTR( pWideStr );
-	return archive << CStringA( str::ToUtf8( pWideStr->c_str() ).c_str() );
-}
-
-inline CArchive& operator>>( CArchive& archive, std::wstring* pOutWideStr )			// Unicode string as UTF8 (for better readability in archive stream)
-{
-	ASSERT_PTR( pOutWideStr );
-	CStringA utf8Str;
-	archive >> utf8Str;
-	*pOutWideStr = str::FromUtf8( utf8Str.GetString() );
-	return archive;
-}
+CArchive& operator<<( CArchive& archive, const std::wstring* pWideStr );		// Unicode string as UTF8 (for better readability in archive stream)
+CArchive& operator>>( CArchive& archive, std::wstring* pOutWideStr );			// Unicode string as UTF8 (for better readability in archive stream)
 
 
 template< typename Type1, typename Type2 >

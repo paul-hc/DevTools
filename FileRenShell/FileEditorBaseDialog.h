@@ -22,9 +22,18 @@ protected:
 	// IFileEditor interface (partial)
 	virtual CFileModel* GetFileModel( void ) const;
 	virtual CDialog* GetDialog( void );
+	virtual bool IsRollMode( void ) const;
 
 	// ui::ICmdCallback interface
 	virtual void QueryTooltipText( std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const;
+
+	enum Mode					// determines the OK button label
+	{
+		EditMode,				// edit destinations
+		CommitFilesMode,		// ready to apply destinations to target files
+		RollBackMode,			// ready to undo the peeked files command
+		RollForwardMode			// ready to redo the peeked files command
+	};
 
 	int PopStackRunCrossEditor( cmd::StackType stackType );
 protected:
@@ -37,6 +46,8 @@ protected:
 protected:
 	CFileModel* m_pFileModel;
 	std::vector< cmd::CommandType > m_nativeCmdTypes;		// the first one always identifies the editor
+	Mode m_mode;
+
 	std::vector< CPathItemBase* > m_errorItems;
 
 	// controls

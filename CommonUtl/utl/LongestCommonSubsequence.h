@@ -95,6 +95,7 @@ namespace lcs
 	template< typename T, typename MatchFunc >
 	class Comparator
 	{
+		typedef short LCS_T;		// int works as well
 	public:
 		Comparator( const T* pSrc, size_t srcSize, const T* pDest, size_t destSize, MatchFunc getMatchFunc = MatchFunc() ) : m_src( pSrc, srcSize ), m_dest( pDest, destSize ), m_getMatchFunc( getMatchFunc ) {}
 
@@ -102,10 +103,12 @@ namespace lcs
 		explicit Comparator( const StringType& src, const StringType& dest ) : m_src( src.c_str(), src.length() ), m_dest( dest.c_str(), dest.length() ) {}
 
 		void Process( std::vector< CResult< T > >& rOutSeq );
-		size_t GetLcsLength( void ) const { return static_cast< size_t >( LcsAt( 0, 0 ) ); }
+		size_t GetLcsLength( void ) const { return static_cast< size_t >( GetLcsAt( 0, 0 ) ); }
 	private:
-		short& LcsAt( size_t col, size_t row );
-		const short& LcsAt( size_t col, size_t row ) const { return const_cast< Comparator* >( this )->LcsAt( col, row ); }
+		size_t GetLcsIndex( size_t col, size_t row ) const;
+
+		LCS_T GetLcsAt( size_t col, size_t row ) const { return m_lcsArray[ GetLcsIndex( col, row ) ]; }
+		void SetLcsAt( size_t col, size_t row, LCS_T lcsValue ) { m_lcsArray[ GetLcsIndex( col, row ) ] = lcsValue; }
 
 		void QueryResults( std::vector< CResult< T > >& rOutSeq ) const;
 
@@ -124,7 +127,7 @@ namespace lcs
 		CBlock< T > m_src;
 		CBlock< T > m_dest;
 		MatchFunc m_getMatchFunc;
-		std::vector< short > m_lcsArray;		// LCS working array
+		std::vector< LCS_T > m_lcsArray;		// LCS working array
 	};
 
 
@@ -150,11 +153,11 @@ namespace lcs
 	// Comparator< T, MatchFunc > template code
 
 	template< typename T, typename MatchFunc >
-	inline short& Comparator< T, MatchFunc >::LcsAt( size_t col, size_t row )
+	inline size_t Comparator< T, MatchFunc >::GetLcsIndex( size_t col, size_t row ) const
 	{
 		size_t index = ( row * m_src.GetSize() ) + col;
 		ASSERT( index < m_lcsArray.size() );
-		return m_lcsArray[ index ];
+		return index;
 	}
 
 	// we calculate the LCS array and return the LCS length
@@ -173,12 +176,12 @@ namespace lcs
 		// calculate the size of the LCS working array
 		size_t lcsSize = ( 1 + m_src.GetSize() ) * ( 1 + m_dest.GetSize() );
 
-		m_lcsArray.resize( lcsSize, -1 );	// initialise to -1
+		m_lcsArray.resize( lcsSize, -1 );			// initialise to -1
 		if ( lcsSize > 1 )
 		{
 			// work through the array, right to left, bottom to top
-			for ( int col = (int)m_src.GetSize(); col >= 0; --col )
-				for ( int row = (int)m_dest.GetSize(); row >= 0; --row )
+			for ( size_t col = m_src.GetSize(); col-- != 0; )
+				for ( size_t row = m_dest.GetSize(); row-- != 0; )
 				{	// get the data at the current col, row for each data source
 					const T* pSrcData = m_src.GetAt( col );
 					const T* pDestData = m_dest.GetAt( row );
@@ -186,21 +189,17 @@ namespace lcs
 					if ( lcs::IsEmpty( pSrcData ) || lcs::IsEmpty( pDestData ) )
 					{
 						// if either data is null, set the array entry to zero
-						LcsAt( col, row ) = 0;
+						SetLcsAt( col, row, 0 );
 					}
 					else if ( lcs::IsEqualTo( pSrcData, pDestData ) )
 					{
-						// if the data for each source is equal, then add one
-						// to the value at the previous diagonal location - to
-						// the right and below - and store it in the current location
-						LcsAt( col, row ) = LcsAt( col + 1, row + 1 ) + 1;
+						// if the data for each source is equal, then add one to the value at the previous diagonal location - to the right and below - and store it in the current location
+						SetLcsAt( col, row, GetLcsAt( col + 1, row + 1 ) + 1 );
 					}
 					else
 					{
-						// if the data is not null and not equal, then copy
-						// the maximum value from the two cells to the right
-						// and below, into the current location
-						LcsAt( col, row ) = std::max( LcsAt( col + 1, row ), LcsAt( col, row + 1 ) );
+						// if the data is not null and not equal, then copy the maximum value from the two cells to the right and below, into the current location
+						SetLcsAt( col, row, std::max( GetLcsAt( col + 1, row ), GetLcsAt( col, row + 1 ) ) );
 					}
 				}
 		}
@@ -225,7 +224,7 @@ namespace lcs
 				rOutSeq.push_back( CResult< T >( ++col, str::MatchEqual == match ? lcs::Equal : lcs::EqualDiffCase, *pSrcData, *pDestData ) );
 				++row;
 			}
-			else if ( !lcs::IsEmpty( pSrcData ) && ( lcs::IsEmpty( pDestData ) || LcsAt( col + 1, row ) >= LcsAt( col, row + 1 ) ) )
+			else if ( !lcs::IsEmpty( pSrcData ) && ( lcs::IsEmpty( pDestData ) || GetLcsAt( col + 1, row ) >= GetLcsAt( col, row + 1 ) ) )
 			{
 				// if the value to the right is greater than or equal to the
 				// value below, and the data is not null, then mark the first

@@ -33,7 +33,7 @@ public:
 
 	bool SaveCommandModel( void ) const;
 	bool LoadCommandModel( void );
-	bool SafeExecuteCmd( utl::ICommand* pCmd );
+	bool SafeExecuteCmd( IFileEditor* pEditor, utl::ICommand* pCmd );
 
 	bool CanUndoRedo( cmd::StackType stackType, int typeId = 0 ) const;
 	bool UndoRedo( cmd::StackType stackType );
@@ -115,8 +115,6 @@ private:
 
 	// generated stuff
 protected:
-	afx_msg void OnChangeDestPathsTool( UINT menuId );
-
 	DECLARE_MESSAGE_MAP()
 };
 

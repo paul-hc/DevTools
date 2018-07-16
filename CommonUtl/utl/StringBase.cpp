@@ -16,10 +16,10 @@ namespace hlp
 			return std::string();
 
 		int wideLength = (int)wcslen( pWide );
-		int requiredSize = WideCharToMultiByte( codePage, 0, pWide, wideLength, NULL, 0, NULL, NULL );
+		int requiredSize = ::WideCharToMultiByte( codePage, 0, pWide, wideLength, NULL, 0, NULL, NULL );
 
 		std::string narrow( requiredSize, '\0' );
-		WideCharToMultiByte( codePage, 0, pWide, wideLength, &narrow[ 0 ], requiredSize, NULL, NULL );
+		::WideCharToMultiByte( codePage, 0, pWide, wideLength, &narrow[ 0 ], requiredSize, NULL, NULL );
 		return narrow;
 	}
 
@@ -29,10 +29,10 @@ namespace hlp
 			return std::wstring();
 
 		int narrowLength = (int)strlen( pNarrow );
-		int requiredSize = MultiByteToWideChar( codePage, 0, pNarrow, narrowLength, NULL, 0 );
+		int requiredSize = ::MultiByteToWideChar( codePage, 0, pNarrow, narrowLength, NULL, 0 );
 
 		std::wstring wide( requiredSize, L'\0' );
-		MultiByteToWideChar( codePage, 0, pNarrow, narrowLength, &wide[ 0 ], requiredSize );
+		::MultiByteToWideChar( codePage, 0, pNarrow, narrowLength, &wide[ 0 ], requiredSize );
 		return wide;
 	}
 }

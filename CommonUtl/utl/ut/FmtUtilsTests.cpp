@@ -23,7 +23,7 @@ namespace ut
 	static const CTime s_mt( 2017, 7, 1, 14, 20, 0 );
 	static const CTime s_at( 2017, 7, 1, 14, 30, 0 );
 
-	static const fs::CFileState& GetRefFileState( void )
+	static const fs::CFileState& GetStdFileState( void )
 	{
 		static fs::CFileState s_refState;
 
@@ -53,7 +53,7 @@ CFmtUtilsTests& CFmtUtilsTests::Instance( void )
 
 void CFmtUtilsTests::TestFileState( void )
 {
-	const fs::CFileState& refState = ut::GetRefFileState();
+	const fs::CFileState& refState = ut::GetStdFileState();
 
 	std::tstring text;
 	fs::CFileState newState;
@@ -80,14 +80,17 @@ void CFmtUtilsTests::TestFileState( void )
 
 void CFmtUtilsTests::TestTouchEntry( void )
 {
-	static const CTimeSpan _5_minutes( 0, 0, 5, 0 );
+	static const CTimeSpan _5_mins( 0, 0, 5, 0 );
 
-	fs::CFileState srcState = ut::GetRefFileState(), destState = ut::GetRefFileState();
+	fs::CFileState srcState = ut::GetStdFileState(), destState = ut::GetStdFileState();
 	ASSERT_EQUAL( _T("C:\\download\\file.txt :: {RH} -> {RH}"), fmt::FormatTouchEntry( srcState, destState ) );
 	ASSERT_EQUAL( _T("C:\\download\\file.txt :: {RH|||} -> {RH|||}"), fmt::FormatTouchEntry( srcState, destState, false ) );		// untagged legacy
 
-	destState.m_creationTime += _5_minutes;
-	destState.m_accessTime += _5_minutes;
+	destState.m_accessTime += _5_mins;
+	ASSERT_EQUAL( _T("C:\\download\\file.txt :: {RH|A=01-07-2017 14:30:00} -> {RH|A=01-07-2017 14:35:00}"), fmt::FormatTouchEntry( srcState, destState ) );
+	ASSERT_EQUAL( _T("C:\\download\\file.txt :: {RH|||01-07-2017 14:30:00} -> {RH|||01-07-2017 14:35:00}"), fmt::FormatTouchEntry( srcState, destState, false ) );	// C|M|A
+
+	destState.m_creationTime += _5_mins;
 	ASSERT_EQUAL( _T("C:\\download\\file.txt :: {RH|C=01-07-2017 14:10:00|A=01-07-2017 14:30:00} -> {RH|C=01-07-2017 14:15:00|A=01-07-2017 14:35:00}"), fmt::FormatTouchEntry( srcState, destState ) );
 	ASSERT_EQUAL( _T("C:\\download\\file.txt :: {RH|01-07-2017 14:10:00||01-07-2017 14:30:00} -> {RH|01-07-2017 14:15:00||01-07-2017 14:35:00}"), fmt::FormatTouchEntry( srcState, destState, false ) );
 }
