@@ -548,6 +548,9 @@ bool CImageArchiveStg::CFactory::VerifyPassword( const fs::CPath& stgFilePath )
 	if ( !password.empty() )
 		if ( m_verifiedPasswords.find( password ) == m_verifiedPasswords.end() )
 		{
+			std::tstring displayPassword = password;
+			DecryptPassword( displayPassword );
+
 			CInputPasswordDialog dlg( stgFilePath.GetNameExt(), AfxGetMainWnd() );
 
 			for ( ;; )
