@@ -143,7 +143,7 @@ STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_CAPTION | WS_SYSMENU
 CAPTION "General"
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
-    GROUPBOX        "File Lists Thumbnails",IDC_GROUP_BOX_1,7,4,188,80
+    GROUPBOX        "File Lists",IDC_GROUP_BOX_1,7,4,188,93
     LTEXT           "Small icon:",IDC_STATIC,14,18,34,8
     COMBOBOX        IDC_SMALL_ICON_SIZE_COMBO,53,16,61,136,CBS_DROPDOWNLIST | WS_VSCROLL | WS_GROUP | WS_TABSTOP
     LTEXT           "Large icon:",IDC_STATIC,14,35,36,8
@@ -151,15 +151,17 @@ BEGIN
     CONTROL         "Display &thumbnails",IDC_USE_LIST_THUMBS_CHECK,"Button",BS_AUTOCHECKBOX | WS_GROUP | WS_TABSTOP,14,54,75,10
     CONTROL         "Use &double-buffering (turn off for smooth scaling)",IDC_USE_LIST_DOUBLE_BUFFER_CHECK,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,14,68,175,10
-    GROUPBOX        "Undo/Redo Log",IDC_GROUP_BOX_2,7,91,188,46
+    CONTROL         "&Highlight text differences with a filled frame",IDC_HIGHLIGHT_TEXT_DIFFS_FRAME_CHECK,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,14,82,155,10
+    GROUPBOX        "Undo/Redo Log",IDC_GROUP_BOX_2,7,104,188,46
     CONTROL         "Save Undo/Redo actions in a log file",IDC_UNDO_LOG_PERSIST_CHECK,
-                    "Button",BS_AUTOCHECKBOX | WS_GROUP | WS_TABSTOP,14,105,131,10
-    LTEXT           "Log format:",IDC_STATIC,14,122,38,8
-    CONTROL         "Text (readable)",IDC_UNDO_LOG_TEXT_FMT_RADIO,"Button",BS_AUTORADIOBUTTON | WS_GROUP,58,121,66,10
-    CONTROL         "Binary (faster)",IDC_UNDO_LOG_BINARY_FMT_RADIO,"Button",BS_AUTORADIOBUTTON,130,121,63,10
+                    "Button",BS_AUTOCHECKBOX | WS_GROUP | WS_TABSTOP,14,118,131,10
+    LTEXT           "Log format:",IDC_STATIC,14,135,38,8
+    CONTROL         "Text (readable)",IDC_UNDO_LOG_TEXT_FMT_RADIO,"Button",BS_AUTORADIOBUTTON | WS_GROUP,58,134,66,10
+    CONTROL         "Binary (faster)",IDC_UNDO_LOG_BINARY_FMT_RADIO,"Button",BS_AUTORADIOBUTTON,130,134,63,10
     PUSHBUTTON      "&Reset Default",IDC_SET_DEFAULT_ALL,7,196,63,14
     CONTROL         "Undo/Redo local editing changes",IDC_UNDO_EDITING_CMDS_CHECK,
-                    "Button",BS_AUTOCHECKBOX | WS_GROUP | WS_TABSTOP,14,143,120,10
+                    "Button",BS_AUTOCHECKBOX | WS_GROUP | WS_TABSTOP,14,156,120,10
 END
 
 

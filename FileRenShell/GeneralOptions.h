@@ -27,10 +27,11 @@ struct CGeneralOptions : public CSubject
 
 	void ApplyToListCtrl( CReportListControl* pListCtrl ) const;
 public:
-	// file lists thumbs
+	// file lists
 	int m_smallIconDim, m_largeIconDim;
 	bool m_useListThumbs;
 	bool m_useListDoubleBuffer;
+	bool m_highlightTextDiffsFrame;
 
 	// Undo/Redo
 	bool m_undoLogPersist;

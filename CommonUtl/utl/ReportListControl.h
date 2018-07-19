@@ -10,8 +10,8 @@
 #include "OleUtils.h"
 #include "MatchSequence.h"
 #include "Resequence.h"
+#include "TextEffect.h"
 #include "vector_map.h"
-#include "ui_fwd.h"
 #include <vector>
 #include <list>
 #include <hash_map>
@@ -55,6 +55,20 @@ public:
 	typedef int TColumn;
 
 	enum StdColumn { Code, EntireRecord = (TColumn)-1 };
+
+	struct CMatchEffects
+	{
+		CMatchEffects( std::vector< ui::CTextEffect >& rMatchEffects )
+			: m_rEqual( rMatchEffects[ str::MatchEqual ] )
+			, m_rEqualDiffCase( rMatchEffects[ str::MatchEqualDiffCase ] )
+			, m_rNotEqual( rMatchEffects[ str::MatchNotEqual ] )
+		{
+		}
+	public:
+		ui::CTextEffect& m_rEqual;
+		ui::CTextEffect& m_rEqualDiffCase;
+		ui::CTextEffect& m_rNotEqual;
+	};
 protected:
 	enum DiffSide { SrcDiff, DestDiff };
 
@@ -103,11 +117,14 @@ public:
 
 	bool IsMultiSelectionList( void ) const { return !HasFlag( GetStyle(), LVS_SINGLESEL ); }
 
-	bool UseExplorerTheme( void ) const { return m_useExplorerTheme; }
+	bool GetUseExplorerTheme( void ) const { return HasFlag( m_optionFlags, UseExplorerTheme ); }
 	void SetUseExplorerTheme( bool useExplorerTheme = true );
 
-	bool UseAlternateRowColoring( void ) const { return m_useAlternateRowColoring; }
-	void SetUseAlternateRowColoring( bool useAlternateRowColoring = true ) { m_useAlternateRowColoring = useAlternateRowColoring; }
+	bool GetUseAlternateRowColoring( void ) const { return HasFlag( m_optionFlags, UseAlternateRowColoring ); }
+	void SetUseAlternateRowColoring( bool useAlternateRowColoring = true ) { SetOptionFlag( UseAlternateRowColoring, useAlternateRowColoring ); }
+
+	bool GetHighlightTextDiffsFrame( void ) const { return HasFlag( m_optionFlags, HighlightTextDiffsFrame ); }
+	void SetHighlightTextDiffsFrame( bool highlightTextDiffsFrame = true ) { SetOptionFlag( HighlightTextDiffsFrame, highlightTextDiffsFrame ); }
 
 	const std::tstring& GetSection( void ) const { return m_regSection; }
 	void SetSection( const std::tstring& regSection ) { m_regSection = regSection; }
@@ -295,11 +312,11 @@ public:
 	CheckState GetCheckState( int index ) const { return static_cast< CheckState >( GetItemState( index, LVIS_STATEIMAGEMASK ) ); }
 	void SetCheckState( int index, CheckState checkState ) { SetItemState( index, checkState, LVIS_STATEIMAGEMASK ); }
 
-	bool UseExtendedCheckStates( void ) const;
+	bool GetUseExtendedCheckStates( void ) const;
 	bool SetupExtendedCheckStates( void );
 
-	bool UseTriStateAutoCheck( void ) const { return m_useTriStateAutoCheck; }
-	void SetUseTriStateAutoCheck( bool useTriStateAutoCheck ) { m_useTriStateAutoCheck = useTriStateAutoCheck; }
+	bool GetUseTriStateAutoCheck( void ) const { return HasFlag( m_optionFlags, UseTriStateAutoCheck ); }
+	void SetUseTriStateAutoCheck( bool useTriStateAutoCheck = true ) { SetOptionFlag( UseTriStateAutoCheck, useTriStateAutoCheck ); }
 
 	static bool StateChanged( UINT newState, UINT oldState, UINT stateMask ) { return ( newState & stateMask ) != ( oldState & stateMask ); }
 	static bool HasCheckState( UINT state ) { return ( state & LVIS_STATEIMAGEMASK ) != 0; }
@@ -356,7 +373,7 @@ public:
 	interface ITextEffectCallback
 	{
 		virtual void CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARAM rowKey, int subItem ) const = 0;
-		virtual void ModifyDiffTextEffectAt( std::vector< ui::CTextEffect >& rMatchEffects, LPARAM rowKey, int subItem ) const { rMatchEffects, rowKey, subItem; }
+		virtual void ModifyDiffTextEffectAt( CListTraits::CMatchEffects& rEffects, LPARAM rowKey, int subItem ) const { rEffects, rowKey, subItem; }
 	};
 
 	void SetTextEffectCallback( ITextEffectCallback* pTextEffectCallback ) { m_pTextEffectCallback = pTextEffectCallback; }
@@ -448,13 +465,22 @@ private:
 		ImageListIndex m_transpImgIndex;					// pos of the transparent entry in the image list
 	};
 private:
+	enum ListOption
+	{
+		UseExplorerTheme			= BIT_FLAG( 0 ),
+		UseAlternateRowColoring		= BIT_FLAG( 1 ),
+		UseTriStateAutoCheck		= BIT_FLAG( 2 ),		// extended check state: allows toggling LVIS_UNCHECKED -> LVIS_CHECKED -> LVIS_CHECKEDGRAY
+		HighlightTextDiffsFrame		= BIT_FLAG( 3 )			// highlight text differences with a filled frame
+	};
+
+	bool SetOptionFlag( ListOption flag, bool on );
+private:
 	UINT m_columnLayoutId;
 	DWORD m_listStyleEx;
 	std::tstring m_regSection;
 	std::vector< CColumnInfo > m_columnInfos;
 	std::vector< UINT > m_tileColumns;						// columns to be displayed as tile additional text (in gray)
-	bool m_useExplorerTheme;
-	bool m_useAlternateRowColoring;
+	int m_optionFlags;
 	bool m_subjectBased;									// objects stored as pointers are derived from utl::ISubject (polymorphic type)
 
 	TColumn m_sortByColumn;
@@ -477,7 +503,6 @@ private:
 	std::auto_ptr< CCustomImager > m_pCustomImager;
 
 	CMenu* m_pPopupMenu[ _ListPopupCount ];					// used when right clicking nowhere - on header or no list item
-	bool m_useTriStateAutoCheck;							// extended check state: allows toggling LVIS_UNCHECKED -> LVIS_CHECKED -> LVIS_CHECKEDGRAY
 	std::auto_ptr< CLabelEdit > m_pLabelEdit;				// stores the label info during inline editing
 
 	CAccelTable m_listAccel;

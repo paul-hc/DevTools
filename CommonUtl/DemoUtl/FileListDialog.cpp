@@ -278,7 +278,7 @@ void CFileListDialog::DoDataExchange( CDataExchange* pDX )
 			CheckDlgButton( IDC_USE_ALTERNATE_ROWS_CHECK, m_useAlternateRows );
 			CheckDlgButton( IDC_USE_TEXT_EFFECTS_CHECK, m_useTextEffects );
 			CheckDlgButton( IDC_USE_DOUBLEBUFFER_CHECK, m_useDoubleBuffer );
-			CheckDlgButton( IDC_USE_EXPLORER_THEME_CHECK, m_fileListCtrl.UseExplorerTheme() );
+			CheckDlgButton( IDC_USE_EXPLORER_THEME_CHECK, m_fileListCtrl.GetUseExplorerTheme() );
 			CheckDlgButton( IDC_USE_DEFAULT_DRAW_CHECK, CReportListCustomDraw::s_useDefaultDraw );
 			CheckDlgButton( IDC_USE_DBG_GUIDES_CHECK, CReportListCustomDraw::s_dbgGuides );
 
@@ -310,7 +310,7 @@ void CFileListDialog::OnDestroy( void )
 	AfxGetApp()->WriteProfileInt( reg::section_dialog, reg::entry_useAlternateRows, m_useAlternateRows );
 	AfxGetApp()->WriteProfileInt( reg::section_dialog, reg::entry_useTextEffects, m_useTextEffects );
 	AfxGetApp()->WriteProfileInt( reg::section_dialog, reg::entry_useDoubleBuffer, m_useDoubleBuffer );
-	AfxGetApp()->WriteProfileInt( reg::section_dialog, reg::entry_useExplorerTheme, m_fileListCtrl.UseExplorerTheme() );
+	AfxGetApp()->WriteProfileInt( reg::section_dialog, reg::entry_useExplorerTheme, m_fileListCtrl.GetUseExplorerTheme() );
 
 	__super::OnDestroy();
 }

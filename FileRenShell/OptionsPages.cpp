@@ -109,6 +109,7 @@ void CGeneralOptionsPage::DoDataExchange( CDataExchange* pDX )
 
 	ui::DDX_Bool( pDX, IDC_USE_LIST_THUMBS_CHECK, m_options.m_useListThumbs );
 	ui::DDX_Bool( pDX, IDC_USE_LIST_DOUBLE_BUFFER_CHECK, m_options.m_useListDoubleBuffer );
+	ui::DDX_Bool( pDX, IDC_HIGHLIGHT_TEXT_DIFFS_FRAME_CHECK, m_options.m_highlightTextDiffsFrame );
 	ui::DDX_Bool( pDX, IDC_UNDO_LOG_PERSIST_CHECK, m_options.m_undoLogPersist );
 	ui::DDX_RadioEnum( pDX, IDC_UNDO_LOG_TEXT_FMT_RADIO, m_options.m_undoLogFormat );
 	ui::DDX_Bool( pDX, IDC_UNDO_EDITING_CMDS_CHECK, m_options.m_undoEditingCmds );
@@ -122,6 +123,7 @@ BEGIN_MESSAGE_MAP( CGeneralOptionsPage, CLayoutPropertyPage )
 	ON_CBN_SELCHANGE( IDC_LARGE_ICON_SIZE_COMBO, OnFieldModified )
 	ON_BN_CLICKED( IDC_USE_LIST_THUMBS_CHECK, OnFieldModified )
 	ON_BN_CLICKED( IDC_USE_LIST_DOUBLE_BUFFER_CHECK, OnFieldModified )
+	ON_BN_CLICKED( IDC_HIGHLIGHT_TEXT_DIFFS_FRAME_CHECK, OnFieldModified )
 	ON_BN_CLICKED( IDC_UNDO_LOG_PERSIST_CHECK, OnFieldModified )
 	ON_BN_CLICKED( IDC_UNDO_LOG_TEXT_FMT_RADIO, OnFieldModified )
 	ON_BN_CLICKED( IDC_UNDO_LOG_BINARY_FMT_RADIO, OnFieldModified )

@@ -30,6 +30,7 @@ private:
 	CRect MakeCellTextRect( void ) const;
 	void BuildTextMatchEffects( std::vector< ui::CTextEffect >& rMatchEffects, DiffSide diffSide, const str::TMatchSequence& cellSeq ) const;
 	bool SelectTextEffect( const ui::CTextEffect& textEffect );		// to m_pDC
+	void DrawTextFrame( const CRect& textRect, const ui::CFrameFillTraits& frameFillTraits );
 
 	bool IsSelItemContrast( void ) const;							// item is blue backgound with white text?
 private:

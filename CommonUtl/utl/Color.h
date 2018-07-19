@@ -100,4 +100,28 @@ namespace ui
 }
 
 
+namespace ui
+{
+	struct CColorAlpha
+	{
+		CColorAlpha( void ) : m_color( CLR_NONE ), m_alpha( 0xFF ) {}
+		CColorAlpha( COLORREF color, BYTE alpha ) : m_color( color ), m_alpha( alpha ) {}
+		CColorAlpha( BYTE red, BYTE green, BYTE blue, BYTE alpha ) : m_color( RGB( red, green, blue ) ), m_alpha( alpha ) {}
+
+		bool IsNull( void ) const { return CLR_NONE == m_color || IsDefault(); }
+		bool IsDefault( void ) const { return CLR_DEFAULT == m_color; }
+
+		static CColorAlpha MakeSysColor( int sysColorIndex, BYTE alpha = 0xFF ) { return CColorAlpha( ::GetSysColor( sysColorIndex ), alpha ); }
+		static CColorAlpha MakeTransparent( COLORREF color, UINT transpPct ) { return CColorAlpha( color, MakeAlpha( transpPct ) ); }
+		static CColorAlpha MakeOpaqueColor( COLORREF color, UINT opacityPct ) { return CColorAlpha( color, MakeAlpha( 100 - opacityPct ) ); }
+
+		static BYTE FromPercentage( UINT percentage ) { ASSERT( percentage <= 100 ); return static_cast< BYTE >( (double)percentage * 255 / 100 ); }
+		static BYTE MakeAlpha( UINT transpPct ) { return FromPercentage( 100 - transpPct ); }
+	public:
+		COLORREF m_color;
+		BYTE m_alpha;
+	};
+}
+
+
 #endif // Color_h

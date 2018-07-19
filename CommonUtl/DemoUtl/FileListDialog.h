@@ -9,6 +9,8 @@
 
 class CDisplayObject;
 class CLogger;
+
+namespace fs { typedef std::map< fs::CFileState, fs::CFileState > TFileStatePairMap; }
 typedef std::pair< const fs::CFileState, fs::CFileState > TFileStatePair;
 
 

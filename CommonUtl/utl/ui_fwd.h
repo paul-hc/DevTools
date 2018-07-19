@@ -31,47 +31,6 @@ namespace ui
 
 	enum FontEffect { Regular = 0, Bold = 1 << 0, Italic = 1 << 1, Underline = 1 << 2 };
 	typedef int TFontEffect;
-
-
-	struct CTextEffect
-	{
-		explicit CTextEffect( ui::TFontEffect fontEffect = ui::Regular, COLORREF textColor = CLR_NONE, COLORREF bkColor = CLR_NONE )
-			: m_fontEffect( fontEffect ), m_textColor( textColor ), m_bkColor( bkColor ) {}
-
-		static CTextEffect MakeColor( COLORREF textColor, COLORREF bkColor = CLR_NONE, ui::TFontEffect fontEffect = ui::Regular ) { return CTextEffect( fontEffect, textColor, bkColor ); }
-
-		bool IsNull( void ) const { return ui::Regular == m_fontEffect && CLR_NONE == m_textColor && CLR_NONE == m_bkColor; }
-
-		bool AssignPtr( const CTextEffect* pRight )
-		{
-			if ( NULL == pRight )
-				return false;
-
-			if ( pRight != this )
-				*this = *pRight;
-			return true;
-		}
-
-		CTextEffect& operator|=( const CTextEffect& right ) { Combine( right ); return *this; }
-		CTextEffect operator|( const CTextEffect& right ) const { CTextEffect effect = *this; effect.Combine( right ); return effect; }
-
-		void Combine( const CTextEffect& right );
-
-		bool CombinePtr( const CTextEffect* pRight )
-		{
-			if ( NULL == pRight )
-				return false;
-
-			Combine( *pRight );
-			return true;
-		}
-	public:
-		ui::TFontEffect m_fontEffect;
-		COLORREF m_textColor;
-		COLORREF m_bkColor;
-
-		static const ui::CTextEffect s_null;
-	};
 }
 
 

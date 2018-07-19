@@ -86,8 +86,7 @@ CReportListControl::CReportListControl( UINT columnLayoutId /*= 0*/, DWORD listS
 	: CListCtrl()
 	, m_columnLayoutId( 0 )
 	, m_listStyleEx( listStyleEx )
-	, m_useExplorerTheme( true )
-	, m_useAlternateRowColoring( false )
+	, m_optionFlags( UseExplorerTheme | HighlightTextDiffsFrame )
 	, m_subjectBased( false )
 	, m_sortByColumn( -1 )			// no sorting by default
 	, m_sortAscending( true )
@@ -96,7 +95,6 @@ CReportListControl::CReportListControl( UINT columnLayoutId /*= 0*/, DWORD listS
 	, m_pTextEffectCallback( NULL )
 	, m_pImageList( NULL )
 	, m_pLargeImageList( NULL )
-	, m_useTriStateAutoCheck( false )
 	, m_listAccel( keys, COUNT_OF( keys ) )
 	, m_pDataSourceFactory( ole::GetStdDataSourceFactory() )
 	, m_painting( false )
@@ -119,6 +117,17 @@ CReportListControl::~CReportListControl()
 
 	for ( std::vector< CColumnComparator >::const_iterator itColComparator = m_comparators.begin(); itColComparator != m_comparators.end(); ++itColComparator )
 		delete itColComparator->m_pComparator;
+}
+
+bool CReportListControl::SetOptionFlag( ListOption flag, bool on )
+{
+	if ( HasFlag( m_optionFlags, flag ) == on )
+		return false;
+
+	SetFlag( m_optionFlags, flag, on );
+	if ( m_hWnd != NULL )
+		Invalidate();
+	return true;
 }
 
 bool CReportListControl::ModifyListStyleEx( DWORD dwRemove, DWORD dwAdd, UINT swpFlags /*= 0*/ )
@@ -157,10 +166,10 @@ void CReportListControl::ClearData( void )
 
 void CReportListControl::SetUseExplorerTheme( bool useExplorerTheme /*= true*/ )
 {
-	m_useExplorerTheme = useExplorerTheme;
+	SetFlag( m_optionFlags, UseExplorerTheme, useExplorerTheme );
 
 	if ( m_hWnd != NULL )
-		CVisualTheme::SetWindowTheme( m_hWnd, m_useExplorerTheme ? L"Explorer" : L"", NULL );		// enable Explorer vs classic theme
+		CVisualTheme::SetWindowTheme( m_hWnd, GetUseExplorerTheme() ? L"Explorer" : L"", NULL );		// enable Explorer vs classic theme
 }
 
 void CReportListControl::SetCustomImageDraw( ui::ICustomImageDraw* pCustomImageDraw, const CSize& smallImageSize /*= CSize( 0, 0 )*/, const CSize& largeImageSize /*= CSize( 0, 0 )*/ )
@@ -242,7 +251,7 @@ void CReportListControl::SetupControl( void )
 	if ( m_listStyleEx != 0 )
 		SetExtendedStyle( m_listStyleEx );
 
-	if ( m_useExplorerTheme )
+	if ( GetUseExplorerTheme() )
 		CVisualTheme::SetWindowTheme( m_hWnd, L"Explorer", NULL );		// enable Explorer theme
 
 	if ( m_pImageList != NULL )
@@ -1265,7 +1274,7 @@ bool CReportListControl::IsCheckedState( UINT state )
 	return false;
 }
 
-bool CReportListControl::UseExtendedCheckStates( void ) const
+bool CReportListControl::GetUseExtendedCheckStates( void ) const
 {
 	if ( HasFlag( GetExtendedStyle(), LVS_EX_CHECKBOXES ) )
 		if ( CImageList* pStateList = GetImageList( LVSIL_STATE ) )
@@ -1277,7 +1286,7 @@ bool CReportListControl::UseExtendedCheckStates( void ) const
 
 bool CReportListControl::SetupExtendedCheckStates( void )
 {
-	ASSERT( !UseExtendedCheckStates() );		// setup once
+	ASSERT( !GetUseExtendedCheckStates() );		// setup once
 	ASSERT( HasFlag( GetExtendedStyle(), LVS_EX_CHECKBOXES ) );
 
 	CImageList* pStateList = GetImageList( LVSIL_STATE );
@@ -1869,7 +1878,7 @@ BOOL CReportListControl::OnLvnItemChanging_Reflect( NMHDR* pNmHdr, LRESULT* pRes
 	NMLISTVIEW* pListInfo = (NMLISTVIEW*)pNmHdr;
 	UNUSED_ALWAYS( pListInfo );
 
-	if ( !m_useTriStateAutoCheck )		// must prevent prevent tri-state transition?
+	if ( !GetUseTriStateAutoCheck() )		// must prevent prevent tri-state transition?
 		if ( HasFlag( pListInfo->uChanged, LVIF_STATE ) && StateChanged( pListInfo->uNewState, pListInfo->uOldState, LVIS_STATEIMAGEMASK ) )	// check state changed
 			if ( LVIS_CHECKEDGRAY == AsCheckState( pListInfo->uNewState ) )
 			{

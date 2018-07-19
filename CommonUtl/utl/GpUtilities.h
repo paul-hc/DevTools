@@ -3,6 +3,7 @@
 #pragma once
 
 #include "GdiPlus_fwd.h"
+#include "Color.h"
 
 
 // GDI+ support
@@ -19,6 +20,11 @@ namespace gp
 	inline Gdiplus::Color MakeSysColor( int sysColorIndex, BYTE alpha = 0xFF )
 	{
 		return MakeColor( GetSysColor( sysColorIndex ), alpha );
+	}
+
+	inline Gdiplus::Color MakeColor( const ui::CColorAlpha& colorAlpha )
+	{
+		return MakeColor( colorAlpha.m_color, colorAlpha.m_alpha );
 	}
 
 	inline BYTE FromPercentage( UINT percentage )

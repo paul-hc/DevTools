@@ -1187,6 +1187,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\TextEffect.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\TextEffect.h"
+				>
+			</File>
+			<File
 				RelativePath=".\ThemeItem.cpp"
 				>
 			</File>

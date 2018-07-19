@@ -55,7 +55,7 @@ ui::CTextEffect CReportListCustomDraw::MakeCellEffect( void ) const
 		m_pList->m_pTextEffectCallback->CombineTextEffectAt( textEffect, m_rowKey, m_subItem );		// combine with callback effect (additive operation)
 
 	if ( CLR_NONE == textEffect.m_bkColor )
-		if ( m_pList->m_useAlternateRowColoring && HasFlag( m_index, 0x01 ) )
+		if ( m_pList->GetUseAlternateRowColoring() && HasFlag( m_index, 0x01 ) )
 			textEffect.m_bkColor = color::GhostWhite;
 
 	return textEffect;
@@ -134,6 +134,10 @@ void CReportListCustomDraw::DrawCellTextDiffs( DiffSide diffSide, const str::TMa
 	if ( s_dbgGuides )
 		gp::FrameRect( m_pDC, textRect, color::Orange, 50 );
 
+	const TCHAR* pText = SrcDiff == diffSide ? cellSeq.m_textPair.first.c_str() : cellSeq.m_textPair.second.c_str();
+	if ( str::IsEmpty( pText ) )
+		return;
+
 	std::vector< ui::CTextEffect > matchEffects;			// indexed by str::Match constants
 	BuildTextMatchEffects( matchEffects, diffSide, cellSeq );
 
@@ -142,18 +146,31 @@ void CReportListCustomDraw::DrawCellTextDiffs( DiffSide diffSide, const str::TMa
 	COLORREF oldBkColor = m_pDC->GetBkColor();
 	int oldBkMode = m_pDC->SetBkMode( TRANSPARENT );
 
-	const TCHAR* pText = SrcDiff == diffSide ? cellSeq.m_textPair.first.c_str() : cellSeq.m_textPair.second.c_str();
 	const std::vector< str::Match >& matchSeq = SrcDiff == diffSide ? cellSeq.m_matchSeqPair.first : cellSeq.m_matchSeqPair.second;
 	CRect itemRect = textRect;
 
 	for ( size_t pos = 0; pos != matchSeq.size() && itemRect.left < itemRect.right; )
 	{
 		unsigned int matchLen = static_cast< unsigned int >( utl::GetMatchingLength( matchSeq.begin() + pos, matchSeq.end() ) );
+		const ui::CTextEffect& effect = matchEffects[ matchSeq[ pos ] ];
 
-		SelectTextEffect( matchEffects[ matchSeq[ pos ] ] );
+		SelectTextEffect( effect );
+
+		CSize textSize = m_pDC->GetTextExtent( pText, matchLen );
+
+		if ( !effect.m_frameFillTraits.IsNull() )
+		{
+			CRect textRect( itemRect.TopLeft(), textSize );
+			ui::CenterRect( textRect, itemRect, false, true );
+			textRect.InflateRect( 0, 2 );
+
+			DrawTextFrame( textRect, effect.m_frameFillTraits );
+		}
+
 		m_pDC->DrawText( pText, matchLen, &itemRect, TextStyle );
+		itemRect.left += textSize.cx;
+
 		//::GdiFlush();
-		itemRect.left += m_pDC->GetTextExtent( pText, matchLen ).cx;
 
 		pText += matchLen;
 		pos += matchLen;
@@ -165,27 +182,53 @@ void CReportListCustomDraw::DrawCellTextDiffs( DiffSide diffSide, const str::TMa
 	m_pDC->SetBkMode( oldBkMode );
 }
 
+void CReportListCustomDraw::DrawTextFrame( const CRect& textRect, const ui::CFrameFillTraits& frameFillTraits )
+{
+	Graphics graphics( m_pDC->GetSafeHdc() );
+	Rect rect = gp::ToRect( textRect );
+	rect.Inflate( 0, -1 );
+
+	Pen pen( gp::MakeColor( frameFillTraits.m_color, frameFillTraits.m_frameAlpha ) );
+	gp::FrameRectangle( graphics, rect, &pen );
+
+	SolidBrush brush( gp::MakeColor( frameFillTraits.m_color, frameFillTraits.m_fillAlpha ) );
+	gp::FillRectangle( graphics, rect, &brush );
+}
+
 void CReportListCustomDraw::BuildTextMatchEffects( std::vector< ui::CTextEffect >& rMatchEffects, DiffSide diffSide, const str::TMatchSequence& cellSeq ) const
 {
 	enum { LastMatch = str::MatchNotEqual, _MatchCount };
 
 	rMatchEffects.resize( _MatchCount );
-	rMatchEffects[ str::MatchEqual ] = MakeCellEffect();
-	rMatchEffects[ str::MatchEqual ].m_textColor = GetRealizedTextColor( diffSide, &cellSeq );		// realize text colour to reset existing (prev sub-item) text highlighting
 
-	rMatchEffects[ str::MatchNotEqual ] = rMatchEffects[ str::MatchEqual ];
-	if ( SrcDiff == diffSide && cellSeq.m_textPair.second.empty() )									// empty DEST?
+	CMatchEffects effects( rMatchEffects );
+
+	effects.m_rEqual = MakeCellEffect();
+	effects.m_rEqual.m_textColor = GetRealizedTextColor( diffSide, &cellSeq );		// realize text colour to reset existing (prev sub-item) text highlighting
+
+	effects.m_rNotEqual = effects.m_rEqual;
+	if ( SrcDiff == diffSide && cellSeq.m_textPair.second.empty() )					// empty DEST?
 	{	// avoid highlighting SRC text
 	}
 	else
-		rMatchEffects[ str::MatchNotEqual ].Combine( SrcDiff == diffSide ? m_pList->m_deleteSrc_DiffEffect : m_pList->m_mismatchDest_DiffEffect );
+		effects.m_rNotEqual.Combine( SrcDiff == diffSide ? m_pList->m_deleteSrc_DiffEffect : m_pList->m_mismatchDest_DiffEffect );
 
-	rMatchEffects[ str::MatchEqualDiffCase ] = rMatchEffects[ str::MatchNotEqual ];
-	ClearFlag( rMatchEffects[ str::MatchEqualDiffCase ].m_fontEffect, ui::Bold );
-	SetFlag( rMatchEffects[ str::MatchEqualDiffCase ].m_fontEffect, ui::Underline );
+	effects.m_rEqualDiffCase = effects.m_rNotEqual;
+	ClearFlag( effects.m_rEqualDiffCase.m_fontEffect, ui::Bold );
+
+	if ( m_pList->GetHighlightTextDiffsFrame() )
+	{
+		if ( effects.m_rEqualDiffCase.m_textColor != effects.m_rEqual.m_textColor )		// diff?
+			effects.m_rEqualDiffCase.SetFrameFromTextColor( 12, 3 );
+
+		if ( effects.m_rNotEqual.m_textColor != effects.m_rEqual.m_textColor )			// diff?
+			effects.m_rNotEqual.SetFrameFromTextColor( 15, 3 );
+	}
+	else
+		SetFlag( effects.m_rEqualDiffCase.m_fontEffect, ui::Underline );
 
 	if ( m_pList->m_pTextEffectCallback != NULL )
-		m_pList->m_pTextEffectCallback->ModifyDiffTextEffectAt( rMatchEffects, m_rowKey, m_subItem );		// resert ui::Bold, etc
+		m_pList->m_pTextEffectCallback->ModifyDiffTextEffectAt( effects, m_rowKey, m_subItem );		// resert ui::Bold, etc
 }
 
 bool CReportListCustomDraw::SelectTextEffect( const ui::CTextEffect& textEffect )
@@ -231,7 +274,7 @@ CRect CReportListCustomDraw::MakeCellTextRect( void ) const
 bool CReportListCustomDraw::IsSelItemContrast( void ) const
 {
 	// classic contrast selected item: blue backgound with white text (not "Explorer" visual theme background)?
-	return m_pList->HasItemState( m_index, LVIS_SELECTED ) && !m_pList->UseExplorerTheme() && ::GetFocus() == m_pList->m_hWnd;
+	return m_pList->HasItemState( m_index, LVIS_SELECTED ) && !m_pList->GetUseExplorerTheme() && ::GetFocus() == m_pList->m_hWnd;
 }
 
 

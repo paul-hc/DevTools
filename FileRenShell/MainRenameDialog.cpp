@@ -135,7 +135,7 @@ bool CMainRenameDialog::RenameFiles( void )
 			m_errorItems.clear();
 
 			cmd::CScopedErrorObserver observe( this );
-			return m_pFileModel->SafeExecuteCmd( this, pRenameMacroCmd.release() );
+			return SafeExecuteCmd( pRenameMacroCmd.release() );
 		}
 		else
 			return PromptCloseDialog();
@@ -629,7 +629,7 @@ void CMainRenameDialog::OnBnClicked_PasteDestFiles( void )
 	try
 	{
 		ClearFileErrors();
-		m_pFileModel->SafeExecuteCmd( this, m_pFileModel->MakeClipPasteDestPathsCmd( this ) );
+		SafeExecuteCmd( m_pFileModel->MakeClipPasteDestPathsCmd( this ) );
 	}
 	catch ( CRuntimeException& exc )
 	{
@@ -640,13 +640,13 @@ void CMainRenameDialog::OnBnClicked_PasteDestFiles( void )
 void CMainRenameDialog::OnBnClicked_ClearDestFiles( void )
 {
 	ClearFileErrors();
-	m_pFileModel->SafeExecuteCmd( this, new CResetDestinationsCmd( m_pFileModel ) );
+	SafeExecuteCmd( new CResetDestinationsCmd( m_pFileModel ) );
 }
 
 void CMainRenameDialog::OnBnClicked_CapitalizeDestFiles( void )
 {
 	CTitleCapitalizer capitalizer;
-	m_pFileModel->SafeExecuteCmd( this, m_pFileModel->MakeChangeDestPathsCmd( func::CapitalizeWords( &capitalizer ), _T("Title Case") ) );
+	SafeExecuteCmd( m_pFileModel->MakeChangeDestPathsCmd( func::CapitalizeWords( &capitalizer ), _T("Title Case") ) );
 }
 
 void CMainRenameDialog::OnSbnRightClicked_CapitalizeOptions( void )
@@ -660,7 +660,7 @@ void CMainRenameDialog::OnBnClicked_ChangeCase( void )
 	ChangeCase selCase = m_changeCaseButton.GetSelEnum< ChangeCase >();
 	std::tstring cmdTag = str::Format( _T("Change case to: %s"), GetTags_ChangeCase().FormatUi( selCase ).c_str() );
 
-	m_pFileModel->SafeExecuteCmd( this, m_pFileModel->MakeChangeDestPathsCmd( func::MakeCase( selCase ), cmdTag ) );
+	SafeExecuteCmd( m_pFileModel->MakeChangeDestPathsCmd( func::MakeCase( selCase ), cmdTag ) );
 }
 
 void CMainRenameDialog::OnBnClicked_ReplaceDestFiles( void )
@@ -679,7 +679,7 @@ void CMainRenameDialog::OnBnClicked_ReplaceAllDelimitersDestFiles( void )
 		return;
 	}
 
-	m_pFileModel->SafeExecuteCmd( this, m_pFileModel->MakeChangeDestPathsCmd( func::ReplaceDelimiterSet( delimiterSet, ui::GetWindowText( &m_newDelimiterEdit ) ), str::Load( IDC_REPLACE_USER_DELIMS_BUTTON ) ) );
+	SafeExecuteCmd( m_pFileModel->MakeChangeDestPathsCmd( func::ReplaceDelimiterSet( delimiterSet, ui::GetWindowText( &m_newDelimiterEdit ) ), str::Load( IDC_REPLACE_USER_DELIMS_BUTTON ) ) );
 }
 
 void CMainRenameDialog::OnFieldChanged( void )
@@ -791,7 +791,7 @@ void CMainRenameDialog::OnEnsureUniformNumPadding( void )
 
 	num::EnsureUniformZeroPadding( fnames );
 
-	m_pFileModel->SafeExecuteCmd( this, m_pFileModel->MakeChangeDestPathsCmd( func::AssignFname( fnames.begin() ), str::Load( ID_ENSURE_UNIFORM_ZERO_PADDING ) ) );
+	SafeExecuteCmd( m_pFileModel->MakeChangeDestPathsCmd( func::AssignFname( fnames.begin() ), str::Load( ID_ENSURE_UNIFORM_ZERO_PADDING ) ) );
 }
 
 void CMainRenameDialog::OnChangeDestPathsTool( UINT menuId )
@@ -829,5 +829,5 @@ void CMainRenameDialog::OnChangeDestPathsTool( UINT menuId )
 			ASSERT( false );
 	}
 
-	m_pFileModel->SafeExecuteCmd( this, pCmd );
+	SafeExecuteCmd( pCmd );
 }
