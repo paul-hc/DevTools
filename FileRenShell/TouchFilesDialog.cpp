@@ -96,8 +96,8 @@ CTouchFilesDialog::~CTouchFilesDialog()
 void CTouchFilesDialog::Construct( void )
 {
 	m_dateTimeStates.reserve( fs::CFileState::_TimeFieldCount );
-	m_dateTimeStates.push_back( multi::CDateTimeState( IDC_MODIFIED_DATE, fs::CFileState::ModifiedDate ) );
 	m_dateTimeStates.push_back( multi::CDateTimeState( IDC_CREATED_DATE, fs::CFileState::CreatedDate ) );
+	m_dateTimeStates.push_back( multi::CDateTimeState( IDC_MODIFIED_DATE, fs::CFileState::ModifiedDate ) );
 	m_dateTimeStates.push_back( multi::CDateTimeState( IDC_ACCESSED_DATE, fs::CFileState::AccessedDate ) );
 
 	m_attribCheckStates.push_back( multi::CAttribCheckState( IDC_ATTRIB_READONLY_CHECK, CFile::readOnly ) );
@@ -118,7 +118,7 @@ bool CTouchFilesDialog::TouchFiles( void )
 			ClearFileErrors();
 
 			cmd::CScopedErrorObserver observe( this );
-			return m_pFileModel->SafeExecuteCmd( this, pTouchMacroCmd.release() );
+			return SafeExecuteCmd( pTouchMacroCmd.release() );
 		}
 		else
 			return PromptCloseDialog();
@@ -241,8 +241,8 @@ void CTouchFilesDialog::AccumulateItemStates( const CTouchItem* pTouchItem )
 {
 	ASSERT_PTR( pTouchItem );
 
-	m_dateTimeStates[ fs::CFileState::ModifiedDate ].Accumulate( pTouchItem->GetDestState().m_modifTime );
 	m_dateTimeStates[ fs::CFileState::CreatedDate ].Accumulate( pTouchItem->GetDestState().m_creationTime );
+	m_dateTimeStates[ fs::CFileState::ModifiedDate ].Accumulate( pTouchItem->GetDestState().m_modifTime );
 	m_dateTimeStates[ fs::CFileState::AccessedDate ].Accumulate( pTouchItem->GetDestState().m_accessTime );
 
 	for ( std::vector< multi::CAttribCheckState >::iterator itAttribState = m_attribCheckStates.begin(); itAttribState != m_attribCheckStates.end(); ++itAttribState )
@@ -288,10 +288,10 @@ void CTouchFilesDialog::InputFields( void )
 
 void CTouchFilesDialog::ApplyFields( void )
 {
-	if ( utl::ICommand* pCmd = CTouchFilesDialog::MakeChangeDestFileStatesCmd() )
+	if ( utl::ICommand* pCmd = MakeChangeDestFileStatesCmd() )
 	{
 		ClearFileErrors();
-		m_pFileModel->SafeExecuteCmd( this, pCmd );
+		SafeExecuteCmd( pCmd );
 	}
 }
 
@@ -444,7 +444,7 @@ void CTouchFilesDialog::CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARA
 	}
 }
 
-void CTouchFilesDialog::ModifyDiffTextEffectAt( std::vector< ui::CTextEffect >& rMatchEffects, LPARAM rowKey, int subItem ) const
+void CTouchFilesDialog::ModifyDiffTextEffectAt( CListTraits::CMatchEffects& rEffects, LPARAM rowKey, int subItem ) const
 {
 	rowKey;
 	switch ( subItem )
@@ -455,8 +455,8 @@ void CTouchFilesDialog::ModifyDiffTextEffectAt( std::vector< ui::CTextEffect >& 
 		case DestCreationTime:
 		case SrcAccessTime:
 		case DestAccessTime:
-			ClearFlag( rMatchEffects[ str::MatchNotEqual ].m_fontEffect, ui::Bold );		// line-up date columns nicely
-			SetFlag( rMatchEffects[ str::MatchNotEqual ].m_fontEffect, ui::Underline );
+			ClearFlag( rEffects.m_rNotEqual.m_fontEffect, ui::Bold );		// line-up date columns nicely
+			//rEffects.m_rNotEqual.m_frameFillTraits.Init( color::Green, 20, 10 );
 			break;
 	}
 }
@@ -611,7 +611,7 @@ void CTouchFilesDialog::OnBnClicked_PasteDestStates( void )
 	try
 	{
 		ClearFileErrors();
-		m_pFileModel->SafeExecuteCmd( this, m_pFileModel->MakeClipPasteDestFileStatesCmd( this ) );
+		SafeExecuteCmd( m_pFileModel->MakeClipPasteDestFileStatesCmd( this ) );
 	}
 	catch ( CRuntimeException& e )
 	{
@@ -622,7 +622,7 @@ void CTouchFilesDialog::OnBnClicked_PasteDestStates( void )
 void CTouchFilesDialog::OnBnClicked_ResetDestFiles( void )
 {
 	ClearFileErrors();
-	m_pFileModel->SafeExecuteCmd( this, new CResetDestinationsCmd( m_pFileModel ) );
+	SafeExecuteCmd( new CResetDestinationsCmd( m_pFileModel ) );
 }
 
 void CTouchFilesDialog::OnBnClicked_ShowSrcColumns( void )

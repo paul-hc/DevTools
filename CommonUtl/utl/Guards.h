@@ -7,6 +7,20 @@
 
 namespace utl
 {
+	// always displays elapsed time for a section scope
+	//
+	class CSectionGuard : public utl::noncopyable
+	{
+	public:
+		CSectionGuard( const std::tstring& sectionName );
+		~CSectionGuard();
+	private:
+		CTimer m_timer;
+	};
+
+
+	// displays elapsed time for a section scope if timeout is exceeded
+	//
 	class CSlowSectionGuard : public utl::noncopyable
 	{
 	public:

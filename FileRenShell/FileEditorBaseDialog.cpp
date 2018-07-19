@@ -75,6 +75,11 @@ void CFileEditorBaseDialog::QueryTooltipText( std::tstring& rText, UINT cmdId, C
 	}
 }
 
+bool CFileEditorBaseDialog::SafeExecuteCmd( utl::ICommand* pCmd )
+{
+	return m_pFileModel->SafeExecuteCmd( this, pCmd );
+}
+
 int CFileEditorBaseDialog::PopStackRunCrossEditor( cmd::StackType stackType )
 {
 	// end this dialog and spawn the foreign dialog editor

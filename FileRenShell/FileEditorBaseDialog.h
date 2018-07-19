@@ -27,6 +27,9 @@ protected:
 	// ui::ICmdCallback interface
 	virtual void QueryTooltipText( std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const;
 
+	bool SafeExecuteCmd( utl::ICommand* pCmd );
+	int PopStackRunCrossEditor( cmd::StackType stackType );
+protected:
 	enum Mode					// determines the OK button label
 	{
 		EditMode,				// edit destinations
@@ -35,8 +38,6 @@ protected:
 		RollForwardMode			// ready to redo the peeked files command
 	};
 
-	int PopStackRunCrossEditor( cmd::StackType stackType );
-protected:
 	bool IsNativeCmd( const utl::ICommand* pCmd ) const;
 	bool IsForeignCmd( const utl::ICommand* pCmd ) const;		// must be handled by a different editor?
 	utl::ICommand* PeekCmdForDialog( cmd::StackType stackType ) const;

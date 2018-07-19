@@ -12,6 +12,27 @@
 
 namespace utl
 {
+	// CSectionGuard implementation
+
+	CSectionGuard::CSectionGuard( const std::tstring& sectionName )
+	{
+		std::tstring sectionMsg = str::Format( _T("* %s.."), sectionName.c_str() );
+		TRACE( _T(" %s"), sectionMsg.c_str() );
+
+		if ( CLogger* pLogger = app::GetLoggerPtr() )
+			pLogger->Log( sectionMsg.c_str() );
+	}
+
+	CSectionGuard::~CSectionGuard()
+	{
+		std::tstring elapsedMsg = str::Format( _T(". takes %s seconds"), num::FormatNumber( m_timer.ElapsedSeconds() ).c_str() );
+		TRACE( _T(" %s\n"), elapsedMsg.c_str() );
+
+		if ( CLogger* pLogger = app::GetLoggerPtr() )
+			pLogger->Log( elapsedMsg.c_str() );
+	}
+
+
 	// CSlowSectionGuard implementation
 
 	bool CSlowSectionGuard::Commit( void )

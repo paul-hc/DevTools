@@ -45,6 +45,8 @@ CApplication::~CApplication()
 
 BOOL CApplication::InitInstance( void )
 {
+	// Called once when the user right-clicks on selected files in Explorer for the first time.
+
 	app::InitModule( m_hInstance );
 	AfxSetResourceHandle( m_hInstance );
 

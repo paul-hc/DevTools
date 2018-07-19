@@ -7,6 +7,7 @@
 #include "TouchFilesDialog.h"
 #include "Application.h"
 #include "utl/FmtUtils.h"
+#include "utl/Guards.h"
 #include "utl/ImageStore.h"
 #include "utl/Utilities.h"
 #include "utl/resource.h"
@@ -216,7 +217,11 @@ STDMETHODIMP CFileRenameShell::Initialize( LPCITEMIDLIST pidlFolder, IDataObject
 
 	//TRACE( _T("CFileRenameShell::Initialize()\n") );
 	if ( pDropInfo != NULL )
+	{
+		//utl::CSectionGuard section( _T("CFileRenameShell::Initialize()") );
+
 		ExtractDropInfo( pDropInfo );
+	}
 	return S_OK;
 }
 
@@ -235,10 +240,10 @@ STDMETHODIMP CFileRenameShell::QueryContextMenu( HMENU hMenu, UINT indexMenu, UI
 	if ( !HasFlag( flags, CMF_DEFAULTONLY ) &&			// kind of CMF_NORMAL
 		 !HasFlag( flags, CMF_VERBSONLY ) )				// for "lnkfile": prevent menu item duplication due to querying twice (* and lnkfile)
 	{
-		//TRACE( _T("CFileRenameShell::QueryContextMenu(): selFileCount=%d\n"), m_fileData.GetSourceFiles().size() );
-
 		if ( m_pFileModel.get() != NULL )
 		{
+			//utl::CSectionGuard section( _T("CFileRenameShell::QueryContextMenu()") );
+
 			AugmentMenuItems( hMenu, indexMenu, idCmdFirst );
 			return MAKE_HRESULT( SEVERITY_SUCCESS, FACILITY_NULL, _CmdCount );
 		}
@@ -259,7 +264,7 @@ STDMETHODIMP CFileRenameShell::InvokeCommand( CMINVOKECOMMANDINFO* pCmi )
 	if ( m_pFileModel.get() != NULL )
 		if ( 0 == HIWORD( pCmi->lpVerb ) )
 		{
-			//TRACE( _T("CFileRenameShell::InvokeCommand(): selFileCount=%d\n"), m_pFileModel->GetSourcePaths().size() );
+			//utl::CSectionGuard section( str::Format( _T("CFileRenameShell::InvokeCommand(): %d files"), m_pFileModel->GetSourcePaths().size() ) );
 
 			MenuCommand menuCmd = static_cast< MenuCommand >( LOWORD( pCmi->lpVerb ) );
 			CScopedMainWnd scopedMainWnd( pCmi->hwnd );
@@ -286,6 +291,8 @@ STDMETHODIMP CFileRenameShell::GetCommandString( UINT_PTR idCmd, UINT flags, UIN
 		if ( flags == GCS_HELPTEXTA || flags == GCS_HELPTEXTW )
 			if ( const CMenuCmdInfo* pCmdInfo = FindCmd( static_cast< MenuCommand >( idCmd ) ) )
 			{
+				//utl::CSectionGuard section( str::Format( _T("CFileRenameShell::GetCommandString(): id=%d, flags=0x%08X"), idCmd, flags ) );
+
 				_bstr_t statusInfo( pCmdInfo->m_pStatusBarInfo );
 				switch ( flags )
 				{

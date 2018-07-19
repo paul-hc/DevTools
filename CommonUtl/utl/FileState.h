@@ -38,6 +38,12 @@ namespace fs
 		void SetTimeField( const CTime& time, TimeField field ) { const_cast< CTime& >( GetTimeField( field ) ) = time; }
 
 		static const CFlagTags& GetTags_FileAttributes( void );
+	private:
+		void ModifyFileStatus( const ::CFileStatus& newStatus ) const throws_( CFileException );
+		void ModifyFileTimes( const ::CFileStatus& newStatus, bool isDirectory ) const throws_( CFileException );
+
+		FILETIME* MakeFileTime( FILETIME& rOutFileTime, const CTime& time ) const throws_( CFileException );
+		void ThrowLastError( DWORD osLastError = ::GetLastError() ) const throws_( CFileException ) { CFileException::ThrowOsError( osLastError, m_fullPath.GetPtr() ); }
 	public:
 		CPath m_fullPath;
 		BYTE m_attributes;			// CFile::Attribute enum values (low-byte)
