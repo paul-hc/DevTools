@@ -540,7 +540,8 @@ void CMainRenameDialog::OnOK( void )
 		{
 			cmd::CScopedErrorObserver observe( this );
 
-			if ( m_pFileModel->UndoRedo( RollBackMode == m_mode ? cmd::Undo : cmd::Redo ) )
+			if ( m_pFileModel->UndoRedo( RollBackMode == m_mode ? cmd::Undo : cmd::Redo ) ||
+				 PromptCloseDialog( PromptClose ) )
 				__super::OnOK();
 			else
 				SwitchMode( EditMode );

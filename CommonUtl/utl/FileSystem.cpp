@@ -135,9 +135,28 @@ namespace fs
 
 	bool DeleteDir( const TCHAR* pDirPath )
 	{
+		DWORD dirAttr = ::GetFileAttributes( pDirPath );
+		if ( INVALID_FILE_ATTRIBUTES == dirAttr )
+			return false;
+
+		if ( HasFlag( dirAttr, FILE_ATTRIBUTE_READONLY ) )								// read-only file?
+			::SetFileAttributes( pDirPath, dirAttr & ~FILE_ATTRIBUTE_READONLY );		// make it writeable so that it can be deleted
+
 		return
 			DeleteAllFiles( pDirPath ) &&
 			::RemoveDirectory( pDirPath ) != FALSE;
+	}
+
+	bool DeleteFile( const TCHAR* pFilePath )
+	{
+		DWORD fileAttr = ::GetFileAttributes( pFilePath );
+		if ( INVALID_FILE_ATTRIBUTES == fileAttr )
+			return false;
+
+		if ( HasFlag( fileAttr, FILE_ATTRIBUTE_READONLY ) )								// read-only file?
+			::SetFileAttributes( pFilePath, fileAttr & ~FILE_ATTRIBUTE_READONLY );		// make it writeable so that it can be deleted
+
+		return ::DeleteFile( pFilePath ) != FALSE;
 	}
 
 	bool DeleteAllFiles( const TCHAR* pDirPath )
@@ -155,7 +174,7 @@ namespace fs
 				++itSubDirPath;
 
 		for ( std::vector< std::tstring >::iterator itFilePath = found.m_filePaths.begin(); itFilePath != found.m_filePaths.end(); )
-			if ( ::DeleteFile( itFilePath->c_str() ) )
+			if ( fs::DeleteFile( itFilePath->c_str() ) )
 				itFilePath = found.m_filePaths.erase( itFilePath );
 			else
 				++itFilePath;

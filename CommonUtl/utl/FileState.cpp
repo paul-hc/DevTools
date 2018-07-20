@@ -11,6 +11,34 @@
 #endif
 
 
+class CScopedWriteableFile
+{
+public:
+	CScopedWriteableFile( const TCHAR* pFilePath )
+		: m_pFilePath( pFilePath )
+		, m_origAttr( ::GetFileAttributes( m_pFilePath ) )
+	{
+		if ( m_origAttr != INVALID_FILE_ATTRIBUTES )
+			if ( HasFlag( m_origAttr, FILE_ATTRIBUTE_READONLY ) )										// currently readonly?
+				if ( !::SetFileAttributes( m_pFilePath, m_origAttr & ~FILE_ATTRIBUTE_READONLY ) )		// temporarily allow changing file times for a read-only file/directory
+					m_origAttr = INVALID_FILE_ATTRIBUTES;												// failed removing FILE_ATTRIBUTE_READONLY
+	}
+
+	~CScopedWriteableFile()
+	{
+		if ( m_origAttr != INVALID_FILE_ATTRIBUTES )
+			if ( HasFlag( m_origAttr, FILE_ATTRIBUTE_READONLY ) )			// was readonly?
+				::SetFileAttributes( m_pFilePath, m_origAttr );				// restore original FILE_ATTRIBUTE_READONLY
+	}
+private:
+	const TCHAR* m_pFilePath;
+	DWORD m_origAttr;
+};
+
+
+#define EDITABLE_ATTRIBUTE_MASK ( FILE_ATTRIBUTE_READONLY | FILE_ATTRIBUTE_HIDDEN | FILE_ATTRIBUTE_SYSTEM | FILE_ATTRIBUTE_ARCHIVE | FILE_ATTRIBUTE_NORMAL )
+
+
 namespace fs
 {
 	CFileState::CFileState( const ::CFileStatus* pFileStatus )
@@ -48,7 +76,7 @@ namespace fs
 		newStatus.m_mtime = m_modifTime;
 		newStatus.m_atime = m_accessTime;
 
-		ModifyFileStatus( newStatus );
+		ModifyFileStatus( newStatus );		// was CFile::SetStatus( m_fullPath.GetPtr(), newStatus );
 	}
 
 	bool CFileState::operator==( const CFileState& right ) const
@@ -78,32 +106,6 @@ namespace fs
 		}
 	}
 
-	const CFlagTags& CFileState::GetTags_FileAttributes( void )
-	{
-		static const CFlagTags::FlagDef flagDefs[] =
-		{
-			{ FILE_ATTRIBUTE_READONLY, _T("R") },		// CFile::readOnly
-			{ FILE_ATTRIBUTE_HIDDEN, _T("H") },			// CFile::hidden
-			{ FILE_ATTRIBUTE_SYSTEM, _T("S") },			// CFile::system
-			{ CFile::volume, _T("V") },
-			{ FILE_ATTRIBUTE_DIRECTORY, _T("D") },		// CFile::directory
-			{ FILE_ATTRIBUTE_ARCHIVE, _T("A") },		// CFile::archive
-			{ FILE_ATTRIBUTE_DEVICE, _T("d") },
-			{ FILE_ATTRIBUTE_NORMAL, _T("N") },
-			{ FILE_ATTRIBUTE_TEMPORARY, _T("t") },
-			{ FILE_ATTRIBUTE_SPARSE_FILE, _T("s") },
-			{ FILE_ATTRIBUTE_REPARSE_POINT, _T("r") },
-			{ FILE_ATTRIBUTE_COMPRESSED, _T("c") },
-			{ FILE_ATTRIBUTE_OFFLINE, _T("o") },
-			{ FILE_ATTRIBUTE_NOT_CONTENT_INDEXED, _T("n") },
-			{ FILE_ATTRIBUTE_ENCRYPTED, _T("e") },
-		};
-		static const std::tstring uiTags = _T("READ-ONLY|HIDDEN|SYSTEM|VOLUME|DIRECTORY|ARCHIVE|Device|NORMAL|Temporary|Sparse File|Reparse Point|Compressed|Offline|Not Content Indexed|Encrypted");
-		static const CFlagTags tags( flagDefs, COUNT_OF( flagDefs ), uiTags );
-		return tags;
-	}
-
-
 	void CFileState::ModifyFileStatus( const ::CFileStatus& newStatus ) const throws_( CFileException )
 	{
 		// Verbatim from CFile::SetStatus( LPCTSTR lpszFileName, const CFileStatus& status ).
@@ -111,19 +113,15 @@ namespace fs
 		//	works for directory using FILE_FLAG_BACKUP_SEMANTICS - new
 
 		DWORD currentAttr = ::GetFileAttributes( m_fullPath.GetPtr() );
-
 		if ( INVALID_FILE_ATTRIBUTES == currentAttr )
 			ThrowLastError();
 
-		DWORD newAttr = static_cast< DWORD >( newStatus.m_attribute );
-
-		if ( newAttr != currentAttr && HasFlag( currentAttr, CFile::readOnly ) )		// currently readonly?
-			if ( !::SetFileAttributes( m_fullPath.GetPtr(), newAttr ) )					// this way we will be able to modify the times assuming the caller changed the file for a read-only file
-				ThrowLastError();
-
 		ModifyFileTimes( newStatus, HasFlag( currentAttr, FILE_ATTRIBUTE_DIRECTORY ) );
 
-		if ( newAttr != currentAttr && !HasFlag( currentAttr, CFile::readOnly ) )
+		DWORD newAttr = currentAttr;
+		CopyFlags( newAttr, EDITABLE_ATTRIBUTE_MASK, static_cast< DWORD >( newStatus.m_attribute ) );
+
+		if ( newAttr != currentAttr )
 			if ( !::SetFileAttributes( m_fullPath.GetPtr(), newAttr ) )
 				ThrowLastError();
 	}
@@ -137,6 +135,8 @@ namespace fs
 		{
 			times[ AccessedDate ].second = MakeFileTime( times[ AccessedDate ].first, newStatus.m_atime );		// last access time
 			times[ CreatedDate ].second = MakeFileTime( times[ CreatedDate ].first, newStatus.m_ctime );		// create time
+
+			CScopedWriteableFile scopedWriteable( m_fullPath.GetPtr() );
 
 			HANDLE hFile = ::CreateFile( m_fullPath.GetPtr(), GENERIC_READ | GENERIC_WRITE,
 				FILE_SHARE_READ, NULL, OPEN_EXISTING,
@@ -183,4 +183,42 @@ namespace fs
 
 		return &rOutFileTime;
 	}
+
+	const CFlagTags& CFileState::GetTags_FileAttributes( void )
+	{
+		static const CFlagTags::FlagDef flagDefs[] =
+		{
+			{ FILE_ATTRIBUTE_READONLY, _T("R") },		// CFile::readOnly
+			{ FILE_ATTRIBUTE_HIDDEN, _T("H") },			// CFile::hidden
+			{ FILE_ATTRIBUTE_SYSTEM, _T("S") },			// CFile::system
+			{ CFile::volume, _T("V") },
+			{ FILE_ATTRIBUTE_DIRECTORY, _T("D") },		// CFile::directory
+			{ FILE_ATTRIBUTE_ARCHIVE, _T("A") },		// CFile::archive
+			{ FILE_ATTRIBUTE_DEVICE, _T("d") },
+			{ FILE_ATTRIBUTE_NORMAL, _T("N") },
+			{ FILE_ATTRIBUTE_TEMPORARY, _T("t") },
+			{ FILE_ATTRIBUTE_SPARSE_FILE, _T("s") },
+			{ FILE_ATTRIBUTE_REPARSE_POINT, _T("r") },
+			{ FILE_ATTRIBUTE_COMPRESSED, _T("c") },
+			{ FILE_ATTRIBUTE_OFFLINE, _T("o") },
+			{ FILE_ATTRIBUTE_NOT_CONTENT_INDEXED, _T("n") },
+			{ FILE_ATTRIBUTE_ENCRYPTED, _T("e") },
+		};
+		static const std::tstring uiTags = _T("READ-ONLY|HIDDEN|SYSTEM|VOLUME|DIRECTORY|ARCHIVE|Device|NORMAL|Temporary|Sparse File|Reparse Point|Compressed|Offline|Not Content Indexed|Encrypted");
+		static const CFlagTags tags( flagDefs, COUNT_OF( flagDefs ), uiTags );
+		return tags;
+	}
+}
+
+
+#include "FmtUtils.h"
+
+std::ostream& operator<<( std::ostream& os, const fs::CFileState& fileState )
+{
+	return os << fmt::FormatClipFileState( fileState );
+}
+
+std::wostream& operator<<( std::wostream& os, const fs::CFileState& fileState )
+{
+	return os << fmt::FormatClipFileState( fileState );
 }

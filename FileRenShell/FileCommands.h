@@ -27,17 +27,6 @@ namespace cmd
 	enum UserFeedback { Abort, Retry, Ignore };
 
 
-	class CUserFeedbackException : public CRuntimeException
-	{
-	public:
-		CUserFeedbackException( UserFeedback feedback );
-	private:
-		static const CEnumTags& GetTags_Feedback( void );
-	public:
-		const UserFeedback m_feedback;
-	};
-
-
 	abstract class CBaseFileCmd : public CBaseSerialCmd
 	{
 	protected:

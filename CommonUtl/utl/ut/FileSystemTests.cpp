@@ -3,6 +3,8 @@
 #include "ut/FileSystemTests.h"
 #include "Path.h"
 #include "FlexPath.h"
+#include "FileState.h"
+#include "TimeUtils.h"
 #include "Resequence.hxx"
 #include "StringUtilities.h"
 #include "StructuredStorage.h"
@@ -15,12 +17,11 @@
 #ifdef _DEBUG		// no UT code in release builds
 
 
-namespace str
+namespace ut
 {
-	inline std::tostream& operator<<( std::tostream& oss, const fs::CPath& path )
-	{
-		return oss << path.Get();
-	}
+	static const CTime s_ct( 2017, 7, 1, 14, 10, 0 );
+	static const CTime s_mt( 2017, 7, 1, 14, 20, 0 );
+	static const CTime s_at( 2017, 7, 1, 14, 30, 0 );
 }
 
 
@@ -122,6 +123,84 @@ void CFileSystemTests::TestTempFilePool( void )
 	}
 }
 
+void CFileSystemTests::TestFileAndDirectoryState( void )
+{
+	ut::CTempFilePool pool( _T("fa.txt|d1\\fb.txt") );
+
+	{
+		const fs::CPath& filePath = pool.GetFilePaths()[ 0 ];
+		fs::CFileState fileState = fs::CFileState::ReadFromFile( filePath );
+		ASSERT_EQUAL( CFile::archive, fileState.m_attributes );
+
+		fs::CFileState newFileState;
+
+		SetFlag( fileState.m_attributes, CFile::readOnly );
+		fileState.WriteToFile();
+		newFileState = fs::CFileState::ReadFromFile( filePath );
+
+		ASSERT_EQUAL( CFile::readOnly | CFile::archive, newFileState.m_attributes );
+		ASSERT_EQUAL( fileState, newFileState );
+
+		fileState.m_creationTime = ut::s_ct;
+		fileState.WriteToFile();
+		newFileState = fs::CFileState::ReadFromFile( filePath );
+
+		ASSERT_EQUAL( ut::s_ct, newFileState.m_creationTime );
+		ASSERT_EQUAL( fileState, newFileState );
+
+		fileState.m_modifTime = ut::s_mt;
+		fileState.WriteToFile();
+		newFileState = fs::CFileState::ReadFromFile( filePath );
+
+		ASSERT_EQUAL( ut::s_mt, newFileState.m_modifTime );
+		ASSERT_EQUAL( fileState, newFileState );
+
+		fileState.m_accessTime = ut::s_at;
+		fileState.WriteToFile();
+		newFileState = fs::CFileState::ReadFromFile( filePath );
+
+		ASSERT_EQUAL( ut::s_at, newFileState.m_accessTime );
+		ASSERT_EQUAL( fileState, newFileState );
+	}
+
+	{
+		fs::CPath dirPath = pool.GetFilePaths()[ 1 ].GetParentPath();
+		fs::CFileState dirState = fs::CFileState::ReadFromFile( dirPath );
+		ASSERT_EQUAL( CFile::directory, dirState.m_attributes );
+
+		fs::CFileState newDirState;
+
+		SetFlag( dirState.m_attributes, CFile::readOnly );
+		dirState.WriteToFile();
+		newDirState = fs::CFileState::ReadFromFile( dirPath );
+
+		ASSERT_EQUAL( CFile::readOnly | CFile::directory, newDirState.m_attributes );
+		ASSERT_EQUAL( dirState, newDirState );
+
+		dirState.m_creationTime = ut::s_ct;
+		dirState.WriteToFile();
+		newDirState = fs::CFileState::ReadFromFile( dirPath );
+
+		ASSERT_EQUAL( ut::s_ct, newDirState.m_creationTime );
+		ASSERT_EQUAL( dirState, newDirState );
+
+		dirState.m_modifTime = ut::s_mt;
+		dirState.WriteToFile();
+		newDirState = fs::CFileState::ReadFromFile( dirPath );
+
+		ASSERT_EQUAL( ut::s_mt, newDirState.m_modifTime );
+		ASSERT_EQUAL( dirState, newDirState );
+
+		dirState.m_accessTime = ut::s_at;
+		dirState.WriteToFile();
+		newDirState = fs::CFileState::ReadFromFile( dirPath );
+
+		ASSERT_EQUAL( ut::s_at, newDirState.m_accessTime );
+		ASSERT_EQUAL( dirState, newDirState );
+	}
+}
+
+
 void CFileSystemTests::Run( void )
 {
 	__super::Run();
@@ -130,6 +209,7 @@ void CFileSystemTests::Run( void )
 	TestFileEnum();
 	TestStgShortFilenames();
 	TestTempFilePool();
+	TestFileAndDirectoryState();
 }
 
 

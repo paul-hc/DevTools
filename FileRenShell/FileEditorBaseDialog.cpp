@@ -142,9 +142,15 @@ int CFileEditorBaseDialog::EnsureVisibleFirstError( CReportListControl* pFileLis
 	return firstErrorIndex;
 }
 
-bool CFileEditorBaseDialog::PromptCloseDialog( void )
+bool CFileEditorBaseDialog::PromptCloseDialog( Prompt prompt /*= PromptNoFileChanges*/ )
 {
-	return IDOK == AfxMessageBox( _T("There are no file changes to apply.\n\nClose the dialog?"), MB_OKCANCEL );
+	static const std::tstring s_noChangesPrefix = _T("There are no file changes to apply.\n\n");
+	std::tstring message = _T("Close the dialog?");
+
+	if ( PromptNoFileChanges == prompt )
+		message = s_noChangesPrefix + message;
+
+	return IDOK == AfxMessageBox( message.c_str(), MB_OKCANCEL );
 }
 
 void CFileEditorBaseDialog::DoDataExchange( CDataExchange* pDX )

@@ -15,15 +15,6 @@
 #ifdef _DEBUG		// no UT code in release builds
 
 
-namespace str
-{
-	inline std::tostream& operator<<( std::tostream& oss, const fs::CPath& path )
-	{
-		return oss << path.Get();
-	}
-}
-
-
 namespace func
 {
 	struct KeyToValue

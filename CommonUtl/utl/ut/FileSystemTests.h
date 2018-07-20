@@ -21,6 +21,7 @@ private:
 	void TestFileEnum( void );
 	void TestStgShortFilenames( void );
 	void TestTempFilePool( void );
+	void TestFileAndDirectoryState( void );
 };
 
 

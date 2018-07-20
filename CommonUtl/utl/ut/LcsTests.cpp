@@ -60,20 +60,20 @@ namespace ut
 	template<>
 	std::tstring ToString< MatchTriplet >( const MatchTriplet& triplet )
 	{
-		std::tostringstream os;
+		std::tostringstream oss;
 		switch ( triplet.m_match )
 		{
-			case str::MatchEqual: os << "EQ"; break;
-			case str::MatchEqualDiffCase: os << "~EQ"; break;
-			case str::MatchNotEqual: os << "DIFF"; break;
+			case str::MatchEqual:			oss << "EQ"; break;
+			case str::MatchEqualDiffCase:	oss << "~EQ"; break;
+			case str::MatchNotEqual:		oss << "DIFF"; break;
 		}
 
-		os
+		oss
 			<< ':'
 			<< " S={" << triplet.m_src << '}'
 			<< " D={" << triplet.m_dest << '}';
 
-		return os.str();
+		return oss.str();
 	}
 
 	str::Match ToStringMatch( lcs::MatchType matchType )

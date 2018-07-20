@@ -121,7 +121,6 @@ namespace ut
 			fs::EnsureDirPath( fullPath.GetPtr() );
 		return fullPath;
 	}
-
 }
 
 

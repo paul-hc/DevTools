@@ -63,13 +63,17 @@ namespace cmd
 	}
 
 
-	// CUserFeedbackException implementation
+	// CUserFeedbackException class
 
-	CUserFeedbackException::CUserFeedbackException( UserFeedback feedback )
-		: CRuntimeException( GetTags_Feedback().FormatUi( feedback ) )
-		, m_feedback( feedback )
+	class CUserFeedbackException : public CRuntimeException
 	{
-	}
+	public:
+		CUserFeedbackException( UserFeedback feedback ) : CRuntimeException( GetTags_Feedback().FormatUi( feedback ) ), m_feedback( feedback ) {}
+	private:
+		static const CEnumTags& GetTags_Feedback( void );
+	public:
+		const UserFeedback m_feedback;
+	};
 
 	const CEnumTags& CUserFeedbackException::GetTags_Feedback( void )
 	{
@@ -328,8 +332,18 @@ void CTouchFileCmd::Serialize( CArchive& archive )
 {
 	cmd::CBaseFileCmd::Serialize( archive );
 
-	archive & m_srcState;
-	archive & m_destState;
+	if ( archive.IsStoring() )
+	{
+		archive << m_srcState;
+		archive << m_destState;
+	}
+	else
+	{
+		archive >> m_srcState;
+		archive >> m_destState;
+
+		m_srcPath = m_srcState.m_fullPath;			// assign path (e.g. for exception messages)
+	}
 }
 
 

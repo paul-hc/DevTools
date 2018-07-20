@@ -19,10 +19,12 @@ namespace fs
 	std::tstring MakeUniqueNumFilename( const TCHAR* pFullPath );				// make file name unique by avoiding collisions with existing files
 	std::tstring MakeUniqueHashedFilename( const TCHAR* pFullPath );			// make file name unique by avoiding collisions with existing files
 
+	bool DeleteFile( const TCHAR* pFilePath );									// delete even if read-only file
+
 	bool CreateDir( const TCHAR* pDirPath );
 	bool CreateDirPath( const TCHAR* pDirPath );								// creates deep directory path, returns true if a valid directory path
 	bool DeleteDir( const TCHAR* pDirPath );
-	bool DeleteAllFiles( const TCHAR* pDirPath );
+	bool DeleteAllFiles( const TCHAR* pDirPath );								// delete even if read-only sub-directories or embedded files
 
 	void EnsureDirPath( const TCHAR* pDirPath ) throws_( CRuntimeException );	// same as CreateDirPath() but throws on error
 	void EnsureDirPath_Mfc( const TCHAR* pDirPath ) throws_( CFileException );	// throws CFileException on error

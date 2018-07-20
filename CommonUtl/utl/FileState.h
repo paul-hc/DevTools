@@ -62,4 +62,10 @@ namespace func
 }
 
 
+#include <iosfwd>
+
+std::ostream& operator<<( std::ostream& os, const fs::CFileState& fileState );
+std::wostream& operator<<( std::wostream& os, const fs::CFileState& fileState );
+
+
 #endif // FileState_h

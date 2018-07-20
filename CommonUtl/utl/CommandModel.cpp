@@ -70,16 +70,12 @@ bool CCommandModel::Undo( size_t stepCount /*= 1*/ )
 
 	while ( stepCount-- != 0 && !m_undoStack.empty() )
 	{
-		utl::ICommand* pCmd = m_undoStack.back();
+		std::auto_ptr< utl::ICommand > pCmd( m_undoStack.back() );
+		m_undoStack.pop_back();
 
-		if ( pCmd->IsUndoable() )
-			succeeded = pCmd->Unexecute();
-
-		if ( utl::Contains( m_undoStack, pCmd ) )		// not already removed?
-		{
-			m_undoStack.pop_back();
-			m_redoStack.push_back( pCmd );
-		}
+		succeeded = pCmd->IsUndoable() && pCmd->Unexecute();
+		if ( succeeded )								// not a zombie command?
+			m_redoStack.push_back( pCmd.release() );
 	}
 
 	return succeeded;
@@ -89,20 +85,16 @@ bool CCommandModel::Redo( size_t stepCount /*= 1*/ )
 {
 	ASSERT( stepCount != 0 && stepCount <= m_redoStack.size() );
 
-	bool succeeded = true;
+	bool succeeded = false;
 
 	while ( stepCount-- != 0 && !m_redoStack.empty() )
 	{
-		utl::ICommand* pCmd = m_redoStack.back();
+		std::auto_ptr< utl::ICommand > pCmd( m_redoStack.back() );
+		m_redoStack.pop_back();
 
-		if ( !pCmd->Execute() )
-			succeeded = false;
-
-		if ( utl::Contains( m_redoStack, pCmd ) )		// not already removed?
-		{
-			m_redoStack.pop_back();
-			m_undoStack.push_back( pCmd );
-		}
+		succeeded = pCmd->Execute();
+		if ( succeeded )
+			m_undoStack.push_back( pCmd.release() );
 	}
 
 	return succeeded;

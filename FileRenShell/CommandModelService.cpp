@@ -89,6 +89,19 @@ bool CCommandModelService::FindSavedUndoLogPath( cmd::FileFormat& rFileFormat )
 }
 
 
+namespace pred
+{
+	struct IsEmptyMacroCmd
+	{
+		bool operator()( const utl::ICommand* pCmd )
+		{
+			const CMacroCommand* pMacroCmd = dynamic_cast< const CMacroCommand* >( pCmd );
+			return pMacroCmd != NULL && pMacroCmd->IsEmpty();
+		}
+	};
+}
+
+
 namespace cmd
 {
 	// CLogSerializer class
@@ -172,12 +185,15 @@ namespace cmd
 
 				if ( const CMacroCommand* pMacroCmd = dynamic_cast< const CMacroCommand* >( cmdStack[ i ] ) )
 				{
-					os << FormatTag( pMacroCmd->Format( utl::Brief ).c_str() ) << std::endl;		// action tag line
+					if ( !pMacroCmd->IsEmpty() )
+					{
+						os << FormatTag( pMacroCmd->Format( utl::Brief ).c_str() ) << std::endl;		// action tag line
 
-					for ( std::vector< utl::ICommand* >::const_iterator itSubCmd = pMacroCmd->GetSubCommands().begin(); itSubCmd != pMacroCmd->GetSubCommands().end(); ++itSubCmd )
-						os << ( *itSubCmd )->Format( utl::Brief ) << std::endl;						// no action tag
+						for ( std::vector< utl::ICommand* >::const_iterator itSubCmd = pMacroCmd->GetSubCommands().begin(); itSubCmd != pMacroCmd->GetSubCommands().end(); ++itSubCmd )
+							os << ( *itSubCmd )->Format( utl::Brief ) << std::endl;						// no action tag
 
-					os << FormatTag( s_tagEndOfBatch ) << std::endl;
+						os << FormatTag( s_tagEndOfBatch ) << std::endl;
+					}
 				}
 				else
 					ASSERT( false );		// TODO: write text serialization code for this command type
@@ -343,7 +359,10 @@ namespace cmd
 		std::tstring sectionTag = FormatSectionTag( GetTags_Section().FormatUi( section ).c_str() );
 		archive << &sectionTag;			// as Utf8; just for inspection
 
-		serial::Save_CObjects( archive, cmdStack );
+		std::vector< utl::ICommand* > validCommands( cmdStack.begin(), cmdStack.end() );
+		std::remove_if( validCommands.begin(), validCommands.end(), pred::IsEmptyMacroCmd() );		// only save non empty commands, i.e. commands that have an effect
+
+		serial::Save_CObjects( archive, validCommands );
 	}
 
 	void CBinaryLogSerializer::LoadStack( CArchive& archive, std::deque< utl::ICommand* >& rCmdStack )

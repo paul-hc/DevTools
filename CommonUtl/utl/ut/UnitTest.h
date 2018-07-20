@@ -44,13 +44,6 @@ namespace ut
 }
 
 
-template< typename Type1, typename Type2 >
-std::wostream& operator<<( std::wostream& os, const std::pair< Type1, Type2 >& rPair )
-{
-	return os << L"pair<" << rPair.first << L", " << rPair.second << L">";
-}
-
-
 namespace numeric
 {
 	const double dEpsilon = 0.000000001;
@@ -154,6 +147,13 @@ namespace ut
 		}
 		return oss.str();
 	}
+}
+
+
+template< typename Type1, typename Type2 >
+std::wostream& operator<<( std::wostream& os, const std::pair< Type1, Type2 >& rPair )
+{
+	return os << L"pair<" << rPair.first << L", " << rPair.second << L">";
 }
 
 

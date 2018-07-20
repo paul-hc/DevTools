@@ -13,11 +13,6 @@
 
 namespace ut
 {
-	inline std::tostream& operator<<( std::tostream& os, const fs::CFileState& fileState )
-	{
-		return os << fmt::FormatClipFileState( fileState );
-	}
-
 	static const std::tstring s_filePath = _T("C:\\download\\file.txt");
 	static const CTime s_ct( 2017, 7, 1, 14, 10, 0 );
 	static const CTime s_mt( 2017, 7, 1, 14, 20, 0 );

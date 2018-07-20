@@ -63,7 +63,7 @@ inline std::ostream& operator<<( std::ostream& oss, const CTime& dt )
 	return oss << time_utl::FormatTimestamp( dt );
 }
 
-inline std::tostream& operator<<( std::wostream& oss, const CTime& dt )
+inline std::wostream& operator<<( std::wostream& oss, const CTime& dt )
 {
 	return oss << time_utl::FormatTimestamp( dt );
 }

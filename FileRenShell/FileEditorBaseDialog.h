@@ -43,7 +43,8 @@ protected:
 	utl::ICommand* PeekCmdForDialog( cmd::StackType stackType ) const;
 	int EnsureVisibleFirstError( CReportListControl* pFileListCtrl ) const;
 
-	bool PromptCloseDialog( void );
+	enum Prompt { PromptClose, PromptNoFileChanges };
+	bool PromptCloseDialog( Prompt prompt = PromptNoFileChanges );
 protected:
 	CFileModel* m_pFileModel;
 	std::vector< cmd::CommandType > m_nativeCmdTypes;		// the first one always identifies the editor
