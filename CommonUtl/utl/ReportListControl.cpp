@@ -86,11 +86,10 @@ CReportListControl::CReportListControl( UINT columnLayoutId /*= 0*/, DWORD listS
 	: CListCtrl()
 	, m_columnLayoutId( 0 )
 	, m_listStyleEx( listStyleEx )
-	, m_optionFlags( UseExplorerTheme | HighlightTextDiffsFrame )
+	, m_optionFlags( UseExplorerTheme | SortInternally | HighlightTextDiffsFrame )
 	, m_subjectBased( false )
 	, m_sortByColumn( -1 )			// no sorting by default
 	, m_sortAscending( true )
-	, m_sortInternally( true )
 	, m_pComparePtrFunc( NULL )		// use text compare by default
 	, m_pTextEffectCallback( NULL )
 	, m_pImageList( NULL )
@@ -490,7 +489,7 @@ bool CReportListControl::SortList( void )
 		else
 			SortItems( (PFNLVCOMPARE)&InitialOrderCompareProc, (LPARAM)this );		// restore initial item order; passes item LPARAMs (i.e. TRowKey) as left/right
 	}
-	else if ( m_sortInternally )													// otherwise was sorted externally, just update sort header
+	else if ( GetSortInternally() )													// otherwise was sorted externally, just update sort header
 		if ( m_pComparePtrFunc != NULL )
 			SortItems( m_pComparePtrFunc, (LPARAM)this );					// passes item LPARAMs as left/right
 		else

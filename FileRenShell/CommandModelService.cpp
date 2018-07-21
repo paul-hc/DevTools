@@ -89,19 +89,6 @@ bool CCommandModelService::FindSavedUndoLogPath( cmd::FileFormat& rFileFormat )
 }
 
 
-namespace pred
-{
-	struct IsEmptyMacroCmd
-	{
-		bool operator()( const utl::ICommand* pCmd )
-		{
-			const CMacroCommand* pMacroCmd = dynamic_cast< const CMacroCommand* >( pCmd );
-			return pMacroCmd != NULL && pMacroCmd->IsEmpty();
-		}
-	};
-}
-
-
 namespace cmd
 {
 	// CLogSerializer class
@@ -360,7 +347,7 @@ namespace cmd
 		archive << &sectionTag;			// as Utf8; just for inspection
 
 		std::vector< utl::ICommand* > validCommands( cmdStack.begin(), cmdStack.end() );
-		std::remove_if( validCommands.begin(), validCommands.end(), pred::IsEmptyMacroCmd() );		// only save non empty commands, i.e. commands that have an effect
+		std::remove_if( validCommands.begin(), validCommands.end(), pred::IsZombieCmd() );		// only save non empty commands, i.e. commands that have an effect
 
 		serial::Save_CObjects( archive, validCommands );
 	}

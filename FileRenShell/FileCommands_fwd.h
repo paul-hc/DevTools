@@ -27,6 +27,7 @@ namespace cmd
 
 
 	bool IsPersistentCmd( const utl::ICommand* pCmd );		// persistent commands are also editor-specific file action commands
+	bool IsZombieCmd( const utl::ICommand* pCmd );			// empty macro file action command with no effect?
 
 
 	interface IErrorObserver
@@ -36,6 +37,18 @@ namespace cmd
 	};
 
 	enum FileFormat { TextFormat, BinaryFormat };
+}
+
+
+namespace pred
+{
+	struct IsZombieCmd
+	{
+		bool operator()( const utl::ICommand* pCmd )
+		{
+			return cmd::IsZombieCmd( pCmd );
+		}
+	};
 }
 
 

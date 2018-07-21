@@ -171,7 +171,8 @@ public:
 	std::pair< TColumn, bool > GetSortByColumn( void ) const { return std::make_pair( m_sortByColumn, m_sortAscending ); }
 	void SetSortByColumn( TColumn sortByColumn, bool sortAscending = true );
 
-	void SetSortInternally( bool sortInternally ) { m_sortInternally = sortInternally; }
+	bool GetSortInternally( void ) const { return HasFlag( m_optionFlags, SortInternally ); }
+	void SetSortInternally( bool sortInternally = true ) { SetFlag( m_optionFlags, SortInternally, sortInternally ); }
 
 	PFNLVCOMPARE GetCompareFunc( void ) const { return m_pComparePtrFunc; }
 	void SetCompareFunc( PFNLVCOMPARE pComparePtrFunc ) { m_pComparePtrFunc = pComparePtrFunc; }
@@ -420,7 +421,7 @@ public:
 public:
 	// groups: rows not assigned to a group will not show in group-view
 
-#if ( _WIN32_WINNT >= 0x0600 ) && defined( UNICODE )	// Vista or greater
+#if ( _WIN32_WINNT >= 0x0600 ) && defined( UNICODE )	// Vista+
 
 	int GetGroupId( int groupIndex ) const;
 
@@ -470,7 +471,8 @@ private:
 		UseExplorerTheme			= BIT_FLAG( 0 ),
 		UseAlternateRowColoring		= BIT_FLAG( 1 ),
 		UseTriStateAutoCheck		= BIT_FLAG( 2 ),		// extended check state: allows toggling LVIS_UNCHECKED -> LVIS_CHECKED -> LVIS_CHECKEDGRAY
-		HighlightTextDiffsFrame		= BIT_FLAG( 3 )			// highlight text differences with a filled frame
+		SortInternally				= BIT_FLAG( 3 ),		// highlight text differences with a filled frame
+		HighlightTextDiffsFrame		= BIT_FLAG( 4 )			// highlight text differences with a filled frame
 	};
 
 	bool SetOptionFlag( ListOption flag, bool on );
@@ -485,7 +487,6 @@ private:
 
 	TColumn m_sortByColumn;
 	bool m_sortAscending;
-	bool m_sortInternally;
 	PFNLVCOMPARE m_pComparePtrFunc;							// compare by object ptr such as: static CompareResult CALLBACK CompareObjects( const CFoo* pLeft, const CFoo* pRight, CReportListControl* pListCtrl );
 
 	std::vector< CColumnComparator > m_comparators;

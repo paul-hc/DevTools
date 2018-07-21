@@ -133,7 +133,7 @@ private:
 	fs::CFlexPath m_srcImagePath;			// path of the source image (large)
 	CThumbKey m_key;						// only for shell cache extraction: a hashed key of the image content, sort of CRC: it depends on image contents
 	CTime m_lastModifTime;					// refers to source image
-	const CSize m_unscaledBmpSize;			// original size of the bitmap source when the thmb was extracted, from which it was scaled to bounds
+	const CSize m_unscaledBmpSize;			// original size of the bitmap source when the thumb was extracted, from which it was scaled to bounds
 public:
 	static const CThumbKey m_nullKey;
 };

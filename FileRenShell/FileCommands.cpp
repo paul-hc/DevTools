@@ -47,6 +47,14 @@ namespace cmd
 		return false;
 	}
 
+	bool IsZombieCmd( const utl::ICommand* pCmd )
+	{
+		if ( const CMacroCommand* pMacroCmd = dynamic_cast< const CMacroCommand* >( pCmd ) )
+			return pMacroCmd->IsEmpty();
+
+		return pCmd != NULL;
+	}
+
 
 	// CBaseSerialCmd implementation
 
