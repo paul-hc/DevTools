@@ -346,10 +346,7 @@ namespace cmd
 		std::tstring sectionTag = FormatSectionTag( GetTags_Section().FormatUi( section ).c_str() );
 		archive << &sectionTag;			// as Utf8; just for inspection
 
-		std::vector< utl::ICommand* > validCommands( cmdStack.begin(), cmdStack.end() );
-		std::remove_if( validCommands.begin(), validCommands.end(), pred::IsZombieCmd() );		// only save non empty commands, i.e. commands that have an effect
-
-		serial::Save_CObjects( archive, validCommands );
+		serial::Save_CObjects( archive, cmdStack );
 	}
 
 	void CBinaryLogSerializer::LoadStack( CArchive& archive, std::deque< utl::ICommand* >& rCmdStack )

@@ -7,6 +7,7 @@
 #define new DEBUG_NEW
 #endif
 
+
 CCommandModel::~CCommandModel()
 {
 	Clear();
@@ -22,9 +23,9 @@ void CCommandModel::RemoveExpiredCommands( size_t maxSize )
 {
 	ASSERT( maxSize > 1 );
 
-	// UNDO takes 2/3 and REDO 1/3 of the history size. We expire oldest commands (at front).
+	// UNDO takes 2/3 and REDO 1/3 of the history size. We expire oldest commands (at front of stack).
 
-	const size_t redoMaxSize = std::min( m_redoStack.size(), std::max( maxSize / 3, (size_t)1 ) );
+	const size_t redoMaxSize = utl::min( m_redoStack.size(), utl::max( maxSize / 3, 1 ) );
 
 	while ( m_redoStack.size() > redoMaxSize )
 	{

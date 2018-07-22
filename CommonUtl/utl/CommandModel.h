@@ -15,10 +15,6 @@ public:
 
 	bool IsUndoEmpty( void ) const { return m_undoStack.empty(); }
 	void Clear( void );
-	void RemoveExpiredCommands( size_t maxSize );
-
-	template< typename FuncType >
-	void RemoveCommandsThat( FuncType func );
 
 	// utl::ICommandExecutor interface
 	virtual bool Execute( utl::ICommand* pCmd );
@@ -39,6 +35,15 @@ public:
 
 	void SwapUndoStack( std::deque< utl::ICommand* >& rUndoStack ) { m_undoStack.swap( rUndoStack ); }
 	void SwapRedoStack( std::deque< utl::ICommand* >& rRedoStack ) { m_redoStack.swap( rRedoStack ); }
+
+	// commands removal
+	void RemoveExpiredCommands( size_t maxSize );
+
+	template< typename PredType >
+	void RemoveCommandsThat( PredType pred );
+private:
+	template< typename PredType >
+	static void RemoveStackCommandsThat( std::deque< utl::ICommand* >& rStack, PredType pred );
 private:
 	// commands stored in UNDO and REDO must keep their objects alive
 	std::deque< utl::ICommand* > m_undoStack;			// stack top at end
@@ -48,26 +53,24 @@ private:
 
 // template code
 
-template< typename FuncType >
-inline void CCommandModel::RemoveCommandsThat( FuncType func )
+template< typename PredType >
+void CCommandModel::RemoveStackCommandsThat( std::deque< utl::ICommand* >& rStack, PredType pred )
 {
-	for ( std::deque< utl::ICommand* >::iterator itCmd = m_undoStack.begin(); itCmd != m_undoStack.end(); )
-		if ( func( *itCmd ) )
+	for ( std::deque< utl::ICommand* >::iterator itCmd = rStack.begin(); itCmd != rStack.end(); )
+		if ( pred( *itCmd ) )
 		{
 			delete *itCmd;
-			itCmd = m_undoStack.erase( itCmd );
+			itCmd = rStack.erase( itCmd );
 		}
 		else
 			++itCmd;
+}
 
-	for ( std::deque< utl::ICommand* >::iterator itCmd = m_redoStack.begin(); itCmd != m_redoStack.end(); )
-		if ( func( *itCmd ) )
-		{
-			delete *itCmd;
-			itCmd = m_redoStack.erase( itCmd );
-		}
-		else
-			++itCmd;
+template< typename PredType >
+inline void CCommandModel::RemoveCommandsThat( PredType pred )
+{
+	RemoveStackCommandsThat( m_undoStack, pred );
+	RemoveStackCommandsThat( m_redoStack, pred );
 }
 
 

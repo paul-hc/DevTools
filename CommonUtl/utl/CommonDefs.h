@@ -224,6 +224,7 @@ namespace utl
 {
 	__declspec( selectany ) extern const size_t npos = std::tstring::npos;
 
+
 	template< typename ValueType >
 	inline void AssignPtr( ValueType* pField, const ValueType& value )
 	{

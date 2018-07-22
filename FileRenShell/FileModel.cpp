@@ -153,10 +153,14 @@ void CFileModel::FetchFromStack( cmd::StackType stackType )
 
 bool CFileModel::SaveCommandModel( void ) const
 {
-	return
-		CGeneralOptions::Instance().m_undoLogPersist &&
-		m_pCommandModel.get() != NULL &&
-		CCommandModelService::SaveUndoLog( *m_pCommandModel, CGeneralOptions::Instance().m_undoLogFormat );
+	if ( NULL == m_pCommandModel.get() || !CGeneralOptions::Instance().m_undoLogPersist )
+		return false;
+
+	// cleanup the command stacks before saving
+	m_pCommandModel->RemoveExpiredCommands( 60 );
+	m_pCommandModel->RemoveCommandsThat( pred::IsZombieCmd() );		// zombie command: it has no effect on files (in most cases empty macros due to non-existing files)
+
+	return CCommandModelService::SaveUndoLog( *m_pCommandModel, CGeneralOptions::Instance().m_undoLogFormat );
 }
 
 bool CFileModel::LoadCommandModel( void )

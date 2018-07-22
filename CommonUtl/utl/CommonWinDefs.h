@@ -6,13 +6,20 @@
 // include this in stdafx.h, just before first Windows header: #include <afxwin.h>
 
 
+namespace utl
+{
+	template< typename LeftT, typename RightT >
+	LeftT max( const LeftT& left, const RightT& right ) { return ( left < static_cast< LeftT >( right ) ) ? static_cast< LeftT >( right ) : left; }
+
+	template< typename LeftT, typename RightT >
+	LeftT min( const LeftT& left, const RightT& right ) { return ( static_cast< LeftT >( right ) < left ) ? static_cast< LeftT >( right ) : left; }
+}
+
+
 #ifdef NOMINMAX
-
-// required by some Windows headers: return by value to make it compatible with uses such as: max< int, unsigned long >( a, b )
-
-template< typename A, typename B > A max( const A& a, const B& b ) { return ( a < static_cast< A >( b ) ) ? static_cast< A >( b ) : a; }
-template< typename A, typename B > A min( const A& a, const B& b ) { return ( static_cast< A >( b ) < a ) ? static_cast< A >( b ) : a; }
-
+	// required by some Windows headers: return by value to make it compatible with uses such as: max< int, unsigned long >( a, b )
+	using utl::max;
+	using utl::min;
 #endif //NOMINMAX
 
 
