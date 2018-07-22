@@ -45,6 +45,22 @@ namespace path
 		return pred::Equal == str::CompareNoCase( leftPath, rightPath );
 	}
 
+	size_t GetHashValue( const TCHAR* pPath )
+	{
+		// compute hash value based on lower-case and normalized backslashes
+
+		// inspired from template function in <xhash> for hash of range of elements:
+		//	template< class InIt >
+		//	size_t stdext::_Hash_value( InIt _Begin, InIt _End )
+
+		size_t hashValue = 2166136261U;
+
+		for ( const TCHAR* pCh = pPath; *pCh != _T('\0'); ++pCh )
+			hashValue = 16777619U * hashValue ^ static_cast< size_t >( ToEquivalentChar( *pCh ) );
+
+		return hashValue;
+	}
+
 
 /*	str::Match GetMatch( const TCHAR* pLeftPath, const TCHAR* pRightPath )
 	{

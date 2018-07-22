@@ -24,6 +24,7 @@ private:
 	void TestCommonSubpath( void );
 	void TestComplexPath( void );
 	void TestFlexPath( void );
+	void TestPathHashValue( void );
 };
 
 

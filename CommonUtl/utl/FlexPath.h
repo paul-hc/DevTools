@@ -51,7 +51,7 @@ namespace fs
 
 namespace stdext
 {
-	inline size_t hash_value( const fs::CFlexPath& path ) { return path.hash_value(); }
+	inline size_t hash_value( const fs::CFlexPath& path ) { return path.GetHashValue(); }
 }
 
 

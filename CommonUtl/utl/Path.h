@@ -32,6 +32,8 @@ namespace path
 		return CompareNPtr( leftPath.c_str(), rightPath.c_str(), count );
 	}
 
+	size_t GetHashValue( const TCHAR* pPath );
+
 
 	struct ToNormal
 	{
@@ -203,7 +205,7 @@ namespace fs
 
 		CPath ExtractExistingFilePath( void ) const;
 
-		inline size_t hash_value( void ) const { return stdext::hash_value( m_filePath ); }
+		inline size_t GetHashValue( void ) const { return path::GetHashValue( m_filePath.c_str() ); }
 	protected:
 		std::tstring& Ref( void ) { return m_filePath; }
 	private:
@@ -215,7 +217,7 @@ namespace fs
 
 namespace stdext
 {
-	inline size_t hash_value( const fs::CPath& path ) { return path.hash_value(); }
+	inline size_t hash_value( const fs::CPath& path ) { return path.GetHashValue(); }
 }
 
 
