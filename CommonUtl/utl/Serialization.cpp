@@ -11,7 +11,7 @@ namespace serial
 {
 	// CPolicy implementation
 
-	UnicodeEncoding CPolicy::s_strEncoding = WideEncoding;
+	UnicodeEncoding CPolicy::s_strEncoding = Utf8Encoding;		// more compact and readable strings
 
 	void CPolicy::ToUtf8String( CStringA& rUtf8Str, const std::wstring& wideStr )
 	{

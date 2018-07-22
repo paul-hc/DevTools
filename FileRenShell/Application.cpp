@@ -6,7 +6,6 @@
 #include "ut/RenameFilesTests.h"
 #include "ut/CommandModelSerializerTests.h"
 #include "utl/EnumTags.h"
-#include "utl/Serialization.h"
 #include "utl/Thumbnailer.h"
 #include "utl/BaseApp.hxx"
 #include "resource.h"
@@ -54,7 +53,6 @@ BOOL CApplication::InitInstance( void )
 		return FALSE;
 
 	app::GetLogger().m_logFileMaxSize = -1;						// unlimited log size
-	serial::CPolicy::s_strEncoding = serial::Utf8Encoding;		// more compact and readable strings
 
 	CGeneralOptions::Instance().LoadFromRegistry();
 
