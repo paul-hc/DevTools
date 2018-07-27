@@ -4,7 +4,6 @@
 #include "stdafx.h"
 #include "BrowserView.h"
 #include "BrowserDoc.h"
-#include "Utilities.h"
 #include "Application.h"
 #include "resource.h"
 
@@ -128,6 +127,10 @@ void CBrowserView::OnDestroy( void )
 
 		pDoc->SetFilePaneViewMode( m_pBrowser->GetFilePaneViewMode() );
 		pDoc->SetPathName( m_pBrowser->GetCurrentDirPath().c_str(), TRUE );
+
+		std::vector< std::tstring > selPaths;
+		m_pBrowser->QuerySelectedFiles( selPaths );
+		pDoc->StoreSelItems( selPaths );
 	}
 
 	CView::OnDestroy();
@@ -142,11 +145,18 @@ void CBrowserView::OnInitialUpdate( void )
 {
 	CView::OnInitialUpdate();
 
-	const CString& dirPath = GetDocument()->GetPathName();
+	CBrowserDoc* pDoc = GetDocument();
+	const CString& dirPath = pDoc->GetPathName();
 
 	if ( fs::IsValidDirectory( dirPath ) )
 		if ( m_pBrowser->NavigateTo( dirPath ) )			// navigate to document's directory
+		{
+			std::vector< std::tstring > selItems;
+			if ( pDoc->QuerySelItems( selItems ) )
+				m_pBrowser->SelectItems( selItems );
+
 			return;
+		}
 
 	OnBrowseToProfileFolder();
 }
@@ -220,7 +230,7 @@ void CBrowserView::OnViewFrames( void )
 void CBrowserView::OnUpdateViewFrames( CCmdUI* pCmdUI )
 {
 	EXPLORER_BROWSER_OPTIONS options = EBO_NONE;
-    m_pBrowser->Get()->GetOptions( &options );
+	m_pBrowser->Get()->GetOptions( &options );
 
 	pCmdUI->SetCheck( HasFlag( options, EBO_SHOWFRAMES ) );
 }

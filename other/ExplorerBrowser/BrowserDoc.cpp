@@ -1,7 +1,6 @@
 
 #include "stdafx.h"
 #include "BrowserDoc.h"
-#include "Utilities.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -11,6 +10,7 @@
 namespace reg
 {
 	static const TCHAR section_view[] = _T("Settings\\View");
+	static const TCHAR section_selItems[] = _T("Settings\\SelItems");
 	static const TCHAR entry_lastDirPath[] = _T("LastDirPath");
 	static const TCHAR entry_viewMode[] = _T("ViewMode");
 }
@@ -68,6 +68,7 @@ void CBrowserDoc::OnCloseDocument( void )
 	CWinApp* pApp = AfxGetApp();
 	pApp->WriteProfileString( reg::section_view, reg::entry_lastDirPath, GetPathName() );
 	pApp->WriteProfileInt( reg::section_view, reg::entry_viewMode, m_filePaneViewMode );
+	pApp->WriteProfileString( reg::section_selItems, GetPathName().GetString(), m_selItems.c_str() );		// use dir path as registry value name
 
 	delete this;
 }
@@ -80,6 +81,23 @@ void CBrowserDoc::Serialize( CArchive& ar )
 	else
 	{
 	}
+}
+
+bool CBrowserDoc::QuerySelItems( std::vector< std::tstring >& rSelItems )
+{
+	m_selItems = AfxGetApp()->GetProfileString( reg::section_selItems, GetPathName().GetString() ).GetString();		// use dir path as registry value name
+	str::Split( rSelItems, m_selItems.c_str(), _T("|") );
+	return !m_selItems.empty();
+}
+
+void CBrowserDoc::StoreSelItems( const std::vector< std::tstring >& selPaths )
+{
+	std::vector< std::tstring > selFilenames; selFilenames.reserve( selPaths.size() );
+
+	for ( std::vector< std::tstring >::const_iterator itSelPath = selPaths.begin(); itSelPath != selPaths.end(); ++itSelPath )
+		selFilenames.push_back( ::PathFindFileName( itSelPath->c_str() ) );			// just the filename
+
+	m_selItems = str::Join( selFilenames, _T("|") );
 }
 
 

@@ -14,10 +14,10 @@ namespace shell
 		std::tstring displayName;
 
 		CComPtr< IShellFolder > pDesktopFolder;
-		if ( SUCCEEDED( ::SHGetDesktopFolder( &pDesktopFolder ) ) )
+		if ( HR_OK( ::SHGetDesktopFolder( &pDesktopFolder ) ) )
 		{
 			STRRET strDisplayName;
-			if ( SUCCEEDED( pDesktopFolder->GetDisplayNameOf( pidlFolder, SHGDN_FORPARSING, &strDisplayName ) ) )
+			if ( HR_OK( pDesktopFolder->GetDisplayNameOf( pidlFolder, SHGDN_FORPARSING, &strDisplayName ) ) )
 			{
 				LPTSTR szDisplayName = NULL;
 				StrRetToStr( &strDisplayName, pidlFolder, &szDisplayName );
@@ -43,13 +43,13 @@ namespace shell
 		CRect browserRect;
 		pParent->GetClientRect( &browserRect );
 
-		if ( SUCCEEDED( ::SHCoCreateInstance( NULL, &CLSID_ExplorerBrowser, NULL, IID_PPV_ARGS( &m_pExplorerBrowser ) ) ) )
+		if ( HR_OK( ::SHCoCreateInstance( NULL, &CLSID_ExplorerBrowser, NULL, IID_PPV_ARGS( &m_pExplorerBrowser ) ) ) )
 		{
 			if ( showFolders )
 				m_pExplorerBrowser->SetOptions( EBO_SHOWFRAMES );
 
 			FOLDERSETTINGS settings = { filePaneViewMode, FWF_NONE };
-			if ( SUCCEEDED( m_pExplorerBrowser->Initialize( pParent->GetSafeHwnd(), &browserRect, &settings ) ) )
+			if ( HR_OK( m_pExplorerBrowser->Initialize( pParent->GetSafeHwnd(), &browserRect, &settings ) ) )
 				return true;
 		}
 
@@ -59,7 +59,7 @@ namespace shell
 	CComPtr< IShellView > CExplorerBrowser::GetShellView( void ) const
 	{
 		CComPtr< IShellView > pShellView;
-		if ( SUCCEEDED( m_pExplorerBrowser->GetCurrentView( IID_PPV_ARGS( &pShellView ) ) ) )
+		if ( HR_OK( m_pExplorerBrowser->GetCurrentView( IID_PPV_ARGS( &pShellView ) ) ) )
 			return pShellView;
 
 		return NULL;
@@ -68,33 +68,48 @@ namespace shell
 	CComPtr< IFolderView2 > CExplorerBrowser::GetFolderView( void ) const
 	{
 		CComPtr< IFolderView2 > pFolderView;
-		if ( SUCCEEDED( m_pExplorerBrowser->GetCurrentView( IID_PPV_ARGS( &pFolderView ) ) ) )
+		if ( HR_OK( m_pExplorerBrowser->GetCurrentView( IID_PPV_ARGS( &pFolderView ) ) ) )
 			return pFolderView;
 
 		return NULL;
 	}
 
-	std::tstring CExplorerBrowser::GetCurrentDirPath( void ) const
+	CComPtr< IShellFolder > CExplorerBrowser::GetCurrentFolder( void ) const
 	{
-		std::tstring currDirPath;
+		CComPtr< IShellFolder > pCurrShellFolder;
+
+		if ( CComPtr< IFolderView2 > pFolderView = GetFolderView() )
+			if ( HR_OK( pFolderView->GetFolder( IID_PPV_ARGS( &pCurrShellFolder ) ) ) )
+				return pCurrShellFolder;
+
+		return NULL;
+	}
+
+	bool CExplorerBrowser::GetCurrentDirPidl( CPidl& rCurrDirPidl ) const
+	{
+		rCurrDirPidl.Reset();
 
 		if ( CComPtr< IFolderView2 > pFolderView = GetFolderView() )
 		{
 			CComPtr< IPersistFolder2 > pCurrFolder;
-			if ( SUCCEEDED( pFolderView->GetFolder( IID_PPV_ARGS( &pCurrFolder ) ) ) )
-			{
-				LPITEMIDLIST pidlDirPath = NULL;
-				if( SUCCEEDED( pCurrFolder->GetCurFolder( &pidlDirPath ) ) )
-				{
-					TCHAR dirPath[ MAX_PATH ];
-					if ( ::SHGetPathFromIDList( pidlDirPath, dirPath ) )
-						currDirPath = dirPath;
-
-					::ILFree( pidlDirPath );
-				}
-			}
+			if ( HR_OK( pFolderView->GetFolder( IID_PPV_ARGS( &pCurrFolder ) ) ) )
+				if ( HR_OK( pCurrFolder->GetCurFolder( &rCurrDirPidl ) ) )
+					return true;
 		}
-		return currDirPath;
+
+		return false;
+	}
+
+	std::tstring CExplorerBrowser::GetCurrentDirPath( void ) const
+	{
+		CPidl currDirPidl;
+		if ( GetCurrentDirPidl( currDirPidl ) )
+		{
+			TCHAR dirPath[ MAX_PATH ];
+			if ( ::SHGetPathFromIDList( currDirPidl.Get(), dirPath ) )
+				return dirPath;
+		}
+		return std::tstring();
 	}
 
 	void CExplorerBrowser::QuerySelectedFiles( std::vector< std::tstring >& rSelPaths ) const
@@ -102,14 +117,14 @@ namespace shell
 		if ( CComPtr< IShellView > pShellView = GetShellView() )
 		{
 			CComPtr< IDataObject > pDataObject;
-			if ( SUCCEEDED( pShellView->GetItemObject( SVGIO_SELECTION, IID_PPV_ARGS( &pDataObject ) ) ) )
+			if ( HR_OK( pShellView->GetItemObject( SVGIO_SELECTION, IID_PPV_ARGS( &pDataObject ) ) ) )
 			{
 				// code adapted from http://www.codeproject.com/shell/shellextguide1.asp
 				FORMATETC fmt = { CF_HDROP, NULL, DVASPECT_CONTENT, -1, TYMED_HGLOBAL };
 				STGMEDIUM stg;
 				stg.tymed =  TYMED_HGLOBAL;
 
-				if ( SUCCEEDED( pDataObject->GetData( &fmt, &stg ) ) )
+				if ( HR_OK( pDataObject->GetData( &fmt, &stg ) ) )
 				{
 					HDROP hDrop = (HDROP)::GlobalLock( stg.hGlobal );
 
@@ -129,6 +144,29 @@ namespace shell
 		}
 	}
 
+	bool CExplorerBrowser::SelectItems( const std::vector< std::tstring >& itemFilenames )
+	{
+		CComPtr< IShellFolder > pCurrFolder = GetCurrentFolder();
+		SVSIF selectFlags = SVSI_SELECT | SVSI_FOCUSED | SVSI_ENSUREVISIBLE | SVSI_DESELECTOTHERS;
+		size_t selCount = 0;
+
+		if ( CComPtr< IShellView > pShellView = GetShellView() )
+			for ( std::vector< std::tstring >::const_iterator itFilename = itemFilenames.begin(); itFilename != itemFilenames.end(); ++itFilename )
+			{
+				CPidl selItemPidl;
+				if ( selItemPidl.CreateChild( pCurrFolder, itFilename->c_str() ) )
+				{
+					if ( HR_OK( pShellView->SelectItem( selItemPidl.Get(), selectFlags ) ) )
+					{
+						++selCount;
+						ClearFlag( selectFlags, SVSI_FOCUSED | SVSI_ENSUREVISIBLE | SVSI_DESELECTOTHERS );
+					}
+				}
+			}
+
+		return selCount == itemFilenames.size();			// all filename items selected?
+	}
+
 	FOLDERVIEWMODE CExplorerBrowser::GetFilePaneViewMode( UINT* pOutFolderFlags /*= NULL*/ ) const
 	{
 		ASSERT_PTR( m_pExplorerBrowser );
@@ -136,7 +174,7 @@ namespace shell
 		if ( CComPtr< IShellView > pShellView = GetShellView() )
 		{
 			FOLDERSETTINGS settings;
-			if ( SUCCEEDED( pShellView->GetCurrentInfo( &settings ) ) )
+			if ( HR_OK( pShellView->GetCurrentInfo( &settings ) ) )
 			{
 				if ( pOutFolderFlags != NULL )
 					*pOutFolderFlags = settings.fFlags;
@@ -151,19 +189,14 @@ namespace shell
 	bool CExplorerBrowser::SetFilePaneViewMode( FOLDERVIEWMODE filePaneViewMode, FOLDERFLAGS flags /*= FWF_NONE*/ ) const
 	{
 		FOLDERSETTINGS settings = { filePaneViewMode, flags };
-		return SUCCEEDED( m_pExplorerBrowser->SetFolderSettings( &settings ) );
+		return HR_OK( m_pExplorerBrowser->SetFolderSettings( &settings ) );
 	}
 
-	bool CExplorerBrowser::NavigateTo( const TCHAR* pDirPath )
+	bool CExplorerBrowser::NavigateTo( const TCHAR dirPath[] )
 	{
-		LPITEMIDLIST pidlBrowsePath;
-		if ( SUCCEEDED( ::SHParseDisplayName( pDirPath, NULL, &pidlBrowsePath, 0, NULL ) ) )
-		{
-			bool succeeded = SUCCEEDED( m_pExplorerBrowser->BrowseToIDList( pidlBrowsePath, 0 ) );
-			::ILFree( pidlBrowsePath );
-
-			return succeeded;
-		}
+		CPidl dirPathPidl;
+		if ( HR_OK( ::SHParseDisplayName( dirPath, NULL, &dirPathPidl, 0, NULL ) ) )
+			return HR_OK( m_pExplorerBrowser->BrowseToIDList( dirPathPidl.Get(), 0 ) );
 
 		return false;
 	}
@@ -173,7 +206,7 @@ namespace shell
 		ASSERT_PTR( m_pExplorerBrowser );
 
 		if ( CComPtr< IFolderView2 > pFolderView = GetFolderView() )
-			return SUCCEEDED( pFolderView->DoRename() );
+			return HR_OK( pFolderView->DoRename() );
 
 		return false;
 	}

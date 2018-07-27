@@ -471,6 +471,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\ShellTypes.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\ShellTypes.h"
+				>
+			</File>
+			<File
 				RelativePath=".\stdafx.cpp"
 				>
 				<FileConfiguration

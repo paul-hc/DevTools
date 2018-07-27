@@ -4,6 +4,7 @@
 
 #pragma once
 
+#define _CRT_SECURE_NO_WARNINGS				// no use printf_s warnings
 #include "StdStl.h"			// Standard C++ Library
 
 #define _ATL_APARTMENT_THREADED 
@@ -70,4 +71,4 @@
 #endif
 
 
-#define ASSERT_PTR( p ) ASSERT( (p) != NULL )
+#include "Utilities.h"

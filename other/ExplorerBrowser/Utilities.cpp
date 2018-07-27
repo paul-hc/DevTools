@@ -1,6 +1,7 @@
 
 #include "stdafx.h"
 #include "Utilities.h"
+#include <comdef.h>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -19,6 +20,18 @@ namespace fs
 	{
 		DWORD attr = ::GetFileAttributes( pDirPath );
 		return attr != INVALID_FILE_ATTRIBUTES && HasFlag( attr, FILE_ATTRIBUTE_DIRECTORY );
+	}
+}
+
+
+namespace utl
+{
+	HRESULT Audit( HRESULT hResult, const char* pFuncName )
+	{
+		pFuncName;
+		if ( !SUCCEEDED( hResult ) )
+			TRACE( " * %s: hResult=0x%08x: '%s' in function %s\n", FAILED( hResult ) ? "FAILED" : "ERROR", hResult, CStringA( _com_error( hResult ).ErrorMessage() ).GetString(), pFuncName );
+		return hResult;
 	}
 }
 

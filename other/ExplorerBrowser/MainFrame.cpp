@@ -1,7 +1,6 @@
 
 #include "stdafx.h"
 #include "MainFrame.h"
-#include "Utilities.h"
 #include "resource.h"
 
 #ifdef _DEBUG

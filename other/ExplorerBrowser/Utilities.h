@@ -3,6 +3,18 @@
 #pragma once
 
 
+#define ASSERT_PTR( p ) ASSERT( (p) != NULL )
+
+
+#ifdef _DEBUG
+	#define HR_AUDIT( expr ) utl::Audit( (expr), (#expr) )
+	#define HR_OK( expr ) utl::Check( (expr), (#expr) )
+#else
+	#define HR_AUDIT( expr ) utl::Audit( (expr), NULL )
+	#define HR_OK( expr ) utl::Check( (expr), NULL )
+#endif
+
+
 template< typename FieldType >
 inline bool HasFlag( FieldType field, unsigned int flag )
 {
@@ -60,6 +72,18 @@ inline bool CopyFlags( FieldType& rField, unsigned int mask, unsigned int flags 
 
 namespace str
 {
+	template< typename CharType > bool IsEmpty( const CharType* pText ) { return NULL == pText || 0 == *pText; }
+
+	inline size_t GetLength( const char* pText ) { return pText != NULL ? strlen( pText ) : 0; }
+	inline size_t GetLength( const wchar_t* pText ) { return pText != NULL ? wcslen( pText ) : 0; }
+
+	inline const char* begin( const char* pText ) { return pText; }
+	inline const wchar_t* begin( const wchar_t* pText ) { return pText; }
+
+	inline const char* end( const char* pText ) { return pText + GetLength( pText ); }
+	inline const wchar_t* end( const wchar_t* pText ) { return pText + GetLength( pText ); }
+
+
 	template< typename Iterator, typename CharType >
 	std::basic_string< CharType > Join( Iterator itFirstToken, Iterator itLastToken, const CharType* pSep )
 	{	// works with any forward/reverse iterator
@@ -80,6 +104,66 @@ namespace str
 	{
 		return Join( items.begin(), items.end(), pSep );
 	}
+
+
+	template< typename CharType, typename StringType >
+	void SplitAdd( std::vector< StringType >& rItems, const CharType* pSource, const CharType* pSep )
+	{
+		ASSERT( !str::IsEmpty( pSep ) );
+
+		if ( !str::IsEmpty( pSource ) )
+		{
+			const size_t sepLen = str::GetLength( pSep );
+			typedef const CharType* const_iterator;
+
+			for ( const_iterator itItemStart = str::begin( pSource ), itEnd = str::end( pSource ); ; )
+			{
+				const_iterator itItemEnd = std::search( itItemStart, itEnd, pSep, pSep + sepLen );
+				if ( itItemEnd != itEnd )
+				{
+					rItems.push_back( std::basic_string< CharType >( itItemStart, std::distance( itItemStart, itItemEnd ) ) );
+					itItemStart = itItemEnd + sepLen;
+				}
+				else
+				{
+					rItems.push_back( std::basic_string< CharType >( itItemStart ) );			// last item
+					break;
+				}
+			}
+		}
+	}
+
+	template< typename CharType, typename StringType >
+	inline void Split( std::vector< StringType >& rItems, const CharType* pSource, const CharType* pSep )
+	{
+		rItems.clear();
+		SplitAdd( rItems, pSource, pSep );
+	}
+}
+
+
+namespace pred
+{
+	enum CompareResult { Less = -1, Equal, Greater };
+
+
+	template< typename DiffType >
+	inline CompareResult ToCompareResult( DiffType difference )
+	{
+		if ( difference < 0 )
+			return Less;
+		else if ( difference > 0 )
+			return Greater;
+		else
+			return Equal;
+	}
+}
+
+
+namespace utl
+{
+	HRESULT Audit( HRESULT hResult, const char* pFuncName );
+	inline bool Check( HRESULT hResult, const char* pFuncName ) { return SUCCEEDED( Audit( hResult, pFuncName ) ); }
 }
 
 
