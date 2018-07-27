@@ -119,9 +119,9 @@ namespace app
 		return str::Format( _T("Slider v%x.%x"), ( version & 0xF0 ) >> 4, version & 0x0F );
 	}
 
-	bool MoveFiles( const std::vector< std::tstring >& filesToMove )
+	bool MoveFiles( const std::vector< std::tstring >& filesToMove, CWnd* pParentWnd /*= AfxGetMainWnd()*/ )
 	{
-		CMoveFileDialog moveToDialog( filesToMove, AfxGetMainWnd() );
+		CMoveFileDialog moveToDialog( filesToMove, pParentWnd );
 		if ( moveToDialog.DoModal() != IDOK )
 			return false;
 
@@ -129,7 +129,7 @@ namespace app
 		std::vector< std::tstring > srcPhysicalPaths;
 		str::cvt::MakeItemsAs( srcPhysicalPaths, tempClone.GetPhysicalFilePaths() );
 
-		return shell::MoveFiles( srcPhysicalPaths, moveToDialog.m_destFolderPath.Get(), AfxGetMainWnd() );
+		return shell::MoveFiles( srcPhysicalPaths, moveToDialog.m_destFolderPath.Get(), pParentWnd );
 	}
 
 	bool DeleteFiles( const std::vector< std::tstring >& filesToDelete, bool allowUndo /*= true*/ )

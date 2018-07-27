@@ -674,7 +674,7 @@ void CAlbumImageView::CmMoveFile( void )
 	m_pPeerThumbView->GetListViewState( filesToMove );
 
 	if ( !filesToMove.m_pStringImpl->m_selItems.empty() )
-		app::MoveFiles( filesToMove.m_pStringImpl->m_selItems );
+		app::MoveFiles( filesToMove.m_pStringImpl->m_selItems, this );
 	else
 		TRACE( _T("(!) No target files selected!\n") );
 }

@@ -6,8 +6,6 @@
 #include "Observers.h"
 
 
-class CGeneralPage;
-
 enum PromptField { PF_None = -1, PF_Handle, PF_Class, PF_Caption, PF_ID, PF_Style, PF_StyleEx, PF_WindowRect, PF_ClientRect, PF_PastEnd };
 
 

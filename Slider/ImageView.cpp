@@ -457,7 +457,7 @@ void CImageView::CmMoveFile( void )
 	if ( pImage != NULL && pImage->IsValidFile() )
 	{
 		std::vector< std::tstring > filesToMove( 1, pImage->GetImagePath().Get() );
-		app::MoveFiles( filesToMove );
+		app::MoveFiles( filesToMove, this );
 	}
 }
 

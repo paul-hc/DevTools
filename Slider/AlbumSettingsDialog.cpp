@@ -81,7 +81,8 @@ CAlbumSettingsDialog::CAlbumSettingsDialog( const CFileList& fileList, int curre
 	m_foundFilesListCtrl.SetCustomImageDraw( app::GetThumbnailer() );
 	m_foundFilesListCtrl.SetSortInternally( false );
 	m_foundFilesListCtrl.SetUseAlternateRowColoring();
-	m_foundFilesListCtrl.SetDataSourceFactory( this );								// uses temporary file clones for embedded images
+	m_foundFilesListCtrl.SetDataSourceFactory( this );									// uses temporary file clones for embedded images
+	m_foundFilesListCtrl.SetPopupMenu( CReportListControl::OnSelection, NULL );			// let dialog track the custom menu
 	m_foundFilesListCtrl
 		.AddTileColumn( Dimensions )
 		.AddTileColumn( Size )
@@ -777,7 +778,7 @@ void CAlbumSettingsDialog::OnImageFileOp( UINT cmdId )
 			app::DeleteFiles( targetFiles, CM_DELETE_FILE == cmdId );
 			break;
 		case CM_MOVE_FILE:
-			app::MoveFiles( targetFiles );
+			app::MoveFiles( targetFiles, this );
 			break;
 		case CM_EXPLORE_IMAGE:
 			for ( std::vector< std::tstring >::const_iterator it = targetFiles.begin(); it != targetFiles.end(); ++it )

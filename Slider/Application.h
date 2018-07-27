@@ -94,7 +94,7 @@ namespace app
 	ui::IUserReport& GetUserReport( void );
 	ui::CIssueStore& GetIssueStore( void );
 
-	bool MoveFiles( const std::vector< std::tstring >& filesToMove );
+	bool MoveFiles( const std::vector< std::tstring >& filesToMove, CWnd* pParentWnd = AfxGetMainWnd() );
 	bool DeleteFiles( const std::vector< std::tstring >& filesToDelete, bool allowUndo = true );
 
 

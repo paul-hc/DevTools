@@ -538,6 +538,10 @@ BEGIN
         MENUITEM "&Move...\tCtrl+M",            CM_MOVE_FILE
         MENUITEM SEPARATOR
         MENUITEM "&Explore Image\tCtrl+E",      CM_EXPLORE_IMAGE
+        MENUITEM SEPARATOR
+        MENUITEM "&Copy\tCtrl+C",               ID_EDIT_COPY
+        MENUITEM SEPARATOR
+        MENUITEM "Select All\tCtrl+A",          ID_EDIT_SELECT_ALL
     END
     POPUP "<drop>"
     BEGIN
