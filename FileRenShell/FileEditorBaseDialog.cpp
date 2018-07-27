@@ -7,6 +7,7 @@
 #include "resource.h"
 #include "utl/ContainerUtilities.h"
 #include "utl/EnumTags.h"
+#include "utl/ReportListControl.h"
 #include "utl/Utilities.h"
 #include "utl/resource.h"
 
@@ -126,22 +127,6 @@ utl::ICommand* CFileEditorBaseDialog::PeekCmdForDialog( cmd::StackType stackType
 	return NULL;
 }
 
-int CFileEditorBaseDialog::EnsureVisibleFirstError( CReportListControl* pFileListCtrl ) const
-{
-	ASSERT_PTR( pFileListCtrl->GetSafeHwnd() );
-
-	int firstErrorIndex = -1;
-
-	if ( !m_errorItems.empty() )
-		firstErrorIndex = pFileListCtrl->FindItemIndex( (LPARAM)m_errorItems.front() );
-
-	if ( firstErrorIndex != -1 )
-		pFileListCtrl->EnsureVisible( firstErrorIndex, FALSE );		// visible first error
-
-	pFileListCtrl->Invalidate();				// trigger some highlighting
-	return firstErrorIndex;
-}
-
 bool CFileEditorBaseDialog::PromptCloseDialog( Prompt prompt /*= PromptNoFileChanges*/ )
 {
 	static const std::tstring s_noChangesPrefix = _T("There are no file changes to apply.\n\n");
@@ -151,6 +136,11 @@ bool CFileEditorBaseDialog::PromptCloseDialog( Prompt prompt /*= PromptNoFileCha
 		message = s_noChangesPrefix + message;
 
 	return IDOK == AfxMessageBox( message.c_str(), MB_OKCANCEL );
+}
+
+bool CFileEditorBaseDialog::IsErrorItem( const CPathItemBase* pItem ) const
+{
+	return utl::Contains( m_errorItems, pItem );
 }
 
 void CFileEditorBaseDialog::DoDataExchange( CDataExchange* pDX )

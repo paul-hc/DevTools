@@ -30,6 +30,9 @@ public:
 	template< typename PageType >
 	PageType* GetPageAs( int pageIndex ) const { return dynamic_cast< PageType* >( GetPage( pageIndex ) ); }	// dynamic so that it works with interfaces
 
+	template< typename PageType >
+	PageType* GetCreatedPageAs( int pageIndex ) const;			// only if page created (pPage->m_hWnd != NULL); useful for selective UI updates
+
 	CLayoutPropertyPage* GetActivePage( void ) const;
 	void SetInitialPageIndex( UINT initialPageIndex ) { REQUIRE( NULL == m_hWnd ); m_initialPageIndex = initialPageIndex; }
 
@@ -97,6 +100,16 @@ protected:
 
 	DECLARE_MESSAGE_MAP()
 };
+
+
+// template code
+
+template< typename PageType >
+PageType* CLayoutBasePropertySheet::GetCreatedPageAs( int pageIndex ) const
+{
+	CLayoutPropertyPage* pPage = GetPage( pageIndex );
+	return pPage->GetSafeHwnd() != NULL ? dynamic_cast< PageType* >( pPage ) : NULL;
+}
 
 
 #endif // LayoutBasePropertySheet_h

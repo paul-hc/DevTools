@@ -18,7 +18,7 @@ public:
 	bool IsModified( void ) const { return HasDestPath() && m_destPath.Get() != GetKeyPath().Get(); }		// case-sensitive string compare (not paths)
 	bool HasDestPath( void ) const { return !m_destPath.IsEmpty(); }
 
-	void Reset( void ) { m_destPath.Clear(); }
+	void Reset( void ) { m_destPath = GetKeyPath(); }
 	fs::CPath& RefDestPath( void ) { return m_destPath; }
 private:
 	fs::CPath m_destPath;

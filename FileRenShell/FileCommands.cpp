@@ -522,17 +522,20 @@ CResetDestinationsCmd::CResetDestinationsCmd( CFileModel* pFileModel )
 {
 	if ( !pFileModel->GetRenameItems().empty() )		// lazy initialized?
 	{
-		std::vector< fs::CPath > emptyDestPaths( pFileModel->GetRenameItems().size() );
-		AddCmd( new CChangeDestPathsCmd( pFileModel, emptyDestPaths, m_userInfo ) );
+		std::vector< fs::CPath > destPaths; destPaths.reserve( pFileModel->GetRenameItems().size() );
+		for ( std::vector< CRenameItem* >::const_iterator itRenameItem = pFileModel->GetRenameItems().begin(); itRenameItem != pFileModel->GetRenameItems().end(); ++itRenameItem )
+			destPaths.push_back( ( *itRenameItem )->GetSrcPath() );		// DEST = SRC
+
+		AddCmd( new CChangeDestPathsCmd( pFileModel, destPaths, m_userInfo ) );
 	}
 
 	if ( !pFileModel->GetTouchItems().empty() )			// lazy initialized?
 	{
-		std::vector< fs::CFileState > emptyDestStates; emptyDestStates.reserve( pFileModel->GetTouchItems().size() );
+		std::vector< fs::CFileState > destStates; destStates.reserve( pFileModel->GetTouchItems().size() );
 		for ( std::vector< CTouchItem* >::const_iterator itTouchItem = pFileModel->GetTouchItems().begin(); itTouchItem != pFileModel->GetTouchItems().end(); ++itTouchItem )
-			emptyDestStates.push_back( ( *itTouchItem )->GetSrcState() );
+			destStates.push_back( ( *itTouchItem )->GetSrcState() );
 
-		AddCmd( new CChangeDestFileStatesCmd( pFileModel, emptyDestStates, m_userInfo ) );
+		AddCmd( new CChangeDestFileStatesCmd( pFileModel, destStates, m_userInfo ) );
 	}
 }
 

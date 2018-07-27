@@ -8,6 +8,36 @@
 #endif
 
 
+/*	Explorer Shell object model
+
+IUnknown
+    IExplorerBrowser
+		{ ::SHCoCreateInstance( NULL, &CLSID_ExplorerBrowser, NULL, IID_PPV_ARGS( &m_pExplorerBrowser ) ) }
+
+	IShellFolder
+		IShellFolder2
+		{ ::SHGetDesktopFolder( &pDesktopShellFolder ) }
+
+    IShellItem
+		IShellItem2
+
+    IOleWindow
+		IShellView
+			IShellView2
+				IShellView3
+				{ IShellView2::SelectAndPositionItem() }
+
+    IFolderView
+		IFolderView2
+
+    IPersist
+		IPersistFolder
+			IPersistFolder2
+				IPersistFolder3
+
+    IDataObject
+*/
+
 namespace shell
 {
 	CComPtr< IShellFolder > CWinExplorer::GetDesktopFolder( void ) const
@@ -15,13 +45,6 @@ namespace shell
 		CComPtr< IShellFolder > pDesktopFolder;
 		Good( ::SHGetDesktopFolder( &pDesktopFolder ) );
 		return pDesktopFolder;
-	}
-
-	CComPtr< IShellItem > CWinExplorer::FindShellItem( const fs::CPath& fullPath ) const
-	{
-		CComPtr< IShellItem > pShellItem;
-		Good( ::SHCreateItemFromParsingName( fullPath.GetPtr(), NULL, IID_PPV_ARGS( &pShellItem ) ) );
-		return pShellItem;
 	}
 
 	bool CWinExplorer::ParsePidl( PIDLIST_RELATIVE* pPidl, IShellFolder* pFolder, const TCHAR* pFnameExt ) const
@@ -42,12 +65,32 @@ namespace shell
 		if ( fs::IsValidDirectory( pDirPath ) )
 			if ( CComPtr< IShellFolder > pDesktopFolder = GetDesktopFolder() )
 			{
-				CComHeapPtr< ITEMIDLIST > pidlWorkDir;
-				if ( ParsePidl( &pidlWorkDir, pDesktopFolder, pDirPath ) )
-					Good( pDesktopFolder->BindToObject( pidlWorkDir, NULL, IID_PPV_ARGS( &pDirFolder ) ) );
+				CComHeapPtr< ITEMIDLIST > workDirPidl;
+				if ( ParsePidl( &workDirPidl, pDesktopFolder, pDirPath ) )
+					Good( pDesktopFolder->BindToObject( workDirPidl, NULL, IID_PPV_ARGS( &pDirFolder ) ) );
 			}
 
 		return pDirFolder;
+	}
+
+
+	CComPtr< IShellItem > CWinExplorer::FindShellItem( const fs::CPath& fullPath ) const
+	{
+		CComPtr< IShellItem > pShellItem;
+		Good( ::SHCreateItemFromParsingName( fullPath.GetPtr(), NULL, IID_PPV_ARGS( &pShellItem ) ) );
+		return pShellItem;
+	}
+
+	std::tstring CWinExplorer::GetItemDisplayName( IShellItem* pShellItem, SIGDN nameType /*= SIGDN_FILESYSPATH*/ ) const
+	{
+		ASSERT_PTR( pShellItem );
+
+		CComHeapPtr< wchar_t > pDisplayName;
+
+		if ( HR_OK( pShellItem->GetDisplayName( nameType, &pDisplayName ) ) )
+			return (const wchar_t*)pDisplayName;
+
+		return std::tstring();
 	}
 
 	HBITMAP CWinExplorer::ExtractThumbnail( const fs::CPath& filePath, const CSize& boundsSize, DWORD flags /*= 0*/ ) const

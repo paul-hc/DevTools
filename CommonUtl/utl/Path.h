@@ -120,9 +120,6 @@ namespace path
 	std::tstring FindCommonPrefix( const TCHAR* pLeftPath, const TCHAR* pRightPath );	// "C:\win" for "C:\win\desktop\temp.txt" and "c:\win\tray\sample.txt"
 	std::tstring StripCommonPrefix( const TCHAR* pFullPath, const TCHAR* pDirPath );	// "desktop\temp.txt" for "C:\win\desktop\temp.txt" and "c:\win\system"
 	bool StripPrefix( std::tstring& rPath, const TCHAR* pPrefix );						// "desktop\temp.txt" for "C:\win\desktop\temp.txt" and "c:\win"
-
-
-	UINT ToHashValue( const TCHAR* pPath );
 }
 
 

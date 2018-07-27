@@ -6,6 +6,7 @@
 #include "PopupDlgBase.h"
 #include "LayoutMetrics.h"
 #include "RuntimeException.h"
+#include <afxdlgs.h>
 
 
 class CLayoutPropertyPage;
@@ -54,6 +55,9 @@ public:
 
 	virtual void SetModified( bool changed );
 protected:
+	bool StoreFocusControl( void );
+	bool RestoreFocusControl( void );
+
 	virtual void OnIdleUpdateControls( void );
 private:
 	using CPropertyPage::SetModified;
@@ -61,6 +65,8 @@ private:
 	UINT m_templateId;
 	std::auto_ptr< CLayoutEngine > m_pLayoutEngine;
 	bool m_useLazyUpdateData;		// call UpdateData on page activation change
+
+	HWND m_hCtrlFocus;
 protected:
 	bool m_idleUpdateDeep;			// send WM_IDLEUPDATECMDUI to all descendants
 	CAccelPool m_accelPool;

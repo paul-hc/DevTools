@@ -3,6 +3,7 @@
 #include "TextEdit.h"
 #include "Dialog_fwd.h"
 #include "Icon.h"
+#include "SyncScrolling.h"
 #include "StringUtilities.h"
 #include "Utilities.h"
 
@@ -18,6 +19,8 @@ static ACCEL editKeys[] =
 	{ FVIRTKEY | FCONTROL, _T('A'), ID_EDIT_SELECT_ALL }
 };
 
+const TCHAR CTextEdit::s_lineEnd[] = _T("\r\n");
+
 CTextEdit::CTextEdit( bool useFixedFont /*= true*/ )
 	: CBaseFrameHostCtrl< CEdit >()
 	, m_useFixedFont( useFixedFont )
@@ -25,11 +28,21 @@ CTextEdit::CTextEdit( bool useFixedFont /*= true*/ )
 	, m_hookThumbTrack( true )
 	, m_visibleWhiteSpace( false )
 	, m_accel( editKeys, COUNT_OF( editKeys ) )
+	, m_pSyncScrolling( NULL )
 {
 }
 
 CTextEdit::~CTextEdit()
 {
+}
+
+void CTextEdit::AddToSyncScrolling( CSyncScrolling* pSyncScrolling )
+{
+	ASSERT_PTR( pSyncScrolling );
+	ASSERT_NULL( m_pSyncScrolling );
+
+	m_pSyncScrolling = pSyncScrolling;
+	m_pSyncScrolling->AddCtrl( this );
 }
 
 bool CTextEdit::HasInvalidText( void ) const
@@ -189,6 +202,8 @@ BEGIN_MESSAGE_MAP( CTextEdit, BaseClass )
 	ON_WM_VSCROLL()
 	ON_CONTROL_REFLECT_EX( EN_CHANGE, OnEnChange_Reflect )
 	ON_CONTROL_REFLECT_EX( EN_KILLFOCUS, OnEnKillFocus_Reflect )
+	ON_CONTROL_REFLECT_EX( EN_HSCROLL, OnEnHScroll_Reflect )
+	ON_CONTROL_REFLECT_EX( EN_VSCROLL, OnEnVScroll_Reflect )
 	ON_COMMAND( ID_EDIT_SELECT_ALL, OnSelectAll )
 END_MESSAGE_MAP()
 
@@ -233,7 +248,23 @@ BOOL CTextEdit::OnEnChange_Reflect( void )
 BOOL CTextEdit::OnEnKillFocus_Reflect( void )
 {
 	NormalizeText();
-	return 0;
+	return FALSE;					// continue routing
+}
+
+BOOL CTextEdit::OnEnHScroll_Reflect( void )
+{
+	if ( m_pSyncScrolling != NULL && m_pSyncScrolling->SyncHorizontal() )
+		m_pSyncScrolling->Synchronize( this );
+
+	return FALSE;					// continue routing
+}
+
+BOOL CTextEdit::OnEnVScroll_Reflect( void )
+{
+	if ( m_pSyncScrolling != NULL && m_pSyncScrolling->SyncVertical() )
+		m_pSyncScrolling->Synchronize( this );
+
+	return FALSE;					// continue routing
 }
 
 void CTextEdit::OnSelectAll( void )

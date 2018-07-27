@@ -4,6 +4,7 @@
 
 #include "LayoutBasePropertySheet.h"
 #include "LayoutMetrics.h"
+#include "AccelTable.h"
 
 
 // base class for top level modeless child property sheets
@@ -36,6 +37,8 @@ private:
 protected:
 	bool m_autoDeletePages;				// true by default
 	CRect m_tabMargins;
+private:
+	CAccelTable m_accel;				// page navigation for modeless child sheet
 
 	// generated overrides
 	public:
@@ -43,6 +46,7 @@ protected:
 protected:
 	// message map functions
 	afx_msg LRESULT OnPageChanged( WPARAM wParam, LPARAM lParam );
+	afx_msg void OnNavigatePage( UINT cmdId );
 
 	DECLARE_MESSAGE_MAP()
 };

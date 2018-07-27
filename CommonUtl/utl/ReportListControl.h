@@ -131,7 +131,7 @@ public:
 public:
 	enum ListPopup { OnSelection, Nowhere, _ListPopupCount };
 
-	void SetPopupMenu( ListPopup popupType, CMenu* pPopupMenu ) { m_pPopupMenu[ popupType ] = pPopupMenu; }
+	void SetPopupMenu( ListPopup popupType, CMenu* pPopupMenu ) { m_pPopupMenu[ popupType ] = pPopupMenu; }		// set pPopupMenu to NULL to allow tracking context menu by parent dialog
 	static CMenu& GetStdPopupMenu( ListPopup popupType );
 
 	ole::IDataSourceFactory* GetDataSourceFactory( void ) const { return m_pDataSourceFactory; }
@@ -296,6 +296,8 @@ public:
 	int Find( const void* pObject ) const;
 	int FindItemIndex( const std::tstring& itemText ) const;
 	int FindItemIndex( LPARAM lParam ) const;
+
+	bool EnsureVisibleObject( const utl::ISubject* pObject );
 
 	void QueryItemsText( std::vector< std::tstring >& rItemsText, const std::vector< int >& indexes, int subItem = 0 ) const;
 	void QuerySelectedItemsText( std::vector< std::tstring >& rItemsText, int subItem = 0 ) const;

@@ -26,7 +26,6 @@ public:
 
 	void Clear( void );
 	size_t SetupFromDropInfo( HDROP hDropInfo );
-	static CFileModel* Instance( void ) { return safe_ptr( s_pInstance ); }			// singleton access
 
 	const std::vector< fs::CPath >& GetSourcePaths( void ) const { return m_sourcePaths; }
 	CCommandModel* GetCommandModel( void );
@@ -110,8 +109,6 @@ private:
 	std::auto_ptr< CCommandModel > m_pCommandModel;		// self-encapsulated
 	std::vector< CRenameItem* > m_renameItems;
 	std::vector< CTouchItem* > m_touchItems;
-
-	static CFileModel* s_pInstance;						// for singleton access
 
 	// generated stuff
 protected:

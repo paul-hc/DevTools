@@ -10,10 +10,18 @@
 #endif
 
 
+static ACCEL s_sheetKeys[] =
+{
+	{ FVIRTKEY | FCONTROL, VK_NEXT, ID_NEXT_PANE },		// Ctrl + Page-Down
+	{ FVIRTKEY | FCONTROL, VK_PRIOR, ID_PREV_PANE }		// Ctrl + Page-Up
+};
+
+
 CLayoutChildPropertySheet::CLayoutChildPropertySheet( UINT selPageIndex /*= 0*/ )
 	: CLayoutBasePropertySheet( _T("<detail sheet>"), NULL, selPageIndex )
 	, m_autoDeletePages( true )
 	, m_tabMargins( 0, 0, 2, 2 )
+	, m_accel( s_sheetKeys, COUNT_OF( s_sheetKeys ) )
 {
 }
 
@@ -87,10 +95,14 @@ void CLayoutChildPropertySheet::LayoutSheet( void )
 
 BEGIN_MESSAGE_MAP( CLayoutChildPropertySheet, CLayoutBasePropertySheet )
 	ON_MESSAGE( PSM_CHANGED, OnPageChanged )
+	ON_COMMAND_RANGE( ID_NEXT_PANE, ID_PREV_PANE, OnNavigatePage )
 END_MESSAGE_MAP()
 
 BOOL CLayoutChildPropertySheet::PreTranslateMessage( MSG* pMsg )
 {
+	if ( m_accel.Translate( pMsg, m_hWnd ) )
+		return TRUE;
+
 	if ( CAccelTable::IsKeyMessage( pMsg ) )
 		if ( GetParent()->PreTranslateMessage( pMsg ) )
 			return TRUE;				// accelerator handled by parent dialog
@@ -111,4 +123,22 @@ LRESULT CLayoutChildPropertySheet::OnPageChanged( WPARAM wParam, LPARAM lParam )
 		ui::EnableWindow( *pApplyNowButton );
 
 	return Default();
+}
+
+void CLayoutChildPropertySheet::OnNavigatePage( UINT cmdId )
+{
+	int pageCount = GetPageCount();
+	if ( 0 == pageCount )
+		return;
+
+	int activePageIndex = GetActiveIndex();
+
+	switch ( cmdId )
+	{
+		case ID_NEXT_PANE: ++activePageIndex; break;
+		case ID_PREV_PANE: --activePageIndex; break;
+	}
+
+	if ( activePageIndex >= 0 && activePageIndex < pageCount )
+		SetActivePage( activePageIndex );
 }

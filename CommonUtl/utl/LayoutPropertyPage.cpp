@@ -5,6 +5,7 @@
 #include "LayoutEngine.h"
 #include "CmdInfoStore.h"
 #include "MenuUtilities.h"
+#include "PostCall.h"
 #include "Utilities.h"
 #include <afxpriv.h>
 
@@ -20,6 +21,7 @@ CLayoutPropertyPage::CLayoutPropertyPage( UINT templateId, UINT titleId /*= 0*/ 
 	, m_templateId( templateId )
 	, m_pLayoutEngine( new CLayoutEngine )
 	, m_useLazyUpdateData( false )				// don't output on each page activation - contrary to CPropertyPage default behaviour
+	, m_hCtrlFocus( NULL )
 	, m_idleUpdateDeep( false )
 {
 	m_psp.dwFlags &= ~PSP_HASHELP;				// don't show the help button by default
@@ -88,6 +90,26 @@ void CLayoutPropertyPage::SetModified( bool changed )
 	CPropertyPage::SetModified( changed );
 }
 
+bool CLayoutPropertyPage::StoreFocusControl( void )
+{
+	HWND hCtrlFocus = ::GetFocus();
+	if ( hCtrlFocus != NULL && ::IsChild( m_hWnd, hCtrlFocus ) )
+		m_hCtrlFocus = hCtrlFocus;
+	else
+		m_hCtrlFocus = NULL;
+
+	return m_hCtrlFocus != NULL;
+}
+
+bool CLayoutPropertyPage::RestoreFocusControl( void )
+{
+	if ( NULL == m_hCtrlFocus || !::IsWindow( m_hCtrlFocus ) )
+		return false;
+
+	::SetFocus( m_hCtrlFocus );
+	return true;
+}
+
 void CLayoutPropertyPage::OnIdleUpdateControls( void )
 {
 	SendMessageToDescendants( WM_IDLEUPDATECMDUI, (WPARAM)TRUE, 0, m_idleUpdateDeep, TRUE );		// update dialog toolbars
@@ -116,6 +138,8 @@ BOOL CLayoutPropertyPage::OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHAND
 
 BOOL CLayoutPropertyPage::OnSetActive( void )
 {
+	ui::PostCall( this, &CLayoutPropertyPage::RestoreFocusControl );			// delayed focus so that it overrides page default behaviour: resetting the focus to first control in the page
+
 	if ( m_useLazyUpdateData )
 		return CPropertyPage::OnSetActive();
 
@@ -124,6 +148,8 @@ BOOL CLayoutPropertyPage::OnSetActive( void )
 
 BOOL CLayoutPropertyPage::OnKillActive( void )
 {
+	StoreFocusControl();
+
 	if ( m_useLazyUpdateData )
 		return CPropertyPage::OnKillActive();
 

@@ -575,14 +575,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\MainRenameDialog.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\MainRenameDialog.h"
-				>
-			</File>
-			<File
 				RelativePath=".\OptionsPages.cpp"
 				>
 			</File>
@@ -592,6 +584,22 @@
 			</File>
 			<File
 				RelativePath=".\OptionsSheet.h"
+				>
+			</File>
+			<File
+				RelativePath=".\RenameFilesDialog.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\RenameFilesDialog.h"
+				>
+			</File>
+			<File
+				RelativePath=".\RenamePages.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\RenamePages.h"
 				>
 			</File>
 			<File

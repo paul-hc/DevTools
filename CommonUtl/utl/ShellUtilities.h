@@ -3,10 +3,6 @@
 #pragma once
 
 #include "Shell_fwd.h"
-#include "StringCvt.h"
-
-
-class COleDataSource;
 
 
 namespace shell
@@ -37,6 +33,12 @@ namespace shell
 
 	bool ExploreAndSelectFile( const TCHAR* pFullPath );
 }
+
+
+#include "StringCvt.h"
+
+
+class COleDataSource;
 
 
 namespace shell

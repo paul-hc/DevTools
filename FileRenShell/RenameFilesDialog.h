@@ -1,7 +1,8 @@
-#ifndef MainRenameDialog_h
-#define MainRenameDialog_h
+#ifndef RenameFilesDialog_h
+#define RenameFilesDialog_h
 #pragma once
 
+#include "utl/LayoutChildPropertySheet.h"
 #include "utl/DialogToolBar.h"
 #include "utl/EnumSplitButton.h"
 #include "utl/HistoryComboBox.h"
@@ -20,12 +21,15 @@ class CRenameService;
 class CPickDataset;
 
 
-class CMainRenameDialog : public CFileEditorBaseDialog
-						, private CReportListControl::ITextEffectCallback
+class CRenameFilesDialog : public CFileEditorBaseDialog
 {
 public:
-	CMainRenameDialog( CFileModel* pFileModel, CWnd* pParent );
-	virtual ~CMainRenameDialog();
+	CRenameFilesDialog( CFileModel* pFileModel, CWnd* pParent );
+	virtual ~CRenameFilesDialog();
+
+	const std::vector< CRenameItem* >& GetRenameItems( void ) const { return m_rRenameItems; }
+	bool IsInitialized( void ) const { return m_isInitialized; }
+	bool HasDestPaths( void ) const;
 private:
 	// IFileEditor interface (partial)
 	virtual void PostMakeDest( bool silent = false );
@@ -38,25 +42,16 @@ private:
 	virtual void ClearFileErrors( void );
 	virtual void OnFileError( const fs::CPath& srcPath, const std::tstring& errMsg );
 
-	// CReportListControl::ITextEffectCallback interface
-	virtual void CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARAM rowKey, int subItem ) const;
-
 	// ui::ICmdCallback interface
 	virtual void QueryTooltipText( std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const;
 private:
-	void SetupFileListView( void );
-
 	void SwitchMode( Mode mode );
-
-	bool HasDestPaths( void ) const;
 
 	void AutoGenerateFiles( void );
 	bool RenameFiles( void );
 	bool ChangeSeqCount( UINT seqCount );
 
-	enum Column { Source, Destination };
-
-	size_t FindItemPos( const fs::CPath& srcPath ) const;
+	CRenameItem* FindItemWithKey( const fs::CPath& srcPath ) const;
 	void MarkInvalidSrcItems( void );
 	std::tstring JoinErrorDestPaths( void ) const;
 
@@ -65,6 +60,7 @@ private:
 private:
 	const std::vector< CRenameItem* >& m_rRenameItems;
 	std::auto_ptr< CRenameService > m_pRenSvc;
+	bool m_isInitialized;
 
 	bool m_autoGenerate;
 	bool m_seqCountAutoAdvance;
@@ -72,11 +68,14 @@ private:
 	std::auto_ptr< CPickDataset > m_pPickDataset;
 private:
 	// enum { IDD = IDD_RENAME_FILES_DIALOG };
+	enum Page { ListPage, EditPage };
+
+	CLayoutChildPropertySheet m_filesSheet;
+
 	CHistoryComboBox m_formatCombo;
 	CDialogToolBar m_formatToolbar;
 	CSpinEdit m_seqCountEdit;
 	CDialogToolBar m_seqCountToolbar;
-	CReportListControl m_fileListCtrl;
 	CSplitPushButton m_capitalizeButton;
 	CEnumSplitButton m_changeCaseButton;
 	CHistoryComboBox m_delimiterSetCombo;
@@ -103,7 +102,7 @@ protected:
 	afx_msg void OnUpdateSeqCountAutoAdvance( CCmdUI* pCmdUI );
 	afx_msg void OnBnClicked_CopySourceFiles( void );
 	afx_msg void OnBnClicked_PasteDestFiles( void );
-	afx_msg void OnBnClicked_ClearDestFiles( void );
+	afx_msg void OnBnClicked_ResetDestFiles( void );
 	afx_msg void OnBnClicked_CapitalizeDestFiles( void );
 	afx_msg void OnSbnRightClicked_CapitalizeOptions( void );
 	afx_msg void OnBnClicked_ChangeCase( void );
@@ -125,4 +124,4 @@ protected:
 };
 
 
-#endif // MainRenameDialog_h
+#endif // RenameFilesDialog_h

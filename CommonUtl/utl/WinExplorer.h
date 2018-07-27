@@ -17,8 +17,8 @@ namespace shell
 	public:
 		CWinExplorer( bool throwMode = false ) : CThrowMode( throwMode ) {}
 
+		// IShellFolder
 		CComPtr< IShellFolder > GetDesktopFolder( void ) const;
-		CComPtr< IShellItem > FindShellItem( const fs::CPath& filePath ) const;		// works with shortcuts only if you pass the link path "shortcut.lnk"
 
 		bool ParsePidl( PIDLIST_RELATIVE* pPidl, IShellFolder* pFolder, const TCHAR* pFnameExt ) const;
 
@@ -26,6 +26,11 @@ namespace shell
 
 		template< typename Interface >
 		CComPtr< Interface > BindFileTo( IShellFolder* pFolder, const TCHAR* pFnameExt ) const;
+
+		// IShellItem
+		CComPtr< IShellItem > FindShellItem( const fs::CPath& filePath ) const;		// works with shortcuts only if you pass the link path "shortcut.lnk"
+		std::tstring GetItemDisplayName( IShellItem* pShellItem, SIGDN nameType = SIGDN_FILESYSPATH ) const;
+		fs::CPath GetItemPath( IShellItem* pShellItem ) const { return GetItemDisplayName( pShellItem, SIGDN_FILESYSPATH ); }
 
 		// caller must delete the bitmap
 		HBITMAP ExtractThumbnail( const fs::CPath& filePath, const CSize& boundsSize, DWORD flags = 0 ) const;		// IEIFLAG_ASPECT corrupts the original aspect ratio, forcing to boundsSize

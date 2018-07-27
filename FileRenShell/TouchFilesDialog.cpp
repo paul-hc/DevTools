@@ -44,7 +44,7 @@ namespace layout
 
 		{ IDC_COPY_SOURCE_PATHS_BUTTON, MoveY },
 		{ IDC_PASTE_FILES_BUTTON, MoveY },
-		{ IDC_CLEAR_FILES_BUTTON, MoveY },
+		{ IDC_RESET_FILES_BUTTON, MoveY },
 
 		{ IDOK, MoveX },
 		{ IDCANCEL, MoveX },
@@ -137,7 +137,7 @@ void CTouchFilesDialog::SwitchMode( Mode mode )
 
 	static const UINT ctrlIds[] =
 	{
-		IDC_COPY_SOURCE_PATHS_BUTTON, IDC_PASTE_FILES_BUTTON, IDC_CLEAR_FILES_BUTTON,
+		IDC_COPY_SOURCE_PATHS_BUTTON, IDC_PASTE_FILES_BUTTON, IDC_RESET_FILES_BUTTON,
 		IDC_MODIFIED_DATE, IDC_CREATED_DATE, IDC_ACCESSED_DATE,
 		IDC_ATTRIB_READONLY_CHECK, IDC_ATTRIB_HIDDEN_CHECK, IDC_ATTRIB_SYSTEM_CHECK, IDC_ATTRIB_ARCHIVE_CHECK
 	};
@@ -154,7 +154,7 @@ void CTouchFilesDialog::PostMakeDest( bool silent /*= false*/ )
 	if ( !silent )
 		GotoDlgCtrl( GetDlgItem( IDOK ) );
 
-	EnsureVisibleFirstError( &m_fileListCtrl );
+	EnsureVisibleFirstError();
 	SwitchMode( CommitFilesMode );
 }
 
@@ -365,11 +365,10 @@ void CTouchFilesDialog::OnFileError( const fs::CPath& srcPath, const std::tstrin
 {
 	errMsg;
 
-	size_t pos = FindItemPos( srcPath );
-	if ( pos != utl::npos )
-		utl::AddUnique( m_errorItems, m_rTouchItems[ pos ] );
+	if ( CTouchItem* pErrorItem = FindItemWithKey( srcPath ) )
+		utl::AddUnique( m_errorItems, pErrorItem );
 
-	EnsureVisibleFirstError( &m_fileListCtrl );
+	EnsureVisibleFirstError();
 }
 
 void CTouchFilesDialog::CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARAM rowKey, int subItem ) const
@@ -461,9 +460,10 @@ void CTouchFilesDialog::ModifyDiffTextEffectAt( CListTraits::CMatchEffects& rEff
 	}
 }
 
-size_t CTouchFilesDialog::FindItemPos( const fs::CPath& keyPath ) const
+CTouchItem* CTouchFilesDialog::FindItemWithKey( const fs::CPath& keyPath ) const
 {
-	return utl::BinaryFindPos( m_rTouchItems, keyPath, CPathItemBase::ToKeyPath() );
+	std::vector< CTouchItem* >::const_iterator itFoundItem = utl::BinaryFind( m_rTouchItems, keyPath, CPathItemBase::ToKeyPath() );
+	return itFoundItem != m_rTouchItems.end() ? *itFoundItem : NULL;
 }
 
 void CTouchFilesDialog::MarkInvalidSrcItems( void )
@@ -471,6 +471,14 @@ void CTouchFilesDialog::MarkInvalidSrcItems( void )
 	for ( std::vector< CTouchItem* >::const_iterator itTouchItem = m_rTouchItems.begin(); itTouchItem != m_rTouchItems.end(); ++itTouchItem )
 		if ( !( *itTouchItem )->GetKeyPath().FileExist() )
 			utl::AddUnique( m_errorItems, *itTouchItem );
+}
+
+void CTouchFilesDialog::EnsureVisibleFirstError( void )
+{
+	if ( !m_errorItems.empty() )
+		m_fileListCtrl.EnsureVisibleObject( m_errorItems.front() );
+
+	m_fileListCtrl.Invalidate();				// trigger some highlighting
 }
 
 fs::CFileState::TimeField CTouchFilesDialog::GetTimeField( UINT dtId )
@@ -502,7 +510,7 @@ void CTouchFilesDialog::DoDataExchange( CDataExchange* pDX )
 
 	ui::DDX_ButtonIcon( pDX, IDC_COPY_SOURCE_PATHS_BUTTON, ID_EDIT_COPY );
 	ui::DDX_ButtonIcon( pDX, IDC_PASTE_FILES_BUTTON, ID_EDIT_PASTE );
-	ui::DDX_ButtonIcon( pDX, IDC_CLEAR_FILES_BUTTON, ID_REMOVE_ALL_ITEMS );
+	ui::DDX_ButtonIcon( pDX, IDC_RESET_FILES_BUTTON, ID_RESET_DEFAULT );
 
 	if ( DialogOutput == pDX->m_bSaveAndValidate )
 	{
@@ -525,7 +533,7 @@ BEGIN_MESSAGE_MAP( CTouchFilesDialog, CFileEditorBaseDialog )
 	ON_UPDATE_COMMAND_UI_RANGE( IDC_UNDO_BUTTON, IDC_REDO_BUTTON, OnUpdateUndoRedo )
 	ON_BN_CLICKED( IDC_COPY_SOURCE_PATHS_BUTTON, OnBnClicked_CopySourceFiles )
 	ON_BN_CLICKED( IDC_PASTE_FILES_BUTTON, OnBnClicked_PasteDestStates )
-	ON_BN_CLICKED( IDC_CLEAR_FILES_BUTTON, OnBnClicked_ResetDestFiles )
+	ON_BN_CLICKED( IDC_RESET_FILES_BUTTON, OnBnClicked_ResetDestFiles )
 	ON_BN_CLICKED( IDC_SHOW_SOURCE_INFO_CHECK, OnBnClicked_ShowSrcColumns )
 	ON_COMMAND_RANGE( ID_COPY_MODIFIED_DATE, ID_COPY_ACCESSED_DATE, OnCopyDateCell )
 	ON_UPDATE_COMMAND_UI_RANGE( ID_COPY_MODIFIED_DATE, ID_COPY_ACCESSED_DATE, OnUpdateSelListItem )

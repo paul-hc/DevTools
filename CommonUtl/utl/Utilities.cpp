@@ -665,7 +665,7 @@ namespace ui
 
 		if ( !HasFlag( GetStyle( hWnd ), WS_CHILD ) )
 			::SetFocus( hWnd );
-		else if ( HWND hParent = GetParent( hWnd ) )
+		else if ( HWND hParent = ::GetParent( hWnd ) )
 			::SendMessage( hParent, WM_NEXTDLGCTL, (WPARAM)hWnd, 1L );
 
 		return true;

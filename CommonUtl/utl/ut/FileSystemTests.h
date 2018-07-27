@@ -22,6 +22,8 @@ private:
 	void TestStgShortFilenames( void );
 	void TestTempFilePool( void );
 	void TestFileAndDirectoryState( void );
+
+	void TestShellPidl( void );
 };
 
 

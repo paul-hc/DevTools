@@ -4,6 +4,7 @@
 
 #include "utl/FileState.h"
 #include "utl/ISubject.h"
+#include "utl/ReportListControl.h"
 #include "utl/DateTimeControl.h"
 #include "FileEditorBaseDialog.h"
 
@@ -63,8 +64,9 @@ private:
 	utl::ICommand* MakeChangeDestFileStatesCmd( void );
 	bool VisibleAllSrcColumns( void ) const;
 
-	size_t FindItemPos( const fs::CPath& keyPath ) const;
+	CTouchItem* FindItemWithKey( const fs::CPath& srcPath ) const;
 	void MarkInvalidSrcItems( void );
+	void EnsureVisibleFirstError( void );
 
 	static fs::CFileState::TimeField GetTimeField( UINT dtId );
 private:

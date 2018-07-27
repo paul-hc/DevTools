@@ -456,13 +456,6 @@ namespace path
 		return false;
 	}
 
-	UINT ToHashValue( const TCHAR* pPath )
-	{
-		std::tstring stdPath = path::MakeNormal( pPath );
-		str::ToLower( stdPath );
-		return static_cast< UINT >( stdext::hash_value( stdPath.c_str() ) );
-	}
-
 } //namespace path
 
 

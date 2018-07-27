@@ -8,6 +8,9 @@
 #include "BaseFrameHostCtrl.h"
 
 
+class CSyncScrolling;
+
+
 // inhibits EN_CHANGE notifications on internal changes;
 // resets the modify flag when setting text programatically.
 
@@ -18,6 +21,8 @@ class CTextEdit : public CBaseFrameHostCtrl< CEdit >
 public:
 	CTextEdit( bool useFixedFont = true );
 	virtual ~CTextEdit();
+
+	void AddToSyncScrolling( CSyncScrolling* pSyncScrolling );
 
 	virtual bool HasInvalidText( void ) const;
 	virtual bool NormalizeText( void );
@@ -36,7 +41,7 @@ public:
 	bool KeepSelOnFocus( void ) const { return m_keepSelOnFocus; }
 	void SetKeepSelOnFocus( bool keepSelOnFocus = true ) { ASSERT_NULL( m_hWnd ); m_keepSelOnFocus = keepSelOnFocus; }		// also set ES_NOHIDESEL to retain selection (edit creation only)
 
-	bool HookThumbTrack( void ) const { return m_keepSelOnFocus; }
+	bool HookThumbTrack( void ) const { return m_hookThumbTrack; }
 	void SetHookThumbTrack( bool hookThumbTrack = true ) { m_hookThumbTrack = hookThumbTrack; }
 
 	bool VisibleWhiteSpace( void ) const { return m_visibleWhiteSpace; }
@@ -67,8 +72,12 @@ private:
 	bool m_hookThumbTrack;						// true: track thumb track scrolling events (edit controls don't send EN_VSCROLL on thumb track scrolling)
 	bool m_visibleWhiteSpace;
 	CAccelTable m_accel;
+
+	CSyncScrolling* m_pSyncScrolling;
 protected:
 	CInternalChange m_userChange;				// allow derived classes to force user change mode (when spinning, etc)
+public:
+	static const TCHAR s_lineEnd[];
 
 	// generated function overrides
 	public:
@@ -80,6 +89,8 @@ protected:
 	afx_msg void OnVScroll( UINT sbCode, UINT pos, CScrollBar* pScrollBar );
 	afx_msg BOOL OnEnChange_Reflect( void );
 	afx_msg BOOL OnEnKillFocus_Reflect( void );
+	afx_msg BOOL OnEnHScroll_Reflect( void );
+	afx_msg BOOL OnEnVScroll_Reflect( void );
 	afx_msg void OnSelectAll( void );
 
 	DECLARE_MESSAGE_MAP()

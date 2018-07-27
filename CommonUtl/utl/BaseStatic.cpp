@@ -53,7 +53,7 @@ void CBaseStatic::PreSubclassWindow( void )
 
 	if ( UINT_MAX == m_dtFlags )
 	{
-		m_dtFlags = DT_LEFT | DT_TOP | DT_NOPREFIX;
+		m_dtFlags = DT_LEFT | DT_TOP /*| DT_NOPREFIX*/;
 
 		switch ( style & SS_TYPEMASK )
 		{

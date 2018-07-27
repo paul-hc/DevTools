@@ -647,6 +647,12 @@ int CReportListControl::FindItemIndex( LPARAM lParam ) const
 	return FindItem( &findInfo );
 }
 
+bool CReportListControl::EnsureVisibleObject( const utl::ISubject* pObject )
+{
+	int foundIndex = FindItemIndex( (LPARAM)pObject );
+	return foundIndex != -1 && EnsureVisible( foundIndex, FALSE );
+}
+
 void CReportListControl::QueryItemsText( std::vector< std::tstring >& rItemsText, const std::vector< int >& indexes, int subItem /*= 0*/ ) const
 {
 	rItemsText.reserve( rItemsText.size() + indexes.size() );

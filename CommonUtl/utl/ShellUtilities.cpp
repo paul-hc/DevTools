@@ -1,6 +1,7 @@
 
 #include "stdafx.h"
 #include "ShellUtilities.h"
+#include "ShellTypes.h"
 #include "ContainerUtilities.h"
 #include "ImagingWic.h"
 #include "Registry.h"
@@ -16,7 +17,7 @@
 
 namespace shell
 {
-	static TCHAR g_initFolderPath[ _MAX_PATH ];
+	static TCHAR g_initFolderPath[ MAX_PATH ];
 	static enum BrowseFolderStatus { Done, Initialized } g_browseFolderStatus = Done;
 
 
@@ -57,9 +58,9 @@ namespace shell
 			{
 				// it seems no longer necessary
 				// set the status window to the currently selected path
-				TCHAR dir[ MAX_PATH ];
-				if ( SHGetPathFromIDList( (LPITEMIDLIST)lParam, dir ) )
-					SendMessage( hDlg, BFFM_SETSTATUSTEXT, 0, (LPARAM)dir );
+				TCHAR dirPath[ MAX_PATH ];
+				if ( ::SHGetPathFromIDList( (LPITEMIDLIST)lParam, dirPath ) )
+					SendMessage( hDlg, BFFM_SETSTATUSTEXT, 0, (LPARAM)dirPath );
 
 				if ( Initialized == g_browseFolderStatus )
 				{
@@ -83,53 +84,47 @@ namespace shell
 	bool BrowseForFolder( std::tstring& rFolderPath, CWnd* pParentWnd, std::tstring* pDisplayedName /*= NULL*/,
 						  BrowseFlags flags /*= BF_FileSystem*/, const TCHAR* pTitle /*= NULL*/, bool useNetwork /*= false*/ )
 	{
-		LPMALLOC pMalloc;
 		bool isOk = false;
 
 		str::Copy( g_initFolderPath, rFolderPath );
 
-		if ( HR_OK( ::SHGetMalloc( &pMalloc ) ) )
+		TCHAR displayName[ MAX_PATH ] = _T("");
+		BROWSEINFO bi = { NULL };
+
+		bi.hwndOwner = pParentWnd->GetSafeHwnd();
+		bi.pszDisplayName = displayName;
+		bi.lpszTitle = pTitle;
+		bi.ulFlags = BIF_VALIDATE | BIF_NEWDIALOGSTYLE | BIF_EDITBOX;
+		switch( flags )
 		{
-			TCHAR displayName[ _MAX_PATH ] = _T("");
-			BROWSEINFO bi = { NULL };
+			case BF_Computers:				bi.ulFlags |= BIF_BROWSEFORCOMPUTER; break;
+			case BF_Printers:				bi.ulFlags |= BIF_BROWSEFORPRINTER; break;
+			case BF_FileSystem:				bi.ulFlags |= BIF_RETURNONLYFSDIRS; break;
+			case BF_FileSystemIncludeFiles:	bi.ulFlags |= ( BIF_RETURNONLYFSDIRS | BIF_BROWSEINCLUDEFILES ); break;
+			case BF_AllIncludeFiles:		bi.ulFlags |= BIF_BROWSEINCLUDEFILES; break;
+			default: ASSERT( BF_All == flags );
+		}
 
-			bi.hwndOwner = pParentWnd->GetSafeHwnd();
-			bi.pszDisplayName = displayName;
-			bi.lpszTitle = pTitle;
-			bi.ulFlags = BIF_VALIDATE | BIF_NEWDIALOGSTYLE | BIF_EDITBOX;
-			switch( flags )
+		if ( useNetwork )
+			bi.ulFlags |= BIF_DONTGOBELOWDOMAIN;		// could be slow network binding
+		bi.lpfn = BrowseFolderCallback;
+
+		CPidl folderPidl( ::SHBrowseForFolder( &bi ) );
+
+		if ( pDisplayedName != NULL )
+			*pDisplayedName = displayName;
+
+		if ( !folderPidl.IsEmpty() )
+		{
+			if ( ::SHGetPathFromIDList( folderPidl.Get(), g_initFolderPath ) )
 			{
-				case BF_Computers:	bi.ulFlags |= BIF_BROWSEFORCOMPUTER; break;
-				case BF_Printers:	bi.ulFlags |= BIF_BROWSEFORPRINTER; break;
-				case BF_FileSystem:	bi.ulFlags |= BIF_RETURNONLYFSDIRS; break;
-				case BF_FileSystemIncludeFiles:	bi.ulFlags |= ( BIF_RETURNONLYFSDIRS | BIF_BROWSEINCLUDEFILES ); break;
-				case BF_AllIncludeFiles:	bi.ulFlags |= BIF_BROWSEINCLUDEFILES; break;
-				default:
-					ASSERT( BF_All == flags );
+				rFolderPath = g_initFolderPath;
+				isOk = true;
 			}
-
-			if ( useNetwork )
-				bi.ulFlags |= BIF_DONTGOBELOWDOMAIN;		// could be slow network binding
-			bi.lpfn = BrowseFolderCallback;
-
-			LPITEMIDLIST pIdl = ::SHBrowseForFolder( &bi );
-
-			if ( pDisplayedName != NULL )
-				*pDisplayedName = displayName;
-			if ( pIdl != NULL )
+			else if ( flags == BF_Computers || flags == BF_All || flags == BF_AllIncludeFiles )
 			{
-				if ( ::SHGetPathFromIDList( pIdl, g_initFolderPath ) )
-				{
-					rFolderPath = g_initFolderPath;
-					isOk = true;
-				}
-				else if ( flags == BF_Computers || flags == BF_All || flags == BF_AllIncludeFiles )
-				{
-					rFolderPath = displayName;
-					isOk = true;
-				}
-				pMalloc->Free( pIdl );
-				pMalloc->Release();
+				rFolderPath = displayName;
+				isOk = true;
 			}
 		}
 
@@ -156,16 +151,16 @@ namespace shell
 		if ( pTitle != NULL )
 			dlg.m_ofn.lpstrTitle = pTitle;
 
-		static stdext::hash_map< const TCHAR*, int > selFilterMap;
-		stdext::hash_map< const TCHAR*, int >::const_iterator itFilterIndex = selFilterMap.find( pFileFilter );
-		if ( itFilterIndex != selFilterMap.end() )
+		static stdext::hash_map< const TCHAR*, int > s_selFilterMap;
+		stdext::hash_map< const TCHAR*, int >::const_iterator itFilterIndex = s_selFilterMap.find( pFileFilter );
+		if ( itFilterIndex != s_selFilterMap.end() )
 			dlg.m_pOFN->nFilterIndex = itFilterIndex->second;			// use last selected filter
 
 		bool ok = IDOK == dlg.DoModal();
 		if ( ok )
 			rFilePath = dlg.GetPathName().GetString();
 
-		selFilterMap[ pFileFilter ] = dlg.m_pOFN->nFilterIndex;			// retain selected file filter
+		s_selFilterMap[ pFileFilter ] = dlg.m_pOFN->nFilterIndex;			// retain selected file filter
 		return ok;
 	}
 

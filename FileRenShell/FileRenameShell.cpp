@@ -3,7 +3,7 @@
 #include "FileRenShell.h"
 #include "FileRenameShell.h"
 #include "FileModel.h"
-#include "MainRenameDialog.h"
+#include "RenameFilesDialog.h"
 #include "TouchFilesDialog.h"
 #include "Application.h"
 #include "utl/FmtUtils.h"
@@ -210,9 +210,9 @@ STDMETHODIMP CFileRenameShell::InterfaceSupportsErrorInfo( REFIID riid )
 
 // IShellExtInit interface implementation
 
-STDMETHODIMP CFileRenameShell::Initialize( LPCITEMIDLIST pidlFolder, IDataObject* pDropInfo, HKEY hKeyProgId )
+STDMETHODIMP CFileRenameShell::Initialize( LPCITEMIDLIST folderPidl, IDataObject* pDropInfo, HKEY hKeyProgId )
 {
-	pidlFolder, hKeyProgId;
+	folderPidl, hKeyProgId;
 	AFX_MANAGE_STATE( AfxGetStaticModuleState() )
 
 	//TRACE( _T("CFileRenameShell::Initialize()\n") );

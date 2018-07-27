@@ -15,7 +15,11 @@ public:
 	CSyncScrolling( int scrollType = SB_VERT ) { SetScrollType( scrollType ); }
 
 	void SetScrollType( int scrollType );
+	bool SyncHorizontal( void ) const;
+	bool SyncVertical( void ) const;
+
 	void SetCtrls( CWnd* pDlg, const UINT ctrlIds[], size_t count );
+
 	CSyncScrolling& AddCtrl( CWnd* pCtrl ) { utl::PushUnique( m_ctrls, pCtrl ); return *this; }
 
 	void HookThumbTrack( void );			// track thumb track scrolling events (edit controls don't send EN_VSCROLL on thumb track scrolling)

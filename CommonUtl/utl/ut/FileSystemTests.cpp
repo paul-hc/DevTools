@@ -5,6 +5,8 @@
 #include "FlexPath.h"
 #include "FileState.h"
 #include "TimeUtils.h"
+#include "ShellTypes.h"
+#include "WinExplorer.h"
 #include "Resequence.hxx"
 #include "StringUtilities.h"
 #include "StructuredStorage.h"
@@ -200,6 +202,91 @@ void CFileSystemTests::TestFileAndDirectoryState( void )
 	}
 }
 
+void CFileSystemTests::TestShellPidl( void )
+{
+	ut::CTempFilePool pool( _T("fa.txt|d1\\fb.txt") );
+	const fs::CPath& poolDirPath = pool.GetPoolDirPath();
+
+	CComPtr< IShellFolder > pDesktopFolder = shell::CPidl::GetDesktopFolder();
+	ASSERT_PTR( pDesktopFolder );
+
+	shell::CPidl desktopPidl;
+	ASSERT( desktopPidl.CreateFromFolder( pDesktopFolder ) );
+	fs::CPath desktopPath = desktopPidl.GetFullPath();
+
+	shell::CPidl poolDirPidl;
+	ASSERT( poolDirPidl.IsEmpty() );
+	ASSERT( poolDirPidl.CreateFromPath( poolDirPath.GetPtr() ) );
+	ASSERT( !poolDirPidl.IsEmpty() );
+	ASSERT_EQUAL( poolDirPath, poolDirPidl.GetFullPath() );
+
+	{
+		shell::CPidl poolDirPidl2;
+		poolDirPidl2.AssignCopy( poolDirPidl.Get() );
+		ASSERT( poolDirPidl == poolDirPidl2 );				// absolute compare
+	}
+
+	CComPtr< IShellFolder > pPoolFolder = poolDirPidl.FindFolder();
+	ASSERT_PTR( pPoolFolder );
+
+	shell::CPidl pidl;
+	{
+		ASSERT( pidl.CreateFrom( pDesktopFolder ) );
+		ASSERT_EQUAL( desktopPath, pidl.GetFullPath() );
+
+		ASSERT( pidl.CreateFrom( pPoolFolder ) );
+		ASSERT_EQUAL( poolDirPath, pidl.GetFullPath() );
+	}
+
+	{
+		const fs::CPath& filePath = pool.GetFilePaths()[ 0 ];
+
+		shell::CPidl filePidl;
+		ASSERT( filePidl.CreateFromPath( filePath.GetPtr() ) );
+		ASSERT( filePidl.GetCount() > 1 );
+		ASSERT_EQUAL( filePath, filePidl.GetFullPath() );
+		ASSERT_EQUAL( _T("fa.txt"), filePidl.GetName() );		// filePath.GetNameExt()
+
+		{	// last item ID
+			shell::CPidl lastPidl;
+			lastPidl.AssignCopy( filePidl.GetLastItem() );
+			ASSERT_EQUAL( _T("fa.txt"), lastPidl.GetName() );
+		}
+
+		{
+			shell::CPidl absFilePidl;
+			ASSERT( absFilePidl.CreateAbsolute( filePath.GetPtr() ) );
+			ASSERT( absFilePidl == filePidl );					// absolute compare
+		}
+
+		{	// child PIDL
+			shell::CPidl itemPidl;
+			ASSERT( itemPidl.CreateChild( pPoolFolder, filePath.GetNameExt() ) );
+			ASSERT_EQUAL( 1, itemPidl.GetCount() );
+			ASSERT_EQUAL( desktopPath / itemPidl.GetName(), itemPidl.GetFullPath() );		// strangely, for child PIDLs the desktop directory is implicitly prepended
+			ASSERT_EQUAL( _T("fa.txt"), itemPidl.GetName() );		// filePath.GetNameExt()
+
+			// shell item from child PIDL relative to parent folder
+			CComPtr< IShellItem > pChildFileItem = itemPidl.FindItem( pPoolFolder );
+			ASSERT_PTR( pChildFileItem );
+			ASSERT_EQUAL( filePath, shell::CWinExplorer().GetItemPath( pChildFileItem ) );
+
+			ASSERT( pidl.CreateFrom( pChildFileItem ) );
+			ASSERT_EQUAL( filePath, pidl.GetFullPath() );
+		}
+
+		{	// shell item
+			CComPtr< IShellItem > pFileItem = filePidl.FindItem();
+			ASSERT_PTR( pFileItem );
+			fs::CPath itemPath = shell::CWinExplorer().GetItemPath( pFileItem );
+			ASSERT_EQUAL( filePath, itemPath );
+
+			ASSERT( pidl.CreateFrom( pFileItem ) );
+			ASSERT_EQUAL( filePath, pidl.GetFullPath() );
+		}
+	}
+}
+
 
 void CFileSystemTests::Run( void )
 {
@@ -210,6 +297,7 @@ void CFileSystemTests::Run( void )
 	TestStgShortFilenames();
 	TestTempFilePool();
 	TestFileAndDirectoryState();
+	TestShellPidl();
 }
 
 

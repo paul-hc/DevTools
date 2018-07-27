@@ -81,7 +81,7 @@ namespace fs
 		{
 			fs::CPathParts parts( uniqueFullPath );
 
-			const UINT hashKey = path::ToHashValue( pFullPath );		// hash key is unique for the whole path
+			const UINT hashKey = static_cast< UINT >( path::GetHashValue( pFullPath ) );		// hash key is unique for the whole path
 			parts.m_fname += str::Format( _T("_%08X"), hashKey );		// "fname_hexHashKey"
 			uniqueFullPath = parts.MakePath();
 

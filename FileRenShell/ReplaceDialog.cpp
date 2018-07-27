@@ -44,7 +44,7 @@ namespace layout
 		{ IDC_STRIP_BAR_2, MoveX },
 		{ IDOK, MoveX },
 		{ IDCANCEL, MoveX },
-		{ IDC_CLEAR_FILES_BUTTON, Move }
+		{ IDC_RESET_FILES_BUTTON, Move }
 	};
 }
 
@@ -198,6 +198,7 @@ void CReplaceDialog::DoDataExchange( CDataExchange* pDX )
 	DDX_Control( pDX, IDC_REPLACE_WITH_COMBO, m_replaceWithCombo );
 	m_findToolbar.DDX_Placeholder( pDX, IDC_STRIP_BAR_1, H_AlignLeft | V_AlignCenter );
 	m_replaceToolbar.DDX_Placeholder( pDX, IDC_STRIP_BAR_2, H_AlignLeft | V_AlignCenter );
+	ui::DDX_ButtonIcon( pDX, IDC_RESET_FILES_BUTTON, ID_RESET_DEFAULT );
 
 	ui::DDX_Bool( pDX, IDC_MATCH_CASE_CHECK, m_matchCase );
 	DDX_Radio( pDX, IDC_TEXT_RADIO, (int&)m_findType );
@@ -245,7 +246,7 @@ BEGIN_MESSAGE_MAP( CReplaceDialog, CLayoutDialog )
 	ON_CBN_EDITCHANGE( IDC_FIND_WHAT_COMBO, OnChanged_FindWhat )
 	ON_CBN_SELCHANGE( IDC_FIND_WHAT_COMBO, OnChanged_FindWhat )
 	ON_BN_CLICKED( IDC_MATCH_CASE_CHECK, OnBnClicked_MatchCase )
-	ON_BN_CLICKED( IDC_CLEAR_FILES_BUTTON, OnBnClicked_ClearDestFiles )
+	ON_BN_CLICKED( IDC_RESET_FILES_BUTTON, OnBnClicked_ResetDestFiles )
 	ON_COMMAND( ID_AUTO_FILL_COMMON_PREFIX_CK, OnToggle_AutoFillCommonPrefix )
 	ON_UPDATE_COMMAND_UI( ID_AUTO_FILL_COMMON_PREFIX_CK, OnUpdate_AutoFillCommonPrefix )
 	ON_COMMAND( ID_PICK_FILENAME, OnPickFilename )
@@ -298,9 +299,9 @@ void CReplaceDialog::OnBnClicked_MatchCase( void )
 	OnChanged_FindWhat();
 }
 
-void CReplaceDialog::OnBnClicked_ClearDestFiles( void )
+void CReplaceDialog::OnBnClicked_ResetDestFiles( void )
 {
-	ui::SendCommand( GetParent()->GetSafeHwnd(), IDC_CLEAR_FILES_BUTTON );
+	ui::SendCommand( GetParent()->GetSafeHwnd(), IDC_RESET_FILES_BUTTON );
 
 	if ( m_autoFillCommonPrefix )
 		FillCommonPrefix();

@@ -5,11 +5,11 @@
 #include "IFileEditor.h"
 #include "utl/BaseMainDialog.h"
 #include "utl/DialogToolBar.h"
-#include "utl/ReportListControl.h"
 
 
 class CFileModel;
 class CPathItemBase;
+class CReportListControl;
 
 
 abstract class CFileEditorBaseDialog : public CBaseMainDialog
@@ -18,12 +18,14 @@ abstract class CFileEditorBaseDialog : public CBaseMainDialog
 protected:
 	CFileEditorBaseDialog( CFileModel* pFileModel, cmd::CommandType nativeCmdType, UINT templateId, CWnd* pParent );
 	virtual ~CFileEditorBaseDialog();
+public:
+	bool IsErrorItem( const CPathItemBase* pItem ) const;
 
 	// IFileEditor interface (partial)
 	virtual CFileModel* GetFileModel( void ) const;
 	virtual CDialog* GetDialog( void );
 	virtual bool IsRollMode( void ) const;
-
+protected:
 	// ui::ICmdCallback interface
 	virtual void QueryTooltipText( std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const;
 
@@ -41,7 +43,6 @@ protected:
 	bool IsNativeCmd( const utl::ICommand* pCmd ) const;
 	bool IsForeignCmd( const utl::ICommand* pCmd ) const;		// must be handled by a different editor?
 	utl::ICommand* PeekCmdForDialog( cmd::StackType stackType ) const;
-	int EnsureVisibleFirstError( CReportListControl* pFileListCtrl ) const;
 
 	enum Prompt { PromptClose, PromptNoFileChanges };
 	bool PromptCloseDialog( Prompt prompt = PromptNoFileChanges );

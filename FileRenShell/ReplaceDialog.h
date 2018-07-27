@@ -62,7 +62,7 @@ protected:
 	afx_msg void OnDestroy( void );
 	afx_msg void OnChanged_FindWhat( void );
 	afx_msg void OnBnClicked_MatchCase( void );
-	afx_msg void OnBnClicked_ClearDestFiles( void );
+	afx_msg void OnBnClicked_ResetDestFiles( void );
 	afx_msg void OnToggle_AutoFillCommonPrefix( void );
 	afx_msg void OnUpdate_AutoFillCommonPrefix( CCmdUI* pCmdUI );
 	afx_msg void OnPickFilename( void );

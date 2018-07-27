@@ -134,6 +134,8 @@ namespace ut
 		: m_poolDirPath( MakeTempUt_DirPath( fs::CPath( _T("_UT") ), true ) )
 		, m_hasFileErrors( false )
 	{
+		fs::DeleteAllFiles( m_poolDirPath.GetPtr() );				// delete existing files from previously failed tests
+
 		if ( !str::IsEmpty( pFlatPaths ) )
 			SplitCreateFiles( pFlatPaths );
 	}

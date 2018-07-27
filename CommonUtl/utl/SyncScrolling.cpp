@@ -48,6 +48,16 @@ void CSyncScrolling::SetScrollType( int scrollType )
 	}
 }
 
+bool CSyncScrolling::SyncHorizontal( void ) const
+{
+	return utl::Contains( m_scrollTypes, SB_HORZ );
+}
+
+bool CSyncScrolling::SyncVertical( void ) const
+{
+	return utl::Contains( m_scrollTypes, SB_VERT );
+}
+
 void CSyncScrolling::SetCtrls( CWnd* pDlg, const UINT ctrlIds[], size_t count )
 {
 	ASSERT_PTR( pDlg->GetSafeHwnd() );

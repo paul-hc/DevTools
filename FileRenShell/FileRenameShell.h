@@ -67,7 +67,7 @@ public:
 	// IFileRenameShell
 
 	// IShellExtInit
-	STDMETHOD( Initialize )( LPCITEMIDLIST pidlFolder, IDataObject* pDropInfo, HKEY hKeyProgId );
+	STDMETHOD( Initialize )( LPCITEMIDLIST folderPidl, IDataObject* pDropInfo, HKEY hKeyProgId );
 
 	// IContextMenu
 	STDMETHOD( QueryContextMenu )( HMENU hMenu, UINT indexMenu, UINT idCmdFirst, UINT idCmdLast, UINT flags );

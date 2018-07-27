@@ -20,22 +20,13 @@
 #endif
 
 
-// CFileModel implementation
-
-CFileModel* CFileModel::s_pInstance = NULL;
-
 CFileModel::CFileModel( void )
 {
-	ASSERT_NULL( s_pInstance );
-	s_pInstance = this;
 }
 
 CFileModel::~CFileModel()
 {
 	Clear();
-
-	ASSERT( s_pInstance == this );
-	s_pInstance = NULL;
 }
 
 void CFileModel::Clear( void )
@@ -384,7 +375,7 @@ void CFileModel::AddTouchItemFromCmd::operator()( const utl::ICommand* pCmd )
 }
 
 
-#include "MainRenameDialog.h"
+#include "RenameFilesDialog.h"
 #include "TouchFilesDialog.h"
 
 IFileEditor* CFileModel::MakeFileEditor( cmd::CommandType cmdType, CWnd* pParent )
@@ -393,7 +384,7 @@ IFileEditor* CFileModel::MakeFileEditor( cmd::CommandType cmdType, CWnd* pParent
 	{
 		case cmd::RenameFile:
 		case cmd::ChangeDestPaths:
-			return new CMainRenameDialog( this, pParent );
+			return new CRenameFilesDialog( this, pParent );
 		case cmd::TouchFile:
 			return new CTouchFilesDialog( this, pParent );
 	}
