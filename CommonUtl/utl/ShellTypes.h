@@ -8,12 +8,13 @@
 
 namespace shell
 {
-	// Manages memory for a PIDL used in shell API. Similar to CComHeapPtr< ITEMIDLIST > with PIDL specific functionality.
+	// manages memory for a PIDL used in shell API; similar to CComHeapPtr< ITEMIDLIST > with PIDL specific functionality.
 
 	class CPidl
 	{
 	public:
 		CPidl( void ) : m_pidl( NULL ) {}
+		CPidl( CPidl& rRight ) : m_pidl( rRight.Release() ) {}													// copy-move constructor
 		explicit CPidl( LPITEMIDLIST pidl ) : m_pidl( pidl ) {}													// takes ownership of pidl
 		explicit CPidl( LPCITEMIDLIST rootPidl, LPCITEMIDLIST dirPathPidl, LPCITEMIDLIST childPidl = NULL );	// creates a copy with concatenation
 		~CPidl() { Delete(); }
@@ -68,14 +69,13 @@ namespace shell
 		pred::CompareResult Compare( const CPidl& rightRelativePidl, IShellFolder* pParentFolder = GetDesktopFolder() ) { return Pidl_Compare( m_pidl, rightRelativePidl.m_pidl, pParentFolder ); }
 
 		// advanced
-		bool CreateFromPath( const TCHAR fullPath[] );								// ABSOLUTE pidl
-		bool CreateAbsolute( const TCHAR fullPath[] );								// ABSOLUTE pidl, synonym to CreateFromPath()
-		bool CreateChild( IShellFolder* pFolder, const TCHAR itemFilename[] );		// RELATIVE or CHILD, depending on itemFilename being a sub-path or fname.ext
+		bool CreateAbsolute( const TCHAR fullPath[] );								// ABSOLUTE pidl
+		bool CreateRelative( IShellFolder* pFolder, const TCHAR itemFilename[] );	// RELATIVE/CHILD pidl, depending on itemFilename being a sub-path or fname.ext
 
 		bool CreateFrom( IUnknown* pUnknown );										// ABSOLUTE pidl - most general, works for any compatible interface passed (IShellItem, IShellFolder, IPersistFolder2, etc)
-		bool CreateFromFolder( IShellFolder* pShellFolder );						// ABSOLUTE pidl
+		bool CreateFromFolder( IShellFolder* pShellFolder );						// ABSOLUTE pidl - superseeded by CreateFrom()
 
-		CComPtr< IShellItem > FindItem( IShellFolder* pParentFolder = NULL ) const;
+		CComPtr< IShellItem > FindItem( IShellFolder* pParentFolder = NULL ) const;			// pass pParentFolder if PIDL is relative/child
 		CComPtr< IShellFolder > FindFolder( IShellFolder* pParentFolder = GetDesktopFolder() ) const;
 
 		fs::CPath GetFullPath( GPFIDL_FLAGS optFlags = GPFIDL_DEFAULT ) const;
@@ -99,7 +99,7 @@ namespace shell
 		static LPITEMIDLIST Pidl_Copy( LPCITEMIDLIST pidl );
 		static LPITEMIDLIST Pidl_CopyFirstItem( LPCITEMIDLIST pidl );
 
-		static LPITEMIDLIST Pidl_GetChildItem( IShellFolder* pFolder, const TCHAR itemFilename[] );		// itemFilename is normally a fname.ext; also works with a sub-path
+		static LPITEMIDLIST Pidl_GetRelativeItem( IShellFolder* pFolder, const TCHAR itemFilename[] );		// itemFilename is normally a fname.ext; also works with a sub-path
 
 		static bool Pidl_IsEqual( PCIDLIST_ABSOLUTE leftPidl, PCIDLIST_ABSOLUTE rightPidl ) { return ::ILIsEqual( leftPidl, rightPidl ) != FALSE; }
 		static pred::CompareResult Pidl_Compare( PCUIDLIST_RELATIVE leftPidl, PCUIDLIST_RELATIVE rightPidl, IShellFolder* pParentFolder = GetDesktopFolder() );
@@ -117,6 +117,13 @@ namespace shell
 	private:
 		LPITEMIDLIST m_pidl;
 	};
+
+
+	template< typename ContainerT >
+	void ClearOwningPidls( ContainerT& rPidls )			// rPidls such as std::vector< LPITEMIDLIST >
+	{
+		std::for_each( rPidls.begin(), rPidls.end(), &CPidl::Pidl_Delete );
+	}
 }
 
 

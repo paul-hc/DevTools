@@ -77,27 +77,22 @@ namespace shell
 
 	// CPidl advanced
 
-	bool CPidl::CreateFromPath( const TCHAR fullPath[] )
+	bool CPidl::CreateAbsolute( const TCHAR fullPath[] )
 	{
 		ASSERT( !str::IsEmpty( fullPath ) );
 		Reset( ::ILCreateFromPath( fullPath ) );
 		return !IsNull();
-	}
 
-	bool CPidl::CreateAbsolute( const TCHAR fullPath[] )			// obsolete? same as CreateFromPath()?
-	{
-		CComPtr< IShellFolder > pDesktopFolder;
-		if ( HR_OK( ::SHGetDesktopFolder( &pDesktopFolder ) ) )
-			if ( HR_OK( pDesktopFolder->ParseDisplayName( NULL, NULL, const_cast< TCHAR* >( fullPath ), NULL, &m_pidl, NULL ) ) )
-				return true;
-
+		/*	equivalent implementation:
+		if ( HR_OK( GetDesktopFolder()->ParseDisplayName( NULL, NULL, const_cast< TCHAR* >( fullPath ), NULL, &m_pidl, NULL ) ) )
+			return true;
 		Delete();
-		return false;
+		return false; */
 	}
 
-	bool CPidl::CreateChild( IShellFolder* pFolder, const TCHAR itemFilename[] )
+	bool CPidl::CreateRelative( IShellFolder* pFolder, const TCHAR itemFilename[] )
 	{
-		Reset( Pidl_GetChildItem( pFolder, itemFilename ) );
+		Reset( Pidl_GetRelativeItem( pFolder, itemFilename ) );
 		return !IsNull();
 	}
 
@@ -287,7 +282,7 @@ namespace shell
 		return targetPidl;
 	}
 
-	LPITEMIDLIST CPidl::Pidl_GetChildItem( IShellFolder* pFolder, const TCHAR itemFilename[] )
+	LPITEMIDLIST CPidl::Pidl_GetRelativeItem( IShellFolder* pFolder, const TCHAR itemFilename[] )
 	{
 		ASSERT_PTR( pFolder );
 		ASSERT_PTR( !str::IsEmpty( itemFilename ) );

@@ -1,6 +1,7 @@
 
 #include "stdafx.h"
 #include "WinExplorer.h"
+#include "ShellTypes.h"
 #include "FileSystem.h"
 
 #ifdef _DEBUG
@@ -10,32 +11,32 @@
 
 /*	Explorer Shell object model
 
-IUnknown
-    IExplorerBrowser
-		{ ::SHCoCreateInstance( NULL, &CLSID_ExplorerBrowser, NULL, IID_PPV_ARGS( &m_pExplorerBrowser ) ) }
+	IUnknown
+		IExplorerBrowser
+			{ ::SHCoCreateInstance( NULL, &CLSID_ExplorerBrowser, NULL, IID_PPV_ARGS( &m_pExplorerBrowser ) ) }
 
-	IShellFolder
-		IShellFolder2
-		{ ::SHGetDesktopFolder( &pDesktopShellFolder ) }
+		IShellFolder
+			IShellFolder2
+			{ ::SHGetDesktopFolder( &pDesktopShellFolder ) }
 
-    IShellItem
-		IShellItem2
+		IShellItem
+			IShellItem2
 
-    IOleWindow
-		IShellView
-			IShellView2
-				IShellView3
-				{ IShellView2::SelectAndPositionItem() }
+		IOleWindow
+			IShellView
+				IShellView2
+					IShellView3
+					{ IShellView2::SelectAndPositionItem() }
 
-    IFolderView
-		IFolderView2
+		IFolderView
+			IFolderView2
 
-    IPersist
-		IPersistFolder
-			IPersistFolder2
-				IPersistFolder3
+		IPersist
+			IPersistFolder
+				IPersistFolder2
+					IPersistFolder3
 
-    IDataObject
+		IDataObject
 */
 
 namespace shell
@@ -124,6 +125,36 @@ namespace shell
 			Good( pImageFactory->GetImage( boundsSize, flags, &hBitmap ) );
 
 		return hBitmap;
+	}
+
+	size_t CWinExplorer::ExploreAndSelectItems( const std::vector< fs::CPath >& itemPaths ) const
+	{
+		size_t selCount = 0;
+		if ( !itemPaths.empty() )
+		{
+			fs::CPath folderPath = itemPaths.front().GetParentPath();
+
+			CPidl folderPidl;
+			if ( folderPidl.CreateAbsolute( folderPath.GetPtr() ) )
+			{
+				std::vector< LPITEMIDLIST > itemPidls; itemPidls.reserve( itemPaths.size() );
+
+				for ( std::vector< fs::CPath >::const_iterator itItemPath = itemPaths.begin(); itItemPath != itemPaths.end(); ++itItemPath )
+					if ( folderPath == itItemPath->GetParentPath() )				// selectable in the same folder view?
+					{
+						CPidl itemPidl;
+						if ( itemPidl.CreateAbsolute( itItemPath->GetPtr() ) )		// works with absolute PIDL as well
+							itemPidls.push_back( itemPidl.Release() );
+					}
+
+				HR_OK( ::SHOpenFolderAndSelectItems( folderPidl.Get(), static_cast< UINT >( itemPidls.size() ), (LPCITEMIDLIST*)&itemPidls.front(), 0 ) );
+
+				selCount = itemPidls.size();
+				shell::ClearOwningPidls( itemPidls );
+			}
+		}
+
+		return selCount;
 	}
 
 } //namespace shell

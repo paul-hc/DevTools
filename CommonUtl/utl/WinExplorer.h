@@ -37,6 +37,8 @@ namespace shell
 
 		// faster
 		HBITMAP ExtractThumbnail( IShellItem* pShellItem, const CSize& boundsSize, SIIGBF flags = SIIGBF_RESIZETOFIT ) const;		// SIIGBF_BIGGERSIZEOK improves performance
+
+		size_t ExploreAndSelectItems( const std::vector< fs::CPath >& itemPaths ) const;		// open an explorer.exe window and select the items
 	};
 
 
