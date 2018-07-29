@@ -70,6 +70,8 @@ namespace hlp
 }
 
 
+// CTextEditor implementation
+
 CTextEditor::CTextEditor( bool useFixedFont /*= false*/ )
 	: CTextEdit( useFixedFont )
 	, m_editorAccel( IDR_TEXT_EDITOR_ACCEL )

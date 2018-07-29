@@ -216,7 +216,7 @@ void CMainDialog::DoDataExchange( CDataExchange* pDX )
 
 			SetFormatCurrLinePicker( FmtDateTime );
 			ui::WriteComboItems( m_currTypeCombo, CDateTimeInfo::GetTags_Type().GetUiTags() );
-			m_inputEdit.PostMessage( EM_SCROLLCARET );			// the only way to scroll the edit to make the caret visible (if outside client rect)
+			m_inputEdit.EnsureCaretVisible();
 		}
 	}
 

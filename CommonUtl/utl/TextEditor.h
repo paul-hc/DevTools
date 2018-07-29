@@ -20,18 +20,6 @@ public:
 	bool HasSelSubText( void ) const { return SelSubText == GetSelType(); }
 	bool HasSelAllText( void ) const { return SelAllText == GetSelType(); }
 	bool HasSel( void ) const;
-
-	template< typename IntType >
-	Range< IntType > GetSelRange( void ) const
-	{
-		int startPos, endPos;
-		GetSel( startPos, endPos );
-		ASSERT( startPos <= endPos && startPos >= 0 );
-		return Range< IntType >( static_cast< IntType >( startPos ), static_cast< IntType >( endPos ) );
-	}
-
-	template< typename IntType >
-	void SetSelRange( const Range< IntType >& sel ) { SetSel( static_cast< int >( sel.m_start ), static_cast< int >( sel.m_end ) ); }
 private:
 	CAccelTable m_editorAccel;
 

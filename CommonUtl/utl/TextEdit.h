@@ -52,14 +52,29 @@ public:
 	std::tstring GetSelText( void ) const;
 
 	// multi-line edit
+	typedef int CharPos;												// position of text character in edit's text
+	typedef int Line;
+
+	Range< CharPos > GetLineRange( Line linePos ) const;				// line startPos and endPos
+	std::tstring GetLineText( Line linePos ) const;
+
 	enum { CaretPos = -1 };
 
-	Range< int > GetLineRangeAt( int charPos = CaretPos ) const;		// line startPos and endPos
-	std::tstring GetLineTextAt( int charPos = CaretPos ) const;			// line with the caret
+	Range< CharPos > GetLineRangeAt( CharPos charPos = CaretPos ) const { return GetLineRange( LineFromChar( charPos ) ); }
+	std::tstring GetLineTextAt( CharPos charPos = CaretPos ) const { return GetLineText( LineFromChar( charPos ) ); }		// by default: text of line with the caret
+
+	// selection
+	template< typename IntType >
+	Range< IntType > GetSelRange( void ) const;
+
+	template< typename IntType >
+	void SetSelRange( const Range< IntType >& sel ) { SetSel( static_cast< CharPos >( sel.m_start ), static_cast< CharPos >( sel.m_end ) ); }
 
 	enum FontSize { Normal, Large };
 	static CFont* GetFixedFont( FontSize fontSize = Normal );
 	static void SetFixedFont( CWnd* pWnd );
+
+	void EnsureCaretVisible( void ) { PostMessage( EM_SCROLLCARET ); }		// the only way to scroll the edit in order to make the caret visible (if outside client rect)
 
 	CScopedInternalChange MakeUserChange( void ) { return CScopedInternalChange( &m_userChange ); }
 protected:
@@ -134,6 +149,18 @@ protected:
 
 	DECLARE_MESSAGE_MAP()
 };
+
+
+// template code
+
+template< typename IntType >
+Range< IntType > CTextEdit::GetSelRange( void ) const
+{
+	CharPos startPos, endPos;
+	GetSel( startPos, endPos );
+	ASSERT( startPos <= endPos && startPos >= 0 );
+	return Range< IntType >( static_cast< IntType >( startPos ), static_cast< IntType >( endPos ) );
+}
 
 
 #endif // TextEdit_h

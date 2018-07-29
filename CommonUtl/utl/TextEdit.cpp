@@ -137,21 +137,21 @@ std::tstring CTextEdit::GetSelText( void ) const
 	return ui::GetWindowText( this ).substr( sel.m_start, sel.GetSpan< size_t >() );
 }
 
-Range< int > CTextEdit::GetLineRangeAt( int charPos /*= CaretPos*/ ) const
+Range< CTextEdit::CharPos > CTextEdit::GetLineRange( Line linePos ) const
 {
-	int linePos = LineFromChar( charPos );
 	Range< int > lineRange( LineIndex( linePos ) );
 	lineRange.m_end += LineLength( lineRange.m_start );
 	return lineRange;
 }
 
-std::tstring CTextEdit::GetLineTextAt( int charPos /*= CaretPos*/ ) const
+std::tstring CTextEdit::GetLineText( Line linePos ) const
 {
-	TCHAR line[ 1024 ];
-	int linePos = LineFromChar( charPos );
-	int len = GetLine( linePos, line, COUNT_OF( line ) );
-	line[ len ] = _T('\0');
-	return line;
+	size_t length = LineLength( linePos );
+	std::vector< TCHAR > lineBuffer( length + 1 );
+
+	length = GetLine( linePos, &lineBuffer.front(), static_cast< int >( lineBuffer.size() ) );
+	lineBuffer[ length ] = _T('\0');
+	return &lineBuffer.front();
 }
 
 CFont* CTextEdit::GetFixedFont( FontSize fontSize /*= Normal*/ )
@@ -192,6 +192,35 @@ void CTextEdit::PreSubclassWindow( void )
 
 BOOL CTextEdit::PreTranslateMessage( MSG* pMsg )
 {
+	if ( WM_KEYDOWN == pMsg->message && m_hWnd == pMsg->hwnd )
+		if ( !ui::IsKeyPressed( VK_SHIFT ) )
+		{
+			Range< CharPos > selRange = GetSelRange< CharPos >();
+			if ( !selRange.IsEmpty() )
+
+			// collapse selection in the direction of the key
+			switch ( pMsg->wParam )
+			{
+				case VK_LEFT:
+				case VK_RIGHT:
+					if ( !ui::IsKeyPressed( VK_CONTROL ) )
+					{
+						if ( VK_LEFT == pMsg->wParam )
+							SetSel( selRange.m_start, selRange.m_start );
+						else
+							SetSel( selRange.m_end, selRange.m_end );
+						return TRUE;										// eat the key
+					}
+					break;
+				case VK_UP:
+					SetSel( selRange.m_start, selRange.m_start );
+					break;
+				case VK_DOWN:
+					SetSel( selRange.m_end, selRange.m_end );
+					break;
+			}
+		}
+
 	return m_accel.Translate( pMsg, m_hWnd ) || CEdit::PreTranslateMessage( pMsg );
 }
 
