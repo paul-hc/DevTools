@@ -223,6 +223,8 @@ namespace ui
 		return static_cast< CtrlType* >( pCtrl );
 	}
 
+	inline void GotoDlgItem( CDialog* pDlg, UINT ctrlId ) { pDlg->GotoDlgCtrl( pDlg->GetDlgItem( ctrlId ) ); }
+
 
 	bool EnableWindow( HWND hWnd, bool enable = true );
 	inline bool EnableControl( HWND hDlg, UINT ctrlId, bool enable = true ) { return EnableWindow( ::GetDlgItem( hDlg, ctrlId ), enable ); }
