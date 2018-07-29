@@ -475,8 +475,8 @@ void CTouchFilesDialog::MarkInvalidSrcItems( void )
 
 void CTouchFilesDialog::EnsureVisibleFirstError( void )
 {
-	if ( !m_errorItems.empty() )
-		m_fileListCtrl.EnsureVisibleObject( m_errorItems.front() );
+	if ( const CTouchItem* pFirstErrorItem = GetFirstErrorItem< CTouchItem >() )
+		m_fileListCtrl.EnsureVisibleObject( pFirstErrorItem );
 
 	m_fileListCtrl.Invalidate();				// trigger some highlighting
 }

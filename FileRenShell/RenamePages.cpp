@@ -5,6 +5,7 @@
 #include "RenameFilesDialog.h"
 #include "GeneralOptions.h"
 #include "FileModel.h"
+#include "FileCommands.h"
 #include "resource.h"
 #include "utl/LongestCommonSubsequence.h"
 #include "utl/UtilitiesEx.h"
@@ -27,8 +28,6 @@ CBaseRenamePage::CBaseRenamePage( UINT templateId, CRenameFilesDialog* pParentDl
 	, m_pParentDlg( pParentDlg )
 {
 	ASSERT_PTR( m_pParentDlg );
-
-//	m_accelPool.AddAccelTable( new CAccelTable( IDD_GENERAL_PAGE ) );
 }
 
 
@@ -70,10 +69,10 @@ void CRenameListPage::SetupFileListView( void )
 
 	for ( unsigned int pos = 0; pos != m_pParentDlg->GetRenameItems().size(); ++pos )
 	{
-		CRenameItem* pItem = m_pParentDlg->GetRenameItems()[ pos ];
+		CRenameItem* pRenameItem = m_pParentDlg->GetRenameItems()[ pos ];
 
-		m_fileListCtrl.InsertObjectItem( pos, pItem );		// Source
-		m_fileListCtrl.SetSubItemText( pos, Destination, pItem->GetDestPath().GetNameExt() );
+		m_fileListCtrl.InsertObjectItem( pos, pRenameItem );		// Source
+		m_fileListCtrl.SetSubItemText( pos, Destination, pRenameItem->GetDestPath().GetNameExt() );
 	}
 
 	m_fileListCtrl.SetupDiffColumnPair( Source, Destination, path::GetMatch() );
@@ -91,10 +90,10 @@ void CRenameListPage::OnUpdate( utl::ISubject* pSubject, utl::IMessage* pMessage
 		CGeneralOptions::Instance().ApplyToListCtrl( &m_fileListCtrl );
 }
 
-void CRenameListPage::EnsureVisibleItem( const CPathItemBase* pItem )
+void CRenameListPage::EnsureVisibleItem( const CRenameItem* pRenameItem )
 {
-	if ( pItem != NULL )
-		m_fileListCtrl.EnsureVisibleObject( pItem );
+	if ( pRenameItem != NULL )
+		m_fileListCtrl.EnsureVisibleObject( pRenameItem );
 
 	InvalidateFiles();				// trigger some highlighting
 }
@@ -109,9 +108,9 @@ void CRenameListPage::CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARAM 
 	subItem;
 
 	static const ui::CTextEffect s_errorBk( ui::Regular, CLR_NONE, app::ColorErrorBk );
-	const CRenameItem* pItem = CReportListControl::AsPtr< CRenameItem >( rowKey );
+	const CRenameItem* pRenameItem = CReportListControl::AsPtr< CRenameItem >( rowKey );
 
-	if ( m_pParentDlg->IsErrorItem( pItem ) )
+	if ( m_pParentDlg->IsErrorItem( pRenameItem ) )
 		rTextEffect.Combine( s_errorBk );
 }
 
@@ -152,9 +151,11 @@ CRenameEditPage::CRenameEditPage( CRenameFilesDialog* pParentDlg )
 	, m_destEditor( true )
 	, m_srcStatic( CThemeItem( L"HEADER", HP_HEADERITEM, HIS_NORMAL ) )
 	, m_destStatic( CThemeItem( L"HEADER", HP_HEADERITEM, HIS_NORMAL ) )
-	, m_syncScrolling( SB_BOTH /*SB_VERT*/ )
+	, m_syncScrolling( SB_BOTH )
 {
 	RegisterCtrlLayout( layout::stylesEdit, COUNT_OF( layout::stylesEdit ) );
+//	SetUseLazyUpdateData( true );			// need data transfer on OnSetActive()/OnKillActive()
+
 	m_srcStatic.m_useText = m_destStatic.m_useText = true;
 
 	m_srcEdit.SetKeepSelOnFocus();
@@ -172,17 +173,29 @@ void CRenameEditPage::OnUpdate( utl::ISubject* pSubject, utl::IMessage* pMessage
 	pMessage;
 	ASSERT_PTR( m_hWnd );
 
-	if ( m_pParentDlg->GetFileModel() == pSubject )
-		SetupFileEdits();
+	if ( !IsInternalChange() )
+		if ( m_pParentDlg->GetFileModel() == pSubject )
+			SetupFileEdits();
 }
 
-void CRenameEditPage::EnsureVisibleItem( const CPathItemBase* pItem )
+void CRenameEditPage::EnsureVisibleItem( const CRenameItem* pRenameItem )
 {
-	pItem;
+	if ( pRenameItem != NULL )
+	{
+		size_t linePos = utl::FindPos( m_pParentDlg->GetRenameItems(), pRenameItem );
+		if ( linePos != utl::npos )
+		{
+			m_srcEdit.SetSelRange( m_srcEdit.GetLineRange( static_cast< CTextEdit::Line >( linePos ) ) );
+			m_destEditor.SetSelRange( m_destEditor.GetLineRange( static_cast< CTextEdit::Line >( linePos ) ) );
+		}
+	}
 }
 
-void CRenameEditPage::InvalidateFiles( void )
+void CRenameEditPage::CommitLocalEdits( void )
 {
+	if ( m_hWnd != NULL && m_destEditor.GetModify() )
+		if ( InputDestPaths() && AnyChanges() )
+			m_pParentDlg->SafeExecuteCmd( new CChangeDestPathsCmd( m_pParentDlg->GetFileModel(), m_newDestPaths, _T("Edit destination filenames manually") ) );
 }
 
 void CRenameEditPage::SetupFileEdits( void )
@@ -199,20 +212,68 @@ void CRenameEditPage::SetupFileEdits( void )
 		destPaths.push_back( ( *itRenameItem )->GetDestPath().GetNameExt() );
 	}
 
+	bool firstSetup = 0 == ::GetWindowTextLength( m_srcEdit );
+
 	m_srcEdit.SetText( str::Join( srcPaths, CTextEdit::s_lineEnd ) );
 	m_destEditor.SetText( str::Join( destPaths, CTextEdit::s_lineEnd ) );
 
+	if ( firstSetup )
+		EnsureVisibleItem( m_pParentDlg->GetFirstErrorItem< CRenameItem >() );
+
 	m_syncScrolling.Synchronize( &m_destEditor );			// sync v-scroll pos
+}
+
+bool CRenameEditPage::InputDestPaths( void )
+{
+	m_newDestPaths.clear();
+
+	std::vector< std::tstring > filenames;
+	str::Split( filenames, m_destEditor.GetText().c_str(), CTextEdit::s_lineEnd );
+
+	for ( std::vector< std::tstring >::iterator itFilename = filenames.begin(); itFilename != filenames.end(); ++itFilename )
+		if ( !path::IsValid( str::Trim( *itFilename ) ) )
+			return false;
+	
+	if ( !filenames.empty() )			// an extra line end?
+	{
+		std::vector< std::tstring >::iterator itLastPath = filenames.end() - 1;
+		if ( itLastPath->empty() )
+			filenames.erase( itLastPath );
+	}
+
+	const std::vector< CRenameItem* >& renameItems = m_pParentDlg->GetRenameItems();
+
+	if ( filenames.size() != renameItems.size() )
+		return false;
+
+	m_newDestPaths.reserve( renameItems.size() );
+
+	for ( size_t i = 0; i != renameItems.size(); ++i )
+		m_newDestPaths.push_back( renameItems[ i ]->GetSrcPath().GetParentPath() / filenames[ i ] );		// SRC_dir_path/filename
+
+	return true;
+}
+
+bool CRenameEditPage::AnyChanges( void ) const
+{
+	const std::vector< CRenameItem* >& renameItems = m_pParentDlg->GetRenameItems();
+	ASSERT( m_newDestPaths.size() == renameItems.size() );
+
+	for ( size_t i = 0; i != renameItems.size(); ++i )
+		if ( renameItems[ i ]->GetDestPath().Get() != m_newDestPaths[ i ].Get() )			// case sensitive compare
+			return true;
+
+	return false;
 }
 
 void CRenameEditPage::DoDataExchange( CDataExchange* pDX )
 {
 	bool firstInit = NULL == m_srcEdit.m_hWnd;
 
-	DDX_Control( pDX, IDC_RENAME_SRC_FILES_EDIT, m_srcEdit );
-	DDX_Control( pDX, IDC_RENAME_DEST_FILES_EDIT, m_destEditor );
 	DDX_Control( pDX, IDC_RENAME_SRC_FILES_STATIC, m_srcStatic );
 	DDX_Control( pDX, IDC_RENAME_DEST_FILES_STATIC, m_destStatic );
+	DDX_Control( pDX, IDC_RENAME_SRC_FILES_EDIT, m_srcEdit );
+	DDX_Control( pDX, IDC_RENAME_DEST_FILES_EDIT, m_destEditor );
 
 	if ( firstInit )
 	{
@@ -220,12 +281,15 @@ void CRenameEditPage::DoDataExchange( CDataExchange* pDX )
 		m_destEditor.AddToSyncScrolling( &m_syncScrolling );
 
 		if ( m_pParentDlg->IsInitialized() )						// not first time sheet creation? - prevent double init if this was the last active page
+		{
+			// page lazy activation
 			if ( !m_pParentDlg->HasDestPaths() )
-				m_pParentDlg->GetFileModel()->ResetDestinations();	// this will call OnUpdate() for all observers
+				CResetDestinationsCmd( m_pParentDlg->GetFileModel() ).Execute();	// this will call OnUpdate() for all observers
 			else
 				OnUpdate( m_pParentDlg->GetFileModel(), NULL );		// initialize the page
+		}
 
-		m_destEditor.PostMessage( EM_SCROLLCARET );					// the only way to scroll the edit to make the caret visible (if outside client rect)
+		m_destEditor.EnsureCaretVisible();
 	}
 
 	CBaseRenamePage::DoDataExchange( pDX );
@@ -235,4 +299,25 @@ void CRenameEditPage::DoDataExchange( CDataExchange* pDX )
 // message handlers
 
 BEGIN_MESSAGE_MAP( CRenameEditPage, CBaseRenamePage )
+	ON_EN_CHANGE( IDC_RENAME_DEST_FILES_EDIT, OnEnChange_DestPaths )
+	ON_EN_KILLFOCUS( IDC_RENAME_DEST_FILES_EDIT, OnEnKillFocus_DestPaths )
 END_MESSAGE_MAP()
+
+void CRenameEditPage::OnEnChange_DestPaths( void )
+{
+	CScopedInternalChange scopedInternal( this );
+
+	if ( InputDestPaths() )
+	{
+	}
+	else
+	{
+		m_destEditor.Undo();
+		ui::BeepSignal();
+	}
+}
+
+void CRenameEditPage::OnEnKillFocus_DestPaths( void )
+{
+	CommitLocalEdits();
+}

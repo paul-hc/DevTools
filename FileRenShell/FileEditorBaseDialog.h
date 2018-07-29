@@ -21,6 +21,11 @@ protected:
 public:
 	bool IsErrorItem( const CPathItemBase* pItem ) const;
 
+	template< typename ItemType >
+	ItemType* GetFirstErrorItem( void ) const { return !m_errorItems.empty() ? checked_static_cast< ItemType* >( m_errorItems.front() ) : NULL; }
+
+	bool SafeExecuteCmd( utl::ICommand* pCmd );
+
 	// IFileEditor interface (partial)
 	virtual CFileModel* GetFileModel( void ) const;
 	virtual CDialog* GetDialog( void );
@@ -29,7 +34,6 @@ protected:
 	// ui::ICmdCallback interface
 	virtual void QueryTooltipText( std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const;
 
-	bool SafeExecuteCmd( utl::ICommand* pCmd );
 	int PopStackRunCrossEditor( cmd::StackType stackType );
 protected:
 	enum Mode					// determines the OK button label

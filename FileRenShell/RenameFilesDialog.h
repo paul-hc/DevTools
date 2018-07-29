@@ -46,6 +46,7 @@ private:
 	virtual void QueryTooltipText( std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const;
 private:
 	void SwitchMode( Mode mode );
+	void CommitLocalEdits( void );
 
 	void AutoGenerateFiles( void );
 	bool RenameFiles( void );

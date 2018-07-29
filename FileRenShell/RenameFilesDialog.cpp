@@ -178,11 +178,10 @@ void CRenameFilesDialog::PostMakeDest( bool silent /*= false*/ )
 		SwitchMode( CommitFilesMode );
 	else
 	{
-		CPathItemBase* pFirstErrorItem = !m_errorItems.empty() ? m_errorItems.front() : NULL;
-
-		for ( int i = 0; i != m_filesSheet.GetPageCount(); ++i )
-			if ( IRenamePage* pPage = m_filesSheet.GetCreatedPageAs< IRenamePage >( i ) )
-				pPage->EnsureVisibleItem( pFirstErrorItem );
+		if ( const CRenameItem* pFirstErrorItem = GetFirstErrorItem< CRenameItem >() )
+			for ( int i = 0; i != m_filesSheet.GetPageCount(); ++i )
+				if ( IRenamePage* pPage = m_filesSheet.GetCreatedPageAs< IRenamePage >( i ) )
+					pPage->EnsureVisibleItem( pFirstErrorItem );
 
 		SwitchMode( EditMode );
 		if ( !silent )
@@ -285,6 +284,11 @@ void CRenameFilesDialog::QueryTooltipText( std::tstring& rText, UINT cmdId, CToo
 		default:
 			__super::QueryTooltipText( rText, cmdId, pTooltip );
 	}
+}
+
+void CRenameFilesDialog::CommitLocalEdits( void )
+{
+	m_filesSheet.GetPageAs< CRenameEditPage >( EditPage )->CommitLocalEdits();			// allow detail page edit input
 }
 
 CRenameItem* CRenameFilesDialog::FindItemWithKey( const fs::CPath& srcPath ) const
@@ -399,7 +403,7 @@ void CRenameFilesDialog::DoDataExchange( CDataExchange* pDX )
 			m_isInitialized = true;
 
 			if ( !HasDestPaths() && EditPage == m_filesSheet.GetActiveIndex() )
-				m_pFileModel->ResetDestinations();	// this will call OnUpdate() for all observers
+				CResetDestinationsCmd( m_pFileModel ).Execute();	// this will call OnUpdate() for all observers
 			else
 				OnUpdate( m_pFileModel, NULL );			// initialize the dialog
 
@@ -461,6 +465,8 @@ BOOL CRenameFilesDialog::OnInitDialog( void )
 
 void CRenameFilesDialog::OnOK( void )
 {
+	CommitLocalEdits();
+
 	switch ( m_mode )
 	{
 		case EditMode:
@@ -609,6 +615,8 @@ void CRenameFilesDialog::OnBnClicked_ResetDestFiles( void )
 
 void CRenameFilesDialog::OnBnClicked_CapitalizeDestFiles( void )
 {
+	CommitLocalEdits();
+
 	CTitleCapitalizer capitalizer;
 	SafeExecuteCmd( m_pFileModel->MakeChangeDestPathsCmd( func::CapitalizeWords( &capitalizer ), _T("Title Case") ) );
 }
@@ -621,6 +629,8 @@ void CRenameFilesDialog::OnSbnRightClicked_CapitalizeOptions( void )
 
 void CRenameFilesDialog::OnBnClicked_ChangeCase( void )
 {
+	CommitLocalEdits();
+
 	ChangeCase selCase = m_changeCaseButton.GetSelEnum< ChangeCase >();
 	std::tstring cmdTag = str::Format( _T("Change case to: %s"), GetTags_ChangeCase().FormatUi( selCase ).c_str() );
 
@@ -635,6 +645,8 @@ void CRenameFilesDialog::OnBnClicked_ReplaceDestFiles( void )
 
 void CRenameFilesDialog::OnBnClicked_ReplaceAllDelimitersDestFiles( void )
 {
+	CommitLocalEdits();
+
 	std::tstring delimiterSet = m_delimiterSetCombo.GetCurrentText();
 	if ( delimiterSet.empty() )
 	{
@@ -749,6 +761,8 @@ void CRenameFilesDialog::OnBnClicked_PickRenameActions( void )
 
 void CRenameFilesDialog::OnEnsureUniformNumPadding( void )
 {
+	CommitLocalEdits();
+
 	std::vector< std::tstring > fnames; fnames.reserve( m_rRenameItems.size() );
 	for ( std::vector< CRenameItem* >::const_iterator itItem = m_rRenameItems.begin(); itItem != m_rRenameItems.end(); ++itItem )
 		fnames.push_back( fs::CPathParts( ( *itItem )->GetSafeDestPath().Get() ).m_fname );
@@ -760,6 +774,8 @@ void CRenameFilesDialog::OnEnsureUniformNumPadding( void )
 
 void CRenameFilesDialog::OnChangeDestPathsTool( UINT menuId )
 {
+	CommitLocalEdits();
+
 	utl::ICommand* pCmd = NULL;
 	std::tstring cmdTag = str::Load( menuId );
 
