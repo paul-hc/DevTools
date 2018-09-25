@@ -1,7 +1,6 @@
 
 #include "stdafx.h"
 #include "StructuredStorage.h"
-#include "EnumTags.h"
 #include "FlexPath.h"
 #include "StringUtilities.h"
 #include <shlwapi.h>
@@ -343,27 +342,18 @@ namespace fs
 		return pStream;
 	}
 
-	CTime ReadLastModifyTime( const fs::CFlexPath& filePath )
-	{
-		_stat64i32 fileStatus;
-		if ( 0 == _tstat( filePath.GetPhysicalPath().c_str(), &fileStatus ) )		// if embedded path, refer to stg file
-			return fileStatus.st_mtime;
-		return 0;
-	}
 
-	const CEnumTags& GetTags_FileExpireStatus( void )
+	namespace flex
 	{
-		static const CEnumTags tags( _T("|source file modified|source file deleted") );
-		return tags;
-	}
+		CTime ReadLastModifyTime( const fs::CFlexPath& filePath )
+		{
+			return fs::ReadLastModifyTime( filePath.GetPhysicalPath() );		// if embedded path, refer to stg file
+		}
 
-	FileExpireStatus CheckExpireStatus( const fs::CFlexPath& filePath, const CTime& lastModifyTime )
-	{
-		CTime currModifTime = ReadLastModifyTime( filePath );
-		if ( 0 == currModifTime.GetTime() )				// probably image file deleted -> expired
-			return ExpiredFileDeleted;
-
-		return currModifTime > lastModifyTime ? ExpiredFileModified : FileNotExpired;
+		FileExpireStatus CheckExpireStatus( const fs::CFlexPath& filePath, const CTime& lastModifyTime )
+		{
+			return fs::CheckExpireStatus( filePath, lastModifyTime );
+		}
 	}
 
 } //namespace fs

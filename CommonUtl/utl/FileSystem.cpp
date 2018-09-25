@@ -1,6 +1,8 @@
 
 #include "stdafx.h"
 #include "FileSystem.h"
+#include "EnumTags.h"
+#include "FlexPath.h"
 #include "RuntimeException.h"
 #include <shlwapi.h>
 #include <stdexcept>
@@ -216,6 +218,33 @@ namespace fs
 	}
 
 } //namespace fs
+
+
+namespace fs
+{
+	CTime ReadLastModifyTime( const fs::CPath& filePath )
+	{
+		_stat64i32 fileStatus;
+		if ( 0 == _tstat( filePath.GetPtr(), &fileStatus ) )
+			return fileStatus.st_mtime;
+		return 0;
+	}
+
+	const CEnumTags& GetTags_FileExpireStatus( void )
+	{
+		static const CEnumTags tags( _T("|source file modified|source file deleted") );
+		return tags;
+	}
+
+	FileExpireStatus CheckExpireStatus( const fs::CPath& filePath, const CTime& lastModifyTime )
+	{
+		CTime currModifTime = ReadLastModifyTime( filePath );
+		if ( 0 == currModifTime.GetTime() )				// probably image file deleted -> expired
+			return ExpiredFileDeleted;
+
+		return currModifTime > lastModifyTime ? ExpiredFileModified : FileNotExpired;
+	}
+}
 
 
 namespace fs

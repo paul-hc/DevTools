@@ -36,6 +36,21 @@ namespace fs
 }
 
 
+class CEnumTags;
+
+
+namespace fs
+{
+	CTime ReadLastModifyTime( const fs::CPath& filePath );
+
+	enum FileExpireStatus { FileNotExpired, ExpiredFileModified, ExpiredFileDeleted };
+
+	const CEnumTags& GetTags_FileExpireStatus( void );
+
+	FileExpireStatus CheckExpireStatus( const fs::CPath& filePath, const CTime& lastModifyTime );
+}
+
+
 namespace fs
 {
 	interface IEnumerator

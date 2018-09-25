@@ -3,6 +3,7 @@
 #pragma once
 
 #include "FlexPath.h"
+#include "FileSystem.h"
 #include "ThrowMode.h"
 #include "RuntimeException.h"
 #include <hash_map>
@@ -124,20 +125,18 @@ namespace fs
 } //namespace fs
 
 
-class CEnumTags;
-
-
 namespace fs
 {
 	// API for file streams and embedded file streams
 
 	CComPtr< IStream > OpenStreamOnFile( const fs::CFlexPath& filePath, DWORD mode = STGM_READ, DWORD createAttributes = 0 );
-	CTime ReadLastModifyTime( const fs::CFlexPath& filePath );			// for embedded images use the stg doc time
 
-	enum FileExpireStatus { FileNotExpired, ExpiredFileModified, ExpiredFileDeleted };
-	const CEnumTags& GetTags_FileExpireStatus( void );
 
-	FileExpireStatus CheckExpireStatus( const fs::CFlexPath& filePath, const CTime& lastModifyTime );
+	namespace flex
+	{
+		CTime ReadLastModifyTime( const fs::CFlexPath& filePath );			// for embedded images use the stg doc time
+		FileExpireStatus CheckExpireStatus( const fs::CFlexPath& filePath, const CTime& lastModifyTime );
+	}
 }
 
 

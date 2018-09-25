@@ -1,19 +1,21 @@
 
 #include "stdafx.h"
 #include "CRC32.h"
+#include "FileSystem.h"
+#include "BaseApp.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
 
 
-namespace crc32
+namespace utl
 {
-	// CCRC32Table implementation
+	// CCRC32 implementation
 
-	const UINT CCRC32Table::s_polynomial = 0xEDB88320;		// this is the official polynomial used by CRC32 in PKZip; often times is reversed as 0x04C11DB7.
+	const UINT CCRC32::s_polynomial = 0xEDB88320;		// this is the official polynomial used by CRC32 in PKZip; often times is reversed as 0x04C11DB7.
 
-	CCRC32Table::CCRC32Table( void )
+	CCRC32::CCRC32( void )
 		: m_lookupTable( 256 )
 	{
 		for ( int i = 0; i != 256; ++i )
@@ -32,13 +34,13 @@ namespace crc32
 		}
 	}
 
-	const CCRC32Table& CCRC32Table::Instance( void )
+	const CCRC32& CCRC32::Instance( void )
 	{
-		static CCRC32Table s_table;
+		static CCRC32 s_table;
 		return s_table;
 	}
 
-	void CCRC32Table::AddBytes( UINT& rCrc32, const BYTE* pBytes, size_t byteCount ) const
+	void CCRC32::AddBytes( UINT& rCrc32, const BYTE* pBytes, size_t byteCount ) const
 	{
 		ASSERT( 0 == byteCount || pBytes != NULL );
 
@@ -46,7 +48,7 @@ namespace crc32
 			AddByte( rCrc32, pBytes[ i ] );
 	}
 
-	UINT CCRC32Table::ComputeCrc32( const BYTE* pBytes, size_t byteCount ) const
+	UINT CCRC32::ComputeCrc32( const BYTE* pBytes, size_t byteCount ) const
 	{
 		UINT crc32CheckSum = UINT_MAX;
 
@@ -56,7 +58,7 @@ namespace crc32
 		return crc32CheckSum;
 	}
 
-	UINT CCRC32Table::ComputeFileCrc32( const TCHAR* pFilePath ) const throws_( CFileException* )
+	UINT CCRC32::ComputeFileCrc32( const TCHAR* pFilePath ) const throws_( CFileException* )
 	{
 		UINT crc32CheckSum = UINT_MAX;
 
@@ -79,5 +81,56 @@ namespace crc32
 
 		crc32CheckSum = ~crc32CheckSum;
 		return crc32CheckSum;
+	}
+
+
+	// CCRC32FileCache implementation
+
+	UINT CCRC32FileCache::AcquireCrc32( const fs::CPath& filePath )
+	{
+		stdext::hash_map< fs::CPath, ChecksumStampPair >::iterator itFound = m_cachedChecksums.find( filePath );
+		if ( itFound != m_cachedChecksums.end() )		// found cached?
+		{
+			switch ( fs::CheckExpireStatus( filePath, itFound->second.second ) )
+			{
+				case fs::ExpiredFileModified:
+					itFound->second.first = ComputeFileCrc32( filePath );
+					if ( 0 == itFound->second.first )		// error
+					{
+						m_cachedChecksums.erase( itFound );
+						break;
+					}
+					// fall-through
+				case fs::FileNotExpired:
+					return itFound->second.first;
+				case fs::ExpiredFileDeleted:
+					m_cachedChecksums.erase( itFound );
+					break;
+			}
+		}
+		else
+		{
+			if ( UINT crc32Checksum = ComputeFileCrc32( filePath ) )
+			{
+				m_cachedChecksums[ filePath ] = ChecksumStampPair( crc32Checksum, fs::ReadLastModifyTime( filePath ) );
+				return crc32Checksum;
+			}
+		}
+
+		return 0;
+	}
+
+	UINT CCRC32FileCache::ComputeFileCrc32( const fs::CPath& filePath ) const throws_()
+	{
+		try
+		{
+			return CCRC32::Instance().ComputeFileCrc32( filePath.GetPtr() );
+		}
+		catch ( CFileException* pExc )
+		{
+			app::TraceException( *pExc );
+			pExc->Delete();
+			return 0;						// error
+		}
 	}
 }
