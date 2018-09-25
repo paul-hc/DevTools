@@ -11,6 +11,8 @@
 class CNumericTests : public ut::CConsoleTestCase
 {
 	CNumericTests( void );
+
+	static const std::vector< UINT >& GetReferenceCRC32Table( void );
 public:
 	static CNumericTests& Instance( void );
 
@@ -21,6 +23,7 @@ private:
 	void TestFormatNumberUserLocale( void );
 	void TestParseNumber( void );
 	void TestParseNumberUserLocale( void );
+	void TestCRC32( void );
 };
 
 

@@ -662,6 +662,14 @@
 					>
 				</File>
 				<File
+					RelativePath=".\CRC32.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\CRC32.h"
+					>
+				</File>
+				<File
 					RelativePath=".\FileObjectCache.cpp"
 					>
 				</File>
