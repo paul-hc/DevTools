@@ -161,6 +161,7 @@ CRenameEditPage::CRenameEditPage( CRenameFilesDialog* pParentDlg )
 	m_srcEdit.SetKeepSelOnFocus();
 	m_srcEdit.SetShowFocus();
 	m_destEditor.SetKeepSelOnFocus();
+	m_destEditor.SetUsePasteTransact();			// get just one EN_CHANGE notification after paste
 	m_destEditor.SetShowFocus();
 }
 

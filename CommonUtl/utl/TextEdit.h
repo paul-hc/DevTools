@@ -41,6 +41,9 @@ public:
 	bool KeepSelOnFocus( void ) const { return m_keepSelOnFocus; }
 	void SetKeepSelOnFocus( bool keepSelOnFocus = true ) { ASSERT_NULL( m_hWnd ); m_keepSelOnFocus = keepSelOnFocus; }		// also set ES_NOHIDESEL to retain selection (edit creation only)
 
+	bool UsePasteTransact( void ) const { return m_usePasteTransact; }
+	void SetUsePasteTransact( bool usePasteTransact = true ) { ASSERT_NULL( m_hWnd ); m_usePasteTransact = usePasteTransact; }
+
 	bool HookThumbTrack( void ) const { return m_hookThumbTrack; }
 	void SetHookThumbTrack( bool hookThumbTrack = true ) { m_hookThumbTrack = hookThumbTrack; }
 
@@ -84,6 +87,7 @@ protected:
 private:
 	bool m_useFixedFont;
 	bool m_keepSelOnFocus;						// true: keep old selection when focused; false: select all text when focused (default)
+	bool m_usePasteTransact;					// true: supress EN_CHANGE during WM_PASTE/WM_UNDO input, and send one EN_CHANGE after text pasted
 	bool m_hookThumbTrack;						// true: track thumb track scrolling events (edit controls don't send EN_VSCROLL on thumb track scrolling)
 	bool m_visibleWhiteSpace;
 	CAccelTable m_accel;
@@ -102,6 +106,7 @@ protected:
 	afx_msg UINT OnGetDlgCode( void );
 	afx_msg void OnHScroll( UINT sbCode, UINT pos, CScrollBar* pScrollBar );
 	afx_msg void OnVScroll( UINT sbCode, UINT pos, CScrollBar* pScrollBar );
+	afx_msg LRESULT OnPasteOrUndo( WPARAM, LPARAM );
 	afx_msg BOOL OnEnChange_Reflect( void );
 	afx_msg BOOL OnEnKillFocus_Reflect( void );
 	afx_msg BOOL OnEnHScroll_Reflect( void );

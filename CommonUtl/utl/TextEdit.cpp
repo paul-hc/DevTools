@@ -25,6 +25,7 @@ CTextEdit::CTextEdit( bool useFixedFont /*= true*/ )
 	: CBaseFrameHostCtrl< CEdit >()
 	, m_useFixedFont( useFixedFont )
 	, m_keepSelOnFocus( false )
+	, m_usePasteTransact( false )
 	, m_hookThumbTrack( true )
 	, m_visibleWhiteSpace( false )
 	, m_accel( editKeys, COUNT_OF( editKeys ) )
@@ -225,10 +226,14 @@ BOOL CTextEdit::PreTranslateMessage( MSG* pMsg )
 }
 
 
+// message handlers
+
 BEGIN_MESSAGE_MAP( CTextEdit, BaseClass )
 	ON_WM_GETDLGCODE()
 	ON_WM_HSCROLL()
 	ON_WM_VSCROLL()
+	ON_MESSAGE( WM_PASTE, OnPasteOrUndo )
+	ON_MESSAGE( WM_UNDO, OnPasteOrUndo )
 	ON_CONTROL_REFLECT_EX( EN_CHANGE, OnEnChange_Reflect )
 	ON_CONTROL_REFLECT_EX( EN_KILLFOCUS, OnEnKillFocus_Reflect )
 	ON_CONTROL_REFLECT_EX( EN_HSCROLL, OnEnHScroll_Reflect )
@@ -262,6 +267,17 @@ void CTextEdit::OnVScroll( UINT sbCode, UINT pos, CScrollBar* pScrollBar )
 
 	if ( m_hookThumbTrack && SB_THUMBTRACK == sbCode )
 		ui::SendCommandToParent( m_hWnd, EN_VSCROLL );
+}
+
+LRESULT CTextEdit::OnPasteOrUndo( WPARAM, LPARAM )
+{
+	LRESULT result;
+	{	// supress internal EN_CHANGE notifications sent by "Edit" during Paste/Undo (for DeleteText, InsertText)
+		CScopedInternalChange internalChange( this );
+		result = Default();
+	}
+	ui::SendCommandToParent( m_hWnd, EN_CHANGE );		// notify once at the end
+	return result;
 }
 
 BOOL CTextEdit::OnEnChange_Reflect( void )
