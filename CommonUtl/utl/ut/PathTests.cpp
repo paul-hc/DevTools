@@ -506,6 +506,23 @@ void CPathTests::TestPathHashValue( void )
 	ASSERT_EQUAL( hashPathChars, stdext::hash_value( flexPath ) );
 }
 
+#include <shlwapi.h>		// for Path... functions
+
+void CPathTests::TestPathShellApi( void )
+{
+	ASSERT( PathIsSameRoot( _T("C:\\dev\\Samples\\CodeProject\\RecycleBin_src\\Debug\\RecycleBinApp.exe"), _T("C:\\dev\\Samples\\CodeProject\\RecycleBin_src\\CoolBtn.h") ) );
+	ASSERT( PathIsSameRoot( _T("C:\\dev\\Samples\\CodeProject\\"), _T("C:\\dev\\Samples") ) );
+
+	ASSERT( !PathIsSameRoot( _T("C:\\dev\\Samples\\CodeProject\\RecycleBin_src\\Debug\\RecycleBinApp.exe"), _T("E:\\Media Library\\Music Drive Mapping.txt") ) );
+
+	TCHAR commonPath[ MAX_PATH ];
+	ASSERT( PathCommonPrefix( _T("C:\\dev\\Samples\\CodeProject\\RecycleBin_src\\Debug\\RecycleBinApp.exe"), _T("C:\\dev\\Samples\\_scratch\\SynchronizedQueue.h"), commonPath ) > 3 );
+	ASSERT_EQUAL_STR( _T("C:\\dev\\Samples"), commonPath );
+
+	PathCommonPrefix( _T("C:\\dev\\Samples\\_scratch\\SynchronizedQueue.h"), _T("C:\\dev\\Samples\\_scratch\\"), commonPath );
+	ASSERT_EQUAL_STR( _T("C:\\dev\\Samples\\_scratch"), commonPath );
+}
+
 
 void CPathTests::Run( void )
 {
@@ -519,6 +536,7 @@ void CPathTests::Run( void )
 	TestComplexPath();
 	TestFlexPath();
 	TestPathHashValue();
+	TestPathShellApi();
 }
 
 

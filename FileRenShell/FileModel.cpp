@@ -377,6 +377,7 @@ void CFileModel::AddTouchItemFromCmd::operator()( const utl::ICommand* pCmd )
 
 #include "RenameFilesDialog.h"
 #include "TouchFilesDialog.h"
+#include "FindDuplicatesDialog.h"
 
 IFileEditor* CFileModel::MakeFileEditor( cmd::CommandType cmdType, CWnd* pParent )
 {
@@ -387,6 +388,8 @@ IFileEditor* CFileModel::MakeFileEditor( cmd::CommandType cmdType, CWnd* pParent
 			return new CRenameFilesDialog( this, pParent );
 		case cmd::TouchFile:
 			return new CTouchFilesDialog( this, pParent );
+		case cmd::FindDuplicates:
+			return new CFindDuplicatesDialog( this, pParent );
 	}
 	ASSERT( false );
 	return NULL;

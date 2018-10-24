@@ -13,6 +13,7 @@
 #define IDD_OPTIONS_GENERAL_PAGE        110
 #define IDD_REN_LIST_PAGE               111
 #define IDD_REN_EDIT_PAGE               112
+#define IDD_FIND_DUPLICATES_DIALOG      113
 #define IDC_FILE_RENAME_LIST            1000
 #define IDC_FORMAT_COMBO                1001
 #define IDC_SEQ_COUNT_EDIT              1002
@@ -82,6 +83,7 @@
 #define IDC_RENAME_DEST_FILES_EDIT      1063
 #define IDC_RENAME_SRC_FILES_STATIC     1064
 #define IDC_RENAME_DEST_FILES_STATIC    1065
+#define IDC_DUPLICATE_FILES_LIST        1066
 #define IDS_INVALID_FORMAT              5000
 #define IDS_NO_DELIMITER_SET            5001
 #define IDS_REPLACE_FILES_TIP_FORMAT    5005
@@ -132,14 +134,15 @@
 #define ID_PUSH_TO_ATTRIBUTE_FIELDS     32817
 #define ID_PUSH_TO_ALL_FIELDS           32818
 #define ID_AUTO_FILL_COMMON_PREFIX_CK   32819
+#define ID_FIND_DUPLICATE_FILES         32820
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        112
-#define _APS_NEXT_COMMAND_VALUE         32819
-#define _APS_NEXT_CONTROL_VALUE         1065
+#define _APS_NEXT_COMMAND_VALUE         32821
+#define _APS_NEXT_CONTROL_VALUE         1067
 #define _APS_NEXT_SYMED_VALUE           5004
 #endif
 #endif

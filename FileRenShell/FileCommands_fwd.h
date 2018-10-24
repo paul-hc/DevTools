@@ -13,7 +13,7 @@ namespace cmd
 {
 	enum CommandType
 	{
-		RenameFile = 100, TouchFile,
+		RenameFile = 100, TouchFile, FindDuplicates,
 		ChangeDestPaths, ChangeDestFileStates, ResetDestinations,
 		EditOptions
 	};

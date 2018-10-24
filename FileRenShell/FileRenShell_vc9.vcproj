@@ -567,6 +567,14 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\FindDuplicatesDialog.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\FindDuplicatesDialog.h"
+				>
+			</File>
+			<File
 				RelativePath=".\GeneralOptions.cpp"
 				>
 			</File>

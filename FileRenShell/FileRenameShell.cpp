@@ -58,6 +58,7 @@ const CFileRenameShell::CMenuCmdInfo CFileRenameShell::m_commands[] =
 	{ Cmd_SendToCliboard, _T("&Send To Clipboard"), _T("Send the selected files path to clipboard"), ID_SEND_TO_CLIP, false },
 	{ Cmd_RenameFiles, _T("&Rename Files..."), _T("Rename selected files in the dialog"), ID_RENAME_ITEM, false },
 	{ Cmd_TouchFiles, _T("&Touch Files..."), _T("Modify the timestamp of selected files"), ID_TOUCH_FILES, false },
+	{ Cmd_FindDuplicates, _T("Find &Duplicates..."), _T("Find duplicate files in selected folders or files, and allow the deletion of duplicates"), ID_FIND_DUPLICATE_FILES, false },
 	{ Cmd_Undo, _T("&Undo %s..."), _T("Undo last operation on files"), ID_EDIT_UNDO, false },
 	{ Cmd_Redo, _T("&Redo %s..."), _T("Redo last undo operation on files"), ID_EDIT_REDO, false },
 
@@ -155,6 +156,9 @@ void CFileRenameShell::ExecuteCommand( MenuCommand menuCmd, CWnd* pParentOwner )
 			break;
 		case Cmd_TouchFiles:
 			pFileEditor.reset( m_pFileModel->MakeFileEditor( cmd::TouchFile, pParentOwner ) );
+			break;
+		case Cmd_FindDuplicates:
+			pFileEditor.reset( m_pFileModel->MakeFileEditor( cmd::FindDuplicates, pParentOwner ) );
 			break;
 		case Cmd_Undo:
 		case Cmd_Redo:

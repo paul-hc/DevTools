@@ -25,6 +25,7 @@ private:
 	void TestComplexPath( void );
 	void TestFlexPath( void );
 	void TestPathHashValue( void );
+	void TestPathShellApi( void );
 };
 
 
