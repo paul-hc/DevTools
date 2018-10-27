@@ -259,6 +259,109 @@ void CNumericTests::TestParseNumberUserLocale( void )
 	}
 }
 
+void CNumericTests::TestConvertFileSize( void )
+{
+	ASSERT_EQUAL( std::make_pair( 0.0, num::Bytes ), num::ConvertFileSize( 0 ) );				// auto-conversion
+	ASSERT_EQUAL( std::make_pair( 0.0, num::Bytes ), num::ConvertFileSize( 0, num::Bytes ) );
+	ASSERT_EQUAL( std::make_pair( 0.0, num::KiloBytes ), num::ConvertFileSize( 0, num::KiloBytes ) );
+	ASSERT_EQUAL( std::make_pair( 0.0, num::MegaBytes ), num::ConvertFileSize( 0, num::MegaBytes ) );
+	ASSERT_EQUAL( std::make_pair( 0.0, num::GigaBytes ), num::ConvertFileSize( 0, num::GigaBytes ) );
+	ASSERT_EQUAL( std::make_pair( 0.0, num::TeraBytes ), num::ConvertFileSize( 0, num::TeraBytes ) );
+
+	// 1 KB=1024 bytes
+	ASSERT_EQUAL( std::make_pair( 1023.0, num::Bytes ), num::ConvertFileSize( 1023 ) );					// auto-conversion
+	ASSERT_EQUAL( std::make_pair( 1023.0, num::Bytes ), num::ConvertFileSize( 1023, num::Bytes ) );
+
+	ASSERT_EQUAL( std::make_pair( 1.0, num::KiloBytes ), num::ConvertFileSize( 1024 ) );				// auto-conversion
+	ASSERT_EQUAL( std::make_pair( 1024.0, num::Bytes ), num::ConvertFileSize( 1024, num::Bytes ) );
+	ASSERT_EQUAL( std::make_pair( 1.0, num::KiloBytes ), num::ConvertFileSize( 1024, num::KiloBytes ) );
+	ASSERT_EQUAL( std::make_pair( 0.001, num::MegaBytes ), num::ConvertFileSize( 1024, num::MegaBytes ) );
+	ASSERT_EQUAL( std::make_pair( 0.0, num::GigaBytes ), num::ConvertFileSize( 1024, num::GigaBytes ) );
+
+	// 1 MB=1048576 bytes (1024*1024)
+	ASSERT_EQUAL( std::make_pair( 1023.999, num::KiloBytes ), num::ConvertFileSize( 1048575 ) );		// auto-conversion
+	ASSERT_EQUAL( std::make_pair( 1048575.0, num::Bytes ), num::ConvertFileSize( 1048575, num::Bytes ) );
+
+	ASSERT_EQUAL( std::make_pair( 1.0, num::MegaBytes ), num::ConvertFileSize( 1048576 ) );				// auto-conversion
+	ASSERT_EQUAL( std::make_pair( 1048576.0, num::Bytes ), num::ConvertFileSize( 1048576, num::Bytes ) );
+	ASSERT_EQUAL( std::make_pair( 1024.0, num::KiloBytes ), num::ConvertFileSize( 1048576, num::KiloBytes ) );
+	ASSERT_EQUAL( std::make_pair( 1.0, num::MegaBytes ), num::ConvertFileSize( 1048576, num::MegaBytes ) );
+	ASSERT_EQUAL( std::make_pair( 0.001, num::GigaBytes ), num::ConvertFileSize( 1048576, num::GigaBytes ) );
+	ASSERT_EQUAL( std::make_pair( 0.0, num::TeraBytes ), num::ConvertFileSize( 1048576, num::TeraBytes ) );
+
+	// 1 GB=1073741824 bytes (1024*1024*1024)
+	ASSERT_EQUAL( std::make_pair( 1023.999, num::MegaBytes ), num::ConvertFileSize( 1073741823 ) );		// auto-conversion
+	ASSERT_EQUAL( std::make_pair( 1073741823.0, num::Bytes ), num::ConvertFileSize( 1073741823, num::Bytes ) );
+
+	ASSERT_EQUAL( std::make_pair( 1.0, num::GigaBytes ), num::ConvertFileSize( 1073741824 ) );			// auto-conversion
+	ASSERT_EQUAL( std::make_pair( 1073741824.0, num::Bytes ), num::ConvertFileSize( 1073741824, num::Bytes ) );
+	ASSERT_EQUAL( std::make_pair( 1048576.0, num::KiloBytes ), num::ConvertFileSize( 1073741824, num::KiloBytes ) );
+	ASSERT_EQUAL( std::make_pair( 1024.0, num::MegaBytes ), num::ConvertFileSize( 1073741824, num::MegaBytes ) );
+	ASSERT_EQUAL( std::make_pair( 1.0, num::GigaBytes ), num::ConvertFileSize( 1073741824, num::GigaBytes ) );
+	ASSERT_EQUAL( std::make_pair( 0.001, num::TeraBytes ), num::ConvertFileSize( 1073741824, num::TeraBytes ) );
+
+	// 1 TB=1099511627776 bytes (1024*1024*1024*1024)
+	ASSERT_EQUAL( std::make_pair( 1023.999, num::GigaBytes ), num::ConvertFileSize( 1099511627775 ) );	// auto-conversion
+	ASSERT_EQUAL( std::make_pair( 1099511627775.0, num::Bytes ), num::ConvertFileSize( 1099511627775, num::Bytes ) );
+
+	ASSERT_EQUAL( std::make_pair( 1.0, num::TeraBytes ), num::ConvertFileSize( 1099511627776 ) );		// auto-conversion
+	ASSERT_EQUAL( std::make_pair( 1099511627776.0, num::Bytes ), num::ConvertFileSize( 1099511627776, num::Bytes ) );
+	ASSERT_EQUAL( std::make_pair( 1073741824.0, num::KiloBytes ), num::ConvertFileSize( 1099511627776, num::KiloBytes ) );
+	ASSERT_EQUAL( std::make_pair( 1048576.0, num::MegaBytes ), num::ConvertFileSize( 1099511627776, num::MegaBytes ) );
+	ASSERT_EQUAL( std::make_pair( 1024.0, num::GigaBytes ), num::ConvertFileSize( 1099511627776, num::GigaBytes ) );
+	ASSERT_EQUAL( std::make_pair( 1.0, num::TeraBytes ), num::ConvertFileSize( 1099511627776, num::TeraBytes ) );
+}
+
+void CNumericTests::TestFormatFileSize( void )
+{
+	ASSERT_EQUAL( _T("0 B"), num::FormatFileSize( 0 ) );						// auto-conversion
+	ASSERT_EQUAL( _T("0 B"), num::FormatFileSize( 0, num::Bytes ) );
+
+	// 1 KB=1024 bytes
+	ASSERT_EQUAL( _T("1,023 B"), num::FormatFileSize( 1023 ) );					// auto-conversion
+	ASSERT_EQUAL( _T("1,023 B"), num::FormatFileSize( 1023, num::Bytes ) );
+
+	ASSERT_EQUAL( _T("1 KB"), num::FormatFileSize( 1024 ) );					// auto-conversion
+	ASSERT_EQUAL( _T("1,024 B"), num::FormatFileSize( 1024, num::Bytes ) );
+	ASSERT_EQUAL( _T("1 KB"), num::FormatFileSize( 1024, num::KiloBytes ) );
+	ASSERT_EQUAL( _T("0.001 MB"), num::FormatFileSize( 1024, num::MegaBytes ) );
+	ASSERT_EQUAL( _T("0 GB"), num::FormatFileSize( 1024, num::GigaBytes ) );
+	ASSERT_EQUAL( _T("0 TB"), num::FormatFileSize( 1024, num::TeraBytes ) );
+
+	// 1 MB=1048576 bytes (1024*1024)
+	ASSERT_EQUAL( _T("1,023.999 KB"), num::FormatFileSize( 1048575 ) );			// auto-conversion
+	ASSERT_EQUAL( _T("1,048,575 B"), num::FormatFileSize( 1048575, num::Bytes ) );
+
+	ASSERT_EQUAL( _T("1 MB"), num::FormatFileSize( 1048576 ) );					// auto-conversion
+	ASSERT_EQUAL( _T("1,048,576 B"), num::FormatFileSize( 1048576, num::Bytes ) );
+	ASSERT_EQUAL( _T("1,024 KB"), num::FormatFileSize( 1048576, num::KiloBytes ) );
+	ASSERT_EQUAL( _T("1 MB"), num::FormatFileSize( 1048576, num::MegaBytes ) );
+	ASSERT_EQUAL( _T("0.001 GB"), num::FormatFileSize( 1048576, num::GigaBytes ) );
+	ASSERT_EQUAL( _T("0 TB"), num::FormatFileSize( 1048576, num::TeraBytes ) );
+
+	// 1 GB=1073741824 bytes (1024*1024*1024)
+	ASSERT_EQUAL( _T("1,023.999 MB"), num::FormatFileSize( 1073741823 ) );		// auto-conversion
+	ASSERT_EQUAL( _T("1,073,741,823 B"), num::FormatFileSize( 1073741823, num::Bytes ) );
+
+	ASSERT_EQUAL( _T("1 GB"), num::FormatFileSize( 1073741824 ) );				// auto-conversion
+	ASSERT_EQUAL( _T("1,073,741,824 B"), num::FormatFileSize( 1073741824, num::Bytes ) );
+	ASSERT_EQUAL( _T("1,048,576 KB"), num::FormatFileSize( 1073741824, num::KiloBytes ) );
+	ASSERT_EQUAL( _T("1,024 MB"), num::FormatFileSize( 1073741824, num::MegaBytes ) );
+	ASSERT_EQUAL( _T("1 GB"), num::FormatFileSize( 1073741824, num::GigaBytes ) );
+	ASSERT_EQUAL( _T("0.001 TB"), num::FormatFileSize( 1073741824, num::TeraBytes ) );
+
+	// 1 TB=1099511627776 bytes (1024*1024*1024*1024)
+	ASSERT_EQUAL( _T("1,023.999 GB"), num::FormatFileSize( 1099511627775 ) );	// auto-conversion
+	ASSERT_EQUAL( _T("1,099,511,627,775 B"), num::FormatFileSize( 1099511627775, num::Bytes ) );
+
+	ASSERT_EQUAL( _T("1 TB"), num::FormatFileSize( 1099511627776 ) );	// auto-conversion
+	ASSERT_EQUAL( _T("1,099,511,627,776 B"), num::FormatFileSize( 1099511627776, num::Bytes ) );
+	ASSERT_EQUAL( _T("1,073,741,824 KB"), num::FormatFileSize( 1099511627776, num::KiloBytes ) );
+	ASSERT_EQUAL( _T("1,048,576 MB"), num::FormatFileSize( 1099511627776, num::MegaBytes ) );
+	ASSERT_EQUAL( _T("1,024 GB"), num::FormatFileSize( 1099511627776, num::GigaBytes ) );
+	ASSERT_EQUAL( _T("1 TB"), num::FormatFileSize( 1099511627776, num::TeraBytes ) );
+}
+
 void CNumericTests::TestCRC32( void )
 {
 	ASSERT( GetReferenceCRC32Table() == utl::CCRC32::Instance().GetLookupTable() );
@@ -301,6 +404,8 @@ void CNumericTests::Run( void )
 	TestFormatNumberUserLocale();
 	TestParseNumber();
 	TestParseNumberUserLocale();
+	TestConvertFileSize();
+	TestFormatFileSize();
 	TestCRC32();
 }
 

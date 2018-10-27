@@ -41,6 +41,8 @@ class CEnumTags;
 
 namespace fs
 {
+	ULONGLONG GetFileSize( const TCHAR* pFilePath );
+
 	CTime ReadLastModifyTime( const fs::CPath& filePath );
 
 	enum FileExpireStatus { FileNotExpired, ExpiredFileModified, ExpiredFileDeleted };

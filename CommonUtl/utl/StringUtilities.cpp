@@ -2,6 +2,7 @@
 #include "stdafx.h"
 #include "StringUtilities.h"
 #include "TokenIterator.h"
+#include "EnumTags.h"
 #include <iomanip>
 
 #ifdef _DEBUG
@@ -220,6 +221,56 @@ namespace num
 			}
 
 		return digitWidths.size();
+	}
+}
+
+
+namespace num
+{
+	const CEnumTags& GetTags_BytesUnit( void )
+	{
+		static const CEnumTags tags( _T("B|KB|MB|GB|TB|") );
+		return tags;
+	}
+
+
+	std::tstring FormatFileSize( ULONGLONG byteFileSize, BytesUnit unit /*= AutoBytes*/, const std::locale& loc /*= str::GetUserLocale()*/ )
+	{
+		std::pair< double, BytesUnit > sizeUnit = ConvertFileSize( byteFileSize, unit );
+
+		return num::FormatNumber( sizeUnit.first, loc ) + _T(" ") + GetTags_BytesUnit().FormatUi( sizeUnit.second );
+	}
+
+	double RoundOffFileSize( double number )
+	{
+		double roundedNumber = number * 1000.0;
+		ULONGLONG integer = static_cast< ULONGLONG >( roundedNumber + 0.5 );
+
+		roundedNumber = static_cast< float >( integer ) / 1000.0;
+		return roundedNumber;
+	}
+
+	std::pair< double, BytesUnit > ConvertFileSize( ULONGLONG fileSize, BytesUnit toUnit /*= AutoBytes*/ )
+	{
+		ULONGLONG newFileSize = fileSize, remainderSize = 0;
+		static const size_t s_kiloSize = 1024;
+
+		BytesUnit unit = Bytes;
+		for ( ; unit != toUnit; ++(int&)unit )
+		{
+			if ( AutoBytes == toUnit && newFileSize < s_kiloSize )
+				break;
+
+			remainderSize = ( newFileSize % s_kiloSize );
+			newFileSize /= s_kiloSize;
+		}
+
+		double newSize = (double)newFileSize + (double)remainderSize / s_kiloSize;
+
+		if ( unit != Bytes )
+			newSize = RoundOffFileSize( newSize );			// round off fractional part if not Bytes
+
+		return std::pair< double, BytesUnit >( newSize, unit );
 	}
 }
 

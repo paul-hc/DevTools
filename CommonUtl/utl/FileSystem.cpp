@@ -1,6 +1,7 @@
 
 #include "stdafx.h"
 #include "FileSystem.h"
+#include "StringUtilities.h"
 #include "EnumTags.h"
 #include "FlexPath.h"
 #include "RuntimeException.h"
@@ -222,6 +223,15 @@ namespace fs
 
 namespace fs
 {
+	ULONGLONG GetFileSize( const TCHAR* pFilePath )
+	{
+		_stat64 fileStatus;
+		if ( 0 == _tstat64( pFilePath, &fileStatus ) )
+			return static_cast< ULONGLONG >( fileStatus.st_size );
+
+		return ULLONG_MAX;			// error, could use errno to find out more
+	}
+
 	CTime ReadLastModifyTime( const fs::CPath& filePath )
 	{
 		_stat64i32 fileStatus;

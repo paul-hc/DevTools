@@ -23,6 +23,8 @@ private:
 	void TestFormatNumberUserLocale( void );
 	void TestParseNumber( void );
 	void TestParseNumberUserLocale( void );
+	void TestConvertFileSize( void );
+	void TestFormatFileSize( void );
 	void TestCRC32( void );
 };
 

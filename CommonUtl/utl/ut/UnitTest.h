@@ -54,10 +54,18 @@ namespace numeric
 
 namespace ut
 {
-	template< class T >
+	template< typename T >
 	bool Equal( const T& x, const T& y )
 	{
 		return x == y;
+	}
+
+	template< typename T1, typename T2 >
+	bool Equal( const std::pair< T1, T2 >& x, const std::pair< T1, T2 >& y )
+	{
+		return
+			Equal( x.first, y.first ) &&
+			Equal( x.second, y.second );
 	}
 
 	template<>
@@ -67,7 +75,7 @@ namespace ut
 	}
 
 
-	template< class T >
+	template< typename T >
 	inline std::tstring ToString( const T& x )
 	{
 		std::tostringstream os;

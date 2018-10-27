@@ -36,7 +36,7 @@ namespace utl
 	class CCRC32FileCache
 	{
 	public:
-		CCRC32FileCache( void );
+		CCRC32FileCache( void ) {}
 
 		void Clear( void ) { m_cachedChecksums.clear(); }
 

@@ -252,7 +252,7 @@ namespace num
 	template< typename ValueType >
 	inline ValueType MinValue( void ) { return (std::numeric_limits< ValueType >::min)(); }
 
-	// for double  doesn't work (DBL_MIN is minimal positive value); in C++11 use lowest()
+	// for double doesn't work (DBL_MIN is minimal positive value); in C++11 use lowest()
 	template<>
 	inline double MinValue< double >( void ) { return -(std::numeric_limits< double >::max)(); }	// min doesn't work (DBL_MIN is minimal positive value)
 
@@ -324,6 +324,22 @@ namespace num
 	}
 
 	bool StripFractionalZeros( std::tstring& rText, const std::locale& loc = str::GetUserLocale() );
+}
+
+
+class CEnumTags;
+
+
+namespace num
+{
+	// file size formatting
+
+	enum BytesUnit { Bytes, KiloBytes, MegaBytes, GigaBytes, TeraBytes, AutoBytes };
+
+	const CEnumTags& GetTags_BytesUnit( void );
+
+	std::tstring FormatFileSize( ULONGLONG byteFileSize, BytesUnit unit = AutoBytes, const std::locale& loc = str::GetUserLocale() );		// use num::GetEmptyLocale() for no commas
+	std::pair< double, BytesUnit > ConvertFileSize( ULONGLONG fileSize, BytesUnit toUnit = AutoBytes );
 }
 
 
