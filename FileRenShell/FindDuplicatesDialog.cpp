@@ -1,7 +1,7 @@
 
 #include "stdafx.h"
 #include "FindDuplicatesDialog.h"
-#include "TouchItem.h"
+#include "DuplicateFileItem.h"
 #include "FileModel.h"
 #include "FileService.h"
 #include "FileCommands.h"
@@ -11,9 +11,11 @@
 #include "utl/Clipboard.h"
 #include "utl/Color.h"
 #include "utl/ContainerUtilities.h"
+#include "utl/CRC32.h"
 #include "utl/CmdInfoStore.h"
 #include "utl/Command.h"
 #include "utl/EnumTags.h"
+#include "utl/FileSystem.h"
 #include "utl/FmtUtils.h"
 #include "utl/LongestCommonSubsequence.h"
 #include "utl/RuntimeException.h"
@@ -37,13 +39,28 @@ namespace reg
 
 namespace layout
 {
+	enum { TopPct = 30, BottomPct = 100 - TopPct };
+
 	static CLayoutStyle styles[] =
 	{
-		{ IDC_DUPLICATE_FILES_LIST, Size },
+		{ IDC_GROUP_BOX_1, SizeX | pctSizeY( TopPct ) },
+		{ IDC_SOURCE_PATHS_LIST, SizeX | pctSizeY( TopPct ) },
+		{ IDC_STRIP_BAR_1, MoveX | pctMoveY( TopPct ) },
 
-		{ IDC_COPY_SOURCE_PATHS_BUTTON, MoveY },
-		{ IDC_PASTE_FILES_BUTTON, MoveY },
-		{ IDC_RESET_FILES_BUTTON, MoveY },
+		{ IDC_FILE_TYPE_STATIC, pctMoveY( TopPct ) },
+		{ IDC_FILE_TYPE_COMBO, pctMoveY( TopPct ) },
+		{ IDC_MINIMUM_SIZE_STATIC, pctMoveY( TopPct ) },
+		{ IDC_MINIMUM_SIZE_COMBO, pctMoveY( TopPct ) },
+		{ IDC_FILE_SPEC_STATIC, pctMoveY( TopPct ) },
+		{ IDC_FILE_SPEC_EDIT, SizeX | pctMoveY( TopPct ) },
+
+		{ IDC_DUPLICATE_FILES_STATIC, pctMoveY( TopPct ) },
+		{ IDC_DUPLICATE_FILES_LIST, SizeX | pctMoveY( TopPct ) | pctSizeY( BottomPct ) },
+
+		{ IDC_SELECT_DUPLICATES_BUTTON, MoveY },
+		{ IDC_DELETE_DUPLICATES_BUTTON, MoveY },
+		{ IDC_MOVE_DUPLICATES_BUTTON, MoveY },
+		{ IDC_CLEAR_CRC32_CACHE_BUTTON, Move },
 
 		{ IDOK, MoveX },
 		{ IDCANCEL, MoveX },
@@ -51,44 +68,88 @@ namespace layout
 	};
 }
 
+
 CFindDuplicatesDialog::CFindDuplicatesDialog( CFileModel* pFileModel, CWnd* pParent )
-	: CFileEditorBaseDialog( pFileModel, cmd::TouchFile, IDD_FIND_DUPLICATES_DIALOG, pParent )
-	, m_rTouchItems( m_pFileModel->LazyInitTouchItems() )
-	, m_fileListCtrl( IDC_DUPLICATE_FILES_LIST )
+	: CFileEditorBaseDialog( pFileModel, cmd::FindDuplicates, IDD_FIND_DUPLICATES_DIALOG, pParent )
+	, m_sourcePaths( m_pFileModel->GetSourcePaths() )
+	, m_dupsListCtrl( IDC_DUPLICATE_FILES_LIST )
 	, m_anyChanges( false )
 {
 	m_nativeCmdTypes.push_back( cmd::ResetDestinations );
 	m_mode = CommitFilesMode;
-	REQUIRE( !m_rTouchItems.empty() );
+	REQUIRE( !m_sourcePaths.empty() );
 
 	m_regSection = reg::section_dialog;
 	RegisterCtrlLayout( layout::styles, COUNT_OF( layout::styles ) );
 	LoadDlgIcon( ID_TOUCH_FILES );
 
-	m_fileListCtrl.ModifyListStyleEx( 0, LVS_EX_GRIDLINES );
-	m_fileListCtrl.SetSection( m_regSection + _T("\\List") );
-	m_fileListCtrl.SetUseAlternateRowColoring();
-	m_fileListCtrl.SetTextEffectCallback( this );
-	m_fileListCtrl.SetPopupMenu( CReportListControl::OnSelection, NULL );				// let us track a custom menu
-	CGeneralOptions::Instance().ApplyToListCtrl( &m_fileListCtrl );
+	m_srcPathsListCtrl.SetAcceptDropFiles();
+	m_srcPathsListCtrl.AddRecordCompare( pred::NewComparator( pred::CompareCode() ) );	// default row item comparator
+	CGeneralOptions::Instance().ApplyToListCtrl( &m_srcPathsListCtrl );
 
-	m_fileListCtrl.AddRecordCompare( pred::NewComparator( pred::CompareCode() ) );		// default row item comparator
-	m_fileListCtrl.AddColumnCompare( PathName, pred::NewComparator( pred::CompareDisplayCode() ) );
-	m_fileListCtrl.AddColumnCompare( DestModifyTime, pred::NewPropertyComparator< CTouchItem >( func::AsDestModifyTime() ), false );		// order date-time descending by default
-	m_fileListCtrl.AddColumnCompare( DestCreationTime, pred::NewPropertyComparator< CTouchItem >( func::AsDestCreationTime() ), false );
-	m_fileListCtrl.AddColumnCompare( DestAccessTime, pred::NewPropertyComparator< CTouchItem >( func::AsDestAccessTime() ), false );
-	m_fileListCtrl.AddColumnCompare( SrcModifyTime, pred::NewPropertyComparator< CTouchItem >( func::AsSrcModifyTime() ), false );
-	m_fileListCtrl.AddColumnCompare( SrcCreationTime, pred::NewPropertyComparator< CTouchItem >( func::AsSrcCreationTime() ), false );
-	m_fileListCtrl.AddColumnCompare( SrcAccessTime, pred::NewPropertyComparator< CTouchItem >( func::AsSrcAccessTime() ), false );
+	m_dupsListCtrl.ModifyListStyleEx( 0, LVS_EX_CHECKBOXES );
+	m_dupsListCtrl.SetSection( m_regSection + _T("\\List") );
+	m_dupsListCtrl.SetUseAlternateRowColoring();
+	m_dupsListCtrl.SetTextEffectCallback( this );
+	m_dupsListCtrl.SetPopupMenu( CReportListControl::OnSelection, NULL );				// let us track a custom menu
+	CGeneralOptions::Instance().ApplyToListCtrl( &m_dupsListCtrl );
+
+	m_dupsListCtrl.AddRecordCompare( pred::NewComparator( pred::CompareCode() ) );		// default row item comparator
+	m_dupsListCtrl.AddColumnCompare( FileName, pred::NewComparator( pred::CompareDisplayCode() ) );
 }
 
 CFindDuplicatesDialog::~CFindDuplicatesDialog()
 {
+	ClearDuplicates();
 }
 
-bool CFindDuplicatesDialog::TouchFiles( void )
+const CEnumTags& CFindDuplicatesDialog::GetTags_FileType( void )
 {
-	CFileService svc;
+	static const CEnumTags tags(
+		_T("*.*|")
+		_T("*.jpeg;*.jpg;*.jpe;*.jp2;*.gif;*.bmp;*.pcx;*.png;*.tif;*.tiff;*.dib;*.ico;*.wmf;*.emf;*.tga;*.psd;*.rle|")
+		_T("*.wav;*.mp3;*.m4a;*.flac;*.wma;*.aac;*.ac3;*.midi;*.mid;*.ogg;*.rmi;*.snd|")
+		_T("*.avi;*.mpeg;*.mpg;*.wmv;*.m1v;*.m2v;*.mp1;*.mp2;*.mpv2;*.mp2v;*.divx|")
+		_T("*.ext1;*.ext2;*.ext3")
+	);
+	return tags;
+}
+
+void CFindDuplicatesDialog::ClearDuplicates( void )
+{
+	utl::ClearOwningContainer( m_duplicateGroups );
+}
+
+void CFindDuplicatesDialog::SearchForDuplicateFiles( void )
+{
+	ClearDuplicates();
+
+	std::tstring wildSpec = ui::GetDlgItemText( this, IDC_FILE_SPEC_EDIT );
+
+	CDuplicateGroupsStore groupsStore;
+
+	for ( std::vector< fs::CPath >::const_iterator itSrcPath = m_sourcePaths.begin(); itSrcPath != m_sourcePaths.end(); ++itSrcPath )
+	{
+		if ( fs::IsValidDirectory( itSrcPath->GetPtr() ) )
+		{
+			fs::CPathEnumerator found;
+			fs::EnumFiles( &found, itSrcPath->GetPtr(), wildSpec.c_str(), Deep );
+
+			for ( fs::TPathSet::const_iterator itFilePath = found.m_filePaths.begin(); itFilePath != found.m_filePaths.end(); ++itFilePath )
+				groupsStore.Register( *itFilePath );
+		}
+		else if ( fs::IsValidFile( itSrcPath->GetPtr() ) )
+			groupsStore.Register( *itSrcPath );
+	}
+
+	groupsStore.ExtractDuplicateGroups( m_duplicateGroups );
+
+	ClearFileErrors();
+}
+
+bool CFindDuplicatesDialog::DeleteDuplicateFiles( void )
+{
+/*	CFileService svc;
 	std::auto_ptr< CMacroCommand > pTouchMacroCmd = svc.MakeTouchCmds( m_rTouchItems );
 	if ( pTouchMacroCmd.get() != NULL )
 		if ( !pTouchMacroCmd->IsEmpty() )
@@ -99,8 +160,7 @@ bool CFindDuplicatesDialog::TouchFiles( void )
 			return SafeExecuteCmd( pTouchMacroCmd.release() );
 		}
 		else
-			return PromptCloseDialog();
-
+			return PromptCloseDialog();*/
 	return false;
 }
 
@@ -110,21 +170,21 @@ void CFindDuplicatesDialog::SwitchMode( Mode mode )
 	if ( NULL == m_hWnd )
 		return;
 
-	static const CEnumTags modeTags( _T("&Store|&Touch|Roll &Back|Roll &Forward") );
+	static const CEnumTags modeTags( _T("&Search|Delete...|Roll &Back|Roll &Forward") );
 	ui::SetDlgItemText( m_hWnd, IDOK, modeTags.FormatUi( m_mode ) );
 
 	static const UINT ctrlIds[] =
 	{
-		IDC_COPY_SOURCE_PATHS_BUTTON, IDC_PASTE_FILES_BUTTON, IDC_RESET_FILES_BUTTON,
-		//IDC_MODIFIED_DATE, IDC_CREATED_DATE, IDC_ACCESSED_DATE,
-		//IDC_ATTRIB_READONLY_CHECK, IDC_ATTRIB_HIDDEN_CHECK, IDC_ATTRIB_SYSTEM_CHECK, IDC_ATTRIB_ARCHIVE_CHECK
+		IDC_GROUP_BOX_1, IDC_SOURCE_PATHS_LIST, IDC_FILE_TYPE_STATIC, IDC_FILE_TYPE_COMBO, IDC_MINIMUM_SIZE_STATIC, IDC_MINIMUM_SIZE_COMBO, IDC_FILE_SPEC_STATIC, IDC_FILE_SPEC_EDIT,
+		IDC_SELECT_DUPLICATES_BUTTON, IDC_DELETE_DUPLICATES_BUTTON, IDC_MOVE_DUPLICATES_BUTTON, IDC_CLEAR_CRC32_CACHE_BUTTON
 	};
 	ui::EnableControls( *this, ctrlIds, COUNT_OF( ctrlIds ), !IsRollMode() );
+	if ( IsRollMode() )
+		m_anyChanges = false;
 
-	m_anyChanges = utl::Any( m_rTouchItems, std::mem_fun( &CTouchItem::IsModified ) );
 	ui::EnableControl( *this, IDOK, m_mode != CommitFilesMode || m_anyChanges );
 
-	m_fileListCtrl.Invalidate();			// do some custom draw magic
+	m_dupsListCtrl.Invalidate();			// do some custom draw magic
 }
 
 void CFindDuplicatesDialog::PostMakeDest( bool silent /*= false*/ )
@@ -142,7 +202,7 @@ void CFindDuplicatesDialog::PopStackTop( cmd::StackType stackType )
 
 	if ( utl::ICommand* pTopCmd = PeekCmdForDialog( stackType ) )		// comand that is target for this dialog editor?
 	{
-		bool isTouchMacro = cmd::TouchFile == pTopCmd->GetTypeID();
+		bool isTouchMacro = cmd::FindDuplicates == pTopCmd->GetTypeID();
 
 		ClearFileErrors();
 
@@ -164,75 +224,52 @@ void CFindDuplicatesDialog::PopStackTop( cmd::StackType stackType )
 
 void CFindDuplicatesDialog::SetupDialog( void )
 {
-	SetupFileListView();							// fill in and select the found files list
+	SetupSrcPathsList();
 }
 
-void CFindDuplicatesDialog::SetupFileListView( void )
+void CFindDuplicatesDialog::SetupSrcPathsList( void )
 {
-	CScopedListTextSelection sel( &m_fileListCtrl );
+	CScopedListTextSelection sel( &m_srcPathsListCtrl );
+	CScopedLockRedraw freeze( &m_srcPathsListCtrl );
+	CScopedInternalChange internalChange( &m_srcPathsListCtrl );
 
-	CScopedLockRedraw freeze( &m_fileListCtrl );
-	CScopedInternalChange internalChange( &m_fileListCtrl );
+	m_srcPathsListCtrl.DeleteAllItems();
 
-	m_fileListCtrl.DeleteAllItems();
-
-	for ( unsigned int pos = 0; pos != m_rTouchItems.size(); ++pos )
+	for ( unsigned int index = 0; index != m_sourcePaths.size(); ++index )
 	{
-		const CTouchItem* pTouchItem = m_rTouchItems[ pos ];
-
-		m_fileListCtrl.InsertObjectItem( pos, pTouchItem );		// PathName
-
-		m_fileListCtrl.SetSubItemText( pos, DestAttributes, fmt::FormatFileAttributes( pTouchItem->GetDestState().m_attributes ) );
-		m_fileListCtrl.SetSubItemText( pos, DestModifyTime, time_utl::FormatTimestamp( pTouchItem->GetDestState().m_modifTime ) );
-		m_fileListCtrl.SetSubItemText( pos, DestCreationTime, time_utl::FormatTimestamp( pTouchItem->GetDestState().m_creationTime ) );
-		m_fileListCtrl.SetSubItemText( pos, DestAccessTime, time_utl::FormatTimestamp( pTouchItem->GetDestState().m_accessTime ) );
-
-		m_fileListCtrl.SetSubItemText( pos, SrcAttributes, fmt::FormatFileAttributes( pTouchItem->GetSrcState().m_attributes ) );
-		m_fileListCtrl.SetSubItemText( pos, SrcModifyTime, time_utl::FormatTimestamp( pTouchItem->GetSrcState().m_modifTime ) );
-		m_fileListCtrl.SetSubItemText( pos, SrcCreationTime, time_utl::FormatTimestamp( pTouchItem->GetSrcState().m_creationTime ) );
-		m_fileListCtrl.SetSubItemText( pos, SrcAccessTime, time_utl::FormatTimestamp( pTouchItem->GetSrcState().m_accessTime ) );
-	}
-
-	m_fileListCtrl.SetupDiffColumnPair( SrcAttributes, DestAttributes, str::GetMatch() );
-	m_fileListCtrl.SetupDiffColumnPair( SrcModifyTime, DestModifyTime, str::GetMatch() );
-	m_fileListCtrl.SetupDiffColumnPair( SrcCreationTime, DestCreationTime, str::GetMatch() );
-	m_fileListCtrl.SetupDiffColumnPair( SrcAccessTime, DestAccessTime, str::GetMatch() );
-
-	m_fileListCtrl.InitialSortList();
-}
-
-void CFindDuplicatesDialog::InputFields( void )
-{
-}
-
-void CFindDuplicatesDialog::ApplyFields( void )
-{
-	if ( utl::ICommand* pCmd = MakeChangeDestFileStatesCmd() )
-	{
-		ClearFileErrors();
-		SafeExecuteCmd( pCmd );
+		const fs::CPath& srcPath = m_sourcePaths[ index ];
+		m_srcPathsListCtrl.InsertItem( LVIF_TEXT | LVIF_IMAGE | LVIF_PARAM, index, srcPath.GetPtr(), 0, 0, CReportListControl::Transparent_Image, reinterpret_cast< LPARAM >( srcPath.GetPtr() ) );
 	}
 }
 
-utl::ICommand* CFindDuplicatesDialog::MakeChangeDestFileStatesCmd( void )
+void CFindDuplicatesDialog::SetupDuplicateFileList( void )
 {
-	std::vector< fs::CFileState > destFileStates; destFileStates.reserve( m_rTouchItems.size() );
-	bool anyChanges = false;
+	CScopedListTextSelection sel( &m_dupsListCtrl );
 
-	// apply valid edits, i.e. if not null
-	for ( size_t i = 0; i != m_rTouchItems.size(); ++i )
+	CScopedLockRedraw freeze( &m_dupsListCtrl );
+	CScopedInternalChange internalChange( &m_dupsListCtrl );
+
+	m_dupsListCtrl.DeleteAllItems();
+	m_dupsListCtrl.RemoveAllGroups();
+
+	m_dupsListCtrl.EnableGroupView( !m_duplicateGroups.empty() );
+
+	unsigned int index = 0;			// strictly item index
+
+	for ( size_t groupPos = 0; groupPos != m_duplicateGroups.size(); ++groupPos )
 	{
-		const CTouchItem* pTouchItem = m_rTouchItems[ i ];
+		const CDuplicateFilesGroup* pGroup = m_duplicateGroups[ groupPos ];
+		ASSERT( pGroup->GetItems().size() > 1 );
 
-		fs::CFileState newFileState = pTouchItem->GetDestState();
-
-		if ( newFileState != pTouchItem->GetDestState() )
-			anyChanges = true;
-
-		destFileStates.push_back( newFileState );
+		for ( std::vector< CDuplicateFileItem* >::const_iterator itDupItem = pGroup->GetItems().begin(); itDupItem != pGroup->GetItems().end(); ++itDupItem, ++index )
+		{
+			ASSERT( pGroup == ( *itDupItem )->GetParentGroup() );
+			m_dupsListCtrl.InsertObjectItem( index, *itDupItem );		// PathName
+			m_dupsListCtrl.SetSubItemText( index, DirPath, ( *itDupItem )->GetKeyPath().GetParentPath().GetPtr() );
+			m_dupsListCtrl.SetSubItemText( index, Size, num::FormatFileSize( pGroup->GetContentKey().m_fileSize ) );
+			m_dupsListCtrl.SetSubItemText( index, CRC32, num::FormatHexNumber( pGroup->GetContentKey().m_crc32, _T("%X") ) );
+		}
 	}
-
-	return anyChanges ? new CChangeDestFileStatesCmd( m_pFileModel, destFileStates ) : NULL;
 }
 
 void CFindDuplicatesDialog::OnUpdate( utl::ISubject* pSubject, utl::IMessage* pMessage )
@@ -252,7 +289,10 @@ void CFindDuplicatesDialog::OnUpdate( utl::ISubject* pSubject, utl::IMessage* pM
 			}
 		}
 		else if ( &CGeneralOptions::Instance() == pSubject )
-			CGeneralOptions::Instance().ApplyToListCtrl( &m_fileListCtrl );
+		{
+			CGeneralOptions::Instance().ApplyToListCtrl( &m_srcPathsListCtrl );
+			CGeneralOptions::Instance().ApplyToListCtrl( &m_dupsListCtrl );
+		}
 }
 
 void CFindDuplicatesDialog::ClearFileErrors( void )
@@ -260,14 +300,14 @@ void CFindDuplicatesDialog::ClearFileErrors( void )
 	m_errorItems.clear();
 
 	if ( m_hWnd != NULL )
-		m_fileListCtrl.Invalidate();
+		m_dupsListCtrl.Invalidate();
 }
 
 void CFindDuplicatesDialog::OnFileError( const fs::CPath& srcPath, const std::tstring& errMsg )
 {
 	errMsg;
 
-	if ( CTouchItem* pErrorItem = FindItemWithKey( srcPath ) )
+	if ( CDuplicateFileItem* pErrorItem = FindItemWithKey( srcPath ) )
 		utl::AddUnique( m_errorItems, pErrorItem );
 
 	EnsureVisibleFirstError();
@@ -275,121 +315,70 @@ void CFindDuplicatesDialog::OnFileError( const fs::CPath& srcPath, const std::ts
 
 void CFindDuplicatesDialog::CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARAM rowKey, int subItem ) const
 {
-	static const ui::CTextEffect s_modPathName( ui::Bold );
-	static const ui::CTextEffect s_modDest( ui::Regular, CReportListControl::s_mismatchDestTextColor );
-	static const ui::CTextEffect s_modSrc( ui::Regular, CReportListControl::s_deleteSrcTextColor );
+	static const ui::CTextEffect s_dup( ui::Bold );
 	static const ui::CTextEffect s_errorBk( ui::Regular, CLR_NONE, app::ColorErrorBk );
 
-	const CTouchItem* pTouchItem = CReportListControl::AsPtr< CTouchItem >( rowKey );
+	const CDuplicateFileItem* pFileItem = CReportListControl::AsPtr< CDuplicateFileItem >( rowKey );
 	const ui::CTextEffect* pTextEffect = NULL;
-	bool isModified = false, isSrc = false;
 
 	switch ( subItem )
 	{
-		case PathName:
-			isModified = pTouchItem->IsModified();
-			if ( isModified )
-				pTextEffect = &s_modPathName;
-			break;
-		case SrcAttributes:
-			isSrc = true;		// fall-through
-		case DestAttributes:
-			isModified = pTouchItem->GetDestState().m_attributes != pTouchItem->GetSrcState().m_attributes;
-			break;
-		case SrcModifyTime:
-			isSrc = true;		// fall-through
-		case DestModifyTime:
-			isModified = pTouchItem->GetDestState().m_modifTime != pTouchItem->GetSrcState().m_modifTime;
-			break;
-		case SrcCreationTime:
-			isSrc = true;		// fall-through
-		case DestCreationTime:
-			isModified = pTouchItem->GetDestState().m_creationTime != pTouchItem->GetSrcState().m_creationTime;
-			break;
-		case SrcAccessTime:
-			isSrc = true;		// fall-through
-		case DestAccessTime:
-			isModified = pTouchItem->GetDestState().m_accessTime != pTouchItem->GetSrcState().m_accessTime;
+		case FileName:
+		case DirPath:
+			if ( pFileItem->IsDuplicateItem() )
+				pTextEffect = &s_dup;
 			break;
 	}
 
-	if ( utl::Contains( m_errorItems, pTouchItem ) )
+	if ( utl::Contains( m_errorItems, pFileItem ) )
 		rTextEffect |= s_errorBk;							// highlight error row background
 
 	if ( pTextEffect != NULL )
 		rTextEffect |= *pTextEffect;
-	else if ( isModified )
-		rTextEffect |= isSrc ? s_modSrc : s_modDest;
-
-	if ( EditMode == m_mode )
-	{
-		bool wouldModify = false;
-		switch ( subItem )
-		{
-			case DestAttributes:
-				//wouldModify = ...;
-				break;
-		}
-
-		if ( wouldModify )
-			rTextEffect.m_textColor = ui::GetBlendedColor( rTextEffect.m_textColor != CLR_NONE ? rTextEffect.m_textColor : m_fileListCtrl.GetTextColor(), color::White );		// blend to gray
-	}
 }
 
-void CFindDuplicatesDialog::ModifyDiffTextEffectAt( CListTraits::CMatchEffects& rEffects, LPARAM rowKey, int subItem ) const
+CDuplicateFileItem* CFindDuplicatesDialog::FindItemWithKey( const fs::CPath& keyPath ) const
 {
-	rowKey;
-	switch ( subItem )
-	{
-		case SrcModifyTime:
-		case DestModifyTime:
-		case SrcCreationTime:
-		case DestCreationTime:
-		case SrcAccessTime:
-		case DestAccessTime:
-			ClearFlag( rEffects.m_rNotEqual.m_fontEffect, ui::Bold );		// line-up date columns nicely
-			//rEffects.m_rNotEqual.m_frameFillTraits.Init( color::Green, 20, 10 );
-			break;
-	}
-}
+	for ( std::vector< CDuplicateFilesGroup* >::const_iterator itGroup = m_duplicateGroups.begin(); itGroup != m_duplicateGroups.end(); ++itGroup )
+		if ( CDuplicateFileItem* pFoundItem = ( *itGroup )->FindItem( keyPath ) )
+			return pFoundItem;
 
-CTouchItem* CFindDuplicatesDialog::FindItemWithKey( const fs::CPath& keyPath ) const
-{
-	std::vector< CTouchItem* >::const_iterator itFoundItem = utl::BinaryFind( m_rTouchItems, keyPath, CPathItemBase::ToKeyPath() );
-	return itFoundItem != m_rTouchItems.end() ? *itFoundItem : NULL;
+	return NULL;
 }
 
 void CFindDuplicatesDialog::MarkInvalidSrcItems( void )
 {
-	for ( std::vector< CTouchItem* >::const_iterator itTouchItem = m_rTouchItems.begin(); itTouchItem != m_rTouchItems.end(); ++itTouchItem )
-		if ( !( *itTouchItem )->GetKeyPath().FileExist() )
-			utl::AddUnique( m_errorItems, *itTouchItem );
+	for ( std::vector< CDuplicateFilesGroup* >::const_iterator itGroup = m_duplicateGroups.begin(); itGroup != m_duplicateGroups.end(); ++itGroup )
+		for ( std::vector< CDuplicateFileItem* >::const_iterator itItem = ( *itGroup )->GetItems().begin(); itItem != ( *itGroup )->GetItems().end(); ++itItem )
+			if ( !( *itItem )->GetKeyPath().FileExist() )
+				utl::AddUnique( m_errorItems, *itItem );
 }
 
 void CFindDuplicatesDialog::EnsureVisibleFirstError( void )
 {
-	if ( const CTouchItem* pFirstErrorItem = GetFirstErrorItem< CTouchItem >() )
-		m_fileListCtrl.EnsureVisibleObject( pFirstErrorItem );
+	if ( const CDuplicateFileItem* pFirstErrorItem = GetFirstErrorItem< CDuplicateFileItem >() )
+		m_dupsListCtrl.EnsureVisibleObject( pFirstErrorItem );
 
-	m_fileListCtrl.Invalidate();				// trigger some highlighting
+	m_dupsListCtrl.Invalidate();				// trigger some highlighting
 }
 
 BOOL CFindDuplicatesDialog::OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo )
 {
 	return
 		__super::OnCmdMsg( id, code, pExtra, pHandlerInfo ) ||
-		m_fileListCtrl.OnCmdMsg( id, code, pExtra, pHandlerInfo );
+		m_dupsListCtrl.OnCmdMsg( id, code, pExtra, pHandlerInfo );
 }
 
 void CFindDuplicatesDialog::DoDataExchange( CDataExchange* pDX )
 {
-	const bool firstInit = NULL == m_fileListCtrl.m_hWnd;
+	const bool firstInit = NULL == m_srcPathsListCtrl.m_hWnd;
 
-	DDX_Control( pDX, IDC_DUPLICATE_FILES_LIST, m_fileListCtrl );
+	DDX_Control( pDX, IDC_SOURCE_PATHS_LIST, m_srcPathsListCtrl );
+	DDX_Control( pDX, IDC_DUPLICATE_FILES_LIST, m_dupsListCtrl );
 
-	ui::DDX_ButtonIcon( pDX, IDC_COPY_SOURCE_PATHS_BUTTON, ID_EDIT_COPY );
-	ui::DDX_ButtonIcon( pDX, IDC_PASTE_FILES_BUTTON, ID_EDIT_PASTE );
-	ui::DDX_ButtonIcon( pDX, IDC_RESET_FILES_BUTTON, ID_RESET_DEFAULT );
+	//ui::DDX_ButtonIcon( pDX, IDC_SELECT_DUPLICATES_BUTTON, ID_EDIT_COPY );
+	ui::DDX_ButtonIcon( pDX, IDC_DELETE_DUPLICATES_BUTTON, ID_REMOVE_ALL_ITEMS );
+	//ui::DDX_ButtonIcon( pDX, IDC_MOVE_DUPLICATES_BUTTON, ID_RESET_DEFAULT );
 
 	if ( DialogOutput == pDX->m_bSaveAndValidate )
 	{
@@ -413,6 +402,7 @@ BEGIN_MESSAGE_MAP( CFindDuplicatesDialog, CFileEditorBaseDialog )
 	ON_BN_CLICKED( IDC_PASTE_FILES_BUTTON, OnBnClicked_PasteDestStates )
 	ON_BN_CLICKED( IDC_RESET_FILES_BUTTON, OnBnClicked_ResetDestFiles )
 	//ON_UPDATE_COMMAND_UI_RANGE( ID_COPY_MODIFIED_DATE, ID_COPY_ACCESSED_DATE, OnUpdateSelListItem )
+	ON_NOTIFY( CReportListControl::LVN_DropFiles, IDC_SOURCE_PATHS_LIST, OnLvnDropFiles_SrcList )
 	ON_NOTIFY( LVN_ITEMCHANGED, IDC_DUPLICATE_FILES_LIST, OnLvnItemChanged_TouchList )
 END_MESSAGE_MAP()
 
@@ -421,12 +411,11 @@ void CFindDuplicatesDialog::OnOK( void )
 	switch ( m_mode )
 	{
 		case EditMode:
-			InputFields();
-			ApplyFields();
+			SearchForDuplicateFiles();
 			PostMakeDest();
 			break;
 		case CommitFilesMode:
-			if ( TouchFiles() )
+			if ( DeleteDuplicateFiles() )
 				__super::OnOK();
 			else
 				SwitchMode( CommitFilesMode );
@@ -448,7 +437,7 @@ void CFindDuplicatesDialog::OnOK( void )
 
 void CFindDuplicatesDialog::OnContextMenu( CWnd* pWnd, CPoint screenPos )
 {
-	if ( &m_fileListCtrl == pWnd )
+	if ( &m_dupsListCtrl == pWnd )
 	{
 		CMenu popupMenu;
 		ui::LoadPopupMenu( popupMenu, IDR_CONTEXT_MENU, popup::TouchList );
@@ -504,7 +493,18 @@ void CFindDuplicatesDialog::OnBnClicked_ResetDestFiles( void )
 
 void CFindDuplicatesDialog::OnUpdateSelListItem( CCmdUI* pCmdUI )
 {
-	pCmdUI->Enable( m_fileListCtrl.GetCurSel() != -1 );
+	pCmdUI->Enable( m_dupsListCtrl.GetCurSel() != -1 );
+}
+
+void CFindDuplicatesDialog::OnLvnDropFiles_SrcList( NMHDR* pNmHdr, LRESULT* pResult )
+{
+	CNmDropFiles* pNmDropFiles = (CNmDropFiles*)pNmHdr;
+	*pResult = 0;
+
+	for ( std::vector< std::tstring >::const_iterator itFilePath = pNmDropFiles->m_filePaths.begin(); itFilePath != pNmDropFiles->m_filePaths.end(); ++itFilePath )
+		utl::AddUnique( m_sourcePaths, *itFilePath );
+
+	SwitchMode( EditMode );
 }
 
 void CFindDuplicatesDialog::OnLvnItemChanged_TouchList( NMHDR* pNmHdr, LRESULT* pResult )
@@ -513,7 +513,7 @@ void CFindDuplicatesDialog::OnLvnItemChanged_TouchList( NMHDR* pNmHdr, LRESULT* 
 
 	if ( CReportListControl::IsSelectionChangedNotify( pNmList, LVIS_SELECTED | LVIS_FOCUSED ) )
 	{
-		//UpdateFieldsFromSel( m_fileListCtrl.GetCurSel() );
+		//UpdateFieldsFromSel( m_dupsListCtrl.GetCurSel() );
 	}
 
 	*pResult = 0;

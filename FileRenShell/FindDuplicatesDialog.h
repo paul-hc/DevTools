@@ -9,15 +9,9 @@
 #include "FileEditorBaseDialog.h"
 
 
-class CTouchItem;
+class CDuplicateFilesGroup;
+class CDuplicateFileItem;
 class CEnumTags;
-
-namespace multi
-{
-	class CDateTimeState;
-	class CAttribCheckState;
-}
-
 
 class CFindDuplicatesDialog : public CFileEditorBaseDialog
 							, private CReportListControl::ITextEffectCallback
@@ -39,39 +33,39 @@ private:
 
 	// CReportListControl::ITextEffectCallback interface
 	virtual void CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARAM rowKey, int subItem ) const;
-	virtual void ModifyDiffTextEffectAt( CListTraits::CMatchEffects& rEffects, LPARAM rowKey, int subItem ) const;
 private:
 	void SwitchMode( Mode mode );
 
-	bool TouchFiles( void );
+	bool DeleteDuplicateFiles( void );
 	void SetupDialog( void );
 
 	// data
 
 	// output
-	void SetupFileListView( void );
+	void SetupSrcPathsList( void );
+	void SetupDuplicateFileList( void );
 
 	// input
-	void InputFields( void );
-	void ApplyFields( void );
-	utl::ICommand* MakeChangeDestFileStatesCmd( void );
+	void ClearDuplicates( void );
+	void SearchForDuplicateFiles( void );
 
-	CTouchItem* FindItemWithKey( const fs::CPath& srcPath ) const;
+	CDuplicateFileItem* FindItemWithKey( const fs::CPath& srcPath ) const;
 	void MarkInvalidSrcItems( void );
 	void EnsureVisibleFirstError( void );
+
+	enum FileType { All, Images, Audio, Video, Custom };
+	static const CEnumTags& GetTags_FileType( void );
 private:
-	const std::vector< CTouchItem* >& m_rTouchItems;
+	std::vector< fs::CPath > m_sourcePaths;
+	std::vector< CDuplicateFilesGroup* > m_duplicateGroups;
+
 	bool m_anyChanges;
 private:
 	// enum { IDD = IDD_FIND_DUPLICATES_DIALOG };
-	enum Column
-	{
-		PathName,
-		DestAttributes, DestModifyTime, DestCreationTime, DestAccessTime,
-		SrcAttributes, SrcModifyTime, SrcCreationTime, SrcAccessTime
-	};
+	enum DupFileColumn { FileName, DirPath, Size, CRC32 };
 
-	CReportListControl m_fileListCtrl;
+	CReportListControl m_srcPathsListCtrl;
+	CReportListControl m_dupsListCtrl;
 
 	// generated stuff
 public:
@@ -87,6 +81,7 @@ protected:
 	afx_msg void OnBnClicked_PasteDestStates( void );
 	afx_msg void OnBnClicked_ResetDestFiles( void );
 	afx_msg void OnUpdateSelListItem( CCmdUI* pCmdUI );
+	afx_msg void OnLvnDropFiles_SrcList( NMHDR* pNmHdr, LRESULT* pResult );
 	afx_msg void OnLvnItemChanged_TouchList( NMHDR* pNmHdr, LRESULT* pResult );
 
 	DECLARE_MESSAGE_MAP()

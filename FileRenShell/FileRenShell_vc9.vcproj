@@ -706,6 +706,14 @@
 					>
 				</File>
 				<File
+					RelativePath=".\DuplicateFileItem.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\DuplicateFileItem.h"
+					>
+				</File>
+				<File
 					RelativePath=".\FileCommands.cpp"
 					>
 				</File>
