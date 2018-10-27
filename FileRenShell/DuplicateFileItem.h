@@ -5,6 +5,17 @@
 #include "PathItemBase.h"
 
 
+class CSrcPathItem : public CPathItemBase
+{
+public:
+	CSrcPathItem( const fs::CPath& srcPath )
+		: CPathItemBase( srcPath )
+	{
+		SetDisplayCode( srcPath.Get() );
+	}
+};
+
+
 namespace utl { class CCRC32FileCache; }
 
 
@@ -35,6 +46,7 @@ public:
 
 	size_t GetGroupPos( void ) const { return m_groupPos; }
 	CFileContentKey GetContentKey( void ) const { return m_contentKey; }
+	bool HasDuplicates( void ) const { return m_items.size() > 1; }
 
 	const std::vector< CDuplicateFileItem* >& GetItems( void ) const { return m_items; }
 	CDuplicateFileItem* FindItem( const fs::CPath& filePath ) const;
@@ -66,7 +78,7 @@ public:
 	CDuplicateGroupsStore( void ) {}
 	~CDuplicateGroupsStore( void );
 
-	bool Register( const fs::CPath& filePath );
+	bool Register( const fs::CPath& filePath, ULONGLONG minFileSize = 0 );
 	void ExtractDuplicateGroups( std::vector< CDuplicateFilesGroup* >& rDuplicateGroups );		// extract groups with more than 1 item (multiple duplicates sharing the same content key)
 private:
 	std::map< CFileContentKey, CDuplicateFilesGroup* > m_groupsMap;

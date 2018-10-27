@@ -82,10 +82,12 @@ CDuplicateGroupsStore::~CDuplicateGroupsStore( void )
 	utl::ClearOwningContainer( m_groups );
 }
 
-bool CDuplicateGroupsStore::Register( const fs::CPath& filePath )
+bool CDuplicateGroupsStore::Register( const fs::CPath& filePath, ULONGLONG minFileSize /*= 0*/ )
 {
 	CFileContentKey contentKey;
 	if ( !contentKey.Compute( filePath ) )
+		return false;
+	if ( contentKey.m_fileSize < minFileSize )			// filtered out by size?
 		return false;
 
 	CDuplicateFilesGroup*& rpGroup = m_groupsMap[ contentKey ];
@@ -105,10 +107,10 @@ void CDuplicateGroupsStore::ExtractDuplicateGroups( std::vector< CDuplicateFiles
 	utl::ClearOwningContainer( rDuplicateGroups );
 
 	for ( std::vector< CDuplicateFilesGroup* >::iterator itGroup = m_groups.begin(); itGroup != m_groups.end(); )
-		if ( ( *itGroup )->GetItems().size() > 1 )		// has duplicates?
+		if ( ( *itGroup )->HasDuplicates() )
 		{
 			rDuplicateGroups.push_back( *itGroup );
-			m_groups.erase( itGroup );
+			itGroup = m_groups.erase( itGroup );
 		}
 		else
 			++itGroup;

@@ -4,11 +4,14 @@
 
 #include "utl/FileState.h"
 #include "utl/ISubject.h"
-#include "utl/ReportListControl.h"
 #include "utl/DateTimeControl.h"
+#include "utl/HistoryComboBox.h"
+#include "utl/ReportListControl.h"
+#include "utl/TextEdit.h"
 #include "FileEditorBaseDialog.h"
 
 
+class CSrcPathItem;
 class CDuplicateFilesGroup;
 class CDuplicateFileItem;
 class CEnumTags;
@@ -56,16 +59,18 @@ private:
 	enum FileType { All, Images, Audio, Video, Custom };
 	static const CEnumTags& GetTags_FileType( void );
 private:
-	std::vector< fs::CPath > m_sourcePaths;
+	std::vector< CSrcPathItem* > m_srcPathItems;
 	std::vector< CDuplicateFilesGroup* > m_duplicateGroups;
-
-	bool m_anyChanges;
+	std::vector< std::tstring > m_fileTypeSpecs;
 private:
 	// enum { IDD = IDD_FIND_DUPLICATES_DIALOG };
 	enum DupFileColumn { FileName, DirPath, Size, CRC32 };
 
 	CReportListControl m_srcPathsListCtrl;
 	CReportListControl m_dupsListCtrl;
+	CComboBox m_fileTypeCombo;
+	CTextEdit m_fileSpecEdit;
+	CHistoryComboBox m_minFileSizeCombo;
 
 	// generated stuff
 public:
@@ -74,12 +79,17 @@ protected:
 	virtual void DoDataExchange( CDataExchange* pDX );
 protected:
 	virtual void OnOK( void );
+	afx_msg void OnDestroy( void );
 	afx_msg void OnContextMenu( CWnd* pWnd, CPoint screenPos );
 	afx_msg void OnUpdateUndoRedo( CCmdUI* pCmdUI );
 	afx_msg void OnFieldChanged( void );
-	afx_msg void OnBnClicked_CopySourceFiles( void );
-	afx_msg void OnBnClicked_PasteDestStates( void );
-	afx_msg void OnBnClicked_ResetDestFiles( void );
+	afx_msg void OnCbnSelChange_FileType( void );
+	afx_msg void OnEnChange_FileSpec( void );
+	afx_msg void OnCbnChanged_MinFileSize( void );
+	afx_msg void OnBnClicked_CheckSelectDuplicates( void );
+	afx_msg void OnBnClicked_DeleteDuplicates( void );
+	afx_msg void OnBnClicked_MoveDuplicates( void );
+	afx_msg void OnBnClicked_ClearCRC32Cache( void );
 	afx_msg void OnUpdateSelListItem( CCmdUI* pCmdUI );
 	afx_msg void OnLvnDropFiles_SrcList( NMHDR* pNmHdr, LRESULT* pResult );
 	afx_msg void OnLvnItemChanged_TouchList( NMHDR* pNmHdr, LRESULT* pResult );

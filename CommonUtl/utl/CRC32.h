@@ -38,6 +38,7 @@ namespace utl
 	public:
 		CCRC32FileCache( void ) {}
 
+		bool IsEmpty( void ) const { return m_cachedChecksums.empty(); }
 		void Clear( void ) { m_cachedChecksums.clear(); }
 
 		UINT AcquireCrc32( const fs::CPath& filePath );

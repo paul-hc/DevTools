@@ -14,6 +14,7 @@ public:
 	virtual ~CPathItemBase();
 
 	const fs::CPath& GetKeyPath( void ) const { return m_keyPath; }
+	void SetDisplayCode( const std::tstring& displayPath ) { m_displayPath = displayPath; }
 	void StripDisplayCode( const fs::CPath& commonParentPath );
 
 	// utl::ISubject interface
@@ -33,6 +34,16 @@ private:
 
 namespace func
 {
+	template< typename ContainerT >
+	typename ContainerT::value_type FindItemWithKeyPath( const ContainerT& items, const fs::CPath& keyPath )
+	{
+		for ( ContainerT::const_iterator itItem = items.begin(); itItem != items.end(); ++itItem )
+			if ( ( *itItem )->GetKeyPath() == keyPath )
+				return *itItem;
+
+		return ContainerT::value_type( NULL );
+	}
+
 	struct ResetItem
 	{
 		template< typename ItemType >
