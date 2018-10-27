@@ -101,7 +101,11 @@ public:
 
 		// note: LVS_EX_DOUBLEBUFFER causes problems of scaling artifacts with CustomImageDraw; remove this styleEx for accurate scaling.
 	};
-	enum Notification { LVN_ItemsReorder = 1000 };
+	enum Notification
+	{
+		LVN_ItemsReorder = 1000,			// via WM_COMMAND
+		LVN_DropFiles						// via WM_NOTIFY, passing CNmDropFiles
+	};
 
 	CReportListControl( UINT columnLayoutId = 0, DWORD listStyleEx = DefaultStyleEx );
 	virtual ~CReportListControl();
@@ -125,6 +129,9 @@ public:
 
 	bool GetHighlightTextDiffsFrame( void ) const { return HasFlag( m_optionFlags, HighlightTextDiffsFrame ); }
 	void SetHighlightTextDiffsFrame( bool highlightTextDiffsFrame = true ) { SetOptionFlag( HighlightTextDiffsFrame, highlightTextDiffsFrame ); }
+
+	bool GetAcceptDropFiles( void ) const { return HasFlag( m_optionFlags, AcceptDropFiles ); }
+	void SetAcceptDropFiles( bool acceptDropFiles = true ) { SetOptionFlag( AcceptDropFiles, acceptDropFiles ); }
 
 	const std::tstring& GetSection( void ) const { return m_regSection; }
 	void SetSection( const std::tstring& regSection ) { m_regSection = regSection; }
@@ -473,8 +480,9 @@ private:
 		UseExplorerTheme			= BIT_FLAG( 0 ),
 		UseAlternateRowColoring		= BIT_FLAG( 1 ),
 		UseTriStateAutoCheck		= BIT_FLAG( 2 ),		// extended check state: allows toggling LVIS_UNCHECKED -> LVIS_CHECKED -> LVIS_CHECKEDGRAY
-		SortInternally				= BIT_FLAG( 3 ),		// highlight text differences with a filled frame
-		HighlightTextDiffsFrame		= BIT_FLAG( 4 )			// highlight text differences with a filled frame
+		SortInternally				= BIT_FLAG( 3 ),
+		HighlightTextDiffsFrame		= BIT_FLAG( 4 ),		// highlight text differences with a filled frame
+		AcceptDropFiles				= BIT_FLAG( 5 )			// enable as Explorer drop target, send LVN_DropFiles notification when files are dropped onto the list
 	};
 
 	bool SetOptionFlag( ListOption flag, bool on );
@@ -532,6 +540,7 @@ public:
 protected:
 	afx_msg int OnCreate( CREATESTRUCT* pCreateStruct );
 	afx_msg void OnDestroy( void );
+	afx_msg void OnDropFiles( HDROP hDropInfo );
 	afx_msg void OnWindowPosChanged( WINDOWPOS* pWndPos );
 	afx_msg void OnKeyDown( UINT chr, UINT repCnt, UINT vkFlags );
 	afx_msg void OnNcLButtonDown( UINT hitTest, CPoint point );
@@ -564,6 +573,13 @@ public:
 	afx_msg void OnUpdateRename( CCmdUI* pCmdUI );
 
 	DECLARE_MESSAGE_MAP()
+};
+
+
+struct CNmDropFiles
+{
+	NMHDR m_nmhdr;
+	std::vector< std::tstring > m_filePaths;
 };
 
 

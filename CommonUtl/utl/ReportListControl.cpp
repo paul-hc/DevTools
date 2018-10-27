@@ -258,6 +258,9 @@ void CReportListControl::SetupControl( void )
 	if ( m_pLargeImageList != NULL )
 		SetImageList( m_pLargeImageList, LVSIL_NORMAL );
 
+	if ( GetAcceptDropFiles() )
+		DragAcceptFiles();
+
 	if ( !m_regSection.empty() )
 		LoadFromRegistry();
 	else
@@ -1765,6 +1768,7 @@ BOOL CReportListControl::PreTranslateMessage( MSG* pMsg )
 BEGIN_MESSAGE_MAP( CReportListControl, CListCtrl )
 	ON_WM_CREATE()
 	ON_WM_DESTROY()
+	ON_WM_DROPFILES()
 	ON_WM_WINDOWPOSCHANGED()
 	ON_WM_KEYDOWN()
 	ON_WM_NCLBUTTONDOWN()
@@ -1811,6 +1815,29 @@ void CReportListControl::OnDestroy( void )
 		SaveToRegistry();
 
 	CListCtrl::OnDestroy();
+}
+
+void CReportListControl::OnDropFiles( HDROP hDropInfo )
+{
+	GetAncestor( GA_PARENT )->SetActiveWindow();		// activate us first
+	NotifyParent( LVN_DropFiles );
+
+	CNmDropFiles dropInfo;
+
+	UINT fileCount = ::DragQueryFile( hDropInfo, (UINT)-1, NULL, 0 );
+	dropInfo.m_filePaths.reserve( fileCount );
+
+	for ( unsigned int i = 0; i != fileCount; ++i )
+	{
+		TCHAR filePath[ _MAX_PATH ];
+		::DragQueryFile( hDropInfo, i, filePath, _MAX_PATH );
+
+		dropInfo.m_filePaths.push_back( filePath );
+	}
+
+	::DragFinish( hDropInfo );
+
+	ui::SendNotifyToParent( m_hWnd, LVN_DropFiles, &dropInfo.m_nmhdr );		// notify parent of dropped file paths
 }
 
 void CReportListControl::OnWindowPosChanged( WINDOWPOS* pWndPos )
