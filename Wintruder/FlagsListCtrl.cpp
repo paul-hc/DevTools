@@ -63,11 +63,12 @@ void CFlagsListCtrl::InitControl( void )
 
 	if ( useGroups )
 	{
+		static const std::tstring s_anonymousGroupText;
+
 		for ( unsigned int groupId = 0; groupId != pFlagStore->m_groups.size(); ++groupId )
 		{
-			static const std::tstring anonymousGroup;
 			const CFlagGroup* pGroup = pFlagStore->m_groups[ groupId ];
-			const std::tstring& header = pGroup->GetName( anonymousGroup );
+			const std::tstring& header = pGroup->GetName( s_anonymousGroupText );
 
 			InsertGroupHeader( groupId, groupId, header, LVGS_NORMAL | LVGS_COLLAPSIBLE );
 			if ( !pGroup->IsReadOnlyGroup() )
