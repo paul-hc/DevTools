@@ -249,7 +249,7 @@ namespace ui
 					pDX->m_idLastControl = IDC_HANDLE_EDIT;
 					pDX->Fail();
 				}
-			else if ( !num::ParseHexNumber( rValue, text ) )
+			else if ( !num::ParseHexNumber< Value >( rValue, text ) )
 			{
 				pDX->m_idLastControl = IDC_HANDLE_EDIT;
 				pDX->Fail();
@@ -260,7 +260,7 @@ namespace ui
 	template< typename Handle >
 	inline void DDX_Handle( CDataExchange* pDX, int ctrlId, Handle& rHandle, const Handle* pNullHandle = NULL )
 	{
-		typedef void* HandleValue;
+		typedef DWORD_PTR HandleValue;
 		DDX_HexValue< HandleValue >( pDX, ctrlId, (HandleValue&)rHandle, _T("%08X"), (const HandleValue*)pNullHandle );
 	}
 }
