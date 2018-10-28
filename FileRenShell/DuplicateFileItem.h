@@ -16,7 +16,7 @@ public:
 };
 
 
-namespace utl { class CCRC32FileCache; }
+namespace utl { class CCrc32FileCache; }
 
 
 struct CFileContentKey
@@ -25,10 +25,13 @@ struct CFileContentKey
 	CFileContentKey( ULONGLONG fileSize, UINT crc32 ) : m_fileSize( fileSize ), m_crc32( crc32 ) { ASSERT( m_fileSize != 0ull && m_crc32 != 0u ); }
 
 	bool Compute( const fs::CPath& filePath );
-	static utl::CCRC32FileCache& GetCRC32FileCache( void );
+	bool ComputeFileSize( const fs::CPath& filePath );
+	bool ComputeCrc32( const fs::CPath& filePath );
 
 	bool operator==( const CFileContentKey& right ) const { return m_fileSize == right.m_fileSize && m_crc32 == right.m_crc32; }
 	bool operator<( const CFileContentKey& right ) const;
+
+	static utl::CCrc32FileCache& GetCrc32FileCache( void );
 public:
 	ULONGLONG m_fileSize;	// in bytes
 	UINT m_crc32;			// CRC32 checksum

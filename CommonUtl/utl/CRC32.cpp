@@ -1,6 +1,6 @@
 
 #include "stdafx.h"
-#include "CRC32.h"
+#include "Crc32.h"
 #include "FileSystem.h"
 #include "BaseApp.h"
 
@@ -11,11 +11,11 @@
 
 namespace utl
 {
-	// CCRC32 implementation
+	// CCrc32 implementation
 
-	const UINT CCRC32::s_polynomial = 0xEDB88320;		// this is the official polynomial used by CRC32 in PKZip; often times is reversed as 0x04C11DB7.
+	const UINT CCrc32::s_polynomial = 0xEDB88320;		// this is the official polynomial used by CRC32 in PKZip; often times is reversed as 0x04C11DB7.
 
-	CCRC32::CCRC32( void )
+	CCrc32::CCrc32( void )
 		: m_lookupTable( 256 )
 	{
 		for ( int i = 0; i != 256; ++i )
@@ -34,13 +34,13 @@ namespace utl
 		}
 	}
 
-	const CCRC32& CCRC32::Instance( void )
+	const CCrc32& CCrc32::Instance( void )
 	{
-		static CCRC32 s_table;
+		static CCrc32 s_table;
 		return s_table;
 	}
 
-	void CCRC32::AddBytes( UINT& rCrc32, const BYTE* pBytes, size_t byteCount ) const
+	void CCrc32::AddBytes( UINT& rCrc32, const BYTE* pBytes, size_t byteCount ) const
 	{
 		ASSERT( 0 == byteCount || pBytes != NULL );
 
@@ -48,7 +48,7 @@ namespace utl
 			AddByte( rCrc32, pBytes[ i ] );
 	}
 
-	UINT CCRC32::ComputeCrc32( const BYTE* pBytes, size_t byteCount ) const
+	UINT CCrc32::ComputeCrc32( const BYTE* pBytes, size_t byteCount ) const
 	{
 		UINT crc32CheckSum = UINT_MAX;
 
@@ -58,7 +58,7 @@ namespace utl
 		return crc32CheckSum;
 	}
 
-	UINT CCRC32::ComputeFileCrc32( const TCHAR* pFilePath ) const throws_( CFileException* )
+	UINT CCrc32::ComputeFileCrc32( const TCHAR* pFilePath ) const throws_( CFileException* )
 	{
 		UINT crc32CheckSum = UINT_MAX;
 
@@ -84,9 +84,9 @@ namespace utl
 	}
 
 
-	// CCRC32FileCache implementation
+	// CCrc32FileCache implementation
 
-	UINT CCRC32FileCache::AcquireCrc32( const fs::CPath& filePath )
+	UINT CCrc32FileCache::AcquireCrc32( const fs::CPath& filePath )
 	{
 		stdext::hash_map< fs::CPath, ChecksumStampPair >::iterator itFound = m_cachedChecksums.find( filePath );
 		if ( itFound != m_cachedChecksums.end() )		// found cached?
@@ -120,11 +120,11 @@ namespace utl
 		return 0;
 	}
 
-	UINT CCRC32FileCache::ComputeFileCrc32( const fs::CPath& filePath ) const throws_()
+	UINT CCrc32FileCache::ComputeFileCrc32( const fs::CPath& filePath ) const throws_()
 	{
 		try
 		{
-			return CCRC32::Instance().ComputeFileCrc32( filePath.GetPtr() );
+			return CCrc32::Instance().ComputeFileCrc32( filePath.GetPtr() );
 		}
 		catch ( CFileException* pExc )
 		{

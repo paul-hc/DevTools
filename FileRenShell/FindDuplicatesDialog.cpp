@@ -11,7 +11,7 @@
 #include "utl/Clipboard.h"
 #include "utl/Color.h"
 #include "utl/ContainerUtilities.h"
-#include "utl/CRC32.h"
+#include "utl/Crc32.h"
 #include "utl/CmdInfoStore.h"
 #include "utl/Command.h"
 #include "utl/EnumTags.h"
@@ -301,7 +301,7 @@ void CFindDuplicatesDialog::SetupDuplicateFileList( void )
 			m_dupsListCtrl.InsertObjectItem( index, *itDupItem );
 			m_dupsListCtrl.SetSubItemText( index, DirPath, ( *itDupItem )->GetKeyPath().GetParentPath().GetPtr() );
 			m_dupsListCtrl.SetSubItemText( index, Size, num::FormatFileSize( pGroup->GetContentKey().m_fileSize ) );
-			m_dupsListCtrl.SetSubItemText( index, CRC32, num::FormatHexNumber( pGroup->GetContentKey().m_crc32, _T("%X") ) );
+			m_dupsListCtrl.SetSubItemText( index, Crc32, num::FormatHexNumber( pGroup->GetContentKey().m_crc32, _T("%X") ) );
 			m_dupsListCtrl.SetSubItemText( index, DateModified, time_utl::FormatTimestamp( ( *itDupItem )->GetModifTime() ) );
 
 			VERIFY( m_dupsListCtrl.SetRowGroupId( index, groupId ) );
@@ -450,7 +450,7 @@ BEGIN_MESSAGE_MAP( CFindDuplicatesDialog, CFileEditorBaseDialog )
 	ON_BN_CLICKED( IDC_SELECT_DUPLICATES_BUTTON, OnBnClicked_CheckSelectDuplicates )
 	ON_BN_CLICKED( IDC_DELETE_DUPLICATES_BUTTON, OnBnClicked_DeleteDuplicates )
 	ON_BN_CLICKED( IDC_MOVE_DUPLICATES_BUTTON, OnBnClicked_MoveDuplicates )
-	ON_BN_CLICKED( IDC_CLEAR_CRC32_CACHE_BUTTON, OnBnClicked_ClearCRC32Cache )
+	ON_BN_CLICKED( IDC_CLEAR_CRC32_CACHE_BUTTON, OnBnClicked_ClearCrc32Cache )
 	//ON_UPDATE_COMMAND_UI_RANGE( ID_COPY_MODIFIED_DATE, ID_COPY_ACCESSED_DATE, OnUpdateSelListItem )
 	ON_NOTIFY( CReportListControl::LVN_DropFiles, IDC_SOURCE_PATHS_LIST, OnLvnDropFiles_SrcList )
 	ON_NOTIFY( LVN_ITEMCHANGED, IDC_DUPLICATE_FILES_LIST, OnLvnItemChanged_TouchList )
@@ -592,9 +592,9 @@ void CFindDuplicatesDialog::OnBnClicked_MoveDuplicates( void )
 	SafeExecuteCmd( new CResetDestinationsCmd( m_pFileModel ) );
 }
 
-void CFindDuplicatesDialog::OnBnClicked_ClearCRC32Cache( void )
+void CFindDuplicatesDialog::OnBnClicked_ClearCrc32Cache( void )
 {
-	CFileContentKey::GetCRC32FileCache().Clear();
+	CFileContentKey::GetCrc32FileCache().Clear();
 }
 
 void CFindDuplicatesDialog::OnUpdateSelListItem( CCmdUI* pCmdUI )

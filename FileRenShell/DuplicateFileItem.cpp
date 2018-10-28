@@ -2,7 +2,7 @@
 #include "stdafx.h"
 #include "DuplicateFileItem.h"
 #include "utl/ContainerUtilities.h"
-#include "utl/CRC32.h"
+#include "utl/Crc32.h"
 #include "utl/FileSystem.h"
 
 #ifdef _DEBUG
@@ -28,16 +28,16 @@ bool CFileContentKey::Compute( const fs::CPath& filePath )
 	if ( ULLONG_MAX == m_fileSize )
 		return false;
 
-	m_crc32 = GetCRC32FileCache().AcquireCrc32( filePath );
+	m_crc32 = GetCrc32FileCache().AcquireCrc32( filePath );
 	if ( 0 == m_crc32 )
 		return false;
 
 	return true;
 }
 
-utl::CCRC32FileCache& CFileContentKey::GetCRC32FileCache( void )
+utl::CCrc32FileCache& CFileContentKey::GetCrc32FileCache( void )
 {
-	static utl::CCRC32FileCache crcCache;
+	static utl::CCrc32FileCache crcCache;
 	return crcCache;
 }
 

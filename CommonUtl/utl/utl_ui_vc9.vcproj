@@ -662,11 +662,11 @@
 					>
 				</File>
 				<File
-					RelativePath=".\CRC32.cpp"
+					RelativePath=".\Crc32.cpp"
 					>
 				</File>
 				<File
-					RelativePath=".\CRC32.h"
+					RelativePath=".\Crc32.h"
 					>
 				</File>
 				<File

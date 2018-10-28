@@ -1,5 +1,5 @@
-#ifndef CRC32_h
-#define CRC32_h
+#ifndef utl_Crc32_h
+#define utl_Crc32_h
 #pragma once
 
 #include <hash_map>
@@ -8,13 +8,13 @@
 
 namespace utl
 {
-	// algorithms and lookup table for computing CRC32 - Cyclic Redundancy Checksum
+	// algorithms and lookup table for computing Crc32 - Cyclic Redundancy Checksum
 
-	class CCRC32
+	class CCrc32
 	{
-		CCRC32( void );
+		CCrc32( void );
 	public:
-		static const CCRC32& Instance( void );
+		static const CCrc32& Instance( void );
 
 		const std::vector< UINT >& GetLookupTable( void ) const { return m_lookupTable; }
 
@@ -33,10 +33,10 @@ namespace utl
 	};
 
 
-	class CCRC32FileCache
+	class CCrc32FileCache
 	{
 	public:
-		CCRC32FileCache( void ) {}
+		CCrc32FileCache( void ) {}
 
 		bool IsEmpty( void ) const { return m_cachedChecksums.empty(); }
 		void Clear( void ) { m_cachedChecksums.clear(); }
@@ -45,11 +45,11 @@ namespace utl
 	private:
 		UINT ComputeFileCrc32( const fs::CPath& filePath ) const throws_();
 	private:
-		typedef std::pair< UINT, CTime > ChecksumStampPair;		// CRC32 checksum, lastModifyTime
+		typedef std::pair< UINT, CTime > ChecksumStampPair;		// Crc32 checksum, lastModifyTime
 
 		stdext::hash_map< fs::CPath, ChecksumStampPair > m_cachedChecksums;
 	};
 }
 
 
-#endif // CRC32_h
+#endif // utl_Crc32_h

@@ -64,7 +64,7 @@ private:
 	std::vector< std::tstring > m_fileTypeSpecs;
 private:
 	// enum { IDD = IDD_FIND_DUPLICATES_DIALOG };
-	enum DupFileColumn { FileName, DirPath, Size, CRC32, DateModified };
+	enum DupFileColumn { FileName, DirPath, Size, Crc32, DateModified };
 
 	CReportListControl m_srcPathsListCtrl;
 	CReportListControl m_dupsListCtrl;
@@ -92,7 +92,7 @@ protected:
 	afx_msg void OnBnClicked_CheckSelectDuplicates( void );
 	afx_msg void OnBnClicked_DeleteDuplicates( void );
 	afx_msg void OnBnClicked_MoveDuplicates( void );
-	afx_msg void OnBnClicked_ClearCRC32Cache( void );
+	afx_msg void OnBnClicked_ClearCrc32Cache( void );
 	afx_msg void OnUpdateSelListItem( CCmdUI* pCmdUI );
 	afx_msg void OnLvnDropFiles_SrcList( NMHDR* pNmHdr, LRESULT* pResult );
 	afx_msg void OnLvnItemChanged_TouchList( NMHDR* pNmHdr, LRESULT* pResult );
