@@ -312,6 +312,11 @@ CItemsListPage::CItemsListPage( CItemListDialog* pDialog )
 	m_listCtrl.SetSection( reg::section_list );
 }
 
+CItemsListPage::~CItemsListPage()
+{
+	utl::ClearOwningContainer( m_pathItems );
+}
+
 bool CItemsListPage::InEditMode( void ) const
 {
 	return m_listCtrl.GetEditControl() != NULL;
@@ -360,8 +365,19 @@ void CItemsListPage::OutputList( void )
 	if ( m_pDialog->m_items != listItems )
 	{
 		m_listCtrl.DeleteAllItems();
-		for ( unsigned int i = 0; i != m_pDialog->m_items.size(); ++i )
-			m_listCtrl.InsertItem( i, m_pDialog->m_items[ i ].c_str() );
+
+		if ( ui::String == m_rContent.m_type )
+		{
+			for ( unsigned int i = 0; i != m_pDialog->m_items.size(); ++i )
+				m_listCtrl.InsertItem( i, m_pDialog->m_items[ i ].c_str() );
+		}
+		else
+		{
+			ui::CPathItem::MakePathItems( m_pathItems, m_pDialog->m_items );
+
+			for ( unsigned int i = 0; i != m_pathItems.size(); ++i )
+				m_listCtrl.InsertObjectItem( i, m_pathItems[ i ] );
+		}
 	}
 
 	int selIndex = m_pDialog->GetSelItemIndex();
@@ -375,10 +391,22 @@ void CItemsListPage::OutputList( void )
 void CItemsListPage::DoDataExchange( CDataExchange* pDX )
 {
 	bool firstInit = NULL == m_listCtrl.m_hWnd;
+
 	DDX_Control( pDX, IDC_ITEMS_LIST, m_listCtrl );
 
 	if ( firstInit )
-		m_listCtrl.SetFont( CTextEdit::GetFixedFont( ui::String == m_rContent.m_type ? CTextEdit::Large : CTextEdit::Normal ) );
+	{
+		switch ( m_rContent.m_type )
+		{
+			case ui::String:
+				m_listCtrl.SetFont( CTextEdit::GetFixedFont( CTextEdit::Large ) );
+				break;
+			case ui::DirPath:
+			case ui::FilePath:
+				m_listCtrl.SetCustomFileGlyphDraw();
+				break;
+		}
+	}
 
 	if ( DialogOutput == pDX->m_bSaveAndValidate )
 		OutputList();

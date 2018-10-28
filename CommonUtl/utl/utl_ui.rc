@@ -44,15 +44,15 @@ BEGIN
     LTEXT           "Comments:",IDC_STATIC,6,70,36,8
 END
 
-IDD_ITEM_LIST_DIALOG DIALOGEX 0, 0, 185, 142
+IDD_ITEM_LIST_DIALOG DIALOGEX 0, 0, 185, 130
 STYLE DS_SETFONT | WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME
 CAPTION "Edit Items"
 FONT 8, "Tahoma", 0, 0, 0x0
 BEGIN
-    LTEXT           "<items sheet>",IDC_ITEMS_SHEET,7,23,171,88,WS_BORDER
-    DEFPUSHBUTTON   "OK",IDOK,73,121,50,14,WS_GROUP
-    PUSHBUTTON      "Cancel",IDCANCEL,128,121,50,14
-    LTEXT           "<toolbar>",IDC_TOOLBAR_PLACEHOLDER,7,7,171,16,SS_CENTERIMAGE | WS_CLIPSIBLINGS | WS_BORDER
+    LTEXT           "<items sheet>",IDC_ITEMS_SHEET,4,18,177,88,WS_BORDER
+    DEFPUSHBUTTON   "OK",IDOK,76,111,50,14,WS_GROUP
+    PUSHBUTTON      "Cancel",IDCANCEL,131,111,50,14
+    LTEXT           "<toolbar>",IDC_TOOLBAR_PLACEHOLDER,4,2,177,16,SS_CENTERIMAGE | WS_CLIPSIBLINGS | WS_BORDER
 END
 
 IDD_ITEMS_LIST_PAGE DIALOGEX 0, 0, 100, 50
@@ -229,10 +229,10 @@ BEGIN
 
     IDD_ITEM_LIST_DIALOG, DIALOG
     BEGIN
-        LEFTMARGIN, 7
-        RIGHTMARGIN, 178
-        TOPMARGIN, 7
-        BOTTOMMARGIN, 135
+        LEFTMARGIN, 4
+        RIGHTMARGIN, 181
+        TOPMARGIN, 2
+        BOTTOMMARGIN, 125
     END
 
     IDD_ITEMS_LIST_PAGE, DIALOG
@@ -378,6 +378,7 @@ BEGIN
     ID_ADD_ITEM             "Add a new item\nAdd (Ins)"
     ID_REMOVE_ITEM          "Remove the selected item\nRemove (Delete)"
     ID_REMOVE_ALL_ITEMS     "Remove all items\nRemove All"
+    ID_RENAME_ITEM          "Rename\nRename (F2)"
     ID_EDIT_ITEM            "Edit selected item\nEdit (F2)"
     ID_MOVE_UP_ITEM         "Move up selected item\nMove Up"
     ID_MOVE_DOWN_ITEM       "Move down selected item\nMove Down"
@@ -387,7 +388,10 @@ STRINGTABLE
 BEGIN
     ID_EDIT_COPY            "Copy to clipboard\nCopy to Clipboard (Ctrl+C)"
     ID_EDIT_CUT             "Cut to clipboard\nCut to Clipboard (Ctrl+X)"
+    ID_EDIT_FIND            "Find"
     ID_EDIT_PASTE           "Paste from clipboard\nPaste from Clipboard (Ctrl+V)"
+    ID_EDIT_REPLACE         "Replace"
+    ID_EDIT_SELECT_ALL      "Select all items\nSelect All"
     ID_EDIT_UNDO            "Undo\nUndo (Ctrl+Z)"
     ID_EDIT_REDO            "Redo\nRedo (Ctrl+Y)"
 END
@@ -396,6 +400,13 @@ STRINGTABLE
 BEGIN
     ID_MOVE_TOP_ITEM        "Move selected item to the top\nMove to Top"
     ID_MOVE_BOTTOM_ITEM     "Move selected item to the bottom\nMove to Bottom"
+    ID_SHUTTLE_UP           "Shuttle up selected item\nShuttle Up"
+    ID_SHUTTLE_DOWN         "Shuttle down selected item\nShuttle Down"
+    ID_SHUTTLE_TOP          "Shuttle to the top selected item\nShuttle Top"
+    ID_SHUTTLE_BOTTOM       "Shuttle to the bottom selected item\nShuttle Bottom"
+    ID_EDIT_DETAILS         "Edit Details"
+    ID_EDIT_LIST_ITEMS      "Edit list of items\nEdit Items"
+    ID_REFRESH              "Refresh"
     ID_RESET_DEFAULT        "Reset to default"
 END
 

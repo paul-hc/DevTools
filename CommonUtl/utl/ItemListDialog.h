@@ -86,6 +86,7 @@ class CItemsListPage : public CLayoutPropertyPage
 {
 public:
 	CItemsListPage( CItemListDialog* pDialog );
+	virtual ~CItemsListPage();
 
 	// detail::IContentPage interface
 	virtual bool InEditMode( void ) const;
@@ -97,6 +98,8 @@ private:
 	CItemListDialog* m_pDialog;
 	const ui::CItemContent& m_rContent;
 	bool m_inEdit;
+
+	std::vector< ui::CPathItem* > m_pathItems;
 private:
 	enum Column { Item };
 

@@ -17,6 +17,7 @@
 #include "utl/EnumTags.h"
 #include "utl/FileSystem.h"
 #include "utl/FmtUtils.h"
+#include "utl/ItemListDialog.h"
 #include "utl/LongestCommonSubsequence.h"
 #include "utl/RuntimeException.h"
 #include "utl/MenuUtilities.h"
@@ -48,7 +49,7 @@ namespace layout
 	{
 		{ IDC_GROUP_BOX_1, SizeX | pctSizeY( TopPct ) },
 		{ IDC_SOURCE_PATHS_LIST, SizeX | pctSizeY( TopPct ) },
-		{ IDC_STRIP_BAR_1, MoveX | pctMoveY( TopPct ) },
+		{ IDC_STRIP_BAR_1, MoveX },
 
 		{ IDC_FILE_TYPE_STATIC, pctMoveY( TopPct ) },
 		{ IDC_FILE_TYPE_COMBO, pctMoveY( TopPct ) },
@@ -100,6 +101,9 @@ CFindDuplicatesDialog::CFindDuplicatesDialog( CFileModel* pFileModel, CWnd* pPar
 
 	m_dupsListCtrl.AddRecordCompare( pred::NewComparator( pred::CompareCode() ) );		// default row item comparator
 	m_dupsListCtrl.AddColumnCompare( FileName, pred::NewComparator( pred::CompareDisplayCode() ) );
+
+	m_srcPathsToolbar.GetStrip()
+		.AddButton( ID_EDIT_LIST_ITEMS );
 
 	m_minFileSizeCombo.SetItemSep( _T("|") );
 
@@ -409,7 +413,7 @@ void CFindDuplicatesDialog::DoDataExchange( CDataExchange* pDX )
 	DDX_Control( pDX, IDC_FILE_TYPE_COMBO, m_fileTypeCombo );
 	DDX_Control( pDX, IDC_FILE_SPEC_EDIT, m_fileSpecEdit );
 	DDX_Control( pDX, IDC_MIN_FILE_SIZE_COMBO, m_minFileSizeCombo );
-
+	m_srcPathsToolbar.DDX_Placeholder( pDX, IDC_STRIP_BAR_1, H_AlignRight | V_AlignBottom );
 	ui::DDX_ButtonIcon( pDX, IDC_DELETE_DUPLICATES_BUTTON, ID_REMOVE_ALL_ITEMS );
 
 	if ( DialogOutput == pDX->m_bSaveAndValidate )
@@ -436,6 +440,8 @@ BEGIN_MESSAGE_MAP( CFindDuplicatesDialog, CFileEditorBaseDialog )
 	ON_WM_DESTROY()
 	ON_WM_CONTEXTMENU()
 	ON_UPDATE_COMMAND_UI_RANGE( IDC_UNDO_BUTTON, IDC_REDO_BUTTON, OnUpdateUndoRedo )
+	ON_COMMAND( ID_EDIT_LIST_ITEMS, OnEditSrcPaths )
+	ON_UPDATE_COMMAND_UI( ID_EDIT_LIST_ITEMS, OnUpdateEditSrcPaths )
 	ON_CBN_SELCHANGE( IDC_FILE_TYPE_COMBO, OnCbnSelChange_FileType )
 	ON_EN_CHANGE( IDC_FILE_SPEC_EDIT, OnEnChange_FileSpec )
 	ON_CBN_EDITCHANGE( IDC_MIN_FILE_SIZE_COMBO, OnCbnChanged_MinFileSize )
@@ -516,6 +522,31 @@ void CFindDuplicatesDialog::OnUpdateUndoRedo( CCmdUI* pCmdUI )
 void CFindDuplicatesDialog::OnFieldChanged( void )
 {
 	SwitchMode( EditMode );
+}
+
+void CFindDuplicatesDialog::OnEditSrcPaths( void )
+{
+	CItemListDialog dlg( this, ui::CItemContent( ui::DirPath ) );
+
+	dlg.m_items.reserve( m_srcPathItems.size() );
+	for ( std::vector< CSrcPathItem* >::const_iterator itSrcPathItem = m_srcPathItems.begin(); itSrcPathItem != m_srcPathItems.end(); ++itSrcPathItem )
+		dlg.m_items.push_back( ( *itSrcPathItem )->GetKeyPath().Get() );
+
+	if ( IDOK == dlg.DoModal() )
+	{
+		utl::ClearOwningContainer( m_srcPathItems );
+		for ( std::vector< std::tstring >::const_iterator itSrcPath = dlg.m_items.begin(); itSrcPath != dlg.m_items.end(); ++itSrcPath )
+			m_srcPathItems.push_back( new CSrcPathItem( *itSrcPath ) );
+
+		SetupSrcPathsList();
+		SwitchMode( EditMode );
+		GotoDlgCtrl( &m_srcPathsListCtrl );
+	}
+}
+
+void CFindDuplicatesDialog::OnUpdateEditSrcPaths( CCmdUI* pCmdUI )
+{
+	pCmdUI;
 }
 
 void CFindDuplicatesDialog::OnCbnSelChange_FileType( void )

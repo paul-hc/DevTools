@@ -71,7 +71,7 @@ namespace ui
 				return emptyText;
 			case ui::DirPath:
 				newItem = str::ExpandEnvironmentStrings( pItem );
-				if ( !shell::BrowseForFolder( newItem, pParent ) )
+				if ( !AutoBrowsePath( newItem, pParent ) )
 					return emptyText;
 				break;
 			case ui::FilePath:
@@ -101,6 +101,22 @@ namespace ui
 		if ( HasFlag( m_itemsFlags, Trim ) )
 			str::Trim( newItem );
 		return newItem;
+	}
+
+	bool CItemContent::AutoBrowsePath( std::tstring& rNewItem, CWnd* pParent ) const
+	{
+		if ( fs::IsValidFile( rNewItem.c_str() ) )
+			return shell::BrowseForFile( rNewItem, pParent, shell::FileOpen, m_pFileFilter );
+
+		return shell::BrowseForFolder( rNewItem, pParent );
+	}
+
+
+	// CPathItem implementation
+
+	const std::tstring& CPathItem::GetCode( void ) const
+	{
+		return m_filePath.Get();
 	}
 
 } //namespace ui

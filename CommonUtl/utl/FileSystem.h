@@ -113,4 +113,33 @@ namespace fs
 }
 
 
+namespace pred
+{
+	struct IsValidFile
+	{
+		bool operator()( const TCHAR* pFilePath ) const { return fs::IsValidFile( pFilePath ); }
+		bool operator()( const fs::CPath& filePath ) const { return fs::IsValidFile( filePath.GetPtr() ); }
+	};
+
+	struct IsValidDirectory
+	{
+		bool operator()( const TCHAR* pFilePath ) const { return fs::IsValidDirectory( pFilePath ); }
+		bool operator()( const fs::CPath& filePath ) const { return fs::IsValidDirectory( filePath.GetPtr() ); }
+	};
+}
+
+
+namespace fs
+{
+	template< typename PathContainerT >
+	void SortDirectoriesFirst( PathContainerT& rPaths )
+	{
+		typename PathContainerT::iterator itFirstFile = std::stable_partition( rPaths.begin(), rPaths.end(), pred::IsValidDirectory() );
+
+		std::sort( rPaths.begin(), itFirstFile );		// directories come first
+		std::sort( itFirstFile, rPaths.end() );
+	}
+}
+
+
 #endif // FileSystem_h

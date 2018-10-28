@@ -11,6 +11,7 @@
 #include "utl/Clipboard.h"
 #include "utl/Command.h"
 #include "utl/ContainerUtilities.h"
+#include "utl/FileSystem.h"
 #include "utl/FmtUtils.h"
 #include "utl/RuntimeException.h"
 #include "utl/StringRange.h"
@@ -67,7 +68,7 @@ void CFileModel::StoreSourcePaths( const ContainerT& sourcePaths )
 	for ( typename ContainerT::const_iterator itSourcePath = sourcePaths.begin(); itSourcePath != sourcePaths.end(); ++itSourcePath )
 		m_sourcePaths.push_back( func::PathOf( *itSourcePath ) );
 
-	std::sort( m_sourcePaths.begin(), m_sourcePaths.end() );
+	fs::SortDirectoriesFirst( m_sourcePaths );
 	m_commonParentPath = path::ExtractCommonParentPath( m_sourcePaths );
 }
 

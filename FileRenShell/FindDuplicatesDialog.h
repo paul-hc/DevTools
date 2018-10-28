@@ -4,7 +4,7 @@
 
 #include "utl/FileState.h"
 #include "utl/ISubject.h"
-#include "utl/DateTimeControl.h"
+#include "utl/DialogToolBar.h"
 #include "utl/HistoryComboBox.h"
 #include "utl/ReportListControl.h"
 #include "utl/TextEdit.h"
@@ -68,6 +68,7 @@ private:
 
 	CReportListControl m_srcPathsListCtrl;
 	CReportListControl m_dupsListCtrl;
+	CDialogToolBar m_srcPathsToolbar;
 	CComboBox m_fileTypeCombo;
 	CTextEdit m_fileSpecEdit;
 	CHistoryComboBox m_minFileSizeCombo;
@@ -83,6 +84,8 @@ protected:
 	afx_msg void OnContextMenu( CWnd* pWnd, CPoint screenPos );
 	afx_msg void OnUpdateUndoRedo( CCmdUI* pCmdUI );
 	afx_msg void OnFieldChanged( void );
+	afx_msg void OnEditSrcPaths( void );
+	afx_msg void OnUpdateEditSrcPaths( CCmdUI* pCmdUI );
 	afx_msg void OnCbnSelChange_FileType( void );
 	afx_msg void OnEnChange_FileSpec( void );
 	afx_msg void OnCbnChanged_MinFileSize( void );
