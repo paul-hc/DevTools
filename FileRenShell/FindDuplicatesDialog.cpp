@@ -58,6 +58,7 @@ namespace layout
 		{ IDC_FILE_SPEC_EDIT, SizeX | pctMoveY( TopPct ) },
 
 		{ IDC_DUPLICATE_FILES_STATIC, pctMoveY( TopPct ) },
+		{ IDC_DUPLICATE_FILES_INFO, SizeX | pctMoveY( TopPct ) },
 		{ IDC_DUPLICATE_FILES_LIST, SizeX | pctMoveY( TopPct ) | pctSizeY( BottomPct ) },
 
 		{ IDC_SELECT_DUPLICATES_BUTTON, MoveY },
@@ -136,9 +137,6 @@ void CFindDuplicatesDialog::SearchForDuplicateFiles( void )
 
 	CWaitCursor wait;
 	std::tstring wildSpec = m_fileSpecEdit.GetText();
-	ULONGLONG minFileSize = 0;
-	num::ParseNumber( minFileSize, m_minFileSizeCombo.GetCurrentText() );
-
 	size_t totalCount = 0, ignoredCount = 0;
 
 	CDuplicateGroupsStore groupsStore;
@@ -151,24 +149,27 @@ void CFindDuplicatesDialog::SearchForDuplicateFiles( void )
 			fs::CPathEnumerator found;
 			fs::EnumFiles( &found, srcPath.GetPtr(), wildSpec.c_str(), Deep );
 
+			totalCount += found.m_filePaths.size();
 			for ( fs::TPathSet::const_iterator itFilePath = found.m_filePaths.begin(); itFilePath != found.m_filePaths.end(); ++itFilePath )
-			{
-				++totalCount;
-				if ( !groupsStore.Register( *itFilePath, minFileSize ) )
-					++ignoredCount;
-			}
+				groupsStore.Register( *itFilePath );
 		}
 		else if ( fs::IsValidFile( srcPath.GetPtr() ) )
 		{
 			++totalCount;
-			if ( !groupsStore.Register( srcPath, minFileSize ) )
-				++ignoredCount;
+			groupsStore.Register( srcPath );
 		}
 	}
 
-	groupsStore.ExtractDuplicateGroups( m_duplicateGroups );
+	ULONGLONG minFileSize = 0;
+	if ( num::ParseNumber( minFileSize, m_minFileSizeCombo.GetCurrentText() ) )
+		minFileSize *= 1024;			// KB
+
+	groupsStore.ExtractDuplicateGroups( m_duplicateGroups, ignoredCount, minFileSize );
+
 	SetupDuplicateFileList();
 	ClearFileErrors();
+
+	ui::SetDlgItemText( this, IDC_DUPLICATE_FILES_INFO, str::Format( _T("Found %d duplicates of total %d files, ignored %d"), m_dupsListCtrl.GetItemCount(), totalCount, ignoredCount ) );
 }
 
 bool CFindDuplicatesDialog::DeleteDuplicateFiles( void )
@@ -346,14 +347,16 @@ void CFindDuplicatesDialog::OnFileError( const fs::CPath& srcPath, const std::ts
 
 void CFindDuplicatesDialog::CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARAM rowKey, int subItem ) const
 {
-	static const ui::CTextEffect s_dup( ui::Regular, CLR_NONE, color::PastelPink );
+	subItem;
+	enum { LightPastelPink = RGB( 255, 240, 240 ) };
+	static const ui::CTextEffect s_duplicate( ui::Regular, CLR_NONE, LightPastelPink );
 	static const ui::CTextEffect s_errorBk( ui::Regular, color::Red, app::ColorErrorBk );
 
 	const CDuplicateFileItem* pFileItem = CReportListControl::AsPtr< CDuplicateFileItem >( rowKey );
 	const ui::CTextEffect* pTextEffect = NULL;
 
 	if ( pFileItem->IsDuplicateItem() )
-		pTextEffect = &s_dup;
+		pTextEffect = &s_duplicate;
 
 	if ( utl::Contains( m_errorItems, pFileItem ) )
 		rTextEffect |= s_errorBk;							// highlight error row background
@@ -572,9 +575,16 @@ void CFindDuplicatesDialog::OnLvnDropFiles_SrcList( NMHDR* pNmHdr, LRESULT* pRes
 	CNmDropFiles* pNmDropFiles = (CNmDropFiles*)pNmHdr;
 	*pResult = 0;
 
+	std::vector< CSrcPathItem* > newPathItems; newPathItems.reserve( pNmDropFiles->m_filePaths.size() );
+
 	for ( std::vector< std::tstring >::const_iterator itFilePath = pNmDropFiles->m_filePaths.begin(); itFilePath != pNmDropFiles->m_filePaths.end(); ++itFilePath )
 		if ( NULL == func::FindItemWithKeyPath( m_srcPathItems, *itFilePath ) )			// unique path?
-			m_srcPathItems.push_back( new CSrcPathItem( *itFilePath ) );
+			newPathItems.push_back( new CSrcPathItem( *itFilePath ) );
+
+	m_srcPathItems.insert( m_srcPathItems.end(), newPathItems.begin(), newPathItems.end() );
+
+	SetupSrcPathsList();
+	m_srcPathsListCtrl.SelectItems( newPathItems );
 
 	SwitchMode( EditMode );
 }

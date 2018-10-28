@@ -733,9 +733,9 @@ void CReportListControl::SelectItems( const std::vector< Type* >& rPtrs )
 	}
 
 	if ( !selIndexes.empty() )
-		SetSelection( selIndexes, selIndexes.front(), false );
+		SetSelection( selIndexes, selIndexes.front() );
 	else
-		ClearSelection( false );
+		ClearSelection();
 }
 
 template< typename MatchFunc >

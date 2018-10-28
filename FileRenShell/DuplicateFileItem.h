@@ -38,6 +38,8 @@ public:
 class CDuplicateFileItem;
 
 
+// group: multiple duplicates sharing the same content key
+//
 class CDuplicateFilesGroup
 {
 public:
@@ -50,6 +52,7 @@ public:
 
 	const std::vector< CDuplicateFileItem* >& GetItems( void ) const { return m_items; }
 	CDuplicateFileItem* FindItem( const fs::CPath& filePath ) const;
+	bool ContainsItem( const fs::CPath& filePath ) const { return FindItem( filePath ) != NULL; }
 
 	void AddItem( const fs::CPath& filePath );
 private:
@@ -78,8 +81,8 @@ public:
 	CDuplicateGroupsStore( void ) {}
 	~CDuplicateGroupsStore( void );
 
-	bool Register( const fs::CPath& filePath, ULONGLONG minFileSize = 0 );
-	void ExtractDuplicateGroups( std::vector< CDuplicateFilesGroup* >& rDuplicateGroups );		// extract groups with more than 1 item (multiple duplicates sharing the same content key)
+	bool Register( const fs::CPath& filePath );
+	void ExtractDuplicateGroups( std::vector< CDuplicateFilesGroup* >& rDuplicateGroups, size_t& rIgnoredCount, ULONGLONG minFileSize = 0 );		// extract groups with more than 1 item
 private:
 	std::map< CFileContentKey, CDuplicateFilesGroup* > m_groupsMap;
 	std::vector< CDuplicateFilesGroup* > m_groups;				// with ownership, in the order they were registered

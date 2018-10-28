@@ -60,7 +60,7 @@ CDuplicateFileItem* CDuplicateFilesGroup::FindItem( const fs::CPath& filePath ) 
 
 void CDuplicateFilesGroup::AddItem( const fs::CPath& filePath )
 {
-	ASSERT( NULL == FindItem( filePath ) );
+	ASSERT( !ContainsItem( filePath ) );
 	m_items.push_back( new CDuplicateFileItem( filePath, this ) );
 }
 
@@ -82,12 +82,10 @@ CDuplicateGroupsStore::~CDuplicateGroupsStore( void )
 	utl::ClearOwningContainer( m_groups );
 }
 
-bool CDuplicateGroupsStore::Register( const fs::CPath& filePath, ULONGLONG minFileSize /*= 0*/ )
+bool CDuplicateGroupsStore::Register( const fs::CPath& filePath )
 {
 	CFileContentKey contentKey;
 	if ( !contentKey.Compute( filePath ) )
-		return false;
-	if ( contentKey.m_fileSize < minFileSize )			// filtered out by size?
 		return false;
 
 	CDuplicateFilesGroup*& rpGroup = m_groupsMap[ contentKey ];
@@ -97,19 +95,29 @@ bool CDuplicateGroupsStore::Register( const fs::CPath& filePath, ULONGLONG minFi
 		rpGroup = new CDuplicateFilesGroup( contentKey );
 		m_groups.push_back( rpGroup );
 	}
+	else if ( rpGroup->ContainsItem( filePath ) )		// already in the group?
+		return false;
 
 	rpGroup->AddItem( filePath );
 	return true;
 }
 
-void CDuplicateGroupsStore::ExtractDuplicateGroups( std::vector< CDuplicateFilesGroup* >& rDuplicateGroups )
+void CDuplicateGroupsStore::ExtractDuplicateGroups( std::vector< CDuplicateFilesGroup* >& rDuplicateGroups, size_t& rIgnoredCount, ULONGLONG minFileSize /*= 0*/ )
 {
 	utl::ClearOwningContainer( rDuplicateGroups );
+	rIgnoredCount = 0;
 
 	for ( std::vector< CDuplicateFilesGroup* >::iterator itGroup = m_groups.begin(); itGroup != m_groups.end(); )
 		if ( ( *itGroup )->HasDuplicates() )
 		{
-			rDuplicateGroups.push_back( *itGroup );
+			if ( ( *itGroup )->GetContentKey().m_fileSize >= minFileSize )			// has minimum size?
+				rDuplicateGroups.push_back( *itGroup );
+			else
+			{
+				rIgnoredCount += ( *itGroup )->GetItems().size();
+				delete *itGroup;
+			}
+
 			itGroup = m_groups.erase( itGroup );
 		}
 		else
