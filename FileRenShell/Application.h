@@ -7,18 +7,11 @@
 #include "Application_fwd.h"
 
 
-class CThumbnailer;
-
-
 class CApplication : public CBaseApp< CWinApp >
 {
 public:
 	CApplication( void );
 	virtual ~CApplication();
-
-	CThumbnailer* GetThumbnailer( void ) const { return safe_ptr( m_pThumbnailer.get() ); }
-private:
-	std::auto_ptr< CThumbnailer > m_pThumbnailer;
 public:
 	// generated stuff
     virtual BOOL InitInstance( void );
@@ -36,7 +29,6 @@ namespace app
 {
 	inline CApplication& GetApp( void ) { return g_app; }
 	inline CLogger& GetLogger( void ) { return g_app.GetLogger(); }
-	inline CThumbnailer* GetThumbnailer( void ) { return g_app.GetThumbnailer(); }
 
 	void InitModule( HINSTANCE hInstance );
 }

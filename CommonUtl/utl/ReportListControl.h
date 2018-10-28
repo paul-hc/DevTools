@@ -22,6 +22,7 @@ class CListSelectionData;
 class CReportListCustomDraw;
 namespace ui { class CFontEffectCache; }
 namespace ole { class CDataSource; }
+struct CCustomDrawImager;
 
 namespace ds
 {
@@ -457,23 +458,6 @@ public:
 
 private:
 	bool UpdateCustomImagerBoundsSize( void );
-
-	struct CCustomImager
-	{
-		CCustomImager( ui::ICustomImageDraw* pRenderer, const CSize& smallImageSize, const CSize& largeImageSize );
-
-		bool IsInit( void ) const { return m_transpImgIndex != -1; }
-		bool UpdateImageSize( ui::ICustomImageDraw::ImageType imgSize );
-	private:
-		void InitImageLists( void );
-	public:
-		ui::ICustomImageDraw* m_pRenderer;					// thumbnailer
-		const bool m_listDrivesBoundsSize;					// true if thumbnailer bounds size is driven by the list control; otherwise the thumbnailer drives image sizes
-		const CSize m_smallImageSize, m_largeImageSize;
-		CImageList m_smallImageList, m_largeImageList;
-
-		ImageListIndex m_transpImgIndex;					// pos of the transparent entry in the image list
-	};
 private:
 	enum ListOption
 	{
@@ -511,7 +495,7 @@ private:
 
 	CImageList* m_pImageList;
 	CImageList* m_pLargeImageList;
-	std::auto_ptr< CCustomImager > m_pCustomImager;
+	std::auto_ptr< CCustomDrawImager > m_pCustomImager;
 
 	CMenu* m_pPopupMenu[ _ListPopupCount ];					// used when right clicking nowhere - on header or no list item
 	std::auto_ptr< CLabelEdit > m_pLabelEdit;				// stores the label info during inline editing

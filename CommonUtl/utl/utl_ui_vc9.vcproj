@@ -1358,6 +1358,14 @@
 					>
 				</File>
 				<File
+					RelativePath=".\FileItemsThumbnailStore.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\FileItemsThumbnailStore.h"
+					>
+				</File>
+				<File
 					RelativePath=".\Icon.cpp"
 					>
 				</File>

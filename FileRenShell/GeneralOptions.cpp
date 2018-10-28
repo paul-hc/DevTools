@@ -3,6 +3,7 @@
 #include "GeneralOptions.h"
 #include "Application.h"
 #include "utl/Image_fwd.h"
+#include "utl/FileItemsThumbnailStore.h"
 #include "utl/ReportListControl.h"
 #include "utl/Thumbnailer.h"
 
@@ -102,7 +103,7 @@ void CGeneralOptions::ApplyToListCtrl( CReportListControl* pListCtrl ) const
 	pListCtrl->SetHighlightTextDiffsFrame( m_highlightTextDiffsFrame );
 	pListCtrl->ModifyListStyleEx( m_useListDoubleBuffer ? 0 : LVS_EX_DOUBLEBUFFER, m_useListDoubleBuffer ? LVS_EX_DOUBLEBUFFER : 0 );
 
-	pListCtrl->SetCustomImageDraw( m_useListThumbs ? app::GetThumbnailer() : NULL,
+	pListCtrl->SetCustomImageDraw( m_useListThumbs ? CFileItemsThumbnailStore::Instance().GetThumbnailer() : NULL,
 		CSize( m_smallIconDim, m_smallIconDim ),
 		CSize( m_largeIconDim, m_largeIconDim ) );
 }

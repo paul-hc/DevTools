@@ -6,17 +6,12 @@
 #include "ut/RenameFilesTests.h"
 #include "ut/CommandModelSerializerTests.h"
 #include "utl/EnumTags.h"
-#include "utl/Thumbnailer.h"
 #include "utl/BaseApp.hxx"
 #include "resource.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
-
-
-CComModule g_comModule;
-CApplication g_app;
 
 
 namespace ut
@@ -30,6 +25,10 @@ namespace ut
 	#endif
 	}
 }
+
+
+CComModule g_comModule;
+CApplication g_app;
 
 
 CApplication::CApplication( void )
@@ -55,10 +54,6 @@ BOOL CApplication::InitInstance( void )
 	app::GetLogger().m_logFileMaxSize = -1;						// unlimited log size
 
 	CGeneralOptions::Instance().LoadFromRegistry();
-
-	m_pThumbnailer.reset( new CThumbnailer );
-	GetSharedResources().AddAutoPtr( &m_pThumbnailer );
-	m_pThumbnailer->SetOptimizeExtractIcons();					// for more accurate icon scaling that favours the best fitting image size present
 
 	CAboutBox::m_appIconId = IDD_RENAME_FILES_DIALOG;			// will use HugeIcon_48
 	CToolStrip::RegisterStripButtons( IDR_IMAGE_STRIP );		// register stock images
