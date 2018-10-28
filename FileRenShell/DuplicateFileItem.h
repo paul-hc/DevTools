@@ -95,8 +95,8 @@ public:
 	CDuplicateGroupsStore( void ) {}
 	~CDuplicateGroupsStore( void );
 
-	bool Register( const fs::CPath& filePath, const CFileContentKey& contentKey );
-	void Register( CDuplicateFileItem* pItem, const CFileContentKey& contentKey );
+	bool RegisterPath( const fs::CPath& filePath, const CFileContentKey& contentKey );
+	void RegisterItem( CDuplicateFileItem* pItem, const CFileContentKey& contentKey );
 	void ExtractDuplicateGroups( std::vector< CDuplicateFilesGroup* >& rDuplicateGroups, size_t& rIgnoredCount );		// extract groups with more than 1 item
 private:
 	std::map< CFileContentKey, CDuplicateFilesGroup* > m_groupsMap;

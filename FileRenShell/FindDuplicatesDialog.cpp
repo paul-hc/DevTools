@@ -136,6 +136,8 @@ void CFindDuplicatesDialog::ClearDuplicates( void )
 	utl::ClearOwningContainer( m_duplicateGroups );
 }
 
+#include "utl/Timer.h"
+
 void CFindDuplicatesDialog::SearchForDuplicateFiles( void )
 {
 	CWaitCursor wait;
@@ -143,8 +145,11 @@ void CFindDuplicatesDialog::SearchForDuplicateFiles( void )
 	if ( num::ParseNumber( minFileSize, m_minFileSizeCombo.GetCurrentText() ) )
 		minFileSize *= 1024;			// KB
 
+CTimer t;
 	std::vector< fs::CPath > foundPaths;
 	SearchForFiles( foundPaths );
+TRACE( _T(" # SearchForFiles: takes %s seconds\n"), num::FormatNumber( t.ElapsedSeconds() ).c_str() );
+t.Restart();
 
 	// optimize performance:
 	//	step 1: compute file-size part of the content key, grouping duplicate candidates by file-size only
@@ -156,16 +161,22 @@ void CFindDuplicatesDialog::SearchForDuplicateFiles( void )
 	for ( std::vector< fs::CPath >::const_iterator itFilePath = foundPaths.begin(); itFilePath != foundPaths.end(); ++itFilePath )
 	{
 		CFileContentKey contentKey;
+		bool registered = false;
 
-		if ( contentKey.ComputeFileSize( *itFilePath ) &&
-			 contentKey.m_fileSize >= minFileSize )				// has minimum size?
-			groupsStore.Register( *itFilePath, contentKey );
-		else
+		if ( contentKey.ComputeFileSize( *itFilePath ) )
+			if ( contentKey.m_fileSize >= minFileSize )				// has minimum size?
+				registered = groupsStore.RegisterPath( *itFilePath, contentKey );
+
+		if ( !registered )
 			++ignoredCount;
 	}
+TRACE( _T(" # File-size grouping: takes %s seconds\n"), num::FormatNumber( t.ElapsedSeconds() ).c_str() );
+t.Restart();
 
 	ClearDuplicates();
 	groupsStore.ExtractDuplicateGroups( m_duplicateGroups, ignoredCount );
+TRACE( _T(" # ExtractDuplicateGroups w. CRC32: takes %s seconds\n"), num::FormatNumber( t.ElapsedSeconds() ).c_str() );
+t.Restart();
 
 	SetupDuplicateFileList();
 	ClearFileErrors();
@@ -173,6 +184,7 @@ void CFindDuplicatesDialog::SearchForDuplicateFiles( void )
 	std::tstring message = str::Format( _T("Found %d duplicates of total %d files"), m_dupsListCtrl.GetItemCount(), foundPaths.size() );
 	if ( ignoredCount != 0 )
 		message += str::Format( _T(" (ignored %d)"), ignoredCount );
+
 	ui::SetDlgItemText( this, IDC_DUPLICATE_FILES_INFO, message );
 }
 

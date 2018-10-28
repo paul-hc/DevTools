@@ -81,9 +81,12 @@ void CDuplicateFilesGroup::ExtractCrc32Duplicates( std::vector< CDuplicateFilesG
 	{
 		CFileContentKey fullContentKey = m_contentKey;
 		if ( fullContentKey.ComputeCrc32( ( *itItem )->GetKeyPath() ) )
-			VERIFY( store.Register( ( *itItem )->GetKeyPath(), fullContentKey ) );
+			store.RegisterItem( *itItem, fullContentKey );
 		else
+		{
+			delete *itItem;
 			++rIgnoredCount;
+		}
 	}
 
 	m_items.clear();		// all items were detached in real duplicate groups
@@ -109,7 +112,7 @@ CDuplicateGroupsStore::~CDuplicateGroupsStore( void )
 	utl::ClearOwningContainer( m_groups );
 }
 
-bool CDuplicateGroupsStore::Register( const fs::CPath& filePath, const CFileContentKey& contentKey )
+bool CDuplicateGroupsStore::RegisterPath( const fs::CPath& filePath, const CFileContentKey& contentKey )
 {
 	CDuplicateFilesGroup*& rpGroup = m_groupsMap[ contentKey ];
 
@@ -125,7 +128,7 @@ bool CDuplicateGroupsStore::Register( const fs::CPath& filePath, const CFileCont
 	return true;
 }
 
-void CDuplicateGroupsStore::Register( CDuplicateFileItem* pItem, const CFileContentKey& contentKey )
+void CDuplicateGroupsStore::RegisterItem( CDuplicateFileItem* pItem, const CFileContentKey& contentKey )
 {
 	ASSERT_PTR( pItem );
 	ASSERT( contentKey.m_crc32 != 0 );
