@@ -101,6 +101,7 @@ CFindDuplicatesDialog::CFindDuplicatesDialog( CFileModel* pFileModel, CWnd* pPar
 
 	m_dupsListCtrl.AddRecordCompare( pred::NewComparator( pred::CompareCode() ) );		// default row item comparator
 	m_dupsListCtrl.AddColumnCompare( FileName, pred::NewComparator( pred::CompareDisplayCode() ) );
+	m_dupsListCtrl.AddColumnCompare( DateModified, pred::NewPropertyComparator< CDuplicateFileItem >( CDuplicateFileItem::AsModifyTime() ), false );		// order date-time descending by default
 
 	m_srcPathsToolbar.GetStrip()
 		.AddButton( ID_EDIT_LIST_ITEMS );
@@ -137,13 +138,48 @@ void CFindDuplicatesDialog::ClearDuplicates( void )
 
 void CFindDuplicatesDialog::SearchForDuplicateFiles( void )
 {
-	ClearDuplicates();
-
 	CWaitCursor wait;
-	std::tstring wildSpec = m_fileSpecEdit.GetText();
-	size_t totalCount = 0, ignoredCount = 0;
+	ULONGLONG minFileSize = 0;
+	if ( num::ParseNumber( minFileSize, m_minFileSizeCombo.GetCurrentText() ) )
+		minFileSize *= 1024;			// KB
+
+	std::vector< fs::CPath > foundPaths;
+	SearchForFiles( foundPaths );
+
+	// optimize performance:
+	//	step 1: compute file-size part of the content key, grouping duplicate candidates by file-size only
+	//	step 2: compute CRC32: real duplicates are within size-based duplicate groups
 
 	CDuplicateGroupsStore groupsStore;
+	size_t ignoredCount = 0;
+
+	for ( std::vector< fs::CPath >::const_iterator itFilePath = foundPaths.begin(); itFilePath != foundPaths.end(); ++itFilePath )
+	{
+		CFileContentKey contentKey;
+
+		if ( contentKey.ComputeFileSize( *itFilePath ) &&
+			 contentKey.m_fileSize >= minFileSize )				// has minimum size?
+			groupsStore.Register( *itFilePath, contentKey );
+		else
+			++ignoredCount;
+	}
+
+	ClearDuplicates();
+	groupsStore.ExtractDuplicateGroups( m_duplicateGroups, ignoredCount );
+
+	SetupDuplicateFileList();
+	ClearFileErrors();
+
+	std::tstring message = str::Format( _T("Found %d duplicates of total %d files"), m_dupsListCtrl.GetItemCount(), foundPaths.size() );
+	if ( ignoredCount != 0 )
+		message += str::Format( _T(" (ignored %d)"), ignoredCount );
+	ui::SetDlgItemText( this, IDC_DUPLICATE_FILES_INFO, message );
+}
+
+void CFindDuplicatesDialog::SearchForFiles( std::vector< fs::CPath >& rFoundPaths ) const
+{
+	std::tstring wildSpec = m_fileSpecEdit.GetText();
+	std::set< fs::CPath > uniquePaths;
 
 	for ( std::vector< CSrcPathItem* >::const_iterator itSrcPathItem = m_srcPathItems.begin(); itSrcPathItem != m_srcPathItems.end(); ++itSrcPathItem )
 	{
@@ -153,27 +189,15 @@ void CFindDuplicatesDialog::SearchForDuplicateFiles( void )
 			fs::CPathEnumerator found;
 			fs::EnumFiles( &found, srcPath.GetPtr(), wildSpec.c_str(), Deep );
 
-			totalCount += found.m_filePaths.size();
+			rFoundPaths.reserve( rFoundPaths.size() + found.m_filePaths.size() );
 			for ( fs::TPathSet::const_iterator itFilePath = found.m_filePaths.begin(); itFilePath != found.m_filePaths.end(); ++itFilePath )
-				groupsStore.Register( *itFilePath );
+				if ( uniquePaths.insert( *itFilePath ).second )			// path is unique?
+					rFoundPaths.push_back( *itFilePath );
 		}
 		else if ( fs::IsValidFile( srcPath.GetPtr() ) )
-		{
-			++totalCount;
-			groupsStore.Register( srcPath );
-		}
+			if ( uniquePaths.insert( srcPath ).second )			// path is unique?
+				rFoundPaths.push_back( srcPath );
 	}
-
-	ULONGLONG minFileSize = 0;
-	if ( num::ParseNumber( minFileSize, m_minFileSizeCombo.GetCurrentText() ) )
-		minFileSize *= 1024;			// KB
-
-	groupsStore.ExtractDuplicateGroups( m_duplicateGroups, ignoredCount, minFileSize );
-
-	SetupDuplicateFileList();
-	ClearFileErrors();
-
-	ui::SetDlgItemText( this, IDC_DUPLICATE_FILES_INFO, str::Format( _T("Found %d duplicates of total %d files, ignored %d"), m_dupsListCtrl.GetItemCount(), totalCount, ignoredCount ) );
 }
 
 bool CFindDuplicatesDialog::DeleteDuplicateFiles( void )
@@ -302,7 +326,7 @@ void CFindDuplicatesDialog::SetupDuplicateFileList( void )
 			m_dupsListCtrl.SetSubItemText( index, DirPath, ( *itDupItem )->GetKeyPath().GetParentPath().GetPtr() );
 			m_dupsListCtrl.SetSubItemText( index, Size, num::FormatFileSize( pGroup->GetContentKey().m_fileSize ) );
 			m_dupsListCtrl.SetSubItemText( index, Crc32, num::FormatHexNumber( pGroup->GetContentKey().m_crc32, _T("%X") ) );
-			m_dupsListCtrl.SetSubItemText( index, DateModified, time_utl::FormatTimestamp( ( *itDupItem )->GetModifTime() ) );
+			m_dupsListCtrl.SetSubItemText( index, DateModified, time_utl::FormatTimestamp( ( *itDupItem )->GetModifyTime() ) );
 
 			VERIFY( m_dupsListCtrl.SetRowGroupId( index, groupId ) );
 		}

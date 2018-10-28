@@ -70,10 +70,11 @@ class CThumbnailer : public CShellThumbCache
 				   , private utl::noncopyable
 {
 public:
-	CThumbnailer( void );
+	CThumbnailer( size_t cacheMaxSize = MaxSize );
 	~CThumbnailer() { Clear(); }
 
 	size_t GetCachedCount( void ) const;
+	void SetCacheMaxSize( size_t cacheMaxSize = MaxSize ) { m_thumbsCache.SetMaxSize( cacheMaxSize ); }
 
 	void Clear( void );
 	bool SetBoundsSize( const CSize& boundsSize );

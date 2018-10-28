@@ -165,9 +165,9 @@ CComPtr< IWICBitmapSource > CShellThumbCache::ScaleToThumbBitmap( IWICBitmapSour
 
 const GUID& CThumbnailer::s_containerFormatId = GUID_ContainerFormatJpeg;
 
-CThumbnailer::CThumbnailer( void )
+CThumbnailer::CThumbnailer( size_t cacheMaxSize /*= MaxSize*/ )
 	: CShellThumbCache()
-	, m_thumbsCache( MaxSize )
+	, m_thumbsCache( cacheMaxSize )
 	, m_flags( 0 )
 {
 }
@@ -317,7 +317,7 @@ bool CThumbnailer::DrawItemImage( CDC* pDC, const utl::ISubject* pSubject, const
 // CGlyphThumbnailer implementation
 
 CGlyphThumbnailer::CGlyphThumbnailer( int glyphDimension )
-	: CThumbnailer()
+	: CThumbnailer( 2500 )
 {
 	SetGlyphDimension( glyphDimension );
 	SetOptimizeExtractIcons();					// for more accurate icon scaling that favours the best fitting image size present

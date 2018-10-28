@@ -51,6 +51,7 @@ private:
 	// input
 	void ClearDuplicates( void );
 	void SearchForDuplicateFiles( void );
+	void SearchForFiles( std::vector< fs::CPath >& rFoundPaths ) const;
 
 	CDuplicateFileItem* FindItemWithKey( const fs::CPath& srcPath ) const;
 	void MarkInvalidSrcItems( void );
