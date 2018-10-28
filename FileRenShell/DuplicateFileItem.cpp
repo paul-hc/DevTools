@@ -67,9 +67,10 @@ void CDuplicateFilesGroup::AddItem( const fs::CPath& filePath )
 
 // CDuplicateFileItem implementation
 
-CDuplicateFileItem::CDuplicateFileItem( const fs::CPath& keyPath, const CDuplicateFilesGroup* pParentGroup )
-	: CPathItemBase( keyPath )
+CDuplicateFileItem::CDuplicateFileItem( const fs::CPath& filePath, const CDuplicateFilesGroup* pParentGroup )
+	: CPathItemBase( filePath )
 	, m_pParentGroup( pParentGroup )
+	, m_modifTime( fs::ReadLastModifyTime( filePath ) )
 {
 	ASSERT_PTR( m_pParentGroup );
 }

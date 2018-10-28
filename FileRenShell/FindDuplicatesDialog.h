@@ -64,7 +64,7 @@ private:
 	std::vector< std::tstring > m_fileTypeSpecs;
 private:
 	// enum { IDD = IDD_FIND_DUPLICATES_DIALOG };
-	enum DupFileColumn { FileName, DirPath, Size, CRC32 };
+	enum DupFileColumn { FileName, DirPath, Size, CRC32, DateModified };
 
 	CReportListControl m_srcPathsListCtrl;
 	CReportListControl m_dupsListCtrl;

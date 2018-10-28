@@ -302,6 +302,7 @@ void CFindDuplicatesDialog::SetupDuplicateFileList( void )
 			m_dupsListCtrl.SetSubItemText( index, DirPath, ( *itDupItem )->GetKeyPath().GetParentPath().GetPtr() );
 			m_dupsListCtrl.SetSubItemText( index, Size, num::FormatFileSize( pGroup->GetContentKey().m_fileSize ) );
 			m_dupsListCtrl.SetSubItemText( index, CRC32, num::FormatHexNumber( pGroup->GetContentKey().m_crc32, _T("%X") ) );
+			m_dupsListCtrl.SetSubItemText( index, DateModified, time_utl::FormatTimestamp( ( *itDupItem )->GetModifTime() ) );
 
 			VERIFY( m_dupsListCtrl.SetRowGroupId( index, groupId ) );
 		}

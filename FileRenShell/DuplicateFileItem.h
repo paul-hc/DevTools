@@ -65,13 +65,16 @@ private:
 class CDuplicateFileItem : public CPathItemBase
 {
 public:
-	CDuplicateFileItem( const fs::CPath& keyPath, const CDuplicateFilesGroup* pParentGroup );
+	CDuplicateFileItem( const fs::CPath& filePath, const CDuplicateFilesGroup* pParentGroup );
 
 	const CDuplicateFilesGroup* GetParentGroup( void ) const { return m_pParentGroup; }
 	bool IsOriginalItem( void ) const { return this == m_pParentGroup->GetItems().front(); }
 	bool IsDuplicateItem( void ) const { return !IsOriginalItem(); }
+
+	const CTime& GetModifTime( void ) const { return m_modifTime; }
 private:
 	const CDuplicateFilesGroup* m_pParentGroup;
+	CTime m_modifTime;			// last modification time of file
 };
 
 
