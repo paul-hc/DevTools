@@ -65,7 +65,9 @@ public:
 };
 
 
-class CThumbnailer : public CShellThumbCache, public ui::ICustomImageDraw, private utl::noncopyable
+class CThumbnailer : public CShellThumbCache
+				   , public ui::ICustomImageDraw
+				   , private utl::noncopyable
 {
 public:
 	CThumbnailer( void );
@@ -95,7 +97,7 @@ public:
 	const CFlagTags& GetTags_CacheStatusFlags( void );
 
 	// ui::ICustomImageDraw interface
-	virtual CSize GetItemImageSize( ui::ICustomImageDraw::ImageType imageType = ui::ICustomImageDraw::SmallImage ) const;
+	virtual CSize GetItemImageSize( ui::GlyphGauge glyphGauge = ui::SmallGlyph ) const;
 	virtual bool SetItemImageSize( const CSize& imageBoundsSize );
 	virtual bool DrawItemImage( CDC* pDC, const utl::ISubject* pSubject, const CRect& itemImageRect );
 private:
@@ -110,6 +112,23 @@ public:
 	{
 		AutoRegenSmallStgThumbs	= BIT_FLAG( 0 )		// for archive stg thumbs: regenerate if to small - this will slow down the process
 	};
+};
+
+
+// thumbnailer that uses a fixed image size (gauge) as bounds
+//
+class CGlyphThumbnailer : public CThumbnailer
+{
+public:
+	CGlyphThumbnailer( int glyphDimension );
+
+	// glyph dimension: width=height
+	int GetGlyphDimension( void ) const { ASSERT( GetBoundsSize().cx == GetBoundsSize().cy ); return GetBoundsSize().cx; }
+	bool SetGlyphDimension( int glyphDimension );
+
+	// base overrides
+	virtual CSize GetItemImageSize( ui::GlyphGauge glyphGauge = ui::SmallGlyph ) const;
+	virtual bool SetItemImageSize( const CSize& imageBoundsSize );
 };
 
 

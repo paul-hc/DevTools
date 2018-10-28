@@ -21,6 +21,7 @@ struct CGeneralOptions : public CSubject
 
 	void LoadFromRegistry( void );
 	void SaveToRegistry( void ) const;
+	void PostApply( void ) const;
 
 	bool operator==( const CGeneralOptions& right ) const;
 	bool operator!=( const CGeneralOptions& right ) const { return !operator==( right ); }

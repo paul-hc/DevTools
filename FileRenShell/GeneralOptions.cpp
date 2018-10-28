@@ -3,7 +3,7 @@
 #include "GeneralOptions.h"
 #include "Application.h"
 #include "utl/Image_fwd.h"
-#include "utl/FileItemsThumbnailStore.h"
+#include "utl/CustomDrawImager.h"
 #include "utl/ReportListControl.h"
 #include "utl/Thumbnailer.h"
 
@@ -27,8 +27,8 @@ namespace reg
 
 
 CGeneralOptions::CGeneralOptions( void )
-	: m_smallIconDim( CIconId::GetStdSize( SmallIcon ).cx )
-	, m_largeIconDim( CIconId::GetStdSize( HugeIcon_48 ).cx )
+	: m_smallIconDim( CFileItemsThumbnailStore::GetDefaultGlyphDimension( ui::SmallGlyph ) )
+	, m_largeIconDim( CFileItemsThumbnailStore::GetDefaultGlyphDimension( ui::LargeGlyph ) )
 	, m_useListThumbs( true )
 	, m_useListDoubleBuffer( true )
 	, m_highlightTextDiffsFrame( true )
@@ -82,6 +82,16 @@ void CGeneralOptions::SaveToRegistry( void ) const
 	pApp->WriteProfileInt( reg::section, reg::entry_undoEditingCmds, m_undoEditingCmds );
 }
 
+void CGeneralOptions::PostApply( void ) const
+{
+	CFileItemsThumbnailStore& rThumbnailStore = CFileItemsThumbnailStore::Instance();
+	rThumbnailStore.SetGlyphDimension( ui::SmallGlyph, m_smallIconDim );
+	rThumbnailStore.SetGlyphDimension( ui::LargeGlyph, m_largeIconDim );
+	rThumbnailStore.UpdateControls();
+
+	SaveToRegistry();
+}
+
 bool CGeneralOptions::operator==( const CGeneralOptions& right ) const
 {
 	return
@@ -103,7 +113,5 @@ void CGeneralOptions::ApplyToListCtrl( CReportListControl* pListCtrl ) const
 	pListCtrl->SetHighlightTextDiffsFrame( m_highlightTextDiffsFrame );
 	pListCtrl->ModifyListStyleEx( m_useListDoubleBuffer ? 0 : LVS_EX_DOUBLEBUFFER, m_useListDoubleBuffer ? LVS_EX_DOUBLEBUFFER : 0 );
 
-	pListCtrl->SetCustomImageDraw( m_useListThumbs ? CFileItemsThumbnailStore::Instance().GetThumbnailer() : NULL,
-		CSize( m_smallIconDim, m_smallIconDim ),
-		CSize( m_largeIconDim, m_largeIconDim ) );
+	pListCtrl->SetCustomFileGlyphDraw( m_useListThumbs );
 }

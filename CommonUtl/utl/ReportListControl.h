@@ -6,7 +6,7 @@
 #include "InternalChange.h"
 #include "ISubject.h"
 #include "SubjectPredicates.h"
-#include "Image_fwd.h"
+#include "CustomDrawImager_fwd.h"
 #include "OleUtils.h"
 #include "MatchSequence.h"
 #include "Resequence.h"
@@ -22,7 +22,7 @@ class CListSelectionData;
 class CReportListCustomDraw;
 namespace ui { class CFontEffectCache; }
 namespace ole { class CDataSource; }
-struct CCustomDrawImager;
+class CBaseCustomDrawImager;
 
 namespace ds
 {
@@ -92,6 +92,7 @@ protected:
 class CReportListControl : public CListCtrl
 						 , public CInternalChange
 						 , public CListTraits
+						 , public ICustomDrawControl
 {
 	friend class CReportListCustomDraw;
 public:
@@ -147,15 +148,19 @@ public:
 
 	typedef int ImageListIndex;
 
+	ui::GlyphGauge GetViewModeGlyphGauge( void ) const { return GetViewModeGlyphGauge( GetView() ); }
+	static ui::GlyphGauge GetViewModeGlyphGauge( DWORD listViewMode );
+
+	// ICustomDrawControl interface
+	virtual CBaseCustomDrawImager* GetCustomDrawImager( void ) const;
+	virtual void SetCustomFileGlyphDraw( bool showGlyphs = true );
+
 	// To prevent icon scaling dithering when displaying shell item icon thumbnails, specify small/large image bounds size from the image list.
 	// Otherwise when displaying only image file thumbs, let the thumbnailer drives bounds sizes.
 	// Remove LVS_EX_DOUBLEBUFFER for accurate image scaling, especially for transparent PNGs.
 	//
 	void SetCustomImageDraw( ui::ICustomImageDraw* pCustomImageDraw, const CSize& smallImageSize = CSize( 0, 0 ), const CSize& largeImageSize = CSize( 0, 0 ) );
 	void SetCustomIconDraw( ui::ICustomImageDraw* pCustomIconDraw, IconStdSize smallIconStdSize = SmallIcon, IconStdSize largeIconStdSize = LargeIcon );
-
-	bool GetCustomImageSizes( CSize& rSmallImageSize, CSize& rLargeImageSize ) const;
-	bool SetCustomImageSizes( const CSize& smallImageSize, const CSize& largeImageSize );
 
 	enum StdMetrics { IconViewEdgeX = 4 };
 
@@ -495,7 +500,7 @@ private:
 
 	CImageList* m_pImageList;
 	CImageList* m_pLargeImageList;
-	std::auto_ptr< CCustomDrawImager > m_pCustomImager;
+	std::auto_ptr< CBaseCustomDrawImager > m_pCustomImager;
 
 	CMenu* m_pPopupMenu[ _ListPopupCount ];					// used when right clicking nowhere - on header or no list item
 	std::auto_ptr< CLabelEdit > m_pLabelEdit;				// stores the label info during inline editing

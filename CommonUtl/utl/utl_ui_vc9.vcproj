@@ -1334,6 +1334,18 @@
 					>
 				</File>
 				<File
+					RelativePath=".\CustomDrawImager.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\CustomDrawImager.h"
+					>
+				</File>
+				<File
+					RelativePath=".\CustomDrawImager_fwd.h"
+					>
+				</File>
+				<File
 					RelativePath=".\DibDraw.cpp"
 					>
 				</File>
@@ -1355,14 +1367,6 @@
 				</File>
 				<File
 					RelativePath=".\DibSection.h"
-					>
-				</File>
-				<File
-					RelativePath=".\FileItemsThumbnailStore.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\FileItemsThumbnailStore.h"
 					>
 				</File>
 				<File

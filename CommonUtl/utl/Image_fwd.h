@@ -39,13 +39,13 @@ namespace ui
 	ImageFileFormat FindImageFileFormat( const TCHAR imageFilePath[] );
 
 
+	enum GlyphGauge { SmallGlyph, LargeGlyph, _GlyphGaugeCount };
+
 	// implemented by clients that can draw custom images (such as thumbnails) over a transparent image entry in control's image list
 
 	interface ICustomImageDraw
 	{
-		enum ImageType { SmallImage, LargeImage, _ImageTypeCount };
-
-		virtual CSize GetItemImageSize( ImageType imageType = SmallImage ) const = 0;
+		virtual CSize GetItemImageSize( GlyphGauge glyphGauge = SmallGlyph ) const = 0;
 		virtual bool SetItemImageSize( const CSize& imageBoundsSize ) = 0;											// call when UI control drives image bounds size
 		virtual bool DrawItemImage( CDC* pDC, const utl::ISubject* pSubject, const CRect& itemImageRect ) = 0;		// pSubject->GetCode() must refer to a fs::CPath or fs::CFlexPath
 

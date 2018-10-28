@@ -225,7 +225,7 @@ protected:
 		m_oldValue = *m_pObject;
 		*m_pObject = m_value;
 
-		m_pObject->SaveToRegistry();
+		m_pObject->PostApply();
 		return true;
 	}
 

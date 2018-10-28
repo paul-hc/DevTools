@@ -2,7 +2,7 @@
 #include "stdafx.h"
 #include "ReportListControl.h"
 #include "ReportListCustomDraw.h"
-#include "FileItemsThumbnailStore.h"
+#include "CustomDrawImager.h"
 #include "MenuUtilities.h"
 #include "ShellDragImager.h"
 #include "OleDataSource.h"
@@ -106,10 +106,14 @@ CReportListControl::CReportListControl( UINT columnLayoutId /*= 0*/, DWORD listS
 
 	if ( columnLayoutId != 0 )
 		SetLayoutInfo( columnLayoutId );
+
+	CFileItemsThumbnailStore::Instance().RegisterControl( this );
 }
 
 CReportListControl::~CReportListControl()
 {
+	CFileItemsThumbnailStore::Instance().UnregisterControl( this );
+
 	ClearData();
 
 	for ( std::vector< CColumnComparator >::const_iterator itColComparator = m_comparators.begin(); itColComparator != m_comparators.end(); ++itColComparator )
@@ -169,14 +173,52 @@ void CReportListControl::SetUseExplorerTheme( bool useExplorerTheme /*= true*/ )
 		CVisualTheme::SetWindowTheme( m_hWnd, GetUseExplorerTheme() ? L"Explorer" : L"", NULL );		// enable Explorer vs classic theme
 }
 
+CBaseCustomDrawImager* CReportListControl::GetCustomDrawImager( void ) const
+{
+	return m_pCustomImager.get();
+}
+
+void CReportListControl::SetCustomFileGlyphDraw( bool showGlyphs /*= true*/ )
+{
+	if ( showGlyphs )
+	{
+		m_pCustomImager.reset( new CFileGlyphCustomDrawImager( ui::SmallGlyph ) );
+
+		m_pImageList = m_pCustomImager->GetImageList( ui::SmallGlyph );
+		m_pLargeImageList = m_pCustomImager->GetImageList( ui::LargeGlyph );
+	}
+	else
+	{
+		m_pCustomImager.reset();
+
+		m_pImageList = NULL;
+		m_pLargeImageList = NULL;
+	}
+
+	if ( m_hWnd != NULL )
+	{
+		SetImageList( m_pImageList, LVSIL_SMALL );
+		SetImageList( m_pLargeImageList, LVSIL_NORMAL );
+		UpdateCustomImagerBoundsSize();
+
+		if ( NULL == m_pCustomImager.get() )
+		{	// hack: force the list to remove icon area for all items
+			ModifyStyle( LVS_TYPEMASK, LVS_ICON );
+			ChangeListViewMode( LV_VIEW_DETAILS );			// switch to report mode since other modes don't make sense without icons
+		}
+
+		ui::RecalculateScrollbars( m_hWnd );
+	}
+}
+
 void CReportListControl::SetCustomImageDraw( ui::ICustomImageDraw* pCustomImageDraw, const CSize& smallImageSize /*= CSize( 0, 0 )*/, const CSize& largeImageSize /*= CSize( 0, 0 )*/ )
 {
 	if ( pCustomImageDraw != NULL )
 	{
-		m_pCustomImager.reset( new CCustomDrawImager( pCustomImageDraw, smallImageSize, largeImageSize ) );
+		m_pCustomImager.reset( new CSingleCustomDrawImager( pCustomImageDraw, smallImageSize, largeImageSize ) );
 
-		m_pImageList = &m_pCustomImager->m_smallImageList;
-		m_pLargeImageList = &m_pCustomImager->m_largeImageList;
+		m_pImageList = m_pCustomImager->GetImageList( ui::SmallGlyph );
+		m_pLargeImageList = m_pCustomImager->GetImageList( ui::LargeGlyph );
 	}
 	else
 	{
@@ -205,26 +247,6 @@ void CReportListControl::SetCustomImageDraw( ui::ICustomImageDraw* pCustomImageD
 void CReportListControl::SetCustomIconDraw( ui::ICustomImageDraw* pCustomIconDraw, IconStdSize smallIconStdSize /*= SmallIcon*/, IconStdSize largeIconStdSize /*= LargeIcon*/ )
 {
 	SetCustomImageDraw( pCustomIconDraw, CIconId::GetStdSize( smallIconStdSize ), CIconId::GetStdSize( largeIconStdSize ) );
-}
-
-bool CReportListControl::GetCustomImageSizes( CSize& rSmallImageSize, CSize& rLargeImageSize ) const
-{
-	if ( NULL == m_pCustomImager.get() )
-		return false;			// no change
-
-	rSmallImageSize = m_pCustomImager->m_smallImageSize;
-	rLargeImageSize = m_pCustomImager->m_largeImageSize;
-	return true;
-}
-
-bool CReportListControl::SetCustomImageSizes( const CSize& smallImageSize, const CSize& largeImageSize )
-{
-	ASSERT_PTR( m_pCustomImager.get() );
-	if ( m_pCustomImager->m_smallImageSize == smallImageSize && m_pCustomImager->m_largeImageSize == largeImageSize )
-		return false;			// no change
-
-	SetCustomImageDraw( m_pCustomImager->m_pRenderer, smallImageSize, largeImageSize );
-	return true;
 }
 
 CMenu& CReportListControl::GetStdPopupMenu( ListPopup popupType )
@@ -293,21 +315,26 @@ void CReportListControl::ChangeListViewMode( DWORD viewMode )
 	}
 }
 
+ui::GlyphGauge CReportListControl::GetViewModeGlyphGauge( DWORD listViewMode )
+{
+	switch ( listViewMode )
+	{
+		case LV_VIEW_ICON:
+		case LV_VIEW_TILE:
+			return ui::LargeGlyph;
+		default:
+			ASSERT( false );
+		case LV_VIEW_DETAILS:
+		case LV_VIEW_SMALLICON:
+		case LV_VIEW_LIST:
+			return ui::SmallGlyph;
+	}
+}
+
 bool CReportListControl::UpdateCustomImagerBoundsSize( void )
 {
 	if ( m_pCustomImager.get() != NULL )
-		switch ( GetView() )
-		{
-			case LV_VIEW_ICON:
-			case LV_VIEW_TILE:
-				return m_pCustomImager->UpdateImageSize( ui::ICustomImageDraw::LargeImage );
-			default:
-				ASSERT( false );
-			case LV_VIEW_DETAILS:
-			case LV_VIEW_SMALLICON:
-			case LV_VIEW_LIST:
-				return m_pCustomImager->UpdateImageSize( ui::ICustomImageDraw::SmallImage );
-		}
+		return m_pCustomImager->SetCurrGlyphGauge( GetViewModeGlyphGauge() );
 
 	return false;			// no change
 }
@@ -1071,7 +1098,7 @@ int CReportListControl::InsertObjectItem( int index, const utl::ISubject* pObjec
 	}
 
 	if ( Transparent_Image == imageIndex )
-		imageIndex = safe_ptr( m_pCustomImager.get() )->m_transpImgIndex;
+		imageIndex = safe_ptr( m_pCustomImager.get() )->GetTranspImageIndex();
 
 	int insertIndex = InsertItem( LVIF_TEXT | LVIF_IMAGE | LVIF_PARAM, index, pText, 0, 0, imageIndex, reinterpret_cast< LPARAM >( pObject ) );
 	ASSERT( insertIndex != -1 );
@@ -1087,7 +1114,7 @@ void CReportListControl::SetSubItemTextPtr( int index, int subItem, const TCHAR*
 	ASSERT( subItem > 0 );
 
 	if ( Transparent_Image == imageIndex )
-		imageIndex = safe_ptr( m_pCustomImager.get() )->m_transpImgIndex;
+		imageIndex = safe_ptr( m_pCustomImager.get() )->GetTranspImageIndex();
 	else if ( str::IsEmpty( pText ) )
 		imageIndex = No_Image;			// clear the image for empty text
 
@@ -2056,7 +2083,7 @@ BOOL CReportListControl::OnNmCustomDraw_Reflect( NMHDR* pNmHdr, LRESULT* pResult
 				{
 					CRect itemImageRect;
 					if ( GetIconItemRect( &itemImageRect, draw.m_index ) )		// visible item?
-						if ( m_pCustomImager->m_pRenderer->CustomDrawItemImage( &pDraw->nmcd, itemImageRect ) )
+						if ( m_pCustomImager->DrawItemGlyph( &pDraw->nmcd, itemImageRect ) )
 							return TRUE;				// handled
 				}
 

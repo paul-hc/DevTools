@@ -87,6 +87,7 @@ struct CCapitalizeOptions : public CSubject
 
 	void LoadFromRegistry( void );
 	void SaveToRegistry( void ) const;
+	void PostApply( void ) const { SaveToRegistry(); }
 
 	bool operator==( const CCapitalizeOptions& right ) const;
 	bool operator!=( const CCapitalizeOptions& right ) const { return !operator==( right ); }

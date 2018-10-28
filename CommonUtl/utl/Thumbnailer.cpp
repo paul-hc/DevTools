@@ -57,7 +57,7 @@ bool CShellThumbCache::SetBoundsSize( const CSize& boundsSize )
 	if ( m_boundsSize == boundsSize )
 		return false;
 
-	ASSERT( m_boundsSize.cx >= 16 && m_boundsSize.cy >= 16 );
+	ASSERT( boundsSize.cx >= 16 && boundsSize.cy >= 16 );
 	m_boundsSize = boundsSize;
 	return true;
 }
@@ -282,13 +282,13 @@ CCachedThumbBitmap* CThumbnailer::AcquireThumbnailNoThrow( const fs::CFlexPath& 
 	}
 }
 
-CSize CThumbnailer::GetItemImageSize( ui::ICustomImageDraw::ImageType imageType /*= ui::ICustomImageDraw::SmallImage*/ ) const
+CSize CThumbnailer::GetItemImageSize( ui::GlyphGauge glyphGauge /*= ui::SmallGlyph*/ ) const
 {
-	switch ( imageType )
+	switch ( glyphGauge )
 	{
 		default: ASSERT( false );
-		case ui::ICustomImageDraw::SmallImage:	return CIconId::GetStdSize( SmallIcon );
-		case ui::ICustomImageDraw::LargeImage:	return GetBoundsSize();
+		case ui::SmallGlyph:	return CIconId::GetStdSize( SmallIcon );
+		case ui::LargeGlyph:	return GetBoundsSize();
 	}
 }
 
@@ -310,6 +310,34 @@ bool CThumbnailer::DrawItemImage( CDC* pDC, const utl::ISubject* pSubject, const
 				return true;
 			}
 	}
+	return false;
+}
+
+
+// CGlyphThumbnailer implementation
+
+CGlyphThumbnailer::CGlyphThumbnailer( int glyphDimension )
+	: CThumbnailer()
+{
+	SetGlyphDimension( glyphDimension );
+	SetOptimizeExtractIcons();					// for more accurate icon scaling that favours the best fitting image size present
+}
+
+bool CGlyphThumbnailer::SetGlyphDimension( int glyphDimension )
+{
+	return SetBoundsSize( CSize( glyphDimension, glyphDimension ) );
+}
+
+CSize CGlyphThumbnailer::GetItemImageSize( ui::GlyphGauge glyphGauge /*= ui::SmallGlyph*/ ) const
+{
+	glyphGauge;
+	return GetBoundsSize();			// fixed gauge, regardless of glyphGauge
+}
+
+bool CGlyphThumbnailer::SetItemImageSize( const CSize& imageBoundsSize )
+{
+	imageBoundsSize;
+	ASSERT( false );				// should never be called
 	return false;
 }
 
