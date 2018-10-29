@@ -2,12 +2,15 @@
 #include "stdafx.h"
 #include "IconButton.h"
 #include "ImageStore.h"
+#include "StringUtilities.h"
 #include "Utilities.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
 
+
+const TCHAR CIconButton::s_textSpacing[] = _T(" ");
 
 CIconButton::CIconButton( const CIconId& iconId /*= CIconId()*/, bool useText /*= true*/ )
 	: CButton()
@@ -52,6 +55,52 @@ void CIconButton::SetUseTextSpacing( bool useTextSpacing /*= true*/ )
 		UpdateCaption( this, m_useText, m_useTextSpacing );
 }
 
+std::tstring CIconButton::GetButtonCaption( void ) const
+{
+	return TextToCaption( ui::GetWindowText( m_hWnd ), m_useText, m_useTextSpacing );
+}
+
+void CIconButton::SetButtonCaption( const std::tstring& caption )
+{
+	ui::SetWindowText( m_hWnd, CaptionToText( caption, m_useText, m_useTextSpacing ) );
+}
+
+void CIconButton::SetButtonIcon( CButton* pButton, const CIconId& iconId, bool useText /*= true*/, bool useTextSpacing /*= true*/ )
+{
+	ASSERT_PTR( pButton->GetSafeHwnd() );
+
+	if ( const CIcon* pIcon = CImageStore::SharedStore()->RetrieveIcon( iconId ) )
+		pButton->SetIcon( pIcon->GetHandle() );
+
+	UpdateCaption( pButton, useText, useTextSpacing );
+}
+
+std::tstring CIconButton::CaptionToText( const std::tstring& caption, bool useText, bool useTextSpacing )
+{
+	std::tstring text = caption;
+
+	if ( useText && useTextSpacing )
+	{
+		str::StripPrefix( text, s_textSpacing );
+		str::StripSuffix( text, s_textSpacing );
+
+		if ( !text.empty() )
+			text = std::tstring( s_textSpacing ) + text + s_textSpacing;
+	}
+	return text;
+}
+
+std::tstring CIconButton::TextToCaption( const std::tstring& text, bool useText, bool useTextSpacing )
+{
+	std::tstring caption = text;
+	if ( useText && useTextSpacing )
+	{
+		str::StripPrefix( caption, s_textSpacing );
+		str::StripSuffix( caption, s_textSpacing );
+	}
+	return caption;
+}
+
 bool CIconButton::UpdateIcon( void )
 {
 	// When the button is created using Create(), strangely the initial SetIcon call on PreSubclassWindow() doesn't stick.
@@ -70,19 +119,7 @@ bool CIconButton::UpdateCaption( CButton* pButton, bool useText, bool useTextSpa
 	ASSERT_PTR( pButton->GetSafeHwnd() );
 	if ( pButton->GetIcon() != NULL )
 		if ( useText )
-		{
-			std::tstring text = ui::GetWindowText( *pButton );
-			if ( !text.empty() )		// handle spacing only if we have caption
-			{
-				static const TCHAR space[] = _T(" ");
-				if ( !useTextSpacing )
-					str::TrimLeft( text, space );
-				else if ( text[ 0 ] != space[ 0 ] )
-					text = space + text;
-
-				return ui::SetWindowText( *pButton, text );
-			}
-		}
+			return ui::SetWindowText( pButton->GetSafeHwnd(), CaptionToText( ui::GetWindowText( pButton->GetSafeHwnd() ), useText, useTextSpacing ) );
 		else
 			pButton->ModifyStyle( 0, BS_ICON );
 
@@ -98,13 +135,4 @@ void CIconButton::PreSubclassWindow( void )
 
 	if ( NULL == GetIcon() )
 		UpdateIcon();
-}
-
-void CIconButton::SetButtonIcon( CButton* pButton, const CIconId& iconId, bool useText /*= true*/, bool useTextSpacing /*= true*/ )
-{
-	ASSERT_PTR( pButton->GetSafeHwnd() );
-
-	if ( const CIcon* pIcon = CImageStore::SharedStore()->RetrieveIcon( iconId ) )
-		pButton->SetIcon( pIcon->GetHandle() );
-	UpdateCaption( pButton, useText, useTextSpacing );
 }

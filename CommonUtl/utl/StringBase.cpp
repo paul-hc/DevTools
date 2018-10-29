@@ -190,26 +190,25 @@ namespace str
 		return message.GetString();
 	}
 
-	std::tstring Load( UINT strId )
+	std::tstring Load( UINT strId, bool* pLoaded /*= NULL*/ )
 	{
 		CString text;
-		text.LoadString( AfxGetResourceHandle(), strId );
+		bool loaded = text.LoadString( AfxGetResourceHandle(), strId ) != FALSE;
+		if ( pLoaded != NULL )
+			*pLoaded = loaded;
 		return text.GetString();
 	}
 
-	std::vector< std::tstring > LoadStrings( UINT strId, const TCHAR* pSep /*= _T("|")*/ )
+	std::vector< std::tstring > LoadStrings( UINT strId, const TCHAR* pSep /*= _T("|")*/, bool* pLoaded /*= NULL*/ )
 	{
-		CString text;
-		text.LoadString( AfxGetResourceHandle(), strId );
-
 		std::vector< std::tstring > items;
-		Split( items, text.GetString(), pSep );
+		Split( items, Load( strId, pLoaded ).c_str(), pSep );
 		return items;
 	}
 
-	std::pair< std::tstring, std::tstring > LoadPair( UINT strId, const TCHAR* pSep /*= _T("|")*/ )
+	std::pair< std::tstring, std::tstring > LoadPair( UINT strId, const TCHAR* pSep /*= _T("|")*/, bool* pLoaded /*= NULL*/ )
 	{
-		std::tstring text = Load( strId );
+		std::tstring text = Load( strId, pLoaded );
 		size_t sepPos = text.find( pSep );
 		if ( std::tstring::npos == sepPos )
 		{

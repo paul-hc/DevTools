@@ -23,6 +23,7 @@
 #define IDD_FILE_LIST_DIALOG            147
 #define IDB_PNG1                        148
 #define IDR_FLAG_STRIP_PNG              148
+#define IDD_TEST_TASK_DIALOG            149
 #define IDC_OPEN_DIALOG_BUTTON          1000
 #define IDC_OPEN_PROPERTIES_BUTTON      1001
 #define IDC_CREATE_PROPERTIES_BUTTON    1002
@@ -107,40 +108,47 @@
 #define IDC_USE_DIFFS_CHECK             1090
 #define IDC_USE_EXPLORER_THEME_CHECK    1091
 #define IDC_USE_DEFAULT_DRAW_CHECK      1092
+#define IDC_TASK_DIALOG_USAGE           1092
 #define IDC_USE_DEFAULT_DRAW_CHECK2     1093
 #define IDC_USE_DBG_GUIDES_CHECK        1093
+#define IDC_OUTCOME_STATIC              1093
 #define IDC_USE_DOUBLEBUFFER_CHECK      1094
+#define ID_COMMAND_LINK1                2001
+#define ID_COMMAND_LINK2                2002
+#define ID_RADIO_BUTTON1                2101
+#define ID_RADIO_BUTTON2                2102
 #define IDS_OLE_INIT_FAILED             5000
 #define IDS_CHANGE_CASE_TAGS            5001
 #define ID_STUDY_IMAGE                  32772
 #define ID_CHANGE_CASE                  32773
 #define ID_SEND_TO_CLIPBOARD            32774
-#define ID_STUDY_LIST_DIFFS             32774
-#define ID_NUMERIC_SEQUENCE             32775
-#define ID_NUMERIC_SEQUENCE_2DIGITS     32776
-#define ID_NUMERIC_SEQUENCE_3DIGITS     32777
-#define ID_NUMERIC_SEQUENCE_4DIGITS     32778
-#define ID_NUMERIC_SEQUENCE_5DIGITS     32779
-#define ID_WILDCARD                     32780
-#define ID_EXTENSION_SEPARATOR          32781
-#define ID_DROP_RIGHT                   32782
-#define ID_DROP_DOWN                    32783
-#define ID_DROP_LEFT                    32784
-#define ID_DROP_UP                      32785
-#define ID_RESOLUTION_TOGGLE            32788
-#define ID_ZOOM_TOGGLE                  32790
-#define ID_SET_TRANSP_COLOR             32792
-#define ID_SET_AUTO_TRANSP_COLOR        32793
-#define ID_RESET_TRANSP_COLOR           32794
-#define ID_AUTO_TRANSP_TOOL             32797
+#define ID_STUDY_LIST_DIFFS             32775
+#define ID_NUMERIC_SEQUENCE             32776
+#define ID_NUMERIC_SEQUENCE_2DIGITS     32777
+#define ID_NUMERIC_SEQUENCE_3DIGITS     32778
+#define ID_NUMERIC_SEQUENCE_4DIGITS     32779
+#define ID_NUMERIC_SEQUENCE_5DIGITS     32780
+#define ID_WILDCARD                     32781
+#define ID_EXTENSION_SEPARATOR          32782
+#define ID_DROP_RIGHT                   32783
+#define ID_DROP_DOWN                    32784
+#define ID_DROP_LEFT                    32785
+#define ID_DROP_UP                      32786
+#define ID_RESOLUTION_TOGGLE            32787
+#define ID_ZOOM_TOGGLE                  32788
+#define ID_SET_TRANSP_COLOR             32789
+#define ID_SET_AUTO_TRANSP_COLOR        32790
+#define ID_RESET_TRANSP_COLOR           32791
+#define ID_AUTO_TRANSP_TOOL             32792
+#define ID_STUDY_TASK_DIALOG            32793
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        149
+#define _APS_NEXT_RESOURCE_VALUE        150
 #define _APS_NEXT_COMMAND_VALUE         32798
-#define _APS_NEXT_CONTROL_VALUE         1091
+#define _APS_NEXT_CONTROL_VALUE         1094
 #define _APS_NEXT_SYMED_VALUE           5002
 #endif
 #endif

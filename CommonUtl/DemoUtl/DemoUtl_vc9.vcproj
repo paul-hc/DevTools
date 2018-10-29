@@ -381,6 +381,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\CustomTaskDialogs.h"
+				>
+			</File>
+			<File
 				RelativePath=".\DemoTemplate.cpp"
 				>
 			</File>
@@ -502,6 +506,14 @@
 			</File>
 			<File
 				RelativePath=".\TestPropertySheet.h"
+				>
+			</File>
+			<File
+				RelativePath=".\TestTaskDialog.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\TestTaskDialog.h"
 				>
 			</File>
 		</Filter>

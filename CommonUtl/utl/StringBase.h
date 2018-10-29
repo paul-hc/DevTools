@@ -26,9 +26,9 @@ namespace str
 	std::tstring Format( const TCHAR* pFormat, ... );
 	std::tstring Format( UINT formatId, ... );
 
-	std::tstring Load( UINT strId );
-	std::vector< std::tstring > LoadStrings( UINT strId, const TCHAR* pSep = _T("|") );
-	std::pair< std::tstring, std::tstring > LoadPair( UINT strId, const TCHAR* pSep = _T("|") );
+	std::tstring Load( UINT strId, bool* pLoaded = NULL );
+	std::vector< std::tstring > LoadStrings( UINT strId, const TCHAR* pSep = _T("|"), bool* pLoaded = NULL );
+	std::pair< std::tstring, std::tstring > LoadPair( UINT strId, const TCHAR* pSep = _T("|"), bool* pLoaded = NULL );
 
 
 	namespace mfc

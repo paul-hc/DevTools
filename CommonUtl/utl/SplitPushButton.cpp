@@ -131,7 +131,7 @@ void CSplitPushButton::PreSubclassWindow( void )
 	str::Split( textParts, ui::GetWindowText( this ).c_str(), _T("|") );
 	if ( 2 == textParts.size() )
 	{
-		ui::SetWindowText( m_hWnd, textParts[ 0 ] );
+		SetButtonCaption( textParts[ 0 ] );
 		SetRhsText( textParts[ 1 ] );
 	}
 

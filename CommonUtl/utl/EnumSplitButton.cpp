@@ -49,7 +49,7 @@ void CEnumSplitButton::SetSelValue( int selValue )
 	m_popupMenu.CheckMenuRadioItem( 0, count - 1, m_selValue, MF_BYPOSITION );
 
 	if ( m_hWnd != NULL && m_pEnumTags != NULL )
-		ui::SetWindowText( m_hWnd, m_pEnumTags->FormatUi( m_selValue ) );
+		SetButtonCaption( m_pEnumTags->FormatUi( m_selValue ) );
 }
 
 void CEnumSplitButton::PreSubclassWindow( void )
@@ -57,7 +57,7 @@ void CEnumSplitButton::PreSubclassWindow( void )
 	CPopupSplitButton::PreSubclassWindow();
 
 	if ( m_pEnumTags != NULL && m_selValue >= 0 )
-		ui::SetWindowText( m_hWnd, m_pEnumTags->FormatUi( m_selValue ) );
+		SetButtonCaption( m_pEnumTags->FormatUi( m_selValue ) );
 }
 
 

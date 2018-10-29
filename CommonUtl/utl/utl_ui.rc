@@ -388,10 +388,7 @@ STRINGTABLE
 BEGIN
     ID_EDIT_COPY            "Copy to clipboard\nCopy to Clipboard (Ctrl+C)"
     ID_EDIT_CUT             "Cut to clipboard\nCut to Clipboard (Ctrl+X)"
-    ID_EDIT_FIND            "Find"
     ID_EDIT_PASTE           "Paste from clipboard\nPaste from Clipboard (Ctrl+V)"
-    ID_EDIT_REPLACE         "Replace"
-    ID_EDIT_SELECT_ALL      "Select all items\nSelect All"
     ID_EDIT_UNDO            "Undo\nUndo (Ctrl+Z)"
     ID_EDIT_REDO            "Redo\nRedo (Ctrl+Y)"
 END
@@ -404,9 +401,7 @@ BEGIN
     ID_SHUTTLE_DOWN         "Shuttle down selected item\nShuttle Down"
     ID_SHUTTLE_TOP          "Shuttle to the top selected item\nShuttle Top"
     ID_SHUTTLE_BOTTOM       "Shuttle to the bottom selected item\nShuttle Bottom"
-    ID_EDIT_DETAILS         "Edit Details"
     ID_EDIT_LIST_ITEMS      "Edit list of items\nEdit Items"
-    ID_REFRESH              "Refresh"
     ID_RESET_DEFAULT        "Reset to default"
 END
 

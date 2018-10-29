@@ -5,6 +5,7 @@
 #include "ChildFrame.h"
 #include "ImageDialog.h"
 #include "FileListDialog.h"
+#include "TestTaskDialog.h"
 #include "ImageTests.h"
 #include "TestDoc.h"
 #include "TestFormView.h"
@@ -43,7 +44,7 @@ static const CImageStore::CCmdAlias cmdAliases[] =
 
 const CEnumTags& GetTags_ResizeStyle( void )
 {
-	static const CEnumTags tags( _T(" &Dialog...| H-&Dialog...| V-&Dialog...| Max &Dialog...") );
+	static const CEnumTags tags( _T("&Dialog...|H-&Dialog...|V-&Dialog...|Max &Dialog...") );
 	return tags;
 }
 
@@ -94,6 +95,13 @@ BOOL CApplication::InitInstance( void )
 	else if ( app::HasCommandLineOption( _T("diffs") ) )			// "-diffs"
 	{
 		CFileListDialog dlg( NULL );
+		m_pMainWnd = &dlg;
+		dlg.DoModal();
+		return FALSE;					// no app loop
+	}
+	else if ( app::HasCommandLineOption( _T("td") ) )			// "-td"
+	{
+		CTestTaskDialog dlg( NULL );
 		m_pMainWnd = &dlg;
 		dlg.DoModal();
 		return FALSE;					// no app loop

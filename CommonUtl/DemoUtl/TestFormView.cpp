@@ -2,6 +2,7 @@
 #include "stdafx.h"
 #include "TestDoc.h"
 #include "TestFormView.h"
+#include "TestTaskDialog.h"
 #include "DemoTemplate.h"
 #include "ImageDialog.h"
 #include "FileListDialog.h"
@@ -29,6 +30,7 @@ CTestFormView::~CTestFormView()
 void CTestFormView::QueryTooltipText( std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const
 {
 	m_pDemo->QueryTooltipText( rText, cmdId, pTooltip );
+
 	if ( rText.empty() )
 		CLayoutFormView::QueryTooltipText( rText, cmdId, pTooltip );
 }
@@ -69,6 +71,7 @@ BEGIN_MESSAGE_MAP( CTestFormView, CLayoutFormView )
 	ON_BN_CLICKED( IDC_RUN_IMAGE_TESTS, OnRunImageUnitTests )
 	ON_BN_CLICKED( ID_STUDY_IMAGE, OnStudyImage )
 	ON_BN_CLICKED( ID_STUDY_LIST_DIFFS, OnStudyListDiffs )
+	ON_BN_CLICKED( ID_STUDY_TASK_DIALOG, OnStudyTaskDialog )
 END_MESSAGE_MAP()
 
 void CTestFormView::OnRunImageUnitTests( void )
@@ -91,4 +94,10 @@ void CTestFormView::OnStudyListDiffs( void )
 		CFileListDialog dlg( AfxGetMainWnd() );
 		btnId = dlg.DoModal();
 	}
+}
+
+void CTestFormView::OnStudyTaskDialog( void )
+{
+	CTestTaskDialog dlg( this );
+	dlg.DoModal();
 }
