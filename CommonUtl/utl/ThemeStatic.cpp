@@ -13,7 +13,7 @@
 // CThemeStatic implementation
 
 CThemeStatic::CThemeStatic( const CThemeItem& bkgndItem, const CThemeItem& contentItem /*= CThemeItem::m_null*/ )
-	: CBaseStatic()
+	: CBufferedStatic()
 	, m_bkgndItem( bkgndItem )
 	, m_contentItem( contentItem )
 	, m_textSpacing( 3, 0 )
@@ -107,14 +107,14 @@ CThemeItem* CThemeStatic::GetTextThemeItem( void )
 }
 
 
-BEGIN_MESSAGE_MAP( CThemeStatic, CBaseStatic )
+BEGIN_MESSAGE_MAP( CThemeStatic, CBufferedStatic )
 	ON_WM_MOUSEMOVE()
 	ON_MESSAGE( WM_MOUSELEAVE, OnMouseLeave )
 END_MESSAGE_MAP()
 
 void CThemeStatic::OnMouseMove( UINT flags, CPoint point )
 {
-	CBaseStatic::OnMouseMove( flags, point );
+	CBufferedStatic::OnMouseMove( flags, point );
 
 	if ( UseMouseInput() && m_state != Pressed )
 	{
@@ -132,6 +132,68 @@ LRESULT CThemeStatic::OnMouseLeave( WPARAM, LPARAM )
 }
 
 
+// CNormalStatic implementation
+
+CNormalStatic::CNormalStatic( Style style /*= Normal*/ )
+	: CThemeStatic( CThemeItem( L"EDIT", EP_BACKGROUND, EBS_DISABLED ) )
+{
+	m_useText = true;
+	m_textSpacing.cx = 0;
+	SetStyle( style );
+}
+
+void CNormalStatic::SetStyle( Style style )
+{
+	switch ( style )
+	{
+		default: ASSERT( false );
+		case Normal:
+			m_textItem = CThemeItem( L"EDIT", EP_EDITTEXT, ETS_NORMAL );
+			break;
+		case Bold:
+			m_textItem = CThemeItem( L"TEXTSTYLE", TEXT_BODYTITLE );
+			break;
+		case Instruction:
+			m_textItem = CThemeItem( L"TEXTSTYLE", TEXT_INSTRUCTION );
+			break;
+		case ControlLabel:
+			m_textItem = CThemeItem( L"TEXTSTYLE", TEXT_CONTROLLABEL, TS_CONTROLLABEL_NORMAL );
+			break;
+		case Hyperlink:
+			m_textItem = CThemeItem( L"TEXTSTYLE", TEXT_HYPERLINKTEXT, TS_HYPERLINK_HOT );
+			break;
+	}
+}
+
+
+// CHeadlineStatic implementation
+
+CHeadlineStatic::CHeadlineStatic( Style style /*= MainInstruction*/ )
+	: CThemeStatic( CThemeItem( L"EDIT", EP_EDITBORDER_NOSCROLL, EPSN_HOT ) )
+{
+	m_useText = true;
+	m_textSpacing.cx = 8;		// more spacing from the left edge
+	SetStyle( style );
+}
+
+void CHeadlineStatic::SetStyle( Style style )
+{
+	switch ( style )
+	{
+		default: ASSERT( false );
+		case MainInstruction:
+			m_textItem = CThemeItem( L"TEXTSTYLE", TEXT_MAININSTRUCTION );
+			break;
+		case Instruction:
+			m_textItem = CThemeItem( L"TEXTSTYLE", TEXT_INSTRUCTION );
+			break;
+		case BoldTitle:
+			m_textItem = CThemeItem( L"TEXTSTYLE", TEXT_BODYTITLE );
+			break;
+	}
+}
+
+
 // CStatusStatic implementation
 
 CStatusStatic::CStatusStatic( Style style /*= Recessed*/ )
@@ -143,7 +205,7 @@ CStatusStatic::CStatusStatic( Style style /*= Recessed*/ )
 
 void CStatusStatic::SetStyle( Style style )
 {
-	static CThemeItem textItem( L"CONTROLPANEL", CPANEL_HELPLINK, CPHL_NORMAL );
+	static CThemeItem s_textItem( L"CONTROLPANEL", CPANEL_HELPLINK, CPHL_NORMAL );
 
 	switch ( style )
 	{
@@ -154,11 +216,11 @@ void CStatusStatic::SetStyle( Style style )
 			break;
 		case Rounded:
 			m_bkgndItem = CThemeItem( L"LISTVIEW", LVP_GROUPHEADER, LVGH_CLOSESELECTEDNOTFOCUSED );
-			m_textItem = textItem;
+			m_textItem = s_textItem;
 			break;
 		case RoundedHot:
 			m_bkgndItem = CThemeItem( L"LISTVIEW", LVP_GROUPHEADER, LVGH_OPENHOT );
-			m_textItem = textItem;
+			m_textItem = s_textItem;
 			break;
 	}
 

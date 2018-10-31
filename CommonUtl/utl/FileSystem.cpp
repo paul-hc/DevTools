@@ -302,6 +302,9 @@ namespace fs
 		std::tstring filePath = path::StripCommonPrefix( pFilePath, m_refDirPath.c_str() );
 		if ( !filePath.empty() )
 			m_filePaths.push_back( filePath );
+
+		if ( m_pChainEnum != NULL )
+			m_pChainEnum->AddFoundFile( pFilePath );
 	}
 
 	void CEnumerator::AddFoundSubDir( const TCHAR* pSubDirPath )
@@ -309,6 +312,9 @@ namespace fs
 		std::tstring subDirPath = path::StripCommonPrefix( pSubDirPath, m_refDirPath.c_str() );
 		if ( !subDirPath.empty() )
 			m_subDirPaths.push_back( subDirPath );
+
+		if ( m_pChainEnum != NULL )
+			m_pChainEnum->AddFoundSubDir( pSubDirPath );
 	}
 
 
@@ -319,6 +325,9 @@ namespace fs
 		std::tstring filePath = path::StripCommonPrefix( pFilePath, m_refDirPath.c_str() );
 		if ( !filePath.empty() )
 			m_filePaths.insert( filePath );
+
+		if ( m_pChainEnum != NULL )
+			m_pChainEnum->AddFoundFile( pFilePath );
 	}
 
 	void CPathEnumerator::AddFoundSubDir( const TCHAR* pSubDirPath )
@@ -326,6 +335,9 @@ namespace fs
 		std::tstring subDirPath = path::StripCommonPrefix( pSubDirPath, m_refDirPath.c_str() );
 		if ( !subDirPath.empty() )
 			m_subDirPaths.insert( subDirPath );
+
+		if ( m_pChainEnum != NULL )
+			m_pChainEnum->AddFoundSubDir( pSubDirPath );
 	}
 
 

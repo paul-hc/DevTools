@@ -1,6 +1,6 @@
 
 #include "stdafx.h"
-#include "BaseStatic.h"
+#include "BufferedStatic.h"
 #include "MemoryDC.h"
 #include "ScopedGdi.h"
 #include "Utilities.h"
@@ -10,17 +10,17 @@
 #endif
 
 
-CBaseStatic::CBaseStatic( void )
+CBufferedStatic::CBufferedStatic( void )
 	: CStatic()
 	, m_dtFlags( UINT_MAX )
 {
 }
 
-CBaseStatic::~CBaseStatic()
+CBufferedStatic::~CBufferedStatic()
 {
 }
 
-void CBaseStatic::PaintImpl( CDC* pDC, const CRect& clientRect )
+void CBufferedStatic::PaintImpl( CDC* pDC, const CRect& clientRect )
 {
 	CScopedGdi< CBrush > scopedBrush( pDC, CBrush::FromHandle( ui::SendCtlColor( m_hWnd, *pDC, WM_CTLCOLORSTATIC ) ) );
 	CScopedGdi< CFont > scopedFont( pDC, GetFont() );
@@ -29,12 +29,12 @@ void CBaseStatic::PaintImpl( CDC* pDC, const CRect& clientRect )
 	Draw( pDC, clientRect );
 }
 
-void CBaseStatic::DrawBackground( CDC* pDC, const CRect& clientRect )
+void CBufferedStatic::DrawBackground( CDC* pDC, const CRect& clientRect )
 {
 	pDC->PatBlt( clientRect.left, clientRect.top, clientRect.Width(), clientRect.Height(), PATCOPY );		// erase background
 }
 
-CFont* CBaseStatic::GetMarlettFont( void )
+CFont* CBufferedStatic::GetMarlettFont( void )
 {
 	static CFont marlettFont;
 	if ( NULL == marlettFont.GetSafeHandle() )
@@ -42,7 +42,7 @@ CFont* CBaseStatic::GetMarlettFont( void )
 	return &marlettFont;
 }
 
-void CBaseStatic::PreSubclassWindow( void )
+void CBufferedStatic::PreSubclassWindow( void )
 {
 	CStatic::PreSubclassWindow();
 
@@ -76,7 +76,7 @@ void CBaseStatic::PreSubclassWindow( void )
 	}
 }
 
-void CBaseStatic::DrawItem( DRAWITEMSTRUCT* pDrawItem )
+void CBufferedStatic::DrawItem( DRAWITEMSTRUCT* pDrawItem )
 {
 	switch ( pDrawItem->itemAction )
 	{
@@ -100,5 +100,5 @@ void CBaseStatic::DrawItem( DRAWITEMSTRUCT* pDrawItem )
 
 // message handlers
 
-BEGIN_MESSAGE_MAP( CBaseStatic, CStatic )
+BEGIN_MESSAGE_MAP( CBufferedStatic, CStatic )
 END_MESSAGE_MAP()

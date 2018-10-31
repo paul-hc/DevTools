@@ -28,7 +28,7 @@ private:
 class CUserAbortedException : public CRuntimeException
 {
 public:
-	CUserAbortedException( void ) : CRuntimeException( _T("<aborted by user>") ) {}
+	CUserAbortedException( void ) : CRuntimeException( "Aborted by user!" ) {}
 };
 
 

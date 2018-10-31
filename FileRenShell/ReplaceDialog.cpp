@@ -66,7 +66,7 @@ CReplaceDialog::CReplaceDialog( IFileEditor* pParentEditor, const CRenameService
 	m_initCentered = false;
 	m_regSection = reg::section;
 	RegisterCtrlLayout( layout::styles, COUNT_OF( layout::styles ) );
-	GetLayoutEngine().MaxClientSize().cy = 0;
+	GetLayoutEngine().MaxClientSize().cy = 0;		// no vertical resize
 	LoadDlgIcon( ID_EDIT_REPLACE );
 
 	ClearFlag( m_findWhatCombo.RefItemContent().m_itemsFlags, ui::CItemContent::Trim );

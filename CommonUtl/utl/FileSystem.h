@@ -72,13 +72,15 @@ namespace fs
 
 	struct CEnumerator : public IEnumerator, private utl::noncopyable
 	{
-		CEnumerator( const std::tstring refDirPath = std::tstring() ) : m_refDirPath( refDirPath ) {}
+		CEnumerator( const std::tstring refDirPath = std::tstring() ) : m_pChainEnum( NULL ), m_refDirPath( refDirPath ) {}
+		CEnumerator( IEnumerator* pChainEnum ) : m_pChainEnum( pChainEnum ) {}
 
 		// IEnumerator interface
 		virtual void AddFoundFile( const TCHAR* pFilePath );
 		virtual void AddFoundSubDir( const TCHAR* pSubDirPath );
 	protected:
-		std::tstring m_refDirPath;						// to remove if common prefix
+		IEnumerator* m_pChainEnum;					// allows chaining for progress reporting
+		std::tstring m_refDirPath;					// to remove if common prefix
 	public:
 		std::vector< std::tstring > m_filePaths;
 		std::vector< std::tstring > m_subDirPaths;
@@ -89,15 +91,17 @@ namespace fs
 
 	struct CPathEnumerator : public IEnumerator
 	{
-		CPathEnumerator( const std::tstring refDirPath = std::tstring() ) : m_refDirPath( refDirPath ) {}
+		CPathEnumerator( const std::tstring refDirPath = std::tstring() ) : m_pChainEnum( NULL ), m_refDirPath( refDirPath ) {}
+		CPathEnumerator( IEnumerator* pChainEnum ) : m_pChainEnum( pChainEnum ) {}
 
 		// IEnumerator interface
 		virtual void AddFoundFile( const TCHAR* pFilePath );
 		virtual void AddFoundSubDir( const TCHAR* pSubDirPath );
 	protected:
-		std::tstring m_refDirPath;						// to remove if common prefix
+		IEnumerator* m_pChainEnum;					// allows chaining for progress reporting
+		std::tstring m_refDirPath;					// to remove if common prefix
 	public:
-		fs::TPathSet m_filePaths;						// sorted intuitively
+		fs::TPathSet m_filePaths;					// sorted intuitively
 		fs::TPathSet m_subDirPaths;
 	};
 

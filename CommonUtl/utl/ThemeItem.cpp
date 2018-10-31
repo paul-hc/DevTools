@@ -20,7 +20,7 @@ CThemeItem::CThemeItem( void )
 	std::fill( m_stateId, m_stateId + COUNT_OF( m_stateId ), 0 );
 }
 
-CThemeItem::CThemeItem( const wchar_t* pThemeClass, int partId, int stateId )
+CThemeItem::CThemeItem( const wchar_t* pThemeClass, int partId, int stateId /*= 0*/ )
 	: m_pThemeClass( pThemeClass )
 	, m_partId( partId )
 {

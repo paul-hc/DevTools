@@ -19,6 +19,7 @@
 #define IDD_ITEMS_LIST_PAGE             28015
 #define IDR_TRACK_ZOOM_CURSOR           28016
 #define IDD_ITEMS_EDIT_PAGE             28016
+#define IDD_PROGRESS_DIALOG             28017
 #define UTL_MIN_COMMAND_VALUE           28200
 #define ID_ADD_ITEM                     28201
 #define ID_REMOVE_ITEM                  28202
@@ -79,15 +80,21 @@
 #define IDC_TOOLBAR_PLACEHOLDER         28515
 #define IDC_ABOUT_BUILD_INFO_LABEL      28515
 #define IDC_ITEMS_LIST                  28516
+#define IDC_PROGRESS_BAR                28516
+#define IDC_OPERATION_LABEL             28517
+#define IDC_STAGE_LABEL                 28518
+#define IDC_STAGE_STATIC                28519
+#define IDC_STEP_LABEL                  28520
+#define IDC_STEP_STATIC                 28521
 #define UTL_MIN_SYMED_VALUE             28800
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        28017
+#define _APS_NEXT_RESOURCE_VALUE        28018
 #define _APS_NEXT_COMMAND_VALUE         28241
-#define _APS_NEXT_CONTROL_VALUE         28516
+#define _APS_NEXT_CONTROL_VALUE         28523
 #define _APS_NEXT_SYMED_VALUE           28801
 #endif
 #endif

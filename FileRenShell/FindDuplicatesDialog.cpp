@@ -17,8 +17,10 @@
 #include "utl/EnumTags.h"
 #include "utl/FileSystem.h"
 #include "utl/FmtUtils.h"
+#include "utl/Guards.h"
 #include "utl/ItemListDialog.h"
 #include "utl/LongestCommonSubsequence.h"
+#include "utl/ProgressDialog.h"
 #include "utl/RuntimeException.h"
 #include "utl/MenuUtilities.h"
 #include "utl/StringUtilities.h"
@@ -32,6 +34,76 @@
 #define new DEBUG_NEW
 #endif
 
+
+// CDuplicatesProgress class
+
+class CDuplicatesProgress : private fs::IEnumerator
+{
+public:
+	CDuplicatesProgress( CWnd* pParent );
+	~CDuplicatesProgress();
+
+	ui::IProgressBox* GetProgressBox( void ) { return &m_dlg; }
+	fs::IEnumerator* GetProgressEnumerator( void ) { return this; }
+
+	void EnterSection_ComputeFileSize( size_t fileCount );
+	void EnterSection_ComputeCrc32( size_t itemCount );
+
+	// file enumerator callback
+	virtual void AddFoundFile( const TCHAR* pFilePath ) throws_( CUserAbortedException );
+	virtual void AddFoundSubDir( const TCHAR* pSubDirPath ) throws_( CUserAbortedException );
+private:
+	CProgressDialog m_dlg;
+};
+
+
+// CDuplicatesProgress implementation
+
+CDuplicatesProgress::CDuplicatesProgress( CWnd* pParent )
+	: m_dlg( _T("Search for Duplicate Files"), CProgressDialog::LabelsCount )
+{
+	if ( m_dlg.Create( _T("Duplicate Files Search"), pParent ) )
+	{
+		m_dlg.SetStageLabel( _T("Search directory") );
+		m_dlg.SetStepLabel( _T("Found file") );
+		m_dlg.SetMarqueeProgress();
+	}
+}
+
+CDuplicatesProgress::~CDuplicatesProgress()
+{
+	m_dlg.DestroyWindow();
+}
+
+void CDuplicatesProgress::EnterSection_ComputeFileSize( size_t fileCount )
+{
+	m_dlg.SetOperationLabel( _T("Compute Size of Files") );
+	m_dlg.ShowStage( false );
+	m_dlg.SetStepLabel( _T("Compute file size") );
+	m_dlg.SetProgressItemCount( fileCount );
+}
+
+void CDuplicatesProgress::EnterSection_ComputeCrc32( size_t itemCount )
+{
+	m_dlg.SetOperationLabel( _T("Compute CRC32 Checksums") );
+	m_dlg.SetStageLabel( _T("Group of duplicates") );
+	m_dlg.SetStepLabel( _T("Compute file CRC32") );
+	m_dlg.SetProgressItemCount( itemCount );
+	m_dlg.SetProgressStep( 1 );			// advance progress on each step since individual computations are slow
+}
+
+void CDuplicatesProgress::AddFoundFile( const TCHAR* pFilePath ) throws_( CUserAbortedException )
+{
+	m_dlg.AdvanceStepItem( pFilePath );
+}
+
+void CDuplicatesProgress::AddFoundSubDir( const TCHAR* pSubDirPath ) throws_( CUserAbortedException )
+{
+	m_dlg.AdvanceStage( pSubDirPath );
+}
+
+
+// CFindDuplicatesDialog implementation
 
 namespace reg
 {
@@ -103,8 +175,7 @@ CFindDuplicatesDialog::CFindDuplicatesDialog( CFileModel* pFileModel, CWnd* pPar
 	m_dupsListCtrl.AddColumnCompare( FileName, pred::NewComparator( pred::CompareDisplayCode() ) );
 	m_dupsListCtrl.AddColumnCompare( DateModified, pred::NewPropertyComparator< CDuplicateFileItem >( CDuplicateFileItem::AsModifyTime() ), false );		// order date-time descending by default
 
-	m_srcPathsToolbar.GetStrip()
-		.AddButton( ID_EDIT_LIST_ITEMS );
+	m_srcPathsToolbar.GetStrip().AddButton( ID_EDIT_LIST_ITEMS );
 
 	m_minFileSizeCombo.SetItemSep( _T("|") );
 
@@ -136,78 +207,98 @@ void CFindDuplicatesDialog::ClearDuplicates( void )
 	utl::ClearOwningContainer( m_duplicateGroups );
 }
 
-#include "utl/Timer.h"
-
-void CFindDuplicatesDialog::SearchForDuplicateFiles( void )
+// optimize performance:
+//	step 1: compute file-size part of the content key, grouping duplicate candidates by file-size only
+//	step 2: compute CRC32: real duplicates are within size-based duplicate groups
+//
+bool CFindDuplicatesDialog::SearchForDuplicateFiles( void )
 {
 	CWaitCursor wait;
 	ULONGLONG minFileSize = 0;
 	if ( num::ParseNumber( minFileSize, m_minFileSizeCombo.GetCurrentText() ) )
-		minFileSize *= 1024;			// KB
+		minFileSize *= 1024;		// to KB
 
-CTimer t;
-	std::vector< fs::CPath > foundPaths;
-	SearchForFiles( foundPaths );
-TRACE( _T(" # SearchForFiles: takes %s seconds\n"), num::FormatNumber( t.ElapsedSeconds() ).c_str() );
-t.Restart();
+	CDuplicatesProgress progress( this );
+	ui::IProgressBox* pProgressBox = progress.GetProgressBox();
 
-	// optimize performance:
-	//	step 1: compute file-size part of the content key, grouping duplicate candidates by file-size only
-	//	step 2: compute CRC32: real duplicates are within size-based duplicate groups
-
-	CDuplicateGroupsStore groupsStore;
-	size_t ignoredCount = 0;
-
-	for ( std::vector< fs::CPath >::const_iterator itFilePath = foundPaths.begin(); itFilePath != foundPaths.end(); ++itFilePath )
+	try
 	{
-		CFileContentKey contentKey;
-		bool registered = false;
+		std::auto_ptr< utl::CSectionGuard > pSection( new utl::CSectionGuard( _T("# SearchForFiles") ) );
 
-		if ( contentKey.ComputeFileSize( *itFilePath ) )
-			if ( contentKey.m_fileSize >= minFileSize )				// has minimum size?
-				registered = groupsStore.RegisterPath( *itFilePath, contentKey );
+		std::vector< fs::CPath > foundPaths;
+		SearchForFiles( foundPaths, progress.GetProgressEnumerator() );
 
-		if ( !registered )
-			++ignoredCount;
+		pSection.reset( new utl::CSectionGuard( _T("# File-size grouping") ) );
+
+		CDuplicateGroupsStore groupsStore;
+		size_t ignoredCount = 0;
+
+		progress.EnterSection_ComputeFileSize( foundPaths.size() );
+
+		for ( size_t i = 0; i != foundPaths.size(); ++i )
+		{
+			const fs::CPath& filePath = foundPaths[ i ];
+
+			CFileContentKey contentKey;
+			bool registered = false;
+
+			if ( contentKey.ComputeFileSize( filePath ) )
+				if ( contentKey.m_fileSize >= minFileSize )				// has minimum size?
+					registered = groupsStore.RegisterPath( filePath, contentKey );
+
+			if ( !registered )
+				++ignoredCount;
+
+			pProgressBox->AdvanceStepItem( filePath.Get() );
+		}
+
+		pSection.reset( new utl::CSectionGuard( _T("# ExtractDuplicateGroups w. CRC32") ) );
+		progress.EnterSection_ComputeCrc32( groupsStore.GetTotalDuplicateItemCount() );		// count of duplicate candidates
+
+		utl::COwningContainer< std::vector< CDuplicateFilesGroup* > > newDuplicateGroups;
+		groupsStore.ExtractDuplicateGroups( newDuplicateGroups, ignoredCount, pProgressBox );
+
+		m_duplicateGroups.swap( newDuplicateGroups );		// swap items and ownership
+
+		std::tstring reportMessage = str::Format( _T("Found %d duplicates of total %d files"), m_dupsListCtrl.GetItemCount(), foundPaths.size() );
+		if ( ignoredCount != 0 )
+			reportMessage += str::Format( _T(" (ignored %d)"), ignoredCount );
+
+		ui::SetDlgItemText( this, IDC_DUPLICATE_FILES_INFO, reportMessage );
+
+		SetupDuplicateFileList();
+		ClearFileErrors();
+		return true;
 	}
-TRACE( _T(" # File-size grouping: takes %s seconds\n"), num::FormatNumber( t.ElapsedSeconds() ).c_str() );
-t.Restart();
-
-	ClearDuplicates();
-	groupsStore.ExtractDuplicateGroups( m_duplicateGroups, ignoredCount );
-TRACE( _T(" # ExtractDuplicateGroups w. CRC32: takes %s seconds\n"), num::FormatNumber( t.ElapsedSeconds() ).c_str() );
-t.Restart();
-
-	SetupDuplicateFileList();
-	ClearFileErrors();
-
-	std::tstring message = str::Format( _T("Found %d duplicates of total %d files"), m_dupsListCtrl.GetItemCount(), foundPaths.size() );
-	if ( ignoredCount != 0 )
-		message += str::Format( _T(" (ignored %d)"), ignoredCount );
-
-	ui::SetDlgItemText( this, IDC_DUPLICATE_FILES_INFO, message );
+	catch ( CUserAbortedException& exc )
+	{
+		app::TraceException( exc );
+		return false;			// cancelled by the user
+	}
 }
 
-void CFindDuplicatesDialog::SearchForFiles( std::vector< fs::CPath >& rFoundPaths ) const
+#include <hash_set>
+
+void CFindDuplicatesDialog::SearchForFiles( std::vector< fs::CPath >& rFoundPaths, fs::IEnumerator* pProgressEnum ) const
 {
 	std::tstring wildSpec = m_fileSpecEdit.GetText();
-	std::set< fs::CPath > uniquePaths;
+	stdext::hash_set< fs::CPath > uniquePaths;
 
 	for ( std::vector< CSrcPathItem* >::const_iterator itSrcPathItem = m_srcPathItems.begin(); itSrcPathItem != m_srcPathItems.end(); ++itSrcPathItem )
 	{
 		const fs::CPath& srcPath = ( *itSrcPathItem )->GetKeyPath();
 		if ( fs::IsValidDirectory( srcPath.GetPtr() ) )
 		{
-			fs::CPathEnumerator found;
+			fs::CPathEnumerator found( pProgressEnum );
 			fs::EnumFiles( &found, srcPath.GetPtr(), wildSpec.c_str(), Deep );
 
 			rFoundPaths.reserve( rFoundPaths.size() + found.m_filePaths.size() );
 			for ( fs::TPathSet::const_iterator itFilePath = found.m_filePaths.begin(); itFilePath != found.m_filePaths.end(); ++itFilePath )
-				if ( uniquePaths.insert( *itFilePath ).second )			// path is unique?
+				if ( uniquePaths.insert( *itFilePath ).second )		// path is unique?
 					rFoundPaths.push_back( *itFilePath );
 		}
 		else if ( fs::IsValidFile( srcPath.GetPtr() ) )
-			if ( uniquePaths.insert( srcPath ).second )			// path is unique?
+			if ( uniquePaths.insert( srcPath ).second )				// path is unique?
 				rFoundPaths.push_back( srcPath );
 	}
 }
@@ -497,8 +588,8 @@ void CFindDuplicatesDialog::OnOK( void )
 	switch ( m_mode )
 	{
 		case EditMode:
-			SearchForDuplicateFiles();
-			PostMakeDest();
+			if ( SearchForDuplicateFiles() )
+				PostMakeDest();
 			break;
 		case CommitFilesMode:
 			if ( DeleteDuplicateFiles() )

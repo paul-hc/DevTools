@@ -170,8 +170,8 @@ private:
 
 	// progress bar
 	Range< int > m_progressRange;
-	int m_progressState;		// ProgressBar or Marquee state
-	int m_progressPos;			// ProgressBar pos or Marquee speed
+	int m_progressState;			// ProgressBar or Marquee state
+	int m_progressPos;				// ProgressBar pos or Marquee speed
 
 	IconInfo m_mainIcon;
 	IconInfo m_footerIcon;
@@ -180,7 +180,7 @@ private:
 	std::vector< CButtonInfo > m_radioButtons;
 
 	// results
-	BOOL m_verificationChecked;			// verification checkbox state
+	BOOL m_verificationChecked;		// verification checkbox state
 	int m_radioId;
 	int m_buttonId;
 public:

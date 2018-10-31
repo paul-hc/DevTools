@@ -1,14 +1,16 @@
-#ifndef BaseStatic_h
-#define BaseStatic_h
+#ifndef BufferedStatic_h
+#define BufferedStatic_h
 #pragma once
 
 
-class CBaseStatic : public CStatic
+// flicker free painting using owner-draw
+//
+class CBufferedStatic : public CStatic
 {
 protected:
-	CBaseStatic( void );
+	CBufferedStatic( void );
 public:
-	virtual ~CBaseStatic();
+	virtual ~CBufferedStatic();
 
 	UINT GetDrawTextFlags( void ) const { return m_dtFlags; }
 	void SetDrawTextFlags( UINT dtFlags ) { m_dtFlags = dtFlags; }
@@ -38,4 +40,4 @@ protected:
 };
 
 
-#endif // BaseStatic_h
+#endif // BufferedStatic_h

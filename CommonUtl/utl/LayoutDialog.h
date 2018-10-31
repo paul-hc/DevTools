@@ -64,6 +64,8 @@ protected:
 public:
 	// generated overrides
 	protected:
+	virtual void OnOK( void );
+	virtual void OnCancel( void );
 	virtual void DoDataExchange( CDataExchange* pDX );
 	public:
 	virtual BOOL PreTranslateMessage( MSG* pMsg );

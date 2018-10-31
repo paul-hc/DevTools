@@ -15,6 +15,8 @@ class CSrcPathItem;
 class CDuplicateFilesGroup;
 class CDuplicateFileItem;
 class CEnumTags;
+namespace fs { interface IEnumerator; }
+
 
 class CFindDuplicatesDialog : public CFileEditorBaseDialog
 							, private CReportListControl::ITextEffectCallback
@@ -50,8 +52,8 @@ private:
 
 	// input
 	void ClearDuplicates( void );
-	void SearchForDuplicateFiles( void );
-	void SearchForFiles( std::vector< fs::CPath >& rFoundPaths ) const;
+	bool SearchForDuplicateFiles( void );
+	void SearchForFiles( std::vector< fs::CPath >& rFoundPaths, fs::IEnumerator* pProgressEnum ) const;
 
 	CDuplicateFileItem* FindItemWithKey( const fs::CPath& srcPath ) const;
 	void MarkInvalidSrcItems( void );

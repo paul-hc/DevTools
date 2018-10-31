@@ -2,6 +2,7 @@
 #define DuplicateFileItem_h
 #pragma once
 
+#include "utl/IProgressBox.h"
 #include "PathItemBase.h"
 
 
@@ -37,33 +38,7 @@ public:
 };
 
 
-class CDuplicateFileItem;
-
-
-// group: multiple duplicates sharing the same content key
-//
-class CDuplicateFilesGroup
-{
-public:
-	CDuplicateFilesGroup( const CFileContentKey& contentKey ) : m_contentKey( contentKey ) {}
-	~CDuplicateFilesGroup();
-
-	CFileContentKey GetContentKey( void ) const { return m_contentKey; }
-	bool HasDuplicates( void ) const { return m_items.size() > 1; }
-	bool HasCrc32( void ) const { return m_contentKey.m_crc32 != 0; }
-
-	const std::vector< CDuplicateFileItem* >& GetItems( void ) const { return m_items; }
-	CDuplicateFileItem* FindItem( const fs::CPath& filePath ) const;
-	bool ContainsItem( const fs::CPath& filePath ) const { return FindItem( filePath ) != NULL; }
-
-	void AddItem( const fs::CPath& filePath );
-	void AddItem( CDuplicateFileItem* pItem );
-
-	void ExtractCrc32Duplicates( std::vector< CDuplicateFilesGroup* >& rDuplicateGroups, size_t& rIgnoredCount );			// step 2 CRC32 evaluation and regrouping
-private:
-	CFileContentKey m_contentKey;
-	std::vector< CDuplicateFileItem* > m_items;
-};
+class CDuplicateFilesGroup;
 
 
 class CDuplicateFileItem : public CPathItemBase
@@ -74,7 +49,7 @@ public:
 	const CDuplicateFilesGroup* GetParentGroup( void ) const { return m_pParentGroup; }
 	void SetParentGroup( const CDuplicateFilesGroup* pParentGroup ) { m_pParentGroup = pParentGroup; }
 
-	bool IsOriginalItem( void ) const { return this == m_pParentGroup->GetItems().front(); }
+	bool IsOriginalItem( void ) const;				// first item in the group?
 	bool IsDuplicateItem( void ) const { return !IsOriginalItem(); }
 
 	const CTime& GetModifyTime( void ) const { return m_modifyTime; }
@@ -89,15 +64,49 @@ private:
 };
 
 
+// group: multiple duplicates sharing the same content key
+//
+class CDuplicateFilesGroup
+{
+public:
+	CDuplicateFilesGroup( const CFileContentKey& contentKey ) : m_contentKey( contentKey ) {}
+	~CDuplicateFilesGroup();
+
+	CFileContentKey GetContentKey( void ) const { return m_contentKey; }
+
+	bool HasDuplicates( void ) const { return m_items.size() > 1; }
+	bool HasCrc32( void ) const { return m_contentKey.m_crc32 != 0; }
+
+	const std::vector< CDuplicateFileItem* >& GetItems( void ) const { return m_items; }
+	CDuplicateFileItem* FindItem( const fs::CPath& filePath ) const;
+	bool ContainsItem( const fs::CPath& filePath ) const { return FindItem( filePath ) != NULL; }
+
+	void AddItem( const fs::CPath& filePath );
+	void AddItem( CDuplicateFileItem* pItem );
+
+	// step 2 CRC32 evaluation and regrouping
+	void ExtractCrc32Duplicates( std::vector< CDuplicateFilesGroup* >& rDuplicateGroups, size_t& rIgnoredCount, ui::IProgressBox* pProgressBox = NULL ) throws_( CUserAbortedException );
+
+	std::tstring FormatContentKey( size_t groupIndex ) const;
+private:
+	CFileContentKey m_contentKey;
+	std::vector< CDuplicateFileItem* > m_items;
+};
+
+
 class CDuplicateGroupsStore
 {
 public:
 	CDuplicateGroupsStore( void ) {}
 	~CDuplicateGroupsStore( void );
 
+	size_t GetTotalDuplicateItemCount( void ) const;
+
 	bool RegisterPath( const fs::CPath& filePath, const CFileContentKey& contentKey );
 	void RegisterItem( CDuplicateFileItem* pItem, const CFileContentKey& contentKey );
-	void ExtractDuplicateGroups( std::vector< CDuplicateFilesGroup* >& rDuplicateGroups, size_t& rIgnoredCount );		// extract groups with more than 1 item
+
+	// extract groups with more than 1 item
+	void ExtractDuplicateGroups( std::vector< CDuplicateFilesGroup* >& rDuplicateGroups, size_t& rIgnoredCount, ui::IProgressBox* pProgressBox = NULL ) throws_( CUserAbortedException );
 private:
 	std::map< CFileContentKey, CDuplicateFilesGroup* > m_groupsMap;
 	std::vector< CDuplicateFilesGroup* > m_groups;				// with ownership, in the order they were registered

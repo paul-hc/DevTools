@@ -2,12 +2,12 @@
 #define ThemeStatic_h
 #pragma once
 
-#include "BaseStatic.h"
+#include "BufferedStatic.h"
 #include "ThemeItem.h"
 #include "ui_fwd.h"
 
 
-class CThemeStatic : public CBaseStatic
+class CThemeStatic : public CBufferedStatic
 {
 public:
 	CThemeStatic( const CThemeItem& bkgndItem, const CThemeItem& contentItem = CThemeItem::m_null );
@@ -44,6 +44,40 @@ protected:
 	afx_msg LRESULT OnMouseLeave( WPARAM wParam, LPARAM lParam );
 
 	DECLARE_MESSAGE_MAP()
+};
+
+
+class CNormalStatic : public CThemeStatic
+{
+public:
+	enum Style
+	{
+		Normal,				// static
+		Bold,				// bold text
+		Instruction,		// dark blue
+		ControlLabel,		// brighter blue
+		Hyperlink			// blue underlined link
+	};
+
+	CNormalStatic( Style style = Normal );
+
+	void SetStyle( Style style );
+};
+
+
+class CHeadlineStatic : public CThemeStatic
+{
+public:
+	enum Style
+	{
+		MainInstruction,	// large dark blue text
+		Instruction,		// dark blue text
+		BoldTitle			// bold text
+	};
+
+	CHeadlineStatic( Style style = MainInstruction );
+
+	void SetStyle( Style style );
 };
 
 

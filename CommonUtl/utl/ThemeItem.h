@@ -9,7 +9,7 @@ class CIcon;
 struct CThemeItem
 {
 	CThemeItem( void );
-	CThemeItem( const wchar_t* pThemeClass, int partId, int stateId );
+	CThemeItem( const wchar_t* pThemeClass, int partId, int stateId = 0 );
 
 	bool IsValid( void ) const { return m_pThemeClass != NULL; }
 	bool IsThemed( void ) const;

@@ -14,22 +14,28 @@ namespace utl
 {
 	// CSectionGuard implementation
 
-	CSectionGuard::CSectionGuard( const std::tstring& sectionName )
+	CSectionGuard::CSectionGuard( const std::tstring& sectionName, bool logging /*= false*/ )
+		: m_timer()
+		, m_pLogger( logging ? app::GetLoggerPtr() : NULL )
+		, m_sectionName( sectionName )
 	{
-		std::tstring sectionMsg = str::Format( _T("* %s.."), sectionName.c_str() );
-		TRACE( _T(" %s"), sectionMsg.c_str() );
+	}
 
-		if ( CLogger* pLogger = app::GetLoggerPtr() )
-			pLogger->Log( sectionMsg.c_str() );
+	CSectionGuard::CSectionGuard( const std::tstring& sectionName, CLogger* pLogger )
+		: m_timer()
+		, m_pLogger( pLogger )
+		, m_sectionName( sectionName )
+	{
 	}
 
 	CSectionGuard::~CSectionGuard()
 	{
-		std::tstring elapsedMsg = str::Format( _T(". takes %s seconds"), num::FormatNumber( m_timer.ElapsedSeconds() ).c_str() );
-		TRACE( _T(" %s\n"), elapsedMsg.c_str() );
+		// report elapsed time at the end of scope so that it doesn't interfere with output tracing in the meantime
+		std::tstring text = str::Format( _T("* %s... takes %s seconds"), m_sectionName.c_str(), num::FormatNumber( m_timer.ElapsedSeconds() ).c_str() );
+		TRACE( _T(" %s\n"), text.c_str() );
 
-		if ( CLogger* pLogger = app::GetLoggerPtr() )
-			pLogger->Log( elapsedMsg.c_str() );
+		if ( m_pLogger != NULL )
+			m_pLogger->Log( text.c_str() );
 	}
 
 

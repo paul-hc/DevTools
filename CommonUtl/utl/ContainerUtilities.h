@@ -694,6 +694,23 @@ namespace utl
 
 		rKeyToObjectMap.clear();
 	}
+
+
+	// exception-safe owning container of pointers; use swap() at the end to exchange safely the new items (old items will be deleted by this).
+	//
+	template< typename ContainerType >
+	class COwningContainer : public ContainerType
+	{
+		using ContainerType::clear;
+	public:
+		COwningContainer( void ) : ContainerType() {}
+		~COwningContainer() { clear(); }
+
+		void clear( void )
+		{
+			utl::ClearOwningContainer( static_cast< ContainerType& >( *this ) );		// cast to ContainerType base to avoid stack overflow
+		}
+	};
 }
 
 

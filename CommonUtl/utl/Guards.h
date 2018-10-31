@@ -5,6 +5,9 @@
 #include "utl/Timer.h"
 
 
+class CLogger;
+
+
 namespace utl
 {
 	// always displays elapsed time for a section scope
@@ -12,10 +15,13 @@ namespace utl
 	class CSectionGuard : public utl::noncopyable
 	{
 	public:
-		CSectionGuard( const std::tstring& sectionName );
+		CSectionGuard( const std::tstring& sectionName, bool logging = false );
+		CSectionGuard( const std::tstring& sectionName, CLogger* pLogger );
 		~CSectionGuard();
 	private:
 		CTimer m_timer;
+		CLogger* m_pLogger;
+		std::tstring m_sectionName;
 	};
 
 

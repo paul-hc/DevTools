@@ -855,14 +855,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\BaseStatic.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\BaseStatic.h"
-				>
-			</File>
-			<File
 				RelativePath=".\BaseToolbar.cpp"
 				>
 			</File>
@@ -876,6 +868,14 @@
 			</File>
 			<File
 				RelativePath=".\BaseZoomView.h"
+				>
+			</File>
+			<File
+				RelativePath=".\BufferedStatic.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\BufferedStatic.h"
 				>
 			</File>
 			<File
@@ -987,6 +987,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\IProgressBox.h"
+				>
+			</File>
+			<File
 				RelativePath=".\ItemContent.cpp"
 				>
 			</File>
@@ -1092,6 +1096,14 @@
 			</File>
 			<File
 				RelativePath=".\PostCall.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ProgressDialog.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\ProgressDialog.h"
 				>
 			</File>
 			<File

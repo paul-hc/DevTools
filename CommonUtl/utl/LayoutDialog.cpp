@@ -295,7 +295,7 @@ void CLayoutDialog::DoDataExchange( CDataExchange* pDX )
 			ModifySystemMenu();
 		}
 
-	MfcBaseDialog::DoDataExchange( pDX );
+	__super::DoDataExchange( pDX );
 }
 
 
@@ -319,25 +319,44 @@ BOOL CLayoutDialog::PreTranslateMessage( MSG* pMsg )
 {
 	return
 		m_accelPool.TranslateAccels( pMsg, m_hWnd ) ||
-		MfcBaseDialog::PreTranslateMessage( pMsg );
+		__super::PreTranslateMessage( pMsg );
 }
 
 BOOL CLayoutDialog::OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo )
 {
 	return
-		MfcBaseDialog::OnCmdMsg( id, code, pExtra, pHandlerInfo ) ||
+		__super::OnCmdMsg( id, code, pExtra, pHandlerInfo ) ||
 		HandleCmdMsg( id, code, pExtra, pHandlerInfo );							// some commands may handled by the CWinApp
 }
 
 void CLayoutDialog::OnDestroy( void )
 {
 	SaveToRegistry();
-	MfcBaseDialog::OnDestroy();
+	__super::OnDestroy();
+}
+
+void CLayoutDialog::OnOK( void )
+{
+	if ( IsModeless() )
+	{
+		if ( UpdateData( DialogSaveChanges ) )
+			DestroyWindow();
+	}
+	else
+		__super::OnOK();
+}
+
+void CLayoutDialog::OnCancel( void )
+{
+	if ( IsModeless() )
+		DestroyWindow();
+	else
+		__super::OnCancel();
 }
 
 void CLayoutDialog::OnSize( UINT sizeType, int cx, int cy )
 {
-	MfcBaseDialog::OnSize( sizeType, cx, cy );
+	__super::OnSize( sizeType, cx, cy );
 
 	if ( sizeType != SIZE_MINIMIZED )
 		LayoutDialog();
@@ -345,25 +364,25 @@ void CLayoutDialog::OnSize( UINT sizeType, int cx, int cy )
 
 void CLayoutDialog::OnGetMinMaxInfo( MINMAXINFO* pMinMaxInfo )
 {
-	MfcBaseDialog::OnGetMinMaxInfo( pMinMaxInfo );
+	__super::OnGetMinMaxInfo( pMinMaxInfo );
 	m_pLayoutEngine->HandleGetMinMaxInfo( pMinMaxInfo );
 }
 
 LRESULT CLayoutDialog::OnNcHitTest( CPoint screenPoint )
 {
-	return m_pLayoutEngine->HandleHitTest( MfcBaseDialog::OnNcHitTest( screenPoint ), screenPoint );
+	return m_pLayoutEngine->HandleHitTest( __super::OnNcHitTest( screenPoint ), screenPoint );
 }
 
 BOOL CLayoutDialog::OnEraseBkgnd( CDC* pDC )
 {
 	return
 		m_pLayoutEngine->HandleEraseBkgnd( pDC ) ||
-		MfcBaseDialog::OnEraseBkgnd( pDC );
+		__super::OnEraseBkgnd( pDC );
 }
 
 void CLayoutDialog::OnPaint( void )
 {
-	MfcBaseDialog::OnPaint();
+	__super::OnPaint();
 	m_pLayoutEngine->HandlePostPaint();
 }
 
@@ -373,7 +392,7 @@ void CLayoutDialog::OnInitMenuPopup( CMenu* pPopupMenu, UINT index, BOOL isSysMe
 	if ( !isSysMenu )
 		ui::UpdateMenuUI( this, pPopupMenu );
 
-	MfcBaseDialog::OnInitMenuPopup( pPopupMenu, index, isSysMenu );
+	__super::OnInitMenuPopup( pPopupMenu, index, isSysMenu );
 }
 
 void CLayoutDialog::OnSysCommand( UINT cmdId, LPARAM lParam )
@@ -383,7 +402,7 @@ void CLayoutDialog::OnSysCommand( UINT cmdId, LPARAM lParam )
 		OnCommand( ID_APP_ABOUT, 0 );
 		return;
 	}
-	MfcBaseDialog::OnSysCommand( cmdId, lParam );
+	__super::OnSysCommand( cmdId, lParam );
 }
 
 BOOL CLayoutDialog::OnTtnNeedText( UINT cmdId, NMHDR* pNmHdr, LRESULT* pResult )
