@@ -32,6 +32,8 @@ struct CFileContentKey
 	bool operator==( const CFileContentKey& right ) const { return m_fileSize == right.m_fileSize && m_crc32 == right.m_crc32; }
 	bool operator<( const CFileContentKey& right ) const;
 
+	std::tstring Format( void ) const;
+
 	static utl::CCrc32FileCache& GetCrc32FileCache( void );
 public:
 	ULONGLONG m_fileSize;	// in bytes
@@ -94,8 +96,6 @@ public:
 	// step 2 CRC32 evaluation and regrouping
 	void ExtractCrc32Duplicates( std::vector< CDuplicateFilesGroup* >& rDuplicateGroups, size_t& rIgnoredCount, ui::IProgressCallback* pProgress = NULL ) throws_( CUserAbortedException );
 	void __ExtractCrc32Duplicates( std::vector< CDuplicateFilesGroup* >& rDuplicateGroups, size_t& rIgnoredCount, ui::IProgressCallback* pProgress = NULL ) throws_( CUserAbortedException );	// old version using group stores
-
-	std::tstring FormatContentKey( void ) const;
 private:
 	CFileContentKey m_contentKey;
 	std::vector< CDuplicateFileItem* > m_items;

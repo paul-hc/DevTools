@@ -146,6 +146,30 @@ void CNumericTests::TestFormatNumber( void )
 		ASSERT_EQUAL( _T("1234.56789"), num::FormatNumber( 1234.56789 ) );
 		ASSERT_EQUAL( _T("-1234.56789"), num::FormatNumber( -1234.56789 ) );
 	}
+
+	{	// with precision
+		ASSERT_EQUAL( _T("1234.56789"), num::FormatNumber( num::GetWithPrecision( 1234.56789, 5 ) ) );
+		ASSERT_EQUAL( _T("1234.5678"), num::FormatNumber( num::GetWithPrecision( 1234.56789, 4 ) ) );
+		ASSERT_EQUAL( _T("1234.567"), num::FormatNumber( num::GetWithPrecision( 1234.56789, 3 ) ) );
+		ASSERT_EQUAL( _T("1234.56"), num::FormatNumber( num::GetWithPrecision( 1234.56789, 2 ) ) );
+		ASSERT_EQUAL( _T("1234.5"), num::FormatNumber( num::GetWithPrecision( 1234.56789, 1 ) ) );
+		ASSERT_EQUAL( _T("1234"), num::FormatNumber( num::GetWithPrecision( 1234.56789, 0 ) ) );
+	}
+
+	{	// rounding with precision
+		ASSERT_EQUAL( _T("1234.56789"), num::FormatDouble( 1234.56789, 5 ) );
+		ASSERT_EQUAL( _T("1234.5679"), num::FormatDouble( 1234.56789, 4 ) );
+		ASSERT_EQUAL( _T("1234.568"), num::FormatDouble( 1234.56789, 3 ) );
+		ASSERT_EQUAL( _T("1234.57"), num::FormatDouble( 1234.56789, 2 ) );
+		ASSERT_EQUAL( _T("1234.6"), num::FormatDouble( 1234.56789, 1 ) );
+		ASSERT_EQUAL( _T("1234"), num::FormatDouble( 1234.56789, 0 ) );
+
+		ASSERT_EQUAL( _T("789.1234"), num::FormatDouble( 789.1234, 4 ) );
+		ASSERT_EQUAL( _T("789.123"), num::FormatDouble( 789.1234, 3 ) );
+		ASSERT_EQUAL( _T("789.12"), num::FormatDouble( 789.1234, 2 ) );
+		ASSERT_EQUAL( _T("789.1"), num::FormatDouble( 789.1234, 1 ) );
+		ASSERT_EQUAL( _T("789"), num::FormatDouble( 789.1234, 0 ) );
+	}
 }
 
 void CNumericTests::TestFormatNumberUserLocale( void )
@@ -367,15 +391,15 @@ void CNumericTests::TestFormatFileSize( void )
 
 	ASSERT_EQUAL( _T("1.12 KB"), num::FormatFileSize( 1147 ) );				//	Explorer: "1.12 KB (1,147 bytes)"
 	ASSERT_EQUAL( _T("4.25 KB"), num::FormatFileSize( 4357 ) );				//	Explorer: "4.25 KB (4,357 bytes)"
-	ASSERT_EQUAL( _T("41.8 KB"), num::FormatFileSize( 42765 ) );			//	Explorer: "41.7 KB (42,765 bytes)" *
-	ASSERT_EQUAL( _T("111 KB"),  num::FormatFileSize( 113497 ) );			//	Explorer: "110 KB (113,497 bytes)" *
+	ASSERT_EQUAL( _T("41.8 KB"), num::FormatFileSize( 42765 ) );			//	Explorer: "41.7 KB (42,765 bytes)"				*differs
+	ASSERT_EQUAL( _T("110 KB"),  num::FormatFileSize( 113497 ) );			//	Explorer: "110 KB (113,497 bytes)"
 	ASSERT_EQUAL( _T("1.58 MB"), num::FormatFileSize( 1661001 ) );			//	Explorer: "1.58 MB (1,661,001 bytes)"
-	ASSERT_EQUAL( _T("2.53 MB"), num::FormatFileSize( 2649147 ) );			//	Explorer: "2.52 MB (2,649,147 bytes)" *
+	ASSERT_EQUAL( _T("2.53 MB"), num::FormatFileSize( 2649147 ) );			//	Explorer: "2.52 MB (2,649,147 bytes)"			*differs
 	ASSERT_EQUAL( _T("119 MB"),  num::FormatFileSize( 125217369 ) );		//	Explorer: "119 MB (125,217,369 bytes)"
-	ASSERT_EQUAL( _T("2.34 GB"), num::FormatFileSize( 2508506361 ) );		//	Explorer: "2.33 GB (2,508,506,361 bytes)" *
-	ASSERT_EQUAL( _T("6.54 GB"), num::FormatFileSize( 7018582830 ) );		//	Explorer: "6.53 GB (7,018,582,830 bytes)" *
-	ASSERT_EQUAL( _T("462 GB"),  num::FormatFileSize( 495761485824 ) );		//	Explorer: "461 GB (495,761,485,824 bytes)" *
-	ASSERT_EQUAL( _T("3.64 TB"), num::FormatFileSize( 4000617312256 ) );	//	Explorer: "3.63 TB (4,000,617,312,256 bytes)" *
+	ASSERT_EQUAL( _T("2.34 GB"), num::FormatFileSize( 2508506361 ) );		//	Explorer: "2.33 GB (2,508,506,361 bytes)"		*differs
+	ASSERT_EQUAL( _T("6.54 GB"), num::FormatFileSize( 7018582830 ) );		//	Explorer: "6.53 GB (7,018,582,830 bytes)"		*differs
+	ASSERT_EQUAL( _T("461 GB"),  num::FormatFileSize( 495761485824 ) );		//	Explorer: "461 GB (495,761,485,824 bytes)"
+	ASSERT_EQUAL( _T("3.64 TB"), num::FormatFileSize( 4000617312256 ) );	//	Explorer: "3.63 TB (4,000,617,312,256 bytes)"	*differs
 }
 
 void CNumericTests::TestCrc32( void )

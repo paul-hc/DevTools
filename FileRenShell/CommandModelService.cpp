@@ -223,7 +223,7 @@ namespace cmd
 		utl::ClearOwningContainer( undoStack );
 		utl::ClearOwningContainer( redoStack );
 
-		TRACE( _T("- CTextLogSerializer::Load(): takes %.3f seconds\n"), timer.ElapsedSeconds() );
+		TRACE( _T("- CTextLogSerializer::Load(): takes %s seconds\n"), timer.FormatElapsedSeconds().c_str() );
 	}
 
 	utl::ICommand* CTextLogSerializer::LoadMacroCmd( std::istream& is, const str::TStringRange& tagRange )

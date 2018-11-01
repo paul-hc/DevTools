@@ -281,6 +281,13 @@ namespace num
 
 	std::tstring FormatNumber( double value, const std::locale& loc = GetEmptyLocale() );
 
+	double GetRounded( double number, unsigned int fractDigits );
+	double GetWithPrecision( double number, unsigned int fractDigits );		// no rounding, just the zeroes additional digits
+	double GetRoundingFactor( unsigned int fractDigits );					// fractDigits is precision
+
+	inline std::tstring FormatDouble( double value, unsigned int precision, const std::locale& loc = GetEmptyLocale() ) { return FormatNumber( GetRounded( value, precision ), loc ); }
+
+
 	template< typename ValueType >
 	bool ParseNumber( ValueType& rNumber, const std::tstring& text, size_t* pSkipLength = NULL, const std::locale& loc = GetEmptyLocale() )
 	{

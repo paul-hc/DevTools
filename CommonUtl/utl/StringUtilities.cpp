@@ -241,28 +241,63 @@ namespace num
 		return num::FormatNumber( sizeUnit.first, loc ) + _T(" ") + GetTags_BytesUnit().Format( sizeUnit.second, longUnitTag ? CEnumTags::UiTag : CEnumTags::KeyTag );
 	}
 
+
+	double GetRounded( double number, unsigned int fractDigits )
+	{
+		const double factor = GetRoundingFactor( fractDigits );
+		double roundedNumber = number * factor;
+		__int64 integer = fractDigits != 0
+			? static_cast< __int64 >( roundedNumber + 0.5 )
+			: static_cast< __int64 >( roundedNumber );			// no rounding
+
+		roundedNumber = static_cast< double >( integer ) / factor;
+		return roundedNumber;
+	}
+
+	double GetWithPrecision( double number, unsigned int fractDigits )
+	{
+		// no rounding, just the zeroes additional digits
+
+		const double factor = GetRoundingFactor( fractDigits );
+		double newNumber = number * factor;
+		__int64 integer = static_cast< __int64 >( newNumber );
+
+		newNumber = static_cast< double >( integer ) / factor;
+		return newNumber;
+	}
+
+
+	double GetRoundingFactor( unsigned int fractDigits )
+	{
+		switch ( fractDigits )
+		{
+			case 0:	return 1.0;
+			case 1:	return 10.0;
+			case 2:	return 100.0;
+			case 3:	return 1000.0;
+			case 4:	return 10000.0;
+			case 5:	return 100000.0;
+			case 6:	return 1000000.0;
+			case 7:	return 10000000.0;
+			default:
+				ASSERT( false );							// 8 is a reasonable limit of fractional digits
+			case 8:	return 100000000.0;
+		}
+	}
+
+
 	double RoundOffFileSize( double number )
 	{
-		double factor = 1.0;			// round to 1 (no fractional digits)
-		double roundUpBy = 0.5;			// fractional rounding up amount
-
 		if ( number < 1.0 )
-			factor = 1000.0;			// round to 3 fractional digits
+			return GetRounded( number, 3 );					// round to 3 fractional digits
 		else if ( number < 10.0 )
-			factor = 100.0;				// round to 1 fractional digit
+			return GetRounded( number, 2 );					// round to 2 fractional digits
 		else if ( number < 100.0 )
-			factor = 10.0;				// round to 2 fractional digit
-		else if ( number < 1024.0 && number >= 1023.0 )			// a bit less than 1024
-		{
-			factor = 10.0;				// round to 1 fractional digit
-			roundUpBy = 0;				// no rounding up
-		}
+			return GetRounded( number, 1 );					// round to 1 fractional digits
+		else if ( number < 1024.0 && number >= 1023.0 )		// a bit less than 1024
+			return GetWithPrecision( number, 1 );			// 1 fractional digit precision, no rounding
 
-		double roundedNumber = number * factor;
-		ULONGLONG integer = static_cast< ULONGLONG >( roundedNumber + roundUpBy );
-
-		roundedNumber = static_cast< float >( integer ) / factor;
-		return roundedNumber;
+		return GetRounded( number, 0 );						// round to no fractional digits
 	}
 
 	std::pair< double, BytesUnit > ConvertFileSize( ULONGLONG fileSize, BytesUnit toUnit /*= AutoBytes*/ )

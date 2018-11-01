@@ -281,6 +281,7 @@ void CFindDuplicatesDialog::SetupDuplicateFileList( void )
 		for ( std::vector< CDuplicateFileItem* >::const_iterator itDupItem = pGroup->GetItems().begin(); itDupItem != pGroup->GetItems().end(); ++itDupItem, ++index )
 		{
 			ASSERT( pGroup == ( *itDupItem )->GetParentGroup() );
+
 			m_dupsListCtrl.InsertObjectItem( index, *itDupItem );
 			m_dupsListCtrl.SetSubItemText( index, DirPath, ( *itDupItem )->GetKeyPath().GetParentPath().GetPtr() );
 			m_dupsListCtrl.SetSubItemText( index, Size, num::FormatFileSize( pGroup->GetContentKey().m_fileSize ) );
@@ -302,7 +303,7 @@ std::tstring CFindDuplicatesDialog::FormatReport( const CDupsOutcome& outcome ) 
 	if ( outcome.m_ignoredCount != 0 )
 		reportMessage += str::Format( _T(" (%d ignored)"), outcome.m_ignoredCount );
 
-	reportMessage += str::Format( _T(" - elapsed %s seconds"), num::FormatNumber( outcome.m_timer.ElapsedSeconds() ).c_str() );
+	reportMessage += str::Format( _T("; elapsed %s seconds"), outcome.m_timer.FormatElapsedSeconds( 2 ).c_str() );
 
 	if ( CLogger* pLogger = app::GetLoggerPtr() )
 		pLogger->LogString( str::Format( _T("Search for duplicates in {%s}  -  %s"), utl::MakeDisplayCodeList( m_srcPathItems, _T(", ") ).c_str(), reportMessage.c_str() ) );

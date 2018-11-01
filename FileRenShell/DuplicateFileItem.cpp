@@ -35,6 +35,16 @@ bool CFileContentKey::operator<( const CFileContentKey& right ) const
 	return false;
 }
 
+std::tstring CFileContentKey::Format( void ) const
+{
+	std::tstring text = str::Format( _T("file size=%s"), num::FormatFileSize( m_fileSize, num::Bytes, true ).c_str() );
+
+	if ( m_crc32 != 0 )
+		text += str::Format( _T(", CRC32=%X"), m_crc32 );
+
+	return text;
+}
+
 bool CFileContentKey::ComputeFileSize( const fs::CPath& filePath )
 {
 	m_fileSize = fs::GetFileSize( filePath.GetPtr() );
@@ -102,18 +112,6 @@ void CDuplicateFilesGroup::AddItem( CDuplicateFileItem* pItem )
 	pItem->SetParentGroup( this );
 }
 
-std::tstring CDuplicateFilesGroup::FormatContentKey( void ) const
-{
-	std::tstring text = str::Format( _T("file size=%s"),
-		num::FormatFileSize( m_contentKey.m_fileSize, num::Bytes, true ).c_str(),
-		m_contentKey.m_crc32 );
-
-	if ( m_contentKey.m_crc32 != 0 )
-		text += str::Format( _T(", CRC32=%X") );
-
-	return text;
-}
-
 void CDuplicateFilesGroup::ExtractCrc32Duplicates( std::vector< CDuplicateFilesGroup* >& rDuplicateGroups, size_t& rIgnoredCount, ui::IProgressCallback* pProgress /*= NULL*/ ) throws_( CUserAbortedException )
 {
 	REQUIRE( HasDuplicates() );
@@ -134,6 +132,9 @@ void CDuplicateFilesGroup::ExtractCrc32Duplicates( std::vector< CDuplicateFilesG
 
 		if ( newItem.first.ComputeCrc32( newItem.second->GetKeyPath() ) )
 		{
+			if ( pProgress != NULL )
+				pProgress->AdvanceStage( newItem.first.Format() );
+
 			scopedKeyItems.push_back( newItem );
 			utl::ReleaseOwnership( *itItem );			// release detached item ownership to prevent being deleted when unwiding the stack
 		}
@@ -265,7 +266,7 @@ void CDuplicateGroupStore::ExtractDuplicateGroups( std::vector< CDuplicateFilesG
 			if ( ( *itGroup )->HasCrc32() )								// checksum computed?
 			{
 				if ( pProgress != NULL )
-					pProgress->AdvanceStage( ( *itGroup )->FormatContentKey() );
+					pProgress->AdvanceStage( ( *itGroup )->GetContentKey().Format() );
 
 				rDuplicateGroups.push_back( *itGroup );
 				*itGroup = NULL;										// mark detached group as NULL to prevent being deleted when unwiding the stack
