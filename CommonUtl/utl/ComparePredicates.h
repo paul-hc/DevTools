@@ -254,29 +254,49 @@ namespace pred
 	};
 
 
-	template< typename CompareFirst, typename CompareSecond >
+	template< typename CompareFirstT >
+	struct CompareFirst
+	{
+		template< typename T, typename U >
+		CompareResult operator()( const std::pair< T, U >& left, const std::pair< T, U >& right ) const
+		{
+			return CompareFirstT()( left.first, right.first );
+		}
+	};
+
+	template< typename CompareSecondT >
+	struct CompareSecond
+	{
+		template< typename T, typename U >
+		CompareResult operator()( const std::pair< T, U >& left, const std::pair< T, U >& right ) const
+		{
+			return CompareSecondT()( left.second, right.second );
+		}
+	};
+
+
+	template< typename CompareFirstT, typename CompareSecondT >
 	struct CompareFirstSecond
 	{
 		template< typename T, typename U >
 		CompareResult operator()( const std::pair< T, U >& left, const std::pair< T, U >& right ) const
 		{
-			CompareResult result = CompareFirst()( left.first, right.first );
+			CompareResult result = CompareFirstT()( left.first, right.first );
 			if ( Equal == result )
-				result = CompareSecond()( left.second, right.second );
+				result = CompareSecondT()( left.second, right.second );
 			return result;
 		}
 	};
 
-
-	template< typename CompareFirst, typename CompareSecond >
+	template< typename CompareFirstT, typename CompareSecondT >
 	struct CompareSecondFirst
 	{
 		template< typename T, typename U >
 		CompareResult operator()( const std::pair< T, U >& left, const std::pair< T, U >& right ) const
 		{
-			CompareResult result = CompareSecond()( left.second, right.second );
+			CompareResult result = CompareSecondT()( left.second, right.second );
 			if ( Equal == result )
-				result = CompareFirst()( left.first, right.first );
+				result = CompareFirstT()( left.first, right.first );
 			return result;
 		}
 	};

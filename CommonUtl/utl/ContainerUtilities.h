@@ -648,8 +648,17 @@ namespace utl
 
 
 	/**
-		object ownership helpers
+		object ownership helpers - for containers of pointers with ownership
 	*/
+
+	template< typename PtrType >
+	inline PtrType* ReleaseOwnership( PtrType*& rPtr )		// release item ownership in owning containers of pointers
+	{
+		PtrType* ptr = rPtr;
+		rPtr = NULL;				// mark detached item as NULL to prevent being deleted
+		return ptr;
+	}
+
 
 	template< typename PtrContainer >
 	void ClearOwningContainer( PtrContainer& rContainer )
@@ -698,7 +707,7 @@ namespace utl
 
 	// exception-safe owning container of pointers; use swap() at the end to exchange safely the new items (old items will be deleted by this).
 	//
-	template< typename ContainerType >
+	template< typename ContainerType, typename DeleteFunc = func::Delete >
 	class COwningContainer : public ContainerType
 	{
 		using ContainerType::clear;
@@ -706,10 +715,8 @@ namespace utl
 		COwningContainer( void ) : ContainerType() {}
 		~COwningContainer() { clear(); }
 
-		void clear( void )
-		{
-			utl::ClearOwningContainer( static_cast< ContainerType& >( *this ) );		// cast to ContainerType base to avoid stack overflow
-		}
+		void clear( void ) { std::for_each( begin(), end(), DeleteFunc() ); Release(); }
+		void Release( void ) { ContainerType::clear(); }
 	};
 }
 

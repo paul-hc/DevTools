@@ -6,30 +6,6 @@
 #include "ComparePredicates.h"
 
 
-namespace func
-{
-	// adapters for comparison predicates
-
-	struct AsCode
-	{
-		template< typename ObjectType >
-		std::tstring operator()( const ObjectType* pObject ) const
-		{
-			return pObject != NULL ? pObject->GetCode() : std::tstring();
-		}
-	};
-
-	struct AsDisplayCode
-	{
-		template< typename ObjectType >
-		std::tstring operator()( const ObjectType* pObject ) const
-		{
-			return pObject != NULL ? pObject->GetDisplayCode() : std::tstring();
-		}
-	};
-}
-
-
 namespace pred
 {
 	typedef CompareScalarAdapterPtr< func::AsCode > CompareCode;

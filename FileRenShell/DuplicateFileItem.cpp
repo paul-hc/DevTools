@@ -3,6 +3,7 @@
 #include "DuplicateFileItem.h"
 #include "utl/ContainerUtilities.h"
 #include "utl/Crc32.h"
+#include "utl/ComparePredicates.h"
 #include "utl/FileSystem.h"
 #include "utl/StringUtilities.h"
 
@@ -103,7 +104,7 @@ void CDuplicateFilesGroup::AddItem( CDuplicateFileItem* pItem )
 
 std::tstring CDuplicateFilesGroup::FormatContentKey( void ) const
 {
-	std::tstring text = str::Format( _T("file-size=%s"),
+	std::tstring text = str::Format( _T("file size=%s"),
 		num::FormatFileSize( m_contentKey.m_fileSize, num::Bytes, true ).c_str(),
 		m_contentKey.m_crc32 );
 
@@ -115,6 +116,71 @@ std::tstring CDuplicateFilesGroup::FormatContentKey( void ) const
 
 void CDuplicateFilesGroup::ExtractCrc32Duplicates( std::vector< CDuplicateFilesGroup* >& rDuplicateGroups, size_t& rIgnoredCount, ui::IProgressCallback* pProgress /*= NULL*/ ) throws_( CUserAbortedException )
 {
+	REQUIRE( HasDuplicates() );
+	REQUIRE( 0 == m_contentKey.m_crc32 );			// CRC32 is yet to be computed
+
+	typedef std::pair< CFileContentKey, CDuplicateFileItem* > TKeyItemPair;
+	typedef utl::COwningContainer< std::vector< TKeyItemPair >, func::DeleteValue > TKeyItemContainer;
+
+	TKeyItemContainer scopedKeyItems;
+	scopedKeyItems.reserve( m_items.size() );
+
+	for ( std::vector< CDuplicateFileItem* >::iterator itItem = m_items.begin(); itItem != m_items.end(); ++itItem )
+	{
+		if ( pProgress != NULL )
+			pProgress->AdvanceItem( ( *itItem )->GetKeyPath().Get() );
+
+		TKeyItemPair newItem( m_contentKey, *itItem );
+
+		if ( newItem.first.ComputeCrc32( newItem.second->GetKeyPath() ) )
+		{
+			scopedKeyItems.push_back( newItem );
+			utl::ReleaseOwnership( *itItem );			// release detached item ownership to prevent being deleted when unwiding the stack
+		}
+		else
+		{
+			delete *itItem;
+			++rIgnoredCount;			// remaining items will be deleted when unwiding the stack
+		}
+	}
+
+	m_items.clear();					// ownership was passed to scopedKeyItems
+
+	typedef pred::CompareFirstSecond< pred::CompareValue, pred::CompareKeyPath > TCompareKeyItemPair;
+
+	std::sort( scopedKeyItems.begin(), scopedKeyItems.end(), pred::LessBy< TCompareKeyItemPair >() );			// sort by full key and path
+
+	typedef std::pair< TKeyItemContainer::iterator, TKeyItemContainer::iterator > IteratorPair;
+	typedef pred::CompareFirst< pred::CompareValue > TCompareKeyPair;
+
+	for ( TKeyItemContainer::iterator itKeyItem = scopedKeyItems.begin(), itEnd = scopedKeyItems.end(); itKeyItem != itEnd; )
+	{
+		IteratorPair itPair = std::equal_range( itKeyItem, itEnd, *itKeyItem, pred::LessBy< TCompareKeyPair >() );		// range of items with same content key -> make new group if more than 1 item
+		ASSERT( itPair.first == itKeyItem );
+		size_t itemCount = std::distance( itPair.first, itPair.second );
+
+		if ( itemCount > 1 )			// has multiple duplicates?
+		{
+			CDuplicateFilesGroup* pNewGroup = new CDuplicateFilesGroup( itPair.first->first );
+
+			for ( itKeyItem = itPair.first; itKeyItem != itPair.second; ++itKeyItem  )
+				pNewGroup->AddItem( utl::ReleaseOwnership( itKeyItem->second ) );
+
+			rDuplicateGroups.push_back( pNewGroup );
+			ENSURE( pNewGroup->HasDuplicates() );
+		}
+		else
+			++itKeyItem;
+	}
+}
+
+void CDuplicateFilesGroup::__ExtractCrc32Duplicates( std::vector< CDuplicateFilesGroup* >& rDuplicateGroups, size_t& rIgnoredCount, ui::IProgressCallback* pProgress /*= NULL*/ ) throws_( CUserAbortedException )
+{
+	// old version using group stores
+
+	REQUIRE( HasDuplicates() );
+	REQUIRE( 0 == m_contentKey.m_crc32 );			// CRC32 is yet to be computed
+
 	utl::COwningContainer< std::vector< CDuplicateFileItem* > > scopedItems;
 	scopedItems.swap( m_items );	// take scoped ownership for exception safety
 
@@ -127,12 +193,9 @@ void CDuplicateFilesGroup::ExtractCrc32Duplicates( std::vector< CDuplicateFilesG
 
 		CFileContentKey fullKey = m_contentKey;
 		if ( fullKey.ComputeCrc32( ( *itItem )->GetKeyPath() ) )
-		{
-			store.RegisterItem( *itItem, fullKey );
-			*itItem = NULL;			// mark detached item as NULL to prevent being deleted when exiting the scope
-		}
+			store.RegisterItem( utl::ReleaseOwnership( *itItem ), fullKey );		// release item ownership to prevent being deleted when unwiding the stack
 		else
-			++rIgnoredCount;		// remaining items will be deleted when exiting the scope
+			++rIgnoredCount;		// remaining items will be deleted when unwiding the stack
 	}
 
 	ENSURE( m_items.empty() );		// all items will be detached in real duplicate groups or discarded
@@ -199,13 +262,13 @@ void CDuplicateGroupStore::ExtractDuplicateGroups( std::vector< CDuplicateFilesG
 	for ( std::vector< CDuplicateFilesGroup* >::iterator itGroup = scopedGroups.begin(); itGroup != scopedGroups.end(); ++itGroup )
 		if ( ( *itGroup )->HasDuplicates() )
 		{
-			if ( pProgress != NULL )
-				pProgress->AdvanceStage( ( *itGroup )->FormatContentKey() );
-
 			if ( ( *itGroup )->HasCrc32() )								// checksum computed?
 			{
+				if ( pProgress != NULL )
+					pProgress->AdvanceStage( ( *itGroup )->FormatContentKey() );
+
 				rDuplicateGroups.push_back( *itGroup );
-				*itGroup = NULL;										// mark detached group as NULL to prevent being deleted when exiting the scope
+				*itGroup = NULL;										// mark detached group as NULL to prevent being deleted when unwiding the stack
 			}
 			else
 			{

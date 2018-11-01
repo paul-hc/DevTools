@@ -32,6 +32,18 @@ private:
 };
 
 
+namespace pred
+{
+	struct CompareKeyPath
+	{
+		CompareResult operator()( const CPathItemBase* pLeftItem, const CPathItemBase* pRightItem ) const
+		{
+			return CompareEquivalentPath()( pLeftItem->GetKeyPath(), pRightItem->GetKeyPath() );
+		}
+	};
+}
+
+
 namespace func
 {
 	template< typename ContainerT >

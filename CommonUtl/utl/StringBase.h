@@ -23,6 +23,8 @@ namespace str
 	std::wstring AsWide( const std::tstring& text );
 
 
+	const std::tstring& GetEmpty( void );
+
 	std::tstring Format( const TCHAR* pFormat, ... );
 	std::tstring Format( UINT formatId, ... );
 

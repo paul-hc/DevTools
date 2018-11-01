@@ -163,8 +163,9 @@ void CProgressDialog::SetProgressState( int barState /*= PBST_NORMAL*/ )
 {
 	ProcessInput();
 
-	m_progressBar.SetState( barState );
+	m_progressBar.Invalidate();
 	m_progressBar.UpdateWindow();
+	m_progressBar.SetState( barState );
 }
 
 void CProgressDialog::AdvanceStage( const std::tstring& stageName ) throws_( CUserAbortedException )

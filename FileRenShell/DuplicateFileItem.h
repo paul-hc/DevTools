@@ -93,6 +93,7 @@ public:
 
 	// step 2 CRC32 evaluation and regrouping
 	void ExtractCrc32Duplicates( std::vector< CDuplicateFilesGroup* >& rDuplicateGroups, size_t& rIgnoredCount, ui::IProgressCallback* pProgress = NULL ) throws_( CUserAbortedException );
+	void __ExtractCrc32Duplicates( std::vector< CDuplicateFilesGroup* >& rDuplicateGroups, size_t& rIgnoredCount, ui::IProgressCallback* pProgress = NULL ) throws_( CUserAbortedException );	// old version using group stores
 
 	std::tstring FormatContentKey( void ) const;
 private:

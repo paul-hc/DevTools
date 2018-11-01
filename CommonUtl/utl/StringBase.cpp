@@ -65,6 +65,12 @@ namespace str
 		return userLocale;
 	}
 
+	const std::tstring& GetEmpty( void )
+	{
+		static const std::tstring s_empty;
+		return s_empty;
+	}
+
 	std::string ToAnsi( const wchar_t* pWide )
 	{
 		return hlp::ToNarrow( pWide, CP_ACP );

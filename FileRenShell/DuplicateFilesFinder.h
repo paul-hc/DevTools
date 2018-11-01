@@ -3,6 +3,7 @@
 #pragma once
 
 #include "utl/FileSystem_fwd.h"
+#include "utl/Timer.h"
 #include "DuplicateFileItem.h"
 
 
@@ -10,6 +11,7 @@ struct CDupsOutcome
 {
 	CDupsOutcome( void ) : m_foundPathsCount( 0 ), m_ignoredCount( 0 ) {}
 public:
+	CTimer m_timer;
 	size_t m_foundPathsCount;
 	size_t m_ignoredCount;
 };
