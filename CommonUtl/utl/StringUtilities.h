@@ -338,7 +338,7 @@ namespace num
 
 	const CEnumTags& GetTags_BytesUnit( void );
 
-	std::tstring FormatFileSize( ULONGLONG byteFileSize, BytesUnit unit = AutoBytes, const std::locale& loc = str::GetUserLocale() );		// use num::GetEmptyLocale() for no commas
+	std::tstring FormatFileSize( ULONGLONG byteFileSize, BytesUnit unit = AutoBytes, bool longUnitTag = false, const std::locale& loc = str::GetUserLocale() );		// use num::GetEmptyLocale() for no commas
 	std::pair< double, BytesUnit > ConvertFileSize( ULONGLONG fileSize, BytesUnit toUnit = AutoBytes );
 }
 

@@ -31,6 +31,16 @@ bool CThemeStatic::HasCustomFacet( void ) const
 	return true;		// if !IsThemed() it may still have fallback drawing
 }
 
+bool CThemeStatic::SetState( State state )
+{
+	if ( m_state == state )
+		return false;
+
+	m_state = state;
+	Invalidate();
+	return true;
+}
+
 void CThemeStatic::Draw( CDC* pDC, const CRect& clientRect )
 {
 	CThemeItem::Status drawStatus = GetDrawStatus();
@@ -70,14 +80,23 @@ void CThemeStatic::DrawFallbackText( const CThemeItem* pTextTheme, CThemeItem::S
 			ui::AlignRect( rRect, anchorRect, ui::GetDrawTextAlignment( dtFlags ) );		// also align to initial anchor
 }
 
-bool CThemeStatic::SetState( State state )
+CSize CThemeStatic::ComputeIdealTextSize( void )
 {
-	if ( m_state == state )
-		return false;
+	CRect textBounds;
+	GetClientRect( &textBounds );
 
-	m_state = state;
-	Invalidate();
-	return true;
+	if ( m_useText )
+	{
+		std::tstring text = ui::GetWindowText( this );
+		CClientDC clientDC( this );
+
+		textBounds.DeflateRect( m_textSpacing );
+		DrawFallbackText( GetTextThemeItem(), GetDrawStatus(), &clientDC, textBounds, text, GetDrawTextFlags() | DT_CALCRECT, GetFont() );		// compute whole text size (aligned to textBounds)
+		textBounds.InflateRect( m_textSpacing );
+	}
+
+	CSize idealSize = textBounds.Size() + ui::GetNonClientSize( m_hWnd );
+	return idealSize;
 }
 
 CThemeItem::Status CThemeStatic::GetDrawStatus( void ) const
@@ -169,7 +188,7 @@ void CNormalStatic::SetStyle( Style style )
 // CHeadlineStatic implementation
 
 CHeadlineStatic::CHeadlineStatic( Style style /*= MainInstruction*/ )
-	: CThemeStatic( CThemeItem( L"EDIT", EP_EDITBORDER_NOSCROLL, EPSN_HOT ) )
+	: CThemeStatic( CThemeItem( L"EDIT", EP_EDITTEXT, ETS_NORMAL ) )
 {
 	m_useText = true;
 	m_textSpacing.cx = 8;		// more spacing from the left edge

@@ -19,6 +19,8 @@ public:
 
 	State GetState( void ) const { return m_state; }
 	bool SetState( State state );
+
+	CSize ComputeIdealTextSize( void );			// based on current text
 protected:
 	CThemeItem::Status GetDrawStatus( void ) const;
 	CThemeItem* GetTextThemeItem( void );

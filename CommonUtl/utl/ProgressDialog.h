@@ -2,7 +2,7 @@
 #define ProgressDialog_h
 #pragma once
 
-#include "IProgressBox.h"
+#include "IProgressCallback.h"
 #include "LayoutDialog.h"
 #include "ThemeStatic.h"
 
@@ -16,18 +16,19 @@ class CScopedPumpMessage;
 // Throws a CUserAbortedException if the caller invokes any advancing method while the dialog window has been closed.
 //
 class CProgressDialog : public CLayoutDialog
-					  , public ui::IProgressBox
+					  , public ui::IProgressCallback
 {
 public:
 	enum OptionFlag
 	{
 		HideStage = 1 << 1,
-		HideStep = 1 << 2,
+		HideItem = 1 << 2,
 		HideProgress = 1 << 3,
+
 		MarqueeProgress = 1 << 4,
 		StageLabelCount = 1 << 5,
-		StepLabelCount = 1 << 6,
-			LabelsCount = StageLabelCount | StepLabelCount,
+		ItemLabelCount = 1 << 6,
+			LabelsCount = StageLabelCount | ItemLabelCount,
 	};
 
 	CProgressDialog( const std::tstring& operationLabel, int optionFlags = MarqueeProgress );
@@ -44,22 +45,26 @@ public:
 	void ShowStage( bool show = true );
 	void SetStageLabel( const std::tstring& stageLabel );
 
-	void ShowStep( bool show = true );
-	void SetStepLabel( const std::tstring& stepLabel );
+	void ShowItem( bool show = true );
+	void SetItemLabel( const std::tstring& itemLabel );
 
 	CProgressCtrl& GetProgressBar( void ) { return m_progressBar; }
 	bool IsMarqueeProgress( void ) const { return HasFlag( m_optionFlags, MarqueeProgress ); }
 	void SetProgressStep( int step );			// step divider for less granular progress updates (default is 10 for CProgressCtrl)
 
-	// ui::IProgressBox interface
+	// ui::IProgressCallback interface
 	virtual void SetProgressRange( int lower, int upper, bool rewindPos = false );
 	virtual bool SetMarqueeProgress( bool marquee = true );
+	virtual void SetProgressState( int barState = PBST_NORMAL );
 	virtual void AdvanceStage( const std::tstring& stageName ) throws_( CUserAbortedException );
-	virtual void AdvanceStepItem( const std::tstring& stepItemName ) throws_( CUserAbortedException );
+	virtual void AdvanceItem( const std::tstring& itemName ) throws_( CUserAbortedException );
+	virtual void AdvanceItemToEnd( void ) throws_( CUserAbortedException );
+	virtual void ProcessInput( void ) const throws_( CUserAbortedException );
 protected:
 	static std::tstring FormatLabelCount( const std::tstring& label, int count );
 	void DisplayStageLabel( void );
-	void DisplayStepLabel( void );
+	void DisplayItemLabel( void );
+	void DisplayItemCounts( void );
 
 	void PumpMessages( void ) throws_( CUserAbortedException );			// collaborative multitasking: dispatch input messages, and throw if dialog got destroyed
 	bool StepIt( void );
@@ -67,19 +72,21 @@ protected:
 private:
 	std::tstring m_operationLabel;
 	std::tstring m_stageLabel;
-	std::tstring m_stepLabel;
+	std::tstring m_itemLabel;
 	int m_optionFlags;
 	std::auto_ptr< CScopedPumpMessage > m_pMsgPump;
 
 	// internal counters, correlated yet independent of m_progressBar.GetPos()
 	int m_stageCount;
-	int m_stepCount;
+	int m_itemNo, m_itemCount;
 private:
 	// enum { IDD = IDD_PROGRESS_DIALOG };
 
 	CHeadlineStatic m_operationStatic;
 	CNormalStatic m_stageLabelStatic, m_stageStatic;
-	CNormalStatic m_stepLabelStatic, m_stepStatic;
+	CNormalStatic m_itemLabelStatic, m_itemStatic;
+	CNormalStatic m_itemCountStatic;
+
 	CProgressCtrl m_progressBar;
 
 	// generated stuff

@@ -229,24 +229,39 @@ namespace num
 {
 	const CEnumTags& GetTags_BytesUnit( void )
 	{
-		static const CEnumTags tags( _T("B|KB|MB|GB|TB|") );
+		static const CEnumTags tags( _T("bytes|kilo-bytes|mega-bytes|giga-bytes|tera-bytes|"), _T("B|KB|MB|GB|TB|") );
 		return tags;
 	}
 
 
-	std::tstring FormatFileSize( ULONGLONG byteFileSize, BytesUnit unit /*= AutoBytes*/, const std::locale& loc /*= str::GetUserLocale()*/ )
+	std::tstring FormatFileSize( ULONGLONG byteFileSize, BytesUnit unit /*= AutoBytes*/, bool longUnitTag /*= false*/, const std::locale& loc /*= str::GetUserLocale()*/ )
 	{
 		std::pair< double, BytesUnit > sizeUnit = ConvertFileSize( byteFileSize, unit );
 
-		return num::FormatNumber( sizeUnit.first, loc ) + _T(" ") + GetTags_BytesUnit().FormatUi( sizeUnit.second );
+		return num::FormatNumber( sizeUnit.first, loc ) + _T(" ") + GetTags_BytesUnit().Format( sizeUnit.second, longUnitTag ? CEnumTags::UiTag : CEnumTags::KeyTag );
 	}
 
 	double RoundOffFileSize( double number )
 	{
-		double roundedNumber = number * 1000.0;
-		ULONGLONG integer = static_cast< ULONGLONG >( roundedNumber + 0.5 );
+		double factor = 1.0;			// round to 1 (no fractional digits)
+		double roundUpBy = 0.5;			// fractional rounding up amount
 
-		roundedNumber = static_cast< float >( integer ) / 1000.0;
+		if ( number < 1.0 )
+			factor = 1000.0;			// round to 3 fractional digits
+		else if ( number < 10.0 )
+			factor = 100.0;				// round to 1 fractional digit
+		else if ( number < 100.0 )
+			factor = 10.0;				// round to 2 fractional digit
+		else if ( number < 1024.0 && number >= 1023.0 )			// a bit less than 1024
+		{
+			factor = 10.0;				// round to 1 fractional digit
+			roundUpBy = 0;				// no rounding up
+		}
+
+		double roundedNumber = number * factor;
+		ULONGLONG integer = static_cast< ULONGLONG >( roundedNumber + roundUpBy );
+
+		roundedNumber = static_cast< float >( integer ) / factor;
 		return roundedNumber;
 	}
 

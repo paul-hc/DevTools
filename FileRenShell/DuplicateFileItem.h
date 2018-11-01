@@ -2,8 +2,9 @@
 #define DuplicateFileItem_h
 #pragma once
 
-#include "utl/IProgressBox.h"
+#include "utl/IProgressCallback.h"
 #include "PathItemBase.h"
+#include <hash_map>
 
 
 class CSrcPathItem : public CPathItemBase
@@ -36,6 +37,12 @@ public:
 	ULONGLONG m_fileSize;	// in bytes
 	UINT m_crc32;			// CRC32 checksum
 };
+
+
+namespace stdext
+{
+	size_t hash_value( const CFileContentKey& key );
+}
 
 
 class CDuplicateFilesGroup;
@@ -85,30 +92,31 @@ public:
 	void AddItem( CDuplicateFileItem* pItem );
 
 	// step 2 CRC32 evaluation and regrouping
-	void ExtractCrc32Duplicates( std::vector< CDuplicateFilesGroup* >& rDuplicateGroups, size_t& rIgnoredCount, ui::IProgressBox* pProgressBox = NULL ) throws_( CUserAbortedException );
+	void ExtractCrc32Duplicates( std::vector< CDuplicateFilesGroup* >& rDuplicateGroups, size_t& rIgnoredCount, ui::IProgressCallback* pProgress = NULL ) throws_( CUserAbortedException );
 
-	std::tstring FormatContentKey( size_t groupIndex ) const;
+	std::tstring FormatContentKey( void ) const;
 private:
 	CFileContentKey m_contentKey;
 	std::vector< CDuplicateFileItem* > m_items;
 };
 
 
-class CDuplicateGroupsStore
+class CDuplicateGroupStore
 {
 public:
-	CDuplicateGroupsStore( void ) {}
-	~CDuplicateGroupsStore( void );
+	CDuplicateGroupStore( void ) {}
+	~CDuplicateGroupStore( void );
 
-	size_t GetTotalDuplicateItemCount( void ) const;
+	size_t GetDuplicateItemCount( void ) const { return GetDuplicateItemCount( m_groups ); }
+	static size_t GetDuplicateItemCount( const std::vector< CDuplicateFilesGroup* >& groups );
 
 	bool RegisterPath( const fs::CPath& filePath, const CFileContentKey& contentKey );
 	void RegisterItem( CDuplicateFileItem* pItem, const CFileContentKey& contentKey );
 
 	// extract groups with more than 1 item
-	void ExtractDuplicateGroups( std::vector< CDuplicateFilesGroup* >& rDuplicateGroups, size_t& rIgnoredCount, ui::IProgressBox* pProgressBox = NULL ) throws_( CUserAbortedException );
+	void ExtractDuplicateGroups( std::vector< CDuplicateFilesGroup* >& rDuplicateGroups, size_t& rIgnoredCount, ui::IProgressCallback* pProgress = NULL ) throws_( CUserAbortedException );
 private:
-	std::map< CFileContentKey, CDuplicateFilesGroup* > m_groupsMap;
+	stdext::hash_map< CFileContentKey, CDuplicateFilesGroup* > m_groupsMap;
 	std::vector< CDuplicateFilesGroup* > m_groups;				// with ownership, in the order they were registered
 };
 

@@ -2,7 +2,7 @@
 #define FileSystem_h
 #pragma once
 
-#include "Path.h"
+#include "FileSystem_fwd.h"
 
 
 namespace fs
@@ -55,19 +55,6 @@ namespace fs
 
 namespace fs
 {
-	interface IEnumerator
-	{
-		virtual void AddFoundFile( const TCHAR* pFilePath ) = 0;
-		virtual void AddFoundSubDir( const TCHAR* pSubDirPath ) { pSubDirPath; }
-
-		// advanced, provides extra info
-		virtual void AddFile( const CFileFind& foundFile ) { AddFoundFile( foundFile.GetFilePath() ); }
-
-		// override to find first file, then abort searching
-		virtual bool MustStop( void ) { return false; }
-	};
-
-
 	// files and sub-dirs as std::tstring; relative to m_refDirPath if specified
 
 	struct CEnumerator : public IEnumerator, private utl::noncopyable

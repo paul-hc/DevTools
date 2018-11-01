@@ -329,6 +329,15 @@ namespace ui
 		return clientRect.TopLeft() - windowRect.TopLeft();
 	}
 
+	CSize GetNonClientSize( HWND hWnd )
+	{
+		CRect windowRect, clientRect;
+		::GetWindowRect( hWnd, &windowRect );
+		::GetClientRect( hWnd, &clientRect );
+		ClientToScreen( hWnd, clientRect );
+		return windowRect.Size() - clientRect.Size();
+	}
+
 	void ScreenToNonClient( HWND hWnd, CRect& rRect )	// IN: screen coordiantes, OUT: non-client coordiantes, relative to CWindowDC( pWnd )
 	{
 		ScreenToClient( hWnd, rRect );
@@ -467,6 +476,20 @@ namespace ui
 		::InvalidateRect( hWnd, NULL, TRUE );
 	}
 
+	bool RepositionWindows( const CWindowPosition wndPositions[], unsigned int count, UINT swpFlags /*= 0*/ )
+	{
+		HDWP hdwp = ::BeginDeferWindowPos( count );
+
+		for ( unsigned int i = 0; i != count && hdwp != NULL; ++i )
+			hdwp = ::DeferWindowPos( hdwp, wndPositions[ i ].m_hWnd, NULL,
+				wndPositions[ i ].m_inParentRect.left, wndPositions[ i ].m_inParentRect.top, wndPositions[ i ].m_inParentRect.Width(), wndPositions[ i ].m_inParentRect.Height(),
+				SWP_NOZORDER | SWP_NOOWNERZORDER | SWP_NOACTIVATE | swpFlags );
+
+		if ( NULL == hdwp )
+			return false;
+
+		return ::EndDeferWindowPos( hdwp ) != FALSE;
+	}
 }
 
 

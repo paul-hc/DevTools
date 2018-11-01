@@ -18,7 +18,8 @@ namespace layout
 	{
 		{ IDC_OPERATION_LABEL, SizeX },
 		{ IDC_STAGE_STATIC, SizeX },
-		{ IDC_STEP_STATIC, SizeX },
+		{ IDC_ITEM_STATIC, SizeX },
+		//{ IDC_ITEM_COUNTS_STATIC, pctMoveX( 50 ) },
 		{ IDC_PROGRESS_BAR, SizeX },
 		{ IDCANCEL, pctMoveX( 50 ) }
 	};
@@ -30,9 +31,10 @@ CProgressDialog::CProgressDialog( const std::tstring& operationLabel, int option
 	, m_operationLabel( operationLabel )
 	, m_optionFlags( optionFlags )
 	, m_stageCount( 0 )
-	, m_stepCount( 0 )
+	, m_itemNo( 0 )
+	, m_itemCount( 0 )
 	, m_stageLabelStatic( CNormalStatic::Instruction )
-	, m_stepLabelStatic( CNormalStatic::Instruction )
+	, m_itemLabelStatic( CNormalStatic::Instruction )
 {
 	m_regSection = _T("utl\\ProgressDialog");
 	RegisterCtrlLayout( layout::styles, COUNT_OF( layout::styles ) );
@@ -77,7 +79,7 @@ void CProgressDialog::SetOperationLabel( const std::tstring& operationLabel )
 	m_operationLabel = operationLabel;
 
 	if ( IsRunning() )
-		ui::SetWindowText( m_operationStatic, m_operationLabel );
+		m_operationStatic.SetWindowText( m_operationLabel );
 }
 
 void CProgressDialog::ShowStage( bool show /*= true*/ )
@@ -97,21 +99,21 @@ void CProgressDialog::SetStageLabel( const std::tstring& stageLabel )
 	ShowStage();
 }
 
-void CProgressDialog::ShowStep( bool show /*= true*/ )
+void CProgressDialog::ShowItem( bool show /*= true*/ )
 {
-	ui::ShowWindow( m_stepLabelStatic, show );
-	ui::ShowWindow( m_stepStatic, show );
+	ui::ShowWindow( m_itemLabelStatic, show );
+	ui::ShowWindow( m_itemStatic, show );
 }
 
-void CProgressDialog::SetStepLabel( const std::tstring& stepLabel )
+void CProgressDialog::SetItemLabel( const std::tstring& itemLabel )
 {
 	ASSERT( IsRunning() );
 
-	m_stepLabel = stepLabel;
-	m_stepCount = 0;
+	m_itemLabel = itemLabel;
+	m_itemNo = 0;
 
-	DisplayStepLabel();
-	ShowStep();
+	DisplayItemLabel();
+	ShowItem();
 }
 
 void CProgressDialog::SetProgressStep( int step )
@@ -121,18 +123,24 @@ void CProgressDialog::SetProgressStep( int step )
 }
 
 
-// ui::IProgressBox interface implementation
+// ui::IProgressCallback interface implementation
 
 void CProgressDialog::SetProgressRange( int lower, int upper, bool rewindPos /*= false*/ )
 {
+	upper = std::max( upper, lower );
+
 	SetMarqueeProgress( false );			// switch to bounded progress
-	m_progressBar.SetRange32( lower, std::max( upper, lower ) );
+	m_progressBar.SetRange32( lower, upper );
+	m_itemCount = upper + 1;
 
 	if ( rewindPos )
 	{
-		m_stepCount = 0;
+		m_itemNo = 0;
 		m_progressBar.SetPos( lower );
+		m_progressBar.UpdateWindow();
 	}
+
+	DisplayItemCounts();
 }
 
 bool CProgressDialog::SetMarqueeProgress( bool marquee /*= true*/ )
@@ -144,8 +152,19 @@ bool CProgressDialog::SetMarqueeProgress( bool marquee /*= true*/ )
 	m_progressBar.ModifyStyle( marquee ? 0 : PBS_MARQUEE, marquee ? PBS_MARQUEE : 0 );
 
 	if ( marquee )
+	{
 		m_progressBar.SetMarquee( true, 0 );
+		m_itemCount = 0;
+	}
 	return true;
+}
+
+void CProgressDialog::SetProgressState( int barState /*= PBST_NORMAL*/ )
+{
+	ProcessInput();
+
+	m_progressBar.SetState( barState );
+	m_progressBar.UpdateWindow();
 }
 
 void CProgressDialog::AdvanceStage( const std::tstring& stageName ) throws_( CUserAbortedException )
@@ -157,19 +176,40 @@ void CProgressDialog::AdvanceStage( const std::tstring& stageName ) throws_( CUs
 	if ( HasFlag( m_optionFlags, StageLabelCount ) )
 		DisplayStageLabel();
 
-	ui::SetWindowText( m_stageStatic, stageName );
+	m_stageStatic.SetWindowText( stageName );
 }
 
-void CProgressDialog::AdvanceStepItem( const std::tstring& stepItemName ) throws_( CUserAbortedException )
+void CProgressDialog::AdvanceItem( const std::tstring& itemName ) throws_( CUserAbortedException )
 {
 	PumpMessages();
 
-	StepIt();				// increment step count and show some progress
+	StepIt();				// increment m_itemNo and show some progress
 
-	if ( HasFlag( m_optionFlags, StepLabelCount ) )
-		DisplayStepLabel();
+	if ( HasFlag( m_optionFlags, ItemLabelCount ) )
+		DisplayItemLabel();
 
-	ui::SetWindowText( m_stepStatic, stepItemName );
+	m_itemStatic.SetWindowText( itemName );
+	DisplayItemCounts();
+}
+
+void CProgressDialog::AdvanceItemToEnd( void ) throws_( CUserAbortedException )
+{
+	ProcessInput();
+
+	int lower, upper;
+	m_progressBar.GetRange( lower, upper );
+	m_progressBar.SetPos( upper );
+
+	m_itemNo = m_itemCount = upper + 1;
+	DisplayItemCounts();
+}
+
+void CProgressDialog::ProcessInput( void ) const throws_( CUserAbortedException )
+{
+	if ( m_pMsgPump.get() != NULL )
+		m_pMsgPump->CheckPump();		// pump any messages in the queue
+
+	CheckRunning();						// throws if dialog got destroyed in the meantime
 }
 
 
@@ -186,40 +226,106 @@ std::tstring CProgressDialog::FormatLabelCount( const std::tstring& label, int c
 
 void CProgressDialog::DisplayStageLabel( void )
 {
-	ui::SetWindowText( m_stageLabelStatic, FormatLabelCount( m_stageLabel, HasFlag( m_optionFlags, StageLabelCount ) ? m_stageCount : 0 ) );
+	m_stageLabelStatic.SetWindowText( FormatLabelCount( m_stageLabel, HasFlag( m_optionFlags, StageLabelCount ) ? m_stageCount : 0 ) );
 }
 
-void CProgressDialog::DisplayStepLabel( void )
+void CProgressDialog::DisplayItemLabel( void )
 {
-	ui::SetWindowText( m_stepLabelStatic, FormatLabelCount( m_stepLabel, HasFlag( m_optionFlags, StepLabelCount ) ? m_stepCount : 0 ) );
+	m_itemLabelStatic.SetWindowText( FormatLabelCount( m_itemLabel, HasFlag( m_optionFlags, ItemLabelCount ) ? m_itemNo : 0 ) );
+}
+
+void CProgressDialog::DisplayItemCounts( void )
+{
+	std::tstring text;
+
+	if ( m_itemNo != 0 )
+	{
+		text = _T("Item ");
+		text += num::FormatNumber( m_itemNo, str::GetUserLocale() ).c_str();
+	}
+
+	if ( !IsMarqueeProgress() )
+		if ( m_itemCount != 0 )
+		{
+			bool wasEmpty = text.empty();
+			stream::Tag( text, num::FormatNumber( m_itemCount, str::GetUserLocale() ), _T(" of ") );
+			if ( wasEmpty )
+				text += _T(" items");
+		}
+
+	m_itemCountStatic.SetWindowText( text );
 }
 
 void CProgressDialog::PumpMessages( void ) throws_( CUserAbortedException )
 {
+	ProcessInput();
 	ResizeLabelsToContents();
-	if ( m_pMsgPump.get() != NULL )
-		m_pMsgPump->CheckPump();		// pump any messages in the queue
-
-	CheckRunning();						// throws if dialog got destroyed in the meantime
 }
 
 bool CProgressDialog::StepIt( void )
 {
-	bool updatedProgress = false;
+	bool updated = false;
 
-	++m_stepCount;
+	++m_itemNo;
 
 	int stepSize = m_progressBar.GetStep();
 
-	if ( stepSize <= 1 || 0 == ( m_stepCount % stepSize ) )
-		m_progressBar.StepIt();				// call StepIt() on progress bar once every step divider
+	if ( stepSize <= 1 || 0 == ( m_itemNo % stepSize ) )
+		m_progressBar.StepIt();				// update progress bar once every step divider
 
-	return updatedProgress;
+	return updated;
 }
 
 bool CProgressDialog::ResizeLabelsToContents( void )
 {
-	return false;
+	CSize idealSize = m_stageLabelStatic.ComputeIdealTextSize();
+	idealSize.cx = utl::max( m_itemLabelStatic.ComputeIdealTextSize().cx, idealSize.cx );
+
+	CRect stageLabelRect = ui::GetControlRect( m_stageLabelStatic );
+	CRect itemLabelRect = ui::GetControlRect( m_itemLabelStatic );
+	CSize currentSize = ui::MaxSize( stageLabelRect.Size(), stageLabelRect.Size() );
+
+	CSize deltaSize = idealSize - currentSize;
+
+	if ( idealSize.cx <= currentSize.cx && idealSize.cy <= currentSize.cy )
+		return false;
+
+	CRect stageStaticRect = ui::GetControlRect( m_stageStatic );
+	CRect itemStaticRect = ui::GetControlRect( m_itemStatic );
+
+	if ( deltaSize.cx > 0 )
+	{
+		// stretch labels by deltaWidth
+		stageLabelRect.right += deltaSize.cx;
+		itemLabelRect.right += deltaSize.cx;
+
+		// shrink statics by deltaWidth
+		stageStaticRect.left += deltaSize.cx;
+		itemStaticRect.left += deltaSize.cx;
+	}
+
+	if ( deltaSize.cy > 0 )
+	{
+		// stretch labels by deltaHeight
+		stageLabelRect.bottom += deltaSize.cy;
+		itemLabelRect.bottom += deltaSize.cy;
+
+		// shrink statics by deltaHeight
+		stageStaticRect.bottom += deltaSize.cy;
+		itemStaticRect.bottom += deltaSize.cy;
+	}
+
+	const ui::CWindowPosition wndPositions[] =
+	{
+		{ m_stageLabelStatic, stageLabelRect },
+		{ m_stageStatic, stageStaticRect },
+		{ m_itemLabelStatic, itemLabelRect },
+		{ m_itemStatic, itemStaticRect }
+	};
+	ui::RepositionWindows( wndPositions, COUNT_OF( wndPositions ) );
+	m_itemLabelStatic.Invalidate();
+	return true;
+//	return ui::RepositionWindows( wndPositions, COUNT_OF( wndPositions ) );
 }
 
 void CProgressDialog::DoDataExchange( CDataExchange* pDX )
@@ -229,21 +335,22 @@ void CProgressDialog::DoDataExchange( CDataExchange* pDX )
 	DDX_Control( pDX, IDC_OPERATION_LABEL, m_operationStatic );
 	DDX_Control( pDX, IDC_STAGE_LABEL, m_stageLabelStatic );
 	DDX_Control( pDX, IDC_STAGE_STATIC, m_stageStatic );
-	DDX_Control( pDX, IDC_STEP_LABEL, m_stepLabelStatic );
-	DDX_Control( pDX, IDC_STEP_STATIC, m_stepStatic );
+	DDX_Control( pDX, IDC_ITEM_LABEL, m_itemLabelStatic );
+	DDX_Control( pDX, IDC_ITEM_STATIC, m_itemStatic );
+	DDX_Control( pDX, IDC_ITEM_COUNTS_STATIC, m_itemCountStatic );
 	DDX_Control( pDX, IDC_PROGRESS_BAR, m_progressBar );
 
 	if ( DialogOutput == pDX->m_bSaveAndValidate )
 	{
 		if ( firstInit )
 		{
-			ui::SetWindowText( m_operationStatic, m_operationLabel );
+			m_operationStatic.SetWindowText( m_operationLabel );
 
 			if ( HasFlag( m_optionFlags, HideStage ) )
 				ShowStage( false );
 
-			if ( HasFlag( m_optionFlags, HideStep ) )
-				ShowStep( false );
+			if ( HasFlag( m_optionFlags, HideItem ) )
+				ShowItem( false );
 
 			if ( HasFlag( m_optionFlags, HideProgress ) )
 				ui::ShowWindow( m_progressBar, false );

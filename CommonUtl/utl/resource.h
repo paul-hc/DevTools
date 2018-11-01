@@ -84,8 +84,9 @@
 #define IDC_OPERATION_LABEL             28517
 #define IDC_STAGE_LABEL                 28518
 #define IDC_STAGE_STATIC                28519
-#define IDC_STEP_LABEL                  28520
-#define IDC_STEP_STATIC                 28521
+#define IDC_ITEM_LABEL                  28520
+#define IDC_ITEM_STATIC                 28521
+#define IDC_ITEM_COUNTS_STATIC          28522
 #define UTL_MIN_SYMED_VALUE             28800
 
 // Next default values for new objects

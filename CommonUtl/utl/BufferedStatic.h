@@ -12,6 +12,9 @@ protected:
 public:
 	virtual ~CBufferedStatic();
 
+	std::tstring GetWindowText( void ) const;
+	bool SetWindowText( const std::tstring& text );
+
 	UINT GetDrawTextFlags( void ) const { return m_dtFlags; }
 	void SetDrawTextFlags( UINT dtFlags ) { m_dtFlags = dtFlags; }
 protected:

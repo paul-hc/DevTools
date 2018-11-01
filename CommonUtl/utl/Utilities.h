@@ -165,6 +165,7 @@ namespace ui
 	void ScreenToNonClient( HWND hWnd, CRect& rRect );		// IN: screen coordiantes, OUT: non-client coordiantes, relative to CWindowDC( pWnd )
 	void ClientToNonClient( HWND hWnd, CRect& rRect );		// IN: client coordiantes, OUT: non-client coordiantes, relative to CWindowDC( pWnd )
 	CSize GetNonClientOffset( HWND hWnd );					// window-rect to client-rect offset
+	CSize GetNonClientSize( HWND hWnd );					// window-rect size - client-rect size
 	CRect GetWindowEdges( HWND hWnd );						// windowRect - clientRect
 
 	CRect GetControlRect( HWND hCtrl );						// in parent's client coords
@@ -178,6 +179,20 @@ namespace ui
 							  const CSize* pCustomSize = NULL, int alignment = NoAlign, CSize addBottomRight = CSize( 0, 0 ) );
 
 	void RecalculateScrollbars( HWND hWnd );				// recalculates scrollbars and internal layout by forcing a resize
+
+
+	struct CWindowPosition
+	{
+		HWND m_hWnd;
+		CRect m_inParentRect;			// for child windows: in parent's client coordinates
+	};
+
+	bool RepositionWindows( const CWindowPosition wndPositions[], unsigned int count, UINT swpFlags = 0 );
+
+	inline bool RepositionWindows( const std::vector< CWindowPosition >& wndPositions, UINT swpFlags = 0 )
+	{
+		return RepositionWindows( &wndPositions.front(), static_cast< unsigned int >( wndPositions.size() ), swpFlags );
+	}
 }
 
 

@@ -20,6 +20,18 @@ CBufferedStatic::~CBufferedStatic()
 {
 }
 
+std::tstring CBufferedStatic::GetWindowText( void ) const
+{
+	std::tstring text;
+	ui::GetWindowText( text, m_hWnd );
+	return text;
+}
+
+bool CBufferedStatic::SetWindowText( const std::tstring& text )
+{
+	return ui::SetWindowText( m_hWnd, text );
+}
+
 void CBufferedStatic::PaintImpl( CDC* pDC, const CRect& clientRect )
 {
 	CScopedGdi< CBrush > scopedBrush( pDC, CBrush::FromHandle( ui::SendCtlColor( m_hWnd, *pDC, WM_CTLCOLORSTATIC ) ) );

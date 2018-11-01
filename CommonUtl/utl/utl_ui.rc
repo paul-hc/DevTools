@@ -11,7 +11,7 @@
 
 #ifndef PBS_MARQUEE
 #define PBS_MARQUEE             0x08   // preset in Vista+
-#endif 
+#endif
 /////////////////////////////////////////////////////////////////////////////
 #undef APSTUDIO_READONLY_SYMBOLS
 
@@ -74,18 +74,19 @@ BEGIN
     EDITTEXT        IDC_ITEMS_EDIT,1,1,98,48,ES_MULTILINE | ES_AUTOVSCROLL | ES_AUTOHSCROLL | ES_NOHIDESEL | ES_WANTRETURN | WS_VSCROLL | WS_HSCROLL | WS_GROUP
 END
 
-IDD_PROGRESS_DIALOG DIALOGEX 0, 0, 269, 103
+IDD_PROGRESS_DIALOG DIALOGEX 0, 0, 269, 127
 STYLE DS_SETFONT | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME
 CAPTION "<title>"
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
-    LTEXT           "<operation>",IDC_OPERATION_LABEL,7,7,255,19,SS_CENTERIMAGE
-    RTEXT           "Stage:",IDC_STAGE_LABEL,7,30,67,8
-    LTEXT           "<stage text>",IDC_STAGE_STATIC,78,30,184,8,SS_WORDELLIPSIS
-    RTEXT           "Step:",IDC_STEP_LABEL,7,43,67,8
-    LTEXT           "<step text>",IDC_STEP_STATIC,78,43,184,8,SS_PATHELLIPSIS
-    CONTROL         "",IDC_PROGRESS_BAR,"msctls_progress32",PBS_SMOOTH | WS_BORDER,7,63,255,9
-    DEFPUSHBUTTON   "Cancel",IDCANCEL,109,82,50,14,WS_GROUP
+    LTEXT           "<operation>",IDC_OPERATION_LABEL,7,7,255,23,SS_CENTERIMAGE
+    RTEXT           "Stage:",IDC_STAGE_LABEL,7,40,67,10,SS_CENTERIMAGE
+    LTEXT           "<stage text>",IDC_STAGE_STATIC,78,40,184,10,SS_CENTERIMAGE | SS_WORDELLIPSIS | NOT WS_GROUP
+    RTEXT           "Step:",IDC_ITEM_LABEL,7,56,67,10,SS_CENTERIMAGE | NOT WS_GROUP
+    LTEXT           "<step text>",IDC_ITEM_STATIC,78,56,184,10,SS_CENTERIMAGE | SS_PATHELLIPSIS | NOT WS_GROUP
+    LTEXT           "<step count>",IDC_ITEM_COUNTS_STATIC,9,75,161,10,SS_CENTERIMAGE | NOT WS_GROUP
+    CONTROL         "",IDC_PROGRESS_BAR,"msctls_progress32",PBS_SMOOTH | WS_BORDER,7,88,255,9
+    DEFPUSHBUTTON   "Cancel",IDCANCEL,109,107,50,14,WS_GROUP
 END
 
 
@@ -273,7 +274,7 @@ BEGIN
         LEFTMARGIN, 7
         RIGHTMARGIN, 262
         TOPMARGIN, 7
-        BOTTOMMARGIN, 96
+        BOTTOMMARGIN, 120
     END
 END
 #endif    // APSTUDIO_INVOKED
@@ -482,7 +483,7 @@ ID_TRANSPARENT          ICON                    "res\\Transparent.ico"
 //
 // Generated from the TEXTINCLUDE 3 resource.
 //
- 
+
 /////////////////////////////////////////////////////////////////////////////
 #endif    // not APSTUDIO_INVOKED
 

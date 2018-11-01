@@ -2,6 +2,7 @@
 #include "stdafx.h"
 #include "FindDuplicatesDialog.h"
 #include "DuplicateFileItem.h"
+#include "DuplicateFilesFinder.h"
 #include "FileModel.h"
 #include "FileService.h"
 #include "FileCommands.h"
@@ -17,10 +18,8 @@
 #include "utl/EnumTags.h"
 #include "utl/FileSystem.h"
 #include "utl/FmtUtils.h"
-#include "utl/Guards.h"
 #include "utl/ItemListDialog.h"
 #include "utl/LongestCommonSubsequence.h"
-#include "utl/ProgressDialog.h"
 #include "utl/RuntimeException.h"
 #include "utl/MenuUtilities.h"
 #include "utl/StringUtilities.h"
@@ -34,76 +33,6 @@
 #define new DEBUG_NEW
 #endif
 
-
-// CDuplicatesProgress class
-
-class CDuplicatesProgress : private fs::IEnumerator
-{
-public:
-	CDuplicatesProgress( CWnd* pParent );
-	~CDuplicatesProgress();
-
-	ui::IProgressBox* GetProgressBox( void ) { return &m_dlg; }
-	fs::IEnumerator* GetProgressEnumerator( void ) { return this; }
-
-	void EnterSection_ComputeFileSize( size_t fileCount );
-	void EnterSection_ComputeCrc32( size_t itemCount );
-
-	// file enumerator callback
-	virtual void AddFoundFile( const TCHAR* pFilePath ) throws_( CUserAbortedException );
-	virtual void AddFoundSubDir( const TCHAR* pSubDirPath ) throws_( CUserAbortedException );
-private:
-	CProgressDialog m_dlg;
-};
-
-
-// CDuplicatesProgress implementation
-
-CDuplicatesProgress::CDuplicatesProgress( CWnd* pParent )
-	: m_dlg( _T("Search for Duplicate Files"), CProgressDialog::LabelsCount )
-{
-	if ( m_dlg.Create( _T("Duplicate Files Search"), pParent ) )
-	{
-		m_dlg.SetStageLabel( _T("Search directory") );
-		m_dlg.SetStepLabel( _T("Found file") );
-		m_dlg.SetMarqueeProgress();
-	}
-}
-
-CDuplicatesProgress::~CDuplicatesProgress()
-{
-	m_dlg.DestroyWindow();
-}
-
-void CDuplicatesProgress::EnterSection_ComputeFileSize( size_t fileCount )
-{
-	m_dlg.SetOperationLabel( _T("Compute Size of Files") );
-	m_dlg.ShowStage( false );
-	m_dlg.SetStepLabel( _T("Compute file size") );
-	m_dlg.SetProgressItemCount( fileCount );
-}
-
-void CDuplicatesProgress::EnterSection_ComputeCrc32( size_t itemCount )
-{
-	m_dlg.SetOperationLabel( _T("Compute CRC32 Checksums") );
-	m_dlg.SetStageLabel( _T("Group of duplicates") );
-	m_dlg.SetStepLabel( _T("Compute file CRC32") );
-	m_dlg.SetProgressItemCount( itemCount );
-	m_dlg.SetProgressStep( 1 );			// advance progress on each step since individual computations are slow
-}
-
-void CDuplicatesProgress::AddFoundFile( const TCHAR* pFilePath ) throws_( CUserAbortedException )
-{
-	m_dlg.AdvanceStepItem( pFilePath );
-}
-
-void CDuplicatesProgress::AddFoundSubDir( const TCHAR* pSubDirPath ) throws_( CUserAbortedException )
-{
-	m_dlg.AdvanceStage( pSubDirPath );
-}
-
-
-// CFindDuplicatesDialog implementation
 
 namespace reg
 {
@@ -207,65 +136,18 @@ void CFindDuplicatesDialog::ClearDuplicates( void )
 	utl::ClearOwningContainer( m_duplicateGroups );
 }
 
-// optimize performance:
-//	step 1: compute file-size part of the content key, grouping duplicate candidates by file-size only
-//	step 2: compute CRC32: real duplicates are within size-based duplicate groups
-//
 bool CFindDuplicatesDialog::SearchForDuplicateFiles( void )
 {
-	CWaitCursor wait;
 	ULONGLONG minFileSize = 0;
 	if ( num::ParseNumber( minFileSize, m_minFileSizeCombo.GetCurrentText() ) )
 		minFileSize *= 1024;		// to KB
 
-	CDuplicatesProgress progress( this );
-	ui::IProgressBox* pProgressBox = progress.GetProgressBox();
-
 	try
 	{
-		std::auto_ptr< utl::CSectionGuard > pSection( new utl::CSectionGuard( _T("# SearchForFiles") ) );
+		CDuplicateFilesFinder finder( m_fileSpecEdit.GetText(), minFileSize );
+		finder.FindDuplicates( m_duplicateGroups, m_srcPathItems, this );
 
-		std::vector< fs::CPath > foundPaths;
-		SearchForFiles( foundPaths, progress.GetProgressEnumerator() );
-
-		pSection.reset( new utl::CSectionGuard( _T("# File-size grouping") ) );
-
-		CDuplicateGroupsStore groupsStore;
-		size_t ignoredCount = 0;
-
-		progress.EnterSection_ComputeFileSize( foundPaths.size() );
-
-		for ( size_t i = 0; i != foundPaths.size(); ++i )
-		{
-			const fs::CPath& filePath = foundPaths[ i ];
-
-			CFileContentKey contentKey;
-			bool registered = false;
-
-			if ( contentKey.ComputeFileSize( filePath ) )
-				if ( contentKey.m_fileSize >= minFileSize )				// has minimum size?
-					registered = groupsStore.RegisterPath( filePath, contentKey );
-
-			if ( !registered )
-				++ignoredCount;
-
-			pProgressBox->AdvanceStepItem( filePath.Get() );
-		}
-
-		pSection.reset( new utl::CSectionGuard( _T("# ExtractDuplicateGroups w. CRC32") ) );
-		progress.EnterSection_ComputeCrc32( groupsStore.GetTotalDuplicateItemCount() );		// count of duplicate candidates
-
-		utl::COwningContainer< std::vector< CDuplicateFilesGroup* > > newDuplicateGroups;
-		groupsStore.ExtractDuplicateGroups( newDuplicateGroups, ignoredCount, pProgressBox );
-
-		m_duplicateGroups.swap( newDuplicateGroups );		// swap items and ownership
-
-		std::tstring reportMessage = str::Format( _T("Found %d duplicates of total %d files"), m_dupsListCtrl.GetItemCount(), foundPaths.size() );
-		if ( ignoredCount != 0 )
-			reportMessage += str::Format( _T(" (ignored %d)"), ignoredCount );
-
-		ui::SetDlgItemText( this, IDC_DUPLICATE_FILES_INFO, reportMessage );
-
+		m_outcomeStatic.SetWindowText( FormatReport( finder.GetOutcome() ) );
 		SetupDuplicateFileList();
 		ClearFileErrors();
 		return true;
@@ -274,32 +156,6 @@ bool CFindDuplicatesDialog::SearchForDuplicateFiles( void )
 	{
 		app::TraceException( exc );
 		return false;			// cancelled by the user
-	}
-}
-
-#include <hash_set>
-
-void CFindDuplicatesDialog::SearchForFiles( std::vector< fs::CPath >& rFoundPaths, fs::IEnumerator* pProgressEnum ) const
-{
-	std::tstring wildSpec = m_fileSpecEdit.GetText();
-	stdext::hash_set< fs::CPath > uniquePaths;
-
-	for ( std::vector< CSrcPathItem* >::const_iterator itSrcPathItem = m_srcPathItems.begin(); itSrcPathItem != m_srcPathItems.end(); ++itSrcPathItem )
-	{
-		const fs::CPath& srcPath = ( *itSrcPathItem )->GetKeyPath();
-		if ( fs::IsValidDirectory( srcPath.GetPtr() ) )
-		{
-			fs::CPathEnumerator found( pProgressEnum );
-			fs::EnumFiles( &found, srcPath.GetPtr(), wildSpec.c_str(), Deep );
-
-			rFoundPaths.reserve( rFoundPaths.size() + found.m_filePaths.size() );
-			for ( fs::TPathSet::const_iterator itFilePath = found.m_filePaths.begin(); itFilePath != found.m_filePaths.end(); ++itFilePath )
-				if ( uniquePaths.insert( *itFilePath ).second )		// path is unique?
-					rFoundPaths.push_back( *itFilePath );
-		}
-		else if ( fs::IsValidFile( srcPath.GetPtr() ) )
-			if ( uniquePaths.insert( srcPath ).second )				// path is unique?
-				rFoundPaths.push_back( srcPath );
 	}
 }
 
@@ -413,7 +269,7 @@ void CFindDuplicatesDialog::SetupDuplicateFileList( void )
 	for ( unsigned int groupId = 0; groupId != m_duplicateGroups.size(); ++groupId )
 	{
 		const CDuplicateFilesGroup* pGroup = m_duplicateGroups[ groupId ];
-		ASSERT( pGroup->GetItems().size() > 1 );
+		ASSERT( pGroup->HasDuplicates() );
 
 		std::tstring header = str::Format( _T("Group %d"), groupId + 1 );
 		if ( pGroup->GetItems().size() > 2 )
@@ -434,6 +290,18 @@ void CFindDuplicatesDialog::SetupDuplicateFileList( void )
 			VERIFY( m_dupsListCtrl.SetRowGroupId( index, groupId ) );
 		}
 	}
+}
+
+std::tstring CFindDuplicatesDialog::FormatReport( const CDupsOutcome& outcome ) const
+{
+	std::tstring reportMessage = str::Format( _T("Found %d groups with %d duplicates out of total %d files"),
+		m_duplicateGroups.size(),
+		CDuplicateGroupStore::GetDuplicateItemCount( m_duplicateGroups ),
+		outcome.m_foundPathsCount );
+
+	if ( outcome.m_ignoredCount != 0 )
+		reportMessage += str::Format( _T(" (%d ignored)"), outcome.m_ignoredCount );
+	return reportMessage;
 }
 
 void CFindDuplicatesDialog::OnUpdate( utl::ISubject* pSubject, utl::IMessage* pMessage )
@@ -537,6 +405,7 @@ void CFindDuplicatesDialog::DoDataExchange( CDataExchange* pDX )
 	const bool firstInit = NULL == m_srcPathsListCtrl.m_hWnd;
 
 	DDX_Control( pDX, IDC_SOURCE_PATHS_LIST, m_srcPathsListCtrl );
+	DDX_Control( pDX, IDC_DUPLICATE_FILES_INFO, m_outcomeStatic );
 	DDX_Control( pDX, IDC_DUPLICATE_FILES_LIST, m_dupsListCtrl );
 	DDX_Control( pDX, IDC_FILE_TYPE_COMBO, m_fileTypeCombo );
 	DDX_Control( pDX, IDC_FILE_SPEC_EDIT, m_fileSpecEdit );

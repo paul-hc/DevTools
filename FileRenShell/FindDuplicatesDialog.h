@@ -2,19 +2,23 @@
 #define FindDuplicatesDialog_h
 #pragma once
 
-#include "utl/FileState.h"
 #include "utl/ISubject.h"
+#include "utl/FileSystem_fwd.h"
 #include "utl/DialogToolBar.h"
 #include "utl/HistoryComboBox.h"
 #include "utl/ReportListControl.h"
 #include "utl/TextEdit.h"
+#include "utl/ThemeStatic.h"
 #include "FileEditorBaseDialog.h"
 
 
 class CSrcPathItem;
-class CDuplicateFilesGroup;
 class CDuplicateFileItem;
+class CDuplicateFilesGroup;
+class CDuplicateGroupStore;
 class CEnumTags;
+struct CDupsOutcome;
+namespace utl { interface ISubject; }
 namespace fs { interface IEnumerator; }
 
 
@@ -53,7 +57,6 @@ private:
 	// input
 	void ClearDuplicates( void );
 	bool SearchForDuplicateFiles( void );
-	void SearchForFiles( std::vector< fs::CPath >& rFoundPaths, fs::IEnumerator* pProgressEnum ) const;
 
 	CDuplicateFileItem* FindItemWithKey( const fs::CPath& srcPath ) const;
 	void MarkInvalidSrcItems( void );
@@ -61,6 +64,8 @@ private:
 
 	enum FileType { All, Images, Audio, Video, Custom };
 	static const CEnumTags& GetTags_FileType( void );
+
+	std::tstring FormatReport( const CDupsOutcome& outcome ) const;
 private:
 	std::vector< CSrcPathItem* > m_srcPathItems;
 	std::vector< CDuplicateFilesGroup* > m_duplicateGroups;
@@ -70,8 +75,9 @@ private:
 	enum DupFileColumn { FileName, DirPath, Size, Crc32, DateModified };
 
 	CReportListControl m_srcPathsListCtrl;
-	CReportListControl m_dupsListCtrl;
 	CDialogToolBar m_srcPathsToolbar;
+	CNormalStatic m_outcomeStatic;
+	CReportListControl m_dupsListCtrl;
 	CComboBox m_fileTypeCombo;
 	CTextEdit m_fileSpecEdit;
 	CHistoryComboBox m_minFileSizeCombo;

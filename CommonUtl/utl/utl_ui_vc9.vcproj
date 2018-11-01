@@ -698,6 +698,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\FileSystem_fwd.h"
+					>
+				</File>
+				<File
 					RelativePath=".\FilterStore.cpp"
 					>
 				</File>
@@ -987,7 +991,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\IProgressBox.h"
+				RelativePath=".\IProgressCallback.h"
 				>
 			</File>
 			<File
