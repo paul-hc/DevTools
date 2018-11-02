@@ -87,6 +87,7 @@
 #define IDC_ITEM_LABEL                  28520
 #define IDC_ITEM_STATIC                 28521
 #define IDC_ITEM_COUNTS_STATIC          28522
+#define IDC_CLOCK_STATIC                28523
 #define UTL_MIN_SYMED_VALUE             28800
 
 // Next default values for new objects

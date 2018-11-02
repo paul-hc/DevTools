@@ -155,7 +155,7 @@ bool CReportListControl::ModifyListStyleEx( DWORD dwRemove, DWORD dwAdd, UINT sw
 bool CReportListControl::DeleteAllItems( void )
 {
 	ClearData();
-	return CListCtrl::DeleteAllItems() != FALSE;
+	return __super::DeleteAllItems() != FALSE;
 }
 
 void CReportListControl::ClearData( void )
@@ -359,7 +359,7 @@ int CReportListControl::GetTopIndex( void ) const
 	{
 		case LV_VIEW_DETAILS:
 		case LV_VIEW_LIST:
-			return CListCtrl::GetTopIndex();			// only works in report/list view mode
+			return __super::GetTopIndex();			// only works in report/list view mode
 		case LV_VIEW_ICON:
 		case LV_VIEW_SMALLICON:
 		case LV_VIEW_TILE:
@@ -409,7 +409,7 @@ OR:
 
 int CReportListControl::HitTest( CPoint pos, UINT* pFlags /*= NULL*/ ) const
 {
-	int result = CListCtrl::HitTest( pos, pFlags );
+	int result = __super::HitTest( pos, pFlags );
 
 	if ( HasFlag( *pFlags, LVHT_NOWHERE ) )
 		if ( int itemCount = GetItemCount() )
@@ -1776,7 +1776,7 @@ int CReportListControl::GroupHitTest( const CPoint& point ) const
 
 void CReportListControl::PreSubclassWindow( void )
 {
-	CListCtrl::PreSubclassWindow();
+	__super::PreSubclassWindow();
 	SetupControl();
 }
 
@@ -1784,7 +1784,7 @@ BOOL CReportListControl::PreTranslateMessage( MSG* pMsg )
 {
 	return
 		m_listAccel.Translate( pMsg, m_hWnd, m_hWnd ) ||
-		CListCtrl::PreTranslateMessage( pMsg );
+		__super::PreTranslateMessage( pMsg );
 }
 
 
@@ -1827,7 +1827,7 @@ END_MESSAGE_MAP()
 
 int CReportListControl::OnCreate( CREATESTRUCT* pCreateStruct )
 {
-	if ( -1 == CListCtrl::OnCreate( pCreateStruct ) )
+	if ( -1 == __super::OnCreate( pCreateStruct ) )
 		return -1;
 
 	SetupControl();
@@ -1839,7 +1839,7 @@ void CReportListControl::OnDestroy( void )
 	if ( !m_regSection.empty() )
 		SaveToRegistry();
 
-	CListCtrl::OnDestroy();
+	__super::OnDestroy();
 }
 
 void CReportListControl::OnDropFiles( HDROP hDropInfo )
@@ -1867,7 +1867,7 @@ void CReportListControl::OnDropFiles( HDROP hDropInfo )
 
 void CReportListControl::OnWindowPosChanged( WINDOWPOS* pWndPos )
 {
-	CListCtrl::OnWindowPosChanged( pWndPos );
+	__super::OnWindowPosChanged( pWndPos );
 
 	if ( !HasFlag( pWndPos->flags, SWP_NOMOVE ) || !HasFlag( pWndPos->flags, SWP_NOSIZE ) )
 		ResizeFlexColumns();
@@ -1879,7 +1879,7 @@ void CReportListControl::OnKeyDown( UINT chr, UINT repCnt, UINT vkFlags )
 
 	if ( NULL == pSelFlow.get() || pSelFlow->HandleKeyDown( chr ) )
 	{
-		CListCtrl::OnKeyDown( chr, repCnt, vkFlags );
+		__super::OnKeyDown( chr, repCnt, vkFlags );
 
 		if ( pSelFlow.get() != NULL )
 			pSelFlow->PostKeyDown( chr );
@@ -1889,7 +1889,7 @@ void CReportListControl::OnKeyDown( UINT chr, UINT repCnt, UINT vkFlags )
 void CReportListControl::OnNcLButtonDown( UINT hitTest, CPoint point )
 {
 	ui::TakeFocus( m_hWnd );
-	CListCtrl::OnNcLButtonDown( hitTest, point );
+	__super::OnNcLButtonDown( hitTest, point );
 }
 
 void CReportListControl::OnContextMenu( CWnd* pWnd, CPoint screenPos )
@@ -1918,7 +1918,7 @@ void CReportListControl::OnInitMenuPopup( CMenu* pPopupMenu, UINT index, BOOL is
 	if ( !isSysMenu )
 		ui::UpdateMenuUI( this, pPopupMenu );
 
-	CListCtrl::OnInitMenuPopup( pPopupMenu, index, isSysMenu );
+	__super::OnInitMenuPopup( pPopupMenu, index, isSysMenu );
 }
 
 void CReportListControl::OnPaint( void )
@@ -1926,7 +1926,7 @@ void CReportListControl::OnPaint( void )
 	REQUIRE( !m_painting );
 
 	m_painting = true;				// for diff text items: supress sub-item draw by the list (default list painting smudges the text due to font effects)
-	CListCtrl::OnPaint();
+	__super::OnPaint();
 	m_painting = false;
 }
 

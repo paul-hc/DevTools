@@ -8,7 +8,41 @@
 #endif
 
 
-std::tstring CTimer::FormatElapsedSeconds( unsigned int precision /*= 3*/ ) const
+const TCHAR CTimer::s_fmtSeconds[] = _T("%s seconds");
+const TCHAR CTimer::s_fmtTimeSpan[] = _T(" (%s)");
+
+std::tstring CTimer::FormatSeconds( double elapsedSeconds, unsigned int precision, const TCHAR fmtSeconds[] /*= s_fmtSeconds*/ )
 {
-	return num::FormatDouble( ElapsedSeconds(), precision, str::GetUserLocale() );
+	return str::Format( fmtSeconds, num::FormatDouble( elapsedSeconds, precision, str::GetUserLocale() ).c_str() );
+}
+
+std::tstring CTimer::FormatTimeSpan( time_t seconds )
+{
+	enum
+	{
+		SecondsPerMinute = 60, MinutesPerHour = 60, HoursPerDay = 24,
+		SecondsPerHour = SecondsPerMinute * 60, SecondsPerDay = SecondsPerHour * 24
+	};
+
+	CTime timespan( 2018, 11, 1,
+		( seconds / SecondsPerHour ) % HoursPerDay,
+		( seconds / SecondsPerMinute ) % MinutesPerHour,
+		seconds % SecondsPerMinute );
+
+	if ( seconds >= SecondsPerDay )
+		return str::Format( _T("%d days "), seconds / SecondsPerDay ) + timespan.Format( _T("%#H:%M:%S") ).GetString();
+	else if ( seconds >= SecondsPerHour )
+		return timespan.Format( _T("%#H:%M:%S") ).GetString();
+
+	return timespan.Format( _T("%#M:%S") ).GetString();
+}
+
+std::tstring CTimer::FormatElapsedTimeSpan( double elapsedSeconds, unsigned int precision /*= 0*/, const TCHAR* pFmtTimeSpan /*= s_fmtTimeSpan*/ )
+{
+	std::tstring text = FormatSeconds( elapsedSeconds, precision );
+
+	if ( elapsedSeconds >= 60.0 && !str::IsEmpty( pFmtTimeSpan ) )
+		text += str::Format( pFmtTimeSpan, FormatTimeSpan( static_cast< time_t >( elapsedSeconds ) ).c_str() );
+
+	return text;
 }

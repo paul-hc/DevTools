@@ -151,9 +151,9 @@ LRESULT CThemeStatic::OnMouseLeave( WPARAM, LPARAM )
 }
 
 
-// CNormalStatic implementation
+// CRegularStatic implementation
 
-CNormalStatic::CNormalStatic( Style style /*= Normal*/ )
+CRegularStatic::CRegularStatic( Style style /*= Static*/ )
 	: CThemeStatic( CThemeItem( L"EDIT", EP_BACKGROUND, EBS_DISABLED ) )
 {
 	m_useText = true;
@@ -161,12 +161,12 @@ CNormalStatic::CNormalStatic( Style style /*= Normal*/ )
 	SetStyle( style );
 }
 
-void CNormalStatic::SetStyle( Style style )
+void CRegularStatic::SetStyle( Style style )
 {
 	switch ( style )
 	{
 		default: ASSERT( false );
-		case Normal:
+		case Static:
 			m_textItem = CThemeItem( L"EDIT", EP_EDITTEXT, ETS_NORMAL );
 			break;
 		case Bold:

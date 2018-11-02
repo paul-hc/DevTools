@@ -49,19 +49,21 @@ protected:
 };
 
 
-class CNormalStatic : public CThemeStatic
+// flicker free regular static with a few themed text styles
+//
+class CRegularStatic : public CThemeStatic
 {
 public:
 	enum Style
 	{
-		Normal,				// static
+		Static,				// regular static
 		Bold,				// bold text
 		Instruction,		// dark blue
 		ControlLabel,		// brighter blue
 		Hyperlink			// blue underlined link
 	};
 
-	CNormalStatic( Style style = Normal );
+	CRegularStatic( Style style = Static );
 
 	void SetStyle( Style style );
 };

@@ -827,26 +827,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\BaseDetailHostCtrl.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\BaseDetailHostCtrl.h"
-				>
-			</File>
-			<File
-				RelativePath=".\BaseDetailHostCtrl.hxx"
-				>
-			</File>
-			<File
-				RelativePath=".\BaseFrameHostCtrl.h"
-				>
-			</File>
-			<File
-				RelativePath=".\BaseFrameHostCtrl.hxx"
-				>
-			</File>
-			<File
 				RelativePath=".\BaseMainDialog.cpp"
 				>
 			</File>
@@ -855,35 +835,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\BaseSplitButton.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\BaseSplitButton.h"
-				>
-			</File>
-			<File
-				RelativePath=".\BaseToolbar.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\BaseToolbar.h"
-				>
-			</File>
-			<File
 				RelativePath=".\BaseZoomView.cpp"
 				>
 			</File>
 			<File
 				RelativePath=".\BaseZoomView.h"
-				>
-			</File>
-			<File
-				RelativePath=".\BufferedStatic.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\BufferedStatic.h"
 				>
 			</File>
 			<File
@@ -899,22 +855,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\CtrlUiState.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\CtrlUiState.h"
-				>
-			</File>
-			<File
-				RelativePath=".\DateTimeControl.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\DateTimeControl.h"
-				>
-			</File>
-			<File
 				RelativePath=".\DesktopDC.cpp"
 				>
 			</File>
@@ -924,30 +864,6 @@
 			</File>
 			<File
 				RelativePath=".\Dialog_fwd.h"
-				>
-			</File>
-			<File
-				RelativePath=".\DialogToolBar.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\DialogToolBar.h"
-				>
-			</File>
-			<File
-				RelativePath=".\DragListCtrl.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\DragListCtrl.h"
-				>
-			</File>
-			<File
-				RelativePath=".\EnumSplitButton.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\EnumSplitButton.h"
 				>
 			</File>
 			<File
@@ -967,22 +883,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\HistoryComboBox.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\HistoryComboBox.h"
-				>
-			</File>
-			<File
-				RelativePath=".\IconButton.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\IconButton.h"
-				>
-			</File>
-			<File
 				RelativePath=".\ImageZoomViewD2D.cpp"
 				>
 			</File>
@@ -991,35 +891,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\InternalChange.h"
-				>
-			</File>
-			<File
 				RelativePath=".\IProgressCallback.h"
-				>
-			</File>
-			<File
-				RelativePath=".\ItemContent.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\ItemContent.h"
-				>
-			</File>
-			<File
-				RelativePath=".\ItemContentEdit.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\ItemContentEdit.h"
-				>
-			</File>
-			<File
-				RelativePath=".\ItemContentHistoryCombo.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\ItemContentHistoryCombo.h"
 				>
 			</File>
 			<File
@@ -1079,23 +951,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\NumericEdit.h"
-				>
-			</File>
-			<File
 				RelativePath=".\PopupDlgBase.cpp"
 				>
 			</File>
 			<File
 				RelativePath=".\PopupDlgBase.h"
-				>
-			</File>
-			<File
-				RelativePath=".\PopupSplitButton.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\PopupSplitButton.h"
 				>
 			</File>
 			<File
@@ -1123,22 +983,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\ReportListControl.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\ReportListControl.h"
-				>
-			</File>
-			<File
-				RelativePath=".\ReportListCustomDraw.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\ReportListCustomDraw.h"
-				>
-			</File>
-			<File
 				RelativePath=".\ResourceData.cpp"
 				>
 			</File>
@@ -1163,30 +1007,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\SpinEdit.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\SpinEdit.h"
-				>
-			</File>
-			<File
-				RelativePath=".\SpinTargetButton.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\SpinTargetButton.h"
-				>
-			</File>
-			<File
-				RelativePath=".\SplitPushButton.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\SplitPushButton.h"
-				>
-			</File>
-			<File
 				RelativePath=".\StdManifest.h"
 				>
 			</File>
@@ -1196,22 +1016,6 @@
 			</File>
 			<File
 				RelativePath=".\SyncScrolling.h"
-				>
-			</File>
-			<File
-				RelativePath=".\TextEdit.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\TextEdit.h"
-				>
-			</File>
-			<File
-				RelativePath=".\TextEditor.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\TextEditor.h"
 				>
 			</File>
 			<File
@@ -1231,14 +1035,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\ThemeStatic.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\ThemeStatic.h"
-				>
-			</File>
-			<File
 				RelativePath=".\ToolStrip.cpp"
 				>
 			</File>
@@ -1252,22 +1048,6 @@
 			</File>
 			<File
 				RelativePath=".\TooltipsHook.h"
-				>
-			</File>
-			<File
-				RelativePath=".\TrackStatic.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\TrackStatic.h"
-				>
-			</File>
-			<File
-				RelativePath=".\TreeControl.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\TreeControl.h"
 				>
 			</File>
 			<File
@@ -1707,6 +1487,238 @@
 				</File>
 				<File
 					RelativePath=".\TaskDialog.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="Controls"
+				>
+				<File
+					RelativePath=".\BaseDetailHostCtrl.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\BaseDetailHostCtrl.h"
+					>
+				</File>
+				<File
+					RelativePath=".\BaseDetailHostCtrl.hxx"
+					>
+				</File>
+				<File
+					RelativePath=".\BaseFrameHostCtrl.h"
+					>
+				</File>
+				<File
+					RelativePath=".\BaseFrameHostCtrl.hxx"
+					>
+				</File>
+				<File
+					RelativePath=".\BaseSplitButton.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\BaseSplitButton.h"
+					>
+				</File>
+				<File
+					RelativePath=".\BaseToolbar.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\BaseToolbar.h"
+					>
+				</File>
+				<File
+					RelativePath=".\BufferedStatic.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\BufferedStatic.h"
+					>
+				</File>
+				<File
+					RelativePath=".\ClockStatic.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\ClockStatic.h"
+					>
+				</File>
+				<File
+					RelativePath=".\CtrlUiState.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\CtrlUiState.h"
+					>
+				</File>
+				<File
+					RelativePath=".\DateTimeControl.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\DateTimeControl.h"
+					>
+				</File>
+				<File
+					RelativePath=".\DialogToolBar.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\DialogToolBar.h"
+					>
+				</File>
+				<File
+					RelativePath=".\DragListCtrl.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\DragListCtrl.h"
+					>
+				</File>
+				<File
+					RelativePath=".\EnumSplitButton.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\EnumSplitButton.h"
+					>
+				</File>
+				<File
+					RelativePath=".\HistoryComboBox.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\HistoryComboBox.h"
+					>
+				</File>
+				<File
+					RelativePath=".\IconButton.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\IconButton.h"
+					>
+				</File>
+				<File
+					RelativePath=".\InternalChange.h"
+					>
+				</File>
+				<File
+					RelativePath=".\ItemContent.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\ItemContent.h"
+					>
+				</File>
+				<File
+					RelativePath=".\ItemContentEdit.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\ItemContentEdit.h"
+					>
+				</File>
+				<File
+					RelativePath=".\ItemContentHistoryCombo.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\ItemContentHistoryCombo.h"
+					>
+				</File>
+				<File
+					RelativePath=".\NumericEdit.h"
+					>
+				</File>
+				<File
+					RelativePath=".\PopupSplitButton.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\PopupSplitButton.h"
+					>
+				</File>
+				<File
+					RelativePath=".\ReportListControl.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\ReportListControl.h"
+					>
+				</File>
+				<File
+					RelativePath=".\ReportListCustomDraw.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\ReportListCustomDraw.h"
+					>
+				</File>
+				<File
+					RelativePath=".\SpinEdit.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\SpinEdit.h"
+					>
+				</File>
+				<File
+					RelativePath=".\SpinTargetButton.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\SpinTargetButton.h"
+					>
+				</File>
+				<File
+					RelativePath=".\SplitPushButton.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\SplitPushButton.h"
+					>
+				</File>
+				<File
+					RelativePath=".\TextEdit.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\TextEdit.h"
+					>
+				</File>
+				<File
+					RelativePath=".\TextEditor.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\TextEditor.h"
+					>
+				</File>
+				<File
+					RelativePath=".\ThemeStatic.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\ThemeStatic.h"
+					>
+				</File>
+				<File
+					RelativePath=".\TrackStatic.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\TrackStatic.h"
+					>
+				</File>
+				<File
+					RelativePath=".\TreeControl.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\TreeControl.h"
 					>
 				</File>
 			</Filter>

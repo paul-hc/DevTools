@@ -181,18 +181,22 @@ namespace ui
 	void RecalculateScrollbars( HWND hWnd );				// recalculates scrollbars and internal layout by forcing a resize
 
 
-	struct CWindowPosition
+	struct CCtrlPlace
 	{
+		CCtrlPlace( HWND hWnd = NULL )
+			: m_hWnd( hWnd )
+		{
+			if ( m_hWnd != NULL )
+				m_rect = ui::GetControlRect( m_hWnd );
+		}
+
+		CCtrlPlace( HWND hWnd, const CRect& rect ) : m_hWnd( hWnd ), m_rect( rect ) {}
+	public:
 		HWND m_hWnd;
-		CRect m_inParentRect;			// for child windows: in parent's client coordinates
+		CRect m_rect;			// for child windows: in parent's client coordinates; for top windows: screen rect
 	};
 
-	bool RepositionWindows( const CWindowPosition wndPositions[], unsigned int count, UINT swpFlags = 0 );
-
-	inline bool RepositionWindows( const std::vector< CWindowPosition >& wndPositions, UINT swpFlags = 0 )
-	{
-		return RepositionWindows( &wndPositions.front(), static_cast< unsigned int >( wndPositions.size() ), swpFlags );
-	}
+	bool RepositionControls( const std::vector< CCtrlPlace >& ctrlPlaces, bool invalidate = true, UINT swpFlags = 0 );
 }
 
 

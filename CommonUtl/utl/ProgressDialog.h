@@ -7,6 +7,7 @@
 #include "ThemeStatic.h"
 
 
+class CClockStatic;
 class CScopedPumpMessage;
 
 
@@ -83,9 +84,10 @@ private:
 	// enum { IDD = IDD_PROGRESS_DIALOG };
 
 	CHeadlineStatic m_operationStatic;
-	CNormalStatic m_stageLabelStatic, m_stageStatic;
-	CNormalStatic m_itemLabelStatic, m_itemStatic;
-	CNormalStatic m_itemCountStatic;
+	CRegularStatic m_stageLabelStatic, m_stageStatic;
+	CRegularStatic m_itemLabelStatic, m_itemStatic;
+	CRegularStatic m_itemCountStatic;
+	std::auto_ptr< CClockStatic > m_pClockStatic;
 
 	CProgressCtrl m_progressBar;
 

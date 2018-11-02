@@ -2,6 +2,7 @@
 #include "stdafx.h"
 #include "ProgressDialog.h"
 #include "LayoutEngine.h"
+#include "ClockStatic.h"
 #include "RuntimeException.h"
 #include "StringUtilities.h"
 #include "UtilitiesEx.h"
@@ -19,7 +20,7 @@ namespace layout
 		{ IDC_OPERATION_LABEL, SizeX },
 		{ IDC_STAGE_STATIC, SizeX },
 		{ IDC_ITEM_STATIC, SizeX },
-		//{ IDC_ITEM_COUNTS_STATIC, pctMoveX( 50 ) },
+		{ IDC_CLOCK_STATIC, MoveX },
 		{ IDC_PROGRESS_BAR, SizeX },
 		{ IDCANCEL, pctMoveX( 50 ) }
 	};
@@ -33,8 +34,9 @@ CProgressDialog::CProgressDialog( const std::tstring& operationLabel, int option
 	, m_stageCount( 0 )
 	, m_itemNo( 0 )
 	, m_itemCount( 0 )
-	, m_stageLabelStatic( CNormalStatic::Instruction )
-	, m_itemLabelStatic( CNormalStatic::Instruction )
+	, m_stageLabelStatic( CRegularStatic::Instruction )
+	, m_itemLabelStatic( CRegularStatic::Instruction )
+	, m_pClockStatic( new CClockStatic )
 {
 	m_regSection = _T("utl\\ProgressDialog");
 	RegisterCtrlLayout( layout::styles, COUNT_OF( layout::styles ) );
@@ -279,54 +281,36 @@ bool CProgressDialog::StepIt( void )
 
 bool CProgressDialog::ResizeLabelsToContents( void )
 {
-	CSize idealSize = m_stageLabelStatic.ComputeIdealTextSize();
-	idealSize.cx = utl::max( m_itemLabelStatic.ComputeIdealTextSize().cx, idealSize.cx );
+	int idealWidth = m_stageLabelStatic.ComputeIdealTextSize().cx;
+	idealWidth = utl::max( m_itemLabelStatic.ComputeIdealTextSize().cx, idealWidth );
 
-	CRect stageLabelRect = ui::GetControlRect( m_stageLabelStatic );
-	CRect itemLabelRect = ui::GetControlRect( m_itemLabelStatic );
-	CSize currentSize = ui::MaxSize( stageLabelRect.Size(), stageLabelRect.Size() );
+	enum { StageLabel, ItemLabel, StageStatic, ItemStatic };
 
-	CSize deltaSize = idealSize - currentSize;
+	std::vector< ui::CCtrlPlace > ctrls;
+	ctrls.push_back( ui::CCtrlPlace( m_stageLabelStatic ) );
+	ctrls.push_back( ui::CCtrlPlace( m_itemLabelStatic ) );
 
-	if ( idealSize.cx <= currentSize.cx && idealSize.cy <= currentSize.cy )
+	int currentWidth = utl::max( ctrls[ StageLabel ].m_rect.Width(), ctrls[ ItemLabel ].m_rect.Width() );
+	int deltaWidth = idealWidth - currentWidth;
+
+	if ( idealWidth <= currentWidth )
 		return false;
 
-	CRect stageStaticRect = ui::GetControlRect( m_stageStatic );
-	CRect itemStaticRect = ui::GetControlRect( m_itemStatic );
+	ctrls.push_back( ui::CCtrlPlace( m_stageStatic ) );
+	ctrls.push_back( ui::CCtrlPlace( m_itemStatic ) );
 
-	if ( deltaSize.cx > 0 )
+	if ( deltaWidth > 0 )
 	{
 		// stretch labels by deltaWidth
-		stageLabelRect.right += deltaSize.cx;
-		itemLabelRect.right += deltaSize.cx;
+		ctrls[ StageLabel ].m_rect.right += deltaWidth;
+		ctrls[ ItemLabel ].m_rect.right += deltaWidth;
 
 		// shrink statics by deltaWidth
-		stageStaticRect.left += deltaSize.cx;
-		itemStaticRect.left += deltaSize.cx;
+		ctrls[ StageStatic ].m_rect.left += deltaWidth;
+		ctrls[ ItemStatic ].m_rect.left += deltaWidth;
 	}
 
-	if ( deltaSize.cy > 0 )
-	{
-		// stretch labels by deltaHeight
-		stageLabelRect.bottom += deltaSize.cy;
-		itemLabelRect.bottom += deltaSize.cy;
-
-		// shrink statics by deltaHeight
-		stageStaticRect.bottom += deltaSize.cy;
-		itemStaticRect.bottom += deltaSize.cy;
-	}
-
-	const ui::CWindowPosition wndPositions[] =
-	{
-		{ m_stageLabelStatic, stageLabelRect },
-		{ m_stageStatic, stageStaticRect },
-		{ m_itemLabelStatic, itemLabelRect },
-		{ m_itemStatic, itemStaticRect }
-	};
-	ui::RepositionWindows( wndPositions, COUNT_OF( wndPositions ) );
-	m_itemLabelStatic.Invalidate();
-	return true;
-//	return ui::RepositionWindows( wndPositions, COUNT_OF( wndPositions ) );
+	return ui::RepositionControls( ctrls );
 }
 
 void CProgressDialog::DoDataExchange( CDataExchange* pDX )
@@ -339,6 +323,7 @@ void CProgressDialog::DoDataExchange( CDataExchange* pDX )
 	DDX_Control( pDX, IDC_ITEM_LABEL, m_itemLabelStatic );
 	DDX_Control( pDX, IDC_ITEM_STATIC, m_itemStatic );
 	DDX_Control( pDX, IDC_ITEM_COUNTS_STATIC, m_itemCountStatic );
+	DDX_Control( pDX, IDC_CLOCK_STATIC, *m_pClockStatic );
 	DDX_Control( pDX, IDC_PROGRESS_BAR, m_progressBar );
 
 	if ( DialogOutput == pDX->m_bSaveAndValidate )

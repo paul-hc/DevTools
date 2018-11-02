@@ -303,7 +303,7 @@ std::tstring CFindDuplicatesDialog::FormatReport( const CDupsOutcome& outcome ) 
 	if ( outcome.m_ignoredCount != 0 )
 		reportMessage += str::Format( _T(" (%d ignored)"), outcome.m_ignoredCount );
 
-	reportMessage += str::Format( _T("; elapsed %s seconds"), outcome.m_timer.FormatElapsedSeconds( 2 ).c_str() );
+	reportMessage += str::Format( _T("; elapsed %s"), outcome.m_timer.FormatElapsedDuration( 2 ).c_str() );
 
 	if ( CLogger* pLogger = app::GetLoggerPtr() )
 		pLogger->LogString( str::Format( _T("Search for duplicates in {%s}  -  %s"), utl::MakeDisplayCodeList( m_srcPathItems, _T(", ") ).c_str(), reportMessage.c_str() ) );

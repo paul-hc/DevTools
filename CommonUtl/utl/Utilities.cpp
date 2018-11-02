@@ -476,19 +476,24 @@ namespace ui
 		::InvalidateRect( hWnd, NULL, TRUE );
 	}
 
-	bool RepositionWindows( const CWindowPosition wndPositions[], unsigned int count, UINT swpFlags /*= 0*/ )
+	bool RepositionControls( const std::vector< CCtrlPlace >& ctrlPlaces, bool invalidate /*= true*/, UINT swpFlags /*= 0*/ )
 	{
-		HDWP hdwp = ::BeginDeferWindowPos( count );
+		HDWP hdwp = ::BeginDeferWindowPos( static_cast< int >( ctrlPlaces.size() ) );
+		std::vector< CCtrlPlace >::const_iterator itCtrl, itEnd = ctrlPlaces.end();
 
-		for ( unsigned int i = 0; i != count && hdwp != NULL; ++i )
-			hdwp = ::DeferWindowPos( hdwp, wndPositions[ i ].m_hWnd, NULL,
-				wndPositions[ i ].m_inParentRect.left, wndPositions[ i ].m_inParentRect.top, wndPositions[ i ].m_inParentRect.Width(), wndPositions[ i ].m_inParentRect.Height(),
+		for ( itCtrl = ctrlPlaces.begin(); itCtrl != itEnd && hdwp != NULL; ++itCtrl )
+			hdwp = ::DeferWindowPos( hdwp, itCtrl->m_hWnd, NULL,
+				itCtrl->m_rect.left, itCtrl->m_rect.top, itCtrl->m_rect.Width(), itCtrl->m_rect.Height(),
 				SWP_NOZORDER | SWP_NOOWNERZORDER | SWP_NOACTIVATE | swpFlags );
 
-		if ( NULL == hdwp )
+		if ( NULL == hdwp || !::EndDeferWindowPos( hdwp ) )
 			return false;
 
-		return ::EndDeferWindowPos( hdwp ) != FALSE;
+		if ( invalidate )
+			for ( itCtrl = ctrlPlaces.begin(); itCtrl != itEnd; ++itCtrl )
+				::InvalidateRect( itCtrl->m_hWnd, NULL, TRUE );
+
+		return true;
 	}
 }
 
