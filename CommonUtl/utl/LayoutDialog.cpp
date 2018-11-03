@@ -275,6 +275,16 @@ void CLayoutDialog::OnIdleUpdateControls( void )
 	SendMessageToDescendants( WM_IDLEUPDATECMDUI, (WPARAM)TRUE, 0, m_idleUpdateDeep, TRUE );			// update dialog toolbars
 }
 
+BOOL CLayoutDialog::DestroyWindow( void )
+{
+	// fix for app losing activation when destroying the modeless dialog: https://stackoverflow.com/questions/3144004/wpf-app-loses-completely-focus-on-window-close
+	if ( IsModeless() && m_hWnd != NULL )
+		if ( CWnd* pOwner = GetOwner() )
+			pOwner->SetActiveWindow();
+
+	return __super::DestroyWindow();
+}
+
 void CLayoutDialog::DoDataExchange( CDataExchange* pDX )
 {
 	if ( DialogOutput == pDX->m_bSaveAndValidate )

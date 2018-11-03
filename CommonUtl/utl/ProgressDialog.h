@@ -92,6 +92,8 @@ private:
 	CProgressCtrl m_progressBar;
 
 	// generated stuff
+public:
+	virtual BOOL DestroyWindow( void );
 protected:
 	virtual void DoDataExchange( CDataExchange* pDX );
 protected:

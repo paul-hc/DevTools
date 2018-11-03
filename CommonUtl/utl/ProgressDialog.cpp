@@ -357,6 +357,12 @@ void CProgressDialog::DoDataExchange( CDataExchange* pDX )
 	__super::DoDataExchange( pDX );
 }
 
+BOOL CProgressDialog::DestroyWindow( void )
+{
+	m_pMsgPump.reset();			// this will re-enable the parent window post simulated "modal-collaborative" long operation run
+	return __super::DestroyWindow();
+}
+
 
 // message handlers
 
@@ -366,12 +372,6 @@ END_MESSAGE_MAP()
 
 void CProgressDialog::OnDestroy( void )
 {
-	CWnd* pOwner = GetOwner();
-
-	m_pMsgPump.reset();			// this will re-enable the parent window post simulated "modal-collaborative" long operation run
+	m_pMsgPump.reset();			// just in case, should've aleady been reset on CProgressDialog::DestroyWindow()
 	__super::OnDestroy();
-
-	if ( pOwner->GetSafeHwnd() != NULL )
-		if ( pOwner->IsWindowEnabled() )
-			pOwner->SetForegroundWindow();
 }
