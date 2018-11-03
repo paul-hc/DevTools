@@ -60,8 +60,8 @@ namespace layout
 		{ IDC_FILE_SPEC_EDIT, SizeX | pctMoveY( TopPct ) },
 
 		{ IDC_DUPLICATE_FILES_STATIC, pctMoveY( TopPct ) },
-		{ IDC_DUPLICATE_FILES_INFO, SizeX | pctMoveY( TopPct ) },
 		{ IDC_DUPLICATE_FILES_LIST, SizeX | pctMoveY( TopPct ) | pctSizeY( BottomPct ) },
+		{ IDC_OUTCOME_INFO_STATUS, SizeX | MoveY },
 
 		{ IDC_SELECT_DUPLICATES_BUTTON, MoveY },
 		{ IDC_DELETE_DUPLICATES_BUTTON, MoveY },
@@ -295,15 +295,16 @@ void CFindDuplicatesDialog::SetupDuplicateFileList( void )
 
 std::tstring CFindDuplicatesDialog::FormatReport( const CDupsOutcome& outcome ) const
 {
-	std::tstring reportMessage = str::Format( _T("Found %d groups with %d duplicates out of total %d files"),
+	std::tstring reportMessage = str::Format( _T("Detected: %d groups, %d duplicate files. Found %d files, %d directories"),
 		m_duplicateGroups.size(),
 		CDuplicateGroupStore::GetDuplicateItemCount( m_duplicateGroups ),
-		outcome.m_foundPathsCount );
+		outcome.m_foundFileCount,
+		outcome.m_searchedDirCount );
 
 	if ( outcome.m_ignoredCount != 0 )
 		reportMessage += str::Format( _T(" (%d ignored)"), outcome.m_ignoredCount );
 
-	reportMessage += str::Format( _T("; elapsed %s"), outcome.m_timer.FormatElapsedDuration( 2 ).c_str() );
+	reportMessage += str::Format( _T(". Elapsed %s."), outcome.m_timer.FormatElapsedDuration( 2 ).c_str() );
 
 	if ( CLogger* pLogger = app::GetLoggerPtr() )
 		pLogger->LogString( str::Format( _T("Search for duplicates in {%s}  -  %s"), utl::MakeDisplayCodeList( m_srcPathItems, _T(", ") ).c_str(), reportMessage.c_str() ) );
@@ -412,7 +413,7 @@ void CFindDuplicatesDialog::DoDataExchange( CDataExchange* pDX )
 	const bool firstInit = NULL == m_srcPathsListCtrl.m_hWnd;
 
 	DDX_Control( pDX, IDC_SOURCE_PATHS_LIST, m_srcPathsListCtrl );
-	DDX_Control( pDX, IDC_DUPLICATE_FILES_INFO, m_outcomeStatic );
+	DDX_Control( pDX, IDC_OUTCOME_INFO_STATUS, m_outcomeStatic );
 	DDX_Control( pDX, IDC_DUPLICATE_FILES_LIST, m_dupsListCtrl );
 	DDX_Control( pDX, IDC_FILE_TYPE_COMBO, m_fileTypeCombo );
 	DDX_Control( pDX, IDC_FILE_SPEC_EDIT, m_fileSpecEdit );

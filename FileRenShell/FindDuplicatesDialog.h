@@ -76,7 +76,7 @@ private:
 
 	CReportListControl m_srcPathsListCtrl;
 	CDialogToolBar m_srcPathsToolbar;
-	CRegularStatic m_outcomeStatic;
+	CStatusStatic m_outcomeStatic;
 	CReportListControl m_dupsListCtrl;
 	CComboBox m_fileTypeCombo;
 	CTextEdit m_fileSpecEdit;

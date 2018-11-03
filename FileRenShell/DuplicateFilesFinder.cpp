@@ -55,13 +55,15 @@ void CDuplicateFilesFinder::SearchForFiles( std::vector< fs::CPath >& rFoundPath
 			for ( fs::TPathSet::const_iterator itFilePath = found.m_filePaths.begin(); itFilePath != found.m_filePaths.end(); ++itFilePath )
 				if ( uniquePaths.insert( *itFilePath ).second )		// path is unique?
 					rFoundPaths.push_back( *itFilePath );
+
+			m_outcome.m_searchedDirCount += 1 + found.m_subDirPaths.size();		// this directory + sub-directories
 		}
 		else if ( fs::IsValidFile( srcPath.GetPtr() ) )
 			if ( uniquePaths.insert( srcPath ).second )				// path is unique?
 				rFoundPaths.push_back( srcPath );
 	}
 
-	m_outcome.m_foundPathsCount = rFoundPaths.size();
+	m_outcome.m_foundFileCount = rFoundPaths.size();
 }
 
 void CDuplicateFilesFinder::GroupByFileSize( CDuplicateGroupStore* pGroupsStore, const std::vector< fs::CPath >& foundPaths, ui::IProgressCallback* pProgress )
