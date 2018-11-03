@@ -80,8 +80,7 @@ CFindDuplicatesDialog::CFindDuplicatesDialog( CFileModel* pFileModel, CWnd* pPar
 	, m_srcPathsListCtrl( IDC_SOURCE_PATHS_LIST )
 	, m_dupsListCtrl( IDC_DUPLICATE_FILES_LIST )
 {
-	for ( std::vector< fs::CPath >::const_iterator itSrcPath = m_pFileModel->GetSourcePaths().begin(); itSrcPath != m_pFileModel->GetSourcePaths().end(); ++itSrcPath )
-		m_srcPathItems.push_back( new CSrcPathItem( *itSrcPath ) );
+	CPathItem::MakePathItems( m_srcPathItems, m_pFileModel->GetSourcePaths() );
 
 	m_nativeCmdTypes.push_back( cmd::ResetDestinations );
 	REQUIRE( !m_srcPathItems.empty() );
@@ -91,6 +90,7 @@ CFindDuplicatesDialog::CFindDuplicatesDialog( CFileModel* pFileModel, CWnd* pPar
 	LoadDlgIcon( ID_TOUCH_FILES );
 
 	m_srcPathsListCtrl.SetAcceptDropFiles();
+	m_srcPathsListCtrl.SetSubjectAdapter( ui::CCodeAdapter::Instance() );				// display full paths
 	m_srcPathsListCtrl.AddRecordCompare( pred::NewComparator( pred::CompareCode() ) );	// default row item comparator
 	CGeneralOptions::Instance().ApplyToListCtrl( &m_srcPathsListCtrl );
 
@@ -283,7 +283,7 @@ void CFindDuplicatesDialog::SetupDuplicateFileList( void )
 			ASSERT( pGroup == ( *itDupItem )->GetParentGroup() );
 
 			m_dupsListCtrl.InsertObjectItem( index, *itDupItem );
-			m_dupsListCtrl.SetSubItemText( index, DirPath, ( *itDupItem )->GetKeyPath().GetParentPath().GetPtr() );
+			m_dupsListCtrl.SetSubItemText( index, DirPath, ( *itDupItem )->GetFilePath().GetParentPath().GetPtr() );
 			m_dupsListCtrl.SetSubItemText( index, Size, num::FormatFileSize( pGroup->GetContentKey().m_fileSize ) );
 			m_dupsListCtrl.SetSubItemText( index, Crc32, num::FormatHexNumber( pGroup->GetContentKey().m_crc32, _T("%X") ) );
 			m_dupsListCtrl.SetSubItemText( index, DateModified, time_utl::FormatTimestamp( ( *itDupItem )->GetModifyTime() ) );
@@ -389,7 +389,7 @@ void CFindDuplicatesDialog::MarkInvalidSrcItems( void )
 {
 	for ( std::vector< CDuplicateFilesGroup* >::const_iterator itGroup = m_duplicateGroups.begin(); itGroup != m_duplicateGroups.end(); ++itGroup )
 		for ( std::vector< CDuplicateFileItem* >::const_iterator itItem = ( *itGroup )->GetItems().begin(); itItem != ( *itGroup )->GetItems().end(); ++itItem )
-			if ( !( *itItem )->GetKeyPath().FileExist() )
+			if ( !( *itItem )->GetFilePath().FileExist() )
 				utl::AddUnique( m_errorItems, *itItem );
 }
 
@@ -534,14 +534,13 @@ void CFindDuplicatesDialog::OnEditSrcPaths( void )
 	CItemListDialog dlg( this, ui::CItemContent( ui::DirPath ) );
 
 	dlg.m_items.reserve( m_srcPathItems.size() );
-	for ( std::vector< CSrcPathItem* >::const_iterator itSrcPathItem = m_srcPathItems.begin(); itSrcPathItem != m_srcPathItems.end(); ++itSrcPathItem )
-		dlg.m_items.push_back( ( *itSrcPathItem )->GetKeyPath().Get() );
+	for ( std::vector< CPathItem* >::const_iterator itSrcPathItem = m_srcPathItems.begin(); itSrcPathItem != m_srcPathItems.end(); ++itSrcPathItem )
+		dlg.m_items.push_back( ( *itSrcPathItem )->GetFilePath().Get() );
 
 	if ( IDOK == dlg.DoModal() )
 	{
 		utl::ClearOwningContainer( m_srcPathItems );
-		for ( std::vector< std::tstring >::const_iterator itSrcPath = dlg.m_items.begin(); itSrcPath != dlg.m_items.end(); ++itSrcPath )
-			m_srcPathItems.push_back( new CSrcPathItem( *itSrcPath ) );
+		CPathItem::MakePathItems( m_srcPathItems, dlg.m_items );
 
 		SetupSrcPathsList();
 		SwitchMode( EditMode );
@@ -611,11 +610,11 @@ void CFindDuplicatesDialog::OnLvnDropFiles_SrcList( NMHDR* pNmHdr, LRESULT* pRes
 	CNmDropFiles* pNmDropFiles = (CNmDropFiles*)pNmHdr;
 	*pResult = 0;
 
-	std::vector< CSrcPathItem* > newPathItems; newPathItems.reserve( pNmDropFiles->m_filePaths.size() );
+	std::vector< CPathItem* > newPathItems; newPathItems.reserve( pNmDropFiles->m_filePaths.size() );
 
 	for ( std::vector< std::tstring >::const_iterator itFilePath = pNmDropFiles->m_filePaths.begin(); itFilePath != pNmDropFiles->m_filePaths.end(); ++itFilePath )
-		if ( NULL == func::FindItemWithKeyPath( m_srcPathItems, *itFilePath ) )			// unique path?
-			newPathItems.push_back( new CSrcPathItem( *itFilePath ) );
+		if ( NULL == func::FindItemWithPath( m_srcPathItems, *itFilePath ) )			// unique path?
+			newPathItems.push_back( new CPathItem( *itFilePath ) );
 
 	m_srcPathItems.insert( m_srcPathItems.end(), newPathItems.begin(), newPathItems.end() );
 

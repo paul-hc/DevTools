@@ -81,6 +81,9 @@ protected:
 };
 
 
+class CPathItem;
+
+
 class CItemsListPage : public CLayoutPropertyPage
 					 , public detail::IContentPage
 {
@@ -99,7 +102,7 @@ private:
 	const ui::CItemContent& m_rContent;
 	bool m_inEdit;
 
-	std::vector< ui::CPathItem* > m_pathItems;
+	std::vector< CPathItem* > m_pathItems;
 private:
 	enum Column { Item };
 

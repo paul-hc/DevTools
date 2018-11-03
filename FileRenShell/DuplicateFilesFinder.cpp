@@ -13,7 +13,7 @@
 
 // CDuplicateFilesFinder implementation
 
-void CDuplicateFilesFinder::FindDuplicates( std::vector< CDuplicateFilesGroup* >& rDuplicateGroups, const std::vector< CSrcPathItem* >& srcPathItems, CWnd* pParent ) throws_( CUserAbortedException )
+void CDuplicateFilesFinder::FindDuplicates( std::vector< CDuplicateFilesGroup* >& rDuplicateGroups, const std::vector< CPathItem* >& srcPathItems, CWnd* pParent ) throws_( CUserAbortedException )
 {
 	CDuplicatesProgress progress( pParent );
 	ui::IProgressCallback* pProgress = progress.GetProgress();
@@ -35,15 +35,15 @@ void CDuplicateFilesFinder::FindDuplicates( std::vector< CDuplicateFilesGroup* >
 	GroupByCrc32( rDuplicateGroups, &groupsStore, pProgress );
 }
 
-void CDuplicateFilesFinder::SearchForFiles( std::vector< fs::CPath >& rFoundPaths, const std::vector< CSrcPathItem* >& srcPathItems, fs::IEnumerator* pProgressEnum )
+void CDuplicateFilesFinder::SearchForFiles( std::vector< fs::CPath >& rFoundPaths, const std::vector< CPathItem* >& srcPathItems, fs::IEnumerator* pProgressEnum )
 {
 	utl::CSectionGuard section( _T("# SearchForFiles") );
 
 	stdext::hash_set< fs::CPath > uniquePaths;
 
-	for ( std::vector< CSrcPathItem* >::const_iterator itSrcPathItem = srcPathItems.begin(); itSrcPathItem != srcPathItems.end(); ++itSrcPathItem )
+	for ( std::vector< CPathItem* >::const_iterator itSrcPathItem = srcPathItems.begin(); itSrcPathItem != srcPathItems.end(); ++itSrcPathItem )
 	{
-		const fs::CPath& srcPath = ( *itSrcPathItem )->GetKeyPath();
+		const fs::CPath& srcPath = ( *itSrcPathItem )->GetFilePath();
 		if ( fs::IsValidDirectory( srcPath.GetPtr() ) )
 		{
 			fs::CPathEnumerator found( pProgressEnum );

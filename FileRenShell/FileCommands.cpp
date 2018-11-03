@@ -422,7 +422,7 @@ CBaseChangeDestCmd::ChangeType CChangeDestPathsCmd::EvalChange( void ) const
 	{
 		const CRenameItem* pRenameItem = m_pFileModel->GetRenameItems()[ i ];
 
-		if ( pRenameItem->GetKeyPath() != m_srcPaths[ i ] )						// keys different?
+		if ( pRenameItem->GetFilePath() != m_srcPaths[ i ] )						// keys different?
 			return Expired;
 		else if ( pRenameItem->GetDestPath().Get() != m_destPaths[ i ].Get() )	// case sensitive string compare
 			changeType = Changed;
@@ -483,7 +483,7 @@ CBaseChangeDestCmd::ChangeType CChangeDestFileStatesCmd::EvalChange( void ) cons
 	{
 		const CTouchItem* pTouchItem = m_pFileModel->GetTouchItems()[ i ];
 
-		if ( pTouchItem->GetKeyPath() != m_srcStates[ i ].m_fullPath )			// keys different?
+		if ( pTouchItem->GetFilePath() != m_srcStates[ i ].m_fullPath )			// keys different?
 			return Expired;
 		else if ( pTouchItem->GetDestState() != m_destStates[ i ] )
 			changeType = Changed;

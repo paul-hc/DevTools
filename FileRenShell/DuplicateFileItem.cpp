@@ -90,7 +90,7 @@ CDuplicateFilesGroup::~CDuplicateFilesGroup()
 CDuplicateFileItem* CDuplicateFilesGroup::FindItem( const fs::CPath& filePath ) const
 {
 	for ( std::vector< CDuplicateFileItem* >::const_iterator itItem = m_items.begin(); itItem != m_items.end(); ++itItem )
-		if ( filePath == ( *itItem )->GetKeyPath() )
+		if ( filePath == ( *itItem )->GetFilePath() )
 			return *itItem;
 
 	return NULL;
@@ -106,7 +106,7 @@ void CDuplicateFilesGroup::AddItem( const fs::CPath& filePath )
 void CDuplicateFilesGroup::AddItem( CDuplicateFileItem* pItem )
 {
 	ASSERT_PTR( pItem );
-	ASSERT( !ContainsItem( pItem->GetKeyPath() ) );
+	ASSERT( !ContainsItem( pItem->GetFilePath() ) );
 
 	m_items.push_back( pItem );
 	pItem->SetParentGroup( this );
@@ -126,11 +126,11 @@ void CDuplicateFilesGroup::ExtractCrc32Duplicates( std::vector< CDuplicateFilesG
 	for ( std::vector< CDuplicateFileItem* >::iterator itItem = m_items.begin(); itItem != m_items.end(); ++itItem )
 	{
 		if ( pProgress != NULL )
-			pProgress->AdvanceItem( ( *itItem )->GetKeyPath().Get() );
+			pProgress->AdvanceItem( ( *itItem )->GetFilePath().Get() );
 
 		TKeyItemPair newItem( m_contentKey, *itItem );
 
-		if ( newItem.first.ComputeCrc32( newItem.second->GetKeyPath() ) )
+		if ( newItem.first.ComputeCrc32( newItem.second->GetFilePath() ) )
 		{
 			if ( pProgress != NULL )
 				pProgress->AdvanceStage( newItem.first.Format() );
@@ -147,7 +147,7 @@ void CDuplicateFilesGroup::ExtractCrc32Duplicates( std::vector< CDuplicateFilesG
 
 	m_items.clear();					// ownership was passed to scopedKeyItems
 
-	typedef pred::CompareFirstSecond< pred::CompareValue, pred::CompareKeyPath > TCompareKeyItemPair;
+	typedef pred::CompareFirstSecond< pred::CompareValue, pred::CompareItemPath > TCompareKeyItemPair;
 
 	std::sort( scopedKeyItems.begin(), scopedKeyItems.end(), pred::LessBy< TCompareKeyItemPair >() );			// sort by full key and path
 
@@ -190,10 +190,10 @@ void CDuplicateFilesGroup::__ExtractCrc32Duplicates( std::vector< CDuplicateFile
 	for ( std::vector< CDuplicateFileItem* >::iterator itItem = scopedItems.begin(); itItem != scopedItems.end(); ++itItem )
 	{
 		if ( pProgress != NULL )
-			pProgress->AdvanceItem( ( *itItem )->GetKeyPath().Get() );
+			pProgress->AdvanceItem( ( *itItem )->GetFilePath().Get() );
 
 		CFileContentKey fullKey = m_contentKey;
-		if ( fullKey.ComputeCrc32( ( *itItem )->GetKeyPath() ) )
+		if ( fullKey.ComputeCrc32( ( *itItem )->GetFilePath() ) )
 			store.RegisterItem( utl::ReleaseOwnership( *itItem ), fullKey );		// release item ownership to prevent being deleted when unwiding the stack
 		else
 			++rIgnoredCount;		// remaining items will be deleted when unwiding the stack

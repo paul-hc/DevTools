@@ -754,14 +754,6 @@
 					>
 				</File>
 				<File
-					RelativePath=".\PathItemBase.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\PathItemBase.h"
-					>
-				</File>
-				<File
 					RelativePath=".\RenameItem.cpp"
 					>
 				</File>

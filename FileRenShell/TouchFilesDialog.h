@@ -64,7 +64,7 @@ private:
 	utl::ICommand* MakeChangeDestFileStatesCmd( void );
 	bool VisibleAllSrcColumns( void ) const;
 
-	CTouchItem* FindItemWithKey( const fs::CPath& srcPath ) const;
+	CTouchItem* FindItemWithKey( const fs::CPath& keyPath ) const;
 	void MarkInvalidSrcItems( void );
 	void EnsureVisibleFirstError( void );
 

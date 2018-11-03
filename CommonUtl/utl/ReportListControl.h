@@ -7,6 +7,7 @@
 #include "ISubject.h"
 #include "SubjectPredicates.h"
 #include "CustomDrawImager_fwd.h"
+#include "BaseObjectCtrl.h"
 #include "OleUtils.h"
 #include "MatchSequence.h"
 #include "Resequence.h"
@@ -20,9 +21,14 @@
 
 class CListSelectionData;
 class CReportListCustomDraw;
-namespace ui { class CFontEffectCache; }
 namespace ole { class CDataSource; }
 class CBaseCustomDrawImager;
+
+namespace ui
+{
+	interface ISubjectAdapter;
+	class CFontEffectCache;
+}
 
 namespace ds
 {
@@ -92,6 +98,7 @@ protected:
 class CReportListControl : public CListCtrl
 						 , public CInternalChange
 						 , public CListTraits
+						 , public CBaseObjectCtrl
 						 , public ICustomDrawControl
 {
 	friend class CReportListCustomDraw;

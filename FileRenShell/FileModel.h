@@ -5,7 +5,7 @@
 #include "utl/Subject.h"
 #include "utl/CommandModel.h"
 #include "utl/InternalChange.h"
-#include "PathItemBase.h"
+#include "utl/PathItemBase.h"
 
 
 class CRenameItem;
@@ -13,6 +13,19 @@ class CTouchItem;
 interface IFileEditor;
 namespace fmt { enum PathFormat; }
 namespace cmd { enum CommandType; enum StackType; }
+
+
+namespace func
+{
+	struct ResetItem
+	{
+		template< typename ItemType >
+		void operator()( ItemType* pItem )
+		{
+			pItem->Reset();
+		}
+	};
+}
 
 
 class CFileModel : public CCmdTarget

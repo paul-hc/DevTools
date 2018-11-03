@@ -111,12 +111,4 @@ namespace ui
 		return shell::BrowseForFolder( rNewItem, pParent );
 	}
 
-
-	// CPathItem implementation
-
-	const std::tstring& CPathItem::GetCode( void ) const
-	{
-		return m_filePath.Get();
-	}
-
 } //namespace ui

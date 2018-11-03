@@ -82,6 +82,7 @@ const TCHAR CReportListControl::s_fmtRegColumnLayout[] = _T("Width=%d, Order=%d"
 
 CReportListControl::CReportListControl( UINT columnLayoutId /*= 0*/, DWORD listStyleEx /*= DefaultStyleEx*/ )
 	: CListCtrl()
+	, CBaseObjectCtrl()
 	, m_columnLayoutId( 0 )
 	, m_listStyleEx( listStyleEx )
 	, m_optionFlags( UseExplorerTheme | SortInternally | HighlightTextDiffsFrame )
@@ -1089,7 +1090,7 @@ int CReportListControl::InsertObjectItem( int index, const utl::ISubject* pObjec
 	{
 		if ( NULL == pText )
 		{
-			displayCode = pObject->GetDisplayCode();
+			displayCode = FormatCode( pObject );
 			pText = displayCode.c_str();
 		}
 

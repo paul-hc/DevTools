@@ -3,19 +3,8 @@
 #pragma once
 
 #include "utl/IProgressCallback.h"
-#include "PathItemBase.h"
+#include "utl/PathItemBase.h"
 #include <hash_map>
-
-
-class CSrcPathItem : public CPathItemBase
-{
-public:
-	CSrcPathItem( const fs::CPath& srcPath )
-		: CPathItemBase( srcPath )
-	{
-		SetDisplayCode( srcPath.Get() );
-	}
-};
 
 
 namespace utl { class CCrc32FileCache; }

@@ -16,6 +16,11 @@
 #include "utl/RuntimeException.h"
 #include "utl/StringRange.h"
 
+// for CFileModel::MakeFileEditor
+#include "RenameFilesDialog.h"
+#include "TouchFilesDialog.h"
+#include "FindDuplicatesDialog.h"
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
@@ -328,7 +333,7 @@ utl::ICommand* CFileModel::MakeClipPasteDestFileStatesCmd( CWnd* pWnd ) throws_(
 		const CTouchItem* pTouchItem = m_touchItems[ i ];
 
 		fs::CFileState newFileState;
-		fmt::ParseClipFileState( newFileState, lines[ i ], &pTouchItem->GetKeyPath() );
+		fmt::ParseClipFileState( newFileState, lines[ i ], &pTouchItem->GetFilePath() );
 
 		if ( newFileState != pTouchItem->GetDestState() )
 			anyChanges = true;
@@ -353,7 +358,7 @@ void CFileModel::AddRenameItemFromCmd::operator()( const utl::ICommand* pCmd )
 	CRenameItem* pRenameItem = new CRenameItem( srcPath );
 	pRenameItem->RefDestPath() = destPath;
 
-	m_pFileModel->m_sourcePaths.push_back( pRenameItem->GetKeyPath() );
+	m_pFileModel->m_sourcePaths.push_back( pRenameItem->GetFilePath() );
 	m_pFileModel->m_renameItems.push_back( pRenameItem );
 }
 
@@ -371,14 +376,9 @@ void CFileModel::AddTouchItemFromCmd::operator()( const utl::ICommand* pCmd )
 	CTouchItem* pTouchItem = new CTouchItem( srcState );
 	pTouchItem->RefDestState() = destState;
 
-	m_pFileModel->m_sourcePaths.push_back( pTouchItem->GetKeyPath() );
+	m_pFileModel->m_sourcePaths.push_back( pTouchItem->GetFilePath() );
 	m_pFileModel->m_touchItems.push_back( pTouchItem );
 }
-
-
-#include "RenameFilesDialog.h"
-#include "TouchFilesDialog.h"
-#include "FindDuplicatesDialog.h"
 
 IFileEditor* CFileModel::MakeFileEditor( cmd::CommandType cmdType, CWnd* pParent )
 {

@@ -25,9 +25,9 @@ public:
 
 	const CDupsOutcome& GetOutcome( void ) const { return m_outcome; }
 
-	void FindDuplicates( std::vector< CDuplicateFilesGroup* >& rDuplicateGroups, const std::vector< CSrcPathItem* >& srcPathItems, CWnd* pParent ) throws_( CUserAbortedException );
+	void FindDuplicates( std::vector< CDuplicateFilesGroup* >& rDuplicateGroups, const std::vector< CPathItem* >& srcPathItems, CWnd* pParent ) throws_( CUserAbortedException );
 private:
-	void SearchForFiles( std::vector< fs::CPath >& rFoundPaths, const std::vector< CSrcPathItem* >& srcPathItems, fs::IEnumerator* pProgressEnum );
+	void SearchForFiles( std::vector< fs::CPath >& rFoundPaths, const std::vector< CPathItem* >& srcPathItems, fs::IEnumerator* pProgressEnum );
 	void GroupByFileSize( CDuplicateGroupStore* pGroupsStore, const std::vector< fs::CPath >& foundPaths, ui::IProgressCallback* pProgress );
 	void GroupByCrc32( std::vector< CDuplicateFilesGroup* >& rDuplicateGroups, CDuplicateGroupStore* pGroupsStore, ui::IProgressCallback* pProgress );
 private:

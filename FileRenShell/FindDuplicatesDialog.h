@@ -6,13 +6,13 @@
 #include "utl/FileSystem_fwd.h"
 #include "utl/DialogToolBar.h"
 #include "utl/HistoryComboBox.h"
-#include "utl/ReportListControl.h"
+#include "utl/FileItemListCtrl.h"
 #include "utl/TextEdit.h"
 #include "utl/ThemeStatic.h"
 #include "FileEditorBaseDialog.h"
 
 
-class CSrcPathItem;
+class CPathItem;
 class CDuplicateFileItem;
 class CDuplicateFilesGroup;
 class CDuplicateGroupStore;
@@ -67,17 +67,17 @@ private:
 
 	std::tstring FormatReport( const CDupsOutcome& outcome ) const;
 private:
-	std::vector< CSrcPathItem* > m_srcPathItems;
+	std::vector< CPathItem* > m_srcPathItems;
 	std::vector< CDuplicateFilesGroup* > m_duplicateGroups;
 	std::vector< std::tstring > m_fileTypeSpecs;
 private:
 	// enum { IDD = IDD_FIND_DUPLICATES_DIALOG };
 	enum DupFileColumn { FileName, DirPath, Size, Crc32, DateModified };
 
-	CReportListControl m_srcPathsListCtrl;
+	CFileItemListCtrl m_srcPathsListCtrl;
 	CDialogToolBar m_srcPathsToolbar;
 	CStatusStatic m_outcomeStatic;
-	CReportListControl m_dupsListCtrl;
+	CFileItemListCtrl m_dupsListCtrl;
 	CComboBox m_fileTypeCombo;
 	CTextEdit m_fileSpecEdit;
 	CHistoryComboBox m_minFileSizeCombo;

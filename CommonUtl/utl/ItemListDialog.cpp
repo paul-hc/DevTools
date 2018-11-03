@@ -1,6 +1,7 @@
 
 #include "stdafx.h"
 #include "ItemListDialog.h"
+#include "PathItemBase.h"
 #include "Clipboard.h"
 #include "EnumTags.h"
 #include "StringCompare.h"
@@ -373,7 +374,7 @@ void CItemsListPage::OutputList( void )
 		}
 		else
 		{
-			ui::CPathItem::MakePathItems( m_pathItems, m_pDialog->m_items );
+			CPathItem::MakePathItems( m_pathItems, m_pDialog->m_items );
 
 			for ( unsigned int i = 0; i != m_pathItems.size(); ++i )
 				m_listCtrl.InsertObjectItem( i, m_pathItems[ i ] );

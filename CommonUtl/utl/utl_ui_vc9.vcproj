@@ -786,6 +786,14 @@
 					>
 				</File>
 				<File
+					RelativePath=".\PathItemBase.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\PathItemBase.h"
+					>
+				</File>
+				<File
 					RelativePath=".\Subject.cpp"
 					>
 				</File>
@@ -1514,6 +1522,14 @@
 					>
 				</File>
 				<File
+					RelativePath=".\BaseObjectCtrl.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\BaseObjectCtrl.h"
+					>
+				</File>
+				<File
 					RelativePath=".\BaseSplitButton.cpp"
 					>
 				</File>
@@ -1591,6 +1607,14 @@
 				</File>
 				<File
 					RelativePath=".\EnumSplitButton.h"
+					>
+				</File>
+				<File
+					RelativePath=".\FileItemListCtrl.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\FileItemListCtrl.h"
 					>
 				</File>
 				<File

@@ -462,14 +462,14 @@ void CTouchFilesDialog::ModifyDiffTextEffectAt( CListTraits::CMatchEffects& rEff
 
 CTouchItem* CTouchFilesDialog::FindItemWithKey( const fs::CPath& keyPath ) const
 {
-	std::vector< CTouchItem* >::const_iterator itFoundItem = utl::BinaryFind( m_rTouchItems, keyPath, CPathItemBase::ToKeyPath() );
+	std::vector< CTouchItem* >::const_iterator itFoundItem = utl::BinaryFind( m_rTouchItems, keyPath, CPathItemBase::ToFilePath() );
 	return itFoundItem != m_rTouchItems.end() ? *itFoundItem : NULL;
 }
 
 void CTouchFilesDialog::MarkInvalidSrcItems( void )
 {
 	for ( std::vector< CTouchItem* >::const_iterator itTouchItem = m_rTouchItems.begin(); itTouchItem != m_rTouchItems.end(); ++itTouchItem )
-		if ( !( *itTouchItem )->GetKeyPath().FileExist() )
+		if ( !( *itTouchItem )->GetFilePath().FileExist() )
 			utl::AddUnique( m_errorItems, *itTouchItem );
 }
 

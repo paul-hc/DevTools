@@ -293,14 +293,14 @@ void CRenameFilesDialog::CommitLocalEdits( void )
 
 CRenameItem* CRenameFilesDialog::FindItemWithKey( const fs::CPath& srcPath ) const
 {
-	std::vector< CRenameItem* >::const_iterator itFoundItem = utl::BinaryFind( m_rRenameItems, srcPath, CPathItemBase::ToKeyPath() );
+	std::vector< CRenameItem* >::const_iterator itFoundItem = utl::BinaryFind( m_rRenameItems, srcPath, CPathItemBase::ToFilePath() );
 	return itFoundItem != m_rRenameItems.end() ? *itFoundItem : NULL;
 }
 
 void CRenameFilesDialog::MarkInvalidSrcItems( void )
 {
 	for ( std::vector< CRenameItem* >::const_iterator itRenameItem = m_rRenameItems.begin(); itRenameItem != m_rRenameItems.end(); ++itRenameItem )
-		if ( !( *itRenameItem )->GetKeyPath().FileExist() )
+		if ( !( *itRenameItem )->GetSrcPath().FileExist() )
 			utl::AddUnique( m_errorItems, *itRenameItem );
 }
 

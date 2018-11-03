@@ -2,9 +2,9 @@
 #define FileCommands_h
 #pragma once
 
+#include "utl/PathItemBase.h"
 #include "utl/RuntimeException.h"
 #include "FileCommands_fwd.h"
-#include "PathItemBase.h"
 
 
 class CLogger;
