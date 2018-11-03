@@ -476,13 +476,21 @@ namespace ui
 		::InvalidateRect( hWnd, NULL, TRUE );
 	}
 
+
+	CCtrlPlace::CCtrlPlace( HWND hCtrl /*= NULL*/ )
+		: m_hCtrl( hCtrl )
+	{
+		if ( m_hCtrl != NULL )
+			m_rect = ui::GetControlRect( m_hCtrl );
+	}
+
 	bool RepositionControls( const std::vector< CCtrlPlace >& ctrlPlaces, bool invalidate /*= true*/, UINT swpFlags /*= 0*/ )
 	{
 		HDWP hdwp = ::BeginDeferWindowPos( static_cast< int >( ctrlPlaces.size() ) );
 		std::vector< CCtrlPlace >::const_iterator itCtrl, itEnd = ctrlPlaces.end();
 
 		for ( itCtrl = ctrlPlaces.begin(); itCtrl != itEnd && hdwp != NULL; ++itCtrl )
-			hdwp = ::DeferWindowPos( hdwp, itCtrl->m_hWnd, NULL,
+			hdwp = ::DeferWindowPos( hdwp, itCtrl->m_hCtrl, NULL,
 				itCtrl->m_rect.left, itCtrl->m_rect.top, itCtrl->m_rect.Width(), itCtrl->m_rect.Height(),
 				SWP_NOZORDER | SWP_NOOWNERZORDER | SWP_NOACTIVATE | swpFlags );
 
@@ -491,7 +499,7 @@ namespace ui
 
 		if ( invalidate )
 			for ( itCtrl = ctrlPlaces.begin(); itCtrl != itEnd; ++itCtrl )
-				::InvalidateRect( itCtrl->m_hWnd, NULL, TRUE );
+				::InvalidateRect( itCtrl->m_hCtrl, NULL, TRUE );
 
 		return true;
 	}

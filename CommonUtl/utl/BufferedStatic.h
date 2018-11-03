@@ -2,10 +2,13 @@
 #define BufferedStatic_h
 #pragma once
 
+#include "ContentFitBase.h"
+
 
 // flicker free painting using owner-draw
 //
 class CBufferedStatic : public CStatic
+					  , public ui::CContentFitBase
 {
 protected:
 	CBufferedStatic( void );
@@ -15,7 +18,7 @@ public:
 	std::tstring GetWindowText( void ) const;
 	bool SetWindowText( const std::tstring& text );
 
-	UINT GetDrawTextFlags( void ) const { return m_dtFlags; }
+	virtual UINT GetDrawTextFlags( void ) const;		// base override
 	void SetDrawTextFlags( UINT dtFlags ) { m_dtFlags = dtFlags; }
 protected:
 	bool UseMouseInput( void ) const { return HasFlag( GetStyle(), SS_NOTIFY ); }

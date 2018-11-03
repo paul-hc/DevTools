@@ -12,6 +12,7 @@
 
 CBufferedStatic::CBufferedStatic( void )
 	: CStatic()
+	, CContentFitBase( this )
 	, m_dtFlags( UINT_MAX )
 {
 }
@@ -29,7 +30,16 @@ std::tstring CBufferedStatic::GetWindowText( void ) const
 
 bool CBufferedStatic::SetWindowText( const std::tstring& text )
 {
-	return ui::SetWindowText( m_hWnd, text );
+	if ( !ui::SetWindowText( m_hWnd, text ) )
+		return false;			// text hasn not changed
+
+	OnContentChanged();
+	return true;
+}
+
+UINT CBufferedStatic::GetDrawTextFlags( void ) const
+{
+	return m_dtFlags;
 }
 
 void CBufferedStatic::PaintImpl( CDC* pDC, const CRect& clientRect )

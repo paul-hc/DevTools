@@ -71,6 +71,11 @@ public:
 
 	ui::ILayoutFrame* FindControlLayoutFrame( HWND hCtrl ) const;
 	void RegisterBuddyCallback( UINT buddyId, ui::ILayoutFrame* pCallback );
+
+	// advanced control layout: use with care
+	layout::CControlState* LookupControlState( UINT ctrlId );
+	bool HasControlState( UINT ctrlId ) const { return m_controlStates.find( ctrlId ) != m_controlStates.end(); }
+	void AdjustControlInitialPosition( UINT ctrlId, const CSize& deltaOrigin, const CSize& deltaSize );		// when stretching content to fit: to retain original layout behaviour
 private:
 	void SetupControlStates( void );
 	void SetupCollapsedState( UINT ctrlId, layout::Style style );

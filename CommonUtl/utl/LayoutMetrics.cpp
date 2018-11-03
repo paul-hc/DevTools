@@ -157,6 +157,12 @@ namespace layout
 		return true;
 	}
 
+	void CControlState::AdjustInitialPosition( const CSize& deltaOrigin, const CSize& deltaSize )
+	{
+		m_initialOrigin += deltaOrigin;
+		m_initialSize += deltaSize;
+	}
+
 
 	// CResizeGripper implementation
 

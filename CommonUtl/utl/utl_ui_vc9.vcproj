@@ -1546,6 +1546,14 @@
 					>
 				</File>
 				<File
+					RelativePath=".\ContentFitBase.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\ContentFitBase.h"
+					>
+				</File>
+				<File
 					RelativePath=".\CtrlUiState.cpp"
 					>
 				</File>

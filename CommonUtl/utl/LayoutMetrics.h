@@ -194,6 +194,9 @@ namespace layout
 
 		bool ComputeLayout( CRect& rCtrlRect, UINT& rSwpFlags, const CSize& delta, bool collapsed ) const;
 		bool RepositionCtrl( const CSize& delta, bool collapsed ) const;
+
+		// advanced control layout (use with care)
+		void AdjustInitialPosition( const CSize& deltaOrigin, const CSize& deltaSize );			// when stretching content to fit: to retain original layout behaviour
 	private:
 		Metrics m_metrics, m_collapsedMetrics;		// self-encapsulated
 	public:

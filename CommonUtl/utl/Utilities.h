@@ -183,16 +183,12 @@ namespace ui
 
 	struct CCtrlPlace
 	{
-		CCtrlPlace( HWND hWnd = NULL )
-			: m_hWnd( hWnd )
-		{
-			if ( m_hWnd != NULL )
-				m_rect = ui::GetControlRect( m_hWnd );
-		}
+		CCtrlPlace( HWND hCtrl = NULL );
+		CCtrlPlace( HWND hCtrl, const CRect& rect ) : m_hCtrl( hCtrl ), m_rect( rect ) {}
 
-		CCtrlPlace( HWND hWnd, const CRect& rect ) : m_hWnd( hWnd ), m_rect( rect ) {}
+		UINT GetCtrlId( void ) const { ASSERT_PTR( m_hCtrl ); return ::GetDlgCtrlID( m_hCtrl ); }
 	public:
-		HWND m_hWnd;
+		HWND m_hCtrl;
 		CRect m_rect;			// for child windows: in parent's client coordinates; for top windows: screen rect
 	};
 

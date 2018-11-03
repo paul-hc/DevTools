@@ -20,7 +20,9 @@ public:
 	State GetState( void ) const { return m_state; }
 	bool SetState( State state );
 
-	CSize ComputeIdealTextSize( void );			// based on current text
+	// base overrides
+	virtual CSize ComputeIdealSize( void );
+	virtual CSize ComputeIdealTextSize( void );
 protected:
 	CThemeItem::Status GetDrawStatus( void ) const;
 	CThemeItem* GetTextThemeItem( void );

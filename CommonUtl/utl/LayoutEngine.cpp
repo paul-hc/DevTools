@@ -385,6 +385,20 @@ layout::Style CLayoutEngine::FindLayoutStyle( UINT ctrlId ) const
 	return itFound != m_controlStates.end() ? itFound->second.GetLayoutStyle( false ) : layout::None;
 }
 
+layout::CControlState* CLayoutEngine::LookupControlState( UINT ctrlId )
+{
+	return utl::FindValuePtr( m_controlStates, ctrlId );
+}
+
+void CLayoutEngine::AdjustControlInitialPosition( UINT ctrlId, const CSize& deltaOrigin, const CSize& deltaSize )
+{
+	// when stretching content to fit: to retain original layout behaviour
+	if ( layout::CControlState* pCtrlState = LookupControlState( ctrlId ) )
+		pCtrlState->AdjustInitialPosition( deltaOrigin, deltaSize );
+	else
+		ASSERT( false );			// no layout info for the control
+}
+
 void CLayoutEngine::RegisterBuddyCallback( UINT buddyId, ui::ILayoutFrame* pCallback )
 {
 	ASSERT_PTR( pCallback );

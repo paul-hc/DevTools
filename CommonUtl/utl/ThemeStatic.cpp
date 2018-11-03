@@ -41,6 +41,31 @@ bool CThemeStatic::SetState( State state )
 	return true;
 }
 
+CSize CThemeStatic::ComputeIdealTextSize( void )
+{
+	CRect textBounds;
+	GetClientRect( &textBounds );
+
+	if ( m_useText )
+	{
+		std::tstring text = ui::GetWindowText( this );
+		CClientDC clientDC( this );
+
+		textBounds.DeflateRect( m_textSpacing );
+		DrawFallbackText( GetTextThemeItem(), GetDrawStatus(), &clientDC, textBounds, text, GetDrawTextFlags() | DT_CALCRECT, GetFont() );		// compute whole text size (aligned to textBounds)
+		textBounds.InflateRect( m_textSpacing );
+	}
+
+	CSize idealSize = textBounds.Size() + ui::GetNonClientSize( m_hWnd );
+	return idealSize;
+}
+
+CSize CThemeStatic::ComputeIdealSize( void )
+{
+	return ComputeIdealTextSize();
+}
+
+
 void CThemeStatic::Draw( CDC* pDC, const CRect& clientRect )
 {
 	CThemeItem::Status drawStatus = GetDrawStatus();
@@ -78,25 +103,6 @@ void CThemeStatic::DrawFallbackText( const CThemeItem* pTextTheme, CThemeItem::S
 	if ( HasFlag( dtFlags, DT_CALCRECT ) )
 		if ( !anchorRect.IsRectNull() && !rRect.IsRectEmpty() )
 			ui::AlignRect( rRect, anchorRect, ui::GetDrawTextAlignment( dtFlags ) );		// also align to initial anchor
-}
-
-CSize CThemeStatic::ComputeIdealTextSize( void )
-{
-	CRect textBounds;
-	GetClientRect( &textBounds );
-
-	if ( m_useText )
-	{
-		std::tstring text = ui::GetWindowText( this );
-		CClientDC clientDC( this );
-
-		textBounds.DeflateRect( m_textSpacing );
-		DrawFallbackText( GetTextThemeItem(), GetDrawStatus(), &clientDC, textBounds, text, GetDrawTextFlags() | DT_CALCRECT, GetFont() );		// compute whole text size (aligned to textBounds)
-		textBounds.InflateRect( m_textSpacing );
-	}
-
-	CSize idealSize = textBounds.Size() + ui::GetNonClientSize( m_hWnd );
-	return idealSize;
 }
 
 CThemeItem::Status CThemeStatic::GetDrawStatus( void ) const

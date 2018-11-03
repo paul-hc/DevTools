@@ -69,7 +69,7 @@ protected:
 
 	void PumpMessages( void ) throws_( CUserAbortedException );			// collaborative multitasking: dispatch input messages, and throw if dialog got destroyed
 	bool StepIt( void );
-	bool ResizeLabelsToContents( void );
+	bool ResizeLabelsContentsToFit( void );
 private:
 	std::tstring m_operationLabel;
 	std::tstring m_stageLabel;

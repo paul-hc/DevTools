@@ -262,7 +262,7 @@ void CProgressDialog::DisplayItemCounts( void )
 void CProgressDialog::PumpMessages( void ) throws_( CUserAbortedException )
 {
 	ProcessInput();
-	ResizeLabelsToContents();
+	ResizeLabelsContentsToFit();
 }
 
 bool CProgressDialog::StepIt( void )
@@ -279,7 +279,7 @@ bool CProgressDialog::StepIt( void )
 	return updated;
 }
 
-bool CProgressDialog::ResizeLabelsToContents( void )
+bool CProgressDialog::ResizeLabelsContentsToFit( void )
 {
 	int idealWidth = m_stageLabelStatic.ComputeIdealTextSize().cx;
 	idealWidth = utl::max( m_itemLabelStatic.ComputeIdealTextSize().cx, idealWidth );
@@ -310,7 +310,16 @@ bool CProgressDialog::ResizeLabelsToContents( void )
 		ctrls[ ItemStatic ].m_rect.left += deltaWidth;
 	}
 
-	return ui::RepositionControls( ctrls );
+	if ( !ui::RepositionControls( ctrls ) )
+		return false;
+
+	// adjust original layout to reflect the deltaWidth change (resize/move)
+	CLayoutEngine& rLayoutEngine = GetLayoutEngine();
+	CSize deltaOrigin( deltaWidth, 0 ), deltaSize( -deltaWidth, 0 );
+
+	rLayoutEngine.AdjustControlInitialPosition( ctrls[ StageStatic ].GetCtrlId(), deltaOrigin, deltaSize );
+	rLayoutEngine.AdjustControlInitialPosition( ctrls[ ItemStatic ].GetCtrlId(), deltaOrigin, deltaSize );
+	return true;
 }
 
 void CProgressDialog::DoDataExchange( CDataExchange* pDX )
