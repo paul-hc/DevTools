@@ -2,25 +2,25 @@
 
 
 // Note: Proxy/Stub Information
-//      To merge the proxy/stub code into the object DLL, add the file
-//      dlldatax.c to the project.  Make sure precompiled headers
-//      are turned off for this file, and add _MERGE_PROXYSTUB to the
-//      defines for the project.
+//	  To merge the proxy/stub code into the object DLL, add the file
+//	  dlldatax.c to the project.  Make sure precompiled headers
+//	  are turned off for this file, and add _MERGE_PROXYSTUB to the
+//	  defines for the project.
 //
-//      If you are not running WinNT4.0 or Win95 with DCOM, then you
-//      need to remove the following define from dlldatax.c
-//      #define _WIN32_WINNT 0x0400
+//	  If you are not running WinNT4.0 or Win95 with DCOM, then you
+//	  need to remove the following define from dlldatax.c
+//	  #define _WIN32_WINNT 0x0400
 //
-//      Further, if you are running MIDL without /Oicf switch, you also
-//      need to remove the following define from dlldatax.c.
-//      #define USE_STUBLESS_PROXY
+//	  Further, if you are running MIDL without /Oicf switch, you also
+//	  need to remove the following define from dlldatax.c.
+//	  #define USE_STUBLESS_PROXY
 //
-//      Modify the custom build rule for FileRenShell.idl by adding the following
-//      files to the Outputs.
-//          FileRenShell_p.c
-//          dlldata.c
-//      To build a separate proxy/stub DLL,
-//      run nmake -f FileRenShellps.mk in the project directory.
+//	  Modify the custom build rule for FileRenShell.idl by adding the following
+//	  files to the Outputs.
+//		  FileRenShell_p.c
+//		  dlldata.c
+//	  To build a separate proxy/stub DLL,
+//	  run nmake -f FileRenShellps.mk in the project directory.
 
 #include "stdafx.h"
 #include "FileRenShell.h"
@@ -29,10 +29,6 @@
 
 #include "FileRenShell_i.c"
 #include "FileRenameShell.h"
-
-#ifdef _MERGE_PROXYSTUB
-extern "C" HINSTANCE hProxyDll;
-#endif
 
 
 BEGIN_OBJECT_MAP( s_objectMap )
@@ -44,11 +40,11 @@ namespace app
 {
 	void InitModule( HINSTANCE hInstance )
 	{
-	#ifdef _MERGE_PROXYSTUB
-		hProxyDll = hInstance;
-	#endif
 		g_comModule.Init( s_objectMap, hInstance, &LIBID_FILERENSHELLLib );
 	}
+
+	bool AddAsApprovedShellExtension( void );
+	bool RemoveAsApprovedShellExtension( void );
 }
 
 
@@ -57,12 +53,8 @@ namespace app
 
 STDAPI DllCanUnloadNow( void )
 {
-#ifdef _MERGE_PROXYSTUB
-    if (PrxDllCanUnloadNow() != S_OK)
-        return S_FALSE;
-#endif
-    AFX_MANAGE_STATE(AfxGetStaticModuleState());
-    return ( S_OK == AfxDllCanUnloadNow() && 0 == g_comModule.GetLockCount() ) ? S_OK : S_FALSE;
+	AFX_MANAGE_STATE( AfxGetStaticModuleState() );
+	return ( S_OK == AfxDllCanUnloadNow() && 0 == g_comModule.GetLockCount() ) ? S_OK : S_FALSE;
 }
 
 
@@ -71,11 +63,7 @@ STDAPI DllCanUnloadNow( void )
 
 STDAPI DllGetClassObject( REFCLSID rclsid, REFIID riid, LPVOID* ppv )
 {
-#ifdef _MERGE_PROXYSTUB
-	if ( S_OK == PrxDllGetClassObject( rclsid, riid, ppv ) )
-        return S_OK;
-#endif
-    return g_comModule.GetClassObject(rclsid, riid, ppv);
+	return g_comModule.GetClassObject(rclsid, riid, ppv);
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -83,12 +71,13 @@ STDAPI DllGetClassObject( REFCLSID rclsid, REFIID riid, LPVOID* ppv )
 
 STDAPI DllRegisterServer( void )
 {
-#ifdef _MERGE_PROXYSTUB
-    HRESULT hRes = PrxDllRegisterServer();
-	if ( FAILED( hRes ) )
-        return hRes;
-#endif
-	return g_comModule.RegisterServer( TRUE );		// registers object, typelib and all interfaces in typelib
+	if ( !app::AddAsApprovedShellExtension() )			// add ourselves to the list of approved shell extensions
+		return E_ACCESSDENIED;
+
+	// OBSOLETE: the type library is not necessary for a shell extension DLL
+	//return g_comModule.RegisterServer( TRUE );		// registers object, typelib and all interfaces in typelib
+
+	return g_comModule.RegisterServer( FALSE );			// registers object, NO TYPELIB (read ProjectNotes.txt)
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -96,8 +85,51 @@ STDAPI DllRegisterServer( void )
 
 STDAPI DllUnregisterServer( void )
 {
-#ifdef _MERGE_PROXYSTUB
-    PrxDllUnregisterServer();
-#endif
-	return g_comModule.UnregisterServer( TRUE );
+	app::RemoveAsApprovedShellExtension();				// remove ourselves from the list of approved shell extensions; don't bail out on error since we do the normal ATL unregistration stuff too
+
+	// OBSOLETE: the type library is not necessary for a shell extension DLL
+	//return g_comModule.UnregisterServer( TRUE );
+
+	return g_comModule.UnregisterServer( FALSE );		// NO TYPELIB (read ProjectNotes.txt)
+}
+
+
+namespace app
+{
+	// Michael Dunn's article:	https://www.codeproject.com/Articles/441/The-Complete-Idiot-s-Guide-to-Writing-Shell-Extens
+
+	static const TCHAR s_shellExtClassIdName[] = _T("{1D4EA504-89A1-11D5-A57D-0050BA0E2E4A}");
+	static const TCHAR regKey_ShellExtensions_Approved[] = _T("Software\\Microsoft\\Windows\\CurrentVersion\\Shell Extensions\\Approved");
+
+	bool AddAsApprovedShellExtension( void )
+	{
+		// NT+: add ourselves to the list of approved shell extensions.
+
+		// Note that you should *NEVER* use the overload of CRegKey::SetValue with 4 parameters.
+		// It lets you set a value in one call, without having to call CRegKey::Open() first.
+		// However, that version of SetValue() has a bug in that it requests KEY_ALL_ACCESS to the key.  That will fail if the user is not an administrator.
+		// (The code should request KEY_WRITE, which is all that's necessary.)
+
+		CRegKey reg;
+		LONG result = reg.Open( HKEY_LOCAL_MACHINE, regKey_ShellExtensions_Approved, KEY_SET_VALUE );
+
+		if ( ERROR_SUCCESS == result )
+			result = reg.SetStringValue( _T("SimpleShlExt extension"), s_shellExtClassIdName );
+
+		return ERROR_SUCCESS == result;
+	}
+
+	bool RemoveAsApprovedShellExtension( void )
+	{
+		// NT+: remove ourselves from the list of approved shell extensions.
+		// Note that if we get an error along the way, I .
+
+		CRegKey reg;
+		LONG result = reg.Open( HKEY_LOCAL_MACHINE, regKey_ShellExtensions_Approved, KEY_SET_VALUE );
+
+		if ( ERROR_SUCCESS == result )
+			result = reg.DeleteValue( s_shellExtClassIdName );
+
+		return ERROR_SUCCESS == result;
+	}
 }

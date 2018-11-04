@@ -29,3 +29,27 @@ DEBUG the shell extension (FileRenameShell64.dll/FileRenameShell32.dll)
 		command arguments: /select,"C:\my\download\env.txt"
 		attach: No
 	Explorer: load the FileRenameShell shell extension (right click on a file), the attach the debugger to the corresponding explorer.exe process instance.
+
+HISTORY
+=======
+1) 4 November 2018: According to Michael Dunn's article:		https://www.codeproject.com/Articles/441/The-Complete-Idiot-s-Guide-to-Writing-Shell-Extens
+- This may have an impact on preventing context menu deadlocks in Explorer on Windows 10 (to verify).
+
+Remove OLE Automation features that we don't need (wizard-generated code) from res\FileRenameShell.rgs.
+ - The original wizard-generated is backed up at res\FileRenameShell-old (wizard-generated).rgs.
+Remove the type library from FileRenShell.rc resources: Resource Includes > Compile-time directives, remove the line:
+	1 TYPELIB "FileRenShell.tlb"
+Change module server registration in FileRenShell.cpp:
+	return g_comModule.RegisterServer( FALSE );			// registers object, NO TYPELIB (read ProjectNotes.txt)
+	return g_comModule.UnregisterServer( FALSE );		// NO TYPELIB (read ProjectNotes.txt)
+
+Final registration detail: on NT it's advisable to put our extension in a list of "approved" extensions.
+There is a system policy that can be set to prevent extensions from being loaded if they are not on the approved list.
+The list is stored in:
+	HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Shell Extensions\Approved
+
+In this key, we create a string value whose name is our GUID. The contents of the string can be anything.
+The code to do this goes in our DllRegisterServer() and DllUnregisterServer() functions.
+In FileRenShell.cpp:
+	AddAsApprovedShellExtension();
+	RemoveAsApprovedShellExtension();

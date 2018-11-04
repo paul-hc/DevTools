@@ -1,14 +1,26 @@
 HKCR
 {
+	FileRenShell.FileRenameShell.1 = s 'FileRenameShell Class'
+	{
+		CLSID = s '{1D4EA504-89A1-11D5-A57D-0050BA0E2E4A}'
+	}
+	FileRenShell.FileRenameShell = s 'FileRenameShell Class'
+	{
+		CLSID = s '{1D4EA504-89A1-11D5-A57D-0050BA0E2E4A}'
+		CurVer = s 'FileRenShell.FileRenameShell.1'
+	}
 	NoRemove CLSID
 	{
 		ForceRemove {1D4EA504-89A1-11D5-A57D-0050BA0E2E4A} = s 'FileRenameShell Class'
 		{
+			ProgID = s 'FileRenShell.FileRenameShell.1'
+			VersionIndependentProgID = s 'FileRenShell.FileRenameShell'
 			ForceRemove 'Programmable'
 			InprocServer32 = s '%MODULE%'
 			{
 				val ThreadingModel = s 'Apartment'
 			}
+			'TypeLib' = s '{1D4EA4F3-89A1-11D5-A57D-0050BA0E2E4A}'
 		}
 	}
 }

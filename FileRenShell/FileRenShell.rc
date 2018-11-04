@@ -300,17 +300,13 @@ END
 2 TEXTINCLUDE 
 BEGIN
     "#include ""utl/resource.h""\r\n"
-    "#include ""afxres.h""\r\n"
-    "\0"
+    "#include ""afxres.h""\r\n\0"
 END
 
 3 TEXTINCLUDE 
 BEGIN
     "#include ""afxres.rc""         // standard components: need it for CFileException::GetErrorMessage()\r\n"
-    "#include ""utl/utl_ui.rc""\r\n"
-    "\r\n"
-    "1 TYPELIB ""FileRenShell.tlb""\r\n"
-    "\0"
+    "#include ""utl/utl_ui.rc""\r\n\0"
 END
 
 #endif    // APSTUDIO_INVOKED
@@ -600,8 +596,6 @@ END
 //
 #include "afxres.rc"         // standard components: need it for CFileException::GetErrorMessage()
 #include "utl/utl_ui.rc"
-
-1 TYPELIB "FileRenShell.tlb"
 
 /////////////////////////////////////////////////////////////////////////////
 #endif    // not APSTUDIO_INVOKED
