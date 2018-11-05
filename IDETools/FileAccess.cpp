@@ -145,7 +145,7 @@ BOOL FileAccess::Execute( LPCTSTR fullPath )
 
 BOOL FileAccess::ShellOpen( LPCTSTR docFullPath )
 {
-	HINSTANCE hInstExec = shell::Execute( docFullPath );
+	HINSTANCE hInstExec = shell::Execute( NULL, docFullPath );
 
 	return (UINT_PTR)hInstExec >= HINSTANCE_ERROR;
 }

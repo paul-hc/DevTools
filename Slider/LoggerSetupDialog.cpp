@@ -82,7 +82,7 @@ void CLoggerSetupDialog::OnTogglePrependTimestamp( void )
 void CLoggerSetupDialog::OnViewLogFileButton( void )
 {
 	// use text key (.txt) for text view, or the default for run
-	shell::Execute( m_pCurrLogger->GetLogFilePath().c_str(), NULL, SEE_MASK_FLAG_DDEWAIT, NULL, NULL, _T(".txt") );
+	shell::Execute( this, m_pCurrLogger->GetLogFilePath().c_str(), NULL, SEE_MASK_FLAG_DDEWAIT, NULL, NULL, _T(".txt") );
 }
 
 void CLoggerSetupDialog::OnClearLogFileButton( void )

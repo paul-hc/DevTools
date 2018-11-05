@@ -228,7 +228,7 @@ namespace shell
 	// if SEE_MASK_FLAG_DDEWAIT mask is specified, the call will be modal for DDE conversations;
 	// otherwise (the default), the function returns before the DDE conversation is finished.
 
-	HINSTANCE Execute( const TCHAR* pExePath, const TCHAR* pParams /*= NULL*/, DWORD mask /*= 0*/, const TCHAR* pVerb /*= NULL*/,
+	HINSTANCE Execute( CWnd* pParentWnd, const TCHAR* pFilePath, const TCHAR* pParams /*= NULL*/, DWORD mask /*= 0*/, const TCHAR* pVerb /*= NULL*/,
 					   const TCHAR* pUseClassName /*= NULL*/, const TCHAR* pUseExtType /*= NULL*/, int cmdShow /*= SW_SHOWNORMAL*/ )
 	{
 		SHELLEXECUTEINFO shellInfo;
@@ -236,9 +236,9 @@ namespace shell
 		memset( &shellInfo, 0, sizeof( shellInfo ) );
 		shellInfo.cbSize = sizeof( shellInfo );
 		shellInfo.fMask = mask;
-		shellInfo.hwnd = NULL;
+		shellInfo.hwnd = pParentWnd->GetSafeHwnd();
 		shellInfo.lpVerb = pVerb;			// Like "[Open(\"%1\")]"
-		shellInfo.lpFile = pExePath;
+		shellInfo.lpFile = pFilePath;
 		shellInfo.lpParameters = pParams;
 		shellInfo.lpDirectory = NULL;
 		shellInfo.nShow = cmdShow;
@@ -256,7 +256,7 @@ namespace shell
 			shellInfo.lpClass = (TCHAR*)className.c_str();
 		}
 
-		ShellExecuteEx( &shellInfo );
+		::ShellExecuteEx( &shellInfo );
 		return shellInfo.hInstApp;
 	}
 

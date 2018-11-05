@@ -622,7 +622,7 @@ void CFileLocatorDialog::CmViewFile( UINT cmdId )
 		// Use text key (.txt) for text view, or the default for run
 		LPCTSTR useExtType = cmdId == CM_TEXT_VIEW_FILE ? _T(".txt") : NULL;
 
-		shell::Execute( fileFullPath.c_str(), NULL, SEE_MASK_FLAG_DDEWAIT, NULL, NULL, useExtType );
+		shell::Execute( this, fileFullPath.c_str(), NULL, SEE_MASK_FLAG_DDEWAIT, NULL, NULL, useExtType );
 	}
 }
 

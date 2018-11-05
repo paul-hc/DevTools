@@ -953,7 +953,7 @@ void CFileTreeDialog::CmViewFile( UINT cmdId )
 	TreeItemPair itemPair = GetSelectedItem();
 	if ( itemPair.first != NULL && itemPair.second->m_path.FileExist() )
 	{	// use text key (.txt) for text view, or the default for run
-		shell::Execute( itemPair.second->m_path.GetPtr(), NULL, SEE_MASK_FLAG_DDEWAIT, NULL, NULL, cmdId == CM_TEXT_VIEW_FILE ? _T(".txt") : NULL );
+		shell::Execute( this, itemPair.second->m_path.GetPtr(), NULL, SEE_MASK_FLAG_DDEWAIT, NULL, NULL, cmdId == CM_TEXT_VIEW_FILE ? _T(".txt") : NULL );
 	}
 }
 

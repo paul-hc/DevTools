@@ -24,7 +24,7 @@ namespace shell
 	bool DoFileOperation( UINT shellOp, const std::vector< std::tstring >& srcPaths, const std::vector< std::tstring >* pDestPaths, CWnd* pWnd = AfxGetMainWnd(), FILEOP_FLAGS flags = FOF_ALLOWUNDO );
 
 
-	HINSTANCE Execute( const TCHAR* pExePath, const TCHAR* pParams = NULL, DWORD mask = 0, const TCHAR* pVerb = NULL,
+	HINSTANCE Execute( CWnd* pParentWnd, const TCHAR* pFilePath, const TCHAR* pParams = NULL, DWORD mask = 0, const TCHAR* pVerb = NULL,
 					   const TCHAR* pUseClassName = NULL, const TCHAR* pUseExtType = NULL, int cmdShow = SW_SHOWNORMAL );
 
 	std::tstring GetClassAssociatedWith( const TCHAR* pExt );
