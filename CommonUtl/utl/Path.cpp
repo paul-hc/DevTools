@@ -337,12 +337,12 @@ namespace path
 		return absolutePath;
 	}
 
-	std::tstring Combine( const TCHAR* pDirPath, const TCHAR* pFile )
+	std::tstring Combine( const TCHAR* pDirPath, const TCHAR* pRightPath )
 	{
-		std::tstring dirPath = MakeNormal( pDirPath ), file = MakeNormal( pFile );		// PathCombine works only with backslashes
+		std::tstring dirPath = MakeNormal( pDirPath ), rightPath = MakeNormal( pRightPath );		// PathCombine works only with backslashes
 
 		TCHAR fullPath[ _MAX_PATH ];
-		if ( NULL == ::PathCombine( fullPath, dirPath.c_str(), file.c_str() ) )
+		if ( NULL == ::PathCombine( fullPath, dirPath.c_str(), rightPath.c_str() ) )
 			return _T("<bad PathCombine>");
 		return fullPath;
 	}

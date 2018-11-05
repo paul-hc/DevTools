@@ -10,6 +10,125 @@
 
 namespace shell
 {
+	CComPtr< IShellFolder > GetDesktopFolder( void )
+	{
+		CComPtr< IShellFolder > pDesktopFolder;
+		if ( HR_OK( ::SHGetDesktopFolder( &pDesktopFolder ) ) )
+			return pDesktopFolder;
+
+		return NULL;
+	}
+
+
+	namespace pidl
+	{
+		size_t GetCount( LPCITEMIDLIST pidl )
+		{
+			UINT count = 0;
+
+			if ( pidl != NULL )
+				for ( ; pidl->mkid.cb > 0; pidl = GetNextItem( pidl ) )
+					++count;
+
+			return count;
+		}
+
+		size_t GetByteSize( LPCITEMIDLIST pidl )
+		{
+			size_t size = 0;
+
+			if ( pidl != NULL )
+			{
+				for ( ; pidl->mkid.cb > 0; pidl = GetNextItem( pidl ) )
+					size += pidl->mkid.cb;
+
+				size += sizeof( WORD );		// add the size of the NULL terminating ITEMIDLIST
+			}
+			return size;
+		}
+
+		LPCITEMIDLIST GetNextItem( LPCITEMIDLIST pidl )
+		{
+			LPITEMIDLIST nextPidl = NULL;
+			if ( pidl != NULL )
+				nextPidl = (LPITEMIDLIST)( impl::GetBuffer( pidl ) + pidl->mkid.cb );
+
+			return nextPidl;
+		}
+
+		LPCITEMIDLIST GetLastItem( LPCITEMIDLIST pidl )
+		{
+			// Get the PIDL of the last item in the list
+			LPCITEMIDLIST lastPidl = NULL;
+			if ( pidl != NULL )
+				for ( ; pidl->mkid.cb > 0; pidl = GetNextItem( pidl ) )
+					lastPidl = pidl;
+
+			return lastPidl;
+		}
+
+		LPITEMIDLIST Copy( LPCITEMIDLIST pidl )
+		{
+			LPITEMIDLIST targetPidl = NULL;
+
+			if ( pidl != NULL )
+			{
+				size_t size = GetByteSize( pidl );
+
+				targetPidl = Allocate( size );				// allocate the new pidl
+				if ( targetPidl != NULL )
+					::CopyMemory( targetPidl, pidl, size );		// copy the source to the target
+			}
+
+			return targetPidl;
+		}
+
+		LPITEMIDLIST CopyFirstItem( LPCITEMIDLIST pidl )
+		{
+			LPITEMIDLIST targetPidl = NULL;
+
+			if ( pidl != NULL )
+			{
+				size_t size = pidl->mkid.cb + sizeof( WORD );
+
+				targetPidl = Allocate( size );				// allocate the new pidl
+				if ( targetPidl != NULL )
+				{
+					::CopyMemory( targetPidl, pidl, size );		// copy the source to the target
+					*(WORD*) ( ( (BYTE*)targetPidl ) + targetPidl->mkid.cb ) = 0;		// add terminator
+				}
+			}
+			return targetPidl;
+		}
+
+		LPITEMIDLIST GetRelativeItem( IShellFolder* pFolder, const TCHAR itemFilename[] )
+		{
+			ASSERT_PTR( pFolder );
+			ASSERT_PTR( !str::IsEmpty( itemFilename ) );
+
+			TCHAR displayName[ MAX_PATH * 2 ];
+			_tcscpy( displayName, itemFilename );
+
+			LPITEMIDLIST childItemPidl = NULL;
+			if ( HR_OK( pFolder->ParseDisplayName( NULL, NULL, displayName, NULL, &childItemPidl, NULL ) ) )
+				return childItemPidl;
+
+			return NULL;
+		}
+
+		pred::CompareResult Compare( PCUIDLIST_RELATIVE leftPidl, PCUIDLIST_RELATIVE rightPidl, IShellFolder* pParentFolder /*= GetDesktopFolder()*/ )
+		{
+			ASSERT_PTR( pParentFolder );
+
+			HRESULT hResult = pParentFolder->CompareIDs( SHCIDS_CANONICALONLY, leftPidl, rightPidl );
+			return pred::ToCompareResult( (short)HRESULT_CODE( hResult ) );
+		}
+	}
+}
+
+
+namespace shell
+{
 	CPidl::CPidl( LPCITEMIDLIST rootPidl, LPCITEMIDLIST dirPathPidl, LPCITEMIDLIST childPidl /*= NULL*/ )
 	{
 		AssignCopy( rootPidl );
@@ -33,12 +152,12 @@ namespace shell
 	{
 		if ( IsNull() )
 			AssignCopy( rightPidl );
-		else if ( !Pidl_IsNull( rightPidl ) )
+		else if ( !pidl::IsNull( rightPidl ) )
 		{
 			size_t oldSize = GetByteSize() - sizeof( WORD );
-			size_t rightSize = Pidl_GetByteSize( rightPidl );
+			size_t rightSize = pidl::GetByteSize( rightPidl );
 
-			LPITEMIDLIST newPidl = Pidl_Allocate( oldSize + rightSize );
+			LPITEMIDLIST newPidl = pidl::Allocate( oldSize + rightSize );
 			if ( newPidl != NULL )
 			{
 				::CopyMemory( newPidl, m_pidl, oldSize );
@@ -52,17 +171,17 @@ namespace shell
 	{
 		if ( IsNull() )
 			AssignCopy( childPidl );
-		else if ( !Pidl_IsNull( childPidl ) )
+		else if ( !pidl::IsNull( childPidl ) )
 		{
 			size_t oldSize = GetByteSize() - sizeof( WORD );
 			size_t childSize = childPidl->mkid.cb;
 
-			LPITEMIDLIST pidlNew = Pidl_Allocate( oldSize + childSize + sizeof( WORD ) );
+			LPITEMIDLIST pidlNew = pidl::Allocate( oldSize + childSize + sizeof( WORD ) );
 			if ( pidlNew != NULL )
 			{
 				::CopyMemory( pidlNew, m_pidl, oldSize );
 				::CopyMemory( ((LPBYTE)pidlNew) + oldSize, childPidl, childSize );
-				Pidl_SetTerminator( pidlNew, oldSize + childSize );
+				pidl::impl::SetTerminator( pidlNew, oldSize + childSize );
 			}
 			Reset( pidlNew );
 		}
@@ -70,7 +189,7 @@ namespace shell
 
 	void CPidl::RemoveLast( void )
 	{
-		if ( LPITEMIDLIST lastPidl = const_cast< LPITEMIDLIST >( Pidl_GetLastItem( m_pidl ) ) )
+		if ( LPITEMIDLIST lastPidl = const_cast< LPITEMIDLIST >( pidl::GetLastItem( m_pidl ) ) )
 			lastPidl->mkid.cb = 0;
 	}
 
@@ -92,7 +211,7 @@ namespace shell
 
 	bool CPidl::CreateRelative( IShellFolder* pFolder, const TCHAR itemFilename[] )
 	{
-		Reset( Pidl_GetRelativeItem( pFolder, itemFilename ) );
+		Reset( pidl::GetRelativeItem( pFolder, itemFilename ) );
 		return !IsNull();
 	}
 
@@ -198,119 +317,5 @@ namespace shell
 		}
 
 		return size == bytesRead;
-	}
-
-
-	// CPidl static interface
-
-	size_t CPidl::Pidl_GetCount( LPCITEMIDLIST pidl )
-	{
-		UINT count = 0;
-
-		if ( pidl != NULL )
-			for ( ; pidl->mkid.cb > 0; pidl = Pidl_GetNextItem( pidl ) )
-				++count;
-
-		return count;
-	}
-
-	size_t CPidl::Pidl_GetByteSize( LPCITEMIDLIST pidl )
-	{
-		size_t size = 0;
-
-		if ( pidl != NULL )
-		{
-			for ( ; pidl->mkid.cb > 0; pidl = Pidl_GetNextItem( pidl ) )
-				size += pidl->mkid.cb;
-
-			size += sizeof( WORD );		// add the size of the NULL terminating ITEMIDLIST
-		}
-		return size;
-	}
-
-	LPCITEMIDLIST CPidl::Pidl_GetNextItem( LPCITEMIDLIST pidl )
-	{
-		LPITEMIDLIST nextPidl = NULL;
-		if ( pidl != NULL )
-			nextPidl = (LPITEMIDLIST)( Pidl_GetBuffer( pidl ) + pidl->mkid.cb );
-
-		return nextPidl;
-	}
-
-	LPCITEMIDLIST CPidl::Pidl_GetLastItem( LPCITEMIDLIST pidl )
-	{
-		// Get the PIDL of the last item in the list
-		LPCITEMIDLIST lastPidl = NULL;
-		if ( pidl != NULL )
-			for ( ; pidl->mkid.cb > 0; pidl = Pidl_GetNextItem( pidl ) )
-				lastPidl = pidl;
-
-		return lastPidl;
-	}
-
-	LPITEMIDLIST CPidl::Pidl_Copy( LPCITEMIDLIST pidl )
-	{
-		LPITEMIDLIST targetPidl = NULL;
-
-		if ( pidl != NULL )
-		{
-			size_t size = Pidl_GetByteSize( pidl );
-
-			targetPidl = Pidl_Allocate( size );				// allocate the new pidl
-			if ( targetPidl != NULL )
-				::CopyMemory( targetPidl, pidl, size );		// copy the source to the target
-		}
-
-		return targetPidl;
-	}
-
-	LPITEMIDLIST CPidl::Pidl_CopyFirstItem( LPCITEMIDLIST pidl )
-	{
-		LPITEMIDLIST targetPidl = NULL;
-
-		if ( pidl != NULL )
-		{
-			size_t size = pidl->mkid.cb + sizeof( WORD );
-
-			targetPidl = Pidl_Allocate( size );				// allocate the new pidl
-			if ( targetPidl != NULL )
-			{
-				::CopyMemory( targetPidl, pidl, size );		// copy the source to the target
-				*(WORD*) ( ( (BYTE*)targetPidl ) + targetPidl->mkid.cb ) = 0;		// add terminator
-			}
-		}
-		return targetPidl;
-	}
-
-	LPITEMIDLIST CPidl::Pidl_GetRelativeItem( IShellFolder* pFolder, const TCHAR itemFilename[] )
-	{
-		ASSERT_PTR( pFolder );
-		ASSERT_PTR( !str::IsEmpty( itemFilename ) );
-
-		TCHAR displayName[ MAX_PATH * 2 ];
-		_tcscpy( displayName, itemFilename );
-
-		LPITEMIDLIST childItemPidl = NULL;
-		if ( HR_OK( pFolder->ParseDisplayName( NULL, NULL, displayName, NULL, &childItemPidl, NULL ) ) )
-			return childItemPidl;
-
-		return NULL;
-	}
-
-	pred::CompareResult CPidl::Pidl_Compare( PCUIDLIST_RELATIVE leftPidl, PCUIDLIST_RELATIVE rightPidl, IShellFolder* pParentFolder /*= GetDesktopFolder()*/ )
-	{
-		ASSERT_PTR( pParentFolder );
-
-		HRESULT hResult = pParentFolder->CompareIDs( SHCIDS_CANONICALONLY, leftPidl, rightPidl );
-		return pred::ToCompareResult( (short)HRESULT_CODE( hResult ) );
-	}
-
-	CComPtr< IShellFolder > CPidl::GetDesktopFolder( void )
-	{
-		CComPtr< IShellFolder > pDesktopFolder;
-		if ( HR_OK( ::SHGetDesktopFolder( &pDesktopFolder ) ) )
-			return pDesktopFolder;
-
-		return NULL;
 	}
 }

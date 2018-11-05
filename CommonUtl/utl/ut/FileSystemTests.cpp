@@ -207,7 +207,7 @@ void CFileSystemTests::TestShellPidl( void )
 	ut::CTempFilePool pool( _T("fa.txt|d1\\fb.txt") );
 	const fs::CPath& poolDirPath = pool.GetPoolDirPath();
 
-	CComPtr< IShellFolder > pDesktopFolder = shell::CPidl::GetDesktopFolder();
+	CComPtr< IShellFolder > pDesktopFolder = shell::GetDesktopFolder();
 	ASSERT_PTR( pDesktopFolder );
 
 	shell::CPidl desktopPidl;
