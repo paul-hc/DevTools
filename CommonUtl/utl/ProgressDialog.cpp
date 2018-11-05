@@ -72,8 +72,12 @@ bool CProgressDialog::CheckRunning( void ) const throws_( CUserAbortedException 
 	if ( IsRunning() )
 		return true;
 
-	Abort();
+	Abort();						// this throws
+
+	// prevent warning in both DEBUG and RELEASE builds
+#pragma warning( disable: 4715 )	// warning C4715: not all control paths return a value
 	return false;
+#pragma warning( default: 4715 )
 }
 
 void CProgressDialog::SetOperationLabel( const std::tstring& operationLabel )
