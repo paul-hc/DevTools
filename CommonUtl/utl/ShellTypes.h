@@ -42,8 +42,11 @@ namespace shell
 			inline void SetTerminator( LPITEMIDLIST pidl, size_t size ) { *GetTerminator( pidl, size ) = 0; }
 		}
 	}
+}
 
 
+namespace shell
+{
 	// manages memory for a PIDL used in shell API; similar to CComHeapPtr< ITEMIDLIST > with PIDL specific functionality.
 	//
 	class CPidl
