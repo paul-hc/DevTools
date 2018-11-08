@@ -223,6 +223,16 @@ namespace fs
 
 namespace fs
 {
+	struct FriendlyFileFind : CFileFind { using CFileFind::m_pFoundInfo; };
+
+	const WIN32_FIND_DATA* GetFindData( const CFileFind& foundFile )
+	{
+		const FriendlyFileFind* pFriendlyFileFinder = reinterpret_cast< const FriendlyFileFind* >( &foundFile );
+		ASSERT_PTR( pFriendlyFileFinder->m_pFoundInfo );				// must have already found have a file (current file)
+		return reinterpret_cast< const WIN32_FIND_DATA* >( pFriendlyFileFinder->m_pFoundInfo );
+	}
+
+
 	ULONGLONG GetFileSize( const TCHAR* pFilePath )
 	{
 		_stat64 fileStatus;

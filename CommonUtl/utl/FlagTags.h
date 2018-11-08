@@ -3,6 +3,10 @@
 #pragma once
 
 
+#define FLAG_TAG( flag )  flag, _T(#flag)
+	// pair to be used in static initializer lists: { MyFlag, _T("MyFlag") }
+
+
 // formatter of bit field flags with values in sequence: 2^0, 2^1, ... 2^31
 
 class CFlagTags

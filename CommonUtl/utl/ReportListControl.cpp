@@ -1893,6 +1893,11 @@ void CReportListControl::OnNcLButtonDown( UINT hitTest, CPoint point )
 	__super::OnNcLButtonDown( hitTest, point );
 }
 
+CMenu* CReportListControl::GetPopupMenu( ListPopup popupType )
+{
+	return m_pPopupMenu[ popupType ];
+}
+
 void CReportListControl::OnContextMenu( CWnd* pWnd, CPoint screenPos )
 {
 	CMenu* pPopupMenu = NULL;

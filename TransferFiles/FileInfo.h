@@ -22,7 +22,6 @@ struct CFileInfo
 	bool DirPathExist( void ) const;
 private:
 	static std::tstring AdjustPath( const TCHAR* pFullPath, path::TrailSlash trailSlash );
-	static DWORD ExtractFileAttributes( const CFileFind& foundFile );
 public:
 	fs::CPath m_fullPath;
 	DWORD m_attributes;

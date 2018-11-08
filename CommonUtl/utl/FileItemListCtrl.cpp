@@ -9,8 +9,10 @@
 
 
 CFileItemListCtrl::CFileItemListCtrl( UINT columnLayoutId /*= 0*/, DWORD listStyleEx /*= DefaultStyleEx*/ )
-	 : CDragListCtrl( columnLayoutId, listStyleEx )
+	: CReportListControl( columnLayoutId, listStyleEx )
 {
+	AddRecordCompare( pred::NewComparator( pred::CompareCode() ) );	// default row item comparator
+	SetCustomFileGlyphDraw();
 }
 
 CFileItemListCtrl::~CFileItemListCtrl()

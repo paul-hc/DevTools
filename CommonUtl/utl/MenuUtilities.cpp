@@ -6,6 +6,7 @@
 #include "VersionInfo.h"
 
 #ifdef _DEBUG
+#include "FlagTags.h"
 #define new DEBUG_NEW
 #endif
 
@@ -164,6 +165,24 @@ namespace ui
 	}
 
 
+	bool GetMenuItemInfo( MENUITEMINFO* pItemInfo, HMENU hMenu, UINT item, bool byPos /*= true*/,
+						  UINT mask /*= MIIM_ID | MIIM_SUBMENU | MIIM_DATA | MIIM_STATE | MIIM_FTYPE | MIIM_STRING | MIIM_BITMAP*/ )
+	{
+		ASSERT_PTR( pItemInfo );
+		ASSERT_PTR( ::IsMenu( hMenu ) );
+
+		static TCHAR s_itemText[ 512 ];
+		utl::ZeroWinStruct( pItemInfo );
+		s_itemText[ 0 ] = _T('\0');
+
+		pItemInfo->fMask = mask;					// MIIM_TYPE replaced by MIIM_FTYPE | MIIM_STRING | MIIM_BITMAP
+		pItemInfo->dwTypeData = s_itemText;
+		pItemInfo->cch = COUNT_OF( s_itemText );
+
+		return ::GetMenuItemInfo( hMenu, item, byPos, pItemInfo ) != FALSE;
+	}
+
+
 	unsigned int FindMenuItemIndex( const CMenu& rMenu, UINT itemId, unsigned int iFirst /*= 0*/ )
 	{
 		for ( unsigned int count = rMenu.GetMenuItemCount(); iFirst < count; ++iFirst )
@@ -194,55 +213,49 @@ namespace ui
 		}
 	}
 
-	HMENU CloneMenu( HMENU hSourceMenu )
+	HMENU CloneMenu( HMENU hSrcMenu )
 	{
-		ASSERT_PTR( ::IsMenu( hSourceMenu ) );
+		ASSERT_PTR( ::IsMenu( hSrcMenu ) );
 
 		HMENU hDestMenu = ::CreatePopupMenu();
-		TCHAR itemText[ 512 ];
 
-		for ( int i = 0, count = ::GetMenuItemCount( hSourceMenu ); i != count; ++i )
+		for ( int i = 0, count = ::GetMenuItemCount( hSrcMenu ); i != count; ++i )
 		{
-			MENUITEMINFO info;
-			ZeroMemory( &info, sizeof( MENUITEMINFO ) );
-			info.cbSize = sizeof( MENUITEMINFO );
-			info.fMask = MIIM_ID | MIIM_SUBMENU | MIIM_DATA | MIIM_TYPE;
-			info.dwTypeData = itemText;
-			info.cch = COUNT_OF( itemText );
+			MENUITEMINFO itemInfo;
+			if ( ui::GetMenuItemInfo( &itemInfo, hSrcMenu, i ) )
+			{
+				if ( itemInfo.hSubMenu != NULL )
+					itemInfo.hSubMenu = ui::CloneMenu( itemInfo.hSubMenu ); // clone the sub-menu
 
-			VERIFY( ::GetMenuItemInfo( hSourceMenu, i, TRUE, &info ) );
-
-			if ( info.hSubMenu != NULL )
-				info.hSubMenu = ui::CloneMenu( info.hSubMenu ); // clone the sub-menu
-
-			VERIFY( ::InsertMenuItem( hDestMenu, i, TRUE, &info ) );
+				VERIFY( ::InsertMenuItem( hDestMenu, i, TRUE, &itemInfo ) );
+			}
+			else
+				ASSERT( false );		// invalid item?
 		}
 
 		return hDestMenu;
 	}
 
-	size_t CopyMenuItems( CMenu& rDestMenu, unsigned int destIndex,
-						  const CMenu& sourceMenu, const std::vector< UINT >* pSourceIds /*= NULL*/ )
+	size_t CopyMenuItems( CMenu& rDestMenu, unsigned int destIndex, const CMenu& srcMenu, const std::vector< UINT >* pSrcIds /*= NULL*/ )
 	{
 		size_t copiedCount = 0;
-		TCHAR itemText[ 512 ];
 
-		for ( unsigned int i = 0, sourceCount = sourceMenu.GetMenuItemCount(); i != sourceCount; ++i )
+		for ( unsigned int i = 0, srcCount = srcMenu.GetMenuItemCount(); i != srcCount; ++i )
 		{
-			UINT sourceId = sourceMenu.GetMenuItemID( i );
+			UINT srcId = srcMenu.GetMenuItemID( i );
 
-			if ( NULL == pSourceIds || ( 0 == sourceId || std::find( pSourceIds->begin(), pSourceIds->end(), sourceId ) != pSourceIds->end() ) )
+			if ( NULL == pSrcIds || ( 0 == srcId || std::find( pSrcIds->begin(), pSrcIds->end(), srcId ) != pSrcIds->end() ) )
 			{
-				MENUITEMINFO info;
-				ZeroMemory( &info, sizeof( MENUITEMINFO ) );
-				info.cbSize = sizeof( MENUITEMINFO );
+				MENUITEMINFO itemInfo;
+				if ( ui::GetMenuItemInfo( &itemInfo, srcMenu, i ) )
+				{
+					VERIFY( rDestMenu.InsertMenuItem( destIndex, &itemInfo, TRUE ) );
 
-				info.fMask = MIIM_ID | MIIM_SUBMENU | MIIM_DATA | MIIM_TYPE;
-				info.dwTypeData = itemText;
-				info.cch = COUNT_OF( itemText );
-
-				VERIFY( const_cast< CMenu& >( sourceMenu ).GetMenuItemInfo( i, &info, TRUE ) );
-				VERIFY( rDestMenu.InsertMenuItem( destIndex++, &info, TRUE ) );
+					++copiedCount;
+					++destIndex;
+				}
+				else
+					ASSERT( false );
 			}
 		}
 
@@ -406,7 +419,7 @@ namespace ui
 		//  it if so (m_pParentMenu == NULL indicates that it is secondary popup)
 		HMENU hParentMenu;
 		if ( AfxGetThreadState()->m_hTrackingMenu == pPopupMenu->m_hMenu )
-			state.m_pParentMenu = pPopupMenu;    // parent == child for tracking popup
+			state.m_pParentMenu = pPopupMenu;	// parent == child for tracking popup
 		else if ( ( hParentMenu = ::GetMenu( pWindow->m_hWnd ) ) != NULL )
 		{
 			CWnd* pParent = pWindow->GetTopLevelParent();
@@ -442,7 +455,7 @@ namespace ui
 				state.m_pSubMenu = pPopupMenu->GetSubMenu( state.m_nIndex );
 				if ( state.m_pSubMenu == NULL ||
 					( state.m_nID = state.m_pSubMenu->GetMenuItemID( 0 ) ) == 0 || state.m_nID == (UINT)-1 )
-					continue;       // first item of popup can't be routed to
+					continue;	   // first item of popup can't be routed to
 
 				state.DoUpdate( pWindow, FALSE ); // popups are never auto disabled
 			}
@@ -450,7 +463,7 @@ namespace ui
 			{
 				// normal menu item
 				// auto enable/disable according to autoMenuEnable
-				//    set and command is _not_ a system command.
+				//	set and command is _not_ a system command.
 				state.m_pSubMenu = NULL;
 				state.DoUpdate( pWindow, !autoMenuEnable && state.m_nID < 0xF000 );
 			}
@@ -468,3 +481,96 @@ namespace ui
 	}
 
 } // namespace ui
+
+
+namespace dbg
+{
+	#ifdef _DEBUG
+
+	const CFlagTags& GetTags_MenuItemType( void )
+	{
+		static const CFlagTags::FlagDef s_flagDefs[] =
+		{
+			{ FLAG_TAG( MFT_BITMAP ) },
+			{ FLAG_TAG( MFT_MENUBARBREAK ) },
+			{ FLAG_TAG( MFT_MENUBREAK ) },
+			{ FLAG_TAG( MFT_OWNERDRAW ) },
+			{ FLAG_TAG( MFT_RADIOCHECK ) },
+			{ FLAG_TAG( MFT_SEPARATOR ) },
+			{ FLAG_TAG( MFT_RIGHTORDER ) },
+			{ FLAG_TAG( MFT_RIGHTJUSTIFY ) }
+		};
+
+		static const CFlagTags s_tags( s_flagDefs, COUNT_OF( s_flagDefs ) );
+		return s_tags;
+	}
+
+	const CFlagTags& GetTags_MenuItemState( void )
+	{
+		static const CFlagTags::FlagDef s_flagDefs[] =
+		{
+			{ FLAG_TAG( MF_GRAYED ) },			// MFS_GRAYED is messy: MF_GRAYED | MF_DISABLED
+			{ FLAG_TAG( MF_DISABLED ) },		// MFS_DISABLED is messy: MFS_GRAYED
+			{ FLAG_TAG( MFS_CHECKED ) },
+			{ FLAG_TAG( MFS_HILITE ) },
+			{ FLAG_TAG( MFS_ENABLED ) },
+			{ FLAG_TAG( MFS_UNCHECKED ) },
+			{ FLAG_TAG( MFS_UNHILITE ) },
+			{ FLAG_TAG( MFS_DEFAULT ) }
+		};
+
+		static const CFlagTags s_tags( s_flagDefs, COUNT_OF( s_flagDefs ) );
+		return s_tags;
+	}
+
+	#endif //_DEBUG
+}
+
+
+namespace dbg
+{
+	void TraceMenu( HMENU hMenu, unsigned int indentLevel /*= 0*/ )
+	{
+	#ifdef _DEBUG
+		ASSERT_PTR( ::IsMenu( hMenu ) );
+
+		for ( int i = 0, count = ::GetMenuItemCount( hMenu ); i != count; ++i )
+		{
+			MENUITEMINFO itemInfo;
+
+			if ( ui::GetMenuItemInfo( &itemInfo, hMenu, i ) )
+				TraceMenuItem( itemInfo, i, indentLevel );
+			else
+				ASSERT( false );
+
+			if ( itemInfo.hSubMenu != NULL )
+				TraceMenu( itemInfo.hSubMenu, indentLevel + 1 );		// trace the sub-menu
+		}
+	#else
+		hMenu, indentLevel;
+	#endif
+	}
+
+	void TraceMenuItem( const MENUITEMINFO& itemInfo, int itemPos, unsigned int indentLevel /*= 0*/ )
+	{
+	#ifdef _DEBUG
+		static const TCHAR s_space[] = _T(", "), s_fieldSep[] = _T(", "), s_flagsSep[] = _T("   "), s_tagSep[] = _T("|");
+		std::tstring text;
+
+		if ( itemInfo.hSubMenu != NULL )
+			stream::Tag( text, str::Format( _T("hSubMenu=0x%08X"), itemInfo.hSubMenu ), s_space );
+		else
+			stream::Tag( text, str::Format( _T("cmdId=%d=0x%X"), itemInfo.wID, itemInfo.wID ), s_space );
+
+		stream::Tag( text, str::Format( _T("\"%s\""), itemInfo.dwTypeData ), s_fieldSep );		// text
+
+		stream::Tag( text, str::Format( _T("Type={%s}"), GetTags_MenuItemType().FormatUi( itemInfo.fType, s_tagSep ) ), s_flagsSep );		// type flags
+		stream::Tag( text, str::Format( _T("State={%s}"), GetTags_MenuItemState().FormatUi( itemInfo.fState, s_tagSep ) ), s_flagsSep );	// state flags
+
+		std::tstring indentPrefix( indentLevel * 2, _T(' ') );
+		TRACE( _T("%s[%d] %s\n"), indentPrefix.c_str(), itemPos, text.c_str() );
+	#else
+		itemInfo, itemPos, indentLevel;
+	#endif
+	}
+}

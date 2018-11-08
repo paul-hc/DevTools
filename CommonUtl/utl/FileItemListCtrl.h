@@ -2,13 +2,13 @@
 #define FileItemListCtrl_h
 #pragma once
 
-#include "DragListCtrl.h"
+#include "ReportListControl.h"
 
 
 class CPathItemBase;
 
 
-class CFileItemListCtrl : public CDragListCtrl
+class CFileItemListCtrl : public CReportListControl
 {
 public:
 	CFileItemListCtrl( UINT columnLayoutId = 0, DWORD listStyleEx = DefaultStyleEx );

@@ -41,6 +41,9 @@ class CEnumTags;
 
 namespace fs
 {
+	const WIN32_FIND_DATA* GetFindData( const CFileFind& foundFile );
+	inline DWORD GetFileAttributes( const CFileFind& foundFile ) { return GetFindData( foundFile )->dwFileAttributes; }
+
 	ULONGLONG GetFileSize( const TCHAR* pFilePath );
 
 	CTime ReadLastModifyTime( const fs::CPath& filePath );

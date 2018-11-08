@@ -13,7 +13,7 @@ CFileInfo::CFileInfo( void )
 
 CFileInfo::CFileInfo( const CFileFind& foundFile )
 	: m_fullPath( AdjustPath( foundFile.GetFilePath(), foundFile.IsDirectory() ? path::AddSlash : path::PreserveSlash ) )
-	, m_attributes( ExtractFileAttributes( foundFile ) )
+	, m_attributes( fs::GetFileAttributes( foundFile ) )
 	, m_lastModifiedTimestamp( 0 )
 {
 	foundFile.GetLastWriteTime( m_lastModifiedTimestamp );
@@ -39,17 +39,6 @@ std::tstring CFileInfo::AdjustPath( const TCHAR* pFullPath, path::TrailSlash tra
 	std::tstring fullPath = pFullPath;
 	path::SetBackslash( fullPath, trailSlash );
 	return fullPath;
-}
-
-struct FriendlyFileFind : CFileFind { using CFileFind::m_pFoundInfo; };
-
-DWORD CFileInfo::ExtractFileAttributes( const CFileFind& foundFile )
-{
-	const FriendlyFileFind* pFriendlyFileFinder = reinterpret_cast< const FriendlyFileFind* >( &foundFile );
-	const WIN32_FIND_DATA* pFoundInfo = reinterpret_cast< const WIN32_FIND_DATA* >( pFriendlyFileFinder->m_pFoundInfo );
-
-	ASSERT_PTR( pFoundInfo );				// must have already found have a file (current file)
-	return pFoundInfo->dwFileAttributes;
 }
 
 void CFileInfo::Clear( void )

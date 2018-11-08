@@ -1362,6 +1362,14 @@
 					>
 				</File>
 				<File
+					RelativePath=".\ShellContextMenu.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\ShellContextMenu.h"
+					>
+				</File>
+				<File
 					RelativePath=".\ShellDragImager.cpp"
 					>
 				</File>

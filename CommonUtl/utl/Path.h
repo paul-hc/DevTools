@@ -90,7 +90,7 @@ namespace path
 	enum TrailSlash { PreserveSlash, AddSlash, RemoveSlash };
 
 	std::tstring& SetBackslash( std::tstring& rDirPath, TrailSlash trailSlash = AddSlash );
-	inline std::tstring& SetBackslash( std::tstring& rDirPath, bool set ) { return SetBackslash( rDirPath, set ? AddSlash : RemoveSlash ); }
+	inline std::tstring& SetBackslash( std::tstring& rDirPath, bool doSet ) { return SetBackslash( rDirPath, doSet ? AddSlash : RemoveSlash ); }
 
 	std::tstring GetParentPath( const TCHAR* pPath, TrailSlash trailSlash = PreserveSlash );
 

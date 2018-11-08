@@ -303,7 +303,7 @@ END
 
 3 TEXTINCLUDE 
 BEGIN
-    "\r\0"
+    "\0"
 END
 
 #endif    // APSTUDIO_INVOKED
@@ -484,7 +484,8 @@ ID_TRANSPARENT          ICON                    "res\\Transparent.ico"
 //
 // Generated from the TEXTINCLUDE 3 resource.
 //
-
+
+
 /////////////////////////////////////////////////////////////////////////////
 #endif    // not APSTUDIO_INVOKED
 

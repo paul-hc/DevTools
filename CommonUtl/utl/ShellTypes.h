@@ -2,13 +2,31 @@
 #define ShellTypes_h
 #pragma once
 
+//#define STRICT_TYPED_ITEMIDS
 #include <shlobj.h>
+#include <atlbase.h>
 #include "Path.h"
 
 
 namespace shell
 {
 	CComPtr< IShellFolder > GetDesktopFolder( void );
+	CComPtr< IShellFolder2 > ToShellFolder( IShellItem* pFolderItem );
+	CComPtr< IShellFolder2 > GetParentFolderAndPidl( ITEMID_CHILD** pPidlItem, IShellItem* pShellItem );
+}
+
+
+namespace shell
+{
+	CComPtr< IShellFolder > MakePidlArray( std::vector< PITEMID_CHILD >& rPidlItemsArray, const std::vector< std::tstring >& filePaths );		// caller must delete the PIDLs
+
+	template< typename ContainerT >
+	void ClearOwningPidls( ContainerT& rPidls )			// container of pointers to PIDLs, such as std::vector< LPITEMIDLIST >
+	{
+		std::for_each( rPidls.begin(), rPidls.end(), &pidl::Delete );
+		rPidls.clear();
+	}
+
 
 	namespace pidl
 	{
@@ -128,14 +146,6 @@ namespace shell
 	private:
 		LPITEMIDLIST m_pidl;
 	};
-
-
-	template< typename ContainerT >
-	void ClearOwningPidls( ContainerT& rPidls )			// rPidls such as std::vector< LPITEMIDLIST >
-	{
-		std::for_each( rPidls.begin(), rPidls.end(), &pidl::Delete );
-		rPidls.clear();
-	}
 }
 
 

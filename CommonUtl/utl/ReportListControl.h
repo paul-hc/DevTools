@@ -148,6 +148,8 @@ public:
 	enum ListPopup { OnSelection, Nowhere, _ListPopupCount };
 
 	void SetPopupMenu( ListPopup popupType, CMenu* pPopupMenu ) { m_pPopupMenu[ popupType ] = pPopupMenu; }		// set pPopupMenu to NULL to allow tracking context menu by parent dialog
+	virtual CMenu* GetPopupMenu( ListPopup popupType );
+
 	static CMenu& GetStdPopupMenu( ListPopup popupType );
 
 	ole::IDataSourceFactory* GetDataSourceFactory( void ) const { return m_pDataSourceFactory; }

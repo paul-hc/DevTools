@@ -31,6 +31,9 @@ namespace ui
 	CPoint GetAlignTrackPos( PopupAlign popupAlign, const RECT& excludeRect );
 
 
+	bool GetMenuItemInfo( MENUITEMINFO* pItemInfo, HMENU hMenu, UINT item, bool byPos = true,
+						  UINT mask = MIIM_ID | MIIM_SUBMENU | MIIM_DATA | MIIM_STATE | MIIM_FTYPE | MIIM_STRING | MIIM_BITMAP );
+
 	inline std::tstring GetMenuItemText( const CMenu& menu, UINT itemId, UINT flags = MF_BYCOMMAND )
 	{
 		CString itemText;
@@ -43,9 +46,9 @@ namespace ui
 
 	void QueryMenuItemIds( std::vector< UINT >& rItemIds, const CMenu& rMenu );
 
-	HMENU CloneMenu( HMENU hSourceMenu );
+	HMENU CloneMenu( HMENU hSrcMenu );
 
-	size_t CopyMenuItems( CMenu& rDestMenu, unsigned int destIndex, const CMenu& sourceMenu, const std::vector< UINT >* pSourceIds = NULL );
+	size_t CopyMenuItems( CMenu& rDestMenu, unsigned int destIndex, const CMenu& srcMenu, const std::vector< UINT >* pSrcIds = NULL );
 	void DeleteMenuItem( CMenu& rDestMenu, UINT itemId );
 	void DeleteMenuItems( CMenu& rDestMenu, const UINT* pItemIds, size_t itemCount );
 
@@ -60,7 +63,14 @@ namespace ui
 	void SetRadio( CCmdUI* pCmdUI, BOOL checked = BST_CHECKED );
 	bool ExpandVersionInfoTags( CCmdUI* pCmdUI );				// based on CVersionInfo
 	void UpdateMenuUI( CWnd* pWindow, CMenu* pPopupMenu, bool autoMenuEnable = true );
-};
+}
+
+
+namespace dbg
+{
+	void TraceMenu( HMENU hMenu, unsigned int indentLevel = 0 );
+	void TraceMenuItem( const MENUITEMINFO& itemInfo, int itemPos, unsigned int indentLevel = 0 );
+}
 
 
 #endif // MenuUtilities_h

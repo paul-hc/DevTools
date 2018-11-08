@@ -7,6 +7,23 @@
 
 namespace utl
 {
+	template< typename StructT >
+	inline StructT* ZeroStruct( StructT* pStruct )
+	{
+		ASSERT_PTR( pStruct );
+		::memset( pStruct, 0, sizeof( StructT ) );
+		return pStruct;
+	}
+
+	template< typename StructT >
+	inline StructT* ZeroWinStruct( StructT* pStruct )		// for Win32 structures with 'cbSize' data-member
+	{
+		ZeroStruct( pStruct );
+		pStruct->cbSize = sizeof( StructT );
+		return pStruct;
+	}
+
+
 	template< typename ContainerT >
 	inline size_t ByteSize( const ContainerT& items ) { return items.size() * sizeof( ContainerT::value_type ); }		// for vector, deque
 
