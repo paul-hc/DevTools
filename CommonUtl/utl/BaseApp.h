@@ -59,7 +59,9 @@ private:
 	std::auto_ptr< CLogger > m_pLogger;
 	std::auto_ptr< CImageStore > m_pImageStore;					// control the lifetime of shared resources
 	CAccelTable m_appAccel;
-	std::tstring m_appNameSuffix, m_profileSuffix;								// could be set to "_v2" when required
+	std::tstring m_appNameSuffix, m_profileSuffix;				// could be set to "_v2" when required
+protected:
+	std::tstring m_appRegistryKeyName;							// by default "Paul Cocoveanu"
 protected:
 	// generated overrides
 	public:

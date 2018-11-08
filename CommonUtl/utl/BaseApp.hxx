@@ -17,6 +17,7 @@
 template< typename BaseClass >
 CBaseApp< BaseClass >::CBaseApp( const TCHAR* pAppName /*= NULL*/ )
 	: BaseClass( pAppName )
+	, m_appRegistryKeyName( _T("Paul Cocoveanu") )
 {
 #if _MSC_VER >= 1800	// Visual C++ 2013
 	m_dwRestartManagerSupportFlags = AFX_RESTART_MANAGER_SUPPORT_RESTART;	// support Restart Manager
@@ -49,7 +50,7 @@ BOOL CBaseApp< BaseClass >::InitInstance( void )
 	}
 	AfxEnableControlContainer();
 
-	SetRegistryKey( _T("Paul Cocoveanu") );			// change the registry key under which our settings are stored
+	SetRegistryKey( m_appRegistryKeyName.c_str() );			// change the registry key under which our settings are stored
 
 	if ( !m_appNameSuffix.empty() )
 		AfxGetAppModuleState()->m_lpszCurrentAppName = AssignStringCopy( m_pszAppName, m_pszAppName + m_appNameSuffix );
