@@ -229,12 +229,12 @@ namespace num
 {
 	const CEnumTags& GetTags_BytesUnit( void )
 	{
-		static const CEnumTags tags( _T("bytes|kilo-bytes|mega-bytes|giga-bytes|tera-bytes|"), _T("B|KB|MB|GB|TB|") );
+		static const CEnumTags tags( _T("bytes|kilo-bytes|mega-bytes|giga-bytes|tera-bytes|"), _T("bytes|KB|MB|GB|TB|") );
 		return tags;
 	}
 
 
-	std::tstring FormatFileSize( ULONGLONG byteFileSize, BytesUnit unit /*= AutoBytes*/, bool longUnitTag /*= false*/, const std::locale& loc /*= str::GetUserLocale()*/ )
+	std::tstring FormatFileSize( UINT64 byteFileSize, BytesUnit unit /*= AutoBytes*/, bool longUnitTag /*= false*/, const std::locale& loc /*= str::GetUserLocale()*/ )
 	{
 		std::pair< double, BytesUnit > sizeUnit = ConvertFileSize( byteFileSize, unit );
 
@@ -300,9 +300,9 @@ namespace num
 		return GetRounded( number, 0 );						// round to no fractional digits
 	}
 
-	std::pair< double, BytesUnit > ConvertFileSize( ULONGLONG fileSize, BytesUnit toUnit /*= AutoBytes*/ )
+	std::pair< double, BytesUnit > ConvertFileSize( UINT64 fileSize, BytesUnit toUnit /*= AutoBytes*/ )
 	{
-		ULONGLONG newFileSize = fileSize, remainderSize = 0;
+		UINT64 newFileSize = fileSize, remainderSize = 0;
 		static const size_t s_kiloSize = 1024;
 
 		BytesUnit unit = Bytes;

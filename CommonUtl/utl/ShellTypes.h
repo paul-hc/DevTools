@@ -10,6 +10,13 @@
 
 namespace shell
 {
+	std::tstring FormatByteSize( UINT64 fileSize );
+	std::tstring FormatKiloByteSize( UINT64 fileSize );
+}
+
+
+namespace shell
+{
 	CComPtr< IShellFolder > GetDesktopFolder( void );
 	CComPtr< IShellFolder2 > ToShellFolder( IShellItem* pFolderItem );
 	CComPtr< IShellFolder2 > GetParentFolderAndPidl( ITEMID_CHILD** pPidlItem, IShellItem* pShellItem );

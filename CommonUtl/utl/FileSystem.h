@@ -30,7 +30,7 @@ namespace fs
 	void EnsureDirPath_Mfc( const TCHAR* pDirPath ) throws_( CFileException );	// throws CFileException on error
 
 
-	ULONGLONG BufferedCopy( CFile& rDestFile, CFile& srcFile, size_t chunkSize = 4 * KiloByte );		// 4096 works well because it's quicker to allocate
+	UINT64 BufferedCopy( CFile& rDestFile, CFile& srcFile, size_t chunkSize = 4 * KiloByte );		// 4096 works well because it's quicker to allocate
 
 	CComPtr< IStream > DuplicateToMemoryStream( IStream* pSrcStream, bool autoDelete = true );
 }
@@ -44,7 +44,7 @@ namespace fs
 	const WIN32_FIND_DATA* GetFindData( const CFileFind& foundFile );
 	inline DWORD GetFileAttributes( const CFileFind& foundFile ) { return GetFindData( foundFile )->dwFileAttributes; }
 
-	ULONGLONG GetFileSize( const TCHAR* pFilePath );
+	UINT64 GetFileSize( const TCHAR* pFilePath );
 
 	CTime ReadLastModifyTime( const fs::CPath& filePath );
 

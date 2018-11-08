@@ -10,6 +10,24 @@
 
 namespace shell
 {
+	std::tstring FormatByteSize( UINT64 fileSize )
+	{
+		TCHAR buffer[ 32 ];
+		::StrFormatByteSize64( fileSize, buffer, COUNT_OF( buffer ) );
+		return buffer;
+	}
+
+	std::tstring FormatKiloByteSize( UINT64 fileSize )
+	{
+		TCHAR buffer[ 32 ];
+		::StrFormatKBSize( fileSize, buffer, COUNT_OF( buffer ) );
+		return buffer;
+	}
+}
+
+
+namespace shell
+{
 	CComPtr< IShellFolder > GetDesktopFolder( void )
 	{
 		CComPtr< IShellFolder > pDesktopFolder;
@@ -61,7 +79,8 @@ namespace shell
 
 		for ( size_t i = 0; i != filePaths.size(); ++i )
 		{
-			CComHeapPtr< ITEMIDLIST_ABSOLUTE > pidlAbs( static_cast< ITEMIDLIST_ABSOLUTE* >( ::ILCreateFromPath( filePaths[ i ].c_str() ) ) );	// 64 bit: prevent warning C4090: 'argument' : different '__unaligned' qualifiers
+			CComHeapPtr< ITEMIDLIST_ABSOLUTE > pidlAbs( static_cast< ITEMIDLIST_ABSOLUTE* >( ::ILCreateFromPath( filePaths[ i ].c_str() ) ) );
+				// on 64 bit: the cast prevents warning C4090: 'argument' : different '__unaligned' qualifiers
 
 			CComPtr< IShellFolder > pParentFolder;
 			PCUITEMID_CHILD pidlItem;				// pidl relative to parent folder (not allocated)

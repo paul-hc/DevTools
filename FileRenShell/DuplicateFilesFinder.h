@@ -21,7 +21,7 @@ public:
 class CDuplicateFilesFinder
 {
 public:
-	CDuplicateFilesFinder( const std::tstring& wildSpec, ULONGLONG minFileSize ) : m_wildSpec( wildSpec ), m_minFileSize( minFileSize ) {}
+	CDuplicateFilesFinder( const std::tstring& wildSpec, UINT64 minFileSize ) : m_wildSpec( wildSpec ), m_minFileSize( minFileSize ) {}
 
 	const CDupsOutcome& GetOutcome( void ) const { return m_outcome; }
 
@@ -32,7 +32,7 @@ private:
 	void GroupByCrc32( std::vector< CDuplicateFilesGroup* >& rDuplicateGroups, CDuplicateGroupStore* pGroupsStore, ui::IProgressCallback* pProgress );
 private:
 	std::tstring m_wildSpec;
-	ULONGLONG m_minFileSize;
+	UINT64 m_minFileSize;
 
 	CDupsOutcome m_outcome;
 };

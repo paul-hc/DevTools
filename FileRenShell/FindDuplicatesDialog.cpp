@@ -136,7 +136,7 @@ void CFindDuplicatesDialog::ClearDuplicates( void )
 
 bool CFindDuplicatesDialog::SearchForDuplicateFiles( void )
 {
-	ULONGLONG minFileSize = 0;
+	UINT64 minFileSize = 0;
 	if ( num::ParseNumber( minFileSize, m_minFileSizeCombo.GetCurrentText() ) )
 		minFileSize *= 1024;		// to KB
 

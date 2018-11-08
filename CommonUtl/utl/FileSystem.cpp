@@ -185,13 +185,13 @@ namespace fs
 		return found.m_subDirPaths.empty() && found.m_filePaths.empty();			// deleted all existing
 	}
 
-	ULONGLONG BufferedCopy( CFile& rDestFile, CFile& srcFile, size_t chunkSize /*= 4 * KiloByte*/ )
+	UINT64 BufferedCopy( CFile& rDestFile, CFile& srcFile, size_t chunkSize /*= 4 * KiloByte*/ )
 	{
-		ULONGLONG fileSize = srcFile.GetLength();
+		UINT64 fileSize = srcFile.GetLength();
 		std::vector< BYTE > buffer;
 		buffer.resize( (std::min)( chunkSize, static_cast< size_t >( fileSize ) ) );		// grow the size of the copy buffer as needed
 
-		for ( ULONGLONG bytesLeft = fileSize; bytesLeft != 0; )
+		for ( UINT64 bytesLeft = fileSize; bytesLeft != 0; )
 		{
 			UINT bytesRead = srcFile.Read( &buffer.front(), static_cast< UINT >( buffer.size() ) );
 			rDestFile.Write( &buffer.front(), bytesRead );
@@ -233,11 +233,11 @@ namespace fs
 	}
 
 
-	ULONGLONG GetFileSize( const TCHAR* pFilePath )
+	UINT64 GetFileSize( const TCHAR* pFilePath )
 	{
 		_stat64 fileStatus;
 		if ( 0 == _tstat64( pFilePath, &fileStatus ) )
-			return static_cast< ULONGLONG >( fileStatus.st_size );
+			return static_cast< UINT64 >( fileStatus.st_size );
 
 		return ULLONG_MAX;			// error, could use errno to find out more
 	}
