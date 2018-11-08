@@ -2,6 +2,7 @@
 #include "stdafx.h"
 #include "FileItemInfo.h"
 #include "utl/FileSystem.h"
+#include "utl/ShellTypes.h"
 #include <shlwapi.h>			// for StrFormatByteSize64()
 
 #ifdef _DEBUG
@@ -97,11 +98,7 @@ void CFileItemInfo::CDetails::LazyInit( const CFileItemInfo* pItem )
 	m_fileAttributesText = FormatAttributes( pItem->m_fileAttributes );
 
 	if ( !pItem->IsDirectory() )
-	{
-		static TCHAR s_buffer[ MAX_PATH ];
-		::StrFormatByteSize64( pItem->m_fileSize, s_buffer, _countof( s_buffer ) );
-		m_fileSizeText = s_buffer;
-	}
+		m_fileSizeText = shell::FormatByteSize( pItem->m_fileSize );
 
 	m_modifiedDateText = pItem->m_modifiedTime.Format( _T("%x %X") );
 }

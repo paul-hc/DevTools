@@ -1,6 +1,6 @@
 
 #include "stdafx.h"
-#include "ChildView.h"
+#include "ChildFormView.h"
 #include "FileItemInfo.h"
 #include "utl/ShellContextMenu.h"
 #include "utl/ContainerUtilities.h"
@@ -17,26 +17,42 @@
 
 namespace reg
 {
-	static const TCHAR section_settings[] = _T("Settings");
+	static const TCHAR section_settings[] = _T("ChildFormView");
+	static const TCHAR section_fileList[] = _T("ChildFormView\\FileList");
 	static const TCHAR entry_listViewMode[] = _T("ListViewMode");
 	static const TCHAR entry_useCustomMenu[] = _T("UseCustomMenu");
 	static const TCHAR entry_currDirPath[] = _T("CurrDirPath");
 }
 
 
-const TCHAR CChildView::s_rootPath[] = _T("C:\\");
+namespace layout
+{
+	static CLayoutStyle s_styles[] =
+	{
+		{ IDC_FILE_LIST, Size },
+	};
+}
 
-CChildView::CChildView( void )
-	: CWnd()
+
+IMPLEMENT_DYNCREATE( CChildFormView, CFormView )
+
+const TCHAR CChildFormView::s_rootPath[] = _T("C:\\");
+
+CChildFormView::CChildFormView( void )
+	: CLayoutFormView( IDD_CHILD_VIEW_FORM )
 	, m_listViewMode( static_cast< ListViewMode >( AfxGetApp()->GetProfileInt( reg::section_settings, reg::entry_listViewMode, ReportView ) ) )
 	, m_useCustomMenu( AfxGetApp()->GetProfileInt( reg::section_settings, reg::entry_useCustomMenu, false ) != FALSE )
 	, m_currDirPath( AfxGetApp()->GetProfileString( reg::section_settings, reg::entry_currDirPath, s_rootPath ).GetString() )
+	, m_fileListCtrl( IDC_FILE_LIST )
 {
+	RegisterCtrlLayout( layout::s_styles, COUNT_OF( layout::s_styles ) );
+	m_fileListCtrl.SetSection( reg::section_fileList );
+
 	if ( !fs::IsValidDirectory( m_currDirPath.c_str() ) )
 		m_currDirPath = s_rootPath;
 }
 
-CChildView::~CChildView()
+CChildFormView::~CChildFormView()
 {
 	AfxGetApp()->WriteProfileInt( reg::section_settings, reg::entry_listViewMode, m_listViewMode );
 	AfxGetApp()->WriteProfileInt( reg::section_settings, reg::entry_useCustomMenu, m_useCustomMenu );
@@ -45,7 +61,7 @@ CChildView::~CChildView()
 	utl::ClearOwningContainer( m_items );
 }
 
-void CChildView::SetListViewMode( ListViewMode listViewMode )
+void CChildFormView::SetListViewMode( ListViewMode listViewMode )
 {
 	int viewMode = LV_VIEW_DETAILS;
 
@@ -63,7 +79,7 @@ void CChildView::SetListViewMode( ListViewMode listViewMode )
 	m_fileListCtrl.SetView( viewMode );
 }
 
-void CChildView::ReadDirectory( const std::tstring& dirPath )
+void CChildFormView::ReadDirectory( const std::tstring& dirPath )
 {
 	m_currDirPath = dirPath;
 
@@ -74,7 +90,7 @@ void CChildView::ReadDirectory( const std::tstring& dirPath )
 	m_fileListCtrl.SetItemCountEx( static_cast< int >( m_items.size() ), LVSICF_NOINVALIDATEALL );
 }
 
-void CChildView::QueryDirectoryItems( std::vector< CFileItemInfo* >& rItems, const std::tstring& dirPath )
+void CChildFormView::QueryDirectoryItems( std::vector< CFileItemInfo* >& rItems, const std::tstring& dirPath )
 {
 	if ( CFileItemInfo* pParentDirItem = CFileItemInfo::MakeParentDirItem( dirPath ) )		// not a root directory?
 		rItems.push_back( pParentDirItem );
@@ -102,7 +118,7 @@ void CChildView::QueryDirectoryItems( std::vector< CFileItemInfo* >& rItems, con
 	rItems.insert( rItems.end(), fileItems.begin(), fileItems.end() );			// add file items after sub-directories
 }
 
-void CChildView::QuerySelectedFilePaths( std::vector< std::tstring >& rSelFilePaths ) const
+void CChildFormView::QuerySelectedFilePaths( std::vector< std::tstring >& rSelFilePaths ) const
 {
 	for ( POSITION pos = m_fileListCtrl.GetFirstSelectedItemPosition(); pos != NULL; )
 	{
@@ -111,7 +127,7 @@ void CChildView::QuerySelectedFilePaths( std::vector< std::tstring >& rSelFilePa
 	}
 }
 
-int CChildView::TrackContextMenu( const std::vector< std::tstring >& selFilePaths, const CPoint& screenPos )
+int CChildFormView::TrackContextMenu( const std::vector< std::tstring >& selFilePaths, const CPoint& screenPos )
 {
 	shell::CContextMenu contextMenu( m_hWnd );
 	contextMenu.SetFilePaths( selFilePaths );
@@ -126,7 +142,7 @@ int CChildView::TrackContextMenu( const std::vector< std::tstring >& selFilePath
 		ui::CopyMenuItems( customPopup, 0, *pViewPopup );							// copy View popup items so it won't get deleted
 
 		customPopup.CheckMenuRadioItem( IDM_VIEW_LARGEICONS, IDM_VIEW_REPORT, IDM_VIEW_LARGEICONS + m_listViewMode, MF_BYCOMMAND );
-		customPopup.CheckMenuItem( IDM_VIEW_CUSTOMMENU, UseCustomMenu() ? MF_CHECKED : MF_UNCHECKED );
+		customPopup.CheckMenuItem( IDM_VIEW_CUSTOMMENU, m_useCustomMenu ? MF_CHECKED : MF_UNCHECKED );
 
 		CMenu* pContextMenu = contextMenu.GetPopupMenu();
 
@@ -140,73 +156,41 @@ int CChildView::TrackContextMenu( const std::vector< std::tstring >& selFilePath
 	return 0;
 }
 
-BOOL CChildView::PreCreateWindow( CREATESTRUCT& cs )
+void CChildFormView::DoDataExchange( CDataExchange* pDX )
 {
-	if ( !__super::PreCreateWindow( cs ) )
-		return FALSE;
+	bool firstInit = NULL == m_fileListCtrl.m_hWnd;
 
-	cs.style &= ~WS_BORDER;
-	cs.lpszClass = AfxRegisterWndClass( CS_DBLCLKS, ::LoadCursor( NULL, IDC_ARROW ), ::GetSysColorBrush( COLOR_3DFACE ), NULL );
+	DDX_Control( pDX, IDC_FILE_LIST, m_fileListCtrl );
 
-	return TRUE;
+	if ( firstInit )
+	{
+		::SetWindowTheme( m_fileListCtrl, L"Explorer", NULL );		// enable Explorer theme
+
+		m_fileListCtrl.SetImageList( CFileItemInfo::GetSystemImageList( false ), LVSIL_SMALL );
+		m_fileListCtrl.SetImageList( CFileItemInfo::GetSystemImageList( true ), LVSIL_NORMAL );
+
+		ReadDirectory( m_currDirPath );
+	}
+
+	__super::DoDataExchange( pDX );
 }
 
 
 // message handlers
 
-BEGIN_MESSAGE_MAP( CChildView, CWnd )
-	ON_WM_CREATE()
-	ON_WM_SIZE()
-	ON_WM_PAINT()
+BEGIN_MESSAGE_MAP( CChildFormView, CLayoutFormView )
 	ON_NOTIFY( NM_RCLICK, IDC_FILE_LIST, OnRClickFileList )
 	ON_NOTIFY( NM_DBLCLK, IDC_FILE_LIST, OnDblclkFileList )
 	ON_NOTIFY( LVN_GETDISPINFO, IDC_FILE_LIST, OnGetDispInfoFileList )
+	ON_COMMAND_RANGE( IDM_VIEW_LARGEICONS, IDM_VIEW_REPORT, OnViewMode )
+	ON_UPDATE_COMMAND_UI_RANGE( IDM_VIEW_LARGEICONS, IDM_VIEW_REPORT, OnUpdateViewMode )
+	ON_COMMAND( IDM_VIEW_CUSTOMMENU, OnUseCustomMenu )
+	ON_UPDATE_COMMAND_UI( IDM_VIEW_CUSTOMMENU, OnUpdateUseCustomMenu )
 END_MESSAGE_MAP()
 
-int CChildView::OnCreate( LPCREATESTRUCT lpCreateStruct )
-{
-	if ( __super::OnCreate( lpCreateStruct ) == -1 )
-		return -1;
-
-	m_fileListCtrl.Create( WS_CHILD | WS_VISIBLE | LVS_REPORT | LVS_OWNERDATA | LVS_SHAREIMAGELISTS | LVS_SHOWSELALWAYS, CRect ( 0, 0, 0, 0 ), this, IDC_FILE_LIST );
-	m_fileListCtrl.ModifyStyleEx( NULL, WS_EX_CLIENTEDGE );
-	m_fileListCtrl.SetImageList( CFileItemInfo::GetSystemImageList( false ), LVSIL_SMALL );
-	m_fileListCtrl.SetImageList( CFileItemInfo::GetSystemImageList( true ), LVSIL_NORMAL );
-
-	enum { DefaultStyleEx = LVS_EX_HEADERDRAGDROP | LVS_EX_FULLROWSELECT | LVS_EX_DOUBLEBUFFER | LVS_EX_INFOTIP | LVS_EX_LABELTIP | LVS_EX_AUTOAUTOARRANGE };
-
-	m_fileListCtrl.SetExtendedStyle( DefaultStyleEx );
-	::SetWindowTheme( m_fileListCtrl, L"Explorer", NULL );		// enable Explorer theme
-
-	m_fileListCtrl.InsertColumn(0, _T("Name"), LVCFMT_LEFT, 250, 0);
-	m_fileListCtrl.InsertColumn(1, _T("Size"), LVCFMT_RIGHT, 80, 1);
-	m_fileListCtrl.InsertColumn(2, _T("Type"), LVCFMT_LEFT, 250, 2);
-	m_fileListCtrl.InsertColumn(3, _T("Last Modified"), LVCFMT_LEFT, 130, 3);
-	m_fileListCtrl.InsertColumn(4, _T("Attributes"), LVCFMT_RIGHT, 100, 4);
-
-	ListView_SetExtendedListViewStyleEx( m_fileListCtrl.m_hWnd, LVS_EX_FULLROWSELECT, LVS_EX_FULLROWSELECT );
-	SetListViewMode( m_listViewMode );
-
-	ReadDirectory( m_currDirPath );
-	return 0;
-}
-
-void CChildView::OnSize( UINT nType, int cx, int cy )
-{
-	__super::OnSize( nType, cx, cy );
-
-	m_fileListCtrl.MoveWindow( CRect ( 0, 0, cx, cy ), TRUE );
-}
-
-void CChildView::OnPaint()
-{
-	CPaintDC dc( this );
-}
-
-void CChildView::OnRClickFileList( NMHDR* pNMHDR, LRESULT* pResult )
+void CChildFormView::OnRClickFileList( NMHDR* pNMHDR, LRESULT* pResult )
 {
 	NMITEMACTIVATE* pNmItemActivate = (NMITEMACTIVATE*)pNMHDR;
-
 	*pResult = 0;
 
 	std::vector< std::tstring > selFilePaths;
@@ -218,7 +202,7 @@ void CChildView::OnRClickFileList( NMHDR* pNMHDR, LRESULT* pResult )
 	TrackContextMenu( selFilePaths, screenPos );
 }
 
-void CChildView::OnDblclkFileList( NMHDR* pNMHDR, LRESULT* pResult )
+void CChildFormView::OnDblclkFileList( NMHDR* pNMHDR, LRESULT* pResult )
 {
 	int itemIndex = m_fileListCtrl.GetNextItem( -1, LVNI_FOCUSED );
 	if ( itemIndex != -1 )
@@ -233,7 +217,7 @@ void CChildView::OnDblclkFileList( NMHDR* pNMHDR, LRESULT* pResult )
 	}
 }
 
-void CChildView::OnGetDispInfoFileList( NMHDR* pNMHDR, LRESULT* pResult )
+void CChildFormView::OnGetDispInfoFileList( NMHDR* pNMHDR, LRESULT* pResult )
 {
 	LV_DISPINFO* pDispInfo = (LV_DISPINFO*)pNMHDR;
 	LVITEM* pLvItem = &pDispInfo->item;
@@ -246,24 +230,37 @@ void CChildView::OnGetDispInfoFileList( NMHDR* pNMHDR, LRESULT* pResult )
 		pLvItem->iImage = itemDetails.m_iconIndex;
 
 	if ( HasFlag( pLvItem->mask, LVIF_TEXT ) )		// test needed
-	{
-		switch (pLvItem->iSubItem)
+		switch ( pLvItem->iSubItem )
 		{
-		case 0:	// Name
-			_tcscpy( pLvItem->pszText, pItemData->m_filename.c_str() );
-			break;
-		case 1:	// Size
-			_tcscpy( pLvItem->pszText, itemDetails.m_fileSizeText.c_str() );
-			break;
-		case 2:	// Type
-			_tcscpy( pLvItem->pszText, itemDetails.m_typeName.c_str() );
-			break;
-		case 3:	// Last Modified
-			_tcscpy( pLvItem->pszText, itemDetails.m_modifiedDateText.c_str() );
-			break;
-		case 4:	// attributes
-			_tcscpy( pLvItem->pszText, itemDetails.m_fileAttributesText.c_str() );
-			break;
+			case Filename:		_tcscpy( pLvItem->pszText, pItemData->m_filename.c_str() ); break;
+			case Size:			_tcscpy( pLvItem->pszText, itemDetails.m_fileSizeText.c_str() ); break;
+			case Type:			_tcscpy( pLvItem->pszText, itemDetails.m_typeName.c_str() ); break;
+			case LastModified:	_tcscpy( pLvItem->pszText, itemDetails.m_modifiedDateText.c_str() ); break;
+			case Attributes:	_tcscpy( pLvItem->pszText, itemDetails.m_fileAttributesText.c_str() ); break;
 		}
-	}
+}
+
+void CChildFormView::OnUpdateViewMode( CCmdUI* pCmdUI )
+{
+	pCmdUI->Enable();
+
+	UINT selCmdId = IDM_VIEW_LARGEICONS + GetViewMode();
+	ui::SetRadio( pCmdUI, selCmdId == pCmdUI->m_nID );
+}
+
+void CChildFormView::OnViewMode( UINT cmdId )
+{
+	SetListViewMode( static_cast< ListViewMode >( cmdId - IDM_VIEW_LARGEICONS ) );
+}
+
+void CChildFormView::OnUseCustomMenu( void )
+{
+	SetUseCustomMenu( !m_useCustomMenu );		// toggle
+}
+
+void CChildFormView::OnUpdateUseCustomMenu( CCmdUI* pCmdUI )
+{
+	// TODO: Code für die Befehlsbehandlungsroutine zum Aktualisieren der Benutzeroberfläche hier einfügen
+	pCmdUI->Enable();
+	pCmdUI->SetCheck( m_useCustomMenu ? MF_CHECKED : MF_UNCHECKED );
 }

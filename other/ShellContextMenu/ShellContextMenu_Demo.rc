@@ -9,7 +9,6 @@
 //
 #include "afxres.h"
 #include "utl/resource.h"
-
 /////////////////////////////////////////////////////////////////////////////
 #undef APSTUDIO_READONLY_SYMBOLS
 
@@ -138,6 +137,15 @@ BEGIN
     DEFPUSHBUTTON   "OK",IDOK,178,7,50,14,WS_GROUP
 END
 
+IDD_CHILD_VIEW_FORM DIALOGEX 0, 0, 316, 183
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_CHILD | WS_CAPTION | WS_SYSMENU
+CAPTION "<form>"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    CONTROL         "",IDC_FILE_LIST,"SysListView32",LVS_REPORT | LVS_SHOWSELALWAYS | LVS_SHAREIMAGELISTS | LVS_ALIGNLEFT | LVS_OWNERDATA | LVS_NOSORTHEADER | WS_BORDER | WS_GROUP | WS_TABSTOP,7,31,302,145
+    LTEXT           "Static",IDC_STATIC,7,7,19,8
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -192,6 +200,14 @@ BEGIN
         TOPMARGIN, 7
         BOTTOMMARGIN, 48
     END
+
+    IDD_CHILD_VIEW_FORM, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 309
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 176
+    END
 END
 #endif    // APSTUDIO_INVOKED
 
@@ -209,6 +225,11 @@ END
 STRINGTABLE 
 BEGIN
     AFX_IDS_APP_TITLE       "ShellContextMenu_Demo"
+END
+
+STRINGTABLE 
+BEGIN
+    IDC_FILE_LIST           "Name=-1|Size=80>|Type=145|Last Modified=125|Attributes=80"
 END
 
 #endif    // English (U.S.) resources
@@ -229,7 +250,6 @@ END
 #define _AFX_NO_PROPERTY_RESOURCES
 
 #include "afxres.rc"         // Standard components
-
 /////////////////////////////////////////////////////////////////////////////
 #endif    // not APSTUDIO_INVOKED
 

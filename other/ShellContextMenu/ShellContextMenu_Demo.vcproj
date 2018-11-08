@@ -74,8 +74,8 @@
 			<Tool
 				Name="VCLinkerTool"
 				LinkIncremental="1"
-				GenerateDebugInformation="true"
 				SuppressStartupBanner="true"
+				GenerateDebugInformation="true"
 				SubSystem="2"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
@@ -224,7 +224,7 @@
 				>
 			</File>
 			<File
-				RelativePath="ChildView.cpp"
+				RelativePath=".\ChildFormView.cpp"
 				>
 				<FileConfiguration
 					Name="ReleaseU|Win32"
@@ -244,7 +244,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="ChildView.h"
+				RelativePath=".\ChildFormView.h"
 				>
 			</File>
 			<File
@@ -256,7 +256,7 @@
 				>
 			</File>
 			<File
-				RelativePath="MainFrm.cpp"
+				RelativePath=".\MainFrame.cpp"
 				>
 				<FileConfiguration
 					Name="ReleaseU|Win32"
@@ -276,7 +276,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="MainFrm.h"
+				RelativePath=".\MainFrame.h"
 				>
 			</File>
 			<File
@@ -351,5 +351,9 @@
 		</File>
 	</Files>
 	<Globals>
+		<Global
+			Name="RESOURCE_FILE"
+			Value="ShellContextMenu_Demo.rc"
+		/>
 	</Globals>
 </VisualStudioProject>
