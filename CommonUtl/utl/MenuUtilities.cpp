@@ -513,14 +513,20 @@ namespace dbg
 			{ FLAG_TAG( MF_DISABLED ) },		// MFS_DISABLED is messy: MFS_GRAYED
 			{ FLAG_TAG( MFS_CHECKED ) },
 			{ FLAG_TAG( MFS_HILITE ) },
-			{ FLAG_TAG( MFS_ENABLED ) },
-			{ FLAG_TAG( MFS_UNCHECKED ) },
-			{ FLAG_TAG( MFS_UNHILITE ) },
 			{ FLAG_TAG( MFS_DEFAULT ) }
 		};
 
 		static const CFlagTags s_tags( s_flagDefs, COUNT_OF( s_flagDefs ) );
 		return s_tags;
+	}
+
+	std::tstring FormatFlags( const TCHAR fmt[], const CFlagTags& tags, int flags )
+	{
+		std::tstring coreText = tags.FormatUi( flags );
+		if ( coreText.empty() )
+			return coreText;			// skip 0 flags
+
+		return str::Format( fmt, coreText.c_str() );
 	}
 
 	#endif //_DEBUG
@@ -554,18 +560,19 @@ namespace dbg
 	void TraceMenuItem( const MENUITEMINFO& itemInfo, int itemPos, unsigned int indentLevel /*= 0*/ )
 	{
 	#ifdef _DEBUG
-		static const TCHAR s_space[] = _T(", "), s_fieldSep[] = _T(", "), s_flagsSep[] = _T("   "), s_tagSep[] = _T("|");
+		static const TCHAR s_space[] = _T(", "), s_fieldSep[] = _T(", "), s_flagsSep[] = _T("   ");
 		std::tstring text;
 
 		if ( itemInfo.hSubMenu != NULL )
 			stream::Tag( text, str::Format( _T("hSubMenu=0x%08X"), itemInfo.hSubMenu ), s_space );
-		else
-			stream::Tag( text, str::Format( _T("cmdId=%d=0x%X"), itemInfo.wID, itemInfo.wID ), s_space );
+		else if ( itemInfo.wID != 0 )			// not a separator
+			stream::Tag( text, str::Format( _T("cmdId=%d (0x%X)"), itemInfo.wID, itemInfo.wID ), s_space );
 
-		stream::Tag( text, str::Format( _T("\"%s\""), itemInfo.dwTypeData ), s_fieldSep );		// text
+		if ( itemInfo.wID != 0 )				// not a separator
+			stream::Tag( text, str::Format( _T("\"%s\""), itemInfo.dwTypeData ), s_fieldSep );		// text
 
-		stream::Tag( text, str::Format( _T("Type={%s}"), GetTags_MenuItemType().FormatUi( itemInfo.fType, s_tagSep ) ), s_flagsSep );		// type flags
-		stream::Tag( text, str::Format( _T("State={%s}"), GetTags_MenuItemState().FormatUi( itemInfo.fState, s_tagSep ) ), s_flagsSep );	// state flags
+		stream::Tag( text, FormatFlags( _T("Type={%s}"), GetTags_MenuItemType(), itemInfo.fType ), s_flagsSep );				// type flags
+		stream::Tag( text, FormatFlags( _T("State={%s}"), GetTags_MenuItemState(), itemInfo.fState ), s_flagsSep );	// state flags
 
 		std::tstring indentPrefix( indentLevel * 2, _T(' ') );
 		TRACE( _T("%s[%d] %s\n"), indentPrefix.c_str(), itemPos, text.c_str() );
