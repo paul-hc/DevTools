@@ -70,14 +70,6 @@ CFileItemInfo* CFileItemInfo::MakeParentDirItem( const std::tstring& dirPath )
 	return pParentDirItem;
 }
 
-CImageList* CFileItemInfo::GetSystemImageList( bool largeIcon /*= false*/ )
-{
-	SHFILEINFO fileInfo;
-	HIMAGELIST hSysImageList = (HIMAGELIST)::SHGetFileInfo( _T("C:\\"), NULL, &fileInfo, sizeof( fileInfo ), SHGFI_SYSICONINDEX | ( largeIcon ? SHGFI_LARGEICON : SHGFI_SMALLICON ) );
-
-	return hSysImageList != NULL ? CImageList::FromHandle( hSysImageList ) : NULL;
-}
-
 
 // CFileItemInfo::CDetails implementation
 

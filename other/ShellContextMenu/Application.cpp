@@ -1,7 +1,7 @@
 
 #include "stdafx.h"
 #include "Application.h"
-#include "MainFrame.h"
+#include "MainDialog.h"
 #include "resource.h"
 
 #ifdef _DEBUG
@@ -25,16 +25,13 @@ BOOL CApplication::InitInstance()
 	if ( !CBaseApp< CWinApp >::InitInstance() )
 		return FALSE;
 
-	CMainFrame* pFrame = new CMainFrame;
-	m_pMainWnd = pFrame;
+	CMainDialog mainDialog;
 
-	pFrame->LoadFrame( IDR_MAINFRAME,
-		WS_OVERLAPPEDWINDOW | FWS_ADDTOTITLE, NULL,
-		NULL );
+	m_pMainWnd = &mainDialog;
+	mainDialog.DoModal();
+	m_pMainWnd = NULL;
 
-	pFrame->ShowWindow( SW_SHOW );
-	pFrame->UpdateWindow();
-	return TRUE;
+	return FALSE;
 }
 
 

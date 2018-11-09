@@ -224,30 +224,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\ChildFormView.cpp"
-				>
-				<FileConfiguration
-					Name="ReleaseU|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="DebugU|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath=".\ChildFormView.h"
-				>
-			</File>
-			<File
 				RelativePath=".\FileItemInfo.cpp"
 				>
 			</File>
@@ -256,7 +232,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\MainFrame.cpp"
+				RelativePath=".\MainDialog.cpp"
 				>
 				<FileConfiguration
 					Name="ReleaseU|Win32"
@@ -276,7 +252,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath=".\MainFrame.h"
+				RelativePath=".\MainDialog.h"
 				>
 			</File>
 			<File

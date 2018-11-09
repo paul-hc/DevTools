@@ -12,8 +12,6 @@ struct CFileItemInfo
 	static CFileItemInfo* MakeItem( const CFileFind& foundFile );
 	static CFileItemInfo* MakeParentDirItem( const std::tstring& dirPath );
 
-	static CImageList* GetSystemImageList( bool largeIcon = false );		// temporary image-list owned by Explorer shell
-
 	bool IsValid( void ) const { return m_fileAttributes != UINT_MAX; }
 	bool IsDirectory( void ) const { ASSERT( IsValid() ); return HasFlag( m_fileAttributes, FILE_ATTRIBUTE_DIRECTORY ); }
 

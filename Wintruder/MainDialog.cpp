@@ -104,7 +104,7 @@ const CIcon* CMainDialog::GetDlgIcon( DlgIcon dlgIcon /*= DlgSmallIcon*/ ) const
 	if ( DlgSmallIcon == dlgIcon )			// custom 4 bit small icon for better contrast
 		return CImageStore::GetSharedStore()->RetrieveIcon( CIconId( IDI_APP_SMALL_ICON, SmallIcon ) );
 
-	return CBaseMainDialog::GetDlgIcon( dlgIcon );
+	return __super::GetDlgIcon( dlgIcon );
 }
 
 void CMainDialog::OnTargetWndChanged( const CWndSpot& targetWnd )
@@ -226,19 +226,19 @@ std::tstring CMainDialog::MakeDirtyString( void ) const
 
 void CMainDialog::LoadFromRegistry( void )
 {
-	CBaseMainDialog::LoadFromRegistry();
+	__super::LoadFromRegistry();
 	m_searchPattern.Load();
 }
 
 void CMainDialog::SaveToRegistry( void )
 {
 	m_searchPattern.Save();
-	CBaseMainDialog::SaveToRegistry();
+	__super::SaveToRegistry();
 }
 
 void CMainDialog::OnCollapseChanged( bool collapsed )
 {
-	CBaseMainDialog::OnCollapseChanged( collapsed );
+	__super::OnCollapseChanged( collapsed );
 
 	m_detailsButton.SetIconId( collapsed ? ID_EXPAND : ID_COLLAPSE );
 	ui::EnableWindow( m_applyButton, app::GetSvc().HasDirtyDetails() && !GetLayoutEngine().IsCollapsed() );
@@ -301,7 +301,7 @@ void CMainDialog::DoDataExchange( CDataExchange* pDX )
 	if ( DialogOutput == pDX->m_bSaveAndValidate )
 		OutputTargetWnd();
 
-	CBaseMainDialog::DoDataExchange( pDX );
+	__super::DoDataExchange( pDX );
 }
 
 
@@ -329,7 +329,7 @@ END_MESSAGE_MAP()
 
 BOOL CMainDialog::OnInitDialog( void )
 {
-	CBaseMainDialog::OnInitDialog();
+	__super::OnInitDialog();
 
 	ui::SetTopMost( m_hWnd, app::GetOptions()->m_keepTopmost );
 	if ( app::GetOptions()->m_autoUpdate )
@@ -341,7 +341,7 @@ BOOL CMainDialog::OnInitDialog( void )
 void CMainDialog::OnDestroy( void )
 {
 	app::GetMainTooltip()->DestroyWindow();
-	CBaseMainDialog::OnDestroy();
+	__super::OnDestroy();
 }
 
 void CMainDialog::OnTimer( UINT_PTR eventId )
@@ -354,12 +354,12 @@ void CMainDialog::OnTimer( UINT_PTR eventId )
 		m_refreshButton.SetState( false );
 	}
 	else
-		CBaseMainDialog::OnTimer( eventId );
+		__super::OnTimer( eventId );
 }
 
 HBRUSH CMainDialog::OnCtlColor( CDC* dc, CWnd* pWnd, UINT ctlColor )
 {
-	HBRUSH hBrush = CBaseMainDialog::OnCtlColor( dc, pWnd, ctlColor );
+	HBRUSH hBrush = __super::OnCtlColor( dc, pWnd, ctlColor );
 
 	if ( ctlColor == CTLCOLOR_STATIC && pWnd == &m_briefInfoEdit )
 		dc->SetTextColor( app::GetTargetWnd().IsValid() ? HotFieldColor : StaleWndColor );
