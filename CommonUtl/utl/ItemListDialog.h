@@ -8,7 +8,7 @@
 #include "LayoutDialog.h"
 #include "LayoutChildPropertySheet.h"
 #include "LayoutPropertyPage.h"
-#include "FileItemListCtrl.h"
+#include "PathItemListCtrl.h"
 #include "TextEdit.h"
 
 
@@ -107,7 +107,7 @@ private:
 private:
 	enum Column { Item };
 
-	CFileItemListCtrl m_listCtrl;
+	CPathItemListCtrl m_listCtrl;
 	CAccelTable m_accel;
 
 	// generated stuff

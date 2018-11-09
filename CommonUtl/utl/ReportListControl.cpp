@@ -82,7 +82,7 @@ const TCHAR CReportListControl::s_fmtRegColumnLayout[] = _T("Width=%d, Order=%d"
 
 CReportListControl::CReportListControl( UINT columnLayoutId /*= 0*/, DWORD listStyleEx /*= DefaultStyleEx*/ )
 	: CListCtrl()
-	, CBaseObjectCtrl()
+	, CObjectCtrlBase()
 	, m_columnLayoutId( 0 )
 	, m_listStyleEx( listStyleEx )
 	, m_optionFlags( UseExplorerTheme | SortInternally | HighlightTextDiffsFrame )

@@ -1538,14 +1538,6 @@
 					>
 				</File>
 				<File
-					RelativePath=".\BaseObjectCtrl.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\BaseObjectCtrl.h"
-					>
-				</File>
-				<File
 					RelativePath=".\BaseSplitButton.cpp"
 					>
 				</File>
@@ -1626,14 +1618,6 @@
 					>
 				</File>
 				<File
-					RelativePath=".\FileItemListCtrl.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\FileItemListCtrl.h"
-					>
-				</File>
-				<File
 					RelativePath=".\HistoryComboBox.cpp"
 					>
 				</File>
@@ -1679,6 +1663,22 @@
 				</File>
 				<File
 					RelativePath=".\NumericEdit.h"
+					>
+				</File>
+				<File
+					RelativePath=".\ObjectCtrlBase.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\ObjectCtrlBase.h"
+					>
+				</File>
+				<File
+					RelativePath=".\PathItemListCtrl.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\PathItemListCtrl.h"
 					>
 				</File>
 				<File

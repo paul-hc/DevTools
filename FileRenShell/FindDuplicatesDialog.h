@@ -6,7 +6,7 @@
 #include "utl/FileSystem_fwd.h"
 #include "utl/DialogToolBar.h"
 #include "utl/HistoryComboBox.h"
-#include "utl/FileItemListCtrl.h"
+#include "utl/PathItemListCtrl.h"
 #include "utl/TextEdit.h"
 #include "utl/ThemeStatic.h"
 #include "FileEditorBaseDialog.h"
@@ -74,10 +74,10 @@ private:
 	// enum { IDD = IDD_FIND_DUPLICATES_DIALOG };
 	enum DupFileColumn { FileName, DirPath, Size, Crc32, DateModified };
 
-	CFileItemListCtrl m_srcPathsListCtrl;
+	CPathItemListCtrl m_srcPathsListCtrl;
 	CDialogToolBar m_srcPathsToolbar;
 	CStatusStatic m_outcomeStatic;
-	CFileItemListCtrl m_dupsListCtrl;
+	CPathItemListCtrl m_dupsListCtrl;
 	CComboBox m_fileTypeCombo;
 	CTextEdit m_fileSpecEdit;
 	CHistoryComboBox m_minFileSizeCombo;

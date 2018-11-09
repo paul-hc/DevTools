@@ -7,7 +7,7 @@
 #include "ISubject.h"
 #include "SubjectPredicates.h"
 #include "CustomDrawImager_fwd.h"
-#include "BaseObjectCtrl.h"
+#include "ObjectCtrlBase.h"
 #include "OleUtils.h"
 #include "MatchSequence.h"
 #include "Resequence.h"
@@ -98,7 +98,7 @@ protected:
 class CReportListControl : public CListCtrl
 						 , public CInternalChange
 						 , public CListTraits
-						 , public CBaseObjectCtrl
+						 , public CObjectCtrlBase
 						 , public ICustomDrawControl
 {
 	friend class CReportListCustomDraw;

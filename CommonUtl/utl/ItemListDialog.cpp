@@ -352,7 +352,7 @@ bool CItemsListPage::EditSelItem( void )
 std::tstring CItemsListPage::GetListItemText( int index ) const
 {
 	if ( ui::String == m_rContent.m_type )
-		return m_listCtrl.GetItemText( index, CFileItemListCtrl::Code ).GetString();
+		return m_listCtrl.GetItemText( index, CPathItemListCtrl::Code ).GetString();
 
 	return m_listCtrl.FormatCode( m_listCtrl.GetObjectAt( index ) );
 }

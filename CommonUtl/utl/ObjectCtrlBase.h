@@ -1,5 +1,5 @@
-#ifndef BaseObjectCtrl_h
-#define BaseObjectCtrl_h
+#ifndef ObjectCtrlBase_h
+#define ObjectCtrlBase_h
 #pragma once
 
 #include "ISubject.h"
@@ -35,10 +35,10 @@ namespace ui
 }
 
 
-abstract class CBaseObjectCtrl
+abstract class CObjectCtrlBase
 {
 protected:
-	CBaseObjectCtrl( UINT ctrlAccelId = 0 );
+	CObjectCtrlBase( UINT ctrlAccelId = 0 );
 public:
 	ui::ISubjectAdapter* GetSubjectAdapter( void ) const { return m_pSubjectAdapter; }
 	void SetSubjectAdapter( ui::ISubjectAdapter* pSubjectAdapter );
@@ -51,4 +51,4 @@ protected:
 };
 
 
-#endif // BaseObjectCtrl_h
+#endif // ObjectCtrlBase_h

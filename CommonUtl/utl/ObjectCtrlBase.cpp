@@ -1,6 +1,6 @@
 
 #include "stdafx.h"
-#include "BaseObjectCtrl.h"
+#include "ObjectCtrlBase.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -38,7 +38,7 @@ namespace ui
 }
 
 
-CBaseObjectCtrl::CBaseObjectCtrl( UINT ctrlAccelId /*= 0*/ )
+CObjectCtrlBase::CObjectCtrlBase( UINT ctrlAccelId /*= 0*/ )
 	: m_pSubjectAdapter( NULL )
 {
 	SetSubjectAdapter( ui::CDisplayCodeAdapter::Instance() );
@@ -46,7 +46,7 @@ CBaseObjectCtrl::CBaseObjectCtrl( UINT ctrlAccelId /*= 0*/ )
 		m_ctrlAccel.Load( ctrlAccelId );
 }
 
-void CBaseObjectCtrl::SetSubjectAdapter( ui::ISubjectAdapter* pSubjectAdapter )
+void CObjectCtrlBase::SetSubjectAdapter( ui::ISubjectAdapter* pSubjectAdapter )
 {
 	ASSERT_PTR( pSubjectAdapter );
 	m_pSubjectAdapter = pSubjectAdapter;
