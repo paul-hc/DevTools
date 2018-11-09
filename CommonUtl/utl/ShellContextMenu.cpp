@@ -2,6 +2,7 @@
 #include "stdafx.h"
 #include "ShellContextMenu.h"
 #include "ContainerUtilities.h"
+#include "MenuUtilities.h"
 #include "Utilities.h"
 
 #ifdef _DEBUG
@@ -69,27 +70,24 @@ namespace shell
 	}
 
 
-	HRESULT InvokeCommandByVerb( IContextMenu* pContextMenu, const char* pVerb, HWND hWnd )
+	bool InvokeCommandByVerb( IContextMenu* pContextMenu, const char* pVerb, HWND hWnd )
 	{	// hosts an IContextMenu and invokes a verb
 		ASSERT_PTR( pContextMenu );
 
-		CMenu popupMenu;
-		popupMenu.CreatePopupMenu();		// temporary popup menu
-
-		HRESULT hr = pContextMenu->QueryContextMenu( popupMenu, 0, 1, 0x7FFF, CMF_NORMAL );
-		if ( SUCCEEDED( hr ) )				// is there a common context menu for the selected files?
-		{
-			CMINVOKECOMMANDINFO cmd;
-			utl::ZeroWinStruct( &cmd );
-
-			cmd.hwnd = hWnd;
-			cmd.lpVerb = pVerb;
-			cmd.nShow = SW_SHOWNORMAL;
-
-			return pContextMenu->InvokeCommand( &cmd );
-		}
-		return hr;
+		CContextMenu ctxMenu( hWnd, pContextMenu );
+		return
+			ctxMenu.MakePopupMenu( CMF_VERBSONLY ) &&		// just verbs
+			ctxMenu.InvokeVerb( pVerb );
 	}
+
+	bool InvokeDefaultVerb( IContextMenu* pContextMenu, HWND hWnd )
+	{
+		ASSERT_PTR( pContextMenu );
+
+		CContextMenu ctxMenu( hWnd, pContextMenu );
+		return ctxMenu.InvokeDefaultVerb();
+	}
+
 
 	bool InvokeVerbOnItem( IShellItem* pShellItem, const wchar_t* pVerb, HWND hWnd )
 	{
@@ -110,37 +108,6 @@ namespace shell
 
 		return ::ShellExecuteEx( &info ) != FALSE;
 	}
-
-//	bool ExecItemVerb( IShellFolder* pParentFolder, const ITEMID_CHILD* pidl, const TCHAR* pVerb, HWND hWndOwner, DWORD mask /*= 0*/, int show /*= SW_SHOWNORMAL*/ )
-//	{
-//		ASSERT_PTR( pVerb );
-//
-//		CContextMenu contextMenu;
-//		if ( contextMenu.SetFromItem( pParentFolder, pidl, hWndOwner ) )
-//		{
-//			int cmdId = contextMenu.FindCmdIdWithVerb( pVerb );
-//			if ( cmdId > 0 )
-//				return contextMenu.InvokeCommand( cmdId, hWndOwner, mask, show );
-//		}
-//
-//		return false;
-//	}
-//
-//	bool ExecItemVerb( IShellItem* pItem, const TCHAR* pVerb, HWND hWndOwner, DWORD mask /*= 0*/, int show /*= SW_SHOWNORMAL*/ )
-//	{
-//		ASSERT_PTR( pVerb );
-//
-//		CContextMenu contextMenu;
-//		if ( contextMenu.SetFromItem( pItem, hWndOwner ) )
-//		{
-//			int cmdId = contextMenu.FindCmdIdWithVerb( pVerb );
-//			if ( cmdId > 0 )
-//				return contextMenu.InvokeCommand( cmdId, hWndOwner, mask, show );
-//		}
-//
-//		return false;
-//	}
-
 }
 
 
@@ -180,25 +147,6 @@ namespace shell
 		m_pContextMenu3 = m_pContextMenu;
 	}
 
-	void CContextMenu::SetExternalPopupMenu( CMenu* pMenu )
-	{
-		if ( InternalMenu == m_menuOwnership )
-			m_popupMenu.DestroyMenu();
-		else
-			m_popupMenu.Detach();
-
-		if ( pMenu->GetSafeHmenu() != NULL )
-		{
-			m_popupMenu.Attach( pMenu->GetSafeHmenu() );
-			m_menuOwnership = ExternalMenu;
-		}
-		else
-		{
-			m_popupMenu.CreatePopupMenu();
-			m_menuOwnership = InternalMenu;
-		}
-	}
-
 	void CContextMenu::SetFolderItem( IShellFolder* pParentFolder, PCITEMID_CHILD pidlItem )
 	{
 		Reset( shell::GetItemContextMenu( pParentFolder, pidlItem, m_hWndOwner ) );
@@ -230,29 +178,56 @@ namespace shell
 	}
 
 
-	bool CContextMenu::MakePopupMenu( CMenu& rPopupMenu, UINT atIndex /*= AtEnd*/, UINT flags /*= CMF_NORMAL | CMF_EXPLORE*/, UINT cmdIdFirst /*= MinCmdId*/, UINT cmdIdLast /*= MaxCmdId*/ ) const
+	void CContextMenu::SetExternalPopupMenu( CMenu* pMenu )
+	{
+		if ( InternalMenu == m_menuOwnership )
+			m_popupMenu.DestroyMenu();
+		else
+			m_popupMenu.Detach();
+
+		if ( pMenu->GetSafeHmenu() != NULL )
+		{
+			m_popupMenu.Attach( pMenu->GetSafeHmenu() );
+			m_menuOwnership = ExternalMenu;
+		}
+		else
+		{
+			m_popupMenu.CreatePopupMenu();
+			m_menuOwnership = InternalMenu;
+		}
+	}
+
+	bool CContextMenu::MakePopupMenu( CMenu& rPopupMenu, int atIndex /*= AtEnd*/, UINT queryFlags /*= CMF_NORMAL | CMF_EXPLORE*/ )
 	{
 		ASSERT( IsValid() );
 
 		if ( NULL == rPopupMenu.GetSafeHmenu() )
 			rPopupMenu.CreatePopupMenu();
 
-		SetFlag( flags, CMF_EXTENDEDVERBS, ui::IsKeyPressed( VK_SHIFT ) );
+		SetFlag( queryFlags, CMF_EXTENDEDVERBS, ui::IsKeyPressed( VK_SHIFT ) );
 		if ( AtEnd == atIndex )
 			atIndex = rPopupMenu.GetMenuItemCount();
 
-		return HR_OK( m_pContextMenu->QueryContextMenu( rPopupMenu, atIndex, cmdIdFirst, cmdIdLast, flags ) );
+		ui::CCmdIdStore oldIdsStore( rPopupMenu );			// commands belonging to the original popup menu, if initialized by the client
+
+		if ( !HR_OK( m_pContextMenu->QueryContextMenu( rPopupMenu, atIndex, MinCmdId, MaxCmdId, queryFlags ) ) )
+			return false;			// no common verbs for the given files
+
+		m_shellIdStore.RegisterCommands( rPopupMenu );
+		m_shellIdStore.Subtract( oldIdsStore );				// keep only the shell commmands
+		return true;
 	}
 
-	int CContextMenu::TrackMenu( const CPoint& screenPos, UINT atIndex /*= AtEnd*/, UINT flags /*= CMF_NORMAL | CMF_EXPLORE*/ )
+	int CContextMenu::TrackMenu( const CPoint& screenPos, UINT atIndex /*= AtEnd*/, UINT queryFlags /*= CMF_NORMAL | CMF_EXPLORE*/ )
 	{
 		if ( !IsValid() )
 			return 0;						// no context menu
 
 		CMenu* pPopupMenu = GetPopupMenu();
-		if ( !MakePopupMenu( *pPopupMenu, atIndex, flags ) )
+		if ( !MakePopupMenu( *pPopupMenu, atIndex, queryFlags ) )
 			return 0;
 
+		dbg::TraceMenu( pPopupMenu->GetSafeHmenu() );
 		return TrackMenu( pPopupMenu, screenPos );
 	}
 
@@ -264,7 +239,7 @@ namespace shell
 			if ( m_pContextMenu2 != NULL || m_pContextMenu3 != NULL )		// only subclass if its version 2 or 3
 				m_pOldWndProc = (WNDPROC)::SetWindowLongPtr( m_hWndOwner, GWLP_WNDPROC, (LONG_PTR)HookWndProc );
 
-		UINT cmdId = ::TrackPopupMenu( pPopupMenu->m_hMenu, TPM_RETURNCMD | TPM_LEFTALIGN, screenPos.x, screenPos.y, 0, m_hWndOwner, NULL );
+		int cmdId = ui::ToCmdId( ::TrackPopupMenu( pPopupMenu->m_hMenu, TPM_RETURNCMD | TPM_LEFTALIGN, screenPos.x, screenPos.y, 0, m_hWndOwner, NULL ) );
 
 		if ( m_pOldWndProc != NULL )		// unsubclass
 		{
@@ -272,24 +247,61 @@ namespace shell
 			m_pOldWndProc = NULL;
 		}
 
-		if ( cmdId >= MinCmdId && cmdId <= MaxCmdId )	// see if returned cmdId belongs to shell menu entries
+		if ( cmdId >= MinCmdId && cmdId <= MaxCmdId )			// see if returned cmdId belongs to shell menu entries
 		{
-			InvokeCommand( cmdId - MinCmdId );	// execute related command
+			InvokeVerbIndex( ToVerbIndex( cmdId ) );			// execute related command
 			cmdId = 0;
 		}
 		return cmdId;
 	}
 
-	bool CContextMenu::InvokeCommand( UINT cmdId )
+
+	std::tstring CContextMenu::GetItemVerb( int cmdId ) const
 	{
+		ASSERT( IsValid() );
+
+		TCHAR verb[ MAX_PATH ];
+		if ( cmdId > 0 )
+			if ( SUCCEEDED( m_pContextMenu->GetCommandString( ToVerbIndex( cmdId ), GCS_VERBW, NULL, (char*)verb, _countof( verb ) ) ) )
+				return verb;
+
+		return std::tstring();
+	}
+
+	bool CContextMenu::InvokeVerb( const char* pVerb )
+	{
+		ASSERT_PTR( pVerb );
+		ASSERT( HasShellCmds() );			// context menu was queryed and there are common verbs on selected files
+
 		CMINVOKECOMMANDINFO cmd;
 		utl::ZeroWinStruct( &cmd );
 
-		cmd.lpVerb = MAKEINTRESOURCEA( cmdId );
+		cmd.lpVerb = pVerb;
 		cmd.hwnd = m_hWndOwner;
 		cmd.nShow = SW_SHOWNORMAL;
 
 		return HR_OK( m_pContextMenu->InvokeCommand( &cmd ) );
+	}
+
+	bool CContextMenu::InvokeDefaultVerb( void )
+	{
+		CMenu* pPopupMenu = EnsurePopupShellCmds( CMF_DEFAULTONLY );		// narrow down to default verb
+		int defaultCmdId = ui::ToCmdId( pPopupMenu->GetDefaultItem( GMDI_GOINTOPOPUPS ) );
+
+		return
+			defaultCmdId >= MinCmdId &&
+			InvokeVerbIndex( ToVerbIndex( defaultCmdId ) );
+	}
+
+	CMenu* CContextMenu::EnsurePopupShellCmds( UINT queryFlags )
+	{
+		if ( HasShellCmds() )
+			return &m_popupMenu;
+
+		// inplace query using a temporary popup menu
+		CMenu* pPopupMenu = CMenu::FromHandle( ::CreatePopupMenu() );
+
+		return MakePopupMenu( *pPopupMenu, AtEnd, queryFlags ) ? pPopupMenu : NULL;
 	}
 
 	LRESULT CContextMenu::HandleWndProc( HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam )
@@ -324,5 +336,18 @@ namespace shell
 	{
 		ASSERT_PTR( s_pInstance );
 		return s_pInstance->HandleWndProc( hWnd, message, wParam, lParam );
+	}
+
+
+	// command handlers
+
+	BEGIN_MESSAGE_MAP( CContextMenu, CCmdTarget )
+	END_MESSAGE_MAP()
+
+	BOOL CContextMenu::OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo )
+	{
+		return
+			HasShellCmd( id ) &&
+			__super::OnCmdMsg( id, code, pExtra, pHandlerInfo );		// shell commands are handled internally
 	}
 }

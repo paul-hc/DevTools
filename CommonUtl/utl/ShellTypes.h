@@ -10,13 +10,6 @@
 
 namespace shell
 {
-	std::tstring FormatByteSize( UINT64 fileSize );
-	std::tstring FormatKiloByteSize( UINT64 fileSize );
-}
-
-
-namespace shell
-{
 	CComPtr< IShellFolder > GetDesktopFolder( void );
 	CComPtr< IShellFolder2 > ToShellFolder( IShellItem* pFolderItem );
 	CComPtr< IShellFolder2 > GetParentFolderAndPidl( ITEMID_CHILD** pPidlItem, IShellItem* pShellItem );
@@ -152,6 +145,34 @@ namespace shell
 		BYTE* GetBuffer( void ) { return pidl::impl::GetBuffer( m_pidl ); }
 	private:
 		LPITEMIDLIST m_pidl;
+	};
+}
+
+
+#include "Image_fwd.h"
+
+
+namespace shell
+{
+	std::tstring FormatByteSize( UINT64 fileSize );
+	std::tstring FormatKiloByteSize( UINT64 fileSize );
+
+	CImageList* GetSysImageList( ui::GlyphGauge glyphGauge );
+
+	int GetFileSysImageIndex( const TCHAR* filePath );
+	HICON GetFileSysIcon( const TCHAR* filePath );			// returns a copy of the icon (client must delete it)
+
+
+	class CSysImageLists
+	{
+		CSysImageLists( void ) {}
+		~CSysImageLists();
+	public:
+		static CSysImageLists& Instance( void );
+
+		CImageList* Get( ui::GlyphGauge glyphGauge );
+	private:
+		CImageList m_imageLists[ ui::_GlyphGaugeCount ];
 	};
 }
 

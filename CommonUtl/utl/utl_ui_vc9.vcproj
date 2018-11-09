@@ -851,6 +851,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\CmdIdStore.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\CmdIdStore.h"
+				>
+			</File>
+			<File
 				RelativePath=".\CmdInfoStore.cpp"
 				>
 			</File>

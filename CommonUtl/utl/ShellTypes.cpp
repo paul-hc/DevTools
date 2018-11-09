@@ -10,24 +10,6 @@
 
 namespace shell
 {
-	std::tstring FormatByteSize( UINT64 fileSize )
-	{
-		TCHAR buffer[ 32 ];
-		::StrFormatByteSize64( fileSize, buffer, COUNT_OF( buffer ) );
-		return buffer;
-	}
-
-	std::tstring FormatKiloByteSize( UINT64 fileSize )
-	{
-		TCHAR buffer[ 32 ];
-		::StrFormatKBSize( fileSize, buffer, COUNT_OF( buffer ) );
-		return buffer;
-	}
-}
-
-
-namespace shell
-{
 	CComPtr< IShellFolder > GetDesktopFolder( void )
 	{
 		CComPtr< IShellFolder > pDesktopFolder;
@@ -393,5 +375,76 @@ namespace shell
 		}
 
 		return size == bytesRead;
+	}
+}
+
+
+namespace shell
+{
+	std::tstring FormatByteSize( UINT64 fileSize )
+	{
+		TCHAR buffer[ 32 ];
+		::StrFormatByteSize64( fileSize, buffer, COUNT_OF( buffer ) );
+		return buffer;
+	}
+
+	std::tstring FormatKiloByteSize( UINT64 fileSize )
+	{
+		TCHAR buffer[ 32 ];
+		::StrFormatKBSize( fileSize, buffer, COUNT_OF( buffer ) );
+		return buffer;
+	}
+
+
+	CImageList* GetSysImageList( ui::GlyphGauge glyphGauge )
+	{
+		return CSysImageLists::Instance().Get( glyphGauge );
+	}
+
+	int GetFileSysImageIndex( const TCHAR* filePath )
+	{
+		SHFILEINFO fileInfo;
+		::SHGetFileInfo( filePath, NULL, &fileInfo, sizeof( fileInfo ), SHGFI_SYSICONINDEX );
+		return fileInfo.iIcon;
+	}
+
+	HICON GetFileSysIcon( const TCHAR* filePath )
+	{
+		SHFILEINFO fileInfo;
+		::SHGetFileInfo( filePath, NULL, &fileInfo, sizeof( fileInfo ), SHGFI_ICON );
+		return fileInfo.hIcon;
+	}
+
+
+	// CSysImageLists implementation
+
+	CSysImageLists::~CSysImageLists()
+	{
+		// release image-lists since they're owned by Explorer
+		m_imageLists[ ui::SmallGlyph ].Detach();
+		m_imageLists[ ui::LargeGlyph ].Detach();
+	}
+
+	CSysImageLists& CSysImageLists::Instance( void )
+	{
+		static CSysImageLists s_sysImages;
+		return s_sysImages;
+	}
+
+	CImageList* CSysImageLists::Get( ui::GlyphGauge glyphGauge )
+	{
+		CImageList* pImageList = &m_imageLists[ glyphGauge ];
+
+		if ( NULL == pImageList->GetSafeHandle() )
+		{
+			SHFILEINFO fileInfo;
+			UINT flags = SHGFI_SYSICONINDEX;
+			SetFlag( flags, ui::LargeGlyph == glyphGauge ? SHGFI_LARGEICON : SHGFI_SMALLICON );
+
+			if ( HIMAGELIST hSysImageList = (HIMAGELIST)::SHGetFileInfo( _T("C:\\"), NULL, &fileInfo, sizeof( fileInfo ), flags ) )
+				pImageList->Attach( hSysImageList );
+		}
+
+		return pImageList;
 	}
 }
