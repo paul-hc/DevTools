@@ -31,6 +31,9 @@ namespace ui
 
 	enum FontEffect { Regular = 0, Bold = 1 << 0, Italic = 1 << 1, Underline = 1 << 2 };
 	typedef int TFontEffect;
+
+
+	inline int ToCmdId( UINT uCmdId ) { return (short)(unsigned short)( uCmdId ); }
 }
 
 

@@ -38,12 +38,12 @@ namespace ui
 }
 
 
-CBaseObjectCtrl::CBaseObjectCtrl( UINT accelId /*= 0*/ )
+CBaseObjectCtrl::CBaseObjectCtrl( UINT ctrlAccelId /*= 0*/ )
 	: m_pSubjectAdapter( NULL )
 {
 	SetSubjectAdapter( ui::CDisplayCodeAdapter::Instance() );
-	if ( accelId != 0 )
-		m_accel.Load( accelId );
+	if ( ctrlAccelId != 0 )
+		m_ctrlAccel.Load( ctrlAccelId );
 }
 
 void CBaseObjectCtrl::SetSubjectAdapter( ui::ISubjectAdapter* pSubjectAdapter )

@@ -8,7 +8,7 @@
 #include "LayoutDialog.h"
 #include "LayoutChildPropertySheet.h"
 #include "LayoutPropertyPage.h"
-#include "ReportListControl.h"
+#include "FileItemListCtrl.h"
 #include "TextEdit.h"
 
 
@@ -95,6 +95,7 @@ public:
 	virtual bool InEditMode( void ) const;
 	virtual bool EditSelItem( void );
 private:
+	std::tstring GetListItemText( int index ) const;
 	void QueryListItems( std::vector< std::tstring >& rItems ) const;
 	void OutputList( void );
 private:
@@ -106,7 +107,7 @@ private:
 private:
 	enum Column { Item };
 
-	CReportListControl m_listCtrl;
+	CFileItemListCtrl m_listCtrl;
 	CAccelTable m_accel;
 
 	// generated stuff

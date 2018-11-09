@@ -310,7 +310,9 @@ CItemsListPage::CItemsListPage( CItemListDialog* pDialog )
 {
 	RegisterCtrlLayout( layout::listPageStyles, COUNT_OF( layout::listPageStyles ) );
 	SetUseLazyUpdateData();			// call UpdateData on page activation change
+
 	m_listCtrl.SetSection( reg::section_list );
+	m_listCtrl.SetSubjectAdapter( ui::CCodeAdapter::Instance() );				// display full paths
 }
 
 CItemsListPage::~CItemsListPage()
@@ -337,7 +339,7 @@ bool CItemsListPage::EditSelItem( void )
 	}
 	else
 	{
-		newItem = m_rContent.EditItem( m_listCtrl.GetItemText( selIndex, Item ), this );
+		newItem = m_rContent.EditItem( GetListItemText( selIndex ).c_str(), this );
 		if ( !newItem.empty() )
 			m_listCtrl.SetItemText( selIndex, Item, newItem.c_str() );
 		else
@@ -347,13 +349,21 @@ bool CItemsListPage::EditSelItem( void )
 	return m_pDialog->InputItem( selIndex, newItem );
 }
 
+std::tstring CItemsListPage::GetListItemText( int index ) const
+{
+	if ( ui::String == m_rContent.m_type )
+		return m_listCtrl.GetItemText( index, CFileItemListCtrl::Code ).GetString();
+
+	return m_listCtrl.FormatCode( m_listCtrl.GetObjectAt( index ) );
+}
+
 void CItemsListPage::QueryListItems( std::vector< std::tstring >& rItems ) const
 {
 	unsigned int count = m_listCtrl.GetItemCount();
 	rItems.clear();
 	rItems.reserve( count );
 	for ( unsigned int i = 0; i != count; ++i )
-		rItems.push_back( m_listCtrl.GetItemText( i, 0 ).GetString() );
+		rItems.push_back( GetListItemText( i ) );
 }
 
 void CItemsListPage::OutputList( void )
@@ -404,7 +414,7 @@ void CItemsListPage::DoDataExchange( CDataExchange* pDX )
 				break;
 			case ui::DirPath:
 			case ui::FilePath:
-				m_listCtrl.SetCustomFileGlyphDraw();
+				//m_listCtrl.SetCustomFileGlyphDraw();
 				break;
 		}
 	}

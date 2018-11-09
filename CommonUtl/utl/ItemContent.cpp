@@ -105,10 +105,10 @@ namespace ui
 
 	bool CItemContent::AutoBrowsePath( std::tstring& rNewItem, CWnd* pParent ) const
 	{
-		if ( fs::IsValidFile( rNewItem.c_str() ) )
+		if ( FilePath == m_type || fs::IsValidFile( rNewItem.c_str() ) )
 			return shell::BrowseForFile( rNewItem, pParent, shell::FileOpen, m_pFileFilter );
 
-		return shell::BrowseForFolder( rNewItem, pParent );
+		return shell::PickFolder( rNewItem, pParent );
 	}
 
 } //namespace ui

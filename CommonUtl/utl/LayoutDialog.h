@@ -61,13 +61,13 @@ protected:
 
 	// option flags
 	bool m_initCollapsed;		// open dialog in collapsed state
-public:
-	// generated overrides
-	protected:
+
+	// generated stuff
+protected:
 	virtual void OnOK( void );
 	virtual void OnCancel( void );
 	virtual void DoDataExchange( CDataExchange* pDX );
-	public:
+public:
 	virtual BOOL DestroyWindow( void );
 	virtual BOOL PreTranslateMessage( MSG* pMsg );
 	virtual BOOL OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo );

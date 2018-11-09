@@ -13,6 +13,21 @@ namespace shell
 	bool BrowseForFile( std::tstring& rFilePath, CWnd* pParentWnd, BrowseMode browseMode = FileOpen,
 						const TCHAR* pFileFilter = NULL, DWORD flags = 0, const TCHAR* pTitle = NULL );
 
+	bool PickFolder( std::tstring& rFilePath, CWnd* pParentWnd,
+					 FILEOPENDIALOGOPTIONS options = 0, const TCHAR* pTitle = NULL );
+
+	namespace impl
+	{
+		CFileDialog* MakeFileDialog( const std::tstring& filePath, CWnd* pParentWnd, BrowseMode browseMode, const std::tstring& fileFilter,
+									 DWORD flags = 0, const TCHAR* pTitle = NULL );
+
+		bool RunFileDialog( std::tstring& rFilePath, CFileDialog* pFileDialog );
+	}
+}
+
+
+namespace shell
+{
 	bool MoveFiles( const std::vector< std::tstring >& srcPaths, const std::vector< std::tstring >& destPaths, CWnd* pWnd = AfxGetMainWnd(), FILEOP_FLAGS flags = FOF_ALLOWUNDO );
 	bool MoveFiles( const std::vector< std::tstring >& srcPaths, const std::tstring& destFolderPath, CWnd* pWnd = AfxGetMainWnd(), FILEOP_FLAGS flags = FOF_ALLOWUNDO );
 

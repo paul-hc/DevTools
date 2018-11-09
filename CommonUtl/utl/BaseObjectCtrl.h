@@ -38,7 +38,7 @@ namespace ui
 abstract class CBaseObjectCtrl
 {
 protected:
-	CBaseObjectCtrl( UINT accelId = 0 );
+	CBaseObjectCtrl( UINT ctrlAccelId = 0 );
 public:
 	ui::ISubjectAdapter* GetSubjectAdapter( void ) const { return m_pSubjectAdapter; }
 	void SetSubjectAdapter( ui::ISubjectAdapter* pSubjectAdapter );
@@ -47,7 +47,7 @@ public:
 private:
 	ui::ISubjectAdapter* m_pSubjectAdapter;			// by default ui::CDisplayCodeAdapter
 protected:
-	CAccelTable m_accel;
+	CAccelTable m_ctrlAccel;
 };
 
 
