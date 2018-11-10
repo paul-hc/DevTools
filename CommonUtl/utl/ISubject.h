@@ -108,6 +108,16 @@ namespace func
 
 namespace utl
 {
+	template< typename CodeContainerT, typename ObjectContainerT >
+	void QueryObjectCodes( CodeContainerT& rItemCodes, const ObjectContainerT& objects )
+	{
+		rItemCodes.reserve( rItemCodes.size() + objects.size() );
+
+		for ( typename ObjectContainerT::const_iterator itObject = objects.begin(); itObject != objects.end(); ++itObject )
+			rItemCodes.push_back( ( *itObject )->GetCode() );		// works for containers of std::tstring, fs::CPath
+	}
+
+
 	template< typename IteratorT, typename GetTextFuncT >
 	void QueryTextItems( std::vector< std::tstring >& rTextItems, IteratorT itFirst, IteratorT itLast, GetTextFuncT getTextFunc )
 	{

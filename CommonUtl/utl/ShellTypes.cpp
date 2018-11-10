@@ -159,7 +159,7 @@ namespace shell
 			return targetPidl;
 		}
 
-		LPITEMIDLIST GetRelativeItem( IShellFolder* pFolder, const TCHAR itemFilename[] )
+		PUIDLIST_RELATIVE GetRelativeItem( IShellFolder* pFolder, const TCHAR itemFilename[] )
 		{
 			ASSERT_PTR( pFolder );
 			ASSERT_PTR( !str::IsEmpty( itemFilename ) );
@@ -167,9 +167,9 @@ namespace shell
 			TCHAR displayName[ MAX_PATH * 2 ];
 			_tcscpy( displayName, itemFilename );
 
-			LPITEMIDLIST childItemPidl = NULL;
+			PUIDLIST_RELATIVE childItemPidl = NULL;
 			if ( HR_OK( pFolder->ParseDisplayName( NULL, NULL, displayName, NULL, &childItemPidl, NULL ) ) )
-				return childItemPidl;
+				return childItemPidl;			// allocated, client must free
 
 			return NULL;
 		}

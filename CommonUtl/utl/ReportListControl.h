@@ -208,6 +208,8 @@ public:
 	const pred::IComparator* FindCompare( TColumn column ) const;
 protected:
 	virtual pred::CompareResult CompareSubItems( const utl::ISubject* pLeft, const utl::ISubject* pRight ) const;
+
+	virtual bool TrackContextMenu( ListPopup popupType, const CPoint& screenPos );
 private:
 	void UpdateColumnSortHeader( void );
 	bool IsDefaultAscending( TColumn column ) const;				// e.g. allows date-time descending ordering by default

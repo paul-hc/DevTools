@@ -87,7 +87,7 @@ namespace ui
 			excludeStruct.rcExclude = *pExcludeRect;
 
 		AdjustMenuTrackPos( screenPos );
-		return rMenu.TrackPopupMenuEx( trackFlags, screenPos.x, screenPos.y, pTargetWnd, pExcludeRect != NULL ? &excludeStruct : NULL );
+		return ui::ToCmdId( rMenu.TrackPopupMenuEx( trackFlags, screenPos.x, screenPos.y, pTargetWnd, pExcludeRect != NULL ? &excludeStruct : NULL ) );
 	}
 
 	int TrackPopupMenuAlign( CMenu& rMenu, CWnd* pTargetWnd, const RECT& excludeRect, PopupAlign popupAlign /*= DropDown*/,

@@ -198,7 +198,7 @@ BEGIN
     EDITTEXT        IDC_FILE_SPEC_EDIT,48,97,270,12,ES_AUTOHSCROLL
     LTEXT           "Mi&nimum size (KB):",IDC_MINIMUM_SIZE_STATIC,138,81,60,8
     COMBOBOX        IDC_MIN_FILE_SIZE_COMBO,201,79,52,123,CBS_DROPDOWN | WS_VSCROLL | WS_TABSTOP
-    LTEXT           "Found D&uplicate files:",IDC_DUPLICATE_FILES_STATIC,5,122,70,8
+    LTEXT           "D&uplicate files:",IDC_DUPLICATE_FILES_STATIC,5,122,48,8
     CONTROL         "List1",IDC_DUPLICATE_FILES_LIST,"SysListView32",LVS_REPORT | LVS_SHOWSELALWAYS | LVS_SHAREIMAGELISTS | WS_BORDER | WS_GROUP | WS_TABSTOP,5,133,383,123
     LTEXT           "",IDC_OUTCOME_INFO_STATUS,5,258,383,10,SS_NOPREFIX | SS_CENTERIMAGE
     PUSHBUTTON      "&Select",IDC_SELECT_DUPLICATES_BUTTON,5,274,50,14,WS_GROUP
@@ -300,13 +300,15 @@ END
 2 TEXTINCLUDE 
 BEGIN
     "#include ""utl/resource.h""\r\n"
-    "#include ""afxres.h""\r\n\0"
+    "#include ""afxres.h""\r\n"
+    "\0"
 END
 
 3 TEXTINCLUDE 
 BEGIN
     "#include ""afxres.rc""         // standard components: need it for CFileException::GetErrorMessage()\r\n"
-    "#include ""utl/utl_ui.rc""\r\n\0"
+    "#include ""utl/utl_ui.rc""\r\n"
+    "\0"
 END
 
 #endif    // APSTUDIO_INVOKED

@@ -42,6 +42,7 @@ CObjectCtrlBase::CObjectCtrlBase( UINT ctrlAccelId /*= 0*/ )
 	: m_pSubjectAdapter( NULL )
 {
 	SetSubjectAdapter( ui::CDisplayCodeAdapter::Instance() );
+
 	if ( ctrlAccelId != 0 )
 		m_ctrlAccel.Load( ctrlAccelId );
 }
@@ -50,4 +51,9 @@ void CObjectCtrlBase::SetSubjectAdapter( ui::ISubjectAdapter* pSubjectAdapter )
 {
 	ASSERT_PTR( pSubjectAdapter );
 	m_pSubjectAdapter = pSubjectAdapter;
+}
+
+bool CObjectCtrlBase::IsInternalCmdId( int cmdId ) const
+{
+	return m_internalCmdIds.ContainsId( cmdId );
 }

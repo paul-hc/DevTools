@@ -3,7 +3,6 @@
 #pragma once
 
 #include "ISubject.h"
-#include "AccelTable.h"
 
 
 namespace ui
@@ -35,6 +34,10 @@ namespace ui
 }
 
 
+#include "AccelTable.h"
+#include "CmdIdStore.h"
+
+
 abstract class CObjectCtrlBase
 {
 protected:
@@ -44,10 +47,13 @@ public:
 	void SetSubjectAdapter( ui::ISubjectAdapter* pSubjectAdapter );
 
 	std::tstring FormatCode( const utl::ISubject* pSubject ) const { ASSERT_PTR( m_pSubjectAdapter ); return m_pSubjectAdapter->FormatCode( pSubject ); }
+
+	virtual bool IsInternalCmdId( int cmdId ) const;
 private:
 	ui::ISubjectAdapter* m_pSubjectAdapter;			// by default ui::CDisplayCodeAdapter
 protected:
 	CAccelTable m_ctrlAccel;
+	ui::CCmdIdStore m_internalCmdIds;				// contains only standard commands that the control handles itself (vs custom commands handled by parent)
 };
 
 

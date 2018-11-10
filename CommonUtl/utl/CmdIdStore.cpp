@@ -10,6 +10,19 @@
 
 namespace ui
 {
+	std::pair< int, int > CCmdIdStore::GetMinMaxIds( void ) const
+	{
+		std::pair< int, int > minMaxPair( 0, 0 );
+		if ( !IsEmpty() )
+		{
+			std::set< int >::const_iterator itLast = m_cmdIds.end();
+
+			minMaxPair.first = *m_cmdIds.begin();
+			minMaxPair.second = *--itLast;
+		}
+		return minMaxPair;
+	}
+
 	void CCmdIdStore::RegisterCommands( HMENU hMenu, RecursionDepth depth /*= Deep*/ )
 	{
 		ASSERT_PTR( ::IsMenu( hMenu ) );
@@ -35,7 +48,7 @@ namespace ui
 	{
 		size_t oldSize = m_cmdIds.size();
 
-		for ( stdext::hash_set< int >::const_iterator itCmdId = store.m_cmdIds.begin(); itCmdId != store.m_cmdIds.end(); ++itCmdId )
+		for ( std::set< int >::const_iterator itCmdId = store.m_cmdIds.begin(); itCmdId != store.m_cmdIds.end(); ++itCmdId )
 			m_cmdIds.insert( *itCmdId );
 
 		return m_cmdIds.size() - oldSize;		// added count
@@ -45,7 +58,7 @@ namespace ui
 	{
 		size_t oldSize = m_cmdIds.size();
 
-		for ( stdext::hash_set< int >::const_iterator itCmdId = store.m_cmdIds.begin(); itCmdId != store.m_cmdIds.end(); ++itCmdId )
+		for ( std::set< int >::const_iterator itCmdId = store.m_cmdIds.begin(); itCmdId != store.m_cmdIds.end(); ++itCmdId )
 			m_cmdIds.erase( *itCmdId );
 
 		return m_cmdIds.size() - oldSize;		// subtracted count

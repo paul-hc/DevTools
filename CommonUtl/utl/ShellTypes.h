@@ -18,7 +18,8 @@ namespace shell
 
 namespace shell
 {
-	CComPtr< IShellFolder > MakePidlArray( std::vector< PITEMID_CHILD >& rPidlItemsArray, const std::vector< std::tstring >& filePaths );		// caller must delete the PIDLs
+	CComPtr< IShellFolder > MakePidlArray( std::vector< PITEMID_CHILD >& rPidlItemsArray, const std::vector< std::tstring >& filePaths );			// caller must delete the PIDLs
+	CComPtr< IShellFolder > MakePidlRelativeArray( std::vector< PIDLIST_RELATIVE >& rPidlItemsArray, const std::vector< std::tstring >& filePaths );	// for mixed directory paths, uses common parent folder, caller must delete the PIDLs
 
 	template< typename ContainerT >
 	void ClearOwningPidls( ContainerT& rPidls )			// container of pointers to PIDLs, such as std::vector< LPITEMIDLIST >
@@ -45,7 +46,7 @@ namespace shell
 		LPITEMIDLIST Copy( LPCITEMIDLIST pidl );
 		LPITEMIDLIST CopyFirstItem( LPCITEMIDLIST pidl );
 
-		LPITEMIDLIST GetRelativeItem( IShellFolder* pFolder, const TCHAR itemFilename[] );		// itemFilename is normally a fname.ext; also works with a sub-path
+		PUIDLIST_RELATIVE GetRelativeItem( IShellFolder* pFolder, const TCHAR itemFilename[] );		// itemFilename is normally a fname.ext; also works with a sub-path
 
 		inline bool IsEqual( PCIDLIST_ABSOLUTE leftPidl, PCIDLIST_ABSOLUTE rightPidl ) { return ::ILIsEqual( leftPidl, rightPidl ) != FALSE; }
 		pred::CompareResult Compare( PCUIDLIST_RELATIVE leftPidl, PCUIDLIST_RELATIVE rightPidl, IShellFolder* pParentFolder = GetDesktopFolder() );

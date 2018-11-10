@@ -90,7 +90,7 @@ void CDuplicateFilesFinder::GroupByFileSize( CDuplicateGroupStore* pGroupsStore,
 
 void CDuplicateFilesFinder::GroupByCrc32( std::vector< CDuplicateFilesGroup* >& rDuplicateGroups, CDuplicateGroupStore* pGroupsStore, ui::IProgressCallback* pProgress )
 {
-	utl::CSectionGuard section( _T("# ExtractDuplicateGroups w. CRC32") );
+	utl::CSectionGuard section( _T("# ExtractDuplicateGroups (CRC32)") );
 
 	utl::COwningContainer< std::vector< CDuplicateFilesGroup* > > newDuplicateGroups;
 	pGroupsStore->ExtractDuplicateGroups( newDuplicateGroups, m_outcome.m_ignoredCount, pProgress );

@@ -190,6 +190,7 @@ void CFindDuplicatesDialog::SwitchMode( Mode mode )
 		IDC_SELECT_DUPLICATES_BUTTON, IDC_DELETE_DUPLICATES_BUTTON, IDC_MOVE_DUPLICATES_BUTTON, IDC_CLEAR_CRC32_CACHE_BUTTON
 	};
 	ui::EnableControls( *this, ctrlIds, COUNT_OF( ctrlIds ), !IsRollMode() );
+	ui::EnableControl( *this, IDC_DUPLICATE_FILES_STATIC, mode != EditMode );
 
 //	if ( IsRollMode() )
 //		m_anyChanges = false;
@@ -319,12 +320,12 @@ void CFindDuplicatesDialog::OnUpdate( utl::ISubject* pSubject, utl::IMessage* pM
 		{
 			SetupDialog();
 
-			switch ( utl::GetSafeTypeID( pMessage ) )
+/*			switch ( utl::GetSafeTypeID( pMessage ) )
 			{
 				case cmd::ChangeDestFileStates:
 					PostMakeDest();
 					break;
-			}
+			}*/
 		}
 		else if ( &CGeneralOptions::Instance() == pSubject )
 		{
@@ -403,7 +404,7 @@ BOOL CFindDuplicatesDialog::OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHA
 {
 	return
 		__super::OnCmdMsg( id, code, pExtra, pHandlerInfo ) ||
-		m_dupsListCtrl.OnCmdMsg( id, code, pExtra, pHandlerInfo );
+		m_dupsListCtrl.OnCmdMsg( id, code, pExtra, pHandlerInfo );		// allow handling list std commands (Copy, Select All)
 }
 
 void CFindDuplicatesDialog::DoDataExchange( CDataExchange* pDX )
@@ -570,8 +571,8 @@ void CFindDuplicatesDialog::OnCbnChanged_MinFileSize( void )
 
 void CFindDuplicatesDialog::OnBnClicked_CheckSelectDuplicates( void )
 {
-	if ( !m_pFileModel->CopyClipSourceFileStates( this ) )
-		AfxMessageBox( _T("Cannot copy source file states to clipboard!"), MB_ICONERROR | MB_OK );
+//	if ( !m_pFileModel->CopyClipSourceFileStates( this ) )
+AfxMessageBox( _T("TODO: CheckSelectDuplicates!"), MB_OK );
 }
 
 void CFindDuplicatesDialog::OnBnClicked_DeleteDuplicates( void )
@@ -579,7 +580,8 @@ void CFindDuplicatesDialog::OnBnClicked_DeleteDuplicates( void )
 	try
 	{
 		ClearFileErrors();
-		SafeExecuteCmd( m_pFileModel->MakeClipPasteDestFileStatesCmd( this ) );
+AfxMessageBox( _T("TODO: DeleteDuplicates!"), MB_OK );
+//		SafeExecuteCmd( m_pFileModel->MakeClipPasteDestFileStatesCmd( this ) );
 	}
 	catch ( CRuntimeException& e )
 	{
@@ -590,7 +592,8 @@ void CFindDuplicatesDialog::OnBnClicked_DeleteDuplicates( void )
 void CFindDuplicatesDialog::OnBnClicked_MoveDuplicates( void )
 {
 	ClearFileErrors();
-	SafeExecuteCmd( new CResetDestinationsCmd( m_pFileModel ) );
+//	SafeExecuteCmd( new CResetDestinationsCmd( m_pFileModel ) );
+AfxMessageBox( _T("TODO: MoveDuplicates!"), MB_OK );
 }
 
 void CFindDuplicatesDialog::OnBnClicked_ClearCrc32Cache( void )

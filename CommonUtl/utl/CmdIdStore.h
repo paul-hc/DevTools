@@ -2,7 +2,7 @@
 #define CmdIdStore_h
 #pragma once
 
-#include <hash_set>
+#include <set>
 
 
 namespace ui
@@ -13,15 +13,17 @@ namespace ui
 		CCmdIdStore( HMENU hMenu = NULL, RecursionDepth depth = Deep ) { if ( hMenu != NULL ) RegisterCommands( hMenu, depth ); }
 
 		bool IsEmpty( void ) const { return m_cmdIds.empty(); }
+
 		bool ContainsId( int cmdId ) const { return m_cmdIds.find( cmdId ) != m_cmdIds.end(); }
-		const stdext::hash_set< int >& GetIds( void ) const { return m_cmdIds; }
+		const std::set< int >& GetIds( void ) const { return m_cmdIds; }
+		std::pair< int, int > GetMinMaxIds( void ) const;
 
 		void RegisterCommands( HMENU hMenu, RecursionDepth depth = Deep );
 
 		size_t Union( const CCmdIdStore& store );
 		size_t Subtract( const CCmdIdStore& store );
 	private:
-		stdext::hash_set< int > m_cmdIds;
+		std::set< int > m_cmdIds;
 	};
 }
 

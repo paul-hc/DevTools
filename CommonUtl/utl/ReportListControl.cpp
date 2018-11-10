@@ -259,6 +259,22 @@ CMenu& CReportListControl::GetStdPopupMenu( ListPopup popupType )
 	return rMenu;
 }
 
+CMenu* CReportListControl::GetPopupMenu( ListPopup popupType )
+{
+	return m_pPopupMenu[ popupType ];
+}
+
+bool CReportListControl::TrackContextMenu( ListPopup popupType, const CPoint& screenPos )
+{
+	if ( CMenu* pPopupMenu = GetPopupMenu( popupType ) )
+	{
+		ui::TrackPopupMenu( *pPopupMenu, this, screenPos );
+		return true;		// handled
+	}
+
+	return false;
+}
+
 ui::CFontEffectCache* CReportListControl::GetFontEffectCache( void )
 {
 	if ( NULL == m_pFontCache.get() )
@@ -1893,27 +1909,20 @@ void CReportListControl::OnNcLButtonDown( UINT hitTest, CPoint point )
 	__super::OnNcLButtonDown( hitTest, point );
 }
 
-CMenu* CReportListControl::GetPopupMenu( ListPopup popupType )
-{
-	return m_pPopupMenu[ popupType ];
-}
-
 void CReportListControl::OnContextMenu( CWnd* pWnd, CPoint screenPos )
 {
-	CMenu* pPopupMenu = NULL;
 	UINT flags;
 	int hitIndex = HitTest( ui::ScreenToClient( m_hWnd, screenPos ), &flags );
+	ListPopup popupType = _ListPopupCount;
 
 	if ( pWnd == GetHeaderCtrl() || -1 == hitIndex )		// clicked on header or nowhere?
-		pPopupMenu = m_pPopupMenu[ Nowhere ];
+		popupType = Nowhere;
 	else if ( HasFlag( flags, LVHT_ONITEM ) )
-		pPopupMenu = m_pPopupMenu[ OnSelection ];
+		popupType = OnSelection;
 
-	if ( pPopupMenu != NULL )
-	{
-		ui::TrackPopupMenu( *pPopupMenu, this, screenPos );
-		return;					// supress rising WM_CONTEXTMENU to the parent
-	}
+	if ( popupType != _ListPopupCount )
+		if ( TrackContextMenu( popupType, screenPos ) )
+			return;					// supress rising WM_CONTEXTMENU to the parent
 
 	Default();
 }

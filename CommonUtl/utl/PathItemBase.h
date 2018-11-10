@@ -54,7 +54,7 @@ public:
 		rFilePaths.reserve( srcPathItems.size() );
 
 		for ( std::vector< CPathItem* >::const_iterator itSrcItem = srcPathItems.begin(); itSrcItem != srcPathItems.end(); ++itSrcItem )
-			rFilePaths.push_back( ( *itSrcItem )->GetPath() );
+			rFilePaths.push_back( ( *itSrcItem )->GetPath().Get() );
 	}
 };
 

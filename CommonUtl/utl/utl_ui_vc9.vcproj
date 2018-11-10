@@ -1370,11 +1370,11 @@
 					>
 				</File>
 				<File
-					RelativePath=".\ShellContextMenu.cpp"
+					RelativePath=".\ShellContextMenuHost.cpp"
 					>
 				</File>
 				<File
-					RelativePath=".\ShellContextMenu.h"
+					RelativePath=".\ShellContextMenuHost.h"
 					>
 				</File>
 				<File
