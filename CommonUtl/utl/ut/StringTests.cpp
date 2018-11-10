@@ -232,6 +232,33 @@ void CStringTests::TestStringOccurenceCount( void )
 	ASSERT_EQUAL_STR( _T(";"), *std::max_element( sepArray, sepArray + COUNT_OF( sepArray ), pred::LessPartCount< TCHAR >( _T("A|B;C|D;E;F") ) ) );
 }
 
+void CStringTests::TestStringLines( void )
+{
+	static const char s_lineEnd[] = "\n";
+
+	std::vector< std::string > lines, outLines;
+
+	str::Split( lines, "", s_lineEnd );
+	ASSERT_EQUAL( "", str::JoinLines( lines, s_lineEnd ) );
+	str::SplitLines( outLines, str::JoinLines( lines, s_lineEnd ).c_str(), s_lineEnd );
+	ASSERT( lines == outLines );
+
+	str::Split( lines, "1", s_lineEnd );
+	ASSERT_EQUAL( "1", str::JoinLines( lines, s_lineEnd ) );
+	str::SplitLines( outLines, str::JoinLines( lines, s_lineEnd ).c_str(), s_lineEnd );
+	ASSERT( lines == outLines );
+
+	str::Split( lines, "1\n22", s_lineEnd );
+	ASSERT_EQUAL( "1\n22\n", str::JoinLines( lines, s_lineEnd ) );							// final line terminator
+	str::SplitLines( outLines, str::JoinLines( lines, s_lineEnd ).c_str(), s_lineEnd );
+	ASSERT( lines == outLines );
+
+	str::Split( lines, "1\n22\n333", s_lineEnd );
+	ASSERT_EQUAL( "1\n22\n333\n", str::JoinLines( lines, s_lineEnd ) );						// final line terminator
+	str::SplitLines( outLines, str::JoinLines( lines, s_lineEnd ).c_str(), s_lineEnd );
+	ASSERT( lines == outLines );
+}
+
 void CStringTests::TestArgUtilities( void )
 {
 	ASSERT( arg::Equals( _T("apple"), _T("apple") ) );
@@ -518,6 +545,7 @@ void CStringTests::Run( void )
 	TestStringMatch();
 	TestStringPart();
 	TestStringOccurenceCount();
+	TestStringLines();
 	TestArgUtilities();
 	TestEnumTags();
 	TestFlagTags();

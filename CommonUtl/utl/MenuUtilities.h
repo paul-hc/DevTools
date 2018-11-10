@@ -17,6 +17,7 @@ namespace ui
 	enum UseMenuImages { NoMenuImages, NormalMenuImages, CheckedMenuImages };
 
 	void LoadPopupMenu( CMenu& rContextMenu, UINT menuResId, int popupIndex, UseMenuImages useMenuImages = NormalMenuImages, std::tstring* pPopupText = NULL );
+	void LoadPopupSubMenu( CMenu& rContextMenu, UINT menuResId, int popupIndex1, int popupIndex2 = -1, int popupIndex3 = -1 );
 
 	bool SetMenuImages( CMenu& rMenu, bool useCheckedBitmaps = false, CImageStore* pImageStore = NULL );
 	bool SetMenuItemImage( CMenu& rMenu, UINT itemId, UINT iconId = 0, bool useCheckedBitmaps = false, CImageStore* pImageStore = NULL );
@@ -31,8 +32,13 @@ namespace ui
 	CPoint GetAlignTrackPos( PopupAlign popupAlign, const RECT& excludeRect );
 
 
+	// menu item
 	bool GetMenuItemInfo( MENUITEMINFO* pItemInfo, HMENU hMenu, UINT item, bool byPos = true,
 						  UINT mask = MIIM_ID | MIIM_SUBMENU | MIIM_DATA | MIIM_STATE | MIIM_FTYPE | MIIM_STRING | MIIM_BITMAP );
+
+	inline bool IsSeparatorItem( const MENUITEMINFO& itemInfo ) { return HasFlag( itemInfo.fType, MFT_SEPARATOR ); }
+	inline bool IsSubMenuItem( const MENUITEMINFO& itemInfo ) { return itemInfo.hSubMenu != NULL; }
+	inline bool IsCommandItem( const MENUITEMINFO& itemInfo ) { return !IsSeparatorItem( itemInfo ) && !IsSubMenuItem( itemInfo ) && itemInfo.wID != 0; }
 
 	inline std::tstring GetMenuItemText( const CMenu& menu, UINT itemId, UINT flags = MF_BYCOMMAND )
 	{

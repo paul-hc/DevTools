@@ -235,7 +235,7 @@ bool CFileModel::CopyClipSourcePaths( fmt::PathFormat format, CWnd* pWnd ) const
 	for ( std::vector< fs::CPath >::const_iterator itSrcPath = m_sourcePaths.begin(); itSrcPath != m_sourcePaths.end(); ++itSrcPath )
 		sourcePaths.push_back( fmt::FormatPath( *itSrcPath, format ) );
 
-	return CClipboard::CopyText( str::Join( sourcePaths, _T("\r\n") ), pWnd );
+	return CClipboard::CopyToLines( sourcePaths, pWnd );
 }
 
 utl::ICommand* CFileModel::MakeClipPasteDestPathsCmd( CWnd* pWnd ) throws_( CRuntimeException )
@@ -244,16 +244,14 @@ utl::ICommand* CFileModel::MakeClipPasteDestPathsCmd( CWnd* pWnd ) throws_( CRun
 
 	static const CRuntimeException s_noDestExc( _T("No destination file paths available to paste.") );
 
-	std::tstring text;
-	if ( !CClipboard::CanPasteText() || !CClipboard::PasteText( text, pWnd ) )
-		throw s_noDestExc;
-
 	std::vector< std::tstring > textPaths;
-	str::Split( textPaths, text.c_str(), _T("\r\n") );
+	if ( !CClipboard::CanPasteText() || !CClipboard::PasteFromLines( textPaths, pWnd ) )
+		throw s_noDestExc;
 
 	for ( std::vector< std::tstring >::iterator itPath = textPaths.begin(); itPath != textPaths.end(); )
 	{
 		str::Trim( *itPath );
+
 		if ( itPath->empty() )
 			itPath = textPaths.erase( itPath );
 		else
@@ -298,7 +296,7 @@ bool CFileModel::CopyClipSourceFileStates( CWnd* pWnd ) const
 	for ( std::vector< CTouchItem* >::const_iterator itTouchItem = m_touchItems.begin(); itTouchItem != m_touchItems.end(); ++itTouchItem )
 		sourcePaths.push_back( fmt::FormatClipFileState( ( *itTouchItem )->GetSrcState(), fmt::FilenameExt ) );
 
-	return CClipboard::CopyText( str::Join( sourcePaths, _T("\r\n") ), pWnd );
+	return CClipboard::CopyToLines( sourcePaths, pWnd );
 }
 
 utl::ICommand* CFileModel::MakeClipPasteDestFileStatesCmd( CWnd* pWnd ) throws_( CRuntimeException )
@@ -306,13 +304,13 @@ utl::ICommand* CFileModel::MakeClipPasteDestFileStatesCmd( CWnd* pWnd ) throws_(
 	REQUIRE( !m_touchItems.empty() );		// should be initialized
 
 	std::vector< std::tstring > lines;
-	std::tstring text;
-	if ( CClipboard::CanPasteText() && CClipboard::PasteText( text, pWnd ) )
-		str::Split( lines, text.c_str(), _T("\r\n") );
+	if ( CClipboard::CanPasteText() )
+		CClipboard::PasteFromLines( lines, pWnd );
 
 	for ( std::vector< std::tstring >::iterator itLine = lines.begin(); itLine != lines.end(); )
 	{
 		str::Trim( *itLine );
+
 		if ( itLine->empty() )
 			itLine = lines.erase( itLine );
 		else

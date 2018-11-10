@@ -110,11 +110,14 @@ public:
 
 		// note: LVS_EX_DOUBLEBUFFER causes problems of scaling artifacts with CustomImageDraw; remove this styleEx for accurate scaling.
 	};
+
 	enum Notification
 	{
 		LVN_ItemsReorder = 1000,			// via WM_COMMAND
 		LVN_DropFiles						// via WM_NOTIFY, passing CNmDropFiles
 	};
+
+	enum ListSubPopup { ListViewNowhereSubPopup, ListViewOnSelectionSubPopup, PathItemListNowhereSubPopup, PathItemListOnSelectionSubPopup };
 
 	CReportListControl( UINT columnLayoutId = 0, DWORD listStyleEx = DefaultStyleEx );
 	virtual ~CReportListControl();
@@ -145,7 +148,7 @@ public:
 	const std::tstring& GetSection( void ) const { return m_regSection; }
 	void SetSection( const std::tstring& regSection ) { m_regSection = regSection; }
 public:
-	enum ListPopup { OnSelection, Nowhere, _ListPopupCount };
+	enum ListPopup { Nowhere, OnSelection, _ListPopupCount };
 
 	void SetPopupMenu( ListPopup popupType, CMenu* pPopupMenu ) { m_pPopupMenu[ popupType ] = pPopupMenu; }		// set pPopupMenu to NULL to allow tracking context menu by parent dialog
 	virtual CMenu* GetPopupMenu( ListPopup popupType );
@@ -331,6 +334,7 @@ public:
 	bool HasItemState( int index, UINT stateMask ) const { return ( GetItemState( index, stateMask ) & stateMask ) != 0; }
 	bool HasItemStrictState( int index, UINT stateMask ) const { return stateMask == ( GetItemState( index, stateMask ) & stateMask ); }
 	int FindItemWithState( UINT stateMask ) const { return GetNextItem( -1, LVNI_ALL | stateMask ); }
+	bool HasItemWithState( UINT stateMask ) const { return GetNextItem( -1, LVNI_ALL | stateMask ) != -1; }
 
 	bool IsChecked( int index ) const { return GetCheck( index ) != FALSE; }
 	bool SetChecked( int index, bool check = true ) { return SetCheck( index, check ) != FALSE; }
@@ -357,6 +361,8 @@ public:
 
 	int GetCurSel( void ) const;
 	bool SetCurSel( int index, bool doSelect = true );		// caret and selection
+
+	bool AnySelected( UINT stateMask = LVIS_SELECTED ) const { return HasItemWithState( stateMask ); }
 
 	bool IsSelected( int index ) const { return HasItemState( index, LVIS_SELECTED ); }
 	bool SetSelected( int index, bool doSelect = true ) { return SetItemState( index, doSelect ? LVIS_SELECTED : 0, LVIS_SELECTED ) != FALSE; }
@@ -564,13 +570,13 @@ public:
 	afx_msg void OnResetColumnLayout( void );
 	afx_msg void OnUpdateResetColumnLayout( CCmdUI* pCmdUI );
 	afx_msg void OnCopy( void );
-	afx_msg void OnUpdateCopy( CCmdUI* pCmdUI );
 	afx_msg void OnSelectAll( void );
 	afx_msg void OnUpdateSelectAll( CCmdUI* pCmdUI );
 	afx_msg void OnMoveTo( UINT cmdId );
 	afx_msg void OnUpdateMoveTo( CCmdUI* pCmdUI );
 	afx_msg void OnRename( void );
 	afx_msg void OnUpdateRename( CCmdUI* pCmdUI );
+	afx_msg void OnUpdateAnySelected( CCmdUI* pCmdUI );
 
 	DECLARE_MESSAGE_MAP()
 };

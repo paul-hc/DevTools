@@ -119,6 +119,7 @@ BEGIN
     SEPARATOR
     BUTTON      ID_RENAME_ITEM
     BUTTON      ID_EDIT_ITEM
+    BUTTON      ID_EDIT_PROPERTIES
     SEPARATOR
     BUTTON      ID_MOVE_UP_ITEM
     BUTTON      ID_MOVE_DOWN_ITEM
@@ -358,26 +359,56 @@ BEGIN
         MENUITEM SEPARATOR
         MENUITEM "&Save Items",                 ID_FILE_SAVE
     END
-    POPUP "<list view selection>"
+    POPUP "<list-view>"
     BEGIN
-        MENUITEM "&Copy\tCtrl+C",               ID_EDIT_COPY
-        MENUITEM SEPARATOR
-        MENUITEM "Select All\tCtrl+A",          ID_EDIT_SELECT_ALL
-    END
-    POPUP "<list view nowhere>"
-    BEGIN
-        MENUITEM "Reset Column Layout",         ID_RESET_DEFAULT
-        MENUITEM SEPARATOR
-        MENUITEM "&Large Icons",                ID_LIST_VIEW_ICON_LARGE
-        MENUITEM "&Small Icons",                ID_LIST_VIEW_ICON_SMALL
-        MENUITEM "&List",                       ID_LIST_VIEW_LIST
-        MENUITEM SEPARATOR
-        MENUITEM "&Report",                     ID_LIST_VIEW_REPORT
-        MENUITEM SEPARATOR
-        MENUITEM "&Tiles",                      ID_LIST_VIEW_TILE
-        MENUITEM SEPARATOR
-        MENUITEM "&Horizontal Stacking\tLeft to Right", ID_LIST_VIEW_STACK_LEFTTORIGHT
-        MENUITEM "&Vertical Stacking\tTop to Bottom", ID_LIST_VIEW_STACK_TOPTOBOTTOM
+        POPUP "<list-view nowhere>"
+        BEGIN
+            MENUITEM "Reset Column Layout",         ID_RESET_DEFAULT
+            MENUITEM SEPARATOR
+            MENUITEM "&Large Icons",                ID_LIST_VIEW_ICON_LARGE
+            MENUITEM "&Small Icons",                ID_LIST_VIEW_ICON_SMALL
+            MENUITEM "&List",                       ID_LIST_VIEW_LIST
+            MENUITEM SEPARATOR
+            MENUITEM "&Report",                     ID_LIST_VIEW_REPORT
+            MENUITEM SEPARATOR
+            MENUITEM "&Tiles",                      ID_LIST_VIEW_TILE
+            MENUITEM SEPARATOR
+            MENUITEM "&Horizontal Stacking\tLeft to Right", ID_LIST_VIEW_STACK_LEFTTORIGHT
+            MENUITEM "&Vertical Stacking\tTop to Bottom", ID_LIST_VIEW_STACK_TOPTOBOTTOM
+        END
+        POPUP "<list view selection>"
+        BEGIN
+            MENUITEM "&Copy\tCtrl+C",               ID_EDIT_COPY
+            MENUITEM SEPARATOR
+            MENUITEM "Select All\tCtrl+A",          ID_EDIT_SELECT_ALL
+        END
+        POPUP "<path-list nowhere>"
+        BEGIN
+            MENUITEM "Reset Column Layout",         ID_RESET_DEFAULT
+            MENUITEM SEPARATOR
+            MENUITEM "&Large Icons",                ID_LIST_VIEW_ICON_LARGE
+            MENUITEM "&Small Icons",                ID_LIST_VIEW_ICON_SMALL
+            MENUITEM "&List",                       ID_LIST_VIEW_LIST
+            MENUITEM SEPARATOR
+            MENUITEM "&Report",                     ID_LIST_VIEW_REPORT
+            MENUITEM SEPARATOR
+            MENUITEM "&Tiles",                      ID_LIST_VIEW_TILE
+            MENUITEM SEPARATOR
+            MENUITEM "&Horizontal Stacking\tLeft to Right", ID_LIST_VIEW_STACK_LEFTTORIGHT
+            MENUITEM "&Vertical Stacking\tTop to Bottom", ID_LIST_VIEW_STACK_TOPTOBOTTOM
+            MENUITEM SEPARATOR
+            MENUITEM "Properties...",               ID_EDIT_PROPERTIES
+        END
+        POPUP "<path-list selection>"
+        BEGIN
+            MENUITEM "&Copy\tCtrl+C",               ID_EDIT_COPY
+            MENUITEM "Copy Filename",               ID_ITEM_COPY_FILENAME
+            MENUITEM "Copy Directory Path",         ID_ITEM_COPY_PARENT_DIR_PATH
+            MENUITEM SEPARATOR
+            MENUITEM "Select All\tCtrl+A",          ID_EDIT_SELECT_ALL
+            MENUITEM SEPARATOR
+            MENUITEM "File &Properties...",         ID_EDIT_ITEM
+        END
     END
     POPUP "<date-time>"
     BEGIN
@@ -451,6 +482,10 @@ STRINGTABLE
 BEGIN
     ID_LIST_VIEW_STACK_TOPTOBOTTOM 
                             "Arrange list items from top to bottom\nVertical Stacking"
+    ID_EDIT_PROPERTIES      "Edit properties\nEdit Properties"
+    ID_ITEM_COPY_FILENAME   "Copy selected filenames\nCopy Filename"
+    ID_ITEM_COPY_PARENT_DIR_PATH 
+                            "Copy selected directory paths\nCopy Directory Path"
 END
 
 #endif    // English (U.S.) resources
@@ -477,15 +512,4 @@ ID_TRANSPARENT          ICON                    "res\\Transparent.ico"
 #endif    // English (U.K.) resources
 /////////////////////////////////////////////////////////////////////////////
 
-
-
-#ifndef APSTUDIO_INVOKED
-/////////////////////////////////////////////////////////////////////////////
-//
-// Generated from the TEXTINCLUDE 3 resource.
-//
-
-
-/////////////////////////////////////////////////////////////////////////////
-#endif    // not APSTUDIO_INVOKED
 

@@ -252,10 +252,10 @@ void CReportListControl::SetCustomIconDraw( ui::ICustomImageDraw* pCustomIconDra
 
 CMenu& CReportListControl::GetStdPopupMenu( ListPopup popupType )
 {
-	static CMenu stdPopupMenu[ _ListPopupCount ];
-	CMenu& rMenu = stdPopupMenu[ popupType ];
+	static CMenu s_stdPopupMenu[ _ListPopupCount ];
+	CMenu& rMenu = s_stdPopupMenu[ popupType ];
 	if ( NULL == rMenu.GetSafeHmenu() )
-		ui::LoadPopupMenu( rMenu, IDR_STD_CONTEXT_MENU, OnSelection == popupType ? ui::ListViewSelectionPopup : ui::ListViewNowherePopup );
+		ui::LoadPopupSubMenu( rMenu, IDR_STD_CONTEXT_MENU, ui::ListView, OnSelection == popupType ? ListViewOnSelectionSubPopup : ListViewNowhereSubPopup );
 	return rMenu;
 }
 
@@ -1833,7 +1833,7 @@ BEGIN_MESSAGE_MAP( CReportListControl, CListCtrl )
 	ON_COMMAND( ID_RESET_DEFAULT, OnResetColumnLayout )
 	ON_UPDATE_COMMAND_UI( ID_RESET_DEFAULT, OnUpdateResetColumnLayout )
 	ON_COMMAND( ID_EDIT_COPY, OnCopy )
-	ON_UPDATE_COMMAND_UI( ID_EDIT_COPY, OnUpdateCopy )
+	ON_UPDATE_COMMAND_UI( ID_EDIT_COPY, OnUpdateAnySelected )
 	ON_COMMAND( ID_EDIT_SELECT_ALL, OnSelectAll )
 	ON_UPDATE_COMMAND_UI( ID_EDIT_SELECT_ALL, OnUpdateSelectAll )
 	ON_COMMAND_RANGE( ID_MOVE_UP_ITEM, ID_MOVE_BOTTOM_ITEM, OnMoveTo )
@@ -2166,11 +2166,6 @@ void CReportListControl::OnCopy( void )
 	Copy();
 }
 
-void CReportListControl::OnUpdateCopy( CCmdUI* pCmdUI )
-{
-	pCmdUI->Enable( FindItemWithState( LVNI_SELECTED ) != -1 );
-}
-
 void CReportListControl::OnSelectAll( void )
 {
 	SelectAll();
@@ -2202,6 +2197,11 @@ void CReportListControl::OnRename( void )
 void CReportListControl::OnUpdateRename( CCmdUI* pCmdUI )
 {
 	pCmdUI->Enable( HasFlag( GetStyle(), LVS_EDITLABELS ) && GetCurSel() != -1 );
+}
+
+void CReportListControl::OnUpdateAnySelected( CCmdUI* pCmdUI )
+{
+	pCmdUI->Enable( AnySelected() );
 }
 
 

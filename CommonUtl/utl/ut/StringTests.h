@@ -25,6 +25,7 @@ private:
 	void TestStringMatch( void );
 	void TestStringPart( void );
 	void TestStringOccurenceCount( void );
+	void TestStringLines( void );
 	void TestArgUtilities( void );
 	void TestEnumTags( void );
 	void TestFlagTags( void );

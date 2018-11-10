@@ -338,15 +338,15 @@ void CNumericTests::TestConvertFileSize( void )
 
 void CNumericTests::TestFormatFileSize( void )
 {
-	ASSERT_EQUAL( _T("0 B"), num::FormatFileSize( 0 ) );						// auto-conversion
-	ASSERT_EQUAL( _T("0 B"), num::FormatFileSize( 0, num::Bytes ) );
+	ASSERT_EQUAL( _T("0 bytes"), num::FormatFileSize( 0 ) );						// auto-conversion
+	ASSERT_EQUAL( _T("0 bytes"), num::FormatFileSize( 0, num::Bytes ) );
 
 	// 1 KB=1024 bytes
-	ASSERT_EQUAL( _T("1,023 B"), num::FormatFileSize( 1023 ) );					// auto-conversion
-	ASSERT_EQUAL( _T("1,023 B"), num::FormatFileSize( 1023, num::Bytes ) );
+	ASSERT_EQUAL( _T("1,023 bytes"), num::FormatFileSize( 1023 ) );					// auto-conversion
+	ASSERT_EQUAL( _T("1,023 bytes"), num::FormatFileSize( 1023, num::Bytes ) );
 
 	ASSERT_EQUAL( _T("1 KB"), num::FormatFileSize( 1024 ) );					// auto-conversion
-	ASSERT_EQUAL( _T("1,024 B"), num::FormatFileSize( 1024, num::Bytes ) );
+	ASSERT_EQUAL( _T("1,024 bytes"), num::FormatFileSize( 1024, num::Bytes ) );
 	ASSERT_EQUAL( _T("1 KB"), num::FormatFileSize( 1024, num::KiloBytes ) );
 	ASSERT_EQUAL( _T("0.001 MB"), num::FormatFileSize( 1024, num::MegaBytes ) );
 	ASSERT_EQUAL( _T("0 GB"), num::FormatFileSize( 1024, num::GigaBytes ) );
@@ -354,10 +354,10 @@ void CNumericTests::TestFormatFileSize( void )
 
 	// 1 MB=1048576 bytes (1024*1024)
 	ASSERT_EQUAL( _T("1,023.9 KB"), num::FormatFileSize( 1048575 ) );			// auto-conversion
-	ASSERT_EQUAL( _T("1,048,575 B"), num::FormatFileSize( 1048575, num::Bytes ) );
+	ASSERT_EQUAL( _T("1,048,575 bytes"), num::FormatFileSize( 1048575, num::Bytes ) );
 
 	ASSERT_EQUAL( _T("1 MB"), num::FormatFileSize( 1048576 ) );					// auto-conversion
-	ASSERT_EQUAL( _T("1,048,576 B"), num::FormatFileSize( 1048576, num::Bytes ) );
+	ASSERT_EQUAL( _T("1,048,576 bytes"), num::FormatFileSize( 1048576, num::Bytes ) );
 	ASSERT_EQUAL( _T("1,024 KB"), num::FormatFileSize( 1048576, num::KiloBytes ) );
 	ASSERT_EQUAL( _T("1 MB"), num::FormatFileSize( 1048576, num::MegaBytes ) );
 	ASSERT_EQUAL( _T("0.001 GB"), num::FormatFileSize( 1048576, num::GigaBytes ) );
@@ -365,10 +365,10 @@ void CNumericTests::TestFormatFileSize( void )
 
 	// 1 GB=1073741824 bytes (1024*1024*1024)
 	ASSERT_EQUAL( _T("1,023.9 MB"), num::FormatFileSize( 1073741823 ) );		// auto-conversion
-	ASSERT_EQUAL( _T("1,073,741,823 B"), num::FormatFileSize( 1073741823, num::Bytes ) );
+	ASSERT_EQUAL( _T("1,073,741,823 bytes"), num::FormatFileSize( 1073741823, num::Bytes ) );
 
 	ASSERT_EQUAL( _T("1 GB"), num::FormatFileSize( 1073741824 ) );				// auto-conversion
-	ASSERT_EQUAL( _T("1,073,741,824 B"), num::FormatFileSize( 1073741824, num::Bytes ) );
+	ASSERT_EQUAL( _T("1,073,741,824 bytes"), num::FormatFileSize( 1073741824, num::Bytes ) );
 	ASSERT_EQUAL( _T("1,048,576 KB"), num::FormatFileSize( 1073741824, num::KiloBytes ) );
 	ASSERT_EQUAL( _T("1,024 MB"), num::FormatFileSize( 1073741824, num::MegaBytes ) );
 	ASSERT_EQUAL( _T("1 GB"), num::FormatFileSize( 1073741824, num::GigaBytes ) );
@@ -376,17 +376,17 @@ void CNumericTests::TestFormatFileSize( void )
 
 	// 1 TB=1099511627776 bytes (1024*1024*1024*1024)
 	ASSERT_EQUAL( _T("1,023.9 GB"), num::FormatFileSize( 1099511627775 ) );	// auto-conversion
-	ASSERT_EQUAL( _T("1,099,511,627,775 B"), num::FormatFileSize( 1099511627775, num::Bytes ) );
+	ASSERT_EQUAL( _T("1,099,511,627,775 bytes"), num::FormatFileSize( 1099511627775, num::Bytes ) );
 
 	ASSERT_EQUAL( _T("1 TB"), num::FormatFileSize( 1099511627776 ) );	// auto-conversion
-	ASSERT_EQUAL( _T("1,099,511,627,776 B"), num::FormatFileSize( 1099511627776, num::Bytes ) );
+	ASSERT_EQUAL( _T("1,099,511,627,776 bytes"), num::FormatFileSize( 1099511627776, num::Bytes ) );
 	ASSERT_EQUAL( _T("1,073,741,824 KB"), num::FormatFileSize( 1099511627776, num::KiloBytes ) );
 	ASSERT_EQUAL( _T("1,048,576 MB"), num::FormatFileSize( 1099511627776, num::MegaBytes ) );
 	ASSERT_EQUAL( _T("1,024 GB"), num::FormatFileSize( 1099511627776, num::GigaBytes ) );
 	ASSERT_EQUAL( _T("1 TB"), num::FormatFileSize( 1099511627776, num::TeraBytes ) );
 
 	// misc. sizes with auto-conversion
-	ASSERT_EQUAL( _T("37 B"), num::FormatFileSize( 37 ) );
+	ASSERT_EQUAL( _T("37 bytes"), num::FormatFileSize( 37 ) );
 	ASSERT_EQUAL( _T("37 bytes"), num::FormatFileSize( 37, num::AutoBytes, true ) );		// long unit
 
 	ASSERT_EQUAL( _T("1.12 KB"), num::FormatFileSize( 1147 ) );				//	Explorer: "1.12 KB (1,147 bytes)"

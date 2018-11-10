@@ -35,6 +35,30 @@ namespace ui
 			SetMenuImages( rContextMenu, CheckedMenuImages == useMenuImages );		// set shared bitmap images
 	}
 
+	void LoadPopupSubMenu( CMenu& rContextMenu, UINT menuResId, int popupIndex1, int popupIndex2 /*= -1*/, int popupIndex3 /*= -1*/ )
+	{
+		CMenu menuBar;
+		VERIFY( menuBar.LoadMenu( menuResId ) );
+
+		int popupIndex;
+		HMENU hParentMenu = menuBar, hSubMenu = safe_ptr( ::GetSubMenu( hParentMenu, popupIndex = popupIndex1 ) );
+
+		if ( popupIndex2 != -1 )
+			hSubMenu = safe_ptr( ::GetSubMenu( hParentMenu = hSubMenu, popupIndex = popupIndex2 ) );
+
+		if ( popupIndex3 != -1 )
+			hSubMenu = safe_ptr( ::GetSubMenu( hParentMenu = hSubMenu, popupIndex = popupIndex3 ) );
+
+		ASSERT_PTR( hParentMenu );
+		ASSERT_PTR( hSubMenu );
+
+		rContextMenu.Attach( hSubMenu );
+		VERIFY( ::RemoveMenu( hParentMenu, popupIndex, MF_BYPOSITION ) );		// detach popup from its parent
+
+		SetMenuImages( rContextMenu );										// set shared bitmap images
+	}
+
+
 	bool SetMenuImages( CMenu& rMenu, bool useCheckedBitmaps /*= false*/, CImageStore* pImageStore /*= NULL*/ )
 	{
 		if ( NULL == pImageStore )
@@ -197,7 +221,8 @@ namespace ui
 		unsigned int atIndex = FindMenuItemIndex( rMenu, itemId, iFirst );
 		if ( UINT_MAX == atIndex )
 			return atIndex;
-		return atIndex + 1; // the position just after
+
+		return atIndex + 1;			// the position just after
 	}
 
 	void QueryMenuItemIds( std::vector< UINT >& rItemIds, const CMenu& rMenu )
@@ -217,7 +242,8 @@ namespace ui
 	{
 		ASSERT_PTR( ::IsMenu( hSrcMenu ) );
 
-		HMENU hDestMenu = ::CreatePopupMenu();
+		CMenu destMenu;
+		destMenu.CreatePopupMenu();
 
 		for ( int i = 0, count = ::GetMenuItemCount( hSrcMenu ); i != count; ++i )
 		{
@@ -225,15 +251,18 @@ namespace ui
 			if ( ui::GetMenuItemInfo( &itemInfo, hSrcMenu, i ) )
 			{
 				if ( itemInfo.hSubMenu != NULL )
-					itemInfo.hSubMenu = ui::CloneMenu( itemInfo.hSubMenu ); // clone the sub-menu
+					itemInfo.hSubMenu = ui::CloneMenu( itemInfo.hSubMenu );		// clone the sub-menu inplace
 
-				VERIFY( ::InsertMenuItem( hDestMenu, i, TRUE, &itemInfo ) );
+				VERIFY( destMenu.InsertMenuItem( i, &itemInfo, TRUE ) );
+
+				if ( !ui::IsSeparatorItem( itemInfo ) )
+					SetMenuItemImage( destMenu, itemInfo.wID );
 			}
 			else
 				ASSERT( false );		// invalid item?
 		}
 
-		return hDestMenu;
+		return destMenu.Detach();
 	}
 
 	size_t CopyMenuItems( CMenu& rDestMenu, unsigned int destIndex, const CMenu& srcMenu, const std::vector< UINT >* pSrcIds /*= NULL*/ )
@@ -250,6 +279,9 @@ namespace ui
 				if ( ui::GetMenuItemInfo( &itemInfo, srcMenu, i ) )
 				{
 					VERIFY( rDestMenu.InsertMenuItem( destIndex, &itemInfo, TRUE ) );
+
+					if ( !ui::IsSeparatorItem( itemInfo ) )
+						SetMenuItemImage( rDestMenu, itemInfo.wID );
 
 					++copiedCount;
 					++destIndex;
@@ -563,12 +595,12 @@ namespace dbg
 		static const TCHAR s_space[] = _T(", "), s_fieldSep[] = _T(", "), s_flagsSep[] = _T("   ");
 		std::tstring text;
 
-		if ( itemInfo.hSubMenu != NULL )
+		if ( ui::IsSubMenuItem( itemInfo ) )
 			stream::Tag( text, str::Format( _T("hSubMenu=0x%08X"), itemInfo.hSubMenu ), s_space );
-		else if ( itemInfo.wID != 0 )			// not a separator
+		else if ( ui::IsCommandItem( itemInfo ) )
 			stream::Tag( text, str::Format( _T("cmdId=%d (0x%X)"), itemInfo.wID, itemInfo.wID ), s_space );
 
-		if ( itemInfo.wID != 0 )				// not a separator
+		if ( ui::IsCommandItem( itemInfo ) )
 			stream::Tag( text, str::Format( _T("\"%s\""), itemInfo.dwTypeData ), s_fieldSep );		// text
 
 		stream::Tag( text, FormatFlags( _T("Type={%s}"), GetTags_MenuItemType(), itemInfo.fType ), s_flagsSep );				// type flags

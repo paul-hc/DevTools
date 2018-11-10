@@ -380,10 +380,30 @@ namespace num
 
 namespace str
 {
+	// line utilities
 	std::string& ToWindowsLineEnds( std::string& rText );
 	std::wstring& ToWindowsLineEnds( std::wstring& rText );
 	std::string& ToUnixLineEnds( std::string& rText );
 	std::wstring& ToUnixLineEnds( std::wstring& rText );
+
+
+	template< typename CharType, typename StringType >
+	inline void SplitLines( std::vector< StringType >& rItems, const CharType* pSource, const CharType* pLineEnd )
+	{
+		Split( rItems, pSource, pLineEnd );
+
+		if ( !rItems.empty() && pred::IsEmpty()( rItems.back() ) )		// last item is empty (from a line-end terminator); pred::IsEmpty works with paths
+			rItems.pop_back();
+	}
+
+	template< typename CharType, typename ContainerType >
+	inline std::basic_string< CharType > JoinLines( const ContainerType& items, const CharType* pLineEnd )
+	{
+		std::basic_string< CharType > text = Join( items, pLineEnd );
+		if ( items.size() > 1 )								// multiple lines
+			text += pLineEnd;								// add a final line-end terminator to have a set of complete lines
+		return text;
+	}
 }
 
 

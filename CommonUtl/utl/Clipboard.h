@@ -13,7 +13,7 @@ public:
 	void Close( void );
 	bool IsOpen( void ) const { return m_pWnd != NULL; }
 
-	void Clear( void );
+	void Clear( void ) { ASSERT( IsOpen() ); EmptyClipboard(); }
 
 	HGLOBAL GetData( UINT clipFormat ) const { ASSERT( IsOpen() ); return IsFormatAvailable( clipFormat ) ? ::GetClipboardData( clipFormat ) : NULL; }
 	bool SetData( UINT clipFormat, HGLOBAL hGlobal ) { ASSERT( IsOpen() ); return ::SetClipboardData( clipFormat, hGlobal ) != NULL; }
@@ -29,24 +29,26 @@ public:
 
 	template< typename ScalarType >
 	bool Read( UINT clipFormat, ScalarType& rOutValue ) const;
-
+public:
 	static bool IsFormatAvailable( UINT clipFormat ) { return ::IsClipboardFormatAvailable( clipFormat ) != FALSE; }
-
 	static bool CanPasteText( void );
-	static bool PasteText( std::tstring& rText, CWnd* pWnd = AfxGetMainWnd() );
+
 	static bool CopyText( const std::tstring& text, CWnd* pWnd = AfxGetMainWnd() );
+	static bool PasteText( std::tstring& rText, CWnd* pWnd = AfxGetMainWnd() );
+
+	template< typename ContainerT >
+	static bool CopyToLines( const ContainerT& textItems, CWnd* pWnd = AfxGetMainWnd(), const TCHAR* pLineEnd = s_lineEnd );
+
+	template< typename StringType >
+	static bool PasteFromLines( std::vector< StringType >& rTextItems, CWnd* pWnd = AfxGetMainWnd(), const TCHAR* pLineEnd = s_lineEnd );
 private:
 	CWnd* m_pWnd;
+public:
+	static const TCHAR s_lineEnd[];
 };
 
 
-// inline code
-
-inline void CClipboard::Clear( void )
-{
-	ASSERT( IsOpen() );
-	EmptyClipboard();
-}
+// template code
 
 template< typename ScalarType >
 inline bool CClipboard::Write( UINT clipFormat, const ScalarType& value )
@@ -67,6 +69,26 @@ inline bool CClipboard::Read( UINT clipFormat, ScalarType& rOutValue ) const
 			}
 
 	return false;
+}
+
+template< typename ContainerT >
+inline bool CClipboard::CopyToLines( const ContainerT& textItems, CWnd* pWnd /*= AfxGetMainWnd()*/, const TCHAR* pLineEnd /*= s_lineEnd*/ )
+{
+	return CopyText( str::JoinLines( textItems, pLineEnd ), pWnd );
+}
+
+template< typename StringType >
+bool CClipboard::PasteFromLines( std::vector< StringType >& rTextItems, CWnd* pWnd /*= AfxGetMainWnd()*/, const TCHAR* pLineEnd /*= s_lineEnd*/ )
+{
+	std::tstring text;
+	if ( !PasteText( text, pWnd ) )
+	{
+		rTextItems.clear();
+		return false;
+	}
+
+	str::SplitLines( rTextItems, text.c_str(), pLineEnd );
+	return true;
 }
 
 

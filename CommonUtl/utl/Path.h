@@ -232,6 +232,13 @@ namespace func
 
 namespace pred
 {
+	template<>
+	inline bool IsEmpty::operator()( const fs::CPath& object ) const
+	{
+		return object.IsEmpty();
+	}
+
+
 	struct FileExist
 	{
 		bool operator()( const TCHAR* pFilePath ) const

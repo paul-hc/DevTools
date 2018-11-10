@@ -8,6 +8,8 @@
 #endif
 
 
+const TCHAR CClipboard::s_lineEnd[] = _T("\r\n");
+
 CClipboard::CClipboard( CWnd* pWnd )
 	: m_pWnd( pWnd )
 {
@@ -98,17 +100,6 @@ bool CClipboard::ReadString( std::tstring& rOutText ) const
 	return false;
 }
 
-bool CClipboard::CanPasteText( void )
-{
-	return IsFormatAvailable( CF_UNICODETEXT ) || IsFormatAvailable( CF_TEXT );
-}
-
-bool CClipboard::PasteText( std::tstring& rText, CWnd* pWnd /*= AfxGetMainWnd()*/ )
-{
-	std::auto_ptr< CClipboard > pClipboard( Open( pWnd ) );
-	return pClipboard.get() != NULL && pClipboard->ReadString( rText );
-}
-
 bool CClipboard::CopyText( const std::tstring& text, CWnd* pWnd /*= AfxGetMainWnd()*/ )
 {
 	std::string utf8Text = str::ToUtf8( text.c_str() );
@@ -122,4 +113,15 @@ bool CClipboard::CopyText( const std::tstring& text, CWnd* pWnd /*= AfxGetMainWn
 	return
 		pClipboard->WriteString( utf8Text.c_str() ) &&		// UTF8 (UNICODE)
 		pClipboard->WriteString( text );					// WIDE (UNICODE)
+}
+
+bool CClipboard::CanPasteText( void )
+{
+	return IsFormatAvailable( CF_UNICODETEXT ) || IsFormatAvailable( CF_TEXT );
+}
+
+bool CClipboard::PasteText( std::tstring& rText, CWnd* pWnd /*= AfxGetMainWnd()*/ )
+{
+	std::auto_ptr< CClipboard > pClipboard( Open( pWnd ) );
+	return pClipboard.get() != NULL && pClipboard->ReadString( rText );
 }

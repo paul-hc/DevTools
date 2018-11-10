@@ -61,6 +61,9 @@
 #define ID_LIST_VIEW_TILE               28238
 #define ID_LIST_VIEW_STACK_LEFTTORIGHT  28239
 #define ID_LIST_VIEW_STACK_TOPTOBOTTOM  28240
+#define ID_EDIT_PROPERTIES              28241
+#define ID_ITEM_COPY_FILENAME           28242
+#define ID_ITEM_COPY_PARENT_DIR_PATH    28243
 #define UTL_MIN_CONTROL_VALUE           28500
 #define IDC_GROUP_BOX_1                 28501
 #define IDC_GROUP_BOX_2                 28502
@@ -95,7 +98,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        28018
-#define _APS_NEXT_COMMAND_VALUE         28241
+#define _APS_NEXT_COMMAND_VALUE         28244
 #define _APS_NEXT_CONTROL_VALUE         28523
 #define _APS_NEXT_SYMED_VALUE           28801
 #endif
