@@ -22,8 +22,6 @@ namespace shell
 
 namespace shell
 {
-	CComPtr< IShellFolder > MakePidlArray( std::vector< PITEMID_CHILD >& rPidlItemsArray, const std::vector< std::tstring >& filePaths );	// for files having the same parent folder; caller must delete the PIDLs
-
 	template< typename PathContainerT >
 	CComPtr< IShellFolder > MakeRelativePidlArray( std::vector< PIDLIST_RELATIVE >& rPidlItemsArray, const PathContainerT& filePaths );		// for mixed files having a common ancestor folder; caller must delete the PIDLs
 

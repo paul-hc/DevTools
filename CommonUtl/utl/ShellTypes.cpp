@@ -65,34 +65,6 @@ namespace shell
 
 namespace shell
 {
-	CComPtr< IShellFolder > MakePidlArray( std::vector< PITEMID_CHILD >& rPidlItemsArray, const std::vector< std::tstring >& filePaths )
-	{
-		// MSDN: we assume that all objects are in the same folder
-		CComPtr< IShellFolder > pFirstParentFolder;
-
-		ASSERT( !filePaths.empty() );
-
-		rPidlItemsArray.reserve( rPidlItemsArray.size() + filePaths.size() );
-
-		for ( size_t i = 0; i != filePaths.size(); ++i )
-		{
-			CComHeapPtr< ITEMIDLIST_ABSOLUTE > pidlAbs( static_cast< ITEMIDLIST_ABSOLUTE* >( ::ILCreateFromPath( filePaths[ i ].c_str() ) ) );
-				// on 64 bit: the cast prevents warning C4090: 'argument' : different '__unaligned' qualifiers
-
-			CComPtr< IShellFolder > pParentFolder;
-			PCUITEMID_CHILD pidlItem;				// pidl relative to parent folder (not allocated)
-
-			if ( HR_OK( ::SHBindToParent( pidlAbs, IID_IShellFolder, (void**)&pParentFolder, &pidlItem ) ) )
-				rPidlItemsArray.push_back( pidl::Copy( pidlItem ) );			// copy relative pidl to pidlArray (caller must delete them)
-
-			if ( pFirstParentFolder == NULL )
-				pFirstParentFolder = pParentFolder;
-		}
-
-		return pFirstParentFolder;
-	}
-
-
 	namespace pidl
 	{
 		PIDLIST_RELATIVE GetRelativeItem( IShellFolder* pFolder, const TCHAR itemFilename[] )
