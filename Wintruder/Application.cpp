@@ -297,7 +297,7 @@ void CApplication::OnUpdateEnableWindow( CCmdUI* pCmdUI )
 	}
 
 	pCmdUI->Enable( enable );
-	pCmdUI->SetCheck( enable && isEnabled );
+	//pCmdUI->SetCheck( enable && isEnabled );		/* just a toggle button */
 
 	if ( pCmdUI->m_pMenu != NULL )
 	{
