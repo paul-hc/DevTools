@@ -117,18 +117,14 @@ fs::CPath ExtractCommonParentPath( const ContainerT& paths )	// uses func::PathO
 }
 
 
-CShellContextMenuHost* CShellContextMenuHost::s_pInstance = NULL;
+// CShellContextMenuHost implementation
 
 CShellContextMenuHost::CShellContextMenuHost( CWnd* pWndOwner, IContextMenu* pContextMenu /*= NULL*/ )
 	: m_pWndOwner( pWndOwner )
-	, m_pOldWndProc( NULL )
 	, m_menuOwnership( InternalMenu )
 {
 	m_popupMenu.CreatePopupMenu();
 	Reset( pContextMenu );
-
-	ASSERT( NULL == s_pInstance );
-	s_pInstance = this;
 }
 
 CShellContextMenuHost::~CShellContextMenuHost()
@@ -137,18 +133,11 @@ CShellContextMenuHost::~CShellContextMenuHost()
 
 	if ( ExternalMenu == m_menuOwnership )
 		m_popupMenu.Detach();			// avoid destroying externally owned menu
-
-	ASSERT( this == s_pInstance );
-	s_pInstance = NULL;
 }
 
 void CShellContextMenuHost::Reset( IContextMenu* pContextMenu /*= NULL*/ )
 {
 	m_pContextMenu = pContextMenu;
-
-	// for handling menu messages while tracking
-	m_pContextMenu2 = m_pContextMenu;
-	m_pContextMenu3 = m_pContextMenu;
 }
 
 void CShellContextMenuHost::SetPopupMenu( HMENU hMenu, MenuOwnership ownership /*= InternalMenu*/ )
@@ -212,19 +201,9 @@ int CShellContextMenuHost::TrackMenu( const CPoint& screenPos, UINT atIndex /*= 
 
 int CShellContextMenuHost::TrackMenu( CMenu* pPopupMenu, const CPoint& screenPos, UINT trackFlags /*= TPM_RETURNCMD | TPM_RIGHTBUTTON*/ )
 {
-	// subclass window to handle menu messages in here
-	ASSERT_NULL( m_pOldWndProc );
-	if ( m_pWndOwner != NULL )
-		if ( m_pContextMenu2 != NULL || m_pContextMenu3 != NULL )		// only subclass if its version 2 or 3
-			m_pOldWndProc = (WNDPROC)::SetWindowLongPtr( m_pWndOwner->GetSafeHwnd(), GWLP_WNDPROC, (LONG_PTR)HookWndProc );
+	CTrackingHook scopedHook( m_pWndOwner->GetSafeHwnd(), m_pContextMenu );
 
 	int cmdId = ui::TrackPopupMenu( *pPopupMenu, m_pWndOwner, screenPos, trackFlags );
-
-	if ( m_pOldWndProc != NULL )		// unsubclass
-	{
-		::SetWindowLongPtr( m_pWndOwner->GetSafeHwnd(), GWLP_WNDPROC, (LONG_PTR)m_pOldWndProc );
-		m_pOldWndProc = NULL;
-	}
 
 	if ( HasFlag( trackFlags, TPM_RETURNCMD ) )			// handle command in-place?
 		if ( HasShellCmd( cmdId ) )						// cmdId belongs to shell menu entries
@@ -285,7 +264,56 @@ CMenu* CShellContextMenuHost::EnsurePopupShellCmds( UINT queryFlags )
 	return MakePopupMenu( *pPopupMenu, AtEnd, queryFlags ) ? pPopupMenu : NULL;
 }
 
-LRESULT CShellContextMenuHost::HandleWndProc( HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam )
+
+// command handlers
+
+BEGIN_MESSAGE_MAP( CShellContextMenuHost, CCmdTarget )
+	ON_COMMAND_RANGE( MinCmdId, MaxCmdId, OnShellCommand )
+END_MESSAGE_MAP()
+
+BOOL CShellContextMenuHost::OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo )
+{
+	return
+		HasShellCmd( id ) &&
+		__super::OnCmdMsg( id, code, pExtra, pHandlerInfo );		// shell commands are handled internally
+}
+
+void CShellContextMenuHost::OnShellCommand( UINT cmdId )
+{
+	ASSERT( HasShellCmd( cmdId ) );
+	InvokeVerbIndex( ToVerbIndex( cmdId ) );	// execute related command
+}
+
+
+// CShellContextMenuHost::CTrackingHook implementation
+
+CShellContextMenuHost::CTrackingHook* CShellContextMenuHost::CTrackingHook::s_pInstance = NULL;
+
+CShellContextMenuHost::CTrackingHook::CTrackingHook( HWND hWndOwner, IContextMenu* pContextMenu )
+	: m_hWndOwner( hWndOwner )
+	, m_pOldWndProc( NULL )
+	, m_pContextMenu2( pContextMenu )
+	, m_pContextMenu3( pContextMenu )
+{
+	// subclass window to handle menu messages in here
+	if ( m_hWndOwner != NULL )
+		if ( m_pContextMenu2 != NULL || m_pContextMenu3 != NULL )		// only subclass if its version 2 or 3 context menu
+			m_pOldWndProc = (WNDPROC)::SetWindowLongPtr( m_hWndOwner, GWLP_WNDPROC, (LONG_PTR)HookWndProc );
+
+	ASSERT_NULL( s_pInstance );
+	s_pInstance = this;
+}
+
+CShellContextMenuHost::CTrackingHook::~CTrackingHook()
+{
+	if ( m_pOldWndProc != NULL )
+		::SetWindowLongPtr( m_hWndOwner, GWLP_WNDPROC, (LONG_PTR)m_pOldWndProc );		// unsubclass
+
+	ASSERT( this == s_pInstance );
+	s_pInstance = NULL;
+}
+
+LRESULT CShellContextMenuHost::CTrackingHook::HandleWndProc( HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam )
 {
 	switch ( message )
 	{
@@ -313,28 +341,8 @@ LRESULT CShellContextMenuHost::HandleWndProc( HWND hWnd, UINT message, WPARAM wP
 	return ::CallWindowProc( m_pOldWndProc, hWnd, message, wParam, lParam );		// call original WndProc
 }
 
-LRESULT CALLBACK CShellContextMenuHost::HookWndProc( HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam )
+LRESULT CALLBACK CShellContextMenuHost::CTrackingHook::HookWndProc( HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam )
 {
 	ASSERT_PTR( s_pInstance );
 	return s_pInstance->HandleWndProc( hWnd, message, wParam, lParam );
-}
-
-
-// command handlers
-
-BEGIN_MESSAGE_MAP( CShellContextMenuHost, CCmdTarget )
-	ON_COMMAND_RANGE( MinCmdId, MaxCmdId, OnShellCommand )
-END_MESSAGE_MAP()
-
-BOOL CShellContextMenuHost::OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo )
-{
-	return
-		HasShellCmd( id ) &&
-		__super::OnCmdMsg( id, code, pExtra, pHandlerInfo );		// shell commands are handled internally
-}
-
-void CShellContextMenuHost::OnShellCommand( UINT cmdId )
-{
-	ASSERT( HasShellCmd( cmdId ) );
-	InvokeVerbIndex( ToVerbIndex( cmdId ) );	// execute related command
 }

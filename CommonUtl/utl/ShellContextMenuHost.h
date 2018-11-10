@@ -65,22 +65,29 @@ public:
 protected:
 	CMenu* EnsurePopupShellCmds( UINT queryFlags );
 private:
-	LRESULT HandleWndProc( HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam );
+	class CTrackingHook
+	{
+	public:
+		CTrackingHook( HWND hWndOwner, IContextMenu* pContextMenu );
+		~CTrackingHook();
+	private:
+		LRESULT HandleWndProc( HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam );
 
-	static LRESULT CALLBACK HookWndProc( HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam );
+		static LRESULT CALLBACK HookWndProc( HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam );
+	private:
+		HWND m_hWndOwner;
+		WNDPROC m_pOldWndProc;
+		CComQIPtr< IContextMenu2 > m_pContextMenu2;
+		CComQIPtr< IContextMenu3 > m_pContextMenu3;
+
+		static CTrackingHook* s_pInstance;			// single one tracking at a time
+	};
 private:
 	CWnd* m_pWndOwner;
-	WNDPROC m_pOldWndProc;
 	CMenu m_popupMenu;
 	MenuOwnership m_menuOwnership;
 	ui::CCmdIdStore m_shellIdStore;					// contains only commands belonging to the shell context menu
 	CComPtr< IContextMenu > m_pContextMenu;
-
-	// used for handling messages during menu tracking
-	CComQIPtr< IContextMenu2 > m_pContextMenu2;
-	CComQIPtr< IContextMenu3 > m_pContextMenu3;
-
-	static CShellContextMenuHost* s_pInstance;		// single one tracking at a time
 
 	// generated stuff
 public:
