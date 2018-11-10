@@ -2,7 +2,7 @@
 #include "stdafx.h"
 #include "MainDialog.h"
 #include "FileItemInfo.h"
-#include "utl/ShellContextMenu.h"
+#include "utl/ShellContextMenuHost.h"
 #include "utl/ContainerUtilities.h"
 #include "utl/Path.h"
 #include "utl/FileSystem.h"
@@ -131,8 +131,8 @@ void CMainDialog::QuerySelectedFilePaths( std::vector< std::tstring >& rSelFileP
 
 int CMainDialog::TrackContextMenu( const std::vector< std::tstring >& selFilePaths, const CPoint& screenPos )
 {
-	shell::CContextMenu contextMenu( m_hWnd );
-	contextMenu.SetFilePaths( selFilePaths );
+	CShellContextMenuHost contextMenu( this );
+	contextMenu.Reset( shell::MakeFilePathsContextMenu( selFilePaths, m_hWnd ) );
 
 	if ( m_useCustomMenu )
 	{
@@ -164,8 +164,8 @@ int CMainDialog::TrackContextMenu( const std::vector< std::tstring >& selFilePat
 
 bool CMainDialog::InvokeDefaultVerb( const std::vector< std::tstring >& selFilePaths )
 {
-	shell::CContextMenu contextMenu( m_hWnd );
-	contextMenu.SetFilePaths( selFilePaths );
+	CShellContextMenuHost contextMenu( this );
+	contextMenu.Reset( shell::MakeFilePathsContextMenu( selFilePaths, m_hWnd ) );
 
 	return contextMenu.InvokeDefaultVerb();
 }
@@ -214,9 +214,9 @@ void CMainDialog::OnDestroy( void )
 	__super::OnDestroy();
 }
 
-void CMainDialog::OnLvnRClick_FileList( NMHDR* pNMHDR, LRESULT* pResult )
+void CMainDialog::OnLvnRClick_FileList( NMHDR* pNmHdr, LRESULT* pResult )
 {
-	NMITEMACTIVATE* pNmItemActivate = (NMITEMACTIVATE*)pNMHDR;
+	NMITEMACTIVATE* pNmItemActivate = (NMITEMACTIVATE*)pNmHdr;
 	*pResult = 0;
 
 	std::vector< std::tstring > selFilePaths;
@@ -233,7 +233,7 @@ void CMainDialog::OnLvnRClick_FileList( NMHDR* pNMHDR, LRESULT* pResult )
 	}
 }
 
-void CMainDialog::OnLvnDblclk_FileList( NMHDR* pNMHDR, LRESULT* pResult )
+void CMainDialog::OnLvnDblclk_FileList( NMHDR* pNmHdr, LRESULT* pResult )
 {
 	int itemIndex = m_fileListCtrl.GetNextItem( -1, LVNI_FOCUSED );
 	if ( itemIndex != -1 )
@@ -253,9 +253,9 @@ void CMainDialog::OnLvnDblclk_FileList( NMHDR* pNMHDR, LRESULT* pResult )
 	}
 }
 
-void CMainDialog::OnGetDispInfoFileList( NMHDR* pNMHDR, LRESULT* pResult )
+void CMainDialog::OnGetDispInfoFileList( NMHDR* pNmHdr, LRESULT* pResult )
 {
-	LV_DISPINFO* pDispInfo = (LV_DISPINFO*)pNMHDR;
+	LV_DISPINFO* pDispInfo = (LV_DISPINFO*)pNmHdr;
 	LVITEM* pLvItem = &pDispInfo->item;
 	*pResult = 0;
 

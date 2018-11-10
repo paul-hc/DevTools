@@ -49,9 +49,9 @@ protected:
 	virtual void DoDataExchange( CDataExchange* pDX );
 protected:
 	afx_msg void OnDestroy( void );
-	afx_msg void OnLvnRClick_FileList( NMHDR* pNMHDR, LRESULT* pResult );
-	afx_msg void OnLvnDblclk_FileList( NMHDR* pNMHDR, LRESULT* pResult );
-	afx_msg void OnGetDispInfoFileList( NMHDR* pNMHDR, LRESULT* pResult );
+	afx_msg void OnLvnRClick_FileList( NMHDR* pNmHdr, LRESULT* pResult );
+	afx_msg void OnLvnDblclk_FileList( NMHDR* pNmHdr, LRESULT* pResult );
+	afx_msg void OnGetDispInfoFileList( NMHDR* pNmHdr, LRESULT* pResult );
 	afx_msg void OnViewMode( UINT cmdId );
 	afx_msg void OnUpdateViewMode( CCmdUI* pCmdUI );
 	afx_msg void OnUseCustomMenu( void );
