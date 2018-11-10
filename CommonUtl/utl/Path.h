@@ -170,6 +170,7 @@ namespace fs
 		bool IsComplexPath( void ) const { return path::IsComplex( GetPtr() ); }
 
 		const std::tstring& Get( void ) const { return m_filePath; }
+		std::tstring& Ref( void ) { return m_filePath; }
 		void Set( const std::tstring& filePath );
 
 		const TCHAR* GetPtr( void ) const { return m_filePath.c_str(); }
@@ -203,8 +204,6 @@ namespace fs
 		CPath ExtractExistingFilePath( void ) const;
 
 		inline size_t GetHashValue( void ) const { return path::GetHashValue( m_filePath.c_str() ); }
-	protected:
-		std::tstring& Ref( void ) { return m_filePath; }
 	private:
 		std::tstring m_filePath;
 	};
@@ -220,6 +219,7 @@ namespace stdext
 
 namespace func
 {
+	inline const std::tstring& StringOf( const fs::CPath& filePath ) { return filePath.Get(); }		// for uniform string algorithms
 	inline const fs::CPath& PathOf( const fs::CPath& keyPath ) { return keyPath; }		// for uniform path algorithms
 
 	struct ToNameExt

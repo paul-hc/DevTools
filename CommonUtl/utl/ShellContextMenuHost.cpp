@@ -32,18 +32,12 @@ namespace shell
 		CComPtr< IContextMenu > pCtxMenu;
 
 		std::vector< PITEMID_CHILD > pidlItemsArray;
-		if ( CComPtr< IShellFolder > pParentFolder = MakePidlArray( pidlItemsArray, filePaths ) )
+		if ( CComPtr< IShellFolder > pParentFolder = MakeRelativePidlArray( pidlItemsArray, filePaths ) )
 			pCtxMenu = MakeFolderItemsContextMenu( &*pParentFolder, (PCUITEMID_CHILD_ARRAY)&pidlItemsArray.front(), pidlItemsArray.size(), hWndOwner );
 
 		ClearOwningPidls( pidlItemsArray );
 		return pCtxMenu;
 	}
-/*
-fs::CPath ExtractCommonParentPath( const ContainerT& paths )	// uses func::PathOf() to extract path of element - for container versatility (map, vector, etc)
-
-	CComPtr< IContextMenu > GetRelativeItemsContextMenu( const std::vector< fs::CPath >& filePaths, HWND hWndOwner )
-	{
-	}*/
 
 
 	CComPtr< IContextMenu > MakeFolderItemContextMenu( IShellFolder* pParentFolder, PCITEMID_CHILD pidlItem, HWND hWndOwner )

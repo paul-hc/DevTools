@@ -215,6 +215,9 @@ namespace str
 
 namespace func
 {
+	inline const std::tstring& StringOf( const std::tstring& filePath ) { return filePath; }		// for uniform string algorithms
+
+
 	template< typename CharType >
 	inline CharType toupper( CharType ch, const std::locale& loc = str::GetUserLocale() )
 	{

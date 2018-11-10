@@ -19,6 +19,21 @@ namespace shell
 		return NULL;
 	}
 
+	CComPtr< IShellFolder > FindShellFolder( const TCHAR* pDirPath )
+	{
+		CComPtr< IShellFolder > pDirFolder;
+
+		if ( CComPtr< IShellFolder > pDesktopFolder = GetDesktopFolder() )
+		{
+			CComHeapPtr< ITEMIDLIST > pidlFolder( static_cast< ITEMIDLIST_RELATIVE* >( pidl::GetRelativeItem( pDesktopFolder, pDirPath ) ) );
+			if ( pidlFolder.m_pData != NULL )
+				HR_AUDIT( pDesktopFolder->BindToObject( pidlFolder, NULL, IID_PPV_ARGS( &pDirFolder ) ) );
+		}
+
+		return pDirFolder;
+	}
+
+
 	CComPtr< IShellFolder2 > ToShellFolder( IShellItem* pFolderItem )
 	{
 		ASSERT_PTR( pFolderItem );
@@ -80,6 +95,50 @@ namespace shell
 
 	namespace pidl
 	{
+		PIDLIST_RELATIVE GetRelativeItem( IShellFolder* pFolder, const TCHAR itemFilename[] )
+		{
+			ASSERT_PTR( pFolder );
+			ASSERT_PTR( !str::IsEmpty( itemFilename ) );
+
+			TCHAR displayName[ MAX_PATH * 2 ];
+			_tcscpy( displayName, itemFilename );
+
+			PIDLIST_RELATIVE childItemPidl = NULL;
+			if ( HR_OK( pFolder->ParseDisplayName( NULL, NULL, displayName, NULL, &childItemPidl, NULL ) ) )
+				return childItemPidl;			// allocated, client must free
+
+			return NULL;
+		}
+
+		std::tstring GetName( LPCITEMIDLIST pidl, SIGDN nameType /*= SIGDN_NORMALDISPLAY*/ )
+		{
+			ASSERT_PTR( pidl );
+			std::tstring name;
+
+			TCHAR* pName;
+			if ( HR_OK( ::SHGetNameFromIDList( pidl, nameType, &pName ) ) )
+			{
+				name = pName;
+				::CoTaskMemFree( pName );
+			}
+			return name;
+		}
+
+		fs::CPath GetAbsolutePath( PIDLIST_ABSOLUTE pidlAbsolute, GPFIDL_FLAGS optFlags /*= GPFIDL_DEFAULT*/ )
+		{
+			fs::CPath fullPath;
+			if ( !IsNull( pidlAbsolute ) )
+			{
+				TCHAR buffFullPath[ MAX_PATH * 2 ];
+				if ( ::SHGetPathFromIDListEx( pidlAbsolute, buffFullPath, _countof( buffFullPath ), optFlags ) )
+					fullPath.Set( buffFullPath );
+			}
+			else
+				ASSERT( false );
+
+			return fullPath;
+		}
+
 		size_t GetCount( LPCITEMIDLIST pidl )
 		{
 			UINT count = 0;
@@ -157,21 +216,6 @@ namespace shell
 				}
 			}
 			return targetPidl;
-		}
-
-		PUIDLIST_RELATIVE GetRelativeItem( IShellFolder* pFolder, const TCHAR itemFilename[] )
-		{
-			ASSERT_PTR( pFolder );
-			ASSERT_PTR( !str::IsEmpty( itemFilename ) );
-
-			TCHAR displayName[ MAX_PATH * 2 ];
-			_tcscpy( displayName, itemFilename );
-
-			PUIDLIST_RELATIVE childItemPidl = NULL;
-			if ( HR_OK( pFolder->ParseDisplayName( NULL, NULL, displayName, NULL, &childItemPidl, NULL ) ) )
-				return childItemPidl;			// allocated, client must free
-
-			return NULL;
 		}
 
 		pred::CompareResult Compare( PCUIDLIST_RELATIVE leftPidl, PCUIDLIST_RELATIVE rightPidl, IShellFolder* pParentFolder /*= GetDesktopFolder()*/ )
@@ -302,7 +346,7 @@ namespace shell
 		}
 		else
 		{
-			if ( HR_OK( ::SHCreateItemFromParsingName( GetFullPath().GetPtr(), NULL, IID_PPV_ARGS( &pShellItem ) ) ) )
+			if ( HR_OK( ::SHCreateItemFromParsingName( GetAbsolutePath().GetPtr(), NULL, IID_PPV_ARGS( &pShellItem ) ) ) )
 				return pShellItem;
 		}
 
@@ -318,34 +362,6 @@ namespace shell
 			return pShellFolder;
 
 		return NULL;
-	}
-
-	fs::CPath CPidl::GetFullPath( GPFIDL_FLAGS optFlags /*= GPFIDL_DEFAULT*/ ) const
-	{
-		fs::CPath fullPath;
-		if ( !IsNull() )
-		{
-			TCHAR buffFullPath[ MAX_PATH * 2 ];
-			if ( ::SHGetPathFromIDListEx( m_pidl, buffFullPath, _countof( buffFullPath ), optFlags ) )
-				fullPath.Set( buffFullPath );
-		}
-		else
-			ASSERT( false );
-
-		return fullPath;
-	}
-
-	std::tstring CPidl::GetName( SIGDN nameType /*= SIGDN_NORMALDISPLAY*/ ) const
-	{
-		std::tstring name;
-
-		TCHAR* pName;
-		if ( HR_OK( ::SHGetNameFromIDList( m_pidl, nameType, &pName ) ) )
-		{
-			name = pName;
-			::CoTaskMemFree( pName );
-		}
-		return name;
 	}
 
 	bool CPidl::WriteToStream( IStream* pStream ) const

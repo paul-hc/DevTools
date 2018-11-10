@@ -10,7 +10,11 @@
 
 namespace shell
 {
+	// shell folder
 	CComPtr< IShellFolder > GetDesktopFolder( void );
+	CComPtr< IShellFolder > FindShellFolder( const TCHAR* pDirPath );
+
+	// shell item
 	CComPtr< IShellFolder2 > ToShellFolder( IShellItem* pFolderItem );
 	CComPtr< IShellFolder2 > GetParentFolderAndPidl( ITEMID_CHILD** pPidlItem, IShellItem* pShellItem );
 }
@@ -18,8 +22,10 @@ namespace shell
 
 namespace shell
 {
-	CComPtr< IShellFolder > MakePidlArray( std::vector< PITEMID_CHILD >& rPidlItemsArray, const std::vector< std::tstring >& filePaths );			// caller must delete the PIDLs
-	CComPtr< IShellFolder > MakePidlRelativeArray( std::vector< PIDLIST_RELATIVE >& rPidlItemsArray, const std::vector< std::tstring >& filePaths );	// for mixed directory paths, uses common parent folder, caller must delete the PIDLs
+	CComPtr< IShellFolder > MakePidlArray( std::vector< PITEMID_CHILD >& rPidlItemsArray, const std::vector< std::tstring >& filePaths );	// for files having the same parent folder; caller must delete the PIDLs
+
+	template< typename PathContainerT >
+	CComPtr< IShellFolder > MakeRelativePidlArray( std::vector< PIDLIST_RELATIVE >& rPidlItemsArray, const PathContainerT& filePaths );		// for mixed files having a common ancestor folder; caller must delete the PIDLs
 
 	template< typename ContainerT >
 	void ClearOwningPidls( ContainerT& rPidls )			// container of pointers to PIDLs, such as std::vector< LPITEMIDLIST >
@@ -35,6 +41,10 @@ namespace shell
 		inline LPITEMIDLIST Allocate( size_t size ) { return static_cast< LPITEMIDLIST >( ::CoTaskMemAlloc( static_cast< ULONG >( size ) ) ); }
 		inline void Delete( LPITEMIDLIST pidl ) { ::CoTaskMemFree( pidl ); }
 
+		PIDLIST_RELATIVE GetRelativeItem( IShellFolder* pFolder, const TCHAR itemFilename[] );		// itemFilename is normally a fname.ext; also works with a sub-path
+		fs::CPath GetAbsolutePath( PIDLIST_ABSOLUTE pidlAbsolute, GPFIDL_FLAGS optFlags = GPFIDL_DEFAULT );
+		std::tstring GetName( LPCITEMIDLIST pidl, SIGDN nameType = SIGDN_NORMALDISPLAY );
+
 		inline bool IsNull( LPCITEMIDLIST pidl ) { return NULL == pidl; }
 		inline bool IsEmpty( LPCITEMIDLIST pidl ) { return IsNull( pidl ) || 0 == pidl->mkid.cb; }
 		size_t GetCount( LPCITEMIDLIST pidl );
@@ -45,8 +55,6 @@ namespace shell
 
 		LPITEMIDLIST Copy( LPCITEMIDLIST pidl );
 		LPITEMIDLIST CopyFirstItem( LPCITEMIDLIST pidl );
-
-		PUIDLIST_RELATIVE GetRelativeItem( IShellFolder* pFolder, const TCHAR itemFilename[] );		// itemFilename is normally a fname.ext; also works with a sub-path
 
 		inline bool IsEqual( PCIDLIST_ABSOLUTE leftPidl, PCIDLIST_ABSOLUTE rightPidl ) { return ::ILIsEqual( leftPidl, rightPidl ) != FALSE; }
 		pred::CompareResult Compare( PCUIDLIST_RELATIVE leftPidl, PCUIDLIST_RELATIVE rightPidl, IShellFolder* pParentFolder = GetDesktopFolder() );
@@ -136,8 +144,8 @@ namespace shell
 		CComPtr< IShellItem > FindItem( IShellFolder* pParentFolder = NULL ) const;			// pass pParentFolder if PIDL is relative/child
 		CComPtr< IShellFolder > FindFolder( IShellFolder* pParentFolder = GetDesktopFolder() ) const;
 
-		fs::CPath GetFullPath( GPFIDL_FLAGS optFlags = GPFIDL_DEFAULT ) const;
-		std::tstring GetName( SIGDN nameType = SIGDN_NORMALDISPLAY ) const;
+		fs::CPath GetAbsolutePath( GPFIDL_FLAGS optFlags = GPFIDL_DEFAULT ) const { return pidl::GetAbsolutePath( m_pidl, optFlags ); }
+		std::tstring GetName( SIGDN nameType = SIGDN_NORMALDISPLAY ) const { return pidl::GetName( m_pidl, nameType ); }
 
 		bool WriteToStream( IStream* pStream ) const;
 		bool ReadFromStream( IStream* pStream );
@@ -175,6 +183,36 @@ namespace shell
 	private:
 		CImageList m_imageLists[ ui::_GlyphGaugeCount ];
 	};
+}
+
+
+namespace shell
+{
+	// template code
+
+	template< typename PathContainerT >
+	CComPtr< IShellFolder > MakeRelativePidlArray( std::vector< PIDLIST_RELATIVE >& rPidlItemsArray, const PathContainerT& filePaths )
+	{	// for mixed files having a common ancestor folder
+		CComPtr< IShellFolder > pCommonFolder;
+		fs::CPath commonDirPath = path::ExtractCommonParentPath( filePaths );
+
+		rPidlItemsArray.reserve( filePaths.size() );
+		if ( !commonDirPath.IsEmpty() )
+		{
+			pCommonFolder = FindShellFolder( commonDirPath.GetPtr() );
+			if ( pCommonFolder != NULL )
+				for ( typename PathContainerT::const_iterator itFilePath = filePaths.begin(); itFilePath != filePaths.end(); ++itFilePath )
+				{
+					std::tstring relativePath = func::StringOf( *itFilePath );
+					path::StripPrefix( relativePath, commonDirPath.GetPtr() );
+
+					if ( PIDLIST_RELATIVE pidlRelative = pidl::GetRelativeItem( pCommonFolder, relativePath.c_str() ) )
+						rPidlItemsArray.push_back( pidlRelative );			// caller must free the pidl
+				}
+		}
+
+		return pCommonFolder;
+	}
 }
 
 

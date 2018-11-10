@@ -24,6 +24,7 @@ private:
 	void TestFileAndDirectoryState( void );
 
 	void TestShellPidl( void );
+	void TestShellRelativePidl( void );
 };
 
 

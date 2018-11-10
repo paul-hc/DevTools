@@ -212,13 +212,13 @@ void CFileSystemTests::TestShellPidl( void )
 
 	shell::CPidl desktopPidl;
 	ASSERT( desktopPidl.CreateFromFolder( pDesktopFolder ) );
-	fs::CPath desktopPath = desktopPidl.GetFullPath();
+	fs::CPath desktopPath = desktopPidl.GetAbsolutePath();
 
 	shell::CPidl poolDirPidl;
 	ASSERT( poolDirPidl.IsEmpty() );
 	ASSERT( poolDirPidl.CreateAbsolute( poolDirPath.GetPtr() ) );
 	ASSERT( !poolDirPidl.IsEmpty() );
-	ASSERT_EQUAL( poolDirPath, poolDirPidl.GetFullPath() );
+	ASSERT_EQUAL( poolDirPath, poolDirPidl.GetAbsolutePath() );
 
 	{
 		shell::CPidl poolDirPidl2;
@@ -232,10 +232,10 @@ void CFileSystemTests::TestShellPidl( void )
 	shell::CPidl pidl;
 	{
 		ASSERT( pidl.CreateFrom( pDesktopFolder ) );
-		ASSERT_EQUAL( desktopPath, pidl.GetFullPath() );
+		ASSERT_EQUAL( desktopPath, pidl.GetAbsolutePath() );
 
 		ASSERT( pidl.CreateFrom( pPoolFolder ) );
-		ASSERT_EQUAL( poolDirPath, pidl.GetFullPath() );
+		ASSERT_EQUAL( poolDirPath, pidl.GetAbsolutePath() );
 	}
 
 	{
@@ -244,7 +244,7 @@ void CFileSystemTests::TestShellPidl( void )
 		shell::CPidl filePidl;
 		ASSERT( filePidl.CreateAbsolute( filePath.GetPtr() ) );
 		ASSERT( filePidl.GetCount() > 1 );
-		ASSERT_EQUAL( filePath, filePidl.GetFullPath() );
+		ASSERT_EQUAL( filePath, filePidl.GetAbsolutePath() );
 		ASSERT_EQUAL( _T("fa.txt"), filePidl.GetName() );		// filePath.GetNameExt()
 
 		{	// last item ID
@@ -257,7 +257,7 @@ void CFileSystemTests::TestShellPidl( void )
 			shell::CPidl itemPidl;
 			ASSERT( itemPidl.CreateRelative( pPoolFolder, filePath.GetNameExt() ) );
 			ASSERT_EQUAL( 1, itemPidl.GetCount() );
-			ASSERT_EQUAL( desktopPath / itemPidl.GetName(), itemPidl.GetFullPath() );		// strangely, for child PIDLs the desktop directory is implicitly prepended
+			ASSERT_EQUAL( desktopPath / itemPidl.GetName(), itemPidl.GetAbsolutePath() );		// strangely, for child PIDLs the desktop directory is implicitly prepended
 			ASSERT_EQUAL( _T("fa.txt"), itemPidl.GetName() );		// filePath.GetNameExt()
 
 			// shell item from child PIDL relative to parent folder
@@ -266,7 +266,7 @@ void CFileSystemTests::TestShellPidl( void )
 			ASSERT_EQUAL( filePath, shell::CWinExplorer().GetItemPath( pChildFileItem ) );
 
 			ASSERT( pidl.CreateFrom( pChildFileItem ) );
-			ASSERT_EQUAL( filePath, pidl.GetFullPath() );
+			ASSERT_EQUAL( filePath, pidl.GetAbsolutePath() );
 		}
 
 		{	// shell item
@@ -276,15 +276,38 @@ void CFileSystemTests::TestShellPidl( void )
 			ASSERT_EQUAL( filePath, itemPath );
 
 			ASSERT( pidl.CreateFrom( pFileItem ) );
-			ASSERT_EQUAL( filePath, pidl.GetFullPath() );
+			ASSERT_EQUAL( filePath, pidl.GetAbsolutePath() );
 		}
 
 		// copy-move
 		shell::CPidl copyPidl = filePidl;
 		ASSERT( filePidl.IsNull() );
 		ASSERT( !copyPidl.IsEmpty() );
-		ASSERT_EQUAL( filePath, copyPidl.GetFullPath() );
+		ASSERT_EQUAL( filePath, copyPidl.GetAbsolutePath() );
 	}
+
+	{	// relative PIDL
+		static const TCHAR s_relFilePath[] = _T("d1\\fb.txt");		// relative to pool folder
+
+		shell::CPidl relativePidl;
+		ASSERT( relativePidl.CreateRelative( pPoolFolder, s_relFilePath ) );
+		ASSERT_EQUAL( 2, relativePidl.GetCount() );
+		ASSERT_EQUAL( _T("fb.txt"), relativePidl.GetName() );		// don't know how to find the actual relative path
+	}
+}
+
+void CFileSystemTests::TestShellRelativePidl( void )
+{
+	ut::CTempFilePool pool( _T("a.txt|d1\\b.txt|d2\\sub3\\c.txt") );
+
+	std::vector< PIDLIST_RELATIVE > pidlItemsArray;
+	CComPtr< IShellFolder > pCommonFolder = shell::MakeRelativePidlArray( pidlItemsArray, pool.GetFilePaths() );
+	ASSERT_PTR( pCommonFolder );
+
+	ASSERT_EQUAL( 3, pidlItemsArray.size() );
+	ASSERT_EQUAL( pool.GetFilePaths()[ 0 ].GetNameExt(), shell::pidl::GetName( pidlItemsArray[ 0 ] ) );
+
+	shell::ClearOwningPidls( pidlItemsArray );
 }
 
 
@@ -298,6 +321,7 @@ void CFileSystemTests::Run( void )
 	TestTempFilePool();
 	TestFileAndDirectoryState();
 	TestShellPidl();
+	TestShellRelativePidl();
 }
 
 

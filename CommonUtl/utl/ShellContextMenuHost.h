@@ -11,8 +11,7 @@ namespace shell
 	// context menu of absolute item(s)
 	CComPtr< IContextMenu > MakeAbsoluteContextMenu( PCIDLIST_ABSOLUTE pidlAbs, HWND hWndOwner );
 	CComPtr< IContextMenu > MakeFilePathContextMenu( const std::tstring& filePath, HWND hWndOwner );
-	CComPtr< IContextMenu > MakeFilePathsContextMenu( const std::vector< std::tstring >& filePaths, HWND hWndOwner );
-	//CComPtr< IContextMenu > GetRelativeItemsContextMenu( const std::vector< fs::CPath >& filePaths, HWND hWndOwner );
+	CComPtr< IContextMenu > MakeFilePathsContextMenu( const std::vector< std::tstring >& filePaths, HWND hWndOwner );		// for mixed files having a common ancestor folder
 
 	// context menu of child item(s)
 	CComPtr< IContextMenu > MakeFolderItemContextMenu( IShellFolder* pParentFolder, PCITEMID_CHILD pidlItem, HWND hWndOwner );
