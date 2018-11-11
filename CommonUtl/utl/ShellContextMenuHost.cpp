@@ -27,19 +27,6 @@ namespace shell
 		return MakeAbsoluteContextMenu( pidlItem, hWndOwner );
 	}
 
-	CComPtr< IContextMenu > MakeFilePathsContextMenu( const std::vector< std::tstring >& filePaths, HWND hWndOwner )
-	{
-		CComPtr< IContextMenu > pCtxMenu;
-
-		std::vector< PITEMID_CHILD > pidlItemsArray;
-		if ( CComPtr< IShellFolder > pParentFolder = MakeRelativePidlArray( pidlItemsArray, filePaths ) )
-			pCtxMenu = MakeFolderItemsContextMenu( &*pParentFolder, (PCUITEMID_CHILD_ARRAY)&pidlItemsArray.front(), pidlItemsArray.size(), hWndOwner );
-
-		ClearOwningPidls( pidlItemsArray );
-		return pCtxMenu;
-	}
-
-
 	CComPtr< IContextMenu > MakeFolderItemContextMenu( IShellFolder* pParentFolder, PCITEMID_CHILD pidlItem, HWND hWndOwner )
 	{
 		ASSERT_PTR( pParentFolder );
@@ -247,6 +234,11 @@ bool CShellContextMenuHost::InvokeDefaultVerb( void )
 		InvokeVerbIndex( ToVerbIndex( defaultCmdId ) );
 }
 
+bool CShellContextMenuHost::IsLazyUninit( void ) const
+{
+	return false;
+}
+
 CMenu* CShellContextMenuHost::EnsurePopupShellCmds( UINT queryFlags )
 {
 	if ( HasShellCmds() )
@@ -289,10 +281,12 @@ CShellContextMenuHost::CTrackingHook::CTrackingHook( HWND hWndOwner, IContextMen
 	, m_pContextMenu2( pContextMenu )
 	, m_pContextMenu3( pContextMenu )
 {
-	// subclass window to handle menu messages in here
+	// only subclass if its version 2 or 3 of context menu - subclass window to handle menu messages in here
 	if ( m_hWndOwner != NULL )
-		if ( m_pContextMenu2 != NULL || m_pContextMenu3 != NULL )		// only subclass if its version 2 or 3 context menu
-			m_pOldWndProc = (WNDPROC)::SetWindowLongPtr( m_hWndOwner, GWLP_WNDPROC, (LONG_PTR)HookWndProc );
+		if ( m_pContextMenu3 != NULL )
+			m_pOldWndProc = (WNDPROC)::SetWindowLongPtr( m_hWndOwner, GWLP_WNDPROC, (LONG_PTR)HookWndProc3 );
+		else if ( m_pContextMenu2 != NULL )
+			m_pOldWndProc = (WNDPROC)::SetWindowLongPtr( m_hWndOwner, GWLP_WNDPROC, (LONG_PTR)HookWndProc2 );
 
 	ASSERT_NULL( s_pInstance );
 	s_pInstance = this;
@@ -307,36 +301,63 @@ CShellContextMenuHost::CTrackingHook::~CTrackingHook()
 	s_pInstance = NULL;
 }
 
-LRESULT CShellContextMenuHost::CTrackingHook::HandleWndProc( HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam )
+LRESULT CShellContextMenuHost::CTrackingHook::HandleWndProc2( HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam )
 {
+	REQUIRE( m_pContextMenu2 != NULL && m_pContextMenu3 == NULL );
+
 	switch ( message )
 	{
-		case WM_MENUCHAR:		// only supported by IContextMenu3
-			if ( m_pContextMenu3 != NULL )
-			{
-				LRESULT lResult = 0;
-				m_pContextMenu3->HandleMenuMsg2( message, wParam, lParam, &lResult );
-				return lResult;
-			}
+		case WM_DRAWITEM:			// return value: if an application processes this message, it should return TRUE
+		case WM_MEASUREITEM:		// return value: if an application processes this message, it should return TRUE
+			if ( 0 == wParam )		// menu-related message?
+				if ( SUCCEEDED( m_pContextMenu2->HandleMenuMsg( message, wParam, lParam ) ) )
+					return TRUE;		// message was handled
 			break;
-		case WM_DRAWITEM:
-		case WM_MEASUREITEM:
-			if ( wParam != 0 )
-				break;			// message is not menu-related
-			// fall-through
-		case WM_INITMENUPOPUP:
-			if ( m_pContextMenu2 != NULL )
-				m_pContextMenu2->HandleMenuMsg( message, wParam, lParam );
-			else	// version 3
-				m_pContextMenu3->HandleMenuMsg( message, wParam, lParam );
-			return message != WM_INITMENUPOPUP;		// inform caller that we handled WM_INITPOPUPMENU by ourself
+		case WM_INITMENUPOPUP:		// return value: if an application processes this message, it should return 0
+			if ( SUCCEEDED( m_pContextMenu2->HandleMenuMsg( message, wParam, lParam ) ) )
+				return FALSE;			// message was handled
+			break;
 	}
 
 	return ::CallWindowProc( m_pOldWndProc, hWnd, message, wParam, lParam );		// call original WndProc
 }
 
-LRESULT CALLBACK CShellContextMenuHost::CTrackingHook::HookWndProc( HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam )
+LRESULT CShellContextMenuHost::CTrackingHook::HandleWndProc3( HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam )
+{
+	REQUIRE( m_pContextMenu3 != NULL );
+
+	LRESULT lResult = 0;
+
+	switch ( message )
+	{
+		case WM_MENUCHAR:			// handled only by IContextMenu3
+			if ( SUCCEEDED( m_pContextMenu3->HandleMenuMsg2( message, wParam, lParam, &lResult ) ) )
+				return lResult;					// return value is important!
+			break;
+		case WM_DRAWITEM:			// return value: if an application processes this message, it should return TRUE
+		case WM_MEASUREITEM:
+			if ( 0 == wParam )					// menu-related message?
+				if ( SUCCEEDED( m_pContextMenu3->HandleMenuMsg2( message, wParam, lParam, &lResult ) ) )
+					if ( TRUE == lResult )		// message was handled?
+						return lResult;
+			break;
+		case WM_INITMENUPOPUP:		// return value: if an application processes this message, it should return 0
+			if ( SUCCEEDED( m_pContextMenu3->HandleMenuMsg2( message, wParam, lParam, &lResult ) ) )
+				if ( 0 == lResult )				// message was handled?
+					return lResult;
+	}
+
+	return ::CallWindowProc( m_pOldWndProc, hWnd, message, wParam, lParam );		// call original WndProc
+}
+
+LRESULT CALLBACK CShellContextMenuHost::CTrackingHook::HookWndProc2( HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam )
 {
 	ASSERT_PTR( s_pInstance );
-	return s_pInstance->HandleWndProc( hWnd, message, wParam, lParam );
+	return s_pInstance->HandleWndProc2( hWnd, message, wParam, lParam );
+}
+
+LRESULT CALLBACK CShellContextMenuHost::CTrackingHook::HookWndProc3( HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam )
+{
+	ASSERT_PTR( s_pInstance );
+	return s_pInstance->HandleWndProc3( hWnd, message, wParam, lParam );
 }

@@ -151,6 +151,8 @@ public:
 	enum ListPopup { Nowhere, OnSelection, _ListPopupCount };
 
 	void SetPopupMenu( ListPopup popupType, CMenu* pPopupMenu ) { m_pPopupMenu[ popupType ] = pPopupMenu; }		// set pPopupMenu to NULL to allow tracking context menu by parent dialog
+	void SetTrackMenuTarget( CWnd* pTrackMenuTarget ) { m_pTrackMenuTarget = pTrackMenuTarget; }
+
 	virtual CMenu* GetPopupMenu( ListPopup popupType );
 
 	static CMenu& GetStdPopupMenu( ListPopup popupType );
@@ -527,6 +529,8 @@ private:
 private:
 	bool m_painting;										// true during OnPaint() - supresses item text callback for diff columns to prevent default list sub-item draw (diffs are custom drawn)
 	BOOL m_parentHandles[ _PN_Count ];						// self-encapsulated 'parent handles' flags array
+protected:
+	CWnd* m_pTrackMenuTarget;								// window that receives commands when tracking the context menu
 public:
 	ui::CTextEffect m_listTextEffect;						// for all items in the list
 

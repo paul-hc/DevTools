@@ -63,7 +63,8 @@ namespace layout
 		{ IDC_DUPLICATE_FILES_LIST, SizeX | pctMoveY( TopPct ) | pctSizeY( BottomPct ) },
 		{ IDC_OUTCOME_INFO_STATUS, SizeX | MoveY },
 
-		{ IDC_SELECT_DUPLICATES_BUTTON, MoveY },
+		{ ID_CHECK_ALL_DUPLICATES, MoveY },
+		{ ID_UNCHECK_ALL_DUPLICATES, MoveY },
 		{ IDC_DELETE_DUPLICATES_BUTTON, MoveY },
 		{ IDC_MOVE_DUPLICATES_BUTTON, MoveY },
 		{ IDC_CLEAR_CRC32_CACHE_BUTTON, Move },
@@ -96,7 +97,11 @@ CFindDuplicatesDialog::CFindDuplicatesDialog( CFileModel* pFileModel, CWnd* pPar
 	m_dupsListCtrl.ModifyListStyleEx( 0, LVS_EX_CHECKBOXES );
 	m_dupsListCtrl.SetSection( m_regSection + _T("\\List") );
 	m_dupsListCtrl.SetTextEffectCallback( this );
-//m_dupsListCtrl.SetPopupMenu( CReportListControl::OnSelection, NULL );				// let us track a custom menu
+
+	m_dupsListCtrl.SetPopupMenu( CReportListControl::Nowhere, &GetDupListPopupMenu( CReportListControl::Nowhere ) );
+	m_dupsListCtrl.SetPopupMenu( CReportListControl::OnSelection, &GetDupListPopupMenu( CReportListControl::OnSelection ) );
+m_dupsListCtrl.SetTrackMenuTarget( this );
+//m_dupsListCtrl.SetShellContextMenuStyle( CPathItemListCtrl::NoShellMenu );
 	CGeneralOptions::Instance().ApplyToListCtrl( &m_dupsListCtrl );
 
 	m_dupsListCtrl.AddColumnCompare( FileName, pred::NewComparator( pred::CompareDisplayCode() ) );
@@ -127,6 +132,19 @@ const CEnumTags& CFindDuplicatesDialog::GetTags_FileType( void )
 		_T("*.ext1;*.ext2;*.ext3")
 	);
 	return tags;
+}
+
+CMenu& CFindDuplicatesDialog::GetDupListPopupMenu( CReportListControl::ListPopup popupType )
+{
+	static CMenu s_popupMenu[ CReportListControl::_ListPopupCount ];
+	CMenu& rMenu = s_popupMenu[ popupType ];
+	if ( NULL == rMenu.GetSafeHmenu() )
+	{
+		CMenu popupMenu;
+		ui::LoadPopupSubMenu( rMenu, IDR_CONTEXT_MENU, popup::DuplicatesList, CReportListControl::OnSelection == popupType ? DupListOnSelection : DupListNowhere );
+		ui::JoinMenuItems( rMenu, CPathItemListCtrl::GetStdPathListPopupMenu( popupType ) );
+	}
+	return rMenu;
 }
 
 void CFindDuplicatesDialog::ClearDuplicates( void )
@@ -187,7 +205,7 @@ void CFindDuplicatesDialog::SwitchMode( Mode mode )
 	{
 		IDC_GROUP_BOX_1, IDC_SOURCE_PATHS_LIST,
 		IDC_FILE_TYPE_STATIC, IDC_FILE_TYPE_COMBO, IDC_MINIMUM_SIZE_STATIC, IDC_MIN_FILE_SIZE_COMBO, IDC_FILE_SPEC_STATIC, IDC_FILE_SPEC_EDIT,
-		IDC_SELECT_DUPLICATES_BUTTON, IDC_DELETE_DUPLICATES_BUTTON, IDC_MOVE_DUPLICATES_BUTTON, IDC_CLEAR_CRC32_CACHE_BUTTON
+		ID_CHECK_ALL_DUPLICATES, IDC_DELETE_DUPLICATES_BUTTON, IDC_MOVE_DUPLICATES_BUTTON, IDC_CLEAR_CRC32_CACHE_BUTTON
 	};
 	ui::EnableControls( *this, ctrlIds, COUNT_OF( ctrlIds ), !IsRollMode() );
 	ui::EnableControl( *this, IDC_DUPLICATE_FILES_STATIC, mode != EditMode );
@@ -450,7 +468,16 @@ BEGIN_MESSAGE_MAP( CFindDuplicatesDialog, CFileEditorBaseDialog )
 	ON_EN_CHANGE( IDC_FILE_SPEC_EDIT, OnEnChange_FileSpec )
 	ON_CBN_EDITCHANGE( IDC_MIN_FILE_SIZE_COMBO, OnCbnChanged_MinFileSize )
 	ON_CBN_SELCHANGE( IDC_MIN_FILE_SIZE_COMBO, OnCbnChanged_MinFileSize )
-	ON_BN_CLICKED( IDC_SELECT_DUPLICATES_BUTTON, OnBnClicked_CheckSelectDuplicates )
+
+	ON_COMMAND_RANGE( ID_CHECK_ALL_DUPLICATES, ID_UNCHECK_ALL_DUPLICATES, OnCheckAllDuplicates )
+	ON_UPDATE_COMMAND_UI_RANGE( ID_CHECK_ALL_DUPLICATES, ID_UNCHECK_ALL_DUPLICATES, OnUpdateCheckAllDuplicates )
+
+	ON_COMMAND_RANGE( ID_CHECK_GROUP_DUPLICATES, ID_UNCHECK_GROUP_DUPLICATES, OnCheckGroupDuplicates )
+	ON_UPDATE_COMMAND_UI_RANGE( ID_CHECK_GROUP_DUPLICATES, ID_UNCHECK_GROUP_DUPLICATES, OnUpdateCheckGroupDuplicates )
+
+	ON_COMMAND( ID_KEEP_AS_ORIGINAL_FILE, OnKeepAsOriginalFile )
+	ON_UPDATE_COMMAND_UI( ID_KEEP_AS_ORIGINAL_FILE, OnUpdateKeepAsOriginalFile )
+
 	ON_BN_CLICKED( IDC_DELETE_DUPLICATES_BUTTON, OnBnClicked_DeleteDuplicates )
 	ON_BN_CLICKED( IDC_MOVE_DUPLICATES_BUTTON, OnBnClicked_MoveDuplicates )
 	ON_BN_CLICKED( IDC_CLEAR_CRC32_CACHE_BUTTON, OnBnClicked_ClearCrc32Cache )
@@ -569,10 +596,33 @@ void CFindDuplicatesDialog::OnCbnChanged_MinFileSize( void )
 	OnFieldChanged();
 }
 
-void CFindDuplicatesDialog::OnBnClicked_CheckSelectDuplicates( void )
+void CFindDuplicatesDialog::OnCheckAllDuplicates( UINT cmdId )
 {
 //	if ( !m_pFileModel->CopyClipSourceFileStates( this ) )
 AfxMessageBox( _T("TODO: CheckSelectDuplicates!"), MB_OK );
+}
+
+void CFindDuplicatesDialog::OnUpdateCheckAllDuplicates( CCmdUI* pCmdUI )
+{
+	pCmdUI->Enable( CommitFilesMode == m_mode );
+}
+
+void CFindDuplicatesDialog::OnCheckGroupDuplicates( UINT cmdId )
+{
+}
+
+void CFindDuplicatesDialog::OnUpdateCheckGroupDuplicates( CCmdUI* pCmdUI )
+{
+	pCmdUI->Enable( false );
+}
+
+void CFindDuplicatesDialog::OnKeepAsOriginalFile( void )
+{
+}
+
+void CFindDuplicatesDialog::OnUpdateKeepAsOriginalFile( CCmdUI* pCmdUI )
+{
+	pCmdUI->Enable( false );
 }
 
 void CFindDuplicatesDialog::OnBnClicked_DeleteDuplicates( void )

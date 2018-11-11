@@ -96,6 +96,7 @@ CReportListControl::CReportListControl( UINT columnLayoutId /*= 0*/, DWORD listS
 	, m_listAccel( keys, COUNT_OF( keys ) )
 	, m_pDataSourceFactory( ole::GetStdDataSourceFactory() )
 	, m_painting( false )
+	, m_pTrackMenuTarget( this )
 	, m_deleteSrc_DiffEffect( ui::Bold, s_deleteSrcTextColor )
 	, m_mismatchDest_DiffEffect( ui::Bold, s_mismatchDestTextColor )
 	, m_matchDest_DiffEffect( ui::Regular, GetSysColor( COLOR_GRAYTEXT ) )
@@ -268,7 +269,7 @@ bool CReportListControl::TrackContextMenu( ListPopup popupType, const CPoint& sc
 {
 	if ( CMenu* pPopupMenu = GetPopupMenu( popupType ) )
 	{
-		ui::TrackPopupMenu( *pPopupMenu, this, screenPos );
+		ui::TrackPopupMenu( *pPopupMenu, m_pTrackMenuTarget, screenPos );
 		return true;		// handled
 	}
 

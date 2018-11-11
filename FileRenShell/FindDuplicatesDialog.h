@@ -66,6 +66,8 @@ private:
 	static const CEnumTags& GetTags_FileType( void );
 
 	std::tstring FormatReport( const CDupsOutcome& outcome ) const;
+
+	static CMenu& GetDupListPopupMenu( CReportListControl::ListPopup popupType );
 private:
 	std::vector< CPathItem* > m_srcPathItems;
 	std::vector< CDuplicateFilesGroup* > m_duplicateGroups;
@@ -73,6 +75,7 @@ private:
 private:
 	// enum { IDD = IDD_FIND_DUPLICATES_DIALOG };
 	enum DupFileColumn { FileName, DirPath, Size, Crc32, DateModified };
+	enum SubPopup { DupListNowhere, DupListOnSelection };
 
 	CPathItemListCtrl m_srcPathsListCtrl;
 	CDialogToolBar m_srcPathsToolbar;
@@ -98,7 +101,16 @@ protected:
 	afx_msg void OnCbnSelChange_FileType( void );
 	afx_msg void OnEnChange_FileSpec( void );
 	afx_msg void OnCbnChanged_MinFileSize( void );
-	afx_msg void OnBnClicked_CheckSelectDuplicates( void );
+
+	afx_msg void OnCheckAllDuplicates( UINT cmdId );
+	afx_msg void OnUpdateCheckAllDuplicates( CCmdUI* pCmdUI );
+
+	afx_msg void OnCheckGroupDuplicates( UINT cmdId );
+	afx_msg void OnUpdateCheckGroupDuplicates( CCmdUI* pCmdUI );
+
+	afx_msg void OnKeepAsOriginalFile( void );
+	afx_msg void OnUpdateKeepAsOriginalFile( CCmdUI* pCmdUI );
+
 	afx_msg void OnBnClicked_DeleteDuplicates( void );
 	afx_msg void OnBnClicked_MoveDuplicates( void );
 	afx_msg void OnBnClicked_ClearCrc32Cache( void );

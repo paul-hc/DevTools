@@ -11,12 +11,24 @@ namespace shell
 	// context menu of absolute item(s)
 	CComPtr< IContextMenu > MakeAbsoluteContextMenu( PCIDLIST_ABSOLUTE pidlAbs, HWND hWndOwner );
 	CComPtr< IContextMenu > MakeFilePathContextMenu( const std::tstring& filePath, HWND hWndOwner );
-	CComPtr< IContextMenu > MakeFilePathsContextMenu( const std::vector< std::tstring >& filePaths, HWND hWndOwner );		// for mixed files having a common ancestor folder
 
 	// context menu of child item(s)
 	CComPtr< IContextMenu > MakeFolderItemContextMenu( IShellFolder* pParentFolder, PCITEMID_CHILD pidlItem, HWND hWndOwner );
 	CComPtr< IContextMenu > MakeFolderItemsContextMenu( IShellFolder* pParentFolder, PCUITEMID_CHILD_ARRAY pidlItemsArray, size_t itemCount, HWND hWndOwner );
 	CComPtr< IContextMenu > MakeItemContextMenu( IShellItem* pItem, HWND hWndOwner );
+
+	template< typename PathContainerT >
+	CComPtr< IContextMenu > MakeFilePathsContextMenu( const PathContainerT& filePaths, HWND hWndOwner )
+	{
+		CComPtr< IContextMenu > pCtxMenu;
+
+		std::vector< PIDLIST_RELATIVE > pidlItemsArray;
+		if ( CComPtr< IShellFolder > pParentFolder = MakeRelativePidlArray( pidlItemsArray, filePaths ) )
+			pCtxMenu = MakeFolderItemsContextMenu( &*pParentFolder, (PCUITEMID_CHILD_ARRAY)&pidlItemsArray.front(), pidlItemsArray.size(), hWndOwner );
+
+		ClearOwningPidls( pidlItemsArray );
+		return pCtxMenu;
+	}
 
 	bool InvokeCommandByVerb( IContextMenu* pContextMenu, const char* pVerb, CWnd* pWndOwner );
 	bool InvokeDefaultVerb( IContextMenu* pContextMenu, CWnd* pWndOwner );
@@ -33,9 +45,10 @@ public:
 	CShellContextMenuHost( CWnd* pWndOwner, IContextMenu* pContextMenu = NULL );
 	virtual ~CShellContextMenuHost();
 
-	void Reset( IContextMenu* pContextMenu = NULL );
-
 	bool IsValid( void ) const { return m_pContextMenu != NULL; }
+	IContextMenu* Get( void ) const { return m_pContextMenu; }
+
+	void Reset( IContextMenu* pContextMenu = NULL );
 
 	// context popup menu
 	enum MenuOwnership { InternalMenu, ExternalMenu };
@@ -62,6 +75,7 @@ public:
 
 	static int ToVerbIndex( int cmdId ) { return cmdId - MinCmdId; }		// fix the misalignment of the verb with its cmdId
 protected:
+	virtual bool IsLazyUninit( void ) const;
 	CMenu* EnsurePopupShellCmds( UINT queryFlags );
 private:
 	class CTrackingHook
@@ -70,9 +84,11 @@ private:
 		CTrackingHook( HWND hWndOwner, IContextMenu* pContextMenu );
 		~CTrackingHook();
 	private:
-		LRESULT HandleWndProc( HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam );
+		LRESULT HandleWndProc2( HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam );
+		LRESULT HandleWndProc3( HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam );
 
-		static LRESULT CALLBACK HookWndProc( HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam );
+		static LRESULT CALLBACK HookWndProc2( HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam );
+		static LRESULT CALLBACK HookWndProc3( HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam );
 	private:
 		HWND m_hWndOwner;
 		WNDPROC m_pOldWndProc;

@@ -25,7 +25,6 @@ CPathItemListCtrl::CPathItemListCtrl( UINT columnLayoutId /*= 0*/, DWORD listSty
 	SetPopupMenu( OnSelection, &GetStdPathListPopupMenu( OnSelection ) );
 
 	AddRecordCompare( pred::NewComparator( pred::CompareCode() ) );		// default row item comparator
-//m_cmStyle = ShellMenuFirst;
 }
 
 CPathItemListCtrl::~CPathItemListCtrl()
@@ -64,47 +63,12 @@ CMenu* CPathItemListCtrl::GetPopupMenu( ListPopup popupType )
 
 	if ( pSrcPopupMenu != NULL && OnSelection == popupType && UseShellContextMenu() )
 	{
-		std::vector< std::tstring > selFilePaths;
+		std::vector< fs::CPath > selFilePaths;
 		QuerySelectedItemPaths( selFilePaths );
 
 		if ( !selFilePaths.empty() )
-		{
-			ASSERT_NULL( m_pShellMenuHost.get() );
-
-			m_pShellMenuHost.reset( new CShellContextMenuHost( this ) );
-			m_pShellMenuHost->Reset( shell::MakeFilePathsContextMenu( selFilePaths, m_hWnd ) );
-
-			if ( m_pShellMenuHost->IsValid() )
-			{
-				CMenu* pContextPopup = CMenu::FromHandle( ui::CloneMenu( pSrcPopupMenu != NULL ? pSrcPopupMenu->GetSafeHmenu() : ::CreatePopupMenu() ) );
-
-				ShellContextMenuStyle cmStyle = m_cmStyle;
-				if ( ExplorerSubMenu == cmStyle && NULL == pSrcPopupMenu )
-					cmStyle = ShellMenuLast;
-
-				switch ( cmStyle )
-				{
-					case ExplorerSubMenu:
-						if ( m_pShellMenuHost->MakePopupMenu( m_cmQueryFlags ) )
-						{
-							pContextPopup->AppendMenu( MF_BYPOSITION, MF_SEPARATOR );
-							pContextPopup->AppendMenu( MF_BYPOSITION | MF_POPUP, (UINT_PTR)m_pShellMenuHost->GetPopupMenu()->Detach(), _T("E&xplorer") );
-						}
-						break;
-					case ShellMenuFirst:
-						m_pShellMenuHost->MakePopupMenu( *pContextPopup, 0, m_cmQueryFlags );
-						break;
-					case ShellMenuLast:
-						m_pShellMenuHost->MakePopupMenu( *pContextPopup, CShellContextMenuHost::AtEnd, m_cmQueryFlags );
-						break;
-				}
-
-				if ( m_pShellMenuHost->HasShellCmds() )
-					return pContextPopup;
-				else
-					m_pShellMenuHost.reset();
-			}
-		}
+			if ( CMenu* pContextPopup = MakeContextMenuHost( pSrcPopupMenu, selFilePaths ) )
+				return pContextPopup;
 	}
 
 	return pSrcPopupMenu;
@@ -115,17 +79,57 @@ bool CPathItemListCtrl::TrackContextMenu( ListPopup popupType, const CPoint& scr
 	if ( CMenu* pPopupMenu = GetPopupMenu( popupType ) )
 	{
 		if ( m_pShellMenuHost.get() != NULL )
-		{
 			m_pShellMenuHost->TrackMenu( pPopupMenu, screenPos, TPM_RIGHTBUTTON );
-			ui::PostCall( this, &CPathItemListCtrl::ResetShellContextMenu );		// delayed reset shell context tracker, after the command was handled or cancelled by user
-		}
 		else
-			ui::TrackPopupMenu( *pPopupMenu, this, screenPos );
+			ui::TrackPopupMenu( *pPopupMenu, m_pTrackMenuTarget, screenPos );
 
+		ui::PostCall( this, &CPathItemListCtrl::ResetShellContextMenu );		// delayed reset shell context tracker, after the command was handled or cancelled by user
 		return true;		// handled
 	}
 
 	return false;
+}
+
+CMenu* CPathItemListCtrl::MakeContextMenuHost( CMenu* pSrcPopupMenu, const std::vector< fs::CPath >& selFilePaths )
+{
+	REQUIRE( !selFilePaths.empty() );
+	ASSERT_NULL( m_pShellMenuHost.get() );
+
+	if ( ExplorerSubMenu == m_cmStyle && NULL == pSrcPopupMenu )
+		m_cmStyle = ShellMenuLast;
+
+	CComPtr< IContextMenu > pContextMenu = shell::MakeFilePathsContextMenu( selFilePaths, m_hWnd );
+	if ( pContextMenu == NULL )
+		return NULL;
+
+	m_pShellMenuHost.reset( new CShellContextMenuHost( m_pTrackMenuTarget ) );
+	m_pShellMenuHost->Reset( pContextMenu );
+
+	CMenu* pContextPopup = CMenu::FromHandle( ui::CloneMenu( pSrcPopupMenu != NULL ? pSrcPopupMenu->GetSafeHmenu() : ::CreatePopupMenu() ) );
+
+	switch ( m_cmStyle )
+	{
+		case ExplorerSubMenu:
+			if ( m_pShellMenuHost->MakePopupMenu( m_cmQueryFlags ) )
+			{
+				pContextPopup->AppendMenu( MF_BYPOSITION, MF_SEPARATOR );
+				pContextPopup->AppendMenu( MF_BYPOSITION | MF_POPUP, (UINT_PTR)m_pShellMenuHost->GetPopupMenu()->Detach(), _T("E&xplorer") );
+			}
+			break;
+		case ShellMenuFirst:
+			m_pShellMenuHost->MakePopupMenu( *pContextPopup, 0, m_cmQueryFlags );
+			break;
+		case ShellMenuLast:
+			pContextPopup->AppendMenu( MF_BYPOSITION, MF_SEPARATOR );
+			m_pShellMenuHost->MakePopupMenu( *pContextPopup, CShellContextMenuHost::AtEnd, m_cmQueryFlags );
+			break;
+	}
+
+	if ( m_pShellMenuHost->HasShellCmds() )
+		return pContextPopup;
+
+	m_pShellMenuHost.reset();
+	return NULL;
 }
 
 void CPathItemListCtrl::ResetShellContextMenu( void )
