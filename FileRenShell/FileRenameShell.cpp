@@ -195,11 +195,11 @@ const CFileRenameShell::CMenuCmdInfo* CFileRenameShell::FindCmd( MenuCommand cmd
 }
 
 
-// ISupportsErrorInfo interface implementation
+// ISupportErrorInfo interface implementation
 
 STDMETHODIMP CFileRenameShell::InterfaceSupportsErrorInfo( REFIID riid )
 {
-	static const IID* s_pInterfaceIds[] = { &IID_IFileRenameShell, &__uuidof( IShellExtInit ), &IID_IContextMenu /*__uuidof( IContextMenu )*/ };
+	static const IID* s_pInterfaceIds[] = { &__uuidof( IShellExtInit ), &__uuidof( IContextMenu )/*, &__uuidof( IFileRenameShell )*/ };		// aka &IID_IContextMenu
 
 	for ( unsigned int i = 0; i != COUNT_OF( s_pInterfaceIds ); ++i )
 		if ( ::InlineIsEqualGUID( *s_pInterfaceIds[ i ], riid ) )
@@ -209,15 +209,12 @@ STDMETHODIMP CFileRenameShell::InterfaceSupportsErrorInfo( REFIID riid )
 }
 
 
-// IFileRenameShell interface implementation
-
-
 // IShellExtInit interface implementation
 
 STDMETHODIMP CFileRenameShell::Initialize( LPCITEMIDLIST folderPidl, IDataObject* pDropInfo, HKEY hKeyProgId )
 {
 	folderPidl, hKeyProgId;
-	AFX_MANAGE_STATE( AfxGetStaticModuleState() )
+	AFX_MANAGE_STATE( AfxGetStaticModuleState() )		// [PC 2018] required for loading resource
 
 	//TRACE( _T("CFileRenameShell::Initialize()\n") );
 	if ( pDropInfo != NULL )
@@ -235,7 +232,7 @@ STDMETHODIMP CFileRenameShell::Initialize( LPCITEMIDLIST folderPidl, IDataObject
 STDMETHODIMP CFileRenameShell::QueryContextMenu( HMENU hMenu, UINT indexMenu, UINT idCmdFirst, UINT idCmdLast, UINT flags )
 {
 	idCmdLast;
-	AFX_MANAGE_STATE( AfxGetStaticModuleState() )
+	AFX_MANAGE_STATE( AfxGetStaticModuleState() )		// [PC 2018] required for loading resource
 
 	// res\FileRenameShell.rgs: this shell extension registers itself for both "*" and "lnkfile" types as ContextMenuHandlers.
 	//		http://microsoft.public.platformsdk.shell.narkive.com/yr1YoK9e/obtaining-selected-shortcut-lnk-files-inside-ishellextinit-initialize
@@ -259,7 +256,7 @@ STDMETHODIMP CFileRenameShell::QueryContextMenu( HMENU hMenu, UINT indexMenu, UI
 
 STDMETHODIMP CFileRenameShell::InvokeCommand( CMINVOKECOMMANDINFO* pCmi )
 {
-	AFX_MANAGE_STATE( AfxGetStaticModuleState() )
+	AFX_MANAGE_STATE( AfxGetStaticModuleState() )		// [PC 2018] required for loading resource
 
 	// If HIWORD(pCmi->lpVerb) then we have been called programmatically and lpVerb is a command that should be invoked.
 	// Otherwise, the shell has called us, and LOWORD(pCmi->lpVerb) is the menu ID the user has selected.
@@ -287,7 +284,7 @@ STDMETHODIMP CFileRenameShell::InvokeCommand( CMINVOKECOMMANDINFO* pCmi )
 STDMETHODIMP CFileRenameShell::GetCommandString( UINT_PTR idCmd, UINT flags, UINT* pReserved, LPSTR pName, UINT cchMax )
 {
 	pReserved, cchMax;
-	AFX_MANAGE_STATE( AfxGetStaticModuleState() )
+	AFX_MANAGE_STATE( AfxGetStaticModuleState() )		// [PC 2018] required for loading resource
 
 	//TRACE( _T("CFileRenameShell::GetCommandString(): flags=0x%08X, cchMax=%d\n"), flags, cchMax );
 

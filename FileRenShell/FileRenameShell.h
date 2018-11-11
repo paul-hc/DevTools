@@ -14,7 +14,6 @@ class ATL_NO_VTABLE CFileRenameShell
 	: public CComObjectRootEx< CComSingleThreadModel >
 	, public CComCoClass< CFileRenameShell, &CLSID_FileRenameShell >
 	, public ISupportErrorInfo
-	, public IDispatchImpl< IFileRenameShell, &IID_IFileRenameShell, &LIBID_FILERENSHELLLib >
 	, public IShellExtInit
 	, public IContextMenu
 {
@@ -49,23 +48,21 @@ private:
 private:
 	std::auto_ptr< CFileModel > m_pFileModel;
 	static const CMenuCmdInfo m_commands[];
+
+	// generated COM stuff
 public:
 	DECLARE_REGISTRY_RESOURCEID( IDR_FILERENAMESHELL_REG )
 
 	DECLARE_PROTECT_FINAL_CONSTRUCT()
 
 	BEGIN_COM_MAP( CFileRenameShell )
-		COM_INTERFACE_ENTRY( IFileRenameShell )
-		COM_INTERFACE_ENTRY( IDispatch )
 		COM_INTERFACE_ENTRY( ISupportErrorInfo )
 		COM_INTERFACE_ENTRY( IShellExtInit )
 		COM_INTERFACE_ENTRY( IContextMenu )
 	END_COM_MAP()
 public:
-	// ISupportsErrorInfo
+	// ISupportErrorInfo
 	STDMETHOD( InterfaceSupportsErrorInfo )( REFIID riid );
-
-	// IFileRenameShell
 
 	// IShellExtInit
 	STDMETHOD( Initialize )( LPCITEMIDLIST folderPidl, IDataObject* pDropInfo, HKEY hKeyProgId );
