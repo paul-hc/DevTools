@@ -4,6 +4,7 @@
 #include "ContainerUtilities.h"
 #include "MenuUtilities.h"
 #include "Utilities.h"
+#include "WindowHook.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -176,14 +177,18 @@ int CShellContextMenuHost::TrackMenu( const CPoint& screenPos, UINT atIndex /*= 
 	if ( !MakePopupMenu( *pPopupMenu, atIndex, queryFlags ) )
 		return 0;
 
-	//dbg::TraceMenu( pPopupMenu->GetSafeHmenu() );
 	return TrackMenu( pPopupMenu, screenPos );
 }
 
 int CShellContextMenuHost::TrackMenu( CMenu* pPopupMenu, const CPoint& screenPos, UINT trackFlags /*= TPM_RETURNCMD | TPM_RIGHTBUTTON*/ )
 {
 	CTrackingHook scopedHook( m_pWndOwner->GetSafeHwnd(), m_pContextMenu );
+	return DoTrackMenu( pPopupMenu, screenPos, trackFlags );
+}
 
+int CShellContextMenuHost::DoTrackMenu( CMenu* pPopupMenu, const CPoint& screenPos, UINT trackFlags )
+{
+	//dbg::TraceMenu( pPopupMenu->GetSafeHmenu() );
 	int cmdId = ui::TrackPopupMenu( *pPopupMenu, m_pWndOwner, screenPos, trackFlags );
 
 	if ( HasFlag( trackFlags, TPM_RETURNCMD ) )			// handle command in-place?
@@ -194,6 +199,22 @@ int CShellContextMenuHost::TrackMenu( CMenu* pPopupMenu, const CPoint& screenPos
 		}
 
 	return cmdId;
+}
+
+bool CShellContextMenuHost::IsLazyUninit( void ) const
+{
+	return false;
+}
+
+CMenu* CShellContextMenuHost::EnsurePopupShellCmds( UINT queryFlags )
+{
+	if ( HasShellCmds() )
+		return &m_popupMenu;
+
+	// inplace query using a temporary popup menu
+	CMenu* pPopupMenu = CMenu::FromHandle( ::CreatePopupMenu() );
+
+	return MakePopupMenu( *pPopupMenu, AtEnd, queryFlags ) ? pPopupMenu : NULL;
 }
 
 
@@ -232,22 +253,6 @@ bool CShellContextMenuHost::InvokeDefaultVerb( void )
 	return
 		defaultCmdId >= MinCmdId &&
 		InvokeVerbIndex( ToVerbIndex( defaultCmdId ) );
-}
-
-bool CShellContextMenuHost::IsLazyUninit( void ) const
-{
-	return false;
-}
-
-CMenu* CShellContextMenuHost::EnsurePopupShellCmds( UINT queryFlags )
-{
-	if ( HasShellCmds() )
-		return &m_popupMenu;
-
-	// inplace query using a temporary popup menu
-	CMenu* pPopupMenu = CMenu::FromHandle( ::CreatePopupMenu() );
-
-	return MakePopupMenu( *pPopupMenu, AtEnd, queryFlags ) ? pPopupMenu : NULL;
 }
 
 
@@ -360,4 +365,89 @@ LRESULT CALLBACK CShellContextMenuHost::CTrackingHook::HookWndProc3( HWND hWnd, 
 {
 	ASSERT_PTR( s_pInstance );
 	return s_pInstance->HandleWndProc3( hWnd, message, wParam, lParam );
+}
+
+
+// abstract base for short-lived dynamic objects that execute a delayed method call
+
+class CExplorerSubMenuHook : public CWindowHook
+{
+public:
+	CExplorerSubMenuHook( CShellLazyContextMenuHost* pLazyHost, CWnd* pWndOwner ) : CWindowHook( false ), m_pLazyHost( pLazyHost ) { HookWindow( pWndOwner->GetSafeHwnd() ); }
+	virtual ~CExplorerSubMenuHook() { if ( IsHooked() ) UnhookWindow(); }
+protected:
+	virtual LRESULT WindowProc( UINT message, WPARAM wParam, LPARAM lParam );		// base override
+private:
+	CShellLazyContextMenuHost* m_pLazyHost;
+};
+
+
+LRESULT CExplorerSubMenuHook::WindowProc( UINT message, WPARAM wParam, LPARAM lParam )
+{
+	if ( WM_INITMENUPOPUP == message )
+		if ( (HMENU)wParam == m_pLazyHost->GetPopupMenu()->GetSafeHmenu() )
+		{
+			UnhookWindow();
+			m_pLazyHost->LazyInit();		// will delete this!
+			return 0L;
+		}
+
+	return CWindowHook::WindowProc( message, wParam, lParam );
+}
+
+
+// CShellLazyContextMenuHost implementation
+
+CShellLazyContextMenuHost::CShellLazyContextMenuHost( CWnd* pWndOwner, const std::vector< std::tstring >& filePaths, UINT queryFlags /*= CMF_NORMAL*/ )
+	: CShellContextMenuHost( pWndOwner )
+	, m_filePaths( filePaths )
+	, m_queryFlags( queryFlags )
+	, m_isLazyInit( false )
+{
+	SetPopupMenu( ::CreatePopupMenu(), CShellContextMenuHost::ExternalMenu );		// will be owned by the menu having the "Explorer" sub-menu
+}
+
+CShellLazyContextMenuHost::~CShellLazyContextMenuHost()
+{
+}
+
+int CShellLazyContextMenuHost::TrackMenu( CMenu* pPopupMenu, const CPoint& screenPos, UINT trackFlags /*= TPM_RETURNCMD | TPM_RIGHTBUTTON*/ )
+{
+	if ( !IsLazyUninit() )
+		return __super::TrackMenu( pPopupMenu, screenPos, trackFlags );		// track directly for subsequent calls
+	else if ( NULL == m_pExplorerSubMenuHook.get() )
+		m_pExplorerSubMenuHook.reset( new CExplorerSubMenuHook( this, m_pWndOwner ) );
+
+	int cmdId = DoTrackMenu( pPopupMenu, screenPos, trackFlags );			// no CTrackingHook yet!
+
+	m_pTrackingHook.reset();
+	return cmdId;
+}
+
+bool CShellLazyContextMenuHost::IsLazyUninit( void ) const
+{
+	return !m_isLazyInit;
+}
+
+bool CShellLazyContextMenuHost::LazyInit( void )
+{
+	ASSERT( !m_isLazyInit );		// call once
+	m_isLazyInit = true;
+
+	m_pExplorerSubMenuHook.reset();
+
+	TRACE( _T(" (!) LazyInit() on Explorer sub-menu.\n") );
+	CWaitCursor wait;
+	if ( CComPtr< IContextMenu > pContextMenu = shell::MakeFilePathsContextMenu( m_filePaths, m_pWndOwner->GetSafeHwnd() ) )
+	{
+		Reset( pContextMenu );
+
+		if ( MakePopupMenu( m_queryFlags ) )
+			m_pTrackingHook.reset( new CTrackingHook( m_pWndOwner->GetSafeHwnd(), Get() ) );
+
+		return true;
+	}
+
+	ui::BeepSignal( MB_ICONWARNING );
+	return false;
 }

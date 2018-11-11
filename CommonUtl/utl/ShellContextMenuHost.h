@@ -45,7 +45,7 @@ public:
 	CShellContextMenuHost( CWnd* pWndOwner, IContextMenu* pContextMenu = NULL );
 	virtual ~CShellContextMenuHost();
 
-	bool IsValid( void ) const { return m_pContextMenu != NULL; }
+	bool IsValid( void ) const { return m_pContextMenu != NULL || IsLazyUninit(); }
 	IContextMenu* Get( void ) const { return m_pContextMenu; }
 
 	void Reset( IContextMenu* pContextMenu = NULL );
@@ -62,11 +62,11 @@ public:
 	bool HasShellCmds( void ) { return !m_shellIdStore.IsEmpty(); }		// has it called QueryContextMenu(), are there common commands?
 	bool HasShellCmd( int cmdId ) const { return m_shellIdStore.ContainsId( cmdId ); }
 
-	bool MakePopupMenu( UINT queryFlags = CMF_NORMAL ) { return MakePopupMenu( m_popupMenu, AtEnd, queryFlags ); }
-	bool MakePopupMenu( CMenu& rPopupMenu, int atIndex = AtEnd, UINT queryFlags = CMF_EXPLORE );						// external menu
+	bool MakePopupMenu( UINT queryFlags = CMF_NORMAL ) { return MakePopupMenu( m_popupMenu, AtEnd, queryFlags ); }		// internal menu
+	bool MakePopupMenu( CMenu& rPopupMenu, int atIndex = AtEnd, UINT queryFlags = CMF_EXPLORE );
 
-	int TrackMenu( const CPoint& screenPos, UINT atIndex = AtEnd, UINT queryFlags = CMF_EXPLORE );
-	int TrackMenu( CMenu* pPopupMenu, const CPoint& screenPos, UINT trackFlags = TPM_RETURNCMD | TPM_RIGHTBUTTON );		// external menu
+	int TrackMenu( const CPoint& screenPos, UINT atIndex = AtEnd, UINT queryFlags = CMF_EXPLORE );						// internal menu
+	virtual int TrackMenu( CMenu* pPopupMenu, const CPoint& screenPos, UINT trackFlags = TPM_RETURNCMD | TPM_RIGHTBUTTON );
 
 	std::tstring GetItemVerb( int cmdId ) const;
 	bool InvokeVerb( const char* pVerb );
@@ -75,9 +75,10 @@ public:
 
 	static int ToVerbIndex( int cmdId ) { return cmdId - MinCmdId; }		// fix the misalignment of the verb with its cmdId
 protected:
-	virtual bool IsLazyUninit( void ) const;
+	virtual bool IsLazyUninit( void ) const;			// for delayed IContextMenu query - kind of don't know if invalid
+	int DoTrackMenu( CMenu* pPopupMenu, const CPoint& screenPos, UINT trackFlags );
 	CMenu* EnsurePopupShellCmds( UINT queryFlags );
-private:
+protected:
 	class CTrackingHook
 	{
 	public:
@@ -97,8 +98,9 @@ private:
 
 		static CTrackingHook* s_pInstance;			// single one tracking at a time
 	};
-private:
+protected:
 	CWnd* m_pWndOwner;
+private:
 	CMenu m_popupMenu;
 	MenuOwnership m_menuOwnership;
 	ui::CCmdIdStore m_shellIdStore;					// contains only commands belonging to the shell context menu
@@ -111,6 +113,29 @@ protected:
 	afx_msg void OnShellCommand( UINT cmdId );
 
 	DECLARE_MESSAGE_MAP()
+};
+
+
+// Allows lazy initialization of the "Explorer" sub-menu, only when the user requires it (for faster context menu tracking).
+//
+class CShellLazyContextMenuHost : public CShellContextMenuHost
+{
+	friend class CExplorerSubMenuHook;
+public:
+	CShellLazyContextMenuHost( CWnd* pWndOwner, const std::vector< std::tstring >& filePaths, UINT queryFlags = CMF_NORMAL );
+	virtual ~CShellLazyContextMenuHost();
+
+	// base overrides
+	virtual int TrackMenu( CMenu* pPopupMenu, const CPoint& screenPos, UINT trackFlags = TPM_RETURNCMD | TPM_RIGHTBUTTON );
+protected:
+	virtual bool IsLazyUninit( void ) const;
+	bool LazyInit( void );
+private:
+	std::vector< std::tstring > m_filePaths;
+	UINT m_queryFlags;
+	bool m_isLazyInit;
+	std::auto_ptr< CExplorerSubMenuHook > m_pExplorerSubMenuHook;		// for lazy init: monitors when "Explorer" sub-menu gets expanded first time
+	std::auto_ptr< CTrackingHook > m_pTrackingHook;
 };
 
 

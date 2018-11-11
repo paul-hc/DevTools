@@ -589,6 +589,20 @@ namespace dbg
 	#endif
 	}
 
+	void TraceMenuItem( HMENU hMenu, int itemPos )
+	{
+	#ifdef _DEBUG
+		MENUITEMINFO itemInfo;
+
+		if ( ui::GetMenuItemInfo( &itemInfo, hMenu, itemPos ) )
+			TraceMenuItem( itemInfo, itemPos );
+		else
+			TRACE( _T("?? Invalid menu item: hMenu=0x%08x itemPos=%d\n"), hMenu, itemPos );
+	#else
+		hMenu, item, byPos;
+	#endif
+	}
+
 	void TraceMenuItem( const MENUITEMINFO& itemInfo, int itemPos, unsigned int indentLevel /*= 0*/ )
 	{
 	#ifdef _DEBUG

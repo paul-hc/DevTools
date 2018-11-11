@@ -63,7 +63,7 @@ CMenu* CPathItemListCtrl::GetPopupMenu( ListPopup popupType )
 
 	if ( pSrcPopupMenu != NULL && OnSelection == popupType && UseShellContextMenu() )
 	{
-		std::vector< fs::CPath > selFilePaths;
+		std::vector< std::tstring > selFilePaths;
 		QuerySelectedItemPaths( selFilePaths );
 
 		if ( !selFilePaths.empty() )
@@ -90,7 +90,7 @@ bool CPathItemListCtrl::TrackContextMenu( ListPopup popupType, const CPoint& scr
 	return false;
 }
 
-CMenu* CPathItemListCtrl::MakeContextMenuHost( CMenu* pSrcPopupMenu, const std::vector< fs::CPath >& selFilePaths )
+CMenu* CPathItemListCtrl::MakeContextMenuHost( CMenu* pSrcPopupMenu, const std::vector< std::tstring >& selFilePaths )
 {
 	REQUIRE( !selFilePaths.empty() );
 	ASSERT_NULL( m_pShellMenuHost.get() );
@@ -102,20 +102,22 @@ CMenu* CPathItemListCtrl::MakeContextMenuHost( CMenu* pSrcPopupMenu, const std::
 	if ( pContextMenu == NULL )
 		return NULL;
 
+	CMenu* pContextPopup = CMenu::FromHandle( ui::CloneMenu( pSrcPopupMenu != NULL ? pSrcPopupMenu->GetSafeHmenu() : ::CreatePopupMenu() ) );
+
+	if ( ExplorerSubMenu == m_cmStyle )
+	{
+		m_pShellMenuHost.reset( new CShellLazyContextMenuHost( m_pTrackMenuTarget, selFilePaths, CMF_EXPLORE ) );	// lazy query the IContextMenu when expanding the "Explorer" sub-menu
+
+		pContextPopup->AppendMenu( MF_BYPOSITION, MF_SEPARATOR );
+		pContextPopup->AppendMenu( MF_BYPOSITION | MF_POPUP, (UINT_PTR)m_pShellMenuHost->GetPopupMenu()->GetSafeHmenu(), _T("E&xplorer") );
+		return pContextPopup;
+	}
+
 	m_pShellMenuHost.reset( new CShellContextMenuHost( m_pTrackMenuTarget ) );
 	m_pShellMenuHost->Reset( pContextMenu );
 
-	CMenu* pContextPopup = CMenu::FromHandle( ui::CloneMenu( pSrcPopupMenu != NULL ? pSrcPopupMenu->GetSafeHmenu() : ::CreatePopupMenu() ) );
-
 	switch ( m_cmStyle )
 	{
-		case ExplorerSubMenu:
-			if ( m_pShellMenuHost->MakePopupMenu( m_cmQueryFlags ) )
-			{
-				pContextPopup->AppendMenu( MF_BYPOSITION, MF_SEPARATOR );
-				pContextPopup->AppendMenu( MF_BYPOSITION | MF_POPUP, (UINT_PTR)m_pShellMenuHost->GetPopupMenu()->Detach(), _T("E&xplorer") );
-			}
-			break;
 		case ShellMenuFirst:
 			m_pShellMenuHost->MakePopupMenu( *pContextPopup, 0, m_cmQueryFlags );
 			break;

@@ -35,7 +35,7 @@ public:
 protected:
 	virtual bool TrackContextMenu( ListPopup popupType, const CPoint& screenPos );
 private:
-	CMenu* MakeContextMenuHost( CMenu* pSrcPopupMenu, const std::vector< fs::CPath >& selFilePaths );
+	CMenu* MakeContextMenuHost( CMenu* pSrcPopupMenu, const std::vector< std::tstring >& selFilePaths );
 	void ResetShellContextMenu( void );
 private:
 	ShellContextMenuStyle m_cmStyle;

@@ -75,6 +75,7 @@ namespace ui
 namespace dbg
 {
 	void TraceMenu( HMENU hMenu, unsigned int indentLevel = 0 );
+	void TraceMenuItem( HMENU hMenu, int itemPos );
 	void TraceMenuItem( const MENUITEMINFO& itemInfo, int itemPos, unsigned int indentLevel = 0 );
 }
 
