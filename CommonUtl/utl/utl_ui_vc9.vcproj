@@ -1847,6 +1847,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\ut\ShellFileSystemTests.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\ut\ShellFileSystemTests.h"
+				>
+			</File>
+			<File
 				RelativePath=".\ut\StringRangeTests.cpp"
 				>
 			</File>

@@ -619,3 +619,20 @@ namespace fs
 	}
 
 } //namespace fs
+
+
+namespace path
+{
+	void QueryParentPaths( std::vector< fs::CPath >& rParentPaths, const std::vector< fs::CPath >& filePaths, bool uniqueOnly /*= true*/ )
+	{
+		for ( std::vector< fs::CPath >::const_iterator itFilePath = filePaths.begin(); itFilePath != filePaths.end(); ++itFilePath )
+		{
+			fs::CPath parentPath = itFilePath->GetParentPath();
+			if ( !parentPath.IsEmpty() )
+				if ( uniqueOnly )
+					utl::AddUnique( rParentPaths, parentPath );
+				else
+					rParentPaths.push_back( parentPath );
+		}
+	}
+}

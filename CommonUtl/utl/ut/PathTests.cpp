@@ -3,6 +3,7 @@
 #include "ut/PathTests.h"
 #include "Path.h"
 #include "FlexPath.h"
+#include "RandomUtilities.h"
 #include "Resequence.hxx"
 #include "StringUtilities.h"
 #include "StructuredStorage.h"
@@ -188,6 +189,170 @@ void CPathTests::TestPathUtilities( void )
 		filePath = _T("C:/win/desktop/temp.txt");
 		ASSERT( !path::StripPrefix( filePath, _T("C:\\WIN\\system") ) );
 		ASSERT_EQUAL( _T("C:/win/desktop/temp.txt"), filePath );			// output is kind of undetermined though
+	}
+}
+
+void CPathTests::TestPathSort( void )
+{
+	std::vector< std::tstring > srcPaths;
+	srcPaths.push_back( _T("C:\\dir/fn.txt") );
+	srcPaths.push_back( _T("C:\\dir2/subDir/fn.txt") );
+	srcPaths.push_back( _T("X:\\dir/file.ext") );
+	srcPaths.push_back( _T("C:\\dir000/fn.txt") );
+	srcPaths.push_back( _T("C:\\dir35/fn.txt") );
+	srcPaths.push_back( _T("C:\\dir/file.txt") );
+	srcPaths.push_back( _T("C:\\dir00001/fn.txt") );
+
+	{
+		std::vector< std::tstring > stringPaths = srcPaths;
+
+		fs::SortPaths( stringPaths );
+		std::vector< std::tstring >::const_iterator itPath = stringPaths.begin();
+		ASSERT_EQUAL( _T("C:\\dir/file.txt"), *itPath++ );
+		ASSERT_EQUAL( _T("C:\\dir/fn.txt"), *itPath++ );
+		ASSERT_EQUAL( _T("C:\\dir000/fn.txt"), *itPath++ );
+		ASSERT_EQUAL( _T("C:\\dir00001/fn.txt"), *itPath++ );
+		ASSERT_EQUAL( _T("C:\\dir2/subDir/fn.txt"), *itPath++ );
+		ASSERT_EQUAL( _T("C:\\dir35/fn.txt"), *itPath++ );
+		ASSERT_EQUAL( _T("X:\\dir/file.ext"), *itPath++ );
+		ASSERT( itPath == stringPaths.end() );
+
+		fs::SortPaths( stringPaths, false );
+		itPath = stringPaths.begin();
+		ASSERT_EQUAL( _T("X:\\dir/file.ext"), *itPath++ );
+		ASSERT_EQUAL( _T("C:\\dir35/fn.txt"), *itPath++ );
+		ASSERT_EQUAL( _T("C:\\dir2/subDir/fn.txt"), *itPath++ );
+		ASSERT_EQUAL( _T("C:\\dir00001/fn.txt"), *itPath++ );
+		ASSERT_EQUAL( _T("C:\\dir000/fn.txt"), *itPath++ );
+		ASSERT_EQUAL( _T("C:\\dir/fn.txt"), *itPath++ );
+		ASSERT_EQUAL( _T("C:\\dir/file.txt"), *itPath++ );
+		ASSERT( itPath == stringPaths.end() );
+	}
+
+	{
+		std::vector< fs::CPath > paths( srcPaths.begin(), srcPaths.end() );
+
+		fs::SortPaths( paths );
+		std::vector< fs::CPath >::const_iterator itPath = paths.begin();
+		ASSERT_EQUAL( _T("C:\\dir/file.txt"), *itPath++ );
+		ASSERT_EQUAL( _T("C:\\dir/fn.txt"), *itPath++ );
+		ASSERT_EQUAL( _T("C:\\dir000/fn.txt"), *itPath++ );
+		ASSERT_EQUAL( _T("C:\\dir00001/fn.txt"), *itPath++ );
+		ASSERT_EQUAL( _T("C:\\dir2/subDir/fn.txt"), *itPath++ );
+		ASSERT_EQUAL( _T("C:\\dir35/fn.txt"), *itPath++ );
+		ASSERT_EQUAL( _T("X:\\dir/file.ext"), *itPath++ );
+		ASSERT( itPath == paths.end() );
+
+		fs::SortPaths( paths, false );
+		itPath = paths.begin();
+		ASSERT_EQUAL( _T("X:\\dir/file.ext"), *itPath++ );
+		ASSERT_EQUAL( _T("C:\\dir35/fn.txt"), *itPath++ );
+		ASSERT_EQUAL( _T("C:\\dir2/subDir/fn.txt"), *itPath++ );
+		ASSERT_EQUAL( _T("C:\\dir00001/fn.txt"), *itPath++ );
+		ASSERT_EQUAL( _T("C:\\dir000/fn.txt"), *itPath++ );
+		ASSERT_EQUAL( _T("C:\\dir/fn.txt"), *itPath++ );
+		ASSERT_EQUAL( _T("C:\\dir/file.txt"), *itPath++ );
+		ASSERT( itPath == paths.end() );
+	}
+}
+
+void CPathTests::TestPathSortExisting( void )
+{
+	ut::CTempFilePairPool pool( _T("a|a.doc|a.txt|d3/some|d1\\b|d1\\b3.doc|d1\\b002.doc|d1\\b.txt|d1\\d2\\c|d1/d2/c.doc|d1\\d2\\c.txt") );
+	const fs::CPath& poolDirPath = pool.GetPoolDirPath();
+
+	std::vector< fs::CPath > mixedPaths;	// files + directories
+	path::QueryParentPaths( mixedPaths, pool.GetFilePaths() );
+	mixedPaths.insert( mixedPaths.begin(), pool.GetFilePaths().begin(), pool.GetFilePaths().end() );
+
+	utl::SetRandomSeed();
+	std::random_shuffle( mixedPaths.begin(), mixedPaths.end() );
+
+	// fs::CPath sort ascending
+	{
+		std::vector< fs::CPath > paths = mixedPaths;
+		std::vector< fs::CPath >::const_iterator itPath;
+
+		fs::SortDirectoriesFirst( paths );
+		path::StripDirPrefix( paths, poolDirPath.GetPtr() );		// left with just relative paths (post physical dir/file grouping)
+
+		itPath = paths.begin();
+		// dirs first
+		ASSERT_EQUAL( _T(""), *itPath++ );							// empty relative root dir
+		ASSERT_EQUAL( _T("d1"), *itPath++ );
+		ASSERT_EQUAL( _T("d1\\d2"), *itPath++ );
+		ASSERT_EQUAL( _T("d3"), *itPath++ );
+		// files after
+		ASSERT_EQUAL( _T("a"), *itPath++ );
+		ASSERT_EQUAL( _T("a.doc"), *itPath++ );
+		ASSERT_EQUAL( _T("a.txt"), *itPath++ );
+		ASSERT_EQUAL( _T("d1\\b"), *itPath++ );
+		ASSERT_EQUAL( _T("d1\\b.txt"), *itPath++ );
+		ASSERT_EQUAL( _T("d1\\b002.doc"), *itPath++ );
+		ASSERT_EQUAL( _T("d1\\b3.doc"), *itPath++ );
+		ASSERT_EQUAL( _T("d1\\d2\\c"), *itPath++ );
+		ASSERT_EQUAL( _T("d1/d2/c.doc"), *itPath++ );
+		ASSERT_EQUAL( _T("d1\\d2\\c.txt"), *itPath++ );
+		ASSERT_EQUAL( _T("d3/some"), *itPath++ );
+	}
+
+	// fs::CPath sort descending
+	{
+		std::vector< fs::CPath > paths = mixedPaths;
+		std::vector< fs::CPath >::const_iterator itPath;
+
+		fs::SortDirectoriesFirst( paths, false );					// sort descending
+		path::StripDirPrefix( paths, poolDirPath.GetPtr() );		// left with just relative paths (post physical dir/file grouping)
+
+		itPath = paths.begin();
+		// dirs first
+		ASSERT_EQUAL( _T("d3"), *itPath++ );
+		ASSERT_EQUAL( _T("d1\\d2"), *itPath++ );
+		ASSERT_EQUAL( _T("d1"), *itPath++ );
+		ASSERT_EQUAL( _T(""), *itPath++ );							// empty relative root dir
+		// files after
+		ASSERT_EQUAL( _T("d3/some"), *itPath++ );
+		ASSERT_EQUAL( _T("d1\\d2\\c.txt"), *itPath++ );
+		ASSERT_EQUAL( _T("d1/d2/c.doc"), *itPath++ );
+		ASSERT_EQUAL( _T("d1\\d2\\c"), *itPath++ );
+		ASSERT_EQUAL( _T("d1\\b3.doc"), *itPath++ );
+		ASSERT_EQUAL( _T("d1\\b002.doc"), *itPath++ );
+		ASSERT_EQUAL( _T("d1\\b.txt"), *itPath++ );
+		ASSERT_EQUAL( _T("d1\\b"), *itPath++ );
+		ASSERT_EQUAL( _T("a.txt"), *itPath++ );
+		ASSERT_EQUAL( _T("a.doc"), *itPath++ );
+		ASSERT_EQUAL( _T("a"), *itPath++ );
+	}
+
+	// std::tstring sort ascending
+	{
+		std::vector< std::tstring > stringPaths;
+		for ( std::vector< fs::CPath >::const_iterator itMixedPath = mixedPaths.begin(); itMixedPath != mixedPaths.end(); ++itMixedPath )
+			stringPaths.push_back( itMixedPath->Get() );
+
+		std::vector< std::tstring >::const_iterator itPath;
+
+		fs::SortDirectoriesFirst( stringPaths );
+		path::StripDirPrefix( stringPaths, poolDirPath.GetPtr() );		// left with just relative paths (post physical dir/file grouping)
+
+		itPath = stringPaths.begin();
+		// dirs first
+		ASSERT_EQUAL( _T(""), *itPath++ );							// empty relative root dir
+		ASSERT_EQUAL( _T("d1"), *itPath++ );
+		ASSERT_EQUAL( _T("d1\\d2"), *itPath++ );
+		ASSERT_EQUAL( _T("d3"), *itPath++ );
+		// files after
+		ASSERT_EQUAL( _T("a"), *itPath++ );
+		ASSERT_EQUAL( _T("a.doc"), *itPath++ );
+		ASSERT_EQUAL( _T("a.txt"), *itPath++ );
+		ASSERT_EQUAL( _T("d1\\b"), *itPath++ );
+		ASSERT_EQUAL( _T("d1\\b.txt"), *itPath++ );
+		ASSERT_EQUAL( _T("d1\\b002.doc"), *itPath++ );
+		ASSERT_EQUAL( _T("d1\\b3.doc"), *itPath++ );
+		ASSERT_EQUAL( _T("d1\\d2\\c"), *itPath++ );
+		ASSERT_EQUAL( _T("d1\\d2\\c.doc"), *itPath++ );				// string version normalizes
+		ASSERT_EQUAL( _T("d1\\d2\\c.txt"), *itPath++ );
+		ASSERT_EQUAL( _T("d3\\some"), *itPath++ );
 	}
 }
 
@@ -529,6 +694,8 @@ void CPathTests::Run( void )
 	__super::Run();
 
 	TestPathUtilities();
+	TestPathSort();
+	TestPathSortExisting();
 	TestPathCompareFind();
 	TestPathWildcardMatch();
 	TestHasMultipleDirPaths();

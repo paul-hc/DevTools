@@ -222,10 +222,36 @@ namespace func
 	inline const std::tstring& StringOf( const fs::CPath& filePath ) { return filePath.Get(); }		// for uniform string algorithms
 	inline const fs::CPath& PathOf( const fs::CPath& keyPath ) { return keyPath; }		// for uniform path algorithms
 
+	struct ToPathPtr
+	{
+		const TCHAR* operator()( const TCHAR* pFilePath ) const { return pFilePath; }
+		const TCHAR* operator()( const std::tstring& filePath ) const { return filePath.c_str(); }
+		const TCHAR* operator()( const fs::CPath& filePath ) const { return filePath.GetPtr(); }
+	};
+
 	struct ToNameExt
 	{
 		const TCHAR* operator()( const fs::CPath& fullPath ) const { return fullPath.GetNameExt(); }
 		const TCHAR* operator()( const TCHAR* pFullPath ) const { return path::FindFilename( pFullPath ); }
+	};
+
+	struct StripPathCommonPrefix
+	{
+		StripPathCommonPrefix( const TCHAR* pDirPrefix ) : m_pDirPrefix( pDirPrefix ), m_count( 0 ) { ASSERT_PTR( m_pDirPrefix ); }
+
+		bool operator()( std::tstring& rFilePath )
+		{
+			if ( !path::StripPrefix( rFilePath, m_pDirPrefix ) )
+				return false;
+
+			++m_count;
+			return true;
+		}
+
+		bool operator()( fs::CPath& rPath ) { return operator()( rPath.Ref() ); }
+	public:
+		const TCHAR* m_pDirPrefix;
+		size_t m_count;
 	};
 }
 
@@ -317,6 +343,11 @@ namespace pred
 			return str::IntuitiveCompare( pLeftPath, pRightPath );
 		}
 
+		pred::CompareResult operator()( const std::tstring& leftPath, const std::tstring& rightPath ) const
+		{
+			return operator()( leftPath.c_str(), rightPath.c_str() );
+		}
+
 		pred::CompareResult operator()( const fs::CPath& leftPath, const fs::CPath& rightPath ) const
 		{
 			if ( leftPath == rightPath )
@@ -327,7 +358,7 @@ namespace pred
 	};
 
 
-	typedef CompareAdapter< CompareEquivalentPath, func::ToNameExt > _CompareNameExt;		// equivalent | intuitive
+	typedef CompareAdapter< CompareEquivalentPath, func::ToNameExt > _CompareNameExt;		// filename | fullpath
 	typedef JoinCompare< _CompareNameExt, CompareEquivalentPath > CompareNameExt;
 
 	typedef LessBy< ComparePath > LessPath;
@@ -344,11 +375,29 @@ namespace fs
 	// orders path keys using path equivalence (rather than CPath::operator< intuitive ordering)
 	typedef std::map< fs::CPath, fs::CPath, pred::Less_EquivalentPath > TPathPairMap;
 	typedef std::set< fs::CPath, pred::Less_EquivalentPath > TPathSet;
+
+
+	// path sort for std::tstring, fs::CPath, fs::CFlexPath
+
+	template< typename IteratorT >
+	inline void SortPaths( IteratorT itFirst, IteratorT itLast, bool ascending = true )
+	{
+		std::sort( itFirst, itLast, pred::OrderBy< pred::CompareEquivalentPath >( ascending ) );
+	}
+
+	template< typename ContainerT >
+	inline void SortPaths( ContainerT& rStrPaths, bool ascending = true )
+	{
+		SortPaths( rStrPaths.begin(), rStrPaths.end(), ascending );
+	}
 }
 
 
 namespace path
 {
+	void QueryParentPaths( std::vector< fs::CPath >& rParentPaths, const std::vector< fs::CPath >& filePaths, bool uniqueOnly = true );
+
+
 	template< typename ContainerT >
 	bool HasMultipleDirPaths( const ContainerT& paths )			// uses func::PathOf() to extract path of element - for container versatility (map, vector, etc)
 	{
@@ -383,6 +432,19 @@ namespace path
 		}
 
 		return commonPrefix;
+	}
+
+	template< typename ContainerT >
+	inline size_t StripDirPrefix( ContainerT& rPaths, const TCHAR* pDirPrefix )
+	{
+		return std::for_each( rPaths.begin(), rPaths.end(), func::StripPathCommonPrefix( pDirPrefix ) ).m_count;		// count of stripped prefixes
+	}
+
+	template< typename ContainerT >
+	inline size_t StripCommonParentPath( ContainerT& rPaths )
+	{
+		fs::CPath commonDirPath = ExtractCommonParentPath( rPaths );
+		return !commonDirPath.IsEmpty() ? StripDirPrefix( rPaths, commonDirPath.GetPtr() ) : 0;
 	}
 }
 

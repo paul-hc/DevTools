@@ -372,6 +372,15 @@ namespace utl
 		rContainer.insert( std::tstring::npos == pos ? rContainer.end() : ( rContainer.begin() + pos ), item );
 	}
 
+	template< typename ContainerT, typename Pred >
+	size_t RemoveIf( ContainerT& rItems, Pred pred )
+	{
+		typename ContainerT::iterator itRemove = std::remove_if( rItems.begin(), rItems.end(), pred );		// doesn't actually remove, just move items to be removed at the end
+		size_t removedCount = std::distance( itRemove, rItems.end() );
+		rItems.erase( itRemove, rItems.end() );
+		return removedCount;
+	}
+
 	template< typename ContainerT >
 	inline void RemoveExisting( ContainerT& rContainer, const typename ContainerT::value_type& rItem )
 	{

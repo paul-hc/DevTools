@@ -56,6 +56,68 @@ namespace fs
 }
 
 
+namespace pred
+{
+	struct IsValidFile
+	{
+		bool operator()( const TCHAR* pFilePath ) const { return fs::IsValidFile( pFilePath ); }
+		bool operator()( const std::tstring& filePath ) const { return fs::IsValidFile( filePath.c_str() ); }
+		bool operator()( const fs::CPath& filePath ) const { return fs::IsValidFile( filePath.GetPtr() ); }
+	};
+
+	struct IsValidDirectory
+	{
+		bool operator()( const TCHAR* pFilePath ) const { return fs::IsValidDirectory( pFilePath ); }
+		bool operator()( const std::tstring& filePath ) const { return fs::IsValidDirectory( filePath.c_str() ); }
+		bool operator()( const fs::CPath& filePath ) const { return fs::IsValidDirectory( filePath.GetPtr() ); }
+	};
+}
+
+
+namespace fs
+{
+	template< typename PathContainerT >
+	inline typename PathContainerT::iterator GroupDirectoriesFirst( PathContainerT& rPaths )
+	{
+		return std::stable_partition( rPaths.begin(), rPaths.end(), pred::IsValidDirectory() );
+	}
+
+	template< typename PathContainerT >
+	void SortDirectoriesFirst( PathContainerT& rPaths, bool ascending = true )
+	{
+		typename PathContainerT::iterator itFirstFile = GroupDirectoriesFirst( rPaths );
+
+		fs::SortPaths( rPaths.begin(), itFirstFile, ascending );		// directories come first
+		fs::SortPaths( itFirstFile, rPaths.end(), ascending );
+	}
+}
+
+
+namespace fs
+{
+	template< typename PathType >
+	void QueryDroppedFiles( std::vector< PathType >& rFilePaths, HDROP hDropInfo, SortType sortType = NoSort )		// works with std::tstring, fs::CPath, fs::CFlexPath
+	{
+		ASSERT_PTR( hDropInfo );
+		UINT fileCount = ::DragQueryFile( hDropInfo, (UINT)-1, NULL, 0 );
+		rFilePaths.reserve( fileCount );
+
+		for ( UINT i = 0; i != fileCount; ++i )
+		{
+			TCHAR filePath[ MAX_PATH ];
+			::DragQueryFile( hDropInfo, i, filePath, MAX_PATH );
+
+			rFilePaths.push_back( std::tstring( filePath ) );
+		}
+
+		::DragFinish( hDropInfo );
+
+		if ( sortType != NoSort )
+			fs::SortDirectoriesFirst( rFilePaths, SortAscending == sortType );
+	}
+}
+
+
 namespace fs
 {
 	// files and sub-dirs as std::tstring; relative to m_refDirPath if specified
@@ -104,35 +166,6 @@ namespace fs
 	void EnumSubDirs( std::vector< std::tstring >& rSubDirPaths, const TCHAR* pDirPath, const TCHAR* pWildSpec = _T("*.*"), RecursionDepth depth = Shallow );
 
 	fs::CPath FindFirstFile( const TCHAR* pDirPath, const TCHAR* pWildSpec = _T("*.*"), RecursionDepth depth = Shallow );
-}
-
-
-namespace pred
-{
-	struct IsValidFile
-	{
-		bool operator()( const TCHAR* pFilePath ) const { return fs::IsValidFile( pFilePath ); }
-		bool operator()( const fs::CPath& filePath ) const { return fs::IsValidFile( filePath.GetPtr() ); }
-	};
-
-	struct IsValidDirectory
-	{
-		bool operator()( const TCHAR* pFilePath ) const { return fs::IsValidDirectory( pFilePath ); }
-		bool operator()( const fs::CPath& filePath ) const { return fs::IsValidDirectory( filePath.GetPtr() ); }
-	};
-}
-
-
-namespace fs
-{
-	template< typename PathContainerT >
-	void SortDirectoriesFirst( PathContainerT& rPaths )
-	{
-		typename PathContainerT::iterator itFirstFile = std::stable_partition( rPaths.begin(), rPaths.end(), pred::IsValidDirectory() );
-
-		std::sort( rPaths.begin(), itFirstFile );		// directories come first
-		std::sort( itFirstFile, rPaths.end() );
-	}
 }
 
 

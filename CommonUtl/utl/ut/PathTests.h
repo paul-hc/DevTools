@@ -18,6 +18,8 @@ public:
 	virtual void Run( void );
 private:
 	void TestPathUtilities( void );
+	void TestPathSort( void );
+	void TestPathSortExisting( void );
 	void TestPathCompareFind( void );
 	void TestPathWildcardMatch( void );
 	void TestHasMultipleDirPaths( void );

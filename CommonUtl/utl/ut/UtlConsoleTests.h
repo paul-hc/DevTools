@@ -12,6 +12,7 @@
 #include "PathTests.h"
 #include "PathGeneratorTests.h"
 #include "SerializationTests.h"
+#include "ShellFileSystemTests.h"
 #include "ThreadingTests.h"
 
 
@@ -28,6 +29,7 @@ namespace ut
 		CResequenceTests::Instance();
 		CFmtUtilsTests::Instance();
 		CFileSystemTests::Instance();
+		CShellFileSystemTests::Instance();
 		CPathTests::Instance();
 		CPathGeneratorTests::Instance();
 		CSerializationTests::Instance();
