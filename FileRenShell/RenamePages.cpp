@@ -76,7 +76,7 @@ void CRenameListPage::SetupFileListView( void )
 	}
 
 	m_fileListCtrl.SetupDiffColumnPair( Source, Destination, path::GetMatch() );
-	m_fileListCtrl.InitialSortList();
+	m_fileListCtrl.InitialSortList();		// store original order and sort by current criteria
 }
 
 void CRenameListPage::OnUpdate( utl::ISubject* pSubject, utl::IMessage* pMessage )

@@ -40,19 +40,69 @@ namespace ds
 	};
 }
 
-
-// list view states, 1-based indexes
-enum CheckState
+namespace lv
 {
-	// predefined check states: existing images in GetImageList( LVSIL_STATE )
-	LVIS_UNCHECKED			= INDEXTOSTATEIMAGEMASK( 1 ),		// BST_UNCHECKED + 1
-	LVIS_CHECKED			= INDEXTOSTATEIMAGEMASK( 2 ),		// BST_CHECKED + 1
+	enum SubPopup { NowhereSubPopup, OnSelectionSubPopup, PathItemNowhereSubPopup, PathItemOnSelectionSubPopup };
 
-	// extended check states
-	LVIS_CHECKEDGRAY		= INDEXTOSTATEIMAGEMASK( 3 ),		// BST_INDETERMINATE + 1
-	LVIS_RADIO_UNCHECKED	= INDEXTOSTATEIMAGEMASK( 4 ),
-	LVIS_RADIO_CHECKED		= INDEXTOSTATEIMAGEMASK( 5 )
-};
+	// list view states, 1-based indexes
+	enum CheckState
+	{
+		// predefined check states: existing images in GetImageList( LVSIL_STATE )
+		LVIS_UNCHECKED			= INDEXTOSTATEIMAGEMASK( 1 ),		// BST_UNCHECKED + 1
+		LVIS_CHECKED			= INDEXTOSTATEIMAGEMASK( 2 ),		// BST_CHECKED + 1
+
+		// extended check states
+		LVIS_CHECKEDGRAY		= INDEXTOSTATEIMAGEMASK( 3 ),		// BST_INDETERMINATE + 1
+		LVIS_RADIO_UNCHECKED	= INDEXTOSTATEIMAGEMASK( 4 ),
+		LVIS_RADIO_CHECKED		= INDEXTOSTATEIMAGEMASK( 5 )
+	};
+
+	enum
+	{
+		DefaultStyleEx = LVS_EX_HEADERDRAGDROP | LVS_EX_FULLROWSELECT | LVS_EX_DOUBLEBUFFER |
+			LVS_EX_INFOTIP | LVS_EX_LABELTIP | LVS_EX_AUTOAUTOARRANGE /*| LVS_EX_JUSTIFYCOLUMNS*/
+
+		// note: LVS_EX_DOUBLEBUFFER causes problems of scaling artifacts with CustomImageDraw; remove this styleEx for accurate scaling.
+	};
+
+
+	enum Notification
+	{
+		// via WM_COMMAND:
+		LVN_ItemsReorder = 1000,
+
+		// via WM_NOTIFY:
+		LVN_CustomSortList,					// pass NMHDR; clients return TRUE if handled custom sorting, using current sorting criteria GetSortByColumn()
+		LVN_DropFiles						// pass lv::CNmDropFiles
+	};
+
+
+	struct CNmHdr : public tagNMHDR
+	{
+		CNmHdr( const CListCtrl* pListCtrl, Notification notifyCode )
+		{
+			hwndFrom = pListCtrl->GetSafeHwnd();
+			idFrom = pListCtrl->GetDlgCtrlID();
+			code = notifyCode;
+		}
+	};
+
+
+	struct CNmDropFiles
+	{
+		CNmDropFiles( const CListCtrl* pListCtrl, const CPoint& dropPoint, int dropItemIndex )
+			: m_nmhdr( pListCtrl, LVN_DropFiles )
+			, m_dropPoint( dropPoint )
+			, m_dropItemIndex( dropItemIndex )
+		{
+		}
+	public:
+		CNmHdr m_nmhdr;
+		CPoint m_dropPoint;							// client coordinates
+		int m_dropItemIndex;
+		std::vector< std::tstring > m_filePaths;	// sorted intuitively
+	};
+}
 
 
 abstract class CListTraits			// defines types shared between CReportListControl and CReportListCustomDraw classes
@@ -103,23 +153,7 @@ class CReportListControl : public CListCtrl
 {
 	friend class CReportListCustomDraw;
 public:
-	enum
-	{
-		DefaultStyleEx = LVS_EX_HEADERDRAGDROP | LVS_EX_FULLROWSELECT | LVS_EX_DOUBLEBUFFER |
-			LVS_EX_INFOTIP | LVS_EX_LABELTIP | LVS_EX_AUTOAUTOARRANGE /*| LVS_EX_JUSTIFYCOLUMNS*/
-
-		// note: LVS_EX_DOUBLEBUFFER causes problems of scaling artifacts with CustomImageDraw; remove this styleEx for accurate scaling.
-	};
-
-	enum Notification
-	{
-		LVN_ItemsReorder = 1000,			// via WM_COMMAND
-		LVN_DropFiles						// via WM_NOTIFY, passing CNmDropFiles
-	};
-
-	enum ListSubPopup { ListViewNowhereSubPopup, ListViewOnSelectionSubPopup, PathItemListNowhereSubPopup, PathItemListOnSelectionSubPopup };
-
-	CReportListControl( UINT columnLayoutId = 0, DWORD listStyleEx = DefaultStyleEx );
+	CReportListControl( UINT columnLayoutId = 0, DWORD listStyleEx = lv::DefaultStyleEx );
 	virtual ~CReportListControl();
 
 	DWORD& RefListStyleEx( void ) { return m_listStyleEx; }
@@ -219,12 +253,14 @@ private:
 	void UpdateColumnSortHeader( void );
 	bool IsDefaultAscending( TColumn column ) const;				// e.g. allows date-time descending ordering by default
 
-	static pred::CompareResult CALLBACK ObjectCompareProc( LPARAM leftParam, LPARAM rightParam, CReportListControl* pListCtrl );
+	static pred::CompareResult CALLBACK ObjectCompareProc( LPARAM leftParam, LPARAM rightParam, CReportListControl* pThis );
 
-	static pred::CompareResult CALLBACK InitialOrderCompareProc( LPARAM leftParam, LPARAM rightParam, CReportListControl* pListCtrl );
+	static pred::CompareResult CALLBACK InitialOrderCompareProc( LPARAM leftParam, LPARAM rightParam, CReportListControl* pThis );
 	pred::CompareResult CompareInitialOrder( TRowKey leftKey, TRowKey rightKey ) const;
 
-	static int CALLBACK TextCompareProc( LPARAM leftParam, LPARAM rightParam, CReportListControl* pListCtrl );
+	static pred::CompareResult CALLBACK InitialGroupOrderCompareProc( int leftGroupId, int rightGroupId, CReportListControl* pThis );
+
+	static int CALLBACK TextCompareProc( LPARAM leftParam, LPARAM rightParam, CReportListControl* pThis );
 	pred::CompareResult CompareSubItemsByIndex( UINT leftIndex, UINT rightIndex ) const;
 	pred::CompareResult CompareSubItemsText( UINT leftIndex, UINT rightIndex, TColumn byColumn ) const;
 
@@ -287,7 +323,7 @@ protected:
 	virtual bool CacheSelectionData( ole::CDataSource* pDataSource, int sourceFlags, const CListSelectionData& selData ) const;
 
 	bool ResizeFlexColumns( void );
-	void NotifyParent( Notification notifCode );
+	void NotifyParent( lv::Notification notifCode );
 
 	// base overrides
 	virtual void OnFinalReleaseInternalChange( void );
@@ -325,6 +361,7 @@ public:
 	int Find( const void* pObject ) const;
 	int FindItemIndex( const std::tstring& itemText ) const;
 	int FindItemIndex( LPARAM lParam ) const;
+	int FindItemIndex( const utl::ISubject* pObject ) const { return FindItemIndex( (LPARAM)pObject ); }
 
 	bool EnsureVisibleObject( const utl::ISubject* pObject );
 
@@ -341,12 +378,25 @@ public:
 	bool IsChecked( int index ) const { return GetCheck( index ) != FALSE; }
 	bool SetChecked( int index, bool check = true ) { return SetCheck( index, check ) != FALSE; }
 
+	template< typename Type >
+	bool QueryCheckedItems( std::vector< Type* >& rCheckedItems ) const { return QueryCheckedStateItems( rCheckedItems, lv::LVIS_CHECKED ); }
+
+	template< typename Type >
+	void SetCheckedItems( const std::vector< Type* >& items, bool check = true, bool uncheckOthers = true ) { SetCheckedStateItems( &items, check ? lv::LVIS_CHECKED : lv::LVIS_UNCHECKED, uncheckOthers ); }
+
+	template< typename Type >
+	void SetCheckedAll( bool check = true ) { SetCheckedStateItems( NULL, check ? lv::LVIS_CHECKED : lv::LVIS_UNCHECKED, false ); }
+
 	// extended check state (includes radio check states)
-	CheckState GetCheckState( int index ) const { return static_cast< CheckState >( GetItemState( index, LVIS_STATEIMAGEMASK ) ); }
-	void SetCheckState( int index, CheckState checkState ) { SetItemState( index, checkState, LVIS_STATEIMAGEMASK ); }
+	lv::CheckState GetCheckState( int index ) const { return static_cast< lv::CheckState >( GetItemState( index, LVIS_STATEIMAGEMASK ) ); }
+	void SetCheckState( int index, lv::CheckState checkState ) { SetItemState( index, checkState, LVIS_STATEIMAGEMASK ); }
+	bool ModifyCheckState( int index, lv::CheckState checkState );
 
 	bool GetUseExtendedCheckStates( void ) const;
 	bool SetupExtendedCheckStates( void );
+
+	bool GetToggleCheckSelected( void ) const { return HasFlag( m_optionFlags, ToggleCheckSelected ); }
+	void SetToggleCheckSelected( bool toggleCheckSelected = true ) { SetOptionFlag( ToggleCheckSelected, toggleCheckSelected ); }
 
 	bool GetUseTriStateAutoCheck( void ) const { return HasFlag( m_optionFlags, UseTriStateAutoCheck ); }
 	void SetUseTriStateAutoCheck( bool useTriStateAutoCheck = true ) { SetOptionFlag( UseTriStateAutoCheck, useTriStateAutoCheck ); }
@@ -354,8 +404,14 @@ public:
 	static bool StateChanged( UINT newState, UINT oldState, UINT stateMask ) { return ( newState & stateMask ) != ( oldState & stateMask ); }
 	static bool HasCheckState( UINT state ) { return ( state & LVIS_STATEIMAGEMASK ) != 0; }
 
-	static CheckState AsCheckState( UINT state ) { return static_cast< CheckState >( state & LVIS_STATEIMAGEMASK ); }
+	static lv::CheckState AsCheckState( UINT state ) { return static_cast< lv::CheckState >( state & LVIS_STATEIMAGEMASK ); }
 	static bool IsCheckedState( UINT state );
+
+	template< typename Type >
+	bool QueryCheckedStateItems( std::vector< Type* >& rCheckedItems, lv::CheckState checkState = lv::LVIS_CHECKED ) const;
+
+	template< typename Type >
+	void SetCheckedStateItems( const std::vector< Type* >* pItems, lv::CheckState checkState = lv::LVIS_CHECKED, bool uncheckOthers = true );
 
 	// caret and selection
 	int GetCaretIndex( void ) const { return FindItemWithState( LVNI_FOCUSED ); }
@@ -457,7 +513,11 @@ public:
 
 #if ( _WIN32_WINNT >= 0x0600 ) && defined( UNICODE )	// Vista+
 
+	// groupId: typically an index in the vector of group objects maintained by the client.
+	// groupIndex can change with sorting, whereas groupId is invariant to that
+	//
 	int GetGroupId( int groupIndex ) const;
+	std::pair< int, UINT > GetGroupItemsRange( int groupId ) const;		// < firstItemIndex, itemCount >
 
 	int GetRowGroupId( int rowIndex ) const;
 	bool SetRowGroupId( int rowIndex, int groupId );
@@ -487,10 +547,11 @@ private:
 	{
 		UseExplorerTheme			= BIT_FLAG( 0 ),
 		UseAlternateRowColoring		= BIT_FLAG( 1 ),
-		UseTriStateAutoCheck		= BIT_FLAG( 2 ),		// extended check state: allows toggling LVIS_UNCHECKED -> LVIS_CHECKED -> LVIS_CHECKEDGRAY
-		SortInternally				= BIT_FLAG( 3 ),
+		SortInternally				= BIT_FLAG( 2 ),
+		AcceptDropFiles				= BIT_FLAG( 3 ),		// enable as Explorer drop target, send LVN_DropFiles notification when files are dropped onto the list
 		HighlightTextDiffsFrame		= BIT_FLAG( 4 ),		// highlight text differences with a filled frame
-		AcceptDropFiles				= BIT_FLAG( 5 )			// enable as Explorer drop target, send LVN_DropFiles notification when files are dropped onto the list
+		ToggleCheckSelected			= BIT_FLAG( 5 ),		// multi-selection: toggle checked state for the selected items
+		UseTriStateAutoCheck		= BIT_FLAG( 6 )			// extended check state: allows toggling lv::LVIS_UNCHECKED -> lv::LVIS_CHECKED -> lv::LVIS_CHECKEDGRAY
 	};
 
 	bool SetOptionFlag( ListOption flag, bool on );
@@ -505,7 +566,7 @@ private:
 
 	TColumn m_sortByColumn;
 	bool m_sortAscending;
-	PFNLVCOMPARE m_pComparePtrFunc;							// compare by object ptr such as: static CompareResult CALLBACK CompareObjects( const CFoo* pLeft, const CFoo* pRight, CReportListControl* pListCtrl );
+	PFNLVCOMPARE m_pComparePtrFunc;							// compare by object ptr such as: static CompareResult CALLBACK CompareObjects( const CFoo* pLeft, const CFoo* pRight, CReportListControl* pThis );
 
 	std::vector< CColumnComparator > m_comparators;
 	utl::vector_map< TRowKey, int > m_initialItemsOrder;	// stores items initial order just after list set-up
@@ -583,13 +644,6 @@ public:
 	afx_msg void OnUpdateAnySelected( CCmdUI* pCmdUI );
 
 	DECLARE_MESSAGE_MAP()
-};
-
-
-struct CNmDropFiles
-{
-	NMHDR m_nmhdr;
-	std::vector< std::tstring > m_filePaths;
 };
 
 
@@ -711,6 +765,27 @@ inline Type* CReportListControl::GetPtrAt( int index ) const
 	ASSERT( index >= 0 && index < GetItemCount() );
 	return AsPtr< Type >( GetItemData( index ) );
 }
+
+template< typename Type >
+bool CReportListControl::QueryCheckedStateItems( std::vector< Type* >& rCheckedItems, lv::CheckState checkState /*= lv::LVIS_CHECKED*/ ) const
+{
+	for ( UINT i = 0, count = GetItemCount(); i != count; ++i )
+		if ( GetCheckState( i ) == checkState )
+			rCheckedItems.push_back( GetPtrAt< Type >( i ) );
+
+	return !rCheckedItems.empty();
+}
+
+template< typename Type >
+void CReportListControl::SetCheckedStateItems( const std::vector< Type* >* pItems, lv::CheckState checkState /*= lv::LVIS_CHECKED*/, bool uncheckOthers /*= true*/ )
+{
+	for ( UINT i = 0, count = GetItemCount(); i != count; ++i )
+		if ( NULL == pItems || utl::Contains( *pItems, GetPtrAt< Type >( i ) ) )
+			ModifyCheckState( i, checkState );
+		else if ( uncheckOthers )
+			ModifyCheckState( i, lv::LVIS_UNCHECKED );
+}
+
 
 template< typename Type >
 bool CReportListControl::QuerySelectionAs( std::vector< Type* >& rSelPtrs ) const

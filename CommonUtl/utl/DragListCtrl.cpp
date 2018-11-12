@@ -16,7 +16,7 @@
 #endif
 
 
-CDragListCtrl::CDragListCtrl( UINT columnLayoutId /*= 0*/, DWORD listStyleEx /*= DefaultStyleEx*/ )
+CDragListCtrl::CDragListCtrl( UINT columnLayoutId /*= 0*/, DWORD listStyleEx /*= lv::DefaultStyleEx*/ )
 	: CReportListControl( columnLayoutId, listStyleEx )
 	, m_draggingMode( NoDragging )
 	, m_pSrcDragging( NULL )
@@ -111,7 +111,7 @@ bool CDragListCtrl::DropSelection( void )
 	if ( caretIndex != -1 )
 		EnsureVisible( caretIndex, FALSE );
 
-	NotifyParent( LVN_ItemsReorder );
+	NotifyParent( lv::LVN_ItemsReorder );
 	return true;
 }
 

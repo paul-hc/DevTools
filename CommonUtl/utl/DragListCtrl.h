@@ -17,7 +17,7 @@ class CDragListCtrl : public CReportListControl
 					, public ole::IDropTargetEventsStub
 {
 public:
-	CDragListCtrl( UINT columnLayoutId = 0, DWORD listStyleEx = DefaultStyleEx );
+	CDragListCtrl( UINT columnLayoutId = 0, DWORD listStyleEx = lv::DefaultStyleEx );
 	virtual ~CDragListCtrl();
 
 	enum DraggingMode { NoDragging, InternalDragging, ExternalDragging };

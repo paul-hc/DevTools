@@ -13,7 +13,7 @@ class CShellContextMenuHost;
 class CPathItemListCtrl : public CReportListControl
 {
 public:
-	CPathItemListCtrl( UINT columnLayoutId = 0, DWORD listStyleEx = DefaultStyleEx );
+	CPathItemListCtrl( UINT columnLayoutId = 0, DWORD listStyleEx = lv::DefaultStyleEx );
 	virtual ~CPathItemListCtrl();
 
 	enum ShellContextMenuStyle { NoShellMenu, ExplorerSubMenu, ShellMenuFirst, ShellMenuLast };
@@ -27,7 +27,7 @@ public:
 
 	// selection
 	template< typename PathType >
-	void QuerySelectedItemPaths( std::vector< PathType >& rSelFilePaths ) const;
+	bool QuerySelectedItemPaths( std::vector< PathType >& rSelFilePaths ) const;
 
 	// base overrides
 	virtual bool IsInternalCmdId( int cmdId ) const;
@@ -59,13 +59,16 @@ protected:
 // template code
 
 template< typename PathType >
-void CPathItemListCtrl::QuerySelectedItemPaths( std::vector< PathType >& rSelFilePaths ) const
+bool CPathItemListCtrl::QuerySelectedItemPaths( std::vector< PathType >& rSelFilePaths ) const
 {
 	std::vector< CPathItemBase* > selItems;
 	QuerySelectionAs( selItems );
 
-	if ( !selItems.empty() )
-		utl::QueryObjectCodes( rSelFilePaths, selItems );
+	if ( selItems.empty() )
+		return false;
+
+	utl::QueryObjectCodes( rSelFilePaths, selItems );
+	return true;
 }
 
 

@@ -128,7 +128,7 @@ namespace layout
 
 CFileListDialog::CFileListDialog( CWnd* pParent )
 	: CLayoutDialog( IDD_FILE_LIST_DIALOG, pParent )
-	, m_fileListCtrl( IDC_FILE_STATE_LIST, LVS_EX_GRIDLINES | CReportListControl::DefaultStyleEx )
+	, m_fileListCtrl( IDC_FILE_STATE_LIST, LVS_EX_GRIDLINES | lv::DefaultStyleEx )
 	, m_useDiffsMode( AfxGetApp()->GetProfileInt( reg::section_dialog, reg::entry_useDiffsMode, true ) != FALSE )
 	, m_useAlternateRows( AfxGetApp()->GetProfileInt( reg::section_dialog, reg::entry_useAlternateRows, true ) != FALSE )
 	, m_useTextEffects( AfxGetApp()->GetProfileInt( reg::section_dialog, reg::entry_useTextEffects, false ) != FALSE )

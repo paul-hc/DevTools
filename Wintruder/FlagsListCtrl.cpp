@@ -18,7 +18,7 @@
 
 
 CFlagsListCtrl::CFlagsListCtrl( void )
-	: CReportListControl( IDC_FLAGS_EDITOR_LIST, LVS_EX_CHECKBOXES | LVS_EX_UNDERLINEHOT | DefaultStyleEx )
+	: CReportListControl( IDC_FLAGS_EDITOR_LIST, LVS_EX_CHECKBOXES | LVS_EX_UNDERLINEHOT | lv::DefaultStyleEx )
 	, CBaseFlagsCtrl( this )
 {
 	SetUseAlternateRowColoring();
@@ -187,12 +187,12 @@ void CFlagsListCtrl::OutputFlags( void )
 				ASSERT_PTR( pFlag );
 
 				bool off = !pFlag->IsOn( flags );
-				CheckState checkState;
+				lv::CheckState checkState;
 
 				if ( pFlag->IsValue() )
-					checkState = off ? LVIS_RADIO_UNCHECKED : LVIS_RADIO_CHECKED;
+					checkState = off ? lv::LVIS_RADIO_UNCHECKED : lv::LVIS_RADIO_CHECKED;
 				else
-					checkState = off ? LVIS_UNCHECKED : ( pFlag->IsReadOnly() ? LVIS_CHECKEDGRAY : LVIS_CHECKED );
+					checkState = off ? lv::LVIS_UNCHECKED : ( pFlag->IsReadOnly() ? lv::LVIS_CHECKEDGRAY : lv::LVIS_CHECKED );
 
 				if ( checkState != GetCheckState( i ) )
 					SetCheckState( i, checkState );
@@ -282,7 +282,7 @@ BOOL CFlagsListCtrl::OnLvnItemChanging_Reflect( NMHDR* pNmHdr, LRESULT* pResult 
 		std::vector< const CFlagInfo* > flagSet;
 		QueryCheckedFlagWorkingSet( flagSet, pListInfo->iItem );
 
-		CheckState checkState = AsCheckState( pListInfo->uNewState );
+		lv::CheckState checkState = AsCheckState( pListInfo->uNewState );
 		if ( AnyFlagCheckConflict( flagSet, IsCheckedState( checkState ) ) )
 		{
 			*pResult = 1;			// prevent change with conflict
@@ -302,7 +302,7 @@ BOOL CFlagsListCtrl::OnLvnItemChanged_Reflect( NMHDR* pNmHdr, LRESULT* pResult )
 	NMLISTVIEW* pListInfo = (NMLISTVIEW*)pNmHdr;
 	*pResult = 0;
 
-	if ( pListInfo->uChanged & LVIF_STATE )		// item state has been changed
+	if ( HasFlag( pListInfo->uChanged, LVIF_STATE ) )		// item state has been changed
 		if ( StateChanged( pListInfo->uNewState, pListInfo->uOldState, LVIS_STATEIMAGEMASK ) )		// check state changed
 			if ( HasCheckState( pListInfo->uNewState ) )
 			{

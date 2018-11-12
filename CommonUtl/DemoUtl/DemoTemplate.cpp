@@ -291,7 +291,7 @@ namespace layout
 
 CListPage::CListPage( void )
 	: CLayoutPropertyPage( IDD_LIST_PAGE )
-	, m_fileListView( IDC_FILE_RENAME_LIST, LVS_EX_GRIDLINES | CReportListControl::DefaultStyleEx )
+	, m_fileListView( IDC_FILE_RENAME_LIST, LVS_EX_GRIDLINES | lv::DefaultStyleEx )
 {
 	RegisterCtrlLayout( layout::listPageStyles, COUNT_OF( layout::listPageStyles ) );
 }

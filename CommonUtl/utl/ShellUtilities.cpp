@@ -17,6 +17,8 @@
 
 namespace shell
 {
+	bool s_useVistaStyle = true;			// set to false to disable Vista style file dialog, which for certain apps is crashing; Vista style requires COM initialization
+
 	namespace impl
 	{
 		// Allows creation and modal execution in 2 separate steps, with eventual customization in between.
@@ -118,7 +120,7 @@ namespace shell
 		if ( IFileOpenDialog* pFileOpenDialog = scopedDlg.m_pFileDlg->GetIFileOpenDialog() )
 		{
 			pFileOpenDialog->SetOptions( FOS_PICKFOLDERS | options );
-			pFileOpenDialog->Release();			// ** cannot use CComPtr< IFileOpenDialog > here since CFileDialog::~CFileDialog() fires an assertion anyway, shape and form
+			pFileOpenDialog->Release();			// ** cannot use CComPtr< IFileOpenDialog > here since CFileDialog::~CFileDialog() fires an assertion any way, shape and form
 		}
 
 		return impl::RunFileDialog( rFilePath, scopedDlg.m_pFileDlg.get() );
@@ -139,7 +141,7 @@ namespace shell
 			else
 				SetFlag( flags, OFN_OVERWRITEPROMPT );
 
-			CFileDialog* pDlg = new CFileDialog( browseMode, NULL, filePath.c_str(), flags, fileFilter.c_str(), pParentWnd );
+			CFileDialog* pDlg = new CFileDialog( browseMode, NULL, filePath.c_str(), flags, fileFilter.c_str(), pParentWnd, 0, s_useVistaStyle );
 
 			if ( pTitle != NULL )
 				pDlg->m_ofn.lpstrTitle = pTitle;

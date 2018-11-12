@@ -222,7 +222,7 @@ void CTouchFilesDialog::SetupFileListView( void )
 	m_fileListCtrl.SetupDiffColumnPair( SrcCreationTime, DestCreationTime, str::GetMatch() );
 	m_fileListCtrl.SetupDiffColumnPair( SrcAccessTime, DestAccessTime, str::GetMatch() );
 
-	m_fileListCtrl.InitialSortList();
+	m_fileListCtrl.InitialSortList();		// store original order and sort by current criteria
 }
 
 void CTouchFilesDialog::AccumulateCommonStates( void )

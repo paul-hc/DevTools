@@ -15,7 +15,7 @@
 #endif
 
 
-CPathItemListCtrl::CPathItemListCtrl( UINT columnLayoutId /*= 0*/, DWORD listStyleEx /*= DefaultStyleEx*/ )
+CPathItemListCtrl::CPathItemListCtrl( UINT columnLayoutId /*= 0*/, DWORD listStyleEx /*= lv::DefaultStyleEx*/ )
 	: CReportListControl( columnLayoutId, listStyleEx )
 	, m_cmStyle( ExplorerSubMenu )
 	, m_cmQueryFlags( CMF_EXPLORE )
@@ -36,7 +36,7 @@ CMenu& CPathItemListCtrl::GetStdPathListPopupMenu( ListPopup popupType )
 	static CMenu s_stdPopupMenu[ _ListPopupCount ];
 	CMenu& rMenu = s_stdPopupMenu[ popupType ];
 	if ( NULL == rMenu.GetSafeHmenu() )
-		ui::LoadPopupSubMenu( rMenu, IDR_STD_CONTEXT_MENU, ui::ListView, OnSelection == popupType ? PathItemListOnSelectionSubPopup : PathItemListNowhereSubPopup );
+		ui::LoadPopupSubMenu( rMenu, IDR_STD_CONTEXT_MENU, ui::ListView, OnSelection == popupType ? lv::PathItemOnSelectionSubPopup : lv::PathItemNowhereSubPopup );
 	return rMenu;
 }
 
@@ -64,9 +64,7 @@ CMenu* CPathItemListCtrl::GetPopupMenu( ListPopup popupType )
 	if ( pSrcPopupMenu != NULL && OnSelection == popupType && UseShellContextMenu() )
 	{
 		std::vector< std::tstring > selFilePaths;
-		QuerySelectedItemPaths( selFilePaths );
-
-		if ( !selFilePaths.empty() )
+		if ( QuerySelectedItemPaths( selFilePaths ) )
 			if ( CMenu* pContextPopup = MakeContextMenuHost( pSrcPopupMenu, selFilePaths ) )
 				return pContextPopup;
 	}
@@ -200,9 +198,8 @@ void CPathItemListCtrl::OnCopyParentDirPath( void )
 	QuerySelectedItemPaths( selFilePaths );
 	ASSERT( !selFilePaths.empty() );
 
-	fs::TPathSet parentDirPaths;
-	for ( std::vector< fs::CPath >::const_iterator itSelFilePath = selFilePaths.begin(); itSelFilePath != selFilePaths.end(); ++itSelFilePath )
-		parentDirPaths.insert( itSelFilePath->GetParentPath() );
+	std::vector< fs::CPath > parentDirPaths;
+	path::QueryParentPaths( parentDirPaths, selFilePaths );
 
 	if ( !CClipboard::CopyToLines( parentDirPaths, this ) )
 		ui::BeepSignal( MB_ICONWARNING );

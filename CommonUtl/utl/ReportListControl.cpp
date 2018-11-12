@@ -13,6 +13,7 @@
 #include "VisualTheme.h"
 #include "ComparePredicates.h"
 #include "ContainerUtilities.h"
+#include "FileSystem.h"
 #include "Resequence.hxx"
 #include "resource.h"
 
@@ -80,7 +81,7 @@ static ACCEL keys[] =
 const TCHAR CReportListControl::s_fmtRegColumnLayout[] = _T("Width=%d, Order=%d");
 
 
-CReportListControl::CReportListControl( UINT columnLayoutId /*= 0*/, DWORD listStyleEx /*= DefaultStyleEx*/ )
+CReportListControl::CReportListControl( UINT columnLayoutId /*= 0*/, DWORD listStyleEx /*= lv::DefaultStyleEx*/ )
 	: CListCtrl()
 	, CObjectCtrlBase()
 	, m_columnLayoutId( 0 )
@@ -256,7 +257,7 @@ CMenu& CReportListControl::GetStdPopupMenu( ListPopup popupType )
 	static CMenu s_stdPopupMenu[ _ListPopupCount ];
 	CMenu& rMenu = s_stdPopupMenu[ popupType ];
 	if ( NULL == rMenu.GetSafeHmenu() )
-		ui::LoadPopupSubMenu( rMenu, IDR_STD_CONTEXT_MENU, ui::ListView, OnSelection == popupType ? ListViewOnSelectionSubPopup : ListViewNowhereSubPopup );
+		ui::LoadPopupSubMenu( rMenu, IDR_STD_CONTEXT_MENU, ui::ListView, OnSelection == popupType ? lv::OnSelectionSubPopup : lv::NowhereSubPopup );
 	return rMenu;
 }
 
@@ -427,7 +428,7 @@ OR:
 
 int CReportListControl::HitTest( CPoint pos, UINT* pFlags /*= NULL*/ ) const
 {
-	int result = __super::HitTest( pos, pFlags );
+	int itemIndex = __super::HitTest( pos, pFlags );
 
 	if ( HasFlag( *pFlags, LVHT_NOWHERE ) )
 		if ( int itemCount = GetItemCount() )
@@ -451,7 +452,7 @@ int CReportListControl::HitTest( CPoint pos, UINT* pFlags /*= NULL*/ ) const
 		else
 			SetFlag( *pFlags, LVHT_MY_PASTEND );
 
-	return result;
+	return itemIndex;
 }
 
 int CReportListControl::GetDropIndexAtPoint( const CPoint& point ) const
@@ -461,7 +462,7 @@ int CReportListControl::GetDropIndexAtPoint( const CPoint& point ) const
 		UINT hitFlags;
 		int newDropIndex = HitTest( point, &hitFlags );
 		if ( HasFlag( hitFlags, LVHT_MY_PASTEND ) )
-			newDropIndex = GetItemCount();					// drop past last item
+			newDropIndex = GetItemCount();				// drop past last item
 		return newDropIndex;
 	}
 	return -1;
@@ -528,18 +529,26 @@ bool CReportListControl::SortList( void )
 {
 	UpdateColumnSortHeader();
 
-	if ( -1 == m_sortByColumn )
-	{
-		if ( m_initialItemsOrder.empty() )
-			return false;
-		else
-			SortItems( (PFNLVCOMPARE)&InitialOrderCompareProc, (LPARAM)this );		// restore initial item order; passes item LPARAMs (i.e. TRowKey) as left/right
-	}
-	else if ( GetSortInternally() )													// otherwise was sorted externally, just update sort header
-		if ( m_pComparePtrFunc != NULL )
-			SortItems( m_pComparePtrFunc, (LPARAM)this );					// passes item LPARAMs as left/right
-		else
-			SortItemsEx( (PFNLVCOMPARE)&TextCompareProc, (LPARAM)this );	// passes item indexes as left/right LPARAMs
+	lv::CNmHdr nmHdr( this, lv::LVN_CustomSortList );
+
+	if ( 0L == ui::SendNotifyToParent( m_hWnd, lv::LVN_CustomSortList, &nmHdr ) )	// give parent a chance to custom sort the list (or sort its groups)
+		if ( -1 == m_sortByColumn )
+		{
+			if ( m_initialItemsOrder.empty() )
+				return false;
+			else
+			{
+				SortItems( (PFNLVCOMPARE)&InitialOrderCompareProc, (LPARAM)this );		// restore initial item order; passes item LPARAMs (i.e. TRowKey) as left/right
+
+				if ( IsGroupViewEnabled() )
+					SortGroups( (PFNLVGROUPCOMPARE)&InitialGroupOrderCompareProc, this );
+			}
+		}
+		else if ( GetSortInternally() )													// otherwise was sorted externally, just update sort header
+			if ( m_pComparePtrFunc != NULL )
+				SortItems( m_pComparePtrFunc, (LPARAM)this );					// passes item LPARAMs as left/right
+			else
+				SortItemsEx( (PFNLVCOMPARE)&TextCompareProc, (LPARAM)this );	// passes item indexes as left/right LPARAMs
 
 	int caretIndex = GetCaretIndex();
 	if ( caretIndex != -1 )
@@ -642,6 +651,11 @@ pred::CompareResult CReportListControl::CompareInitialOrder( TRowKey leftKey, TR
 
 	ASSERT( false );			// item not accounted for in m_initialItemsOrder
 	return pred::Equal;
+}
+
+pred::CompareResult CALLBACK CReportListControl::InitialGroupOrderCompareProc( int leftGroupId, int rightGroupId, CReportListControl* /*pThis*/ )
+{
+	return pred::Compare_Scalar( leftGroupId, rightGroupId );		// groupID corresponds to the initial group order
 }
 
 int CALLBACK CReportListControl::TextCompareProc( LPARAM leftParam, LPARAM rightParam, CReportListControl* pListCtrl )
@@ -989,7 +1003,7 @@ bool CReportListControl::ResizeFlexColumns( void )
 	return true;
 }
 
-void CReportListControl::NotifyParent( Notification notifCode )
+void CReportListControl::NotifyParent( lv::Notification notifCode )
 {
 	ui::SendCommandToParent( m_hWnd, notifCode );
 }
@@ -1317,12 +1331,21 @@ bool CReportListControl::IsCheckedState( UINT state )
 	ASSERT( HasCheckState( state ) );
 	switch ( state & LVIS_STATEIMAGEMASK )
 	{
-		case LVIS_CHECKED:
-		case LVIS_CHECKEDGRAY:
-		case LVIS_RADIO_CHECKED:
+		case lv::LVIS_CHECKED:
+		case lv::LVIS_CHECKEDGRAY:
+		case lv::LVIS_RADIO_CHECKED:
 			return true;
 	}
 	return false;
+}
+
+bool CReportListControl::ModifyCheckState( int index, lv::CheckState checkState )
+{
+	if ( GetCheckState( index ) == checkState )
+		return false;			// checked state not modified
+
+	SetCheckState( index, checkState );
+	return true;
 }
 
 bool CReportListControl::GetUseExtendedCheckStates( void ) const
@@ -1484,7 +1507,7 @@ void CReportListControl::MoveSelectionTo( seq::MoveTo moveTo )
 		seq::Resequence( sequence, selIndexes, moveTo );
 	}
 
-	NotifyParent( LVN_ItemsReorder );
+	NotifyParent( lv::LVN_ItemsReorder );
 }
 
 bool CReportListControl::CacheSelectionData( ole::CDataSource* pDataSource, int sourceFlags, const CListSelectionData& selData ) const
@@ -1641,10 +1664,24 @@ bool CReportListControl::ParentHandles( ParentNotif notif )
 
 int CReportListControl::GetGroupId( int groupIndex ) const
 {
-	LVGROUP group = { sizeof( LVGROUP ) };
+	LVGROUP group;
+	utl::ZeroWinStruct( &group );
+
 	group.mask = LVGF_GROUPID;
 	VERIFY( GetGroupInfoByIndex( groupIndex, &group ) );
 	return group.iGroupId;
+}
+
+std::pair< int, UINT > CReportListControl::GetGroupItemsRange( int groupId ) const
+{
+	LVGROUP group;
+	utl::ZeroWinStruct( &group );
+
+	group.mask = LVGF_ITEMS;
+	group.iGroupId = groupId;
+	VERIFY( GetGroupInfo( groupId, &group ) != -1 );		// returns the groupID
+
+	return std::make_pair( group.iFirstItem, group.cItems );
 }
 
 int CReportListControl::GetRowGroupId( int rowIndex ) const
@@ -1863,24 +1900,13 @@ void CReportListControl::OnDestroy( void )
 void CReportListControl::OnDropFiles( HDROP hDropInfo )
 {
 	GetAncestor( GA_PARENT )->SetActiveWindow();		// activate us first
-	NotifyParent( LVN_DropFiles );
 
-	CNmDropFiles dropInfo;
+	CPoint dropPoint = ui::GetCursorPos( m_hWnd );
+	lv::CNmDropFiles dropFiles( this, dropPoint, GetDropIndexAtPoint( dropPoint ) );
 
-	UINT fileCount = ::DragQueryFile( hDropInfo, (UINT)-1, NULL, 0 );
-	dropInfo.m_filePaths.reserve( fileCount );
+	fs::QueryDroppedFiles( dropFiles.m_filePaths, hDropInfo, SortAscending );
 
-	for ( unsigned int i = 0; i != fileCount; ++i )
-	{
-		TCHAR filePath[ _MAX_PATH ];
-		::DragQueryFile( hDropInfo, i, filePath, _MAX_PATH );
-
-		dropInfo.m_filePaths.push_back( filePath );
-	}
-
-	::DragFinish( hDropInfo );
-
-	ui::SendNotifyToParent( m_hWnd, LVN_DropFiles, &dropInfo.m_nmhdr );		// notify parent of dropped file paths
+	ui::SendNotifyToParent( m_hWnd, lv::LVN_DropFiles, &dropFiles.m_nmhdr );		// notify parent of dropped file paths
 }
 
 void CReportListControl::OnWindowPosChanged( WINDOWPOS* pWndPos )
@@ -1953,9 +1979,9 @@ BOOL CReportListControl::OnLvnItemChanging_Reflect( NMHDR* pNmHdr, LRESULT* pRes
 
 	if ( !GetUseTriStateAutoCheck() )		// must prevent prevent tri-state transition?
 		if ( HasFlag( pListInfo->uChanged, LVIF_STATE ) && StateChanged( pListInfo->uNewState, pListInfo->uOldState, LVIS_STATEIMAGEMASK ) )	// check state changed
-			if ( LVIS_CHECKEDGRAY == AsCheckState( pListInfo->uNewState ) )
+			if ( lv::LVIS_CHECKEDGRAY == AsCheckState( pListInfo->uNewState ) )
 			{
-				SetCheckState( pListInfo->iItem, LVIS_UNCHECKED );
+				SetCheckState( pListInfo->iItem, lv::LVIS_UNCHECKED );
 				*pResult = 1;
 				return TRUE;
 			}
@@ -1968,6 +1994,22 @@ BOOL CReportListControl::OnLvnItemChanged_Reflect( NMHDR* pNmHdr, LRESULT* pResu
 {
 	NMLISTVIEW* pListInfo = (NMLISTVIEW*)pNmHdr;
 	UNUSED_ALWAYS( pListInfo );
+
+	if ( !IsInternalChange() && GetToggleCheckSelected() && IsMultiSelectionList() )
+		if ( HasFlag( pListInfo->uChanged, LVIF_STATE ) )		// item state has been changed?
+			if ( StateChanged( pListInfo->uNewState, pListInfo->uOldState, LVIS_STATEIMAGEMASK ) )		// check state changed?
+				if ( IsSelected( pListInfo->iItem ) )			// toggle item part of the selection?
+				{
+					bool checked = IsCheckedState( pListInfo->uNewState );
+
+					std::vector< utl::ISubject* > selItems;
+					if ( QuerySelectionAs( selItems ) )
+					{
+						CScopedInternalChange change( this );
+						SetCheckedItems( selItems, checked, false );
+					}
+				}
+
 	*pResult = 0L;
 	return IsInternalChange();		// don't raise the notification to list's parent during an internal change
 }
