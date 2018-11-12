@@ -726,7 +726,7 @@ void CFindDuplicatesDialog::OnEditSrcPaths( void )
 
 void CFindDuplicatesDialog::OnUpdateEditSrcPaths( CCmdUI* pCmdUI )
 {
-	pCmdUI;
+	pCmdUI->Enable( !IsRollMode() );
 }
 
 void CFindDuplicatesDialog::OnCbnSelChange_FileType( void )
@@ -867,9 +867,8 @@ void CFindDuplicatesDialog::OnLvnDropFiles_SrcList( NMHDR* pNmHdr, LRESULT* pRes
 void CFindDuplicatesDialog::OnLvnLinkClick_DuplicateList( NMHDR* pNmHdr, LRESULT* pResult )
 {
 	NMLVLINK* pLinkInfo = (NMLVLINK*)pNmHdr;
-	int groupId = pLinkInfo->iSubItem;
 
-	ToggleCheckGroupDuplicates( groupId );
+	ToggleCheckGroupDuplicates( pLinkInfo->iSubItem );
 	*pResult = 0;
 }
 
@@ -883,23 +882,20 @@ void CFindDuplicatesDialog::OnLvnCustomSortList_DuplicateList( NMHDR* pNmHdr, LR
 	{
 		case FileName:				// sort groups AND items
 			m_dupsListCtrl.SortGroups( (PFNLVGROUPCOMPARE)&CompareGroupFileName, this );
-			*pResult = FALSE;		// sorted the groups, but keep on sorting the items
-			break;
+			break;					// sorted the groups, but keep on sorting the items
 		case DirPath:				// sort groups AND items
 			m_dupsListCtrl.SortGroups( (PFNLVGROUPCOMPARE)&CompareGroupDirPath, this );
-			*pResult = FALSE;		// sorted the groups, but keep on sorting the items
-			break;
-		case Size:					// sort groups rather than items
+			break;					// sorted the groups, but keep on sorting the items
+		case Size:
 			m_dupsListCtrl.SortGroups( (PFNLVGROUPCOMPARE)&CompareGroupFileSize, this );
-			*pResult = TRUE;		// done, prevent internal list item sorting
+			*pResult = TRUE;		// done, prevent list item internal sorting
 			break;
-		case Crc32:					// sort groups rather than items
+		case Crc32:
 			m_dupsListCtrl.SortGroups( (PFNLVGROUPCOMPARE)&CompareGroupFileCrc32, this );
-			*pResult = TRUE;		// done, prevent internal list item sorting
+			*pResult = TRUE;		// done, prevent list item internal sorting
 			break;
 		case DateModified:			// sort groups AND items
 			m_dupsListCtrl.SortGroups( (PFNLVGROUPCOMPARE)&CompareGroupDateModified, this );
-			*pResult = FALSE;		// sorted the groups, but keep on sorting the items
-			break;
+			break;					// sorted the groups, but keep on sorting the items
 	}
 }
