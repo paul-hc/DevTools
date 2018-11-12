@@ -30,7 +30,7 @@ public:
 	const std::vector< CRenameItem* >& GetRenameItems( void ) const { return m_rRenameItems; }
 	bool IsInitialized( void ) const { return m_isInitialized; }
 	bool HasDestPaths( void ) const;
-private:
+protected:
 	// IFileEditor interface (partial)
 	virtual void PostMakeDest( bool silent = false );
 	virtual void PopStackTop( cmd::StackType stackType );
@@ -44,8 +44,9 @@ private:
 
 	// ui::ICmdCallback interface
 	virtual void QueryTooltipText( std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const;
+
+	virtual void SwitchMode( Mode mode );
 private:
-	void SwitchMode( Mode mode );
 	void CommitLocalEdits( void );
 
 	void AutoGenerateFiles( void );

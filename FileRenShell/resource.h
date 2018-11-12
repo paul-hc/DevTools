@@ -92,11 +92,9 @@
 #define IDC_FILE_SPEC_EDIT              1072
 #define IDC_MINIMUM_SIZE_STATIC         1073
 #define IDC_MIN_FILE_SIZE_COMBO         1074
-#define IDC_DELETE_DUPLICATES_BUTTON    1076
-#define IDC_MOVE_DUPLICATES_BUTTON      1077
-#define IDC_CLEAR_CRC32_CACHE_BUTTON    1078
-#define IDC_DUPLICATE_FILES_STATIC2     1079
-#define IDC_OUTCOME_INFO_STATUS         1079
+#define IDC_OUTCOME_INFO_STATUS         1078
+#define IDC_OUTCOME_INFO_STATUS2        1079
+#define IDC_COMMIT_INFO_STATUS          1079
 #define IDS_INVALID_FORMAT              5000
 #define IDS_NO_DELIMITER_SET            5001
 #define IDS_REPLACE_FILES_TIP_FORMAT    5005
@@ -152,13 +150,18 @@
 #define ID_UNCHECK_ALL_DUPLICATES       32822
 #define ID_TOGGLE_CHECK_GROUP_DUPLICATES 32823
 #define ID_KEEP_AS_ORIGINAL_FILE        32824
+#define ID_CLEAR_CRC32_CACHE            32825
+#define ID_DELETE_DUPLICATES            32826
+#define ID_MOVE_DUPLICATES              32827
+#define ID_SEARCH_MODE                  32828
+#define ID_COMMIT_MODE                  32829
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        112
-#define _APS_NEXT_COMMAND_VALUE         32825
+#define _APS_NEXT_COMMAND_VALUE         32830
 #define _APS_NEXT_CONTROL_VALUE         1081
 #define _APS_NEXT_SYMED_VALUE           5004
 #endif

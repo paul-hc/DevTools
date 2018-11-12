@@ -59,8 +59,8 @@ bool CFileContentKey::ComputeCrc32( const fs::CPath& filePath )
 
 utl::CCrc32FileCache& CFileContentKey::GetCrc32FileCache( void )
 {
-	static utl::CCrc32FileCache crcCache;
-	return crcCache;
+	static utl::CCrc32FileCache s_crcCache;
+	return s_crcCache;
 }
 
 

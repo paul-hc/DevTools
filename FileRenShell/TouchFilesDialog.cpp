@@ -133,7 +133,7 @@ void CTouchFilesDialog::SwitchMode( Mode mode )
 		return;
 
 	static const CEnumTags modeTags( _T("&Store|&Touch|Roll &Back|Roll &Forward") );
-	ui::SetDlgItemText( m_hWnd, IDOK, modeTags.FormatUi( m_mode ) );
+	UpdateOkButton( modeTags.FormatUi( m_mode ) );
 
 	static const UINT ctrlIds[] =
 	{
@@ -512,14 +512,10 @@ void CTouchFilesDialog::DoDataExchange( CDataExchange* pDX )
 	ui::DDX_ButtonIcon( pDX, IDC_PASTE_FILES_BUTTON, ID_EDIT_PASTE );
 	ui::DDX_ButtonIcon( pDX, IDC_RESET_FILES_BUTTON, ID_RESET_DEFAULT );
 
-	if ( DialogOutput == pDX->m_bSaveAndValidate )
+	if ( firstInit )
 	{
-		if ( firstInit )
-		{
-			OnUpdate( m_pFileModel, NULL );
-			SwitchMode( m_mode );
-			CheckDlgButton( IDC_SHOW_SOURCE_INFO_CHECK, VisibleAllSrcColumns() );
-		}
+		OnUpdate( m_pFileModel, NULL );
+		CheckDlgButton( IDC_SHOW_SOURCE_INFO_CHECK, VisibleAllSrcColumns() );
 	}
 
 	__super::DoDataExchange( pDX );

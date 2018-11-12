@@ -5,6 +5,7 @@
 #include "IFileEditor.h"
 #include "utl/BaseMainDialog.h"
 #include "utl/DialogToolBar.h"
+#include "utl/IconButton.h"
 
 
 class CFileModel;
@@ -34,8 +35,6 @@ protected:
 	// ui::ICmdCallback interface
 	virtual void QueryTooltipText( std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const;
 
-	int PopStackRunCrossEditor( cmd::StackType stackType );
-protected:
 	enum Mode					// determines the OK button label
 	{
 		EditMode,				// edit destinations
@@ -43,6 +42,11 @@ protected:
 		RollBackMode,			// ready to undo the peeked files command
 		RollForwardMode			// ready to redo the peeked files command
 	};
+
+	virtual void SwitchMode( Mode mode ) = 0;
+	void UpdateOkButton( const std::tstring& caption, UINT iconId = 0 );
+protected:
+	int PopStackRunCrossEditor( cmd::StackType stackType );
 
 	bool IsNativeCmd( const utl::ICommand* pCmd ) const;
 	bool IsForeignCmd( const utl::ICommand* pCmd ) const;		// must be handled by a different editor?
@@ -58,6 +62,7 @@ protected:
 	std::vector< CPathItemBase* > m_errorItems;
 
 	// controls
+	CIconButton m_okButton;				// overloaded, does various things depending of the mode
 	CDialogToolBar m_toolbar;
 
 	// generated stuff

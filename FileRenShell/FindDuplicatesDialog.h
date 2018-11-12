@@ -28,7 +28,7 @@ class CFindDuplicatesDialog : public CFileEditorBaseDialog
 public:
 	CFindDuplicatesDialog( CFileModel* pFileModel, CWnd* pParent );
 	virtual ~CFindDuplicatesDialog();
-private:
+protected:
 	// IFileEditor interface
 	virtual void PostMakeDest( bool silent = false );
 	virtual void PopStackTop( cmd::StackType stackType );
@@ -42,9 +42,9 @@ private:
 
 	// CReportListControl::ITextEffectCallback interface
 	virtual void CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARAM rowKey, int subItem ) const;
-private:
-	void SwitchMode( Mode mode );
 
+	virtual void SwitchMode( Mode mode );
+private:
 	bool DeleteDuplicateFiles( void );
 	void SetupDialog( void );
 
@@ -66,6 +66,7 @@ private:
 	static const CEnumTags& GetTags_FileType( void );
 
 	std::tstring FormatReport( const CDupsOutcome& outcome ) const;
+	void DisplayCheckedGroupInfo( void );
 
 	// duplicates
 	void ToggleCheckGroupDuplicates( unsigned int groupId );
@@ -93,11 +94,14 @@ private:
 
 	CPathItemListCtrl m_srcPathsListCtrl;
 	CDialogToolBar m_srcPathsToolbar;
-	CStatusStatic m_outcomeStatic;
-	CPathItemListCtrl m_dupsListCtrl;
 	CComboBox m_fileTypeCombo;
 	CTextEdit m_fileSpecEdit;
 	CHistoryComboBox m_minFileSizeCombo;
+
+	CDialogToolBar m_dupsToolbar;
+	CPathItemListCtrl m_dupsListCtrl;
+	CStatusStatic m_outcomeStatic;
+	CRegularStatic m_commitInfoStatic;
 
 	// generated stuff
 public:
@@ -107,6 +111,7 @@ protected:
 protected:
 	virtual void OnOK( void );
 	afx_msg void OnDestroy( void );
+	virtual void OnIdleUpdateControls( void );
 	afx_msg void OnUpdateUndoRedo( CCmdUI* pCmdUI );
 	afx_msg void OnFieldChanged( void );
 	afx_msg void OnEditSrcPaths( void );
@@ -121,10 +126,11 @@ protected:
 	afx_msg void OnUpdateToggleCheckGroupDups( CCmdUI* pCmdUI );
 	afx_msg void OnKeepAsOriginalFile( void );
 	afx_msg void OnUpdateKeepAsOriginalFile( CCmdUI* pCmdUI );
+	afx_msg void OnClearCrc32Cache( void );
+	afx_msg void OnUpdateClearCrc32Cache( CCmdUI* pCmdUI );
 
 	afx_msg void OnBnClicked_DeleteDuplicates( void );
 	afx_msg void OnBnClicked_MoveDuplicates( void );
-	afx_msg void OnBnClicked_ClearCrc32Cache( void );
 	afx_msg void OnUpdateSelListItem( CCmdUI* pCmdUI );
 	afx_msg void OnLvnDropFiles_SrcList( NMHDR* pNmHdr, LRESULT* pResult );
 	afx_msg void OnLvnLinkClick_DuplicateList( NMHDR* pNmHdr, LRESULT* pResult );

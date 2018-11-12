@@ -25,7 +25,7 @@ class CTouchFilesDialog : public CFileEditorBaseDialog
 public:
 	CTouchFilesDialog( CFileModel* pFileModel, CWnd* pParent );
 	virtual ~CTouchFilesDialog();
-private:
+protected:
 	// IFileEditor interface
 	virtual void PostMakeDest( bool silent = false );
 	virtual void PopStackTop( cmd::StackType stackType );
@@ -40,10 +40,10 @@ private:
 	// CReportListControl::ITextEffectCallback interface
 	virtual void CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARAM rowKey, int subItem ) const;
 	virtual void ModifyDiffTextEffectAt( CListTraits::CMatchEffects& rEffects, LPARAM rowKey, int subItem ) const;
+
+	virtual void SwitchMode( Mode mode );
 private:
 	void Construct( void );
-
-	void SwitchMode( Mode mode );
 
 	bool TouchFiles( void );
 	void SetupDialog( void );

@@ -25,7 +25,7 @@ struct CFileContentKey
 
 	static utl::CCrc32FileCache& GetCrc32FileCache( void );
 public:
-	UINT64 m_fileSize;	// in bytes
+	UINT64 m_fileSize;		// in bytes
 	UINT m_crc32;			// CRC32 checksum
 };
 

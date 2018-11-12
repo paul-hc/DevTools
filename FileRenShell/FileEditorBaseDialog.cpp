@@ -81,6 +81,15 @@ bool CFileEditorBaseDialog::SafeExecuteCmd( utl::ICommand* pCmd )
 	return m_pFileModel->SafeExecuteCmd( this, pCmd );
 }
 
+void CFileEditorBaseDialog::UpdateOkButton( const std::tstring& caption, UINT iconId /*= 0*/ )
+{
+	if ( 0 == iconId && IsRollMode() )
+		iconId = ID_COMMIT_MODE;
+
+	m_okButton.SetButtonCaption( caption );
+	m_okButton.SetIconId( iconId );
+}
+
 int CFileEditorBaseDialog::PopStackRunCrossEditor( cmd::StackType stackType )
 {
 	// end this dialog and spawn the foreign dialog editor
@@ -145,7 +154,13 @@ bool CFileEditorBaseDialog::IsErrorItem( const CPathItemBase* pItem ) const
 
 void CFileEditorBaseDialog::DoDataExchange( CDataExchange* pDX )
 {
+	const bool firstInit = NULL == m_okButton.m_hWnd;
+
+	DDX_Control( pDX, IDOK, m_okButton );
 	m_toolbar.DDX_Placeholder( pDX, IDC_TOOLBAR_PLACEHOLDER, H_AlignRight | V_AlignCenter );
+
+	if ( firstInit )
+		SwitchMode( m_mode );
 
 	__super::DoDataExchange( pDX );
 }

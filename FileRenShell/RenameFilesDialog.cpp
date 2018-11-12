@@ -152,7 +152,7 @@ void CRenameFilesDialog::SwitchMode( Mode mode )
 		return;
 
 	static const CEnumTags modeTags( _T("&Make Names|Rena&me|Roll &Back|Roll &Forward") );
-	ui::SetWindowText( ::GetDlgItem( m_hWnd, IDOK ), modeTags.FormatUi( m_mode ) );
+	UpdateOkButton( modeTags.FormatUi( m_mode ) );
 
 	static const UINT ctrlIds[] =
 	{
@@ -385,30 +385,25 @@ void CRenameFilesDialog::DoDataExchange( CDataExchange* pDX )
 	ui::DDX_ButtonIcon( pDX, IDC_RESET_FILES_BUTTON, ID_RESET_DEFAULT );
 	ui::DDX_ButtonIcon( pDX, IDC_REPLACE_FILES_BUTTON, ID_EDIT_REPLACE );
 
-	if ( DialogOutput == pDX->m_bSaveAndValidate )
+	if ( firstInit )
 	{
-		if ( firstInit )
-		{
-			m_formatCombo.LimitText( _MAX_PATH );
-			CTextEdit::SetFixedFont( &m_delimiterSetCombo );
-			m_delimiterSetCombo.LimitText( 64 );
-			m_newDelimiterEdit.LimitText( 64 );
+		m_formatCombo.LimitText( _MAX_PATH );
+		CTextEdit::SetFixedFont( &m_delimiterSetCombo );
+		m_delimiterSetCombo.LimitText( 64 );
+		m_newDelimiterEdit.LimitText( 64 );
 
-			m_formatCombo.LoadHistory( m_regSection.c_str(), reg::entry_formatHistory, _T("## - *.*") );
-			m_delimiterSetCombo.LoadHistory( m_regSection.c_str(), reg::entry_delimiterSetHistory, delim::s_defaultDelimiterSet.c_str() );
-			m_newDelimiterEdit.SetWindowText( AfxGetApp()->GetProfileString( m_regSection.c_str(), reg::entry_newDelimiterHistory, s_defaultNewDelimiter ) );
+		m_formatCombo.LoadHistory( m_regSection.c_str(), reg::entry_formatHistory, _T("## - *.*") );
+		m_delimiterSetCombo.LoadHistory( m_regSection.c_str(), reg::entry_delimiterSetHistory, delim::s_defaultDelimiterSet.c_str() );
+		m_newDelimiterEdit.SetWindowText( AfxGetApp()->GetProfileString( m_regSection.c_str(), reg::entry_newDelimiterHistory, s_defaultNewDelimiter ) );
 
-			m_seqCountEdit.SetNumericValue( AfxGetApp()->GetProfileInt( m_regSection.c_str(), reg::entry_seqCount, 1 ) );
+		m_seqCountEdit.SetNumericValue( AfxGetApp()->GetProfileInt( m_regSection.c_str(), reg::entry_seqCount, 1 ) );
 
-			m_isInitialized = true;
+		m_isInitialized = true;
 
-			if ( !HasDestPaths() && EditPage == m_filesSheet.GetActiveIndex() )
-				CResetDestinationsCmd( m_pFileModel ).Execute();	// this will call OnUpdate() for all observers
-			else
-				OnUpdate( m_pFileModel, NULL );			// initialize the dialog
-
-			SwitchMode( m_mode );					// normally EditMode
-		}
+		if ( !HasDestPaths() && EditPage == m_filesSheet.GetActiveIndex() )
+			CResetDestinationsCmd( m_pFileModel ).Execute();	// this will call OnUpdate() for all observers
+		else
+			OnUpdate( m_pFileModel, NULL );			// initialize the dialog
 	}
 
 	__super::DoDataExchange( pDX );
