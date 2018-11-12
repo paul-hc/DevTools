@@ -14,6 +14,7 @@ public:
 	virtual ~CPathItemBase();
 
 	const fs::CPath& GetFilePath( void ) const { return m_filePath; }
+
 	void SetDisplayCode( const std::tstring& displayPath ) { m_displayPath = displayPath; }
 	void StripDisplayCode( const fs::CPath& commonParentPath );
 
@@ -25,6 +26,16 @@ public:
 	{
 		const fs::CPath& operator()( const fs::CPath& path ) const { return path; }
 		const fs::CPath& operator()( const CPathItemBase* pItem ) const { return pItem->GetFilePath(); }
+	};
+
+	struct ToParentDirPath
+	{
+		fs::CPath operator()( const CPathItemBase* pItem ) const { return pItem->GetFilePath().GetParentPath(); }
+	};
+
+	struct ToNameExt
+	{
+		const TCHAR* operator()( const CPathItemBase* pItem ) const { return pItem->GetFilePath().GetNameExt(); }
 	};
 private:
 	fs::CPath m_filePath;

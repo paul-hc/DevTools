@@ -46,16 +46,8 @@ void CFileModel::Clear( void )
 
 size_t CFileModel::SetupFromDropInfo( HDROP hDropInfo )
 {
-	ASSERT_PTR( hDropInfo );
-
 	std::vector< fs::CPath > sourcePaths;
-	for ( UINT i = 0, fileCount = ::DragQueryFile( hDropInfo, UINT_MAX, NULL, 0 ); i != fileCount; ++i )
-	{
-		TCHAR pathBuffer[ MAX_PATH ];
-		::DragQueryFile( hDropInfo, i, pathBuffer, COUNT_OF( pathBuffer ) );
-
-		sourcePaths.push_back( fs::CPath( pathBuffer ) );
-	}
+	fs::QueryDroppedFiles( sourcePaths, hDropInfo );
 
 // to test multiple paths:
 //str::Split( sourcePaths, _T("C:\\dev\\DevTools\\CommonUtl\\DemoUtl\\DemoUtl.rc|C:\\dev\\DevTools\\CommonUtl\\utl\\utl_ui.rc|C:\\dev\\DevTools\\FileRenShell\\FileRenShell.rc"), _T("|") );

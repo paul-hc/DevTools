@@ -66,7 +66,7 @@ utl::CCrc32FileCache& CFileContentKey::GetCrc32FileCache( void )
 
 // CDuplicateFileItem implementation
 
-CDuplicateFileItem::CDuplicateFileItem( const fs::CPath& filePath, const CDuplicateFilesGroup* pParentGroup )
+CDuplicateFileItem::CDuplicateFileItem( const fs::CPath& filePath, CDuplicateFilesGroup* pParentGroup )
 	: CPathItemBase( filePath )
 	, m_pParentGroup( pParentGroup )
 	, m_modifyTime( fs::ReadLastModifyTime( filePath ) )
@@ -77,6 +77,11 @@ CDuplicateFileItem::CDuplicateFileItem( const fs::CPath& filePath, const CDuplic
 bool CDuplicateFileItem::IsOriginalItem( void ) const
 {
 	return this == m_pParentGroup->GetItems().front();
+}
+
+bool CDuplicateFileItem::MakeOriginalItem( void )
+{
+	return m_pParentGroup->MakeOriginalItem( this );
 }
 
 
@@ -94,6 +99,20 @@ CDuplicateFileItem* CDuplicateFilesGroup::FindItem( const fs::CPath& filePath ) 
 			return *itItem;
 
 	return NULL;
+}
+
+bool CDuplicateFilesGroup::MakeOriginalItem( CDuplicateFileItem* pItem )
+{
+	ASSERT_PTR( pItem != NULL );
+	std::vector< CDuplicateFileItem* >::iterator itFountItem = std::find( m_items.begin(), m_items.end(), pItem );
+	ASSERT( itFountItem != m_items.end() );
+
+	if ( pItem->IsOriginalItem() )
+		return false;
+
+	m_items.erase( itFountItem );
+	m_items.insert( m_items.begin(), pItem );
+	return true;
 }
 
 void CDuplicateFilesGroup::AddItem( const fs::CPath& filePath )

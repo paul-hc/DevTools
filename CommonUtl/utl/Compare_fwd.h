@@ -3,6 +3,9 @@
 #pragma once
 
 
+enum SortType { NoSort, SortAscending, SortDescending };
+
+
 namespace pred
 {
 	enum CompareResult { Less = -1, Equal, Greater };

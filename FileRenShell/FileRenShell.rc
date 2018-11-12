@@ -442,15 +442,14 @@ BEGIN
         POPUP "<nowhere>"
         BEGIN
             MENUITEM "Check All Duplicates",        ID_CHECK_ALL_DUPLICATES
-            MENUITEM "Uncheck All Duplicates",      ID_UNCHECK_ALL_DUPLICATES
+            MENUITEM "Uncheck All Files",           ID_UNCHECK_ALL_DUPLICATES
         END
         POPUP "<on-selection>"
         BEGIN
             MENUITEM "Check All Duplicates",        ID_CHECK_ALL_DUPLICATES
-            MENUITEM "Uncheck All Duplicates",      ID_UNCHECK_ALL_DUPLICATES
+            MENUITEM "Uncheck All Files",           ID_UNCHECK_ALL_DUPLICATES
             MENUITEM SEPARATOR
-            MENUITEM "Check Group Duplicates",      ID_CHECK_GROUP_DUPLICATES
-            MENUITEM "Uncheck Group Duplicates",    ID_UNCHECK_GROUP_DUPLICATES
+            MENUITEM "Toggle Check Duplicates in Group", ID_TOGGLE_CHECK_GROUP_DUPLICATES
             MENUITEM "Keep as Original File",       ID_KEEP_AS_ORIGINAL_FILE
         END
     END

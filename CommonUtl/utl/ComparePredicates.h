@@ -40,6 +40,32 @@ namespace func
 namespace pred
 {
 	template< typename Compare >
+	struct CompareInOrder
+	{
+		CompareInOrder( Compare compare = Compare(), bool ascendingOrder = true ) : m_compare( compare ), m_ascendingOrder( ascendingOrder ) {}
+
+		template< typename T >
+		CompareResult operator()( const T& left, const T& right ) const
+		{
+			return GetResultInOrder( m_compare( left, right ), m_ascendingOrder );
+		}
+	private:
+		Compare m_compare;
+		bool m_ascendingOrder;
+	};
+
+
+	template< typename Compare >
+	inline CompareInOrder< Compare > MakeCompareInOrder( Compare compare, bool ascendingOrder = true )
+	{
+		return CompareInOrder< Compare >( compare, ascendingOrder );
+	}
+}
+
+
+namespace pred
+{
+	template< typename Compare >
 	struct LessBy
 	{
 		LessBy( Compare compare = Compare() ) : m_compare( compare ) {}
@@ -113,15 +139,17 @@ namespace pred
 	template< typename ComparePtr >
 	struct OrderByPtr
 	{
-		bool m_ascendingOrder;
-	public:
 		OrderByPtr( bool ascendingOrder = true ) : m_ascendingOrder( ascendingOrder ) {}
+		OrderByPtr( ComparePtr compare, bool ascendingOrder = true ) : m_compare( compare ), m_ascendingOrder( ascendingOrder ) {}
 
 		template< typename ObjectType >
 		bool operator()( const ObjectType* pLeft, const ObjectType* pRight ) const
 		{
-			return ( m_ascendingOrder ? Less : Greater ) == ComparePtr()( pLeft, pRight );
+			return ( m_ascendingOrder ? Less : Greater ) == m_compare( pLeft, pRight );
 		}
+	private:
+		ComparePtr m_compare;
+		bool m_ascendingOrder;
 	};
 
 
@@ -326,6 +354,12 @@ namespace pred
 	inline OrderBy< Compare > MakeOrderBy( Compare compare, bool ascendingOrder = true )
 	{
 		return OrderBy< Compare >( compare, ascendingOrder );
+	}
+
+	template< typename ComparePtr >
+	inline OrderByPtr< ComparePtr > MakeOrderByPtr( ComparePtr compare, bool ascendingOrder = true )
+	{
+		return OrderByPtr< ComparePtr >( compare, ascendingOrder );
 	}
 }
 

@@ -67,6 +67,20 @@ private:
 
 	std::tstring FormatReport( const CDupsOutcome& outcome ) const;
 
+	// duplicates
+	void ToggleCheckGroupDuplicates( unsigned int groupId );
+	static pred::CompareResult CALLBACK CompareGroupFileName( int leftGroupId, int rightGroupId, const CFindDuplicatesDialog* pThis );
+	static pred::CompareResult CALLBACK CompareGroupDirPath( int leftGroupId, int rightGroupId, const CFindDuplicatesDialog* pThis );
+	static pred::CompareResult CALLBACK CompareGroupFileSize( int leftGroupId, int rightGroupId, const CFindDuplicatesDialog* pThis );
+	static pred::CompareResult CALLBACK CompareGroupFileCrc32( int leftGroupId, int rightGroupId, const CFindDuplicatesDialog* pThis );
+	static pred::CompareResult CALLBACK CompareGroupDateModified( int leftGroupId, int rightGroupId, const CFindDuplicatesDialog* pThis );
+
+	template< typename CompareGroupPtr >
+	pred::CompareResult CompareGroupsBy( int leftGroupId, int rightGroupId, CompareGroupPtr compareGroup ) const;
+
+	template< typename CompareItemPtr >
+	pred::CompareResult CompareGroupsByItemField( int leftGroupId, int rightGroupId, CompareItemPtr compareItem ) const;
+
 	static CMenu& GetDupListPopupMenu( CReportListControl::ListPopup popupType );
 private:
 	std::vector< CPathItem* > m_srcPathItems;
@@ -93,7 +107,6 @@ protected:
 protected:
 	virtual void OnOK( void );
 	afx_msg void OnDestroy( void );
-	afx_msg void OnContextMenu( CWnd* pWnd, CPoint screenPos );
 	afx_msg void OnUpdateUndoRedo( CCmdUI* pCmdUI );
 	afx_msg void OnFieldChanged( void );
 	afx_msg void OnEditSrcPaths( void );
@@ -104,10 +117,8 @@ protected:
 
 	afx_msg void OnCheckAllDuplicates( UINT cmdId );
 	afx_msg void OnUpdateCheckAllDuplicates( CCmdUI* pCmdUI );
-
-	afx_msg void OnCheckGroupDuplicates( UINT cmdId );
-	afx_msg void OnUpdateCheckGroupDuplicates( CCmdUI* pCmdUI );
-
+	afx_msg void OnToggleCheckGroupDups( void );
+	afx_msg void OnUpdateToggleCheckGroupDups( CCmdUI* pCmdUI );
 	afx_msg void OnKeepAsOriginalFile( void );
 	afx_msg void OnUpdateKeepAsOriginalFile( CCmdUI* pCmdUI );
 
@@ -116,7 +127,8 @@ protected:
 	afx_msg void OnBnClicked_ClearCrc32Cache( void );
 	afx_msg void OnUpdateSelListItem( CCmdUI* pCmdUI );
 	afx_msg void OnLvnDropFiles_SrcList( NMHDR* pNmHdr, LRESULT* pResult );
-	afx_msg void OnLvnItemChanged_TouchList( NMHDR* pNmHdr, LRESULT* pResult );
+	afx_msg void OnLvnLinkClick_DuplicateList( NMHDR* pNmHdr, LRESULT* pResult );
+	afx_msg void OnLvnCustomSortList_DuplicateList( NMHDR* pNmHdr, LRESULT* pResult );
 
 	DECLARE_MESSAGE_MAP()
 };

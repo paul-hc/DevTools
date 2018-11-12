@@ -42,13 +42,14 @@ class CDuplicateFilesGroup;
 class CDuplicateFileItem : public CPathItemBase
 {
 public:
-	CDuplicateFileItem( const fs::CPath& filePath, const CDuplicateFilesGroup* pParentGroup );
+	CDuplicateFileItem( const fs::CPath& filePath, CDuplicateFilesGroup* pParentGroup );
 
-	const CDuplicateFilesGroup* GetParentGroup( void ) const { return m_pParentGroup; }
-	void SetParentGroup( const CDuplicateFilesGroup* pParentGroup ) { m_pParentGroup = pParentGroup; }
+	CDuplicateFilesGroup* GetParentGroup( void ) const { return m_pParentGroup; }
+	void SetParentGroup( CDuplicateFilesGroup* pParentGroup ) { m_pParentGroup = pParentGroup; }
 
 	bool IsOriginalItem( void ) const;				// first item in the group?
 	bool IsDuplicateItem( void ) const { return !IsOriginalItem(); }
+	bool MakeOriginalItem( void );
 
 	const CTime& GetModifyTime( void ) const { return m_modifyTime; }
 
@@ -57,7 +58,7 @@ public:
 		const CTime& operator()( const CDuplicateFileItem* pItem ) const { return pItem->GetModifyTime(); }
 	};
 private:
-	const CDuplicateFilesGroup* m_pParentGroup;
+	CDuplicateFilesGroup* m_pParentGroup;
 	CTime m_modifyTime;			// last modification time of file
 };
 
@@ -76,6 +77,7 @@ public:
 	bool HasCrc32( void ) const { return m_contentKey.m_crc32 != 0; }
 
 	const std::vector< CDuplicateFileItem* >& GetItems( void ) const { return m_items; }
+	size_t GetDuplicatesCount( void ) const { ASSERT( !m_items.empty() ); return m_items.size() - 1; }		// excluding the original item
 	CDuplicateFileItem* FindItem( const fs::CPath& filePath ) const;
 	bool ContainsItem( const fs::CPath& filePath ) const { return FindItem( filePath ) != NULL; }
 
@@ -85,6 +87,14 @@ public:
 	// step 2 CRC32 evaluation and regrouping
 	void ExtractCrc32Duplicates( std::vector< CDuplicateFilesGroup* >& rDuplicateGroups, size_t& rIgnoredCount, ui::IProgressCallback* pProgress = NULL ) throws_( CUserAbortedException );
 	void __ExtractCrc32Duplicates( std::vector< CDuplicateFilesGroup* >& rDuplicateGroups, size_t& rIgnoredCount, ui::IProgressCallback* pProgress = NULL ) throws_( CUserAbortedException );	// old version using group stores
+
+	bool MakeOriginalItem( CDuplicateFileItem* pItem );
+
+	template< typename CompareT >
+	const CDuplicateFileItem* GetSortingItem( CompareT compare )
+	{
+		return *std::min_element( m_items.begin(), m_items.end(), pred::MakeLessPtr( compare ) );		// sort ascending - lowest value; sort descending: highest value
+	}
 private:
 	CFileContentKey m_contentKey;
 	std::vector< CDuplicateFileItem* > m_items;
