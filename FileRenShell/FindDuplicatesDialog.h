@@ -91,6 +91,7 @@ private:
 	// enum { IDD = IDD_FIND_DUPLICATES_DIALOG };
 	enum DupFileColumn { FileName, DirPath, Size, Crc32, DateModified };
 	enum SubPopup { DupListNowhere, DupListOnSelection };
+	enum CheckStateEx { LVIS_ORIGINAL_ITEM = lv::LVIS_CHECKEDGRAY };		// BST_INDETERMINATE + 1
 
 	CPathItemListCtrl m_srcPathsListCtrl;
 	CDialogToolBar m_srcPathsToolbar;

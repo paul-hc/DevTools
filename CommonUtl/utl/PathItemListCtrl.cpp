@@ -108,6 +108,7 @@ CMenu* CPathItemListCtrl::MakeContextMenuHost( CMenu* pSrcPopupMenu, const std::
 
 		pContextPopup->AppendMenu( MF_BYPOSITION, MF_SEPARATOR );
 		pContextPopup->AppendMenu( MF_BYPOSITION | MF_POPUP, (UINT_PTR)m_pShellMenuHost->GetPopupMenu()->GetSafeHmenu(), _T("E&xplorer") );
+		ui::SetMenuItemImage( *pContextPopup, ui::CMenuItemRef::ByPosition( pContextPopup->GetMenuItemCount() - 1 ), ID_SHELL_SUBMENU );
 		return pContextPopup;
 	}
 
@@ -165,13 +166,16 @@ BOOL CPathItemListCtrl::OnLvnDblclk_Reflect( NMHDR* pNmHdr, LRESULT* pResult )
 	NMITEMACTIVATE* pNmItemActivate = (NMITEMACTIVATE*)pNmHdr;
 	*pResult = 0;
 
-	if ( utl::ISubject* pCaretObject = GetObjectAt( pNmItemActivate->iItem ) )
-	{
-		CShellContextMenuHost contextMenu( this );
-		contextMenu.Reset( shell::MakeFilePathContextMenu( pCaretObject->GetCode(), m_hWnd ) );
+	UINT flags;
+	int itemIndex = HitTest( pNmItemActivate->ptAction, &flags );
+	if ( itemIndex != -1 && !HasFlag( flags, LVHT_ONITEMSTATEICON ) )				// on item but not checkbox
+		if ( utl::ISubject* pCaretObject = GetObjectAt( pNmItemActivate->iItem ) )
+		{
+			CShellContextMenuHost contextMenu( this );
+			contextMenu.Reset( shell::MakeFilePathContextMenu( pCaretObject->GetCode(), m_hWnd ) );
 
-		return contextMenu.InvokeDefaultVerb();
-	}
+			return contextMenu.InvokeDefaultVerb();
+		}
 
 	return FALSE;			// raise the notification to parent
 }

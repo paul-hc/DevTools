@@ -389,11 +389,12 @@ public:
 
 	// extended check state (includes radio check states)
 	lv::CheckState GetCheckState( int index ) const { return static_cast< lv::CheckState >( GetItemState( index, LVIS_STATEIMAGEMASK ) ); }
-	void SetCheckState( int index, lv::CheckState checkState ) { SetItemState( index, checkState, LVIS_STATEIMAGEMASK ); }
+	bool SetCheckState( int index, lv::CheckState checkState ) { return SetItemState( index, checkState, LVIS_STATEIMAGEMASK ) != FALSE; }
 	bool ModifyCheckState( int index, lv::CheckState checkState );
 
 	bool GetUseExtendedCheckStates( void ) const;
 	bool SetupExtendedCheckStates( void );
+	CImageList* GetStateImageList( void ) const { return GetImageList( LVSIL_STATE ); }
 
 	bool GetToggleCheckSelected( void ) const { return HasFlag( m_optionFlags, ToggleCheckSelected ); }
 	void SetToggleCheckSelected( bool toggleCheckSelected = true ) { SetOptionFlag( ToggleCheckSelected, toggleCheckSelected ); }
@@ -550,8 +551,8 @@ private:
 		SortInternally				= BIT_FLAG( 2 ),
 		AcceptDropFiles				= BIT_FLAG( 3 ),		// enable as Explorer drop target, send LVN_DropFiles notification when files are dropped onto the list
 		HighlightTextDiffsFrame		= BIT_FLAG( 4 ),		// highlight text differences with a filled frame
-		ToggleCheckSelected			= BIT_FLAG( 5 ),		// multi-selection: toggle checked state for the selected items
-		UseTriStateAutoCheck		= BIT_FLAG( 6 )			// extended check state: allows toggling lv::LVIS_UNCHECKED -> lv::LVIS_CHECKED -> lv::LVIS_CHECKEDGRAY
+		UseTriStateAutoCheck		= BIT_FLAG( 5 ),		// extended check state: allows toggling lv::LVIS_UNCHECKED -> lv::LVIS_CHECKED -> lv::LVIS_CHECKEDGRAY
+		ToggleCheckSelected			= BIT_FLAG( 5 )			// multi-selection: toggle checked state for the selected items
 	};
 
 	bool SetOptionFlag( ListOption flag, bool on );

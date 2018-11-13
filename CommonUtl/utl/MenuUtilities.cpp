@@ -85,17 +85,17 @@ namespace ui
 		return true;
 	}
 
-	bool SetMenuItemImage( CMenu& rMenu, UINT itemId, UINT iconId /*= 0*/, bool useCheckedBitmaps /*= false*/, CImageStore* pImageStore /*= NULL*/ )
+	bool SetMenuItemImage( CMenu& rMenu, const CMenuItemRef& itemRef, UINT iconId /*= 0*/, bool useCheckedBitmaps /*= false*/, CImageStore* pImageStore /*= NULL*/ )
 	{
 		if ( NULL == pImageStore )
 			pImageStore = CImageStore::GetSharedStore();
 
 		if ( pImageStore != NULL )
 		{
-			std::pair< CBitmap*, CBitmap* > bitmaps = pImageStore->RetrieveMenuBitmaps( 0 == iconId ? itemId : iconId, useCheckedBitmaps );
+			std::pair< CBitmap*, CBitmap* > bitmaps = pImageStore->RetrieveMenuBitmaps( 0 == iconId ? itemRef.GetCmdId() : iconId, useCheckedBitmaps );
 			if ( bitmaps.first != NULL || bitmaps.second != NULL )
 			{
-				rMenu.SetMenuItemBitmaps( itemId, MF_BYCOMMAND, bitmaps.first, bitmaps.second );
+				rMenu.SetMenuItemBitmaps( itemRef.m_itemRef, itemRef.m_refFlags, bitmaps.first, bitmaps.second );
 				return true;
 			}
 		}

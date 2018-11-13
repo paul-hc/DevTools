@@ -18,6 +18,7 @@
 #include "utl/EnumTags.h"
 #include "utl/FileSystem.h"
 #include "utl/FmtUtils.h"
+#include "utl/ImageStore.h"
 #include "utl/ItemListDialog.h"
 #include "utl/LongestCommonSubsequence.h"
 #include "utl/RuntimeException.h"
@@ -113,7 +114,7 @@ CFindDuplicatesDialog::CFindDuplicatesDialog( CFileModel* pFileModel, CWnd* pPar
 
 	m_regSection = reg::section_dialog;
 	RegisterCtrlLayout( layout::styles, COUNT_OF( layout::styles ) );
-	LoadDlgIcon( ID_TOUCH_FILES );
+	LoadDlgIcon( ID_FIND_DUPLICATE_FILES );
 
 	m_srcPathsListCtrl.SetAcceptDropFiles();
 	m_srcPathsListCtrl.SetSubjectAdapter( ui::CCodeAdapter::Instance() );				// display full paths
@@ -230,23 +231,9 @@ void CFindDuplicatesDialog::SwitchMode( Mode mode )
 	if ( NULL == m_hWnd )
 		return;
 
-	static const UINT s_okIconId[] = { ID_SEARCH_MODE, ID_DELETE_DUPLICATES, 0, 0 };
+	static const UINT s_okIconId[] = { ID_FIND_DUPLICATE_FILES, ID_DELETE_DUPLICATES, 0, 0 };
 	static const CEnumTags modeTags( _T("&Search|Delete...|Roll &Back|Roll &Forward") );
 	UpdateOkButton( modeTags.FormatUi( m_mode ), s_okIconId[ m_mode ] );
-
-	switch ( m_mode )
-	{
-		case EditMode:
-			m_okButton.SetIconId( ID_SEARCH_MODE );
-			break;
-		case CommitFilesMode:
-			m_okButton.SetIconId( ID_DELETE_DUPLICATES );
-			break;
-		case RollBackMode:
-		case RollForwardMode:
-			m_okButton.SetIconId( ID_COMMIT_MODE );
-			break;
-	}
 
 	static const UINT ctrlIds[] =
 	{
@@ -328,6 +315,8 @@ void CFindDuplicatesDialog::SetupDuplicateFileList( void )
 
 	m_dupsListCtrl.EnableGroupView( !m_duplicateGroups.empty() );
 
+ASSERT( m_dupsListCtrl.GetUseExtendedCheckStates() );
+
 	unsigned int index = 0;			// strictly item index
 
 	for ( unsigned int groupId = 0; groupId != m_duplicateGroups.size(); ++groupId )
@@ -351,6 +340,9 @@ void CFindDuplicatesDialog::SetupDuplicateFileList( void )
 			m_dupsListCtrl.SetSubItemText( index, Size, num::FormatFileSize( pGroup->GetContentKey().m_fileSize ) );
 			m_dupsListCtrl.SetSubItemText( index, Crc32, num::FormatHexNumber( pGroup->GetContentKey().m_crc32, _T("%X") ) );
 			m_dupsListCtrl.SetSubItemText( index, DateModified, time_utl::FormatTimestamp( ( *itDupItem )->GetModifyTime() ) );
+
+			if ( ( *itDupItem )->IsOriginalItem() )
+				m_dupsListCtrl.ModifyCheckState( index, (lv::CheckState)LVIS_ORIGINAL_ITEM );
 
 			VERIFY( m_dupsListCtrl.SetRowGroupId( index, groupId ) );
 		}
@@ -517,22 +509,29 @@ void CFindDuplicatesDialog::ToggleCheckGroupDuplicates( unsigned int groupId )
 	size_t dupsCheckedCount = 0;
 
 	for ( UINT pos = 0; pos != groupItemsPair.second; ++pos )
-		if ( m_dupsListCtrl.IsChecked( firstIndex + pos ) )
+	{
+		if ( lv::LVIS_CHECKED == m_dupsListCtrl.GetCheckState( firstIndex + pos ) )
 			if ( m_dupsListCtrl.GetPtrAt< CDuplicateFileItem >( firstIndex + pos )->IsOriginalItem() )
 				origChecked = true;
 			else
 				++dupsCheckedCount;
+	}
 
 	if ( !origChecked && pCurrGroup->GetDuplicatesCount() == dupsCheckedCount )			// original unchecked and all duplicates checked?
 	{	// toggle: uncheck duplicates
 		for ( UINT pos = 0; pos != groupItemsPair.second; ++pos )
-			if ( m_dupsListCtrl.GetPtrAt< CDuplicateFileItem >( firstIndex + pos )->IsDuplicateItem() )
-				m_dupsListCtrl.SetChecked( firstIndex + pos, false );
+		{
+			int checkState = m_dupsListCtrl.GetPtrAt< CDuplicateFileItem >( firstIndex + pos )->IsOriginalItem() ? LVIS_ORIGINAL_ITEM : lv::LVIS_UNCHECKED;
+			m_dupsListCtrl.ModifyCheckState( firstIndex + pos, (lv::CheckState)checkState );
+		}
 	}
 	else
 	{	// toggle: uncheck original and check duplicates
 		for ( UINT pos = 0; pos != groupItemsPair.second; ++pos )
-			m_dupsListCtrl.SetChecked( firstIndex + pos, m_dupsListCtrl.GetPtrAt< CDuplicateFileItem >( firstIndex + pos )->IsDuplicateItem() );
+		{
+			int checkState = m_dupsListCtrl.GetPtrAt< CDuplicateFileItem >( firstIndex + pos )->IsOriginalItem() ? LVIS_ORIGINAL_ITEM : lv::LVIS_CHECKED;
+			m_dupsListCtrl.ModifyCheckState( firstIndex + pos, (lv::CheckState)checkState );
+		}
 	}
 }
 
@@ -606,6 +605,11 @@ void CFindDuplicatesDialog::DoDataExchange( CDataExchange* pDX )
 		m_fileTypeCombo.SetCurSel( AfxGetApp()->GetProfileInt( reg::section_dialog, reg::entry_fileType, All ) );
 		m_fileSpecEdit.SetText( m_fileTypeSpecs[ m_fileTypeCombo.GetCurSel() ] );
 		m_minFileSizeCombo.LoadHistory( m_regSection.c_str(), reg::entry_minFileSize, _T("0|1|10|50|100|500|1000") );
+
+		CImageList* pStateList = m_dupsListCtrl.GetStateImageList();
+		ASSERT_PTR( pStateList );
+		ASSERT( !m_dupsListCtrl.GetUseExtendedCheckStates() );		// setup once
+		pStateList->Add( CImageStore::SharedStore()->RetrieveIcon( ID_KEEP_AS_ORIGINAL_FILE )->GetHandle() );
 
 		OnUpdate( m_pFileModel, NULL );
 	}
@@ -755,7 +759,7 @@ void CFindDuplicatesDialog::OnCheckAllDuplicates( UINT cmdId )
 	{
 		CDuplicateFileItem* pItem = checked_static_cast< CDuplicateFileItem* >( m_dupsListCtrl.GetObjectAt( i ) );
 
-		m_dupsListCtrl.ModifyCheckState( i, pItem->IsOriginalItem() ? lv::LVIS_UNCHECKED : checkState );
+		m_dupsListCtrl.ModifyCheckState( i, pItem->IsOriginalItem() ? (lv::CheckState)LVIS_ORIGINAL_ITEM : checkState );
 	}
 }
 

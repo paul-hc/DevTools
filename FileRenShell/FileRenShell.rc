@@ -466,10 +466,10 @@ BEGIN
     BUTTON      ID_SEND_TO_CLIP
     BUTTON      ID_TOUCH_FILES
     BUTTON      ID_FIND_DUPLICATE_FILES
+    SEPARATOR
+    BUTTON      ID_COMMIT_MODE
     BUTTON      IDC_CAPITALIZE_OPTIONS
     BUTTON      IDC_CHANGE_CASE_BUTTON
-    SEPARATOR
-    BUTTON      ID_SHELL_SUBMENU
     SEPARATOR
     BUTTON      ID_RENAME_AND_COPY
     SEPARATOR
@@ -493,9 +493,6 @@ BEGIN
     BUTTON      ID_CLEAR_CRC32_CACHE
     BUTTON      ID_DELETE_DUPLICATES
     BUTTON      ID_MOVE_DUPLICATES
-    SEPARATOR
-    BUTTON      ID_SEARCH_MODE
-    BUTTON      ID_COMMIT_MODE
 END
 
 
@@ -588,6 +585,7 @@ STRINGTABLE
 BEGIN
     ID_AUTO_FILL_COMMON_PREFIX_CK 
                             "Auto-fill pattern with the common prefix of the files"
+    ID_FIND_DUPLICATE_FILES "Search selected folders for duplicate files"
     ID_CHECK_ALL_DUPLICATES "Check select duplicate files in all groups (to be deleted)\nCheck Select All Duplicates"
     ID_UNCHECK_ALL_DUPLICATES "Uncheck all files\nUncheck All"
     ID_KEEP_AS_ORIGINAL_FILE 

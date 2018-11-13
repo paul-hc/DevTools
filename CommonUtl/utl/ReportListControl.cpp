@@ -1363,7 +1363,7 @@ bool CReportListControl::SetupExtendedCheckStates( void )
 	ASSERT( !GetUseExtendedCheckStates() );		// setup once
 	ASSERT( HasFlag( GetExtendedStyle(), LVS_EX_CHECKBOXES ) );
 
-	CImageList* pStateList = GetImageList( LVSIL_STATE );
+	CImageList* pStateList = GetStateImageList();
 	if ( NULL == pStateList )
 		return false;
 
@@ -1977,12 +1977,12 @@ BOOL CReportListControl::OnLvnItemChanging_Reflect( NMHDR* pNmHdr, LRESULT* pRes
 	NMLISTVIEW* pListInfo = (NMLISTVIEW*)pNmHdr;
 	UNUSED_ALWAYS( pListInfo );
 
-	if ( !GetUseTriStateAutoCheck() )		// must prevent prevent tri-state transition?
+	if ( !IsInternalChange() && !GetUseTriStateAutoCheck() )		// must prevent prevent user's tri-state transition?
 		if ( HasFlag( pListInfo->uChanged, LVIF_STATE ) && StateChanged( pListInfo->uNewState, pListInfo->uOldState, LVIS_STATEIMAGEMASK ) )	// check state changed
-			if ( lv::LVIS_CHECKEDGRAY == AsCheckState( pListInfo->uNewState ) )
+			if ( lv::LVIS_CHECKEDGRAY == AsCheckState( pListInfo->uNewState ) && lv::LVIS_CHECKED == AsCheckState( pListInfo->uOldState ) )		// CHECKED -> UNDETERMINATE transition?
 			{
 				SetCheckState( pListInfo->iItem, lv::LVIS_UNCHECKED );
-				*pResult = 1;
+				*pResult = TRUE;	// reject transition to LVIS_CHECKEDGRAY
 				return TRUE;
 			}
 

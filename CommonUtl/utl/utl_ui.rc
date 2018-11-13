@@ -147,6 +147,7 @@ BEGIN
     BUTTON      ID_FILE_SAVE
     BUTTON      ID_FILE_PRINT
     BUTTON      ID_APP_ABOUT
+    BUTTON      ID_SHELL_SUBMENU
     SEPARATOR
     BUTTON      ID_EXPAND
     BUTTON      ID_COLLAPSE
@@ -486,6 +487,7 @@ BEGIN
     ID_ITEM_COPY_FILENAME   "Copy selected filenames\nCopy Filename"
     ID_ITEM_COPY_PARENT_DIR_PATH 
                             "Copy selected directory paths\nCopy Directory Path"
+    ID_SHELL_SUBMENU        "Explorer system menu"
 END
 
 #endif    // English (U.S.) resources

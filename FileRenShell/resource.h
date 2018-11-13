@@ -107,7 +107,6 @@
 #define ID_WILDCARD                     32779
 #define ID_EXTENSION_SEPARATOR          32780
 #define ID_RENAME_AND_COPY              32781
-#define ID_SHELL_SUBMENU                32782
 #define ID_REPLACE_ALL_DELIMS           32783
 #define ID_REPLACE_UNICODE_SYMBOLS      32784
 #define ID_SINGLE_WHITESPACE            32785
@@ -153,7 +152,6 @@
 #define ID_CLEAR_CRC32_CACHE            32825
 #define ID_DELETE_DUPLICATES            32826
 #define ID_MOVE_DUPLICATES              32827
-#define ID_SEARCH_MODE                  32828
 #define ID_COMMIT_MODE                  32829
 
 // Next default values for new objects

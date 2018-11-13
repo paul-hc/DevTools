@@ -16,11 +16,28 @@ namespace ui
 {
 	enum UseMenuImages { NoMenuImages, NormalMenuImages, CheckedMenuImages };
 
+
+	struct CMenuItemRef
+	{
+		CMenuItemRef( UINT itemRef, UINT refFlags = MF_BYCOMMAND )			// item qualified with ID by default
+			: m_itemRef( itemRef ), m_refFlags( refFlags ) {}
+
+		static CMenuItemRef ByPosition( UINT itemPos ) { return CMenuItemRef( itemPos, MF_BYPOSITION ); }
+
+		bool IsByPosition( void ) const { return HasFlag( m_refFlags, MF_BYPOSITION ); }
+		bool IsByCommand( void ) const { return !IsByPosition(); }
+		UINT GetCmdId( void ) const { ASSERT( IsByCommand() ); return m_itemRef; }
+	public:
+		UINT m_itemRef;
+		UINT m_refFlags;
+	};
+
+
 	void LoadPopupMenu( CMenu& rContextMenu, UINT menuResId, int popupIndex, UseMenuImages useMenuImages = NormalMenuImages, std::tstring* pPopupText = NULL );
 	void LoadPopupSubMenu( CMenu& rContextMenu, UINT menuResId, int popupIndex1, int popupIndex2 = -1, int popupIndex3 = -1 );
 
 	bool SetMenuImages( CMenu& rMenu, bool useCheckedBitmaps = false, CImageStore* pImageStore = NULL );
-	bool SetMenuItemImage( CMenu& rMenu, UINT itemId, UINT iconId = 0, bool useCheckedBitmaps = false, CImageStore* pImageStore = NULL );
+	bool SetMenuItemImage( CMenu& rMenu, const CMenuItemRef& itemRef, UINT iconId = 0, bool useCheckedBitmaps = false, CImageStore* pImageStore = NULL );
 
 	int TrackPopupMenu( CMenu& rMenu, CWnd* pTargetWnd, CPoint screenPos, UINT trackFlags = TPM_RIGHTBUTTON, const RECT* pExcludeRect = NULL );
 	int TrackPopupMenuAlign( CMenu& rMenu, CWnd* pTargetWnd, const RECT& excludeRect, PopupAlign popupAlign = DropDown, UINT trackFlags = TPM_RIGHTBUTTON );
