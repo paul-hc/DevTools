@@ -103,6 +103,8 @@ private:
 	CStatusStatic m_outcomeStatic;
 	CRegularStatic m_commitInfoStatic;
 
+	bool m_highlightDuplicates;
+
 	// generated stuff
 public:
 	virtual BOOL OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo );
@@ -128,6 +130,8 @@ protected:
 	afx_msg void OnUpdateKeepAsOriginalFile( CCmdUI* pCmdUI );
 	afx_msg void OnClearCrc32Cache( void );
 	afx_msg void OnUpdateClearCrc32Cache( CCmdUI* pCmdUI );
+	afx_msg void OnToggleHighlightDuplicates( void );
+	afx_msg void OnUpdateHighlightDuplicates( CCmdUI* pCmdUI );
 
 	afx_msg void OnBnClicked_DeleteDuplicates( void );
 	afx_msg void OnBnClicked_MoveDuplicates( void );

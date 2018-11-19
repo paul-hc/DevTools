@@ -490,7 +490,9 @@ BEGIN
     BUTTON      ID_CHECK_ALL_DUPLICATES
     BUTTON      ID_UNCHECK_ALL_DUPLICATES
     BUTTON      ID_KEEP_AS_ORIGINAL_FILE
+    BUTTON      ID_HIGHLIGHT_DUPLICATES
     BUTTON      ID_CLEAR_CRC32_CACHE
+    SEPARATOR
     BUTTON      ID_DELETE_DUPLICATES
     BUTTON      ID_MOVE_DUPLICATES
 END
@@ -593,6 +595,7 @@ BEGIN
     ID_CLEAR_CRC32_CACHE    "Clear all CRC32 checksums computed in previous searches"
     ID_DELETE_DUPLICATES    "Delete checked duplicate files to Recycle Bin"
     ID_MOVE_DUPLICATES      "Move checked duplicate files to the vault directory"
+    ID_HIGHLIGHT_DUPLICATES "Highlight original and duplicate files"
 END
 
 STRINGTABLE 

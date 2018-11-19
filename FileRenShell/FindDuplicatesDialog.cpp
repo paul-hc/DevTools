@@ -93,6 +93,7 @@ namespace reg
 	static const TCHAR entry_minFileSize[] = _T("minFileSize");
 	static const TCHAR entry_fileType[] = _T("fileType");
 	static const TCHAR entry_fileTypeSpecs[] = _T("fileTypeSpecs");
+	static const TCHAR entry_highlightDuplicates[] = _T("HighlightDuplicates");
 }
 
 namespace layout
@@ -134,6 +135,7 @@ CFindDuplicatesDialog::CFindDuplicatesDialog( CFileModel* pFileModel, CWnd* pPar
 	, m_srcPathsListCtrl( IDC_SOURCE_PATHS_LIST )
 	, m_dupsListCtrl( IDC_DUPLICATE_FILES_LIST )
 	, m_commitInfoStatic( CRegularStatic::Bold )
+	, m_highlightDuplicates( AfxGetApp()->GetProfileInt( reg::section_dialog, reg::entry_highlightDuplicates, true ) != FALSE )
 {
 	CPathItem::MakePathItems( m_srcPathItems, m_pFileModel->GetSourcePaths() );
 
@@ -168,6 +170,8 @@ CFindDuplicatesDialog::CFindDuplicatesDialog( CFileModel* pFileModel, CWnd* pPar
 		.AddButton( ID_UNCHECK_ALL_DUPLICATES )
 		.AddSeparator()
 		.AddButton( ID_KEEP_AS_ORIGINAL_FILE )
+		.AddSeparator()
+		.AddButton( ID_HIGHLIGHT_DUPLICATES )
 		.AddSeparator()
 		.AddButton( ID_CLEAR_CRC32_CACHE );
 
@@ -487,7 +491,7 @@ void CFindDuplicatesDialog::CombineTextEffectAt( ui::CTextEffect& rTextEffect, L
 	if ( utl::Contains( m_errorItems, pFileItem ) )
 		rTextEffect |= s_errorBk;							// highlight error row background
 
-	if ( pTextEffect != NULL )
+	if ( m_highlightDuplicates )
 		rTextEffect |= *pTextEffect;
 
 	if ( FileName == subItem && pFileItem->IsOriginalItem() )
@@ -538,7 +542,7 @@ void CFindDuplicatesDialog::ToggleCheckGroupDuplicates( unsigned int groupId )
 	CheckDup::CheckState checkState = pCurrGroup->GetDuplicatesCount() == dupsCheckedCount ? CheckDup::UncheckedItem : CheckDup::CheckedItem;		// toggle checked duplicates
 
 	for ( std::vector< CDuplicateFileItem* >::const_iterator itItem = pCurrGroup->GetItems().begin() + 1; itItem != pCurrGroup->GetItems().end(); ++itItem )
-			m_dupsListCtrl.ModifyObjectCheckState( *itItem, checkState );
+		m_dupsListCtrl.ModifyObjectCheckState( *itItem, checkState );
 }
 
 template< typename CompareGroupPtr >
@@ -641,6 +645,8 @@ BEGIN_MESSAGE_MAP( CFindDuplicatesDialog, CFileEditorBaseDialog )
 	ON_UPDATE_COMMAND_UI( ID_KEEP_AS_ORIGINAL_FILE, OnUpdateKeepAsOriginalFile )
 	ON_COMMAND( ID_CLEAR_CRC32_CACHE, OnClearCrc32Cache )
 	ON_UPDATE_COMMAND_UI( ID_CLEAR_CRC32_CACHE, OnUpdateClearCrc32Cache )
+	ON_COMMAND( ID_HIGHLIGHT_DUPLICATES, OnToggleHighlightDuplicates )
+	ON_UPDATE_COMMAND_UI( ID_HIGHLIGHT_DUPLICATES, OnUpdateHighlightDuplicates )
 
 	ON_BN_CLICKED( ID_DELETE_DUPLICATES, OnBnClicked_DeleteDuplicates )
 	ON_BN_CLICKED( ID_MOVE_DUPLICATES, OnBnClicked_MoveDuplicates )
@@ -684,6 +690,7 @@ void CFindDuplicatesDialog::OnDestroy( void )
 {
 	AfxGetApp()->WriteProfileInt( reg::section_dialog, reg::entry_fileType, m_fileTypeCombo.GetCurSel() );
 	AfxGetApp()->WriteProfileString( reg::section_dialog, reg::entry_fileTypeSpecs, str::Join( m_fileTypeSpecs, _T("|") ).c_str() );
+	AfxGetApp()->WriteProfileInt( reg::section_dialog, reg::entry_highlightDuplicates, m_highlightDuplicates );
 	m_minFileSizeCombo.SaveHistory( m_regSection.c_str(), reg::entry_minFileSize );
 
 	__super::OnDestroy();
@@ -851,6 +858,17 @@ void CFindDuplicatesDialog::OnClearCrc32Cache( void )
 void CFindDuplicatesDialog::OnUpdateClearCrc32Cache( CCmdUI* pCmdUI )
 {
 	pCmdUI->Enable( !CFileContentKey::GetCrc32FileCache().IsEmpty() );
+}
+
+void CFindDuplicatesDialog::OnToggleHighlightDuplicates( void )
+{
+	m_highlightDuplicates = !m_highlightDuplicates;
+	m_dupsListCtrl.Invalidate();
+}
+
+void CFindDuplicatesDialog::OnUpdateHighlightDuplicates( CCmdUI* pCmdUI )
+{
+	pCmdUI->SetCheck( m_highlightDuplicates );
 }
 
 void CFindDuplicatesDialog::OnUpdateSelListItem( CCmdUI* pCmdUI )

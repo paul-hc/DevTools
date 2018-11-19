@@ -153,13 +153,14 @@
 #define ID_DELETE_DUPLICATES            32826
 #define ID_MOVE_DUPLICATES              32827
 #define ID_COMMIT_MODE                  32829
+#define ID_HIGHLIGHT_DUPLICATES         32830
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        112
-#define _APS_NEXT_COMMAND_VALUE         32830
+#define _APS_NEXT_COMMAND_VALUE         32831
 #define _APS_NEXT_CONTROL_VALUE         1081
 #define _APS_NEXT_SYMED_VALUE           5004
 #endif
