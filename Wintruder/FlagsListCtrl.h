@@ -14,6 +14,8 @@ public:
 	virtual ~CFlagsListCtrl();
 protected:
 	// base overrides
+	virtual void CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARAM rowKey, int subItem ) const;
+
 	virtual void OutputFlags( void );
 	virtual void InitControl( void );
 
@@ -36,15 +38,12 @@ public:
 	// generated overrides
 	virtual void PreSubclassWindow( void );
 	virtual BOOL PreTranslateMessage( MSG* pMsg );
-	protected:
-	virtual BOOL OnLvnItemChanging_Reflect( NMHDR* pNmHdr, LRESULT* pResult );
-	virtual BOOL OnLvnItemChanged_Reflect( NMHDR* pNmHdr, LRESULT* pResult );
-	virtual BOOL OnNmCustomDraw_Reflect( NMHDR* pNmHdr, LRESULT* pResult );
 protected:
 	afx_msg void OnContextMenu( CWnd* pWnd, CPoint point );
 	afx_msg void OnInitMenuPopup( CMenu* pPopupMenu, UINT index, BOOL isSysMenu );
-	afx_msg HBRUSH CtlColor( CDC* pDC, UINT ctlType );
-	afx_msg BOOL OnGroupTaskClick_Reflect( NMHDR* pNmHdr, LRESULT* pResult );
+	afx_msg BOOL OnLvnToggleCheckState_Reflect( NMHDR* pNmHdr, LRESULT* pResult );
+	afx_msg BOOL OnLvnCheckStatesChanged_Reflect( NMHDR* pNmHdr, LRESULT* pResult );
+	afx_msg BOOL OnLvnLinkClick_Reflect( NMHDR* pNmHdr, LRESULT* pResult );			// group task click
 	afx_msg void OnCopy( void );
 	afx_msg void OnUpdateCopy( CCmdUI* pCmdUI );
 	afx_msg void OnCopySelected( void );

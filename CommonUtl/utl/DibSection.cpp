@@ -122,7 +122,7 @@ bool CDibSection::Convert( const CDibSection& srcDib, UINT destBitsPerPixel )
 
 	// retain original source information
 	m_srcDibMeta.CopyPixelFormat( srcDib.m_srcDibMeta );
-	CopyFlags( m_flags, F_IsPng | F_AutoTranspColor, srcDib.m_flags );
+	SetMaskedValue( m_flags, F_IsPng | F_AutoTranspColor, srcDib.m_flags );
 	m_transpColor = CLR_NONE;
 
 	if ( !HasFlag( m_testFlags, ForceCvtCopyPixels ) )

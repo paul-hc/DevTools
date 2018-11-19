@@ -23,7 +23,7 @@ namespace fs { interface IEnumerator; }
 
 
 class CFindDuplicatesDialog : public CFileEditorBaseDialog
-							, private CReportListControl::ITextEffectCallback
+							, private lv::ITextEffectCallback
 {
 public:
 	CFindDuplicatesDialog( CFileModel* pFileModel, CWnd* pParent );
@@ -40,7 +40,7 @@ protected:
 	virtual void ClearFileErrors( void );
 	virtual void OnFileError( const fs::CPath& srcPath, const std::tstring& errMsg );
 
-	// CReportListControl::ITextEffectCallback interface
+	// lv::ITextEffectCallback interface
 	virtual void CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARAM rowKey, int subItem ) const;
 
 	virtual void SwitchMode( Mode mode );
@@ -69,7 +69,9 @@ private:
 	void DisplayCheckedGroupInfo( void );
 
 	// duplicates
+	static CMenu& GetDupListPopupMenu( CReportListControl::ListPopup popupType );
 	void ToggleCheckGroupDuplicates( unsigned int groupId );
+
 	static pred::CompareResult CALLBACK CompareGroupFileName( int leftGroupId, int rightGroupId, const CFindDuplicatesDialog* pThis );
 	static pred::CompareResult CALLBACK CompareGroupDirPath( int leftGroupId, int rightGroupId, const CFindDuplicatesDialog* pThis );
 	static pred::CompareResult CALLBACK CompareGroupFileSize( int leftGroupId, int rightGroupId, const CFindDuplicatesDialog* pThis );
@@ -81,8 +83,6 @@ private:
 
 	template< typename CompareItemPtr >
 	pred::CompareResult CompareGroupsByItemField( int leftGroupId, int rightGroupId, CompareItemPtr compareItem ) const;
-
-	static CMenu& GetDupListPopupMenu( CReportListControl::ListPopup popupType );
 private:
 	std::vector< CPathItem* > m_srcPathItems;
 	std::vector< CDuplicateFilesGroup* > m_duplicateGroups;
@@ -91,7 +91,6 @@ private:
 	// enum { IDD = IDD_FIND_DUPLICATES_DIALOG };
 	enum DupFileColumn { FileName, DirPath, Size, Crc32, DateModified };
 	enum SubPopup { DupListNowhere, DupListOnSelection };
-	enum CheckStateEx { LVIS_ORIGINAL_ITEM = lv::LVIS_CHECKEDGRAY };		// BST_INDETERMINATE + 1
 
 	CPathItemListCtrl m_srcPathsListCtrl;
 	CDialogToolBar m_srcPathsToolbar;
@@ -135,6 +134,7 @@ protected:
 	afx_msg void OnUpdateSelListItem( CCmdUI* pCmdUI );
 	afx_msg void OnLvnDropFiles_SrcList( NMHDR* pNmHdr, LRESULT* pResult );
 	afx_msg void OnLvnLinkClick_DuplicateList( NMHDR* pNmHdr, LRESULT* pResult );
+	afx_msg void OnLvnCheckStatesChanged_DuplicateList( NMHDR* pNmHdr, LRESULT* pResult );
 	afx_msg void OnLvnCustomSortList_DuplicateList( NMHDR* pNmHdr, LRESULT* pResult );
 
 	DECLARE_MESSAGE_MAP()

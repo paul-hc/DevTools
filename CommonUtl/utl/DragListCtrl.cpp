@@ -111,7 +111,7 @@ bool CDragListCtrl::DropSelection( void )
 	if ( caretIndex != -1 )
 		EnsureVisible( caretIndex, FALSE );
 
-	NotifyParent( lv::LVN_ItemsReorder );
+	ui::SendCommandToParent( m_hWnd, lv::LVN_ItemsReorder );
 	return true;
 }
 

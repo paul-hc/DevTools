@@ -46,6 +46,9 @@
 // iterator-like access for STL algorithms
 #define END_OF( array ) ( array + COUNT_OF( array ) )
 
+// pass the pair of "array, arrayCount" in functions
+#define ARRAY_PAIR( array ) (array), COUNT_OF( (array) )
+
 
 #ifdef _DEBUG
 	#define HR_AUDIT( expr ) utl::Audit( (expr), (#expr) )
@@ -185,9 +188,9 @@ inline bool ModifyFlag( FieldType& rField, unsigned int clearFlags, unsigned int
 }
 
 template< typename FieldType >
-inline bool CopyFlags( FieldType& rField, unsigned int mask, unsigned int flags )
+inline bool SetMaskedValue( FieldType& rField, unsigned int mask, unsigned int value )
 {
-	return ModifyFlag( rField, mask, flags & mask );
+	return ModifyFlag( rField, mask, value & mask );
 }
 
 

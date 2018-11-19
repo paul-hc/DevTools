@@ -119,7 +119,7 @@ namespace fs
 		ModifyFileTimes( newStatus, HasFlag( currentAttr, FILE_ATTRIBUTE_DIRECTORY ) );
 
 		DWORD newAttr = currentAttr;
-		CopyFlags( newAttr, EDITABLE_ATTRIBUTE_MASK, static_cast< DWORD >( newStatus.m_attribute ) );
+		SetMaskedValue( newAttr, EDITABLE_ATTRIBUTE_MASK, static_cast< DWORD >( newStatus.m_attribute ) );
 
 		if ( newAttr != currentAttr )
 			if ( !::SetFileAttributes( m_fullPath.GetPtr(), newAttr ) )

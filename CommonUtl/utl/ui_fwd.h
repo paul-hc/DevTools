@@ -34,6 +34,29 @@ namespace ui
 
 
 	inline int ToCmdId( UINT uCmdId ) { return (short)(unsigned short)( uCmdId ); }
+
+
+	// conversion to/from state (0-based index); raw state (UINT) uses is 1-based indexes - works for list control, tree control
+	typedef UINT RawCheckState;
+
+	inline RawCheckState CheckStateToRaw( int checkState ) { return INDEXTOSTATEIMAGEMASK( checkState + 1 ); }
+	inline int CheckStateFromRaw( RawCheckState rawCheckState )	{ return ( rawCheckState >> 12 ) - 1; }
+
+
+	struct CNmHdr : public tagNMHDR
+	{
+		CNmHdr( const CWnd* pCtrl, int notifyCode )
+		{
+			hwndFrom = pCtrl->GetSafeHwnd();
+			idFrom = pCtrl->GetDlgCtrlID();
+			code = notifyCode;
+		}
+
+		LRESULT NotifyParent( void );						// returns 0 if handler did not reject the action (0 means unhandled or success; 1 means reject)
+	};
+
+
+	COLORREF AlterColorSlightly( COLORREF bkColor );		// slightly modified background colour used as transparent colour for bitmap masks, so that themes that render with alpha blending don't show weird colours (such as radio button)
 }
 
 

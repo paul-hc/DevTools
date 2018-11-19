@@ -20,7 +20,7 @@ namespace multi
 
 
 class CTouchFilesDialog : public CFileEditorBaseDialog
-						, private CReportListControl::ITextEffectCallback
+						, private lv::ITextEffectCallback
 {
 public:
 	CTouchFilesDialog( CFileModel* pFileModel, CWnd* pParent );
@@ -37,7 +37,7 @@ protected:
 	virtual void ClearFileErrors( void );
 	virtual void OnFileError( const fs::CPath& srcPath, const std::tstring& errMsg );
 
-	// CReportListControl::ITextEffectCallback interface
+	// lv::ITextEffectCallback interface
 	virtual void CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARAM rowKey, int subItem ) const;
 	virtual void ModifyDiffTextEffectAt( CListTraits::CMatchEffects& rEffects, LPARAM rowKey, int subItem ) const;
 

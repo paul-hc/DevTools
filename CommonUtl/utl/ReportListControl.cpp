@@ -8,12 +8,13 @@
 #include "OleDataSource.h"
 #include "StringUtilities.h"
 #include "StringRange.h"
-#include "ThemeItem.h"
 #include "UtilitiesEx.h"
+#include "CheckStatePolicies.h"
 #include "VisualTheme.h"
 #include "ComparePredicates.h"
 #include "ContainerUtilities.h"
 #include "FileSystem.h"
+#include "PostCall.h"
 #include "Resequence.hxx"
 #include "resource.h"
 
@@ -67,6 +68,25 @@ namespace lv
 			case ID_MOVE_BOTTOM_ITEM:	return seq::MoveToEnd;
 		}
 	}
+
+
+	// CNmToggleCheckState implementation
+
+	CNmToggleCheckState::CNmToggleCheckState( const CListCtrl* pListCtrl, NMLISTVIEW* pListView, const ui::ICheckStatePolicy* pCheckStatePolicy )
+		: m_nmHdr( pListCtrl, lv::LVN_ToggleCheckState )
+		, m_pListView( pListView )
+		, m_oldCheckState( ui::CheckStateFromRaw( m_pListView->uOldState ) )
+		, m_newCheckState( pCheckStatePolicy != NULL ? pCheckStatePolicy->Toggle( m_oldCheckState ) : m_oldCheckState )		// toggle check-state by default
+	{
+	}
+
+
+	// CNmCheckStatesChanged implementation
+
+	bool CNmCheckStatesChanged::AddIndex( int itemIndex )
+	{
+		return utl::AddUnique( m_itemIndexes, itemIndex );
+	}
 }
 
 
@@ -91,9 +111,10 @@ CReportListControl::CReportListControl( UINT columnLayoutId /*= 0*/, DWORD listS
 	, m_sortByColumn( -1 )			// no sorting by default
 	, m_sortAscending( true )
 	, m_pComparePtrFunc( NULL )		// use text compare by default
-	, m_pTextEffectCallback( NULL )
 	, m_pImageList( NULL )
 	, m_pLargeImageList( NULL )
+	, m_pCheckStatePolicy( NULL )
+	, m_pTextEffectCallback( NULL )
 	, m_listAccel( keys, COUNT_OF( keys ) )
 	, m_pDataSourceFactory( ole::GetStdDataSourceFactory() )
 	, m_painting( false )
@@ -161,9 +182,16 @@ bool CReportListControl::DeleteAllItems( void )
 	return __super::DeleteAllItems() != FALSE;
 }
 
+void CReportListControl::RemoveAllGroups( void )
+{
+	m_groupIdToItemsMap.clear();
+	__super::RemoveAllGroups();
+}
+
 void CReportListControl::ClearData( void )
 {
 	m_initialItemsOrder.clear();
+	m_groupIdToItemsMap.clear();
 	m_markedCells.clear();
 	m_diffColumnPairs.clear();
 }
@@ -296,6 +324,17 @@ void CReportListControl::SetupControl( void )
 		SetImageList( m_pImageList, LVSIL_SMALL );
 	if ( m_pLargeImageList != NULL )
 		SetImageList( m_pLargeImageList, LVSIL_NORMAL );
+
+	if ( m_pCheckStatePolicy != NULL )
+	{
+		CImageList* pStateImageList = GetStateImageList();
+		ASSERT( HasFlag( GetExtendedStyle(), LVS_EX_CHECKBOXES ) && pStateImageList != NULL );
+		ASSERT( 2 == pStateImageList->GetImageCount() );				// standard check-box
+
+		if ( const std::vector< CThemeItem >* pThemeItems = m_pCheckStatePolicy->GetThemeItems() )
+			// mask transparent colour - almost white, so that themes that render with alpha blending don't show weird colours (such as radio button)
+			ui::AppendToStateImageList( pStateImageList, *pThemeItems, ui::AlterColorSlightly( GetBkColor() ) );
+	}
 
 	if ( GetAcceptDropFiles() )
 		DragAcceptFiles();
@@ -529,9 +568,9 @@ bool CReportListControl::SortList( void )
 {
 	UpdateColumnSortHeader();
 
-	lv::CNmHdr nmHdr( this, lv::LVN_CustomSortList );
+	ui::CNmHdr nmHdr( this, lv::LVN_CustomSortList );
 
-	if ( 0L == ui::SendNotifyToParent( m_hWnd, lv::LVN_CustomSortList, &nmHdr ) )	// give parent a chance to custom sort the list (or sort its groups)
+	if ( 0L == nmHdr.NotifyParent() )			// give parent a chance to custom sort the list (or sort its groups); still sort items by default?
 		if ( -1 == m_sortByColumn )
 		{
 			if ( m_initialItemsOrder.empty() )
@@ -544,7 +583,7 @@ bool CReportListControl::SortList( void )
 					SortGroups( (PFNLVGROUPCOMPARE)&InitialGroupOrderCompareProc, this );
 			}
 		}
-		else if ( GetSortInternally() )													// otherwise was sorted externally, just update sort header
+		else if ( GetSortInternally() )											// otherwise was sorted externally, just update sort header
 			if ( m_pComparePtrFunc != NULL )
 				SortItems( m_pComparePtrFunc, (LPARAM)this );					// passes item LPARAMs as left/right
 			else
@@ -739,12 +778,12 @@ void CReportListControl::QueryAllItemsText( std::vector< std::tstring >& rItemsT
 		rItemsText.push_back( GetItemText( i, subItem ).GetString() );
 }
 
-bool CReportListControl::IsSelectionChangedNotify( const NMLISTVIEW* pNmList, UINT selMask /*= LVIS_SELECTED | LVIS_FOCUSED*/ )
+bool CReportListControl::IsStateChangeNotify( const NMLISTVIEW* pNmListView, UINT selMask )
 {
-	ASSERT_PTR( pNmList );
+	ASSERT_PTR( pNmListView );
 
-	if ( HasFlag( pNmList->uChanged, LVIF_STATE ) )
-		if ( ( pNmList->uNewState & selMask ) != ( pNmList->uOldState & selMask ) )
+	if ( HasFlag( pNmListView->uChanged, LVIF_STATE ) )										// item state has been changed?
+		if ( StateChanged( pNmListView->uNewState, pNmListView->uOldState, selMask ) )		// state changed according to the mask?
 			return true;
 
 	return false;
@@ -1003,11 +1042,6 @@ bool CReportListControl::ResizeFlexColumns( void )
 	return true;
 }
 
-void CReportListControl::NotifyParent( lv::Notification notifCode )
-{
-	ui::SendCommandToParent( m_hWnd, notifCode );
-}
-
 void CReportListControl::OnFinalReleaseInternalChange( void )
 {
 	ResizeFlexColumns();		// layout flexible columns after list content has changed
@@ -1099,7 +1133,7 @@ void CReportListControl::SaveToRegistry( void )
 	}
 }
 
-utl::ISubject* CReportListControl::GetObjectAt( int index ) const
+utl::ISubject* CReportListControl::GetSubjectAt( int index ) const
 {
 	if ( utl::ISubject* pObject = ToSubject( GetItemData( index ) ) )
 		if ( !m_subjectBased )
@@ -1326,20 +1360,18 @@ int CReportListControl::Find( const void* pObject ) const
 	return -1;
 }
 
-bool CReportListControl::IsCheckedState( UINT state )
+bool CReportListControl::SetCheckState( int index, int checkState )
 {
-	ASSERT( HasCheckState( state ) );
-	switch ( state & LVIS_STATEIMAGEMASK )
-	{
-		case lv::LVIS_CHECKED:
-		case lv::LVIS_CHECKEDGRAY:
-		case lv::LVIS_RADIO_CHECKED:
-			return true;
-	}
-	return false;
+	if ( !SetRawCheckState( index, ui::CheckStateToRaw( checkState ) ) )
+		return false;
+
+	if ( m_pNmToggling.get() != NULL )
+		m_pNmToggling->AddIndex( index );		// accumulate items that have changed state during a toggle
+
+	return true;
 }
 
-bool CReportListControl::ModifyCheckState( int index, lv::CheckState checkState )
+bool CReportListControl::ModifyCheckState( int index, int checkState )
 {
 	if ( GetCheckState( index ) == checkState )
 		return false;			// checked state not modified
@@ -1348,45 +1380,113 @@ bool CReportListControl::ModifyCheckState( int index, lv::CheckState checkState 
 	return true;
 }
 
-bool CReportListControl::GetUseExtendedCheckStates( void ) const
+int CReportListControl::GetObjectCheckState( const utl::ISubject* pObject ) const
 {
-	if ( HasFlag( GetExtendedStyle(), LVS_EX_CHECKBOXES ) )
-		if ( CImageList* pStateList = GetImageList( LVSIL_STATE ) )
-			if ( pStateList->GetImageCount() > 2 )
-				return true;
-
-	return false;
+	int index = FindItemIndex( pObject );
+	return index != -1 && GetCheckState( index );
 }
 
-bool CReportListControl::SetupExtendedCheckStates( void )
+bool CReportListControl::ModifyObjectCheckState( const utl::ISubject* pObject, int checkState )
 {
-	ASSERT( !GetUseExtendedCheckStates() );		// setup once
-	ASSERT( HasFlag( GetExtendedStyle(), LVS_EX_CHECKBOXES ) );
+	int index = FindItemIndex( pObject );
+	return index != -1 && ModifyCheckState( index, checkState );
+}
 
-	CImageList* pStateList = GetStateImageList();
-	if ( NULL == pStateList )
-		return false;
+bool CReportListControl::IsChecked( int index ) const
+{
+	if ( m_pCheckStatePolicy != NULL )
+		return GetCheckStatePolicy()->IsCheckedState( GetCheckState( index ) );
 
-	CSize imageSize = CIconId::GetStdSize( SmallIcon );
-	COLORREF transpColor = RGB( 255, 255, 254 );	// almost white: so that themes that render with alpha blending don't show weird colours (such as radio button)
-	CBitmap imageBitmap, maskBitmap;
+	return GetCheck( index ) != FALSE;
+}
 
-	CThemeItem checkedDisabled( L"BUTTON", BP_CHECKBOX, CBS_IMPLICITNORMAL );
-	checkedDisabled.MakeBitmap( imageBitmap, transpColor, imageSize, H_AlignLeft | V_AlignTop );
-	gdi::CreateBitmapMask( maskBitmap, imageBitmap, transpColor );
-	pStateList->Add( &imageBitmap, &maskBitmap );
+void CReportListControl::SetCheckStatePolicy( const ui::ICheckStatePolicy* pCheckStatePolicy )
+{
+	ASSERT_NULL( m_hWnd );
+	m_pCheckStatePolicy = pCheckStatePolicy;
+	ModifyListStyleEx( 0, LVS_EX_CHECKBOXES );
+}
 
-	CThemeItem radioUnchecked( L"BUTTON", BP_RADIOBUTTON, RBS_UNCHECKEDNORMAL );
-	radioUnchecked.MakeBitmap( imageBitmap, transpColor, imageSize, H_AlignLeft | V_AlignTop );
-	gdi::CreateBitmapMask( maskBitmap, imageBitmap, transpColor );
-	pStateList->Add( &imageBitmap, &maskBitmap );
+void CReportListControl::ToggleCheckState( int index, int newCheckState )
+{
+	ASSERT_NULL( m_pNmToggling.get() );						// toggle custom check-state is non recursive (is client using a CScopedInternalChange?)
+	m_pNmToggling.reset( new lv::CNmCheckStatesChanged( this ) );
+	m_pNmToggling->m_itemIndexes.push_back( index );		// first index is the toggled reference
 
-	CThemeItem radioChecked( L"BUTTON", BP_RADIOBUTTON, RBS_CHECKEDNORMAL );
-	radioChecked.MakeBitmap( imageBitmap, transpColor, imageSize, H_AlignLeft | V_AlignTop );
-	gdi::CreateBitmapMask( maskBitmap, imageBitmap, transpColor );
-	pStateList->Add( &imageBitmap, &maskBitmap );
+	CScopedInternalChange change( this );					// to avoid infinite recursion
 
-	return true;
+	SetItemCheckState( index, newCheckState );
+
+	// delayed notification for the item, after LVN_ITEMCHANGED has been send by the list for all items involved (multiple times for a group of radio buttons)
+	ui::PostCall( this, &CReportListControl::NotifyCheckStatesChanged );
+}
+
+void CReportListControl::SetItemCheckState( int index, int checkState )
+{
+	ASSERT_PTR( m_pCheckStatePolicy );
+	ASSERT( m_pCheckStatePolicy->IsEnabledState( checkState ) );
+
+	if ( CheckRadio::Instance() == m_pCheckStatePolicy && CheckRadio::RadioChecked == checkState )
+	{
+//		std::pair< int, UINT > radioItemsPair( 0, GetItemCount() );		// <firstRadioIndex, radioCount>: by default assume all items in the list are ONE radio group
+		if ( IsGroupViewEnabled() )
+		{
+			int radioGroupId = GetItemGroupId( index );
+			if ( radioGroupId != -1 )						// radio button item belongs to a group?
+			{
+				std::vector< utl::ISubject* > radioItems;
+				QueryGroupItems( radioItems, radioGroupId );
+
+				// uncheck all other radio button items
+				for ( std::vector< utl::ISubject* >::const_iterator itRadioItem = radioItems.begin(); itRadioItem != radioItems.end(); ++itRadioItem )
+				{
+					int radioIndex = FindItemIndex( *itRadioItem );
+					if ( radioIndex != -1 && radioIndex != index )
+						ModifyCheckState( radioIndex, CheckRadio::RadioUnchecked );
+				}
+//				radioItemsPair = GetGroupItemsRange( radioGroupId );
+			}
+		}
+
+
+/*		// uncheck all other radio button items
+		for ( int radioPos = 0; radioPos != (int)radioItemsPair.second; ++radioPos )
+			if ( radioItemsPair.first + radioPos != index )
+				ModifyCheckState( radioItemsPair.first + radioPos, CheckRadio::RadioUnchecked );*/
+	}
+
+	SetCheckState( index, checkState );
+}
+
+void CReportListControl::NotifyCheckStatesChanged( void )
+{
+	ASSERT_PTR( m_pNmToggling.get() );
+
+	m_pNmToggling->m_nmHdr.NotifyParent();
+	m_pNmToggling.reset();
+}
+
+size_t CReportListControl::ApplyCheckStateToSelectedItems( int toggledIndex, int checkState )
+{
+	size_t changedCount = 0;
+
+	if ( IsSelected( toggledIndex ) && IsMultiSelectionList() )		// toggledIndex is part of multiple selection?
+		if ( ui::IsCheckBoxState( checkState, m_pCheckStatePolicy ) )
+		{
+			CScopedInternalChange change( this );
+
+			for ( POSITION pos = GetFirstSelectedItemPosition(); pos != NULL; )
+			{
+				int index = GetNextSelectedItem( pos );
+
+				if ( index != toggledIndex )						// exclude the toggled item
+					if ( ui::IsCheckBoxState( GetCheckState( index ), m_pCheckStatePolicy ) )
+						if ( ModifyCheckState( index, checkState ) )
+							++changedCount;
+			}
+		}
+
+	return changedCount;
 }
 
 bool CReportListControl::SetCaretIndex( int index, bool doSet /*= true*/ )
@@ -1425,9 +1525,7 @@ bool CReportListControl::GetSelection( std::vector< int >& rSelIndexes, int* pCa
 {
 	rSelIndexes.reserve( rSelIndexes.size() + GetSelectedCount() );
 
-	POSITION pos = GetFirstSelectedItemPosition();
-
-	for ( int index = 0; pos != NULL; ++index )
+	for ( POSITION pos = GetFirstSelectedItemPosition(); pos != NULL; )
 		rSelIndexes.push_back( GetNextSelectedItem( pos ) );
 
 	if ( pCaretIndex != NULL )
@@ -1507,7 +1605,7 @@ void CReportListControl::MoveSelectionTo( seq::MoveTo moveTo )
 		seq::Resequence( sequence, selIndexes, moveTo );
 	}
 
-	NotifyParent( lv::LVN_ItemsReorder );
+	ui::SendCommandToParent( m_hWnd, lv::LVN_ItemsReorder );
 }
 
 bool CReportListControl::CacheSelectionData( ole::CDataSource* pDataSource, int sourceFlags, const CListSelectionData& selData ) const
@@ -1523,7 +1621,7 @@ bool CReportListControl::CacheSelectionData( ole::CDataSource* pDataSource, int 
 	std::vector< std::tstring > codes;
 	if ( HasFlag( sourceFlags, ds::ItemsText | ds::ShellFiles ) )
 		for ( std::vector< int >::const_iterator itSelIndex = selData.m_selIndexes.begin(); itSelIndex != selData.m_selIndexes.end(); ++itSelIndex )
-			if ( utl::ISubject* pObject = GetObjectAt( *itSelIndex ) )
+			if ( utl::ISubject* pObject = GetSubjectAt( *itSelIndex ) )
 				codes.push_back( pObject->GetCode() );		// assume GetCode() represents a full path, and GetDisplayCode() represents a fname.ext
 			else
 				codes.push_back( GetItemText( *itSelIndex, Code ).GetString() );
@@ -1618,15 +1716,21 @@ void CReportListControl::ClearMarkedCells( void )
 	Invalidate();
 }
 
-CReportListControl::TRowKey CReportListControl::MakeRowKeyAt( int index ) const
-{
-	TRowKey rowKey = static_cast< TRowKey >( GetItemData( index ) );
-	return rowKey != 0 ? rowKey : static_cast< TRowKey >( index );
-}
-
 const ui::CTextEffect* CReportListControl::FindTextEffectAt( TRowKey rowKey, TColumn subItem ) const
 {
 	return utl::FindValuePtr( m_markedCells, TCellPair( rowKey, subItem ) );
+}
+
+void CReportListControl::CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARAM rowKey, int subItem ) const
+{
+	if ( m_pTextEffectCallback != NULL )
+		m_pTextEffectCallback->CombineTextEffectAt( rTextEffect, rowKey, subItem );
+}
+
+void CReportListControl::ModifyDiffTextEffectAt( CListTraits::CMatchEffects& rEffects, LPARAM rowKey, int subItem ) const
+{
+	if ( m_pTextEffectCallback != NULL )
+		m_pTextEffectCallback->ModifyDiffTextEffectAt( rEffects, rowKey, subItem );
 }
 
 const CReportListControl::CDiffColumnPair* CReportListControl::FindDiffColumnPair( TColumn column ) const
@@ -1660,7 +1764,7 @@ bool CReportListControl::ParentHandles( ParentNotif notif )
 
 // groups
 
-#if ( _WIN32_WINNT >= 0x0600 ) && defined( UNICODE )
+#ifdef UTL_VISTA_GROUPS
 
 int CReportListControl::GetGroupId( int groupIndex ) const
 {
@@ -1672,7 +1776,32 @@ int CReportListControl::GetGroupId( int groupIndex ) const
 	return group.iGroupId;
 }
 
-std::pair< int, UINT > CReportListControl::GetGroupItemsRange( int groupId ) const
+int CReportListControl::GetItemGroupId( int itemIndex ) const
+{
+	LVITEM item;
+	item.mask = LVIF_GROUPID;
+	item.iItem = itemIndex;
+	if ( !GetItem( &item ) )
+		return -1;					// item does not belong to a group
+	return item.iGroupId;
+}
+
+bool CReportListControl::SetItemGroupId( int itemIndex, int groupId )
+{
+	// rows not assigned to a group will not show in group-view
+	LVITEM item;
+	item.mask = LVIF_GROUPID;
+	item.iItem = itemIndex;
+	item.iSubItem = 0;
+	item.iGroupId = groupId;
+	if ( !SetItem( &item ) )
+		return false;
+
+	m_groupIdToItemsMap.insert( std::make_pair( groupId, MakeRowKeyAt( itemIndex ) ) );
+	return true;
+}
+
+std::pair< int, UINT > CReportListControl::_GetGroupItemsRange( int groupId ) const
 {
 	LVGROUP group;
 	utl::ZeroWinStruct( &group );
@@ -1684,26 +1813,6 @@ std::pair< int, UINT > CReportListControl::GetGroupItemsRange( int groupId ) con
 	return std::make_pair( group.iFirstItem, group.cItems );
 }
 
-int CReportListControl::GetRowGroupId( int rowIndex ) const
-{
-	LVITEM item;
-	item.mask = LVIF_GROUPID;
-	item.iItem = rowIndex;
-	VERIFY( GetItem( &item ) );
-	return item.iGroupId;
-}
-
-bool CReportListControl::SetRowGroupId( int rowIndex, int groupId )
-{
-	// rows not assigned to a group will not show in group-view
-	LVITEM item;
-	item.mask = LVIF_GROUPID;
-	item.iItem = rowIndex;
-	item.iSubItem = 0;
-	item.iGroupId = groupId;
-	return SetItem( &item ) != FALSE;
-}
-
 std::tstring CReportListControl::GetGroupHeaderText( int groupId ) const
 {
 	LVGROUP group = { sizeof( LVGROUP ) };
@@ -1713,7 +1822,7 @@ std::tstring CReportListControl::GetGroupHeaderText( int groupId ) const
 	return group.pszHeader;
 }
 
-int CReportListControl::InsertGroupHeader( int index, int groupId, const std::tstring& header, DWORD state /*= LVGS_NORMAL*/, DWORD align /*= LVGA_HEADER_LEFT*/ )
+int CReportListControl::InsertGroupHeader( int groupIndex, int groupId, const std::tstring& header, DWORD state /*= LVGS_NORMAL*/, DWORD align /*= LVGA_HEADER_LEFT*/ )
 {
 	LVGROUP group = { sizeof( LVGROUP ) };
 	group.mask = LVGF_GROUPID | LVGF_STATE | LVGF_ALIGN | LVGF_HEADER;
@@ -1722,7 +1831,7 @@ int CReportListControl::InsertGroupHeader( int index, int groupId, const std::ts
 	group.uAlign = align;
 	group.pszHeader = const_cast< TCHAR* >( header.c_str() );
 
-	return InsertGroup( index, &group );
+	return InsertGroup( groupIndex, &group );
 }
 
 bool CReportListControl::SetGroupFooter( int groupId, const std::tstring& footer, DWORD align /*= LVGA_FOOTER_CENTER*/ )
@@ -1776,7 +1885,7 @@ bool CReportListControl::SetGroupTitleImage( int groupId, int image, const std::
 void CReportListControl::DeleteEntireGroup( int groupId )
 {
 	for ( int rowIndex = 0, count = GetItemCount(); rowIndex != count; ++rowIndex )
-		if ( GetRowGroupId( rowIndex ) == groupId )
+		if ( GetItemGroupId( rowIndex ) == groupId )
 			DeleteItem( rowIndex-- );
 
 	RemoveGroup( groupId );
@@ -1786,7 +1895,7 @@ void CReportListControl::CheckEntireGroup( int groupId, bool check /*= true*/ )
 {
 	if ( HasFlag( GetExtendedStyle(), LVS_EX_CHECKBOXES ) )
 		for ( int rowIndex = 0, count = GetItemCount(); rowIndex != count; ++rowIndex )
-			if ( GetRowGroupId( rowIndex ) == groupId )
+			if ( GetItemGroupId( rowIndex ) == groupId )
 				SetChecked( rowIndex, check );
 }
 
@@ -1826,7 +1935,7 @@ int CReportListControl::GroupHitTest( const CPoint& point ) const
 	return -1;			// don't try other ways to find the group
 }
 
-#endif // Vista groups
+#endif //UTL_VISTA_GROUPS
 
 
 void CReportListControl::PreSubclassWindow( void )
@@ -1906,7 +2015,7 @@ void CReportListControl::OnDropFiles( HDROP hDropInfo )
 
 	fs::QueryDroppedFiles( dropFiles.m_filePaths, hDropInfo, SortAscending );
 
-	ui::SendNotifyToParent( m_hWnd, lv::LVN_DropFiles, &dropFiles.m_nmhdr );		// notify parent of dropped file paths
+	dropFiles.m_nmHdr.NotifyParent();					// lv::LVN_DropFiles -> notify parent of dropped file paths
 }
 
 void CReportListControl::OnWindowPosChanged( WINDOWPOS* pWndPos )
@@ -1967,50 +2076,45 @@ void CReportListControl::OnPaint( void )
 {
 	REQUIRE( !m_painting );
 
-	m_painting = true;				// for diff text items: supress sub-item draw by the list (default list painting smudges the text due to font effects)
+	m_painting = true;			// for diff text items: supress sub-item draw by the list (default list painting smudges the text due to font effects)
 	__super::OnPaint();
 	m_painting = false;
 }
 
 BOOL CReportListControl::OnLvnItemChanging_Reflect( NMHDR* pNmHdr, LRESULT* pResult )
 {
-	NMLISTVIEW* pListInfo = (NMLISTVIEW*)pNmHdr;
-	UNUSED_ALWAYS( pListInfo );
+	NMLISTVIEW* pListView = (NMLISTVIEW*)pNmHdr;
+	*pResult = 0L;
 
-	if ( !IsInternalChange() && !GetUseTriStateAutoCheck() )		// must prevent prevent user's tri-state transition?
-		if ( HasFlag( pListInfo->uChanged, LVIF_STATE ) && StateChanged( pListInfo->uNewState, pListInfo->uOldState, LVIS_STATEIMAGEMASK ) )	// check state changed
-			if ( lv::LVIS_CHECKEDGRAY == AsCheckState( pListInfo->uNewState ) && lv::LVIS_CHECKED == AsCheckState( pListInfo->uOldState ) )		// CHECKED -> UNDETERMINATE transition?
+	if ( !IsInternalChange() )									// a user change?
+		if ( IsCheckStateChangeNotify( pListView ) )			// item check-state is about to change?
+		{
+			if ( m_pCheckStatePolicy != NULL )
 			{
-				SetCheckState( pListInfo->iItem, lv::LVIS_UNCHECKED );
-				*pResult = TRUE;	// reject transition to LVIS_CHECKEDGRAY
+				lv::CNmToggleCheckState toggleInfo( this, pListView, m_pCheckStatePolicy );		// toggle check-state by default
+
+				if ( 0L == toggleInfo.m_nmHdr.NotifyParent() )	// send lv::LVN_ToggleCheckState, give parent a chance to override toggling
+					if ( toggleInfo.m_newCheckState != toggleInfo.m_oldCheckState )
+						ToggleCheckState( pListView->iItem, toggleInfo.m_newCheckState );		// will send a delayed lv::LVN_CheckStatesChanged notification
+
+				*pResult = TRUE;								// prevent automatic toggle initiated internally by the list-ctrl (default behaviour)
 				return TRUE;
 			}
+		}
 
-	*pResult = 0L;
 	return IsInternalChange();		// don't raise the notification to list's parent during an internal change
 }
 
 BOOL CReportListControl::OnLvnItemChanged_Reflect( NMHDR* pNmHdr, LRESULT* pResult )
 {
-	NMLISTVIEW* pListInfo = (NMLISTVIEW*)pNmHdr;
-	UNUSED_ALWAYS( pListInfo );
-
-	if ( !IsInternalChange() && GetToggleCheckSelected() && IsMultiSelectionList() )
-		if ( HasFlag( pListInfo->uChanged, LVIF_STATE ) )		// item state has been changed?
-			if ( StateChanged( pListInfo->uNewState, pListInfo->uOldState, LVIS_STATEIMAGEMASK ) )		// check state changed?
-				if ( IsSelected( pListInfo->iItem ) )			// toggle item part of the selection?
-				{
-					bool checked = IsCheckedState( pListInfo->uNewState );
-
-					std::vector< utl::ISubject* > selItems;
-					if ( QuerySelectionAs( selItems ) )
-					{
-						CScopedInternalChange change( this );
-						SetCheckedItems( selItems, checked, false );
-					}
-				}
-
+	NMLISTVIEW* pListView = (NMLISTVIEW*)pNmHdr;
 	*pResult = 0L;
+
+	if ( GetToggleCheckSelItems() )											// apply toggle to multi-selection?
+		if ( !IsInternalChange() || m_pNmToggling.get() != NULL )			// user has toggled the check-state (directly or indirectly)?
+			if ( IsCheckStateChangeNotify( pListView ) )					// user has toggled the check-state?
+				ApplyCheckStateToSelectedItems( pListView->iItem, ui::CheckStateFromRaw( pListView->uNewState ) );		// apply check-state to selected items if toggled an item that is part of the multi-selection
+
 	return IsInternalChange();		// don't raise the notification to list's parent during an internal change
 }
 
@@ -2032,7 +2136,7 @@ BOOL CReportListControl::OnHdnItemChanged_Reflect( NMHDR* pNmHdr, LRESULT* pResu
 
 BOOL CReportListControl::OnLvnColumnClick_Reflect( NMHDR* pNmHdr, LRESULT* pResult )
 {
-	NM_LISTVIEW* pNmListView = (NM_LISTVIEW*)pNmHdr;
+	NMLISTVIEW* pNmListView = (NMLISTVIEW*)pNmHdr;
 
 	*pResult = 0;
 
@@ -2086,7 +2190,7 @@ BOOL CReportListControl::OnLvnGetDispInfo_Reflect( NMHDR* pNmHdr, LRESULT* pResu
 	NMLVDISPINFO* pDispInfo = (NMLVDISPINFO*)pNmHdr;
 
 	if ( HasFlag( pDispInfo->item.mask, LVIF_TEXT ) )
-		if ( !m_painting )									// supress sub-item draw by the list (default list painting)
+		if ( !m_painting )					// supress sub-item draw by the list (default list painting)
 			if ( const CDiffColumnPair* pDiffPair = FindDiffColumnPair( pDispInfo->item.iSubItem ) )
 				if ( const str::TMatchSequence* pMatchSeq = utl::FindValuePtr( pDiffPair->m_rowSequences, MakeRowKeyAt( pDispInfo->item.iItem ) ) )
 					pDispInfo->item.pszText = const_cast< TCHAR* >( SrcDiff == pDiffPair->GetDiffSide( pDispInfo->item.iSubItem )

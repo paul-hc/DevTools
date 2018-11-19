@@ -51,8 +51,7 @@ ui::CTextEffect CReportListCustomDraw::MakeCellEffect( void ) const
 	if ( m_subItem != EntireRecord )
 		textEffect.AssignPtr( m_pList->FindTextEffectAt( m_rowKey, m_subItem ) );	// assign individual cell
 
-	if ( m_pList->m_pTextEffectCallback != NULL )
-		m_pList->m_pTextEffectCallback->CombineTextEffectAt( textEffect, m_rowKey, m_subItem );		// combine with callback effect (additive operation)
+	m_pList->CombineTextEffectAt( textEffect, m_rowKey, m_subItem );				// combine with callback effect (additive operation)
 
 	if ( CLR_NONE == textEffect.m_bkColor )
 		if ( m_pList->GetUseAlternateRowColoring() && HasFlag( m_index, 0x01 ) )
@@ -227,8 +226,7 @@ void CReportListCustomDraw::BuildTextMatchEffects( std::vector< ui::CTextEffect 
 	else
 		SetFlag( effects.m_rEqualDiffCase.m_fontEffect, ui::Underline );
 
-	if ( m_pList->m_pTextEffectCallback != NULL )
-		m_pList->m_pTextEffectCallback->ModifyDiffTextEffectAt( effects, m_rowKey, m_subItem );		// resert ui::Bold, etc
+	m_pList->ModifyDiffTextEffectAt( effects, m_rowKey, m_subItem );					// resert ui::Bold, etc
 }
 
 bool CReportListCustomDraw::SelectTextEffect( const ui::CTextEffect& textEffect )

@@ -557,7 +557,7 @@ void CFileLocatorDialog::LVnBeginLabelEditFoundFiles( NMHDR* pNmHdr, LRESULT* pR
 
 void CFileLocatorDialog::LVnItemChangedFoundFiles( NMHDR* pNmHdr, LRESULT* pResult )
 {
-	NM_LISTVIEW* pNmListView = (NM_LISTVIEW*)pNmHdr;
+	NMLISTVIEW* pNmListView = (NMLISTVIEW*)pNmHdr;
 	UINT selMask = LVIS_SELECTED | LVIS_FOCUSED;
 
 	if ( 0 == m_intrinsic )

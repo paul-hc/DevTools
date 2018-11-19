@@ -804,7 +804,7 @@ void CAlbumSettingsDialog::OnToggle_AutoDrop( void )
 
 void CAlbumSettingsDialog::OnLVnColumnClick_FoundFiles( NMHDR* pNmHdr, LRESULT* pResult )
 {
-	NM_LISTVIEW* pNmListView = (NM_LISTVIEW*)pNmHdr;
+	NMLISTVIEW* pNmListView = (NMLISTVIEW*)pNmHdr;
 	CFileList::Order fileOrder = m_fileList.GetFileOrder();
 
 	switch ( pNmListView->iSubItem )
@@ -833,7 +833,7 @@ void CAlbumSettingsDialog::OnLVnColumnClick_FoundFiles( NMHDR* pNmHdr, LRESULT* 
 
 void CAlbumSettingsDialog::OnLVnDblclk_FoundFiles( NMHDR* pNmHdr, LRESULT* pResult )
 {
-	NM_LISTVIEW* pNmListView = (NM_LISTVIEW*)pNmHdr; pNmListView;
+	NMLISTVIEW* pNmListView = (NMLISTVIEW*)pNmHdr; pNmListView;
 
 	PostMessage( WM_COMMAND, IDC_OPEN_IMAGE );
 	*pResult = 0;

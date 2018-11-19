@@ -46,7 +46,7 @@ namespace style
 {
 	namespace general
 	{
-		CFlagInfo topLevelFlags[] =
+		CFlagInfo s_topLevelFlags[] =
 		{
 			GROUP_SEPARATOR( _T("Top Level") ),
 			FLAG( WS_OVERLAPPED, WS_POPUP ),
@@ -68,7 +68,7 @@ namespace style
 			FLAG( WS_MAXIMIZEBOX, 0 )
 		};
 
-		CFlagInfo childFlags[] =
+		CFlagInfo s_childFlags[] =
 		{
 			GROUP_SEPARATOR( _T("Child") ),
 			FLAG_READONLY( WS_CHILD, 0 ),
@@ -93,7 +93,7 @@ namespace style
 
 	namespace specific
 	{
-		CFlagInfo dialogFlags[] =
+		CFlagInfo s_dialogFlags[] =
 		{
 			FLAG( DS_3DLOOK, 0 ),
 			FLAG( DS_SETFONT, 0 ),
@@ -114,12 +114,12 @@ namespace style
 			FLAG( DS_CONTEXTHELP, 0 )
 		};
 
-		CFlagInfo popupMenuFlags[] =
+		CFlagInfo s_popupMenuFlags[] =
 		{
 			{ 0, 1, CFlagInfo::ReadOnly, _T("<<n/a>>") }
 		};
 
-		CFlagInfo staticFlags[] =
+		CFlagInfo s_staticFlags[] =
 		{
 			GROUP_SEPARATOR( _T("Static Type") ),
 			FLAG( SS_LEFT, SS_TYPEMASK ),
@@ -153,7 +153,7 @@ namespace style
 			FLAG( SS_PATHELLIPSIS, 0 )
 		};
 
-		CFlagInfo editFlags[] =
+		CFlagInfo s_editFlags[] =
 		{
 			GROUP_SEPARATOR( _T("Align") ),
 			FLAG( ES_LEFT, ES_CENTER | ES_RIGHT ),
@@ -171,15 +171,36 @@ namespace style
 			FLAG( ES_WANTRETURN, 0 ),
 			FLAG( ES_UPPERCASE, 0 ),
 			FLAG( ES_LOWERCASE, 0 ),
+			FLAG( ES_PASSWORD, 0 )
+		};
+
+		CFlagInfo s_richEditFlags[] =
+		{
+			GROUP_SEPARATOR( _T("Align") ),
+			FLAG( ES_LEFT, ES_CENTER | ES_RIGHT ),
+			FLAG( ES_CENTER, ES_CENTER | ES_RIGHT ),
+			FLAG( ES_RIGHT, ES_CENTER | ES_RIGHT ),
+			GROUP_SEPARATOR( NULL ),
+			FLAG( ES_MULTILINE, 0 ),
+			FLAG( ES_READONLY, 0 ),
+			GROUP_SEPARATOR( NULL ),
+			FLAG( ES_AUTOVSCROLL, 0 ),
+			FLAG( ES_AUTOHSCROLL, 0 ),
+			FLAG( ES_NOHIDESEL, 0 ),
+			FLAG( ES_OEMCONVERT, 0 ),
+			FLAG( ES_WANTRETURN, 0 ),
+			FLAG( ES_LOWERCASE, 0 ),
 			FLAG( ES_PASSWORD, 0 ),
 			GROUP_SEPARATOR( _T("Rich Edit") ),
 			// rich edit specific
 			FLAG( ES_SAVESEL, 0 ),
 			FLAG( ES_SUNKEN, 0 ),
-			FLAG( ES_DISABLENOSCROLL, 0 )
+			FLAG( ES_DISABLENOSCROLL, 0 ),		// overrides ES_NUMBER
+			FLAG( ES_SELECTIONBAR, 0 ),			// overrides WS_MAXIMIZE
+			FLAG( ES_NOOLEDRAGDROP, 0 )			// overrides ES_UPPERCASE
 		};
 
-		CFlagInfo buttonFlags[] =
+		CFlagInfo s_buttonFlags[] =
 		{
 			GROUP_SEPARATOR( _T("Button Type") ),
 			FLAG( BS_PUSHBUTTON, BS_TYPEMASK ),
@@ -213,7 +234,7 @@ namespace style
 			FLAG( BS_FLAT, 0 )
 		};
 
-		CFlagInfo comboBoxFlags[] =
+		CFlagInfo s_comboBoxFlags[] =
 		{
 			GROUP_SEPARATOR( _T("Combo Type") ),
 			FLAG( CBS_SIMPLE, CBS_SIMPLE | CBS_DROPDOWN | CBS_DROPDOWNLIST ),
@@ -234,7 +255,7 @@ namespace style
 			FLAG( CBS_LOWERCASE, 0 )
 		};
 
-		CFlagInfo listBoxFlags[] =
+		CFlagInfo s_listBoxFlags[] =
 		{
 			GROUP_SEPARATOR( _T("Behavior") ),
 			FLAG( LBS_MULTIPLESEL, 0 ),
@@ -258,7 +279,7 @@ namespace style
 			FLAG( LBS_NODATA, 0 )
 		};
 
-		CFlagInfo scrollBarFlags[] =
+		CFlagInfo s_scrollBarFlags[] =
 		{
 			GROUP_SEPARATOR( _T("Orientation") ),
 			FLAG( SBS_HORZ, SBS_HORZ | SBS_VERT ),
@@ -271,7 +292,7 @@ namespace style
 			FLAG( SBS_SIZEGRIP, 0 )
 		};
 
-		CFlagInfo spinButtonFlags[] =
+		CFlagInfo s_spinButtonFlags[] =
 		{	// no groups
 			GROUP_SEPARATOR( _T("Align") ),
 			FLAG_NAME( 0, UDS_ALIGNRIGHT | UDS_ALIGNLEFT, _T("[not aligned]") ),
@@ -287,7 +308,7 @@ namespace style
 			FLAG( UDS_WRAP, 0 )
 		};
 
-		CFlagInfo sliderFlags[] =
+		CFlagInfo s_sliderFlags[] =
 		{
 			FLAG( TBS_AUTOTICKS, 0 ),
 			FLAG( TBS_NOTICKS, 0 ),
@@ -301,12 +322,12 @@ namespace style
 			FLAG( TBS_BOTH, 0 )
 		};
 
-		CFlagInfo hotKeyFlags[] =
+		CFlagInfo s_hotKeyFlags[] =
 		{
 			BAR_COMMCTRL_FLAGS
 		};
 
-		CFlagInfo headerCtrlFlags[] =
+		CFlagInfo s_headerCtrlFlags[] =
 		{
 			FLAG_READONLY( HDS_HORZ, HDS_VERT ),
 			FLAG_READONLY( HDS_VERT, HDS_VERT ),
@@ -318,7 +339,7 @@ namespace style
 			BAR_COMMCTRL_FLAGS
 		};
 
-		CFlagInfo listCtrlFlags[] =
+		CFlagInfo s_listCtrlFlags[] =
 		{
 			GROUP_SEPARATOR( _T("List View Mode") ),
 			FLAG( LVS_ICON, LVS_TYPEMASK ),
@@ -346,7 +367,7 @@ namespace style
 			FLAG( LVS_NOSORTHEADER, 0 )
 		};
 
-		CFlagInfo treeCtrlFlags[] =
+		CFlagInfo s_treeCtrlFlags[] =
 		{
 			FLAG( TVS_HASBUTTONS, 0 ),
 			FLAG( TVS_HASLINES, 0 ),
@@ -358,17 +379,17 @@ namespace style
 			FLAG( TVS_NOTOOLTIPS, 0 ),
 			FLAG( TVS_CHECKBOXES, 0 ),
 			FLAG( TVS_TRACKSELECT, 0 ),
-			GROUP_SEPARATOR( _T("Internet Explorer 4") ),
+			GROUP_SEPARATOR( _T("Internet Explorer 4+") ),
 			FLAG( TVS_SINGLEEXPAND, 0 ),
 			FLAG( TVS_INFOTIP, 0 ),
 			FLAG( TVS_FULLROWSELECT, 0 ),
 			FLAG( TVS_NOSCROLL, 0 ),
 			FLAG( TVS_NONEVENHEIGHT, 0 ),
-			GROUP_SEPARATOR( _T("Internet Explorer 5") ),
+			GROUP_SEPARATOR( _T("Internet Explorer 5+") ),
 			FLAG( TVS_NOHSCROLL, 0 )
 		};
 
-		CFlagInfo tabCtrlFlags[] =
+		CFlagInfo s_tabCtrlFlags[] =
 		{
 			FLAG_NAME( 0, TCS_FOCUSONBUTTONDOWN | TCS_FOCUSNEVER, _T("[default]") ),
 			FLAG( TCS_FOCUSONBUTTONDOWN, TCS_FOCUSONBUTTONDOWN | TCS_FOCUSNEVER ),
@@ -390,11 +411,11 @@ namespace style
 			GROUP_SEPARATOR( NULL ),
 			FLAG( TCS_OWNERDRAWFIXED, 0 ),
 			FLAG( TCS_TOOLTIPS, 0 ),
-			GROUP_SEPARATOR( _T("Internet Explorer 4") ),
+			GROUP_SEPARATOR( _T("Internet Explorer 4+") ),
 			FLAG( TCS_FLATBUTTONS, 0 )
 		};
 
-		CFlagInfo monthCalendarFlags[] =
+		CFlagInfo s_monthCalendarFlags[] =
 		{
 			FLAG( MCS_DAYSTATE, 0 ),
 			FLAG( MCS_MULTISELECT, 0 ),
@@ -403,7 +424,7 @@ namespace style
 			FLAG( MCS_NOTODAY, 0 )
 		};
 
-		CFlagInfo dateTimeCtrlFlags[] =
+		CFlagInfo s_dateTimeCtrlFlags[] =
 		{
 			// [PC]: Strange DTS_UPDOWN and DTS_TIMEFORMAT styles overlap
 			FLAG( DTS_UPDOWN, DTS_UPDOWN | DTS_TIMEFORMAT ),
@@ -414,17 +435,17 @@ namespace style
 			FLAG( DTS_LONGDATEFORMAT, 0 ),
 			FLAG( DTS_APPCANPARSE, 0 ),
 			FLAG( DTS_RIGHTALIGN, 0 ),
-			GROUP_SEPARATOR( _T("Internet Explorer 5") ),
+			GROUP_SEPARATOR( _T("Internet Explorer 5+") ),
 			FLAG( DTS_SHORTDATECENTURYFORMAT, 0 )
 		};
 
-		CFlagInfo progressBarFlags[] =
+		CFlagInfo s_progressBarFlags[] =
 		{
 			FLAG( PBS_SMOOTH, 0 ),
 			FLAG( PBS_VERTICAL, 0 )
 		};
 
-		CFlagInfo animateCtrlFlags[] =
+		CFlagInfo s_animateCtrlFlags[] =
 		{
 			FLAG( ACS_CENTER, 0 ),
 			FLAG( ACS_TRANSPARENT, 0 ),
@@ -432,7 +453,7 @@ namespace style
 			FLAG( ACS_TIMER, 0 )
 		};
 
-		CFlagInfo tooltipCtrlFlags[] =
+		CFlagInfo s_tooltipCtrlFlags[] =
 		{
 			FLAG( TTS_ALWAYSTIP, 0 ),
 			FLAG( TTS_NOPREFIX, 0 ),
@@ -440,11 +461,11 @@ namespace style
 			FLAG( TTS_NOFADE, 0 ),
 			FLAG( TTS_BALLOON, 0 ),
 			FLAG( TTS_CLOSE, 0 ),
-			GROUP_SEPARATOR( _T("Windows Vista") ),
+			GROUP_SEPARATOR( _T("Windows Vista+") ),
 			FLAG( TTS_USEVISUALSTYLE, 0 )
 		};
 
-		CFlagInfo toolBarFlags[] =
+		CFlagInfo s_toolBarFlags[] =
 		{
 			FLAG( TBSTYLE_TOOLTIPS, 0 ),
 			FLAG( TBSTYLE_WRAPABLE, 0 ),
@@ -457,7 +478,7 @@ namespace style
 			BAR_COMMCTRL_FLAGS
 		};
 
-		CFlagInfo reBarFlags[] =
+		CFlagInfo s_reBarFlags[] =
 		{
 			FLAG( RBS_TOOLTIPS, 0 ),
 			FLAG( RBS_VARHEIGHT, 0 ),
@@ -475,10 +496,10 @@ namespace style
 			BAR_COMMCTRL_FLAGS
 		};
 
-		CFlagInfo statusBarFlags[] =
+		CFlagInfo s_statusBarFlags[] =
 		{
 			FLAG( SBARS_SIZEGRIP, 0 ),
-			GROUP_SEPARATOR( _T("Internet Explorer 5") ),
+			GROUP_SEPARATOR( _T("Internet Explorer 5+") ),
 			FLAG( SBARS_TOOLTIPS, 0 ),
 			BAR_COMMCTRL_FLAGS
 		};
@@ -492,7 +513,7 @@ namespace style
 
 namespace style_ex
 {
-	CFlagInfo generalExFlags[] =
+	CFlagInfo s_generalExFlags[] =
 	{
 		FLAG( WS_EX_WINDOWEDGE, 0 ),
 		FLAG( WS_EX_STATICEDGE, 0 ),
@@ -521,7 +542,7 @@ namespace style_ex
 	};
 
 
-	CFlagInfo comboBoxExFlags[] =
+	CFlagInfo s_comboBoxExFlags[] =
 	{
 		FLAG( CBES_EX_NOEDITIMAGE, 0 ),
 		FLAG( CBES_EX_NOEDITIMAGEINDENT, 0 ),
@@ -529,7 +550,7 @@ namespace style_ex
 	};
 
 
-	CFlagInfo listCtrlExFlags[] =
+	CFlagInfo s_listCtrlExFlags[] =
 	{
 		FLAG( LVS_EX_GRIDLINES, 0 ),
 		FLAG( LVS_EX_SUBITEMIMAGES, 0 ),
@@ -546,16 +567,16 @@ namespace style_ex
 		FLAG( LVS_EX_UNDERLINEHOT, 0 ),
 		FLAG( LVS_EX_UNDERLINECOLD, 0 ),
 		FLAG( LVS_EX_MULTIWORKAREAS, 0 ),
-		GROUP_SEPARATOR( _T("Internet Explorer 5") ),
+		GROUP_SEPARATOR( _T("Internet Explorer 5+") ),
 		FLAG( LVS_EX_LABELTIP, 0 ),
 		FLAG( LVS_EX_BORDERSELECT, 0 ),
-		GROUP_SEPARATOR( _T("Windows XP") ),
+		GROUP_SEPARATOR( _T("Windows XP+") ),
 		FLAG( LVS_EX_DOUBLEBUFFER, 0 ),
 		FLAG( LVS_EX_HIDELABELS, 0 ),
 		FLAG( LVS_EX_SINGLEROW, 0 ),
 		FLAG( LVS_EX_SNAPTOGRID, 0 ),
 		FLAG( LVS_EX_SIMPLESELECT, 0 ),
-		GROUP_SEPARATOR( _T("Windows Vista") ),
+		GROUP_SEPARATOR( _T("Windows Vista+") ),
 		FLAG( LVS_EX_JUSTIFYCOLUMNS, 0 ),
 		FLAG( LVS_EX_TRANSPARENTBKGND, 0 ),
 		FLAG( LVS_EX_TRANSPARENTSHADOWTEXT, 0 ),
@@ -568,9 +589,9 @@ namespace style_ex
 	};
 
 
-	CFlagInfo treeCtrlExFlags[] =
+	CFlagInfo s_treeCtrlExFlags[] =
 	{
-		GROUP_SEPARATOR( _T("Windows Vista") ),
+		GROUP_SEPARATOR( _T("Windows Vista+") ),
 		FLAG( TVS_EX_MULTISELECT, 0 ),
 		FLAG( TVS_EX_DOUBLEBUFFER, 0 ),
 		FLAG( TVS_EX_NOINDENTSTATE, 0 ),
@@ -584,15 +605,15 @@ namespace style_ex
 	};
 
 
-	CFlagInfo tabCtrlExFlags[] =
+	CFlagInfo s_tabCtrlExFlags[] =
 	{
-		GROUP_SEPARATOR( _T("Internet Explorer 4") ),
+		GROUP_SEPARATOR( _T("Internet Explorer 4+") ),
 		FLAG( TCS_EX_FLATSEPARATORS, 0 ),
 		FLAG( TCS_EX_REGISTERDROP, 0 )
 	};
 
 
-	CFlagInfo toolbarExFlags[] =
+	CFlagInfo s_toolbarExFlags[] =
 	{
 		FLAG( TBSTYLE_EX_DRAWDDARROWS, 0 ),
 		FLAG_ALIASES( TBSTYLE_WRAPABLE, 0, TBSTYLE_EX_MULTICOLUMN ),
@@ -610,34 +631,35 @@ namespace style_ex
 // CStyleRepository implementation
 
 CStyleRepository::CStyleRepository( void )
-	: m_generalTopLevelStore( _T(""), style::general::topLevelFlags, COUNT_OF( style::general::topLevelFlags ), &GetWindowStyle, &SetWindowStyle )
-	, m_generalChildStore( _T(""), style::general::childFlags, COUNT_OF( style::general::childFlags ), &GetWindowStyle, &SetWindowStyle )
+	: m_generalTopLevelStore( _T(""), ARRAY_PAIR( style::general::s_topLevelFlags ), &GetWindowStyle, &SetWindowStyle )
+	, m_generalChildStore( _T(""), ARRAY_PAIR( style::general::s_childFlags ), &GetWindowStyle, &SetWindowStyle )
 {
 	using namespace style;
 
-	AddFlagStore( _T("#32768"), specific::popupMenuFlags, COUNT_OF( specific::popupMenuFlags ) );
-	AddFlagStore( _T("#32770"), specific::dialogFlags, COUNT_OF( specific::dialogFlags ) );
-	AddFlagStore( _T("Static"), specific::staticFlags, COUNT_OF( specific::staticFlags ) );
-	AddFlagStore( _T("Edit|RichEdit|RichEdit20A|RichEdit20W"), specific::editFlags, COUNT_OF( specific::editFlags ) );
-	AddFlagStore( _T("Button"), specific::buttonFlags, COUNT_OF( specific::buttonFlags ) );
-	AddFlagStore( _T("ComboBox|ComboBoxEx32"), specific::comboBoxFlags, COUNT_OF( specific::comboBoxFlags ) );
-	AddFlagStore( _T("ListBox|ComboLBox"), specific::listBoxFlags, COUNT_OF( specific::listBoxFlags ) );
-	AddFlagStore( _T("ScrollBar"), specific::scrollBarFlags, COUNT_OF( specific::scrollBarFlags ) );
-	AddFlagStore( _T("msctls_UpDown32|msctls_UpDown"), specific::spinButtonFlags, COUNT_OF( specific::spinButtonFlags ) );
-	AddFlagStore( _T("msctls_TrackBar32|msctls_TrackBar"), specific::sliderFlags, COUNT_OF( specific::sliderFlags ) );
-	AddFlagStore( _T("msctls_HotKey32|msctls_HotKey"), specific::hotKeyFlags, COUNT_OF( specific::hotKeyFlags ) );
-	AddFlagStore( _T("SysHeader32|SysHeader"), specific::headerCtrlFlags, COUNT_OF( specific::headerCtrlFlags ) );
-	AddFlagStore( _T("SysListView32|SysListView"), specific::listCtrlFlags, COUNT_OF( specific::listCtrlFlags ) );
-	AddFlagStore( _T("SysTreeView32|SysTreeView"), specific::treeCtrlFlags, COUNT_OF( specific::treeCtrlFlags ) );
-	AddFlagStore( _T("SysTabControl32|SysTabControl"), specific::tabCtrlFlags, COUNT_OF( specific::tabCtrlFlags ) );
-	AddFlagStore( _T("SysMonthCal32"), specific::monthCalendarFlags, COUNT_OF( specific::monthCalendarFlags ) );
-	AddFlagStore( _T("SysDateTimePick32"), specific::dateTimeCtrlFlags, COUNT_OF( specific::dateTimeCtrlFlags ) );
-	AddFlagStore( _T("msctls_progress32|msctls_progress"), specific::progressBarFlags, COUNT_OF( specific::progressBarFlags ) );
-	AddFlagStore( _T("SysAnimate32"), specific::animateCtrlFlags, COUNT_OF( specific::animateCtrlFlags ) );
-	AddFlagStore( _T("tooltips_class32|tooltips_class"), specific::tooltipCtrlFlags, COUNT_OF( specific::tooltipCtrlFlags ) );
-	AddFlagStore( _T("ToolbarWindow32|ToolbarWindow"), specific::toolBarFlags, COUNT_OF( specific::toolBarFlags ) );
-	AddFlagStore( _T("ReBarWindow32|ReBarWindow"), specific::reBarFlags, COUNT_OF( specific::reBarFlags ) );
-	AddFlagStore( _T("msctls_statusbar32|msctls_statusbar"), specific::statusBarFlags, COUNT_OF( specific::statusBarFlags ) );
+	AddFlagStore( _T("#32768"), ARRAY_PAIR( specific::s_popupMenuFlags ) );
+	AddFlagStore( _T("#32770"), ARRAY_PAIR( specific::s_dialogFlags ) );
+	AddFlagStore( _T("Static"), ARRAY_PAIR( specific::s_staticFlags ) );
+	AddFlagStore( _T("Edit"), ARRAY_PAIR( specific::s_editFlags ) );
+	AddFlagStore( _T("RichEdit|RichEdit20A|RichEdit20W"), ARRAY_PAIR( specific::s_richEditFlags ) );
+	AddFlagStore( _T("Button"), ARRAY_PAIR( specific::s_buttonFlags ) );
+	AddFlagStore( _T("ComboBox|ComboBoxEx32"), ARRAY_PAIR( specific::s_comboBoxFlags ) );
+	AddFlagStore( _T("ListBox|ComboLBox"), ARRAY_PAIR( specific::s_listBoxFlags ) );
+	AddFlagStore( _T("ScrollBar"), ARRAY_PAIR( specific::s_scrollBarFlags ) );
+	AddFlagStore( _T("msctls_UpDown32|msctls_UpDown"), ARRAY_PAIR( specific::s_spinButtonFlags ) );
+	AddFlagStore( _T("msctls_TrackBar32|msctls_TrackBar"), ARRAY_PAIR( specific::s_sliderFlags ) );
+	AddFlagStore( _T("msctls_HotKey32|msctls_HotKey"), ARRAY_PAIR( specific::s_hotKeyFlags ) );
+	AddFlagStore( _T("SysHeader32|SysHeader"), ARRAY_PAIR( specific::s_headerCtrlFlags ) );
+	AddFlagStore( _T("SysListView32|SysListView"), ARRAY_PAIR( specific::s_listCtrlFlags ) );
+	AddFlagStore( _T("SysTreeView32|SysTreeView"), ARRAY_PAIR( specific::s_treeCtrlFlags ) );
+	AddFlagStore( _T("SysTabControl32|SysTabControl"), ARRAY_PAIR( specific::s_tabCtrlFlags ) );
+	AddFlagStore( _T("SysMonthCal32"), ARRAY_PAIR( specific::s_monthCalendarFlags ) );
+	AddFlagStore( _T("SysDateTimePick32"), ARRAY_PAIR( specific::s_dateTimeCtrlFlags ) );
+	AddFlagStore( _T("msctls_progress32|msctls_progress"), ARRAY_PAIR( specific::s_progressBarFlags ) );
+	AddFlagStore( _T("SysAnimate32"), ARRAY_PAIR( specific::s_animateCtrlFlags ) );
+	AddFlagStore( _T("tooltips_class32|tooltips_class"), ARRAY_PAIR( specific::s_tooltipCtrlFlags ) );
+	AddFlagStore( _T("ToolbarWindow32|ToolbarWindow"), ARRAY_PAIR( specific::s_toolBarFlags ) );
+	AddFlagStore( _T("ReBarWindow32|ReBarWindow"), ARRAY_PAIR( specific::s_reBarFlags ) );
+	AddFlagStore( _T("msctls_statusbar32|msctls_statusbar"), ARRAY_PAIR( specific::s_statusBarFlags ) );
 }
 
 CStyleRepository::~CStyleRepository()
@@ -695,12 +717,12 @@ DWORD CStyleRepository::SetWindowStyle( HWND hDest, DWORD style )
 
 CStyleExRepository::CStyleExRepository( void )
 {
-	m_stores.push_back( new CFlagStore( _T(""), style_ex::generalExFlags, COUNT_OF( style_ex::generalExFlags ), &GetWindowStyleEx, &SetWindowStyleEx ) );
-	m_stores.push_back( new CFlagStore( _T("SysListView|SysListView32"), style_ex::listCtrlExFlags, COUNT_OF( style_ex::listCtrlExFlags ), &GetListViewStyleEx, &SetListViewStyleEx ) );
-	m_stores.push_back( new CFlagStore( _T("SysTreeView|SysTreeView32"), style_ex::treeCtrlExFlags, COUNT_OF( style_ex::treeCtrlExFlags ), &GetTreeViewStyleEx, &SetTreeViewStyleEx ) );
-	m_stores.push_back( new CFlagStore( _T("SysTabControl|SysTabControl32"), style_ex::tabCtrlExFlags, COUNT_OF( style_ex::tabCtrlExFlags ), &GetTabCtrlStyleEx, &SetTabCtrlStyleEx ) );
-	m_stores.push_back( new CFlagStore( _T("ComboBoxEx32"), style_ex::comboBoxExFlags, COUNT_OF( style_ex::comboBoxExFlags ), &GetComboExStyleEx, &SetComboExStyleEx ) );
-	m_stores.push_back( new CFlagStore( _T("ToolbarWindow|ToolbarWindow32"), style_ex::toolbarExFlags, COUNT_OF( style_ex::toolbarExFlags ), &GetToolbarStyleEx, &SetToolbarStyleEx ) );
+	m_stores.push_back( new CFlagStore( _T(""), ARRAY_PAIR( style_ex::s_generalExFlags ), &GetWindowStyleEx, &SetWindowStyleEx ) );
+	m_stores.push_back( new CFlagStore( _T("SysListView|SysListView32"), ARRAY_PAIR( style_ex::s_listCtrlExFlags ), &GetListViewStyleEx, &SetListViewStyleEx ) );
+	m_stores.push_back( new CFlagStore( _T("SysTreeView|SysTreeView32"), ARRAY_PAIR( style_ex::s_treeCtrlExFlags ), &GetTreeViewStyleEx, &SetTreeViewStyleEx ) );
+	m_stores.push_back( new CFlagStore( _T("SysTabControl|SysTabControl32"), ARRAY_PAIR( style_ex::s_tabCtrlExFlags ), &GetTabCtrlStyleEx, &SetTabCtrlStyleEx ) );
+	m_stores.push_back( new CFlagStore( _T("ComboBoxEx32"), ARRAY_PAIR( style_ex::s_comboBoxExFlags ), &GetComboExStyleEx, &SetComboExStyleEx ) );
+	m_stores.push_back( new CFlagStore( _T("ToolbarWindow|ToolbarWindow32"), ARRAY_PAIR( style_ex::s_toolbarExFlags ), &GetToolbarStyleEx, &SetToolbarStyleEx ) );
 }
 
 CStyleExRepository::~CStyleExRepository()

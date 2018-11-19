@@ -1562,6 +1562,14 @@
 					>
 				</File>
 				<File
+					RelativePath=".\CheckStatePolicies.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\CheckStatePolicies.h"
+					>
+				</File>
+				<File
 					RelativePath=".\ClockStatic.cpp"
 					>
 				</File>

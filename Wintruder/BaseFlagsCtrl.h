@@ -13,6 +13,9 @@ abstract class CBaseFlagsCtrl
 {
 protected:
 	CBaseFlagsCtrl( CWnd* pCtrl );
+
+	virtual void InitControl( void ) = 0;
+	virtual void OutputFlags( void ) = 0;
 public:
 	enum NotifyCode { FN_FLAGSCHANGED = 0x0B00 };
 
@@ -36,9 +39,6 @@ public:
 
 	std::tstring Format( void ) const;
 	std::tstring FormatTooltip( void ) const;
-protected:
-	virtual void InitControl( void ) = 0;
-	virtual void OutputFlags( void ) = 0;
 private:
 	CWnd* m_pCtrl;
 	std::vector< const CFlagStore* > m_flagStores;

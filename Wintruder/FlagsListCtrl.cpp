@@ -7,14 +7,26 @@
 #include "utl/Clipboard.h"
 #include "utl/CtrlUiState.h"
 #include "utl/ContainerUtilities.h"
+#include "utl/CheckStatePolicies.h"
 #include "utl/MenuUtilities.h"
 #include "utl/StringUtilities.h"
 #include "utl/UtilitiesEx.h"
-#include <set>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
+
+
+namespace pred
+{
+	struct IsRadioGroup
+	{
+		bool operator()( const CFlagGroup* pGroup ) const
+		{
+			return pGroup != NULL && pGroup->IsValueGroup();
+		}
+	};
+}
 
 
 CFlagsListCtrl::CFlagsListCtrl( void )
@@ -22,6 +34,9 @@ CFlagsListCtrl::CFlagsListCtrl( void )
 	, CBaseFlagsCtrl( this )
 {
 	SetUseAlternateRowColoring();
+	SetCheckStatePolicy( CheckRadio::Instance() );
+	SetToggleCheckSelItems();
+
 	ui::LoadPopupMenu( m_contextMenu, IDR_CONTEXT_MENU, app::FlagsListPopup );
 }
 
@@ -81,7 +96,7 @@ void CFlagsListCtrl::InitControl( void )
 				{
 					int groupId = FindGroupIdWithFlag( pFlag );
 					if ( groupId != -1 )
-						VERIFY( SetRowGroupId( row, groupId ) );
+						VERIFY( SetItemGroupId( row, groupId ) );
 				}
 	}
 }
@@ -132,7 +147,7 @@ int CFlagsListCtrl::FindGroupIdWithFlag( const CFlagInfo* pFlag ) const
 			const std::vector< CFlagGroup* >& groups = pFlagStore->m_groups;
 			std::vector< CFlagGroup* >::const_iterator itGroup = std::find( groups.begin(), groups.end(), pFlag->m_pGroup );
 			if ( itGroup != groups.end() )
-			return static_cast< int >( std::distance( groups.begin(), itGroup ) );
+				return static_cast< int >( std::distance( groups.begin(), itGroup ) );
 		}
 	return -1;
 }
@@ -147,18 +162,30 @@ void CFlagsListCtrl::QueryCheckedFlagWorkingSet( std::vector< const CFlagInfo* >
 
 bool CFlagsListCtrl::AnyFlagCheckConflict( const std::vector< const CFlagInfo* >& flagSet, bool checked ) const
 {
-	std::set< CFlagGroup* > exclusiveGroups;
+	std::vector< CFlagGroup* > flagGroups;		// includes radio, check-box or NULL (groupless)
 
 	for ( std::vector< const CFlagInfo* >::const_iterator itFlag = flagSet.begin(); itFlag != flagSet.end(); ++itFlag )
 		if ( ( *itFlag )->IsReadOnly() )
-			return true;				// can't modify read-only
-		else if ( ( *itFlag )->m_pGroup != NULL && ( *itFlag )->m_pGroup->IsValueGroup() )
-			if ( !exclusiveGroups.insert( ( *itFlag )->m_pGroup ).second )
-				return true;
-			else if ( !checked )
-				return true;			// can't uncheck a value
+			return true;				// can't modify read-only flags
+		else
+		{
+			utl::AddUnique( flagGroups, ( *itFlag )->m_pGroup );
 
-	return false;
+			if ( ( *itFlag )->m_pGroup != NULL && ( *itFlag )->m_pGroup->IsValueGroup() )
+				if ( !checked )
+					return true;		// can't uncheck a radio button
+		}
+
+	std::vector< CFlagGroup* >::iterator itCheckGroup = std::partition( flagGroups.begin(), flagGroups.end(), pred::IsRadioGroup() );
+	size_t radioGroupCount = std::distance( flagGroups.begin(), itCheckGroup );
+	size_t checkGroupCount = std::distance( itCheckGroup, flagGroups.end() );
+
+	if ( radioGroupCount > 1 )
+		return true;					// more that 1 radio groups in selected set
+	else if ( 1 == radioGroupCount && checkGroupCount != 0 )
+		return true;					// can't mix radio group with checbox groups
+
+	return false;						// no conflicts
 }
 
 bool CFlagsListCtrl::SetFlagsChecked( const std::vector< const CFlagInfo* >& flagSet, bool checked )
@@ -183,20 +210,7 @@ void CFlagsListCtrl::OutputFlags( void )
 	for ( int i = 0, count = GetItemCount(); i != count; ++i )
 		if ( const CFlagInfo* pFlag = GetFlagInfoAt( i ) )
 			if ( !pFlag->IsSeparator() )
-			{
-				ASSERT_PTR( pFlag );
-
-				bool off = !pFlag->IsOn( flags );
-				lv::CheckState checkState;
-
-				if ( pFlag->IsValue() )
-					checkState = off ? lv::LVIS_RADIO_UNCHECKED : lv::LVIS_RADIO_CHECKED;
-				else
-					checkState = off ? lv::LVIS_UNCHECKED : ( pFlag->IsReadOnly() ? lv::LVIS_CHECKEDGRAY : lv::LVIS_CHECKED );
-
-				if ( checkState != GetCheckState( i ) )
-					SetCheckState( i, checkState );
-			}
+				ModifyCheckState( i, CheckRadio::MakeCheckState( pFlag->IsValue(), pFlag->IsOn( flags ), !pFlag->IsReadOnly() ) );
 }
 
 DWORD CFlagsListCtrl::InputFlags( void ) const
@@ -212,11 +226,21 @@ DWORD CFlagsListCtrl::InputFlags( void ) const
 	return flags;
 }
 
+void CFlagsListCtrl::CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARAM rowKey, int subItem ) const
+{
+	const CFlagInfo* pFlag = CReportListControl::AsPtr< CFlagInfo >( rowKey );
+	if ( pFlag->IsReadOnly() || pFlag->IsSeparator() )
+		rTextEffect.m_textColor = color::Grey60;
+	else if ( pFlag->IsOn( GetFlags() ) )
+		rTextEffect.m_textColor = HotFieldColor;
+
+	CReportListControl::CombineTextEffectAt( rTextEffect, rowKey, subItem );
+}
+
 void CFlagsListCtrl::PreSubclassWindow( void )
 {
 	CReportListControl::PreSubclassWindow();
 
-	SetupExtendedCheckStates();
 	if ( HasValidMask() )
 	{
 		InitControl();
@@ -229,9 +253,10 @@ void CFlagsListCtrl::PreSubclassWindow( void )
 
 BEGIN_MESSAGE_MAP( CFlagsListCtrl, CReportListControl )
 	ON_WM_CONTEXTMENU()
-	ON_WM_CTLCOLOR_REFLECT()
 	ON_WM_INITMENUPOPUP()
-	ON_NOTIFY_REFLECT_EX( LVN_LINKCLICK, OnGroupTaskClick_Reflect )
+	ON_NOTIFY_REFLECT_EX( lv::LVN_ToggleCheckState, OnLvnToggleCheckState_Reflect )
+	ON_NOTIFY_REFLECT_EX( lv::LVN_CheckStatesChanged, OnLvnCheckStatesChanged_Reflect )
+	ON_NOTIFY_REFLECT_EX( LVN_LINKCLICK, OnLvnLinkClick_Reflect )
 	ON_COMMAND( CM_COPY_FORMATTED, OnCopy )
 	ON_UPDATE_COMMAND_UI( CM_COPY_FORMATTED, OnUpdateCopy )
 	ON_COMMAND( CM_COPY_SELECTED, OnCopySelected )
@@ -261,68 +286,50 @@ void CFlagsListCtrl::OnInitMenuPopup( CMenu* pPopupMenu, UINT index, BOOL isSysM
 	CReportListControl::OnInitMenuPopup( pPopupMenu, index, isSysMenu );
 }
 
-HBRUSH CFlagsListCtrl::CtlColor( CDC* pDC, UINT ctlType )
+BOOL CFlagsListCtrl::OnLvnToggleCheckState_Reflect( NMHDR* pNmHdr, LRESULT* pResult )
 {
-	pDC;
-	if ( ctlType == CTLCOLOR_LISTBOX && !HasValidMask() )
-		return ::GetSysColorBrush( COLOR_3DFACE );
-	return NULL;
-}
-
-BOOL CFlagsListCtrl::OnLvnItemChanging_Reflect( NMHDR* pNmHdr, LRESULT* pResult )
-{
-	if ( CReportListControl::OnLvnItemChanging_Reflect( pNmHdr, pResult ) )
-		return TRUE;			// internal change
-
-	NMLISTVIEW* pListInfo = (NMLISTVIEW*)pNmHdr;
+	lv::CNmToggleCheckState* pToggleInfo = (lv::CNmToggleCheckState*)pNmHdr;
+	ASSERT( !IsInternalChange() );
 	*pResult = 0;
 
-	if ( HasFlag( pListInfo->uChanged, LVIF_STATE ) && StateChanged( pListInfo->uNewState, pListInfo->uOldState, LVIS_STATEIMAGEMASK ) )		// check state changed
-	{
-		std::vector< const CFlagInfo* > flagSet;
-		QueryCheckedFlagWorkingSet( flagSet, pListInfo->iItem );
+	std::vector< const CFlagInfo* > flagSet;
+	QueryCheckedFlagWorkingSet( flagSet, pToggleInfo->m_pListView->iItem );
 
-		lv::CheckState checkState = AsCheckState( pListInfo->uNewState );
-		if ( AnyFlagCheckConflict( flagSet, IsCheckedState( checkState ) ) )
-		{
-			*pResult = 1;			// prevent change with conflict
-			ui::BeepSignal();
-			return TRUE;
-		}
+	if ( AnyFlagCheckConflict( flagSet, GetCheckStatePolicy()->IsCheckedState( pToggleInfo->m_newCheckState ) ) )
+	{
+		ui::BeepSignal();
+		*pResult = TRUE;	// prevent conflicting toggle
+		return TRUE;		// skip routing to parent
 	}
 
-	return FALSE;
+	return FALSE;			// continue routing to parent
 }
 
-BOOL CFlagsListCtrl::OnLvnItemChanged_Reflect( NMHDR* pNmHdr, LRESULT* pResult )
+BOOL CFlagsListCtrl::OnLvnCheckStatesChanged_Reflect( NMHDR* pNmHdr, LRESULT* pResult )
 {
-	if ( CReportListControl::OnLvnItemChanged_Reflect( pNmHdr, pResult ) )
-		return TRUE;			// internal change
-
-	NMLISTVIEW* pListInfo = (NMLISTVIEW*)pNmHdr;
+	lv::CNmCheckStatesChanged* pInfo = (lv::CNmCheckStatesChanged*)pNmHdr;
+	ASSERT( !IsInternalChange() );
+	ASSERT( !pInfo->m_itemIndexes.empty() );
 	*pResult = 0;
 
-	if ( HasFlag( pListInfo->uChanged, LVIF_STATE ) )		// item state has been changed
-		if ( StateChanged( pListInfo->uNewState, pListInfo->uOldState, LVIS_STATEIMAGEMASK ) )		// check state changed
-			if ( HasCheckState( pListInfo->uNewState ) )
-			{
-				std::vector< const CFlagInfo* > flagSet;
-				QueryCheckedFlagWorkingSet( flagSet, pListInfo->iItem );
+	// user has just toggled the check-state
+	std::vector< const CFlagInfo* > flagSet;
+	QueryObjectsByIndex( flagSet, pInfo->m_itemIndexes );		// get all flags impacted by the toggle
 
-				bool checked = IsCheckedState( pListInfo->uNewState );
-				if ( AnyFlagCheckConflict( flagSet, checked ) )
-				{
-					*pResult = 1;				// prevent conflict
-					ui::BeepSignal();
-					return TRUE;
-				}
-				SetFlagsChecked( flagSet, checked );
-			}
+	if ( AnyFlagCheckConflict( flagSet, IsChecked( pInfo->m_itemIndexes.front() ) ) )		// first index is the toggled reference
+	{
+		ui::BeepSignal();
+		OutputFlags();
+		*pResult = TRUE;	// prevent conflicting toggle
+		return TRUE;		// skip routing to parent
+	}
 
-	return FALSE;
+	DWORD newFlags = InputFlags();
+	UserSetFlags( newFlags );
+	return FALSE;			// continue routing to parent
 }
 
-BOOL CFlagsListCtrl::OnGroupTaskClick_Reflect( NMHDR* pNmHdr, LRESULT* pResult )
+BOOL CFlagsListCtrl::OnLvnLinkClick_Reflect( NMHDR* pNmHdr, LRESULT* pResult )
 {
 	NMLVLINK* pLinkInfo = (NMLVLINK*)pNmHdr;
 	int groupId = pLinkInfo->iSubItem;
@@ -353,42 +360,14 @@ BOOL CFlagsListCtrl::OnGroupTaskClick_Reflect( NMHDR* pNmHdr, LRESULT* pResult )
 	return FALSE;
 }
 
-BOOL CFlagsListCtrl::OnNmCustomDraw_Reflect( NMHDR* pNmHdr, LRESULT* pResult )
-{
-	NMLVCUSTOMDRAW* pDraw = (NMLVCUSTOMDRAW*)pNmHdr;
-	BOOL handled = CReportListControl::OnNmCustomDraw_Reflect( pNmHdr, pResult );
-
-	switch ( pDraw->nmcd.dwDrawStage )
-	{
-		case CDDS_PREPAINT:
-			*pResult = CDRF_NOTIFYITEMDRAW;
-			break;
-		case CDDS_ITEMPREPAINT:
-			if ( const CFlagInfo* pFlag = AsPtr< CFlagInfo >( pDraw->nmcd.lItemlParam ) )
-				if ( pFlag->IsReadOnly() || pFlag->IsSeparator() )
-				{
-					pDraw->clrText = color::DarkGrey;
-					*pResult |= CDRF_NEWFONT;
-					return TRUE;		// handled
-				}
-				else if ( pFlag->IsOn( GetFlags() ) )
-				{
-					pDraw->clrText = HotFieldColor;
-					*pResult |= CDRF_NEWFONT;
-					return TRUE;		// handled
-				}
-			break;
-	}
-	return handled;
-}
-
 void CFlagsListCtrl::OnCopy( void )
 {
 	CClipboard::CopyText( Format(), this );
 }
 
-void CFlagsListCtrl::OnUpdateCopy( CCmdUI* )
+void CFlagsListCtrl::OnUpdateCopy( CCmdUI* pCmdUI )
 {
+	pCmdUI;
 }
 
 void CFlagsListCtrl::OnCopySelected( void )

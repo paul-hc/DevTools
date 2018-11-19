@@ -37,8 +37,14 @@ bool CFlagInfo::SetTo( DWORD* pFlags, bool on /*= true*/ ) const
 
 	if ( IsBitFlag() )
 		SetFlag( *pFlags, m_value, on );
+	else if ( IsValue() )
+	{
+		if ( on )				// radio button checked?
+			SetMaskedValue( *pFlags, m_mask, m_value );
+	}
 	else
 	{
+		ASSERT( false );	// TODO: is this ever hit?
 		*pFlags &= ~m_mask;
 		if ( on )
 			*pFlags |= m_value;

@@ -12,50 +12,36 @@
 #include "MatchSequence.h"
 #include "Resequence.h"
 #include "TextEffect.h"
+#include "ui_fwd.h"
 #include "vector_map.h"
 #include <vector>
 #include <list>
+#include <map>
 #include <hash_map>
 #include <afxcmn.h>
 
 
+#if ( _WIN32_WINNT >= 0x0600 ) && defined( UNICODE )	// Vista+
+	#define UTL_VISTA_GROUPS
+#endif
+
+
 class CListSelectionData;
 class CReportListCustomDraw;
-namespace ole { class CDataSource; }
 class CBaseCustomDrawImager;
+namespace ole { class CDataSource; }
 
 namespace ui
 {
 	interface ISubjectAdapter;
+	interface ICheckStatePolicy;
 	class CFontEffectCache;
 }
 
-namespace ds
-{
-	enum DataSourceFlags
-	{
-		Indexes		= BIT_FLAG( 0 ),		// "cfListSelIndexes"
-		ItemsText	= BIT_FLAG( 1 ),		// CF_TEXT, CF_UNICODETEXT
-		ShellFiles	= BIT_FLAG( 2 )			// cfHDROP
-	};
-}
 
 namespace lv
 {
 	enum SubPopup { NowhereSubPopup, OnSelectionSubPopup, PathItemNowhereSubPopup, PathItemOnSelectionSubPopup };
-
-	// list view states, 1-based indexes
-	enum CheckState
-	{
-		// predefined check states: existing images in GetImageList( LVSIL_STATE )
-		LVIS_UNCHECKED			= INDEXTOSTATEIMAGEMASK( 1 ),		// BST_UNCHECKED + 1
-		LVIS_CHECKED			= INDEXTOSTATEIMAGEMASK( 2 ),		// BST_CHECKED + 1
-
-		// extended check states
-		LVIS_CHECKEDGRAY		= INDEXTOSTATEIMAGEMASK( 3 ),		// BST_INDETERMINATE + 1
-		LVIS_RADIO_UNCHECKED	= INDEXTOSTATEIMAGEMASK( 4 ),
-		LVIS_RADIO_CHECKED		= INDEXTOSTATEIMAGEMASK( 5 )
-	};
 
 	enum
 	{
@@ -70,37 +56,59 @@ namespace lv
 	{
 		// via WM_COMMAND:
 		LVN_ItemsReorder = 1000,
+			_LastCmd,						// derived classes may define new WM_COMMAND notifications starting from this value
 
 		// via WM_NOTIFY:
-		LVN_CustomSortList,					// pass NMHDR; clients return TRUE if handled custom sorting, using current sorting criteria GetSortByColumn()
-		LVN_DropFiles						// pass lv::CNmDropFiles
-	};
-
-
-	struct CNmHdr : public tagNMHDR
-	{
-		CNmHdr( const CListCtrl* pListCtrl, Notification notifyCode )
-		{
-			hwndFrom = pListCtrl->GetSafeHwnd();
-			idFrom = pListCtrl->GetDlgCtrlID();
-			code = notifyCode;
-		}
+		LVN_CustomSortList = 1100,			// pass NMHDR; clients return TRUE if handled custom sorting, using current sorting criteria GetSortByColumn()
+		LVN_ToggleCheckState,				// pass lv::CNmToggleCheckState; client could return TRUE to reject default toggle
+		LVN_CheckStatesChanged,				// pass lv::CNmCheckStatesChanged
+		LVN_DropFiles,						// pass lv::CNmDropFiles
+			_LastNotify						// derived classes may define new WM_NOTIFY notifications starting from this value
 	};
 
 
 	struct CNmDropFiles
 	{
 		CNmDropFiles( const CListCtrl* pListCtrl, const CPoint& dropPoint, int dropItemIndex )
-			: m_nmhdr( pListCtrl, LVN_DropFiles )
-			, m_dropPoint( dropPoint )
-			, m_dropItemIndex( dropItemIndex )
-		{
-		}
+			: m_nmHdr( pListCtrl, lv::LVN_DropFiles ), m_dropPoint( dropPoint ), m_dropItemIndex( dropItemIndex ) {}
 	public:
-		CNmHdr m_nmhdr;
+		ui::CNmHdr m_nmHdr;
 		CPoint m_dropPoint;							// client coordinates
 		int m_dropItemIndex;
 		std::vector< std::tstring > m_filePaths;	// sorted intuitively
+	};
+
+
+	struct CNmToggleCheckState
+	{
+		CNmToggleCheckState( const CListCtrl* pListCtrl, NMLISTVIEW* pListView, const ui::ICheckStatePolicy* pCheckStatePolicy );
+	public:
+		ui::CNmHdr m_nmHdr;
+		NMLISTVIEW* m_pListView;
+		const int m_oldCheckState;
+		int m_newCheckState;			// in/out
+	};
+
+
+	struct CNmCheckStatesChanged
+	{
+		CNmCheckStatesChanged( const CListCtrl* pListCtrl ) : m_nmHdr( pListCtrl, lv::LVN_CheckStatesChanged ) {}
+
+		bool AddIndex( int itemIndex );
+	public:
+		ui::CNmHdr m_nmHdr;
+		std::vector< int > m_itemIndexes;		// all items impacted by the toggle; first index is the toggled reference
+	};
+}
+
+
+namespace ds
+{
+	enum DataSourceFlags
+	{
+		Indexes		= BIT_FLAG( 0 ),		// "cfListSelIndexes"
+		ItemsText	= BIT_FLAG( 1 ),		// CF_TEXT, CF_UNICODETEXT
+		ShellFiles	= BIT_FLAG( 2 )			// cfHDROP
 	};
 }
 
@@ -108,7 +116,7 @@ namespace lv
 abstract class CListTraits			// defines types shared between CReportListControl and CReportListCustomDraw classes
 {
 public:
-	typedef LPARAM TRowKey;			// row keys are invariant to sorting
+	typedef LPARAM TRowKey;			// row keys are invariant to sorting; they represent item data (LPARAM), or fall back to index (int)
 	typedef int TColumn;
 
 	enum StdColumn { Code, EntireRecord = (TColumn)-1 };
@@ -145,11 +153,22 @@ protected:
 };
 
 
+namespace lv
+{
+	interface ITextEffectCallback
+	{
+		virtual void CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARAM rowKey, int subItem ) const = 0;
+		virtual void ModifyDiffTextEffectAt( CListTraits::CMatchEffects& rEffects, LPARAM rowKey, int subItem ) const { rEffects, rowKey, subItem; }
+	};
+}
+
+
 class CReportListControl : public CListCtrl
 						 , public CInternalChange
 						 , public CListTraits
 						 , public CObjectCtrlBase
 						 , public ICustomDrawControl
+						 , protected lv::ITextEffectCallback
 {
 	friend class CReportListCustomDraw;
 public:
@@ -223,10 +242,12 @@ public:
 	int GetDropIndexAtPoint( const CPoint& point ) const;
 	bool IsItemFullyVisible( int index ) const;
 	bool GetIconItemRect( CRect* pIconRect, int index ) const;				// returns true if item visible
-
-	static bool IsSelectionChangedNotify( const NMLISTVIEW* pNmList, UINT selMask = LVIS_SELECTED | LVIS_FOCUSED );
 public:
-	TRowKey MakeRowKeyAt( int index ) const;			// favour item data (LPARAM), or fall back to index (int)
+	TRowKey MakeRowKeyAt( int index ) const			// favour item data (LPARAM), or fall back to index (int)
+	{
+		TRowKey rowKey = static_cast< TRowKey >( GetItemData( index ) );
+		return rowKey != 0 ? rowKey : static_cast< TRowKey >( index );
+	}
 
 	// sorting
 	std::pair< TColumn, bool > GetSortByColumn( void ) const { return std::make_pair( m_sortByColumn, m_sortAscending ); }
@@ -323,7 +344,6 @@ protected:
 	virtual bool CacheSelectionData( ole::CDataSource* pDataSource, int sourceFlags, const CListSelectionData& selData ) const;
 
 	bool ResizeFlexColumns( void );
-	void NotifyParent( lv::Notification notifCode );
 
 	// base overrides
 	virtual void OnFinalReleaseInternalChange( void );
@@ -339,10 +359,17 @@ public:
 
 	bool SetPtrAt( int index, const void* pData ) { return SetItemData( index, (DWORD_PTR)pData ) != FALSE; }
 
-	utl::ISubject* GetObjectAt( int index ) const;
+	utl::ISubject* GetSubjectAt( int index ) const;
 	static inline utl::ISubject* ToSubject( LPARAM data ) { return checked_static_cast< utl::ISubject* >( (utl::ISubject*)data ); }
 
+	template< typename ObjectT >
+	ObjectT* GetObjectAt( int index ) const { return checked_static_cast< ObjectT* >( GetSubjectAt( index ) ); }
+
+	template< typename ObjectT >
+	void QueryObjectsByIndex( std::vector< ObjectT* >& rObjects, const std::vector< int >& itemIndexes ) const;
+
 	bool DeleteAllItems( void );
+	void RemoveAllGroups( void );
 
 	virtual int InsertObjectItem( int index, const utl::ISubject* pObject, int imageIndex = No_Image, const TCHAR* pText = NULL );		// pText could be LPSTR_TEXTCALLBACK
 
@@ -375,45 +402,61 @@ public:
 	int FindItemWithState( UINT stateMask ) const { return GetNextItem( -1, LVNI_ALL | stateMask ); }
 	bool HasItemWithState( UINT stateMask ) const { return GetNextItem( -1, LVNI_ALL | stateMask ) != -1; }
 
-	bool IsChecked( int index ) const { return GetCheck( index ) != FALSE; }
+	static bool StateChanged( UINT newState, UINT oldState, UINT stateMask ) { return ( newState & stateMask ) != ( oldState & stateMask ); }
+	static bool IsStateChangeNotify( const NMLISTVIEW* pNmListView, UINT selMask );
+
+	static bool IsSelectionChangeNotify( const NMLISTVIEW* pNmListView, UINT selMask = LVIS_SELECTED | LVIS_FOCUSED ) { return IsStateChangeNotify( pNmListView, selMask ); }
+	static bool IsCheckStateChangeNotify( const NMLISTVIEW* pNmListView ) { return IsStateChangeNotify( pNmListView, LVIS_STATEIMAGEMASK ); }
+
+	// check-box
+	bool GetToggleCheckSelItems( void ) const { return HasFlag( m_optionFlags, ToggleCheckSelItems ); }
+	void SetToggleCheckSelItems( bool toggleCheckSelected = true ) { SetOptionFlag( ToggleCheckSelItems, toggleCheckSelected ); }
+
+	bool IsChecked( int index ) const;
 	bool SetChecked( int index, bool check = true ) { return SetCheck( index, check ) != FALSE; }
 
-	template< typename Type >
-	bool QueryCheckedItems( std::vector< Type* >& rCheckedItems ) const { return QueryCheckedStateItems( rCheckedItems, lv::LVIS_CHECKED ); }
+	template< typename ObjectT >
+	bool QueryCheckedObjects( std::vector< ObjectT* >& rCheckedObjects ) const { return QueryObjectsWithCheckedState( rCheckedObjects, BST_CHECKED ); }
 
-	template< typename Type >
-	void SetCheckedItems( const std::vector< Type* >& items, bool check = true, bool uncheckOthers = true ) { SetCheckedStateItems( &items, check ? lv::LVIS_CHECKED : lv::LVIS_UNCHECKED, uncheckOthers ); }
+	template< typename ObjectT >
+	void SetCheckedObjects( const std::vector< ObjectT* >& objects, bool check = true, bool uncheckOthers = true ) { SetObjectsCheckedState( &objects, check ? BST_CHECKED : BST_UNCHECKED, uncheckOthers ); }
 
-	template< typename Type >
-	void SetCheckedAll( bool check = true ) { SetCheckedStateItems( NULL, check ? lv::LVIS_CHECKED : lv::LVIS_UNCHECKED, false ); }
+	void SetCheckedAll( bool check = true ) { SetObjectsCheckedState( (const std::vector< utl::ISubject* >*)NULL, check ? BST_CHECKED : BST_UNCHECKED, false ); }
 
-	// extended check state (includes radio check states)
-	lv::CheckState GetCheckState( int index ) const { return static_cast< lv::CheckState >( GetItemState( index, LVIS_STATEIMAGEMASK ) ); }
-	bool SetCheckState( int index, lv::CheckState checkState ) { return SetItemState( index, checkState, LVIS_STATEIMAGEMASK ) != FALSE; }
-	bool ModifyCheckState( int index, lv::CheckState checkState );
+	// Extended check-state (may include radio check-states).
+	//	Internally, the list-ctrl toggles through the sequence of states. That behaviour is replaced with custom togging when using a m_pCheckStatePolicy.
+	//	Clients can:
+	//		handle LVN_ToggleCheckState and override that behaviour;
+	//		handle LVN_CheckStatesChanged to correlate other items with the new toggled state.
+	//
+	const ui::ICheckStatePolicy* GetCheckStatePolicy( void ) const { return m_pCheckStatePolicy; }
+	void SetCheckStatePolicy( const ui::ICheckStatePolicy* pCheckStatePolicy );
 
-	bool GetUseExtendedCheckStates( void ) const;
-	bool SetupExtendedCheckStates( void );
 	CImageList* GetStateImageList( void ) const { return GetImageList( LVSIL_STATE ); }
 
-	bool GetToggleCheckSelected( void ) const { return HasFlag( m_optionFlags, ToggleCheckSelected ); }
-	void SetToggleCheckSelected( bool toggleCheckSelected = true ) { SetOptionFlag( ToggleCheckSelected, toggleCheckSelected ); }
+	int GetCheckState( int index ) const { return ui::CheckStateFromRaw( GetRawCheckState( index ) ); }
+	bool SetCheckState( int index, int checkState );
+	bool ModifyCheckState( int index, int checkState );
 
-	bool GetUseTriStateAutoCheck( void ) const { return HasFlag( m_optionFlags, UseTriStateAutoCheck ); }
-	void SetUseTriStateAutoCheck( bool useTriStateAutoCheck = true ) { SetOptionFlag( UseTriStateAutoCheck, useTriStateAutoCheck ); }
+	int GetObjectCheckState( const utl::ISubject* pObject ) const;
+	bool ModifyObjectCheckState( const utl::ISubject* pObject, int checkState );
 
-	static bool StateChanged( UINT newState, UINT oldState, UINT stateMask ) { return ( newState & stateMask ) != ( oldState & stateMask ); }
-	static bool HasCheckState( UINT state ) { return ( state & LVIS_STATEIMAGEMASK ) != 0; }
+	template< typename ObjectT >
+	bool QueryObjectsWithCheckedState( std::vector< ObjectT* >& rCheckedObjects, int checkState = BST_CHECKED ) const;
 
-	static lv::CheckState AsCheckState( UINT state ) { return static_cast< lv::CheckState >( state & LVIS_STATEIMAGEMASK ); }
-	static bool IsCheckedState( UINT state );
+	template< typename ObjectT >
+	void SetObjectsCheckedState( const std::vector< ObjectT* >* pObjects, int checkState = BST_CHECKED, bool uncheckOthers = true );
+private:
+	ui::RawCheckState GetRawCheckState( int index ) const { return GetItemState( index, LVIS_STATEIMAGEMASK ); }
+	bool SetRawCheckState( int index, ui::RawCheckState rawCheckState ) { return SetItemState( index, rawCheckState, LVIS_STATEIMAGEMASK ) != FALSE; }
 
-	template< typename Type >
-	bool QueryCheckedStateItems( std::vector< Type* >& rCheckedItems, lv::CheckState checkState = lv::LVIS_CHECKED ) const;
+	static bool HasRawCheckState( ui::RawCheckState state ) { return HasFlag( state, LVIS_STATEIMAGEMASK ); }
 
-	template< typename Type >
-	void SetCheckedStateItems( const std::vector< Type* >* pItems, lv::CheckState checkState = lv::LVIS_CHECKED, bool uncheckOthers = true );
-
+	void ToggleCheckState( int index, int newCheckState );
+	void SetItemCheckState( int index, int checkState );
+	void NotifyCheckStatesChanged( void );
+	size_t ApplyCheckStateToSelectedItems( int toggledIndex, int checkState );
+public:
 	// caret and selection
 	int GetCaretIndex( void ) const { return FindItemWithState( LVNI_FOCUSED ); }
 	bool SetCaretIndex( int index, bool doSet = true );
@@ -434,11 +477,11 @@ public:
 
 	void Select( const void* pObject );
 
-	template< typename Type >
-	bool QuerySelectionAs( std::vector< Type* >& rSelPtrs ) const;
+	template< typename ObjectT >
+	bool QuerySelectionAs( std::vector< ObjectT* >& rSelObjects ) const;
 
-	template< typename Type >
-	void SelectItems( const std::vector< Type* >& rPtrs );
+	template< typename ObjectT >
+	void SelectObjects( const std::vector< ObjectT* >& objects );
 
 	// resequence
 	void MoveSelectionTo( seq::MoveTo moveTo );
@@ -462,18 +505,16 @@ public:
 
 	const ui::CTextEffect* FindTextEffectAt( TRowKey rowKey, TColumn subItem ) const;
 
-	interface ITextEffectCallback
-	{
-		virtual void CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARAM rowKey, int subItem ) const = 0;
-		virtual void ModifyDiffTextEffectAt( CListTraits::CMatchEffects& rEffects, LPARAM rowKey, int subItem ) const { rEffects, rowKey, subItem; }
-	};
-
-	void SetTextEffectCallback( ITextEffectCallback* pTextEffectCallback ) { m_pTextEffectCallback = pTextEffectCallback; }
+	void SetTextEffectCallback( lv::ITextEffectCallback* pTextEffectCallback ) { m_pTextEffectCallback = pTextEffectCallback; }
 
 	// diff columns
 	template< typename MatchFunc >
 	void SetupDiffColumnPair( TColumn srcColumn, TColumn destColumn, MatchFunc getMatchFunc );		// call after the list items are set up; by default pass str::GetMatch()
 protected:
+	// lv::ITextEffectCallback interface
+	virtual void CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARAM rowKey, int subItem ) const;
+	virtual void ModifyDiffTextEffectAt( CListTraits::CMatchEffects& rEffects, LPARAM rowKey, int subItem ) const;
+
 	const CDiffColumnPair* FindDiffColumnPair( TColumn column ) const;
 	bool IsDiffColumn( TColumn column ) const { return FindDiffColumnPair( column ) != NULL; }
 
@@ -512,19 +553,23 @@ public:
 public:
 	// groups: rows not assigned to a group will not show in group-view
 
-#if ( _WIN32_WINNT >= 0x0600 ) && defined( UNICODE )	// Vista+
+#ifdef UTL_VISTA_GROUPS
 
 	// groupId: typically an index in the vector of group objects maintained by the client.
-	// groupIndex can change with sorting, whereas groupId is invariant to that
+	// groupIndex: display index, can change with sorting, whereas groupId is invariant to that.
 	//
 	int GetGroupId( int groupIndex ) const;
-	std::pair< int, UINT > GetGroupItemsRange( int groupId ) const;		// < firstItemIndex, itemCount >
 
-	int GetRowGroupId( int rowIndex ) const;
-	bool SetRowGroupId( int rowIndex, int groupId );
+	int GetItemGroupId( int itemIndex ) const;							// itemIndex refers to a regular item in the list
+	bool SetItemGroupId( int itemIndex, int groupId );
+
+	template< typename ObjectT >
+	void QueryGroupItems( std::vector< ObjectT* >& rObjectItems, int groupId ) const;
+
+	std::pair< int, UINT > _GetGroupItemsRange( int groupId ) const;		// <firstItemIndex, itemCount> - not reliable with groups/items custom sorting, use QueryGroupItems instead (just the first item index is accurate)
 
 	std::tstring GetGroupHeaderText( int groupId ) const;
-	int InsertGroupHeader( int index, int groupId, const std::tstring& header, DWORD state = LVGS_NORMAL, DWORD align = LVGA_HEADER_LEFT );
+	int InsertGroupHeader( int groupIndex, int groupId, const std::tstring& header, DWORD state = LVGS_NORMAL, DWORD align = LVGA_HEADER_LEFT );
 	bool SetGroupFooter( int groupId, const std::tstring& footer, DWORD align = LVGA_FOOTER_CENTER );
 	bool SetGroupTask( int groupId, const std::tstring& task );
 	bool SetGroupSubtitle( int groupId, const std::tstring& subtitle );
@@ -539,7 +584,7 @@ public:
 	void ExpandAllGroups( void );
 
 	int GroupHitTest( const CPoint& point ) const;
-#endif // Vista groups
+#endif //UTL_VISTA_GROUPS
 
 private:
 	bool UpdateCustomImagerBoundsSize( void );
@@ -551,8 +596,7 @@ private:
 		SortInternally				= BIT_FLAG( 2 ),
 		AcceptDropFiles				= BIT_FLAG( 3 ),		// enable as Explorer drop target, send LVN_DropFiles notification when files are dropped onto the list
 		HighlightTextDiffsFrame		= BIT_FLAG( 4 ),		// highlight text differences with a filled frame
-		UseTriStateAutoCheck		= BIT_FLAG( 5 ),		// extended check state: allows toggling lv::LVIS_UNCHECKED -> lv::LVIS_CHECKED -> lv::LVIS_CHECKEDGRAY
-		ToggleCheckSelected			= BIT_FLAG( 5 )			// multi-selection: toggle checked state for the selected items
+		ToggleCheckSelItems			= BIT_FLAG( 5 )			// multi-selection: toggle checked state for the selected items
 	};
 
 	bool SetOptionFlag( ListOption flag, bool on );
@@ -571,16 +615,19 @@ private:
 
 	std::vector< CColumnComparator > m_comparators;
 	utl::vector_map< TRowKey, int > m_initialItemsOrder;	// stores items initial order just after list set-up
+	std::multimap< int, TRowKey > m_groupIdToItemsMap;		// group ID per row-key items map
+
+	CImageList* m_pImageList;
+	CImageList* m_pLargeImageList;
+	const ui::ICheckStatePolicy* m_pCheckStatePolicy;		// for extended check states
 
 	typedef std::pair< TRowKey, TColumn > TCellPair;		// invariant to sorting: favour LPARAMs instead of indexes
 	stdext::hash_map< TCellPair, ui::CTextEffect > m_markedCells;
 	std::auto_ptr< ui::CFontEffectCache > m_pFontCache;		// self-encapsulated
-	ITextEffectCallback* m_pTextEffectCallback;
+	lv::ITextEffectCallback* m_pTextEffectCallback;
 
 	std::list< CDiffColumnPair > m_diffColumnPairs;
 
-	CImageList* m_pImageList;
-	CImageList* m_pLargeImageList;
 	std::auto_ptr< CBaseCustomDrawImager > m_pCustomImager;
 
 	CMenu* m_pPopupMenu[ _ListPopupCount ];					// used when right clicking nowhere - on header or no list item
@@ -590,6 +637,7 @@ private:
 	ole::IDataSourceFactory* m_pDataSourceFactory;			// creates ole::CDataSource for clipboard and drag-drop
 private:
 	bool m_painting;										// true during OnPaint() - supresses item text callback for diff columns to prevent default list sub-item draw (diffs are custom drawn)
+	std::auto_ptr< lv::CNmCheckStatesChanged > m_pNmToggling;	// set during OnLvnItemChanging_Reflect() - user toggling check-state with extended states
 	BOOL m_parentHandles[ _PN_Count ];						// self-encapsulated 'parent handles' flags array
 protected:
 	CWnd* m_pTrackMenuTarget;								// window that receives commands when tracking the context menu
@@ -619,8 +667,8 @@ protected:
 	afx_msg void OnContextMenu( CWnd* pWnd, CPoint screenPos );
 	afx_msg void OnInitMenuPopup( CMenu* pPopupMenu, UINT index, BOOL isSysMenu );
 	afx_msg void OnPaint( void );
-	virtual BOOL OnLvnItemChanging_Reflect( NMHDR* pNmHdr, LRESULT* pResult );
-	virtual BOOL OnLvnItemChanged_Reflect( NMHDR* pNmHdr, LRESULT* pResult );
+	afx_msg BOOL OnLvnItemChanging_Reflect( NMHDR* pNmHdr, LRESULT* pResult );
+	afx_msg BOOL OnLvnItemChanged_Reflect( NMHDR* pNmHdr, LRESULT* pResult );
 	afx_msg BOOL OnHdnItemChanging_Reflect( NMHDR* pNmHdr, LRESULT* pResult );
 	afx_msg BOOL OnHdnItemChanged_Reflect( NMHDR* pNmHdr, LRESULT* pResult );
 	afx_msg BOOL OnLvnColumnClick_Reflect( NMHDR* pNmHdr, LRESULT* pResult );
@@ -767,53 +815,57 @@ inline Type* CReportListControl::GetPtrAt( int index ) const
 	return AsPtr< Type >( GetItemData( index ) );
 }
 
-template< typename Type >
-bool CReportListControl::QueryCheckedStateItems( std::vector< Type* >& rCheckedItems, lv::CheckState checkState /*= lv::LVIS_CHECKED*/ ) const
+template< typename ObjectT >
+void CReportListControl::QueryObjectsByIndex( std::vector< ObjectT* >& rObjects, const std::vector< int >& itemIndexes ) const
+{
+	rObjects.reserve( rObjects.size() + itemIndexes.size() );
+
+	for ( std::vector< int >::const_iterator itIndex = itemIndexes.begin(); itIndex != itemIndexes.end(); ++itIndex )
+		if ( ObjectT* pObject = GetPtrAt< ObjectT >( *itIndex ) )
+			rObjects.push_back( pObject );
+}
+
+template< typename ObjectT >
+bool CReportListControl::QueryObjectsWithCheckedState( std::vector< ObjectT* >& rCheckedObjects, int checkState /*= BST_CHECKED*/ ) const
 {
 	for ( UINT i = 0, count = GetItemCount(); i != count; ++i )
 		if ( GetCheckState( i ) == checkState )
-			rCheckedItems.push_back( GetPtrAt< Type >( i ) );
+			rCheckedObjects.push_back( GetPtrAt< ObjectT >( i ) );
 
-	return !rCheckedItems.empty();
+	return !rCheckedObjects.empty();
 }
 
-template< typename Type >
-void CReportListControl::SetCheckedStateItems( const std::vector< Type* >* pItems, lv::CheckState checkState /*= lv::LVIS_CHECKED*/, bool uncheckOthers /*= true*/ )
+template< typename ObjectT >
+void CReportListControl::SetObjectsCheckedState( const std::vector< ObjectT* >* pObjects, int checkState /*= BST_CHECKED*/, bool uncheckOthers /*= true*/ )
 {
 	for ( UINT i = 0, count = GetItemCount(); i != count; ++i )
-		if ( NULL == pItems || utl::Contains( *pItems, GetPtrAt< Type >( i ) ) )
+		if ( NULL == pObjects || utl::Contains( *pObjects, GetPtrAt< ObjectT >( i ) ) )
 			ModifyCheckState( i, checkState );
 		else if ( uncheckOthers )
-			ModifyCheckState( i, lv::LVIS_UNCHECKED );
+			ModifyCheckState( i, BST_UNCHECKED );
 }
 
 
-template< typename Type >
-bool CReportListControl::QuerySelectionAs( std::vector< Type* >& rSelPtrs ) const
+template< typename ObjectT >
+bool CReportListControl::QuerySelectionAs( std::vector< ObjectT* >& rSelObjects ) const
 {
 	std::vector< int > selIndexes;
 	if ( !GetSelection( selIndexes ) )
 		return false;
 
-	rSelPtrs.clear();
-	rSelPtrs.reserve( selIndexes.size() );
+	rSelObjects.clear();
+	QueryObjectsByIndex( rSelObjects, selIndexes );
 
-	size_t selCount = 0;
-
-	for ( std::vector< int >::const_iterator itSelIndex = selIndexes.begin(); itSelIndex != selIndexes.end(); ++itSelIndex, ++selCount )
-		if ( Type* pSelObject = GetPtrAt< Type >( *itSelIndex ) )
-			rSelPtrs.push_back( pSelObject );
-
-	return !rSelPtrs.empty() && rSelPtrs.size() == selCount;		// homogenous selection?
+	return !rSelObjects.empty() && rSelObjects.size() == selIndexes.size();		// homogenous selection?
 }
 
-template< typename Type >
-void CReportListControl::SelectItems( const std::vector< Type* >& rPtrs )
+template< typename ObjectT >
+void CReportListControl::SelectObjects( const std::vector< ObjectT* >& objects )
 {
 	std::vector< int > selIndexes;
-	for ( std::vector< Type* >::const_iterator itObject = rPtrs.begin(); itObject != rPtrs.end(); ++itObject )
+	for ( std::vector< ObjectT* >::const_iterator itObject = objects.begin(); itObject != objects.end(); ++itObject )
 	{
-		int foundIndex = Find( *itObject );
+		int foundIndex = FindItemIndex( *itObject );
 		if ( foundIndex != -1 )
 			selIndexes.push_back( foundIndex );
 	}
@@ -822,6 +874,18 @@ void CReportListControl::SelectItems( const std::vector< Type* >& rPtrs )
 		SetSelection( selIndexes, selIndexes.front() );
 	else
 		ClearSelection();
+}
+
+template< typename ObjectT >
+void CReportListControl::QueryGroupItems( std::vector< ObjectT* >& rObjectItems, int groupId ) const
+{
+	REQUIRE( IsGroupViewEnabled() );
+
+	typedef std::multimap< int, TRowKey >::const_iterator GroupMapIterator;
+	std::pair< GroupMapIterator, GroupMapIterator > itPair = m_groupIdToItemsMap.equal_range( groupId );
+
+	for ( GroupMapIterator it = itPair.first; it != itPair.second; ++it )
+		rObjectItems.push_back( AsPtr< ObjectT >( it->second ) );
 }
 
 template< typename MatchFunc >

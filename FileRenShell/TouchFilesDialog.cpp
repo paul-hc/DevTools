@@ -695,9 +695,9 @@ void CTouchFilesDialog::OnToggle_Attribute( UINT checkId )
 
 void CTouchFilesDialog::OnLvnItemChanged_TouchList( NMHDR* pNmHdr, LRESULT* pResult )
 {
-	NM_LISTVIEW* pNmList = (NM_LISTVIEW*)pNmHdr;
+	NMLISTVIEW* pNmList = (NMLISTVIEW*)pNmHdr;
 
-	if ( CReportListControl::IsSelectionChangedNotify( pNmList, LVIS_SELECTED | LVIS_FOCUSED ) )
+	if ( CReportListControl::IsSelectionChangeNotify( pNmList, LVIS_SELECTED | LVIS_FOCUSED ) )
 	{
 		//UpdateFieldsFromSel( m_fileListCtrl.GetCurSel() );
 	}

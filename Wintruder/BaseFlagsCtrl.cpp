@@ -42,8 +42,7 @@ void CBaseFlagsCtrl::SetMultiFlagStores( const std::vector< const CFlagStore* >&
 	m_flagsMask = flagsMask;
 
 	if ( 0 == m_flagsMask )
-		for ( std::vector< const CFlagStore* >::const_iterator itFlagStore = flagStores.begin();
-			  itFlagStore != flagStores.end(); ++itFlagStore )
+		for ( std::vector< const CFlagStore* >::const_iterator itFlagStore = flagStores.begin(); itFlagStore != flagStores.end(); ++itFlagStore )
 			m_flagsMask |= ( *itFlagStore )->GetMask();
 
 	m_flags = 0;

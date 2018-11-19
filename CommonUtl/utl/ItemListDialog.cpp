@@ -354,7 +354,7 @@ std::tstring CItemsListPage::GetListItemText( int index ) const
 	if ( ui::String == m_rContent.m_type )
 		return m_listCtrl.GetItemText( index, CPathItemListCtrl::Code ).GetString();
 
-	return m_listCtrl.FormatCode( m_listCtrl.GetObjectAt( index ) );
+	return m_listCtrl.FormatCode( m_listCtrl.GetSubjectAt( index ) );
 }
 
 void CItemsListPage::QueryListItems( std::vector< std::tstring >& rItems ) const
@@ -438,8 +438,8 @@ BOOL CItemsListPage::PreTranslateMessage( MSG* pMsg )
 
 void CItemsListPage::OnLvnItemChanged_Items( NMHDR* pNmHdr, LRESULT* pResult )
 {
-	NM_LISTVIEW* pNmList = (NM_LISTVIEW*)pNmHdr;
-	if ( CReportListControl::IsSelectionChangedNotify( pNmList, LVIS_SELECTED | LVIS_FOCUSED ) )
+	NMLISTVIEW* pNmList = (NMLISTVIEW*)pNmHdr;
+	if ( CReportListControl::IsSelectionChangeNotify( pNmList, LVIS_SELECTED | LVIS_FOCUSED ) )
 	{
 		int selIndex = m_listCtrl.GetCurSel();
 		if ( selIndex != -1 )

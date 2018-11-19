@@ -491,7 +491,7 @@ void CArchiveImagesDialog::OnEditArchivePassword( void )
 
 void CArchiveImagesDialog::LVnItemChangedFilePathsList( NMHDR* pNmHdr, LRESULT* pResult )
 {
-	NM_LISTVIEW* pNmListView = (NM_LISTVIEW*)pNmHdr; pNmListView;
+	NMLISTVIEW* pNmListView = (NMLISTVIEW*)pNmHdr; pNmListView;
 
 	// store new selection only if not empty
 	if ( m_filesListCtrl.GetSelectedCount() != 0 )

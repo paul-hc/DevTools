@@ -732,6 +732,27 @@ namespace ui
 		else									// hWnd is a dialog's child
 			return (HBRUSH)::SendMessage( ::GetParent( hWnd ), message, (WPARAM)hDC, (LPARAM)hWnd );
 	}
+
+
+	// CNmHdr implementation (declared in ui_fwd.h)
+
+	LRESULT CNmHdr::NotifyParent( void )
+	{
+		return ui::SendNotifyToParent( hwndFrom, code, this );		// give parent a chance to handle the notification
+	}
+
+
+	COLORREF AlterColorSlightly( COLORREF bkColor )
+	{
+		// modify slightly the background (~ white): so that themes that render with alpha blending don't show weird colours (such as for radio button)
+		BYTE green = GetGValue( bkColor );
+		if ( green != 0 )
+			++green;
+		else
+			--green;
+
+		return RGB( GetRValue( bkColor ), green, GetBValue( bkColor ) );
+	}
 }
 
 

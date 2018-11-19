@@ -169,7 +169,7 @@ BOOL CPathItemListCtrl::OnLvnDblclk_Reflect( NMHDR* pNmHdr, LRESULT* pResult )
 	UINT flags;
 	int itemIndex = HitTest( pNmItemActivate->ptAction, &flags );
 	if ( itemIndex != -1 && !HasFlag( flags, LVHT_ONITEMSTATEICON ) )				// on item but not checkbox
-		if ( utl::ISubject* pCaretObject = GetObjectAt( pNmItemActivate->iItem ) )
+		if ( utl::ISubject* pCaretObject = GetSubjectAt( pNmItemActivate->iItem ) )
 		{
 			CShellContextMenuHost contextMenu( this );
 			contextMenu.Reset( shell::MakeFilePathContextMenu( pCaretObject->GetCode(), m_hWnd ) );

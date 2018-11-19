@@ -13,8 +13,8 @@
 #include "utl/Color.h"
 #include "utl/ContainerUtilities.h"
 #include "utl/Crc32.h"
-#include "utl/CmdInfoStore.h"
 #include "utl/Command.h"
+#include "utl/CheckStatePolicies.h"
 #include "utl/EnumTags.h"
 #include "utl/FileSystem.h"
 #include "utl/FmtUtils.h"
@@ -33,6 +33,34 @@
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
+
+
+struct CheckDup : public ui::ICheckStatePolicy
+{
+	enum CheckState { UncheckedItem = BST_UNCHECKED, CheckedItem = BST_CHECKED, OriginalItem, _Count };
+
+	static const ui::ICheckStatePolicy* Instance( void );
+
+	// ui::ICheckStatePolicy interface
+	virtual bool IsCheckedState( int checkState ) const { return CheckedItem == checkState; }
+	virtual bool IsEnabledState( int checkState ) const { return checkState != OriginalItem; }
+	virtual int Toggle( int checkState ) const;
+};
+
+
+const ui::ICheckStatePolicy* CheckDup::Instance( void )
+{
+	static CheckDup s_checkStatePolicy;
+	return &s_checkStatePolicy;
+}
+
+int CheckDup::Toggle( int checkState ) const
+{
+	if ( checkState != OriginalItem )
+		++checkState %= OriginalItem;
+
+	return checkState;
+}
 
 
 namespace hlp
@@ -123,7 +151,8 @@ CFindDuplicatesDialog::CFindDuplicatesDialog( CFileModel* pFileModel, CWnd* pPar
 	m_dupsListCtrl.ModifyListStyleEx( 0, LVS_EX_CHECKBOXES );
 	m_dupsListCtrl.SetSection( m_regSection + _T("\\List") );
 	m_dupsListCtrl.SetTextEffectCallback( this );
-	m_dupsListCtrl.SetToggleCheckSelected();
+	m_dupsListCtrl.SetCheckStatePolicy( CheckDup::Instance() );
+	m_dupsListCtrl.SetToggleCheckSelItems();
 
 	m_dupsListCtrl.SetPopupMenu( CReportListControl::Nowhere, &GetDupListPopupMenu( CReportListControl::Nowhere ) );
 	m_dupsListCtrl.SetPopupMenu( CReportListControl::OnSelection, &GetDupListPopupMenu( CReportListControl::OnSelection ) );
@@ -315,8 +344,6 @@ void CFindDuplicatesDialog::SetupDuplicateFileList( void )
 
 	m_dupsListCtrl.EnableGroupView( !m_duplicateGroups.empty() );
 
-ASSERT( m_dupsListCtrl.GetUseExtendedCheckStates() );
-
 	unsigned int index = 0;			// strictly item index
 
 	for ( unsigned int groupId = 0; groupId != m_duplicateGroups.size(); ++groupId )
@@ -342,9 +369,9 @@ ASSERT( m_dupsListCtrl.GetUseExtendedCheckStates() );
 			m_dupsListCtrl.SetSubItemText( index, DateModified, time_utl::FormatTimestamp( ( *itDupItem )->GetModifyTime() ) );
 
 			if ( ( *itDupItem )->IsOriginalItem() )
-				m_dupsListCtrl.ModifyCheckState( index, (lv::CheckState)LVIS_ORIGINAL_ITEM );
+				m_dupsListCtrl.ModifyCheckState( index, CheckDup::OriginalItem );
 
-			VERIFY( m_dupsListCtrl.SetRowGroupId( index, groupId ) );
+			VERIFY( m_dupsListCtrl.SetItemGroupId( index, groupId ) );
 		}
 	}
 
@@ -375,7 +402,7 @@ void CFindDuplicatesDialog::DisplayCheckedGroupInfo( void )
 	std::tstring text;
 
 	std::vector< CDuplicateFileItem* > checkedDupItems;
-	if ( m_dupsListCtrl.QueryCheckedItems( checkedDupItems ) )
+	if ( m_dupsListCtrl.QueryObjectsWithCheckedState( checkedDupItems, CheckDup::CheckedItem ) )
 	{
 		std::set< CDuplicateFilesGroup* > dupGroups;
 		std::set< fs::CPath > dirPaths;
@@ -500,39 +527,18 @@ void CFindDuplicatesDialog::ToggleCheckGroupDuplicates( unsigned int groupId )
 	ASSERT( groupId < m_duplicateGroups.size() );
 
 	const CDuplicateFilesGroup* pCurrGroup = m_duplicateGroups[ groupId ];
-
-	std::pair< int, UINT > groupItemsPair = m_dupsListCtrl.GetGroupItemsRange( groupId );
-	ASSERT( groupItemsPair.second > 1 );
-
-	const int firstIndex = groupItemsPair.first;
-	bool origChecked = false;
+	ASSERT( pCurrGroup->GetItems().front()->IsOriginalItem() );
 	size_t dupsCheckedCount = 0;
 
-	for ( UINT pos = 0; pos != groupItemsPair.second; ++pos )
-	{
-		if ( lv::LVIS_CHECKED == m_dupsListCtrl.GetCheckState( firstIndex + pos ) )
-			if ( m_dupsListCtrl.GetPtrAt< CDuplicateFileItem >( firstIndex + pos )->IsOriginalItem() )
-				origChecked = true;
-			else
-				++dupsCheckedCount;
-	}
+	for ( std::vector< CDuplicateFileItem* >::const_iterator itItem = pCurrGroup->GetItems().begin() + 1; itItem != pCurrGroup->GetItems().end(); ++itItem )
+		if ( CheckDup::CheckedItem == m_dupsListCtrl.GetObjectCheckState( *itItem ) )
+			++dupsCheckedCount;
 
-	if ( !origChecked && pCurrGroup->GetDuplicatesCount() == dupsCheckedCount )			// original unchecked and all duplicates checked?
-	{	// toggle: uncheck duplicates
-		for ( UINT pos = 0; pos != groupItemsPair.second; ++pos )
-		{
-			int checkState = m_dupsListCtrl.GetPtrAt< CDuplicateFileItem >( firstIndex + pos )->IsOriginalItem() ? LVIS_ORIGINAL_ITEM : lv::LVIS_UNCHECKED;
-			m_dupsListCtrl.ModifyCheckState( firstIndex + pos, (lv::CheckState)checkState );
-		}
-	}
-	else
-	{	// toggle: uncheck original and check duplicates
-		for ( UINT pos = 0; pos != groupItemsPair.second; ++pos )
-		{
-			int checkState = m_dupsListCtrl.GetPtrAt< CDuplicateFileItem >( firstIndex + pos )->IsOriginalItem() ? LVIS_ORIGINAL_ITEM : lv::LVIS_CHECKED;
-			m_dupsListCtrl.ModifyCheckState( firstIndex + pos, (lv::CheckState)checkState );
-		}
-	}
+	CScopedInternalChange change( &m_dupsListCtrl );		// prevent selection block check-state changes
+	CheckDup::CheckState checkState = pCurrGroup->GetDuplicatesCount() == dupsCheckedCount ? CheckDup::UncheckedItem : CheckDup::CheckedItem;		// toggle checked duplicates
+
+	for ( std::vector< CDuplicateFileItem* >::const_iterator itItem = pCurrGroup->GetItems().begin() + 1; itItem != pCurrGroup->GetItems().end(); ++itItem )
+			m_dupsListCtrl.ModifyObjectCheckState( *itItem, checkState );
 }
 
 template< typename CompareGroupPtr >
@@ -606,10 +612,7 @@ void CFindDuplicatesDialog::DoDataExchange( CDataExchange* pDX )
 		m_fileSpecEdit.SetText( m_fileTypeSpecs[ m_fileTypeCombo.GetCurSel() ] );
 		m_minFileSizeCombo.LoadHistory( m_regSection.c_str(), reg::entry_minFileSize, _T("0|1|10|50|100|500|1000") );
 
-		CImageList* pStateList = m_dupsListCtrl.GetStateImageList();
-		ASSERT_PTR( pStateList );
-		ASSERT( !m_dupsListCtrl.GetUseExtendedCheckStates() );		// setup once
-		pStateList->Add( CImageStore::SharedStore()->RetrieveIcon( ID_KEEP_AS_ORIGINAL_FILE )->GetHandle() );
+		m_dupsListCtrl.GetStateImageList()->Add( CImageStore::SharedStore()->RetrieveIcon( ID_KEEP_AS_ORIGINAL_FILE )->GetHandle() );		// OriginalItem
 
 		OnUpdate( m_pFileModel, NULL );
 	}
@@ -644,6 +647,7 @@ BEGIN_MESSAGE_MAP( CFindDuplicatesDialog, CFileEditorBaseDialog )
 
 	ON_NOTIFY( lv::LVN_DropFiles, IDC_SOURCE_PATHS_LIST, OnLvnDropFiles_SrcList )
 	ON_NOTIFY( LVN_LINKCLICK, IDC_DUPLICATE_FILES_LIST, OnLvnLinkClick_DuplicateList )
+	ON_NOTIFY( lv::LVN_CheckStatesChanged, IDC_DUPLICATE_FILES_LIST, OnLvnCheckStatesChanged_DuplicateList )
 	ON_NOTIFY( lv::LVN_CustomSortList, IDC_DUPLICATE_FILES_LIST, OnLvnCustomSortList_DuplicateList )
 END_MESSAGE_MAP()
 
@@ -752,14 +756,14 @@ void CFindDuplicatesDialog::OnCbnChanged_MinFileSize( void )
 
 void CFindDuplicatesDialog::OnCheckAllDuplicates( UINT cmdId )
 {
-	lv::CheckState checkState = ID_CHECK_ALL_DUPLICATES == cmdId ? lv::LVIS_CHECKED : lv::LVIS_UNCHECKED;
+	CheckDup::CheckState toCheckState = ID_CHECK_ALL_DUPLICATES == cmdId ? CheckDup::CheckedItem : CheckDup::UncheckedItem;
 	CScopedInternalChange changeDups( &m_dupsListCtrl );
 
 	for ( UINT i = 0, count = m_dupsListCtrl.GetItemCount(); i != count; ++i )
 	{
-		CDuplicateFileItem* pItem = checked_static_cast< CDuplicateFileItem* >( m_dupsListCtrl.GetObjectAt( i ) );
+		const CDuplicateFileItem* pItem = m_dupsListCtrl.GetPtrAt< CDuplicateFileItem >( i );
 
-		m_dupsListCtrl.ModifyCheckState( i, pItem->IsOriginalItem() ? (lv::CheckState)LVIS_ORIGINAL_ITEM : checkState );
+		m_dupsListCtrl.ModifyCheckState( i, pItem->IsOriginalItem() ? CheckDup::OriginalItem : toCheckState );
 	}
 }
 
@@ -770,8 +774,8 @@ void CFindDuplicatesDialog::OnUpdateCheckAllDuplicates( CCmdUI* pCmdUI )
 
 void CFindDuplicatesDialog::OnToggleCheckGroupDups( void )
 {
-	int rowIndex = m_dupsListCtrl.GetCaretIndex();
-	ToggleCheckGroupDuplicates( m_dupsListCtrl.GetRowGroupId( rowIndex ) );
+	int itemIndex = m_dupsListCtrl.GetCaretIndex();
+	ToggleCheckGroupDuplicates( m_dupsListCtrl.GetItemGroupId( itemIndex ) );
 }
 
 void CFindDuplicatesDialog::OnUpdateToggleCheckGroupDups( CCmdUI* pCmdUI )
@@ -784,18 +788,23 @@ void CFindDuplicatesDialog::OnKeepAsOriginalFile( void )
 	std::vector< CDuplicateFileItem* > selItems;
 	if ( m_dupsListCtrl.QuerySelectionAs( selItems ) )
 	{
-		std::vector< CDuplicateFileItem* > checkedItems;
-		m_dupsListCtrl.QueryCheckedItems( checkedItems );
-
 		utl::RemoveIf( selItems, std::mem_fun( &CDuplicateFileItem::IsOriginalItem ) );
 		std::for_each( selItems.begin(), selItems.end(), std::mem_fun( &CDuplicateFileItem::MakeOriginalItem ) );
 
+		std::vector< CDuplicateFileItem* > checkedItems;
+		m_dupsListCtrl.QueryObjectsWithCheckedState( checkedItems, CheckDup::CheckedItem );
+
 		SetupDuplicateFileList();
-		m_dupsListCtrl.SelectItems( selItems );
+		m_dupsListCtrl.SelectObjects( selItems );
 
 		CScopedInternalChange change( &m_dupsListCtrl );
 		utl::RemoveIf( checkedItems, std::mem_fun( &CDuplicateFileItem::IsOriginalItem ) );
-		m_dupsListCtrl.SetCheckedItems( checkedItems );			// restore original checked state (except new originals)
+		m_dupsListCtrl.SetObjectsCheckedState( &checkedItems, CheckDup::CheckedItem, false );			// restore original checked state (except new originals)
+
+		// update check-state for all original items
+		for ( int index = 0, count = m_dupsListCtrl.GetItemCount(); index != count; ++index )
+			if ( m_dupsListCtrl.GetPtrAt< CDuplicateFileItem >( index )->IsOriginalItem() )
+				m_dupsListCtrl.ModifyCheckState( index, CheckDup::OriginalItem );
 	}
 }
 
@@ -863,7 +872,7 @@ void CFindDuplicatesDialog::OnLvnDropFiles_SrcList( NMHDR* pNmHdr, LRESULT* pRes
 	m_srcPathItems.insert( m_srcPathItems.begin() + pNmDropFiles->m_dropItemIndex, newPathItems.begin(), newPathItems.end() );
 
 	SetupSrcPathsList();
-	m_srcPathsListCtrl.SelectItems( newPathItems );
+	m_srcPathsListCtrl.SelectObjects( newPathItems );
 
 	SwitchMode( EditMode );
 }
@@ -874,6 +883,13 @@ void CFindDuplicatesDialog::OnLvnLinkClick_DuplicateList( NMHDR* pNmHdr, LRESULT
 
 	ToggleCheckGroupDuplicates( pLinkInfo->iSubItem );
 	*pResult = 0;
+}
+
+void CFindDuplicatesDialog::OnLvnCheckStatesChanged_DuplicateList( NMHDR* pNmHdr, LRESULT* pResult )
+{
+	lv::CNmCheckStatesChanged* pInfo = (lv::CNmCheckStatesChanged*)pNmHdr;
+	pInfo;
+	*pResult = 0L;
 }
 
 void CFindDuplicatesDialog::OnLvnCustomSortList_DuplicateList( NMHDR* pNmHdr, LRESULT* pResult )
