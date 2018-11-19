@@ -599,7 +599,7 @@ namespace dbg
 		else
 			TRACE( _T("?? Invalid menu item: hMenu=0x%08x itemPos=%d\n"), hMenu, itemPos );
 	#else
-		hMenu, item, byPos;
+		hMenu, itemPos;
 	#endif
 	}
 
