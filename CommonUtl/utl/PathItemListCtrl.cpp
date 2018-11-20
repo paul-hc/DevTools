@@ -156,8 +156,8 @@ BEGIN_MESSAGE_MAP( CPathItemListCtrl, CReportListControl )
 	ON_UPDATE_COMMAND_UI( ID_ITEM_COPY_FILENAME, OnUpdateAnySelected )
 	ON_COMMAND( ID_ITEM_COPY_PARENT_DIR_PATH, OnCopyParentDirPath )
 	ON_UPDATE_COMMAND_UI( ID_ITEM_COPY_PARENT_DIR_PATH, OnUpdateAnySelected )
-	ON_COMMAND( ID_EDIT_ITEM, OnEditFileProperties )
-	ON_UPDATE_COMMAND_UI( ID_EDIT_ITEM, OnUpdateAnySelected )
+	ON_COMMAND( ID_FILE_PROPERTIES, OnFileProperties )
+	ON_UPDATE_COMMAND_UI( ID_FILE_PROPERTIES, OnUpdateAnySelected )
 	ON_COMMAND( ID_EDIT_PROPERTIES, OnEditListViewProperties )
 END_MESSAGE_MAP()
 
@@ -209,7 +209,7 @@ void CPathItemListCtrl::OnCopyParentDirPath( void )
 		ui::BeepSignal( MB_ICONWARNING );
 }
 
-void CPathItemListCtrl::OnEditFileProperties( void )
+void CPathItemListCtrl::OnFileProperties( void )
 {
 	std::vector< std::tstring > selFilePaths;
 	QuerySelectedItemPaths( selFilePaths );

@@ -75,6 +75,11 @@ namespace hlp
 		UINT operator()( const CDuplicateFilesGroup* pGroup ) const { return pGroup->GetContentKey().m_crc32; }
 	};
 
+	struct AsGroupDuplicateCount
+	{
+		size_t operator()( const CDuplicateFilesGroup* pGroup ) const { return pGroup->GetItems().size() - 1; }
+	};
+
 	bool HasUniqueGroups( const std::vector< CDuplicateFileItem* >& dupItems )
 	{
 		std::set< CDuplicateFilesGroup* > groups;
@@ -83,6 +88,15 @@ namespace hlp
 				return false;
 
 		return true;
+	}
+
+	CDuplicateFileItem* FindFirstDupItemWithDirPath( const CDuplicateFilesGroup* pGroup, const fs::CPath& dirPath )
+	{
+		for ( std::vector< CDuplicateFileItem* >::const_iterator itItem = pGroup->GetItems().begin(); itItem != pGroup->GetItems().end(); ++itItem )
+			if ( ( *itItem )->GetFilePath().GetParentPath() == dirPath )
+				return *itItem;
+
+		return NULL;
 	}
 }
 
@@ -161,8 +175,9 @@ CFindDuplicatesDialog::CFindDuplicatesDialog( CFileModel* pFileModel, CWnd* pPar
 	m_dupsListCtrl.SetTrackMenuTarget( this );
 	CGeneralOptions::Instance().ApplyToListCtrl( &m_dupsListCtrl );
 
-	m_dupsListCtrl.AddColumnCompare( FileName, pred::NewComparator( pred::CompareDisplayCode() ) );
+	m_dupsListCtrl.AddColumnCompare( FileName, pred::NewPropertyComparator< CDuplicateFileItem, pred::CompareNameExt >( CDuplicateFileItem::ToNameExt() ) );
 	m_dupsListCtrl.AddColumnCompare( DateModified, pred::NewPropertyComparator< CDuplicateFileItem >( CDuplicateFileItem::AsModifyTime() ), false );		// order date-time descending by default
+	m_dupsListCtrl.AddColumnCompare( DuplicateCount, NULL, false );		// order by duplicate count descending by default; NULL comparator since uses only group ordering
 
 	m_srcPathsToolbar.GetStrip().AddButton( ID_EDIT_LIST_ITEMS );
 	m_dupsToolbar.GetStrip()
@@ -170,6 +185,7 @@ CFindDuplicatesDialog::CFindDuplicatesDialog( CFileModel* pFileModel, CWnd* pPar
 		.AddButton( ID_UNCHECK_ALL_DUPLICATES )
 		.AddSeparator()
 		.AddButton( ID_KEEP_AS_ORIGINAL_FILE )
+		.AddButton( ID_PICK_AS_ORIGINAL_FOLDER )
 		.AddSeparator()
 		.AddButton( ID_HIGHLIGHT_DUPLICATES )
 		.AddSeparator()
@@ -586,6 +602,11 @@ pred::CompareResult CALLBACK CFindDuplicatesDialog::CompareGroupDateModified( in
 	return pThis->CompareGroupsByItemField( leftGroupId, rightGroupId, pred::CompareScalarAdapterPtr< CDuplicateFileItem::AsModifyTime >() );
 }
 
+pred::CompareResult CALLBACK CFindDuplicatesDialog::CompareGroupDuplicateCount( int leftGroupId, int rightGroupId, const CFindDuplicatesDialog* pThis )
+{
+	return pThis->CompareGroupsBy( leftGroupId, rightGroupId, pred::CompareScalarAdapterPtr< hlp::AsGroupDuplicateCount >() );
+}
+
 BOOL CFindDuplicatesDialog::OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo )
 {
 	return
@@ -616,7 +637,7 @@ void CFindDuplicatesDialog::DoDataExchange( CDataExchange* pDX )
 		m_fileSpecEdit.SetText( m_fileTypeSpecs[ m_fileTypeCombo.GetCurSel() ] );
 		m_minFileSizeCombo.LoadHistory( m_regSection.c_str(), reg::entry_minFileSize, _T("0|1|10|50|100|500|1000") );
 
-		m_dupsListCtrl.GetStateImageList()->Add( CImageStore::SharedStore()->RetrieveIcon( ID_KEEP_AS_ORIGINAL_FILE )->GetHandle() );		// OriginalItem
+		m_dupsListCtrl.GetStateImageList()->Add( CImageStore::SharedStore()->RetrieveIcon( ID_ORIGINAL_FILE )->GetHandle() );		// OriginalItem
 
 		OnUpdate( m_pFileModel, NULL );
 	}
@@ -643,6 +664,8 @@ BEGIN_MESSAGE_MAP( CFindDuplicatesDialog, CFileEditorBaseDialog )
 	ON_UPDATE_COMMAND_UI( ID_TOGGLE_CHECK_GROUP_DUPLICATES, OnUpdateToggleCheckGroupDups )
 	ON_COMMAND( ID_KEEP_AS_ORIGINAL_FILE, OnKeepAsOriginalFile )
 	ON_UPDATE_COMMAND_UI( ID_KEEP_AS_ORIGINAL_FILE, OnUpdateKeepAsOriginalFile )
+	ON_COMMAND( ID_PICK_AS_ORIGINAL_FOLDER, OnPickAsOriginalFolder )
+	ON_UPDATE_COMMAND_UI( ID_PICK_AS_ORIGINAL_FOLDER, OnUpdatePickAsOriginalFolder )
 	ON_COMMAND( ID_CLEAR_CRC32_CACHE, OnClearCrc32Cache )
 	ON_UPDATE_COMMAND_UI( ID_CLEAR_CRC32_CACHE, OnUpdateClearCrc32Cache )
 	ON_COMMAND( ID_HIGHLIGHT_DUPLICATES, OnToggleHighlightDuplicates )
@@ -807,11 +830,6 @@ void CFindDuplicatesDialog::OnKeepAsOriginalFile( void )
 		CScopedInternalChange change( &m_dupsListCtrl );
 		utl::RemoveIf( checkedItems, std::mem_fun( &CDuplicateFileItem::IsOriginalItem ) );
 		m_dupsListCtrl.SetObjectsCheckedState( &checkedItems, CheckDup::CheckedItem, false );			// restore original checked state (except new originals)
-
-		// update check-state for all original items
-		for ( int index = 0, count = m_dupsListCtrl.GetItemCount(); index != count; ++index )
-			if ( m_dupsListCtrl.GetPtrAt< CDuplicateFileItem >( index )->IsOriginalItem() )
-				m_dupsListCtrl.ModifyCheckState( index, CheckDup::OriginalItem );
 	}
 }
 
@@ -827,6 +845,40 @@ void CFindDuplicatesDialog::OnUpdateKeepAsOriginalFile( CCmdUI* pCmdUI )
 	}
 
 	pCmdUI->Enable( enable );
+}
+
+void CFindDuplicatesDialog::OnPickAsOriginalFolder( void )
+{
+	int selIndex = m_dupsListCtrl.GetCurSel();
+	if ( -1 == selIndex )
+		return;
+
+	std::vector< CDuplicateFileItem* > checkedDupItems;
+	m_dupsListCtrl.QueryObjectsWithCheckedState( checkedDupItems, CheckDup::CheckedItem );
+
+	fs::CPath dirPath = m_dupsListCtrl.GetPtrAt< CDuplicateFileItem >( selIndex )->GetFilePath().GetParentPath();
+	std::vector< CDuplicateFileItem* > originalItems;
+
+	for ( std::vector< CDuplicateFilesGroup* >::const_iterator itGroup = m_duplicateGroups.begin(); itGroup != m_duplicateGroups.end(); ++itGroup )
+		if ( CDuplicateFileItem* pItem = hlp::FindFirstDupItemWithDirPath( *itGroup, dirPath ) )
+		{
+			pItem->MakeOriginalItem();
+			originalItems.push_back( pItem );
+		}
+
+	SetupDuplicateFileList();
+	m_dupsListCtrl.SelectObjects( originalItems );
+
+	// remove any new original items from the checked items
+	utl::RemoveIf( checkedDupItems, std::mem_fun( &CDuplicateFileItem::IsOriginalItem ) );
+
+	CScopedInternalChange change( &m_dupsListCtrl );
+	m_dupsListCtrl.SetObjectsCheckedState( &checkedDupItems, CheckDup::CheckedItem, false );			// restore original checked state (except new originals)
+}
+
+void CFindDuplicatesDialog::OnUpdatePickAsOriginalFolder( CCmdUI* pCmdUI )
+{
+	pCmdUI->Enable( m_dupsListCtrl.SingleSelected() );
 }
 
 void CFindDuplicatesDialog::OnBnClicked_DeleteDuplicates( void )
@@ -935,5 +987,9 @@ void CFindDuplicatesDialog::OnLvnCustomSortList_DuplicateList( NMHDR* pNmHdr, LR
 		case DateModified:			// sort groups AND items
 			m_dupsListCtrl.SortGroups( (PFNLVGROUPCOMPARE)&CompareGroupDateModified, this );
 			break;					// sorted the groups, but keep on sorting the items
+		case DuplicateCount:
+			m_dupsListCtrl.SortGroups( (PFNLVGROUPCOMPARE)&CompareGroupDuplicateCount, this );
+			*pResult = TRUE;		// done, prevent list item internal sorting
+			break;
 	}
 }

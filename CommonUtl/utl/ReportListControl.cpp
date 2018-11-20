@@ -614,7 +614,7 @@ void CReportListControl::InitialSortList( void )
 
 void CReportListControl::AddColumnCompare( TColumn column, const pred::IComparator* pComparator, bool defaultAscending /*= true*/ )
 {
-	ASSERT_PTR( pComparator );
+	// note: pComparator could be NULL for custom sorting
 	ASSERT( column >= 0 || EntireRecord == column );
 
 	if ( NULL == m_pComparePtrFunc )
@@ -1499,6 +1499,15 @@ bool CReportListControl::SetCaretIndex( int index, bool doSet /*= true*/ )
 	return true;
 }
 
+bool CReportListControl::SingleSelected( void ) const
+{
+	int selCount = 0;
+	for ( POSITION pos = GetFirstSelectedItemPosition(); pos != NULL && selCount < 2; ++selCount )
+		GetNextSelectedItem( pos );
+
+	return 1 == selCount;
+}
+
 int CReportListControl::GetCurSel( void ) const
 {
 	if ( !IsMultiSelectionList() )
@@ -2349,6 +2358,11 @@ void CReportListControl::OnUpdateRename( CCmdUI* pCmdUI )
 void CReportListControl::OnUpdateAnySelected( CCmdUI* pCmdUI )
 {
 	pCmdUI->Enable( AnySelected() );
+}
+
+void CReportListControl::OnUpdateSingleSelected( CCmdUI* pCmdUI )
+{
+	pCmdUI->Enable( SingleSelected() );
 }
 
 

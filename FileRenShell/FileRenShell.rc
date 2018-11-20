@@ -451,6 +451,7 @@ BEGIN
             MENUITEM SEPARATOR
             MENUITEM "Toggle Check Duplicates in Group", ID_TOGGLE_CHECK_GROUP_DUPLICATES
             MENUITEM "Mark as Original File",       ID_KEEP_AS_ORIGINAL_FILE
+            MENUITEM "Mark as Original Folder",     ID_PICK_AS_ORIGINAL_FOLDER
         END
     END
 END
@@ -490,9 +491,11 @@ BEGIN
     BUTTON      ID_CHECK_ALL_DUPLICATES
     BUTTON      ID_UNCHECK_ALL_DUPLICATES
     BUTTON      ID_KEEP_AS_ORIGINAL_FILE
+    BUTTON      ID_PICK_AS_ORIGINAL_FOLDER
     BUTTON      ID_HIGHLIGHT_DUPLICATES
     BUTTON      ID_CLEAR_CRC32_CACHE
     SEPARATOR
+    BUTTON      ID_ORIGINAL_FILE
     BUTTON      ID_DELETE_DUPLICATES
     BUTTON      ID_MOVE_DUPLICATES
 END
@@ -617,8 +620,14 @@ END
 STRINGTABLE 
 BEGIN
     IDC_DUPLICATE_FILES_LIST 
-                            "File Name=120|Directory=-1/150|Size=90|CRC32=85|DateModified=125"
+                            "File Name=120|Directory=-1/150|Size=90|CRC32=85|DateModified=125|(*)"
     IDC_SOURCE_PATHS_LIST   "Source Path=-1"
+END
+
+STRINGTABLE 
+BEGIN
+    ID_PICK_AS_ORIGINAL_FOLDER 
+                            "Select all files in the parent folder as original files"
 END
 
 #endif    // English (U.S.) resources

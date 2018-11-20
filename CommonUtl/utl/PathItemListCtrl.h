@@ -49,7 +49,7 @@ protected:
 	afx_msg BOOL OnLvnDblclk_Reflect( NMHDR* pNmHdr, LRESULT* pResult );
 	afx_msg void OnCopyFilename( void );
 	afx_msg void OnCopyParentDirPath( void );
-	afx_msg void OnEditFileProperties( void );
+	afx_msg void OnFileProperties( void );
 	afx_msg void OnEditListViewProperties( void );
 
 	DECLARE_MESSAGE_MAP()

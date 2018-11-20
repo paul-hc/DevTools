@@ -395,9 +395,6 @@ BEGIN
             MENUITEM SEPARATOR
             MENUITEM "&Tiles",                      ID_LIST_VIEW_TILE
             MENUITEM SEPARATOR
-            MENUITEM "&Horizontal Stacking\tLeft to Right", ID_LIST_VIEW_STACK_LEFTTORIGHT
-            MENUITEM "&Vertical Stacking\tTop to Bottom", ID_LIST_VIEW_STACK_TOPTOBOTTOM
-            MENUITEM SEPARATOR
             MENUITEM "Properties...",               ID_EDIT_PROPERTIES
         END
         POPUP "<path-list selection>"
@@ -408,7 +405,7 @@ BEGIN
             MENUITEM SEPARATOR
             MENUITEM "Select All\tCtrl+A",          ID_EDIT_SELECT_ALL
             MENUITEM SEPARATOR
-            MENUITEM "File &Properties...",         ID_EDIT_ITEM
+            MENUITEM "File &Properties...",         ID_FILE_PROPERTIES
         END
     END
     POPUP "<date-time>"
@@ -488,6 +485,7 @@ BEGIN
     ID_ITEM_COPY_PARENT_DIR_PATH 
                             "Copy selected directory paths\nCopy Directory Path"
     ID_SHELL_SUBMENU        "Explorer system menu"
+    ID_FILE_PROPERTIES      "Open property sheet for selected files\nEdit File Properties"
 END
 
 #endif    // English (U.S.) resources

@@ -55,7 +55,7 @@ namespace ui
 		rContextMenu.Attach( hSubMenu );
 		VERIFY( ::RemoveMenu( hParentMenu, popupIndex, MF_BYPOSITION ) );		// detach popup from its parent
 
-		SetMenuImages( rContextMenu );										// set shared bitmap images
+		SetMenuImages( rContextMenu );											// set shared bitmap images
 	}
 
 

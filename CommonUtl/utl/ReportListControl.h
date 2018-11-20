@@ -465,6 +465,7 @@ public:
 	bool SetCurSel( int index, bool doSelect = true );		// caret and selection
 
 	bool AnySelected( UINT stateMask = LVIS_SELECTED ) const { return HasItemWithState( stateMask ); }
+	bool SingleSelected( void ) const;
 
 	bool IsSelected( int index ) const { return HasItemState( index, LVIS_SELECTED ); }
 	bool SetSelected( int index, bool doSelect = true ) { return SetItemState( index, doSelect ? LVIS_SELECTED : 0, LVIS_SELECTED ) != FALSE; }
@@ -691,6 +692,7 @@ public:
 	afx_msg void OnRename( void );
 	afx_msg void OnUpdateRename( CCmdUI* pCmdUI );
 	afx_msg void OnUpdateAnySelected( CCmdUI* pCmdUI );
+	afx_msg void OnUpdateSingleSelected( CCmdUI* pCmdUI );
 
 	DECLARE_MESSAGE_MAP()
 };

@@ -77,6 +77,7 @@ private:
 	static pred::CompareResult CALLBACK CompareGroupFileSize( int leftGroupId, int rightGroupId, const CFindDuplicatesDialog* pThis );
 	static pred::CompareResult CALLBACK CompareGroupFileCrc32( int leftGroupId, int rightGroupId, const CFindDuplicatesDialog* pThis );
 	static pred::CompareResult CALLBACK CompareGroupDateModified( int leftGroupId, int rightGroupId, const CFindDuplicatesDialog* pThis );
+	static pred::CompareResult CALLBACK CompareGroupDuplicateCount( int leftGroupId, int rightGroupId, const CFindDuplicatesDialog* pThis );
 
 	template< typename CompareGroupPtr >
 	pred::CompareResult CompareGroupsBy( int leftGroupId, int rightGroupId, CompareGroupPtr compareGroup ) const;
@@ -89,7 +90,7 @@ private:
 	std::vector< std::tstring > m_fileTypeSpecs;
 private:
 	// enum { IDD = IDD_FIND_DUPLICATES_DIALOG };
-	enum DupFileColumn { FileName, DirPath, Size, Crc32, DateModified };
+	enum DupFileColumn { FileName, DirPath, Size, Crc32, DateModified, DuplicateCount };
 	enum SubPopup { DupListNowhere, DupListOnSelection };
 
 	CPathItemListCtrl m_srcPathsListCtrl;
@@ -128,6 +129,8 @@ protected:
 	afx_msg void OnUpdateToggleCheckGroupDups( CCmdUI* pCmdUI );
 	afx_msg void OnKeepAsOriginalFile( void );
 	afx_msg void OnUpdateKeepAsOriginalFile( CCmdUI* pCmdUI );
+	afx_msg void OnPickAsOriginalFolder( void );
+	afx_msg void OnUpdatePickAsOriginalFolder( CCmdUI* pCmdUI );
 	afx_msg void OnClearCrc32Cache( void );
 	afx_msg void OnUpdateClearCrc32Cache( CCmdUI* pCmdUI );
 	afx_msg void OnToggleHighlightDuplicates( void );
