@@ -367,11 +367,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\res\ItemListStrip.bmp"
+				RelativePath=".\res\ListStrip.bmp"
 				>
 			</File>
 			<File
-				RelativePath=".\res\ItemListStrip.png"
+				RelativePath=".\res\ListStrip.png"
 				>
 			</File>
 			<File

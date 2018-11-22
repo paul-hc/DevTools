@@ -96,7 +96,7 @@ END
 // Toolbar
 //
 
-IDR_ITEM_LIST_STRIP TOOLBAR  16, 16
+IDR_LIST_STRIP TOOLBAR  16, 16
 BEGIN
     BUTTON      ID_ADD_ITEM
     BUTTON      ID_REMOVE_ITEM
@@ -176,7 +176,7 @@ END
 // Bitmap
 //
 
-IDR_ITEM_LIST_STRIP     BITMAP                  "res\\ItemListStrip.bmp"
+IDR_LIST_STRIP          BITMAP                  "res\\ListStrip.bmp"
 IDR_STD_STRIP           BITMAP                  "res\\StdStrip.bmp"
 
 /////////////////////////////////////////////////////////////////////////////
@@ -184,7 +184,7 @@ IDR_STD_STRIP           BITMAP                  "res\\StdStrip.bmp"
 // PNG
 //
 
-IDR_ITEM_LIST_STRIP     PNG                     "res\\ItemListStrip.png"
+IDR_LIST_STRIP          PNG                     "res\\ListStrip.png"
 IDR_STD_STRIP           PNG                     "res\\StdStrip.png"
 
 /////////////////////////////////////////////////////////////////////////////

@@ -5,8 +5,8 @@
 #define UTL_MIN_RESOURCE_VALUE          28000
 #define IDR_APP_SHARED_ACCEL            28001
 #define IDD_ABOUT_BOX                   28002
-#define IDR_STD_STRIP                   28003
-#define IDR_ITEM_LIST_STRIP             28004
+#define IDR_LIST_STRIP                  28003
+#define IDR_STD_STRIP                   28004
 #define IDD_ITEM_LIST_DIALOG            28006
 #define IDR_SCROLLABLE_CURSOR           28008
 #define IDR_SCROLL_DRAG_CURSOR          28009
