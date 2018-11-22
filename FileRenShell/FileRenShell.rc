@@ -442,12 +442,12 @@ BEGIN
         POPUP "<nowhere>"
         BEGIN
             MENUITEM "Check All Duplicates",        ID_CHECK_ALL_DUPLICATES
-            MENUITEM "Uncheck All Files",           ID_UNCHECK_ALL_DUPLICATES
+            MENUITEM "Uncheck All Duplicates",      ID_UNCHECK_ALL_DUPLICATES
         END
         POPUP "<on-selection>"
         BEGIN
             MENUITEM "Check All Duplicates",        ID_CHECK_ALL_DUPLICATES
-            MENUITEM "Uncheck All Files",           ID_UNCHECK_ALL_DUPLICATES
+            MENUITEM "Uncheck All Duplicates",      ID_UNCHECK_ALL_DUPLICATES
             MENUITEM SEPARATOR
             MENUITEM "Toggle Check Duplicates in Group", ID_TOGGLE_CHECK_GROUP_DUPLICATES
             MENUITEM "Mark as Original File",       ID_KEEP_AS_ORIGINAL_FILE
@@ -620,7 +620,7 @@ END
 STRINGTABLE 
 BEGIN
     IDC_DUPLICATE_FILES_LIST 
-                            "File Name=120|Directory=-1/150|Size=90|CRC32=85|DateModified=125|#"
+                            "File Name=120|Folder=-1/150|Size=90|CRC32=85|DateModified=125|#"
     IDC_SOURCE_PATHS_LIST   "Source Path=-1"
 END
 

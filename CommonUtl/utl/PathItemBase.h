@@ -28,7 +28,7 @@ public:
 		const fs::CPath& operator()( const CPathItemBase* pItem ) const { return pItem->GetFilePath(); }
 	};
 
-	struct ToParentDirPath
+	struct ToParentFolderPath
 	{
 		fs::CPath operator()( const CPathItemBase* pItem ) const { return pItem->GetFilePath().GetParentPath(); }
 	};

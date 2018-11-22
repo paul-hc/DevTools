@@ -69,8 +69,8 @@ BOOL CBaseApp< BaseClass >::InitInstance( void )
 	// Rely on CLogger::m_addSessionNewLine to add a delayed new line on first log entry
 	//GetLogger().LogLine( _T(""), false );					// new-line as session separator
 
+	CToolStrip::RegisterStripButtons( IDR_LIST_STRIP );		// register stock images
 	CToolStrip::RegisterStripButtons( IDR_STD_STRIP );		// register stock images
-	CImageStore::SharedStore()->RegisterAlias( ID_FILE_PROPERTIES, ID_EDIT_PROPERTIES );
 
 	// activate "Windows Native" visual manager for enabling themes in MFC controls
 	CMFCVisualManager::SetDefaultManager( RUNTIME_CLASS( CMFCVisualManagerWindows ) );

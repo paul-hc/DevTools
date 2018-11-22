@@ -90,7 +90,7 @@ namespace hlp
 		return true;
 	}
 
-	CDuplicateFileItem* FindFirstDupItemWithDirPath( const CDuplicateFilesGroup* pGroup, const fs::CPath& dirPath )
+	CDuplicateFileItem* FindFirstDupItemWithFolderPath( const CDuplicateFilesGroup* pGroup, const fs::CPath& dirPath )
 	{
 		for ( std::vector< CDuplicateFileItem* >::const_iterator itItem = pGroup->GetItems().begin(); itItem != pGroup->GetItems().end(); ++itItem )
 			if ( ( *itItem )->GetFilePath().GetParentPath() == dirPath )
@@ -385,7 +385,7 @@ void CFindDuplicatesDialog::SetupDuplicateFileList( void )
 			ASSERT( pGroup == pDupItem->GetParentGroup() );
 
 			m_dupsListCtrl.InsertObjectItem( index, pDupItem );
-			m_dupsListCtrl.SetSubItemText( index, DirPath, pDupItem->GetFilePath().GetParentPath().GetPtr() );
+			m_dupsListCtrl.SetSubItemText( index, FolderPath, pDupItem->GetFilePath().GetParentPath().GetPtr() );
 			m_dupsListCtrl.SetSubItemText( index, Size, num::FormatFileSize( pGroup->GetContentKey().m_fileSize ) );
 			m_dupsListCtrl.SetSubItemText( index, Crc32, num::FormatHexNumber( pGroup->GetContentKey().m_crc32, _T("%X") ) );
 			m_dupsListCtrl.SetSubItemText( index, DateModified, time_utl::FormatTimestamp( pDupItem->GetModifyTime() ) );
@@ -586,9 +586,9 @@ pred::CompareResult CALLBACK CFindDuplicatesDialog::CompareGroupFileName( int le
 	return pThis->CompareGroupsByItemField( leftGroupId, rightGroupId, pred::CompareAdapterPtr< pred::CompareEquivalentPath, CDuplicateFileItem::ToNameExt >() );
 }
 
-pred::CompareResult CALLBACK CFindDuplicatesDialog::CompareGroupDirPath( int leftGroupId, int rightGroupId, const CFindDuplicatesDialog* pThis )
+pred::CompareResult CALLBACK CFindDuplicatesDialog::CompareGroupFolderPath( int leftGroupId, int rightGroupId, const CFindDuplicatesDialog* pThis )
 {
-	return pThis->CompareGroupsByItemField( leftGroupId, rightGroupId, pred::CompareAdapterPtr< pred::CompareEquivalentPath, CDuplicateFileItem::ToParentDirPath >() );
+	return pThis->CompareGroupsByItemField( leftGroupId, rightGroupId, pred::CompareAdapterPtr< pred::CompareEquivalentPath, CDuplicateFileItem::ToParentFolderPath >() );
 }
 
 pred::CompareResult CALLBACK CFindDuplicatesDialog::CompareGroupFileSize( int leftGroupId, int rightGroupId, const CFindDuplicatesDialog* pThis )
@@ -864,7 +864,7 @@ void CFindDuplicatesDialog::OnPickAsOriginalFolder( void )
 	std::vector< CDuplicateFileItem* > originalItems;
 
 	for ( std::vector< CDuplicateFilesGroup* >::const_iterator itGroup = m_duplicateGroups.begin(); itGroup != m_duplicateGroups.end(); ++itGroup )
-		if ( CDuplicateFileItem* pItem = hlp::FindFirstDupItemWithDirPath( *itGroup, dirPath ) )
+		if ( CDuplicateFileItem* pItem = hlp::FindFirstDupItemWithFolderPath( *itGroup, dirPath ) )
 		{
 			pItem->MakeOriginalItem();
 			originalItems.push_back( pItem );
@@ -977,8 +977,8 @@ void CFindDuplicatesDialog::OnLvnCustomSortList_DuplicateList( NMHDR* pNmHdr, LR
 		case FileName:				// sort groups AND items
 			m_dupsListCtrl.SortGroups( (PFNLVGROUPCOMPARE)&CompareGroupFileName, this );
 			break;					// sorted the groups, but keep on sorting the items
-		case DirPath:				// sort groups AND items
-			m_dupsListCtrl.SortGroups( (PFNLVGROUPCOMPARE)&CompareGroupDirPath, this );
+		case FolderPath:			// sort groups AND items
+			m_dupsListCtrl.SortGroups( (PFNLVGROUPCOMPARE)&CompareGroupFolderPath, this );
 			break;					// sorted the groups, but keep on sorting the items
 		case Size:
 			m_dupsListCtrl.SortGroups( (PFNLVGROUPCOMPARE)&CompareGroupFileSize, this );

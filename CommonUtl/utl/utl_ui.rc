@@ -133,6 +133,7 @@ BEGIN
     BUTTON      ID_EDIT_REDO
     SEPARATOR
     BUTTON      ID_EDIT_PROPERTIES
+    BUTTON      ID_FILE_PROPERTIES
     BUTTON      ID_EDIT_FIND
     BUTTON      ID_EDIT_REPLACE
     SEPARATOR
@@ -393,8 +394,8 @@ BEGIN
         POPUP "<path-list selection>"
         BEGIN
             MENUITEM "&Copy\tCtrl+C",               ID_EDIT_COPY
-            MENUITEM "Copy Filename",               ID_ITEM_COPY_FILENAME
-            MENUITEM "Copy Directory Path",         ID_ITEM_COPY_PARENT_DIR_PATH
+            MENUITEM "Copy Filename",               ID_ITEM_COPY_FILENAMES
+            MENUITEM "Copy Directory Path",         ID_ITEM_COPY_FOLDERS
             MENUITEM SEPARATOR
             MENUITEM "Select All\tCtrl+A",          ID_EDIT_SELECT_ALL
             MENUITEM SEPARATOR
@@ -474,9 +475,8 @@ BEGIN
     ID_LIST_VIEW_STACK_TOPTOBOTTOM 
                             "Arrange list items from top to bottom\nVertical Stacking"
     ID_EDIT_PROPERTIES      "Edit properties\nEdit Properties"
-    ID_ITEM_COPY_FILENAME   "Copy selected filenames\nCopy Filename"
-    ID_ITEM_COPY_PARENT_DIR_PATH 
-                            "Copy selected directory paths\nCopy Directory Path"
+    ID_ITEM_COPY_FILENAMES  "Copy selected filenames\nCopy Filename"
+    ID_ITEM_COPY_FOLDERS    "Copy selected directory paths\nCopy Directory Path"
     ID_SHELL_SUBMENU        "Explorer system menu"
     ID_FILE_PROPERTIES      "Open property sheet for selected files\nEdit File Properties"
 END

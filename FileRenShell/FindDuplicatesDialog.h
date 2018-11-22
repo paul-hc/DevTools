@@ -73,7 +73,7 @@ private:
 	void ToggleCheckGroupDuplicates( unsigned int groupId );
 
 	static pred::CompareResult CALLBACK CompareGroupFileName( int leftGroupId, int rightGroupId, const CFindDuplicatesDialog* pThis );
-	static pred::CompareResult CALLBACK CompareGroupDirPath( int leftGroupId, int rightGroupId, const CFindDuplicatesDialog* pThis );
+	static pred::CompareResult CALLBACK CompareGroupFolderPath( int leftGroupId, int rightGroupId, const CFindDuplicatesDialog* pThis );
 	static pred::CompareResult CALLBACK CompareGroupFileSize( int leftGroupId, int rightGroupId, const CFindDuplicatesDialog* pThis );
 	static pred::CompareResult CALLBACK CompareGroupFileCrc32( int leftGroupId, int rightGroupId, const CFindDuplicatesDialog* pThis );
 	static pred::CompareResult CALLBACK CompareGroupDateModified( int leftGroupId, int rightGroupId, const CFindDuplicatesDialog* pThis );
@@ -90,7 +90,7 @@ private:
 	std::vector< std::tstring > m_fileTypeSpecs;
 private:
 	// enum { IDD = IDD_FIND_DUPLICATES_DIALOG };
-	enum DupFileColumn { FileName, DirPath, Size, Crc32, DateModified, DuplicateCount };
+	enum DupFileColumn { FileName, FolderPath, Size, Crc32, DateModified, DuplicateCount };
 	enum SubPopup { DupListNowhere, DupListOnSelection };
 
 	CPathItemListCtrl m_srcPathsListCtrl;

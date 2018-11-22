@@ -155,10 +155,10 @@ BOOL CPathItemListCtrl::OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLE
 
 BEGIN_MESSAGE_MAP( CPathItemListCtrl, CReportListControl )
 	ON_NOTIFY_REFLECT_EX( NM_DBLCLK, OnLvnDblclk_Reflect )
-	ON_COMMAND( ID_ITEM_COPY_FILENAME, OnCopyFilename )
-	ON_UPDATE_COMMAND_UI( ID_ITEM_COPY_FILENAME, OnUpdateAnySelected )
-	ON_COMMAND( ID_ITEM_COPY_PARENT_DIR_PATH, OnCopyParentDirPath )
-	ON_UPDATE_COMMAND_UI( ID_ITEM_COPY_PARENT_DIR_PATH, OnUpdateAnySelected )
+	ON_COMMAND( ID_ITEM_COPY_FILENAMES, OnCopyFilenames )
+	ON_UPDATE_COMMAND_UI( ID_ITEM_COPY_FILENAMES, OnUpdateAnySelected )
+	ON_COMMAND( ID_ITEM_COPY_FOLDERS, OnCopyFolders )
+	ON_UPDATE_COMMAND_UI( ID_ITEM_COPY_FOLDERS, OnUpdateAnySelected )
 	ON_COMMAND( ID_FILE_PROPERTIES, OnFileProperties )
 	ON_UPDATE_COMMAND_UI( ID_FILE_PROPERTIES, OnUpdateAnySelected )
 END_MESSAGE_MAP()
@@ -182,7 +182,7 @@ BOOL CPathItemListCtrl::OnLvnDblclk_Reflect( NMHDR* pNmHdr, LRESULT* pResult )
 	return FALSE;			// raise the notification to parent
 }
 
-void CPathItemListCtrl::OnCopyFilename( void )
+void CPathItemListCtrl::OnCopyFilenames( void )
 {
 	std::vector< std::tstring > selFilePaths;
 	QuerySelectedItemPaths( selFilePaths );
@@ -198,7 +198,7 @@ void CPathItemListCtrl::OnCopyFilename( void )
 		ui::BeepSignal( MB_ICONWARNING );
 }
 
-void CPathItemListCtrl::OnCopyParentDirPath( void )
+void CPathItemListCtrl::OnCopyFolders( void )
 {
 	std::vector< fs::CPath > selFilePaths;
 	QuerySelectedItemPaths( selFilePaths );
