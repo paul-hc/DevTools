@@ -620,7 +620,7 @@ END
 STRINGTABLE 
 BEGIN
     IDC_DUPLICATE_FILES_LIST 
-                            "File Name=120|Directory=-1/150|Size=90|CRC32=85|DateModified=125|(*)"
+                            "File Name=120|Directory=-1/150|Size=90|CRC32=85|DateModified=125|#"
     IDC_SOURCE_PATHS_LIST   "Source Path=-1"
 END
 

@@ -33,6 +33,9 @@ CPathItemListCtrl::~CPathItemListCtrl()
 
 CMenu& CPathItemListCtrl::GetStdPathListPopupMenu( ListPopup popupType )
 {
+	if ( OnGroup == popupType )
+		return __super::GetStdPopupMenu( popupType );
+
 	static CMenu s_stdPopupMenu[ _ListPopupCount ];
 	CMenu& rMenu = s_stdPopupMenu[ popupType ];
 	if ( NULL == rMenu.GetSafeHmenu() )
@@ -158,7 +161,6 @@ BEGIN_MESSAGE_MAP( CPathItemListCtrl, CReportListControl )
 	ON_UPDATE_COMMAND_UI( ID_ITEM_COPY_PARENT_DIR_PATH, OnUpdateAnySelected )
 	ON_COMMAND( ID_FILE_PROPERTIES, OnFileProperties )
 	ON_UPDATE_COMMAND_UI( ID_FILE_PROPERTIES, OnUpdateAnySelected )
-	ON_COMMAND( ID_EDIT_PROPERTIES, OnEditListViewProperties )
 END_MESSAGE_MAP()
 
 BOOL CPathItemListCtrl::OnLvnDblclk_Reflect( NMHDR* pNmHdr, LRESULT* pResult )
@@ -221,9 +223,4 @@ void CPathItemListCtrl::OnFileProperties( void )
 	if ( !contextMenu.MakePopupMenu( CMF_NORMAL ) ||
 		 !contextMenu.InvokeVerb( "properties" ) )
 		ui::BeepSignal( MB_ICONWARNING );
-}
-
-void CPathItemListCtrl::OnEditListViewProperties( void )
-{
-AfxMessageBox( _T("TODO: OnEditListViewProperties!"), MB_OK );
 }

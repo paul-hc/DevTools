@@ -12,8 +12,10 @@ class CFlagsListCtrl : public CReportListControl
 public:
 	CFlagsListCtrl( void );
 	virtual ~CFlagsListCtrl();
-protected:
+
 	// base overrides
+	virtual CMenu* GetPopupMenu( ListPopup popupType );
+protected:
 	virtual void CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARAM rowKey, int subItem ) const;
 
 	virtual void OutputFlags( void );
@@ -39,8 +41,6 @@ public:
 	virtual void PreSubclassWindow( void );
 	virtual BOOL PreTranslateMessage( MSG* pMsg );
 protected:
-	afx_msg void OnContextMenu( CWnd* pWnd, CPoint point );
-	afx_msg void OnInitMenuPopup( CMenu* pPopupMenu, UINT index, BOOL isSysMenu );
 	afx_msg BOOL OnLvnToggleCheckState_Reflect( NMHDR* pNmHdr, LRESULT* pResult );
 	afx_msg BOOL OnLvnCheckStatesChanged_Reflect( NMHDR* pNmHdr, LRESULT* pResult );
 	afx_msg BOOL OnLvnLinkClick_Reflect( NMHDR* pNmHdr, LRESULT* pResult );			// group task click
@@ -48,10 +48,6 @@ protected:
 	afx_msg void OnUpdateCopy( CCmdUI* pCmdUI );
 	afx_msg void OnCopySelected( void );
 	afx_msg void OnUpdateCopySelected( CCmdUI* pCmdUI );
-	afx_msg void OnExpandGroups( void );
-	afx_msg void OnUpdateExpandGroups( CCmdUI* pCmdUI );
-	afx_msg void OnCollapseGroups( void );
-	afx_msg void OnUpdateCollapseGroups( CCmdUI* pCmdUI );
 
 	DECLARE_MESSAGE_MAP()
 };

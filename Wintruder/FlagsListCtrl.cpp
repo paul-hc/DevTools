@@ -44,6 +44,12 @@ CFlagsListCtrl::~CFlagsListCtrl( void )
 {
 }
 
+CMenu* CFlagsListCtrl::GetPopupMenu( ListPopup popupType )
+{
+	popupType;
+	return &m_contextMenu;
+}
+
 void CFlagsListCtrl::InitControl( void )
 {
 	if ( NULL == m_hWnd )
@@ -252,8 +258,6 @@ void CFlagsListCtrl::PreSubclassWindow( void )
 // message handlers
 
 BEGIN_MESSAGE_MAP( CFlagsListCtrl, CReportListControl )
-	ON_WM_CONTEXTMENU()
-	ON_WM_INITMENUPOPUP()
 	ON_NOTIFY_REFLECT_EX( lv::LVN_ToggleCheckState, OnLvnToggleCheckState_Reflect )
 	ON_NOTIFY_REFLECT_EX( lv::LVN_CheckStatesChanged, OnLvnCheckStatesChanged_Reflect )
 	ON_NOTIFY_REFLECT_EX( LVN_LINKCLICK, OnLvnLinkClick_Reflect )
@@ -261,29 +265,11 @@ BEGIN_MESSAGE_MAP( CFlagsListCtrl, CReportListControl )
 	ON_UPDATE_COMMAND_UI( CM_COPY_FORMATTED, OnUpdateCopy )
 	ON_COMMAND( CM_COPY_SELECTED, OnCopySelected )
 	ON_UPDATE_COMMAND_UI( CM_COPY_SELECTED, OnUpdateCopySelected )
-	ON_COMMAND( CM_EXPAND_GROUPS, OnExpandGroups )
-	ON_UPDATE_COMMAND_UI( CM_EXPAND_GROUPS, OnUpdateExpandGroups )
-	ON_COMMAND( CM_COLLAPSE_GROUPS, OnCollapseGroups )
-	ON_UPDATE_COMMAND_UI( CM_COLLAPSE_GROUPS, OnUpdateCollapseGroups )
 END_MESSAGE_MAP()
 
 BOOL CFlagsListCtrl::PreTranslateMessage( MSG* pMsg )
 {
 	return m_accel.Translate( pMsg, m_hWnd ) || CReportListControl::PreTranslateMessage( pMsg );
-}
-
-void CFlagsListCtrl::OnContextMenu( CWnd* /*pWnd*/, CPoint point )
-{
-	m_contextMenu.TrackPopupMenu( TPM_RIGHTBUTTON, point.x, point.y, this );
-}
-
-void CFlagsListCtrl::OnInitMenuPopup( CMenu* pPopupMenu, UINT index, BOOL isSysMenu )
-{
-	AfxCancelModes( m_hWnd );
-	if ( !isSysMenu )
-		ui::UpdateMenuUI( this, pPopupMenu );
-
-	CReportListControl::OnInitMenuPopup( pPopupMenu, index, isSysMenu );
 }
 
 BOOL CFlagsListCtrl::OnLvnToggleCheckState_Reflect( NMHDR* pNmHdr, LRESULT* pResult )
@@ -377,63 +363,16 @@ void CFlagsListCtrl::OnCopySelected( void )
 
 	if ( !selFlags.empty() )
 	{
-		std::tstring text; text.reserve( 1024 );
+		std::vector< std::tstring > lines;
 
-		if ( 1 == selFlags.size() )
-			text = selFlags.front()->GetName().c_str();		// no line-end
-		else
-			for ( std::vector< CFlagInfo* >::const_iterator itSelFlag = selFlags.begin(); itSelFlag != selFlags.end(); ++itSelFlag )
-			{
-				static const TCHAR lineEnd[] = _T("\r\n");
-				text += ( *itSelFlag )->GetName();
-				text += lineEnd;
-			}
+		for ( std::vector< CFlagInfo* >::const_iterator itSelFlag = selFlags.begin(); itSelFlag != selFlags.end(); ++itSelFlag )
+			lines.push_back( ( *itSelFlag )->GetName() );
 
-		CClipboard::CopyText( text, this );
+		CClipboard::CopyToLines( lines, this );
 	}
 }
 
 void CFlagsListCtrl::OnUpdateCopySelected( CCmdUI* pCmdUI )
 {
 	pCmdUI->Enable( FindItemWithState( LVNI_SELECTED ) != -1 );
-}
-
-void CFlagsListCtrl::OnExpandGroups( void )
-{
-	ExpandAllGroups();
-}
-
-void CFlagsListCtrl::OnUpdateExpandGroups( CCmdUI* pCmdUI )
-{
-	bool anyCollapsed = false;
-
-	for ( int i = 0, groupCount = GetGroupCount(); i != groupCount; ++i )
-		if ( HasGroupState( GetGroupId( i ), LVGS_COLLAPSED ) )
-		{
-			anyCollapsed = true;
-			break;
-		}
-
-	pCmdUI->Enable( anyCollapsed );
-	pCmdUI->SetCheck( !anyCollapsed );
-}
-
-void CFlagsListCtrl::OnCollapseGroups( void )
-{
-	CollapseAllGroups();
-}
-
-void CFlagsListCtrl::OnUpdateCollapseGroups( CCmdUI* pCmdUI )
-{
-	bool anyExpanded = false;
-
-	for ( int i = 0, groupCount = GetGroupCount(); i != groupCount; ++i )
-		if ( !HasGroupState( GetGroupId( i ), LVGS_COLLAPSED ) )
-		{
-			anyExpanded = true;
-			break;
-		}
-
-	pCmdUI->Enable( anyExpanded );
-	pCmdUI->SetCheck( !anyExpanded );
 }

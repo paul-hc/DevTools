@@ -41,7 +41,11 @@ namespace ui
 
 namespace lv
 {
-	enum SubPopup { NowhereSubPopup, OnSelectionSubPopup, PathItemNowhereSubPopup, PathItemOnSelectionSubPopup };
+	enum SubPopup
+	{
+		NowhereSubPopup, OnSelectionSubPopup, OnGroupSubPopup,
+		PathItemNowhereSubPopup, PathItemOnSelectionSubPopup
+	};
 
 	enum
 	{
@@ -118,6 +122,7 @@ abstract class CListTraits			// defines types shared between CReportListControl 
 public:
 	typedef LPARAM TRowKey;			// row keys are invariant to sorting; they represent item data (LPARAM), or fall back to index (int)
 	typedef int TColumn;
+	typedef int TGroupId;
 
 	enum StdColumn { Code, EntireRecord = (TColumn)-1 };
 
@@ -201,7 +206,7 @@ public:
 	const std::tstring& GetSection( void ) const { return m_regSection; }
 	void SetSection( const std::tstring& regSection ) { m_regSection = regSection; }
 public:
-	enum ListPopup { Nowhere, OnSelection, _ListPopupCount };
+	enum ListPopup { Nowhere, OnSelection, OnGroup, _ListPopupCount };
 
 	void SetPopupMenu( ListPopup popupType, CMenu* pPopupMenu ) { m_pPopupMenu[ popupType ] = pPopupMenu; }		// set pPopupMenu to NULL to allow tracking context menu by parent dialog
 	void SetTrackMenuTarget( CWnd* pTrackMenuTarget ) { m_pTrackMenuTarget = pTrackMenuTarget; }
@@ -238,7 +243,9 @@ public:
 
 	enum MyHitTest { LVHT_MY_PASTEND = 0x00080000 };
 
-	int HitTest( CPoint pos, UINT* pFlags = NULL ) const;
+	int HitTest( CPoint point, UINT* pFlags = NULL, TGroupId* pGroupId = NULL ) const;
+	TGroupId GroupHitTest( const CPoint& point, int groupType = LVGGR_HEADER ) const;
+
 	int GetDropIndexAtPoint( const CPoint& point ) const;
 	bool IsItemFullyVisible( int index ) const;
 	bool GetIconItemRect( CRect* pIconRect, int index ) const;				// returns true if item visible
@@ -433,6 +440,7 @@ public:
 	void SetCheckStatePolicy( const ui::ICheckStatePolicy* pCheckStatePolicy );
 
 	CImageList* GetStateImageList( void ) const { return GetImageList( LVSIL_STATE ); }
+	CSize GetStateIconSize( void ) const;
 
 	int GetCheckState( int index ) const { return ui::CheckStateFromRaw( GetRawCheckState( index ) ); }
 	bool SetCheckState( int index, int checkState );
@@ -583,8 +591,6 @@ public:
 
 	void CollapseAllGroups( void );
 	void ExpandAllGroups( void );
-
-	int GroupHitTest( const CPoint& point ) const;
 #endif //UTL_VISTA_GROUPS
 
 private:
@@ -638,6 +644,7 @@ private:
 	ole::IDataSourceFactory* m_pDataSourceFactory;			// creates ole::CDataSource for clipboard and drag-drop
 private:
 	bool m_painting;										// true during OnPaint() - supresses item text callback for diff columns to prevent default list sub-item draw (diffs are custom drawn)
+	mutable CSize m_stateIconSize;							// self-encapsulated, call GetStateIconSize(): cached size of an icon in the StateImageList
 	std::auto_ptr< lv::CNmCheckStatesChanged > m_pNmToggling;	// set during OnLvnItemChanging_Reflect() - user toggling check-state with extended states
 	BOOL m_parentHandles[ _PN_Count ];						// self-encapsulated 'parent handles' flags array
 protected:
@@ -691,6 +698,8 @@ public:
 	afx_msg void OnUpdateMoveTo( CCmdUI* pCmdUI );
 	afx_msg void OnRename( void );
 	afx_msg void OnUpdateRename( CCmdUI* pCmdUI );
+	afx_msg void OnExpandCollapseGroups( UINT cmdId );
+	afx_msg void OnUpdateExpandCollapseGroups( CCmdUI* pCmdUI );
 	afx_msg void OnUpdateAnySelected( CCmdUI* pCmdUI );
 	afx_msg void OnUpdateSingleSelected( CCmdUI* pCmdUI );
 

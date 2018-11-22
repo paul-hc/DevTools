@@ -46,6 +46,19 @@ CItemListDialog::CItemListDialog( CWnd* pParent, const ui::CItemContent& content
 
 	m_childSheet.AddPage( new CItemsListPage( this ) );
 	m_childSheet.AddPage( new CItemsEditPage( this ) );
+
+	m_toolbar.GetStrip()
+		.AddButton( ID_ADD_ITEM )
+		.AddButton( ID_REMOVE_ITEM )
+		.AddButton( ID_REMOVE_ALL_ITEMS )
+		.AddSeparator()
+		.AddButton( ID_EDIT_ITEM )
+		.AddSeparator()
+		.AddButton( ID_MOVE_UP_ITEM )
+		.AddButton( ID_MOVE_DOWN_ITEM )
+		.AddSeparator()
+		.AddButton( ID_EDIT_COPY )
+		.AddButton( ID_EDIT_PASTE );
 }
 
 void CItemListDialog::SetSelItemPos( size_t selItemPos )
@@ -113,7 +126,7 @@ void CItemListDialog::DoDataExchange( CDataExchange* pDX )
 {
 	bool firstInit = NULL == m_toolbar.m_hWnd;
 
-	m_toolbar.DDX_Placeholder( pDX, IDC_TOOLBAR_PLACEHOLDER, H_AlignLeft | V_AlignCenter, IDR_ITEM_LIST_STRIP );
+	m_toolbar.DDX_Placeholder( pDX, IDC_TOOLBAR_PLACEHOLDER, H_AlignLeft | V_AlignCenter );
 
 	if ( firstInit )
 	{

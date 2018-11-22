@@ -218,6 +218,8 @@ const CEnumTags& CFindDuplicatesDialog::GetTags_FileType( void )
 
 CMenu& CFindDuplicatesDialog::GetDupListPopupMenu( CReportListControl::ListPopup popupType )
 {
+	ASSERT( popupType != CReportListControl::OnGroup );		// use the base popup for OnGroup menu tracking
+
 	static CMenu s_popupMenu[ CReportListControl::_ListPopupCount ];
 	CMenu& rMenu = s_popupMenu[ popupType ];
 	if ( NULL == rMenu.GetSafeHmenu() )
@@ -365,7 +367,6 @@ void CFindDuplicatesDialog::SetupDuplicateFileList( void )
 	m_dupsListCtrl.EnableGroupView( !m_duplicateGroups.empty() );
 
 	unsigned int index = 0;			// strictly item index
-
 	for ( unsigned int groupId = 0; groupId != m_duplicateGroups.size(); ++groupId )
 	{
 		const CDuplicateFilesGroup* pGroup = m_duplicateGroups[ groupId ];
@@ -378,18 +379,21 @@ void CFindDuplicatesDialog::SetupDuplicateFileList( void )
 		m_dupsListCtrl.InsertGroupHeader( groupId, groupId, header, LVGS_NORMAL | LVGS_COLLAPSIBLE );
 		m_dupsListCtrl.SetGroupTask( groupId, _T("Toggle Duplicates") );
 
-		for ( std::vector< CDuplicateFileItem* >::const_iterator itDupItem = pGroup->GetItems().begin(); itDupItem != pGroup->GetItems().end(); ++itDupItem, ++index )
+		for ( size_t pos = 0; pos != pGroup->GetItems().size(); ++pos, ++index )
 		{
-			ASSERT( pGroup == ( *itDupItem )->GetParentGroup() );
+			CDuplicateFileItem* pDupItem = pGroup->GetItems()[ pos ];
+			ASSERT( pGroup == pDupItem->GetParentGroup() );
 
-			m_dupsListCtrl.InsertObjectItem( index, *itDupItem );
-			m_dupsListCtrl.SetSubItemText( index, DirPath, ( *itDupItem )->GetFilePath().GetParentPath().GetPtr() );
+			m_dupsListCtrl.InsertObjectItem( index, pDupItem );
+			m_dupsListCtrl.SetSubItemText( index, DirPath, pDupItem->GetFilePath().GetParentPath().GetPtr() );
 			m_dupsListCtrl.SetSubItemText( index, Size, num::FormatFileSize( pGroup->GetContentKey().m_fileSize ) );
 			m_dupsListCtrl.SetSubItemText( index, Crc32, num::FormatHexNumber( pGroup->GetContentKey().m_crc32, _T("%X") ) );
-			m_dupsListCtrl.SetSubItemText( index, DateModified, time_utl::FormatTimestamp( ( *itDupItem )->GetModifyTime() ) );
+			m_dupsListCtrl.SetSubItemText( index, DateModified, time_utl::FormatTimestamp( pDupItem->GetModifyTime() ) );
 
-			if ( ( *itDupItem )->IsOriginalItem() )
+			if ( pDupItem->IsOriginalItem() )
 				m_dupsListCtrl.ModifyCheckState( index, CheckDup::OriginalItem );
+			else
+				m_dupsListCtrl.SetSubItemText( index, DuplicateCount, num::FormatNumber( pos ) );
 
 			VERIFY( m_dupsListCtrl.SetItemGroupId( index, groupId ) );
 		}

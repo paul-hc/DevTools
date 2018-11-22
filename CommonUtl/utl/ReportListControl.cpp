@@ -90,11 +90,13 @@ namespace lv
 }
 
 
-static ACCEL keys[] =
+static ACCEL s_keys[] =
 {
-	{ FVIRTKEY | FCONTROL, _T('A'), ID_EDIT_SELECT_ALL },
-	{ FVIRTKEY | FCONTROL, _T('C'), ID_EDIT_COPY },
-	{ FVIRTKEY | FCONTROL, VK_INSERT, ID_EDIT_COPY },
+	{ FVIRTKEY | FCONTROL, _T('A'), ID_EDIT_SELECT_ALL },		// Ctrl+A
+	{ FVIRTKEY | FCONTROL, _T('C'), ID_EDIT_COPY },				// Ctrl+C
+	{ FVIRTKEY | FCONTROL, VK_INSERT, ID_EDIT_COPY },			// Ctrl+Ins
+	{ FVIRTKEY | FCONTROL, VK_ADD, ID_EXPAND },					// Ctrl+Plus
+	{ FVIRTKEY | FCONTROL, VK_SUBTRACT, ID_COLLAPSE },			// Ctrl+Minus
 	{ FVIRTKEY, VK_F2, ID_RENAME_ITEM }
 };
 
@@ -115,16 +117,18 @@ CReportListControl::CReportListControl( UINT columnLayoutId /*= 0*/, DWORD listS
 	, m_pLargeImageList( NULL )
 	, m_pCheckStatePolicy( NULL )
 	, m_pTextEffectCallback( NULL )
-	, m_listAccel( keys, COUNT_OF( keys ) )
+	, m_listAccel( ARRAY_PAIR( s_keys ) )
 	, m_pDataSourceFactory( ole::GetStdDataSourceFactory() )
 	, m_painting( false )
+	, m_stateIconSize( 0, 0 )
 	, m_pTrackMenuTarget( this )
 	, m_deleteSrc_DiffEffect( ui::Bold, s_deleteSrcTextColor )
 	, m_mismatchDest_DiffEffect( ui::Bold, s_mismatchDestTextColor )
 	, m_matchDest_DiffEffect( ui::Regular, GetSysColor( COLOR_GRAYTEXT ) )
 {
-	m_pPopupMenu[ OnSelection ] = &GetStdPopupMenu( OnSelection );
 	m_pPopupMenu[ Nowhere ] = &GetStdPopupMenu( Nowhere );
+	m_pPopupMenu[ OnSelection ] = &GetStdPopupMenu( OnSelection );
+	m_pPopupMenu[ OnGroup ] = &GetStdPopupMenu( OnGroup );
 
 	std::fill_n( m_parentHandles, (int)_PN_Count, -1 );
 
@@ -284,8 +288,17 @@ CMenu& CReportListControl::GetStdPopupMenu( ListPopup popupType )
 {
 	static CMenu s_stdPopupMenu[ _ListPopupCount ];
 	CMenu& rMenu = s_stdPopupMenu[ popupType ];
+
 	if ( NULL == rMenu.GetSafeHmenu() )
-		ui::LoadPopupSubMenu( rMenu, IDR_STD_CONTEXT_MENU, ui::ListView, OnSelection == popupType ? lv::OnSelectionSubPopup : lv::NowhereSubPopup );
+	{
+		switch ( popupType )
+		{
+			default: ASSERT( false );
+			case Nowhere:		ui::LoadPopupSubMenu( rMenu, IDR_STD_CONTEXT_MENU, ui::ListView, lv::NowhereSubPopup ); break;
+			case OnSelection:	ui::LoadPopupSubMenu( rMenu, IDR_STD_CONTEXT_MENU, ui::ListView, lv::OnSelectionSubPopup ); break;
+			case OnGroup:		ui::LoadPopupSubMenu( rMenu, IDR_STD_CONTEXT_MENU, ui::ListView, lv::OnGroupSubPopup ); break;
+		}
+	}
 	return rMenu;
 }
 
@@ -453,7 +466,6 @@ void CReportListControl::SetTopIndex( int topIndex )
 	Scroll( scrollsize );
 
 OR:
-
 	EnsureVisible( topIndex, FALSE );
 	CRect itemRect;
 	if ( GetItemRect( topIndex, &itemRect, LVIR_BOUNDS ) )
@@ -465,33 +477,64 @@ OR:
 */
 }
 
-int CReportListControl::HitTest( CPoint pos, UINT* pFlags /*= NULL*/ ) const
+int CReportListControl::HitTest( CPoint point, UINT* pFlags /*= NULL*/, TGroupId* pGroupId /*= NULL*/ ) const
 {
-	int itemIndex = __super::HitTest( pos, pFlags );
+	REQUIRE( NULL == pGroupId || pFlags != NULL );
+	int itemIndex = __super::HitTest( point, pFlags );
 
-	if ( HasFlag( *pFlags, LVHT_NOWHERE ) )
-		if ( int itemCount = GetItemCount() )
+	if ( pFlags != NULL )
+		if ( HasFlag( *pFlags, LVHT_NOWHERE ) )
 		{
-			CRect lastItemRect;
-			GetItemRect( itemCount - 1, &lastItemRect, LVIR_BOUNDS );
+			if ( int itemCount = GetItemCount() )
+			{
+				CRect lastItemRect;
+				GetItemRect( itemCount - 1, &lastItemRect, LVIR_BOUNDS );
 
-			if ( pos.y > lastItemRect.bottom )
-				SetFlag( *pFlags, LVHT_MY_PASTEND );
+				if ( point.y > lastItemRect.bottom )
+					SetFlag( *pFlags, LVHT_MY_PASTEND );
+				else
+					switch ( GetView() )
+					{
+						case LV_VIEW_ICON:
+						case LV_VIEW_SMALLICON:
+						case LV_VIEW_TILE:
+							if ( !EqFlag( GetStyle(), LVS_ALIGNLEFT ) )
+								if ( point.x > lastItemRect.right && point.y > lastItemRect.top )		// to the right of last item?
+									SetFlag( *pFlags, LVHT_MY_PASTEND );
+					}
+			}
 			else
-				switch ( GetView() )
-				{
-					case LV_VIEW_ICON:
-					case LV_VIEW_SMALLICON:
-					case LV_VIEW_TILE:
-						if ( !EqFlag( GetStyle(), LVS_ALIGNLEFT ) )
-							if ( pos.x > lastItemRect.right && pos.y > lastItemRect.top )				// to the right of last item?
-								SetFlag( *pFlags, LVHT_MY_PASTEND );
-				}
+				SetFlag( *pFlags, LVHT_MY_PASTEND );
+
+			if ( pGroupId != NULL )
+			{
+				*pGroupId = GroupHitTest( point );
+
+				if ( *pGroupId != -1 )
+					SetFlag( *pFlags, LVHT_EX_GROUP_HEADER );
+			}
 		}
-		else
-			SetFlag( *pFlags, LVHT_MY_PASTEND );
 
 	return itemIndex;
+}
+
+CListTraits::TGroupId CReportListControl::GroupHitTest( const CPoint& point, int groupType /*= LVGGR_HEADER*/ ) const
+{
+#ifdef UTL_VISTA_GROUPS
+	if ( IsGroupViewEnabled() || -1 == __super::HitTest( point ) )
+		for ( int i = 0, groupCount = GetGroupCount(); i != groupCount; ++i )
+		{
+			int groupId = GetGroupId( i );
+			CRect rect( 0, LVGGR_HEADER, 0, 0 );
+			VERIFY( GetGroupRect( groupId, &rect, groupType ) );
+			if ( rect.PtInRect( point ) )
+				return groupId;
+		}
+#else
+	point;
+#endif //UTL_VISTA_GROUPS
+
+	return -1;			// don't try other ways to find the group
 }
 
 int CReportListControl::GetDropIndexAtPoint( const CPoint& point ) const
@@ -528,6 +571,15 @@ bool CReportListControl::GetIconItemRect( CRect* pIconRect, int index ) const
 
 	if ( ( pIconRect->Height() - 1 ) == pIconRect->Width() )
 		--pIconRect->bottom;		// reduce height since it has one extra pixel at the bottom (16x17); this allows proper icon drawing that fits vertically
+
+	if ( HasFlag( GetExtendedStyle(), LVS_EX_CHECKBOXES ) )
+		switch ( GetView() )
+		{
+			case LV_VIEW_ICON:
+			case LV_VIEW_SMALLICON:
+			case LV_VIEW_TILE:
+				pIconRect->left += GetStateIconSize().cx + 5;
+		}
 
 	return true;
 }
@@ -1360,6 +1412,16 @@ int CReportListControl::Find( const void* pObject ) const
 	return -1;
 }
 
+CSize CReportListControl::GetStateIconSize( void ) const
+{
+	if ( 0 == m_stateIconSize.cx && 0 == m_stateIconSize.cy )
+		if ( HasFlag( GetExtendedStyle(), LVS_EX_CHECKBOXES ) )
+			if ( CImageList* pStateImageList = GetStateImageList() )
+				m_stateIconSize = gdi::GetImageSize( *pStateImageList );		// cache the size of an state image list icon, used to offset glyph rect in certain view modes
+
+	return m_stateIconSize;
+}
+
 bool CReportListControl::SetCheckState( int index, int checkState )
 {
 	if ( !SetRawCheckState( index, ui::CheckStateToRaw( checkState ) ) )
@@ -1928,22 +1990,6 @@ void CReportListControl::ExpandAllGroups( void )
 	}
 }
 
-int CReportListControl::GroupHitTest( const CPoint& point ) const
-{
-	if ( !IsGroupViewEnabled() || 0 == GetItemCount() || HitTest( point ) != -1 )
-		return -1;
-
-	for ( int i = 0, groupCount = GetGroupCount(); i != groupCount; ++i )
-	{
-		int groupId = GetGroupId( i );
-		CRect rect( 0, LVGGR_HEADER, 0, 0 );
-		VERIFY( GetGroupRect( groupId, &rect, LVGGR_HEADER ) );
-		if ( rect.PtInRect( point ) )
-			return groupId;
-	}
-	return -1;			// don't try other ways to find the group
-}
-
 #endif //UTL_VISTA_GROUPS
 
 
@@ -1996,6 +2042,8 @@ BEGIN_MESSAGE_MAP( CReportListControl, CListCtrl )
 	ON_UPDATE_COMMAND_UI_RANGE( ID_MOVE_UP_ITEM, ID_MOVE_BOTTOM_ITEM, OnUpdateMoveTo )
 	ON_COMMAND( ID_RENAME_ITEM, OnRename )
 	ON_UPDATE_COMMAND_UI( ID_RENAME_ITEM, OnUpdateRename )
+	ON_COMMAND_RANGE( ID_EXPAND, ID_COLLAPSE, OnExpandCollapseGroups )
+	ON_UPDATE_COMMAND_UI_RANGE( ID_EXPAND, ID_COLLAPSE, OnUpdateExpandCollapseGroups )
 END_MESSAGE_MAP()
 
 int CReportListControl::OnCreate( CREATESTRUCT* pCreateStruct )
@@ -2057,10 +2105,13 @@ void CReportListControl::OnNcLButtonDown( UINT hitTest, CPoint point )
 void CReportListControl::OnContextMenu( CWnd* pWnd, CPoint screenPos )
 {
 	UINT flags;
-	int hitIndex = HitTest( ui::ScreenToClient( m_hWnd, screenPos ), &flags );
+	TGroupId groupId;
+	int hitIndex = HitTest( ui::ScreenToClient( m_hWnd, screenPos ), &flags, &groupId );
 	ListPopup popupType = _ListPopupCount;
 
-	if ( pWnd == GetHeaderCtrl() || -1 == hitIndex )		// clicked on header or nowhere?
+	if ( HasFlag( flags, LVHT_EX_GROUP ) )
+		popupType = OnGroup;
+	else if ( pWnd == GetHeaderCtrl() || -1 == hitIndex )		// clicked on header or nowhere?
 		popupType = Nowhere;
 	else if ( HasFlag( flags, LVHT_ONITEM ) )
 		popupType = OnSelection;
@@ -2353,6 +2404,31 @@ void CReportListControl::OnRename( void )
 void CReportListControl::OnUpdateRename( CCmdUI* pCmdUI )
 {
 	pCmdUI->Enable( HasFlag( GetStyle(), LVS_EDITLABELS ) && GetCurSel() != -1 );
+}
+
+void CReportListControl::OnExpandCollapseGroups( UINT cmdId )
+{
+	if ( ID_EXPAND == cmdId )
+		ExpandAllGroups();
+	else
+		CollapseAllGroups();
+}
+
+void CReportListControl::OnUpdateExpandCollapseGroups( CCmdUI* pCmdUI )
+{
+	bool anyToToggle = false;
+
+	for ( int i = 0, groupCount = GetGroupCount(); i != groupCount; ++i )
+	{
+		bool isCollapsed = HasGroupState( GetGroupId( i ), LVGS_COLLAPSED );
+		if ( ID_EXPAND == pCmdUI->m_nID ? isCollapsed : ( !isCollapsed ) )
+		{
+			anyToToggle = true;
+			break;
+		}
+	}
+
+	pCmdUI->Enable( anyToToggle );
 }
 
 void CReportListControl::OnUpdateAnySelected( CCmdUI* pCmdUI )

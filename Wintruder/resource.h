@@ -139,8 +139,6 @@
 #define CM_MOVE_WINDOW_TO_BOTTOM        32803
 #define CM_COPY_FORMATTED               32804
 #define CM_COPY_SELECTED                32805
-#define CM_EXPAND_GROUPS                32806
-#define CM_COLLAPSE_GROUPS              32807
 #define ID_MOVE_TOOL                    32809
 #define ID_SIZE_TOOL                    32810
 #define ID_SIZE_TOP_LEFT_TOOL           32811
