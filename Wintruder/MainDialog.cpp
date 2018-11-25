@@ -92,6 +92,16 @@ CMainDialog::CMainDialog( void )
 	m_findButton.SetIconId( ID_EDIT_FIND );
 	m_findButton.LoadMenu( IDR_CONTEXT_MENU, app::FindSplitButton );
 	m_detailsButton.LoadMenu( IDR_CONTEXT_MENU, app::HighlightSplitButton );
+
+	m_optionsToolbar.GetStrip()
+		.AddButton( ID_TOP_MOST_CHECK )
+		.AddButton( ID_AUTO_HILIGHT_CHECK )
+		.AddSeparator()
+		.AddButton( ID_IGNORE_HIDDEN_CHECK )
+		.AddButton( ID_IGNORE_DISABLED_CHECK )
+		.AddSeparator()
+		.AddButton( ID_AUTO_UPDATE_CHECK )
+		.AddButton( ID_AUTO_UPDATE_REFRESH_CHECK );
 }
 
 CMainDialog::~CMainDialog()
@@ -133,6 +143,9 @@ void CMainDialog::OnAppEvent( app::Event appEvent )
 			break;
 		case app::DirtyChanged:
 			ui::EnableWindow( m_applyButton, app::GetSvc().HasDirtyDetails() && !GetLayoutEngine().IsCollapsed() );
+			break;
+		case app::ToggleAutoUpdate:
+			GetAutoUpdateTimer()->SetStarted( app::GetOptions()->m_autoUpdate );
 			break;
 		case app::WndStateChanged:
 			{
@@ -209,6 +222,11 @@ void CMainDialog::FlashTargetWnd( int flashCount )
 		m_pFlashHighlighter.reset( new CWndHighlighter );
 		m_pFlashHighlighter->FlashWnd( m_hWnd, *pTargetWnd, flashCount );
 	}
+}
+
+void CMainDialog::AutoUpdateRefresh( void )
+{
+	CmUpdateTick();
 }
 
 std::tstring CMainDialog::MakeDirtyString( void ) const
@@ -289,6 +307,7 @@ void CMainDialog::DoDataExchange( CDataExchange* pDX )
 	DDX_Control( pDX, ID_APPLY_NOW, m_applyButton );
 	m_mainSheet.DDX_DetailSheet( pDX, IDC_MAIN_SHEET );
 	m_detailsSheet.DDX_DetailSheet( pDX, IDC_DETAILS_SHEET );
+	m_optionsToolbar.DDX_Placeholder( pDX, IDC_STRIP_BAR_1, H_AlignLeft | V_AlignTop );
 
 	if ( firstInit )
 	{
@@ -347,7 +366,7 @@ void CMainDialog::OnDestroy( void )
 void CMainDialog::OnTimer( UINT_PTR eventId )
 {
 	if ( m_autoUpdateTimer.IsHit( eventId ) )
-		CmUpdateTick();
+		AutoUpdateRefresh();
 	else if ( m_refreshTimer.IsHit( eventId ) )
 	{
 		m_refreshTimer.Stop();

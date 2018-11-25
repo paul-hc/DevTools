@@ -31,87 +31,92 @@ void COptionsPage::OnAppEvent( app::Event appEvent )
 	switch ( appEvent )
 	{
 		case app::OptionChanged:
-			m_pOptions->Save();			// save right away so that new app instances read the current state
+			UpdateData( DialogOutput );
 			break;
 	}
 }
 
 void COptionsPage::DoDataExchange( CDataExchange* pDX )
 {
-	bool firstInit = NULL == m_autoUpdateTargetCombo.m_hWnd;
+	bool firstInit = NULL == m_auTargetCombo.m_hWnd;
 
-	ui::DDX_EnumCombo( pDX, ID_FRAME_STYLE_COMBO, m_frameStyleCombo, m_pOptions->m_frameStyle, opt::GetTags_FrameStyle() );
-	ui::DDX_EnumCombo( pDX, ID_QUERY_WND_ICONS_COMBO, m_queryWndIconsCombo, m_pOptions->m_queryWndIcons, opt::GetTags_QueryWndIcons() );
-	ui::DDX_EnumCombo( pDX, ID_AUTO_UPDATE_TARGET_COMBO, m_autoUpdateTargetCombo, m_pOptions->m_updateTarget, opt::GetTags_AutoUpdateTarget() );
+	DDX_Control( pDX, ID_FRAME_STYLE_COMBO, m_frameStyleCombo );
+	DDX_Control( pDX, ID_FRAME_SIZE_EDIT, m_frameSizeEdit );
+	DDX_Control( pDX, ID_QUERY_WND_ICONS_COMBO, m_queryWndIconsCombo );
+	DDX_Control( pDX, ID_AUTO_UPDATE_TARGET_COMBO, m_auTargetCombo );
+	DDX_Control( pDX, ID_AUTO_UPDATE_TIMEOUT_EDIT, m_auTimeoutEdit );
 
 	if ( firstInit )
 	{
 		EnableToolTips( TRUE );
-		ui::SetSpinRange( this, ID_FRAME_SIZE_SPIN, 1, 50 );
-		ui::SetSpinRange( this, ID_AUTO_UPDATE_TIMEOUT_SPIN, 1, 50 );
-		ui::EnableControl( m_hWnd, ID_AUTO_UPDATE_REFRESH_CHECK, !wnd::HasUIPI() );		// enabled for Windows 7-
+
+		ui::WriteComboItems( m_frameStyleCombo, opt::GetTags_FrameStyle().GetUiTags() );
+		ui::WriteComboItems( m_queryWndIconsCombo, opt::GetTags_QueryWndIcons().GetUiTags() );
+		ui::WriteComboItems( m_auTargetCombo, opt::GetTags_AutoUpdateTarget().GetUiTags() );
+
+		m_frameSizeEdit.SetValidRange( Range< int >( 1, 50 ) );
+		m_auTimeoutEdit.SetValidRange( Range< int >( 1, 60 ) );
 	}
 
-	ui::DDX_Bool( pDX, ID_TOP_MOST_CHECK, m_pOptions->m_keepTopmost );
-	ui::DDX_Bool( pDX, ID_AUTO_HIDE_CHECK, m_pOptions->m_hideOnTrack );
-	ui::DDX_Bool( pDX, ID_AUTO_HILIGHT_CHECK, m_pOptions->m_autoHighlight );
-	ui::DDX_Number( pDX, ID_FRAME_SIZE_EDIT, m_pOptions->m_frameSize );
+	if ( DialogOutput == pDX->m_bSaveAndValidate )
+	{
+		ui::UpdateControlsUI( this );		// update check-boxes (check-state and enabling)
 
-	ui::DDX_Bool( pDX, ID_IGNORE_DISABLED_CHECK, m_pOptions->m_ignoreDisabled );
-	ui::DDX_Bool( pDX, ID_IGNORE_HIDDEN_CHECK, m_pOptions->m_ignoreHidden );
-	ui::DDX_Bool( pDX, ID_DISPLAY_ZERO_FLAGS_CHECK, m_pOptions->m_displayZeroFlags );
+		m_frameSizeEdit.SetNumber( m_pOptions->m_frameSize );
+		m_frameStyleCombo.SetCurSel( m_pOptions->m_frameStyle );
+		m_queryWndIconsCombo.SetCurSel( m_pOptions->m_queryWndIcons );
+		m_auTargetCombo.SetCurSel( m_pOptions->m_updateTarget );
+		m_auTimeoutEdit.SetNumber( m_pOptions->m_autoUpdateTimeout );
+	}
 
-	ui::DDX_Bool( pDX, ID_AUTO_UPDATE_CHECK, m_pOptions->m_autoUpdate );
-	ui::DDX_Bool( pDX, ID_AUTO_UPDATE_REFRESH_CHECK, m_pOptions->m_autoUpdateRefresh );
-	ui::DDX_Number( pDX, ID_AUTO_UPDATE_TIMEOUT_EDIT, m_pOptions->m_autoUpdateTimeout );
+	__super::DoDataExchange( pDX );
+}
 
-	if ( DialogSaveChanges == pDX->m_bSaveAndValidate )
-		m_pOptions->Save();			// save right away so that new app instances read the current state
+BOOL COptionsPage::OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo )
+{
+	if ( m_pOptions->OnCmdMsg( id, code, pExtra, pHandlerInfo ) )
+		return true;
 
-	CLayoutPropertyPage::DoDataExchange( pDX );
+	return __super::OnCmdMsg( id, code, pExtra, pHandlerInfo );
 }
 
 
 // message handlers
 
 BEGIN_MESSAGE_MAP( COptionsPage, CLayoutPropertyPage )
-	ON_COMMAND_RANGE( ID_TOP_MOST_CHECK, ID_AUTO_UPDATE_TARGET_COMBO, OnFieldModified )
-	ON_CBN_SELCHANGE( ID_FRAME_STYLE_COMBO, OnFieldModified )
-	ON_CBN_SELCHANGE( ID_QUERY_WND_ICONS_COMBO, OnFieldModified )
-	ON_CBN_SELCHANGE( ID_AUTO_UPDATE_TARGET_COMBO, OnFieldModified )
+	ON_CBN_SELCHANGE( ID_FRAME_STYLE_COMBO, OnCbnSelchange_FrameStyle )
+	ON_EN_CHANGE( ID_FRAME_SIZE_EDIT, OnEnChange_FrameSize )
+	ON_CBN_SELCHANGE( ID_QUERY_WND_ICONS_COMBO, OnCbnSelchange_QueryWndIcons )
+	ON_CBN_SELCHANGE( ID_AUTO_UPDATE_TARGET_COMBO, OnCbnSelchange_AutoUpdateTarget )
 	ON_EN_CHANGE( ID_AUTO_UPDATE_TIMEOUT_EDIT, OnEnChange_AutoUpdateRate )
 END_MESSAGE_MAP()
 
-void COptionsPage::OnFieldModified( void )
+void COptionsPage::OnCbnSelchange_FrameStyle( void )
 {
-	UpdateData( DialogSaveChanges );
+	m_pOptions->ModifyOption( &m_pOptions->m_frameStyle, static_cast< opt::FrameStyle >( m_frameStyleCombo.GetCurSel() ) );
 }
 
-void COptionsPage::OnFieldModified( UINT ctrlId )
+void COptionsPage::OnEnChange_FrameSize( void )
 {
-	OnFieldModified();
+	int frameSize;
+	if ( m_frameSizeEdit.ParseNumber( &frameSize ) )
+		m_pOptions->ModifyOption( &m_pOptions->m_frameSize, frameSize );
+}
 
-	switch ( ctrlId )
-	{
-		case ID_TOP_MOST_CHECK:
-			ui::SetTopMost( AfxGetMainWnd()->GetSafeHwnd(), m_pOptions->m_keepTopmost );
-			break;
-		case ID_AUTO_UPDATE_CHECK:
-			app::GetMainDialog()->GetAutoUpdateTimer()->SetStarted( m_pOptions->m_autoUpdate );
-			break;
-	}
+void COptionsPage::OnCbnSelchange_QueryWndIcons( void )
+{
+	m_pOptions->ModifyOption( &m_pOptions->m_queryWndIcons, static_cast< opt::QueryWndIcons >( m_queryWndIconsCombo.GetCurSel() ) );
+}
+
+void COptionsPage::OnCbnSelchange_AutoUpdateTarget( void )
+{
+	m_pOptions->ModifyOption( &m_pOptions->m_updateTarget, static_cast< opt::UpdateTarget >( m_auTargetCombo.GetCurSel() ) );
 }
 
 void COptionsPage::OnEnChange_AutoUpdateRate( void )
 {
-	if ( m_autoUpdateTargetCombo.m_hWnd != NULL )		// subclassed
-	{
-		OnFieldModified();
-		app::GetMainDialog()->GetAutoUpdateTimer()->SetElapsed( m_pOptions->m_autoUpdateTimeout * 1000 );
-	}
-}
-
-void COptionsPage::OnSelChange_AutoUpdateTarget( void )
-{
-	OnFieldModified();
+	int timeout;
+	if ( m_auTimeoutEdit.ParseNumber( &timeout ) )
+		if ( m_pOptions->ModifyOption( &m_pOptions->m_autoUpdateTimeout, timeout ) )
+			app::GetMainDialog()->GetAutoUpdateTimer()->SetElapsed( m_pOptions->m_autoUpdateTimeout * 1000 );
 }

@@ -31,7 +31,7 @@ interface IWndDetailObserver : public IWndObserver
 
 namespace app
 {
-	enum Event { RefreshWndTree, UpdateTarget, DirtyChanged, OptionChanged, WndStateChanged };
+	enum Event { RefreshWndTree, UpdateTarget, DirtyChanged, OptionChanged, ToggleAutoUpdate, WndStateChanged };
 }
 
 

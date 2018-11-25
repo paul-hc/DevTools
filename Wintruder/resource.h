@@ -95,7 +95,6 @@
 #define ID_AUTO_HILIGHT_CHECK           31002
 #define ID_FRAME_STYLE_COMBO            31003
 #define ID_FRAME_SIZE_EDIT              31004
-#define ID_FRAME_SIZE_SPIN              31005
 #define ID_QUERY_WND_ICONS_COMBO        31006
 #define ID_IGNORE_HIDDEN_CHECK          31007
 #define ID_IGNORE_DISABLED_CHECK        31008
@@ -103,7 +102,6 @@
 #define ID_AUTO_UPDATE_CHECK            31010
 #define ID_AUTO_UPDATE_REFRESH_CHECK    31011
 #define ID_AUTO_UPDATE_TIMEOUT_EDIT     31012
-#define ID_AUTO_UPDATE_TIMEOUT_SPIN     31013
 #define ID_AUTO_UPDATE_TARGET_COMBO     31014
 #define CM_MINIMIZE                     32772
 #define CM_VIEW_GENERAL                 32773
@@ -152,7 +150,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        141
 #define _APS_NEXT_COMMAND_VALUE         32815
-#define _APS_NEXT_CONTROL_VALUE         1079
+#define _APS_NEXT_CONTROL_VALUE         1080
 #define _APS_NEXT_SYMED_VALUE           5009
 #endif
 #endif

@@ -14,8 +14,6 @@
 #endif
 
 
-// CLayoutPropertyPage implementation
-
 CLayoutPropertyPage::CLayoutPropertyPage( UINT templateId, UINT titleId /*= 0*/ )
 	: CPropertyPage( templateId, titleId )
 	, m_templateId( templateId )

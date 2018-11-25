@@ -451,24 +451,21 @@ namespace ui
 		//  it if so (m_pParentMenu == NULL indicates that it is secondary popup)
 		HMENU hParentMenu;
 		if ( AfxGetThreadState()->m_hTrackingMenu == pPopupMenu->m_hMenu )
-			state.m_pParentMenu = pPopupMenu;	// parent == child for tracking popup
+			state.m_pParentMenu = pPopupMenu;					// parent == child for tracking popup
 		else if ( ( hParentMenu = ::GetMenu( pWindow->m_hWnd ) ) != NULL )
 		{
-			CWnd* pParent = pWindow->GetTopLevelParent();
-				// child windows don't have menus -- need to go to the top!
+			CWnd* pParent = pWindow->GetTopLevelParent();		// child windows don't have menus - need to go to the top
+
 			if ( pParent != NULL &&
 				( hParentMenu = ::GetMenu( pParent->m_hWnd ) ) != NULL )
 			{
 				int nIndexMax = ::GetMenuItemCount( hParentMenu );
 				for ( int nIndex = 0; nIndex < nIndexMax; nIndex++ )
-				{
-					if ( ::GetSubMenu( hParentMenu, nIndex ) == pPopupMenu->m_hMenu )
+					if ( ::GetSubMenu( hParentMenu, nIndex ) == pPopupMenu->m_hMenu )	// popup found?
 					{
-						// when popup is found, m_pParentMenu is containing menu
-						state.m_pParentMenu = CMenu::FromHandle( hParentMenu );
+						state.m_pParentMenu = CMenu::FromHandle( hParentMenu );			// m_pParentMenu is the containing menu
 						break;
 					}
-				}
 			}
 		}
 
@@ -477,7 +474,7 @@ namespace ui
 		{
 			state.m_nID = pPopupMenu->GetMenuItemID( state.m_nIndex );
 			if ( state.m_nID == 0 )
-				continue; // menu separator or invalid cmd - ignore it
+				continue;				// menu separator or invalid cmd - ignore it
 
 			ASSERT( state.m_pOther == NULL );
 			ASSERT( state.m_pMenu != NULL );

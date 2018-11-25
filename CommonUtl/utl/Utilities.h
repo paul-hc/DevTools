@@ -249,6 +249,10 @@ namespace ui
 	inline bool ShowControl( HWND hDlg, UINT ctrlId, bool show = true ) { return ShowWindow( ::GetDlgItem( hDlg, ctrlId ), show ); }
 	void ShowControls( HWND hDlg, const UINT ctrlIds[], size_t count, bool show = true );
 
+	bool UpdateControlUI( CWnd* pCtrl, CWnd* pTargetWnd = NULL );
+	void UpdateControlsUI( CWnd* pParent, CWnd* pTargetWnd = NULL );
+	void UpdateControlsUI( CWnd* pParent, const UINT ctrlIds[], size_t count, CWnd* pTargetWnd = NULL );
+
 	bool RedrawWnd( HWND hWnd );				// works for both top level and child windows
 	bool RedrawControl( HWND hCtrl );
 

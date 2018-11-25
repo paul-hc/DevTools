@@ -80,6 +80,11 @@ namespace reg
 		throw CRuntimeException( "Data-member not found in option container" );
 	}
 
+	void COptionContainer::SaveOption( const void* pDataMember ) const
+	{
+		LookupOption( pDataMember ).Save();
+	}
+
 
 	// COption< fs::CPath > specialization
 

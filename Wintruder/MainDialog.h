@@ -3,6 +3,7 @@
 #pragma once
 
 #include "utl/BaseMainDialog.h"
+#include "utl/DialogToolBar.h"
 #include "utl/IconButton.h"
 #include "utl/InternalChange.h"
 #include "utl/LayoutChildPropertySheet.h"
@@ -49,6 +50,7 @@ public:
 	virtual const CIcon* GetDlgIcon( DlgIcon dlgIcon = DlgSmallIcon ) const;
 private:
 	void FlashTargetWnd( int flashCount );
+	void AutoUpdateRefresh( void );
 
 	void SearchUpdateTarget( void );
 	void SearchWindow( void );
@@ -67,6 +69,7 @@ private:
 
 	CLayoutChildPropertySheet m_mainSheet;
 
+	CDialogToolBar m_optionsToolbar;
 	CTrackWndPickerStatic m_trackWndPicker;
 	CWndInfoEdit m_briefInfoEdit;
 	CButton m_highlightButton;
@@ -75,9 +78,9 @@ private:
 	CPopupSplitButton m_detailsButton;
 	CSplitPushButton m_applyButton;
 	CLayoutChildPropertySheet m_detailsSheet;
-public:
-	// generated overrides
-	protected:
+
+	// generated stuff
+protected:
 	virtual void DoDataExchange( CDataExchange* pDX );
 protected:
 	virtual BOOL OnInitDialog( void );

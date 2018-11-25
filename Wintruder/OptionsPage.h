@@ -3,6 +3,7 @@
 #pragma once
 
 #include "utl/LayoutPropertyPage.h"
+#include "utl/SpinEdit.h"
 #include "Observers.h"
 
 
@@ -24,15 +25,22 @@ private:
 
 	// enum { IDD = IDD_OPTIONS_PAGE };
 	CComboBox m_frameStyleCombo;
+	CSpinEdit m_frameSizeEdit;
 	CComboBox m_queryWndIconsCombo;
-	CComboBox m_autoUpdateTargetCombo;
+	CComboBox m_auTargetCombo;
+	CSpinEdit m_auTimeoutEdit;
+
+	// generated stuff
+public:
+	virtual BOOL OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo );
 protected:
 	virtual void DoDataExchange( CDataExchange* pDX );
 protected:
-	afx_msg void OnFieldModified( void );
-	afx_msg void OnFieldModified( UINT ctrlId );
+	afx_msg void OnCbnSelchange_FrameStyle( void );
+	afx_msg void OnEnChange_FrameSize( void );
+	afx_msg void OnCbnSelchange_QueryWndIcons( void );
+	afx_msg void OnCbnSelchange_AutoUpdateTarget( void );
 	afx_msg void OnEnChange_AutoUpdateRate( void );
-	afx_msg void OnSelChange_AutoUpdateTarget( void );
 
 	DECLARE_MESSAGE_MAP()
 };

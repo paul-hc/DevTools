@@ -17,7 +17,34 @@ class CEnumTags;
 
 namespace reg
 {
-	class COptionContainer;
+	class CBaseOption;
+
+
+	// container of serializable options (to registry)
+	//
+	class COptionContainer : private utl::noncopyable
+	{
+	public:
+		COptionContainer( const std::tstring& section );
+		COptionContainer( IRegistrySection* pRegSection );		// takes ownership
+		~COptionContainer();
+
+		CBaseOption& GetOptionAt( size_t index ) const { ASSERT( index < m_options.size() ); return *m_options[ index ]; }
+
+		COptionContainer& AddOption( CBaseOption* pOption );
+		CBaseOption& LookupOption( const void* pDataMember ) const;
+
+		// all options
+		void LoadOptions( void );
+		void SaveOptions( void ) const;
+
+		// single option
+		void SaveOption( const void* pDataMember ) const;
+	public:
+		std::auto_ptr< IRegistrySection > m_pRegSection;
+	protected:
+		std::vector< CBaseOption* > m_options;
+	};
 
 
 	// abstract base for options that hold reference to external data members
@@ -37,30 +64,6 @@ namespace reg
 	protected:
 		std::tstring m_entryName;
 		COptionContainer* m_pContainer;
-	};
-
-
-	// container of serializable options (to registry)
-	//
-	class COptionContainer : private utl::noncopyable
-	{
-	public:
-		COptionContainer( const std::tstring& section );
-		COptionContainer( IRegistrySection* pRegSection );		// takes ownership
-		~COptionContainer();
-
-		CBaseOption& GetOptionAt( size_t index ) const { ASSERT( index < m_options.size() ); return *m_options[ index ]; }
-
-		COptionContainer& AddOption( CBaseOption* pOption );
-		CBaseOption& LookupOption( const void* pDataMember ) const;
-
-		void LoadOptions( void );
-		void SaveOptions( void ) const;
-		void SaveOption( const void* pDataMember ) const { LookupOption( pDataMember ).Save(); }
-	public:
-		std::auto_ptr< IRegistrySection > m_pRegSection;
-	protected:
-		std::vector< CBaseOption* > m_options;
 	};
 
 

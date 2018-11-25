@@ -2,8 +2,11 @@
 #define Options_h
 #pragma once
 
+#include "utl/OptionContainer.h"
+
 
 class CEnumTags;
+class CAppService;
 
 
 namespace opt
@@ -19,13 +22,25 @@ namespace opt
 }
 
 
-struct COptions
+struct COptions : public CCmdTarget
 {
-	COptions( void );
+	COptions( CAppService* pAppSvc );
 
 	void Load( void );
 	void Save( void ) const;
+
+	void PublishChangeEvent( void );
+
+	template< typename ValueT >
+	bool ModifyOption( ValueT* pOptionDataMember, const ValueT& newValue );
+
+	void ToggleOption( bool* pBoolDataMember ) { ModifyOption( pBoolDataMember, !*pBoolDataMember ); }
+private:
+	CAppService* m_pAppSvc;
+	reg::COptionContainer m_regOptions;
 public:
+	const bool m_hasUIPI;					// Windows 8+?
+
 	bool m_keepTopmost;
 	bool m_hideOnTrack;
 	bool m_autoHighlight;
@@ -41,7 +56,45 @@ public:
 	bool m_autoUpdateRefresh;
 	int m_autoUpdateTimeout;
 	opt::UpdateTarget m_updateTarget;
+
+	// generated command handlers
+protected:
+	afx_msg void OnToggle_KeepTopmost( void );
+	afx_msg void OnUpdate_KeepTopmost( CCmdUI* pCmdUI );
+	afx_msg void OnToggle_AutoHideCheck( void );
+	afx_msg void OnUpdate_AutoHideCheck( CCmdUI* pCmdUI );
+	afx_msg void OnToggle_AutoHilightCheck( void );
+	afx_msg void OnUpdate_AutoHilightCheck( CCmdUI* pCmdUI );
+	afx_msg void OnToggle_IgnoreHidden( void );
+	afx_msg void OnUpdate_IgnoreHidden( CCmdUI* pCmdUI );
+	afx_msg void OnToggle_IgnoreDisabled( void );
+	afx_msg void OnUpdate_IgnoreDisabled( CCmdUI* pCmdUI );
+	afx_msg void OnToggle_DisplayZeroFlags( void );
+	afx_msg void OnUpdate_DisplayZeroFlags( CCmdUI* pCmdUI );
+	afx_msg void OnToggle_AutoUpdate( void );
+	afx_msg void OnUpdate_AutoUpdate( CCmdUI* pCmdUI );
+	afx_msg void OnToggle_AutoUpdateRefresh( void );
+	afx_msg void OnUpdate_AutoUpdateRefresh( CCmdUI* pCmdUI );
+
+	DECLARE_MESSAGE_MAP()
 };
+
+
+// COptions template code
+
+template< typename ValueT >
+inline bool COptions::ModifyOption( ValueT* pOptionDataMember, const ValueT& newValue )
+{
+	ASSERT_PTR( pOptionDataMember );
+	if ( *pOptionDataMember == newValue )
+		return false;
+
+	*pOptionDataMember = newValue;
+
+	m_regOptions.SaveOption( pOptionDataMember );
+	PublishChangeEvent();
+	return true;
+}
 
 
 #endif // Options_h

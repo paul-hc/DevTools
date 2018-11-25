@@ -59,7 +59,8 @@ namespace app
 // CAppService implementation
 
 CAppService::CAppService( void )
-	: m_targetWnd( ::GetDesktopWindow() )
+	: m_options( this )
+	, m_targetWnd( ::GetDesktopWindow() )
 	, m_dirtyDetails( false )
 {
 }

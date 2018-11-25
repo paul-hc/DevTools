@@ -10,6 +10,8 @@
 namespace num { enum Format { Decimal, Hexa }; }
 
 
+// Note: CSpinEdit is the preferred class for number editing
+//
 template< typename Value >
 class CNumericEdit : public CTextEdit
 {

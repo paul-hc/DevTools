@@ -42,15 +42,22 @@ public:
 	Range< int > GetValidRange( void ) const { return m_validRange; }
 	void SetValidRange( const Range< int >& validRange ) { ASSERT( validRange.IsNormalized() ); m_validRange = validRange; }
 
-	template< typename NumericType > void SetFullRange( void ) { m_validRange = num::FullRange< NumericType >(); }
+	template< typename NumericT > void SetFullRange( void ) { m_validRange = num::FullRange< NumericT >(); }
 
 	int GetNumericValue( bool* pValid = NULL ) const;
 	void SetNumericValue( int value );
 
-	template< typename NumericType > NumericType GetNumber( bool* pValid = NULL ) const { return static_cast< NumericType >( GetNumericValue( pValid ) ); }
-	template< typename NumericType > void SetNumber( NumericType value ) { SetNumericValue( static_cast< int >( value ) ); }
+	template< typename NumericT >
+	NumericT GetNumber( bool* pValid = NULL ) const { return static_cast< NumericT >( GetNumericValue( pValid ) ); }
 
-	template< typename NumericType > void DDX_Number( CDataExchange* pDX, NumericType& rValue, int ctrlId = 0 );
+	template< typename NumericT >
+	bool ParseNumber( NumericT* pNumber ) const;
+
+	template< typename NumericT >
+	void SetNumber( NumericT value ) { SetNumericValue( static_cast< int >( value ) ); }
+
+	template< typename NumericT >
+	void DDX_Number( CDataExchange* pDX, NumericT& rValue, int ctrlId = 0 );
 
 	void SpinValueBy( int delta );
 	bool CheckValidNumber( int& rNumber ) const;
@@ -79,16 +86,29 @@ protected:
 
 // template code
 
-template< typename NumericType >
-void CSpinEdit::DDX_Number( CDataExchange* pDX, NumericType& rValue, int ctrlId /*= 0*/ )
+
+template< typename NumericT >
+bool CSpinEdit::ParseNumber( NumericT* pNumber ) const
+{
+	bool valid;
+	NumericT number = GetNumber< NumericT >( &valid );
+	if ( !valid )
+		return false;
+
+	*pNumber = number;
+	return true;
+}
+
+template< typename NumericT >
+void CSpinEdit::DDX_Number( CDataExchange* pDX, NumericT& rValue, int ctrlId /*= 0*/ )
 {
 	if ( ctrlId != 0 )
 		DDX_Control( pDX, ctrlId, *this );
 
 	if ( DialogOutput == pDX->m_bSaveAndValidate )
-		SetNumber< NumericType >( rValue );
+		SetNumber< NumericT >( rValue );
 	else
-		rValue = GetNumber< NumericType >();
+		rValue = GetNumber< NumericT >();
 }
 
 

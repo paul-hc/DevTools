@@ -147,31 +147,6 @@ bool CApplication::RelayTooltipEvent( MSG* pMsg )
 	return true;
 }
 
-
-// command handlers
-
-BEGIN_MESSAGE_MAP( CApplication, CBaseApp< CWinApp > )
-	ON_COMMAND( ID_FILE_CLOSE, OnFileClose )
-	ON_COMMAND( CM_RESTORE, CmRestore )
-	ON_COMMAND( CM_MINIMIZE, CmMinimize )
-	ON_COMMAND( CM_REFRESH, CmRefresh )
-	ON_COMMAND( ID_TOP_MOST_CHECK, OnToggleKeepTopmost )
-	ON_UPDATE_COMMAND_UI( ID_TOP_MOST_CHECK, OnUpdateKeepTopmost )
-	ON_COMMAND( CM_ACTIVATE_WINDOW, CmActivateWindow )
-	ON_UPDATE_COMMAND_UI( CM_ACTIVATE_WINDOW, OnUpdateActivateWindow )
-	ON_COMMAND( CM_SHOW_WINDOW, CmShowWindow )
-	ON_UPDATE_COMMAND_UI( CM_SHOW_WINDOW, OnUpdateShowWindow )
-	ON_COMMAND( CM_HIDE_WINDOW, CmHideWindow )
-	ON_UPDATE_COMMAND_UI( CM_HIDE_WINDOW, OnUpdateHideWindow )
-	ON_COMMAND( CM_TOGGLE_TOPMOST_WINDOW, CmToggleTopmostWindow )
-	ON_UPDATE_COMMAND_UI( CM_TOGGLE_TOPMOST_WINDOW, OnUpdateTopmostWindow )
-	ON_COMMAND( CM_TOGGLE_ENABLE_WINDOW, CmToggleEnableWindow )
-	ON_UPDATE_COMMAND_UI( CM_TOGGLE_ENABLE_WINDOW, OnUpdateEnableWindow )
-	ON_COMMAND_RANGE( CM_MOVE_WINDOW_UP, CM_MOVE_WINDOW_TO_BOTTOM, CmMoveWindow )
-	ON_UPDATE_COMMAND_UI_RANGE( CM_MOVE_WINDOW_UP, CM_MOVE_WINDOW_TO_BOTTOM, OnUpdateMoveWindow )
-	ON_COMMAND( CM_REDRAW_DESKTOP, CmRedrawDesktop )
-END_MESSAGE_MAP()
-
 BOOL CApplication::PreTranslateMessage( MSG* pMsg )
 {
 	if ( HWND hMainDlg = AfxGetMainWnd()->GetSafeHwnd() )
@@ -186,6 +161,37 @@ BOOL CApplication::PreTranslateMessage( MSG* pMsg )
 
 	return CBaseApp< CWinApp >::PreTranslateMessage( pMsg );
 }
+
+BOOL CApplication::OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo )
+{
+	if ( app::GetOptions()->OnCmdMsg( id, code, pExtra, pHandlerInfo ) )
+		return true;
+
+	return __super::OnCmdMsg( id, code, pExtra, pHandlerInfo );
+}
+
+
+// command handlers
+
+BEGIN_MESSAGE_MAP( CApplication, CBaseApp< CWinApp > )
+	ON_COMMAND( ID_FILE_CLOSE, OnFileClose )
+	ON_COMMAND( CM_RESTORE, CmRestore )
+	ON_COMMAND( CM_MINIMIZE, CmMinimize )
+	ON_COMMAND( CM_REFRESH, CmRefresh )
+	ON_COMMAND( CM_ACTIVATE_WINDOW, CmActivateWindow )
+	ON_UPDATE_COMMAND_UI( CM_ACTIVATE_WINDOW, OnUpdateActivateWindow )
+	ON_COMMAND( CM_SHOW_WINDOW, CmShowWindow )
+	ON_UPDATE_COMMAND_UI( CM_SHOW_WINDOW, OnUpdateShowWindow )
+	ON_COMMAND( CM_HIDE_WINDOW, CmHideWindow )
+	ON_UPDATE_COMMAND_UI( CM_HIDE_WINDOW, OnUpdateHideWindow )
+	ON_COMMAND( CM_TOGGLE_TOPMOST_WINDOW, CmToggleTopmostWindow )
+	ON_UPDATE_COMMAND_UI( CM_TOGGLE_TOPMOST_WINDOW, OnUpdateTopmostWindow )
+	ON_COMMAND( CM_TOGGLE_ENABLE_WINDOW, CmToggleEnableWindow )
+	ON_UPDATE_COMMAND_UI( CM_TOGGLE_ENABLE_WINDOW, OnUpdateEnableWindow )
+	ON_COMMAND_RANGE( CM_MOVE_WINDOW_UP, CM_MOVE_WINDOW_TO_BOTTOM, CmMoveWindow )
+	ON_UPDATE_COMMAND_UI_RANGE( CM_MOVE_WINDOW_UP, CM_MOVE_WINDOW_TO_BOTTOM, OnUpdateMoveWindow )
+	ON_COMMAND( CM_REDRAW_DESKTOP, CmRedrawDesktop )
+END_MESSAGE_MAP()
 
 void CApplication::OnFileClose( void )
 {
@@ -205,20 +211,6 @@ void CApplication::CmMinimize( void )
 void CApplication::CmRefresh( void )
 {
 	app::GetSvc().PublishEvent( app::RefreshWndTree );
-}
-
-void CApplication::OnToggleKeepTopmost( void )
-{
-	COptions* pOptions = app::GetOptions();
-	pOptions->m_keepTopmost = !pOptions->m_keepTopmost;
-	ui::SetTopMost( AfxGetMainWnd()->GetSafeHwnd(), pOptions->m_keepTopmost );
-
-	app::GetSvc().PublishEvent( app::OptionChanged );
-}
-
-void CApplication::OnUpdateKeepTopmost( CCmdUI* pCmdUI )
-{
-	pCmdUI->SetCheck( app::GetOptions()->m_keepTopmost );
 }
 
 void CApplication::CmActivateWindow( void )

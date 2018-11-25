@@ -23,17 +23,18 @@ private:
 private:
 	CAccelTable m_sharedAccel;
 	CToolTipCtrl m_mainTooltip;
+
+	// generated overrides
 public:
 	virtual BOOL InitInstance( void );
 	virtual int ExitInstance( void );
 	virtual BOOL PreTranslateMessage( MSG* pMsg );
+	virtual BOOL OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo );
 protected:
 	afx_msg void OnFileClose( void );
 	afx_msg void CmRestore( void );
 	afx_msg void CmMinimize( void );
 	afx_msg void CmRefresh( void );
-	afx_msg void OnToggleKeepTopmost( void );
-	afx_msg void OnUpdateKeepTopmost( CCmdUI* pCmdUI );
 	afx_msg void CmActivateWindow( void );
 	afx_msg void OnUpdateActivateWindow( CCmdUI* pCmdUI );
 	afx_msg void CmShowWindow( void );
