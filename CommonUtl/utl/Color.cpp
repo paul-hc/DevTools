@@ -40,6 +40,22 @@ namespace hlp
 
 namespace ui
 {
+	BYTE GetLuminance( UINT red, UINT green, UINT blue )
+	{	// perceived luminance (gray level) of a color (Y component) = 0.3*R + 0.59*G + 0.11*B
+		UINT luminance;
+		if ( red == green && red == blue )
+			luminance = red;					// preserve grays unchanged
+		else
+			luminance = ( red * 30 + green * 59 + blue * 11 ) / 100;
+
+		ASSERT( luminance <= 255 );
+		return static_cast< BYTE >( luminance );
+	}
+}
+
+
+namespace ui
+{
 	const std::tstring nullTag = _T("null");
 	const TCHAR rgbTag[] = _T("RGB");
 	const TCHAR htmlTag[] = _T("#");
@@ -184,13 +200,13 @@ namespace ui
 
 	CHslColor::CHslColor( COLORREF rgbColor )
 	{
-		::ColorRGBToHLS( rgbColor, &m_hue, &m_luminance, &m_saturation );
+		::ColorRGBToHLS( rgbColor, &m_hue, &m_luminance, &m_saturation );	// note the difference: Hsl vs HLS - L and S position is swapped in shell API
 	}
 
 	COLORREF CHslColor::GetRGB( void ) const
 	{
 		ASSERT( IsValid() );
-		return ::ColorHLSToRGB( m_hue, m_luminance, m_saturation );
+		return ::ColorHLSToRGB( m_hue, m_luminance, m_saturation );			// note the difference: Hsl vs HLS - L and S position is swapped in shell API
 	}
 
 	WORD CHslColor::ModifyBy( WORD component, int byPercentage )

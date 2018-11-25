@@ -501,6 +501,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\TestMiscDialog.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\TestMiscDialog.h"
+				>
+			</File>
+			<File
 				RelativePath=".\TestPropertySheet.cpp"
 				>
 			</File>

@@ -1170,6 +1170,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\DibDraw_fwd.h"
+					>
+				</File>
+				<File
 					RelativePath=".\DibPixels.cpp"
 					>
 				</File>
@@ -1546,14 +1550,6 @@
 					>
 				</File>
 				<File
-					RelativePath=".\BaseToolbar.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\BaseToolbar.h"
-					>
-				</File>
-				<File
 					RelativePath=".\BufferedStatic.cpp"
 					>
 				</File>
@@ -1759,6 +1755,14 @@
 				</File>
 				<File
 					RelativePath=".\ThemeStatic.h"
+					>
+				</File>
+				<File
+					RelativePath=".\ToolbarStrip.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\ToolbarStrip.h"
 					>
 				</File>
 				<File

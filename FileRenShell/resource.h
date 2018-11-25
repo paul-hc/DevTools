@@ -55,8 +55,6 @@
 #define IDC_PREPOSITIONS_COMBO          1038
 #define IDC_SKIP_NUMERIC_PREFIX_CHECK   1039
 #define IDC_PICK_RENAME_ACTIONS         1040
-#define IDC_STRIP_BAR_1                 1041
-#define IDC_STRIP_BAR_2                 1042
 #define IDC_FILE_TOUCH_LIST             1043
 #define IDC_SHOW_SOURCE_INFO_CHECK      1044
 #define IDC_MODIFIED_DATE               1045

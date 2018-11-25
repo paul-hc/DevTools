@@ -91,8 +91,10 @@ public:
 	bool ApplyGrayScale( COLORREF transpColor24 = CLR_NONE ) { return ForEach( func::ToGrayScale( transpColor24 ) ); }
 	bool ApplyAlphaBlend( BYTE alpha, COLORREF blendColor24 = color::AzureBlue ) { return ForEach( func::AlphaBlend( alpha, blendColor24 ) ); }
 	bool ApplyBlendColor( COLORREF toColor24, BYTE toAlpha ) { return ForEach( func::BlendColor( toColor24, toAlpha ) ); }
+
+	bool ApplyDisabledGrayOut( COLORREF toColor24, BYTE toAlpha = 64 ) { return ForEach( func::DisabledGrayOut( toColor24, toAlpha ) ); }
 	bool ApplyDisabledEffect( COLORREF toColor24, BYTE toAlpha = 64 ) { return ForEach( func::DisabledEffect( toColor24, toAlpha ) ); }
-	bool ApplyDisabledGrayEffect( COLORREF toColor24, BYTE toAlpha = 64 ) { return ForEach( func::DisabledGrayEffect( toColor24, toAlpha ) ); }
+	bool ApplyDisabledGrayEffect_( COLORREF toColor24, BYTE toAlpha = 64 ) { return ForEach( func::_DisabledGrayEffect( toColor24, toAlpha ) ); }
 private:
 	static CDibSection* MakeLocalDibSection( HBITMAP hDib );
 	void Reset( void );

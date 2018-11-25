@@ -2,11 +2,7 @@
 #define DibDraw_h
 #pragma once
 
-
-enum RopCodes
-{
-	ROP_PSDPxax = 0xb8074a			// ( ( destination XOR pattern ) AND source ) XOR pattern
-};
+#include "DibDraw_fwd.h"
 
 
 namespace gdi
@@ -32,9 +28,7 @@ namespace gdi
 
 	// image list conversion
 
-	enum DisabledStyle { DisabledGray, DisabledEffect, DisabledBlendColor };
-
-	void MakeDisabledImageList( CImageList& rDestImageList, const CImageList& srcImageList, DisabledStyle style = gdi::DisabledBlendColor,
+	bool MakeDisabledImageList( CImageList& rDestImageList, const CImageList& srcImageList, DisabledStyle style = gdi::DisabledBlendColor,
 								COLORREF blendToColor = GetSysColor( COLOR_BTNFACE ), BYTE toAlpha = 128 );
 
 

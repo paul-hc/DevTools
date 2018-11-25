@@ -147,7 +147,7 @@ namespace res
 		if ( disabledEffect )
 		{
 			CDibPixels pixels( &dibSection );
-			pixels.ApplyDisabledGrayEffect( GetSysColor( COLOR_BTNFACE ), 64 );
+			pixels.ApplyDisabledGrayOut( GetSysColor( COLOR_BTNFACE ), 64 );
 		}
 
 		CSize buttonSize = dibSection.MakeImageList( rOutImageList, imageCount );

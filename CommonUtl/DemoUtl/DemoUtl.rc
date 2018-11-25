@@ -214,7 +214,7 @@ BEGIN
         MENUITEM SEPARATOR
         MENUITEM "Drop Right",                  ID_WILDCARD
         MENUITEM "Drop Down",                   ID_EXTENSION_SEPARATOR
-        MENUITEM "Drop Left",                   32782
+        MENUITEM "Drop Left",                   ID_EXTENSION_SEPARATOR
         MENUITEM "Drop Up",                     32783
         MENUITEM SEPARATOR
         POPUP "&File"
@@ -305,6 +305,7 @@ BEGIN
     PUSHBUTTON      "&Study Image...",ID_STUDY_IMAGE,171,17,74,14
     PUSHBUTTON      "&Study List Diffs...",ID_STUDY_LIST_DIFFS,250,17,74,14
     PUSHBUTTON      "Task Dialog...",ID_STUDY_TASK_DIALOG,13,36,74,14
+    PUSHBUTTON      "Misc. Dialog...",ID_STUDY_MISC_DIALOG,92,36,74,14
     DEFPUSHBUTTON   "&Dialog...",IDC_OPEN_DIALOG_BUTTON,274,64,62,14,WS_GROUP
     PUSHBUTTON      "&Properties...",IDC_OPEN_PROPERTIES_BUTTON,274,80,62,14
     PUSHBUTTON      "&Modeless",IDC_CREATE_PROPERTIES_BUTTON,274,96,62,14
@@ -551,6 +552,26 @@ BEGIN
     DEFPUSHBUTTON   "Close",IDOK,196,96,50,14
 END
 
+IDD_TEST_MISC_DIALOG DIALOGEX 0, 0, 241, 157
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME
+CAPTION "Miscellaneous demo"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    LTEXT           "Standard Enabled:",IDC_STATIC,7,9,60,8
+    LTEXT           "<strip-bar1>",IDC_TOOLBAR_PLACEHOLDER,82,7,140,12,SS_CENTERIMAGE | WS_BORDER
+    LTEXT           "Standard Disabled:",IDC_STATIC,7,25,62,8
+    LTEXT           "<strip-bar1>",IDC_STRIP_BAR_1,82,23,140,12,SS_CENTERIMAGE | WS_BORDER
+    LTEXT           "Disabled Gray Scale:",IDC_STATIC,7,53,66,8
+    LTEXT           "<strip-bar2>",IDC_STRIP_BAR_2,82,51,140,12,SS_CENTERIMAGE | WS_BORDER
+    LTEXT           "Disabled Gray:",IDC_STATIC,7,69,48,8
+    LTEXT           "<strip-bar3>",IDC_STRIP_BAR_3,82,68,140,12,SS_CENTERIMAGE | WS_BORDER
+    LTEXT           "Disabled Effect:",IDC_STATIC,7,87,52,8
+    LTEXT           "<strip-bar4>",IDC_STRIP_BAR_4,82,85,140,12,SS_CENTERIMAGE | WS_BORDER
+    LTEXT           "Disabled Blend Color:",IDC_STATIC,7,103,68,8
+    LTEXT           "<strip-bar5>",IDC_STRIP_BAR_5,82,101,140,12,SS_CENTERIMAGE | WS_BORDER
+    DEFPUSHBUTTON   "Close",IDOK,184,136,50,14
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -712,6 +733,14 @@ BEGIN
         TOPMARGIN, 7
         BOTTOMMARGIN, 110
     END
+
+    IDD_TEST_MISC_DIALOG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 234
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 150
+    END
 END
 #endif    // APSTUDIO_INVOKED
 
@@ -725,8 +754,16 @@ STRINGTABLE
 BEGIN
     ID_COMMAND_LINK1        "First command link option"
     ID_COMMAND_LINK2        "Second command link option"
+END
+
+STRINGTABLE 
+BEGIN
     ID_RADIO_BUTTON1        "First possible radio"
     ID_RADIO_BUTTON2        "Second possible radio"
+END
+
+STRINGTABLE 
+BEGIN
     IDS_OLE_INIT_FAILED     "OLE initialization failed.  Make sure that the OLE libraries are the correct version."
     IDS_CHANGE_CASE_TAGS    "filename.ext|FILENAME.EXT|filename.*|FILENAME.*|*.ext|*.EXT|* (no ext)"
 END

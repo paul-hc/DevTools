@@ -35,14 +35,7 @@ namespace ui
 	inline COLORREF GetActualColorSysdef( COLORREF color, int defaultSysIndex ) { return IsActualColor( color ) ? color : ::GetSysColor( defaultSysIndex ); }
 
 
-	inline BYTE GetLuminance( BYTE red, BYTE green, BYTE blue )
-	{	// luminance (gray level) of a color (Y component) = 0.3*R + 0.59*G + 0.11*B
-		if ( red == green && red == blue )
-			return red;							// preserve grays unchanged
-
-		UINT luminance = ( (UINT)red * 30 + green * 59 + blue * 11 ) / 100;
-		return static_cast< BYTE >( luminance );
-	}
+	BYTE GetLuminance( UINT red, UINT green, UINT blue );
 
 	inline BYTE GetLuminance( COLORREF color )
 	{
@@ -78,22 +71,22 @@ namespace ui
 	struct CHslColor
 	{
 	public:
-		CHslColor( void ) : m_hue( 0 ), m_luminance( 0 ), m_saturation( 100 ) {}
-		CHslColor( WORD hue, WORD luminance, WORD saturation ) : m_hue( hue ), m_luminance( luminance ), m_saturation( saturation ) {}
+		CHslColor( void ) : m_hue( 0 ), m_saturation( 100 ), m_luminance( 0 ) {}
+		CHslColor( WORD hue, WORD saturation, WORD luminance ) : m_hue( hue ), m_saturation( saturation ), m_luminance( luminance ) {}
 		CHslColor( COLORREF rgbColor );
 
-		bool IsValid( void ) const { return s_validRange.Contains( m_hue ) && s_validRange.Contains( m_luminance ) && s_validRange.Contains( m_saturation ); }
+		bool IsValid( void ) const { return s_validRange.Contains( m_hue ) && s_validRange.Contains( m_saturation ) && s_validRange.Contains( m_luminance ); }
 		COLORREF GetRGB( void ) const;
 
 		CHslColor& ScaleHue( int byPct ) { m_hue = ModifyBy( m_hue, byPct ); return *this; }
-		CHslColor& ScaleLuminance( int byPct ) { m_luminance = ModifyBy( m_luminance, byPct ); return *this; }
 		CHslColor& ScaleSaturation( int byPct ) { m_saturation = ModifyBy( m_saturation, byPct ); return *this; }
+		CHslColor& ScaleLuminance( int byPct ) { m_luminance = ModifyBy( m_luminance, byPct ); return *this; }
 
 		static WORD ModifyBy( WORD component, int byPercentage );
 	public:
 		WORD m_hue;
-		WORD m_luminance;
 		WORD m_saturation;
+		WORD m_luminance;
 
 		static const Range< WORD > s_validRange;
 	};

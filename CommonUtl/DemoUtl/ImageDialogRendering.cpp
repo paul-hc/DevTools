@@ -82,7 +82,7 @@ void CImageDialog::CreateEffectDibs( void )
 			}
 			pModeData->PushDib( pNewDib );
 			break;
-		case Disabled:			// enum EffectDib { GrayScale, Blended, Disabled, DisabledGray };
+		case Disabled:			// enum EffectDib { GrayScale, Blended, Disabled, DisabledGrayOut };
 			if ( utl::ResetPtr( pNewDib, CloneSourceDib() ) )
 			{
 				CDibPixels grayedPixels( pNewDib.get() );
@@ -110,7 +110,7 @@ void CImageDialog::CreateEffectDibs( void )
 			if ( utl::ResetPtr( pNewDib, CloneSourceDib() ) )
 			{
 				CDibPixels disabledPixels( pNewDib.get() );
-				if ( !disabledPixels.ApplyDisabledGrayEffect( bkColor, m_disabledAlpha ) )
+				if ( !disabledPixels.ApplyDisabledGrayOut( bkColor, m_disabledAlpha ) )
 					utl::ResetPtr( pNewDib );
 			}
 			pModeData->PushDib( pNewDib );

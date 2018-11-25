@@ -3,6 +3,7 @@
 #include "TestDoc.h"
 #include "TestFormView.h"
 #include "TestTaskDialog.h"
+#include "TestMiscDialog.h"
 #include "DemoTemplate.h"
 #include "ImageDialog.h"
 #include "FileListDialog.h"
@@ -72,6 +73,7 @@ BEGIN_MESSAGE_MAP( CTestFormView, CLayoutFormView )
 	ON_BN_CLICKED( ID_STUDY_IMAGE, OnStudyImage )
 	ON_BN_CLICKED( ID_STUDY_LIST_DIFFS, OnStudyListDiffs )
 	ON_BN_CLICKED( ID_STUDY_TASK_DIALOG, OnStudyTaskDialog )
+	ON_BN_CLICKED( ID_STUDY_MISC_DIALOG, OnStudyMiscDialog )
 END_MESSAGE_MAP()
 
 void CTestFormView::OnRunImageUnitTests( void )
@@ -99,5 +101,11 @@ void CTestFormView::OnStudyListDiffs( void )
 void CTestFormView::OnStudyTaskDialog( void )
 {
 	CTestTaskDialog dlg( this );
+	dlg.DoModal();
+}
+
+void CTestFormView::OnStudyMiscDialog( void )
+{
+	CTestMiscDialog dlg( this );
 	dlg.DoModal();
 }

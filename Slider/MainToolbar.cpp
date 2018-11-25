@@ -64,7 +64,7 @@ const UINT CMainToolbar::s_buttons[] =
 
 
 CMainToolbar::CMainToolbar( void )
-	: CBaseToolbar()
+	: CToolbarStrip()
 {
 	ui::MakeStandardControlFont( m_comboFont );
 }
@@ -189,7 +189,7 @@ int CMainToolbar::InputNavigPos( void ) const
 
 // message handlers
 
-BEGIN_MESSAGE_MAP( CMainToolbar, CBaseToolbar )
+BEGIN_MESSAGE_MAP( CMainToolbar, CToolbarStrip )
 	ON_WM_ERASEBKGND()
 	ON_WM_HSCROLL()
 	ON_COMMAND( IDOK, OnOk )
@@ -209,12 +209,12 @@ BOOL CMainToolbar::OnEraseBkgnd( CDC* pDC )
 	clientRect.bottom += 20;
 	::FillRect( pDC->m_hDC, &clientRect, ::GetSysColorBrush( COLOR_3DFACE ) );
 
-	return CBaseToolbar::OnEraseBkgnd( pDC );
+	return CToolbarStrip::OnEraseBkgnd( pDC );
 }
 
 void CMainToolbar::OnHScroll( UINT sbCode, UINT nPos, CScrollBar* pScrollBar )
 {
-	CBaseToolbar::OnHScroll( sbCode, nPos, pScrollBar );
+	CToolbarStrip::OnHScroll( sbCode, nPos, pScrollBar );
 	if ( pScrollBar != NULL && pScrollBar->m_hWnd == m_navigSlider.m_hWnd )
 	{
 		BOOL doCommit = true;

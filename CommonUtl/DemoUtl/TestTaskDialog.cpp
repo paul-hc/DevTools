@@ -46,7 +46,7 @@ const CEnumTags& CTestTaskDialog::GetTags_TaskDialogUsage( void )
 
 void CTestTaskDialog::DisplayOutcome( void )
 {
-	ui::SetDlgItemText( m_hWnd, IDC_OUTCOME_STATIC, str::Format( _T("%d\n%s\n%s"), m_outcome, m_radioButtonId, m_verificationChecked ? _T("[X]") : _T("[ ]") ) );
+	ui::SetDlgItemText( m_hWnd, IDC_OUTCOME_STATIC, str::Format( _T("%d\n%d\n%s"), m_outcome, m_radioButtonId, m_verificationChecked ? _T("[X]") : _T("[ ]") ) );
 }
 
 void CTestTaskDialog::ClearOutcome( void )

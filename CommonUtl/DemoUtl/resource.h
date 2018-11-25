@@ -24,6 +24,7 @@
 #define IDB_PNG1                        148
 #define IDR_FLAG_STRIP_PNG              148
 #define IDD_TEST_TASK_DIALOG            149
+#define IDD_TEST_MISC_DIALOG            150
 #define IDC_OPEN_DIALOG_BUTTON          1000
 #define IDC_OPEN_PROPERTIES_BUTTON      1001
 #define IDC_CREATE_PROPERTIES_BUTTON    1002
@@ -119,6 +120,7 @@
 #define ID_RADIO_BUTTON2                2102
 #define IDS_OLE_INIT_FAILED             5000
 #define IDS_CHANGE_CASE_TAGS            5001
+#define IDC_STRIP_BAR_5                 28510
 #define ID_STUDY_IMAGE                  32772
 #define ID_CHANGE_CASE                  32773
 #define ID_SEND_TO_CLIPBOARD            32774
@@ -141,6 +143,7 @@
 #define ID_RESET_TRANSP_COLOR           32791
 #define ID_AUTO_TRANSP_TOOL             32792
 #define ID_STUDY_TASK_DIALOG            32793
+#define ID_STUDY_MISC_DIALOG            32794
 
 // Next default values for new objects
 // 

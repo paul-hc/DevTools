@@ -37,6 +37,7 @@ protected:
 	afx_msg void OnStudyImage( void );
 	afx_msg void OnStudyListDiffs( void );
 	afx_msg void OnStudyTaskDialog( void );
+	afx_msg void OnStudyMiscDialog( void );
 
 	DECLARE_MESSAGE_MAP()
 };

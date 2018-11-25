@@ -270,6 +270,10 @@ namespace func
 	};
 
 
+	/* Note 24 Nov, 2018:
+		Something odd is happening with AlphaBlend, at least for 32bpp bitmaps - blending looks too "opaque" for my expectations.
+		Because of that AlphaBlend doesn't seem very reliable.
+	*/
 	struct AlphaBlend : public CBasePixelFunc				// aka MultiplyAlpha
 	{
 		AlphaBlend( BYTE alpha, COLORREF blendColor24 = color::AzureBlue )
@@ -331,6 +335,28 @@ namespace func
 	};
 
 
+	struct DisabledGrayOut : public CBasePixelFunc		// dim colors and make gray-scale
+	{
+		DisabledGrayOut( COLORREF toColor24, BYTE toAlpha ) : m_blendFunc( toColor24, toAlpha ), m_grayScaleFunc( CLR_NONE /*toColor24*/ ) {}
+
+		template< typename PixelType >
+		void operator()( PixelType& rPixel ) const
+		{
+			m_blendFunc( rPixel );
+			m_grayScaleFunc( rPixel );
+		}
+
+		void AdjustColors( CDC* pDC )
+		{
+			m_blendFunc.AdjustColors( pDC );
+			m_grayScaleFunc.AdjustColors( pDC );
+		}
+	private:
+		BlendColor m_blendFunc;
+		ToGrayScale m_grayScaleFunc;
+	};
+
+
 	struct DisabledEffect : public CBasePixelFunc			// dim colors towards toColor24
 	{
 		DisabledEffect( COLORREF toColor24, BYTE toAlpha ) : m_alphaBlendFunc( toAlpha, toColor24 ) {}
@@ -347,9 +373,9 @@ namespace func
 	};
 
 
-	struct DisabledGrayEffect : public CBasePixelFunc		// dim colors and make gray-scale
+	struct _DisabledGrayEffect : public CBasePixelFunc		// dim colors and make gray-scale; made obsolete since AlphaBlend doesn't behave "naturally".
 	{
-		DisabledGrayEffect( COLORREF toColor24, BYTE toAlpha ) : m_alphaBlendFunc( toAlpha, toColor24 ), m_grayScaleFunc( toColor24 ) {}
+		_DisabledGrayEffect( COLORREF toColor24, BYTE toAlpha ) : m_alphaBlendFunc( toAlpha, toColor24 ), m_grayScaleFunc( CLR_NONE /*toColor24*/ ) {}
 
 		template< typename PixelType >
 		void operator()( PixelType& rPixel ) const
@@ -360,8 +386,8 @@ namespace func
 
 		void AdjustColors( CDC* pDC )
 		{
-			m_alphaBlendFunc.AdjustColors( pDC );
 			m_grayScaleFunc.AdjustColors( pDC );
+			m_alphaBlendFunc.AdjustColors( pDC );
 		}
 	private:
 		AlphaBlend m_alphaBlendFunc;

@@ -2,13 +2,13 @@
 #define MainToolbar_h
 #pragma once
 
-#include "utl/BaseToolbar.h"
+#include "utl/ToolbarStrip.h"
 #include "utl/IZoomBar.h"
 #include "utl/ui_fwd.h"
 #include "INavigationBar.h"
 
 
-class CMainToolbar : public CBaseToolbar
+class CMainToolbar : public CToolbarStrip
 				   , public ui::IZoomBar
 				   , public INavigationBar
 {

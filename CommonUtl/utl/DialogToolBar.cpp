@@ -80,14 +80,14 @@ void CDialogToolBar::CreateToolbar( CWnd* pParent, UINT toolbarResId )
 			GetToolBarCtrl().SetImageList( pImageList );
 	}
 
-	if ( m_useCustomDisabledImages )
-		SetCustomDisabledImageList();
+	if ( m_disabledStyle != gdi::DisabledStd )
+		SetCustomDisabledImageList( m_disabledStyle );
 }
 
 
 // message handlers
 
-BEGIN_MESSAGE_MAP( CDialogToolBar, CBaseToolbar )
+BEGIN_MESSAGE_MAP( CDialogToolBar, CToolbarStrip )
 	ON_MESSAGE( WM_IDLEUPDATECMDUI, OnIdleUpdateCmdUI )
 	ON_NOTIFY_REFLECT_EX( NM_CUSTOMDRAW, OnCustomDrawReflect )
 END_MESSAGE_MAP()

@@ -23,14 +23,15 @@ CTestDialog::~CTestDialog()
 void CTestDialog::DoDataExchange( CDataExchange* pDX )
 {
 	m_pDemo->DoDataExchange( pDX );
-	CLayoutDialog::DoDataExchange( pDX );
+
+	__super::DoDataExchange( pDX );
 }
 
 BOOL CTestDialog::OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo )
 {
 	return
 		m_pDemo->OnCmdMsg( id, code, pExtra, pHandlerInfo ) ||
-		CLayoutDialog::OnCmdMsg( id, code, pExtra, pHandlerInfo );
+		__super::OnCmdMsg( id, code, pExtra, pHandlerInfo );
 }
 
 BEGIN_MESSAGE_MAP( CTestDialog, CLayoutDialog )

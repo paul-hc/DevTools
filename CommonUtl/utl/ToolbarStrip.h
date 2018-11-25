@@ -1,24 +1,25 @@
-#ifndef BaseToolbar_h
-#define BaseToolbar_h
+#ifndef ToolbarStrip_h
+#define ToolbarStrip_h
 #pragma once
 
 #include <afxext.h>			// CToolBar
 #include "ToolStrip.h"
+#include "DibDraw_fwd.h"
 #include "ui_fwd.h"
 
 
-class CBaseToolbar : public CToolBar
+class CToolbarStrip : public CToolBar
 {
 public:
-	CBaseToolbar( void );
-	virtual ~CBaseToolbar();
+	CToolbarStrip( void );
+	virtual ~CToolbarStrip();
 
 	// button initialization (before DDX_ creation)
 	CToolStrip& GetStrip( void ) { return m_strip; }
 
 	bool LoadToolStrip( UINT toolStripId, COLORREF transpColor = color::Auto );
 	bool InitToolbarButtons( void );						// use already set up strip to initialize toolbar buttons
-	void SetCustomDisabledImageList( void );
+	void SetCustomDisabledImageList( gdi::DisabledStyle style = gdi::DisabledGrayOut );
 
 	void UpdateCmdUI( void );
 
@@ -29,7 +30,7 @@ protected:
 	enum Metrics { BtnEdgeWidth = 7, BtnEdgeHeight = 7 };
 private:
 	std::auto_ptr< CImageList > m_pDisabledImageList;
-public:
+
 	// generated overrides
 protected:
 	// generated message map
@@ -37,4 +38,4 @@ protected:
 };
 
 
-#endif // BaseToolbar_h
+#endif // ToolbarStrip_h

@@ -3,13 +3,13 @@
 #pragma once
 
 #include "ui_fwd.h"
-#include "BaseToolbar.h"
+#include "ToolbarStrip.h"
 
 
-class CDialogToolBar : public CBaseToolbar
+class CDialogToolBar : public CToolbarStrip
 {
 public:
-	CDialogToolBar( bool useCustomDisabledImages = true ) : m_useCustomDisabledImages( useCustomDisabledImages ) {}
+	CDialogToolBar( gdi::DisabledStyle disabledStyle = gdi::DisabledGrayOut ) : m_disabledStyle( disabledStyle ) {}
 	virtual ~CDialogToolBar();
 
 	// use a placeholder static (with the same id)
@@ -22,7 +22,7 @@ public:
 private:
 	void CreateToolbar( CWnd* pParent, UINT toolbarResId );
 private:
-	bool m_useCustomDisabledImages;
+	gdi::DisabledStyle m_disabledStyle;
 public:
 	// generated overrides
 protected:

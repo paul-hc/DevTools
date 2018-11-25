@@ -1,6 +1,6 @@
 
 #include "stdafx.h"
-#include "BaseToolbar.h"
+#include "ToolbarStrip.h"
 #include "DibDraw.h"
 #include "MenuUtilities.h"
 #include <afxpriv.h>		// for WM_IDLEUPDATECMDUI
@@ -10,16 +10,16 @@
 #endif
 
 
-CBaseToolbar::CBaseToolbar( void )
+CToolbarStrip::CToolbarStrip( void )
 	: CToolBar()
 {
 }
 
-CBaseToolbar::~CBaseToolbar()
+CToolbarStrip::~CToolbarStrip()
 {
 }
 
-bool CBaseToolbar::LoadToolStrip( UINT toolStripId, COLORREF transpColor /*= color::Auto*/ )
+bool CToolbarStrip::LoadToolStrip( UINT toolStripId, COLORREF transpColor /*= color::Auto*/ )
 {
 	ASSERT_PTR( m_hWnd );
 	return
@@ -27,7 +27,7 @@ bool CBaseToolbar::LoadToolStrip( UINT toolStripId, COLORREF transpColor /*= col
 		InitToolbarButtons();
 }
 
-bool CBaseToolbar::InitToolbarButtons( void )
+bool CToolbarStrip::InitToolbarButtons( void )
 {
 	ASSERT_PTR( m_hWnd );
 	ASSERT( m_strip.IsValid() );
@@ -43,25 +43,30 @@ bool CBaseToolbar::InitToolbarButtons( void )
 	return true;
 }
 
-void CBaseToolbar::SetCustomDisabledImageList( void )
+void CToolbarStrip::SetCustomDisabledImageList( gdi::DisabledStyle style /*= gdi::DisabledGrayOut*/ )
 {
 	if ( CImageList* pImageList = m_strip.EnsureImageList() )
 	{
 		m_pDisabledImageList.reset( new CImageList );
-		gdi::MakeDisabledImageList( *m_pDisabledImageList, *pImageList, gdi::DisabledBlendColor, GetSysColor( COLOR_3DLIGHT ), 128 );
-		GetToolBarCtrl().SetDisabledImageList( m_pDisabledImageList.get() );
+		if ( gdi::MakeDisabledImageList( *m_pDisabledImageList, *pImageList, style, GetSysColor( COLOR_BTNFACE ), 128 ) )	// was COLOR_3DLIGHT, 128
+			GetToolBarCtrl().SetDisabledImageList( m_pDisabledImageList.get() );
+		else
+		{
+			ASSERT( false );
+			m_pDisabledImageList.reset();
+		}
 	}
 	else
 		ASSERT( false );
 }
 
-void CBaseToolbar::UpdateCmdUI( void )
+void CToolbarStrip::UpdateCmdUI( void )
 {
 	if ( m_hWnd != NULL )
 		SendMessage( WM_IDLEUPDATECMDUI, (WPARAM)TRUE );
 }
 
-void CBaseToolbar::TrackButtonMenu( UINT buttonId, CWnd* pTargetWnd, CMenu* pPopupMenu, ui::PopupAlign popupAlign )
+void CToolbarStrip::TrackButtonMenu( UINT buttonId, CWnd* pTargetWnd, CMenu* pPopupMenu, ui::PopupAlign popupAlign )
 {
 	ASSERT_PTR( GetSafeHwnd() );
 	ASSERT_PTR( pPopupMenu->GetSafeHmenu() );
@@ -80,5 +85,5 @@ void CBaseToolbar::TrackButtonMenu( UINT buttonId, CWnd* pTargetWnd, CMenu* pPop
 
 // message handlers
 
-BEGIN_MESSAGE_MAP( CBaseToolbar, CToolBar )
+BEGIN_MESSAGE_MAP( CToolbarStrip, CToolBar )
 END_MESSAGE_MAP()

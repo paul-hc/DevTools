@@ -1,42 +1,23 @@
-// MainFrame.h : interface of the CMainFrame class
-//
 #pragma once
 
-#include "utl/BaseToolbar.h"
+#include "utl/ToolbarStrip.h"
 
 
 class CMainFrame : public CMDIFrameWnd
 {
-	DECLARE_DYNAMIC(CMainFrame)
+	DECLARE_DYNAMIC( CMainFrame )
 public:
-	CMainFrame();
-
-// Attributes
-public:
-
-// Operations
-public:
-
-// Overrides
-public:
-	virtual BOOL PreCreateWindow(CREATESTRUCT& cs);
-
-// Implementation
-public:
+	CMainFrame( void );
 	virtual ~CMainFrame();
-#ifdef _DEBUG
-	virtual void AssertValid() const;
-	virtual void Dump(CDumpContext& dc) const;
-#endif
-
-protected:  // control bar embedded members
-	CStatusBar  m_wndStatusBar;
-	CBaseToolbar m_wndToolBar;
-
-// Generated message map functions
 protected:
-	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
+	CStatusBar  m_wndStatusBar;
+	CToolbarStrip m_wndToolBar;
+
+	// generated stuff
+public:
+	virtual BOOL PreCreateWindow( CREATESTRUCT& cs );
+protected:
+	afx_msg int OnCreate( LPCREATESTRUCT lpCreateStruct );
+
 	DECLARE_MESSAGE_MAP()
 };
-
-

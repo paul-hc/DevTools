@@ -78,7 +78,7 @@ namespace gdi
 			if ( !hasAlpha )
 				pixels.ForEach( func::ReplaceColor( blendToColor, color::Black, 0 ) );		// fillColor -> transparent (0 alpha, i.e. opacity)
 
-			pixels.ApplyDisabledGrayEffect( blendToColor, toAlpha );
+			pixels.ApplyDisabledGrayOut( blendToColor, toAlpha );
 			if ( CDibSection::AlphaBlended == dib.DrawTransparent( pDC, CRect( pos, size ) ) )
 				return;
 		}
@@ -152,19 +152,19 @@ namespace gdi
 	}
 
 
-	void MakeDisabledImageList( CImageList& rDestImageList, const CImageList& srcImageList, DisabledStyle style /*= gdi::DisabledBlendColor*/,
+	bool MakeDisabledImageList( CImageList& rDestImageList, const CImageList& srcImageList, DisabledStyle style /*= gdi::DisabledBlendColor*/,
 								COLORREF blendToColor /*= GetSysColor( COLOR_BTNFACE )*/, BYTE toAlpha /*= 128*/ )
 	{
 		ASSERT_PTR( srcImageList.GetSafeHandle() );
 		ASSERT( gdi::HasAlphaTransparency( srcImageList ) );		// not implemented for other DIBs
-		rDestImageList.DeleteImageList();
 
 		CImageInfo info( &srcImageList, 0 );
 		CDibPixels srcPixels( info.hbmImage );
 
 		CDibSection dib;
 		CDibPixels pixels( &dib );
-		dib.CreateDIBSection( pixels, info.m_imageSize.cx * info.m_imageCount, info.m_imageSize.cy, srcPixels.GetBitsPerPixel() );
+		if ( !dib.CreateDIBSection( pixels, info.m_imageSize.cx * info.m_imageCount, info.m_imageSize.cy, srcPixels.GetBitsPerPixel() ) )
+			return false;
 
 		// src is vertical and dest is horizontal, so copy pixels image by image
 		for ( UINT i = 0; i != info.m_imageCount; ++i )
@@ -176,11 +176,14 @@ namespace gdi
 
 		switch ( style )
 		{
-			case DisabledGray:			pixels.ApplyDisabledGrayEffect( blendToColor, toAlpha ); break;
+			default: ASSERT( false );
+			case DisabledGrayScale:		pixels.ApplyGrayScale(); break;
+			case DisabledGrayOut:		pixels.ApplyDisabledGrayOut( blendToColor, toAlpha ); break;
 			case DisabledEffect:		pixels.ApplyDisabledEffect( blendToColor, toAlpha ); break;
 			case DisabledBlendColor:	pixels.ApplyBlendColor( blendToColor, toAlpha ); break;
 		}
 
+		rDestImageList.DeleteImageList();
 		dib.CreateEmptyImageList( rDestImageList, info.m_imageSize, info.m_imageCount );		// compatible with source DIB
 		if ( dib.HasAlpha() )
 			rDestImageList.Add( &dib, (CBitmap*)NULL );					// use alpha channel (no mask required)
@@ -188,6 +191,8 @@ namespace gdi
 			rDestImageList.Add( &dib, CBitmap::FromHandle( info.hbmMask ) );
 		else
 			rDestImageList.Add( &dib, srcImageList.GetBkColor() );
+
+		return true;
 	}
 
 
