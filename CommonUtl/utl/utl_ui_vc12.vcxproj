@@ -575,8 +575,6 @@
     <ResourceCompile Include="utl_ui.rc" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="res\ItemListStrip.bmp" />
-    <Image Include="res\ItemListStrip.png" />
     <Image Include="res\ListStrip.bmp" />
     <Image Include="res\ListStrip.png" />
     <Image Include="res\StdStrip.bmp" />

@@ -1202,13 +1202,7 @@
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <Image Include="res\ItemListStrip.bmp">
-      <Filter>Resource Files</Filter>
-    </Image>
     <Image Include="res\StdStrip.bmp">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="res\ItemListStrip.png">
       <Filter>Resource Files</Filter>
     </Image>
     <Image Include="res\StdStrip.png">
