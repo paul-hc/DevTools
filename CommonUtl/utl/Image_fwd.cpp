@@ -100,7 +100,7 @@ namespace res
 	HICON LoadIcon( const CIconId& iconId )
 	{
 		const CSize iconSize = iconId.GetStdSize();
-		return (HICON)LoadImage( CScopedResInst::Get(), MAKEINTRESOURCE( iconId.m_id ), IMAGE_ICON, iconSize.cx, iconSize.cy, LR_DEFAULTCOLOR );
+		return (HICON)::LoadImage( CScopedResInst::Get(), MAKEINTRESOURCE( iconId.m_id ), IMAGE_ICON, iconSize.cx, iconSize.cy, LR_DEFAULTCOLOR );
 	}
 
 	void LoadImageList( CImageList& rOutImageList, const UINT* pIconIds, size_t iconCount, IconStdSize iconStdSize /*= SmallIcon*/,

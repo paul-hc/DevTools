@@ -754,14 +754,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\UserInterfaceUtilities.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\UserInterfaceUtilities.h"
-				>
-			</File>
-			<File
 				RelativePath="WkspLoadDialog.cpp"
 				>
 				<FileConfiguration

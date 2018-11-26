@@ -13,6 +13,7 @@
 #include "Application.h"
 #include "resource.h"
 #include "utl/Clipboard.h"
+#include "utl/CmdUpdate.h"
 #include "utl/MenuUtilities.h"
 #include "utl/PostCall.h"
 #include "utl/Utilities.h"

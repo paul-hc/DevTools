@@ -5,6 +5,7 @@
 #include "StringTests.h"
 #include "StringRangeTests.h"
 #include "NumericTests.h"
+#include "ColorTests.h"
 #include "LcsTests.h"
 #include "ResequenceTests.h"
 #include "FmtUtilsTests.h"
@@ -25,6 +26,7 @@ namespace ut
 		CStringTests::Instance();
 		CStringRangeTests::Instance();
 		CNumericTests::Instance();
+		CColorTests::Instance();
 		CLcsTests::Instance();
 		CResequenceTests::Instance();
 		CFmtUtilsTests::Instance();

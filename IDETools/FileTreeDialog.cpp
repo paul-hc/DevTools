@@ -11,6 +11,7 @@
 #include "utl/ContainerUtilities.h"
 #include "utl/CtrlUiState.h"
 #include "utl/FileSystem.h"
+#include "utl/CmdUpdate.h"
 #include "utl/MenuUtilities.h"
 #include "utl/ShellUtilities.h"
 #include "utl/Utilities.h"

@@ -4,7 +4,7 @@
 #include "LayoutBasePropertySheet.h"
 #include "LayoutEngine.h"
 #include "CmdInfoStore.h"
-#include "MenuUtilities.h"
+#include "CmdUpdate.h"
 #include "PostCall.h"
 #include "Utilities.h"
 #include <afxpriv.h>

@@ -33,6 +33,18 @@
     <Filter Include="utl-UI\Layout">
       <UniqueIdentifier>{ad125ca0-fe7d-4418-b9ee-313a62cd1873}</UniqueIdentifier>
     </Filter>
+    <Filter Include="utl\Pattern">
+      <UniqueIdentifier>{6c46bb28-894d-4d4c-b7d2-ad0c08933b01}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="utl-UI\Controls">
+      <UniqueIdentifier>{f43f37a3-3d87-42ae-a95b-621bcf7c44bb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="utl-UI\Registry">
+      <UniqueIdentifier>{0b1e95d8-18f2-4a80-8c3c-b56839af585e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="utl-UI\Vista MFC">
+      <UniqueIdentifier>{05b7717b-7ff4-4fa5-90dc-a661133d308d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -53,22 +65,7 @@
     <ClInclude Include="BaseApp.hxx">
       <Filter>utl-UI</Filter>
     </ClInclude>
-    <ClInclude Include="BaseDetailHostCtrl.h">
-      <Filter>utl-UI</Filter>
-    </ClInclude>
     <ClInclude Include="BaseMainDialog.h">
-      <Filter>utl-UI</Filter>
-    </ClInclude>
-    <ClInclude Include="BasePopupDialog.h">
-      <Filter>utl-UI</Filter>
-    </ClInclude>
-    <ClInclude Include="BaseSplitButton.h">
-      <Filter>utl-UI</Filter>
-    </ClInclude>
-    <ClInclude Include="BaseStatic.h">
-      <Filter>utl-UI</Filter>
-    </ClInclude>
-    <ClInclude Include="BaseToolbar.h">
       <Filter>utl-UI</Filter>
     </ClInclude>
     <ClInclude Include="CmdInfoStore.h">
@@ -77,37 +74,13 @@
     <ClInclude Include="CommonWinDefs.h">
       <Filter>utl-UI</Filter>
     </ClInclude>
-    <ClInclude Include="CtrlUiState.h">
-      <Filter>utl-UI</Filter>
-    </ClInclude>
     <ClInclude Include="DesktopDC.h">
       <Filter>utl-UI</Filter>
     </ClInclude>
     <ClInclude Include="Dialog_fwd.h">
       <Filter>utl-UI</Filter>
     </ClInclude>
-    <ClInclude Include="DialogToolBar.h">
-      <Filter>utl-UI</Filter>
-    </ClInclude>
-    <ClInclude Include="EnumSplitButton.h">
-      <Filter>utl-UI</Filter>
-    </ClInclude>
     <ClInclude Include="GroupIcon.h">
-      <Filter>utl-UI</Filter>
-    </ClInclude>
-    <ClInclude Include="HistoryComboBox.h">
-      <Filter>utl-UI</Filter>
-    </ClInclude>
-    <ClInclude Include="IconButton.h">
-      <Filter>utl-UI</Filter>
-    </ClInclude>
-    <ClInclude Include="InternalChange.h">
-      <Filter>utl-UI</Filter>
-    </ClInclude>
-    <ClInclude Include="ItemContent.h">
-      <Filter>utl-UI</Filter>
-    </ClInclude>
-    <ClInclude Include="ItemContentEdit.h">
       <Filter>utl-UI</Filter>
     </ClInclude>
     <ClInclude Include="ItemListDialog.h">
@@ -122,34 +95,10 @@
     <ClInclude Include="MenuUtilities.h">
       <Filter>utl-UI</Filter>
     </ClInclude>
-    <ClInclude Include="NumericEdit.h">
-      <Filter>utl-UI</Filter>
-    </ClInclude>
-    <ClInclude Include="PopupSplitButton.h">
-      <Filter>utl-UI</Filter>
-    </ClInclude>
-    <ClInclude Include="Registry.h">
-      <Filter>utl-UI</Filter>
-    </ClInclude>
-    <ClInclude Include="ReportListControl.h">
-      <Filter>utl-UI</Filter>
-    </ClInclude>
     <ClInclude Include="ResourceData.h">
       <Filter>utl-UI</Filter>
     </ClInclude>
     <ClInclude Include="ScopedGdi.h">
-      <Filter>utl-UI</Filter>
-    </ClInclude>
-    <ClInclude Include="SpinEdit.h">
-      <Filter>utl-UI</Filter>
-    </ClInclude>
-    <ClInclude Include="SpinTargetButton.h">
-      <Filter>utl-UI</Filter>
-    </ClInclude>
-    <ClInclude Include="SplitPushButton.h">
-      <Filter>utl-UI</Filter>
-    </ClInclude>
-    <ClInclude Include="TextEdit.h">
       <Filter>utl-UI</Filter>
     </ClInclude>
     <ClInclude Include="Color.h">
@@ -167,9 +116,6 @@
     <ClInclude Include="EnumTags.h">
       <Filter>utl</Filter>
     </ClInclude>
-    <ClInclude Include="ISubject.h">
-      <Filter>utl</Filter>
-    </ClInclude>
     <ClInclude Include="Logger.h">
       <Filter>utl</Filter>
     </ClInclude>
@@ -183,9 +129,6 @@
       <Filter>utl</Filter>
     </ClInclude>
     <ClInclude Include="StdColors.h">
-      <Filter>utl</Filter>
-    </ClInclude>
-    <ClInclude Include="StdStl.h">
       <Filter>utl</Filter>
     </ClInclude>
     <ClInclude Include="StringBase.h">
@@ -209,19 +152,10 @@
     <ClInclude Include="ThemeItem.h">
       <Filter>utl-UI</Filter>
     </ClInclude>
-    <ClInclude Include="ThemeStatic.h">
-      <Filter>utl-UI</Filter>
-    </ClInclude>
     <ClInclude Include="ToolStrip.h">
       <Filter>utl-UI</Filter>
     </ClInclude>
     <ClInclude Include="TooltipsHook.h">
-      <Filter>utl-UI</Filter>
-    </ClInclude>
-    <ClInclude Include="TrackStatic.h">
-      <Filter>utl-UI</Filter>
-    </ClInclude>
-    <ClInclude Include="TreeControl.h">
       <Filter>utl-UI</Filter>
     </ClInclude>
     <ClInclude Include="Utilities.h">
@@ -254,12 +188,6 @@
     <ClInclude Include="resource.h">
       <Filter>Resource Files</Filter>
     </ClInclude>
-    <ClInclude Include="BaseDetailHostCtrl.hxx">
-      <Filter>utl-UI</Filter>
-    </ClInclude>
-    <ClInclude Include="ItemContentHistoryCombo.h">
-      <Filter>utl-UI</Filter>
-    </ClInclude>
     <ClInclude Include="MultiZone.h">
       <Filter>utl-UI</Filter>
     </ClInclude>
@@ -267,9 +195,6 @@
       <Filter>utl-UI</Filter>
     </ClInclude>
     <ClInclude Include="ScopedBitmapMemDC.h">
-      <Filter>utl-UI</Filter>
-    </ClInclude>
-    <ClInclude Include="TextEditor.h">
       <Filter>utl-UI</Filter>
     </ClInclude>
     <ClInclude Include="ui_fwd.h">
@@ -476,14 +401,8 @@
     <ClInclude Include="StringCvt.h">
       <Filter>utl</Filter>
     </ClInclude>
-    <ClInclude Include="TimeUtl.h">
-      <Filter>utl</Filter>
-    </ClInclude>
     <ClInclude Include="vector_map.h">
       <Filter>utl</Filter>
-    </ClInclude>
-    <ClInclude Include="utl.h">
-      <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="Thumbnailer.h">
       <Filter>utl-UI\Imaging</Filter>
@@ -539,12 +458,6 @@
     <ClInclude Include="BaseZoomView.h">
       <Filter>utl-UI</Filter>
     </ClInclude>
-    <ClInclude Include="BatchTransactions.h">
-      <Filter>utl\File System</Filter>
-    </ClInclude>
-    <ClInclude Include="DragListCtrl.h">
-      <Filter>utl-UI</Filter>
-    </ClInclude>
     <ClInclude Include="GdiPlus_fwd.h">
       <Filter>utl-UI</Filter>
     </ClInclude>
@@ -560,6 +473,237 @@
     <ClInclude Include="PostCall.h">
       <Filter>utl-UI</Filter>
     </ClInclude>
+    <ClInclude Include="ut\ColorTests.h">
+      <Filter>utl-UnitTest</Filter>
+    </ClInclude>
+    <ClInclude Include="ut\FmtUtilsTests.h">
+      <Filter>utl-UnitTest</Filter>
+    </ClInclude>
+    <ClInclude Include="ut\NumericTests.h">
+      <Filter>utl-UnitTest</Filter>
+    </ClInclude>
+    <ClInclude Include="ut\SerializationTests.h">
+      <Filter>utl-UnitTest</Filter>
+    </ClInclude>
+    <ClInclude Include="ut\ShellFileSystemTests.h">
+      <Filter>utl-UnitTest</Filter>
+    </ClInclude>
+    <ClInclude Include="ut\StringRangeTests.h">
+      <Filter>utl-UnitTest</Filter>
+    </ClInclude>
+    <ClInclude Include="StdManifest.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BaseDetailHostCtrl.h">
+      <Filter>utl-UI\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="BaseDetailHostCtrl.hxx">
+      <Filter>utl-UI\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="BaseSplitButton.h">
+      <Filter>utl-UI\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="CtrlUiState.h">
+      <Filter>utl-UI\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="DialogToolBar.h">
+      <Filter>utl-UI\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="DragListCtrl.h">
+      <Filter>utl-UI\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="EnumSplitButton.h">
+      <Filter>utl-UI\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="HistoryComboBox.h">
+      <Filter>utl-UI\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="IconButton.h">
+      <Filter>utl-UI\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="InternalChange.h">
+      <Filter>utl-UI\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="ItemContent.h">
+      <Filter>utl-UI\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="ItemContentEdit.h">
+      <Filter>utl-UI\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="ItemContentHistoryCombo.h">
+      <Filter>utl-UI\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="PopupSplitButton.h">
+      <Filter>utl-UI\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="NumericEdit.h">
+      <Filter>utl-UI\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="ReportListControl.h">
+      <Filter>utl-UI\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="SpinEdit.h">
+      <Filter>utl-UI\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="SpinTargetButton.h">
+      <Filter>utl-UI\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="SplitPushButton.h">
+      <Filter>utl-UI\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="TextEdit.h">
+      <Filter>utl-UI\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="TextEditor.h">
+      <Filter>utl-UI\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="ThemeStatic.h">
+      <Filter>utl-UI\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="TrackStatic.h">
+      <Filter>utl-UI\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="TreeControl.h">
+      <Filter>utl-UI\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="Registry.h">
+      <Filter>utl-UI\Registry</Filter>
+    </ClInclude>
+    <ClInclude Include="Command.h">
+      <Filter>utl\Pattern</Filter>
+    </ClInclude>
+    <ClInclude Include="CommandModel.h">
+      <Filter>utl\Pattern</Filter>
+    </ClInclude>
+    <ClInclude Include="PathItemBase.h">
+      <Filter>utl\Pattern</Filter>
+    </ClInclude>
+    <ClInclude Include="Subject.h">
+      <Filter>utl\Pattern</Filter>
+    </ClInclude>
+    <ClInclude Include="ISubject.h">
+      <Filter>utl\Pattern</Filter>
+    </ClInclude>
+    <ClInclude Include="BaseFrameHostCtrl.h">
+      <Filter>utl-UI\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="BaseFrameHostCtrl.hxx">
+      <Filter>utl-UI\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="BufferedStatic.h">
+      <Filter>utl-UI\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="CheckStatePolicies.h">
+      <Filter>utl-UI\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="ClockStatic.h">
+      <Filter>utl-UI\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="DateTimeControl.h">
+      <Filter>utl-UI\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="ObjectCtrlBase.h">
+      <Filter>utl-UI\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="PathItemListCtrl.h">
+      <Filter>utl-UI\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="ReportListCustomDraw.h">
+      <Filter>utl-UI\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="ToolbarStrip.h">
+      <Filter>utl-UI\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="CmdIdStore.h">
+      <Filter>utl-UI</Filter>
+    </ClInclude>
+    <ClInclude Include="CmdUpdate.h">
+      <Filter>utl-UI</Filter>
+    </ClInclude>
+    <ClInclude Include="ContentFitBase.h">
+      <Filter>utl-UI\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="CRC32.h">
+      <Filter>utl\File System</Filter>
+    </ClInclude>
+    <ClInclude Include="FileState.h">
+      <Filter>utl\File System</Filter>
+    </ClInclude>
+    <ClInclude Include="FileSystem_fwd.h">
+      <Filter>utl\File System</Filter>
+    </ClInclude>
+    <ClInclude Include="CustomDrawImager.h">
+      <Filter>utl-UI\Imaging</Filter>
+    </ClInclude>
+    <ClInclude Include="CustomDrawImager_fwd.h">
+      <Filter>utl-UI\Imaging</Filter>
+    </ClInclude>
+    <ClInclude Include="DibDraw_fwd.h">
+      <Filter>utl-UI\Imaging</Filter>
+    </ClInclude>
+    <ClInclude Include="FmtUtils.h">
+      <Filter>utl</Filter>
+    </ClInclude>
+    <ClInclude Include="IniFile.h">
+      <Filter>utl-UI\Registry</Filter>
+    </ClInclude>
+    <ClInclude Include="IniFileRegistrySection.h">
+      <Filter>utl-UI\Registry</Filter>
+    </ClInclude>
+    <ClInclude Include="IRegistrySection.h">
+      <Filter>utl-UI\Registry</Filter>
+    </ClInclude>
+    <ClInclude Include="OptionContainer.h">
+      <Filter>utl-UI\Registry</Filter>
+    </ClInclude>
+    <ClInclude Include="PropertyLineReader.h">
+      <Filter>utl-UI\Registry</Filter>
+    </ClInclude>
+    <ClInclude Include="RegistrySection.h">
+      <Filter>utl-UI\Registry</Filter>
+    </ClInclude>
+    <ClInclude Include="IProgressCallback.h">
+      <Filter>utl-UI</Filter>
+    </ClInclude>
+    <ClInclude Include="ProgressDialog.h">
+      <Filter>utl-UI</Filter>
+    </ClInclude>
+    <ClInclude Include="MatchSequence.h">
+      <Filter>utl</Filter>
+    </ClInclude>
+    <ClInclude Include="PopupDlgBase.h">
+      <Filter>utl-UI</Filter>
+    </ClInclude>
+    <ClInclude Include="ShellContextMenuHost.h">
+      <Filter>utl-UI\Shell %28Explorer API%29</Filter>
+    </ClInclude>
+    <ClInclude Include="ShellTypes.h">
+      <Filter>utl-UI\Shell %28Explorer API%29</Filter>
+    </ClInclude>
+    <ClInclude Include="StdStl.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="StringRange.h">
+      <Filter>utl</Filter>
+    </ClInclude>
+    <ClInclude Include="StringRange_fwd.h">
+      <Filter>utl</Filter>
+    </ClInclude>
+    <ClInclude Include="SyncScrolling.h">
+      <Filter>utl-UI</Filter>
+    </ClInclude>
+    <ClInclude Include="TaskDialog.h">
+      <Filter>utl-UI</Filter>
+    </ClInclude>
+    <ClInclude Include="TextEffect.h">
+      <Filter>utl-UI</Filter>
+    </ClInclude>
+    <ClInclude Include="TimeUtils.h">
+      <Filter>utl</Filter>
+    </ClInclude>
+    <ClInclude Include="utl.h">
+      <Filter>utl</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -571,52 +715,16 @@
     <ClCompile Include="AccelTable.cpp">
       <Filter>utl-UI</Filter>
     </ClCompile>
-    <ClCompile Include="BaseDetailHostCtrl.cpp">
-      <Filter>utl-UI</Filter>
-    </ClCompile>
     <ClCompile Include="BaseMainDialog.cpp">
-      <Filter>utl-UI</Filter>
-    </ClCompile>
-    <ClCompile Include="BasePopupDialog.cpp">
-      <Filter>utl-UI</Filter>
-    </ClCompile>
-    <ClCompile Include="BaseSplitButton.cpp">
-      <Filter>utl-UI</Filter>
-    </ClCompile>
-    <ClCompile Include="BaseStatic.cpp">
-      <Filter>utl-UI</Filter>
-    </ClCompile>
-    <ClCompile Include="BaseToolbar.cpp">
       <Filter>utl-UI</Filter>
     </ClCompile>
     <ClCompile Include="CmdInfoStore.cpp">
       <Filter>utl-UI</Filter>
     </ClCompile>
-    <ClCompile Include="CtrlUiState.cpp">
-      <Filter>utl-UI</Filter>
-    </ClCompile>
     <ClCompile Include="DesktopDC.cpp">
       <Filter>utl-UI</Filter>
     </ClCompile>
-    <ClCompile Include="DialogToolBar.cpp">
-      <Filter>utl-UI</Filter>
-    </ClCompile>
-    <ClCompile Include="EnumSplitButton.cpp">
-      <Filter>utl-UI</Filter>
-    </ClCompile>
     <ClCompile Include="GroupIcon.cpp">
-      <Filter>utl-UI</Filter>
-    </ClCompile>
-    <ClCompile Include="HistoryComboBox.cpp">
-      <Filter>utl-UI</Filter>
-    </ClCompile>
-    <ClCompile Include="IconButton.cpp">
-      <Filter>utl-UI</Filter>
-    </ClCompile>
-    <ClCompile Include="ItemContent.cpp">
-      <Filter>utl-UI</Filter>
-    </ClCompile>
-    <ClCompile Include="ItemContentEdit.cpp">
       <Filter>utl-UI</Filter>
     </ClCompile>
     <ClCompile Include="ItemListDialog.cpp">
@@ -631,28 +739,7 @@
     <ClCompile Include="MenuUtilities.cpp">
       <Filter>utl-UI</Filter>
     </ClCompile>
-    <ClCompile Include="PopupSplitButton.cpp">
-      <Filter>utl-UI</Filter>
-    </ClCompile>
-    <ClCompile Include="Registry.cpp">
-      <Filter>utl-UI</Filter>
-    </ClCompile>
-    <ClCompile Include="ReportListControl.cpp">
-      <Filter>utl-UI</Filter>
-    </ClCompile>
     <ClCompile Include="ResourceData.cpp">
-      <Filter>utl-UI</Filter>
-    </ClCompile>
-    <ClCompile Include="SpinEdit.cpp">
-      <Filter>utl-UI</Filter>
-    </ClCompile>
-    <ClCompile Include="SpinTargetButton.cpp">
-      <Filter>utl-UI</Filter>
-    </ClCompile>
-    <ClCompile Include="SplitPushButton.cpp">
-      <Filter>utl-UI</Filter>
-    </ClCompile>
-    <ClCompile Include="TextEdit.cpp">
       <Filter>utl-UI</Filter>
     </ClCompile>
     <ClCompile Include="Color.cpp">
@@ -682,19 +769,10 @@
     <ClCompile Include="ThemeItem.cpp">
       <Filter>utl-UI</Filter>
     </ClCompile>
-    <ClCompile Include="ThemeStatic.cpp">
-      <Filter>utl-UI</Filter>
-    </ClCompile>
     <ClCompile Include="ToolStrip.cpp">
       <Filter>utl-UI</Filter>
     </ClCompile>
     <ClCompile Include="TooltipsHook.cpp">
-      <Filter>utl-UI</Filter>
-    </ClCompile>
-    <ClCompile Include="TrackStatic.cpp">
-      <Filter>utl-UI</Filter>
-    </ClCompile>
-    <ClCompile Include="TreeControl.cpp">
       <Filter>utl-UI</Filter>
     </ClCompile>
     <ClCompile Include="Utilities.cpp">
@@ -718,16 +796,10 @@
     <ClCompile Include="WindowTimer.cpp">
       <Filter>utl-UI</Filter>
     </ClCompile>
-    <ClCompile Include="ItemContentHistoryCombo.cpp">
-      <Filter>utl-UI</Filter>
-    </ClCompile>
     <ClCompile Include="MultiZone.cpp">
       <Filter>utl-UI</Filter>
     </ClCompile>
     <ClCompile Include="SampleView.cpp">
-      <Filter>utl-UI</Filter>
-    </ClCompile>
-    <ClCompile Include="TextEditor.cpp">
       <Filter>utl-UI</Filter>
     </ClCompile>
     <ClCompile Include="BaseApp.cpp">
@@ -880,9 +952,6 @@
     <ClCompile Include="StringCompare.cpp">
       <Filter>utl</Filter>
     </ClCompile>
-    <ClCompile Include="TimeUtl.cpp">
-      <Filter>utl</Filter>
-    </ClCompile>
     <ClCompile Include="Thumbnailer.cpp">
       <Filter>utl-UI\Imaging</Filter>
     </ClCompile>
@@ -931,12 +1000,6 @@
     <ClCompile Include="BaseZoomView.cpp">
       <Filter>utl-UI</Filter>
     </ClCompile>
-    <ClCompile Include="BatchTransactions.cpp">
-      <Filter>utl\File System</Filter>
-    </ClCompile>
-    <ClCompile Include="DragListCtrl.cpp">
-      <Filter>utl-UI</Filter>
-    </ClCompile>
     <ClCompile Include="ImageZoomViewD2D.cpp">
       <Filter>utl-UI</Filter>
     </ClCompile>
@@ -945,6 +1008,192 @@
     </ClCompile>
     <ClCompile Include="PostCall.cpp">
       <Filter>utl-UI</Filter>
+    </ClCompile>
+    <ClCompile Include="ut\ColorTests.cpp">
+      <Filter>utl-UnitTest</Filter>
+    </ClCompile>
+    <ClCompile Include="ut\FmtUtilsTests.cpp">
+      <Filter>utl-UnitTest</Filter>
+    </ClCompile>
+    <ClCompile Include="ut\NumericTests.cpp">
+      <Filter>utl-UnitTest</Filter>
+    </ClCompile>
+    <ClCompile Include="ut\SerializationTests.cpp">
+      <Filter>utl-UnitTest</Filter>
+    </ClCompile>
+    <ClCompile Include="ut\ShellFileSystemTests.cpp">
+      <Filter>utl-UnitTest</Filter>
+    </ClCompile>
+    <ClCompile Include="ut\StringRangeTests.cpp">
+      <Filter>utl-UnitTest</Filter>
+    </ClCompile>
+    <ClCompile Include="BaseDetailHostCtrl.cpp">
+      <Filter>utl-UI\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="BaseSplitButton.cpp">
+      <Filter>utl-UI\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="CtrlUiState.cpp">
+      <Filter>utl-UI\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="DialogToolBar.cpp">
+      <Filter>utl-UI\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="DragListCtrl.cpp">
+      <Filter>utl-UI\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="EnumSplitButton.cpp">
+      <Filter>utl-UI\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="HistoryComboBox.cpp">
+      <Filter>utl-UI\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="IconButton.cpp">
+      <Filter>utl-UI\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="ItemContent.cpp">
+      <Filter>utl-UI\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="ItemContentEdit.cpp">
+      <Filter>utl-UI\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="ItemContentHistoryCombo.cpp">
+      <Filter>utl-UI\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="PopupSplitButton.cpp">
+      <Filter>utl-UI\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="ReportListControl.cpp">
+      <Filter>utl-UI\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="SpinEdit.cpp">
+      <Filter>utl-UI\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="SpinTargetButton.cpp">
+      <Filter>utl-UI\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="SplitPushButton.cpp">
+      <Filter>utl-UI\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="TextEdit.cpp">
+      <Filter>utl-UI\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="TextEditor.cpp">
+      <Filter>utl-UI\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="ThemeStatic.cpp">
+      <Filter>utl-UI\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="TrackStatic.cpp">
+      <Filter>utl-UI\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="TreeControl.cpp">
+      <Filter>utl-UI\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="Registry.cpp">
+      <Filter>utl-UI\Registry</Filter>
+    </ClCompile>
+    <ClCompile Include="Command.cpp">
+      <Filter>utl\Pattern</Filter>
+    </ClCompile>
+    <ClCompile Include="CommandModel.cpp">
+      <Filter>utl\Pattern</Filter>
+    </ClCompile>
+    <ClCompile Include="PathItemBase.cpp">
+      <Filter>utl\Pattern</Filter>
+    </ClCompile>
+    <ClCompile Include="Subject.cpp">
+      <Filter>utl\Pattern</Filter>
+    </ClCompile>
+    <ClCompile Include="BufferedStatic.cpp">
+      <Filter>utl-UI\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="CheckStatePolicies.cpp">
+      <Filter>utl-UI\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="ClockStatic.cpp">
+      <Filter>utl-UI\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="DateTimeControl.cpp">
+      <Filter>utl-UI\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="ObjectCtrlBase.cpp">
+      <Filter>utl-UI\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="PathItemListCtrl.cpp">
+      <Filter>utl-UI\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="ReportListCustomDraw.cpp">
+      <Filter>utl-UI\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="ToolbarStrip.cpp">
+      <Filter>utl-UI\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="CmdIdStore.cpp">
+      <Filter>utl-UI</Filter>
+    </ClCompile>
+    <ClCompile Include="CmdUpdate.cpp">
+      <Filter>utl-UI</Filter>
+    </ClCompile>
+    <ClCompile Include="ContentFitBase.cpp">
+      <Filter>utl-UI\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="CRC32.cpp">
+      <Filter>utl\File System</Filter>
+    </ClCompile>
+    <ClCompile Include="FileState.cpp">
+      <Filter>utl\File System</Filter>
+    </ClCompile>
+    <ClCompile Include="CustomDrawImager.cpp">
+      <Filter>utl-UI\Imaging</Filter>
+    </ClCompile>
+    <ClCompile Include="FmtUtils.cpp">
+      <Filter>utl</Filter>
+    </ClCompile>
+    <ClCompile Include="IniFile.cpp">
+      <Filter>utl-UI\Registry</Filter>
+    </ClCompile>
+    <ClCompile Include="IniFileRegistrySection.cpp">
+      <Filter>utl-UI\Registry</Filter>
+    </ClCompile>
+    <ClCompile Include="OptionContainer.cpp">
+      <Filter>utl-UI\Registry</Filter>
+    </ClCompile>
+    <ClCompile Include="PropertyLineReader.cpp">
+      <Filter>utl-UI\Registry</Filter>
+    </ClCompile>
+    <ClCompile Include="RegistrySection.cpp">
+      <Filter>utl-UI\Registry</Filter>
+    </ClCompile>
+    <ClCompile Include="ProgressDialog.cpp">
+      <Filter>utl-UI</Filter>
+    </ClCompile>
+    <ClCompile Include="PopupDlgBase.cpp">
+      <Filter>utl-UI</Filter>
+    </ClCompile>
+    <ClCompile Include="Serialization.cpp">
+      <Filter>utl</Filter>
+    </ClCompile>
+    <ClCompile Include="ShellContextMenuHost.cpp">
+      <Filter>utl-UI\Shell %28Explorer API%29</Filter>
+    </ClCompile>
+    <ClCompile Include="ShellTypes.cpp">
+      <Filter>utl-UI\Shell %28Explorer API%29</Filter>
+    </ClCompile>
+    <ClCompile Include="SyncScrolling.cpp">
+      <Filter>utl-UI</Filter>
+    </ClCompile>
+    <ClCompile Include="TaskDialog.cpp">
+      <Filter>utl-UI</Filter>
+    </ClCompile>
+    <ClCompile Include="TextEffect.cpp">
+      <Filter>utl-UI</Filter>
+    </ClCompile>
+    <ClCompile Include="Timer.cpp">
+      <Filter>utl</Filter>
+    </ClCompile>
+    <ClCompile Include="TimeUtils.cpp">
+      <Filter>utl</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -965,6 +1214,15 @@
     <Image Include="res\StdStrip.png">
       <Filter>Resource Files</Filter>
     </Image>
+    <Image Include="res\ListStrip.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\ListStrip.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\Transparent.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
     <None Include="res\Scrollable.cur">
@@ -973,5 +1231,23 @@
     <None Include="res\ScrollDrag.cur">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="res\DragDrop-Copy.cur">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\DragDrop-Move.cur">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\DragDrop-None.cur">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\TrackScroll.cur">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\TrackZoom.cur">
+      <Filter>Resource Files</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="UTL Library.txt" />
   </ItemGroup>
 </Project>

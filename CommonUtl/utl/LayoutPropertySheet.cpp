@@ -3,7 +3,7 @@
 #include "LayoutPropertySheet.h"
 #include "LayoutPropertyPage.h"
 #include "LayoutEngine.h"
-#include "MenuUtilities.h"
+#include "CmdUpdate.h"
 #include "Utilities.h"
 #include "StringUtilities.h"
 #include "BaseApp.h"

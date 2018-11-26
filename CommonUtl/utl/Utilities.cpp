@@ -620,50 +620,6 @@ namespace ui
 	}
 
 
-	void UpdateControlsUI( CWnd* pParent, CWnd* pTargetWnd /*= NULL*/ )
-	{
-		if ( NULL == pTargetWnd )
-			pTargetWnd = pParent;
-
-		ASSERT_PTR( pParent->GetSafeHwnd() );
-		ASSERT_PTR( pTargetWnd->GetSafeHwnd() );
-
-		for ( CWnd* pCtrl = pParent->GetWindow( GW_CHILD ); pCtrl != NULL; pCtrl = pCtrl->GetNextWindow() )
-			UpdateControlUI( pCtrl, pTargetWnd );
-	}
-
-	void UpdateControlsUI( CWnd* pParent, const UINT ctrlIds[], size_t count, CWnd* pTargetWnd /*= NULL*/ )
-	{
-		if ( NULL == pTargetWnd )
-			pTargetWnd = pParent;
-
-		ASSERT_PTR( pParent->GetSafeHwnd() );
-		ASSERT_PTR( pTargetWnd->GetSafeHwnd() );
-
-		for ( size_t i = 0; i != count; ++i )
-			if ( CWnd* pCtrl = pParent->GetDlgItem( ctrlIds[ i ] ) )
-				UpdateControlUI( pCtrl, pTargetWnd );
-	}
-
-	bool UpdateControlUI( CWnd* pCtrl, CWnd* pTargetWnd /*= NULL*/ )
-	{
-		if ( NULL == pTargetWnd )
-			pTargetWnd = pCtrl->GetParent();
-
-		ASSERT_PTR( pCtrl->GetSafeHwnd() );
-		ASSERT_PTR( pTargetWnd->GetSafeHwnd() );
-
-		CCmdUI ctrlState;
-
-		ctrlState.m_nID = pCtrl->GetDlgCtrlID();
-		if ( -1 == ui::ToCmdId( ctrlState.m_nID ) )
-			return false;			// avoid anonymous statics and group-boxes
-
-		ctrlState.m_pOther = pCtrl;
-		return ctrlState.DoUpdate( pTargetWnd, FALSE ) != FALSE;
-	}
-
-
 	bool RedrawWnd( HWND hWnd )
 	{
 		if ( !::IsWindowVisible( hWnd ) )

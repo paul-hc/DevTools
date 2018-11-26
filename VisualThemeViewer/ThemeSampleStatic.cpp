@@ -108,7 +108,7 @@ void CThemeSampleOptions::OnToggle_DisableThemes( void )
 // CThemeSampleStatic implementation
 
 CThemeSampleStatic::CThemeSampleStatic( void )
-	: CBaseStatic()
+	: CBufferedStatic()
 	, m_pOptions( NULL )
 	, m_margins( Margin, Margin )
 	, m_coreSize( 0, 0 )
@@ -138,6 +138,11 @@ CRect CThemeSampleStatic::GetCoreRect( const CRect& clientRect ) const
 	CRect coreRect( 0, 0, coreSize.cx, coreSize.cy );
 	ui::CenterRect( coreRect, clientRect, true, true );
 	return coreRect;
+}
+
+CSize CThemeSampleStatic::ComputeIdealSize( void )
+{
+	return ComputeIdealTextSize();
 }
 
 bool CThemeSampleStatic::HasCustomFacet( void ) const
@@ -253,5 +258,5 @@ bool CThemeSampleStatic::SizeToContent( CRect& rCoreRect, CDC* pDC )
 
 // message handlers
 
-BEGIN_MESSAGE_MAP( CThemeSampleStatic, CBaseStatic )
+BEGIN_MESSAGE_MAP( CThemeSampleStatic, CBufferedStatic )
 END_MESSAGE_MAP()

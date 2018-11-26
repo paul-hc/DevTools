@@ -10,6 +10,7 @@
 #include "Workspace.h"
 #include "Application.h"
 #include "resource.h"
+#include "utl/CmdUpdate.h"
 #include "utl/MenuUtilities.h"
 #include "utl/PostCall.h"
 #include "utl/RuntimeException.h"

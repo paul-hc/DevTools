@@ -10,6 +10,7 @@
 #include "utl/ImagingGdiPlus.h"
 #include "utl/ImagingWic.h"
 #include "utl/LayoutEngine.h"
+#include "utl/CmdUpdate.h"
 #include "utl/MenuUtilities.h"
 #include "utl/FileSystem.h"
 #include "utl/Pixel.h"

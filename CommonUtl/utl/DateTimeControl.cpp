@@ -3,6 +3,7 @@
 #include "DateTimeControl.h"
 #include "AccelTable.h"
 #include "Clipboard.h"
+#include "CmdUpdate.h"
 #include "MenuUtilities.h"
 #include "Utilities.h"
 #include "TimeUtils.h"

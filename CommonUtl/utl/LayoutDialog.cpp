@@ -3,7 +3,7 @@
 #include "LayoutDialog.h"
 #include "LayoutEngine.h"
 #include "CmdInfoStore.h"
-#include "MenuUtilities.h"
+#include "CmdUpdate.h"
 #include "Utilities.h"
 #include <afxpriv.h>		// for WM_IDLEUPDATECMDUI
 

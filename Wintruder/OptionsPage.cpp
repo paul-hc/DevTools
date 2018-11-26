@@ -6,7 +6,7 @@
 #include "Application.h"
 #include "wnd/WndUtils.h"
 #include "utl/EnumTags.h"
-#include "utl/Utilities.h"
+#include "utl/CmdUpdate.h"
 #include "resource.h"
 
 #ifdef _DEBUG

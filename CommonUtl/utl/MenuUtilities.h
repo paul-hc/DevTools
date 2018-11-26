@@ -65,7 +65,7 @@ namespace ui
 	}
 
 	unsigned int FindMenuItemIndex( const CMenu& rMenu, UINT itemId, unsigned int iFirst = 0 );
-	unsigned int FindAfterMenuItemIndex( const CMenu& rMenu, UINT itemId, unsigned int iFirst = 0 ); // subsequent position
+	unsigned int FindAfterMenuItemIndex( const CMenu& rMenu, UINT itemId, unsigned int iFirst = 0 );		// subsequent position
 
 	void QueryMenuItemIds( std::vector< UINT >& rItemIds, const CMenu& rMenu );
 
@@ -81,11 +81,6 @@ namespace ui
 	enum MenuInsert { PrependSrc, AppendSrc };
 
 	bool JoinMenuItems( CMenu& rDestMenu, const CMenu& srcMenu, MenuInsert menuInsert = AppendSrc, bool addSep = true, UseMenuImages useMenuImages = NormalMenuImages );
-
-
-	void SetRadio( CCmdUI* pCmdUI, BOOL checked = BST_CHECKED );
-	bool ExpandVersionInfoTags( CCmdUI* pCmdUI );				// based on CVersionInfo
-	void UpdateMenuUI( CWnd* pWindow, CMenu* pPopupMenu, bool autoMenuEnable = true );
 }
 
 

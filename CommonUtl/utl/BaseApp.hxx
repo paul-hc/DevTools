@@ -3,7 +3,7 @@
 #include "ImageStore.h"
 #include "ResourcePool.h"
 #include "Logger.h"
-#include "MenuUtilities.h"
+#include "CmdUpdate.h"
 #include "ToolStrip.h"
 #include "Utilities.h"
 #include "resource.h"

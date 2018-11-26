@@ -1,7 +1,6 @@
 
 #include "stdafx.h"
 #include "TokenizeTextDialog.h"
-#include "UserInterfaceUtilities.h"
 #include "resource.h"
 #include "utl/StringUtilities.h"
 #include "utl/Utilities.h"

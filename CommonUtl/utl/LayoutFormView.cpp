@@ -3,7 +3,7 @@
 #include "LayoutFormView.h"
 #include "LayoutEngine.h"
 #include "CmdInfoStore.h"
-#include "MenuUtilities.h"
+#include "CmdUpdate.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

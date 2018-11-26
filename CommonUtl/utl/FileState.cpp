@@ -43,7 +43,7 @@ namespace fs
 {
 	CFileState::CFileState( const ::CFileStatus* pFileStatus )
 		: m_fullPath( pFileStatus->m_szFullName )
-		, m_attributes( pFileStatus->m_attribute )
+		, m_attributes( static_cast< BYTE >( pFileStatus->m_attribute ) )
 		, m_creationTime( pFileStatus->m_ctime )
 		, m_modifTime( pFileStatus->m_mtime )
 		, m_accessTime( pFileStatus->m_atime )

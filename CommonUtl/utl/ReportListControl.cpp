@@ -3,6 +3,7 @@
 #include "ReportListControl.h"
 #include "ReportListCustomDraw.h"
 #include "CustomDrawImager.h"
+#include "CmdUpdate.h"
 #include "MenuUtilities.h"
 #include "ShellDragImager.h"
 #include "OleDataSource.h"

@@ -301,10 +301,6 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath=".\MatchSequence.h"
-				>
-			</File>
-			<File
 				RelativePath=".\stdafx.cpp"
 				>
 				<FileConfiguration
@@ -342,6 +338,14 @@
 			</File>
 			<File
 				RelativePath=".\stdafx.h"
+				>
+			</File>
+			<File
+				RelativePath=".\StdManifest.h"
+				>
+			</File>
+			<File
+				RelativePath=".\StdStl.h"
 				>
 			</File>
 			<File
@@ -503,6 +507,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\MatchSequence.h"
+				>
+			</File>
+			<File
 				RelativePath=".\Process_.cpp"
 				>
 			</File>
@@ -556,10 +564,6 @@
 			</File>
 			<File
 				RelativePath=".\StdColors.h"
-				>
-			</File>
-			<File
-				RelativePath=".\StdStl.h"
 				>
 			</File>
 			<File
@@ -867,6 +871,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\CmdUpdate.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\CmdUpdate.h"
+				>
+			</File>
+			<File
 				RelativePath=".\CommonWinDefs.h"
 				>
 			</File>
@@ -1012,10 +1024,6 @@
 			</File>
 			<File
 				RelativePath=".\ScopedGdi.h"
-				>
-			</File>
-			<File
-				RelativePath=".\StdManifest.h"
 				>
 			</File>
 			<File
@@ -1840,6 +1848,14 @@
 			</File>
 			<File
 				RelativePath=".\ut\BaseImageTestCase.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ut\ColorTests.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\ut\ColorTests.h"
 				>
 			</File>
 			<File

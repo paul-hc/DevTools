@@ -298,7 +298,7 @@ namespace num
 			return false;
 
 		if ( pSkipLength != NULL )
-			*pSkipLength = iss.tellg();
+			*pSkipLength = static_cast< size_t >( iss.tellg() );
 		return true;
 	}
 
@@ -326,7 +326,7 @@ namespace num
 
 		rNumber = static_cast< ValueType >( number );
 		if ( pSkipLength != NULL )
-			*pSkipLength = iss.tellg();
+			*pSkipLength = static_cast< size_t >( iss.tellg() );
 		return true;
 	}
 

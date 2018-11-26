@@ -4,7 +4,7 @@
 
 #include "utl/ComparePredicates.h"
 #include "utl/ContainerUtilities.h"
-#include "utl/ISubject.h"
+#include "utl/Subject.h"
 
 
 class CVisualTheme;
@@ -13,7 +13,7 @@ class CVisualTheme;
 enum Relevance { HighRelevance, MediumRelevance, ObscureRelevance, NotImplemented = ObscureRelevance };
 
 
-interface IThemeNode : public utl::ISubject
+interface IThemeNode : public CSubject
 {
 	enum ThemeNode { Class = 1, Part, State };
 
@@ -39,7 +39,7 @@ struct CThemeState : public CBaseNode
 	CThemeState( int stateId, const std::wstring& stateName, Relevance relevance ) : CBaseNode( relevance ), m_stateId( stateId ), m_stateName( stateName ) {}
 
 	virtual ThemeNode GetThemeNode( void ) const { return State; }
-	virtual std::tstring GetCode( void ) const { return m_stateName; }
+	virtual const std::tstring& GetCode( void ) const { return m_stateName; }
 public:
 	int m_stateId;
 	std::wstring m_stateName;
@@ -51,7 +51,7 @@ struct CThemePart : public CBaseNode
 	CThemePart( int partId, const std::wstring& partName, Relevance relevance ) : CBaseNode( relevance ), m_partId( partId ), m_partName( partName ) {}
 
 	virtual ThemeNode GetThemeNode( void ) const { return Part; }
-	virtual std::tstring GetCode( void ) const { return m_partName; }
+	virtual const std::tstring& GetCode( void ) const { return m_partName; }
 	CThemePart* AddState( int stateId, const std::wstring& stateName, Relevance relevance = HighRelevance );
 	bool SetupNotImplemented( CVisualTheme& rTheme, HDC hDC );
 public:
@@ -67,7 +67,7 @@ struct CThemeClass : public CBaseNode
 	~CThemeClass() { utl::ClearOwningContainer( m_parts ); }
 
 	virtual ThemeNode GetThemeNode( void ) const { return Class; }
-	virtual std::tstring GetCode( void ) const { return m_className; }
+	virtual const std::tstring& GetCode( void ) const { return m_className; }
 	CThemePart* AddPart( int partId, const std::wstring& partName, Relevance relevance = HighRelevance );
 	bool SetupNotImplemented( CVisualTheme& rTheme, HDC hDC );
 public:

@@ -3,7 +3,6 @@
 #include "OptionsSheet.h"
 #include "IncludeDirectories.h"
 #include "ModuleSession.h"
-#include "UserInterfaceUtilities.h"
 #include "Application.h"
 #include "resource.h"
 #include "utl/Clipboard.h"

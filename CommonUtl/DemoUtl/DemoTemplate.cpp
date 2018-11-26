@@ -6,7 +6,7 @@
 #include "TestDialog.h"
 #include "TestPropertySheet.h"
 #include "utl/LayoutEngine.h"
-#include "utl/MenuUtilities.h"
+#include "utl/CmdUpdate.h"
 #include "utl/StringUtilities.h"
 #include "utl/UtilitiesEx.h"
 #include "utl/VisualTheme.h"
