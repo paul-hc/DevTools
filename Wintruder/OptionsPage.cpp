@@ -28,12 +28,13 @@ COptionsPage::~COptionsPage()
 
 void COptionsPage::OnAppEvent( app::Event appEvent )
 {
-	switch ( appEvent )
-	{
-		case app::OptionChanged:
-			UpdateData( DialogOutput );
-			break;
-	}
+	if ( m_hWnd != NULL )		// page created?
+		switch ( appEvent )
+		{
+			case app::OptionChanged:
+				UpdateData( DialogOutput );
+				break;
+		}
 }
 
 void COptionsPage::DoDataExchange( CDataExchange* pDX )
