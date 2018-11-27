@@ -10,29 +10,16 @@
 #endif
 
 
-bool CReportListCustomDraw::s_useDefaultDraw = false;
-bool CReportListCustomDraw::s_dbgGuides = false;
-
-
 CReportListCustomDraw::CReportListCustomDraw( NMLVCUSTOMDRAW* pDraw, CReportListControl* pList )
-	: m_pDraw( safe_ptr( pDraw ) )
+	: CListLikeCustomDrawBase( &pDraw->nmcd )
+	, m_pDraw( pDraw )
 	, m_pList( safe_ptr( pList ) )
 	, m_index( static_cast< int >( m_pDraw->nmcd.dwItemSpec ) )
 	, m_subItem( m_pDraw->iSubItem )
 	, m_rowKey( m_pDraw->nmcd.lItemlParam != 0 ? m_pDraw->nmcd.lItemlParam : m_index )
 	, m_pObject( CReportListControl::ToSubject( m_pDraw->nmcd.lItemlParam ) )
 	, m_isReportMode( LV_VIEW_DETAILS == m_pList->GetView() )
-	, m_pDC( CDC::FromHandle( m_pDraw->nmcd.hdc ) )
 {
-}
-
-bool CReportListCustomDraw::IsTooltipDraw( const NMLVCUSTOMDRAW* pDraw )
-{
-	ASSERT_PTR( pDraw );
-	static const CRect s_emptyRect( 0, 0, 0, 0 );
-	if ( s_emptyRect == pDraw->nmcd.rc )
-		return true;						// tooltip custom draw
-	return false;
 }
 
 bool CReportListCustomDraw::ApplyCellTextEffect( void )
@@ -45,7 +32,7 @@ bool CReportListCustomDraw::ApplyCellTextEffect( void )
 
 ui::CTextEffect CReportListCustomDraw::MakeCellEffect( void ) const
 {
-	ui::CTextEffect textEffect = m_pList->m_listTextEffect;							// start with the global list effect
+	ui::CTextEffect textEffect = m_pList->m_ctrlTextEffect;							// start with the global list effect
 	textEffect.AssignPtr( m_pList->FindTextEffectAt( m_rowKey, EntireRecord ) );	// assign entire record
 
 	if ( m_subItem != EntireRecord )
@@ -108,7 +95,7 @@ COLORREF CReportListCustomDraw::GetRealizedTextColor( DiffSide diffSide, const s
 	if ( DestDiff == diffSide && pCellSeq != NULL && str::MatchEqual == pCellSeq->m_match )
 		return m_pList->m_matchDest_DiffEffect.m_textColor;				// gray-out text of unmodified DEST files, but continue with default drawing
 
-	return ui::GetActualColorSysdef( m_pList->m_listTextEffect.m_textColor, COLOR_WINDOWTEXT );
+	return ui::GetActualColorSysdef( m_pList->m_ctrlTextEffect.m_textColor, COLOR_WINDOWTEXT );
 }
 
 bool CReportListCustomDraw::DrawCellTextDiffs( void )
@@ -200,7 +187,7 @@ void CReportListCustomDraw::BuildTextMatchEffects( std::vector< ui::CTextEffect 
 
 	rMatchEffects.resize( _MatchCount );
 
-	CMatchEffects effects( rMatchEffects );
+	lv::CMatchEffects effects( rMatchEffects );
 
 	effects.m_rEqual = MakeCellEffect();
 	effects.m_rEqual.m_textColor = GetRealizedTextColor( diffSide, &cellSeq );		// realize text colour to reset existing (prev sub-item) text highlighting
@@ -273,37 +260,4 @@ bool CReportListCustomDraw::IsSelItemContrast( void ) const
 {
 	// classic contrast selected item: blue backgound with white text (not "Explorer" visual theme background)?
 	return m_pList->HasItemState( m_index, LVIS_SELECTED ) && !m_pList->GetUseExplorerTheme() && ::GetFocus() == m_pList->m_hWnd;
-}
-
-
-#ifdef _DEBUG
-#include "EnumTags.h"
-#include "FlagTags.h"
-#include "StringUtilities.h"
-#endif //_DEBUG
-
-namespace dbg
-{
-	const TCHAR* FormatDrawStage( DWORD dwDrawStage )
-	{
-	#ifdef _DEBUG
-		static const CEnumTags enumTags( _T("CDDS_PREPAINT|CDDS_POSTPAINT|CDDS_PREERASE|CDDS_POSTERASE"), NULL, -1, CDDS_PREPAINT );		// mask 0x0000000F
-		static const CFlagTags::FlagDef flagDefs[] =
-		{
-			{ CDDS_ITEM, _T("CDDS_ITEM") },
-			{ CDDS_SUBITEM, _T("CDDS_SUBITEM") }
-		};
-		static const CFlagTags flagTags( flagDefs, COUNT_OF( flagDefs ) );
-		static const TCHAR sep[] = _T(" | ");
-
-		static std::tstring s_text;
-		s_text = enumTags.FormatUi( dwDrawStage & 0x0000000F );
-		stream::Tag( s_text, flagTags.FormatKey( dwDrawStage, sep ), sep );
-
-		return s_text.c_str();
-	#else
-		dwDrawStage;
-		return _T("");
-	#endif //_DEBUG
-	}
 }

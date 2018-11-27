@@ -704,6 +704,12 @@
     <ClInclude Include="utl.h">
       <Filter>utl</Filter>
     </ClInclude>
+    <ClInclude Include="ListLikeCtrlBase.h">
+      <Filter>utl-UI\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="TreeControlCustomDraw.h">
+      <Filter>utl-UI\Controls</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -1194,6 +1200,12 @@
     </ClCompile>
     <ClCompile Include="TimeUtils.cpp">
       <Filter>utl</Filter>
+    </ClCompile>
+    <ClCompile Include="ListLikeCtrlBase.cpp">
+      <Filter>utl-UI\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="TreeControlCustomDraw.cpp">
+      <Filter>utl-UI\Controls</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

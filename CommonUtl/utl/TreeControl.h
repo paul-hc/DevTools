@@ -2,15 +2,46 @@
 #define TreeControl_h
 #pragma once
 
-#include "InternalChange.h"
+#include "ListLikeCtrlBase.h"
+#include "ui_fwd.h"				// ui::CNmHdr
+#include <hash_map>
 
 
-class CTreeControl : public CTreeCtrl
-				   , public CInternalChange
+class CTreeControlCustomDraw;
+
+
+namespace tv
 {
+	// custom notifications: handled the standard way with ON_NOTIFY( NotifyCode, id, memberFxn )
+	enum NotifyCode
+	{
+		TVN_REFRESHITEM = TVN_FIRST - 77		// pass tv::CNmTreeItem; client could return TRUE if refresh was rejected
+	};
+
+
+	struct CNmTreeItem
+	{
+		CNmTreeItem( const CTreeCtrl* pTreeCtrl, NotifyCode notifyCode, HTREEITEM hItem )
+			: m_nmHdr( pTreeCtrl, notifyCode ), m_hItem( hItem ) {}
+	public:
+		ui::CNmHdr m_nmHdr;
+		HTREEITEM m_hItem;
+	};
+}
+
+
+class CTreeControl
+	: public CTreeCtrl
+	, public CListLikeCtrlBase
+{
+	friend class CTreeControlCustomDraw;
 public:
 	CTreeControl( void );
 	virtual ~CTreeControl();
+
+	bool DeleteAllItems( void );
+
+	void Set_ImageList( CImageList* pImageList ) { m_pImageList = pImageList; }
 
 	template< typename Type >
 	Type GetItemDataAs( HTREEITEM hItem ) const { return (Type)GetItemData( hItem ); }
@@ -44,31 +75,43 @@ public:
 
 	// item image
 	const CSize& GetImageSize( void ) const;
-	bool GetItemImageRect( CRect& rItemImageRect, HTREEITEM hItem ) const;
+	bool GetIconItemRect( CRect* pItemImageRect, HTREEITEM hItem ) const;
 	bool CustomDrawItemIcon( const NMTVCUSTOMDRAW* pDraw, HICON hIcon, int diFlags = DI_NORMAL | DI_COMPAT );		// works with transparent item image
-public:
-	// custom notifications: handled the standard way with ON_NOTIFY( NotifyCode, id, memberFxn )
-	enum NotifCode { TCN_REFRESHITEM = TVN_FIRST - 77 };
 
-	struct NMTREEITEM
-	{
-		NMHDR hdr;
-		HTREEITEM hItem;
-	};
+	// custom item marking: color, bold, italic, underline
+	void MarkItem( HTREEITEM hItem, const ui::CTextEffect& textEfect );
+	void UnmarkItem( HTREEITEM hItem );
+	void ClearMarkedItems( void );
+
+	const ui::CTextEffect* FindTextEffect( HTREEITEM hItem ) const;
+
+	// custom imager
+	virtual void SetCustomFileGlyphDraw( bool showGlyphs = true );		// ICustomDrawControl base override
+	void SetCustomImageDraw( ui::ICustomImageDraw* pCustomImageDraw, const CSize& imageSize = CSize( 0, 0 ) );
+protected:
+	void ClearData( void );
+
+	// base overrides
+	virtual void SetupControl( void );
+private:
+	bool UpdateCustomImagerBoundsSize( void );
 protected:
 	CMenu m_contextMenu;
 private:
+	CImageList* m_pImageList;
+	stdext::hash_map< HTREEITEM, ui::CTextEffect > m_markedItems;
+
 	mutable CSize m_imageSize;			// self-encapsulated
-public:
+
 	// generated overrides
-	public:
+public:
 	virtual void PreSubclassWindow( void );
 protected:
-	// message map functions
 	afx_msg void OnNcLButtonDown( UINT hitTest, CPoint point );
 	afx_msg BOOL OnTvnSelChanged_Reflect( NMHDR* pNmHdr, LRESULT* pResult );
 	afx_msg BOOL OnTvnRClick_Reflect( NMHDR* pNmHdr, LRESULT* pResult );
 	afx_msg BOOL OnTvnDblClk_Reflect( NMHDR* pNmHdr, LRESULT* pResult );
+	afx_msg BOOL OnNmCustomDraw_Reflect( NMHDR* pNmHdr, LRESULT* pResult );
 
 	DECLARE_MESSAGE_MAP()
 };

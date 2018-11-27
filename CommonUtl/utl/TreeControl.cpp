@@ -1,23 +1,51 @@
 
 #include "stdafx.h"
 #include "TreeControl.h"
+#include "TreeControlCustomDraw.h"
+#include "CustomDrawImager.h"
 #include "Icon.h"
+#include "ContainerUtilities.h"
 #include "UtilitiesEx.h"
-#include "VisualTheme.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
 
 
+namespace tv
+{
+	bool IsTooltipDraw( const NMTVCUSTOMDRAW* pDraw )
+	{
+		ASSERT_PTR( pDraw );
+		static const CRect s_emptyRect( 0, 0, 0, 0 );
+		if ( s_emptyRect == pDraw->nmcd.rc )
+			return true;						// tooltip custom draw
+		return false;
+	}
+}
+
+
 CTreeControl::CTreeControl( void )
 	: CTreeCtrl()
+	, CListLikeCtrlBase( this )
+	, m_pImageList( NULL )
 	, m_imageSize( 0, 0 )
 {
 }
 
 CTreeControl::~CTreeControl()
 {
+}
+
+void CTreeControl::ClearData( void )
+{
+	m_markedItems.clear();
+}
+
+bool CTreeControl::DeleteAllItems( void )
+{
+	ClearData();
+	return __super::DeleteAllItems() != FALSE;
 }
 
 bool CTreeControl::IsRealItem( HTREEITEM hItem ) const
@@ -37,8 +65,10 @@ bool CTreeControl::IsRealItem( HTREEITEM hItem ) const
 bool CTreeControl::IsExpandLazyChildren( const NMTREEVIEW* pNmTreeView ) const
 {
 	ASSERT_PTR( pNmTreeView );
-	return ( HasFlag( pNmTreeView->action, TVE_EXPAND ) && !HasFlag( pNmTreeView->itemNew.state, TVIS_EXPANDEDONCE ) ) ||
-		   ( HasFlag( pNmTreeView->action, TVE_TOGGLE ) && !HasFlag( pNmTreeView->itemNew.state, TVIS_EXPANDED ) );
+
+	return
+		( HasFlag( pNmTreeView->action, TVE_EXPAND ) && !HasFlag( pNmTreeView->itemNew.state, TVIS_EXPANDEDONCE ) ) ||
+		( HasFlag( pNmTreeView->action, TVE_TOGGLE ) && !HasFlag( pNmTreeView->itemNew.state, TVIS_EXPANDED ) );
 }
 
 BOOL CTreeControl::EnsureVisible( HTREEITEM hItem )
@@ -46,10 +76,11 @@ BOOL CTreeControl::EnsureVisible( HTREEITEM hItem )
 	BOOL result = CTreeCtrl::EnsureVisible( hItem );
 
 	CRect itemImageRect;
-	if ( GetItemImageRect( itemImageRect, hItem ) )
+	if ( GetIconItemRect( &itemImageRect, hItem ) )
 	{
 		CRect clientRect;
 		GetClientRect( &clientRect );
+
 		if ( itemImageRect.left < clientRect.left )		// item icon not visible
 		{	// make the image and leading part visible
 			int horizPos = GetScrollPos( SB_HORZ );
@@ -74,10 +105,10 @@ bool CTreeControl::SelectItem( HTREEITEM hItem )
 bool CTreeControl::RefreshItem( HTREEITEM hItem )
 {
 	ASSERT_PTR( hItem );
-	NMTREEITEM treeItemInfo;
-	treeItemInfo.hItem = hItem;
+	tv::CNmTreeItem treeItemInfo( this, tv::TVN_REFRESHITEM, hItem );
+
 	// notify parent to refresh the item
-	return 0 == ui::SendNotifyToParent( m_hWnd, TCN_REFRESHITEM, &treeItemInfo.hdr );		// false if an error occured
+	return 0 == treeItemInfo.m_nmHdr.NotifyParent();		// false if refresh was rejected
 }
 
 void CTreeControl::ExpandBranch( HTREEITEM hItem, bool expand /*= true*/ )
@@ -98,18 +129,19 @@ const CSize& CTreeControl::GetImageSize( void ) const
 	return m_imageSize;
 }
 
-bool CTreeControl::GetItemImageRect( CRect& rItemImageRect, HTREEITEM hItem ) const
+bool CTreeControl::GetIconItemRect( CRect* pItemImageRect, HTREEITEM hItem ) const
 {
+	ASSERT_PTR( pItemImageRect );
 	ASSERT_PTR( hItem );
 	CRect itemTextRect;
 	if ( !GetItemRect( hItem, &itemTextRect, TRUE ) )
 		return false;			// item is not visible
 
-	rItemImageRect.SetRect( 0, 0, GetImageSize().cx, GetImageSize().cy );
-	ui::AlignRect( rItemImageRect, itemTextRect, H_AlignLeft | V_AlignCenter );
+	pItemImageRect->SetRect( 0, 0, GetImageSize().cx, GetImageSize().cy );
+	ui::AlignRect( *pItemImageRect, itemTextRect, H_AlignLeft | V_AlignCenter );
 
 	enum { IconTextSpacing = 3 };
-	rItemImageRect.OffsetRect( -( IconTextSpacing + rItemImageRect.Width() ), 0 );
+	pItemImageRect->OffsetRect( -( IconTextSpacing + pItemImageRect->Width() ), 0 );
 	return true;
 }
 
@@ -120,18 +152,99 @@ bool CTreeControl::CustomDrawItemIcon( const NMTVCUSTOMDRAW* pDraw, HICON hIcon,
 
 	HTREEITEM hItem = (HTREEITEM)pDraw->nmcd.dwItemSpec;
 	CRect itemImageRect;
-	if ( !GetItemImageRect( itemImageRect, hItem ) )
+	if ( !GetIconItemRect( &itemImageRect, hItem ) )
 		return false;
 
 	::DrawIconEx( pDraw->nmcd.hdc, itemImageRect.left, itemImageRect.top, hIcon, itemImageRect.Width(), itemImageRect.Height(), 0, NULL, diFlags );
 	return true;
 }
 
+void CTreeControl::MarkItem( HTREEITEM hItem, const ui::CTextEffect& textEfect )
+{
+	m_markedItems[ hItem ] = textEfect;
+}
+
+void CTreeControl::UnmarkItem( HTREEITEM hItem )
+{
+	stdext::hash_map< HTREEITEM, ui::CTextEffect >::iterator itFound = m_markedItems.find( hItem );
+	if ( itFound != m_markedItems.end() )
+		m_markedItems.erase( itFound );
+}
+
+void CTreeControl::ClearMarkedItems( void )
+{
+	m_markedItems.clear();
+	Invalidate();
+}
+
+const ui::CTextEffect* CTreeControl::FindTextEffect( HTREEITEM hItem ) const
+{
+	return utl::FindValuePtr( m_markedItems, hItem );
+}
+
+void CTreeControl::SetCustomFileGlyphDraw( bool showGlyphs /*= true*/ )
+{
+	CListLikeCtrlBase::SetCustomFileGlyphDraw( showGlyphs );
+
+	if ( showGlyphs )
+		m_pImageList = m_pCustomImager->GetImageList( ui::SmallGlyph );
+	else
+		m_pImageList = NULL;
+
+	if ( m_hWnd != NULL )
+	{
+		SetImageList( m_pImageList, TVSIL_NORMAL );
+		UpdateCustomImagerBoundsSize();
+
+		//ui::RecalculateScrollbars( m_hWnd );
+	}
+}
+
+void CTreeControl::SetCustomImageDraw( ui::ICustomImageDraw* pCustomImageDraw, const CSize& imageSize /*= CSize( 0, 0 )*/ )
+{
+	if ( pCustomImageDraw != NULL )
+	{
+		m_pCustomImager.reset( new CSingleCustomDrawImager( pCustomImageDraw, imageSize, imageSize ) );
+		m_pImageList = m_pCustomImager->GetImageList( ui::SmallGlyph );
+	}
+	else
+	{
+		m_pCustomImager.reset();
+		m_pImageList = NULL;
+	}
+
+	if ( m_hWnd != NULL )
+	{
+		SetImageList( m_pImageList, TVSIL_NORMAL );
+		UpdateCustomImagerBoundsSize();
+
+		//ui::RecalculateScrollbars( m_hWnd );
+	}
+}
+
+bool CTreeControl::UpdateCustomImagerBoundsSize( void )
+{
+	if ( m_pCustomImager.get() != NULL )
+		return m_pCustomImager->SetCurrGlyphGauge( ui::SmallGlyph );
+
+	return false;			// no change
+}
+
+void CTreeControl::SetupControl( void )
+{
+	CListLikeCtrlBase::SetupControl();
+
+	if ( m_pImageList != NULL )
+		SetImageList( m_pImageList, TVSIL_NORMAL );
+
+	UpdateCustomImagerBoundsSize();
+}
+
 void CTreeControl::PreSubclassWindow( void )
 {
-	CTreeCtrl::PreSubclassWindow();
+	__super::PreSubclassWindow();
 
-	CVisualTheme::SetWindowTheme( m_hWnd, L"Explorer", NULL );		// enable Explorer theme
+	SetupControl();
 }
 
 
@@ -142,6 +255,7 @@ BEGIN_MESSAGE_MAP( CTreeControl, CTreeCtrl )
 	ON_NOTIFY_REFLECT_EX( TVN_SELCHANGED, OnTvnSelChanged_Reflect )
 	ON_NOTIFY_REFLECT_EX( NM_RCLICK, OnTvnRClick_Reflect )
 	ON_NOTIFY_REFLECT_EX( NM_DBLCLK, OnTvnDblClk_Reflect )
+	ON_NOTIFY_REFLECT_EX( NM_CUSTOMDRAW, OnNmCustomDraw_Reflect )
 END_MESSAGE_MAP()
 
 void CTreeControl::OnNcLButtonDown( UINT hitTest, CPoint point )
@@ -177,4 +291,50 @@ BOOL CTreeControl::OnTvnDblClk_Reflect( NMHDR* /*pNmHdr*/, LRESULT* pResult )
 
 	*pResult = 0;
 	return 0;				// continue routing
+}
+
+BOOL CTreeControl::OnNmCustomDraw_Reflect( NMHDR* pNmHdr, LRESULT* pResult )
+{
+	NMTVCUSTOMDRAW* pDraw = (NMTVCUSTOMDRAW*)pNmHdr;
+	if ( CListLikeCustomDrawBase::IsTooltipDraw( &pDraw->nmcd ) )
+		return TRUE;		// IMP: avoid custom drawing for tooltips
+
+	TRACE( _T(" CTreeControl::DrawStage: %s\n"), dbg::FormatDrawStage( pDraw->nmcd.dwDrawStage ) );
+
+	CTreeControlCustomDraw draw( pDraw, this );
+
+	*pResult = CDRF_DODEFAULT;
+	switch ( pDraw->nmcd.dwDrawStage )
+	{
+		case CDDS_PREPAINT:
+			*pResult = CDRF_NOTIFYITEMDRAW;
+			break;
+
+		case CDDS_ITEMPREPAINT:
+			*pResult = CDRF_NEWFONT | CDRF_NOTIFYITEMDRAW;
+
+			if ( draw.ApplyItemTextEffect() )
+				*pResult |= CDRF_NEWFONT;
+
+			if ( m_pCustomImager.get() != NULL )
+				*pResult |= CDRF_NOTIFYPOSTPAINT;				// will superimpose the thumbnail on top of transparent image (on CDDS_ITEMPOSTPAINT drawing stage)
+
+			break;
+
+		case CDDS_ITEMPOSTPAINT:
+			if ( m_pCustomImager.get() != NULL )
+			{
+				CRect itemImageRect;
+				if ( GetIconItemRect( &itemImageRect, draw.m_hItem ) )		// visible item?
+					if ( m_pCustomImager->DrawItemGlyph( &pDraw->nmcd, itemImageRect ) )
+						return TRUE;				// handled
+			}
+
+			break;
+	}
+
+	if ( !ParentHandles( PN_CustomDraw ) )
+		return TRUE;			// mark as handled so changes are applied
+
+	return FALSE;				// continue handling by parent, even if changed (additive logic)
 }

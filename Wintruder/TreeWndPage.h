@@ -9,9 +9,11 @@
 #include "Observers.h"
 
 
-class CTreeWndPage : public CLayoutPropertyPage
-				   , public IWndObserver
-				   , public IEventObserver
+class CTreeWndPage
+	: public CLayoutPropertyPage
+	, public IWndObserver
+	, public IEventObserver
+	, private ui::ITextEffectCallback
 {
 public:
 	CTreeWndPage( void );
@@ -22,6 +24,9 @@ private:
 
 	// IEventObserver interface
 	virtual void OnAppEvent( app::Event appEvent );
+
+	// ui::ITextEffectCallback interface
+	virtual void CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARAM rowKey, int subItem ) const;
 private:
 	void RefreshTreeContents( void );
 	bool RefreshTreeItem( HTREEITEM hItem );
@@ -31,7 +36,6 @@ private:
 	HTREEITEM FindItemWithWnd( HWND hWnd ) const;
 	HWND FindValidParentItem( HTREEITEM hItem ) const;
 private:
-	CFont m_italicFont;
 	bool m_destroying;
 
 	// enum { IDD = IDD_TREE_WND_PAGE };

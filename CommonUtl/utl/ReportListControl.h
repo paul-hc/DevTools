@@ -2,17 +2,12 @@
 #define ReportListControl_h
 #pragma once
 
-#include "AccelTable.h"
-#include "InternalChange.h"
-#include "ISubject.h"
+#include "ListLikeCtrlBase.h"
 #include "SubjectPredicates.h"
-#include "CustomDrawImager_fwd.h"
-#include "ObjectCtrlBase.h"
 #include "OleUtils.h"
 #include "MatchSequence.h"
 #include "Resequence.h"
-#include "TextEffect.h"
-#include "ui_fwd.h"
+#include "ui_fwd.h"				// for ui::CNmHdr
 #include "vector_map.h"
 #include <vector>
 #include <list>
@@ -28,15 +23,8 @@
 
 class CListSelectionData;
 class CReportListCustomDraw;
-class CBaseCustomDrawImager;
 namespace ole { class CDataSource; }
-
-namespace ui
-{
-	interface ISubjectAdapter;
-	interface ICheckStatePolicy;
-	class CFontEffectCache;
-}
+namespace ui { interface ICheckStatePolicy; }
 
 
 namespace lv
@@ -56,7 +44,7 @@ namespace lv
 	};
 
 
-	enum Notification
+	enum NotifyCode
 	{
 		// via WM_COMMAND:
 		LVN_ItemsReorder = 1000,
@@ -106,6 +94,24 @@ namespace lv
 }
 
 
+namespace lv
+{
+	struct CMatchEffects
+	{
+		CMatchEffects( std::vector< ui::CTextEffect >& rMatchEffects )
+			: m_rEqual( rMatchEffects[ str::MatchEqual ] )
+			, m_rEqualDiffCase( rMatchEffects[ str::MatchEqualDiffCase ] )
+			, m_rNotEqual( rMatchEffects[ str::MatchNotEqual ] )
+		{
+		}
+	public:
+		ui::CTextEffect& m_rEqual;
+		ui::CTextEffect& m_rEqualDiffCase;
+		ui::CTextEffect& m_rNotEqual;
+	};
+}
+
+
 namespace ds
 {
 	enum DataSourceFlags
@@ -125,20 +131,6 @@ public:
 	typedef int TGroupId;
 
 	enum StdColumn { Code, EntireRecord = (TColumn)-1 };
-
-	struct CMatchEffects
-	{
-		CMatchEffects( std::vector< ui::CTextEffect >& rMatchEffects )
-			: m_rEqual( rMatchEffects[ str::MatchEqual ] )
-			, m_rEqualDiffCase( rMatchEffects[ str::MatchEqualDiffCase ] )
-			, m_rNotEqual( rMatchEffects[ str::MatchNotEqual ] )
-		{
-		}
-	public:
-		ui::CTextEffect& m_rEqual;
-		ui::CTextEffect& m_rEqualDiffCase;
-		ui::CTextEffect& m_rNotEqual;
-	};
 protected:
 	enum DiffSide { SrcDiff, DestDiff };
 
@@ -158,22 +150,10 @@ protected:
 };
 
 
-namespace lv
-{
-	interface ITextEffectCallback
-	{
-		virtual void CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARAM rowKey, int subItem ) const = 0;
-		virtual void ModifyDiffTextEffectAt( CListTraits::CMatchEffects& rEffects, LPARAM rowKey, int subItem ) const { rEffects, rowKey, subItem; }
-	};
-}
-
-
-class CReportListControl : public CListCtrl
-						 , public CInternalChange
-						 , public CListTraits
-						 , public CObjectCtrlBase
-						 , public ICustomDrawControl
-						 , protected lv::ITextEffectCallback
+class CReportListControl
+	: public CListCtrl
+	, public CListLikeCtrlBase
+	, public CListTraits
 {
 	friend class CReportListCustomDraw;
 public:
@@ -190,9 +170,6 @@ public:
 	void ChangeListViewMode( DWORD viewMode );
 
 	bool IsMultiSelectionList( void ) const { return !HasFlag( GetStyle(), LVS_SINGLESEL ); }
-
-	bool GetUseExplorerTheme( void ) const { return HasFlag( m_optionFlags, UseExplorerTheme ); }
-	void SetUseExplorerTheme( bool useExplorerTheme = true );
 
 	bool GetUseAlternateRowColoring( void ) const { return HasFlag( m_optionFlags, UseAlternateRowColoring ); }
 	void SetUseAlternateRowColoring( bool useAlternateRowColoring = true ) { SetOptionFlag( UseAlternateRowColoring, useAlternateRowColoring ); }
@@ -223,8 +200,7 @@ public:
 	ui::GlyphGauge GetViewModeGlyphGauge( void ) const { return GetViewModeGlyphGauge( GetView() ); }
 	static ui::GlyphGauge GetViewModeGlyphGauge( DWORD listViewMode );
 
-	// ICustomDrawControl interface
-	virtual CBaseCustomDrawImager* GetCustomDrawImager( void ) const;
+	// ICustomDrawControl overrides
 	virtual void SetCustomFileGlyphDraw( bool showGlyphs = true );
 
 	// To prevent icon scaling dithering when displaying shell item icon thumbnails, specify small/large image bounds size from the image list.
@@ -356,18 +332,12 @@ protected:
 	virtual void OnFinalReleaseInternalChange( void );
 public:
 	// items and sub-items
-	enum { No_Image = -1, Transparent_Image = -2 };
-
-	template< typename Type >
-	static Type* AsPtr( LPARAM data ) { return reinterpret_cast< Type* >( data ); }
-
 	template< typename Type >
 	Type* GetPtrAt( int index ) const;
 
 	bool SetPtrAt( int index, const void* pData ) { return SetItemData( index, (DWORD_PTR)pData ) != FALSE; }
 
 	utl::ISubject* GetSubjectAt( int index ) const;
-	static inline utl::ISubject* ToSubject( LPARAM data ) { return checked_static_cast< utl::ISubject* >( (utl::ISubject*)data ); }
 
 	template< typename ObjectT >
 	ObjectT* GetObjectAt( int index ) const { return checked_static_cast< ObjectT* >( GetSubjectAt( index ) ); }
@@ -514,24 +484,12 @@ public:
 
 	const ui::CTextEffect* FindTextEffectAt( TRowKey rowKey, TColumn subItem ) const;
 
-	void SetTextEffectCallback( lv::ITextEffectCallback* pTextEffectCallback ) { m_pTextEffectCallback = pTextEffectCallback; }
-
 	// diff columns
 	template< typename MatchFunc >
 	void SetupDiffColumnPair( TColumn srcColumn, TColumn destColumn, MatchFunc getMatchFunc );		// call after the list items are set up; by default pass str::GetMatch()
 protected:
-	// lv::ITextEffectCallback interface
-	virtual void CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARAM rowKey, int subItem ) const;
-	virtual void ModifyDiffTextEffectAt( CListTraits::CMatchEffects& rEffects, LPARAM rowKey, int subItem ) const;
-
 	const CDiffColumnPair* FindDiffColumnPair( TColumn column ) const;
 	bool IsDiffColumn( TColumn column ) const { return FindDiffColumnPair( column ) != NULL; }
-
-	ui::CFontEffectCache* GetFontEffectCache( void );
-
-	enum ParentNotif { PN_DispInfo, PN_CustomDraw, _PN_Count };
-
-	bool ParentHandles( ParentNotif notif );
 public:
 	enum SortOrder { NotSorted, Ascending, Descending };				// column sort image index
 
@@ -598,12 +556,11 @@ private:
 private:
 	enum ListOption
 	{
-		UseExplorerTheme			= BIT_FLAG( 0 ),
-		UseAlternateRowColoring		= BIT_FLAG( 1 ),
-		SortInternally				= BIT_FLAG( 2 ),
-		AcceptDropFiles				= BIT_FLAG( 3 ),		// enable as Explorer drop target, send LVN_DropFiles notification when files are dropped onto the list
-		HighlightTextDiffsFrame		= BIT_FLAG( 4 ),		// highlight text differences with a filled frame
-		ToggleCheckSelItems			= BIT_FLAG( 5 )			// multi-selection: toggle checked state for the selected items
+		UseAlternateRowColoring		= BIT_FLAG( 0 ),
+		SortInternally				= BIT_FLAG( 1 ),
+		AcceptDropFiles				= BIT_FLAG( 2 ),		// enable as Explorer drop target, send LVN_DropFiles notification when files are dropped onto the list
+		HighlightTextDiffsFrame		= BIT_FLAG( 3 ),		// highlight text differences with a filled frame
+		ToggleCheckSelItems			= BIT_FLAG( 4 )			// multi-selection: toggle checked state for the selected items
 	};
 
 	bool SetOptionFlag( ListOption flag, bool on );
@@ -630,28 +587,18 @@ private:
 
 	typedef std::pair< TRowKey, TColumn > TCellPair;		// invariant to sorting: favour LPARAMs instead of indexes
 	stdext::hash_map< TCellPair, ui::CTextEffect > m_markedCells;
-	std::auto_ptr< ui::CFontEffectCache > m_pFontCache;		// self-encapsulated
-	lv::ITextEffectCallback* m_pTextEffectCallback;
 
 	std::list< CDiffColumnPair > m_diffColumnPairs;
-
-	std::auto_ptr< CBaseCustomDrawImager > m_pCustomImager;
 
 	CMenu* m_pPopupMenu[ _ListPopupCount ];					// used when right clicking nowhere - on header or no list item
 	std::auto_ptr< CLabelEdit > m_pLabelEdit;				// stores the label info during inline editing
 
-	CAccelTable m_listAccel;
 	ole::IDataSourceFactory* m_pDataSourceFactory;			// creates ole::CDataSource for clipboard and drag-drop
 private:
 	bool m_painting;										// true during OnPaint() - supresses item text callback for diff columns to prevent default list sub-item draw (diffs are custom drawn)
 	mutable CSize m_stateIconSize;							// self-encapsulated, call GetStateIconSize(): cached size of an icon in the StateImageList
 	std::auto_ptr< lv::CNmCheckStatesChanged > m_pNmToggling;	// set during OnLvnItemChanging_Reflect() - user toggling check-state with extended states
-	BOOL m_parentHandles[ _PN_Count ];						// self-encapsulated 'parent handles' flags array
-protected:
-	CWnd* m_pTrackMenuTarget;								// window that receives commands when tracking the context menu
 public:
-	ui::CTextEffect m_listTextEffect;						// for all items in the list
-
 	ui::CTextEffect m_deleteSrc_DiffEffect;					// text diffs: text removed from SRC (red)
 	ui::CTextEffect m_mismatchDest_DiffEffect;				// text diffs: text mismatched in DEST (blue)
 	ui::CTextEffect m_matchDest_DiffEffect;					// text diffs: text matched in DEST (gray)
@@ -660,9 +607,9 @@ public:
 	static const COLORREF s_mismatchDestTextColor = color::Blue;
 private:
 	static const TCHAR s_fmtRegColumnLayout[];
-public:
+
 	// generated stuff
-	public:
+public:
 	virtual void PreSubclassWindow( void );
 	virtual BOOL PreTranslateMessage( MSG* pMsg );
 protected:

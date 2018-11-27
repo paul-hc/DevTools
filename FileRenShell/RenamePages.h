@@ -33,7 +33,7 @@ protected:
 
 
 class CRenameListPage : public CBaseRenamePage
-					  , private lv::ITextEffectCallback
+					  , private ui::ITextEffectCallback
 {
 public:
 	CRenameListPage( CRenameFilesDialog* pParentDlg );
@@ -46,7 +46,7 @@ private:
 	virtual void EnsureVisibleItem( const CRenameItem* pRenameItem );
 	virtual void InvalidateFiles( void );
 
-	// lv::ITextEffectCallback interface
+	// ui::ITextEffectCallback interface
 	virtual void CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARAM rowKey, int subItem ) const;
 
 	void SetupFileListView( void );

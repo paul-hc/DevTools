@@ -142,7 +142,7 @@ CFileListDialog::CFileListDialog( CWnd* pParent )
 
 	m_fileListCtrl.SetUseAlternateRowColoring( m_useAlternateRows );
 	m_fileListCtrl.SetUseExplorerTheme( AfxGetApp()->GetProfileInt( reg::section_dialog, reg::entry_useExplorerTheme, true ) != FALSE );
-	m_fileListCtrl.m_listTextEffect.m_textColor = m_useTextEffects ? color::Violet : CLR_NONE;	// list global text effects
+	m_fileListCtrl.m_ctrlTextEffect.m_textColor = m_useTextEffects ? color::Violet : CLR_NONE;	// list global text effects
 	SetFlag( m_fileListCtrl.RefListStyleEx(), LVS_EX_DOUBLEBUFFER, m_useDoubleBuffer );
 
 	VERIFY( res::LoadImageList( m_imageList, IDR_FLAG_STRIP_PNG, _FlagStripCount ) );
@@ -340,7 +340,7 @@ void CFileListDialog::OnToggle_UseTextEffects( void )
 {
 	m_useTextEffects = IsDlgButtonChecked( IDC_USE_TEXT_EFFECTS_CHECK ) != FALSE;
 
-	m_fileListCtrl.m_listTextEffect.m_textColor = m_useTextEffects ? color::Violet : CLR_NONE;
+	m_fileListCtrl.m_ctrlTextEffect.m_textColor = m_useTextEffects ? color::Violet : CLR_NONE;
 	m_fileListCtrl.Invalidate();
 }
 

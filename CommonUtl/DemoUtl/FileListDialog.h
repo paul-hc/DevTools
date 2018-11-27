@@ -15,7 +15,7 @@ typedef std::pair< const fs::CFileState, fs::CFileState > TFileStatePair;
 
 
 class CFileListDialog : public CLayoutDialog
-					  , private lv::ITextEffectCallback
+					  , private ui::ITextEffectCallback
 {
 public:
 	CFileListDialog( CWnd* pParent );
@@ -26,7 +26,7 @@ private:
 	// output
 	void SetupFileListView( void );
 
-	// lv::ITextEffectCallback interface
+	// ui::ITextEffectCallback interface
 	virtual void CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARAM rowKey, int subItem ) const;
 	virtual void ModifyDiffTextEffectAt( std::vector< ui::CTextEffect >& rMatchEffects, LPARAM rowKey, int subItem ) const;
 private:

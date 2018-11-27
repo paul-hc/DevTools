@@ -356,7 +356,7 @@ void CListPage::OnToggle_UseTextEffects( void )
 	if ( useTextEffects )
 	{
 		// list global text effects
-		m_fileListView.m_listTextEffect.m_textColor = color::Violet;
+		m_fileListView.m_ctrlTextEffect.m_textColor = color::Violet;
 
 		// rows/cells text effects
 		m_fileListView.MarkCellAt( 0, Source, ui::CTextEffect( ui::Bold ) );
@@ -370,7 +370,7 @@ void CListPage::OnToggle_UseTextEffects( void )
 	}
 	else
 	{
-		m_fileListView.m_listTextEffect = ui::CTextEffect::s_null;
+		m_fileListView.m_ctrlTextEffect = ui::CTextEffect::s_null;
 		m_fileListView.ClearMarkedCells();
 	}
 

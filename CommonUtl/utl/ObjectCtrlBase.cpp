@@ -38,9 +38,12 @@ namespace ui
 }
 
 
-CObjectCtrlBase::CObjectCtrlBase( UINT ctrlAccelId /*= 0*/ )
+CObjectCtrlBase::CObjectCtrlBase( CWnd* pCtrl, UINT ctrlAccelId /*= 0*/ )
 	: m_pSubjectAdapter( NULL )
+	, m_pCtrl( pCtrl )
+	, m_pTrackMenuTarget( m_pCtrl )
 {
+	ASSERT_PTR( m_pCtrl );
 	SetSubjectAdapter( ui::CDisplayCodeAdapter::Instance() );
 
 	if ( ctrlAccelId != 0 )
@@ -56,4 +59,11 @@ void CObjectCtrlBase::SetSubjectAdapter( ui::ISubjectAdapter* pSubjectAdapter )
 bool CObjectCtrlBase::IsInternalCmdId( int cmdId ) const
 {
 	return m_internalCmdIds.ContainsId( cmdId );
+}
+
+bool CObjectCtrlBase::TranslateMessage( MSG* pMsg )
+{
+	return
+		m_ctrlAccel.GetAccel() != NULL &&
+		m_ctrlAccel.Translate( pMsg, m_pCtrl->m_hWnd, m_pCtrl->m_hWnd );
 }

@@ -36,12 +36,13 @@ namespace ui
 
 #include "AccelTable.h"
 #include "CmdIdStore.h"
+#include "InternalChange.h"
 
 
-abstract class CObjectCtrlBase
+abstract class CObjectCtrlBase : public CInternalChange
 {
 protected:
-	CObjectCtrlBase( UINT ctrlAccelId = 0 );
+	CObjectCtrlBase( CWnd* pCtrl, UINT ctrlAccelId = 0 );
 public:
 	ui::ISubjectAdapter* GetSubjectAdapter( void ) const { return m_pSubjectAdapter; }
 	void SetSubjectAdapter( ui::ISubjectAdapter* pSubjectAdapter );
@@ -49,9 +50,13 @@ public:
 	std::tstring FormatCode( const utl::ISubject* pSubject ) const { ASSERT_PTR( m_pSubjectAdapter ); return m_pSubjectAdapter->FormatCode( pSubject ); }
 
 	virtual bool IsInternalCmdId( int cmdId ) const;
+protected:
+	bool TranslateMessage( MSG* pMsg );
 private:
 	ui::ISubjectAdapter* m_pSubjectAdapter;			// by default ui::CDisplayCodeAdapter
 protected:
+	CWnd* m_pCtrl;
+	CWnd* m_pTrackMenuTarget;						// receiver of commands when tracking the context menu
 	CAccelTable m_ctrlAccel;
 	ui::CCmdIdStore m_internalCmdIds;				// contains only standard commands that the control handles itself (vs custom commands handled by parent)
 };

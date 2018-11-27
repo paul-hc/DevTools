@@ -271,6 +271,7 @@
     <ClInclude Include="LayoutMetrics.h" />
     <ClInclude Include="LayoutPropertyPage.h" />
     <ClInclude Include="LayoutPropertySheet.h" />
+    <ClInclude Include="ListLikeCtrlBase.h" />
     <ClInclude Include="Logger.h" />
     <ClInclude Include="LogPalette.h" />
     <ClInclude Include="LongestCommonDuplicate.h" />
@@ -364,6 +365,7 @@
     <ClInclude Include="TooltipsHook.h" />
     <ClInclude Include="TrackStatic.h" />
     <ClInclude Include="TreeControl.h" />
+    <ClInclude Include="TreeControlCustomDraw.h" />
     <ClInclude Include="ui_fwd.h" />
     <ClInclude Include="UserReport.h" />
     <ClInclude Include="Utilities.h" />
@@ -468,6 +470,7 @@
     <ClCompile Include="LayoutMetrics.cpp" />
     <ClCompile Include="LayoutPropertyPage.cpp" />
     <ClCompile Include="LayoutPropertySheet.cpp" />
+    <ClCompile Include="ListLikeCtrlBase.cpp" />
     <ClCompile Include="Logger.cpp" />
     <ClCompile Include="LogPalette.cpp" />
     <ClCompile Include="MemoryDC.cpp" />
@@ -540,6 +543,7 @@
     <ClCompile Include="TooltipsHook.cpp" />
     <ClCompile Include="TrackStatic.cpp" />
     <ClCompile Include="TreeControl.cpp" />
+    <ClCompile Include="TreeControlCustomDraw.cpp" />
     <ClCompile Include="UserReport.cpp" />
     <ClCompile Include="Utilities.cpp" />
     <ClCompile Include="UtilitiesEx.cpp" />

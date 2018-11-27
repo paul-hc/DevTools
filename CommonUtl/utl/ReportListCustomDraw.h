@@ -5,12 +5,12 @@
 #include "ReportListControl.h"
 
 
-class CReportListCustomDraw : public CListTraits
+class CReportListCustomDraw
+	: public CListLikeCustomDrawBase
+	, public CListTraits
 {
 public:
 	CReportListCustomDraw( NMLVCUSTOMDRAW* pDraw, CReportListControl* pList );
-
-	static bool IsTooltipDraw( const NMLVCUSTOMDRAW* pDraw );
 
 	// cell text effects
 	bool ApplyCellTextEffect( void );
@@ -42,18 +42,7 @@ public:
 	const TRowKey m_rowKey;
 	const utl::ISubject* m_pObject;
 	const bool m_isReportMode;
-
-	static bool s_useDefaultDraw;
-	static bool s_dbgGuides;
-private:
-	CDC* m_pDC;
 };
-
-
-namespace dbg
-{
-	const TCHAR* FormatDrawStage( DWORD dwDrawStage );
-}
 
 
 #endif // ReportListCustomDraw_h

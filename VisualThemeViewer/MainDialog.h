@@ -1,7 +1,8 @@
 #pragma once
 
-#include "utl/HistoryComboBox.h"
 #include "utl/BaseMainDialog.h"
+#include "utl/HistoryComboBox.h"
+#include "utl/TreeControl.h"
 #include "ThemeStore.h"
 #include "ThemeSampleStatic.h"
 
@@ -9,7 +10,9 @@
 struct CThemeContext;
 
 
-class CMainDialog : public CBaseMainDialog, private ISampleOptionsCallback
+class CMainDialog
+	: public CBaseMainDialog
+	, private ISampleOptionsCallback
 {
 public:
 	CMainDialog( void );
@@ -31,7 +34,7 @@ private:
 	// enum { IDD = IDD_MAIN_DIALOG };
 
 	CComboBox m_classCombo;
-	CTreeCtrl m_partStateTree;
+	CTreeControl m_partStateTree;
 	CComboBox m_classFilterCombo;
 	CComboBox m_partsFilterCombo;
 	CHistoryComboBox m_bkColorCombo;

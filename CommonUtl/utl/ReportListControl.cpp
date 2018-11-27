@@ -11,7 +11,6 @@
 #include "StringRange.h"
 #include "UtilitiesEx.h"
 #include "CheckStatePolicies.h"
-#include "VisualTheme.h"
 #include "ComparePredicates.h"
 #include "ContainerUtilities.h"
 #include "FileSystem.h"
@@ -106,10 +105,10 @@ const TCHAR CReportListControl::s_fmtRegColumnLayout[] = _T("Width=%d, Order=%d"
 
 CReportListControl::CReportListControl( UINT columnLayoutId /*= 0*/, DWORD listStyleEx /*= lv::DefaultStyleEx*/ )
 	: CListCtrl()
-	, CObjectCtrlBase()
+	, CListLikeCtrlBase( this )
 	, m_columnLayoutId( 0 )
 	, m_listStyleEx( listStyleEx )
-	, m_optionFlags( UseExplorerTheme | SortInternally | HighlightTextDiffsFrame )
+	, m_optionFlags( SortInternally | HighlightTextDiffsFrame )
 	, m_subjectBased( false )
 	, m_sortByColumn( -1 )			// no sorting by default
 	, m_sortAscending( true )
@@ -117,32 +116,25 @@ CReportListControl::CReportListControl( UINT columnLayoutId /*= 0*/, DWORD listS
 	, m_pImageList( NULL )
 	, m_pLargeImageList( NULL )
 	, m_pCheckStatePolicy( NULL )
-	, m_pTextEffectCallback( NULL )
-	, m_listAccel( ARRAY_PAIR( s_keys ) )
 	, m_pDataSourceFactory( ole::GetStdDataSourceFactory() )
 	, m_painting( false )
 	, m_stateIconSize( 0, 0 )
-	, m_pTrackMenuTarget( this )
 	, m_deleteSrc_DiffEffect( ui::Bold, s_deleteSrcTextColor )
 	, m_mismatchDest_DiffEffect( ui::Bold, s_mismatchDestTextColor )
 	, m_matchDest_DiffEffect( ui::Regular, GetSysColor( COLOR_GRAYTEXT ) )
 {
+	m_ctrlAccel.Create( ARRAY_PAIR( s_keys ) );
+
 	m_pPopupMenu[ Nowhere ] = &GetStdPopupMenu( Nowhere );
 	m_pPopupMenu[ OnSelection ] = &GetStdPopupMenu( OnSelection );
 	m_pPopupMenu[ OnGroup ] = &GetStdPopupMenu( OnGroup );
 
-	std::fill_n( m_parentHandles, (int)_PN_Count, -1 );
-
 	if ( columnLayoutId != 0 )
 		SetLayoutInfo( columnLayoutId );
-
-	CFileItemsThumbnailStore::Instance().RegisterControl( this );
 }
 
 CReportListControl::~CReportListControl()
 {
-	CFileItemsThumbnailStore::Instance().UnregisterControl( this );
-
 	ClearData();
 
 	for ( std::vector< CColumnComparator >::const_iterator itColComparator = m_comparators.begin(); itColComparator != m_comparators.end(); ++itColComparator )
@@ -201,32 +193,17 @@ void CReportListControl::ClearData( void )
 	m_diffColumnPairs.clear();
 }
 
-void CReportListControl::SetUseExplorerTheme( bool useExplorerTheme /*= true*/ )
-{
-	SetFlag( m_optionFlags, UseExplorerTheme, useExplorerTheme );
-
-	if ( m_hWnd != NULL )
-		CVisualTheme::SetWindowTheme( m_hWnd, GetUseExplorerTheme() ? L"Explorer" : L"", NULL );		// enable Explorer vs classic theme
-}
-
-CBaseCustomDrawImager* CReportListControl::GetCustomDrawImager( void ) const
-{
-	return m_pCustomImager.get();
-}
-
 void CReportListControl::SetCustomFileGlyphDraw( bool showGlyphs /*= true*/ )
 {
+	CListLikeCtrlBase::SetCustomFileGlyphDraw( showGlyphs );
+
 	if ( showGlyphs )
 	{
-		m_pCustomImager.reset( new CFileGlyphCustomDrawImager( ui::SmallGlyph ) );
-
 		m_pImageList = m_pCustomImager->GetImageList( ui::SmallGlyph );
 		m_pLargeImageList = m_pCustomImager->GetImageList( ui::LargeGlyph );
 	}
 	else
 	{
-		m_pCustomImager.reset();
-
 		m_pImageList = NULL;
 		m_pLargeImageList = NULL;
 	}
@@ -319,20 +296,12 @@ bool CReportListControl::TrackContextMenu( ListPopup popupType, const CPoint& sc
 	return false;
 }
 
-ui::CFontEffectCache* CReportListControl::GetFontEffectCache( void )
-{
-	if ( NULL == m_pFontCache.get() )
-		m_pFontCache.reset( new ui::CFontEffectCache( GetFont() ) );
-	return m_pFontCache.get();
-}
-
 void CReportListControl::SetupControl( void )
 {
 	if ( m_listStyleEx != 0 )
 		SetExtendedStyle( m_listStyleEx );
 
-	if ( GetUseExplorerTheme() )
-		CVisualTheme::SetWindowTheme( m_hWnd, L"Explorer", NULL );		// enable Explorer theme
+	CListLikeCtrlBase::SetupControl();
 
 	if ( m_pImageList != NULL )
 		SetImageList( m_pImageList, LVSIL_SMALL );
@@ -1490,8 +1459,6 @@ void CReportListControl::SetItemCheckState( int index, int checkState )
 	ASSERT( m_pCheckStatePolicy->IsEnabledState( checkState ) );
 
 	if ( CheckRadio::Instance() == m_pCheckStatePolicy && CheckRadio::RadioChecked == checkState )
-	{
-//		std::pair< int, UINT > radioItemsPair( 0, GetItemCount() );		// <firstRadioIndex, radioCount>: by default assume all items in the list are ONE radio group
 		if ( IsGroupViewEnabled() )
 		{
 			int radioGroupId = GetItemGroupId( index );
@@ -1507,16 +1474,8 @@ void CReportListControl::SetItemCheckState( int index, int checkState )
 					if ( radioIndex != -1 && radioIndex != index )
 						ModifyCheckState( radioIndex, CheckRadio::RadioUnchecked );
 				}
-//				radioItemsPair = GetGroupItemsRange( radioGroupId );
 			}
 		}
-
-
-/*		// uncheck all other radio button items
-		for ( int radioPos = 0; radioPos != (int)radioItemsPair.second; ++radioPos )
-			if ( radioItemsPair.first + radioPos != index )
-				ModifyCheckState( radioItemsPair.first + radioPos, CheckRadio::RadioUnchecked );*/
-	}
 
 	SetCheckState( index, checkState );
 }
@@ -1793,18 +1752,6 @@ const ui::CTextEffect* CReportListControl::FindTextEffectAt( TRowKey rowKey, TCo
 	return utl::FindValuePtr( m_markedCells, TCellPair( rowKey, subItem ) );
 }
 
-void CReportListControl::CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARAM rowKey, int subItem ) const
-{
-	if ( m_pTextEffectCallback != NULL )
-		m_pTextEffectCallback->CombineTextEffectAt( rTextEffect, rowKey, subItem );
-}
-
-void CReportListControl::ModifyDiffTextEffectAt( CListTraits::CMatchEffects& rEffects, LPARAM rowKey, int subItem ) const
-{
-	if ( m_pTextEffectCallback != NULL )
-		m_pTextEffectCallback->ModifyDiffTextEffectAt( rEffects, rowKey, subItem );
-}
-
 const CReportListControl::CDiffColumnPair* CReportListControl::FindDiffColumnPair( TColumn column ) const
 {
 	for ( std::list< CDiffColumnPair >::const_iterator itDiffPair = m_diffColumnPairs.begin(); itDiffPair != m_diffColumnPairs.end(); ++itDiffPair )
@@ -1812,25 +1759,6 @@ const CReportListControl::CDiffColumnPair* CReportListControl::FindDiffColumnPai
 			return &*itDiffPair;
 
 	return NULL;
-}
-
-bool CReportListControl::ParentHandles( ParentNotif notif )
-{
-	ASSERT( notif < COUNT_OF( m_parentHandles ) );
-	if ( -1 == m_parentHandles[ notif ] )
-		switch ( notif )
-		{
-			case PN_DispInfo:
-				m_parentHandles[ notif ] = ui::ParentContainsMessageHandler( this, WM_NOTIFY, LVN_GETDISPINFO );
-				break;
-			case PN_CustomDraw:
-				m_parentHandles[ notif ] = ui::ParentContainsMessageHandler( this, WM_NOTIFY, NM_CUSTOMDRAW );
-				break;
-			default:
-				ASSERT( false );
-		}
-
-	return m_parentHandles[ notif ] != FALSE;
 }
 
 
@@ -1997,13 +1925,14 @@ void CReportListControl::ExpandAllGroups( void )
 void CReportListControl::PreSubclassWindow( void )
 {
 	__super::PreSubclassWindow();
+
 	SetupControl();
 }
 
 BOOL CReportListControl::PreTranslateMessage( MSG* pMsg )
 {
 	return
-		m_listAccel.Translate( pMsg, m_hWnd, m_hWnd ) ||
+		TranslateMessage( pMsg ) ||
 		__super::PreTranslateMessage( pMsg );
 }
 
@@ -2269,10 +2198,10 @@ BOOL CReportListControl::OnLvnGetDispInfo_Reflect( NMHDR* pNmHdr, LRESULT* pResu
 BOOL CReportListControl::OnNmCustomDraw_Reflect( NMHDR* pNmHdr, LRESULT* pResult )
 {
 	NMLVCUSTOMDRAW* pDraw = (NMLVCUSTOMDRAW*)pNmHdr;
-	if ( CReportListCustomDraw::IsTooltipDraw( pDraw ) )
+	if ( CListLikeCustomDrawBase::IsTooltipDraw( &pDraw->nmcd ) )
 		return TRUE;		// IMP: avoid custom drawing for tooltips
 
-	//TRACE( _T("-DrawStage: %s\n"), dbg::FormatDrawStage( pDraw->nmcd.dwDrawStage ) );
+	//TRACE( _T(" CReportListControl::DrawStage: %s\n"), dbg::FormatDrawStage( pDraw->nmcd.dwDrawStage ) );
 
 	CReportListCustomDraw draw( pDraw, this );
 

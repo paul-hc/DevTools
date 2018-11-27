@@ -136,6 +136,7 @@ CTreeWndPage::CTreeWndPage( void )
 {
 	RegisterCtrlLayout( layout::styles, COUNT_OF( layout::styles ) );
 	app::GetSvc().AddObserver( this );
+	m_treeCtrl.SetTextEffectCallback( this );
 
 	m_accelPool.AddAccelTable( new CAccelTable( IDD_TREE_WND_PAGE ) );
 
@@ -186,6 +187,28 @@ void CTreeWndPage::OnAppEvent( app::Event appEvent )
 		case app::RefreshWndTree:
 			RefreshTreeContents();
 			break;
+	}
+}
+
+void CTreeWndPage::CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARAM rowKey, int subItem ) const
+{
+	subItem;
+
+	HTREEITEM hItem = reinterpret_cast< HTREEITEM >( rowKey );
+	HWND hWnd = m_treeCtrl.GetItemDataAs< HWND >( hItem );
+
+	if ( !ui::IsValidWindow( hWnd ) )
+		rTextEffect.m_textColor = StaleWndColor;
+	else
+	{
+		if ( !ui::IsVisible( hWnd ) )
+			rTextEffect.m_fontEffect |= ui::Italic;
+
+		if ( ui::IsDisabled( hWnd ) )
+			rTextEffect.m_textColor = ::GetSysColor( COLOR_GRAYTEXT );
+
+		if ( wnd::IsSlowWindow( hWnd ) )
+			rTextEffect.m_textColor = ui::GetBlendedColor( rTextEffect.m_textColor != CLR_NONE ? rTextEffect.m_textColor : m_treeCtrl.GetTextColor(), SlowWndColor );
 	}
 }
 
@@ -294,10 +317,6 @@ void CTreeWndPage::DoDataExchange( CDataExchange* pDX )
 		CImageList* pImageList = CWndImageRepository::Instance().GetImageList();
 		m_treeCtrl.SetImageList( pImageList, TVSIL_NORMAL );
 
-		//[PC] doesn't seem necessary
-		//m_treeCtrl.SetImageList( pImageList, TVSIL_STATE );
-		ui::MakeStandardControlFont( m_italicFont, ui::CFontInfo( ui::Italic ) );
-
 		RefreshTreeContents();				// first init
 	}
 
@@ -316,7 +335,7 @@ BEGIN_MESSAGE_MAP( CTreeWndPage, CLayoutPropertyPage )
 	ON_NOTIFY( TVN_SELCHANGED, IDC_WINDOW_TREE, OnTvnSelChanged_WndTree )
 	ON_NOTIFY( NM_SETFOCUS, IDC_WINDOW_TREE, OnTvnSerFocus_WndTree )
 	ON_NOTIFY( NM_CUSTOMDRAW, IDC_WINDOW_TREE, OnTvnCustomDraw_WndTree )
-	ON_NOTIFY( CTreeControl::TCN_REFRESHITEM, IDC_WINDOW_TREE, OnTcnRefreshItem_WndTree )
+	ON_NOTIFY( tv::TVN_REFRESHITEM, IDC_WINDOW_TREE, OnTcnRefreshItem_WndTree )
 	ON_COMMAND( CM_EXPAND_BRANCH, CmExpandBranch )
 	ON_COMMAND( CM_COLAPSE_BRANCH, CmColapseBranch )
 	ON_COMMAND( ID_COPY_TREE_ANCESTORS, OnCopyTreeAncestors )
@@ -373,29 +392,6 @@ void CTreeWndPage::OnTvnCustomDraw_WndTree( NMHDR* pNmHdr, LRESULT* pResult )
 			*pResult = CDRF_NOTIFYITEMDRAW;
 			break;
 		case CDDS_ITEMPREPAINT:
-			if ( !ui::IsValidWindow( hWnd ) )
-			{
-				pDraw->clrText = StaleWndColor;
-				*pResult = CDRF_NEWFONT;
-			}
-			else
-			{
-				if ( !ui::IsVisible( hWnd ) )
-				{
-					::SelectObject( pDraw->nmcd.hdc, m_italicFont );
-					*pResult = CDRF_NEWFONT;
-				}
-				if ( ui::IsDisabled( hWnd ) )
-				{
-					pDraw->clrText = color::Grey60;
-					*pResult = CDRF_NEWFONT;
-				}
-				if ( wnd::IsSlowWindow( hWnd ) )
-				{
-					pDraw->clrText = SlowWndColor;
-					*pResult = CDRF_NEWFONT;
-				}
-			}
 			*pResult |= CDRF_NOTIFYPOSTPAINT;
 			break;
 		case CDDS_ITEMPOSTPAINT:
@@ -409,8 +405,8 @@ void CTreeWndPage::OnTvnCustomDraw_WndTree( NMHDR* pNmHdr, LRESULT* pResult )
 
 void CTreeWndPage::OnTcnRefreshItem_WndTree( NMHDR* pNmHdr, LRESULT* pResult )
 {
-	CTreeControl::NMTREEITEM* pTreeItemInfo = (CTreeControl::NMTREEITEM*)pNmHdr;
-	*pResult = RefreshTreeItem( pTreeItemInfo->hItem ) ? 0 : 1;
+	tv::CNmTreeItem* pTreeItemInfo = (tv::CNmTreeItem*)pNmHdr;
+	*pResult = RefreshTreeItem( pTreeItemInfo->m_hItem ) ? 0 : 1;
 }
 
 void CTreeWndPage::CmExpandBranch( void )

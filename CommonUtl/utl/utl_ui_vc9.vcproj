@@ -1666,6 +1666,14 @@
 					>
 				</File>
 				<File
+					RelativePath=".\ListLikeCtrlBase.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\ListLikeCtrlBase.h"
+					>
+				</File>
+				<File
 					RelativePath=".\NumericEdit.h"
 					>
 				</File>
@@ -1779,6 +1787,14 @@
 				</File>
 				<File
 					RelativePath=".\TreeControl.h"
+					>
+				</File>
+				<File
+					RelativePath=".\TreeControlCustomDraw.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\TreeControlCustomDraw.h"
 					>
 				</File>
 			</Filter>
