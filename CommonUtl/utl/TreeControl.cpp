@@ -48,6 +48,17 @@ bool CTreeControl::DeleteAllItems( void )
 	return __super::DeleteAllItems() != FALSE;
 }
 
+void CTreeControl::StoreImageList( CImageList* pImageList )
+{
+	m_pImageList = pImageList;
+
+	if ( m_hWnd != NULL )
+	{
+		SetImageList( m_pImageList, TVSIL_NORMAL );
+		UpdateCustomImagerBoundsSize();
+	}
+}
+
 bool CTreeControl::IsRealItem( HTREEITEM hItem ) const
 {
 	ASSERT_PTR( hItem );
@@ -187,17 +198,9 @@ void CTreeControl::SetCustomFileGlyphDraw( bool showGlyphs /*= true*/ )
 	CListLikeCtrlBase::SetCustomFileGlyphDraw( showGlyphs );
 
 	if ( showGlyphs )
-		m_pImageList = m_pCustomImager->GetImageList( ui::SmallGlyph );
+		StoreImageList( m_pCustomImager->GetImageList( ui::SmallGlyph ) );
 	else
-		m_pImageList = NULL;
-
-	if ( m_hWnd != NULL )
-	{
-		SetImageList( m_pImageList, TVSIL_NORMAL );
-		UpdateCustomImagerBoundsSize();
-
-		//ui::RecalculateScrollbars( m_hWnd );
-	}
+		StoreImageList( NULL );
 }
 
 void CTreeControl::SetCustomImageDraw( ui::ICustomImageDraw* pCustomImageDraw, const CSize& imageSize /*= CSize( 0, 0 )*/ )
@@ -205,20 +208,12 @@ void CTreeControl::SetCustomImageDraw( ui::ICustomImageDraw* pCustomImageDraw, c
 	if ( pCustomImageDraw != NULL )
 	{
 		m_pCustomImager.reset( new CSingleCustomDrawImager( pCustomImageDraw, imageSize, imageSize ) );
-		m_pImageList = m_pCustomImager->GetImageList( ui::SmallGlyph );
+		StoreImageList( m_pCustomImager->GetImageList( ui::SmallGlyph ) );
 	}
 	else
 	{
 		m_pCustomImager.reset();
-		m_pImageList = NULL;
-	}
-
-	if ( m_hWnd != NULL )
-	{
-		SetImageList( m_pImageList, TVSIL_NORMAL );
-		UpdateCustomImagerBoundsSize();
-
-		//ui::RecalculateScrollbars( m_hWnd );
+		StoreImageList( NULL );
 	}
 }
 

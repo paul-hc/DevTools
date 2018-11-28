@@ -13,7 +13,7 @@ class CVisualTheme;
 enum Relevance { HighRelevance, MediumRelevance, ObscureRelevance, NotImplemented = ObscureRelevance };
 
 
-interface IThemeNode : public CSubject
+interface IThemeNode : public utl::ISubject
 {
 	enum ThemeNode { Class = 1, Part, State };
 
@@ -22,7 +22,7 @@ interface IThemeNode : public CSubject
 };
 
 
-class CBaseNode : public IThemeNode
+abstract class CBaseNode : public CSubjectImpl< IThemeNode >
 {
 protected:
 	CBaseNode( Relevance relevance ) : m_relevance( relevance ) {}

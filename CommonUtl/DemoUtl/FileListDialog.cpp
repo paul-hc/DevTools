@@ -146,7 +146,7 @@ CFileListDialog::CFileListDialog( CWnd* pParent )
 	SetFlag( m_fileListCtrl.RefListStyleEx(), LVS_EX_DOUBLEBUFFER, m_useDoubleBuffer );
 
 	VERIFY( res::LoadImageList( m_imageList, IDR_FLAG_STRIP_PNG, _FlagStripCount ) );
-	m_fileListCtrl.Set_ImageList( &m_imageList );
+	m_fileListCtrl.StoreImageLists( &m_imageList );
 }
 
 CFileListDialog::~CFileListDialog()

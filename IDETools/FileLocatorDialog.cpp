@@ -89,7 +89,7 @@ CFileLocatorDialog::CFileLocatorDialog( CWnd* pParent )
 
 	m_foundFilesListCtrl.SetSection( reg::section_list );
 	m_foundFilesListCtrl.SetUseAlternateRowColoring();
-	m_foundFilesListCtrl.Set_ImageList( &ft::GetFileTypeImageList() );
+	m_foundFilesListCtrl.StoreImageLists( &ft::GetFileTypeImageList() );
 	m_foundFilesListCtrl.SetPopupMenu( CReportListControl::OnSelection, NULL );
 }
 

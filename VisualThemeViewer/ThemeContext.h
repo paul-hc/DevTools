@@ -17,6 +17,7 @@ struct CThemeContext
 	{
 		if ( !IsValid() )
 			return CThemeItem::m_null;
+
 		return CThemeItem( m_pClass->m_className.c_str(), m_pPart->m_partId, m_pState != NULL ? m_pState->m_stateId : 0 );
 	}
 
@@ -40,6 +41,7 @@ struct CThemeContext
 				return m_pState->m_stateName;
 		else if ( asNumber && m_pPart != NULL )
 			return _T("0");
+
 		return std::tstring();
 	}
 public:

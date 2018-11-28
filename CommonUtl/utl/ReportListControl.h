@@ -166,7 +166,8 @@ public:
 	void SaveToRegistry( void );
 	bool LoadFromRegistry( void );
 
-	void Set_ImageList( CImageList* pImageList, CImageList* pLargeImageList = NULL ) { m_pImageList = pImageList; m_pLargeImageList = pLargeImageList; }
+	void StoreImageLists( CImageList* pImageList, CImageList* pLargeImageList = NULL );
+
 	void ChangeListViewMode( DWORD viewMode );
 
 	bool IsMultiSelectionList( void ) const { return !HasFlag( GetStyle(), LVS_SINGLESEL ); }

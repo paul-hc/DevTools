@@ -136,7 +136,9 @@ CTreeWndPage::CTreeWndPage( void )
 {
 	RegisterCtrlLayout( layout::styles, COUNT_OF( layout::styles ) );
 	app::GetSvc().AddObserver( this );
+
 	m_treeCtrl.SetTextEffectCallback( this );
+	m_treeCtrl.StoreImageList( CWndImageRepository::Instance().GetImageList() );
 
 	m_accelPool.AddAccelTable( new CAccelTable( IDD_TREE_WND_PAGE ) );
 
@@ -313,12 +315,7 @@ void CTreeWndPage::DoDataExchange( CDataExchange* pDX )
 	DDX_Control( pDX, IDC_WINDOW_TREE, m_treeCtrl );
 
 	if ( firstInit )
-	{
-		CImageList* pImageList = CWndImageRepository::Instance().GetImageList();
-		m_treeCtrl.SetImageList( pImageList, TVSIL_NORMAL );
-
 		RefreshTreeContents();				// first init
-	}
 
 	if ( DialogOutput == pDX->m_bSaveAndValidate )
 		OutputTargetWnd();

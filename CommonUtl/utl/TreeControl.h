@@ -41,7 +41,13 @@ public:
 
 	bool DeleteAllItems( void );
 
-	void Set_ImageList( CImageList* pImageList ) { m_pImageList = pImageList; }
+	void StoreImageList( CImageList* pImageList );
+
+	template< typename ObjectT >
+	ObjectT* GetItemObject( HTREEITEM hItem ) const { return AsPtr< ObjectT >( GetItemData( hItem ) ); }
+
+	template< typename ObjectT >
+	void SetItemObject( HTREEITEM hItem, ObjectT* pObject ) { VERIFY( SetItemData( hItem, (DWORD_PTR)pObject ) != FALSE ); }
 
 	template< typename Type >
 	Type GetItemDataAs( HTREEITEM hItem ) const { return (Type)GetItemData( hItem ); }

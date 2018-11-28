@@ -193,27 +193,39 @@ void CReportListControl::ClearData( void )
 	m_diffColumnPairs.clear();
 }
 
-void CReportListControl::SetCustomFileGlyphDraw( bool showGlyphs /*= true*/ )
+void CReportListControl::StoreImageLists( CImageList* pImageList, CImageList* pLargeImageList /*= NULL*/ )
 {
-	CListLikeCtrlBase::SetCustomFileGlyphDraw( showGlyphs );
-
-	if ( showGlyphs )
-	{
-		m_pImageList = m_pCustomImager->GetImageList( ui::SmallGlyph );
-		m_pLargeImageList = m_pCustomImager->GetImageList( ui::LargeGlyph );
-	}
-	else
-	{
-		m_pImageList = NULL;
-		m_pLargeImageList = NULL;
-	}
+	m_pImageList = pImageList;
+	m_pLargeImageList = pLargeImageList;
 
 	if ( m_hWnd != NULL )
 	{
 		SetImageList( m_pImageList, LVSIL_SMALL );
 		SetImageList( m_pLargeImageList, LVSIL_NORMAL );
-		UpdateCustomImagerBoundsSize();
 
+		UpdateCustomImagerBoundsSize();
+	}
+}
+
+bool CReportListControl::UpdateCustomImagerBoundsSize( void )
+{
+	if ( m_pCustomImager.get() != NULL )
+		return m_pCustomImager->SetCurrGlyphGauge( GetViewModeGlyphGauge() );
+
+	return false;			// no change
+}
+
+void CReportListControl::SetCustomFileGlyphDraw( bool showGlyphs /*= true*/ )
+{
+	CListLikeCtrlBase::SetCustomFileGlyphDraw( showGlyphs );
+
+	if ( showGlyphs )
+		StoreImageLists( m_pCustomImager->GetImageList( ui::SmallGlyph ), m_pCustomImager->GetImageList( ui::LargeGlyph ) );
+	else
+		StoreImageLists( NULL, NULL );
+
+	if ( m_hWnd != NULL )
+	{
 		if ( NULL == m_pCustomImager.get() )
 		{	// hack: force the list to remove icon area for all items
 			ModifyStyle( LVS_TYPEMASK, LVS_ICON );
@@ -229,24 +241,16 @@ void CReportListControl::SetCustomImageDraw( ui::ICustomImageDraw* pCustomImageD
 	if ( pCustomImageDraw != NULL )
 	{
 		m_pCustomImager.reset( new CSingleCustomDrawImager( pCustomImageDraw, smallImageSize, largeImageSize ) );
-
-		m_pImageList = m_pCustomImager->GetImageList( ui::SmallGlyph );
-		m_pLargeImageList = m_pCustomImager->GetImageList( ui::LargeGlyph );
+		StoreImageLists( m_pCustomImager->GetImageList( ui::SmallGlyph ), m_pCustomImager->GetImageList( ui::LargeGlyph ) );
 	}
 	else
 	{
 		m_pCustomImager.reset();
-
-		m_pImageList = NULL;
-		m_pLargeImageList = NULL;
+		StoreImageLists( NULL, NULL );
 	}
 
 	if ( m_hWnd != NULL )
 	{
-		SetImageList( m_pImageList, LVSIL_SMALL );
-		SetImageList( m_pLargeImageList, LVSIL_NORMAL );
-		UpdateCustomImagerBoundsSize();
-
 		if ( NULL == m_pCustomImager.get() )
 		{	// hack: force the list to remove icon area for all items
 			ModifyStyle( LVS_TYPEMASK, LVS_ICON );
@@ -370,14 +374,6 @@ ui::GlyphGauge CReportListControl::GetViewModeGlyphGauge( DWORD listViewMode )
 		case LV_VIEW_LIST:
 			return ui::SmallGlyph;
 	}
-}
-
-bool CReportListControl::UpdateCustomImagerBoundsSize( void )
-{
-	if ( m_pCustomImager.get() != NULL )
-		return m_pCustomImager->SetCurrGlyphGauge( GetViewModeGlyphGauge() );
-
-	return false;			// no change
 }
 
 bool CReportListControl::SetCompactIconSpacing( int iconEdgeWidth /*= IconViewEdgeX*/ )

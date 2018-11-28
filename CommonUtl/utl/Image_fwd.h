@@ -51,7 +51,7 @@ namespace ui
 
 		bool CustomDrawItemImage( const NMCUSTOMDRAW* pDraw, const CRect& itemImageRect )		// for CListCtrl, CTreeCtrl
 		{
-			// pDraw could point to NMTVCUSTOMDRAW, NMLVCUSTOMDRAW, etc
+			// pDraw could point to NMLVCUSTOMDRAW, NMTVCUSTOMDRAW, etc
 			ASSERT_PTR( pDraw );
 			return DrawItemImage( CDC::FromHandle( pDraw->hdc ), checked_static_cast< const utl::ISubject* >( (const utl::ISubject*)pDraw->lItemlParam ), itemImageRect );
 		}
