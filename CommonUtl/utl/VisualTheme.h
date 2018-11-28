@@ -14,11 +14,11 @@ public:
 	static bool IsThemed( void ) { return IsEnabled() && ::IsAppThemed() != FALSE; }
 	static bool IsDisabled( void ) { return !IsEnabled(); }
 
-	static bool IsEnabled( void ) { return m_enabled; }
-	static void SetEnabled( bool enabled ) { m_enabled = enabled; }
+	static bool IsEnabled( void ) { return s_enabled; }
+	static void SetEnabled( bool enabled ) { s_enabled = enabled; }
 
-	static bool IsFallbackEnabled( void ) { return m_fallbackEnabled; }
-	static void SetFallbackEnabled( bool fallbackEnabled ) { m_fallbackEnabled = fallbackEnabled; }
+	static bool IsFallbackEnabled( void ) { return s_fallbackEnabled; }
+	static void SetFallbackEnabled( bool fallbackEnabled ) { s_fallbackEnabled = fallbackEnabled; }
 
 	bool IsValid( void ) const { return m_hTheme != NULL; }
 	HTHEME GetTheme( void ) const { return m_hTheme; }
@@ -51,8 +51,8 @@ public:
 	bool DrawEntireBackground( HDC hdc, int partId, int stateId, const RECT& rect, const RECT* pClipRect = NULL );
 
 	// theme testing
-	static bool* GetEnabledPtr( void ) { return &m_enabled; }
-	static bool* GetFallbackEnabledPtr( void ) { return &m_fallbackEnabled; }
+	static bool* GetEnabledPtr( void ) { return &s_enabled; }
+	static bool* GetFallbackEnabledPtr( void ) { return &s_fallbackEnabled; }
 private:
 	static bool IsDisabledState( int partId, int stateId );
 private:
@@ -61,8 +61,8 @@ private:
 private:
 	enum { LazyLoad = -1, StaticLib = -2 };
 
-	static bool m_enabled;				// may be disabled to test CVisualThemeFallback
-	static bool m_fallbackEnabled;
+	static bool s_enabled;				// may be disabled to test CVisualThemeFallback
+	static bool s_fallbackEnabled;
 };
 
 

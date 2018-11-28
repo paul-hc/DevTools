@@ -15,14 +15,25 @@
 
 namespace reg
 {
+	const TCHAR* SkipDataMemberPrefix( const TCHAR* pEntry )
+	{
+		const TCHAR* pSkipped = pEntry;
+		pSkipped = str::SkipPrefix< str::Case >( pSkipped, _T("&") );		// strip "&" operator used to pass the address of data-member
+		pSkipped = str::SkipPrefix< str::Case >( pSkipped, _T("m_") );
+		pSkipped = str::SkipPrefix< str::Case >( pSkipped, _T("s_") );
+		return pSkipped;
+	}
+
+
 	// CBaseOption implementation
 
-	CBaseOption::CBaseOption( const std::tstring& entryName )
-		: m_entryName( entryName )
+	CBaseOption::CBaseOption( const TCHAR* pEntry )
+		: m_entry( SkipDataMemberPrefix( pEntry ) )
 		, m_pContainer( NULL )
 	{
-		ASSERT( !m_entryName.empty() );
-		func::ToUpper()( m_entryName[ 0 ] );		// automatically capitalize first letter of the entry name
+		ASSERT( !m_entry.empty() );
+
+		m_entry[ 0 ] = func::ToUpper()( m_entry[ 0 ] );		// capitalize first letter of the entry name
 	}
 
 	CBaseOption::~CBaseOption()
@@ -48,13 +59,12 @@ namespace reg
 		utl::ClearOwningContainer( m_options );
 	}
 
-	COptionContainer& COptionContainer::AddOption( CBaseOption* pOption )
+	void COptionContainer::AddOption( CBaseOption* pOption )
 	{
 		ASSERT_PTR( pOption );
 
 		m_options.push_back( pOption );
 		pOption->SetContainer( this );
-		return *this;
 	}
 
 	void COptionContainer::LoadOptions( void )
@@ -77,12 +87,8 @@ namespace reg
 			if ( ( *itOption )->HasDataMember( pDataMember ) )
 				return **itOption;
 
+		ASSERT( false );
 		throw CRuntimeException( "Data-member not found in option container" );
-	}
-
-	void COptionContainer::SaveOption( const void* pDataMember ) const
-	{
-		LookupOption( pDataMember ).Save();
 	}
 
 
@@ -91,13 +97,13 @@ namespace reg
 	template<>
 	void COption< fs::CPath >::Load( void )
 	{
-		*m_pValue = m_pContainer->m_pRegSection->GetStringParameter( m_entryName.c_str(), m_pValue->GetPtr() );
+		*m_pValue = m_pContainer->m_pRegSection->GetStringParameter( m_entry.c_str(), m_pValue->GetPtr() );
 	}
 
 	template<>
 	void COption< fs::CPath >::Save( void ) const
 	{
-		m_pContainer->m_pRegSection->SaveParameter( m_entryName.c_str(), m_pValue->GetPtr() );
+		m_pContainer->m_pRegSection->SaveParameter( m_entry.c_str(), m_pValue->GetPtr() );
 	}
 
 
@@ -106,14 +112,14 @@ namespace reg
 	template<>
 	void COption< double >::Load( void )
 	{
-		std::tstring text = m_pContainer->m_pRegSection->GetStringParameter( m_entryName.c_str(), num::FormatNumber( *m_pValue ).c_str() );
+		std::tstring text = m_pContainer->m_pRegSection->GetStringParameter( m_entry.c_str(), num::FormatNumber( *m_pValue ).c_str() );
 		num::ParseNumber( *m_pValue, text );
 	}
 
 	template<>
 	void COption< double >::Save( void ) const
 	{
-		m_pContainer->m_pRegSection->SaveParameter( m_entryName.c_str(), num::FormatNumber( *m_pValue ) );
+		m_pContainer->m_pRegSection->SaveParameter( m_entry.c_str(), num::FormatNumber( *m_pValue ) );
 	}
 
 
@@ -123,12 +129,12 @@ namespace reg
 	{
 		if ( m_pTags != NULL )
 		{
-			std::tstring keyTag = m_pContainer->m_pRegSection->GetStringParameter( m_entryName.c_str(), m_pTags->FormatKey( *m_pValue ).c_str() );
+			std::tstring keyTag = m_pContainer->m_pRegSection->GetStringParameter( m_entry.c_str(), m_pTags->FormatKey( *m_pValue ).c_str() );
 			int newValue;
 			if ( m_pTags->ParseKeyAs( newValue, keyTag ) )
 				*m_pValue = newValue;
 			else
-				TRACE( _T(" * CEnumOption::Load() - tag mismatch '%s' in enum option '%s'\n"), keyTag.c_str(), m_entryName.c_str() );
+				TRACE( _T(" * CEnumOption::Load() - tag mismatch '%s' in enum option '%s'\n"), keyTag.c_str(), m_entry.c_str() );
 		}
 		else
 			BaseClass::Load();
@@ -137,7 +143,7 @@ namespace reg
 	void CEnumOption::Save( void ) const
 	{
 		if ( m_pTags != NULL )
-			m_pContainer->m_pRegSection->SaveParameter( m_entryName.c_str(), m_pTags->FormatKey( *m_pValue ).c_str() );
+			m_pContainer->m_pRegSection->SaveParameter( m_entry.c_str(), m_pTags->FormatKey( *m_pValue ).c_str() );
 		else
 			BaseClass::Save();
 	}

@@ -177,6 +177,12 @@ void CStringTests::TestStringSearch( void )
 
 void CStringTests::TestStringMatch( void )
 {
+	ASSERT_EQUAL_STR( _T("Text"), str::SkipPrefix< str::Case >( _T("abcText"), _T("abc") ) );
+	ASSERT_EQUAL_STR( _T("ABcText"), str::SkipPrefix< str::Case >( _T("ABcText"), _T("aBC") ) );
+
+	ASSERT_EQUAL_STR( _T("Text"), str::SkipPrefix< str::IgnoreCase >( _T("abcText"), _T("abc") ) );
+	ASSERT_EQUAL_STR( _T("Text"), str::SkipPrefix< str::IgnoreCase >( _T("ABcText"), _T("aBC") ) );
+
 	str::GetMatch getMatchFunc;
 	ASSERT_EQUAL( str::MatchEqual, getMatchFunc( _T(""), _T("") ) );
 	ASSERT_EQUAL( str::MatchEqual, getMatchFunc( _T("SomeText"), _T("SomeText") ) );

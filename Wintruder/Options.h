@@ -85,13 +85,9 @@ protected:
 template< typename ValueT >
 inline bool COptions::ModifyOption( ValueT* pOptionDataMember, const ValueT& newValue )
 {
-	ASSERT_PTR( pOptionDataMember );
-	if ( *pOptionDataMember == newValue )
+	if ( !m_regOptions.ModifyOption( pOptionDataMember, newValue, true ) )		// save it right away if changed
 		return false;
 
-	*pOptionDataMember = newValue;
-
-	m_regOptions.SaveOption( pOptionDataMember );
 	PublishChangeEvent();
 	return true;
 }

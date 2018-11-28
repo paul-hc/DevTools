@@ -303,6 +303,20 @@ namespace str
 	// custom case type
 
 	template< str::CaseType caseType, typename CharType >
+	const CharType* SkipPrefix( const CharType* pText, const CharType* pPrefix )
+	{
+		pred::CharEqual< caseType > eqChar;
+
+		for ( const CharType* pSkip = pText; ; )
+			if ( _T('\0') == *pPrefix )
+				return pSkip;
+			else if ( !eqChar( *pSkip++, *pPrefix++ ) )
+				break;
+
+		return pText;
+	}
+
+	template< str::CaseType caseType, typename CharType >
 	size_t Find( const CharType* pText, CharType chr, size_t offset = 0 )
 	{
 		ASSERT( pText != 0 && offset <= GetLength( pText ) );

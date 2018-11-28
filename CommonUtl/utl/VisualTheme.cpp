@@ -13,8 +13,8 @@
 #endif
 
 
-bool CVisualTheme::m_enabled = true;
-bool CVisualTheme::m_fallbackEnabled = true;
+bool CVisualTheme::s_enabled = true;
+bool CVisualTheme::s_fallbackEnabled = true;
 
 CVisualTheme::CVisualTheme( const wchar_t* pClass, HWND hWnd /*= NULL*/ )
 	: m_pClass( pClass )
@@ -86,7 +86,7 @@ bool CVisualTheme::GetThemeBackgroundExtent( OUT RECT* pExtentRect, HDC hdc, int
 
 bool CVisualTheme::DrawThemeEdge( HDC hdc, int partId, int stateId, const RECT& rect, UINT edge, UINT flags, RECT* pContentRect /*= NULL*/ )
 {
-	if ( !IsValid() && m_fallbackEnabled )
+	if ( !IsValid() && s_fallbackEnabled )
 		return CVisualThemeFallback::Instance().DrawEdge( hdc, rect, edge, flags );
 
 	return HR_OK( ::DrawThemeEdge( m_hTheme, hdc, partId, stateId, &rect, edge, flags, pContentRect ) );
@@ -94,7 +94,7 @@ bool CVisualTheme::DrawThemeEdge( HDC hdc, int partId, int stateId, const RECT& 
 
 bool CVisualTheme::DrawThemeBackground( HDC hdc, int partId, int stateId, const RECT& rect, const RECT* pClipRect /*= NULL*/ )
 {
-	if ( !IsValid() && m_fallbackEnabled )
+	if ( !IsValid() && s_fallbackEnabled )
 		return CVisualThemeFallback::Instance().DrawBackground( m_pClass, partId, stateId, hdc, rect );
 
 	return HR_OK( ::DrawThemeBackground( m_hTheme, hdc, partId, stateId, &rect, pClipRect ) );

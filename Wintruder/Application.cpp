@@ -73,6 +73,8 @@ BOOL CApplication::InitInstance( void )
 	m_pMainWnd = &mainDialog;
 	mainDialog.DoModal();
 	m_pMainWnd = NULL;
+
+	app::GetOptions()->Save();
 	return FALSE;
 }
 

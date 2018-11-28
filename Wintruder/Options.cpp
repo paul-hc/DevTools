@@ -63,20 +63,19 @@ COptions::COptions( CAppService* pAppSvc )
 {
 	ASSERT_PTR( m_pAppSvc );
 
-	m_regOptions
-		.AddOption( MAKE_OPTION( &m_keepTopmost ) )
-		.AddOption( MAKE_OPTION( &m_hideOnTrack ) )
-		.AddOption( MAKE_OPTION( &m_autoHighlight ) )
-		.AddOption( MAKE_OPTION( &m_ignoreHidden ) )
-		.AddOption( MAKE_OPTION( &m_ignoreDisabled ) )
-		.AddOption( MAKE_OPTION( &m_displayZeroFlags ) )
-		.AddOption( MAKE_ENUM_OPTION( &m_frameStyle ) )
-		.AddOption( MAKE_OPTION( &m_frameSize ) )
-		.AddOption( MAKE_ENUM_OPTION( &m_queryWndIcons ) )
-		.AddOption( MAKE_OPTION( &m_autoUpdate ) )
-		.AddOption( MAKE_OPTION( &m_autoUpdateRefresh ) )
-		.AddOption( MAKE_OPTION( &m_autoUpdateTimeout ) )
-		.AddOption( MAKE_ENUM_OPTION( &m_updateTarget ) );
+	m_regOptions.AddOption( MAKE_OPTION( &m_keepTopmost ) );
+	m_regOptions.AddOption( MAKE_OPTION( &m_hideOnTrack ) );
+	m_regOptions.AddOption( MAKE_OPTION( &m_autoHighlight ) );
+	m_regOptions.AddOption( MAKE_OPTION( &m_ignoreHidden ) );
+	m_regOptions.AddOption( MAKE_OPTION( &m_ignoreDisabled ) );
+	m_regOptions.AddOption( MAKE_OPTION( &m_displayZeroFlags ) );
+	m_regOptions.AddOption( MAKE_ENUM_OPTION( &m_frameStyle ) );
+	m_regOptions.AddOption( MAKE_OPTION( &m_frameSize ) );
+	m_regOptions.AddOption( MAKE_ENUM_OPTION( &m_queryWndIcons ) );
+	m_regOptions.AddOption( MAKE_OPTION( &m_autoUpdate ) );
+	m_regOptions.AddOption( MAKE_OPTION( &m_autoUpdateRefresh ) );
+	m_regOptions.AddOption( MAKE_OPTION( &m_autoUpdateTimeout ) );
+	m_regOptions.AddOption( MAKE_ENUM_OPTION( &m_updateTarget ) );
 }
 
 void COptions::Load( void )
