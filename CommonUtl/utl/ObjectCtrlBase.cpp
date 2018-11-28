@@ -65,5 +65,5 @@ bool CObjectCtrlBase::TranslateMessage( MSG* pMsg )
 {
 	return
 		m_ctrlAccel.GetAccel() != NULL &&
-		m_ctrlAccel.Translate( pMsg, m_pCtrl->m_hWnd, m_pCtrl->m_hWnd );
+		m_ctrlAccel.Translate( pMsg, m_pTrackMenuTarget->m_hWnd, m_pCtrl->m_hWnd );
 }

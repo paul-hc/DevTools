@@ -15,34 +15,38 @@
 
 namespace reg
 {
-	static const TCHAR section[] = _T("MainDialog");
-	static const TCHAR entry_bkColor[] = _T("BkColor");
-	static const TCHAR entry_useBorder[] = _T("UseBorder");
-	static const TCHAR entry_preBkGuides[] = _T("PreBkGuides");
-	static const TCHAR entry_postBkGuides[] = _T("PreBkGuides");
+	static const TCHAR section[] = _T("MainDialog\\ThemeSample");
 	static const TCHAR entry_enableThemes[] = _T("EnableThemes");
+	static const TCHAR entry_enableThemesFallback[] = _T("EnableThemesFallback");
 }
 
 
 // CThemeSampleOptions implementation
 
 CThemeSampleOptions::CThemeSampleOptions( ISampleOptionsCallback* pCallback )
-	: m_pCallback( pCallback )
-	, m_bkColorText( AfxGetApp()->GetProfileString( reg::section, reg::entry_bkColor ) )
-	, m_useBorder( AfxGetApp()->GetProfileInt( reg::section, reg::entry_useBorder, true ) != FALSE )
-	, m_preBkGuides( AfxGetApp()->GetProfileInt( reg::section, reg::entry_preBkGuides, false ) != FALSE )
-	, m_postBkGuides( AfxGetApp()->GetProfileInt( reg::section, reg::entry_postBkGuides, false ) != FALSE )
+	: reg::COptionContainer( reg::section )
+	, m_pCallback( pCallback )
+	, m_useBorder( true )
+	, m_preBkGuides( false )
+	, m_postBkGuides( false )
+	, m_showThemeGlyphs( true )
+	, m_enableThemes( *CVisualTheme::GetEnabledPtr() )						// acts directly on target bool (by reference)
+	, m_enableThemesFallback( *CVisualTheme::GetFallbackEnabledPtr() )		// acts directly by target bool (by reference)
 {
-	CVisualTheme::SetEnabled( AfxGetApp()->GetProfileInt( reg::section, reg::entry_enableThemes, CVisualTheme::IsEnabled() ) != FALSE );
+	AddOption( MAKE_OPTION( &m_bkColorText ) );
+	AddOption( MAKE_OPTION( &m_useBorder ), IDC_USE_BORDER_CHECK );
+	AddOption( MAKE_OPTION( &m_preBkGuides ), IDC_PRE_BK_GUIDES_CHECK );
+	AddOption( MAKE_OPTION( &m_postBkGuides ), IDC_POST_BK_GUIDES_CHECK );
+	AddOption( MAKE_OPTION( &m_showThemeGlyphs ), ID_SHOW_THEME_GLYPHS_CHECK );
+	AddOption( MAKE_OPTION( &m_enableThemes ), IDC_ENABLE_THEMES_CHECK );
+	AddOption( MAKE_OPTION( &m_enableThemesFallback ), IDC_ENABLE_THEMES_FALLBACK_CHECK );
+
+	LoadOptions();
 }
 
 CThemeSampleOptions::~CThemeSampleOptions()
 {
-	AfxGetApp()->WriteProfileString( reg::section, reg::entry_bkColor, m_bkColorText.c_str() );
-	AfxGetApp()->WriteProfileInt( reg::section, reg::entry_useBorder, m_useBorder );
-	AfxGetApp()->WriteProfileInt( reg::section, reg::entry_preBkGuides, m_preBkGuides );
-	AfxGetApp()->WriteProfileInt( reg::section, reg::entry_postBkGuides, m_postBkGuides );
-	AfxGetApp()->WriteProfileInt( reg::section, reg::entry_enableThemes, CVisualTheme::IsEnabled() );
+	SaveOptions();
 }
 
 COLORREF CThemeSampleOptions::GetBkColor( void ) const
@@ -61,13 +65,25 @@ CHistoryComboBox* CThemeSampleOptions::GetBkColorCombo( void ) const
 }
 
 
-BEGIN_MESSAGE_MAP( CThemeSampleOptions, CCmdTarget )
+BEGIN_MESSAGE_MAP( CThemeSampleOptions, COptionContainer )
 	ON_CBN_EDITCHANGE( IDC_BK_COLOR_COMBO, OnChange_BkColor )
 	ON_CBN_SELCHANGE( IDC_BK_COLOR_COMBO, OnChange_BkColor )
-	ON_COMMAND( IDC_USE_BORDER_CHECK, OnToggle_UseBorder )
-	ON_COMMAND_RANGE( IDC_PRE_BK_GUIDES_CHECK, IDC_POST_BK_GUIDES_CHECK, OnToggle_DrawBkGuides )
-	ON_COMMAND( IDC_DISABLE_THEMES_CHECK, OnToggle_DisableThemes )
 END_MESSAGE_MAP()
+
+void CThemeSampleOptions::OnToggle_BoolOption( UINT cmdId )
+{
+	__super::OnToggle_BoolOption( cmdId );
+
+	switch ( cmdId )
+	{
+		case IDC_ENABLE_THEMES_CHECK:
+		case IDC_ENABLE_THEMES_FALLBACK_CHECK:
+			m_pCallback->GetWnd()->Invalidate();		// redraw the resize gripper
+			break;
+	}
+
+	m_pCallback->RedrawSamples();
+}
 
 void CThemeSampleOptions::OnChange_BkColor( void )
 {
@@ -83,25 +99,6 @@ void CThemeSampleOptions::OnChange_BkColor( void )
 	}
 	else
 		pCombo->SetFrameColor( RGB( 255, 0, 0 ) );
-}
-
-void CThemeSampleOptions::OnToggle_UseBorder( void )
-{
-	m_useBorder = m_pCallback->GetWnd()->IsDlgButtonChecked( IDC_USE_BORDER_CHECK ) != FALSE;
-	m_pCallback->RedrawSamples();
-}
-
-void CThemeSampleOptions::OnToggle_DrawBkGuides( UINT cmdId )
-{
-	( IDC_PRE_BK_GUIDES_CHECK == cmdId ? m_preBkGuides : m_postBkGuides ) = m_pCallback->GetWnd()->IsDlgButtonChecked( cmdId ) != FALSE;
-	m_pCallback->RedrawSamples();
-}
-
-void CThemeSampleOptions::OnToggle_DisableThemes( void )
-{
-	CVisualTheme::SetEnabled( !m_pCallback->GetWnd()->IsDlgButtonChecked( IDC_DISABLE_THEMES_CHECK ) );
-	m_pCallback->GetWnd()->Invalidate();		// redraw the resize gripper
-	m_pCallback->RedrawSamples();
 }
 
 
@@ -120,7 +117,7 @@ CThemeSampleStatic::~CThemeSampleStatic()
 {
 }
 
-void CThemeSampleStatic::SetThemeItem( CThemeItem& themeItem )
+void CThemeSampleStatic::SetThemeItem( const CThemeItem& themeItem )
 {
 	m_themeItem = themeItem;
 	RedrawWindow( NULL, NULL );

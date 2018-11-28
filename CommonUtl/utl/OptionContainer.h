@@ -20,10 +20,13 @@ namespace reg
 {
 	class CBaseOption;
 
+	template< typename ValueT >
+	class COption;
+
 
 	// container of serializable options (to registry)
 	//
-	class COptionContainer : private utl::noncopyable
+	class COptionContainer : public CCmdTarget
 	{
 	public:
 		COptionContainer( const std::tstring& section );
@@ -32,8 +35,9 @@ namespace reg
 
 		CBaseOption& GetOptionAt( size_t index ) const { ASSERT( index < m_options.size() ); return *m_options[ index ]; }
 
-		void AddOption( CBaseOption* pOption );
+		void AddOption( CBaseOption* pOption, UINT ctrlId = 0 );
 		CBaseOption& LookupOption( const void* pDataMember ) const;
+		COption< bool >* FindBoolOptionByID( UINT ctrlId ) const;
 
 		// all options
 		void LoadOptions( void );
@@ -46,10 +50,21 @@ namespace reg
 		bool ModifyOption( ValueT* pDataMember, const ValueT& newValue, bool save = true );
 
 		void ToggleOption( bool* pBoolDataMember, bool save = true ) { ModifyOption( pBoolDataMember, !*pBoolDataMember, save ); }
+
+		void UpdateControls( CWnd* pTargetWnd );			// update check-box buttons
 	public:
 		std::auto_ptr< IRegistrySection > m_pRegSection;
 	protected:
 		std::vector< CBaseOption* > m_options;
+
+		// generated overrides
+	public:
+		virtual BOOL OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo );
+	protected:
+		virtual void OnToggle_BoolOption( UINT cmdId );
+		virtual void OnUpdate_BoolOption( CCmdUI* pCmdUI );
+
+		DECLARE_MESSAGE_MAP()
 	};
 
 
@@ -64,12 +79,16 @@ namespace reg
 
 		void SetContainer( COptionContainer* pContainer ) { ASSERT_PTR( pContainer ); m_pContainer = pContainer; }
 
+		UINT GetCtrlId( void ) const { return m_ctrlId; }
+		void SetCtrlId( UINT ctrlId ) { m_ctrlId = ctrlId; }
+
 		virtual void Load( void ) = 0;
 		virtual void Save( void ) const = 0;
 		virtual bool HasDataMember( const void* pDataMember ) const = 0;
 	protected:
 		std::tstring m_entry;
 		COptionContainer* m_pContainer;
+		UINT m_ctrlId;
 	};
 
 
@@ -77,7 +96,10 @@ namespace reg
 	class COption : public CBaseOption
 	{
 	public:
-		COption( ValueT* pValue, const TCHAR* pEntry ) : CBaseOption( pEntry ), m_pValue( safe_ptr( pValue ) ) {}
+		COption( ValueT* pValue, const TCHAR* pEntry ) : CBaseOption( pEntry ), m_pValue( pValue ) { ASSERT_PTR( m_pValue ); }
+
+		const ValueT& GetValue( void ) const { return *m_pValue; }
+		ValueT& RefValue( void ) { return *m_pValue; }
 
 		// base overrides
 		virtual void Load( void )

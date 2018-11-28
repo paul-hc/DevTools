@@ -32,11 +32,10 @@ BOOL CApplication::InitInstance( void )
 	if ( !CBaseApp< CWinApp >::InitInstance() )
 		return FALSE;
 
-	// create the shell manager, in case the dialog contains any shell tree view or shell list view controls
-	std::auto_ptr< CShellManager > pShellManager( new CShellManager );
+	std::auto_ptr< CShellManager > pShellManager( new CShellManager );						// create the shell manager, in case the dialog contains any shell tree view or shell list view controls
 
-	// activate "Windows Native" visual manager for enabling themes in MFC controls
-	CMFCVisualManager::SetDefaultManager( RUNTIME_CLASS( CMFCVisualManagerWindows ) );
+	CMFCVisualManager::SetDefaultManager( RUNTIME_CLASS( CMFCVisualManagerWindows ) );		// activate "Windows Native" visual manager for enabling themes in MFC controls
+	CToolStrip::RegisterStripButtons( IDR_IMAGE_STRIP );		// register stock images
 
 	CMainDialog dlg;
 	m_pMainWnd = &dlg;

@@ -2,6 +2,7 @@
 #include "StdAfx.h"
 #include "OptionContainer.h"
 #include "RegistrySection.h"
+#include "CmdUpdate.h"
 #include "RuntimeException.h"
 #include "EnumTags.h"
 #include "Path.h"
@@ -30,6 +31,7 @@ namespace reg
 	CBaseOption::CBaseOption( const TCHAR* pEntry )
 		: m_entry( SkipDataMemberPrefix( pEntry ) )
 		, m_pContainer( NULL )
+		, m_ctrlId( 0 )
 	{
 		ASSERT( !m_entry.empty() );
 
@@ -59,12 +61,13 @@ namespace reg
 		utl::ClearOwningContainer( m_options );
 	}
 
-	void COptionContainer::AddOption( CBaseOption* pOption )
+	void COptionContainer::AddOption( CBaseOption* pOption, UINT ctrlId /*= 0*/ )
 	{
 		ASSERT_PTR( pOption );
 
 		m_options.push_back( pOption );
 		pOption->SetContainer( this );
+		pOption->SetCtrlId( ctrlId );
 	}
 
 	void COptionContainer::LoadOptions( void )
@@ -89,6 +92,63 @@ namespace reg
 
 		ASSERT( false );
 		throw CRuntimeException( "Data-member not found in option container" );
+	}
+
+	COption< bool >* COptionContainer::FindBoolOptionByID( UINT ctrlId ) const
+	{
+		ASSERT( ctrlId != 0 );
+
+		for ( std::vector< CBaseOption* >::const_iterator itOption = m_options.begin(); itOption != m_options.end(); ++itOption )
+			if ( ( *itOption )->GetCtrlId() == ctrlId )
+				return checked_static_cast< COption< bool >* >( *itOption );
+
+		return NULL;
+	}
+
+	void COptionContainer::UpdateControls( CWnd* pTargetWnd )
+	{
+		ASSERT_PTR( pTargetWnd );
+
+		for ( std::vector< CBaseOption* >::const_iterator itOption = m_options.begin(); itOption != m_options.end(); ++itOption )
+			if ( ( *itOption )->GetCtrlId() != 0 )
+				if ( CWnd* pCtrl = pTargetWnd->GetDlgItem( ( *itOption )->GetCtrlId() ) )
+					ui::UpdateControlUI( pCtrl, pTargetWnd );
+	}
+
+	BOOL COptionContainer::OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo )
+	{
+		if ( CN_COMMAND == code || CN_UPDATE_COMMAND_UI == code )		// boolean check toggle or update?
+		{
+			COption< bool >* pBoolOption = FindBoolOptionByID( id );
+			if ( NULL == pBoolOption )
+				return false;											// not a bool option registered as such
+		}
+
+		return
+			CCmdTarget::OnCmdMsg( id, code, pExtra, pHandlerInfo );
+	}
+
+
+	// message handlers
+
+	BEGIN_MESSAGE_MAP( COptionContainer, CCmdTarget )
+		ON_COMMAND_RANGE( 1, 0x8FFF, OnToggle_BoolOption )
+		ON_UPDATE_COMMAND_UI_RANGE( 1, 0x8FFF, OnUpdate_BoolOption )
+	END_MESSAGE_MAP()
+
+	void COptionContainer::OnToggle_BoolOption( UINT cmdId )
+	{
+		COption< bool >* pBoolOption = FindBoolOptionByID( cmdId );
+		ASSERT_PTR( pBoolOption );
+
+		ToggleOption( &pBoolOption->RefValue() );
+	}
+
+	void COptionContainer::OnUpdate_BoolOption( CCmdUI* pCmdUI )
+	{
+		const COption< bool >* pBoolOption = FindBoolOptionByID( pCmdUI->m_nID );
+		ASSERT_PTR( pBoolOption );
+		pCmdUI->SetCheck( pBoolOption->GetValue() );
 	}
 
 

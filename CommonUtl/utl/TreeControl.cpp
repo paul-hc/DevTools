@@ -2,9 +2,11 @@
 #include "stdafx.h"
 #include "TreeControl.h"
 #include "TreeControlCustomDraw.h"
+#include "Clipboard.h"
 #include "CustomDrawImager.h"
 #include "Icon.h"
 #include "ContainerUtilities.h"
+#include "MenuUtilities.h"
 #include "UtilitiesEx.h"
 
 #ifdef _DEBUG
@@ -48,6 +50,14 @@ bool CTreeControl::DeleteAllItems( void )
 	return __super::DeleteAllItems() != FALSE;
 }
 
+bool CTreeControl::Copy( void )
+{
+	HTREEITEM hSelItem = GetSelectedItem();
+	return
+		hSelItem != NULL &&
+		CClipboard::CopyText( FormatCode( GetItemObject< utl::ISubject >( hSelItem ) ), this );
+}
+
 void CTreeControl::StoreImageList( CImageList* pImageList )
 {
 	m_pImageList = pImageList;
@@ -57,6 +67,92 @@ void CTreeControl::StoreImageList( CImageList* pImageList )
 		SetImageList( m_pImageList, TVSIL_NORMAL );
 		UpdateCustomImagerBoundsSize();
 	}
+}
+
+void CTreeControl::SetCustomFileGlyphDraw( bool showGlyphs /*= true*/ )
+{
+	CListLikeCtrlBase::SetCustomFileGlyphDraw( showGlyphs );
+
+	if ( showGlyphs )
+		StoreImageList( m_pCustomImager->GetImageList( ui::SmallGlyph ) );
+	else
+		StoreImageList( NULL );
+}
+
+void CTreeControl::SetCustomImageDraw( ui::ICustomImageDraw* pCustomImageDraw, const CSize& imageSize /*= CSize( 0, 0 )*/ )
+{
+	if ( pCustomImageDraw != NULL )
+	{
+		m_pCustomImager.reset( new CSingleCustomDrawImager( pCustomImageDraw, imageSize, imageSize ) );
+		StoreImageList( m_pCustomImager->GetImageList( ui::SmallGlyph ) );
+	}
+	else
+	{
+		m_pCustomImager.reset();
+		StoreImageList( NULL );
+	}
+}
+
+const CSize& CTreeControl::GetImageSize( void ) const
+{
+	if ( 0 == m_imageSize.cx && 0 == m_imageSize.cy )
+		if ( CImageList* pImageList = GetImageList( TVSIL_NORMAL ) )
+			m_imageSize = gdi::GetImageSize( *pImageList );
+
+	return m_imageSize;
+}
+
+bool CTreeControl::GetIconItemRect( CRect* pItemImageRect, HTREEITEM hItem ) const
+{
+	ASSERT_PTR( pItemImageRect );
+	ASSERT_PTR( hItem );
+	CRect itemTextRect;
+	if ( !GetItemRect( hItem, &itemTextRect, TRUE ) )
+		return false;			// item is not visible
+
+	pItemImageRect->SetRect( 0, 0, GetImageSize().cx, GetImageSize().cy );
+	ui::AlignRect( *pItemImageRect, itemTextRect, H_AlignLeft | V_AlignCenter );
+
+	enum { IconTextSpacing = 3 };
+	pItemImageRect->OffsetRect( -( IconTextSpacing + pItemImageRect->Width() ), 0 );
+	return true;
+}
+
+bool CTreeControl::CustomDrawItemIcon( const NMTVCUSTOMDRAW* pDraw, HICON hIcon, int diFlags /*= DI_NORMAL | DI_COMPAT*/ )
+{
+	ASSERT_PTR( pDraw );
+	ASSERT_PTR( hIcon );
+
+	HTREEITEM hItem = (HTREEITEM)pDraw->nmcd.dwItemSpec;
+	CRect itemImageRect;
+	if ( !GetIconItemRect( &itemImageRect, hItem ) )
+		return false;
+
+	::DrawIconEx( pDraw->nmcd.hdc, itemImageRect.left, itemImageRect.top, hIcon, itemImageRect.Width(), itemImageRect.Height(), 0, NULL, diFlags );
+	return true;
+}
+
+void CTreeControl::MarkItem( HTREEITEM hItem, const ui::CTextEffect& textEfect )
+{
+	m_markedItems[ hItem ] = textEfect;
+}
+
+void CTreeControl::UnmarkItem( HTREEITEM hItem )
+{
+	stdext::hash_map< HTREEITEM, ui::CTextEffect >::iterator itFound = m_markedItems.find( hItem );
+	if ( itFound != m_markedItems.end() )
+		m_markedItems.erase( itFound );
+}
+
+void CTreeControl::ClearMarkedItems( void )
+{
+	m_markedItems.clear();
+	Invalidate();
+}
+
+const ui::CTextEffect* CTreeControl::FindTextEffect( HTREEITEM hItem ) const
+{
+	return utl::FindValuePtr( m_markedItems, hItem );
 }
 
 bool CTreeControl::IsRealItem( HTREEITEM hItem ) const
@@ -131,92 +227,6 @@ void CTreeControl::ExpandBranch( HTREEITEM hItem, bool expand /*= true*/ )
 	EnsureVisible( hItem );
 }
 
-const CSize& CTreeControl::GetImageSize( void ) const
-{
-	if ( 0 == m_imageSize.cx && 0 == m_imageSize.cy )
-		if ( CImageList* pImageList = GetImageList( TVSIL_NORMAL ) )
-			m_imageSize = gdi::GetImageSize( *pImageList );
-
-	return m_imageSize;
-}
-
-bool CTreeControl::GetIconItemRect( CRect* pItemImageRect, HTREEITEM hItem ) const
-{
-	ASSERT_PTR( pItemImageRect );
-	ASSERT_PTR( hItem );
-	CRect itemTextRect;
-	if ( !GetItemRect( hItem, &itemTextRect, TRUE ) )
-		return false;			// item is not visible
-
-	pItemImageRect->SetRect( 0, 0, GetImageSize().cx, GetImageSize().cy );
-	ui::AlignRect( *pItemImageRect, itemTextRect, H_AlignLeft | V_AlignCenter );
-
-	enum { IconTextSpacing = 3 };
-	pItemImageRect->OffsetRect( -( IconTextSpacing + pItemImageRect->Width() ), 0 );
-	return true;
-}
-
-bool CTreeControl::CustomDrawItemIcon( const NMTVCUSTOMDRAW* pDraw, HICON hIcon, int diFlags /*= DI_NORMAL | DI_COMPAT*/ )
-{
-	ASSERT_PTR( pDraw );
-	ASSERT_PTR( hIcon );
-
-	HTREEITEM hItem = (HTREEITEM)pDraw->nmcd.dwItemSpec;
-	CRect itemImageRect;
-	if ( !GetIconItemRect( &itemImageRect, hItem ) )
-		return false;
-
-	::DrawIconEx( pDraw->nmcd.hdc, itemImageRect.left, itemImageRect.top, hIcon, itemImageRect.Width(), itemImageRect.Height(), 0, NULL, diFlags );
-	return true;
-}
-
-void CTreeControl::MarkItem( HTREEITEM hItem, const ui::CTextEffect& textEfect )
-{
-	m_markedItems[ hItem ] = textEfect;
-}
-
-void CTreeControl::UnmarkItem( HTREEITEM hItem )
-{
-	stdext::hash_map< HTREEITEM, ui::CTextEffect >::iterator itFound = m_markedItems.find( hItem );
-	if ( itFound != m_markedItems.end() )
-		m_markedItems.erase( itFound );
-}
-
-void CTreeControl::ClearMarkedItems( void )
-{
-	m_markedItems.clear();
-	Invalidate();
-}
-
-const ui::CTextEffect* CTreeControl::FindTextEffect( HTREEITEM hItem ) const
-{
-	return utl::FindValuePtr( m_markedItems, hItem );
-}
-
-void CTreeControl::SetCustomFileGlyphDraw( bool showGlyphs /*= true*/ )
-{
-	CListLikeCtrlBase::SetCustomFileGlyphDraw( showGlyphs );
-
-	if ( showGlyphs )
-		StoreImageList( m_pCustomImager->GetImageList( ui::SmallGlyph ) );
-	else
-		StoreImageList( NULL );
-}
-
-void CTreeControl::SetCustomImageDraw( ui::ICustomImageDraw* pCustomImageDraw, const CSize& imageSize /*= CSize( 0, 0 )*/ )
-{
-	if ( pCustomImageDraw != NULL )
-	{
-		m_pCustomImager.reset( new CSingleCustomDrawImager( pCustomImageDraw, imageSize, imageSize ) );
-		StoreImageList( m_pCustomImager->GetImageList( ui::SmallGlyph ) );
-	}
-	else
-	{
-		m_pCustomImager.reset();
-		StoreImageList( NULL );
-	}
-}
-
 bool CTreeControl::UpdateCustomImagerBoundsSize( void )
 {
 	if ( m_pCustomImager.get() != NULL )
@@ -242,21 +252,46 @@ void CTreeControl::PreSubclassWindow( void )
 	SetupControl();
 }
 
+BOOL CTreeControl::PreTranslateMessage( MSG* pMsg )
+{
+	return
+		TranslateMessage( pMsg ) ||
+		__super::PreTranslateMessage( pMsg );
+}
+
 
 // message handlers
 
 BEGIN_MESSAGE_MAP( CTreeControl, CTreeCtrl )
 	ON_WM_NCLBUTTONDOWN()
+	ON_WM_CONTEXTMENU()
 	ON_NOTIFY_REFLECT_EX( TVN_SELCHANGED, OnTvnSelChanged_Reflect )
 	ON_NOTIFY_REFLECT_EX( NM_RCLICK, OnTvnRClick_Reflect )
 	ON_NOTIFY_REFLECT_EX( NM_DBLCLK, OnTvnDblClk_Reflect )
 	ON_NOTIFY_REFLECT_EX( NM_CUSTOMDRAW, OnNmCustomDraw_Reflect )
+	ON_COMMAND( ID_EDIT_COPY, OnEditCopy )
+	ON_UPDATE_COMMAND_UI( ID_EDIT_COPY, OnUpdateEditCopy )
 END_MESSAGE_MAP()
 
 void CTreeControl::OnNcLButtonDown( UINT hitTest, CPoint point )
 {
 	ui::TakeFocus( m_hWnd );
 	CTreeCtrl::OnNcLButtonDown( hitTest, point );
+}
+
+void CTreeControl::OnContextMenu( CWnd* pWnd, CPoint screenPos )
+{
+	UINT flags;
+	HTREEITEM hitIndex = HitTest( ui::ScreenToClient( m_hWnd, screenPos ), &flags );
+	hitIndex, pWnd;
+
+	if ( m_contextMenu.GetSafeHmenu() != NULL )
+	{
+		ui::TrackPopupMenu( m_contextMenu, m_pTrackMenuTarget, screenPos );
+		return;						// supress rising WM_CONTEXTMENU to the parent
+	}
+
+	Default();
 }
 
 BOOL CTreeControl::OnTvnSelChanged_Reflect( NMHDR* pNmHdr, LRESULT* pResult )
@@ -268,12 +303,13 @@ BOOL CTreeControl::OnTvnSelChanged_Reflect( NMHDR* pNmHdr, LRESULT* pResult )
 
 BOOL CTreeControl::OnTvnRClick_Reflect( NMHDR* /*pNmHdr*/, LRESULT* pResult )
 {
-	if ( HTREEITEM hHitItem = GetDropHilightItem() )		// item right clicked (temporary highlighted)
+	if ( HTREEITEM hHitItem = GetDropHilightItem() )					// item right clicked (temporary highlighted)
 		if ( RefreshItem( hHitItem ) )
 			if ( hHitItem != GetSelectedItem() )
 				CTreeCtrl::SelectItem( hHitItem );
 
-	*pResult = 0;			// will send WM_CONTEXTMENU
+	SendMessage( WM_CONTEXTMENU, (WPARAM)m_hWnd, GetMessagePos() );		// send WM_CONTEXTMENU to self
+  	*pResult = 1;			// mark message as handled and suppress default handling
 	return 0;				// continue routing
 }
 
@@ -332,4 +368,14 @@ BOOL CTreeControl::OnNmCustomDraw_Reflect( NMHDR* pNmHdr, LRESULT* pResult )
 		return TRUE;			// mark as handled so changes are applied
 
 	return FALSE;				// continue handling by parent, even if changed (additive logic)
+}
+
+void CTreeControl::OnEditCopy( void )
+{
+	Copy();
+}
+
+void CTreeControl::OnUpdateEditCopy( CCmdUI* pCmdUI )
+{
+	pCmdUI->Enable( GetSelectedItem() != NULL );
 }

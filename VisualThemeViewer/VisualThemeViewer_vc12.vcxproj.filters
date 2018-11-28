@@ -49,6 +49,9 @@
     <ClCompile Include="Application.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="ThemeContext.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="VisualThemeViewer.rc">
@@ -62,6 +65,12 @@
   </ItemGroup>
   <ItemGroup>
     <Image Include="res\VisualThemeViewer.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\ImageStrip.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\ImageStrip.png">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>

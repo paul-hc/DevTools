@@ -3,8 +3,9 @@
 #pragma once
 
 #include "utl/BufferedStatic.h"
-#include "utl/ThemeItem.h"
 #include "utl/GpUtilities.h"
+#include "utl/OptionContainer.h"
+#include "utl/ThemeItem.h"
 
 
 class CHistoryComboBox;
@@ -17,7 +18,7 @@ interface ISampleOptionsCallback
 };
 
 
-struct CThemeSampleOptions : public CCmdTarget
+struct CThemeSampleOptions : public reg::COptionContainer
 {
 	CThemeSampleOptions( ISampleOptionsCallback* pCallback );
 	~CThemeSampleOptions();
@@ -31,12 +32,16 @@ public:
 	bool m_useBorder;
 	bool m_preBkGuides;
 	bool m_postBkGuides;
+	bool m_showThemeGlyphs;
+
+	// external options
+	bool& m_enableThemes;
+	bool& m_enableThemesFallback;
+
+	// generated stuff
+	virtual void OnToggle_BoolOption( UINT cmdId );
 protected:
-	// message map functions
 	afx_msg void OnChange_BkColor( void );
-	afx_msg void OnToggle_UseBorder( void );
-	afx_msg void OnToggle_DrawBkGuides( UINT cmdId );
-	afx_msg void OnToggle_DisableThemes( void );
 
 	DECLARE_MESSAGE_MAP()
 };
@@ -49,7 +54,7 @@ public:
 	virtual ~CThemeSampleStatic();
 
 	void SetOptions( const CThemeSampleOptions* pOptions ) { m_pOptions = pOptions; }
-	void SetThemeItem( CThemeItem& themeItem );
+	void SetThemeItem( const CThemeItem& themeItem );
 
 	bool InSizeToContentMode( void ) const { return m_stcInfoId != 0; }
 	void SetSizeToContentMode( UINT infoId ) { m_stcInfoId = infoId; }
@@ -62,9 +67,10 @@ protected:
 	virtual void Draw( CDC* pDC, const CRect& clientRect );
 private:
 	CRect GetCoreRect( const CRect& clientRect ) const;
-	void DrawGuides( CDC* pDC, CRect coreRect, Color guideColor );
-	void DrawError( CDC* pDC, const CRect& coreRect );
 	bool SizeToContent( CRect& rCoreRect, CDC* pDC );
+
+	static void DrawGuides( CDC* pDC, CRect coreRect, Color guideColor );
+	static void DrawError( CDC* pDC, const CRect& coreRect );
 public:
 	CSize m_margins;
 	CSize m_coreSize;
@@ -75,8 +81,9 @@ private:
 	CThemeItem m_themeItem;
 
 	enum { Margin = 8 };
+
+	// generated stuff
 protected:
-	// message map functions
 	DECLARE_MESSAGE_MAP()
 };
 

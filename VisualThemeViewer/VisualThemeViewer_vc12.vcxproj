@@ -126,6 +126,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='DebugU|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='ReleaseU|Win32'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="ThemeContext.cpp" />
     <ClCompile Include="ThemeSampleStatic.cpp" />
     <ClCompile Include="ThemeStore.cpp" />
     <ClCompile Include="Application.cpp" />
@@ -137,6 +138,8 @@
     <None Include="res\VisualThemeViewer.rc2" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="res\ImageStrip.bmp" />
+    <Image Include="res\ImageStrip.png" />
     <Image Include="res\VisualThemeViewer.ico" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

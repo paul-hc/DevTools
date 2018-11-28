@@ -1,6 +1,7 @@
 #pragma once
 
 #include "utl/BaseMainDialog.h"
+#include "utl/DialogToolBar.h"
 #include "utl/HistoryComboBox.h"
 #include "utl/TreeControl.h"
 #include "ThemeStore.h"
@@ -16,7 +17,7 @@ class CMainDialog
 {
 public:
 	CMainDialog( void );
-	~CMainDialog();
+	virtual ~CMainDialog();
 private:
 	// ISampleOptionsCallback interface
 	virtual CWnd* GetWnd( void ) ;
@@ -37,6 +38,7 @@ private:
 	CTreeControl m_partStateTree;
 	CComboBox m_classFilterCombo;
 	CComboBox m_partsFilterCombo;
+	CDialogToolBar m_toolbar;
 	CHistoryComboBox m_bkColorCombo;
 
 	enum { Tiny, Small, Medium, Large, SampleCount };
@@ -55,6 +57,10 @@ protected:
 	afx_msg void OnTvnCustomDraw_PartStateTree( NMHDR* pNmHdr, LRESULT* pResult );
 	afx_msg void OnCbnSelChange_ClassFilterCombo( void );
 	afx_msg void OnCbnSelChange_PartsFilterCombo( void );
+	afx_msg void OnEditCopy( void );
+	afx_msg void OnUpdateEditCopy( CCmdUI* pCmdUI );
+	afx_msg void OnCopyTheme( UINT cmdId );
+	afx_msg void OnUpdateCopyTheme( CCmdUI* pCmdUI );
 
 	DECLARE_MESSAGE_MAP()
 };

@@ -1,15 +1,15 @@
 
-// MainDialog.cpp : implementation file
-//
-
 #include "stdafx.h"
 #include "MainDialog.h"
+#include "Application.h"
 #include "ThemeContext.h"
+#include "utl/Clipboard.h"
+#include "utl/MenuUtilities.h"
 #include "utl/StringUtilities.h"
 #include "utl/Utilities.h"
 #include "utl/StdColors.h"
 #include "utl/SubjectPredicates.h"
-#include "utl/VisualTheme.h"
+#include "utl/resource.h"
 #include "resource.h"
 
 #ifdef _DEBUG
@@ -57,7 +57,8 @@ namespace layout
 		{ IDC_USE_BORDER_CHECK, MoveY },
 		{ IDC_PRE_BK_GUIDES_CHECK, MoveY },
 		{ IDC_POST_BK_GUIDES_CHECK, MoveY },
-		{ IDC_DISABLE_THEMES_CHECK, MoveY },
+		{ IDC_ENABLE_THEMES_CHECK, MoveY },
+		{ IDC_ENABLE_THEMES_FALLBACK_CHECK, MoveY },
 		{ IDCANCEL, Move }
 	};
 }
@@ -78,6 +79,16 @@ CMainDialog::CMainDialog( void )
 	m_samples[ Tiny ].m_coreSize = CSize( 10, 10 );
 	m_samples[ Medium ].SetSizeToContentMode( IDC_CORE_SIZE_STATIC );
 	m_samples[ Large ].m_sampleText = _T("Some Sample Themed Text");
+
+	m_partStateTree.GetCtrlAccel().Load( IDC_PARTS_AND_STATES_TREE );
+	ui::LoadPopupMenu( m_partStateTree.GetContextMenu(), IDR_CONTEXT_MENU, app::ListTreePopup );
+	m_partStateTree.SetTrackMenuTarget( this );
+
+	m_toolbar.GetStrip()
+		.AddButton( ID_COPY_THEME )
+		.AddButton( ID_COPY_THEME_PART_AND_STATE )
+		.AddSeparator()
+		.AddButton( ID_SHOW_THEME_GLYPHS_CHECK );
 }
 
 CMainDialog::~CMainDialog()
@@ -199,7 +210,7 @@ CThemeContext CMainDialog::GetSelThemeContext( void ) const
 	selTheme.m_pClass = m_themeStore.FindClass( ui::GetComboSelText( m_classCombo ).c_str() );
 
 	if ( HTREEITEM hSelItem = m_partStateTree.GetSelectedItem() )
-		if ( IThemeNode* pNode = (IThemeNode*)m_partStateTree.GetItemData( hSelItem ) )
+		if ( IThemeNode* pNode = m_partStateTree.GetItemObject< IThemeNode >( hSelItem ) )
 			switch ( pNode->GetThemeNode() )
 			{
 				case IThemeNode::State:
@@ -227,6 +238,7 @@ void CMainDialog::DoDataExchange( CDataExchange* pDX )
 	DDX_Control( pDX, IDC_MEDIUM_SAMPLE_STATIC, m_samples[ Medium ] );
 	DDX_Control( pDX, IDC_LARGE_SAMPLE_STATIC, m_samples[ Large ] );
 	DDX_Control( pDX, IDC_BK_COLOR_COMBO, m_bkColorCombo );
+	m_toolbar.DDX_Placeholder( pDX, IDC_STRIP_BAR_1, H_AlignLeft | V_AlignTop );
 
 	if ( !pDX->m_bSaveAndValidate )
 	{
@@ -236,10 +248,8 @@ void CMainDialog::DoDataExchange( CDataExchange* pDX )
 			m_partsFilterCombo.SetCurSel( AfxGetApp()->GetProfileInt( reg::section, reg::entry_partsFilter, ObscureRelevance ) );
 			ui::LoadHistoryCombo( m_bkColorCombo, reg::section, reg::entry_bkColorHistory, NULL );
 			ui::SetDlgItemText( this, IDC_BK_COLOR_COMBO, m_options.m_bkColorText );
-			CheckDlgButton( IDC_USE_BORDER_CHECK, m_options.m_useBorder );
-			CheckDlgButton( IDC_PRE_BK_GUIDES_CHECK, m_options.m_preBkGuides );
-			CheckDlgButton( IDC_POST_BK_GUIDES_CHECK, m_options.m_postBkGuides );
-			CheckDlgButton( IDC_DISABLE_THEMES_CHECK, !CVisualTheme::IsEnabled() );
+
+			m_options.UpdateControls( this );			// update check-box buttons
 
 			SetupClassesCombo();
 			SetupPartsAndStatesTree();
@@ -267,6 +277,10 @@ BEGIN_MESSAGE_MAP( CMainDialog, CBaseMainDialog )
 	ON_NOTIFY( NM_CUSTOMDRAW, IDC_PARTS_AND_STATES_TREE, OnTvnCustomDraw_PartStateTree )
 	ON_CBN_SELCHANGE( IDC_CLASS_FILTER_COMBO, OnCbnSelChange_ClassFilterCombo )
 	ON_CBN_SELCHANGE( IDC_PARTS_FILTER_COMBO, OnCbnSelChange_PartsFilterCombo )
+	ON_COMMAND( ID_EDIT_COPY, OnEditCopy )
+	ON_UPDATE_COMMAND_UI( ID_EDIT_COPY, OnUpdateEditCopy )
+	ON_COMMAND_RANGE( ID_COPY_THEME, ID_COPY_THEME_PART_AND_STATE, OnCopyTheme )
+	ON_UPDATE_COMMAND_UI_RANGE( ID_COPY_THEME, ID_COPY_THEME_PART_AND_STATE, OnUpdateCopyTheme )
 END_MESSAGE_MAP()
 
 BOOL CMainDialog::OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo )
@@ -339,4 +353,27 @@ void CMainDialog::OnCbnSelChange_PartsFilterCombo( void )
 {
 	SetupPartsAndStatesTree();
 	OutputCurrentTheme();
+}
+
+void CMainDialog::OnEditCopy( void )
+{
+	m_partStateTree.Copy();
+}
+
+void CMainDialog::OnUpdateEditCopy( CCmdUI* pCmdUI )
+{
+	pCmdUI->Enable( m_partStateTree.GetSelectedItem() != NULL );
+}
+
+void CMainDialog::OnCopyTheme( UINT cmdId )
+{
+	CThemeContext selTheme = GetSelThemeContext();
+	std::tstring text = ID_COPY_THEME == cmdId ? selTheme.FormatTheme() : selTheme.FormatThemePartAndState();
+
+	CClipboard::CopyText( text, this );
+}
+
+void CMainDialog::OnUpdateCopyTheme( CCmdUI* pCmdUI )
+{
+	pCmdUI->Enable( GetSelThemeContext().IsValid() );
 }

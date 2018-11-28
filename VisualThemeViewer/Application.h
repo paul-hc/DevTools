@@ -6,6 +6,12 @@
 class CScopedGdiPlusInit;
 
 
+namespace app
+{
+	enum Popup { ListTreePopup };
+}
+
+
 class CApplication : public CBaseApp< CWinApp >
 {
 public:

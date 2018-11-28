@@ -39,10 +39,29 @@ public:
 	CTreeControl( void );
 	virtual ~CTreeControl();
 
-	bool DeleteAllItems( void );
-
+	CMenu& GetContextMenu( void ) { return m_contextMenu; }
 	void StoreImageList( CImageList* pImageList );
 
+	bool DeleteAllItems( void );
+	bool Copy( void );
+
+	// custom imager
+	virtual void SetCustomFileGlyphDraw( bool showGlyphs = true );		// ICustomDrawControl base override
+	void SetCustomImageDraw( ui::ICustomImageDraw* pCustomImageDraw, const CSize& imageSize = CSize( 0, 0 ) );
+
+	// item image
+	const CSize& GetImageSize( void ) const;
+	bool GetIconItemRect( CRect* pItemImageRect, HTREEITEM hItem ) const;
+	bool CustomDrawItemIcon( const NMTVCUSTOMDRAW* pDraw, HICON hIcon, int diFlags = DI_NORMAL | DI_COMPAT );		// works with transparent item image
+
+	// custom item marking: color, bold, italic, underline
+	void MarkItem( HTREEITEM hItem, const ui::CTextEffect& textEfect );
+	void UnmarkItem( HTREEITEM hItem );
+	void ClearMarkedItems( void );
+
+	const ui::CTextEffect* FindTextEffect( HTREEITEM hItem ) const;
+
+	// item interface
 	template< typename ObjectT >
 	ObjectT* GetItemObject( HTREEITEM hItem ) const { return AsPtr< ObjectT >( GetItemData( hItem ) ); }
 
@@ -65,7 +84,6 @@ public:
 	bool RefreshItem( HTREEITEM hItem );				// notifies parent to refresh the item
 
 	// tree algorithms
-
 	template< typename Pred >
 	HTREEITEM FirstThat( Pred pred, HTREEITEM hItem = TVI_ROOT ) const;
 
@@ -76,24 +94,6 @@ public:
 
 	template< typename Type >
 	HTREEITEM FindItemWithData( Type data, HTREEITEM hItem = TVI_ROOT ) const;
-
-	CMenu& GetContextMenu( void ) { return m_contextMenu; }
-
-	// item image
-	const CSize& GetImageSize( void ) const;
-	bool GetIconItemRect( CRect* pItemImageRect, HTREEITEM hItem ) const;
-	bool CustomDrawItemIcon( const NMTVCUSTOMDRAW* pDraw, HICON hIcon, int diFlags = DI_NORMAL | DI_COMPAT );		// works with transparent item image
-
-	// custom item marking: color, bold, italic, underline
-	void MarkItem( HTREEITEM hItem, const ui::CTextEffect& textEfect );
-	void UnmarkItem( HTREEITEM hItem );
-	void ClearMarkedItems( void );
-
-	const ui::CTextEffect* FindTextEffect( HTREEITEM hItem ) const;
-
-	// custom imager
-	virtual void SetCustomFileGlyphDraw( bool showGlyphs = true );		// ICustomDrawControl base override
-	void SetCustomImageDraw( ui::ICustomImageDraw* pCustomImageDraw, const CSize& imageSize = CSize( 0, 0 ) );
 protected:
 	void ClearData( void );
 
@@ -112,12 +112,16 @@ private:
 	// generated overrides
 public:
 	virtual void PreSubclassWindow( void );
+	virtual BOOL PreTranslateMessage( MSG* pMsg );
 protected:
 	afx_msg void OnNcLButtonDown( UINT hitTest, CPoint point );
+	afx_msg void OnContextMenu( CWnd* pWnd, CPoint screenPos );
 	afx_msg BOOL OnTvnSelChanged_Reflect( NMHDR* pNmHdr, LRESULT* pResult );
 	afx_msg BOOL OnTvnRClick_Reflect( NMHDR* pNmHdr, LRESULT* pResult );
 	afx_msg BOOL OnTvnDblClk_Reflect( NMHDR* pNmHdr, LRESULT* pResult );
 	afx_msg BOOL OnNmCustomDraw_Reflect( NMHDR* pNmHdr, LRESULT* pResult );
+	afx_msg void OnEditCopy( void );
+	afx_msg void OnUpdateEditCopy( CCmdUI* pCmdUI );
 
 	DECLARE_MESSAGE_MAP()
 };

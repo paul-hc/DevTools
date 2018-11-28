@@ -187,7 +187,6 @@ public:
 	enum ListPopup { Nowhere, OnSelection, OnGroup, _ListPopupCount };
 
 	void SetPopupMenu( ListPopup popupType, CMenu* pPopupMenu ) { m_pPopupMenu[ popupType ] = pPopupMenu; }		// set pPopupMenu to NULL to allow tracking context menu by parent dialog
-	void SetTrackMenuTarget( CWnd* pTrackMenuTarget ) { m_pTrackMenuTarget = pTrackMenuTarget; }
 
 	virtual CMenu* GetPopupMenu( ListPopup popupType );
 

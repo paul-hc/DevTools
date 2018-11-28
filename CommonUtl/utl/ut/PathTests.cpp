@@ -662,13 +662,14 @@ void CPathTests::TestPathHashValue( void )
 
 	const size_t hashPathChars = path::GetHashValue( s_pathChars );
 	ASSERT( hashPathChars != hashChars );
-	ASSERT_EQUAL( hashPathChars, stdext::hash_value( _T("c:\\images\\fruit.stg>europe\\apple.jpg") ) );		// lower-case and normalized backslashes
 
 	fs::CPath path( pathString );
 	ASSERT_EQUAL( hashPathChars, stdext::hash_value( path ) );
 
 	fs::CFlexPath flexPath( pathString );
 	ASSERT_EQUAL( hashPathChars, stdext::hash_value( flexPath ) );
+
+	ASSERT_EQUAL( stdext::hash_value( fs::CPath( _T("C:\\Images/fruit.stg\\Europe/apple.jpg") ) ), stdext::hash_value( fs::CPath( _T("C:/IMAGES/FRUIT.STG/EUROPE/APPLE.JPG") ) ) );
 }
 
 #include <shlwapi.h>		// for Path... functions
