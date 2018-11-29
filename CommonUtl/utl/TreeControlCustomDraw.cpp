@@ -31,6 +31,9 @@ bool CTreeControlCustomDraw::ApplyItemTextEffect( void )
 ui::CTextEffect CTreeControlCustomDraw::MakeItemEffect( void ) const
 {
 	ui::CTextEffect textEffect = m_pTree->m_ctrlTextEffect;					// start with the global text effect
+	if ( m_pTree->HasItemState( m_hItem, TVIS_BOLD ) )
+		SetFlag( textEffect.m_fontEffect, ui::Bold );
+
 	textEffect.AssignPtr( m_pTree->FindTextEffect( m_hItem ) );				// assign individual item
 
 	m_pTree->CombineTextEffectAt( textEffect, (LPARAM)m_hItem, 0 );			// combine with callback effect (additive operation)

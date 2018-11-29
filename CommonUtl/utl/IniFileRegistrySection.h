@@ -19,9 +19,9 @@ public:
 	size_t GetSize( void ) const;
 
 	// IRegistrySection interface
+	virtual const std::tstring& GetSectionName( void ) const;
 	virtual int GetIntParameter( const TCHAR entryName[], int defaultValue ) const;
 	virtual std::tstring GetStringParameter( const TCHAR entryName[], const TCHAR* pDefaultValue = NULL ) const;
-
 	virtual bool SaveParameter( const TCHAR entryName[], int value ) const;
 	virtual bool SaveParameter( const TCHAR entryName[], const std::tstring& value ) const;
 private:
@@ -29,8 +29,9 @@ private:
 	bool LocateSection( CPropertyLineReader& rLineReader ) const;
 	bool ExtractSectionName( std::string& rOutSectionName, const char* pLineBuffer, int lineSize ) const;
 private:
-	std::string m_section;
-	std::map< std::string, std::string> m_entries;
+	std::tstring m_section;
+	std::string m_sectionAnsi;
+	std::map< std::string, std::tstring > m_entries;		// <name, value>	(ANSI -> WIDE)
 };
 
 

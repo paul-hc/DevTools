@@ -4,7 +4,7 @@
 
 #include "utl/BufferedStatic.h"
 #include "utl/GpUtilities.h"
-#include "utl/OptionContainer.h"
+#include "utl/RegistryOptions.h"
 #include "utl/ThemeItem.h"
 
 
@@ -18,7 +18,7 @@ interface ISampleOptionsCallback
 };
 
 
-struct CThemeSampleOptions : public reg::COptionContainer
+struct CThemeSampleOptions : public CRegistryOptions
 {
 	CThemeSampleOptions( ISampleOptionsCallback* pCallback );
 	~CThemeSampleOptions();
@@ -37,9 +37,11 @@ public:
 	// external options
 	bool& m_enableThemes;
 	bool& m_enableThemesFallback;
+protected:
+	// base overrides
+	virtual void OnOptionChanged( const void* pDataMember );
 
 	// generated stuff
-	virtual void OnToggle_BoolOption( UINT cmdId );
 protected:
 	afx_msg void OnChange_BkColor( void );
 

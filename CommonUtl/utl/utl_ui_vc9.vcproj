@@ -806,6 +806,62 @@
 					>
 				</File>
 			</Filter>
+			<Filter
+				Name="Registry"
+				>
+				<File
+					RelativePath=".\IniFile.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\IniFile.h"
+					>
+				</File>
+				<File
+					RelativePath=".\IniFileRegistrySection.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\IniFileRegistrySection.h"
+					>
+				</File>
+				<File
+					RelativePath=".\IRegistrySection.h"
+					>
+				</File>
+				<File
+					RelativePath=".\PropertyLineReader.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\PropertyLineReader.h"
+					>
+				</File>
+				<File
+					RelativePath=".\Registry.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Registry.h"
+					>
+				</File>
+				<File
+					RelativePath=".\RegistryOptions.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\RegistryOptions.h"
+					>
+				</File>
+				<File
+					RelativePath=".\RegistrySection.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\RegistrySection.h"
+					>
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="utl-UI"
@@ -1795,62 +1851,6 @@
 				</File>
 				<File
 					RelativePath=".\TreeControlCustomDraw.h"
-					>
-				</File>
-			</Filter>
-			<Filter
-				Name="Registry"
-				>
-				<File
-					RelativePath=".\IniFile.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\IniFile.h"
-					>
-				</File>
-				<File
-					RelativePath=".\IniFileRegistrySection.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\IniFileRegistrySection.h"
-					>
-				</File>
-				<File
-					RelativePath=".\IRegistrySection.h"
-					>
-				</File>
-				<File
-					RelativePath=".\OptionContainer.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\OptionContainer.h"
-					>
-				</File>
-				<File
-					RelativePath=".\PropertyLineReader.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\PropertyLineReader.h"
-					>
-				</File>
-				<File
-					RelativePath=".\Registry.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\Registry.h"
-					>
-				</File>
-				<File
-					RelativePath=".\RegistrySection.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\RegistrySection.h"
 					>
 				</File>
 			</Filter>

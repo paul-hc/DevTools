@@ -11,6 +11,7 @@ public:
 	CAppRegistrySection( const std::tstring& section ) : m_pApp( AfxGetApp() ), m_section( section ) { ASSERT_PTR( m_pApp ); }
 
 	// IRegistrySection implementation
+	virtual const std::tstring& GetSectionName( void ) const;
 	virtual int GetIntParameter( const TCHAR entryName[], int defaultValue ) const;
 	virtual std::tstring GetStringParameter( const TCHAR entryName[], const TCHAR* pDefaultValue = NULL ) const;
 
@@ -34,6 +35,7 @@ public:
 	CRegistrySection( HKEY hKey, const std::tstring& section );
 
 	// IRegistrySection implementation
+	virtual const std::tstring& GetSectionName( void ) const;
 	virtual int GetIntParameter( const TCHAR entryName[], int defaultValue ) const;
 	virtual std::tstring GetStringParameter( const TCHAR entryName[], const TCHAR* pDefaultValue = NULL ) const;
 

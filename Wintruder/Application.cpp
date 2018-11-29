@@ -59,7 +59,7 @@ BOOL CApplication::InitInstance( void )
 	if ( proc::IsProcessElevated() )
 		GetLogger().Log( _T("* RUN ELEVATED (ADMIN) *") );
 
-	app::GetOptions()->Load();
+	app::GetOptions()->LoadAll();
 	ui::CCmdInfoStore::m_autoPopDuration = 30000;			// 30 sec popup display time for MFC tooltips
 
 	CAboutBox::m_appIconId = IDD_MAIN_DIALOG;
@@ -74,7 +74,7 @@ BOOL CApplication::InitInstance( void )
 	mainDialog.DoModal();
 	m_pMainWnd = NULL;
 
-	app::GetOptions()->Save();
+	app::GetOptions()->SaveAll();
 	return FALSE;
 }
 

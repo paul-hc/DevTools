@@ -288,7 +288,6 @@
     <ClInclude Include="OleDropSource.h" />
     <ClInclude Include="OleDropTarget.h" />
     <ClInclude Include="OleUtils.h" />
-    <ClInclude Include="OptionContainer.h" />
     <ClInclude Include="Path.h" />
     <ClInclude Include="PathFormatter.h" />
     <ClInclude Include="PathGenerator.h" />
@@ -306,6 +305,7 @@
     <ClInclude Include="RandomUtilities.h" />
     <ClInclude Include="Range.h" />
     <ClInclude Include="Registry.h" />
+    <ClInclude Include="RegistryOptions.h" />
     <ClInclude Include="RegistrySection.h" />
     <ClInclude Include="ReportListControl.h" />
     <ClInclude Include="ReportListCustomDraw.h" />
@@ -483,7 +483,6 @@
     <ClCompile Include="OleDropSource.cpp" />
     <ClCompile Include="OleDropTarget.cpp" />
     <ClCompile Include="OleUtils.cpp" />
-    <ClCompile Include="OptionContainer.cpp" />
     <ClCompile Include="Path.cpp" />
     <ClCompile Include="PathFormatter.cpp" />
     <ClCompile Include="PathGenerator.cpp" />
@@ -498,6 +497,7 @@
     <ClCompile Include="ProgressDialog.cpp" />
     <ClCompile Include="PropertyLineReader.cpp" />
     <ClCompile Include="Registry.cpp" />
+    <ClCompile Include="RegistryOptions.cpp" />
     <ClCompile Include="RegistrySection.cpp" />
     <ClCompile Include="ReportListControl.cpp" />
     <ClCompile Include="ReportListCustomDraw.cpp" />

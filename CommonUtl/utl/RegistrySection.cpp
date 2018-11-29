@@ -10,6 +10,11 @@
 
 // CAppRegistrySection implementation
 
+const std::tstring& CAppRegistrySection::GetSectionName( void ) const
+{
+	return m_section;
+}
+
 int CAppRegistrySection::GetIntParameter( const TCHAR entryName[], int defaultValue ) const
 {
 	return m_pApp->GetProfileInt( m_section.c_str(), entryName, defaultValue );
@@ -85,6 +90,11 @@ CRegistrySection::CRegistrySection( HKEY hKey, const std::tstring& section )
 	: m_hKey( hKey )
 	, m_section( section )
 {
+}
+
+const std::tstring& CRegistrySection::GetSectionName( void ) const
+{
+	return m_section;
 }
 
 int CRegistrySection::GetIntParameter( const TCHAR entryName[], int defaultValue ) const

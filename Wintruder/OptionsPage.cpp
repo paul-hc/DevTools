@@ -61,7 +61,7 @@ void COptionsPage::DoDataExchange( CDataExchange* pDX )
 
 	if ( DialogOutput == pDX->m_bSaveAndValidate )
 	{
-		ui::UpdateControlsUI( this );		// update check-boxes (check-state and enabling)
+		m_pOptions->UpdateControls( this );		// update check-boxes (check-state and enabling)
 
 		m_frameSizeEdit.SetNumber( m_pOptions->m_frameSize );
 		m_frameStyleCombo.SetCurSel( m_pOptions->m_frameStyle );

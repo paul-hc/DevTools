@@ -4,6 +4,7 @@
 #include "PropertyLineReader.h"
 #include "FileSystem.h"
 #include "RuntimeException.h"
+#include "StringUtilities.h"
 #include <fstream>
 
 #ifdef _DEBUG
@@ -53,13 +54,15 @@
 */
 
 CIniFileRegistrySection::CIniFileRegistrySection( std::istream& rParameterStream, const std::tstring& section )
-	: m_section( str::ToAnsi( section.c_str() ) )
+	: m_section( section )
+	, m_sectionAnsi( str::ToAnsi( m_section.c_str() ) )
 {
 	LoadSection( rParameterStream );
 }
 
 CIniFileRegistrySection::CIniFileRegistrySection( const fs::CPath& iniFilePath, const std::tstring& section )
-	: m_section( str::ToAnsi( section.c_str() ) )
+	: m_section( section )
+	, m_sectionAnsi( str::ToAnsi( m_section.c_str() ) )
 {
 	if ( iniFilePath.FileExist() )
 	{
@@ -79,17 +82,28 @@ size_t CIniFileRegistrySection::GetSize( void ) const
 	return m_entries.size();
 }
 
+const std::tstring& CIniFileRegistrySection::GetSectionName( void ) const
+{
+	return m_section;
+}
+
 int CIniFileRegistrySection::GetIntParameter( const TCHAR entryName[], int defaultValue ) const
 {
-	std::map< std::string, std::string >::const_iterator iter = m_entries.find( str::ToAnsi( entryName ) );
-	return iter != m_entries.end() ? atoi( iter->second.c_str() ) : defaultValue;
+	std::map< std::string, std::tstring >::const_iterator itEntry = m_entries.find( str::ToAnsi( entryName ) );
+	if ( itEntry != m_entries.end() )
+	{
+		int value = defaultValue;
+		if ( num::ParseNumber( value, itEntry->second ) )
+			return value;
+	}
+	return defaultValue;
 }
 
 std::tstring CIniFileRegistrySection::GetStringParameter( const TCHAR entryName[], const TCHAR* pDefaultValue/* = NULL*/ ) const
 {
-	std::map< std::string, std::string>::const_iterator iter = m_entries.find( str::ToAnsi( entryName ) );
-	if ( iter != m_entries.end() )
-		return str::FromAnsi( iter->second.c_str() );
+	std::map< std::string, std::tstring >::const_iterator itEntry = m_entries.find( str::ToAnsi( entryName ) );
+	if ( itEntry != m_entries.end() )
+		return itEntry->second;
 
 	return pDefaultValue != NULL ? pDefaultValue : std::tstring();
 }
@@ -122,7 +136,7 @@ void CIniFileRegistrySection::LoadSection( std::istream& rParameterStream )
 	{
 		std::string newSection;
 		if ( ExtractSectionName( newSection, lineReader.m_lineBuffer.get(), lineSize ) )
-			if ( m_section != newSection )
+			if ( m_sectionAnsi != newSection )
 				break;		// end of current section
 			else
 				continue;	// skip repeated section line
@@ -150,25 +164,23 @@ void CIniFileRegistrySection::LoadSection( std::istream& rParameterStream )
 		}
 
 		std::string key( lineReader.m_lineBuffer.get(), keySize );
-		key.erase ( key.find_last_not_of ( " \t" ) + 1 );
+		key.erase( key.find_last_not_of ( " \t" ) + 1 );
 
 		std::string value( lineReader.m_lineBuffer.get() + valueStart, lineSize - valueStart );
-		value.erase ( value.find_last_not_of ( " \t" ) + 1 );
-		value.erase ( 0, value.find_first_not_of ( " \t" ) );
+		value.erase( value.find_last_not_of ( " \t" ) + 1 );
+		value.erase( 0, value.find_first_not_of ( " \t" ) );
 
 		// replace double slash with single slash
 		for ( size_t index = 0; ( index = value.find( "\\\\" ) ) != std::string::npos; )
-		{
 			value.replace( index, 2, "\\" );
-		}
 
-		m_entries[key] = value;
+		m_entries[ key ] = str::FromUtf8( value.c_str() );
 	}
 }
 
 bool CIniFileRegistrySection::LocateSection( CPropertyLineReader& rLineReader ) const
 {
-	if ( m_section.empty() )
+	if ( m_sectionAnsi.empty() )
 		return true;	// read non-section parameters if registry section is not specified
 
 	// skip lines until the specified section
@@ -177,7 +189,7 @@ bool CIniFileRegistrySection::LocateSection( CPropertyLineReader& rLineReader ) 
 	{
 		std::string newSection;
 		if ( ExtractSectionName( newSection, rLineReader.m_lineBuffer.get(), lineSize ) )
-			if ( m_section == newSection )
+			if ( m_sectionAnsi == newSection )
 				return true;
 	}
 

@@ -24,7 +24,7 @@ namespace reg
 // CThemeSampleOptions implementation
 
 CThemeSampleOptions::CThemeSampleOptions( ISampleOptionsCallback* pCallback )
-	: reg::COptionContainer( reg::section )
+	: CRegistryOptions( reg::section, true )
 	, m_pCallback( pCallback )
 	, m_useBorder( true )
 	, m_preBkGuides( false )
@@ -41,12 +41,12 @@ CThemeSampleOptions::CThemeSampleOptions( ISampleOptionsCallback* pCallback )
 	AddOption( MAKE_OPTION( &m_enableThemes ), IDC_ENABLE_THEMES_CHECK );
 	AddOption( MAKE_OPTION( &m_enableThemesFallback ), IDC_ENABLE_THEMES_FALLBACK_CHECK );
 
-	LoadOptions();
+	LoadAll();
 }
 
 CThemeSampleOptions::~CThemeSampleOptions()
 {
-	SaveOptions();
+	SaveAll();
 }
 
 COLORREF CThemeSampleOptions::GetBkColor( void ) const
@@ -64,26 +64,21 @@ CHistoryComboBox* CThemeSampleOptions::GetBkColorCombo( void ) const
 	return static_cast< CHistoryComboBox* >( m_pCallback->GetWnd()->GetDlgItem( IDC_BK_COLOR_COMBO ) );
 }
 
-
-BEGIN_MESSAGE_MAP( CThemeSampleOptions, COptionContainer )
-	ON_CBN_EDITCHANGE( IDC_BK_COLOR_COMBO, OnChange_BkColor )
-	ON_CBN_SELCHANGE( IDC_BK_COLOR_COMBO, OnChange_BkColor )
-END_MESSAGE_MAP()
-
-void CThemeSampleOptions::OnToggle_BoolOption( UINT cmdId )
+void CThemeSampleOptions::OnOptionChanged( const void* pDataMember )
 {
-	__super::OnToggle_BoolOption( cmdId );
+	__super::OnOptionChanged( pDataMember );
 
-	switch ( cmdId )
-	{
-		case IDC_ENABLE_THEMES_CHECK:
-		case IDC_ENABLE_THEMES_FALLBACK_CHECK:
-			m_pCallback->GetWnd()->Invalidate();		// redraw the resize gripper
-			break;
-	}
+	if ( pDataMember == &m_enableThemes || pDataMember == &m_enableThemesFallback )
+		m_pCallback->GetWnd()->Invalidate();		// redraw the resize gripper
 
 	m_pCallback->RedrawSamples();
 }
+
+
+BEGIN_MESSAGE_MAP( CThemeSampleOptions, CRegistryOptions )
+	ON_CBN_EDITCHANGE( IDC_BK_COLOR_COMBO, OnChange_BkColor )
+	ON_CBN_SELCHANGE( IDC_BK_COLOR_COMBO, OnChange_BkColor )
+END_MESSAGE_MAP()
 
 void CThemeSampleOptions::OnChange_BkColor( void )
 {
