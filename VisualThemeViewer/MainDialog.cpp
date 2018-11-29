@@ -80,9 +80,10 @@ CMainDialog::CMainDialog( void )
 	m_samples[ Medium ].SetSizeToContentMode( IDC_CORE_SIZE_STATIC );
 	m_samples[ Large ].m_sampleText = _T("Some Sample Themed Text");
 
+	m_partStateTree.SetTextEffectCallback( this );
+	m_partStateTree.SetTrackMenuTarget( this );
 	m_partStateTree.GetCtrlAccel().Load( IDC_PARTS_AND_STATES_TREE );
 	ui::LoadPopupMenu( m_partStateTree.GetContextMenu(), IDR_CONTEXT_MENU, app::ListTreePopup );
-	m_partStateTree.SetTrackMenuTarget( this );
 
 	m_toolbar.GetStrip()
 		.AddButton( ID_COPY_THEME )
@@ -104,6 +105,24 @@ void CMainDialog::RedrawSamples( void )
 {
 	for ( int i = 0; i != SampleCount; ++i )
 		m_samples[ i ].RedrawWindow( NULL, NULL );
+}
+
+void CMainDialog::CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARAM rowKey, int subItem ) const
+{
+	subItem;
+
+	HTREEITEM hItem = reinterpret_cast< HTREEITEM >( rowKey );
+	const IThemeNode* pThemeNode = m_partStateTree.GetItemObject< IThemeNode >( hItem );
+
+	switch ( pThemeNode->GetRelevance() )
+	{
+		case MediumRelevance:
+			rTextEffect.m_textColor = GetSysColor( COLOR_GRAYTEXT );
+			break;
+		case ObscureRelevance:
+			rTextEffect.m_textColor = color::Grey25;
+			break;
+	}
 }
 
 void CMainDialog::SetupClassesCombo( void )
@@ -274,7 +293,6 @@ BEGIN_MESSAGE_MAP( CMainDialog, CBaseMainDialog )
 	ON_WM_DESTROY()
 	ON_CBN_SELCHANGE( IDC_CLASS_COMBO, OnCbnSelChange_ClassCombo )
 	ON_NOTIFY( TVN_SELCHANGED, IDC_PARTS_AND_STATES_TREE, OnTVnSelChanged_PartStateTree )
-	ON_NOTIFY( NM_CUSTOMDRAW, IDC_PARTS_AND_STATES_TREE, OnTvnCustomDraw_PartStateTree )
 	ON_CBN_SELCHANGE( IDC_CLASS_FILTER_COMBO, OnCbnSelChange_ClassFilterCombo )
 	ON_CBN_SELCHANGE( IDC_PARTS_FILTER_COMBO, OnCbnSelChange_PartsFilterCombo )
 	ON_COMMAND( ID_EDIT_COPY, OnEditCopy )
@@ -318,28 +336,6 @@ void CMainDialog::OnTVnSelChanged_PartStateTree( NMHDR* pNmHdr, LRESULT* pResult
 		OutputCurrentTheme();
 
 	*pResult = 0;
-}
-
-void CMainDialog::OnTvnCustomDraw_PartStateTree( NMHDR* pNmHdr, LRESULT* pResult )
-{
-	NMTVCUSTOMDRAW* pCustomDraw = (NMTVCUSTOMDRAW*)pNmHdr;
-	const IThemeNode* pThemeNode = reinterpret_cast< const IThemeNode* >( pCustomDraw->nmcd.lItemlParam );
-
-	*pResult = CDRF_DODEFAULT;
-	switch ( pCustomDraw->nmcd.dwDrawStage )
-	{
-		case CDDS_PREPAINT:
-			*pResult = CDRF_NOTIFYITEMDRAW;
-			break;
-		case CDDS_ITEMPREPAINT:
-			if ( !( GetFocus() == &m_partStateTree && HasFlag( pCustomDraw->nmcd.uItemState, CDIS_SELECTED ) ) )	// not sel focused?
-				switch ( pThemeNode->GetRelevance() )
-				{
-					case MediumRelevance:  pCustomDraw->clrText = color::Grey60; *pResult = CDRF_NEWFONT; break;
-					case ObscureRelevance: pCustomDraw->clrText = color::Grey50; *pResult = CDRF_NEWFONT; break;
-				}
-			break;
-	}
 }
 
 void CMainDialog::OnCbnSelChange_ClassFilterCombo( void )

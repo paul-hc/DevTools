@@ -14,6 +14,7 @@ struct CThemeContext;
 class CMainDialog
 	: public CBaseMainDialog
 	, private ISampleOptionsCallback
+	, private ui::ITextEffectCallback
 {
 public:
 	CMainDialog( void );
@@ -22,6 +23,9 @@ private:
 	// ISampleOptionsCallback interface
 	virtual CWnd* GetWnd( void ) ;
 	virtual void RedrawSamples( void );
+
+	// ui::ITextEffectCallback interface
+	virtual void CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARAM rowKey, int subItem ) const;
 
 	CThemeContext GetSelThemeContext( void ) const;
 	void SetupClassesCombo( void );
@@ -54,7 +58,6 @@ protected:
 	afx_msg void OnDestroy( void );
 	afx_msg void OnCbnSelChange_ClassCombo( void );
 	afx_msg void OnTVnSelChanged_PartStateTree( NMHDR* pNmHdr, LRESULT* pResult );
-	afx_msg void OnTvnCustomDraw_PartStateTree( NMHDR* pNmHdr, LRESULT* pResult );
 	afx_msg void OnCbnSelChange_ClassFilterCombo( void );
 	afx_msg void OnCbnSelChange_PartsFilterCombo( void );
 	afx_msg void OnEditCopy( void );
