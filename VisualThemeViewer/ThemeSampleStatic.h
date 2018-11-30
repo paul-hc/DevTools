@@ -3,50 +3,10 @@
 #pragma once
 
 #include "utl/BufferedStatic.h"
-#include "utl/RegistryOptions.h"
 #include "utl/ThemeItem.h"
 
 
-class CHistoryComboBox;
-
-
-interface ISampleOptionsCallback
-{
-	virtual CWnd* GetWnd( void ) = 0;
-	virtual void RedrawSamples( void ) = 0;
-};
-
-
-class CThemeSampleOptions : public CRegistryOptions
-{
-public:
-	CThemeSampleOptions( ISampleOptionsCallback* pCallback );
-	~CThemeSampleOptions();
-
-	COLORREF GetBkColor( void ) const;
-private:
-	CHistoryComboBox* GetBkColorCombo( void ) const;
-public:
-	ISampleOptionsCallback* m_pCallback;
-	std::tstring m_bkColorText;
-	bool m_useBorder;
-	bool m_preBkGuides;
-	bool m_postBkGuides;
-	bool m_showThemeGlyphs;
-
-	// external options
-	bool& m_enableThemes;
-	bool& m_enableThemesFallback;
-protected:
-	// base overrides
-	virtual void OnOptionChanged( const void* pDataMember );
-
-	// generated stuff
-protected:
-	afx_msg void OnChange_BkColor( void );
-
-	DECLARE_MESSAGE_MAP()
-};
+class COptions;
 
 
 class CThemeSampleStatic : public CBufferedStatic
@@ -55,7 +15,7 @@ public:
 	CThemeSampleStatic( void );
 	virtual ~CThemeSampleStatic();
 
-	void SetOptions( const CThemeSampleOptions* pOptions ) { m_pOptions = pOptions; }
+	void SetOptions( const COptions* pOptions ) { m_pOptions = pOptions; }
 	void SetThemeItem( const CThemeItem& themeItem );
 
 	bool InSizeToContentMode( void ) const { return m_stcInfoId != 0; }
@@ -76,7 +36,7 @@ public:
 	std::tstring m_sampleText;
 	UINT m_stcInfoId;				// labels for size-to-content mode
 private:
-	const CThemeSampleOptions* m_pOptions;
+	const COptions* m_pOptions;
 	CThemeItem m_themeItem;
 
 	enum { Margin = 8 };

@@ -5,6 +5,7 @@
 #include "utl/HistoryComboBox.h"
 #include "utl/ReportListControl.h"
 #include "utl/TreeControl.h"
+#include "Options.h"
 #include "ThemeStore.h"
 #include "ThemeSampleStatic.h"
 
@@ -25,10 +26,13 @@ private:
 	// ISampleOptionsCallback interface
 	virtual CWnd* GetWnd( void ) ;
 	virtual void RedrawSamples( void );
+	virtual void UpdateGlyphPreview( void );
+	virtual void UpdateExplorerTheme( void );
 
 	// ui::ITextEffectCallback interface
 	virtual void CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARAM rowKey, int subItem, CListLikeCtrlBase* pCtrl ) const;
 
+	void InitCustomDraw( void );
 	CThemeContext GetSelThemeContext( void ) const;
 	void SetupClassesList( void );
 	void SetupPartsAndStatesTree( void );
@@ -36,9 +40,10 @@ private:
 
 	static std::tstring FormatCounts( unsigned int count, unsigned int total );
 private:
-	CThemeSampleOptions m_options;
+	COptions m_options;
 	CThemeStore m_themeStore;
-	std::auto_ptr< CThemeCustomDraw > m_pCustomDraw;
+	std::auto_ptr< CThemeCustomDraw > m_pListCustomDraw;
+	std::auto_ptr< CThemeCustomDraw > m_pTreeCustomDraw;
 private:
 	// enum { IDD = IDD_MAIN_DIALOG };
 	enum ClassColumn { ClassName, RelevanceTag };

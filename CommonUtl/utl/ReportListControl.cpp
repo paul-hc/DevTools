@@ -1182,7 +1182,7 @@ int CReportListControl::InsertObjectItem( int index, const utl::ISubject* pObjec
 	}
 
 	if ( ui::Transparent_Image == imageIndex )
-		imageIndex = safe_ptr( m_pCustomImager.get() )->GetTranspImageIndex();
+		imageIndex = m_pCustomImager.get() != NULL ? m_pCustomImager->GetTranspImageIndex() : 0;
 
 	int insertIndex = InsertItem( LVIF_TEXT | LVIF_IMAGE | LVIF_PARAM, index, pText, 0, 0, imageIndex, reinterpret_cast< LPARAM >( pObject ) );
 	ASSERT( insertIndex != -1 );
@@ -1198,7 +1198,7 @@ void CReportListControl::SetSubItemTextPtr( int index, int subItem, const TCHAR*
 	ASSERT( subItem > 0 );
 
 	if ( ui::Transparent_Image == imageIndex )
-		imageIndex = safe_ptr( m_pCustomImager.get() )->GetTranspImageIndex();
+		imageIndex = m_pCustomImager.get() != NULL ? m_pCustomImager->GetTranspImageIndex() : 0;
 	else if ( str::IsEmpty( pText ) )
 		imageIndex = ui::No_Image;			// clear the image for empty text
 

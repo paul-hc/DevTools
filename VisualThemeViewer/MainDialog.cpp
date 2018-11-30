@@ -32,12 +32,17 @@ namespace reg
 
 namespace layout
 {
-	enum { SizeSamplesPct = 25, MoveSamplesPct = SizeSamplesPct * 15 / 10 /* x1.5 */ };
+	enum { TopPct = 30, BottomPct = 100 - TopPct, SizeSamplesPct = 25, MoveSamplesPct = SizeSamplesPct * 15 / 10 /* x1.5 */ };
 
 	static CLayoutStyle layoutStyles[] =
 	{
-		//{ IDC_THEME_CLASS_LIST, SizeY },
-		{ IDC_PARTS_AND_STATES_TREE, SizeY },
+		{ IDC_THEME_CLASS_LIST, pctSizeY( TopPct ) },
+
+		{ IDC_PARTS_AND_STATES_LABEL, pctMoveY( TopPct ) },
+		{ IDC_PARTS_FILTER_STATIC, pctMoveY( TopPct ) },
+		{ IDC_PARTS_FILTER_COMBO, pctMoveY( TopPct ) },
+		{ IDC_PARTS_AND_STATES_TREE, pctMoveY( TopPct ) | pctSizeY( BottomPct ) },
+
 		{ IDC_SMALL_SAMPLE_STATIC, pctMoveX( MoveSamplesPct ) | pctSizeX( SizeSamplesPct ) },
 		{ IDC_TINY_SAMPLE_STATIC, MoveX },
 		{ IDC_MEDIUM_SAMPLE_STATIC, pctMoveX( MoveSamplesPct ) | pctSizeX( SizeSamplesPct ) },
@@ -60,33 +65,28 @@ namespace layout
 CMainDialog::CMainDialog( void )
 	: CBaseMainDialog( IDD_MAIN_DIALOG )
 	, m_options( this )
-	, m_pCustomDraw( new CThemeCustomDraw( &m_options, _T("Text") ) )
 	, m_classList( IDC_THEME_CLASS_LIST )
 {
 	m_regSection = reg::section_dialog;
 	RegisterCtrlLayout( layout::layoutStyles, COUNT_OF( layout::layoutStyles ) );
 	m_themeStore.SetupNotImplementedThemes();				// mark not implemented themes as NotImplemented
 
-	static const CSize s_themePreviewSize( 40, 24 ), s_themePreviewSizeLarge( 50, 32 );
 	m_classList.SetSection( reg::section_classList );
 	m_classList.SetTextEffectCallback( this );
-	m_classList.SetCustomImageDraw( m_pCustomDraw.get(), s_themePreviewSize, s_themePreviewSizeLarge );
-	//m_classList.SetUseExplorerTheme( false );
-	m_classList.AddRecordCompare( pred::NewComparator( pred::CompareCode() ) );						// default row item comparator
+	m_classList.AddRecordCompare( pred::NewComparator( pred::CompareCode() ) );							// default row item comparator
 	m_classList.AddColumnCompare( RelevanceTag, pred::NewComparator( pred::CompareRelevance() ) );		// order date-time descending by default
 
-	m_partStateTree.SetUseExplorerTheme( false );
 	m_partStateTree.SetTextEffectCallback( this );
 	m_partStateTree.SetTrackMenuTarget( this );
 	m_partStateTree.GetCtrlAccel().Load( IDC_PARTS_AND_STATES_TREE );
 	ui::LoadPopupMenu( m_partStateTree.GetContextMenu(), IDR_CONTEXT_MENU, app::ListTreePopup );
-	m_partStateTree.SetCustomImageDraw( m_pCustomDraw.get(), s_themePreviewSize );
 
 	m_toolbar.GetStrip()
 		.AddButton( ID_COPY_THEME )
 		.AddButton( ID_COPY_THEME_PART_AND_STATE )
 		.AddSeparator()
-		.AddButton( ID_SHOW_THEME_GLYPHS_CHECK );
+		.AddButton( ID_PREVIEW_THEME_GLYPHS_CHECK )
+		.AddButton( ID_USE_EXPLORER_THEME_CHECK );
 
 	for ( int i = 0; i != SampleCount; ++i )
 		m_samples[ i ].SetOptions( &m_options );
@@ -94,10 +94,30 @@ CMainDialog::CMainDialog( void )
 	m_samples[ Tiny ].m_coreSize = CSize( 10, 10 );
 	m_samples[ Medium ].SetSizeToContentMode( IDC_CORE_SIZE_STATIC );
 	m_samples[ Large ].m_sampleText = _T("Some Sample Themed Text");
+
+	InitCustomDraw();
+	UpdateGlyphPreview();
+	UpdateExplorerTheme();
 }
 
 CMainDialog::~CMainDialog()
 {
+}
+
+void CMainDialog::InitCustomDraw( void )
+{
+	static const CSize s_themePreviewSize( 40, 24 ), s_themePreviewSizeLarge( 50, 32 );
+
+	m_pListCustomDraw.reset( new CThemeCustomDraw( &m_options ) );
+	m_pListCustomDraw->m_imageSize[ ui::SmallGlyph ] = s_themePreviewSize;
+	m_pListCustomDraw->m_imageSize[ ui::LargeGlyph ] = s_themePreviewSizeLarge;
+	m_pListCustomDraw->m_imageMargin = CSize( 0, 2 );
+	m_pListCustomDraw->m_textMargin = 2;
+
+	m_pTreeCustomDraw.reset( new CThemeCustomDraw( &m_options ) );
+	m_pTreeCustomDraw->m_imageSize[ ui::SmallGlyph ] = s_themePreviewSize;
+	m_pTreeCustomDraw->m_imageMargin = CSize( 0, 1 );
+	m_pTreeCustomDraw->m_textMargin = 2;
 }
 
 CWnd* CMainDialog::GetWnd( void )
@@ -110,7 +130,20 @@ void CMainDialog::RedrawSamples( void )
 	for ( int i = 0; i != SampleCount; ++i )
 		m_samples[ i ].RedrawWindow( NULL, NULL );
 
+	m_classList.Invalidate();
 	m_partStateTree.Invalidate();
+}
+
+void CMainDialog::UpdateGlyphPreview( void )
+{
+	m_classList.SetCustomImageDraw( m_options.m_previewThemeGlyphs ? m_pListCustomDraw.get() : NULL );
+	m_partStateTree.SetCustomImageDraw( m_options.m_previewThemeGlyphs ? m_pTreeCustomDraw.get() : NULL );
+}
+
+void CMainDialog::UpdateExplorerTheme( void )
+{
+	m_classList.SetUseExplorerTheme( m_options.m_useExplorerTheme );
+	m_partStateTree.SetUseExplorerTheme( m_options.m_useExplorerTheme );
 }
 
 void CMainDialog::CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARAM rowKey, int subItem, CListLikeCtrlBase* pCtrl ) const
@@ -183,7 +216,7 @@ void CMainDialog::SetupPartsAndStatesTree( void )
 
 	m_partStateTree.DeleteAllItems();
 
-	for ( std::vector< CThemePart* >::const_iterator itPart = pSelThemeClass->m_parts.begin(); itPart != pSelThemeClass->m_parts.end(); ++itPart )
+	for ( auto itPart = pSelThemeClass->m_parts.begin(); itPart != pSelThemeClass->m_parts.end(); ++itPart )
 		if ( ( *itPart )->GetRelevance() <= partsStatesFilter )
 		{
 			HTREEITEM hPartItem = m_partStateTree.InsertObjectItem( TVI_ROOT, *itPart, ui::Transparent_Image, TVIS_BOLD | TVIS_EXPANDED );
@@ -238,7 +271,7 @@ CThemeContext CMainDialog::GetSelThemeContext( void ) const
 
 	if ( HTREEITEM hSelItem = m_partStateTree.GetSelectedItem() )
 		if ( IThemeNode* pNode = m_partStateTree.GetItemObject< IThemeNode >( hSelItem ) )
-			switch ( pNode->GetThemeNode() )
+			switch ( pNode->GetNodeType() )
 			{
 				case IThemeNode::State:
 					selTheme.m_pState = static_cast< CThemeState* >( pNode );

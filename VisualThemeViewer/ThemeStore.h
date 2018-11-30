@@ -18,9 +18,9 @@ const CEnumTags& GetTags_Relevance( void );
 
 interface IThemeNode : public utl::ISubject
 {
-	enum ThemeNode { Class = 1, Part, State };
+	enum NodeType { Class = 1, Part, State };
 
-	virtual ThemeNode GetThemeNode( void ) const = 0;
+	virtual NodeType GetNodeType( void ) const = 0;
 	virtual Relevance GetRelevance( void ) const = 0;
 
 	virtual const IThemeNode* GetParentNode( void ) const = 0;
@@ -48,7 +48,7 @@ struct CThemeState : public CBaseNode
 {
 	CThemeState( int stateId, const std::wstring& stateName, Relevance relevance ) : CBaseNode( relevance ), m_stateId( stateId ), m_stateName( stateName ) {}
 
-	virtual ThemeNode GetThemeNode( void ) const { return State; }
+	virtual NodeType GetNodeType( void ) const { return State; }
 	virtual const std::tstring& GetCode( void ) const { return m_stateName; }
 	virtual CThemeItem MakeThemeItem( void ) const;
 public:
@@ -62,7 +62,7 @@ struct CThemePart : public CBaseNode
 	CThemePart( int partId, const std::wstring& partName, Relevance relevance ) : CBaseNode( relevance ), m_partId( partId ), m_partName( partName ) {}
 	~CThemePart() { utl::ClearOwningContainer( m_states ); }
 
-	virtual ThemeNode GetThemeNode( void ) const { return Part; }
+	virtual NodeType GetNodeType( void ) const { return Part; }
 	virtual const std::tstring& GetCode( void ) const { return m_partName; }
 	virtual CThemeItem MakeThemeItem( void ) const;
 
@@ -72,6 +72,8 @@ public:
 	int m_partId;
 	std::wstring m_partName;
 	std::vector< CThemeState* > m_states;
+private:
+	CThemeState* m_pPreviewState;
 };
 
 
@@ -80,7 +82,7 @@ struct CThemeClass : public CBaseNode
 	CThemeClass( const std::wstring& className, Relevance relevance ) : CBaseNode( relevance ), m_className( className ) {}
 	~CThemeClass() { utl::ClearOwningContainer( m_parts ); }
 
-	virtual ThemeNode GetThemeNode( void ) const { return Class; }
+	virtual NodeType GetNodeType( void ) const { return Class; }
 	virtual const std::tstring& GetCode( void ) const { return m_className; }
 	virtual CThemeItem MakeThemeItem( void ) const;
 
@@ -90,6 +92,8 @@ struct CThemeClass : public CBaseNode
 public:
 	std::wstring m_className;
 	std::vector< CThemePart* > m_parts;
+	CThemePart* m_pPreviewPart;
+	CThemeState* m_pPreviewState;
 };
 
 

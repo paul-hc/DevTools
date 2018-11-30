@@ -2,7 +2,7 @@
 #include "stdafx.h"
 #include "ThemeCustomDraw.h"
 #include "ThemeStore.h"
-#include "ThemeSampleStatic.h"
+#include "Options.h"
 #include "utl/VisualTheme.h"
 
 #ifdef _DEBUG
@@ -103,10 +103,27 @@ namespace hlp
 }
 
 
-CSize CThemeCustomDraw::GetItemImageSize( ui::GlyphGauge glyphGauge /*= ui::SmallGlyph*/ ) const
+// CThemeCustomDraw implementation
+
+CThemeCustomDraw::CThemeCustomDraw( const COptions* pOptions, const std::tstring& itemCaption /*= _T("text")*/ )
+	: m_pOptions( pOptions )
+	, m_boundsSize( 0, 0 )
+	, m_imageMargin( 0, 1 )
+	, m_textMargin( 0 )
+	, m_itemCaption( itemCaption )
 {
-	glyphGauge;
-	ASSERT( false );		// shouldn't be called since the ctrl drives bounds size
+	m_imageSize[ ui::SmallGlyph ] = CSize( 16, 16 );
+	m_imageSize[ ui::LargeGlyph ] = CSize( 32, 32 );
+
+	ASSERT_PTR( m_pOptions );
+}
+
+CSize CThemeCustomDraw::GetItemImageSize( ui::GlyphGauge glyphGauge /*= ui::SmallGlyph*/ ) const
+{	// called when this drives bounds size (default, more accurate for tweaking margins for list vs tree)
+	m_boundsSize = m_imageSize[ glyphGauge ];
+	m_boundsSize.cx += m_imageMargin.cx * 2;
+	m_boundsSize.cy += m_imageMargin.cy * 2;
+	m_boundsSize.cx += m_textMargin;
 	return m_boundsSize;
 }
 
@@ -127,7 +144,9 @@ bool CThemeCustomDraw::DrawItemImage( CDC* pDC, const utl::ISubject* pSubject, c
 	CThemeItem themeItem = pThemeNode->MakeThemeItem();
 
 	CRect rect = itemRect;
-	rect.DeflateRect( 0, 1 );
+	rect.DeflateRect( m_imageMargin );
+	rect.right -= m_textMargin;
+
 	if ( !themeItem.DrawBackground( *pDC, rect ) )
 	{
 		hlp::DrawError( pDC, rect );
@@ -138,12 +157,15 @@ bool CThemeCustomDraw::DrawItemImage( CDC* pDC, const utl::ISubject* pSubject, c
 		if ( hlp::UseText( themeItem ) )
 		{
 			CRect textRect = rect;
-			textRect.left += 5;
+			textRect.left += TextMargin;
 			themeItem.DrawText( *pDC, textRect, m_itemCaption.c_str(), DT_SINGLELINE | DT_LEFT | DT_VCENTER | DT_WORD_ELLIPSIS );
 		}
 
 	if ( m_pOptions->m_postBkGuides )
-		hlp::DrawFrameGuides( pDC, itemRect, Color( 96, 0, 0, 255 ) );
+	{
+		rect.InflateRect( 1, 1 );
+		hlp::DrawFrameGuides( pDC, rect, Color( 96, 0, 0, 255 ) );
+	}
 
 	return true;
 }

@@ -26,7 +26,7 @@ enum SEARCHEDITBOXTEXT_STATES { SEBTS_FORMATTED = 1 };
 
 const CEnumTags& GetTags_Relevance( void )
 {
-	static const CEnumTags s_tags( _T("High|Medium|Obscure|Not Implemented") );
+	static const CEnumTags s_tags( _T("High|Medium|Obscure") );
 	return s_tags;
 }
 
@@ -96,7 +96,7 @@ CThemeItem CThemeClass::MakeThemeItem( void ) const
 	const CThemePart* pFirstPart = !m_parts.empty() ? m_parts.front() : NULL;
 	const CThemeState* pFirstState = pFirstPart != NULL && !pFirstPart->m_states.empty() ? pFirstPart->m_states.front() : NULL;
 
-	return CThemeItem( m_className.c_str(), pFirstPart != NULL ? pFirstPart->m_partId : 0, pFirstState != NULL ? pFirstState->m_stateId : 0 );
+	return CThemeItem( m_className.c_str(), pFirstPart != NULL ? pFirstPart->m_partId : 1, pFirstState != NULL ? pFirstState->m_stateId : 0 );
 }
 
 bool CThemeClass::SetupNotImplemented( CVisualTheme& rTheme, HDC hDC )

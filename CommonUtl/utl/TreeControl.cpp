@@ -105,7 +105,7 @@ HTREEITEM CTreeControl::InsertObjectItem( HTREEITEM hParent, const utl::ISubject
 		}
 
 	if ( ui::Transparent_Image == imageIndex )
-		imageIndex = safe_ptr( m_pCustomImager.get() )->GetTranspImageIndex();
+		imageIndex = m_pCustomImager.get() != NULL ? m_pCustomImager->GetTranspImageIndex() : 0;
 
 	UINT mask = TVIF_TEXT | TVIF_PARAM | TVIF_STATE;
 	if ( imageIndex != ui::No_Image )
