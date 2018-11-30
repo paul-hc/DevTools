@@ -3,6 +3,7 @@
 #include "utl/BaseMainDialog.h"
 #include "utl/DialogToolBar.h"
 #include "utl/HistoryComboBox.h"
+#include "utl/ReportListControl.h"
 #include "utl/TreeControl.h"
 #include "ThemeStore.h"
 #include "ThemeSampleStatic.h"
@@ -26,21 +27,23 @@ private:
 	virtual void RedrawSamples( void );
 
 	// ui::ITextEffectCallback interface
-	virtual void CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARAM rowKey, int subItem ) const;
+	virtual void CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARAM rowKey, int subItem, CListLikeCtrlBase* pCtrl ) const;
 
 	CThemeContext GetSelThemeContext( void ) const;
-	void SetupClassesCombo( void );
+	void SetupClassesList( void );
 	void SetupPartsAndStatesTree( void );
 	void OutputCurrentTheme( void );
+
+	static std::tstring FormatCounts( unsigned int count, unsigned int total );
 private:
 	CThemeSampleOptions m_options;
 	CThemeStore m_themeStore;
 	std::auto_ptr< CThemeCustomDraw > m_pCustomDraw;
-	int m_internalChange;
 private:
 	// enum { IDD = IDD_MAIN_DIALOG };
+	enum ClassColumn { ClassName, RelevanceTag };
 
-	CComboBox m_classCombo;
+	CReportListControl m_classList;
 	CTreeControl m_partStateTree;
 	CComboBox m_classFilterCombo;
 	CComboBox m_partsFilterCombo;
@@ -58,8 +61,8 @@ protected:
 protected:
 	// message map functions
 	afx_msg void OnDestroy( void );
-	afx_msg void OnCbnSelChange_ClassCombo( void );
-	afx_msg void OnTVnSelChanged_PartStateTree( NMHDR* pNmHdr, LRESULT* pResult );
+	afx_msg void OnLvnItemChanged_ThemeClass( NMHDR* pNmHdr, LRESULT* pResult );
+	afx_msg void OnTvnSelChanged_PartStateTree( NMHDR* pNmHdr, LRESULT* pResult );
 	afx_msg void OnCbnSelChange_ClassFilterCombo( void );
 	afx_msg void OnCbnSelChange_PartsFilterCombo( void );
 	afx_msg void OnEditCopy( void );

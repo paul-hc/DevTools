@@ -4,6 +4,7 @@
 
 #include "utl/ComparePredicates.h"
 #include "utl/ContainerUtilities.h"
+#include "utl/EnumTags.h"
 #include "utl/Subject.h"
 #include "utl/ThemeItem.h"
 
@@ -12,6 +13,7 @@ class CVisualTheme;
 
 
 enum Relevance { HighRelevance, MediumRelevance, ObscureRelevance, NotImplemented = ObscureRelevance };
+const CEnumTags& GetTags_Relevance( void );
 
 
 interface IThemeNode : public utl::ISubject
@@ -58,6 +60,7 @@ public:
 struct CThemePart : public CBaseNode
 {
 	CThemePart( int partId, const std::wstring& partName, Relevance relevance ) : CBaseNode( relevance ), m_partId( partId ), m_partName( partName ) {}
+	~CThemePart() { utl::ClearOwningContainer( m_states ); }
 
 	virtual ThemeNode GetThemeNode( void ) const { return Part; }
 	virtual const std::tstring& GetCode( void ) const { return m_partName; }
@@ -68,7 +71,7 @@ struct CThemePart : public CBaseNode
 public:
 	int m_partId;
 	std::wstring m_partName;
-	std::vector< CThemeState > m_states;
+	std::vector< CThemeState* > m_states;
 };
 
 

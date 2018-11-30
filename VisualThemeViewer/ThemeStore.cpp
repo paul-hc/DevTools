@@ -24,6 +24,13 @@ enum SEARCHEDITBOX_PARTS { SEBP_SEARCHEDITBOXTEXT = 1 };
 enum SEARCHEDITBOXTEXT_STATES { SEBTS_FORMATTED = 1 };
 
 
+const CEnumTags& GetTags_Relevance( void )
+{
+	static const CEnumTags s_tags( _T("High|Medium|Obscure|Not Implemented") );
+	return s_tags;
+}
+
+
 // CThemeState class
 
 CThemeItem CThemeState::MakeThemeItem( void ) const
@@ -39,8 +46,9 @@ CThemeItem CThemeState::MakeThemeItem( void ) const
 
 CThemePart* CThemePart::AddState( int stateId, const std::wstring& stateName, Relevance relevance /*= HighRelevance*/ )
 {
-	m_states.push_back( CThemeState( stateId, stateName, relevance ) );
-	m_states.back().SetParentNode( this );
+	CThemeState* pNewState = new CThemeState( stateId, stateName, relevance );
+	pNewState->SetParentNode( this );
+	m_states.push_back( pNewState );
 	return this;
 }
 
@@ -48,7 +56,7 @@ CThemeItem CThemePart::MakeThemeItem( void ) const
 {
 	const CThemeClass* pClass = checked_static_cast< const CThemeClass* >( GetParentNode() );
 
-	return CThemeItem( pClass->m_className.c_str(), m_partId, !m_states.empty() ? m_states.front().m_stateId : 0 );
+	return CThemeItem( pClass->m_className.c_str(), m_partId, !m_states.empty() ? m_states.front()->m_stateId : 0 );
 }
 
 bool CThemePart::SetupNotImplemented( CVisualTheme& rTheme, HDC hDC )
@@ -63,11 +71,11 @@ bool CThemePart::SetupNotImplemented( CVisualTheme& rTheme, HDC hDC )
 			++implCount;
 	}
 	else
-		for ( std::vector< CThemeState >::iterator itState = m_states.begin(); itState != m_states.end(); ++itState )
-			if ( rTheme.DrawThemeBackground( hDC, m_partId, itState->m_stateId, rect ) )
+		for ( auto itState = m_states.begin(); itState != m_states.end(); ++itState )
+			if ( rTheme.DrawThemeBackground( hDC, m_partId, ( *itState )->m_stateId, rect ) )
 				++implCount;
 			else
-				itState->SetRelevance( NotImplemented );
+				( *itState )->SetRelevance( NotImplemented );
 
 	return implCount != 0;
 }
@@ -86,7 +94,7 @@ CThemePart* CThemeClass::AddPart( int partId, const std::wstring& partName, Rele
 CThemeItem CThemeClass::MakeThemeItem( void ) const
 {
 	const CThemePart* pFirstPart = !m_parts.empty() ? m_parts.front() : NULL;
-	const CThemeState* pFirstState = pFirstPart != NULL && !pFirstPart->m_states.empty() ? &pFirstPart->m_states.front() : NULL;
+	const CThemeState* pFirstState = pFirstPart != NULL && !pFirstPart->m_states.empty() ? pFirstPart->m_states.front() : NULL;
 
 	return CThemeItem( m_className.c_str(), pFirstPart != NULL ? pFirstPart->m_partId : 0, pFirstState != NULL ? pFirstState->m_stateId : 0 );
 }
