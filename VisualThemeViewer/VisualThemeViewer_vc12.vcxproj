@@ -116,6 +116,7 @@
     <ClInclude Include="resource.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="ThemeContext.h" />
+    <ClInclude Include="ThemeCustomDraw.h" />
     <ClInclude Include="ThemeSampleStatic.h" />
     <ClInclude Include="ThemeStore.h" />
     <ClInclude Include="Application.h" />
@@ -127,6 +128,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='ReleaseU|Win32'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="ThemeContext.cpp" />
+    <ClCompile Include="ThemeCustomDraw.cpp" />
     <ClCompile Include="ThemeSampleStatic.cpp" />
     <ClCompile Include="ThemeStore.cpp" />
     <ClCompile Include="Application.cpp" />

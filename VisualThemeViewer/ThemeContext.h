@@ -13,6 +13,7 @@ struct CThemeContext
 	bool IsValid( void ) const { return m_pClass != NULL && m_pPart != NULL; }
 
 	CThemeItem GetThemeItem( void ) const;
+
 	std::tstring FormatClass( void ) const;
 	std::tstring FormatPart( bool asNumber = false ) const;
 	std::tstring FormatState( bool asNumber = false ) const;

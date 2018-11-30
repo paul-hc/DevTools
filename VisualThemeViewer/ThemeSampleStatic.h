@@ -3,7 +3,6 @@
 #pragma once
 
 #include "utl/BufferedStatic.h"
-#include "utl/GpUtilities.h"
 #include "utl/RegistryOptions.h"
 #include "utl/ThemeItem.h"
 
@@ -18,8 +17,9 @@ interface ISampleOptionsCallback
 };
 
 
-struct CThemeSampleOptions : public CRegistryOptions
+class CThemeSampleOptions : public CRegistryOptions
 {
+public:
 	CThemeSampleOptions( ISampleOptionsCallback* pCallback );
 	~CThemeSampleOptions();
 
@@ -70,9 +70,6 @@ protected:
 private:
 	CRect GetCoreRect( const CRect& clientRect ) const;
 	bool SizeToContent( CRect& rCoreRect, CDC* pDC );
-
-	static void DrawGuides( CDC* pDC, CRect coreRect, Color guideColor );
-	static void DrawError( CDC* pDC, const CRect& coreRect );
 public:
 	CSize m_margins;
 	CSize m_coreSize;

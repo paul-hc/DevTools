@@ -47,7 +47,7 @@ namespace ui
 	{
 		virtual CSize GetItemImageSize( GlyphGauge glyphGauge = SmallGlyph ) const = 0;
 		virtual bool SetItemImageSize( const CSize& imageBoundsSize ) = 0;											// call when UI control drives image bounds size
-		virtual bool DrawItemImage( CDC* pDC, const utl::ISubject* pSubject, const CRect& itemImageRect ) = 0;		// pSubject->GetCode() must refer to a fs::CPath or fs::CFlexPath
+		virtual bool DrawItemImage( CDC* pDC, const utl::ISubject* pSubject, const CRect& itemImageRect ) = 0;		// e.g. pSubject->GetCode() refers to a fs::CPath
 
 		bool CustomDrawItemImage( const NMCUSTOMDRAW* pDraw, const CRect& itemImageRect )		// for CListCtrl, CTreeCtrl
 		{

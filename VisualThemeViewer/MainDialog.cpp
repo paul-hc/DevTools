@@ -3,6 +3,7 @@
 #include "MainDialog.h"
 #include "Application.h"
 #include "ThemeContext.h"
+#include "ThemeCustomDraw.h"
 #include "utl/Clipboard.h"
 #include "utl/MenuUtilities.h"
 #include "utl/StringUtilities.h"
@@ -67,6 +68,7 @@ namespace layout
 CMainDialog::CMainDialog( void )
 	: CBaseMainDialog( IDD_MAIN_DIALOG )
 	, m_options( this )
+	, m_pCustomDraw( new CThemeCustomDraw( &m_options, _T("Text") ) )
 	, m_internalChange( 0 )
 {
 	m_regSection = reg::section;
@@ -80,10 +82,12 @@ CMainDialog::CMainDialog( void )
 	m_samples[ Medium ].SetSizeToContentMode( IDC_CORE_SIZE_STATIC );
 	m_samples[ Large ].m_sampleText = _T("Some Sample Themed Text");
 
+	m_partStateTree.SetUseExplorerTheme( false );
 	m_partStateTree.SetTextEffectCallback( this );
 	m_partStateTree.SetTrackMenuTarget( this );
 	m_partStateTree.GetCtrlAccel().Load( IDC_PARTS_AND_STATES_TREE );
 	ui::LoadPopupMenu( m_partStateTree.GetContextMenu(), IDR_CONTEXT_MENU, app::ListTreePopup );
+	m_partStateTree.SetCustomImageDraw( m_pCustomDraw.get(), CSize( 40, 24 ) );
 
 	m_toolbar.GetStrip()
 		.AddButton( ID_COPY_THEME )
@@ -105,6 +109,8 @@ void CMainDialog::RedrawSamples( void )
 {
 	for ( int i = 0; i != SampleCount; ++i )
 		m_samples[ i ].RedrawWindow( NULL, NULL );
+
+	m_partStateTree.Invalidate();
 }
 
 void CMainDialog::CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARAM rowKey, int subItem ) const

@@ -24,12 +24,31 @@ enum SEARCHEDITBOX_PARTS { SEBP_SEARCHEDITBOXTEXT = 1 };
 enum SEARCHEDITBOXTEXT_STATES { SEBTS_FORMATTED = 1 };
 
 
+// CThemeState class
+
+CThemeItem CThemeState::MakeThemeItem( void ) const
+{
+	const CThemePart* pPart = checked_static_cast< const CThemePart* >( GetParentNode() );
+	const CThemeClass* pClass = checked_static_cast< const CThemeClass* >( pPart->GetParentNode() );
+
+	return CThemeItem( pClass->m_className.c_str(), pPart->m_partId, m_stateId );
+}
+
+
 // CThemePart class
 
 CThemePart* CThemePart::AddState( int stateId, const std::wstring& stateName, Relevance relevance /*= HighRelevance*/ )
 {
 	m_states.push_back( CThemeState( stateId, stateName, relevance ) );
+	m_states.back().SetParentNode( this );
 	return this;
+}
+
+CThemeItem CThemePart::MakeThemeItem( void ) const
+{
+	const CThemeClass* pClass = checked_static_cast< const CThemeClass* >( GetParentNode() );
+
+	return CThemeItem( pClass->m_className.c_str(), m_partId, !m_states.empty() ? m_states.front().m_stateId : 0 );
 }
 
 bool CThemePart::SetupNotImplemented( CVisualTheme& rTheme, HDC hDC )
@@ -59,8 +78,17 @@ bool CThemePart::SetupNotImplemented( CVisualTheme& rTheme, HDC hDC )
 CThemePart* CThemeClass::AddPart( int partId, const std::wstring& partName, Relevance relevance /*= HighRelevance*/ )
 {
 	CThemePart* pPart = new CThemePart( partId, partName, relevance );
+	pPart->SetParentNode( this );
 	m_parts.push_back( pPart );
 	return pPart;
+}
+
+CThemeItem CThemeClass::MakeThemeItem( void ) const
+{
+	const CThemePart* pFirstPart = !m_parts.empty() ? m_parts.front() : NULL;
+	const CThemeState* pFirstState = pFirstPart != NULL && !pFirstPart->m_states.empty() ? &pFirstPart->m_states.front() : NULL;
+
+	return CThemeItem( m_className.c_str(), pFirstPart != NULL ? pFirstPart->m_partId : 0, pFirstState != NULL ? pFirstState->m_stateId : 0 );
 }
 
 bool CThemeClass::SetupNotImplemented( CVisualTheme& rTheme, HDC hDC )

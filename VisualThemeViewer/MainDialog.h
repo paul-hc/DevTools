@@ -9,6 +9,7 @@
 
 
 struct CThemeContext;
+class CThemeCustomDraw;
 
 
 class CMainDialog
@@ -34,6 +35,7 @@ private:
 private:
 	CThemeSampleOptions m_options;
 	CThemeStore m_themeStore;
+	std::auto_ptr< CThemeCustomDraw > m_pCustomDraw;
 	int m_internalChange;
 private:
 	// enum { IDD = IDD_MAIN_DIALOG };

@@ -330,7 +330,7 @@ BOOL CTreeControl::OnNmCustomDraw_Reflect( NMHDR* pNmHdr, LRESULT* pResult )
 	if ( CListLikeCustomDrawBase::IsTooltipDraw( &pDraw->nmcd ) )
 		return TRUE;		// IMP: avoid custom drawing for tooltips
 
-	TRACE( _T(" CTreeControl::DrawStage: %s\n"), dbg::FormatDrawStage( pDraw->nmcd.dwDrawStage ) );
+	//TRACE( _T(" CTreeControl::DrawStage: %s\n"), dbg::FormatDrawStage( pDraw->nmcd.dwDrawStage ) );
 
 	CTreeControlCustomDraw draw( pDraw, this );
 

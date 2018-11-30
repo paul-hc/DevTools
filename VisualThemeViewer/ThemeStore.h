@@ -5,6 +5,7 @@
 #include "utl/ComparePredicates.h"
 #include "utl/ContainerUtilities.h"
 #include "utl/Subject.h"
+#include "utl/ThemeItem.h"
 
 
 class CVisualTheme;
@@ -19,18 +20,25 @@ interface IThemeNode : public utl::ISubject
 
 	virtual ThemeNode GetThemeNode( void ) const = 0;
 	virtual Relevance GetRelevance( void ) const = 0;
+
+	virtual const IThemeNode* GetParentNode( void ) const = 0;
+	virtual CThemeItem MakeThemeItem( void ) const = 0;			// for previewing any node
 };
 
 
 abstract class CBaseNode : public CSubjectImpl< IThemeNode >
 {
 protected:
-	CBaseNode( Relevance relevance ) : m_relevance( relevance ) {}
+	CBaseNode( Relevance relevance ) : m_relevance( relevance ), m_pParentNode( NULL ) {}
 public:
 	virtual Relevance GetRelevance( void ) const { return m_relevance; }
+	virtual const IThemeNode* GetParentNode( void ) const { return m_pParentNode; }
+
 	void SetRelevance( Relevance relevance ) { m_relevance = relevance; }
+	void SetParentNode( IThemeNode* pParentNode ) { m_pParentNode = pParentNode; }
 private:
 	Relevance m_relevance;
+	IThemeNode* m_pParentNode;
 };
 
 
@@ -40,6 +48,7 @@ struct CThemeState : public CBaseNode
 
 	virtual ThemeNode GetThemeNode( void ) const { return State; }
 	virtual const std::tstring& GetCode( void ) const { return m_stateName; }
+	virtual CThemeItem MakeThemeItem( void ) const;
 public:
 	int m_stateId;
 	std::wstring m_stateName;
@@ -52,6 +61,8 @@ struct CThemePart : public CBaseNode
 
 	virtual ThemeNode GetThemeNode( void ) const { return Part; }
 	virtual const std::tstring& GetCode( void ) const { return m_partName; }
+	virtual CThemeItem MakeThemeItem( void ) const;
+
 	CThemePart* AddState( int stateId, const std::wstring& stateName, Relevance relevance = HighRelevance );
 	bool SetupNotImplemented( CVisualTheme& rTheme, HDC hDC );
 public:
@@ -68,7 +79,10 @@ struct CThemeClass : public CBaseNode
 
 	virtual ThemeNode GetThemeNode( void ) const { return Class; }
 	virtual const std::tstring& GetCode( void ) const { return m_className; }
+	virtual CThemeItem MakeThemeItem( void ) const;
+
 	CThemePart* AddPart( int partId, const std::wstring& partName, Relevance relevance = HighRelevance );
+
 	bool SetupNotImplemented( CVisualTheme& rTheme, HDC hDC );
 public:
 	std::wstring m_className;

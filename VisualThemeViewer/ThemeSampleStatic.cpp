@@ -1,6 +1,7 @@
 
 #include "StdAfx.h"
 #include "ThemeSampleStatic.h"
+#include "ThemeCustomDraw.h"
 #include "utl/Color.h"
 #include "utl/HistoryComboBox.h"
 #include "utl/StringUtilities.h"
@@ -52,7 +53,7 @@ CThemeSampleOptions::~CThemeSampleOptions()
 COLORREF CThemeSampleOptions::GetBkColor( void ) const
 {
 	if ( m_bkColorText.empty() )
-		return GetSysColor( COLOR_BTNFACE );
+		return ::GetSysColor( COLOR_BTNFACE );
 
 	enum { Salmon = RGB( 255, 145, 164 ) };
 	COLORREF bkColor;
@@ -164,11 +165,11 @@ void CThemeSampleStatic::Draw( CDC* pDC, const CRect& clientRect )
 
 	BYTE alpha = 96;
 	if ( m_pOptions->m_preBkGuides )
-		DrawGuides( pDC, coreRect, Color( alpha, 255, 0, 0 ) );
+		hlp::DrawGuides( pDC, coreRect, Color( alpha, 255, 0, 0 ) );
 
 	if ( !m_themeItem.DrawBackground( *pDC, coreRect ) )
 	{
-		DrawError( pDC, coreRect );
+		hlp::DrawError( pDC, coreRect );
 		return;
 	}
 
@@ -180,36 +181,7 @@ void CThemeSampleStatic::Draw( CDC* pDC, const CRect& clientRect )
 	}
 
 	if ( m_pOptions->m_postBkGuides )
-		DrawGuides( pDC, coreRect, Color( alpha, 0, 0, 255 ) );
-}
-
-void CThemeSampleStatic::DrawGuides( CDC* pDC, CRect coreRect, Color guideColor )
-{
-	Graphics graphics( *pDC );
-
-	Rect rect = gp::ToRect( coreRect );
-	Pen pen( guideColor );
-	gp::FrameRectangle( graphics, rect, &pen );
-
-	coreRect.DeflateRect( 1, 1, 2, 2 );
-	Point center = gp::ToPoint( coreRect.CenterPoint() );
-
-	Point vertPoints[] = { Point( center.X, coreRect.top ), Point( center.X, coreRect.bottom ) };
-	graphics.DrawLines( &pen, vertPoints, COUNT_OF( vertPoints ) );
-
-	Point horizPoints[] = { Point( coreRect.left, center.Y ), Point( coreRect.right, center.Y ) };
-	graphics.DrawLines( &pen, horizPoints, COUNT_OF( horizPoints ) );
-}
-
-void CThemeSampleStatic::DrawError( CDC* pDC, const CRect& coreRect )
-{
-	enum { Pink = RGB( 254, 204, 204 ) };
-	CBrush errorBrush( Pink );
-	pDC->FillRect( &coreRect, &errorBrush );		// error colour
-
-	Graphics graphics( *pDC );
-    HatchBrush brush( HatchStyleBackwardDiagonal, Color( 128, 200, 0, 0 ), Color( 0, 0, 0, 0 ) );
-	graphics.FillRectangle( &brush, gp::ToRect( coreRect ) );
+		hlp::DrawGuides( pDC, coreRect, Color( alpha, 0, 0, 255 ) );
 }
 
 bool CThemeSampleStatic::SizeToContent( CRect& rCoreRect, CDC* pDC )
