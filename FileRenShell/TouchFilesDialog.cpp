@@ -371,8 +371,9 @@ void CTouchFilesDialog::OnFileError( const fs::CPath& srcPath, const std::tstrin
 	EnsureVisibleFirstError();
 }
 
-void CTouchFilesDialog::CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARAM rowKey, int subItem ) const
+void CTouchFilesDialog::CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARAM rowKey, int subItem, CListLikeCtrlBase* pCtrl ) const
 {
+	pCtrl;
 	static const ui::CTextEffect s_modPathName( ui::Bold );
 	static const ui::CTextEffect s_modDest( ui::Regular, CReportListControl::s_mismatchDestTextColor );
 	static const ui::CTextEffect s_modSrc( ui::Regular, CReportListControl::s_deleteSrcTextColor );
@@ -443,9 +444,9 @@ void CTouchFilesDialog::CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARA
 	}
 }
 
-void CTouchFilesDialog::ModifyDiffTextEffectAt( lv::CMatchEffects& rEffects, LPARAM rowKey, int subItem ) const
+void CTouchFilesDialog::ModifyDiffTextEffectAt( lv::CMatchEffects& rEffects, LPARAM rowKey, int subItem, CReportListControl* pCtrl ) const
 {
-	rowKey;
+	rowKey, pCtrl;
 	switch ( subItem )
 	{
 		case SrcModifyTime:

@@ -229,8 +229,8 @@ namespace num
 {
 	const CEnumTags& GetTags_BytesUnit( void )
 	{
-		static const CEnumTags tags( _T("bytes|kilo-bytes|mega-bytes|giga-bytes|tera-bytes|"), _T("bytes|KB|MB|GB|TB|") );
-		return tags;
+		static const CEnumTags s_tags( _T("bytes|kilo-bytes|mega-bytes|giga-bytes|tera-bytes|"), _T("bytes|KB|MB|GB|TB|") );
+		return s_tags;
 	}
 
 

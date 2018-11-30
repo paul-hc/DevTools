@@ -43,8 +43,8 @@ void CMultiZone::SetStacking( Stacking stacking )
 }
 const CEnumTags& CMultiZone::GetTags_Stacking( void )
 {
-	static const CEnumTags tags( _T("Vertical|Horizontal|Auto") );
-	return tags;
+	static const CEnumTags s_tags( _T("Vertical|Horizontal|Auto") );
+	return s_tags;
 }
 
 CMultiZone::Stacking CMultiZone::GetBestFitStacking( void ) const

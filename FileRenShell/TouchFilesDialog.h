@@ -38,8 +38,8 @@ protected:
 	virtual void OnFileError( const fs::CPath& srcPath, const std::tstring& errMsg );
 
 	// ui::ITextEffectCallback interface
-	virtual void CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARAM rowKey, int subItem ) const;
-	virtual void ModifyDiffTextEffectAt( lv::CMatchEffects& rEffects, LPARAM rowKey, int subItem ) const;
+	virtual void CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARAM rowKey, int subItem, CListLikeCtrlBase* pCtrl ) const;
+	virtual void ModifyDiffTextEffectAt( lv::CMatchEffects& rEffects, LPARAM rowKey, int subItem, CReportListControl* pCtrl ) const;
 
 	virtual void SwitchMode( Mode mode );
 private:

@@ -103,9 +103,9 @@ void CRenameListPage::InvalidateFiles( void )
 	m_fileListCtrl.Invalidate();
 }
 
-void CRenameListPage::CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARAM rowKey, int subItem ) const
+void CRenameListPage::CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARAM rowKey, int subItem, CListLikeCtrlBase* pCtrl ) const
 {
-	subItem;
+	subItem, pCtrl;
 
 	static const ui::CTextEffect s_errorBk( ui::Regular, CLR_NONE, app::ColorErrorBk );
 	const CRenameItem* pRenameItem = CReportListControl::AsPtr< CRenameItem >( rowKey );

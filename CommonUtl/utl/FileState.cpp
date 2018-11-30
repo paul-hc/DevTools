@@ -91,8 +91,8 @@ namespace fs
 
 	const CEnumTags& CFileState::GetTags_TimeField( void )
 	{
-		static const CEnumTags tags( _T("Created Date|Modified Date|Accessed Date"), _T("C|M|A") );
-		return tags;
+		static const CEnumTags s_tags( _T("Created Date|Modified Date|Accessed Date"), _T("C|M|A") );
+		return s_tags;
 	}
 
 	const CTime& CFileState::GetTimeField( TimeField field ) const

@@ -348,10 +348,10 @@ public:
 	bool DeleteAllItems( void );
 	void RemoveAllGroups( void );
 
-	virtual int InsertObjectItem( int index, const utl::ISubject* pObject, int imageIndex = No_Image, const TCHAR* pText = NULL );		// pText could be LPSTR_TEXTCALLBACK
+	virtual int InsertObjectItem( int index, const utl::ISubject* pObject, int imageIndex = ui::No_Image, const TCHAR* pText = NULL );		// pText could be LPSTR_TEXTCALLBACK
 
-	void SetSubItemTextPtr( int index, int subItem, const TCHAR* pText = LPSTR_TEXTCALLBACK, int imageIndex = No_Image );
-	void SetSubItemText( int index, int subItem, const std::tstring& text, int imageIndex = No_Image ) { SetSubItemTextPtr( index, subItem, text.c_str(), imageIndex ); }
+	void SetSubItemTextPtr( int index, int subItem, const TCHAR* pText = LPSTR_TEXTCALLBACK, int imageIndex = ui::No_Image );
+	void SetSubItemText( int index, int subItem, const std::tstring& text, int imageIndex = ui::No_Image ) { SetSubItemTextPtr( index, subItem, text.c_str(), imageIndex ); }
 	void SetSubItemImage( int index, int subItem, int imageIndex );
 
 	bool SetItemTileInfo( int index );
@@ -362,10 +362,9 @@ public:
 	void DropMoveItems( int destIndex, const std::vector< int >& selIndexes );
 	bool ForceRearrangeItems( void );				// for icon view modes
 
-	int Find( const void* pObject ) const;
 	int FindItemIndex( const std::tstring& itemText ) const;
 	int FindItemIndex( LPARAM lParam ) const;
-	int FindItemIndex( const utl::ISubject* pObject ) const { return FindItemIndex( (LPARAM)pObject ); }
+	int FindItemIndex( const void* pObject ) const { return FindItemIndex( (LPARAM)pObject ); }
 
 	bool EnsureVisibleObject( const utl::ISubject* pObject );
 
@@ -453,6 +452,9 @@ public:
 	void SetSelection( const std::vector< int >& selIndexes, int caretIndex = -1 );
 	void ClearSelection( void );
 	void SelectAll( void );
+
+	template< typename ObjectT >
+	ObjectT* GetSelected( void ) const;
 
 	void Select( const void* pObject );
 
@@ -803,6 +805,14 @@ void CReportListControl::SetObjectsCheckedState( const std::vector< ObjectT* >* 
 			ModifyCheckState( i, BST_UNCHECKED );
 }
 
+
+template< typename ObjectT >
+ObjectT* CReportListControl::GetSelected( void ) const
+{
+	ASSERT( !IsMultiSelectionList() );
+	int selIndex = GetCurSel();
+	return selIndex != -1 ? GetPtrAt< ObjectT >( selIndex ) : NULL;
+}
 
 template< typename ObjectT >
 bool CReportListControl::QuerySelectionAs( std::vector< ObjectT* >& rSelObjects ) const

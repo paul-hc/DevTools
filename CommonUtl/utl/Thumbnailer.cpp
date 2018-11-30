@@ -26,8 +26,8 @@ namespace thumb
 
 	const CEnumTags& GetTags_StdBoundsSize( void )
 	{
-		static const CEnumTags tags( _T("16|32|48|64|96|128|256|512|1024") );
-		return tags;
+		static const CEnumTags s_tags( _T("16|32|48|64|96|128|256|512|1024") );
+		return s_tags;
 	}
 }
 

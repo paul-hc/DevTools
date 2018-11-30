@@ -62,6 +62,9 @@ public:
 	const ui::CTextEffect* FindTextEffect( HTREEITEM hItem ) const;
 
 	// item interface
+	virtual HTREEITEM InsertObjectItem( HTREEITEM hParent, const utl::ISubject* pObject, int imageIndex = ui::No_Image, UINT state = TVIS_EXPANDED,
+										HTREEITEM hInsertAfter = TVI_LAST, const TCHAR* pText = NULL );		// pText could be LPSTR_TEXTCALLBACK
+
 	template< typename ObjectT >
 	ObjectT* GetItemObject( HTREEITEM hItem ) const { return AsPtr< ObjectT >( GetItemData( hItem ) ); }
 

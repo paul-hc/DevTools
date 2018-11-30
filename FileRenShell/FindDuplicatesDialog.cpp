@@ -497,9 +497,12 @@ void CFindDuplicatesDialog::OnFileError( const fs::CPath& srcPath, const std::ts
 	EnsureVisibleFirstError();
 }
 
-void CFindDuplicatesDialog::CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARAM rowKey, int subItem ) const
+void CFindDuplicatesDialog::CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARAM rowKey, int subItem, CListLikeCtrlBase* pCtrl ) const
 {
 	subItem;
+	if ( pCtrl != &m_dupsListCtrl )
+		return;
+
 	enum { LightPastelGreen = RGB( 225, 250, 237 ), LightPastelPink = RGB( 255, 240, 240 ) };
 	static const ui::CTextEffect s_original( ui::Regular, CLR_NONE, LightPastelGreen );
 	static const ui::CTextEffect s_duplicate( ui::Regular, CLR_NONE, LightPastelPink );

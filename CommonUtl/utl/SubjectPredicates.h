@@ -42,7 +42,7 @@ namespace pred
 
 
 	template< typename Compare >
-	IComparator* NewComparator( const Compare& compare )
+	inline IComparator* NewComparator( const Compare& compare )
 	{
 		return new Comparator< Compare >( compare );
 	}

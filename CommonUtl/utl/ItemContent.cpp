@@ -16,8 +16,8 @@ namespace ui
 {
 	const CEnumTags& GetTags_ContentType( void )
 	{
-		static const CEnumTags tags( _T("Text|Folder|File") );
-		return tags;
+		static const CEnumTags s_tags( _T("Text|Folder|File") );
+		return s_tags;
 	}
 
 

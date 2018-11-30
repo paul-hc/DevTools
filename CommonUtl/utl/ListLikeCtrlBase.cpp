@@ -58,16 +58,18 @@ ui::CFontEffectCache* CListLikeCtrlBase::GetFontEffectCache( void )
 	return m_pFontCache.get();
 }
 
-void CListLikeCtrlBase::CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARAM rowKey, int subItem ) const
+void CListLikeCtrlBase::CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARAM rowKey, int subItem, CListLikeCtrlBase* pCtrl ) const
 {
+	ASSERT( this == pCtrl );
 	if ( m_pTextEffectCallback != NULL )
-		m_pTextEffectCallback->CombineTextEffectAt( rTextEffect, rowKey, subItem );
+		m_pTextEffectCallback->CombineTextEffectAt( rTextEffect, rowKey, subItem, pCtrl );
 }
 
-void CListLikeCtrlBase::ModifyDiffTextEffectAt( lv::CMatchEffects& rEffects, LPARAM rowKey, int subItem ) const
+void CListLikeCtrlBase::ModifyDiffTextEffectAt( lv::CMatchEffects& rEffects, LPARAM rowKey, int subItem, CReportListControl* pCtrl ) const
 {
+	//ASSERT( this == pCtrl );		// for this check: don't bother to #include "ReportListControl.h"
 	if ( m_pTextEffectCallback != NULL )
-		m_pTextEffectCallback->ModifyDiffTextEffectAt( rEffects, rowKey, subItem );
+		m_pTextEffectCallback->ModifyDiffTextEffectAt( rEffects, rowKey, subItem, pCtrl );
 }
 
 bool CListLikeCtrlBase::ParentHandles( ParentNotif notif )

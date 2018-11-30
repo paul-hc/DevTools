@@ -192,9 +192,9 @@ void CTreeWndPage::OnAppEvent( app::Event appEvent )
 	}
 }
 
-void CTreeWndPage::CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARAM rowKey, int subItem ) const
+void CTreeWndPage::CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARAM rowKey, int subItem, CListLikeCtrlBase* pCtrl ) const
 {
-	subItem;
+	subItem, pCtrl;
 
 	HTREEITEM hItem = reinterpret_cast< HTREEITEM >( rowKey );
 	HWND hWnd = m_treeCtrl.GetItemDataAs< HWND >( hItem );

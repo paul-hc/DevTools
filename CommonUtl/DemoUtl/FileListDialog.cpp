@@ -204,8 +204,9 @@ void CFileListDialog::SetupFileListView( void )
 	}
 }
 
-void CFileListDialog::CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARAM rowKey, int subItem ) const
+void CFileListDialog::CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARAM rowKey, int subItem, CListLikeCtrlBase* pCtrl ) const
 {
+	pCtrl;
 	if ( !m_useTextEffects )
 		return;
 
@@ -246,9 +247,9 @@ void CFileListDialog::CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARAM 
 		rTextEffect |= isSrc ? s_modSrc : s_modDest;
 }
 
-void CFileListDialog::ModifyDiffTextEffectAt( std::vector< ui::CTextEffect >& rMatchEffects, LPARAM rowKey, int subItem ) const
+void CFileListDialog::ModifyDiffTextEffectAt( std::vector< ui::CTextEffect >& rMatchEffects, LPARAM rowKey, int subItem, CReportListControl* pCtrl ) const
 {
-	rowKey;
+	rowKey, pCtrl;
 	switch ( subItem )
 	{
 		case SrcCreationDate:

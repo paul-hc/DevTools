@@ -16,7 +16,7 @@ public:
 	// base overrides
 	virtual CMenu* GetPopupMenu( ListPopup popupType );
 protected:
-	virtual void CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARAM rowKey, int subItem ) const;
+	virtual void CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARAM rowKey, int subItem, CListLikeCtrlBase* pCtrl ) const;
 
 	virtual void OutputFlags( void );
 	virtual void InitControl( void );

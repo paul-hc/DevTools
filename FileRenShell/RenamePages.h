@@ -47,7 +47,7 @@ private:
 	virtual void InvalidateFiles( void );
 
 	// ui::ITextEffectCallback interface
-	virtual void CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARAM rowKey, int subItem ) const;
+	virtual void CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARAM rowKey, int subItem, CListLikeCtrlBase* pCtrl ) const;
 
 	void SetupFileListView( void );
 private:

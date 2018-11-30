@@ -21,14 +21,14 @@ namespace ui
 {
 	const CEnumTags& GetTags_AutoImageSize( void )
 	{
-		static const CEnumTags tags( _T("Auto Fit (Large Only)|Auto Fit (All)|Fit Width|Fit Height|Actual Size (100%)|Use Zoom Level") );
-		return tags;
+		static const CEnumTags s_tags( _T("Auto Fit (Large Only)|Auto Fit (All)|Fit Width|Fit Height|Actual Size (100%)|Use Zoom Level") );
+		return s_tags;
 	}
 
 	const CEnumTags& GetTags_ImagingApi( void )
 	{
-		static const CEnumTags tags( _T("Use WIC API|Use GDI+ API (ATL)") );
-		return tags;
+		static const CEnumTags s_tags( _T("Use WIC API|Use GDI+ API (ATL)") );
+		return s_tags;
 	}
 
 	ImageFileFormat FindImageFileFormat( const TCHAR imageFilePath[] )

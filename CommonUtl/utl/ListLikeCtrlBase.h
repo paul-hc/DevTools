@@ -7,6 +7,8 @@
 #include "CustomDrawImager_fwd.h"
 
 
+class CListLikeCtrlBase;
+class CReportListControl;
 namespace lv { struct CMatchEffects; }
 
 
@@ -15,12 +17,15 @@ namespace ui
 	class CFontEffectCache;
 
 
-	interface ITextEffectCallback
+	enum StdImageIndex { No_Image = -1, Transparent_Image = -2 };
+
+
+	interface ITextEffectCallback		// passes the control to identify multile lists in parent (mediator pattern)
 	{
-		virtual void CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARAM rowKey, int subItem ) const = 0;		// for CTreeControl: rowKey is HTREEITEM hItem; subItem is unused
+		virtual void CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARAM rowKey, int subItem, CListLikeCtrlBase* pCtrl ) const = 0;		// for CTreeControl: rowKey is HTREEITEM hItem; subItem is unused
 
 		// list-ctrl specific
-		virtual void ModifyDiffTextEffectAt( lv::CMatchEffects& rEffects, LPARAM rowKey, int subItem ) const { &rEffects, rowKey, subItem; }
+		virtual void ModifyDiffTextEffectAt( lv::CMatchEffects& rEffects, LPARAM rowKey, int subItem, CReportListControl* pCtrl ) const { &rEffects, rowKey, subItem, pCtrl; }
 	};
 }
 
@@ -39,8 +44,6 @@ public:
 
 	void SetTextEffectCallback( ui::ITextEffectCallback* pTextEffectCallback ) { m_pTextEffectCallback = pTextEffectCallback; }
 
-	enum StdImageIndex { No_Image = -1, Transparent_Image = -2 };
-
 	template< typename Type >
 	static Type* AsPtr( LPARAM data ) { return reinterpret_cast< Type* >( data ); }
 
@@ -51,8 +54,8 @@ public:
 	virtual void SetCustomFileGlyphDraw( bool showGlyphs = true );
 protected:
 	// ui::ITextEffectCallback interface
-	virtual void CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARAM rowKey, int subItem ) const;
-	virtual void ModifyDiffTextEffectAt( lv::CMatchEffects& rEffects, LPARAM rowKey, int subItem ) const;
+	virtual void CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARAM rowKey, int subItem, CListLikeCtrlBase* pCtrl ) const;
+	virtual void ModifyDiffTextEffectAt( lv::CMatchEffects& rEffects, LPARAM rowKey, int subItem, CReportListControl* pCtrl ) const;
 
 	virtual void SetupControl( void );
 

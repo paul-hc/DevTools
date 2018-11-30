@@ -93,6 +93,28 @@ void CTreeControl::SetCustomImageDraw( ui::ICustomImageDraw* pCustomImageDraw, c
 	}
 }
 
+HTREEITEM CTreeControl::InsertObjectItem( HTREEITEM hParent, const utl::ISubject* pObject, int imageIndex /*= ui::No_Image*/, UINT state /*= TVIS_EXPANDED*/,
+										  HTREEITEM hInsertAfter /*= TVI_LAST*/, const TCHAR* pText /*= NULL*/ )
+{
+	std::tstring displayCode;
+	if ( pObject != NULL )
+		if ( NULL == pText )
+		{
+			displayCode = FormatCode( pObject );
+			pText = displayCode.c_str();
+		}
+
+	if ( ui::Transparent_Image == imageIndex )
+		imageIndex = safe_ptr( m_pCustomImager.get() )->GetTranspImageIndex();
+
+	UINT mask = TVIF_TEXT | TVIF_PARAM | TVIF_STATE;
+	if ( imageIndex != ui::No_Image )
+		SetFlag( mask, TVIF_IMAGE );
+
+	return InsertItem( mask, pText, imageIndex, imageIndex, state, state, reinterpret_cast< LPARAM >( pObject ),
+		hParent, hInsertAfter );
+}
+
 const CSize& CTreeControl::GetImageSize( void ) const
 {
 	if ( 0 == m_imageSize.cx && 0 == m_imageSize.cy )

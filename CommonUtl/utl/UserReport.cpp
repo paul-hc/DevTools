@@ -85,8 +85,8 @@ namespace ui
 
 	const CEnumTags& CIssueStore::GetTags_Issue( void )
 	{
-		static const CEnumTags tags( _T("WARNING|ERROR") );
-		return tags;
+		static const CEnumTags s_tags( _T("WARNING|ERROR") );
+		return s_tags;
 	}
 
 	void CIssueStore::Clear( void )

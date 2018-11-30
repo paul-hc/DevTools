@@ -1166,7 +1166,7 @@ utl::ISubject* CReportListControl::GetSubjectAt( int index ) const
 	return NULL;
 }
 
-int CReportListControl::InsertObjectItem( int index, const utl::ISubject* pObject, int imageIndex /*= No_Image*/, const TCHAR* pText /*= NULL*/ )
+int CReportListControl::InsertObjectItem( int index, const utl::ISubject* pObject, int imageIndex /*= ui::No_Image*/, const TCHAR* pText /*= NULL*/ )
 {
 	std::tstring displayCode;
 	if ( pObject != NULL )
@@ -1181,7 +1181,7 @@ int CReportListControl::InsertObjectItem( int index, const utl::ISubject* pObjec
 			m_subjectBased = true;
 	}
 
-	if ( Transparent_Image == imageIndex )
+	if ( ui::Transparent_Image == imageIndex )
 		imageIndex = safe_ptr( m_pCustomImager.get() )->GetTranspImageIndex();
 
 	int insertIndex = InsertItem( LVIF_TEXT | LVIF_IMAGE | LVIF_PARAM, index, pText, 0, 0, imageIndex, reinterpret_cast< LPARAM >( pObject ) );
@@ -1193,14 +1193,14 @@ int CReportListControl::InsertObjectItem( int index, const utl::ISubject* pObjec
 	return insertIndex;
 }
 
-void CReportListControl::SetSubItemTextPtr( int index, int subItem, const TCHAR* pText /*= LPSTR_TEXTCALLBACK*/, int imageIndex /*= No_Image*/ )
+void CReportListControl::SetSubItemTextPtr( int index, int subItem, const TCHAR* pText /*= LPSTR_TEXTCALLBACK*/, int imageIndex /*= ui::No_Image*/ )
 {
 	ASSERT( subItem > 0 );
 
-	if ( Transparent_Image == imageIndex )
+	if ( ui::Transparent_Image == imageIndex )
 		imageIndex = safe_ptr( m_pCustomImager.get() )->GetTranspImageIndex();
 	else if ( str::IsEmpty( pText ) )
-		imageIndex = No_Image;			// clear the image for empty text
+		imageIndex = ui::No_Image;			// clear the image for empty text
 
 	VERIFY( SetItem( index, subItem, LVIF_TEXT | LVIF_IMAGE, pText, imageIndex, 0, 0, 0 ) );
 }
@@ -1369,15 +1369,6 @@ bool CReportListControl::ForceRearrangeItems( void )
 	return true;
 }
 
-int CReportListControl::Find( const void* pObject ) const
-{
-	for ( int i = 0, count = GetItemCount(); i != count; ++i )
-		if ( pObject == GetPtrAt< void >( i ) )
-			return i;
-
-	return -1;
-}
-
 CSize CReportListControl::GetStateIconSize( void ) const
 {
 	if ( 0 == m_stateIconSize.cx && 0 == m_stateIconSize.cy )
@@ -1528,12 +1519,19 @@ bool CReportListControl::SingleSelected( void ) const
 
 int CReportListControl::GetCurSel( void ) const
 {
-	if ( !IsMultiSelectionList() )
-		return FindItemWithState( LVNI_SELECTED );
-
-	int selIndex = FindItemWithState( LVNI_SELECTED | LVNI_FOCUSED );
-	if ( -1 == selIndex )
+	int selIndex;
+	if ( IsMultiSelectionList() )
+	{
+		selIndex = FindItemWithState( LVNI_SELECTED | LVNI_FOCUSED );
+		if ( -1 == selIndex )
+			selIndex = FindItemWithState( LVNI_FOCUSED );
+	}
+	else
+	{
 		selIndex = FindItemWithState( LVNI_SELECTED );
+		if ( -1 == selIndex )
+			selIndex = FindItemWithState( LVNI_FOCUSED );
+	}
 
 	return selIndex;
 }
@@ -1567,7 +1565,7 @@ bool CReportListControl::GetSelection( std::vector< int >& rSelIndexes, int* pCa
 
 void CReportListControl::Select( const void* pObject )
 {
-	int indexFound = Find( pObject );
+	int indexFound = FindItemIndex( pObject );
 	if ( IsMultiSelectionList() )
 		if ( indexFound != -1 )
 		{

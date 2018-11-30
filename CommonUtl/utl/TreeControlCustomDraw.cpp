@@ -36,8 +36,7 @@ ui::CTextEffect CTreeControlCustomDraw::MakeItemEffect( void ) const
 
 	textEffect.AssignPtr( m_pTree->FindTextEffect( m_hItem ) );				// assign individual item
 
-	m_pTree->CombineTextEffectAt( textEffect, (LPARAM)m_hItem, 0 );			// combine with callback effect (additive operation)
-
+	m_pTree->CombineTextEffectAt( textEffect, (LPARAM)m_hItem, 0, m_pTree );	// combine with callback effect (additive operation)
 	return textEffect;
 }
 

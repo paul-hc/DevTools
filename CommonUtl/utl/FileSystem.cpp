@@ -252,8 +252,8 @@ namespace fs
 
 	const CEnumTags& GetTags_FileExpireStatus( void )
 	{
-		static const CEnumTags tags( _T("|source file modified|source file deleted") );
-		return tags;
+		static const CEnumTags s_tags( _T("|source file modified|source file deleted") );
+		return s_tags;
 	}
 
 	FileExpireStatus CheckExpireStatus( const fs::CPath& filePath, const CTime& lastModifyTime )

@@ -67,8 +67,8 @@ namespace win
 
 	const CEnumTags& GetTags_OsVersion( void )
 	{
-		static const CEnumTags osTags( _T("n/a|Windows 2000|Windows XP|Windows Vista|Windows 7|Windows 8|Windows 10|WinBeyond++") );
-		return osTags;
+		static const CEnumTags s_tags( _T("n/a|Windows 2000|Windows XP|Windows Vista|Windows 7|Windows 8|Windows 10|WinBeyond++") );
+		return s_tags;
 	}
 
 	OsVersion GetOsVersion( void )

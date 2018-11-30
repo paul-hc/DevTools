@@ -26,7 +26,7 @@ private:
 	virtual void OnAppEvent( app::Event appEvent );
 
 	// ui::ITextEffectCallback interface
-	virtual void CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARAM rowKey, int subItem ) const;
+	virtual void CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARAM rowKey, int subItem, CListLikeCtrlBase* pCtrl ) const;
 private:
 	void RefreshTreeContents( void );
 	bool RefreshTreeItem( HTREEITEM hItem );

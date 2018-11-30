@@ -41,7 +41,7 @@ protected:
 	virtual void OnFileError( const fs::CPath& srcPath, const std::tstring& errMsg );
 
 	// ui::ITextEffectCallback interface
-	virtual void CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARAM rowKey, int subItem ) const;
+	virtual void CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARAM rowKey, int subItem, CListLikeCtrlBase* pCtrl ) const;
 
 	virtual void SwitchMode( Mode mode );
 private:
@@ -99,8 +99,8 @@ private:
 	CTextEdit m_fileSpecEdit;
 	CHistoryComboBox m_minFileSizeCombo;
 
-	CDialogToolBar m_dupsToolbar;
 	CPathItemListCtrl m_dupsListCtrl;
+	CDialogToolBar m_dupsToolbar;
 	CStatusStatic m_outcomeStatic;
 	CRegularStatic m_commitInfoStatic;
 

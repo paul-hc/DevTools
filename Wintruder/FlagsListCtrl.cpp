@@ -232,7 +232,7 @@ DWORD CFlagsListCtrl::InputFlags( void ) const
 	return flags;
 }
 
-void CFlagsListCtrl::CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARAM rowKey, int subItem ) const
+void CFlagsListCtrl::CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARAM rowKey, int subItem, CListLikeCtrlBase* pCtrl ) const
 {
 	const CFlagInfo* pFlag = CReportListControl::AsPtr< CFlagInfo >( rowKey );
 	if ( pFlag->IsReadOnly() || pFlag->IsSeparator() )
@@ -240,7 +240,7 @@ void CFlagsListCtrl::CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARAM r
 	else if ( pFlag->IsOn( GetFlags() ) )
 		rTextEffect.m_textColor = HotFieldColor;
 
-	CReportListControl::CombineTextEffectAt( rTextEffect, rowKey, subItem );
+	CReportListControl::CombineTextEffectAt( rTextEffect, rowKey, subItem, pCtrl );
 }
 
 void CFlagsListCtrl::PreSubclassWindow( void )
