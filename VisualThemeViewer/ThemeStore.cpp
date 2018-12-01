@@ -33,30 +33,42 @@ const CEnumTags& GetTags_Relevance( void )
 
 // CThemeState class
 
-CThemeItem CThemeState::MakeThemeItem( void ) const
+CThemeItemNode CThemeState::MakeThemeItem( void ) const
 {
-	const CThemePart* pPart = checked_static_cast< const CThemePart* >( GetParentNode() );
-	const CThemeClass* pClass = checked_static_cast< const CThemeClass* >( pPart->GetParentNode() );
+	const CThemePart* pPart = GetParentAs< CThemePart >();
 
-	return CThemeItem( pClass->m_className.c_str(), pPart->m_partId, m_stateId );
+	return CThemeItemNode( pPart->GetParentAs< CThemeClass >()->m_className.c_str(), pPart->m_partId, m_stateId, this );
 }
 
 
 // CThemePart class
 
-CThemePart* CThemePart::AddState( int stateId, const std::wstring& stateName, Relevance relevance /*= HighRelevance*/ )
+CThemePart* CThemePart::AddState( int stateId, const std::wstring& stateName, int flags /*= 0*/, Relevance relevance /*= HighRelevance*/ )
 {
-	CThemeState* pNewState = new CThemeState( stateId, stateName, relevance );
+	CThemeState* pNewState = new CThemeState( stateId, stateName, relevance, flags );
 	pNewState->SetParentNode( this );
+
+	if ( HasFlag( flags, PreviewFlag | PreviewShallowFlag ) )
+		SetPreviewState( pNewState, HasFlag( GetFlags(), PreviewShallowFlag ) ? Shallow : Deep );
+
 	m_states.push_back( pNewState );
 	return this;
 }
 
-CThemeItem CThemePart::MakeThemeItem( void ) const
+void CThemePart::SetDeepFlags( unsigned int addFlags )
 {
-	const CThemeClass* pClass = checked_static_cast< const CThemeClass* >( GetParentNode() );
+	ModifyFlags( 0, addFlags );
 
-	return CThemeItem( pClass->m_className.c_str(), m_partId, !m_states.empty() ? m_states.front()->m_stateId : 0 );
+	for ( CThemeState* pState : m_states )
+		pState->ModifyFlags( 0, addFlags );
+}
+
+CThemeItemNode CThemePart::MakeThemeItem( void ) const
+{
+	if ( const CThemeState* pPreviewState = GetPreviewState() )
+		return pPreviewState->MakeThemeItem();
+
+	return CThemeItemNode( GetParentAs< CThemeClass >()->m_className.c_str(), m_partId, 0, this );
 }
 
 bool CThemePart::SetupNotImplemented( CVisualTheme& rTheme, HDC hDC )
@@ -80,23 +92,51 @@ bool CThemePart::SetupNotImplemented( CVisualTheme& rTheme, HDC hDC )
 	return implCount != 0;
 }
 
+const CThemeState* CThemePart::GetPreviewState( void ) const
+{
+	if ( NULL == m_pPreviewState && !m_states.empty() )
+		m_pPreviewState = *std::min_element( m_states.begin(), m_states.end(), pred::LessBy< pred::CompareRelevance >() );
+
+	return m_pPreviewState;
+}
+
+void CThemePart::SetPreviewState( const CThemeState* pPreviewState, RecursionDepth depth )
+{
+	ASSERT_PTR( pPreviewState );
+	m_pPreviewState = pPreviewState;
+
+	if ( Deep == depth )
+		GetParentAs< CThemeClass >()->SetPreviewPart( this );
+}
+
 
 // CThemeClass class
 
-CThemePart* CThemeClass::AddPart( int partId, const std::wstring& partName, Relevance relevance /*= HighRelevance*/ )
+CThemePart* CThemeClass::AddPart( int partId, const std::wstring& partName, int flags /*= 0*/, Relevance relevance /*= HighRelevance*/ )
 {
-	CThemePart* pPart = new CThemePart( partId, partName, relevance );
-	pPart->SetParentNode( this );
-	m_parts.push_back( pPart );
-	return pPart;
+	CThemePart* pNewPart = new CThemePart( partId, partName, relevance, flags );
+	pNewPart->SetParentNode( this );
+	if ( HasFlag( flags, PreviewFlag ) )
+		SetPreviewPart( pNewPart );
+
+	m_parts.push_back( pNewPart );
+	return pNewPart;
 }
 
-CThemeItem CThemeClass::MakeThemeItem( void ) const
+void CThemeClass::SetDeepFlags( unsigned int addFlags )
 {
-	const CThemePart* pFirstPart = !m_parts.empty() ? m_parts.front() : NULL;
-	const CThemeState* pFirstState = pFirstPart != NULL && !pFirstPart->m_states.empty() ? pFirstPart->m_states.front() : NULL;
+	ModifyFlags( 0, addFlags );
 
-	return CThemeItem( m_className.c_str(), pFirstPart != NULL ? pFirstPart->m_partId : 1, pFirstState != NULL ? pFirstState->m_stateId : 0 );
+	for ( CThemePart* pPart : m_parts )
+		pPart->SetDeepFlags( addFlags );
+}
+
+CThemeItemNode CThemeClass::MakeThemeItem( void ) const
+{
+	if ( const CThemePart* pPreviewPart = GetPreviewPart() )
+		return pPreviewPart->MakeThemeItem();
+
+	return CThemeItemNode( m_className.c_str(), 0, 0, this );
 }
 
 bool CThemeClass::SetupNotImplemented( CVisualTheme& rTheme, HDC hDC )
@@ -109,6 +149,14 @@ bool CThemeClass::SetupNotImplemented( CVisualTheme& rTheme, HDC hDC )
 			( *itPart )->SetRelevance( NotImplemented );
 
 	return implCount != 0;
+}
+
+const CThemePart* CThemeClass::GetPreviewPart( void ) const
+{
+	if ( NULL == m_pPreviewPart && !m_parts.empty() )
+		m_pPreviewPart = *std::min_element( m_parts.begin(), m_parts.end(), pred::LessBy< pred::CompareRelevance >() );
+
+	return m_pPreviewPart;
 }
 
 
@@ -155,65 +203,65 @@ void CThemeStore::RegisterStandardClasses( void )
 	{
 		CThemeClass* pClass = AddClass( L"BUTTON" );
 
-		pClass->AddPart( ID_TAG( BP_PUSHBUTTON ) )
-			->AddState( ID_TAG( PBS_NORMAL ) )
-			->AddState( ID_TAG( PBS_HOT ) )
-			->AddState( ID_TAG( PBS_PRESSED ) )
-			->AddState( ID_TAG( PBS_DISABLED ) )
-			->AddState( ID_TAG( PBS_DEFAULTED ) )
-			->AddState( ID_TAG( PBS_DEFAULTED_ANIMATING ) )
+		pClass->AddPart( ID_TAG( BP_PUSHBUTTON ), TextFlag )
+			->AddState( ID_TAG( PBS_NORMAL ), TextFlag )
+			->AddState( ID_TAG( PBS_HOT ), TextFlag )
+			->AddState( ID_TAG( PBS_PRESSED ), TextFlag )
+			->AddState( ID_TAG( PBS_DISABLED ), TextFlag )
+			->AddState( ID_TAG( PBS_DEFAULTED ), TextFlag )
+			->AddState( ID_TAG( PBS_DEFAULTED_ANIMATING ), TextFlag )
 		;
-		pClass->AddPart( ID_TAG( BP_RADIOBUTTON ) )
-			->AddState( ID_TAG( RBS_UNCHECKEDNORMAL ) )
-			->AddState( ID_TAG( RBS_UNCHECKEDHOT ) )
-			->AddState( ID_TAG( RBS_UNCHECKEDPRESSED ) )
-			->AddState( ID_TAG( RBS_UNCHECKEDDISABLED ) )
-			->AddState( ID_TAG( RBS_CHECKEDNORMAL ) )
-			->AddState( ID_TAG( RBS_CHECKEDHOT ) )
-			->AddState( ID_TAG( RBS_CHECKEDPRESSED ) )
-			->AddState( ID_TAG( RBS_CHECKEDDISABLED ) )
+		pClass->AddPart( ID_TAG( BP_RADIOBUTTON ), SquareContentFlag )
+			->AddState( ID_TAG( RBS_UNCHECKEDNORMAL ), SquareContentFlag )
+			->AddState( ID_TAG( RBS_UNCHECKEDHOT ), SquareContentFlag )
+			->AddState( ID_TAG( RBS_UNCHECKEDPRESSED ), SquareContentFlag )
+			->AddState( ID_TAG( RBS_UNCHECKEDDISABLED ), SquareContentFlag )
+			->AddState( ID_TAG( RBS_CHECKEDNORMAL ), SquareContentFlag )
+			->AddState( ID_TAG( RBS_CHECKEDHOT ), SquareContentFlag )
+			->AddState( ID_TAG( RBS_CHECKEDPRESSED ), SquareContentFlag )
+			->AddState( ID_TAG( RBS_CHECKEDDISABLED ), SquareContentFlag )
 		;
-		pClass->AddPart( ID_TAG( BP_CHECKBOX ) )
-			->AddState( ID_TAG( CBS_UNCHECKEDNORMAL ) )
-			->AddState( ID_TAG( CBS_UNCHECKEDHOT ) )
-			->AddState( ID_TAG( CBS_UNCHECKEDPRESSED ) )
-			->AddState( ID_TAG( CBS_UNCHECKEDDISABLED ) )
-			->AddState( ID_TAG( CBS_CHECKEDNORMAL ) )
-			->AddState( ID_TAG( CBS_CHECKEDHOT ) )
-			->AddState( ID_TAG( CBS_CHECKEDPRESSED ) )
-			->AddState( ID_TAG( CBS_CHECKEDDISABLED ) )
-			->AddState( ID_TAG( CBS_MIXEDNORMAL ) )
-			->AddState( ID_TAG( CBS_MIXEDHOT ) )
-			->AddState( ID_TAG( CBS_MIXEDPRESSED ) )
-			->AddState( ID_TAG( CBS_MIXEDDISABLED ) )
-			->AddState( ID_TAG( CBS_IMPLICITNORMAL ) )
-			->AddState( ID_TAG( CBS_IMPLICITHOT ) )
-			->AddState( ID_TAG( CBS_IMPLICITPRESSED ) )
-			->AddState( ID_TAG( CBS_IMPLICITDISABLED ) )
-			->AddState( ID_TAG( CBS_EXCLUDEDNORMAL ) )
-			->AddState( ID_TAG( CBS_EXCLUDEDHOT ) )
-			->AddState( ID_TAG( CBS_EXCLUDEDPRESSED ) )
-			->AddState( ID_TAG( CBS_EXCLUDEDDISABLED ) )
+		pClass->AddPart( ID_TAG( BP_CHECKBOX ), SquareContentFlag )
+			->AddState( ID_TAG( CBS_UNCHECKEDNORMAL ), SquareContentFlag )
+			->AddState( ID_TAG( CBS_UNCHECKEDHOT ), SquareContentFlag )
+			->AddState( ID_TAG( CBS_UNCHECKEDPRESSED ), SquareContentFlag )
+			->AddState( ID_TAG( CBS_UNCHECKEDDISABLED ), SquareContentFlag )
+			->AddState( ID_TAG( CBS_CHECKEDNORMAL ), SquareContentFlag )
+			->AddState( ID_TAG( CBS_CHECKEDHOT ), SquareContentFlag )
+			->AddState( ID_TAG( CBS_CHECKEDPRESSED ), SquareContentFlag )
+			->AddState( ID_TAG( CBS_CHECKEDDISABLED ), SquareContentFlag )
+			->AddState( ID_TAG( CBS_MIXEDNORMAL ), SquareContentFlag )
+			->AddState( ID_TAG( CBS_MIXEDHOT ), SquareContentFlag )
+			->AddState( ID_TAG( CBS_MIXEDPRESSED ), SquareContentFlag )
+			->AddState( ID_TAG( CBS_MIXEDDISABLED ), SquareContentFlag )
+			->AddState( ID_TAG( CBS_IMPLICITNORMAL ), SquareContentFlag )
+			->AddState( ID_TAG( CBS_IMPLICITHOT ), SquareContentFlag )
+			->AddState( ID_TAG( CBS_IMPLICITPRESSED ), SquareContentFlag )
+			->AddState( ID_TAG( CBS_IMPLICITDISABLED ), SquareContentFlag )
+			->AddState( ID_TAG( CBS_EXCLUDEDNORMAL ), SquareContentFlag )
+			->AddState( ID_TAG( CBS_EXCLUDEDHOT ), SquareContentFlag )
+			->AddState( ID_TAG( CBS_EXCLUDEDPRESSED ), SquareContentFlag )
+			->AddState( ID_TAG( CBS_EXCLUDEDDISABLED ), SquareContentFlag )
 		;
 		pClass->AddPart( ID_TAG( BP_GROUPBOX ) )
 			->AddState( ID_TAG( GBS_NORMAL ) )
 			->AddState( ID_TAG( GBS_DISABLED ) )
 		;
-		pClass->AddPart( ID_TAG( BP_USERBUTTON ) );
-		pClass->AddPart( ID_TAG( BP_COMMANDLINK ) )
-			->AddState( ID_TAG( CMDLS_NORMAL ) )
-			->AddState( ID_TAG( CMDLS_HOT ) )
-			->AddState( ID_TAG( CMDLS_PRESSED ) )
-			->AddState( ID_TAG( CMDLS_DISABLED ) )
-			->AddState( ID_TAG( CMDLS_DEFAULTED ) )
-			->AddState( ID_TAG( CMDLS_DEFAULTED_ANIMATING ) )
+		pClass->AddPart( ID_TAG( BP_USERBUTTON ), TextFlag );
+		pClass->AddPart( ID_TAG( BP_COMMANDLINK ), TextFlag )
+			->AddState( ID_TAG( CMDLS_NORMAL ), TextFlag )
+			->AddState( ID_TAG( CMDLS_HOT ), TextFlag )
+			->AddState( ID_TAG( CMDLS_PRESSED ), TextFlag )
+			->AddState( ID_TAG( CMDLS_DISABLED ), TextFlag )
+			->AddState( ID_TAG( CMDLS_DEFAULTED ), TextFlag )
+			->AddState( ID_TAG( CMDLS_DEFAULTED_ANIMATING ), TextFlag )
 		;
-		pClass->AddPart( ID_TAG( BP_COMMANDLINKGLYPH ) )
-			->AddState( ID_TAG( CMDLGS_NORMAL ) )
-			->AddState( ID_TAG( CMDLGS_HOT ) )
-			->AddState( ID_TAG( CMDLGS_PRESSED ) )
-			->AddState( ID_TAG( CMDLGS_DISABLED ) )
-			->AddState( ID_TAG( CMDLGS_DEFAULTED ) )
+		pClass->AddPart( ID_TAG( BP_COMMANDLINKGLYPH ), SquareContentFlag )
+			->AddState( ID_TAG( CMDLGS_NORMAL ), SquareContentFlag )
+			->AddState( ID_TAG( CMDLGS_HOT ), SquareContentFlag )
+			->AddState( ID_TAG( CMDLGS_PRESSED ), SquareContentFlag )
+			->AddState( ID_TAG( CMDLGS_DISABLED ), SquareContentFlag )
+			->AddState( ID_TAG( CMDLGS_DEFAULTED ), SquareContentFlag )
 		;
 	}
 
@@ -229,18 +277,18 @@ void CThemeStore::RegisterStandardClasses( void )
 	{
 		CThemeClass* pClass = AddClass( L"COMBOBOX" );
 
-		pClass->AddPart( ID_TAG( CP_DROPDOWNBUTTON ) )
-			->AddState( ID_TAG( CBXS_NORMAL ) )
-			->AddState( ID_TAG( CBXS_HOT ) )
-			->AddState( ID_TAG( CBXS_PRESSED ) )
-			->AddState( ID_TAG( CBXS_DISABLED ) )
+		pClass->AddPart( ID_TAG( CP_DROPDOWNBUTTON ), SquareContentFlag )
+			->AddState( ID_TAG( CBXS_NORMAL ), SquareContentFlag )
+			->AddState( ID_TAG( CBXS_HOT ), SquareContentFlag )
+			->AddState( ID_TAG( CBXS_PRESSED ), SquareContentFlag )
+			->AddState( ID_TAG( CBXS_DISABLED ), SquareContentFlag )
 		;
-		pClass->AddPart( ID_TAG( CP_BACKGROUND ) );
-		pClass->AddPart( ID_TAG( CP_TRANSPARENTBACKGROUND ) )
-			->AddState( ID_TAG( CBTBS_NORMAL ) )
-			->AddState( ID_TAG( CBTBS_HOT ) )
-			->AddState( ID_TAG( CBTBS_FOCUSED ) )
-			->AddState( ID_TAG( CBTBS_DISABLED ) )
+		pClass->AddPart( ID_TAG( CP_BACKGROUND ), TextFlag );
+		pClass->AddPart( ID_TAG( CP_TRANSPARENTBACKGROUND ), TextFlag )
+			->AddState( ID_TAG( CBTBS_NORMAL ), TextFlag )
+			->AddState( ID_TAG( CBTBS_HOT ), TextFlag )
+			->AddState( ID_TAG( CBTBS_FOCUSED ), TextFlag )
+			->AddState( ID_TAG( CBTBS_DISABLED ), TextFlag )
 		;
 		pClass->AddPart( ID_TAG( CP_BORDER ) )
 			->AddState( ID_TAG( CBB_NORMAL ) )
@@ -248,29 +296,29 @@ void CThemeStore::RegisterStandardClasses( void )
 			->AddState( ID_TAG( CBB_FOCUSED ) )
 			->AddState( ID_TAG( CBB_DISABLED ) )
 		;
-		pClass->AddPart( ID_TAG( CP_READONLY ) )
-			->AddState( ID_TAG( CBRO_NORMAL ) )
-			->AddState( ID_TAG( CBRO_HOT ) )
-			->AddState( ID_TAG( CBRO_PRESSED ) )
-			->AddState( ID_TAG( CBRO_DISABLED ) )
+		pClass->AddPart( ID_TAG( CP_READONLY ), TextFlag )
+			->AddState( ID_TAG( CBRO_NORMAL ), TextFlag )
+			->AddState( ID_TAG( CBRO_HOT ), TextFlag )
+			->AddState( ID_TAG( CBRO_PRESSED ), TextFlag )
+			->AddState( ID_TAG( CBRO_DISABLED ), TextFlag )
 		;
-		pClass->AddPart( ID_TAG( CP_DROPDOWNBUTTONRIGHT ) )
-			->AddState( ID_TAG( CBXSR_NORMAL ) )
-			->AddState( ID_TAG( CBXSR_HOT ) )
-			->AddState( ID_TAG( CBXSR_PRESSED ) )
-			->AddState( ID_TAG( CBXSR_DISABLED ) )
+		pClass->AddPart( ID_TAG( CP_DROPDOWNBUTTONRIGHT ), SquareContentFlag )
+			->AddState( ID_TAG( CBXSR_NORMAL ), SquareContentFlag )
+			->AddState( ID_TAG( CBXSR_HOT ), SquareContentFlag )
+			->AddState( ID_TAG( CBXSR_PRESSED ), SquareContentFlag )
+			->AddState( ID_TAG( CBXSR_DISABLED ), SquareContentFlag )
 		;
-		pClass->AddPart( ID_TAG( CP_DROPDOWNBUTTONLEFT ) )
-			->AddState( ID_TAG( CBXSL_NORMAL ) )
-			->AddState( ID_TAG( CBXSL_HOT ) )
-			->AddState( ID_TAG( CBXSL_PRESSED ) )
-			->AddState( ID_TAG( CBXSL_DISABLED ) )
+		pClass->AddPart( ID_TAG( CP_DROPDOWNBUTTONLEFT ), SquareContentFlag )
+			->AddState( ID_TAG( CBXSL_NORMAL ), SquareContentFlag )
+			->AddState( ID_TAG( CBXSL_HOT ), SquareContentFlag )
+			->AddState( ID_TAG( CBXSL_PRESSED ), SquareContentFlag )
+			->AddState( ID_TAG( CBXSL_DISABLED ), SquareContentFlag )
 		;
-		pClass->AddPart( ID_TAG( CP_CUEBANNER ) )
-			->AddState( ID_TAG( CBCB_NORMAL ) )
-			->AddState( ID_TAG( CBCB_HOT ) )
-			->AddState( ID_TAG( CBCB_PRESSED ) )
-			->AddState( ID_TAG( CBCB_DISABLED ) )
+		pClass->AddPart( ID_TAG( CP_CUEBANNER ), TextFlag )
+			->AddState( ID_TAG( CBCB_NORMAL ), TextFlag )
+			->AddState( ID_TAG( CBCB_HOT ), TextFlag )
+			->AddState( ID_TAG( CBCB_PRESSED ), TextFlag )
+			->AddState( ID_TAG( CBCB_DISABLED ), TextFlag )
 		;
 	}
 
@@ -324,15 +372,17 @@ void CThemeStore::RegisterStandardClasses( void )
 		pClass->AddPart( ID_TAG( CPANEL_CONTENTPANELINE ) );
 		pClass->AddPart( ID_TAG( CPANEL_BANNERAREA ) );
 		pClass->AddPart( ID_TAG( CPANEL_BODYTITLE ) );
+
+		pClass->SetDeepFlags( TextFlag );
 	}
 
 	{
 		CThemeClass* pClass = AddClass( L"DATEPICKER", MediumRelevance );
 
-		pClass->AddPart( ID_TAG( DP_DATETEXT ) )
-			->AddState( ID_TAG( DPDT_NORMAL ) )
-			->AddState( ID_TAG( DPDT_SELECTED ) )
-			->AddState( ID_TAG( DPDT_DISABLED ) )
+		pClass->AddPart( ID_TAG( DP_DATETEXT ), TextFlag )
+			->AddState( ID_TAG( DPDT_NORMAL ), TextFlag )
+			->AddState( ID_TAG( DPDT_SELECTED ), TextFlag )
+			->AddState( ID_TAG( DPDT_DISABLED ), TextFlag )
 		;
 		pClass->AddPart( ID_TAG( DP_DATEBORDER ) )
 			->AddState( ID_TAG( DPDB_NORMAL ) )
@@ -342,7 +392,7 @@ void CThemeStore::RegisterStandardClasses( void )
 		;
 		pClass->AddPart( ID_TAG( DP_SHOWCALENDARBUTTONRIGHT ) )
 			->AddState( ID_TAG( DPSCBR_NORMAL ) )
-			->AddState( ID_TAG( DPSCBR_HOT ) )
+			->AddState( ID_TAG( DPSCBR_HOT ), PreviewFlag )
 			->AddState( ID_TAG( DPSCBR_PRESSED ) )
 			->AddState( ID_TAG( DPSCBR_DISABLED ) )
 		;
@@ -375,138 +425,141 @@ void CThemeStore::RegisterStandardClasses( void )
 			->AddState( ID_TAG( DDNONE_HIGHLIGHT ) )
 			->AddState( ID_TAG( DDNONE_NOHIGHLIGHT ) )
 		;
-		pClass->AddPart( ID_TAG( DD_IMAGEBG ) );
-		pClass->AddPart( ID_TAG( DD_TEXTBG ) );
+
+		pClass->SetDeepFlags( SquareContentFlag );
+
+		pClass->AddPart( ID_TAG( DD_IMAGEBG ), TextFlag );
+		pClass->AddPart( ID_TAG( DD_TEXTBG ), TextFlag );
 	}
 
 	{
 		CThemeClass* pClass = AddClass( L"EDIT" );
 
-		pClass->AddPart( ID_TAG( EP_EDITTEXT ) )
-			->AddState( ID_TAG( ETS_NORMAL ) )
-			->AddState( ID_TAG( ETS_HOT ) )
-			->AddState( ID_TAG( ETS_SELECTED ) )
-			->AddState( ID_TAG( ETS_DISABLED ) )
-			->AddState( ID_TAG( ETS_FOCUSED ) )
-			->AddState( ID_TAG( ETS_READONLY ) )
-			->AddState( ID_TAG( ETS_ASSIST ) )
-			->AddState( ID_TAG( ETS_CUEBANNER ) )
+		pClass->AddPart( ID_TAG( EP_EDITTEXT ), TextFlag )
+			->AddState( ID_TAG( ETS_NORMAL ), TextFlag )
+			->AddState( ID_TAG( ETS_HOT ), TextFlag )
+			->AddState( ID_TAG( ETS_SELECTED ), TextFlag )
+			->AddState( ID_TAG( ETS_DISABLED ), TextFlag )
+			->AddState( ID_TAG( ETS_FOCUSED ), TextFlag )
+			->AddState( ID_TAG( ETS_READONLY ), TextFlag )
+			->AddState( ID_TAG( ETS_ASSIST ), TextFlag )
+			->AddState( ID_TAG( ETS_CUEBANNER ), TextFlag )
 		;
-		pClass->AddPart( ID_TAG( EP_CARET ) );
-		pClass->AddPart( ID_TAG( EP_BACKGROUND ) )
-			->AddState( ID_TAG( EBS_NORMAL ) )
-			->AddState( ID_TAG( EBS_HOT ) )
-			->AddState( ID_TAG( EBS_DISABLED ) )
-			->AddState( ID_TAG( EBS_FOCUSED ) )
-			->AddState( ID_TAG( EBS_READONLY ) )
-			->AddState( ID_TAG( EBS_ASSIST ) )
+		pClass->AddPart( ID_TAG( EP_CARET ), TextFlag );
+		pClass->AddPart( ID_TAG( EP_BACKGROUND ), TextFlag )
+			->AddState( ID_TAG( EBS_NORMAL ), TextFlag )
+			->AddState( ID_TAG( EBS_HOT ), TextFlag )
+			->AddState( ID_TAG( EBS_DISABLED ), TextFlag )
+			->AddState( ID_TAG( EBS_FOCUSED ), TextFlag )
+			->AddState( ID_TAG( EBS_READONLY ), TextFlag )
+			->AddState( ID_TAG( EBS_ASSIST ), TextFlag )
 		;
 		pClass->AddPart( ID_TAG( EP_PASSWORD ) );
-		pClass->AddPart( ID_TAG( EP_BACKGROUNDWITHBORDER ) )
-			->AddState( ID_TAG( EBWBS_NORMAL ) )
-			->AddState( ID_TAG( EBWBS_HOT ) )
-			->AddState( ID_TAG( EBWBS_DISABLED ) )
-			->AddState( ID_TAG( EBWBS_FOCUSED ) )
+		pClass->AddPart( ID_TAG( EP_BACKGROUNDWITHBORDER ), TextFlag )
+			->AddState( ID_TAG( EBWBS_NORMAL ), TextFlag )
+			->AddState( ID_TAG( EBWBS_HOT ), TextFlag )
+			->AddState( ID_TAG( EBWBS_DISABLED ), TextFlag )
+			->AddState( ID_TAG( EBWBS_FOCUSED ), TextFlag )
 		;
-		pClass->AddPart( ID_TAG( EP_EDITBORDER_NOSCROLL ) )
-			->AddState( ID_TAG( EPSN_NORMAL ) )
-			->AddState( ID_TAG( EPSN_HOT ) )
-			->AddState( ID_TAG( EPSN_FOCUSED ) )
-			->AddState( ID_TAG( EPSN_DISABLED ) )
+		pClass->AddPart( ID_TAG( EP_EDITBORDER_NOSCROLL ), TextFlag )
+			->AddState( ID_TAG( EPSN_NORMAL ), TextFlag )
+			->AddState( ID_TAG( EPSN_HOT ), PreviewFlag | TextFlag )
+			->AddState( ID_TAG( EPSN_FOCUSED ), TextFlag )
+			->AddState( ID_TAG( EPSN_DISABLED ), TextFlag )
 		;
 
-		pClass->AddPart( ID_TAG( EP_EDITBORDER_HSCROLL ) )
-			->AddState( ID_TAG( EPSH_NORMAL ) )
-			->AddState( ID_TAG( EPSH_HOT ) )
-			->AddState( ID_TAG( EPSH_FOCUSED ) )
-			->AddState( ID_TAG( EPSH_DISABLED ) )
+		pClass->AddPart( ID_TAG( EP_EDITBORDER_HSCROLL ), TextFlag )
+			->AddState( ID_TAG( EPSH_NORMAL ), TextFlag )
+			->AddState( ID_TAG( EPSH_HOT ), TextFlag )
+			->AddState( ID_TAG( EPSH_FOCUSED ), TextFlag )
+			->AddState( ID_TAG( EPSH_DISABLED ), TextFlag )
 		;
-		pClass->AddPart( ID_TAG( EP_EDITBORDER_VSCROLL ) )
-			->AddState( ID_TAG( EPSV_NORMAL ) )
-			->AddState( ID_TAG( EPSV_HOT ) )
-			->AddState( ID_TAG( EPSV_FOCUSED ) )
-			->AddState( ID_TAG( EPSV_DISABLED ) )
+		pClass->AddPart( ID_TAG( EP_EDITBORDER_VSCROLL ), TextFlag )
+			->AddState( ID_TAG( EPSV_NORMAL ), TextFlag )
+			->AddState( ID_TAG( EPSV_HOT ), TextFlag )
+			->AddState( ID_TAG( EPSV_FOCUSED ), TextFlag )
+			->AddState( ID_TAG( EPSV_DISABLED ), TextFlag )
 		;
-		pClass->AddPart( ID_TAG( EP_EDITBORDER_HVSCROLL ) )
-			->AddState( ID_TAG( EPSHV_NORMAL ) )
-			->AddState( ID_TAG( EPSHV_HOT ) )
-			->AddState( ID_TAG( EPSHV_FOCUSED ) )
-			->AddState( ID_TAG( EPSHV_DISABLED ) )
+		pClass->AddPart( ID_TAG( EP_EDITBORDER_HVSCROLL ), TextFlag )
+			->AddState( ID_TAG( EPSHV_NORMAL ), TextFlag )
+			->AddState( ID_TAG( EPSHV_HOT ), TextFlag )
+			->AddState( ID_TAG( EPSHV_FOCUSED ), TextFlag )
+			->AddState( ID_TAG( EPSHV_DISABLED ), TextFlag )
 		;
 	}
 
 	{
 		CThemeClass* pClass = AddClass( L"EXPLORERBAR", MediumRelevance );
 
-		pClass->AddPart( ID_TAG( EBP_HEADERBACKGROUND ) );
-		pClass->AddPart( ID_TAG( EBP_HEADERCLOSE ) )
-			->AddState( ID_TAG( EBHC_NORMAL ) )
-			->AddState( ID_TAG( EBHC_HOT ) )
-			->AddState( ID_TAG( EBHC_PRESSED ) )
+		pClass->AddPart( ID_TAG( EBP_HEADERBACKGROUND ), TextFlag );
+		pClass->AddPart( ID_TAG( EBP_HEADERCLOSE ), SquareContentFlag )
+			->AddState( ID_TAG( EBHC_NORMAL ), SquareContentFlag )
+			->AddState( ID_TAG( EBHC_HOT ), SquareContentFlag )
+			->AddState( ID_TAG( EBHC_PRESSED ), SquareContentFlag )
 		;
-		pClass->AddPart( ID_TAG( EBP_HEADERPIN ) )
-			->AddState( ID_TAG( EBHP_NORMAL ) )
-			->AddState( ID_TAG( EBHP_HOT ) )
-			->AddState( ID_TAG( EBHP_PRESSED ) )
-			->AddState( ID_TAG( EBHP_SELECTEDNORMAL ) )
-			->AddState( ID_TAG( EBHP_SELECTEDHOT ) )
-			->AddState( ID_TAG( EBHP_SELECTEDPRESSED ) )
+		pClass->AddPart( ID_TAG( EBP_HEADERPIN ), SquareContentFlag )
+			->AddState( ID_TAG( EBHP_NORMAL ), SquareContentFlag )
+			->AddState( ID_TAG( EBHP_HOT ), SquareContentFlag )
+			->AddState( ID_TAG( EBHP_PRESSED ), SquareContentFlag )
+			->AddState( ID_TAG( EBHP_SELECTEDNORMAL ), SquareContentFlag )
+			->AddState( ID_TAG( EBHP_SELECTEDHOT ), SquareContentFlag )
+			->AddState( ID_TAG( EBHP_SELECTEDPRESSED ), SquareContentFlag )
 		;
-		pClass->AddPart( ID_TAG( EBP_IEBARMENU ) )
-			->AddState( ID_TAG( EBM_NORMAL ) )
-			->AddState( ID_TAG( EBM_HOT ) )
-			->AddState( ID_TAG( EBM_PRESSED ) )
+		pClass->AddPart( ID_TAG( EBP_IEBARMENU ), SquareContentFlag )
+			->AddState( ID_TAG( EBM_NORMAL ), SquareContentFlag )
+			->AddState( ID_TAG( EBM_HOT ), PreviewFlag | SquareContentFlag )
+			->AddState( ID_TAG( EBM_PRESSED ), SquareContentFlag )
 		;
-		pClass->AddPart( ID_TAG( EBP_NORMALGROUPBACKGROUND ) );
-		pClass->AddPart( ID_TAG( EBP_NORMALGROUPCOLLAPSE ) )
-			->AddState( ID_TAG( EBNGC_NORMAL ) )
-			->AddState( ID_TAG( EBNGC_HOT ) )
-			->AddState( ID_TAG( EBNGC_PRESSED ) )
+		pClass->AddPart( ID_TAG( EBP_NORMALGROUPBACKGROUND ), TextFlag );
+		pClass->AddPart( ID_TAG( EBP_NORMALGROUPCOLLAPSE ), SquareContentFlag )
+			->AddState( ID_TAG( EBNGC_NORMAL ), SquareContentFlag )
+			->AddState( ID_TAG( EBNGC_HOT ), SquareContentFlag )
+			->AddState( ID_TAG( EBNGC_PRESSED ), SquareContentFlag )
 		;
-		pClass->AddPart( ID_TAG( EBP_NORMALGROUPEXPAND ) )
-			->AddState( ID_TAG( EBNGE_NORMAL ) )
-			->AddState( ID_TAG( EBNGE_HOT ) )
-			->AddState( ID_TAG( EBNGE_PRESSED ) )
+		pClass->AddPart( ID_TAG( EBP_NORMALGROUPEXPAND ), SquareContentFlag )
+			->AddState( ID_TAG( EBNGE_NORMAL ), SquareContentFlag )
+			->AddState( ID_TAG( EBNGE_HOT ), SquareContentFlag )
+			->AddState( ID_TAG( EBNGE_PRESSED ), SquareContentFlag )
 		;
-		pClass->AddPart( ID_TAG( EBP_NORMALGROUPHEAD ) );
-		pClass->AddPart( ID_TAG( EBP_SPECIALGROUPBACKGROUND ) );
-		pClass->AddPart( ID_TAG( EBP_SPECIALGROUPCOLLAPSE ) )
-			->AddState( ID_TAG( EBSGC_NORMAL ) )
-			->AddState( ID_TAG( EBSGC_HOT ) )
-			->AddState( ID_TAG( EBSGC_PRESSED ) )
+		pClass->AddPart( ID_TAG( EBP_NORMALGROUPHEAD ), TextFlag );
+		pClass->AddPart( ID_TAG( EBP_SPECIALGROUPBACKGROUND ), TextFlag );
+		pClass->AddPart( ID_TAG( EBP_SPECIALGROUPCOLLAPSE ), SquareContentFlag )
+			->AddState( ID_TAG( EBSGC_NORMAL ), SquareContentFlag )
+			->AddState( ID_TAG( EBSGC_HOT ), SquareContentFlag )
+			->AddState( ID_TAG( EBSGC_PRESSED ), SquareContentFlag )
 		;
-		pClass->AddPart( ID_TAG( EBP_SPECIALGROUPEXPAND ) )
-			->AddState( ID_TAG( EBSGE_NORMAL ) )
-			->AddState( ID_TAG( EBSGE_HOT ) )
-			->AddState( ID_TAG( EBSGE_PRESSED ) )
+		pClass->AddPart( ID_TAG( EBP_SPECIALGROUPEXPAND ), SquareContentFlag )
+			->AddState( ID_TAG( EBSGE_NORMAL ), SquareContentFlag )
+			->AddState( ID_TAG( EBSGE_HOT ), SquareContentFlag )
+			->AddState( ID_TAG( EBSGE_PRESSED ), SquareContentFlag )
 		;
-		pClass->AddPart( ID_TAG( EBP_SPECIALGROUPHEAD ) );
+		pClass->AddPart( ID_TAG( EBP_SPECIALGROUPHEAD ), TextFlag );
 	}
 
 	{
 		CThemeClass* pClass = AddClass( L"FLYOUT", MediumRelevance );
 
-		pClass->AddPart( ID_TAG( FLYOUT_HEADER ) );
-		pClass->AddPart( ID_TAG( FLYOUT_BODY ) )
-			->AddState( ID_TAG( FBS_NORMAL ) )
-			->AddState( ID_TAG( FBS_EMPHASIZED ) )
+		pClass->AddPart( ID_TAG( FLYOUT_HEADER ), TextFlag );
+		pClass->AddPart( ID_TAG( FLYOUT_BODY ), TextFlag )
+			->AddState( ID_TAG( FBS_NORMAL ), TextFlag )
+			->AddState( ID_TAG( FBS_EMPHASIZED ), TextFlag )
 		;
-		pClass->AddPart( ID_TAG( FLYOUT_LABEL ) )
-			->AddState( ID_TAG( FLS_NORMAL ) )
-			->AddState( ID_TAG( FLS_SELECTED ) )
-			->AddState( ID_TAG( FLS_EMPHASIZED ) )
-			->AddState( ID_TAG( FLS_DISABLED ) )
+		pClass->AddPart( ID_TAG( FLYOUT_LABEL ), TextFlag )
+			->AddState( ID_TAG( FLS_NORMAL ), TextFlag )
+			->AddState( ID_TAG( FLS_SELECTED ), TextFlag )
+			->AddState( ID_TAG( FLS_EMPHASIZED ), TextFlag )
+			->AddState( ID_TAG( FLS_DISABLED ), TextFlag )
 		;
-		pClass->AddPart( ID_TAG( FLYOUT_LINK ) )
-			->AddState( ID_TAG( FLYOUTLINK_NORMAL ) )
-			->AddState( ID_TAG( FLYOUTLINK_HOVER ) )
+		pClass->AddPart( ID_TAG( FLYOUT_LINK ), TextFlag )
+			->AddState( ID_TAG( FLYOUTLINK_NORMAL ), TextFlag )
+			->AddState( ID_TAG( FLYOUTLINK_HOVER ), PreviewFlag | TextFlag )
 		;
 		pClass->AddPart( ID_TAG( FLYOUT_DIVIDER ) );
-		pClass->AddPart( ID_TAG( FLYOUT_WINDOW ) );
-		pClass->AddPart( ID_TAG( FLYOUT_LINKAREA ) );
-		pClass->AddPart( ID_TAG( FLYOUT_LINKHEADER ) )
-			->AddState( ID_TAG( FLH_NORMAL ) )
-			->AddState( ID_TAG( FLH_HOVER ) )
+		pClass->AddPart( ID_TAG( FLYOUT_WINDOW ), TextFlag );
+		pClass->AddPart( ID_TAG( FLYOUT_LINKAREA ), TextFlag );
+		pClass->AddPart( ID_TAG( FLYOUT_LINKHEADER ), TextFlag )
+			->AddState( ID_TAG( FLH_NORMAL ), TextFlag )
+			->AddState( ID_TAG( FLH_HOVER ), TextFlag )
 		;
 	}
 
@@ -528,6 +581,8 @@ void CThemeStore::RegisterStandardClasses( void )
 			->AddState( ID_TAG( LVS_RAISED ) )
 			->AddState( ID_TAG( LVS_SUNKEN ) )
 		;
+
+		pClass->SetDeepFlags( TextFlag );
 	}
 
 	{
@@ -548,7 +603,7 @@ void CThemeStore::RegisterStandardClasses( void )
 			->AddState( ID_TAG( HIS_ICONSORTEDPRESSED ) )
 		;
 		pClass->AddPart( ID_TAG( HP_HEADERITEMLEFT ) )
-			->AddState( ID_TAG( HILS_NORMAL ) )
+			->AddState( ID_TAG( HILS_NORMAL ), PreviewFlag )
 			->AddState( ID_TAG( HILS_HOT ) )
 			->AddState( ID_TAG( HILS_PRESSED ) )
 		;
@@ -557,121 +612,126 @@ void CThemeStore::RegisterStandardClasses( void )
 			->AddState( ID_TAG( HIRS_HOT ) )
 			->AddState( ID_TAG( HIRS_PRESSED ) )
 		;
-		pClass->AddPart( ID_TAG( HP_HEADERSORTARROW ) )
-			->AddState( ID_TAG( HSAS_SORTEDUP ) )
-			->AddState( ID_TAG( HSAS_SORTEDDOWN ) )
+
+		pClass->SetDeepFlags( TextFlag );
+
+		pClass->AddPart( ID_TAG( HP_HEADERSORTARROW ), SquareContentFlag )
+			->AddState( ID_TAG( HSAS_SORTEDUP ), SquareContentFlag )
+			->AddState( ID_TAG( HSAS_SORTEDDOWN ), SquareContentFlag )
 		;
-		pClass->AddPart( ID_TAG( HP_HEADERDROPDOWN ) )
-			->AddState( ID_TAG( HDDS_NORMAL ) )
-			->AddState( ID_TAG( HDDS_SOFTHOT ) )
-			->AddState( ID_TAG( HDDS_HOT ) )
+		pClass->AddPart( ID_TAG( HP_HEADERDROPDOWN ), SquareContentFlag )
+			->AddState( ID_TAG( HDDS_NORMAL ), SquareContentFlag )
+			->AddState( ID_TAG( HDDS_SOFTHOT ), SquareContentFlag )
+			->AddState( ID_TAG( HDDS_HOT ), SquareContentFlag )
 		;
-		pClass->AddPart( ID_TAG( HP_HEADERDROPDOWNFILTER ) )
-			->AddState( ID_TAG( HDDFS_NORMAL ) )
-			->AddState( ID_TAG( HDDFS_SOFTHOT ) )
-			->AddState( ID_TAG( HDDFS_HOT ) )
+		pClass->AddPart( ID_TAG( HP_HEADERDROPDOWNFILTER ), SquareContentFlag )
+			->AddState( ID_TAG( HDDFS_NORMAL ), SquareContentFlag )
+			->AddState( ID_TAG( HDDFS_SOFTHOT ), SquareContentFlag )
+			->AddState( ID_TAG( HDDFS_HOT ), SquareContentFlag )
 		;
-		pClass->AddPart( ID_TAG( HP_HEADEROVERFLOW ) )
-			->AddState( ID_TAG( HOFS_NORMAL ) )
-			->AddState( ID_TAG( HOFS_HOT ) )
+		pClass->AddPart( ID_TAG( HP_HEADEROVERFLOW ), SquareContentFlag )
+			->AddState( ID_TAG( HOFS_NORMAL ), SquareContentFlag )
+			->AddState( ID_TAG( HOFS_HOT ), SquareContentFlag )
 		;
 	}
 
 	{
 		CThemeClass* pClass = AddClass( L"LISTBOX", MediumRelevance );
 
-		pClass->AddPart( ID_TAG( LBCP_BORDER_HSCROLL ), MediumRelevance )
+		pClass->AddPart( ID_TAG( LBCP_BORDER_HSCROLL ), 0, MediumRelevance )
 			->AddState( ID_TAG( LBPSH_NORMAL ) )
 			->AddState( ID_TAG( LBPSH_FOCUSED ) )
 			->AddState( ID_TAG( LBPSH_HOT ) )
 			->AddState( ID_TAG( LBPSH_DISABLED ) )
 		;
-		pClass->AddPart( ID_TAG( LBCP_BORDER_HVSCROLL ), MediumRelevance )
+		pClass->AddPart( ID_TAG( LBCP_BORDER_HVSCROLL ), 0, MediumRelevance )
 			->AddState( ID_TAG( LBPSHV_NORMAL ) )
 			->AddState( ID_TAG( LBPSHV_FOCUSED ) )
 			->AddState( ID_TAG( LBPSHV_HOT ) )
 			->AddState( ID_TAG( LBPSHV_DISABLED ) )
 		;
-		pClass->AddPart( ID_TAG( LBCP_BORDER_NOSCROLL ), MediumRelevance )
+		pClass->AddPart( ID_TAG( LBCP_BORDER_NOSCROLL ), 0, MediumRelevance )
 			->AddState( ID_TAG( LBPSN_NORMAL ) )
 			->AddState( ID_TAG( LBPSN_FOCUSED ) )
 			->AddState( ID_TAG( LBPSN_HOT ) )
 			->AddState( ID_TAG( LBPSN_DISABLED ) )
 		;
-		pClass->AddPart( ID_TAG( LBCP_BORDER_VSCROLL ), MediumRelevance )
+		pClass->AddPart( ID_TAG( LBCP_BORDER_VSCROLL ), 0, MediumRelevance )
 			->AddState( ID_TAG( LBPSV_NORMAL ) )
 			->AddState( ID_TAG( LBPSV_FOCUSED ) )
 			->AddState( ID_TAG( LBPSV_HOT ) )
 			->AddState( ID_TAG( LBPSV_DISABLED ) )
 		;
 		pClass->AddPart( ID_TAG( LBCP_ITEM ) )
-			->AddState( ID_TAG( LBPSI_HOT ) )
+			->AddState( ID_TAG( LBPSI_HOT ), PreviewFlag )
 			->AddState( ID_TAG( LBPSI_HOTSELECTED ) )
 			->AddState( ID_TAG( LBPSI_SELECTED ) )
 			->AddState( ID_TAG( LBPSI_SELECTEDNOTFOCUS ) )
 		;
+
+		pClass->SetDeepFlags( TextFlag );
 	}
 
 	{
 		CThemeClass* pClass = AddClass( L"LISTVIEW" );
 
-		pClass->AddPart( ID_TAG( LVP_LISTITEM ), MediumRelevance )
-			->AddState( ID_TAG( LISS_NORMAL ) )
-			->AddState( ID_TAG( LISS_HOT ) )
-			->AddState( ID_TAG( LISS_SELECTED ) )
-			->AddState( ID_TAG( LISS_DISABLED ) )
-			->AddState( ID_TAG( LISS_SELECTEDNOTFOCUS ) )
-			->AddState( ID_TAG( LISS_HOTSELECTED ) )
+		pClass->AddPart( ID_TAG( LVP_LISTITEM ), TextFlag )
+			->AddState( ID_TAG( LISS_NORMAL ), TextFlag )
+			->AddState( ID_TAG( LISS_HOT ), TextFlag )
+			->AddState( ID_TAG( LISS_SELECTED ), TextFlag )
+			->AddState( ID_TAG( LISS_DISABLED ), TextFlag )
+			->AddState( ID_TAG( LISS_SELECTEDNOTFOCUS ), TextFlag )
+			->AddState( ID_TAG( LISS_HOTSELECTED ), TextFlag )
 		;
-		pClass->AddPart( ID_TAG( LVP_LISTGROUP ), MediumRelevance );
-		pClass->AddPart( ID_TAG( LVP_LISTDETAIL ), MediumRelevance );
-		pClass->AddPart( ID_TAG( LVP_LISTSORTEDDETAIL ), MediumRelevance );
-		pClass->AddPart( ID_TAG( LVP_EMPTYTEXT ), MediumRelevance );
-		pClass->AddPart( ID_TAG( LVP_GROUPHEADER ) )
-			->AddState( ID_TAG( LVGH_OPEN ) )
-			->AddState( ID_TAG( LVGH_OPENHOT ) )
-			->AddState( ID_TAG( LVGH_OPENSELECTED ) )
-			->AddState( ID_TAG( LVGH_OPENSELECTEDHOT ) )
-			->AddState( ID_TAG( LVGH_OPENSELECTEDNOTFOCUSED ) )
-			->AddState( ID_TAG( LVGH_OPENSELECTEDNOTFOCUSEDHOT ) )
-			->AddState( ID_TAG( LVGH_OPENMIXEDSELECTION ) )
-			->AddState( ID_TAG( LVGH_OPENMIXEDSELECTIONHOT ) )
-			->AddState( ID_TAG( LVGH_CLOSE ) )
-			->AddState( ID_TAG( LVGH_CLOSEHOT ) )
-			->AddState( ID_TAG( LVGH_CLOSESELECTED ) )
-			->AddState( ID_TAG( LVGH_CLOSESELECTEDHOT ) )
-			->AddState( ID_TAG( LVGH_CLOSESELECTEDNOTFOCUSED ) )
-			->AddState( ID_TAG( LVGH_CLOSESELECTEDNOTFOCUSEDHOT ) )
-			->AddState( ID_TAG( LVGH_CLOSEMIXEDSELECTION ) )
-			->AddState( ID_TAG( LVGH_CLOSEMIXEDSELECTIONHOT ) )
+		pClass->AddPart( ID_TAG( LVP_LISTGROUP ), TextFlag, MediumRelevance );
+		pClass->AddPart( ID_TAG( LVP_LISTDETAIL ), TextFlag, MediumRelevance );
+		pClass->AddPart( ID_TAG( LVP_LISTSORTEDDETAIL ), TextFlag, MediumRelevance );
+		pClass->AddPart( ID_TAG( LVP_EMPTYTEXT ), TextFlag, MediumRelevance );
+		pClass->AddPart( ID_TAG( LVP_GROUPHEADER ), TextFlag )
+			->AddState( ID_TAG( LVGH_OPEN ), TextFlag )
+			->AddState( ID_TAG( LVGH_OPENHOT ), PreviewFlag | TextFlag )
+			->AddState( ID_TAG( LVGH_OPENSELECTED ), TextFlag )
+			->AddState( ID_TAG( LVGH_OPENSELECTEDHOT ), TextFlag )
+			->AddState( ID_TAG( LVGH_OPENSELECTEDNOTFOCUSED ), TextFlag )
+			->AddState( ID_TAG( LVGH_OPENSELECTEDNOTFOCUSEDHOT ), TextFlag )
+			->AddState( ID_TAG( LVGH_OPENMIXEDSELECTION ), TextFlag )
+			->AddState( ID_TAG( LVGH_OPENMIXEDSELECTIONHOT ), TextFlag )
+			->AddState( ID_TAG( LVGH_CLOSE ), TextFlag )
+			->AddState( ID_TAG( LVGH_CLOSEHOT ), TextFlag )
+			->AddState( ID_TAG( LVGH_CLOSESELECTED ), TextFlag )
+			->AddState( ID_TAG( LVGH_CLOSESELECTEDHOT ), TextFlag )
+			->AddState( ID_TAG( LVGH_CLOSESELECTEDNOTFOCUSED ), TextFlag )
+			->AddState( ID_TAG( LVGH_CLOSESELECTEDNOTFOCUSEDHOT ), TextFlag )
+			->AddState( ID_TAG( LVGH_CLOSEMIXEDSELECTION ), TextFlag )
+			->AddState( ID_TAG( LVGH_CLOSEMIXEDSELECTIONHOT ), TextFlag )
 		;
-		pClass->AddPart( ID_TAG( LVP_GROUPHEADERLINE ) )
-			->AddState( ID_TAG( LVGHL_OPEN ) )
-			->AddState( ID_TAG( LVGHL_OPENHOT ) )
-			->AddState( ID_TAG( LVGHL_OPENSELECTED ) )
-			->AddState( ID_TAG( LVGHL_OPENSELECTEDHOT ) )
-			->AddState( ID_TAG( LVGHL_OPENSELECTEDNOTFOCUSED ) )
-			->AddState( ID_TAG( LVGHL_OPENSELECTEDNOTFOCUSEDHOT ) )
-			->AddState( ID_TAG( LVGHL_OPENMIXEDSELECTION ) )
-			->AddState( ID_TAG( LVGHL_OPENMIXEDSELECTIONHOT ) )
-			->AddState( ID_TAG( LVGHL_CLOSE ) )
-			->AddState( ID_TAG( LVGHL_CLOSEHOT ) )
-			->AddState( ID_TAG( LVGHL_CLOSESELECTED ) )
-			->AddState( ID_TAG( LVGHL_CLOSESELECTEDHOT ) )
-			->AddState( ID_TAG( LVGHL_CLOSESELECTEDNOTFOCUSED ) )
-			->AddState( ID_TAG( LVGHL_CLOSESELECTEDNOTFOCUSEDHOT ) )
-			->AddState( ID_TAG( LVGHL_CLOSEMIXEDSELECTION ) )
-			->AddState( ID_TAG( LVGHL_CLOSEMIXEDSELECTIONHOT ) )
+		pClass->AddPart( ID_TAG( LVP_GROUPHEADERLINE ), TextFlag )
+			->AddState( ID_TAG( LVGHL_OPEN ), TextFlag )
+			->AddState( ID_TAG( LVGHL_OPENHOT ), TextFlag )
+			->AddState( ID_TAG( LVGHL_OPENSELECTED ), TextFlag )
+			->AddState( ID_TAG( LVGHL_OPENSELECTEDHOT ), TextFlag )
+			->AddState( ID_TAG( LVGHL_OPENSELECTEDNOTFOCUSED ), TextFlag )
+			->AddState( ID_TAG( LVGHL_OPENSELECTEDNOTFOCUSEDHOT ), TextFlag )
+			->AddState( ID_TAG( LVGHL_OPENMIXEDSELECTION ), TextFlag )
+			->AddState( ID_TAG( LVGHL_OPENMIXEDSELECTIONHOT ), TextFlag )
+			->AddState( ID_TAG( LVGHL_CLOSE ), TextFlag )
+			->AddState( ID_TAG( LVGHL_CLOSEHOT ), TextFlag )
+			->AddState( ID_TAG( LVGHL_CLOSESELECTED ), TextFlag )
+			->AddState( ID_TAG( LVGHL_CLOSESELECTEDHOT ), TextFlag )
+			->AddState( ID_TAG( LVGHL_CLOSESELECTEDNOTFOCUSED ), TextFlag )
+			->AddState( ID_TAG( LVGHL_CLOSESELECTEDNOTFOCUSEDHOT ), TextFlag )
+			->AddState( ID_TAG( LVGHL_CLOSEMIXEDSELECTION ), TextFlag )
+			->AddState( ID_TAG( LVGHL_CLOSEMIXEDSELECTIONHOT ), TextFlag )
 		;
-		pClass->AddPart( ID_TAG( LVP_EXPANDBUTTON ) )
-			->AddState( ID_TAG( LVEB_NORMAL ) )
-			->AddState( ID_TAG( LVEB_HOVER ) )
-			->AddState( ID_TAG( LVEB_PUSHED ) )
+		pClass->AddPart( ID_TAG( LVP_EXPANDBUTTON ), SquareContentFlag )
+			->AddState( ID_TAG( LVEB_NORMAL ), SquareContentFlag )
+			->AddState( ID_TAG( LVEB_HOVER ), SquareContentFlag )
+			->AddState( ID_TAG( LVEB_PUSHED ), SquareContentFlag )
 		;
-		pClass->AddPart( ID_TAG( LVP_COLLAPSEBUTTON ) )
-			->AddState( ID_TAG( LVCB_NORMAL ) )
-			->AddState( ID_TAG( LVCB_HOVER ) )
-			->AddState( ID_TAG( LVCB_PUSHED ) )
+		pClass->AddPart( ID_TAG( LVP_COLLAPSEBUTTON ), SquareContentFlag )
+			->AddState( ID_TAG( LVCB_NORMAL ), SquareContentFlag )
+			->AddState( ID_TAG( LVCB_HOVER ), SquareContentFlag )
+			->AddState( ID_TAG( LVCB_PUSHED ), SquareContentFlag )
 		;
 		pClass->AddPart( ID_TAG( LVP_COLUMNDETAIL ) );
 	}
@@ -679,66 +739,66 @@ void CThemeStore::RegisterStandardClasses( void )
 	{
 		CThemeClass* pClass = AddClass( L"MENU" );
 
-		pClass->AddPart( ID_TAG( MENU_MENUITEM_TMSCHEMA ), ObscureRelevance );
-		pClass->AddPart( ID_TAG( MENU_MENUDROPDOWN_TMSCHEMA ), ObscureRelevance );
-		pClass->AddPart( ID_TAG( MENU_MENUBARITEM_TMSCHEMA ), ObscureRelevance );
-		pClass->AddPart( ID_TAG( MENU_MENUBARDROPDOWN_TMSCHEMA ), ObscureRelevance );
-		pClass->AddPart( ID_TAG( MENU_CHEVRON_TMSCHEMA ), ObscureRelevance );
-		pClass->AddPart( ID_TAG( MENU_SEPARATOR_TMSCHEMA ), ObscureRelevance );
-		pClass->AddPart( ID_TAG( MENU_BARBACKGROUND ) )
-			->AddState( ID_TAG( MB_ACTIVE ) )
-			->AddState( ID_TAG( MB_INACTIVE ) )
+		pClass->AddPart( ID_TAG( MENU_MENUITEM_TMSCHEMA ), TextFlag, ObscureRelevance );
+		pClass->AddPart( ID_TAG( MENU_MENUDROPDOWN_TMSCHEMA ), TextFlag, ObscureRelevance );
+		pClass->AddPart( ID_TAG( MENU_MENUBARITEM_TMSCHEMA ), TextFlag, ObscureRelevance );
+		pClass->AddPart( ID_TAG( MENU_MENUBARDROPDOWN_TMSCHEMA ), TextFlag, ObscureRelevance );
+		pClass->AddPart( ID_TAG( MENU_CHEVRON_TMSCHEMA ), TextFlag, ObscureRelevance );
+		pClass->AddPart( ID_TAG( MENU_SEPARATOR_TMSCHEMA ), TextFlag, ObscureRelevance );
+		pClass->AddPart( ID_TAG( MENU_BARBACKGROUND ), TextFlag )
+			->AddState( ID_TAG( MB_ACTIVE ), PreviewFlag | TextFlag )
+			->AddState( ID_TAG( MB_INACTIVE ), TextFlag )
 		;
-		pClass->AddPart( ID_TAG( MENU_BARITEM ) )
-			->AddState( ID_TAG( MBI_NORMAL ) )
-			->AddState( ID_TAG( MBI_HOT ) )
-			->AddState( ID_TAG( MBI_PUSHED ) )
-			->AddState( ID_TAG( MBI_DISABLED ) )
-			->AddState( ID_TAG( MBI_DISABLEDHOT ) )
-			->AddState( ID_TAG( MBI_DISABLEDPUSHED ) )
+		pClass->AddPart( ID_TAG( MENU_BARITEM ), TextFlag )
+			->AddState( ID_TAG( MBI_NORMAL ), TextFlag )
+			->AddState( ID_TAG( MBI_HOT ), TextFlag )
+			->AddState( ID_TAG( MBI_PUSHED ), TextFlag )
+			->AddState( ID_TAG( MBI_DISABLED ), TextFlag )
+			->AddState( ID_TAG( MBI_DISABLEDHOT ), TextFlag )
+			->AddState( ID_TAG( MBI_DISABLEDPUSHED ), TextFlag )
 		;
 		pClass->AddPart( ID_TAG( MENU_POPUPBACKGROUND ) );
 		pClass->AddPart( ID_TAG( MENU_POPUPBORDERS ) );
 
-		pClass->AddPart( ID_TAG( MENU_POPUPCHECK ) )
-			->AddState( ID_TAG( MC_CHECKMARKNORMAL ) )
-			->AddState( ID_TAG( MC_CHECKMARKDISABLED ) )
-			->AddState( ID_TAG( MC_BULLETNORMAL ) )
-			->AddState( ID_TAG( MC_BULLETDISABLED ) )
+		pClass->AddPart( ID_TAG( MENU_POPUPCHECK ), SquareContentFlag )
+			->AddState( ID_TAG( MC_CHECKMARKNORMAL ), SquareContentFlag )
+			->AddState( ID_TAG( MC_CHECKMARKDISABLED ), SquareContentFlag )
+			->AddState( ID_TAG( MC_BULLETNORMAL ), SquareContentFlag )
+			->AddState( ID_TAG( MC_BULLETDISABLED ), SquareContentFlag )
 		;
-		pClass->AddPart( ID_TAG( MENU_POPUPCHECKBACKGROUND ) )
-			->AddState( ID_TAG( MCB_DISABLED ) )
-			->AddState( ID_TAG( MCB_NORMAL ) )
-			->AddState( ID_TAG( MCB_BITMAP ) )
+		pClass->AddPart( ID_TAG( MENU_POPUPCHECKBACKGROUND ), SquareContentFlag )
+			->AddState( ID_TAG( MCB_DISABLED ), SquareContentFlag )
+			->AddState( ID_TAG( MCB_NORMAL ), SquareContentFlag )
+			->AddState( ID_TAG( MCB_BITMAP ), SquareContentFlag )
 		;
 		pClass->AddPart( ID_TAG( MENU_POPUPGUTTER ) );
-		pClass->AddPart( ID_TAG( MENU_POPUPITEM ) )
-			->AddState( ID_TAG( MPI_NORMAL ) )
-			->AddState( ID_TAG( MPI_HOT ) )
-			->AddState( ID_TAG( MPI_DISABLED ) )
-			->AddState( ID_TAG( MPI_DISABLEDHOT ) )
+		pClass->AddPart( ID_TAG( MENU_POPUPITEM ), TextFlag )
+			->AddState( ID_TAG( MPI_NORMAL ), TextFlag )
+			->AddState( ID_TAG( MPI_HOT ), TextFlag )
+			->AddState( ID_TAG( MPI_DISABLED ), TextFlag )
+			->AddState( ID_TAG( MPI_DISABLEDHOT ), TextFlag )
 		;
 		pClass->AddPart( ID_TAG( MENU_POPUPSEPARATOR ) );
 
-		pClass->AddPart( ID_TAG( MENU_POPUPSUBMENU ) )
-			->AddState( ID_TAG( MSM_NORMAL ) )
-			->AddState( ID_TAG( MSM_DISABLED ) )
+		pClass->AddPart( ID_TAG( MENU_POPUPSUBMENU ), SquareContentFlag )
+			->AddState( ID_TAG( MSM_NORMAL ), SquareContentFlag )
+			->AddState( ID_TAG( MSM_DISABLED ), SquareContentFlag )
 		;
-		pClass->AddPart( ID_TAG( MENU_SYSTEMCLOSE ), MediumRelevance )
-			->AddState( ID_TAG( MSYSC_NORMAL ) )
-			->AddState( ID_TAG( MSYSC_DISABLED ) )
+		pClass->AddPart( ID_TAG( MENU_SYSTEMCLOSE ), SquareContentFlag, MediumRelevance )
+			->AddState( ID_TAG( MSYSC_NORMAL ), SquareContentFlag )
+			->AddState( ID_TAG( MSYSC_DISABLED ), SquareContentFlag )
 		;
-		pClass->AddPart( ID_TAG( MENU_SYSTEMMAXIMIZE ), MediumRelevance )
-			->AddState( ID_TAG( MSYSMX_NORMAL ) )
-			->AddState( ID_TAG( MSYSMX_DISABLED ) )
+		pClass->AddPart( ID_TAG( MENU_SYSTEMMAXIMIZE ), SquareContentFlag, MediumRelevance )
+			->AddState( ID_TAG( MSYSMX_NORMAL ), SquareContentFlag )
+			->AddState( ID_TAG( MSYSMX_DISABLED ), SquareContentFlag )
 		;
-		pClass->AddPart( ID_TAG( MENU_SYSTEMMINIMIZE ), MediumRelevance )
-			->AddState( ID_TAG( MSYSMN_NORMAL ) )
-			->AddState( ID_TAG( MSYSMN_DISABLED ) )
+		pClass->AddPart( ID_TAG( MENU_SYSTEMMINIMIZE ), SquareContentFlag, MediumRelevance )
+			->AddState( ID_TAG( MSYSMN_NORMAL ), SquareContentFlag )
+			->AddState( ID_TAG( MSYSMN_DISABLED ), SquareContentFlag )
 		;
-		pClass->AddPart( ID_TAG( MENU_SYSTEMRESTORE ), MediumRelevance )
-			->AddState( ID_TAG( MSYSR_NORMAL ) )
-			->AddState( ID_TAG( MSYSR_DISABLED ) )
+		pClass->AddPart( ID_TAG( MENU_SYSTEMRESTORE ), SquareContentFlag, MediumRelevance )
+			->AddState( ID_TAG( MSYSR_NORMAL ), SquareContentFlag )
+			->AddState( ID_TAG( MSYSR_DISABLED ), SquareContentFlag )
 		;
 	}
 
@@ -816,7 +876,7 @@ void CThemeStore::RegisterStandardClasses( void )
 		pClass->AddPart( ID_TAG( PP_CHUNK ) );
 		pClass->AddPart( ID_TAG( PP_CHUNKVERT ) );
 		pClass->AddPart( ID_TAG( PP_FILL ) )
-			->AddState( ID_TAG( PBFS_NORMAL ) )
+			->AddState( ID_TAG( PBFS_NORMAL ), PreviewFlag )
 			->AddState( ID_TAG( PBFS_ERROR ) )
 			->AddState( ID_TAG( PBFS_PAUSED ) )
 			->AddState( ID_TAG( PBFS_PARTIAL ) )
@@ -827,9 +887,9 @@ void CThemeStore::RegisterStandardClasses( void )
 			->AddState( ID_TAG( PBFVS_PAUSED ) )
 			->AddState( ID_TAG( PBFVS_PARTIAL ) )
 		;
-		pClass->AddPart( ID_TAG( PP_PULSEOVERLAY ) );
+		pClass->AddPart( ID_TAG( PP_PULSEOVERLAY ), PreviewFillBkFlag );
 		pClass->AddPart( ID_TAG( PP_MOVEOVERLAY ) );
-		pClass->AddPart( ID_TAG( PP_PULSEOVERLAYVERT ) );
+		pClass->AddPart( ID_TAG( PP_PULSEOVERLAYVERT ), PreviewFillBkFlag );
 		pClass->AddPart( ID_TAG( PP_MOVEOVERLAYVERT ) );
 		pClass->AddPart( ID_TAG( PP_TRANSPARENTBAR ) )
 			->AddState( ID_TAG( PBBS_NORMAL ) )
@@ -846,27 +906,27 @@ void CThemeStore::RegisterStandardClasses( void )
 
 		pClass->AddPart( ID_TAG( RP_GRIPPER ) );
 		pClass->AddPart( ID_TAG( RP_GRIPPERVERT ) );
-		pClass->AddPart( ID_TAG( RP_BAND ) );
-		pClass->AddPart( ID_TAG( RP_CHEVRON ), MediumRelevance )
-			->AddState( ID_TAG( CHEVS_NORMAL ) )
-			->AddState( ID_TAG( CHEVS_HOT ) )
-			->AddState( ID_TAG( CHEVS_PRESSED ) )
+		pClass->AddPart( ID_TAG( RP_BAND ), TextFlag );
+		pClass->AddPart( ID_TAG( RP_CHEVRON ), SquareContentFlag, MediumRelevance )
+			->AddState( ID_TAG( CHEVS_NORMAL ), SquareContentFlag )
+			->AddState( ID_TAG( CHEVS_HOT ), SquareContentFlag )
+			->AddState( ID_TAG( CHEVS_PRESSED ), SquareContentFlag )
 		;
-		pClass->AddPart( ID_TAG( RP_CHEVRONVERT ), MediumRelevance )
-			->AddState( ID_TAG( CHEVSV_NORMAL ) )
-			->AddState( ID_TAG( CHEVSV_HOT ) )
-			->AddState( ID_TAG( CHEVSV_PRESSED ) )
+		pClass->AddPart( ID_TAG( RP_CHEVRONVERT ), SquareContentFlag, MediumRelevance )
+			->AddState( ID_TAG( CHEVSV_NORMAL ), SquareContentFlag )
+			->AddState( ID_TAG( CHEVSV_HOT ), SquareContentFlag )
+			->AddState( ID_TAG( CHEVSV_PRESSED ), SquareContentFlag )
 		;
-		pClass->AddPart( ID_TAG( RP_BACKGROUND ) );
-		pClass->AddPart( ID_TAG( RP_SPLITTER ) )
-			->AddState( ID_TAG( SPLITS_NORMAL ) )
-			->AddState( ID_TAG( SPLITS_HOT ) )
-			->AddState( ID_TAG( SPLITS_PRESSED ) )
+		pClass->AddPart( ID_TAG( RP_BACKGROUND ), PreviewFlag | TextFlag );
+		pClass->AddPart( ID_TAG( RP_SPLITTER ), TextFlag )
+			->AddState( ID_TAG( SPLITS_NORMAL ), TextFlag )
+			->AddState( ID_TAG( SPLITS_HOT ), TextFlag )
+			->AddState( ID_TAG( SPLITS_PRESSED ), TextFlag )
 		;
-		pClass->AddPart( ID_TAG( RP_SPLITTERVERT ) )
-			->AddState( ID_TAG( SPLITSV_NORMAL ) )
-			->AddState( ID_TAG( SPLITSV_HOT ) )
-			->AddState( ID_TAG( SPLITSV_PRESSED ) )
+		pClass->AddPart( ID_TAG( RP_SPLITTERVERT ), TextFlag )
+			->AddState( ID_TAG( SPLITSV_NORMAL ), TextFlag )
+			->AddState( ID_TAG( SPLITSV_HOT ), TextFlag )
+			->AddState( ID_TAG( SPLITSV_PRESSED ), TextFlag )
 		;
 	}
 
@@ -875,7 +935,7 @@ void CThemeStore::RegisterStandardClasses( void )
 
 		pClass->AddPart( ID_TAG( SBP_ARROWBTN ) )
 			->AddState( ID_TAG( ABS_UPNORMAL ) )
-			->AddState( ID_TAG( ABS_UPHOT ) )
+			->AddState( ID_TAG( ABS_UPHOT ), PreviewFlag )
 			->AddState( ID_TAG( ABS_UPPRESSED ) )
 			->AddState( ID_TAG( ABS_UPDISABLED ) )
 			->AddState( ID_TAG( ABS_UPHOVER ) )
@@ -961,13 +1021,15 @@ void CThemeStore::RegisterStandardClasses( void )
 			->AddState( ID_TAG( SZB_HALFTOPRIGHTALIGN ) )
 			->AddState( ID_TAG( SZB_HALFTOPLEFTALIGN ) )
 		;
+
+		pClass->SetDeepFlags( SquareContentFlag );
 	}
 
 	{
 		CThemeClass* pClass = AddClass( L"SEARCHEDITBOX", MediumRelevance );
 
-		pClass->AddPart( SEBP_SEARCHEDITBOXTEXT, L"SEBP_SEARCHEDITBOXTEXT (Windows 7)" )
-			->AddState( ID_TAG( SEBTS_FORMATTED ) )
+		pClass->AddPart( SEBP_SEARCHEDITBOXTEXT, L"SEBP_SEARCHEDITBOXTEXT (Windows 7)", TextFlag )
+			->AddState( ID_TAG( SEBTS_FORMATTED ), TextFlag )
 		;
 	}
 
@@ -998,23 +1060,25 @@ void CThemeStore::RegisterStandardClasses( void )
 			->AddState( ID_TAG( DNHZS_PRESSED ) )
 			->AddState( ID_TAG( DNHZS_DISABLED ) )
 		;
+
+		pClass->SetDeepFlags( SquareContentFlag );
 	}
 
 	{
 		CThemeClass* pClass = AddClass( L"STARTPANEL", MediumRelevance );
 
-		pClass->AddPart( ID_TAG( SPP_USERPANE ) );
+		pClass->AddPart( ID_TAG( SPP_USERPANE ), PreviewFlag | TextFlag );
 		pClass->AddPart( ID_TAG( SPP_MOREPROGRAMS ) );
-		pClass->AddPart( ID_TAG( SPP_MOREPROGRAMSARROW ) )
-			->AddState( ID_TAG( SPS_NORMAL ) )
-			->AddState( ID_TAG( SPS_HOT ) )
-			->AddState( ID_TAG( SPS_PRESSED ) )
+		pClass->AddPart( ID_TAG( SPP_MOREPROGRAMSARROW ), SquareContentFlag )
+			->AddState( ID_TAG( SPS_NORMAL ), SquareContentFlag )
+			->AddState( ID_TAG( SPS_HOT ), SquareContentFlag )
+			->AddState( ID_TAG( SPS_PRESSED ), SquareContentFlag )
 		;
 		pClass->AddPart( ID_TAG( SPP_PROGLIST ) );
 		pClass->AddPart( ID_TAG( SPP_PROGLISTSEPARATOR ) );
-		pClass->AddPart( ID_TAG( SPP_PLACESLIST ) );
+		pClass->AddPart( ID_TAG( SPP_PLACESLIST ), TextFlag );
 		pClass->AddPart( ID_TAG( SPP_PLACESLISTSEPARATOR ) );
-		pClass->AddPart( ID_TAG( SPP_LOGOFF ) );
+		pClass->AddPart( ID_TAG( SPP_LOGOFF ), TextFlag );
 		pClass->AddPart( ID_TAG( SPP_LOGOFFBUTTONS ) )
 			->AddState( ID_TAG( SPLS_NORMAL ) )
 			->AddState( ID_TAG( SPLS_HOT ) )
@@ -1023,31 +1087,30 @@ void CThemeStore::RegisterStandardClasses( void )
 		pClass->AddPart( ID_TAG( SPP_USERPICTURE ) );
 		pClass->AddPart( ID_TAG( SPP_PREVIEW ) );
 
-		pClass->AddPart( ID_TAG( SPP_PREVIEW ) );
-		pClass->AddPart( ID_TAG( SPP_MOREPROGRAMSTAB ) )
-			->AddState( ID_TAG( SPSB_NORMAL ) )
-			->AddState( ID_TAG( SPSB_HOT ) )
-			->AddState( ID_TAG( SPSB_PRESSED ) )
+		pClass->AddPart( ID_TAG( SPP_MOREPROGRAMSTAB ), TextFlag )
+			->AddState( ID_TAG( SPSB_NORMAL ), TextFlag )
+			->AddState( ID_TAG( SPSB_HOT ), TextFlag )
+			->AddState( ID_TAG( SPSB_PRESSED ), PreviewShallowFlag | TextFlag )
 		;
 		pClass->AddPart( ID_TAG( SPP_NSCHOST ) );
-		pClass->AddPart( ID_TAG( SPP_SOFTWAREEXPLORER ) );
+		pClass->AddPart( ID_TAG( SPP_SOFTWAREEXPLORER ), TextFlag );
 		pClass->AddPart( ID_TAG( SPP_OPENBOX ) );
 		pClass->AddPart( ID_TAG( SPP_SEARCHVIEW ) );
-		pClass->AddPart( ID_TAG( SPP_MOREPROGRAMSARROWBACK ) );
+		pClass->AddPart( ID_TAG( SPP_MOREPROGRAMSARROWBACK ), SquareContentFlag );
 		pClass->AddPart( ID_TAG( SPP_TOPMATCH ) );
-		pClass->AddPart( ID_TAG( SPP_LOGOFFSPLITBUTTONDROPDOWN ) )
-			->AddState( ID_TAG( SPLS_NORMAL ) )
-			->AddState( ID_TAG( SPLS_HOT ) )
-			->AddState( ID_TAG( SPLS_PRESSED ) )
+		pClass->AddPart( ID_TAG( SPP_LOGOFFSPLITBUTTONDROPDOWN ), SquareContentFlag )
+			->AddState( ID_TAG( SPLS_NORMAL ), SquareContentFlag )
+			->AddState( ID_TAG( SPLS_HOT ), SquareContentFlag )
+			->AddState( ID_TAG( SPLS_PRESSED ), SquareContentFlag )
 		;
 	}
 
 	{
 		CThemeClass* pClass = AddClass( L"STATUS", MediumRelevance );
 
-		pClass->AddPart( ID_TAG( SP_PANE ) );
-		pClass->AddPart( ID_TAG( SP_GRIPPERPANE ) );
-		pClass->AddPart( ID_TAG( SP_GRIPPER ), MediumRelevance );
+		pClass->AddPart( ID_TAG( SP_PANE ), TextFlag );
+		pClass->AddPart( ID_TAG( SP_GRIPPERPANE ), TextFlag );
+		pClass->AddPart( ID_TAG( SP_GRIPPER ), 0, MediumRelevance );
 	}
 
 	{
@@ -1109,17 +1172,19 @@ void CThemeStore::RegisterStandardClasses( void )
 			->AddState( ID_TAG( TTIBES_DISABLED ) )
 			->AddState( ID_TAG( TTIBES_FOCUSED ) )
 		;
-		pClass->AddPart( ID_TAG( TABP_PANE ), MediumRelevance );
-		pClass->AddPart( ID_TAG( TABP_BODY ), MediumRelevance );
-		pClass->AddPart( ID_TAG( TABP_AEROWIZARDBODY ), MediumRelevance );
+		pClass->AddPart( ID_TAG( TABP_PANE ), 0, MediumRelevance );
+		pClass->AddPart( ID_TAG( TABP_BODY ), 0, MediumRelevance );
+		pClass->AddPart( ID_TAG( TABP_AEROWIZARDBODY ), 0, MediumRelevance );
+
+		pClass->SetDeepFlags( TextFlag );
 	}
 
 	{
 		CThemeClass* pClass = AddClass( L"TASKBAND", MediumRelevance );
 
-		pClass->AddPart( ID_TAG( TDP_GROUPCOUNT ), MediumRelevance );
-		pClass->AddPart( ID_TAG( TDP_FLASHBUTTON ) );
-		pClass->AddPart( ID_TAG( TDP_FLASHBUTTONGROUPMENU ) );
+		pClass->AddPart( ID_TAG( TDP_GROUPCOUNT ), TextFlag );
+		pClass->AddPart( ID_TAG( TDP_FLASHBUTTON ), TextFlag );
+		pClass->AddPart( ID_TAG( TDP_FLASHBUTTONGROUPMENU ), 0, MediumRelevance );
 	}
 
 	{
@@ -1138,38 +1203,39 @@ void CThemeStore::RegisterStandardClasses( void )
 	{
 		CThemeClass* pClass = AddClass( L"TASKDIALOG", MediumRelevance );
 
-		pClass->AddPart( ID_TAG( TDLG_PRIMARYPANEL ) );
-		pClass->AddPart( ID_TAG( TDLG_MAININSTRUCTIONPANE ) );
-		pClass->AddPart( ID_TAG( TDLG_MAINICON ) );
-		pClass->AddPart( ID_TAG( TDLG_CONTENTPANE ) )
-			->AddState( ID_TAG( TDLGCPS_STANDALONE ) )
+		pClass->AddPart( ID_TAG( TDLG_PRIMARYPANEL ), TextFlag );
+		pClass->AddPart( ID_TAG( TDLG_MAININSTRUCTIONPANE ), PreviewFlag | TextFlag );
+		pClass->AddPart( ID_TAG( TDLG_MAINICON ), TextFlag );
+		pClass->AddPart( ID_TAG( TDLG_CONTENTPANE ), TextFlag )
+			->AddState( ID_TAG( TDLGCPS_STANDALONE ), TextFlag )
 		;
-		pClass->AddPart( ID_TAG( TDLG_CONTENTICON ) );
-		pClass->AddPart( ID_TAG( TDLG_EXPANDEDCONTENT ) );
-		pClass->AddPart( ID_TAG( TDLG_COMMANDLINKPANE ) );
-		pClass->AddPart( ID_TAG( TDLG_SECONDARYPANEL ) );
-		pClass->AddPart( ID_TAG( TDLG_CONTROLPANE ) );
-		pClass->AddPart( ID_TAG( TDLG_BUTTONSECTION ) );
-		pClass->AddPart( ID_TAG( TDLG_BUTTONWRAPPER ) );
-		pClass->AddPart( ID_TAG( TDLG_EXPANDOTEXT ) );
-		pClass->AddPart( ID_TAG( TDLG_EXPANDOBUTTON ) )
-			->AddState( ID_TAG( TDLGEBS_NORMAL ) )
-			->AddState( ID_TAG( TDLGEBS_HOVER ) )
-			->AddState( ID_TAG( TDLGEBS_PRESSED ) )
-			->AddState( ID_TAG( TDLGEBS_EXPANDEDNORMAL ) )
-			->AddState( ID_TAG( TDLGEBS_EXPANDEDHOVER ) )
-			->AddState( ID_TAG( TDLGEBS_EXPANDEDPRESSED ) )
-			->AddState( ID_TAG( TDLGEBS_NORMALDISABLED ) )
-			->AddState( ID_TAG( TDLGEBS_EXPANDEDDISABLED ) )
+		pClass->AddPart( ID_TAG( TDLG_CONTENTICON ), TextFlag );
+		pClass->AddPart( ID_TAG( TDLG_EXPANDEDCONTENT ), TextFlag );
+		pClass->AddPart( ID_TAG( TDLG_COMMANDLINKPANE ), TextFlag );
+		pClass->AddPart( ID_TAG( TDLG_SECONDARYPANEL ), TextFlag );
+		pClass->AddPart( ID_TAG( TDLG_CONTROLPANE ), TextFlag );
+		pClass->AddPart( ID_TAG( TDLG_BUTTONSECTION ), TextFlag );
+		pClass->AddPart( ID_TAG( TDLG_BUTTONWRAPPER ), TextFlag );
+		pClass->AddPart( ID_TAG( TDLG_EXPANDOTEXT ), TextFlag );
+
+		pClass->AddPart( ID_TAG( TDLG_EXPANDOBUTTON ), SquareContentFlag )
+			->AddState( ID_TAG( TDLGEBS_NORMAL ), SquareContentFlag )
+			->AddState( ID_TAG( TDLGEBS_HOVER ), SquareContentFlag )
+			->AddState( ID_TAG( TDLGEBS_PRESSED ), SquareContentFlag )
+			->AddState( ID_TAG( TDLGEBS_EXPANDEDNORMAL ), SquareContentFlag )
+			->AddState( ID_TAG( TDLGEBS_EXPANDEDHOVER ), SquareContentFlag )
+			->AddState( ID_TAG( TDLGEBS_EXPANDEDPRESSED ), SquareContentFlag )
+			->AddState( ID_TAG( TDLGEBS_NORMALDISABLED ), SquareContentFlag )
+			->AddState( ID_TAG( TDLGEBS_EXPANDEDDISABLED ), SquareContentFlag )
 		;
-		pClass->AddPart( ID_TAG( TDLG_VERIFICATIONTEXT ) );
-		pClass->AddPart( ID_TAG( TDLG_FOOTNOTEPANE ) );
-		pClass->AddPart( ID_TAG( TDLG_FOOTNOTEAREA ) );
-		pClass->AddPart( ID_TAG( TDLG_FOOTNOTESEPARATOR ) );
-		pClass->AddPart( ID_TAG( TDLG_EXPANDEDFOOTERAREA ) );
-		pClass->AddPart( ID_TAG( TDLG_PROGRESSBAR ) );
-		pClass->AddPart( ID_TAG( TDLG_IMAGEALIGNMENT ) );
-		pClass->AddPart( ID_TAG( TDLG_RADIOBUTTONPANE ) );
+		pClass->AddPart( ID_TAG( TDLG_VERIFICATIONTEXT ), TextFlag );
+		pClass->AddPart( ID_TAG( TDLG_FOOTNOTEPANE ), TextFlag );
+		pClass->AddPart( ID_TAG( TDLG_FOOTNOTEAREA ), TextFlag );
+		pClass->AddPart( ID_TAG( TDLG_FOOTNOTESEPARATOR ), TextFlag );
+		pClass->AddPart( ID_TAG( TDLG_EXPANDEDFOOTERAREA ), TextFlag );
+		pClass->AddPart( ID_TAG( TDLG_PROGRESSBAR ), TextFlag );
+		pClass->AddPart( ID_TAG( TDLG_IMAGEALIGNMENT ), TextFlag );
+		pClass->AddPart( ID_TAG( TDLG_RADIOBUTTONPANE ), TextFlag );
 	}
 
 	{
@@ -1183,7 +1249,7 @@ void CThemeStore::RegisterStandardClasses( void )
 		pClass->AddPart( ID_TAG( TEXT_HYPERLINKTEXT ) )
 			->AddState( ID_TAG( TS_HYPERLINK_NORMAL ) )
 			->AddState( ID_TAG( TS_HYPERLINK_HOT ) )
-			->AddState( ID_TAG( TS_HYPERLINK_PRESSED ) )
+			->AddState( ID_TAG( TS_HYPERLINK_PRESSED ), PreviewFlag )
 			->AddState( ID_TAG( TS_HYPERLINK_DISABLED ) )
 		;
 		pClass->AddPart( ID_TAG( TEXT_EXPANDED ) );
@@ -1192,12 +1258,27 @@ void CThemeStore::RegisterStandardClasses( void )
 			->AddState( ID_TAG( TS_CONTROLLABEL_NORMAL ) )
 			->AddState( ID_TAG( TS_CONTROLLABEL_DISABLED ) )
 		;
+
+		pClass->SetDeepFlags( TextFlag );
 	}
 
 	{
 		CThemeClass* pClass = AddClass( L"TOOLBAR" );
+		CThemePart* pPart;
 
-		pClass->AddPart( ID_TAG( TP_BUTTON ) )
+		pPart = pClass->AddPart( ID_TAG( TP_BUTTON ) )
+			->AddState( ID_TAG( TS_NORMAL ) )
+			->AddState( ID_TAG( TS_HOT ), PreviewFlag )
+			->AddState( ID_TAG( TS_PRESSED ) )
+			->AddState( ID_TAG( TS_DISABLED ) )
+			->AddState( ID_TAG( TS_CHECKED ) )
+			->AddState( ID_TAG( TS_HOTCHECKED ) )
+			->AddState( ID_TAG( TS_NEARHOT ) )
+			->AddState( ID_TAG( TS_OTHERSIDEHOT ) )
+		;
+		pPart->SetDeepFlags( TextFlag );
+
+		pPart = pClass->AddPart( ID_TAG( TP_DROPDOWNBUTTON ) )
 			->AddState( ID_TAG( TS_NORMAL ) )
 			->AddState( ID_TAG( TS_HOT ) )
 			->AddState( ID_TAG( TS_PRESSED ) )
@@ -1207,7 +1288,9 @@ void CThemeStore::RegisterStandardClasses( void )
 			->AddState( ID_TAG( TS_NEARHOT ) )
 			->AddState( ID_TAG( TS_OTHERSIDEHOT ) )
 		;
-		pClass->AddPart( ID_TAG( TP_DROPDOWNBUTTON ) )
+		pPart->SetDeepFlags( TextFlag );
+
+		pPart = pClass->AddPart( ID_TAG( TP_SPLITBUTTON ) )
 			->AddState( ID_TAG( TS_NORMAL ) )
 			->AddState( ID_TAG( TS_HOT ) )
 			->AddState( ID_TAG( TS_PRESSED ) )
@@ -1217,7 +1300,9 @@ void CThemeStore::RegisterStandardClasses( void )
 			->AddState( ID_TAG( TS_NEARHOT ) )
 			->AddState( ID_TAG( TS_OTHERSIDEHOT ) )
 		;
-		pClass->AddPart( ID_TAG( TP_SPLITBUTTON ) )
+		pPart->SetDeepFlags( TextFlag );
+
+		pPart = pClass->AddPart( ID_TAG( TP_SPLITBUTTONDROPDOWN ) )
 			->AddState( ID_TAG( TS_NORMAL ) )
 			->AddState( ID_TAG( TS_HOT ) )
 			->AddState( ID_TAG( TS_PRESSED ) )
@@ -1227,16 +1312,8 @@ void CThemeStore::RegisterStandardClasses( void )
 			->AddState( ID_TAG( TS_NEARHOT ) )
 			->AddState( ID_TAG( TS_OTHERSIDEHOT ) )
 		;
-		pClass->AddPart( ID_TAG( TP_SPLITBUTTONDROPDOWN ) )
-			->AddState( ID_TAG( TS_NORMAL ) )
-			->AddState( ID_TAG( TS_HOT ) )
-			->AddState( ID_TAG( TS_PRESSED ) )
-			->AddState( ID_TAG( TS_DISABLED ) )
-			->AddState( ID_TAG( TS_CHECKED ) )
-			->AddState( ID_TAG( TS_HOTCHECKED ) )
-			->AddState( ID_TAG( TS_NEARHOT ) )
-			->AddState( ID_TAG( TS_OTHERSIDEHOT ) )
-		;
+		pPart->SetDeepFlags( SquareContentFlag );
+
 		pClass->AddPart( ID_TAG( TP_SEPARATOR ) )
 			->AddState( ID_TAG( TS_NORMAL ) )
 			->AddState( ID_TAG( TS_HOT ) )
@@ -1257,7 +1334,7 @@ void CThemeStore::RegisterStandardClasses( void )
 			->AddState( ID_TAG( TS_NEARHOT ) )
 			->AddState( ID_TAG( TS_OTHERSIDEHOT ) )
 		;
-		pClass->AddPart( TP_DROPDOWNBUTTONGLYPH, L"TP_DROPDOWNBUTTONGLYPH (Windows 7)" )
+		pPart = pClass->AddPart( TP_DROPDOWNBUTTONGLYPH, L"TP_DROPDOWNBUTTONGLYPH (Windows 7)" )
 			->AddState( ID_TAG( TS_NORMAL ) )
 			->AddState( ID_TAG( TS_HOT ) )
 			->AddState( ID_TAG( TS_PRESSED ) )
@@ -1267,100 +1344,108 @@ void CThemeStore::RegisterStandardClasses( void )
 			->AddState( ID_TAG( TS_NEARHOT ) )
 			->AddState( ID_TAG( TS_OTHERSIDEHOT ) )
 		;
+		pPart->SetDeepFlags( SquareContentFlag );
 	}
 
 	{
 		CThemeClass* pClass = AddClass( L"TOOLTIP" );
 
-		pClass->AddPart( ID_TAG( TTP_STANDARD ) )
-			->AddState( ID_TAG( TTSS_NORMAL ) )
-			->AddState( ID_TAG( TTSS_LINK ) )
+		pClass->AddPart( ID_TAG( TTP_STANDARD ), TextFlag )
+			->AddState( ID_TAG( TTSS_NORMAL ), TextFlag )
+			->AddState( ID_TAG( TTSS_LINK ), TextFlag )
 		;
-		pClass->AddPart( ID_TAG( TTP_STANDARDTITLE ) )
-			->AddState( ID_TAG( TTSS_NORMAL ) )
-			->AddState( ID_TAG( TTSS_LINK ) )
+		pClass->AddPart( ID_TAG( TTP_STANDARDTITLE ), TextFlag )
+			->AddState( ID_TAG( TTSS_NORMAL ), TextFlag )
+			->AddState( ID_TAG( TTSS_LINK ), TextFlag )
 		;
-		pClass->AddPart( ID_TAG( TTP_BALLOON ) )
-			->AddState( ID_TAG( TTBS_NORMAL ) )
-			->AddState( ID_TAG( TTBS_LINK ) )
+		pClass->AddPart( ID_TAG( TTP_BALLOON ), TextFlag )
+			->AddState( ID_TAG( TTBS_NORMAL ), TextFlag )
+			->AddState( ID_TAG( TTBS_LINK ), TextFlag )
 		;
-		pClass->AddPart( ID_TAG( TTP_BALLOONTITLE ) );
-		pClass->AddPart( ID_TAG( TTP_CLOSE ) )
-			->AddState( ID_TAG( TTCS_NORMAL ) )
-			->AddState( ID_TAG( TTCS_HOT ) )
-			->AddState( ID_TAG( TTCS_PRESSED ) )
+		pClass->AddPart( ID_TAG( TTP_BALLOONTITLE ), TextFlag );
+
+		pClass->AddPart( ID_TAG( TTP_CLOSE ), SquareContentFlag )
+			->AddState( ID_TAG( TTCS_NORMAL ), SquareContentFlag )
+			->AddState( ID_TAG( TTCS_HOT ), SquareContentFlag )
+			->AddState( ID_TAG( TTCS_PRESSED ), SquareContentFlag )
 		;
-		pClass->AddPart( ID_TAG( TTP_BALLOONSTEM ) )
-			->AddState( ID_TAG( TTBSS_POINTINGUPLEFTWALL ) )
-			->AddState( ID_TAG( TTBSS_POINTINGUPCENTERED ) )
-			->AddState( ID_TAG( TTBSS_POINTINGUPRIGHTWALL ) )
-			->AddState( ID_TAG( TTBSS_POINTINGDOWNRIGHTWALL ) )
-			->AddState( ID_TAG( TTBSS_POINTINGDOWNCENTERED ) )
-			->AddState( ID_TAG( TTBSS_POINTINGDOWNLEFTWALL ) )
+		pClass->AddPart( ID_TAG( TTP_BALLOONSTEM ), SquareContentFlag )
+			->AddState( ID_TAG( TTBSS_POINTINGUPLEFTWALL ), SquareContentFlag )
+			->AddState( ID_TAG( TTBSS_POINTINGUPCENTERED ), SquareContentFlag )
+			->AddState( ID_TAG( TTBSS_POINTINGUPRIGHTWALL ), SquareContentFlag )
+			->AddState( ID_TAG( TTBSS_POINTINGDOWNRIGHTWALL ), SquareContentFlag )
+			->AddState( ID_TAG( TTBSS_POINTINGDOWNCENTERED ), SquareContentFlag )
+			->AddState( ID_TAG( TTBSS_POINTINGDOWNLEFTWALL ), SquareContentFlag )
 		;
-		pClass->AddPart( TTP_WRENCH, L"TTP_WRENCH (Windows 7)" )
-			->AddState( ID_TAG( TTWS_NORMAL ) )
-			->AddState( ID_TAG( TTWS_HOT ) )
-			->AddState( ID_TAG( TTWS_PRESSED ) )
+		pClass->AddPart( TTP_WRENCH, L"TTP_WRENCH (Windows 7)", SquareContentFlag )
+			->AddState( ID_TAG( TTWS_NORMAL ), SquareContentFlag )
+			->AddState( ID_TAG( TTWS_HOT ), SquareContentFlag )
+			->AddState( ID_TAG( TTWS_PRESSED ), SquareContentFlag )
 		;
 	}
 
 	{
 		CThemeClass* pClass = AddClass( L"TRACKBAR" );
 
-		pClass->AddPart( ID_TAG( TKP_TRACK ) )
-			->AddState( ID_TAG( TRS_NORMAL ) )
+		pClass->AddPart( ID_TAG( TKP_TRACK ), SquareContentFlag )
+			->AddState( ID_TAG( TRS_NORMAL ), SquareContentFlag )
 		;
-		pClass->AddPart( ID_TAG( TKP_TRACKVERT ) )
-			->AddState( ID_TAG( TRVS_NORMAL ) )
+		pClass->AddPart( ID_TAG( TKP_TRACKVERT ), SquareContentFlag )
+			->AddState( ID_TAG( TRVS_NORMAL ), SquareContentFlag )
 		;
-		pClass->AddPart( ID_TAG( TKP_THUMB ) )
-			->AddState( ID_TAG( TUS_NORMAL ) )
-			->AddState( ID_TAG( TUS_HOT ) )
-			->AddState( ID_TAG( TUS_PRESSED ) )
-			->AddState( ID_TAG( TUS_FOCUSED ) )
-			->AddState( ID_TAG( TUS_DISABLED ) )
+		pClass->AddPart( ID_TAG( TKP_THUMB ), SquareContentFlag )
+			->AddState( ID_TAG( TUS_NORMAL ), SquareContentFlag )
+			->AddState( ID_TAG( TUS_HOT ), SquareContentFlag )
+			->AddState( ID_TAG( TUS_PRESSED ), SquareContentFlag )
+			->AddState( ID_TAG( TUS_FOCUSED ), SquareContentFlag )
+			->AddState( ID_TAG( TUS_DISABLED ), SquareContentFlag )
 		;
-		pClass->AddPart( ID_TAG( TKP_THUMBBOTTOM ) )
-			->AddState( ID_TAG( TUBS_NORMAL ) )
-			->AddState( ID_TAG( TUBS_HOT ) )
-			->AddState( ID_TAG( TUBS_PRESSED ) )
-			->AddState( ID_TAG( TUBS_FOCUSED ) )
-			->AddState( ID_TAG( TUBS_DISABLED ) )
+
+		pClass->AddPart( ID_TAG( TKP_THUMBBOTTOM ), ShrinkFitContentFlag )
+			->AddState( ID_TAG( TUBS_NORMAL ), PreviewFlag | ShrinkFitContentFlag )
+			->AddState( ID_TAG( TUBS_HOT ), ShrinkFitContentFlag )
+			->AddState( ID_TAG( TUBS_PRESSED ), ShrinkFitContentFlag )
+			->AddState( ID_TAG( TUBS_FOCUSED ), ShrinkFitContentFlag )
+			->AddState( ID_TAG( TUBS_DISABLED ), ShrinkFitContentFlag )
 		;
-		pClass->AddPart( ID_TAG( TKP_THUMBTOP ) )
-			->AddState( ID_TAG( TUTS_NORMAL ) )
-			->AddState( ID_TAG( TUTS_HOT ) )
-			->AddState( ID_TAG( TUTS_PRESSED ) )
-			->AddState( ID_TAG( TUTS_FOCUSED ) )
-			->AddState( ID_TAG( TUTS_DISABLED ) )
+
+		pClass->AddPart( ID_TAG( TKP_THUMBTOP ), ShrinkFitContentFlag )
+			->AddState( ID_TAG( TUTS_NORMAL ), ShrinkFitContentFlag )
+			->AddState( ID_TAG( TUTS_HOT ), ShrinkFitContentFlag )
+			->AddState( ID_TAG( TUTS_PRESSED ), ShrinkFitContentFlag )
+			->AddState( ID_TAG( TUTS_FOCUSED ), ShrinkFitContentFlag )
+			->AddState( ID_TAG( TUTS_DISABLED ), ShrinkFitContentFlag )
 		;
-		pClass->AddPart( ID_TAG( TKP_THUMBVERT ) )
-			->AddState( ID_TAG( TUVS_NORMAL ) )
-			->AddState( ID_TAG( TUVS_HOT ) )
-			->AddState( ID_TAG( TUVS_PRESSED ) )
-			->AddState( ID_TAG( TUVS_FOCUSED ) )
-			->AddState( ID_TAG( TUVS_DISABLED ) )
+
+		pClass->AddPart( ID_TAG( TKP_THUMBVERT ), SquareContentFlag )
+			->AddState( ID_TAG( TUVS_NORMAL ), SquareContentFlag )
+			->AddState( ID_TAG( TUVS_HOT ), SquareContentFlag )
+			->AddState( ID_TAG( TUVS_PRESSED ), SquareContentFlag )
+			->AddState( ID_TAG( TUVS_FOCUSED ), SquareContentFlag )
+			->AddState( ID_TAG( TUVS_DISABLED ), SquareContentFlag )
 		;
-		pClass->AddPart( ID_TAG( TKP_THUMBLEFT ) )
-			->AddState( ID_TAG( TUVLS_NORMAL ) )
-			->AddState( ID_TAG( TUVLS_HOT ) )
-			->AddState( ID_TAG( TUVLS_PRESSED ) )
-			->AddState( ID_TAG( TUVLS_FOCUSED ) )
-			->AddState( ID_TAG( TUVLS_DISABLED ) )
+
+		pClass->AddPart( ID_TAG( TKP_THUMBLEFT ), ShrinkFitContentFlag )
+			->AddState( ID_TAG( TUVLS_NORMAL ), ShrinkFitContentFlag )
+			->AddState( ID_TAG( TUVLS_HOT ), ShrinkFitContentFlag )
+			->AddState( ID_TAG( TUVLS_PRESSED ), ShrinkFitContentFlag )
+			->AddState( ID_TAG( TUVLS_FOCUSED ), ShrinkFitContentFlag )
+			->AddState( ID_TAG( TUVLS_DISABLED ), ShrinkFitContentFlag )
 		;
-		pClass->AddPart( ID_TAG( TKP_THUMBRIGHT ) )
-			->AddState( ID_TAG( TUVRS_NORMAL ) )
-			->AddState( ID_TAG( TUVRS_HOT ) )
-			->AddState( ID_TAG( TUVRS_PRESSED ) )
-			->AddState( ID_TAG( TUVRS_FOCUSED ) )
-			->AddState( ID_TAG( TUVRS_DISABLED ) )
+
+		pClass->AddPart( ID_TAG( TKP_THUMBRIGHT ), ShrinkFitContentFlag )
+			->AddState( ID_TAG( TUVRS_NORMAL ), ShrinkFitContentFlag )
+			->AddState( ID_TAG( TUVRS_HOT ), ShrinkFitContentFlag )
+			->AddState( ID_TAG( TUVRS_PRESSED ), ShrinkFitContentFlag )
+			->AddState( ID_TAG( TUVRS_FOCUSED ), ShrinkFitContentFlag )
+			->AddState( ID_TAG( TUVRS_DISABLED ), ShrinkFitContentFlag )
 		;
-		pClass->AddPart( ID_TAG( TKP_TICS ) )
-			->AddState( ID_TAG( TSS_NORMAL ) )
+
+		pClass->AddPart( ID_TAG( TKP_TICS ), SquareContentFlag )
+			->AddState( ID_TAG( TSS_NORMAL ), SquareContentFlag )
 		;
-		pClass->AddPart( ID_TAG( TKP_TICSVERT ) )
-			->AddState( ID_TAG( TSVS_NORMAL ) )
+		pClass->AddPart( ID_TAG( TKP_TICSVERT ), SquareContentFlag )
+			->AddState( ID_TAG( TSVS_NORMAL ), SquareContentFlag )
 		;
 	}
 
@@ -1374,71 +1459,71 @@ void CThemeStore::RegisterStandardClasses( void )
 	{
 		CThemeClass* pClass = AddClass( L"TREEVIEW" );
 
-		pClass->AddPart( ID_TAG( TVP_GLYPH ) )
-			->AddState( ID_TAG( GLPS_CLOSED ) )
-			->AddState( ID_TAG( GLPS_OPENED ) )
+		pClass->AddPart( ID_TAG( TVP_GLYPH ), SquareContentFlag )
+			->AddState( ID_TAG( GLPS_CLOSED ), SquareContentFlag )
+			->AddState( ID_TAG( GLPS_OPENED ), SquareContentFlag )
 		;
-		pClass->AddPart( ID_TAG( TVP_TREEITEM ) )
-			->AddState( ID_TAG( TREIS_NORMAL ) )
-			->AddState( ID_TAG( TREIS_HOT ) )
-			->AddState( ID_TAG( TREIS_SELECTED ) )
-			->AddState( ID_TAG( TREIS_DISABLED ) )
-			->AddState( ID_TAG( TREIS_SELECTEDNOTFOCUS ) )
-			->AddState( ID_TAG( TREIS_HOTSELECTED ) )
+		pClass->AddPart( ID_TAG( TVP_TREEITEM ), TextFlag )
+			->AddState( ID_TAG( TREIS_NORMAL ), TextFlag )
+			->AddState( ID_TAG( TREIS_HOT ), TextFlag )
+			->AddState( ID_TAG( TREIS_SELECTED ), TextFlag )
+			->AddState( ID_TAG( TREIS_DISABLED ), TextFlag )
+			->AddState( ID_TAG( TREIS_SELECTEDNOTFOCUS ), TextFlag )
+			->AddState( ID_TAG( TREIS_HOTSELECTED ), TextFlag )
 		;
-		pClass->AddPart( ID_TAG( TVP_BRANCH ) );
-		pClass->AddPart( ID_TAG( TVP_HOTGLYPH ) )
-			->AddState( ID_TAG( HGLPS_CLOSED ) )
-			->AddState( ID_TAG( HGLPS_OPENED ) )
+		pClass->AddPart( ID_TAG( TVP_BRANCH ), TextFlag );
+		pClass->AddPart( ID_TAG( TVP_HOTGLYPH ), SquareContentFlag )
+			->AddState( ID_TAG( HGLPS_CLOSED ), SquareContentFlag )
+			->AddState( ID_TAG( HGLPS_OPENED ), SquareContentFlag )
 		;
 	}
 
 	{
 		CThemeClass* pClass = AddClass( L"WINDOW" );
 
-		pClass->AddPart( ID_TAG( WP_CAPTION ) )
-			->AddState( ID_TAG( CS_ACTIVE ) )
-			->AddState( ID_TAG( CS_INACTIVE ) )
-			->AddState( ID_TAG( CS_DISABLED ) )
+		pClass->AddPart( ID_TAG( WP_CAPTION ), TextFlag )
+			->AddState( ID_TAG( CS_ACTIVE ), TextFlag )
+			->AddState( ID_TAG( CS_INACTIVE ), TextFlag )
+			->AddState( ID_TAG( CS_DISABLED ), TextFlag )
 		;
-		pClass->AddPart( ID_TAG( WP_SMALLCAPTION ) );
-		pClass->AddPart( ID_TAG( WP_MINCAPTION ) )
-			->AddState( ID_TAG( MNCS_ACTIVE ) )
-			->AddState( ID_TAG( MNCS_INACTIVE ) )
-			->AddState( ID_TAG( MNCS_DISABLED ) )
+		pClass->AddPart( ID_TAG( WP_SMALLCAPTION ), TextFlag );
+		pClass->AddPart( ID_TAG( WP_MINCAPTION ), TextFlag )
+			->AddState( ID_TAG( MNCS_ACTIVE ), TextFlag )
+			->AddState( ID_TAG( MNCS_INACTIVE ), TextFlag )
+			->AddState( ID_TAG( MNCS_DISABLED ), TextFlag )
 		;
 		pClass->AddPart( ID_TAG( WP_SMALLMINCAPTION ) );		// ObscureRelevance
-		pClass->AddPart( ID_TAG( WP_MAXCAPTION ) )
-			->AddState( ID_TAG( MXCS_ACTIVE ) )
-			->AddState( ID_TAG( MXCS_INACTIVE ) )
-			->AddState( ID_TAG( MXCS_DISABLED ) )
+		pClass->AddPart( ID_TAG( WP_MAXCAPTION ), TextFlag )
+			->AddState( ID_TAG( MXCS_ACTIVE ), TextFlag )
+			->AddState( ID_TAG( MXCS_INACTIVE ), TextFlag )
+			->AddState( ID_TAG( MXCS_DISABLED ), TextFlag )
 		;
 		pClass->AddPart( ID_TAG( WP_SMALLMAXCAPTION ) );		// ObscureRelevance
-		pClass->AddPart( ID_TAG( WP_FRAMELEFT ) );
-		pClass->AddPart( ID_TAG( WP_FRAMERIGHT ) );
+		pClass->AddPart( ID_TAG( WP_FRAMELEFT ), ShrinkFitContentFlag );
+		pClass->AddPart( ID_TAG( WP_FRAMERIGHT ), ShrinkFitContentFlag );
 		pClass->AddPart( ID_TAG( WP_FRAMEBOTTOM ) );
 		pClass->AddPart( ID_TAG( WP_SMALLFRAMELEFT ) );
 		pClass->AddPart( ID_TAG( WP_SMALLFRAMERIGHT ) );
 		pClass->AddPart( ID_TAG( WP_SMALLFRAMEBOTTOM ) );
-		pClass->AddPart( ID_TAG( WP_SYSBUTTON ) )				// ObscureRelevance
-			->AddState( ID_TAG( SBS_NORMAL ) )
-			->AddState( ID_TAG( SBS_HOT ) )
-			->AddState( ID_TAG( SBS_PUSHED ) )
-			->AddState( ID_TAG( SBS_DISABLED ) )
+		pClass->AddPart( ID_TAG( WP_SYSBUTTON ), SquareContentFlag )				// ObscureRelevance
+			->AddState( ID_TAG( SBS_NORMAL ), SquareContentFlag )
+			->AddState( ID_TAG( SBS_HOT ), SquareContentFlag )
+			->AddState( ID_TAG( SBS_PUSHED ), SquareContentFlag )
+			->AddState( ID_TAG( SBS_DISABLED ), SquareContentFlag )
 		;
-		pClass->AddPart( ID_TAG( WP_MDISYSBUTTON ) );			// ObscureRelevance
-		pClass->AddPart( ID_TAG( WP_MINBUTTON ) )
-			->AddState( ID_TAG( MINBS_NORMAL ) )
-			->AddState( ID_TAG( MINBS_HOT ) )
-			->AddState( ID_TAG( MINBS_PUSHED ) )
-			->AddState( ID_TAG( MINBS_DISABLED ) )
+		pClass->AddPart( ID_TAG( WP_MDISYSBUTTON ), SquareContentFlag );			// ObscureRelevance
+		pClass->AddPart( ID_TAG( WP_MINBUTTON ), SquareContentFlag )
+			->AddState( ID_TAG( MINBS_NORMAL ), SquareContentFlag )
+			->AddState( ID_TAG( MINBS_HOT ), SquareContentFlag )
+			->AddState( ID_TAG( MINBS_PUSHED ), SquareContentFlag )
+			->AddState( ID_TAG( MINBS_DISABLED ), SquareContentFlag )
 		;
-		pClass->AddPart( ID_TAG( WP_MDIMINBUTTON ) );
-		pClass->AddPart( ID_TAG( WP_MAXBUTTON ) )
-			->AddState( ID_TAG( MAXBS_NORMAL ) )
-			->AddState( ID_TAG( MAXBS_HOT ) )
-			->AddState( ID_TAG( MAXBS_PUSHED ) )
-			->AddState( ID_TAG( MAXBS_DISABLED ) )
+		pClass->AddPart( ID_TAG( WP_MDIMINBUTTON ), SquareContentFlag );
+		pClass->AddPart( ID_TAG( WP_MAXBUTTON ), SquareContentFlag )
+			->AddState( ID_TAG( MAXBS_NORMAL ), SquareContentFlag )
+			->AddState( ID_TAG( MAXBS_HOT ), SquareContentFlag )
+			->AddState( ID_TAG( MAXBS_PUSHED ), SquareContentFlag )
+			->AddState( ID_TAG( MAXBS_DISABLED ), SquareContentFlag )
 		;
 		pClass->AddPart( ID_TAG( WP_CLOSEBUTTON ) )
 			->AddState( ID_TAG( CBS_NORMAL ) )
@@ -1454,41 +1539,41 @@ void CThemeStore::RegisterStandardClasses( void )
 			->AddState( ID_TAG( RBS_PUSHED ) )
 			->AddState( ID_TAG( RBS_DISABLED ) )
 		;
-		pClass->AddPart( ID_TAG( WP_MDIRESTOREBUTTON ) );
-		pClass->AddPart( ID_TAG( WP_HELPBUTTON ) )
-			->AddState( ID_TAG( HBS_NORMAL ) )
-			->AddState( ID_TAG( HBS_HOT ) )
-			->AddState( ID_TAG( HBS_PUSHED ) )
-			->AddState( ID_TAG( HBS_DISABLED ) )
+		pClass->AddPart( ID_TAG( WP_MDIRESTOREBUTTON ), SquareContentFlag );
+		pClass->AddPart( ID_TAG( WP_HELPBUTTON ), SquareContentFlag )
+			->AddState( ID_TAG( HBS_NORMAL ), SquareContentFlag )
+			->AddState( ID_TAG( HBS_HOT ), SquareContentFlag )
+			->AddState( ID_TAG( HBS_PUSHED ), SquareContentFlag )
+			->AddState( ID_TAG( HBS_DISABLED ), SquareContentFlag )
 		;
-		pClass->AddPart( ID_TAG( WP_MDIHELPBUTTON ) );			// ObscureRelevance
-		pClass->AddPart( ID_TAG( WP_HORZSCROLL ) )
-			->AddState( ID_TAG( HSS_NORMAL ) )
-			->AddState( ID_TAG( HSS_HOT ) )
-			->AddState( ID_TAG( HSS_PUSHED ) )
-			->AddState( ID_TAG( HSS_DISABLED ) )
+		pClass->AddPart( ID_TAG( WP_MDIHELPBUTTON ), SquareContentFlag );			// ObscureRelevance
+		pClass->AddPart( ID_TAG( WP_HORZSCROLL ), SquareContentFlag )
+			->AddState( ID_TAG( HSS_NORMAL ), SquareContentFlag )
+			->AddState( ID_TAG( HSS_HOT ), SquareContentFlag )
+			->AddState( ID_TAG( HSS_PUSHED ), SquareContentFlag )
+			->AddState( ID_TAG( HSS_DISABLED ), SquareContentFlag )
 		;
-		pClass->AddPart( ID_TAG( WP_HORZTHUMB ) )				// ObscureRelevance
-			->AddState( ID_TAG( HTS_NORMAL ) )
-			->AddState( ID_TAG( HTS_HOT ) )
-			->AddState( ID_TAG( HTS_PUSHED ) )
-			->AddState( ID_TAG( HTS_DISABLED ) )
+		pClass->AddPart( ID_TAG( WP_HORZTHUMB ), SquareContentFlag )				// ObscureRelevance
+			->AddState( ID_TAG( HTS_NORMAL ), SquareContentFlag )
+			->AddState( ID_TAG( HTS_HOT ), SquareContentFlag )
+			->AddState( ID_TAG( HTS_PUSHED ), SquareContentFlag )
+			->AddState( ID_TAG( HTS_DISABLED ), SquareContentFlag )
 		;
-		pClass->AddPart( ID_TAG( WP_VERTSCROLL ) )				// ObscureRelevance
-			->AddState( ID_TAG( VSS_NORMAL ) )
-			->AddState( ID_TAG( VSS_HOT ) )
-			->AddState( ID_TAG( VSS_PUSHED ) )
-			->AddState( ID_TAG( VSS_DISABLED ) )
+		pClass->AddPart( ID_TAG( WP_VERTSCROLL ), SquareContentFlag )				// ObscureRelevance
+			->AddState( ID_TAG( VSS_NORMAL ), SquareContentFlag )
+			->AddState( ID_TAG( VSS_HOT ), SquareContentFlag )
+			->AddState( ID_TAG( VSS_PUSHED ), SquareContentFlag )
+			->AddState( ID_TAG( VSS_DISABLED ), SquareContentFlag )
 		;
-		pClass->AddPart( ID_TAG( WP_VERTTHUMB ) )				// ObscureRelevance
-			->AddState( ID_TAG( VTS_NORMAL ) )
-			->AddState( ID_TAG( VTS_HOT ) )
-			->AddState( ID_TAG( VTS_PUSHED ) )
-			->AddState( ID_TAG( VTS_DISABLED ) )
+		pClass->AddPart( ID_TAG( WP_VERTTHUMB ), SquareContentFlag )				// ObscureRelevance
+			->AddState( ID_TAG( VTS_NORMAL ), SquareContentFlag )
+			->AddState( ID_TAG( VTS_HOT ), SquareContentFlag )
+			->AddState( ID_TAG( VTS_PUSHED ), SquareContentFlag )
+			->AddState( ID_TAG( VTS_DISABLED ), SquareContentFlag )
 		;
-		pClass->AddPart( ID_TAG( WP_DIALOG ) );
-		pClass->AddPart( ID_TAG( WP_CAPTIONSIZINGTEMPLATE ), MediumRelevance );
-		pClass->AddPart( ID_TAG( WP_SMALLCAPTIONSIZINGTEMPLATE ), MediumRelevance );
+		pClass->AddPart( ID_TAG( WP_DIALOG ), TextFlag );
+		pClass->AddPart( ID_TAG( WP_CAPTIONSIZINGTEMPLATE ), 0, MediumRelevance );
+		pClass->AddPart( ID_TAG( WP_SMALLCAPTIONSIZINGTEMPLATE ), 0, MediumRelevance );
 		pClass->AddPart( ID_TAG( WP_FRAMELEFTSIZINGTEMPLATE ) );		// ObscureRelevance
 		pClass->AddPart( ID_TAG( WP_SMALLFRAMELEFTSIZINGTEMPLATE ) );	// ObscureRelevance
 		pClass->AddPart( ID_TAG( WP_FRAMERIGHTSIZINGTEMPLATE ) );		// ObscureRelevance

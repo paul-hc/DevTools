@@ -3,6 +3,7 @@
 #include "ThemeCustomDraw.h"
 #include "ThemeStore.h"
 #include "Options.h"
+#include "utl/Utilities.h"
 #include "utl/VisualTheme.h"
 
 #ifdef _DEBUG
@@ -49,57 +50,6 @@ namespace hlp
 		Point horizPoints[] = { Point( coreRect.left, center.Y ), Point( coreRect.right, center.Y ) };
 		graphics.DrawLines( &pen, horizPoints, COUNT_OF( horizPoints ) );
 	}
-
-	bool HasBitmap( const CThemeItem& themeItem )
-	{
-		CVisualTheme theme( themeItem.m_pThemeClass );
-		if ( theme.IsValid() )
-		{
-			HBITMAP hBitmap = NULL;
-			if ( HR_OK( ::GetThemeBitmap( theme.GetTheme(), themeItem.m_partId, themeItem.GetStateId(), TMT_GLYPHDIBDATA, GBF_DIRECT, &hBitmap ) ) )
-				if ( hBitmap != NULL )
-					return true;
-		}
-		return false;
-	}
-
-	bool HasGlyph( const CThemeItem& themeItem )
-	{
-		CVisualTheme theme( themeItem.m_pThemeClass );
-		if ( theme.IsValid() )
-		{
-			int value;
-			if ( HR_OK( ::GetThemeEnumValue( theme.GetTheme(), themeItem.m_partId, themeItem.GetStateId(), TMT_GLYPHTYPE, &value ) ) )
-				switch ( value )
-				{
-					case GT_IMAGEGLYPH:
-					case GT_FONTGLYPH:
-						return true;
-				}
-
-			if ( HR_OK( ::GetThemeEnumValue( theme.GetTheme(), themeItem.m_partId, themeItem.GetStateId(), TMT_SIZINGTYPE, &value ) ) )
-				switch ( value )
-				{
-					case ST_TRUESIZE:
-						return true;
-				}
-
-			if ( HR_OK( ::GetThemeBool( theme.GetTheme(), themeItem.m_partId, themeItem.GetStateId(), TMT_GLYPHTRANSPARENT, &value ) ) )
-				if ( value != FALSE )
-					return true;
-
-			if ( HR_OK( ::GetThemeBool( theme.GetTheme(), themeItem.m_partId, themeItem.GetStateId(), TMT_GLYPHONLY, &value ) ) )
-				if ( value != FALSE )
-					return true;
-		}
-
-		return HasBitmap( themeItem );
-	}
-
-	bool UseText( const CThemeItem& themeItem )
-	{
-		return !HasGlyph( themeItem );
-	}
 }
 
 
@@ -139,22 +89,47 @@ bool CThemeCustomDraw::SetItemImageSize( const CSize& boundsSize )
 
 bool CThemeCustomDraw::DrawItemImage( CDC* pDC, const utl::ISubject* pSubject, const CRect& itemRect )
 {
-	const IThemeNode* pThemeNode = checked_static_cast< const IThemeNode* >( pSubject );
+	const CBaseNode* pThemeNode = checked_static_cast< const CBaseNode* >( pSubject );
 	ASSERT_PTR( pThemeNode );
-	CThemeItem themeItem = pThemeNode->MakeThemeItem();
+	CThemeItemNode themeItem = pThemeNode->MakeThemeItem();
+	int nodeFlags = themeItem.m_pDeepNode->GetFlags();
 
 	CRect rect = itemRect;
 	rect.DeflateRect( m_imageMargin );
 	rect.right -= m_textMargin;
 
-	if ( !themeItem.DrawBackground( *pDC, rect ) )
+	if ( HasFlag( nodeFlags, PreviewFillBkFlag ) )
+		::FillRect( pDC->m_hDC, &rect, GetSysColorBrush( COLOR_BTNFACE ) );
+
+	CRect bkRect = rect;
+	if ( HasFlag( nodeFlags, SquareContentFlag | ShrinkFitContentFlag ) )
+	{
+		CSize partSize( 0, 0 );
+
+		if ( HasFlag( nodeFlags, SquareContentFlag ) )
+		{
+			partSize = bkRect.Size();
+			partSize.cx = partSize.cy = std::min( partSize.cx, partSize.cy );
+		}
+		else if ( HasFlag( nodeFlags, ShrinkFitContentFlag ) )
+			themeItem.GetPartSize( &partSize, pDC->m_hDC, TS_TRUE, &rect );
+
+		if ( partSize.cx * partSize.cy > 2 )						// not a minuscule size?
+		{
+			partSize = ui::MinSize( partSize, rect.Size() );		// limit bkRect to rect
+			bkRect.SetRect( 0, 0, partSize.cx, partSize.cy );
+			ui::CenterRect( bkRect, rect );
+		}
+	}
+
+	if ( !themeItem.DrawBackground( *pDC, bkRect ) )
 	{
 		hlp::DrawError( pDC, rect );
 		return false;
 	}
 
 	if ( !m_itemCaption.empty() )
-		if ( hlp::UseText( themeItem ) )
+		if ( HasFlag( nodeFlags, TextFlag ) )
 		{
 			CRect textRect = rect;
 			textRect.left += TextMargin;

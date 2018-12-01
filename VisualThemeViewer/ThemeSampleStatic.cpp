@@ -99,7 +99,7 @@ bool CThemeSampleStatic::SizeToContent( CRect& rCoreRect, CDC* pDC )
 {
 	CVisualTheme theme( m_themeItem.m_pThemeClass );
 	CSize coreSize;
-	std::tstring shrunkLabel;
+	std::tstring shrunkInfo;
 
 	if ( theme.IsValid() )
 		if ( theme.GetThemePartSize( &coreSize, *pDC, m_themeItem.m_partId, m_themeItem.GetStateId(), TS_TRUE, &rCoreRect ) )
@@ -115,7 +115,7 @@ bool CThemeSampleStatic::SizeToContent( CRect& rCoreRect, CDC* pDC )
 				}
 
 				rCoreRect = coreRect;		// shrink core rect to auto size
-				shrunkLabel = str::Format( _T("SHRUNK:\ncx=%d\ncy=%d"), rCoreRect.Width(), rCoreRect.Height() );
+				shrunkInfo = str::Format( _T("SHRUNK:\ncx=%d\ncy=%d"), rCoreRect.Width(), rCoreRect.Height() );
 
 				DrawBackground( pDC, rCoreRect );
 
@@ -126,8 +126,8 @@ bool CThemeSampleStatic::SizeToContent( CRect& rCoreRect, CDC* pDC )
 				}
 			}
 
-	ui::SetDlgItemText( GetParent(), m_stcInfoId, shrunkLabel );
-	return !shrunkLabel.empty();
+	ui::SetDlgItemText( GetParent(), m_stcInfoId, shrunkInfo );
+	return !shrunkInfo.empty();
 }
 
 

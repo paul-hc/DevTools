@@ -151,7 +151,12 @@ void CMainDialog::CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARAM rowK
 	const IThemeNode* pThemeNode = NULL;
 
 	if ( &m_classList == pCtrl )
+	{
 		pThemeNode = m_classList.AsPtr< IThemeNode >( rowKey );
+
+		if ( 0 == subItem )
+			rTextEffect.m_fontEffect = ui::Bold;
+	}
 	if ( &m_partStateTree == pCtrl )
 		pThemeNode = m_partStateTree.GetItemObject< IThemeNode >( reinterpret_cast< HTREEITEM >( rowKey ) );
 
