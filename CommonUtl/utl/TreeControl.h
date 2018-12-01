@@ -41,6 +41,7 @@ public:
 
 	CMenu& GetContextMenu( void ) { return m_contextMenu; }
 	void StoreImageList( CImageList* pImageList );
+	CImageList* SetImageList( CImageList* pImageList, int imageType );		// pseudo-override
 
 	bool DeleteAllItems( void );
 	bool Copy( void );
@@ -107,9 +108,10 @@ private:
 protected:
 	CMenu m_contextMenu;
 private:
-	CImageList* m_pImageList;
+	CImageList* m_pImageList;			// for TVSIL_NORMAL type
 	stdext::hash_map< HTREEITEM, ui::CTextEffect > m_markedItems;
 
+	UINT m_indentNoImages, m_indentWithImages;
 	mutable CSize m_imageSize;			// self-encapsulated
 
 	// generated overrides

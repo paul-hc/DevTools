@@ -31,6 +31,8 @@ CTreeControl::CTreeControl( void )
 	: CTreeCtrl()
 	, CListLikeCtrlBase( this )
 	, m_pImageList( NULL )
+	, m_indentNoImages( 0 )
+	, m_indentWithImages( 0 )
 	, m_imageSize( 0, 0 )
 {
 }
@@ -65,8 +67,24 @@ void CTreeControl::StoreImageList( CImageList* pImageList )
 	if ( m_hWnd != NULL )
 	{
 		SetImageList( m_pImageList, TVSIL_NORMAL );
+
+		if ( UINT indent = m_pImageList != NULL ? m_indentWithImages : m_indentNoImages )
+			SetIndent( indent );
+
 		UpdateCustomImagerBoundsSize();
+		ui::RecalculateScrollbars( m_hWnd );
 	}
+}
+
+CImageList* CTreeControl::SetImageList( CImageList* pImageList, int imageType )
+{
+	CImageList* pOldImageList = __super::SetImageList( pImageList, imageType );
+
+	if ( pImageList != NULL && TVSIL_NORMAL == imageType )
+		if ( 0 == m_indentWithImages )
+			m_indentWithImages = GetIndent();
+
+	return pOldImageList;
 }
 
 void CTreeControl::SetCustomFileGlyphDraw( bool showGlyphs /*= true*/ )
@@ -261,6 +279,7 @@ void CTreeControl::SetupControl( void )
 {
 	CListLikeCtrlBase::SetupControl();
 
+	m_indentNoImages = GetIndent();
 	if ( m_pImageList != NULL )
 		SetImageList( m_pImageList, TVSIL_NORMAL );
 

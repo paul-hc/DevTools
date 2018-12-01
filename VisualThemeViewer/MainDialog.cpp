@@ -106,7 +106,7 @@ CMainDialog::~CMainDialog()
 
 void CMainDialog::InitCustomDraw( void )
 {
-	static const CSize s_themePreviewSize( 40, 24 ), s_themePreviewSizeLarge( 50, 32 );
+	static const CSize s_themePreviewSize( 40, 20 ), s_themePreviewSizeLarge( 50, 32 );
 
 	m_pListCustomDraw.reset( new CThemeCustomDraw( &m_options ) );
 	m_pListCustomDraw->m_imageSize[ ui::SmallGlyph ] = s_themePreviewSize;
@@ -116,7 +116,7 @@ void CMainDialog::InitCustomDraw( void )
 
 	m_pTreeCustomDraw.reset( new CThemeCustomDraw( &m_options ) );
 	m_pTreeCustomDraw->m_imageSize[ ui::SmallGlyph ] = s_themePreviewSize;
-	m_pTreeCustomDraw->m_imageMargin = CSize( 0, 1 );
+	m_pTreeCustomDraw->m_imageMargin = CSize( 0, 2 );
 	m_pTreeCustomDraw->m_textMargin = 2;
 }
 
@@ -305,28 +305,25 @@ void CMainDialog::DoDataExchange( CDataExchange* pDX )
 	DDX_Control( pDX, IDC_BK_COLOR_COMBO, m_bkColorCombo );
 	m_toolbar.DDX_Placeholder( pDX, IDC_STRIP_BAR_1, H_AlignLeft | V_AlignTop );
 
-	if ( !pDX->m_bSaveAndValidate )
+	if ( firstInit )
 	{
-		if ( firstInit )
+		m_classFilterCombo.SetCurSel( AfxGetApp()->GetProfileInt( reg::section_dialog, reg::entry_classFilter, ObscureRelevance ) );
+		m_partsFilterCombo.SetCurSel( AfxGetApp()->GetProfileInt( reg::section_dialog, reg::entry_partsFilter, ObscureRelevance ) );
+		ui::LoadHistoryCombo( m_bkColorCombo, reg::section_dialog, reg::entry_bkColorHistory, NULL );
+		ui::SetDlgItemText( this, IDC_BK_COLOR_COMBO, m_options.m_bkColorText );
+
+		m_options.UpdateControls( this );			// update check-box buttons
+
+		SetupClassesList();
+		SetupPartsAndStatesTree();
+
+		std::tstring selText = AfxGetApp()->GetProfileString( reg::section_dialog, reg::entry_selTreeItem, NULL );
+		if ( HTREEITEM hSelItem = ui::FindTreeItem( m_partStateTree, selText ) )
 		{
-			m_classFilterCombo.SetCurSel( AfxGetApp()->GetProfileInt( reg::section_dialog, reg::entry_classFilter, ObscureRelevance ) );
-			m_partsFilterCombo.SetCurSel( AfxGetApp()->GetProfileInt( reg::section_dialog, reg::entry_partsFilter, ObscureRelevance ) );
-			ui::LoadHistoryCombo( m_bkColorCombo, reg::section_dialog, reg::entry_bkColorHistory, NULL );
-			ui::SetDlgItemText( this, IDC_BK_COLOR_COMBO, m_options.m_bkColorText );
-
-			m_options.UpdateControls( this );			// update check-box buttons
-
-			SetupClassesList();
-			SetupPartsAndStatesTree();
-
-			std::tstring selText = AfxGetApp()->GetProfileString( reg::section_dialog, reg::entry_selTreeItem, NULL );
-			if ( HTREEITEM hSelItem = ui::FindTreeItem( m_partStateTree, selText ) )
-			{
-				m_partStateTree.SelectItem( hSelItem );
-				OutputCurrentTheme();
-			}
-			GotoDlgCtrl( &m_partStateTree );
+			m_partStateTree.SelectItem( hSelItem );
+			OutputCurrentTheme();
 		}
+		GotoDlgCtrl( &m_partStateTree );
 	}
 
 	CBaseMainDialog::DoDataExchange( pDX );
