@@ -258,6 +258,12 @@ bool CTreeControl::RefreshItem( HTREEITEM hItem )
 	return 0 == treeItemInfo.m_nmHdr.NotifyParent();		// false if refresh was rejected
 }
 
+bool CTreeControl::SetSelected( const utl::ISubject* pObject )
+{
+	HTREEITEM hItem = FindItemWithObject( pObject );
+	return hItem != NULL && SelectItem( hItem );
+}
+
 void CTreeControl::ExpandBranch( HTREEITEM hItem, bool expand /*= true*/ )
 {
 	{

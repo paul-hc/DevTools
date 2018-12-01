@@ -32,13 +32,10 @@ private:
 	// ui::ITextEffectCallback interface
 	virtual void CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARAM rowKey, int subItem, CListLikeCtrlBase* pCtrl ) const;
 
-	void InitCustomDraw( void );
 	CThemeContext GetSelThemeContext( void ) const;
 	void SetupClassesList( void );
 	void SetupPartsAndStatesTree( void );
 	void OutputCurrentTheme( void );
-
-	static std::tstring FormatCounts( unsigned int count, unsigned int total );
 private:
 	COptions m_options;
 	CThemeStore m_themeStore;
@@ -57,14 +54,13 @@ private:
 
 	enum { Tiny, Small, Medium, Large, SampleCount };
 	CThemeSampleStatic m_samples[ SampleCount ];
-protected:
+
 	// generated overrides
 	public:
 	virtual BOOL OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo );
 	protected:
 	virtual void DoDataExchange( CDataExchange* pDX );
 protected:
-	// message map functions
 	afx_msg void OnDestroy( void );
 	afx_msg void OnLvnItemChanged_ThemeClass( NMHDR* pNmHdr, LRESULT* pResult );
 	afx_msg void OnTvnSelChanged_PartStateTree( NMHDR* pNmHdr, LRESULT* pResult );
@@ -74,6 +70,7 @@ protected:
 	afx_msg void OnUpdateEditCopy( CCmdUI* pCmdUI );
 	afx_msg void OnCopyTheme( UINT cmdId );
 	afx_msg void OnUpdateCopyTheme( CCmdUI* pCmdUI );
+	afx_msg void OnBrowseThemes( void );
 
 	DECLARE_MESSAGE_MAP()
 };

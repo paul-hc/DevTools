@@ -147,6 +147,8 @@ struct CThemeStore
 
 	CThemeClass* FindClass( const wchar_t* pClassName ) const;
 	bool SetupNotImplementedThemes( void );
+
+	size_t GetTotalCount( void ) const;
 private:
 	CThemeClass* AddClass( const std::wstring& className, Relevance relevance = HighRelevance );
 	void RegisterStandardClasses( void );

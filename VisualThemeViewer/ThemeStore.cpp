@@ -198,6 +198,20 @@ CThemeClass* CThemeStore::AddClass( const std::wstring& className, Relevance rel
 	return pClass;
 }
 
+size_t CThemeStore::GetTotalCount( void ) const
+{
+	size_t totalCount = 0;
+
+	for ( CThemeClass* pClass : m_classes )
+	{
+		++totalCount;
+
+		for ( CThemePart* pPart : pClass->m_parts )
+			totalCount += 1 + pPart->m_states.size();
+	}
+	return totalCount;
+}
+
 void CThemeStore::RegisterStandardClasses( void )
 {
 	{

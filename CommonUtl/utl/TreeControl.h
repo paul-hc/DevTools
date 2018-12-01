@@ -87,6 +87,12 @@ public:
 	bool SelectItem( HTREEITEM hItem );					// select item and make it visible
 	bool RefreshItem( HTREEITEM hItem );				// notifies parent to refresh the item
 
+	// selection
+	template< typename ObjectT >
+	ObjectT* GetSelected( void ) const;
+
+	bool SetSelected( const utl::ISubject* pObject );
+
 	// tree algorithms
 	template< typename Pred >
 	HTREEITEM FirstThat( Pred pred, HTREEITEM hItem = TVI_ROOT ) const;
@@ -97,7 +103,9 @@ public:
 	void ExpandBranch( HTREEITEM hItem, bool expand = true );
 
 	template< typename Type >
-	HTREEITEM FindItemWithData( Type data, HTREEITEM hItem = TVI_ROOT ) const;
+	HTREEITEM FindItemWithData( Type data, HTREEITEM hStart = TVI_ROOT ) const;
+
+	HTREEITEM FindItemWithObject( const utl::ISubject* pObject, HTREEITEM hStart = TVI_ROOT ) const { return FindItemWithData( pObject, hStart ); }
 protected:
 	void ClearData( void );
 
@@ -163,6 +171,13 @@ namespace func
 
 // template code
 
+template< typename ObjectT >
+ObjectT* CTreeControl::GetSelected( void ) const
+{
+	HTREEITEM hSelItem = GetSelectedItem();
+	return hSelItem != NULL ? GetItemObject< ObjectT >( hSelItem ) : NULL;
+}
+
 template< typename Func >
 void CTreeControl::ForEach( Func func, HTREEITEM hItem /*= TVI_ROOT*/ )
 {
@@ -188,12 +203,12 @@ HTREEITEM CTreeControl::FirstThat( Pred pred, HTREEITEM hItem /*= TVI_ROOT*/ ) c
 }
 
 template< typename Type >
-inline HTREEITEM CTreeControl::FindItemWithData( Type data, HTREEITEM hItem /*= TVI_ROOT*/ ) const
+inline HTREEITEM CTreeControl::FindItemWithData( Type data, HTREEITEM hStart /*= TVI_ROOT*/ ) const
 {
-	if ( NULL == hItem )
+	if ( NULL == hStart )
 		return NULL;
 
-	return FirstThat( func::HasItemData( data ), hItem );
+	return FirstThat( func::HasItemData( data ), hStart );
 }
 
 

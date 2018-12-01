@@ -456,7 +456,7 @@ public:
 	template< typename ObjectT >
 	ObjectT* GetSelected( void ) const;
 
-	void Select( const void* pObject );
+	bool Select( const void* pObject );
 
 	template< typename ObjectT >
 	bool QuerySelectionAs( std::vector< ObjectT* >& rSelObjects ) const;

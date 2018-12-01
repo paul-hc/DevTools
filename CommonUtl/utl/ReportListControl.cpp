@@ -1563,10 +1563,11 @@ bool CReportListControl::GetSelection( std::vector< int >& rSelIndexes, int* pCa
 	return !rSelIndexes.empty();
 }
 
-void CReportListControl::Select( const void* pObject )
+bool CReportListControl::Select( const void* pObject )
 {
 	int indexFound = FindItemIndex( pObject );
 	if ( IsMultiSelectionList() )
+	{
 		if ( indexFound != -1 )
 		{
 			std::vector< int > selIndexes;
@@ -1576,8 +1577,11 @@ void CReportListControl::Select( const void* pObject )
 		}
 		else
 			ClearSelection();
+
+		return ( -1 == indexFound ) == ( NULL == pObject );
+	}
 	else
-		SetCurSel( indexFound );
+		return SetCurSel( indexFound );
 }
 
 void CReportListControl::SetSelection( const std::vector< int >& selIndexes, int caretIndex /*= -1*/ )

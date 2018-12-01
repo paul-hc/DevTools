@@ -21,6 +21,9 @@ class CThemeCustomDraw : public ui::ICustomImageDraw
 {
 public:
 	CThemeCustomDraw( const COptions* pOptions, const std::tstring& itemCaption = _T("text") );
+
+	static CThemeCustomDraw* MakeListCustomDraw( const COptions* pOptions );
+	static CThemeCustomDraw* MakeTreeCustomDraw( const COptions* pOptions );
 private:
 	// ui::ICustomImageDraw interface
 	virtual CSize GetItemImageSize( ui::GlyphGauge glyphGauge = ui::SmallGlyph ) const;
@@ -37,6 +40,9 @@ public:
 	int m_textMargin;				// extra spacing to the right between image and item text
 
 	std::tstring m_itemCaption;
+
+	static const CSize s_themePreviewSize;
+	static const CSize s_themePreviewSizeLarge;
 };
 
 

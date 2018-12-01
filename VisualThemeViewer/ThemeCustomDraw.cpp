@@ -55,6 +55,9 @@ namespace hlp
 
 // CThemeCustomDraw implementation
 
+const CSize CThemeCustomDraw::s_themePreviewSize( 40, 20 );
+const CSize CThemeCustomDraw::s_themePreviewSizeLarge( 50, 32 );
+
 CThemeCustomDraw::CThemeCustomDraw( const COptions* pOptions, const std::tstring& itemCaption /*= _T("text")*/ )
 	: m_pOptions( pOptions )
 	, m_boundsSize( 0, 0 )
@@ -66,6 +69,27 @@ CThemeCustomDraw::CThemeCustomDraw( const COptions* pOptions, const std::tstring
 	m_imageSize[ ui::LargeGlyph ] = CSize( 32, 32 );
 
 	ASSERT_PTR( m_pOptions );
+}
+
+CThemeCustomDraw* CThemeCustomDraw::MakeListCustomDraw( const COptions* pOptions )
+{
+	CThemeCustomDraw* pListCustomDraw = new CThemeCustomDraw( pOptions );
+
+	pListCustomDraw->m_imageSize[ ui::SmallGlyph ] = s_themePreviewSize;
+	pListCustomDraw->m_imageSize[ ui::LargeGlyph ] = s_themePreviewSizeLarge;
+	pListCustomDraw->m_imageMargin = CSize( 0, 2 );
+	pListCustomDraw->m_textMargin = 2;
+	return pListCustomDraw;
+}
+
+CThemeCustomDraw* CThemeCustomDraw::MakeTreeCustomDraw( const COptions* pOptions )
+{
+	CThemeCustomDraw* pTreeCustomDraw = new CThemeCustomDraw( pOptions );
+
+	pTreeCustomDraw->m_imageSize[ ui::SmallGlyph ] = s_themePreviewSize;
+	pTreeCustomDraw->m_imageMargin = CSize( 0, 2 );
+	pTreeCustomDraw->m_textMargin = 2;
+	return pTreeCustomDraw;
 }
 
 CSize CThemeCustomDraw::GetItemImageSize( ui::GlyphGauge glyphGauge /*= ui::SmallGlyph*/ ) const
