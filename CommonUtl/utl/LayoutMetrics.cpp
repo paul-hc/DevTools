@@ -74,10 +74,10 @@ namespace layout
 
 	void CControlState::ModifyLayoutStyle( int clearStyle, int setStyle )
 	{
-		ModifyFlag( m_metrics.m_layoutStyle, clearStyle, setStyle );
+		ModifyFlags( m_metrics.m_layoutStyle, clearStyle, setStyle );
 
 		if ( HasCollapsedState() )
-			ModifyFlag( m_collapsedMetrics.m_layoutStyle, clearStyle, setStyle );
+			ModifyFlags( m_collapsedMetrics.m_layoutStyle, clearStyle, setStyle );
 	}
 
 	void CControlState::InitCtrl( HWND hControl )

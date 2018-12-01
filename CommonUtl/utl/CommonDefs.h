@@ -164,6 +164,12 @@ inline void ClearFlag( FieldType& rField, unsigned int flag )
 }
 
 template< typename FieldType >
+inline FieldType GetMasked( FieldType field, unsigned int mask, bool on )
+{
+	return on ? ( field | mask ) : ( field & ~mask );
+}
+
+template< typename FieldType >
 inline void SetFlag( FieldType& rField, unsigned int flag, bool on = true )
 {
 	if ( on )
@@ -179,7 +185,7 @@ inline void ToggleFlag( FieldType& rField, unsigned int flag )
 }
 
 template< typename FieldType >
-inline bool ModifyFlag( FieldType& rField, unsigned int clearFlags, unsigned int setFlags )
+inline bool ModifyFlags( FieldType& rField, unsigned int clearFlags, unsigned int setFlags )
 {
 	FieldType oldField = rField;
 	rField &= ~clearFlags;
@@ -190,7 +196,7 @@ inline bool ModifyFlag( FieldType& rField, unsigned int clearFlags, unsigned int
 template< typename FieldType >
 inline bool SetMaskedValue( FieldType& rField, unsigned int mask, unsigned int value )
 {
-	return ModifyFlag( rField, mask, value & mask );
+	return ModifyFlags( rField, mask, value & mask );
 }
 
 

@@ -117,7 +117,7 @@ namespace ui
 		else if ( HasFlag( alignment, V_AlignBottom ) )
 			SetFlag( dtAlign, DT_BOTTOM );
 
-		ModifyFlag( *pDtFlags, DT_CENTER | DT_RIGHT | DT_VCENTER | DT_BOTTOM, dtAlign );
+		ModifyFlags( *pDtFlags, DT_CENTER | DT_RIGHT | DT_VCENTER | DT_BOTTOM, dtAlign );
 	}
 
 

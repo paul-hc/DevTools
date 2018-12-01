@@ -23,7 +23,7 @@ struct CThemeItem
 	bool GetPartSize( CSize* pPartSize, HDC hdc, THEMESIZE themeSize = TS_TRUE, const RECT* pRect = NULL ) const;
 
 	// status dependent drawing
-	enum Status { Normal, Hot, Pressed, Disabled, StatusCount };
+	enum Status { Normal, Hot, Pressed, Disabled, _StatusCount };
 
 	int GetStateId( Status status = Normal ) const { return m_stateId[ status ]; }
 	CThemeItem& SetStateId( Status status, int stateId = -1 );
@@ -39,7 +39,7 @@ struct CThemeItem
 public:
 	const wchar_t* m_pThemeClass;
 	int m_partId;
-	int m_stateId[ StatusCount ];
+	int m_stateId[ _StatusCount ];
 
 	static const CThemeItem m_null;
 };

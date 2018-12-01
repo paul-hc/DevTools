@@ -320,7 +320,7 @@ void CPickMenuStatic::DrawTextContent( CDC* pDC, const CRect& textBounds, CTheme
 	// draw arrow text
 	{
 		UINT dtArrowFlags = dtFlags;
-		ModifyFlag( dtArrowFlags, DT_CENTER | DT_RIGHT, ui::DropLeft == m_popupAlign ? DT_LEFT : DT_RIGHT );
+		ModifyFlags( dtArrowFlags, DT_CENTER | DT_RIGHT, ui::DropLeft == m_popupAlign ? DT_LEFT : DT_RIGHT );
 		wholeRect.InflateRect( ArrowDelta, 0 );		// space the arrow more
 
 		CScopedDrawText scopedDrawText( pDC, this, pMarlettFont );

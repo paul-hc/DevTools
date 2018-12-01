@@ -83,7 +83,7 @@ bool CDibSection::Copy( HBITMAP hSrcBitmap )
 	ASSERT_PTR( hSrcBitmap );
 	CSize bitmapSize = gdi::GetBitmapSize( hSrcBitmap );
 	// converts to a bottom-up bitmap even if source is top-down
-	CDibMeta dibMeta( (HBITMAP)CopyImage( hSrcBitmap, IMAGE_BITMAP, bitmapSize.cx, bitmapSize.cy, LR_CREATEDIBSECTION ) );
+	CDibMeta dibMeta( (HBITMAP)::CopyImage( hSrcBitmap, IMAGE_BITMAP, bitmapSize.cx, bitmapSize.cy, LR_CREATEDIBSECTION ) );
 	dibMeta.StorePixelFormat();
 	m_transpColor = CLR_NONE;
 	return AttachDib( dibMeta );
@@ -95,9 +95,9 @@ bool CDibSection::Copy( const CDibSection* pSrcDib )
 
 	CSize bitmapSize = pSrcDib->GetSize();
 	// converts to a bottom-up bitmap even if source is top-down
-	CDibMeta dibMeta( (HBITMAP)CopyImage( pSrcDib->GetHandle(), IMAGE_BITMAP, bitmapSize.cx, bitmapSize.cy, LR_CREATEDIBSECTION ) );
+	CDibMeta dibMeta( (HBITMAP)::CopyImage( pSrcDib->GetHandle(), IMAGE_BITMAP, bitmapSize.cx, bitmapSize.cy, LR_CREATEDIBSECTION ) );
 	dibMeta.CopyPixelFormat( pSrcDib->m_srcDibMeta );
-	ModifyFlag( m_flags, _CopyMask, pSrcDib->m_flags );
+	ModifyFlags( m_flags, _CopyMask, pSrcDib->m_flags );
 	m_transpColor = pSrcDib->m_transpColor;
 	return AttachDib( dibMeta );
 }

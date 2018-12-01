@@ -241,9 +241,9 @@ bool CIconInfo::MakeDibSection( CBitmap& rDibSection )
 	//	Use this if m_hasAlpha, otherwise better use MakeBitmap with transparent colour.
 
 	if ( m_info.hbmColor != NULL )
-		rDibSection.Attach( (HBITMAP)CopyImage( m_info.hbmColor, IMAGE_BITMAP, m_size.cx, m_size.cy, LR_CREATEDIBSECTION ) );	// copy colour bitmap as DIB
+		rDibSection.Attach( (HBITMAP)::CopyImage( m_info.hbmColor, IMAGE_BITMAP, m_size.cx, m_size.cy, LR_CREATEDIBSECTION ) );		// copy colour bitmap as DIB
 	else if ( m_info.hbmMask != NULL )				// monochrome icons have only the mask bitmap
-		rDibSection.Attach( (HBITMAP)CopyImage( m_info.hbmMask, IMAGE_BITMAP, m_size.cx, m_size.cy, LR_MONOCHROME ) );			// copy monochrome bitmap
+		rDibSection.Attach( (HBITMAP)::CopyImage( m_info.hbmMask, IMAGE_BITMAP, m_size.cx, m_size.cy, LR_MONOCHROME ) );			// copy monochrome bitmap
 
 	return rDibSection.GetSafeHandle() != NULL;
 }

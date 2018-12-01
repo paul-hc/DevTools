@@ -125,7 +125,7 @@ void CLayoutEngine::SetupControlStates( void )
 
 	if ( anyRepaintCtrl )
 	{
-		ModifyFlag( m_flags, SmoothGroups, GroupsTransparent | GroupsRepaint );		// disable SmoothGroups and WS_CLIPCHILDREN when one control requires repaint (layout::DoRepaint)
+		ModifyFlags( m_flags, SmoothGroups, GroupsTransparent | GroupsRepaint );		// disable SmoothGroups and WS_CLIPCHILDREN when one control requires repaint (layout::DoRepaint)
 		m_pDialog->ModifyStyle( WS_CLIPCHILDREN, 0 );
 	}
 
