@@ -17,10 +17,15 @@ Linking to UTL library:
 	- Add the utl/utl_ui_vc9.vcproj project to the solution and set a dependency to it.
 
 * For Visual Studio 2013++ solutions:
-	- There is no UTL solution for Visual Studio 2013.
-	- Build utl/utl_vc9.sln in Visual Studio 2008 for all configurations and platforms.
-	- In Solution Explorer right click the client project and add Linker > Additional Library Directories: ../CommonUtl/utl/bin
-	- In the client project include "utl/utl.h" in stdafx.h. This will link to the right library, which is binary compatible with Visual Studio 2013.
+	NEW:
+	- There is VC12 project utl\utl_ui_vc12.vcxproj for UTL library.
+	- Include utl_ui_vc12.vcxproj in your solution, and set dependency to it.
+	- To link with utl_ui_u*.lib select project, click Properties, go to Common Properties > References and a reference to utl_ui.
+		OBSOLETE:
+		- There is no UTL solution for Visual Studio 2013.
+		- Build utl/utl_vc9.sln in Visual Studio 2008 for all configurations and platforms.
+		- In Solution Explorer right click the client project and add Linker > Additional Library Directories: ../CommonUtl/utl/bin
+		- In the client project include "utl/utl.h" in stdafx.h. This will link to the right library, which is binary compatible with Visual Studio 2013.
 
 
 UTL Environment Variables:

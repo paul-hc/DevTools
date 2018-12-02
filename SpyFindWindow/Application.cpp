@@ -5,7 +5,6 @@
 #include "WndFinder.h"
 #include "WndHighlighter.h"
 #include "resource.h"
-#include "utl/utl.h"			// link to UTL
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

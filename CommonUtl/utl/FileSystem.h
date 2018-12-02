@@ -95,31 +95,6 @@ namespace fs
 
 namespace fs
 {
-	template< typename PathType >
-	void QueryDroppedFiles( std::vector< PathType >& rFilePaths, HDROP hDropInfo, SortType sortType = NoSort )		// works with std::tstring, fs::CPath, fs::CFlexPath
-	{
-		ASSERT_PTR( hDropInfo );
-		UINT fileCount = ::DragQueryFile( hDropInfo, (UINT)-1, NULL, 0 );
-		rFilePaths.reserve( fileCount );
-
-		for ( UINT i = 0; i != fileCount; ++i )
-		{
-			TCHAR filePath[ MAX_PATH ];
-			::DragQueryFile( hDropInfo, i, filePath, MAX_PATH );
-
-			rFilePaths.push_back( std::tstring( filePath ) );
-		}
-
-		::DragFinish( hDropInfo );
-
-		if ( sortType != NoSort )
-			fs::SortDirectoriesFirst( rFilePaths, SortAscending == sortType );
-	}
-}
-
-
-namespace fs
-{
 	// files and sub-dirs as std::tstring; relative to m_refDirPath if specified
 
 	struct CEnumerator : public IEnumerator, private utl::noncopyable

@@ -14,6 +14,7 @@
 #include "ComparePredicates.h"
 #include "ContainerUtilities.h"
 #include "FileSystem.h"
+#include "ShellUtilities.h"
 #include "PostCall.h"
 #include "Resequence.hxx"
 #include "resource.h"
@@ -1998,7 +1999,7 @@ void CReportListControl::OnDropFiles( HDROP hDropInfo )
 	CPoint dropPoint = ui::GetCursorPos( m_hWnd );
 	lv::CNmDropFiles dropFiles( this, dropPoint, GetDropIndexAtPoint( dropPoint ) );
 
-	fs::QueryDroppedFiles( dropFiles.m_filePaths, hDropInfo, SortAscending );
+	shell::QueryDroppedFiles( dropFiles.m_filePaths, hDropInfo, SortAscending );
 
 	dropFiles.m_nmHdr.NotifyParent();					// lv::LVN_DropFiles -> notify parent of dropped file paths
 }

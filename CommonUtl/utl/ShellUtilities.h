@@ -5,6 +5,9 @@
 #include "Shell_fwd.h"
 
 
+class CFileDialog;
+
+
 namespace shell
 {
 	bool BrowseForFolder( std::tstring& rFolderPath, CWnd* pParentWnd, std::tstring* pDisplayedName = NULL,
@@ -28,6 +31,10 @@ namespace shell
 
 namespace shell
 {
+	template< typename PathType >
+	void QueryDroppedFiles( std::vector< PathType >& rFilePaths, HDROP hDropInfo, SortType sortType = NoSort );		// works with std::tstring, fs::CPath, fs::CFlexPath
+
+
 	bool MoveFiles( const std::vector< std::tstring >& srcPaths, const std::vector< std::tstring >& destPaths, CWnd* pWnd = AfxGetMainWnd(), FILEOP_FLAGS flags = FOF_ALLOWUNDO );
 	bool MoveFiles( const std::vector< std::tstring >& srcPaths, const std::tstring& destFolderPath, CWnd* pWnd = AfxGetMainWnd(), FILEOP_FLAGS flags = FOF_ALLOWUNDO );
 
@@ -47,6 +54,31 @@ namespace shell
 	std::tstring GetExecErrorMessage( const TCHAR* pExeFullPath, HINSTANCE hInstExec );
 
 	bool ExploreAndSelectFile( const TCHAR* pFullPath );
+}
+
+
+namespace shell
+{
+	template< typename PathType >
+	void QueryDroppedFiles( std::vector< PathType >& rFilePaths, HDROP hDropInfo, SortType sortType /*= NoSort*/ )		// works with std::tstring, fs::CPath, fs::CFlexPath
+	{
+		ASSERT_PTR( hDropInfo );
+		UINT fileCount = ::DragQueryFile( hDropInfo, (UINT)-1, NULL, 0 );
+		rFilePaths.reserve( fileCount );
+
+		for ( UINT i = 0; i != fileCount; ++i )
+		{
+			TCHAR filePath[ MAX_PATH ];
+			::DragQueryFile( hDropInfo, i, filePath, MAX_PATH );
+
+			rFilePaths.push_back( std::tstring( filePath ) );
+		}
+
+		::DragFinish( hDropInfo );
+
+		if ( sortType != NoSort )
+			fs::SortDirectoriesFirst( rFilePaths, SortAscending == sortType );
+	}
 }
 
 
