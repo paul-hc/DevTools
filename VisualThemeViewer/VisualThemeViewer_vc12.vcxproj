@@ -122,6 +122,7 @@
     <ClInclude Include="ThemeSampleStatic.h" />
     <ClInclude Include="ThemeStore.h" />
     <ClInclude Include="Application.h" />
+    <ClInclude Include="ThemeStore_fwd.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="BrowseThemesDialog.cpp" />
@@ -144,9 +145,15 @@
     <None Include="res\VisualThemeViewer.rc2" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="res\BrowseThemes.ico" />
     <Image Include="res\ImageStrip.bmp" />
     <Image Include="res\ImageStrip.png" />
     <Image Include="res\VisualThemeViewer.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\CommonUtl\utl\utl_ui_vc12.vcxproj">
+      <Project>{fa759613-6a3a-46dc-9ce8-a60b10eb5986}</Project>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

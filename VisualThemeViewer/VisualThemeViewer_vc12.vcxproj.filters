@@ -41,6 +41,9 @@
     <ClInclude Include="BrowseThemesDialog.h">
       <Filter>Source Files</Filter>
     </ClInclude>
+    <ClInclude Include="ThemeStore_fwd.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="MainDialog.cpp">
@@ -89,6 +92,9 @@
       <Filter>Resource Files</Filter>
     </Image>
     <Image Include="res\ImageStrip.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\BrowseThemes.ico">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>

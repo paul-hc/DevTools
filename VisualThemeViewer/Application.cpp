@@ -1,10 +1,11 @@
 
 #include "stdafx.h"
 #include "Application.h"
+#include "Options.h"
+#include "ThemeStore.h"
 #include "MainDialog.h"
 #include "resource.h"
 #include "utl/GpUtilities.h"
-#include "utl/utl.h"		// link to UTL
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -37,7 +38,11 @@ BOOL CApplication::InitInstance( void )
 	CMFCVisualManager::SetDefaultManager( RUNTIME_CLASS( CMFCVisualManagerWindows ) );		// activate "Windows Native" visual manager for enabling themes in MFC controls
 	CToolStrip::RegisterStripButtons( IDR_IMAGE_STRIP );		// register stock images
 
-	CMainDialog dlg;
+	COptions options;
+	CThemeStore themeStore;
+	themeStore.SetupNotImplementedThemes();				// mark not implemented themes as NotImplemented
+
+	CMainDialog dlg( &options, &themeStore );
 	m_pMainWnd = &dlg;
 	dlg.DoModal();
 

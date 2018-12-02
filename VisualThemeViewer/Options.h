@@ -20,10 +20,11 @@ interface ISampleOptionsCallback
 class COptions : public CRegistryOptions
 {
 public:
-	COptions( ISampleOptionsCallback* pCallback );
+	COptions( void );
 	~COptions();
 
 	COLORREF GetBkColor( void ) const;
+	void SetCallback( ISampleOptionsCallback* pCallback ) { m_pCallback = pCallback; }
 private:
 	CHistoryComboBox* GetBkColorCombo( void ) const;
 public:

@@ -112,6 +112,19 @@ void CThemePart::SetPreviewState( const CThemeState* pPreviewState, RecursionDep
 
 // CThemeClass class
 
+IThemeNode* CThemeClass::FindNode( const std::wstring& code ) const
+{
+	for ( CThemePart* pPart : m_parts )
+		if ( pPart->m_partName == code )
+			return pPart;
+		else
+			for ( CThemeState* pState : pPart->m_states )
+				if ( pState->m_stateName == code )
+					return pState;
+
+	return NULL;
+}
+
 CThemePart* CThemeClass::AddPart( int partId, const std::wstring& partName, int flags /*= 0*/, Relevance relevance /*= HighRelevance*/ )
 {
 	CThemePart* pNewPart = new CThemePart( partId, partName, relevance, flags );
@@ -162,11 +175,23 @@ const CThemePart* CThemeClass::GetPreviewPart( void ) const
 
 // CThemeStore class
 
-CThemeClass* CThemeStore::FindClass( const wchar_t* pClassName ) const
+CThemeClass* CThemeStore::FindClass( const std::wstring& className ) const
 {
-	for ( std::vector< CThemeClass* >::const_iterator itClass = m_classes.begin(); itClass != m_classes.end(); ++itClass )
-		if ( pred::Equal == _wcsicmp( ( *itClass )->m_className.c_str(), pClassName ) )
-			return *itClass;
+	for ( CThemeClass* pClass : m_classes )
+		if ( pClass->m_className == className )
+			return pClass;
+
+	return NULL;
+}
+
+IThemeNode* CThemeStore::FindNode( const std::wstring& code ) const
+{
+	for ( CThemeClass* pClass : m_classes )
+		if ( pClass->m_className == code )
+			return pClass;
+		else
+			if ( IThemeNode* pFoundNode = pClass->FindNode( code ) )
+				return pFoundNode;
 
 	return NULL;
 }
@@ -1547,11 +1572,11 @@ void CThemeStore::RegisterStandardClasses( void )
 		;
 		pClass->AddPart( ID_TAG( WP_SMALLCLOSEBUTTON ) );
 		pClass->AddPart( ID_TAG( WP_MDICLOSEBUTTON ) );
-		pClass->AddPart( ID_TAG( WP_RESTOREBUTTON ) )
-			->AddState( ID_TAG( RBS_NORMAL ) )
-			->AddState( ID_TAG( RBS_HOT ) )
-			->AddState( ID_TAG( RBS_PUSHED ) )
-			->AddState( ID_TAG( RBS_DISABLED ) )
+		pClass->AddPart( ID_TAG( WP_RESTOREBUTTON ), SquareContentFlag )
+			->AddState( ID_TAG( RBS_NORMAL ), SquareContentFlag )
+			->AddState( ID_TAG( RBS_HOT ), SquareContentFlag )
+			->AddState( ID_TAG( RBS_PUSHED ), SquareContentFlag )
+			->AddState( ID_TAG( RBS_DISABLED ), SquareContentFlag )
 		;
 		pClass->AddPart( ID_TAG( WP_MDIRESTOREBUTTON ), SquareContentFlag );
 		pClass->AddPart( ID_TAG( WP_HELPBUTTON ), SquareContentFlag )

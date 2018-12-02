@@ -5,6 +5,7 @@
 #include "Application.h"
 #include "ThemeContext.h"
 #include "ThemeCustomDraw.h"
+#include "ThemeStore.h"
 #include "utl/Clipboard.h"
 #include "utl/MenuUtilities.h"
 #include "utl/StringUtilities.h"
@@ -21,8 +22,7 @@
 
 namespace reg
 {
-	static const TCHAR section_dialog[] = _T("MainDialog");
-	static const TCHAR section_classList[] = _T("MainDialog\\ClassList");
+	static const TCHAR section_settings[] = _T("Settings");
 	static const TCHAR entry_selClass[] = _T("SelClass");
 	static const TCHAR entry_selTreeItem[] = _T("SelTreeItem");
 	static const TCHAR entry_bkColorHistory[] = _T("BkColorHistory");
@@ -64,16 +64,20 @@ namespace layout
 }
 
 
-CMainDialog::CMainDialog( void )
+CMainDialog::CMainDialog( COptions* pOptions, const CThemeStore* pThemeStore )
 	: CBaseMainDialog( IDD_MAIN_DIALOG )
-	, m_options( this )
+	, m_pOptions( pOptions )
+	, m_pThemeStore( pThemeStore )
+	, m_pSelClass( NULL )
+	, m_pSelNode( NULL )
 	, m_classList( IDC_THEME_CLASS_LIST )
 {
-	m_regSection = reg::section_dialog;
+	m_regSection = _T("MainDialog");
 	RegisterCtrlLayout( ARRAY_PAIR( layout::styles ) );
-	m_themeStore.SetupNotImplementedThemes();				// mark not implemented themes as NotImplemented
 
-	m_classList.SetSection( reg::section_classList );
+	m_pOptions->SetCallback( this );
+
+	m_classList.SetSection( _T("MainDialog\\ClassList") );
 	m_classList.SetTextEffectCallback( this );
 	m_classList.AddRecordCompare( pred::NewComparator( pred::CompareCode() ) );							// default row item comparator
 	m_classList.AddColumnCompare( RelevanceTag, pred::NewComparator( pred::CompareRelevance() ) );		// order date-time descending by default
@@ -91,14 +95,14 @@ CMainDialog::CMainDialog( void )
 		.AddButton( ID_USE_EXPLORER_THEME_CHECK );
 
 	for ( int i = 0; i != SampleCount; ++i )
-		m_samples[ i ].SetOptions( &m_options );
+		m_samples[ i ].SetOptions( m_pOptions );
 
 	m_samples[ Tiny ].m_coreSize = CSize( 10, 10 );
 	m_samples[ Medium ].SetSizeToContentMode( IDC_CORE_SIZE_STATIC );
 	m_samples[ Large ].m_sampleText = _T("Some Sample Themed Text");
 
-	m_pListCustomDraw.reset( CThemeCustomDraw::MakeListCustomDraw( &m_options ) );
-	m_pTreeCustomDraw.reset( CThemeCustomDraw::MakeTreeCustomDraw( &m_options ) );
+	m_pListCustomDraw.reset( CThemeCustomDraw::MakeListCustomDraw( m_pOptions ) );
+	m_pTreeCustomDraw.reset( CThemeCustomDraw::MakeTreeCustomDraw( m_pOptions ) );
 
 	UpdateGlyphPreview();
 	UpdateExplorerTheme();
@@ -124,14 +128,14 @@ void CMainDialog::RedrawSamples( void )
 
 void CMainDialog::UpdateGlyphPreview( void )
 {
-	m_classList.SetCustomImageDraw( m_options.m_previewThemeGlyphs ? m_pListCustomDraw.get() : NULL );
-	m_partStateTree.SetCustomImageDraw( m_options.m_previewThemeGlyphs ? m_pTreeCustomDraw.get() : NULL );
+	m_classList.SetCustomImageDraw( m_pOptions->m_previewThemeGlyphs ? m_pListCustomDraw.get() : NULL );
+	m_partStateTree.SetCustomImageDraw( m_pOptions->m_previewThemeGlyphs ? m_pTreeCustomDraw.get() : NULL );
 }
 
 void CMainDialog::UpdateExplorerTheme( void )
 {
-	m_classList.SetUseExplorerTheme( m_options.m_useExplorerTheme );
-	m_partStateTree.SetUseExplorerTheme( m_options.m_useExplorerTheme );
+	m_classList.SetUseExplorerTheme( m_pOptions->m_useExplorerTheme );
+	m_partStateTree.SetUseExplorerTheme( m_pOptions->m_useExplorerTheme );
 }
 
 void CMainDialog::CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARAM rowKey, int subItem, CListLikeCtrlBase* pCtrl ) const
@@ -162,8 +166,6 @@ void CMainDialog::CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARAM rowK
 
 void CMainDialog::SetupClassesList( void )
 {
-	const CThemeClass* pSelClass = m_classList.GetSelected< CThemeClass >();
-
 	{
 		CScopedLockRedraw freeze( &m_classList );
 		CScopedInternalChange internalChange( &m_classList );
@@ -173,30 +175,28 @@ void CMainDialog::SetupClassesList( void )
 		Relevance classFilter = static_cast< Relevance >( m_classFilterCombo.GetCurSel() );
 
 		unsigned int index = 0;
-		for ( auto itClass = m_themeStore.m_classes.begin(); itClass != m_themeStore.m_classes.end(); ++itClass )
-			if ( ( *itClass )->GetRelevance() <= classFilter )
+		for ( CThemeClass* pClass : m_pThemeStore->m_classes )
+			if ( pClass->GetRelevance() <= classFilter )
 			{
-				m_classList.InsertObjectItem( index, *itClass );		// PathName
-				m_classList.SetSubItemText( index, RelevanceTag, GetTags_Relevance().FormatUi( ( *itClass )->GetRelevance() ) );
+				m_classList.InsertObjectItem( index, pClass );		// PathName
+				m_classList.SetSubItemText( index, RelevanceTag, GetTags_Relevance().FormatUi( pClass->GetRelevance() ) );
 				++index;
 			}
 
 		m_classList.InitialSortList();		// store original order and sort by current criteria
 	}
 
-	if ( NULL == pSelClass || !m_classList.Select( pSelClass ) )
-		m_classList.SetCurSel( 0 );
+	if ( NULL == m_pSelClass || !m_classList.Select( m_pSelClass ) )
+		m_classList.Select( m_pSelClass = m_classList.GetObjectAt< CThemeClass >( 0 ) );
 
 	ui::SetDlgItemText( this, IDC_CLASS_LABEL,
-		str::Format( _T("Theme &Class (%s):"), hlp::FormatCounts( m_classList.GetItemCount(), m_themeStore.m_classes.size() ).c_str() ) );
+		str::Format( _T("Theme &Class (%s):"), hlp::FormatCounts( m_classList.GetItemCount(), m_pThemeStore->m_classes.size() ).c_str() ) );
 }
 
 void CMainDialog::SetupPartsAndStatesTree( void )
 {
-	IThemeNode* pSelNode = m_partStateTree.GetSelected< IThemeNode >();
 	unsigned int partCount = 0, stateCount = 0, totalStateCount = 0;
-	const CThemeClass* pSelClass = m_classList.GetSelected< CThemeClass >();
-	ASSERT_PTR( pSelClass );
+	ASSERT_PTR( m_pSelClass );
 
 	{
 		CScopedLockRedraw freeze( &m_partStateTree );
@@ -206,8 +206,7 @@ void CMainDialog::SetupPartsAndStatesTree( void )
 
 		m_partStateTree.DeleteAllItems();
 
-
-		for ( CThemePart* pPart : pSelClass->m_parts )
+		for ( CThemePart* pPart : m_pSelClass->m_parts )
 			if ( pPart->GetRelevance() <= partsStatesFilter )
 			{
 				HTREEITEM hPartItem = m_partStateTree.InsertObjectItem( TVI_ROOT, pPart, ui::Transparent_Image, TVIS_BOLD | TVIS_EXPANDED );
@@ -228,12 +227,12 @@ void CMainDialog::SetupPartsAndStatesTree( void )
 		ui::SortCompareTreeChildren( pred::CompareRelevance(), m_partStateTree, TVI_ROOT, Deep );
 	}
 
-	if ( NULL == pSelNode || !m_partStateTree.SetSelected( pSelNode ) )
-		m_partStateTree.SelectItem( m_partStateTree.GetChildItem( TVI_ROOT ) );
+	if ( NULL == m_pSelNode || !m_partStateTree.SetSelected( m_pSelNode ) )
+		m_partStateTree.SetSelected( m_pSelNode = m_partStateTree.GetItemObject< IThemeNode >( m_partStateTree.GetChildItem( TVI_ROOT ) ) );
 
 	ui::SetDlgItemText( this, IDC_PARTS_AND_STATES_LABEL,
 		str::Format( _T("&Parts (%s) && States (%s):"),
-			hlp::FormatCounts( partCount, pSelClass->m_parts.size() ).c_str(),
+			hlp::FormatCounts( partCount, m_pSelClass->m_parts.size() ).c_str(),
 			hlp::FormatCounts( stateCount, totalStateCount ).c_str() ) );
 
 	OutputCurrentTheme();
@@ -243,7 +242,7 @@ void CMainDialog::OutputCurrentTheme( void )
 {
 	CThemeContext selTheme = GetSelThemeContext();
 
-	ui::SetDlgItemText( this, IDC_CLASS_EDIT, m_classList.FormatCode( m_classList.GetSelected< IThemeNode >() ) );
+	ui::SetDlgItemText( this, IDC_CLASS_EDIT, m_classList.FormatCode( m_pSelClass ) );
 	ui::SetDlgItemText( this, IDC_PART_EDIT, selTheme.FormatPart() );
 	ui::SetDlgItemText( this, IDC_PART_NUMBER_EDIT, selTheme.FormatPart( true ) );
 	ui::SetDlgItemText( this, IDC_STATE_EDIT, selTheme.FormatState() );
@@ -258,22 +257,36 @@ void CMainDialog::OutputCurrentTheme( void )
 CThemeContext CMainDialog::GetSelThemeContext( void ) const
 {
 	CThemeContext selTheme;
-	selTheme.m_pClass = m_classList.GetSelected< CThemeClass >();
+	selTheme.m_pClass = m_pSelClass;
 
-	if ( HTREEITEM hSelItem = m_partStateTree.GetSelectedItem() )
-		if ( IThemeNode* pNode = m_partStateTree.GetItemObject< IThemeNode >( hSelItem ) )
-			switch ( pNode->GetNodeType() )
-			{
-				case IThemeNode::State:
-					selTheme.m_pState = static_cast< CThemeState* >( pNode );
-					selTheme.m_pPart = static_cast< CThemePart* >( (IThemeNode*)m_partStateTree.GetItemData( m_partStateTree.GetParentItem( hSelItem ) ) );
-					break;
-				case IThemeNode::Part:
-					selTheme.m_pPart = static_cast< CThemePart* >( pNode );
-					break;
-			}
+	if ( m_pSelNode != NULL )
+		switch ( m_pSelNode->GetNodeType() )
+		{
+			case IThemeNode::State:
+				selTheme.m_pState = static_cast< CThemeState* >( m_pSelNode );
+				selTheme.m_pPart = selTheme.m_pState->GetParentAs< CThemePart >();
+				break;
+			case IThemeNode::Part:
+				selTheme.m_pPart = static_cast< CThemePart* >( m_pSelNode );
+				break;
+		}
 
 	return selTheme;
+}
+
+void CMainDialog::LoadSelItems( void )
+{
+	std::tstring selText = AfxGetApp()->GetProfileString( reg::section_settings, reg::entry_selClass ).GetString();
+	if ( !selText.empty() )
+	{
+		m_pSelClass = m_pThemeStore->FindClass( selText );
+		if ( m_pSelClass != NULL )
+		{
+			selText = AfxGetApp()->GetProfileString( reg::section_settings, reg::entry_selTreeItem ).GetString();
+			if ( !selText.empty() )
+				m_pSelNode = m_pSelClass->FindNode( selText );
+		}
+	}
 }
 
 void CMainDialog::DoDataExchange( CDataExchange* pDX )
@@ -296,17 +309,18 @@ void CMainDialog::DoDataExchange( CDataExchange* pDX )
 		ui::WriteComboItems( m_classFilterCombo, GetTags_Relevance().GetUiTags() );
 		ui::WriteComboItems( m_partsFilterCombo, GetTags_Relevance().GetUiTags() );
 
-		m_classFilterCombo.SetCurSel( AfxGetApp()->GetProfileInt( reg::section_dialog, reg::entry_classFilter, ObscureRelevance ) );
-		m_partsFilterCombo.SetCurSel( AfxGetApp()->GetProfileInt( reg::section_dialog, reg::entry_partsFilter, ObscureRelevance ) );
-		ui::LoadHistoryCombo( m_bkColorCombo, reg::section_dialog, reg::entry_bkColorHistory, NULL );
-		ui::SetDlgItemText( this, IDC_BK_COLOR_COMBO, m_options.m_bkColorText );
+		m_classFilterCombo.SetCurSel( AfxGetApp()->GetProfileInt( reg::section_settings, reg::entry_classFilter, ObscureRelevance ) );
+		m_partsFilterCombo.SetCurSel( AfxGetApp()->GetProfileInt( reg::section_settings, reg::entry_partsFilter, ObscureRelevance ) );
+		ui::LoadHistoryCombo( m_bkColorCombo, reg::section_settings, reg::entry_bkColorHistory, NULL );
+		ui::SetDlgItemText( this, IDC_BK_COLOR_COMBO, m_pOptions->m_bkColorText );
 
-		m_options.UpdateControls( this );			// update check-box buttons
+		m_pOptions->UpdateControls( this );			// update check-box buttons
 
+		LoadSelItems();
 		SetupClassesList();
 		SetupPartsAndStatesTree();
 
-		std::tstring selText = AfxGetApp()->GetProfileString( reg::section_dialog, reg::entry_selTreeItem, NULL );
+		std::tstring selText = AfxGetApp()->GetProfileString( reg::section_settings, reg::entry_selTreeItem, NULL );
 		if ( HTREEITEM hSelItem = ui::FindTreeItem( m_partStateTree, selText ) )
 		{
 			m_partStateTree.SelectItem( hSelItem );
@@ -337,23 +351,17 @@ END_MESSAGE_MAP()
 BOOL CMainDialog::OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo )
 {
 	return
-		m_options.OnCmdMsg( id, code, pExtra, pHandlerInfo ) ||
+		m_pOptions->OnCmdMsg( id, code, pExtra, pHandlerInfo ) ||
 		CBaseMainDialog::OnCmdMsg( id, code, pExtra, pHandlerInfo );
 }
 
 void CMainDialog::OnDestroy( void )
 {
-	std::tstring selClassText, selItemText;
-
-	selClassText = m_classList.FormatCode( m_classList.GetSelected< utl::ISubject >() );
-	if ( HTREEITEM hSelItem = m_partStateTree.GetSelectedItem() )
-		selItemText = m_partStateTree.GetItemText( hSelItem );
-
-	AfxGetApp()->WriteProfileString( reg::section_dialog, reg::entry_selClass, selClassText.c_str() );
-	AfxGetApp()->WriteProfileString( reg::section_dialog, reg::entry_selTreeItem, selItemText.c_str() );
-	AfxGetApp()->WriteProfileInt( reg::section_dialog, reg::entry_classFilter, m_classFilterCombo.GetCurSel() );
-	AfxGetApp()->WriteProfileInt( reg::section_dialog, reg::entry_partsFilter, m_partsFilterCombo.GetCurSel() );
-	ui::SaveHistoryCombo( m_bkColorCombo, reg::section_dialog, reg::entry_bkColorHistory );
+	AfxGetApp()->WriteProfileString( reg::section_settings, reg::entry_selClass, m_classList.FormatCode( m_pSelClass ).c_str() );
+	AfxGetApp()->WriteProfileString( reg::section_settings, reg::entry_selTreeItem, m_partStateTree.FormatCode( m_pSelNode ).c_str() );
+	AfxGetApp()->WriteProfileInt( reg::section_settings, reg::entry_classFilter, m_classFilterCombo.GetCurSel() );
+	AfxGetApp()->WriteProfileInt( reg::section_settings, reg::entry_partsFilter, m_partsFilterCombo.GetCurSel() );
+	ui::SaveHistoryCombo( m_bkColorCombo, reg::section_settings, reg::entry_bkColorHistory );
 
 	CBaseMainDialog::OnDestroy();
 }
@@ -365,7 +373,10 @@ void CMainDialog::OnLvnItemChanged_ThemeClass( NMHDR* pNmHdr, LRESULT* pResult )
 
 	if ( !m_classList.IsInternalChange() )
 		if ( CReportListControl::IsSelectionChangeNotify( pNmList ) && HasFlag( pNmList->uNewState, LVIS_SELECTED ) )		// new item selected?
+		{
+			m_pSelClass = m_classList.GetSelected< CThemeClass >();
 			SetupPartsAndStatesTree();
+		}
 }
 
 void CMainDialog::OnTvnSelChanged_PartStateTree( NMHDR* pNmHdr, LRESULT* pResult )
@@ -374,7 +385,10 @@ void CMainDialog::OnTvnSelChanged_PartStateTree( NMHDR* pNmHdr, LRESULT* pResult
 	*pResult = 0;
 
 	if ( !m_partStateTree.IsInternalChange() )
+	{
+		m_pSelNode = m_partStateTree.GetSelected< IThemeNode >();
 		OutputCurrentTheme();
+	}
 }
 
 void CMainDialog::OnCbnSelChange_ClassFilterCombo( void )
@@ -395,7 +409,7 @@ void CMainDialog::OnEditCopy( void )
 
 void CMainDialog::OnUpdateEditCopy( CCmdUI* pCmdUI )
 {
-	pCmdUI->Enable( m_partStateTree.GetSelectedItem() != NULL );
+	pCmdUI->Enable( m_pSelNode != NULL );
 }
 
 void CMainDialog::OnCopyTheme( UINT cmdId )
@@ -414,11 +428,9 @@ void CMainDialog::OnUpdateCopyTheme( CCmdUI* pCmdUI )
 void CMainDialog::OnBrowseThemes( void )
 {
 	Relevance relevanceFilter = static_cast< Relevance >( std::max( m_classFilterCombo.GetCurSel(), m_partsFilterCombo.GetCurSel() ) );
-	CBrowseThemesDialog dlg( &m_options, &m_themeStore, relevanceFilter, this );
+	CBrowseThemesDialog dlg( m_pOptions, m_pThemeStore, relevanceFilter, this );
 
-	if ( HTREEITEM hSelItem = m_partStateTree.GetSelectedItem() )
-		dlg.SetSelectedNode( m_partStateTree.GetItemObject< IThemeNode >( hSelItem ) );
-
+	dlg.SetSelectedNode( m_pSelNode );
 	if ( IDOK == dlg.DoModal() )
 		if ( IThemeNode* pSelNode = dlg.GetSelectedNode() )
 		{
@@ -428,11 +440,8 @@ void CMainDialog::OnBrowseThemes( void )
 			if ( dlg.GetSelectedNode() == pSelClass )
 				GotoDlgCtrl( &m_classList );
 			else
-				if ( HTREEITEM hNodeItem = m_partStateTree.FindItemWithObject( dlg.GetSelectedNode() ) )
-				{
-					m_partStateTree.SelectItem( hNodeItem );
+				if ( m_partStateTree.SetSelected( m_pSelNode = pSelNode ) )
 					GotoDlgCtrl( &m_partStateTree );
-				}
 				else
 					ui::BeepSignal( MB_ICONWARNING );		// no matching item due to relevance filter
 		}

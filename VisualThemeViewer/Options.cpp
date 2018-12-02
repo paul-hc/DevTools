@@ -13,16 +13,16 @@
 
 namespace reg
 {
-	static const TCHAR section[] = _T("MainDialog\\ThemeSample");
+	static const TCHAR section[] = _T("Settings\\ThemeSample");
 	static const TCHAR entry_enableThemes[] = _T("EnableThemes");
 	static const TCHAR entry_enableThemesFallback[] = _T("EnableThemesFallback");
 }
 
 
-COptions::COptions( ISampleOptionsCallback* pCallback )
+COptions::COptions( void )
 	: CRegistryOptions( reg::section, true )
-	, m_pCallback( pCallback )
-	, m_useBorder( true )
+	, m_pCallback( NULL )
+	, m_useBorder( false )
 	, m_preBkGuides( false )
 	, m_postBkGuides( false )
 	, m_previewThemeGlyphs( true )

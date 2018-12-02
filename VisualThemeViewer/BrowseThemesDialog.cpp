@@ -36,7 +36,7 @@ namespace layout
 
 
 CBrowseThemesDialog::CBrowseThemesDialog( const COptions* pOptions, const CThemeStore* pThemeStore, Relevance relevanceFilter, CWnd* pParent )
-	: CLayoutDialog( IDD_BROWSE_THEMES_DIALOG, pParent )
+	: CBaseMainDialog( IDD_BROWSE_THEMES_DIALOG, pParent )
 	, m_pOptions( pOptions )
 	, m_pThemeStore( pThemeStore )
 	, m_relevanceFilter( relevanceFilter )
@@ -160,7 +160,7 @@ void CBrowseThemesDialog::DoDataExchange( CDataExchange* pDX )
 
 // message handlers
 
-BEGIN_MESSAGE_MAP( CBrowseThemesDialog, CLayoutDialog )
+BEGIN_MESSAGE_MAP( CBrowseThemesDialog, CBaseMainDialog )
 	ON_CBN_SELCHANGE( IDC_PARTS_FILTER_COMBO, OnCbnSelChange_FilterCombo )
 	ON_NOTIFY( TVN_SELCHANGED, IDC_PARTS_AND_STATES_TREE, OnTvnSelChanged_ThemesTree )
 END_MESSAGE_MAP()

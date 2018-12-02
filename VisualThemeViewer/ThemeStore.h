@@ -80,8 +80,8 @@ struct CThemeState : public CBaseNode
 	CThemeState( int stateId, const std::wstring& stateName, Relevance relevance, int flags )
 		: CBaseNode( relevance, flags ), m_stateId( stateId ), m_stateName( stateName ) {}
 
-	virtual NodeType GetNodeType( void ) const { return State; }
 	virtual const std::tstring& GetCode( void ) const { return m_stateName; }
+	virtual NodeType GetNodeType( void ) const { return State; }
 	virtual CThemeItemNode MakeThemeItem( void ) const;
 public:
 	int m_stateId;
@@ -96,8 +96,8 @@ struct CThemePart : public CBaseNode
 
 	~CThemePart() { utl::ClearOwningContainer( m_states ); }
 
-	virtual NodeType GetNodeType( void ) const { return Part; }
 	virtual const std::tstring& GetCode( void ) const { return m_partName; }
+	virtual NodeType GetNodeType( void ) const { return Part; }
 	virtual CThemeItemNode MakeThemeItem( void ) const;
 
 	CThemePart* AddState( int stateId, const std::wstring& stateName, int flags = 0, Relevance relevance = HighRelevance );
@@ -121,12 +121,13 @@ struct CThemeClass : public CBaseNode
 	CThemeClass( const std::wstring& className, Relevance relevance ) : CBaseNode( relevance, 0 ), m_className( className ), m_pPreviewPart( NULL ) {}
 	~CThemeClass() { utl::ClearOwningContainer( m_parts ); }
 
-	virtual NodeType GetNodeType( void ) const { return Class; }
 	virtual const std::tstring& GetCode( void ) const { return m_className; }
+	virtual NodeType GetNodeType( void ) const { return Class; }
 	virtual CThemeItemNode MakeThemeItem( void ) const;
 
 	CThemePart* AddPart( int partId, const std::wstring& partName, int flags = 0, Relevance relevance = HighRelevance );
 	void SetDeepFlags( unsigned int addFlags );
+	IThemeNode* FindNode( const std::wstring& code ) const;
 
 	bool SetupNotImplemented( CVisualTheme& rTheme, HDC hDC );
 
@@ -145,7 +146,8 @@ struct CThemeStore
 	CThemeStore( void ) { RegisterStandardClasses(); }
 	~CThemeStore() { utl::ClearOwningContainer( m_classes ); }
 
-	CThemeClass* FindClass( const wchar_t* pClassName ) const;
+	CThemeClass* FindClass( const std::wstring& className ) const;
+	IThemeNode* FindNode( const std::wstring& code ) const;
 	bool SetupNotImplementedThemes( void );
 
 	size_t GetTotalCount( void ) const;

@@ -2,8 +2,9 @@
 #define BrowseThemesDialog_h
 #pragma once
 
-#include "utl/LayoutDialog.h"
+#include "utl/BaseMainDialog.h"
 #include "utl/TreeControl.h"
+#include "ThemeStore_fwd.h"
 
 
 namespace hlp
@@ -14,14 +15,10 @@ namespace hlp
 
 class COptions;
 class CThemeCustomDraw;
-struct CThemeStore;
-struct CThemeClass;
-interface IThemeNode;
-enum Relevance;
 
 
 class CBrowseThemesDialog
-	: public CLayoutDialog
+	: public CBaseMainDialog			// display an icon, persist window placement in maximized state
 	, private ui::ITextEffectCallback
 {
 public:

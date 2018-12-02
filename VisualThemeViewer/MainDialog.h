@@ -6,7 +6,7 @@
 #include "utl/ReportListControl.h"
 #include "utl/TreeControl.h"
 #include "Options.h"
-#include "ThemeStore.h"
+#include "ThemeStore_fwd.h"
 #include "ThemeSampleStatic.h"
 
 
@@ -20,7 +20,7 @@ class CMainDialog
 	, private ui::ITextEffectCallback
 {
 public:
-	CMainDialog( void );
+	CMainDialog( COptions* pOptions, const CThemeStore* pThemeStore );
 	virtual ~CMainDialog();
 private:
 	// ISampleOptionsCallback interface
@@ -36,9 +36,13 @@ private:
 	void SetupClassesList( void );
 	void SetupPartsAndStatesTree( void );
 	void OutputCurrentTheme( void );
+	void LoadSelItems( void );
 private:
-	COptions m_options;
-	CThemeStore m_themeStore;
+	COptions* m_pOptions;
+	const CThemeStore* m_pThemeStore;
+	CThemeClass* m_pSelClass;			// list selection
+	IThemeNode* m_pSelNode;				// tree selection
+
 	std::auto_ptr< CThemeCustomDraw > m_pListCustomDraw;
 	std::auto_ptr< CThemeCustomDraw > m_pTreeCustomDraw;
 private:
