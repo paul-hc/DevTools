@@ -5,7 +5,6 @@
 #pragma once
 
 #define _CRT_SECURE_NO_WARNINGS				// no use printf_s warnings
-#include "StdStl.h"			// Standard C++ Library
 
 #define _ATL_APARTMENT_THREADED 
 #ifndef _SECURE_ATL
@@ -42,9 +41,9 @@
 #define _AFX_ALL_WARNINGS
 
 #include <afxwin.h>         // MFC core and standard components
+#include "StdStl.h"			// Standard C++ Library
+
 #include <afxext.h>         // MFC extensions
-
-
 #include <afxdisp.h>        // MFC Automation classes
 
 #include <atlbase.h>
