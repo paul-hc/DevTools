@@ -362,8 +362,8 @@ void CPathTests::TestPathNaturalSort( void )
 		_T("Ardeal\\1254 Biertan{DUP}.jpg|")
 		_T("ardeal/1254 Biertan-DUP.jpg|")
 		_T("ARDEAL\\1254 Biertan~DUP.jpg|")
-		_T("ARDeal\\1254 Biertan[DUP].jpg|")
-		_T("ardEAL\\1254 Biertan_DUP.jpg|")
+		_T("ARDeal\\1254 biertan[DUP].jpg|")
+		_T("ardEAL\\1254 biertan_DUP.jpg|")
 		_T("Ardeal\\1254 Biertan(DUP).jpg|")
 		_T("Ardeal\\1254 Biertan+DUP.jpg|")
 		_T("Ardeal\\1254 Biertan_noDUP.jpg|")
@@ -376,6 +376,12 @@ void CPathTests::TestPathNaturalSort( void )
 	std::random_shuffle( filePaths.begin(), filePaths.end() );
 
 	fs::SortPaths( filePaths );
+
+	{	// check that fs::TPathSet orders in the same order with fs::SortPaths()
+		fs::TPathSet setOfFilePaths( filePaths.begin(), filePaths.end() );
+		ASSERT_EQUAL( str::Join( filePaths, _T("|") ), str::Join( setOfFilePaths, _T("|") ) );
+	}
+
 	path::StripCommonParentPath( filePaths );		// get rid of the directory prefix, to focus on filename order
 
 	/*
@@ -384,8 +390,8 @@ void CPathTests::TestPathNaturalSort( void )
 	Explorer.exe sort order (on Windows 7):		(note: it changes with version)
 		1254 Biertan(DUP).jpg
 		1254 Biertan.jpg
-		1254 Biertan[DUP].jpg
-		1254 Biertan_DUP.jpg
+		1254 biertan[DUP].jpg
+		1254 biertan_DUP.jpg
 		1254 Biertan_noDUP.jpg
 		1254 Biertan{DUP}.jpg
 		1254 Biertan~DUP.jpg
@@ -398,8 +404,8 @@ return;	// TODO
 	/* My expected sort order:
 		1254 Biertan.jpg			// only the straight extension (shortest filename) goes first
 		1254 Biertan(DUP).jpg
-		1254 Biertan[DUP].jpg
-		1254 Biertan_DUP.jpg
+		1254 biertan[DUP].jpg
+		1254 biertan_DUP.jpg
 		1254 Biertan_noDUP.jpg
 		1254 Biertan{DUP}.jpg
 		1254 Biertan~DUP.jpg
@@ -413,8 +419,8 @@ return;	// TODO
 		1254 Biertan.jpg
 		1254 Biertan(DUP).jpg
 		1254 Biertan+DUP.jpg
-		1254 Biertan[DUP].jpg
-		1254 Biertan_DUP.jpg
+		1254 biertan[DUP].jpg
+		1254 biertan_DUP.jpg
 		1254 Biertan_noDUP.jpg
 		1254 Biertan{DUP}.jpg
 		1254 Biertan~DUP.jpg
@@ -423,8 +429,8 @@ return;	// TODO
 	std::vector< fs::CPath >::const_iterator itPath = filePaths.begin();
 	ASSERT_EQUAL( _T("1254 Biertan.jpg"), *itPath++ );
 	ASSERT_EQUAL( _T("1254 Biertan(DUP).jpg"), *itPath++ );
-	ASSERT_EQUAL( _T("1254 Biertan[DUP].jpg"), *itPath++ );
-	ASSERT_EQUAL( _T("1254 Biertan_DUP.jpg"), *itPath++ );
+	ASSERT_EQUAL( _T("1254 biertan[DUP].jpg"), *itPath++ );
+	ASSERT_EQUAL( _T("1254 biertan_DUP.jpg"), *itPath++ );
 	ASSERT_EQUAL( _T("1254 Biertan_noDUP.jpg"), *itPath++ );
 	ASSERT_EQUAL( _T("1254 Biertan{DUP}.jpg"), *itPath++ );
 	ASSERT_EQUAL( _T("1254 Biertan~DUP.jpg"), *itPath++ );

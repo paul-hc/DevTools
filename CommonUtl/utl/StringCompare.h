@@ -166,7 +166,7 @@ namespace pred
 	// string compare policies
 
 	template< typename CharCasePolicy >
-	struct CompareString
+	struct CompareCharPtr		// rename to avoid collision with CompareStringW/A (<WinNls.h>)
 	{
 		template< typename CharType >
 		CompareResult operator()( CharType left, CharType right ) const
@@ -184,8 +184,8 @@ namespace pred
 	};
 
 
-	typedef CompareString< func::ToChar > CompareCase;
-	typedef CompareString< func::ToLower > CompareNoCase;
+	typedef CompareCharPtr< func::ToChar > CompareCase;
+	typedef CompareCharPtr< func::ToLower > CompareNoCase;
 
 
 	template< typename CharType, str::CaseType caseType >

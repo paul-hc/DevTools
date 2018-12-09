@@ -3,6 +3,7 @@
 #include "ut/StringTests.h"
 #include "EnumTags.h"
 #include "FlagTags.h"
+#include "RandomUtilities.h"
 #include "StringUtilities.h"
 #include "TimeUtils.h"
 #include "vector_map.h"
@@ -55,6 +56,62 @@ void CStringTests::TestIgnoreCase( void )
 	ASSERT( "BCD" == s );
 	ASSERT( s == "BCD" );
 	ASSERT( s != "xy" );
+}
+
+void CStringTests::TestNaturalSort( void )
+{
+	const char s_srcItems[] =
+		"1254 Biertan{DUP}.jpg|"
+		"1254 Biertan-DUP.jpg|"
+		"1254 Biertan~DUP.jpg|"
+		"1254 biertan[DUP].jpg|"
+		"1254 biertan_DUP.jpg|"
+		"1254 Biertan(DUP).jpg|"
+		"1254 Biertan+DUP.jpg|"
+		"1254 Biertan_noDUP.jpg|"
+		"1254 Biertan.jpg";
+
+	{	// case-sensitive
+		std::vector< std::string > items;
+		str::Split( items, s_srcItems, "|" );
+
+		utl::SetRandomSeed();
+		std::random_shuffle( items.begin(), items.end() );
+
+		std::sort( items.begin(), items.end(), pred::LessBy< pred::CompareValue >() );
+		ASSERT_EQUAL(
+			"1254 Biertan(DUP).jpg|"
+			"1254 Biertan+DUP.jpg|"
+			"1254 Biertan-DUP.jpg|"
+			"1254 Biertan.jpg|"
+			"1254 biertan[DUP].jpg|"
+			"1254 biertan_DUP.jpg|"
+			"1254 Biertan_noDUP.jpg|"
+			"1254 Biertan{DUP}.jpg|"
+			"1254 Biertan~DUP.jpg"
+			, str::Join( items, "|" ) );
+	}
+
+	{	// case-insensitive
+		std::vector< std::wstring > items;
+		str::Split( items, str::FromUtf8( s_srcItems ).c_str(), L"|" );
+
+		utl::SetNextRandomSeed();
+		std::random_shuffle( items.begin(), items.end() );
+
+		std::sort( items.begin(), items.end(), pred::LessBy< pred::CompareValue >() );
+		ASSERT_EQUAL(
+			L"1254 Biertan(DUP).jpg|"
+			L"1254 Biertan+DUP.jpg|"
+			L"1254 Biertan-DUP.jpg|"
+			L"1254 Biertan.jpg|"
+			L"1254 biertan[DUP].jpg|"
+			L"1254 biertan_DUP.jpg|"
+			L"1254 Biertan_noDUP.jpg|"
+			L"1254 Biertan{DUP}.jpg|"
+			L"1254 Biertan~DUP.jpg"
+			, str::Join( items, L"|" ) );
+	}
 }
 
 void CStringTests::TestValueToString( void )
@@ -595,6 +652,7 @@ void CStringTests::Run( void )
 	__super::Run();
 
 	TestIgnoreCase();
+	TestNaturalSort();
 	TestValueToString();
 	TestStringSplit();
 	TestStringTokenize();

@@ -12,7 +12,7 @@ namespace str
 		int result = CharTraits::CompareNoCase( pLeft, pRight );
 
 		if ( 0 == result )
-			result = CharTraits::Compare( pLeft, pRight ); // they seem equal, but they might differ in case
+			result = CharTraits::Compare( pLeft, pRight );		// they seem equal, but they might differ in case
 
 		return result;
 	}

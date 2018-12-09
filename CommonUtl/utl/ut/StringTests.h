@@ -18,6 +18,7 @@ public:
 	virtual void Run( void );
 private:
 	void TestIgnoreCase( void );
+	void TestNaturalSort( void );
 	void TestValueToString( void );
 	void TestStringSplit( void );
 	void TestStringTokenize( void );
