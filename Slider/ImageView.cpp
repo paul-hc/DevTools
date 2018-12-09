@@ -16,6 +16,7 @@
 #include "utl/CmdUpdate.h"
 #include "utl/MenuUtilities.h"
 #include "utl/PostCall.h"
+#include "utl/ShellUtilities.h"
 #include "utl/Utilities.h"
 #include "utl/Thumbnailer.h"
 #include "utl/WicImageCache.h"

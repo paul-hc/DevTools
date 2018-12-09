@@ -6,7 +6,7 @@
 #include "DefinePasswordDialog.h"
 #include "Application.h"
 #include "resource.h"
-#include "utl/ShellUtilities.h"
+#include "utl/ShellDialogs.h"
 #include "utl/UtilitiesEx.h"
 
 #ifdef _DEBUG
@@ -196,7 +196,7 @@ bool CArchiveImagesDialog::CheckDestFolder( void )
 
 	try
 	{
-		fs::EnsureDirPath_Mfc( m_destPath.GetPtr() );
+		fs::thr::CreateDirPath_Mfc( m_destPath.GetPtr() );
 		return true;
 	}
 	catch ( CException* pExc )

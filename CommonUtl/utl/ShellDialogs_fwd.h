@@ -1,5 +1,5 @@
-#ifndef Shell_fwd_h
-#define Shell_fwd_h
+#ifndef ShellDialogs_fwd_h
+#define ShellDialogs_fwd_h
 #pragma once
 
 
@@ -22,4 +22,4 @@ namespace shell
 }
 
 
-#endif // Shell_fwd_h
+#endif // ShellDialogs_fwd_h

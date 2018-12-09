@@ -6,6 +6,7 @@
 #include "resource.h"
 #include "utl/MenuUtilities.h"
 #include "utl/SerializeStdTypes.h"
+#include "utl/ShellUtilities.h"
 #include "utl/Utilities.h"
 #include <map>
 

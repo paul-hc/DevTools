@@ -3,7 +3,7 @@
 #pragma once
 
 #include "utl/BaseApp.h"
-#include "utl/ShellUtilities.h"
+#include "utl/ShellDialogs_fwd.h"
 #include "utl/UserReport.h"
 #include "Application_fwd.h"
 

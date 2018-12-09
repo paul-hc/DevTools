@@ -11,6 +11,7 @@
 #include "utl/MenuUtilities.h"
 #include "utl/Path.h"
 #include "utl/Thumbnailer.h"
+#include "utl/ShellUtilities.h"
 #include "utl/UtilitiesEx.h"
 #include "utl/resource.h"
 
@@ -368,7 +369,7 @@ void CAlbumSettingsDialog::SetupFoundListView( void )
 		{
 			const CFileAttr* pFileAttr = &m_fileList.GetFileAttr( i );
 
-			m_foundFilesListCtrl.InsertObjectItem( i, const_cast< CFileAttr* >( pFileAttr ), CReportListControl::Transparent_Image );
+			m_foundFilesListCtrl.InsertObjectItem( i, const_cast< CFileAttr* >( pFileAttr ), ui::Transparent_Image );
 			m_foundFilesListCtrl.SetSubItemText( i, Folder, pFileAttr->GetPath().GetOriginParentPath().Get() );
 			m_foundFilesListCtrl.SetItemText( i, Dimensions, LPSTR_TEXTCALLBACK );			// defer CPU-intensive dimensions evaluation
 

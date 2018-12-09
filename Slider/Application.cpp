@@ -15,6 +15,8 @@
 #include "utl/DragListCtrl.h"
 #include "utl/GdiPlus_fwd.h"
 #include "utl/RuntimeException.h"
+#include "utl/ShellDialogs.h"
+#include "utl/ShellUtilities.h"
 #include "utl/UtilitiesEx.h"
 #include "utl/Thumbnailer.h"
 #include "utl/WicImageCache.h"
@@ -72,11 +74,8 @@ namespace app
 		if ( is_a< mfc::CUserAbortedException >( pExc ) )
 			return;					// already reported, skip logging
 
-		TCHAR messageBuffer[ 512 ];
-		ASSERT_PTR( pExc );
-		pExc->GetErrorMessage( messageBuffer, COUNT_OF( messageBuffer ) );
-
-		std::tstring message = str::Format( _T("* C++ MFC exception: %s"), messageBuffer );
+		std::tstring message = _T("* C++ MFC exception: ");
+		message += mfc::CRuntimeException::MessageOf( *pExc );
 		TRACE( _T("%s\n"), message.c_str() );
 		LogLine( message.c_str() );
 

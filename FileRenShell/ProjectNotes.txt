@@ -53,3 +53,21 @@ The code to do this goes in our DllRegisterServer() and DllUnregisterServer() fu
 In FileRenShell.cpp:
 	AddAsApprovedShellExtension();
 	RemoveAsApprovedShellExtension();
+
+BUGS
+====
+1) Deadlock on loading FileRenShell*.dll (64/32 bit, RELEASE/DEBUG):
+When FileRenShell64.dll (or 32) is registered and enabled (ShellExView), sometimes when right clicking on a FOLDER *first time* in Explorer.exe (or ExplorerBrowser64.exe), a deadlock occurs.
+This happens in global/static variables initialization, during initialization of "AFX_GLOBAL_DATA afxGlobalData;", when calling SHAppBarMessage():
+ 	shell32.dll!SHAppBarMessage()  + 0xf7 bytes	
+>	FileRenShell64.dll!AFX_GLOBAL_DATA::OnSettingChange()  Line 546 + 0x10 bytes	C++
+ 	FileRenShell64.dll!AFX_GLOBAL_DATA::AFX_GLOBAL_DATA()  Line 254	C++
+ 	FileRenShell64.dll!`dynamic initializer for 'afxGlobalData''()  Line 149 + 0x10 bytes	C++
+ 	FileRenShell64.dll!_initterm(void (void)* * pfbegin=0x0000000007f5ea98, void (void)* * pfend=0x0000000007f5f3c8)  Line 903	C
+ 	FileRenShell64.dll!_cinit(int initFloatingPrecision=0x00000000)  Line 320	C
+ 	FileRenShell64.dll!_CRT_INIT(void * hDllHandle=0x0000000007460000, unsigned long dwReason=0x00000001, void * lpreserved=0x0000000000000000)  Line 132 + 0x19 bytes	C
+ 	FileRenShell64.dll!__DllMainCRTStartup(void * hDllHandle=0x0000000007460000, unsigned long dwReason=0x00000001, void * lpreserved=0x0000000000000000)  Line 312 + 0x13 bytes	C
+ 	FileRenShell64.dll!_DllMainCRTStartup(void * hDllHandle=0x0000000007460000, unsigned long dwReason=0x00000001, void * lpreserved=0x0000000000000000)  Line 282	C
+
+- Quick workaround is to right click on a file to open context menu, then it starts working for folders.
+- Read: https://answers.microsoft.com/en-us/windows/forum/all/windows-explorer-not-responding-loader-lock-active/fc695f5b-a4cb-47fd-a747-e95770e444bf

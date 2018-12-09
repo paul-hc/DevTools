@@ -14,6 +14,7 @@
 #include "utl/FileSystem.h"
 #include "utl/FmtUtils.h"
 #include "utl/RuntimeException.h"
+#include "utl/ShellUtilities.h"
 #include "utl/StringRange.h"
 
 // for CFileModel::MakeFileEditor
@@ -47,7 +48,7 @@ void CFileModel::Clear( void )
 size_t CFileModel::SetupFromDropInfo( HDROP hDropInfo )
 {
 	std::vector< fs::CPath > sourcePaths;
-	fs::QueryDroppedFiles( sourcePaths, hDropInfo );
+	shell::QueryDroppedFiles( sourcePaths, hDropInfo );
 
 // to test multiple paths:
 //str::Split( sourcePaths, _T("C:\\dev\\DevTools\\CommonUtl\\DemoUtl\\DemoUtl.rc|C:\\dev\\DevTools\\CommonUtl\\utl\\utl_ui.rc|C:\\dev\\DevTools\\FileRenShell\\FileRenShell.rc"), _T("|") );

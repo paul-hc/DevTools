@@ -2,38 +2,19 @@
 #define ShellUtilities_h
 #pragma once
 
-#include "Shell_fwd.h"
-
-
-class CFileDialog;
-
-
-namespace shell
-{
-	bool BrowseForFolder( std::tstring& rFolderPath, CWnd* pParentWnd, std::tstring* pDisplayedName = NULL,
-						  BrowseFlags flags = BF_FileSystem, const TCHAR* pTitle = NULL, bool useNetwork = false );
-
-	bool BrowseForFile( std::tstring& rFilePath, CWnd* pParentWnd, BrowseMode browseMode = FileOpen,
-						const TCHAR* pFileFilter = NULL, DWORD flags = 0, const TCHAR* pTitle = NULL );
-
-	bool PickFolder( std::tstring& rFilePath, CWnd* pParentWnd,
-					 FILEOPENDIALOGOPTIONS options = 0, const TCHAR* pTitle = NULL );
-
-	namespace impl
-	{
-		CFileDialog* MakeFileDialog( const std::tstring& filePath, CWnd* pParentWnd, BrowseMode browseMode, const std::tstring& fileFilter,
-									 DWORD flags = 0, const TCHAR* pTitle = NULL );
-
-		bool RunFileDialog( std::tstring& rFilePath, CFileDialog* pFileDialog );
-	}
-}
-
 
 namespace shell
 {
 	template< typename PathType >
 	void QueryDroppedFiles( std::vector< PathType >& rFilePaths, HDROP hDropInfo, SortType sortType = NoSort );		// works with std::tstring, fs::CPath, fs::CFlexPath
 
+	CComPtr< IStream > DuplicateToMemoryStream( IStream* pSrcStream, bool autoDelete = true );
+}
+
+
+namespace shell
+{
+	// file operations
 
 	bool MoveFiles( const std::vector< std::tstring >& srcPaths, const std::vector< std::tstring >& destPaths, CWnd* pWnd = AfxGetMainWnd(), FILEOP_FLAGS flags = FOF_ALLOWUNDO );
 	bool MoveFiles( const std::vector< std::tstring >& srcPaths, const std::tstring& destFolderPath, CWnd* pWnd = AfxGetMainWnd(), FILEOP_FLAGS flags = FOF_ALLOWUNDO );

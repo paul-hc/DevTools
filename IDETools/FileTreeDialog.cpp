@@ -13,6 +13,7 @@
 #include "utl/FileSystem.h"
 #include "utl/CmdUpdate.h"
 #include "utl/MenuUtilities.h"
+#include "utl/ShellDialogs.h"
 #include "utl/ShellUtilities.h"
 #include "utl/Utilities.h"
 #include "utl/UtilitiesEx.h"

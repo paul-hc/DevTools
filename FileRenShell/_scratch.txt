@@ -69,6 +69,10 @@ void f()
 	// bitmapInfoMask1bpp.bmBits pointing to mask data (.bmWidth * .bmHeight Bits!)
 }
 
+//////////////////////////////////////////////////////////////////////////////////
+//
+// https://doxygen.reactos.org/da/dfe/dll_2win32_2comctl32_2toolbar_8c_source.html
+//
 
 static LRESULT TOOLBAR_EraseBackground( TOOLBAR_INFO* infoPtr, WPARAM wParam, LPARAM lParam )
 {

@@ -4,7 +4,7 @@
 #include "ContainerUtilities.h"
 #include "EnumTags.h"
 #include "FileSystem.h"
-#include "ShellUtilities.h"
+#include "ShellDialogs.h"
 #include "StringUtilities.h"
 
 #ifdef _DEBUG

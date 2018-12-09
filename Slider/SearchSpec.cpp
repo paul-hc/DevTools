@@ -6,7 +6,7 @@
 #include "resource.h"
 #include "utl/Serialization.h"
 #include "utl/SerializeStdTypes.h"
-#include "utl/ShellUtilities.h"
+#include "utl/ShellDialogs.h"
 #include "utl/StringUtilities.h"
 #include "utl/WicImage.h"
 
