@@ -14,24 +14,24 @@ namespace lcs
 	template< typename CharType, typename Compare = pred::CompareCase >
 	class CSuffixTree
 	{
-		typedef std::basic_string< CharType > StringType;
+		typedef std::basic_string< CharType > StringT;
 	public:
 		CSuffixTree( Compare compareStr = Compare() ) : m_compareStr( compareStr ) {}
 
-		CSuffixTree( const StringType& source, Compare compareStr = Compare() )
+		CSuffixTree( const StringT& source, Compare compareStr = Compare() )
 			: m_compareStr( compareStr )
 			, m_source( source )
 		{
 			BuildSuffixTree();
 		}
 
-		StringType FindLongestDuplicate( size_t dupTimes = 1 ) const
+		StringT FindLongestDuplicate( size_t dupTimes = 1 ) const
 		{
 			ASSERT( dupTimes != 0 );
 			ENSURE( m_source.size() == m_suffixes.size() );
 
 			if ( m_source.empty() || dupTimes >= m_suffixes.size() )
-				return StringType();
+				return StringT();
 
 			size_t maxPos = 0, maxLen = 0;
 
@@ -44,15 +44,15 @@ namespace lcs
 					maxPos = i;
 				}
 			}
-			return StringType( m_suffixes[ maxPos ], maxLen );
+			return StringT( m_suffixes[ maxPos ], maxLen );
 		}
 
-		StringType FindLongestCommonSubstring( const std::vector< std::basic_string< CharType > >& items )
+		StringT FindLongestCommonSubstring( const std::vector< std::basic_string< CharType > >& items )
 		{
 			ASSERT( m_source.empty() && m_suffixes.empty() );		// instantiated with default constructor
 			switch ( items.size() )
 			{
-				case 0:	return StringType();						// no common substring
+				case 0:	return StringT();						// no common substring
 				case 1:	return items.front();						// single item: the entire string is common
 			}
 
@@ -108,8 +108,8 @@ namespace lcs
 		};
 	private:
 		Compare m_compareStr;
-		StringType m_source;								// keep a copy of source
-		std::vector< const CharType* > m_suffixes;			// suffix tree as sorted array: pointers to each character in the source string
+		StringT m_source;								// keep a copy of source
+		std::vector< const CharType* > m_suffixes;		// suffix tree as sorted array: pointers to each character in the source string
 	};
 }
 

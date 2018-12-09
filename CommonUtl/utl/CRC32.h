@@ -31,12 +31,16 @@ namespace utl
 		std::vector< UINT > m_lookupTable;		// the lookup table with constants generated based on s_polynomial, with entry for each byte value from 0 to 255
 		static const UINT s_polynomial;
 	};
+}
 
 
+namespace fs
+{
 	class CCrc32FileCache
 	{
-	public:
 		CCrc32FileCache( void ) {}
+	public:
+		static CCrc32FileCache& Instance( void );
 
 		bool IsEmpty( void ) const { return m_cachedChecksums.empty(); }
 		void Clear( void ) { m_cachedChecksums.clear(); }

@@ -1,6 +1,8 @@
 
 #include "stdafx.h"
 #include "Path.h"
+#include "FileSystem.h"
+#include "Crc32.h"
 #include "ContainerUtilities.h"
 #include "StringUtilities.h"
 #include <xhash>
@@ -309,6 +311,13 @@ namespace path
 		return rDirPath;
 	}
 
+	bool HasTrailingSlash( const TCHAR* pPath )
+	{	// true for non-root paths with a trailing slash
+		return
+			!IsRoot( pPath ) &&
+			IsSlash( pPath[ str::GetLength( pPath ) - 1 ] );
+	}
+
 	std::tstring GetParentPath( const TCHAR* pPath, TrailSlash trailSlash /*= PreserveSlash*/ )
 	{
 		const TCHAR* pFilename = FindFilename( pPath );
@@ -431,6 +440,7 @@ namespace path
 			{
 				if ( IsSlash( pFullPath[ commonLen ] ) )
 					++commonLen;								// exclude leading slash if pDirPath doesn't end in "\\"
+
 				restPath = restPath.substr( commonLen );
 			}
 		}

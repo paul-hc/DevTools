@@ -5,7 +5,7 @@
 
 #ifdef _DEBUG		// no UT code in release builds
 
-#include "ut/UnitTest.h"
+#include "UnitTest.h"
 
 
 class CStringTests : public ut::CConsoleTestCase
@@ -18,6 +18,7 @@ public:
 	virtual void Run( void );
 private:
 	void TestIgnoreCase( void );
+	void TestValueToString( void );
 	void TestStringSplit( void );
 	void TestStringTokenize( void );
 	void TestStringConversion( void );

@@ -1,42 +1,33 @@
-#ifndef Process_h
-#define Process_h
+#ifndef ProcessUtils_h
+#define ProcessUtils_h
 #pragma once
+
+#include <process.h>
 
 
 namespace utl
 {
-	class CHandle : private utl::noncopyable
+	class CProcess
 	{
 	public:
-		CHandle( HANDLE handle = NULL ) : m_handle( handle ) {}
-		~CHandle() { Close(); }
+		CProcess( const TCHAR* pExePath ) : m_exePath( pExePath ) { ASSERT( !m_exePath.empty() ); }
 
-		HANDLE Get( void ) const { return m_handle; }
-		HANDLE* GetPtr( void ) { return &m_handle; }
+		template< typename ValueT >
+		void AddParam( const ValueT& value ) { m_params.push_back( arg::AutoEnquote( value ) ); }
 
-		void Reset( HANDLE handle )
-		{
-			Close();
-			m_handle = handle;
-		}
-
-		HANDLE Release( void )
-		{
-			HANDLE handle = m_handle;
-			m_handle = NULL;
-			return handle;
-		}
-
-		void Close( void )
-		{
-			if ( m_handle != NULL )
-				::CloseHandle( m_handle );
-		}
+		int Execute( void ) { return static_cast< int >( ExecuteProcess( _P_WAIT ) ); }			// waits for completion
+		HANDLE Spawn( int mode = _P_NOWAIT ) { return reinterpret_cast< HANDLE >( ExecuteProcess( mode ) ); }
 	private:
-		HANDLE m_handle;
+		intptr_t ExecuteProcess( int mode );
+		const TCHAR* const* MakeArgList( std::vector< const TCHAR* >& rArgList ) const;
+	private:
+		std::tstring m_exePath;
+		std::vector< std::tstring > m_params;
 	};
 }
 
+
+#ifndef _CONSOLE
 
 namespace proc
 {
@@ -71,5 +62,7 @@ private:
 	bool m_attached;
 };
 
+#endif //_CONSOLE
 
-#endif // Process_h
+
+#endif // ProcessUtils_h

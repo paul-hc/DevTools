@@ -200,6 +200,27 @@ void CFileSystemTests::TestFileAndDirectoryState( void )
 	}
 }
 
+void CFileSystemTests::TestTouchFile( void )
+{
+	ut::CTempFilePool pool( _T("name.txt") );
+	const fs::CPath filePath = pool.GetPoolDirPath() / fs::CPath( _T("name.txt") );
+
+	CTime lastModifiedTime = fs::ReadLastModifyTime( filePath );
+	ASSERT_EQUAL( CTime::GetCurrentTime(), lastModifiedTime );
+
+	lastModifiedTime += CTimeSpan( 0, 0, 0, 30 );		// add 30 seconds
+	fs::thr::TouchFile( filePath.GetPtr(), lastModifiedTime );
+	ASSERT_EQUAL( lastModifiedTime, fs::ReadLastModifyTime( filePath ) );
+}
+
+void CFileSystemTests::TestFileContent( void )
+{
+}
+
+void CFileSystemTests::TestBackupFile( void )
+{
+}
+
 
 void CFileSystemTests::Run( void )
 {
@@ -210,6 +231,9 @@ void CFileSystemTests::Run( void )
 	TestStgShortFilenames();
 	TestTempFilePool();
 	TestFileAndDirectoryState();
+	TestTouchFile();
+	TestFileContent();
+	TestBackupFile();
 }
 
 

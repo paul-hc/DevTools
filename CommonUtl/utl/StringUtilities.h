@@ -252,7 +252,7 @@ namespace num
 	template< typename ValueType >
 	inline ValueType MinValue( void ) { return (std::numeric_limits< ValueType >::min)(); }
 
-	// for double doesn't work (DBL_MIN is minimal positive value); in C++11 use lowest()
+	// for double doesn't work (DBL_MIN is minimal positive value); in C++ 11 use lowest()
 	template<>
 	inline double MinValue< double >( void ) { return -(std::numeric_limits< double >::max)(); }	// min doesn't work (DBL_MIN is minimal positive value)
 
@@ -354,8 +354,8 @@ namespace num
 {
 	// advanced numeric algorithms
 
-	template< typename IntType, typename StringType >
-	bool EnwrapNumericSequence( Range< IntType >& rRange, const StringType& text )
+	template< typename IntType, typename StringT >
+	bool EnwrapNumericSequence( Range< IntType >& rRange, const StringT& text )
 	{
 		IntType len = static_cast< IntType >( text.length() );
 		if ( text.empty() || rRange.m_start >= len || !str::CharTraits::IsDigit( text[ rRange.m_start ] ) )
@@ -387,8 +387,8 @@ namespace str
 	std::wstring& ToUnixLineEnds( std::wstring& rText );
 
 
-	template< typename CharType, typename StringType >
-	inline void SplitLines( std::vector< StringType >& rItems, const CharType* pSource, const CharType* pLineEnd )
+	template< typename CharType, typename StringT >
+	inline void SplitLines( std::vector< StringT >& rItems, const CharType* pSource, const CharType* pLineEnd )
 	{
 		Split( rItems, pSource, pLineEnd );
 
@@ -455,7 +455,33 @@ namespace arg
 	bool StartsWith( const TCHAR* pArg, const TCHAR* pPrefix, size_t count = std::tstring::npos );
 	bool StartsWithAnyOf( const TCHAR* pArg, const TCHAR* pPrefixList, const TCHAR* pListDelims = _T("|") );
 
-	bool ParseValuePair( std::tstring& rValue, const TCHAR* pPairArg, const TCHAR* pNameList, TCHAR valueSep = _T('='), const TCHAR* pListDelims = _T("|") );
+	bool ParseValuePair( std::tstring& rValue, const TCHAR* pArg, const TCHAR* pNameList, TCHAR valueSep = _T('='), const TCHAR* pListDelims = _T("|") );
+	bool ParseOptionalValuePair( std::tstring* pValue, const TCHAR* pArg, const TCHAR* pNameList, TCHAR valueSep = _T('='), const TCHAR* pListDelims = _T("|") );
+
+
+	// command line
+
+	template< typename ValueT >
+	inline std::tstring Enquote( const ValueT& value, TCHAR quote = _T('\"') ) { return str::Enquote< std::tstring >( value, quote ); }
+
+	template< typename ValueT >
+	std::tstring AutoEnquote( const ValueT& value, TCHAR quote = _T('\"') )
+	{
+		std::tstring text = str::ValueToString< std::tstring >( value );
+		if ( text.find( _T(' ') ) != std::tstring::npos )
+		{
+			text.reserve( text.length() + 2 );
+			text.insert( 0, 1, quote );
+			text.append( 1, quote );
+		}
+		return text;
+	}
+
+	template< typename ValueT >
+	bool AddCmd_Param( std::tstring& rCmdLine, const ValueT& param )
+	{
+		return stream::Tag( rCmdLine, AutoEnquote( param ), _T(" ") );
+	}
 }
 
 

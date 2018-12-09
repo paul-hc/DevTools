@@ -32,7 +32,7 @@ namespace multi
 	class CDateTimeState
 	{
 	public:
-		CDateTimeState( UINT ctrlId = 0, fs::CFileState::TimeField timeField = fs::CFileState::ModifiedDate, const CTime& dateTimeState = CTime() )
+		CDateTimeState( UINT ctrlId = 0, fs::TimeField timeField = fs::ModifiedDate, const CTime& dateTimeState = CTime() )
 			: m_ctrlId( ctrlId ), m_timeField( timeField ), m_dateTimeState( dateTimeState ) {}
 
 		void Clear( void ) { m_dateTimeState = CTime(); }
@@ -48,7 +48,7 @@ namespace multi
 		bool WouldModify( const CTouchItem* pTouchItem ) const;
 	public:
 		UINT m_ctrlId;
-		fs::CFileState::TimeField m_timeField;
+		fs::TimeField m_timeField;
 	private:
 		CTime m_dateTimeState;
 		static const CTime s_invalid;

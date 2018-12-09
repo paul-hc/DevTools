@@ -8,6 +8,33 @@
 #endif
 
 
+std::ostream& operator<<( std::ostream& os, const wchar_t* pWide )
+{
+	if ( NULL == pWide )
+		return os << "<NULL>";
+	return os << str::ToUtf8( pWide );
+}
+
+std::wostream& operator<<( std::wostream& os, const char* pUtf8 )
+{
+	if ( NULL == pUtf8 )
+		return os << L"<NULL>";
+	return os << str::FromUtf8( pUtf8 );
+}
+
+std::ostream& operator<<( std::ostream& os, wchar_t chWide )
+{
+	const wchar_t strWide[] = { chWide, _T('\0') };
+	return os << strWide;
+}
+
+std::wostream& operator<<( std::wostream& os, char chUtf8 )
+{
+	const char strUtf8[] = { chUtf8, '\0' };
+	return os << strUtf8;
+}
+
+
 namespace hlp
 {
 	std::string ToNarrow( const wchar_t* pWide, UINT codePage )
@@ -35,21 +62,6 @@ namespace hlp
 		::MultiByteToWideChar( codePage, 0, pNarrow, narrowLength, &wide[ 0 ], requiredSize );
 		return wide;
 	}
-}
-
-
-std::ostream& operator<<( std::ostream& os, const wchar_t* pWide )
-{
-	if ( NULL == pWide )
-		return os << "<NULL>";
-	return os << str::ToUtf8( pWide );
-}
-
-std::wostream& operator<<( std::wostream& os, const char* pUtf8 )
-{
-	if ( NULL == pUtf8 )
-		return os << L"<NULL>";
-	return os << str::FromUtf8( pUtf8 );
 }
 
 

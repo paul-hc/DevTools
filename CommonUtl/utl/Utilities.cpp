@@ -1355,13 +1355,6 @@ namespace ui
 			rColors.push_back( GetSysColor( sysIndexes[ i ] ) );
 	}
 
-	std::tstring GetErrorMessage( const CException* pExc )
-	{
-		TCHAR excMessage[ 1024 ];
-		pExc->GetErrorMessage( excMessage, COUNT_OF( excMessage ) );
-		return excMessage;
-	}
-
 
 	bool PumpPendingMessages( void )
 	{

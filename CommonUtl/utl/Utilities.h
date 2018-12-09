@@ -586,9 +586,6 @@ namespace ui
 	void AddSysColors( std::vector< COLORREF >& rColors, const int sysIndexes[], size_t count );
 
 
-	std::tstring GetErrorMessage( const CException* pExc );
-
-
 	bool PumpPendingMessages( void );
 	bool EatPendingMessages( HWND hWnd = NULL, UINT minMessage = WM_TIMER, UINT maxMessage = WM_TIMER );
 }

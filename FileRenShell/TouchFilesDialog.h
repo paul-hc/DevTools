@@ -68,7 +68,7 @@ private:
 	void MarkInvalidSrcItems( void );
 	void EnsureVisibleFirstError( void );
 
-	static fs::CFileState::TimeField GetTimeField( UINT dtId );
+	static fs::TimeField GetTimeField( UINT dtId );
 private:
 	const std::vector< CTouchItem* >& m_rTouchItems;
 	bool m_anyChanges;

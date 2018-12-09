@@ -2,10 +2,9 @@
 #define FileState_h
 #pragma once
 
-#include "Path.h"
+#include "FileSystem_fwd.h"
 
 
-class CEnumTags;
 class CFlagTags;
 
 
@@ -30,10 +29,6 @@ namespace fs
 		void WriteToFile( void ) const throws_( CFileException, mfc::CRuntimeException );
 
 		// time fields
-		enum TimeField { CreatedDate, ModifiedDate, AccessedDate, _TimeFieldCount };
-
-		static const CEnumTags& GetTags_TimeField( void );
-
 		const CTime& GetTimeField( TimeField field ) const;
 		void SetTimeField( const CTime& time, TimeField field ) { const_cast< CTime& >( GetTimeField( field ) ) = time; }
 
@@ -42,7 +37,6 @@ namespace fs
 		void ModifyFileStatus( const ::CFileStatus& newStatus ) const throws_( CFileException );
 		void ModifyFileTimes( const ::CFileStatus& newStatus, bool isDirectory ) const throws_( CFileException );
 
-		FILETIME* MakeFileTime( FILETIME& rOutFileTime, const CTime& time ) const throws_( CFileException );
 		void ThrowLastError( DWORD osLastError = ::GetLastError() ) const throws_( CFileException ) { CFileException::ThrowOsError( osLastError, m_fullPath.GetPtr() ); }
 	public:
 		CPath m_fullPath;

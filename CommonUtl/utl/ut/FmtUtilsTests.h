@@ -5,8 +5,8 @@
 
 #ifdef _DEBUG		// no UT code in release builds
 
-#include "ut/UnitTest.h"
-#include "FileState.h"
+#include "UnitTest.h"
+#include "utl/FileState.h"
 
 
 class CFmtUtilsTests : public ut::CConsoleTestCase

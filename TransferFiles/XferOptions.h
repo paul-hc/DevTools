@@ -1,7 +1,9 @@
 #ifndef XferOptions_h
 #define XferOptions_h
+#pragma once
 
 #include <vector>
+#include "utl/Path.h"
 
 
 class CRuntimeException;
@@ -20,10 +22,10 @@ struct CXferOptions
 	bool PassFilter( const CTransferItem& transferNode ) const;
 
 	void ParseCommandLine( int argc, TCHAR* argv[] ) throws_( CRuntimeException );
-	void CheckCreateTargetDirPath( void );
 private:
-	enum CaseCvt { PreserveCase, UpperCase, LowerCase };
-	static bool ParseValue( std::tstring& rValue, const TCHAR* pArg, const TCHAR* pNameList, CaseCvt caseCvt = PreserveCase );
+	enum CaseCvt { AsIs, UpperCase, LowerCase };
+
+	static bool ParseValue( std::tstring& rValue, const TCHAR* pArg, const TCHAR* pNameList, CaseCvt caseCvt = AsIs );
 
 	void ParseFileAction( const std::tstring& value ) throws_( CRuntimeException );
 	void ParseFileAttributes( const std::tstring& value ) throws_( CRuntimeException );
@@ -35,12 +37,14 @@ private:
 private:
 	const TCHAR* m_pArg;								// current argument parsed
 public:
+	bool m_helpMode;
 	bool m_recurseSubDirectories;
-	std::tstring m_sourceDirPath;
-	std::tstring m_targetDirPath;
+	fs::CPath m_sourceDirPath;
+	fs::CPath m_targetDirPath;
 	std::tstring m_searchSpecs;
 	std::tstring m_excludeWildSpec;						// multiple list separated by ';' or ','
 	std::vector< std::tstring > m_excludeFindSpecs;
+	std::auto_ptr< fs::CPath > m_pBackupDirPath;
 
 	DWORD m_mustHaveFileAttr;
 	DWORD m_mustNotHaveFileAttr;

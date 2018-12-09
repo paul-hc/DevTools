@@ -99,8 +99,8 @@ namespace lcs
 	public:
 		Comparator( const T* pSrc, size_t srcSize, const T* pDest, size_t destSize, MatchFunc getMatchFunc = MatchFunc() ) : m_src( pSrc, srcSize ), m_dest( pDest, destSize ), m_getMatchFunc( getMatchFunc ) {}
 
-		template< typename StringType >
-		explicit Comparator( const StringType& src, const StringType& dest ) : m_src( src.c_str(), src.length() ), m_dest( dest.c_str(), dest.length() ) {}
+		template< typename StringT >
+		explicit Comparator( const StringT& src, const StringT& dest ) : m_src( src.c_str(), src.length() ), m_dest( dest.c_str(), dest.length() ) {}
 
 		void Process( std::vector< CResult< T > >& rOutSeq );
 		size_t GetLcsLength( void ) const { return static_cast< size_t >( GetLcsAt( 0, 0 ) ); }
@@ -131,17 +131,17 @@ namespace lcs
 	};
 
 
-	template< typename StringType, typename MatchFunc >
-	void CompareStrings( std::vector< CResult< typename StringType::value_type > >& rLcsSequence, const StringType& srcText, const StringType& destText, MatchFunc getMatchFunc )
+	template< typename StringT, typename MatchFunc >
+	void CompareStrings( std::vector< CResult< typename StringT::value_type > >& rLcsSequence, const StringT& srcText, const StringT& destText, MatchFunc getMatchFunc )
 	{
-		typedef typename StringType::value_type CharType;
+		typedef typename StringT::value_type CharType;
 
 		Comparator< CharType, MatchFunc > comparator( srcText.c_str(), srcText.size(), destText.c_str(), destText.size(), getMatchFunc );
 		comparator.Process( rLcsSequence );
 	}
 
-	template< typename StringType, typename MatchFunc >
-	inline void CompareStringPair( std::vector< CResult< typename StringType::value_type > >& rLcsSequence, const std::pair< StringType, StringType >& textPair, MatchFunc getMatchFunc )
+	template< typename StringT, typename MatchFunc >
+	inline void CompareStringPair( std::vector< CResult< typename StringT::value_type > >& rLcsSequence, const std::pair< StringT, StringT >& textPair, MatchFunc getMatchFunc )
 	{
 		CompareStrings( rLcsSequence, textPair.first, textPair.second, getMatchFunc );
 	}

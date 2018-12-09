@@ -2,6 +2,7 @@
 #include "stdafx.h"
 #include "Logger.h"
 #include "Path.h"
+#include "RuntimeException.h"
 #include "Utilities.h"
 #include <fstream>
 
@@ -146,9 +147,7 @@ bool CLogger::CheckTruncate( void )
 	}
 	catch ( CException* pExc )
 	{
-		TCHAR excMessage[ 512 ];
-		pExc->GetErrorMessage( excMessage, 512 );
-		TRACE( _T("* C++ exception: %s\n"), excMessage );
+		TRACE( _T("* C++ exception: %s\n"), mfc::CRuntimeException::MessageOf( *pExc ).c_str() );
 		pExc->Delete();
 	}
 

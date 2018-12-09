@@ -493,22 +493,19 @@ namespace app
 {
 	bool HasCommandLineOption( const TCHAR* pOption, std::tstring* pValue /*= NULL*/ )
 	{
-		if ( pValue != NULL )
-			pValue->clear();
+		std::tstring value;
 
 		for ( int i = 1; i < __argc; ++i )
 		{
-			std::tstring argument = __targv[ i ];
-			str::CTokenIterator< pred::CompareNoCase > itToken( argument );
-			if ( itToken.Matches( _T('/') ) || itToken.Matches( _T('-') ) )
-				if ( itToken.Matches( pOption ) )
-				{
-					if ( pValue != NULL && itToken.Matches( '=' ) )
-						*pValue = itToken.GetCurrentSubstr();
+			const TCHAR* pArg = __targv[ i ];
+
+			if ( arg::IsSwitch( pArg ) )
+				if ( arg::ParseOptionalValuePair( pValue, pArg + 1, pOption ) )
 					return true;
-				}
 		}
 
+		if ( pValue != NULL )
+			pValue->clear();
 		return false;
 	}
 
@@ -568,17 +565,43 @@ namespace arg
 		return false;
 	}
 
-	bool ParseValuePair( std::tstring& rValue, const TCHAR* pPairArg, const TCHAR* pNameList, TCHAR valueSep /*= _T('=')*/, const TCHAR* pListDelims /*= _T("|")*/ )
-	{	// argument syntax: name=value
-		const TCHAR* pValueSep = std::find( pPairArg, str::end( pPairArg ), valueSep );
+	bool ParseValuePair( std::tstring& rValue, const TCHAR* pArg, const TCHAR* pNameList, TCHAR valueSep /*= _T('=')*/, const TCHAR* pListDelims /*= _T("|")*/ )
+	{
+		// argument syntax: name=value - allows name partial prefix matches
+		const TCHAR* pValueSep = std::find( pArg, str::end( pArg ), valueSep );
 		if ( !str::IsEmpty( pValueSep ) )		// a "name=value" pair
-			if ( StartsWithAnyOf( pPairArg, pNameList, pListDelims ) )
+			if ( StartsWithAnyOf( pArg, pNameList, pListDelims ) )
 			{
 				rValue = pValueSep + 1;
 				return true;
 			}
 
 		rValue.clear();
+		return false;
+	}
+
+	bool ParseOptionalValuePair( std::tstring* pValue, const TCHAR* pArg, const TCHAR* pNameList, TCHAR valueSep /*= _T('=')*/, const TCHAR* pListDelims /*= _T("|")*/ )
+	{
+		// argument syntax: name[=value], where "name" can be a case insensitive match of any item in pNameList
+
+		std::tstring name;
+		const TCHAR* pValueSep = std::find( pArg, str::end( pArg ), valueSep );
+
+		if ( !str::IsEmpty( pValueSep ) )
+			name.assign( pArg, pValueSep++ );
+		else
+			name = pArg;
+
+		if ( EqualsAnyOf( name.c_str(), pNameList, pListDelims ) )
+		{
+			if ( pValue != NULL )
+				*pValue = pValueSep;
+
+			return true;
+		}
+
+		if ( pValue != NULL )
+			pValue->clear();
 		return false;
 	}
 }

@@ -48,7 +48,7 @@
 				Optimization="2"
 				InlineFunctionExpansion="2"
 				WholeProgramOptimization="true"
-				AdditionalIncludeDirectories="../CommonUtl;$(UTL_INCLUDE)"
+				AdditionalIncludeDirectories=".;../CommonUtl;$(UTL_INCLUDE)"
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
 				StringPooling="true"
 				RuntimeLibrary="0"
@@ -59,6 +59,7 @@
 				AssemblerListingLocation=""
 				ObjectFile="$(IntDir)\"
 				ProgramDataBaseFileName="$(IntDir)\vc90.pdb"
+				BrowseInformation="0"
 				WarningLevel="4"
 				SuppressStartupBanner="true"
 				DebugInformationFormat="3"
@@ -81,6 +82,7 @@
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
 				AdditionalLibraryDirectories="$(UTL_INCLUDE)\lib\32"
+				GenerateDebugInformation="true"
 				ProgramDatabaseFile="$(TargetDir)$(TargetName).pdb"
 				SubSystem="1"
 				OptimizeReferences="2"
@@ -144,7 +146,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="../CommonUtl;$(UTL_INCLUDE)"
+				AdditionalIncludeDirectories=".;../CommonUtl;$(UTL_INCLUDE)"
 				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -155,7 +157,7 @@
 				AssemblerListingLocation=""
 				ObjectFile="$(IntDir)\"
 				ProgramDataBaseFileName="$(IntDir)\vc90.pdb"
-				BrowseInformation="1"
+				BrowseInformation="0"
 				WarningLevel="4"
 				SuppressStartupBanner="true"
 				DebugInformationFormat="4"
@@ -239,10 +241,6 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath=".\Application.h"
-				>
-			</File>
-			<File
 				RelativePath="FileInfo.cpp"
 				>
 				<FileConfiguration
@@ -288,30 +286,6 @@
 			</File>
 			<File
 				RelativePath="FileTransfer.h"
-				>
-			</File>
-			<File
-				RelativePath=".\InputOutput.cpp"
-				>
-				<FileConfiguration
-					Name="ReleaseU|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="DebugU|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath=".\InputOutput.h"
 				>
 			</File>
 			<File
@@ -422,15 +396,15 @@
 			Name="Unit Tests"
 			>
 			<File
-				RelativePath=".\test.bat"
+				RelativePath=".\ut\test.bat"
 				>
 			</File>
 			<File
-				RelativePath=".\TestCase.cpp"
+				RelativePath=".\ut\TransferFuncTests.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\TestCase.h"
+				RelativePath=".\ut\TransferFuncTests.h"
 				>
 			</File>
 		</Filter>

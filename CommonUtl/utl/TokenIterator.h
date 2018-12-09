@@ -11,9 +11,9 @@ namespace str
 	template< typename Compare = pred::CompareCase, typename CharType = TCHAR >
 	struct CTokenIterator
 	{
-		typedef std::basic_string< CharType > StringType;
+		typedef std::basic_string< CharType > StringT;
 
-		explicit CTokenIterator( const StringType& text, size_t pos = 0, Compare compare = Compare() )
+		explicit CTokenIterator( const StringT& text, size_t pos = 0, Compare compare = Compare() )
 			: m_text( text )
 			, m_length( m_text.length() )
 			, m_pos( pos )
@@ -40,10 +40,10 @@ namespace str
 		CharType Previous( void ) const { ASSERT( !IsEmpty() && !AtFront() ); return m_text[ m_pos - 1 ]; }
 		CharType Next( void ) const { ASSERT( !IsEmpty() ); return !AtEnd() ? m_text[ m_pos - 1 ] : _T('\0'); }
 
-		StringType GetLeadSubstr( void ) const { return m_text.substr( 0, m_pos ); }
-		StringType GetCurrentSubstr( void ) const { return m_text.substr( m_pos ); }
-		StringType MakePrevToken( size_t tokenLen ) const { ASSERT( tokenLen <= m_pos ); return m_text.substr( m_pos - tokenLen, tokenLen ); }
-		StringType MakeToken( size_t tokenLen ) const { ASSERT( tokenLen <= m_pos ); return m_text.substr( m_pos, tokenLen ); }
+		StringT GetLeadSubstr( void ) const { return m_text.substr( 0, m_pos ); }
+		StringT GetCurrentSubstr( void ) const { return m_text.substr( m_pos ); }
+		StringT MakePrevToken( size_t tokenLen ) const { ASSERT( tokenLen <= m_pos ); return m_text.substr( m_pos - tokenLen, tokenLen ); }
+		StringT MakeToken( size_t tokenLen ) const { ASSERT( tokenLen <= m_pos ); return m_text.substr( m_pos, tokenLen ); }
 
 		const CharType* GetWhiteSpace( void ) const { return m_whiteSpace.m_start; }
 		void SetWhiteSpace( const CharType whiteSpace[] ) { ASSERT( !str::IsEmpty( whiteSpace ) ); m_whiteSpace.SetRange( whiteSpace, str::end( whiteSpace ) ); }
@@ -73,7 +73,7 @@ namespace str
 			if ( !AtEnd() )
 			{
 				size_t tokenLen = str::GetLength( pToken );
-				typename StringType::const_iterator itFound = std::search( m_text.begin() + m_pos, m_text.end(), pToken, pToken + tokenLen, m_compare );
+				typename StringT::const_iterator itFound = std::search( m_text.begin() + m_pos, m_text.end(), pToken, pToken + tokenLen, m_compare );
 				if ( itFound != m_text.end() )
 				{
 					m_pos = std::distance( m_text.begin(), itFound );
@@ -105,7 +105,7 @@ namespace str
 			return true;
 		}
 
-		bool Matches( const StringType& token )
+		bool Matches( const StringT& token )
 		{
 			size_t tokenLen = token.length();
 			if ( 0 == tokenLen || m_compare( m_text.c_str() + m_pos, token.c_str(), tokenLen ) != pred::Equal )
@@ -121,20 +121,20 @@ namespace str
 				if ( Matches( tokens[ pos ] ) )
 					return pos;
 
-			return StringType::npos;
+			return StringT::npos;
 		}
 
 		template< typename Container >
 		bool MatchesAny( const Container& tokens )
 		{
-			return FindMatch( tokens ) != StringType::npos;
+			return FindMatch( tokens ) != StringT::npos;
 		}
 
 
 		// word matching
 
 		template< typename WordBreakPred >
-		bool MatchesWord( const StringType& token, WordBreakPred isWordBreak )
+		bool MatchesWord( const StringT& token, WordBreakPred isWordBreak )
 		{
 			size_t tokenLen = token.length();
 			if ( 0 == tokenLen || m_compare( m_text.c_str() + m_pos, token.c_str(), tokenLen ) != pred::Equal )
@@ -152,10 +152,10 @@ namespace str
 				if ( MatchesWord( tokens[ pos ], isWordBreak ) )
 					return pos;
 
-			return StringType::npos;
+			return StringT::npos;
 		}
 	private:
-		const StringType& m_text;
+		const StringT& m_text;
 		Range< const CharType* > m_whiteSpace;
 	public:
 		const size_t m_length;

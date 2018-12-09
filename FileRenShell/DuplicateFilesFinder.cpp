@@ -74,7 +74,7 @@ void CDuplicateFilesFinder::GroupByFileSize( CDuplicateGroupStore* pGroupsStore,
 	{
 		const fs::CPath& filePath = foundPaths[ i ];
 
-		CFileContentKey contentKey;
+		fs::CFileContentKey contentKey;
 		bool registered = false;
 
 		if ( contentKey.ComputeFileSize( filePath ) )

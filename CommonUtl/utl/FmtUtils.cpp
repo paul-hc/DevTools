@@ -260,19 +260,19 @@ namespace fmt
 		}
 
 
-		std::tstring _FormatTaggedTimeField( const CTime& time, fs::CFileState::TimeField field )
+		std::tstring _FormatTaggedTimeField( const CTime& time, fs::TimeField field )
 		{
-			return fs::CFileState::GetTags_TimeField().FormatKey( field ) + s_tagPrefixSep + time_utl::FormatTimestamp( time );
+			return fs::GetTags_TimeField().FormatKey( field ) + s_tagPrefixSep + time_utl::FormatTimestamp( time );
 		}
 
-		bool _ParseTaggedTimeField( CTime& rTime, fs::CFileState::TimeField& rField, const std::tstring& text )
+		bool _ParseTaggedTimeField( CTime& rTime, fs::TimeField& rField, const std::tstring& text )
 		{
 			str::TStringRange textRange( text );
 			Range< size_t > sepPos;
 			if ( textRange.Find( sepPos, s_tagPrefixSep ) )
 			{
 				str::TStringRange tagRange = textRange.MakeLead( sepPos.m_start );
-				if ( fs::CFileState::GetTags_TimeField().ParseAs( rField, tagRange.Extract(), CEnumTags::KeyTag ) )
+				if ( fs::GetTags_TimeField().ParseAs( rField, tagRange.Extract(), CEnumTags::KeyTag ) )
 				{
 					rTime = time_utl::ParseTimestamp( textRange.MakeTrail( sepPos.m_end ).Extract() );
 					return rTime.GetTime() != 0;
@@ -294,7 +294,7 @@ namespace fmt
 
 				parts.push_back( FormatFileAttributes( fileState.m_attributes, false ) );
 
-				for ( fs::CFileState::TimeField field = fs::CFileState::TimeField( 0 ); field != fs::CFileState::_TimeFieldCount; ++(int&)field )
+				for ( fs::TimeField field = fs::TimeField( 0 ); field != fs::_TimeFieldCount; ++(int&)field )
 				{
 					const CTime& time = fileState.GetTimeField( field );
 					if ( time.GetTime() != 0 )
@@ -333,7 +333,7 @@ namespace fmt
 				// optional tagged time fields: missing ones will preserve existing data-members
 				for ( ; itPart != parts.end(); ++itPart )
 				{
-					fs::CFileState::TimeField field;
+					fs::TimeField field;
 					CTime time;
 
 					if ( _ParseTaggedTimeField( time, field, *itPart ) )

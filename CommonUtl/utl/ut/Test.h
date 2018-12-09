@@ -1,0 +1,50 @@
+#ifndef Test_h
+#define Test_h
+#pragma once
+
+
+#ifdef _DEBUG		// no UT code in release builds
+
+
+namespace ut
+{
+	interface ITestCase
+	{
+		virtual void Run( void ) = 0;
+	};
+
+	abstract class CConsoleTestCase : public ITestCase
+	{
+	public:
+		// base overrides
+		virtual void Run( void ) = 0;		// pure with implementation; must be called for tracing execution
+	};
+
+	abstract class CGraphicTestCase : public ITestCase
+	{
+	public:
+		// base overrides
+		virtual void Run( void ) = 0;		// pure with implementation; must be called for tracing execution
+	};
+
+
+	class CTestSuite
+	{
+		~CTestSuite();
+	public:
+		static CTestSuite& Instance( void );
+
+		void RunTests( void );
+
+		bool IsEmpty( void ) const { return m_testCases.empty(); }
+		bool RegisterTestCase( ut::ITestCase* pTestCase );
+	private:
+		std::vector< ITestCase* > m_testCases;
+	};
+}
+
+
+#endif //_DEBUG
+
+
+#endif // Test_h

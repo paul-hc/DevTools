@@ -3,7 +3,7 @@
 #pragma once
 
 #include "Path.h"
-#include "Shell_fwd.h"
+#include "ShellDialogs_fwd.h"
 #include <hash_map>
 
 

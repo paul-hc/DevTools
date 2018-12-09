@@ -2,46 +2,10 @@
 #define UnitTest_h
 #pragma once
 
+#include "Test.h"
+
 
 #ifdef _DEBUG		// no UT code in release builds
-
-
-namespace ut
-{
-	interface ITestCase
-	{
-		virtual void Run( void ) = 0;
-	};
-
-	abstract class CConsoleTestCase : public ITestCase
-	{
-	public:
-		// base overrides
-		virtual void Run( void ) = 0;		// pure with implementation; must be called for tracing execution
-	};
-
-	abstract class CGraphicTestCase : public ITestCase
-	{
-	public:
-		// base overrides
-		virtual void Run( void ) = 0;		// pure with implementation; must be called for tracing execution
-	};
-
-
-	class CTestSuite
-	{
-		~CTestSuite();
-	public:
-		static CTestSuite& Instance( void );
-
-		void RunUnitTests( void );
-
-		bool IsEmpty( void ) const { return m_testCases.empty(); }
-		bool RegisterTestCase( ut::ITestCase* pTestCase );
-	private:
-		std::vector< ITestCase* > m_testCases;
-	};
-}
 
 
 namespace numeric
@@ -195,9 +159,11 @@ namespace ut
 		fs::CPath QualifyPath( const TCHAR* pRelativePath ) const { return m_poolDirPath / fs::CPath( pRelativePath ); }
 
 		bool DeleteAllFiles( void );
-		bool SplitCreateFiles( const TCHAR* pFlatPaths = NULL );			// can contain subdirectories
+		bool SplitCreateFiles( const TCHAR* pFlatPaths = NULL );	// can contain subdirectories
+
+		static bool ModifyTextFile( const fs::CPath& filePath );	// add another line containing its name.ext
 	private:
-		static bool CreateFile( const TCHAR* pFilePath );
+		static bool CreateTextFile( const fs::CPath& filePath );	// contains one line with its name.ext
 	private:
 		fs::CPath m_poolDirPath;							// temorary directory
 		std::vector< fs::CPath > m_filePaths;
@@ -232,6 +198,13 @@ namespace ut
 
 	inline std::tstring JoinFiles( const fs::CEnumerator& enumerator ) { return str::Join( enumerator.m_filePaths, ut::CTempFilePool::m_sep ); }
 	inline std::tstring JoinSubDirs( const fs::CEnumerator& enumerator ) { return str::Join( enumerator.m_subDirPaths, ut::CTempFilePool::m_sep ); }
+
+	// enumeration with relative paths
+	size_t EnumFiles( std::vector< fs::CPath >& rFilePaths, const fs::CPath& dirPath, SortType sortType = SortAscending, const TCHAR* pWildSpec = _T("*"), RecursionDepth depth = Deep );
+	size_t EnumSubDirs( std::vector< fs::CPath >& rSubDirPaths, const fs::CPath& dirPath, SortType sortType = SortAscending, RecursionDepth depth = Deep );
+
+	std::tstring EnumJoinFiles( const fs::CPath& dirPath, SortType sortType = SortAscending, const TCHAR* pWildSpec = _T("*"), RecursionDepth depth = Deep );
+	std::tstring EnumJoinSubDirs( const fs::CPath& dirPath, SortType sortType = SortAscending, RecursionDepth depth = Deep );
 
 } //namespace ut
 

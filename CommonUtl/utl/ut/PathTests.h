@@ -5,7 +5,7 @@
 
 #ifdef _DEBUG		// no UT code in release builds
 
-#include "ut/UnitTest.h"
+#include "UnitTest.h"
 
 
 class CPathTests : public ut::CConsoleTestCase
@@ -20,6 +20,7 @@ private:
 	void TestPathUtilities( void );
 	void TestPathSort( void );
 	void TestPathSortExisting( void );
+	void TestPathNaturalSort( void );
 	void TestPathCompareFind( void );
 	void TestPathWildcardMatch( void );
 	void TestHasMultipleDirPaths( void );

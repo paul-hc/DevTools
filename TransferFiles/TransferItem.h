@@ -1,29 +1,47 @@
-// Copyleft 2004 Paul H. Cocoveanu
-//
 #ifndef TransferItem_h
 #define TransferItem_h
+#pragma once
 
 #include "FileInfo.h"
+#include "utl/ConsoleInputOutput.h"
+#include "utl/EnumTags.h"
 #include "utl/Path.h"
 
 
-enum FileAction { FileCopy, FileMove, TargetFileRemove };
+struct CXferOptions;
+
+
+enum FileAction { FileCopy, FileMove, TargetFileDelete };
+
+const CEnumTags& GetTags_FileAction( void );
+
+
+struct CBackupInfo
+{
+	CBackupInfo( const CXferOptions* pOptions );
+public:
+	fs::CPath m_dirPath;
+	io::CUserQueryCreateDirectory m_uqCreateDir;
+};
 
 
 struct CTransferItem
 {
-	CTransferItem( const CFileFind& sourceFinder, const std::tstring& rootSourceDirPath, const std::tstring& rootTargetDirPath );
-	CTransferItem( const std::tstring& sourceFilePath, const std::tstring& rootSourceDirPath, const std::tstring& rootTargetDirPath );
+	CTransferItem( const CFileFind& sourceFinder, const fs::CPath& rootSourceDirPath, const fs::CPath& rootTargetDirPath );
+	CTransferItem( const fs::CPath& srcFilePath, const fs::CPath& rootSourceDirPath, const fs::CPath& rootTargetDirPath );
 	~CTransferItem();
 
-	bool Transfer( FileAction fileAction );
+	bool Transfer( FileAction fileAction, CBackupInfo* pBackupInfo );
 	std::ostream& Print( std::ostream& os, FileAction fileAction, bool showTimestamp = false ) const;
 private:
-	static std::tstring MakeTargetFilePath( const std::tstring& sourceFullPath, const std::tstring& rootSourceDirPath,
-											const std::tstring& rootTargetDirPath );
+	bool BackupExistingTarget( CBackupInfo* pBackupInfo );
+
+	static fs::CPath MakeDeepTargetFilePath( const fs::CPath& srcFilePath, const fs::CPath& rootSourceDirPath,
+											 const fs::CPath& rootTargetDirPath );
 public:
 	CFileInfo m_sourceFileInfo;
 	CFileInfo m_targetFileInfo;
+	fs::CPath m_targetBackupFilePath;
 };
 
 

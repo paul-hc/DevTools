@@ -5,7 +5,7 @@
 
 #ifdef _DEBUG		// no UT code in release builds
 
-#include "ut/UnitTest.h"
+#include "UnitTest.h"
 
 
 class CFileSystemTests : public ut::CConsoleTestCase
@@ -22,6 +22,9 @@ private:
 	void TestStgShortFilenames( void );
 	void TestTempFilePool( void );
 	void TestFileAndDirectoryState( void );
+	void TestTouchFile( void );
+	void TestFileContent( void );
+	void TestBackupFile( void );
 };
 
 

@@ -5,7 +5,7 @@
 
 #ifdef _DEBUG		// no UT code in release builds
 
-#include "ut/UnitTest.h"
+#include "UnitTest.h"
 
 
 class CStringRangeTests : public ut::CConsoleTestCase

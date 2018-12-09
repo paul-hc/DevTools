@@ -13,8 +13,8 @@ namespace str
 	pred::CompareResult IntuitiveCompare( const wchar_t* pLeft, const wchar_t* pRight );
 
 
-	template< typename StringType >
-	inline pred::CompareResult IntuitiveCompareStr( const StringType& left, const StringType& right )
+	template< typename StringT >
+	inline pred::CompareResult IntuitiveCompareStr( const StringT& left, const StringT& right )
 	{
 		return IntuitiveCompare( left.c_str(), right.c_str() );
 	}
@@ -91,11 +91,11 @@ namespace str
 	};
 
 
-	template< typename StringType >
-	static inline int Compare( const StringType& left, const StringType& right ) { return left.compare( right ); }
+	template< typename StringT >
+	static inline int Compare( const StringT& left, const StringT& right ) { return left.compare( right ); }
 
-	template< typename StringType >
-	static inline int CompareNoCase( const StringType& left, const StringType& right ) { return CharTraits::CompareNoCase( left.c_str(), right.c_str() ); }
+	template< typename StringT >
+	static inline int CompareNoCase( const StringT& left, const StringT& right ) { return CharTraits::CompareNoCase( left.c_str(), right.c_str() ); }
 
 	template< typename CharType >
 	bool EqualsN( const CharType* pLeft, const CharType* pRight, size_t count, bool matchCase )

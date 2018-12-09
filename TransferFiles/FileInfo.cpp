@@ -1,60 +1,66 @@
 
 #include "stdafx.h"
 #include "FileInfo.h"
-#include "InputOutput.h"
+#include "utl/ConsoleInputOutput.h"
 #include "utl/FileSystem.h"
 
 
 CFileInfo::CFileInfo( void )
 	: m_attributes( INVALID_FILE_ATTRIBUTES )
-	, m_lastModifiedTimestamp( 0 )
+	, m_lastModifyTime( 0 )
 {
 }
 
 CFileInfo::CFileInfo( const CFileFind& foundFile )
-	: m_fullPath( AdjustPath( foundFile.GetFilePath(), foundFile.IsDirectory() ? path::AddSlash : path::PreserveSlash ) )
+	: m_filePath( foundFile.GetFilePath().GetString() )
 	, m_attributes( fs::GetFileAttributes( foundFile ) )
-	, m_lastModifiedTimestamp( 0 )
+	, m_lastModifyTime( 0 )
 {
-	foundFile.GetLastWriteTime( m_lastModifiedTimestamp );
+	foundFile.GetLastWriteTime( m_lastModifyTime );
+
+	ENSURE( !path::HasTrailingSlash( m_filePath.GetPtr() ) );
 }
 
-CFileInfo::CFileInfo( const std::tstring& fullPath )
-	: m_fullPath( fullPath )
+CFileInfo::CFileInfo( const fs::CPath& filePath )
+	: m_filePath( filePath )
 	, m_attributes( INVALID_FILE_ATTRIBUTES )
-	, m_lastModifiedTimestamp( 0 )
+	, m_lastModifyTime( 0 )
 {
-	CFileStatus fileStatus;
-	std::tstring fsPath = AdjustPath( fullPath.c_str(), path::RemoveSlash );		// [!] GetStatus() fails if a directory path with a trailing slash is passed
+	if ( path::HasTrailingSlash( m_filePath.GetPtr() ) )
+	{
+		ASSERT( false );			// new style: not expected, calling code must not use unnecessary trailing backslashes
+		m_filePath.SetBackslash( false );
+	}
 
-	if ( CFile::GetStatus( fsPath.c_str(), fileStatus ) )
+	CFileStatus fileStatus;
+	if ( CFile::GetStatus( m_filePath.GetPtr(), fileStatus ) )		// [!] GetStatus() fails if a directory path with a trailing slash is passed
 	{
 		m_attributes = fileStatus.m_attribute;
-		m_lastModifiedTimestamp = fileStatus.m_mtime;
+		m_lastModifyTime = fileStatus.m_mtime;
 	}
 }
 
-std::tstring CFileInfo::AdjustPath( const TCHAR* pFullPath, path::TrailSlash trailSlash )
+fs::CPath CFileInfo::AdjustPath( const TCHAR* pFullPath, path::TrailSlash trailSlash )
 {
-	std::tstring fullPath = pFullPath;
-	path::SetBackslash( fullPath, trailSlash );
+	fs::CPath fullPath = pFullPath;
+	path::SetBackslash( fullPath.Ref(), trailSlash );
 	return fullPath;
 }
 
 void CFileInfo::Clear( void )
 {
-	m_fullPath.Clear();
+	m_filePath.Clear();
 	m_attributes = INVALID_FILE_ATTRIBUTES;
-	m_lastModifiedTimestamp = CTime( 0 );
+	m_lastModifyTime = CTime( 0 );
 }
 
 bool CFileInfo::Exist( void ) const
 {
-	ASSERT( m_attributes == INVALID_FILE_ATTRIBUTES || !m_fullPath.IsEmpty() );
+	ASSERT( m_attributes == INVALID_FILE_ATTRIBUTES || !m_filePath.IsEmpty() );
 	return m_attributes != INVALID_FILE_ATTRIBUTES;
 }
 
 bool CFileInfo::DirPathExist( void ) const
 {
-	return fs::IsValidDirectory( m_fullPath.GetParentPath().GetPtr() );
+	return fs::IsValidDirectory( m_filePath.GetParentPath().GetPtr() );
 }

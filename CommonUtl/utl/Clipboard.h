@@ -24,11 +24,11 @@ public:
 	bool WriteString( const std::wstring& text );
 	bool ReadString( std::tstring& rOutText ) const;
 
-	template< typename ScalarType >
-	bool Write( UINT clipFormat, const ScalarType& value );
+	template< typename ScalarT >
+	bool Write( UINT clipFormat, const ScalarT& value );
 
-	template< typename ScalarType >
-	bool Read( UINT clipFormat, ScalarType& rOutValue ) const;
+	template< typename ScalarT >
+	bool Read( UINT clipFormat, ScalarT& rOutValue ) const;
 public:
 	static bool IsFormatAvailable( UINT clipFormat ) { return ::IsClipboardFormatAvailable( clipFormat ) != FALSE; }
 	static bool CanPasteText( void );
@@ -39,8 +39,8 @@ public:
 	template< typename ContainerT >
 	static bool CopyToLines( const ContainerT& textItems, CWnd* pWnd = AfxGetMainWnd(), const TCHAR* pLineEnd = s_lineEnd );
 
-	template< typename StringType >
-	static bool PasteFromLines( std::vector< StringType >& rTextItems, CWnd* pWnd = AfxGetMainWnd(), const TCHAR* pLineEnd = s_lineEnd );
+	template< typename StringT >
+	static bool PasteFromLines( std::vector< StringT >& rTextItems, CWnd* pWnd = AfxGetMainWnd(), const TCHAR* pLineEnd = s_lineEnd );
 private:
 	CWnd* m_pWnd;
 public:
@@ -50,21 +50,21 @@ public:
 
 // template code
 
-template< typename ScalarType >
-inline bool CClipboard::Write( UINT clipFormat, const ScalarType& value )
+template< typename ScalarT >
+inline bool CClipboard::Write( UINT clipFormat, const ScalarT& value )
 {
 	return WriteData( clipFormat, &value, sizeof( value ) );
 }
 
-template< typename ScalarType >
-inline bool CClipboard::Read( UINT clipFormat, ScalarType& rOutValue ) const
+template< typename ScalarT >
+inline bool CClipboard::Read( UINT clipFormat, ScalarT& rOutValue ) const
 {
 	if ( IsFormatAvailable( clipFormat ) )
 		if ( HGLOBAL hBuffer = ::GetClipboardData( clipFormat ) )
-			if ( const ScalarType* pValue = (const ScalarType*)GlobalLock( hBuffer ) )
+			if ( const ScalarT* pValue = (const ScalarT*)::GlobalLock( hBuffer ) )
 			{
 				rOutValue = *pValue;
-				GlobalUnlock( hBuffer );
+				::GlobalUnlock( hBuffer );
 				return true;
 			}
 
@@ -77,8 +77,8 @@ inline bool CClipboard::CopyToLines( const ContainerT& textItems, CWnd* pWnd /*=
 	return CopyText( str::JoinLines( textItems, pLineEnd ), pWnd );
 }
 
-template< typename StringType >
-bool CClipboard::PasteFromLines( std::vector< StringType >& rTextItems, CWnd* pWnd /*= AfxGetMainWnd()*/, const TCHAR* pLineEnd /*= s_lineEnd*/ )
+template< typename StringT >
+bool CClipboard::PasteFromLines( std::vector< StringT >& rTextItems, CWnd* pWnd /*= AfxGetMainWnd()*/, const TCHAR* pLineEnd /*= s_lineEnd*/ )
 {
 	std::tstring text;
 	if ( !PasteText( text, pWnd ) )

@@ -20,6 +20,7 @@ public:
 	void ReportError( void ) const throw();
 
 	static std::tstring MessageOf( const std::exception& exc ) throw();
+	static void ThrowFromMfc( CException* pExc ) throws_( CRuntimeException );
 private:
 	std::string m_message;		// UTF8
 };
@@ -29,6 +30,7 @@ class CUserAbortedException : public CRuntimeException
 {
 public:
 	CUserAbortedException( void ) : CRuntimeException( "Aborted by user!" ) {}
+	CUserAbortedException( const std::tstring& message ) : CRuntimeException( message ) {}
 };
 
 

@@ -911,12 +911,12 @@ AfxMessageBox( _T("TODO: MoveDuplicates!"), MB_OK );
 
 void CFindDuplicatesDialog::OnClearCrc32Cache( void )
 {
-	CFileContentKey::GetCrc32FileCache().Clear();
+	fs::CCrc32FileCache::Instance().Clear();
 }
 
 void CFindDuplicatesDialog::OnUpdateClearCrc32Cache( CCmdUI* pCmdUI )
 {
-	pCmdUI->Enable( !CFileContentKey::GetCrc32FileCache().IsEmpty() );
+	pCmdUI->Enable( !fs::CCrc32FileCache::Instance().IsEmpty() );
 }
 
 void CFindDuplicatesDialog::OnToggleHighlightDuplicates( void )

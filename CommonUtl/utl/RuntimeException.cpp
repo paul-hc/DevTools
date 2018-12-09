@@ -49,6 +49,16 @@ std::tstring CRuntimeException::MessageOf( const std::exception& exc ) throw()
 	return str::FromUtf8( exc.what() );
 }
 
+void CRuntimeException::ThrowFromMfc( CException* pExc ) throws_( CRuntimeException )
+{
+	ASSERT_PTR( pExc );
+
+	std::tstring message = mfc::CRuntimeException::MessageOf( *pExc );
+	pExc->Delete();
+
+	throw CRuntimeException( message );
+}
+
 
 namespace mfc
 {
@@ -78,7 +88,7 @@ namespace mfc
 
 	std::tstring CRuntimeException::MessageOf( const CException& exc ) throw()
 	{
-		TCHAR message[ 256 ];
+		TCHAR message[ 1024 ];
 		exc.GetErrorMessage( message, COUNT_OF( message ) );
 		return message;
 	}

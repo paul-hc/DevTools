@@ -2,20 +2,19 @@
 #include "stdafx.h"
 #include "XferOptions.h"
 #include "TransferItem.h"
-#include "InputOutput.h"
+#include "utl/ConsoleInputOutput.h"
 #include "utl/FileSystem.h"
 #include "utl/RuntimeException.h"
 #include "utl/StringUtilities.h"
 #include <iostream>
 
 
-extern const TCHAR* pHelpMessage;
-
 const TCHAR CXferOptions::m_specDelims[] = _T(";,");
 
 
 CXferOptions::CXferOptions( void )
 	: m_pArg( NULL )
+	, m_helpMode( false )
 	, m_recurseSubDirectories( true )
 	, m_mustHaveFileAttr( 0 )
 	, m_mustNotHaveFileAttr( 0 )
@@ -55,30 +54,30 @@ bool CXferOptions::PassFilter( const CTransferItem& transferNode ) const
 		{
 			TRACE( _T("<earliest: %s>  <source: %s>\n"),
 				   (LPCTSTR)m_earliestTimestamp.Format( _T("%b-%d-%Y") ),
-				   (LPCTSTR)transferNode.m_sourceFileInfo.m_lastModifiedTimestamp.Format( _T("%b-%d-%Y") ) );
+				   (LPCTSTR)transferNode.m_sourceFileInfo.m_lastModifyTime.Format( _T("%b-%d-%Y") ) );
 
-			if ( transferNode.m_sourceFileInfo.m_lastModifiedTimestamp < m_earliestTimestamp )
+			if ( transferNode.m_sourceFileInfo.m_lastModifyTime < m_earliestTimestamp )
 				return false;
 
-			TRACE( _T("  copy newer: %s\n"), transferNode.m_sourceFileInfo.m_fullPath.GetPtr() );
+			TRACE( _T("  copy newer: %s\n"), transferNode.m_sourceFileInfo.m_filePath.GetPtr() );
 		}
 		else
 		{
 			TRACE( _T("<source: %s>"),
-				(LPCTSTR)transferNode.m_sourceFileInfo.m_lastModifiedTimestamp.Format( _T("%b-%d-%Y") ) );
+				(LPCTSTR)transferNode.m_sourceFileInfo.m_lastModifyTime.Format( _T("%b-%d-%Y") ) );
 
 			if ( transferNode.m_targetFileInfo.Exist() )
 				TRACE( _T("  <target: %s>"),
-					(LPCTSTR)transferNode.m_targetFileInfo.m_lastModifiedTimestamp.Format( _T("%b-%d-%Y") ) );
+					(LPCTSTR)transferNode.m_targetFileInfo.m_lastModifyTime.Format( _T("%b-%d-%Y") ) );
 			TRACE( _T("\n") );
 
 			if ( transferNode.m_targetFileInfo.Exist() )
-				if ( transferNode.m_sourceFileInfo.m_lastModifiedTimestamp <= transferNode.m_targetFileInfo.m_lastModifiedTimestamp )
+				if ( transferNode.m_sourceFileInfo.m_lastModifyTime <= transferNode.m_targetFileInfo.m_lastModifyTime )
 					return false;
 
 			TRACE( _T("  copy newer: %s\n  to:         %s\n"),
-				transferNode.m_sourceFileInfo.m_fullPath.GetPtr(),
-				transferNode.m_targetFileInfo.m_fullPath.GetPtr() );
+				transferNode.m_sourceFileInfo.m_filePath.GetPtr(),
+				transferNode.m_targetFileInfo.m_filePath.GetPtr() );
 		}
 
 	if ( m_transferOnlyToExistentTargetDirs )
@@ -90,27 +89,27 @@ bool CXferOptions::PassFilter( const CTransferItem& transferNode ) const
 			return false;
 
 	if ( !m_excludeWildSpec.empty() )
-		if ( path::MatchWildcard( transferNode.m_sourceFileInfo.m_fullPath.GetPtr(), m_excludeWildSpec.c_str() ) != _T('\0') )
+		if ( path::MatchWildcard( transferNode.m_sourceFileInfo.m_filePath.GetPtr(), m_excludeWildSpec.c_str() ) != _T('\0') )
 			return false;
 
 	if ( !m_excludeFindSpecs.empty() )
 		for ( std::vector< std::tstring >::const_iterator itSubstrSpec = m_excludeFindSpecs.begin(); itSubstrSpec != m_excludeFindSpecs.end(); ++itSubstrSpec )
-			if ( *path::Find( transferNode.m_sourceFileInfo.m_fullPath.GetPtr(), itSubstrSpec->c_str() ) != _T('\0') )
+			if ( *path::Find( transferNode.m_sourceFileInfo.m_filePath.GetPtr(), itSubstrSpec->c_str() ) != _T('\0') )
 				return false;
 
 	return true;
 }
 
-bool CXferOptions::ParseValue( std::tstring& rValue, const TCHAR* pArg, const TCHAR* pNameList, CaseCvt caseCvt /*= PreserveCase*/ )
+bool CXferOptions::ParseValue( std::tstring& rValue, const TCHAR* pArg, const TCHAR* pNameList, CaseCvt caseCvt /*= AsIs*/ )
 {
-	if ( !arg::ParseValuePair( rValue, pArg, pNameList, _T(':'), _T("|") ) )
-		return false;
-	switch ( caseCvt )
-	{
-		case UpperCase: str::ToUpper( rValue ); break;
-		case LowerCase: str::ToLower( rValue ); break;
-	}
-	return true;
+	if ( arg::ParseValuePair( rValue, pArg, pNameList ) )
+		switch ( caseCvt )
+		{
+			case UpperCase: str::ToUpper( rValue ); return true;
+			case LowerCase: str::ToLower( rValue ); return true;
+		}
+
+	return false;
 }
 
 void CXferOptions::ParseCommandLine( int argc, TCHAR* argv[] ) throws_( CRuntimeException )
@@ -119,11 +118,11 @@ void CXferOptions::ParseCommandLine( int argc, TCHAR* argv[] ) throws_( CRuntime
 	{
 		m_pArg = argv[ i ];
 
-		if ( _T('/') == m_pArg[ 0 ] || _T('-') == m_pArg[ 0 ] )
+		if ( arg::IsSwitch( m_pArg ) )
 		{
 			const TCHAR* pSwitch = m_pArg + 1;
-
 			std::tstring value;
+
 			if ( ParseValue( value, pSwitch, _T("TRANSFER|T"), UpperCase ) )
 				ParseFileAction( value );
 			else if ( ParseValue( value, pSwitch, _T("ATTRIBUTES|A"), UpperCase ) )
@@ -135,10 +134,12 @@ void CXferOptions::ParseCommandLine( int argc, TCHAR* argv[] ) throws_( CRuntime
 				if ( !path::ContainsWildcards( value.c_str() ) )
 					str::Tokenize( m_excludeFindSpecs, value.c_str(), m_specDelims );
 				else
-					throw CRuntimeException( str::Format( _T("Error: cannot use wildcards in exclusion argument '%s'"), m_pArg ) );
+					throw CRuntimeException( str::Format( _T("Cannot use wildcards in exclusion argument '%s'"), m_pArg ) );
 			}
 			else if ( ParseValue( value, pSwitch, _T("EW") ) )
 				m_excludeWildSpec = value;
+			else if ( arg::ParseOptionalValuePair( &value, pSwitch, _T("BK") ) )
+				m_pBackupDirPath.reset( new fs::CPath( value ) );
 			else if ( arg::Equals( pSwitch, _T("Q") ) )
 				m_displayFileNames = false;
 			else if ( arg::Equals( pSwitch, _T("LS") ) )
@@ -158,24 +159,27 @@ void CXferOptions::ParseCommandLine( int argc, TCHAR* argv[] ) throws_( CRuntime
 			else if ( arg::Equals( pSwitch, _T("UD") ) )
 				m_transferOnlyToExistentTargetDirs = true;
 			else if ( arg::Equals( pSwitch, _T("Y") ) )
-				m_userPrompt = PromptAlways;
-			else if ( arg::Equals( pSwitch, _T("Y-") ) )
 				m_userPrompt = PromptNever;
+			else if ( arg::Equals( pSwitch, _T("Y-") ) )
+				m_userPrompt = PromptAlways;
 			else if ( arg::EqualsAnyOf( pSwitch, _T("?|H") ) )
-				throw CRuntimeException( pHelpMessage );
-			else if ( arg::EqualsAnyOf( pSwitch, _T("TEST|DEBUG|NDEBUG|NODEBUG") ) )
+			{
+				m_helpMode = true;
+				return;
+			}
+			else if ( arg::EqualsAnyOf( pSwitch, _T("UT|DEBUG|NDEBUG|NODEBUG") ) )
 				continue;							// consume known debug args
 			else
 				ThrowInvalidArgument();
 		}
 		else
 		{
-			if ( m_sourceDirPath.empty() )
-				m_sourceDirPath = m_pArg;
-			else if ( m_targetDirPath.empty() )
-				m_targetDirPath = m_pArg;
+			if ( m_sourceDirPath.IsEmpty() )
+				m_sourceDirPath.Set( m_pArg );
+			else if ( m_targetDirPath.IsEmpty() )
+				m_targetDirPath.Set( m_pArg );
 			else
-				throw CRuntimeException( str::Format( _T("Error: unrecognized argument '%s'"), m_pArg ) );
+				throw CRuntimeException( str::Format( _T("Unrecognized argument '%s'"), m_pArg ) );
 		}
 	}
 
@@ -189,7 +193,7 @@ void CXferOptions::ParseFileAction( const std::tstring& value ) throws_( CRuntim
 		{
 			case _T('C'): m_fileAction = FileCopy; return;
 			case _T('M'): m_fileAction = FileMove; return;
-			case _T('R'): m_fileAction = TargetFileRemove; return;
+			case _T('R'): m_fileAction = TargetFileDelete; return;
 		}
 
 	ThrowInvalidArgument();
@@ -218,7 +222,7 @@ void CXferOptions::ParseFileAttributes( const std::tstring& value ) throws_( CRu
 	}
 }
 
-// argument format: "/D:m-d-y h:min:s"
+// argument format: "/D=m-d-y h:min:s"
 
 void CXferOptions::ParseTimestamp( const std::tstring& value ) throws_( CRuntimeException )
 {
@@ -240,53 +244,35 @@ void CXferOptions::ParseTimestamp( const std::tstring& value ) throws_( CRuntime
 			return;
 		}
 
-	throw CRuntimeException( str::Format( _T("Error: invalid date-time in argument '%s'"), m_pArg ) );
+	throw CRuntimeException( str::Format( _T("Invalid date-time in argument '%s'"), m_pArg ) );
 }
 
 void CXferOptions::PostProcessArguments( void ) throws_( CRuntimeException )
 {
-	if ( m_sourceDirPath.empty() )
-		throw CRuntimeException( _T("Error: missing 'source_filter' argument!") );
+	if ( m_sourceDirPath.IsEmpty() )
+		throw CRuntimeException( _T("Missing 'source_filter' argument!") );
 
 	// split m_sourceDirPath into path and search specifiers
-	if ( fs::IsValidDirectory( m_sourceDirPath.c_str() ) )
-		path::SetBackslash( m_sourceDirPath );
-	else
+	if ( !fs::IsValidDirectory( m_sourceDirPath.GetPtr() ) )
 	{
-		m_searchSpecs = path::FindFilename( m_sourceDirPath.c_str() );
-		m_sourceDirPath = path::GetParentPath( m_sourceDirPath.c_str(), path::AddSlash );
+		m_searchSpecs = m_sourceDirPath.GetNameExt();
+		m_sourceDirPath = m_sourceDirPath.GetParentPath();
 	}
+//	else
+//		path::SetBackslash( m_sourceDirPath );
+
 	if ( m_searchSpecs.empty() )
 		m_searchSpecs = _T("*.*");
 
-	fs::AbsolutizeToCWD( m_sourceDirPath );
-	if ( fs::IsValidDirectory( m_sourceDirPath.c_str() ) )
-		path::SetBackslash( m_sourceDirPath );
+	fs::CvtAbsoluteToCWD( m_sourceDirPath );
+//	if ( fs::IsValidDirectory( m_sourceDirPath.c_str() ) )
+//		path::SetBackslash( m_sourceDirPath );
 
-	fs::AbsolutizeToCWD( m_targetDirPath );
-	path::SetBackslash( m_targetDirPath );
-}
-
-void CXferOptions::CheckCreateTargetDirPath( void )
-{
-	if ( fs::IsValidDirectory( m_targetDirPath.c_str() ) )
-		return;
-
-	std::cout << "Target directory does not exist. Create '" << m_targetDirPath << "'? (Yes/No): ";
-	switch ( io::InputUserKey() )
-	{
-		case 'Y':
-			if ( fs::CreateDirPath( m_targetDirPath.c_str() ) )
-				return;
-			throw CRuntimeException( str::Format( _T("Error: could not create directory: '%s'"), m_targetDirPath.c_str() ) );
-		case 'N':
-			throw CRuntimeException( _T("...aborted") );			// cancelled by user
-	}
-
-	throw CRuntimeException( str::Format( _T("Error: invalid target directory: '%s' !"), m_targetDirPath.c_str() ) );
+	fs::CvtAbsoluteToCWD( m_targetDirPath );
+//	path::SetBackslash( m_targetDirPath );
 }
 
 void CXferOptions::ThrowInvalidArgument( void ) throws_( CRuntimeException )
 {
-	throw CRuntimeException( str::Format( _T("Error: invalid argument '%s'"), m_pArg ) );
+	throw CRuntimeException( str::Format( _T("invalid argument '%s'"), m_pArg ) );
 }

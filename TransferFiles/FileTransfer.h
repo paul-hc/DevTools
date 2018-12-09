@@ -1,9 +1,9 @@
-// Copyleft 2004-2016 Paul H. Cocoveanu
-
 #ifndef FileTransfer_h
 #define FileTransfer_h
+#pragma once
 
 #include <set>
+#include "utl/ConsoleInputOutput.h"
 #include "utl/FileSystem.h"
 #include "TransferItem.h"
 
@@ -11,20 +11,23 @@
 struct CXferOptions;
 
 
-class CFileTransfer : private fs::IEnumerator
+class CFileTransfer
+	: private fs::IEnumerator
 {
 public:
-	CFileTransfer( const CXferOptions& options );
+	CFileTransfer( const CXferOptions* pOptions );
 	~CFileTransfer();
 
 	int Run( void );
 
 	std::ostream& PrintStatistics( std::ostream& os ) const;
 private:
-	void SearchSourceFiles( const std::tstring& dirPath );
+	void SearchSourceFiles( const fs::CPath& dirPath );
 	int Transfer( void );
 
-	bool CanAlterTargetFile( const CTransferItem& node );
+	// user-interactive
+	bool CanAlterTargetFile( const CTransferItem& item );
+	bool CreateTargetDirectory( const CTransferItem& item );
 
 	static std::tstring FormatProtectedFileAttr( DWORD fileAttr );
 private:
@@ -37,12 +40,15 @@ private:
 
 	bool AddTransferItem( CTransferItem* pTransferItem );
 private:
-	const CXferOptions& m_options;
-	TransferItemMap m_xferNodesMap;
+	const CXferOptions* m_pOptions;
+	TransferItemMap m_transferItems;
 	size_t m_fileCount;
 	size_t m_createdDirCount;
 
-	fs::TPathSet m_failedTargetDirs;
+	// interactive state
+	io::CUserQuery m_uqOverrideReadOnly;
+	io::CUserQuery m_uqOverrideFiles;
+	io::CUserQueryCreateDirectory m_uqCreateDirs;
 };
 
 

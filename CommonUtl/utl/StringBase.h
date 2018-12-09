@@ -41,39 +41,11 @@ namespace str
 
 
 	std::tstring GetTypeName( const type_info& info );
+}
 
 
-	template< typename StringType >
-	inline StringType& ToUpper( StringType& rText, const std::locale& loc = str::GetUserLocale() )
-	{
-		if ( !rText.empty() )
-			std::transform( rText.begin(), rText.end(), rText.begin(), func::ToUpper( loc ) );
-		return rText;
-	}
-
-	template< typename StringType >
-	inline StringType& ToLower( StringType& rText, const std::locale& loc = str::GetUserLocale() )
-	{
-		if ( !rText.empty() )
-			std::transform( rText.begin(), rText.end(), rText.begin(), func::ToLower( loc ) );
-		return rText;
-	}
-
-	template< typename StringType >
-	inline StringType MakeUpper( const StringType& rText, const std::locale& loc = str::GetUserLocale() )
-	{
-		StringType upperText = rText;
-		return ToUpper( upperText, loc );
-	}
-
-	template< typename StringType >
-	inline StringType MakeLower( const StringType& rText, const std::locale& loc = str::GetUserLocale() )
-	{
-		StringType lowerText = rText;
-		return ToLower( lowerText, loc );
-	}
-
-
+namespace str
+{
 	enum CaseType { Case, IgnoreCase };
 
 
@@ -84,8 +56,8 @@ namespace str
 	template<> inline bool Equals< Case, wchar_t >( const wchar_t* pLeft, const wchar_t* pRight ) { return pred::Equal == wcscmp( pLeft, pRight ); }
 	template<> inline bool Equals< IgnoreCase, wchar_t >( const wchar_t* pLeft, const wchar_t* pRight ) { return pred::Equal == _wcsicmp( pLeft, pRight ); }
 
-	template< str::CaseType caseType, typename StringType >
-	bool EqualString( const StringType& left, const StringType& right ) { return Equals< caseType >( left.c_str(), right.c_str() ); }
+	template< str::CaseType caseType, typename StringT >
+	bool EqualString( const StringT& left, const StringT& right ) { return Equals< caseType >( left.c_str(), right.c_str() ); }
 
 
 	// string to STL iterators conversions
@@ -105,6 +77,18 @@ namespace str
 	inline char* Copy( char* pBuffer, const std::string& text ) { return strcpy( pBuffer, text.c_str() ); }
 	inline wchar_t* Copy( wchar_t* pBuffer, const std::wstring& text ) { return wcscpy( pBuffer, text.c_str() ); }
 
+
+	template< typename CharType >
+	bool ContainsAnyOf( const CharType* pCharSet, CharType ch )
+	{
+		ASSERT_PTR( pCharSet );
+		for ( ; *pCharSet != 0; ++pCharSet )
+			if ( ch == *pCharSet )
+				return true;
+
+		return false;
+	}
+
 	template< typename CharType >
 	inline const CharType* FindTokenEnd( const CharType* pText, const CharType delims[] )
 	{
@@ -116,16 +100,55 @@ namespace str
 
 namespace str
 {
-	template< typename CharType >
-	bool ContainsAnyOf( const CharType* pCharSet, CharType ch )
+	template< typename StringT, typename ValueT >
+	StringT ValueToString( const ValueT& value )
 	{
-		ASSERT_PTR( pCharSet );
-		for ( ; *pCharSet != 0; ++pCharSet )
-			if ( ch == *pCharSet )
-				return true;
-
-		return false;
+		std::basic_ostringstream< typename StringT::value_type > oss;
+		oss << value;
+		return oss.str();
 	}
+
+
+	template< typename StringT, typename ValueT >
+	StringT Enquote( const ValueT& value, typename StringT::value_type quote = '\'' )
+	{
+		std::basic_ostringstream< typename StringT::value_type > oss;
+		oss << quote << value << quote;
+		return oss.str();
+	}
+
+
+	template< typename StringT >
+	inline StringT& ToUpper( StringT& rText, const std::locale& loc = str::GetUserLocale() )
+	{
+		if ( !rText.empty() )
+			std::transform( rText.begin(), rText.end(), rText.begin(), func::ToUpper( loc ) );
+		return rText;
+	}
+
+	template< typename StringT >
+	inline StringT& ToLower( StringT& rText, const std::locale& loc = str::GetUserLocale() )
+	{
+		if ( !rText.empty() )
+			std::transform( rText.begin(), rText.end(), rText.begin(), func::ToLower( loc ) );
+		return rText;
+	}
+
+	template< typename StringT >
+	inline StringT MakeUpper( const StringT& rText, const std::locale& loc = str::GetUserLocale() )
+	{
+		StringT upperText = rText;
+		return ToUpper( upperText, loc );
+	}
+
+	template< typename StringT >
+	inline StringT MakeLower( const StringT& rText, const std::locale& loc = str::GetUserLocale() )
+	{
+		StringT lowerText = rText;
+		return ToLower( lowerText, loc );
+	}
+
+
 }
 
 
@@ -326,8 +349,8 @@ namespace str
 	}
 
 
-	template< typename CharType, typename StringType >
-	void SplitAdd( std::vector< StringType >& rItems, const CharType* pSource, const CharType* pSep )
+	template< typename CharType, typename StringT >
+	void SplitAdd( std::vector< StringT >& rItems, const CharType* pSource, const CharType* pSep )
 	{
 		ASSERT( !str::IsEmpty( pSep ) );
 
@@ -353,8 +376,8 @@ namespace str
 		}
 	}
 
-	template< typename CharType, typename StringType >
-	inline void Split( std::vector< StringType >& rItems, const CharType* pSource, const CharType* pSep )
+	template< typename CharType, typename StringT >
+	inline void Split( std::vector< StringT >& rItems, const CharType* pSource, const CharType* pSep )
 	{
 		rItems.clear();
 		SplitAdd( rItems, pSource, pSep );
@@ -425,19 +448,19 @@ namespace pred
 		}
 	};
 
-	template< typename StringType >
+	template< typename StringT >
 	struct EqualString
 	{
-		EqualString( const StringType& text, str::CaseType caseType = str::IgnoreCase ) : m_text( text ), m_caseType( caseType ) {}
+		EqualString( const StringT& text, str::CaseType caseType = str::IgnoreCase ) : m_text( text ), m_caseType( caseType ) {}
 
-		bool operator()( const StringType& itemText ) const
+		bool operator()( const StringT& itemText ) const
 		{
 			return str::IgnoreCase == m_caseType
 				? str::Equals< str::IgnoreCase >( m_text.c_str(), itemText.c_str() )
 				: str::Equals< str::Case >( m_text.c_str(), itemText.c_str() );
 		}
 	private:
-		const StringType& m_text;
+		const StringT& m_text;
 		str::CaseType m_caseType;
 	};
 }
@@ -502,6 +525,9 @@ namespace stream
 
 std::ostream& operator<<( std::ostream& os, const wchar_t* pWide );
 std::wostream& operator<<( std::wostream& os, const char* pUtf8 );
+
+std::ostream& operator<<( std::ostream& os, wchar_t chWide );
+std::wostream& operator<<( std::wostream& os, char chUtf8 );
 
 inline std::ostream& operator<<( std::ostream& os, const std::wstring& wide ) { return os << wide.c_str(); }
 inline std::wostream& operator<<( std::wostream& os, const std::string& utf8 ) { return os << utf8.c_str(); }

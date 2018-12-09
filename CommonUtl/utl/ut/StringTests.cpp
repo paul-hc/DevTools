@@ -57,6 +57,36 @@ void CStringTests::TestIgnoreCase( void )
 	ASSERT( s != "xy" );
 }
 
+void CStringTests::TestValueToString( void )
+{
+	// to NARROW stream
+	ASSERT_EQUAL( "", str::ValueToString< std::string >( "" ) );
+	ASSERT_EQUAL( "", str::ValueToString< std::string >( _T("") ) );
+
+	ASSERT_EQUAL( "x", str::ValueToString< std::string >( 'x' ) );
+	ASSERT_EQUAL( "x", str::ValueToString< std::string >( _T('x') ) );
+
+	ASSERT_EQUAL( "abc", str::ValueToString< std::string >( "abc" ) );
+	ASSERT_EQUAL( "abc", str::ValueToString< std::string >( _T("abc") ) );
+
+	ASSERT_EQUAL( "name.ext", str::ValueToString< std::string >( fs::CPath( _T("name.ext") ) ) );
+	ASSERT_EQUAL( "37", str::ValueToString< std::string >( 37 ) );
+
+	// to WIDE stream
+	ASSERT_EQUAL( L"", str::ValueToString< std::wstring >( "" ) );
+	ASSERT_EQUAL( L"", str::ValueToString< std::wstring >( _T("") ) );
+
+	ASSERT_EQUAL( L"x", str::ValueToString< std::wstring >( 'x' ) );
+	ASSERT_EQUAL( L"x", str::ValueToString< std::wstring >( _T('x') ) );
+
+	ASSERT_EQUAL( L"abc", str::ValueToString< std::wstring >( "abc" ) );
+	ASSERT_EQUAL( L"abc", str::ValueToString< std::wstring >( _T("abc") ) );
+
+	ASSERT_EQUAL( L"name.ext", str::ValueToString< std::wstring >( fs::CPath( _T("name.ext") ) ) );
+
+	ASSERT_EQUAL( L"37", str::ValueToString< std::wstring >( fs::CPath( _T("37") ) ) );
+}
+
 void CStringTests::TestStringSplit( void )
 {
 	static const TCHAR whitespaceText[] = _T("	  ab c 		");
@@ -300,6 +330,27 @@ void CStringTests::TestArgUtilities( void )
 	ASSERT( !arg::ParseValuePair( value, _T("SOURCE:Value3"), _T("source|s"), _T(':'), _T("$") ) );
 
 	ASSERT( !arg::ParseValuePair( value, _T("Source=Value3"), _T("source"), _T('>') ) );
+	ASSERT( arg::ParseOptionalValuePair( &value, _T("Source=Value3"), _T("source"), _T('>') ) );
+
+
+	ASSERT_EQUAL( _T("\"\""), arg::Enquote( "" ) );
+	ASSERT_EQUAL( _T("''"), arg::Enquote( "", '\'' ) );
+	ASSERT_EQUAL( _T("'x'"), arg::Enquote( "x", '\'' ) );
+
+	ASSERT_EQUAL( _T("\"x\""), arg::Enquote( 'x' ) );
+	ASSERT_EQUAL( _T("\"x\""), arg::Enquote( L'x' ) );
+	ASSERT_EQUAL( _T("\"abc\""), arg::Enquote( "abc" ) );
+	ASSERT_EQUAL( _T("\"abc\""), arg::Enquote( _T("abc") ) );
+	ASSERT_EQUAL( _T("\"abc\""), arg::Enquote( std::string( "abc" ) ) );
+	ASSERT_EQUAL( _T("\"abc\""), arg::Enquote( std::wstring( L"abc" ) ) );
+	ASSERT_EQUAL( _T("\"name.ext\""), arg::Enquote( fs::CPath( _T("name.ext") ) ) );
+
+	ASSERT_EQUAL( _T(""), arg::AutoEnquote( "" ) );
+	ASSERT_EQUAL( _T(""), arg::AutoEnquote( '\0' ) );
+	ASSERT_EQUAL( _T("abc"), arg::AutoEnquote( _T("abc") ) );
+	ASSERT_EQUAL( _T("\"abc d\""), arg::AutoEnquote( _T("abc d") ) );
+	ASSERT_EQUAL( _T("name.ext"), arg::AutoEnquote( fs::CPath( _T("name.ext") ) ) );
+	ASSERT_EQUAL( _T("\"name space.ext\""), arg::AutoEnquote( fs::CPath( _T("name space.ext") ) ) );
 }
 
 void CStringTests::TestEnumTags( void )
@@ -544,6 +595,7 @@ void CStringTests::Run( void )
 	__super::Run();
 
 	TestIgnoreCase();
+	TestValueToString();
 	TestStringSplit();
 	TestStringTokenize();
 	TestStringConversion();

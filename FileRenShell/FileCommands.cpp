@@ -8,7 +8,6 @@
 #include "utl/EnumTags.h"
 #include "utl/FmtUtils.h"
 #include "utl/StringUtilities.h"
-#include "utl/Utilities.h"
 #include "utl/TimeUtils.h"
 #include "utl/SerializeStdTypes.h"
 
@@ -149,7 +148,7 @@ namespace cmd
 
 	std::tstring CBaseFileCmd::ExtractMessage( CException* pExc ) const
 	{
-		std::tstring message = ui::GetErrorMessage( pExc );
+		std::tstring message = mfc::CRuntimeException::MessageOf( *pExc );
 		pExc->Delete();
 
 		if ( !m_srcPath.FileExist() )

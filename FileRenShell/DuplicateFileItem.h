@@ -3,37 +3,9 @@
 #pragma once
 
 #include "utl/IProgressCallback.h"
+#include "utl/FileContent.h"
 #include "utl/PathItemBase.h"
 #include <hash_map>
-
-
-namespace utl { class CCrc32FileCache; }
-
-
-struct CFileContentKey
-{
-	CFileContentKey( void ) : m_fileSize( 0ull ), m_crc32( 0u ) {}
-	CFileContentKey( UINT64 fileSize, UINT crc32 ) : m_fileSize( fileSize ), m_crc32( crc32 ) { ASSERT( m_fileSize != 0ull && m_crc32 != 0u ); }
-
-	bool ComputeFileSize( const fs::CPath& filePath );
-	bool ComputeCrc32( const fs::CPath& filePath );
-
-	bool operator==( const CFileContentKey& right ) const { return m_fileSize == right.m_fileSize && m_crc32 == right.m_crc32; }
-	bool operator<( const CFileContentKey& right ) const;
-
-	std::tstring Format( void ) const;
-
-	static utl::CCrc32FileCache& GetCrc32FileCache( void );
-public:
-	UINT64 m_fileSize;		// in bytes
-	UINT m_crc32;			// CRC32 checksum
-};
-
-
-namespace stdext
-{
-	size_t hash_value( const CFileContentKey& key );
-}
 
 
 class CDuplicateFilesGroup;
@@ -68,10 +40,10 @@ private:
 class CDuplicateFilesGroup
 {
 public:
-	CDuplicateFilesGroup( const CFileContentKey& contentKey ) : m_contentKey( contentKey ) {}
+	CDuplicateFilesGroup( const fs::CFileContentKey& contentKey ) : m_contentKey( contentKey ) {}
 	~CDuplicateFilesGroup();
 
-	CFileContentKey GetContentKey( void ) const { return m_contentKey; }
+	fs::CFileContentKey GetContentKey( void ) const { return m_contentKey; }
 
 	bool HasDuplicates( void ) const { return m_items.size() > 1; }
 	bool HasCrc32( void ) const { return m_contentKey.m_crc32 != 0; }
@@ -96,7 +68,7 @@ public:
 		return *std::min_element( m_items.begin(), m_items.end(), pred::MakeLessPtr( compare ) );		// sort ascending - lowest value; sort descending: highest value
 	}
 private:
-	CFileContentKey m_contentKey;
+	fs::CFileContentKey m_contentKey;
 	std::vector< CDuplicateFileItem* > m_items;
 };
 
@@ -110,13 +82,13 @@ public:
 	size_t GetDuplicateItemCount( void ) const { return GetDuplicateItemCount( m_groups ); }
 	static size_t GetDuplicateItemCount( const std::vector< CDuplicateFilesGroup* >& groups );
 
-	bool RegisterPath( const fs::CPath& filePath, const CFileContentKey& contentKey );
-	void RegisterItem( CDuplicateFileItem* pItem, const CFileContentKey& contentKey );
+	bool RegisterPath( const fs::CPath& filePath, const fs::CFileContentKey& contentKey );
+	void RegisterItem( CDuplicateFileItem* pItem, const fs::CFileContentKey& contentKey );
 
 	// extract groups with more than 1 item
 	void ExtractDuplicateGroups( std::vector< CDuplicateFilesGroup* >& rDuplicateGroups, size_t& rIgnoredCount, ui::IProgressCallback* pProgress = NULL ) throws_( CUserAbortedException );
 private:
-	stdext::hash_map< CFileContentKey, CDuplicateFilesGroup* > m_groupsMap;
+	stdext::hash_map< fs::CFileContentKey, CDuplicateFilesGroup* > m_groupsMap;
 	std::vector< CDuplicateFilesGroup* > m_groups;				// with ownership, in the order they were registered
 };
 

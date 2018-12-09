@@ -82,9 +82,18 @@ namespace utl
 		crc32CheckSum = ~crc32CheckSum;
 		return crc32CheckSum;
 	}
+}
 
 
+namespace fs
+{
 	// CCrc32FileCache implementation
+
+	CCrc32FileCache& CCrc32FileCache::Instance( void )
+	{
+		static CCrc32FileCache s_cache;
+		return s_cache;
+	}
 
 	UINT CCrc32FileCache::AcquireCrc32( const fs::CPath& filePath )
 	{
@@ -124,7 +133,7 @@ namespace utl
 	{
 		try
 		{
-			return CCrc32::Instance().ComputeFileCrc32( filePath.GetPtr() );
+			return utl::CCrc32::Instance().ComputeFileCrc32( filePath.GetPtr() );
 		}
 		catch ( CFileException* pExc )
 		{

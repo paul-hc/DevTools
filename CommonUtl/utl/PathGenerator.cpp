@@ -148,7 +148,7 @@ bool CPathGenerator::IsPathUnique( const fs::CPath& newPath ) const
 {
 	if ( newPath.FileExist() )
 		if ( m_pRenamePairs->find( newPath ) == m_pRenamePairs->end() )
-			return false;													// collision with an existing file outside of current working set
+			return false;							// collision with an existing file outside of current working set
 
 	return m_destSet.find( newPath ) == m_destSet.end();
 }

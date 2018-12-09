@@ -12,58 +12,6 @@
 #endif
 
 
-namespace stdext
-{
-	size_t hash_value( const CFileContentKey& key )
-	{
-		size_t value = stdext::hash_value( key.m_fileSize );
-		utl::hash_combine( value, key.m_crc32 );
-		return value;
-	}
-}
-
-
-// CFileContentKey implementation
-
-bool CFileContentKey::operator<( const CFileContentKey& right ) const
-{
-	if ( m_fileSize < right.m_fileSize )
-		return true;
-	else if ( m_fileSize == right.m_fileSize )
-		return m_crc32 < right.m_crc32;
-
-	return false;
-}
-
-std::tstring CFileContentKey::Format( void ) const
-{
-	std::tstring text = str::Format( _T("file size=%s"), num::FormatFileSize( m_fileSize, num::Bytes, true ).c_str() );
-
-	if ( m_crc32 != 0 )
-		text += str::Format( _T(", CRC32=%X"), m_crc32 );
-
-	return text;
-}
-
-bool CFileContentKey::ComputeFileSize( const fs::CPath& filePath )
-{
-	m_fileSize = fs::GetFileSize( filePath.GetPtr() );
-	return m_fileSize != ULLONG_MAX;
-}
-
-bool CFileContentKey::ComputeCrc32( const fs::CPath& filePath )
-{
-	m_crc32 = GetCrc32FileCache().AcquireCrc32( filePath );
-	return m_crc32 != 0;
-}
-
-utl::CCrc32FileCache& CFileContentKey::GetCrc32FileCache( void )
-{
-	static utl::CCrc32FileCache s_crcCache;
-	return s_crcCache;
-}
-
-
 // CDuplicateFileItem implementation
 
 CDuplicateFileItem::CDuplicateFileItem( const fs::CPath& filePath, CDuplicateFilesGroup* pParentGroup )
@@ -136,7 +84,7 @@ void CDuplicateFilesGroup::ExtractCrc32Duplicates( std::vector< CDuplicateFilesG
 	REQUIRE( HasDuplicates() );
 	REQUIRE( 0 == m_contentKey.m_crc32 );			// CRC32 is yet to be computed
 
-	typedef std::pair< CFileContentKey, CDuplicateFileItem* > TKeyItemPair;
+	typedef std::pair< fs::CFileContentKey, CDuplicateFileItem* > TKeyItemPair;
 	typedef utl::COwningContainer< std::vector< TKeyItemPair >, func::DeleteValue > TKeyItemContainer;
 
 	TKeyItemContainer scopedKeyItems;
@@ -211,7 +159,7 @@ void CDuplicateFilesGroup::__ExtractCrc32Duplicates( std::vector< CDuplicateFile
 		if ( pProgress != NULL )
 			pProgress->AdvanceItem( ( *itItem )->GetFilePath().Get() );
 
-		CFileContentKey fullKey = m_contentKey;
+		fs::CFileContentKey fullKey = m_contentKey;
 		if ( fullKey.ComputeCrc32( ( *itItem )->GetFilePath() ) )
 			store.RegisterItem( utl::ReleaseOwnership( *itItem ), fullKey );		// release item ownership to prevent being deleted when unwiding the stack
 		else
@@ -241,7 +189,7 @@ size_t CDuplicateGroupStore::GetDuplicateItemCount( const std::vector< CDuplicat
 	return dupItemCount;
 }
 
-bool CDuplicateGroupStore::RegisterPath( const fs::CPath& filePath, const CFileContentKey& contentKey )
+bool CDuplicateGroupStore::RegisterPath( const fs::CPath& filePath, const fs::CFileContentKey& contentKey )
 {
 	CDuplicateFilesGroup*& rpGroup = m_groupsMap[ contentKey ];
 
@@ -257,7 +205,7 @@ bool CDuplicateGroupStore::RegisterPath( const fs::CPath& filePath, const CFileC
 	return true;
 }
 
-void CDuplicateGroupStore::RegisterItem( CDuplicateFileItem* pItem, const CFileContentKey& contentKey )
+void CDuplicateGroupStore::RegisterItem( CDuplicateFileItem* pItem, const fs::CFileContentKey& contentKey )
 {
 	ASSERT_PTR( pItem );
 	ASSERT( contentKey.m_crc32 != 0 );

@@ -1,6 +1,7 @@
 
 #include "stdafx.h"
 #include "FileState.h"
+#include "FileSystem.h"
 #include "EnumTags.h"
 #include "FlagTags.h"
 #include "RuntimeException.h"
@@ -9,31 +10,6 @@
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
-
-
-class CScopedWriteableFile
-{
-public:
-	CScopedWriteableFile( const TCHAR* pFilePath )
-		: m_pFilePath( pFilePath )
-		, m_origAttr( ::GetFileAttributes( m_pFilePath ) )
-	{
-		if ( m_origAttr != INVALID_FILE_ATTRIBUTES )
-			if ( HasFlag( m_origAttr, FILE_ATTRIBUTE_READONLY ) )										// currently readonly?
-				if ( !::SetFileAttributes( m_pFilePath, m_origAttr & ~FILE_ATTRIBUTE_READONLY ) )		// temporarily allow changing file times for a read-only file/directory
-					m_origAttr = INVALID_FILE_ATTRIBUTES;												// failed removing FILE_ATTRIBUTE_READONLY
-	}
-
-	~CScopedWriteableFile()
-	{
-		if ( m_origAttr != INVALID_FILE_ATTRIBUTES )
-			if ( HasFlag( m_origAttr, FILE_ATTRIBUTE_READONLY ) )			// was readonly?
-				::SetFileAttributes( m_pFilePath, m_origAttr );				// restore original FILE_ATTRIBUTE_READONLY
-	}
-private:
-	const TCHAR* m_pFilePath;
-	DWORD m_origAttr;
-};
 
 
 #define EDITABLE_ATTRIBUTE_MASK ( FILE_ATTRIBUTE_READONLY | FILE_ATTRIBUTE_HIDDEN | FILE_ATTRIBUTE_SYSTEM | FILE_ATTRIBUTE_ARCHIVE | FILE_ATTRIBUTE_NORMAL )
@@ -89,12 +65,6 @@ namespace fs
 			m_accessTime == right.m_accessTime;
 	}
 
-	const CEnumTags& CFileState::GetTags_TimeField( void )
-	{
-		static const CEnumTags s_tags( _T("Created Date|Modified Date|Accessed Date"), _T("C|M|A") );
-		return s_tags;
-	}
-
 	const CTime& CFileState::GetTimeField( TimeField field ) const
 	{
 		switch ( field )
@@ -130,58 +100,23 @@ namespace fs
 	{
 		std::vector< std::pair< FILETIME, const FILETIME* > > times( _TimeFieldCount );		// pair.second: ptr not NULL when time is defined (!= 0)
 
-		times[ ModifiedDate ].second = MakeFileTime( times[ ModifiedDate ].first, newStatus.m_mtime );			// last modification time
+		times[ ModifiedDate ].second = fs::thr::MakeFileTime_Mfc( times[ ModifiedDate ].first, newStatus.m_mtime );			// last modification time
 		if ( times[ ModifiedDate ].second != NULL )
 		{
-			times[ AccessedDate ].second = MakeFileTime( times[ AccessedDate ].first, newStatus.m_atime );		// last access time
-			times[ CreatedDate ].second = MakeFileTime( times[ CreatedDate ].first, newStatus.m_ctime );		// create time
+			times[ AccessedDate ].second = fs::thr::MakeFileTime_Mfc( times[ AccessedDate ].first, newStatus.m_atime );		// last access time
+			times[ CreatedDate ].second = fs::thr::MakeFileTime_Mfc( times[ CreatedDate ].first, newStatus.m_ctime );		// create time
 
-			CScopedWriteableFile scopedWriteable( m_fullPath.GetPtr() );
-
-			HANDLE hFile = ::CreateFile( m_fullPath.GetPtr(), GENERIC_READ | GENERIC_WRITE,
+			fs::CScopedWriteableFile scopedWriteable( m_fullPath.GetPtr() );
+			fs::CHandle file( ::CreateFile( m_fullPath.GetPtr(), GENERIC_READ | GENERIC_WRITE,
 				FILE_SHARE_READ, NULL, OPEN_EXISTING,
 				isDirectory ? FILE_FLAG_BACKUP_SEMANTICS : FILE_ATTRIBUTE_NORMAL,								// IMPORTANT: for access to directory vs file
-				NULL );
+				NULL ) );
 
-			if ( INVALID_HANDLE_VALUE == hFile )
-				ThrowLastError();
-
-			if ( !::SetFileTime( hFile, times[ CreatedDate ].second, times[ AccessedDate ].second, times[ ModifiedDate ].second ) )
-			{
-				const DWORD lastError = ::GetLastError();
-				::CloseHandle( hFile );
-				ThrowLastError( lastError );
-			}
-
-			if ( !::CloseHandle( hFile ) )
+			if ( !file.IsValid() ||
+				 !::SetFileTime( file.Get(), times[ CreatedDate ].second, times[ AccessedDate ].second, times[ ModifiedDate ].second ) ||
+				 !file.Close() )
 				ThrowLastError();
 		}
-	}
-
-	FILETIME* CFileState::MakeFileTime( FILETIME& rOutFileTime, const CTime& time ) const throws_( CFileException )
-	{
-		if ( 0 == time.GetTime() )
-			return NULL;
-
-		SYSTEMTIME sysTime;
-		sysTime.wYear = (WORD)time.GetYear();
-		sysTime.wMonth = (WORD)time.GetMonth();
-		sysTime.wDay = (WORD)time.GetDay();
-		sysTime.wHour = (WORD)time.GetHour();
-		sysTime.wMinute = (WORD)time.GetMinute();
-		sysTime.wSecond = (WORD)time.GetSecond();
-		sysTime.wMilliseconds = 0;
-
-		// convert system time to local file time
-		FILETIME localTime;
-		if ( !::SystemTimeToFileTime( &sysTime, &localTime ) )
-			CFileException::ThrowOsError( (LONG)::GetLastError() );
-
-		// convert local file time to UTC file time
-		if ( !::LocalFileTimeToFileTime( &localTime, &rOutFileTime ) )
-			CFileException::ThrowOsError( (LONG)::GetLastError() );
-
-		return &rOutFileTime;
 	}
 
 	const CFlagTags& CFileState::GetTags_FileAttributes( void )

@@ -91,6 +91,7 @@ namespace path
 
 	std::tstring& SetBackslash( std::tstring& rDirPath, TrailSlash trailSlash = AddSlash );
 	inline std::tstring& SetBackslash( std::tstring& rDirPath, bool doSet ) { return SetBackslash( rDirPath, doSet ? AddSlash : RemoveSlash ); }
+	bool HasTrailingSlash( const TCHAR* pPath );				// true for non-root paths with a trailing slash
 
 	std::tstring GetParentPath( const TCHAR* pPath, TrailSlash trailSlash = PreserveSlash );
 
@@ -181,6 +182,7 @@ namespace fs
 		CPath& SetBackslash( bool trailSlash = true );
 
 		const TCHAR* GetNameExt( void ) const { return path::FindFilename( m_filePath.c_str() ); }
+		std::tstring GetFilename( void ) const { return GetNameExt(); }
 		void SetNameExt( const std::tstring& nameExt );
 
 		void SetDirPath( const std::tstring& dirPath );
@@ -220,7 +222,7 @@ namespace stdext
 namespace func
 {
 	inline const std::tstring& StringOf( const fs::CPath& filePath ) { return filePath.Get(); }		// for uniform string algorithms
-	inline const fs::CPath& PathOf( const fs::CPath& keyPath ) { return keyPath; }		// for uniform path algorithms
+	inline const fs::CPath& PathOf( const fs::CPath& keyPath ) { return keyPath; }					// for uniform path algorithms
 
 	struct ToPathPtr
 	{
