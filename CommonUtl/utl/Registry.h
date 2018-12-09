@@ -2,9 +2,21 @@
 #define Registry_h
 #pragma once
 
+#include <atlbase.h>
+
 
 namespace reg
 {
+	// CRegKey (ATL class) helpers
+
+	bool QueryValue( std::tstring& rValue, const CRegKey& key, const TCHAR* pValueName );
+}
+
+
+namespace reg
+{
+	// obsolete stuff: should be based on using CRegKey ATL class
+
 	enum SeekBound { SB_First, SB_Last };
 
 

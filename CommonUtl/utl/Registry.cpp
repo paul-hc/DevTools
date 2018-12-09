@@ -9,6 +9,26 @@
 
 namespace reg
 {
+	// CRegKey (ATL class) helpers
+
+	bool QueryValue( std::tstring& rValue, const CRegKey& key, const TCHAR* pValueName )
+	{
+		TCHAR buffer[ MAX_PATH * 2 ];
+		ULONG charCount;
+		if ( ERROR_SUCCESS == const_cast< CRegKey& >( key ).QueryStringValue( pValueName, buffer, &charCount ) )
+		{
+			rValue = buffer;
+			return true;
+		}
+		return false;
+	}
+}
+
+
+namespace reg
+{
+	// obsolete stuff: should be based on using CRegKey ATL class
+
 	void QuerySubKeyNames( std::vector< std::tstring >& rSubKeyNames, const reg::CKey& key )
 	{
 		if ( !key.IsValid() )
