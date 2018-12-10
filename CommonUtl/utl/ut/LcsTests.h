@@ -18,6 +18,9 @@ public:
 	// ut::ITestCase interface
 	virtual void Run( void );
 private:
+	void TestSuffixTreeGutsAnsi( void );
+	void TestSuffixTreeGutsWide( void );
+
 	// common substring
 	void TestFindLongestDuplicatedString( void );		// single string multiple occurence
 	void TestFindLongestCommonSubstring( void );		// string set common occurence

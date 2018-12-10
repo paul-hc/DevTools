@@ -135,8 +135,112 @@ CLcsTests::~CLcsTests()
 
 CLcsTests& CLcsTests::Instance( void )
 {
-	static CLcsTests testCase;
-	return testCase;
+	static CLcsTests s_testCase;
+	return s_testCase;
+}
+
+void CLcsTests::TestSuffixTreeGutsAnsi( void )
+{
+	lcs::CSuffixTree< char, pred::CompareCase > suffixTree( "of the people, by the people, for the people," );
+	std::vector< const char* >::const_iterator itSuffix = suffixTree.m_suffixes.begin();
+
+	ASSERT_EQUAL( _T(" by the people, for the people,"), str::FromAnsi( *itSuffix++ ) );
+	ASSERT_EQUAL( _T(" for the people,"), str::FromAnsi( *itSuffix++ ) );
+	ASSERT_EQUAL( _T(" people,"), str::FromAnsi( *itSuffix++ ) );
+	ASSERT_EQUAL( _T(" people, by the people, for the people,"), str::FromAnsi( *itSuffix++ ) );
+	ASSERT_EQUAL( _T(" people, for the people,"), str::FromAnsi( *itSuffix++ ) );
+	ASSERT_EQUAL( _T(" the people,"), str::FromAnsi( *itSuffix++ ) );
+	ASSERT_EQUAL( _T(" the people, by the people, for the people,"), str::FromAnsi( *itSuffix++ ) );
+	ASSERT_EQUAL( _T(" the people, for the people,"), str::FromAnsi( *itSuffix++ ) );
+	ASSERT_EQUAL( _T(","), str::FromAnsi( *itSuffix++ ) );
+	ASSERT_EQUAL( _T(", by the people, for the people,"), str::FromAnsi( *itSuffix++ ) );
+	ASSERT_EQUAL( _T(", for the people,"), str::FromAnsi( *itSuffix++ ) );
+	ASSERT_EQUAL( _T("by the people, for the people,"), str::FromAnsi( *itSuffix++ ) );
+	ASSERT_EQUAL( _T("e people,"), str::FromAnsi( *itSuffix++ ) );
+	ASSERT_EQUAL( _T("e people, by the people, for the people,"), str::FromAnsi( *itSuffix++ ) );
+	ASSERT_EQUAL( _T("e people, for the people,"), str::FromAnsi( *itSuffix++ ) );
+	ASSERT_EQUAL( _T("e,"), str::FromAnsi( *itSuffix++ ) );
+	ASSERT_EQUAL( _T("e, by the people, for the people,"), str::FromAnsi( *itSuffix++ ) );
+	ASSERT_EQUAL( _T("e, for the people,"), str::FromAnsi( *itSuffix++ ) );
+	ASSERT_EQUAL( _T("eople,"), str::FromAnsi( *itSuffix++ ) );
+	ASSERT_EQUAL( _T("eople, by the people, for the people,"), str::FromAnsi( *itSuffix++ ) );
+	ASSERT_EQUAL( _T("eople, for the people,"), str::FromAnsi( *itSuffix++ ) );
+	ASSERT_EQUAL( _T("f the people, by the people, for the people,"), str::FromAnsi( *itSuffix++ ) );
+	ASSERT_EQUAL( _T("for the people,"), str::FromAnsi( *itSuffix++ ) );
+	ASSERT_EQUAL( _T("he people,"), str::FromAnsi( *itSuffix++ ) );
+	ASSERT_EQUAL( _T("he people, by the people, for the people,"), str::FromAnsi( *itSuffix++ ) );
+	ASSERT_EQUAL( _T("he people, for the people,"), str::FromAnsi( *itSuffix++ ) );
+	ASSERT_EQUAL( _T("le,"), str::FromAnsi( *itSuffix++ ) );
+	ASSERT_EQUAL( _T("le, by the people, for the people,"), str::FromAnsi( *itSuffix++ ) );
+	ASSERT_EQUAL( _T("le, for the people,"), str::FromAnsi( *itSuffix++ ) );
+	ASSERT_EQUAL( _T("of the people, by the people, for the people,"), str::FromAnsi( *itSuffix++ ) );
+	ASSERT_EQUAL( _T("ople,"), str::FromAnsi( *itSuffix++ ) );
+	ASSERT_EQUAL( _T("ople, by the people, for the people,"), str::FromAnsi( *itSuffix++ ) );
+	ASSERT_EQUAL( _T("ople, for the people,"), str::FromAnsi( *itSuffix++ ) );
+	ASSERT_EQUAL( _T("or the people,"), str::FromAnsi( *itSuffix++ ) );
+	ASSERT_EQUAL( _T("people,"), str::FromAnsi( *itSuffix++ ) );
+	ASSERT_EQUAL( _T("people, by the people, for the people,"), str::FromAnsi( *itSuffix++ ) );
+	ASSERT_EQUAL( _T("people, for the people,"), str::FromAnsi( *itSuffix++ ) );
+	ASSERT_EQUAL( _T("ple,"), str::FromAnsi( *itSuffix++ ) );
+	ASSERT_EQUAL( _T("ple, by the people, for the people,"), str::FromAnsi( *itSuffix++ ) );
+	ASSERT_EQUAL( _T("ple, for the people,"), str::FromAnsi( *itSuffix++ ) );
+	ASSERT_EQUAL( _T("r the people,"), str::FromAnsi( *itSuffix++ ) );
+	ASSERT_EQUAL( _T("the people,"), str::FromAnsi( *itSuffix++ ) );
+	ASSERT_EQUAL( _T("the people, by the people, for the people,"), str::FromAnsi( *itSuffix++ ) );
+	ASSERT_EQUAL( _T("the people, for the people,"), str::FromAnsi( *itSuffix++ ) );
+	ASSERT_EQUAL( _T("y the people, for the people,"), str::FromAnsi( *itSuffix++ ) );
+}
+
+void CLcsTests::TestSuffixTreeGutsWide( void )
+{
+	lcs::CSuffixTree< TCHAR, pred::CompareCase > suffixTree( _T("of the people, by the people, for the people,") );
+	std::vector< const TCHAR* >::const_iterator itSuffix = suffixTree.m_suffixes.begin();
+
+	ASSERT_EQUAL_STR( _T(" by the people, for the people,"), *itSuffix++ );
+	ASSERT_EQUAL_STR( _T(" for the people,"), *itSuffix++ );
+	ASSERT_EQUAL_STR( _T(" people,"), *itSuffix++ );
+	ASSERT_EQUAL_STR( _T(" people, by the people, for the people,"), *itSuffix++ );
+	ASSERT_EQUAL_STR( _T(" people, for the people,"), *itSuffix++ );
+	ASSERT_EQUAL_STR( _T(" the people,"), *itSuffix++ );
+	ASSERT_EQUAL_STR( _T(" the people, by the people, for the people,"), *itSuffix++ );
+	ASSERT_EQUAL_STR( _T(" the people, for the people,"), *itSuffix++ );
+	ASSERT_EQUAL_STR( _T(","), *itSuffix++ );
+	ASSERT_EQUAL_STR( _T(", by the people, for the people,"), *itSuffix++ );
+	ASSERT_EQUAL_STR( _T(", for the people,"), *itSuffix++ );
+	ASSERT_EQUAL_STR( _T("by the people, for the people,"), *itSuffix++ );
+	ASSERT_EQUAL_STR( _T("e people,"), *itSuffix++ );
+	ASSERT_EQUAL_STR( _T("e people, by the people, for the people,"), *itSuffix++ );
+	ASSERT_EQUAL_STR( _T("e people, for the people,"), *itSuffix++ );
+	ASSERT_EQUAL_STR( _T("e,"), *itSuffix++ );
+	ASSERT_EQUAL_STR( _T("e, by the people, for the people,"), *itSuffix++ );
+	ASSERT_EQUAL_STR( _T("e, for the people,"), *itSuffix++ );
+	ASSERT_EQUAL_STR( _T("eople,"), *itSuffix++ );
+	ASSERT_EQUAL_STR( _T("eople, by the people, for the people,"), *itSuffix++ );
+	ASSERT_EQUAL_STR( _T("eople, for the people,"), *itSuffix++ );
+	ASSERT_EQUAL_STR( _T("f the people, by the people, for the people,"), *itSuffix++ );
+	ASSERT_EQUAL_STR( _T("for the people,"), *itSuffix++ );
+	ASSERT_EQUAL_STR( _T("he people,"), *itSuffix++ );
+	ASSERT_EQUAL_STR( _T("he people, by the people, for the people,"), *itSuffix++ );
+	ASSERT_EQUAL_STR( _T("he people, for the people,"), *itSuffix++ );
+	ASSERT_EQUAL_STR( _T("le,"), *itSuffix++ );
+	ASSERT_EQUAL_STR( _T("le, by the people, for the people,"), *itSuffix++ );
+	ASSERT_EQUAL_STR( _T("le, for the people,"), *itSuffix++ );
+	ASSERT_EQUAL_STR( _T("of the people, by the people, for the people,"), *itSuffix++ );
+	ASSERT_EQUAL_STR( _T("ople,"), *itSuffix++ );
+	ASSERT_EQUAL_STR( _T("ople, by the people, for the people,"), *itSuffix++ );
+	ASSERT_EQUAL_STR( _T("ople, for the people,"), *itSuffix++ );
+	ASSERT_EQUAL_STR( _T("or the people,"), *itSuffix++ );
+	ASSERT_EQUAL_STR( _T("people,"), *itSuffix++ );
+	ASSERT_EQUAL_STR( _T("people, by the people, for the people,"), *itSuffix++ );
+	ASSERT_EQUAL_STR( _T("people, for the people,"), *itSuffix++ );
+	ASSERT_EQUAL_STR( _T("ple,"), *itSuffix++ );
+	ASSERT_EQUAL_STR( _T("ple, by the people, for the people,"), *itSuffix++ );
+	ASSERT_EQUAL_STR( _T("ple, for the people,"), *itSuffix++ );
+	ASSERT_EQUAL_STR( _T("r the people,"), *itSuffix++ );
+	ASSERT_EQUAL_STR( _T("the people,"), *itSuffix++ );
+	ASSERT_EQUAL_STR( _T("the people, by the people, for the people,"), *itSuffix++ );
+	ASSERT_EQUAL_STR( _T("the people, for the people,"), *itSuffix++ );
+	ASSERT_EQUAL_STR( _T("y the people, for the people,"), *itSuffix++ );
 }
 
 void CLcsTests::TestFindLongestDuplicatedString( void )
@@ -271,6 +375,8 @@ void CLcsTests::Run( void )
 {
 	__super::Run();
 
+	TestSuffixTreeGutsAnsi();
+	TestSuffixTreeGutsWide();
 	TestFindLongestDuplicatedString();
 	TestFindLongestCommonSubstring();
 	TestRandomLongestCommonSubstring();

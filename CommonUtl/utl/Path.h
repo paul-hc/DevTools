@@ -27,11 +27,6 @@ namespace path
 		return str::CompareN( pLeftPath, pRightPath, &path::ToEquivalentChar, count );
 	}
 
-	inline pred::CompareResult CompareN( const std::tstring& leftPath, const std::tstring& rightPath, size_t count = std::tstring::npos )
-	{
-		return CompareNPtr( leftPath.c_str(), rightPath.c_str(), count );
-	}
-
 	size_t GetHashValue( const TCHAR* pPath );
 
 
