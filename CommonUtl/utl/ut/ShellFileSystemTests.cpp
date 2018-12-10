@@ -1,6 +1,7 @@
 
 #include "stdafx.h"
 #include "ut/ShellFileSystemTests.h"
+#include "RandomUtilities.h"
 #include "ShellTypes.h"
 #include "WinExplorer.h"
 #include "StringUtilities.h"
@@ -147,6 +148,45 @@ void CShellFileSystemTests::TestPathShellApi( void )
 	ASSERT_EQUAL_STR( _T("C:\\dev\\Samples\\_scratch"), commonPath );
 }
 
+void CShellFileSystemTests::TestPathExplorerSort( void )
+{
+	const TCHAR s_srcFiles[] =
+		_T("Ardeal\\1254 Biertan{DUP}.txt|")
+		_T("ardeal\\1254 Biertan-DUP.txt|")
+		_T("ARDEAL\\1254 Biertan~DUP.txt|")
+		_T("ARDeal\\1254 biertan[DUP].txt|")
+		_T("ardEAL\\1254 biertan_DUP.txt|")
+		_T("Ardeal\\1254 Biertan(DUP).txt|")
+		_T("Ardeal\\1254 Biertan+DUP.txt|")
+		_T("Ardeal\\1254 Biertan_noDUP.txt|")
+		_T("Ardeal\\1254 Biertan.txt");
+
+	std::vector< fs::CPath > filePaths;
+	str::Split( filePaths, s_srcFiles, _T("|") );
+
+	utl::SetNextRandomSeed();
+	std::random_shuffle( filePaths.begin(), filePaths.end() );
+
+	shell::SortPaths( filePaths );
+
+	path::StripCommonParentPath( filePaths );		// get rid of the directory prefix, to focus on filename order
+
+	//ut::CTempFilePairPool pool( s_srcFiles );		// uncomment this line to break in the debugger and read the actual file order in Explorer.exe
+
+	// Explorer.exe sort order (on Windows 7):		note: it changes with version; provided by ::StrCmpLogicalW from <shlwapi.h>
+	ASSERT_EQUAL(
+		_T("1254 Biertan(DUP).txt|")
+		_T("1254 Biertan.txt|")
+		_T("1254 biertan[DUP].txt|")
+		_T("1254 biertan_DUP.txt|")
+		_T("1254 Biertan_noDUP.txt|")
+		_T("1254 Biertan{DUP}.txt|")
+		_T("1254 Biertan~DUP.txt|")
+		_T("1254 Biertan+DUP.txt|")
+		_T("1254 Biertan-DUP.txt")
+		, str::Join( filePaths, _T("|") ) );
+}
+
 
 void CShellFileSystemTests::Run( void )
 {
@@ -155,6 +195,7 @@ void CShellFileSystemTests::Run( void )
 	TestShellPidl();
 	TestShellRelativePidl();
 	TestPathShellApi();
+	TestPathExplorerSort();
 }
 
 

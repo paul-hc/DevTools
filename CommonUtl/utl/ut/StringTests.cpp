@@ -80,13 +80,13 @@ void CStringTests::TestNaturalSort( void )
 
 		std::sort( items.begin(), items.end(), pred::LessBy< pred::CompareValue >() );
 		ASSERT_EQUAL(
-			"1254 Biertan(DUP).jpg|"
-			"1254 Biertan+DUP.jpg|"
-			"1254 Biertan-DUP.jpg|"
 			"1254 Biertan.jpg|"
-			"1254 biertan[DUP].jpg|"
+			"1254 Biertan-DUP.jpg|"
+			"1254 Biertan+DUP.jpg|"
 			"1254 biertan_DUP.jpg|"
 			"1254 Biertan_noDUP.jpg|"
+			"1254 Biertan(DUP).jpg|"
+			"1254 biertan[DUP].jpg|"
 			"1254 Biertan{DUP}.jpg|"
 			"1254 Biertan~DUP.jpg"
 			, str::Join( items, "|" ) );
@@ -101,13 +101,13 @@ void CStringTests::TestNaturalSort( void )
 
 		std::sort( items.begin(), items.end(), pred::LessBy< pred::CompareValue >() );
 		ASSERT_EQUAL(
-			L"1254 Biertan(DUP).jpg|"
-			L"1254 Biertan+DUP.jpg|"
-			L"1254 Biertan-DUP.jpg|"
 			L"1254 Biertan.jpg|"
-			L"1254 biertan[DUP].jpg|"
+			L"1254 Biertan-DUP.jpg|"
+			L"1254 Biertan+DUP.jpg|"
 			L"1254 biertan_DUP.jpg|"
 			L"1254 Biertan_noDUP.jpg|"
+			L"1254 Biertan(DUP).jpg|"
+			L"1254 biertan[DUP].jpg|"
 			L"1254 Biertan{DUP}.jpg|"
 			L"1254 Biertan~DUP.jpg"
 			, str::Join( items, L"|" ) );

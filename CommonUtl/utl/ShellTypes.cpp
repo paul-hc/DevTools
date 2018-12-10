@@ -466,3 +466,15 @@ namespace shell
 		return pImageList;
 	}
 }
+
+
+namespace shell
+{
+	pred::CompareResult ExplorerCompare( const wchar_t* pLeftPath, const wchar_t* pRightPath )
+	{
+		if ( path::EquivalentPtr( pLeftPath, pRightPath ) )
+			return pred::Equal;
+
+		return pred::ToCompareResult( ::StrCmpLogicalW( pLeftPath, pRightPath ) );
+	}
+}

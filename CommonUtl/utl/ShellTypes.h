@@ -214,4 +214,50 @@ namespace shell
 }
 
 
+namespace shell
+{
+	// for sorting in Explorer.exe order (which varies with Windows version), based on ::StrCmpLogicalW
+	// note: it doesn't translate '/' to '\\'
+
+	pred::CompareResult ExplorerCompare( const wchar_t* pLeftPath, const wchar_t* pRightPath );
+}
+
+
+namespace pred
+{
+	struct CompareExplorerPath
+	{
+		pred::CompareResult operator()( const wchar_t* pLeftPath, const wchar_t* pRightPath ) const
+		{
+			return shell::ExplorerCompare( pLeftPath, pRightPath );
+		}
+
+		pred::CompareResult operator()( const fs::CPath& leftPath, const fs::CPath& rightPath ) const
+		{
+			return operator()( leftPath.GetPtr(), rightPath.GetPtr() );
+		}
+	};
+
+	typedef LessBy< CompareExplorerPath > TLess_ExplorerPath;
+}
+
+
+namespace shell
+{
+	// path sort for std::tstring, fs::CPath, fs::CFlexPath
+
+	template< typename IteratorT >
+	inline void SortPaths( IteratorT itFirst, IteratorT itLast, bool ascending = true )
+	{
+		std::sort( itFirst, itLast, pred::OrderBy< pred::CompareExplorerPath >( ascending ) );
+	}
+
+	template< typename ContainerT >
+	inline void SortPaths( ContainerT& rStrPaths, bool ascending = true )
+	{
+		shell::SortPaths( rStrPaths.begin(), rStrPaths.end(), ascending );
+	}
+}
+
+
 #endif // ShellTypes_h

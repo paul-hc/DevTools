@@ -4,15 +4,50 @@
 #include "ComparePredicates.h"
 
 
+namespace func
+{
+	int ToNaturalChar::Translate( int charCode )
+	{
+		enum TranslatedCode		// natural order for punctuation characters
+		{
+			Dot = 1, Colon, SemiColon, Comma, Dash, Plus, Underbar,
+			CurvedBraceB, CurvedBraceE,
+			SquareBraceB, SquareBraceE,
+			CurlyBraceB, CurlyBraceE,
+			AngularBraceB, AngularBraceE
+		};
+
+		switch ( charCode )
+		{
+			case '.':	return Dot;
+			case ':':	return Colon;
+			case ';':	return SemiColon;
+			case ',':	return Comma;
+			case '-':	return Dash;
+			case '+':	return Plus;
+			case '_':	return Underbar;
+			case '(':	return CurvedBraceB;
+			case ')':	return CurvedBraceE;
+			case '[':	return SquareBraceB;
+			case ']':	return SquareBraceE;
+			case '{':	return CurlyBraceB;
+			case '}':	return CurlyBraceE;
+			case '<':	return AngularBraceB;
+			case '>':	return AngularBraceE;
+		}
+		return charCode;
+	}
+}
+
+
 namespace str
 {
-	template< typename CharType >
-	inline int CompareTieBreak( const CharType* pLeft, const CharType* pRight )
+	template< typename CharType, typename ToCharFunc >
+	inline int CompareTieBreak( const CharType* pLeft, const CharType* pRight, ToCharFunc toCharFunc )
 	{
-		int result = CharTraits::CompareI( pLeft, pRight );
-
-		if ( 0 == result )
-			result = CharTraits::Compare( pLeft, pRight );		// they seem equal, but they might differ in case
+		int result = CharTraits::CompareI( pLeft, pRight );				// case-insensitive
+		if ( pred::Equal == result )
+			result = str::_CompareN( pLeft, pRight, toCharFunc );			// they seem equal, but they might differ in case
 
 		return result;
 	}
@@ -57,8 +92,8 @@ namespace str
 	}
 
 
-	template< typename CharType >
-	pred::CompareResult IntuitiveCompareImpl( const CharType* pLeft, const CharType* pRight )
+	template< typename CharType, typename ToCharFunc >
+	pred::CompareResult IntuitiveCompareImpl( const CharType* pLeft, const CharType* pRight, ToCharFunc toCharFunc )
 	{
 		REQUIRE( pLeft != NULL && pRight != NULL );
 
@@ -77,10 +112,10 @@ namespace str
 					return pred::ToCompareResult( result );
 
 			if ( 0 == chLeft && 0 == chRight )
-				return pred::ToCompareResult( CompareTieBreak( pLeft, pRight ) );
+				return pred::ToCompareResult( CompareTieBreak( pLeft, pRight, toCharFunc ) );
 
-			chLeft = CharTraits::ToUpper( chLeft );
-			chRight = CharTraits::ToUpper( chRight );
+			chLeft = toCharFunc( CharTraits::ToUpper( chLeft ) );
+			chRight = toCharFunc( CharTraits::ToUpper( chRight ) );
 
 			if ( chLeft < chRight )
 				return pred::Less;
@@ -94,12 +129,12 @@ namespace str
 
 	pred::CompareResult IntuitiveCompare( const char* pLeft, const char* pRight )
 	{
-		return IntuitiveCompareImpl( pLeft, pRight );
+		return IntuitiveCompareImpl( pLeft, pRight, func::ToNaturalChar() );
 	}
 
 	pred::CompareResult IntuitiveCompare( const wchar_t* pLeft, const wchar_t* pRight )
 	{
-		return IntuitiveCompareImpl( pLeft, pRight );
+		return IntuitiveCompareImpl( pLeft, pRight, func::ToNaturalChar() );
 	}
 
 } // namespace str

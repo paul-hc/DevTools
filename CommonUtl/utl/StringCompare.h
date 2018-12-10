@@ -49,6 +49,21 @@ namespace func
 			return ch;
 		}
 	};
+
+
+	// Translates characters to generate a natural order, useful particularly for sorting paths and filenames.
+	// Note: This is closer to Explorer.exe order (which varies with Windows version), yet still different than ::StrCmpLogicalW from <shlwapi.h>
+	//
+	struct ToNaturalChar
+	{
+		template< typename CharType >
+		CharType operator()( CharType ch ) const
+		{
+			return static_cast< CharType >( Translate( ch ) );
+		}
+
+		static int Translate( int charCode );
+	};
 }
 
 
@@ -56,8 +71,8 @@ namespace str
 {
 	// comparison with character translation (low-level)
 
-	template< typename CharType, typename TranslateFunc >
-	std::pair< int, size_t > _BaseCompareDiff( const CharType* pLeft, const CharType* pRight, TranslateFunc transFunc, size_t count = std::tstring::npos )
+	template< typename CharType, typename ToCharFunc >
+	std::pair< int, size_t > _BaseCompareDiff( const CharType* pLeft, const CharType* pRight, ToCharFunc toCharFunc, size_t count = std::tstring::npos )
 	{
 		ASSERT_PTR( pLeft );
 		ASSERT_PTR( pRight );
@@ -69,7 +84,7 @@ namespace str
 			if ( pLeft != pRight )
 			{
 				while ( count-- != 0 &&
-						0 == ( firstMismatch = transFunc( *pLeft ) - transFunc( *pRight ) ) &&
+						0 == ( firstMismatch = toCharFunc( *pLeft ) - toCharFunc( *pRight ) ) &&
 						*pLeft != 0 && *pRight != 0 )
 				{
 					++pLeft;
@@ -83,17 +98,17 @@ namespace str
 		return std::pair< int, size_t >( firstMismatch, matchLen );
 	}
 
-	template< typename CharType, typename TranslateFunc >
-	inline std::pair< pred::CompareResult, size_t > _BaseCompare( const CharType* pLeft, const CharType* pRight, TranslateFunc transFunc, size_t count = std::tstring::npos )
+	template< typename CharType, typename ToCharFunc >
+	inline std::pair< pred::CompareResult, size_t > _BaseCompare( const CharType* pLeft, const CharType* pRight, ToCharFunc toCharFunc, size_t count = std::tstring::npos )
 	{
-		std::pair< int, size_t > diffPair = _BaseCompareDiff( pLeft, pRight, transFunc, count );
+		std::pair< int, size_t > diffPair = _BaseCompareDiff( pLeft, pRight, toCharFunc, count );
 		return std::pair< pred::CompareResult, size_t >( pred::ToCompareResult( diffPair.first ), diffPair.second );
 	}
 
-	template< typename CharType, typename TranslateFunc >
-	inline pred::CompareResult _CompareN( const CharType* pLeft, const CharType* pRight, TranslateFunc transFunc, size_t count = std::tstring::npos )
+	template< typename CharType, typename ToCharFunc >
+	inline pred::CompareResult _CompareN( const CharType* pLeft, const CharType* pRight, ToCharFunc toCharFunc, size_t count = std::tstring::npos )
 	{
-		return _BaseCompare( pLeft, pRight, transFunc, count ).first;
+		return _BaseCompare( pLeft, pRight, toCharFunc, count ).first;
 	}
 
 
@@ -325,7 +340,7 @@ namespace str
 	{
 		size_t len = 0;
 		while ( *pLeft != 0 && pred::Equal == compareStr( *pLeft++, *pRight++ ) )
-			len++;
+			++len;
 
 		return len;
 	}

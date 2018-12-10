@@ -20,6 +20,7 @@ private:
 	void TestShellPidl( void );
 	void TestShellRelativePidl( void );
 	void TestPathShellApi( void );
+	void TestPathExplorerSort( void );
 };
 
 

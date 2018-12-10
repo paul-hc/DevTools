@@ -1439,7 +1439,7 @@
 				</File>
 			</Filter>
 			<Filter
-				Name="Shell (Explorer API)"
+				Name="Shell Explorer API"
 				>
 				<File
 					RelativePath=".\ShellContextMenuHost.cpp"
