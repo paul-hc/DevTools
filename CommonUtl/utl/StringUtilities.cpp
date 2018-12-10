@@ -535,7 +535,7 @@ namespace arg
 		for ( str::const_iterator pItem = pMatchList, pMatchListEnd = str::end( pMatchList ); pItem != pMatchListEnd; )
 		{
 			const TCHAR* pItemEnd = str::FindTokenEnd( pItem, pListDelims );
-			if ( str::EqualsN( pArg, pItem, std::distance( pItem, pItemEnd ), false ) )
+			if ( str::EqualsI( pArg, pItem, std::distance( pItem, pItemEnd ) ) )
 				return true;
 			if ( pItemEnd == pMatchListEnd )
 				break;							// reached last item
@@ -547,7 +547,7 @@ namespace arg
 
 	bool StartsWith( const TCHAR* pArg, const TCHAR* pPrefix, size_t count /*= std::tstring::npos*/ )
 	{
-		return pred::Equal == str::CompareN( pArg, pPrefix, func::ToUpper(), count != std::tstring::npos ? count : str::GetLength( pPrefix ) );
+		return str::EqualsI( pArg, pPrefix, count );
 	}
 
 	bool StartsWithAnyOf( const TCHAR* pArg, const TCHAR* pPrefixList, const TCHAR* pListDelims )

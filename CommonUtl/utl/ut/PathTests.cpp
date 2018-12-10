@@ -359,15 +359,15 @@ void CPathTests::TestPathSortExisting( void )
 void CPathTests::TestPathNaturalSort( void )
 {
 	const TCHAR s_srcFiles[] =
-		_T("Ardeal\\1254 Biertan{DUP}.jpg|")
-		_T("ardeal/1254 Biertan-DUP.jpg|")
-		_T("ARDEAL\\1254 Biertan~DUP.jpg|")
-		_T("ARDeal\\1254 biertan[DUP].jpg|")
-		_T("ardEAL\\1254 biertan_DUP.jpg|")
-		_T("Ardeal\\1254 Biertan(DUP).jpg|")
-		_T("Ardeal\\1254 Biertan+DUP.jpg|")
-		_T("Ardeal\\1254 Biertan_noDUP.jpg|")
-		_T("Ardeal/1254 Biertan.jpg");
+		_T("Ardeal\\1254 Biertan{DUP}.txt|")
+		_T("ardeal/1254 Biertan-DUP.txt|")
+		_T("ARDEAL\\1254 Biertan~DUP.txt|")
+		_T("ARDeal\\1254 biertan[DUP].txt|")
+		_T("ardEAL\\1254 biertan_DUP.txt|")
+		_T("Ardeal\\1254 Biertan(DUP).txt|")
+		_T("Ardeal\\1254 Biertan+DUP.txt|")
+		_T("Ardeal\\1254 Biertan_noDUP.txt|")
+		_T("Ardeal/1254 Biertan.txt");
 
 	std::vector< fs::CPath > filePaths;
 	str::Split( filePaths, s_srcFiles, _T("|") );
@@ -384,58 +384,44 @@ void CPathTests::TestPathNaturalSort( void )
 
 	path::StripCommonParentPath( filePaths );		// get rid of the directory prefix, to focus on filename order
 
+	ASSERT_EQUAL(
+		_T("1254 Biertan.txt|")				// straight extension (shortest filename) goes first
+		_T("1254 Biertan-DUP.txt|")
+		_T("1254 Biertan+DUP.txt|")
+		_T("1254 biertan_DUP.txt|")
+		_T("1254 Biertan_noDUP.txt|")
+		_T("1254 Biertan(DUP).txt|")
+		_T("1254 biertan[DUP].txt|")
+		_T("1254 Biertan{DUP}.txt|")
+		_T("1254 Biertan~DUP.txt")
+		, str::Join( filePaths, _T("|") ) );
+
 	/*
 	ut::CTempFilePairPool pool( s_srcFiles );
 
-	Explorer.exe sort order (on Windows 7):		(note: it changes with version)
-		1254 Biertan(DUP).jpg
-		1254 Biertan.jpg
-		1254 biertan[DUP].jpg
-		1254 biertan_DUP.jpg
-		1254 Biertan_noDUP.jpg
-		1254 Biertan{DUP}.jpg
-		1254 Biertan~DUP.jpg
-		1254 Biertan+DUP.jpg
-		1254 Biertan-DUP.jpg
+	Explorer.exe sort order (on Windows 7):		note: it changes with version; provided by ::StrCmpLogicalW from <shlwapi.h>
+		1254 Biertan(DUP).txt
+		1254 Biertan.txt
+		1254 biertan[DUP].txt
+		1254 biertan_DUP.txt
+		1254 Biertan_noDUP.txt
+		1254 Biertan{DUP}.txt
+		1254 Biertan~DUP.txt
+		1254 Biertan+DUP.txt
+		1254 Biertan-DUP.txt
 	*/
 
-return;	// TODO
-
-	/* My expected sort order:
-		1254 Biertan.jpg			// only the straight extension (shortest filename) goes first
-		1254 Biertan(DUP).jpg
-		1254 biertan[DUP].jpg
-		1254 biertan_DUP.jpg
-		1254 Biertan_noDUP.jpg
-		1254 Biertan{DUP}.jpg
-		1254 Biertan~DUP.jpg
-		1254 Biertan+DUP.jpg
-		1254 Biertan-DUP.jpg
+	/* Old "intuitive" sort order was:
+		1254 Biertan-DUP.txt
+		1254 Biertan.txt
+		1254 Biertan(DUP).txt
+		1254 Biertan+DUP.txt
+		1254 biertan[DUP].txt
+		1254 biertan_DUP.txt
+		1254 Biertan_noDUP.txt
+		1254 Biertan{DUP}.txt
+		1254 Biertan~DUP.txt
 	*/
-
-
-	/* Current intuitive sort order:
-		1254 Biertan-DUP.jpg
-		1254 Biertan.jpg
-		1254 Biertan(DUP).jpg
-		1254 Biertan+DUP.jpg
-		1254 biertan[DUP].jpg
-		1254 biertan_DUP.jpg
-		1254 Biertan_noDUP.jpg
-		1254 Biertan{DUP}.jpg
-		1254 Biertan~DUP.jpg
-	*/
-
-	std::vector< fs::CPath >::const_iterator itPath = filePaths.begin();
-	ASSERT_EQUAL( _T("1254 Biertan.jpg"), *itPath++ );
-	ASSERT_EQUAL( _T("1254 Biertan(DUP).jpg"), *itPath++ );
-	ASSERT_EQUAL( _T("1254 biertan[DUP].jpg"), *itPath++ );
-	ASSERT_EQUAL( _T("1254 biertan_DUP.jpg"), *itPath++ );
-	ASSERT_EQUAL( _T("1254 Biertan_noDUP.jpg"), *itPath++ );
-	ASSERT_EQUAL( _T("1254 Biertan{DUP}.jpg"), *itPath++ );
-	ASSERT_EQUAL( _T("1254 Biertan~DUP.jpg"), *itPath++ );
-	ASSERT_EQUAL( _T("1254 Biertan+DUP.jpg"), *itPath++ );
-	ASSERT_EQUAL( _T("1254 Biertan-DUP.jpg"), *itPath++ );
 }
 
 void CPathTests::TestPathCompareFind( void )

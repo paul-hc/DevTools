@@ -107,7 +107,7 @@ namespace str
 			bool Equals( const CharType part[], str::CaseType caseType = str::Case )
 			{
 				ASSERT( InBounds() );
-				return str::EqualsN( m_text.c_str() + m_pos.m_start, part, GetLength(), str::Case == caseType );
+				return str::EqualsCaseType( caseType, m_text.c_str() + m_pos.m_start, part, GetLength() );
 			}
 
 			bool TrimLeft( const CharType* pWhiteSpace = StdWhitespace< CharType >() )

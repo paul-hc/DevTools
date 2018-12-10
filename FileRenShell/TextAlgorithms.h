@@ -123,7 +123,7 @@ namespace func
 		ReplaceText( const std::tstring& pattern, const std::tstring& replaceWith, bool matchCase, bool commit = true )
 			: m_pattern( pattern )
 			, m_replaceWith( replaceWith )
-			, m_matchCase( matchCase )
+			, m_caseType( matchCase ? str::Case : str::IgnoreCase )
 			, m_commit( commit )
 			, m_patternLen( static_cast< unsigned int >( m_pattern.size() ) )
 			, m_matchCount( 0 )
@@ -139,7 +139,7 @@ namespace func
 	private:
 		const std::tstring& m_pattern;
 		const std::tstring& m_replaceWith;
-		bool m_matchCase;
+		str::CaseType m_caseType;
 		bool m_commit;
 		unsigned int m_patternLen;
 	public:

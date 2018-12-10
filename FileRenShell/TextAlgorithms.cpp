@@ -118,7 +118,7 @@ namespace func
 		std::tstring newText; newText.reserve( rDestText.size() * 2 );
 
 		for ( const TCHAR* pSource = rDestText.c_str(); *pSource != _T('\0'); )
-			if ( str::EqualsN( pSource, m_pattern.c_str(), m_patternLen, m_matchCase ) )
+			if ( str::EqualsCaseType( m_caseType, pSource, m_pattern.c_str(), m_patternLen ) )
 			{
 				newText += m_replaceWith;
 				pSource += m_patternLen;

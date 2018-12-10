@@ -63,7 +63,7 @@ bool CEnumTags::_Parse( int& rValue, const std::tstring& text, const std::vector
 bool CEnumTags::Contains( const std::vector< std::tstring >& strings, const std::tstring& value )
 {
 	for ( std::vector< std::tstring >::const_iterator itString = strings.begin(); itString != strings.end(); ++itString )
-		if ( pred::Equal == str::CompareNoCase( *itString, value ) )
+		if ( str::EqualsI( itString->c_str(), value.c_str() ) )
 			return true;
 
 	return false;

@@ -52,7 +52,7 @@ namespace lcs
 			ASSERT( m_source.empty() && m_suffixes.empty() );		// instantiated with default constructor
 			switch ( items.size() )
 			{
-				case 0:	return StringT();						// no common substring
+				case 0:	return StringT();							// no common substring
 				case 1:	return items.front();						// single item: the entire string is common
 			}
 
@@ -84,8 +84,8 @@ namespace lcs
 		void BuildSuffixTree( void )
 		{
 			m_suffixes.reserve( m_source.length() );
-			for ( size_t pos = 0; pos != m_source.length(); ++pos )
-				m_suffixes.push_back( &m_source[ pos ] );
+			for ( const CharType* pSuffix = m_source.c_str(); *pSuffix != 0; ++pSuffix )
+				m_suffixes.push_back( pSuffix );
 
 			std::sort( m_suffixes.begin(), m_suffixes.end(), LessRefPtr( m_compareStr ) );		// sort the suffix tree
 		}

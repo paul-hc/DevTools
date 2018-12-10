@@ -21,48 +21,36 @@ namespace str
 }
 
 
+namespace func
+{
+	struct ToChar
+	{
+		template< typename CharType >
+		CharType operator()( CharType ch ) const
+		{
+			return ch;
+		}
+	};
+
+
+	// Translates characters to generate a natural order, useful particularly for sorting paths and filenames.
+	// Note: This is closer to Explorer.exe order (which varies with Windows version), yet still different than ::StrCmpLogicalW from <shlwapi.h>
+	//
+	struct ToNaturalChar
+	{
+		template< typename CharType >
+		CharType operator()( CharType ch ) const
+		{
+			return static_cast< CharType >( Translate( ch ) );
+		}
+
+		static int Translate( int charCode );
+	};
+}
+
+
 namespace str
 {
-	template< typename CharType, typename TranslateCharFunc >
-	std::pair< int, size_t > BaseCompareDiff( const CharType* pLeft, const CharType* pRight, TranslateCharFunc translateFunc, size_t count = std::tstring::npos )
-	{
-		ASSERT_PTR( pLeft );
-		ASSERT_PTR( pRight );
-
-		int firstMismatch = 0;
-		size_t matchLen = 0;
-		if ( pLeft != pRight )
-		{
-			while ( count-- != 0 &&
-					0 == ( firstMismatch = translateFunc( *pLeft ) - translateFunc( *pRight ) ) &&
-					*pLeft != 0 &&
-					*pRight != 0 )
-			{
-				++pLeft;
-				++pRight;
-				++matchLen;
-			}
-		}
-		else
-			matchLen = str::GetLength( pLeft );
-
-		return std::pair< int, size_t >( firstMismatch, matchLen );
-	}
-
-	template< typename CharType, typename TranslateCharFunc >
-	inline std::pair< pred::CompareResult, size_t > BaseCompare( const CharType* pLeft, const CharType* pRight, TranslateCharFunc translateFunc, size_t count = std::tstring::npos )
-	{
-		std::pair< int, size_t > diffPair = BaseCompareDiff( pLeft, pRight, translateFunc, count );
-		return std::pair< pred::CompareResult, size_t >( pred::ToCompareResult( diffPair.first ), diffPair.second );
-	}
-
-	template< typename CharType, typename TranslateCharFunc >
-	inline pred::CompareResult CompareN( const CharType* pLeft, const CharType* pRight, TranslateCharFunc translateFunc, size_t count = std::tstring::npos )
-	{
-		return BaseCompare( pLeft, pRight, translateFunc, count ).first;
-	}
-
-
 	// pointer to character traits and predicates
 	struct CharTraits
 	{
@@ -76,33 +64,83 @@ namespace str
 
 		static inline pred::CompareResult CompareN( const char* pLeft, const char* pRight, size_t count ) { return pred::ToCompareResult( strncmp( pLeft, pRight, count ) ); }
 		static inline pred::CompareResult CompareN( const wchar_t* pLeft, const wchar_t* pRight, size_t count ) { return pred::ToCompareResult( wcsncmp( pLeft, pRight, count ) ); }
-
-		template< typename CharType >
-		static pred::CompareResult CompareN_NoCase( const CharType* pLeft, const CharType* pRight, size_t count )
-		{
-			return str::CompareN( pLeft, pRight, &::tolower, count );
-		}
-
-		template< typename CharType >
-		static inline int CompareNoCase( const CharType* pLeft, const CharType* pRight )
-		{
-			return CompareN_NoCase( pLeft, pRight, std::string::npos );
-		}
 	};
 
 
-	template< typename StringT >
-	static inline int Compare( const StringT& left, const StringT& right ) { return left.compare( right ); }
+	// low level comparison with character translation
 
-	template< typename StringT >
-	static inline int CompareNoCase( const StringT& left, const StringT& right ) { return CharTraits::CompareNoCase( left.c_str(), right.c_str() ); }
+	template< typename CharType, typename ToCharFunc >
+	std::pair< int, size_t > _BaseCompareDiff( const CharType* pLeft, const CharType* pRight, ToCharFunc toCharFunc, size_t count = std::tstring::npos )
+	{
+		ASSERT_PTR( pLeft );
+		ASSERT_PTR( pRight );
+
+		int firstMismatch = 0;
+		size_t matchLen = 0;
+
+		if ( std::tstring::npos == count )
+			count = std::min( GetLength( pLeft ), GetLength( pRight ) );
+
+		if ( pLeft != pRight && count != 0 )
+		{	// compare until reaching either EOS (inclusive)
+			while ( count-- != 0 &&
+					0 == ( firstMismatch = toCharFunc( *pLeft ) - toCharFunc( *pRight ) ) &&
+					*pLeft != 0 && *pRight != 0 )
+			{
+				++pLeft;
+				++pRight;
+				++matchLen;
+			}
+		}
+		else
+			matchLen = str::GetLength( pLeft );
+
+		return std::pair< int, size_t >( firstMismatch, matchLen );
+	}
+
+	template< typename CharType, typename ToCharFunc >
+	inline std::pair< pred::CompareResult, size_t > _BaseCompare( const CharType* pLeft, const CharType* pRight, ToCharFunc toCharFunc, size_t count = std::tstring::npos )
+	{
+		std::pair< int, size_t > diffPair = _BaseCompareDiff( pLeft, pRight, toCharFunc, count );
+		return std::pair< pred::CompareResult, size_t >( pred::ToCompareResult( diffPair.first ), diffPair.second );
+	}
+
+	template< typename CharType, typename ToCharFunc >
+	inline pred::CompareResult _CompareN( const CharType* pLeft, const CharType* pRight, ToCharFunc toCharFunc, size_t count = std::tstring::npos )
+	{
+		return _BaseCompare( pLeft, pRight, toCharFunc, count ).first;
+	}
+
+
+	// comparison interface
 
 	template< typename CharType >
-	bool EqualsN( const CharType* pLeft, const CharType* pRight, size_t count, bool matchCase )
+	inline pred::CompareResult Compare( const CharType* pLeft, const CharType* pRight, size_t count = std::tstring::npos ) { return _CompareN( pLeft, pRight, func::ToChar(), count ); }
+
+	template< typename CharType >
+	inline pred::CompareResult CompareI( const CharType* pLeft, const CharType* pRight, size_t count = std::tstring::npos ) { return _CompareN( pLeft, pRight, func::ToLower(), count ); }
+
+	template< typename CharType >
+	inline pred::CompareResult CompareCaseType( str::CaseType caseType, const CharType* pLeft, const CharType* pRight, size_t count = std::tstring::npos )
 	{
-		return matchCase
-			? pred::Equal == CharTraits::CompareN( pLeft, pRight, count )
-			: pred::Equal == CharTraits::CompareN_NoCase( pLeft, pRight, count );
+		return str::Case == caseType
+			? Compare( pLeft, pRight, count )
+			: CompareI( pLeft, pRight, count );
+	}
+
+
+	template< typename CharType >
+	inline bool Equals( const CharType* pLeft, const CharType* pRight, size_t count = std::tstring::npos ) { return pred::Equal == Compare( pLeft, pRight, count ); }
+
+	template< typename CharType >
+	inline bool EqualsI( const CharType* pLeft, const CharType* pRight, size_t count = std::tstring::npos ) { return pred::Equal == CompareI( pLeft, pRight, count ); }
+
+	template< typename CharType >
+	inline bool EqualsCaseType( str::CaseType caseType, const CharType* pLeft, const CharType* pRight, size_t count = std::tstring::npos )
+	{
+		return str::Case == caseType
+			? Equals( pLeft, pRight, count )
+			: EqualsI( pLeft, pRight, count );
 	}
 }
 
@@ -127,24 +165,11 @@ namespace str
 		const CharType hexPrefix[] = { '0', 'x', 0 };
 		enum { HexPrefixLen = 2 };
 
-		if ( str::EqualsN( pText, hexPrefix, HexPrefixLen, str::Case == caseType ) )
+		if ( str::EqualsCaseType( caseType, pText, hexPrefix, HexPrefixLen ) )
 			pText += HexPrefixLen;
 
 		return pText;
 	}
-}
-
-
-namespace func
-{
-	struct ToChar
-	{
-		template< typename CharType >
-		CharType operator()( CharType ch ) const
-		{
-			return ch;
-		}
-	};
 }
 
 
@@ -177,7 +202,7 @@ namespace pred
 		template< typename CharType >
 		CompareResult operator()( const CharType* pLeft, const CharType* pRight, size_t count = std::string::npos ) const
 		{
-			return str::CompareN( pLeft, pRight, m_casePolicy, count );
+			return str::_CompareN( pLeft, pRight, m_casePolicy, count );
 		}
 	private:
 		CharCasePolicy m_casePolicy;
@@ -294,7 +319,7 @@ namespace str
 	{
 		size_t len = 0;
 		while ( *pLeft != 0 && pred::Equal == compareStr( *pLeft++, *pRight++ ) )
-			len++;
+			++len;
 
 		return len;
 	}
@@ -382,9 +407,9 @@ namespace str
 		template< typename CharType >
 		Match operator()( const CharType* pLeft, const CharType* pRight ) const
 		{
-			if ( pred::Equal == str::CompareN( pLeft, pRight, m_toNormalFunc ) )		// case sensitive match?
+			if ( pred::Equal == _CompareN( pLeft, pRight, m_toNormalFunc ) )		// case sensitive match?
 				return MatchEqual;
-			if ( pred::Equal == str::CompareN( pLeft, pRight, m_toEquivFunc ) )			// case insensitive match?
+			if ( pred::Equal == _CompareN( pLeft, pRight, m_toEquivFunc ) )		// case insensitive match?
 				return MatchEqualDiffCase;
 			return MatchNotEqual;
 		}

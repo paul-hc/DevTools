@@ -208,7 +208,7 @@ bool CPickDataset::AllHavePrefix( size_t prefixLen ) const
 
 	if ( m_destFnames.size() > 1 )
 		for ( std::vector< std::tstring >::const_iterator itFname = itFirstFname + 1; itFname != m_destFnames.end(); ++itFname )
-			if ( !str::EqualsN( itFname->c_str(), itFirstFname->c_str(), prefixLen, false ) )
+			if ( !str::EqualsI( itFname->c_str(), itFirstFname->c_str(), prefixLen ) )
 				return false;
 
 	return true;		// all strings match the prefix

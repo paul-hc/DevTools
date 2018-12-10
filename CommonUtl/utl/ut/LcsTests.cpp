@@ -141,6 +141,13 @@ CLcsTests& CLcsTests::Instance( void )
 
 void CLcsTests::TestFindLongestDuplicatedString( void )
 {
+pred::CompareResult r;
+r = str::CharTraits::CompareN( "abc", "ab", 2 );
+r = str::Compare( "abc", "ab", 2 );
+
+r = str::CharTraits::CompareN( "abc", "ab", 10 );
+r = str::Compare( "abc", "ab", std::tstring::npos );
+
 	ASSERT_EQUAL( "", str::FindLongestDuplicatedString( std::string(), pred::CompareCase() ) );
 	ASSERT_EQUAL( L"", str::FindLongestDuplicatedString( std::wstring(), pred::CompareCase() ) );
 

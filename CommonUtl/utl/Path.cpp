@@ -44,7 +44,7 @@ namespace path
 
 	bool Equal( const std::tstring& leftPath, const std::tstring& rightPath )
 	{
-		return pred::Equal == str::CompareNoCase( leftPath, rightPath );
+		return str::EqualsI( leftPath.c_str(), rightPath.c_str() );
 	}
 
 	size_t GetHashValue( const TCHAR* pPath )
@@ -66,9 +66,9 @@ namespace path
 
 /*	str::Match GetMatch( const TCHAR* pLeftPath, const TCHAR* pRightPath )
 	{
-		if ( pred::Equal == str::CompareN( pLeftPath, pRightPath, &path::ToNormalChar ) )			// case sensitive
+		if ( pred::Equal == str::_CompareN( pLeftPath, pRightPath, &path::ToNormalChar ) )			// case sensitive
 			return str::MatchEqual;
-		if ( pred::Equal == str::CompareN( pLeftPath, pRightPath, &path::ToEquivalentChar ) )		// case insensitive
+		if ( pred::Equal == str::_CompareN( pLeftPath, pRightPath, &path::ToEquivalentChar ) )		// case insensitive
 			return str::MatchEqualDiffCase;
 		return str::MatchNotEqual;
 	}*/
@@ -435,7 +435,7 @@ namespace path
 
 		if ( !str::IsEmpty( pDirPath ) )
 		{
-			size_t commonLen = str::BaseCompare( pFullPath, pDirPath, &path::ToEquivalentChar ).second;
+			size_t commonLen = str::_BaseCompare( pFullPath, pDirPath, &path::ToEquivalentChar ).second;
 			if ( commonLen != 0 )
 			{
 				if ( IsSlash( pFullPath[ commonLen ] ) )

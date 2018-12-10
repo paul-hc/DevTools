@@ -124,7 +124,7 @@ bool CFileAssoc::IsResourceHeaderFile( const fs::CPathParts& parts )
 		static const TCHAR prefix[] = _T("Res");
 		const size_t prefixLen = str::GetLength( prefix );
 
-		if ( pred::Equal == str::CharTraits::CompareN_NoCase( parts.m_fname.c_str(), prefix, prefixLen ) )
+		if ( str::EqualsI( parts.m_fname.c_str(), prefix, prefixLen ) )
 		{
 			fs::CPathParts rcParts = parts;
 			rcParts.m_fname = parts.m_fname.substr( 0, parts.m_fname.length() - prefixLen );
