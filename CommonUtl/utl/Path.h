@@ -24,7 +24,7 @@ namespace path
 
 	inline pred::CompareResult CompareNPtr( const TCHAR* pLeftPath, const TCHAR* pRightPath, size_t count = std::tstring::npos )
 	{
-		return str::CompareN( pLeftPath, pRightPath, &path::ToEquivalentChar, count );
+		return str::_CompareN( pLeftPath, pRightPath, &path::ToEquivalentChar, count );
 	}
 
 	size_t GetHashValue( const TCHAR* pPath );
@@ -173,7 +173,7 @@ namespace fs
 		std::string GetUtf8( void ) const { return str::ToUtf8( GetPtr() ); }
 
 		bool HasParentPath( void ) const { return GetNameExt() != GetPtr(); }		// has a directory path?
-		CPath GetParentPath( bool trailSlash = false ) const;			// always a directory path
+		CPath GetParentPath( bool trailSlash = false ) const;						// always a directory path
 		CPath& SetBackslash( bool trailSlash = true );
 
 		const TCHAR* GetNameExt( void ) const { return path::FindFilename( m_filePath.c_str() ); }
@@ -321,16 +321,16 @@ namespace pred
 	};
 
 
-	struct ComparePath					// equivalent
+	struct CompareEquivPath			// equivalent
 	{
 		pred::CompareResult operator()( const std::tstring& leftPath, const std::tstring& rightPath ) const
 		{
-			return str::CompareN( leftPath.c_str(), rightPath.c_str(), &path::ToEquivalentChar );
+			return str::_CompareN( leftPath.c_str(), rightPath.c_str(), &path::ToEquivalentChar );
 		}
 	};
 
 
-	struct CompareEquivalentPath		// equivalent | intuitive
+	struct CompareNaturalPath		// equivalent | intuitive
 	{
 		pred::CompareResult operator()( const TCHAR* pLeftPath, const TCHAR* pRightPath ) const
 		{
@@ -355,11 +355,10 @@ namespace pred
 	};
 
 
-	typedef CompareAdapter< CompareEquivalentPath, func::ToNameExt > _CompareNameExt;		// filename | fullpath
-	typedef JoinCompare< _CompareNameExt, CompareEquivalentPath > CompareNameExt;
+	typedef CompareAdapter< CompareNaturalPath, func::ToNameExt > _CompareNameExt;		// filename | fullpath
+	typedef JoinCompare< _CompareNameExt, CompareNaturalPath > TCompareNameExt;
 
-	typedef LessBy< ComparePath > LessPath;
-	typedef LessBy< CompareEquivalentPath > Less_EquivalentPath;
+	typedef LessBy< CompareNaturalPath > TLess_NaturalPath;
 }
 
 
@@ -370,8 +369,8 @@ namespace fs
 
 
 	// orders path keys using path equivalence (rather than CPath::operator< intuitive ordering)
-	typedef std::map< fs::CPath, fs::CPath, pred::Less_EquivalentPath > TPathPairMap;
-	typedef std::set< fs::CPath, pred::Less_EquivalentPath > TPathSet;
+	typedef std::map< fs::CPath, fs::CPath, pred::TLess_NaturalPath > TPathPairMap;
+	typedef std::set< fs::CPath, pred::TLess_NaturalPath > TPathSet;
 
 
 	// path sort for std::tstring, fs::CPath, fs::CFlexPath
@@ -379,7 +378,7 @@ namespace fs
 	template< typename IteratorT >
 	inline void SortPaths( IteratorT itFirst, IteratorT itLast, bool ascending = true )
 	{
-		std::sort( itFirst, itLast, pred::OrderBy< pred::CompareEquivalentPath >( ascending ) );
+		std::sort( itFirst, itLast, pred::OrderBy< pred::CompareNaturalPath >( ascending ) );
 	}
 
 	template< typename ContainerT >

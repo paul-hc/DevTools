@@ -19,6 +19,7 @@ public:
 private:
 	void TestShellPidl( void );
 	void TestShellRelativePidl( void );
+	void TestPathShellApi( void );
 };
 
 

@@ -76,7 +76,7 @@ namespace pred
 	{
 		CompareResult operator()( const CPathItemBase* pLeftItem, const CPathItemBase* pRightItem ) const
 		{
-			return CompareEquivalentPath()( pLeftItem->GetFilePath(), pRightItem->GetFilePath() );
+			return CompareNaturalPath()( pLeftItem->GetFilePath(), pRightItem->GetFilePath() );
 		}
 	};
 }

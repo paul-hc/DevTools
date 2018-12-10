@@ -106,7 +106,7 @@ void CFlagTags::Parse( int* pFlags, const std::tstring& text, const std::vector<
 bool CFlagTags::Contains( const std::vector< std::tstring >& strings, const std::tstring& value, str::CaseType caseType )
 {
 	for ( std::vector< std::tstring >::const_iterator itString = strings.begin(); itString != strings.end(); ++itString )
-		if ( str::EqualsN( itString->c_str(), value.c_str(), utl::npos, str::Case == caseType ) )
+		if ( str::EqualsN_ByCase( caseType, itString->c_str(), value.c_str(), utl::npos ) )
 			return true;
 
 	return false;
@@ -132,7 +132,7 @@ int CFlagTags::FindFlag( TagType tag, const std::tstring& flagOn ) const
 	const std::vector< std::tstring >& tags = KeyTag == tag ? m_keyTags : m_uiTags;
 
 	for ( size_t i = 0; i != tags.size(); ++i )
-		if ( pred::Equal == str::CompareNoCase( tags[ i ], flagOn ) )
+		if ( str::EqualString< str::IgnoreCase >( tags[ i ], flagOn ) )
 			return ToBitFlag( static_cast< int >( i ) );
 
 	return -1;

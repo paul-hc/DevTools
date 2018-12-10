@@ -31,7 +31,7 @@ private:
 
 	static std::tstring FormatProtectedFileAttr( DWORD fileAttr );
 private:
-	typedef std::map< fs::CPath, CTransferItem*, pred::Less_EquivalentPath > TransferItemMap;
+	typedef std::map< fs::CPath, CTransferItem* > TransferItemMap;		// , pred::TLess_NaturalPath
 
 	// fs::IEnumerator interface (files only)
 	virtual void AddFoundFile( const TCHAR* pFilePath ) { pFilePath; ASSERT( false ); }

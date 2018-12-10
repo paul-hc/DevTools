@@ -8,7 +8,7 @@
 
 namespace str
 {
-	template< typename Compare = pred::CompareCase, typename CharType = TCHAR >
+	template< typename Compare = pred::TCompareCase, typename CharType = TCHAR >
 	struct CTokenIterator
 	{
 		typedef std::basic_string< CharType > StringT;

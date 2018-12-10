@@ -9,7 +9,7 @@ namespace str
 	template< typename CharType >
 	inline int CompareTieBreak( const CharType* pLeft, const CharType* pRight )
 	{
-		int result = CharTraits::CompareNoCase( pLeft, pRight );
+		int result = CharTraits::CompareI( pLeft, pRight );
 
 		if ( 0 == result )
 			result = CharTraits::Compare( pLeft, pRight );		// they seem equal, but they might differ in case

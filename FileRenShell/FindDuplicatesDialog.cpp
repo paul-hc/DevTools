@@ -175,7 +175,7 @@ CFindDuplicatesDialog::CFindDuplicatesDialog( CFileModel* pFileModel, CWnd* pPar
 	m_dupsListCtrl.SetTrackMenuTarget( this );
 	CGeneralOptions::Instance().ApplyToListCtrl( &m_dupsListCtrl );
 
-	m_dupsListCtrl.AddColumnCompare( FileName, pred::NewPropertyComparator< CDuplicateFileItem, pred::CompareNameExt >( CDuplicateFileItem::ToNameExt() ) );
+	m_dupsListCtrl.AddColumnCompare( FileName, pred::NewPropertyComparator< CDuplicateFileItem, pred::TCompareNameExt >( CDuplicateFileItem::ToNameExt() ) );
 	m_dupsListCtrl.AddColumnCompare( DateModified, pred::NewPropertyComparator< CDuplicateFileItem >( CDuplicateFileItem::AsModifyTime() ), false );		// order date-time descending by default
 	m_dupsListCtrl.AddColumnCompare( DuplicateCount, NULL, false );		// order by duplicate count descending by default; NULL comparator since uses only group ordering
 
@@ -586,12 +586,12 @@ pred::CompareResult CFindDuplicatesDialog::CompareGroupsByItemField( int leftGro
 
 pred::CompareResult CALLBACK CFindDuplicatesDialog::CompareGroupFileName( int leftGroupId, int rightGroupId, const CFindDuplicatesDialog* pThis )
 {
-	return pThis->CompareGroupsByItemField( leftGroupId, rightGroupId, pred::CompareAdapterPtr< pred::CompareEquivalentPath, CDuplicateFileItem::ToNameExt >() );
+	return pThis->CompareGroupsByItemField( leftGroupId, rightGroupId, pred::CompareAdapterPtr< pred::CompareNaturalPath, CDuplicateFileItem::ToNameExt >() );
 }
 
 pred::CompareResult CALLBACK CFindDuplicatesDialog::CompareGroupFolderPath( int leftGroupId, int rightGroupId, const CFindDuplicatesDialog* pThis )
 {
-	return pThis->CompareGroupsByItemField( leftGroupId, rightGroupId, pred::CompareAdapterPtr< pred::CompareEquivalentPath, CDuplicateFileItem::ToParentFolderPath >() );
+	return pThis->CompareGroupsByItemField( leftGroupId, rightGroupId, pred::CompareAdapterPtr< pred::CompareNaturalPath, CDuplicateFileItem::ToParentFolderPath >() );
 }
 
 pred::CompareResult CALLBACK CFindDuplicatesDialog::CompareGroupFileSize( int leftGroupId, int rightGroupId, const CFindDuplicatesDialog* pThis )

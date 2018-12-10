@@ -81,7 +81,7 @@ namespace fmt
 	DWORD ParseFileAttributes( const std::tstring& text, bool uiFormat /*= false*/ )
 	{
 		DWORD fileAttr = 0;
-		bool parsedHex = str::EqualsN( text.c_str(), _T("0x"), 2, false ) && num::ParseHexNumber( fileAttr, text );
+		bool parsedHex = str::EqualsIN( text.c_str(), _T("0x"), 2 ) && num::ParseHexNumber( fileAttr, text );
 
 		if ( !parsedHex )
 			if ( uiFormat )

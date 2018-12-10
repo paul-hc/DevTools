@@ -22,6 +22,7 @@ private:
 	void TestValueToString( void );
 	void TestStringSplit( void );
 	void TestStringTokenize( void );
+	void TestStringPrefixSuffix( void );
 	void TestStringConversion( void );
 	void TestStringSearch( void );
 	void TestStringMatch( void );

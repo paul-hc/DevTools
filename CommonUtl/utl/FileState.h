@@ -21,7 +21,7 @@ namespace fs
 		bool IsValid( void ) const { return !IsEmpty() && m_attributes != s_invalidAttributes; }
 		bool FileExist( AccessMode accessMode = Exist ) const { return m_fullPath.FileExist( accessMode ); }
 
-		bool operator<( const CFileState& right ) const { return pred::Less == pred::CompareEquivalentPath()( m_fullPath, right.m_fullPath ); }		// order by path
+		bool operator<( const CFileState& right ) const { return pred::Less == pred::CompareNaturalPath()( m_fullPath, right.m_fullPath ); }		// order by path
 		bool operator==( const CFileState& right ) const;
 		bool operator!=( const CFileState& right ) const { return !operator==( right ); }
 

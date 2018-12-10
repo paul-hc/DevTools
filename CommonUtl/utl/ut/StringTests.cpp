@@ -220,6 +220,63 @@ void CStringTests::TestStringTokenize( void )
 	ASSERT_EQUAL_STR( _T("apple|grape|plum|pear|kiwi|banana"), str::Join( tokens, _T("|") ) );
 }
 
+void CStringTests::TestStringPrefixSuffix( void )
+{
+	// ANSI
+	ASSERT( str::HasPrefix( "abc_Item_xyz", "" ) );
+	ASSERT( !str::HasPrefix( "", "abc_Item_xyz" ) );
+
+	ASSERT( str::HasPrefix( "abc_Item_xyz", "abc" ) );
+	ASSERT( !str::HasPrefix( "abc", "abc_Item_xyz" ) );
+
+	ASSERT( !str::HasPrefix( "abc_Item_xyz", "ABC" ) );
+	ASSERT( str::HasPrefixI( "abc_Item_xyz", "ABC" ) );
+
+	ASSERT( !str::HasPrefix( "abc_Item_xyz", "abx" ) );
+	ASSERT( str::HasPrefix( "abc_Item_xyz", "abx", 2 ) );		// N
+	ASSERT( str::HasPrefixI( "abc_Item_xyz", "ABx", 2 ) );		// N
+
+	ASSERT( str::HasSuffix( "abc_Item_xyz", "" ) );
+	ASSERT( !str::HasSuffix( "", "abc_Item_xyz" ) );
+
+	ASSERT( str::HasSuffix( "abc_Item_xyz", "xyz" ) );
+	ASSERT( !str::HasSuffix( "xyz", "abc_Item_xyz" ) );
+
+	ASSERT( !str::HasSuffix( "abc_Item_xyz", "XYZ" ) );
+	ASSERT( str::HasSuffixI( "abc_Item_xyz", "XYZ" ) );
+
+	ASSERT( !str::HasSuffixI( "abc_Item_xyz", "YZa" ) );
+	ASSERT( str::HasSuffixI( "abc_Item_xyz", "YZa", 2 ) );		// N
+	ASSERT( str::HasSuffix( "abc_Item_xyz", "yzA", 2 ) );		// N
+
+	// WIDE
+	ASSERT( str::HasPrefix( _T("abc_Item_xyz"), _T("") ) );
+	ASSERT( !str::HasPrefix( _T(""), _T("abc_Item_xyz") ) );
+
+	ASSERT( str::HasPrefix( _T("abc_Item_xyz"), _T("abc") ) );
+	ASSERT( !str::HasPrefix( _T("abc"), _T("abc_Item_xyz") ) );
+
+	ASSERT( !str::HasPrefix( _T("abc_Item_xyz"), _T("ABC") ) );
+	ASSERT( str::HasPrefixI( _T("abc_Item_xyz"), _T("ABC") ) );
+
+	ASSERT( !str::HasPrefix( _T("abc_Item_xyz"), _T("abx") ) );
+	ASSERT( str::HasPrefix( _T("abc_Item_xyz"), _T("abx"), 2 ) );		// N
+	ASSERT( str::HasPrefixI( _T("abc_Item_xyz"), _T("ABx"), 2 ) );		// N
+
+	ASSERT( str::HasSuffix( _T("abc_Item_xyz"), _T("") ) );
+	ASSERT( !str::HasSuffix( _T(""), _T("abc_Item_xyz") ) );
+
+	ASSERT( str::HasSuffix( _T("abc_Item_xyz"), _T("xyz") ) );
+	ASSERT( !str::HasSuffix( _T("xyz"), _T("abc_Item_xyz") ) );
+
+	ASSERT( !str::HasSuffix( _T("abc_Item_xyz"), _T("XYZ") ) );
+	ASSERT( str::HasSuffixI( _T("abc_Item_xyz"), _T("XYZ") ) );
+
+	ASSERT( !str::HasSuffixI( _T("abc_Item_xyz"), _T("YZa") ) );
+	ASSERT( str::HasSuffixI( _T("abc_Item_xyz"), _T("YZa"), 2 ) );		// N
+	ASSERT( str::HasSuffix( _T("abc_Item_xyz"), _T("yzA"), 2 ) );		// N
+}
+
 void CStringTests::TestStringConversion( void )
 {
 	std::tstring io;
@@ -283,9 +340,9 @@ void CStringTests::TestStringPart( void )
 	ASSERT_EQUAL( 2, str::FindPart( L"a line", str::CPart< wchar_t >( L"liquid", 2 ) ) );
 	ASSERT_EQUAL( std::tstring::npos, str::FindPart( L"a line", str::CPart< wchar_t >( L"liquid", 3 ) ) );
 
-	ASSERT_EQUAL( 2, str::FindPart( "a line", str::CPart< char >( "LIQUID", 2 ), pred::CompareNoCase() ) );
-	ASSERT_EQUAL( 2, str::FindPart( L"a line", str::CPart< wchar_t >( L"LIQUID", 2 ), pred::CompareNoCase() ) );
-	ASSERT_EQUAL( std::tstring::npos, str::FindPart( "a line", str::CPart< char >( "LIQUID", 2 ), pred::CompareCase() ) );
+	ASSERT_EQUAL( 2, str::FindPart( "a line", str::CPart< char >( "LIQUID", 2 ), pred::TCompareNoCase() ) );
+	ASSERT_EQUAL( 2, str::FindPart( L"a line", str::CPart< wchar_t >( L"LIQUID", 2 ), pred::TCompareNoCase() ) );
+	ASSERT_EQUAL( std::tstring::npos, str::FindPart( "a line", str::CPart< char >( "LIQUID", 2 ), pred::TCompareCase() ) );
 	ASSERT_EQUAL( std::tstring::npos, str::FindPart( "a line", str::CPart< char >( "LIQUID", 2 ) ) );
 
 	std::vector< std::string > items;
@@ -294,15 +351,15 @@ void CStringTests::TestStringPart( void )
 	items.push_back( "a line" );
 	ASSERT( AllContain( items, str::CPart< char >( "liquid", 2 ) ) );
 	ASSERT( !AllContain( items, str::CPart< char >( "LIQUID", 2 ) ) );
-	ASSERT( AllContain( items, str::CPart< char >( "LIQUID", 2 ), pred::CompareNoCase() ) );
+	ASSERT( AllContain( items, str::CPart< char >( "LIQUID", 2 ), pred::TCompareNoCase() ) );
 
 	items.push_back( "OS linux" );
 	ASSERT( AllContain( items, str::CPart< char >( "liquid", 2 ) ) );
 	ASSERT( !AllContain( items, str::CPart< char >( "LIQUID", 2 ) ) );
-	ASSERT( AllContain( items, str::CPart< char >( "LIQUID", 2 ), pred::CompareNoCase() ) );
+	ASSERT( AllContain( items, str::CPart< char >( "LIQUID", 2 ), pred::TCompareNoCase() ) );
 
 	items.push_back( "Red Hat Linux" );
-	ASSERT( AllContain( items, str::CPart< char >( "LIQUID", 2 ), pred::CompareNoCase() ) );
+	ASSERT( AllContain( items, str::CPart< char >( "LIQUID", 2 ), pred::TCompareNoCase() ) );
 }
 
 void CStringTests::TestStringOccurenceCount( void )
@@ -656,6 +713,7 @@ void CStringTests::Run( void )
 	TestValueToString();
 	TestStringSplit();
 	TestStringTokenize();
+	TestStringPrefixSuffix();
 	TestStringConversion();
 	TestStringSearch();
 	TestStringMatch();

@@ -530,7 +530,7 @@ namespace pred
 				break;
 			case CFileList::ByFileNameAsc:
 			case CFileList::ByFileNameDesc:
-				result = CompareNameExt()( left.GetPath(), right.GetPath() );
+				result = TCompareNameExt()( left.GetPath(), right.GetPath() );
 				break;
 			case CFileList::BySizeAsc:
 			case CFileList::BySizeDesc:

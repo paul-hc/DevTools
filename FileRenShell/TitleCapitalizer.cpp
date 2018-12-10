@@ -165,7 +165,7 @@ std::tstring CTitleCapitalizer::GetCapitalized( const std::tstring& text ) const
 	enum WordStatus { TitleStart, WordBreak, WordStart, WordCore } prevStatus = TitleStart;		// was WordBreak
 	const pred::IsWordBreakChar wordBreakPred( m_pOptions->m_wordBreakChars );
 
-	str::CTokenIterator< pred::CompareNoCase > it( text );
+	str::CTokenIterator< pred::TCompareNoCase > it( text );
 
 	if ( m_pOptions->m_skipNumericPrefix )
 		if ( !it.AtEnd() && _istdigit( *it ) )

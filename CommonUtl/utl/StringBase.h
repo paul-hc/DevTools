@@ -46,15 +46,50 @@ namespace str
 
 namespace str
 {
+	// pointer to character traits and predicates
+	struct CharTraits
+	{
+		static bool IsDigit( char ch ) { return isdigit( (unsigned char)ch ) != 0; }
+		static bool IsDigit( wchar_t ch ) { return iswdigit( ch ) != 0; }
+
+		static char ToUpper( char ch ) { return (char)(unsigned char)::toupper( (unsigned char)ch ); }
+		static wchar_t ToUpper( wchar_t ch ) { return static_cast< wchar_t >( ::towupper( ch ) ); }
+
+		// case-sensitive
+		static inline pred::CompareResult Compare( const char leftCh, const char rightCh ) { return pred::ToCompareResult( leftCh - rightCh ); }
+		static inline pred::CompareResult Compare( const wchar_t leftCh, const wchar_t rightCh ) { return pred::ToCompareResult( leftCh - rightCh ); }
+
+		static inline pred::CompareResult Compare( const char* pLeft, const char* pRight ) { return pred::ToCompareResult( ::strcmp( pLeft, pRight ) ); }
+		static inline pred::CompareResult Compare( const wchar_t* pLeft, const wchar_t* pRight ) { return pred::ToCompareResult( ::wcscmp( pLeft, pRight ) ); }
+
+		static inline pred::CompareResult CompareN( const char* pLeft, const char* pRight, size_t count ) { return pred::ToCompareResult( ::strncmp( pLeft, pRight, count ) ); }
+		static inline pred::CompareResult CompareN( const wchar_t* pLeft, const wchar_t* pRight, size_t count ) { return pred::ToCompareResult( ::wcsncmp( pLeft, pRight, count ) ); }
+
+		// case-insensitive
+		static inline pred::CompareResult CompareI( const char leftCh, const char rightCh ) { return Compare( ToUpper( leftCh ), ToUpper( rightCh ) ); }
+		static inline pred::CompareResult CompareI( const wchar_t leftCh, const wchar_t rightCh ) { return Compare( ToUpper( leftCh ), ToUpper( rightCh ) ); }
+
+		static inline pred::CompareResult CompareI( const char* pLeft, const char* pRight ) { return pred::ToCompareResult( ::_stricmp( pLeft, pRight ) ); }
+		static inline pred::CompareResult CompareI( const wchar_t* pLeft, const wchar_t* pRight ) { return pred::ToCompareResult( ::_wcsicmp( pLeft, pRight ) ); }
+
+		static inline pred::CompareResult CompareIN( const char* pLeft, const char* pRight, size_t count ) { return pred::ToCompareResult( ::_strnicmp( pLeft, pRight, count ) ); }
+		static inline pred::CompareResult CompareIN( const wchar_t* pLeft, const wchar_t* pRight, size_t count ) { return pred::ToCompareResult( ::_wcsnicmp( pLeft, pRight, count ) ); }
+	};
+}
+
+
+namespace str
+{
 	enum CaseType { Case, IgnoreCase };
 
 
 	template< str::CaseType caseType, typename CharType > bool Equals( const CharType* pLeft, const CharType* pRight );
 
-	template<> inline bool Equals< Case, char >( const char* pLeft, const char* pRight ) { return pred::Equal == strcmp( pLeft, pRight ); }
-	template<> inline bool Equals< IgnoreCase, char >( const char* pLeft, const char* pRight ) { return pred::Equal == _stricmp( pLeft, pRight ); }
-	template<> inline bool Equals< Case, wchar_t >( const wchar_t* pLeft, const wchar_t* pRight ) { return pred::Equal == wcscmp( pLeft, pRight ); }
-	template<> inline bool Equals< IgnoreCase, wchar_t >( const wchar_t* pLeft, const wchar_t* pRight ) { return pred::Equal == _wcsicmp( pLeft, pRight ); }
+	template<> inline bool Equals< Case, char >( const char* pLeft, const char* pRight ) { return pred::Equal == CharTraits::Compare( pLeft, pRight ); }
+	template<> inline bool Equals< Case, wchar_t >( const wchar_t* pLeft, const wchar_t* pRight ) { return pred::Equal == CharTraits::Compare( pLeft, pRight ); }
+
+	template<> inline bool Equals< IgnoreCase, char >( const char* pLeft, const char* pRight ) { return pred::Equal == CharTraits::CompareI( pLeft, pRight ); }
+	template<> inline bool Equals< IgnoreCase, wchar_t >( const wchar_t* pLeft, const wchar_t* pRight ) { return pred::Equal == CharTraits::CompareI( pLeft, pRight ); }
 
 	template< str::CaseType caseType, typename StringT >
 	bool EqualString( const StringT& left, const StringT& right ) { return Equals< caseType >( left.c_str(), right.c_str() ); }

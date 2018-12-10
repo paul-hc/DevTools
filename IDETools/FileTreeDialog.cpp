@@ -401,7 +401,7 @@ int CALLBACK SortCallback( const CIncludeNode* pLeft, const CIncludeNode* pRight
 		case ordAlphaText:
 			return lstrcmp( pDialog->BuildItemText( pLeft ).c_str(), pDialog->BuildItemText( pRight ).c_str() );
 		case ordAlphaFileName:
-			return pred::CompareEquivalentPath()( pLeft->m_path.GetNameExt(), pRight->m_path.GetNameExt() );
+			return pred::CompareNaturalPath()( pLeft->m_path.GetNameExt(), pRight->m_path.GetNameExt() );
 		default:
 			ASSERT( false );
 			return 0;

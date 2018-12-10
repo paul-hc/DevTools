@@ -117,7 +117,7 @@ namespace func
 
 namespace pred
 {
-	typedef CompareAdapter< CompareEquivalentPath, func::ToFilePath > CompareFileAttrPath;
+	typedef CompareAdapter< CompareNaturalPath, func::ToFilePath > CompareFileAttrPath;
 
 	typedef CompareAdapter< CompareValue, func::ToFileSize > CompareFileAttrSize;
 
