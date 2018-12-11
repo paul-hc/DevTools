@@ -26,6 +26,7 @@ private:
 	void TestConvertFileSize( void );
 	void TestFormatFileSize( void );
 	void TestCrc32( void );
+	void TestMemLeakCheck( void );
 };
 
 

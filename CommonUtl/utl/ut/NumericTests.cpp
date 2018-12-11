@@ -4,9 +4,10 @@
 #include "StringUtilities.h"
 #include "Crc32.h"
 #include "ut/BaseImageTestCase.h"
+#include "utl/MemLeakCheck.h"
 
 #ifdef _DEBUG
-#define new DEBUG_NEW
+//#define new DEBUG_NEW
 #endif
 
 
@@ -435,6 +436,22 @@ void CNumericTests::TestCrc32( void )
 	}
 }
 
+void CNumericTests::TestMemLeakCheck( void )
+{
+	double* pNumber;
+	{
+		MEM_LEAK_START( testMemLeakCheck );
+		MEM_LEAK_CHECK( testMemLeakCheck );
+		ASSERT_NO_LEAKS( testMemLeakCheck );
+
+		pNumber = new double;
+
+		MEM_LEAK_CHECK( testMemLeakCheck );
+		//ASSERT_NO_LEAKS( testMemLeakCheck );
+	}
+	delete pNumber;
+}
+
 
 void CNumericTests::Run( void )
 {
@@ -447,6 +464,7 @@ void CNumericTests::Run( void )
 	TestConvertFileSize();
 	TestFormatFileSize();
 	TestCrc32();
+	TestMemLeakCheck();
 }
 
 

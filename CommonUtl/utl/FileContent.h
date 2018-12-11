@@ -53,6 +53,7 @@ namespace fs
 		UINT GetCrc32( void ) const;
 		bool IsContentMatch( const CFileLazyContentKey& right, FileContentMatch matchBy ) const;
 
+		// as is (no lazy evaluation)
 		const fs::CPath& GetFilePath( void ) const { return m_filePath; }
 		const fs::CFileContentKey& GetKey( void ) const { return m_key; }
 	private:

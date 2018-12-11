@@ -519,6 +519,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\MemLeakCheck.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\MemLeakCheck.h"
+				>
+			</File>
+			<File
 				RelativePath=".\ProcessUtils.cpp"
 				>
 			</File>
