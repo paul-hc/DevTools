@@ -23,7 +23,7 @@ private:
 	void TestTempFilePool( void );
 	void TestFileAndDirectoryState( void );
 	void TestTouchFile( void );
-	void TestFileContent( void );
+	void TestFileTransferMatch( void );
 	void TestBackupFile( void );
 };
 

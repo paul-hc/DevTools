@@ -4,6 +4,7 @@
 #include "Path.h"
 #include "FlexPath.h"
 #include "FileState.h"
+#include "FileContent.h"
 #include "TimeUtils.h"
 #include "Resequence.hxx"
 #include "StringUtilities.h"
@@ -213,12 +214,60 @@ void CFileSystemTests::TestTouchFile( void )
 	ASSERT_EQUAL( lastModifiedTime, fs::ReadLastModifyTime( filePath ) );
 }
 
-void CFileSystemTests::TestFileContent( void )
+void CFileSystemTests::TestFileTransferMatch( void )
 {
+	ut::CTempFilePool pool( _T("file.txt|item.txt") );
+	const fs::CPath& filePath = pool.GetFilePaths()[ 0 ];
+	const fs::CPath destPath = pool.GetPoolDirPath() / fs::CPath( _T("fileX.txt") );		// non-existent file
+
+	ASSERT_EQUAL( fs::NoDestFile, fs::EvalTransferMatch( filePath, destPath ) );
+	ASSERT_EQUAL( fs::NoSrcFile, fs::EvalTransferMatch( destPath, filePath ) );
+
+	{
+		const fs::CPath& itemPath = pool.GetFilePaths()[ 1 ];		// same timestamp, same size, different content (CRC32)
+		ASSERT_EQUAL( fs::SrcUpToDate, fs::EvalTransferMatch( filePath, itemPath ) );
+		ASSERT_EQUAL( fs::Crc32Mismatch, fs::EvalTransferMatch( filePath, itemPath, true, fs::FileSizeAndCrc32 ) );
+	}
+
+	fs::thr::CopyFile( filePath.GetPtr(), destPath.GetPtr(), true );
+
+	ASSERT_EQUAL( fs::SrcUpToDate, fs::EvalTransferMatch( filePath, destPath ) );
+	ASSERT_EQUAL( fs::SrcUpToDate, fs::EvalTransferMatch( filePath, destPath, false ) );
+	ASSERT_EQUAL( fs::SrcUpToDate, fs::EvalTransferMatch( filePath, destPath, true, fs::FileSize ) );
+	ASSERT_EQUAL( fs::SrcUpToDate, fs::EvalTransferMatch( filePath, destPath, true, fs::FileSizeAndCrc32 ) );
+
+	fs::thr::TouchFile( filePath.GetPtr(), fs::ReadLastModifyTime( filePath ) + CTimeSpan( 0, 0, 0, 30 ) );		// change SRC timestamp: += 30 seconds
+	ASSERT_EQUAL( fs::SrcFileNewer, fs::EvalTransferMatch( filePath, destPath, true ) );
+	ASSERT_EQUAL( fs::SrcUpToDate, fs::EvalTransferMatch( filePath, destPath, false, fs::FileSize ) );
+
+	ut::CTempFilePool::ModifyTextFile( destPath );			// change DEST content
+	ASSERT_EQUAL( fs::SizeMismatch, fs::EvalTransferMatch( filePath, destPath, false ) );
 }
 
 void CFileSystemTests::TestBackupFile( void )
 {
+	ut::CTempFilePool pool( _T("src.txt") );
+	const fs::CPath& srcPath = pool.GetFilePaths()[ 0 ];
+
+	fs::CFileBackup backup( srcPath );
+	fs::CPath bkFilePath;
+	ASSERT( !backup.FindFirstDuplicateFile( bkFilePath ) );
+
+	ASSERT_EQUAL( fs::Created, backup.CreateBackupFile( bkFilePath ) );
+	ASSERT_EQUAL( _T("src-[2].txt"), bkFilePath.GetFilename() );
+
+	bkFilePath.Clear();
+	ASSERT_EQUAL( fs::FoundExisting, backup.CreateBackupFile( bkFilePath ) );
+	ASSERT_EQUAL( _T("src-[2].txt"), bkFilePath.GetFilename() );
+
+	ut::CTempFilePool::ModifyTextFile( srcPath );			// change SRC content
+
+	ASSERT_EQUAL( fs::Created, backup.CreateBackupFile( bkFilePath ) );
+	ASSERT_EQUAL( _T("src-[3].txt"), bkFilePath.GetFilename() );
+
+	bkFilePath.Clear();
+	ASSERT_EQUAL( fs::FoundExisting, backup.CreateBackupFile( bkFilePath ) );
+	ASSERT_EQUAL( _T("src-[3].txt"), bkFilePath.GetFilename() );
 }
 
 
@@ -232,7 +281,7 @@ void CFileSystemTests::Run( void )
 	TestTempFilePool();
 	TestFileAndDirectoryState();
 	TestTouchFile();
-	TestFileContent();
+	TestFileTransferMatch();
 	TestBackupFile();
 }
 

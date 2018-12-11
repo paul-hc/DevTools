@@ -24,7 +24,7 @@ namespace stdext
 
 namespace fs
 {
-	TransferMatch EvalTransferPairMatch( const fs::CPath& srcFilePath, const fs::CPath& destFilePath, bool checkTimestamp, FileContentMatch matchContentBy )
+	TransferMatch EvalTransferMatch( const fs::CPath& srcFilePath, const fs::CPath& destFilePath, bool checkTimestamp /*= true*/, FileContentMatch matchContentBy /*= FileSize*/ )
 	{
 		if ( !IsValidFile( srcFilePath.GetPtr() ) )
 			return NoSrcFile;
@@ -56,9 +56,9 @@ namespace fs
 		return SrcUpToDate;		// no need to copy SRC over dest
 	}
 
-	bool IsSrcFileMismatch( const fs::CPath& srcFilePath, const fs::CPath& destFilePath, bool checkTimestamp, FileContentMatch matchContentBy )
+	bool IsSrcFileMismatch( const fs::CPath& srcFilePath, const fs::CPath& destFilePath, bool checkTimestamp /*= true*/, FileContentMatch matchContentBy /*= FileSize*/ )
 	{
-		return SrcUpToDate == EvalTransferPairMatch( srcFilePath, destFilePath, checkTimestamp, matchContentBy );
+		return SrcUpToDate == EvalTransferMatch( srcFilePath, destFilePath, checkTimestamp, matchContentBy );
 	}
 
 

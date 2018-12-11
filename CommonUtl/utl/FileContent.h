@@ -17,8 +17,8 @@ namespace fs
 	// for file transfer (copy/move)
 	enum TransferMatch { SrcUpToDate, NoSrcFile, NoDestFile, SrcFileNewer, SizeMismatch, Crc32Mismatch };
 
-	TransferMatch EvalTransferPairMatch( const fs::CPath& srcFilePath, const fs::CPath& destFilePath, bool checkTimestamp, FileContentMatch matchContentBy );
-	bool IsSrcFileMismatch( const fs::CPath& srcFilePath, const fs::CPath& destFilePath, bool checkTimestamp, FileContentMatch matchContentBy );
+	TransferMatch EvalTransferMatch( const fs::CPath& srcFilePath, const fs::CPath& destFilePath, bool checkTimestamp = true, FileContentMatch matchContentBy = FileSize );
+	bool IsSrcFileMismatch( const fs::CPath& srcFilePath, const fs::CPath& destFilePath, bool checkTimestamp = true, FileContentMatch matchContentBy = FileSize );
 
 
 	struct CFileContentKey
