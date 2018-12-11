@@ -168,11 +168,13 @@ namespace fs
 			m_backupDirPath = m_srcFilePath.GetParentPath() / m_backupDirPath;
 			CvtAbsoluteToCWD( m_backupDirPath );
 		}
-		ENSURE( fs::IsValidDirectory( m_backupDirPath.GetPtr() ) );
 	}
 
 	bool CFileBackup::FindFirstDuplicateFile( fs::CPath& rDupFilePath ) const
 	{
+		if ( !fs::IsValidDirectory( m_backupDirPath.GetPtr() ) )
+			return false;		// not yet created
+
 		const fs::CPathParts srcParts( m_srcFilePath.Get() );
 		std::tstring wildSpec = srcParts.m_fname + _T("*") + srcParts.m_ext;	// "name*.ext"
 
@@ -190,6 +192,8 @@ namespace fs
 	{
 		if ( FindFirstDuplicateFile( rBackupFilePath ) )
 			return fs::FoundExisting;			// found existing backed-up file matching "name*.ext" with matching content
+
+		fs::thr::CreateDirPath( m_backupDirPath.GetPtr() );
 
 		fs::CPath backupFilePath = m_backupDirPath / m_srcFilePath.GetFilename();
 

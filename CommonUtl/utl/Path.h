@@ -205,6 +205,9 @@ namespace fs
 		std::tstring m_filePath;
 	};
 
+
+	inline fs::CPath StripDirPrefix( const fs::CPath& filePath, const fs::CPath& dirPath ) { return path::StripCommonPrefix( filePath.GetPtr(), dirPath.GetPtr() ); }
+
 } // namespace fs
 
 

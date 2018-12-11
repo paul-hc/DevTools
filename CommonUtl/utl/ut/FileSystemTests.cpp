@@ -249,25 +249,39 @@ void CFileSystemTests::TestBackupFile( void )
 	ut::CTempFilePool pool( _T("src.txt") );
 	const fs::CPath& srcPath = pool.GetFilePaths()[ 0 ];
 
-	fs::CFileBackup backup( srcPath );
 	fs::CPath bkFilePath;
-	ASSERT( !backup.FindFirstDuplicateFile( bkFilePath ) );
+	{
+		fs::CFileBackup backup( srcPath );
+		ASSERT( !backup.FindFirstDuplicateFile( bkFilePath ) );
 
-	ASSERT_EQUAL( fs::Created, backup.CreateBackupFile( bkFilePath ) );
-	ASSERT_EQUAL( _T("src-[2].txt"), bkFilePath.GetFilename() );
+		ASSERT_EQUAL( fs::Created, backup.CreateBackupFile( bkFilePath ) );
+		ASSERT_EQUAL( _T("src-[2].txt"), bkFilePath.GetFilename() );
 
-	bkFilePath.Clear();
-	ASSERT_EQUAL( fs::FoundExisting, backup.CreateBackupFile( bkFilePath ) );
-	ASSERT_EQUAL( _T("src-[2].txt"), bkFilePath.GetFilename() );
+		bkFilePath.Clear();
+		ASSERT_EQUAL( fs::FoundExisting, backup.CreateBackupFile( bkFilePath ) );
+		ASSERT_EQUAL( _T("src-[2].txt"), bkFilePath.GetFilename() );
 
-	ut::CTempFilePool::ModifyTextFile( srcPath );			// change SRC content
+		ut::CTempFilePool::ModifyTextFile( srcPath );			// change SRC content
 
-	ASSERT_EQUAL( fs::Created, backup.CreateBackupFile( bkFilePath ) );
-	ASSERT_EQUAL( _T("src-[3].txt"), bkFilePath.GetFilename() );
+		ASSERT_EQUAL( fs::Created, backup.CreateBackupFile( bkFilePath ) );
+		ASSERT_EQUAL( _T("src-[3].txt"), bkFilePath.GetFilename() );
 
-	bkFilePath.Clear();
-	ASSERT_EQUAL( fs::FoundExisting, backup.CreateBackupFile( bkFilePath ) );
-	ASSERT_EQUAL( _T("src-[3].txt"), bkFilePath.GetFilename() );
+		bkFilePath.Clear();
+		ASSERT_EQUAL( fs::FoundExisting, backup.CreateBackupFile( bkFilePath ) );
+		ASSERT_EQUAL( _T("src-[3].txt"), bkFilePath.GetFilename() );
+	}
+
+	{
+		fs::CFileBackup backup( srcPath, fs::CPath( _T("SubDirA\\SubDirB") ) );
+		ASSERT( !backup.FindFirstDuplicateFile( bkFilePath ) );
+
+		ASSERT_EQUAL( fs::Created, backup.CreateBackupFile( bkFilePath ) );
+		ASSERT_EQUAL( _T("SubDirA\\SubDirB\\src.txt"), fs::StripDirPrefix( bkFilePath, pool.GetPoolDirPath() ) );
+
+		ut::CTempFilePool::ModifyTextFile( srcPath );			// change SRC content
+		ASSERT_EQUAL( fs::Created, backup.CreateBackupFile( bkFilePath ) );
+		ASSERT_EQUAL( _T("SubDirA\\SubDirB\\src-[2].txt"), fs::StripDirPrefix( bkFilePath, pool.GetPoolDirPath() ) );
+	}
 }
 
 
