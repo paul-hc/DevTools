@@ -136,46 +136,67 @@ namespace str
 
 namespace str
 {
-	template< typename EqualsN_FuncT, typename CharType >
-	bool _HasPrefix( EqualsN_FuncT pEqualsNFunc, const CharType* pText, const CharType prefix[], size_t prefixLen )
+	template< typename CharType >
+	inline bool HasPrefix( const CharType* pText, const CharType prefix[], size_t prefixLen = std::string::npos )		// empty prefix is always a match
 	{
-		if ( std::string::npos == prefixLen )
-			prefixLen = GetLength( prefix );
-
-		return
-			0 == prefixLen ||					// empty prefix is always a match
-			pEqualsNFunc( pText, prefix, prefixLen );
+		return EqualsN( pText, prefix, prefixLen != std::string::npos ? prefixLen : GetLength( prefix ) );
 	}
 
-	template< typename CompareN_FuncT, typename CharType >
-	bool _HasSuffix( CompareN_FuncT pCompareN, const CharType* pText, const CharType suffix[], size_t suffixLen )
+	template< typename CharType >
+	inline bool HasPrefixI( const CharType* pText, const CharType prefix[], size_t prefixLen = std::string::npos )		// empty prefix is always a match
 	{
-		if ( std::string::npos == suffixLen )
-			suffixLen = GetLength( suffix );
+		return EqualsIN( pText, prefix, prefixLen != std::string::npos ? prefixLen : GetLength( prefix ) );
+	}
 
-		if ( 0 == suffixLen )					// empty suffix is always a match
-			return true;
 
+	template< typename CharType >
+	bool HasSuffixN_ByCase( str::CaseType caseType, const CharType* pText, const CharType suffix[], size_t suffixLen )
+	{	// empty suffix is always a match
 		size_t textLength = GetLength( pText );
-		if ( textLength < suffixLen )
-			return false;
-
-		return pCompareN( pText + textLength - suffixLen, suffix, suffixLen );
+		return
+			textLength >= suffixLen &&			// shorter pText is always a mismatch
+			EqualsN_ByCase( caseType, pText + textLength - suffixLen, suffix, suffixLen );
 	}
 
+	template< typename CharType >
+	inline bool HasSuffix( const CharType* pText, const CharType suffix[], size_t suffixLen = std::string::npos )
+	{
+		return HasSuffixN_ByCase( str::Case, pText, suffix, suffixLen != std::string::npos ? suffixLen : GetLength( suffix ) );
+	}
 
 	template< typename CharType >
-	inline bool HasPrefix( const CharType* pText, const CharType prefix[], size_t prefixLen = std::string::npos ) { return _HasPrefix( &EqualsN< CharType >, pText, prefix, prefixLen ); }
+	inline bool HasSuffixI( const CharType* pText, const CharType suffix[], size_t suffixLen = std::string::npos )
+	{
+		return HasSuffixN_ByCase( str::IgnoreCase, pText, suffix, suffixLen != std::string::npos ? suffixLen : GetLength( suffix ) );
+	}
+}
 
-	template< typename CharType >
-	inline bool HasPrefixI( const CharType* pText, const CharType prefix[], size_t prefixLen = std::string::npos ) { return _HasPrefix( &EqualsIN< CharType >, pText, prefix, prefixLen ); }
+
+namespace str
+{
+	namespace ignore_case
+	{
+		template< typename CharType >
+		inline bool operator==( const std::basic_string< CharType >& left, const std::basic_string< CharType >& right ) { return str::Equals< IgnoreCase >( left.c_str(), right.c_str() ); }
+
+		template< typename CharType >
+		inline bool operator==( const CharType* pLeft, const std::basic_string< CharType >& right ) { return str::Equals< IgnoreCase >( pLeft, right.c_str() ); }
+
+		template< typename CharType >
+		inline bool operator==( const std::basic_string< CharType >& left, const CharType* pRight ) { return str::Equals< IgnoreCase >( left.c_str(), pRight ); }
 
 
-	template< typename CharType >
-	inline bool HasSuffix( const CharType* pText, const CharType suffix[], size_t suffixLen = std::string::npos ) { return _HasSuffix( &EqualsN< CharType >, pText, suffix, suffixLen ); }
+		template< typename CharType >
+		inline bool operator!=( const std::basic_string< CharType >& left, const std::basic_string< CharType >& right ) { return !operator==( left, right ); }
 
-	template< typename CharType >
-	inline bool HasSuffixI( const CharType* pText, const CharType suffix[], size_t suffixLen = std::string::npos ) { return _HasSuffix( &EqualsIN< CharType >, pText, suffix, suffixLen ); }
+		template< typename CharType >
+		inline bool operator!=( const CharType* pLeft, const std::basic_string< CharType >& right ) { return !operator==( pLeft, right ); }
+
+		template< typename CharType >
+		inline bool operator!=( const std::basic_string< CharType >& left, const CharType* pRight ) { return !operator==( left, pRight ); }
+
+		// don't bother defining operator<, it's not picked up by sorting algorithms due to Koenig lookup
+	}
 }
 
 
@@ -232,8 +253,11 @@ namespace pred
 
 	typedef CompareCharPtr< func::ToChar > TCompareCase;
 	typedef CompareCharPtr< func::ToUpper > TCompareNoCase;
+}
 
 
+namespace pred
+{
 	template< typename CharType, str::CaseType caseType >
 	struct CharMatch
 	{

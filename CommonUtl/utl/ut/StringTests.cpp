@@ -45,17 +45,150 @@ CStringTests& CStringTests::Instance( void )
 	return testCase;
 }
 
-void CStringTests::TestIgnoreCase( void )
+void CStringTests::TestCharTraits( void )
 {
-	std::string s( "bcd" );
-	ASSERT( "BCD" != s );
-	ASSERT( s != "BCD" );
+	static const char* s_nullA = NULL;
+	static const wchar_t* s_nullW = NULL;
 
-	using namespace str::ignore_case;
+	{	// NARROW
+		ASSERT_EQUAL( 0, str::CharTraits::GetLength( s_nullA ) );
+		ASSERT_EQUAL( 0, str::CharTraits::GetLength( "" ) );
+		ASSERT_EQUAL( 1, str::CharTraits::GetLength( "a" ) );
+		ASSERT_EQUAL( 5, str::CharTraits::GetLength( "12345" ) );
 
-	ASSERT( "BCD" == s );
-	ASSERT( s == "BCD" );
-	ASSERT( s != "xy" );
+		ASSERT_EQUAL( 'A', str::CharTraits::ToUpper( 'a' ) );
+		ASSERT_EQUAL( 'A', str::CharTraits::ToUpper( 'A' ) );
+		ASSERT_EQUAL( '3', str::CharTraits::ToUpper( '3' ) );
+
+		ASSERT( str::CharTraits::IsDigit( '0' ) );
+		ASSERT( !str::CharTraits::IsDigit( '-' ) );
+		ASSERT( !str::CharTraits::IsDigit( '.' ) );
+		ASSERT( !str::CharTraits::IsDigit( 'a' ) );
+
+		// case-sensitive
+		ASSERT_EQUAL( pred::Less, str::CharTraits::Compare( 'a', 'b' ) );
+		ASSERT_EQUAL( pred::Equal, str::CharTraits::Compare( 'a', 'a' ) );
+		ASSERT_EQUAL( pred::Greater, str::CharTraits::Compare( 'b', 'a' ) );
+
+		ASSERT_EQUAL( pred::Less, str::CharTraits::Compare( "aa", "bb" ) );
+		ASSERT_EQUAL( pred::Equal, str::CharTraits::Compare( "aa", "aa" ) );
+		ASSERT_EQUAL( pred::Greater, str::CharTraits::Compare( "bb", "aa" ) );
+
+		ASSERT_EQUAL( pred::Less, str::CharTraits::CompareN( "ax", "bx", 1 ) );
+		ASSERT_EQUAL( pred::Equal, str::CharTraits::CompareN( "ax", "ay", 1 ) );
+		ASSERT_EQUAL( pred::Greater, str::CharTraits::CompareN( "bx", "ax", 1 ) );
+		ASSERT( pred::Equal != str::CharTraits::CompareN( "ax", "ay", 2 ) );
+
+		// case-insensitive
+		ASSERT_EQUAL( pred::Less, str::CharTraits::CompareI( 'a', 'B' ) );
+		ASSERT_EQUAL( pred::Equal, str::CharTraits::CompareI( 'a', 'A' ) );
+		ASSERT_EQUAL( pred::Greater, str::CharTraits::CompareI( 'B', 'a' ) );
+
+		ASSERT_EQUAL( pred::Less, str::CharTraits::CompareI( "AA", "bb" ) );
+		ASSERT_EQUAL( pred::Equal, str::CharTraits::CompareI( "aa", "AA" ) );
+		ASSERT_EQUAL( pred::Greater, str::CharTraits::CompareI( "bb", "AA" ) );
+
+		ASSERT_EQUAL( pred::Less, str::CharTraits::CompareIN( "ax", "BX", 1 ) );
+		ASSERT_EQUAL( pred::Equal, str::CharTraits::CompareIN( "ax", "AY", 1 ) );
+		ASSERT_EQUAL( pred::Greater, str::CharTraits::CompareIN( "BX", "ax", 1 ) );
+		ASSERT( pred::Equal != str::CharTraits::CompareIN( "ax", "aY", 2 ) );
+	}
+
+	{	// WIDE
+		ASSERT_EQUAL( 0, str::CharTraits::GetLength( s_nullW ) );
+		ASSERT_EQUAL( 0, str::CharTraits::GetLength( L"" ) );
+		ASSERT_EQUAL( 1, str::CharTraits::GetLength( L"a" ) );
+		ASSERT_EQUAL( 5, str::CharTraits::GetLength( L"12345" ) );
+
+		ASSERT_EQUAL( L'A', str::CharTraits::ToUpper( L'a' ) );
+		ASSERT_EQUAL( L'A', str::CharTraits::ToUpper( L'A' ) );
+		ASSERT_EQUAL( L'3', str::CharTraits::ToUpper( L'3' ) );
+
+		ASSERT( str::CharTraits::IsDigit( L'0' ) );
+		ASSERT( !str::CharTraits::IsDigit( L'-' ) );
+		ASSERT( !str::CharTraits::IsDigit( L'.' ) );
+		ASSERT( !str::CharTraits::IsDigit( L'a' ) );
+
+		// case-sensitive
+		ASSERT_EQUAL( pred::Less, str::CharTraits::Compare( L'a', L'b' ) );
+		ASSERT_EQUAL( pred::Equal, str::CharTraits::Compare( L'a', L'a' ) );
+		ASSERT_EQUAL( pred::Greater, str::CharTraits::Compare( L'b', L'a' ) );
+
+		ASSERT_EQUAL( pred::Less, str::CharTraits::Compare( L"aa", L"bb" ) );
+		ASSERT_EQUAL( pred::Equal, str::CharTraits::Compare( L"aa", L"aa" ) );
+		ASSERT_EQUAL( pred::Greater, str::CharTraits::Compare( L"bb", L"aa" ) );
+
+		ASSERT_EQUAL( pred::Less, str::CharTraits::CompareN( L"ax", L"bx", 1 ) );
+		ASSERT_EQUAL( pred::Equal, str::CharTraits::CompareN( L"ax", L"ay", 1 ) );
+		ASSERT_EQUAL( pred::Greater, str::CharTraits::CompareN( L"bx", L"ax", 1 ) );
+		ASSERT( pred::Equal != str::CharTraits::CompareN( L"ax", L"ay", 2 ) );
+
+		// case-insensitive
+		ASSERT_EQUAL( pred::Less, str::CharTraits::CompareI( L'a', L'B' ) );
+		ASSERT_EQUAL( pred::Equal, str::CharTraits::CompareI( L'a', L'A' ) );
+		ASSERT_EQUAL( pred::Greater, str::CharTraits::CompareI( L'B', L'a' ) );
+
+		ASSERT_EQUAL( pred::Less, str::CharTraits::CompareI( L"AA", L"bb" ) );
+		ASSERT_EQUAL( pred::Equal, str::CharTraits::CompareI( L"aa", L"AA" ) );
+		ASSERT_EQUAL( pred::Greater, str::CharTraits::CompareI( L"bb", L"AA" ) );
+
+		ASSERT_EQUAL( pred::Less, str::CharTraits::CompareIN( L"ax", L"BX", 1 ) );
+		ASSERT_EQUAL( pred::Equal, str::CharTraits::CompareIN( L"ax", L"AY", 1 ) );
+		ASSERT_EQUAL( pred::Greater, str::CharTraits::CompareIN( L"BX", L"ax", 1 ) );
+		ASSERT( pred::Equal != str::CharTraits::CompareIN( L"ax", L"aY", 2 ) );
+	}
+
+	ASSERT( str::IsEmpty( s_nullA ) );
+	ASSERT( str::IsEmpty( s_nullW ) );
+
+	ASSERT( str::IsEmpty( "" ) );
+	ASSERT( str::IsEmpty( L"" ) );
+
+	ASSERT( !str::IsEmpty( "a" ) );
+	ASSERT( !str::IsEmpty( L"a" ) );
+
+	ASSERT_EQUAL( 0, str::GetLength( s_nullA ) );
+	ASSERT_EQUAL( 0, str::GetLength( s_nullW ) );
+
+	ASSERT_EQUAL( 0, str::GetLength( "" ) );
+	ASSERT_EQUAL( 0, str::GetLength( L"" ) );
+}
+
+void CStringTests::TestValueToString( void )
+{
+	{	// to NARROW
+		ASSERT_EQUAL( "", str::ValueToString< std::string >( "" ) );
+		ASSERT_EQUAL( "", str::ValueToString< std::string >( _T("") ) );
+
+		ASSERT_EQUAL( "x", str::ValueToString< std::string >( 'x' ) );
+		ASSERT_EQUAL( "x", str::ValueToString< std::string >( _T('x') ) );
+
+		ASSERT_EQUAL( "abc", str::ValueToString< std::string >( "abc" ) );
+		ASSERT_EQUAL( "abc", str::ValueToString< std::string >( _T("abc") ) );
+
+		ASSERT_EQUAL( "name.ext", str::ValueToString< std::string >( fs::CPath( _T("name.ext") ) ) );
+		ASSERT_EQUAL( "37", str::ValueToString< std::string >( 37 ) );
+	}
+
+	{	// to WIDE
+		ASSERT_EQUAL( L"", str::ValueToString< std::wstring >( "" ) );
+		ASSERT_EQUAL( L"", str::ValueToString< std::wstring >( _T("") ) );
+
+		ASSERT_EQUAL( L"x", str::ValueToString< std::wstring >( 'x' ) );
+		ASSERT_EQUAL( L"x", str::ValueToString< std::wstring >( _T('x') ) );
+
+		ASSERT_EQUAL( L"abc", str::ValueToString< std::wstring >( "abc" ) );
+		ASSERT_EQUAL( L"abc", str::ValueToString< std::wstring >( _T("abc") ) );
+
+		ASSERT_EQUAL( L"name.ext", str::ValueToString< std::wstring >( fs::CPath( _T("name.ext") ) ) );
+
+		ASSERT_EQUAL( L"37", str::ValueToString< std::wstring >( fs::CPath( _T("37") ) ) );
+	}
+}
+
+void CStringTests::TestStringSorting( void )
+{
+	//TODO...
 }
 
 void CStringTests::TestNaturalSort( void )
@@ -114,34 +247,27 @@ void CStringTests::TestNaturalSort( void )
 	}
 }
 
-void CStringTests::TestValueToString( void )
+void CStringTests::TestIgnoreCase( void )
 {
-	// to NARROW stream
-	ASSERT_EQUAL( "", str::ValueToString< std::string >( "" ) );
-	ASSERT_EQUAL( "", str::ValueToString< std::string >( _T("") ) );
+	std::string s( "bcd" );
+	ASSERT( "BCD" != s );
+	ASSERT( s != "BCD" );
 
-	ASSERT_EQUAL( "x", str::ValueToString< std::string >( 'x' ) );
-	ASSERT_EQUAL( "x", str::ValueToString< std::string >( _T('x') ) );
+	std::wstring ws( L"bcd" );
+	ASSERT( L"BCD" != ws );
+	ASSERT( ws != L"BCD" );
 
-	ASSERT_EQUAL( "abc", str::ValueToString< std::string >( "abc" ) );
-	ASSERT_EQUAL( "abc", str::ValueToString< std::string >( _T("abc") ) );
+	{
+		using namespace str::ignore_case;
 
-	ASSERT_EQUAL( "name.ext", str::ValueToString< std::string >( fs::CPath( _T("name.ext") ) ) );
-	ASSERT_EQUAL( "37", str::ValueToString< std::string >( 37 ) );
+		ASSERT( "BCD" == s );
+		ASSERT( s == "BCD" );
+		ASSERT( s != "xy" );
 
-	// to WIDE stream
-	ASSERT_EQUAL( L"", str::ValueToString< std::wstring >( "" ) );
-	ASSERT_EQUAL( L"", str::ValueToString< std::wstring >( _T("") ) );
-
-	ASSERT_EQUAL( L"x", str::ValueToString< std::wstring >( 'x' ) );
-	ASSERT_EQUAL( L"x", str::ValueToString< std::wstring >( _T('x') ) );
-
-	ASSERT_EQUAL( L"abc", str::ValueToString< std::wstring >( "abc" ) );
-	ASSERT_EQUAL( L"abc", str::ValueToString< std::wstring >( _T("abc") ) );
-
-	ASSERT_EQUAL( L"name.ext", str::ValueToString< std::wstring >( fs::CPath( _T("name.ext") ) ) );
-
-	ASSERT_EQUAL( L"37", str::ValueToString< std::wstring >( fs::CPath( _T("37") ) ) );
+		ASSERT( L"BCD" == ws );
+		ASSERT( ws == L"BCD" );
+		ASSERT( ws != L"xy" );
+	}
 }
 
 void CStringTests::TestStringSplit( void )
@@ -222,59 +348,61 @@ void CStringTests::TestStringTokenize( void )
 
 void CStringTests::TestStringPrefixSuffix( void )
 {
-	// ANSI
-	ASSERT( str::HasPrefix( "abc_Item_xyz", "" ) );
-	ASSERT( !str::HasPrefix( "", "abc_Item_xyz" ) );
+	{	// ANSI
+		ASSERT( str::HasPrefix( "abc_Item_xyz", "" ) );				// match empty prefix
+		ASSERT( !str::HasPrefix( "", "abc_Item_xyz" ) );			// but not the other way around
 
-	ASSERT( str::HasPrefix( "abc_Item_xyz", "abc" ) );
-	ASSERT( !str::HasPrefix( "abc", "abc_Item_xyz" ) );
+		ASSERT( str::HasPrefix( "abc_Item_xyz", "abc" ) );
+		ASSERT( !str::HasPrefix( "abc", "abc_Item_xyz" ) );
 
-	ASSERT( !str::HasPrefix( "abc_Item_xyz", "ABC" ) );
-	ASSERT( str::HasPrefixI( "abc_Item_xyz", "ABC" ) );
+		ASSERT( !str::HasPrefix( "abc_Item_xyz", "ABC" ) );
+		ASSERT( str::HasPrefixI( "abc_Item_xyz", "ABC" ) );
 
-	ASSERT( !str::HasPrefix( "abc_Item_xyz", "abx" ) );
-	ASSERT( str::HasPrefix( "abc_Item_xyz", "abx", 2 ) );		// N
-	ASSERT( str::HasPrefixI( "abc_Item_xyz", "ABx", 2 ) );		// N
+		ASSERT( !str::HasPrefix( "abc_Item_xyz", "abx" ) );
+		ASSERT( str::HasPrefix( "abc_Item_xyz", "abx", 2 ) );		// N
+		ASSERT( str::HasPrefixI( "abc_Item_xyz", "ABx", 2 ) );		// N
 
-	ASSERT( str::HasSuffix( "abc_Item_xyz", "" ) );
-	ASSERT( !str::HasSuffix( "", "abc_Item_xyz" ) );
+		ASSERT( str::HasSuffix( "abc_Item_xyz", "" ) );				// match empty suffix
+		ASSERT( !str::HasSuffix( "", "abc_Item_xyz" ) );			// but not the other way around
 
-	ASSERT( str::HasSuffix( "abc_Item_xyz", "xyz" ) );
-	ASSERT( !str::HasSuffix( "xyz", "abc_Item_xyz" ) );
+		ASSERT( str::HasSuffix( "abc_Item_xyz", "xyz" ) );
+		ASSERT( !str::HasSuffix( "xyz", "abc_Item_xyz" ) );
 
-	ASSERT( !str::HasSuffix( "abc_Item_xyz", "XYZ" ) );
-	ASSERT( str::HasSuffixI( "abc_Item_xyz", "XYZ" ) );
+		ASSERT( !str::HasSuffix( "abc_Item_xyz", "XYZ" ) );
+		ASSERT( str::HasSuffixI( "abc_Item_xyz", "XYZ" ) );
 
-	ASSERT( !str::HasSuffixI( "abc_Item_xyz", "YZa" ) );
-	ASSERT( str::HasSuffixI( "abc_Item_xyz", "YZa", 2 ) );		// N
-	ASSERT( str::HasSuffix( "abc_Item_xyz", "yzA", 2 ) );		// N
+		ASSERT( !str::HasSuffixI( "abc_Item_xyz", "YZa" ) );
+		ASSERT( str::HasSuffixI( "abc_Item_xyz", "YZa", 2 ) );		// N
+		ASSERT( str::HasSuffix( "abc_Item_xyz", "yzA", 2 ) );		// N
+	}
 
-	// WIDE
-	ASSERT( str::HasPrefix( _T("abc_Item_xyz"), _T("") ) );
-	ASSERT( !str::HasPrefix( _T(""), _T("abc_Item_xyz") ) );
+	{	// WIDE
+		ASSERT( str::HasPrefix( _T("abc_Item_xyz"), _T("") ) );
+		ASSERT( !str::HasPrefix( _T(""), _T("abc_Item_xyz") ) );
 
-	ASSERT( str::HasPrefix( _T("abc_Item_xyz"), _T("abc") ) );
-	ASSERT( !str::HasPrefix( _T("abc"), _T("abc_Item_xyz") ) );
+		ASSERT( str::HasPrefix( _T("abc_Item_xyz"), _T("abc") ) );
+		ASSERT( !str::HasPrefix( _T("abc"), _T("abc_Item_xyz") ) );
 
-	ASSERT( !str::HasPrefix( _T("abc_Item_xyz"), _T("ABC") ) );
-	ASSERT( str::HasPrefixI( _T("abc_Item_xyz"), _T("ABC") ) );
+		ASSERT( !str::HasPrefix( _T("abc_Item_xyz"), _T("ABC") ) );
+		ASSERT( str::HasPrefixI( _T("abc_Item_xyz"), _T("ABC") ) );
 
-	ASSERT( !str::HasPrefix( _T("abc_Item_xyz"), _T("abx") ) );
-	ASSERT( str::HasPrefix( _T("abc_Item_xyz"), _T("abx"), 2 ) );		// N
-	ASSERT( str::HasPrefixI( _T("abc_Item_xyz"), _T("ABx"), 2 ) );		// N
+		ASSERT( !str::HasPrefix( _T("abc_Item_xyz"), _T("abx") ) );
+		ASSERT( str::HasPrefix( _T("abc_Item_xyz"), _T("abx"), 2 ) );		// N
+		ASSERT( str::HasPrefixI( _T("abc_Item_xyz"), _T("ABx"), 2 ) );		// N
 
-	ASSERT( str::HasSuffix( _T("abc_Item_xyz"), _T("") ) );
-	ASSERT( !str::HasSuffix( _T(""), _T("abc_Item_xyz") ) );
+		ASSERT( str::HasSuffix( _T("abc_Item_xyz"), _T("") ) );
+		ASSERT( !str::HasSuffix( _T(""), _T("abc_Item_xyz") ) );
 
-	ASSERT( str::HasSuffix( _T("abc_Item_xyz"), _T("xyz") ) );
-	ASSERT( !str::HasSuffix( _T("xyz"), _T("abc_Item_xyz") ) );
+		ASSERT( str::HasSuffix( _T("abc_Item_xyz"), _T("xyz") ) );
+		ASSERT( !str::HasSuffix( _T("xyz"), _T("abc_Item_xyz") ) );
 
-	ASSERT( !str::HasSuffix( _T("abc_Item_xyz"), _T("XYZ") ) );
-	ASSERT( str::HasSuffixI( _T("abc_Item_xyz"), _T("XYZ") ) );
+		ASSERT( !str::HasSuffix( _T("abc_Item_xyz"), _T("XYZ") ) );
+		ASSERT( str::HasSuffixI( _T("abc_Item_xyz"), _T("XYZ") ) );
 
-	ASSERT( !str::HasSuffixI( _T("abc_Item_xyz"), _T("YZa") ) );
-	ASSERT( str::HasSuffixI( _T("abc_Item_xyz"), _T("YZa"), 2 ) );		// N
-	ASSERT( str::HasSuffix( _T("abc_Item_xyz"), _T("yzA"), 2 ) );		// N
+		ASSERT( !str::HasSuffixI( _T("abc_Item_xyz"), _T("YZa") ) );
+		ASSERT( str::HasSuffixI( _T("abc_Item_xyz"), _T("YZa"), 2 ) );		// N
+		ASSERT( str::HasSuffix( _T("abc_Item_xyz"), _T("yzA"), 2 ) );		// N
+	}
 }
 
 void CStringTests::TestStringConversion( void )
@@ -708,9 +836,11 @@ void CStringTests::Run( void )
 {
 	__super::Run();
 
-	TestIgnoreCase();
-	TestNaturalSort();
+	TestCharTraits();
 	TestValueToString();
+	TestStringSorting();
+	TestNaturalSort();
+	TestIgnoreCase();
 	TestStringSplit();
 	TestStringTokenize();
 	TestStringPrefixSuffix();

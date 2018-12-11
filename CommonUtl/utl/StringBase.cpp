@@ -239,6 +239,7 @@ namespace str
 
 	namespace mfc
 	{
+	#ifdef _MFC_VER
 		CString Load( UINT strId )
 		{
 			CString text;
@@ -254,6 +255,7 @@ namespace str
 
 			return _T("<null_ptr>");
 		}
+	#endif //_MFC_VER
 	}
 
 

@@ -17,9 +17,11 @@ public:
 	// ut::ITestCase interface
 	virtual void Run( void );
 private:
-	void TestIgnoreCase( void );
-	void TestNaturalSort( void );
+	void TestCharTraits( void );
 	void TestValueToString( void );
+	void TestStringSorting( void );
+	void TestNaturalSort( void );
+	void TestIgnoreCase( void );
 	void TestStringSplit( void );
 	void TestStringTokenize( void );
 	void TestStringPrefixSuffix( void );

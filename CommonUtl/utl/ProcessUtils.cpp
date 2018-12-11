@@ -10,7 +10,7 @@
 
 namespace utl
 {
-	intptr_t CProcess::ExecuteProcess( int mode )
+	intptr_t CProcessCmd::ExecuteProcess( int mode )
 	{
 		::_flushall();				// flush i/o streams so the console is synched for child process output (if any)
 
@@ -18,7 +18,7 @@ namespace utl
 		return ::_tspawnv( mode, m_exePath.c_str(), MakeArgList( argList ) );
 	}
 
-	const TCHAR* const* CProcess::MakeArgList( std::vector< const TCHAR* >& rArgList ) const
+	const TCHAR* const* CProcessCmd::MakeArgList( std::vector< const TCHAR* >& rArgList ) const
 	{
 		rArgList.push_back( m_exePath.c_str() );	// first arg is always the executable itself
 

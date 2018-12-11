@@ -35,8 +35,10 @@ namespace str
 
 	namespace mfc
 	{
+	#ifdef _MFC_VER
 		CString Load( UINT strId );
 		CString GetTypeName( const CObject* pObject );
+	#endif //_MFC_VER
 	}
 
 
@@ -46,14 +48,16 @@ namespace str
 
 namespace str
 {
-	// pointer to character traits and predicates
-	struct CharTraits
+	struct CharTraits		// CRT abstraction for strings API: character and character-ptr traits and predicates
 	{
-		static bool IsDigit( char ch ) { return isdigit( (unsigned char)ch ) != 0; }
-		static bool IsDigit( wchar_t ch ) { return iswdigit( ch ) != 0; }
+		static size_t GetLength( const char* pText ) { return pText != NULL ? ::strlen( pText ) : 0; }
+		static size_t GetLength( const wchar_t* pText ) { return pText != NULL ? ::wcslen( pText ) : 0; }
 
 		static char ToUpper( char ch ) { return (char)(unsigned char)::toupper( (unsigned char)ch ); }
 		static wchar_t ToUpper( wchar_t ch ) { return static_cast< wchar_t >( ::towupper( ch ) ); }
+
+		static bool IsDigit( char ch ) { return ::isdigit( (unsigned char)ch ) != 0; }
+		static bool IsDigit( wchar_t ch ) { return ::iswdigit( ch ) != 0; }
 
 		// case-sensitive
 		static inline pred::CompareResult Compare( const char leftCh, const char rightCh ) { return pred::ToCompareResult( leftCh - rightCh ); }
@@ -80,6 +84,13 @@ namespace str
 
 namespace str
 {
+	template< typename CharType >
+	inline bool IsEmpty( const CharType* pText ) { return NULL == pText || 0 == *pText; }
+
+	template< typename CharType >
+	inline size_t GetLength( const CharType* pText ) { return CharTraits::GetLength( pText ); }
+
+
 	enum CaseType { Case, IgnoreCase };
 
 
@@ -98,16 +109,11 @@ namespace str
 	// string to STL iterators conversions
 	typedef const TCHAR* const_iterator;
 
-	inline size_t GetLength( const char* pText ) { return pText != NULL ? strlen( pText ) : 0; }
-	inline size_t GetLength( const wchar_t* pText ) { return pText != NULL ? wcslen( pText ) : 0; }
-
 	inline const char* begin( const char* pText ) { return pText; }
 	inline const wchar_t* begin( const wchar_t* pText ) { return pText; }
 
 	inline const char* end( const char* pText ) { return pText + GetLength( pText ); }
 	inline const wchar_t* end( const wchar_t* pText ) { return pText + GetLength( pText ); }
-
-	template< typename CharType > bool IsEmpty( const CharType* pText ) { return NULL == pText || 0 == *pText; }
 
 	inline char* Copy( char* pBuffer, const std::string& text ) { return strcpy( pBuffer, text.c_str() ); }
 	inline wchar_t* Copy( wchar_t* pBuffer, const std::wstring& text ) { return wcscpy( pBuffer, text.c_str() ); }
@@ -227,50 +233,6 @@ namespace str
 }
 
 
-namespace str
-{
-	namespace ignore_case
-	{
-		template< typename CharType >
-		inline bool operator==( const std::basic_string< CharType >& left, const std::basic_string< CharType >& right )
-		{
-			return str::Equals< IgnoreCase >( left.c_str(), right.c_str() );
-		}
-
-		template< typename CharType >
-		inline bool operator==( const CharType* pLeft, const std::basic_string< CharType >& right )
-		{
-			return str::Equals< IgnoreCase >( pLeft, right.c_str() );
-		}
-
-		template< typename CharType >
-		inline bool operator==( const std::basic_string< CharType >& left, const CharType* pRight )
-		{
-			return str::Equals< IgnoreCase >( left.c_str(), pRight );
-		}
-
-
-		template< typename CharType >
-		inline bool operator!=( const std::basic_string< CharType >& left, const std::basic_string< CharType >& right )
-		{
-			return !operator==( left, right );
-		}
-
-		template< typename CharType >
-		inline bool operator!=( const CharType* pLeft, const std::basic_string< CharType >& right )
-		{
-			return !operator==( pLeft, right );
-		}
-
-		template< typename CharType >
-		inline bool operator!=( const std::basic_string< CharType >& left, const CharType* pRight )
-		{
-			return !operator==( left, pRight );
-		}
-	}
-}
-
-
 namespace func
 {
 	inline const std::tstring& StringOf( const std::tstring& filePath ) { return filePath; }		// for uniform string algorithms
@@ -357,10 +319,12 @@ namespace str
 		return rText;
 	}
 
+#ifdef _MFC_VER
 	inline CStringA& Trim( CStringA& rText ) { rText.TrimLeft(); rText.TrimRight(); return rText; }
 	inline CStringW& Trim( CStringW& rText ) { rText.TrimLeft(); rText.TrimRight(); return rText; }
 
 	inline BSTR AllocSysString( const std::tstring& text ) { return CString( text.c_str() ).AllocSysString(); }
+#endif //_MFC_VER
 
 
 	template< typename CharType >
@@ -566,8 +530,11 @@ std::wostream& operator<<( std::wostream& os, char chUtf8 );
 
 inline std::ostream& operator<<( std::ostream& os, const std::wstring& wide ) { return os << wide.c_str(); }
 inline std::wostream& operator<<( std::wostream& os, const std::string& utf8 ) { return os << utf8.c_str(); }
-inline std::ostream& operator<<( std::ostream& os, const CString& mfcString ) { return os << mfcString.GetString(); }
-inline std::wostream& operator<<( std::wostream& os, const CString& mfcString ) { return os << mfcString.GetString(); }
+
+#ifdef _MFC_VER
+	inline std::ostream& operator<<( std::ostream& os, const CString& mfcString ) { return os << mfcString.GetString(); }
+	inline std::wostream& operator<<( std::wostream& os, const CString& mfcString ) { return os << mfcString.GetString(); }
+#endif //_MFC_VER
 
 
 #endif // StringBase_h

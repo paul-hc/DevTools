@@ -7,10 +7,10 @@
 
 namespace utl
 {
-	class CProcess
+	class CProcessCmd
 	{
 	public:
-		CProcess( const TCHAR* pExePath ) : m_exePath( pExePath ) { ASSERT( !m_exePath.empty() ); }
+		CProcessCmd( const TCHAR* pExePath ) : m_exePath( pExePath ) { ASSERT( !m_exePath.empty() ); }
 
 		template< typename ValueT >
 		void AddParam( const ValueT& value ) { m_params.push_back( arg::AutoEnquote( value ) ); }
