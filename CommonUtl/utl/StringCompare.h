@@ -2,7 +2,7 @@
 #define StringCompare_h
 #pragma once
 
-#include "Compare_fwd.h"
+#include "ComparePredicates.h"
 #include "StringBase.h"
 #include <locale>
 
@@ -63,6 +63,14 @@ namespace func
 		}
 
 		static int Translate( int charCode );
+	};
+
+
+	struct ToCharPtr		// character-ptr translator
+	{
+		const char* operator()( const std::string& value ) const { return str::traits::GetCharPtr( value ); }
+		const wchar_t* operator()( const std::wstring& value ) const { return str::traits::GetCharPtr( value ); }
+		const TCHAR* operator()( const fs::CPath& value ) const { return str::traits::GetCharPtr( value ); }
 	};
 }
 
@@ -251,8 +259,13 @@ namespace pred
 	};
 
 
+	// character-ptr comparators
 	typedef CompareCharPtr< func::ToChar > TCompareCase;
 	typedef CompareCharPtr< func::ToUpper > TCompareNoCase;
+
+	// stringy comparators for string-like objects
+	typedef CompareAdapter< TCompareCase, func::ToCharPtr > TStringyCompareCase;
+	typedef CompareAdapter< TCompareNoCase, func::ToCharPtr > TStringyCompareNoCase;
 }
 
 

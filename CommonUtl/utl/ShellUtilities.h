@@ -106,7 +106,7 @@ namespace shell
 			// setup the file list buffer content
 			for ( typename ContainerType::const_iterator itPath = fullPaths.begin(); itPath != fullPaths.end(); ++itPath )
 			{
-				_tcscpy( &rFileListBuffer[ pos ], str::traits::GetStr( *itPath ) );
+				_tcscpy( &rFileListBuffer[ pos ], str::traits::GetCharPtr( *itPath ) );
 				pos += (UINT)str::traits::GetLength( *itPath ) + 1;
 			}
 

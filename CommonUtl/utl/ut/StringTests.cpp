@@ -3,6 +3,7 @@
 #include "ut/StringTests.h"
 #include "EnumTags.h"
 #include "FlagTags.h"
+#include "FlexPath.h"
 #include "RandomUtilities.h"
 #include "StringUtilities.h"
 #include "TimeUtils.h"
@@ -15,6 +16,19 @@
 
 #ifdef _DEBUG		// no UT code in release builds
 
+
+namespace ut
+{
+	template< typename CharType, typename StringT, typename LessPred >
+	std::basic_string< CharType > SplitShuffleSortJoin( std::vector< StringT >& rItems, const CharType* pSource, const CharType* pSep, LessPred lessPred )
+	{
+		str::Split( rItems, pSource, pSep );
+		std::random_shuffle( rItems.begin(), rItems.end() );
+
+		std::sort( rItems.begin(), rItems.end(), lessPred );
+		return str::Join( rItems, pSep );
+	}
+}
 
 namespace func
 {
@@ -188,7 +202,25 @@ void CStringTests::TestValueToString( void )
 
 void CStringTests::TestStringSorting( void )
 {
-	//TODO...
+	static const char s_src[] = "a,ab,abc,abcd,A-,AB-,ABC-,ABCD-";		// add trailing '-' to avoid arbitrary order on case-insensitive comparison
+
+	utl::SetRandomSeed();
+
+	std::vector< std::string > items;
+	ASSERT_EQUAL( "A-,AB-,ABC-,ABCD-,a,ab,abc,abcd", ut::SplitShuffleSortJoin( items, s_src, ",", pred::LessBy< pred::TStringyCompareCase >() ) );
+	ASSERT_EQUAL( "a,A-,ab,AB-,abc,ABC-,abcd,ABCD-", ut::SplitShuffleSortJoin( items, s_src, ",", pred::LessBy< pred::TStringyCompareNoCase >() ) );
+
+	std::vector< std::wstring > witems;
+	ASSERT_EQUAL( L"A-,AB-,ABC-,ABCD-,a,ab,abc,abcd", ut::SplitShuffleSortJoin( witems, str::FromAnsi( s_src ).c_str(), L",", pred::LessBy< pred::TStringyCompareCase >() ) );
+	ASSERT_EQUAL( L"a,A-,ab,AB-,abc,ABC-,abcd,ABCD-", ut::SplitShuffleSortJoin( witems, str::FromAnsi( s_src ).c_str(), L",", pred::LessBy< pred::TStringyCompareNoCase >() ) );
+
+	std::vector< fs::CPath > paths;
+	ASSERT_EQUAL( _T("A-,AB-,ABC-,ABCD-,a,ab,abc,abcd"), ut::SplitShuffleSortJoin( paths, str::FromAnsi( s_src ).c_str(), _T(","), pred::LessBy< pred::TStringyCompareCase >() ) );
+	ASSERT_EQUAL( _T("a,A-,ab,AB-,abc,ABC-,abcd,ABCD-"), ut::SplitShuffleSortJoin( paths, str::FromAnsi( s_src ).c_str(), _T(","), pred::LessBy< pred::TStringyCompareNoCase >() ) );
+
+	std::vector< fs::CFlexPath > flexPaths;
+	ASSERT_EQUAL( _T("A-,AB-,ABC-,ABCD-,a,ab,abc,abcd"), ut::SplitShuffleSortJoin( flexPaths, str::FromAnsi( s_src ).c_str(), _T(","), pred::LessBy< pred::TStringyCompareCase >() ) );
+	ASSERT_EQUAL( _T("a,A-,ab,AB-,abc,ABC-,abcd,ABCD-"), ut::SplitShuffleSortJoin( flexPaths, str::FromAnsi( s_src ).c_str(), _T(","), pred::LessBy< pred::TStringyCompareNoCase >() ) );
 }
 
 void CStringTests::TestNaturalSort( void )

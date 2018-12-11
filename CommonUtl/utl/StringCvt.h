@@ -7,20 +7,23 @@
 
 namespace str
 {
-	// utilities for converting standard and utl types to MFC types (CString, etc)
-
-	namespace traits
+	namespace traits		// utils for converting stringy (string-like) types to character-ptr
 	{
-		inline const TCHAR* GetStr( const CString& str ) { return str.GetString(); }
-		inline size_t GetLength( const CString& str ) { return str.GetLength(); }
-
-		inline const TCHAR* GetStr( const std::tstring& str ) { return str.c_str(); }
-		inline size_t GetLength( const std::tstring& str ) { return str.length(); }
-
-		inline const TCHAR* GetStr( const fs::CPath& path ) { return path.Get().c_str(); }
-		inline size_t GetLength( const fs::CPath& path ) { return path.Get().length(); }
+		inline const char* GetCharPtr( const CStringA& text ) { return text.GetString(); }
+		inline const wchar_t* GetCharPtr( const CStringW& text ) { return text.GetString(); }
 	}
 
+	namespace traits		// utils for converting stringy (string-like) types to character-ptr
+	{
+		inline size_t GetLength( const CStringA& text ) { return text.GetLength(); }
+		inline size_t GetLength( const CStringW& text ) { return text.GetLength(); }
+	}
+}
+
+
+namespace str
+{
+	// utilities for converting standard and utl types to MFC types (CString, etc)
 
 	namespace cvt
 	{
@@ -30,7 +33,7 @@ namespace str
 		MfcContainerT& MakeMfcStrings( MfcContainerT& rMfcItems, const SrcContainerT& srcItems )
 		{
 			for ( typename SrcContainerT::const_iterator itSrcItem = srcItems.begin(); itSrcItem != srcItems.end(); ++itSrcItem )
-				rMfcItems.push_back( str::traits::GetStr( *itSrcItem ) );
+				rMfcItems.push_back( str::traits::GetCharPtr( *itSrcItem ) );
 
 			return rMfcItems;
 		}
@@ -41,7 +44,7 @@ namespace str
 		std::vector< ValueType >& MakeItemsAs( std::vector< ValueType >& rDestItems, const SrcContainerT& srcItems )
 		{
 			for ( typename SrcContainerT::const_iterator itSrcItem = srcItems.begin(); itSrcItem != srcItems.end(); ++itSrcItem )
-				rDestItems.push_back( ValueType( str::traits::GetStr( *itSrcItem ) ) );
+				rDestItems.push_back( ValueType( str::traits::GetCharPtr( *itSrcItem ) ) );
 
 			return rDestItems;
 		}

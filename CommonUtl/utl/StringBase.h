@@ -46,6 +46,8 @@ namespace str
 }
 
 
+namespace fs { class CPath; }
+
 namespace str
 {
 	struct CharTraits		// CRT abstraction for strings API: character and character-ptr traits and predicates
@@ -79,6 +81,21 @@ namespace str
 		static inline pred::CompareResult CompareIN( const char* pLeft, const char* pRight, size_t count ) { return pred::ToCompareResult( ::_strnicmp( pLeft, pRight, count ) ); }
 		static inline pred::CompareResult CompareIN( const wchar_t* pLeft, const wchar_t* pRight, size_t count ) { return pred::ToCompareResult( ::_wcsnicmp( pLeft, pRight, count ) ); }
 	};
+
+	namespace traits		// utils for converting stringy (string-like) types to character-ptr
+	{
+		inline const char* GetCharPtr( const char* pText ) { return pText; }
+		inline const wchar_t* GetCharPtr( const wchar_t* pText ) { return pText; }
+		inline const char* GetCharPtr( const std::string& text ) { return text.c_str(); }
+		inline const wchar_t* GetCharPtr( const std::wstring& text ) { return text.c_str(); }
+		const TCHAR* GetCharPtr( const fs::CPath& filePath );
+
+		inline size_t GetLength( const char* pText ) { return CharTraits::GetLength( pText ); }
+		inline size_t GetLength( const wchar_t* pText ) { return CharTraits::GetLength( pText ); }
+		inline size_t GetLength( const std::string& text ) { return text.length(); }
+		inline size_t GetLength( const std::wstring& text ) { return text.length(); }
+		size_t GetLength( const fs::CPath& filePath );
+	}
 }
 
 

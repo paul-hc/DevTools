@@ -217,17 +217,20 @@ namespace stdext
 }
 
 
+namespace str
+{
+	namespace traits
+	{
+		inline const TCHAR* GetCharPtr( const fs::CPath& filePath ) { return filePath.Get().c_str(); }
+		inline size_t GetLength( const fs::CPath& filePath ) { return filePath.Get().length(); }
+	}
+}
+
+
 namespace func
 {
 	inline const std::tstring& StringOf( const fs::CPath& filePath ) { return filePath.Get(); }		// for uniform string algorithms
 	inline const fs::CPath& PathOf( const fs::CPath& keyPath ) { return keyPath; }					// for uniform path algorithms
-
-	struct ToPathPtr
-	{
-		const TCHAR* operator()( const TCHAR* pFilePath ) const { return pFilePath; }
-		const TCHAR* operator()( const std::tstring& filePath ) const { return filePath.c_str(); }
-		const TCHAR* operator()( const fs::CPath& filePath ) const { return filePath.GetPtr(); }
-	};
 
 	struct ToNameExt
 	{
