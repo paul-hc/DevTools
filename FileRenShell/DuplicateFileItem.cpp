@@ -116,14 +116,14 @@ void CDuplicateFilesGroup::ExtractCrc32Duplicates( std::vector< CDuplicateFilesG
 
 	typedef pred::CompareFirstSecond< pred::CompareValue, pred::CompareItemPath > TCompareKeyItemPair;
 
-	std::sort( scopedKeyItems.begin(), scopedKeyItems.end(), pred::LessBy< TCompareKeyItemPair >() );			// sort by full key and path
+	std::sort( scopedKeyItems.begin(), scopedKeyItems.end(), pred::LessValue< TCompareKeyItemPair >() );			// sort by full key and path
 
 	typedef std::pair< TKeyItemContainer::iterator, TKeyItemContainer::iterator > IteratorPair;
 	typedef pred::CompareFirst< pred::CompareValue > TCompareKeyPair;
 
 	for ( TKeyItemContainer::iterator itKeyItem = scopedKeyItems.begin(), itEnd = scopedKeyItems.end(); itKeyItem != itEnd; )
 	{
-		IteratorPair itPair = std::equal_range( itKeyItem, itEnd, *itKeyItem, pred::LessBy< TCompareKeyPair >() );		// range of items with same content key -> make new group if more than 1 item
+		IteratorPair itPair = std::equal_range( itKeyItem, itEnd, *itKeyItem, pred::LessValue< TCompareKeyPair >() );		// range of items with same content key -> make new group if more than 1 item
 		ASSERT( itPair.first == itKeyItem );
 		size_t itemCount = std::distance( itPair.first, itPair.second );
 

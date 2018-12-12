@@ -190,7 +190,7 @@ std::tstring CPickDataset::ExtractLongestCommonPrefix( void ) const
 {
 	REQUIRE( m_destFnames.size() > 1 );
 
-	size_t maxLen = std::max_element( m_destFnames.begin(), m_destFnames.end(), pred::LessBy< pred::CompareLength >() )->length();
+	size_t maxLen = std::max_element( m_destFnames.begin(), m_destFnames.end(), pred::LessValue< pred::CompareLength >() )->length();
 
 	for ( size_t prefixLen = 1; prefixLen <= maxLen; ++prefixLen )
 		if ( !AllHavePrefix( prefixLen ) )

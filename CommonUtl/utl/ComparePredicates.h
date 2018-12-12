@@ -12,8 +12,8 @@ namespace func
 	template< typename SubType >
 	struct As
 	{
-		template< typename ObjectType >
-		const SubType* operator()( const ObjectType* pObject ) const
+		template< typename ObjectT >
+		const SubType* operator()( const ObjectT* pObject ) const
 		{
 			return checked_static_cast< const SubType* >( pObject );
 		}
@@ -22,8 +22,8 @@ namespace func
 	template< typename SubType >
 	struct DynamicAs
 	{
-		template< typename ObjectType >
-		const SubType* operator()( const ObjectType* pObject ) const
+		template< typename ObjectT >
+		const SubType* operator()( const ObjectT* pObject ) const
 		{
 			return dynamic_cast< const SubType* >( pObject );
 		}
@@ -31,72 +31,72 @@ namespace func
 
 	struct ToSelf
 	{
-		template< typename ValueType >
-		const ValueType& operator()( const ValueType& value ) const { return value; }
+		template< typename ValueT >
+		const ValueT& operator()( const ValueT& value ) const { return value; }
 	};
 }
 
 
 namespace pred
 {
-	template< typename Compare >
+	template< typename CompareValues >
 	struct CompareInOrder
 	{
-		CompareInOrder( Compare compare = Compare(), bool ascendingOrder = true ) : m_compare( compare ), m_ascendingOrder( ascendingOrder ) {}
+		CompareInOrder( CompareValues cmpValues = CompareValues(), bool ascendingOrder = true ) : m_cmpValues( cmpValues ), m_ascendingOrder( ascendingOrder ) {}
 
-		template< typename T >
-		CompareResult operator()( const T& left, const T& right ) const
+		template< typename ValueT >
+		CompareResult operator()( const ValueT& left, const ValueT& right ) const
 		{
-			return GetResultInOrder( m_compare( left, right ), m_ascendingOrder );
+			return GetResultInOrder( m_cmpValues( left, right ), m_ascendingOrder );
 		}
 	private:
-		Compare m_compare;
+		CompareValues m_cmpValues;
 		bool m_ascendingOrder;
 	};
 
 
-	template< typename Compare >
-	inline CompareInOrder< Compare > MakeCompareInOrder( Compare compare, bool ascendingOrder = true )
+	template< typename CompareValues >
+	inline CompareInOrder< CompareValues > MakeCompareInOrder( CompareValues cmpValues, bool ascendingOrder = true )
 	{
-		return CompareInOrder< Compare >( compare, ascendingOrder );
+		return CompareInOrder< CompareValues >( cmpValues, ascendingOrder );
 	}
 }
 
 
 namespace pred
 {
-	template< typename Compare >
-	struct LessBy
+	template< typename CompareValues >
+	struct LessValue							// used for either containers of values or pointers, based on a values comparator
 	{
-		LessBy( Compare compare = Compare() ) : m_compare( compare ) {}
+		LessValue( CompareValues cmpValues = CompareValues() ) : m_cmpValues( cmpValues ) {}
 
-		template< typename T >
-		bool operator()( const T& left, const T& right ) const		// containers of values
+		template< typename ValueT >
+		bool operator()( const ValueT& left, const ValueT& right ) const			// containers of values
 		{
-			return Less == m_compare( left, right );
+			return Less == m_cmpValues( left, right );
 		}
 
-		template< typename T >
-		bool operator()( const T* pLeft, const T* pRight ) const				// containers of pointers (non-const pointers to disambiguate)
+		template< typename ObjectT >
+		bool operator()( const ObjectT* pLeft, const ObjectT* pRight ) const		// containers of pointers (non-const pointers to disambiguate)
 		{
-			return Less == m_compare( *pLeft, *pRight );
+			return Less == m_cmpValues( *pLeft, *pRight );							// compare-by-value dereferenced pointers
 		}
 	private:
-		Compare m_compare;
+		CompareValues m_cmpValues;
 	};
 
-	template< typename ComparePtr >
+	template< typename ComparePtrs >
 	struct LessPtr
 	{
-		LessPtr( ComparePtr comparePtr = ComparePtr() ) : m_comparePtr( comparePtr ) {}
+		LessPtr( ComparePtrs cmpPtrs = ComparePtrs() ) : m_cmpPtrs( cmpPtrs ) {}
 
-		template< typename ObjectType >
-		bool operator()( const ObjectType* pLeft, const ObjectType* pRight ) const
+		template< typename ObjectT >
+		bool operator()( const ObjectT* pLeft, const ObjectT* pRight ) const
 		{
-			return Less == m_comparePtr( pLeft, pRight );
+			return Less == m_cmpPtrs( pLeft, pRight );
 		}
 	private:
-		ComparePtr m_comparePtr;
+		ComparePtrs m_cmpPtrs;
 	};
 
 	template< typename ToKeyFunc >
@@ -104,8 +104,8 @@ namespace pred
 	{
 		LessKey( ToKeyFunc toKey = ToKeyFunc() ) : m_toKey( toKey ) {}
 
-		template< typename T1, typename T2 >
-		bool operator()( const T1& left, const T2& right ) const
+		template< typename ValueT1, typename ValueT2 >
+		bool operator()( const ValueT1& left, const ValueT2& right ) const
 		{
 			return m_toKey( left ) < m_toKey( right );
 		}
@@ -114,89 +114,89 @@ namespace pred
 	};
 
 
-	template< typename Compare >
-	struct OrderBy
+	template< typename CompareValues >
+	struct OrderByValue
 	{
-		OrderBy( bool ascendingOrder = true ) : m_ascendingOrder( ascendingOrder ) {}
-		OrderBy( Compare compare, bool ascendingOrder = true ) : m_compare( compare ), m_ascendingOrder( ascendingOrder ) {}
+		OrderByValue( bool ascendingOrder = true ) : m_ascendingOrder( ascendingOrder ) {}
+		OrderByValue( CompareValues cmpValues, bool ascendingOrder = true ) : m_cmpValues( cmpValues ), m_ascendingOrder( ascendingOrder ) {}
 
-		template< typename T >
-		bool operator()( const T& left, const T& right ) const		// containers of values
+		template< typename ValueT >
+		bool operator()( const ValueT& left, const ValueT& right ) const		// containers of values
 		{
-			return ( m_ascendingOrder ? Less : Greater ) == m_compare( left, right );
+			return ( m_ascendingOrder ? Less : Greater ) == m_cmpValues( left, right );
 		}
 
-		template< typename T >
-		bool operator()( T* pLeft, T* pRight ) const				// containers of pointers (non-const pointers to disambiguate)
+		template< typename ObjectT >
+		bool operator()( ObjectT* pLeft, ObjectT* pRight ) const				// containers of pointers (non-const pointers to disambiguate)
 		{
-			return ( m_ascendingOrder ? Less : Greater ) == m_compare( *pLeft, *pRight );
+			return ( m_ascendingOrder ? Less : Greater ) == m_cmpValues( *pLeft, *pRight );		// compare-by-value dereferenced pointers
 		}
 	private:
-		Compare m_compare;
+		CompareValues m_cmpValues;
 		bool m_ascendingOrder;
 	};
 
-	template< typename ComparePtr >
+	template< typename ComparePtrs >
 	struct OrderByPtr
 	{
 		OrderByPtr( bool ascendingOrder = true ) : m_ascendingOrder( ascendingOrder ) {}
-		OrderByPtr( ComparePtr compare, bool ascendingOrder = true ) : m_compare( compare ), m_ascendingOrder( ascendingOrder ) {}
+		OrderByPtr( ComparePtrs cmpPtrs, bool ascendingOrder = true ) : m_cmpPtrs( cmpPtrs ), m_ascendingOrder( ascendingOrder ) {}
 
-		template< typename ObjectType >
-		bool operator()( const ObjectType* pLeft, const ObjectType* pRight ) const
+		template< typename ObjectT >
+		bool operator()( const ObjectT* pLeft, const ObjectT* pRight ) const
 		{
-			return ( m_ascendingOrder ? Less : Greater ) == m_compare( pLeft, pRight );
+			return ( m_ascendingOrder ? Less : Greater ) == m_cmpPtrs( pLeft, pRight );
 		}
 	private:
-		ComparePtr m_compare;
+		ComparePtrs m_cmpPtrs;
 		bool m_ascendingOrder;
 	};
 
 
-	template< typename Compare >
+	template< typename CompareValues >
 	struct IsEqual
 	{
-		IsEqual( Compare compare = Compare() ) : m_compare( compare ) {}
+		IsEqual( CompareValues cmpValues = CompareValues() ) : m_cmpValues( cmpValues ) {}
 
-		template< typename T >
-		bool operator()( const T& left, const T& right ) const		// containers of values
+		template< typename ValueT >
+		bool operator()( const ValueT& left, const ValueT& right ) const		// containers of values
 		{
-			return Equal == m_compare( left, right );
+			return Equal == m_cmpValues( left, right );
 		}
 	private:
-		Compare m_compare;
+		CompareValues m_cmpValues;
 	};
 
 
 	// adapts Compare defined for an object to a new object via Adapter functor; example CompareAdapter< CompareRequestDate, func::ToWorkOrder >
 
-	template< typename Compare, typename Adapter >
+	template< typename CompareValues, typename Adapter >
 	struct CompareAdapter
 	{
-		CompareAdapter( Compare compare = Compare(), Adapter adapter = Adapter() ) : m_compare( compare ), m_adapter( adapter ) {}
+		CompareAdapter( CompareValues cmpValues = CompareValues(), Adapter adapter = Adapter() ) : m_cmpValues( cmpValues ), m_adapter( adapter ) {}
 
-		template< typename T >
-		CompareResult operator()( const T& left, const T& right ) const
+		template< typename ValueT >
+		CompareResult operator()( const ValueT& left, const ValueT& right ) const
 		{
-			return m_compare( m_adapter( left ), m_adapter( right ) );
+			return m_cmpValues( m_adapter( left ), m_adapter( right ) );
 		}
 	private:
-		Compare m_compare;
+		CompareValues m_cmpValues;
 		Adapter m_adapter;
 	};
 
-	template< typename ComparePtr, typename AdapterPtr >
+	template< typename ComparePtrs, typename AdapterPtr >
 	struct CompareAdapterPtr
 	{
-		CompareAdapterPtr( ComparePtr compare = ComparePtr(), AdapterPtr adapter = AdapterPtr() ) : m_compare( compare ), m_adapter( adapter ) {}
+		CompareAdapterPtr( ComparePtrs cmpPtrs = ComparePtrs(), AdapterPtr adapter = AdapterPtr() ) : m_cmpPtrs( cmpPtrs ), m_adapter( adapter ) {}
 
-		template< typename ObjectType >
-		CompareResult operator()( const ObjectType* pLeft, const ObjectType* pRight ) const
+		template< typename ObjectT >
+		CompareResult operator()( const ObjectT* pLeft, const ObjectT* pRight ) const
 		{
-			return m_compare( m_adapter( pLeft ), m_adapter( pRight ) );
+			return m_cmpPtrs( m_adapter( pLeft ), m_adapter( pRight ) );
 		}
 	private:
-		ComparePtr m_compare;
+		ComparePtrs m_cmpPtrs;
 		AdapterPtr m_adapter;
 	};
 
@@ -208,8 +208,8 @@ namespace pred
 	{
 		CompareScalarAdapterPtr( Adapter adapter = Adapter() ) : m_adapter( adapter ) {}
 
-		template< typename ObjectType >
-		CompareResult operator()( const ObjectType* pLeft, const ObjectType* pRight ) const
+		template< typename ObjectT >
+		CompareResult operator()( const ObjectT* pLeft, const ObjectT* pRight ) const
 		{
 			return Compare_Scalar( m_adapter( pLeft ), m_adapter( pRight ) );
 		}
@@ -220,32 +220,32 @@ namespace pred
 
 	// creates a descending criteria by flipping Less and Greater of the comparator; example Descending< CompareEndTime >
 
-	template< typename Compare >
+	template< typename CompareValues >
 	struct Descending
 	{
-		Descending( Compare compare = Compare() ) : m_compare( compare ) {}
+		Descending( CompareValues cmpValues = CompareValues() ) : m_cmpValues( cmpValues ) {}
 
-		template< typename T >
-		CompareResult operator()( const T& left, const T& right ) const
+		template< typename ValueT >
+		CompareResult operator()( const ValueT& left, const ValueT& right ) const
 		{
-			return GetInvertedResult( m_compare( left, right ) );
+			return GetInvertedResult( m_cmpValues( left, right ) );
 		}
 	private:
-		Compare m_compare;
+		CompareValues m_cmpValues;
 	};
 
-	template< typename ComparePtr >
+	template< typename ComparePtrs >
 	struct DescendingPtr
 	{
-		DescendingPtr( ComparePtr compare = ComparePtr() ) : m_compare( compare ) {}
+		DescendingPtr( ComparePtrs cmpPtrs = ComparePtrs() ) : m_cmpPtrs( cmpPtrs ) {}
 
-		template< typename ObjectType >
-		CompareResult operator()( const ObjectType* pLeft, const ObjectType* pRight ) const
+		template< typename ObjectT >
+		CompareResult operator()( const ObjectT* pLeft, const ObjectT* pRight ) const
 		{
-			return GetInvertedResult( m_compare( pLeft, pRight ) );
+			return GetInvertedResult( m_cmpPtrs( pLeft, pRight ) );
 		}
 	private:
-		ComparePtr m_compare;
+		ComparePtrs m_cmpPtrs;
 	};
 
 
@@ -258,8 +258,8 @@ namespace pred
 	template< typename Compare1, typename Compare2 >
 	struct JoinCompare
 	{
-		template< typename T >
-		CompareResult operator()( const T& left, const T& right ) const
+		template< typename ValueT >
+		CompareResult operator()( const ValueT& left, const ValueT& right ) const
 		{
 			CompareResult result = Compare1()( left, right );
 			if ( Equal == result )
@@ -268,15 +268,15 @@ namespace pred
 		}
 	};
 
-	template< typename ComparePtr1, typename ComparePtr2 >
+	template< typename ComparePtrs1, typename ComparePtrs2 >
 	struct JoinComparePtr
 	{
-		template< typename ObjectType >
-		CompareResult operator()( const ObjectType* pLeft, const ObjectType* pRight ) const
+		template< typename ObjectT >
+		CompareResult operator()( const ObjectT* pLeft, const ObjectT* pRight ) const
 		{
-			CompareResult result = ComparePtr1()( pLeft, pRight );
+			CompareResult result = ComparePtrs1()( pLeft, pRight );
 			if ( Equal == result )
-				result = ComparePtr2()( pLeft, pRight );
+				result = ComparePtrs2()( pLeft, pRight );
 			return result;
 		}
 	};
@@ -335,32 +335,20 @@ namespace pred
 {
 	// make template functions for compare primitives that work stateful functors
 
-	template< typename Compare >
-	inline LessBy< Compare > MakeLessBy( Compare compare )
-	{
-		return LessBy< Compare >( compare );
-	}
+	template< typename CompareValues >
+	inline LessValue< CompareValues > MakeLessValue( CompareValues cmpValues ) { return LessValue< CompareValues >( cmpValues ); }
 
-	template< typename Compare >
-	inline LessPtr< Compare > MakeLessPtr( Compare compare )
-	{
-		return LessPtr< Compare >( compare );
-	}
+	template< typename ComparePtrs >
+	inline LessPtr< ComparePtrs > MakeLessPtr( ComparePtrs cmpPtrs ) { return LessPtr< ComparePtrs >( cmpPtrs ); }
 
 	template< typename ToKeyFunc >
 	inline LessKey< ToKeyFunc > MakeLessKey( ToKeyFunc toKeyFunc ) { return LessKey< ToKeyFunc >( toKeyFunc ); }
 
-	template< typename Compare >
-	inline OrderBy< Compare > MakeOrderBy( Compare compare, bool ascendingOrder = true )
-	{
-		return OrderBy< Compare >( compare, ascendingOrder );
-	}
+	template< typename CompareValues >
+	inline OrderByValue< CompareValues > MakeOrderByValue( CompareValues cmpValues, bool ascendingOrder = true ) { return OrderByValue< CompareValues >( cmpValues, ascendingOrder ); }
 
-	template< typename ComparePtr >
-	inline OrderByPtr< ComparePtr > MakeOrderByPtr( ComparePtr compare, bool ascendingOrder = true )
-	{
-		return OrderByPtr< ComparePtr >( compare, ascendingOrder );
-	}
+	template< typename ComparePtrs >
+	inline OrderByPtr< ComparePtrs > MakeOrderByPtr( ComparePtrs cmpPtrs, bool ascendingOrder = true ) { return OrderByPtr< ComparePtrs >( cmpPtrs, ascendingOrder ); }
 }
 
 

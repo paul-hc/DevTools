@@ -4,7 +4,7 @@
 #include "EnumTags.h"
 #include "FlagTags.h"
 #include "FlexPath.h"
-#include "RandomUtilities.h"
+#include "ContainerUtilities.h"
 #include "StringUtilities.h"
 #include "TimeUtils.h"
 #include "vector_map.h"
@@ -16,19 +16,6 @@
 
 #ifdef _DEBUG		// no UT code in release builds
 
-
-namespace ut
-{
-	template< typename CharType, typename StringT, typename LessPred >
-	std::basic_string< CharType > SplitShuffleSortJoin( std::vector< StringT >& rItems, const CharType* pSource, const CharType* pSep, LessPred lessPred )
-	{
-		str::Split( rItems, pSource, pSep );
-		std::random_shuffle( rItems.begin(), rItems.end() );
-
-		std::sort( rItems.begin(), rItems.end(), lessPred );
-		return str::Join( rItems, pSep );
-	}
-}
 
 namespace func
 {
@@ -204,26 +191,102 @@ void CStringTests::TestStringSorting( void )
 {
 	static const char s_src[] = "a,ab,abc,abcd,A-,AB-,ABC-,ABCD-";		// add trailing '-' to avoid arbitrary order on case-insensitive comparison
 
-	utl::SetRandomSeed();
-
 	std::vector< std::string > items;
-	ASSERT_EQUAL( "A-,AB-,ABC-,ABCD-,a,ab,abc,abcd", ut::SplitShuffleSortJoin( items, s_src, ",", pred::LessBy< pred::TStringyCompareCase >() ) );
-	ASSERT_EQUAL( "a,A-,ab,AB-,abc,ABC-,abcd,ABCD-", ut::SplitShuffleSortJoin( items, s_src, ",", pred::LessBy< pred::TStringyCompareNoCase >() ) );
+	str::Split( items, s_src, "," );
+	ASSERT_EQUAL( "A-,AB-,ABC-,ABCD-,a,ab,abc,abcd", ut::ShuffleSortJoin( items, ",", pred::LessValue< pred::TStringyCompareCase >() ) );
+	ASSERT_EQUAL( "a,A-,ab,AB-,abc,ABC-,abcd,ABCD-", ut::ShuffleSortJoin( items, ",", pred::LessValue< pred::TStringyCompareNoCase >() ) );
 
-	std::vector< std::wstring > witems;
-	ASSERT_EQUAL( L"A-,AB-,ABC-,ABCD-,a,ab,abc,abcd", ut::SplitShuffleSortJoin( witems, str::FromAnsi( s_src ).c_str(), L",", pred::LessBy< pred::TStringyCompareCase >() ) );
-	ASSERT_EQUAL( L"a,A-,ab,AB-,abc,ABC-,abcd,ABCD-", ut::SplitShuffleSortJoin( witems, str::FromAnsi( s_src ).c_str(), L",", pred::LessBy< pred::TStringyCompareNoCase >() ) );
+	std::vector< std::wstring > wItems;
+	str::Split( wItems, str::FromAnsi( s_src ).c_str(), L"," );
+	ASSERT_EQUAL( L"A-,AB-,ABC-,ABCD-,a,ab,abc,abcd", ut::ShuffleSortJoin( wItems, L",", pred::LessValue< pred::TStringyCompareCase >() ) );
+	ASSERT_EQUAL( L"a,A-,ab,AB-,abc,ABC-,abcd,ABCD-", ut::ShuffleSortJoin( wItems, L",", pred::LessValue< pred::TStringyCompareNoCase >() ) );
 
 	std::vector< fs::CPath > paths;
-	ASSERT_EQUAL( _T("A-,AB-,ABC-,ABCD-,a,ab,abc,abcd"), ut::SplitShuffleSortJoin( paths, str::FromAnsi( s_src ).c_str(), _T(","), pred::LessBy< pred::TStringyCompareCase >() ) );
-	ASSERT_EQUAL( _T("a,A-,ab,AB-,abc,ABC-,abcd,ABCD-"), ut::SplitShuffleSortJoin( paths, str::FromAnsi( s_src ).c_str(), _T(","), pred::LessBy< pred::TStringyCompareNoCase >() ) );
+	str::Split( paths, str::FromAnsi( s_src ).c_str(), L"," );
+	ASSERT_EQUAL( _T("A-,AB-,ABC-,ABCD-,a,ab,abc,abcd"), ut::ShuffleSortJoin( paths, _T(","), pred::LessValue< pred::TStringyCompareCase >() ) );
+	ASSERT_EQUAL( _T("a,A-,ab,AB-,abc,ABC-,abcd,ABCD-"), ut::ShuffleSortJoin( paths, _T(","), pred::LessValue< pred::TStringyCompareNoCase >() ) );
 
 	std::vector< fs::CFlexPath > flexPaths;
-	ASSERT_EQUAL( _T("A-,AB-,ABC-,ABCD-,a,ab,abc,abcd"), ut::SplitShuffleSortJoin( flexPaths, str::FromAnsi( s_src ).c_str(), _T(","), pred::LessBy< pred::TStringyCompareCase >() ) );
-	ASSERT_EQUAL( _T("a,A-,ab,AB-,abc,ABC-,abcd,ABCD-"), ut::SplitShuffleSortJoin( flexPaths, str::FromAnsi( s_src ).c_str(), _T(","), pred::LessBy< pred::TStringyCompareNoCase >() ) );
+	str::Split( flexPaths, str::FromAnsi( s_src ).c_str(), L"," );
+	ASSERT_EQUAL( _T("A-,AB-,ABC-,ABCD-,a,ab,abc,abcd"), ut::ShuffleSortJoin( flexPaths, _T(","), pred::LessValue< pred::TStringyCompareCase >() ) );
+	ASSERT_EQUAL( _T("a,A-,ab,AB-,abc,ABC-,abcd,ABCD-"), ut::ShuffleSortJoin( flexPaths, _T(","), pred::LessValue< pred::TStringyCompareNoCase >() ) );
+
+	// vector of pointers
+	{
+		std::vector< const char* > ptrItems;
+		utl::Assign( ptrItems, items, func::ToCharPtr() );
+
+		ASSERT_EQUAL( "A-,AB-,ABC-,ABCD-,a,ab,abc,abcd", ut::ShuffleSortJoin( ptrItems, ",", pred::LessPtr< pred::TCompareCase >() ) );
+		ASSERT_EQUAL( "a,A-,ab,AB-,abc,ABC-,abcd,ABCD-", ut::ShuffleSortJoin( ptrItems, ",", pred::LessPtr< pred::TCompareNoCase >() ) );
+	}
+
+	{
+		std::vector< const wchar_t* > wPtrItems;
+		utl::Assign( wPtrItems, wItems, func::ToCharPtr() );
+
+		ASSERT_EQUAL( L"A-,AB-,ABC-,ABCD-,a,ab,abc,abcd", ut::ShuffleSortJoin( wPtrItems, L",", pred::LessPtr< pred::TCompareCase >() ) );
+		ASSERT_EQUAL( L"a,A-,ab,AB-,abc,ABC-,abcd,ABCD-", ut::ShuffleSortJoin( wPtrItems, L",", pred::LessPtr< pred::TCompareNoCase >() ) );
+	}
 }
 
 void CStringTests::TestNaturalSort( void )
+{
+	const char s_srcItems[] = "st3Ring,2string,st2ring,STRING20,string2,3String,20STRING,st20RING,String3";
+
+	{	// NARROW
+		std::vector< std::string > items;
+		str::Split( items, s_srcItems, "," );
+		std::random_shuffle( items.begin(), items.end() );
+
+		// sort natural via pred::CompareValue that uses pred::Compare_Scalar() specialization
+		ASSERT_EQUAL(
+			"2string,3String,20STRING,st2ring,st3Ring,st20RING,string2,String3,STRING20",
+			ut::ShuffleSortJoin( items, ",", pred::LessValue< pred::CompareValue >() ) );
+
+		// sort natural via pred::TStringyCompareNatural (equivalent with pred::CompareValue)
+		ASSERT_EQUAL(
+			"2string,3String,20STRING,st2ring,st3Ring,st20RING,string2,String3,STRING20",
+			ut::ShuffleSortJoin( items, ",", pred::LessValue< pred::TStringyCompareNatural >() ) );
+
+		// sort case-insensitive
+		ASSERT_EQUAL(
+			"20STRING,2string,3String,st20RING,st2ring,st3Ring,string2,STRING20,String3",
+			ut::ShuffleSortJoin( items, ",", pred::LessValue< pred::TStringyCompareNoCase >() ) );
+
+		// sort case-sensitive
+		ASSERT_EQUAL(
+			"20STRING,2string,3String,STRING20,String3,st20RING,st2ring,st3Ring,string2",
+			ut::ShuffleSortJoin( items, ",", pred::LessValue< pred::TStringyCompareCase >() ) );
+	}
+
+	{	// WIDE
+		std::vector< std::wstring > items;
+		str::Split( items, str::FromAnsi( s_srcItems ).c_str(), L"," );
+		std::random_shuffle( items.begin(), items.end() );
+
+		// sort natural via pred::CompareValue that uses pred::Compare_Scalar() specialization
+		ASSERT_EQUAL(
+			L"2string,3String,20STRING,st2ring,st3Ring,st20RING,string2,String3,STRING20",
+			ut::ShuffleSortJoin( items, L",", pred::LessValue< pred::CompareValue >() ) );
+
+		// sort natural via pred::TStringyCompareNatural (equivalent with pred::CompareValue)
+		ASSERT_EQUAL(
+			L"2string,3String,20STRING,st2ring,st3Ring,st20RING,string2,String3,STRING20",
+			ut::ShuffleSortJoin( items, L",", pred::LessValue< pred::TStringyCompareNatural >() ) );
+
+		// sort case-insensitive
+		ASSERT_EQUAL(
+			L"20STRING,2string,3String,st20RING,st2ring,st3Ring,string2,STRING20,String3",
+			ut::ShuffleSortJoin( items, L",", pred::LessValue< pred::TStringyCompareNoCase >() ) );
+
+		// sort case-sensitive
+		ASSERT_EQUAL(
+			L"20STRING,2string,3String,STRING20,String3,st20RING,st2ring,st3Ring,string2",
+			ut::ShuffleSortJoin( items, L",", pred::LessValue< pred::TStringyCompareCase >() ) );
+	}
+}
+
+void CStringTests::TestNaturalSortPunctuation( void )
 {
 	const char s_srcItems[] =
 		"1254 Biertan{DUP}.jpg|"
@@ -240,10 +303,6 @@ void CStringTests::TestNaturalSort( void )
 		std::vector< std::string > items;
 		str::Split( items, s_srcItems, "|" );
 
-		utl::SetRandomSeed();
-		std::random_shuffle( items.begin(), items.end() );
-
-		std::sort( items.begin(), items.end(), pred::LessBy< pred::CompareValue >() );
 		ASSERT_EQUAL(
 			"1254 Biertan.jpg|"
 			"1254 Biertan-DUP.jpg|"
@@ -254,17 +313,13 @@ void CStringTests::TestNaturalSort( void )
 			"1254 biertan[DUP].jpg|"
 			"1254 Biertan{DUP}.jpg|"
 			"1254 Biertan~DUP.jpg"
-			, str::Join( items, "|" ) );
+			, ut::ShuffleSortJoin( items, "|", pred::LessValue< pred::CompareValue >() ) );
 	}
 
 	{	// case-insensitive
 		std::vector< std::wstring > items;
 		str::Split( items, str::FromUtf8( s_srcItems ).c_str(), L"|" );
 
-		utl::SetNextRandomSeed();
-		std::random_shuffle( items.begin(), items.end() );
-
-		std::sort( items.begin(), items.end(), pred::LessBy< pred::CompareValue >() );
 		ASSERT_EQUAL(
 			L"1254 Biertan.jpg|"
 			L"1254 Biertan-DUP.jpg|"
@@ -275,7 +330,7 @@ void CStringTests::TestNaturalSort( void )
 			L"1254 biertan[DUP].jpg|"
 			L"1254 Biertan{DUP}.jpg|"
 			L"1254 Biertan~DUP.jpg"
-			, str::Join( items, L"|" ) );
+			, ut::ShuffleSortJoin( items, L"|", pred::LessValue< pred::CompareValue >() ) );
 	}
 }
 
@@ -872,6 +927,7 @@ void CStringTests::Run( void )
 	TestValueToString();
 	TestStringSorting();
 	TestNaturalSort();
+	TestNaturalSortPunctuation();
 	TestIgnoreCase();
 	TestStringSplit();
 	TestStringTokenize();

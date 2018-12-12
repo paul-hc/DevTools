@@ -55,10 +55,10 @@ void CLineSet::Reverse( void )
 
 void CLineSet::SortAscending( void )
 {
-	std::stable_sort( m_lines.begin(), m_lines.end(), pred::LessBy< pred::CompareValue >() );
+	std::stable_sort( m_lines.begin(), m_lines.end(), pred::LessValue< pred::CompareValue >() );
 }
 
 void CLineSet::SortDescending( void )
 {
-	std::stable_sort( m_lines.rbegin(), m_lines.rend(), pred::LessBy< pred::CompareValue >() );		// sort descending
+	std::stable_sort( m_lines.rbegin(), m_lines.rend(), pred::LessValue< pred::CompareValue >() );		// sort descending
 }

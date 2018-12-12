@@ -65,7 +65,7 @@ namespace pred
 
 	// implements pred::IComparator in terms of GetPropFunc
 
-	template< typename ObjectType, typename GetPropFunc, typename Compare = CompareValue >
+	template< typename ObjectType, typename GetPropFunc, typename Compare = pred::CompareValue >
 	struct PropertyComparator : public IComparator
 	{
 		PropertyComparator( GetPropFunc getPropFunc, Compare compare = Compare() )
@@ -90,7 +90,7 @@ namespace pred
 	template< typename ObjectType, typename GetPropFunc >
 	IComparator* NewPropertyComparator( GetPropFunc getPropFunc )
 	{
-		return new PropertyComparator< ObjectType, GetPropFunc >( getPropFunc );		// use default CompareValue
+		return new PropertyComparator< ObjectType, GetPropFunc >( getPropFunc );		// use default pred::CompareValue
 	}
 
 	template< typename ObjectType, typename Compare, typename GetPropFunc >

@@ -96,7 +96,7 @@ private:
 	std::vector< CIncludeNode* > m_treeItems;				// has ownership
 	int m_sourceLineNo;
 
-	typedef pred::LessBy< pred::CompareEquivPath > TLessPath;
+	typedef pred::LessValue< pred::CompareEquivPath > TLessPath;
 	typedef std::map< std::tstring, HTREEITEM, TLessPath > PathToItemMap;
 	PathToItemMap m_originalItems;
 

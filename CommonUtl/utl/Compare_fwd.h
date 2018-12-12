@@ -18,8 +18,8 @@ namespace pred
 			return Less;
 		else if ( difference > 0 )
 			return Greater;
-		else
-			return Equal;
+
+		return Equal;
 	}
 
 
@@ -30,8 +30,8 @@ namespace pred
 
 
 	// function version
-	template< typename Type >
-	inline CompareResult Compare_Scalar( const Type& left, const Type& right )
+	template< typename ValueT >
+	inline CompareResult Compare_Scalar( const ValueT& left, const ValueT& right )
 	{
 		if ( left < right )
 			return Less;
@@ -44,8 +44,8 @@ namespace pred
 	// functor version
 	struct CompareValue
 	{
-		template< typename T >
-		CompareResult operator()( const T& left, const T& right ) const
+		template< typename ValueT >
+		CompareResult operator()( const ValueT& left, const ValueT& right ) const
 		{
 			return Compare_Scalar( left, right );
 		}
@@ -54,23 +54,23 @@ namespace pred
 
 	// functor versions of is_a
 
-	template< typename ObjectType >
+	template< typename ObjectT >
 	struct IsA
 	{
 		template< typename AnyType >
 		bool operator()( const AnyType* pObject ) const
 		{
-			return is_a< ObjectType >( pObject );
+			return is_a< ObjectT >( pObject );
 		}
 	};
 
-	template< typename ObjectType >
+	template< typename ObjectT >
 	struct IsNotA
 	{
 		template< typename AnyType >
 		bool operator()( const AnyType* pObject ) const
 		{
-			return !is_a< ObjectType >( pObject );
+			return !is_a< ObjectT >( pObject );
 		}
 	};
 }

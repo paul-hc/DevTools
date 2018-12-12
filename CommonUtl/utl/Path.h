@@ -364,7 +364,7 @@ namespace pred
 	typedef CompareAdapter< CompareNaturalPath, func::ToNameExt > _CompareNameExt;		// filename | fullpath
 	typedef JoinCompare< _CompareNameExt, CompareNaturalPath > TCompareNameExt;
 
-	typedef LessBy< CompareNaturalPath > TLess_NaturalPath;
+	typedef LessValue< CompareNaturalPath > TLess_NaturalPath;
 }
 
 
@@ -384,7 +384,7 @@ namespace fs
 	template< typename IteratorT >
 	inline void SortPaths( IteratorT itFirst, IteratorT itLast, bool ascending = true )
 	{
-		std::sort( itFirst, itLast, pred::OrderBy< pred::CompareNaturalPath >( ascending ) );
+		std::sort( itFirst, itLast, pred::OrderByValue< pred::CompareNaturalPath >( ascending ) );
 	}
 
 	template< typename ContainerT >

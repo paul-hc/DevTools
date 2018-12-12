@@ -69,14 +69,14 @@ bool CGroupIcon::ContainsBpp( BitsPerPixel bitsPerPixel, IconStdSize* pIconStdSi
 std::pair< BitsPerPixel, IconStdSize > CGroupIcon::FindSmallest( void ) const
 {
 	if ( IsValid() )		// strictly minimum size
-		return ToBppSize( std::min_element( m_pGroupIconDir->Begin(), m_pGroupIconDir->End(), pred::LessBy< pred::CompareIcon_Size >() ) );
+		return ToBppSize( std::min_element( m_pGroupIconDir->Begin(), m_pGroupIconDir->End(), pred::LessValue< pred::CompareIcon_Size >() ) );
 	return m_nullBppStdSize;
 }
 
 std::pair< BitsPerPixel, IconStdSize > CGroupIcon::FindLargest( void ) const
 {
 	if ( IsValid() )		// max colour maximum size (I think max colour takes precedence by icon scaler)
-		return ToBppSize( std::max_element( m_pGroupIconDir->Begin(), m_pGroupIconDir->End(), pred::LessBy< pred::CompareIcon_BppSize >() ) );
+		return ToBppSize( std::max_element( m_pGroupIconDir->Begin(), m_pGroupIconDir->End(), pred::LessValue< pred::CompareIcon_BppSize >() ) );
 	return m_nullBppStdSize;
 }
 
@@ -89,7 +89,7 @@ void CGroupIcon::QueryAvailableSizes( std::vector< std::pair< BitsPerPixel, Icon
 		for ( int i = 0; i != m_pGroupIconDir->m_count; ++i )
 			rIconPairs.push_back( std::make_pair( m_pGroupIconDir->m_images[ i ].GetBitsPerPixel(), CIconId::FindStdSize( m_pGroupIconDir->m_images[ i ].GetSize() ) ) );
 
-		std::sort( rIconPairs.begin(), rIconPairs.end(), pred::LessBy< pred::CompareIcon_BppSize >() );		// BitsPerPixel | Width
+		std::sort( rIconPairs.begin(), rIconPairs.end(), pred::LessValue< pred::CompareIcon_BppSize >() );		// BitsPerPixel | Width
 	}
 }
 
@@ -102,6 +102,6 @@ void CGroupIcon::QueryAvailableSizes( std::vector< std::pair< BitsPerPixel, CSiz
 		for ( int i = 0; i != m_pGroupIconDir->m_count; ++i )
 			rIconPairs.push_back( std::make_pair( m_pGroupIconDir->m_images[ i ].GetBitsPerPixel(), m_pGroupIconDir->m_images[ i ].GetSize() ) );
 
-		std::sort( rIconPairs.begin(), rIconPairs.end(), pred::LessBy< pred::CompareIcon_BppSize >() );		// BitsPerPixel | Width
+		std::sort( rIconPairs.begin(), rIconPairs.end(), pred::LessValue< pred::CompareIcon_BppSize >() );		// BitsPerPixel | Width
 	}
 }

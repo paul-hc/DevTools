@@ -119,6 +119,14 @@ namespace ut
 		}
 		return oss.str();
 	}
+
+	template< typename CharType, typename StringT, typename LessPred >
+	std::basic_string< CharType > ShuffleSortJoin( std::vector< StringT >& rItems, const CharType* pSep, LessPred lessPred )
+	{
+		std::random_shuffle( rItems.begin(), rItems.end() );
+		std::sort( rItems.begin(), rItems.end(), lessPred );
+		return str::Join( rItems, pSep );
+	}
 }
 
 

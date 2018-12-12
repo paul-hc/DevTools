@@ -238,7 +238,7 @@ namespace pred
 		}
 	};
 
-	typedef LessBy< CompareExplorerPath > TLess_ExplorerPath;
+	typedef LessValue< CompareExplorerPath > TLess_ExplorerPath;
 }
 
 
@@ -249,7 +249,7 @@ namespace shell
 	template< typename IteratorT >
 	inline void SortPaths( IteratorT itFirst, IteratorT itLast, bool ascending = true )
 	{
-		std::sort( itFirst, itLast, pred::OrderBy< pred::CompareExplorerPath >( ascending ) );
+		std::sort( itFirst, itLast, pred::OrderByValue< pred::CompareExplorerPath >( ascending ) );
 	}
 
 	template< typename ContainerT >

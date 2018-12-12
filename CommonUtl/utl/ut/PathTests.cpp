@@ -3,7 +3,6 @@
 #include "ut/PathTests.h"
 #include "Path.h"
 #include "FlexPath.h"
-#include "RandomUtilities.h"
 #include "Resequence.hxx"
 #include "StringUtilities.h"
 
@@ -264,7 +263,6 @@ void CPathTests::TestPathSortExisting( void )
 	path::QueryParentPaths( mixedPaths, pool.GetFilePaths() );
 	mixedPaths.insert( mixedPaths.begin(), pool.GetFilePaths().begin(), pool.GetFilePaths().end() );
 
-	utl::SetRandomSeed();
 	std::random_shuffle( mixedPaths.begin(), mixedPaths.end() );
 
 	// fs::CPath sort ascending
@@ -371,7 +369,6 @@ void CPathTests::TestPathNaturalSort( void )
 	std::vector< fs::CPath > filePaths;
 	str::Split( filePaths, s_srcFiles, _T("|") );
 
-	utl::SetRandomSeed();
 	std::random_shuffle( filePaths.begin(), filePaths.end() );
 
 	fs::SortPaths( filePaths );

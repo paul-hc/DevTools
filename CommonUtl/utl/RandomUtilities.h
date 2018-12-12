@@ -14,11 +14,6 @@ namespace utl
 		::srand( stdext::hash_value( seed ) % RAND_MAX );
 	}
 
-	inline void SetNextRandomSeed( void )
-	{
-		SetRandomSeed( ::GetTickCount() + 10 );
-	}
-
 	template< typename ValueType >
 	ValueType GetRandomValue( ValueType minValue, ValueType maxValue )
 	{

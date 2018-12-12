@@ -413,7 +413,7 @@ void CFileList::SearchForFiles( bool reportEmpty /*= true*/ ) throws_( CExceptio
 					app::CScopedProgress progress( 0, (int)m_fileAttributes.size(), 1, _T("Check for images with same sizes:") );
 					progress.SetStepDivider( 7 );		// ~ empirically set to 7 as the best for the tested working set
 
-					std::sort( m_fileAttributes.begin(), m_fileAttributes.end(), pred::MakeOrderBy( pred::CompareFileAttr( m_fileOrder, true, &progress ) ) );
+					std::sort( m_fileAttributes.begin(), m_fileAttributes.end(), pred::MakeOrderByValue( pred::CompareFileAttr( m_fileOrder, true, &progress ) ) );
 					progress.GotoEnd();
 				}
 				FilterFileDuplicates( true );
@@ -442,7 +442,7 @@ bool CFileList::OrderFileList( void )
 			std::random_shuffle( m_fileAttributes.begin(), m_fileAttributes.end() );
 			break;
 		default:
-			std::sort( m_fileAttributes.begin(), m_fileAttributes.end(), pred::MakeOrderBy( pred::CompareFileAttr( m_fileOrder ) ) );
+			std::sort( m_fileAttributes.begin(), m_fileAttributes.end(), pred::MakeOrderByValue( pred::CompareFileAttr( m_fileOrder ) ) );
 			break;
 	}
 	return true;

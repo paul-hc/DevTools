@@ -163,7 +163,7 @@ namespace pred
 {
 	struct AsWidth { int operator()( const CSize& size ) const { return size.cx; } };
 
-	typedef CompareAdapter< CompareValue, AsWidth > CompareWidth;
+	typedef CompareAdapter< pred::CompareValue, AsWidth > CompareWidth;
 }
 
 CSize CMultiZoneIterator::FindWidestSize( CDC* pDC, const std::vector< std::tstring >& labels ) const
@@ -175,7 +175,7 @@ CSize CMultiZoneIterator::FindWidestSize( CDC* pDC, const std::vector< std::tstr
 	for ( unsigned int i = 0; i != m_zoneCount; ++i )
 		textSizes.push_back( ui::GetTextSize( pDC, labels[ i ].c_str() ) );
 
-	return *std::max_element( textSizes.begin(), textSizes.end(), pred::LessBy< pred::CompareWidth >() );
+	return *std::max_element( textSizes.begin(), textSizes.end(), pred::LessValue< pred::CompareWidth >() );
 }
 
 std::pair< CMultiZoneIterator::LabelLayout, UINT >

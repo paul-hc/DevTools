@@ -21,6 +21,7 @@ private:
 	void TestValueToString( void );
 	void TestStringSorting( void );
 	void TestNaturalSort( void );
+	void TestNaturalSortPunctuation( void );
 	void TestIgnoreCase( void );
 	void TestStringSplit( void );
 	void TestStringTokenize( void );

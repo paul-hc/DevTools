@@ -329,6 +329,31 @@ namespace utl
 				rSubset.push_back( *itObject );
 	}
 
+
+	// copy items between containers using a conversion functor (unary)
+
+	template< typename DestContainerT, typename SrcContainerT, typename ConvertFunc >
+	inline void Assign( DestContainerT& rDestItems, const SrcContainerT& srcItems, ConvertFunc cvtFunc )
+	{
+		rDestItems.resize( srcItems.size() );
+		std::transform( srcItems.begin(), srcItems.end(), rDestItems.begin(), cvtFunc );
+	}
+
+	template< typename DestContainerT, typename SrcContainerT, typename ConvertFunc >
+	inline void Append( DestContainerT& rDestItems, const SrcContainerT& srcItems, ConvertFunc cvtFunc )
+	{
+		rDestItems.resize( rDestItems.size() + srcItems.size() );
+		std::transform( srcItems.begin(), srcItems.end(), rDestItems.end(), cvtFunc );
+	}
+
+	template< typename DestContainerT, typename SrcContainerT, typename ConvertFunc >
+	inline void Prepend( DestContainerT& rDestItems, const SrcContainerT& srcItems, ConvertFunc cvtFunc )
+	{
+		rDestItems.resize( rDestItems.size() + srcItems.size() );
+		std::transform( srcItems.begin(), srcItems.end(), rDestItems.begin(), cvtFunc );
+	}
+
+
 	template< typename Type, typename ItemType >
 	inline void AddSorted( std::vector< Type >& rDest, ItemType item )
 	{

@@ -11,34 +11,19 @@ namespace str
 {
 	pred::CompareResult IntuitiveCompare( const char* pLeft, const char* pRight );
 	pred::CompareResult IntuitiveCompare( const wchar_t* pLeft, const wchar_t* pRight );
-
-
-	template< typename StringT >
-	inline pred::CompareResult IntuitiveCompareStr( const StringT& left, const StringT& right )
-	{
-		return IntuitiveCompare( left.c_str(), right.c_str() );
-	}
-}
-
-
-namespace pred
-{
-	template<>
-	inline CompareResult Compare_Scalar< std::string >( const std::string& left, const std::string& right )
-	{
-		return str::IntuitiveCompareStr( left, right );
-	}
-
-	template<>
-	inline CompareResult Compare_Scalar< std::wstring >( const std::wstring& left, const std::wstring& right )
-	{
-		return str::IntuitiveCompareStr( left, right );
-	}
 }
 
 
 namespace func
 {
+	struct ToCharPtr		// character-ptr translator
+	{
+		const char* operator()( const std::string& value ) const { return str::traits::GetCharPtr( value ); }
+		const wchar_t* operator()( const std::wstring& value ) const { return str::traits::GetCharPtr( value ); }
+		const TCHAR* operator()( const fs::CPath& value ) const { return str::traits::GetCharPtr( value ); }
+	};
+
+
 	// character translators
 
 	struct ToChar
@@ -64,14 +49,36 @@ namespace func
 
 		static int Translate( int charCode );
 	};
+}
 
 
-	struct ToCharPtr		// character-ptr translator
+namespace pred
+{
+	// natural string compare
+
+	template<>
+	inline CompareResult Compare_Scalar< std::string >( const std::string& left, const std::string& right )			// by default sort std::string in natural order
 	{
-		const char* operator()( const std::string& value ) const { return str::traits::GetCharPtr( value ); }
-		const wchar_t* operator()( const std::wstring& value ) const { return str::traits::GetCharPtr( value ); }
-		const TCHAR* operator()( const fs::CPath& value ) const { return str::traits::GetCharPtr( value ); }
+		return str::IntuitiveCompare( str::traits::GetCharPtr( left ), str::traits::GetCharPtr( right ) );
+	}
+
+	template<>
+	inline CompareResult Compare_Scalar< std::wstring >( const std::wstring& left, const std::wstring& right )		// by default sort std::wstring in natural order
+	{
+		return str::IntuitiveCompare( str::traits::GetCharPtr( left ), str::traits::GetCharPtr( right ) );
+	}
+
+
+	struct CompareNaturalCharPtr
+	{
+		template< typename CharType >
+		pred::CompareResult operator()( const CharType* pLeft, const CharType* pRight ) const
+		{
+			return str::IntuitiveCompare( pLeft, pRight );
+		}
 	};
+
+	typedef CompareAdapter< CompareNaturalCharPtr, func::ToCharPtr > TStringyCompareNatural;		// for string-like objects
 }
 
 

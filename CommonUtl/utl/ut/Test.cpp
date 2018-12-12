@@ -6,6 +6,7 @@
 #include "Logger.h"
 #include "Path.h"
 #include "RuntimeException.h"
+#include "RandomUtilities.h"
 #include "StringUtilities.h"
 #include <math.h>
 #include <fstream>
@@ -44,6 +45,19 @@ namespace ut
 
 namespace ut
 {
+	void RunAllTests( void )				// main entry point for running all unit tests
+	{
+		TRACE( "\nRUNNING UNIT TESTS:\n" );
+
+		utl::SetRandomSeed();				// ensure randomness on std::random_shuffle calls
+		CTestSuite::Instance().RunTests();
+
+		TRACE( "\nEND UNIT TESTS\n" );
+	}
+
+
+	// CTestSuite implementation
+
 	CTestSuite::~CTestSuite()
 	{
 	}

@@ -294,8 +294,6 @@ void CLcsTests::TestFindLongestCommonSubstring( void )
 
 void CLcsTests::TestRandomLongestCommonSubstring( void )
 {
-	utl::SetRandomSeed();
-
 	const Range< wchar_t > charRange = utl::GetRangeLowerLetters< wchar_t >();
 	static const wchar_t fragment[] = L" XYZ ";
 

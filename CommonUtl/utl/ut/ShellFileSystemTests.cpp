@@ -1,7 +1,6 @@
 
 #include "stdafx.h"
 #include "ut/ShellFileSystemTests.h"
-#include "RandomUtilities.h"
 #include "ShellTypes.h"
 #include "WinExplorer.h"
 #include "StringUtilities.h"
@@ -164,7 +163,6 @@ void CShellFileSystemTests::TestPathExplorerSort( void )
 	std::vector< fs::CPath > filePaths;
 	str::Split( filePaths, s_srcFiles, _T("|") );
 
-	utl::SetNextRandomSeed();
 	std::random_shuffle( filePaths.begin(), filePaths.end() );
 
 	shell::SortPaths( filePaths );

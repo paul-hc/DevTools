@@ -41,6 +41,8 @@ namespace ut
 	private:
 		std::vector< ITestCase* > m_testCases;
 	};
+
+	void RunAllTests( void );				// main entry point for running all unit tests
 }
 
 
