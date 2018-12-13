@@ -23,14 +23,16 @@ namespace fs
 	std::tstring MakeTempDirPath( const TCHAR* pSubPath );
 
 
-	fs::AcquireResult MakeFileWritable( const TCHAR* pFilePath );				// make file writable if read-only
-	bool DeleteFile( const TCHAR* pFilePath );									// delete even if read-only file
+	fs::AcquireResult MakeFileWritable( const TCHAR* pFilePath );		// make file writable if read-only
+	bool DeleteFile( const TCHAR* pFilePath );							// delete even if read-only file
 
 	bool CreateDir( const TCHAR* pDirPath );
-	bool CreateDirPath( const TCHAR* pDirPath );								// creates deep directory path, returns true if a valid directory path
+	bool CreateDirPath( const TCHAR* pDirPath );						// creates deep directory path, returns true if a valid directory path
 	bool DeleteDir( const TCHAR* pDirPath );
-	bool DeleteAllFiles( const TCHAR* pDirPath );								// delete even if read-only sub-directories or embedded files
+	bool DeleteAllFiles( const TCHAR* pDirPath );						// delete even if read-only sub-directories or embedded files
 
+
+	enum ExcPolicy { RuntimeExc, MfcExc };
 
 	namespace thr
 	{
@@ -41,18 +43,10 @@ namespace fs
 		void MoveFile( const TCHAR* pSrcFilePath, const TCHAR* pDestFilePath, DWORD flags = MOVEFILE_COPY_ALLOWED | MOVEFILE_REPLACE_EXISTING | MOVEFILE_WRITE_THROUGH ) throws_( CRuntimeException );
 		void DeleteFile( const TCHAR* pFilePath ) throws_( CRuntimeException );		// delete even if read-only file
 
-		void CreateDirPath( const TCHAR* pDirPath ) throws_( CRuntimeException );	// same as CreateDirPath() but throws on error
-		void CreateDirPath_Mfc( const TCHAR* pDirPath ) throws_( CFileException );	// throws CFileException on error
+		void CreateDirPath( const TCHAR* pDirPath,
+							fs::ExcPolicy policy = fs::RuntimeExc ) throws_( CRuntimeException, CFileException* );
 
 		void ThrowFileOpLastError( DWORD lastError, const TCHAR operationTag[], const TCHAR* pSrcFilePath, const TCHAR* pDestFilePath ) throws_( CRuntimeException );
-		void ThrowFileOpLastError_Mfc( const TCHAR* pFilePath, DWORD lastError = ::GetLastError() ) throws_( CFileException );
-	}
-
-
-	template< typename PathType >		// PathType could be any of: const char*, const TCHAR*, std::tstring, fs::CPath
-	void ThrowFileException( const std::tstring& description, const PathType& filePath ) throws_( CRuntimeException )
-	{
-		throw CRuntimeException( description + str::Enquote< std::tstring >( filePath ) );
 	}
 
 
@@ -78,13 +72,42 @@ namespace fs
 
 	namespace thr
 	{
-		void WriteFileTime( const TCHAR* pFilePath, TimeField timeField, const CTime& time ) throws_( CRuntimeException );
-		void WriteFileTime_Mfc( const TCHAR* pFilePath, TimeField timeField, const CTime& time ) throws_( CFileException );
+		CTime ReadFileTime( const fs::CPath& filePath, TimeField timeField,
+							fs::ExcPolicy policy = fs::RuntimeExc ) throws_( CRuntimeException, CFileException* );
 
-		inline void TouchFile( const TCHAR* pFilePath, const CTime& time = CTime::GetCurrentTime() ) throws_( CRuntimeException ) { WriteFileTime( pFilePath, ModifiedDate, time ); }
+		void WriteFileTime( const TCHAR* pFilePath, TimeField timeField, const CTime& time,
+							fs::ExcPolicy policy = fs::RuntimeExc ) throws_( CRuntimeException, CFileException* );
 
-		FILETIME* MakeFileTime( FILETIME& rOutFileTime, const CTime& time ) throws_( CRuntimeException );
-		FILETIME* MakeFileTime_Mfc( FILETIME& rOutFileTime, const CTime& time ) throws_( CFileException );
+		FILETIME* MakeFileTime( FILETIME& rOutFileTime, const CTime& time, const TCHAR* pFilePath,
+								fs::ExcPolicy policy = fs::RuntimeExc ) throws_( CRuntimeException, CFileException* );
+
+		void TouchFile( const fs::CPath& filePath, const CTime& time = CTime::GetCurrentTime(), TimeField timeField = ModifiedDate,
+						fs::ExcPolicy policy = fs::RuntimeExc ) throws_( CRuntimeException, CFileException* );
+
+		void TouchFileBy( const fs::CPath& filePath, const CTimeSpan& bySpan, TimeField timeField = ModifiedDate,
+						  fs::ExcPolicy policy = fs::RuntimeExc ) throws_( CRuntimeException, CFileException* );
+	}
+}
+
+
+namespace fs
+{
+	template< typename PathType >		// PathType could be any of: const char*, const TCHAR*, std::tstring, fs::CPath
+	void __declspec( noreturn ) ThrowFileException( const std::tstring& description, const PathType& filePath,
+													fs::ExcPolicy policy = fs::RuntimeExc ) throws_( CRuntimeException, CFileException* )
+	{
+		fs::RuntimeExc == policy
+			? impl::ThrowFileException( description, str::ValueToString< std::tstring >( filePath ).c_str() )
+			: impl::ThrowMfcErrorAs( policy, impl::NewLastErrorException( str::traits::GetCharPtr( filePath ), ERROR_INVALID_ACCESS ) );
+	}
+
+	namespace impl
+	{
+		CFileException* NewLastErrorException( const TCHAR* pFilePath, LONG lastError = ::GetLastError() );
+		CFileException* NewErrnoException( const TCHAR* pFilePath, unsigned long errNo );	// pass _doserrno or the DOS function result
+
+		void __declspec( noreturn ) ThrowMfcErrorAs( ExcPolicy policy, CFileException* pExc ) throws_( CRuntimeException, CFileException* );
+		void __declspec( noreturn ) ThrowFileException( const std::tstring& description, const TCHAR* pFilePath, const TCHAR sep[] = _T(": ") ) throws_( CRuntimeException );
 	}
 }
 
@@ -99,6 +122,17 @@ namespace fs
 	private:
 		const TCHAR* m_pFilePath;
 		DWORD m_origAttr;
+	};
+
+	class CScopedFileTime
+	{
+	public:
+		CScopedFileTime( const fs::CPath& filePath, TimeField timeField = fs::ModifiedDate );
+		~CScopedFileTime();
+	private:
+		fs::CPath m_filePath;
+		TimeField m_timeField;
+		CTime m_origFileTime;
 	};
 }
 

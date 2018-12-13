@@ -7,13 +7,6 @@
 
 namespace fs
 {
-	enum FileContentMatch
-	{
-		FileSize,				// quick and approximate
-		FileSizeAndCrc32		// slower but accurate
-	};
-
-
 	// for file transfer (copy/move)
 	enum TransferMatch { SrcUpToDate, NoSrcFile, NoDestFile, SrcFileNewer, SizeMismatch, Crc32Mismatch };
 

@@ -62,7 +62,7 @@ bool CProgressDialog::Create( const std::tstring& title, CWnd* pParentWnd /*= NU
 	return true;
 }
 
-void CProgressDialog::Abort( void ) throws_( CUserAbortedException )
+void __declspec( noreturn ) CProgressDialog::Abort( void ) throws_( CUserAbortedException )
 {
 	throw CUserAbortedException();
 }
@@ -73,11 +73,6 @@ bool CProgressDialog::CheckRunning( void ) const throws_( CUserAbortedException 
 		return true;
 
 	Abort();						// this throws
-
-	// prevent warning in both DEBUG and RELEASE builds
-#pragma warning( disable: 4715 )	// warning C4715: not all control paths return a value
-	return false;
-#pragma warning( default: 4715 )
 }
 
 void CProgressDialog::SetOperationLabel( const std::tstring& operationLabel )

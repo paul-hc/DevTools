@@ -3,12 +3,13 @@
 #pragma once
 
 #include "Range.h"
+#include "atlcomtime.h"		// for COleDateTime
 
 
 namespace time_utl
 {
-	extern const COleDateTime nullOleDateTime;
-	extern const Range< COleDateTime > nullOleRange;
+	const COleDateTime& GetNullOleDateTime( void );
+	const Range< COleDateTime > GetNullOleDateTimeRange( void );
 
 
 	inline bool IsValid( const CTime& dateTime ) { return dateTime.GetTime() != 0; }
@@ -25,7 +26,7 @@ namespace time_utl
 	enum CheckInvalid { NullOnInvalid, ThrowOnInvalid };
 
 	CTime FromOleTime( const COleDateTime& oleTime, CheckInvalid checkInvalid = NullOnInvalid, DaylightSavingsTimeUsage dstUsage = UseSystemDefault ) throws_( COleException );
-	inline COleDateTime ToOleTime( const CTime& stdTime ) { return IsValid( stdTime ) ? COleDateTime( stdTime.GetTime() ) : nullOleDateTime; }
+	inline COleDateTime ToOleTime( const CTime& stdTime ) { return IsValid( stdTime ) ? COleDateTime( stdTime.GetTime() ) : GetNullOleDateTime(); }
 
 	inline Range< CTime > FromOleTimeRange( const Range< COleDateTime >& oleTimeRange ) { return Range< CTime >( FromOleTime( oleTimeRange.m_start ), FromOleTime( oleTimeRange.m_end ) ); }
 	inline Range< COleDateTime > ToOleTimeRange( const Range< CTime >& stdTimeRange ) { return Range< COleDateTime >( ToOleTime( stdTimeRange.m_start ), ToOleTime( stdTimeRange.m_end ) ); }

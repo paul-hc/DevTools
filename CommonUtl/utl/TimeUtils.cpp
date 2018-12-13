@@ -9,16 +9,23 @@
 
 namespace time_utl
 {
-	static COleDateTime GetNullOleDateTime( void )
+	const COleDateTime& GetNullOleDateTime( void )
 	{
-		COleDateTime nullDateTime;							// default contructor sets status to valid
-		nullDateTime.SetStatus( COleDateTime::null );		// we need to make it null
-		return nullDateTime;
+		static COleDateTime s_null;							// default contructor sets status to valid
+		static bool isInit = false;
+		if ( !isInit )
+		{
+			s_null.SetStatus( COleDateTime::null );		// we need to make it null
+			isInit = true;
+		}
+		return s_null;
 	}
 
-
-	const COleDateTime nullOleDateTime = GetNullOleDateTime();
-	const Range< COleDateTime > nullOleRange( nullOleDateTime, nullOleDateTime );
+	const Range< COleDateTime > GetNullOleDateTimeRange( void )
+	{
+		const Range< COleDateTime > s_nullRange( GetNullOleDateTime(), GetNullOleDateTime() );
+		return s_nullRange;
+	}
 }
 
 
@@ -181,7 +188,7 @@ namespace time_utl
 	std::tstring FormatTimestamp( const CTime& dt, const TCHAR format[] /*= s_outFormat*/ )
 	{
 		std::tstring text;
-		if ( dt.GetTime() != 0 )
+		if ( time_utl::IsValid( dt ) )
 			text = dt.Format( format ).GetString();
 		return text;
 	}

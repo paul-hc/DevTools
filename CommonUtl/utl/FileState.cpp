@@ -100,11 +100,11 @@ namespace fs
 	{
 		std::vector< std::pair< FILETIME, const FILETIME* > > times( _TimeFieldCount );		// pair.second: ptr not NULL when time is defined (!= 0)
 
-		times[ ModifiedDate ].second = fs::thr::MakeFileTime_Mfc( times[ ModifiedDate ].first, newStatus.m_mtime );			// last modification time
+		times[ ModifiedDate ].second = fs::thr::MakeFileTime( times[ ModifiedDate ].first, newStatus.m_mtime, newStatus.m_szFullName, fs::MfcExc );			// last modification time
 		if ( times[ ModifiedDate ].second != NULL )
 		{
-			times[ AccessedDate ].second = fs::thr::MakeFileTime_Mfc( times[ AccessedDate ].first, newStatus.m_atime );		// last access time
-			times[ CreatedDate ].second = fs::thr::MakeFileTime_Mfc( times[ CreatedDate ].first, newStatus.m_ctime );		// create time
+			times[ AccessedDate ].second = fs::thr::MakeFileTime( times[ AccessedDate ].first, newStatus.m_atime, newStatus.m_szFullName, fs::MfcExc );		// last access time
+			times[ CreatedDate ].second = fs::thr::MakeFileTime( times[ CreatedDate ].first, newStatus.m_ctime, newStatus.m_szFullName, fs::MfcExc );		// create time
 
 			fs::CScopedWriteableFile scopedWriteable( m_fullPath.GetPtr() );
 			fs::CHandle file( ::CreateFile( m_fullPath.GetPtr(), GENERIC_READ | GENERIC_WRITE,

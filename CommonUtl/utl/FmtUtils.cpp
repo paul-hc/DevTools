@@ -275,7 +275,7 @@ namespace fmt
 				if ( fs::GetTags_TimeField().ParseAs( rField, tagRange.Extract(), CEnumTags::KeyTag ) )
 				{
 					rTime = time_utl::ParseTimestamp( textRange.MakeTrail( sepPos.m_end ).Extract() );
-					return rTime.GetTime() != 0;
+					return time_utl::IsValid( rTime );
 				}
 			}
 
@@ -297,7 +297,7 @@ namespace fmt
 				for ( fs::TimeField field = fs::TimeField( 0 ); field != fs::_TimeFieldCount; ++(int&)field )
 				{
 					const CTime& time = fileState.GetTimeField( field );
-					if ( time.GetTime() != 0 )
+					if ( time_utl::IsValid( time ) )
 						parts.push_back( _FormatTaggedTimeField( time, field ) );		// only add defined time-fields
 				}
 			}

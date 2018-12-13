@@ -170,9 +170,14 @@ namespace str
 	template< typename StringT, typename ValueT >
 	StringT Enquote( const ValueT& value, typename StringT::value_type quote = '\'' )
 	{
-		std::basic_ostringstream< typename StringT::value_type > oss;
-		oss << quote << value << quote;
-		return oss.str();
+		StringT text = ValueToString< StringT >( value );
+		if ( !text.empty() )
+		{
+			text.reserve( text.length() + 2 );
+			text.insert( 0, 1, quote );
+			text.append( 1, quote );
+		}
+		return text;
 	}
 
 

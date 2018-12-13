@@ -39,7 +39,7 @@ public:
 	bool CheckRunning( void ) const throws_( CUserAbortedException );
 
 	bool Create( const std::tstring& title, CWnd* pParentWnd = NULL );
-	static void Abort( void ) throws_( CUserAbortedException );
+	static void __declspec( noreturn ) Abort( void ) throws_( CUserAbortedException );
 
 	void SetOperationLabel( const std::tstring& operationLabel );
 

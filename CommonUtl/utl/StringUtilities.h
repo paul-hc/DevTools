@@ -465,7 +465,7 @@ namespace arg
 	inline std::tstring Enquote( const ValueT& value, TCHAR quote = _T('\"') ) { return str::Enquote< std::tstring >( value, quote ); }
 
 	template< typename ValueT >
-	std::tstring AutoEnquote( const ValueT& value, TCHAR quote = _T('\"') )
+	std::tstring AutoEnquote( const ValueT& value, TCHAR quote = _T('\"') )		// enquote only if it contains spaces
 	{
 		std::tstring text = str::ValueToString< std::tstring >( value );
 		if ( text.find( _T(' ') ) != std::tstring::npos )

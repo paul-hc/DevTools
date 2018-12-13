@@ -3,6 +3,7 @@
 #include "WicImage.h"
 #include "WicAnimatedImage.h"
 #include "StructuredStorage.h"
+#include "TimeUtils.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -137,7 +138,7 @@ std::tstring CWicImage::FormatDbg( void ) const
 	oss << sep << GetBmpFmt().FormatDbg( sep );
 
 	CTime lastModifyTime = fs::ReadLastModifyTime( m_key.first );
-	if ( lastModifyTime.GetTime() != 0 )
+	if ( time_utl::IsValid( lastModifyTime ) )
 		oss << sep << _T("modify_time=") << lastModifyTime.Format( _T("%d/%m/%Y %H:%M:%S") ).GetString();
 
 	return oss.str();

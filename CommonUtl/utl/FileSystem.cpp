@@ -4,6 +4,7 @@
 #include "EnumTags.h"
 #include "FlexPath.h"
 #include "RuntimeException.h"
+#include "TimeUtils.h"
 #include <shlwapi.h>				// for PathRelativePathTo
 #include <stdexcept>
 
@@ -81,7 +82,6 @@ namespace fs
 	}
 
 
-
 	fs::AcquireResult MakeFileWritable( const TCHAR* pFilePath )
 	{
 		ASSERT( !str::IsEmpty( pFilePath ) );
@@ -136,95 +136,6 @@ namespace fs
 		}
 
 		return fs::IsValidDirectory( dirPath.c_str() );
-	}
-
-
-	namespace thr
-	{
-		void MakeFileWritable( const TCHAR* pFilePath )
-		{
-			ASSERT( !str::IsEmpty( pFilePath ) );
-
-			static const TCHAR s_opTag[] = _T("Make file writable");
-
-			DWORD fileAttr = ::GetFileAttributes( pFilePath );
-			if ( INVALID_FILE_ATTRIBUTES == fileAttr )
-				ThrowFileOpLastError( ::GetLastError(), s_opTag, pFilePath, NULL );
-
-			if ( HasFlag( fileAttr, FILE_ATTRIBUTE_READONLY ) )
-				if ( !::SetFileAttributes( pFilePath, fileAttr & ~FILE_ATTRIBUTE_READONLY ) )
-					ThrowFileOpLastError( ::GetLastError(), s_opTag, pFilePath, NULL );
-		}
-
-		void CopyFile( const TCHAR* pSrcFilePath, const TCHAR* pDestFilePath, bool failIfExists ) throws_( CRuntimeException )
-		{
-			ASSERT( !str::IsEmpty( pSrcFilePath ) && !str::IsEmpty( pDestFilePath ) );
-
-			if ( !::CopyFile( pSrcFilePath, pDestFilePath, failIfExists ) )
-				ThrowFileOpLastError( ::GetLastError(), _T("Copy file"), pSrcFilePath, pDestFilePath );
-		}
-
-		void MoveFile( const TCHAR* pSrcFilePath, const TCHAR* pDestFilePath,
-					   DWORD flags /*= MOVEFILE_COPY_ALLOWED | MOVEFILE_REPLACE_EXISTING | MOVEFILE_WRITE_THROUGH*/ ) throws_( CRuntimeException )
-		{
-			ASSERT( !str::IsEmpty( pSrcFilePath ) && !str::IsEmpty( pDestFilePath ) );
-
-			if ( !::MoveFileEx( pSrcFilePath, pDestFilePath, flags ) )
-				ThrowFileOpLastError( ::GetLastError(), _T("Move file"), pSrcFilePath, pDestFilePath );
-		}
-
-		void DeleteFile( const TCHAR* pFilePath ) throws_( CRuntimeException )
-		{
-			MakeFileWritable( pFilePath );
-
-			if ( !::DeleteFile( pFilePath ) )
-				ThrowFileOpLastError( ::GetLastError(), _T("Delete file"), pFilePath, NULL );
-		}
-
-
-		void CreateDirPath( const TCHAR* pDirPath ) throws_( CRuntimeException )
-		{
-			if ( !fs::CreateDirPath( pDirPath ) )
-				ThrowFileException( _T("Could not create directory: "), pDirPath );
-		}
-
-		void CreateDirPath_Mfc( const TCHAR* pDirPath ) throws_( CFileException )
-		{
-			if ( !fs::CreateDirPath( pDirPath ) )
-				AfxThrowFileException( CFileException::badPath, -1, pDirPath );
-		}
-
-		void ThrowFileOpLastError( DWORD lastError, const TCHAR operationTag[], const TCHAR* pSrcFilePath, const TCHAR* pDestFilePath ) throws_( CRuntimeException )
-		{
-			std::tstring description = operationTag;
-			std::tstring whatTag = _T("failed to copy to destination file: ");
-			const TCHAR* pFilePath = pDestFilePath != NULL ? pDestFilePath : pSrcFilePath;
-
-			switch ( lastError )
-			{
-				case ERROR_FILE_NOT_FOUND:
-				case ERROR_PATH_NOT_FOUND:
-					whatTag = _T("file not found");
-					pFilePath = pSrcFilePath != NULL ? pSrcFilePath : pDestFilePath;
-					break;
-				case ERROR_ACCESS_DENIED:
-					whatTag = _T("destination file already exists");
-					break;
-				case ERROR_ENCRYPTION_FAILED:
-					whatTag = _T("failed to encrypt destination file ");
-					break;
-			}
-
-			stream::Tag( description, whatTag, _T(" - ") );
-			description += _T(": ");
-
-			fs::ThrowFileException( description, pFilePath );
-		}
-
-		void ThrowFileOpLastError_Mfc( const TCHAR* pFilePath, DWORD lastError /*= ::GetLastError()*/ ) throws_( CFileException )
-		{
-			CFileException::ThrowOsError( lastError, pFilePath );
-		}
 	}
 
 	bool DeleteDir( const TCHAR* pDirPath )
@@ -282,6 +193,85 @@ namespace fs
 		return fileSize;
 	}
 
+
+	namespace thr
+	{
+		void MakeFileWritable( const TCHAR* pFilePath ) throws_( CRuntimeException )
+		{
+			ASSERT( !str::IsEmpty( pFilePath ) );
+
+			static const TCHAR s_opTag[] = _T("Make file writable");
+
+			DWORD fileAttr = ::GetFileAttributes( pFilePath );
+			if ( INVALID_FILE_ATTRIBUTES == fileAttr )
+				ThrowFileOpLastError( ::GetLastError(), s_opTag, pFilePath, NULL );
+
+			if ( HasFlag( fileAttr, FILE_ATTRIBUTE_READONLY ) )
+				if ( !::SetFileAttributes( pFilePath, fileAttr & ~FILE_ATTRIBUTE_READONLY ) )
+					ThrowFileOpLastError( ::GetLastError(), s_opTag, pFilePath, NULL );
+		}
+
+		void CopyFile( const TCHAR* pSrcFilePath, const TCHAR* pDestFilePath, bool failIfExists ) throws_( CRuntimeException )
+		{
+			ASSERT( !str::IsEmpty( pSrcFilePath ) && !str::IsEmpty( pDestFilePath ) );
+
+			if ( !::CopyFile( pSrcFilePath, pDestFilePath, failIfExists ) )
+				ThrowFileOpLastError( ::GetLastError(), _T("Copy file"), pSrcFilePath, pDestFilePath );
+		}
+
+		void MoveFile( const TCHAR* pSrcFilePath, const TCHAR* pDestFilePath,
+					   DWORD flags /*= MOVEFILE_COPY_ALLOWED | MOVEFILE_REPLACE_EXISTING | MOVEFILE_WRITE_THROUGH*/ ) throws_( CRuntimeException )
+		{
+			ASSERT( !str::IsEmpty( pSrcFilePath ) && !str::IsEmpty( pDestFilePath ) );
+
+			if ( !::MoveFileEx( pSrcFilePath, pDestFilePath, flags ) )
+				ThrowFileOpLastError( ::GetLastError(), _T("Move file"), pSrcFilePath, pDestFilePath );
+		}
+
+		void DeleteFile( const TCHAR* pFilePath ) throws_( CRuntimeException )
+		{
+			MakeFileWritable( pFilePath );
+
+			if ( !::DeleteFile( pFilePath ) )
+				ThrowFileOpLastError( ::GetLastError(), _T("Delete file"), pFilePath, NULL );
+		}
+
+
+		void CreateDirPath( const TCHAR* pDirPath,
+							fs::ExcPolicy policy /*= fs::RuntimeExc*/ ) throws_( CRuntimeException, CFileException* )
+		{
+			if ( !fs::CreateDirPath( pDirPath ) )
+				ThrowFileException( _T("Could not create directory"), pDirPath, policy );
+		}
+
+		void ThrowFileOpLastError( DWORD lastError, const TCHAR operationTag[], const TCHAR* pSrcFilePath, const TCHAR* pDestFilePath ) throws_( CRuntimeException )
+		{
+			std::tstring description = operationTag;
+			std::tstring whatTag = _T("failed to copy to destination file: ");
+			const TCHAR* pFilePath = pDestFilePath != NULL ? pDestFilePath : pSrcFilePath;
+
+			switch ( lastError )
+			{
+				case ERROR_FILE_NOT_FOUND:
+				case ERROR_PATH_NOT_FOUND:
+					whatTag = _T("file not found");
+					pFilePath = pSrcFilePath != NULL ? pSrcFilePath : pDestFilePath;
+					break;
+				case ERROR_ACCESS_DENIED:
+					whatTag = _T("destination file already exists");
+					break;
+				case ERROR_ENCRYPTION_FAILED:
+					whatTag = _T("failed to encrypt destination file ");
+					break;
+			}
+
+			stream::Tag( description, whatTag, _T(" - ") );
+
+			impl::ThrowFileException( description, pFilePath );
+		}
+
+	} //namespace thr
+
 } //namespace fs
 
 
@@ -336,7 +326,7 @@ namespace fs
 	FileExpireStatus CheckExpireStatus( const fs::CPath& filePath, const CTime& lastModifyTime )
 	{
 		CTime currModifTime = ReadLastModifyTime( filePath );
-		if ( 0 == currModifTime.GetTime() )				// probably image file deleted -> expired
+		if ( !time_utl::IsValid( currModifTime ) )				// probably image file deleted -> expired
 			return ExpiredFileDeleted;
 
 		return currModifTime > lastModifyTime ? ExpiredFileModified : FileNotExpired;
@@ -345,27 +335,32 @@ namespace fs
 
 	namespace thr
 	{
-		void WriteFileTime( const TCHAR* pFilePath, TimeField timeField, const CTime& time ) throws_( CRuntimeException )
+		CTime ReadFileTime( const fs::CPath& filePath, TimeField timeField,
+							fs::ExcPolicy policy /*= fs::RuntimeExc*/ ) throws_( CRuntimeException, CFileException* )
 		{
-			try
-			{
-				WriteFileTime_Mfc( pFilePath, timeField, time );
-			}
-			catch ( CException* pExc )
-			{
-				CRuntimeException::ThrowFromMfc( pExc );
-			}
+			_stat64i32 fileStatus;
+			int result = _tstat( filePath.GetPtr(), &fileStatus );
+			if ( 0 == result )
+				switch ( timeField )
+				{
+					case CreatedDate:	return fileStatus.st_ctime;
+					case ModifiedDate:	return fileStatus.st_mtime;
+					case AccessedDate:	return fileStatus.st_atime;
+				}
+
+			impl::ThrowMfcErrorAs( policy, impl::NewErrnoException( filePath.GetPtr(), result ) );
 		}
 
-		void WriteFileTime_Mfc( const TCHAR* pFilePath, TimeField timeField, const CTime& time ) throws_( CFileException )
+		void WriteFileTime( const TCHAR* pFilePath, TimeField timeField, const CTime& time,
+							fs::ExcPolicy policy /*= fs::RuntimeExc*/ ) throws_( CRuntimeException, CFileException* )
 		{
 			ASSERT( !str::IsEmpty( pFilePath ) );
-			ASSERT( time.GetTime() != 0 );
+			ASSERT( time_utl::IsValid( time ) );
 
 			FILETIME fileTime;
 			std::vector< const FILETIME* > triplet( _TimeFieldCount );		// all reset to NULL
 
-			triplet[ timeField ] = MakeFileTime_Mfc( fileTime, time );
+			triplet[ timeField ] = MakeFileTime( fileTime, time, pFilePath, policy );
 			if ( triplet[ timeField ] != NULL )
 			{
 				fs::CScopedWriteableFile scopedWriteable( pFilePath );
@@ -375,30 +370,19 @@ namespace fs
 					IsValidDirectory( pFilePath ) ? FILE_FLAG_BACKUP_SEMANTICS : FILE_ATTRIBUTE_NORMAL,		// IMPORTANT: for access to directory vs file
 					NULL ) );
 
-				if ( !file.IsValid() ||
-					 !::SetFileTime( file.Get(), triplet[ CreatedDate ], triplet[ AccessedDate ], triplet[ ModifiedDate ] ) ||
-					 !file.Close() )
-					ThrowFileOpLastError_Mfc( pFilePath );
+				if ( file.IsValid() )
+					if ( ::SetFileTime( file.Get(), triplet[ CreatedDate ], triplet[ AccessedDate ], triplet[ ModifiedDate ] ) != FALSE )
+						if ( file.Close() )
+							return;
+
+				impl::ThrowMfcErrorAs( policy, impl::NewLastErrorException( pFilePath ) );
 			}
 		}
 
-
-		FILETIME* MakeFileTime( FILETIME& rOutFileTime, const CTime& time ) throws_( CRuntimeException )
+		FILETIME* MakeFileTime( FILETIME& rOutFileTime, const CTime& time, const TCHAR* pFilePath,
+								fs::ExcPolicy policy /*= fs::RuntimeExc*/ ) throws_( CRuntimeException, CFileException* )
 		{
-			try
-			{
-				return MakeFileTime_Mfc( rOutFileTime, time );
-			}
-			catch ( CException* pExc )
-			{
-				CRuntimeException::ThrowFromMfc( pExc );
-				return NULL;
-			}
-		}
-
-		FILETIME* MakeFileTime_Mfc( FILETIME& rOutFileTime, const CTime& time ) throws_( CFileException )
-		{
-			if ( 0 == time.GetTime() )
+			if ( !time_utl::IsValid( time ) )
 				return NULL;
 
 			SYSTEMTIME sysTime;
@@ -413,13 +397,25 @@ namespace fs
 			// convert system time to local file time
 			FILETIME localTime;
 			if ( !::SystemTimeToFileTime( &sysTime, &localTime ) )
-				CFileException::ThrowOsError( (LONG)::GetLastError() );
+				impl::ThrowMfcErrorAs( policy, impl::NewLastErrorException( pFilePath ) );
 
 			// convert local file time to UTC file time
 			if ( !::LocalFileTimeToFileTime( &localTime, &rOutFileTime ) )
-				CFileException::ThrowOsError( (LONG)::GetLastError() );
+				impl::ThrowMfcErrorAs( policy, impl::NewLastErrorException( pFilePath ) );
 
 			return &rOutFileTime;
+		}
+
+		void TouchFile( const fs::CPath& filePath, const CTime& time /*= CTime::GetCurrentTime()*/, TimeField timeField /*= ModifiedDate*/,
+						fs::ExcPolicy policy /*= fs::RuntimeExc*/ ) throws_( CRuntimeException, CFileException* )
+		{
+			WriteFileTime( filePath.GetPtr(), timeField, time, policy );
+		}
+
+		void TouchFileBy( const fs::CPath& filePath, const CTimeSpan& bySpan, TimeField timeField /*= ModifiedDate*/,
+						  fs::ExcPolicy policy /*= fs::RuntimeExc*/ ) throws_( CRuntimeException, CFileException* )
+		{
+			WriteFileTime( filePath.GetPtr(), timeField, ReadFileTime( filePath, timeField, policy ) + bySpan, policy );
 		}
 	}
 }
@@ -427,6 +423,50 @@ namespace fs
 
 namespace fs
 {
+	namespace impl
+	{
+		CFileException* NewLastErrorException( const TCHAR* pFilePath, LONG lastError /*= ::GetLastError()*/ )
+		{
+			return lastError != 0
+				? new CFileException( CFileException::OsErrorToException( lastError ), lastError, pFilePath )
+				: NULL;
+		}
+
+		CFileException* NewErrnoException( const TCHAR* pFilePath, unsigned long errNo )	// = _doserrno
+		{
+			return errNo != 0
+				? new CFileException( CFileException::ErrnoToException( errNo != -1 ? errNo : (int)_doserrno ), _doserrno, pFilePath )
+				: NULL;
+		}
+
+		void __declspec( noreturn ) ThrowMfcErrorAs( ExcPolicy policy, CFileException* pExc ) throws_( CRuntimeException, CFileException* )
+		{
+			if ( pExc != NULL )
+				switch ( policy )
+				{
+					case RuntimeExc:
+						throw CRuntimeException( str::Enquote< std::tstring >( std::auto_ptr< CFileException >( pExc ).get()->m_strFileName ) );	// pExc will be deleted
+					case MfcExc:
+						throw pExc;
+					default: ASSERT( false );
+				}
+		}
+
+		void __declspec( noreturn ) ThrowFileException( const std::tstring& description, const TCHAR* pFilePath, const TCHAR sep[] /*= _T(": ")*/ ) throws_( CRuntimeException )
+		{
+			std::tstring message = description;
+			stream::Tag( message, str::Enquote< std::tstring >( pFilePath ), sep );
+
+			throw CRuntimeException( message );
+		}
+	}
+}
+
+
+namespace fs
+{
+	// CScopedWriteableFile implementation
+
 	CScopedWriteableFile::CScopedWriteableFile( const TCHAR* pFilePath )
 		: m_pFilePath( pFilePath )
 		, m_origAttr( ::GetFileAttributes( m_pFilePath ) )
@@ -434,14 +474,43 @@ namespace fs
 		if ( m_origAttr != INVALID_FILE_ATTRIBUTES )
 			if ( HasFlag( m_origAttr, FILE_ATTRIBUTE_READONLY ) )										// currently readonly?
 				if ( !::SetFileAttributes( m_pFilePath, m_origAttr & ~FILE_ATTRIBUTE_READONLY ) )		// temporarily allow changing file times for a read-only file/directory
+				{
 					m_origAttr = INVALID_FILE_ATTRIBUTES;												// failed removing FILE_ATTRIBUTE_READONLY
+					TRACE( _T("* fs::CScopedWriteableFile::CScopedWriteableFile - SetFileAttributes() failed for %s\n"), str::Enquote< std::tstring >( m_pFilePath ).c_str() );
+				}
 	}
 
 	CScopedWriteableFile::~CScopedWriteableFile()
 	{
 		if ( m_origAttr != INVALID_FILE_ATTRIBUTES )
 			if ( HasFlag( m_origAttr, FILE_ATTRIBUTE_READONLY ) )			// was readonly?
-				::SetFileAttributes( m_pFilePath, m_origAttr );				// restore original FILE_ATTRIBUTE_READONLY
+				if ( !::SetFileAttributes( m_pFilePath, m_origAttr ) )		// restore original FILE_ATTRIBUTE_READONLY
+					TRACE( _T("* fs::CScopedWriteableFile::~CScopedWriteableFile - SetFileAttributes() failed for %s\n"), str::Enquote< std::tstring >( m_pFilePath ).c_str() );
+	}
+
+
+	// CScopedFileTime implementation
+
+	CScopedFileTime::CScopedFileTime( const fs::CPath& filePath, TimeField timeField /*= fs::ModifiedDate*/ )
+		: m_filePath( filePath )
+		, m_timeField( timeField )
+		, m_origFileTime( fs::ReadFileTime( m_filePath, m_timeField ) )
+	{
+		if ( !time_utl::IsValid( m_origFileTime ) )
+			TRACE( _T("* fs::CScopedFileTime::CScopedFileTime - ReadFileTime() failed for %s\n"), str::Enquote< std::tstring >( m_filePath ).c_str() );
+	}
+
+	CScopedFileTime::~CScopedFileTime()
+	{
+		if ( time_utl::IsValid( m_origFileTime ) )
+			try
+			{
+				fs::thr::WriteFileTime( m_filePath.GetPtr(), m_timeField, m_origFileTime );
+			}
+			catch ( CRuntimeException& exc )
+			{
+				TRACE( _T("* fs::CScopedFileTime::CScopedFileTime - WriteFileTime() failed for %s\n"), exc.GetMessage().c_str() );
+			}
 	}
 }
 

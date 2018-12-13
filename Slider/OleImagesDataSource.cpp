@@ -131,7 +131,7 @@ const fs::CPath& CTempCloneFileSet::GetTempDirPath( void )
 		if ( !fs::IsValidDirectory( dirPath.GetPtr() ) )
 			try
 			{
-				fs::thr::CreateDirPath_Mfc( dirPath.GetPtr() );
+				fs::thr::CreateDirPath( dirPath.GetPtr(), fs::MfcExc );
 			}
 			catch ( CException* pExc )
 			{

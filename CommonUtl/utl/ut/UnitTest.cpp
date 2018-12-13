@@ -29,11 +29,53 @@ namespace numeric
 
 namespace ut
 {
+	bool SetFileText( const fs::CPath& filePath, const TCHAR* pText /*= NULL*/ )
+	{
+		if ( !fs::CreateDirPath( filePath.GetParentPath().GetPtr() ) )
+			return false;			// error creating sub dir
+
+		if ( NULL == pText )
+			pText = filePath.GetNameExt();		// use the filename as text content
+
+		std::ofstream output( filePath.GetUtf8().c_str(), std::ios_base::out | std::ios_base::trunc );
+		output
+			<< "Unit-test file: " << std::endl
+			<< pText << std::endl;
+
+		return filePath.FileExist();
+	}
+
+	bool ModifyFileText( const fs::CPath& filePath, const TCHAR* pText /*= NULL*/, bool retainModifyTime /*= false*/ )
+	{
+		if ( !filePath.FileExist() )
+		{
+			ASSERT( false );
+			return false;
+		}
+
+		std::auto_ptr< fs::CScopedFileTime > pScopedFileTime( retainModifyTime ? new fs::CScopedFileTime( filePath ) : NULL );
+
+		if ( NULL == pText )
+			pText = filePath.GetNameExt();		// use the filename as text content
+
+		{
+			std::ofstream output( filePath.GetUtf8().c_str(), std::ios_base::out | std::ios_base::app );
+			output << pText << std::endl;
+		}
+
+		return true;
+	}
+}
+
+
+namespace ut
+{
 	CLogger& GetTestLogger( void )
 	{
 		static CLogger testLogger( _T("%s_tests") );
 		return testLogger;
 	}
+
 
 	std::tstring MakeNotEqualMessage( const std::tstring& expectedValue, const std::tstring& actualValue )
 	{
@@ -111,7 +153,7 @@ namespace ut
 		for ( std::vector< fs::CPath >::iterator itSrcPath = filePaths.begin(); itSrcPath != filePaths.end(); ++itSrcPath )
 		{
 			*itSrcPath = m_poolDirPath / *itSrcPath;		// convert to absolute path
-			if ( !CreateTextFile( *itSrcPath ) )
+			if ( !ut::SetFileText( *itSrcPath ) )
 			{
 				m_hasFileErrors = true;
 				return false;
@@ -123,34 +165,6 @@ namespace ut
 			m_filePaths.push_back( *itSrcPath );
 
 		return true;
-	}
-
-	bool CTempFilePool::CreateTextFile( const fs::CPath& filePath )
-	{
-		if ( fs::IsValidFile( filePath.GetPtr() ) )
-			return true;
-
-		if ( !fs::CreateDirPath( filePath.GetParentPath().GetPtr() ) )
-			return false;			// error creating sub dir
-
-		std::ofstream output( filePath.GetUtf8().c_str(), std::ios_base::out | std::ios_base::trunc );
-		output
-			<< "Unit-test file: " << std::endl
-			<< filePath.GetFilename() << std::endl;
-
-		return filePath.FileExist();
-	}
-
-	bool CTempFilePool::ModifyTextFile( const fs::CPath& filePath )
-	{
-		if ( !filePath.FileExist() )
-		{
-			ASSERT( false );
-			return false;
-		}
-		std::ofstream output( filePath.GetUtf8().c_str(), std::ios_base::out | std::ios_base::app );
-		output << filePath.GetFilename() << std::endl;
-		return filePath.FileExist();
 	}
 
 

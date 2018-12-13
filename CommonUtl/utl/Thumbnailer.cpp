@@ -8,6 +8,7 @@
 #include "StreamStdTypes.h"
 #include "StructuredStorage.h"
 #include "Utilities.h"
+#include "TimeUtils.h"
 #include "BaseApp.h"
 #include "FileObjectCache.hxx"
 
@@ -375,7 +376,7 @@ std::tstring CCachedThumbBitmap::FormatDbg( void ) const
 	if ( GetBmpFmt().m_size != m_unscaledBmpSize )
 		oss << sep << _T("size=") << GetBmpFmt().FormatDbg( sep );
 
-	if ( m_lastModifTime.GetTime() != 0 )
+	if ( time_utl::IsValid( m_lastModifTime ) != 0 )
 		oss << _T("  modif_time=") << m_lastModifTime.Format( _T("%d/%m/%Y %H:%M:%S") ).GetString();
 
 	if ( IsCachedByShell() )

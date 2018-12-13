@@ -88,6 +88,9 @@ namespace ut
 	do { std::tstring msg; _ASSERT_EXPR( ( ut::AssertEqualsIgnoreCase( (expected), (actual), msg ) ), msg.c_str() ); } while( false )
 
 
+#define UT_REPEAT_BLOCK( count )  for ( unsigned int i = count; i-- != 0; )
+
+
 namespace ut
 {
 	template< typename Container >
@@ -140,6 +143,13 @@ std::wostream& operator<<( std::wostream& os, const std::pair< Type1, Type2 >& r
 #include "utl/FileSystem.h"
 
 
+namespace ut
+{
+	bool SetFileText( const fs::CPath& filePath, const TCHAR* pText = NULL );				// set a line of thext (pass NULL for using "name.ext")
+	bool ModifyFileText( const fs::CPath& filePath, const TCHAR* pAddText = NULL, bool retainModifyTime = false );	// add another line of thext (pass NULL for using "name.ext")
+}
+
+
 class CLogger;
 
 
@@ -168,10 +178,6 @@ namespace ut
 
 		bool DeleteAllFiles( void );
 		bool SplitCreateFiles( const TCHAR* pFlatPaths = NULL );	// can contain subdirectories
-
-		static bool ModifyTextFile( const fs::CPath& filePath );	// add another line containing its name.ext
-	private:
-		static bool CreateTextFile( const fs::CPath& filePath );	// contains one line with its name.ext
 	private:
 		fs::CPath m_poolDirPath;							// temorary directory
 		std::vector< fs::CPath > m_filePaths;

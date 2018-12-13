@@ -4,6 +4,7 @@
 #include "FileSystem.h"
 #include "Crc32.h"
 #include "ContainerUtilities.h"
+#include "TimeUtils.h"
 #include "StringUtilities.h"
 
 #ifdef _DEBUG
@@ -35,7 +36,7 @@ namespace fs
 		if ( checkTimestamp )
 		{
 			CTime destModifTime = ReadLastModifyTime( destFilePath );
-			if ( 0 == destModifTime.GetTime() != 0 )
+			if ( !time_utl::IsValid( destModifTime ) )
 				return NoDestFile;
 
 			switch ( CheckExpireStatus( srcFilePath, destModifTime ) )

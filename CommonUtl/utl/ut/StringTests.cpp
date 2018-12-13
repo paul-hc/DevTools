@@ -662,8 +662,8 @@ void CStringTests::TestArgUtilities( void )
 	ASSERT( arg::ParseOptionalValuePair( &value, _T("Source=Value3"), _T("source"), _T('>') ) );
 
 
-	ASSERT_EQUAL( _T("\"\""), arg::Enquote( "" ) );
-	ASSERT_EQUAL( _T("''"), arg::Enquote( "", '\'' ) );
+	ASSERT_EQUAL( _T(""), arg::Enquote( "" ) );
+	ASSERT_EQUAL( _T(""), arg::Enquote( "", '\'' ) );
 	ASSERT_EQUAL( _T("'x'"), arg::Enquote( "x", '\'' ) );
 
 	ASSERT_EQUAL( _T("\"x\""), arg::Enquote( 'x' ) );

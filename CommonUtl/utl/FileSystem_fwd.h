@@ -16,6 +16,12 @@ namespace fs
 
 	enum AcquireResult { FoundExisting, Created, CreationError };		// result of resource acquisition
 
+	enum FileContentMatch
+	{
+		FileSize,				// quick and approximate
+		FileSizeAndCrc32		// slower but accurate
+	};
+
 
 	bool IsValidFile( const TCHAR* pFilePath );
 	bool IsValidDirectory( const TCHAR* pDirPath );
