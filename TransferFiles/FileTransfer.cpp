@@ -53,17 +53,17 @@ int CFileTransfer::Transfer( void )
 					if ( pItem->Transfer( m_pOptions->m_fileAction, pBackupInfo.get() ) )
 					{
 						++m_fileCount;
-						pItem->Print( std::cout, m_pOptions->m_fileAction, m_pOptions->m_filterByTimestamp ) << std::endl;
+						pItem->Print( std::cout, m_pOptions->m_fileAction, m_pOptions->m_filterBy >= CheckTimestamp ) << std::endl;
 					}
 		}
 		else
 		{	// just display SOURCE or TARGET
 			if ( JustDisplaySourceFile == m_pOptions->m_transferMode )
-				std::cout << pItem->m_sourceFileInfo.m_filePath.Get();
+				std::cout << pItem->m_source.m_filePath.Get();
 			else
-				std::cout << pItem->m_targetFileInfo.m_filePath.Get();
+				std::cout << pItem->m_target.m_filePath.Get();
 
-			if ( pItem->m_sourceFileInfo.IsDirectory() )
+			if ( pItem->m_source.IsDirectory() )
 				++m_createdDirCount;
 			else
 				++m_fileCount;
@@ -103,32 +103,32 @@ bool CFileTransfer::AddTransferItem( CTransferItem* pTransferItem )
 	if ( !m_pOptions->PassFilter( *pTransferItem ) )
 		return false;
 
-	TransferItemMap::const_iterator itFoundItem = m_transferItems.find( pTransferItem->m_sourceFileInfo.m_filePath );
+	TransferItemMap::const_iterator itFoundItem = m_transferItems.find( pTransferItem->m_source.m_filePath );
 	if ( itFoundItem != m_transferItems.end() )
 		return false;			// reject duplicates
 
-	m_transferItems.insert( std::make_pair( pTransferItem->m_sourceFileInfo.m_filePath, itemPtr.release() ) );
+	m_transferItems.insert( std::make_pair( pTransferItem->m_source.m_filePath, itemPtr.release() ) );
 	return true;
 }
 
 bool CFileTransfer::CanAlterTargetFile( const CTransferItem& item )
 {
-	if ( item.m_targetFileInfo.Exist() )
+	if ( item.m_target.Exist() )
 	{
 		static const char* s_promptFileAction[] = { "Overwrite", "Overwrite", "Remove" };		// indexed by FileAction
 
-		if ( item.m_targetFileInfo.IsRegularFile() )
-			if ( m_uqOverrideReadOnly.MustAsk() && item.m_targetFileInfo.IsProtected() )
+		if ( item.m_target.IsRegularFile() )
+			if ( m_uqOverrideReadOnly.MustAsk() && item.m_target.IsProtected() )
 			{
-				std::cout << s_promptFileAction[ m_pOptions->m_fileAction ] << FormatProtectedFileAttr( item.m_targetFileInfo.m_attributes ) << _T(" ");
+				std::cout << s_promptFileAction[ m_pOptions->m_fileAction ] << FormatProtectedFileAttr( item.m_target.m_attributes ) << _T(" ");
 
-				return m_uqOverrideReadOnly.Ask( arg::Enquote( item.m_targetFileInfo.m_filePath ) );
+				return m_uqOverrideReadOnly.Ask( arg::Enquote( item.m_target.m_filePath ) );
 			}
 			else if ( m_uqOverrideFiles.MustAsk() )
 			{
 				std::cout << s_promptFileAction[ m_pOptions->m_fileAction ] << _T(" ");
 
-				return m_uqOverrideFiles.Ask( arg::Enquote( item.m_targetFileInfo.m_filePath ) );
+				return m_uqOverrideFiles.Ask( arg::Enquote( item.m_target.m_filePath ) );
 			}
 	}
 	else
@@ -146,9 +146,9 @@ bool CFileTransfer::CanAlterTargetFile( const CTransferItem& item )
 
 bool CFileTransfer::CreateTargetDirectory( const CTransferItem& item )
 {
-	fs::CPath targetDirPath = item.m_targetFileInfo.m_filePath;
+	fs::CPath targetDirPath = item.m_target.m_filePath;
 
-	if ( item.m_sourceFileInfo.IsRegularFile() )			// SRC (physically present) is a file?
+	if ( item.m_source.IsRegularFile() )					// SRC (physically present) is a file?
 		targetDirPath = targetDirPath.GetParentPath();		// take the target parent directory
 
 	switch ( m_uqCreateDirs.Acquire( targetDirPath ) )

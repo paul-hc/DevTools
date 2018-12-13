@@ -31,14 +31,14 @@ private:
 
 	static std::tstring FormatProtectedFileAttr( DWORD fileAttr );
 private:
-	typedef std::map< fs::CPath, CTransferItem* > TransferItemMap;		// , pred::TLess_NaturalPath
-
 	// fs::IEnumerator interface (files only)
 	virtual void AddFoundFile( const TCHAR* pFilePath ) { pFilePath; ASSERT( false ); }
 	virtual void AddFoundSubDir( const TCHAR* pSubDirPath );
 	virtual void AddFile( const CFileFind& foundFile );
 
 	bool AddTransferItem( CTransferItem* pTransferItem );
+
+	typedef std::map< fs::CPath, CTransferItem* > TransferItemMap;		// uses pred::TLess_NaturalPath
 private:
 	const CXferOptions* m_pOptions;
 	TransferItemMap m_transferItems;

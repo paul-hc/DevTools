@@ -33,11 +33,11 @@ static const char s_helpMessage[] =
 	"\n"
 	"xFer source_filter [target_dir]\n"
 	"     [/transfer=action]\n"
+	"     [/bk[=bk_dir]]\n"
 	"     [/ch[=CRC32]]\n"
 	"     [/a[=attributes]] [/d[=date]]\n"
 	"     [/exclude=file1[+file2][+file3]...]\n"
 	"     [/ew=spec1[+spec2][+spec3]...]\n"
-	"     [/bk[=bk_dir]]\n"
 	"     [/q] [/jd] [/r] [/u] [/ud] [/ls or /lt] [/s[-]] [/y[-]]\n"
 	"\n"
 	"  source_filter\n"
@@ -50,9 +50,15 @@ static const char s_helpMessage[] =
 	"        /t=c    /transfer=copy    Copy source files to target (default).\n"
 	"        /t=m    /transfer=move    Move source files to target.\n"
 	"        /t=r    /transfer=remove  Remove target files matching source files.\n"
-	"  /ch[=CRC32]\n"
-	"      Transfer only source files that have a content than the existing target.\n"
-	"      Compare files by size, or optionally also by CRC32 checksum (slower).\n"
+	"  /bk[=bk_dir]\n"
+	"      Backup destination files about to be overwritten using a numeric suffix.\n"
+	"      If bk_dir is specified, all backups go in that directory,\n"
+	"      relative to target_dir, otherwise uses target_dir.\n"
+	"  /ch[=size|crc32]\n"
+	"      Transfer only source files that are newer, or optionally have a different\n"
+	"      content than the existing target file:\n"
+	"        size    compared by file size;\n"
+	"        crc32   compared by file size and CRC32 checksum (slower).\n"
 	"  /a[=attributes]\n"
 	"      Filter files with specified attributes:\n"
 	"        D  Directories       R  Read-only files\n"
@@ -72,10 +78,6 @@ static const char s_helpMessage[] =
 	"  /ew=spec1[,spec2][,spec3]...\n"
 	"      Specifies a list of file wildcard specs.\n"
 	"      Matching files will be excluded from transfer.\n"
-	"  /bk[=bk_dir]\n"
-	"      Backup destination file about to be overwritten using a numeric suffix.\n"
-	"      If bk_dir is specified, it does the backup in that directory,\n"
-	"      relative to target_dir, otherwise uses target_dir.\n"
 	"  /q  Quiet mode, does not display file names while transfering.\n"
 	"  /jd Just creates directory structure, but does not transfer files.\n"
 	"  /r  Overwrites read-only files.\n"
@@ -115,10 +117,7 @@ int _tmain( int argc, TCHAR* argv[] )
 	if ( app::HasCommandLineOption( _T("ut"), &value ) )
 	{
 		ut::RegisterAppUnitTests( value == _T("debug") );
-
-		std::cout << "RUNNING UNIT TESTS:" << std::endl;
-		ut::CTestSuite::Instance().RunTests();
-		std::cout << "END UNIT TESTS" << std::endl;
+		ut::RunAllTests();
 		return 0;
 	}
 #endif

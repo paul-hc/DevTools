@@ -18,7 +18,7 @@ CXferOptions::CXferOptions( void )
 	, m_recurseSubDirectories( true )
 	, m_mustHaveFileAttr( 0 )
 	, m_mustNotHaveFileAttr( 0 )
-	, m_filterByTimestamp( false )
+	, m_filterBy( NoCheck )
 	, m_earliestTimestamp( 0 )
 	, m_justCreateTargetDirs( false )
 	, m_overrideReadOnlyFiles( false )
@@ -37,8 +37,7 @@ CXferOptions::~CXferOptions()
 
 bool CXferOptions::PassFilter( const CTransferItem& transferNode ) const
 {
-	DWORD sourceAttributes = transferNode.m_sourceFileInfo.m_attributes;
-
+	DWORD sourceAttributes = transferNode.m_source.m_attributes;
 	ASSERT( sourceAttributes != INVALID_FILE_ATTRIBUTES );
 
 	if ( m_mustHaveFileAttr != 0 )
@@ -49,52 +48,25 @@ bool CXferOptions::PassFilter( const CTransferItem& transferNode ) const
 		if ( ( sourceAttributes & m_mustNotHaveFileAttr ) != 0 )
 			return false;
 
-	if ( m_filterByTimestamp )
-		if ( m_earliestTimestamp != CTime( 0 ) )
-		{
-			TRACE( _T("<earliest: %s>  <source: %s>\n"),
-				   (LPCTSTR)m_earliestTimestamp.Format( _T("%b-%d-%Y") ),
-				   (LPCTSTR)transferNode.m_sourceFileInfo.m_lastModifyTime.Format( _T("%b-%d-%Y") ) );
-
-			if ( transferNode.m_sourceFileInfo.m_lastModifyTime < m_earliestTimestamp )
-				return false;
-
-			TRACE( _T("  copy newer: %s\n"), transferNode.m_sourceFileInfo.m_filePath.GetPtr() );
-		}
-		else
-		{
-			TRACE( _T("<source: %s>"),
-				(LPCTSTR)transferNode.m_sourceFileInfo.m_lastModifyTime.Format( _T("%b-%d-%Y") ) );
-
-			if ( transferNode.m_targetFileInfo.Exist() )
-				TRACE( _T("  <target: %s>"),
-					(LPCTSTR)transferNode.m_targetFileInfo.m_lastModifyTime.Format( _T("%b-%d-%Y") ) );
-			TRACE( _T("\n") );
-
-			if ( transferNode.m_targetFileInfo.Exist() )
-				if ( transferNode.m_sourceFileInfo.m_lastModifyTime <= transferNode.m_targetFileInfo.m_lastModifyTime )
-					return false;
-
-			TRACE( _T("  copy newer: %s\n  to:         %s\n"),
-				transferNode.m_sourceFileInfo.m_filePath.GetPtr(),
-				transferNode.m_targetFileInfo.m_filePath.GetPtr() );
-		}
+	if ( m_filterBy != NoCheck )
+		if ( !transferNode.PassesFileFilter( this ) )
+			return false;
 
 	if ( m_transferOnlyToExistentTargetDirs )
-		if ( !transferNode.m_targetFileInfo.DirPathExist() )
+		if ( !transferNode.m_target.DirPathExist() )
 			return false;
 
 	if ( m_transferOnlyExistentTargetFiles )
-		if ( !transferNode.m_targetFileInfo.Exist() )
+		if ( !transferNode.m_target.Exist() )
 			return false;
 
 	if ( !m_excludeWildSpec.empty() )
-		if ( path::MatchWildcard( transferNode.m_sourceFileInfo.m_filePath.GetPtr(), m_excludeWildSpec.c_str() ) != _T('\0') )
+		if ( path::MatchWildcard( transferNode.m_source.m_filePath.GetPtr(), m_excludeWildSpec.c_str() ) != _T('\0') )
 			return false;
 
 	if ( !m_excludeFindSpecs.empty() )
 		for ( std::vector< std::tstring >::const_iterator itSubstrSpec = m_excludeFindSpecs.begin(); itSubstrSpec != m_excludeFindSpecs.end(); ++itSubstrSpec )
-			if ( *path::Find( transferNode.m_sourceFileInfo.m_filePath.GetPtr(), itSubstrSpec->c_str() ) != _T('\0') )
+			if ( *path::Find( transferNode.m_source.m_filePath.GetPtr(), itSubstrSpec->c_str() ) != _T('\0') )
 				return false;
 
 	return true;
@@ -125,6 +97,10 @@ void CXferOptions::ParseCommandLine( int argc, TCHAR* argv[] ) throws_( CRuntime
 
 			if ( ParseValue( value, pSwitch, _T("TRANSFER|T"), UpperCase ) )
 				ParseFileAction( value );
+			else if ( arg::ParseOptionalValuePair( &value, pSwitch, _T("BK") ) )
+				m_pBackupDirPath.reset( new fs::CPath( value ) );
+			else if ( arg::ParseOptionalValuePair( &value, pSwitch, _T("CH") ) )
+				ParseFileChangesFilter( value );
 			else if ( ParseValue( value, pSwitch, _T("ATTRIBUTES|A"), UpperCase ) )
 				ParseFileAttributes( value );
 			else if ( ParseValue( value, pSwitch, _T("D") ) )
@@ -138,8 +114,6 @@ void CXferOptions::ParseCommandLine( int argc, TCHAR* argv[] ) throws_( CRuntime
 			}
 			else if ( ParseValue( value, pSwitch, _T("EW") ) )
 				m_excludeWildSpec = value;
-			else if ( arg::ParseOptionalValuePair( &value, pSwitch, _T("BK") ) )
-				m_pBackupDirPath.reset( new fs::CPath( value ) );
 			else if ( arg::Equals( pSwitch, _T("Q") ) )
 				m_displayFileNames = false;
 			else if ( arg::Equals( pSwitch, _T("LS") ) )
@@ -199,6 +173,18 @@ void CXferOptions::ParseFileAction( const std::tstring& value ) throws_( CRuntim
 	ThrowInvalidArgument();
 }
 
+void CXferOptions::ParseFileChangesFilter( const std::tstring& value ) throws_( CRuntimeException )
+{
+	if ( value.empty() )
+		m_filterBy = CheckTimestamp;
+	else if ( arg::Equals( _T("SIZE"), value.c_str() ) )
+		m_filterBy = CheckFileSize;
+	else if ( arg::Equals( _T("CRC32"), value.c_str() ) )
+		m_filterBy = CheckFullContent;
+	else
+		ThrowInvalidArgument();
+}
+
 void CXferOptions::ParseFileAttributes( const std::tstring& value ) throws_( CRuntimeException )
 {
 	for ( std::tstring::const_iterator itCh = value.begin(); itCh != value.end(); ++itCh )
@@ -226,7 +212,7 @@ void CXferOptions::ParseFileAttributes( const std::tstring& value ) throws_( CRu
 
 void CXferOptions::ParseTimestamp( const std::tstring& value ) throws_( CRuntimeException )
 {
-	m_filterByTimestamp = true;
+	m_filterBy = CheckTimestamp;
 	if ( value.empty() )
 		return;
 
@@ -258,18 +244,12 @@ void CXferOptions::PostProcessArguments( void ) throws_( CRuntimeException )
 		m_searchSpecs = m_sourceDirPath.GetNameExt();
 		m_sourceDirPath = m_sourceDirPath.GetParentPath();
 	}
-//	else
-//		path::SetBackslash( m_sourceDirPath );
 
 	if ( m_searchSpecs.empty() )
 		m_searchSpecs = _T("*.*");
 
 	fs::CvtAbsoluteToCWD( m_sourceDirPath );
-//	if ( fs::IsValidDirectory( m_sourceDirPath.c_str() ) )
-//		path::SetBackslash( m_sourceDirPath );
-
 	fs::CvtAbsoluteToCWD( m_targetDirPath );
-//	path::SetBackslash( m_targetDirPath );
 }
 
 void CXferOptions::ThrowInvalidArgument( void ) throws_( CRuntimeException )

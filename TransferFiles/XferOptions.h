@@ -12,6 +12,7 @@ struct CTransferItem;
 enum FileAction;
 enum TransferMode { ExecuteTransfer, JustDisplaySourceFile, JustDisplayTargetFile };
 enum UserPrompt { PromptOnIssues, PromptAlways, PromptNever };
+enum CheckFileChanges { NoCheck, CheckTimestamp, CheckFileSize, CheckFullContent };
 
 
 struct CXferOptions
@@ -28,6 +29,7 @@ private:
 	static bool ParseValue( std::tstring& rValue, const TCHAR* pArg, const TCHAR* pNameList, CaseCvt caseCvt = AsIs );
 
 	void ParseFileAction( const std::tstring& value ) throws_( CRuntimeException );
+	void ParseFileChangesFilter( const std::tstring& value ) throws_( CRuntimeException );
 	void ParseFileAttributes( const std::tstring& value ) throws_( CRuntimeException );
 	void ParseTimestamp( const std::tstring& value ) throws_( CRuntimeException );
 
@@ -49,7 +51,7 @@ public:
 	DWORD m_mustHaveFileAttr;
 	DWORD m_mustNotHaveFileAttr;
 
-	bool m_filterByTimestamp;
+	CheckFileChanges m_filterBy;
 	CTime m_earliestTimestamp;
 
 	bool m_justCreateTargetDirs;

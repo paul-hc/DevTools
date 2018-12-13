@@ -8,7 +8,7 @@
 #include "utl/ut/UnitTest.h"
 
 
-namespace utl { class CProcess; }
+namespace utl { class CProcessCmd; }
 
 
 // functional tests that invoke child xfer.exe processes in order to exercise the command line parsing (pretty complex functionality)
@@ -20,16 +20,20 @@ public:
 	static CTransferFuncTests& Instance( void );
 
 	void SetDebugChildProcs( bool debugChildProcs ) { m_debugChildProcs = debugChildProcs; }
-	void AddExtraParams( utl::CProcess& rXferProcess );
+	int ExecuteProcess( utl::CProcessCmd& rProcess );
 
 	// ut::ITestCase interface
 	virtual void Run( void );
 private:
-	void TestTransferCopy( void );
+	void TestCopy( void );
+	void TestMove( void );
+	void TestBackup( void );
 	void TestPullLossy( void );
 private:
 	bool m_debugChildProcs;
+
 	static const TCHAR s_srcFiles[];
+	static const fs::CPath s_lossyFilter;
 };
 
 

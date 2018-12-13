@@ -5,7 +5,7 @@
 #include "FileInfo.h"
 #include "utl/ConsoleInputOutput.h"
 #include "utl/EnumTags.h"
-#include "utl/Path.h"
+#include "utl/FileSystem_fwd.h"
 
 
 struct CXferOptions;
@@ -21,7 +21,8 @@ struct CBackupInfo
 	CBackupInfo( const CXferOptions* pOptions );
 public:
 	fs::CPath m_dirPath;
-	io::CUserQueryCreateDirectory m_uqCreateDir;
+	fs::FileContentMatch m_matchContentBy;
+	mutable io::CUserQueryCreateDirectory m_uqCreateDir;
 };
 
 
@@ -31,16 +32,20 @@ struct CTransferItem
 	CTransferItem( const fs::CPath& srcFilePath, const fs::CPath& rootSourceDirPath, const fs::CPath& rootTargetDirPath );
 	~CTransferItem();
 
-	bool Transfer( FileAction fileAction, CBackupInfo* pBackupInfo );
+	bool PassesFileFilter( const CXferOptions* pOptions ) const;
+	bool Transfer( FileAction fileAction, const CBackupInfo* pBackupInfo );
 	std::ostream& Print( std::ostream& os, FileAction fileAction, bool showTimestamp = false ) const;
 private:
-	bool BackupExistingTarget( CBackupInfo* pBackupInfo );
+	bool IsSrcNewer( const CTime& earliestTimestamp ) const;
+	bool HasDifferentContents( fs::FileContentMatch matchContentBy ) const;
+
+	bool BackupExistingTarget( const CBackupInfo& backupInfo );
 
 	static fs::CPath MakeDeepTargetFilePath( const fs::CPath& srcFilePath, const fs::CPath& rootSourceDirPath,
 											 const fs::CPath& rootTargetDirPath );
 public:
-	CFileInfo m_sourceFileInfo;
-	CFileInfo m_targetFileInfo;
+	CFileInfo m_source;
+	CFileInfo m_target;
 	fs::CPath m_targetBackupFilePath;
 };
 
