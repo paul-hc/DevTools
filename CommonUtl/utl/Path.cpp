@@ -5,8 +5,45 @@
 #include "Crc32.h"
 #include "ContainerUtilities.h"
 #include "StringUtilities.h"
+#include "StringIntuitiveCompare.h"
 #include <xhash>
 #include <shlwapi.h>				// for PathCombine
+
+
+namespace func
+{
+	int ToNaturalPathChar::Translate( int charCode )
+	{
+		enum TranslatedCode		// natural order for punctuation characters
+		{
+			Dot = 1, Colon, SemiColon, Comma, Dash, Plus, Underbar,
+			CurvedBraceB, CurvedBraceE,
+			SquareBraceB, SquareBraceE,
+			CurlyBraceB, CurlyBraceE,
+			AngularBraceB, AngularBraceE
+		};
+
+		switch ( charCode )
+		{
+			case '.':	return Dot;
+			case ':':	return Colon;
+			case ';':	return SemiColon;
+			case ',':	return Comma;
+			case '-':	return Dash;
+			case '+':	return Plus;
+			case '_':	return Underbar;
+			case '(':	return CurvedBraceB;
+			case ')':	return CurvedBraceE;
+			case '[':	return SquareBraceB;
+			case ']':	return SquareBraceE;
+			case '{':	return CurlyBraceB;
+			case '}':	return CurlyBraceE;
+			case '<':	return AngularBraceB;
+			case '>':	return AngularBraceE;
+		}
+		return charCode;
+	}
+}
 
 
 // this has no effect in VC2013; workaround in utl_ui_vc12.vcxproj: Solution Explorer > C++ > Advanced - Disable Specific Warnings: 4996
@@ -29,7 +66,7 @@ namespace path
 
 		return
 			str::GetLength( pLeftPath ) == str::GetLength( pRightPath ) &&
-			std::equal( str::begin( pLeftPath ), str::end( pLeftPath ), str::begin( pRightPath ), pred::EquivalentPathChar() );
+			std::equal( str::begin( pLeftPath ), str::end( pLeftPath ), str::begin( pRightPath ), pred::IsEquivalentPathChar() );
 	}
 
 	bool Equivalent( const std::tstring& leftPath, const std::tstring& rightPath )
@@ -39,13 +76,19 @@ namespace path
 
 		return
 			leftPath.length() == rightPath.length() &&
-			std::equal( leftPath.begin(), leftPath.end(), rightPath.begin(), pred::EquivalentPathChar() );
+			std::equal( leftPath.begin(), leftPath.end(), rightPath.begin(), pred::IsEquivalentPathChar() );
 	}
 
 	bool Equal( const std::tstring& leftPath, const std::tstring& rightPath )
 	{
 		return str::Equals< str::IgnoreCase >( leftPath.c_str(), rightPath.c_str() );
 	}
+
+	pred::CompareResult CompareNaturalPtr( const TCHAR* pLeft, const TCHAR* pRight )
+	{
+		return pred::MakeIntuitiveComparator( func::ToNaturalPathChar() ).Compare( pLeft, pRight );
+	}
+
 
 	size_t GetHashValue( const TCHAR* pPath )
 	{
@@ -212,7 +255,7 @@ namespace path
 
 		return std::search( str::begin( pPath ), str::end( pPath ),
 							str::begin( pSubString ), str::end( pSubString ),
-							pred::EquivalentPathChar() );
+							pred::IsEquivalentPathChar() );
 	}
 
 	const TCHAR* FindFilename( const TCHAR* pPath )

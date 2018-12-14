@@ -34,21 +34,6 @@ namespace func
 			return ch;
 		}
 	};
-
-
-	// Translates characters to generate a natural order, useful particularly for sorting paths and filenames.
-	// Note: This is closer to Explorer.exe order (which varies with Windows version), yet still different than ::StrCmpLogicalW from <shlwapi.h>
-	//
-	struct ToNaturalChar
-	{
-		template< typename CharType >
-		CharType operator()( CharType ch ) const
-		{
-			return static_cast< CharType >( Translate( ch ) );
-		}
-
-		static int Translate( int charCode );
-	};
 }
 
 
@@ -69,7 +54,7 @@ namespace pred
 	}
 
 
-	struct CompareNaturalCharPtr
+	struct CompareIntuitiveCharPtr
 	{
 		template< typename CharType >
 		pred::CompareResult operator()( const CharType* pLeft, const CharType* pRight ) const
@@ -78,7 +63,7 @@ namespace pred
 		}
 	};
 
-	typedef CompareAdapter< CompareNaturalCharPtr, func::ToCharPtr > TStringyCompareNatural;		// for string-like objects
+	typedef CompareAdapter< CompareIntuitiveCharPtr, func::ToCharPtr > TStringyCompareIntuitive;		// for string-like objects
 }
 
 

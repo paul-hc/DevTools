@@ -229,7 +229,7 @@ void CStringTests::TestStringSorting( void )
 	}
 }
 
-void CStringTests::TestNaturalSort( void )
+void CStringTests::TestIntuitiveSort( void )
 {
 	const char s_srcItems[] = "st3Ring,2string,st2ring,STRING20,string2,3String,20STRING,st20RING,String3";
 
@@ -238,15 +238,15 @@ void CStringTests::TestNaturalSort( void )
 		str::Split( items, s_srcItems, "," );
 		std::random_shuffle( items.begin(), items.end() );
 
-		// sort natural via pred::CompareValue that uses pred::Compare_Scalar() specialization
+		// sort intuitive via pred::CompareValue that uses pred::Compare_Scalar() specialization
 		ASSERT_EQUAL(
 			"2string,3String,20STRING,st2ring,st3Ring,st20RING,string2,String3,STRING20",
 			ut::ShuffleSortJoin( items, ",", pred::LessValue< pred::CompareValue >() ) );
 
-		// sort natural via pred::TStringyCompareNatural (equivalent with pred::CompareValue)
+		// sort intuitive via pred::TStringyCompareIntuitive (equivalent with pred::CompareValue)
 		ASSERT_EQUAL(
 			"2string,3String,20STRING,st2ring,st3Ring,st20RING,string2,String3,STRING20",
-			ut::ShuffleSortJoin( items, ",", pred::LessValue< pred::TStringyCompareNatural >() ) );
+			ut::ShuffleSortJoin( items, ",", pred::LessValue< pred::TStringyCompareIntuitive >() ) );
 
 		// sort case-insensitive
 		ASSERT_EQUAL(
@@ -264,15 +264,15 @@ void CStringTests::TestNaturalSort( void )
 		str::Split( items, str::FromAnsi( s_srcItems ).c_str(), L"," );
 		std::random_shuffle( items.begin(), items.end() );
 
-		// sort natural via pred::CompareValue that uses pred::Compare_Scalar() specialization
+		// sort intuitive via pred::CompareValue that uses pred::Compare_Scalar() specialization
 		ASSERT_EQUAL(
 			L"2string,3String,20STRING,st2ring,st3Ring,st20RING,string2,String3,STRING20",
 			ut::ShuffleSortJoin( items, L",", pred::LessValue< pred::CompareValue >() ) );
 
-		// sort natural via pred::TStringyCompareNatural (equivalent with pred::CompareValue)
+		// sort intuitive via pred::TStringyCompareIntuitive (equivalent with pred::CompareValue)
 		ASSERT_EQUAL(
 			L"2string,3String,20STRING,st2ring,st3Ring,st20RING,string2,String3,STRING20",
-			ut::ShuffleSortJoin( items, L",", pred::LessValue< pred::TStringyCompareNatural >() ) );
+			ut::ShuffleSortJoin( items, L",", pred::LessValue< pred::TStringyCompareIntuitive >() ) );
 
 		// sort case-insensitive
 		ASSERT_EQUAL(
@@ -286,7 +286,7 @@ void CStringTests::TestNaturalSort( void )
 	}
 }
 
-void CStringTests::TestNaturalSortPunctuation( void )
+void CStringTests::TestIntuitiveSortPunctuation( void )
 {
 	const char s_srcItems[] =
 		"1254 Biertan{DUP}.jpg|"
@@ -299,35 +299,36 @@ void CStringTests::TestNaturalSortPunctuation( void )
 		"1254 Biertan_noDUP.jpg|"
 		"1254 Biertan.jpg";
 
-	{	// case-sensitive
+	// intuitive: case-insensitive, numbers by value, default punctuation order
+	{
 		std::vector< std::string > items;
 		str::Split( items, s_srcItems, "|" );
 
 		ASSERT_EQUAL(
-			"1254 Biertan.jpg|"
-			"1254 Biertan-DUP.jpg|"
+			"1254 Biertan(DUP).jpg|"
 			"1254 Biertan+DUP.jpg|"
+			"1254 Biertan-DUP.jpg|"
+			"1254 Biertan.jpg|"
+			"1254 biertan[DUP].jpg|"
 			"1254 biertan_DUP.jpg|"
 			"1254 Biertan_noDUP.jpg|"
-			"1254 Biertan(DUP).jpg|"
-			"1254 biertan[DUP].jpg|"
 			"1254 Biertan{DUP}.jpg|"
 			"1254 Biertan~DUP.jpg"
 			, ut::ShuffleSortJoin( items, "|", pred::LessValue< pred::CompareValue >() ) );
 	}
 
-	{	// case-insensitive
+	{
 		std::vector< std::wstring > items;
 		str::Split( items, str::FromUtf8( s_srcItems ).c_str(), L"|" );
 
 		ASSERT_EQUAL(
-			L"1254 Biertan.jpg|"
-			L"1254 Biertan-DUP.jpg|"
+			L"1254 Biertan(DUP).jpg|"
 			L"1254 Biertan+DUP.jpg|"
+			L"1254 Biertan-DUP.jpg|"
+			L"1254 Biertan.jpg|"
+			L"1254 biertan[DUP].jpg|"
 			L"1254 biertan_DUP.jpg|"
 			L"1254 Biertan_noDUP.jpg|"
-			L"1254 Biertan(DUP).jpg|"
-			L"1254 biertan[DUP].jpg|"
 			L"1254 Biertan{DUP}.jpg|"
 			L"1254 Biertan~DUP.jpg"
 			, ut::ShuffleSortJoin( items, L"|", pred::LessValue< pred::CompareValue >() ) );
@@ -926,8 +927,8 @@ void CStringTests::Run( void )
 	TestCharTraits();
 	TestValueToString();
 	TestStringSorting();
-	TestNaturalSort();
-	TestNaturalSortPunctuation();
+	TestIntuitiveSort();
+	TestIntuitiveSortPunctuation();
 	TestIgnoreCase();
 	TestStringSplit();
 	TestStringTokenize();

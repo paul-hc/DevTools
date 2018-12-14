@@ -10,6 +10,25 @@
 #include "StringCompare.h"
 
 
+namespace func
+{
+	// Translates characters to generate a natural order, useful for sorting paths and filenames.
+	// Natural order: intuitive (case insensitive, order numeric sequences by value) | punctuation first (shortest filename first in a tie).
+	// Note: This is closer to Explorer.exe sort order (which varies with Windows version), yet different than ::StrCmpLogicalW from <shlwapi.h>
+	//
+	struct ToNaturalPathChar
+	{
+		template< typename CharType >
+		CharType operator()( CharType ch ) const
+		{
+			return static_cast< CharType >( Translate( ch ) );
+		}
+
+		static int Translate( int charCode );
+	};
+}
+
+
 namespace path
 {
 	inline bool IsSlash( TCHAR ch ) { return _T('\\') == ch || _T('/') == ch; }
@@ -22,10 +41,7 @@ namespace path
 	bool Equivalent( const std::tstring& leftPath, const std::tstring& rightPath );
 	bool Equal( const std::tstring& leftPath, const std::tstring& rightPath );
 
-	inline pred::CompareResult CompareNPtr( const TCHAR* pLeftPath, const TCHAR* pRightPath, size_t count = std::tstring::npos )
-	{
-		return str::_CompareN( pLeftPath, pRightPath, &path::ToEquivalentChar, count );
-	}
+	pred::CompareResult CompareNaturalPtr( const TCHAR* pLeft, const TCHAR* pRight );
 
 	size_t GetHashValue( const TCHAR* pPath );
 
@@ -39,6 +55,12 @@ namespace path
 	{
 		TCHAR operator()( TCHAR ch ) const { return ToEquivalentChar( ch ); }
 	};
+
+
+	inline pred::CompareResult CompareNPtr( const TCHAR* pLeftPath, const TCHAR* pRightPath, size_t count = std::tstring::npos )
+	{
+		return str::_CompareN( pLeftPath, pRightPath, path::ToEquivalent(), count );
+	}
 
 	typedef str::EvalMatch< ToNormal, ToEquivalent > GetMatch;
 
@@ -261,6 +283,8 @@ namespace func
 
 namespace pred
 {
+	// path unary predicates
+
 	template<>
 	inline bool IsEmpty::operator()( const fs::CPath& object ) const
 	{
@@ -292,7 +316,7 @@ namespace pred
 	};
 
 
-	struct EquivalentPathChar
+	struct IsEquivalentPathChar
 	{
 		bool operator()( TCHAR left, TCHAR right ) const
 		{
@@ -301,9 +325,9 @@ namespace pred
 	};
 
 
-	struct EquivalentPathString
+	struct IsEquivalentPathString
 	{
-		EquivalentPathString( const std::tstring& path ) : m_path( path ) {}
+		IsEquivalentPathString( const std::tstring& path ) : m_path( path ) {}
 
 		bool operator()( const std::tstring& path ) const
 		{
@@ -314,9 +338,9 @@ namespace pred
 	};
 
 
-	struct EquivalentPath
+	struct IsEquivalentPath
 	{
-		EquivalentPath( const fs::CPath& path ) : m_path( path ) {}
+		IsEquivalentPath( const fs::CPath& path ) : m_path( path ) {}
 
 		bool operator()( const fs::CPath& path ) const
 		{
@@ -325,7 +349,12 @@ namespace pred
 	private:
 		const fs::CPath& m_path;
 	};
+}
 
+
+namespace pred
+{
+	// path binary predicates
 
 	struct CompareEquivPath			// equivalent
 	{
@@ -336,14 +365,14 @@ namespace pred
 	};
 
 
-	struct CompareNaturalPath		// equivalent | intuitive
+	struct CompareNaturalPath		// equivalent | natural-intuitive
 	{
 		pred::CompareResult operator()( const TCHAR* pLeftPath, const TCHAR* pRightPath ) const
 		{
 			if ( path::EquivalentPtr( pLeftPath, pRightPath ) )
 				return pred::Equal;
 
-			return str::IntuitiveCompare( pLeftPath, pRightPath );
+			return path::CompareNaturalPtr( pLeftPath, pRightPath );
 		}
 
 		pred::CompareResult operator()( const std::tstring& leftPath, const std::tstring& rightPath ) const
@@ -356,7 +385,7 @@ namespace pred
 			if ( leftPath == rightPath )
 				return pred::Equal;
 
-			return str::IntuitiveCompare( leftPath.GetPtr(), rightPath.GetPtr() );
+			return path::CompareNaturalPtr( leftPath.GetPtr(), rightPath.GetPtr() );
 		}
 	};
 

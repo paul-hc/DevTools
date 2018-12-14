@@ -350,16 +350,10 @@ void CBscPathPage::DoDataExchange( CDataExchange* pDX )
 	}
 	else
 	{	// save controls
-		std::vector< std::tstring > uniqueDirs;
+		std::vector< fs::CPath > uniqueDirs;
 		for ( unsigned int i = 0; i != m_pathItems.size(); ++i )
-		{
-			std::tstring dirPath = m_pathItems[ i ].m_searchInfo.GetParentPath().Get();
-			if ( std::find_if( uniqueDirs.begin(), uniqueDirs.end(), pred::EquivalentPathString( dirPath ) ) == uniqueDirs.end() )
-			{
+			if ( utl::AddUnique( uniqueDirs, m_pathItems[ i ].m_searchInfo.GetParentPath() ) )
 				items.push_back( m_pathItems[ i ].GetAsString() );
-				uniqueDirs.push_back( dirPath );
-			}
-		}
 
 		m_folderContent.FilterItems( items );
 		m_browseInfoPath.Set( str::Join( items, EDIT_SEP ) );

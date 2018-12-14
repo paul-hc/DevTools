@@ -433,6 +433,17 @@ void CPathTests::TestPathCompareFind( void )
 		ASSERT_EQUAL( pred::Less, path::CompareNPtr( _T("name 05.ext"), _T("name 10.ext") ) );
 	}
 	{
+		static const fs::CPath windowsPath( _T("X:\\DIR\\SUB\\NAME.EXT") );
+		static const fs::CPath unixPath( _T("x:/dir/sub/name.ext") );
+
+		ASSERT_EQUAL( windowsPath, unixPath );
+		ASSERT( windowsPath == unixPath );
+
+		// check transitive
+		ASSERT( !( windowsPath < unixPath ) );
+		ASSERT( !( unixPath < windowsPath ) );
+	}
+	{
 		path::GetMatch getMatchFunc;
 		ASSERT_EQUAL( str::MatchEqual, getMatchFunc( _T("x:\\dir\\sub\\name.ext"), _T("x:/dir/sub/name.ext") ) );
 		ASSERT_EQUAL( str::MatchEqualDiffCase, getMatchFunc( _T("X:\\dir\\sub\\NAME.ext"), _T("x:/dir/sub/name.ext") ) );

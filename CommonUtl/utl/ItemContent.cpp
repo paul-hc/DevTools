@@ -41,7 +41,7 @@ namespace ui
 			if ( ui::String == m_type )
 				utl::RemoveDuplicates< pred::EqualString< std::tstring > >( rItems );
 			else
-				utl::RemoveDuplicates< pred::EquivalentPathString >( rItems );
+				utl::RemoveDuplicates< pred::IsEquivalentPathString >( rItems );
 
 		if ( HasFlag( m_itemsFlags, EnsurePathExist ) )
 			if ( ui::DirPath == m_type || ui::FilePath == m_type )
