@@ -10,6 +10,7 @@
 class CFileModel;
 interface IFileEditor;
 
+
 class ATL_NO_VTABLE CFileRenameShell
 	: public CComObjectRootEx< CComSingleThreadModel >
 	, public CComCoClass< CFileRenameShell, &CLSID_FileRenameShell >
@@ -26,7 +27,8 @@ private:
 
 	enum MenuCommand
 	{
-		Cmd_SendToCliboard, Cmd_RenameFiles, Cmd_TouchFiles, Cmd_FindDuplicates,
+		Cmd_SendToCliboard,
+		Cmd_RenameFiles, Cmd_TouchFiles, Cmd_FindDuplicates,
 		Cmd_Undo, Cmd_Redo,
 		Cmd_RunUnitTests,
 			_CmdCount
@@ -47,7 +49,8 @@ private:
 	static const CMenuCmdInfo* FindCmd( MenuCommand cmd );
 private:
 	std::auto_ptr< CFileModel > m_pFileModel;
-	static const CMenuCmdInfo m_commands[];
+
+	static const CMenuCmdInfo s_commands[];
 
 	// generated COM stuff
 public:

@@ -3,16 +3,16 @@
 #pragma once
 
 #include "utl/Subject.h"
-#include "utl/CommandModel.h"
 #include "utl/InternalChange.h"
 #include "utl/PathItemBase.h"
-
+#include "utl/PathItemBase.h"
+#include "utl/ICommandService.h"
 
 class CRenameItem;
 class CTouchItem;
 interface IFileEditor;
 namespace fmt { enum PathFormat; }
-namespace cmd { enum CommandType; enum StackType; }
+namespace cmd { enum CommandType; }
 
 
 namespace func
@@ -34,25 +34,16 @@ class CFileModel : public CCmdTarget
 				 , private utl::noncopyable
 {
 public:
-	CFileModel( void );
+	CFileModel( svc::ICommandService* pCmdSvc );
 	~CFileModel();
 
 	void Clear( void );
 	size_t SetupFromDropInfo( HDROP hDropInfo );
 
 	const std::vector< fs::CPath >& GetSourcePaths( void ) const { return m_sourcePaths; }
-	CCommandModel* GetCommandModel( void );
 
-	bool SaveCommandModel( void ) const;
-	bool LoadCommandModel( void );
 	bool SafeExecuteCmd( IFileEditor* pEditor, utl::ICommand* pCmd );
-
-	bool CanUndoRedo( cmd::StackType stackType, int typeId = 0 ) const;
-	bool UndoRedo( cmd::StackType stackType );
-	void FetchFromStack( cmd::StackType stackType );				// fetches data set from undo stack (macro command)
-
-	template< typename CmdType >
-	CmdType* PeekCmdAs( cmd::StackType stackType ) const;
+	void FetchFromStack( svc::StackType stackType );				// fetches data set from undo stack (macro command)
 
 	// utl::ISubject interface
 	virtual const std::tstring& GetCode( void ) const;
@@ -84,7 +75,7 @@ private:
 
 	struct AddRenameItemFromCmd
 	{
-		AddRenameItemFromCmd( CFileModel* pFileModel, cmd::StackType stackType )
+		AddRenameItemFromCmd( CFileModel* pFileModel, svc::StackType stackType )
 			: m_pFileModel( pFileModel )
 			, m_stackType( stackType )
 		{
@@ -94,12 +85,12 @@ private:
 		void operator()( const utl::ICommand* pCmd );
 	private:
 		CFileModel* m_pFileModel;
-		cmd::StackType m_stackType;
+		svc::StackType m_stackType;
 	};
 
 	struct AddTouchItemFromCmd
 	{
-		AddTouchItemFromCmd( CFileModel* pFileModel, cmd::StackType stackType )
+		AddTouchItemFromCmd( CFileModel* pFileModel, svc::StackType stackType )
 			: m_pFileModel( pFileModel )
 			, m_stackType( stackType )
 		{
@@ -109,17 +100,17 @@ private:
 		void operator()( const utl::ICommand* pCmd );
 	private:
 		CFileModel* m_pFileModel;
-		cmd::StackType m_stackType;
+		svc::StackType m_stackType;
 	};
 
 	friend struct AddRenameItemFromCmd;
 	friend struct AddTouchItemFromCmd;
 private:
+	svc::ICommandService* m_pCmdSvc;
 	std::vector< fs::CPath > m_sourcePaths;
 	fs::CPath m_commonParentPath;						// for paths in multiple directories
 
 	// lazy init
-	std::auto_ptr< CCommandModel > m_pCommandModel;		// self-encapsulated
 	std::vector< CRenameItem* > m_renameItems;
 	std::vector< CTouchItem* > m_touchItems;
 
@@ -130,15 +121,6 @@ protected:
 
 
 // template code
-
-template< typename CmdType >
-CmdType* CFileModel::PeekCmdAs( cmd::StackType stackType ) const
-{
-	if ( m_pCommandModel.get() != NULL )
-		return dynamic_cast< CmdType* >( cmd::Undo == stackType ? m_pCommandModel->PeekUndo() : m_pCommandModel->PeekRedo() );
-
-	return NULL;
-}
 
 template< typename FuncType >
 utl::ICommand* CFileModel::MakeChangeDestPathsCmd( const FuncType& func, const std::tstring& cmdTag )

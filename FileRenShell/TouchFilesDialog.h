@@ -28,7 +28,7 @@ public:
 protected:
 	// IFileEditor interface
 	virtual void PostMakeDest( bool silent = false );
-	virtual void PopStackTop( cmd::StackType stackType );
+	virtual void PopStackTop( svc::StackType stackType );
 
 	// utl::IObserver interface (via IFileEditor)
 	virtual void OnUpdate( utl::ISubject* pSubject, utl::IMessage* pMessage );

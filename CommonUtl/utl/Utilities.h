@@ -214,6 +214,9 @@ namespace ui
 	inline bool HasStyleTopLevelCaption( DWORD style ) { return !HasFlag( style, WS_CHILD ) && EqFlag( style, WS_CAPTION ); }	// WS_CAPTION=WS_BORDER|WS_DLGFRAME
 	inline bool IsTopLevelCaption( HWND hWnd ) { return HasStyleTopLevelCaption( GetStyle( hWnd ) ); }
 
+	inline bool IsWndPermanent( HWND hWnd ) { return hWnd != NULL && CWnd::FromHandlePermanent( hWnd ) != NULL; }		// permanent: a window subclassed in this module
+	CWnd* FindTopParentPermanent( HWND hWnd );		// find first parent (non-child) that is a permanent window (subclassed in this module)
+
 
 	void GetWindowText( std::tstring& rText, HWND hWnd );
 	inline std::tstring GetWindowText( HWND hWnd ) { std::tstring text; GetWindowText( text, hWnd ); return text; }		// no extra string copy
@@ -310,7 +313,6 @@ namespace ui
 	bool IsDialogBox( HWND hWnd );
 
 	bool ModifyBorder( CWnd* pWnd, bool useBorder = true );
-
 
 	template< typename WndType >
 	WndType* FindAncestorAs( const CWnd* pWnd )

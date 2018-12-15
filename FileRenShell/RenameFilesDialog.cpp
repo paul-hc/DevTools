@@ -151,7 +151,7 @@ void CRenameFilesDialog::SwitchMode( Mode mode )
 	if ( NULL == m_hWnd )
 		return;
 
-	static const CEnumTags modeTags( _T("&Make Names|Rena&me|Roll &Back|Roll &Forward") );
+	static const CEnumTags modeTags( _T("&Make Names|Rena&me|Roll &Back|Roll &Fwd") );
 	UpdateOkButton( modeTags.FormatUi( m_mode ) );
 
 	static const UINT ctrlIds[] =
@@ -189,7 +189,7 @@ void CRenameFilesDialog::PostMakeDest( bool silent /*= false*/ )
 	}
 }
 
-void CRenameFilesDialog::PopStackTop( cmd::StackType stackType )
+void CRenameFilesDialog::PopStackTop( svc::StackType stackType )
 {
 	ASSERT( !IsRollMode() );
 
@@ -202,12 +202,12 @@ void CRenameFilesDialog::PopStackTop( cmd::StackType stackType )
 		if ( isRenameMacro )
 			m_pFileModel->FetchFromStack( stackType );		// fetch dataset from the stack top macro command
 		else
-			m_pFileModel->UndoRedo( stackType );
+			m_pCmdSvc->UndoRedo( stackType );
 
 		MarkInvalidSrcItems();
 
 		if ( isRenameMacro )								// file command?
-			SwitchMode( cmd::Undo == stackType ? RollBackMode : RollForwardMode );
+			SwitchMode( svc::Undo == stackType ? RollBackMode : RollForwardMode );
 		else
 			SwitchMode( HasDestPaths() ? CommitFilesMode : EditMode );
 	}
@@ -504,7 +504,7 @@ void CRenameFilesDialog::OnOK( void )
 		{
 			cmd::CScopedErrorObserver observe( this );
 
-			if ( m_pFileModel->UndoRedo( RollBackMode == m_mode ? cmd::Undo : cmd::Redo ) ||
+			if ( m_pCmdSvc->UndoRedo( RollBackMode == m_mode ? svc::Undo : svc::Redo ) ||
 				 PromptCloseDialog( PromptClose ) )
 				__super::OnOK();
 			else
@@ -528,10 +528,10 @@ void CRenameFilesDialog::OnUpdateUndoRedo( CCmdUI* pCmdUI )
 	switch ( pCmdUI->m_nID )
 	{
 		case IDC_UNDO_BUTTON:
-			pCmdUI->Enable( !IsRollMode() && m_pFileModel->CanUndoRedo( cmd::Undo ) );
+			pCmdUI->Enable( !IsRollMode() && m_pCmdSvc->CanUndoRedo( svc::Undo ) );
 			break;
 		case IDC_REDO_BUTTON:
-			pCmdUI->Enable( !IsRollMode() && m_pFileModel->CanUndoRedo( cmd::Redo ) );
+			pCmdUI->Enable( !IsRollMode() && m_pCmdSvc->CanUndoRedo( svc::Redo ) );
 			break;
 	}
 }

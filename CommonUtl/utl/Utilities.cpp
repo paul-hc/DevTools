@@ -508,6 +508,22 @@ namespace ui
 
 namespace ui
 {
+	CWnd* FindTopParentPermanent( HWND hWnd )		// find first parent (non-child) that is a permanent window (subclassed in this module)
+	{	// useful in shell extension DLLd to distinguish from windows created by the owner application
+		ASSERT_PTR( hWnd );
+
+		for ( CWnd* pParentPerm = CWnd::FromHandlePermanent( hWnd ); pParentPerm != NULL; )
+			if ( !ui::IsChild( pParentPerm->GetSafeHwnd() ) )
+				return pParentPerm;					// found top-level parent (non-child)
+			else
+				if ( CWnd* pParent = CWnd::FromHandlePermanent( ::GetParent( pParentPerm->GetSafeHwnd() ) ) )
+					pParentPerm = pParent;
+				else
+					return pParentPerm;				// found top child window that's permanent
+
+		return NULL;
+	}
+
 	DWORD GetWindowProcessId( HWND hWnd )
 	{
 		ASSERT_PTR( hWnd );

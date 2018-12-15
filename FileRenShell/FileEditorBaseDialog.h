@@ -46,16 +46,17 @@ protected:
 	virtual void SwitchMode( Mode mode ) = 0;
 	void UpdateOkButton( const std::tstring& caption, UINT iconId = 0 );
 protected:
-	int PopStackRunCrossEditor( cmd::StackType stackType );
+	int PopStackRunCrossEditor( svc::StackType stackType );
 
 	bool IsNativeCmd( const utl::ICommand* pCmd ) const;
 	bool IsForeignCmd( const utl::ICommand* pCmd ) const;		// must be handled by a different editor?
-	utl::ICommand* PeekCmdForDialog( cmd::StackType stackType ) const;
+	utl::ICommand* PeekCmdForDialog( svc::StackType stackType ) const;
 
 	enum Prompt { PromptClose, PromptNoFileChanges };
 	bool PromptCloseDialog( Prompt prompt = PromptNoFileChanges );
 protected:
 	CFileModel* m_pFileModel;
+	svc::ICommandService* m_pCmdSvc;
 	std::vector< cmd::CommandType > m_nativeCmdTypes;		// the first one always identifies the editor
 	Mode m_mode;
 

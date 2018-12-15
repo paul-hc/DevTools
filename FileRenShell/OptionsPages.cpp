@@ -4,8 +4,10 @@
 #include "OptionsPages.h"
 #include "FileModel.h"
 #include "FileCommands.h"
+#include "CommandService.h"
 #include "IFileEditor.h"
 #include "resource.h"
+#include "utl/CommandModel.h"
 #include "utl/EnumTags.h"
 #include "utl/StringUtilities.h"
 #include "utl/Utilities.h"
@@ -38,7 +40,7 @@ void COptionsSheet::OnChangesApplied( void )
 		m_pFileModel->SafeExecuteCmd( m_pFileEditor, m_pApplyMacroCmd.release() );
 
 	if ( !CGeneralOptions::Instance().m_undoEditingCmds )
-		m_pFileModel->GetCommandModel()->RemoveCommandsThat( pred::IsNotA< cmd::CFileMacroCmd >() );
+		checked_static_cast< CCommandService* >( app::GetCmdSvc() )->RemoveCommandsThat( pred::IsNotA< cmd::CFileMacroCmd >() );
 }
 
 

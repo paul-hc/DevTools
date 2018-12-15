@@ -4,6 +4,7 @@
 
 #include <deque>
 #include <iosfwd>
+#include "utl/ICommandService.h"
 #include "FileCommands_fwd.h"
 
 
@@ -62,7 +63,7 @@ namespace cmd
 		void Save( std::ostream& os ) const;
 		void Load( std::istream& is );
 	private:
-		void SaveStack( std::ostream& os, cmd::StackType section, const std::deque< utl::ICommand* >& cmdStack ) const;
+		void SaveStack( std::ostream& os, svc::StackType section, const std::deque< utl::ICommand* >& cmdStack ) const;
 
 		utl::ICommand* LoadMacroCmd( std::istream& is, const str::TStringRange& tagRange );
 		utl::ICommand* LoadSubCmd( cmd::CommandType cmdType, const str::TStringRange& textRange );
@@ -92,7 +93,7 @@ namespace cmd
 		virtual void Save( CArchive& archive ) throws_( CException* );
 		virtual void Load( CArchive& archive ) throws_( CException* );
 
-		static void SaveStack( CArchive& archive, cmd::StackType section, const std::deque< utl::ICommand* >& cmdStack );
+		static void SaveStack( CArchive& archive, svc::StackType section, const std::deque< utl::ICommand* >& cmdStack );
 		static void LoadStack( CArchive& archive, std::deque< utl::ICommand* >& rCmdStack );
 	};
 }

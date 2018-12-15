@@ -21,11 +21,6 @@ namespace cmd
 	const CEnumTags& GetTags_CommandType( void );
 
 
-	enum StackType { Undo, Redo };
-
-	const CEnumTags& GetTags_StackType( void );
-
-
 	bool IsPersistentCmd( const utl::ICommand* pCmd );		// persistent commands are also editor-specific file action commands
 	bool IsZombieCmd( const utl::ICommand* pCmd );			// empty macro file action command with no effect?
 

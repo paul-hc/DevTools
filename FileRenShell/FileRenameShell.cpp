@@ -3,8 +3,7 @@
 #include "FileRenShell.h"
 #include "FileRenameShell.h"
 #include "FileModel.h"
-#include "RenameFilesDialog.h"
-#include "TouchFilesDialog.h"
+#include "IFileEditor.h"
 #include "Application.h"
 #include "utl/FmtUtils.h"
 #include "utl/Guards.h"
@@ -17,43 +16,7 @@
 #endif
 
 
-struct CScopedMainWnd
-{
-	CScopedMainWnd( HWND hWnd )
-		: m_pParentOwner( NULL )
-		, m_pOldMainWnd( NULL )
-	{
-		if ( hWnd != NULL && ::IsWindow( hWnd ) )
-			m_pParentOwner = CWnd::FromHandle( hWnd )->GetTopLevelParent();
-
-		if ( ::IsWindow( m_pParentOwner->GetSafeHwnd() ) )
-			if ( CWnd* pOldMainWnd = AfxGetMainWnd() )
-				if ( NULL == pOldMainWnd->m_hWnd )						// it happens sometimes, kind of transitory state when invoking from Explorer.exe
-					if ( CWinThread* pCurrThread = AfxGetThread() )
-					{
-						m_pOldMainWnd = pOldMainWnd;
-						pCurrThread->m_pMainWnd = m_pParentOwner;		// temporarily substitute main window
-					}
-	}
-
-	~CScopedMainWnd()
-	{
-		if ( m_pOldMainWnd != NULL )
-			if ( CWinThread* pCurrThread = AfxGetThread() )
-				pCurrThread->m_pMainWnd = m_pOldMainWnd;				// restore original main window
-	}
-
-	bool HasValidParentOwner( void ) const { return IsWindow( m_pParentOwner->GetSafeHwnd() ) != FALSE; }
-	bool IsValidMainWnd( void ) const { return HasValidParentOwner() && NULL == m_pOldMainWnd; }
-public:
-	CWnd* m_pParentOwner;
-	CWnd* m_pOldMainWnd;
-};
-
-
-// CFileRenameShell implementation
-
-const CFileRenameShell::CMenuCmdInfo CFileRenameShell::m_commands[] =
+const CFileRenameShell::CMenuCmdInfo CFileRenameShell::s_commands[] =
 {
 	{ Cmd_SendToCliboard, _T("&Send To Clipboard"), _T("Send the selected files path to clipboard"), ID_SEND_TO_CLIP, false },
 	{ Cmd_RenameFiles, _T("&Rename Files..."), _T("Rename selected files in the dialog"), ID_RENAME_ITEM, false },
@@ -61,7 +24,6 @@ const CFileRenameShell::CMenuCmdInfo CFileRenameShell::m_commands[] =
 	{ Cmd_FindDuplicates, _T("Find &Duplicates..."), _T("Find duplicate files in selected folders or files, and allow the deletion of duplicates"), ID_FIND_DUPLICATE_FILES, false },
 	{ Cmd_Undo, _T("&Undo %s..."), _T("Undo last operation on files"), ID_EDIT_UNDO, false },
 	{ Cmd_Redo, _T("&Redo %s..."), _T("Redo last undo operation on files"), ID_EDIT_REDO, false },
-
 #ifdef _DEBUG
 	{ Cmd_RunUnitTests, _T("# Run Unit Tests (FileRenameShell)"), _T("Modify the timestamp of selected files"), ID_RUN_TESTS, true }
 #endif
@@ -85,7 +47,7 @@ size_t CFileRenameShell::ExtractDropInfo( IDataObject* pDropInfo )
 	if ( !HR_OK( pDropInfo->GetData( &format, &storageMedium ) ) )		// make the data transfer
 		return 0;
 
-	m_pFileModel.reset( new CFileModel );
+	m_pFileModel.reset( new CFileModel( app::GetCmdSvc() ) );
 	return m_pFileModel->SetupFromDropInfo( (HDROP)storageMedium.hGlobal );
 }
 
@@ -97,19 +59,21 @@ void CFileRenameShell::AugmentMenuItems( HMENU hMenu, UINT indexMenu, UINT idBas
 
 	::InsertMenu( hMenu, indexMenu++, MF_SEPARATOR | MF_BYPOSITION, 0, NULL );
 
-	for ( int i = 0; i != COUNT_OF( m_commands ); ++i )
+	static const MenuCommand firstCmdUsingDlg = Cmd_RenameFiles;
+
+	for ( int i = 0; i != COUNT_OF( s_commands ); ++i )
 	{
-		std::tstring itemText = FormatCmdText( m_commands[ i ] );
+		std::tstring itemText = FormatCmdText( s_commands[ i ] );
 		if ( !itemText.empty() )
 		{
-			if ( m_commands[ i ].m_addSep )
+			if ( s_commands[ i ].m_addSep )
 				::InsertMenu( hMenu, indexMenu++, MF_SEPARATOR | MF_BYPOSITION, 0, NULL );
 
-			::InsertMenu( hMenu, indexMenu++, MF_STRING | MF_BYPOSITION, idBaseCmd + m_commands[ i ].m_cmd, itemText.c_str() );
+			::InsertMenu( hMenu, indexMenu++, MF_STRING | MF_BYPOSITION, idBaseCmd + s_commands[ i ].m_cmd, itemText.c_str() );
 
-			if ( CBitmap* pMenuBitmap = pImageStore->RetrieveBitmap( m_commands[ i ].m_iconId, menuColor ) )
+			if ( CBitmap* pMenuBitmap = pImageStore->RetrieveBitmap( s_commands[ i ].m_iconId, menuColor ) )
 				SetMenuItemBitmaps( hMenu,
-					idBaseCmd + m_commands[ i ].m_cmd,
+					idBaseCmd + s_commands[ i ].m_cmd,
 					MF_BYCOMMAND,
 					*pMenuBitmap, *pMenuBitmap );
 		}
@@ -122,9 +86,7 @@ std::tstring CFileRenameShell::FormatCmdText( const CMenuCmdInfo& cmdInfo )
 {
 	if ( Cmd_Undo == cmdInfo.m_cmd || Cmd_Redo == cmdInfo.m_cmd )
 	{
-		m_pFileModel->LoadCommandModel();
-
-		if ( utl::ICommand* pTopCmd = m_pFileModel->PeekCmdAs< utl::ICommand >( Cmd_Undo == cmdInfo.m_cmd ? cmd::Undo : cmd::Redo ) )
+		if ( utl::ICommand* pTopCmd = app::GetCmdSvc()->PeekCmd( Cmd_Undo == cmdInfo.m_cmd ? svc::Undo : svc::Redo ) )
 			return str::Format( cmdInfo.m_pTitle, pTopCmd->Format( utl::Detailed ).c_str() );
 
 		return std::tstring();
@@ -146,8 +108,6 @@ void CFileRenameShell::ExecuteCommand( MenuCommand menuCmd, CWnd* pParentOwner )
 	}
 
 	// file operations commands
-	m_pFileModel->LoadCommandModel();
-
 	std::auto_ptr< IFileEditor > pFileEditor;
 	switch ( menuCmd )
 	{
@@ -162,34 +122,42 @@ void CFileRenameShell::ExecuteCommand( MenuCommand menuCmd, CWnd* pParentOwner )
 			break;
 		case Cmd_Undo:
 		case Cmd_Redo:
-			if ( CCommandModel* pCommandModel = m_pFileModel->GetCommandModel() )
-				if ( utl::ICommand* pTopCmd = Cmd_Undo == menuCmd ? pCommandModel->PeekUndo() : pCommandModel->PeekRedo() )
-					switch ( pTopCmd->GetTypeID() )
-					{
-						case cmd::RenameFile:
-						case cmd::TouchFile:
-							pFileEditor.reset( m_pFileModel->MakeFileEditor( static_cast< cmd::CommandType >( pTopCmd->GetTypeID() ), pParentOwner ) );
-							pFileEditor->PopStackTop( Cmd_Undo == menuCmd ? cmd::Undo : cmd::Redo );
-							break;
-					}
+		{
+			svc::StackType stackType = Cmd_Undo == menuCmd ? svc::Undo : svc::Redo;
+			svc::ICommandService* pCmdSvc = app::GetCmdSvc();
+			if ( utl::ICommand* pTopCmd = pCmdSvc->PeekCmd( stackType ) )
+				switch ( pTopCmd->GetTypeID() )
+				{
+					case cmd::RenameFile:
+					case cmd::TouchFile:
+						pFileEditor.reset( m_pFileModel->MakeFileEditor( static_cast< cmd::CommandType >( pTopCmd->GetTypeID() ), pParentOwner ) );
+						pFileEditor->PopStackTop( Cmd_Undo == menuCmd ? svc::Undo : svc::Redo );
+						break;
+				}
 
 			if ( NULL == pFileEditor.get() )
 				ui::ReportError( _T("No command available to undo."), MB_OK | MB_ICONINFORMATION );
 			break;
+		}
 		default:
 			ASSERT( false );
 	}
 
 	if ( pFileEditor.get() != NULL )
-		if ( IDOK == pFileEditor->GetDialog()->DoModal() )
-			m_pFileModel->SaveCommandModel();
+	{
+		// Note that CPathItemListCtrl::ResetShellContextMenu() that releases the hosted context menu (and this instance), leaving the UI with dangling pointers into m_pFileModel.
+		CComPtr< IContextMenu > pThisAlive( this );		// keep this alive to make the UI code re-entrant
+
+		pFileEditor->GetDialog()->DoModal();
+		pFileEditor.reset();							// delete the dialog here, before pThis goes out of scope
+	}
 }
 
 const CFileRenameShell::CMenuCmdInfo* CFileRenameShell::FindCmd( MenuCommand cmd )
 {
-	for ( int i = 0; i != COUNT_OF( m_commands ); ++i )
-		if ( cmd == m_commands[ i ].m_cmd )
-			return &m_commands[ i ];
+	for ( int i = 0; i != COUNT_OF( s_commands ); ++i )
+		if ( cmd == s_commands[ i ].m_cmd )
+			return &s_commands[ i ];
 
 	return NULL;
 }
@@ -214,7 +182,7 @@ STDMETHODIMP CFileRenameShell::InterfaceSupportsErrorInfo( REFIID riid )
 STDMETHODIMP CFileRenameShell::Initialize( LPCITEMIDLIST folderPidl, IDataObject* pDropInfo, HKEY hKeyProgId )
 {
 	folderPidl, hKeyProgId;
-	AFX_MANAGE_STATE( AfxGetStaticModuleState() )		// [PC 2018] required for loading resource
+	AFX_MANAGE_STATE( AfxGetStaticModuleState() )		// [PC 2018] required for loading resources
 
 	//TRACE( _T("CFileRenameShell::Initialize()\n") );
 	if ( pDropInfo != NULL )
@@ -232,7 +200,8 @@ STDMETHODIMP CFileRenameShell::Initialize( LPCITEMIDLIST folderPidl, IDataObject
 STDMETHODIMP CFileRenameShell::QueryContextMenu( HMENU hMenu, UINT indexMenu, UINT idCmdFirst, UINT idCmdLast, UINT flags )
 {
 	idCmdLast;
-	AFX_MANAGE_STATE( AfxGetStaticModuleState() )		// [PC 2018] required for loading resource
+
+	AFX_MANAGE_STATE( AfxGetStaticModuleState() )		// [PC 2018] required for loading resources
 
 	// res\FileRenameShell.rgs: this shell extension registers itself for both "*" and "lnkfile" types as ContextMenuHandlers.
 	//		http://microsoft.public.platformsdk.shell.narkive.com/yr1YoK9e/obtaining-selected-shortcut-lnk-files-inside-ishellextinit-initialize
@@ -256,7 +225,7 @@ STDMETHODIMP CFileRenameShell::QueryContextMenu( HMENU hMenu, UINT indexMenu, UI
 
 STDMETHODIMP CFileRenameShell::InvokeCommand( CMINVOKECOMMANDINFO* pCmi )
 {
-	AFX_MANAGE_STATE( AfxGetStaticModuleState() )		// [PC 2018] required for loading resource
+	AFX_MANAGE_STATE( AfxGetStaticModuleState() )		// [PC 2018] required for loading resources
 
 	// If HIWORD(pCmi->lpVerb) then we have been called programmatically and lpVerb is a command that should be invoked.
 	// Otherwise, the shell has called us, and LOWORD(pCmi->lpVerb) is the menu ID the user has selected.
@@ -274,6 +243,7 @@ STDMETHODIMP CFileRenameShell::InvokeCommand( CMINVOKECOMMANDINFO* pCmi )
 				ui::BeepSignal( MB_ICONERROR );
 			else
 				ExecuteCommand( menuCmd, scopedMainWnd.m_pParentOwner );
+
 			return S_OK;
 		}
 
@@ -284,7 +254,7 @@ STDMETHODIMP CFileRenameShell::InvokeCommand( CMINVOKECOMMANDINFO* pCmi )
 STDMETHODIMP CFileRenameShell::GetCommandString( UINT_PTR idCmd, UINT flags, UINT* pReserved, LPSTR pName, UINT cchMax )
 {
 	pReserved, cchMax;
-	AFX_MANAGE_STATE( AfxGetStaticModuleState() )		// [PC 2018] required for loading resource
+	AFX_MANAGE_STATE( AfxGetStaticModuleState() )		// [PC 2018] required for loading resources
 
 	//TRACE( _T("CFileRenameShell::GetCommandString(): flags=0x%08X, cchMax=%d\n"), flags, cchMax );
 

@@ -7,6 +7,7 @@
 #include "utl/ContainerUtilities.h"
 #include "utl/EnumTags.h"
 #include "utl/FmtUtils.h"
+#include "utl/FileSystem.h"
 #include "utl/Guards.h"
 #include "utl/MfcUtilities.h"
 #include "utl/Serialization.h"
@@ -71,13 +72,13 @@ fs::CPath CCommandModelService::GetUndoLogPath( cmd::FileFormat fileFormat )
 
 bool CCommandModelService::FindSavedUndoLogPath( cmd::FileFormat& rFileFormat )
 {
-	CFileStatus txtFileStatus;
-	CFileStatus binFileStatus;
-	bool txtLogExists = CFile::GetStatus( GetUndoLogPath( cmd::TextFormat ).GetPtr(), txtFileStatus ) != FALSE;
-	bool binLogExists = CFile::GetStatus( GetUndoLogPath( cmd::BinaryFormat ).GetPtr(), binFileStatus ) != FALSE;
+	CTime txtModifyTime = fs::ReadLastModifyTime( GetUndoLogPath( cmd::TextFormat ) );
+	CTime binModifyTime = fs::ReadLastModifyTime( GetUndoLogPath( cmd::BinaryFormat ) );
+	bool txtLogExists = time_utl::IsValid( txtModifyTime );
+	bool binLogExists = time_utl::IsValid( binModifyTime );
 
 	if ( txtLogExists && binLogExists )
-		rFileFormat = txtFileStatus.m_mtime > binFileStatus.m_mtime ? cmd::TextFormat : cmd::BinaryFormat;		// choose the last modified one
+		rFileFormat = txtModifyTime > binModifyTime ? cmd::TextFormat : cmd::BinaryFormat;		// choose the last modified one
 	else if ( txtLogExists )
 		rFileFormat = cmd::TextFormat;
 	else if ( binLogExists )
@@ -150,16 +151,16 @@ namespace cmd
 
 	void CTextLogSerializer::Save( std::ostream& os ) const
 	{
-		SaveStack( os, cmd::Undo, m_pCommandModel->GetUndoStack() );
-		SaveStack( os, cmd::Redo, m_pCommandModel->GetRedoStack() );
+		SaveStack( os, svc::Undo, m_pCommandModel->GetUndoStack() );
+		SaveStack( os, svc::Redo, m_pCommandModel->GetRedoStack() );
 	}
 
-	void CTextLogSerializer::SaveStack( std::ostream& os, cmd::StackType section, const std::deque< utl::ICommand* >& cmdStack ) const
+	void CTextLogSerializer::SaveStack( std::ostream& os, svc::StackType section, const std::deque< utl::ICommand* >& cmdStack ) const
 	{
 		if ( cmdStack.empty() )
 			return;
 
-		if ( cmd::Redo == section )
+		if ( svc::Redo == section )
 			os << std::endl;		// push redo section down one line
 
 		os << FormatSectionTag( GetTags_Section().FormatUi( section ).c_str() ) << std::endl;		// section tag
@@ -205,9 +206,9 @@ namespace cmd
 			if ( !textRange.IsEmpty() )		// ignore empty lines
 				if ( ParseSectionTag( textRange ) )
 				{
-					cmd::StackType section;
+					svc::StackType section;
 					if ( GetTags_Section().ParseUiAs( section, textRange.Extract() ) )
-						pStack = cmd::Undo == section ? &undoStack : &redoStack;
+						pStack = svc::Undo == section ? &undoStack : &redoStack;
 				}
 				else if ( ParseTag( textRange ) )
 					if ( utl::ICommand* pMacroCmd = LoadMacroCmd( is, textRange ) )
@@ -327,8 +328,8 @@ namespace cmd
 
 	void CBinaryLogSerializer::Save( CArchive& archive ) throws_( CException* )
 	{
-		SaveStack( archive, cmd::Undo, m_pCommandModel->GetUndoStack() );
-		SaveStack( archive, cmd::Redo, m_pCommandModel->GetRedoStack() );
+		SaveStack( archive, svc::Undo, m_pCommandModel->GetUndoStack() );
+		SaveStack( archive, svc::Redo, m_pCommandModel->GetRedoStack() );
 	}
 
 	void CBinaryLogSerializer::Load( CArchive& archive ) throws_( CException* )
@@ -341,7 +342,7 @@ namespace cmd
 		m_pCommandModel->SwapRedoStack( redoStack );
 	}
 
-	void CBinaryLogSerializer::SaveStack( CArchive& archive, cmd::StackType section, const std::deque< utl::ICommand* >& cmdStack )
+	void CBinaryLogSerializer::SaveStack( CArchive& archive, svc::StackType section, const std::deque< utl::ICommand* >& cmdStack )
 	{
 		std::tstring sectionTag = FormatSectionTag( GetTags_Section().FormatUi( section ).c_str() );
 		archive << &sectionTag;			// as Utf8; just for inspection

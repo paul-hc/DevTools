@@ -14,6 +14,7 @@ public:
 	~CCommandModel();
 
 	bool IsUndoEmpty( void ) const { return m_undoStack.empty(); }
+	bool IsRedoEmpty( void ) const { return m_redoStack.empty(); }
 	void Clear( void );
 
 	// utl::ICommandExecutor interface

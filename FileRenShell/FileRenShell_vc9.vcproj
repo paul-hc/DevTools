@@ -714,6 +714,14 @@
 					>
 				</File>
 				<File
+					RelativePath=".\CommandService.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\CommandService.h"
+					>
+				</File>
+				<File
 					RelativePath=".\DuplicateFileItem.cpp"
 					>
 				</File>

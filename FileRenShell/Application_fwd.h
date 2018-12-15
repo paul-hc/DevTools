@@ -3,9 +3,14 @@
 #pragma once
 
 
+namespace svc { interface ICommandService; }
+
+
 namespace app
 {
 	enum CustomColors { ColorErrorBk = color::PastelPink };
+
+	svc::ICommandService* GetCmdSvc( void );
 }
 
 

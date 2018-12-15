@@ -283,7 +283,7 @@ void CFindDuplicatesDialog::SwitchMode( Mode mode )
 		return;
 
 	static const UINT s_okIconId[] = { ID_FIND_DUPLICATE_FILES, ID_DELETE_DUPLICATES, 0, 0 };
-	static const CEnumTags modeTags( _T("&Search|Delete...|Roll &Back|Roll &Forward") );
+	static const CEnumTags modeTags( _T("&Search|Delete...|Roll &Back|Roll &Fwd") );
 	UpdateOkButton( modeTags.FormatUi( m_mode ), s_okIconId[ m_mode ] );
 
 	static const UINT ctrlIds[] =
@@ -311,7 +311,7 @@ void CFindDuplicatesDialog::PostMakeDest( bool silent /*= false*/ )
 	SwitchMode( CommitFilesMode );
 }
 
-void CFindDuplicatesDialog::PopStackTop( cmd::StackType stackType )
+void CFindDuplicatesDialog::PopStackTop( svc::StackType stackType )
 {
 	ASSERT( !IsRollMode() );
 
@@ -324,12 +324,12 @@ void CFindDuplicatesDialog::PopStackTop( cmd::StackType stackType )
 		if ( isTouchMacro )
 			m_pFileModel->FetchFromStack( stackType );		// fetch dataset from the stack top macro command
 		else
-			m_pFileModel->UndoRedo( stackType );
+			m_pCmdSvc->UndoRedo( stackType );
 
 		MarkInvalidSrcItems();
 
 		if ( isTouchMacro )							// file command?
-			SwitchMode( cmd::Undo == stackType ? RollBackMode : RollForwardMode );
+			SwitchMode( svc::Undo == stackType ? RollBackMode : RollForwardMode );
 		else if ( IsNativeCmd( pTopCmd ) )			// file state editing command?
 			SwitchMode( CommitFilesMode );
 	}
@@ -503,10 +503,12 @@ void CFindDuplicatesDialog::CombineTextEffectAt( ui::CTextEffect& rTextEffect, L
 	if ( pCtrl != &m_dupsListCtrl )
 		return;
 
-	enum { LightPastelGreen = RGB( 225, 250, 237 ), LightPastelPink = RGB( 255, 240, 240 ) };
-	static const ui::CTextEffect s_original( ui::Regular, CLR_NONE, LightPastelGreen );
-	static const ui::CTextEffect s_duplicate( ui::Regular, CLR_NONE, LightPastelPink );
-	static const ui::CTextEffect s_errorBk( ui::Regular, color::Red, app::ColorErrorBk );
+	enum BkColor { LightPastelGreen = RGB( 225, 250, 237 ), LightPastelPink = RGB( 255, 240, 240 ) };
+	enum TextColor { DuplicateRed = RGB( 192, 0, 0 ) };
+
+	static const ui::CTextEffect s_original;
+	static const ui::CTextEffect s_duplicate( ui::Regular, DuplicateRed );
+	static const ui::CTextEffect s_errorBk( ui::Regular, CLR_NONE, app::ColorErrorBk );
 
 	const CDuplicateFileItem* pFileItem = CReportListControl::AsPtr< CDuplicateFileItem >( rowKey );
 	const ui::CTextEffect* pTextEffect = pFileItem->IsOriginalItem() ? &s_original : &s_duplicate;
@@ -517,8 +519,8 @@ void CFindDuplicatesDialog::CombineTextEffectAt( ui::CTextEffect& rTextEffect, L
 	if ( m_highlightDuplicates )
 		rTextEffect |= *pTextEffect;
 
-	if ( FileName == subItem && pFileItem->IsOriginalItem() )
-		SetFlag( rTextEffect.m_fontEffect, ui::Bold );
+//	if ( FileName == subItem && pFileItem->IsOriginalItem() )
+//		SetFlag( rTextEffect.m_fontEffect, ui::Bold );
 
 	if ( EditMode == m_mode )								// duplicates list is dirty?
 		rTextEffect.m_textColor = ui::GetBlendedColor( rTextEffect.m_textColor != CLR_NONE ? rTextEffect.m_textColor : m_dupsListCtrl.GetTextColor(), color::White );		// blend to gray
@@ -706,7 +708,7 @@ void CFindDuplicatesDialog::OnOK( void )
 		{
 			cmd::CScopedErrorObserver observe( this );
 
-			if ( m_pFileModel->UndoRedo( RollBackMode == m_mode ? cmd::Undo : cmd::Redo ) ||
+			if ( m_pCmdSvc->UndoRedo( RollBackMode == m_mode ? svc::Undo : svc::Redo ) ||
 				 PromptCloseDialog( PromptClose ) )
 				__super::OnOK();
 			else
@@ -737,10 +739,10 @@ void CFindDuplicatesDialog::OnUpdateUndoRedo( CCmdUI* pCmdUI )
 	switch ( pCmdUI->m_nID )
 	{
 		case IDC_UNDO_BUTTON:
-			pCmdUI->Enable( !IsRollMode() && m_pFileModel->CanUndoRedo( cmd::Undo ) );
+			pCmdUI->Enable( !IsRollMode() && m_pCmdSvc->CanUndoRedo( svc::Undo ) );
 			break;
 		case IDC_REDO_BUTTON:
-			pCmdUI->Enable( !IsRollMode() && m_pFileModel->CanUndoRedo( cmd::Redo ) );
+			pCmdUI->Enable( !IsRollMode() && m_pCmdSvc->CanUndoRedo( svc::Redo ) );
 			break;
 	}
 }

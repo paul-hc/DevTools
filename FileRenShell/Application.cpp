@@ -1,6 +1,7 @@
 
 #include "stdafx.h"
 #include "Application.h"
+#include "CommandService.h"
 #include "GeneralOptions.h"
 #include "ut/TextAlgorithmsTests.h"
 #include "ut/RenameFilesTests.h"
@@ -23,6 +24,15 @@ namespace ut
 		CRenameFilesTests::Instance();
 		CCommandModelSerializerTests::Instance();
 	#endif
+	}
+}
+
+
+namespace app
+{
+	svc::ICommandService* GetCmdSvc( void )
+	{
+		return g_app.GetCommandService();
 	}
 }
 
@@ -54,6 +64,8 @@ BOOL CApplication::InitInstance( void )
 	app::GetLogger().m_logFileMaxSize = -1;						// unlimited log size
 
 	CGeneralOptions::Instance().LoadFromRegistry();
+	m_pCmdSvc.reset( new CCommandService );
+	m_pCmdSvc->LoadCommandModel();
 
 	CAboutBox::m_appIconId = IDD_RENAME_FILES_DIALOG;			// will use HugeIcon_48
 	CToolStrip::RegisterStripButtons( IDR_IMAGE_STRIP );		// register stock images
@@ -66,11 +78,54 @@ BOOL CApplication::InitInstance( void )
 
 int CApplication::ExitInstance( void )
 {
+	if ( m_pCmdSvc->IsDirty() )
+		m_pCmdSvc->SaveCommandModel();
+
+	m_pCmdSvc.reset();
 	CGeneralOptions::Instance().SaveToRegistry();
 
 	g_comModule.Term();
 	return CBaseApp< CWinApp >::ExitInstance();
 }
 
+svc::ICommandService* CApplication::GetCommandService( void ) const
+{
+	ASSERT_PTR( m_pCmdSvc.get() );
+	return m_pCmdSvc.get();
+}
+
 BEGIN_MESSAGE_MAP( CApplication, CBaseApp< CWinApp > )
 END_MESSAGE_MAP()
+
+
+// CScopedMainWnd implementation
+
+CScopedMainWnd::CScopedMainWnd( HWND hWnd )
+	: m_pParentOwner( NULL )
+	, m_pOldMainWnd( NULL )
+{
+	CWnd* pMainWnd = AfxGetMainWnd();
+	bool fromThisModule = ui::IsWndPermanent( pMainWnd->GetSafeHwnd() );
+
+	if ( hWnd != NULL && ::IsWindow( hWnd ) )
+		if ( fromThisModule )
+			m_pParentOwner = ui::FindTopParentPermanent( hWnd );
+		else
+			m_pParentOwner = CWnd::FromHandle( hWnd )->GetTopLevelParent();
+
+	if ( ::IsWindow( m_pParentOwner->GetSafeHwnd() ) )
+		if ( pMainWnd != NULL )
+			if ( NULL == pMainWnd->m_hWnd )							// it happens sometimes, kind of transitory state when invoking from Explorer.exe
+				if ( CWinThread* pCurrThread = AfxGetThread() )
+				{
+					m_pOldMainWnd = pMainWnd;
+					pCurrThread->m_pMainWnd = m_pParentOwner;		// temporarily substitute main window
+				}
+}
+
+CScopedMainWnd::~CScopedMainWnd()
+{
+	if ( m_pOldMainWnd != NULL )
+		if ( CWinThread* pCurrThread = AfxGetThread() )
+			pCurrThread->m_pMainWnd = m_pOldMainWnd;				// restore original main window
+}

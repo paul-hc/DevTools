@@ -3,8 +3,12 @@
 #pragma once
 
 #include "utl/BaseApp.h"
+#include "utl/CommandModel.h"
 #include "utl/Logger.h"
 #include "Application_fwd.h"
+
+
+class CCommandService;
 
 
 class CApplication : public CBaseApp< CWinApp >
@@ -13,7 +17,12 @@ public:
 	CApplication( void );
 	virtual ~CApplication();
 public:
+	svc::ICommandService* GetCommandService( void ) const;
+private:
+	std::auto_ptr< CCommandService > m_pCmdSvc;
+
 	// generated stuff
+public:
     virtual BOOL InitInstance( void );
     virtual int ExitInstance( void );
 protected:
@@ -32,6 +41,18 @@ namespace app
 
 	void InitModule( HINSTANCE hInstance );
 }
+
+
+struct CScopedMainWnd
+{
+	CScopedMainWnd( HWND hWnd );
+	~CScopedMainWnd();
+
+	bool HasValidParentOwner( void ) const { return ::IsWindow( m_pParentOwner->GetSafeHwnd() ) != FALSE; }
+public:
+	CWnd* m_pParentOwner;
+	CWnd* m_pOldMainWnd;
+};
 
 
 #endif // Application_h

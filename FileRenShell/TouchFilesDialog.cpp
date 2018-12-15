@@ -132,7 +132,7 @@ void CTouchFilesDialog::SwitchMode( Mode mode )
 	if ( NULL == m_hWnd )
 		return;
 
-	static const CEnumTags modeTags( _T("&Store|&Touch|Roll &Back|Roll &Forward") );
+	static const CEnumTags modeTags( _T("&Store|&Touch|Roll &Back|Roll &Fwd") );
 	UpdateOkButton( modeTags.FormatUi( m_mode ) );
 
 	static const UINT ctrlIds[] =
@@ -158,7 +158,7 @@ void CTouchFilesDialog::PostMakeDest( bool silent /*= false*/ )
 	SwitchMode( CommitFilesMode );
 }
 
-void CTouchFilesDialog::PopStackTop( cmd::StackType stackType )
+void CTouchFilesDialog::PopStackTop( svc::StackType stackType )
 {
 	ASSERT( !IsRollMode() );
 
@@ -171,12 +171,12 @@ void CTouchFilesDialog::PopStackTop( cmd::StackType stackType )
 		if ( isTouchMacro )
 			m_pFileModel->FetchFromStack( stackType );		// fetch dataset from the stack top macro command
 		else
-			m_pFileModel->UndoRedo( stackType );
+			m_pCmdSvc->UndoRedo( stackType );
 
 		MarkInvalidSrcItems();
 
 		if ( isTouchMacro )							// file command?
-			SwitchMode( cmd::Undo == stackType ? RollBackMode : RollForwardMode );
+			SwitchMode( svc::Undo == stackType ? RollBackMode : RollForwardMode );
 		else if ( IsNativeCmd( pTopCmd ) )			// file state editing command?
 			SwitchMode( CommitFilesMode );
 	}
@@ -565,7 +565,7 @@ void CTouchFilesDialog::OnOK( void )
 		{
 			cmd::CScopedErrorObserver observe( this );
 
-			if ( m_pFileModel->UndoRedo( RollBackMode == m_mode ? cmd::Undo : cmd::Redo ) ||
+			if ( m_pCmdSvc->UndoRedo( RollBackMode == m_mode ? svc::Undo : svc::Redo ) ||
 				 PromptCloseDialog( PromptClose ) )
 				__super::OnOK();
 			else
@@ -593,10 +593,10 @@ void CTouchFilesDialog::OnUpdateUndoRedo( CCmdUI* pCmdUI )
 	switch ( pCmdUI->m_nID )
 	{
 		case IDC_UNDO_BUTTON:
-			pCmdUI->Enable( !IsRollMode() && m_pFileModel->CanUndoRedo( cmd::Undo ) );
+			pCmdUI->Enable( !IsRollMode() && m_pCmdSvc->CanUndoRedo( svc::Undo ) );
 			break;
 		case IDC_REDO_BUTTON:
-			pCmdUI->Enable( !IsRollMode() && m_pFileModel->CanUndoRedo( cmd::Redo ) );
+			pCmdUI->Enable( !IsRollMode() && m_pCmdSvc->CanUndoRedo( svc::Redo ) );
 			break;
 	}
 }

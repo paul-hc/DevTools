@@ -4,6 +4,7 @@
 #include "FileModel.h"
 #include "GeneralOptions.h"
 #include "OptionsSheet.h"
+#include "Application_fwd.h"
 #include "resource.h"
 #include "utl/ContainerUtilities.h"
 #include "utl/EnumTags.h"
@@ -19,8 +20,10 @@
 CFileEditorBaseDialog::CFileEditorBaseDialog( CFileModel* pFileModel, cmd::CommandType nativeCmdType, UINT templateId, CWnd* pParent )
 	: CBaseMainDialog( templateId, pParent )
 	, m_pFileModel( pFileModel )
+	, m_pCmdSvc( app::GetCmdSvc() )
 	, m_mode( EditMode )
 {
+	ASSERT_PTR( m_pCmdSvc );
 	m_nativeCmdTypes.push_back( nativeCmdType );
 
 	m_pFileModel->AddObserver( this );
@@ -61,14 +64,14 @@ void CFileEditorBaseDialog::QueryTooltipText( std::tstring& rText, UINT cmdId, C
 		case IDC_UNDO_BUTTON:
 		case IDC_REDO_BUTTON:
 		{
-			cmd::StackType stackType = IDC_UNDO_BUTTON == cmdId ? cmd::Undo : cmd::Redo;
-			if ( utl::ICommand* pTopCmd = m_pFileModel->PeekCmdAs< utl::ICommand >( stackType ) )
+			svc::StackType stackType = IDC_UNDO_BUTTON == cmdId ? svc::Undo : svc::Redo;
+			if ( utl::ICommand* pTopCmd = m_pCmdSvc->PeekCmd( stackType ) )
 			{
 				std::tstring cmdInfo = pTopCmd->Format( utl::DetailedLine );
-				rText = str::Format( _T("%s: %s"), cmd::GetTags_StackType().FormatUi( stackType ).c_str(), cmdInfo.c_str() );
+				rText = str::Format( _T("%s: %s"), svc::GetTags_StackType().FormatUi( stackType ).c_str(), cmdInfo.c_str() );
 			}
 			else
-				rText = str::Format( _T("%s the file operation"), cmd::GetTags_StackType().FormatUi( stackType ).c_str() );
+				rText = str::Format( _T("%s the file operation"), svc::GetTags_StackType().FormatUi( stackType ).c_str() );
 			break;
 		}
 		default:
@@ -90,12 +93,12 @@ void CFileEditorBaseDialog::UpdateOkButton( const std::tstring& caption, UINT ic
 	m_okButton.SetIconId( iconId );
 }
 
-int CFileEditorBaseDialog::PopStackRunCrossEditor( cmd::StackType stackType )
+int CFileEditorBaseDialog::PopStackRunCrossEditor( svc::StackType stackType )
 {
 	// end this dialog and spawn the foreign dialog editor
-	cmd::CommandType foreignCmdType = static_cast< cmd::CommandType >( m_pFileModel->PeekCmdAs< utl::ICommand >( stackType )->GetTypeID() );
+	cmd::CommandType foreignCmdType = static_cast< cmd::CommandType >( m_pCmdSvc->PeekCmd( stackType )->GetTypeID() );
 	ASSERT( foreignCmdType != m_nativeCmdTypes.front() );
-	ASSERT( m_pFileModel->CanUndoRedo( stackType, foreignCmdType ) );
+	ASSERT( m_pCmdSvc->CanUndoRedo( stackType, foreignCmdType ) );
 
 	m_pFileModel->RemoveObserver( this );		// reject further updates
 
@@ -126,11 +129,11 @@ bool CFileEditorBaseDialog::IsForeignCmd( const utl::ICommand* pCmd ) const
 	return false;
 }
 
-utl::ICommand* CFileEditorBaseDialog::PeekCmdForDialog( cmd::StackType stackType ) const
+utl::ICommand* CFileEditorBaseDialog::PeekCmdForDialog( svc::StackType stackType ) const
 {
-	if ( utl::ICommand* pTopCmd = m_pFileModel->PeekCmdAs< utl::ICommand >( stackType ) )
+	if ( utl::ICommand* pTopCmd = m_pCmdSvc->PeekCmd( stackType ) )
 		if ( !IsForeignCmd( pTopCmd ) )
-			if ( m_pFileModel->CanUndoRedo( stackType ) )
+			if ( m_pCmdSvc->CanUndoRedo( stackType ) )
 				return pTopCmd;
 
 	return NULL;
@@ -184,7 +187,7 @@ BOOL CFileEditorBaseDialog::OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHA
 void CFileEditorBaseDialog::OnUndoRedo( UINT btnId )
 {
 	GotoDlgCtrl( GetDlgItem( IDOK ) );
-	PopStackTop( IDC_UNDO_BUTTON == btnId ? cmd::Undo : cmd::Redo );
+	PopStackTop( IDC_UNDO_BUTTON == btnId ? svc::Undo : svc::Redo );
 }
 
 void CFileEditorBaseDialog::OnOptions( void )

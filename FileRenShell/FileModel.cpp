@@ -1,7 +1,6 @@
 
 #include "stdafx.h"
 #include "FileModel.h"
-#include "CommandModelService.h"
 #include "FileCommands.h"
 #include "IFileEditor.h"
 #include "RenameItem.h"
@@ -27,8 +26,10 @@
 #endif
 
 
-CFileModel::CFileModel( void )
+CFileModel::CFileModel( svc::ICommandService* pCmdSvc )
+	: m_pCmdSvc( pCmdSvc )
 {
+	ASSERT_PTR( m_pCmdSvc );
 }
 
 CFileModel::~CFileModel()
@@ -70,58 +71,33 @@ void CFileModel::StoreSourcePaths( const ContainerT& sourcePaths )
 	m_commonParentPath = path::ExtractCommonParentPath( m_sourcePaths );
 }
 
-CCommandModel* CFileModel::GetCommandModel( void )
-{
-	if ( NULL == m_pCommandModel.get() )
-		m_pCommandModel.reset( new CCommandModel );
-
-	return m_pCommandModel.get();
-}
-
 bool CFileModel::SafeExecuteCmd( IFileEditor* pEditor, utl::ICommand* pCmd )
 {
 	if ( NULL == pCmd )
 		return false;
 
-	bool executeInline = false;
+	bool execInline = false;
 
 	if ( pEditor != NULL && pEditor->IsRollMode() )
-		executeInline = true;
+		execInline = true;
 	else if ( !CGeneralOptions::Instance().m_undoEditingCmds )
-		executeInline = !cmd::IsPersistentCmd( pCmd );			// local editing command?
+		execInline = !cmd::IsPersistentCmd( pCmd );			// local editing command?
 
-	if ( executeInline )
+	if ( execInline )
 	{
 		std::auto_ptr< utl::ICommand > pEditCmd( pCmd );		// take ownership
 		return pEditCmd->Execute();
 	}
 
-	return GetCommandModel()->Execute( pCmd );
+	return m_pCmdSvc->Execute( pCmd );
 }
 
-bool CFileModel::CanUndoRedo( cmd::StackType stackType, int typeId /*= 0*/ ) const
-{
-	if ( utl::ICommand* pTopCmd = PeekCmdAs< utl::ICommand >( stackType ) )
-		if ( 0 == typeId || typeId == pTopCmd->GetTypeID() )
-			return cmd::Undo == stackType
-				? m_pCommandModel->CanUndo()
-				: m_pCommandModel->CanRedo();
-
-	return false;
-}
-
-bool CFileModel::UndoRedo( cmd::StackType stackType )
-{
-	return cmd::Undo == stackType ? GetCommandModel()->Undo() : GetCommandModel()->Redo();
-}
-
-void CFileModel::FetchFromStack( cmd::StackType stackType )
+void CFileModel::FetchFromStack( svc::StackType stackType )
 {
 	// fills the data set from undo stack
-	ASSERT_PTR( m_pCommandModel.get() );
-	ASSERT( cmd::Undo == stackType ? m_pCommandModel->CanUndo() : m_pCommandModel->CanRedo() );
+	ASSERT( m_pCmdSvc->CanUndoRedo( stackType ) );
 
-	utl::ICommand* pTopCmd = PeekCmdAs< utl::ICommand >( stackType );
+	utl::ICommand* pTopCmd = m_pCmdSvc->PeekCmd( stackType );
 	if ( const cmd::CFileMacroCmd* pFileMacroCmd = dynamic_cast< const cmd::CFileMacroCmd* >( pTopCmd ) )
 	{
 		Clear();
@@ -138,29 +114,7 @@ void CFileModel::FetchFromStack( cmd::StackType stackType )
 		UpdateAllObservers( NULL );				// items changed
 	}
 	else
-		UndoRedo( stackType );
-}
-
-bool CFileModel::SaveCommandModel( void ) const
-{
-	if ( NULL == m_pCommandModel.get() || !CGeneralOptions::Instance().m_undoLogPersist )
-		return false;
-
-	// cleanup the command stacks before saving
-	m_pCommandModel->RemoveExpiredCommands( 60 );
-	m_pCommandModel->RemoveCommandsThat( pred::IsZombieCmd() );		// zombie command: it has no effect on files (in most cases empty macros due to non-existing files)
-
-	return CCommandModelService::SaveUndoLog( *m_pCommandModel, CGeneralOptions::Instance().m_undoLogFormat );
-}
-
-bool CFileModel::LoadCommandModel( void )
-{
-	if ( m_pCommandModel.get() != NULL )
-		return false;				// already loaded once
-
-	return
-		CGeneralOptions::Instance().m_undoLogPersist &&
-		CCommandModelService::LoadUndoLog( GetCommandModel() );			// load the most recently modified log file (regardless of CGeneralOptions::m_undoLogFormat)
+		m_pCmdSvc->UndoRedo( stackType );
 }
 
 std::vector< CRenameItem* >& CFileModel::LazyInitRenameItems( void )
@@ -343,7 +297,7 @@ void CFileModel::AddRenameItemFromCmd::operator()( const utl::ICommand* pCmd )
 	const CRenameFileCmd* pRenameCmd = checked_static_cast< const CRenameFileCmd* >( pCmd );
 
 	fs::CPath srcPath = pRenameCmd->m_srcPath, destPath = pRenameCmd->m_destPath;
-	if ( cmd::Undo == m_stackType )
+	if ( svc::Undo == m_stackType )
 		std::swap( srcPath, destPath );			// swap DEST and SRC for undo
 
 	CRenameItem* pRenameItem = new CRenameItem( srcPath );
@@ -361,7 +315,7 @@ void CFileModel::AddTouchItemFromCmd::operator()( const utl::ICommand* pCmd )
 	const CTouchFileCmd* pTouchCmd = checked_static_cast< const CTouchFileCmd* >( pCmd );
 
 	fs::CFileState srcState = pTouchCmd->m_srcState, destState = pTouchCmd->m_destState;
-	if ( cmd::Undo == m_stackType )
+	if ( svc::Undo == m_stackType )
 		std::swap( srcState, destState );			// swap DEST and SRC for undo
 
 	CTouchItem* pTouchItem = new CTouchItem( srcState );

@@ -3,6 +3,7 @@
 #pragma once
 
 #include "utl/ISubject.h"
+#include "utl/ICommandService.h"
 #include "FileCommands_fwd.h"
 
 
@@ -18,7 +19,7 @@ interface IFileEditor : public IMemoryManaged
 	virtual bool IsRollMode( void ) const = 0;						// about to undo/redo mode?
 	virtual void PostMakeDest( bool silent = false ) = 0;
 
-	virtual void PopStackTop( cmd::StackType stackType ) = 0;
+	virtual void PopStackTop( svc::StackType stackType ) = 0;
 };
 
 
