@@ -147,10 +147,12 @@ Range< CTextEdit::CharPos > CTextEdit::GetLineRange( Line linePos ) const
 
 std::tstring CTextEdit::GetLineText( Line linePos ) const
 {
-	size_t length = LineLength( linePos );
+	// Note: careful with LineLength() - the 'nLine' parameter is the index of the first character on the line (CharPos), not the line index
+	size_t length = GetLineRange( linePos ).GetSpan< size_t >();
 	std::vector< TCHAR > lineBuffer( length + 1 );
 
-	length = GetLine( linePos, &lineBuffer.front(), static_cast< int >( lineBuffer.size() ) );
+	size_t newLength = GetLine( linePos, &lineBuffer.front(), static_cast< int >( lineBuffer.size() ) );
+	ENSURE( length == newLength ); newLength;
 	lineBuffer[ length ] = _T('\0');
 	return &lineBuffer.front();
 }
