@@ -509,6 +509,7 @@ namespace fs
 			}
 			catch ( CRuntimeException& exc )
 			{
+				exc;
 				TRACE( _T("* fs::CScopedFileTime::CScopedFileTime - WriteFileTime() failed for %s\n"), exc.GetMessage().c_str() );
 			}
 	}
