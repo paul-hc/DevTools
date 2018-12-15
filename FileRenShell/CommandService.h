@@ -28,23 +28,17 @@ public:
 	virtual bool Execute( utl::ICommand* pCmd );
 
 	template< typename PredType >
-	void RemoveCommandsThat( PredType pred );
+	void RemoveCommandsThat( PredType pred )
+	{
+		m_pCommandModel->RemoveCommandsThat( pred );
+		m_dirty = true;
+	}
 private:
 	std::auto_ptr< CCommandModel > m_pCommandModel;		// self-encapsulated
 	bool m_dirty;
 
 	enum { MaxCommands = 60 };
 };
-
-
-// CCommandService template code
-
-template< typename PredType >
-void CCommandService::RemoveCommandsThat( PredType pred )
-{
-	m_pCommandModel->RemoveCommandsThat( pred );
-	m_dirty = true;
-}
 
 
 #endif // CommandService_h
