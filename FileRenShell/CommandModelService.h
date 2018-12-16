@@ -4,7 +4,7 @@
 
 #include <deque>
 #include <iosfwd>
-#include "utl/ICommandService.h"
+#include "utl/ICommand.h"
 #include "FileCommands_fwd.h"
 
 

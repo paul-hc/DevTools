@@ -1,8 +1,26 @@
-#ifndef ICommandService_h
-#define ICommandService_h
+#ifndef ICommand_h
+#define ICommand_h
 #pragma once
 
-#include "utl/ISubject.h"
+#include "ISubject.h"
+
+
+namespace utl
+{
+	interface ICommand
+		: public IMemoryManaged
+		, public IMessage
+	{
+		virtual bool Execute( void ) = 0;
+		virtual bool Unexecute( void ) = 0;
+		virtual bool IsUndoable( void ) const = 0;
+	};
+
+	interface ICommandExecutor
+	{
+		virtual bool Execute( ICommand* pCmd ) = 0;
+	};
+}
 
 
 class CEnumTags;
@@ -28,4 +46,4 @@ namespace svc
 }
 
 
-#endif // ICommandService_h
+#endif // ICommand_h

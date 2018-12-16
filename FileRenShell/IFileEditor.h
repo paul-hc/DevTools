@@ -3,7 +3,7 @@
 #pragma once
 
 #include "utl/ISubject.h"
-#include "utl/ICommandService.h"
+#include "utl/ICommand.h"
 #include "FileCommands_fwd.h"
 
 

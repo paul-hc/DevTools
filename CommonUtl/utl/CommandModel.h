@@ -2,7 +2,7 @@
 #define CommandModel_h
 #pragma once
 
-#include "ISubject.h"
+#include "ICommand.h"
 #include <deque>
 
 

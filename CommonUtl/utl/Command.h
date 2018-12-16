@@ -2,7 +2,7 @@
 #define Command_h
 #pragma once
 
-#include "ISubject.h"
+#include "ICommand.h"
 
 
 abstract class CBaseCommand : public utl::ICommand

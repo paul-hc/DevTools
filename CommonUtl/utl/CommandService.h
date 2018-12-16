@@ -2,8 +2,7 @@
 #define CommandService_h
 #pragma once
 
-#include "utl/ICommandService.h"
-#include "Application_fwd.h"
+#include "ICommand.h"
 
 
 class CCommandModel;
@@ -18,12 +17,10 @@ public:
 	const CCommandModel* GetCommandModel( void ) const { return m_pCommandModel.get(); }
 
 	bool IsDirty( void ) const { return m_dirty; }
-	bool SaveCommandModel( void );
-	bool LoadCommandModel( void );
 
 	// svc::ICommandService interface
 	virtual utl::ICommand* PeekCmd( svc::StackType stackType ) const;
-	virtual bool CanUndoRedo( svc::StackType stackType, int typeId = 0 ) const;
+	virtual bool CanUndoRedo( svc::StackType stackType, int cmdTypeId = 0 ) const;
 	virtual bool UndoRedo( svc::StackType stackType );
 	virtual bool Execute( utl::ICommand* pCmd );
 
@@ -33,11 +30,12 @@ public:
 		m_pCommandModel->RemoveCommandsThat( pred );
 		m_dirty = true;
 	}
-private:
+protected:
+	void SetDirty( bool dirty = true ) { m_dirty = dirty; }
+protected:
 	std::auto_ptr< CCommandModel > m_pCommandModel;		// self-encapsulated
+private:
 	bool m_dirty;
-
-	enum { MaxCommands = 60 };
 };
 
 

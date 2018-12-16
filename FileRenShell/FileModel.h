@@ -6,7 +6,7 @@
 #include "utl/InternalChange.h"
 #include "utl/PathItemBase.h"
 #include "utl/PathItemBase.h"
-#include "utl/ICommandService.h"
+#include "utl/ICommand.h"
 
 class CRenameItem;
 class CTouchItem;

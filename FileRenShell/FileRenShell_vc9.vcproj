@@ -706,19 +706,19 @@
 				Name="model"
 				>
 				<File
+					RelativePath=".\AppCmdService.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\AppCmdService.h"
+					>
+				</File>
+				<File
 					RelativePath=".\CommandModelService.cpp"
 					>
 				</File>
 				<File
 					RelativePath=".\CommandModelService.h"
-					>
-				</File>
-				<File
-					RelativePath=".\CommandService.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\CommandService.h"
 					>
 				</File>
 				<File

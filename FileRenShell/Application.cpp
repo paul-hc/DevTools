@@ -1,7 +1,7 @@
 
 #include "stdafx.h"
 #include "Application.h"
-#include "CommandService.h"
+#include "AppCmdService.h"
 #include "GeneralOptions.h"
 #include "ut/TextAlgorithmsTests.h"
 #include "ut/RenameFilesTests.h"
@@ -53,7 +53,7 @@ CApplication::~CApplication()
 
 BOOL CApplication::InitInstance( void )
 {
-	// Called once when the user right-clicks on selected files in Explorer for the first time.
+	// called once when the user right-clicks on selected files in Explorer for the first time.
 
 	app::InitModule( m_hInstance );
 	AfxSetResourceHandle( m_hInstance );
@@ -63,15 +63,16 @@ BOOL CApplication::InitInstance( void )
 
 	app::GetLogger().m_logFileMaxSize = -1;						// unlimited log size
 
-	CGeneralOptions::Instance().LoadFromRegistry();
-	m_pCmdSvc.reset( new CCommandService );
-	m_pCmdSvc->LoadCommandModel();
-
 	CAboutBox::m_appIconId = IDD_RENAME_FILES_DIALOG;			// will use HugeIcon_48
 	CToolStrip::RegisterStripButtons( IDR_IMAGE_STRIP );		// register stock images
 	CImageStore::SharedStore()->RegisterAlias( ID_EDIT_CLEAR, ID_REMOVE_ITEM );
 
 	ut::RegisterAppUnitTests();
+
+	CGeneralOptions::Instance().LoadFromRegistry();
+
+	m_pCmdSvc.reset( new CAppCmdService );
+	m_pCmdSvc->LoadCommandModel();
 
 	return TRUE;
 }

@@ -8,7 +8,7 @@
 #include "Application_fwd.h"
 
 
-class CCommandService;
+class CAppCmdService;
 
 
 class CApplication : public CBaseApp< CWinApp >
@@ -19,7 +19,7 @@ public:
 public:
 	svc::ICommandService* GetCommandService( void ) const;
 private:
-	std::auto_ptr< CCommandService > m_pCmdSvc;
+	std::auto_ptr< CAppCmdService > m_pCmdSvc;
 
 	// generated stuff
 public:

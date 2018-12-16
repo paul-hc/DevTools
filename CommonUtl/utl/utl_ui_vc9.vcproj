@@ -814,7 +814,15 @@
 					>
 				</File>
 				<File
-					RelativePath=".\ICommandService.h"
+					RelativePath=".\CommandService.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\CommandService.h"
+					>
+				</File>
+				<File
+					RelativePath=".\ICommand.h"
 					>
 				</File>
 				<File
