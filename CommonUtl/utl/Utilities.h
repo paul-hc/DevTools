@@ -213,9 +213,13 @@ namespace ui
 	inline bool IsTopLevel( HWND hWnd ) { return !IsChild( hWnd ); }
 	inline bool HasStyleTopLevelCaption( DWORD style ) { return !HasFlag( style, WS_CHILD ) && EqFlag( style, WS_CAPTION ); }	// WS_CAPTION=WS_BORDER|WS_DLGFRAME
 	inline bool IsTopLevelCaption( HWND hWnd ) { return HasStyleTopLevelCaption( GetStyle( hWnd ) ); }
+	inline bool IsPermanentWnd( HWND hWnd ) { return hWnd != NULL && CWnd::FromHandlePermanent( hWnd ) != NULL; }		// permanent: a window subclassed in this module
 
-	inline bool IsWndPermanent( HWND hWnd ) { return hWnd != NULL && CWnd::FromHandlePermanent( hWnd ) != NULL; }		// permanent: a window subclassed in this module
-	CWnd* FindTopParentPermanent( HWND hWnd );		// find first parent (non-child) that is a permanent window (subclassed in this module)
+
+	HWND GetTopLevelParent( HWND hWnd );				// find first top-level parent (non-child)
+	inline CWnd* GetTopLevelParent( const CWnd* pWnd ) { return CWnd::FromHandle( GetTopLevelParent( pWnd->GetSafeHwnd() ) ); }
+
+	CWnd* FindTopLevelParentPermanent( HWND hWnd );		// find first parent (non-child) that is a permanent window (subclassed in this module)
 
 
 	void GetWindowText( std::tstring& rText, HWND hWnd );

@@ -104,13 +104,18 @@ namespace ui
 
 	int TrackPopupMenu( CMenu& rMenu, CWnd* pTargetWnd, CPoint screenPos, UINT trackFlags /*= TPM_RIGHTBUTTON*/, const RECT* pExcludeRect /*= NULL*/ )
 	{
-		TPMPARAMS excludeStruct = { sizeof( TPMPARAMS ) };
+		AdjustMenuTrackPos( screenPos );
 
 		if ( pExcludeRect != NULL ) // pExcludeRect is ignored by TrackPopupMenu()
+		{
+			TPMPARAMS excludeStruct;
+			utl::ZeroWinStruct( &excludeStruct );
 			excludeStruct.rcExclude = *pExcludeRect;
 
-		AdjustMenuTrackPos( screenPos );
-		return ui::ToCmdId( rMenu.TrackPopupMenuEx( trackFlags, screenPos.x, screenPos.y, pTargetWnd, pExcludeRect != NULL ? &excludeStruct : NULL ) );
+			return ui::ToCmdId( rMenu.TrackPopupMenuEx( trackFlags, screenPos.x, screenPos.y, pTargetWnd, pExcludeRect != NULL ? &excludeStruct : NULL ) );
+		}
+		else
+			return ui::ToCmdId( rMenu.TrackPopupMenu( trackFlags, screenPos.x, screenPos.y, pTargetWnd ) );
 	}
 
 	int TrackPopupMenuAlign( CMenu& rMenu, CWnd* pTargetWnd, const RECT& excludeRect, PopupAlign popupAlign /*= DropDown*/,

@@ -50,7 +50,7 @@ namespace app
 
 
 #ifdef _DEBUG
-	#define DEBUG_LOG app::GetLogger().Log
+	#define DEBUG_LOG app::GetLogger().LogTrace
 #else
 	#define DEBUG_LOG __noop
 #endif

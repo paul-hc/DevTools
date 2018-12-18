@@ -14,8 +14,7 @@ class WorkspaceProfile;
 class CWkspSaveDialog : public CLayoutDialog
 {
 public:
-	CWkspSaveDialog( WorkspaceProfile& _wkspProfile, const CString& _section, const CString& _currProjectName,
-					CWnd* parent );
+	CWkspSaveDialog( WorkspaceProfile& _wkspProfile, const CString& _section, const CString& _currProjectName, CWnd* parent );
 	virtual ~CWkspSaveDialog();
 
 	void updateFileContents( void );

@@ -414,8 +414,8 @@ namespace code
 
 		typeChoiceMenu.SetDefaultItem( cmdUseDocQualifier );
 
-		CPoint mousePointerPos = ide::getCaretScreenPos();
-		CWnd* pIdeRootWindow = ide::getRootWindow();
+		CPoint mousePointerPos = ide::GetMouseScreenPos();
+		CWnd* pIdeRootWindow = ide::GetRootWindow();
 		MenuCommand command = (MenuCommand)ide::trackPopupMenu( typeChoiceMenu, mousePointerPos, pIdeRootWindow,
 																TPM_LEFTALIGN | TPM_TOPALIGN | TPM_RIGHTBUTTON | TPM_NONOTIFY | TPM_RETURNCMD );
 
@@ -499,7 +499,7 @@ namespace code
 		CMenu contextMenu;
 		ui::LoadPopupMenu( contextMenu, IDR_CONTEXT_MENU, app_popup::AutoMakeCode );
 
-		CWnd* pIdeRootWindow = ide::getRootWindow();
+		CWnd* pIdeRootWindow = ide::GetRootWindow();
 		return ide::trackPopupMenu( contextMenu, screenPos, pIdeRootWindow,
 									TPM_LEFTALIGN | TPM_TOPALIGN | TPM_RIGHTBUTTON | TPM_NONOTIFY | TPM_RETURNCMD );
 	}
@@ -575,7 +575,7 @@ namespace code
 
 	CString CppImplementationFormatter::tokenizeText( const TCHAR* codeText )
 	{
-		CTokenizeTextDialog dialog( ide::getRootWindow() );
+		CTokenizeTextDialog dialog( ide::GetRootWindow() );
 		dialog.m_sourceText = codeText;
 
 		if ( IDCANCEL == dialog.DoModal() )

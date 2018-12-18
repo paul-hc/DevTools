@@ -21,6 +21,8 @@ public:
 
 	void LogString( const std::tstring& text ) { LogLine( text.c_str() ); }
 
+	void LogTrace( const TCHAR format[], ... );
+
 	void Clear( void );
 	void SetOverwrite( void );
 protected:

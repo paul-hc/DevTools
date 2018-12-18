@@ -19,6 +19,8 @@ interface IMenuCommandTarget
 
 class CMenuTrackingWindow : public CFrameWnd
 {
+private:
+	virtual ~CMenuTrackingWindow();
 public:
 	CMenuTrackingWindow( IMenuCommandTarget* pCommandTarget, CMenu& rTrackingMenu, MenuTrackMode menuTrackMode = MTM_None );
 
@@ -29,8 +31,6 @@ public:
 
 	void Create( CWnd* pOwner );
 	void InvalidateMenuWindow( void );
-protected:
-	virtual ~CMenuTrackingWindow();
 private:
 	void OnMenuEnterIdle( int idleCount );
 private:
@@ -46,7 +46,7 @@ private:
 public:
 	// generated overrides
 	protected:
-	virtual LRESULT WindowProc(UINT message, WPARAM wParam, LPARAM lParam);
+	virtual LRESULT WindowProc( UINT message, WPARAM wParam, LPARAM lParam );
 protected:
 	// generated message map
 	DECLARE_MESSAGE_MAP()

@@ -352,7 +352,7 @@ int CompoundTextParser::Section::bindAllReferences( void ) throws_( CString )
 
 							promptMessage.Format( IDS_PROMPTINCLUDESECTION, (LPCTSTR)refSectionName );
 							if ( CCodeMessageBox( promptMessage, referredContent, MB_OKCANCEL | MB_ICONQUESTION,
-												  MAKEINTRESOURCE( IDS_CODE_GENERATOR_CAPTION ), ide::getRootWindow() ).DoModal() != IDOK )
+												  MAKEINTRESOURCE( IDS_CODE_GENERATOR_CAPTION ), ide::GetRootWindow() ).DoModal() != IDOK )
 								referredContent.Empty();
 						}
 					}

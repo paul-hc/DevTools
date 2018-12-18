@@ -117,17 +117,20 @@ namespace pred
 
 struct CFolderOptions : public IMenuCommandTarget
 {
-	CFolderOptions( LPCTSTR sectionPostfix = _T("") );
+	CFolderOptions( const TCHAR* pSubSection = _T("") );		// pass "" for using the root section
 	~CFolderOptions();
 
-	bool isDefaultSection( void ) const;
-	const CString& setSection( LPCTSTR sectionPostfix );
+	const std::tstring& GetSection( void ) const { return m_section; }
+	void SetSubSection( const TCHAR* pSubSection );
+
+void LoadAll( void );
+void SaveAll( void ) const;
 
 	DWORD getFlags( void ) const;
 	void setFlags( DWORD flags );
 
-	bool loadProfile( void );
-	bool saveProfile( void ) const;
+	const std::tstring& GetSelectedFileName( void ) const { return m_selectedFileName; }
+	void SetSelectedFileName( const std::tstring& selectedFileName ) { m_selectedFileName = selectedFileName; }
 
 	UINT getNextMenuId( void ) const { return m_menuFileItemId++; }
 	UINT getMenuId( void ) const { return m_menuFileItemId; }
@@ -149,7 +152,7 @@ struct CFolderOptions : public IMenuCommandTarget
 	static bool IsMenuStructureCommand( UINT cmdId );
 	static bool IsFilepathSortingCommand( UINT cmdId );
 private:
-	CString m_section;
+	std::tstring m_section;
 	mutable UINT m_menuFileItemId;
 
 	std::set< CString, LessPathPred > m_fileDirMap;
@@ -166,9 +169,9 @@ public:
 	CPathOrder m_fileSortOrder;
 	FolderLayout m_folderLayout;
 
-	CString m_selectedFileName;
-
 	mutable CMetaFolder::CFile* m_pSelectedFileRef;
+private:
+	std::tstring m_selectedFileName;
 };
 
 
@@ -185,7 +188,7 @@ public:
 	bool overallExcludeFile( const CString& filePathFilter );
 	bool excludeFileFromFolder( const CString& folderPath, const CString& fileFilter );
 
-	bool pickFile( CPoint trackPos );
+	bool PickFile( CPoint screenPos );
 
 	int getFileTotalCount( void ) const;
 	int getFolderCount( void ) const { return (int)m_folders.size(); }
@@ -195,13 +198,14 @@ public:
 	// IMenuCommandTarget interface implementation
 	virtual bool OnMenuCommand( UINT cmdId );
 private:
-	void buildMenu( CMenu& rOutMenu );
+	void BuildMenu( CMenu& rOutMenu );
 public:
 	CFolderOptions m_options;
 private:
 	std::vector< CMetaFolder* > m_folders;
 	CMetaFolder* m_pExtraFiles;
 	bool m_extraFilesFirst;
+	bool m_keepTracking;
 };
 
 

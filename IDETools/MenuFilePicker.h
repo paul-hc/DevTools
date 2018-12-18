@@ -36,8 +36,8 @@ protected:
 	afx_msg long GetFolderLayout();
 	afx_msg void SetFolderLayout( long nNewValue );
 	afx_msg BSTR GetCurrentFileName();
-	afx_msg void SetCurrentFileName( LPCTSTR lpszNewValue );
-	afx_msg BSTR SetProfileSection( LPCTSTR sectionPostfix, BOOL loadNow );
+	afx_msg void SetCurrentFileName( LPCTSTR pSelectedFileName );
+	afx_msg BSTR SetProfileSection( LPCTSTR pSubSection, BOOL loadNow );
 	afx_msg BOOL AddFolder( LPCTSTR folderPathFilter, LPCTSTR folderAlias );
 	afx_msg BOOL AddFolderArray( LPCTSTR folderItemFlatArray );
 	afx_msg BOOL AddRootFile( LPCTSTR filePath, LPCTSTR label );

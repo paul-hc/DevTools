@@ -153,7 +153,7 @@ BSTR FileLocator::GetSelectedFile( long index )
 
 BOOL FileLocator::LocateFile( void )
 {
-	CFileLocatorDialog dlg( ide::getRootWindow() );
+	CFileLocatorDialog dlg( ide::GetRootWindow() );
 	dlg.SetLocalCurrentFile( m_projCtx.GetLocalCurrentFile() );
 
 	if ( dlg.DoModal() != IDOK )

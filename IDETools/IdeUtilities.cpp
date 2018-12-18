@@ -4,6 +4,7 @@
 #include "Application.h"
 #include "utl/Path.h"
 #include "utl/Registry.h"
+#include "utl/Utilities.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -14,13 +15,13 @@ namespace ide
 {
 	bool IsVC6( void )
 	{
-		CWnd* pRootWindow = getRootWindow();
+		CWnd* pRootWindow = GetRootWindow();
 		return pRootWindow != NULL && getWindowClassName( pRootWindow->m_hWnd ).Left( 4 ) == _T("Afx:");
 	}
 
 	bool IsVC_71to90( void )
 	{
-		CWnd* pRootWindow = getRootWindow();
+		CWnd* pRootWindow = GetRootWindow();
 		return pRootWindow != NULL && getWindowClassName( pRootWindow->m_hWnd ) == _T("wndclass_desked_gsk");
 	}
 
@@ -34,23 +35,23 @@ namespace ide
 		return VC_110plus;
 	}
 
-	CWnd* getRootWindow( void )
+	CWnd* GetRootWindow( void )
 	{
-		CWnd* pRootWindow = getFocusWindow();
+		CWnd* pRootWnd = GetFocusWindow();
 
-		if ( pRootWindow == NULL )
-			pRootWindow = CWnd::GetForegroundWindow();
+		if ( pRootWnd == NULL )
+			pRootWnd = CWnd::GetForegroundWindow();
 
-		if ( pRootWindow != NULL )
-			pRootWindow = getRootParentWindow( pRootWindow );
+		if ( pRootWnd != NULL )
+			pRootWnd = ui::GetTopLevelParent( pRootWnd );
 
-		if ( pRootWindow != NULL )
-			DEBUG_LOG( _T("RootWindow: %s\n"), getWindowInfo( pRootWindow->m_hWnd ).c_str() );
+		if ( pRootWnd != NULL )
+			DEBUG_LOG( _T("RootWindow: %s"), getWindowInfo( pRootWnd->m_hWnd ).c_str() );
 
-		return pRootWindow;
+		return pRootWnd;
 	}
 
-	CWnd* getFocusWindow( void )
+	CWnd* GetFocusWindow( void )
 	{
 		GUITHREADINFO threadInfo =
 		{
@@ -58,7 +59,7 @@ namespace ide
 			GUI_CARETBLINKING | GUI_INMENUMODE | GUI_INMOVESIZE | GUI_POPUPMENUMODE | GUI_SYSTEMMENUMODE
 		};
 
-		if ( GetGUIThreadInfo( GetWindowThreadProcessId( GetForegroundWindow(), NULL ), &threadInfo ) )
+		if ( ::GetGUIThreadInfo( ::GetWindowThreadProcessId( ::GetForegroundWindow(), NULL ), &threadInfo ) )
 		{
 			HWND hFocusWnds[] = { threadInfo.hwndCaret, threadInfo.hwndFocus, threadInfo.hwndCapture, threadInfo.hwndActive };
 
@@ -67,7 +68,7 @@ namespace ide
 					return CWnd::FromHandle( hFocusWnds[ i ] );
 		}
 
-		HWND hWnds[] = { GetFocus(), GetActiveWindow() };
+		HWND hWnds[] = { ::GetFocus(), ::GetActiveWindow() };
 
 		for ( unsigned int i = 0; i != COUNT_OF( hWnds ); ++i )
 			if ( hWnds[ i ] != NULL )
@@ -76,38 +77,29 @@ namespace ide
 		return CWnd::GetForegroundWindow();
 	}
 
-	CPoint getCaretScreenPos( void )
+	CPoint GetMouseScreenPos( void )
 	{
-		CPoint mousePointerPos;
-		CWnd* pFocusWindow = getFocusWindow();
+		CPoint mouseScreenPos;
 
-		if ( pFocusWindow != NULL )
+		if ( CWnd* pFocusWindow = GetFocusWindow() )
 		{
-			if ( !GetCaretPos( &mousePointerPos ) )
+			if ( !::GetCaretPos( &mouseScreenPos ) )
 			{
 				CRect windowRect;
 
 				pFocusWindow->GetWindowRect( &windowRect );
-				mousePointerPos = windowRect.TopLeft();
-				DEBUG_LOG( _T("NO_CARET!\n") );
+				mouseScreenPos = windowRect.TopLeft();
+				DEBUG_LOG( _T("NO_CARET!") );
 			}
 			else if ( pFocusWindow->GetStyle() & WS_CHILD )
-				pFocusWindow->ClientToScreen( &mousePointerPos );
+				pFocusWindow->ClientToScreen( &mouseScreenPos );
 
-			DEBUG_LOG( _T("CaretPos [%d,%d]\n"), mousePointerPos.x, mousePointerPos.y );
+			DEBUG_LOG( _T("Mouse pos (%d,%d)"), mouseScreenPos.x, mouseScreenPos.y );
 		}
 		else
-			::GetCursorPos( &mousePointerPos );
+			::GetCursorPos( &mouseScreenPos );
 
-		return mousePointerPos;
-	}
-
-	CPoint getMouseScreenPos( void )
-	{
-		CPoint mousePointerPos;
-
-		GetCursorPos( &mousePointerPos );
-		return mousePointerPos;
+		return mouseScreenPos;
 	}
 
 	std::pair< HMENU, int > findPopupMenuWithCommand( HWND hWnd, UINT commandID )
@@ -253,7 +245,7 @@ namespace ide
 		if ( regKey.IsValid() )
 		{
 			path = regKey.ReadString( entry );
-			DEBUG_LOG( _T("VC6 %s: %s\n"), entry, path.c_str() );
+			DEBUG_LOG( _T("VC6 %s: %s"), entry, path.c_str() );
 		}
 		else
 			TRACE( _T("# Error accessing the registry: %s\n"), regKeyPathVC6 );
@@ -277,7 +269,7 @@ namespace ide
 			if ( !vc71InstallDir.empty() )
 				str::Replace( path, _T("$(VCInstallDir)"), vc71InstallDir.c_str() );
 
-			DEBUG_LOG( _T("VC71 %s: %s\n"), entry, path.c_str() );
+			DEBUG_LOG( _T("VC71 %s: %s"), entry, path.c_str() );
 		}
 		else
 			TRACE( _T("# Error accessing the registry: %s\n"), regKeyPathVC71 );

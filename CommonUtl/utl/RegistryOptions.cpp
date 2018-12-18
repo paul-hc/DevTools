@@ -17,16 +17,16 @@
 // CRegistryOptions implementation
 
 CRegistryOptions::CRegistryOptions( const std::tstring& section, bool saveOnModify )
-	: m_pRegSection( new CAppRegistrySection( section ) )
-	, m_saveOnModify( saveOnModify )
+	: m_saveOnModify( saveOnModify )
 {
+	if ( !section.empty() )
+		m_pRegSection.reset( new CAppRegistrySection( section ) );
 }
 
 CRegistryOptions::CRegistryOptions( IRegistrySection* pRegSection, bool saveOnModify )
 	: m_pRegSection( pRegSection )
 	, m_saveOnModify( saveOnModify )
 {
-	ASSERT_PTR( m_pRegSection.get() );
 }
 
 CRegistryOptions::~CRegistryOptions()
@@ -39,20 +39,22 @@ void CRegistryOptions::AddOption( reg::CBaseOption* pOption, UINT ctrlId /*= 0*/
 	ASSERT_PTR( pOption );
 
 	m_options.push_back( pOption );
-	pOption->SetSection( GetSection() );
+	pOption->SetParent( this );
 	pOption->SetCtrlId( ctrlId );
 }
 
 void CRegistryOptions::LoadAll( void )
 {
-	for ( std::vector< reg::CBaseOption* >::const_iterator itOption = m_options.begin(); itOption != m_options.end(); ++itOption )
-		( *itOption )->Load();
+	if ( IsPersistent() )
+		for ( std::vector< reg::CBaseOption* >::const_iterator itOption = m_options.begin(); itOption != m_options.end(); ++itOption )
+			( *itOption )->Load();
 }
 
 void CRegistryOptions::SaveAll( void ) const
 {
-	for ( std::vector< reg::CBaseOption* >::const_iterator itOption = m_options.begin(); itOption != m_options.end(); ++itOption )
-		( *itOption )->Save();
+	if ( IsPersistent() )
+		for ( std::vector< reg::CBaseOption* >::const_iterator itOption = m_options.begin(); itOption != m_options.end(); ++itOption )
+			( *itOption )->Save();
 }
 
 bool CRegistryOptions::AnyNonDefaultValue( void ) const
@@ -178,8 +180,8 @@ namespace reg
 
 	CBaseOption::CBaseOption( const TCHAR* pEntry )
 		: m_entry( SkipDataMemberPrefix( pEntry ) )
-		, m_pRegSection( NULL )
 		, m_ctrlId( 0 )
+		, m_pParent( NULL )
 	{
 		ASSERT( !m_entry.empty() );
 
@@ -196,13 +198,13 @@ namespace reg
 	template<>
 	void COption< fs::CPath >::Load( void )
 	{
-		*m_pValue = m_pRegSection->GetStringParameter( m_entry.c_str(), m_pValue->GetPtr() );
+		*m_pValue = GetSection()->GetStringParameter( m_entry.c_str(), m_pValue->GetPtr() );
 	}
 
 	template<>
 	void COption< fs::CPath >::Save( void ) const
 	{
-		m_pRegSection->SaveParameter( m_entry.c_str(), m_pValue->GetPtr() );
+		GetSection()->SaveParameter( m_entry.c_str(), m_pValue->GetPtr() );
 	}
 
 
@@ -211,14 +213,14 @@ namespace reg
 	template<>
 	void COption< double >::Load( void )
 	{
-		std::tstring text = m_pRegSection->GetStringParameter( m_entry.c_str(), num::FormatNumber( *m_pValue ).c_str() );
+		std::tstring text = GetSection()->GetStringParameter( m_entry.c_str(), num::FormatNumber( *m_pValue ).c_str() );
 		num::ParseNumber( *m_pValue, text );
 	}
 
 	template<>
 	void COption< double >::Save( void ) const
 	{
-		m_pRegSection->SaveParameter( m_entry.c_str(), num::FormatNumber( *m_pValue ) );
+		GetSection()->SaveParameter( m_entry.c_str(), num::FormatNumber( *m_pValue ) );
 	}
 
 
@@ -228,7 +230,7 @@ namespace reg
 	{
 		if ( m_pTags != NULL )
 		{
-			std::tstring keyTag = m_pRegSection->GetStringParameter( m_entry.c_str(), m_pTags->FormatKey( *m_pValue ).c_str() );
+			std::tstring keyTag = GetSection()->GetStringParameter( m_entry.c_str(), m_pTags->FormatKey( *m_pValue ).c_str() );
 			int newValue;
 			if ( m_pTags->ParseKeyAs( newValue, keyTag ) )
 				*m_pValue = newValue;
@@ -242,7 +244,7 @@ namespace reg
 	void CEnumOption::Save( void ) const
 	{
 		if ( m_pTags != NULL )
-			m_pRegSection->SaveParameter( m_entry.c_str(), m_pTags->FormatKey( *m_pValue ).c_str() );
+			GetSection()->SaveParameter( m_entry.c_str(), m_pTags->FormatKey( *m_pValue ).c_str() );
 		else
 			COption< int >::Save();
 	}

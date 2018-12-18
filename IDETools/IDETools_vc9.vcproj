@@ -65,6 +65,7 @@
 				BrowseInformationFile="$(IntDir)\"
 				WarningLevel="4"
 				SuppressStartupBanner="true"
+				DebugInformationFormat="3"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -85,6 +86,7 @@
 				SuppressStartupBanner="true"
 				AdditionalLibraryDirectories="$(UTL_INCLUDE)\lib\32"
 				ModuleDefinitionFile=".\IDETools.def"
+				GenerateDebugInformation="true"
 				ProgramDatabaseFile="$(TargetDir)$(TargetName).pdb"
 				SubSystem="2"
 				OptimizeReferences="2"

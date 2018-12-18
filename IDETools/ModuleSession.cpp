@@ -161,7 +161,7 @@ code::CFormatterOptions& CModuleSession::GetCodeFormatterOptions( void )
 
 bool CModuleSession::EditOptions( void )
 {
-	COptionsSheet sheet( ide::getRootWindow() );
+	COptionsSheet sheet( ide::GetRootWindow() );
 
 	CGeneralOptionsPage* pGeneralPage = sheet.GetPageAs< CGeneralOptionsPage >( COptionsSheet::GeneralPage );
 

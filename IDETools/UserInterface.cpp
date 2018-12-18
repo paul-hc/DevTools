@@ -119,7 +119,7 @@ void UserInterface::SetIDEToolsRegistryKey( LPCTSTR lpszNewValue )
 BSTR UserInterface::InputBox( LPCTSTR title, LPCTSTR prompt, LPCTSTR initialValue )
 {
 	CString strResult;
-	CInputBoxDialog inputDialog( title, prompt, initialValue, ide::getRootWindow() );
+	CInputBoxDialog inputDialog( title, prompt, initialValue, ide::GetRootWindow() );
 	if ( IDOK == inputDialog.DoModal() )
 		strResult = inputDialog.m_inputText;
 
@@ -301,7 +301,7 @@ BSTR UserInterface::ExpandEnvironmentVariables( LPCTSTR sourceString )
 BSTR UserInterface::LocateFile( LPCTSTR localDirPath )
 {
 	std::tstring includeFilePath;
-	CFileLocatorDialog dlg( ide::getRootWindow() );
+	CFileLocatorDialog dlg( ide::GetRootWindow() );
 
 	dlg.SetLocalDirPath( localDirPath );
 

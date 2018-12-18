@@ -35,6 +35,7 @@ public:
 	CRegistryOptions( const CRegistryOptions& right ) { right; }
 	CRegistryOptions& operator=( const CRegistryOptions& right ) { right; return *this; }
 
+	bool IsPersistent( void ) const { return m_pRegSection.get() != NULL; }
 	IRegistrySection* GetSection( void ) const { return m_pRegSection.get(); }
 
 	void AddOption( reg::CBaseOption* pOption, UINT ctrlId = 0 );
@@ -93,7 +94,7 @@ namespace reg
 	public:
 		virtual ~CBaseOption();
 
-		void SetSection( IRegistrySection* pRegSection ) { ASSERT_PTR( pRegSection ); m_pRegSection = pRegSection; }
+		void SetParent( const CRegistryOptions* pParent ) { ASSERT_NULL( m_pParent ); m_pParent = pParent; ASSERT_PTR( m_pParent ); }
 
 		UINT GetCtrlId( void ) const { return m_ctrlId; }
 		void SetCtrlId( UINT ctrlId ) { m_ctrlId = ctrlId; }
@@ -106,9 +107,13 @@ namespace reg
 		virtual bool HasDefaultValue( void ) const = 0;
 		virtual void SetDefaultValue( void ) = 0;				// returns true if value has changed
 	protected:
+		// must only be called for persistent options
+		IRegistrySection* GetSection( void ) const { ASSERT_PTR( m_pParent->GetSection() ); return m_pParent->GetSection(); }
+	protected:
 		std::tstring m_entry;
-		IRegistrySection* m_pRegSection;
 		UINT m_ctrlId;
+	private:
+		const CRegistryOptions* m_pParent;
 	};
 
 
@@ -124,12 +129,12 @@ namespace reg
 		// base overrides
 		virtual void Load( void )
 		{
-			*m_pValue = static_cast< ValueT >( m_pRegSection->GetIntParameter( m_entry.c_str(), (int)*m_pValue ) );
+			*m_pValue = static_cast< ValueT >( GetSection()->GetIntParameter( m_entry.c_str(), (int)*m_pValue ) );
 		}
 
 		virtual void Save( void ) const
 		{
-			m_pRegSection->SaveParameter( m_entry.c_str(), static_cast< int >( *m_pValue ) );
+			GetSection()->SaveParameter( m_entry.c_str(), static_cast< int >( *m_pValue ) );
 		}
 
 		virtual const void* GetDataMember( void ) const { return m_pValue; }
@@ -157,12 +162,12 @@ namespace reg
 		// base overrides
 		virtual void Load( void )
 		{
-			str::Split( *m_pValues, m_pRegSection->GetStringParameter( m_entry.c_str() ).c_str(), m_pDelimiter );
+			str::Split( *m_pValues, GetSection()->GetStringParameter( m_entry.c_str() ).c_str(), m_pDelimiter );
 		}
 
 		virtual void Save( void ) const
 		{
-			m_pRegSection->SaveParameter( m_entry.c_str(), str::Join( *m_pValues, m_pDelimiter ) );
+			GetSection()->SaveParameter( m_entry.c_str(), str::Join( *m_pValues, m_pDelimiter ) );
 		}
 
 		virtual const void* GetDataMember( void ) const { return m_pValues; }
@@ -198,7 +203,8 @@ namespace reg
 
 inline void CRegistryOptions::SaveOption( const void* pDataMember ) const
 {
-	LookupOption( pDataMember ).Save();
+	if ( IsPersistent() )
+		LookupOption( pDataMember ).Save();
 }
 
 inline bool CRegistryOptions::RestoreOptionDefaultValue( const void* pDataMember )
@@ -226,13 +232,13 @@ namespace reg
 	template<>
 	inline void COption< std::tstring >::Load( void )
 	{
-		*m_pValue = m_pRegSection->GetStringParameter( m_entry.c_str(), m_pValue->c_str() );
+		*m_pValue = GetSection()->GetStringParameter( m_entry.c_str(), m_pValue->c_str() );
 	}
 
 	template<>
 	inline void COption< std::tstring >::Save( void ) const
 	{
-		m_pRegSection->SaveParameter( m_entry.c_str(), *m_pValue );
+		GetSection()->SaveParameter( m_entry.c_str(), *m_pValue );
 	}
 
 
@@ -241,13 +247,13 @@ namespace reg
 	template<>
 	inline void COption< bool >::Load( void )
 	{
-		*m_pValue = m_pRegSection->GetIntParameter( m_entry.c_str(), *m_pValue ) != FALSE;
+		*m_pValue = GetSection()->GetIntParameter( m_entry.c_str(), *m_pValue ) != FALSE;
 	}
 
 	template<>
 	inline void COption< bool >::Save( void ) const
 	{
-		m_pRegSection->SaveParameter( m_entry.c_str(), *m_pValue );
+		GetSection()->SaveParameter( m_entry.c_str(), *m_pValue );
 	}
 
 

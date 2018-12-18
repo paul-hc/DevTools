@@ -20,15 +20,15 @@ namespace hlp
 {
 	bool SmartAppendMenu( int menuVertSplitCount, CMenu& destMenu, UINT flags, UINT itemId = 0, LPCTSTR pItemText = NULL )
 	{
-		ASSERT( (HMENU)destMenu != NULL );
+		ASSERT_PTR( destMenu.GetSafeHmenu() );
 
 		int itemCount = destMenu.GetMenuItemCount();
 
-		if ( flags & MF_SEPARATOR )
-			if ( itemCount == 0 || destMenu.GetMenuItemID( itemCount - 1 ) == 0 )
+		if ( HasFlag( flags, MF_SEPARATOR ) )
+			if ( 0 == itemCount || 0 == destMenu.GetMenuItemID( itemCount - 1 ) )
 				return false;
 
-		if ( itemCount > 0 && !( itemCount % menuVertSplitCount ) )
+		if ( itemCount != 0 && 0 == ( itemCount % menuVertSplitCount ) )
 			flags |= MF_MENUBARBREAK | MF_MENUBREAK;
 
 		return destMenu.AppendMenu( flags, itemId, pItemText ) != FALSE;
@@ -42,6 +42,7 @@ CFileBrowser::CFileBrowser( void )
 	: m_options()
 	, m_pExtraFiles( new CMetaFolder( m_options, CString(), _T("[Extra Root Files]") ) )
 	, m_extraFilesFirst( false )
+	, m_keepTracking( false )
 {
 }
 
@@ -136,7 +137,7 @@ bool CFileBrowser::excludeFileFromFolder( const CString& folderPath, const CStri
 	return false;
 }
 
-void CFileBrowser::buildMenu( CMenu& rOutMenu )
+void CFileBrowser::BuildMenu( CMenu& rOutMenu )
 {
 	rOutMenu.CreatePopupMenu();
 
@@ -174,31 +175,31 @@ CMetaFolder::CFile* CFileBrowser::findFileWithId( UINT id ) const
 {
 	const CMetaFolder::CFile* pFoundFile = NULL;
 
-	for ( int i = 0; i < getFolderCount() && pFoundFile == NULL; ++i )
+	for ( int i = 0; i < getFolderCount() && NULL == pFoundFile; ++i )
 		pFoundFile = getFolder( i )->findFileWithId( id, true );
 
-	if ( pFoundFile == NULL )
+	if ( NULL == pFoundFile )
 		pFoundFile = m_pExtraFiles->findFileWithId( id, true );
 
 	return (CMetaFolder::CFile*)pFoundFile;
 }
 
-bool CFileBrowser::pickFile( CPoint trackPos )
+bool CFileBrowser::PickFile( CPoint screenPos )
 {
-	if ( trackPos.x == -1 && trackPos.y == -1 )
-		::GetCursorPos( &trackPos );
+	if ( -1 == screenPos.x && -1 == screenPos.y )
+		::GetCursorPos( &screenPos );
 
-	CWnd* pIdeWindow = ide::getRootWindow();
+	CWnd* pIdeWindow = ide::GetRootWindow();
 	UINT cmdId = 0;
-	bool trackAgain = false;
 
 	do
 	{
-		trackAgain = false;
+		m_keepTracking = false;
 
 		CMenu popup;
 
-		buildMenu( popup );
+		BuildMenu( popup );
+		m_options.EnableMenuCommands();
 
 		CMenuTrackingWindow* pTrackingWindow = new CMenuTrackingWindow( this, popup, MTM_CommandRepeat );
 
@@ -207,23 +208,27 @@ bool CFileBrowser::pickFile( CPoint trackPos )
 
 		pTrackingWindow->Create( pIdeWindow );
 
-		m_options.EnableMenuCommands();
-		cmdId = popup.TrackPopupMenu( TPM_LEFTALIGN | TPM_TOPALIGN | TPM_NONOTIFY | TPM_RETURNCMD,
-										   trackPos.x, trackPos.y, pTrackingWindow );
+		// Sometimes this fails to track the menu, due to some _AFX_THREAD_STATE related global state.
+		// The workaround is to set pTrackingWindow as foreground window; or alternatively use CMenu::TrackPopupMenu() method, instead of TrackPopupMenuEx().
+		pTrackingWindow->SetForegroundWindow();
+
+		cmdId = ui::TrackPopupMenu( popup, pTrackingWindow, screenPos, TPM_NONOTIFY | TPM_RETURNCMD );		// TPM_RIGHTBUTTON creates problems?!
+		// was: cmdId = popup.TrackPopupMenu( TPM_NONOTIFY | TPM_RETURNCMD, trackPos.x, trackPos.y, pTrackingWindow );
 
 		if ( cmdId != 0 )
 			if ( OnMenuCommand( cmdId ) )
 				if ( CFolderOptions::IsMenuStructureCommand( cmdId ) )
-					trackAgain = true;	// rebuild and track the menu
+					m_keepTracking = true;	// rebuild and track the menu
 
-		pIdeWindow->SetForegroundWindow();
 		pTrackingWindow->DestroyWindow();	// auto-delete
 
-		DEBUG_LOG( _T("MenuId=%d, Selected File: %s\n"), cmdId, (LPCTSTR)m_options.m_selectedFileName );
+		pIdeWindow->SetForegroundWindow();
 
-	} while ( trackAgain );
+		DEBUG_LOG( _T("MenuId=%d, Selected File: %s"), cmdId, m_options.GetSelectedFileName().c_str() );
 
-	return cmdId >= CM_FILEBROWSER_FILEITEM && !m_options.m_selectedFileName.IsEmpty();
+	} while ( m_keepTracking );
+
+	return cmdId >= CM_FILEBROWSER_FILEITEM && !m_options.GetSelectedFileName().empty();
 }
 
 bool CFileBrowser::OnMenuCommand( UINT cmdId )
@@ -238,10 +243,10 @@ bool CFileBrowser::OnMenuCommand( UINT cmdId )
 			if ( ui::IsKeyPressed( VK_CONTROL ) )
 			{	// final command with CTRL pressed -> sent selected file path to the clipboard
 				if ( CClipboard::CopyText( (LPCTSTR)pPickedFile->m_pathInfo.GetFullPath() ) )
-					m_options.m_selectedFileName.Empty();		// reset the picked file path member in order to avoid the final execution
+					m_options.SetSelectedFileName( std::tstring() );			// reset the picked file path member in order to avoid the final execution
 			}
 			else
-				m_options.m_selectedFileName = pPickedFile->m_pathInfo.Get();	// setup the picked file path
+				m_options.SetSelectedFileName( pPickedFile->m_pathInfo.Get().GetString() );	// setup the picked file path
 		}
 		return true;
 	}
@@ -253,7 +258,6 @@ bool CFileBrowser::OnMenuCommand( UINT cmdId )
 // CMetaFolder implementation
 
 CString CMetaFolder::m_defaultPrefix( _T("+ ") );
-
 
 CMetaFolder::CMetaFolder( CFolderOptions& rOptions, const CString& pathFilter, const CString& alias )
 	: m_rOptions( rOptions )
@@ -395,8 +399,7 @@ CString CMetaFolder::getFolderAlias( const CString& prefix /*= m_defaultPrefix*/
 	return prefix + m_alias;
 }
 
-bool CMetaFolder::addFilesToMenu( CMenu& rootMenu, CMenu& menu,
-								 FolderLayout folderLayout /*= flRootFoldersExpanded*/ ) const
+bool CMetaFolder::addFilesToMenu( CMenu& rootMenu, CMenu& menu, FolderLayout folderLayout /*= flRootFoldersExpanded*/ ) const
 {
 	// avoid adding deep-empty / empty folders, depending on 'folderLayout'
 	if ( !IsValid() )
@@ -431,20 +434,21 @@ bool CMetaFolder::addFilesToMenu( CMenu& rootMenu, CMenu& menu,
 	if ( subFoldersComesFirst )
 		addSubFoldersToMenu( rootMenu, targetMenu, folderLayout );	// recurse into sub-folders (if any)
 
-	PathInfo currFilePath( m_rOptions.m_selectedFileName );
-	// second add files (if any)
+	PathInfo currFilePath( m_rOptions.GetSelectedFileName().c_str() );
+
+	// add files
 	for ( int index = 0, fileCount = getFileCount( false ); index < fileCount; ++index )
 	{
 		CMetaFolder::CFile& file = *getFile( index );
 
 		file.m_menuId = m_rOptions.getNextMenuId();
 		appendMenu( targetMenu, MF_STRING, file.m_menuId, file.getLabel() );
-		if ( !m_rOptions.m_selectedFileName.IsEmpty() && file.hasFileName( currFilePath ) )
+		if ( !m_rOptions.GetSelectedFileName().empty() && file.hasFileName( currFilePath ) )
 		{
 			targetMenu.CheckMenuRadioItem( file.m_menuId, file.m_menuId, file.m_menuId, MF_BYCOMMAND );
 			if ( m_rOptions.m_pSelectedFileRef == NULL )
 			{
-//				targetMenu.SetDefaultItem( file.m_menuId );
+				targetMenu.SetDefaultItem( file.m_menuId );
 				m_rOptions.m_pSelectedFileRef = &file;
 			}
 		}
@@ -572,9 +576,12 @@ CString CMetaFolder::CFile::getLabel( void ) const
 
 // CFolderOptions implementation
 
-static LPCTSTR defaultSection = _T("FolderOptions");
+namespace reg
+{
+	static const TCHAR section_rootOptions[] = _T("FolderOptions");
+}
 
-CFolderOptions::CFolderOptions( LPCTSTR sectionPostfix /*= _T("")*/ )
+CFolderOptions::CFolderOptions( LPCTSTR pSubSection /*= _T("")*/ )
 	: m_menuFileItemId( CM_FILEBROWSER_FILEITEM )
 	, m_recurseFolders( false )
 	, m_cutDuplicates( false )
@@ -586,14 +593,61 @@ CFolderOptions::CFolderOptions( LPCTSTR sectionPostfix /*= _T("")*/ )
 	, m_folderLayout( flFoldersAsPopups )
 	, m_pSelectedFileRef( NULL )
 {
-	setSection( sectionPostfix );
-	loadProfile();
+	SetSubSection( pSubSection );
+	LoadAll();
 }
 
 CFolderOptions::~CFolderOptions()
 {
 	if ( !m_noOptionsPopup )
 		m_optionsPopup.Detach();
+}
+
+void CFolderOptions::SetSubSection( const TCHAR* pSubSection )
+{
+	if ( NULL == pSubSection )
+		m_section.clear();
+	else
+	{
+		m_section = reg::section_rootOptions;
+		stream::Tag( m_section, pSubSection, _T("\\") );		// append optional sub-section
+	}
+}
+
+void CFolderOptions::LoadAll( void )
+{
+	if ( m_section.empty() )
+		return;
+
+	CWinApp* pApp = AfxGetApp();
+
+	m_recurseFolders = pApp->GetProfileInt( m_section.c_str(), ENTRY_OF( RecurseFolders ), m_recurseFolders ) != FALSE;
+	m_cutDuplicates = pApp->GetProfileInt( m_section.c_str(), ENTRY_OF( CutDuplicates ), m_cutDuplicates ) != FALSE;
+	m_hideExt = pApp->GetProfileInt( m_section.c_str(), ENTRY_OF( HideExt ), m_hideExt ) != FALSE;
+	m_rightJustifyExt = pApp->GetProfileInt( m_section.c_str(), ENTRY_OF( RightJustifyExt ), m_rightJustifyExt ) != FALSE;
+	m_dirNamePrefix = pApp->GetProfileInt( m_section.c_str(), ENTRY_OF( DirNamePrefix ), m_dirNamePrefix ) != FALSE;
+	m_sortFolders = pApp->GetProfileInt( m_section.c_str(), ENTRY_OF( SortFolders ), m_sortFolders ) != FALSE;
+
+	m_fileSortOrder.SetFromString( (LPCTSTR)pApp->GetProfileString( m_section.c_str(), ENTRY_OF( FileSortOrder ), m_fileSortOrder.GetAsString().c_str() ) );
+	m_folderLayout = (FolderLayout)pApp->GetProfileInt( m_section.c_str(), ENTRY_OF( FolderLayout ), m_folderLayout );
+}
+
+void CFolderOptions::SaveAll( void ) const
+{
+	if ( m_section.empty() )
+		return;
+
+	CWinApp* pApp = AfxGetApp();
+
+	pApp->WriteProfileInt( m_section.c_str(), ENTRY_OF( RecurseFolders ), m_recurseFolders );
+	pApp->WriteProfileInt( m_section.c_str(), ENTRY_OF( CutDuplicates ), m_cutDuplicates );
+	pApp->WriteProfileInt( m_section.c_str(), ENTRY_OF( HideExt ), m_hideExt );
+	pApp->WriteProfileInt( m_section.c_str(), ENTRY_OF( RightJustifyExt ), m_rightJustifyExt );
+	pApp->WriteProfileInt( m_section.c_str(), ENTRY_OF( DirNamePrefix ), m_dirNamePrefix );
+	pApp->WriteProfileInt( m_section.c_str(), ENTRY_OF( SortFolders ), m_sortFolders );
+
+	pApp->WriteProfileString( m_section.c_str(), ENTRY_OF( FileSortOrder ), m_fileSortOrder.GetAsString().c_str() );
+	pApp->WriteProfileInt( m_section.c_str(), ENTRY_OF( FolderLayout ), m_folderLayout );
 }
 
 bool CFolderOptions::queryAddFileOrFolder( CString fileOrFolderPath, void* pFileOrFolder /*= NULL*/ )
@@ -611,23 +665,6 @@ bool CFolderOptions::queryAddFileOrFolder( CString fileOrFolderPath, void* pFile
 
 	m_fileDirMap.insert( fileOrFolderPath );
 	return true;
-}
-
-bool CFolderOptions::isDefaultSection( void ) const
-{
-	return !!( m_section == defaultSection );
-}
-
-const CString& CFolderOptions::setSection( LPCTSTR sectionPostfix )
-{
-	if ( sectionPostfix == NULL )
-		m_section.Empty();
-	else if ( sectionPostfix[ 0 ] == _T('\0') )
-		m_section = defaultSection;
-	else
-		m_section.Format( _T("%s-%s"), defaultSection, sectionPostfix );
-
-	return m_section;
 }
 
 DWORD CFolderOptions::getFlags( void ) const
@@ -657,47 +694,10 @@ void CFolderOptions::setFlags( DWORD flags )
 	m_sortFolders = ( flags & foSortFolders ) != 0;
 }
 
-bool CFolderOptions::loadProfile( void )
-{
-	if ( m_section.IsEmpty() )
-		return false;
-
-	CWinApp* pApp = AfxGetApp();
-
-	m_recurseFolders = pApp->GetProfileInt( m_section, ENTRY_OF( recurseFolders ), m_recurseFolders ) != FALSE;
-	m_cutDuplicates = pApp->GetProfileInt( m_section, ENTRY_OF( cutDuplicates ), m_cutDuplicates ) != FALSE;
-	m_hideExt = pApp->GetProfileInt( m_section, ENTRY_OF( hideExt ), m_hideExt ) != FALSE;
-	m_rightJustifyExt = pApp->GetProfileInt( m_section, ENTRY_OF( rightJustifyExt ), m_rightJustifyExt ) != FALSE;
-	m_dirNamePrefix = pApp->GetProfileInt( m_section, ENTRY_OF( dirNamePrefix ), m_dirNamePrefix ) != FALSE;
-	m_sortFolders = pApp->GetProfileInt( m_section, ENTRY_OF( sortFolders ), m_sortFolders ) != FALSE;
-
-	m_fileSortOrder.SetFromString( (LPCTSTR)pApp->GetProfileString( m_section, ENTRY_OF( fileSortOrder ), m_fileSortOrder.GetAsString().c_str() ) );
-	m_folderLayout = (FolderLayout)pApp->GetProfileInt( m_section, ENTRY_OF( folderLayout ), m_folderLayout );
-	return true;
-}
-
-bool CFolderOptions::saveProfile( void ) const
-{
-	if ( m_section.IsEmpty() )
-		return false;
-
-	CWinApp* pApp = AfxGetApp();
-
-	pApp->WriteProfileInt( m_section, ENTRY_OF( recurseFolders ), m_recurseFolders );
-	pApp->WriteProfileInt( m_section, ENTRY_OF( cutDuplicates ), m_cutDuplicates );
-	pApp->WriteProfileInt( m_section, ENTRY_OF( hideExt ), m_hideExt );
-	pApp->WriteProfileInt( m_section, ENTRY_OF( rightJustifyExt ), m_rightJustifyExt );
-	pApp->WriteProfileInt( m_section, ENTRY_OF( dirNamePrefix ), m_dirNamePrefix );
-	pApp->WriteProfileInt( m_section, ENTRY_OF( sortFolders ), m_sortFolders );
-
-	pApp->WriteProfileString( m_section, ENTRY_OF( fileSortOrder ), m_fileSortOrder.GetAsString().c_str() );
-	pApp->WriteProfileInt( m_section, ENTRY_OF( folderLayout ), m_folderLayout );
-	return true;
-}
-
 std::tstring CFolderOptions::loadOptionsPopup( void )
 {
 	std::tstring popupText;
+	m_optionsPopup.DestroyMenu();
 	ui::LoadPopupMenu( m_optionsPopup, IDR_CONTEXT_MENU, app_popup::MenuBrowserOptions, ui::NormalMenuImages, &popupText );
 	return popupText;
 }
@@ -725,7 +725,7 @@ void CFolderOptions::EnableMenuCommands( void )
 }
 
 
-static struct SortMenuLayout { PathField field; UINT id; } sortLayout[] =
+static struct CSortMenuLayout { PathField m_field; UINT m_id; } s_sortLayout[] =
 {
 	{ pfDrive, CK_FILEBROWSER_SORTBY_DRIVE },
 	{ pfDir, CK_FILEBROWSER_SORTBY_DIR },
@@ -737,9 +737,9 @@ static struct SortMenuLayout { PathField field; UINT id; } sortLayout[] =
 
 PathField CommandIdToPathFiled( UINT cmdId )
 {
-	for ( int i = 0; i != COUNT_OF( sortLayout ); ++i )
-		if ( cmdId == sortLayout[ i ].id )
-			return sortLayout[ i ].field;
+	for ( UINT i = 0; i != COUNT_OF( s_sortLayout ); ++i )
+		if ( cmdId == s_sortLayout[ i ].m_id )
+			return s_sortLayout[ i ].m_field;
 
 	ASSERT( false );
 	return (PathField)-1;
@@ -747,7 +747,7 @@ PathField CommandIdToPathFiled( UINT cmdId )
 
 void CFolderOptions::updateSortOrderMenu( void )
 {
-	if ( (HMENU)m_optionsPopup != NULL )
+	if ( m_optionsPopup.GetSafeHmenu() != NULL )
 	{
 		CMenu sortOrderPopup;
 
@@ -759,12 +759,12 @@ void CFolderOptions::updateSortOrderMenu( void )
 
 void CFolderOptions::updateSortOrderMenu( CMenu& rSortOrderPopup )
 {
-	for ( int i = 0; i < COUNT_OF( sortLayout ); ++i )
+	for ( UINT i = 0; i != COUNT_OF( s_sortLayout ); ++i )
 	{
 		CString basicText;
-		UINT newFlags = rSortOrderPopup.GetMenuState( sortLayout[ i ].id, MF_BYCOMMAND );
+		UINT newFlags = rSortOrderPopup.GetMenuState( s_sortLayout[ i ].m_id, MF_BYCOMMAND );
 
-		rSortOrderPopup.GetMenuString( sortLayout[ i ].id, basicText, MF_BYCOMMAND );
+		rSortOrderPopup.GetMenuString( s_sortLayout[ i ].m_id, basicText, MF_BYCOMMAND );
 
 		int suffixPos = basicText.ReverseFind( _T('(') );
 
@@ -772,7 +772,7 @@ void CFolderOptions::updateSortOrderMenu( CMenu& rSortOrderPopup )
 			basicText = basicText.Left( suffixPos - 1 );
 
 		CString itemText;
-		size_t foundPos = utl::FindPos( m_fileSortOrder.m_fields, sortLayout[ i ].field );
+		size_t foundPos = utl::FindPos( m_fileSortOrder.m_fields, s_sortLayout[ i ].m_field );
 		if ( foundPos != std::tstring::npos )
 		{
 			itemText.Format( _T("%s\t(%d)"), (LPCTSTR)basicText, foundPos + 1 );
@@ -784,7 +784,7 @@ void CFolderOptions::updateSortOrderMenu( CMenu& rSortOrderPopup )
 			newFlags &= ~MF_CHECKED;
 		}
 
-		rSortOrderPopup.ModifyMenu( sortLayout[ i ].id, MF_BYCOMMAND | newFlags, sortLayout[ i ].id, (LPCTSTR)itemText );
+		rSortOrderPopup.ModifyMenu( s_sortLayout[ i ].m_id, MF_BYCOMMAND | newFlags, s_sortLayout[ i ].m_id, (LPCTSTR)itemText );
 	}
 }
 
@@ -840,7 +840,8 @@ bool CFolderOptions::OnMenuCommand( UINT cmdId )
 
 	// (!) changes in COM object lifetime in VC 7.1 don't allow us to reliably save profile on destructor,
 	// therefore we have to save pre-emptively.
-	saveProfile();
+	SaveAll();
+
 	return true;
 }
 

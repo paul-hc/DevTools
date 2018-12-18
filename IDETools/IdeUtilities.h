@@ -11,11 +11,10 @@ namespace ide
 
 	IdeType FindIdeType( void );
 
-	CWnd* getRootWindow( void );
-	CWnd* getFocusWindow( void );
+	CWnd* GetRootWindow( void );
+	CWnd* GetFocusWindow( void );
 
-	CPoint getCaretScreenPos( void );
-	CPoint getMouseScreenPos( void );
+	CPoint GetMouseScreenPos( void );
 
 	std::pair< HMENU, int > findPopupMenuWithCommand( HWND hWnd, UINT commandID );
 

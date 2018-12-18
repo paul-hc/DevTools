@@ -74,11 +74,24 @@ void CLogger::Log( const TCHAR format[], ... )
 	va_end( argList );
 }
 
+void CLogger::LogTrace( const TCHAR format[], ... )
+{
+	CString entry;
+	va_list argList;
+
+	va_start( argList, format );
+	entry.FormatV( format, argList );
+	va_end( argList );
+
+	TRACE( _T("-LogTrace: %s\n"), entry.GetString() );
+	LogLine( entry.GetString() );
+}
+
 void CLogger::LogV( const TCHAR format[], va_list argList )
 {
 	CString entry;
 	entry.FormatV( format, argList );
-	LogLine( entry );
+	LogLine( entry.GetString() );
 }
 
 void CLogger::LogLine( const TCHAR text[], bool useTimestamp /*= true*/ )

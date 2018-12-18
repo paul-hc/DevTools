@@ -116,27 +116,30 @@ void MenuFilePicker::SetFolderLayout( long nNewValue )
 
 BSTR MenuFilePicker::GetCurrentFileName( void )
 {
-	return m_browser.m_options.m_selectedFileName.AllocSysString();
+	CString selectedFileName( m_browser.m_options.GetSelectedFileName().c_str() );
+	return selectedFileName.AllocSysString();
 }
 
-void MenuFilePicker::SetCurrentFileName( LPCTSTR lpszNewValue )
+void MenuFilePicker::SetCurrentFileName( LPCTSTR pSelectedFileName )
 {
-	m_browser.m_options.m_selectedFileName = lpszNewValue;
+	m_browser.m_options.SetSelectedFileName( pSelectedFileName );
 }
 
 
 // automation methods
 
 /**
-	Set the profile section where browsing options will be loaded and saved.
-	Section layout is: "FolderOptions[-sectionPostfix]"
+	Set the profile section where browsing options will be persisted.
+	Section layout is: "FolderOptions[\\SubSection]"
 */
-BSTR MenuFilePicker::SetProfileSection( LPCTSTR sectionPostfix, BOOL loadNow )
+BSTR MenuFilePicker::SetProfileSection( LPCTSTR pSubSection, BOOL loadNow )
 {
-	CString result( m_browser.m_options.setSection( sectionPostfix ) );
+	m_browser.m_options.SetSubSection( pSubSection );
 
 	if ( loadNow )
-		m_browser.m_options.loadProfile();
+		m_browser.m_options.LoadAll();
+
+	CString result( m_browser.m_options.GetSection().c_str() );
 	return result.AllocSysString();
 }
 
@@ -186,7 +189,7 @@ void MenuFilePicker::StoreTrackPos( void )
 
 BOOL MenuFilePicker::ChooseFile( void )
 {
-	return m_browser.pickFile( CPoint( m_trackPosX, m_trackPosY ) );
+	return m_browser.PickFile( CPoint( m_trackPosX, m_trackPosY ) );
 }
 
 BOOL MenuFilePicker::OverallExcludeFile( LPCTSTR filePathFilter )

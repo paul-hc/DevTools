@@ -10,8 +10,7 @@
 #endif
 
 
-CMenuTrackingWindow::CMenuTrackingWindow( IMenuCommandTarget* pCommandTarget, CMenu& rTrackingMenu,
-										  MenuTrackMode menuTrackMode /*= MTM_None*/ )
+CMenuTrackingWindow::CMenuTrackingWindow( IMenuCommandTarget* pCommandTarget, CMenu& rTrackingMenu, MenuTrackMode menuTrackMode /*= MTM_None*/ )
 	: CFrameWnd()
 	, m_pCommandTarget( pCommandTarget )
 	, m_rTrackingMenu( rTrackingMenu )
@@ -94,7 +93,7 @@ LRESULT CMenuTrackingWindow::WindowProc( UINT message, WPARAM wParam, LPARAM lPa
 
 			if ( UINT cmdId = menu::getItemFromPosID( foundItem, clickPos, m_popups ) )		// doesn't seem to function properly
 			{
-				DEBUG_LOG( _T("Right-clicked command %d\n"), cmdId );
+				DEBUG_LOG( _T("Right-clicked command %d"), cmdId );
 				ASSERT( foundItem.isValidCommand() );
 				if ( m_pCommandTarget != NULL && m_pCommandTarget->OnMenuCommand( cmdId ) )
 					InvalidateMenuWindow();

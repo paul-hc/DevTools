@@ -154,7 +154,7 @@ library IDETools
 			// NOTE - ClassWizard will maintain method information here.
 			//    Use extreme caution when editing this section.
 			//{{AFX_ODL_METHOD(MenuFilePicker)
-			[id(6)] BSTR SetProfileSection(BSTR sectionPostfix, boolean loadNow);
+			[id(6)] BSTR SetProfileSection(BSTR pSubSection, boolean loadNow);
 			[id(7)] boolean AddFolder(BSTR folderPathSpec, BSTR folderAlias, BSTR fileFilter);
 			[id(8)] boolean AddFolderArray(BSTR folderItemFlatArray);
 			[id(9)] boolean AddRootFile(BSTR filePath, BSTR label);
