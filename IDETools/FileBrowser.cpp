@@ -19,375 +19,6 @@
 #endif
 
 
-// CFileBrowser implementation
-
-CFileBrowser::CFileBrowser( void )
-	: m_options()
-	, m_pRootFolderItem( new CFolderItem( _T("[Root Files]") ) )
-{
-	if ( m_options.m_cutDuplicates )
-		m_pPathIndex.reset( new CPathIndex );
-}
-
-CFileBrowser::~CFileBrowser()
-{
-}
-
-bool CFileBrowser::AddFolder( const fs::CPath& folderPathFilter, const std::tstring& folderAlias )
-{
-	fs::CPath folderPath = folderPathFilter.GetParentPath();
-
-	if ( !fs::IsValidDirectory( folderPath.GetPtr() ) )
-		return false;
-
-	if ( m_pPathIndex.get() != NULL && !m_pPathIndex->RegisterUnique( folderPathFilter ) )
-		return false;
-
-	std::auto_ptr< CFolderItem > pNewFolder( new CFolderItem( m_pRootFolderItem.get(), folderPath, folderPathFilter.GetFilename(), folderAlias ) );
-
-	pNewFolder->SearchForFiles( m_options.m_recurseFolders ? Deep : Shallow, m_pPathIndex.get() );
-	if ( !pNewFolder->HasAnyLeafs() )
-		return false;
-
-	m_pRootFolderItem->AddSubFolderItem( pNewFolder.release() );
-	return true;
-}
-
-bool CFileBrowser::AddFolderItems( const TCHAR* pFolderItems )
-{
-	// pFolderItems: folder items separated by EDIT_SEP=";" token (at end no token);
-	// Each folder item contains a folder path filter, and optional, a folder alias separated
-	// by PROF_SEP="|" separator.
-	// example:
-	//	"D:\Development\Tools\Slider\LogicalFilesBackup.h,LogicalFilesBackup.hxx,LogicalFilesBackup.cxx|ASSOCIATIONS;D:\Development\Tools\Slider\slider Desc\LogicalFilesBackup_Factory.*,LogicalFilesBackup_Tags.*|FACTORY"
-
-	std::vector< std::tstring > dualArray;
-	str::Split( dualArray, pFolderItems, _T(";") );
-
-	for ( std::vector< std::tstring >::const_iterator itFolderItem = dualArray.begin(); itFolderItem != dualArray.end(); ++itFolderItem )
-	{
-		ASSERT( !itFolderItem->empty() );
-		size_t sepPos = itFolderItem->find( PROF_SEP );
-
-		if ( sepPos != std::tstring::npos )
-			AddFolder( itFolderItem->substr( 0, sepPos ), itFolderItem->substr( sepPos + 1 ) );			// alias is specified
-		else
-			AddFolder( *itFolderItem, std::tstring() );		// no alias
-	}
-
-	return !dualArray.empty();
-}
-
-bool CFileBrowser::AddRootFile( const fs::CPath& filePath, const std::tstring& label /*= std::tstring()*/ )
-{
-	return m_pRootFolderItem->AddFileItem( m_pPathIndex.get(), filePath, label );
-}
-
-void CFileBrowser::SortItems( void )
-{
-	ASSERT_PTR( m_pRootFolderItem.get() );
-
-	if ( m_options.m_sortFolders )
-		m_pRootFolderItem->SortSubFolders();
-
-	m_pRootFolderItem->SortFileItems( m_options.m_fileSortOrder );
-}
-
-CMenu* CFileBrowser::BuildMenu( void )
-{
-	m_pTrackInfo.reset( new CTrackInfo( &m_options ) );
-	m_pTrackInfo->m_menuBuilder.BuildFolderItem( m_pRootFolderItem.get() );
-
-	CMenu* pPopupMenu = m_pTrackInfo->m_menuBuilder.GetPopupMenu();
-
-	if ( !m_options.m_noOptionsPopup )
-	{	// append options popups
-		CTargetMenu::AppendSeparator( pPopupMenu );
-		CTargetMenu::AppendContextSubMenu( pPopupMenu, app::MenuBrowserOptionsPopup );
-		CTargetMenu::AppendContextSubMenu( pPopupMenu, app::FileSortOrderPopup );
-	}
-
-	ui::DeleteLastMenuSeparator( *pPopupMenu );
-
-	ENSURE( ui::IsValidMenu( pPopupMenu->GetSafeHmenu() ) );
-	return pPopupMenu;
-}
-
-bool CFileBrowser::PickFile( CPoint screenPos )
-{
-	if ( -1 == screenPos.x && -1 == screenPos.y )
-		screenPos = ui::GetCursorPos();
-
-	SortItems();
-
-	ide::CScopedWindow scopedIDE;
-	if ( !scopedIDE.IsValid() )
-		return false;
-
-	CTrackMenuWnd trackingWnd( this );
-
-	VERIFY( trackingWnd.Create( scopedIDE.GetFocusWnd() ) );
-	trackingWnd.SetRightClickRepeat();		// keep popup menu open when right clicking on a command
-
-	for ( ;; )
-	{
-		CMenu* pPopupMenu = BuildMenu();
-
-		trackingWnd.SetHilightId( GetMenuBuilder()->MarkCurrFileItemId( m_currFilePath ) );
-
-		if ( trackingWnd.TrackContextMenu( pPopupMenu, screenPos ) != 0 )
-			DEBUG_LOG( _T("Picked cmdId=%d, filePath: %s"), trackingWnd.GetSelCmdId(), GetCurrFilePath().GetPtr() );
-
-		if ( !m_pTrackInfo->m_keepTracking )
-			break;
-	}
-
-	m_pTrackInfo.reset();
-
-	trackingWnd.DestroyWindow();
-
-	return IsFileCmd( trackingWnd.GetSelCmdId() ) && !m_currFilePath.IsEmpty();
-}
-
-bool CFileBrowser::IsFileCmd( UINT cmdId )
-{
-	return cmdId >= CM_FILEBROWSER_FILEITEM && cmdId <= CM_FILEBROWSER_FILEITEM_LAST;
-}
-
-BOOL CFileBrowser::OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo )
-{
-	if ( m_options.OnCmdMsg( id, code, pExtra, pHandlerInfo ) )
-	{
-		if ( CN_COMMAND == code && NULL == pHandlerInfo && m_pTrackInfo.get() != NULL )
-			m_pTrackInfo->m_keepTracking = true;		// keep tracking the context menu while options are changed
-
-		return TRUE;
-	}
-
-	return __super::OnCmdMsg( id, code, pExtra, pHandlerInfo );
-}
-
-
-// CFileBrowser command handlers
-
-BEGIN_MESSAGE_MAP( CFileBrowser, CCmdTarget )
-	ON_COMMAND_RANGE( CM_FILEBROWSER_FILEITEM, CM_FILEBROWSER_FILEITEM_LAST, OnCommand_FileItem )
-	ON_UPDATE_COMMAND_UI_RANGE( CM_FILEBROWSER_FILEITEM, CM_FILEBROWSER_FILEITEM_LAST, OnUpdate_FileItem )
-END_MESSAGE_MAP()
-
-void CFileBrowser::OnCommand_FileItem( UINT cmdId )
-{
-	if ( CFileMenuBuilder* pMenuBuilder = GetMenuBuilder() )
-		if ( const CFileItem* pPickedFileItem = pMenuBuilder->FindFileItemWithId( cmdId ) )
-			if ( ui::IsKeyPressed( VK_CONTROL ) )
-			{	// final command with CTRL pressed -> sent selected file path to the clipboard
-				if ( CClipboard::CopyText( pPickedFileItem->GetFilePath().Get() ) )
-					SetCurrFilePath( fs::CPath() );			// reset the picked file path member in order to avoid the final execution
-			}
-			else
-				SetCurrFilePath( pPickedFileItem->GetFilePath() );
-}
-
-void CFileBrowser::OnUpdate_FileItem( CCmdUI* pCmdUI )
-{
-	if ( CFileMenuBuilder* pMenuBuilder = GetMenuBuilder() )
-		if ( const CFileItem* pPickedFileItem = pMenuBuilder->FindFileItemWithId( pCmdUI->m_nID ) )
-			if ( pPickedFileItem->HasFilePath( m_currFilePath ) )
-				ui::SetRadio( pCmdUI );
-}
-
-
-// CFileMenuBuilder implementation
-
-CFileMenuBuilder::CFileMenuBuilder( const CFolderOptions* pOptions )
-	: m_pOptions( pOptions )
-	, m_fileItemId( CM_FILEBROWSER_FILEITEM )
-{
-	ASSERT_PTR( m_pOptions );
-	m_rootPopupMenu.CreatePopupMenu();
-}
-
-const CFileItem* CFileMenuBuilder::FindFileItemWithId( UINT cmdId ) const
-{
-	TMapIdToItem::const_iterator itFound = m_idToItemMap.find( cmdId );
-	return itFound != m_idToItemMap.end() ? itFound->second : NULL;
-}
-
-UINT CFileMenuBuilder::MarkCurrFileItemId( const fs::CPath& currFilePath )
-{
-	for ( UINT i = 0, count = m_rootPopupMenu.GetMenuItemCount(); i != count; ++i )
-		if ( !HasFlag( m_rootPopupMenu.GetMenuState( i, MF_BYPOSITION ), MF_POPUP | MF_SEPARATOR | MF_MENUBREAK | MFT_OWNERDRAW ) )
-		{
-			UINT cmdId = m_rootPopupMenu.GetMenuItemID( i );
-			ASSERT( cmdId != 0 && cmdId != UINT_MAX );
-
-			if ( const CFileItem* pFileItem = FindFileItemWithId( cmdId ) )
-				if ( pFileItem->HasFilePath( currFilePath ) )
-				{
-					m_rootPopupMenu.SetDefaultItem( cmdId );
-					return cmdId;
-				}
-		}
-
-	return 0;
-}
-
-bool CFileMenuBuilder::BuildFolderItem( CMenu* pParentMenu, const CFolderItem* pFolderItem )
-{
-	ASSERT_PTR( pParentMenu->GetSafeHmenu() );
-	ASSERT_PTR( pFolderItem );
-
-	if ( !pFolderItem->HasAnyLeafs() )
-		return false;					// avoid adding empty folders
-
-	CScopedTargetMenu scopedTargetMenu( pParentMenu );
-
-	if ( UseSubMenu( pFolderItem ) )
-		scopedTargetMenu.InitAsSubMenu( pFolderItem->FormatAlias() );
-	else
-		scopedTargetMenu.InitInplace( pParentMenu );
-
-	AppendFolderItem( &scopedTargetMenu, pFolderItem );
-	return true;
-}
-
-bool CFileMenuBuilder::UseSubMenu( const CFolderItem* pFolderItem ) const
-{
-	if ( pFolderItem->IsRootFolder() )
-		return false;							// always expand files of the root folder
-
-	switch ( m_pOptions->m_folderLayout )
-	{
-		default: ASSERT( false );
-		case flFoldersAsPopups:
-		case flFoldersAsRootPopups:
-			return true;
-		case flTopFoldersExpanded:
-			return !pFolderItem->IsTopFolder();
-		case flAllFoldersExpanded:
-			return false;
-	}
-}
-
-void CFileMenuBuilder::AppendFolderItem( CTargetMenu* pTargetMenu, const CFolderItem* pFolderItem )
-{
-	AppendFileItems( pTargetMenu, pFolderItem->GetFileItems() );
-	AppendSubFolders( pTargetMenu, pFolderItem->GetSubFolders() );
-}
-
-void CFileMenuBuilder::AppendSubFolders( CTargetMenu* pTargetMenu, const std::vector< CFolderItem* >& subFolders )
-{
-	for ( std::vector< CFolderItem* >::const_iterator itSubFolder = subFolders.begin(); itSubFolder != subFolders.end(); ++itSubFolder )
-		BuildFolderItem( pTargetMenu->GetMenu(), *itSubFolder );
-}
-
-void CFileMenuBuilder::AppendFileItems( CTargetMenu* pTargetMenu, const std::vector< CFileItem* >& fileItems )
-{
-	for ( std::vector< CFileItem* >::const_iterator itFileItem = fileItems.begin(); itFileItem != fileItems.end(); ++itFileItem )
-		if ( RegisterMenuUniqueItem( pTargetMenu->GetMenu(), *itFileItem ) )		// unique path item in the popup?
-		{
-			UINT cmdId = GetNextFileItemId();
-
-			pTargetMenu->AppendItem( cmdId, ( *itFileItem )->FormatLabel( m_pOptions ) );
-			m_idToItemMap[ cmdId ] = *itFileItem;
-		}
-}
-
-bool CFileMenuBuilder::RegisterMenuUniqueItem( const CMenu* pPopupMenu, const CFileItem* pFileItem )
-{
-	ASSERT_PTR( pPopupMenu->GetSafeHmenu() );
-	ASSERT_PTR( pFileItem );
-
-	const CFileItem*& rpItem = m_menuPathToItemMap[ TMenuPathKey( pPopupMenu->GetSafeHmenu(), pFileItem->GetFilePath() ) ];
-	if ( rpItem != NULL )
-		return false;				// reject duplicate path menu items in the same popup menu
-
-	rpItem = pFileItem;
-	return true;
-}
-
-
-// CTargetMenu implementation
-
-void CTargetMenu::InitInplace( CMenu* pParentMenu )
-{
-	REQUIRE( NULL == m_menu.GetSafeHmenu() );
-
-	ASSERT_PTR( pParentMenu->GetSafeHmenu() );
-	m_menu.Attach( pParentMenu->GetSafeHmenu() );
-	m_initialCount = pParentMenu->GetMenuItemCount();
-}
-
-void CTargetMenu::InitAsSubMenu( const std::tstring& subMenuCaption )
-{
-	REQUIRE( NULL == m_menu.GetSafeHmenu() );
-
-	m_menu.CreatePopupMenu();
-	m_initialCount = 0;
-	m_subMenuCaption = subMenuCaption;
-}
-
-void CTargetMenu::Commit( CMenu* pParentMenu )
-{
-	ASSERT_PTR( pParentMenu->GetSafeHmenu() );
-
-	if ( IsSubMenu() )
-	{
-		if ( !IsEmpty() )
-			AppendSubMenu( pParentMenu, m_menu.Detach(), m_subMenuCaption );
-	}
-	else
-	{
-		ASSERT( pParentMenu->GetSafeHmenu() == m_menu.GetSafeHmenu() );
-
-		if ( !IsEmpty() )
-			AppendSeparator();
-
-		m_menu.Detach();		// release ownership
-	}
-}
-
-bool CTargetMenu::AppendSeparator( CMenu* pMenu )
-{
-	ASSERT_PTR( pMenu->GetSafeHmenu() );
-
-	UINT itemCount = pMenu->GetMenuItemCount();
-	if ( 0 == itemCount || 0 == pMenu->GetMenuItemID( itemCount - 1 ) )		// empty menu or last item is a separator?
-		return false;
-
-	return DoAppendItem( pMenu, MF_SEPARATOR );
-}
-
-bool CTargetMenu::AppendContextSubMenu( CMenu* pMenu, app::ContextPopup popupIndex )
-{
-	ASSERT_PTR( pMenu->GetSafeHmenu() );
-
-	CMenu subMenu;
-	std::tstring subMenuCaption;
-	ui::LoadPopupMenu( subMenu, IDR_CONTEXT_MENU, popupIndex, ui::NormalMenuImages, &subMenuCaption );
-
-	return AppendSubMenu( pMenu, subMenu.Detach(), subMenuCaption );
-}
-
-bool CTargetMenu::DoAppendItem( CMenu* pMenu, UINT flags, UINT_PTR itemId /*= 0*/, const TCHAR* pItemText /*= NULL*/ )
-{
-	ASSERT_PTR( pMenu->GetSafeHmenu() );
-
-	UINT itemCount = pMenu->GetMenuItemCount();
-
-	if ( HasFlag( flags, MF_SEPARATOR ) )
-		if ( 0 == itemCount || 0 == pMenu->GetMenuItemID( itemCount - 1 ) )
-			return false;
-
-	UINT maxVertItems = app::GetMenuVertSplitCount();
-
-	if ( itemCount != 0 && 0 == ( itemCount % maxVertItems ) )
-		flags |= MF_MENUBARBREAK | MF_MENUBREAK;
-
-	return pMenu->AppendMenu( flags, itemId, pItemText ) != FALSE;
-}
-
-
 // CFolderItem implementation
 
 CFolderItem::CFolderItem( const std::tstring& alias )
@@ -762,4 +393,373 @@ void CFolderOptions::OnResetSortOrder( void )
 void CFolderOptions::OnUpdateResetSortOrder( CCmdUI* pCmdUI )
 {
 	pCmdUI->Enable( !m_fileSortOrder.IsDefaultOrder() );
+}
+
+
+// CTargetMenu implementation
+
+void CTargetMenu::InitInplace( CMenu* pParentMenu )
+{
+	REQUIRE( NULL == m_menu.GetSafeHmenu() );
+
+	ASSERT_PTR( pParentMenu->GetSafeHmenu() );
+	m_menu.Attach( pParentMenu->GetSafeHmenu() );
+	m_initialCount = pParentMenu->GetMenuItemCount();
+}
+
+void CTargetMenu::InitAsSubMenu( const std::tstring& subMenuCaption )
+{
+	REQUIRE( NULL == m_menu.GetSafeHmenu() );
+
+	m_menu.CreatePopupMenu();
+	m_initialCount = 0;
+	m_subMenuCaption = subMenuCaption;
+}
+
+void CTargetMenu::Commit( CMenu* pParentMenu )
+{
+	ASSERT_PTR( pParentMenu->GetSafeHmenu() );
+
+	if ( IsSubMenu() )
+	{
+		if ( !IsEmpty() )
+			AppendSubMenu( pParentMenu, m_menu.Detach(), m_subMenuCaption );
+	}
+	else
+	{
+		ASSERT( pParentMenu->GetSafeHmenu() == m_menu.GetSafeHmenu() );
+
+		if ( !IsEmpty() )
+			AppendSeparator();
+
+		m_menu.Detach();		// release ownership
+	}
+}
+
+bool CTargetMenu::AppendSeparator( CMenu* pMenu )
+{
+	ASSERT_PTR( pMenu->GetSafeHmenu() );
+
+	UINT itemCount = pMenu->GetMenuItemCount();
+	if ( 0 == itemCount || 0 == pMenu->GetMenuItemID( itemCount - 1 ) )		// empty menu or last item is a separator?
+		return false;
+
+	return DoAppendItem( pMenu, MF_SEPARATOR );
+}
+
+bool CTargetMenu::AppendContextSubMenu( CMenu* pMenu, app::ContextPopup popupIndex )
+{
+	ASSERT_PTR( pMenu->GetSafeHmenu() );
+
+	CMenu subMenu;
+	std::tstring subMenuCaption;
+	ui::LoadPopupMenu( subMenu, IDR_CONTEXT_MENU, popupIndex, ui::NormalMenuImages, &subMenuCaption );
+
+	return AppendSubMenu( pMenu, subMenu.Detach(), subMenuCaption );
+}
+
+bool CTargetMenu::DoAppendItem( CMenu* pMenu, UINT flags, UINT_PTR itemId /*= 0*/, const TCHAR* pItemText /*= NULL*/ )
+{
+	ASSERT_PTR( pMenu->GetSafeHmenu() );
+
+	UINT itemCount = pMenu->GetMenuItemCount();
+
+	if ( HasFlag( flags, MF_SEPARATOR ) )
+		if ( 0 == itemCount || 0 == pMenu->GetMenuItemID( itemCount - 1 ) )
+			return false;
+
+	UINT maxVertItems = app::GetMenuVertSplitCount();
+
+	if ( itemCount != 0 && 0 == ( itemCount % maxVertItems ) )
+		flags |= MF_MENUBARBREAK | MF_MENUBREAK;
+
+	return pMenu->AppendMenu( flags, itemId, pItemText ) != FALSE;
+}
+
+
+// CFileMenuBuilder implementation
+
+CFileMenuBuilder::CFileMenuBuilder( const CFolderOptions* pOptions )
+	: m_pOptions( pOptions )
+	, m_fileItemId( CM_FILEBROWSER_FILEITEM )
+{
+	ASSERT_PTR( m_pOptions );
+	m_rootPopupMenu.CreatePopupMenu();
+}
+
+const CFileItem* CFileMenuBuilder::FindFileItemWithId( UINT cmdId ) const
+{
+	TMapIdToItem::const_iterator itFound = m_idToItemMap.find( cmdId );
+	return itFound != m_idToItemMap.end() ? itFound->second : NULL;
+}
+
+UINT CFileMenuBuilder::MarkCurrFileItemId( const fs::CPath& currFilePath )
+{
+	for ( UINT i = 0, count = m_rootPopupMenu.GetMenuItemCount(); i != count; ++i )
+		if ( !HasFlag( m_rootPopupMenu.GetMenuState( i, MF_BYPOSITION ), MF_POPUP | MF_SEPARATOR | MF_MENUBREAK | MFT_OWNERDRAW ) )
+		{
+			UINT cmdId = m_rootPopupMenu.GetMenuItemID( i );
+			ASSERT( cmdId != 0 && cmdId != UINT_MAX );
+
+			if ( const CFileItem* pFileItem = FindFileItemWithId( cmdId ) )
+				if ( pFileItem->HasFilePath( currFilePath ) )
+				{
+					m_rootPopupMenu.SetDefaultItem( cmdId );
+					return cmdId;
+				}
+		}
+
+	return 0;
+}
+
+bool CFileMenuBuilder::BuildFolderItem( CMenu* pParentMenu, const CFolderItem* pFolderItem )
+{
+	ASSERT_PTR( pParentMenu->GetSafeHmenu() );
+	ASSERT_PTR( pFolderItem );
+
+	if ( !pFolderItem->HasAnyLeafs() )
+		return false;					// avoid adding empty folders
+
+	CScopedTargetMenu scopedTargetMenu( pParentMenu );
+
+	if ( UseSubMenu( pFolderItem ) )
+		scopedTargetMenu.InitAsSubMenu( pFolderItem->FormatAlias() );
+	else
+		scopedTargetMenu.InitInplace( pParentMenu );
+
+	AppendFolderItem( &scopedTargetMenu, pFolderItem );
+	return true;
+}
+
+bool CFileMenuBuilder::UseSubMenu( const CFolderItem* pFolderItem ) const
+{
+	if ( pFolderItem->IsRootFolder() )
+		return false;							// always expand files of the root folder
+
+	switch ( m_pOptions->m_folderLayout )
+	{
+		default: ASSERT( false );
+		case flFoldersAsPopups:
+		case flFoldersAsRootPopups:
+			return true;
+		case flTopFoldersExpanded:
+			return !pFolderItem->IsTopFolder();
+		case flAllFoldersExpanded:
+			return false;
+	}
+}
+
+void CFileMenuBuilder::AppendFolderItem( CTargetMenu* pTargetMenu, const CFolderItem* pFolderItem )
+{
+	AppendFileItems( pTargetMenu, pFolderItem->GetFileItems() );
+	AppendSubFolders( pTargetMenu, pFolderItem->GetSubFolders() );
+}
+
+void CFileMenuBuilder::AppendSubFolders( CTargetMenu* pTargetMenu, const std::vector< CFolderItem* >& subFolders )
+{
+	for ( std::vector< CFolderItem* >::const_iterator itSubFolder = subFolders.begin(); itSubFolder != subFolders.end(); ++itSubFolder )
+		BuildFolderItem( pTargetMenu->GetMenu(), *itSubFolder );
+}
+
+void CFileMenuBuilder::AppendFileItems( CTargetMenu* pTargetMenu, const std::vector< CFileItem* >& fileItems )
+{
+	for ( std::vector< CFileItem* >::const_iterator itFileItem = fileItems.begin(); itFileItem != fileItems.end(); ++itFileItem )
+		if ( RegisterMenuUniqueItem( pTargetMenu->GetMenu(), *itFileItem ) )		// unique path item in the popup?
+		{
+			UINT cmdId = GetNextFileItemId();
+
+			pTargetMenu->AppendItem( cmdId, ( *itFileItem )->FormatLabel( m_pOptions ) );
+			m_idToItemMap[ cmdId ] = *itFileItem;
+		}
+}
+
+bool CFileMenuBuilder::RegisterMenuUniqueItem( const CMenu* pPopupMenu, const CFileItem* pFileItem )
+{
+	ASSERT_PTR( pPopupMenu->GetSafeHmenu() );
+	ASSERT_PTR( pFileItem );
+
+	const CFileItem*& rpItem = m_menuPathToItemMap[ TMenuPathKey( pPopupMenu->GetSafeHmenu(), pFileItem->GetFilePath() ) ];
+	if ( rpItem != NULL )
+		return false;				// reject duplicate path menu items in the same popup menu
+
+	rpItem = pFileItem;
+	return true;
+}
+
+
+// CFileBrowser implementation
+
+CFileBrowser::CFileBrowser( void )
+	: m_options()
+	, m_pRootFolderItem( new CFolderItem( _T("[Root Files]") ) )
+{
+	if ( m_options.m_cutDuplicates )
+		m_pPathIndex.reset( new CPathIndex );
+}
+
+CFileBrowser::~CFileBrowser()
+{
+}
+
+bool CFileBrowser::AddFolder( const fs::CPath& folderPathFilter, const std::tstring& folderAlias )
+{
+	fs::CPath folderPath = folderPathFilter.GetParentPath();
+
+	if ( !fs::IsValidDirectory( folderPath.GetPtr() ) )
+		return false;
+
+	if ( m_pPathIndex.get() != NULL && !m_pPathIndex->RegisterUnique( folderPathFilter ) )
+		return false;
+
+	std::auto_ptr< CFolderItem > pNewFolder( new CFolderItem( m_pRootFolderItem.get(), folderPath, folderPathFilter.GetFilename(), folderAlias ) );
+
+	pNewFolder->SearchForFiles( m_options.m_recurseFolders ? Deep : Shallow, m_pPathIndex.get() );
+	if ( !pNewFolder->HasAnyLeafs() )
+		return false;
+
+	m_pRootFolderItem->AddSubFolderItem( pNewFolder.release() );
+	return true;
+}
+
+bool CFileBrowser::AddFolderItems( const TCHAR* pFolderItems )
+{
+	// pFolderItems: folder items separated by EDIT_SEP=";" token (at end no token);
+	// Each folder item contains a folder path filter, and optional, a folder alias separated
+	// by PROF_SEP="|" separator.
+	// example:
+	//	"D:\Development\Tools\Slider\LogicalFilesBackup.h,LogicalFilesBackup.hxx,LogicalFilesBackup.cxx|ASSOCIATIONS;D:\Development\Tools\Slider\slider Desc\LogicalFilesBackup_Factory.*,LogicalFilesBackup_Tags.*|FACTORY"
+
+	std::vector< std::tstring > dualArray;
+	str::Split( dualArray, pFolderItems, _T(";") );
+
+	for ( std::vector< std::tstring >::const_iterator itFolderItem = dualArray.begin(); itFolderItem != dualArray.end(); ++itFolderItem )
+	{
+		ASSERT( !itFolderItem->empty() );
+		size_t sepPos = itFolderItem->find( PROF_SEP );
+
+		if ( sepPos != std::tstring::npos )
+			AddFolder( itFolderItem->substr( 0, sepPos ), itFolderItem->substr( sepPos + 1 ) );			// alias is specified
+		else
+			AddFolder( *itFolderItem, std::tstring() );		// no alias
+	}
+
+	return !dualArray.empty();
+}
+
+bool CFileBrowser::AddRootFile( const fs::CPath& filePath, const std::tstring& label /*= std::tstring()*/ )
+{
+	return m_pRootFolderItem->AddFileItem( m_pPathIndex.get(), filePath, label );
+}
+
+void CFileBrowser::SortItems( void )
+{
+	ASSERT_PTR( m_pRootFolderItem.get() );
+
+	if ( m_options.m_sortFolders )
+		m_pRootFolderItem->SortSubFolders();
+
+	m_pRootFolderItem->SortFileItems( m_options.m_fileSortOrder );
+}
+
+CMenu* CFileBrowser::BuildMenu( void )
+{
+	m_pTrackInfo.reset( new CTrackInfo( &m_options ) );
+	m_pTrackInfo->m_menuBuilder.BuildFolderItem( m_pRootFolderItem.get() );
+
+	CMenu* pPopupMenu = m_pTrackInfo->m_menuBuilder.GetPopupMenu();
+
+	if ( !m_options.m_noOptionsPopup )
+	{	// append options popups
+		CTargetMenu::AppendSeparator( pPopupMenu );
+		CTargetMenu::AppendContextSubMenu( pPopupMenu, app::MenuBrowserOptionsPopup );
+		CTargetMenu::AppendContextSubMenu( pPopupMenu, app::FileSortOrderPopup );
+	}
+
+	ui::DeleteLastMenuSeparator( *pPopupMenu );
+
+	ENSURE( ui::IsValidMenu( pPopupMenu->GetSafeHmenu() ) );
+	return pPopupMenu;
+}
+
+bool CFileBrowser::PickFile( CPoint screenPos )
+{
+	if ( -1 == screenPos.x && -1 == screenPos.y )
+		screenPos = ui::GetCursorPos();
+
+	SortItems();
+
+	ide::CScopedWindow scopedIDE;
+	if ( !scopedIDE.IsValid() )
+		return false;
+
+	CTrackMenuWnd trackingWnd( this );
+
+	VERIFY( trackingWnd.Create( scopedIDE.GetFocusWnd() ) );
+	trackingWnd.SetRightClickRepeat();		// keep popup menu open when right clicking on a command
+
+	for ( ;; )
+	{
+		CMenu* pPopupMenu = BuildMenu();
+
+		trackingWnd.SetHilightId( GetMenuBuilder()->MarkCurrFileItemId( m_currFilePath ) );
+
+		if ( trackingWnd.TrackContextMenu( pPopupMenu, screenPos ) != 0 )
+			DEBUG_LOG( _T("Picked cmdId=%d, filePath: %s"), trackingWnd.GetSelCmdId(), GetCurrFilePath().GetPtr() );
+
+		if ( !m_pTrackInfo->m_keepTracking )
+			break;
+	}
+
+	m_pTrackInfo.reset();
+
+	trackingWnd.DestroyWindow();
+
+	return IsFileCmd( trackingWnd.GetSelCmdId() ) && !m_currFilePath.IsEmpty();
+}
+
+bool CFileBrowser::IsFileCmd( UINT cmdId )
+{
+	return cmdId >= CM_FILEBROWSER_FILEITEM && cmdId <= CM_FILEBROWSER_FILEITEM_LAST;
+}
+
+BOOL CFileBrowser::OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo )
+{
+	if ( m_options.OnCmdMsg( id, code, pExtra, pHandlerInfo ) )
+	{
+		if ( CN_COMMAND == code && NULL == pHandlerInfo && m_pTrackInfo.get() != NULL )
+			m_pTrackInfo->m_keepTracking = true;		// keep tracking the context menu while options are changed
+
+		return TRUE;
+	}
+
+	return __super::OnCmdMsg( id, code, pExtra, pHandlerInfo );
+}
+
+
+// CFileBrowser command handlers
+
+BEGIN_MESSAGE_MAP( CFileBrowser, CCmdTarget )
+	ON_COMMAND_RANGE( CM_FILEBROWSER_FILEITEM, CM_FILEBROWSER_FILEITEM_LAST, OnCommand_FileItem )
+	ON_UPDATE_COMMAND_UI_RANGE( CM_FILEBROWSER_FILEITEM, CM_FILEBROWSER_FILEITEM_LAST, OnUpdate_FileItem )
+END_MESSAGE_MAP()
+
+void CFileBrowser::OnCommand_FileItem( UINT cmdId )
+{
+	if ( CFileMenuBuilder* pMenuBuilder = GetMenuBuilder() )
+		if ( const CFileItem* pPickedFileItem = pMenuBuilder->FindFileItemWithId( cmdId ) )
+			if ( ui::IsKeyPressed( VK_CONTROL ) )
+			{	// final command with CTRL pressed -> sent selected file path to the clipboard
+				if ( CClipboard::CopyText( pPickedFileItem->GetFilePath().Get() ) )
+					SetCurrFilePath( fs::CPath() );			// reset the picked file path member in order to avoid the final execution
+			}
+			else
+				SetCurrFilePath( pPickedFileItem->GetFilePath() );
+}
+
+void CFileBrowser::OnUpdate_FileItem( CCmdUI* pCmdUI )
+{
+	if ( CFileMenuBuilder* pMenuBuilder = GetMenuBuilder() )
+		if ( const CFileItem* pPickedFileItem = pMenuBuilder->FindFileItemWithId( pCmdUI->m_nID ) )
+			if ( pPickedFileItem->HasFilePath( m_currFilePath ) )
+				ui::SetRadio( pCmdUI );
 }
