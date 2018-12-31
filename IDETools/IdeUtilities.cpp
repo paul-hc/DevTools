@@ -1,8 +1,11 @@
 
 #include "stdafx.h"
 #include "IdeUtilities.h"
+#include "TrackMenuWnd.h"
 #include "Application.h"
+#include "utl/EnumTags.h"
 #include "utl/Path.h"
+#include "utl/ProcessUtils.h"
 #include "utl/Registry.h"
 #include "utl/Utilities.h"
 
@@ -13,42 +16,117 @@
 
 namespace ide
 {
-	bool IsVC6( void )
+	// CScopedWindow implementation
+
+	CScopedWindow::CScopedWindow( void )
+		: m_pFocusWnd( ide::GetFocusWindow() )
+		, m_pMainWnd( ide::GetMainWindow( m_pFocusWnd ) )
+		, m_hasDifferentThread( false )
+		, m_ideType( ide::FindIdeType( m_pMainWnd ) )
 	{
-		CWnd* pRootWindow = GetRootWindow();
-		return pRootWindow != NULL && getWindowClassName( pRootWindow->m_hWnd ).Left( 4 ) == _T("Afx:");
+		if ( IsValid() )
+			m_hasDifferentThread = ::GetWindowThreadProcessId( m_pFocusWnd->m_hWnd, NULL ) != ::GetCurrentThreadId();	// VC 7.1+: this COM object runs in a different thread than the text window
+
+		DEBUG_LOG( _T("IDE: %s"), FormatInfo().c_str() );
 	}
 
-	bool IsVC_71to90( void )
+	CScopedWindow::~CScopedWindow()
 	{
-		CWnd* pRootWindow = GetRootWindow();
-		return pRootWindow != NULL && getWindowClassName( pRootWindow->m_hWnd ) == _T("wndclass_desked_gsk");
+		RestoreFocusWnd();
 	}
 
-	IdeType FindIdeType( void )
+	bool CScopedWindow::RestoreFocusWnd( void )
 	{
-		if ( IsVC6() )
-			return VC_60;
-		if ( IsVC_71to90() )
-			return VC_71to90;
+		HWND hWnd = m_pFocusWnd->GetSafeHwnd();
+		if ( !::IsWindow( hWnd ) )
+			return false;
+
+		CScopedAttachThreadInput scopedThreadInput( hWnd );
+		bool isFocused = ::GetFocus() == hWnd;
+
+		if ( !isFocused )
+		{
+			::SetFocus( hWnd );
+
+			isFocused = ::GetFocus() == hWnd;
+		}
+
+		return isFocused;
+	}
+
+	UINT CScopedWindow::TrackPopupMenu( CMenu& rMenu, CPoint screenPos, UINT flags /*= TPM_RIGHTBUTTON*/ )
+	{
+		if ( -1 == screenPos.x && -1 == screenPos.y )
+			screenPos = ui::GetCursorPos();
+
+		if ( !IsValid() )
+			return 0;
+
+		// VC 7.1 and up: this COM object runs in a different thread than the text window, therefore we need to create a tracking window in THIS thread.
+		CTrackMenuWnd trackingWnd;
+		VERIFY( trackingWnd.Create( m_pFocusWnd ) );
+
+		UINT command = trackingWnd.TrackContextMenu( &rMenu, screenPos, flags );
+		trackingWnd.DestroyWindow();
+
+		return command;
+	}
+
+	std::tstring CScopedWindow::FormatInfo( void ) const
+	{
+		if ( !IsValid() )
+			return _T("<Invalid IDE window>");
+
+		return str::Format( _T("%s%s - FOCUS window: %s - MAIN window: %s"),
+			GetTags_IdeType().FormatUi( m_ideType ).c_str(),
+			m_hasDifferentThread ? _T(" (Different thread)") : _T(""),
+			FormatWndInfo( m_pFocusWnd->GetSafeHwnd() ).c_str(),
+			FormatWndInfo( m_pMainWnd->GetSafeHwnd() ).c_str() );
+	}
+	
+	std::tstring CScopedWindow::FormatWndInfo( HWND hWnd )
+	{
+		if ( NULL == hWnd )
+			return _T("<null-wnd>");
+
+		DWORD style = ::GetWindowLong( hWnd, GWL_STYLE );
+		CRect windowRect;
+		::GetWindowRect( hWnd, &windowRect );
+
+		static const TCHAR s_sep[] = _T(", ");
+		std::tstring text = str::Format( _T("0x%08X [%s] \"%s\" style=0x%08X"),
+			hWnd, ui::GetClassName( hWnd ).c_str(), ui::GetWindowText( hWnd ).c_str(), style );
+
+		if ( HasFlag( style, WS_CHILD ) )
+			stream::Tag( text, str::Format( _T("child_id=%d"), ui::ToCmdId( ::GetDlgCtrlID( hWnd ) ) ), s_sep );
+
+		stream::Tag( text, str::Format( _T("pos(%d, %d), size(%d, %d)"), windowRect.left, windowRect.top, windowRect.Width(), windowRect.Height() ), s_sep );
+		return text;
+	}
+
+	const CEnumTags& CScopedWindow::GetTags_IdeType( void )
+	{
+		static const CEnumTags s_tags( _T("VC 6.0|VC 7.1 to 9.0|VC 11+") );
+		return s_tags;
+	}
+}
+
+
+namespace ide
+{
+	IdeType FindIdeType( CWnd* pMainWnd /*= GetMainWindow()*/ )
+	{
+		if ( pMainWnd->GetSafeHwnd() != NULL )
+		{
+			std::tstring className = ui::GetClassName( pMainWnd->GetSafeHwnd() );
+
+			if ( str::HasPrefix( className.c_str(), _T("Afx:") ) )
+				return VC_60;
+			else if ( className == _T("wndclass_desked_gsk") )
+				return VC_71to90;
+		}
 
 		return VC_110plus;
-	}
-
-	CWnd* GetRootWindow( void )
-	{
-		CWnd* pRootWnd = GetFocusWindow();
-
-		if ( pRootWnd == NULL )
-			pRootWnd = CWnd::GetForegroundWindow();
-
-		if ( pRootWnd != NULL )
-			pRootWnd = ui::GetTopLevelParent( pRootWnd );
-
-		if ( pRootWnd != NULL )
-			DEBUG_LOG( _T("RootWindow: %s"), getWindowInfo( pRootWnd->m_hWnd ).c_str() );
-
-		return pRootWnd;
 	}
 
 	CWnd* GetFocusWindow( void )
@@ -61,11 +139,11 @@ namespace ide
 
 		if ( ::GetGUIThreadInfo( ::GetWindowThreadProcessId( ::GetForegroundWindow(), NULL ), &threadInfo ) )
 		{
-			HWND hFocusWnds[] = { threadInfo.hwndCaret, threadInfo.hwndFocus, threadInfo.hwndCapture, threadInfo.hwndActive };
+			HWND s_hFocusWnds[] = { threadInfo.hwndCaret, threadInfo.hwndFocus, threadInfo.hwndCapture, threadInfo.hwndActive };
 
-			for ( unsigned int i = 0; i != COUNT_OF( hFocusWnds ); ++i )
-				if ( hFocusWnds[ i ] != NULL )
-					return CWnd::FromHandle( hFocusWnds[ i ] );
+			for ( unsigned int i = 0; i != COUNT_OF( s_hFocusWnds ); ++i )
+				if ( s_hFocusWnds[ i ] != NULL )
+					return CWnd::FromHandle( s_hFocusWnds[ i ] );
 		}
 
 		HWND hWnds[] = { ::GetFocus(), ::GetActiveWindow() };
@@ -76,6 +154,18 @@ namespace ide
 
 		return CWnd::GetForegroundWindow();
 	}
+
+	CWnd* GetMainWindow( CWnd* pStartingWnd /*= GetFocusWindow()*/ )
+	{
+		if ( NULL == pStartingWnd )
+			pStartingWnd = CWnd::GetForegroundWindow();
+
+		if ( pStartingWnd != NULL )
+			pStartingWnd = ui::GetTopLevelParent( pStartingWnd );
+
+		return pStartingWnd;
+	}
+
 
 	CPoint GetMouseScreenPos( void )
 	{
@@ -102,138 +192,28 @@ namespace ide
 		return mouseScreenPos;
 	}
 
-	std::pair< HMENU, int > findPopupMenuWithCommand( HWND hWnd, UINT commandID )
+	std::pair< HMENU, int > FindPopupMenuWithCommand( HWND hWnd, UINT commandID )
 	{
-		ASSERT( hWnd != NULL );
+		ASSERT_PTR( hWnd );
 
-		HMENU hMenuIDE = GetMenu( hWnd );
-
-		if ( hMenuIDE != NULL )
-			for ( UINT i = 0, count = GetMenuItemCount( hMenuIDE ); i < count; ++i )
+		if ( HMENU hMenuIDE = ::GetMenu( hWnd ) )
+			for ( UINT i = 0, count = ::GetMenuItemCount( hMenuIDE ); i != count; ++i )
 			{
-				HMENU hPopup = GetSubMenu( hMenuIDE, i );
-
-				if ( hPopup != NULL )
+				if ( HMENU hSubMenu = ::GetSubMenu( hMenuIDE, i ) )
 				{
-					UINT itemState = GetMenuState( hPopup, commandID, MF_BYCOMMAND );
-
-					if ( itemState != UINT( -1 ) )
-						return std::make_pair( hPopup, i );
+					UINT itemState = ::GetMenuState( hSubMenu, commandID, MF_BYCOMMAND );
+					if ( itemState != UINT_MAX )
+						return std::make_pair( hSubMenu, i );
 				}
 			}
 
 		return std::make_pair( (HMENU)NULL, -1 );
 	}
-
-	CWnd* getRootParentWindow( CWnd* pWindow )
-	{
-		while ( pWindow != NULL )
-			if ( pWindow->GetStyle() & WS_CHILD )
-				pWindow = pWindow->GetParent();
-			else
-				break;
-
-		return pWindow;
-	}
-
-	std::tstring getWindowInfo( HWND hWnd )
-	{
-		if ( hWnd == NULL )
-			return _T("{NULL-WND}");
-
-		TCHAR className[ 256 ];
-		GetClassName( hWnd, className, COUNT_OF( className ) );
-
-		TCHAR caption[ 256 ];
-		GetWindowText( hWnd, caption, COUNT_OF( caption ) );
-
-		UINT id = GetDlgCtrlID( hWnd );
-		DWORD style = GetWindowLong( hWnd, GWL_STYLE );
-
-		CRect windowRect;
-		GetWindowRect( hWnd, &windowRect );
-
-		return str::Format( _T("0x%08X {%s} '%s' id=%d, style=0x%08X, [%d,%d] - [%d,%d]"),
-							hWnd, className, caption, id, style,
-							windowRect.left, windowRect.top, windowRect.Width(), windowRect.Height() );
-	}
-
-	CString getWindowClassName( HWND hWnd )
-	{
-		ASSERT( IsWindow( hWnd ) );
-
-		CString className;
-
-		::GetClassName( hWnd, className.GetBuffer( 256 ), 256 );
-		className.ReleaseBuffer();
-		return className;
-	}
-
-	CString getWindowTitle( HWND hWnd )
-	{
-		CString title;
-
-		ASSERT( IsWindow( hWnd ) );
-		::GetWindowText( hWnd, title.GetBuffer( 256 ), 256 );
-		title.ReleaseBuffer();
-		return title;
-	}
-
-	int setFocusWindow( HWND hWnd )
-	{
-		ASSERT( IsWindow( hWnd ) );
-
-		bool isFocused = ::GetFocus() == hWnd;
-
-		if ( !isFocused )
-		{
-			DWORD currThreadID =::GetCurrentThreadId();
-			DWORD wndThreadID =::GetWindowThreadProcessId( hWnd, NULL );
-			bool differentThread = wndThreadID != currThreadID;
-
-			if ( differentThread )
-				VERIFY( ::AttachThreadInput( currThreadID, wndThreadID, TRUE ) );
-
-			::SetFocus( hWnd );
-
-			isFocused = ::GetFocus() == hWnd;
-
-			if ( differentThread )
-				VERIFY( ::AttachThreadInput( currThreadID, wndThreadID, FALSE ) );
-		}
-
-		return isFocused;
-	}
-
-	UINT trackPopupMenu( CMenu& rMenu, const CPoint& screenPos, CWnd* pWindow,
-						 UINT flags /*= TPM_LEFTALIGN | TPM_TOPALIGN | TPM_RIGHTBUTTON*/ )
-	{
-		ASSERT( IsWindow( pWindow->GetSafeHwnd() ) );
-
-		CWnd* pTrackingWindow = pWindow;
-
-		// VC 7.1 and up: this COM object runs in a different thread than the text window, therefore
-		// we need to create a tracking frame in this thread.
-		if ( GetWindowThreadProcessId( pTrackingWindow->m_hWnd, NULL ) != GetCurrentThreadId() )
-			pTrackingWindow = createThreadTrackingWindow( pTrackingWindow );
-
-		UINT command = rMenu.TrackPopupMenu( flags, screenPos.x, screenPos.y, pTrackingWindow );
-
-		if ( pTrackingWindow != pWindow )
-			pTrackingWindow->DestroyWindow();	// this will also delete pTrackingWindow
-
-		return command;
-	}
-
-	CWnd* createThreadTrackingWindow( CWnd* pParent )
-	{
-		CFrameWnd* pTrackingFrame = new CFrameWnd;
-
-		VERIFY( pTrackingFrame->Create( NULL, NULL, WS_POPUP | WS_VISIBLE, CRect( 0, 0, 0, 0 ), pParent ) );
-		return pTrackingFrame;
-	}
+}
 
 
+namespace ide
+{
 	// VC registry access
 
 	std::tstring GetRegistryPath_VC6( const TCHAR entry[] )

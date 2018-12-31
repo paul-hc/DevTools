@@ -36,6 +36,12 @@ namespace ui
 	inline int ToCmdId( UINT uCmdId ) { return (short)(unsigned short)( uCmdId ); }
 
 
+	CPoint GetCursorPos( HWND hWnd = NULL );			// return screen coordinates if NULL
+
+	// works for VK_CONTROL, VK_SHIFT, VK_MENU (alt), VK_LBUTTON, VK_RBUTTON, VK_MBUTTON, etc
+	inline bool IsKeyPressed( int virtKey ) { return ::GetKeyState( virtKey ) < 0; }
+
+
 	// conversion to/from state (0-based index); raw state (UINT) uses is 1-based indexes - works for list control, tree control
 	typedef UINT RawCheckState;
 

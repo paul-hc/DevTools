@@ -752,6 +752,43 @@ namespace ui
 		return false;		// nothing changed
 	}
 
+	struct CTestCmdUI : public CCmdUI		// used to test for disabled commands before dispatching
+	{
+	public:
+		CTestCmdUI( void ) : CCmdUI() { m_enabled = true; }			// assume it's enabled
+
+		// base overrides
+		virtual void Enable( BOOL enabled ) { m_enabled = enabled != FALSE; m_bEnableChanged = TRUE; }
+		virtual void SetCheck( int check ) { check; }
+		virtual void SetRadio( BOOL on ) { on; }
+		virtual void SetText( const TCHAR* pText ) { pText; }
+	public:
+		bool m_enabled;
+	};
+
+
+	bool HandleCommand( CCmdTarget* pCmdTarget, UINT cmdId )
+	{
+		ASSERT_PTR( pCmdTarget );
+
+		// zero IDs for normal commands are not allowed
+		if ( 0 == cmdId )
+			return false;
+
+		// make sure command has not become disabled before routing
+		CTestCmdUI state;
+		state.m_nID = cmdId;
+		pCmdTarget->OnCmdMsg( cmdId, CN_UPDATE_COMMAND_UI, &state, NULL );
+		if ( !state.m_enabled )
+		{
+			TRACE( "Warning: not executing disabled command %d\n", cmdId );
+			return TRUE;
+		}
+
+		return pCmdTarget->OnCmdMsg( cmdId, CN_COMMAND, NULL, NULL ) != FALSE;
+	}
+
+
 	HBRUSH SendCtlColor( HWND hWnd, HDC hDC, UINT message /*= WM_CTLCOLORSTATIC*/ )
 	{
 		ASSERT_PTR( hWnd );
@@ -811,14 +848,19 @@ namespace ui
 
 namespace ui
 {
+	std::tstring GetClassName( HWND hWnd )
+	{
+		ASSERT_PTR( hWnd );
+
+		TCHAR className[ 128 ] = { 0 };
+		::GetClassName( hWnd, className, COUNT_OF( className ) );
+		return className;
+	}
+
 	bool IsGroupBox( HWND hWnd )
 	{
-		if ( ( GetStyle( hWnd ) & BS_TYPEMASK ) == BS_GROUPBOX )
-		{
-			TCHAR className[ 128 ];
-			::GetClassName( hWnd, className, COUNT_OF( className ) );
-			return 0 == _tcscmp( className, WC_BUTTON );
-		}
+		if ( EqMaskedValue( GetStyle( hWnd ), BS_TYPEMASK, BS_GROUPBOX ) )
+			return GetClassName( hWnd ) == WC_BUTTON;
 
 		return false;
 	}
@@ -829,6 +871,12 @@ namespace ui
 		::GetClassName( hWnd, className, COUNT_OF( className ) );
 		return _T('#') == className[ 0 ] && (ATOM)WC_DIALOG == ::GlobalFindAtom( className );
 	}
+
+	bool IsMenuWnd( HWND hWnd )
+	{
+		return GetClassName( hWnd ) == _T("#32768");
+	}
+
 
 	bool ModifyBorder( CWnd* pWnd, bool useBorder /*= true*/ )
 	{
@@ -1383,11 +1431,11 @@ namespace ui
 	}
 
 
-	bool PumpPendingMessages( void )
+	bool PumpPendingMessages( HWND hWnd /*= NULL*/ )
 	{
 		// eat all messages in queue, no OnIdle() though
 		MSG msg;
-		while ( ::PeekMessage( &msg, NULL, 0, 0, PM_NOREMOVE ) )
+		while ( ::PeekMessage( &msg, hWnd, 0, 0, PM_NOREMOVE ) )
 			if ( !AfxGetThread()->PumpMessage() )
 			{
 				::PostQuitMessage( 0 );

@@ -46,7 +46,8 @@ struct CScopedAttachThreadInput
 	CScopedAttachThreadInput( HWND hWnd )
 		: m_currThreadId( ::GetCurrentThreadId() )
 		, m_wndThreadId( ::GetWindowThreadProcessId( hWnd, NULL ) )
-		, m_attached( m_currThreadId != m_wndThreadId && ::AttachThreadInput( m_currThreadId, m_wndThreadId, TRUE ) != FALSE )
+		, m_differentThread( m_currThreadId != m_wndThreadId )
+		, m_attached( m_differentThread && ::AttachThreadInput( m_currThreadId, m_wndThreadId, TRUE ) != FALSE )
 	{
 		ASSERT_PTR( ::IsWindow( hWnd ) );
 	}
@@ -56,9 +57,12 @@ struct CScopedAttachThreadInput
 		if ( m_attached )
 			::AttachThreadInput( m_currThreadId, m_wndThreadId, FALSE );		// un-attach this thread from hWnd's thread
 	}
+
+	bool DifferentThread( void ) const { return m_differentThread; }
 private:
 	DWORD m_currThreadId;
 	DWORD m_wndThreadId;
+	bool m_differentThread;
 	bool m_attached;
 };
 

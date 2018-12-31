@@ -153,7 +153,8 @@ BSTR WorkspaceProfile::GetFileName( long index )
 
 BOOL WorkspaceProfile::Save( LPCTSTR section, LPCTSTR currProjectName )
 {
-	CWkspSaveDialog dialog( *this, section, currProjectName, ide::GetRootWindow() );
+	ide::CScopedWindow scopedIDE;
+	CWkspSaveDialog dialog( *this, section, currProjectName, scopedIDE.GetMainWnd() );
 
 	return dialog.DoModal() != IDCANCEL;
 }
@@ -163,7 +164,8 @@ BOOL WorkspaceProfile::Load( LPCTSTR section, LPCTSTR currProjectName )
 	UNUSED_ALWAYS( section );
 	UNUSED_ALWAYS( currProjectName );
 
-	CWkspLoadDialog dialog( *this, section, currProjectName, ide::GetRootWindow() );
+	ide::CScopedWindow scopedIDE;
+	CWkspLoadDialog dialog( *this, section, currProjectName, scopedIDE.GetMainWnd() );
 
 	if ( dialog.DoModal() == IDCANCEL )
 		return FALSE;

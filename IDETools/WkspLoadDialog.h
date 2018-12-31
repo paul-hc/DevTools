@@ -1,4 +1,3 @@
-
 #ifndef WkspLoadDialog_h
 #define WkspLoadDialog_h
 #pragma once
@@ -17,9 +16,9 @@ class WorkspaceProfile;
 class CWkspLoadDialog : public CLayoutDialog
 {
 public:
-	CWkspLoadDialog( WorkspaceProfile& _wkspProfile, const CString& _section, const CString& _currProjectName, CWnd* parent );
+	CWkspLoadDialog( WorkspaceProfile& rWkspProfile, const CString& section, const CString& currProjectName, CWnd* pParent );
 	virtual ~CWkspLoadDialog();
-protected:
+private:
 	void setupWindow( void );
 	void cleanupWindow( void );
 	void updateFileContents( void );
@@ -27,20 +26,18 @@ protected:
 	bool loadExistingProjects( void );
 	bool transferFiles( void );
 	bool readProjectName( void );
-	CMetaFolder::CFile* getListFile( int listIndex ) const;
+	CFileItem* GetListFileItem( int listIndex ) const { return (CFileItem*)m_fileList.GetItemDataPtr( listIndex ); }
 
 	void handleSelection( Ternary operation );
-protected:
-	CString section, currProjectName;
-	WorkspaceProfile& wkspProfile;
-	CFolderOptions options;
-	CMetaFolder metaFolder;
-
-	bool showFullPath;
+private:
+	CString m_section, m_currProjectName;
+	WorkspaceProfile& m_rWkspProfile;
+	CFolderOptions m_options;
+	CFolderItem m_folderItem;
 private:
 	// enum { IDD = IDD_WORKSPACE_LOAD_DIALOG };
-	CComboBox projectNameCombo;
-	CListBox fileList;
+	CComboBox m_projectNameCombo;
+	CListBox m_fileList;
 	CItemContentEdit m_fullPathEdit;
 
 	protected:

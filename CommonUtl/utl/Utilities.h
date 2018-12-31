@@ -130,12 +130,6 @@ namespace ui
 
 namespace ui
 {
-	CPoint GetCursorPos( HWND hWnd = NULL );			// return screen coordinates if NULL
-
-	// works for VK_CONTROL, VK_SHIFT, VK_MENU (alt), VK_LBUTTON, VK_RBUTTON, VK_MBUTTON, etc
-	inline bool IsKeyPressed( int virtKey ) { return ::GetKeyState( virtKey ) < 0; }
-
-
 	// window coords
 
 	inline CPoint ScreenToClient( HWND hWnd, const CPoint& screenPos )
@@ -274,10 +268,13 @@ namespace ui
 	bool TakeFocus( HWND hWnd );
 	bool TriggerInput( HWND hParent );		// trigger input if a modified edit is focused, i.e. uncommited
 
-	inline void SendCommand( HWND hTargetWnd, UINT cmdId, int notifCode = BN_CLICKED, HWND hCtrl = NULL )
+
+	bool HandleCommand( CCmdTarget* pCmdTarget, UINT cmdId );		// menu or accelerator
+
+	inline LRESULT SendCommand( HWND hTargetWnd, UINT cmdId, int notifCode = BN_CLICKED, HWND hCtrl = NULL )
 	{
 		ASSERT_PTR( hTargetWnd );
-		::SendMessage( hTargetWnd, WM_COMMAND, MAKEWPARAM( cmdId, notifCode ), (LPARAM)hCtrl );
+		return ::SendMessage( hTargetWnd, WM_COMMAND, MAKEWPARAM( cmdId, notifCode ), (LPARAM)hCtrl );
 	}
 
 	inline void SendCommandToParent( HWND hCtrl, int notifCode = BN_CLICKED )
@@ -298,6 +295,7 @@ namespace ui
 		return ::SendMessage( ::GetParent( hCtrl ), WM_NOTIFY, pNmHdr->idFrom, (LPARAM)pNmHdr );
 	}
 
+
 	HBRUSH SendCtlColor( HWND hWnd, HDC hDC, UINT message = WM_CTLCOLORSTATIC );
 
 	const AFX_MSGMAP_ENTRY* FindMessageHandler( const CCmdTarget* pCmdTarget, UINT message, UINT notifyCode, UINT id );
@@ -313,8 +311,10 @@ namespace ui
 	}
 
 
+	std::tstring GetClassName( HWND hWnd );
 	bool IsGroupBox( HWND hWnd );
 	bool IsDialogBox( HWND hWnd );
+	bool IsMenuWnd( HWND hWnd );
 
 	bool ModifyBorder( CWnd* pWnd, bool useBorder = true );
 
@@ -592,7 +592,7 @@ namespace ui
 	void AddSysColors( std::vector< COLORREF >& rColors, const int sysIndexes[], size_t count );
 
 
-	bool PumpPendingMessages( void );
+	bool PumpPendingMessages( HWND hWnd = NULL );
 	bool EatPendingMessages( HWND hWnd = NULL, UINT minMessage = WM_TIMER, UINT maxMessage = WM_TIMER );
 }
 

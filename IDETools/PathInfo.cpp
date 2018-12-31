@@ -1,7 +1,7 @@
 
 #include "stdafx.h"
 #include "PathInfo.h"
-#include "utl/ContainerUtilities.h"
+#include "PathSortOrder.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -41,7 +41,7 @@ namespace path
 
 // PathInfo implementation
 
-int PathInfo::extPredefinedOrder[] =
+int PathInfo::s_extPredefinedOrder[] =
 {
 	12,		// ft::Unknown
 	0,		// ft::Extless
@@ -118,9 +118,7 @@ PathInfo::~PathInfo()
 
 const std::vector< PathField >& PathInfo::GetDefaultOrder( void )
 {
-	static const PathField defaultFields[] = { pfDirName, pfName, pfExt };
-	static std::vector< PathField > defaultOrder( defaultFields, END_OF( defaultFields ) );
-	return defaultOrder;
+	return CPathSortOrder::GetDefaultOrder();
 }
 
 CString PathInfo::getField( PathField field, const TCHAR* defaultField /*= NULL*/ ) const
@@ -177,13 +175,13 @@ bool PathInfo::operator==( const PathInfo& right ) const
 }
 
 pred::CompareResult PathInfo::Compare( const PathInfo& right,
-									   const std::vector< PathField >& orderArray /*= GetDefaultOrder()*/,
+									   const std::vector< PathField >& orderFields /*= GetDefaultOrder()*/,
 									   const TCHAR* pDefaultDirName /*= NULL*/ ) const
 {
-	// make field comparisions as specified by orderArray while most signifiant fileds are equal
+	// make field comparisions as specified by orderFields while most signifiant fileds are equal
 	pred::CompareResult result = pred::Equal;
-	for ( size_t i = 0; result == 0 && i != orderArray.size(); ++i )
-		result = CompareField( right, orderArray[ i ], pDefaultDirName );
+	for ( size_t i = 0; result == 0 && i != orderFields.size(); ++i )
+		result = CompareField( right, orderFields[ i ], pDefaultDirName );
 	return result;
 }
 
@@ -195,7 +193,7 @@ pred::CompareResult PathInfo::CompareField( const PathInfo& right, PathField fie
 		if ( !( pred::Equal == result || ext.IsEmpty() || right.ext.IsEmpty() ) )		// different non-empty extensions
 			if ( m_fileType != ft::Unknown || right.m_fileType != ft::Unknown )
 				// compare extension custom order
-				result = pred::ToCompareResult( extPredefinedOrder[ m_fileType ] - extPredefinedOrder[ right.m_fileType ] );
+				result = pred::ToCompareResult( s_extPredefinedOrder[ m_fileType ] - s_extPredefinedOrder[ right.m_fileType ] );
 
 	return result;
 }
@@ -451,47 +449,6 @@ void PathInfoEx::updateFullPath( void )
 bool PathInfoEx::isConsistent( void ) const
 {
 	return path::EquivalentPtr( fullPath, PathInfo::GetFullPath() );
-}
-
-
-// CPathOrder implementation
-
-void CPathOrder::Add( PathField field )
-{
-	utl::RemoveValue( m_fields, field );
-	m_fields.push_back( field );
-}
-
-bool CPathOrder::Toggle( PathField field )
-{
-	std::vector< PathField >::iterator itFound = std::find( m_fields.begin(), m_fields.end(), field );
-	if ( itFound != m_fields.end() )
-		m_fields.erase( itFound );
-	else
-		m_fields.push_back( field );
-	return true;
-}
-
-std::tstring CPathOrder::GetAsString( void ) const
-{
-	std::tstring mnemonic;
-	mnemonic.reserve( m_fields.size() + 1 );
-	for ( std::vector< PathField >::const_iterator itField = m_fields.begin(); itField != m_fields.end(); ++itField )
-		mnemonic += static_cast< TCHAR >( _T('A') + *itField );
-
-	return mnemonic;
-}
-
-void CPathOrder::SetFromString( const std::tstring& source )
-{
-	Clear();
-	for ( std::tstring::const_iterator itCh = source.begin(); itCh != source.end(); ++itCh )
-	{
-		PathField field = static_cast< PathField >( *itCh - _T('A') );
-		ASSERT( field >= pfDrive && field < pfFieldCount );
-		ASSERT( !utl::Contains( m_fields, field ) );
-		m_fields.push_back( field );
-	}
 }
 
 

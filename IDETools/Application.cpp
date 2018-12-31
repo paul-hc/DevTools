@@ -4,6 +4,7 @@
 #include "IdeUtilities.h"
 #include "IncludeDirectories.h"
 #include "ModuleSession.h"
+#include "PathSortOrder.h"
 #include "SafeForScripting.h"
 #include "resource.h"
 #include "utl/FileSystem.h"
@@ -17,38 +18,29 @@
 #include "utl/BaseApp.hxx"
 
 
-// CApplication implementation
-//	NOTE:
-//		If this DLL is dynamically linked against the MFC
-//		DLLs, any functions exported from this DLL which
-//		call into MFC must have the AFX_MANAGE_STATE macro
-//		added at the very beginning of the function.
-//
-//		For example:
-//
-//		extern "C" BOOL PASCAL EXPORT ExportedFunction()
-//		{
-//			AFX_MANAGE_STATE(AfxGetStaticModuleState());
-//			// normal function body here
-//		}
-//
-//		It is very important that this macro appear in each
-//		function, prior to any calls into MFC.  This means that
-//		it must appear as the first statement within the
-//		function, even before any object variable declarations
-//		as their constructors may generate calls into the MFC
-//		DLL.
-//
-//		Please see MFC Technical Notes 33 and 58 for additional
-//		details.
-//
+/* CApplication implementation note:
+
+	If this DLL is dynamically linked against the MFC DLLs, any functions exported from this DLL which call into MFC must have the AFX_MANAGE_STATE macro added at the very beginning of the function.
+
+	For example:
+
+	extern "C" BOOL PASCAL EXPORT ExportedFunction()
+	{
+		AFX_MANAGE_STATE(AfxGetStaticModuleState());
+		// normal function body here
+	}
+
+	It is very important that this macro appear in each function, prior to any calls into MFC.  This means that it must appear as the first statement within the function,
+	even before any object variable declarations as their constructors may generate calls into the MFC DLL.
+
+	Please see MFC Technical Notes 33 and 58 for additional details.
+*/
 
 CApplication theApp;
 
 CApplication::CApplication( void )
 	: CBaseApp< CWinApp >()
 {
-	// TODO: add construction code here, place all significant initialization in InitInstance
 }
 
 CApplication::~CApplication()
@@ -58,7 +50,7 @@ CApplication::~CApplication()
 
 BOOL CApplication::InitInstance( void )
 {
-	// modify profile name from "IDETools" to "IDETools_v5"
+	// modify profile name from "IDETools" to "IDETools_v7"
 	StoreProfileSuffix( str::Format( _T("_v%d"), HIWORD( CVersionInfo().GetFileInfo().dwProductVersionMS ) ) );
 
 	if ( !CBaseApp< CWinApp >::InitInstance() )
@@ -66,6 +58,8 @@ BOOL CApplication::InitInstance( void )
 
 	CToolStrip::RegisterStripButtons( IDR_IMAGE_STRIP );		// register command images
 	CAboutBox::m_appIconId = IDR_IDE_TOOLS_APP;
+
+	fs::CExtCustomOrder::Instance().RegisterCustomOrder();
 
 	m_pModuleSession.reset( new CModuleSession );
 	m_pModuleSession->LoadFromRegistry();
@@ -105,6 +99,11 @@ END_MESSAGE_MAP()
 
 namespace app
 {
+	UINT GetMenuVertSplitCount( void )
+	{
+		return GetModuleSession().m_menuVertSplitCount;
+	}
+
 	const CIncludePaths* GetIncludePaths( void )
 	{
 		return CIncludeDirectories::Instance().GetCurrentPaths();

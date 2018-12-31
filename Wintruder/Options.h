@@ -26,7 +26,7 @@ struct COptions : public CRegistryOptions
 {
 	COptions( CAppService* pAppSvc );
 
-	void LoadAll( void );
+	virtual void LoadAll( void );
 
 	void PublishChangeEvent( void );
 private:
@@ -52,7 +52,7 @@ public:
 protected:
 	// base overrides
 	virtual void OnOptionChanged( const void* pDataMember );
-	virtual void OnUpdate_BoolOption( CCmdUI* pCmdUI );
+	virtual void OnUpdateOption( CCmdUI* pCmdUI );
 
 	// generated command handlers
 protected:

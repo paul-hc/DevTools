@@ -16,22 +16,35 @@
 
 // CRegistryOptions implementation
 
-CRegistryOptions::CRegistryOptions( const std::tstring& section, bool saveOnModify )
-	: m_saveOnModify( saveOnModify )
+CRegistryOptions::CRegistryOptions( const std::tstring& sectionName, AutoSave autoSave )
+	: m_autoSave( autoSave )
 {
-	if ( !section.empty() )
-		m_pRegSection.reset( new CAppRegistrySection( section ) );
+	SetSectionName( sectionName );
 }
 
-CRegistryOptions::CRegistryOptions( IRegistrySection* pRegSection, bool saveOnModify )
+CRegistryOptions::CRegistryOptions( IRegistrySection* pRegSection, AutoSave autoSave )
 	: m_pRegSection( pRegSection )
-	, m_saveOnModify( saveOnModify )
+	, m_autoSave( autoSave )
 {
 }
 
 CRegistryOptions::~CRegistryOptions()
 {
 	utl::ClearOwningContainer( m_options );
+}
+
+const std::tstring& CRegistryOptions::GetSectionName( void ) const
+{
+	IRegistrySection* pSection = GetSection();
+	return pSection != NULL ? pSection->GetSectionName() : str::GetEmpty();
+}
+
+void CRegistryOptions::SetSectionName( const std::tstring& sectionName )
+{
+	if ( !sectionName.empty() )
+		m_pRegSection.reset( new CAppRegistrySection( sectionName ) );
+	else
+		m_pRegSection.reset();
 }
 
 void CRegistryOptions::AddOption( reg::CBaseOption* pOption, UINT ctrlId /*= 0*/ )
@@ -100,13 +113,13 @@ reg::CBaseOption& CRegistryOptions::LookupOption( const void* pDataMember ) cons
 	throw CRuntimeException( "Data-member not found in option container" );
 }
 
-reg::COption< bool >* CRegistryOptions::FindBoolOptionByID( UINT ctrlId ) const
+reg::CBaseOption* CRegistryOptions::FindOptionByID( UINT ctrlId ) const
 {
 	ASSERT( ctrlId != 0 );
 
 	for ( std::vector< reg::CBaseOption* >::const_iterator itOption = m_options.begin(); itOption != m_options.end(); ++itOption )
-		if ( ( *itOption )->GetCtrlId() == ctrlId )
-			return checked_static_cast< reg::COption< bool >* >( *itOption );
+		if ( ( *itOption )->HasCtrlId( ctrlId ) )
+			return *itOption;
 
 	return NULL;
 }
@@ -123,44 +136,54 @@ void CRegistryOptions::UpdateControls( CWnd* pTargetWnd )
 
 void CRegistryOptions::OnOptionChanged( const void* pDataMember )
 {
-	if ( m_saveOnModify )
-		SaveOption( pDataMember );		// save right away the changed option
-}
-
-BOOL CRegistryOptions::OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo )
-{
-	if ( CN_COMMAND == code || CN_UPDATE_COMMAND_UI == code )		// boolean check toggle or update?
+	switch ( m_autoSave )
 	{
-		reg::COption< bool >* pBoolOption = FindBoolOptionByID( id );
-		if ( NULL == pBoolOption )
-			return false;											// not a bool option registered as such
+		case SaveOnModify:
+			SaveOption( pDataMember );		// save right away the changed option
+			break;
+		case SaveAllOnModify:
+			SaveAll();
+			break;
 	}
-
-	return
-		CCmdTarget::OnCmdMsg( id, code, pExtra, pHandlerInfo );
 }
 
 
 // message handlers
 
 BEGIN_MESSAGE_MAP( CRegistryOptions, CCmdTarget )
-	ON_COMMAND_RANGE( 1, 0x8FFF, OnToggle_BoolOption )
-	ON_UPDATE_COMMAND_UI_RANGE( 1, 0x8FFF, OnUpdate_BoolOption )
+	ON_COMMAND_EX_RANGE( 1, 0x8FFF, OnToggleOption )
+	ON_UPDATE_COMMAND_UI_RANGE( 1, 0x8FFF, OnUpdateOption )
 END_MESSAGE_MAP()
 
-void CRegistryOptions::OnToggle_BoolOption( UINT cmdId )
+BOOL CRegistryOptions::OnToggleOption( UINT cmdId )
 {
-	reg::COption< bool >* pBoolOption = FindBoolOptionByID( cmdId );
-	ASSERT_PTR( pBoolOption );
+	if ( reg::CBaseOption* pOption = FindOptionByID( cmdId ) )
+	{
+		if ( reg::TBoolOption* pBoolOption = dynamic_cast< reg::TBoolOption* >( pOption ) )
+			ToggleOption( &pBoolOption->RefValue() );
+		else if ( reg::CEnumOption* pEnumOption = dynamic_cast< reg::CEnumOption* >( pOption ) )
+			ModifyOption( &pEnumOption->RefValue(), pEnumOption->GetValueFromRadioId( cmdId ) );
+		else
+			return FALSE;		// continue routing (to derived class handlers)
 
-	ToggleOption( &pBoolOption->RefValue() );
+		return TRUE;			// handled
+	}
+	return FALSE;				// continue routing (to derived class handlers)
 }
 
-void CRegistryOptions::OnUpdate_BoolOption( CCmdUI* pCmdUI )
+void CRegistryOptions::OnUpdateOption( CCmdUI* pCmdUI )
 {
-	const reg::COption< bool >* pBoolOption = FindBoolOptionByID( pCmdUI->m_nID );
-	ASSERT_PTR( pBoolOption );
-	pCmdUI->SetCheck( pBoolOption->GetValue() );
+	if ( const reg::CBaseOption* pOption = FindOptionByID( pCmdUI->m_nID ) )
+	{
+		if ( const reg::TBoolOption* pBoolOption = dynamic_cast< const reg::TBoolOption* >( pOption ) )
+			pCmdUI->SetCheck( pBoolOption->GetValue() );
+		else if ( const reg::CEnumOption* pEnumOption = dynamic_cast< const reg::CEnumOption* >( pOption ) )
+			ui::SetRadio( pCmdUI, pEnumOption->GetValueFromRadioId( pCmdUI->m_nID ) == pEnumOption->GetValue() );
+		else
+			pCmdUI->ContinueRouting();		// continue routing (to derived class handlers)
+	}
+	else
+		pCmdUI->ContinueRouting();			// continue routing (to derived class handlers)
 }
 
 
@@ -180,8 +203,8 @@ namespace reg
 
 	CBaseOption::CBaseOption( const TCHAR* pEntry )
 		: m_entry( SkipDataMemberPrefix( pEntry ) )
-		, m_ctrlId( 0 )
 		, m_pParent( NULL )
+		, m_ctrlId( 0 )
 	{
 		ASSERT( !m_entry.empty() );
 
@@ -190,6 +213,11 @@ namespace reg
 
 	CBaseOption::~CBaseOption()
 	{
+	}
+
+	bool CBaseOption::HasCtrlId( UINT ctrlId ) const
+	{
+		return m_ctrlId == ctrlId;
 	}
 
 
@@ -238,7 +266,7 @@ namespace reg
 				TRACE( _T(" * CEnumOption::Load() - tag mismatch '%s' in enum option '%s'\n"), keyTag.c_str(), m_entry.c_str() );
 		}
 		else
-			COption< int >::Load();
+			TBaseClass::Load();
 	}
 
 	void CEnumOption::Save( void ) const
@@ -246,7 +274,18 @@ namespace reg
 		if ( m_pTags != NULL )
 			GetSection()->SaveParameter( m_entry.c_str(), m_pTags->FormatKey( *m_pValue ).c_str() );
 		else
-			COption< int >::Save();
+			TBaseClass::Save();
+	}
+
+	bool CEnumOption::HasCtrlId( UINT ctrlId ) const
+	{
+		return HasRadioId( ctrlId ) || TBaseClass::HasCtrlId( ctrlId );
+	}
+
+	int CEnumOption::GetValueFromRadioId( UINT radioId ) const
+	{
+		ASSERT( m_radioIds.Contains( radioId ) );
+		return radioId - m_radioIds.m_start;
 	}
 
 } // namespace reg

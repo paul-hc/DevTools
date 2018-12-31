@@ -14,7 +14,7 @@ class WorkspaceProfile;
 class CWkspSaveDialog : public CLayoutDialog
 {
 public:
-	CWkspSaveDialog( WorkspaceProfile& _wkspProfile, const CString& _section, const CString& _currProjectName, CWnd* parent );
+	CWkspSaveDialog( WorkspaceProfile& rWkspProfile, const CString& section, const CString& currProjectName, CWnd* pParent );
 	virtual ~CWkspSaveDialog();
 
 	void updateFileContents( void );
@@ -25,23 +25,24 @@ protected:
 	bool loadExistingProjects( void );
 	bool saveFiles( void );
 	bool readProjectName( void );
-	CMetaFolder::CFile* getListFile( int listIndex ) const;
-public:
-	CString section;
-	CString currProjectName;
-	WorkspaceProfile& wkspProfile;
+	CFileItem* getListFile( int listIndex ) const;
+private:
+	CString m_section;
+	CString m_currProjectName;
+	WorkspaceProfile& m_rWkspProfile;
 	CFolderOptions& m_rOptions;
-	CMetaFolder metaFolder;
+	CFolderItem m_folderItem;
 	CMenu m_sortOrderPopup;
-
-	bool showFullPath;
 private:
 	// enum { IDD = IDD_WORKSPACE_SAVE_DIALOG };
-	CComboBox projectNameCombo;
-	CDragListBox fileList;
+	CComboBox m_projectNameCombo;
+	CDragListBox m_fileList;
 	CItemContentEdit m_fullPathEdit;
 
-	protected:
+	// generated stuff
+public:
+	virtual BOOL OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo );
+protected:
 	virtual void DoDataExchange( CDataExchange* pDX );
 	virtual LRESULT WindowProc( UINT message, WPARAM wParam, LPARAM lParam );
 protected:

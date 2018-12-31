@@ -35,18 +35,16 @@ protected:
 	afx_msg void SetOptionFlags( long nNewValue );
 	afx_msg long GetFolderLayout();
 	afx_msg void SetFolderLayout( long nNewValue );
-	afx_msg BSTR GetCurrentFileName();
-	afx_msg void SetCurrentFileName( LPCTSTR pSelectedFileName );
-	afx_msg BSTR SetProfileSection( LPCTSTR pSubSection, BOOL loadNow );
-	afx_msg BOOL AddFolder( LPCTSTR folderPathFilter, LPCTSTR folderAlias );
-	afx_msg BOOL AddFolderArray( LPCTSTR folderItemFlatArray );
-	afx_msg BOOL AddRootFile( LPCTSTR filePath, LPCTSTR label );
+	afx_msg BSTR GetCurrentFilePath();
+	afx_msg void SetCurrentFilePath( LPCTSTR pCurrFilePath );
+	afx_msg BSTR SetProfileSection( LPCTSTR pSubSection );
+	afx_msg BOOL AddFolder( LPCTSTR pFolderPathFilter, LPCTSTR pFolderAlias );
+	afx_msg BOOL AddFolderArray( LPCTSTR pFolderItemFlatArray );
+	afx_msg BOOL AddRootFile( LPCTSTR pFilePath, LPCTSTR pLabel );
 	afx_msg void AddSortOrder( long pathField, BOOL exclusive );
 	afx_msg void ClearSortOrder();
 	afx_msg void StoreTrackPos();
 	afx_msg BOOL ChooseFile();
-	afx_msg BOOL OverallExcludeFile( LPCTSTR filePathFilter );
-	afx_msg BOOL ExcludeFileFromFolder( LPCTSTR folderPath, LPCTSTR fileFilter );
 	//}}AFX_DISPATCH
 
 	DECLARE_DISPATCH_MAP()

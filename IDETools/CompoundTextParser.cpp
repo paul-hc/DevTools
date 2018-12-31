@@ -351,8 +351,10 @@ int CompoundTextParser::Section::bindAllReferences( void ) throws_( CString )
 							CString promptMessage;
 
 							promptMessage.Format( IDS_PROMPTINCLUDESECTION, (LPCTSTR)refSectionName );
+
+							ide::CScopedWindow scopedIDE;
 							if ( CCodeMessageBox( promptMessage, referredContent, MB_OKCANCEL | MB_ICONQUESTION,
-												  MAKEINTRESOURCE( IDS_CODE_GENERATOR_CAPTION ), ide::GetRootWindow() ).DoModal() != IDOK )
+												  MAKEINTRESOURCE( IDS_CODE_GENERATOR_CAPTION ), scopedIDE.GetMainWnd() ).DoModal() != IDOK )
 								referredContent.Empty();
 						}
 					}

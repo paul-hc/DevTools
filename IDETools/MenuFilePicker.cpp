@@ -51,8 +51,8 @@ BEGIN_DISPATCH_MAP(MenuFilePicker, CCmdTarget)
 	DISP_PROPERTY_NOTIFY(MenuFilePicker, "TrackPosY", m_trackPosY, OnTrackPosYChanged, VT_I4)
 	DISP_PROPERTY_EX(MenuFilePicker, "OptionFlags", GetOptionFlags, SetOptionFlags, VT_I4)
 	DISP_PROPERTY_EX(MenuFilePicker, "FolderLayout", GetFolderLayout, SetFolderLayout, VT_I4)
-	DISP_PROPERTY_EX(MenuFilePicker, "CurrentFileName", GetCurrentFileName, SetCurrentFileName, VT_BSTR)
-	DISP_FUNCTION(MenuFilePicker, "SetProfileSection", SetProfileSection, VT_BSTR, VTS_BSTR VTS_BOOL)
+	DISP_PROPERTY_EX(MenuFilePicker, "CurrentFilePath", GetCurrentFilePath, SetCurrentFilePath, VT_BSTR)
+	DISP_FUNCTION(MenuFilePicker, "SetProfileSection", SetProfileSection, VT_BSTR, VTS_BSTR)
 	DISP_FUNCTION(MenuFilePicker, "AddFolder", AddFolder, VT_BOOL, VTS_BSTR VTS_BSTR)
 	DISP_FUNCTION(MenuFilePicker, "AddFolderArray", AddFolderArray, VT_BOOL, VTS_BSTR)
 	DISP_FUNCTION(MenuFilePicker, "AddRootFile", AddRootFile, VT_BOOL, VTS_BSTR VTS_BSTR)
@@ -60,9 +60,7 @@ BEGIN_DISPATCH_MAP(MenuFilePicker, CCmdTarget)
 	DISP_FUNCTION(MenuFilePicker, "ClearSortOrder", ClearSortOrder, VT_EMPTY, VTS_NONE)
 	DISP_FUNCTION(MenuFilePicker, "StoreTrackPos", StoreTrackPos, VT_EMPTY, VTS_NONE)
 	DISP_FUNCTION(MenuFilePicker, "ChooseFile", ChooseFile, VT_BOOL, VTS_NONE)
-	DISP_FUNCTION(MenuFilePicker, "OverallExcludeFile", OverallExcludeFile, VT_BOOL, VTS_BSTR)
-	DISP_FUNCTION(MenuFilePicker, "ExcludeFileFromFolder", ExcludeFileFromFolder, VT_BOOL, VTS_BSTR VTS_BSTR)
-	DISP_DEFVALUE(MenuFilePicker, "CurrentFileName")
+	DISP_DEFVALUE(MenuFilePicker, "CurrentFilePath")
 	//}}AFX_DISPATCH_MAP
 END_DISPATCH_MAP()
 
@@ -96,12 +94,12 @@ void MenuFilePicker::OnTrackPosYChanged( void )
 
 long MenuFilePicker::GetOptionFlags( void )
 {
-	return m_browser.m_options.getFlags();
+	return m_browser.m_options.GetFlags();
 }
 
 void MenuFilePicker::SetOptionFlags( long nNewValue )
 {
-	m_browser.m_options.setFlags( nNewValue );
+	m_browser.m_options.SetFlags( nNewValue );
 }
 
 long MenuFilePicker::GetFolderLayout( void )
@@ -114,15 +112,15 @@ void MenuFilePicker::SetFolderLayout( long nNewValue )
 	m_browser.m_options.m_folderLayout = (FolderLayout)nNewValue;
 }
 
-BSTR MenuFilePicker::GetCurrentFileName( void )
+BSTR MenuFilePicker::GetCurrentFilePath( void )
 {
-	CString selectedFileName( m_browser.m_options.GetSelectedFileName().c_str() );
-	return selectedFileName.AllocSysString();
+	CString currFilePath( m_browser.GetCurrFilePath().GetPtr() );
+	return currFilePath.AllocSysString();
 }
 
-void MenuFilePicker::SetCurrentFileName( LPCTSTR pSelectedFileName )
+void MenuFilePicker::SetCurrentFilePath( LPCTSTR pCurrFilePath )
 {
-	m_browser.m_options.SetSelectedFileName( pSelectedFileName );
+	m_browser.SetCurrFilePath( fs::CPath( pCurrFilePath ) );
 }
 
 
@@ -132,45 +130,46 @@ void MenuFilePicker::SetCurrentFileName( LPCTSTR pSelectedFileName )
 	Set the profile section where browsing options will be persisted.
 	Section layout is: "FolderOptions[\\SubSection]"
 */
-BSTR MenuFilePicker::SetProfileSection( LPCTSTR pSubSection, BOOL loadNow )
+BSTR MenuFilePicker::SetProfileSection( LPCTSTR pSubSection )
 {
 	m_browser.m_options.SetSubSection( pSubSection );
 
-	if ( loadNow )
-		m_browser.m_options.LoadAll();
-
-	CString result( m_browser.m_options.GetSection().c_str() );
+	CString result( m_browser.m_options.GetSectionName().c_str() );
 	return result.AllocSysString();
 }
 
-BOOL MenuFilePicker::AddFolder( LPCTSTR folderPathFilter, LPCTSTR folderAlias )
+BOOL MenuFilePicker::AddFolder( LPCTSTR pFolderPathFilter, LPCTSTR pFolderAlias )
 {
-	return m_browser.addFolder( folderPathFilter, folderAlias );
+	return m_browser.AddFolder( fs::CPath( pFolderPathFilter ), pFolderAlias );
 }
 
 /**
-	'folderItemFlatArray' contains folder items separated by ';' token (at end no token);
-	Each folder item contains a folder path filter, and optional, a folder alias separated
-	by '|' separator.
+	'pFolderItemFlatArray' contains folder items separated by ';' separator.
+	Each folder item contains a folder path filter, and optional, a folder alias separated by '|' separator.
 	Example:
 		"C:\Documents\*.doc;C:\TextFiles\*.txt|My Text Files;C:\Documents\*.bmp,*.dib|Image Files"
 */
-BOOL MenuFilePicker::AddFolderArray( LPCTSTR folderItemFlatArray )
+BOOL MenuFilePicker::AddFolderArray( LPCTSTR pFolderItemFlatArray )
 {
-	return m_browser.addFolderStringArray( folderItemFlatArray );
+	return m_browser.AddFolderItems( pFolderItemFlatArray );
 }
 
-BOOL MenuFilePicker::AddRootFile( LPCTSTR filePath, LPCTSTR label )
+/*
+	Add source files open in Visual Studio.
+*/
+BOOL MenuFilePicker::AddRootFile( LPCTSTR pFilePath, LPCTSTR pLabel )
 {
-	return m_browser.addRootFile( filePath, label );
+	return m_browser.AddRootFile( fs::CPath( pFilePath ), pLabel );
 }
 
 void MenuFilePicker::AddSortOrder( long pathField, BOOL exclusive )
 {
-	ASSERT( pathField >= pfDrive && pathField < pfFieldCount );
+	ASSERT( pathField >= pfDrive && pathField < _pfFieldCount );
+
 	if ( exclusive )
 		m_browser.m_options.m_fileSortOrder.Clear();
-	m_browser.m_options.m_fileSortOrder.Add( (PathField)pathField );
+
+	m_browser.m_options.m_fileSortOrder.Add( static_cast< PathField >( pathField ) );
 }
 
 void MenuFilePicker::ClearSortOrder( void )
@@ -190,14 +189,4 @@ void MenuFilePicker::StoreTrackPos( void )
 BOOL MenuFilePicker::ChooseFile( void )
 {
 	return m_browser.PickFile( CPoint( m_trackPosX, m_trackPosY ) );
-}
-
-BOOL MenuFilePicker::OverallExcludeFile( LPCTSTR filePathFilter )
-{
-	return m_browser.overallExcludeFile( filePathFilter );
-}
-
-BOOL MenuFilePicker::ExcludeFileFromFolder( LPCTSTR folderPath, LPCTSTR fileFilter )
-{
-	return m_browser.excludeFileFromFolder( folderPath, fileFilter );
 }

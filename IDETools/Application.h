@@ -40,6 +40,7 @@ namespace app
 {
 	inline CLogger& GetLogger( void ) { return CApplication::GetApp()->GetLogger(); }
 	inline CModuleSession& GetModuleSession( void ) { return CApplication::GetApp()->GetModuleSession(); }
+	UINT GetMenuVertSplitCount( void );
 
 	const CIncludePaths* GetIncludePaths( void );
 

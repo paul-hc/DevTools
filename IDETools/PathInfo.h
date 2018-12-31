@@ -48,7 +48,7 @@ public:
 	bool operator==( const PathInfo& right ) const;
 	bool operator!=( const PathInfo& right ) const { return !operator==( right ); }
 	bool operator<( const PathInfo& right ) const { return path::CompareNPtr( GetFullPath(), right.GetFullPath() ) < 0; }
-	pred::CompareResult Compare( const PathInfo& right, const std::vector< PathField >& orderArray = GetDefaultOrder(),
+	pred::CompareResult Compare( const PathInfo& right, const std::vector< PathField >& orderFields = GetDefaultOrder(),
 								 const TCHAR* pDefaultDirName = NULL ) const;
 	bool smartNameExtEQ( const PathInfo& right ) const;
 
@@ -106,7 +106,7 @@ public:									// "C:\WINNT\system32\BROWSER.DLL":
 	CString dirName;				// "system32"
 	ft::FileType m_fileType;		// ft::Unknown
 
-	static int extPredefinedOrder[];
+	static int s_extPredefinedOrder[];
 };
 
 
@@ -136,23 +136,6 @@ struct PathInfoEx : public PathInfo
 	bool isConsistent( void ) const;
 public:
 	CString fullPath;
-};
-
-
-struct CPathOrder
-{
-	CPathOrder( void ) {}
-
-	bool IsEmpty( void ) const { return m_fields.empty(); }
-
-	void Clear( void ) { m_fields.clear(); }
-	void Add( PathField field );
-	bool Toggle( PathField field );
-
-	std::tstring GetAsString( void ) const;
-	void SetFromString( const std::tstring& source );
-public:
-	std::vector< PathField > m_fields;
 };
 
 

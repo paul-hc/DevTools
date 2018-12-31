@@ -198,9 +198,14 @@ namespace fs
 		CPath GetParentPath( bool trailSlash = false ) const;						// always a directory path
 		CPath& SetBackslash( bool trailSlash = true );
 
-		const TCHAR* GetNameExt( void ) const { return path::FindFilename( m_filePath.c_str() ); }
 		std::tstring GetFilename( void ) const { return GetNameExt(); }
+		const TCHAR* GetNameExt( void ) const { return path::FindFilename( m_filePath.c_str() ); }
 		void SetNameExt( const std::tstring& nameExt );
+
+		const TCHAR* GetExt( void ) const { return path::FindExt( m_filePath.c_str() ); }
+		void ReplaceExt( const TCHAR* pExt ) { Set( GetRemoveExt().Get() + pExt ); }
+		void RemoveExt( void ) { Set( GetRemoveExt().Get() ); }
+		CPath GetRemoveExt( void ) const;
 
 		void SetDirPath( const std::tstring& dirPath );
 

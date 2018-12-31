@@ -3,6 +3,7 @@
 #include "MenuUtilities.h"
 #include "ContainerUtilities.h"
 #include "ImageStore.h"
+#include "Utilities.h"
 
 #ifdef _DEBUG
 #include "FlagTags.h"
@@ -106,16 +107,13 @@ namespace ui
 	{
 		AdjustMenuTrackPos( screenPos );
 
-		if ( pExcludeRect != NULL ) // pExcludeRect is ignored by TrackPopupMenu()
-		{
-			TPMPARAMS excludeStruct;
-			utl::ZeroWinStruct( &excludeStruct );
-			excludeStruct.rcExclude = *pExcludeRect;
+		TPMPARAMS excludeParams;
+		utl::ZeroWinStruct( &excludeParams );
 
-			return ui::ToCmdId( rMenu.TrackPopupMenuEx( trackFlags, screenPos.x, screenPos.y, pTargetWnd, pExcludeRect != NULL ? &excludeStruct : NULL ) );
-		}
-		else
-			return ui::ToCmdId( rMenu.TrackPopupMenu( trackFlags, screenPos.x, screenPos.y, pTargetWnd ) );
+		if ( pExcludeRect != NULL )			// pExcludeRect is ignored by TrackPopupMenu()
+			excludeParams.rcExclude = *pExcludeRect;
+
+		return ui::ToCmdId( rMenu.TrackPopupMenuEx( trackFlags, screenPos.x, screenPos.y, pTargetWnd, pExcludeRect != NULL ? &excludeParams : NULL ) );
 	}
 
 	int TrackPopupMenuAlign( CMenu& rMenu, CWnd* pTargetWnd, const RECT& excludeRect, PopupAlign popupAlign /*= DropDown*/,
@@ -190,6 +188,38 @@ namespace ui
 			case DropLeft:
 				return CPoint( excludeRect.left, excludeRect.top );
 		}
+	}
+
+
+
+	bool IsValidMenu( HMENU hMenu, unsigned int depth /*= 0*/ )
+	{
+		ASSERT_PTR( hMenu );
+
+		if ( !::IsMenu( hMenu ) )
+			return false;
+
+		for ( UINT i = 0, count = ::GetMenuItemCount( hMenu ); i != count; ++i )
+			switch ( ::GetMenuItemID( hMenu, i ) )
+			{
+				case 0:				// separator
+					break;
+				case UINT_MAX:		// sub-menu?
+					if ( HMENU hSubMenu = ::GetSubMenu( hMenu, i ) )
+						if ( !IsValidMenu( hSubMenu, depth + 1 ) )
+						{
+							TCHAR text[ 256 ] = { 0 };
+							::GetMenuString( hMenu, i, text, COUNT_OF( text ), MF_BYPOSITION );
+
+							std::tstring indentPrefix( depth, _T(' ') );
+
+							TRACE( _T("%s- Invalid sub-menu item: hMenu=0x%08x  itemPos=%d  itemText='%s'  hSubMenu=0x%08x  depth=%d\n"), indentPrefix.c_str(), hMenu, i, text, hSubMenu, depth );
+							return false;
+						}
+					break;
+			}
+
+		return true;
 	}
 
 
@@ -356,17 +386,31 @@ namespace ui
 			UINT itemId = rDestMenu.GetMenuItemID( i );
 
 			if ( 0 == itemId && 0 == prevId )
-				rDestMenu.DeleteMenu( i, MF_BYPOSITION ); // delete double separator
+				rDestMenu.DeleteMenu( i, MF_BYPOSITION );		// delete double separator
 			else
 				prevId = itemId;
 		}
 
-		if ( rDestMenu.GetMenuItemCount() != 0 && 0 == rDestMenu.GetMenuItemID( 0 ) )
-			rDestMenu.DeleteMenu( 0, MF_BYPOSITION ); // delete first separator
+		DeleteFirstMenuSeparator( rDestMenu );
+		DeleteLastMenuSeparator( rDestMenu );
+	}
 
-		if ( UINT i = rDestMenu.GetMenuItemCount() )
-			if ( 0 == rDestMenu.GetMenuItemID( --i ) )
-				rDestMenu.DeleteMenu( i, MF_BYPOSITION ); // delete last separator
+	bool DeleteFirstMenuSeparator( CMenu& rDestMenu )
+	{
+		return
+			rDestMenu.GetMenuItemCount() != 0 &&
+			0 == rDestMenu.GetMenuItemID( 0 ) &&
+			rDestMenu.DeleteMenu( 0, MF_BYPOSITION ) != FALSE;		// delete first separator
+	}
+
+	bool DeleteLastMenuSeparator( CMenu& rDestMenu )
+	{
+		UINT i = rDestMenu.GetMenuItemCount();
+
+		return
+			i != 0 &&
+			0 == rDestMenu.GetMenuItemID( --i ) &&
+			rDestMenu.DeleteMenu( i, MF_BYPOSITION ) != FALSE;		// delete last separator
 	}
 
 
@@ -400,8 +444,38 @@ namespace ui
 
 		return true;
 	}
+}
 
-} //namespace ui
+
+namespace ui
+{
+	HWND FindMenuWindowFromPoint( CPoint screenPos /*= ui::GetCursorPos()*/ )
+	{
+		if ( HWND hWnd = ::WindowFromPoint( screenPos ) )
+			if ( ui::IsMenuWnd( hWnd ) )
+				return hWnd;
+
+		return NULL;
+	}
+
+	bool IsHiliteMenuItem( HMENU hMenu, int itemPos )
+	{
+		ASSERT_PTR( hMenu );
+
+		UINT itemState = ::GetMenuState( hMenu, itemPos, MF_BYPOSITION );
+		if ( itemState != UINT_MAX )
+			if ( !HasFlag( itemState, MF_GRAYED | MF_DISABLED | MF_POPUP | MF_SEPARATOR ) )
+				return HasFlag( itemState, MF_HILITE );
+
+		return false;
+	}
+
+	void InvalidateMenuWindow( void )
+	{
+		if ( HWND hMenuWnd = FindMenuWindowFromPoint() )
+			::InvalidateRect( hMenuWnd, NULL, TRUE );
+	}
+}
 
 
 namespace dbg

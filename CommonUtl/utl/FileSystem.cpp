@@ -605,8 +605,11 @@ namespace fs
 		ASSERT_PTR( pEnumerator );
 		ASSERT_PTR( pDirPath );
 
+		if ( str::IsEmpty( pWildSpec ) )
+			pWildSpec = _T("*");
+
 		fs::CPath dirPathFilter = fs::CPath( pDirPath ) /
-			fs::CPath( Deep == depth || str::IsEmpty( pWildSpec )
+			fs::CPath( Deep == depth || path::IsMultipleWildcard( pWildSpec )
 				? _T("*")			// need to relax filter to all so that it covers sub-directories
 				: pWildSpec );
 
@@ -629,7 +632,7 @@ namespace fs
 			}
 			else
 			{
-				if ( Shallow == depth || path::MatchWildcard( foundPath.c_str(), pWildSpec ) )
+				if ( path::MatchWildcard( foundPath.c_str(), pWildSpec ) )
 					pEnumerator->AddFile( finder );
 			}
 		}

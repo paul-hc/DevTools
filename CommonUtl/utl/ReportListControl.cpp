@@ -2054,7 +2054,7 @@ void CReportListControl::OnContextMenu( CWnd* pWnd, CPoint screenPos )
 
 void CReportListControl::OnInitMenuPopup( CMenu* pPopupMenu, UINT index, BOOL isSysMenu )
 {
-	AfxCancelModes( m_hWnd );
+	AfxCancelModes( m_hWnd );		// cancel any combobox popups that could be in toolbars or dialog bars
 	if ( !isSysMenu )
 		ui::UpdateMenuUI( this, pPopupMenu );
 

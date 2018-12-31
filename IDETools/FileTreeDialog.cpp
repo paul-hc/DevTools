@@ -574,7 +574,7 @@ void CFileTreeDialog::OnContextMenu( CWnd* pWnd, CPoint screenPos )
 	if ( pWnd == &m_treeCtrl )
 	{
 		CMenu contextMenu;
-		ui::LoadPopupMenu( contextMenu, IDR_CONTEXT_MENU, m_rOpt.m_noDuplicates ? app_popup::IncludeTree_NoDups : app_popup::IncludeTree );
+		ui::LoadPopupMenu( contextMenu, IDR_CONTEXT_MENU, m_rOpt.m_noDuplicates ? app::IncludeTree_NoDupsPopup : app::IncludeTreePopup );
 		ui::TrackPopupMenu( contextMenu, this, screenPos );
 	}
 }

@@ -119,7 +119,7 @@ enum %TypeName%
 [[EOS]]
 
 [[CPP STD Include]]
-#include "StdAfx.h"
+#include "stdafx.h"
 #include "%FileName%.h"
 
 #ifdef _DEBUG
@@ -170,8 +170,7 @@ enum %TypeName%
 [[EOS]]
 
 [[ForLoopIterator]]
-%LeadingSpaces%for ( %ContainerType%::%IteratorType% it%IteratorName% = %Container%%Selector%begin();
-%LeadingSpaces%	  it%IteratorName% != %Container%%Selector%end(); ++it%IteratorName% )
+%LeadingSpaces%for ( %ContainerType%::%IteratorType% it%IteratorName% = %Container%%Selector%begin(); it%IteratorName% != %Container%%Selector%end(); ++it%IteratorName% )
 %LeadingSpaces%{
 %LeadingSpaces%}
 [[EOS]]

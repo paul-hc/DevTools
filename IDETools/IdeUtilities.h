@@ -5,29 +5,49 @@
 #include "utl/Path.h"
 
 
+class CEnumTags;
+
+
 namespace ide
 {
+	CWnd* GetFocusWindow( void );
+	CWnd* GetMainWindow( CWnd* pStartingWnd = GetFocusWindow() );
+
 	enum IdeType { VC_60, VC_71to90, VC_110plus };
 
-	IdeType FindIdeType( void );
+	IdeType FindIdeType( CWnd* pMainWnd = GetMainWindow() );
 
-	CWnd* GetRootWindow( void );
-	CWnd* GetFocusWindow( void );
+
+	class CScopedWindow
+	{
+	public:
+		CScopedWindow( void );
+		~CScopedWindow();
+
+		CWnd* GetFocusWnd( void ) const { return m_pFocusWnd; }
+		CWnd* GetMainWnd( void ) const { return m_pMainWnd; }
+
+		bool IsValid( void ) const { return m_pFocusWnd != NULL; }
+		bool HasDifferentThread( void ) const { return m_hasDifferentThread; }
+		IdeType GetType( void ) const { return m_ideType; }
+		std::tstring FormatInfo( void ) const;
+
+		UINT TrackPopupMenu( CMenu& rMenu, CPoint screenPos, UINT flags = TPM_RIGHTBUTTON );
+
+		static std::tstring FormatWndInfo( HWND hWnd );
+		static const CEnumTags& GetTags_IdeType( void );
+	private:
+		bool RestoreFocusWnd( void );
+	private:
+		CWnd* m_pFocusWnd;
+		CWnd* m_pMainWnd;
+		bool m_hasDifferentThread;			// VC 7.1+: macros (this thread) are executed on a different thread than the IDE windows
+		IdeType m_ideType;
+	};
+
 
 	CPoint GetMouseScreenPos( void );
-
-	std::pair< HMENU, int > findPopupMenuWithCommand( HWND hWnd, UINT commandID );
-
-	CWnd* getRootParentWindow( CWnd* pWindow );
-	std::tstring getWindowInfo( HWND hWnd );
-	CString	getWindowTitle( HWND hWnd );
-	CString	getWindowClassName( HWND hWnd );
-
-	int setFocusWindow( HWND hWnd );
-	CWnd* createThreadTrackingWindow( CWnd* pParent );
-
-	UINT trackPopupMenu( CMenu& rMenu, const CPoint& screenPos, CWnd* pWindow,
-						 UINT flags = TPM_LEFTALIGN | TPM_TOPALIGN | TPM_RIGHTBUTTON );
+	std::pair< HMENU, int > FindPopupMenuWithCommand( HWND hWnd, UINT commandID );
 
 
 	std::tstring GetRegistryPath_VC6( const TCHAR entry[] );

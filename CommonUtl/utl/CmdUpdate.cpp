@@ -101,7 +101,7 @@ namespace ui
 		{
 			state.m_nID = pPopupMenu->GetMenuItemID( state.m_nIndex );
 			if ( state.m_nID == 0 )
-				continue;				// menu separator or invalid cmd - ignore it
+				continue;								// menu separator or invalid cmd - ignore it
 
 			ASSERT( state.m_pOther == NULL );
 			ASSERT( state.m_pMenu != NULL );
@@ -113,7 +113,7 @@ namespace ui
 					( state.m_nID = state.m_pSubMenu->GetMenuItemID( 0 ) ) == 0 || state.m_nID == (UINT)-1 )
 					continue;	   // first item of popup can't be routed to
 
-				state.DoUpdate( pWindow, FALSE ); // popups are never auto disabled
+				state.DoUpdate( pWindow, FALSE );		// popups are never auto disabled
 			}
 			else
 			{

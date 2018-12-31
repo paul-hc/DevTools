@@ -85,7 +85,7 @@ library IDETools
 	//  *** MenuFilePicker stuff ***
 	//
 
-	// Also defined in "PublicEnums.h"
+	// also defined in "PublicEnums.h"
 	typedef
 		[ v1_enum, uuid(4F24B8C0-CD4D-11D4-B57C-00D0B74ECB52), helpstring("enum TFolderOptions") ]
 		enum tagTFolderOptions
@@ -102,18 +102,18 @@ library IDETools
 			foDefault			= foUsePopups
 		} TFolderOptions;
 
-	// Also defined in "PublicEnums.h"
+	// also defined in "PublicEnums.h"
 	typedef
 		[ v1_enum, uuid(F9662B50-CD4E-11D4-B57C-00D0B74ECB52), helpstring("enum FolderLayout") ]
 		enum tagFolderLayout
 		{
 			flFoldersAsPopups,
 			flFoldersAsRootPopups,
-			flRootFoldersExpanded,
+			flTopFoldersExpanded,
 			flAllFoldersExpanded,
 		} FolderLayout;
 
-	// Also defined in "PublicEnums.h"
+	// also defined in "PublicEnums.h"
 	typedef
 		[ v1_enum, uuid(35DC2F00-CD50-11D4-B57C-00D0B74ECB52), helpstring("enum PathField") ]
 		enum tagPathField
@@ -127,10 +127,7 @@ library IDETools
 			pfDirPath,
 			pfDirNameExt,
 			pfNameExt,
-			pfCoreExt,
-
-			pfBaseFieldCount = pfFullPath,
-			pfFieldCount,
+			pfCoreExt
 		} PathField;
 
 
@@ -147,14 +144,14 @@ library IDETools
 			[id(2)] long TrackPosY;
 			[id(3)] long OptionFlags;
 			[id(4)] long FolderLayout;
-			[id(5)] BSTR CurrentFileName;
+			[id(5)] BSTR CurrentFilePath;
 			//}}AFX_ODL_PROP
 
 		methods:
 			// NOTE - ClassWizard will maintain method information here.
 			//    Use extreme caution when editing this section.
 			//{{AFX_ODL_METHOD(MenuFilePicker)
-			[id(6)] BSTR SetProfileSection(BSTR pSubSection, boolean loadNow);
+			[id(6)] BSTR SetProfileSection(BSTR subSection);
 			[id(7)] boolean AddFolder(BSTR folderPathSpec, BSTR folderAlias, BSTR fileFilter);
 			[id(8)] boolean AddFolderArray(BSTR folderItemFlatArray);
 			[id(9)] boolean AddRootFile(BSTR filePath, BSTR label);
@@ -162,8 +159,6 @@ library IDETools
 			[id(11)] void ClearSortOrder();
 			[id(12)] void StoreTrackPos();
 			[id(13)] boolean ChooseFile();
-			[id(14)] boolean OverallExcludeFile(BSTR filePathFilter);
-			[id(15)] boolean ExcludeFileFromFolder(BSTR folderPath, BSTR fileFilter);
 			//}}AFX_ODL_METHOD
 
 	};

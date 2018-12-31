@@ -48,9 +48,7 @@ enum PathField				// (!) careful to maintain C++ Macros.dsm corresponding consta
 	pfDirNameExt,
 	pfNameExt,
 	pfCoreExt,
-
-	pfBaseFieldCount = pfFullPath,
-	pfFieldCount,
+		_pfFieldCount
 };
 
 
@@ -58,8 +56,8 @@ enum FolderLayout			// (!) careful to maintain C++ Macros.dsm corresponding cons
 {
 	flFoldersAsPopups,
 	flFoldersAsRootPopups,
-	flRootFoldersExpanded,
-	flAllFoldersExpanded,
+	flTopFoldersExpanded,
+	flAllFoldersExpanded
 };
 
 

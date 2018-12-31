@@ -211,7 +211,7 @@ Sub ChooseOpenWindow()
 	Call windowPicker.AddSortOrder( pfDirName, True )
 	Call windowPicker.AddSortOrder( pfName, False )
 	Call windowPicker.AddSortOrder( pfExt, False )
-	Call windowPicker.SetProfileSection( "Window", True )
+	Call windowPicker.SetProfileSection( "Window" )
 
 	Dim fullPath, label
 
@@ -231,12 +231,12 @@ Sub ChooseOpenWindow()
 		windowPicker.AddFolderArray( associations )
 	End If
 
-	windowPicker.CurrentFileName = currentWindow
+	windowPicker.CurrentFilePath = currentWindow
 	If windowPicker.ChooseFile() Then
 		Dim pickedOK
 
 		pickedOK = False
-		currentWindow = windowPicker.CurrentFileName
+		currentWindow = windowPicker.CurrentFilePath
 		For Each window In Application.Windows
 			If GetWindowFullName( window, label ) = currentWindow Then
 				window.Active = True
@@ -296,7 +296,7 @@ Sub ChooseWorkingFolderFile()
 	Call windowPicker.AddSortOrder( pfDirName, True )
 	Call windowPicker.AddSortOrder( pfName, False )
 	Call windowPicker.AddSortOrder( pfExt, False )
-	Call windowPicker.SetProfileSection( "WorkingFolder", True )
+	Call windowPicker.SetProfileSection( "WorkingFolder" )
 
 	Dim ext
 
@@ -341,12 +341,12 @@ Sub ChooseWorkingFolderFile()
 
 	Call windowPicker.AddFolderArray( filterPath & "|Current Folder" )
 
-	windowPicker.CurrentFileName = doc.FullName
+	windowPicker.CurrentFilePath = doc.FullName
 	If windowPicker.ChooseFile() Then
 		Dim pickedOK, label
 
 		pickedOK = False
-		currentWindow = windowPicker.CurrentFileName
+		currentWindow = windowPicker.CurrentFilePath
 		For Each window In Application.Windows
 			If GetWindowFullName( window, label ) = currentWindow Then
 				window.Active = True
@@ -1915,11 +1915,11 @@ Function BrowseForFile( folderItemFlatArray, currentFileName, sectionPostfix, op
 	If folderLayout <> -1 Then filePicker.FolderLayout = folderLayout
 	If filePicker.TrackPosX = -1 And filePicker.TrackPosY = -1 Then filePicker.StoreTrackPos()
 	'Setup the INI section for current browsing context
-	If sectionPostfix <> "" Then Call filePicker.SetProfileSection( sectionPostfix, True )
+	If sectionPostfix <> "" Then Call filePicker.SetProfileSection( sectionPostfix )
 	filePicker.AddFolderArray( folderItemFlatArray )
-	filePicker.CurrentFileName = currentFileName
+	filePicker.CurrentFilePath = currentFileName
 	If filePicker.ChooseFile() Then
-		BrowseForFile = filePicker.CurrentFileName
+		BrowseForFile = filePicker.CurrentFilePath
 	End If
 	Set filePicker = Nothing
 End Function
@@ -2731,7 +2731,7 @@ Function GetClassBodyText( doPrompt, docFileName )
 			className = fileToIdentifier( docFileName )
 		End If
 	End If
-	className = "class " & className
+	className = "class " & parClassPrefix & className
 
 	Dim info, cppType
 

@@ -29,14 +29,13 @@ namespace layout
 }
 
 
-CWkspLoadDialog::CWkspLoadDialog( WorkspaceProfile& _wkspProfile, const CString& _section, const CString& _currProjectName, CWnd* parent )
-	: CLayoutDialog( IDD_WORKSPACE_LOAD_DIALOG, parent )
-	, section( _section )
-	, currProjectName( _currProjectName )
-	, wkspProfile( _wkspProfile )
-	, options( NULL )
-	, metaFolder( options, _T(""), _T("") )
-	, showFullPath( false )
+CWkspLoadDialog::CWkspLoadDialog( WorkspaceProfile& rWkspProfile, const CString& section, const CString& currProjectName, CWnd* pParent )
+	: CLayoutDialog( IDD_WORKSPACE_LOAD_DIALOG, pParent )
+	, m_section( section )
+	, m_currProjectName( currProjectName )
+	, m_rWkspProfile( rWkspProfile )
+	, m_options( NULL )
+	, m_folderItem( _T("") )
 	, m_fullPathEdit( ui::FilePath )
 {
 	m_regSection = ::sectionWorkspaceDialogs;
@@ -44,15 +43,16 @@ CWkspLoadDialog::CWkspLoadDialog( WorkspaceProfile& _wkspProfile, const CString&
 	LoadDlgIcon( IDD_WORKSPACE_LOAD_DIALOG );
 	m_accelPool.AddAccelTable( new CAccelTable( IDR_WKSPLOAD_ACCEL ) );
 
-	options.m_sortFolders = false;
-	options.m_fileSortOrder.Clear();
-
-	if ( section.IsEmpty() )
-		section = ::defaulWkspSection;
-
 	CWinApp* pApp = AfxGetApp();
-	showFullPath = pApp->GetProfileInt( m_regSection.c_str(), ENTRY_OF( showFullPath ), showFullPath ) != FALSE;
-	wkspProfile.m_mustCloseAll = pApp->GetProfileInt( m_regSection.c_str(), ENTRY_OF( mustCloseAll ), wkspProfile.m_mustCloseAll );
+
+	m_options.m_displayFullPath = pApp->GetProfileInt( m_regSection.c_str(), ENTRY_MEMBER( m_displayFullPath ), m_options.m_displayFullPath ) != FALSE;
+	m_options.m_sortFolders = false;
+	m_options.m_fileSortOrder.Clear();
+
+	if ( m_section.IsEmpty() )
+		m_section = ::defaulWkspSection;
+
+	m_rWkspProfile.m_mustCloseAll = pApp->GetProfileInt( m_regSection.c_str(), ENTRY_OF( mustCloseAll ), m_rWkspProfile.m_mustCloseAll );
 }
 
 CWkspLoadDialog::~CWkspLoadDialog()
@@ -65,11 +65,11 @@ void CWkspLoadDialog::setupWindow( void )
 
 	loadExistingProjects();
 
-	for ( unsigned int i = 0; i != wkspProfile.projectNameArray.size(); ++i )
-		projectNameCombo.AddString( wkspProfile.projectNameArray[ i ] );
+	for ( unsigned int i = 0; i != m_rWkspProfile.projectNameArray.size(); ++i )
+		m_projectNameCombo.AddString( m_rWkspProfile.projectNameArray[ i ] );
 
-	if ( projectNameCombo.SelectString( -1, currProjectName ) == -1 )
-		projectNameCombo.SetCurSel( 0 );
+	if ( m_projectNameCombo.SelectString( -1, m_currProjectName ) == -1 )
+		m_projectNameCombo.SetCurSel( 0 );
 
 	updateFileContents();
 }
@@ -78,15 +78,15 @@ void CWkspLoadDialog::cleanupWindow( void )
 {
 	CWinApp* pApp = AfxGetApp();
 
-	pApp->WriteProfileInt( m_regSection.c_str(), ENTRY_OF( showFullPath ), showFullPath );
-	pApp->WriteProfileInt( m_regSection.c_str(), ENTRY_OF( mustCloseAll ), wkspProfile.m_mustCloseAll );
+	pApp->WriteProfileInt( m_regSection.c_str(), ENTRY_MEMBER( m_displayFullPath ), m_options.m_displayFullPath );
+	pApp->WriteProfileInt( m_regSection.c_str(), ENTRY_OF( mustCloseAll ), m_rWkspProfile.m_mustCloseAll );
 }
 
 bool CWkspLoadDialog::loadExistingProjects( void )
 {
 	// Enums the already stored projects keys, by ex:
 	//	HKEY_CURRENT_USER\Software\RegistryKey\AppName\section\Project1
-	reg::CKey projectsKey( AfxGetApp()->GetSectionKey( section ) );
+	reg::CKey projectsKey( AfxGetApp()->GetSectionKey( m_section ) );
 
 	if ( !projectsKey.IsValid() )
 		return false;
@@ -94,46 +94,47 @@ bool CWkspLoadDialog::loadExistingProjects( void )
 	reg::CKeyIterator itProj( &projectsKey );
 
 	for ( ; itProj.IsValid(); ++itProj )
-		wkspProfile.AddProjectName( itProj.GetName() );
+		m_rWkspProfile.AddProjectName( itProj.GetName() );
 
 	return itProj.GetCount() > 0;
 }
 
 void CWkspLoadDialog::updateFileContents( void )
 {
-	int i;
-
-	metaFolder.Clear();
+	m_folderItem.Clear();
 	if ( readProjectName() )
 	{
-		reg::CKey keyWorkspaces( AfxGetApp()->GetSectionKey( section ) );
-		if ( keyWorkspaces.IsValid() && keyWorkspaces.HasSubKey( currProjectName ) )
+		reg::CKey keyWorkspaces( AfxGetApp()->GetSectionKey( m_section ) );
+		if ( keyWorkspaces.IsValid() && keyWorkspaces.HasSubKey( m_currProjectName ) )
 		{
-			reg::CKey keyCurrProject = keyWorkspaces.OpenSubKey( currProjectName, false );
+			reg::CKey keyCurrProject = keyWorkspaces.OpenSubKey( m_currProjectName, false );
 			reg::CKey::CInfo keyInfo( keyCurrProject.Get() );
 			reg::CValue value;
 			TCHAR buffer[ MAX_PATH ];
 
 			value.AttachBuffer( (BYTE*)buffer, sizeof( buffer ) );
-			for ( i = 0; i < (int)keyInfo.m_valueCount; ++i )
-				if ( keyCurrProject.GetValue( value, wkspProfile.getFileEntryName( i ) ) )
-					metaFolder.addFile( value.GetString().c_str() );
+			for ( unsigned int i = 0; i != keyInfo.m_valueCount; ++i )
+				if ( keyCurrProject.GetValue( value, m_rWkspProfile.getFileEntryName( i ) ) )
+					m_folderItem.AddFileItem( NULL, value.GetString() );
 		}
 	}
 
-	fileList.SetRedraw( FALSE );
-	fileList.ResetContent();
-	for ( i = 0; i < metaFolder.getFileCount(); ++i )
-	{
-		CMetaFolder::CFile* file = metaFolder.getFile( i );
+	m_fileList.SetRedraw( FALSE );
+	m_fileList.ResetContent();
 
-		fileList.AddString( showFullPath ? file->m_pathInfo.Get() : file->getLabel() );
-		fileList.SetItemDataPtr( i, file );
+	const std::vector< CFileItem* >& fileItems = m_folderItem.GetFileItems();
+	for ( unsigned int index = 0; index != fileItems.size(); ++index )
+	{
+		CFileItem* pFileItem = fileItems[ index ];
+
+		m_fileList.AddString( pFileItem->FormatLabel( &m_options ).c_str() );
+		m_fileList.SetItemDataPtr( index, pFileItem );
 	}
-	fileList.SetSel( -1, TRUE );
-	fileList.SetRedraw( TRUE );
-	fileList.Invalidate();
-	fileList.SetCaretIndex( 0 );
+
+	m_fileList.SetSel( -1, TRUE );
+	m_fileList.SetRedraw( TRUE );
+	m_fileList.Invalidate();
+	m_fileList.SetCaretIndex( 0 );
 	LBnSelChangeFiles();
 }
 
@@ -142,32 +143,30 @@ bool CWkspLoadDialog::transferFiles( void )
 	if ( !readProjectName() )
 		return false;
 
-	int selCount = fileList.GetSelCount();
+	size_t selCount = m_fileList.GetSelCount();
 
-	wkspProfile.fileArray.clear();
-	if ( selCount > 0 )
+	m_rWkspProfile.fileArray.clear();
+	if ( selCount != 0 )
 	{
-		int* selection = new int[ selCount ];
+		std::vector< int > selection( selCount );
 
-		VERIFY( fileList.GetSelItems( selCount, selection ) != LB_ERR );
+		VERIFY( m_fileList.GetSelItems( selCount, &selection.front() ) != LB_ERR );
 		for ( int i = 0; i < selCount; ++i )
-			wkspProfile.fileArray.push_back( getListFile( selection[ i ] )->m_pathInfo.Get() );
-
-		delete selection;
+			m_rWkspProfile.fileArray.push_back( GetListFileItem( selection[ i ] )->GetFilePath().GetPtr() );
 	}
 	return true;
 }
 
 bool CWkspLoadDialog::readProjectName( void )
 {
-	int selIndex = projectNameCombo.GetCurSel();
+	int selIndex = m_projectNameCombo.GetCurSel();
 
-	currProjectName.Empty();
+	m_currProjectName.Empty();
 
 	if ( selIndex != CB_ERR )
-		projectNameCombo.GetLBText( selIndex, currProjectName );
+		m_projectNameCombo.GetLBText( selIndex, m_currProjectName );
 
-	if ( !currProjectName.IsEmpty() )
+	if ( !m_currProjectName.IsEmpty() )
 		return true;
 
 	return false;
@@ -176,23 +175,18 @@ bool CWkspLoadDialog::readProjectName( void )
 void CWkspLoadDialog::handleSelection( Ternary operation )
 {
 	if ( operation != Toggle )
-		fileList.SetSel( -1, operation );
+		m_fileList.SetSel( -1, operation );
 	else
 	{	// Toggle
-		for ( int i = 0, count = fileList.GetCount(); i < count; ++i )
-			fileList.SetSel( i, !fileList.GetSel( i ) );
+		for ( int i = 0, count = m_fileList.GetCount(); i < count; ++i )
+			m_fileList.SetSel( i, !m_fileList.GetSel( i ) );
 	}
-}
-
-CMetaFolder::CFile* CWkspLoadDialog::getListFile( int listIndex ) const
-{
-	return (CMetaFolder::CFile*)fileList.GetItemDataPtr( listIndex );
 }
 
 void CWkspLoadDialog::DoDataExchange( CDataExchange* pDX )
 {
-	DDX_Control( pDX, IDC_PROJECT_NAME_COMBO, projectNameCombo );
-	DDX_Control( pDX, IDC_FILES_LIST, fileList );
+	DDX_Control( pDX, IDC_PROJECT_NAME_COMBO, m_projectNameCombo );
+	DDX_Control( pDX, IDC_FILES_LIST, m_fileList );
 	DDX_Control( pDX, IDC_FULLPATH_EDIT, m_fullPathEdit );
 
 	CLayoutDialog::DoDataExchange( pDX );
@@ -215,8 +209,8 @@ BOOL CWkspLoadDialog::OnInitDialog( void )
 {
 	CLayoutDialog::OnInitDialog();
 
-	CheckDlgButton( IDC_SHOW_FULL_PATH_CHECK, showFullPath );
-	CheckDlgButton( IDC_CLOSE_ALL_BEFORE_OPEN_CHECK, wkspProfile.m_mustCloseAll );
+	CheckDlgButton( IDC_SHOW_FULL_PATH_CHECK, m_options.m_displayFullPath );
+	CheckDlgButton( IDC_CLOSE_ALL_BEFORE_OPEN_CHECK, m_rWkspProfile.m_mustCloseAll );
 
 	setupWindow();
 	return TRUE;
@@ -236,10 +230,10 @@ void CWkspLoadDialog::OnOK( void )
 
 void CWkspLoadDialog::OnContextMenu( CWnd* pWnd, CPoint point )
 {
-	if ( pWnd == &fileList )
+	if ( pWnd == &m_fileList )
 	{
 		CMenu contextMenu;
-		ui::LoadPopupMenu( contextMenu, IDR_CONTEXT_MENU, app_popup::ProfileListContext );
+		ui::LoadPopupMenu( contextMenu, IDR_CONTEXT_MENU, app::ProfileListContextPopup );
 
 		if ( point.x == -1 || point.y == -1 )
 			::GetCursorPos( &point );
@@ -250,14 +244,14 @@ void CWkspLoadDialog::OnContextMenu( CWnd* pWnd, CPoint point )
 
 void CWkspLoadDialog::CkShowFullPath( void )
 {
-	showFullPath = IsDlgButtonChecked( IDC_SHOW_FULL_PATH_CHECK ) != FALSE;
-	fileList.SetCurSel( -1 );
+	m_options.m_displayFullPath = IsDlgButtonChecked( IDC_SHOW_FULL_PATH_CHECK ) != FALSE;
+	m_fileList.SetCurSel( -1 );
 	updateFileContents();
 }
 
 void CWkspLoadDialog::CkCloseAllBeforeOpen( void )
 {
-	wkspProfile.m_mustCloseAll = IsDlgButtonChecked( IDC_CLOSE_ALL_BEFORE_OPEN_CHECK );
+	m_rWkspProfile.m_mustCloseAll = IsDlgButtonChecked( IDC_CLOSE_ALL_BEFORE_OPEN_CHECK );
 }
 
 void CWkspLoadDialog::CBnSelChangeProjectName( void )
@@ -267,13 +261,13 @@ void CWkspLoadDialog::CBnSelChangeProjectName( void )
 
 void CWkspLoadDialog::LBnSelChangeFiles( void )
 {
-	int caretIndex = fileList.GetCaretIndex();
-	CString fullPath;
+	int caretIndex = m_fileList.GetCaretIndex();
+	fs::CPath fullPath;
 
-	if ( caretIndex != LB_ERR && caretIndex < fileList.GetCount() )
-		fullPath = metaFolder.getFile( caretIndex )->m_pathInfo.Get();
+	if ( caretIndex != LB_ERR && caretIndex < m_fileList.GetCount() )
+		fullPath = m_folderItem.GetFileItems()[ caretIndex ]->GetFilePath();
 
-	SetDlgItemText( IDC_FULLPATH_EDIT, fullPath );
+	SetDlgItemText( IDC_FULLPATH_EDIT, fullPath.GetPtr() );
 }
 
 void CWkspLoadDialog::CmMultiSelection( UINT cmdId )

@@ -64,8 +64,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 6,1,0,1
- PRODUCTVERSION 6,1,0,1
+ FILEVERSION 7,1,0,1
+ PRODUCTVERSION 7,1,0,1
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -80,16 +80,16 @@ BEGIN
     BEGIN
         BLOCK "040904b0"
         BEGIN
-            VALUE "Comments", "TODO: Directories page. Redesigned include options and paths. Removed .dsp additional include path."
+            VALUE "Comments", "V7: New IDETools with tracking static for menu file picker and other popup menus|Restore focus of IDE windows|V6: Directories page. Redesigned include options and paths. Removed .dsp additional include path."
             VALUE "CompanyName", "Paul Cocoveanu"
             VALUE "Email", "phc.2nd@gmail.com"
             VALUE "FileDescription", "IDETools DLL"
-            VALUE "FileVersion", "6, 1, 0, 1"
+            VALUE "FileVersion", "7, 1, 0, 1"
             VALUE "InternalName", "IDETools"
             VALUE "LegalCopyright", "Copyright © 1998-2018"
             VALUE "OriginalFilename", "IDETools.dll"
             VALUE "ProductName", "IDETools Automation DLL"
-            VALUE "ProductVersion", "6, 1, 0, 1"
+            VALUE "ProductVersion", "7, 1, 0, 1"
             VALUE "WrittenBy", "Written by Paul Cocoveanu"
         END
     END
@@ -662,42 +662,34 @@ BEGIN
         MENUITEM SEPARATOR
         MENUITEM "&Browse From Here",           CM_BROWSE_FROM_SEL
     END
-    POPUP "Menu Browser Options"
+    POPUP "Menu Browser &Options"
     BEGIN
-        MENUITEM "All Folders As Popups",       CM_FILEBROWSER_FOLDERSASPOPUPS
-        MENUITEM "All Folders As Root Popups",  CM_FILEBROWSER_FOLDERSASROOTPOPUPS
-        MENUITEM "Root Folders Expanded",       CM_FILEBROWSER_ROOTFOLDERSEXPANDED
-        MENUITEM "All Folders Expanded",        CM_FILEBROWSER_ALLFOLDERSEXPANDED
+        MENUITEM "All Folders As Popups",       CM_FILEBROWSER_FoldersAsPopups
+        MENUITEM "All Folders As Root Popups",  CM_FILEBROWSER_FoldersAsRootPopups
+        MENUITEM "Root Folders Expanded",       CM_FILEBROWSER_TopFoldersExpanded
+        MENUITEM "All Folders Expanded",        CM_FILEBROWSER_AllFoldersExpanded
         MENUITEM SEPARATOR
         MENUITEM "&Recurse Folders",            CK_FILEBROWSER_RECURSEFOLDERS
-        MENUITEM "Remove &Duplicated Files",    CK_FILEBROWSER_CUTDUPLICATES
+        MENUITEM "Remove &Duplicate Files",     CK_FILEBROWSER_CUTDUPLICATES
         MENUITEM SEPARATOR
+        MENUITEM "Display F&ull Path",          CK_FILEBROWSER_DISPLAYFULLPATH
         MENUITEM "Hide File E&xtension",        CK_FILEBROWSER_HIDEEXT
         MENUITEM "Right &Justify Extension",    CK_FILEBROWSER_RIGHTJUSTIFYEXT
         MENUITEM "&Prefix by Directory Name",   CK_FILEBROWSER_DIRNAMEPREFIX
         MENUITEM SEPARATOR
         MENUITEM "Sort &Folders",               CK_FILEBROWSER_SORTFOLDERS
-        MENUITEM SEPARATOR
-        POPUP "&Sort Files By"
-        BEGIN
-            MENUITEM "Dri&ve",                      CK_FILEBROWSER_SORTBY_DRIVE
-            MENUITEM "Directory &Path",             CK_FILEBROWSER_SORTBY_DIR
-            MENUITEM "&Directory Name",             CK_FILEBROWSER_SORTBY_DIRNAME
-            MENUITEM "File &Name",                  CK_FILEBROWSER_SORTBY_NAME
-            MENUITEM "File &Extension",             CK_FILEBROWSER_SORTBY_EXT
-            MENUITEM SEPARATOR
-            MENUITEM "&File Full Path",             CK_FILEBROWSER_SORTBY_FULLPATH
-        END
     END
-    POPUP "<SortFiles>"
+    POPUP "&Sort Files By"
     BEGIN
-        MENUITEM "Dri&ve",                      CK_FILEBROWSER_SORTBY_DRIVE
-        MENUITEM "Directory &Path",             CK_FILEBROWSER_SORTBY_DIR
-        MENUITEM "&Directory Name",             CK_FILEBROWSER_SORTBY_DIRNAME
-        MENUITEM "File &Name",                  CK_FILEBROWSER_SORTBY_NAME
-        MENUITEM "File &Extension",             CK_FILEBROWSER_SORTBY_EXT
+        MENUITEM "Dri&ve",                      CM_FILEBROWSER_SortByDrive
+        MENUITEM "Directory &Path",             CM_FILEBROWSER_SortByDirPath
+        MENUITEM "&Directory Name",             CM_FILEBROWSER_SortByDirName
+        MENUITEM "File &Name",                  CM_FILEBROWSER_SortByFname
+        MENUITEM "File &Extension",             CM_FILEBROWSER_SortByExt
         MENUITEM SEPARATOR
-        MENUITEM "&File Full Path",             CK_FILEBROWSER_SORTBY_FULLPATH
+        MENUITEM "&File Full Path",             CM_FILEBROWSER_SortByFullPath
+        MENUITEM SEPARATOR
+        MENUITEM "&Reset Default Sort Order",   ID_RESET_DEFAULT
     END
     POPUP "<ProfileListContext>"
     BEGIN

@@ -43,7 +43,7 @@ namespace reg
 // COptions implementation
 
 COptions::COptions( CAppService* pAppSvc )
-	: CRegistryOptions( reg::section_options, true )
+	: CRegistryOptions( reg::section_options, CRegistryOptions::SaveOnModify )
 	, m_pAppSvc( pAppSvc )
 	, m_hasUIPI( wnd::HasUIPI() )
 	, m_keepTopmost( false )
@@ -102,9 +102,9 @@ void COptions::OnOptionChanged( const void* pDataMember )
 		m_pAppSvc->PublishEvent( app::ToggleAutoUpdate );	// main dialog will toggle the timer on/off
 }
 
-void COptions::OnUpdate_BoolOption( CCmdUI* pCmdUI )
+void COptions::OnUpdateOption( CCmdUI* pCmdUI )
 {
-	__super::OnUpdate_BoolOption( pCmdUI );
+	__super::OnUpdateOption( pCmdUI );
 
 	switch ( pCmdUI->m_nID )
 	{

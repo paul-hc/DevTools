@@ -646,6 +646,12 @@ namespace fs
 		m_filePath = parts.MakePath();
 	}
 
+	CPath CPath::GetRemoveExt( void ) const
+	{
+		size_t extPos = std::distance( GetPtr(), GetExt() );
+		return CPath( m_filePath.substr( 0, extPos ) );
+	}
+
 	void CPath::SetDirPath( const std::tstring& dirPath )
 	{
 		CPathParts parts( m_filePath );

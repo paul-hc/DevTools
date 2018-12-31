@@ -526,54 +526,6 @@
 				>
 			</File>
 			<File
-				RelativePath="MenuTrackingWindow.cpp"
-				>
-				<FileConfiguration
-					Name="ReleaseU|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="DebugU|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="MenuTrackingWindow.h"
-				>
-			</File>
-			<File
-				RelativePath=".\MenuUtilitiesOLD.cpp"
-				>
-				<FileConfiguration
-					Name="ReleaseU|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="DebugU|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath=".\MenuUtilitiesOLD.h"
-				>
-			</File>
-			<File
 				RelativePath="ModuleSession.cpp"
 				>
 				<FileConfiguration
@@ -753,6 +705,30 @@
 			</File>
 			<File
 				RelativePath="TokenizeTextDialog.h"
+				>
+			</File>
+			<File
+				RelativePath=".\TrackMenuWnd.cpp"
+				>
+				<FileConfiguration
+					Name="ReleaseU|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						PreprocessorDefinitions=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="DebugU|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						PreprocessorDefinitions=""
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\TrackMenuWnd.h"
 				>
 			</File>
 			<File
@@ -1172,6 +1148,18 @@
 				</File>
 				<File
 					RelativePath="TokenRange.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="path"
+				>
+				<File
+					RelativePath=".\PathSortOrder.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\PathSortOrder.h"
 					>
 				</File>
 			</Filter>

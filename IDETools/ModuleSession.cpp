@@ -92,7 +92,7 @@ void CModuleSession::LoadFromRegistry( void )
 	m_codeTemplatePath.Set( pApp->GetProfileString( reg::section_settings, reg::entry_codeTemplateFile, m_codeTemplatePath.GetPtr() ).GetString() );
 	m_splitMaxColumn = pApp->GetProfileInt( reg::section_settings, reg::entry_splitMaxColumn, m_splitMaxColumn );
 	m_menuVertSplitCount = pApp->GetProfileInt( reg::section_settings, reg::entry_menuVertSplitCount, m_menuVertSplitCount );
-	m_menuVertSplitCount = __max( m_menuVertSplitCount, 1 );
+	m_menuVertSplitCount = std::max( m_menuVertSplitCount, 1u );
 	m_singleLineCommentToken = pApp->GetProfileString( reg::section_settings, reg::entry_singleLineCommentToken, m_singleLineCommentToken.c_str() );
 
 	m_autoCodeGeneration = pApp->GetProfileInt( reg::section_settings, reg::entry_autoCodeGeneration, m_autoCodeGeneration ) != FALSE;
@@ -161,7 +161,8 @@ code::CFormatterOptions& CModuleSession::GetCodeFormatterOptions( void )
 
 bool CModuleSession::EditOptions( void )
 {
-	COptionsSheet sheet( ide::GetRootWindow() );
+	ide::CScopedWindow scopedIDE;
+	COptionsSheet sheet( scopedIDE.GetMainWnd() );
 
 	CGeneralOptionsPage* pGeneralPage = sheet.GetPageAs< CGeneralOptionsPage >( COptionsSheet::GeneralPage );
 

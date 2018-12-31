@@ -414,10 +414,8 @@ namespace code
 
 		typeChoiceMenu.SetDefaultItem( cmdUseDocQualifier );
 
-		CPoint mousePointerPos = ide::GetMouseScreenPos();
-		CWnd* pIdeRootWindow = ide::GetRootWindow();
-		MenuCommand command = (MenuCommand)ide::trackPopupMenu( typeChoiceMenu, mousePointerPos, pIdeRootWindow,
-																TPM_LEFTALIGN | TPM_TOPALIGN | TPM_RIGHTBUTTON | TPM_NONOTIFY | TPM_RETURNCMD );
+		ide::CScopedWindow scopedIDE;
+		MenuCommand command = static_cast< MenuCommand >( scopedIDE.TrackPopupMenu( typeChoiceMenu, ide::GetMouseScreenPos() ) );
 
 		switch ( command )
 		{
@@ -427,10 +425,9 @@ namespace code
 				break;
 			case cmdUseCustomQualifier:
 			{
-				InputTypeQualifierDialog dialog( docTypeQualifier, pIdeRootWindow );
-
-				if ( dialog.DoModal() != IDCANCEL )
-					return dialog.m_typeQualifier;
+				CInputTypeQualifierDialog dlg( docTypeQualifier, scopedIDE.GetMainWnd() );
+				if ( dlg.DoModal() != IDCANCEL )
+					return dlg.m_typeQualifier;
 			}
 			case cmdCancel:
 				return m_cancelTag;
@@ -497,11 +494,10 @@ namespace code
 		GetCursorPos( &screenPos );
 
 		CMenu contextMenu;
-		ui::LoadPopupMenu( contextMenu, IDR_CONTEXT_MENU, app_popup::AutoMakeCode );
+		ui::LoadPopupMenu( contextMenu, IDR_CONTEXT_MENU, app::AutoMakeCodePopup );
 
-		CWnd* pIdeRootWindow = ide::GetRootWindow();
-		return ide::trackPopupMenu( contextMenu, screenPos, pIdeRootWindow,
-									TPM_LEFTALIGN | TPM_TOPALIGN | TPM_RIGHTBUTTON | TPM_NONOTIFY | TPM_RETURNCMD );
+		ide::CScopedWindow scopedIDE;
+		return scopedIDE.TrackPopupMenu( contextMenu, screenPos );
 	}
 
 	CString CppImplementationFormatter::autoMakeCode( const TCHAR* codeText )
@@ -575,7 +571,8 @@ namespace code
 
 	CString CppImplementationFormatter::tokenizeText( const TCHAR* codeText )
 	{
-		CTokenizeTextDialog dialog( ide::GetRootWindow() );
+		ide::CScopedWindow scopedIDE;
+		CTokenizeTextDialog dialog( scopedIDE.GetMainWnd() );
 		dialog.m_sourceText = codeText;
 
 		if ( IDCANCEL == dialog.DoModal() )

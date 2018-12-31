@@ -49,6 +49,9 @@ namespace ui
 	CPoint GetAlignTrackPos( PopupAlign popupAlign, const RECT& excludeRect );
 
 
+	bool IsValidMenu( HMENU hMenu, unsigned int depth = 0 );
+
+
 	// menu item
 	bool GetMenuItemInfo( MENUITEMINFO* pItemInfo, HMENU hMenu, UINT item, bool byPos = true,
 						  UINT mask = MIIM_ID | MIIM_SUBMENU | MIIM_DATA | MIIM_STATE | MIIM_FTYPE | MIIM_STRING | MIIM_BITMAP );
@@ -78,9 +81,21 @@ namespace ui
 	void CleanupMenuDuplicates( CMenu& rDestMenu );
 	void CleanupMenuSeparators( CMenu& rDestMenu );
 
+	bool DeleteFirstMenuSeparator( CMenu& rDestMenu );
+	bool DeleteLastMenuSeparator( CMenu& rDestMenu );
+
 	enum MenuInsert { PrependSrc, AppendSrc };
 
 	bool JoinMenuItems( CMenu& rDestMenu, const CMenu& srcMenu, MenuInsert menuInsert = AppendSrc, bool addSep = true, UseMenuImages useMenuImages = NormalMenuImages );
+}
+
+
+namespace ui
+{
+	// menu hit-test
+	HWND FindMenuWindowFromPoint( CPoint screenPos = ui::GetCursorPos() );
+	bool IsHiliteMenuItem( HMENU hMenu, int itemPos );
+	void InvalidateMenuWindow( void );
 }
 
 

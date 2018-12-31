@@ -587,7 +587,7 @@ void CFileLocatorDialog::OnContextMenu( CWnd* pWnd, CPoint screenPos )
 		if ( !selFiles.empty() )
 		{
 			CMenu contextMenu;
-			ui::LoadPopupMenu( contextMenu, IDR_CONTEXT_MENU, app_popup::FoundListContext );
+			ui::LoadPopupMenu( contextMenu, IDR_CONTEXT_MENU, app::FoundListContextPopup );
 			contextMenu.SetDefaultItem( ID_FILE_OPEN );
 			contextMenu.EnableMenuItem( CM_EXPLORE_FILE, MF_BYCOMMAND | ( 1 == selFiles.size() ? MF_ENABLED : MF_GRAYED ) );
 

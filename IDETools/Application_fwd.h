@@ -3,9 +3,9 @@
 #pragma once
 
 
-namespace app_popup
+namespace app
 {
-	enum PopupPos { IncludeTree, IncludeTree_NoDups, MenuBrowserOptions, SortFiles, ProfileListContext, FoundListContext, AutoMakeCode, _Unused };
+	enum ContextPopup { IncludeTreePopup, IncludeTree_NoDupsPopup, MenuBrowserOptionsPopup, FileSortOrderPopup, ProfileListContextPopup, FoundListContextPopup, AutoMakeCodePopup, _UnusedPopup };
 }
 
 

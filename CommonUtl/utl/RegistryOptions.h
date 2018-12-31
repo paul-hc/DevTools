@@ -3,13 +3,13 @@
 #pragma once
 
 #include "IRegistrySection.h"
+#include "Range.h"
 
 
 #define ENTRY_MEMBER( value ) ( _T( #value ) + 2 )					// skip past "m_"; it doesn't work well when expanded from other macros
 
 #define MAKE_OPTION( pDataMember )  reg::MakeOption( pDataMember, ENTRY_MEMBER( pDataMember ) + 1 )		// also skip the leading "&" operator for address of data-member
 #define MAKE_ENUM_OPTION( pDataMember )  reg::MakeEnumOption( pDataMember, ENTRY_MEMBER( pDataMember ) + 1 )
-#define MAKE_ENUM_TAG_OPTION( pDataMember, pTags )  reg::MakeEnumOption( pDataMember, ENTRY_MEMBER( pDataMember ) + 1, (pTags) )
 #define MAKE_MULTIPLE_OPTION( pDataMember )  reg::MakeMultipleOption( pDataMember, ENTRY_MEMBER( pDataMember ) + 1 )
 
 
@@ -22,29 +22,41 @@ namespace reg
 }
 
 
-// container of serializable options (to registry)
+// container of registry-persistent options
 //
 class CRegistryOptions : public CCmdTarget
 {
 public:
-	CRegistryOptions( const std::tstring& section, bool saveOnModify );
-	CRegistryOptions( IRegistrySection* pRegSection, bool saveOnModify );		// takes ownership
-	~CRegistryOptions();
+	enum AutoSave { NoAutoSave, SaveOnModify, SaveAllOnModify };
+
+	CRegistryOptions( const std::tstring& sectionName, AutoSave autoSave );
+	CRegistryOptions( IRegistrySection* pRegSection, AutoSave autoSave );		// takes ownership
+	virtual ~CRegistryOptions();
 
 	// protect on assignment; let derived class assign options' state (e.g. default values)
 	CRegistryOptions( const CRegistryOptions& right ) { right; }
 	CRegistryOptions& operator=( const CRegistryOptions& right ) { right; return *this; }
 
 	bool IsPersistent( void ) const { return m_pRegSection.get() != NULL; }
+
 	IRegistrySection* GetSection( void ) const { return m_pRegSection.get(); }
+	void SetSection( IRegistrySection* pRegSection ) { m_pRegSection.reset( pRegSection ); }
+
+	const std::tstring& GetSectionName( void ) const;
+	void SetSectionName( const std::tstring& sectionName );
 
 	void AddOption( reg::CBaseOption* pOption, UINT ctrlId = 0 );
+
 	reg::CBaseOption& LookupOption( const void* pDataMember ) const;
-	reg::COption< bool >* FindBoolOptionByID( UINT ctrlId ) const;
+
+	template< typename OptionT >
+	OptionT* LookupOptionAs( const void* pDataMember ) const { return checked_static_cast< OptionT* >( &LookupOption( pDataMember ) ); }
+
+	reg::CBaseOption* FindOptionByID( UINT ctrlId ) const;
 
 	// all options
-	void LoadAll( void );
-	void SaveAll( void ) const;
+	virtual void LoadAll( void );
+	virtual void SaveAll( void ) const;
 
 	bool AnyNonDefaultValue( void ) const;
 	size_t RestoreAllDefaultValues( void );
@@ -60,21 +72,20 @@ public:
 
 	void UpdateControls( CWnd* pTargetWnd );			// update check-box buttons
 protected:
+	bool IsHandledInternallyID( UINT ctrlId ) const { return FindOptionByID( ctrlId ) != NULL; }
 	bool RestoreOptionDefaultValue( reg::CBaseOption* pOption );
 
 	// overrideables
 	virtual void OnOptionChanged( const void* pDataMember );
 protected:
 	std::auto_ptr< IRegistrySection > m_pRegSection;
-	bool m_saveOnModify;								// for individual options
+	AutoSave m_autoSave;
 	std::vector< reg::CBaseOption* > m_options;
 
 	// generated overrides
-public:
-	virtual BOOL OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo );
 protected:
-	virtual void OnToggle_BoolOption( UINT cmdId );
-	virtual void OnUpdate_BoolOption( CCmdUI* pCmdUI );
+	virtual BOOL OnToggleOption( UINT cmdId );
+	virtual void OnUpdateOption( CCmdUI* pCmdUI );
 
 	DECLARE_MESSAGE_MAP()
 };
@@ -98,6 +109,7 @@ namespace reg
 
 		UINT GetCtrlId( void ) const { return m_ctrlId; }
 		void SetCtrlId( UINT ctrlId ) { m_ctrlId = ctrlId; }
+		virtual bool HasCtrlId( UINT ctrlId ) const;
 
 		bool HasDataMember( const void* pDataMember ) const { return GetDataMember() == pDataMember; }
 
@@ -111,9 +123,9 @@ namespace reg
 		IRegistrySection* GetSection( void ) const { ASSERT_PTR( m_pParent->GetSection() ); return m_pParent->GetSection(); }
 	protected:
 		std::tstring m_entry;
-		UINT m_ctrlId;
 	private:
 		const CRegistryOptions* m_pParent;
+		UINT m_ctrlId;
 	};
 
 
@@ -143,6 +155,32 @@ namespace reg
 	protected:
 		ValueT* m_pValue;
 		ValueT m_defaultValue;
+	};
+
+
+	typedef COption< bool > TBoolOption;
+
+
+	class CEnumOption : public COption< int >
+	{
+		typedef COption< int > TBaseClass;
+	public:
+		template< typename EnumType >
+		CEnumOption( EnumType* pValue, const TCHAR* pEntry ) : COption< int >( (int*)pValue, pEntry ), m_pTags( NULL ), m_radioIds( 0 ) {}
+
+		void SetEnumTags( const CEnumTags* pTags ) { m_pTags = pTags; }
+		void SetRadioIds( UINT firstRadioId, UINT lastRadioId ) { m_radioIds.SetRange( firstRadioId, lastRadioId ); }
+
+		bool HasRadioId( UINT radioId ) const { return radioId != 0 && !m_radioIds.IsEmpty() && m_radioIds.Contains( radioId ); }
+		int GetValueFromRadioId( UINT radioId ) const;
+
+		// base overrides
+		virtual bool HasCtrlId( UINT ctrlId ) const;
+		virtual void Load( void );
+		virtual void Save( void ) const;
+	private:
+		const CEnumTags* m_pTags;
+		Range< UINT > m_radioIds;
 	};
 
 
@@ -177,24 +215,6 @@ namespace reg
 		std::vector< ValueT >* m_pValues;
 		std::vector< ValueT > m_defaultValues;
 		const TCHAR* m_pDelimiter;
-	};
-
-
-	class CEnumOption : public COption< int >
-	{
-	public:
-		template< typename EnumType >
-		CEnumOption( EnumType* pValue, const TCHAR* pEntry, const CEnumTags* pTags = NULL )
-			: COption< int >( (int*)pValue, pEntry )
-			, m_pTags( pTags )
-		{
-		}
-
-		// base overrides
-		virtual void Load( void );
-		virtual void Save( void ) const;
-	private:
-		const CEnumTags* m_pTags;
 	};
 }
 
@@ -260,19 +280,19 @@ namespace reg
 	// option factory template code
 
 	template< typename ValueT >
-	inline CBaseOption* MakeOption( ValueT* pDataMember, const TCHAR* pEntry )
+	inline COption< ValueT >* MakeOption( ValueT* pDataMember, const TCHAR* pEntry )
 	{
 		return new COption< ValueT >( pDataMember, pEntry );
 	}
 
 	template< typename EnumT >
-	inline CBaseOption* MakeEnumOption( EnumT* pDataMember, const TCHAR* pEntry, const CEnumTags* pTags = NULL )
+	inline CEnumOption* MakeEnumOption( EnumT* pDataMember, const TCHAR* pEntry )
 	{
-		return new CEnumOption( pDataMember, pEntry, pTags );
+		return new CEnumOption( pDataMember, pEntry );
 	}
 
 	template< typename ValueT >
-	inline CBaseOption* MakeMultipleOption( ValueT* pDataMember, const TCHAR* pEntry )
+	inline CMultipleOption< ValueT >* MakeMultipleOption( ValueT* pDataMember, const TCHAR* pEntry )
 	{
 		return new CMultipleOption< ValueT >( pDataMember, pEntry );
 	}

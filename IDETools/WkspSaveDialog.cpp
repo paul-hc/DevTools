@@ -30,33 +30,31 @@ namespace layout
 }
 
 
-CWkspSaveDialog::CWkspSaveDialog( WorkspaceProfile& _wkspProfile, const CString& _section, const CString& _currProjectName, CWnd* parent )
-	: CLayoutDialog( IDD_WORKSPACE_SAVE_DIALOG, parent )
-	, section( _section )
-	, currProjectName( _currProjectName )
-	, wkspProfile( _wkspProfile )
-	, m_rOptions( wkspProfile.m_options )
-	, metaFolder( m_rOptions, _T(""), _T("") )
-	, showFullPath( false )
+CWkspSaveDialog::CWkspSaveDialog( WorkspaceProfile& rWkspProfile, const CString& section, const CString& currProjectName, CWnd* pParent )
+	: CLayoutDialog( IDD_WORKSPACE_SAVE_DIALOG, pParent )
+	, m_section( section )
+	, m_currProjectName( currProjectName )
+	, m_rWkspProfile( rWkspProfile )
+	, m_rOptions( m_rWkspProfile.m_options )
+	, m_folderItem( _T("") )
 	, m_fullPathEdit( ui::FilePath )
 {
 	m_regSection = ::sectionWorkspaceDialogs;
 	RegisterCtrlLayout( layout::styles, COUNT_OF( layout::styles ) );
 	LoadDlgIcon( IDD_WORKSPACE_SAVE_DIALOG );
 
-	if ( section.IsEmpty() )
-		section = ::defaulWkspSection;
-	if ( currProjectName.IsEmpty() )
-		currProjectName = ::defaulProjectName;
+	if ( m_section.IsEmpty() )
+		m_section = ::defaulWkspSection;
+	if ( m_currProjectName.IsEmpty() )
+		m_currProjectName = ::defaulProjectName;
 
-	ui::LoadPopupMenu( m_sortOrderPopup, IDR_CONTEXT_MENU, app_popup::SortFiles );
+	ui::LoadPopupMenu( m_sortOrderPopup, IDR_CONTEXT_MENU, app::FileSortOrderPopup );
 
 	CWinApp* pApp = AfxGetApp();
 
-	m_rOptions.m_fileSortOrder.SetFromString(
-		(LPCTSTR)pApp->GetProfileString( m_regSection.c_str(), ENTRY_OF( fileSortOrder ), m_rOptions.m_fileSortOrder.GetAsString().c_str() ) );
-	showFullPath = pApp->GetProfileInt( m_regSection.c_str(), ENTRY_OF( showFullPath ), showFullPath ) != FALSE;
-
+	m_rOptions.m_fileSortOrder.SetOrderText(
+		pApp->GetProfileString( m_regSection.c_str(), ENTRY_OF( SortOrder ), m_rOptions.m_fileSortOrder.GetOrderTextPtr()->c_str() ).GetString() );
+	m_rOptions.m_displayFullPath = pApp->GetProfileInt( m_regSection.c_str(), ENTRY_OF( m_displayFullPath ), m_rOptions.m_displayFullPath ) != FALSE;
 }
 
 CWkspSaveDialog::~CWkspSaveDialog()
@@ -67,14 +65,14 @@ void CWkspSaveDialog::setupWindow( void )
 {
 	ASSERT( IsWindow( m_hWnd ) );
 
-	wkspProfile.AddProjectName( currProjectName );
+	m_rWkspProfile.AddProjectName( m_currProjectName );
 	loadExistingProjects();
 
-	for ( unsigned int i = 0; i != wkspProfile.projectNameArray.size(); ++i )
-		projectNameCombo.AddString( wkspProfile.projectNameArray[ i ] );
+	for ( unsigned int i = 0; i != m_rWkspProfile.projectNameArray.size(); ++i )
+		m_projectNameCombo.AddString( m_rWkspProfile.projectNameArray[ i ] );
 
-	if ( projectNameCombo.SelectString( -1, currProjectName ) == -1 )
-		projectNameCombo.SetCurSel( 0 );
+	if ( m_projectNameCombo.SelectString( -1, m_currProjectName ) == -1 )
+		m_projectNameCombo.SetCurSel( 0 );
 
 	updateFileContents();
 }
@@ -83,56 +81,57 @@ void CWkspSaveDialog::cleanupWindow( void )
 {
 	CWinApp* pApp = AfxGetApp();
 
-	pApp->WriteProfileString( m_regSection.c_str(), ENTRY_OF( fileSortOrder ), m_rOptions.m_fileSortOrder.GetAsString().c_str() );
-
-	pApp->WriteProfileInt( m_regSection.c_str(), ENTRY_OF( showFullPath ), showFullPath );
+	pApp->WriteProfileString( m_regSection.c_str(), ENTRY_OF( SortOrder ), m_rOptions.m_fileSortOrder.GetOrderTextPtr()->c_str() );
+	pApp->WriteProfileInt( m_regSection.c_str(), ENTRY_OF( m_displayFullPath ), m_rOptions.m_displayFullPath );
 }
 
 bool CWkspSaveDialog::loadExistingProjects( void )
 {
 	// Enums the already stored projects keys, by ex:
 	//	HKEY_CURRENT_USER\Software\RegistryKey\AppName\section\Project1
-	reg::CKey projectsKey( AfxGetApp()->GetSectionKey( section ) );
+	reg::CKey projectsKey( AfxGetApp()->GetSectionKey( m_section ) );
 	if ( !projectsKey.IsValid() )
 		return false;
 
 	reg::CKeyIterator itProj( &projectsKey );
 
 	for ( ; itProj.IsValid(); ++itProj )
-		wkspProfile.AddProjectName( itProj.GetName() );
+		m_rWkspProfile.AddProjectName( itProj.GetName() );
 
 	return itProj.GetCount() > 0;
 }
 
 void CWkspSaveDialog::updateFileContents( void )
 {
-	int selIndex = fileList.GetCurSel();
+	int selIndex = m_fileList.GetCurSel();
 	CString orgSelString;
 
 	if ( selIndex != -1 )
-		fileList.GetText( selIndex, orgSelString );
+		m_fileList.GetText( selIndex, orgSelString );
 
-	metaFolder.Clear();
-	for ( unsigned int i = 0; i != wkspProfile.fileArray.size(); ++i )
-		metaFolder.addFile( wkspProfile.fileArray[ i ] );
+	m_folderItem.Clear();
+	for ( unsigned int i = 0; i != m_rWkspProfile.fileArray.size(); ++i )
+		m_folderItem.AddFileItem( NULL, fs::CPath( m_rWkspProfile.fileArray[ i ].GetString() ) );
 
-	fileList.SetRedraw( FALSE );
-	fileList.ResetContent();
-	for ( unsigned int i = 0; i < metaFolder.getFileCount(); ++i )
+	m_fileList.SetRedraw( FALSE );
+	m_fileList.ResetContent();
+
+	const std::vector< CFileItem* >& fileItems = m_folderItem.GetFileItems();
+	for ( unsigned int index = 0; index != fileItems.size(); ++index )
 	{
-		CMetaFolder::CFile* file = metaFolder.getFile( i );
+		CFileItem* pFileItem = fileItems[ index ];
 
-		fileList.AddString( showFullPath ? file->m_pathInfo.Get() : file->getLabel() );
-		fileList.SetItemDataPtr( i, file );
+		m_fileList.AddString( pFileItem->FormatLabel( &m_rOptions ).c_str() );
+		m_fileList.SetItemDataPtr( index, pFileItem );
 	}
 
 	if ( !orgSelString.IsEmpty() )
-		VERIFY( fileList.SelectString( -1, orgSelString ) != -1 );
+		VERIFY( m_fileList.SelectString( -1, orgSelString ) != -1 );
 	else
-		fileList.SetCurSel( 0 );
+		m_fileList.SetCurSel( 0 );
 
-	fileList.SetRedraw( TRUE );
-	fileList.Invalidate();
+	m_fileList.SetRedraw( TRUE );
+	m_fileList.Invalidate();
 	LBnSelChangeFiles();
 }
 
@@ -141,26 +140,26 @@ bool CWkspSaveDialog::saveFiles( void )
 	if ( !readProjectName() )
 		return false;
 
-	reg::CKey keyWorkspaces( AfxGetApp()->GetSectionKey( section ) );
+	reg::CKey keyWorkspaces( AfxGetApp()->GetSectionKey( m_section ) );
 
 	if ( !keyWorkspaces.IsValid() )
 		return false;
 
-	int listCount = fileList.GetCount();
+	int listCount = m_fileList.GetCount();
 
-	if ( listCount == 0 && keyWorkspaces.HasSubKey( currProjectName ) )
+	if ( listCount == 0 && keyWorkspaces.HasSubKey( m_currProjectName ) )
 	{	// Nothing to save but there is an existing current project key -> query for remove:
 		CString message;
 
-		message.Format( IDS_QUERY_DELETE_PROJECT_MESSAGE, (LPCTSTR)currProjectName );
+		message.Format( IDS_QUERY_DELETE_PROJECT_MESSAGE, (LPCTSTR)m_currProjectName );
 		if ( AfxMessageBox( message, MB_YESNO ) == IDYES )
 		{
-			keyWorkspaces.RemoveSubKey( currProjectName );
+			keyWorkspaces.RemoveSubKey( m_currProjectName );
 			return true;
 		}
 	}
 
-	reg::CKey keyCurrProject = keyWorkspaces.OpenSubKey( currProjectName, listCount > 0 );
+	reg::CKey keyCurrProject = keyWorkspaces.OpenSubKey( m_currProjectName, listCount > 0 );
 
 	if ( keyCurrProject.IsValid() )
 	{
@@ -168,8 +167,8 @@ bool CWkspSaveDialog::saveFiles( void )
 		for ( int i = 0; i < listCount; ++i )
 		{
 			reg::CValue entryValue;
-			entryValue.SetString( getListFile( i )->m_pathInfo.Get() );
-			VERIFY( keyCurrProject.SetValue( wkspProfile.getFileEntryName( i ), entryValue ) );
+			entryValue.SetString( getListFile( i )->GetFilePath().GetPtr() );
+			VERIFY( keyCurrProject.SetValue( m_rWkspProfile.getFileEntryName( i ), entryValue ) );
 		}
 	}
 	else
@@ -180,16 +179,17 @@ bool CWkspSaveDialog::saveFiles( void )
 
 bool CWkspSaveDialog::readProjectName( void )
 {
-	projectNameCombo.GetWindowText( currProjectName );
-	if ( !currProjectName.IsEmpty() )
+	m_projectNameCombo.GetWindowText( m_currProjectName );
+	if ( !m_currProjectName.IsEmpty() )
 		return true;
+
 	AfxMessageBox( IDS_EMPTY_CURR_PROJECT_MESSAGE, MB_OK | MB_ICONHAND );
 	return false;
 }
 
-CMetaFolder::CFile* CWkspSaveDialog::getListFile( int listIndex ) const
+CFileItem* CWkspSaveDialog::getListFile( int listIndex ) const
 {
-	return (CMetaFolder::CFile*)fileList.GetItemDataPtr( listIndex );
+	return (CFileItem*)m_fileList.GetItemDataPtr( listIndex );
 }
 
 bool CWkspSaveDialog::dragListNotify( UINT listID, DRAGLISTINFO& dragInfo )
@@ -197,30 +197,30 @@ bool CWkspSaveDialog::dragListNotify( UINT listID, DRAGLISTINFO& dragInfo )
 	if ( listID == IDC_FILES_LIST )
 		if ( dragInfo.uNotification == DL_DROPPED )
 		{
-			int srcIndex = fileList.GetCurSel();
-			int destIndex = fileList.ItemFromPt( dragInfo.ptCursor );
+			int srcIndex = m_fileList.GetCurSel();
+			int destIndex = m_fileList.ItemFromPt( dragInfo.ptCursor );
 
 			if ( destIndex == -1 )
 			{
 				CString message;
-				CString selFilePath;
+				fs::CPath selFilePath;
 
 				if ( srcIndex != -1 )
-					selFilePath = getListFile( srcIndex )->m_pathInfo.Get();
+					selFilePath = getListFile( srcIndex )->GetFilePath();
 
-				message.Format( IDC_REMOVE_SELECTED_FILE, (LPCTSTR)selFilePath );
-				if ( srcIndex != -1 && AfxMessageBox( message, MB_OKCANCEL | MB_ICONQUESTION ) == IDOK )
+				message.Format( IDC_REMOVE_SELECTED_FILE, selFilePath.GetPtr() );
+				if ( srcIndex != -1 && IDOK == AfxMessageBox( message, MB_OKCANCEL | MB_ICONQUESTION ) )
 				{
-					int profIndex = wkspProfile.findFile( selFilePath );
+					int profIndex = m_rWkspProfile.findFile( selFilePath.GetPtr() );
 
 					// remove from source index
 					if ( profIndex != -1 )
-						wkspProfile.fileArray.erase( wkspProfile.fileArray.begin() + profIndex );
+						m_rWkspProfile.fileArray.erase( m_rWkspProfile.fileArray.begin() + profIndex );
 
-					fileList.DeleteString( srcIndex );
-					if ( srcIndex >= fileList.GetCount() )
+					m_fileList.DeleteString( srcIndex );
+					if ( srcIndex >= m_fileList.GetCount() )
 						--srcIndex;
-					fileList.SetCurSel( srcIndex );
+					m_fileList.SetCurSel( srcIndex );
 					return false;
 				}
 			}
@@ -230,8 +230,8 @@ bool CWkspSaveDialog::dragListNotify( UINT listID, DRAGLISTINFO& dragInfo )
 
 void CWkspSaveDialog::DoDataExchange( CDataExchange* pDX )
 {
-	DDX_Control( pDX, IDC_PROJECT_NAME_COMBO, projectNameCombo );
-	DDX_Control( pDX, IDC_FILES_LIST, fileList );
+	DDX_Control( pDX, IDC_PROJECT_NAME_COMBO, m_projectNameCombo );
+	DDX_Control( pDX, IDC_FILES_LIST, m_fileList );
 	DDX_Control( pDX, IDC_FULLPATH_EDIT, m_fullPathEdit );
 
 	CLayoutDialog::DoDataExchange( pDX );
@@ -259,12 +259,20 @@ LRESULT CWkspSaveDialog::WindowProc( UINT message, WPARAM wParam, LPARAM lParam 
 	return CLayoutDialog::WindowProc( message, wParam, lParam );
 }
 
+BOOL CWkspSaveDialog::OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo )
+{
+	if ( m_rOptions.OnCmdMsg( id, code, pExtra, pHandlerInfo ) )
+		return true;
+
+	return __super::OnCmdMsg( id, code, pExtra, pHandlerInfo );
+}
+
 BOOL CWkspSaveDialog::OnInitDialog( void )
 {
 	CLayoutDialog::OnInitDialog();
 	DragAcceptFiles( TRUE );
 
-	CheckDlgButton( IDC_SHOW_FULL_PATH_CHECK, showFullPath );
+	CheckDlgButton( IDC_SHOW_FULL_PATH_CHECK, m_rOptions.m_displayFullPath );
 
 	setupWindow();
 	return TRUE;
@@ -290,7 +298,7 @@ void CWkspSaveDialog::OnDropFiles( HDROP hDropInfo )
 	for ( UINT index = 0; index < fileCount; index++ )
 	{
 		::DragQueryFile( hDropInfo, index, fullPath, COUNT_OF( fullPath ) );
-		wkspProfile.AddFile( fullPath );
+		m_rWkspProfile.AddFile( fullPath );
 	}
 
 	::DragFinish( hDropInfo );
@@ -304,13 +312,13 @@ void CWkspSaveDialog::CmDeleteProjectEntry( void )
 	{
 		CString message;
 
-		message.Format( IDC_DELETE_PROJECT_ENTRY, (LPCTSTR)currProjectName );
-		if ( AfxMessageBox( message, MB_OKCANCEL | MB_ICONEXCLAMATION ) == IDOK )
+		message.Format( IDC_DELETE_PROJECT_ENTRY, (LPCTSTR)m_currProjectName );
+		if ( IDOK == AfxMessageBox( message, MB_OKCANCEL | MB_ICONEXCLAMATION ) )
 		{
-			reg::CKey keyWorkspaces( AfxGetApp()->GetSectionKey( section ) );
+			reg::CKey keyWorkspaces( AfxGetApp()->GetSectionKey( m_section ) );
 
-			if ( keyWorkspaces.IsValid() && keyWorkspaces.HasSubKey( currProjectName ) )
-				keyWorkspaces.RemoveSubKey( currProjectName );
+			if ( keyWorkspaces.IsValid() && keyWorkspaces.HasSubKey( m_currProjectName ) )
+				keyWorkspaces.RemoveSubKey( m_currProjectName );
 		}
 	}
 }
@@ -320,7 +328,7 @@ void CWkspSaveDialog::CmDeleteAllProjects( void )
 	if ( readProjectName() )
 		if ( AfxMessageBox( IDC_DELETE_ALL_PROJECTS, MB_OKCANCEL | MB_ICONEXCLAMATION ) == IDOK )
 		{
-			reg::CKey keyWorkspaces( AfxGetApp()->GetSectionKey( section ) );
+			reg::CKey keyWorkspaces( AfxGetApp()->GetSectionKey( m_section ) );
 
 			if ( keyWorkspaces.IsValid() )
 				keyWorkspaces.RemoveAllSubKeys();
@@ -329,33 +337,34 @@ void CWkspSaveDialog::CmDeleteAllProjects( void )
 
 void CWkspSaveDialog::CkShowFullPath( void )
 {
-	showFullPath = IsDlgButtonChecked( IDC_SHOW_FULL_PATH_CHECK ) != FALSE;
-	fileList.SetCurSel( -1 );
+	m_rOptions.m_displayFullPath = IsDlgButtonChecked( IDC_SHOW_FULL_PATH_CHECK ) != FALSE;
+	m_fileList.SetCurSel( -1 );
 	updateFileContents();
 }
 
 void CWkspSaveDialog::CmSortByFiles( void )
 {
-	CRect buttonRect;
+ASSERT( false );
 
-	GetDlgItem( IDC_SORTBY_FILES )->GetWindowRect( buttonRect );
+/*	CRect buttonRect;
+	GetDlgItem( IDC_SORTBY_FILES )->GetWindowRect( &buttonRect );
 
 	m_rOptions.updateSortOrderMenu( m_sortOrderPopup );
-	UINT cmdId = m_sortOrderPopup.TrackPopupMenu( TPM_LEFTALIGN | TPM_TOPALIGN | TPM_RIGHTBUTTON | TPM_NONOTIFY | TPM_RETURNCMD,
+	UINT cmdId = m_sortOrderPopup.TrackPopupMenu( TPM_RIGHTBUTTON | TPM_NONOTIFY | TPM_RETURNCMD,
 												  buttonRect.right, buttonRect.top, this );
 
 	if ( cmdId != 0 )
 		if ( m_rOptions.OnMenuCommand( cmdId ) )
-			updateFileContents();
+			updateFileContents();*/
 }
 
 void CWkspSaveDialog::LBnSelChangeFiles( void )
 {
-	int selIndex = fileList.GetCurSel();
-	CString fullPath;
+	int selIndex = m_fileList.GetCurSel();
+	fs::CPath fullPath;
 
 	if ( selIndex != -1 )
-		fullPath = metaFolder.getFile( selIndex )->m_pathInfo.Get();
+		fullPath = m_folderItem.GetFileItems()[ selIndex ]->GetFilePath();
 
-	SetDlgItemText( IDC_FULLPATH_EDIT, fullPath );
+	SetDlgItemText( IDC_FULLPATH_EDIT, fullPath.GetPtr() );
 }

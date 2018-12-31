@@ -39,7 +39,7 @@ public:
 	std::tstring m_developerName;
 	fs::CPath m_codeTemplatePath;
 	UINT m_splitMaxColumn;
-	int m_menuVertSplitCount;
+	UINT m_menuVertSplitCount;
 	std::tstring m_singleLineCommentToken;
 
 	bool m_autoCodeGeneration;
