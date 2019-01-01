@@ -6,6 +6,8 @@
 #include "utl/CmdUpdate.h"
 #include "utl/ContainerUtilities.h"
 #include "utl/MenuUtilities.h"
+#include "utl/PostCall.h"
+#include "utl/ProcessUtils.h"
 #include "utl/Utilities.h"
 
 #ifdef _DEBUG
@@ -28,51 +30,44 @@ CTrackMenuWnd::~CTrackMenuWnd()
 
 bool CTrackMenuWnd::Create( CWnd* pParentWnd )
 {
-	return CStatic::Create( _T("TRACKING-STATIC"), WS_CHILD | WS_VISIBLE | SS_LEFT | SS_NOTIFY, CRect( 0, 0, 0, 0 ), pParentWnd ) != FALSE;
+	return CStatic::Create( _T("<TRACKING-STATIC>"), WS_CHILD | WS_VISIBLE | SS_LEFT, CRect( 0, 0, 0, 0 ), pParentWnd ) != FALSE;
 }
 
 UINT CTrackMenuWnd::TrackContextMenu( CMenu* pPopupMenu, CPoint screenPos /*= ui::GetCursorPos()*/, UINT flags /*= TPM_RIGHTBUTTON*/ )
 {
 	if ( m_rightClickRepeat )
-		ClearFlag( flags, TPM_RIGHTBUTTON );		// avoid eating right clicks as valid commands
+		ClearFlag( flags, TPM_RIGHTBUTTON );	// avoid eating right clicks as valid commands
 
 	if ( HasFlag( flags, TPM_RETURNCMD ) )
 	{
-		ClearFlag( flags, TPM_RETURNCMD );			// this returns the command anyway; avoid problems of CMenu::TrackPopupMenu returning 0xFFFF in the high word of the selected command
+		ClearFlag( flags, TPM_RETURNCMD );		// this returns the command anyway; avoid problems of CMenu::TrackPopupMenu returning 0xFFFF in the high word of the selected command
 		TRACE( "! CTrackMenuWnd::TrackContextMenu(): forced removing the TPM_RETURNCMD (sould not be passed)." );
 	}
-	ClearFlag( flags, TPM_NONOTIFY );				// we do need to receive and handle all menu messages
+	ClearFlag( flags, TPM_NONOTIFY );			// we do need to receive and handle all menu messages
 
-	SetFocus();										// MSDN documentation of CMenu::TrackPopupMenu requires SetForegroundWindow(), but we use a child window (static control)
+	SetFocus();									// MSDN documentation of CMenu::TrackPopupMenu requires SetForegroundWindow(), but we use a child window (static control)
 	m_selCmdId = 0;
+	m_subMenus.clear();
 
-	BOOL selected = ui::TrackPopupMenu( *pPopupMenu, this, screenPos, flags );
+	if ( proc::InDifferentThread( GetParent()->GetSafeHwnd() ) )
+	{	// simulate a window click to "unlock" the keyboard for menu selection - workaround CMenu::TrackPopupMenu multi-threading issues when cancelling the menu (clicking outside of it).
+		SendMessage( WM_LBUTTONDOWN, MK_LBUTTON );
+		PostMessage( WM_LBUTTONUP, MK_LBUTTON );
+	}
 
-	PostMessage( WM_NULL );							// TrackPopupMenu on MSDN: Force a task switch to the application that called TrackPopupMenu, by posting a benign message to the window or thread
+	BOOL selected = ui::TrackPopupMenu( *pPopupMenu, this, screenPos, flags ); selected;
 
-	if ( selected != FALSE )
-		ui::PumpPendingMessages( m_hWnd );			// wait for the WM_COMMAND message to be dispatched
+	PostMessage( WM_NULL );						// TrackPopupMenu on MSDN: Force a task switch to the application that called TrackPopupMenu, by posting a benign message to the window or thread
+	ui::PumpPendingMessages( m_hWnd );			// wait for the WM_COMMAND message to be dispatched
 
 	return m_selCmdId;
 }
 
 bool CTrackMenuWnd::HighlightMenuItem( HMENU hHoverPopup )
 {
-	ASSERT( m_hilightId != 0 );
-	ASSERT_PTR( ::IsMenu( hHoverPopup ) );
-
-	// simulate selection hilight on current item: by posting arrow down for non-separator items until reaching the m_hilightId item
-	if ( ::GetMenuState( hHoverPopup, m_hilightId, MF_BYCOMMAND ) != UINT_MAX )			// item exists in popup?
-		for ( UINT i = 0, count = ::GetMenuItemCount( hHoverPopup ); i != count; ++i )
-			if ( UINT itemId = ::GetMenuItemID( hHoverPopup, i ) )		// not a separator
-			{	// non-separator item, simulate arrow-down key
-				PostMessage( WM_KEYDOWN, VK_DOWN );
-
-				if ( itemId == m_hilightId )
-					return true;
-			}
-
-	return false;
+	return
+		ui::HoverOnMenuItem( m_hWnd, hHoverPopup, m_hilightId ) ||
+		ui::ScrollVisibleMenuItem( m_hWnd, hHoverPopup, m_hilightId );
 }
 
 std::pair< HMENU, UINT > CTrackMenuWnd::FindMenuItemFromPoint( const CPoint& screenPos ) const
@@ -129,7 +124,7 @@ void CTrackMenuWnd::OnInitMenuPopup( CMenu* pPopupMenu, UINT index, BOOL isSysMe
 	if ( !isSysMenu )
 	{
 		if ( m_hilightId != 0 )
-			HighlightMenuItem( pPopupMenu->GetSafeHmenu() );
+			ui::PostCall( this, &CTrackMenuWnd::HighlightMenuItem, pPopupMenu->GetSafeHmenu() );		// wait for the manu to become visible to allow hover item highlighting
 
 		utl::AddUnique( m_subMenus, pPopupMenu->GetSafeHmenu() );
 	}

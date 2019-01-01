@@ -241,34 +241,39 @@ namespace ui
 	}
 
 
-	unsigned int FindMenuItemIndex( const CMenu& rMenu, UINT itemId, unsigned int iFirst /*= 0*/ )
+	int FindMenuItemIndex( HMENU hMenu, UINT itemId, unsigned int iFirst /*= 0*/ )
 	{
-		for ( unsigned int count = rMenu.GetMenuItemCount(); iFirst < count; ++iFirst )
-			if ( rMenu.GetMenuItemID( iFirst ) == itemId )
+		ASSERT_PTR( hMenu );
+
+		for ( unsigned int count = ::GetMenuItemCount( hMenu ); iFirst < count; ++iFirst )
+			if ( ::GetMenuItemID( hMenu, iFirst ) == itemId )
 				return iFirst;
 
-		return UINT_MAX;
+		return -1;
 	}
 
-	unsigned int FindAfterMenuItemIndex( const CMenu& rMenu, UINT itemId, unsigned int iFirst /*= 0*/ )
+	int FindAfterMenuItemIndex( HMENU hMenu, UINT itemId, unsigned int iFirst /*= 0*/ )
 	{
-		unsigned int atIndex = FindMenuItemIndex( rMenu, itemId, iFirst );
-		if ( UINT_MAX == atIndex )
+		int atIndex = FindMenuItemIndex( hMenu, itemId, iFirst );
+		if ( -1 == atIndex )
 			return atIndex;
 
 		return atIndex + 1;			// the position just after
 	}
 
-	void QueryMenuItemIds( std::vector< UINT >& rItemIds, const CMenu& rMenu )
+	void QueryMenuItemIds( std::vector< UINT >& rItemIds, HMENU hMenu )
 	{
-		for ( unsigned int i = 0, count = rMenu.GetMenuItemCount(); i != count; ++i )
+		ASSERT_PTR( hMenu );
+
+		for ( unsigned int i = 0, count = ::GetMenuItemCount( hMenu ); i != count; ++i )
 		{
-			UINT state = rMenu.GetMenuState( i, MF_BYPOSITION );
+			UINT state = ::GetMenuState( hMenu, i, MF_BYPOSITION );
+			ASSERT( state != UINT_MAX );
 
 			if ( HasFlag( state, MF_POPUP ) )
-				QueryMenuItemIds( rItemIds, *rMenu.GetSubMenu( i ) );
+				QueryMenuItemIds( rItemIds, ::GetSubMenu( hMenu, i ) );
 			else if ( HasFlag( state, MFT_OWNERDRAW ) )
-				utl::AddUnique( rItemIds, rMenu.GetMenuItemID( i ) ); // even separators are added to m_noTouch map
+				utl::AddUnique( rItemIds, ::GetMenuItemID( hMenu, i ) );		// even separators are added to m_noTouch map
 		}
 	}
 
@@ -474,6 +479,53 @@ namespace ui
 	{
 		if ( HWND hMenuWnd = FindMenuWindowFromPoint() )
 			::InvalidateRect( hMenuWnd, NULL, TRUE );
+	}
+
+
+	bool ScrollVisibleMenuItem( HWND hTrackWnd, HMENU hMenu, UINT hiliteId )
+	{
+		ASSERT( hiliteId != 0 );
+		ASSERT_PTR( hTrackWnd );
+		ASSERT_PTR( ::IsMenu( hMenu ) );
+
+		// post arrow down for non-separator items until reaching the hiliteId item; scrolls the menu if necessary
+		if ( ::GetMenuState( hMenu, hiliteId, MF_BYCOMMAND ) != UINT_MAX )		// item exists in popup?
+			for ( UINT i = 0, count = ::GetMenuItemCount( hMenu ); i != count; ++i )
+				if ( UINT itemId = ::GetMenuItemID( hMenu, i ) )				// not a separator?
+				{	// non-separator item, simulate arrow-down key
+					::PostMessage( hTrackWnd, WM_KEYDOWN, VK_DOWN, 0 );
+
+					if ( itemId == hiliteId )
+						return true;
+				}
+
+		return false;
+	}
+
+	bool HoverOnMenuItem( HWND hTrackWnd, HMENU hMenu, UINT hiliteId )
+	{	// don't call this directly: works when called delayed, e.g. through a ui::PostCall when handling WM_INITMENUPOPUP
+		ASSERT( hiliteId != 0 );
+		ASSERT_PTR( hTrackWnd );
+		ASSERT_PTR( ::IsMenu( hMenu ) );
+
+		int itemPos = ui::FindMenuItemIndex( hMenu, hiliteId );
+		if ( itemPos != -1 )
+		{
+			CRect itemRect;
+			if ( ::GetMenuItemRect( hTrackWnd, hMenu, itemPos, &itemRect ) )
+				if ( !itemRect.IsRectEmpty() )
+				{
+					CPoint itemPoint = itemRect.CenterPoint();
+					CRect workspaceRect = ui::FindMonitorRect( hTrackWnd, ui::Workspace );
+					if ( workspaceRect.PtInRect( itemPoint ) )
+					{	// item is visible, no menu scrolling is required, so we're good
+						::SetCursorPos( itemPoint.x, itemPoint.y );
+						return true;
+					}
+				}
+		}
+
+		return false;
 	}
 }
 

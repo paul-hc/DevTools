@@ -67,10 +67,10 @@ namespace ui
 		return itemText.GetString();
 	}
 
-	unsigned int FindMenuItemIndex( const CMenu& rMenu, UINT itemId, unsigned int iFirst = 0 );
-	unsigned int FindAfterMenuItemIndex( const CMenu& rMenu, UINT itemId, unsigned int iFirst = 0 );		// subsequent position
+	int FindMenuItemIndex( HMENU hMenu, UINT itemId, unsigned int iFirst = 0 );
+	int FindAfterMenuItemIndex( HMENU hMenu, UINT itemId, unsigned int iFirst = 0 );		// subsequent position
 
-	void QueryMenuItemIds( std::vector< UINT >& rItemIds, const CMenu& rMenu );
+	void QueryMenuItemIds( std::vector< UINT >& rItemIds, HMENU hMenu );
 
 	HMENU CloneMenu( HMENU hSrcMenu );
 
@@ -96,6 +96,9 @@ namespace ui
 	HWND FindMenuWindowFromPoint( CPoint screenPos = ui::GetCursorPos() );
 	bool IsHiliteMenuItem( HMENU hMenu, int itemPos );
 	void InvalidateMenuWindow( void );
+
+	bool ScrollVisibleMenuItem( HWND hTrackWnd, HMENU hMenu, UINT hiliteId );
+	bool HoverOnMenuItem( HWND hTrackWnd, HMENU hMenu, UINT hiliteId );			// don't call this directly (menu must be visible): call delayed through ui::PostCall when handling WM_INITMENUPOPUP
 }
 
 

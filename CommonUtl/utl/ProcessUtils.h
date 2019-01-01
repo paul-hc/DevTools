@@ -31,6 +31,9 @@ namespace utl
 
 namespace proc
 {
+	inline bool InCurrentThread( HWND hWnd ) { ASSERT_PTR( hWnd ); return ::GetWindowThreadProcessId( hWnd, NULL ) == ::GetCurrentThreadId(); }
+	inline bool InDifferentThread( HWND hWnd ) { return !InCurrentThread( hWnd ); }
+
 	bool IsProcessElevated( HANDLE hProcess = ::GetCurrentProcess() );
 	bool IsProcessElevated( DWORD processId, DWORD access = SYNCHRONIZE );
 

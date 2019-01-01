@@ -470,8 +470,11 @@ bool CTargetMenu::DoAppendItem( CMenu* pMenu, UINT flags, UINT_PTR itemId /*= 0*
 
 	UINT maxVertItems = app::GetMenuVertSplitCount();
 
+	// note:
+	//	When adding a menu break, the menu is drawn as classic menu (blue background for selected item), not themed.
+	//	Themed menus use UP and DOWN arrows to scroll items into view.
 	if ( itemCount != 0 && 0 == ( itemCount % maxVertItems ) )
-		flags |= MF_MENUBARBREAK | MF_MENUBREAK;
+		flags |= MF_MENUBARBREAK;
 
 	return pMenu->AppendMenu( flags, itemId, pItemText ) != FALSE;
 }

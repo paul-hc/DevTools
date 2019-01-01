@@ -21,12 +21,9 @@ namespace ide
 	CScopedWindow::CScopedWindow( void )
 		: m_pFocusWnd( ide::GetFocusWindow() )
 		, m_pMainWnd( ide::GetMainWindow( m_pFocusWnd ) )
-		, m_hasDifferentThread( false )
+		, m_hasDifferentThread( m_pFocusWnd != NULL && proc::InDifferentThread( m_pFocusWnd->GetSafeHwnd() ) )	// VC 7.1+: this COM object runs in a different thread than the text window
 		, m_ideType( ide::FindIdeType( m_pMainWnd ) )
 	{
-		if ( IsValid() )
-			m_hasDifferentThread = ::GetWindowThreadProcessId( m_pFocusWnd->m_hWnd, NULL ) != ::GetCurrentThreadId();	// VC 7.1+: this COM object runs in a different thread than the text window
-
 		DEBUG_LOG( _T("IDE: %s"), FormatInfo().c_str() );
 	}
 
@@ -42,6 +39,9 @@ namespace ide
 			return false;
 
 		CScopedAttachThreadInput scopedThreadInput( hWnd );
+
+		::SetForegroundWindow( hWnd );
+
 		bool isFocused = ::GetFocus() == hWnd;
 
 		if ( !isFocused )
