@@ -50,10 +50,12 @@ void CWicImageTests::TestImageCache( ut::CTestDevice* pTestDev )
 	if ( GetImageSourceDirPath().IsEmpty() )
 		return;
 
-	fs::CPathEnumerator imageEnum;
+	fs::CEnumerator imageEnum;
 	fs::EnumFiles( &imageEnum, GetImageSourceDirPath().GetPtr(), _T("*.*") );
 
-	fs::TPathSet::const_iterator itFilePath = imageEnum.m_filePaths.begin();
+	fs::SortPaths( imageEnum.m_filePaths );
+
+	std::vector< fs::CPath >::const_iterator itFilePath = imageEnum.m_filePaths.begin();
 
 	enum { MaxSize = 10u, N5 = 5u, N15 = 15u };
 

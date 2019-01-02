@@ -129,7 +129,7 @@ void CThumbnailTests::TestImageThumbs( void )
 	if ( GetImageSourceDirPath().IsEmpty() )
 		return;
 
-	fs::CPathEnumerator imageEnum;
+	fs::CSortedEnumerator imageEnum;
 	fs::EnumFiles( &imageEnum, GetImageSourceDirPath().GetPtr(), _T("*.*") );
 
 	std::vector< CBitmap* > thumbs;
@@ -159,7 +159,7 @@ void CThumbnailTests::TestThumbnailCache( void )
 	if ( GetImageSourceDirPath().IsEmpty() )
 		return;
 
-	fs::CPathEnumerator imageEnum;
+	fs::CSortedEnumerator imageEnum;
 	fs::EnumFiles( &imageEnum, GetImageSourceDirPath().GetPtr(), _T("*.*") );
 
 	std::vector< CBitmap* > thumbs;

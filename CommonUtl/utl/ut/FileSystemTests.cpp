@@ -53,39 +53,51 @@ void CFileSystemTests::TestFileSystem( void )
 
 void CFileSystemTests::TestFileEnum( void )
 {
-	ut::CTempFilePairPool pool( _T("a|a.doc|a.txt|d1\\b|d1\\b.doc|d1\\b.txt|d1\\d2\\c|d1/d2/c.doc|d1\\d2\\c.txt") );
+	ut::CTempFilePairPool pool( _T("a|a.txt|a.doc|a.jpg|a.png|D1\\b|D1\\b.doc|D1\\b.txt|D1\\D2\\c|D1/D2/c.doc|D1\\D2\\c.txt|D1\\D2\\c.png") );
 	const fs::CPath& tempDirPath = pool.GetPoolDirPath();
 
 	{
 		fs::CEnumerator found( tempDirPath.Get() );
 		fs::EnumFiles( &found, tempDirPath.GetPtr(), _T("*.*"), Shallow );
-		ASSERT_EQUAL( _T("a|a.doc|a.txt"), ut::JoinFiles( found ) );
+		ASSERT_EQUAL( _T("a|a.doc|a.jpg|a.png|a.txt"), ut::JoinFiles( found ) );
 	}
 	{
 		fs::CEnumerator found( tempDirPath.Get() );
 		fs::EnumFiles( &found, tempDirPath.GetPtr(), _T("*.*"), Deep );
-		ASSERT_EQUAL( _T("a|a.doc|a.txt|d1\\b|d1\\b.doc|d1\\b.txt|d1\\d2\\c|d1\\d2\\c.doc|d1\\d2\\c.txt"), ut::JoinFiles( found ) );
+		ASSERT_EQUAL( _T("a|a.doc|a.jpg|a.png|a.txt|D1\\b|D1\\b.doc|D1\\b.txt|D1\\D2\\c|D1\\D2\\c.doc|D1\\D2\\c.png|D1\\D2\\c.txt"), ut::JoinFiles( found ) );
 	}
 	{
 		fs::CEnumerator found( tempDirPath.Get() );
-		fs::EnumFiles( &found, tempDirPath.GetPtr(), _T("*."), Deep );
-		ASSERT_EQUAL( _T("a|d1\\b|d1\\d2\\c"), ut::JoinFiles( found ) );
+		fs::EnumFiles( &found, tempDirPath.GetPtr(), _T("*."), Deep );			// filter files with no extension
+		ASSERT_EQUAL( _T("a|D1\\b|D1\\D2\\c"), ut::JoinFiles( found ) );
 	}
 	{
 		fs::CEnumerator found( tempDirPath.Get() );
 		fs::EnumFiles( &found, tempDirPath.GetPtr(), _T("*.doc"), Deep );
-		ASSERT_EQUAL( _T("a.doc|d1\\b.doc|d1\\d2\\c.doc"), ut::JoinFiles( found ) );
+		ASSERT_EQUAL( _T("a.doc|D1\\b.doc|D1\\D2\\c.doc"), ut::JoinFiles( found ) );
 	}
 	{
 		fs::CEnumerator found( tempDirPath.Get() );
 		fs::EnumFiles( &found, tempDirPath.GetPtr(), _T("*.doc;*.txt"), Deep );
-		ASSERT_EQUAL( _T("a.doc|a.txt|d1\\b.doc|d1\\b.txt|d1\\d2\\c.doc|d1\\d2\\c.txt"), ut::JoinFiles( found ) );
-		ASSERT_EQUAL( _T("d1|d1\\d2"), ut::JoinSubDirs( found ) );
+		ASSERT_EQUAL( _T("a.doc|a.txt|D1\\b.doc|D1\\b.txt|D1\\D2\\c.doc|D1\\D2\\c.txt"), ut::JoinFiles( found ) );
+		ASSERT_EQUAL( _T("D1|D1\\D2"), ut::JoinSubDirs( found ) );
 	}
 	{
 		fs::CEnumerator found( tempDirPath.Get() );
 		fs::EnumFiles( &found, tempDirPath.GetPtr(), _T("*.?oc;*.t?t"), Deep );
-		ASSERT_EQUAL( _T("a.doc|a.txt|d1\\b.doc|d1\\b.txt|d1\\d2\\c.doc|d1\\d2\\c.txt"), ut::JoinFiles( found ) );
+		ASSERT_EQUAL( _T("a.doc|a.txt|D1\\b.doc|D1\\b.txt|D1\\D2\\c.doc|D1\\D2\\c.txt"), ut::JoinFiles( found ) );
+	}
+	{
+		fs::CEnumerator found( tempDirPath.Get() );
+		fs::EnumFiles( &found, tempDirPath.GetPtr(), _T("*.jpg;*.png"), Deep );
+		ASSERT_EQUAL( _T("a.jpg|a.png|D1\\D2\\c.png"), ut::JoinFiles( found ) );
+		ASSERT_EQUAL( _T("D1|D1\\D2"), ut::JoinSubDirs( found ) );
+	}
+	{
+		fs::CEnumerator found( tempDirPath.Get() );
+		fs::EnumFiles( &found, tempDirPath.GetPtr(), _T("*.jpg;*.png"), Shallow );
+		ASSERT_EQUAL( _T("a.jpg|a.png"), ut::JoinFiles( found ) );
+		ASSERT_EQUAL( _T("D1"), ut::JoinSubDirs( found ) );				// only the shallow subdirs
 	}
 	{
 		fs::CEnumerator found( tempDirPath.Get() );
@@ -118,7 +130,7 @@ void CFileSystemTests::TestTempFilePool( void )
 		ASSERT_EQUAL( _T("a.txt|b.txt|c.txt"), pool.JoinDest() );
 	}
 	{
-		ut::CTempFilePairPool pool( _T("a.txt|d1\\b.txt|d1\\d2\\c.txt") );
+		ut::CTempFilePairPool pool( _T("a.txt|D1\\b.txt|D1\\D2\\c.txt") );
 		pool.CopySrc();
 		ASSERT_EQUAL( _T("a.txt|b.txt|c.txt"), pool.JoinDest() );
 	}
@@ -126,7 +138,7 @@ void CFileSystemTests::TestTempFilePool( void )
 
 void CFileSystemTests::TestFileAndDirectoryState( void )
 {
-	ut::CTempFilePool pool( _T("fa.txt|d1\\fb.txt") );
+	ut::CTempFilePool pool( _T("fa.txt|D1\\fb.txt") );
 
 	{
 		const fs::CPath& filePath = pool.GetFilePaths()[ 0 ];

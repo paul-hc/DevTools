@@ -213,8 +213,6 @@ namespace ui
 	HWND GetTopLevelParent( HWND hWnd );				// find first top-level parent (non-child)
 	inline CWnd* GetTopLevelParent( const CWnd* pWnd ) { return CWnd::FromHandle( GetTopLevelParent( pWnd->GetSafeHwnd() ) ); }
 
-	CWnd* FindTopLevelParentPermanent( HWND hWnd );		// find first parent (non-child) that is a permanent window (subclassed in this module)
-
 
 	void GetWindowText( std::tstring& rText, HWND hWnd );
 	inline std::tstring GetWindowText( HWND hWnd ) { std::tstring text; GetWindowText( text, hWnd ); return text; }		// no extra string copy

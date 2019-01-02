@@ -92,13 +92,13 @@ UINT CPathGenerator::FindNextAvailSeqCount( void ) const
 		// sweep existing files (source + outside) that match current format for the lowest seq count that is not used
 		fs::CPath dirPath = m_pRenamePairs->begin()->first.GetParentPath();			// use first source file dir path
 
-		std::vector< std::tstring > existingFilePaths;
+		std::vector< fs::CPath > existingFilePaths;
 		fs::EnumFiles( existingFilePaths, dirPath.GetPtr() );
 
-		for ( std::vector< std::tstring >::const_iterator itFilePath = existingFilePaths.begin(); itFilePath != existingFilePaths.end(); ++itFilePath )
+		for ( std::vector< fs::CPath >::const_iterator itFilePath = existingFilePaths.begin(); itFilePath != existingFilePaths.end(); ++itFilePath )
 		{
 			UINT seqCount;
-			if ( m_formatter.ParseSeqCount( seqCount, *itFilePath ) )
+			if ( m_formatter.ParseSeqCount( seqCount, itFilePath->Get() ) )
 				nextAvailSeqCount = std::max( nextAvailSeqCount, ++seqCount );		// increment for next avail
 		}
 	}

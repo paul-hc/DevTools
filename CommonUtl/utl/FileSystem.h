@@ -176,31 +176,44 @@ namespace fs
 
 namespace fs
 {
-	// files and sub-dirs as std::tstring; relative to m_refDirPath if specified
-
+	// files and sub-dirs in existing file-system order; relative to m_refDirPath if specified
+	//
 	struct CEnumerator : public IEnumerator, private utl::noncopyable
 	{
-		CEnumerator( const std::tstring refDirPath = std::tstring() ) : m_pChainEnum( NULL ), m_refDirPath( refDirPath ) {}
-		CEnumerator( IEnumerator* pChainEnum ) : m_pChainEnum( pChainEnum ) {}
+		CEnumerator( const std::tstring refDirPath = std::tstring() ) : m_pChainEnum( NULL ), m_refDirPath( refDirPath ), m_maxFiles( utl::npos ) {}
+		CEnumerator( IEnumerator* pChainEnum ) : m_pChainEnum( pChainEnum ), m_maxFiles( utl::npos ) {}
+
+		void SetMaxFiles( size_t maxFiles ) { ASSERT( m_filePaths.empty() && m_subDirPaths.empty() ); m_maxFiles = maxFiles; }
 
 		// IEnumerator interface
 		virtual void AddFoundFile( const TCHAR* pFilePath );
 		virtual void AddFoundSubDir( const TCHAR* pSubDirPath );
+		virtual bool MustStop( void ) const;
 	protected:
 		IEnumerator* m_pChainEnum;					// allows chaining for progress reporting
 		std::tstring m_refDirPath;					// to remove if common prefix
+	private:
+		size_t m_maxFiles;
 	public:
-		std::vector< std::tstring > m_filePaths;
-		std::vector< std::tstring > m_subDirPaths;
+		std::vector< fs::CPath > m_filePaths;
+		std::vector< fs::CPath > m_subDirPaths;
+	};
+
+
+	struct CSingleFileEnumerator : public CEnumerator
+	{
+		CSingleFileEnumerator( const std::tstring refDirPath = std::tstring() ) : CEnumerator( refDirPath ) { SetMaxFiles( 1 ); }
+
+		fs::CPath GetFoundPath( void ) const { return !m_filePaths.empty() ? m_filePaths.front() : fs::CPath(); }
 	};
 
 
 	// files and sub-dirs as fs::CPath, sorted intuitively; relative to m_refDirPath if specified
 
-	struct CPathEnumerator : public IEnumerator
+	struct CSortedEnumerator : public IEnumerator
 	{
-		CPathEnumerator( const std::tstring refDirPath = std::tstring() ) : m_pChainEnum( NULL ), m_refDirPath( refDirPath ) {}
-		CPathEnumerator( IEnumerator* pChainEnum ) : m_pChainEnum( pChainEnum ) {}
+		CSortedEnumerator( const std::tstring refDirPath = std::tstring() ) : m_pChainEnum( NULL ), m_refDirPath( refDirPath ) {}
+		CSortedEnumerator( IEnumerator* pChainEnum ) : m_pChainEnum( pChainEnum ) {}
 
 		// IEnumerator interface
 		virtual void AddFoundFile( const TCHAR* pFilePath );
@@ -218,8 +231,8 @@ namespace fs
 
 	void EnumFiles( IEnumerator* pEnumerator, const TCHAR* pDirPath, const TCHAR* pWildSpec = _T("*.*"), RecursionDepth depth = Shallow );
 
-	void EnumFiles( std::vector< std::tstring >& rFilePaths, const TCHAR* pDirPath, const TCHAR* pWildSpec = _T("*.*"), RecursionDepth depth = Shallow );
-	void EnumSubDirs( std::vector< std::tstring >& rSubDirPaths, const TCHAR* pDirPath, const TCHAR* pWildSpec = _T("*.*"), RecursionDepth depth = Shallow );
+	void EnumFiles( std::vector< fs::CPath >& rFilePaths, const TCHAR* pDirPath, const TCHAR* pWildSpec = _T("*.*"), RecursionDepth depth = Shallow );
+	void EnumSubDirs( std::vector< fs::CPath >& rSubDirPaths, const TCHAR* pDirPath, const TCHAR* pWildSpec = _T("*.*"), RecursionDepth depth = Shallow );
 
 	fs::CPath FindFirstFile( const TCHAR* pDirPath, const TCHAR* pWildSpec = _T("*.*"), RecursionDepth depth = Shallow );
 }

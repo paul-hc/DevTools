@@ -46,13 +46,15 @@ void CDuplicateFilesFinder::SearchForFiles( std::vector< fs::CPath >& rFoundPath
 		const fs::CPath& srcPath = ( *itSrcPathItem )->GetFilePath();
 		if ( fs::IsValidDirectory( srcPath.GetPtr() ) )
 		{
-			fs::CPathEnumerator found( pProgressEnum );
+			fs::CEnumerator found( pProgressEnum );
 			fs::EnumFiles( &found, srcPath.GetPtr(), m_wildSpec.c_str(), Deep );
+
+			fs::SortPaths( found.m_filePaths );
 
 			rFoundPaths.reserve( rFoundPaths.size() + found.m_filePaths.size() );
 
 			CWaitCursor wait;			// could take a long time for directories with many subdirectories and files
-			for ( fs::TPathSet::const_iterator itFilePath = found.m_filePaths.begin(); itFilePath != found.m_filePaths.end(); ++itFilePath )
+			for ( std::vector< fs::CPath >::const_iterator itFilePath = found.m_filePaths.begin(); itFilePath != found.m_filePaths.end(); ++itFilePath )
 				if ( uniquePaths.insert( *itFilePath ).second )		// path is unique?
 					rFoundPaths.push_back( *itFilePath );
 

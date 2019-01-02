@@ -106,11 +106,11 @@ CScopedMainWnd::CScopedMainWnd( HWND hWnd )
 	, m_pOldMainWnd( NULL )
 {
 	CWnd* pMainWnd = AfxGetMainWnd();
-	bool fromThisModule = ui::IsWndPermanent( pMainWnd->GetSafeHwnd() );
+	bool fromThisModule = ui::IsPermanentWnd( pMainWnd->GetSafeHwnd() );
 
 	if ( hWnd != NULL && ::IsWindow( hWnd ) )
 		if ( fromThisModule )
-			m_pParentOwner = ui::FindTopParentPermanent( hWnd );
+			m_pParentOwner = CWnd::FromHandlePermanent( ui::GetTopLevelParent( hWnd ) );
 		else
 			m_pParentOwner = CWnd::FromHandle( hWnd )->GetTopLevelParent();
 

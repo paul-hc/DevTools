@@ -85,10 +85,12 @@ void CFolderItem::SearchForFiles( RecursionDepth depth, CPathIndex* pPathIndex )
 	Clear();
 	ASSERT( fs::IsValidDirectory( GetFilePath().GetPtr() ) );
 
-	fs::CPathEnumerator found;
+	fs::CEnumerator found;
 	fs::EnumFiles( &found, GetFilePath().GetPtr(), m_wildSpecs.c_str(), Shallow );
 
-	for ( fs::TPathSet::const_iterator itFilePath = found.m_filePaths.begin(); itFilePath != found.m_filePaths.end(); ++itFilePath )
+	fs::SortPaths( found.m_filePaths );				// natural path order
+
+	for ( std::vector< fs::CPath >::const_iterator itFilePath = found.m_filePaths.begin(); itFilePath != found.m_filePaths.end(); ++itFilePath )
 		if ( NULL == pPathIndex || pPathIndex->RegisterUnique( *itFilePath ) )
 			m_files.push_back( new CFileItem( this, *itFilePath ) );
 
@@ -96,7 +98,9 @@ void CFolderItem::SearchForFiles( RecursionDepth depth, CPathIndex* pPathIndex )
 
 	if ( Deep == depth )
 	{
-		for ( fs::TPathSet::const_iterator itSubDirPath = found.m_subDirPaths.begin(); itSubDirPath != found.m_subDirPaths.end(); ++itSubDirPath )
+		fs::SortPaths( found.m_subDirPaths );		// natural path order
+
+		for ( std::vector< fs::CPath >::const_iterator itSubDirPath = found.m_subDirPaths.begin(); itSubDirPath != found.m_subDirPaths.end(); ++itSubDirPath )
 			if ( NULL == pPathIndex || pPathIndex->RegisterUnique( *itSubDirPath ) )
 			{
 				std::auto_ptr< CFolderItem > pNewFolder( new CFolderItem( this, *itSubDirPath ) );
