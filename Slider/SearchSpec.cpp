@@ -95,7 +95,7 @@ void CSearchSpec::EnumImageFiles( fs::IEnumerator* pEnumerator ) const
 	switch ( m_type )
 	{
 		case DirPath:
-			fs::EnumFiles( pEnumerator, m_searchPath.GetPtr(), GetImageSearchFilters().c_str(), RecurseSubDirs == m_options ? Deep : Shallow );
+			fs::EnumFiles( pEnumerator, m_searchPath, GetImageSearchFilters().c_str(), RecurseSubDirs == m_options ? Deep : Shallow );
 			break;
 		case ArchiveStgFile:
 		case ExplicitFile:

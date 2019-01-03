@@ -158,7 +158,7 @@ namespace fs
 			return false;
 
 		fs::CEnumerator found;
-		fs::EnumFiles( &found, pDirPath, _T("*") );
+		fs::EnumFiles( &found, fs::CPath( pDirPath ), _T("*") );
 
 		for ( std::vector< fs::CPath >::iterator itSubDirPath = found.m_subDirPaths.begin(); itSubDirPath != found.m_subDirPaths.end(); )
 			if ( fs::DeleteDir( itSubDirPath->GetPtr() ) )
@@ -569,15 +569,14 @@ namespace fs
 	}
 
 
-	void EnumFiles( IEnumerator* pEnumerator, const TCHAR* pDirPath, const TCHAR* pWildSpec /*= _T("*.*")*/, RecursionDepth depth /*= Shallow*/ )
+	void EnumFiles( IEnumerator* pEnumerator, const fs::CPath& dirPath, const TCHAR* pWildSpec /*= _T("*.*")*/, RecursionDepth depth /*= Shallow*/ )
 	{
 		ASSERT_PTR( pEnumerator );
-		ASSERT_PTR( pDirPath );
 
 		if ( str::IsEmpty( pWildSpec ) )
 			pWildSpec = _T("*");
 
-		fs::CPath dirPathFilter = fs::CPath( pDirPath ) /
+		fs::CPath dirPathFilter = dirPath /
 			fs::CPath( Deep == depth || path::IsMultipleWildcard( pWildSpec )
 				? _T("*")			// need to relax filter to all so that it covers sub-directories
 				: pWildSpec );
@@ -611,31 +610,31 @@ namespace fs
 			fs::SortPaths( subDirPaths );		// natural path order
 
 			for ( std::vector< fs::CPath >::const_iterator itSubDirPath = subDirPaths.begin(); itSubDirPath != subDirPaths.end(); ++itSubDirPath )
-				EnumFiles( pEnumerator, itSubDirPath->GetPtr(), pWildSpec, depth );
+				EnumFiles( pEnumerator, *itSubDirPath, pWildSpec, depth );
 		}
 	}
 
-	void EnumFiles( std::vector< fs::CPath >& rFilePaths, const TCHAR* pDirPath, const TCHAR* pWildSpec /*= _T("*")*/, RecursionDepth depth /*= Shallow*/ )
+	void EnumFiles( std::vector< fs::CPath >& rFilePaths, const fs::CPath& dirPath, const TCHAR* pWildSpec /*= _T("*")*/, RecursionDepth depth /*= Shallow*/ )
 	{
 		CEnumerator found;
-		EnumFiles( &found, pDirPath, pWildSpec, depth );
+		EnumFiles( &found, dirPath, pWildSpec, depth );
 
 		rFilePaths.assign( found.m_filePaths.begin(), found.m_filePaths.end() );
 	}
 
-	void EnumSubDirs( std::vector< fs::CPath >& rSubDirPaths, const TCHAR* pDirPath, const TCHAR* pWildSpec /*= _T("*.*")*/, RecursionDepth depth /*= Shallow*/ )
+	void EnumSubDirs( std::vector< fs::CPath >& rSubDirPaths, const fs::CPath& dirPath, const TCHAR* pWildSpec /*= _T("*.*")*/, RecursionDepth depth /*= Shallow*/ )
 	{
 		CEnumerator found;
-		EnumFiles( &found, pDirPath, pWildSpec, depth );
+		EnumFiles( &found, dirPath, pWildSpec, depth );
 
 		rSubDirPaths.assign( found.m_subDirPaths.begin(), found.m_subDirPaths.end() );
 	}
 
 
-	fs::CPath FindFirstFile( const TCHAR* pDirPath, const TCHAR* pWildSpec /*= _T("*.*")*/, RecursionDepth depth /*= Shallow*/ )
+	fs::CPath FindFirstFile( const fs::CPath& dirPath, const TCHAR* pWildSpec /*= _T("*.*")*/, RecursionDepth depth /*= Shallow*/ )
 	{
 		CSingleFileEnumerator singleEnumer;
-		EnumFiles( &singleEnumer, pDirPath, pWildSpec, depth );
+		EnumFiles( &singleEnumer, dirPath, pWildSpec, depth );
 		return singleEnumer.GetFoundPath();
 	}
 

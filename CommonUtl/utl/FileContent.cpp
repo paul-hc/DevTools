@@ -180,7 +180,7 @@ namespace fs
 		std::tstring wildSpec = srcParts.m_fname + _T("*") + srcParts.m_ext;	// "name*.ext"
 
 		CDupFileEnumerator enumerator( *this );
-		EnumFiles( &enumerator, m_backupDirPath.GetPtr(), wildSpec.c_str(), Shallow );
+		EnumFiles( &enumerator, m_backupDirPath, wildSpec.c_str(), Shallow );
 
 		if ( enumerator.m_dupFilePaths.empty() )
 			return false;

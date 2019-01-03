@@ -82,7 +82,7 @@ void CFileTransfer::SearchSourceFiles( const fs::CPath& dirPath )
 	if ( m_pOptions->m_justCreateTargetDirs )
 		AddTransferItem( new CTransferItem( dirPath, m_pOptions->m_sourceDirPath, m_pOptions->m_targetDirPath ) );
 	else
-		fs::EnumFiles( this, dirPath.GetPtr(), m_pOptions->m_searchSpecs.c_str(), m_pOptions->m_recurseSubDirectories ? Deep : Shallow );
+		fs::EnumFiles( this, dirPath, m_pOptions->m_searchSpecs.c_str(), m_pOptions->m_recurseSubDirectories ? Deep : Shallow );
 }
 
 void CFileTransfer::AddFoundSubDir( const TCHAR* pSubDirPath )

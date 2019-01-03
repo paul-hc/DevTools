@@ -29,7 +29,7 @@ namespace ut
 	std::tstring EnumDirFiles( const fs::CPath& dirPath, const TCHAR wildSpec[] = _T("*.*") )
 	{
 		fs::CEnumerator found( dirPath.Get() );
-		fs::EnumFiles( &found, dirPath.GetPtr(), wildSpec );
+		fs::EnumFiles( &found, dirPath, wildSpec );
 		return ut::JoinFiles( found );
 	}
 

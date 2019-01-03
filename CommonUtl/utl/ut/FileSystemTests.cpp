@@ -23,6 +23,12 @@ namespace ut
 	static const CTime s_ct( 2017, 7, 1, 14, 10, 0 );
 	static const CTime s_mt( 2017, 7, 1, 14, 20, 0 );
 	static const CTime s_at( 2017, 7, 1, 14, 30, 0 );
+
+
+	fs::CPath FindFirstFile( const fs::CPath& dirPath, const TCHAR* pWildSpec = _T("*.*"), RecursionDepth depth = Shallow )
+	{
+		return StripDirPrefix( fs::FindFirstFile( dirPath, pWildSpec, depth ), dirPath );
+	}
 }
 
 
@@ -53,57 +59,68 @@ void CFileSystemTests::TestFileSystem( void )
 
 void CFileSystemTests::TestFileEnum( void )
 {
-	ut::CTempFilePairPool pool( _T("a|a.txt|a.doc|a.jpg|a.png|D1\\b|D1\\b.doc|D1\\b.txt|D1\\D2\\c|D1/D2/c.doc|D1\\D2\\c.txt|D1\\D2\\c.png") );
+	ut::CTempFilePairPool pool( _T("a|a.txt|a.doc|a.jpg|a.png|D1\\b|D1\\b.doc|D1\\b.txt|D1\\D2\\c|D1/D2/c.doc|D1\\D2\\c.png|D1\\D2\\c.txt") );
 	const fs::CPath& tempDirPath = pool.GetPoolDirPath();
 
 	{
 		fs::CEnumerator found( tempDirPath.Get() );
-		fs::EnumFiles( &found, tempDirPath.GetPtr(), _T("*.*"), Shallow );
+		fs::EnumFiles( &found, tempDirPath, _T("*.*"), Shallow );
 		ASSERT_EQUAL( _T("a|a.doc|a.jpg|a.png|a.txt"), ut::JoinFiles( found ) );
 	}
 	{
 		fs::CEnumerator found( tempDirPath.Get() );
-		fs::EnumFiles( &found, tempDirPath.GetPtr(), _T("*.*"), Deep );
+		fs::EnumFiles( &found, tempDirPath, _T("*.*"), Deep );
 		ASSERT_EQUAL( _T("a|a.doc|a.jpg|a.png|a.txt|D1\\b|D1\\b.doc|D1\\b.txt|D1\\D2\\c|D1\\D2\\c.doc|D1\\D2\\c.png|D1\\D2\\c.txt"), ut::JoinFiles( found ) );
 	}
 	{
 		fs::CEnumerator found( tempDirPath.Get() );
-		fs::EnumFiles( &found, tempDirPath.GetPtr(), _T("*."), Deep );			// filter files with no extension
+		fs::EnumFiles( &found, tempDirPath, _T("*."), Deep );			// filter files with no extension
 		ASSERT_EQUAL( _T("a|D1\\b|D1\\D2\\c"), ut::JoinFiles( found ) );
 	}
 	{
 		fs::CEnumerator found( tempDirPath.Get() );
-		fs::EnumFiles( &found, tempDirPath.GetPtr(), _T("*.doc"), Deep );
+		fs::EnumFiles( &found, tempDirPath, _T("*.doc"), Deep );
 		ASSERT_EQUAL( _T("a.doc|D1\\b.doc|D1\\D2\\c.doc"), ut::JoinFiles( found ) );
 	}
 	{
 		fs::CEnumerator found( tempDirPath.Get() );
-		fs::EnumFiles( &found, tempDirPath.GetPtr(), _T("*.doc;*.txt"), Deep );
+		fs::EnumFiles( &found, tempDirPath, _T("*.doc;*.txt"), Deep );
 		ASSERT_EQUAL( _T("a.doc|a.txt|D1\\b.doc|D1\\b.txt|D1\\D2\\c.doc|D1\\D2\\c.txt"), ut::JoinFiles( found ) );
 		ASSERT_EQUAL( _T("D1|D1\\D2"), ut::JoinSubDirs( found ) );
 	}
 	{
 		fs::CEnumerator found( tempDirPath.Get() );
-		fs::EnumFiles( &found, tempDirPath.GetPtr(), _T("*.?oc;*.t?t"), Deep );
+		fs::EnumFiles( &found, tempDirPath, _T("*.?oc;*.t?t"), Deep );
 		ASSERT_EQUAL( _T("a.doc|a.txt|D1\\b.doc|D1\\b.txt|D1\\D2\\c.doc|D1\\D2\\c.txt"), ut::JoinFiles( found ) );
 	}
 	{
 		fs::CEnumerator found( tempDirPath.Get() );
-		fs::EnumFiles( &found, tempDirPath.GetPtr(), _T("*.jpg;*.png"), Deep );
+		fs::EnumFiles( &found, tempDirPath, _T("*.jpg;*.png"), Deep );
 		ASSERT_EQUAL( _T("a.jpg|a.png|D1\\D2\\c.png"), ut::JoinFiles( found ) );
 		ASSERT_EQUAL( _T("D1|D1\\D2"), ut::JoinSubDirs( found ) );
 	}
 	{
 		fs::CEnumerator found( tempDirPath.Get() );
-		fs::EnumFiles( &found, tempDirPath.GetPtr(), _T("*.jpg;*.png"), Shallow );
+		fs::EnumFiles( &found, tempDirPath, _T("*.jpg;*.png"), Shallow );
 		ASSERT_EQUAL( _T("a.jpg|a.png"), ut::JoinFiles( found ) );
 		ASSERT_EQUAL( _T("D1"), ut::JoinSubDirs( found ) );				// only the shallow subdirs
 	}
 	{
 		fs::CEnumerator found( tempDirPath.Get() );
-		fs::EnumFiles( &found, tempDirPath.GetPtr(), _T("*.exe;*.bat"), Deep );
+		fs::EnumFiles( &found, tempDirPath, _T("*.exe;*.bat"), Deep );
 		ASSERT_EQUAL( _T(""), ut::JoinFiles( found ) );
 	}
+
+	ASSERT_EQUAL( _T("a"), ut::FindFirstFile( tempDirPath, _T("*"), Deep ) );
+	ASSERT_EQUAL( _T("a"), ut::FindFirstFile( tempDirPath, _T("*.*"), Shallow ) );
+	ASSERT_EQUAL( _T("a"), ut::FindFirstFile( tempDirPath, _T("*."), Shallow ) );
+	ASSERT_EQUAL( _T("a.png"), ut::FindFirstFile( tempDirPath, _T("*.png"), Shallow ) );
+	ASSERT_EQUAL( _T("a.png"), ut::FindFirstFile( tempDirPath, _T("a*.png"), Shallow ) );
+	ASSERT_EQUAL( _T("a.png"), ut::FindFirstFile( tempDirPath, _T("*a*.png"), Shallow ) );
+	ASSERT_EQUAL( _T(""), ut::FindFirstFile( tempDirPath, _T("c.png"), Shallow ) );
+	ASSERT_EQUAL( _T("D1\\D2\\c.png"), ut::FindFirstFile( tempDirPath, _T("c.png"), Deep ) );
+
+	ASSERT_EQUAL( _T(""), ut::FindFirstFile( tempDirPath, _T("*.exe"), Deep ) );
 }
 
 void CFileSystemTests::TestStgShortFilenames( void )

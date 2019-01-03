@@ -214,7 +214,7 @@ namespace ut
 					  const TCHAR* pWildSpec /*= _T("*")*/, RecursionDepth depth /*= Deep*/ )
 	{
 		fs::CEnumerator found( dirPath.Get() );
-		fs::EnumFiles( &found, dirPath.GetPtr(), pWildSpec, depth );
+		fs::EnumFiles( &found, dirPath, pWildSpec, depth );
 
 		rFilePaths.assign( found.m_filePaths.begin(), found.m_filePaths.end() );
 
@@ -228,7 +228,7 @@ namespace ut
 						RecursionDepth depth /*= Deep*/ )
 	{
 		fs::CEnumerator found( dirPath.Get() );
-		fs::EnumFiles( &found, dirPath.GetPtr(), _T("*"), depth );
+		fs::EnumFiles( &found, dirPath, _T("*"), depth );
 
 		rSubDirPaths.assign( found.m_subDirPaths.begin(), found.m_subDirPaths.end() );
 

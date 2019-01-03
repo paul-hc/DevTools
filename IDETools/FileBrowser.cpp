@@ -86,7 +86,7 @@ void CFolderItem::SearchForFiles( RecursionDepth depth, CPathIndex* pPathIndex )
 	ASSERT( fs::IsValidDirectory( GetFilePath().GetPtr() ) );
 
 	fs::CEnumerator found;
-	fs::EnumFiles( &found, GetFilePath().GetPtr(), m_wildSpecs.c_str(), Shallow );
+	fs::EnumFiles( &found, GetFilePath(), m_wildSpecs.c_str(), Shallow );
 
 	fs::SortPaths( found.m_filePaths );				// natural path order
 

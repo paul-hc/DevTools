@@ -229,12 +229,12 @@ namespace fs
 
 	// pWildSpec can be multiple: "*.*", "*.doc;*.txt"
 
-	void EnumFiles( IEnumerator* pEnumerator, const TCHAR* pDirPath, const TCHAR* pWildSpec = _T("*.*"), RecursionDepth depth = Shallow );
+	void EnumFiles( IEnumerator* pEnumerator, const fs::CPath& dirPath, const TCHAR* pWildSpec = _T("*.*"), RecursionDepth depth = Shallow );
 
-	void EnumFiles( std::vector< fs::CPath >& rFilePaths, const TCHAR* pDirPath, const TCHAR* pWildSpec = _T("*.*"), RecursionDepth depth = Shallow );
-	void EnumSubDirs( std::vector< fs::CPath >& rSubDirPaths, const TCHAR* pDirPath, const TCHAR* pWildSpec = _T("*.*"), RecursionDepth depth = Shallow );
+	void EnumFiles( std::vector< fs::CPath >& rFilePaths, const fs::CPath& dirPath, const TCHAR* pWildSpec = _T("*.*"), RecursionDepth depth = Shallow );
+	void EnumSubDirs( std::vector< fs::CPath >& rSubDirPaths, const fs::CPath& dirPath, const TCHAR* pWildSpec = _T("*.*"), RecursionDepth depth = Shallow );
 
-	fs::CPath FindFirstFile( const TCHAR* pDirPath, const TCHAR* pWildSpec = _T("*.*"), RecursionDepth depth = Shallow );
+	fs::CPath FindFirstFile( const fs::CPath& dirPath, const TCHAR* pWildSpec = _T("*.*"), RecursionDepth depth = Shallow );
 }
 
 
