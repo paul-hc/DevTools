@@ -143,7 +143,7 @@ bool CShellFileDialog::ReplaceExt( std::tstring& rFilePath, const COMDLG_FILTERS
 			{
 				fs::CPathParts parts( rFilePath );
 				parts.m_ext = extensions.GetDefaultExt();
-				rFilePath = parts.MakePath();
+				rFilePath = parts.MakePath().Get();
 				return true;
 			}
 	}

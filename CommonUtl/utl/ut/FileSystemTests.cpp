@@ -23,12 +23,6 @@ namespace ut
 	static const CTime s_ct( 2017, 7, 1, 14, 10, 0 );
 	static const CTime s_mt( 2017, 7, 1, 14, 20, 0 );
 	static const CTime s_at( 2017, 7, 1, 14, 30, 0 );
-
-
-	fs::CPath FindFirstFile( const fs::CPath& dirPath, const TCHAR* pWildSpec = _T("*.*"), RecursionDepth depth = Shallow )
-	{
-		return StripDirPrefix( fs::FindFirstFile( dirPath, pWildSpec, depth ), dirPath );
-	}
 }
 
 
@@ -59,68 +53,94 @@ void CFileSystemTests::TestFileSystem( void )
 
 void CFileSystemTests::TestFileEnum( void )
 {
-	ut::CTempFilePairPool pool( _T("a|a.txt|a.doc|a.jpg|a.png|D1\\b|D1\\b.doc|D1\\b.txt|D1\\D2\\c|D1/D2/c.doc|D1\\D2\\c.png|D1\\D2\\c.txt") );
-	const fs::CPath& tempDirPath = pool.GetPoolDirPath();
+	ut::CTempFilePool pool( _T("a|a.txt|a.doc|a.jpg|a.png|D1\\b|D1\\b.doc|D1\\b.txt|D1\\D2\\c|D1/D2/c.doc|D1\\D2\\c.png|D1\\D2\\c.txt") );
+	const fs::CPath& poolDirPath = pool.GetPoolDirPath();
 
 	{
-		fs::CRelativeEnumerator found( tempDirPath );
-		fs::EnumFiles( &found, tempDirPath, _T("*.*"), Shallow );
+		fs::CRelativeEnumerator found( poolDirPath );
+		fs::EnumFiles( &found, poolDirPath, _T("*.*"), Shallow );
 		ASSERT_EQUAL( _T("a|a.doc|a.jpg|a.png|a.txt"), ut::JoinFiles( found ) );
 	}
 	{
-		fs::CRelativeEnumerator found( tempDirPath );
-		fs::EnumFiles( &found, tempDirPath, _T("*.*"), Deep );
+		fs::CRelativeEnumerator found( poolDirPath );
+		fs::EnumFiles( &found, poolDirPath, _T("*.*"), Deep );
 		ASSERT_EQUAL( _T("a|a.doc|a.jpg|a.png|a.txt|D1\\b|D1\\b.doc|D1\\b.txt|D1\\D2\\c|D1\\D2\\c.doc|D1\\D2\\c.png|D1\\D2\\c.txt"), ut::JoinFiles( found ) );
 	}
 	{
-		fs::CRelativeEnumerator found( tempDirPath );
-		fs::EnumFiles( &found, tempDirPath, _T("*."), Deep );			// filter files with no extension
+		fs::CRelativeEnumerator found( poolDirPath );
+		fs::EnumFiles( &found, poolDirPath, _T("*."), Deep );			// filter files with no extension
 		ASSERT_EQUAL( _T("a|D1\\b|D1\\D2\\c"), ut::JoinFiles( found ) );
 	}
 	{
-		fs::CRelativeEnumerator found( tempDirPath );
-		fs::EnumFiles( &found, tempDirPath, _T("*.doc"), Deep );
+		fs::CRelativeEnumerator found( poolDirPath );
+		fs::EnumFiles( &found, poolDirPath, _T("*.doc"), Deep );
 		ASSERT_EQUAL( _T("a.doc|D1\\b.doc|D1\\D2\\c.doc"), ut::JoinFiles( found ) );
 	}
 	{
-		fs::CRelativeEnumerator found( tempDirPath );
-		fs::EnumFiles( &found, tempDirPath, _T("*.doc;*.txt"), Deep );
+		fs::CRelativeEnumerator found( poolDirPath );
+		fs::EnumFiles( &found, poolDirPath, _T("*.doc;*.txt"), Deep );
 		ASSERT_EQUAL( _T("a.doc|a.txt|D1\\b.doc|D1\\b.txt|D1\\D2\\c.doc|D1\\D2\\c.txt"), ut::JoinFiles( found ) );
 		ASSERT_EQUAL( _T("D1|D1\\D2"), ut::JoinSubDirs( found ) );
 	}
 	{
-		fs::CRelativeEnumerator found( tempDirPath );
-		fs::EnumFiles( &found, tempDirPath, _T("*.?oc;*.t?t"), Deep );
+		fs::CRelativeEnumerator found( poolDirPath );
+		fs::EnumFiles( &found, poolDirPath, _T("*.?oc;*.t?t"), Deep );
 		ASSERT_EQUAL( _T("a.doc|a.txt|D1\\b.doc|D1\\b.txt|D1\\D2\\c.doc|D1\\D2\\c.txt"), ut::JoinFiles( found ) );
 	}
 	{
-		fs::CRelativeEnumerator found( tempDirPath );
-		fs::EnumFiles( &found, tempDirPath, _T("*.jpg;*.png"), Deep );
+		fs::CRelativeEnumerator found( poolDirPath );
+		fs::EnumFiles( &found, poolDirPath, _T("*.jpg;*.png"), Deep );
 		ASSERT_EQUAL( _T("a.jpg|a.png|D1\\D2\\c.png"), ut::JoinFiles( found ) );
 		ASSERT_EQUAL( _T("D1|D1\\D2"), ut::JoinSubDirs( found ) );
 	}
 	{
-		fs::CRelativeEnumerator found( tempDirPath );
-		fs::EnumFiles( &found, tempDirPath, _T("*.jpg;*.png"), Shallow );
+		fs::CRelativeEnumerator found( poolDirPath );
+		fs::EnumFiles( &found, poolDirPath, _T("*.jpg;*.png"), Shallow );
 		ASSERT_EQUAL( _T("a.jpg|a.png"), ut::JoinFiles( found ) );
 		ASSERT_EQUAL( _T("D1"), ut::JoinSubDirs( found ) );				// only the shallow subdirs
 	}
 	{
-		fs::CRelativeEnumerator found( tempDirPath );
-		fs::EnumFiles( &found, tempDirPath, _T("*.exe;*.bat"), Deep );
+		fs::CRelativeEnumerator found( poolDirPath );
+		fs::EnumFiles( &found, poolDirPath, _T("*.exe;*.bat"), Deep );
 		ASSERT_EQUAL( _T(""), ut::JoinFiles( found ) );
 	}
 
-	ASSERT_EQUAL( _T("a"), ut::FindFirstFile( tempDirPath, _T("*"), Deep ) );
-	ASSERT_EQUAL( _T("a"), ut::FindFirstFile( tempDirPath, _T("*.*"), Shallow ) );
-	ASSERT_EQUAL( _T("a"), ut::FindFirstFile( tempDirPath, _T("*."), Shallow ) );
-	ASSERT_EQUAL( _T("a.png"), ut::FindFirstFile( tempDirPath, _T("*.png"), Shallow ) );
-	ASSERT_EQUAL( _T("a.png"), ut::FindFirstFile( tempDirPath, _T("a*.png"), Shallow ) );
-	ASSERT_EQUAL( _T("a.png"), ut::FindFirstFile( tempDirPath, _T("*a*.png"), Shallow ) );
-	ASSERT_EQUAL( _T(""), ut::FindFirstFile( tempDirPath, _T("c.png"), Shallow ) );
-	ASSERT_EQUAL( _T("D1\\D2\\c.png"), ut::FindFirstFile( tempDirPath, _T("c.png"), Deep ) );
+	ASSERT_EQUAL( _T("a"), ut::FindFirstFile( poolDirPath, _T("*"), Deep ) );
+	ASSERT_EQUAL( _T("a"), ut::FindFirstFile( poolDirPath, _T("*.*"), Shallow ) );
+	ASSERT_EQUAL( _T("a"), ut::FindFirstFile( poolDirPath, _T("*."), Shallow ) );
+	ASSERT_EQUAL( _T("a.png"), ut::FindFirstFile( poolDirPath, _T("*.png"), Shallow ) );
+	ASSERT_EQUAL( _T("a.png"), ut::FindFirstFile( poolDirPath, _T("a*.png"), Shallow ) );
+	ASSERT_EQUAL( _T("a.png"), ut::FindFirstFile( poolDirPath, _T("*a*.png"), Shallow ) );
+	ASSERT_EQUAL( _T(""), ut::FindFirstFile( poolDirPath, _T("c.png"), Shallow ) );
+	ASSERT_EQUAL( _T("D1\\D2\\c.png"), ut::FindFirstFile( poolDirPath, _T("c.png"), Deep ) );
 
-	ASSERT_EQUAL( _T(""), ut::FindFirstFile( tempDirPath, _T("*.exe"), Deep ) );
+	ASSERT_EQUAL( _T(""), ut::FindFirstFile( poolDirPath, _T("*.exe"), Deep ) );
+}
+
+void CFileSystemTests::TestNumericFilename( void )
+{
+	const fs::CPath& poolDirPath = ut::CTempFilePool::MakePoolDirPath();
+
+	const fs::CPath seedFilePath = ut::CTempFilePool::MakePoolDirPath() / fs::CPath( _T("SeedFile.txt") );
+	if ( seedFilePath.FileExist() )
+		fs::DeleteFile( seedFilePath.GetPtr() );
+
+	ASSERT_EQUAL( _T("SeedFile.txt"), fs::StripDirPrefix( fs::MakeUniqueNumFilename( seedFilePath ), poolDirPath ) );
+
+	ut::CTempFilePool pool( _T("SeedFile.txt") );
+	ASSERT_EQUAL( _T("SeedFile_[2].txt"), fs::StripDirPrefix( fs::MakeUniqueNumFilename( seedFilePath ), poolDirPath ) );
+
+	pool.CreateFiles( _T("SeedFile_ABC.txt") );
+	ASSERT_EQUAL( _T("SeedFile_[3].txt"), fs::StripDirPrefix( fs::MakeUniqueNumFilename( seedFilePath ), poolDirPath ) );
+
+	pool.CreateFiles( _T("SeedFile_5.txt|SeedFile7.txt") );
+	ASSERT_EQUAL( _T("SeedFile_[8].txt"), fs::StripDirPrefix( fs::MakeUniqueNumFilename( seedFilePath ), poolDirPath ) );
+
+	pool.CreateFiles( _T("SeedFile_abc30xyz.txt") );
+	ASSERT_EQUAL( _T("SeedFile_[31].txt"), fs::StripDirPrefix( fs::MakeUniqueNumFilename( seedFilePath ), poolDirPath ) );
+
+	pool.CreateFiles( _T("SeedFile5870.txt|SeedFile133.txt") );
+	ASSERT_EQUAL( _T("SeedFile_[5871].txt"), fs::StripDirPrefix( fs::MakeUniqueNumFilename( seedFilePath ), poolDirPath ) );
 }
 
 void CFileSystemTests::TestStgShortFilenames( void )
@@ -320,6 +340,7 @@ void CFileSystemTests::Run( void )
 
 	TestFileSystem();
 	TestFileEnum();
+	TestNumericFilename();
 	TestStgShortFilenames();
 	TestTempFilePool();
 	TestFileAndDirectoryState();

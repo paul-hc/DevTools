@@ -148,6 +148,9 @@ namespace fs
 	inline bool FileExist( const TCHAR* pFilePath, AccessMode accessMode = Exist ) { return !str::IsEmpty( pFilePath ) && 0 == _taccess( pFilePath, accessMode ); }
 
 
+	class CPath;
+
+
 	struct CPathParts
 	{
 		CPathParts( void ) {}
@@ -157,11 +160,11 @@ namespace fs
 		void Clear( void );
 
 		std::tstring GetNameExt( void ) const { return m_fname + m_ext; }
-		std::tstring GetDirPath( bool trailSlash = false ) const;
+		fs::CPath GetDirPath( void ) const;
 		CPathParts& SetNameExt( const std::tstring& nameExt );
 		CPathParts& SetDirPath( const std::tstring& dirPath );
 
-		std::tstring MakePath( void ) const;
+		fs::CPath MakePath( void ) const;
 		void SplitPath( const std::tstring& filePath );
 
 		bool MatchExt( const TCHAR* pExt ) const { return path::EquivalentPtr( m_ext.c_str(), pExt ); }		// pExt: ".txt"

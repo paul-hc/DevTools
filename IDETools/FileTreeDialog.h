@@ -101,7 +101,7 @@ private:
 	PathToItemMap m_originalItems;
 
 	CFileAssoc m_fileAssoc;
-	std::tstring m_complemFilePath;
+	fs::CPath m_complemFilePath;
 	std::tstring m_titlePrefix;
 
 	int m_nestingLevel;

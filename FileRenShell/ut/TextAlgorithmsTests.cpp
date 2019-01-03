@@ -18,7 +18,7 @@ namespace ut
 	{
 		fs::CPathParts parts( filePath );
 		func( parts );
-		return parts.MakePath();
+		return parts.m_fname + parts.m_ext;
 	}
 }
 

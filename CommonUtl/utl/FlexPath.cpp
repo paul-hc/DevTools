@@ -23,7 +23,7 @@ namespace path
 			const UINT hashKey = static_cast< UINT >( path::GetHashValue( pFullPath ) );		// hash key is unique for the whole path
 
 			parts.m_fname = str::Format( _T("%s_%08X"), parts.m_fname.substr( 0, prefixLen ).c_str(), hashKey );	// "prefix_hexHashKey"
-			shortFullPath.Set( parts.MakePath() );
+			shortFullPath.Set( parts.MakePath().Get() );
 
 			ENSURE( str::GetLength( path::FindFilename( shortFullPath.GetPtr() ) ) <= maxFnameExtLen );
 		}

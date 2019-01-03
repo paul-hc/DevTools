@@ -24,27 +24,27 @@ CLogger::~CLogger()
 
 void CLogger::Clear( void )
 {
-	if ( FILE* pLogFile = _tfopen( GetLogFilePath().c_str(), _T("wt") ) )
+	if ( FILE* pLogFile = _tfopen( GetLogFilePath().GetPtr(), _T("wt") ) )
 		fclose( pLogFile );
 }
 
 void CLogger::SetOverwrite( void )
 {
-	std::tstring backupLogPath = MakeBackupLogFilePath();
+	fs::CPath backupLogPath = MakeBackupLogFilePath();
 
-	if ( fs::FileExist( backupLogPath.c_str(), fs::Write ) )
-		::DeleteFile( backupLogPath.c_str() );
+	if ( fs::FileExist( backupLogPath.GetPtr(), fs::Write ) )
+		::DeleteFile( backupLogPath.GetPtr() );
 
-	const std::tstring& logPath = GetLogFilePath();
-	if ( fs::FileExist( logPath.c_str(), fs::Write ) )
-		::MoveFile( logPath.c_str(), backupLogPath.c_str() );
+	const fs::CPath& logPath = GetLogFilePath();
+	if ( fs::FileExist( logPath.GetPtr(), fs::Write ) )
+		::MoveFile( logPath.GetPtr(), backupLogPath.GetPtr() );
 
 	Clear();
 }
 
-const std::tstring& CLogger::GetLogFilePath( void ) const
+const fs::CPath& CLogger::GetLogFilePath( void ) const
 {
-	if ( m_logFilePath.empty() )
+	if ( m_logFilePath.IsEmpty() )
 	{
 		fs::CPathParts parts( ui::GetModuleFileName() );
 
@@ -53,14 +53,14 @@ const std::tstring& CLogger::GetLogFilePath( void ) const
 		parts.m_ext = _T(".log");
 
 		m_logFilePath = parts.MakePath();
-		ENSURE( path::IsValid( m_logFilePath ) );
+		ENSURE( m_logFilePath.IsValid() );
 	}
 	return m_logFilePath;
 }
 
-std::tstring CLogger::MakeBackupLogFilePath( void ) const
+fs::CPath CLogger::MakeBackupLogFilePath( void ) const
 {
-	fs::CPathParts parts( GetLogFilePath() );
+	fs::CPathParts parts( GetLogFilePath().Get() );
 	parts.m_fname += _T("_bak");
 	return parts.MakePath();
 }
@@ -106,7 +106,7 @@ void CLogger::LogLine( const TCHAR text[], bool useTimestamp /*= true*/ )
 		if ( !( ++m_logCount % m_checkLogLineCount ) )
 			CheckTruncate();
 
-	std::ofstream output( str::ToUtf8( GetLogFilePath().c_str() ).c_str(), std::ios_base::out | std::ios_base::app );
+	std::ofstream output( str::ToUtf8( GetLogFilePath().GetPtr() ).c_str(), std::ios_base::out | std::ios_base::app );
 	if ( output.is_open() )
 	{
 		if ( m_addSessionNewLine )
@@ -129,13 +129,13 @@ void CLogger::LogLine( const TCHAR text[], bool useTimestamp /*= true*/ )
 
 bool CLogger::CheckTruncate( void )
 {
-	std::tstring newLogFilePath = GetLogFilePath() + _T(".new");
+	fs::CPath newLogFilePath = GetLogFilePath().Get() + _T(".new");
 
 	try
 	{
 		CStdioFile logFile;
 
-		if ( !logFile.Open( GetLogFilePath().c_str(), CFile::modeRead | CFile::typeText ) )
+		if ( !logFile.Open( GetLogFilePath().GetPtr(), CFile::modeRead | CFile::typeText ) )
 			return false;
 		if ( logFile.GetLength() <= m_logFileMaxSize )
 			return false;
@@ -151,7 +151,7 @@ bool CLogger::CheckTruncate( void )
 
 		CStdioFile newLogFile;
 
-		if ( !newLogFile.Open( newLogFilePath.c_str(), CFile::modeCreate | CFile::modeWrite | CFile::typeText ) )
+		if ( !newLogFile.Open( newLogFilePath.GetPtr(), CFile::modeCreate | CFile::modeWrite | CFile::typeText ) )
 			return false;
 
 		// copy the remaining contents of old log file to the new file
@@ -164,7 +164,7 @@ bool CLogger::CheckTruncate( void )
 		pExc->Delete();
 	}
 
-	::DeleteFile( GetLogFilePath().c_str() );
-	::MoveFile( newLogFilePath.c_str(), GetLogFilePath().c_str() );
+	::DeleteFile( GetLogFilePath().GetPtr() );
+	::MoveFile( newLogFilePath.GetPtr(), GetLogFilePath().GetPtr() );
 	return true;
 }

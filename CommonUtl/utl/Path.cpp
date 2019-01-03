@@ -524,13 +524,12 @@ namespace fs
 		m_ext.clear();
 	}
 
-	std::tstring CPathParts::GetDirPath( bool trailSlash /*= false*/ ) const
+	fs::CPath CPathParts::GetDirPath( void ) const
 	{
-		ASSERT( !IsEmpty() );
-
-		std::tstring dir = m_dir;
-		path::SetBackslash( dir, trailSlash );
-		return m_drive + dir;
+		fs::CPath dirPath = m_drive;
+		dirPath /= m_dir;
+		dirPath.SetBackslash( false );
+		return dirPath;
 	}
 
 	CPathParts& CPathParts::SetNameExt( const std::tstring& nameExt )
@@ -550,7 +549,7 @@ namespace fs
 		return *this;
 	}
 
-	std::tstring CPathParts::MakePath( void ) const
+	fs::CPath CPathParts::MakePath( void ) const
 	{
 		TCHAR path[ _MAX_PATH * 2 ];
 		size_t sepPos = std::tstring::npos;
@@ -572,7 +571,7 @@ namespace fs
 			path[ sepPos ] = path::s_complexPathSep;
 		}
 
-		return path;
+		return fs::CPath( path );
 	}
 
 	void CPathParts::SplitPath( const std::tstring& filePath )
@@ -643,7 +642,7 @@ namespace fs
 	{
 		CPathParts parts( m_filePath );			// split into parts rather than use '/' operator in order to preserve fwd slashes
 		parts.SetNameExt( nameExt );
-		m_filePath = parts.MakePath();
+		m_filePath = parts.MakePath().Get();
 	}
 
 	CPath CPath::GetRemoveExt( void ) const
@@ -656,7 +655,7 @@ namespace fs
 	{
 		CPathParts parts( m_filePath );
 		parts.SetDirPath( dirPath );
-		m_filePath = parts.MakePath();
+		m_filePath = parts.MakePath().Get();
 	}
 
 	CPath& CPath::operator/=( const CPath& right )

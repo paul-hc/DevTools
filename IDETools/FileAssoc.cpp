@@ -37,7 +37,7 @@ enum CircularIndex
 };
 
 
-const TCHAR* CFileAssoc::m_circularExt[] =
+const TCHAR* CFileAssoc::s_circularExt[] =
 {
 	_T(".h"),		// CI_H
 	_T(".hxx"),		// CI_HXX
@@ -64,12 +64,14 @@ const TCHAR* CFileAssoc::m_circularExt[] =
 };
 
 
-const TCHAR* CFileAssoc::m_relDirs[] =
+const TCHAR* CFileAssoc::s_relDirs[] =
 {
 	_T(""),
 	_T("..\\include\\"),
 	_T("..\\source\\")
 };
+
+const fs::CPath CFileAssoc::s_emptyPath;
 
 
 // CFileAssoc implementation
@@ -82,13 +84,13 @@ void CFileAssoc::Clear( void )
 	m_hasSpecialAssociations = false;
 }
 
-bool CFileAssoc::SetPath( const std::tstring& path )
+bool CFileAssoc::SetPath( const fs::CPath& path )
 {
 	Clear();
-	if ( !path::IsAbsolute( path.c_str() ) || !fs::FileExist( path.c_str() ) )
+	if ( !path::IsAbsolute( path.GetPtr() ) || !path.FileExist() )
 		return false;
 
-	m_parts.SplitPath( path );
+	m_parts.SplitPath( path.Get() );
 	m_fileType = ft::FindTypeOfExtension( m_parts.m_ext.c_str() );
 
 	// search for known circular index
@@ -96,8 +98,8 @@ bool CFileAssoc::SetPath( const std::tstring& path )
 		ft::RC == m_fileType ||
 		ft::RES == m_fileType;
 
-	for ( unsigned int i = 0; i != COUNT_OF( m_circularExt ); ++i )
-		if ( path::Equal( m_parts.m_ext.c_str(), m_circularExt[ i ] ) )
+	for ( unsigned int i = 0; i != COUNT_OF( s_circularExt ); ++i )
+		if ( path::Equal( m_parts.m_ext.c_str(), s_circularExt[ i ] ) )
 		{
 			m_circularIndex = static_cast< CircularIndex >( i );
 			break;
@@ -130,38 +132,38 @@ bool CFileAssoc::IsResourceHeaderFile( const fs::CPathParts& parts )
 			rcParts.m_fname = parts.m_fname.substr( 0, parts.m_fname.length() - prefixLen );
 			rcParts.m_ext = _T(".rc");
 
-			return fs::IsValidFile( rcParts.MakePath().c_str() );
+			return fs::IsValidFile( rcParts.MakePath().GetPtr() );
 		}
 	}
 
 	return false;
 }
 
-std::tstring CFileAssoc::FindAssociation( const TCHAR* pExt ) const
+fs::CPath CFileAssoc::FindAssociation( const TCHAR* pExt ) const
 {
-	std::vector< std::tstring > alternateDirs;
+	std::vector< fs::CPath > alternateDirs;
 
-	for ( unsigned int i = 0; i != COUNT_OF( m_relDirs ); ++i )
-		alternateDirs.push_back( path::Combine( m_parts.m_dir.c_str(), m_relDirs[ i ] ) );
+	for ( unsigned int i = 0; i != COUNT_OF( s_relDirs ); ++i )
+		alternateDirs.push_back( fs::CPath( m_parts.m_dir ) / fs::CPath( s_relDirs[ i ] ) );
 
 	QueryComplementaryParentDirs( alternateDirs, m_parts.m_dir );		// also add complementary parent directories, such as SOURCE/INCLUDE
 
-	for ( std::vector< std::tstring >::const_iterator itDir = alternateDirs.begin(); itDir != alternateDirs.end(); ++itDir )
+	for ( std::vector< fs::CPath >::const_iterator itDir = alternateDirs.begin(); itDir != alternateDirs.end(); ++itDir )
 	{
-		std::tstring assocFullPath = fs::CPathParts::MakeFullPath( m_parts.m_drive.c_str(), itDir->c_str(), m_parts.m_fname.c_str(), pExt );
-		if ( fs::FileExist( assocFullPath.c_str() ) )
+		fs::CPath assocFullPath = fs::CPathParts::MakeFullPath( m_parts.m_drive.c_str(), itDir->GetPtr(), m_parts.m_fname.c_str(), pExt );
+		if ( assocFullPath.FileExist() )
 			return assocFullPath;
 	}
 
-	return std::tstring();
+	return s_emptyPath;
 }
 
-void CFileAssoc::QueryComplementaryParentDirs( std::vector< std::tstring >& rComplementaryDirs, const std::tstring& dir )
+void CFileAssoc::QueryComplementaryParentDirs( std::vector< fs::CPath >& rComplementaryDirs, const fs::CPath& dir )
 {
 	// dir and rComplementaryDirs should look like "\WINNT\system32\"
 
 	std::vector< std::tstring > dirTokens;
-	str::Split( dirTokens, dir.c_str(), _T("\\") );
+	str::Split( dirTokens, dir.GetPtr(), _T("\\") );
 
 	// reverse iteration
 	for ( int i = (int)dirTokens.size(); --i >= 0; )
@@ -197,10 +199,10 @@ int CFileAssoc::GetNextIndex( int& index, bool forward /*= true*/ ) const
 
 	index += ( forward ? 1 : -1 );
 
-	if ( index >= (int)COUNT_OF( m_circularExt ) )
+	if ( index >= (int)COUNT_OF( s_circularExt ) )
 		index = 0;
 	else if ( index < 0 )
-		index = (int)COUNT_OF( m_circularExt ) - 1;
+		index = (int)COUNT_OF( s_circularExt ) - 1;
 
 	return index;
 }
@@ -258,42 +260,42 @@ void CFileAssoc::GetComplIndex( std::vector< CircularIndex >& rIndexes ) const
 	}
 }
 
-std::tstring CFileAssoc::GetNextAssoc( bool forward /*= true*/ )
+fs::CPath CFileAssoc::GetNextAssoc( bool forward /*= true*/ )
 {
 	int extIndex = m_circularIndex;
 
 	if ( IsValidKnownAssoc() )
 	{
-		std::tstring associatedFullPath;
+		fs::CPath associatedFullPath;
 
 		if ( HasSpecialAssociations() )
 		{
 			associatedFullPath = GetSpecialComplementaryAssoc();
-			if ( !associatedFullPath.empty() )
+			if ( !associatedFullPath.IsEmpty() )
 				return associatedFullPath;
 		}
 
 		while ( GetNextIndex( extIndex, forward ) != m_circularIndex )
 		{
-			associatedFullPath = FindAssociation( m_circularExt[ extIndex ] );
-			if ( !associatedFullPath.empty() )
+			associatedFullPath = FindAssociation( s_circularExt[ extIndex ] );
+			if ( !associatedFullPath.IsEmpty() )
 				return associatedFullPath;
 		}
 	}
 
-	return std::tstring();
+	return s_emptyPath;
 }
 
-std::tstring CFileAssoc::GetComplementaryAssoc( void )
+fs::CPath CFileAssoc::GetComplementaryAssoc( void )
 {
 	if ( IsValidKnownAssoc() )
 	{
-		std::tstring associatedFullPath;
+		fs::CPath associatedFullPath;
 
 		if ( HasSpecialAssociations() )
 		{
 			associatedFullPath = GetSpecialComplementaryAssoc();
-			if ( !associatedFullPath.empty() )
+			if ( !associatedFullPath.IsEmpty() )
 				return associatedFullPath;
 		}
 
@@ -301,19 +303,19 @@ std::tstring CFileAssoc::GetComplementaryAssoc( void )
 		GetComplIndex( indexes );
 		for ( std::vector< CircularIndex >::const_iterator itIndex = indexes.begin(); itIndex != indexes.end(); ++itIndex )
 		{
-			associatedFullPath = FindAssociation( m_circularExt[ *itIndex ] );
-			if ( !associatedFullPath.empty() )
+			associatedFullPath = FindAssociation( s_circularExt[ *itIndex ] );
+			if ( !associatedFullPath.IsEmpty() )
 				return associatedFullPath;
 		}
 	}
 
-	return std::tstring();
+	return s_emptyPath;
 }
 
-std::tstring CFileAssoc::LookupSpecialFullPath( const std::tstring& wildPattern )
+fs::CPath CFileAssoc::LookupSpecialFullPath( const fs::CPath& wildPattern )
 {
 	_tfinddata_t findInfo;
-	long hFile = _tfindfirst( (TCHAR*)wildPattern.c_str(), &findInfo );
+	long hFile = _tfindfirst( wildPattern.GetPtr(), &findInfo );
 	std::tstring specFullPath;
 
 	if ( hFile != -1L )
@@ -324,39 +326,39 @@ std::tstring CFileAssoc::LookupSpecialFullPath( const std::tstring& wildPattern 
 	return specFullPath;
 }
 
-std::tstring CFileAssoc::GetSpecialComplementaryAssoc( void ) const
+fs::CPath CFileAssoc::GetSpecialComplementaryAssoc( void ) const
 {
-	std::tstring assocFullPath;
-	std::tstring dirPath = m_parts.GetDirPath();
+	fs::CPath assocFullPath;
+	fs::CPath dirPath = m_parts.GetDirPath();
 
 	ASSERT( HasSpecialAssociations() );
 
 	if ( IsResourceHeaderFile( m_parts ) )
 	{
-		assocFullPath = LookupSpecialFullPath( path::Combine( dirPath.c_str(), _T("*.rc") ) );
-		if ( !assocFullPath.empty() )
-			assocFullPath = path::Combine( dirPath.c_str(), assocFullPath.c_str() );
+		assocFullPath = LookupSpecialFullPath( dirPath / fs::CPath( _T("*.rc") ) );
+		if ( !assocFullPath.IsEmpty() )
+			assocFullPath = dirPath / assocFullPath;
 	}
 	else if ( ft::RC == m_fileType || ft::RES == m_fileType )
 	{
-		assocFullPath = LookupSpecialFullPath( path::Combine( dirPath.c_str(), _T("resource.*h") ) );
-		if ( assocFullPath.empty() )
-			assocFullPath = LookupSpecialFullPath( path::Combine( dirPath.c_str(), ( m_parts.m_fname + _T("Res.*h") ).c_str() ) );
+		assocFullPath = LookupSpecialFullPath( dirPath / fs::CPath( _T("resource.*h") ) );
+		if ( assocFullPath.IsEmpty() )
+			assocFullPath = LookupSpecialFullPath( dirPath / fs::CPath( m_parts.m_fname + _T("Res.*h") ) );
 
-		if ( !assocFullPath.empty() )
-			assocFullPath = path::Combine( dirPath.c_str(), assocFullPath.c_str() );
+		if ( !assocFullPath.IsEmpty() )
+			assocFullPath = dirPath / assocFullPath;
 	}
 
-	if ( !assocFullPath.empty() && fs::FileExist( assocFullPath.c_str() ) )
+	if ( !assocFullPath.IsEmpty() && assocFullPath.FileExist() )
 		return assocFullPath;
 
-	return std::tstring();
+	return s_emptyPath;
 }
 
-void CFileAssoc::FindVariationsOf( std::vector< std::tstring >& rVariations, int& rThisIdx, const std::tstring& pattern )
+void CFileAssoc::FindVariationsOf( std::vector< fs::CPath >& rVariations, int& rThisIdx, const fs::CPath& pattern )
 {
 	CFileFind findVariations;
-	for( BOOL found = findVariations.FindFile( pattern.c_str() ); found; )
+	for( BOOL found = findVariations.FindFile( pattern.GetPtr() ); found; )
 	{
 		found = findVariations.FindNextFile();
 
@@ -371,9 +373,9 @@ void CFileAssoc::FindVariationsOf( std::vector< std::tstring >& rVariations, int
 	}
 }
 
-std::tstring CFileAssoc::GetNextFileNameVariation( bool forward /*= true*/ )
+fs::CPath CFileAssoc::GetNextFileNameVariation( bool forward /*= true*/ )
 {
-	std::vector< std::tstring > variations;
+	std::vector< fs::CPath > variations;
 	int thisVariationIdx = -1;
 	std::tstring nameBase;
 	size_t lastUnderscorePos = m_parts.m_fname.rfind( _T('_') );
@@ -407,15 +409,15 @@ std::tstring CFileAssoc::GetNextFileNameVariation( bool forward /*= true*/ )
 	else if ( nextVariationIdx >= variations.size() )
 		nextVariationIdx = 0;
 
-	return path::Combine( m_parts.GetDirPath().c_str(), variations[ nextVariationIdx ].c_str() );
+	return m_parts.GetDirPath() / variations[ nextVariationIdx ];
 }
 
-std::tstring CFileAssoc::GetNextFileNameVariationEx( bool forward /*= true*/ )
+fs::CPath CFileAssoc::GetNextFileNameVariationEx( bool forward /*= true*/ )
 {
 	int extIndex = m_circularIndex, origCIndex = m_circularIndex;
-	std::tstring variation = GetNextFileNameVariation( forward );
+	fs::CPath variation = GetNextFileNameVariation( forward );
 
-	while ( variation.empty() && GetNextIndex( extIndex, forward ) != origCIndex )
+	while ( variation.IsEmpty() && GetNextIndex( extIndex, forward ) != origCIndex )
 	{
 		m_circularIndex = (CircularIndex)extIndex;
 		variation = GetNextFileNameVariation( forward );

@@ -258,18 +258,18 @@ bool CFileTreeDialog::SafeBindItem( HTREEITEM hItem, CIncludeNode* pTreeItem )
 
 bool CFileTreeDialog::UpdateCurrentSelection( void )
 {
-	std::tstring fullPath;
+	fs::CPath fullPath;
 	HTREEITEM hSelItem = m_treeCtrl.GetSelectedItem();
 	if ( hSelItem != NULL )
 		if ( const CIncludeNode* pItemInfo = GetItemInfo( hSelItem ) )
-			fullPath = pItemInfo->m_path.Get();
+			fullPath = pItemInfo->m_path;
 
-	ui::SetWindowText( m_selFilePathEdit, fullPath );
+	ui::SetWindowText( m_selFilePathEdit, fullPath.Get() );
 	m_fileAssoc.SetPath( fullPath );
 	if ( m_fileAssoc.IsValidKnownAssoc() )
 		m_complemFilePath = m_fileAssoc.GetComplementaryAssoc();
 
-	if ( m_complemFilePath.empty() )
+	if ( m_complemFilePath.IsEmpty() )
 		m_complemFilePath = fullPath;		// set to current file if no associations
 	return hSelItem != NULL;
 }
@@ -440,7 +440,7 @@ bool CFileTreeDialog::IsFileExcluded( const fs::CPath& path ) const
 
 bool CFileTreeDialog::HasValidComplementary( void ) const		// true if the selected file has a valid complementary
 {
-	if ( m_complemFilePath.empty() )
+	if ( m_complemFilePath.IsEmpty() )
 		return false;
 
 	if ( HTREEITEM hSelItem = m_treeCtrl.GetSelectedItem() )
@@ -922,9 +922,9 @@ void CFileTreeDialog::OnCancel( void )
 
 void CFileTreeDialog::CmOpenComplementary( void )
 {
-	if ( !m_complemFilePath.empty() )
+	if ( !m_complemFilePath.IsEmpty() )
 	{
-		m_rootPath.Set( m_complemFilePath );
+		m_rootPath = m_complemFilePath;
 		EndDialog( CM_OPEN_COMPLEMENTARY );
 	}
 }
@@ -1018,7 +1018,7 @@ void CFileTreeDialog::UUI_OpenComplementary( CCmdUI* pCmdUI )
 			std::tstring itemCore = _T("Complementary");
 
 			if ( hasComplementary )
-				itemCore = std::tstring( _T("\"") ) + fs::CPath( m_complemFilePath ).GetNameExt() + _T("\"");
+				itemCore = arg::Enquote( m_complemFilePath.GetFilename() );
 
 			pCmdUI->SetText( str::Format( itemFormat, itemCore.c_str() ).c_str() );
 		}

@@ -173,7 +173,7 @@ namespace fs
 		fs::CPathParts parts( pStreamSubPath );
 		ASSERT( parts.m_drive.empty() );
 
-		CComPtr< IStorage > pSubDir = OpenDeepDir( parts.GetDirPath( false ).c_str(), pParentDir );		// use default mode for sub-dir storages
+		CComPtr< IStorage > pSubDir = OpenDeepDir( parts.GetDirPath().GetPtr(), pParentDir );		// use default mode for sub-dir storages
 		if ( NULL == pSubDir )
 			return NULL;
 		return OpenStream( parts.GetNameExt().c_str(), pSubDir, mode );

@@ -161,7 +161,7 @@ BSTR FileAccess::GetNextAssocDoc( LPCTSTR docFullPath, BOOL forward )
 	CString nextDocFullPath;
 
 	if ( fileAssoc.IsValidKnownAssoc() )
-		nextDocFullPath = fileAssoc.GetNextAssoc( forward != FALSE ).c_str();
+		nextDocFullPath = fileAssoc.GetNextAssoc( forward != FALSE ).GetPtr();
 	return nextDocFullPath.AllocSysString();
 }
 
@@ -171,7 +171,7 @@ BSTR FileAccess::GetNextVariationDoc( LPCTSTR docFullPath, BOOL forward )
 	CString nextDocFullPath;
 
 	if ( fileAssoc.IsValidKnownAssoc() )
-		nextDocFullPath = fileAssoc.GetNextFileNameVariationEx( forward != FALSE ).c_str();
+		nextDocFullPath = fileAssoc.GetNextFileNameVariationEx( forward != FALSE ).GetPtr();
 	return nextDocFullPath.AllocSysString();
 }
 
@@ -181,7 +181,7 @@ BSTR FileAccess::GetComplementaryDoc( LPCTSTR docFullPath )
 	CString complDocFullPath;
 
 	if ( fileAssoc.IsValidKnownAssoc() )
-		complDocFullPath = fileAssoc.GetComplementaryAssoc().c_str();
+		complDocFullPath = fileAssoc.GetComplementaryAssoc().GetPtr();
 	return complDocFullPath.AllocSysString();
 }
 

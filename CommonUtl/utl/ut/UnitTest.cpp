@@ -120,13 +120,13 @@ namespace ut
 	const TCHAR CTempFilePool::m_sep[] = _T("|");
 
 	CTempFilePool::CTempFilePool( const TCHAR* pFlatPaths /*= NULL*/ )
-		: m_poolDirPath( MakeTempUt_DirPath( fs::CPath( _T("_UT") ), true ) )
+		: m_poolDirPath( MakePoolDirPath( true ) )
 		, m_hasFileErrors( false )
 	{
 		fs::DeleteAllFiles( m_poolDirPath.GetPtr() );				// delete existing files from previously failed tests
 
 		if ( !str::IsEmpty( pFlatPaths ) )
-			SplitCreateFiles( pFlatPaths );
+			CreateFiles( pFlatPaths );
 	}
 
 	CTempFilePool::~CTempFilePool()
@@ -134,14 +134,18 @@ namespace ut
 		fs::DeleteDir( m_poolDirPath.GetPtr() );
 	}
 
+	fs::CPath CTempFilePool::MakePoolDirPath( bool createDir /*= false*/ )
+	{
+		return MakeTempUt_DirPath( fs::CPath( _T("_UT") ), createDir );
+	}
+
 	bool CTempFilePool::DeleteAllFiles( void )
 	{
 		return fs::DeleteAllFiles( m_poolDirPath.GetPtr() );
 	}
 
-	bool CTempFilePool::SplitCreateFiles( const TCHAR* pFlatPaths /*= NULL*/ )
+	bool CTempFilePool::CreateFiles( const TCHAR* pFlatPaths /*= NULL*/ )
 	{
-		m_filePaths.clear();
 		if ( !IsValidDir() )
 			return false;
 
@@ -160,9 +164,8 @@ namespace ut
 			}
 		}
 
-		m_filePaths.reserve( filePaths.size() );
-		for ( std::vector< fs::CPath >::const_iterator itSrcPath = filePaths.begin(); itSrcPath != filePaths.end(); ++itSrcPath )
-			m_filePaths.push_back( *itSrcPath );
+		m_filePaths.reserve( m_filePaths.size() + filePaths.size() );
+		m_filePaths.insert( m_filePaths.end(), filePaths.begin(), filePaths.end() );
 
 		return true;
 	}
@@ -254,6 +257,12 @@ namespace ut
 		EnumSubDirs( subDirPaths, dirPath, sortType, depth );
 
 		return str::Join( subDirPaths, CTempFilePool::m_sep );
+	}
+
+
+	fs::CPath FindFirstFile( const fs::CPath& dirPath, const TCHAR* pWildSpec /*= _T("*.*")*/, RecursionDepth depth /*= Shallow*/ )
+	{
+		return fs::StripDirPrefix( fs::FindFirstFile( dirPath, pWildSpec, depth ), dirPath );
 	}
 }
 

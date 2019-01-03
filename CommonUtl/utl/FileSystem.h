@@ -230,8 +230,8 @@ namespace fs
 namespace fs
 {
 	// generate a path of a unique filename using a suffix, by avoiding collisions with existing files
-	std::tstring MakeUniqueNumFilename( const TCHAR* pFilePath, const TCHAR fmtNumSuffix[] = _T("_[%d]") ) throws_( CRuntimeException );	// with numeric suffix
-	std::tstring MakeUniqueHashedFilename( const TCHAR* pFilePath, const TCHAR fmtHashSuffix[] = _T("_%08X") );								// with hash suffix
+	fs::CPath MakeUniqueNumFilename( const fs::CPath& filePath, const TCHAR fmtNumSuffix[] = _T("_[%d]") ) throws_( CRuntimeException );	// with numeric suffix
+	fs::CPath MakeUniqueHashedFilename( const fs::CPath& filePath, const TCHAR fmtHashSuffix[] = _T("_%08X") );								// with hash suffix
 }
 
 

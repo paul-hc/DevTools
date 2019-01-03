@@ -198,7 +198,7 @@ namespace fs
 
 		fs::CPath backupFilePath = m_backupDirPath / m_srcFilePath.GetFilename();
 
-		backupFilePath = fs::MakeUniqueNumFilename( backupFilePath.GetPtr(), m_pFmtNumSuffix );		// make unique backup file name by avoiding collisions with existing file backups
+		backupFilePath = fs::MakeUniqueNumFilename( backupFilePath, m_pFmtNumSuffix );		// make unique backup file name by avoiding collisions with existing file backups
 		fs::thr::CopyFile( m_srcFilePath.GetPtr(), backupFilePath.GetPtr(), FALSE );
 
 		rBackupFilePath = backupFilePath;

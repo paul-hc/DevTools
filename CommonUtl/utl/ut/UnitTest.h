@@ -177,11 +177,13 @@ namespace ut
 		fs::CPath QualifyPath( const TCHAR* pRelativePath ) const { return m_poolDirPath / fs::CPath( pRelativePath ); }
 
 		bool DeleteAllFiles( void );
-		bool SplitCreateFiles( const TCHAR* pFlatPaths = NULL );	// can contain subdirectories
+		bool CreateFiles( const TCHAR* pFlatPaths = NULL );		// can contain subdirectories
+
+		static fs::CPath MakePoolDirPath( bool createDir = false );
 	private:
-		fs::CPath m_poolDirPath;							// temorary directory
+		fs::CPath m_poolDirPath;								// temorary directory
 		std::vector< fs::CPath > m_filePaths;
-		bool m_hasFileErrors;								// file creation errors
+		bool m_hasFileErrors;									// file creation errors
 	public:
 		static const TCHAR m_sep[];
 	};
@@ -219,6 +221,8 @@ namespace ut
 
 	std::tstring EnumJoinFiles( const fs::CPath& dirPath, SortType sortType = SortAscending, const TCHAR* pWildSpec = _T("*"), RecursionDepth depth = Deep );
 	std::tstring EnumJoinSubDirs( const fs::CPath& dirPath, SortType sortType = SortAscending, RecursionDepth depth = Deep );
+
+	fs::CPath FindFirstFile( const fs::CPath& dirPath, const TCHAR* pWildSpec = _T("*.*"), RecursionDepth depth = Shallow );		// returns relative path
 
 } //namespace ut
 

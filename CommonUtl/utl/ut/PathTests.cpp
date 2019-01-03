@@ -128,7 +128,6 @@ void CPathTests::TestPathUtilities( void )
 		ASSERT_EQUAL( _T(".ext"), parts.m_ext );
 
 		ASSERT_EQUAL( _T("X:\\Dir\\Sub"), parts.GetDirPath() );
-		ASSERT_EQUAL( _T("X:\\Dir\\Sub/"), parts.GetDirPath( true ) );
 		ASSERT_EQUAL_STR( _T("name.ext"), parts.GetNameExt() );
 	}
 	{
@@ -139,7 +138,6 @@ void CPathTests::TestPathUtilities( void )
 		ASSERT_EQUAL( _T(".ext"), parts.m_ext );
 
 		ASSERT_EQUAL( _T("\\\\server\\share\\Dir"), parts.GetDirPath() );
-		ASSERT_EQUAL( _T("\\\\server\\share\\Dir\\"), parts.GetDirPath( true ) );
 		ASSERT_EQUAL_STR( _T("name.ext"), parts.GetNameExt() );
 	}
 	{

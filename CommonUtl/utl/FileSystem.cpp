@@ -4,6 +4,7 @@
 #include "EnumTags.h"
 #include "FlexPath.h"
 #include "RuntimeException.h"
+#include "StringUtilities.h"
 #include "TimeUtils.h"
 #include <shlwapi.h>				// for PathRelativePathTo
 #include <stdexcept>
@@ -634,18 +635,62 @@ namespace fs
 
 namespace fs
 {
-	std::tstring MakeUniqueNumFilename( const TCHAR* pFilePath, const TCHAR fmtNumSuffix[] /*= _T("_[%d]")*/ ) throws_( CRuntimeException )
+	namespace impl
 	{
-		ASSERT( !str::IsEmpty( pFilePath ) );
-		if ( !FileExist( pFilePath ) )
-			return pFilePath;					// no filename collision
+		UINT QueryExistingSequenceCount( const fs::CPathParts& filePathParts )
+		{
+			fs::CPath dirPath = filePathParts.GetDirPath();
+			std::vector< fs::CPath > existingPaths;
+			UINT seqCount = 0;
 
-		fs::CPathParts parts( pFilePath );
+			if ( fs::IsValidDirectory( dirPath.GetPtr() ) )
+			{
+				std::tstring wildSpec = filePathParts.m_fname + _T("*") + filePathParts.m_ext;
+
+				if ( fs::IsValidDirectory( filePathParts.MakePath().GetPtr() ) )
+					fs::EnumSubDirs( existingPaths, dirPath, wildSpec.c_str(), Shallow );
+				else
+					fs::EnumFiles( existingPaths, dirPath, wildSpec.c_str(), Shallow );
+
+				seqCount = static_cast< UINT >( existingPaths.size() );
+			}
+
+			const size_t prefixLen = filePathParts.m_fname.length();
+
+			for ( std::vector< fs::CPath >::const_iterator itExistingPath = existingPaths.begin(); itExistingPath != existingPaths.end(); ++itExistingPath )
+			{
+				fs::CPathParts parts( itExistingPath->GetFilename() );
+				ASSERT( str::HasPrefixI( parts.m_fname.c_str(), filePathParts.m_fname.c_str() ) );
+
+				const TCHAR* pNumber = parts.m_fname.c_str() + prefixLen;		// skip past original fname to search for digits
+
+				while ( *pNumber != _T('\0') && !str::CharTraits::IsDigit( *pNumber ) )
+					++pNumber;
+
+				if ( *pNumber != _T('\0') )
+				{
+					UINT number = 0;
+					if ( num::ParseNumber( number, pNumber ) )
+						seqCount = std::max( seqCount, number );
+				}
+			}
+
+			return seqCount;
+		}
+	}
+
+	fs::CPath MakeUniqueNumFilename( const fs::CPath& filePath, const TCHAR fmtNumSuffix[] /*= _T("_[%d]")*/ ) throws_( CRuntimeException )
+	{
+		ASSERT( !filePath.IsEmpty() );
+		if ( !filePath.FileExist() )
+			return filePath;						// no filename collision
+
+		fs::CPathParts parts( filePath.Get() );
 		const std::tstring fnameBase = parts.m_fname;
 		std::tstring lastSuffix;
-		std::tstring uniqueFilePath;
+		fs::CPath uniqueFilePath;
 
-		for ( UINT seqCount = 2; ; ++seqCount )
+		for ( UINT seqCount = std::max( 2u, impl::QueryExistingSequenceCount( parts ) + 1 ); ; ++seqCount )
 		{
 			std::tstring suffix = str::Format( fmtNumSuffix, seqCount );
 			if ( lastSuffix == suffix )
@@ -656,25 +701,26 @@ namespace fs
 			parts.m_fname = fnameBase + suffix;		// e.g. "fnameBase_[N]"
 			uniqueFilePath = parts.MakePath();
 
-			if ( !FileExist( uniqueFilePath.c_str() ) )					// unique, done
+			if ( !uniqueFilePath.FileExist() )		// path is unique, done
 				break;
 		}
 		return uniqueFilePath;
 	}
 
-	std::tstring MakeUniqueHashedFilename( const TCHAR* pFilePath, const TCHAR fmtHashSuffix[] /*= _T("_%08X")*/ )
+	fs::CPath MakeUniqueHashedFilename( const fs::CPath& filePath, const TCHAR fmtHashSuffix[] /*= _T("_%08X")*/ )
 	{
-		std::tstring uniqueFilePath = pFilePath;
-		if ( FileExist( pFilePath ) )
-		{
-			fs::CPathParts parts( uniqueFilePath );
+		ASSERT( !filePath.IsEmpty() );
+		if ( !filePath.FileExist() )
+			return filePath;						// no filename collision
 
-			const UINT hashKey = static_cast< UINT >( path::GetHashValue( pFilePath ) );		// hash key is unique for the whole path
-			parts.m_fname += str::Format( fmtHashSuffix, hashKey );		// e.g. "fname_hexHashKey"
-			uniqueFilePath = parts.MakePath();
+		fs::CPathParts parts( filePath.Get() );
 
-			ENSURE( !FileExist( uniqueFilePath.c_str() ) );				// unique
-		}
+		const UINT hashKey = static_cast< UINT >( path::GetHashValue( filePath.GetPtr() ) );		// hash key is unique for the whole path
+		parts.m_fname += str::Format( fmtHashSuffix, hashKey );		// e.g. "fname_hexHashKey"
+		fs::CPath uniqueFilePath = parts.MakePath();
+
+		ENSURE( !uniqueFilePath.FileExist() );		// hashed path is supposed to be be unique
+
 		return uniqueFilePath;
 	}
 }

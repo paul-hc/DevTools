@@ -75,8 +75,8 @@ bool CTempCloneFileSet::SetInputFilePaths( const std::vector< fs::CFlexPath >& i
 			{
 				if ( HasFlag( CWorkspace::GetFlags(), wf::AllowEmbeddedFileTransfers ) )
 				{
-					// make a unique hashed physical temp path
-					fs::CFlexPath physicalTempPath( fs::MakeUniqueNumFilename( path::Combine( tempDirPath.GetPtr(), itInputPath->GetNameExt() ).c_str() ) );
+					// make a unique numeric physical temp path
+					fs::CFlexPath physicalTempPath( fs::MakeUniqueNumFilename( tempDirPath / itInputPath->GetFilename() ).Get() );
 
 					CFileOperation fileOperation;
 					if ( fileOperation.Copy( *itInputPath, physicalTempPath ) )

@@ -3,6 +3,7 @@
 #pragma once
 
 #include <afxmt.h>
+#include "Path.h"
 
 
 class CLogger
@@ -13,7 +14,7 @@ public:
 	CLogger( const TCHAR* pFnameFmt = NULL );		// could be _T("%s-suffix") for "exe_name-suffix.log"
 	~CLogger();
 
-	const std::tstring& GetLogFilePath( void ) const;
+	const fs::CPath& GetLogFilePath( void ) const;
 
 	void Log( const TCHAR format[], ... );
 	void LogV( const TCHAR format[], va_list argList );
@@ -26,7 +27,7 @@ public:
 	void Clear( void );
 	void SetOverwrite( void );
 protected:
-	std::tstring MakeBackupLogFilePath( void ) const;
+	fs::CPath MakeBackupLogFilePath( void ) const;
 	bool CheckTruncate( void );
 private:
 	const TCHAR* m_pFnameFmt;
@@ -40,7 +41,7 @@ public:
 	bool m_addSessionNewLine;		// adds a new line on first log entry; prevents adding consecutive empty session lines if no logging
 private:
 	CCriticalSection m_cs;
-	mutable std::tstring m_logFilePath;
+	mutable fs::CPath m_logFilePath;
 };
 
 
