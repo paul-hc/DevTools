@@ -25,13 +25,6 @@ namespace ut
 		CPathGenerator gen( &pPool->m_pathPairs, format, seqCount );
 		return gen.GeneratePairs();
 	}
-	
-	std::tstring EnumDirFiles( const fs::CPath& dirPath, const TCHAR wildSpec[] = _T("*.*") )
-	{
-		fs::CEnumerator found( dirPath.Get() );
-		fs::EnumFiles( &found, dirPath, wildSpec );
-		return ut::JoinFiles( found );
-	}
 
 	template< typename FuncType >
 	void ForEachDestination( std::vector< CRenameItem* >& rRenameItems, const FuncType& func )
@@ -74,7 +67,7 @@ void CRenameFilesTests::TestRenameSimple( void )
 	ASSERT_EQUAL( 3, pRenameMacroCmd->GetSubCommands().size() );
 
 	ASSERT( pRenameMacroCmd->Execute() );
-	ASSERT_EQUAL( _T("foo 1.txt|foo 2.txt|foo 3.txt"), ut::EnumDirFiles( pool.GetPoolDirPath() ) );
+	ASSERT_EQUAL( _T("foo 1.txt|foo 2.txt|foo 3.txt"), ut::EnumJoinFiles( pool.GetPoolDirPath() ) );
 
 	utl::ClearOwningContainer( renameItems );
 }
@@ -102,7 +95,7 @@ void CRenameFilesTests::TestRenameCollisionExisting( void )
 	ASSERT_EQUAL( 9, pRenameMacroCmd->GetSubCommands().size() );		// plenty of intermediate paths
 
 	ASSERT( pRenameMacroCmd->Execute() );
-	ASSERT_EQUAL( _T("foo 2.txt|foo 3.txt|foo 4.txt|foo 5.txt|foo 6.txt"), ut::EnumDirFiles( pool.GetPoolDirPath(), _T("foo ?.*") ) );
+	ASSERT_EQUAL( _T("foo 2.txt|foo 3.txt|foo 4.txt|foo 5.txt|foo 6.txt"), ut::EnumJoinFiles( pool.GetPoolDirPath(), SortAscending, _T("foo ?.*") ) );
 
 	utl::ClearOwningContainer( renameItems );
 }
@@ -124,7 +117,7 @@ void CRenameFilesTests::TestRenameChangeCase( void )
 	ASSERT_EQUAL( 3, pRenameMacroCmd->GetSubCommands().size() );
 
 	ASSERT( pRenameMacroCmd->Execute() );
-	ASSERT_EQUAL( _T("FOO A.TXT|FOO B.TXT|FOO C.TXT"), ut::EnumDirFiles( pool.GetPoolDirPath() ) );
+	ASSERT_EQUAL( _T("FOO A.TXT|FOO B.TXT|FOO C.TXT"), ut::EnumJoinFiles( pool.GetPoolDirPath() ) );
 
 	utl::ClearOwningContainer( renameItems );
 }

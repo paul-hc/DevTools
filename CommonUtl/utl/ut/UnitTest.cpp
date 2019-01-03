@@ -213,7 +213,7 @@ namespace ut
 	size_t EnumFiles( std::vector< fs::CPath >& rFilePaths, const fs::CPath& dirPath, SortType sortType /*= SortAscending*/,
 					  const TCHAR* pWildSpec /*= _T("*")*/, RecursionDepth depth /*= Deep*/ )
 	{
-		fs::CEnumerator found( dirPath.Get() );
+		fs::CRelativeEnumerator found( dirPath );
 		fs::EnumFiles( &found, dirPath, pWildSpec, depth );
 
 		rFilePaths.assign( found.m_filePaths.begin(), found.m_filePaths.end() );
@@ -227,7 +227,7 @@ namespace ut
 	size_t EnumSubDirs( std::vector< fs::CPath >& rSubDirPaths, const fs::CPath& dirPath, SortType sortType /*= SortAscending*/,
 						RecursionDepth depth /*= Deep*/ )
 	{
-		fs::CEnumerator found( dirPath.Get() );
+		fs::CRelativeEnumerator found( dirPath );
 		fs::EnumFiles( &found, dirPath, _T("*"), depth );
 
 		rSubDirPaths.assign( found.m_subDirPaths.begin(), found.m_subDirPaths.end() );

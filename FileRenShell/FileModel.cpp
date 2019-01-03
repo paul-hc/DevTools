@@ -67,7 +67,7 @@ void CFileModel::StoreSourcePaths( const ContainerT& sourcePaths )
 	for ( typename ContainerT::const_iterator itSourcePath = sourcePaths.begin(); itSourcePath != sourcePaths.end(); ++itSourcePath )
 		m_sourcePaths.push_back( func::PathOf( *itSourcePath ) );
 
-	fs::SortDirectoriesFirst( m_sourcePaths );
+	fs::SortPathsDirsFirst( m_sourcePaths );
 	m_commonParentPath = path::ExtractCommonParentPath( m_sourcePaths );
 }
 

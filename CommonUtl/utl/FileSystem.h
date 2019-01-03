@@ -164,7 +164,7 @@ namespace fs
 	}
 
 	template< typename PathContainerT >
-	void SortDirectoriesFirst( PathContainerT& rPaths, bool ascending = true )
+	void SortPathsDirsFirst( PathContainerT& rPaths, bool ascending = true )
 	{
 		typename PathContainerT::iterator itFirstFile = GroupDirectoriesFirst( rPaths );
 
@@ -176,14 +176,17 @@ namespace fs
 
 namespace fs
 {
-	// files and sub-dirs in existing file-system order; relative to m_refDirPath if specified
+	// files and sub-dirs in existing file-system order; stored paths are relative to m_relativeDirPath (if specified).
 	//
 	struct CEnumerator : public IEnumerator, private utl::noncopyable
 	{
-		CEnumerator( const std::tstring refDirPath = std::tstring() ) : m_pChainEnum( NULL ), m_refDirPath( refDirPath ), m_maxFiles( utl::npos ) {}
-		CEnumerator( IEnumerator* pChainEnum ) : m_pChainEnum( pChainEnum ), m_maxFiles( utl::npos ) {}
+		CEnumerator( IEnumerator* pChainEnum = NULL ) : m_pChainEnum( pChainEnum ), m_maxFiles( utl::npos ) {}
 
-		void SetMaxFiles( size_t maxFiles ) { ASSERT( m_filePaths.empty() && m_subDirPaths.empty() ); m_maxFiles = maxFiles; }
+		void SetRelativeDirPath( const fs::CPath& relativeDirPath ) { ASSERT( IsEmpty() ); m_relativeDirPath = relativeDirPath; }
+		void SetMaxFiles( size_t maxFiles ) { ASSERT( IsEmpty() ); m_maxFiles = maxFiles; }
+
+		bool IsEmpty( void ) const { return m_filePaths.empty() && m_subDirPaths.empty(); }
+		void Clear( void );
 
 		// IEnumerator interface
 		virtual void AddFoundFile( const TCHAR* pFilePath );
@@ -191,8 +194,7 @@ namespace fs
 		virtual bool MustStop( void ) const;
 	protected:
 		IEnumerator* m_pChainEnum;					// allows chaining for progress reporting
-		std::tstring m_refDirPath;					// to remove if common prefix
-	private:
+		fs::CPath m_relativeDirPath;				// to remove if it's common prefix
 		size_t m_maxFiles;
 	public:
 		std::vector< fs::CPath > m_filePaths;
@@ -200,30 +202,17 @@ namespace fs
 	};
 
 
-	struct CSingleFileEnumerator : public CEnumerator
+	struct CRelativeEnumerator : public CEnumerator
 	{
-		CSingleFileEnumerator( const std::tstring refDirPath = std::tstring() ) : CEnumerator( refDirPath ) { SetMaxFiles( 1 ); }
-
-		fs::CPath GetFoundPath( void ) const { return !m_filePaths.empty() ? m_filePaths.front() : fs::CPath(); }
+		CRelativeEnumerator( const fs::CPath& relativeDirPath ) : CEnumerator( NULL ) { SetRelativeDirPath( relativeDirPath ); }
 	};
 
 
-	// files and sub-dirs as fs::CPath, sorted intuitively; relative to m_refDirPath if specified
-
-	struct CSortedEnumerator : public IEnumerator
+	struct CFirstFileEnumerator : public CEnumerator
 	{
-		CSortedEnumerator( const std::tstring refDirPath = std::tstring() ) : m_pChainEnum( NULL ), m_refDirPath( refDirPath ) {}
-		CSortedEnumerator( IEnumerator* pChainEnum ) : m_pChainEnum( pChainEnum ) {}
+		CFirstFileEnumerator( void ) : CEnumerator() { SetMaxFiles( 1 ); }
 
-		// IEnumerator interface
-		virtual void AddFoundFile( const TCHAR* pFilePath );
-		virtual void AddFoundSubDir( const TCHAR* pSubDirPath );
-	protected:
-		IEnumerator* m_pChainEnum;					// allows chaining for progress reporting
-		std::tstring m_refDirPath;					// to remove if common prefix
-	public:
-		fs::TPathSet m_filePaths;					// sorted intuitively
-		fs::TPathSet m_subDirPaths;
+		fs::CPath GetFoundPath( void ) const { return !m_filePaths.empty() ? m_filePaths.front() : fs::CPath(); }
 	};
 
 

@@ -58,7 +58,7 @@ namespace shell
 		::DragFinish( hDropInfo );
 
 		if ( sortType != NoSort )
-			fs::SortDirectoriesFirst( rFilePaths, SortAscending == sortType );
+			fs::SortPathsDirsFirst( rFilePaths, SortAscending == sortType );
 	}
 }
 

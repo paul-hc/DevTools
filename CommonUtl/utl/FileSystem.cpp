@@ -158,7 +158,7 @@ namespace fs
 			return false;
 
 		fs::CEnumerator found;
-		fs::EnumFiles( &found, fs::CPath( pDirPath ), _T("*") );
+		fs::EnumFiles( &found, fs::CPath( pDirPath ), _T("*"), Shallow );
 
 		for ( std::vector< fs::CPath >::iterator itSubDirPath = found.m_subDirPaths.begin(); itSubDirPath != found.m_subDirPaths.end(); )
 			if ( fs::DeleteDir( itSubDirPath->GetPtr() ) )
@@ -520,10 +520,20 @@ namespace fs
 {
 	// CEnumerator implementation
 
+	void CEnumerator::Clear( void )
+	{
+		m_filePaths.clear();
+		m_subDirPaths.clear();
+	}
+
 	void CEnumerator::AddFoundFile( const TCHAR* pFilePath )
 	{
-		std::tstring filePath = path::StripCommonPrefix( pFilePath, m_refDirPath.c_str() );
-		if ( !filePath.empty() )
+		fs::CPath filePath( pFilePath );
+
+		if ( !m_relativeDirPath.IsEmpty() )
+			filePath = fs::StripDirPrefix( filePath, m_relativeDirPath );
+
+		if ( !filePath.IsEmpty() )
 			m_filePaths.push_back( filePath );
 
 		if ( m_pChainEnum != NULL )
@@ -532,8 +542,12 @@ namespace fs
 
 	void CEnumerator::AddFoundSubDir( const TCHAR* pSubDirPath )
 	{
-		std::tstring subDirPath = path::StripCommonPrefix( pSubDirPath, m_refDirPath.c_str() );
-		if ( !subDirPath.empty() )
+		fs::CPath subDirPath( pSubDirPath );
+
+		if ( !m_relativeDirPath.IsEmpty() )
+			subDirPath = fs::StripDirPrefix( subDirPath, m_relativeDirPath );
+
+		if ( !subDirPath.IsEmpty() )
 			m_subDirPaths.push_back( subDirPath );
 
 		if ( m_pChainEnum != NULL )
@@ -543,29 +557,6 @@ namespace fs
 	bool CEnumerator::MustStop( void ) const
 	{
 		return m_filePaths.size() >= m_maxFiles;
-	}
-
-
-	// CSortedEnumerator implementation
-
-	void CSortedEnumerator::AddFoundFile( const TCHAR* pFilePath )
-	{
-		std::tstring filePath = path::StripCommonPrefix( pFilePath, m_refDirPath.c_str() );
-		if ( !filePath.empty() )
-			m_filePaths.insert( filePath );
-
-		if ( m_pChainEnum != NULL )
-			m_pChainEnum->AddFoundFile( pFilePath );
-	}
-
-	void CSortedEnumerator::AddFoundSubDir( const TCHAR* pSubDirPath )
-	{
-		std::tstring subDirPath = path::StripCommonPrefix( pSubDirPath, m_refDirPath.c_str() );
-		if ( !subDirPath.empty() )
-			m_subDirPaths.insert( subDirPath );
-
-		if ( m_pChainEnum != NULL )
-			m_pChainEnum->AddFoundSubDir( pSubDirPath );
 	}
 
 
@@ -633,7 +624,7 @@ namespace fs
 
 	fs::CPath FindFirstFile( const fs::CPath& dirPath, const TCHAR* pWildSpec /*= _T("*.*")*/, RecursionDepth depth /*= Shallow*/ )
 	{
-		CSingleFileEnumerator singleEnumer;
+		CFirstFileEnumerator singleEnumer;
 		EnumFiles( &singleEnumer, dirPath, pWildSpec, depth );
 		return singleEnumer.GetFoundPath();
 	}
