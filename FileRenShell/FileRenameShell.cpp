@@ -7,9 +7,9 @@
 #include "Application.h"
 #include "utl/FmtUtils.h"
 #include "utl/Guards.h"
-#include "utl/ImageStore.h"
-#include "utl/Utilities.h"
-#include "utl/resource.h"
+#include "utl/UI/ImageStore.h"
+#include "utl/UI/Utilities.h"
+#include "utl/UI/resource.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

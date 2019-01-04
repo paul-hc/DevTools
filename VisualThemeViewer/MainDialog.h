@@ -1,10 +1,10 @@
 #pragma once
 
-#include "utl/BaseMainDialog.h"
-#include "utl/DialogToolBar.h"
-#include "utl/HistoryComboBox.h"
-#include "utl/ReportListControl.h"
-#include "utl/TreeControl.h"
+#include "utl/UI/BaseMainDialog.h"
+#include "utl/UI/DialogToolBar.h"
+#include "utl/UI/HistoryComboBox.h"
+#include "utl/UI/ReportListControl.h"
+#include "utl/UI/TreeControl.h"
 #include "Options.h"
 #include "ThemeStore_fwd.h"
 #include "ThemeSampleStatic.h"

@@ -45,7 +45,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="../CommonUtl"
+				AdditionalIncludeDirectories="../CommonUtl;../CommonUtl/utl"
 				PreprocessorDefinitions="WIN32;_WINDOWS;_DEBUG"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -61,7 +61,7 @@
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="_DEBUG"
 				Culture="1033"
-				AdditionalIncludeDirectories="$(IntDir);../CommonUtl;../CommonUtl/utl"
+				AdditionalIncludeDirectories="$(IntDir);../CommonUtl;../CommonUtl/utl/UI"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -126,7 +126,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="2"
-				AdditionalIncludeDirectories="../CommonUtl"
+				AdditionalIncludeDirectories="../CommonUtl;../CommonUtl/utl"
 				PreprocessorDefinitions="WIN32;_WINDOWS;NDEBUG"
 				MinimalRebuild="false"
 				RuntimeLibrary="0"
@@ -142,7 +142,7 @@
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="NDEBUG"
 				Culture="1033"
-				AdditionalIncludeDirectories="$(IntDir);../CommonUtl;../CommonUtl/utl"
+				AdditionalIncludeDirectories="$(IntDir);../CommonUtl;../CommonUtl/utl/UI"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"

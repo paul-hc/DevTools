@@ -1,5 +1,5 @@
 
-#include "StdAfx.h"
+#include "stdafx.h"
 #include "AlbumThumbListView.h"
 #include "Workspace.h"
 #include "MainFrame.h"
@@ -10,10 +10,10 @@
 #include "OleImagesDataSource.h"
 #include "Application.h"
 #include "resource.h"
-#include "utl/DragListCtrl.h"
-#include "utl/MenuUtilities.h"
-#include "utl/UtilitiesEx.h"
-#include "utl/Thumbnailer.h"
+#include "utl/UI/DragListCtrl.h"
+#include "utl/UI/MenuUtilities.h"
+#include "utl/UI/UtilitiesEx.h"
+#include "utl/UI/Thumbnailer.h"
 #include <memory>
 #include <algorithm>
 

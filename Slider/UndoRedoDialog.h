@@ -3,7 +3,7 @@
 #pragma once
 
 #include "AutoDrop.h"
-#include "utl/LayoutDialog.h"
+#include "utl/UI/LayoutDialog.h"
 
 
 class CUndoRedoDialog : public CLayoutDialog

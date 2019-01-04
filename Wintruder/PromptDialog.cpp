@@ -4,8 +4,8 @@
 #include "AppService.h"
 #include "resource.h"
 #include "wnd/WndUtils.h"
-#include "utl/StdColors.h"
-#include "utl/Utilities.h"
+#include "utl/UI/StdColors.h"
+#include "utl/UI/Utilities.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

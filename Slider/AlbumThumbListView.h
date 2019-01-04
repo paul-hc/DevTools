@@ -4,9 +4,9 @@
 
 #include "FileList.h"
 #include "ListViewState.h"
-#include "utl/OleDragDrop_fwd.h"
-#include "utl/OleDropTarget.h"
-#include "utl/WindowTimer.h"
+#include "utl/UI/OleDragDrop_fwd.h"
+#include "utl/UI/OleDropTarget.h"
+#include "utl/UI/WindowTimer.h"
 
 
 class CAlbumImageView;

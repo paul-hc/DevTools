@@ -2,6 +2,7 @@
 #include "stdafx.h"
 #include "IncludePaths.h"
 #include "IdeUtilities.h"
+#include "Application.h"
 #include "utl/EnumTags.h"
 
 #ifdef _DEBUG
@@ -48,18 +49,18 @@ const inc::CDirPathGroup& CIncludePaths::Get_PATH( void )
 
 void CIncludePaths::Load( const TCHAR section[] )
 {
-	m_standard.Load( section, reg::entry_Include );
-	m_source.Load( section, reg::entry_Source );
-	m_library.Load( section, reg::entry_Library );
-	m_binary.Load( section, reg::entry_Binary );
+	reg::LoadPathGroup( m_standard, section, reg::entry_Include );
+	reg::LoadPathGroup( m_source, section, reg::entry_Source );
+	reg::LoadPathGroup( m_library, section, reg::entry_Library );
+	reg::LoadPathGroup( m_binary, section, reg::entry_Binary );
 }
 
 void CIncludePaths::Save( const TCHAR section[] ) const
 {
-	m_standard.Save( section, reg::entry_Include );
-	m_source.Save( section, reg::entry_Source );
-	m_library.Save( section, reg::entry_Library );
-	m_binary.Save( section, reg::entry_Binary );
+	reg::SavePathGroup( m_standard, section, reg::entry_Include );
+	reg::SavePathGroup( m_source, section, reg::entry_Source );
+	reg::SavePathGroup( m_library, section, reg::entry_Library );
+	reg::SavePathGroup( m_binary, section, reg::entry_Binary );
 }
 
 std::tstring CIncludePaths::FormatLines( const TCHAR lineSep[] /*= s_lineSep*/ ) const

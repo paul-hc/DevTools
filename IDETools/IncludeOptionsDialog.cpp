@@ -5,9 +5,9 @@
 #include "IncludePaths.h"
 #include "ModuleSession.h"
 #include "Application.h"
-#include "utl/LayoutEngine.h"
-#include "utl/Utilities.h"
-#include "utl/resource.h"
+#include "utl/UI/LayoutEngine.h"
+#include "utl/UI/Utilities.h"
+#include "utl/UI/resource.h"
 #include "resource.h"
 
 #ifdef _DEBUG

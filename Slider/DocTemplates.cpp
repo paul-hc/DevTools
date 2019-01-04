@@ -8,14 +8,14 @@
 #include "ShellRegHelpers.h"
 #include "Application.h"
 #include "resource.h"
-#include "utl/ImagingWic.h"
-#include "utl/MenuUtilities.h"
 #include "utl/Path.h"
 #include "utl/Registry.h"
 #include "utl/ScopedValue.h"
-#include "utl/ShellFileDialog.h"
-#include "utl/Utilities.h"
-#include "utl/WicImage.h"
+#include "utl/UI/ImagingWic.h"
+#include "utl/UI/MenuUtilities.h"
+#include "utl/UI/ShellFileDialog.h"
+#include "utl/UI/Utilities.h"
+#include "utl/UI/WicImage.h"
 #include <afxpriv.h>		// for AfxRegQueryValue
 
 #ifdef _DEBUG
@@ -221,7 +221,7 @@ namespace app
 		{	// register Slider as view for sliding directory images
 			reg::CKey dirCommandKey( HKEY_CLASSES_ROOT, s_dirHandler[ ShellCommand ], true );
 			if ( dirCommandKey.IsValid() )
-				dirCommandKey.WriteString( NULL, str::Format( s_fmtValueCommand, ui::GetModuleFileName().c_str() ).c_str() );		// write the directory command value (such as "C:\My\Tools\mine\Slider.exe" "%L")
+				dirCommandKey.WriteString( NULL, str::Format( s_fmtValueCommand, app::GetModuleFilePath().GetPtr() ).c_str() );		// write the directory command value (such as "C:\My\Tools\mine\Slider.exe" "%L")
 
 			reg::CKey dirDdeExecKey( HKEY_CLASSES_ROOT, s_dirHandler[ ShellDdeExec ], true );
 			if ( dirDdeExecKey.IsValid() )
@@ -283,7 +283,7 @@ namespace app
 	{
 		using namespace shell_reg;
 
-		static const std::tstring sliderExePath = ui::GetModuleFileName();
+		static const fs::CPath sliderExePath = app::GetModuleFilePath();
 
 		// process known registered image files extensions
 		const std::vector< std::tstring >& imageExts = CImageDocTemplate::Instance()->GetAllExts();
@@ -305,7 +305,7 @@ namespace app
 							{
 								reg::CKey commandKey( HKEY_CLASSES_ROOT, str::Format( s_fmtShlHandlerCommand[ k ], shellHandlerName.c_str() ).c_str(), true );
 								if ( commandKey.IsValid() )
-									commandKey.WriteString( NULL, str::Format( s_fmtValueCommand, sliderExePath.c_str() ).c_str() );		// write the shell command (like "C:\My\Tools\mine\Slider.exe" "%L")
+									commandKey.WriteString( NULL, str::Format( s_fmtValueCommand, sliderExePath.GetPtr() ).c_str() );		// write the shell command (like "C:\My\Tools\mine\Slider.exe" "%L")
 
 								reg::CKey ddeExecKey( HKEY_CLASSES_ROOT, str::Format( s_fmtShlHandlerDdeExec[ k ], shellHandlerName.c_str() ).c_str(), true );
 								if ( ddeExecKey.IsValid() )

@@ -3,11 +3,11 @@
 #pragma once
 
 #include "utl/ISubject.h"
-#include "utl/LayoutPropertyPage.h"
-#include "utl/ReportListControl.h"
-#include "utl/SyncScrolling.h"
-#include "utl/TextEditor.h"
-#include "utl/ThemeStatic.h"
+#include "utl/UI/LayoutPropertyPage.h"
+#include "utl/UI/ReportListControl.h"
+#include "utl/UI/SyncScrolling.h"
+#include "utl/UI/TextEditor.h"
+#include "utl/UI/ThemeStatic.h"
 
 
 class CFileModel;

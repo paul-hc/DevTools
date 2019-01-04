@@ -3,8 +3,8 @@
 #include "TestTaskDialog.h"
 #include "CustomTaskDialogs.h"
 #include "utl/EnumTags.h"
-#include "utl/TaskDialog.h"
-#include "utl/Utilities.h"
+#include "utl/UI/TaskDialog.h"
+#include "utl/UI/Utilities.h"
 #include "resource.h"
 
 #ifdef _DEBUG

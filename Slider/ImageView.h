@@ -3,8 +3,8 @@
 #pragma once
 
 #include "IImageView.h"
-#include "utl/AccelTable.h"
-#include "utl/ImageZoomViewD2D.h"
+#include "utl/UI/AccelTable.h"
+#include "utl/UI/ImageZoomViewD2D.h"
 
 
 class CImageState;

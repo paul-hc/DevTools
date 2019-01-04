@@ -1,5 +1,5 @@
 
-#include "StdAfx.h"
+#include "stdafx.h"
 #include "ImageArchiveStg.h"
 #include "InputPasswordDialog.h"
 #include "Application.h"
@@ -8,8 +8,8 @@
 #include "utl/FileSystem.h"
 #include "utl/RuntimeException.h"
 #include "utl/Serialization.h"
-#include "utl/Thumbnailer.h"
-#include "utl/WicImageCache.h"
+#include "utl/UI/Thumbnailer.h"
+#include "utl/UI/WicImageCache.h"
 #include <numeric>
 
 #ifdef _DEBUG

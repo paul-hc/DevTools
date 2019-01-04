@@ -3,8 +3,8 @@
 #define WkspSaveDialog_h
 #pragma once
 
-#include "utl/ItemContentEdit.h"
-#include "utl/LayoutDialog.h"
+#include "utl/UI/ItemContentEdit.h"
+#include "utl/UI/LayoutDialog.h"
 #include "FileBrowser.h"
 
 

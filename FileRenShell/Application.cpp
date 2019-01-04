@@ -7,7 +7,7 @@
 #include "ut/RenameFilesTests.h"
 #include "ut/CommandModelSerializerTests.h"
 #include "utl/EnumTags.h"
-#include "utl/BaseApp.hxx"
+#include "utl/UI/BaseApp.hxx"
 #include "resource.h"
 
 #ifdef _DEBUG
@@ -61,7 +61,7 @@ BOOL CApplication::InitInstance( void )
 	if ( !CBaseApp< CWinApp >::InitInstance() )
 		return FALSE;
 
-	app::GetLogger().m_logFileMaxSize = -1;						// unlimited log size
+	app::GetLogger()->m_logFileMaxSize = -1;						// unlimited log size
 
 	CAboutBox::m_appIconId = IDD_RENAME_FILES_DIALOG;			// will use HugeIcon_48
 	CToolStrip::RegisterStripButtons( IDR_IMAGE_STRIP );		// register stock images

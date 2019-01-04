@@ -1,14 +1,14 @@
 
 #include "stdafx.h"
 #include "ImageDialogUtils.h"
-#include "utl/Color.h"
-#include "utl/DibSection.h"
-#include "utl/DibPixels.h"
 #include "utl/EnumTags.h"
-#include "utl/ImageProxy.h"
-#include "utl/Pixel.h"
 #include "utl/StringUtilities.h"
-#include "utl/UtilitiesEx.h"
+#include "utl/UI/Color.h"
+#include "utl/UI/DibSection.h"
+#include "utl/UI/DibPixels.h"
+#include "utl/UI/ImageProxy.h"
+#include "utl/UI/Pixel.h"
+#include "utl/UI/UtilitiesEx.h"
 #include <set>
 #include <math.h>
 

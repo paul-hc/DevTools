@@ -2,7 +2,7 @@
 #define AlbumDoc_h
 #pragma once
 
-#include "utl/ImagePathKey.h"
+#include "utl/UI/ImagePathKey.h"
 #include "DocumentBase.h"
 #include "FileList.h"
 #include "SlideData.h"

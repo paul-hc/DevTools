@@ -1,5 +1,5 @@
 
-#include "StdAfx.h"
+#include "stdafx.h"
 #include "Workspace.h"
 #include "WorkspaceDialog.h"
 #include "SlideData.h"
@@ -9,13 +9,13 @@
 #include "ChildFrame.h"
 #include "Application.h"
 #include "resource.h"
-#include "utl/ImagingDirect2D.h"
-#include "utl/MfcUtilities.h"
-#include "utl/ShellUtilities.h"
 #include "utl/Serialization.h"
 #include "utl/SerializeStdTypes.h"
-#include "utl/Utilities.h"
-#include "utl/Thumbnailer.h"
+#include "utl/UI/ImagingDirect2D.h"
+#include "utl/UI/MfcUtilities.h"
+#include "utl/UI/ShellUtilities.h"
+#include "utl/UI/Utilities.h"
+#include "utl/UI/Thumbnailer.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -120,7 +120,7 @@ CWorkspace::CWorkspace( void )
 	, m_isFullScreen( false )
 	, m_reserved( 0 )
 {
-	fs::CPathParts parts( ui::GetModuleFileName() );
+	fs::CPathParts parts( app::GetModuleFilePath().Get() );
 	parts.m_ext = _T(".slw");
 	m_filePath = parts.MakePath();
 

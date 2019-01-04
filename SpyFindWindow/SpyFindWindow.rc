@@ -7,7 +7,7 @@
 //
 // Generated from the TEXTINCLUDE 2 resource.
 //
-#include "utl/resource.h"
+#include "utl/UI/resource.h"
 #include "afxres.h"
 
 /////////////////////////////////////////////////////////////////////////////
@@ -69,8 +69,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 2,0,0,1
- PRODUCTVERSION 2,0,0,1
+ FILEVERSION 3,0,0,1
+ PRODUCTVERSION 3,0,0,1
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -85,15 +85,16 @@ BEGIN
     BEGIN
         BLOCK "040904e4"
         BEGIN
+            VALUE "Comments", "Split UTL_BASE/UTL_UI projects"
             VALUE "CompanyName", "Paul Cocoveanu"
             VALUE "Email", "phc.2nd@gmail.com"
             VALUE "FileDescription", "SpyFindWindow Application"
-            VALUE "FileVersion", "2, 0, 0, 1"
+            VALUE "FileVersion", "3, 0, 0, 1"
             VALUE "InternalName", "SpyFindWindow"
-            VALUE "LegalCopyright", "Copyright (C) 2014-2015"
+            VALUE "LegalCopyright", "Copyright (C) 2014-2019"
             VALUE "OriginalFilename", "SpyFindWindow.exe"
             VALUE "ProductName", "SpyFindWindow"
-            VALUE "ProductVersion", "2, 0, 0, 1"
+            VALUE "ProductVersion", "3, 0, 0, 1"
             VALUE "WrittenBy", "Written by Paul Cocoveanu"
         END
     END
@@ -171,14 +172,14 @@ END
 
 2 TEXTINCLUDE 
 BEGIN
-    "#include ""utl/resource.h""\r\n"
+    "#include ""utl/UI/resource.h""\r\n"
     "#include ""afxres.h""\r\n"
     "\0"
 END
 
 3 TEXTINCLUDE 
 BEGIN
-    "#include ""utl/utl_ui.rc""\r\n"
+    "#include ""utl/UI/utl_ui.rc""\r\n"
     "#include ""res\\SpyFindWindow.rc2""  // non-Microsoft Visual C++ edited resources\r\n"
     "\r\n"
     "#define _AFX_NO_SPLITTER_RESOURCES\r\n"
@@ -202,7 +203,7 @@ END
 //
 // Generated from the TEXTINCLUDE 3 resource.
 //
-#include "utl/utl_ui.rc"
+#include "utl/UI/utl_ui.rc"
 #include "res\SpyFindWindow.rc2"  // non-Microsoft Visual C++ edited resources
 
 #define _AFX_NO_SPLITTER_RESOURCES

@@ -7,15 +7,16 @@
 #include "PathSortOrder.h"
 #include "SafeForScripting.h"
 #include "resource.h"
+#include "utl/AppTools.h"
 #include "utl/FileSystem.h"
-#include "utl/VersionInfo.h"
-#include "utl/resource.h"
+#include "utl/UI/VersionInfo.h"
+#include "utl/UI/resource.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
 
-#include "utl/BaseApp.hxx"
+#include "utl/UI/BaseApp.hxx"
 
 
 /* CApplication implementation note:
@@ -114,7 +115,7 @@ namespace app
 		static fs::CPath configDirPath;
 		if ( configDirPath.IsEmpty() )
 		{
-			fs::CPath exeDirPath = fs::CPath( ui::GetModuleFileName() ).GetParentPath();
+			fs::CPath exeDirPath = app::GetModuleFilePath().GetParentPath();
 
 			configDirPath = exeDirPath / fs::CPath( _T("mine\\config") );
 

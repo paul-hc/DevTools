@@ -3,10 +3,9 @@
 #pragma once
 
 #include "utl/Subject.h"
-#include "utl/InternalChange.h"
-#include "utl/PathItemBase.h"
 #include "utl/PathItemBase.h"
 #include "utl/ICommand.h"
+#include "utl/UI/InternalChange.h"
 
 class CRenameItem;
 class CTouchItem;

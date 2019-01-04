@@ -5,11 +5,11 @@
 #include "TextAlgorithms.h"
 #include "resource.h"
 #include "utl/ContainerUtilities.h"
-#include "utl/MenuUtilities.h"
 #include "utl/PathGenerator.h"
 #include "utl/StringUtilities.h"
-#include "utl/Utilities.h"
-#include "utl/resource.h"
+#include "utl/UI/MenuUtilities.h"
+#include "utl/UI/Utilities.h"
+#include "utl/UI/resource.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

@@ -2,7 +2,7 @@
 #define WorkspaceDialog_h
 #pragma once
 
-#include "utl/SpinEdit.h"
+#include "utl/UI/SpinEdit.h"
 #include "Workspace.h"
 
 

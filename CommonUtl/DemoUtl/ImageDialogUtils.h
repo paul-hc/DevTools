@@ -4,7 +4,7 @@
 
 #include "utl/ContainerUtilities.h"
 #include "utl/Path.h"
-#include "utl/Pixel.h"
+#include "utl/UI/Pixel.h"
 #include <map>
 
 
@@ -125,7 +125,7 @@ public:
 };
 
 
-#include "utl/SpinEdit.h"
+#include "utl/UI/SpinEdit.h"
 
 
 class CColorChannelEdit : public CSpinEdit
@@ -153,7 +153,7 @@ private:
 };
 
 
-#include "utl/SampleView.h"
+#include "utl/UI/SampleView.h"
 
 
 class CColorSample : public CSampleView

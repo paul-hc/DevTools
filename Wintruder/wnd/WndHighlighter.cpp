@@ -3,8 +3,8 @@
 #include "WndHighlighter.h"
 #include "AppService.h"
 #include "utl/ContainerUtilities.h"
-#include "utl/DesktopDC.h"
-#include "utl/Utilities.h"
+#include "utl/UI/DesktopDC.h"
+#include "utl/UI/Utilities.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

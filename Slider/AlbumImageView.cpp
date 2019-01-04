@@ -1,5 +1,5 @@
 
-#include "StdAfx.h"
+#include "stdafx.h"
 #include "AlbumImageView.h"
 #include "AlbumDoc.h"
 #include "AlbumDialogBar.h"
@@ -10,12 +10,12 @@
 #include "Workspace.h"
 #include "Application.h"
 #include "resource.h"
-#include "utl/CmdUpdate.h"
-#include "utl/MenuUtilities.h"
-#include "utl/PostCall.h"
 #include "utl/RuntimeException.h"
-#include "utl/Utilities.h"
-#include "utl/WicImageCache.h"
+#include "utl/UI/CmdUpdate.h"
+#include "utl/UI/MenuUtilities.h"
+#include "utl/UI/PostCall.h"
+#include "utl/UI/Utilities.h"
+#include "utl/UI/WicImageCache.h"
 #include <map>
 
 #ifdef _DEBUG

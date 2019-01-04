@@ -2,14 +2,13 @@
 #define OptionsSheet_h
 #pragma once
 
-#include <vector>
 #include "FormatterOptions.h"
-#include "utl/DialogToolBar.h"
-#include "utl/ItemContentEdit.h"
-#include "utl/LayoutPropertyPage.h"
-#include "utl/LayoutPropertySheet.h"
 #include "utl/Path.h"
-#include "utl/SpinEdit.h"
+#include "utl/UI/DialogToolBar.h"
+#include "utl/UI/ItemContentEdit.h"
+#include "utl/UI/LayoutPropertyPage.h"
+#include "utl/UI/LayoutPropertySheet.h"
+#include "utl/UI/SpinEdit.h"
 
 
 class COptionsSheet : public CLayoutPropertySheet

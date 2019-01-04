@@ -14,7 +14,7 @@
 #include "ModuleSession.h"
 #include "Application.h"
 #include "resource.h"
-#include "utl/MenuUtilities.h"
+#include "utl/UI/MenuUtilities.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

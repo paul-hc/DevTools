@@ -3,8 +3,8 @@
 #include "ThumbnailTests.h"
 #include "Application.h"
 #include "utl/StructuredStorage.h"
-#include "utl/Thumbnailer.h"
-#include "utl/ut/TestToolWnd.h"
+#include "utl/UI/Thumbnailer.h"
+#include "utl/UI/ut/TestToolWnd.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -60,7 +60,7 @@ namespace ut
 			parts.m_ext = extensions[ i ];
 
 			const GUID& containerFormatId = wic::CBitmapOrigin::FindContainerFormatId( parts.m_ext.c_str() );
-			CComPtr< IStream > pThumbStream = docStg.CreateStream( parts.MakePath().c_str() );
+			CComPtr< IStream > pThumbStream = docStg.CreateStream( parts.MakePath().GetPtr() );
 			
 			if ( !wic::SaveBitmapToStream( pThumbBitmap, pThumbStream, containerFormatId ) )
 				return false;
@@ -83,7 +83,7 @@ CThumbnailTests& CThumbnailTests::Instance( void )
 
 const fs::CPath& CThumbnailTests::GetThumbSaveDirPath( void )
 {
-	static fs::CPath dirPath = GetTestImagesDirPath() / fs::CPath( _T("thumbnails") );
+	static fs::CPath dirPath = ut::GetTestImagesDirPath() / fs::CPath( _T("thumbnails") );
 	if ( !dirPath.IsEmpty() && !fs::CreateDirPath( dirPath.GetPtr() ) )
 	{
 		TRACE( _T("\n * Cannot create the local save directory for thumbs: %s\n"), dirPath.GetPtr() );
@@ -126,11 +126,11 @@ void CThumbnailTests::TestThumbConversion( void )
 
 void CThumbnailTests::TestImageThumbs( void )
 {
-	if ( GetImageSourceDirPath().IsEmpty() )
+	if ( ut::GetImageSourceDirPath().IsEmpty() )
 		return;
 
 	fs::CEnumerator imageEnum;
-	fs::EnumFiles( &imageEnum, GetImageSourceDirPath(), _T("*.*") );
+	fs::EnumFiles( &imageEnum, ut::GetImageSourceDirPath(), _T("*.*") );
 
 	fs::SortPaths( imageEnum.m_filePaths );
 
@@ -158,11 +158,11 @@ void CThumbnailTests::TestImageThumbs( void )
 
 void CThumbnailTests::TestThumbnailCache( void )
 {
-	if ( GetImageSourceDirPath().IsEmpty() )
+	if ( ut::GetImageSourceDirPath().IsEmpty() )
 		return;
 
 	fs::CEnumerator imageEnum;
-	fs::EnumFiles( &imageEnum, GetImageSourceDirPath(), _T("*.*") );
+	fs::EnumFiles( &imageEnum, ut::GetImageSourceDirPath(), _T("*.*") );
 
 	fs::SortPaths( imageEnum.m_filePaths );
 

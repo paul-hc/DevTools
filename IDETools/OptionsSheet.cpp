@@ -5,10 +5,10 @@
 #include "ModuleSession.h"
 #include "Application.h"
 #include "resource.h"
-#include "utl/Clipboard.h"
 #include "utl/FileSystem.h"
-#include "utl/UtilitiesEx.h"
-#include "utl/resource.h"
+#include "utl/UI/Clipboard.h"
+#include "utl/UI/UtilitiesEx.h"
+#include "utl/UI/resource.h"
 #include <sstream>
 #include <afxpriv.h>		// for WM_IDLEUPDATECMDUI
 
@@ -172,10 +172,10 @@ END_MESSAGE_MAP()
 
 void CCodingStandardPage::CBnSelChange_BraceRules( void )
 {
-	int selIndex = m_braceRulesCombo.GetCurSel();
+	unsigned int selIndex = m_braceRulesCombo.GetCurSel();
 	const code::CFormatterOptions::CBraceRule& braceRule = m_braceRules[ selIndex ];
 
-	ASSERT( selIndex >= 0 && selIndex < m_braceRules.size() );
+	ASSERT( selIndex < m_braceRules.size() );
 
 	CheckDlgButton( IDC_IS_ARGUMENT_LIST_BRACKET_CHECK, braceRule.m_isArgList );
 	CheckRadioButton( IDC_REMOVE_SPACES_RADIO, IDC_PRESERVE_SPACES_RADIO, IDC_REMOVE_SPACES_RADIO + braceRule.m_spacing );
@@ -185,10 +185,11 @@ void CCodingStandardPage::CBnSelChange_BraceRules( void )
 
 void CCodingStandardPage::CBnSelChange_OperatorRules( void )
 {
-	int selIndex = m_operatorRulesCombo.GetCurSel();
+	unsigned int selIndex = m_operatorRulesCombo.GetCurSel();
+	ASSERT( selIndex < m_operatorRules.size() );
+
 	const code::CFormatterOptions::COperatorRule& operatorRule = m_operatorRules[ selIndex ];
 
-	ASSERT( selIndex >= 0 && selIndex < m_operatorRules.size() );
 	CheckRadioButton( IDC_OP_BEFORE_REMOVE_SPACES_RADIO, IDC_OP_BEFORE_PRESERVE_SPACES_RADIO,
 					  IDC_OP_BEFORE_REMOVE_SPACES_RADIO + operatorRule.m_spaceBefore );
 	CheckRadioButton( IDC_OP_AFTER_REMOVE_SPACES_RADIO, IDC_OP_AFTER_PRESERVE_SPACES_RADIO,
@@ -200,10 +201,10 @@ void CCodingStandardPage::CBnSelChange_OperatorRules( void )
 void CCodingStandardPage::BnClicked_BraceRulesButton( UINT cmdId )
 {
 	cmdId;
-	int selIndex = m_braceRulesCombo.GetCurSel();
-	code::CFormatterOptions::CBraceRule& rBraceRule = m_braceRules[ selIndex ];
+	unsigned int selIndex = m_braceRulesCombo.GetCurSel();
+	ASSERT( selIndex < m_braceRules.size() );
 
-	ASSERT( selIndex >= 0 && selIndex < m_braceRules.size() );
+	code::CFormatterOptions::CBraceRule& rBraceRule = m_braceRules[ selIndex ];
 
 	rBraceRule.m_isArgList = IsDlgButtonChecked( IDC_IS_ARGUMENT_LIST_BRACKET_CHECK ) != FALSE;
 	rBraceRule.m_spacing = code::TokenSpacing( GetCheckedRadioButton( IDC_REMOVE_SPACES_RADIO, IDC_PRESERVE_SPACES_RADIO ) - IDC_REMOVE_SPACES_RADIO );
@@ -212,10 +213,10 @@ void CCodingStandardPage::BnClicked_BraceRulesButton( UINT cmdId )
 void CCodingStandardPage::BnClicked_OperatorRulesButton( UINT cmdId )
 {
 	cmdId;
-	int selIndex = m_operatorRulesCombo.GetCurSel();
-	code::CFormatterOptions::COperatorRule& rOperatorRule = m_operatorRules[ selIndex ];
+	unsigned int selIndex = m_operatorRulesCombo.GetCurSel();
+	ASSERT( selIndex < m_operatorRules.size() );
 
-	ASSERT( selIndex >= 0 && selIndex < m_operatorRules.size() );
+	code::CFormatterOptions::COperatorRule& rOperatorRule = m_operatorRules[ selIndex ];
 
 	rOperatorRule.m_spaceBefore = code::TokenSpacing( GetCheckedRadioButton( IDC_OP_BEFORE_REMOVE_SPACES_RADIO, IDC_OP_BEFORE_PRESERVE_SPACES_RADIO ) - IDC_OP_BEFORE_REMOVE_SPACES_RADIO );
 	rOperatorRule.m_spaceAfter = code::TokenSpacing( GetCheckedRadioButton( IDC_OP_AFTER_REMOVE_SPACES_RADIO, IDC_OP_AFTER_PRESERVE_SPACES_RADIO ) - IDC_OP_AFTER_REMOVE_SPACES_RADIO );

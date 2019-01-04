@@ -3,8 +3,8 @@
 #include "ThemeCustomDraw.h"
 #include "ThemeStore.h"
 #include "Options.h"
-#include "utl/Utilities.h"
-#include "utl/VisualTheme.h"
+#include "utl/UI/Utilities.h"
+#include "utl/UI/VisualTheme.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

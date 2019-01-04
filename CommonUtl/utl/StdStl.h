@@ -3,6 +3,11 @@
 #define StdStl_h
 #pragma once
 
+
+#define OEMRESOURCE			// load OCR_NORMAL cursor values from winuser.h
+#include <afx.h>			// must include first to prevent: uafxcw.lib(afxmem.obj) : error LNK2005: "void * __cdecl operator new[](unsigned int)" (??_U@YAPAXI@Z) already defined in libcpmt.lib(newaop.obj)
+
+
 // C standard headers
 #include <stdlib.h>
 #include <stdio.h>
@@ -79,6 +84,25 @@ namespace std
 	#define tcin cin
 #endif
 }
+
+
+// include this in stdafx.h just before first Windows header: #include <afxwin.h>
+
+namespace utl
+{
+	template< typename LeftT, typename RightT >
+	LeftT max( const LeftT& left, const RightT& right ) { return ( left < static_cast< LeftT >( right ) ) ? static_cast< LeftT >( right ) : left; }
+
+	template< typename LeftT, typename RightT >
+	LeftT min( const LeftT& left, const RightT& right ) { return ( static_cast< LeftT >( right ) < left ) ? static_cast< LeftT >( right ) : left; }
+}
+
+
+#ifdef NOMINMAX
+	// required by some Windows headers: return by value to make it compatible with uses such as: max< int, unsigned long >( a, b )
+	using utl::max;
+	using utl::min;
+#endif //NOMINMAX
 
 
 #endif // StdStl_h

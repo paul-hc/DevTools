@@ -5,15 +5,12 @@
 #include "StringTests.h"
 #include "StringRangeTests.h"
 #include "NumericTests.h"
-#include "ColorTests.h"
 #include "LcsTests.h"
 #include "ResequenceTests.h"
 #include "FmtUtilsTests.h"
 #include "FileSystemTests.h"
 #include "PathTests.h"
 #include "PathGeneratorTests.h"
-#include "SerializationTests.h"
-#include "ShellFileSystemTests.h"
 #include "ThreadingTests.h"
 
 
@@ -26,15 +23,12 @@ namespace ut
 		CStringTests::Instance();
 		CStringRangeTests::Instance();
 		CNumericTests::Instance();
-		CColorTests::Instance();
 		CLcsTests::Instance();
 		CResequenceTests::Instance();
 		CFmtUtilsTests::Instance();
 		CFileSystemTests::Instance();
-		CShellFileSystemTests::Instance();
 		CPathTests::Instance();
 		CPathGeneratorTests::Instance();
-		CSerializationTests::Instance();
 		//CThreadingTests::Instance();
 	#endif
 	}

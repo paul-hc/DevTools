@@ -2,7 +2,7 @@
 #define DuplicateFileItem_h
 #pragma once
 
-#include "utl/IProgressCallback.h"
+#include "utl/UI/IProgressCallback.h"
 #include "utl/FileContent.h"
 #include "utl/PathItemBase.h"
 #include <hash_map>

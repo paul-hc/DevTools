@@ -3,7 +3,7 @@
 #pragma once
 
 #include "BaseFlagsCtrl.h"
-#include "utl/InternalChange.h"
+#include "utl/UI/InternalChange.h"
 
 
 class CFlagsEdit : public CEdit

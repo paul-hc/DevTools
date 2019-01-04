@@ -5,7 +5,7 @@
 #include "AppService.h"
 #include "Application.h"
 #include "resource.h"
-#include "utl/Utilities.h"
+#include "utl/UI/Utilities.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

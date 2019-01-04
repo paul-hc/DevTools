@@ -2,7 +2,7 @@
 #include "stdafx.h"
 #include "XferOptions.h"
 #include "TransferItem.h"
-#include "utl/ConsoleInputOutput.h"
+#include "utl/ConsoleApplication.h"
 #include "utl/FileSystem.h"
 #include "utl/RuntimeException.h"
 #include "utl/StringUtilities.h"

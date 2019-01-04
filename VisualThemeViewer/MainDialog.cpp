@@ -6,13 +6,13 @@
 #include "ThemeContext.h"
 #include "ThemeCustomDraw.h"
 #include "ThemeStore.h"
-#include "utl/Clipboard.h"
-#include "utl/MenuUtilities.h"
 #include "utl/StringUtilities.h"
-#include "utl/UtilitiesEx.h"
-#include "utl/StdColors.h"
 #include "utl/SubjectPredicates.h"
-#include "utl/resource.h"
+#include "utl/UI/Clipboard.h"
+#include "utl/UI/MenuUtilities.h"
+#include "utl/UI/UtilitiesEx.h"
+#include "utl/UI/StdColors.h"
+#include "utl/UI/resource.h"
 #include "resource.h"
 
 #ifdef _DEBUG

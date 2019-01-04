@@ -1,7 +1,7 @@
 #pragma once
 
-#include "utl/LayoutDialog.h"
-#include "utl/EnumSplitButton.h"
+#include "utl/UI/LayoutDialog.h"
+#include "utl/UI/EnumSplitButton.h"
 
 
 class CTaskDialog;

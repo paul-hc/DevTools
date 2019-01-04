@@ -1,7 +1,7 @@
 
 #include "stdafx.h"
 #include "ut/ThreadingTests.h"
-#include "MfcUtilities.h"
+#include "MultiThreading.h"
 #include <boost/thread.hpp>
 
 #ifdef _DEBUG

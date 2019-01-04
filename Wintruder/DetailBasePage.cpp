@@ -2,7 +2,7 @@
 #include "stdafx.h"
 #include "DetailBasePage.h"
 #include "AppService.h"
-#include "utl/LayoutBasePropertySheet.h"
+#include "utl/UI/LayoutBasePropertySheet.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

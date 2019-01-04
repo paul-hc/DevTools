@@ -4,8 +4,8 @@
 #include "WorkspaceProfile.h"
 #include "Application_fwd.h"
 #include "resource.h"
-#include "utl/MenuUtilities.h"
 #include "utl/Registry.h"
+#include "utl/UI/MenuUtilities.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

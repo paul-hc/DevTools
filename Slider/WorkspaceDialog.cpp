@@ -1,16 +1,16 @@
 
-#include "StdAfx.h"
+#include "stdafx.h"
 #include "WorkspaceDialog.h"
 #include "SlideData.h"				// af::ShowAlbumDialogBar
 #include "Application.h"
 #include "resource.h"
-#include "utl/Dialog_fwd.h"
 #include "utl/EnumTags.h"
 #include "utl/FileSystem.h"
-#include "utl/ImagingDirect2D.h"
-#include "utl/ShellUtilities.h"
-#include "utl/Utilities.h"
-#include "utl/Thumbnailer.h"
+#include "utl/UI/Dialog_fwd.h"
+#include "utl/UI/ImagingDirect2D.h"
+#include "utl/UI/ShellUtilities.h"
+#include "utl/UI/Utilities.h"
+#include "utl/UI/Thumbnailer.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

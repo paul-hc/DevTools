@@ -2,9 +2,9 @@
 #define ReplaceDialog_h
 #pragma once
 
-#include "utl/DialogToolBar.h"
-#include "utl/HistoryComboBox.h"
-#include "utl/LayoutDialog.h"
+#include "utl/UI/DialogToolBar.h"
+#include "utl/UI/HistoryComboBox.h"
+#include "utl/UI/LayoutDialog.h"
 
 
 interface IFileEditor;

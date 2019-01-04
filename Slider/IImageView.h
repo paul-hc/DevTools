@@ -2,7 +2,7 @@
 #define IImageView_h
 #pragma once
 
-#include "utl/ImagePathKey.h"
+#include "utl/UI/ImagePathKey.h"
 
 
 class CWicImage;

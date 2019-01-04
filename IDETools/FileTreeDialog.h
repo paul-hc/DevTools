@@ -3,11 +3,11 @@
 #pragma once
 
 #include <map>
-#include "utl/AccelTable.h"
-#include "utl/ItemContentEdit.h"
-#include "utl/LayoutDialog.h"
 #include "utl/Path.h"
-#include "utl/TreeControl.h"
+#include "utl/UI/AccelTable.h"
+#include "utl/UI/ItemContentEdit.h"
+#include "utl/UI/LayoutDialog.h"
+#include "utl/UI/TreeControl.h"
 #include "FileAssoc.h"
 #include "IncludeOptions.h"
 #include "IncludeNode.h"

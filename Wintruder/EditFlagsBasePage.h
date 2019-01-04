@@ -2,8 +2,8 @@
 #define EditFlagsBasePage_h
 #pragma once
 
-#include "utl/CmdInfoStore.h"
-#include "utl/LayoutChildPropertySheet.h"
+#include "utl/UI/CmdInfoStore.h"
+#include "utl/UI/LayoutChildPropertySheet.h"
 #include "DetailBasePage.h"
 #include "FlagsEdit.h"
 

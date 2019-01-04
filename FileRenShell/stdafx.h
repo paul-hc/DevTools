@@ -9,10 +9,9 @@
 #define _ATL_APARTMENT_THREADED
 #define _ATL_NO_UUIDOF
 
-#include <afxwin.h>					// MFC core and standard components
 #include "utl/StdStl.h"				// Standard C++ Library
-#include "utl/CommonWinDefs.h"		// min/max
 
+#include <afxwin.h>					// MFC core and standard components
 #include <afxdisp.h>
 #include <afxmt.h>
 
@@ -23,5 +22,6 @@
 #include <atlcom.h>
 #include <afxcmn.h>
 
-#include "utl/StdManifest.h"		// include manifest for common controls
 #include "utl/CommonDefs.h"
+#include "utl/UI/CommonWinDefs.h"		// min/max
+#include "utl/UI/StdManifest.h"		// include manifest for common controls

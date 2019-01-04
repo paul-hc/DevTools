@@ -2,8 +2,8 @@
 #define MainFrame_h
 #pragma once
 
-#include "utl/InternalChange.h"
-#include "utl/WindowTimer.h"
+#include "utl/UI/InternalChange.h"
+#include "utl/UI/WindowTimer.h"
 #include "WindowPlacement.h"
 
 

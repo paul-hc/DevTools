@@ -4,8 +4,8 @@
 #include "WndUtils.h"
 #include "AppService.h"
 #include "utl/Guards.h"
-#include "utl/ProcessUtils.h"
-#include "utl/Utilities.h"
+#include "utl/UI/ProcessUtils.h"
+#include "utl/UI/Utilities.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

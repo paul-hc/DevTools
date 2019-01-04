@@ -1,5 +1,5 @@
 
-#include "StdAfx.h"
+#include "stdafx.h"
 #include "ImageView.h"
 #include "INavigationBar.h"
 #include "Workspace.h"
@@ -12,14 +12,14 @@
 #include "OleImagesDataSource.h"
 #include "Application.h"
 #include "resource.h"
-#include "utl/Clipboard.h"
-#include "utl/CmdUpdate.h"
-#include "utl/MenuUtilities.h"
-#include "utl/PostCall.h"
-#include "utl/ShellUtilities.h"
-#include "utl/Utilities.h"
-#include "utl/Thumbnailer.h"
-#include "utl/WicImageCache.h"
+#include "utl/UI/Clipboard.h"
+#include "utl/UI/CmdUpdate.h"
+#include "utl/UI/MenuUtilities.h"
+#include "utl/UI/PostCall.h"
+#include "utl/UI/ShellUtilities.h"
+#include "utl/UI/Utilities.h"
+#include "utl/UI/Thumbnailer.h"
+#include "utl/UI/WicImageCache.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

@@ -2,7 +2,7 @@
 #include "stdafx.h"
 #include "Crc32.h"
 #include "FileSystem.h"
-#include "BaseApp.h"
+#include "AppTools.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -58,11 +58,11 @@ namespace utl
 		return crc32CheckSum;
 	}
 
-	UINT CCrc32::ComputeFileCrc32( const TCHAR* pFilePath ) const throws_( CFileException* )
+	UINT CCrc32::ComputeFileCrc32( const fs::CPath& filePath ) const throws_( CFileException* )
 	{
 		UINT crc32CheckSum = UINT_MAX;
 
-		CFile file( pFilePath, CFile::modeRead | CFile::shareDenyWrite );
+		CFile file( filePath.GetPtr(), CFile::modeRead | CFile::shareDenyWrite );
 
 		enum { BlockSize = 4096 * 4 };		// read in 16384-byte (16K) data blocks at a time; originally 4096-byte (4K) data blocks
 
@@ -133,11 +133,11 @@ namespace fs
 	{
 		try
 		{
-			return utl::CCrc32::Instance().ComputeFileCrc32( filePath.GetPtr() );
+			return utl::CCrc32::Instance().ComputeFileCrc32( filePath );
 		}
 		catch ( CFileException* pExc )
 		{
-			app::TraceException( *pExc );
+			app::TraceException( pExc );
 			pExc->Delete();
 			return 0;						// error
 		}

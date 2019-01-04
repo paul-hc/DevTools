@@ -3,9 +3,9 @@
 #define FindWndDialog_h
 #pragma once
 
-#include "utl/IconButton.h"
-#include "utl/LayoutDialog.h"
-#include "utl/PopupSplitButton.h"
+#include "utl/UI/IconButton.h"
+#include "utl/UI/LayoutDialog.h"
+#include "utl/UI/PopupSplitButton.h"
 #include "TrackWndPickerStatic.h"
 
 

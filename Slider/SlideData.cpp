@@ -1,5 +1,5 @@
 
-#include "StdAfx.h"
+#include "stdafx.h"
 #include "SlideData.h"
 #include "Workspace.h"
 #include "utl/Serialization.h"

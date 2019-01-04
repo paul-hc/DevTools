@@ -32,7 +32,7 @@ namespace code
 	{
 		clear();
 
-		ASSERT( pStr != NULL && openBracePos >= 0 && openBracePos <= _tcslen( pStr ) );
+		ASSERT( pStr != NULL && openBracePos >= 0 && openBracePos <= str::Length( pStr ) );
 		ASSERT( isOpenBraceChar( pStr[ openBracePos ] ) );
 
 		storeBrace( pStr[ openBracePos ] );
@@ -120,7 +120,7 @@ namespace code
 	TokenRange BraceParityStatus::findArgList( const TCHAR* codeText, int pos, const TCHAR* argListOpenBraces,
 											   DocLanguage docLanguage, bool allowUnclosedArgList /*= false*/ )
 	{
-		ASSERT( codeText != NULL && pos >= 0 && pos <= _tcslen( codeText ) );
+		ASSERT( codeText != NULL && pos >= 0 && pos <= str::Length( codeText ) );
 		ASSERT( argListOpenBraces != NULL && argListOpenBraces[ 0 ] != _T('\0') );
 
 		code::LanguageSearchEngine languageEngine( docLanguage );

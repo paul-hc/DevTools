@@ -2,7 +2,7 @@
 #include "stdafx.h"
 #include "FileType.h"
 #include "resource.h"
-#include "utl/Image_fwd.h"
+#include "utl/UI/Image_fwd.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

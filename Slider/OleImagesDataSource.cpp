@@ -1,12 +1,12 @@
 
-#include "StdAfx.h"
+#include "stdafx.h"
 #include "OleImagesDataSource.h"
 #include "FileOperation.h"
 #include "Workspace.h"
 #include "Application.h"
-#include "utl/ShellUtilities.h"
-#include "utl/UtilitiesEx.h"
-#include "utl/WicDibSection.h"
+#include "utl/UI/ShellUtilities.h"
+#include "utl/UI/UtilitiesEx.h"
+#include "utl/UI/WicDibSection.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -122,12 +122,12 @@ void CTempCloneFileSet::DeleteClones( void )
 
 const fs::CPath& CTempCloneFileSet::GetTempDirPath( void )
 {
-	static const TCHAR cloneSubDir[] = _T("SliderTempClones");
+	static const fs::CPath s_cloneSubDir( _T("SliderTempClones") );
 	static fs::CPath dirPath;
 
 	if ( dirPath.IsEmpty() )
 	{
-		dirPath = path::Combine( fs::GetTempDirPath().c_str(), cloneSubDir );
+		dirPath = fs::GetTempDirPath() / s_cloneSubDir;
 		if ( !fs::IsValidDirectory( dirPath.GetPtr() ) )
 			try
 			{

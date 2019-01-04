@@ -1,10 +1,10 @@
 
-#include "StdAfx.h"
+#include "stdafx.h"
 #include "ThumbPreviewCtrl.h"
 #include "AlbumThumbListView.h"
 #include "Application.h"
-#include "utl/Utilities.h"
-#include "utl/Thumbnailer.h"
+#include "utl/UI/Utilities.h"
+#include "utl/UI/Thumbnailer.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

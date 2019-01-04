@@ -1,5 +1,5 @@
 
-#include "StdAfx.h"
+#include "stdafx.h"
 #include "AlbumChildFrame.h"
 #include "MainFrame.h"
 #include "AlbumImageView.h"

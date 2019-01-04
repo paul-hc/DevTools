@@ -79,14 +79,4 @@ namespace fs
 		for ( std::vector< std::tstring >::const_iterator itSpec = m_specs.begin(); itSpec != m_specs.end(); ++itSpec )
 			m_paths.push_back( str::ExpandEnvironmentStrings( itSpec->c_str() ) );
 	}
-
-	void CPathGroup::Load( const TCHAR section[], const TCHAR entry[] )
-	{
-		Split( AfxGetApp()->GetProfileString( section, entry, Join( s_sep ).c_str() ).GetString(), s_sep );
-	}
-
-	void CPathGroup::Save( const TCHAR section[], const TCHAR entry[] ) const
-	{
-		AfxGetApp()->WriteProfileString( section, entry, Join( s_sep ).c_str() );
-	}
 }

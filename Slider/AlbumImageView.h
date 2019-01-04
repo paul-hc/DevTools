@@ -5,7 +5,7 @@
 #include "ImageView.h"
 #include "SlideData.h"
 #include "utl/FlexPath.h"
-#include "utl/WindowTimer.h"
+#include "utl/UI/WindowTimer.h"
 
 
 class CAlbumDoc;

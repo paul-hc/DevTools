@@ -64,7 +64,7 @@
       <WarningLevel>Level4</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_WINDOWS;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>.;../CommonUtl;$(UTL_INCLUDE)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.;../CommonUtl;../CommonUtl/utl;$(UTL_INCLUDE)</AdditionalIncludeDirectories>
       <ShowIncludes>false</ShowIncludes>
     </ClCompile>
     <Link>
@@ -80,7 +80,7 @@
     <ResourceCompile>
       <Culture>0x0409</Culture>
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(IntDir);../CommonUtl;../CommonUtl/utl;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(IntDir);../CommonUtl;../CommonUtl/utl/UI;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseU|Win32'">
@@ -91,7 +91,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>.;../CommonUtl;$(UTL_INCLUDE)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.;../CommonUtl;../CommonUtl/utl;$(UTL_INCLUDE)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -108,7 +108,7 @@
     <ResourceCompile>
       <Culture>0x0409</Culture>
       <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(IntDir);../CommonUtl;../CommonUtl/utl;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(IntDir);../CommonUtl;../CommonUtl/utl/UI;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -151,8 +151,11 @@
     <Image Include="res\VisualThemeViewer.ico" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\CommonUtl\utl\utl_ui_vc12.vcxproj">
+    <ProjectReference Include="..\CommonUtl\utl\UI\UTL_UI_vc12.vcxproj">
       <Project>{fa759613-6a3a-46dc-9ce8-a60b10eb5986}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\CommonUtl\utl\UTL_BASE_vc12.vcxproj">
+      <Project>{2d1343ae-bd7c-4114-9f9a-6848bd79f762}</Project>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

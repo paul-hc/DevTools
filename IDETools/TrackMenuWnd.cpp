@@ -3,12 +3,12 @@
 #include "TrackMenuWnd.h"
 #include "IdeUtilities.h"
 #include "Application.h"
-#include "utl/CmdUpdate.h"
 #include "utl/ContainerUtilities.h"
-#include "utl/MenuUtilities.h"
-#include "utl/PostCall.h"
-#include "utl/ProcessUtils.h"
-#include "utl/Utilities.h"
+#include "utl/UI/CmdUpdate.h"
+#include "utl/UI/MenuUtilities.h"
+#include "utl/UI/PostCall.h"
+#include "utl/UI/ProcessUtils.h"
+#include "utl/UI/Utilities.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

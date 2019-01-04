@@ -8,7 +8,7 @@
 #define new DEBUG_NEW
 #endif
 
-#include "utl/BaseApp.hxx"
+#include "utl/UI/BaseApp.hxx"
 
 
 CApplication theApp;		// the one and only CApplication object

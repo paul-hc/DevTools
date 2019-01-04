@@ -1,13 +1,13 @@
 
-#include "StdAfx.h"
+#include "stdafx.h"
 #include "AutoDrop.h"
 #include "ImageFileEnumerator.h"
 #include "Application.h"
 #include "resource.h"
-#include "utl/MenuUtilities.h"
 #include "utl/SerializeStdTypes.h"
-#include "utl/ShellUtilities.h"
-#include "utl/Utilities.h"
+#include "utl/UI/MenuUtilities.h"
+#include "utl/UI/ShellUtilities.h"
+#include "utl/UI/Utilities.h"
 #include <map>
 
 #ifdef _DEBUG

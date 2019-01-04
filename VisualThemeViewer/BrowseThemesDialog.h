@@ -2,8 +2,8 @@
 #define BrowseThemesDialog_h
 #pragma once
 
-#include "utl/BaseMainDialog.h"
-#include "utl/TreeControl.h"
+#include "utl/UI/BaseMainDialog.h"
+#include "utl/UI/TreeControl.h"
 #include "ThemeStore_fwd.h"
 
 

@@ -10,19 +10,19 @@
 #include "TestDoc.h"
 #include "TestFormView.h"
 #include "resource.h"
-#include "utl/AboutBox.h"
 #include "utl/EnumTags.h"
-#include "utl/GpUtilities.h"
-#include "utl/ImageStore.h"
-#include "utl/LayoutEngine.h"
 #include "utl/StringUtilities.h"
-#include "utl/VisualTheme.h"
+#include "utl/UI/AboutBox.h"
+#include "utl/UI/GpUtilities.h"
+#include "utl/UI/ImageStore.h"
+#include "utl/UI/LayoutEngine.h"
+#include "utl/UI/VisualTheme.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
 
-#include "utl/BaseApp.hxx"
+#include "utl/UI/BaseApp.hxx"
 
 
 namespace reg

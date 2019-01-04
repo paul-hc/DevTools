@@ -2,11 +2,11 @@
 #define MainDialog_h
 #pragma once
 
-#include "utl/BaseMainDialog.h"
-#include "utl/InternalChange.h"
 #include "utl/Range.h"
-#include "utl/SyncScrolling.h"
-#include "utl/TextEditor.h"
+#include "utl/UI/BaseMainDialog.h"
+#include "utl/UI/InternalChange.h"
+#include "utl/UI/SyncScrolling.h"
+#include "utl/UI/TextEditor.h"
 #include "DateTimeInfo.h"
 
 

@@ -7,9 +7,9 @@
 #include "wnd/FlagRepository.h"
 #include "wnd/WndSearchPattern.h"
 #include "wnd/WndUtils.h"
-#include "utl/MenuUtilities.h"
-#include "utl/UtilitiesEx.h"
-#include "utl/resource.h"
+#include "utl/UI/MenuUtilities.h"
+#include "utl/UI/UtilitiesEx.h"
+#include "utl/UI/resource.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

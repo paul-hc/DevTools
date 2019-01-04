@@ -293,7 +293,7 @@ namespace str
 
 	int findCharPos( const TCHAR* pString, TCHAR chr, int startPos /*= 0*/, str::CaseType caseType /*= str::Case*/ )
 	{
-		ASSERT( startPos >= 0 && startPos <= _tcslen( pString ) );
+		ASSERT( startPos >= 0 && startPos <= str::Length( pString ) );
 
 		str::const_iterator itEnd = end( pString ), itFound;
 
@@ -308,7 +308,7 @@ namespace str
 	TokenRange findStringPos( const TCHAR* pString, const TCHAR* subString, int startPos /*= 0*/,
 							  str::CaseType caseType /*= str::Case*/ )
 	{
-		ASSERT( startPos >= 0 && startPos <= _tcslen( pString ) );
+		ASSERT( startPos >= 0 && startPos <= str::Length( pString ) );
 
 		str::const_iterator itFound;
 
@@ -335,7 +335,7 @@ namespace str
 		if ( startPos == -1 )
 			startPos = str::Length( pString );
 
-		ASSERT( startPos >= 0 && startPos <= _tcslen( pString ) );
+		ASSERT( startPos >= 0 && startPos <= str::Length( pString ) );
 
 		str::const_reverse_iterator itFound;
 
@@ -361,7 +361,7 @@ namespace str
 	int findOneOfPos( const TCHAR* pString, const TCHAR* charSet, int startPos /*= 0*/,
 					  str::CaseType caseType /*= str::Case*/ )
 	{
-		ASSERT( startPos >= 0 && startPos <= _tcslen( pString ) );
+		ASSERT( startPos >= 0 && startPos <= str::Length( pString ) );
 
 		str::const_iterator itFound;
 
@@ -388,7 +388,7 @@ namespace str
 		if ( startPos == -1 )
 			startPos = str::Length( pString );
 
-		ASSERT( startPos >= 0 && startPos <= _tcslen( pString ) );
+		ASSERT( startPos >= 0 && startPos <= str::Length( pString ) );
 
 		str::const_reverse_iterator itFound;
 
@@ -416,7 +416,7 @@ namespace str
 	bool isTokenMatch( const TCHAR* pString, const TCHAR* token, int startPos /*= 0*/, str::CaseType caseType /*= str::Case*/ )
 	{
 		ASSERT( token != NULL );
-		ASSERT( pString != NULL && startPos >= 0 && startPos <= (int)_tcslen( pString ) );
+		ASSERT( pString != NULL && startPos >= 0 && startPos <= str::Length( pString ) );
 
 		int tokenLength = str::Length( token );
 

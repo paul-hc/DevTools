@@ -3,14 +3,14 @@
 #include "FileListDialog.h"
 #include "FlagStrip.h"
 #include "TestDialog.h"
-#include "utl/Color.h"
 #include "utl/FmtUtils.h"
 #include "utl/LongestCommonSubsequence.h"
-#include "utl/ReportListCustomDraw.h"
 #include "utl/StringUtilities.h"
-#include "utl/UtilitiesEx.h"
 #include "utl/TimeUtils.h"
-#include "utl/resource.h"
+#include "utl/UI/Color.h"
+#include "utl/UI/ReportListCustomDraw.h"
+#include "utl/UI/UtilitiesEx.h"
+#include "utl/UI/resource.h"
 #include "resource.h"
 
 #ifdef _DEBUG

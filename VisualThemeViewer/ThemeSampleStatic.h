@@ -2,8 +2,8 @@
 #define ThemeSampleStatic_h
 #pragma once
 
-#include "utl/BufferedStatic.h"
-#include "utl/ThemeItem.h"
+#include "utl/UI/BufferedStatic.h"
+#include "utl/UI/ThemeItem.h"
 
 
 class COptions;

@@ -608,7 +608,7 @@ namespace code
 			lineCount = (int)linesOfCode.size();
 
 		ASSERT( linesOfCode.size() == lineEnds.size() );
-		ASSERT( lineCount <= linesOfCode.size() );
+		ASSERT( lineCount <= (int)linesOfCode.size() );
 
 		int requiredLength = 0;
 

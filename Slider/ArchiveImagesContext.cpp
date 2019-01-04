@@ -1,5 +1,5 @@
 
-#include "StdAfx.h"
+#include "stdafx.h"
 #include "ArchiveImagesContext.h"
 #include "ImageArchiveStg.h"
 #include "FileList.h"

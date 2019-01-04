@@ -2,9 +2,9 @@
 #define Application_h
 #pragma once
 
-#include "utl/BaseApp.h"
 #include "utl/Logger.h"
 #include "utl/Path.h"
+#include "utl/UI/BaseApp.h"
 #include "Application_fwd.h"
 
 
@@ -38,7 +38,6 @@ struct CIncludePaths;
 
 namespace app
 {
-	inline CLogger& GetLogger( void ) { return CApplication::GetApp()->GetLogger(); }
 	inline CModuleSession& GetModuleSession( void ) { return CApplication::GetApp()->GetModuleSession(); }
 	UINT GetMenuVertSplitCount( void );
 
@@ -50,8 +49,25 @@ namespace app
 }
 
 
+#include "utl/PathGroup.h"
+
+
+namespace reg
+{
+	inline void LoadPathGroup( fs::CPathGroup& rPathGroup, const TCHAR section[], const TCHAR entry[] )
+	{
+		rPathGroup.Split( AfxGetApp()->GetProfileString( section, entry, rPathGroup.Join().c_str() ).GetString() );
+	}
+
+	inline void SavePathGroup( const fs::CPathGroup& pathGroup, const TCHAR section[], const TCHAR entry[] )
+	{
+		AfxGetApp()->WriteProfileString( section, entry, pathGroup.Join().c_str() );
+	}
+}
+
+
 #ifdef _DEBUG
-	#define DEBUG_LOG app::GetLogger().LogTrace
+	#define DEBUG_LOG app::GetLogger()->LogTrace
 #else
 	#define DEBUG_LOG __noop
 #endif

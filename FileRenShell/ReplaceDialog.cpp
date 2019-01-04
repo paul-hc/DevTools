@@ -9,12 +9,12 @@
 #include "TextAlgorithms.h"
 #include "Application_fwd.h"
 #include "resource.h"
-#include "utl/ImageStore.h"
-#include "utl/LayoutEngine.h"
-#include "utl/MenuUtilities.h"
-#include "utl/TextEditor.h"
-#include "utl/UtilitiesEx.h"
-#include "utl/resource.h"
+#include "utl/UI/ImageStore.h"
+#include "utl/UI/LayoutEngine.h"
+#include "utl/UI/MenuUtilities.h"
+#include "utl/UI/TextEditor.h"
+#include "utl/UI/UtilitiesEx.h"
+#include "utl/UI/resource.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

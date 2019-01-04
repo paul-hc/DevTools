@@ -1,13 +1,13 @@
 
-#include "StdAfx.h"
+#include "stdafx.h"
 #include "ArchiveImagesDialog.h"
 #include "FileList.h"
 #include "ImageArchiveStg.h"
 #include "DefinePasswordDialog.h"
 #include "Application.h"
 #include "resource.h"
-#include "utl/ShellDialogs.h"
-#include "utl/UtilitiesEx.h"
+#include "utl/UI/ShellDialogs.h"
+#include "utl/UI/UtilitiesEx.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -110,7 +110,7 @@ bool CArchiveImagesDialog::SetDefaultDestPath( void )
 			fs::CPathParts parts( firstDirPath );
 			parts.m_fname += parts.m_ext + s_archiveFnameSuffix;			// add to fname existing ext (for folders with extension)
 			parts.m_ext = CImageArchiveStg::GetDefaultExtension();
-			m_destPath.Set( parts.MakePath() );
+			m_destPath = parts.MakePath();
 			break;
 		}
 	}

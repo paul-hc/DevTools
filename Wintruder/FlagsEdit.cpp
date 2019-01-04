@@ -2,9 +2,9 @@
 #include "stdafx.h"
 #include "FlagsEdit.h"
 #include "resource.h"
-#include "utl/Clipboard.h"
-#include "utl/CtrlUiState.h"
-#include "utl/TextEdit.h"
+#include "utl/UI/Clipboard.h"
+#include "utl/UI/CtrlUiState.h"
+#include "utl/UI/TextEdit.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

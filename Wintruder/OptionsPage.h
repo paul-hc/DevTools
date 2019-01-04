@@ -2,8 +2,8 @@
 #define OptionsPage_h
 #pragma once
 
-#include "utl/LayoutPropertyPage.h"
-#include "utl/SpinEdit.h"
+#include "utl/UI/LayoutPropertyPage.h"
+#include "utl/UI/SpinEdit.h"
 #include "Observers.h"
 
 

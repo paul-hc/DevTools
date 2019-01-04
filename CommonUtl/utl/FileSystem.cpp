@@ -40,6 +40,15 @@ namespace fs
 		return attr != INVALID_FILE_ATTRIBUTES && HasFlag( attr, FILE_ATTRIBUTE_READONLY | FILE_ATTRIBUTE_HIDDEN | FILE_ATTRIBUTE_SYSTEM );
 	}
 
+	fs::CPath GetTempDirPath( void )
+	{
+		TCHAR dirPath[ MAX_PATH ];
+		if ( 0 == ::GetTempPath( MAX_PATH, dirPath ) )
+			dirPath[ 0 ] = _T('\0');
+
+		return fs::CPath( dirPath );
+	}
+
 
 	fs::CPath MakeAbsoluteToCWD( const TCHAR* pRelativePath )
 	{
@@ -61,25 +70,6 @@ namespace fs
 			return fromPath;		// on error return input path as is (but normalized)
 
 		return fs::CPath( relativePath );
-	}
-
-	std::tstring GetTempDirPath( void )
-	{
-		TCHAR dirPath[ MAX_PATH ];
-		if ( 0 == ::GetTempPath( MAX_PATH, dirPath ) )
-			return std::tstring();
-		return dirPath;
-	}
-
-	std::tstring MakeTempDirPath( const TCHAR* pSubPath )
-	{
-		TCHAR dirPath[ MAX_PATH ];
-		if ( 0 == ::GetTempPath( MAX_PATH, dirPath ) )
-			return std::tstring();
-
-		if ( !str::IsEmpty( pSubPath ) )
-			return path::Combine( dirPath, pSubPath );
-		return dirPath;
 	}
 
 

@@ -3,8 +3,8 @@
 #pragma once
 
 #include "utl/ComparePredicates.h"
-#include "utl/ImagePathKey.h"
 #include "utl/Subject.h"
+#include "utl/UI/ImagePathKey.h"
 
 
 enum FileType { FT_Generic, FT_BMP, FT_JPEG, FT_GIFF, FT_TIFF };

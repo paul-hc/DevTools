@@ -10,7 +10,7 @@
 #define new DEBUG_NEW
 #endif
 
-#include "utl/BaseApp.hxx"
+#include "utl/UI/BaseApp.hxx"
 
 
 namespace reg

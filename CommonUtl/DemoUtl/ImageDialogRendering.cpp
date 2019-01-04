@@ -2,12 +2,12 @@
 #include "stdafx.h"
 #include "ImageDialog.h"
 #include "utl/ContainerUtilities.h"
-#include "utl/DibDraw.h"
-#include "utl/DibSection.h"
-#include "utl/DibPixels.h"
-#include "utl/ImagingGdiPlus.h"
 #include "utl/ScopedValue.h"
-#include "utl/Utilities.h"
+#include "utl/UI/DibDraw.h"
+#include "utl/UI/DibSection.h"
+#include "utl/UI/DibPixels.h"
+#include "utl/UI/ImagingGdiPlus.h"
+#include "utl/UI/Utilities.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

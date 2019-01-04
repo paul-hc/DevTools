@@ -2,8 +2,8 @@
 #define ThemeCustomDraw_h
 #pragma once
 
-#include "utl/Image_fwd.h"
-#include "utl/GpUtilities.h"
+#include "utl/UI/Image_fwd.h"
+#include "utl/UI/GpUtilities.h"
 
 
 class COptions;

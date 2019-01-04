@@ -5,7 +5,7 @@
 #include "resource.h"
 #include "utl/StringUtilities.h"
 #include "utl/TimeUtils.h"
-#include "utl/Utilities.h"
+#include "utl/UI/Utilities.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

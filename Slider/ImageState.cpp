@@ -1,5 +1,5 @@
 
-#include "StdAfx.h"
+#include "stdafx.h"
 #include "ImageState.h"
 #include "Application_fwd.h"
 #include "utl/Serialization.h"

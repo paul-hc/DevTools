@@ -8,7 +8,7 @@
 #include "utl/ContainerUtilities.h"
 #include "utl/Logger.h"
 #include "utl/StringUtilities.h"
-#include "utl/Utilities.h"
+#include "utl/UI/Utilities.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -17,11 +17,6 @@
 
 namespace app
 {
-	CLogger& GetLogger( void )
-	{
-		return *GetLoggerPtr();
-	}
-
 	CLogger& GetPrivateLogger( void )
 	{
 		static CLogger logger;

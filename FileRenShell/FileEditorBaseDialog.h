@@ -3,9 +3,9 @@
 #pragma once
 
 #include "IFileEditor.h"
-#include "utl/BaseMainDialog.h"
-#include "utl/DialogToolBar.h"
-#include "utl/IconButton.h"
+#include "utl/UI/BaseMainDialog.h"
+#include "utl/UI/DialogToolBar.h"
+#include "utl/UI/IconButton.h"
 
 
 class CFileModel;

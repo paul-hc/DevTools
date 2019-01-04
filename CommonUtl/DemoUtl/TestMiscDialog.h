@@ -1,7 +1,7 @@
 #pragma once
 
-#include "utl/LayoutDialog.h"
-#include "utl/DialogToolBar.h"
+#include "utl/UI/LayoutDialog.h"
+#include "utl/UI/DialogToolBar.h"
 
 
 class CTestMiscDialog : public CLayoutDialog

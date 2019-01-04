@@ -2,10 +2,10 @@
 #include "stdafx.h"
 #include "GeneralOptions.h"
 #include "Application.h"
-#include "utl/Image_fwd.h"
-#include "utl/CustomDrawImager.h"
-#include "utl/ReportListControl.h"
-#include "utl/Thumbnailer.h"
+#include "utl/UI/Image_fwd.h"
+#include "utl/UI/CustomDrawImager.h"
+#include "utl/UI/ReportListControl.h"
+#include "utl/UI/Thumbnailer.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

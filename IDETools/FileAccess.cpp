@@ -7,7 +7,7 @@
 #include "ModuleSession.h"
 #include "Application.h"
 #include "utl/FileSystem.h"
-#include "utl/ShellUtilities.h"
+#include "utl/UI/ShellUtilities.h"
 
 #define INVALID_FILE_ATTRIBUTES ((DWORD)-1)
 

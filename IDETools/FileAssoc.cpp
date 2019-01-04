@@ -401,12 +401,13 @@ fs::CPath CFileAssoc::GetNextFileNameVariation( bool forward /*= true*/ )
 	altParts.m_fname = nameBase + _T(" *");
 	FindVariationsOf( variations, thisVariationIdx, altParts.MakePath() );
 
+	const int size = (int)variations.size();
 	int nextVariationIdx;
 
 	nextVariationIdx = ( forward ? thisVariationIdx + 1 : thisVariationIdx - 1 );
 	if ( nextVariationIdx < 0 )
-		nextVariationIdx = (int)variations.size() - 1;
-	else if ( nextVariationIdx >= variations.size() )
+		nextVariationIdx = size - 1;
+	else if ( nextVariationIdx >= size )
 		nextVariationIdx = 0;
 
 	return m_parts.GetDirPath() / variations[ nextVariationIdx ];

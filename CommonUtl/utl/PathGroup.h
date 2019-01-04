@@ -29,9 +29,6 @@ namespace fs
 		void Append( const CPathGroup& right );
 		CPathGroup& operator+=( const CPathGroup& right ) { Append( right ); return *this; }
 		CPathGroup operator+( const CPathGroup& right ) const { CPathGroup pathGroup = *this; return pathGroup += right; }
-
-		void Load( const TCHAR section[], const TCHAR entry[] );
-		void Save( const TCHAR section[], const TCHAR entry[] ) const;
 	private:
 		void ExpandPaths( void );
 	private:

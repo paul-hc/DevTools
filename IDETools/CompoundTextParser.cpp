@@ -18,8 +18,8 @@ SectionParser::SectionParser( LPCTSTR _sectionName, LPCTSTR _tagOpen /*= _T("[["
 	, tagOpen( _tagOpen )
 	, tagClose( _tagClose )
 	, tagCoreEOS( _tagCoreEOS )
-	, tagOpenLen( str::Length( tagOpen ) )
-	, tagCloseLen( str::Length( tagClose ) )
+	, tagOpenLen( str::GetLength( tagOpen ) )
+	, tagCloseLen( str::GetLength( tagClose ) )
 
 	, zone( Before )
 	, textContent()
@@ -232,7 +232,7 @@ CompoundTextParser::TokenSemantic CompoundTextParser::getNextLine( void ) throws
 	{	// read a new line string from the file
 		if ( textFile.ReadString( line ) )
 		{
-			static std::pair< int, int > tokenSectionLen( str::Length( tokenSection.first ), str::Length( tokenSection.second ) );
+			static std::pair< int, int > tokenSectionLen( str::GetLength( tokenSection.first ), str::GetLength( tokenSection.second ) );
 			int tokenStart = 0, tokenEnd = 0;
 
 			if ( !line.IsEmpty() )
@@ -295,7 +295,7 @@ CString CompoundTextParser::Section::extractContent( const TCHAR* insertorReplac
 	{
 		// Replace embedded insertion point with referredContent
 		const TCHAR* contentPtr = outcomeContent;
-		int insertorEnd = insertorStart + static_cast< int >( str::Length( embeddedInsertPoint ) );
+		int insertorEnd = insertorStart + static_cast< int >( str::GetLength( embeddedInsertPoint ) );
 
 		// If post token tag line remover exists, extend the token after the next "\r\n"
 		if ( contentPtr[ insertorEnd ] == chNoEndOfLineIfEmpty )
@@ -316,8 +316,8 @@ CString CompoundTextParser::Section::extractContent( const TCHAR* insertorReplac
 
 int CompoundTextParser::Section::bindAllReferences( void ) throws_( CString )
 {
-	static std::pair< int, int > tokenPairLen( str::Length( CompoundTextParser::tokenSectionRef.first ),
-											   str::Length( CompoundTextParser::tokenSectionRef.second ) );
+	static std::pair< int, int > tokenPairLen( str::GetLength( CompoundTextParser::tokenSectionRef.first ),
+											   str::GetLength( CompoundTextParser::tokenSectionRef.second ) );
 	int tokenStart = 0, tokenEnd = 0, boundCount = 0;
 	CString errMessage;
 
@@ -391,7 +391,7 @@ int CompoundTextParser::Section::bindAllReferences( void ) throws_( CString )
 				if ( insertorStart != -1 )
 				{
 					// replace embedded insertion point with referredContent
-					int insertorEnd = insertorStart + str::Length( embeddedInsertPoint );
+					int insertorEnd = insertorStart + str::GetLength( embeddedInsertPoint );
 
 					contentPtr = content;
 					// If post token tag line remover exists, extend the token after the next "\r\n"

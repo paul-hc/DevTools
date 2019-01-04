@@ -7,7 +7,7 @@
 //
 // Generated from the TEXTINCLUDE 2 resource.
 //
-#include "utl/resource.h"
+#include "utl/UI/resource.h"
 #include "afxres.h"
 
 /////////////////////////////////////////////////////////////////////////////
@@ -35,14 +35,14 @@ END
 
 2 TEXTINCLUDE 
 BEGIN
-    "#include ""utl/resource.h""\r\n"
+    "#include ""utl/UI/resource.h""\r\n"
     "#include ""afxres.h""\r\n"
     "\0"
 END
 
 3 TEXTINCLUDE 
 BEGIN
-    "#include ""utl/utl_ui.rc""\r\n"
+    "#include ""utl/UI/utl_ui.rc""\r\n"
     "#include ""res\\Slider.rc2""  // non-Microsoft Visual C++ edited resources\r\n"
     "\r\n"
     "\r\n"
@@ -902,8 +902,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 3,9,0,0
- PRODUCTVERSION 3,9,0,0
+ FILEVERSION 4,0,0,1
+ PRODUCTVERSION 4,0,0,1
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -918,17 +918,17 @@ BEGIN
     BEGIN
         BLOCK "040904b0"
         BEGIN
-            VALUE "Comments", "Image viewer with slide albums: [3.8] use image path keys; [3.9] ui::AutoImageSize"
+            VALUE "Comments", "Split UTL_BASE/UTL_UI|Image viewer with slide albums: [3.8] use image path keys; [3.9] ui::AutoImageSize"
             VALUE "CompanyName", "Paul Cocoveanu"
             VALUE "Email", "phc.2nd@gmail.com"
             VALUE "FileDescription", "Slider Application"
-            VALUE "FileVersion", "3, 9, 0, 0"
+            VALUE "FileVersion", "4, 0, 0, 1"
             VALUE "InternalName", "Slider"
-            VALUE "LegalCopyright", "Copyright (C) 2000-2017"
+            VALUE "LegalCopyright", "Copyright (C) 2000-2019"
             VALUE "LegalTrademarks", "Enjoy it mate."
             VALUE "OriginalFilename", "Slider.exe"
             VALUE "ProductName", "Slider Application"
-            VALUE "ProductVersion", "3, 9, 0, 0"
+            VALUE "ProductVersion", "4, 0, 0, 1"
             VALUE "WrittenBy", "Written by Paul Cocoveanu"
         END
     END
@@ -1357,7 +1357,7 @@ END
 //
 // Generated from the TEXTINCLUDE 3 resource.
 //
-#include "utl/utl_ui.rc"
+#include "utl/UI/utl_ui.rc"
 #include "res\Slider.rc2"  // non-Microsoft Visual C++ edited resources
 
 

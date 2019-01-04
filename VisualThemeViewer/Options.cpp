@@ -1,9 +1,9 @@
 
 #include "stdafx.h"
 #include "Options.h"
-#include "utl/Color.h"
-#include "utl/HistoryComboBox.h"
-#include "utl/VisualTheme.h"
+#include "utl/UI/Color.h"
+#include "utl/UI/HistoryComboBox.h"
+#include "utl/UI/VisualTheme.h"
 #include "resource.h"
 
 #ifdef _DEBUG
@@ -20,7 +20,7 @@ namespace reg
 
 
 COptions::COptions( void )
-	: CRegistryOptions( reg::section, true )
+	: CRegistryOptions( reg::section, SaveOnModify )
 	, m_pCallback( NULL )
 	, m_useBorder( false )
 	, m_preBkGuides( false )

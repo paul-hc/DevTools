@@ -4,16 +4,16 @@
 #include "AppService.h"
 #include "MainDialog.h"
 #include "resource.h"
-#include "utl/CmdInfoStore.h"
-#include "utl/MenuUtilities.h"
-#include "utl/ProcessUtils.h"
+#include "utl/UI/CmdInfoStore.h"
+#include "utl/UI/MenuUtilities.h"
+#include "utl/UI/ProcessUtils.h"
 #include "wnd/WndUtils.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
 
-#include "utl/BaseApp.hxx"
+#include "utl/UI/BaseApp.hxx"
 
 
 static const CImageStore::CCmdAlias cmdAliases[] =

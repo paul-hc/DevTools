@@ -2,8 +2,8 @@
 #define EditPlacementPage_h
 #pragma once
 
-#include "utl/InternalChange.h"
-#include "utl/TrackStatic.h"
+#include "utl/UI/InternalChange.h"
+#include "utl/UI/TrackStatic.h"
 #include "DetailBasePage.h"
 
 

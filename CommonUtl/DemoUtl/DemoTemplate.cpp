@@ -5,12 +5,12 @@
 #include "ITestMarkup.h"
 #include "TestDialog.h"
 #include "TestPropertySheet.h"
-#include "utl/LayoutEngine.h"
-#include "utl/CmdUpdate.h"
 #include "utl/StringUtilities.h"
-#include "utl/UtilitiesEx.h"
-#include "utl/VisualTheme.h"
-#include "utl/resource.h"
+#include "utl/UI/LayoutEngine.h"
+#include "utl/UI/CmdUpdate.h"
+#include "utl/UI/UtilitiesEx.h"
+#include "utl/UI/VisualTheme.h"
+#include "utl/UI/resource.h"
 #include "resource.h"
 
 #ifdef _DEBUG

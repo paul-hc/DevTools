@@ -8,9 +8,9 @@
 #include "resource.h"
 #include "utl/ContainerUtilities.h"
 #include "utl/EnumTags.h"
-#include "utl/ReportListControl.h"
-#include "utl/Utilities.h"
-#include "utl/resource.h"
+#include "utl/UI/ReportListControl.h"
+#include "utl/UI/Utilities.h"
+#include "utl/UI/resource.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

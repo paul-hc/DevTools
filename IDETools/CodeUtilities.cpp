@@ -153,7 +153,7 @@ int findMatchingQuotePos( const TCHAR* str, int openQuotePos )
 {
 	TCHAR matchingQuote = str[ openQuotePos ];
 
-	ASSERT( str != NULL && openQuotePos >= 0 && openQuotePos < _tcslen( str ) );
+	ASSERT( str != NULL && openQuotePos >= 0 && openQuotePos < str::Length( str ) );
 	ASSERT( isQuoteChar( matchingQuote ) );
 
 	const TCHAR* cursor = str + openQuotePos + 1;

@@ -18,11 +18,11 @@
 #include "wnd/WndHighlighter.h"
 #include "wnd/WndUtils.h"
 #include "utl/EnumTags.h"
-#include "utl/ImageStore.h"
-#include "utl/LayoutEngine.h"
-#include "utl/MenuUtilities.h"
 #include "utl/ScopedValue.h"
-#include "utl/resource.h"
+#include "utl/UI/ImageStore.h"
+#include "utl/UI/LayoutEngine.h"
+#include "utl/UI/MenuUtilities.h"
+#include "utl/UI/resource.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

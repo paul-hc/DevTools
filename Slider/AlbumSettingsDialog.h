@@ -4,12 +4,12 @@
 
 #include "FileList.h"
 #include "ThumbPreviewCtrl.h"
-#include "utl/AccelTable.h"
-#include "utl/DialogToolBar.h"
-#include "utl/DragListCtrl.h"
-#include "utl/LayoutDialog.h"
-#include "utl/OleUtils.h"
-#include "utl/SpinEdit.h"
+#include "utl/UI/AccelTable.h"
+#include "utl/UI/DialogToolBar.h"
+#include "utl/UI/DragListCtrl.h"
+#include "utl/UI/LayoutDialog.h"
+#include "utl/UI/OleUtils.h"
+#include "utl/UI/SpinEdit.h"
 
 
 class CImageView;

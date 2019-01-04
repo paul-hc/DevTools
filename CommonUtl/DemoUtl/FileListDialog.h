@@ -3,8 +3,8 @@
 #pragma once
 
 #include "utl/FileState.h"
-#include "utl/LayoutDialog.h"
-#include "utl/ReportListControl.h"
+#include "utl/UI/LayoutDialog.h"
+#include "utl/UI/ReportListControl.h"
 
 
 class CDisplayObject;

@@ -3,7 +3,7 @@
 #pragma once
 
 #include "DetailBasePage.h"
-#include "utl/NumericEdit.h"
+#include "utl/UI/NumericEdit.h"
 
 
 class CEditIdentPage : public CDetailBasePage

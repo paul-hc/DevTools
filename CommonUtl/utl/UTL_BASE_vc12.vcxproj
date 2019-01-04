@@ -1,0 +1,337 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="DebugU|Win32">
+      <Configuration>DebugU</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="DebugU|x64">
+      <Configuration>DebugU</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="ReleaseU|Win32">
+      <Configuration>ReleaseU</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="ReleaseU|x64">
+      <Configuration>ReleaseU</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{2D1343AE-BD7C-4114-9F9A-6848BD79F762}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>UTL_BASE_vc12</RootNamespace>
+    <ProjectName>UTL_BASE</ProjectName>
+    <SccProjectName>
+    </SccProjectName>
+    <SccLocalPath>
+    </SccLocalPath>
+    <SccProvider>
+    </SccProvider>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugU|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+    <UseOfMfc>Static</UseOfMfc>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugU|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+    <UseOfMfc>Static</UseOfMfc>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseU|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+    <UseOfMfc>Static</UseOfMfc>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseU|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+    <UseOfMfc>Static</UseOfMfc>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='DebugU|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='DebugU|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='ReleaseU|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseU|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugU|Win32'">
+    <OutDir>$(ProjectDir)bin_vc12\</OutDir>
+    <IntDir>bin_vc12\base\$(PlatformName)_$(Configuration)\</IntDir>
+    <TargetName>$(ProjectName)_ud</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseU|Win32'">
+    <OutDir>$(ProjectDir)bin_vc12\</OutDir>
+    <IntDir>bin_vc12\base\$(PlatformName)_$(Configuration)\</IntDir>
+    <TargetName>$(ProjectName)_u</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugU|x64'">
+    <OutDir>$(ProjectDir)bin_vc12\</OutDir>
+    <IntDir>bin_vc12\base\$(PlatformName)_$(Configuration)\</IntDir>
+    <TargetName>$(ProjectName)_ud64</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseU|x64'">
+    <OutDir>$(ProjectDir)bin_vc12\</OutDir>
+    <IntDir>bin_vc12\base\$(PlatformName)_$(Configuration)\</IntDir>
+    <TargetName>$(ProjectName)_u64</TargetName>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugU|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <WarningLevel>Level4</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <SDLCheck>false</SDLCheck>
+      <AdditionalIncludeDirectories>.;..;$(UTL_INCLUDE)</AdditionalIncludeDirectories>
+      <DisableSpecificWarnings>4996</DisableSpecificWarnings>
+      <ShowIncludes>false</ShowIncludes>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+    <Lib>
+      <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
+      <TargetMachine>MachineX86</TargetMachine>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugU|x64'">
+    <ClCompile>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <WarningLevel>Level4</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <SDLCheck>false</SDLCheck>
+      <AdditionalIncludeDirectories>.;..;$(UTL_INCLUDE)</AdditionalIncludeDirectories>
+      <DisableSpecificWarnings>4996</DisableSpecificWarnings>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+    <Lib>
+      <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseU|Win32'">
+    <ClCompile>
+      <WarningLevel>Level4</WarningLevel>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <SDLCheck>false</SDLCheck>
+      <AdditionalIncludeDirectories>.;..;$(UTL_INCLUDE)</AdditionalIncludeDirectories>
+      <DisableSpecificWarnings>4996</DisableSpecificWarnings>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+    <Lib>
+      <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
+      <TargetMachine>MachineX86</TargetMachine>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseU|x64'">
+    <ClCompile>
+      <WarningLevel>Level4</WarningLevel>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <SDLCheck>false</SDLCheck>
+      <AdditionalIncludeDirectories>.;..;$(UTL_INCLUDE)</AdditionalIncludeDirectories>
+      <DisableSpecificWarnings>4996</DisableSpecificWarnings>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+    <Lib>
+      <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="AppTools.h" />
+    <ClInclude Include="CacheLoader.h" />
+    <ClInclude Include="CacheLoader.hxx" />
+    <ClInclude Include="Command.h" />
+    <ClInclude Include="CommandModel.h" />
+    <ClInclude Include="CommandService.h" />
+    <ClInclude Include="CommonDefs.h" />
+    <ClInclude Include="ComparePredicates.h" />
+    <ClInclude Include="Compare_fwd.h" />
+    <ClInclude Include="ConsoleApplication.h" />
+    <ClInclude Include="ContainerUtilities.h" />
+    <ClInclude Include="CRC32.h" />
+    <ClInclude Include="EnumTags.h" />
+    <ClInclude Include="FileContent.h" />
+    <ClInclude Include="FileObjectCache.h" />
+    <ClInclude Include="FileObjectCache.hxx" />
+    <ClInclude Include="FileState.h" />
+    <ClInclude Include="FileSystem.h" />
+    <ClInclude Include="FileSystem_fwd.h" />
+    <ClInclude Include="FlagTags.h" />
+    <ClInclude Include="FlexPath.h" />
+    <ClInclude Include="FmtUtils.h" />
+    <ClInclude Include="Guards.h" />
+    <ClInclude Include="ICommand.h" />
+    <ClInclude Include="IniFile.h" />
+    <ClInclude Include="IniFileRegistrySection.h" />
+    <ClInclude Include="IRegistrySection.h" />
+    <ClInclude Include="ISubject.h" />
+    <ClInclude Include="Logger.h" />
+    <ClInclude Include="LongestCommonDuplicate.h" />
+    <ClInclude Include="LongestCommonSubsequence.h" />
+    <ClInclude Include="MatchSequence.h" />
+    <ClInclude Include="MemLeakCheck.h" />
+    <ClInclude Include="MultiThreading.h" />
+    <ClInclude Include="Path.h" />
+    <ClInclude Include="PathFormatter.h" />
+    <ClInclude Include="PathGenerator.h" />
+    <ClInclude Include="PathGroup.h" />
+    <ClInclude Include="PathItemBase.h" />
+    <ClInclude Include="PathMaker.h" />
+    <ClInclude Include="ProcessCmd.h" />
+    <ClInclude Include="PropertyLineReader.h" />
+    <ClInclude Include="RandomUtilities.h" />
+    <ClInclude Include="Range.h" />
+    <ClInclude Include="Registry.h" />
+    <ClInclude Include="Resequence.h" />
+    <ClInclude Include="Resequence.hxx" />
+    <ClInclude Include="ResourcePool.h" />
+    <ClInclude Include="RuntimeException.h" />
+    <ClInclude Include="ScopedValue.h" />
+    <ClInclude Include="Serialization.h" />
+    <ClInclude Include="SerializeStdTypes.h" />
+    <ClInclude Include="stdafx.h" />
+    <ClInclude Include="StdStl.h" />
+    <ClInclude Include="StreamStdTypes.h" />
+    <ClInclude Include="StringBase.h" />
+    <ClInclude Include="StringCompare.h" />
+    <ClInclude Include="StringCvt.h" />
+    <ClInclude Include="StringIntuitiveCompare.h" />
+    <ClInclude Include="StringRange.h" />
+    <ClInclude Include="StringRange_fwd.h" />
+    <ClInclude Include="StringUtilities.h" />
+    <ClInclude Include="StructuredStorage.h" />
+    <ClInclude Include="Subject.h" />
+    <ClInclude Include="SubjectPredicates.h" />
+    <ClInclude Include="targetver.h" />
+    <ClInclude Include="TextFileParser.h" />
+    <ClInclude Include="ThrowMode.h" />
+    <ClInclude Include="Timer.h" />
+    <ClInclude Include="TimeUtils.h" />
+    <ClInclude Include="TokenIterator.h" />
+    <ClInclude Include="ut\FileSystemTests.h" />
+    <ClInclude Include="ut\FmtUtilsTests.h" />
+    <ClInclude Include="ut\LcsTests.h" />
+    <ClInclude Include="ut\NumericTests.h" />
+    <ClInclude Include="ut\PathGeneratorTests.h" />
+    <ClInclude Include="ut\PathTests.h" />
+    <ClInclude Include="ut\ResequenceTests.h" />
+    <ClInclude Include="ut\StringRangeTests.h" />
+    <ClInclude Include="ut\StringTests.h" />
+    <ClInclude Include="ut\Test.h" />
+    <ClInclude Include="ut\ThreadingTests.h" />
+    <ClInclude Include="ut\UnitTest.h" />
+    <ClInclude Include="ut\UtlConsoleTests.h" />
+    <ClInclude Include="vector_map.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="AppTools.cpp" />
+    <ClCompile Include="Command.cpp" />
+    <ClCompile Include="CommandModel.cpp" />
+    <ClCompile Include="CommandService.cpp" />
+    <ClCompile Include="ConsoleApplication.cpp" />
+    <ClCompile Include="CRC32.cpp" />
+    <ClCompile Include="EnumTags.cpp" />
+    <ClCompile Include="FileContent.cpp" />
+    <ClCompile Include="FileObjectCache.cpp" />
+    <ClCompile Include="FileState.cpp" />
+    <ClCompile Include="FileSystem.cpp" />
+    <ClCompile Include="FlagTags.cpp" />
+    <ClCompile Include="FlexPath.cpp" />
+    <ClCompile Include="FmtUtils.cpp" />
+    <ClCompile Include="Guards.cpp" />
+    <ClCompile Include="IniFile.cpp" />
+    <ClCompile Include="IniFileRegistrySection.cpp" />
+    <ClCompile Include="Logger.cpp" />
+    <ClCompile Include="MemLeakCheck.cpp" />
+    <ClCompile Include="MultiThreading.cpp" />
+    <ClCompile Include="Path.cpp" />
+    <ClCompile Include="PathFormatter.cpp" />
+    <ClCompile Include="PathGenerator.cpp" />
+    <ClCompile Include="PathGroup.cpp" />
+    <ClCompile Include="PathItemBase.cpp" />
+    <ClCompile Include="PathMaker.cpp" />
+    <ClCompile Include="ProcessCmd.cpp" />
+    <ClCompile Include="PropertyLineReader.cpp" />
+    <ClCompile Include="Registry.cpp" />
+    <ClCompile Include="RuntimeException.cpp" />
+    <ClCompile Include="Serialization.cpp" />
+    <ClCompile Include="stdafx.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='DebugU|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='DebugU|x64'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='ReleaseU|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='ReleaseU|x64'">Create</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="StringBase.cpp" />
+    <ClCompile Include="StringCompare.cpp" />
+    <ClCompile Include="StringUtilities.cpp" />
+    <ClCompile Include="StructuredStorage.cpp" />
+    <ClCompile Include="Subject.cpp" />
+    <ClCompile Include="TextFileParser.cpp" />
+    <ClCompile Include="ThrowMode.cpp" />
+    <ClCompile Include="Timer.cpp" />
+    <ClCompile Include="TimeUtils.cpp" />
+    <ClCompile Include="TokenIterator.cpp" />
+    <ClCompile Include="ut\FileSystemTests.cpp" />
+    <ClCompile Include="ut\FmtUtilsTests.cpp" />
+    <ClCompile Include="ut\LcsTests.cpp" />
+    <ClCompile Include="ut\NumericTests.cpp" />
+    <ClCompile Include="ut\PathGeneratorTests.cpp" />
+    <ClCompile Include="ut\PathTests.cpp" />
+    <ClCompile Include="ut\ResequenceTests.cpp" />
+    <ClCompile Include="ut\StringRangeTests.cpp" />
+    <ClCompile Include="ut\StringTests.cpp" />
+    <ClCompile Include="ut\Test.cpp" />
+    <ClCompile Include="ut\ThreadingTests.cpp" />
+    <ClCompile Include="ut\UnitTest.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="UTL Library.txt" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

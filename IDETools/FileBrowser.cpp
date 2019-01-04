@@ -5,14 +5,14 @@
 #include "TrackMenuWnd.h"
 #include "Application.h"
 #include "resource.h"
-#include "utl/Clipboard.h"
-#include "utl/CmdUpdate.h"
 #include "utl/FileSystem.h"
 #include "utl/ContainerUtilities.h"
-#include "utl/MenuUtilities.h"
-#include "utl/ProcessUtils.h"
-#include "utl/Utilities.h"
-#include "utl/resource.h"
+#include "utl/UI/ProcessUtils.h"
+#include "utl/UI/Clipboard.h"
+#include "utl/UI/CmdUpdate.h"
+#include "utl/UI/MenuUtilities.h"
+#include "utl/UI/Utilities.h"
+#include "utl/UI/resource.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

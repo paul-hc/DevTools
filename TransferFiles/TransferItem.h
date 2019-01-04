@@ -3,7 +3,7 @@
 #pragma once
 
 #include "FileInfo.h"
-#include "utl/ConsoleInputOutput.h"
+#include "utl/ConsoleApplication.h"
 #include "utl/EnumTags.h"
 #include "utl/FileSystem_fwd.h"
 

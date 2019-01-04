@@ -2,7 +2,7 @@
 #define Application_h
 #pragma once
 
-#include "utl/BaseApp.h"
+#include "utl/UI/BaseApp.h"
 
 
 class CApplication : public CBaseApp< CWinApp >
@@ -10,12 +10,10 @@ class CApplication : public CBaseApp< CWinApp >
 public:
 	CApplication( void );
 
-	// generated overrides
-	public:
+	// generated stuff
+public:
 	virtual BOOL InitInstance( void );
 private:
-	// generated message map
-
 	DECLARE_MESSAGE_MAP()
 };
 

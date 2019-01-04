@@ -13,15 +13,15 @@
 #include "Application.h"
 #include "resource.h"
 #include "utl/ContainerUtilities.h"
-#include "utl/CmdInfoStore.h"
 #include "utl/EnumTags.h"
 #include "utl/FmtUtils.h"
-#include "utl/MenuUtilities.h"
 #include "utl/PathGenerator.h"
 #include "utl/RuntimeException.h"
-#include "utl/Thumbnailer.h"
-#include "utl/VisualTheme.h"
-#include "utl/resource.h"
+#include "utl/UI/CmdInfoStore.h"
+#include "utl/UI/MenuUtilities.h"
+#include "utl/UI/Thumbnailer.h"
+#include "utl/UI/VisualTheme.h"
+#include "utl/UI/resource.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

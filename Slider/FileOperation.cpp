@@ -1,5 +1,5 @@
 
-#include "StdAfx.h"
+#include "stdafx.h"
 #include "FileOperation.h"
 #include "ImageArchiveStg.h"
 #include "utl/EnumTags.h"

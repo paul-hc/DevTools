@@ -13,14 +13,15 @@ namespace fs
 	bool IsReadOnlyFile( const TCHAR* pFilePath );
 	bool IsProtectedFile( const TCHAR* pFilePath );
 
+
+	fs::CPath GetTempDirPath( void );
+
+
 	fs::CPath MakeAbsoluteToCWD( const TCHAR* pRelativePath );						// normalize, strip "./", "../", relative to CWD - current working directory
 	fs::CPath MakeRelativeTo( const TCHAR* pFromPath, const fs::CPath& dirPath );	// normalize, make relative to dirPath (such as "..\\.." etc)
 
 	inline fs::CPath& CvtAbsoluteToCWD( fs::CPath& rPath ) { return rPath = MakeAbsoluteToCWD( rPath.GetPtr() ); }
 	inline fs::CPath& CvtRelativeTo( fs::CPath& rPath, const fs::CPath& dirPath ) { return rPath = MakeRelativeTo( rPath.GetPtr(), dirPath ); }
-
-	std::tstring GetTempDirPath( void );
-	std::tstring MakeTempDirPath( const TCHAR* pSubPath );
 
 
 	fs::AcquireResult MakeFileWritable( const TCHAR* pFilePath );		// make file writable if read-only

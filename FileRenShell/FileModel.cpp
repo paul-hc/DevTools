@@ -7,14 +7,14 @@
 #include "TouchItem.h"
 #include "GeneralOptions.h"
 #include "resource.h"
-#include "utl/Clipboard.h"
 #include "utl/Command.h"
 #include "utl/ContainerUtilities.h"
 #include "utl/FileSystem.h"
 #include "utl/FmtUtils.h"
 #include "utl/RuntimeException.h"
-#include "utl/ShellUtilities.h"
 #include "utl/StringRange.h"
+#include "utl/UI/Clipboard.h"
+#include "utl/UI/ShellUtilities.h"
 
 // for CFileModel::MakeFileEditor
 #include "RenameFilesDialog.h"

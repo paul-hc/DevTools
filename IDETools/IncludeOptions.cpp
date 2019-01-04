@@ -1,6 +1,7 @@
 
 #include "stdafx.h"
 #include "IncludeOptions.h"
+#include "Application.h"
 #include "utl/ContainerUtilities.h"
 #include "utl/Path.h"
 #include "utl/StringUtilities.h"
@@ -55,9 +56,9 @@ void CIncludeOptions::Load( void )
 	m_lazyParsing = pApp->GetProfileInt( reg::section, ENTRY_MEMBER( m_lazyParsing ), m_lazyParsing ) != FALSE;
 	m_lastBrowsedFile = pApp->GetProfileString( reg::section, ENTRY_MEMBER( m_lastBrowsedFile ), m_lastBrowsedFile.c_str() ).GetString();
 
-	m_fnIgnored.Load( reg::section, ENTRY_MEMBER( m_fnIgnored ) );
-	m_fnAdded.Load( reg::section, ENTRY_MEMBER( m_fnAdded ) );
-	m_additionalIncludePath.Load( reg::section, ENTRY_MEMBER( m_additionalIncludePath ) );
+	reg::LoadPathGroup( m_fnIgnored, reg::section, ENTRY_MEMBER( m_fnIgnored ) );
+	reg::LoadPathGroup( m_fnAdded, reg::section, ENTRY_MEMBER( m_fnAdded ) );
+	reg::LoadPathGroup( m_additionalIncludePath, reg::section, ENTRY_MEMBER( m_additionalIncludePath ) );
 }
 
 void CIncludeOptions::Save( void ) const
@@ -74,9 +75,9 @@ void CIncludeOptions::Save( void ) const
 	pApp->WriteProfileInt( reg::section, ENTRY_MEMBER( m_lazyParsing ), m_lazyParsing );
 	pApp->WriteProfileString( reg::section, ENTRY_MEMBER( m_lastBrowsedFile ), m_lastBrowsedFile.c_str() );
 
-	m_fnIgnored.Save( reg::section, ENTRY_MEMBER( m_fnIgnored ) );
-	m_fnAdded.Save( reg::section, ENTRY_MEMBER( m_fnAdded ) );
-	m_additionalIncludePath.Save( reg::section, ENTRY_MEMBER( m_additionalIncludePath ) );
+	reg::SavePathGroup( m_fnIgnored, reg::section, ENTRY_MEMBER( m_fnIgnored ) );
+	reg::SavePathGroup( m_fnAdded, reg::section, ENTRY_MEMBER( m_fnAdded ) );
+	reg::SavePathGroup( m_additionalIncludePath, reg::section, ENTRY_MEMBER( m_additionalIncludePath ) );
 }
 
 const CEnumTags& CIncludeOptions::GetTags_DepthLevel( void )

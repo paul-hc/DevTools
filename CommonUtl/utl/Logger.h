@@ -11,7 +11,7 @@ class CLogger
 public:
 	enum { DefaultSize = 512 * KiloByte };
 
-	CLogger( const TCHAR* pFnameFmt = NULL );		// could be _T("%s-suffix") for "exe_name-suffix.log"
+	CLogger( const TCHAR* pFmtFname = NULL );		// could be _T("%s-suffix") for "exe_name-suffix.log"
 	~CLogger();
 
 	const fs::CPath& GetLogFilePath( void ) const;
@@ -30,7 +30,7 @@ protected:
 	fs::CPath MakeBackupLogFilePath( void ) const;
 	bool CheckTruncate( void );
 private:
-	const TCHAR* m_pFnameFmt;
+	const TCHAR* m_pFmtFname;
 public:
 	bool m_enabled;
 	bool m_prependTimestamp;

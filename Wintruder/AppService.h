@@ -48,8 +48,6 @@ private:
 
 namespace app
 {
-	CLogger& GetLogger( void );
-
 	inline CAppService& GetSvc( void ) { return CAppService::Instance(); }
 	inline COptions* GetOptions( void ) { return GetSvc().GetOptions(); }
 

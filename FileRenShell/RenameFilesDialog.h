@@ -2,16 +2,16 @@
 #define RenameFilesDialog_h
 #pragma once
 
-#include "utl/LayoutChildPropertySheet.h"
-#include "utl/DialogToolBar.h"
-#include "utl/EnumSplitButton.h"
-#include "utl/HistoryComboBox.h"
-#include "utl/Subject.h"
 #include "utl/Path.h"
-#include "utl/SplitPushButton.h"
-#include "utl/SpinEdit.h"
-#include "utl/TextEdit.h"
-#include "utl/ThemeStatic.h"
+#include "utl/Subject.h"
+#include "utl/UI/LayoutChildPropertySheet.h"
+#include "utl/UI/DialogToolBar.h"
+#include "utl/UI/EnumSplitButton.h"
+#include "utl/UI/HistoryComboBox.h"
+#include "utl/UI/SplitPushButton.h"
+#include "utl/UI/SpinEdit.h"
+#include "utl/UI/TextEdit.h"
+#include "utl/UI/ThemeStatic.h"
 #include "Application_fwd.h"
 #include "FileEditorBaseDialog.h"
 

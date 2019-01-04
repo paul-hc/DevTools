@@ -2,10 +2,10 @@
 #define FileLocatorDialog_h
 #pragma once
 
-#include "utl/AccelTable.h"
-#include "utl/ReportListControl.h"
-#include "utl/LayoutDialog.h"
-#include "utl/ItemContentEdit.h"
+#include "utl/UI/AccelTable.h"
+#include "utl/UI/ReportListControl.h"
+#include "utl/UI/LayoutDialog.h"
+#include "utl/UI/ItemContentEdit.h"
 #include "IncludePaths.h"
 #include "ProjectContext.h"
 

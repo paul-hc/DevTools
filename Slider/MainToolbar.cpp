@@ -1,16 +1,16 @@
 
-#include "StdAfx.h"
+#include "stdafx.h"
 #include "MainToolbar.h"
 #include "MainFrame.h"
 #include "IImageView.h"
 #include "Workspace.h"
 #include "Application.h"
 #include "resource.h"
-#include "utl/CmdInfoStore.h"
 #include "utl/EnumTags.h"
 #include "utl/StringUtilities.h"
-#include "utl/Utilities.h"
-#include "utl/resource.h"
+#include "utl/UI/CmdInfoStore.h"
+#include "utl/UI/Utilities.h"
+#include "utl/UI/resource.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

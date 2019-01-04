@@ -2,7 +2,7 @@
 #define InputBoxDialog_h
 #pragma once
 
-#include "utl/LayoutDialog.h"
+#include "utl/UI/LayoutDialog.h"
 
 
 class CInputBoxDialog : public CLayoutDialog

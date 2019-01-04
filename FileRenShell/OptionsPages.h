@@ -2,8 +2,8 @@
 #define OptionsPages_h
 #pragma once
 
-#include "utl/LayoutPropertyPage.h"
-#include "utl/DialogToolBar.h"
+#include "utl/UI/LayoutPropertyPage.h"
+#include "utl/UI/DialogToolBar.h"
 
 
 // property pages owned by COptionsSheet
@@ -46,7 +46,7 @@ protected:
 };
 
 
-#include "utl/ItemContentEdit.h"
+#include "utl/UI/ItemContentEdit.h"
 #include "TitleCapitalizer.h"
 
 

@@ -94,7 +94,7 @@ namespace cmd
 		, m_srcPath( srcPath )
 	{
 		if ( (CLogger*)-1 == s_pLogger )
-			s_pLogger = &app::GetLogger();
+			s_pLogger = app::GetLogger();
 	}
 
 	void CBaseFileCmd::ExecuteHandle( void ) throws_( CUserFeedbackException )

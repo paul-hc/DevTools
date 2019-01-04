@@ -19,6 +19,8 @@ namespace str
 	CString formatString( const TCHAR* format, ... );
 	CString formatString( UINT formatResId, ... );
 
+	inline int Length( const TCHAR* pString ) { return static_cast< int >( GetLength( pString ) ); }	// return int for convenience
+
 
 	// tokenize/untokenize
 
@@ -51,7 +53,7 @@ namespace str
 	void skipWhiteSpace( IntegralType& rPos, const TCHAR* str )
 	{
 		ASSERT( str != NULL );
-		ASSERT( rPos >= (IntegralType)0 && rPos <= (IntegralType)_tcslen( str ) );
+		ASSERT( rPos >= (IntegralType)0 && rPos <= (IntegralType)GetLength( str ) );
 
 		while ( str[ rPos ] != _T('\0') && _istspace( str[ rPos ] ) )
 			++rPos;
@@ -62,7 +64,7 @@ namespace str
 	void skipNonWhiteSpace( IntegralType& rPos, const TCHAR* str )
 	{
 		ASSERT( str != NULL );
-		ASSERT( rPos >= (IntegralType)0 && rPos <= (IntegralType)_tcslen( str ) );
+		ASSERT( rPos >= (IntegralType)0 && rPos <= (IntegralType)GetLength( str ) );
 
 		while ( str[ rPos ] != _T('\0') && !_istspace( str[ rPos ] ) )
 			++rPos;
@@ -73,7 +75,7 @@ namespace str
 	void skipDigit( IntegralType& rPos, const TCHAR* str )
 	{
 		ASSERT( str != NULL );
-		ASSERT( rPos >= (IntegralType)0 && rPos <= (IntegralType)_tcslen( str ) );
+		ASSERT( rPos >= (IntegralType)0 && rPos <= (IntegralType)GetLength( str ) );
 		ASSERT( isNumberChar( str[ rPos ] ) );
 
 		bool isHexNumber = 0 == _tcsnicmp( str + rPos, _T("0x"), 2 );
@@ -90,7 +92,7 @@ namespace str
 	void skipCharSet( IntegralType& rPos, const TCHAR* str, const TCHAR* characterSet )
 	{
 		ASSERT( str != NULL );
-		ASSERT( rPos >= (IntegralType)0 && rPos <= (IntegralType)_tcslen( str ) );
+		ASSERT( rPos >= (IntegralType)0 && rPos <= (IntegralType)GetLength( str ) );
 
 		while ( str[ rPos ] != _T('\0') && str::isCharOneOf( str[ rPos ], characterSet ) )
 			++rPos;
@@ -101,7 +103,7 @@ namespace str
 	void skipNotCharSet( IntegralType& rPos, const TCHAR* str, const TCHAR* characterSet )
 	{
 		ASSERT( str != NULL );
-		ASSERT( rPos >= (IntegralType)0 && rPos <= (IntegralType)_tcslen( str ) );
+		ASSERT( rPos >= (IntegralType)0 && rPos <= (IntegralType)GetLength( str ) );
 
 		while ( str[ rPos ] != _T('\0') && !str::isCharOneOf( str[ rPos ], characterSet ) )
 			++rPos;
@@ -309,24 +311,24 @@ namespace str
 
 	inline const TCHAR* ptrAt( const TCHAR* pString, int pos )
 	{
-		ASSERT( pString != NULL && pos >= 0 && pos <= _tcslen( pString ) );
+		ASSERT( pString != NULL && pos >= 0 && pos <= Length( pString ) );
 
 		return pString + pos;
 	}
 
 	inline TCHAR charAt( const TCHAR* pString, int pos )
 	{
-		ASSERT( pString != NULL && pos >= 0 && pos <= _tcslen( pString ) );
+		ASSERT( pString != NULL && pos >= 0 && pos <= Length( pString ) );
 
 		return pString[ pos ];
 	}
 
 	inline int safePos( int pos, const TCHAR* pString )
 	{
-		ASSERT( pString != NULL && ( pos == -1 || pos <= _tcslen( pString ) ) );
+		ASSERT( pString != NULL && ( pos == -1 || pos <= Length( pString ) ) );
 
 		if ( pos == -1 )
-			pos = (int)_tcslen( pString );
+			pos = Length( pString );
 
 		return pos;
 	}

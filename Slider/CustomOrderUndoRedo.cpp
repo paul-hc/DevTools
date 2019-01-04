@@ -1,5 +1,5 @@
 
-#include "StdAfx.h"
+#include "stdafx.h"
 #include "CustomOrderUndoRedo.h"
 #include "utl/EnumTags.h"
 

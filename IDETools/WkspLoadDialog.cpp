@@ -4,8 +4,8 @@
 #include "WorkspaceProfile.h"
 #include "Application_fwd.h"
 #include "resource.h"
-#include "utl/MenuUtilities.h"
 #include "utl/Registry.h"
+#include "utl/UI/MenuUtilities.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -151,7 +151,7 @@ bool CWkspLoadDialog::transferFiles( void )
 		std::vector< int > selection( selCount );
 
 		VERIFY( m_fileList.GetSelItems( selCount, &selection.front() ) != LB_ERR );
-		for ( int i = 0; i < selCount; ++i )
+		for ( size_t i = 0; i < selCount; ++i )
 			m_rWkspProfile.fileArray.push_back( GetListFileItem( selection[ i ] )->GetFilePath().GetPtr() );
 	}
 	return true;

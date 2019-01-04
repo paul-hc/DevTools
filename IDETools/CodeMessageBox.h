@@ -2,8 +2,8 @@
 #define CodeMessageBox_h
 #pragma once
 
-#include "utl/LayoutDialog.h"
-#include "utl/TextEdit.h"
+#include "utl/UI/LayoutDialog.h"
+#include "utl/UI/TextEdit.h"
 
 
 class CCodeMessageBox : public CLayoutDialog

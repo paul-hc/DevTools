@@ -1,5 +1,5 @@
 
-#include "StdAfx.h"
+#include "stdafx.h"
 #include "Application.h"
 #include "DocTemplates.h"
 #include "MainFrame.h"
@@ -11,23 +11,23 @@
 #include "UT/ImagingD2DTests.h"
 #include "UT/ThumbnailTests.h"
 #include "resource.h"
-#include "utl/AboutBox.h"
-#include "utl/DragListCtrl.h"
-#include "utl/GdiPlus_fwd.h"
 #include "utl/RuntimeException.h"
-#include "utl/ShellDialogs.h"
-#include "utl/ShellUtilities.h"
-#include "utl/UtilitiesEx.h"
-#include "utl/Thumbnailer.h"
-#include "utl/WicImageCache.h"
-#include "utl/ut/WicImageTests.h"
+#include "utl/UI/AboutBox.h"
+#include "utl/UI/DragListCtrl.h"
+#include "utl/UI/GdiPlus_fwd.h"
+#include "utl/UI/ShellDialogs.h"
+#include "utl/UI/ShellUtilities.h"
+#include "utl/UI/UtilitiesEx.h"
+#include "utl/UI/Thumbnailer.h"
+#include "utl/UI/WicImageCache.h"
+#include "utl/UI/ut/WicImageTests.h"
 #include <io.h>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
 
-#include "utl/BaseApp.hxx"
+#include "utl/UI/BaseApp.hxx"
 
 
 static const CImageStore::CCmdAlias cmdAliases[] =

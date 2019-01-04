@@ -2,6 +2,7 @@
 #include "stdafx.h"
 #include "PathInfo.h"
 #include "PathSortOrder.h"
+#include "StringUtilitiesEx.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -387,7 +388,7 @@ TCHAR* PathInfo::findSubString( const TCHAR* pathString, const TCHAR* subString 
 int PathInfo::find( const TCHAR* pathString, const TCHAR* subString, int startPos /*= 0*/ )
 {
 	ASSERT( pathString != NULL && subString != NULL && startPos >= startPos );
-	ASSERT( startPos <= _tcslen( pathString ) );
+	ASSERT( startPos <= str::Length( pathString ) );
 
 	TCHAR* pMatch = findSubString( pathString + startPos, subString );
 

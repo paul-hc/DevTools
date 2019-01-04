@@ -7,9 +7,9 @@
 #include "StringUtilitiesEx.h"
 #include "ModuleSession.h"
 #include "resource.h"
-#include "utl/Clipboard.h"
 #include "utl/Registry.h"
-#include "utl/Utilities.h"
+#include "utl/UI/Clipboard.h"
+#include "utl/UI/Utilities.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

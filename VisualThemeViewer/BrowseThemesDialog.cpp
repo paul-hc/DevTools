@@ -4,8 +4,8 @@
 #include "Options.h"
 #include "ThemeCustomDraw.h"
 #include "ThemeStore.h"
-#include "utl/UtilitiesEx.h"
 #include "utl/SubjectPredicates.h"
+#include "utl/UI/UtilitiesEx.h"
 #include "resource.h"
 
 #ifdef _DEBUG

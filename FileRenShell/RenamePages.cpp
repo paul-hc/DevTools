@@ -8,7 +8,7 @@
 #include "FileCommands.h"
 #include "resource.h"
 #include "utl/LongestCommonSubsequence.h"
-#include "utl/UtilitiesEx.h"
+#include "utl/UI/UtilitiesEx.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

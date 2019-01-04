@@ -6,9 +6,9 @@
 #include "resource.h"
 #include "wnd/FlagRepository.h"
 #include "wnd/WindowClass.h"
-#include "utl/LayoutBasePropertySheet.h"
 #include "utl/StringUtilities.h"
-#include "utl/Utilities.h"
+#include "utl/UI/LayoutBasePropertySheet.h"
+#include "utl/UI/Utilities.h"
 #include "wnd/WndUtils.h"
 
 #ifdef _DEBUG

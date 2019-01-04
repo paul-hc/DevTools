@@ -7,7 +7,7 @@
 //
 // Generated from the TEXTINCLUDE 2 resource.
 //
-#include "utl/resource.h"
+#include "utl/UI/resource.h"
 #include "afxres.h"
 
 /////////////////////////////////////////////////////////////////////////////
@@ -300,7 +300,7 @@ END
 
 2 TEXTINCLUDE 
 BEGIN
-    "#include ""utl/resource.h""\r\n"
+    "#include ""utl/UI/resource.h""\r\n"
     "#include ""afxres.h""\r\n"
     "\0"
 END
@@ -308,7 +308,7 @@ END
 3 TEXTINCLUDE 
 BEGIN
     "#include ""afxres.rc""         // standard components: need it for CFileException::GetErrorMessage()\r\n"
-    "#include ""utl/utl_ui.rc""\r\n"
+    "#include ""utl/UI/utl_ui.rc""\r\n"
     "\0"
 END
 
@@ -321,8 +321,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 7,9,0,1
- PRODUCTVERSION 7,9,0,1
+ FILEVERSION 8,0,0,1
+ PRODUCTVERSION 8,0,0,1
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -337,16 +337,16 @@ BEGIN
     BEGIN
         BLOCK "040904b0"
         BEGIN
-            VALUE "Comments", "Rename edit page|Highlight text diffs|Edit commands|Text/Binary undo log|Undo log text/binary|Replace dialog auto-fill common prefix|Report list uses callback text for diff items text|Rename of .lnk shortcut files|Options properties|File list thumbnails|List sorting"
+            VALUE "Comments", "Split UTL_BASE/UTL_UI|Rename edit page|Highlight text diffs|Edit commands|Text/Binary undo log|Undo log text/binary|Replace dialog auto-fill common prefix|Report list uses callback text for diff items text|Rename of .lnk shortcut files|Options properties"
             VALUE "CompanyName", "Paul Cocoveanu"
             VALUE "Email", "phc.2nd@gmail.com"
             VALUE "FileDescription", "Shell extension for renaming files and folders"
-            VALUE "FileVersion", "7, 9, 0, 1"
+            VALUE "FileVersion", "8, 0, 0, 1"
             VALUE "InternalName", "FileRenShell"
-            VALUE "LegalCopyright", "Copyright © 2001-2018"
+            VALUE "LegalCopyright", "Copyright © 2001-2019"
             VALUE "OriginalFilename", "FileRenShell64.dll"
             VALUE "ProductName", "FileRenShell Shell Extension DLL"
-            VALUE "ProductVersion", "7, 9, 0, 1"
+            VALUE "ProductVersion", "8, 0, 0, 1"
             VALUE "WrittenBy", "Written by Paul Cocoveanu"
         END
     END
@@ -641,7 +641,7 @@ END
 // Generated from the TEXTINCLUDE 3 resource.
 //
 #include "afxres.rc"         // standard components: need it for CFileException::GetErrorMessage()
-#include "utl/utl_ui.rc"
+#include "utl/UI/utl_ui.rc"
 
 /////////////////////////////////////////////////////////////////////////////
 #endif    // not APSTUDIO_INVOKED

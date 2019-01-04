@@ -1,6 +1,6 @@
 #pragma once
 
-#include "utl/ToolbarStrip.h"
+#include "utl/UI/ToolbarStrip.h"
 
 
 class CMainFrame : public CMDIFrameWnd

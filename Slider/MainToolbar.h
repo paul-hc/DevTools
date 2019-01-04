@@ -2,9 +2,9 @@
 #define MainToolbar_h
 #pragma once
 
-#include "utl/ToolbarStrip.h"
-#include "utl/IZoomBar.h"
-#include "utl/ui_fwd.h"
+#include "utl/UI/ToolbarStrip.h"
+#include "utl/UI/IZoomBar.h"
+#include "utl/UI/ui_fwd.h"
 #include "INavigationBar.h"
 
 

@@ -4,7 +4,7 @@
 #include "XferOptions.h"
 #include "FileTransfer.h"
 #include "ut/TransferFuncTests.h"
-#include "utl/ConsoleInputOutput.h"
+#include "utl/ConsoleApplication.h"
 #include "utl/StringUtilities.h"
 #include <iostream>
 
@@ -29,7 +29,7 @@ namespace ut
 
 static const char s_helpMessage[] =
 	"Copies files recursively in target directory tree (Unicode paths).\n"
-	"    Written by Paul Cocoveanu, 2004-2018.\n"
+	"    Written by Paul Cocoveanu, 2004-2019.\n"
 	"\n"
 	"xFer source_filter [target_dir]\n"
 	"     [/transfer=action]\n"
@@ -107,7 +107,7 @@ static const char s_helpMessage[] =
 
 int _tmain( int argc, TCHAR* argv[] )
 {
-	setlocale( LC_ALL, "" );
+	CConsoleApplication app;
 
 #ifdef _DEBUG
 	// options to check outside the try block (debugging)
@@ -139,7 +139,7 @@ int _tmain( int argc, TCHAR* argv[] )
 	}
 	catch ( const std::exception& exc )
 	{
-		io::ReportException( exc );
+		app::ReportException( exc );
 		return 1;
 	}
 }

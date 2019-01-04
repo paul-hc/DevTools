@@ -2,14 +2,14 @@
 #define MainDialog_h
 #pragma once
 
-#include "utl/BaseMainDialog.h"
-#include "utl/DialogToolBar.h"
-#include "utl/IconButton.h"
-#include "utl/InternalChange.h"
-#include "utl/LayoutChildPropertySheet.h"
-#include "utl/PopupSplitButton.h"
-#include "utl/SplitPushButton.h"
-#include "utl/WindowTimer.h"
+#include "utl/UI/BaseMainDialog.h"
+#include "utl/UI/DialogToolBar.h"
+#include "utl/UI/IconButton.h"
+#include "utl/UI/InternalChange.h"
+#include "utl/UI/LayoutChildPropertySheet.h"
+#include "utl/UI/PopupSplitButton.h"
+#include "utl/UI/SplitPushButton.h"
+#include "utl/UI/WindowTimer.h"
 #include "wnd/WndSearchPattern.h"
 #include "Observers.h"
 #include "TrackWndPickerStatic.h"

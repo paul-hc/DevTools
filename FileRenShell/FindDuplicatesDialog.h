@@ -4,11 +4,11 @@
 
 #include "utl/ISubject.h"
 #include "utl/FileSystem_fwd.h"
-#include "utl/DialogToolBar.h"
-#include "utl/HistoryComboBox.h"
-#include "utl/PathItemListCtrl.h"
-#include "utl/TextEdit.h"
-#include "utl/ThemeStatic.h"
+#include "utl/UI/DialogToolBar.h"
+#include "utl/UI/HistoryComboBox.h"
+#include "utl/UI/PathItemListCtrl.h"
+#include "utl/UI/TextEdit.h"
+#include "utl/UI/ThemeStatic.h"
 #include "FileEditorBaseDialog.h"
 
 

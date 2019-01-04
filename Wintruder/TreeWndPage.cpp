@@ -6,14 +6,14 @@
 #include "resource.h"
 #include "wnd/WndImageRepository.h"
 #include "wnd/WndUtils.h"
-#include "utl/AccelTable.h"
-#include "utl/Clipboard.h"
-#include "utl/Icon.h"
 #include "utl/Logger.h"
-#include "utl/MenuUtilities.h"
 #include "utl/Timer.h"
 #include "utl/StringUtilities.h"
-#include "utl/UtilitiesEx.h"
+#include "utl/UI/AccelTable.h"
+#include "utl/UI/Clipboard.h"
+#include "utl/UI/Icon.h"
+#include "utl/UI/MenuUtilities.h"
+#include "utl/UI/UtilitiesEx.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -114,7 +114,7 @@ namespace wt
 	void CWndTreeBuilder::LogWnd( HWND hWnd, int indent ) const
 	{
 		if ( m_pLogger != NULL )
-			app::GetLogger().Log( _T("%swnd: %s"), std::tstring( indent * 2, _T(' ') ).c_str(), wnd::FormatBriefWndInfo( hWnd ).c_str() );
+			app::GetLogger()->Log( _T("%swnd: %s"), std::tstring( indent * 2, _T(' ') ).c_str(), wnd::FormatBriefWndInfo( hWnd ).c_str() );
 	}
 }
 
@@ -240,17 +240,17 @@ void CTreeWndPage::SetupTreeItems( void )
 
 	if ( EnumWindows == buildMethod )
 	{	// enum windows
-		app::GetLogger().Log( _T("# Enum Windows") );
+		app::GetLogger()->Log( _T("# Enum Windows") );
 		wt::CWndTreeBuilder builder( &m_treeCtrl );
 		builder.Build( ::GetDesktopWindow() );
 	}
 	else
 	{	// loop windows
-		app::GetLogger().Log( _T("# Loop Windows (OLD)") );
+		app::GetLogger()->Log( _T("# Loop Windows (OLD)") );
 		InsertWndItem( TVI_ROOT, ::GetDesktopWindow(), 0, Image_Desktop );
 	}
 
-	app::GetLogger().Log( _T("Elapsed %.3f seconds (found %d windows)"), timer.ElapsedSeconds(), m_treeCtrl.GetCount() );
+	app::GetLogger()->Log( _T("Elapsed %.3f seconds (found %d windows)"), timer.ElapsedSeconds(), m_treeCtrl.GetCount() );
 }
 
 HTREEITEM CTreeWndPage::FindItemWithWnd( HWND hWnd ) const
@@ -276,7 +276,7 @@ HWND CTreeWndPage::FindValidParentItem( HTREEITEM hItem ) const
 
 HTREEITEM CTreeWndPage::InsertWndItem( HTREEITEM hItemParent, HWND hWnd, int indent, int image /*= -1*/ )
 {
-//	app::GetLogger().Log( _T("%swnd: %s"), std::tstring( indent * 2, _T(' ') ).c_str(), wnd::FormatBriefWndInfo( hWnd ).c_str() );
+//	app::GetLogger()->Log( _T("%swnd: %s"), std::tstring( indent * 2, _T(' ') ).c_str(), wnd::FormatBriefWndInfo( hWnd ).c_str() );
 
 	wt::CItemInfo info( hWnd, image );
 	HTREEITEM hItem = m_treeCtrl.InsertItem( info.m_item.mask, info.m_item.pszText,

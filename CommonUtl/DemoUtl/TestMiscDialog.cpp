@@ -1,9 +1,9 @@
 
 #include "stdafx.h"
 #include "TestMiscDialog.h"
-#include "utl/ImageStore.h"
-#include "utl/Utilities.h"
-#include "utl/resource.h"
+#include "utl/UI/ImageStore.h"
+#include "utl/UI/Utilities.h"
+#include "utl/UI/resource.h"
 #include "resource.h"
 
 #ifdef _DEBUG

@@ -3,9 +3,9 @@
 #include "WndUtils.h"
 #include "WindowClass.h"
 #include "WindowInfoStore.h"
-#include "utl/BaseApp.h"
-#include "utl/ProcessUtils.h"
 #include "utl/StringUtilities.h"
+#include "utl/UI/BaseApp.h"
+#include "utl/UI/ProcessUtils.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

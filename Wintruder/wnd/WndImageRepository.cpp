@@ -3,9 +3,9 @@
 #include "WndImageRepository.h"
 #include "WindowClass.h"
 #include "resource.h"
-#include "utl/Icon.h"
 #include "utl/StringUtilities.h"
-#include "utl/Utilities.h"
+#include "utl/UI/Icon.h"
+#include "utl/UI/Utilities.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

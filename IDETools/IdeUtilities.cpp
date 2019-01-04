@@ -5,9 +5,9 @@
 #include "Application.h"
 #include "utl/EnumTags.h"
 #include "utl/Path.h"
-#include "utl/ProcessUtils.h"
+#include "utl/UI/ProcessUtils.h"
 #include "utl/Registry.h"
-#include "utl/Utilities.h"
+#include "utl/UI/Utilities.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

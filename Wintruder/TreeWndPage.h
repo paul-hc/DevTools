@@ -3,8 +3,8 @@
 #pragma once
 
 #include <hash_map>
-#include "utl/LayoutPropertyPage.h"
-#include "utl/TreeControl.h"
+#include "utl/UI/LayoutPropertyPage.h"
+#include "utl/UI/TreeControl.h"
 #include "wnd/WndEnumerator.h"
 #include "Observers.h"
 

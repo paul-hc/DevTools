@@ -3,7 +3,7 @@
 #pragma once
 
 #include "WindowPlacement.h"
-#include "utl/Image_fwd.h"
+#include "utl/UI/Image_fwd.h"
 
 
 class CImageState

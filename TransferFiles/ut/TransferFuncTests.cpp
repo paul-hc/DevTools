@@ -2,7 +2,7 @@
 #include "stdafx.h"
 #include "TransferFuncTests.h"
 #include "utl/FileSystem.h"
-#include "utl/ProcessUtils.h"
+#include "utl/ProcessCmd.h"
 #include "utl/StringUtilities.h"
 
 #ifdef _DEBUG

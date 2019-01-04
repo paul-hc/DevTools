@@ -3,7 +3,7 @@
 #pragma once
 
 #include "utl/Path.h"
-#include "utl/LayoutDialog.h"
+#include "utl/UI/LayoutDialog.h"
 
 
 class CItemContentHistoryCombo;

@@ -1,7 +1,7 @@
 
 #include "stdafx.h"
 #include "RuntimeException.h"
-#include "UserReport.h"
+#include "AppTools.h"
 #include <iostream>
 
 
@@ -35,13 +35,7 @@ std::tstring CRuntimeException::GetMessage( void ) const throw()
 void CRuntimeException::ReportError( void ) const throw()
 {
 	if ( HasMessage() )
-	{
-	#ifdef _CONSOLE
-		std::cerr << m_message << std::endl;
-	#else
-		AfxMessageBox( GetMessage().c_str(), MB_ICONERROR );
-	#endif
-	}
+		app::ReportException( *this );
 }
 
 std::tstring CRuntimeException::MessageOf( const std::exception& exc ) throw()
@@ -98,8 +92,7 @@ namespace mfc
 
 	int CUserAbortedException::ReportError( UINT mbType /*= MB_OK*/, UINT messageId /*= 0*/ )
 	{
-		messageId;
-		return ui::CSilentMode::Instance().MessageBox( std::tstring(), mbType );
+		mbType, messageId;
+		return 1;
 	}
-
 }

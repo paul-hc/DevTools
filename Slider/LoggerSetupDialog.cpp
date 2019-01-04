@@ -1,11 +1,11 @@
 
-#include "StdAfx.h"
+#include "stdafx.h"
 #include "LoggerSetupDialog.h"
 #include "Application.h"
 #include "resource.h"
 #include "utl/Logger.h"
 #include "utl/Path.h"
-#include "utl/ShellUtilities.h"
+#include "utl/UI/ShellUtilities.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -64,7 +64,7 @@ void CLoggerSetupDialog::OnCBnSelChangeLogger( void )
 
 	CheckDlgButton( CK_LOGGER_ENABLED, m_pCurrLogger->m_enabled );
 	CheckDlgButton( CK_PREPEND_TIMESTAMP, m_pCurrLogger->m_prependTimestamp );
-	GetDlgItem( IDC_VIEW_LOG_FILE_BUTTON )->EnableWindow( fs::FileExist( m_pCurrLogger->GetLogFilePath().c_str() ) );
+	GetDlgItem( IDC_VIEW_LOG_FILE_BUTTON )->EnableWindow( m_pCurrLogger->GetLogFilePath().FileExist() );
 }
 
 void CLoggerSetupDialog::OnToggleLoggerEnabled( void )
@@ -82,7 +82,7 @@ void CLoggerSetupDialog::OnTogglePrependTimestamp( void )
 void CLoggerSetupDialog::OnViewLogFileButton( void )
 {
 	// use text key (.txt) for text view, or the default for run
-	shell::Execute( this, m_pCurrLogger->GetLogFilePath().c_str(), NULL, SEE_MASK_FLAG_DDEWAIT, NULL, NULL, _T(".txt") );
+	shell::Execute( this, m_pCurrLogger->GetLogFilePath().GetPtr(), NULL, SEE_MASK_FLAG_DDEWAIT, NULL, NULL, _T(".txt") );
 }
 
 void CLoggerSetupDialog::OnClearLogFileButton( void )

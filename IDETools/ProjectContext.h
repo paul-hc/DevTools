@@ -2,7 +2,7 @@
 #define ProjectContext_h
 #pragma once
 
-#include "utl/InternalChange.h"
+#include "utl/UI/InternalChange.h"
 
 
 class CProjectContext : private CInternalChange

@@ -5,13 +5,13 @@
 #include "ThemeStore.h"
 #include "MainDialog.h"
 #include "resource.h"
-#include "utl/GpUtilities.h"
+#include "utl/UI/GpUtilities.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
 
-#include "utl/BaseApp.hxx"
+#include "utl/UI/BaseApp.hxx"
 
 
 CApplication theApp;		// the one and only CApplication object

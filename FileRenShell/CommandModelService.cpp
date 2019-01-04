@@ -9,12 +9,12 @@
 #include "utl/FmtUtils.h"
 #include "utl/FileSystem.h"
 #include "utl/Guards.h"
-#include "utl/MfcUtilities.h"
 #include "utl/Serialization.h"
 #include "utl/StringRange.h"
 #include "utl/StringUtilities.h"
 #include "utl/Timer.h"
 #include "utl/TimeUtils.h"
+#include "utl/UI/MfcUtilities.h"
 #include <fstream>
 
 #ifdef _DEBUG

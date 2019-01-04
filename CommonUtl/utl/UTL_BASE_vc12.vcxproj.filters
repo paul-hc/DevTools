@@ -1,0 +1,448 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd;cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="utl">
+      <UniqueIdentifier>{d38ded75-f931-46b5-946b-d748d5cc9d7e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="utl\File System">
+      <UniqueIdentifier>{f79bb196-8c2a-4f5f-8c61-122350cd8913}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="utl-UnitTest">
+      <UniqueIdentifier>{024ac24f-2026-4af9-8be8-1b2e0e607b41}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="utl\Pattern">
+      <UniqueIdentifier>{6c46bb28-894d-4d4c-b7d2-ad0c08933b01}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="utl\Registry">
+      <UniqueIdentifier>{0b1e95d8-18f2-4a80-8c3c-b56839af585e}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="stdafx.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="targetver.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CommonDefs.h">
+      <Filter>utl</Filter>
+    </ClInclude>
+    <ClInclude Include="ComparePredicates.h">
+      <Filter>utl</Filter>
+    </ClInclude>
+    <ClInclude Include="ContainerUtilities.h">
+      <Filter>utl</Filter>
+    </ClInclude>
+    <ClInclude Include="EnumTags.h">
+      <Filter>utl</Filter>
+    </ClInclude>
+    <ClInclude Include="Logger.h">
+      <Filter>utl</Filter>
+    </ClInclude>
+    <ClInclude Include="Range.h">
+      <Filter>utl</Filter>
+    </ClInclude>
+    <ClInclude Include="RuntimeException.h">
+      <Filter>utl</Filter>
+    </ClInclude>
+    <ClInclude Include="ScopedValue.h">
+      <Filter>utl</Filter>
+    </ClInclude>
+    <ClInclude Include="StringBase.h">
+      <Filter>utl</Filter>
+    </ClInclude>
+    <ClInclude Include="StringUtilities.h">
+      <Filter>utl</Filter>
+    </ClInclude>
+    <ClInclude Include="SubjectPredicates.h">
+      <Filter>utl</Filter>
+    </ClInclude>
+    <ClInclude Include="TextFileParser.h">
+      <Filter>utl</Filter>
+    </ClInclude>
+    <ClInclude Include="Timer.h">
+      <Filter>utl</Filter>
+    </ClInclude>
+    <ClInclude Include="TokenIterator.h">
+      <Filter>utl</Filter>
+    </ClInclude>
+    <ClInclude Include="FileSystem.h">
+      <Filter>utl\File System</Filter>
+    </ClInclude>
+    <ClInclude Include="FlagTags.h">
+      <Filter>utl</Filter>
+    </ClInclude>
+    <ClInclude Include="PathFormatter.h">
+      <Filter>utl\File System</Filter>
+    </ClInclude>
+    <ClInclude Include="PathGenerator.h">
+      <Filter>utl\File System</Filter>
+    </ClInclude>
+    <ClInclude Include="PathMaker.h">
+      <Filter>utl\File System</Filter>
+    </ClInclude>
+    <ClInclude Include="FlexPath.h">
+      <Filter>utl\File System</Filter>
+    </ClInclude>
+    <ClInclude Include="ThrowMode.h">
+      <Filter>utl</Filter>
+    </ClInclude>
+    <ClInclude Include="ut\FileSystemTests.h">
+      <Filter>utl-UnitTest</Filter>
+    </ClInclude>
+    <ClInclude Include="ut\LcsTests.h">
+      <Filter>utl-UnitTest</Filter>
+    </ClInclude>
+    <ClInclude Include="ut\PathGeneratorTests.h">
+      <Filter>utl-UnitTest</Filter>
+    </ClInclude>
+    <ClInclude Include="ut\PathTests.h">
+      <Filter>utl-UnitTest</Filter>
+    </ClInclude>
+    <ClInclude Include="ut\ResequenceTests.h">
+      <Filter>utl-UnitTest</Filter>
+    </ClInclude>
+    <ClInclude Include="ut\StringTests.h">
+      <Filter>utl-UnitTest</Filter>
+    </ClInclude>
+    <ClInclude Include="ut\ThreadingTests.h">
+      <Filter>utl-UnitTest</Filter>
+    </ClInclude>
+    <ClInclude Include="ut\UnitTest.h">
+      <Filter>utl-UnitTest</Filter>
+    </ClInclude>
+    <ClInclude Include="ut\UtlConsoleTests.h">
+      <Filter>utl-UnitTest</Filter>
+    </ClInclude>
+    <ClInclude Include="CacheLoader.h">
+      <Filter>utl\File System</Filter>
+    </ClInclude>
+    <ClInclude Include="CacheLoader.hxx">
+      <Filter>utl\File System</Filter>
+    </ClInclude>
+    <ClInclude Include="FileObjectCache.h">
+      <Filter>utl\File System</Filter>
+    </ClInclude>
+    <ClInclude Include="FileObjectCache.hxx">
+      <Filter>utl\File System</Filter>
+    </ClInclude>
+    <ClInclude Include="Path.h">
+      <Filter>utl\File System</Filter>
+    </ClInclude>
+    <ClInclude Include="PathGroup.h">
+      <Filter>utl\File System</Filter>
+    </ClInclude>
+    <ClInclude Include="Compare_fwd.h">
+      <Filter>utl</Filter>
+    </ClInclude>
+    <ClInclude Include="Guards.h">
+      <Filter>utl</Filter>
+    </ClInclude>
+    <ClInclude Include="LongestCommonDuplicate.h">
+      <Filter>utl</Filter>
+    </ClInclude>
+    <ClInclude Include="LongestCommonSubsequence.h">
+      <Filter>utl</Filter>
+    </ClInclude>
+    <ClInclude Include="RandomUtilities.h">
+      <Filter>utl</Filter>
+    </ClInclude>
+    <ClInclude Include="Resequence.h">
+      <Filter>utl</Filter>
+    </ClInclude>
+    <ClInclude Include="Resequence.hxx">
+      <Filter>utl</Filter>
+    </ClInclude>
+    <ClInclude Include="ResourcePool.h">
+      <Filter>utl</Filter>
+    </ClInclude>
+    <ClInclude Include="Serialization.h">
+      <Filter>utl</Filter>
+    </ClInclude>
+    <ClInclude Include="SerializeStdTypes.h">
+      <Filter>utl</Filter>
+    </ClInclude>
+    <ClInclude Include="StreamStdTypes.h">
+      <Filter>utl</Filter>
+    </ClInclude>
+    <ClInclude Include="StringCompare.h">
+      <Filter>utl</Filter>
+    </ClInclude>
+    <ClInclude Include="StringCvt.h">
+      <Filter>utl</Filter>
+    </ClInclude>
+    <ClInclude Include="vector_map.h">
+      <Filter>utl</Filter>
+    </ClInclude>
+    <ClInclude Include="ut\FmtUtilsTests.h">
+      <Filter>utl-UnitTest</Filter>
+    </ClInclude>
+    <ClInclude Include="ut\NumericTests.h">
+      <Filter>utl-UnitTest</Filter>
+    </ClInclude>
+    <ClInclude Include="ut\StringRangeTests.h">
+      <Filter>utl-UnitTest</Filter>
+    </ClInclude>
+    <ClInclude Include="Registry.h">
+      <Filter>utl\Registry</Filter>
+    </ClInclude>
+    <ClInclude Include="Command.h">
+      <Filter>utl\Pattern</Filter>
+    </ClInclude>
+    <ClInclude Include="CommandModel.h">
+      <Filter>utl\Pattern</Filter>
+    </ClInclude>
+    <ClInclude Include="PathItemBase.h">
+      <Filter>utl\Pattern</Filter>
+    </ClInclude>
+    <ClInclude Include="Subject.h">
+      <Filter>utl\Pattern</Filter>
+    </ClInclude>
+    <ClInclude Include="ISubject.h">
+      <Filter>utl\Pattern</Filter>
+    </ClInclude>
+    <ClInclude Include="CRC32.h">
+      <Filter>utl\File System</Filter>
+    </ClInclude>
+    <ClInclude Include="FileState.h">
+      <Filter>utl\File System</Filter>
+    </ClInclude>
+    <ClInclude Include="FileSystem_fwd.h">
+      <Filter>utl\File System</Filter>
+    </ClInclude>
+    <ClInclude Include="FmtUtils.h">
+      <Filter>utl</Filter>
+    </ClInclude>
+    <ClInclude Include="IniFile.h">
+      <Filter>utl\Registry</Filter>
+    </ClInclude>
+    <ClInclude Include="IniFileRegistrySection.h">
+      <Filter>utl\Registry</Filter>
+    </ClInclude>
+    <ClInclude Include="IRegistrySection.h">
+      <Filter>utl\Registry</Filter>
+    </ClInclude>
+    <ClInclude Include="PropertyLineReader.h">
+      <Filter>utl\Registry</Filter>
+    </ClInclude>
+    <ClInclude Include="MatchSequence.h">
+      <Filter>utl</Filter>
+    </ClInclude>
+    <ClInclude Include="StdStl.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="StringRange.h">
+      <Filter>utl</Filter>
+    </ClInclude>
+    <ClInclude Include="StringRange_fwd.h">
+      <Filter>utl</Filter>
+    </ClInclude>
+    <ClInclude Include="TimeUtils.h">
+      <Filter>utl</Filter>
+    </ClInclude>
+    <ClInclude Include="ut\Test.h">
+      <Filter>utl-UnitTest</Filter>
+    </ClInclude>
+    <ClInclude Include="AppTools.h">
+      <Filter>utl</Filter>
+    </ClInclude>
+    <ClInclude Include="CommandService.h">
+      <Filter>utl\Pattern</Filter>
+    </ClInclude>
+    <ClInclude Include="ConsoleApplication.h">
+      <Filter>utl</Filter>
+    </ClInclude>
+    <ClInclude Include="FileContent.h">
+      <Filter>utl\File System</Filter>
+    </ClInclude>
+    <ClInclude Include="ICommand.h">
+      <Filter>utl\Pattern</Filter>
+    </ClInclude>
+    <ClInclude Include="MemLeakCheck.h">
+      <Filter>utl</Filter>
+    </ClInclude>
+    <ClInclude Include="MultiThreading.h">
+      <Filter>utl</Filter>
+    </ClInclude>
+    <ClInclude Include="ProcessCmd.h">
+      <Filter>utl</Filter>
+    </ClInclude>
+    <ClInclude Include="StringIntuitiveCompare.h">
+      <Filter>utl</Filter>
+    </ClInclude>
+    <ClInclude Include="StructuredStorage.h">
+      <Filter>utl\File System</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="stdafx.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="EnumTags.cpp">
+      <Filter>utl</Filter>
+    </ClCompile>
+    <ClCompile Include="Logger.cpp">
+      <Filter>utl</Filter>
+    </ClCompile>
+    <ClCompile Include="RuntimeException.cpp">
+      <Filter>utl</Filter>
+    </ClCompile>
+    <ClCompile Include="StringBase.cpp">
+      <Filter>utl</Filter>
+    </ClCompile>
+    <ClCompile Include="StringUtilities.cpp">
+      <Filter>utl</Filter>
+    </ClCompile>
+    <ClCompile Include="TextFileParser.cpp">
+      <Filter>utl</Filter>
+    </ClCompile>
+    <ClCompile Include="TokenIterator.cpp">
+      <Filter>utl</Filter>
+    </ClCompile>
+    <ClCompile Include="FileSystem.cpp">
+      <Filter>utl\File System</Filter>
+    </ClCompile>
+    <ClCompile Include="FlagTags.cpp">
+      <Filter>utl</Filter>
+    </ClCompile>
+    <ClCompile Include="PathFormatter.cpp">
+      <Filter>utl\File System</Filter>
+    </ClCompile>
+    <ClCompile Include="PathGenerator.cpp">
+      <Filter>utl\File System</Filter>
+    </ClCompile>
+    <ClCompile Include="PathMaker.cpp">
+      <Filter>utl\File System</Filter>
+    </ClCompile>
+    <ClCompile Include="FlexPath.cpp">
+      <Filter>utl\File System</Filter>
+    </ClCompile>
+    <ClCompile Include="ThrowMode.cpp">
+      <Filter>utl</Filter>
+    </ClCompile>
+    <ClCompile Include="ut\FileSystemTests.cpp">
+      <Filter>utl-UnitTest</Filter>
+    </ClCompile>
+    <ClCompile Include="ut\LcsTests.cpp">
+      <Filter>utl-UnitTest</Filter>
+    </ClCompile>
+    <ClCompile Include="ut\PathGeneratorTests.cpp">
+      <Filter>utl-UnitTest</Filter>
+    </ClCompile>
+    <ClCompile Include="ut\PathTests.cpp">
+      <Filter>utl-UnitTest</Filter>
+    </ClCompile>
+    <ClCompile Include="ut\ResequenceTests.cpp">
+      <Filter>utl-UnitTest</Filter>
+    </ClCompile>
+    <ClCompile Include="ut\StringTests.cpp">
+      <Filter>utl-UnitTest</Filter>
+    </ClCompile>
+    <ClCompile Include="ut\ThreadingTests.cpp">
+      <Filter>utl-UnitTest</Filter>
+    </ClCompile>
+    <ClCompile Include="ut\UnitTest.cpp">
+      <Filter>utl-UnitTest</Filter>
+    </ClCompile>
+    <ClCompile Include="FileObjectCache.cpp">
+      <Filter>utl\File System</Filter>
+    </ClCompile>
+    <ClCompile Include="Path.cpp">
+      <Filter>utl\File System</Filter>
+    </ClCompile>
+    <ClCompile Include="PathGroup.cpp">
+      <Filter>utl\File System</Filter>
+    </ClCompile>
+    <ClCompile Include="Guards.cpp">
+      <Filter>utl</Filter>
+    </ClCompile>
+    <ClCompile Include="StringCompare.cpp">
+      <Filter>utl</Filter>
+    </ClCompile>
+    <ClCompile Include="ut\FmtUtilsTests.cpp">
+      <Filter>utl-UnitTest</Filter>
+    </ClCompile>
+    <ClCompile Include="ut\NumericTests.cpp">
+      <Filter>utl-UnitTest</Filter>
+    </ClCompile>
+    <ClCompile Include="ut\StringRangeTests.cpp">
+      <Filter>utl-UnitTest</Filter>
+    </ClCompile>
+    <ClCompile Include="Registry.cpp">
+      <Filter>utl\Registry</Filter>
+    </ClCompile>
+    <ClCompile Include="Command.cpp">
+      <Filter>utl\Pattern</Filter>
+    </ClCompile>
+    <ClCompile Include="CommandModel.cpp">
+      <Filter>utl\Pattern</Filter>
+    </ClCompile>
+    <ClCompile Include="PathItemBase.cpp">
+      <Filter>utl\Pattern</Filter>
+    </ClCompile>
+    <ClCompile Include="Subject.cpp">
+      <Filter>utl\Pattern</Filter>
+    </ClCompile>
+    <ClCompile Include="CRC32.cpp">
+      <Filter>utl\File System</Filter>
+    </ClCompile>
+    <ClCompile Include="FileState.cpp">
+      <Filter>utl\File System</Filter>
+    </ClCompile>
+    <ClCompile Include="FmtUtils.cpp">
+      <Filter>utl</Filter>
+    </ClCompile>
+    <ClCompile Include="IniFile.cpp">
+      <Filter>utl\Registry</Filter>
+    </ClCompile>
+    <ClCompile Include="IniFileRegistrySection.cpp">
+      <Filter>utl\Registry</Filter>
+    </ClCompile>
+    <ClCompile Include="PropertyLineReader.cpp">
+      <Filter>utl\Registry</Filter>
+    </ClCompile>
+    <ClCompile Include="Serialization.cpp">
+      <Filter>utl</Filter>
+    </ClCompile>
+    <ClCompile Include="Timer.cpp">
+      <Filter>utl</Filter>
+    </ClCompile>
+    <ClCompile Include="TimeUtils.cpp">
+      <Filter>utl</Filter>
+    </ClCompile>
+    <ClCompile Include="ut\Test.cpp">
+      <Filter>utl-UnitTest</Filter>
+    </ClCompile>
+    <ClCompile Include="AppTools.cpp">
+      <Filter>utl</Filter>
+    </ClCompile>
+    <ClCompile Include="CommandService.cpp">
+      <Filter>utl\Pattern</Filter>
+    </ClCompile>
+    <ClCompile Include="ConsoleApplication.cpp">
+      <Filter>utl</Filter>
+    </ClCompile>
+    <ClCompile Include="FileContent.cpp">
+      <Filter>utl\File System</Filter>
+    </ClCompile>
+    <ClCompile Include="MemLeakCheck.cpp">
+      <Filter>utl</Filter>
+    </ClCompile>
+    <ClCompile Include="MultiThreading.cpp">
+      <Filter>utl</Filter>
+    </ClCompile>
+    <ClCompile Include="ProcessCmd.cpp">
+      <Filter>utl</Filter>
+    </ClCompile>
+    <ClCompile Include="StructuredStorage.cpp">
+      <Filter>utl\File System</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="UTL Library.txt" />
+  </ItemGroup>
+</Project>

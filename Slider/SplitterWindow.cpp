@@ -1,5 +1,5 @@
 
-#include "StdAfx.h"
+#include "stdafx.h"
 #include "SplitterWindow.h"
 #include "AlbumThumbListView.h"
 #include "resource.h"

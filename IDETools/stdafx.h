@@ -5,20 +5,17 @@
 #pragma once
 
 #include "utl/targetver.h"
+#include "utl/StdStl.h"				// Standard C++ Library
 
 #include <afxwin.h>					// MFC core and standard components
-#include "utl/StdStl.h"				// Standard C++ Library
-#include "utl/CommonWinDefs.h"		// min/max
-
 #include <afxext.h>         		// MFC extensions
 #include <afxdisp.h>        		// MFC OLE automation classes
 #include <afxcmn.h>					// MFC support for Windows Common Controls
 
-// Warning Level 4 STL disables:
-#pragma warning( disable: 4018 )	// signed/unsigned mismatch
 
-#include "utl/StdManifest.h"		// include manifest for common controls
 #include "utl/CommonDefs.h"
+#include "utl/UI/CommonWinDefs.h"		// min/max
+#include "utl/UI/StdManifest.h"		// include manifest for common controls
 
 
 #define PROF_SEP _T("|")
@@ -31,9 +28,3 @@
 enum ThreeState { False, True, Toggle = -1, };
 
 typedef int Ternary;
-
-
-namespace str
-{
-	inline int Length( const TCHAR* pString ) { return static_cast< int >( _tcslen( pString ) ); }	// return int for convenience
-}

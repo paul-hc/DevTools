@@ -1,7 +1,7 @@
 
 #include "stdafx.h"
 #include "TrackWndPickerStatic.h"
-#include "utl/Utilities.h"
+#include "utl/UI/Utilities.h"
 #include "wnd/WndFinder.h"
 #include "wnd/WndHighlighter.h"
 

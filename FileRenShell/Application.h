@@ -2,9 +2,9 @@
 #define Application_h
 #pragma once
 
-#include "utl/BaseApp.h"
 #include "utl/CommandModel.h"
 #include "utl/Logger.h"
+#include "utl/UI/BaseApp.h"
 #include "Application_fwd.h"
 
 
@@ -37,7 +37,6 @@ extern CApplication g_app;
 namespace app
 {
 	inline CApplication& GetApp( void ) { return g_app; }
-	inline CLogger& GetLogger( void ) { return g_app.GetLogger(); }
 
 	void InitModule( HINSTANCE hInstance );
 }

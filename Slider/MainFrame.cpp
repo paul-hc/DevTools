@@ -1,5 +1,5 @@
 
-#include "StdAfx.h"
+#include "stdafx.h"
 #include "MainFrame.h"
 #include "MainToolbar.h"
 #include "IImageView.h"
@@ -8,11 +8,11 @@
 #include "ChildFrame.h"
 #include "Application.h"
 #include "resource.h"
-#include "utl/resource.h"
-#include "utl/MenuUtilities.h"
-#include "utl/Utilities.h"
-#include "utl/Thumbnailer.h"
-#include "utl/WicImageCache.h"
+#include "utl/UI/MenuUtilities.h"
+#include "utl/UI/Utilities.h"
+#include "utl/UI/Thumbnailer.h"
+#include "utl/UI/WicImageCache.h"
+#include "utl/UI/resource.h"
 #include <afxpriv.h>		// for WM_SETMESSAGESTRING
 #include <dde.h>
 

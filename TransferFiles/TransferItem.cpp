@@ -182,7 +182,7 @@ bool CTransferItem::Transfer( FileAction fileAction, const CBackupInfo* pBackupI
 		}
 		catch ( const std::exception& exc )
 		{
-			io::ReportException( exc );
+			app::ReportException( exc );
 		}
 
 	return false;
@@ -219,7 +219,7 @@ bool CTransferItem::BackupExistingTarget( const CBackupInfo& backupInfo )
 	}
 	catch ( const CRuntimeException& exc )
 	{
-		io::TraceException( exc );
+		app::TraceException( exc );
 	}
 
 	return false;

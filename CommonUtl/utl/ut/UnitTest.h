@@ -158,6 +158,8 @@ namespace ut
 	CLogger& GetTestLogger( void );
 
 	const fs::CPath& GetTestDataDirPath( void ) throws_( CRuntimeException );
+	const fs::CPath& GetImageSourceDirPath( void );		// %UTL_THUMB_SRC_IMAGE_PATH%
+	const fs::CPath& GetTestImagesDirPath( void );		// %UTL_TESTDATA_PATH%\images
 
 	const fs::CPath& GetTempUt_DirPath( void ) throws_( CRuntimeException );
 	fs::CPath MakeTempUt_DirPath( const fs::CPath& subPath, bool createDir ) throws_( CRuntimeException );

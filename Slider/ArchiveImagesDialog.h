@@ -5,9 +5,9 @@
 #include "ArchiveImagesContext.h"
 #include "ListViewState.h"
 #include "utl/Path.h"
-#include "utl/HistoryComboBox.h"
-#include "utl/LayoutDialog.h"
-#include "utl/ReportListControl.h"
+#include "utl/UI/HistoryComboBox.h"
+#include "utl/UI/LayoutDialog.h"
+#include "utl/UI/ReportListControl.h"
 #include <vector>
 
 

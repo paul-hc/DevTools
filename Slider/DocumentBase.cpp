@@ -1,5 +1,5 @@
 
-#include "StdAfx.h"
+#include "stdafx.h"
 #include "DocumentBase.h"
 
 #ifdef _DEBUG

@@ -295,15 +295,8 @@ namespace utl
 #endif //_MSC_VER
 
 
-// forward declarations
-void AFXAPI AfxSetWindowText( HWND hWndCtrl, LPCTSTR lpszNew );		// <afxpriv.h>
-void AFXAPI AfxCancelModes( HWND hWndRcvr );						// <src/mfc/afximpl.h>
-BOOL AFXAPI AfxFullPath( _Pre_notnull_ _Post_z_ LPTSTR lpszPathOut, LPCTSTR lpszFileIn );		// <src/mfc/afximpl.h>
-
-
 #include "Compare_fwd.h"
 #include "StringBase.h"
-#include "StdColors.h"
 
 
 #endif // CommonDefs_h

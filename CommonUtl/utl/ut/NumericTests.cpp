@@ -3,7 +3,8 @@
 #include "ut/NumericTests.h"
 #include "StringUtilities.h"
 #include "Crc32.h"
-#include "ut/BaseImageTestCase.h"
+//#include "ut/BaseImageTestCase.h"
+#include "utl/AppTools.h"
 #include "utl/MemLeakCheck.h"
 
 #ifdef _DEBUG
@@ -423,16 +424,14 @@ void CNumericTests::TestCrc32( void )
 
 	ASSERT_EQUAL( 0xAD957AB0, utl::CCrc32::Instance().ComputeCrc32( L"abc" ) );		// wide string
 
-	TCHAR exePath[ MAX_PATH ];
-	::GetModuleFileName( AfxGetApp()->m_hInstance, exePath, COUNT_OF( exePath ) );
-	ASSERT( utl::CCrc32::Instance().ComputeFileCrc32( exePath ) != 0 );				// exe file CRC32
+	ASSERT( utl::CCrc32::Instance().ComputeFileCrc32( app::GetModuleFilePath() ) != 0 );				// exe file CRC32
 
-	const fs::CPath& imagesDirPath = CBaseImageTestCase::GetTestImagesDirPath();
+	const fs::CPath& imagesDirPath = ut::GetTestImagesDirPath();
 	if ( !imagesDirPath.IsEmpty() )
 	{
 		fs::CPath gifPath = imagesDirPath / fs::CPath( _T("Animated.gif") );
 		if ( gifPath.FileExist() )
-			ASSERT_EQUAL( 0xA524D308, utl::CCrc32::Instance().ComputeFileCrc32( gifPath.GetPtr() ) );		// gif file CRC32
+			ASSERT_EQUAL( 0xA524D308, utl::CCrc32::Instance().ComputeFileCrc32( gifPath ) );		// gif file CRC32
 	}
 }
 

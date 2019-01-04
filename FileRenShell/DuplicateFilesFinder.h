@@ -38,7 +38,7 @@ private:
 };
 
 
-#include "utl/ProgressDialog.h"
+#include "utl/UI/ProgressDialog.h"
 
 
 class CDuplicatesProgress : private fs::IEnumerator

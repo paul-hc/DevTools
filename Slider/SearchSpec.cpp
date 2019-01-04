@@ -6,9 +6,9 @@
 #include "resource.h"
 #include "utl/Serialization.h"
 #include "utl/SerializeStdTypes.h"
-#include "utl/ShellDialogs.h"
 #include "utl/StringUtilities.h"
-#include "utl/WicImage.h"
+#include "utl/UI/ShellDialogs.h"
+#include "utl/UI/WicImage.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -126,5 +126,5 @@ std::tstring CSearchSpec::FormatNumericFilePath( const TCHAR* pFullPath, int num
 {
 	fs::CPathParts parts( pFullPath );
 	parts.m_fname = str::Format( _T("%04d"), numSeq );
-	return parts.MakePath();
+	return parts.MakePath().Get();
 }

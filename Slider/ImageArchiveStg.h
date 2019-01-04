@@ -5,7 +5,7 @@
 #include "FileAttr.h"
 #include "utl/FlexPath.h"
 #include "utl/StructuredStorage.h"
-#include "utl/Thumbnailer_fwd.h"
+#include "utl/UI/Thumbnailer_fwd.h"
 #include <set>
 #include <hash_map>
 

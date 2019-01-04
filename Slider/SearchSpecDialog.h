@@ -3,8 +3,8 @@
 #pragma once
 
 #include "FileList.h"
-#include "utl/HistoryComboBox.h"
-#include "utl/ui_fwd.h"
+#include "utl/UI/HistoryComboBox.h"
+#include "utl/UI/ui_fwd.h"
 
 
 class CSearchSpecDialog : public CDialog

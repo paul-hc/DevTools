@@ -1,5 +1,5 @@
 
-#include "StdAfx.h"
+#include "stdafx.h"
 #include "FileList.h"
 #include "ImageArchiveStg.h"
 #include "ImageFileEnumerator.h"
@@ -13,8 +13,8 @@
 #include "utl/SerializeStdTypes.h"
 #include "utl/ScopedValue.h"
 #include "utl/StringUtilities.h"
-#include "utl/Utilities.h"
-#include "utl/WicImage.h"
+#include "utl/UI/Utilities.h"
+#include "utl/UI/WicImage.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

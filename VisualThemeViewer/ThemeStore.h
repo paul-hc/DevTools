@@ -6,7 +6,7 @@
 #include "utl/ContainerUtilities.h"
 #include "utl/EnumTags.h"
 #include "utl/Subject.h"
-#include "utl/ThemeItem.h"
+#include "utl/UI/ThemeItem.h"
 
 
 class CVisualTheme;

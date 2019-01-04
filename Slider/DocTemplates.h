@@ -2,8 +2,8 @@
 #define DocTemplates_h
 #pragma once
 
-#include "utl/AccelTable.h"
-#include "utl/FilterStore.h"
+#include "utl/UI/AccelTable.h"
+#include "utl/UI/FilterStore.h"
 
 
 class CAlbumDoc;

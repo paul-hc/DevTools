@@ -2,9 +2,9 @@
 #define Slider_h
 #pragma once
 
-#include "utl/BaseApp.h"
-#include "utl/ShellDialogs_fwd.h"
-#include "utl/UserReport.h"
+#include "utl/UI/BaseApp.h"
+#include "utl/UI/ShellDialogs_fwd.h"
+#include "utl/UI/UserReport.h"
 #include "Application_fwd.h"
 
 

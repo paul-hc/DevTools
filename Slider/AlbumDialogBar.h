@@ -2,7 +2,7 @@
 #define AlbumDialogBar_h
 #pragma once
 
-#include "utl/ui_fwd.h"
+#include "utl/UI/ui_fwd.h"
 
 
 class CAlbumImageView;

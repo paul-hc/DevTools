@@ -1,5 +1,5 @@
 
-#include "StdAfx.h"
+#include "stdafx.h"
 #include "AlbumSettingsDialog.h"
 #include "MainFrame.h"
 #include "ImageView.h"
@@ -8,12 +8,12 @@
 #include "Application.h"
 #include "resource.h"
 #include "utl/EnumTags.h"
-#include "utl/MenuUtilities.h"
 #include "utl/Path.h"
-#include "utl/Thumbnailer.h"
-#include "utl/ShellUtilities.h"
-#include "utl/UtilitiesEx.h"
-#include "utl/resource.h"
+#include "utl/UI/MenuUtilities.h"
+#include "utl/UI/Thumbnailer.h"
+#include "utl/UI/ShellUtilities.h"
+#include "utl/UI/UtilitiesEx.h"
+#include "utl/UI/resource.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

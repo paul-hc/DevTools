@@ -3,13 +3,13 @@
 #pragma once
 
 #include <vector>
-#include "utl/LayoutChildPropertySheet.h"
-#include "utl/LayoutPropertyPage.h"
-#include "utl/ReportListControl.h"
-#include "utl/SplitPushButton.h"
-#include "utl/SpinEdit.h"
-#include "utl/EnumSplitButton.h"
-#include "utl/ThemeStatic.h"
+#include "utl/UI/LayoutChildPropertySheet.h"
+#include "utl/UI/LayoutPropertyPage.h"
+#include "utl/UI/ReportListControl.h"
+#include "utl/UI/SplitPushButton.h"
+#include "utl/UI/SpinEdit.h"
+#include "utl/UI/EnumSplitButton.h"
+#include "utl/UI/ThemeStatic.h"
 
 
 enum ResizeStyle;

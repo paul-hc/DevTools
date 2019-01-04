@@ -2,15 +2,15 @@
 #define ImageDialog_h
 #pragma once
 
-#include "utl/DibSection.h"
-#include "utl/HistoryComboBox.h"
-#include "utl/ItemContentEdit.h"
-#include "utl/ItemContentHistoryCombo.h"
-#include "utl/LayoutDialog.h"
-#include "utl/LayoutChildPropertySheet.h"
-#include "utl/LayoutPropertyPage.h"
-#include "utl/MultiZone.h"
-#include "utl/SampleView.h"
+#include "utl/UI/DibSection.h"
+#include "utl/UI/HistoryComboBox.h"
+#include "utl/UI/ItemContentEdit.h"
+#include "utl/UI/ItemContentHistoryCombo.h"
+#include "utl/UI/LayoutDialog.h"
+#include "utl/UI/LayoutChildPropertySheet.h"
+#include "utl/UI/LayoutPropertyPage.h"
+#include "utl/UI/MultiZone.h"
+#include "utl/UI/SampleView.h"
 #include "ImageDialogUtils.h"
 
 

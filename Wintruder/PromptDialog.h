@@ -3,7 +3,7 @@
 #define PromptDialog_h
 #pragma once
 
-#include "utl/LayoutDialog.h"
+#include "utl/UI/LayoutDialog.h"
 
 
 class CPromptDialog : public CLayoutDialog

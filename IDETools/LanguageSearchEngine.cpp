@@ -74,7 +74,7 @@ namespace code
 	bool LanguageSearchEngine::isTokenMatch( const TCHAR* pString, int pos, const TCHAR* token,
 											 bool skipFwdWhiteSpace /*= true*/ ) const
 	{
-		ASSERT( pString != NULL && pos >= 0 && pos <= _tcslen( pString ) );
+		ASSERT( pString != NULL && pos >= 0 && pos <= str::Length( pString ) );
 		ASSERT( token != NULL );
 
 		if ( skipFwdWhiteSpace )
@@ -87,7 +87,7 @@ namespace code
 	bool LanguageSearchEngine::isTokenMatchBefore( const TCHAR* pString, int pos, const TCHAR* token,
 												   bool skipBkwdWhiteSpace /*= true*/ ) const
 	{
-		ASSERT( pString != NULL && pos >= 0 && pos <= _tcslen( pString ) );
+		ASSERT( pString != NULL && pos >= 0 && pos <= str::Length( pString ) );
 		ASSERT( token != NULL );
 
 		if ( skipBkwdWhiteSpace )
@@ -108,7 +108,7 @@ namespace code
 	*/
 	bool LanguageSearchEngine::isCommentStatement( int& outStatementEndPos, const TCHAR* pString, int pos ) const
 	{
-		ASSERT( pString != NULL && pos >= 0 && pos <= _tcslen( pString ) );
+		ASSERT( pString != NULL && pos >= 0 && pos <= str::Length( pString ) );
 
 		outStatementEndPos = -1;
 
@@ -182,7 +182,7 @@ namespace code
 
 	bool LanguageSearchEngine::isSingleLineCommentStatement( const TCHAR* pString, int pos ) const
 	{
-		ASSERT( pString != NULL && pos >= 0 && pos <= _tcslen( pString ) );
+		ASSERT( pString != NULL && pos >= 0 && pos <= str::Length( pString ) );
 
 		switch ( m_docLanguage )
 		{
@@ -214,7 +214,7 @@ namespace code
 	bool LanguageSearchEngine::isCCastStatement( int& outStatementEndPos, const TCHAR* pString, int pos ) const
 	{
 		ASSERT( m_docLanguage == DocLang_Cpp );
-		ASSERT( pString != NULL && pos >= 0 && pos <= _tcslen( pString ) );
+		ASSERT( pString != NULL && pos >= 0 && pos <= str::Length( pString ) );
 
 		outStatementEndPos = -1;
 
@@ -266,7 +266,7 @@ namespace code
 	bool LanguageSearchEngine::isUnicodePortableStringConstant( int& outStatementEndPos, const TCHAR* pString, int pos ) const
 	{
 		ASSERT( m_docLanguage == DocLang_Cpp );
-		ASSERT( pString != NULL && pos >= 0 && pos <= _tcslen( pString ) );
+		ASSERT( pString != NULL && pos >= 0 && pos <= str::Length( pString ) );
 
 		outStatementEndPos = -1;
 
@@ -302,7 +302,7 @@ namespace code
 	*/
 	bool LanguageSearchEngine::isProtectedLineTermination( int& outStatementEndPos, const TCHAR* pString, int pos ) const
 	{
-		ASSERT( pString != NULL && pos >= 0 && pos <= _tcslen( pString ) );
+		ASSERT( pString != NULL && pos >= 0 && pos <= str::Length( pString ) );
 
 		outStatementEndPos = -1;
 
@@ -331,7 +331,7 @@ namespace code
 													   const TCHAR* quoteSet /*= code::quoteChars*/ ) const
 	{
 		caseType;
-		ASSERT( pString != NULL && startPos >= 0 && startPos <= _tcslen( pString ) );
+		ASSERT( pString != NULL && startPos >= 0 && startPos <= str::Length( pString ) );
 
 		const TCHAR* pCursor = pString + startPos;
 
@@ -364,7 +364,7 @@ namespace code
 												  str::CaseType caseType /*= str::Case*/ ) const
 	{
 		caseType;
-		ASSERT( pString != NULL && startPos >= 0 && startPos <= _tcslen( pString ) );
+		ASSERT( pString != NULL && startPos >= 0 && startPos <= str::Length( pString ) );
 
 		const TCHAR* pCursor = pString + startPos;
 
@@ -395,7 +395,7 @@ namespace code
 
 	TokenRange LanguageSearchEngine::findNextNumber( const TCHAR* text, int startPos /*= 0*/ )
 	{
-		ASSERT( text != NULL && startPos >= 0 && startPos <= _tcslen( text ) );
+		ASSERT( text != NULL && startPos >= 0 && startPos <= str::Length( text ) );
 
 		int pos = startPos;
 
@@ -528,7 +528,7 @@ namespace code
 	*/
 	bool LanguageSearchEngine::findNextMatch( const TCHAR* pString, int startPos, IsMatchAtCursor& isMatchAtCursor ) const
 	{
-		ASSERT( pString != NULL && startPos >= 0 && startPos <= _tcslen( pString ) );
+		ASSERT( pString != NULL && startPos >= 0 && startPos <= str::Length( pString ) );
 
 		const TCHAR* pCursor = pString + startPos;
 

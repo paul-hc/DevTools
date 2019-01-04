@@ -1,11 +1,11 @@
 
-#include "StdAfx.h"
+#include "stdafx.h"
 #include "MoveFileDialog.h"
 #include "resource.h"
 #include "utl/FileSystem.h"
-#include "utl/ItemContentHistoryCombo.h"
-#include "utl/ShellUtilities.h"
-#include "utl/Utilities.h"
+#include "utl/UI/ItemContentHistoryCombo.h"
+#include "utl/UI/ShellUtilities.h"
+#include "utl/UI/Utilities.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

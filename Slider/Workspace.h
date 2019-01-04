@@ -5,7 +5,8 @@
 #include "Application_fwd.h"
 #include "ImageState.h"
 #include "WindowPlacement.h"
-#include "utl/Image_fwd.h"			// ui::AutoImageSize
+#include "utl/Path.h"		// ui::AutoImageSize
+#include "utl/UI/Image_fwd.h"		// ui::AutoImageSize
 
 
 class CMainFrame;
@@ -101,7 +102,7 @@ private:
 	void SetImageSelColor( COLORREF imageSelColor );
 private:
 	CMainFrame* m_pMainFrame;
-	std::tstring m_filePath;
+	fs::CPath m_filePath;
 	bool m_isLoaded;								// workspace loaded from an existing .slw file
 	bool m_delayFullScreen;							// intermediate mirror flag for m_isFullScreen
 	CImageState* m_pLoadingImageState;

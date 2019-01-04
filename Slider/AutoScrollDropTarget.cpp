@@ -1,5 +1,5 @@
 
-#include "StdAfx.h"
+#include "stdafx.h"
 #include "AutoScrollDropTarget.h"
 
 #ifdef _DEBUG

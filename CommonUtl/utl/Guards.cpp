@@ -1,7 +1,7 @@
 
 #include "stdafx.h"
 #include "Guards.h"
-#include "BaseApp.h"
+#include "AppTools.h"
 #include "Logger.h"
 #include "StringUtilities.h"
 
@@ -16,7 +16,7 @@ namespace utl
 
 	CSectionGuard::CSectionGuard( const std::tstring& sectionName, bool logging /*= false*/ )
 		: m_timer()
-		, m_pLogger( logging ? app::GetLoggerPtr() : NULL )
+		, m_pLogger( logging ? app::GetLogger() : NULL )
 		, m_sectionName( sectionName )
 	{
 	}
@@ -50,7 +50,7 @@ namespace utl
 		std::tstring message = str::Format( _T("(*) Slow section for '%s': it takes %s"), m_context.c_str(), m_timer.FormatElapsedDuration( 3 ).c_str() );
 		TRACE( _T(" %s\n"), message.c_str() );
 
-		if ( CLogger* pLogger = app::GetLoggerPtr() )
+		if ( CLogger* pLogger = app::GetLogger() )
 			pLogger->Log( message.c_str() );
 
 		m_context.clear();		// mark it as done

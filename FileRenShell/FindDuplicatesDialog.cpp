@@ -9,25 +9,25 @@
 #include "GeneralOptions.h"
 #include "Application.h"
 #include "resource.h"
-#include "utl/Clipboard.h"
-#include "utl/Color.h"
 #include "utl/ContainerUtilities.h"
 #include "utl/Crc32.h"
 #include "utl/Command.h"
-#include "utl/CheckStatePolicies.h"
 #include "utl/EnumTags.h"
 #include "utl/FileSystem.h"
 #include "utl/FmtUtils.h"
-#include "utl/ImageStore.h"
-#include "utl/ItemListDialog.h"
 #include "utl/LongestCommonSubsequence.h"
 #include "utl/RuntimeException.h"
-#include "utl/MenuUtilities.h"
 #include "utl/StringUtilities.h"
-#include "utl/UtilitiesEx.h"
-#include "utl/Thumbnailer.h"
 #include "utl/TimeUtils.h"
-#include "utl/resource.h"
+#include "utl/UI/Clipboard.h"
+#include "utl/UI/Color.h"
+#include "utl/UI/CheckStatePolicies.h"
+#include "utl/UI/ImageStore.h"
+#include "utl/UI/ItemListDialog.h"
+#include "utl/UI/MenuUtilities.h"
+#include "utl/UI/UtilitiesEx.h"
+#include "utl/UI/Thumbnailer.h"
+#include "utl/UI/resource.h"
 #include "resource.h"
 
 #ifdef _DEBUG
@@ -415,7 +415,7 @@ std::tstring CFindDuplicatesDialog::FormatReport( const CDupsOutcome& outcome ) 
 
 	reportMessage += str::Format( _T(". Elapsed %s."), outcome.m_timer.FormatElapsedDuration( 2 ).c_str() );
 
-	if ( CLogger* pLogger = app::GetLoggerPtr() )
+	if ( CLogger* pLogger = app::GetLogger() )
 		pLogger->LogString( str::Format( _T("Search for duplicates in {%s}  -  %s"), utl::MakeDisplayCodeList( m_srcPathItems, _T(", ") ).c_str(), reportMessage.c_str() ) );
 
 	return reportMessage;

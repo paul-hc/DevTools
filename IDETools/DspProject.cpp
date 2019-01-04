@@ -191,7 +191,7 @@ void DspProject::SetDspProjectFilePath( LPCTSTR dspProjectFilePath )
 	}
 	catch ( CException* exc )
 	{
-		app::TraceException( *exc );
+		app::TraceException( exc );
 		exc->Delete();
 	}
 }

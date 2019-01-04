@@ -2,7 +2,7 @@
 #define BaseFlagsCtrl_h
 #pragma once
 
-#include "utl/AccelTable.h"
+#include "utl/UI/AccelTable.h"
 #include "wnd/FlagStore.h"
 
 

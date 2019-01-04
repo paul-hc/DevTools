@@ -2,7 +2,7 @@
 #define EditCaptionPage_h
 #pragma once
 
-#include "utl/TextEdit.h"
+#include "utl/UI/TextEdit.h"
 #include "DetailBasePage.h"
 
 

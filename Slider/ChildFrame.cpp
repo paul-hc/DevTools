@@ -1,5 +1,5 @@
 
-#include "StdAfx.h"
+#include "stdafx.h"
 #include "ChildFrame.h"
 #include "Workspace.h"
 #include "DocTemplates.h"

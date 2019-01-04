@@ -1,0 +1,899 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd;cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="UI">
+      <UniqueIdentifier>{61186fd2-c4b4-47e0-a20b-730dd0c6e32e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="UI\Shell %28Explorer API%29">
+      <UniqueIdentifier>{b530b84d-3d32-4f43-a00b-3bf7ac6592a8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="UI\Drag and Drop %28OLE%29">
+      <UniqueIdentifier>{e524d267-e1cc-448d-b600-668002f0c086}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="UI\Imaging">
+      <UniqueIdentifier>{13069f16-0c88-4408-85f8-7d098b146615}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="UI\Layout">
+      <UniqueIdentifier>{ad125ca0-fe7d-4418-b9ee-313a62cd1873}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="UI\Controls">
+      <UniqueIdentifier>{f43f37a3-3d87-42ae-a95b-621bcf7c44bb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="UI\Vista MFC">
+      <UniqueIdentifier>{05b7717b-7ff4-4fa5-90dc-a661133d308d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="UnitTest">
+      <UniqueIdentifier>{024ac24f-2026-4af9-8be8-1b2e0e607b41}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="UI\Registry">
+      <UniqueIdentifier>{70ff721e-49ed-4872-908f-53ff515a7b1f}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="stdafx.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="AboutBox.h">
+      <Filter>UI</Filter>
+    </ClInclude>
+    <ClInclude Include="AccelTable.h">
+      <Filter>UI</Filter>
+    </ClInclude>
+    <ClInclude Include="BaseApp.h">
+      <Filter>UI</Filter>
+    </ClInclude>
+    <ClInclude Include="BaseApp.hxx">
+      <Filter>UI</Filter>
+    </ClInclude>
+    <ClInclude Include="BaseMainDialog.h">
+      <Filter>UI</Filter>
+    </ClInclude>
+    <ClInclude Include="CmdInfoStore.h">
+      <Filter>UI</Filter>
+    </ClInclude>
+    <ClInclude Include="CommonWinDefs.h">
+      <Filter>UI</Filter>
+    </ClInclude>
+    <ClInclude Include="DesktopDC.h">
+      <Filter>UI</Filter>
+    </ClInclude>
+    <ClInclude Include="Dialog_fwd.h">
+      <Filter>UI</Filter>
+    </ClInclude>
+    <ClInclude Include="GroupIcon.h">
+      <Filter>UI</Filter>
+    </ClInclude>
+    <ClInclude Include="ItemListDialog.h">
+      <Filter>UI</Filter>
+    </ClInclude>
+    <ClInclude Include="LogPalette.h">
+      <Filter>UI</Filter>
+    </ClInclude>
+    <ClInclude Include="MemoryDC.h">
+      <Filter>UI</Filter>
+    </ClInclude>
+    <ClInclude Include="MenuUtilities.h">
+      <Filter>UI</Filter>
+    </ClInclude>
+    <ClInclude Include="ResourceData.h">
+      <Filter>UI</Filter>
+    </ClInclude>
+    <ClInclude Include="ScopedGdi.h">
+      <Filter>UI</Filter>
+    </ClInclude>
+    <ClInclude Include="ThemeItem.h">
+      <Filter>UI</Filter>
+    </ClInclude>
+    <ClInclude Include="ToolStrip.h">
+      <Filter>UI</Filter>
+    </ClInclude>
+    <ClInclude Include="TooltipsHook.h">
+      <Filter>UI</Filter>
+    </ClInclude>
+    <ClInclude Include="Utilities.h">
+      <Filter>UI</Filter>
+    </ClInclude>
+    <ClInclude Include="UtilitiesEx.h">
+      <Filter>UI</Filter>
+    </ClInclude>
+    <ClInclude Include="VersionInfo.h">
+      <Filter>UI</Filter>
+    </ClInclude>
+    <ClInclude Include="VisualTheme.h">
+      <Filter>UI</Filter>
+    </ClInclude>
+    <ClInclude Include="VisualThemeFallback.h">
+      <Filter>UI</Filter>
+    </ClInclude>
+    <ClInclude Include="vsstyle.h">
+      <Filter>UI</Filter>
+    </ClInclude>
+    <ClInclude Include="WindowHook.h">
+      <Filter>UI</Filter>
+    </ClInclude>
+    <ClInclude Include="WindowTimer.h">
+      <Filter>UI</Filter>
+    </ClInclude>
+    <ClInclude Include="GpUtilities.h">
+      <Filter>UI</Filter>
+    </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>Resource Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MultiZone.h">
+      <Filter>UI</Filter>
+    </ClInclude>
+    <ClInclude Include="SampleView.h">
+      <Filter>UI</Filter>
+    </ClInclude>
+    <ClInclude Include="ScopedBitmapMemDC.h">
+      <Filter>UI</Filter>
+    </ClInclude>
+    <ClInclude Include="ui_fwd.h">
+      <Filter>UI</Filter>
+    </ClInclude>
+    <ClInclude Include="Clipboard.h">
+      <Filter>UI\Drag and Drop %28OLE%29</Filter>
+    </ClInclude>
+    <ClInclude Include="OleDataSource.h">
+      <Filter>UI\Drag and Drop %28OLE%29</Filter>
+    </ClInclude>
+    <ClInclude Include="OleDragDrop_fwd.h">
+      <Filter>UI\Drag and Drop %28OLE%29</Filter>
+    </ClInclude>
+    <ClInclude Include="OleDropSource.h">
+      <Filter>UI\Drag and Drop %28OLE%29</Filter>
+    </ClInclude>
+    <ClInclude Include="OleDropTarget.h">
+      <Filter>UI\Drag and Drop %28OLE%29</Filter>
+    </ClInclude>
+    <ClInclude Include="OleUtils.h">
+      <Filter>UI\Drag and Drop %28OLE%29</Filter>
+    </ClInclude>
+    <ClInclude Include="ShellDragImager.h">
+      <Filter>UI\Shell %28Explorer API%29</Filter>
+    </ClInclude>
+    <ClInclude Include="ShellDropTip.h">
+      <Filter>UI\Shell %28Explorer API%29</Filter>
+    </ClInclude>
+    <ClInclude Include="ShellFileDialog.h">
+      <Filter>UI\Shell %28Explorer API%29</Filter>
+    </ClInclude>
+    <ClInclude Include="WinExplorer.h">
+      <Filter>UI\Shell %28Explorer API%29</Filter>
+    </ClInclude>
+    <ClInclude Include="UserReport.h">
+      <Filter>UI</Filter>
+    </ClInclude>
+    <ClInclude Include="MfcUtilities.h">
+      <Filter>UI</Filter>
+    </ClInclude>
+    <ClInclude Include="ImagePathKey.h">
+      <Filter>UI\Imaging</Filter>
+    </ClInclude>
+    <ClInclude Include="DibDraw.h">
+      <Filter>UI\Imaging</Filter>
+    </ClInclude>
+    <ClInclude Include="DibPixels.h">
+      <Filter>UI\Imaging</Filter>
+    </ClInclude>
+    <ClInclude Include="DibSection.h">
+      <Filter>UI\Imaging</Filter>
+    </ClInclude>
+    <ClInclude Include="Icon.h">
+      <Filter>UI\Imaging</Filter>
+    </ClInclude>
+    <ClInclude Include="Image_fwd.h">
+      <Filter>UI\Imaging</Filter>
+    </ClInclude>
+    <ClInclude Include="ImageProxy.h">
+      <Filter>UI\Imaging</Filter>
+    </ClInclude>
+    <ClInclude Include="ImageStore.h">
+      <Filter>UI\Imaging</Filter>
+    </ClInclude>
+    <ClInclude Include="Imaging.h">
+      <Filter>UI\Imaging</Filter>
+    </ClInclude>
+    <ClInclude Include="ImagingDirect2D.h">
+      <Filter>UI\Imaging</Filter>
+    </ClInclude>
+    <ClInclude Include="ImagingGdiPlus.h">
+      <Filter>UI\Imaging</Filter>
+    </ClInclude>
+    <ClInclude Include="ImagingWic.h">
+      <Filter>UI\Imaging</Filter>
+    </ClInclude>
+    <ClInclude Include="ImagingWic_fwd.h">
+      <Filter>UI\Imaging</Filter>
+    </ClInclude>
+    <ClInclude Include="ut\BaseImageTestCase.h">
+      <Filter>UnitTest</Filter>
+    </ClInclude>
+    <ClInclude Include="ut\TestToolWnd.h">
+      <Filter>UnitTest</Filter>
+    </ClInclude>
+    <ClInclude Include="ut\WicImageTests.h">
+      <Filter>UnitTest</Filter>
+    </ClInclude>
+    <ClInclude Include="Thumbnailer.h">
+      <Filter>UI\Imaging</Filter>
+    </ClInclude>
+    <ClInclude Include="Thumbnailer_fwd.h">
+      <Filter>UI\Imaging</Filter>
+    </ClInclude>
+    <ClInclude Include="WicAnimatedImage.h">
+      <Filter>UI\Imaging</Filter>
+    </ClInclude>
+    <ClInclude Include="WicBitmap.h">
+      <Filter>UI\Imaging</Filter>
+    </ClInclude>
+    <ClInclude Include="WicDibSection.h">
+      <Filter>UI\Imaging</Filter>
+    </ClInclude>
+    <ClInclude Include="WicImage.h">
+      <Filter>UI\Imaging</Filter>
+    </ClInclude>
+    <ClInclude Include="WicImageCache.h">
+      <Filter>UI\Imaging</Filter>
+    </ClInclude>
+    <ClInclude Include="LayoutBasePropertySheet.h">
+      <Filter>UI\Layout</Filter>
+    </ClInclude>
+    <ClInclude Include="LayoutChildPropertySheet.h">
+      <Filter>UI\Layout</Filter>
+    </ClInclude>
+    <ClInclude Include="LayoutDialog.h">
+      <Filter>UI\Layout</Filter>
+    </ClInclude>
+    <ClInclude Include="LayoutEngine.h">
+      <Filter>UI\Layout</Filter>
+    </ClInclude>
+    <ClInclude Include="LayoutFormView.h">
+      <Filter>UI\Layout</Filter>
+    </ClInclude>
+    <ClInclude Include="LayoutMetrics.h">
+      <Filter>UI\Layout</Filter>
+    </ClInclude>
+    <ClInclude Include="LayoutPropertyPage.h">
+      <Filter>UI\Layout</Filter>
+    </ClInclude>
+    <ClInclude Include="LayoutPropertySheet.h">
+      <Filter>UI\Layout</Filter>
+    </ClInclude>
+    <ClInclude Include="ShellUtilities.h">
+      <Filter>UI\Shell %28Explorer API%29</Filter>
+    </ClInclude>
+    <ClInclude Include="AnimatedFrameComposer.h">
+      <Filter>UI\Imaging</Filter>
+    </ClInclude>
+    <ClInclude Include="BaseZoomView.h">
+      <Filter>UI</Filter>
+    </ClInclude>
+    <ClInclude Include="GdiPlus_fwd.h">
+      <Filter>UI</Filter>
+    </ClInclude>
+    <ClInclude Include="ImageZoomViewD2D.h">
+      <Filter>UI</Filter>
+    </ClInclude>
+    <ClInclude Include="IZoomBar.h">
+      <Filter>UI</Filter>
+    </ClInclude>
+    <ClInclude Include="Pixel.h">
+      <Filter>UI\Imaging</Filter>
+    </ClInclude>
+    <ClInclude Include="PostCall.h">
+      <Filter>UI</Filter>
+    </ClInclude>
+    <ClInclude Include="ut\ColorTests.h">
+      <Filter>UnitTest</Filter>
+    </ClInclude>
+    <ClInclude Include="ut\SerializationTests.h">
+      <Filter>UnitTest</Filter>
+    </ClInclude>
+    <ClInclude Include="ut\ShellFileSystemTests.h">
+      <Filter>UnitTest</Filter>
+    </ClInclude>
+    <ClInclude Include="StdManifest.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BaseDetailHostCtrl.h">
+      <Filter>UI\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="BaseDetailHostCtrl.hxx">
+      <Filter>UI\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="BaseSplitButton.h">
+      <Filter>UI\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="CtrlUiState.h">
+      <Filter>UI\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="DialogToolBar.h">
+      <Filter>UI\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="DragListCtrl.h">
+      <Filter>UI\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="EnumSplitButton.h">
+      <Filter>UI\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="HistoryComboBox.h">
+      <Filter>UI\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="IconButton.h">
+      <Filter>UI\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="InternalChange.h">
+      <Filter>UI\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="ItemContent.h">
+      <Filter>UI\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="ItemContentEdit.h">
+      <Filter>UI\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="ItemContentHistoryCombo.h">
+      <Filter>UI\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="PopupSplitButton.h">
+      <Filter>UI\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="NumericEdit.h">
+      <Filter>UI\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="ReportListControl.h">
+      <Filter>UI\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="SpinEdit.h">
+      <Filter>UI\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="SpinTargetButton.h">
+      <Filter>UI\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="SplitPushButton.h">
+      <Filter>UI\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="TextEdit.h">
+      <Filter>UI\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="TextEditor.h">
+      <Filter>UI\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="ThemeStatic.h">
+      <Filter>UI\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="TrackStatic.h">
+      <Filter>UI\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="TreeControl.h">
+      <Filter>UI\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="BaseFrameHostCtrl.h">
+      <Filter>UI\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="BaseFrameHostCtrl.hxx">
+      <Filter>UI\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="BufferedStatic.h">
+      <Filter>UI\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="CheckStatePolicies.h">
+      <Filter>UI\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="ClockStatic.h">
+      <Filter>UI\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="DateTimeControl.h">
+      <Filter>UI\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="ObjectCtrlBase.h">
+      <Filter>UI\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="PathItemListCtrl.h">
+      <Filter>UI\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="ReportListCustomDraw.h">
+      <Filter>UI\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="ToolbarStrip.h">
+      <Filter>UI\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="CmdIdStore.h">
+      <Filter>UI</Filter>
+    </ClInclude>
+    <ClInclude Include="CmdUpdate.h">
+      <Filter>UI</Filter>
+    </ClInclude>
+    <ClInclude Include="ContentFitBase.h">
+      <Filter>UI\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="CustomDrawImager.h">
+      <Filter>UI\Imaging</Filter>
+    </ClInclude>
+    <ClInclude Include="CustomDrawImager_fwd.h">
+      <Filter>UI\Imaging</Filter>
+    </ClInclude>
+    <ClInclude Include="DibDraw_fwd.h">
+      <Filter>UI\Imaging</Filter>
+    </ClInclude>
+    <ClInclude Include="IProgressCallback.h">
+      <Filter>UI</Filter>
+    </ClInclude>
+    <ClInclude Include="ProgressDialog.h">
+      <Filter>UI</Filter>
+    </ClInclude>
+    <ClInclude Include="PopupDlgBase.h">
+      <Filter>UI</Filter>
+    </ClInclude>
+    <ClInclude Include="ShellContextMenuHost.h">
+      <Filter>UI\Shell %28Explorer API%29</Filter>
+    </ClInclude>
+    <ClInclude Include="ShellTypes.h">
+      <Filter>UI\Shell %28Explorer API%29</Filter>
+    </ClInclude>
+    <ClInclude Include="SyncScrolling.h">
+      <Filter>UI</Filter>
+    </ClInclude>
+    <ClInclude Include="TaskDialog.h">
+      <Filter>UI</Filter>
+    </ClInclude>
+    <ClInclude Include="TextEffect.h">
+      <Filter>UI</Filter>
+    </ClInclude>
+    <ClInclude Include="ListLikeCtrlBase.h">
+      <Filter>UI\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="TreeControlCustomDraw.h">
+      <Filter>UI\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="ut\UtlUserInterfaceTests.h">
+      <Filter>UnitTest</Filter>
+    </ClInclude>
+    <ClInclude Include="StdColors.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="utl_ui.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Color.h">
+      <Filter>UI</Filter>
+    </ClInclude>
+    <ClInclude Include="FilterStore.h">
+      <Filter>UI\Shell %28Explorer API%29</Filter>
+    </ClInclude>
+    <ClInclude Include="ProcessUtils.h">
+      <Filter>UI</Filter>
+    </ClInclude>
+    <ClInclude Include="RegistryOptions.h">
+      <Filter>UI\Registry</Filter>
+    </ClInclude>
+    <ClInclude Include="RegistrySection.h">
+      <Filter>UI\Registry</Filter>
+    </ClInclude>
+    <ClInclude Include="ShellDialogs.h">
+      <Filter>UI\Shell %28Explorer API%29</Filter>
+    </ClInclude>
+    <ClInclude Include="ShellDialogs_fwd.h">
+      <Filter>UI\Shell %28Explorer API%29</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="stdafx.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="AboutBox.cpp">
+      <Filter>UI</Filter>
+    </ClCompile>
+    <ClCompile Include="AccelTable.cpp">
+      <Filter>UI</Filter>
+    </ClCompile>
+    <ClCompile Include="BaseMainDialog.cpp">
+      <Filter>UI</Filter>
+    </ClCompile>
+    <ClCompile Include="CmdInfoStore.cpp">
+      <Filter>UI</Filter>
+    </ClCompile>
+    <ClCompile Include="DesktopDC.cpp">
+      <Filter>UI</Filter>
+    </ClCompile>
+    <ClCompile Include="GroupIcon.cpp">
+      <Filter>UI</Filter>
+    </ClCompile>
+    <ClCompile Include="ItemListDialog.cpp">
+      <Filter>UI</Filter>
+    </ClCompile>
+    <ClCompile Include="LogPalette.cpp">
+      <Filter>UI</Filter>
+    </ClCompile>
+    <ClCompile Include="MemoryDC.cpp">
+      <Filter>UI</Filter>
+    </ClCompile>
+    <ClCompile Include="MenuUtilities.cpp">
+      <Filter>UI</Filter>
+    </ClCompile>
+    <ClCompile Include="ResourceData.cpp">
+      <Filter>UI</Filter>
+    </ClCompile>
+    <ClCompile Include="ThemeItem.cpp">
+      <Filter>UI</Filter>
+    </ClCompile>
+    <ClCompile Include="ToolStrip.cpp">
+      <Filter>UI</Filter>
+    </ClCompile>
+    <ClCompile Include="TooltipsHook.cpp">
+      <Filter>UI</Filter>
+    </ClCompile>
+    <ClCompile Include="Utilities.cpp">
+      <Filter>UI</Filter>
+    </ClCompile>
+    <ClCompile Include="UtilitiesEx.cpp">
+      <Filter>UI</Filter>
+    </ClCompile>
+    <ClCompile Include="VersionInfo.cpp">
+      <Filter>UI</Filter>
+    </ClCompile>
+    <ClCompile Include="VisualTheme.cpp">
+      <Filter>UI</Filter>
+    </ClCompile>
+    <ClCompile Include="VisualThemeFallback.cpp">
+      <Filter>UI</Filter>
+    </ClCompile>
+    <ClCompile Include="WindowHook.cpp">
+      <Filter>UI</Filter>
+    </ClCompile>
+    <ClCompile Include="WindowTimer.cpp">
+      <Filter>UI</Filter>
+    </ClCompile>
+    <ClCompile Include="MultiZone.cpp">
+      <Filter>UI</Filter>
+    </ClCompile>
+    <ClCompile Include="SampleView.cpp">
+      <Filter>UI</Filter>
+    </ClCompile>
+    <ClCompile Include="BaseApp.cpp">
+      <Filter>UI</Filter>
+    </ClCompile>
+    <ClCompile Include="Clipboard.cpp">
+      <Filter>UI\Drag and Drop %28OLE%29</Filter>
+    </ClCompile>
+    <ClCompile Include="OleDataSource.cpp">
+      <Filter>UI\Drag and Drop %28OLE%29</Filter>
+    </ClCompile>
+    <ClCompile Include="OleDragDrop_fwd.cpp">
+      <Filter>UI\Drag and Drop %28OLE%29</Filter>
+    </ClCompile>
+    <ClCompile Include="OleDropSource.cpp">
+      <Filter>UI\Drag and Drop %28OLE%29</Filter>
+    </ClCompile>
+    <ClCompile Include="OleDropTarget.cpp">
+      <Filter>UI\Drag and Drop %28OLE%29</Filter>
+    </ClCompile>
+    <ClCompile Include="OleUtils.cpp">
+      <Filter>UI\Drag and Drop %28OLE%29</Filter>
+    </ClCompile>
+    <ClCompile Include="ShellDragImager.cpp">
+      <Filter>UI\Shell %28Explorer API%29</Filter>
+    </ClCompile>
+    <ClCompile Include="ShellDropTip.cpp">
+      <Filter>UI\Shell %28Explorer API%29</Filter>
+    </ClCompile>
+    <ClCompile Include="ShellFileDialog.cpp">
+      <Filter>UI\Shell %28Explorer API%29</Filter>
+    </ClCompile>
+    <ClCompile Include="WinExplorer.cpp">
+      <Filter>UI\Shell %28Explorer API%29</Filter>
+    </ClCompile>
+    <ClCompile Include="UserReport.cpp">
+      <Filter>UI</Filter>
+    </ClCompile>
+    <ClCompile Include="MfcUtilities.cpp">
+      <Filter>UI</Filter>
+    </ClCompile>
+    <ClCompile Include="DibDraw.cpp">
+      <Filter>UI\Imaging</Filter>
+    </ClCompile>
+    <ClCompile Include="DibPixels.cpp">
+      <Filter>UI\Imaging</Filter>
+    </ClCompile>
+    <ClCompile Include="DibSection.cpp">
+      <Filter>UI\Imaging</Filter>
+    </ClCompile>
+    <ClCompile Include="Icon.cpp">
+      <Filter>UI\Imaging</Filter>
+    </ClCompile>
+    <ClCompile Include="Image_fwd.cpp">
+      <Filter>UI\Imaging</Filter>
+    </ClCompile>
+    <ClCompile Include="ImageProxy.cpp">
+      <Filter>UI\Imaging</Filter>
+    </ClCompile>
+    <ClCompile Include="ImageStore.cpp">
+      <Filter>UI\Imaging</Filter>
+    </ClCompile>
+    <ClCompile Include="Imaging.cpp">
+      <Filter>UI\Imaging</Filter>
+    </ClCompile>
+    <ClCompile Include="ImagingDirect2D.cpp">
+      <Filter>UI\Imaging</Filter>
+    </ClCompile>
+    <ClCompile Include="ImagingGdiPlus.cpp">
+      <Filter>UI\Imaging</Filter>
+    </ClCompile>
+    <ClCompile Include="ImagingWic.cpp">
+      <Filter>UI\Imaging</Filter>
+    </ClCompile>
+    <ClCompile Include="ut\BaseImageTestCase.cpp">
+      <Filter>UnitTest</Filter>
+    </ClCompile>
+    <ClCompile Include="ut\TestToolWnd.cpp">
+      <Filter>UnitTest</Filter>
+    </ClCompile>
+    <ClCompile Include="ut\WicImageTests.cpp">
+      <Filter>UnitTest</Filter>
+    </ClCompile>
+    <ClCompile Include="Thumbnailer.cpp">
+      <Filter>UI\Imaging</Filter>
+    </ClCompile>
+    <ClCompile Include="WicAnimatedImage.cpp">
+      <Filter>UI\Imaging</Filter>
+    </ClCompile>
+    <ClCompile Include="WicDibSection.cpp">
+      <Filter>UI\Imaging</Filter>
+    </ClCompile>
+    <ClCompile Include="WicImage.cpp">
+      <Filter>UI\Imaging</Filter>
+    </ClCompile>
+    <ClCompile Include="WicImageCache.cpp">
+      <Filter>UI\Imaging</Filter>
+    </ClCompile>
+    <ClCompile Include="LayoutBasePropertySheet.cpp">
+      <Filter>UI\Layout</Filter>
+    </ClCompile>
+    <ClCompile Include="LayoutChildPropertySheet.cpp">
+      <Filter>UI\Layout</Filter>
+    </ClCompile>
+    <ClCompile Include="LayoutDialog.cpp">
+      <Filter>UI\Layout</Filter>
+    </ClCompile>
+    <ClCompile Include="LayoutEngine.cpp">
+      <Filter>UI\Layout</Filter>
+    </ClCompile>
+    <ClCompile Include="LayoutFormView.cpp">
+      <Filter>UI\Layout</Filter>
+    </ClCompile>
+    <ClCompile Include="LayoutMetrics.cpp">
+      <Filter>UI\Layout</Filter>
+    </ClCompile>
+    <ClCompile Include="LayoutPropertyPage.cpp">
+      <Filter>UI\Layout</Filter>
+    </ClCompile>
+    <ClCompile Include="LayoutPropertySheet.cpp">
+      <Filter>UI\Layout</Filter>
+    </ClCompile>
+    <ClCompile Include="ShellUtilities.cpp">
+      <Filter>UI\Shell %28Explorer API%29</Filter>
+    </ClCompile>
+    <ClCompile Include="AnimatedFrameComposer.cpp">
+      <Filter>UI\Imaging</Filter>
+    </ClCompile>
+    <ClCompile Include="BaseZoomView.cpp">
+      <Filter>UI</Filter>
+    </ClCompile>
+    <ClCompile Include="ImageZoomViewD2D.cpp">
+      <Filter>UI</Filter>
+    </ClCompile>
+    <ClCompile Include="IZoomBar.cpp">
+      <Filter>UI</Filter>
+    </ClCompile>
+    <ClCompile Include="PostCall.cpp">
+      <Filter>UI</Filter>
+    </ClCompile>
+    <ClCompile Include="ut\ColorTests.cpp">
+      <Filter>UnitTest</Filter>
+    </ClCompile>
+    <ClCompile Include="ut\SerializationTests.cpp">
+      <Filter>UnitTest</Filter>
+    </ClCompile>
+    <ClCompile Include="ut\ShellFileSystemTests.cpp">
+      <Filter>UnitTest</Filter>
+    </ClCompile>
+    <ClCompile Include="BaseDetailHostCtrl.cpp">
+      <Filter>UI\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="BaseSplitButton.cpp">
+      <Filter>UI\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="CtrlUiState.cpp">
+      <Filter>UI\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="DialogToolBar.cpp">
+      <Filter>UI\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="DragListCtrl.cpp">
+      <Filter>UI\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="EnumSplitButton.cpp">
+      <Filter>UI\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="HistoryComboBox.cpp">
+      <Filter>UI\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="IconButton.cpp">
+      <Filter>UI\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="ItemContent.cpp">
+      <Filter>UI\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="ItemContentEdit.cpp">
+      <Filter>UI\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="ItemContentHistoryCombo.cpp">
+      <Filter>UI\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="PopupSplitButton.cpp">
+      <Filter>UI\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="ReportListControl.cpp">
+      <Filter>UI\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="SpinEdit.cpp">
+      <Filter>UI\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="SpinTargetButton.cpp">
+      <Filter>UI\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="SplitPushButton.cpp">
+      <Filter>UI\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="TextEdit.cpp">
+      <Filter>UI\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="TextEditor.cpp">
+      <Filter>UI\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="ThemeStatic.cpp">
+      <Filter>UI\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="TrackStatic.cpp">
+      <Filter>UI\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="TreeControl.cpp">
+      <Filter>UI\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="BufferedStatic.cpp">
+      <Filter>UI\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="CheckStatePolicies.cpp">
+      <Filter>UI\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="ClockStatic.cpp">
+      <Filter>UI\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="DateTimeControl.cpp">
+      <Filter>UI\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="ObjectCtrlBase.cpp">
+      <Filter>UI\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="PathItemListCtrl.cpp">
+      <Filter>UI\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="ReportListCustomDraw.cpp">
+      <Filter>UI\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="ToolbarStrip.cpp">
+      <Filter>UI\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="CmdIdStore.cpp">
+      <Filter>UI</Filter>
+    </ClCompile>
+    <ClCompile Include="CmdUpdate.cpp">
+      <Filter>UI</Filter>
+    </ClCompile>
+    <ClCompile Include="ContentFitBase.cpp">
+      <Filter>UI\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="CustomDrawImager.cpp">
+      <Filter>UI\Imaging</Filter>
+    </ClCompile>
+    <ClCompile Include="ProgressDialog.cpp">
+      <Filter>UI</Filter>
+    </ClCompile>
+    <ClCompile Include="PopupDlgBase.cpp">
+      <Filter>UI</Filter>
+    </ClCompile>
+    <ClCompile Include="ShellContextMenuHost.cpp">
+      <Filter>UI\Shell %28Explorer API%29</Filter>
+    </ClCompile>
+    <ClCompile Include="ShellTypes.cpp">
+      <Filter>UI\Shell %28Explorer API%29</Filter>
+    </ClCompile>
+    <ClCompile Include="SyncScrolling.cpp">
+      <Filter>UI</Filter>
+    </ClCompile>
+    <ClCompile Include="TaskDialog.cpp">
+      <Filter>UI</Filter>
+    </ClCompile>
+    <ClCompile Include="TextEffect.cpp">
+      <Filter>UI</Filter>
+    </ClCompile>
+    <ClCompile Include="ListLikeCtrlBase.cpp">
+      <Filter>UI\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="TreeControlCustomDraw.cpp">
+      <Filter>UI\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="Color.cpp">
+      <Filter>UI</Filter>
+    </ClCompile>
+    <ClCompile Include="FilterStore.cpp">
+      <Filter>UI\Shell %28Explorer API%29</Filter>
+    </ClCompile>
+    <ClCompile Include="ProcessUtils.cpp">
+      <Filter>UI</Filter>
+    </ClCompile>
+    <ClCompile Include="RegistryOptions.cpp">
+      <Filter>UI\Registry</Filter>
+    </ClCompile>
+    <ClCompile Include="RegistrySection.cpp">
+      <Filter>UI\Registry</Filter>
+    </ClCompile>
+    <ClCompile Include="ShellDialogs.cpp">
+      <Filter>UI\Shell %28Explorer API%29</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="utl_ui.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="res\StdStrip.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\StdStrip.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\ListStrip.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\ListStrip.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\Transparent.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="res\Scrollable.cur">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\ScrollDrag.cur">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\DragDrop-Copy.cur">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\DragDrop-Move.cur">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\DragDrop-None.cur">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\TrackScroll.cur">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\TrackZoom.cur">
+      <Filter>Resource Files</Filter>
+    </None>
+  </ItemGroup>
+</Project>

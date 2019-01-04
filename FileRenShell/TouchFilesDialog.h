@@ -4,8 +4,8 @@
 
 #include "utl/FileState.h"
 #include "utl/ISubject.h"
-#include "utl/ReportListControl.h"
-#include "utl/DateTimeControl.h"
+#include "utl/UI/ReportListControl.h"
+#include "utl/UI/DateTimeControl.h"
 #include "FileEditorBaseDialog.h"
 
 

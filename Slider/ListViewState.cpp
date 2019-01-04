@@ -1,11 +1,11 @@
 
-#include "StdAfx.h"
+#include "stdafx.h"
 #include "ListViewState.h"
 #include "utl/ContainerUtilities.h"
-#include "utl/ReportListControl.h"
 #include "utl/Serialization.h"
 #include "utl/SerializeStdTypes.h"
-#include "utl/Utilities.h"
+#include "utl/UI/ReportListControl.h"
+#include "utl/UI/Utilities.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

@@ -1,14 +1,14 @@
 
 #include "stdafx.h"
 #include "Logger.h"
-#include "Path.h"
+#include "FileSystem.h"
 #include "RuntimeException.h"
-#include "Utilities.h"
+#include "AppTools.h"
 #include <fstream>
 
 
-CLogger::CLogger( const TCHAR* pFnameFmt /*= NULL*/ )
-	: m_pFnameFmt( pFnameFmt )
+CLogger::CLogger( const TCHAR* pFmtFname /*= NULL*/ )
+	: m_pFmtFname( pFmtFname )
 	, m_enabled( true )
 	, m_prependTimestamp( true )
 	, m_logFileMaxSize( DefaultSize )
@@ -46,10 +46,10 @@ const fs::CPath& CLogger::GetLogFilePath( void ) const
 {
 	if ( m_logFilePath.IsEmpty() )
 	{
-		fs::CPathParts parts( ui::GetModuleFileName() );
+		fs::CPathParts parts( app::GetModuleFilePath().Get() );
 
-		if ( !str::IsEmpty( m_pFnameFmt ) )
-			parts.m_fname = str::Format( m_pFnameFmt, parts.m_fname.c_str() );
+		if ( !str::IsEmpty( m_pFmtFname ) )
+			parts.m_fname = str::Format( m_pFmtFname, parts.m_fname.c_str() );
 		parts.m_ext = _T(".log");
 
 		m_logFilePath = parts.MakePath();

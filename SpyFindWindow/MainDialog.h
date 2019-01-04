@@ -2,7 +2,7 @@
 #define MainDialog_h
 #pragma once
 
-#include "utl/BaseMainDialog.h"
+#include "utl/UI/BaseMainDialog.h"
 #include "WndSpot.h"
 #include "TrackWndPickerStatic.h"
 

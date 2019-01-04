@@ -2,7 +2,7 @@
 #define DetailBasePage_h
 #pragma once
 
-#include "utl/LayoutPropertyPage.h"
+#include "utl/UI/LayoutPropertyPage.h"
 #include "Observers.h"
 
 

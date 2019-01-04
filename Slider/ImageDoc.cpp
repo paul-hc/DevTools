@@ -1,11 +1,11 @@
 
-#include "StdAfx.h"
+#include "stdafx.h"
 #include "ImageDoc.h"
 #include "MainFrame.h"
 #include "ImageView.h"
 #include "Application.h"
-#include "utl/Utilities.h"
-#include "utl/WicImageCache.h"
+#include "utl/UI/Utilities.h"
+#include "utl/UI/WicImageCache.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

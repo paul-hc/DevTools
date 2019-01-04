@@ -1,12 +1,12 @@
 
-#include "StdAfx.h"
+#include "stdafx.h"
 #include "FileAttr.h"
 #include "Application_fwd.h"
 #include "utl/Serialization.h"
 #include "utl/SerializeStdTypes.h"
-#include "utl/MfcUtilities.h"
 #include "utl/StringUtilities.h"
-#include "utl/WicImageCache.h"
+#include "utl/UI/MfcUtilities.h"
+#include "utl/UI/WicImageCache.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

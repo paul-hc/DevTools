@@ -7,12 +7,12 @@
 #include "ModuleSession.h"
 #include "Application.h"
 #include "resource.h"
-#include "utl/Clipboard.h"
 #include "utl/EnumTags.h"
 #include "utl/FileSystem.h"
-#include "utl/MenuUtilities.h"
-#include "utl/ShellUtilities.h"
-#include "utl/UtilitiesEx.h"
+#include "utl/UI/Clipboard.h"
+#include "utl/UI/MenuUtilities.h"
+#include "utl/UI/ShellUtilities.h"
+#include "utl/UI/UtilitiesEx.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -357,9 +357,9 @@ std::tstring CFileLocatorDialog::getSelectedFoundFilesFlat( const std::vector< i
 {
 	std::tstring selFilesFlat;
 
-	for ( int i = 0; i < selFiles.size(); ++i )
+	for ( size_t i = 0; i != selFiles.size(); ++i )
 	{
-		if ( i > 0 )
+		if ( i != 0 )
 			selFilesFlat += sep;
 		selFilesFlat += m_foundFiles[ selFiles[ i ] ].first.Get();
 	}
@@ -372,7 +372,7 @@ int CFileLocatorDialog::storeSelection( void )
 
 	getSelectedFoundFiles( selFiles );
 	m_selectedFiles.clear();
-	for ( int i = 0; i < selFiles.size(); ++i )
+	for ( size_t i = 0; i != selFiles.size(); ++i )
 		m_selectedFiles.push_back( m_foundFiles[ selFiles[ i ] ] );
 	m_selectedFilePath = getSelectedFoundFilesFlat( selFiles );
 	return (int)m_selectedFiles.size();
@@ -612,11 +612,11 @@ void CFileLocatorDialog::CmViewFile( UINT cmdId )
 	std::vector< int > selFiles;
 
 	getSelectedFoundFiles( selFiles );
-	for ( int i = 0; i < selFiles.size(); ++i )
+	for ( size_t i = 0; i != selFiles.size(); ++i )
 	{
 		std::tstring fileFullPath = m_foundFiles[ selFiles[ i ] ].first.Get();
 
-		if ( i == 0 )
+		if ( 0 == i )
 			UpdateHistory( fileFullPath );
 
 		// Use text key (.txt) for text view, or the default for run

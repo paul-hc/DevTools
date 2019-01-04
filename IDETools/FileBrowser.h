@@ -91,7 +91,7 @@ private:
 };
 
 
-#include "utl/RegistryOptions.h"
+#include "utl/UI/RegistryOptions.h"
 
 
 struct CFolderOptions : public CRegistryOptions

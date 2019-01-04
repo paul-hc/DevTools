@@ -3,7 +3,7 @@
 #pragma once
 
 #include "WndSpot.h"
-#include "utl/WindowTimer.h"
+#include "utl/UI/WindowTimer.h"
 
 
 namespace opt { enum FrameStyle; }

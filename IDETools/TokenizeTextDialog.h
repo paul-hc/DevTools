@@ -2,9 +2,9 @@
 #define TokenizeTextDialog_h
 #pragma once
 
-#include "utl/IconButton.h"
-#include "utl/LayoutDialog.h"
-#include "utl/TextEdit.h"
+#include "utl/UI/IconButton.h"
+#include "utl/UI/LayoutDialog.h"
+#include "utl/UI/TextEdit.h"
 #include "LineSet.h"
 
 

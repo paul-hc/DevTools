@@ -91,6 +91,29 @@ namespace ut
 		return dirPath;
 	}
 
+	const fs::CPath& GetImageSourceDirPath( void )
+	{
+		static fs::CPath imagesDirPath = str::ExpandEnvironmentStrings( _T("%UTL_THUMB_SRC_IMAGE_PATH%") );
+		if ( !imagesDirPath.IsEmpty() && !fs::IsValidDirectory( imagesDirPath.GetPtr() ) )
+		{
+			TRACE( _T("\n # Cannot find unit test images dir path: %s #\n"), imagesDirPath.GetPtr() );
+			imagesDirPath.Clear();
+		}
+		return imagesDirPath;
+	}
+
+	const fs::CPath& GetTestImagesDirPath( void )
+	{
+		static fs::CPath dirPath = GetTestDataDirPath() / fs::CPath( _T("images") );
+		if ( !dirPath.IsEmpty() && !fs::IsValidDirectory( dirPath.GetPtr() ) )
+		{
+			TRACE( _T("\n * Cannot find the local test images dir path: %s\n"), dirPath.GetPtr() );
+			dirPath.Clear();
+		}
+		return dirPath;
+	}
+
+
 	const fs::CPath& GetTempUt_DirPath( void ) throws_( CRuntimeException )
 	{
 		static fs::CPath tempUtDirPath;

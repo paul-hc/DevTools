@@ -8,7 +8,7 @@
 #include "ImageDialog.h"
 #include "FileListDialog.h"
 #include "ImageTests.h"
-#include "utl/Utilities.h"
+#include "utl/UI/Utilities.h"
 #include "resource.h"
 
 #ifdef _DEBUG

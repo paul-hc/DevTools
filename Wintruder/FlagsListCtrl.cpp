@@ -4,13 +4,13 @@
 #include "Application.h"
 #include "AppService.h"
 #include "resource.h"
-#include "utl/Clipboard.h"
-#include "utl/CtrlUiState.h"
 #include "utl/ContainerUtilities.h"
-#include "utl/CheckStatePolicies.h"
-#include "utl/MenuUtilities.h"
 #include "utl/StringUtilities.h"
-#include "utl/UtilitiesEx.h"
+#include "utl/UI/Clipboard.h"
+#include "utl/UI/CtrlUiState.h"
+#include "utl/UI/CheckStatePolicies.h"
+#include "utl/UI/MenuUtilities.h"
+#include "utl/UI/UtilitiesEx.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
