@@ -133,10 +133,9 @@ namespace shell
 		ASSERT( !str::IsEmpty( pExt ) );
 
 		std::tstring className;
-		CRegKey key;
-
-		if ( ERROR_SUCCESS == key.Open( HKEY_CLASSES_ROOT, pExt, KEY_READ ) )
-			reg::QueryValue( className, key, NULL );
+		reg::CKey key;
+		if ( key.Open( HKEY_CLASSES_ROOT, pExt, KEY_READ ) )
+			className = key.ReadStringValue( NULL );			// default value for the key
 
 		return className;
 	}

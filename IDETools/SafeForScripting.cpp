@@ -14,7 +14,7 @@ namespace scripting
 {
 	// COM registration helpers implementation
 
-	static const TCHAR* categoryIds[] =
+	static const TCHAR* s_categoryIds[] =
 	{
 		_T("{40FC6ED5-2438-11CF-A3DB-080036F12502}"),
 		_T("{7DD95801-9882-11CF-9FA9-00AA006C42C4}"),
@@ -99,40 +99,37 @@ namespace scripting
 	}
 
 	// registers automation object identified by classId as safe for scripting.
-	void registerScriptSafeObject( const TCHAR* classId )
+	void registerScriptSafeObject( const TCHAR* pClassId )
 	{
-		ASSERT_PTR( classId );
+		ASSERT_PTR( pClassId );
 
-		CString implCategKeyPath;
-		implCategKeyPath.Format( _T("HKEY_CLASSES_ROOT\\CLSID\\%s\\Implemented Categories\\"), classId );
+		fs::CPath implCategKeyPath = fs::CPath( _T("CLSID") ) / pClassId / _T("Implemented Categories");
 
-		for ( unsigned int i = 0; i != COUNT_OF( categoryIds ); ++i )
+		for ( unsigned int i = 0; i != COUNT_OF( s_categoryIds ); ++i )
 		{
-			CString categoryKeyFullPath = implCategKeyPath + categoryIds[ i ];
-			reg::CKey categoryKey( categoryKeyFullPath, true );
+			fs::CPath categoryKeyPath = implCategKeyPath / s_categoryIds[ i ];
+			reg::CKey key;
 
-			if ( !categoryKey.IsValid() )
-				TRACE( _T("registerScriptSafeObject(): Invalid key: %s\n"), categoryKeyFullPath );
+			if ( !key.Create( HKEY_CLASSES_ROOT, categoryKeyPath ) )
+				TRACE( _T("registerScriptSafeObject(): Invalid key: %s\n"), categoryKeyPath.GetPtr() );
 		}
 	}
 
-	void unregisterClass( const TCHAR* classId )
+	void unregisterClass( const TCHAR* pClassId )
 	{
-		ASSERT( classId != NULL && classId[0] != _T('\0') );
+		ASSERT( !str::IsEmpty( pClassId ) );
 
-		CString classesKeyFullPath = _T("HKEY_CLASSES_ROOT\\CLSID");
-		reg::CKey classKey( classesKeyFullPath + _T("\\") + classId, false );
+		static const fs::CPath s_classesKeyFullPath = _T("CLSID");
+		reg::CKey key;
 
-		if ( classKey.IsValid() )
+		if ( key.Open( HKEY_CLASSES_ROOT, s_classesKeyFullPath / pClassId ) )
 		{
-			classKey.RemoveAll();
-			classKey.Close();
+			key.DeleteAll();
+			key.Close();
 
-			reg::CKey classesKey( classesKeyFullPath, false );
-
-			if ( classesKey.IsValid() )
-				if ( !classesKey.RemoveSubKey( classId ) )
-					TRACE( _T("unregisterClass(): cannot remove class key: %s\n"), classId );
+			if ( key.Open( HKEY_CLASSES_ROOT, s_classesKeyFullPath ) )
+				if ( !key.DeleteSubKey( pClassId ) )
+					TRACE( _T("unregisterClass(): cannot remove class key: %s\n"), pClassId );
 		}
 	}
 

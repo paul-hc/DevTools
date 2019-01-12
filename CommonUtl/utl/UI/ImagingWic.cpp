@@ -64,7 +64,7 @@ namespace wic
 		GUID format;
 		return
 			HR_OK( m_pDecoder->GetContainerFormat( &format ) ) &&
-			IsEqualGUID( containerFormatId, format ) != FALSE;
+			::IsEqualGUID( containerFormatId, format ) != FALSE;
 	}
 
 	CComPtr< IWICBitmapFrameDecode > CBitmapDecoder::GetFrameAt( UINT framePos ) const

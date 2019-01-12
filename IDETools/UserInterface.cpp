@@ -161,94 +161,84 @@ BOOL UserInterface::IsClipFormatNameAvailable( LPCTSTR formatName )
 
 // Registry implementation
 
-// Returns TRUE if the specified key path exist, otherwise FALSE.
-BOOL UserInterface::IsKeyPath( LPCTSTR keyFullPath )
+// returns TRUE if the specified key path exist, otherwise FALSE
+BOOL UserInterface::IsKeyPath( LPCTSTR pKeyFullPath )
 {
-	reg::CKey key( keyFullPath, false );
-
-	return key.IsValid();
+	reg::CKey key;
+	return reg::OpenKey( &key, pKeyFullPath, KEY_READ );
 }
 
-// Recursively creates the specified path, if not already created.
-// Returns the number of created keys.
-BOOL UserInterface::CreateKeyPath( LPCTSTR keyFullPath )
+// recursively creates the specified path, if not already created; returns TRUE if the key was created.
+BOOL UserInterface::CreateKeyPath( LPCTSTR pKeyFullPath )
 {
-	reg::CKey key( keyFullPath, true );
-
-	return key.IsValid();
+	reg::CKey key;
+	return reg::CreateKey( &key, pKeyFullPath );
 }
 
-BSTR UserInterface::RegReadString( LPCTSTR keyFullPath, LPCTSTR valueName, LPCTSTR defaultString )
+BSTR UserInterface::RegReadString( LPCTSTR pKeyFullPath, LPCTSTR pValueName, LPCTSTR pDefaultString )
 {
-	reg::CKey key( keyFullPath, false );
 	std::tstring stringValue;
 
-	if ( key.IsValid() )
-		stringValue = key.ReadString( valueName, defaultString );
+	reg::CKey key;
+	if ( reg::OpenKey( &key, pKeyFullPath, KEY_READ ) )
+		stringValue = key.ReadStringValue( pValueName, pDefaultString );
 
-	return str:: AllocSysString( stringValue );
+	return str::AllocSysString( stringValue );
 }
 
-long UserInterface::RegReadNumber( LPCTSTR keyFullPath, LPCTSTR valueName, long defaultNumber )
+long UserInterface::RegReadNumber( LPCTSTR pKeyFullPath, LPCTSTR pValueName, long defaultNumber )
 {
-	reg::CKey key( keyFullPath, false );
 	long numValue = 0;
-
-	if ( key.IsValid() )
-		numValue = key.ReadNumber( valueName, defaultNumber );
+	reg::CKey key;
+	if ( reg::OpenKey( &key, pKeyFullPath, KEY_READ ) )
+		numValue = key.ReadNumberValue( pValueName, defaultNumber );
 
 	return numValue;
 }
 
-BOOL UserInterface::RegWriteString( LPCTSTR keyFullPath, LPCTSTR valueName, LPCTSTR strValue )
+BOOL UserInterface::RegWriteString( LPCTSTR pKeyFullPath, LPCTSTR pValueName, LPCTSTR pStrValue )
 {
-	reg::CKey key( keyFullPath, true );
-
-	return key.WriteString( valueName, strValue );
+	reg::CKey key;
+	return
+		reg::CreateKey( &key, pKeyFullPath ) &&
+		key.WriteStringValue( pValueName, pStrValue );
 }
 
-BOOL UserInterface::RegWriteNumber( LPCTSTR keyFullPath, LPCTSTR valueName, long numValue )
+BOOL UserInterface::RegWriteNumber( LPCTSTR pKeyFullPath, LPCTSTR pValueName, long numValue )
 {
-	reg::CKey key( keyFullPath, true );
-
-	return key.WriteNumber( valueName, numValue );
+	reg::CKey key;
+	return
+		reg::CreateKey( &key, pKeyFullPath ) &&
+		key.WriteNumberValue( pValueName, numValue );
 }
 
 // Ensures that a registry string value exists. If doesn't exist, a value is created and assigned with default string.
 // Returns TRUE if non-existing value was created and assigned, otherwise FALSE.
-BOOL UserInterface::EnsureStringValue( LPCTSTR keyFullPath, LPCTSTR valueName, LPCTSTR defaultString )
+BOOL UserInterface::EnsureStringValue( LPCTSTR pKeyFullPath, LPCTSTR pValueName, LPCTSTR pDefaultString )
 {
-	reg::CKey key( keyFullPath, true );
-	static LPCTSTR testString = _T("_TestString_");
+	static std::tstring s_testString = _T("_TestString_");
+	reg::CKey key;
 
-	if ( !key.IsValid() )
-	{
-		CString msg;
-
-		msg.Format( IDS_ERR_CANNOT_CREATE_REGKEY, keyFullPath );
-		AfxMessageBox( msg );
-	}
-	else if ( key.ReadString( valueName, testString ) == testString )
-		return key.WriteString( valueName, defaultString );
+	if ( !reg::CreateKey( &key, pKeyFullPath ) )
+		AfxMessageBox( str::Format( _T("Cannot create registry key: %s"), pKeyFullPath ).c_str() );
+	else if ( key.ReadStringValue( pValueName, s_testString ) == s_testString )
+		return key.WriteStringValue( pValueName, pDefaultString );
 
 	return FALSE;
 }
 
 // Ensures that a registry numeric value exists. If doesn't exist, a value is created and assigned with default number.
 // Returns TRUE if non-existing value was created and assigned, otherwise FALSE.
-BOOL UserInterface::EnsureNumberValue( LPCTSTR keyFullPath, LPCTSTR valueName, long defaultNumber )
+BOOL UserInterface::EnsureNumberValue( LPCTSTR pKeyFullPath, LPCTSTR pValueName, long defaultNumber )
 {
-	reg::CKey key( keyFullPath, true );
-	static long testNumber = 1234321;
+	static long s_testNumber = 1234321;
+	reg::CKey key;
 
-	if ( !key.IsValid() )
-	{
-		CString msg;
-		msg.Format( IDS_ERR_CANNOT_CREATE_REGKEY, keyFullPath );
-		AfxMessageBox( msg );
-	}
-	else if ( key.ReadNumber( valueName, testNumber ) == testNumber )
-		return key.WriteNumber( valueName, defaultNumber );
+	if ( !reg::CreateKey( &key, pKeyFullPath ) )
+		AfxMessageBox( str::Format( _T("Cannot create registry key: %s"), pKeyFullPath ).c_str() );
+	else if ( key.ReadNumberValue( pValueName, s_testNumber ) == s_testNumber )
+		return key.WriteNumberValue( pValueName, defaultNumber );
+
 	return FALSE;
 }
 

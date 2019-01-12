@@ -1,8 +1,9 @@
 
+#include "utl/FileSystem.h"
+#include "utl/Logger.h"
+#include "utl/ResourcePool.h"
 #include "AboutBox.h"
 #include "ImageStore.h"
-#include "utl/ResourcePool.h"
-#include "utl/Logger.h"
 #include "CmdUpdate.h"
 #include "ToolStrip.h"
 #include "Utilities.h"
@@ -18,6 +19,7 @@
 template< typename BaseClass >
 CBaseApp< BaseClass >::CBaseApp( const TCHAR* pAppName /*= NULL*/ )
 	: BaseClass( pAppName )
+	, CAppTools()
 	, m_appRegistryKeyName( _T("Paul Cocoveanu") )
 {
 #if _MSC_VER >= 1800	// Visual C++ 2013
@@ -36,6 +38,7 @@ template< typename BaseClass >
 BOOL CBaseApp< BaseClass >::InitInstance( void )
 {
 	app::TraceOsVersion();
+	m_modulePath = fs::GetModuleFilePath( m_hInstance );
 
 	// InitCommonControlsEx() is required on Windows XP if an application manifest specifies use of ComCtl32.dll version 6 or later to enable visual styles.
 	// Otherwise, any window creation will fail.

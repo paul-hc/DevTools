@@ -452,14 +452,14 @@ BOOL CItemsListPage::PreTranslateMessage( MSG* pMsg )
 void CItemsListPage::OnLvnItemChanged_Items( NMHDR* pNmHdr, LRESULT* pResult )
 {
 	NMLISTVIEW* pNmList = (NMLISTVIEW*)pNmHdr;
+	*pResult = 0;
+
 	if ( CReportListControl::IsSelectionChangeNotify( pNmList, LVIS_SELECTED | LVIS_FOCUSED ) )
 	{
 		int selIndex = m_listCtrl.GetCurSel();
 		if ( selIndex != -1 )
 			m_pDialog->SetSelItemPos( selIndex );
 	}
-
-	*pResult = 0;
 }
 
 

@@ -10,6 +10,7 @@
 #include "resource.h"
 #include "utl/Path.h"
 #include "utl/Registry.h"
+#include "utl/StringUtilities.h"
 #include "utl/ScopedValue.h"
 #include "utl/UI/ImagingWic.h"
 #include "utl/UI/MenuUtilities.h"
@@ -216,22 +217,30 @@ namespace app
 	{
 		using namespace shell_reg;
 
+		static fs::CPath s_sliderKeyPath( _T("Directory\\shell\\SlideView") );
+		s_sliderKeyPath / _T("abc");
+		s_sliderKeyPath /= _T("xyz");
+
 		// process the 'Directory' file type handler
 		if ( doRegister )
 		{	// register Slider as view for sliding directory images
-			reg::CKey dirCommandKey( HKEY_CLASSES_ROOT, s_dirHandler[ ShellCommand ], true );
-			if ( dirCommandKey.IsValid() )
-				dirCommandKey.WriteString( NULL, str::Format( s_fmtValueCommand, app::GetModuleFilePath().GetPtr() ).c_str() );		// write the directory command value (such as "C:\My\Tools\mine\Slider.exe" "%L")
 
-			reg::CKey dirDdeExecKey( HKEY_CLASSES_ROOT, s_dirHandler[ ShellDdeExec ], true );
-			if ( dirDdeExecKey.IsValid() )
-				dirDdeExecKey.WriteString( NULL, s_fmtValueDdeExec[ 0 ] );		// write the directory ddeexec value (such as "[open("%L")]")
+			reg::CKey commandKey;
+			if ( commandKey.Create( HKEY_CLASSES_ROOT, s_dirHandler[ ShellCommand ] ) )
+			{
+				std::tstring cmdLine = arg::Enquote( app::GetModulePath() ) + _T(" ") + arg::Enquote( _T("%1") );
+				commandKey.WriteStringValue( NULL, cmdLine );						// write the directory command value (such as "C:\My\Tools\mine\Slider.exe" "%1")
+			}
+
+			reg::CKey ddeExecKey;
+			if ( ddeExecKey.Create( HKEY_CLASSES_ROOT, s_dirHandler[ ShellDdeExec ] ) )
+				ddeExecKey.WriteStringValue( NULL, s_fmtValueDdeExec[ 0 ] );		// write the directory ddeexec value (such as "[open("%L")]")
 		}
 		else
 		{	// remove Slider registration entries
-			reg::CKey dirShellKey( HKEY_CLASSES_ROOT, _T("Directory\\shell") );
-			if ( dirShellKey.IsValid() )
-				dirShellKey.RemoveSubKey( s_dirVerb_SlideView );
+			reg::CKey dirShellKey;
+			if ( dirShellKey.Open( HKEY_CLASSES_ROOT, _T("Directory\\shell") ) )
+				dirShellKey.DeleteSubKey( s_dirVerb_SlideView );
 		}
 	}
 
@@ -283,42 +292,41 @@ namespace app
 	{
 		using namespace shell_reg;
 
-		static const fs::CPath sliderExePath = app::GetModuleFilePath();
+		static const fs::CPath sliderExePath = app::GetModulePath();
 
 		// process known registered image files extensions
 		const std::vector< std::tstring >& imageExts = CImageDocTemplate::Instance()->GetAllExts();
 		for ( std::vector< std::tstring >::const_iterator itImageExt = imageExts.begin(); itImageExt != imageExts.end(); ++itImageExt )
 		{
-			reg::CKey extKey( HKEY_CLASSES_ROOT, itImageExt->c_str(), false );
-			if ( extKey.IsValid() )				// extension already registered?
+			reg::CKey extKey;
+			if ( extKey.Open( HKEY_CLASSES_ROOT, itImageExt->c_str() ) )				// extension already registered?
 			{
 				// query for default key value (shell handler name)
-				std::tstring shellHandlerName = extKey.ReadString( NULL );
+				std::tstring shellHandlerName = extKey.ReadStringValue( NULL );
 				if ( !shellHandlerName.empty() )
 				{
-					reg::CKey shellHandlerKey( HKEY_CLASSES_ROOT, shellHandlerName.c_str() );
-
-					if ( shellHandlerKey.IsValid() )
+					reg::CKey shellHandlerKey;
+					if ( shellHandlerKey.Open( HKEY_CLASSES_ROOT, shellHandlerName.c_str() ) )
 						if ( doRegister )
 						{	// valid indirect shell file handler, add command and ddeexec keys
 							for ( size_t k = 0; k != COUNT_OF( s_fmtShlHandlerCommand ); ++k )
 							{
-								reg::CKey commandKey( HKEY_CLASSES_ROOT, str::Format( s_fmtShlHandlerCommand[ k ], shellHandlerName.c_str() ).c_str(), true );
-								if ( commandKey.IsValid() )
-									commandKey.WriteString( NULL, str::Format( s_fmtValueCommand, sliderExePath.GetPtr() ).c_str() );		// write the shell command (like "C:\My\Tools\mine\Slider.exe" "%L")
+								reg::CKey commandKey;
+								if ( commandKey.Create( HKEY_CLASSES_ROOT, str::Format( s_fmtShlHandlerCommand[ k ], shellHandlerName.c_str() ).c_str() ) )
+									commandKey.WriteStringValue( NULL, arg::Enquote( sliderExePath ).c_str() );			// write the shell command (like "C:\My\Tools\mine\Slider.exe" "%1")
 
-								reg::CKey ddeExecKey( HKEY_CLASSES_ROOT, str::Format( s_fmtShlHandlerDdeExec[ k ], shellHandlerName.c_str() ).c_str(), true );
-								if ( ddeExecKey.IsValid() )
-									ddeExecKey.WriteString( NULL, s_fmtValueDdeExec[ k ] );		// write the shell ddeexec, like "[open("%L")]" or "[queue(\"%L\")]", etc
+								reg::CKey ddeExecKey;
+								if ( ddeExecKey.Create( HKEY_CLASSES_ROOT, str::Format( s_fmtShlHandlerDdeExec[ k ], shellHandlerName.c_str() ).c_str() ) )
+									ddeExecKey.WriteStringValue( NULL, s_fmtValueDdeExec[ k ] );						// write the shell ddeexec, like "[open("%1")]" or "[queue(\"%1\")]", etc
 							}
 						}
 						else
 						{	// remove slider entries for shell
-							reg::CKey shellKey( HKEY_CLASSES_ROOT, str::Format( _T("%s\\shell"), shellHandlerName.c_str() ).c_str() );
-							if ( shellKey.IsValid() )
+							reg::CKey shellKey;
+							if ( shellKey.Open( HKEY_CLASSES_ROOT, str::Format( _T("%s\\shell"), shellHandlerName.c_str() ).c_str() ) )
 							{
-								shellKey.RemoveSubKey( s_imgVerb_OpenWithSlider );
-								shellKey.RemoveSubKey( s_imgVerb_QueueInSlider );
+								shellKey.DeleteSubKey( s_imgVerb_OpenWithSlider, Deep );
+								shellKey.DeleteSubKey( s_imgVerb_QueueInSlider, Deep );
 							}
 						}
 				}

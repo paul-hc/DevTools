@@ -12,8 +12,8 @@ public:
 
 	void InitFromIde( void );			// for the app singleton
 
-	void Load( const TCHAR section[] );
-	void Save( const TCHAR section[] ) const;
+	void Load( const fs::CPath& section );
+	void Save( const fs::CPath& section ) const;
 
 	std::tstring FormatLines( const TCHAR lineSep[] = s_lineSep ) const;
 	bool ParseLines( const std::tstring& linesSpec, const TCHAR lineSep[] = s_lineSep );

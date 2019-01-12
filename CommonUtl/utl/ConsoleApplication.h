@@ -22,8 +22,8 @@ public:
 	virtual int ReportException( const std::exception& exc );
 	virtual int ReportException( const CException* pExc );
 private:
-	CLogger m_logger;
 	utl::CResourcePool m_resourcePool;
+	std::auto_ptr< CLogger > m_pLogger;
 };
 
 

@@ -2,18 +2,16 @@
 #define AppTools_h
 #pragma once
 
+#include "Path.h"
+
 
 class CEnumTags;
 class CLogger;
-namespace fs { class CPath; }
 namespace utl { class CResourcePool; }
 
 
 namespace app
 {
-	fs::CPath GetModuleFilePath( HINSTANCE hInstance = NULL );		// AfxGetApp()->m_hInstance
-
-
 	void TraceException( const std::exception& exc );
 	void TraceException( const CException* pExc );
 
@@ -41,12 +39,17 @@ namespace app
 //
 abstract class CAppTools
 	: public app::IAppTools
+	, private utl::noncopyable
 {
 protected:
 	CAppTools( void );
 	~CAppTools();
 public:
 	static CAppTools* Instance( void ) { ASSERT_PTR( s_pAppTools ); return s_pAppTools; }
+
+	const fs::CPath& GetModulePath( void ) const { return m_modulePath; }
+protected:
+	fs::CPath m_modulePath;
 private:
 	static CAppTools* s_pAppTools;
 };
@@ -54,13 +57,14 @@ private:
 
 namespace app
 {
+	inline const fs::CPath& GetModulePath( void ) { return CAppTools::Instance()->GetModulePath(); }
+	inline CLogger* GetLogger( void ) { return &CAppTools::Instance()->GetLogger(); }
+	inline utl::CResourcePool& GetSharedResources( void ) { return CAppTools::Instance()->GetSharedResources(); }
+
 	inline bool BeepSignal( app::MsgType msgType = app::Info ) { return CAppTools::Instance()->BeepSignal( msgType ); }
 	inline bool ReportError( const std::tstring& message, app::MsgType msgType = app::Error ) { return CAppTools::Instance()->ReportError( message, msgType ); }
 	inline int ReportException( const std::exception& exc ) { return CAppTools::Instance()->ReportException( exc ); }
 	inline int ReportException( const CException* pExc ) { return CAppTools::Instance()->ReportException( pExc ); }
-
-	inline CLogger* GetLogger( void ) { return &CAppTools::Instance()->GetLogger(); }
-	inline utl::CResourcePool& GetSharedResources( void ) { return CAppTools::Instance()->GetSharedResources(); }
 }
 
 

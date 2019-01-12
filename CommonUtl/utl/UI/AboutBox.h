@@ -2,6 +2,8 @@
 #define AboutBox_h
 #pragma once
 
+#include "utl/MultiThreading.h"
+#include "utl/Path.h"
 #include "LayoutDialog.h"
 
 
@@ -17,11 +19,14 @@ public:
 	CAboutBox( CWnd* pParent );
 	virtual ~CAboutBox();
 private:
+	const fs::CPath* GetSelPath( void ) const;
 	void SetupBuildInfoList( void );
 public:
 	static UINT m_appIconId;
 private:
-	std::tstring m_executablePath;
+	mt::CScopedInitializeCom m_scopedCom;		// enable clipboard
+	fs::CPath m_modulePath;
+	fs::CPath m_exePath;
 
 	// enum { IDD = IDD_ABOUT_BOX };
 	CStatic m_appIconStatic;
@@ -32,7 +37,9 @@ private:
 protected:
 	virtual void DoDataExchange( CDataExchange* pDX );
 protected:
-	afx_msg void OnExploreExecutable( void );
+	afx_msg void OnLvnItemChanged_ListItems( NMHDR* pNmHdr, LRESULT* pResult );
+	afx_msg void OnExploreModule( void );
+	afx_msg void OnUpdateExploreModule( CCmdUI* pCmdUI );
 
 	DECLARE_MESSAGE_MAP()
 };

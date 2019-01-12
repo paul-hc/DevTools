@@ -9,7 +9,7 @@ namespace shell_reg
 
 	enum { ShellCommand, ShellDdeExec, ShellCmdCount = 2 };			// count of shell commands associated to any image extension (SLIDER_MENU_NAME_...)
 
-	static const TCHAR s_fmtValueCommand[] = _T("\"%s\"");
+//	static const TCHAR s_fmtValueCommand[] = _T("\"%s\"");
 
 #define DIR_VERB_SLIDE_VIEW _T("Slide &View")
 
@@ -29,7 +29,7 @@ namespace shell_reg
 #define IMG_VERB_QUEUE_IN_SLIDER  _T("Queue in &Slider")
 
 	// image verbs
-	static const TCHAR* s_fmtValueDdeExec[ ShellCmdCount ] = { _T("[open(\"%L\")]"), _T("[queue(\"%L\")]") };
+	static const TCHAR* s_fmtValueDdeExec[ ShellCmdCount ] = { _T("[open(\"%1\")]"), _T("[queue(\"%1\")]") };
 
 	static const TCHAR s_imgVerb_OpenWithSlider[] = IMG_VERB_OPEN_WITH_SLIDER;
 	static const TCHAR s_imgVerb_QueueInSlider[] = IMG_VERB_QUEUE_IN_SLIDER;

@@ -88,15 +88,16 @@ bool CWkspLoadDialog::loadExistingProjects( void )
 	//	HKEY_CURRENT_USER\Software\RegistryKey\AppName\section\Project1
 	reg::CKey projectsKey( AfxGetApp()->GetSectionKey( m_section ) );
 
-	if ( !projectsKey.IsValid() )
+	if ( !projectsKey.IsOpen() )
 		return false;
 
-	reg::CKeyIterator itProj( &projectsKey );
+	std::vector< std::tstring > projects;
+	projectsKey.QuerySubKeyNames( projects );
 
-	for ( ; itProj.IsValid(); ++itProj )
-		m_rWkspProfile.AddProjectName( itProj.GetName() );
+	for ( std::vector< std::tstring >::const_iterator itProject = projects.begin(); itProject != projects.end(); ++itProject )
+		m_rWkspProfile.AddProjectName( itProject->c_str() );
 
-	return itProj.GetCount() > 0;
+	return !projects.empty();
 }
 
 void CWkspLoadDialog::updateFileContents( void )
@@ -104,18 +105,19 @@ void CWkspLoadDialog::updateFileContents( void )
 	m_folderItem.Clear();
 	if ( readProjectName() )
 	{
-		reg::CKey keyWorkspaces( AfxGetApp()->GetSectionKey( m_section ) );
-		if ( keyWorkspaces.IsValid() && keyWorkspaces.HasSubKey( m_currProjectName ) )
-		{
-			reg::CKey keyCurrProject = keyWorkspaces.OpenSubKey( m_currProjectName, false );
-			reg::CKey::CInfo keyInfo( keyCurrProject.Get() );
-			reg::CValue value;
-			TCHAR buffer[ MAX_PATH ];
+		reg::CKey workspacesKey( AfxGetApp()->GetSectionKey( m_section ) );
 
-			value.AttachBuffer( (BYTE*)buffer, sizeof( buffer ) );
-			for ( unsigned int i = 0; i != keyInfo.m_valueCount; ++i )
-				if ( keyCurrProject.GetValue( value, m_rWkspProfile.getFileEntryName( i ) ) )
-					m_folderItem.AddFileItem( NULL, value.GetString() );
+		if ( workspacesKey.IsOpen() )
+		{
+			reg::CKey projectKey;
+			if ( projectKey.Open( workspacesKey.Get(), m_currProjectName.GetString(), KEY_READ ) )
+			{
+				std::vector< std::tstring > valueNames;
+				projectKey.QueryValueNames( valueNames );
+
+				for ( std::vector< std::tstring >::const_iterator itValueName = valueNames.begin(); itValueName != valueNames.end(); ++itValueName )
+					m_folderItem.AddFileItem( NULL, projectKey.ReadStringValue( itValueName->c_str() ) );		// was m_rWkspProfile.getFileEntryName( i )
+			}
 		}
 	}
 

@@ -46,7 +46,7 @@ const fs::CPath& CLogger::GetLogFilePath( void ) const
 {
 	if ( m_logFilePath.IsEmpty() )
 	{
-		fs::CPathParts parts( app::GetModuleFilePath().Get() );
+		fs::CPathParts parts( app::GetModulePath().Get() );
 
 		if ( !str::IsEmpty( m_pFmtFname ) )
 			parts.m_fname = str::Format( m_pFmtFname, parts.m_fname.c_str() );

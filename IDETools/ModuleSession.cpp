@@ -109,14 +109,17 @@ void CModuleSession::LoadFromRegistry( void )
 	m_additionalAssocFolders = (LPCTSTR)pApp->GetProfileString( reg::section_settings_Additional, reg::entry_additionalAssocFolders, m_additionalAssocFolders.c_str() );
 
 	{
-		reg::CKey key( HKEY_CURRENT_USER, _T("Software\\Microsoft\\DevStudio\\6.0\\Text Editor\\Tabs/Language Settings\\C/C++") );
-
-		m_vsTabSizeCpp = (int)key.ReadNumber( _T("TabSize"), m_vsTabSizeCpp );
-		m_vsKeepTabsCpp = key.ReadNumber( _T("InsertSpaces"), m_vsKeepTabsCpp ) == 0L;
+		reg::CKey key;
+		if ( key.Open( HKEY_CURRENT_USER, _T("Software\\Microsoft\\DevStudio\\6.0\\Text Editor\\Tabs/Language Settings\\C/C++"), KEY_READ ) )
+		{
+			m_vsTabSizeCpp = key.ReadNumberValue< int >( _T("TabSize"), m_vsTabSizeCpp );
+			m_vsKeepTabsCpp = ( 0 == key.ReadNumberValue< int >( _T("InsertSpaces"), m_vsKeepTabsCpp ) );
+		}
 	}
 	{
-		reg::CKey key( HKEY_CURRENT_USER, _T("Software\\Microsoft\\DevStudio\\6.0\\General") );
-		m_vsUseStandardWindowsMenu = key.ReadNumber( _T("TraditionalMenu"), m_vsUseStandardWindowsMenu ) != 0L;
+		reg::CKey key;
+		if ( key.Open( HKEY_CURRENT_USER, _T("Software\\Microsoft\\DevStudio\\6.0\\General"), KEY_READ ) )
+			m_vsUseStandardWindowsMenu = key.ReadNumberValue< int >( _T("TraditionalMenu"), m_vsUseStandardWindowsMenu ) != 0;
 	}
 }
 

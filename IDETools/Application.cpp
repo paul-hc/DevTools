@@ -115,7 +115,7 @@ namespace app
 		static fs::CPath configDirPath;
 		if ( configDirPath.IsEmpty() )
 		{
-			fs::CPath exeDirPath = app::GetModuleFilePath().GetParentPath();
+			fs::CPath exeDirPath = app::GetModulePath().GetParentPath();
 
 			configDirPath = exeDirPath / fs::CPath( _T("mine\\config") );
 

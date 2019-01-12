@@ -14,6 +14,7 @@ namespace fs
 	bool IsProtectedFile( const TCHAR* pFilePath );
 
 
+	fs::CPath GetModuleFilePath( HINSTANCE hInstance );		// pass AfxGetApp()->m_hInstance in GUI apps, or NULL for the .exe
 	fs::CPath GetTempDirPath( void );
 
 

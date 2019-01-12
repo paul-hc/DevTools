@@ -14,7 +14,7 @@
 
 namespace reg
 {
-	const std::tstring section = _T("Settings\\Directories");
+	const fs::CPath section = _T("Settings\\Directories");
 	const TCHAR entry_currSetPos[] = _T("currSetPos");
 }
 
@@ -158,16 +158,20 @@ void CIncludeDirectories::Load( void )
 {
 	CWinApp* pApp = AfxGetApp();
 
+	reg::CKey sectionKey( pApp->GetSectionKey( reg::section.GetPtr() ) );
+
 	std::vector< std::tstring > subKeyNames;
-	reg::QuerySubKeyNames( subKeyNames, pApp->GetSectionKey( reg::section.c_str() ) );
+	sectionKey.QuerySubKeyNames( subKeyNames );
+
 	if ( !subKeyNames.empty() )
 	{
 		Clear();
+
 		for ( std::vector< std::tstring >::const_iterator itSubKeyName = subKeyNames.begin(); itSubKeyName != subKeyNames.end(); ++itSubKeyName )
-			Add( *itSubKeyName )->Load( ( reg::section + _T('\\') + *itSubKeyName ).c_str() );
+			Add( *itSubKeyName )->Load( reg::section / *itSubKeyName );
 	}
 
-	m_currSetPos = pApp->GetProfileInt( reg::section.c_str(), reg::entry_currSetPos, static_cast< int >( m_currSetPos ) );
+	m_currSetPos = pApp->GetProfileInt( reg::section.GetPtr(), reg::entry_currSetPos, static_cast< int >( m_currSetPos ) );
 	m_currSetPos = std::min( m_currSetPos, m_includePaths.size() - 1 );
 
 	m_searchSpecs.clear();
@@ -178,16 +182,17 @@ void CIncludeDirectories::Save( void ) const
 	CWinApp* pApp = AfxGetApp();
 
 	// delete keys no longer used
-	reg::CKey key( pApp->GetSectionKey( reg::section.c_str() ) );
+	reg::CKey key( pApp->GetSectionKey( reg::section.GetPtr() ) );
+
 	std::vector< std::tstring > subKeyNames;
-	reg::QuerySubKeyNames( subKeyNames, key );
+	key.QuerySubKeyNames( subKeyNames );
 
 	for ( std::vector< std::tstring >::const_iterator itSubKeyName = subKeyNames.begin(); itSubKeyName != subKeyNames.end(); ++itSubKeyName )
 		if ( NULL == utl::FindValue( m_includePaths, *itSubKeyName ) )
-			key.RemoveSubKey( itSubKeyName->c_str() );
+			key.DeleteSubKey( itSubKeyName->c_str() );
 
 	for ( utl::vector_map< std::tstring, CIncludePaths* >::const_iterator itIncludePath = m_includePaths.begin(); itIncludePath != m_includePaths.end(); ++itIncludePath )
-		itIncludePath->second->Save( ( reg::section + _T('\\') + itIncludePath->first ).c_str() );
+		itIncludePath->second->Save( reg::section / itIncludePath->first );
 
-	pApp->WriteProfileInt( reg::section.c_str(), reg::entry_currSetPos, static_cast< int >( m_currSetPos ) );
+	pApp->WriteProfileInt( reg::section.GetPtr(), reg::entry_currSetPos, static_cast< int >( m_currSetPos ) );
 }

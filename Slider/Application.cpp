@@ -314,7 +314,7 @@ BOOL CApplication::InitInstance( void )
 
 	ASSERT_NULL( m_pDocManager );
 	m_pDocManager = new app::CDocManager;	// register document templates
-
+//ASSERT(0);
 	EnableShellOpen();						// enable DDE Execute open
 	RegisterShellFileTypes( TRUE );			// register album extensions for Album.Document
 
@@ -351,6 +351,9 @@ BOOL CApplication::InitInstance( void )
 			return FALSE;
 
 	// the main window has been initialized, so show and update it
+	if ( -1 == m_nCmdShow )				// PHC 2019-01: in case we no longer use WM_DDE_EXECUTE command
+		m_nCmdShow = SW_SHOWNORMAL;		// make the main frame visible
+
 	m_pMainFrame->ShowWindow( m_nCmdShow );
 	m_pMainFrame->UpdateWindow();
 

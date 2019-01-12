@@ -20,7 +20,9 @@ class CImageStore;
 
 
 template< typename BaseClass = CWinApp >		// could use CWinAppEx base for new MFC app support (ribbons, etc)
-class CBaseApp : public BaseClass, public CAppTools
+class CBaseApp
+	: public BaseClass
+	, public CAppTools
 {
 protected:
 	CBaseApp( const TCHAR* pAppName = NULL );

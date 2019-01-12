@@ -3,201 +3,241 @@
 #pragma once
 
 #include <atlbase.h>
+#include "Path.h"
 
 
 namespace reg
 {
-	// CRegKey (ATL class) helpers
-
-	bool QueryValue( std::tstring& rValue, const CRegKey& key, const TCHAR* pValueName );
-}
+	class CKey;
 
 
-namespace reg
-{
-	// obsolete stuff: should be based on using CRegKey ATL class
-
-	enum SeekBound { SB_First, SB_Last };
-
-
-	struct CValue;
+	bool OpenKey( CKey* pKey, const TCHAR* pKeyFullPath, REGSAM samDesired = KEY_READ | KEY_WRITE );
+	bool CreateKey( CKey* pKey, const TCHAR* pKeyFullPath );
 
 
 	class CKey : private utl::noncopyable
 	{
 	public:
-		CKey( HKEY hKey = NULL ) : m_hKey( hKey ) {}
-		CKey( HKEY hParentKey, const TCHAR* pKeyName, bool forceCreate = false );
-		CKey( const TCHAR* pKeyFullPath, bool forceCreate = false ) : m_hKey( CKey::OpenKeyFullPath( pKeyFullPath, forceCreate ) ) {}
-		CKey( const CKey& src ) : m_hKey( ( (CKey&)src ).Detach() ) {}
+		explicit CKey( HKEY hKey = NULL ) : m_key( hKey ) {}
+		CKey( CKey& rSrcMove ) : m_key( rSrcMove.m_key ) {}								// move constructor
 		~CKey() { Close(); }
 
-		static HKEY ExtractRootKey( std::tstring& rSubKeysPath, const std::tstring& srcKeyPath );
-		static HKEY OpenKeySubPath( HKEY hParentKey, const TCHAR* pSubKeyPath, bool forceCreate = false );
-		static HKEY OpenKeyFullPath( const TCHAR* pKeyFullPath, bool forceCreate = false );
+		CKey& operator=( CKey& rSrcMove ) { m_key = rSrcMove.m_key; return *this; }		// move assignment
 
-		HKEY Get( void ) const { return m_hKey; }
+		bool Open( HKEY hParentKey, const TCHAR* pSubKeyPath, REGSAM samDesired = KEY_READ | KEY_WRITE ) throw()
+		{
+			return ERROR_SUCCESS == m_key.Open( hParentKey, pSubKeyPath, samDesired );
+		}
 
-		bool IsValid( void ) const { return this != NULL && m_hKey != NULL; }
-		bool HasSubKeys( void ) const { return GetSubKeyCount() != 0; }
-		bool HasValues( void ) const { return GetValueCount() != 0; }
+		bool Open( HKEY hParentKey, const fs::CPath& subKeyPath, REGSAM samDesired = KEY_READ | KEY_WRITE ) throw()
+		{
+			return ERROR_SUCCESS == m_key.Open( hParentKey, subKeyPath.GetPtr(), samDesired );
+		}
 
-		struct CInfo;
-		int GetKeyInfo( CInfo& rKeyInfo ) const { VERIFY( rKeyInfo.Build( m_hKey ) ); return rKeyInfo.m_subKeyCount; }
+		bool Create( HKEY hParentKey, const TCHAR* pSubKeyPath, LPTSTR pClass = REG_NONE,
+					 DWORD dwOptions = REG_OPTION_NON_VOLATILE, REGSAM samDesired = KEY_READ | KEY_WRITE, SECURITY_ATTRIBUTES* pSecAttr = NULL, DWORD* pDisposition = NULL ) throw()
+		{
+			return ERROR_SUCCESS == m_key.Create( hParentKey, pSubKeyPath, pClass, dwOptions, samDesired, pSecAttr, pDisposition );
+		}
 
-		void Assign( HKEY hKey ) { Close(); m_hKey = hKey; }
-		bool Flush( void ) { ASSERT( IsValid() ); return ERROR_SUCCESS == ::RegFlushKey( m_hKey ); }
-		HKEY Detach( void );
-		bool Close( void );
+		bool Create( HKEY hParentKey, const fs::CPath& subKeyPath, LPTSTR pClass = REG_NONE,
+					 DWORD dwOptions = REG_OPTION_NON_VOLATILE, REGSAM samDesired = KEY_READ | KEY_WRITE, SECURITY_ATTRIBUTES* pSecAttr = NULL, DWORD* pDisposition = NULL ) throw()
+		{
+			return ERROR_SUCCESS == m_key.Create( hParentKey, subKeyPath.GetPtr(), pClass, dwOptions, samDesired, pSecAttr, pDisposition );
+		}
 
-		void RemoveAllSubKeys( void );
-		void RemoveAllValues( void );
-		void RemoveAll( void ) { RemoveAllSubKeys(); RemoveAllValues(); }
+		HKEY Get( void ) const { return m_key.m_hKey; }
+		CRegKey& GetKey( void ) { return m_key; }
+
+		bool IsOpen( void ) const { return Get() != NULL; }
+
+		bool Close( void ) { return ERROR_SUCCESS == m_key.Close(); }
+		void Reset( HKEY hKey = NULL ) { Close(); m_key.Attach( hKey ); }
+		HKEY Detach( void ) { return m_key.Detach(); }
+
+		bool Flush( void ) { return ERROR_SUCCESS == m_key.Flush(); }		// flush the key's data to disk
+
+		static bool ParseFullPath( HKEY& rhHive, fs::CPath& rSubPath, const TCHAR* pKeyFullPath );		// full path includes registry hive (the root)
+
+		void DeleteAll( void ) { DeleteAllValues(); DeleteAllSubKeys(); }
 
 		// sub-keys
-		int GetSubKeyCount( void ) const { return CInfo( m_hKey ).m_subKeyCount; }
-		bool HasSubKey( const TCHAR* pSubKeyName ) const { return CKey( m_hKey, pSubKeyName, false ).IsValid(); }
+		bool HasSubKey( const TCHAR* pSubKeyName ) const;
+		void QuerySubKeyNames( std::vector< std::tstring >& rSubKeyNames ) const;
+		bool DeleteSubKey( const TCHAR* pSubKey, RecursionDepth depth = Shallow ) { return ERROR_SUCCESS == ( Shallow == depth ? m_key.DeleteSubKey( pSubKey ) : m_key.RecurseDeleteKey( pSubKey ) ); }
+		void DeleteAllSubKeys( void );
 
-		CKey OpenSubKey( const TCHAR* pSubKeyName, bool forceCreate = false ) { return CKey( m_hKey, pSubKeyName, forceCreate ); }
-		bool RemoveSubKey( const TCHAR* pSubKeyName ) { ASSERT( IsValid() && !str::IsEmpty( pSubKeyName ) ); return ERROR_SUCCESS == ::RegDeleteKey( m_hKey, pSubKeyName ); }
+		// values
+		void QueryValueNames( std::vector< std::tstring >& rValueNames ) const;
+		bool DeleteValue( const TCHAR* pValueName ) { return ERROR_SUCCESS == m_key.DeleteValue( pValueName ); }
+		void DeleteAllValues( void );
 
-		// values access
-		int GetValueCount( void ) const { return CInfo( m_hKey ).m_valueCount; }
-		DWORD GetValueType( const TCHAR* pValueName, DWORD* pBufferSize = NULL ) const;
 		bool HasValue( const TCHAR* pValueName ) const { return GetValueType( pValueName ) != REG_NONE; }
-		bool GetValue( CValue& rValue, const TCHAR* pValueName ) const;
-		bool SetValue( const TCHAR* pValueName, const CValue& value );
-		bool RemoveValue( const TCHAR* pValueName );
+		std::pair< DWORD, size_t > GetValueInfo( const TCHAR* pValueName ) const;		// <Type, BufferSize>
+		DWORD GetValueType( const TCHAR* pValueName ) const { return GetValueInfo( pValueName ).first; }
+		size_t GetValueBufferSize( const TCHAR* pValueName ) const { return GetValueInfo( pValueName ).second; }
 
-		// direct values manipulation
-		std::tstring ReadString( const TCHAR* pValueName, const TCHAR* pDefaultText = _T("") );
-		bool WriteString( const TCHAR* pValueName, const TCHAR* pValue );
+		std::tstring ReadStringValue( const TCHAR* pValueName, const std::tstring& defaultValue = str::GetEmpty() ) const;
+		bool WriteStringValue( const TCHAR* pValueName, const std::tstring& value );
 
-		long ReadNumber( const TCHAR* pValueName, long defaultNumber = 0L );
-		bool WriteNumber( const TCHAR* pValueName, long value );
-	protected:
-		HKEY m_hKey;
-	public:
-		struct CInfo
-		{
-			CInfo( HKEY hKey ) { memset( this, 0, sizeof( CInfo ) ); VERIFY( NULL == hKey || Build( hKey ) ); }
+		template< typename StringyT >
+		bool ReadMultiString( const TCHAR* pValueName, std::vector< StringyT >& rValues ) const;
 
-			bool Build( HKEY hKey )
-			{
-				ASSERT_PTR( hKey );
-				return ERROR_SUCCESS == ::RegQueryInfoKey( hKey, NULL, NULL, NULL, &m_subKeyCount, &m_subKeyNameMaxLen, NULL,
-														   &m_valueCount, &m_valueNameMaxLen, &m_valueBufferMaxLen, NULL, NULL );
-			}
-		public:
-			DWORD m_subKeyCount;
-			DWORD m_subKeyNameMaxLen;
-			DWORD m_valueCount;
-			DWORD m_valueNameMaxLen;
-			DWORD m_valueBufferMaxLen;
-		};
-	};
+		template< typename StringyT >
+		bool WriteMultiString( const TCHAR* pValueName, const std::vector< StringyT >& values );
 
+		template< typename NumericT >
+		NumericT ReadNumberValue( const TCHAR* pValueName, NumericT defaultValue = NumericT() ) const;
 
-	struct CValue
-	{
-		CValue( void );
-		CValue( const CValue& src );
-		~CValue();
+		template< typename NumericT >
+		bool WriteNumberValue( const TCHAR* pValueName, NumericT value );
 
-		bool IsValid( void ) const { return m_pBuffer != NULL && m_type != REG_NONE; }
+		bool ReadGuidValue( const TCHAR* pValueName, GUID& rValue ) const { return ERROR_SUCCESS == m_key.QueryGUIDValue( pValueName, rValue ); }
+		bool WriteGuidValue( const TCHAR* pValueName, const GUID& value ) { return ERROR_SUCCESS == m_key.SetGUIDValue( pValueName, value ); }
 
-		CValue& operator=( const CValue& src );
-		void AttachBuffer( void* extDestBuffer, DWORD extBufferSize );
-		BYTE* AllocCopy( const void* srcBuffer, DWORD srcBufferSize, DWORD srcType = REG_BINARY );
-		bool Destroy( void );
-		void Detach( void );
+		template< typename ValueT >
+		bool ReadBinaryValue( const TCHAR* pValueName, ValueT* pValue ) const;
 
-		// registry IO
-		bool Read( const CKey& key, const TCHAR* pValueName );
-		bool Write( CKey& key, const TCHAR* pValueName ) const;
+		template< typename ValueT >
+		bool WriteBinaryValue( const TCHAR* pValueName, const ValueT& value );
 
-		DWORD GetDword( void ) const { ASSERT( IsValid() && REG_DWORD == m_type ); return *(DWORD*)m_pBuffer; }
-		std::tstring GetString( void ) const { ASSERT( IsValid() && REG_SZ == m_type ); return reinterpret_cast< const TCHAR* >( m_pBuffer ); }
+		template< typename ValueT >
+		bool ReadBinaryBuffer( const TCHAR* pValueName, std::vector< ValueT >& rBufferValue ) const;
 
-		// assignment
-		void Assign( DWORD srcType, const void* srcBuffer, DWORD srcBufferSize );
-		void SetDword( DWORD dword );
-		void SetString( const TCHAR* pText ) { Assign( REG_SZ, (const BYTE*)pText, ( (DWORD)str::GetLength( pText ) + 1 ) * sizeof( TCHAR ) ); }
-	protected:
-		bool ensureBuffer( DWORD requiredSize );
-	public:
-		DWORD m_type;
-		BYTE* m_pBuffer;
-		DWORD m_size;
-	protected:
-		bool m_autoDelete;
+		template< typename ValueT >
+		bool WriteBinaryBuffer( const TCHAR* pValueName, const std::vector< ValueT >& bufferValue );
 	private:
-		DWORD m_quickBuffer;
+		mutable CRegKey m_key;			// friendly for Query... methods (declared non-const in CRegKey class)
 	};
 
 
-	class CKeyIterator
+	struct CKeyInfo
 	{
+		CKeyInfo( void ) { Clear(); }
+		CKeyInfo( HKEY hKey ) { Build( hKey ); }
+		CKeyInfo( const CKey& key ) { key.IsOpen() ? Build( key.Get() ) : Clear(); }
+
+		void Clear( void );
+		bool Build( HKEY hKey );
 	public:
-		CKeyIterator( const CKey* pParentKey, SeekBound bound = SB_First );
-		~CKeyIterator();
-
-		bool IsValid( void ) const;
-		const TCHAR* GetName( void ) const { ASSERT( IsValid() ); return m_pSubKeyName; }		// was operator()
-		int GetPos( void ) const { return m_pos; }
-		int GetCount( void ) const { return m_keyInfo.m_subKeyCount; }
-
-		CKeyIterator& operator++( void ) { ++m_pos; SeekToPos(); return *this; }
-		CKeyIterator& operator--( void ) { --m_pos; SeekToPos(); return *this; }
-
-		CKeyIterator& Seek( int pos ) { m_pos = pos; SeekToPos(); return *this; }
-		CKeyIterator& Restart( SeekBound bound = SB_First ) { m_pos = bound == SB_First ? 0 : ( m_keyInfo.m_subKeyCount - 1 ); SeekToPos(); return *this; }
-	protected:
-		bool SeekToPos( void );
-	protected:
-		const CKey* m_pParentKey;
-		CKey::CInfo m_keyInfo;
-		TCHAR* m_pSubKeyName;
-		int m_pos;
-		LSTATUS m_lastResult;
+		DWORD m_subKeyCount;
+		DWORD m_subKeyNameMaxLen;
+		DWORD m_valueCount;
+		DWORD m_valueNameMaxLen;
+		DWORD m_valueBufferMaxLen;
+		CTime m_lastWriteTime;
 	};
+}
 
 
-	class CValueIterator
+namespace reg
+{
+	// CKey template code
+
+	template< typename StringyT >
+	bool CKey::ReadMultiString( const TCHAR* pValueName, std::vector< StringyT >& rValues ) const
 	{
-	public:
-		CValueIterator( const CKey* pParentKey, SeekBound bound = SB_First );
-		~CValueIterator();
+		ASSERT( IsOpen() );
 
-		bool IsValid( void ) const;
-		const TCHAR* GetName( void ) const { ASSERT( IsValid() ); return m_pValueName; }		// was operator()
-		int GetPos( void ) const { return m_pos; }
-		int GetCount( void ) const { return m_keyInfo.m_valueCount; }
+		std::vector< TCHAR > buffer( GetValueBufferSize( pValueName ) );
+		if ( buffer.empty() )
+			return false;
 
-		DWORD GetValueType( void ) const { ASSERT( IsValid() ); return m_valueType; }
-		DWORD GetValueBuffSize( void ) const { ASSERT( IsValid() ); return m_valueBuffSize; }
+		ULONG count = static_cast< ULONG >( buffer.size() );
+		LONG result = m_key.QueryMultiStringValue( pValueName, &buffer.front(), &count );
+		ASSERT( result != ERROR_MORE_DATA );		// GetValueBufferSize() sized the buffer properly?
+		if ( result != ERROR_SUCCESS )
+			return false;
 
-		CValueIterator& operator++( void ) { ++m_pos; SeekToPos(); return *this; }
-		CValueIterator& operator--( void ) { --m_pos; SeekToPos(); return *this; }
+		rValues.clear();
+		for ( const TCHAR* pItem = &buffer.front(); *pItem != _T('\0'); pItem += str::GetLength( pItem ) + 1 )
+			rValues.push_back( StringyT( pItem ) );
+		return true;
+	}
 
-		CValueIterator& Seek( int valueIndex ) { m_pos = valueIndex; SeekToPos(); return *this; }
-		CValueIterator& Restart( SeekBound bound = SB_First );
-	protected:
-		bool SeekToPos( void );
-	protected:
-		const CKey* m_pParentKey;
-		CKey::CInfo m_keyInfo;
+	template< typename StringyT >
+	bool CKey::WriteMultiString( const TCHAR* pValueName, const std::vector< StringyT >& values )
+	{
+		ASSERT( IsOpen() );
 
-		TCHAR* m_pValueName;
-		int m_pos;
-		LSTATUS m_lastResult;
-
-		DWORD m_valueType;
-		DWORD m_valueBuffSize;
-	};
+		std::vector< TCHAR > msData;		// multi-string data: an array of zero-terminated strings, terminated by 2 zero characters
+		str::QuickTokenize( msData, str::JoinLines( values, _T("|") ).c_str(), _T("|") );
+		return ERROR_SUCCESS == m_key.SetMultiStringValue( pValueName, &msData.front() );
+	}
 
 
-	void QuerySubKeyNames( std::vector< std::tstring >& rSubKeyNames, const reg::CKey& key );
+	template< typename NumericT >
+	NumericT CKey::ReadNumberValue( const TCHAR* pValueName, NumericT defaultValue /*= NumericT()*/ ) const
+	{
+		ASSERT( IsOpen() );
+		if ( sizeof( ULONGLONG ) == sizeof( NumericT ) )
+		{
+			ULONGLONG value;
+			if ( ERROR_SUCCESS == m_key.QueryQWORDValue( pValueName, value ) )
+				return static_cast< NumericT >( value );
+		}
+		else
+		{
+			DWORD value;
+			if ( ERROR_SUCCESS == m_key.QueryDWORDValue( pValueName, value ) )
+				return static_cast< NumericT >( value );
+		}
+		return defaultValue;
+	}
+
+	template< typename NumericT >
+	bool CKey::WriteNumberValue( const TCHAR* pValueName, NumericT value )
+	{
+		ASSERT( IsOpen() );
+		if ( sizeof( ULONGLONG ) == sizeof( NumericT ) )
+			return ERROR_SUCCESS == m_key.SetQWORDValue( pValueName, static_cast< ULONGLONG >( value ) );
+		else
+			return ERROR_SUCCESS == m_key.SetDWORDValue( pValueName, static_cast< DWORD >( value ) );
+	}
+
+
+	template< typename ValueT >
+	bool CKey::ReadBinaryValue( const TCHAR* pValueName, ValueT* pValue ) const
+	{
+		ASSERT( IsOpen() );
+		ASSERT_PTR( pValue );
+
+		size_t byteSize = GetValueBufferSize( pValueName );
+		if ( 0 == byteSize || byteSize != sizeof( ValueT ) )
+			return false;				// bad size or it doesn't line up with ValueT's storage size
+
+		ULONG count = static_cast< ULONG >( byteSize );
+		return ERROR_SUCCESS == m_key.QueryBinaryValue( pValueName, pValue, &count );
+	}
+
+	template< typename ValueT >
+	bool CKey::WriteBinaryValue( const TCHAR* pValueName, const ValueT& value )
+	{
+		ASSERT( IsOpen() );
+		return ERROR_SUCCESS == m_key.SetBinaryValue( pValueName, &value, static_cast< ULONG >( sizeof( value ) ) );
+	}
+
+
+	template< typename ValueT >
+	bool CKey::ReadBinaryBuffer( const TCHAR* pValueName, std::vector< ValueT >& rBufferValue ) const
+	{
+		size_t byteSize = GetValueBufferSize( pValueName );
+		if ( 0 == byteSize )
+			return false;
+		if ( ( byteSize % sizeof( ValueT ) ) != 0 )
+			return false;				// byte size doesn't line up with ValueT's storage size
+
+		rBufferValue.resize( byteSize / sizeof( ValueT ) );
+
+		ULONG count = static_cast< ULONG >( byteSize );
+		return ERROR_SUCCESS == m_key.QueryBinaryValue( pValueName, &rBufferValue.front(), &count );
+	}
+
+	template< typename ValueT >
+	bool CKey::WriteBinaryBuffer( const TCHAR* pValueName, const std::vector< ValueT >& bufferValue )
+	{
+		return ERROR_SUCCESS == m_key.SetBinaryValue( pValueName, &bufferValue.front(), static_cast< ULONG >( utl::ByteSize( bufferValue ) ) );
+	}
 }
 
 

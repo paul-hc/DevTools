@@ -16,10 +16,12 @@
 
 CConsoleApplication::CConsoleApplication( void )
 	: CAppTools()
-	, m_logger()
 {
 	// facilitate Unicode output - in a console that has a Unicode font defined!
 	::setlocale( LC_ALL, "" );		// sets the locale to the default, which is obtained from the operating system
+
+	m_modulePath = fs::GetModuleFilePath( NULL );
+	m_pLogger.reset( new CLogger );
 }
 
 CConsoleApplication::~CConsoleApplication()
@@ -33,7 +35,8 @@ utl::CResourcePool& CConsoleApplication::GetSharedResources( void )
 
 CLogger& CConsoleApplication::GetLogger( void )
 {
-	return m_logger;
+	ASSERT_PTR( m_pLogger.get() );
+	return *m_pLogger;
 }
 
 bool CConsoleApplication::BeepSignal( app::MsgType msgType /*= app::Info*/ )

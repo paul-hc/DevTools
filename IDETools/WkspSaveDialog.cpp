@@ -71,7 +71,7 @@ void CWkspSaveDialog::setupWindow( void )
 	for ( unsigned int i = 0; i != m_rWkspProfile.projectNameArray.size(); ++i )
 		m_projectNameCombo.AddString( m_rWkspProfile.projectNameArray[ i ] );
 
-	if ( m_projectNameCombo.SelectString( -1, m_currProjectName ) == -1 )
+	if ( -1 == m_projectNameCombo.SelectString( -1, m_currProjectName ) )
 		m_projectNameCombo.SetCurSel( 0 );
 
 	updateFileContents();
@@ -90,15 +90,16 @@ bool CWkspSaveDialog::loadExistingProjects( void )
 	// Enums the already stored projects keys, by ex:
 	//	HKEY_CURRENT_USER\Software\RegistryKey\AppName\section\Project1
 	reg::CKey projectsKey( AfxGetApp()->GetSectionKey( m_section ) );
-	if ( !projectsKey.IsValid() )
+	if ( !projectsKey.IsOpen() )
 		return false;
 
-	reg::CKeyIterator itProj( &projectsKey );
+	std::vector< std::tstring > subKeyNames;
+	projectsKey.QuerySubKeyNames( subKeyNames );
 
-	for ( ; itProj.IsValid(); ++itProj )
-		m_rWkspProfile.AddProjectName( itProj.GetName() );
+	for ( std::vector< std::tstring >::const_iterator itSubKeyName = subKeyNames.begin(); itSubKeyName != subKeyNames.end(); ++itSubKeyName )
+		m_rWkspProfile.AddProjectName( itSubKeyName->c_str() );
 
-	return itProj.GetCount() > 0;
+	return !subKeyNames.empty();
 }
 
 void CWkspSaveDialog::updateFileContents( void )
@@ -140,39 +141,38 @@ bool CWkspSaveDialog::saveFiles( void )
 	if ( !readProjectName() )
 		return false;
 
-	reg::CKey keyWorkspaces( AfxGetApp()->GetSectionKey( m_section ) );
+	reg::CKey workspacesKey( AfxGetApp()->GetSectionKey( m_section ) );
 
-	if ( !keyWorkspaces.IsValid() )
+	if ( !workspacesKey.IsOpen() )
 		return false;
 
-	int listCount = m_fileList.GetCount();
+	UINT listCount = m_fileList.GetCount();
 
-	if ( listCount == 0 && keyWorkspaces.HasSubKey( m_currProjectName ) )
-	{	// Nothing to save but there is an existing current project key -> query for remove:
-		CString message;
-
-		message.Format( IDS_QUERY_DELETE_PROJECT_MESSAGE, (LPCTSTR)m_currProjectName );
-		if ( AfxMessageBox( message, MB_YESNO ) == IDYES )
+	if ( 0 == listCount && workspacesKey.HasSubKey( m_currProjectName ) )
+	{	// nothing to save but there is an existing current project key -> prompt to delete:
+		if ( IDYES == AfxMessageBox( str::Format( _T("There are no files avaiable for '%s' project !\n\nDo you want to remove it's entry?"), m_currProjectName.GetString() ).c_str(), MB_YESNO ) )
 		{
-			keyWorkspaces.RemoveSubKey( m_currProjectName );
+			workspacesKey.DeleteSubKey( m_currProjectName );
 			return true;
 		}
 	}
 
-	reg::CKey keyCurrProject = keyWorkspaces.OpenSubKey( m_currProjectName, listCount > 0 );
+	reg::CKey projectKey;
 
-	if ( keyCurrProject.IsValid() )
+	if ( listCount != 0 )
+		projectKey.Create( workspacesKey.Get(), m_currProjectName.GetString() );
+	else
+		projectKey.Open( workspacesKey.Get(), m_currProjectName.GetString() );
+
+	if ( projectKey.IsOpen() )
 	{
-		keyCurrProject.RemoveAll();
-		for ( int i = 0; i < listCount; ++i )
-		{
-			reg::CValue entryValue;
-			entryValue.SetString( getListFile( i )->GetFilePath().GetPtr() );
-			VERIFY( keyCurrProject.SetValue( m_rWkspProfile.getFileEntryName( i ), entryValue ) );
-		}
+		projectKey.DeleteAll();
+
+		for ( UINT i = 0; i != listCount; ++i )
+			projectKey.WriteStringValue( m_rWkspProfile.getFileEntryName( i ), getListFile( i )->GetFilePath().Get() );
 	}
 	else
-		ASSERT( listCount == 0 );
+		ASSERT( 0 == listCount );
 
 	return true;
 }
@@ -295,7 +295,7 @@ void CWkspSaveDialog::OnDropFiles( HDROP hDropInfo )
 	UINT fileCount =::DragQueryFile( hDropInfo, UINT( -1 ), NULL, 0 );
 	TCHAR fullPath[ MAX_PATH ];
 
-	for ( UINT index = 0; index < fileCount; index++ )
+	for ( UINT index = 0; index < fileCount; ++index )
 	{
 		::DragQueryFile( hDropInfo, index, fullPath, COUNT_OF( fullPath ) );
 		m_rWkspProfile.AddFile( fullPath );
@@ -315,10 +315,10 @@ void CWkspSaveDialog::CmDeleteProjectEntry( void )
 		message.Format( IDC_DELETE_PROJECT_ENTRY, (LPCTSTR)m_currProjectName );
 		if ( IDOK == AfxMessageBox( message, MB_OKCANCEL | MB_ICONEXCLAMATION ) )
 		{
-			reg::CKey keyWorkspaces( AfxGetApp()->GetSectionKey( m_section ) );
+			reg::CKey workspacesKey( AfxGetApp()->GetSectionKey( m_section ) );
 
-			if ( keyWorkspaces.IsValid() && keyWorkspaces.HasSubKey( m_currProjectName ) )
-				keyWorkspaces.RemoveSubKey( m_currProjectName );
+			if ( workspacesKey.IsOpen() )
+				workspacesKey.DeleteSubKey( m_currProjectName );
 		}
 	}
 }
@@ -328,10 +328,10 @@ void CWkspSaveDialog::CmDeleteAllProjects( void )
 	if ( readProjectName() )
 		if ( AfxMessageBox( IDC_DELETE_ALL_PROJECTS, MB_OKCANCEL | MB_ICONEXCLAMATION ) == IDOK )
 		{
-			reg::CKey keyWorkspaces( AfxGetApp()->GetSectionKey( m_section ) );
+			reg::CKey workspacesKey( AfxGetApp()->GetSectionKey( m_section ) );
 
-			if ( keyWorkspaces.IsValid() )
-				keyWorkspaces.RemoveAllSubKeys();
+			if ( workspacesKey.IsOpen() )
+				workspacesKey.DeleteAllSubKeys();
 		}
 }
 

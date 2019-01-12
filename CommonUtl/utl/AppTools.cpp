@@ -2,7 +2,7 @@
 #include "stdafx.h"
 #include "AppTools.h"
 #include "EnumTags.h"
-#include "Path.h"
+#include "FileSystem.h"
 #include "RuntimeException.h"
 
 #ifdef _DEBUG
@@ -12,16 +12,6 @@
 
 namespace app
 {
-	fs::CPath GetModuleFilePath( HINSTANCE hInstance /*= NULL*/ )
-	{
-		TCHAR exePath[ _MAX_PATH ];
-		::GetModuleFileName( hInstance, exePath, COUNT_OF( exePath ) );			// may return short path, depending on how it was invoked
-
-		TCHAR longExePath[ _MAX_PATH ];
-		::GetLongPathName( exePath, longExePath, COUNT_OF( longExePath ) );		// convert to long path
-		return fs::CPath( longExePath );
-	}
-
 	const CEnumTags& GetTags_MsgType( void )
 	{
 		static const CEnumTags s_tags( _T("* Error|! Warning|- Info") );

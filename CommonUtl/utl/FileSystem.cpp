@@ -40,6 +40,18 @@ namespace fs
 		return attr != INVALID_FILE_ATTRIBUTES && HasFlag( attr, FILE_ATTRIBUTE_READONLY | FILE_ATTRIBUTE_HIDDEN | FILE_ATTRIBUTE_SYSTEM );
 	}
 
+
+	fs::CPath GetModuleFilePath( HINSTANCE hInstance )
+	{
+		TCHAR modulePath[ MAX_PATH ];
+		::GetModuleFileName( hInstance, modulePath, COUNT_OF( modulePath ) );				// may return short path, depending on how it was invoked
+
+		TCHAR longModulePath[ MAX_PATH ];
+		::GetLongPathName( modulePath, longModulePath, COUNT_OF( longModulePath ) );		// convert to long path
+
+		return fs::CPath( longModulePath );
+	}
+
 	fs::CPath GetTempDirPath( void )
 	{
 		TCHAR dirPath[ MAX_PATH ];
@@ -53,7 +65,7 @@ namespace fs
 	fs::CPath MakeAbsoluteToCWD( const TCHAR* pRelativePath )
 	{
 		std::tstring relativePath = path::MakeNormal( pRelativePath );
-		TCHAR absolutePath[ _MAX_PATH ];
+		TCHAR absolutePath[ MAX_PATH ];
 		if ( NULL == ::_tfullpath( absolutePath, relativePath.c_str(), COUNT_OF( absolutePath ) ) )
 			return std::tstring();			// failed
 
@@ -64,7 +76,7 @@ namespace fs
 	{
 		std::tstring fromPath = path::MakeNormal( pFromPath );
 		DWORD fromAttr = IsValidDirectory( fromPath.c_str() ) ? FILE_ATTRIBUTE_DIRECTORY : 0;
-		TCHAR relativePath[ _MAX_PATH ];
+		TCHAR relativePath[ MAX_PATH ];
 
 		if ( !::PathRelativePathTo( relativePath, fromPath.c_str(), fromAttr, dirPath.GetPtr(), FILE_ATTRIBUTE_DIRECTORY ) )
 			return fromPath;		// on error return input path as is (but normalized)

@@ -216,7 +216,10 @@ namespace fs
 		void Canonicalize( void ) { path::Canonicalize( m_filePath ); }
 
 		CPath operator/( const CPath& right ) const { return CPath( path::Combine( GetPtr(), right.GetPtr() ) ); }
+		CPath operator/( const TCHAR* pRight ) const { return CPath( path::Combine( GetPtr(), pRight ) ); }
+
 		CPath& operator/=( const CPath& right );
+		CPath& operator/=( const TCHAR* pRight ) { Set( path::Combine( GetPtr(), pRight ) ); return *this; }
 
 		bool operator==( const CPath& right ) const { return path::Equivalent( m_filePath, right.m_filePath ); }
 		bool operator!=( const CPath& right ) const { return !operator==( right ); }

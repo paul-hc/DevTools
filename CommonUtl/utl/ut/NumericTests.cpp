@@ -424,7 +424,7 @@ void CNumericTests::TestCrc32( void )
 
 	ASSERT_EQUAL( 0xAD957AB0, utl::CCrc32::Instance().ComputeCrc32( L"abc" ) );		// wide string
 
-	ASSERT( utl::CCrc32::Instance().ComputeFileCrc32( app::GetModuleFilePath() ) != 0 );				// exe file CRC32
+	ASSERT( utl::CCrc32::Instance().ComputeFileCrc32( app::GetModulePath() ) != 0 );				// exe file CRC32
 
 	const fs::CPath& imagesDirPath = ut::GetTestImagesDirPath();
 	if ( !imagesDirPath.IsEmpty() )

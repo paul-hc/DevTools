@@ -188,11 +188,11 @@ namespace fs
 	std::tstring CFilterJoiner::RetrieveSelFilterSpec( void ) const
 	{
 		reg::CKey key( AfxGetApp()->GetSectionKey( s_regSection ) );
-		if ( key.IsValid() )
+		if ( key.IsOpen() )
 		{
 			std::tstring valueName = FormatHashKey( GetKey() );
 			if ( key.HasValue( valueName.c_str() ) )				// was persisted?
-				return key.ReadString( valueName.c_str() );
+				return key.ReadStringValue( valueName.c_str() );
 		}
 		return std::tstring();
 	}

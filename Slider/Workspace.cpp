@@ -120,7 +120,7 @@ CWorkspace::CWorkspace( void )
 	, m_isFullScreen( false )
 	, m_reserved( 0 )
 {
-	fs::CPathParts parts( app::GetModuleFilePath().Get() );
+	fs::CPathParts parts( app::GetModulePath().Get() );
 	parts.m_ext = _T(".slw");
 	m_filePath = parts.MakePath();
 

@@ -183,6 +183,9 @@ public:
 
 	const std::tstring& GetSection( void ) const { return m_regSection; }
 	void SetSection( const std::tstring& regSection ) { m_regSection = regSection; }
+
+	const TCHAR* GetTabularTextSep( void ) const { return m_pTabularSep; }
+	void SetTabularTextSep( const TCHAR* pTabularSep ) { m_pTabularSep = pTabularSep; }
 public:
 	enum ListPopup { Nowhere, OnSelection, OnGroup, _ListPopupCount };
 
@@ -325,6 +328,7 @@ protected:
 
 	virtual void SetupControl( void );
 	virtual bool CacheSelectionData( ole::CDataSource* pDataSource, int sourceFlags, const CListSelectionData& selData ) const;
+	virtual std::tstring FormatItemLine( int index ) const;
 
 	bool ResizeFlexColumns( void );
 
@@ -574,6 +578,7 @@ private:
 	std::vector< UINT > m_tileColumns;						// columns to be displayed as tile additional text (in gray)
 	int m_optionFlags;
 	bool m_subjectBased;									// objects stored as pointers are derived from utl::ISubject (polymorphic type)
+	const TCHAR* m_pTabularSep;							// NULL by default (copy Code column text); could be set to "\t" for a tab-separated copy to clipboard
 
 	TColumn m_sortByColumn;
 	bool m_sortAscending;

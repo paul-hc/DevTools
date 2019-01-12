@@ -37,10 +37,10 @@ void CImageFileEnumerator::Search( const std::vector< CSearchSpec >& searchSpecs
 		try
 		{
 			const size_t oldFoundSize = m_fileAttrs.size();
-			itSpec->EnumImageFiles( this );
+			m_pCurrSpec->EnumImageFiles( this );
 
 			if ( oldFoundSize == m_fileAttrs.size() )		// no new matching files found
-				m_issueStore.AddIssue( str::Format( _T("No matching images found in: %s"), itSpec->m_searchPath.GetPtr() ) );
+				m_issueStore.AddIssue( str::Format( _T("No matching images found in: %s"), m_pCurrSpec->m_searchPath.GetPtr() ) );
 		}
 		catch ( CException* pExc )
 		{

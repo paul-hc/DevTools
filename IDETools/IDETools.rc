@@ -779,14 +779,11 @@ IDR_IMAGE_STRIP         PNG                     "res\\ImageStrip.png"
 STRINGTABLE 
 BEGIN
     IDS_OPTIONS_PROPERTY_SHEET_CAPTION "IDETools Options"
-    IDS_QUERY_DELETE_PROJECT_MESSAGE 
-                            "There are no files avaiable for '%s' project !\n\nDo you want to remove it's entry?"
     IDS_EMPTY_CURR_PROJECT_MESSAGE "No project name is specified!"
     IDS_CODE_GENERATOR_CAPTION "IDETools - Code Generator"
     IDS_PROMPTINCLUDESECTION "Do you want to include the section ""%s""?"
     IDS_PROMPT_DEBUG_BREAK  "Do you want to debug IDETools.dll ?"
     IDS_ERR_READONLY_PROPERTY "Attempt to set the read only property '%s'."
-    IDS_ERR_CANNOT_CREATE_REGKEY "Cannot create registry key: %s"
 END
 
 STRINGTABLE 

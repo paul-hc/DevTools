@@ -219,16 +219,16 @@ namespace ide
 	std::tstring GetRegistryPath_VC6( const TCHAR entry[] )
 	{
 		// Visual C++ 6 'Directories' key path
-		static const TCHAR regKeyPathVC6[] = _T("HKEY_CURRENT_USER\\Software\\Microsoft\\DevStudio\\6.0\\Build System\\Components\\Platforms\\Win32 (x86)\\Directories");
+		static const fs::CPath s_regKeyPathVC6 = _T("Software\\Microsoft\\DevStudio\\6.0\\Build System\\Components\\Platforms\\Win32 (x86)\\Directories");
 		std::tstring path;
-		reg::CKey regKey( regKeyPathVC6, false );
-		if ( regKey.IsValid() )
+		reg::CKey regKey;
+		if ( regKey.Open( HKEY_CURRENT_USER, s_regKeyPathVC6, KEY_READ ) )
 		{
-			path = regKey.ReadString( entry );
+			path = regKey.ReadStringValue( entry );
 			DEBUG_LOG( _T("VC6 %s: %s"), entry, path.c_str() );
 		}
 		else
-			TRACE( _T("# Error accessing the registry: %s\n"), regKeyPathVC6 );
+			TRACE( _T("# Error accessing the registry: %s\n"), s_regKeyPathVC6.GetPtr() );
 
 		return path;
 	}
@@ -236,14 +236,13 @@ namespace ide
 	std::tstring GetRegistryPath_VC71( const TCHAR entry[] )
 	{
 		// Visual C++ 7.1 'Directories' key path
-		static const TCHAR regKeyPathVC71[] = _T("HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\7.1\\VC\\VC_OBJECTS_PLATFORM_INFO\\Win32\\Directories");
+		static const fs::CPath s_regKeyPathVC71 = _T("SOFTWARE\\Microsoft\\VisualStudio\\7.1\\VC\\VC_OBJECTS_PLATFORM_INFO\\Win32\\Directories");
 
 		std::tstring path;
-		reg::CKey regKey( regKeyPathVC71, false );
-
-		if ( regKey.IsValid() )
+		reg::CKey regKey;
+		if ( regKey.Open( HKEY_LOCAL_MACHINE, s_regKeyPathVC71, KEY_READ ) )
 		{
-			path = regKey.ReadString( entry );
+			path = regKey.ReadStringValue( entry );
 			const std::tstring& vc71InstallDir = GetVC71InstallDir();
 
 			if ( !vc71InstallDir.empty() )
@@ -252,25 +251,25 @@ namespace ide
 			DEBUG_LOG( _T("VC71 %s: %s"), entry, path.c_str() );
 		}
 		else
-			TRACE( _T("# Error accessing the registry: %s\n"), regKeyPathVC71 );
+			TRACE( _T("# Error accessing the registry: %s\n"), s_regKeyPathVC71.GetPtr() );
 
 		return path;
 	}
 
 	const std::tstring& GetVC71InstallDir( void )
 	{
-		static std::tstring vc71InstallDir;
-		if ( vc71InstallDir.empty() )
+		static std::tstring s_vc71InstallDir;
+		if ( s_vc71InstallDir.empty() )
 		{
-			reg::CKey regKey( _T("HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\7.1"), false );
-			if ( regKey.IsValid() )
+			reg::CKey regKey;
+			if ( regKey.Open( HKEY_LOCAL_MACHINE, _T("SOFTWARE\\Microsoft\\VisualStudio\\7.1"), KEY_READ ) )
 			{
-				vc71InstallDir = regKey.ReadString( _T("InstallDir") );
-				str::Replace( vc71InstallDir, _T("Common7\\IDE\\"), _T("Vc7\\") );
+				s_vc71InstallDir = regKey.ReadStringValue( _T("InstallDir") );
+				str::Replace( s_vc71InstallDir, _T("Common7\\IDE\\"), _T("Vc7\\") );
 			}
 		}
 
-		return vc71InstallDir;
+		return s_vc71InstallDir;
 	}
 
 
@@ -278,12 +277,12 @@ namespace ide
 	{
 		fs::CPath GetCommonDirPath( bool trailSlash /*= true*/ )
 		{
-			reg::CKey key( HKEY_LOCAL_MACHINE, _T("SOFTWARE\\Microsoft\\VisualStudio\\6.0\\Setup") );
 			std::tstring vsCommonDirPath;
 
-			if ( key.IsValid() )
+			reg::CKey key;
+			if ( key.Open( HKEY_LOCAL_MACHINE, _T("SOFTWARE\\Microsoft\\VisualStudio\\6.0\\Setup"), KEY_READ ) )
 			{
-				vsCommonDirPath = key.ReadString( _T("VsCommonDir") );
+				vsCommonDirPath = key.ReadStringValue( _T("VsCommonDir") );
 				path::SetBackslash( vsCommonDirPath, trailSlash );
 			}
 			return vsCommonDirPath;
@@ -302,13 +301,12 @@ namespace ide
 
 		fs::CPath GetVC98DirPath( bool trailSlash /*= true*/ )
 		{
-			reg::CKey key( HKEY_LOCAL_MACHINE, _T("SOFTWARE\\Microsoft\\VisualStudio\\6.0\\Setup\\Microsoft Visual C++") );
-			//reg::CKey key( HKEY_LOCAL_MACHINE, _T("SOFTWARE\\Microsoft\\DevStudio\\6.0\\Products\\Microsoft Visual C++") );
 			std::tstring vsVC98DirPath;
 
-			if ( key.IsValid() )
+			reg::CKey key;
+			if ( key.Open( HKEY_LOCAL_MACHINE, _T("SOFTWARE\\Microsoft\\VisualStudio\\6.0\\Setup\\Microsoft Visual C++"), KEY_READ ) )
 			{
-				vsVC98DirPath = key.ReadString( _T("ProductDir") );
+				vsVC98DirPath = key.ReadStringValue( _T("ProductDir") );
 				path::SetBackslash( vsVC98DirPath, trailSlash );
 			}
 			return vsVC98DirPath;

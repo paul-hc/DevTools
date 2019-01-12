@@ -25,6 +25,7 @@
 #include "stdafx.h"
 #include "FileRenShell.h"
 #include "Application.h"
+#include "utl/Registry.h"
 #include <initguid.h>
 
 #include "FileRenShell_i.c"
@@ -107,29 +108,24 @@ namespace app
 
 		// Note that you should *NEVER* use the overload of CRegKey::SetValue with 4 parameters.
 		// It lets you set a value in one call, without having to call CRegKey::Open() first.
-		// However, that version of SetValue() has a bug in that it requests KEY_ALL_ACCESS to the key.  That will fail if the user is not an administrator.
+		// However, that version of SetValue() has a bug in that it requests KEY_ALL_ACCESS to the key. That will fail if the user is not an administrator.
 		// (The code should request KEY_WRITE, which is all that's necessary.)
 
-		CRegKey reg;
-		LONG result = reg.Open( HKEY_LOCAL_MACHINE, regKey_ShellExtensions_Approved, KEY_SET_VALUE );
+		reg::CKey key;
+		if ( key.Open( HKEY_LOCAL_MACHINE, regKey_ShellExtensions_Approved, KEY_SET_VALUE ) )
+			return key.WriteStringValue( _T("SimpleShlExt extension"), s_shellExtClassIdName );
 
-		if ( ERROR_SUCCESS == result )
-			result = reg.SetStringValue( _T("SimpleShlExt extension"), s_shellExtClassIdName );
-
-		return ERROR_SUCCESS == result;
+		return false;
 	}
 
 	bool RemoveAsApprovedShellExtension( void )
 	{
 		// NT+: remove ourselves from the list of approved shell extensions.
-		// Note that if we get an error along the way, I .
 
-		CRegKey reg;
-		LONG result = reg.Open( HKEY_LOCAL_MACHINE, regKey_ShellExtensions_Approved, KEY_SET_VALUE );
+		reg::CKey key;
+		if ( key.Open( HKEY_LOCAL_MACHINE, regKey_ShellExtensions_Approved, KEY_SET_VALUE ) )
+			return key.DeleteValue( s_shellExtClassIdName );
 
-		if ( ERROR_SUCCESS == result )
-			result = reg.DeleteValue( s_shellExtClassIdName );
-
-		return ERROR_SUCCESS == result;
+		return false;
 	}
 }

@@ -1,6 +1,7 @@
 
 #include "stdafx.h"
 #include "AboutBox.h"
+#include "CmdUpdate.h"
 #include "ImageStore.h"
 #include "LayoutEngine.h"
 #include "ReportListControl.h"
@@ -101,7 +102,7 @@ namespace layout
 		{ IDC_ABOUT_COMMENTS_EDIT, SizeX | pctSizeY( CommentsPct ) },
 		{ IDC_ABOUT_BUILD_INFO_LABEL, pctMoveY( CommentsPct ) },
 		{ IDC_ABOUT_BUILD_INFO_LIST, pctMoveY( CommentsPct ) | SizeX | pctSizeY( ListPct ) },
-		{ IDC_ABOUT_EXPLORE_EXECUTABLE, MoveY },
+		{ IDC_ABOUT_EXPLORE_MODULE, MoveY },
 		{ IDOK, Move }
 	};
 }
@@ -111,7 +112,8 @@ UINT CAboutBox::m_appIconId = 0;
 
 CAboutBox::CAboutBox( CWnd* pParent )
 	: CLayoutDialog( IDD_ABOUT_BOX, pParent )
-	, m_executablePath( app::GetModuleFilePath().Get() )
+	, m_modulePath( app::GetModulePath() )
+	, m_exePath( fs::GetModuleFilePath( NULL ) )
 	, m_pEmailStatic( new CLinkStatic( _T("mailto:") ) )
 	, m_pBuildInfoList( new CReportListControl() )
 {
@@ -122,10 +124,20 @@ CAboutBox::CAboutBox( CWnd* pParent )
 	std::vector< std::tstring > columnSpecs;
 	str::Split( columnSpecs, _T("Property=85|Value=-1"), _T("|") );
 	m_pBuildInfoList->SetLayoutInfo( columnSpecs );
+	m_pBuildInfoList->SetTabularTextSep( _T("\t") );
 }
 
 CAboutBox::~CAboutBox()
 {
+}
+
+const fs::CPath* CAboutBox::GetSelPath( void ) const
+{
+	int caretIndex = m_pBuildInfoList->GetCaretIndex();
+	if ( -1 == caretIndex )
+		return NULL;
+
+	return m_pBuildInfoList->GetPtrAt< fs::CPath >( caretIndex );
 }
 
 void CAboutBox::SetupBuildInfoList( void )
@@ -137,9 +149,9 @@ void CAboutBox::SetupBuildInfoList( void )
 
 	enum Column { Property, Value };
 
-	int pos = -1;
+	int pos = 0;
 
-	m_pBuildInfoList->InsertItem( ++pos, _T("Platform") );
+	m_pBuildInfoList->InsertItem( pos, _T("Platform") );
 	m_pBuildInfoList->SetItemText( pos, Value, str::Format( _T("%d bit"), utl::GetPlatformBits() ).c_str() );
 
 	m_pBuildInfoList->InsertItem( ++pos, _T("Build") );
@@ -167,8 +179,14 @@ void CAboutBox::SetupBuildInfoList( void )
 			str::Conditional( L'\x25cf', '-' ),
 			hlp::IsMfcDll() ? _T("Dynamic Library") : _T("Static Library") ).c_str() );
 
-	m_pBuildInfoList->InsertItem( ++pos, _T("Executable") );
-	m_pBuildInfoList->SetItemText( pos, Value, m_executablePath.c_str() );
+	if ( m_modulePath != m_exePath )
+	{
+		m_pBuildInfoList->InsertItem( LVIF_TEXT | LVIF_PARAM, ++pos, _T("Module"), 0, 0, 0, (LPARAM)&m_modulePath );
+		m_pBuildInfoList->SetItemText( pos, Value, m_modulePath.GetPtr() );
+	}
+
+	m_pBuildInfoList->InsertItem( LVIF_TEXT | LVIF_PARAM, ++pos, _T("Executable"), 0, 0, 0, (LPARAM)&m_exePath );
+	m_pBuildInfoList->SetItemText( pos, Value, m_exePath.GetPtr() );
 }
 
 void CAboutBox::DoDataExchange( CDataExchange* pDX )
@@ -194,6 +212,7 @@ void CAboutBox::DoDataExchange( CDataExchange* pDX )
 			ui::SetDlgItemText( this, fieldIds[ i ], version.ExpandValues( ui::GetDlgItemText( this, fieldIds[ i ] ).c_str() ) );
 
 		ui::SetDlgItemText( this, IDC_ABOUT_COMMENTS_EDIT, version.ExpandValues( _T("[Comments]") ) );
+		ui::UpdateControlUI( GetDlgItem( IDC_ABOUT_EXPLORE_MODULE ) );
 	}
 
 	CLayoutDialog::DoDataExchange( pDX );
@@ -203,11 +222,33 @@ void CAboutBox::DoDataExchange( CDataExchange* pDX )
 // message handlers
 
 BEGIN_MESSAGE_MAP( CAboutBox, CLayoutDialog )
-	ON_BN_CLICKED( IDC_ABOUT_EXPLORE_EXECUTABLE, OnExploreExecutable )
+	ON_NOTIFY( LVN_ITEMCHANGED, IDC_ABOUT_BUILD_INFO_LIST, OnLvnItemChanged_ListItems )
+	ON_BN_CLICKED( IDC_ABOUT_EXPLORE_MODULE, OnExploreModule )
+	ON_UPDATE_COMMAND_UI( IDC_ABOUT_EXPLORE_MODULE, OnUpdateExploreModule )
 END_MESSAGE_MAP()
 
-void CAboutBox::OnExploreExecutable( void )
+void CAboutBox::OnLvnItemChanged_ListItems( NMHDR* pNmHdr, LRESULT* pResult )
 {
-	std::tstring parameters = _T("/select,") + m_executablePath;
+	NMLISTVIEW* pNmList = (NMLISTVIEW*)pNmHdr;
+	*pResult = 0;
+
+	if ( CReportListControl::IsSelectionChangeNotify( pNmList, LVIS_SELECTED | LVIS_FOCUSED ) )
+		ui::UpdateControlUI( GetDlgItem( IDC_ABOUT_EXPLORE_MODULE ) );
+}
+
+void CAboutBox::OnExploreModule( void )
+{
+	const fs::CPath* pItemPath = GetSelPath();
+	if ( NULL == pItemPath )
+		pItemPath = &m_modulePath;
+
+	std::tstring parameters = _T("/select,") + pItemPath->Get();
 	::ShellExecute( m_hWnd, NULL, _T("explorer.exe"), parameters.c_str(), NULL, SW_SHOWNORMAL );
+}
+
+void CAboutBox::OnUpdateExploreModule( CCmdUI* pCmdUI )
+{
+	const fs::CPath* pItemPath = GetSelPath();
+
+	pCmdUI->Enable( NULL == pItemPath || pItemPath->FileExist() );
 }

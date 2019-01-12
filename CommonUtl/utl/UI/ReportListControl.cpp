@@ -111,6 +111,7 @@ CReportListControl::CReportListControl( UINT columnLayoutId /*= 0*/, DWORD listS
 	, m_listStyleEx( listStyleEx )
 	, m_optionFlags( SortInternally | HighlightTextDiffsFrame )
 	, m_subjectBased( false )
+	, m_pTabularSep( NULL )
 	, m_sortByColumn( -1 )			// no sorting by default
 	, m_sortAscending( true )
 	, m_pComparePtrFunc( NULL )		// use text compare by default
@@ -1648,21 +1649,45 @@ bool CReportListControl::CacheSelectionData( ole::CDataSource* pDataSource, int 
 	if ( HasFlag( sourceFlags, ds::Indexes ) )
 		selData.CacheTo( pDataSource );
 
-	std::vector< std::tstring > codes;
+	std::vector< std::tstring > textLines;
 	if ( HasFlag( sourceFlags, ds::ItemsText | ds::ShellFiles ) )
 		for ( std::vector< int >::const_iterator itSelIndex = selData.m_selIndexes.begin(); itSelIndex != selData.m_selIndexes.end(); ++itSelIndex )
-			if ( utl::ISubject* pObject = GetSubjectAt( *itSelIndex ) )
-				codes.push_back( pObject->GetCode() );		// assume GetCode() represents a full path, and GetDisplayCode() represents a fname.ext
-			else
-				codes.push_back( GetItemText( *itSelIndex, Code ).GetString() );
+			textLines.push_back( FormatItemLine( *itSelIndex ) );
 
 	if ( HasFlag( sourceFlags, ds::ItemsText ) )
-		ole_utl::CacheTextData( pDataSource, str::Join( codes, _T("\r\n") ) );
+		ole_utl::CacheTextData( pDataSource, str::Join( textLines, _T("\r\n") ) );
 
 	if ( HasFlag( sourceFlags, ds::ShellFiles ) )
-		pDataSource->CacheShellFilePaths( codes );
+		pDataSource->CacheShellFilePaths( textLines );
 
 	return true;
+}
+
+std::tstring CReportListControl::FormatItemLine( int index ) const
+{
+	std::tstring lineText;
+	utl::ISubject* pObject = GetSubjectAt( index );
+
+	if ( !str::IsEmpty( m_pTabularSep ) )
+	{
+		for ( unsigned int col = 0, count = GetColumnCount(); col != count; ++col )
+		{
+			if ( col != 0 )
+				lineText += m_pTabularSep;
+
+			if ( Code == col && pObject != NULL )
+				lineText += pObject->GetCode();
+			else
+				lineText += GetItemText( index, col ).GetString();
+		}
+	}
+	else
+		if ( pObject != NULL )
+			lineText = pObject->GetCode();		// assume GetCode() represents a full path, and GetDisplayCode() represents a fname.ext
+		else
+			lineText = GetItemText( index, Code ).GetString();
+
+	return lineText;
 }
 
 bool CReportListControl::Copy( int sourceFlags /*= ListSourcesMask*/ )

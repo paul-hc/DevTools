@@ -47,20 +47,20 @@ const inc::CDirPathGroup& CIncludePaths::Get_PATH( void )
 	return include;
 }
 
-void CIncludePaths::Load( const TCHAR section[] )
+void CIncludePaths::Load( const fs::CPath& section )
 {
-	reg::LoadPathGroup( m_standard, section, reg::entry_Include );
-	reg::LoadPathGroup( m_source, section, reg::entry_Source );
-	reg::LoadPathGroup( m_library, section, reg::entry_Library );
-	reg::LoadPathGroup( m_binary, section, reg::entry_Binary );
+	reg::LoadPathGroup( m_standard, section.GetPtr(), reg::entry_Include );
+	reg::LoadPathGroup( m_source, section.GetPtr(), reg::entry_Source );
+	reg::LoadPathGroup( m_library, section.GetPtr(), reg::entry_Library );
+	reg::LoadPathGroup( m_binary, section.GetPtr(), reg::entry_Binary );
 }
 
-void CIncludePaths::Save( const TCHAR section[] ) const
+void CIncludePaths::Save( const fs::CPath& section ) const
 {
-	reg::SavePathGroup( m_standard, section, reg::entry_Include );
-	reg::SavePathGroup( m_source, section, reg::entry_Source );
-	reg::SavePathGroup( m_library, section, reg::entry_Library );
-	reg::SavePathGroup( m_binary, section, reg::entry_Binary );
+	reg::SavePathGroup( m_standard, section.GetPtr(), reg::entry_Include );
+	reg::SavePathGroup( m_source, section.GetPtr(), reg::entry_Source );
+	reg::SavePathGroup( m_library, section.GetPtr(), reg::entry_Library );
+	reg::SavePathGroup( m_binary, section.GetPtr(), reg::entry_Binary );
 }
 
 std::tstring CIncludePaths::FormatLines( const TCHAR lineSep[] /*= s_lineSep*/ ) const
