@@ -9,6 +9,25 @@
 
 namespace reg
 {
+	bool WriteStringValue( HKEY hParentKey, const fs::CPath& keySubPath, const TCHAR* pValueName, const std::tstring& text )
+	{
+		CKey key;
+		return
+			key.Create( hParentKey, keySubPath ) &&
+			key.WriteStringValue( pValueName, text );
+	}
+
+
+	bool DeleteKey( HKEY hParentKey, const fs::CPath& keySubPath, RecursionDepth depth /*= Deep*/ )
+	{
+		ASSERT( !keySubPath.GetParentPath().IsEmpty() );		// must have a parent path to delete its sub-key
+
+		reg::CKey parentKey;
+		return
+			parentKey.Open( hParentKey, keySubPath.GetParentPath() ) &&
+			parentKey.DeleteSubKey( keySubPath.GetNameExt(), depth );
+	}
+
 	bool OpenKey( CKey* pKey, const TCHAR* pKeyFullPath, REGSAM samDesired /*= KEY_READ | KEY_WRITE*/ )
 	{
 		ASSERT_PTR( pKey );
@@ -65,7 +84,10 @@ namespace reg
 			else if ( str::EqualsN( pKeyFullPath, _T("HKEY_DYN_DATA"), sepPos ) )
 				rhHive = HKEY_DYN_DATA;
 			else
+			{
+				rSubPath.Clear();
 				return false;
+			}
 
 			return true;
 		}
@@ -145,28 +167,29 @@ namespace reg
 		return std::pair< DWORD, size_t >( REG_NONE, 0 );
 	}
 
-	std::tstring CKey::ReadStringValue( const TCHAR* pValueName, const std::tstring& defaultValue /*= str::GetEmpty()*/ ) const
+	bool CKey::WriteStringValue( const TCHAR* pValueName, const std::tstring& text )
+	{
+		ASSERT( IsOpen() );
+		return ERROR_SUCCESS == m_key.SetStringValue( pValueName, text.c_str() );
+	}
+
+	bool CKey::QueryStringValue( const TCHAR* pValueName, std::tstring& rText ) const
 	{
 		ASSERT( IsOpen() );
 
 		std::vector< TCHAR > buffer( GetValueBufferSize( pValueName ) );
 		if ( buffer.empty() )
-			return defaultValue;
+			return false;
 
 		ULONG count = static_cast< ULONG >( buffer.size() );
 		LONG result = m_key.QueryStringValue( pValueName, &buffer.front(), &count );
 		ASSERT( result != ERROR_MORE_DATA );		// GetValueBufferSize() sized the buffer properly?
 
 		if ( result != ERROR_SUCCESS )
-			return defaultValue;
+			return false;
 
-		return &buffer.front();
-	}
-
-	bool CKey::WriteStringValue( const TCHAR* pValueName, const std::tstring& value )
-	{
-		ASSERT( IsOpen() );
-		return ERROR_SUCCESS == m_key.SetStringValue( pValueName, value.c_str() );
+		rText = &buffer.front();
+		return true;
 	}
 
 

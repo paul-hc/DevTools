@@ -6,7 +6,7 @@
 #include "StringRangeTests.h"
 #include "NumericTests.h"
 #include "LcsTests.h"
-#include "RegistryKeyTests.h"
+#include "RegistryTests.h"
 #include "ResequenceTests.h"
 #include "FmtUtilsTests.h"
 #include "FileSystemTests.h"
@@ -25,7 +25,7 @@ namespace ut
 		CStringRangeTests::Instance();
 		CNumericTests::Instance();
 		CLcsTests::Instance();
-		CRegistryKeyTests::Instance();
+		CRegistryTests::Instance();
 		CResequenceTests::Instance();
 		CFmtUtilsTests::Instance();
 		CFileSystemTests::Instance();

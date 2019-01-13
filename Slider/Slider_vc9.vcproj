@@ -655,10 +655,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\ShellRegHelpers.h"
-				>
-			</File>
-			<File
 				RelativePath=".\SlideData.cpp"
 				>
 			</File>

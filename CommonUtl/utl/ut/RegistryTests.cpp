@@ -1,6 +1,6 @@
 
 #include "stdafx.h"
-#include "ut/RegistryKeyTests.h"
+#include "ut/RegistryTests.h"
 #include "Registry.h"
 #include "MultiThreading.h"
 #include "ContainerUtilities.h"
@@ -15,23 +15,61 @@
 #ifdef _DEBUG		// no UT code in release builds
 
 
-namespace ut
-{
-}
-
-
-CRegistryKeyTests::CRegistryKeyTests( void )
+CRegistryTests::CRegistryTests( void )
 {
 	ut::CTestSuite::Instance().RegisterTestCase( this );		// self-registration
 }
 
-CRegistryKeyTests& CRegistryKeyTests::Instance( void )
+CRegistryTests& CRegistryTests::Instance( void )
 {
-	static CRegistryKeyTests testCase;
+	static CRegistryTests testCase;
 	return testCase;
 }
 
-void CRegistryKeyTests::TestKey( void )
+void CRegistryTests::TestParseKeyFullPath( void )
+{
+	HKEY hHive;
+	fs::CPath subPath;
+
+	ASSERT( reg::CKey::ParseFullPath( hHive, subPath, _T("HKEY_CLASSES_ROOT\\Directory\\shell\\cmd\\command") ) );
+	ASSERT( HKEY_CLASSES_ROOT == hHive );
+	ASSERT_EQUAL( _T("Directory\\shell\\cmd\\command"), subPath );
+
+	ASSERT( reg::CKey::ParseFullPath( hHive, subPath, _T("HKEY_CURRENT_USER\\Software\\Paul Cocoveanu\\Demo Utl\\FileListDialog") ) );
+	ASSERT( HKEY_CURRENT_USER == hHive );
+	ASSERT_EQUAL( _T("Software\\Paul Cocoveanu\\Demo Utl\\FileListDialog"), subPath );
+
+	ASSERT( reg::CKey::ParseFullPath( hHive, subPath, _T("HKEY_LOCAL_MACHINE\\SOFTWARE\\Brother\\Brother MFL-Pro\\BrMfInfo\\MFC-7860DW") ) );
+	ASSERT( HKEY_LOCAL_MACHINE == hHive );
+	ASSERT_EQUAL( _T("SOFTWARE\\Brother\\Brother MFL-Pro\\BrMfInfo\\MFC-7860DW"), subPath );
+
+	ASSERT( reg::CKey::ParseFullPath( hHive, subPath, _T("HKEY_USERS\\.DEFAULT\\Software\\Garmin\\Express") ) );
+	ASSERT( HKEY_USERS == hHive );
+	ASSERT_EQUAL( _T(".DEFAULT\\Software\\Garmin\\Express"), subPath );
+
+	ASSERT( reg::CKey::ParseFullPath( hHive, subPath, _T("HKEY_CURRENT_CONFIG\\System\\CurrentControlSet\\Control\\VIDEO") ) );
+	ASSERT( HKEY_CURRENT_CONFIG == hHive );
+	ASSERT_EQUAL( _T("System\\CurrentControlSet\\Control\\VIDEO"), subPath );
+
+	ASSERT( reg::CKey::ParseFullPath( hHive, subPath, _T("HKEY_PERFORMANCE_DATA\\Key\\SubKey\\Control") ) );
+	ASSERT( HKEY_PERFORMANCE_DATA == hHive );
+	ASSERT_EQUAL( _T("Key\\SubKey\\Control"), subPath );
+
+	ASSERT( reg::CKey::ParseFullPath( hHive, subPath, _T("HKEY_CURRENT_CONFIG\\Key\\SubKey\\Control") ) );
+	ASSERT( HKEY_CURRENT_CONFIG == hHive );
+	ASSERT_EQUAL( _T("Key\\SubKey\\Control"), subPath );
+
+	ASSERT( reg::CKey::ParseFullPath( hHive, subPath, _T("HKEY_DYN_DATA\\Key\\SubKey\\Control") ) );
+	ASSERT( HKEY_DYN_DATA == hHive );
+	ASSERT_EQUAL( _T("Key\\SubKey\\Control"), subPath );
+
+	// negative check
+	ASSERT( !reg::CKey::ParseFullPath( hHive, subPath, _T("HKEY_BLAH\\Directory\\shell\\cmd\\command") ) );
+	ASSERT( NULL == hHive );
+	ASSERT_EQUAL( _T(""), subPath );
+}
+
+void CRegistryTests::TestKey( void )
 {
 	const fs::CPath s_rootPath( _T("Software\\Paul Cocoveanu") );
 	const fs::CPath s_test( _T("UTL-Test") );
@@ -71,9 +109,13 @@ void CRegistryKeyTests::TestKey( void )
 }
 
 
-void CRegistryKeyTests::Test_StringValue( reg::CKey& rKey )
+void CRegistryTests::Test_StringValue( reg::CKey& rKey )
 {
 	ASSERT( !rKey.HasValue( _T("StrName") ) );
+
+	std::tstring text;
+	ASSERT( !rKey.QueryStringValue( _T("StrName"), text ) );
+
 	ASSERT_EQUAL( _T(""), rKey.ReadStringValue( _T("StrName") ) );
 	ASSERT_EQUAL( _T("blah"), rKey.ReadStringValue( _T("StrName"), _T("blah") ) );
 
@@ -86,25 +128,28 @@ void CRegistryKeyTests::Test_StringValue( reg::CKey& rKey )
 	ASSERT_EQUAL( ( 4 + 1 ) * 2, rKey.GetValueBufferSize( _T("StrName") ) );
 }
 
-void CRegistryKeyTests::Test_MultiStringValue( reg::CKey& rKey )
+void CRegistryTests::Test_MultiStringValue( reg::CKey& rKey )
 {
 	std::vector< fs::CPath > paths;
 	ASSERT( !rKey.HasValue( _T("MultiPaths") ) );
-	ASSERT( !rKey.ReadMultiString( _T("MultiPaths"), paths ) );
+	ASSERT( !rKey.QueryMultiString( _T("MultiPaths"), paths ) );
 	ASSERT( paths.empty() );
 
 	str::Split( paths, _T("C:\\My\\file.txt|C:\\My\\Image\\img.jpg"), _T("|") );
 	ASSERT( rKey.WriteMultiString( _T("MultiPaths"), paths ) );
 
 	paths.clear();
-	ASSERT( rKey.ReadMultiString( _T("MultiPaths"), paths ) );
+	ASSERT( rKey.QueryMultiString( _T("MultiPaths"), paths ) );
 	ASSERT_EQUAL( _T("C:\\My\\file.txt|C:\\My\\Image\\img.jpg"), str::Join( paths, _T("|") ) );
 	ASSERT( rKey.HasValue( _T("MultiPaths") ) );
 	ASSERT_EQUAL( REG_MULTI_SZ, rKey.GetValueType( _T("MultiPaths") ) );
 }
 
-void CRegistryKeyTests::Test_NumericValues( reg::CKey& rKey )
+void CRegistryTests::Test_NumericValues( reg::CKey& rKey )
 {
+	int number;
+	ASSERT( !rKey.QueryNumberValue( _T("Integer"), number ) );
+
 	ASSERT_EQUAL( -1, rKey.ReadNumberValue( _T("Int16"), static_cast< short >( -1 ) ) );
 	ASSERT( rKey.WriteNumberValue( _T("Int16"), static_cast< short >( 55 ) ) );
 	ASSERT_EQUAL( 55, rKey.ReadNumberValue( _T("Int16"), static_cast< short >( -1 ) ) );
@@ -119,7 +164,7 @@ void CRegistryKeyTests::Test_NumericValues( reg::CKey& rKey )
 	ASSERT_EQUAL( 55, rKey.ReadNumberValue( _T("UInt64"), static_cast< ULONGLONG >( 1000 ) ) );
 }
 
-void CRegistryKeyTests::Test_GuidValue( reg::CKey& rKey )
+void CRegistryTests::Test_GuidValue( reg::CKey& rKey )
 {
 	mt::CScopedInitializeCom scopedCom;
 	GUID itfID = IID_IShellFolder;
@@ -127,27 +172,27 @@ void CRegistryKeyTests::Test_GuidValue( reg::CKey& rKey )
 	ASSERT( rKey.WriteGuidValue( _T("InterfaceID"), itfID ) );
 
 	itfID = IID_IUnknown;
-	ASSERT( rKey.ReadGuidValue( _T("InterfaceID"), itfID ) );
+	ASSERT( rKey.QueryGuidValue( _T("InterfaceID"), itfID ) );
 	ASSERT( ::IsEqualGUID( IID_IShellFolder, itfID ) );
 
 	ASSERT( rKey.HasValue( _T("InterfaceID") ) );
 	ASSERT_EQUAL( REG_SZ, rKey.GetValueType( _T("InterfaceID") ) );
 }
 
-void CRegistryKeyTests::Test_BinaryValue( reg::CKey& rKey )
+void CRegistryTests::Test_BinaryValue( reg::CKey& rKey )
 {
 	CRect rect( -10, -20, 33, 45 );
 
 	ASSERT( rKey.WriteBinaryValue( _T("Rect"), rect ) );
 
 	rect.SetRectEmpty();
-	ASSERT( rKey.ReadBinaryValue( _T("Rect"), &rect ) );
+	ASSERT( rKey.QueryBinaryValue( _T("Rect"), &rect ) );
 	ASSERT( rKey.HasValue( _T("Rect") ) );
 	ASSERT_EQUAL( REG_BINARY, rKey.GetValueType( _T("Rect") ) );
 	ASSERT_EQUAL( sizeof( CRect ), rKey.GetValueBufferSize( _T("Rect") ) );
 }
 
-void CRegistryKeyTests::Test_BinaryBuffer( reg::CKey& rKey )
+void CRegistryTests::Test_BinaryBuffer( reg::CKey& rKey )
 {
 	std::vector< double > numbers;
 	numbers.push_back( 123.4567 );
@@ -156,13 +201,13 @@ void CRegistryKeyTests::Test_BinaryBuffer( reg::CKey& rKey )
 	ASSERT( rKey.WriteBinaryBuffer( _T("Doubles"), numbers ) );
 
 	std::vector< double > persistNumbers;
-	ASSERT( rKey.ReadBinaryBuffer( _T("Doubles"), persistNumbers ) );
+	ASSERT( rKey.QueryBinaryBuffer( _T("Doubles"), persistNumbers ) );
 	ASSERT( numbers == persistNumbers );
 	ASSERT_EQUAL( REG_BINARY, rKey.GetValueType( _T("Doubles") ) );
 	ASSERT_EQUAL( sizeof( double ) * 2, rKey.GetValueBufferSize( _T("Rect") ) );
 }
 
-void CRegistryKeyTests::Test_SubKeys( reg::CKey& rKey )
+void CRegistryTests::Test_SubKeys( reg::CKey& rKey )
 {
 	reg::CKey subKey;
 	ASSERT( subKey.Create( rKey.Get(), fs::CPath( _T("Details") ) ) );
@@ -175,7 +220,7 @@ void CRegistryKeyTests::Test_SubKeys( reg::CKey& rKey )
 	ASSERT( destSubKey.IsOpen() );
 }
 
-void CRegistryKeyTests::Test_KeyInfo( const reg::CKey& rKey )
+void CRegistryTests::Test_KeyInfo( const reg::CKey& rKey )
 {
 	reg::CKeyInfo keyInfo( rKey );
 	ASSERT_EQUAL( 1, keyInfo.m_subKeyCount );
@@ -192,10 +237,11 @@ void CRegistryKeyTests::Test_KeyInfo( const reg::CKey& rKey )
 }
 
 
-void CRegistryKeyTests::Run( void )
+void CRegistryTests::Run( void )
 {
 	__super::Run();
 
+	TestParseKeyFullPath();
 	TestKey();
 }
 

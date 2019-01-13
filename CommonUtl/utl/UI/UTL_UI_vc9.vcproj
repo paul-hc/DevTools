@@ -1118,6 +1118,14 @@
 					>
 				</File>
 				<File
+					RelativePath=".\ShellRegistryAssoc.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\ShellRegistryAssoc.h"
+					>
+				</File>
+				<File
 					RelativePath=".\ShellTypes.cpp"
 					>
 				</File>

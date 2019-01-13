@@ -31,13 +31,10 @@ namespace app
 		const fs::CFilterStore* GetFilterStore( void ) const { return m_pFilterStore; }
 		const std::vector< std::tstring >& GetAllExts( void ) const { return m_allExts; }
 
-		void RegisterAdditionalDocExts( void );
+		void RegisterAdditionalDocExtensions( void );
 		bool PromptFileDialog( CString& rFilePath, UINT titleId, DWORD flags, BOOL openDlg ) const;
 	protected:
 		virtual void AlterSaveAsPath( CString& rFilePath ) const;
-
-		static bool RegisterAdditionalDocExt( const TCHAR* pDocTypeId, const TCHAR* pDocExt );
-		static bool SetRegKey( const TCHAR* pKey, const TCHAR* pValue, const TCHAR* pValueName );
 	protected:
 		const fs::CFilterStore* m_pFilterStore;			// for file filters and known extensions
 		std::tstring m_fileFilters;

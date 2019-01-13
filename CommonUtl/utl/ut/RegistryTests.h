@@ -1,5 +1,5 @@
-#ifndef RegistryKeyTests_h
-#define RegistryKeyTests_h
+#ifndef RegistryTests_h
+#define RegistryTests_h
 #pragma once
 
 
@@ -11,15 +11,16 @@
 namespace reg { class CKey; }
 
 
-class CRegistryKeyTests : public ut::CConsoleTestCase
+class CRegistryTests : public ut::CConsoleTestCase
 {
-	CRegistryKeyTests( void );
+	CRegistryTests( void );
 public:
-	static CRegistryKeyTests& Instance( void );
+	static CRegistryTests& Instance( void );
 
 	// ut::ITestCase interface
 	virtual void Run( void );
 private:
+	void TestParseKeyFullPath( void );
 	void TestKey( void );
 
 	void Test_StringValue( reg::CKey& rKey );
@@ -36,4 +37,4 @@ private:
 #endif //_DEBUG
 
 
-#endif // RegistryKeyTests_h
+#endif // RegistryTests_h

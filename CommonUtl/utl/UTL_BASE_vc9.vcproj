@@ -857,11 +857,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\ut\RegistryKeyTests.cpp"
+				RelativePath=".\ut\RegistryTests.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\ut\RegistryKeyTests.h"
+				RelativePath=".\ut\RegistryTests.h"
 				>
 			</File>
 			<File

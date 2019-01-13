@@ -12,6 +12,7 @@
 #include "UT/ThumbnailTests.h"
 #include "resource.h"
 #include "utl/RuntimeException.h"
+#include "utl/StringUtilities.h"
 #include "utl/UI/AboutBox.h"
 #include "utl/UI/DragListCtrl.h"
 #include "utl/UI/GdiPlus_fwd.h"
@@ -467,19 +468,19 @@ void CApplication::UpdateAllViews( UpdateViewHint hint /*= Hint_ViewUpdate*/, CD
 //	[queue("D:\WINNT\Background\Tiles\JPGs\blue.jpg")]
 BOOL CApplication::OnDDECommand( LPTSTR pCommand )
 {
-	CString command = pCommand;
-	if ( command.Left( 8 ) == _T("[queue(\"") )
-	{	// process each DDE "queue" request for explicit albums
-		int trailingQuotePos = command.ReverseFind( _T('\"') );
-		if ( -1 == trailingQuotePos )
-			return FALSE;
+	std::tstring command = pCommand;
+	if ( str::StripPrefix( command, _T("[queue(") ) )
+		if ( str::StripSuffix( command, _T(")]") ) )
+		{	// process each DDE "queue" request for explicit albums
+			str::StripPrefix( command, _T("\"") );
+			str::StripSuffix( command, _T("\"") );
 
-		m_queuedAlbumFilePaths.push_back( command.Mid( 8, trailingQuotePos - 8 ).GetString() );
-		app::GetMainFrame()->StartQueuedAlbumTimer();
-		return TRUE;
-	}
-	else
-		return CBaseApp< CWinApp >::OnDDECommand( pCommand );
+			m_queuedAlbumFilePaths.push_back( command );
+			app::GetMainFrame()->StartQueuedAlbumTimer();
+			return TRUE;
+		}
+
+	return CBaseApp< CWinApp >::OnDDECommand( pCommand );
 }
 
 BOOL CApplication::PreTranslateMessage( MSG* pMsg )

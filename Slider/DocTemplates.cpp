@@ -5,7 +5,6 @@
 #include "AlbumChildFrame.h"
 #include "AlbumImageView.h"
 #include "ImageDoc.h"
-#include "ShellRegHelpers.h"
 #include "Application.h"
 #include "resource.h"
 #include "utl/Path.h"
@@ -15,9 +14,9 @@
 #include "utl/UI/ImagingWic.h"
 #include "utl/UI/MenuUtilities.h"
 #include "utl/UI/ShellFileDialog.h"
+#include "utl/UI/ShellRegistryAssoc.h"
 #include "utl/UI/Utilities.h"
 #include "utl/UI/WicImage.h"
-#include <afxpriv.h>		// for AfxRegQueryValue
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -111,52 +110,21 @@ namespace app
 		return app::PromptFileDialogImpl( rFilePath, filterJoiner, titleId, flags, openDlg );
 	}
 
-	void CSharedDocTemplate::RegisterAdditionalDocExts( void )
+	void CSharedDocTemplate::RegisterAdditionalDocExtensions( void )
 	{
-		CString docTypeId;
-		GetDocString( docTypeId, CDocTemplate::regFileTypeId );
-		if ( docTypeId.IsEmpty() )
-			return;
+		std::tstring docType;
+		{
+			CString docTypeId;
+			GetDocString( docTypeId, CDocTemplate::regFileTypeId );
+			if ( docTypeId.IsEmpty() )
+				return;
+			docType = docTypeId;
+		}
 
 		// skip first assuming is already registered
 		if ( m_allExts.size() > 1 )
 			for ( size_t i = 1; i != m_allExts.size(); ++i )
-				VERIFY( RegisterAdditionalDocExt( docTypeId, m_allExts[ i ].c_str() ) );		// register all additional extensions
-	}
-
-	bool CSharedDocTemplate::RegisterAdditionalDocExt( const TCHAR* pDocTypeId, const TCHAR* pDocExt )
-	{
-		ASSERT( pDocExt != NULL && _T('.') == pDocExt[ 0 ] );
-
-		TCHAR textBuffer[ MAX_PATH * 2 ];
-		long size = COUNT_OF( textBuffer );
-		long result = AfxRegQueryValue( HKEY_CLASSES_ROOT, pDocExt, textBuffer, &size );
-		std::tstring text( textBuffer );
-
-		if ( result != ERROR_SUCCESS || text.empty() || text == pDocTypeId )
-		{
-			// no association for that suffix
-			if ( !SetRegKey( pDocExt, pDocTypeId, NULL ) )
-				return false;
-
-			SetRegKey( str::Format( _T("%s\\ShellNew"), pDocExt ).c_str(), _T(""), _T("NullFile") );
-		}
-		return true;
-	}
-
-	bool CSharedDocTemplate::SetRegKey( const TCHAR* pKey, const TCHAR* pValue, const TCHAR* pValueName )
-	{
-		if ( NULL == pValueName )
-			return ERROR_SUCCESS == AfxRegSetValue( HKEY_CLASSES_ROOT, pKey, REG_SZ, pValue, (DWORD)( str::GetLength( pValue ) * sizeof( TCHAR ) ) );
-
-		HKEY hKey;
-		if ( ERROR_SUCCESS == AfxRegCreateKey( HKEY_CLASSES_ROOT, pKey, &hKey ) )
-		{
-			long result = ::RegSetValueEx( hKey, pValueName, 0, REG_SZ, (const BYTE*)pValue, (DWORD)( str::GetLength( pValue ) + 1 ) * sizeof( TCHAR ) );
-			if ( ERROR_SUCCESS == ::RegCloseKey( hKey ) && ERROR_SUCCESS == result )
-				return true;
-		}
-		return false;
+				shell::RegisterAdditionalDocumentExt( docType, m_allExts[ i ] );		// register all additional extensions
 	}
 
 
@@ -215,33 +183,13 @@ namespace app
 
 	void CAlbumDocTemplate::RegisterAlbumShellDirectory( bool doRegister )
 	{
-		using namespace shell_reg;
+		// register Slider as view for sliding images in 'Directory' file type handler:
+		fs::CPath verbPath = shell::MakeShellHandlerVerbPath( _T("Directory"), _T("SlideView") );		// "Directory\\shell\\SlideView"
 
-		static fs::CPath s_sliderKeyPath( _T("Directory\\shell\\SlideView") );
-		s_sliderKeyPath / _T("abc");
-		s_sliderKeyPath /= _T("xyz");
-
-		// process the 'Directory' file type handler
 		if ( doRegister )
-		{	// register Slider as view for sliding directory images
-
-			reg::CKey commandKey;
-			if ( commandKey.Create( HKEY_CLASSES_ROOT, s_dirHandler[ ShellCommand ] ) )
-			{
-				std::tstring cmdLine = arg::Enquote( app::GetModulePath() ) + _T(" ") + arg::Enquote( _T("%1") );
-				commandKey.WriteStringValue( NULL, cmdLine );						// write the directory command value (such as "C:\My\Tools\mine\Slider.exe" "%1")
-			}
-
-			reg::CKey ddeExecKey;
-			if ( ddeExecKey.Create( HKEY_CLASSES_ROOT, s_dirHandler[ ShellDdeExec ] ) )
-				ddeExecKey.WriteStringValue( NULL, s_fmtValueDdeExec[ 0 ] );		// write the directory ddeexec value (such as "[open("%L")]")
-		}
+			shell::RegisterShellVerb( verbPath, app::GetModulePath(), _T("Slide &View"), shell::GetDdeOpenCmd() );		// e.g. command="C:\My\Tools\mine\Slider.exe" "%1"
 		else
-		{	// remove Slider registration entries
-			reg::CKey dirShellKey;
-			if ( dirShellKey.Open( HKEY_CLASSES_ROOT, _T("Directory\\shell") ) )
-				dirShellKey.DeleteSubKey( s_dirVerb_SlideView );
-		}
+			shell::UnregisterShellVerb( verbPath );
 	}
 
 
@@ -284,51 +232,33 @@ namespace app
 		}
 
 		CAlbumDocTemplate* pAlbumTemplate = CAlbumDocTemplate::Instance();
-		pAlbumTemplate->RegisterAdditionalDocExts();
+		pAlbumTemplate->RegisterAdditionalDocExtensions();
 		pAlbumTemplate->RegisterAlbumShellDirectory( true );
 	}
 
 	void CDocManager::RegisterImageAdditionalShellExt( bool doRegister )
 	{
-		using namespace shell_reg;
-
-		static const fs::CPath sliderExePath = app::GetModulePath();
+		const fs::CPath sliderExePath = app::GetModulePath();
 
 		// process known registered image files extensions
 		const std::vector< std::tstring >& imageExts = CImageDocTemplate::Instance()->GetAllExts();
 		for ( std::vector< std::tstring >::const_iterator itImageExt = imageExts.begin(); itImageExt != imageExts.end(); ++itImageExt )
 		{
-			reg::CKey extKey;
-			if ( extKey.Open( HKEY_CLASSES_ROOT, itImageExt->c_str() ) )				// extension already registered?
+			std::tstring handlerName;
+			if ( shell::QueryHandlerName( handlerName, itImageExt->c_str() ) )			// valid indirect shell extension handler?
 			{
-				// query for default key value (shell handler name)
-				std::tstring shellHandlerName = extKey.ReadStringValue( NULL );
-				if ( !shellHandlerName.empty() )
-				{
-					reg::CKey shellHandlerKey;
-					if ( shellHandlerKey.Open( HKEY_CLASSES_ROOT, shellHandlerName.c_str() ) )
-						if ( doRegister )
-						{	// valid indirect shell file handler, add command and ddeexec keys
-							for ( size_t k = 0; k != COUNT_OF( s_fmtShlHandlerCommand ); ++k )
-							{
-								reg::CKey commandKey;
-								if ( commandKey.Create( HKEY_CLASSES_ROOT, str::Format( s_fmtShlHandlerCommand[ k ], shellHandlerName.c_str() ).c_str() ) )
-									commandKey.WriteStringValue( NULL, arg::Enquote( sliderExePath ).c_str() );			// write the shell command (like "C:\My\Tools\mine\Slider.exe" "%1")
+				fs::CPath openPath = shell::MakeShellHandlerVerbPath( handlerName.c_str(), _T("OpenWithSlider") );				// "<handler>\\shell\\OpenWithSlider"
+				fs::CPath enqueuePath = shell::MakeShellHandlerVerbPath( handlerName.c_str(), _T("EnqueueInSlider") );			// "<handler>\\shell\\EnqueueInSlider"
 
-								reg::CKey ddeExecKey;
-								if ( ddeExecKey.Create( HKEY_CLASSES_ROOT, str::Format( s_fmtShlHandlerDdeExec[ k ], shellHandlerName.c_str() ).c_str() ) )
-									ddeExecKey.WriteStringValue( NULL, s_fmtValueDdeExec[ k ] );						// write the shell ddeexec, like "[open("%1")]" or "[queue(\"%1\")]", etc
-							}
-						}
-						else
-						{	// remove slider entries for shell
-							reg::CKey shellKey;
-							if ( shellKey.Open( HKEY_CLASSES_ROOT, str::Format( _T("%s\\shell"), shellHandlerName.c_str() ).c_str() ) )
-							{
-								shellKey.DeleteSubKey( s_imgVerb_OpenWithSlider, Deep );
-								shellKey.DeleteSubKey( s_imgVerb_QueueInSlider, Deep );
-							}
-						}
+				if ( doRegister )
+				{
+					shell::RegisterShellVerb( openPath, app::GetModulePath(), _T("Open with &Slider"), shell::GetDdeOpenCmd() );
+					shell::RegisterShellVerb( enqueuePath, app::GetModulePath(), _T("Enque&ue in Slider"), _T("[queue(\"%1\")]") );
+				}
+				else
+				{	// remove slider entries for shell
+					shell::UnregisterShellVerb( openPath );
+					shell::UnregisterShellVerb( enqueuePath );
 				}
 			}
 		}

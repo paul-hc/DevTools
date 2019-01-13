@@ -8,6 +8,11 @@
 
 namespace reg
 {
+	bool WriteStringValue( HKEY hParentKey, const fs::CPath& keySubPath, const TCHAR* pValueName, const std::tstring& text );
+
+	bool DeleteKey( HKEY hParentKey, const fs::CPath& keySubPath, RecursionDepth depth = Deep );		// deletes the rightmost key (identified by 'filename')
+
+
 	class CKey;
 
 
@@ -61,51 +66,62 @@ namespace reg
 
 		void DeleteAll( void ) { DeleteAllValues(); DeleteAllSubKeys(); }
 
-		// sub-keys
+		// SUB-KEYS
 		bool HasSubKey( const TCHAR* pSubKeyName ) const;
 		void QuerySubKeyNames( std::vector< std::tstring >& rSubKeyNames ) const;
 		bool DeleteSubKey( const TCHAR* pSubKey, RecursionDepth depth = Shallow ) { return ERROR_SUCCESS == ( Shallow == depth ? m_key.DeleteSubKey( pSubKey ) : m_key.RecurseDeleteKey( pSubKey ) ); }
 		void DeleteAllSubKeys( void );
 
-		// values
+		// VALUES
+		bool HasValue( const TCHAR* pValueName ) const { return GetValueType( pValueName ) != REG_NONE; }
 		void QueryValueNames( std::vector< std::tstring >& rValueNames ) const;
+
 		bool DeleteValue( const TCHAR* pValueName ) { return ERROR_SUCCESS == m_key.DeleteValue( pValueName ); }
 		void DeleteAllValues( void );
 
-		bool HasValue( const TCHAR* pValueName ) const { return GetValueType( pValueName ) != REG_NONE; }
 		std::pair< DWORD, size_t > GetValueInfo( const TCHAR* pValueName ) const;		// <Type, BufferSize>
 		DWORD GetValueType( const TCHAR* pValueName ) const { return GetValueInfo( pValueName ).first; }
 		size_t GetValueBufferSize( const TCHAR* pValueName ) const { return GetValueInfo( pValueName ).second; }
 
-		std::tstring ReadStringValue( const TCHAR* pValueName, const std::tstring& defaultValue = str::GetEmpty() ) const;
-		bool WriteStringValue( const TCHAR* pValueName, const std::tstring& value );
+		// string
+		bool WriteStringValue( const TCHAR* pValueName, const std::tstring& text );
+		bool QueryStringValue( const TCHAR* pValueName, std::tstring& rText ) const;
+		std::tstring ReadStringValue( const TCHAR* pValueName, const std::tstring& defaultText = str::GetEmpty() ) const { std::tstring text; return QueryStringValue( pValueName, text ) ? text : defaultText; }
 
-		template< typename StringyT >
-		bool ReadMultiString( const TCHAR* pValueName, std::vector< StringyT >& rValues ) const;
-
+		// multi-string
 		template< typename StringyT >
 		bool WriteMultiString( const TCHAR* pValueName, const std::vector< StringyT >& values );
 
-		template< typename NumericT >
-		NumericT ReadNumberValue( const TCHAR* pValueName, NumericT defaultValue = NumericT() ) const;
+		template< typename StringyT >
+		bool QueryMultiString( const TCHAR* pValueName, std::vector< StringyT >& rValues ) const;
 
+		// number
 		template< typename NumericT >
 		bool WriteNumberValue( const TCHAR* pValueName, NumericT value );
 
-		bool ReadGuidValue( const TCHAR* pValueName, GUID& rValue ) const { return ERROR_SUCCESS == m_key.QueryGUIDValue( pValueName, rValue ); }
+		template< typename NumericT >
+		bool QueryNumberValue( const TCHAR* pValueName, NumericT& rNumber ) const;
+
+		template< typename NumericT >
+		NumericT ReadNumberValue( const TCHAR* pValueName, NumericT defaultNumber = NumericT() ) const { NumericT number; return QueryNumberValue( pValueName, number ) ? number : defaultNumber; }
+
+		// GUID (persisted as string)
 		bool WriteGuidValue( const TCHAR* pValueName, const GUID& value ) { return ERROR_SUCCESS == m_key.SetGUIDValue( pValueName, value ); }
+		bool QueryGuidValue( const TCHAR* pValueName, GUID& rValue ) const { return ERROR_SUCCESS == m_key.QueryGUIDValue( pValueName, rValue ); }
 
-		template< typename ValueT >
-		bool ReadBinaryValue( const TCHAR* pValueName, ValueT* pValue ) const;
-
+		// binary structure
 		template< typename ValueT >
 		bool WriteBinaryValue( const TCHAR* pValueName, const ValueT& value );
 
 		template< typename ValueT >
-		bool ReadBinaryBuffer( const TCHAR* pValueName, std::vector< ValueT >& rBufferValue ) const;
+		bool QueryBinaryValue( const TCHAR* pValueName, ValueT* pValue ) const;
 
+		// binary buffer
 		template< typename ValueT >
 		bool WriteBinaryBuffer( const TCHAR* pValueName, const std::vector< ValueT >& bufferValue );
+
+		template< typename ValueT >
+		bool QueryBinaryBuffer( const TCHAR* pValueName, std::vector< ValueT >& rBufferValue ) const;
 	private:
 		mutable CRegKey m_key;			// friendly for Query... methods (declared non-const in CRegKey class)
 	};
@@ -135,7 +151,17 @@ namespace reg
 	// CKey template code
 
 	template< typename StringyT >
-	bool CKey::ReadMultiString( const TCHAR* pValueName, std::vector< StringyT >& rValues ) const
+	bool CKey::WriteMultiString( const TCHAR* pValueName, const std::vector< StringyT >& values )
+	{
+		ASSERT( IsOpen() );
+
+		std::vector< TCHAR > msData;		// multi-string data: an array of zero-terminated strings, terminated by 2 zero characters
+		str::QuickTokenize( msData, str::JoinLines( values, _T("|") ).c_str(), _T("|") );
+		return ERROR_SUCCESS == m_key.SetMultiStringValue( pValueName, &msData.front() );
+	}
+
+	template< typename StringyT >
+	bool CKey::QueryMultiString( const TCHAR* pValueName, std::vector< StringyT >& rValues ) const
 	{
 		ASSERT( IsOpen() );
 
@@ -155,35 +181,6 @@ namespace reg
 		return true;
 	}
 
-	template< typename StringyT >
-	bool CKey::WriteMultiString( const TCHAR* pValueName, const std::vector< StringyT >& values )
-	{
-		ASSERT( IsOpen() );
-
-		std::vector< TCHAR > msData;		// multi-string data: an array of zero-terminated strings, terminated by 2 zero characters
-		str::QuickTokenize( msData, str::JoinLines( values, _T("|") ).c_str(), _T("|") );
-		return ERROR_SUCCESS == m_key.SetMultiStringValue( pValueName, &msData.front() );
-	}
-
-
-	template< typename NumericT >
-	NumericT CKey::ReadNumberValue( const TCHAR* pValueName, NumericT defaultValue /*= NumericT()*/ ) const
-	{
-		ASSERT( IsOpen() );
-		if ( sizeof( ULONGLONG ) == sizeof( NumericT ) )
-		{
-			ULONGLONG value;
-			if ( ERROR_SUCCESS == m_key.QueryQWORDValue( pValueName, value ) )
-				return static_cast< NumericT >( value );
-		}
-		else
-		{
-			DWORD value;
-			if ( ERROR_SUCCESS == m_key.QueryDWORDValue( pValueName, value ) )
-				return static_cast< NumericT >( value );
-		}
-		return defaultValue;
-	}
 
 	template< typename NumericT >
 	bool CKey::WriteNumberValue( const TCHAR* pValueName, NumericT value )
@@ -195,9 +192,39 @@ namespace reg
 			return ERROR_SUCCESS == m_key.SetDWORDValue( pValueName, static_cast< DWORD >( value ) );
 	}
 
+	template< typename NumericT >
+	bool CKey::QueryNumberValue( const TCHAR* pValueName, NumericT& rNumber ) const
+	{
+		ASSERT( IsOpen() );
+		if ( sizeof( ULONGLONG ) == sizeof( NumericT ) )
+		{
+			ULONGLONG value;
+			if ( m_key.QueryQWORDValue( pValueName, value ) != ERROR_SUCCESS )
+				return false;
+
+			rNumber = static_cast< NumericT >( value );
+		}
+		else
+		{
+			DWORD value;
+			if ( m_key.QueryDWORDValue( pValueName, value ) != ERROR_SUCCESS )
+				return false;
+
+			rNumber = static_cast< NumericT >( value );
+		}
+		return true;
+	}
+
 
 	template< typename ValueT >
-	bool CKey::ReadBinaryValue( const TCHAR* pValueName, ValueT* pValue ) const
+	bool CKey::WriteBinaryValue( const TCHAR* pValueName, const ValueT& value )
+	{
+		ASSERT( IsOpen() );
+		return ERROR_SUCCESS == m_key.SetBinaryValue( pValueName, &value, static_cast< ULONG >( sizeof( value ) ) );
+	}
+
+	template< typename ValueT >
+	bool CKey::QueryBinaryValue( const TCHAR* pValueName, ValueT* pValue ) const
 	{
 		ASSERT( IsOpen() );
 		ASSERT_PTR( pValue );
@@ -210,16 +237,15 @@ namespace reg
 		return ERROR_SUCCESS == m_key.QueryBinaryValue( pValueName, pValue, &count );
 	}
 
+
 	template< typename ValueT >
-	bool CKey::WriteBinaryValue( const TCHAR* pValueName, const ValueT& value )
+	bool CKey::WriteBinaryBuffer( const TCHAR* pValueName, const std::vector< ValueT >& bufferValue )
 	{
-		ASSERT( IsOpen() );
-		return ERROR_SUCCESS == m_key.SetBinaryValue( pValueName, &value, static_cast< ULONG >( sizeof( value ) ) );
+		return ERROR_SUCCESS == m_key.SetBinaryValue( pValueName, &bufferValue.front(), static_cast< ULONG >( utl::ByteSize( bufferValue ) ) );
 	}
 
-
 	template< typename ValueT >
-	bool CKey::ReadBinaryBuffer( const TCHAR* pValueName, std::vector< ValueT >& rBufferValue ) const
+	bool CKey::QueryBinaryBuffer( const TCHAR* pValueName, std::vector< ValueT >& rBufferValue ) const
 	{
 		size_t byteSize = GetValueBufferSize( pValueName );
 		if ( 0 == byteSize )
@@ -231,12 +257,6 @@ namespace reg
 
 		ULONG count = static_cast< ULONG >( byteSize );
 		return ERROR_SUCCESS == m_key.QueryBinaryValue( pValueName, &rBufferValue.front(), &count );
-	}
-
-	template< typename ValueT >
-	bool CKey::WriteBinaryBuffer( const TCHAR* pValueName, const std::vector< ValueT >& bufferValue )
-	{
-		return ERROR_SUCCESS == m_key.SetBinaryValue( pValueName, &bufferValue.front(), static_cast< ULONG >( utl::ByteSize( bufferValue ) ) );
 	}
 }
 
