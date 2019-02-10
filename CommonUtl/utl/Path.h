@@ -239,6 +239,9 @@ namespace fs
 	};
 
 
+	fs::CPath GetShortFilePath( const fs::CPath& filePath );
+	fs::CPath GetLongFilePath( const fs::CPath& filePath );
+
 	inline fs::CPath StripDirPrefix( const fs::CPath& filePath, const fs::CPath& dirPath ) { return path::StripCommonPrefix( filePath.GetPtr(), dirPath.GetPtr() ); }
 
 } // namespace fs

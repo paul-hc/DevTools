@@ -19,7 +19,7 @@ namespace shell
 							const TCHAR* pVerbTag = NULL, const TCHAR* pDdeCmd = NULL, const std::tstring extraParams = str::GetEmpty() );
 	bool UnregisterShellVerb( const fs::CPath& verbPath );
 
-	bool RegisterAdditionalDocumentExt( const std::tstring& docTypeId, const fs::CPath& docExt );
+	bool RegisterAdditionalDocumentExt( const fs::CPath& docExt, const std::tstring& docTypeId );
 }
 
 

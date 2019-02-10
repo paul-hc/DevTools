@@ -679,6 +679,26 @@ namespace fs
 } //namespace fs
 
 
+namespace fs
+{
+	fs::CPath GetShortFilePath( const fs::CPath& filePath )
+	{
+		TCHAR shortPath[ MAX_PATH ];
+		::GetShortPathName( filePath.GetPtr(), shortPath, COUNT_OF( shortPath ) );			// convert to short path
+
+		return fs::CPath( shortPath );
+	}
+
+	fs::CPath GetLongFilePath( const fs::CPath& filePath )
+	{
+		TCHAR longPath[ MAX_PATH ];
+		::GetLongPathName( filePath.GetPtr(), longPath, COUNT_OF( longPath ) );						// convert to long path
+
+		return fs::CPath( longPath );
+	}
+}
+
+
 namespace path
 {
 	void QueryParentPaths( std::vector< fs::CPath >& rParentPaths, const std::vector< fs::CPath >& filePaths, bool uniqueOnly /*= true*/ )

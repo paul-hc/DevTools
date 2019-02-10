@@ -124,7 +124,7 @@ namespace app
 		// skip first assuming is already registered
 		if ( m_allExts.size() > 1 )
 			for ( size_t i = 1; i != m_allExts.size(); ++i )
-				shell::RegisterAdditionalDocumentExt( docType, m_allExts[ i ] );		// register all additional extensions
+				shell::RegisterAdditionalDocumentExt( m_allExts[ i ], docType );		// register all additional extensions
 	}
 
 

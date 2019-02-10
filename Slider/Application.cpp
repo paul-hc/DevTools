@@ -264,9 +264,9 @@ CApplication theApp;
 CApplication::CApplication( void )
 	: CBaseApp< CWinApp >()
 	, m_pMainFrame( NULL )
-	, m_pEventLogger( new CLogger( _T("%s-events") ) )
 	, m_forceMask( 0 )
 	, m_forceFlags( 0 )
+	, m_pEventLogger( new CLogger( _T("%s-events") ) )
 {
 	COLORREF* pCustomColors = CColorDialog::GetSavedCustomColors();
 	UINT component = 0x00, increment = 0xFF / 15;
@@ -313,23 +313,21 @@ BOOL CApplication::InitInstance( void )
 	CToolStrip::RegisterStripButtons( IDR_MAINFRAME );
 	CImageStore::SharedStore()->RegisterAliases( cmdAliases, COUNT_OF( cmdAliases ) );
 
+	app::CDocManager* pAppDocManager = new app::CDocManager;
 	ASSERT_NULL( m_pDocManager );
-	m_pDocManager = new app::CDocManager;	// register document templates
-//ASSERT(0);
-	EnableShellOpen();						// enable DDE Execute open
-	RegisterShellFileTypes( TRUE );			// register album extensions for Album.Document
+	m_pDocManager = pAppDocManager;	// register document templates
 
-	CCommandLineInfo cmdInfo;
-	ParseCommandLine( cmdInfo );			// parse command line for standard shell commands, DDE, file open
+	CCmdLineInfo cmdInfo( this );
+	cmdInfo.ParseAppSwitches();				// just our switches (ignore MFC arguments)
+
+	if ( ui::IsKeyPressed( VK_SHIFT ) )
+		cmdInfo.SetForceFlag( app::FullScreen | app::DocMaximize, true );
 
 	if ( HasForceMask( app::ShowHelp ) && HasForceFlag( app::ShowHelp ) )
 	{
 		AfxMessageBox( IDS_HELP_MESSAGE );
 		return FALSE;
 	}
-
-	if ( ui::IsKeyPressed( VK_SHIFT ) )
-		SetForceFlag( app::FullScreen | app::DocMaximize, true );
 
 	// create main MDI Frame window
 	m_pMainFrame = new CMainFrame;
@@ -343,18 +341,26 @@ BOOL CApplication::InitInstance( void )
 	// adjust the MRU list max count
 	delete m_pRecentFileList;
 	m_pRecentFileList = NULL;
-
 	LoadStdProfileSettings( CWorkspace::GetData().m_mruCount );
 
-	// dispatch commands specified on the command line (if any):
+//ASSERT(0);
+	ParseCommandLine( cmdInfo );			// parse command line for standard shell commands, DDE, file open
+
+	EnableShellOpen();						// enable DDE Execute open
+	RegisterShellFileTypes( TRUE );			// register image and album extensions and document types
+
+	if ( HasForceMask( app::RegAdditionalExt ) )
+		pAppDocManager->RegisterImageAdditionalShellExt( HasForceFlag( app::RegAdditionalExt ) );
+
+	// Dispatch commands specified on the command line.  Will return FALSE if app was launched with /RegServer, /Register, /Unregserver or /Unregister.
 	if ( !cmdInfo.m_strFileName.IsEmpty() )
 		if ( !ProcessShellCommand( cmdInfo ) )
 			return FALSE;
 
-	// the main window has been initialized, so show and update it
-	if ( -1 == m_nCmdShow )				// PHC 2019-01: in case we no longer use WM_DDE_EXECUTE command
+	if ( -1 == m_nCmdShow || SW_HIDE == m_nCmdShow )				// PHC 2019-01: in case we no longer use WM_DDE_EXECUTE command
 		m_nCmdShow = SW_SHOWNORMAL;		// make the main frame visible
 
+	// the main window has been initialized, so show and update it
 	m_pMainFrame->ShowWindow( m_nCmdShow );
 	m_pMainFrame->UpdateWindow();
 
@@ -388,38 +394,6 @@ int CApplication::ExitInstance( void )
 	m_pEventLogger.reset();
 
 	return CBaseApp< CWinApp >::ExitInstance();
-}
-
-void CApplication::ParseCommandLine( CCommandLineInfo& rCmdInfo )
-{
-	for ( int i = 1; i < __argc; i++ )
-	{
-		const TCHAR* pParam = __targv[ i ];
-		bool isFlag = _T('-') == pParam[ 0 ] || _T('/') == pParam[ 0 ];
-
-		if ( isFlag )
-			++pParam;
-
-		rCmdInfo.ParseParam( pParam, isFlag, __argc == ( i + 1 ) );
-
-		if ( isFlag )
-			switch ( _totlower( pParam[ 0 ] ) )
-			{
-				case _T('r'):	checked_static_cast< app::CDocManager* >( m_pDocManager )->RegisterImageAdditionalShellExt( pParam[ 1 ] != _T('-') ); break;
-				case _T('f'):	SetForceFlag( app::FullScreen, pParam[ 1 ] != _T('-') ); break;
-				case _T('x'):	SetForceFlag( app::DocMaximize, pParam[ 1 ] != _T('-') ); break;
-				case _T('t'):	SetForceFlag( app::ShowToolbar, pParam[ 1 ] != _T('-') ); break;
-				case _T('s'):	SetForceFlag( app::ShowStatusBar, pParam[ 1 ] != _T('-') ); break;
-				case _T('h'):
-				case _T('?'):	SetForceFlag( app::ShowHelp, pParam[ 1 ] != _T('-') ); break;
-			}
-	}
-}
-
-void CApplication::SetForceFlag( int forceFlag, bool on )
-{
-	SetFlag( m_forceMask, forceFlag, true );
-	SetFlag( m_forceFlags, forceFlag, on );
 }
 
 bool CApplication::OpenQueuedAlbum( void )
@@ -514,4 +488,56 @@ void CApplication::OnFileOpenAlbumFolder( void )
 void CApplication::OnClearTempEmbeddedClones( void )
 {
 	CTempCloneFileSet::ClearAllTempFiles();
+}
+
+
+// CApplication::CCmdLineInfo implementation
+
+void CApplication::CCmdLineInfo::ParseAppSwitches( void )
+{
+	ASSERT( __argc > 0 );
+
+	for ( int i = 1; i != __argc; ++i )
+	{
+		const TCHAR* pParam = __targv[ i ];
+		if ( arg::IsSwitch( pParam ) )
+			ParseSwitch( arg::GetSwitch( pParam ) );
+	}
+}
+
+void CApplication::CCmdLineInfo::ParseParam( const TCHAR* pParam, BOOL isFlag, BOOL isLast )
+{
+	if ( isFlag )
+		if ( ParseSwitch( pParam ) )
+		{
+			ParseLast( isLast );
+			return;
+		}
+
+	CCommandLineInfo::ParseParam( pParam, isFlag, isLast );
+}
+
+bool CApplication::CCmdLineInfo::ParseSwitch( const TCHAR* pSwitch )
+{
+	ASSERT_PTR( pSwitch );
+
+	switch ( func::ToUpper()( pSwitch[ 0 ] ) )
+	{
+		case _T('R'):	SetForceFlag( app::RegAdditionalExt, pSwitch[ 1 ] != _T('-') ); break;
+		case _T('F'):	SetForceFlag( app::FullScreen, pSwitch[ 1 ] != _T('-') ); break;
+		case _T('X'):	SetForceFlag( app::DocMaximize, pSwitch[ 1 ] != _T('-') ); break;
+		case _T('T'):	SetForceFlag( app::ShowToolbar, pSwitch[ 1 ] != _T('-') ); break;
+		case _T('S'):	SetForceFlag( app::ShowStatusBar, pSwitch[ 1 ] != _T('-') ); break;
+		case _T('H'):
+		case _T('?'):	SetForceFlag( app::ShowHelp, pSwitch[ 1 ] != _T('-') ); break;
+		default:
+			return false;
+	}
+	return true;
+}
+
+void CApplication::CCmdLineInfo::SetForceFlag( int forceFlag, bool on )
+{
+	SetFlag( m_pApp->m_forceMask, forceFlag, true );
+	SetFlag( m_pApp->m_forceFlags, forceFlag, on );
 }

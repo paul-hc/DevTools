@@ -61,12 +61,18 @@ namespace shell
 
 		bool useDDE = !str::IsEmpty( pDdeCmd );
 		{
-			std::tstring cmdLine = arg::Enquote( modulePath );
+			std::tstring cmdLine;
 
-			stream::Tag( cmdLine, MakeParam( 1 ), _T(" ") );
-			//if ( useDDE )
-			//	stream::Tag( cmdLine, _T("/dde"), _T(" ") );
-			stream::Tag( cmdLine, extraParams, _T(" ") );
+			if ( useDDE )
+			{
+				cmdLine = fs::GetShortFilePath( modulePath ).Get();			// use short module path for DDE protocol
+				stream::Tag( cmdLine, _T("/dde"), _T(" ") );
+			}
+			else
+			{
+				cmdLine = arg::Enquote( modulePath );
+				stream::Tag( cmdLine, MakeParam( 1 ), _T(" ") );
+			}
 
 			reg::CKey key;
 			if ( !key.Create( HKEY_CLASSES_ROOT, verbPath / _T("command") ) ||
@@ -91,21 +97,18 @@ namespace shell
 	}
 
 
-	bool RegisterAdditionalDocumentExt( const std::tstring& docTypeId, const fs::CPath& docExt )
+	bool RegisterAdditionalDocumentExt( const fs::CPath& docExt, const std::tstring& docTypeId )
 	{
 		ASSERT( !docExt.IsEmpty() && _T('.') == docExt.Get()[ 0 ] );
 
 		// check if there is a valid association for the docExt
 		std::tstring handlerName;
-		if ( !shell::QueryHandlerName( handlerName, docExt.GetPtr() ) ||	// non-existing shell handlerName for docExt?
-			 handlerName != docTypeId )										// bad handler?
-		{
+		shell::QueryHandlerName( handlerName, docExt.GetPtr() );
+
+		if ( handlerName != docTypeId )										// bad handler?
 			if ( !reg::WriteStringValue( HKEY_CLASSES_ROOT, docExt, NULL, docTypeId ) )			// default value of the key
 				return false;
 
-			if ( !reg::WriteStringValue( HKEY_CLASSES_ROOT, docExt / _T("ShellNew"), _T("NullFile"), std::tstring() ) )
-				return false;
-		}
-		return true;
+		return reg::WriteStringValue( HKEY_CLASSES_ROOT, docExt / _T("ShellNew"), _T("NullFile"), std::tstring() );
 	}
 }

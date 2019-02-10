@@ -20,11 +20,14 @@ namespace app
 
 	enum ForceFlags
 	{
-		FullScreen		= BIT_FLAG( 0 ),
-		DocMaximize		= BIT_FLAG( 1 ),
-		ShowToolbar		= BIT_FLAG( 2 ),
-		ShowStatusBar	= BIT_FLAG( 3 ),
-		ShowHelp		= BIT_FLAG( 4 )
+		FullScreen			= BIT_FLAG( 0 ),
+		DocMaximize			= BIT_FLAG( 1 ),
+		ShowToolbar			= BIT_FLAG( 2 ),
+		ShowStatusBar		= BIT_FLAG( 3 ),
+		ShowHelp			= BIT_FLAG( 4 ),
+
+		// handled by CApplication
+		RegAdditionalExt	= BIT_FLAG( 8 )
 	};
 }
 
@@ -49,8 +52,23 @@ public:
 
 	void UpdateAllViews( UpdateViewHint hint = Hint_ViewUpdate, CDocument* pSenderDoc = NULL, CView* pSenderView = NULL );
 private:
-	void ParseCommandLine( CCommandLineInfo& rCmdInfo );
-	void SetForceFlag( int forceFlag, bool on );
+	class CCmdLineInfo : public CCommandLineInfo
+	{
+	public:
+		CCmdLineInfo( CApplication* pApp ) : m_pApp( pApp ) { ASSERT_PTR( m_pApp ); }
+
+		void SetForceFlag( int forceFlag, bool on );
+		void ParseAppSwitches( void );
+
+		// base overrides
+		virtual void ParseParam( const TCHAR* pParam, BOOL isFlag, BOOL isLast );
+	private:
+		bool ParseSwitch( const TCHAR* pSwitch );
+	private:
+		CApplication* m_pApp;
+	};
+
+	friend class CCmdLineInfo;
 private:
 	std::auto_ptr< CScopedGdiPlusInit > m_pGdiPlusInit;
 	std::auto_ptr< CThumbnailer > m_pThumbnailer;

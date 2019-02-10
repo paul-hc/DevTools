@@ -825,5 +825,9 @@
 		</File>
 	</Files>
 	<Globals>
+		<Global
+			Name="RESOURCE_FILE"
+			Value="Slider.rc"
+		/>
 	</Globals>
 </VisualStudioProject>
