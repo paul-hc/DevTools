@@ -1,8 +1,8 @@
 #pragma once
 
-#include "utl/BaseMainDialog.h"
-#include "utl/ReportListControl.h"
-#include "utl/TextEdit.h"
+#include "utl/UI/BaseMainDialog.h"
+#include "utl/UI/ReportListControl.h"
+#include "utl/UI/TextEdit.h"
 
 
 enum ListViewMode { LargeIconView, SmallIconView, ListView, ReportView };

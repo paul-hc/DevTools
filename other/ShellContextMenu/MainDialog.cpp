@@ -2,13 +2,14 @@
 #include "stdafx.h"
 #include "MainDialog.h"
 #include "FileItemInfo.h"
-#include "utl/ShellContextMenuHost.h"
 #include "utl/ContainerUtilities.h"
 #include "utl/Path.h"
 #include "utl/FileSystem.h"
-#include "utl/MenuUtilities.h"
-#include "utl/ShellTypes.h"
-#include "utl/Utilities.h"
+#include "utl/UI/CmdUpdate.h"
+#include "utl/UI/MenuUtilities.h"
+#include "utl/UI/ShellContextMenuHost.h"
+#include "utl/UI/ShellTypes.h"
+#include "utl/UI/Utilities.h"
 #include "resource.h"
 
 #ifdef _DEBUG

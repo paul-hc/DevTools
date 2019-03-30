@@ -2,7 +2,7 @@
 #include "stdafx.h"
 #include "FileItemInfo.h"
 #include "utl/FileSystem.h"
-#include "utl/ShellTypes.h"
+#include "utl/UI/ShellTypes.h"
 #include <shlwapi.h>			// for StrFormatByteSize64()
 
 #ifdef _DEBUG
