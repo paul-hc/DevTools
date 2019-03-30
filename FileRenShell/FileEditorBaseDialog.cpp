@@ -86,6 +86,9 @@ bool CFileEditorBaseDialog::SafeExecuteCmd( utl::ICommand* pCmd )
 
 void CFileEditorBaseDialog::UpdateOkButton( const std::tstring& caption, UINT iconId /*= 0*/ )
 {
+	if ( NULL == m_okButton.m_hWnd )
+		return;				// avoid button update if not yet sub-classed (CFileEditorBaseDialog::DoDataExchange not yet called)
+
 	if ( 0 == iconId && IsRollMode() )
 		iconId = ID_COMMIT_MODE;
 
