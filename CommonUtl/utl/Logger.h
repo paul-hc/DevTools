@@ -16,6 +16,7 @@ public:
 
 	const fs::CPath& GetLogFilePath( void ) const;
 
+	// pass '\n' for line ends, since the log file is open in text mode
 	void Log( const TCHAR format[], ... );
 	void LogV( const TCHAR format[], va_list argList );
 	void LogLine( const TCHAR text[], bool useTimestamp = true );

@@ -8,6 +8,7 @@
 
 
 class CFileModel;
+class CPasteDeepModel;
 interface IFileEditor;
 
 
@@ -23,7 +24,8 @@ public:
 	~CFileRenameShell();
 private:
 	size_t ExtractDropInfo( IDataObject* pDropInfo );
-	void AugmentMenuItems( HMENU hMenu, UINT indexMenu, UINT idBaseCmd );
+	UINT AugmentMenuItems( CMenu* pMenu, UINT indexMenu, UINT idBaseCmd );		// return the added commands count
+	UINT BuildPasteDeepSubmenu( CMenu* pSubMenu, UINT idBaseCmd );				// return the added commands count
 
 	enum MenuCommand
 	{
@@ -31,7 +33,10 @@ private:
 		Cmd_RenameFiles, Cmd_TouchFiles, Cmd_FindDuplicates,
 		Cmd_Undo, Cmd_Redo,
 		Cmd_RunUnitTests,
-			_CmdCount
+		Cmd_PasteDeepBase,
+
+		// popup IDs are negative
+		Cmd_PasteDeepPopup = -100
 	};
 
 	struct CMenuCmdInfo
@@ -44,11 +49,13 @@ private:
 	};
 
 	void ExecuteCommand( MenuCommand menuCmd, CWnd* pParentOwner );
+	bool ExecutePasteDeep( MenuCommand menuCmd, CWnd* pParentOwner );
 
 	std::tstring FormatCmdText( const CMenuCmdInfo& cmdInfo );
 	static const CMenuCmdInfo* FindCmd( MenuCommand cmd );
 private:
 	std::auto_ptr< CFileModel > m_pFileModel;
+	std::auto_ptr< CPasteDeepModel > m_pPasteDeepModel;
 
 	static const CMenuCmdInfo s_commands[];
 

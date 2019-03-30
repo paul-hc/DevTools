@@ -468,6 +468,7 @@ BEGIN
     BUTTON      ID_TOUCH_FILES
     BUTTON      ID_FIND_DUPLICATE_FILES
     SEPARATOR
+    BUTTON      ID_PASTE_DEEP_FOLDER
     BUTTON      ID_COMMIT_MODE
     BUTTON      IDC_CAPITALIZE_OPTIONS
     BUTTON      IDC_CHANGE_CASE_BUTTON
@@ -628,6 +629,7 @@ STRINGTABLE
 BEGIN
     ID_PICK_AS_ORIGINAL_FOLDER 
                             "Select all files in the parent folder as original files"
+    ID_PASTE_DEEP_FOLDER    "Paste deep folder image"
 END
 
 #endif    // English (U.S.) resources

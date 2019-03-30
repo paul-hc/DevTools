@@ -426,10 +426,10 @@ namespace shell
 		return fileInfo.iIcon;
 	}
 
-	HICON GetFileSysIcon( const TCHAR* filePath )
+	HICON GetFileSysIcon( const TCHAR* filePath, UINT flags /*= SHGFI_SMALLICON*/ )
 	{
 		SHFILEINFO fileInfo;
-		::SHGetFileInfo( filePath, NULL, &fileInfo, sizeof( fileInfo ), SHGFI_ICON );
+		::SHGetFileInfo( filePath, NULL, &fileInfo, sizeof( fileInfo ), SHGFI_ICON | flags );
 		return fileInfo.hIcon;
 	}
 

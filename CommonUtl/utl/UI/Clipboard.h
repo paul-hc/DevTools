@@ -33,11 +33,11 @@ public:
 	static bool IsFormatAvailable( UINT clipFormat ) { return ::IsClipboardFormatAvailable( clipFormat ) != FALSE; }
 	static bool CanPasteText( void );
 
-	static bool CopyText( const std::tstring& text, CWnd* pWnd = AfxGetMainWnd() );
+	static bool CopyText( const std::tstring& text, CWnd* pWnd = AfxGetMainWnd(), bool clear = true );
 	static bool PasteText( std::tstring& rText, CWnd* pWnd = AfxGetMainWnd() );
 
 	template< typename ContainerT >
-	static bool CopyToLines( const ContainerT& textItems, CWnd* pWnd = AfxGetMainWnd(), const TCHAR* pLineEnd = s_lineEnd );
+	static bool CopyToLines( const ContainerT& textItems, CWnd* pWnd = AfxGetMainWnd(), const TCHAR* pLineEnd = s_lineEnd, bool clear = true );
 
 	template< typename StringT >
 	static bool PasteFromLines( std::vector< StringT >& rTextItems, CWnd* pWnd = AfxGetMainWnd(), const TCHAR* pLineEnd = s_lineEnd );
@@ -72,9 +72,9 @@ inline bool CClipboard::Read( UINT clipFormat, ScalarT& rOutValue ) const
 }
 
 template< typename ContainerT >
-inline bool CClipboard::CopyToLines( const ContainerT& textItems, CWnd* pWnd /*= AfxGetMainWnd()*/, const TCHAR* pLineEnd /*= s_lineEnd*/ )
+inline bool CClipboard::CopyToLines( const ContainerT& textItems, CWnd* pWnd /*= AfxGetMainWnd()*/, const TCHAR* pLineEnd /*= s_lineEnd*/, bool clear /*= true*/ )
 {
-	return CopyText( str::JoinLines( textItems, pLineEnd ), pWnd );
+	return CopyText( str::JoinLines( textItems, pLineEnd ), pWnd, clear );
 }
 
 template< typename StringT >

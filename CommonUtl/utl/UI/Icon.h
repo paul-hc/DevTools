@@ -14,6 +14,7 @@ public:
 	CIcon( const CIcon& shared );
 	~CIcon();
 
+	static CIcon* NewIcon( HICON hIcon );
 	static CIcon* NewIcon( const CIconId& iconId );
 	static CIcon* NewExactIcon( const CIconId& iconId );					// loads only if size exists (no scaling)
 
@@ -64,6 +65,7 @@ struct CIconInfo
 
 	bool IsValid( void ) const { return m_info.hbmColor != NULL || m_info.hbmMask != NULL; }	// if monochrome it has only mask
 	bool IsCursor( void ) const { return !m_info.fIcon; }
+	bool HasAlpha( void ) const { return IsValid() && NULL == m_info.hbmMask; }
 
 	CPoint GetHotSpot( void ) const { return CPoint( m_info.xHotspot, m_info.yHotspot ); }
 	bool MakeDibSection( CBitmap& rDibSection );				// uses hbmColor (ignores hbmMask)

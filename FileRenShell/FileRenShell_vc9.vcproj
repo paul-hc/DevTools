@@ -762,6 +762,14 @@
 					>
 				</File>
 				<File
+					RelativePath=".\PasteDeepModel.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\PasteDeepModel.h"
+					>
+				</File>
+				<File
 					RelativePath=".\RenameItem.cpp"
 					>
 				</File>

@@ -199,7 +199,7 @@ void CImageStore::RegisterButtonImages( const CImageList& imageList, const UINT 
 		case 24: iconKey.second = MediumIcon; break;
 		case 32: iconKey.second = LargeIcon; break;
 		case 48: iconKey.second = HugeIcon_48; break;
-	};
+	}
 
 	for ( UINT i = 0, imagePos = 0; i != buttonCount; ++i )
 		if ( buttonIds[ i ] != ID_SEPARATOR )			// skip separators
@@ -218,6 +218,18 @@ void CImageStore::RegisterButtonImages( const CImageList& imageList, const UINT 
 			}
 			++imagePos;
 		}
+}
+
+void CImageStore::RegisterIcon( UINT cmdId, CIcon* pIcon )
+{
+	ASSERT( cmdId != 0 );
+	ASSERT( pIcon != NULL && pIcon->IsValid() );
+
+	IconKey iconKey( cmdId, ui::LookupIconStdSize( pIcon->GetSize().cx ) );
+
+	CIcon*& rpIcon = m_iconMap[ iconKey ];
+	delete rpIcon;
+	rpIcon = pIcon;
 }
 
 int CImageStore::AddToImageList( CImageList& rImageList, const UINT buttonIds[], size_t buttonCount, const CSize& imageSize )

@@ -154,13 +154,14 @@
 #define ID_HIGHLIGHT_DUPLICATES         32830
 #define ID_ORIGINAL_FILE                32831
 #define ID_PICK_AS_ORIGINAL_FOLDER      32832
+#define ID_PASTE_DEEP_FOLDER            32833
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        112
-#define _APS_NEXT_COMMAND_VALUE         32833
+#define _APS_NEXT_COMMAND_VALUE         32834
 #define _APS_NEXT_CONTROL_VALUE         1081
 #define _APS_NEXT_SYMED_VALUE           5004
 #endif

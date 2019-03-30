@@ -40,6 +40,17 @@ CIcon::~CIcon()
 
 // scales to nearest size if the icon doesn't contain the exact size
 
+CIcon* CIcon::NewIcon( HICON hIcon )
+{
+	ASSERT_PTR( hIcon );
+
+	CIconInfo iconInfo( hIcon );
+	CIcon* pIcon = new CIcon( hIcon, iconInfo.m_size );
+	pIcon->SetHasAlpha( iconInfo.HasAlpha() );
+
+	return pIcon;
+}
+
 CIcon* CIcon::NewIcon( const CIconId& iconId )
 {
 	bool hasAlpha = CGroupIcon( iconId.m_id ).Contains( ILC_COLOR32, iconId.m_stdSize );
@@ -237,7 +248,7 @@ bool CIconInfo::MakeDibSection( CBitmap& rDibSection )
 	rDibSection.DeleteObject();
 
 	// CAREFUL:
-	//	If it doesn't have an alpha channel (32 bpp) it dulls the colours and has slight pixel errors.
+	//	If it does not have an alpha channel (32 bpp) it dulls the colours and has slight pixel errors.
 	//	Use this if m_hasAlpha, otherwise better use MakeBitmap with transparent colour.
 
 	if ( m_info.hbmColor != NULL )

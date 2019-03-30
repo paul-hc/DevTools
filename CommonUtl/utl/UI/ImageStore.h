@@ -30,7 +30,10 @@ public:
 	CBitmap* RetrieveBitmap( const CIconId& cmdId, COLORREF transpColor );
 	std::pair< CBitmap*, CBitmap* > RetrieveMenuBitmaps( const CIconId& cmdId );
 	std::pair< CBitmap*, CBitmap* > RetrieveMenuBitmaps( const CIconId& cmdId, bool useCheckedBitmaps );
+
 	void RegisterButtonImages( const CImageList& imageList, const UINT buttonIds[], size_t buttonCount, const CSize* pImageSize = NULL );
+	void RegisterIcon( UINT cmdId, CIcon* pIcon );		// takes ownership of pIcon
+	void RegisterIcon( UINT cmdId, HICON hIcon ) { return RegisterIcon( cmdId, CIcon::NewIcon( hIcon ) ); }
 
 	int AddToImageList( CImageList& rImageList, const UINT buttonIds[], size_t buttonCount, const CSize& imageSize );
 

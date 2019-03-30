@@ -100,7 +100,7 @@ bool CClipboard::ReadString( std::tstring& rOutText ) const
 	return false;
 }
 
-bool CClipboard::CopyText( const std::tstring& text, CWnd* pWnd /*= AfxGetMainWnd()*/ )
+bool CClipboard::CopyText( const std::tstring& text, CWnd* pWnd /*= AfxGetMainWnd()*/, bool clear /*= true*/ )
 {
 	std::string utf8Text = str::ToUtf8( text.c_str() );
 
@@ -108,7 +108,8 @@ bool CClipboard::CopyText( const std::tstring& text, CWnd* pWnd /*= AfxGetMainWn
 	if ( NULL == pClipboard.get() )
 		return false;
 
-	pClipboard->Clear();
+	if ( clear )
+		pClipboard->Clear();
 
 	return
 		pClipboard->WriteString( utf8Text.c_str() ) &&		// UTF8 (UNICODE)

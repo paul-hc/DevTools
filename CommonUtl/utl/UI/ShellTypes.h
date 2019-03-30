@@ -167,7 +167,7 @@ namespace shell
 	CImageList* GetSysImageList( ui::GlyphGauge glyphGauge );
 
 	int GetFileSysImageIndex( const TCHAR* filePath );
-	HICON GetFileSysIcon( const TCHAR* filePath );			// returns a copy of the icon (client must delete it)
+	HICON GetFileSysIcon( const TCHAR* filePath, UINT flags = SHGFI_SMALLICON );			// returns a copy of the icon (client must delete it)
 
 
 	class CSysImageLists
