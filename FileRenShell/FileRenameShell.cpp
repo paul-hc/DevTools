@@ -56,7 +56,7 @@ size_t CFileRenameShell::ExtractDropInfo( IDataObject* pDropInfo )
 
 UINT CFileRenameShell::AugmentMenuItems( CMenu* pMenu, UINT indexMenu, UINT idBaseCmd )
 {
-	COLORREF menuColor = GetSysColor( COLOR_MENU );
+	COLORREF menuColor = ::GetSysColor( COLOR_MENU );
 	CImageStore* pImageStore = CImageStore::GetSharedStore();
 	ASSERT_PTR( pImageStore );
 
@@ -85,6 +85,8 @@ UINT CFileRenameShell::AugmentMenuItems( CMenu* pMenu, UINT indexMenu, UINT idBa
 						pMenuBitmap = pImageStore->RetrieveBitmap( ID_PASTE_DEEP_FOLDER, menuColor );
 						cmdCount += itemCount + 1;		// +1 for the popup entry (otherwise it skips the last deep folder on ExecuteCommand)
 					}
+					else
+						continue;
 					break;
 				}
 				default:
