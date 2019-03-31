@@ -21,6 +21,7 @@
 
 const CFileRenameShell::CMenuCmdInfo CFileRenameShell::s_commands[] =
 {
+	{ Cmd_Separator },
 	{ Cmd_SendToCliboard, _T("&Send To Clipboard"), _T("Send the selected files path to clipboard"), ID_SEND_TO_CLIP },
 	{ Cmd_RenameFiles, _T("&Rename Files..."), _T("Rename selected files in the dialog"), ID_RENAME_ITEM },
 	{ Cmd_TouchFiles, _T("&Touch Files..."), _T("Modify the timestamp of selected files"), ID_TOUCH_FILES },
@@ -30,8 +31,9 @@ const CFileRenameShell::CMenuCmdInfo CFileRenameShell::s_commands[] =
 	{ Cmd_PasteDeepPopup, _T("&Paste Deep to Folder"), _T("Paste copied files creating a deep folder"), ID_PASTE_DEEP_FOLDER },
 #ifdef _DEBUG
 	{ Cmd_Separator },
-	{ Cmd_RunUnitTests, _T("# Run Unit Tests (FileRenameShell)"), _T("Run the unit tests (debug build only)"), ID_RUN_TESTS }
+	{ Cmd_RunUnitTests, _T("# Run Unit Tests (FileRenameShell)"), _T("Run the unit tests (debug build only)"), ID_RUN_TESTS },
 #endif
+	{ Cmd_Separator }
 };
 
 
@@ -70,7 +72,6 @@ size_t CFileRenameShell::ExtractDropInfo( IDataObject* pDropInfo )
 UINT CFileRenameShell::AugmentMenuItems( HMENU hMenu, UINT indexMenu, UINT idBaseCmd )
 {
 	CShellContextMenuBuilder menuBuilder( hMenu, indexMenu, idBaseCmd );
-	menuBuilder.AddSeparator();
 
 	for ( int i = 0; i != COUNT_OF( s_commands ); ++i )
 	{
@@ -96,7 +97,6 @@ UINT CFileRenameShell::AugmentMenuItems( HMENU hMenu, UINT indexMenu, UINT idBas
 		}
 	}
 
-	menuBuilder.AddSeparator();
 	return menuBuilder.GetAddedCmdCount();
 }
 
