@@ -1,13 +1,18 @@
 
 #include "stdafx.h"
 #include "Clipboard.h"
+#include "FileSystem.h"
+#include "OleUtils.h"
 #include "Utilities.h"
+#include "ShellUtilities.h"
+#include "utl/StringUtilities.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
 
 
+const CLIPFORMAT CClipboard::s_cfPreferredDropEffect = static_cast< CLIPFORMAT >( ::RegisterClipboardFormat( CFSTR_PREFERREDDROPEFFECT ) );
 const TCHAR CClipboard::s_lineEnd[] = _T("\r\n");
 
 CClipboard::CClipboard( CWnd* pWnd )
@@ -125,4 +130,49 @@ bool CClipboard::PasteText( std::tstring& rText, CWnd* pWnd /*= AfxGetMainWnd()*
 {
 	std::auto_ptr< CClipboard > pClipboard( Open( pWnd ) );
 	return pClipboard.get() != NULL && pClipboard->ReadString( rText );
+}
+
+
+bool CClipboard::HasDropFiles( void )
+{
+	return ::IsClipboardFormatAvailable( CF_HDROP ) != FALSE;
+}
+
+DROPEFFECT CClipboard::QueryDropFilePaths( std::vector< fs::CPath >& rSrcPaths )
+{
+	CComPtr< IDataObject > pDataObject;
+
+	if ( ::IsClipboardFormatAvailable( CF_HDROP ) )
+		if ( SUCCEEDED( ::OleGetClipboard( &pDataObject ) ) )
+		{
+			FORMATETC format = { CF_HDROP, NULL, DVASPECT_CONTENT, -1, TYMED_HGLOBAL };
+			STGMEDIUM storageMedium;
+
+			if ( SUCCEEDED( pDataObject->GetData( &format, &storageMedium ) ) )		// transfer the data
+			{
+				HDROP hDropInfo = (HDROP)storageMedium.hGlobal;
+				shell::QueryDroppedFiles( rSrcPaths, hDropInfo );
+			}
+
+			return ::IsClipboardFormatAvailable( s_cfPreferredDropEffect )
+				? ole_utl::GetValueDWord( pDataObject, CFSTR_PREFERREDDROPEFFECT )		// Copy or Paste?
+				: DROPEFFECT_COPY;
+		}
+
+	return DROPEFFECT_NONE;
+}
+
+bool CClipboard::AlsoCopyDropFilesAsPaths( CWnd* pParentOwner )
+{
+	if ( CanPasteText() )
+		return false;				// avoid overriding existing text
+
+	std::vector< fs::CPath > srcPaths;
+	QueryDropFilePaths( srcPaths );
+
+	if ( srcPaths.empty() )
+		return false;				// no CF_HDROP stored on clipboard
+
+	CopyToLines( srcPaths, pParentOwner, CClipboard::s_lineEnd, false );		// keep all the file transfer (Copy, Cut) clipboard data, and add the source paths as text
+	return true;
 }

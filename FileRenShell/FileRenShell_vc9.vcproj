@@ -722,6 +722,14 @@
 					>
 				</File>
 				<File
+					RelativePath=".\DropFilesModel.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\DropFilesModel.h"
+					>
+				</File>
+				<File
 					RelativePath=".\DuplicateFileItem.cpp"
 					>
 				</File>
@@ -759,14 +767,6 @@
 				</File>
 				<File
 					RelativePath=".\IFileEditor.h"
-					>
-				</File>
-				<File
-					RelativePath=".\PasteDeepModel.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\PasteDeepModel.h"
 					>
 				</File>
 				<File

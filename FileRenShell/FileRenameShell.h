@@ -8,7 +8,7 @@
 
 
 class CFileModel;
-class CPasteDeepModel;
+class CDropFilesModel;
 class CShellContextMenuBuilder;
 interface IFileEditor;
 
@@ -56,8 +56,8 @@ private:
 	CBitmap* MakeCmdInfo( std::tstring& rItemText, const CMenuCmdInfo& cmdInfo );
 	static const CMenuCmdInfo* FindCmd( MenuCommand cmd );
 private:
-	std::auto_ptr< CFileModel > m_pFileModel;
-	std::auto_ptr< CPasteDeepModel > m_pPasteDeepModel;
+	std::auto_ptr< CFileModel > m_pFileModel;				// files selected in Explorer
+	std::auto_ptr< CDropFilesModel > m_pDropFilesModel;		// files copied or cut to clipboard (CF_HDROP)
 
 	static const CMenuCmdInfo s_commands[];
 

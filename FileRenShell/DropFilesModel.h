@@ -1,5 +1,5 @@
-#ifndef PasteDeepModel_h
-#define PasteDeepModel_h
+#ifndef DropFilesModel_h
+#define DropFilesModel_h
 #pragma once
 
 #include "utl/Path.h"
@@ -9,18 +9,15 @@ class CEnumTags;
 class CImageStore;
 
 
-class CPasteDeepModel : private utl::noncopyable
+class CDropFilesModel : private utl::noncopyable
 {
 public:
-	CPasteDeepModel( const fs::CPath& destDirPath );
-	~CPasteDeepModel();
+	CDropFilesModel( const fs::CPath& destDirPath );
+	~CDropFilesModel();
 
 	void Init( const std::vector< fs::CPath >& srcPaths, DROPEFFECT dropEffect );
 	void BuildFromClipboard( void );
 	void Clear( void );
-
-	static bool HasSelFilesOnClipboard( void );					// any files Copied or Pasted on clipboard?
-	static bool AlsoCopyFilesAsPaths( CWnd* pParentOwner );		// if files Copied or Pasted on clipboard, also store their paths as text
 
 	bool HasSrcPaths( void ) const { return !m_srcPaths.empty(); }
 	const std::vector< fs::CPath >& GetSrcPaths( void ) const { return m_srcPaths; }
@@ -36,13 +33,12 @@ public:
 	static const CEnumTags& GetTags_PasteOperation( void );
 	PasteOperation GetPasteOperation( void ) const;
 private:
-	static void QueryClipboardData( std::vector< fs::CPath >& rSrcPaths, DROPEFFECT& rDropEffect );
 	void RegisterFolderImage( const fs::CPath& folderPath );
 	fs::CPath MakeDeepTargetFilePath( const fs::CPath& srcFilePath, const fs::CPath& relFolderPath ) const;
 private:
 	fs::CPath m_destDirPath;
 	std::vector< fs::CPath > m_srcPaths;
-	DROPEFFECT m_dropEffect;			// Copy=DROPEFFECT_COPY|DROPEFFECT_LINK, Paste=DROPEFFECT_MOVE
+	DROPEFFECT m_dropEffect;						// Copy=DROPEFFECT_COPY|DROPEFFECT_LINK, Paste=DROPEFFECT_MOVE
 
 	fs::CPath m_srcParentPath;
 	std::vector< fs::CPath > m_relFolderPaths;		// relative folders from the original source parent path
@@ -52,4 +48,4 @@ private:
 };
 
 
-#endif // PasteDeepModel_h
+#endif // DropFilesModel_h

@@ -13,7 +13,7 @@ public:
 	void Close( void );
 	bool IsOpen( void ) const { return m_pWnd != NULL; }
 
-	void Clear( void ) { ASSERT( IsOpen() ); EmptyClipboard(); }
+	void Clear( void ) { ASSERT( IsOpen() ); ::EmptyClipboard(); }
 
 	HGLOBAL GetData( UINT clipFormat ) const { ASSERT( IsOpen() ); return IsFormatAvailable( clipFormat ) ? ::GetClipboardData( clipFormat ) : NULL; }
 	bool SetData( UINT clipFormat, HGLOBAL hGlobal ) { ASSERT( IsOpen() ); return ::SetClipboardData( clipFormat, hGlobal ) != NULL; }
@@ -41,9 +41,15 @@ public:
 
 	template< typename StringT >
 	static bool PasteFromLines( std::vector< StringT >& rTextItems, CWnd* pWnd = AfxGetMainWnd(), const TCHAR* pLineEnd = s_lineEnd );
+
+	// CF_HDROP: cut or copied files
+	static bool HasDropFiles( void );
+	static DROPEFFECT QueryDropFilePaths( std::vector< fs::CPath >& rSrcPaths );
+	static bool AlsoCopyDropFilesAsPaths( CWnd* pParentOwner );		// if files Copied or Pasted on clipboard, also store their paths as text
 private:
 	CWnd* m_pWnd;
 public:
+	static const CLIPFORMAT s_cfPreferredDropEffect;
 	static const TCHAR s_lineEnd[];
 };
 

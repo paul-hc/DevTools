@@ -1,6 +1,6 @@
 
 #include "stdafx.h"
-#include "PasteDeepModel.h"
+#include "DropFilesModel.h"
 #include "utl/AppTools.h"
 #include "utl/EnumTags.h"
 #include "utl/FileSystem.h"
@@ -8,7 +8,6 @@
 #include "utl/StringUtilities.h"
 #include "utl/UI/Clipboard.h"
 #include "utl/UI/ImageStore.h"
-#include "utl/UI/OleUtils.h"
 #include "utl/UI/ShellTypes.h"
 #include "utl/UI/ShellUtilities.h"
 
@@ -17,18 +16,18 @@
 #endif
 
 
-CPasteDeepModel::CPasteDeepModel( const fs::CPath& destDirPath )
+CDropFilesModel::CDropFilesModel( const fs::CPath& destDirPath )
 	: m_destDirPath( destDirPath )
 	, m_dropEffect( DROPEFFECT_NONE )
 {
 	ASSERT( fs::IsValidDirectory( m_destDirPath.GetPtr() ) );
 }
 
-CPasteDeepModel::~CPasteDeepModel()
+CDropFilesModel::~CDropFilesModel()
 {
 }
 
-void CPasteDeepModel::Clear( void )
+void CDropFilesModel::Clear( void )
 {
 	m_srcPaths.clear();
 	m_dropEffect = DROPEFFECT_NONE;
@@ -38,7 +37,7 @@ void CPasteDeepModel::Clear( void )
 	m_pImageStore.reset();
 }
 
-void CPasteDeepModel::Init( const std::vector< fs::CPath >& srcPaths, DROPEFFECT dropEffect )
+void CDropFilesModel::Init( const std::vector< fs::CPath >& srcPaths, DROPEFFECT dropEffect )
 {
 	m_srcPaths = srcPaths;
 	m_dropEffect = dropEffect;
@@ -61,13 +60,13 @@ void CPasteDeepModel::Init( const std::vector< fs::CPath >& srcPaths, DROPEFFECT
 	}
 }
 
-void CPasteDeepModel::RegisterFolderImage( const fs::CPath& folderPath )
+void CDropFilesModel::RegisterFolderImage( const fs::CPath& folderPath )
 {
 	if ( HICON hFolderIcon = shell::GetFileSysIcon( folderPath.GetPtr(), SHGFI_SMALLICON ) )
 		m_pImageStore->RegisterIcon( BaseImageId + static_cast< UINT >( m_relFolderPaths.size() - 1 ), CIcon::NewIcon( hFolderIcon ) );		// match the folder index
 }
 
-CBitmap* CPasteDeepModel::GetItemInfo( std::tstring& rItemText, size_t fldPos ) const
+CBitmap* CDropFilesModel::GetItemInfo( std::tstring& rItemText, size_t fldPos ) const
 {
 	rItemText = m_relFolderPaths[ fldPos ].Get();
 
@@ -83,64 +82,18 @@ CBitmap* CPasteDeepModel::GetItemInfo( std::tstring& rItemText, size_t fldPos ) 
 	return m_pImageStore->RetrieveBitmap( BaseImageId + static_cast< UINT >( fldPos ), ::GetSysColor( COLOR_MENU ) );
 }
 
-void CPasteDeepModel::BuildFromClipboard( void )
+void CDropFilesModel::BuildFromClipboard( void )
 {
 	Clear();
 
 	std::vector< fs::CPath > srcPaths;
-	DROPEFFECT dropEffect = DROPEFFECT_NONE;
-	QueryClipboardData( srcPaths, dropEffect );
+	DROPEFFECT dropEffect = CClipboard::QueryDropFilePaths( srcPaths );
 
 	if ( !srcPaths.empty() )
 		Init( srcPaths, dropEffect );
 }
 
-bool CPasteDeepModel::HasSelFilesOnClipboard( void )
-{
-	return ::IsClipboardFormatAvailable( CF_HDROP ) != FALSE;
-}
-
-bool CPasteDeepModel::AlsoCopyFilesAsPaths( CWnd* pParentOwner )
-{
-	if ( CClipboard::CanPasteText() )
-		return false;				// avoid overriding existing text
-
-	std::vector< fs::CPath > srcPaths;
-	DROPEFFECT dropEffect = DROPEFFECT_NONE;
-	QueryClipboardData( srcPaths, dropEffect );
-
-	if ( srcPaths.empty() )
-		return false;				// no CF_HDROP stored on clipboard
-
-	CClipboard::CopyToLines( srcPaths, pParentOwner, CClipboard::s_lineEnd, false );		// keep all the file transfer (Copy, Cut) clipboard data, and add the source paths as text
-	return true;
-}
-
-void CPasteDeepModel::QueryClipboardData( std::vector< fs::CPath >& rSrcPaths, DROPEFFECT& rDropEffect )
-{
-	CComPtr< IDataObject > pDataObject;
-	if ( ::IsClipboardFormatAvailable( CF_HDROP ) )
-		if ( SUCCEEDED( ::OleGetClipboard( &pDataObject ) ) )
-		{
-			FORMATETC format = { CF_HDROP, NULL, DVASPECT_CONTENT, -1, TYMED_HGLOBAL };
-			STGMEDIUM storageMedium;
-
-			if ( SUCCEEDED( pDataObject->GetData( &format, &storageMedium ) ) )		// transfer the data
-			{
-				HDROP hDropInfo = (HDROP)storageMedium.hGlobal;
-				shell::QueryDroppedFiles( rSrcPaths, hDropInfo );
-			}
-
-			static CLIPFORMAT s_cfPreferredDropEffect = static_cast< CLIPFORMAT >( RegisterClipboardFormat( CFSTR_PREFERREDDROPEFFECT ) );
-
-			if ( ::IsClipboardFormatAvailable( s_cfPreferredDropEffect ) )
-				rDropEffect = ole_utl::GetValueDWord( pDataObject, CFSTR_PREFERREDDROPEFFECT );		// Copy or Paste?
-			else
-				rDropEffect = DROPEFFECT_COPY;
-		}
-}
-
-bool CPasteDeepModel::PasteDeep( const fs::CPath& relFolderPath, CWnd* pParentOwner )
+bool CDropFilesModel::PasteDeep( const fs::CPath& relFolderPath, CWnd* pParentOwner )
 {
 	std::vector< std::tstring > srcPaths, destPaths;
 	srcPaths.reserve( m_srcPaths.size() );
@@ -183,7 +136,7 @@ bool CPasteDeepModel::PasteDeep( const fs::CPath& relFolderPath, CWnd* pParentOw
 	return succeeded;
 }
 
-fs::CPath CPasteDeepModel::MakeDeepTargetFilePath( const fs::CPath& srcFilePath, const fs::CPath& relFolderPath ) const
+fs::CPath CDropFilesModel::MakeDeepTargetFilePath( const fs::CPath& srcFilePath, const fs::CPath& relFolderPath ) const
 {
 	fs::CPath srcParentDirPath = srcFilePath.GetParentPath();
 	std::tstring targetRelPath = path::StripCommonPrefix( srcParentDirPath.GetPtr(), m_srcParentPath.GetPtr() );
@@ -192,7 +145,7 @@ fs::CPath CPasteDeepModel::MakeDeepTargetFilePath( const fs::CPath& srcFilePath,
 	return targetFullPath;
 }
 
-CPasteDeepModel::PasteOperation CPasteDeepModel::GetPasteOperation( void ) const
+CDropFilesModel::PasteOperation CDropFilesModel::GetPasteOperation( void ) const
 {
 	if ( HasFlag( m_dropEffect, DROPEFFECT_MOVE ) )
 		return PasteMoveFiles;
@@ -202,7 +155,7 @@ CPasteDeepModel::PasteOperation CPasteDeepModel::GetPasteOperation( void ) const
 	return PasteNone;
 }
 
-const CEnumTags& CPasteDeepModel::GetTags_PasteOperation( void )
+const CEnumTags& CDropFilesModel::GetTags_PasteOperation( void )
 {
 	static const CEnumTags tags( _T("n/a|DEEP PASTE - COPY|DEEP PASTE - CUT") );
 	return tags;

@@ -5,10 +5,11 @@
 #include "FileModel.h"
 #include "IFileEditor.h"
 #include "Application.h"
-#include "PasteDeepModel.h"
+#include "DropFilesModel.h"
 #include "utl/FmtUtils.h"
 #include "utl/FileSystem_fwd.h"
 #include "utl/Guards.h"
+#include "utl/UI/Clipboard.h"
 #include "utl/UI/ImageStore.h"
 #include "utl/UI/ShellContextMenuBuilder.h"
 #include "utl/UI/Utilities.h"
@@ -56,11 +57,11 @@ size_t CFileRenameShell::ExtractDropInfo( IDataObject* pDropInfo )
 		m_pFileModel.reset( new CFileModel( app::GetCmdSvc() ) );
 		m_pFileModel->SetupFromDropInfo( (HDROP)storageMedium.hGlobal );
 
-		if ( 1 == m_pFileModel->GetSourcePaths().size() && fs::IsValidDirectory( m_pFileModel->GetSourcePaths().front().GetPtr() ) )	// single paste target directory?
-			if ( CPasteDeepModel::HasSelFilesOnClipboard() )
+		if ( 1 == m_pFileModel->GetSourcePaths().size() && fs::IsValidDirectory( m_pFileModel->GetSourcePaths().front().GetPtr() ) )	// single selected directory as paste target?
+			if ( CClipboard::HasDropFiles() )
 			{
-				m_pPasteDeepModel.reset( new CPasteDeepModel( m_pFileModel->GetSourcePaths().front() ) );
-				m_pPasteDeepModel->BuildFromClipboard();
+				m_pDropFilesModel.reset( new CDropFilesModel( m_pFileModel->GetSourcePaths().front() ) );
+				m_pDropFilesModel->BuildFromClipboard();
 			}
 
 		return m_pFileModel->GetSourcePaths().size();
@@ -102,16 +103,16 @@ UINT CFileRenameShell::AugmentMenuItems( HMENU hMenu, UINT indexMenu, UINT idBas
 
 HMENU CFileRenameShell::BuildPasteDeepSubmenu( const CShellContextMenuBuilder& menuBuilder )
 {
-	if ( m_pPasteDeepModel.get() != NULL )
-		if ( m_pPasteDeepModel->HasSrcPaths() && m_pPasteDeepModel->HasRelFolderPaths() )
+	if ( m_pDropFilesModel.get() != NULL )
+		if ( m_pDropFilesModel->HasSrcPaths() && m_pDropFilesModel->HasRelFolderPaths() )
 		{
 			CMenu subMenu;
 			subMenu.CreatePopupMenu();
 
-			for ( UINT i = 0, count = (UINT)m_pPasteDeepModel->GetRelFolderPaths().size(); i != count; ++i )
+			for ( UINT i = 0, count = (UINT)m_pDropFilesModel->GetRelFolderPaths().size(); i != count; ++i )
 			{
 				std::tstring itemText;
-				CBitmap* pFolderBitmap = m_pPasteDeepModel->GetItemInfo( itemText, i );
+				CBitmap* pFolderBitmap = m_pDropFilesModel->GetItemInfo( itemText, i );
 				UINT cmdId = menuBuilder.MakeCmdId( Cmd_PasteDeepBase + i );
 
 				subMenu.InsertMenu( i, MF_STRING | MF_BYPOSITION, cmdId, itemText.c_str() );
@@ -207,12 +208,12 @@ void CFileRenameShell::ExecuteCommand( MenuCommand menuCmd, CWnd* pParentOwner )
 
 bool CFileRenameShell::ExecutePasteDeep( MenuCommand menuCmd, CWnd* pParentOwner )
 {
-	if ( menuCmd >= Cmd_PasteDeepBase && m_pPasteDeepModel.get() != NULL )
+	if ( menuCmd >= Cmd_PasteDeepBase && m_pDropFilesModel.get() != NULL )
 	{
 		UINT relFldPos = menuCmd - Cmd_PasteDeepBase;
-		if ( relFldPos < m_pPasteDeepModel->GetRelFolderPaths().size() )
+		if ( relFldPos < m_pDropFilesModel->GetRelFolderPaths().size() )
 		{
-			if ( !m_pPasteDeepModel->PasteDeep( m_pPasteDeepModel->GetRelFolderPaths()[ relFldPos ], pParentOwner ) )
+			if ( !m_pDropFilesModel->PasteDeep( m_pDropFilesModel->GetRelFolderPaths()[ relFldPos ], pParentOwner ) )
 				ui::BeepSignal();		// a file transfer error occured
 
 			return true;				// handled
@@ -283,7 +284,7 @@ STDMETHODIMP CFileRenameShell::QueryContextMenu( HMENU hMenu, UINT indexMenu, UI
 			//utl::CSectionGuard section( _T("CFileRenameShell::QueryContextMenu()") );
 
 			if ( CWnd* pParent = AfxGetMainWnd() )
-				if ( CPasteDeepModel::AlsoCopyFilesAsPaths( pParent ) )		// if files Copied or Cut on clipboard, also store their paths as text
+				if ( CClipboard::AlsoCopyDropFilesAsPaths( pParent ) )		// if files Copied or Cut on clipboard, also store their paths as text
 					TRACE( _T("CFileRenameShell::QueryContextMenu(): found files copied or cut on clipboard - also store their paths as text!\n") );
 
 			UINT cmdCount = AugmentMenuItems( hMenu, indexMenu, idCmdFirst );
