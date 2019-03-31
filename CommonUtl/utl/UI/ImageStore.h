@@ -28,6 +28,8 @@ public:
 	static const CIcon* RetrieveSharedIcon( const CIconId& cmdId );
 
 	CBitmap* RetrieveBitmap( const CIconId& cmdId, COLORREF transpColor );
+	CBitmap* RetrieveMenuBitmap( const CIconId& cmdId ) { return RetrieveBitmap( cmdId, ::GetSysColor( COLOR_MENU ) ); }
+
 	std::pair< CBitmap*, CBitmap* > RetrieveMenuBitmaps( const CIconId& cmdId );
 	std::pair< CBitmap*, CBitmap* > RetrieveMenuBitmaps( const CIconId& cmdId, bool useCheckedBitmaps );
 

@@ -19,6 +19,7 @@ public:
 	void BuildFromClipboard( void );
 	void Clear( void );
 
+	static bool HasSelFilesOnClipboard( void );					// any files Copied or Pasted on clipboard?
 	static bool AlsoCopyFilesAsPaths( CWnd* pParentOwner );		// if files Copied or Pasted on clipboard, also store their paths as text
 
 	bool HasSrcPaths( void ) const { return !m_srcPaths.empty(); }
@@ -27,7 +28,7 @@ public:
 	bool HasRelFolderPaths( void ) const { return !m_relFolderPaths.empty(); }
 	const std::vector< fs::CPath >& GetRelFolderPaths( void ) const { return m_relFolderPaths; }
 
-	CBitmap* GetItemInfo( std::tstring& rItemText, UINT fldPos ) const;
+	CBitmap* GetItemInfo( std::tstring& rItemText, size_t fldPos ) const;
 	bool PasteDeep( const fs::CPath& relFolderPath, CWnd* pParentOwner );
 
 	enum PasteOperation { PasteNone, PasteCopyFiles, PasteMoveFiles };

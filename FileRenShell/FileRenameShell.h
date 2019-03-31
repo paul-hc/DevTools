@@ -9,6 +9,7 @@
 
 class CFileModel;
 class CPasteDeepModel;
+class CShellContextMenuBuilder;
 interface IFileEditor;
 
 
@@ -24,8 +25,8 @@ public:
 	~CFileRenameShell();
 private:
 	size_t ExtractDropInfo( IDataObject* pDropInfo );
-	UINT AugmentMenuItems( CMenu* pMenu, UINT indexMenu, UINT idBaseCmd );		// return the added commands count
-	UINT BuildPasteDeepSubmenu( CMenu* pSubMenu, UINT idBaseCmd );				// return the added commands count
+	UINT AugmentMenuItems( HMENU hMenu, UINT indexMenu, UINT idBaseCmd );			// return the added commands count
+	HMENU BuildPasteDeepSubmenu( const CShellContextMenuBuilder& menuBuilder );		// return the created sub-menu
 
 	enum MenuCommand
 	{
@@ -34,6 +35,8 @@ private:
 		Cmd_Undo, Cmd_Redo,
 		Cmd_RunUnitTests,
 		Cmd_PasteDeepBase,
+
+		Cmd_Separator = -1,
 
 		// popup IDs are negative
 		Cmd_PasteDeepPopup = -100
@@ -45,13 +48,12 @@ private:
 		const TCHAR* m_pTitle;
 		const TCHAR* m_pStatusBarInfo;
 		UINT m_iconId;
-		bool m_addSep;
 	};
 
 	void ExecuteCommand( MenuCommand menuCmd, CWnd* pParentOwner );
 	bool ExecutePasteDeep( MenuCommand menuCmd, CWnd* pParentOwner );
 
-	std::tstring FormatCmdText( const CMenuCmdInfo& cmdInfo );
+	CBitmap* MakeCmdInfo( std::tstring& rItemText, const CMenuCmdInfo& cmdInfo );
 	static const CMenuCmdInfo* FindCmd( MenuCommand cmd );
 private:
 	std::auto_ptr< CFileModel > m_pFileModel;

@@ -67,7 +67,7 @@ void CPasteDeepModel::RegisterFolderImage( const fs::CPath& folderPath )
 		m_pImageStore->RegisterIcon( BaseImageId + static_cast< UINT >( m_relFolderPaths.size() - 1 ), CIcon::NewIcon( hFolderIcon ) );		// match the folder index
 }
 
-CBitmap* CPasteDeepModel::GetItemInfo( std::tstring& rItemText, UINT fldPos ) const
+CBitmap* CPasteDeepModel::GetItemInfo( std::tstring& rItemText, size_t fldPos ) const
 {
 	rItemText = m_relFolderPaths[ fldPos ].Get();
 
@@ -80,7 +80,7 @@ CBitmap* CPasteDeepModel::GetItemInfo( std::tstring& rItemText, UINT fldPos ) co
 
 	rItemText += _T("*");
 
-	return m_pImageStore->RetrieveBitmap( BaseImageId + fldPos, ::GetSysColor( COLOR_MENU ) );
+	return m_pImageStore->RetrieveBitmap( BaseImageId + static_cast< UINT >( fldPos ), ::GetSysColor( COLOR_MENU ) );
 }
 
 void CPasteDeepModel::BuildFromClipboard( void )
@@ -93,6 +93,11 @@ void CPasteDeepModel::BuildFromClipboard( void )
 
 	if ( !srcPaths.empty() )
 		Init( srcPaths, dropEffect );
+}
+
+bool CPasteDeepModel::HasSelFilesOnClipboard( void )
+{
+	return ::IsClipboardFormatAvailable( CF_HDROP ) != FALSE;
 }
 
 bool CPasteDeepModel::AlsoCopyFilesAsPaths( CWnd* pParentOwner )

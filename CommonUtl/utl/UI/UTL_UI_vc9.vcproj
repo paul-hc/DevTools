@@ -1074,6 +1074,14 @@
 					>
 				</File>
 				<File
+					RelativePath=".\ShellContextMenuBuilder.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\ShellContextMenuBuilder.h"
+					>
+				</File>
+				<File
 					RelativePath=".\ShellContextMenuHost.cpp"
 					>
 				</File>

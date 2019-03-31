@@ -70,6 +70,7 @@ namespace ui
 	int FindMenuItemIndex( HMENU hMenu, UINT itemId, unsigned int iFirst = 0 );
 	int FindAfterMenuItemIndex( HMENU hMenu, UINT itemId, unsigned int iFirst = 0 );		// subsequent position
 
+	UINT GetTotalCmdCount( HMENU hMenu, RecursionDepth depth = Deep );						// just commands (excluding separators, sub-menus)
 	void QueryMenuItemIds( std::vector< UINT >& rItemIds, HMENU hMenu );
 
 	HMENU CloneMenu( HMENU hSrcMenu );

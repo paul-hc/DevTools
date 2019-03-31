@@ -261,6 +261,32 @@ namespace ui
 		return atIndex + 1;			// the position just after
 	}
 
+	UINT GetTotalCmdCount( HMENU hMenu, RecursionDepth depth /*= Deep*/ )
+	{
+		ASSERT_PTR( hMenu );
+		UINT cmdCount = 0;
+
+		for ( UINT i = 0, count = ::GetMenuItemCount( hMenu ); i != count; ++i )
+		{
+			UINT state = ::GetMenuState( hMenu, i, MF_BYPOSITION );
+			ASSERT( state != UINT_MAX );
+
+			if ( HasFlag( state, MF_POPUP ) )
+			{
+				if ( Deep == depth )
+					cmdCount += GetTotalCmdCount( ::GetSubMenu( hMenu, i ), Deep );
+			}
+			else if ( !HasFlag( state, MF_SEPARATOR ) )
+			{
+				UINT cmdId = ::GetMenuItemID( hMenu, i );
+				if ( cmdId != 0 && cmdId != UINT_MAX )
+					++cmdCount;
+			}
+		}
+
+		return cmdCount;
+	}
+
 	void QueryMenuItemIds( std::vector< UINT >& rItemIds, HMENU hMenu )
 	{
 		ASSERT_PTR( hMenu );

@@ -144,6 +144,30 @@ public:
 };
 
 
+// Used for removing duplicate files. Can be undone by undeleting the file from Recycle Bin.
+//
+class CDeleteFileCmd : public cmd::CBaseFileCmd
+{
+	DECLARE_SERIAL( CDeleteFileCmd )
+
+	CDeleteFileCmd( void ) {}
+public:
+	CDeleteFileCmd( const fs::CPath& srcPath, const fs::CPath& destPath );
+	virtual ~CDeleteFileCmd();
+
+	// ICommand interface
+	virtual std::tstring Format( utl::Verbosity verbosity ) const;
+	virtual bool Execute( void );
+	virtual bool IsUndoable( void ) const;
+	virtual std::auto_ptr< CBaseFileCmd > MakeUnexecuteCmd( void ) const;
+
+	// base overrides
+	virtual void Serialize( CArchive& archive );
+public:
+	fs::CPath m_destPath;
+};
+
+
 class CFileModel;
 
 

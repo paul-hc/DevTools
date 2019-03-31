@@ -347,6 +347,57 @@ void CTouchFileCmd::Serialize( CArchive& archive )
 	}
 }
 
+/*
+// CDeleteFileCmd implementation
+
+IMPLEMENT_SERIAL( CDeleteFileCmd, CBaseSerialCmd, VERSIONABLE_SCHEMA | 1 )
+
+CDeleteFileCmd::CDeleteFileCmd( const fs::CPath& srcPath, const fs::CPath& destPath )
+	: CBaseFileCmd( cmd::DeleteFile, srcPath )
+	, m_destPath( destPath )
+{
+}
+
+CDeleteFileCmd::~CDeleteFileCmd()
+{
+}
+
+std::tstring CDeleteFileCmd::Format( utl::Verbosity verbosity ) const
+{
+	std::tstring text;
+	if ( verbosity != utl::Brief )
+		text = CBaseFileCmd::Format( utl::Brief );		// prepend "RENAME" tag
+
+	stream::Tag( text, fmt::FormatDeleteEntry( m_srcPath, m_destPath ), _T(" ") );
+	return text;
+}
+
+bool CDeleteFileCmd::Execute( void )
+{
+	CFile::Delete( m_srcPath.GetPtr(), m_destPath.GetPtr() );
+	NotifyObservers();
+	return true;
+}
+
+std::auto_ptr< cmd::CBaseFileCmd > CDeleteFileCmd::MakeUnexecuteCmd( void ) const
+{
+	return std::auto_ptr< cmd::CBaseFileCmd >( new CDeleteFileCmd( m_destPath, m_srcPath ) );
+}
+
+bool CDeleteFileCmd::IsUndoable( void ) const
+{
+	//return m_destPath.FileExist() && !m_srcPath.FileExist();
+	return true;		// let it unexecute with error rather than being skipped in UNDO
+}
+
+void CDeleteFileCmd::Serialize( CArchive& archive )
+{
+	cmd::CBaseFileCmd::Serialize( archive );
+
+	archive & m_srcPath;
+	archive & m_destPath;
+}
+*/
 
 // CBaseChangeDestCmd implementation
 
