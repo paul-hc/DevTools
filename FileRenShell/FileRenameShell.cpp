@@ -134,16 +134,16 @@ HMENU CFileRenameShell::BuildCreateFoldersSubmenu( CBaseMenuBuilder* pParentBuil
 HMENU CFileRenameShell::BuildPasteDeepSubmenu( CBaseMenuBuilder* pParentBuilder, std::tstring& rItemText )
 {
 	if ( m_pDropFilesModel.get() != NULL )
-		if ( m_pDropFilesModel->HasDropPaths() && m_pDropFilesModel->HasRelFolderPaths() )
+		if ( m_pDropFilesModel->HasDropPaths() && m_pDropFilesModel->HasRelFolderPathSeq() )
 		{
 			rItemText += str::Format( _T(" (%s)"), m_pDropFilesModel->FormatDropCounts().c_str() );
 
 			CSubMenuBuilder subMenuBuilder( pParentBuilder );
 
-			for ( UINT i = 0, count = (UINT)m_pDropFilesModel->GetRelFolderPaths().size(); i != count; ++i )
+			for ( UINT i = 0, count = (UINT)m_pDropFilesModel->GetRelFolderPathSeq().size(); i != count; ++i )
 			{
 				std::tstring itemText;
-				CBitmap* pFolderBitmap = m_pDropFilesModel->GetItemInfo( itemText, i );
+				CBitmap* pFolderBitmap = m_pDropFilesModel->GetRelFolderItemInfo( itemText, i );
 
 				subMenuBuilder.AddCmdItem( Cmd_PasteDeepBase + i, itemText, pFolderBitmap );
 			}
@@ -262,9 +262,9 @@ bool CFileRenameShell::ExecutePasteDeep( MenuCommand menuCmd, CWnd* pParentOwner
 	if ( menuCmd >= Cmd_PasteDeepBase && m_pDropFilesModel.get() != NULL )
 	{
 		UINT relFldPos = menuCmd - Cmd_PasteDeepBase;
-		if ( relFldPos < m_pDropFilesModel->GetRelFolderPaths().size() )
+		if ( relFldPos < m_pDropFilesModel->GetRelFolderPathSeq().size() )
 		{
-			if ( !m_pDropFilesModel->PasteDeep( m_pDropFilesModel->GetRelFolderPaths()[ relFldPos ], pParentOwner ) )
+			if ( !m_pDropFilesModel->PasteDeep( m_pDropFilesModel->GetRelFolderPathSeq()[ relFldPos ], pParentOwner ) )
 				ui::BeepSignal();		// a file transfer error occured
 
 			return true;				// handled

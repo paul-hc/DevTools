@@ -38,7 +38,7 @@ void CDropFilesModel::Clear( void )
 	m_srcCommonFolderPath.Clear();
 	m_srcFolderPaths.clear();
 	m_srcDeepFolderPaths.clear();
-	m_relFolderPaths.clear();
+	m_relFolderPathSeq.clear();
 	m_pImageStore.reset();
 }
 
@@ -83,14 +83,14 @@ void CDropFilesModel::Init( const std::vector< fs::CPath >& dropPaths, DROPEFFEC
 	fs::SortPaths( m_srcDeepFolderPaths );
 
 	// deep paste folders
-	m_relFolderPaths.push_back( std::tstring() );		// the "." entry (shallow paste)
+	m_relFolderPathSeq.push_back( std::tstring() );		// the "." entry (shallow paste)
 	RegisterFolderImage( m_destDirPath );
 
 	for ( fs::CPath relFolderPath = m_srcCommonFolderPath.GetFilename(), parentPath = m_srcCommonFolderPath;
 		  !parentPath.IsEmpty() && !path::IsRoot( parentPath.GetPtr() );
 		  relFolderPath = path::Combine( parentPath.GetNameExt(), relFolderPath.GetPtr() ) )
 	{
-		m_relFolderPaths.push_back( relFolderPath );
+		m_relFolderPathSeq.push_back( relFolderPath );
 		RegisterFolderImage( parentPath );
 
 		parentPath = parentPath.GetParentPath();
@@ -100,7 +100,7 @@ void CDropFilesModel::Init( const std::vector< fs::CPath >& dropPaths, DROPEFFEC
 void CDropFilesModel::RegisterFolderImage( const fs::CPath& folderPath )
 {
 	if ( HICON hFolderIcon = shell::GetFileSysIcon( folderPath.GetPtr(), SHGFI_SMALLICON ) )
-		m_pImageStore->RegisterIcon( BaseImageId + static_cast< UINT >( m_relFolderPaths.size() - 1 ), CIcon::NewIcon( hFolderIcon ) );		// match the folder index
+		m_pImageStore->RegisterIcon( BaseImageId + static_cast< UINT >( m_relFolderPathSeq.size() - 1 ), CIcon::NewIcon( hFolderIcon ) );		// match the folder index
 }
 
 std::tstring CDropFilesModel::FormatDropCounts( void ) const
@@ -124,9 +124,9 @@ std::tstring CDropFilesModel::FormatDropCounts( void ) const
 	return str::Join( dropItems, _T(", ") );
 }
 
-CBitmap* CDropFilesModel::GetItemInfo( std::tstring& rItemText, size_t fldPos ) const
+CBitmap* CDropFilesModel::GetRelFolderItemInfo( std::tstring& rItemText, size_t fldSeqPos ) const
 {
-	rItemText = m_relFolderPaths[ fldPos ].Get();
+	rItemText = m_relFolderPathSeq[ fldSeqPos ].Get();
 
 	if ( !rItemText.empty() )
 	{
@@ -137,7 +137,7 @@ CBitmap* CDropFilesModel::GetItemInfo( std::tstring& rItemText, size_t fldPos ) 
 
 	rItemText += _T("*");
 
-	return m_pImageStore->RetrieveBitmap( BaseImageId + static_cast< UINT >( fldPos ), ::GetSysColor( COLOR_MENU ) );
+	return m_pImageStore->RetrieveBitmap( BaseImageId + static_cast< UINT >( fldSeqPos ), ::GetSysColor( COLOR_MENU ) );
 }
 
 bool CDropFilesModel::CreateFolders( const std::vector< fs::CPath >& srcFolderPaths )

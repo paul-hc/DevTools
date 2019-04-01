@@ -28,10 +28,9 @@ public:
 	bool HasSrcDeepFolderPaths( void ) const { return HasSrcFolderPaths() && m_srcDeepFolderPaths.size() != m_srcFolderPaths.size(); }
 	const std::vector< fs::CPath >& GetSrcDeepFolderPaths( void ) const { return m_srcDeepFolderPaths; }
 
-	bool HasRelFolderPaths( void ) const { return !m_relFolderPaths.empty(); }
-	const std::vector< fs::CPath >& GetRelFolderPaths( void ) const { return m_relFolderPaths; }
-
-	CBitmap* GetItemInfo( std::tstring& rItemText, size_t fldPos ) const;
+	bool HasRelFolderPathSeq( void ) const { return !m_relFolderPathSeq.empty(); }
+	const std::vector< fs::CPath >& GetRelFolderPathSeq( void ) const { return m_relFolderPathSeq; }
+	CBitmap* GetRelFolderItemInfo( std::tstring& rItemText, size_t fldSeqPos ) const;
 
 	bool CreateFolders( RecursionDepth depth ) { return CreateFolders( Shallow == depth ? m_srcFolderPaths : m_srcDeepFolderPaths ); }
 	bool PasteDeep( const fs::CPath& relFolderPath, CWnd* pParentOwner );
@@ -53,7 +52,7 @@ private:
 	fs::CPath m_srcCommonFolderPath;
 	std::vector< fs::CPath > m_srcFolderPaths;			// drop source folders
 	std::vector< fs::CPath > m_srcDeepFolderPaths;		// drop source folders and their sub-folders
-	std::vector< fs::CPath > m_relFolderPaths;			// relative folders from the original source parent path
+	std::vector< fs::CPath > m_relFolderPathSeq;		// sequence of relative folders from the original source parent path
 
 	std::auto_ptr< CImageStore > m_pImageStore;			// for folder images
 	enum { BaseImageId = 100 };
