@@ -260,6 +260,16 @@ namespace func
 	inline const std::tstring& StringOf( const std::tstring& filePath ) { return filePath; }		// for uniform string algorithms
 
 
+	namespace tor
+	{
+		struct StringOf
+		{
+			template< typename StringyT >
+			const std::tstring& operator()( const StringyT& value ) const { return func::StringOf( value ); }
+		};
+	}
+
+
 	template< typename CharType >
 	inline CharType toupper( CharType ch, const std::locale& loc = str::GetUserLocale() )
 	{

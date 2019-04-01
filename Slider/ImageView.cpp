@@ -301,7 +301,7 @@ void CImageView::OnLButtonDown( UINT mkFlags, CPoint point )
 					if ( pImage->IsValidFile() )
 					{
 						ole::CImagesDataSource dataSource;
-						dataSource.CacheShellFilePath( pImage->GetImagePath().Get() );
+						dataSource.CacheShellFilePath( pImage->GetImagePath() );
 
 						CWicDibSection* pThumbBitmap = app::GetThumbnailer()->AcquireThumbnailNoThrow( pImage->GetImagePath() );
 						dataSource.DragAndDropImages( pThumbBitmap, DROPEFFECT_COPY | DROPEFFECT_MOVE | DROPEFFECT_LINK );

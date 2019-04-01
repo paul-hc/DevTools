@@ -2,7 +2,7 @@
 #define StringCvt_h
 #pragma once
 
-#include "utl/Path.h"
+#include "Path.h"
 
 
 namespace str
@@ -36,17 +36,6 @@ namespace str
 				rMfcItems.push_back( str::traits::GetCharPtr( *itSrcItem ) );
 
 			return rMfcItems;
-		}
-
-		// converts a source container of paths (std::tstring, fs::CPath, fs::CFlexPath) into a container of CString
-		//
-		template< typename ValueType, typename SrcContainerT >
-		std::vector< ValueType >& MakeItemsAs( std::vector< ValueType >& rDestItems, const SrcContainerT& srcItems )
-		{
-			for ( typename SrcContainerT::const_iterator itSrcItem = srcItems.begin(); itSrcItem != srcItems.end(); ++itSrcItem )
-				rDestItems.push_back( ValueType( str::traits::GetCharPtr( *itSrcItem ) ) );
-
-			return rDestItems;
 		}
 	}
 }

@@ -3,6 +3,7 @@
 #pragma once
 
 #include <afxole.h>
+#include "utl/Path.h"
 #include "ShellDragImager.h"
 #include "ShellDropTip.h"
 
@@ -30,8 +31,8 @@ namespace ole
 		bool SetDropTipText( DROPIMAGETYPE dropImageType, const wchar_t* pMessage, const wchar_t* pInsertFmt, const wchar_t* pInsertText = NULL );
 
 		// data caching overridables
-		virtual void CacheShellFilePaths( const std::vector< std::tstring >& filePaths );			// formats: shell::cfHDROP, shell::cfFileGroupDescriptor
-		void CacheShellFilePath( const std::tstring& filePath );
+		virtual void CacheShellFilePaths( const std::vector< fs::CPath >& filePaths );			// formats: shell::cfHDROP, shell::cfFileGroupDescriptor
+		void CacheShellFilePath( const fs::CPath& filePath );
 
 		// data rendering (delayed)
 		CWnd* GetWnd( void ) const { return m_pSrcWnd; }

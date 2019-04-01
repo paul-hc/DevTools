@@ -360,24 +360,24 @@ namespace auto_drop
 			for ( itGroup = dropStack.begin(); itGroup != dropStack.end() && itGroup->m_groupID == groupID; ++itGroup )
 			{	// prepare data for two phase-rename
 				const COpGroup& group = *itGroup;
-				std::vector< std::tstring > srcPaths, destPaths;
+				std::vector< fs::CPath > srcPaths, destPaths;
 
 				ASSERT( group.size() > 0 );
 				srcPaths.resize( group.size() );
 				destPaths.resize( group.size() );
 
-				std::vector< std::tstring >::iterator itSrc = srcPaths.begin(), itDest = destPaths.begin();
+				std::vector< fs::CPath >::iterator itSrc = srcPaths.begin(), itDest = destPaths.begin();
 
 				for ( COpGroup::const_iterator itOp = group.begin(); itOp != group.end(); ++itOp, ++itSrc, ++itDest )
 					if ( 1 == phaseNo )
 					{
-						*itSrc = isUndoOp ? itOp->GetDestFullPath( m_destSearchSpec.m_searchPath.GetPtr() ) : itOp->m_srcFullPath;
-						*itDest = itOp->GetMidDestPath( m_destSearchSpec.m_searchPath.GetPtr() );
+						*itSrc = isUndoOp ? itOp->GetDestFullPath( m_destSearchSpec.m_searchPath.Get() ) : itOp->m_srcFullPath;
+						*itDest = itOp->GetMidDestPath( m_destSearchSpec.m_searchPath.Get() );
 					}
 					else // 2 == phaseNo
 					{
-						*itSrc = itOp->GetMidDestPath( m_destSearchSpec.m_searchPath.GetPtr() );
-						*itDest = isUndoOp ? itOp->m_srcFullPath : itOp->GetDestFullPath( m_destSearchSpec.m_searchPath.GetPtr() );
+						*itSrc = itOp->GetMidDestPath( m_destSearchSpec.m_searchPath.Get() );
+						*itDest = isUndoOp ? itOp->m_srcFullPath : itOp->GetDestFullPath( m_destSearchSpec.m_searchPath.Get() );
 					}
 
 				// NOTE: undoing a COPY actually means DELETE !
@@ -390,17 +390,17 @@ namespace auto_drop
 		return true;
 	}
 
-	bool CContext::DoFileSetOperation( const std::vector< std::tstring >& srcPaths, const std::vector< std::tstring >& destPaths,
+	bool CContext::DoFileSetOperation( const std::vector< fs::CPath >& srcPaths, const std::vector< fs::CPath >& destPaths,
 									   FileSetOperation fileSetOp )
 	{
 		ASSERT( srcPaths.size() == destPaths.size() );
 
 	#ifdef _DEBUG
-		std::vector< std::tstring >::const_iterator itSrc = srcPaths.begin(), itDest = destPaths.begin();
+		std::vector< fs::CPath >::const_iterator itSrc = srcPaths.begin(), itDest = destPaths.begin();
 
 		TRACE( _T("* %s FileSetOperation\n"), opName[ fileSetOp ] );
 		for ( ; itSrc != srcPaths.end(); ++itSrc, ++itDest )
-			TRACE( _T("\t%s -> %s\n"), itSrc->c_str(), itDest->c_str() );
+			TRACE( _T("\t%s -> %s\n"), itSrc->GetPtr(), itDest->GetPtr() );
 	#endif
 
 		switch ( fileSetOp )

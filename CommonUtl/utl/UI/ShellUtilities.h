@@ -2,6 +2,8 @@
 #define ShellUtilities_h
 #pragma once
 
+#include "Path.h"
+
 
 namespace shell
 {
@@ -16,15 +18,15 @@ namespace shell
 {
 	// file operations
 
-	bool MoveFiles( const std::vector< std::tstring >& srcPaths, const std::vector< std::tstring >& destPaths, CWnd* pWnd = AfxGetMainWnd(), FILEOP_FLAGS flags = FOF_ALLOWUNDO );
-	bool MoveFiles( const std::vector< std::tstring >& srcPaths, const std::tstring& destFolderPath, CWnd* pWnd = AfxGetMainWnd(), FILEOP_FLAGS flags = FOF_ALLOWUNDO );
+	bool MoveFiles( const std::vector< fs::CPath >& srcPaths, const std::vector< fs::CPath >& destPaths, CWnd* pWnd = AfxGetMainWnd(), FILEOP_FLAGS flags = FOF_ALLOWUNDO );
+	bool MoveFiles( const std::vector< fs::CPath >& srcPaths, const fs::CPath& destFolderPath, CWnd* pWnd = AfxGetMainWnd(), FILEOP_FLAGS flags = FOF_ALLOWUNDO );
 
-	bool CopyFiles( const std::vector< std::tstring >& srcPaths, const std::vector< std::tstring >& destPaths, CWnd* pWnd = AfxGetMainWnd(), FILEOP_FLAGS flags = FOF_ALLOWUNDO );
-	bool CopyFiles( const std::vector< std::tstring >& srcPaths, const std::tstring& destFolderPath, CWnd* pWnd = AfxGetMainWnd(), FILEOP_FLAGS flags = FOF_ALLOWUNDO );
+	bool CopyFiles( const std::vector< fs::CPath >& srcPaths, const std::vector< fs::CPath >& destPaths, CWnd* pWnd = AfxGetMainWnd(), FILEOP_FLAGS flags = FOF_ALLOWUNDO );
+	bool CopyFiles( const std::vector< fs::CPath >& srcPaths, const fs::CPath& destFolderPath, CWnd* pWnd = AfxGetMainWnd(), FILEOP_FLAGS flags = FOF_ALLOWUNDO );
 
-	bool DeleteFiles( const std::vector< std::tstring >& srcPaths, CWnd* pWnd = AfxGetMainWnd(), FILEOP_FLAGS flags = FOF_ALLOWUNDO );
+	bool DeleteFiles( const std::vector< fs::CPath >& srcPaths, CWnd* pWnd = AfxGetMainWnd(), FILEOP_FLAGS flags = FOF_ALLOWUNDO );
 
-	bool DoFileOperation( UINT shellOp, const std::vector< std::tstring >& srcPaths, const std::vector< std::tstring >* pDestPaths, CWnd* pWnd = AfxGetMainWnd(), FILEOP_FLAGS flags = FOF_ALLOWUNDO );
+	bool DoFileOperation( UINT shellOp, const std::vector< fs::CPath >& srcPaths, const std::vector< fs::CPath >* pDestPaths, CWnd* pWnd = AfxGetMainWnd(), FILEOP_FLAGS flags = FOF_ALLOWUNDO );
 
 
 	HINSTANCE Execute( CWnd* pParentWnd, const TCHAR* pFilePath, const TCHAR* pParams = NULL, DWORD mask = 0, const TCHAR* pVerb = NULL,
@@ -126,20 +128,20 @@ namespace shell
 
 
 		// data transfer build helpers
-		HGLOBAL BuildHDrop( const std::vector< std::tstring >& srcFiles );						// works well for drag&drop; minimum neccessary for drag&drop files
-		HGLOBAL BuildFileGroupDescriptor( const std::vector< std::tstring >& srcFiles );
+		HGLOBAL BuildHDrop( const std::vector< fs::CPath >& srcFiles );						// works well for drag&drop; minimum neccessary for drag&drop files
+		HGLOBAL BuildFileGroupDescriptor( const std::vector< fs::CPath >& srcFiles );
 
 		// template version for compatibility with fs::CPath, fs::CFlexPath, CString
 		template< typename SrcContainerT >
 		void CacheDragDropSrcFiles( COleDataSource& rDataSource, const SrcContainerT& srcFiles )
 		{
-			std::vector< std::tstring > strSrcFiles;
-			str::cvt::MakeItemsAs( strSrcFiles, srcFiles );
+			std::vector< fs::CPath > filePaths;
+			utl::Assign( filePaths, srcFiles, func::tor::StringOf() );
 
-			if ( HGLOBAL hDrop = BuildHDrop( strSrcFiles ) )		// minimum neccessary for drag&drop files
+			if ( HGLOBAL hDrop = BuildHDrop( filePaths ) )		// minimum neccessary for drag&drop files
 				rDataSource.CacheGlobalData( cfHDROP, hDrop );
 
-			if ( HGLOBAL hFileGroupDescr = BuildFileGroupDescriptor( strSrcFiles ) )
+			if ( HGLOBAL hFileGroupDescr = BuildFileGroupDescriptor( filePaths ) )
 				rDataSource.CacheGlobalData( cfFileGroupDescriptor, hFileGroupDescr );
 		}
 	}

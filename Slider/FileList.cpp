@@ -361,11 +361,11 @@ bool CFileList::MoveBackCustomOrderIndexes( int newDestIndex, const std::vector<
 	return true;
 }
 
-void CFileList::FetchFilePathsFromIndexes( std::vector< std::tstring >& rFilePaths, const std::vector< int >& displayIndexes ) const
+void CFileList::FetchFilePathsFromIndexes( std::vector< fs::CPath >& rFilePaths, const std::vector< int >& displayIndexes ) const
 {
 	rFilePaths.resize( displayIndexes.size() );
 	for ( size_t i = 0; i != displayIndexes.size(); ++i )
-		rFilePaths[ i ] = GetFileAttr( displayIndexes[ i ] ).GetPath().Get();
+		rFilePaths[ i ] = GetFileAttr( displayIndexes[ i ] ).GetPath();
 }
 
 void CFileList::ClearArchiveStgPaths( void )

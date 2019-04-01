@@ -719,7 +719,7 @@ bool CAlbumThumbListView::DoDragDrop( void )
 	CListSelectionData selData( this );
 	selData.m_selIndexes = indexesToDropState.m_pIndexImpl->m_selItems;
 
-	std::vector< std::tstring > filesToDrag;
+	std::vector< fs::CPath > filesToDrag;
 	m_pFileList->FetchFilePathsFromIndexes( filesToDrag, selData.m_selIndexes );
 
 	ole::CImagesDataSource dataSource;

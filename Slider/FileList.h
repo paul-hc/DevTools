@@ -62,7 +62,7 @@ public:
 	void QueryFileAttrs( std::vector< CFileAttr* >& rFileAttrs ) const;
 
 	int FindFileAttr( const fs::CFlexPath& filePath, bool wantDisplayIndex = true ) const;
-	void FetchFilePathsFromIndexes( std::vector< std::tstring >& rFilePaths, const std::vector< int >& displayIndexes ) const;
+	void FetchFilePathsFromIndexes( std::vector< fs::CPath >& rFilePaths, const std::vector< int >& displayIndexes ) const;
 
 	enum PersistOp { Loading, Saving };
 

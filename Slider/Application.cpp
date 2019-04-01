@@ -126,15 +126,16 @@ namespace app
 			return false;
 
 		CTempCloneFileSet tempClone( filesToMove );		// make temporary copies for logical files (if any)
-		std::vector< std::tstring > srcPhysicalPaths;
-		str::cvt::MakeItemsAs( srcPhysicalPaths, tempClone.GetPhysicalFilePaths() );
 
-		return shell::MoveFiles( srcPhysicalPaths, moveToDialog.m_destFolderPath.Get(), pParentWnd );
+		return shell::MoveFiles( tempClone.GetPhysicalFilePaths(), moveToDialog.m_destFolderPath, pParentWnd );
 	}
 
 	bool DeleteFiles( const std::vector< std::tstring >& filesToDelete, bool allowUndo /*= true*/ )
 	{
-		return shell::DeleteFiles( filesToDelete, AfxGetMainWnd(), allowUndo ? FOF_ALLOWUNDO : 0 );
+		std::vector< fs::CPath > filePaths;
+		utl::Assign( filePaths, filesToDelete, func::tor::StringOf() );
+
+		return shell::DeleteFiles( filePaths, AfxGetMainWnd(), allowUndo ? FOF_ALLOWUNDO : 0 );
 	}
 
 

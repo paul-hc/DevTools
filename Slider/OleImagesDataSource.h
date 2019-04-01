@@ -28,7 +28,8 @@ public:
 	bool SetInputFilePaths( const SrcContainerT& inputFilePaths )
 	{
 		std::vector< fs::CFlexPath > flexPaths;
-		return SetInputFilePaths( str::cvt::MakeItemsAs( flexPaths, inputFilePaths ) );
+		utl::Assign( flexPaths, inputFilePaths, func::tor::StringOf() );
+		return SetInputFilePaths( flexPaths );
 	}
 
 	void DeleteClones( void );
@@ -57,7 +58,7 @@ namespace ole
 		virtual ~CImagesDataSource();
 
 		// caching overrides
-		virtual void CacheShellFilePaths( const std::vector< std::tstring >& filePaths );
+		virtual void CacheShellFilePaths( const std::vector< fs::CPath >& filePaths );
 
 		// pass m_nullRect to disable the start drag delay
 		DROPEFFECT DragAndDropImages( HWND hSrcWnd, DROPEFFECT dropEffect, const RECT* pStartDragRect = NULL );

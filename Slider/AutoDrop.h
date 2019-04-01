@@ -91,7 +91,7 @@ namespace auto_drop
 	protected:
 		bool DoAutoDropOperation( const COpStack& dropStack, bool isUndoOp ) const;
 
-		static bool DoFileSetOperation( const std::vector< std::tstring >& srcPaths, const std::vector< std::tstring >& destPaths,
+		static bool DoFileSetOperation( const std::vector< fs::CPath >& srcPaths, const std::vector< fs::CPath >& destPaths,
 										FileSetOperation fileSetOp );
 		static FileSetOperation GetFileSetOperation( bool imageWasMoved, bool isUndoOp, int phaseNo )
 		{

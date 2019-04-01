@@ -33,7 +33,7 @@ namespace shell
 
 namespace shell
 {
-	bool DoFileOperation( UINT shellOp, const std::vector< std::tstring >& srcPaths, const std::vector< std::tstring >* pDestPaths,
+	bool DoFileOperation( UINT shellOp, const std::vector< fs::CPath >& srcPaths, const std::vector< fs::CPath >* pDestPaths,
 						  CWnd* pWnd /*= AfxGetMainWnd()*/, FILEOP_FLAGS flags /*= FOF_ALLOWUNDO*/ )
 	{
 		static const TCHAR* pShellOpTags[] = { _T("Move Files"), _T("Copy Files"), _T("Delete Files"), _T("Rename Files") };	// FO_MOVE, FO_COPY, FO_DELETE, FO_RENAME
@@ -56,38 +56,38 @@ namespace shell
 
 		if ( shellOp != FO_DELETE )
 			if ( pDestPaths != NULL && pDestPaths->size() == srcPaths.size() )
-				SetFlag( fileOp.fFlags, FOF_MULTIDESTFILES );								// each SRC file has a DEST file
+				SetFlag( fileOp.fFlags, FOF_MULTIDESTFILES );							// each SRC file has a DEST file
 
 		return 0 == ::SHFileOperation( &fileOp ) && !fileOp.fAnyOperationsAborted;		// true for success AND not canceled by user
 	}
 
-	bool MoveFiles( const std::vector< std::tstring >& srcPaths, const std::vector< std::tstring >& destPaths,
+	bool MoveFiles( const std::vector< fs::CPath >& srcPaths, const std::vector< fs::CPath >& destPaths,
 					CWnd* pWnd /*= AfxGetMainWnd()*/, FILEOP_FLAGS flags /*= FOF_ALLOWUNDO*/ )
 	{
 		return DoFileOperation( FO_MOVE, srcPaths, &destPaths, pWnd, flags );
 	}
 
-	bool MoveFiles( const std::vector< std::tstring >& srcPaths, const std::tstring& destFolderPath,
+	bool MoveFiles( const std::vector< fs::CPath >& srcPaths, const fs::CPath& destFolderPath,
 					CWnd* pWnd /*= AfxGetMainWnd()*/, FILEOP_FLAGS flags /*= FOF_ALLOWUNDO*/ )
 	{
-		std::vector< std::tstring > destPaths( 1, destFolderPath );
+		std::vector< fs::CPath > destPaths( 1, destFolderPath );
 		return DoFileOperation( FO_MOVE, srcPaths, &destPaths, pWnd, flags );
 	}
 
-	bool CopyFiles( const std::vector< std::tstring >& srcPaths, const std::vector< std::tstring >& destPaths,
+	bool CopyFiles( const std::vector< fs::CPath >& srcPaths, const std::vector< fs::CPath >& destPaths,
 					CWnd* pWnd /*= AfxGetMainWnd()*/, FILEOP_FLAGS flags /*= FOF_ALLOWUNDO*/ )
 	{
 		return DoFileOperation( FO_COPY, srcPaths, &destPaths, pWnd, flags );
 	}
 
-	bool CopyFiles( const std::vector< std::tstring >& srcPaths, const std::tstring& destFolderPath, CWnd* pWnd /*= AfxGetMainWnd()*/,
+	bool CopyFiles( const std::vector< fs::CPath >& srcPaths, const fs::CPath& destFolderPath, CWnd* pWnd /*= AfxGetMainWnd()*/,
 					FILEOP_FLAGS flags /*= FOF_ALLOWUNDO*/ )
 	{
-		std::vector< std::tstring > destPaths( 1, destFolderPath );
+		std::vector< fs::CPath > destPaths( 1, destFolderPath );
 		return DoFileOperation( FO_COPY, srcPaths, &destPaths, pWnd, flags );
 	}
 
-	bool DeleteFiles( const std::vector< std::tstring >& srcPaths, CWnd* pWnd /*= AfxGetMainWnd()*/, FILEOP_FLAGS flags /*= FOF_ALLOWUNDO*/ )
+	bool DeleteFiles( const std::vector< fs::CPath >& srcPaths, CWnd* pWnd /*= AfxGetMainWnd()*/, FILEOP_FLAGS flags /*= FOF_ALLOWUNDO*/ )
 	{
 		return DoFileOperation( FO_DELETE, srcPaths, NULL, pWnd, flags );
 	}
@@ -197,7 +197,7 @@ namespace shell
 				cfFileGroupDescriptor == cfFormat;
 		}
 
-		HGLOBAL BuildHDrop( const std::vector< std::tstring >& srcFiles )
+		HGLOBAL BuildHDrop( const std::vector< fs::CPath >& srcFiles )
 		{
 			if ( srcFiles.empty() )
 				return NULL;
@@ -226,7 +226,7 @@ namespace shell
 			return hGlobal;
 		}
 
-		HGLOBAL BuildFileGroupDescriptor( const std::vector< std::tstring >& srcFiles )
+		HGLOBAL BuildFileGroupDescriptor( const std::vector< fs::CPath >& srcFiles )
 		{
 			size_t fileCount = srcFiles.size();
 			HGLOBAL hGlobal = NULL;
@@ -243,7 +243,7 @@ namespace shell
 						{
 							pFileGroupDescr->fgd[ i ].dwFlags = FD_ATTRIBUTES;
 							pFileGroupDescr->fgd[ i ].dwFileAttributes = FILE_ATTRIBUTE_NORMAL;
-							_tcscpy( pFileGroupDescr->fgd[ i ].cFileName, srcFiles[ i ].c_str() );
+							_tcscpy( pFileGroupDescr->fgd[ i ].cFileName, srcFiles[ i ].GetPtr() );
 						}
 						::GlobalUnlock( hGlobal );
 					}

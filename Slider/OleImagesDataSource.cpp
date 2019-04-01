@@ -19,13 +19,12 @@ namespace ole
 	{
 	}
 
-	void CImagesDataSource::CacheShellFilePaths( const std::vector< std::tstring >& filePaths )
+	void CImagesDataSource::CacheShellFilePaths( const std::vector< fs::CPath >& filePaths )
 	{
 		if ( !m_tempClones.SetInputFilePaths( filePaths ) )			// use temporary copies of embedded image files
 			return;
 
-		std::vector< std::tstring > physicalPaths;
-		CDataSource::CacheShellFilePaths( str::cvt::MakeItemsAs( physicalPaths, m_tempClones.GetPhysicalFilePaths() ) );
+		CDataSource::CacheShellFilePaths( m_tempClones.GetPhysicalFilePaths() );
 	}
 
 	DROPEFFECT CImagesDataSource::DragAndDropImages( HWND hSrcWnd, DROPEFFECT dropEffect, const RECT* pStartDragRect /*= NULL*/ )

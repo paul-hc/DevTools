@@ -1658,7 +1658,12 @@ bool CReportListControl::CacheSelectionData( ole::CDataSource* pDataSource, int 
 		ole_utl::CacheTextData( pDataSource, str::Join( textLines, _T("\r\n") ) );
 
 	if ( HasFlag( sourceFlags, ds::ShellFiles ) )
-		pDataSource->CacheShellFilePaths( textLines );
+	{
+		std::vector< fs::CPath > filePaths;
+		utl::Assign( filePaths, textLines, func::tor::StringOf() );
+
+		pDataSource->CacheShellFilePaths( filePaths );
+	}
 
 	return true;
 }

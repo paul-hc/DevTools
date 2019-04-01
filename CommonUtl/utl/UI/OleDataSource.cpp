@@ -101,14 +101,14 @@ namespace ole
 		return changed;
 	}
 
-	void CDataSource::CacheShellFilePaths( const std::vector< std::tstring >& filePaths )
+	void CDataSource::CacheShellFilePaths( const std::vector< fs::CPath >& filePaths )
 	{
 		shell::xfer::CacheDragDropSrcFiles( *this, filePaths );
 	}
 
-	void CDataSource::CacheShellFilePath( const std::tstring& filePath )
+	void CDataSource::CacheShellFilePath( const fs::CPath& filePath )
 	{
-		std::vector< std::tstring > filePaths( 1, filePath );
+		std::vector< fs::CPath > filePaths( 1, filePath );
 		CacheShellFilePaths( filePaths );
 	}
 
