@@ -9,6 +9,7 @@
 #include "utl/FmtUtils.h"
 #include "utl/FileSystem_fwd.h"
 #include "utl/Guards.h"
+#include "utl/StringUtilities.h"
 #include "utl/UI/Clipboard.h"
 #include "utl/UI/ImageStore.h"
 #include "utl/UI/ShellContextMenuBuilder.h"
@@ -29,12 +30,19 @@ const CFileRenameShell::CMenuCmdInfo CFileRenameShell::s_commands[] =
 	{ Cmd_FindDuplicates, _T("Find &Duplicates..."), _T("Find duplicate files in selected folders or files, and allow the deletion of duplicates"), ID_FIND_DUPLICATE_FILES },
 	{ Cmd_Undo, _T("&Undo %s..."), _T("Undo last operation on files"), ID_EDIT_UNDO },
 	{ Cmd_Redo, _T("&Redo %s..."), _T("Redo last undo operation on files"), ID_EDIT_REDO },
-	{ Cmd_PasteDeepPopup, _T("&Paste Deep to Folder"), _T("Paste copied files creating a deep folder"), ID_PASTE_DEEP_FOLDER },
+	{ Popup_CreateFolders, _T("Create &Folder Structure"), _T("Popup menu for creating folder structure based on files copied on clipboard"), ID_CREATE_FOLDERS_POPUP },
+	{ Popup_PasteDeep, _T("&Paste Deep"), _T("Paste copied files creating a deep folder"), ID_PASTE_DEEP_POPUP },
 #ifdef _DEBUG
 	{ Cmd_Separator },
 	{ Cmd_RunUnitTests, _T("# Run Unit Tests (FileRenameShell)"), _T("Run the unit tests (debug build only)"), ID_RUN_TESTS },
 #endif
 	{ Cmd_Separator }
+};
+
+const CFileRenameShell::CMenuCmdInfo CFileRenameShell::s_moreCommands[] =
+{
+	{ Cmd_MakeFolders, _T("Create &Folders"), _T("Create folders in destination to replicate copied folders"), ID_MAKE_FOLDERS },
+	{ Cmd_MakeDeepFolderStructure, _T("Create Deep Folder Structure"), _T("Create folders in destination to replicate copied folders and their sub-folders"), ID_MAKE_DEEP_FOLDER_STRUCTURE }
 };
 
 
@@ -88,8 +96,12 @@ UINT CFileRenameShell::AugmentMenuItems( HMENU hMenu, UINT indexMenu, UINT idBas
 			if ( !itemText.empty() )
 				switch ( cmdInfo.m_cmd )
 				{
-					case Cmd_PasteDeepPopup:
-						if ( HMENU hSubMenu = BuildPasteDeepSubmenu( menuBuilder ) )
+					case Popup_CreateFolders:
+						if ( HMENU hSubMenu = BuildCreateFoldersSubmenu( &menuBuilder ) )
+							menuBuilder.AddPopupItem( hSubMenu, itemText, pItemBitmap );
+						break;
+					case Popup_PasteDeep:
+						if ( HMENU hSubMenu = BuildPasteDeepSubmenu( &menuBuilder, itemText ) )
 							menuBuilder.AddPopupItem( hSubMenu, itemText, pItemBitmap );
 						break;
 					default:
@@ -101,32 +113,48 @@ UINT CFileRenameShell::AugmentMenuItems( HMENU hMenu, UINT indexMenu, UINT idBas
 	return menuBuilder.GetAddedCmdCount();
 }
 
-HMENU CFileRenameShell::BuildPasteDeepSubmenu( const CShellContextMenuBuilder& menuBuilder )
+HMENU CFileRenameShell::BuildCreateFoldersSubmenu( CBaseMenuBuilder* pParentBuilder )
 {
 	if ( m_pDropFilesModel.get() != NULL )
-		if ( m_pDropFilesModel->HasSrcPaths() && m_pDropFilesModel->HasRelFolderPaths() )
+		if ( m_pDropFilesModel->HasSrcFolderPaths() )
 		{
-			CMenu subMenu;
-			subMenu.CreatePopupMenu();
+			CSubMenuBuilder subMenuBuilder( pParentBuilder );
 
-			for ( UINT i = 0, count = (UINT)m_pDropFilesModel->GetRelFolderPaths().size(); i != count; ++i )
-			{
-				std::tstring itemText;
-				CBitmap* pFolderBitmap = m_pDropFilesModel->GetItemInfo( itemText, i );
-				UINT cmdId = menuBuilder.MakeCmdId( Cmd_PasteDeepBase + i );
+			AddCmd( &subMenuBuilder, Cmd_MakeFolders, str::Format( _T("(%d)"), m_pDropFilesModel->GetSrcFolderPaths().size() ) );
 
-				subMenu.InsertMenu( i, MF_STRING | MF_BYPOSITION, cmdId, itemText.c_str() );
-				if ( pFolderBitmap != NULL )
-					subMenu.SetMenuItemBitmaps( i, MF_BYPOSITION, pFolderBitmap, pFolderBitmap );
-			}
+			if ( m_pDropFilesModel->HasSrcDeepFolderPaths() )
+				AddCmd( &subMenuBuilder, Cmd_MakeDeepFolderStructure, str::Format( _T("(%d)"), m_pDropFilesModel->GetSrcDeepFolderPaths().size() ) );
 
-			return subMenu.Detach();
+			return subMenuBuilder.GetPopupMenu()->Detach();
 		}
 
 	return NULL;
 }
 
-CBitmap* CFileRenameShell::MakeCmdInfo( std::tstring& rItemText, const CMenuCmdInfo& cmdInfo )
+HMENU CFileRenameShell::BuildPasteDeepSubmenu( CBaseMenuBuilder* pParentBuilder, std::tstring& rItemText )
+{
+	if ( m_pDropFilesModel.get() != NULL )
+		if ( m_pDropFilesModel->HasDropPaths() && m_pDropFilesModel->HasRelFolderPaths() )
+		{
+			rItemText += str::Format( _T(" (%s)"), m_pDropFilesModel->FormatDropCounts().c_str() );
+
+			CSubMenuBuilder subMenuBuilder( pParentBuilder );
+
+			for ( UINT i = 0, count = (UINT)m_pDropFilesModel->GetRelFolderPaths().size(); i != count; ++i )
+			{
+				std::tstring itemText;
+				CBitmap* pFolderBitmap = m_pDropFilesModel->GetItemInfo( itemText, i );
+
+				subMenuBuilder.AddCmdItem( Cmd_PasteDeepBase + i, itemText, pFolderBitmap );
+			}
+
+			return subMenuBuilder.GetPopupMenu()->Detach();
+		}
+
+	return NULL;
+}
+
+CBitmap* CFileRenameShell::MakeCmdInfo( std::tstring& rItemText, const CMenuCmdInfo& cmdInfo, const std::tstring& tabbedText /*= str::GetEmpty()*/ )
 {
 	switch ( cmdInfo.m_cmd )
 	{
@@ -141,10 +169,26 @@ CBitmap* CFileRenameShell::MakeCmdInfo( std::tstring& rItemText, const CMenuCmdI
 			rItemText = cmdInfo.m_pTitle;
 	}
 
+	if ( !tabbedText.empty() )
+		rItemText += _T('\t') + tabbedText;
+
 	if ( cmdInfo.m_iconId != 0 )
 		return CImageStore::SharedStore()->RetrieveMenuBitmap( cmdInfo.m_iconId );
 
 	return NULL;
+}
+
+void CFileRenameShell::AddCmd( CBaseMenuBuilder* pMenuBuilder, MenuCommand cmd, const std::tstring& tabbedText /*= str::GetEmpty()*/ )
+{
+	ASSERT_PTR( pMenuBuilder );
+
+	const CMenuCmdInfo* pCmdInfo = FindCmd( cmd );
+	ASSERT_PTR( pCmdInfo );
+
+	std::tstring itemText;
+	CBitmap* pItemBitmap = MakeCmdInfo( itemText, *pCmdInfo, tabbedText );
+
+	pMenuBuilder->AddCmdItem( cmd, itemText, pItemBitmap );
 }
 
 void CFileRenameShell::ExecuteCommand( MenuCommand menuCmd, CWnd* pParentOwner )
@@ -191,6 +235,13 @@ void CFileRenameShell::ExecuteCommand( MenuCommand menuCmd, CWnd* pParentOwner )
 				ui::ReportError( _T("No command available to undo."), MB_OK | MB_ICONINFORMATION );
 			break;
 		}
+		case Cmd_MakeFolders:
+		case Cmd_MakeDeepFolderStructure:
+			if ( m_pDropFilesModel.get() != NULL )
+				m_pDropFilesModel->CreateFolders( Cmd_MakeFolders == menuCmd ? Shallow : Deep );
+			else
+				ASSERT( false );
+			break;
 		default:
 			if ( !ExecutePasteDeep( menuCmd, pParentOwner ) )
 				ASSERT( false );
@@ -224,9 +275,17 @@ bool CFileRenameShell::ExecutePasteDeep( MenuCommand menuCmd, CWnd* pParentOwner
 
 const CFileRenameShell::CMenuCmdInfo* CFileRenameShell::FindCmd( MenuCommand cmd )
 {
-	for ( int i = 0; i != COUNT_OF( s_commands ); ++i )
-		if ( cmd == s_commands[ i ].m_cmd )
-			return &s_commands[ i ];
+	if ( const CMenuCmdInfo* pFoundCmd = FindCmd( cmd, ARRAY_PAIR( s_commands ) ) )
+		return pFoundCmd;
+
+	return FindCmd( cmd, ARRAY_PAIR( s_moreCommands ) );
+}
+
+const CFileRenameShell::CMenuCmdInfo* CFileRenameShell::FindCmd( MenuCommand cmd, const CMenuCmdInfo cmds[], size_t count )
+{
+	for ( size_t i = 0; i != count; ++i )
+		if ( cmd == cmds[ i ].m_cmd )
+			return &cmds[ i ];
 
 	return NULL;
 }

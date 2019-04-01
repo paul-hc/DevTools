@@ -9,7 +9,7 @@
 
 class CFileModel;
 class CDropFilesModel;
-class CShellContextMenuBuilder;
+class CBaseMenuBuilder;
 interface IFileEditor;
 
 
@@ -25,8 +25,10 @@ public:
 	~CFileRenameShell();
 private:
 	size_t ExtractDropInfo( IDataObject* pDropInfo );
-	UINT AugmentMenuItems( HMENU hMenu, UINT indexMenu, UINT idBaseCmd );			// return the added commands count
-	HMENU BuildPasteDeepSubmenu( const CShellContextMenuBuilder& menuBuilder );		// return the created sub-menu
+
+	UINT AugmentMenuItems( HMENU hMenu, UINT indexMenu, UINT idBaseCmd );		// return the added commands count
+	HMENU BuildCreateFoldersSubmenu( CBaseMenuBuilder* pParentBuilder );
+	HMENU BuildPasteDeepSubmenu( CBaseMenuBuilder* pParentBuilder, std::tstring& rItemText );
 
 	enum MenuCommand
 	{
@@ -34,12 +36,15 @@ private:
 		Cmd_RenameFiles, Cmd_TouchFiles, Cmd_FindDuplicates,
 		Cmd_Undo, Cmd_Redo,
 		Cmd_RunUnitTests,
+		Cmd_MakeFolders,
+		Cmd_MakeDeepFolderStructure,
 		Cmd_PasteDeepBase,
 
 		Cmd_Separator = -1,
 
 		// popup IDs are negative
-		Cmd_PasteDeepPopup = -100
+		Popup_CreateFolders = -550,
+		Popup_PasteDeep,
 	};
 
 	struct CMenuCmdInfo
@@ -53,13 +58,16 @@ private:
 	void ExecuteCommand( MenuCommand menuCmd, CWnd* pParentOwner );
 	bool ExecutePasteDeep( MenuCommand menuCmd, CWnd* pParentOwner );
 
-	CBitmap* MakeCmdInfo( std::tstring& rItemText, const CMenuCmdInfo& cmdInfo );
+	CBitmap* MakeCmdInfo( std::tstring& rItemText, const CMenuCmdInfo& cmdInfo, const std::tstring& tabbedText = str::GetEmpty() );
+	void AddCmd( CBaseMenuBuilder* pMenuBuilder, MenuCommand cmd, const std::tstring& tabbedText = str::GetEmpty() );
 	static const CMenuCmdInfo* FindCmd( MenuCommand cmd );
+	static const CMenuCmdInfo* FindCmd( MenuCommand cmd, const CMenuCmdInfo cmds[], size_t count );
 private:
 	std::auto_ptr< CFileModel > m_pFileModel;				// files selected in Explorer
 	std::auto_ptr< CDropFilesModel > m_pDropFilesModel;		// files copied or cut to clipboard (CF_HDROP)
 
 	static const CMenuCmdInfo s_commands[];
+	static const CMenuCmdInfo s_moreCommands[];
 
 	// generated COM stuff
 public:
