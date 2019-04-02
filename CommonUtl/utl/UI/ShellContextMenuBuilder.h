@@ -9,8 +9,7 @@ class CShellContextMenuBuilder;
 class CBaseMenuBuilder
 {
 protected:
-	CBaseMenuBuilder( CBaseMenuBuilder* pParentBuilder, CMenu* pPopupMenu, UINT indexMenu );
-	virtual ~CBaseMenuBuilder();		// polymorphic type
+	CBaseMenuBuilder( CMenu* pPopupMenu, UINT indexMenu );
 public:
 	CMenu* GetPopupMenu( void ) const { return m_pPopupMenu; }
 
@@ -18,13 +17,13 @@ public:
 	void AddPopupItem( HMENU hSubMenu, const std::tstring& itemText, CBitmap* pItemBitmap );
 	void AddSeparator( void );
 protected:
-	bool IsShellMenu( void ) const { return NULL == m_pParentBuilder; }
+	// composite overridables
+	virtual CBaseMenuBuilder* GetParentBuilder( void ) const = 0;
+
+	bool IsShellMenu( void ) const { return NULL == GetParentBuilder(); }
 	bool IsSubMenuMenu( void ) const { return !IsShellMenu(); }
 	CShellContextMenuBuilder* GetShellBuilder( void );
-
-	static CMenu* CreateEmptyPopupMenu( void );
 private:
-	CBaseMenuBuilder* m_pParentBuilder;
 	CMenu* m_pPopupMenu;
 	UINT m_indexMenu;
 
@@ -35,8 +34,15 @@ private:
 class CSubMenuBuilder : public CBaseMenuBuilder
 {
 public:
-	CSubMenuBuilder( CBaseMenuBuilder* pParentBuilder ) : CBaseMenuBuilder( pParentBuilder, CreateEmptyPopupMenu(), 0 ) {}
-	virtual ~CSubMenuBuilder() { delete GetPopupMenu(); }
+	CSubMenuBuilder( CBaseMenuBuilder* pParentBuilder );
+	~CSubMenuBuilder();
+protected:
+	// composite overrides
+	virtual CBaseMenuBuilder* GetParentBuilder( void ) const;
+
+	static CMenu* CreateEmptyPopupMenu( void );
+private:
+	CBaseMenuBuilder* m_pParentBuilder;
 };
 
 
@@ -49,6 +55,9 @@ public:
 	UINT MakeCmdId( UINT cmdOffset ) const { return m_idBaseCmd + cmdOffset; }
 
 	void OnAddCmd( void ) { ++m_cmdCount; }
+protected:
+	// composite overrides
+	virtual CBaseMenuBuilder* GetParentBuilder( void ) const;
 private:
 	const UINT m_idBaseCmd;
 	UINT m_cmdCount;			// total count of commands ADDED (excluding separators, sub-menus)

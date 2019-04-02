@@ -18,6 +18,11 @@ public:
 	void BuildFromClipboard( void );
 	void Clear( void );
 
+	enum PasteOperation { PasteNone, PasteCopyFiles, PasteMoveFiles };
+
+	static const CEnumTags& GetTags_PasteOperation( void );
+	PasteOperation GetPasteOperation( void ) const;
+
 	bool HasDropPaths( void ) const { return !m_dropPaths.empty(); }
 	const std::vector< fs::CPath >& GetDropPaths( void ) const { return m_dropPaths; }
 	std::tstring FormatDropCounts( void ) const;
@@ -34,13 +39,10 @@ public:
 
 	bool CreateFolders( RecursionDepth depth ) { return CreateFolders( Shallow == depth ? m_srcFolderPaths : m_srcDeepFolderPaths ); }
 	bool PasteDeep( const fs::CPath& relFolderPath, CWnd* pParentOwner );
-
-	enum PasteOperation { PasteNone, PasteCopyFiles, PasteMoveFiles };
-
-	static const CEnumTags& GetTags_PasteOperation( void );
-	PasteOperation GetPasteOperation( void ) const;
 private:
 	void Init( const std::vector< fs::CPath >& dropPaths, DROPEFFECT dropEffect );
+	void InitSrcFolders( void );
+	void InitDeepPasteFolders( void );
 	void RegisterFolderImage( const fs::CPath& folderPath );
 	bool CreateFolders( const std::vector< fs::CPath >& srcFolderPaths );
 	fs::CPath MakeDeepTargetFilePath( const fs::CPath& srcFilePath, const fs::CPath& relFolderPath ) const;

@@ -30,8 +30,8 @@ const CFileRenameShell::CMenuCmdInfo CFileRenameShell::s_commands[] =
 	{ Cmd_FindDuplicates, _T("Find &Duplicates..."), _T("Find duplicate files in selected folders or files, and allow the deletion of duplicates"), ID_FIND_DUPLICATE_FILES },
 	{ Cmd_Undo, _T("&Undo %s..."), _T("Undo last operation on files"), ID_EDIT_UNDO },
 	{ Cmd_Redo, _T("&Redo %s..."), _T("Redo last undo operation on files"), ID_EDIT_REDO },
-	{ Popup_CreateFolders, _T("Create &Folder Structure"), _T("Popup menu for creating folder structure based on files copied on clipboard"), ID_CREATE_FOLDERS_POPUP },
-	{ Popup_PasteDeep, _T("&Paste Deep"), _T("Paste copied files creating a deep folder"), ID_PASTE_DEEP_POPUP },
+	{ Popup_PasteFolderStruct, _T("Paste &Folder Structure"), _T("Open menu for creating folder structure based on files copied on clipboard"), ID_PASTE_FOLDER_STRUCT_POPUP },
+	{ Popup_PasteDeep, _T("Paste D&eep"), _T("Paste copied files creating a deep folder"), ID_PASTE_DEEP_POPUP },
 #ifdef _DEBUG
 	{ Cmd_Separator },
 	{ Cmd_RunUnitTests, _T("# Run Unit Tests (FileRenameShell)"), _T("Run the unit tests (debug build only)"), ID_RUN_TESTS },
@@ -41,8 +41,8 @@ const CFileRenameShell::CMenuCmdInfo CFileRenameShell::s_commands[] =
 
 const CFileRenameShell::CMenuCmdInfo CFileRenameShell::s_moreCommands[] =
 {
-	{ Cmd_MakeFolders, _T("Create &Folders"), _T("Create folders in destination to replicate copied folders"), ID_MAKE_FOLDERS },
-	{ Cmd_MakeDeepFolderStructure, _T("Create Deep Folder Structure"), _T("Create folders in destination to replicate copied folders and their sub-folders"), ID_MAKE_DEEP_FOLDER_STRUCTURE }
+	{ Cmd_CreateFolders, _T("Create &Folders"), _T("Create folders in destination to replicate copied folders"), ID_CREATE_FOLDERS },
+	{ Cmd_CreateDeepFolderStruct, _T("Create Deep Folder Structure"), _T("Create folders in destination to replicate copied folders and their sub-folders"), ID_CREATE_DEEP_FOLDER_STRUCT }
 };
 
 
@@ -96,13 +96,16 @@ UINT CFileRenameShell::AugmentMenuItems( HMENU hMenu, UINT indexMenu, UINT idBas
 			if ( !itemText.empty() )
 				switch ( cmdInfo.m_cmd )
 				{
-					case Popup_CreateFolders:
+					case Popup_PasteFolderStruct:
 						if ( HMENU hSubMenu = BuildCreateFoldersSubmenu( &menuBuilder ) )
 							menuBuilder.AddPopupItem( hSubMenu, itemText, pItemBitmap );
 						break;
 					case Popup_PasteDeep:
-						if ( HMENU hSubMenu = BuildPasteDeepSubmenu( &menuBuilder, itemText ) )
+						if ( HMENU hSubMenu = BuildPasteDeepSubmenu( &menuBuilder ) )
+						{
+							itemText += str::Format( _T(" (%s)"), m_pDropFilesModel->FormatDropCounts().c_str() );
 							menuBuilder.AddPopupItem( hSubMenu, itemText, pItemBitmap );
+						}
 						break;
 					default:
 						menuBuilder.AddCmdItem( cmdInfo.m_cmd, itemText, pItemBitmap );
@@ -120,10 +123,10 @@ HMENU CFileRenameShell::BuildCreateFoldersSubmenu( CBaseMenuBuilder* pParentBuil
 		{
 			CSubMenuBuilder subMenuBuilder( pParentBuilder );
 
-			AddCmd( &subMenuBuilder, Cmd_MakeFolders, str::Format( _T("(%d)"), m_pDropFilesModel->GetSrcFolderPaths().size() ) );
+			AddCmd( &subMenuBuilder, Cmd_CreateFolders, str::Format( _T("(%d)"), m_pDropFilesModel->GetSrcFolderPaths().size() ) );
 
 			if ( m_pDropFilesModel->HasSrcDeepFolderPaths() )
-				AddCmd( &subMenuBuilder, Cmd_MakeDeepFolderStructure, str::Format( _T("(%d)"), m_pDropFilesModel->GetSrcDeepFolderPaths().size() ) );
+				AddCmd( &subMenuBuilder, Cmd_CreateDeepFolderStruct, str::Format( _T("(%d)"), m_pDropFilesModel->GetSrcDeepFolderPaths().size() ) );
 
 			return subMenuBuilder.GetPopupMenu()->Detach();
 		}
@@ -131,13 +134,11 @@ HMENU CFileRenameShell::BuildCreateFoldersSubmenu( CBaseMenuBuilder* pParentBuil
 	return NULL;
 }
 
-HMENU CFileRenameShell::BuildPasteDeepSubmenu( CBaseMenuBuilder* pParentBuilder, std::tstring& rItemText )
+HMENU CFileRenameShell::BuildPasteDeepSubmenu( CBaseMenuBuilder* pParentBuilder )
 {
 	if ( m_pDropFilesModel.get() != NULL )
 		if ( m_pDropFilesModel->HasDropPaths() && m_pDropFilesModel->HasRelFolderPathSeq() )
 		{
-			rItemText += str::Format( _T(" (%s)"), m_pDropFilesModel->FormatDropCounts().c_str() );
-
 			CSubMenuBuilder subMenuBuilder( pParentBuilder );
 
 			for ( UINT i = 0, count = (UINT)m_pDropFilesModel->GetRelFolderPathSeq().size(); i != count; ++i )
@@ -235,10 +236,10 @@ void CFileRenameShell::ExecuteCommand( MenuCommand menuCmd, CWnd* pParentOwner )
 				ui::ReportError( _T("No command available to undo."), MB_OK | MB_ICONINFORMATION );
 			break;
 		}
-		case Cmd_MakeFolders:
-		case Cmd_MakeDeepFolderStructure:
+		case Cmd_CreateFolders:
+		case Cmd_CreateDeepFolderStruct:
 			if ( m_pDropFilesModel.get() != NULL )
-				m_pDropFilesModel->CreateFolders( Cmd_MakeFolders == menuCmd ? Shallow : Deep );
+				m_pDropFilesModel->CreateFolders( Cmd_CreateFolders == menuCmd ? Shallow : Deep );
 			else
 				ASSERT( false );
 			break;

@@ -155,9 +155,9 @@
 #define ID_ORIGINAL_FILE                32831
 #define ID_PICK_AS_ORIGINAL_FOLDER      32832
 #define ID_PASTE_DEEP_POPUP             32833
-#define ID_CREATE_FOLDERS_POPUP         32834
-#define ID_MAKE_FOLDERS                 32835
-#define ID_MAKE_DEEP_FOLDER_STRUCTURE   32836
+#define ID_PASTE_FOLDER_STRUCT_POPUP    32834
+#define ID_CREATE_FOLDERS               32835
+#define ID_CREATE_DEEP_FOLDER_STRUCT    32836
 
 // Next default values for new objects
 // 

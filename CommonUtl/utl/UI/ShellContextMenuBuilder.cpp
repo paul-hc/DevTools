@@ -10,33 +10,28 @@
 
 // CBaseMenuBuilder implementation
 
-CBaseMenuBuilder::CBaseMenuBuilder( CBaseMenuBuilder* pParentBuilder, CMenu* pPopupMenu, UINT indexMenu )
-	: m_pParentBuilder( pParentBuilder )
-	, m_pPopupMenu( pPopupMenu )
+CBaseMenuBuilder::CBaseMenuBuilder( CMenu* pPopupMenu, UINT indexMenu )
+	: m_pPopupMenu( pPopupMenu )
 	, m_indexMenu( indexMenu )
 	, m_pShellBuilder( NULL )
 {
 	ASSERT_PTR( m_pPopupMenu->GetSafeHmenu() );
 }
 
-CBaseMenuBuilder::~CBaseMenuBuilder()
-{
-}
-
 CShellContextMenuBuilder* CBaseMenuBuilder::GetShellBuilder( void )
 {
 	if ( NULL == m_pShellBuilder )
 	{
-		CBaseMenuBuilder* pParentBuilder = m_pParentBuilder;
+		CBaseMenuBuilder* pParentBuilder = GetParentBuilder();
 		if ( NULL == pParentBuilder )
 			pParentBuilder = this;
 		else
-			while ( pParentBuilder->m_pParentBuilder != NULL )
-				pParentBuilder = pParentBuilder->m_pParentBuilder;
+			while ( pParentBuilder->GetParentBuilder() != NULL )
+				pParentBuilder = pParentBuilder->GetParentBuilder();
 
 		m_pShellBuilder = checked_static_cast< CShellContextMenuBuilder* >( pParentBuilder );
 	}
-	ENSURE( m_pShellBuilder != NULL );
+	ASSERT_PTR( m_pShellBuilder );
 	return m_pShellBuilder;
 }
 
@@ -70,7 +65,26 @@ void CBaseMenuBuilder::AddSeparator( void )
 	++m_indexMenu;
 }
 
-CMenu* CBaseMenuBuilder::CreateEmptyPopupMenu( void )
+
+// CSubMenuBuilder implementation
+
+CSubMenuBuilder::CSubMenuBuilder( CBaseMenuBuilder* pParentBuilder )
+	: CBaseMenuBuilder( CreateEmptyPopupMenu(), 0 )
+	, m_pParentBuilder( pParentBuilder )
+{
+}
+
+CSubMenuBuilder::~CSubMenuBuilder()
+{
+	delete GetPopupMenu();
+}
+
+CBaseMenuBuilder* CSubMenuBuilder::GetParentBuilder( void ) const
+{
+	return m_pParentBuilder;
+}
+
+CMenu* CSubMenuBuilder::CreateEmptyPopupMenu( void )
 {
 	CMenu* pPopupMenu = new CMenu;
 	pPopupMenu->CreatePopupMenu();
@@ -81,8 +95,13 @@ CMenu* CBaseMenuBuilder::CreateEmptyPopupMenu( void )
 // CShellContextMenuBuilder implementation
 
 CShellContextMenuBuilder::CShellContextMenuBuilder( HMENU hShellMenu, UINT indexMenu, UINT idBaseCmd )
-	: CBaseMenuBuilder( NULL, CMenu::FromHandle( hShellMenu ), indexMenu )
+	: CBaseMenuBuilder( CMenu::FromHandle( hShellMenu ), indexMenu )
 	, m_idBaseCmd( idBaseCmd )
 	, m_cmdCount( 0 )
 {
+}
+
+CBaseMenuBuilder* CShellContextMenuBuilder::GetParentBuilder( void ) const
+{
+	return NULL;
 }

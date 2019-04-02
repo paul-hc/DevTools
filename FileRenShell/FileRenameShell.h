@@ -28,7 +28,7 @@ private:
 
 	UINT AugmentMenuItems( HMENU hMenu, UINT indexMenu, UINT idBaseCmd );		// return the added commands count
 	HMENU BuildCreateFoldersSubmenu( CBaseMenuBuilder* pParentBuilder );
-	HMENU BuildPasteDeepSubmenu( CBaseMenuBuilder* pParentBuilder, std::tstring& rItemText );
+	HMENU BuildPasteDeepSubmenu( CBaseMenuBuilder* pParentBuilder );
 
 	enum MenuCommand
 	{
@@ -36,14 +36,14 @@ private:
 		Cmd_RenameFiles, Cmd_TouchFiles, Cmd_FindDuplicates,
 		Cmd_Undo, Cmd_Redo,
 		Cmd_RunUnitTests,
-		Cmd_MakeFolders,
-		Cmd_MakeDeepFolderStructure,
+		Cmd_CreateFolders,
+		Cmd_CreateDeepFolderStruct,
 		Cmd_PasteDeepBase,
 
 		Cmd_Separator = -1,
 
 		// popup IDs are negative
-		Popup_CreateFolders = -550,
+		Popup_PasteFolderStruct = -550,
 		Popup_PasteDeep,
 	};
 

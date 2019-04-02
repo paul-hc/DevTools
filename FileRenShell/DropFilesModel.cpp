@@ -42,6 +42,22 @@ void CDropFilesModel::Clear( void )
 	m_pImageStore.reset();
 }
 
+const CEnumTags& CDropFilesModel::GetTags_PasteOperation( void )
+{
+	static const CEnumTags tags( _T("n/a|DEEP PASTE - COPY|DEEP PASTE - CUT") );
+	return tags;
+}
+
+CDropFilesModel::PasteOperation CDropFilesModel::GetPasteOperation( void ) const
+{
+	if ( HasFlag( m_dropEffect, DROPEFFECT_MOVE ) )
+		return PasteMoveFiles;
+	else if ( HasFlag( m_dropEffect, DROPEFFECT_COPY ) )
+		return PasteCopyFiles;
+
+	return PasteNone;
+}
+
 void CDropFilesModel::BuildFromClipboard( void )
 {
 	Clear();
@@ -57,11 +73,14 @@ void CDropFilesModel::Init( const std::vector< fs::CPath >& dropPaths, DROPEFFEC
 {
 	m_dropPaths = dropPaths;
 	m_dropEffect = dropEffect;
-
 	m_srcCommonFolderPath = path::ExtractCommonParentPath( m_dropPaths );
 
-	m_pImageStore.reset( new CImageStore );
+	InitSrcFolders();
+	InitDeepPasteFolders();
+}
 
+void CDropFilesModel::InitSrcFolders( void )
+{
 	// folders of drop source files
 	for ( std::vector< fs::CPath >::const_iterator itDropPath = m_dropPaths.begin(); itDropPath != m_dropPaths.end(); ++itDropPath )
 		if ( fs::IsValidDirectory( itDropPath->GetPtr() ) )
@@ -81,8 +100,12 @@ void CDropFilesModel::Init( const std::vector< fs::CPath >& dropPaths, DROPEFFEC
 		utl::JoinUnique( m_srcDeepFolderPaths, subDirPaths.begin(), subDirPaths.end() );
 	}
 	fs::SortPaths( m_srcDeepFolderPaths );
+}
 
-	// deep paste folders
+void CDropFilesModel::InitDeepPasteFolders( void )
+{
+	m_pImageStore.reset( new CImageStore );
+
 	m_relFolderPathSeq.push_back( std::tstring() );		// the "." entry (shallow paste)
 	RegisterFolderImage( m_destDirPath );
 
@@ -219,20 +242,4 @@ fs::CPath CDropFilesModel::MakeDeepTargetFilePath( const fs::CPath& srcFilePath,
 
 	fs::CPath targetFullPath = m_destDirPath / relFolderPath / targetRelPath / srcFilePath.GetFilename();
 	return targetFullPath;
-}
-
-CDropFilesModel::PasteOperation CDropFilesModel::GetPasteOperation( void ) const
-{
-	if ( HasFlag( m_dropEffect, DROPEFFECT_MOVE ) )
-		return PasteMoveFiles;
-	else if ( HasFlag( m_dropEffect, DROPEFFECT_COPY ) )
-		return PasteCopyFiles;
-
-	return PasteNone;
-}
-
-const CEnumTags& CDropFilesModel::GetTags_PasteOperation( void )
-{
-	static const CEnumTags tags( _T("n/a|DEEP PASTE - COPY|DEEP PASTE - CUT") );
-	return tags;
 }
