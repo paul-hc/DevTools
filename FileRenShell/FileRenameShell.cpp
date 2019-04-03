@@ -348,7 +348,7 @@ STDMETHODIMP CFileRenameShell::QueryContextMenu( HMENU hMenu, UINT indexMenu, UI
 					TRACE( _T("CFileRenameShell::QueryContextMenu(): found files copied or cut on clipboard - also store their paths as text!\n") );
 
 			UINT cmdCount = AugmentMenuItems( hMenu, indexMenu, idCmdFirst );
-			return MAKE_HRESULT( SEVERITY_SUCCESS, FACILITY_NULL, cmdCount );
+			return MAKE_HRESULT( SEVERITY_SUCCESS, FACILITY_NULL, cmdCount + 1 );
 		}
 	}
 
@@ -375,7 +375,7 @@ STDMETHODIMP CFileRenameShell::InvokeCommand( CMINVOKECOMMANDINFO* pCmi )
 			if ( !scopedMainWnd.HasValidParentOwner() )
 				ui::BeepSignal( MB_ICONERROR );
 			else
-				ExecuteCommand( menuCmd, scopedMainWnd.m_pParentOwner );
+				ExecuteCommand( menuCmd, scopedMainWnd.GetParentOwnerWnd() );
 
 			return S_OK;
 		}

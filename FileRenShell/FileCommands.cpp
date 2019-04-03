@@ -10,6 +10,7 @@
 #include "utl/StringUtilities.h"
 #include "utl/TimeUtils.h"
 #include "utl/SerializeStdTypes.h"
+#include "utl/UI/ShellUtilities.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -21,8 +22,8 @@ namespace cmd
 	const CEnumTags& GetTags_CommandType( void )
 	{
 		static const CEnumTags tags(
-			_T("Rename Files|Touch Files|Find Duplicates|Change Destination Paths|Change Destination File States|Reset Destinations|Edit"),
-			_T("RENAME|TOUCH|FIND_DUPLICATES|CHANGE_DEST_PATHS|CHANGE_DEST_FILE_STATES|RESET_DESTINATIONS|EDIT"),
+			_T("Rename Files|Touch Files|Find Duplicates|Delete Files|Undelete Files|Change Destination Paths|Change Destination File States|Reset Destinations|Edit"),
+			_T("RENAME|TOUCH|FIND_DUPLICATES|DELETE_FILES|UNDELETE_FILES|CHANGE_DEST_PATHS|CHANGE_DEST_FILE_STATES|RESET_DESTINATIONS|EDIT"),
 			-1, RenameFile );
 
 		return tags;
@@ -49,21 +50,6 @@ namespace cmd
 	}
 
 
-	// CBaseSerialCmd implementation
-
-	IMPLEMENT_DYNAMIC( CBaseSerialCmd, CObject )
-
-	CBaseSerialCmd::CBaseSerialCmd( CommandType cmdType /*= CommandType()*/ )
-		: CCommand( cmdType, NULL, &GetTags_CommandType() )
-	{
-	}
-
-	void CBaseSerialCmd::Serialize( CArchive& archive )
-	{
-		CCommand::Serialize( archive );		// dis-ambiguate from CObject::Serialize()
-	}
-
-
 	// CUserFeedbackException class
 
 	class CUserFeedbackException : public CRuntimeException
@@ -83,18 +69,34 @@ namespace cmd
 	}
 
 
+	// CBaseSerialCmd implementation
+
+	IMPLEMENT_DYNAMIC( CBaseSerialCmd, CObject )
+
+	IErrorObserver* CBaseSerialCmd::s_pErrorObserver = NULL;
+	CLogger* CBaseSerialCmd::s_pLogger = (CLogger*)-1;
+
+	CBaseSerialCmd::CBaseSerialCmd( CommandType cmdType /*= CommandType()*/ )
+		: CCommand( cmdType, NULL, &GetTags_CommandType() )
+	{
+		if ( (CLogger*)-1 == s_pLogger )
+			s_pLogger = app::GetLogger();
+	}
+
+	void CBaseSerialCmd::Serialize( CArchive& archive )
+	{
+		CCommand::Serialize( archive );		// dis-ambiguate from CObject::Serialize()
+	}
+
+
 	// CBaseFileCmd implementation
 
 	const TCHAR CBaseFileCmd::s_fmtError[] = _T("* %s\n ERROR: %s");
-	IErrorObserver* CBaseFileCmd::s_pErrorObserver = NULL;
-	CLogger* CBaseFileCmd::s_pLogger = (CLogger*)-1;
 
 	CBaseFileCmd::CBaseFileCmd( CommandType cmdType /*= CommandType()*/, const fs::CPath& srcPath /*= fs::CPath()*/ )
 		: CBaseSerialCmd( cmdType )
 		, m_srcPath( srcPath )
 	{
-		if ( (CLogger*)-1 == s_pLogger )
-			s_pLogger = app::GetLogger();
 	}
 
 	void CBaseFileCmd::ExecuteHandle( void ) throws_( CUserFeedbackException )
@@ -108,7 +110,7 @@ namespace cmd
 		}
 		catch ( CException* pExc )
 		{
-			throw CUserFeedbackException( HandleFileError( pExc ) );
+			throw CUserFeedbackException( HandleFileError( pExc, m_srcPath ) );
 		}
 	}
 
@@ -119,12 +121,12 @@ namespace cmd
 		return pUndoCmd.get() != NULL && pUndoCmd->Execute();
 	}
 
-	UserFeedback CBaseFileCmd::HandleFileError( CException* pExc ) const
+	UserFeedback CBaseFileCmd::HandleFileError( CException* pExc, const fs::CPath& srcPath ) const
 	{
-		std::tstring errMsg = ExtractMessage( pExc );
+		std::tstring errMsg = ExtractMessage( pExc, srcPath );
 
 		if ( s_pErrorObserver != NULL )
-			s_pErrorObserver->OnFileError( m_srcPath, errMsg );
+			s_pErrorObserver->OnFileError( srcPath, errMsg );
 
 		UserFeedback feedback;
 		switch ( AfxMessageBox( errMsg.c_str(), MB_ICONWARNING | MB_ABORTRETRYIGNORE ) )
@@ -140,14 +142,90 @@ namespace cmd
 		return feedback;
 	}
 
-	std::tstring CBaseFileCmd::ExtractMessage( CException* pExc ) const
+	std::tstring CBaseFileCmd::ExtractMessage( CException* pExc, const fs::CPath& srcPath )
 	{
 		std::tstring message = mfc::CRuntimeException::MessageOf( *pExc );
 		pExc->Delete();
 
-		if ( !m_srcPath.FileExist() )
-			return str::Format( _T("Cannot find file: %s"), m_srcPath.GetPtr() );
+		if ( !srcPath.FileExist() )
+			return str::Format( _T("Cannot find file: %s"), srcPath.GetPtr() );
 		return message;
+	}
+
+
+	// CBaseMultiFilesCmd implementation
+
+	CBaseMultiFilesCmd::CBaseMultiFilesCmd( CommandType cmdType /*= CommandType()*/, const std::vector< fs::CPath >& filePaths /*= std::vector< fs::CPath >()*/,
+											const CTime& timestamp /*= CTime::GetCurrentTime()*/ )
+		: CBaseSerialCmd( cmdType )
+		, m_filePaths( filePaths )
+		, m_timestamp( timestamp )
+	{
+	}
+
+	std::tstring CBaseMultiFilesCmd::Format( utl::Verbosity verbosity ) const
+	{
+		std::tstring text = GetTags_CommandType().Format( GetTypeID(), verbosity != utl::Brief ? CEnumTags::UiTag : CEnumTags::KeyTag );
+
+		if ( verbosity != utl::Brief )
+			stream::Tag( text, str::Format( _T("[%d]"), m_filePaths.size() ), _T(" ") );
+
+		if ( m_timestamp.GetTime() != 0 )
+			stream::Tag( text, time_utl::FormatTimestamp( m_timestamp, verbosity != utl::Brief ? time_utl::s_outFormatUi : time_utl::s_outFormat ), _T(" ") );
+
+		return text;
+	}
+
+	void CBaseMultiFilesCmd::Serialize( CArchive& archive )
+	{
+		__super::Serialize( archive );
+
+		archive & m_timestamp;
+		serial::SerializeValues( archive, m_filePaths );
+	}
+
+	void CBaseMultiFilesCmd::HandleExecuteResult( bool succeeded, const CWorkingSet& workingSet, const std::tstring& details /*= str::GetEmpty()*/ ) const
+	{
+		if ( s_pErrorObserver != NULL )
+			for ( std::vector< fs::CPath >::const_iterator itBadFilePath = workingSet.m_badFilePaths.begin(); itBadFilePath != workingSet.m_badFilePaths.end(); ++itBadFilePath )
+				s_pErrorObserver->OnFileError( *itBadFilePath, str::Format( _T("Cannot access file: %s"), itBadFilePath->GetPtr() ) );
+
+		if ( s_pLogger != NULL )
+		{
+			std::tstring message = Format( utl::Detailed );
+			stream::Tag( message, details, _T(" ") );
+
+			if ( !succeeded )
+				message += _T("\n ERROR");
+			else if ( !workingSet.m_badFilePaths.empty() )
+			{
+				message += str::Format( _T("\n WARNING: Cannot access %d files:\n"), workingSet.m_badFilePaths.size() );
+				message += str::Join( workingSet.m_badFilePaths, _T("\n") );
+			}
+			s_pLogger->LogString( message );
+		}
+	}
+
+
+	// CBaseMultiFilesCmd::CWorkingSet implementation
+
+	CBaseMultiFilesCmd::CWorkingSet::CWorkingSet( const CBaseMultiFilesCmd& cmd, fs::AccessMode accessMode /*= fs::Read*/ )
+		: m_existStatus( AllExist )
+	{
+		const std::vector< fs::CPath >& filePaths = cmd.GetFilePaths();
+
+		ASSERT( !filePaths.empty() );
+
+		m_currFilePaths.reserve( filePaths.size() );
+
+		for ( std::vector< fs::CPath >::const_iterator itFilePath = filePaths.begin(); itFilePath != filePaths.end(); ++itFilePath )
+			if ( itFilePath->FileExist( accessMode ) )
+				m_currFilePaths.push_back( *itFilePath );
+			else
+				m_badFilePaths.push_back( *itFilePath );
+
+		if ( m_currFilePaths.size() != filePaths.size() )
+			m_existStatus = !m_currFilePaths.empty() ? SomeExist : NoneExist;
 	}
 
 
@@ -347,57 +425,65 @@ void CTouchFileCmd::Serialize( CArchive& archive )
 	}
 }
 
-/*
-// CDeleteFileCmd implementation
+// CDeleteFilesCmd implementation
 
-IMPLEMENT_SERIAL( CDeleteFileCmd, CBaseSerialCmd, VERSIONABLE_SCHEMA | 1 )
+IMPLEMENT_SERIAL( CDeleteFilesCmd, CBaseSerialCmd, VERSIONABLE_SCHEMA | 1 )
 
-CDeleteFileCmd::CDeleteFileCmd( const fs::CPath& srcPath, const fs::CPath& destPath )
-	: CBaseFileCmd( cmd::DeleteFile, srcPath )
-	, m_destPath( destPath )
+CDeleteFilesCmd::CDeleteFilesCmd( const std::vector< fs::CPath >& filePaths )
+	: cmd::CBaseMultiFilesCmd( cmd::DeleteFiles, filePaths )
 {
 }
 
-CDeleteFileCmd::~CDeleteFileCmd()
+CDeleteFilesCmd::~CDeleteFilesCmd()
 {
 }
 
-std::tstring CDeleteFileCmd::Format( utl::Verbosity verbosity ) const
+bool CDeleteFilesCmd::Execute( void )
 {
-	std::tstring text;
-	if ( verbosity != utl::Brief )
-		text = CBaseFileCmd::Format( utl::Brief );		// prepend "RENAME" tag
+	CWorkingSet workingSet( *this, fs::Write );
 
-	stream::Tag( text, fmt::FormatDeleteEntry( m_srcPath, m_destPath ), _T(" ") );
-	return text;
-}
+	if ( !shell::DeleteFiles( workingSet.m_currFilePaths, app::GetMainWnd() ) )		// delete to RecycleBin
+	{
+		if ( !shell::AnyOperationAborted() )
+			HandleExecuteResult( false, workingSet );
 
-bool CDeleteFileCmd::Execute( void )
-{
-	CFile::Delete( m_srcPath.GetPtr(), m_destPath.GetPtr() );
+		return false;
+	}
+
+	HandleExecuteResult( true, workingSet );
 	NotifyObservers();
 	return true;
 }
 
-std::auto_ptr< cmd::CBaseFileCmd > CDeleteFileCmd::MakeUnexecuteCmd( void ) const
+bool CDeleteFilesCmd::Unexecute( void )
 {
-	return std::auto_ptr< cmd::CBaseFileCmd >( new CDeleteFileCmd( m_destPath, m_srcPath ) );
+	CUndeleteFilesCmd undoCmd( GetFilePaths() );
+	return undoCmd.Execute();
 }
 
-bool CDeleteFileCmd::IsUndoable( void ) const
+bool CDeleteFilesCmd::IsUndoable( void ) const
 {
-	//return m_destPath.FileExist() && !m_srcPath.FileExist();
 	return true;		// let it unexecute with error rather than being skipped in UNDO
 }
 
-void CDeleteFileCmd::Serialize( CArchive& archive )
-{
-	cmd::CBaseFileCmd::Serialize( archive );
 
-	archive & m_srcPath;
-	archive & m_destPath;
+// CDeleteFilesCmd::CUndeleteFilesCmd implementation
+
+bool CDeleteFilesCmd::CUndeleteFilesCmd::Execute( void )
+{
+	std::vector< fs::CPath > errorFilePaths;
+	size_t restoredCount = shell::UndeleteFiles( GetFilePaths(), app::GetMainWnd(), &errorFilePaths );
+	bool succeeded = restoredCount != 0;
+
+	CWorkingSet workingSet( *this );
+	workingSet.m_badFilePaths.swap( errorFilePaths );
+
+	HandleExecuteResult( succeeded, workingSet );
+	if ( succeeded )
+		NotifyObservers();
+	return succeeded;
 }
-*/
+
 
 // CBaseChangeDestCmd implementation
 

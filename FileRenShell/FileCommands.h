@@ -8,10 +8,14 @@
 
 
 class CLogger;
+namespace app { enum MsgType; }
 
 
 namespace cmd
 {
+	enum UserFeedback { Abort, Retry, Ignore };
+
+
 	abstract class CBaseSerialCmd : public CObject
 								  , public CCommand
 	{
@@ -21,12 +25,14 @@ namespace cmd
 	public:
 		// base overrides
 		virtual void Serialize( CArchive& archive );
+	public:
+		static CLogger* s_pLogger;
+		static IErrorObserver* s_pErrorObserver;
 	};
 
 
-	enum UserFeedback { Abort, Retry, Ignore };
-
-
+	// abstract base for file leaf commands embedded in a CFileMacroCmd, that operates on a single file
+	//
 	abstract class CBaseFileCmd : public CBaseSerialCmd
 	{
 	protected:
@@ -38,34 +44,45 @@ namespace cmd
 		virtual bool Unexecute( void );
 		virtual std::auto_ptr< CBaseFileCmd > MakeUnexecuteCmd( void ) const = 0;
 	private:
-		UserFeedback HandleFileError( CException* pExc ) const;
-		std::tstring ExtractMessage( CException* pExc ) const;
+		UserFeedback HandleFileError( CException* pExc, const fs::CPath& srcPath ) const;
+		static std::tstring ExtractMessage( CException* pExc, const fs::CPath& srcPath );
 	public:
 		fs::CPath m_srcPath;
 	private:
 		static const TCHAR s_fmtError[];
-	public:
-		static CLogger* s_pLogger;
-		static IErrorObserver* s_pErrorObserver;
 	};
 
 
-	class CScopedLogger
+	// abstract base for commands that operate on multiple files
+	//
+	abstract class CBaseMultiFilesCmd : public CBaseSerialCmd
 	{
+	protected:
+		CBaseMultiFilesCmd( CommandType cmdType = CommandType(), const std::vector< fs::CPath >& filePaths = std::vector< fs::CPath >(), const CTime& timestamp = CTime::GetCurrentTime() );
 	public:
-		CScopedLogger( CLogger* pLogger ) : m_pOldLogger( CBaseFileCmd::s_pLogger ) { CBaseFileCmd::s_pLogger = pLogger; }
-		~CScopedLogger() { CBaseFileCmd::s_pLogger = m_pOldLogger; }
-	private:
-		CLogger* m_pOldLogger;
-	};
+		const std::vector< fs::CPath >& GetFilePaths( void ) const { return m_filePaths; }
+		const CTime& GetTimestamp( void ) const { return m_timestamp; }
 
-	class CScopedErrorObserver
-	{
-	public:
-		CScopedErrorObserver( IErrorObserver* pErrorObserver ) : m_pOldErrorObserver( CBaseFileCmd::s_pErrorObserver ) { CBaseFileCmd::s_pErrorObserver = pErrorObserver; }
-		~CScopedErrorObserver() { CBaseFileCmd::s_pErrorObserver = m_pOldErrorObserver; }
+		// base overrides
+		virtual std::tstring Format( utl::Verbosity verbosity ) const;
+
+		virtual void Serialize( CArchive& archive );
+	protected:
+		enum MultiFileStatus { AllExist, SomeExist, NoneExist };
+
+		struct CWorkingSet
+		{
+			CWorkingSet( const CBaseMultiFilesCmd& cmd, fs::AccessMode accessMode = fs::Read );
+		public:
+			std::vector< fs::CPath > m_currFilePaths;
+			std::vector< fs::CPath > m_badFilePaths;
+			MultiFileStatus m_existStatus;
+		};
+
+		void HandleExecuteResult( bool succeeded, const CWorkingSet& workingSet, const std::tstring& details = str::GetEmpty() ) const;
 	private:
-		IErrorObserver* m_pOldErrorObserver;
+		CTime m_timestamp;
+		std::vector< fs::CPath > m_filePaths;
 	};
 
 
@@ -92,6 +109,25 @@ namespace cmd
 		void ExecuteMacro( Mode mode );
 	private:
 		CTime m_timestamp;
+	};
+
+
+	class CScopedLogger
+	{
+	public:
+		CScopedLogger( CLogger* pLogger ) : m_pOldLogger( CBaseFileCmd::s_pLogger ) { CBaseFileCmd::s_pLogger = pLogger; }
+		~CScopedLogger() { CBaseFileCmd::s_pLogger = m_pOldLogger; }
+	private:
+		CLogger* m_pOldLogger;
+	};
+
+	class CScopedErrorObserver
+	{
+	public:
+		CScopedErrorObserver( IErrorObserver* pErrorObserver ) : m_pOldErrorObserver( CBaseFileCmd::s_pErrorObserver ) { CBaseFileCmd::s_pErrorObserver = pErrorObserver; }
+		~CScopedErrorObserver() { CBaseFileCmd::s_pErrorObserver = m_pOldErrorObserver; }
+	private:
+		IErrorObserver* m_pOldErrorObserver;
 	};
 }
 
@@ -146,25 +182,28 @@ public:
 
 // Used for removing duplicate files. Can be undone by undeleting the file from Recycle Bin.
 //
-class CDeleteFileCmd : public cmd::CBaseFileCmd
+class CDeleteFilesCmd : public cmd::CBaseMultiFilesCmd
 {
-	DECLARE_SERIAL( CDeleteFileCmd )
+	DECLARE_SERIAL( CDeleteFilesCmd )
 
-	CDeleteFileCmd( void ) {}
+	CDeleteFilesCmd( void ) {}
 public:
-	CDeleteFileCmd( const fs::CPath& srcPath, const fs::CPath& destPath );
-	virtual ~CDeleteFileCmd();
+	CDeleteFilesCmd( const std::vector< fs::CPath >& filePaths );
+	virtual ~CDeleteFilesCmd();
 
 	// ICommand interface
-	virtual std::tstring Format( utl::Verbosity verbosity ) const;
 	virtual bool Execute( void );
+	virtual bool Unexecute( void );
 	virtual bool IsUndoable( void ) const;
-	virtual std::auto_ptr< CBaseFileCmd > MakeUnexecuteCmd( void ) const;
+private:
+	struct CUndeleteFilesCmd : public cmd::CBaseMultiFilesCmd
+	{
+		CUndeleteFilesCmd( const std::vector< fs::CPath >& delFilePaths ) : cmd::CBaseMultiFilesCmd( cmd::Priv_UndeleteFiles, delFilePaths ) {}
 
-	// base overrides
-	virtual void Serialize( CArchive& archive );
-public:
-	fs::CPath m_destPath;
+		// ICommand interface
+		virtual bool Execute( void );
+		virtual bool IsUndoable( void ) const { return false; }
+	};
 };
 
 

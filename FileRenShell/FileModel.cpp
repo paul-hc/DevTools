@@ -81,7 +81,7 @@ bool CFileModel::SafeExecuteCmd( IFileEditor* pEditor, utl::ICommand* pCmd )
 	if ( pEditor != NULL && pEditor->IsRollMode() )
 		execInline = true;
 	else if ( !CGeneralOptions::Instance().m_undoEditingCmds )
-		execInline = !cmd::IsPersistentCmd( pCmd );			// local editing command?
+		execInline = !cmd::IsPersistentCmd( pCmd );				// local editing command?
 
 	if ( execInline )
 	{

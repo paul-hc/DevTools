@@ -30,6 +30,19 @@ protected:
 };
 
 
+struct CScopedMainWnd
+{
+	CScopedMainWnd( HWND hWnd );
+	~CScopedMainWnd();
+
+	static bool HasValidParentOwner( void ) { return ::IsWindow( s_pParentOwner->GetSafeHwnd() ) != FALSE; }
+	static CWnd* GetParentOwnerWnd( void ) { ASSERT( HasValidParentOwner() ); return s_pParentOwner; }
+private:
+	CWnd* m_pOldMainWnd;
+	static CWnd* s_pParentOwner;
+};
+
+
 extern CComModule g_comModule;	// _Module original name
 extern CApplication g_app;
 
@@ -37,21 +50,10 @@ extern CApplication g_app;
 namespace app
 {
 	inline CApplication& GetApp( void ) { return g_app; }
+	inline CWnd* GetMainWnd( void ) { return CScopedMainWnd::GetParentOwnerWnd(); }
 
 	void InitModule( HINSTANCE hInstance );
 }
-
-
-struct CScopedMainWnd
-{
-	CScopedMainWnd( HWND hWnd );
-	~CScopedMainWnd();
-
-	bool HasValidParentOwner( void ) const { return ::IsWindow( m_pParentOwner->GetSafeHwnd() ) != FALSE; }
-public:
-	CWnd* m_pParentOwner;
-	CWnd* m_pOldMainWnd;
-};
 
 
 #endif // Application_h

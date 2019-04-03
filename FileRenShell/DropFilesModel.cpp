@@ -228,10 +228,12 @@ bool CDropFilesModel::PasteDeep( const fs::CPath& relFolderPath, CWnd* pParentOw
 			return false;
 	}
 
-	if ( !succeeded && pLogger != NULL )
-		pLogger->LogLine( _T(" * ERROR"), false );
+	if ( succeeded )
+		CClipboard::CopyToLines( destPaths, pParentOwner );		// clear clipboard after Paste, and add the destination paths as text
+	else if ( !shell::AnyOperationAborted() )
+		if ( pLogger != NULL )
+			pLogger->LogLine( _T(" * ERROR"), false );
 
-	CClipboard::CopyToLines( destPaths, pParentOwner );		// clear clipboard after Paste, and add the destination paths as text
 	return succeeded;
 }
 

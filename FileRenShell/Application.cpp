@@ -101,26 +101,29 @@ END_MESSAGE_MAP()
 
 // CScopedMainWnd implementation
 
+CWnd* CScopedMainWnd::s_pParentOwner = NULL;
+
 CScopedMainWnd::CScopedMainWnd( HWND hWnd )
-	: m_pParentOwner( NULL )
-	, m_pOldMainWnd( NULL )
+	: m_pOldMainWnd( NULL )
 {
+	ASSERT_NULL( s_pParentOwner );
+
 	CWnd* pMainWnd = AfxGetMainWnd();
 	bool fromThisModule = ui::IsPermanentWnd( pMainWnd->GetSafeHwnd() );
 
 	if ( hWnd != NULL && ::IsWindow( hWnd ) )
 		if ( fromThisModule )
-			m_pParentOwner = CWnd::FromHandlePermanent( ui::GetTopLevelParent( hWnd ) );
+			s_pParentOwner = CWnd::FromHandlePermanent( ui::GetTopLevelParent( hWnd ) );
 		else
-			m_pParentOwner = CWnd::FromHandle( hWnd )->GetTopLevelParent();
+			s_pParentOwner = CWnd::FromHandle( hWnd )->GetTopLevelParent();
 
-	if ( ::IsWindow( m_pParentOwner->GetSafeHwnd() ) )
+	if ( ::IsWindow( s_pParentOwner->GetSafeHwnd() ) )
 		if ( pMainWnd != NULL )
 			if ( NULL == pMainWnd->m_hWnd )							// it happens sometimes, kind of transitory state when invoking from Explorer.exe
 				if ( CWinThread* pCurrThread = AfxGetThread() )
 				{
 					m_pOldMainWnd = pMainWnd;
-					pCurrThread->m_pMainWnd = m_pParentOwner;		// temporarily substitute main window
+					pCurrThread->m_pMainWnd = s_pParentOwner;		// temporarily substitute main window
 				}
 }
 
@@ -129,4 +132,6 @@ CScopedMainWnd::~CScopedMainWnd()
 	if ( m_pOldMainWnd != NULL )
 		if ( CWinThread* pCurrThread = AfxGetThread() )
 			pCurrThread->m_pMainWnd = m_pOldMainWnd;				// restore original main window
+
+	s_pParentOwner = NULL;
 }

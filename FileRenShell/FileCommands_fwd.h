@@ -14,6 +14,7 @@ namespace cmd
 	enum CommandType
 	{
 		RenameFile = 100, TouchFile, FindDuplicates,
+		DeleteFiles, Priv_UndeleteFiles,
 		ChangeDestPaths, ChangeDestFileStates, ResetDestinations,
 		EditOptions
 	};
