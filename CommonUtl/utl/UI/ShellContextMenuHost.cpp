@@ -242,6 +242,9 @@ bool CShellContextMenuHost::InvokeVerb( const char* pVerb )
 	cmd.hwnd = m_pWndOwner->GetSafeHwnd();
 	cmd.nShow = SW_SHOWNORMAL;
 
+	if ( NULL == cmd.hwnd )
+		SetFlag( cmd.fMask, CMIC_MASK_FLAG_NO_UI );		// doesn't seem to have any effect
+
 	return HR_OK( m_pContextMenu->InvokeCommand( &cmd ) );
 }
 

@@ -7,6 +7,7 @@
 #include "ut/RenameFilesTests.h"
 #include "ut/CommandModelSerializerTests.h"
 #include "utl/EnumTags.h"
+#include "utl/FlagTags.h"
 #include "utl/UI/BaseApp.hxx"
 #include "resource.h"
 
@@ -135,3 +136,33 @@ CScopedMainWnd::~CScopedMainWnd()
 
 	s_pParentOwner = NULL;
 }
+
+
+#ifdef _DEBUG
+
+namespace dbg
+{
+	const CFlagTags& GetTags_ContextMenuFlags( void )
+	{
+		static const CFlagTags::FlagDef flagDefs[] =
+		{
+			{ FLAG_TAG( CMF_DEFAULTONLY ) },
+			{ FLAG_TAG( CMF_VERBSONLY ) },
+			{ FLAG_TAG( CMF_EXPLORE ) },
+			{ FLAG_TAG( CMF_NOVERBS ) },
+			{ FLAG_TAG( CMF_CANRENAME ) },
+			{ FLAG_TAG( CMF_NODEFAULT ) },
+			{ FLAG_TAG( CMF_ITEMMENU ) },
+			{ FLAG_TAG( CMF_EXTENDEDVERBS ) },
+			{ FLAG_TAG( CMF_DISABLEDVERBS ) },
+			{ FLAG_TAG( CMF_ASYNCVERBSTATE ) },
+			{ FLAG_TAG( CMF_OPTIMIZEFORINVOKE ) },
+			{ FLAG_TAG( CMF_SYNCCASCADEMENU ) },
+			{ FLAG_TAG( CMF_DONOTPICKDEFAULT ) }
+		};
+		static const CFlagTags s_tags( ARRAY_PAIR( flagDefs ) );
+		return s_tags;
+	}
+}
+
+#endif //_DEBUG

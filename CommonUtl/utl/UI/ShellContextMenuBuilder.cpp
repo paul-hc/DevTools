@@ -10,40 +10,26 @@
 
 // CBaseMenuBuilder implementation
 
-CBaseMenuBuilder::CBaseMenuBuilder( CMenu* pPopupMenu, UINT indexMenu )
-	: m_pPopupMenu( pPopupMenu )
+CBaseMenuBuilder::CBaseMenuBuilder( CShellContextMenuBuilder* pShellBuilder, CMenu* pPopupMenu, UINT indexMenu )
+	: m_pShellBuilder( pShellBuilder )
+	, m_pPopupMenu( pPopupMenu )
 	, m_indexMenu( indexMenu )
-	, m_pShellBuilder( NULL )
 {
-	ASSERT_PTR( m_pPopupMenu->GetSafeHmenu() );
-}
-
-CShellContextMenuBuilder* CBaseMenuBuilder::GetShellBuilder( void )
-{
-	if ( NULL == m_pShellBuilder )
-	{
-		CBaseMenuBuilder* pParentBuilder = GetParentBuilder();
-		if ( NULL == pParentBuilder )
-			pParentBuilder = this;
-		else
-			while ( pParentBuilder->GetParentBuilder() != NULL )
-				pParentBuilder = pParentBuilder->GetParentBuilder();
-
-		m_pShellBuilder = checked_static_cast< CShellContextMenuBuilder* >( pParentBuilder );
-	}
 	ASSERT_PTR( m_pShellBuilder );
-	return m_pShellBuilder;
+	ASSERT_PTR( m_pPopupMenu->GetSafeHmenu() );
 }
 
 void CBaseMenuBuilder::AddCmdItem( UINT cmdOffset, const std::tstring& itemText, CBitmap* pItemBitmap )
 {
-	VERIFY( m_pPopupMenu->InsertMenu( m_indexMenu, MF_STRING | MF_BYPOSITION, GetShellBuilder()->MakeCmdId( cmdOffset ), itemText.c_str() ) );
+	UINT cmdId = GetShellBuilder()->MakeCmdId( cmdOffset );
+
+	VERIFY( m_pPopupMenu->InsertMenu( m_indexMenu, MF_STRING | MF_BYPOSITION, cmdId, itemText.c_str() ) );
 
 	if ( pItemBitmap != NULL )
 		VERIFY( m_pPopupMenu->SetMenuItemBitmaps( m_indexMenu, MF_BYPOSITION, pItemBitmap, pItemBitmap ) );
 
 	++m_indexMenu;
-	GetShellBuilder()->OnAddCmd();
+	GetShellBuilder()->OnAddCmd( cmdId );
 }
 
 void CBaseMenuBuilder::AddPopupItem( HMENU hSubMenu, const std::tstring& itemText, CBitmap* pItemBitmap )
@@ -56,7 +42,6 @@ void CBaseMenuBuilder::AddPopupItem( HMENU hSubMenu, const std::tstring& itemTex
 		VERIFY( m_pPopupMenu->SetMenuItemBitmaps( m_indexMenu, MF_BYPOSITION, pItemBitmap, pItemBitmap ) );
 
 	++m_indexMenu;
-	GetShellBuilder()->OnAddCmd();			// for the popup entry - otherwise it skips the callback for last deep folder on IContextMenu::InvokeCommand()
 }
 
 void CBaseMenuBuilder::AddSeparator( void )
@@ -69,7 +54,7 @@ void CBaseMenuBuilder::AddSeparator( void )
 // CSubMenuBuilder implementation
 
 CSubMenuBuilder::CSubMenuBuilder( CBaseMenuBuilder* pParentBuilder )
-	: CBaseMenuBuilder( CreateEmptyPopupMenu(), 0 )
+	: CBaseMenuBuilder( pParentBuilder->GetShellBuilder(), CreateEmptyPopupMenu(), 0 )
 	, m_pParentBuilder( pParentBuilder )
 {
 }
@@ -95,8 +80,9 @@ CMenu* CSubMenuBuilder::CreateEmptyPopupMenu( void )
 // CShellContextMenuBuilder implementation
 
 CShellContextMenuBuilder::CShellContextMenuBuilder( HMENU hShellMenu, UINT indexMenu, UINT idBaseCmd )
-	: CBaseMenuBuilder( CMenu::FromHandle( hShellMenu ), indexMenu )
+	: CBaseMenuBuilder( this, CMenu::FromHandle( hShellMenu ), indexMenu )
 	, m_idBaseCmd( idBaseCmd )
+	, m_maxCmdId( 0 )
 	, m_cmdCount( 0 )
 {
 }
@@ -104,4 +90,10 @@ CShellContextMenuBuilder::CShellContextMenuBuilder( HMENU hShellMenu, UINT index
 CBaseMenuBuilder* CShellContextMenuBuilder::GetParentBuilder( void ) const
 {
 	return NULL;
+}
+
+void CShellContextMenuBuilder::OnAddCmd( UINT cmdId )
+{
+	m_maxCmdId = std::max( cmdId, m_maxCmdId );
+	++m_cmdCount;
 }

@@ -47,6 +47,9 @@ extern CComModule g_comModule;	// _Module original name
 extern CApplication g_app;
 
 
+class CFlagTags;
+
+
 namespace app
 {
 	inline CApplication& GetApp( void ) { return g_app; }
@@ -54,6 +57,16 @@ namespace app
 
 	void InitModule( HINSTANCE hInstance );
 }
+
+
+#ifdef _DEBUG
+
+namespace dbg
+{
+	const CFlagTags& GetTags_ContextMenuFlags( void );
+}
+
+#endif //_DEBUG
 
 
 #endif // Application_h

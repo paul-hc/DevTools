@@ -6,6 +6,7 @@
 #include "IFileEditor.h"
 #include "Application.h"
 #include "DropFilesModel.h"
+#include "utl/FlagTags.h"
 #include "utl/FmtUtils.h"
 #include "utl/FileSystem_fwd.h"
 #include "utl/Guards.h"
@@ -113,7 +114,7 @@ UINT CFileRenameShell::AugmentMenuItems( HMENU hMenu, UINT indexMenu, UINT idBas
 		}
 	}
 
-	return menuBuilder.GetAddedCmdCount();
+	return menuBuilder.GetNextCmdId();
 }
 
 HMENU CFileRenameShell::BuildCreateFoldersSubmenu( CBaseMenuBuilder* pParentBuilder )
@@ -336,6 +337,8 @@ STDMETHODIMP CFileRenameShell::QueryContextMenu( HMENU hMenu, UINT indexMenu, UI
 	//		http://microsoft.public.platformsdk.shell.narkive.com/yr1YoK9e/obtaining-selected-shortcut-lnk-files-inside-ishellextinit-initialize
 	//		https://stackoverflow.com/questions/21848694/windows-shell-extension-doesnt-give-exact-file-paths
 
+	TRACE( _T("CFileRenameShell::QueryContextMenu(): flags=0x%X {%s}\n"), flags, dbg::GetTags_ContextMenuFlags().FormatKey( flags ).c_str() );
+
 	if ( !HasFlag( flags, CMF_DEFAULTONLY ) &&			// kind of CMF_NORMAL
 		 !HasFlag( flags, CMF_VERBSONLY ) )				// for "lnkfile": prevent menu item duplication due to querying twice (* and lnkfile)
 	{
@@ -347,8 +350,9 @@ STDMETHODIMP CFileRenameShell::QueryContextMenu( HMENU hMenu, UINT indexMenu, UI
 				if ( CClipboard::AlsoCopyDropFilesAsPaths( pParent ) )		// if files Copied or Cut on clipboard, also store their paths as text
 					TRACE( _T("CFileRenameShell::QueryContextMenu(): found files copied or cut on clipboard - also store their paths as text!\n") );
 
-			UINT cmdCount = AugmentMenuItems( hMenu, indexMenu, idCmdFirst );
-			return MAKE_HRESULT( SEVERITY_SUCCESS, FACILITY_NULL, cmdCount + 1 );
+			UINT nextCmdId = AugmentMenuItems( hMenu, indexMenu, idCmdFirst );
+			TRACE( "CFileRenameShell::QueryContextMenu(): indexMenu=%d idCmdFirst=%d idCmdLast=%d  nextCmdId=%d  flags=0x%X\n", indexMenu, idCmdFirst, idCmdLast, nextCmdId, flags );
+			return MAKE_HRESULT( SEVERITY_SUCCESS, FACILITY_NULL, nextCmdId );		// increment, otherwise it skips the callback for last command on IContextMenu::InvokeCommand()
 		}
 	}
 

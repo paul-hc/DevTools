@@ -9,8 +9,9 @@ class CShellContextMenuBuilder;
 class CBaseMenuBuilder
 {
 protected:
-	CBaseMenuBuilder( CMenu* pPopupMenu, UINT indexMenu );
+	CBaseMenuBuilder( CShellContextMenuBuilder* pShellBuilder, CMenu* pPopupMenu, UINT indexMenu );
 public:
+	CShellContextMenuBuilder* GetShellBuilder( void ) const { return m_pShellBuilder; }
 	CMenu* GetPopupMenu( void ) const { return m_pPopupMenu; }
 
 	void AddCmdItem( UINT cmdOffset, const std::tstring& itemText, CBitmap* pItemBitmap );
@@ -22,12 +23,10 @@ protected:
 
 	bool IsShellMenu( void ) const { return NULL == GetParentBuilder(); }
 	bool IsSubMenuMenu( void ) const { return !IsShellMenu(); }
-	CShellContextMenuBuilder* GetShellBuilder( void );
 private:
+	CShellContextMenuBuilder* m_pShellBuilder;
 	CMenu* m_pPopupMenu;
 	UINT m_indexMenu;
-
-	CShellContextMenuBuilder* m_pShellBuilder;		// self-encapsulated, lazy
 };
 
 
@@ -51,15 +50,19 @@ class CShellContextMenuBuilder : public CBaseMenuBuilder
 public:
 	CShellContextMenuBuilder( HMENU hShellMenu, UINT indexMenu, UINT idBaseCmd );
 
-	UINT GetAddedCmdCount( void ) const { return m_cmdCount; }
 	UINT MakeCmdId( UINT cmdOffset ) const { return m_idBaseCmd + cmdOffset; }
 
-	void OnAddCmd( void ) { ++m_cmdCount; }
+	void OnAddCmd( UINT cmdId );
+
+	// query context menu results
+	UINT GetNextCmdId( void ) const { return m_maxCmdId - m_idBaseCmd + 1; }
+	UINT GetCmdCount( void ) const { return m_cmdCount; }
 protected:
 	// composite overrides
 	virtual CBaseMenuBuilder* GetParentBuilder( void ) const;
 private:
 	const UINT m_idBaseCmd;
+	UINT m_maxCmdId;			// maximum inserted command id, deep
 	UINT m_cmdCount;			// total count of commands ADDED (excluding separators, sub-menus)
 };
 
