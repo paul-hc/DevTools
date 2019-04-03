@@ -55,7 +55,7 @@ public:
 	void OnAddCmd( UINT cmdId );
 
 	// query context menu results
-	UINT GetNextCmdId( void ) const { return m_maxCmdId - m_idBaseCmd + 1; }
+	UINT GetNextCmdId( void ) const { return m_maxCmdId - m_idBaseCmd + 1; }		// increment, otherwise it skips the callback for last command on IContextMenu::InvokeCommand()
 	UINT GetCmdCount( void ) const { return m_cmdCount; }
 protected:
 	// composite overrides
