@@ -25,8 +25,15 @@ namespace shell
 	bool CopyFiles( const std::vector< fs::CPath >& srcPaths, const fs::CPath& destFolderPath, CWnd* pWnd = AfxGetMainWnd(), FILEOP_FLAGS flags = FOF_ALLOWUNDO );
 
 	bool DeleteFiles( const std::vector< fs::CPath >& srcPaths, CWnd* pWnd = AfxGetMainWnd(), FILEOP_FLAGS flags = FOF_ALLOWUNDO );
+	bool DeleteFile( const fs::CPath& filePath, CWnd* pWnd = AfxGetMainWnd(), FILEOP_FLAGS flags = FOF_ALLOWUNDO );
 
 	bool DoFileOperation( UINT shellOp, const std::vector< fs::CPath >& srcPaths, const std::vector< fs::CPath >* pDestPaths, CWnd* pWnd = AfxGetMainWnd(), FILEOP_FLAGS flags = FOF_ALLOWUNDO );
+	bool AnyOperationAborted( void );		// aborted by user?
+
+	// Recycle Bin operations
+
+	bool UndeleteFile( const fs::CPath& delFilePath, CWnd* pWnd = AfxGetMainWnd() );
+	size_t UndeleteFiles( const std::vector< fs::CPath >& delFilePaths, CWnd* pWnd = AfxGetMainWnd(), std::vector< fs::CPath >* pErrorFilePaths = NULL );
 
 
 	HINSTANCE Execute( CWnd* pParentWnd, const TCHAR* pFilePath, const TCHAR* pParams = NULL, DWORD mask = 0, const TCHAR* pVerb = NULL,

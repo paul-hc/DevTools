@@ -70,7 +70,7 @@ public:
 
 	std::tstring GetItemVerb( int cmdId ) const;
 	bool InvokeVerb( const char* pVerb );
-	bool InvokeVerbIndex( int verbIndex ) { ASSERT( verbIndex >= 0 ); return InvokeVerb( MAKEINTRESOURCEA( verbIndex ) ); }
+	bool InvokeVerbIndex( int verbIndex );
 	bool InvokeDefaultVerb( void );
 
 	static int ToVerbIndex( int cmdId ) { return cmdId - MinCmdId; }		// fix the misalignment of the verb with its cmdId

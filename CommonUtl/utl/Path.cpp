@@ -207,6 +207,25 @@ namespace path
 	}
 
 
+	SpecMatch MatchesPrefix( const TCHAR* pFilePath, const TCHAR* pPrefixOrSpec )
+	{
+		if ( str::IsEmpty( pPrefixOrSpec ) )
+			return Match_Any;		// no common prefix/spec filter
+
+		fs::CPath filePath = pFilePath, spec = pPrefixOrSpec;
+		filePath.Normalize();
+		spec.Normalize();
+
+		if ( ::PathIsPrefix( spec.GetPtr(), filePath.GetPtr() ) )
+			return Match_Prefix;
+
+		if ( ::PathMatchSpec( filePath.GetPtr(), spec.GetPtr() ) )
+			return Match_Spec;
+
+		return NoMatch;
+	}
+
+
 	bool IsValid( const std::tstring& path )
 	{
 		return !path.empty() && std::tstring::npos == path.find_first_of( GetInvalidChars() );

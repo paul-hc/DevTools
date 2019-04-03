@@ -178,6 +178,8 @@ namespace ut
 		const std::vector< fs::CPath >& GetFilePaths( void ) const { return m_filePaths; }
 		fs::CPath QualifyPath( const TCHAR* pRelativePath ) const { return m_poolDirPath / fs::CPath( pRelativePath ); }
 
+		size_t SplitQualifyPaths( std::vector< fs::CPath >& rFullPaths, const TCHAR relFilePaths[] ) const;
+
 		bool DeleteAllFiles( void );
 		bool CreateFiles( const TCHAR* pFlatPaths = NULL );		// can contain subdirectories
 

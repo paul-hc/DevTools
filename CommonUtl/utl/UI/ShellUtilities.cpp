@@ -2,6 +2,7 @@
 #include "stdafx.h"
 #include "ShellUtilities.h"
 #include "ImagingWic.h"
+#include "Recycler.h"
 #include "Registry.h"
 #include "ContainerUtilities.h"
 #include <shlwapi.h>
@@ -33,6 +34,13 @@ namespace shell
 
 namespace shell
 {
+	static bool s_anyOperationAborted = false;
+
+	bool AnyOperationAborted( void )
+	{
+		return s_anyOperationAborted;
+	}
+
 	bool DoFileOperation( UINT shellOp, const std::vector< fs::CPath >& srcPaths, const std::vector< fs::CPath >* pDestPaths,
 						  CWnd* pWnd /*= AfxGetMainWnd()*/, FILEOP_FLAGS flags /*= FOF_ALLOWUNDO*/ )
 	{
@@ -58,7 +66,11 @@ namespace shell
 			if ( pDestPaths != NULL && pDestPaths->size() == srcPaths.size() )
 				SetFlag( fileOp.fFlags, FOF_MULTIDESTFILES );							// each SRC file has a DEST file
 
-		return 0 == ::SHFileOperation( &fileOp ) && !fileOp.fAnyOperationsAborted;		// true for success AND not canceled by user
+		s_anyOperationAborted = false;
+		bool succeeded = 0 == ::SHFileOperation( &fileOp );
+		s_anyOperationAborted = fileOp.fAnyOperationsAborted != FALSE;
+
+		return succeeded && !s_anyOperationAborted;		// true for success AND not canceled by user
 	}
 
 	bool MoveFiles( const std::vector< fs::CPath >& srcPaths, const std::vector< fs::CPath >& destPaths,
@@ -90,6 +102,24 @@ namespace shell
 	bool DeleteFiles( const std::vector< fs::CPath >& srcPaths, CWnd* pWnd /*= AfxGetMainWnd()*/, FILEOP_FLAGS flags /*= FOF_ALLOWUNDO*/ )
 	{
 		return DoFileOperation( FO_DELETE, srcPaths, NULL, pWnd, flags );
+	}
+
+	bool DeleteFile( const fs::CPath& filePath, CWnd* pWnd /*= AfxGetMainWnd()*/, FILEOP_FLAGS flags /*= FOF_ALLOWUNDO*/ )
+	{
+		return DeleteFiles( std::vector< fs::CPath >( 1, filePath ), pWnd, flags );
+	}
+
+
+	bool UndeleteFile( const fs::CPath& delFilePath, CWnd* pWnd /*= AfxGetMainWnd()*/ )
+	{
+		shell::CRecycler recycleBin;
+		return recycleBin.UndeleteFile( delFilePath, pWnd );
+	}
+
+	size_t UndeleteFiles( const std::vector< fs::CPath >& delFilePaths, CWnd* pWnd /*= AfxGetMainWnd()*/, std::vector< fs::CPath >* pErrorFilePaths /*= NULL*/ )
+	{
+		shell::CRecycler recycleBin;
+		return recycleBin.UndeleteMultiFiles( delFilePaths, pWnd, pErrorFilePaths );
 	}
 
 

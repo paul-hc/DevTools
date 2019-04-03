@@ -21,6 +21,7 @@ private:
 	void TestShellRelativePidl( void );
 	void TestPathShellApi( void );
 	void TestPathExplorerSort( void );
+	void TestRecycler( void );
 };
 
 

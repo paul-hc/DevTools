@@ -22,6 +22,33 @@ namespace shell
 
 namespace shell
 {
+	// shell properties
+
+	std::tstring GetString( STRRET* pStrRet, PCUITEMID_CHILD pidl = NULL );
+
+
+	// IShellFolder properties
+	std::tstring GetDisplayName( IShellFolder* pFolder, PCUITEMID_CHILD pidl, SHGDNF flags );
+
+	// IShellFolder2 properties
+	std::tstring GetStringDetail( IShellFolder2* pFolder, PCUITEMID_CHILD pidl, const PROPERTYKEY& propKey );
+	CTime GetDateTimeDetail( IShellFolder2* pFolder, PCUITEMID_CHILD pidl, const PROPERTYKEY& propKey );
+
+
+	// IShellItem properties
+	std::tstring GetDisplayName( IShellItem* pItem, SIGDN sigdn );
+	inline std::tstring GetName( IShellItem* pItem ) { return GetDisplayName( pItem, SIGDN_NORMALDISPLAY ); }
+
+	// IShellItem2 properties
+	std::tstring GetStringProperty( IShellItem2* pItem, const PROPERTYKEY& propKey );
+	CTime GetDateTimeProperty( IShellItem2* pItem, const PROPERTYKEY& propKey );
+	DWORD GetFileAttributesProperty( IShellItem2* pItem, const PROPERTYKEY& propKey );
+	ULONGLONG GetFileSizeProperty( IShellItem2* pItem, const PROPERTYKEY& propKey );
+}
+
+
+namespace shell
+{
 	template< typename PathContainerT >
 	CComPtr< IShellFolder > MakeRelativePidlArray( std::vector< PIDLIST_RELATIVE >& rPidlItemsArray, const PathContainerT& filePaths );		// for mixed files having a common ancestor folder; caller must delete the PIDLs
 

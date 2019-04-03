@@ -1,7 +1,9 @@
 
 #include "stdafx.h"
 #include "ut/ShellFileSystemTests.h"
+#include "Recycler.h"
 #include "ShellTypes.h"
+#include "ShellUtilities.h"
 #include "WinExplorer.h"
 #include "StringUtilities.h"
 
@@ -11,6 +13,18 @@
 
 
 #ifdef _DEBUG		// no UT code in release builds
+
+
+namespace ut
+{
+	size_t ShellDeleteFiles( const ut::CTempFilePool& pool, const TCHAR relFilePaths[] )
+	{
+		std::vector< fs::CPath > fullPaths;
+		pool.SplitQualifyPaths( fullPaths, relFilePaths );
+
+		return shell::DeleteFiles( fullPaths, AfxGetMainWnd(), FOF_ALLOWUNDO | FOF_SILENT | FOF_NOCONFIRMATION );
+	}
+}
 
 
 CShellFileSystemTests::CShellFileSystemTests( void )
@@ -185,6 +199,33 @@ void CShellFileSystemTests::TestPathExplorerSort( void )
 		, str::Join( filePaths, _T("|") ) );
 }
 
+void CShellFileSystemTests::TestRecycler( void )
+{
+	ut::CTempFilePool pool( _T("a.txt|B\\b1.txt|B\\b2.txt|B\\C\\c1.txt|B\\C\\c2.txt|B\\D\\d1.txt") );
+	const fs::CPath& poolDirPath = pool.GetPoolDirPath();
+
+	ASSERT_EQUAL( _T("a.txt|B\\b1.txt|B\\b2.txt|B\\C\\c1.txt|B\\C\\c2.txt|B\\D\\d1.txt"), ut::EnumJoinFiles( poolDirPath ) );
+
+	// delete files
+	ASSERT( ut::ShellDeleteFiles( pool, _T("B\\b2.txt") ) );
+	ASSERT_EQUAL( _T("a.txt|B\\b1.txt|B\\C\\c1.txt|B\\C\\c2.txt|B\\D\\d1.txt"), ut::EnumJoinFiles( pool.GetPoolDirPath() ) );
+
+	ASSERT( ut::ShellDeleteFiles( pool, _T("a.txt|B\\C") ) );
+	ASSERT_EQUAL( _T("B\\b1.txt|B\\D\\d1.txt"), ut::EnumJoinFiles( pool.GetPoolDirPath() ) );
+
+	// undelete files (restore)
+	ASSERT( shell::UndeleteFile( poolDirPath / _T("B\\b2.txt") ) );
+	ASSERT_EQUAL( _T("B\\b1.txt|B\\b2.txt|B\\D\\d1.txt"), ut::EnumJoinFiles( pool.GetPoolDirPath() ) );
+
+	std::vector< fs::CPath > delFilePaths, errorFilePaths;
+	pool.SplitQualifyPaths( delFilePaths, _T("B\\C|a.txt|XXX\\foo.txt") );
+
+	ASSERT_EQUAL( 2, shell::UndeleteFiles( delFilePaths, AfxGetMainWnd(), &errorFilePaths ) );
+	ASSERT_EQUAL( _T("a.txt|B\\b1.txt|B\\b2.txt|B\\C\\c1.txt|B\\C\\c2.txt|B\\D\\d1.txt"), ut::EnumJoinFiles( poolDirPath ) );
+	ASSERT_EQUAL( 1, errorFilePaths.size() );
+	ASSERT_EQUAL( poolDirPath / _T("XXX\\foo.txt"), errorFilePaths.front() );
+}
+
 
 void CShellFileSystemTests::Run( void )
 {
@@ -194,6 +235,7 @@ void CShellFileSystemTests::Run( void )
 	TestShellRelativePidl();
 	TestPathShellApi();
 	TestPathExplorerSort();
+	TestRecycler();
 }
 
 

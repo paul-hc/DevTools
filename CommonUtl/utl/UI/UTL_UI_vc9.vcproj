@@ -1074,6 +1074,14 @@
 					>
 				</File>
 				<File
+					RelativePath=".\Recycler.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Recycler.h"
+					>
+				</File>
+				<File
 					RelativePath=".\ShellContextMenuBuilder.cpp"
 					>
 				</File>

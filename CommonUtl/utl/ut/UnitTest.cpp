@@ -193,6 +193,16 @@ namespace ut
 		return true;
 	}
 
+	size_t CTempFilePool::SplitQualifyPaths( std::vector< fs::CPath >& rFullPaths, const TCHAR relFilePaths[] ) const
+	{
+		str::Split( rFullPaths, relFilePaths, m_sep );
+
+		for ( std::vector< fs::CPath >::iterator itFilePath = rFullPaths.begin(); itFilePath != rFullPaths.end(); ++itFilePath )
+			*itFilePath = m_poolDirPath / *itFilePath;
+
+		return rFullPaths.size();
+	}
+
 
 	// CPathPairPool implementation
 

@@ -72,6 +72,10 @@ namespace path
 	bool IsMultipleWildcard( const TCHAR* pWildSpec, const TCHAR* pMultiSpecDelims = MultiSpecDelims() );
 	bool ContainsWildcards( const TCHAR* pWildSpec, const TCHAR* pWildcards = Wildcards() );
 
+	enum SpecMatch { NoMatch, Match_Any, Match_Prefix, Match_Spec };
+
+	SpecMatch MatchesPrefix( const TCHAR* pFilePath, const TCHAR* pPrefixOrSpec );
+
 	bool IsValid( const std::tstring& path );
 	const TCHAR* GetInvalidChars( void );
 	const TCHAR* GetReservedChars( void );

@@ -233,7 +233,7 @@ std::tstring CShellContextMenuHost::GetItemVerb( int cmdId ) const
 bool CShellContextMenuHost::InvokeVerb( const char* pVerb )
 {
 	ASSERT_PTR( pVerb );
-	ASSERT( HasShellCmds() );			// context menu was queryed and there are common verbs on selected files
+	// Note: allow verb invocation without checking ASSERT( HasShellCmds() ), since it could use a standard verb (no need to build the popup menu)
 
 	CMINVOKECOMMANDINFO cmd;
 	utl::ZeroWinStruct( &cmd );
@@ -243,6 +243,14 @@ bool CShellContextMenuHost::InvokeVerb( const char* pVerb )
 	cmd.nShow = SW_SHOWNORMAL;
 
 	return HR_OK( m_pContextMenu->InvokeCommand( &cmd ) );
+}
+
+bool CShellContextMenuHost::InvokeVerbIndex( int verbIndex )
+{
+	ASSERT( verbIndex >= 0 );
+	ASSERT( HasShellCmds() );			// context menu was queryed and there are common verbs on selected files
+
+	return InvokeVerb( MAKEINTRESOURCEA( verbIndex ) );
 }
 
 bool CShellContextMenuHost::InvokeDefaultVerb( void )

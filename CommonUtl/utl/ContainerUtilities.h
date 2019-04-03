@@ -114,6 +114,16 @@ namespace func
 		}
 	};
 
+	struct ReleaseCom
+	{
+		template< typename InterfaceType >
+		void operator()( InterfaceType* pInterface ) const
+		{
+			pInterface->Release();
+		}
+	};
+
+
 	// std::map aliases
 	typedef DeleteFirst DeleteKey;
 	typedef DeleteSecond DeleteValue;

@@ -65,6 +65,106 @@ namespace shell
 
 namespace shell
 {
+	std::tstring GetString( STRRET* pStrRet, PCUITEMID_CHILD pidl /*= NULL*/ )
+	{
+		ASSERT_PTR( pStrRet );
+
+		CComHeapPtr< TCHAR > text;
+		if ( SUCCEEDED( ::StrRetToStr( pStrRet, pidl, &text ) ) )
+			return text.m_pData;
+
+		return std::tstring();
+	}
+
+	// IShellFolder properties
+
+	std::tstring GetDisplayName( IShellFolder* pFolder, PCUITEMID_CHILD pidl, SHGDNF flags )
+	{
+		STRRET strRet;
+		if ( SUCCEEDED( pFolder->GetDisplayNameOf( pidl, flags, &strRet ) ) )
+			return GetString( &strRet, pidl );
+
+		return std::tstring();
+	}
+
+	std::tstring GetStringDetail( IShellFolder2* pFolder, PCUITEMID_CHILD pidl, const PROPERTYKEY& propKey )
+	{
+		CComVariant value;
+		if ( SUCCEEDED( pFolder->GetDetailsEx( pidl, &propKey, &value ) ) )
+			if ( HR_OK( value.ChangeType( VT_BSTR ) ) )
+				return V_BSTR( &value );
+
+		return std::tstring();
+	}
+
+	CTime GetDateTimeDetail( IShellFolder2* pFolder, PCUITEMID_CHILD pidl, const PROPERTYKEY& propKey )
+	{
+		CComVariant value;
+		if ( SUCCEEDED( pFolder->GetDetailsEx( pidl, &propKey, &value ) ) )
+		{
+			if ( VT_DATE == value.vt )
+			{
+				COleDateTime dateTime( V_DATE( &value ) );
+				SYSTEMTIME sysTime;
+				if ( dateTime.GetAsSystemTime( sysTime ) )
+					return CTime( sysTime );
+			}
+		}
+		return CTime();
+	}
+
+
+	// IShellItem properties
+
+	std::tstring GetDisplayName( IShellItem* pItem, SIGDN sigdn )
+	{
+		CComHeapPtr< wchar_t > name;
+		if ( SUCCEEDED( pItem->GetDisplayName( sigdn, &name ) ) )
+			return name.m_pData;
+
+		return std::tstring();
+	}
+
+	std::tstring GetStringProperty( IShellItem2* pItem, const PROPERTYKEY& propKey )
+	{
+		CComHeapPtr< wchar_t > value;
+		if ( SUCCEEDED( pItem->GetString( propKey, &value ) ) )
+			return value.m_pData;
+
+		return std::tstring();
+	}
+
+	CTime GetDateTimeProperty( IShellItem2* pItem, const PROPERTYKEY& propKey )
+	{
+		FILETIME fileTime;
+		if ( SUCCEEDED( pItem->GetFileTime( propKey, &fileTime ) ) )
+			return CTime( fileTime );
+
+		return CTime();
+	}
+
+	DWORD GetFileAttributesProperty( IShellItem2* pItem, const PROPERTYKEY& propKey )
+	{
+		DWORD fileAttr;
+		if ( SUCCEEDED( pItem->GetUInt32( propKey, &fileAttr ) ) )
+			return fileAttr;
+
+		return UINT_MAX;
+	}
+
+	ULONGLONG GetFileSizeProperty( IShellItem2* pItem, const PROPERTYKEY& propKey )
+	{
+		ULONGLONG fileSize;
+		if ( SUCCEEDED( pItem->GetUInt64( propKey, &fileSize ) ) )
+			return fileSize;
+
+		return 0;
+	}
+}
+
+
+namespace shell
+{
 	// obsolete, kept just for reference on using SHBindToParent
 	//
 	CComPtr< IShellFolder > _MakeChildPidlArray( std::vector< PITEMID_CHILD >& rPidlItemsArray, const std::vector< std::tstring >& filePaths )
