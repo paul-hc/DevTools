@@ -3,6 +3,7 @@
 #pragma once
 
 #include "AppCommands.h"
+#include "utl/ContainerUtilities.h"
 #include "utl/Path.h"
 
 
@@ -17,6 +18,7 @@ namespace cmd
 	public:
 		const std::vector< fs::CPath >& GetFilePaths( void ) const { return m_filePaths; }
 		const CTime& GetTimestamp( void ) const { return m_timestamp; }
+		void CopyTimestampOf( const CBaseFileGroupCmd& srcCmd ) { m_timestamp = srcCmd.GetTimestamp(); }
 
 		// base overrides
 		virtual std::tstring Format( utl::Verbosity verbosity ) const;
@@ -28,16 +30,22 @@ namespace cmd
 		struct CWorkingSet
 		{
 			CWorkingSet( const CBaseFileGroupCmd& cmd, fs::AccessMode accessMode = fs::Read );
+
+			bool IsValid( void ) const { return m_existStatus != NoneExist; }
+			bool IsBadFilePath( const fs::CPath& filePath ) const { return !utl::Contains( m_badFilePaths, filePath ); }
 		public:
 			std::vector< fs::CPath > m_currFilePaths;
 			std::vector< fs::CPath > m_badFilePaths;
 			MultiFileStatus m_existStatus;
+			bool m_succeeded;
 		};
 
-		void HandleExecuteResult( bool succeeded, const CWorkingSet& workingSet, const std::tstring& details = str::GetEmpty() ) const;
+		bool HandleExecuteResult( const CWorkingSet& workingSet, const std::tstring& groupDetails );
 	private:
 		CTime m_timestamp;
 		std::vector< fs::CPath > m_filePaths;
+	protected:
+		static const TCHAR s_lineEnd[];
 	};
 }
 
@@ -60,12 +68,47 @@ public:
 private:
 	struct CUndeleteFilesCmd : public cmd::CBaseFileGroupCmd
 	{
-		CUndeleteFilesCmd( const std::vector< fs::CPath >& delFilePaths ) : cmd::CBaseFileGroupCmd( cmd::Priv_UndeleteFiles, delFilePaths ) {}
+		CUndeleteFilesCmd( const std::vector< fs::CPath >& delFilePaths )
+			: cmd::CBaseFileGroupCmd( cmd::Priv_UndeleteFiles, delFilePaths ) {}
 
 		// ICommand interface
 		virtual bool Execute( void );
 		virtual bool IsUndoable( void ) const { return false; }
 	};
+};
+
+
+// Used for moving files (usually duplicates), using a deep destination directory structure.
+//
+class CMoveFilesCmd : public cmd::CBaseFileGroupCmd
+{
+	DECLARE_SERIAL( CMoveFilesCmd )
+
+	CMoveFilesCmd( void ) {}
+public:
+	CMoveFilesCmd( const std::vector< fs::CPath >& srcFilePaths, const fs::CPath& destDirPath );
+	virtual ~CMoveFilesCmd();
+
+	const std::vector< fs::CPath >& GetSrcFilePaths( void ) const { return GetFilePaths(); }
+	const fs::CPath& GetSrcCommonDirPath( void ) const { return m_srcCommonDirPath; }
+	const fs::CPath& GetDestDirPath( void ) const { return m_destDirPath; }
+
+	// base overrides
+	virtual void Serialize( CArchive& archive );
+
+	// ICommand interface
+	virtual std::tstring Format( utl::Verbosity verbosity ) const;
+	virtual bool Execute( void );
+	virtual bool Unexecute( void );
+	virtual bool IsUndoable( void ) const;
+private:
+	void MakeDestFilePaths( std::vector< fs::CPath >& rDestFilePaths, const std::vector< fs::CPath >& srcFilePaths ) const;
+	fs::CPath MakeDeepDestFilePath( const fs::CPath& srcFilePath ) const;
+
+	static std::tstring FormatGroupDetails( const std::vector< fs::CPath >& srcFilePaths, std::vector< fs::CPath >& destFilePaths );
+private:
+	fs::CPath m_srcCommonDirPath;
+	fs::CPath m_destDirPath;
 };
 
 

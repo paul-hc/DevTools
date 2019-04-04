@@ -338,8 +338,9 @@ IFileEditor* CFileModel::MakeFileEditor( cmd::CommandType cmdType, CWnd* pParent
 		case cmd::FindDuplicates:
 			return new CFindDuplicatesDialog( this, pParent );
 	}
-	ASSERT( false );
-	return NULL;
+	// files group commands may be editor-less
+	//ASSERT( false );
+	return NULL;			// assume is a persistent command
 }
 
 

@@ -3,6 +3,7 @@
 #include "FileGroupCommands.h"
 #include "Application.h"
 #include "utl/EnumTags.h"
+#include "utl/FmtUtils.h"
 #include "utl/Logger.h"
 #include "utl/SerializeStdTypes.h"
 #include "utl/TimeUtils.h"
@@ -16,6 +17,8 @@
 namespace cmd
 {
 	// CBaseFileGroupCmd implementation
+
+	const TCHAR CBaseFileGroupCmd::s_lineEnd[] = _T("\n");
 
 	CBaseFileGroupCmd::CBaseFileGroupCmd( CommandType cmdType /*= CommandType()*/, const std::vector< fs::CPath >& filePaths /*= std::vector< fs::CPath >()*/,
 										  const CTime& timestamp /*= CTime::GetCurrentTime()*/ )
@@ -46,7 +49,7 @@ namespace cmd
 		serial::SerializeValues( archive, m_filePaths );
 	}
 
-	void CBaseFileGroupCmd::HandleExecuteResult( bool succeeded, const CWorkingSet& workingSet, const std::tstring& details /*= str::GetEmpty()*/ ) const
+	bool CBaseFileGroupCmd::HandleExecuteResult( const CWorkingSet& workingSet, const std::tstring& groupDetails )
 	{
 		if ( s_pErrorObserver != NULL )
 			for ( std::vector< fs::CPath >::const_iterator itBadFilePath = workingSet.m_badFilePaths.begin(); itBadFilePath != workingSet.m_badFilePaths.end(); ++itBadFilePath )
@@ -55,17 +58,26 @@ namespace cmd
 		if ( s_pLogger != NULL )
 		{
 			std::tstring message = Format( utl::Detailed );
-			stream::Tag( message, details, _T(" ") );
 
-			if ( !succeeded )
+			if ( !workingSet.m_succeeded )
+				stream::Tag( message, _T(" * ERROR"), s_lineEnd );
+			stream::Tag( message, groupDetails, s_lineEnd );
+
+			if ( !workingSet.m_succeeded )
 				message += _T("\n ERROR");
 			else if ( !workingSet.m_badFilePaths.empty() )
 			{
-				message += str::Format( _T("\n WARNING: Cannot access %d files:\n"), workingSet.m_badFilePaths.size() );
-				message += str::Join( workingSet.m_badFilePaths, _T("\n") );
+				stream::Tag( message, str::Format( _T(" WARNING: Cannot access %d files:"), workingSet.m_badFilePaths.size() ), s_lineEnd );
+				stream::Tag( message, str::Join( workingSet.m_badFilePaths, s_lineEnd ), s_lineEnd );
 			}
 			s_pLogger->LogString( message );
 		}
+
+		if ( !workingSet.m_succeeded )
+			return false;
+
+		NotifyObservers();
+		return true;
 	}
 
 
@@ -73,6 +85,7 @@ namespace cmd
 
 	CBaseFileGroupCmd::CWorkingSet::CWorkingSet( const CBaseFileGroupCmd& cmd, fs::AccessMode accessMode /*= fs::Read*/ )
 		: m_existStatus( AllExist )
+		, m_succeeded( false )
 	{
 		const std::vector< fs::CPath >& filePaths = cmd.GetFilePaths();
 
@@ -109,23 +122,26 @@ bool CDeleteFilesCmd::Execute( void )
 {
 	CWorkingSet workingSet( *this, fs::Write );
 
-	if ( !shell::DeleteFiles( workingSet.m_currFilePaths, app::GetMainWnd() ) )		// delete to RecycleBin
-	{
-		if ( !shell::AnyOperationAborted() )
-			HandleExecuteResult( false, workingSet );
+	if ( workingSet.IsValid() )
+		if ( shell::DeleteFiles( workingSet.m_currFilePaths, app::GetMainWnd() ) )		// delete to RecycleBin
+			workingSet.m_succeeded = true;
+		else if ( shell::AnyOperationAborted() )
+			return false;			// silent if cancelled by user
 
-		return false;
-	}
-
-	HandleExecuteResult( true, workingSet );
-	NotifyObservers();
-	return true;
+	return HandleExecuteResult( workingSet, str::Join( workingSet.m_currFilePaths, s_lineEnd ) );
 }
 
 bool CDeleteFilesCmd::Unexecute( void )
 {
 	CUndeleteFilesCmd undoCmd( GetFilePaths() );
-	return undoCmd.Execute();
+	undoCmd.CopyTimestampOf( *this );
+	if ( undoCmd.Execute() )
+	{
+		AfxMessageBox( undoCmd.Format( utl::Detailed ).c_str() );		// notify user that command was undone (editor-less command)
+		return true;
+	}
+
+	return false;
 }
 
 bool CDeleteFilesCmd::IsUndoable( void ) const
@@ -140,13 +156,110 @@ bool CDeleteFilesCmd::CUndeleteFilesCmd::Execute( void )
 {
 	std::vector< fs::CPath > errorFilePaths;
 	size_t restoredCount = shell::UndeleteFiles( GetFilePaths(), app::GetMainWnd(), &errorFilePaths );
-	bool succeeded = restoredCount != 0;
 
 	CWorkingSet workingSet( *this );
 	workingSet.m_badFilePaths.swap( errorFilePaths );
+	workingSet.m_succeeded = restoredCount != 0;
 
-	HandleExecuteResult( succeeded, workingSet );
-	if ( succeeded )
-		NotifyObservers();
-	return succeeded;
+	return HandleExecuteResult( workingSet, str::Join( workingSet.m_currFilePaths, s_lineEnd ) );
+}
+
+
+// CMoveFilesCmd implementation
+
+IMPLEMENT_SERIAL( CMoveFilesCmd, CBaseSerialCmd, VERSIONABLE_SCHEMA | 1 )
+
+CMoveFilesCmd::CMoveFilesCmd( const std::vector< fs::CPath >& srcFilePaths, const fs::CPath& destDirPath )
+	: cmd::CBaseFileGroupCmd( cmd::MoveFiles, srcFilePaths )
+	, m_srcCommonDirPath( path::ExtractCommonParentPath( srcFilePaths ) )
+	, m_destDirPath( destDirPath )
+{
+}
+
+CMoveFilesCmd::~CMoveFilesCmd()
+{
+}
+
+void CMoveFilesCmd::Serialize( CArchive& archive )
+{
+	__super::Serialize( archive );
+
+	archive & m_destDirPath;
+	archive & m_srcCommonDirPath;
+}
+
+std::tstring CMoveFilesCmd::Format( utl::Verbosity verbosity ) const
+{
+	std::tstring text = __super::Format( verbosity );
+
+	if ( verbosity != utl::Brief )
+		stream::Tag( text, str::Format( _T("to folder: %s"), m_destDirPath.GetPtr() ), _T(" ") );
+
+	return text;
+}
+
+bool CMoveFilesCmd::Execute( void )
+{
+	CWorkingSet workingSet( *this, fs::ReadWrite );
+
+	std::vector< fs::CPath > destFilePaths;
+	MakeDestFilePaths( destFilePaths, workingSet.m_currFilePaths );
+
+	if ( workingSet.IsValid() )
+		if ( shell::MoveFiles( workingSet.m_currFilePaths, destFilePaths, app::GetMainWnd() ) )		// undoable move files
+			workingSet.m_succeeded = true;
+		else if ( shell::AnyOperationAborted() )
+			return false;			// silent if cancelled by user
+
+	return HandleExecuteResult( workingSet, str::Join( workingSet.m_currFilePaths, s_lineEnd ) );
+}
+
+bool CMoveFilesCmd::Unexecute( void )
+{
+	std::vector< fs::CPath > destFilePaths;
+	MakeDestFilePaths( destFilePaths, GetSrcFilePaths() );
+
+	CMoveFilesCmd undoCmd( destFilePaths, m_srcCommonDirPath );	// move back destination files to source common directory
+	undoCmd.CopyTimestampOf( *this );
+	if ( undoCmd.Execute() )
+	{
+		AfxMessageBox( undoCmd.Format( utl::Detailed ).c_str() );			// notify user that command was undone (editor-less command)
+		return true;
+	}
+
+	return false;
+}
+
+bool CMoveFilesCmd::IsUndoable( void ) const
+{
+	return true;		// let it unexecute with error rather than being skipped in UNDO
+}
+
+void CMoveFilesCmd::MakeDestFilePaths( std::vector< fs::CPath >& rDestFilePaths, const std::vector< fs::CPath >& srcFilePaths ) const
+{
+	rDestFilePaths.clear();
+	rDestFilePaths.reserve( srcFilePaths.size() );
+
+	for ( std::vector< fs::CPath >::const_iterator itSrcPath = srcFilePaths.begin(); itSrcPath != srcFilePaths.end(); ++itSrcPath )
+		rDestFilePaths.push_back( MakeDeepDestFilePath( *itSrcPath ) );
+}
+
+fs::CPath CMoveFilesCmd::MakeDeepDestFilePath( const fs::CPath& srcFilePath ) const
+{
+	fs::CPath srcParentDirPath = srcFilePath.GetParentPath();
+	std::tstring destRelPath = path::StripCommonPrefix( srcParentDirPath.GetPtr(), m_srcCommonDirPath.GetPtr() );
+
+	fs::CPath targetFullPath = m_destDirPath / destRelPath / srcFilePath.GetFilename();
+	return targetFullPath;
+}
+
+std::tstring CMoveFilesCmd::FormatGroupDetails( const std::vector< fs::CPath >& srcFilePaths, std::vector< fs::CPath >& destFilePaths )
+{
+	ASSERT( srcFilePaths.size() == destFilePaths.size() );
+
+	std::vector< std::tstring > lines; lines.reserve( srcFilePaths.size() );
+	for ( size_t i = 0; i != srcFilePaths.size(); ++i )
+		lines.push_back( fmt::FormatRenameEntry( srcFilePaths[ i ], destFilePaths[ i ] ) );
+
+	return str::Join( lines, s_lineEnd );
 }

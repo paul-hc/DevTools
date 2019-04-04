@@ -4,13 +4,12 @@
 #include "DuplicateFileItem.h"
 #include "DuplicateFilesFinder.h"
 #include "FileModel.h"
-#include "FileService.h"
+#include "FileGroupCommands.h"
 #include "GeneralOptions.h"
 #include "Application.h"
 #include "resource.h"
 #include "utl/ContainerUtilities.h"
 #include "utl/Crc32.h"
-#include "utl/Command.h"
 #include "utl/EnumTags.h"
 #include "utl/FileSystem.h"
 #include "utl/FmtUtils.h"
@@ -24,6 +23,7 @@
 #include "utl/UI/ImageStore.h"
 #include "utl/UI/ItemListDialog.h"
 #include "utl/UI/MenuUtilities.h"
+#include "utl/UI/ShellDialogs.h"
 #include "utl/UI/UtilitiesEx.h"
 #include "utl/UI/Thumbnailer.h"
 #include "utl/UI/resource.h"
@@ -258,21 +258,46 @@ bool CFindDuplicatesDialog::SearchForDuplicateFiles( void )
 	}
 }
 
+bool CFindDuplicatesDialog::QueryCheckedDupFilePaths( std::vector< fs::CPath >& rDupFilePaths ) const
+{
+	rDupFilePaths.clear();
+
+	std::vector< CDuplicateFileItem* > checkedDupItems;
+	if ( m_dupsListCtrl.QueryObjectsWithCheckedState( checkedDupItems, CheckDup::CheckedItem ) )
+		func::QueryItemsPaths( rDupFilePaths, checkedDupItems );
+
+	return !rDupFilePaths.empty();
+}
+
 bool CFindDuplicatesDialog::DeleteDuplicateFiles( void )
 {
-/*	CFileService svc;
-	std::auto_ptr< CMacroCommand > pTouchMacroCmd = svc.MakeTouchCmds( m_rTouchItems );
-	if ( pTouchMacroCmd.get() != NULL )
-		if ( !pTouchMacroCmd->IsEmpty() )
-		{
-			ClearFileErrors();
+	std::vector< fs::CPath > dupFilePaths;
+	if ( QueryCheckedDupFilePaths( dupFilePaths ) )
+		return ExecuteDuplicatesCmd( new CDeleteFilesCmd( dupFilePaths ) );
 
-			cmd::CScopedErrorObserver observe( this );
-			return SafeExecuteCmd( pTouchMacroCmd.release() );
-		}
-		else
-			return PromptCloseDialog();*/
 	return false;
+}
+
+bool CFindDuplicatesDialog::MoveDuplicateFiles( void )
+{
+	std::vector< fs::CPath > dupFilePaths;
+	if ( QueryCheckedDupFilePaths( dupFilePaths ) )
+	{
+		static std::tstring s_destFolderPath;
+
+		if ( shell::PickFolder( s_destFolderPath, this, 0, _T("Move Selected Duplicates to Folder") ) )
+			return ExecuteDuplicatesCmd( new CMoveFilesCmd( dupFilePaths, s_destFolderPath ) );
+	}
+
+	return false;
+}
+
+bool CFindDuplicatesDialog::ExecuteDuplicatesCmd( utl::ICommand* pDupsCmd )
+{
+	ClearFileErrors();
+
+	cmd::CScopedErrorObserver observe( this );
+	return SafeExecuteCmd( pDupsCmd );
 }
 
 void CFindDuplicatesDialog::SwitchMode( Mode mode )
@@ -333,7 +358,7 @@ void CFindDuplicatesDialog::PopStackTop( svc::StackType stackType )
 			SwitchMode( CommitFilesMode );
 	}
 	else
-		PopStackRunCrossEditor( stackType );		// end this dialog and execute the target dialog editor
+		PopStackRunCrossEditor( stackType );		// end this dialog and execute the target dialog editor (depending on the command on stack top)
 }
 
 void CFindDuplicatesDialog::SetupDialog( void )
@@ -420,7 +445,7 @@ std::tstring CFindDuplicatesDialog::FormatReport( const CDupsOutcome& outcome ) 
 	return reportMessage;
 }
 
-void CFindDuplicatesDialog::DisplayCheckedGroupInfo( void )
+void CFindDuplicatesDialog::DisplayCheckedGroupsInfo( void )
 {
 	std::tstring text;
 
@@ -698,7 +723,7 @@ void CFindDuplicatesDialog::OnOK( void )
 			break;
 		case CommitFilesMode:
 			if ( DeleteDuplicateFiles() )
-				__super::OnOK();
+				SwitchMode( EditMode );
 			else
 				SwitchMode( CommitFilesMode );
 			break;
@@ -730,7 +755,7 @@ void CFindDuplicatesDialog::OnDestroy( void )
 void CFindDuplicatesDialog::OnIdleUpdateControls( void )
 {
 	__super::OnIdleUpdateControls();
-	DisplayCheckedGroupInfo();
+	DisplayCheckedGroupsInfo();
 }
 
 void CFindDuplicatesDialog::OnUpdateUndoRedo( CCmdUI* pCmdUI )
@@ -891,23 +916,14 @@ void CFindDuplicatesDialog::OnUpdatePickAsOriginalFolder( CCmdUI* pCmdUI )
 
 void CFindDuplicatesDialog::OnBnClicked_DeleteDuplicates( void )
 {
-	try
-	{
-		ClearFileErrors();
-AfxMessageBox( _T("TODO: DeleteDuplicates!"), MB_OK );
-//		SafeExecuteCmd( m_pFileModel->MakeClipPasteDestFileStatesCmd( this ) );
-	}
-	catch ( CRuntimeException& e )
-	{
-		e.ReportError();
-	}
+	if ( DeleteDuplicateFiles() )
+		SwitchMode( EditMode );
 }
 
 void CFindDuplicatesDialog::OnBnClicked_MoveDuplicates( void )
 {
-	ClearFileErrors();
-//	SafeExecuteCmd( new CResetDestinationsCmd( m_pFileModel ) );
-AfxMessageBox( _T("TODO: MoveDuplicates!"), MB_OK );
+	if ( MoveDuplicateFiles() )
+		SwitchMode( EditMode );
 }
 
 void CFindDuplicatesDialog::OnClearCrc32Cache( void )

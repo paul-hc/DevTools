@@ -46,9 +46,12 @@ protected:
 	virtual void SwitchMode( Mode mode );
 private:
 	bool DeleteDuplicateFiles( void );
+	bool MoveDuplicateFiles( void );
+	bool ExecuteDuplicatesCmd( utl::ICommand* pCmd );
 	void SetupDialog( void );
 
 	// data
+	bool QueryCheckedDupFilePaths( std::vector< fs::CPath >& rDupFilePaths ) const;
 
 	// output
 	void SetupSrcPathsList( void );
@@ -66,7 +69,7 @@ private:
 	static const CEnumTags& GetTags_FileType( void );
 
 	std::tstring FormatReport( const CDupsOutcome& outcome ) const;
-	void DisplayCheckedGroupInfo( void );
+	void DisplayCheckedGroupsInfo( void );
 
 	// duplicates
 	static CMenu& GetDupListPopupMenu( CReportListControl::ListPopup popupType );

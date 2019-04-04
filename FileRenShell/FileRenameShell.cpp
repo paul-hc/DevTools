@@ -231,6 +231,12 @@ void CFileRenameShell::ExecuteCommand( MenuCommand menuCmd, CWnd* pParentOwner )
 						pFileEditor.reset( m_pFileModel->MakeFileEditor( static_cast< cmd::CommandType >( pTopCmd->GetTypeID() ), pParentOwner ) );
 						pFileEditor->PopStackTop( Cmd_Undo == menuCmd ? svc::Undo : svc::Redo );
 						break;
+					default:
+						if ( cmd::IsPersistentCmd( pTopCmd ) )
+						{
+							app::GetCmdSvc()->UndoRedo( stackType );
+							return;
+						}
 				}
 
 			if ( NULL == pFileEditor.get() )

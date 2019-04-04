@@ -57,16 +57,6 @@ public:
 		for ( typename PathContainerT::const_iterator itFilePath = filePaths.begin(); itFilePath != filePaths.end(); ++itFilePath )
 			rPathItems.push_back( new CPathItem( *itFilePath ) );
 	}
-
-	template< typename PathContainerT >
-	static void QueryItemsPaths( PathContainerT& rFilePaths, const std::vector< CPathItem* >& srcPathItems )
-	{
-		rFilePaths.clear();
-		rFilePaths.reserve( srcPathItems.size() );
-
-		for ( std::vector< CPathItem* >::const_iterator itSrcItem = srcPathItems.begin(); itSrcItem != srcPathItems.end(); ++itSrcItem )
-			rFilePaths.push_back( ( *itSrcItem )->GetPath().Get() );
-	}
 };
 
 
@@ -84,6 +74,16 @@ namespace pred
 
 namespace func
 {
+	template< typename PathContainerT, typename ItemContainerT >
+	void QueryItemsPaths( PathContainerT& rFilePaths, const ItemContainerT& srcPathItems )
+	{
+		rFilePaths.clear();
+		rFilePaths.reserve( srcPathItems.size() );
+
+		for ( typename ItemContainerT::const_iterator itSrcItem = srcPathItems.begin(); itSrcItem != srcPathItems.end(); ++itSrcItem )
+			rFilePaths.push_back( ( *itSrcItem )->GetFilePath().Get() );
+	}
+
 	template< typename ContainerT >
 	typename ContainerT::value_type FindItemWithPath( const ContainerT& items, const fs::CPath& filePath )
 	{

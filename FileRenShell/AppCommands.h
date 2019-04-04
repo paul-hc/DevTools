@@ -14,15 +14,17 @@ namespace cmd
 	enum CommandType
 	{
 		RenameFile = 100, TouchFile, FindDuplicates,
-		DeleteFiles, Priv_UndeleteFiles,
+		DeleteFiles, MoveFiles,
 		ChangeDestPaths, ChangeDestFileStates, ResetDestinations,
-		EditOptions
+		EditOptions,
+
+		Priv_UndeleteFiles
 	};
 
 	const CEnumTags& GetTags_CommandType( void );
 
 
-	bool IsPersistentCmd( const utl::ICommand* pCmd );		// persistent commands are also editor-specific file action commands
+	bool IsPersistentCmd( const utl::ICommand* pCmd );		// some persistent commands are also editor-specific file action commands
 	bool IsZombieCmd( const utl::ICommand* pCmd );			// empty macro file action command with no effect?
 
 

@@ -14,8 +14,8 @@ namespace cmd
 	const CEnumTags& GetTags_CommandType( void )
 	{
 		static const CEnumTags tags(
-			_T("Rename Files|Touch Files|Find Duplicates|Delete Files|Undelete Files|Change Destination Paths|Change Destination File States|Reset Destinations|Edit"),
-			_T("RENAME|TOUCH|FIND_DUPLICATES|DELETE_FILES|UNDELETE_FILES|CHANGE_DEST_PATHS|CHANGE_DEST_FILE_STATES|RESET_DESTINATIONS|EDIT"),
+			_T("Rename Files|Touch Files|Find Duplicates|Delete Files|Move Files|Change Destination Paths|Change Destination File States|Reset Destinations|Edit|Undelete Files"),
+			_T("RENAME|TOUCH|FIND_DUPLICATES|DELETE_FILES|MOVE_FILES|CHANGE_DEST_PATHS|CHANGE_DEST_FILE_STATES|RESET_DESTINATIONS|EDIT|UNDELETE_FILES"),
 			-1, RenameFile );
 
 		return tags;
@@ -38,7 +38,7 @@ namespace cmd
 		if ( const CMacroCommand* pMacroCmd = dynamic_cast< const CMacroCommand* >( pCmd ) )
 			return pMacroCmd->IsEmpty();
 
-		return pCmd != NULL;
+		return NULL == pCmd || !IsPersistentCmd( pCmd );
 	}
 }
 

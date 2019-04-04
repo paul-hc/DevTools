@@ -103,12 +103,18 @@ int CFileEditorBaseDialog::PopStackRunCrossEditor( svc::StackType stackType )
 	ASSERT( foreignCmdType != m_nativeCmdTypes.front() );
 	ASSERT( m_pCmdSvc->CanUndoRedo( stackType, foreignCmdType ) );
 
-	m_pFileModel->RemoveObserver( this );		// reject further updates
-
 	CWnd* pParent = GetParent();
-	OnCancel();									// end this dialog
 
 	std::auto_ptr< IFileEditor > pFileEditor( m_pFileModel->MakeFileEditor( foreignCmdType, pParent ) );
+	if ( NULL == pFileEditor.get() )
+	{	// command has no editor in particular, just undo/redo it
+		m_pCmdSvc->UndoRedo( stackType );
+		SwitchMode( EditMode );					// signal the dirty state of this editor
+		return 0;
+	}
+
+	m_pFileModel->RemoveObserver( this );		// reject further updates
+	OnCancel();									// end this dialog
 	pFileEditor->PopStackTop( stackType );
 
 	m_nModalResult = static_cast< int >( pFileEditor->GetDialog()->DoModal() );		// pass the modal result from the spawned editor dialog
