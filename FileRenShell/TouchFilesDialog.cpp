@@ -4,7 +4,7 @@
 #include "TouchItem.h"
 #include "FileModel.h"
 #include "FileService.h"
-#include "FileCommands.h"
+#include "EditingCommands.h"
 #include "GeneralOptions.h"
 #include "Application.h"
 #include "resource.h"

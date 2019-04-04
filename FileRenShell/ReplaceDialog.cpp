@@ -4,7 +4,7 @@
 #include "IFileEditor.h"
 #include "RenameService.h"
 #include "FileModel.h"
-#include "FileCommands.h"
+#include "EditingCommands.h"
 #include "RenameItem.h"
 #include "TextAlgorithms.h"
 #include "Application_fwd.h"

@@ -1,7 +1,7 @@
 
 #include "stdafx.h"
-#include "CommandModelService.h"
-#include "FileCommands.h"
+#include "CommandModelPersist.h"
+#include "FileMacroCommands.h"
 #include "utl/Command.h"
 #include "utl/CommandModel.h"
 #include "utl/ContainerUtilities.h"
@@ -22,17 +22,17 @@
 #endif
 
 
-// CCommandModelService class
+// CCommandModelPersist class
 
-bool CCommandModelService::SaveUndoLog( const CCommandModel& commandModel, cmd::FileFormat fileFormat )
+bool CCommandModelPersist::SaveUndoLog( const CCommandModel& commandModel, cmd::FileFormat fileFormat )
 {
-	//utl::CSlowSectionGuard slow( _T("CCommandModelService::SaveUndoLog"), 0.01 );
+	//utl::CSlowSectionGuard slow( _T("CCommandModelPersist::SaveUndoLog"), 0.01 );
 
 	std::auto_ptr< cmd::CLogSerializer > pSerializer( CreateSerializer( const_cast< CCommandModel* >( &commandModel ), fileFormat ) );
 	return pSerializer->Save( GetUndoLogPath( fileFormat ) );
 }
 
-bool CCommandModelService::LoadUndoLog( CCommandModel* pOutCommandModel, cmd::FileFormat* pOutFileFormat /*= NULL*/ )
+bool CCommandModelPersist::LoadUndoLog( CCommandModel* pOutCommandModel, cmd::FileFormat* pOutFileFormat /*= NULL*/ )
 {
 	cmd::FileFormat fileFormat;
 	if ( !FindSavedUndoLogPath( fileFormat ) )
@@ -41,12 +41,12 @@ bool CCommandModelService::LoadUndoLog( CCommandModel* pOutCommandModel, cmd::Fi
 	if ( pOutFileFormat != NULL )
 		*pOutFileFormat = fileFormat;
 
-	//utl::CSlowSectionGuard slow( _T("CCommandModelService::LoadUndoLog()"), 0.01 );
+	//utl::CSlowSectionGuard slow( _T("CCommandModelPersist::LoadUndoLog()"), 0.01 );
 	std::auto_ptr< cmd::CLogSerializer > pSerializer( CreateSerializer( pOutCommandModel, fileFormat ) );
 	return pSerializer->Load( GetUndoLogPath( fileFormat ) );
 }
 
-cmd::CLogSerializer* CCommandModelService::CreateSerializer( CCommandModel* pCommandModel, cmd::FileFormat fileFormat )
+cmd::CLogSerializer* CCommandModelPersist::CreateSerializer( CCommandModel* pCommandModel, cmd::FileFormat fileFormat )
 {
 	switch ( fileFormat )
 	{
@@ -57,7 +57,7 @@ cmd::CLogSerializer* CCommandModelService::CreateSerializer( CCommandModel* pCom
 	return NULL;
 }
 
-fs::CPath CCommandModelService::GetUndoLogPath( cmd::FileFormat fileFormat )
+fs::CPath CCommandModelPersist::GetUndoLogPath( cmd::FileFormat fileFormat )
 {
 	static const CEnumTags fmtExtTags( _T(".log|.dat") );
 
@@ -70,7 +70,7 @@ fs::CPath CCommandModelService::GetUndoLogPath( cmd::FileFormat fileFormat )
 	return fs::CPath( parts.MakePath() );
 }
 
-bool CCommandModelService::FindSavedUndoLogPath( cmd::FileFormat& rFileFormat )
+bool CCommandModelPersist::FindSavedUndoLogPath( cmd::FileFormat& rFileFormat )
 {
 	CTime txtModifyTime = fs::ReadLastModifyTime( GetUndoLogPath( cmd::TextFormat ) );
 	CTime binModifyTime = fs::ReadLastModifyTime( GetUndoLogPath( cmd::BinaryFormat ) );

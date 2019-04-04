@@ -4,7 +4,7 @@
 
 #include "utl/ISubject.h"
 #include "utl/ICommand.h"
-#include "FileCommands_fwd.h"
+#include "AppCommands.h"
 
 
 class CFileModel;

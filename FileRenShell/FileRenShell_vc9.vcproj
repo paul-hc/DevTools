@@ -706,22 +706,6 @@
 				Name="model"
 				>
 				<File
-					RelativePath=".\AppCmdService.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\AppCmdService.h"
-					>
-				</File>
-				<File
-					RelativePath=".\CommandModelService.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\CommandModelService.h"
-					>
-				</File>
-				<File
 					RelativePath=".\DropFilesModel.cpp"
 					>
 				</File>
@@ -738,31 +722,11 @@
 					>
 				</File>
 				<File
-					RelativePath=".\FileCommands.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\FileCommands.h"
-					>
-				</File>
-				<File
-					RelativePath=".\FileCommands_fwd.h"
-					>
-				</File>
-				<File
 					RelativePath=".\FileModel.cpp"
 					>
 				</File>
 				<File
 					RelativePath=".\FileModel.h"
-					>
-				</File>
-				<File
-					RelativePath=".\FileService.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\FileService.h"
 					>
 				</File>
 				<File
@@ -783,6 +747,66 @@
 				</File>
 				<File
 					RelativePath=".\TouchItem.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="command"
+				>
+				<File
+					RelativePath=".\AppCmdService.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\AppCmdService.h"
+					>
+				</File>
+				<File
+					RelativePath=".\AppCommands.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\AppCommands.h"
+					>
+				</File>
+				<File
+					RelativePath=".\CommandModelPersist.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\CommandModelPersist.h"
+					>
+				</File>
+				<File
+					RelativePath=".\EditingCommands.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\EditingCommands.h"
+					>
+				</File>
+				<File
+					RelativePath=".\FileGroupCommands.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\FileGroupCommands.h"
+					>
+				</File>
+				<File
+					RelativePath=".\FileMacroCommands.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\FileMacroCommands.h"
+					>
+				</File>
+				<File
+					RelativePath=".\FileService.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\FileService.h"
 					>
 				</File>
 			</Filter>

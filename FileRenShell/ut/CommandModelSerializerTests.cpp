@@ -1,8 +1,8 @@
 
 #include "stdafx.h"
 #include "CommandModelSerializerTests.h"
-#include "CommandModelService.h"
-#include "FileCommands.h"
+#include "CommandModelPersist.h"
+#include "FileMacroCommands.h"
 #include "utl/ContainerUtilities.h"
 #include "utl/CommandModel.h"
 #include "utl/FileSystem.h"

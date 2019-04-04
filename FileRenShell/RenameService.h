@@ -3,7 +3,7 @@
 #pragma once
 
 #include "utl/Path.h"
-#include "FileCommands_fwd.h"
+#include "AppCommands.h"
 
 
 class CRenameItem;

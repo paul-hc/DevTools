@@ -3,7 +3,7 @@
 #include "OptionsSheet.h"
 #include "OptionsPages.h"
 #include "FileModel.h"
-#include "FileCommands.h"
+#include "EditingCommands.h"
 #include "IFileEditor.h"
 #include "Application_fwd.h"
 #include "resource.h"
@@ -41,7 +41,7 @@ void COptionsSheet::OnChangesApplied( void )
 		m_pFileModel->SafeExecuteCmd( m_pFileEditor, m_pApplyMacroCmd.release() );
 
 	if ( !CGeneralOptions::Instance().m_undoEditingCmds )
-		checked_static_cast< CCommandService* >( app::GetCmdSvc() )->RemoveCommandsThat( pred::IsNotA< cmd::CFileMacroCmd >() );
+		checked_static_cast< CCommandService* >( app::GetCmdSvc() )->RemoveCommandsThat( std::not1( pred::IsPersistentCmd() ) );		// was pred::IsNotA< cmd::CFileMacroCmd >()
 }
 
 

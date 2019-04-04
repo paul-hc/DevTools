@@ -3,7 +3,6 @@
 #include "RenameFilesTests.h"
 #include "RenameItem.h"
 #include "FileService.h"
-#include "FileCommands.h"
 #include "TextAlgorithms.h"
 #include "utl/ContainerUtilities.h"
 #include "utl/Logger.h"

@@ -3,7 +3,7 @@
 #pragma once
 
 #include "Application_fwd.h"
-#include "FileCommands_fwd.h"
+#include "AppCommands.h"
 #include "resource.h"
 
 

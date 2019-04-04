@@ -10,7 +10,7 @@ utl::ICommand
 				CBaseFileCmd
 					CRenameFileCmd
 					CTouchFileCmd
-				CBaseMultiFilesCmd
+				CBaseFileGroupCmd
 					CDeleteFilesCmd (TODO...)
 			CBaseChangeDestCmd
 				CChangeDestPathsCmd

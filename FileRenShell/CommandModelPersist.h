@@ -1,18 +1,18 @@
-#ifndef CommandModelService_h
-#define CommandModelService_h
+#ifndef CommandModelPersist_h
+#define CommandModelPersist_h
 #pragma once
 
 #include <deque>
 #include <iosfwd>
 #include "utl/ICommand.h"
-#include "FileCommands_fwd.h"
+#include "AppCommands.h"
 
 
 class CCommandModel;
 namespace cmd { class CLogSerializer; }
 
 
-class CCommandModelService
+class CCommandModelPersist
 {
 public:
 	static bool SaveUndoLog( const CCommandModel& commandModel, cmd::FileFormat fileFormat );
@@ -99,4 +99,4 @@ namespace cmd
 }
 
 
-#endif // CommandModelService_h
+#endif // CommandModelPersist_h

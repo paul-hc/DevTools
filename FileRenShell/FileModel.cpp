@@ -1,7 +1,8 @@
 
 #include "stdafx.h"
 #include "FileModel.h"
-#include "FileCommands.h"
+#include "FileMacroCommands.h"
+#include "EditingCommands.h"
 #include "IFileEditor.h"
 #include "RenameItem.h"
 #include "TouchItem.h"

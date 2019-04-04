@@ -1,7 +1,7 @@
 
 #include "stdafx.h"
 #include "FileService.h"
-#include "FileCommands.h"
+#include "FileMacroCommands.h"
 #include "RenameItem.h"
 #include "TouchItem.h"
 #include "utl/PathFormatter.h"

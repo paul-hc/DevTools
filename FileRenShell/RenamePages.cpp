@@ -5,7 +5,7 @@
 #include "RenameFilesDialog.h"
 #include "GeneralOptions.h"
 #include "FileModel.h"
-#include "FileCommands.h"
+#include "EditingCommands.h"
 #include "resource.h"
 #include "utl/LongestCommonSubsequence.h"
 #include "utl/UI/UtilitiesEx.h"

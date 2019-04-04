@@ -5,7 +5,6 @@
 #include "DuplicateFilesFinder.h"
 #include "FileModel.h"
 #include "FileService.h"
-#include "FileCommands.h"
 #include "GeneralOptions.h"
 #include "Application.h"
 #include "resource.h"
@@ -317,18 +316,18 @@ void CFindDuplicatesDialog::PopStackTop( svc::StackType stackType )
 
 	if ( utl::ICommand* pTopCmd = PeekCmdForDialog( stackType ) )		// comand that is target for this dialog editor?
 	{
-		bool isTouchMacro = cmd::FindDuplicates == pTopCmd->GetTypeID();
+		bool isThisMacro = cmd::FindDuplicates == pTopCmd->GetTypeID();
 
 		ClearFileErrors();
 
-		if ( isTouchMacro )
+		if ( isThisMacro )
 			m_pFileModel->FetchFromStack( stackType );		// fetch dataset from the stack top macro command
 		else
 			m_pCmdSvc->UndoRedo( stackType );
 
 		MarkInvalidSrcItems();
 
-		if ( isTouchMacro )							// file command?
+		if ( isThisMacro )							// file command?
 			SwitchMode( svc::Undo == stackType ? RollBackMode : RollForwardMode );
 		else if ( IsNativeCmd( pTopCmd ) )			// file state editing command?
 			SwitchMode( CommitFilesMode );
