@@ -1056,10 +1056,7 @@ namespace ui
 	{
 		if ( DialogOutput == pDX->m_bSaveAndValidate && CImageStore::HasSharedStore() )
 			if ( CButton* pButton = (CButton*)pDX->m_pDlgWnd->GetDlgItem( ctrlId ) )
-			{
-				if ( NULL == pButton->GetIcon() )
-					CIconButton::SetButtonIcon( pButton, CIconId( iconId.m_id != 0 ? iconId.m_id : ctrlId, iconId.m_stdSize ), useText, useTextSpacing );
-			}
+				CIconButton::SetButtonIcon( pButton, CIconId( iconId.m_id != 0 ? iconId.m_id : ctrlId, iconId.m_stdSize ), useText, useTextSpacing );
 			else
 				ASSERT( false );
 	}

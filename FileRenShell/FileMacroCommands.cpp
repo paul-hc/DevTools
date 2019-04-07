@@ -75,13 +75,14 @@ namespace cmd
 
 	std::tstring CFileMacroCmd::Format( utl::Verbosity verbosity ) const
 	{
-		std::tstring text = GetTags_CommandType().Format( GetTypeID(), verbosity != utl::Brief ? CEnumTags::UiTag : CEnumTags::KeyTag );
+		std::tstring text = FormatCmdTag( this, verbosity );
+		const TCHAR* pSep = GetSeparator( verbosity );
 
 		if ( verbosity != utl::Brief )
-			stream::Tag( text, str::Format( _T("[%d]"), GetSubCommands().size() ), _T(" ") );
+			stream::Tag( text, str::Format( _T("[%d]"), GetSubCommands().size() ), pSep );
 
 		if ( m_timestamp.GetTime() != 0 )
-			stream::Tag( text, time_utl::FormatTimestamp( m_timestamp, verbosity != utl::Brief ? time_utl::s_outFormatUi : time_utl::s_outFormat ), _T(" ") );
+			stream::Tag( text, time_utl::FormatTimestamp( m_timestamp, verbosity != utl::Brief ? time_utl::s_outFormatUi : time_utl::s_outFormat ), pSep );
 
 		return text;
 	}

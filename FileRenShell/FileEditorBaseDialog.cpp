@@ -67,7 +67,7 @@ void CFileEditorBaseDialog::QueryTooltipText( std::tstring& rText, UINT cmdId, C
 			svc::StackType stackType = IDC_UNDO_BUTTON == cmdId ? svc::Undo : svc::Redo;
 			if ( utl::ICommand* pTopCmd = m_pCmdSvc->PeekCmd( stackType ) )
 			{
-				std::tstring cmdInfo = pTopCmd->Format( utl::DetailedLine );
+				std::tstring cmdInfo = cmd::FormatCmdLine( pTopCmd, utl::DetailFields );
 				rText = str::Format( _T("%s: %s"), svc::GetTags_StackType().FormatUi( stackType ).c_str(), cmdInfo.c_str() );
 			}
 			else

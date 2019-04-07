@@ -4,6 +4,8 @@
 #include "IFileEditor.h"
 #include "DropFilesModel.h"
 #include "Application.h"
+#include "CmdDashboardDialog.h"
+#include "OptionsSheet.h"
 #include "utl/EnumTags.h"
 #include "utl/FlagTags.h"
 #include "utl/FmtUtils.h"
@@ -33,6 +35,7 @@ const CShellMenuController::CMenuCmdInfo CShellMenuController::s_commands[] =
 	{ Cmd_Redo, _T("&Redo \"%s\" ..."), _T("Redo last undo operation on files"), ID_EDIT_REDO },
 	{ Popup_PasteFolderStruct, _T("Paste &Folder Structure"), _T("Open menu for creating folder structure based on files copied on clipboard"), ID_PASTE_FOLDER_STRUCT_POPUP },
 	{ Popup_PasteDeep, _T("Paste D&eep"), _T("Paste copied files creating a deep folder"), ID_PASTE_DEEP_POPUP },
+	{ Popup_MoreGoodies, _T("More &Goodies"), _T("Open more options"), 0 },
 #ifdef _DEBUG
 	{ Cmd_Separator },
 	{ Cmd_RunUnitTests, _T("# Run Unit Tests (FileRenameShell)"), _T("Run the unit tests (debug build only)"), ID_RUN_TESTS },
@@ -43,7 +46,9 @@ const CShellMenuController::CMenuCmdInfo CShellMenuController::s_commands[] =
 const CShellMenuController::CMenuCmdInfo CShellMenuController::s_moreCommands[] =
 {
 	{ Cmd_CreateFolders, _T("Create &Folders"), _T("Create folders in destination to replicate copied folders"), ID_CREATE_FOLDERS },
-	{ Cmd_CreateDeepFolderStruct, _T("Create Deep Folder Structure"), _T("Create folders in destination to replicate copied folders and their sub-folders"), ID_CREATE_DEEP_FOLDER_STRUCT }
+	{ Cmd_CreateDeepFolderStruct, _T("Create Deep Folder Structure"), _T("Create folders in destination to replicate copied folders and their sub-folders"), ID_CREATE_DEEP_FOLDER_STRUCT },
+	{ Cmd_Dashboard, _T("Dashboard.."), _T("Open the undo/redo actions dashboard"), ID_OPEN_CMD_DASHBOARD },
+	{ Cmd_Options, _T("&Properties..."), _T("Open the properties dialog"), ID_OPTIONS }
 };
 
 
@@ -103,6 +108,10 @@ UINT CShellMenuController::AugmentMenuItems( HMENU hMenu, UINT indexMenu, UINT i
 							menuBuilder.AddPopupItem( hSubMenu, itemText, pItemBitmap );
 						}
 						break;
+					case Popup_MoreGoodies:
+						if ( HMENU hSubMenu = BuildMoreGoodiesSubmenu( &menuBuilder ) )
+							menuBuilder.AddPopupItem( hSubMenu, itemText, pItemBitmap );
+						break;
 					default:
 						menuBuilder.AddCmdItem( cmdInfo.m_cmd, itemText, pItemBitmap );
 				}
@@ -149,6 +158,17 @@ HMENU CShellMenuController::BuildPasteDeepSubmenu( CBaseMenuBuilder* pParentBuil
 		}
 
 	return NULL;
+}
+
+HMENU CShellMenuController::BuildMoreGoodiesSubmenu( CBaseMenuBuilder* pParentBuilder )
+{
+	CSubMenuBuilder subMenuBuilder( pParentBuilder );
+
+	AddCmd( &subMenuBuilder, Cmd_Dashboard );
+	subMenuBuilder.AddSeparator();
+	AddCmd( &subMenuBuilder, Cmd_Options );
+
+	return subMenuBuilder.GetPopupMenu()->Detach();
 }
 
 CBitmap* CShellMenuController::MakeCmdInfo( std::tstring& rItemText, const CMenuCmdInfo& cmdInfo, const std::tstring& tabbedText /*= str::GetEmpty()*/ )
@@ -271,6 +291,18 @@ bool CShellMenuController::HandleCommand( MenuCommand menuCmd, CWnd* pParentOwne
 			}
 
 			break;
+		}
+		case Cmd_Dashboard:
+		{
+			CCmdDashboardDialog dlg( &m_fileModel, svc::Undo, pParentOwner );
+			dlg.DoModal();
+			return true;
+		}
+		case Cmd_Options:
+		{
+			COptionsSheet sheet( &m_fileModel, pParentOwner );
+			sheet.DoModal();
+			return true;
 		}
 		case Cmd_CreateFolders:
 		case Cmd_CreateDeepFolderStruct:

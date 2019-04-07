@@ -3,9 +3,11 @@
 #include "CmdDashboardDialog.h"
 #include "FileModel.h"
 #include "AppCommands.h"
+#include "AppCmdService.h"
 #include "Application.h"
 #include "OptionsSheet.h"
 #include "utl/EnumTags.h"
+#include "utl/FmtUtils.h"
 #include "utl/StringUtilities.h"
 #include "utl/Subject.h"
 #include "utl/TimeUtils.h"
@@ -63,8 +65,10 @@ void CCmdItem::SetCmd( utl::ICommand* pCmd )
 
 	if ( m_pCmd != NULL )
 	{
-		m_code = m_pCmd->Format( utl::Detailed );
-		cmd::StripTimestamp( m_code, m_pCmd );
+		std::vector< std::tstring > fields;
+		cmd::QueryCmdFields( fields, m_pCmd );
+		if ( !fields.empty() )
+			m_code = fields.front();
 	}
 }
 
@@ -119,8 +123,8 @@ namespace layout
 
 	static CLayoutStyle styles[] =
 	{
+		{ IDC_STRIP_BAR_2, MoveX },
 		{ IDC_COMMANDS_LIST, SizeX | pctSizeY( TopPct ) },
-		{ IDC_STRIP_BAR_1, MoveX },
 		{ IDC_CMD_HEADER_STATIC, pctMoveY( TopPct ) },
 		{ IDC_CMD_HEADER_EDIT, SizeX | pctMoveY( TopPct ) },
 		{ IDC_CMD_DETAILS_STATIC, pctMoveY( TopPct ) },
@@ -135,6 +139,8 @@ CCmdDashboardDialog::CCmdDashboardDialog( CFileModel* pFileModel, svc::StackType
 	, m_pFileModel( pFileModel )
 	, m_pCmdSvc( app::GetCmdSvc() )
 	, m_stackType( stackType )
+	, m_enableProperties( false )
+	, m_actionHistoryStatic( CRegularStatic::Bold )
 	, m_commandsList( IDC_COMMANDS_LIST )
 {
 	m_initCentered = false;
@@ -147,11 +153,16 @@ CCmdDashboardDialog::CCmdDashboardDialog( CFileModel* pFileModel, svc::StackType
 	m_commandsList.SetTextEffectCallback( this );
 	m_commandsList.StoreImageLists( CCmdItem::GetCmdTypeStrip().m_pImageList.get() );
 
+	m_actionToolbar.GetStrip()
+		.AddButton( IDC_UNDO_BUTTON, ID_EDIT_UNDO )
+		.AddButton( IDC_REDO_BUTTON, ID_EDIT_REDO )
+		.AddSeparator()
+		.AddButton( ID_OPTIONS );
+
 	m_cmdsToolbar.GetStrip()
 		.AddButton( ID_EDIT_SELECT_ALL )
 		.AddSeparator()
-		.AddButton( ID_REMOVE_ITEM )
-		;
+		.AddButton( ID_REMOVE_ITEM );
 }
 
 CCmdDashboardDialog::~CCmdDashboardDialog()
@@ -199,12 +210,14 @@ void CCmdDashboardDialog::SetupCommandList( void )
 
 		m_commandsList.InsertObjectItem( index, pCmdItem, pCmdItem->GetImageIndex() );		// Source
 
-		if ( const cmd::IPersistentCmd* pPersistCmd = pCmdItem->GetCmdAs< cmd::IPersistentCmd >() )
-			m_commandsList.SetSubItemText( index, Timestamp, time_utl::FormatTimestamp( pPersistCmd->GetTimestamp() ) );
-
 		if ( const cmd::IFileDetailsCmd* pDetailsCmd = pCmdItem->GetCmdAs< cmd::IFileDetailsCmd >() )
 			m_commandsList.SetSubItemText( index, FileCount, num::FormatNumber( pDetailsCmd->GetFileCount() ) );
+
+		if ( const cmd::IPersistentCmd* pPersistCmd = pCmdItem->GetCmdAs< cmd::IPersistentCmd >() )
+			m_commandsList.SetSubItemText( index, Timestamp, time_utl::FormatTimestamp( pPersistCmd->GetTimestamp() ) );
 	}
+
+	m_actionHistoryStatic.SetWindowText( str::Format( _T("%s History (%d actions):"), svc::GetTags_StackType().FormatUi( m_stackType ).c_str(), m_cmdItems.size() ) );
 }
 
 utl::ICommand* CCmdDashboardDialog::GetSelectedCmd( void ) const
@@ -242,7 +255,12 @@ void CCmdDashboardDialog::UpdateSelCommand( void )
 
 	if ( pSelectedCmd != NULL )
 	{
-		headerText = pSelectedCmd->Format( utl::DetailedLine );
+		std::vector< std::tstring > fields;
+		cmd::QueryCmdFields( fields, pSelectedCmd );
+		if ( fields.size() > 1 )
+			fields.back() = fmt::FormatBraces( fields.back().c_str(), _T("()") );		// enclose timestamp in parens
+
+		headerText = str::Join( fields, _T(" ") );
 
 		if ( cmd::IFileDetailsCmd* pDetailsCmd = dynamic_cast< cmd::IFileDetailsCmd* >( pSelectedCmd ) )
 		{
@@ -257,6 +275,18 @@ void CCmdDashboardDialog::UpdateSelCommand( void )
 
 	static const UINT ctrlIds[] = { IDC_CMD_HEADER_STATIC, IDC_CMD_HEADER_EDIT, IDC_CMD_DETAILS_STATIC, IDC_CMD_DETAILS_EDIT, IDOK };
 	ui::EnableControls( *this, ARRAY_PAIR( ctrlIds ), pSelectedCmd != NULL );
+}
+
+void CCmdDashboardDialog::QueryTooltipText( std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const
+{
+	switch ( cmdId )
+	{
+		case IDC_UNDO_BUTTON:
+		case IDC_REDO_BUTTON:
+			rText = str::Format( _T("View %s action history"), svc::GetTags_StackType().FormatUi( m_stackType ).c_str() );
+			return;
+	}
+	__super::QueryTooltipText( rText, cmdId, pTooltip );
 }
 
 void CCmdDashboardDialog::CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARAM rowKey, int subItem, CListLikeCtrlBase* pCtrl ) const
@@ -279,15 +309,21 @@ BOOL CCmdDashboardDialog::OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHAND
 
 void CCmdDashboardDialog::DoDataExchange( CDataExchange* pDX )
 {
-	ui::DDX_EnumCombo( pDX, IDC_STACK_TYPE_COMBO, m_stackTypeCombo, m_stackType, svc::GetTags_StackType() );
+	const bool firstInit = NULL == m_actionHistoryStatic.m_hWnd;
+
+	DDX_Control( pDX, IDC_ACTION_HISTORY_STATIC, m_actionHistoryStatic );
 	DDX_Control( pDX, IDC_COMMANDS_LIST, m_commandsList );
 	DDX_Control( pDX, IDC_CMD_HEADER_EDIT, m_cmdHeaderEdit );
 	DDX_Control( pDX, IDC_CMD_DETAILS_EDIT, m_cmdDetailsEdit );
 	ui::DDX_ButtonIcon( pDX, IDOK, svc::Undo == m_stackType ? ID_EDIT_UNDO : ID_EDIT_REDO );
-	m_cmdsToolbar.DDX_Placeholder( pDX, IDC_STRIP_BAR_1, H_AlignRight | V_AlignBottom );
+	m_actionToolbar.DDX_Placeholder( pDX, IDC_STRIP_BAR_1, H_AlignLeft | V_AlignBottom );
+	m_cmdsToolbar.DDX_Placeholder( pDX, IDC_STRIP_BAR_2, H_AlignRight | V_AlignBottom );
 
 	if ( DialogOutput == pDX->m_bSaveAndValidate )
 	{
+		if ( firstInit )
+			m_enableProperties = NULL == ui::FindAncestorAs< COptionsSheet >( this );		// prevent recursion
+
 		SetupCommandList();
 		SelectCommandList( 0 );
 
@@ -301,30 +337,60 @@ void CCmdDashboardDialog::DoDataExchange( CDataExchange* pDX )
 // message handlers
 
 BEGIN_MESSAGE_MAP( CCmdDashboardDialog, CLayoutDialog )
-	ON_CBN_SELCHANGE( IDC_STACK_TYPE_COMBO, OnCbnSelChange_StackType )
 	ON_NOTIFY( LVN_ITEMCHANGED, IDC_COMMANDS_LIST, OnLvnItemChanged_CommandsList )
+	ON_COMMAND_RANGE( IDC_UNDO_BUTTON, IDC_REDO_BUTTON, OnStackType )
+	ON_UPDATE_COMMAND_UI_RANGE( IDC_UNDO_BUTTON, IDC_REDO_BUTTON, OnUpdateStackType )
 	ON_COMMAND_EX( ID_EDIT_SELECT_ALL, OnSelCmds_SelectAll )
 	ON_COMMAND( ID_REMOVE_ITEM, OnSelCmds_Delete )
 	ON_UPDATE_COMMAND_UI( ID_REMOVE_ITEM, OnUpdateSelCmds_Delete )
 	ON_COMMAND( ID_OPTIONS, OnOptions )
+	ON_UPDATE_COMMAND_UI( ID_OPTIONS, OnUpdateOptions )
 END_MESSAGE_MAP()
+
+BOOL CCmdDashboardDialog::OnInitDialog( void )
+{
+	__super::OnInitDialog();
+	GotoDlgCtrl( &m_commandsList );
+	return FALSE;		// skip default dialog focus
+}
 
 void CCmdDashboardDialog::OnOK( void )
 {
-	bool keepRunning = ui::IsKeyPressed( VK_CONTROL );
+	bool keepRunning = !ui::IsKeyPressed( VK_SHIFT );
+	bool succeeded = false;
 
-	m_pCmdSvc->UndoRedo( m_stackType );
-
-	if ( keepRunning )
-		UpdateData( DialogOutput );		// refresh the remaining commands on the stack
+	int selIndex = m_commandsList.GetSelCaretIndex();
+	if ( 0 == selIndex )
+		succeeded = m_pCmdSvc->UndoRedo( m_stackType );
 	else
+	{
+		std::tstring message = str::Format( _T("Are you sure you want to %s the command not at the stack top?\n\nThis could have unforseen side effects."),
+			svc::GetTags_StackType().FormatUi( m_stackType ).c_str() );
+
+		if ( IDYES == AfxMessageBox( message.c_str(), MB_YESNO | MB_DEFBUTTON2 ) )
+		{
+			CAppCmdService* m_pAppCmdSvc = checked_static_cast< CAppCmdService* >( m_pCmdSvc );
+			succeeded = m_pAppCmdSvc->UndoRedoAt( m_stackType, selIndex );
+		}
+	}
+	UpdateData( DialogOutput );		// refresh the remaining commands on the stack
+
+	if ( succeeded && !keepRunning )
 		__super::OnOK();
 }
 
-void CCmdDashboardDialog::OnCbnSelChange_StackType( void )
+void CCmdDashboardDialog::OnStackType( UINT cmdId )
 {
-	m_stackType = static_cast< svc::StackType >( m_stackTypeCombo.GetCurSel() );
+	m_stackType = IDC_UNDO_BUTTON == cmdId ? svc::Undo : svc::Redo;
+	LoadDlgIcon( svc::Undo == m_stackType ? ID_EDIT_UNDO : ID_EDIT_REDO );
+	SetupDlgIcons();
+
 	UpdateData( DialogOutput );		// refresh the remaining commands on the stack
+}
+
+void CCmdDashboardDialog::OnUpdateStackType( CCmdUI* pCmdUI )
+{
+	pCmdUI->SetRadio( ( svc::Undo == m_stackType ) == ( IDC_UNDO_BUTTON == pCmdUI->m_nID ) );
 }
 
 void CCmdDashboardDialog::OnLvnItemChanged_CommandsList( NMHDR* pNmHdr, LRESULT* pResult )
@@ -372,4 +438,9 @@ void CCmdDashboardDialog::OnOptions( void )
 {
 	COptionsSheet sheet( m_pFileModel, this );
 	sheet.DoModal();
+}
+
+void CCmdDashboardDialog::OnUpdateOptions( CCmdUI* pCmdUI )
+{
+	pCmdUI->Enable( m_enableProperties );
 }

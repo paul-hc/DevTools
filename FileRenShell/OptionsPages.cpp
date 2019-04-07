@@ -2,6 +2,7 @@
 #include "stdafx.h"
 #include "OptionsSheet.h"
 #include "OptionsPages.h"
+#include "CmdDashboardDialog.h"
 #include "FileModel.h"
 #include "EditingCommands.h"
 #include "IFileEditor.h"
@@ -92,6 +93,8 @@ void CGeneralOptionsPage::ApplyPageChanges( void ) throws_( CRuntimeException )
 
 void CGeneralOptionsPage::DoDataExchange( CDataExchange* pDX )
 {
+	const bool firstInit = NULL == m_smallIconDimCombo.m_hWnd;
+
 	ui::DDX_ButtonIcon( pDX, IDC_SET_DEFAULT_ALL, ID_RESET_DEFAULT );
 
 	IconStdSize smallStdSize, largeStdSize;
@@ -103,6 +106,13 @@ void CGeneralOptionsPage::DoDataExchange( CDataExchange* pDX )
 
 	ui::DDX_EnumCombo( pDX, IDC_SMALL_ICON_SIZE_COMBO, m_smallIconDimCombo, smallStdSize, GetTags_IconDim() );
 	ui::DDX_EnumCombo( pDX, IDC_LARGE_ICON_SIZE_COMBO, m_largeIconDimCombo, largeStdSize, GetTags_IconDim() );
+
+	if ( firstInit )
+	{
+		bool enableProperties = NULL == ui::FindAncestorAs< CCmdDashboardDialog >( this );		// prevent recursion
+		ui::EnableControl( m_hWnd, ID_OPEN_CMD_DASHBOARD, enableProperties );
+		ui::ShowControl( m_hWnd, ID_OPEN_CMD_DASHBOARD, enableProperties );
+	}
 
 	if ( DialogSaveChanges == pDX->m_bSaveAndValidate )
 	{
@@ -132,6 +142,7 @@ BEGIN_MESSAGE_MAP( CGeneralOptionsPage, CLayoutPropertyPage )
 	ON_BN_CLICKED( IDC_UNDO_LOG_BINARY_FMT_RADIO, OnFieldModified )
 	ON_BN_CLICKED( IDC_UNDO_EDITING_CMDS_CHECK, OnFieldModified )
 	ON_BN_CLICKED( IDC_SET_DEFAULT_ALL, OnBnClicked_ResetDefaultAll )
+	ON_BN_CLICKED( ID_OPEN_CMD_DASHBOARD, OnBnClicked_OpenCmdDashboard )
 END_MESSAGE_MAP()
 
 void CGeneralOptionsPage::OnFieldModified( void )
@@ -146,6 +157,12 @@ void CGeneralOptionsPage::OnBnClicked_ResetDefaultAll( void )
 	m_options = s_defaultOptions;
 	UpdateData( DialogOutput );
 	OnFieldModified();
+}
+
+void CGeneralOptionsPage::OnBnClicked_OpenCmdDashboard( void )
+{
+	CCmdDashboardDialog dlg( checked_static_cast< const COptionsSheet* >( GetParent() )->GetFileModel(), svc::Undo, this );
+	dlg.DoModal();
 }
 
 

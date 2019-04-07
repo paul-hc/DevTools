@@ -48,7 +48,14 @@ namespace cmd
 
 	bool IsPersistentCmd( const utl::ICommand* pCmd );		// some persistent commands are also editor-specific file action commands
 	bool IsZombieCmd( const utl::ICommand* pCmd );			// empty macro file action command with no effect?
-	bool StripTimestamp( std::tstring& rText, const utl::ICommand* pCmd );
+
+
+	// command formatting
+	const std::tstring& FormatCmdTag( const utl::ICommand* pCmd, utl::Verbosity verbosity );
+	const TCHAR* GetSeparator( utl::Verbosity verbosity );
+
+	std::tstring FormatCmdLine( const utl::ICommand* pCmd, utl::Verbosity verbosity );
+	void QueryCmdFields( std::vector< std::tstring >& rFields, const utl::ICommand* pCmd );
 }
 
 

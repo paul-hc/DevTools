@@ -15,7 +15,7 @@ interface IMemoryManaged
 
 namespace utl
 {
-	enum Verbosity { Brief, Detailed, DetailedLine };
+	enum Verbosity { Brief, Detailed, DetailFields };
 
 	interface IMessage
 	{

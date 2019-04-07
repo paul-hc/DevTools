@@ -41,6 +41,7 @@ private:
 protected:
 	virtual void OnFieldModified( void );			// base override
 	afx_msg void OnBnClicked_ResetDefaultAll( void );
+	afx_msg void OnBnClicked_OpenCmdDashboard( void );
 
 	DECLARE_MESSAGE_MAP()
 };

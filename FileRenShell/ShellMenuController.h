@@ -31,12 +31,15 @@ public:
 private:
 	HMENU BuildCreateFoldersSubmenu( CBaseMenuBuilder* pParentBuilder );
 	HMENU BuildPasteDeepSubmenu( CBaseMenuBuilder* pParentBuilder );
+	HMENU BuildMoreGoodiesSubmenu( CBaseMenuBuilder* pParentBuilder );
 
 	enum MenuCommand
 	{
 		Cmd_SendToCliboard,
 		Cmd_RenameFiles, Cmd_TouchFiles, Cmd_FindDuplicates,
 		Cmd_Undo, Cmd_Redo,
+		Cmd_Dashboard,
+		Cmd_Options,
 		Cmd_RunUnitTests,
 		Cmd_CreateFolders,
 		Cmd_CreateDeepFolderStruct,
@@ -47,6 +50,7 @@ private:
 		// popup IDs are negative
 		Popup_PasteFolderStruct = -550,
 		Popup_PasteDeep,
+		Popup_MoreGoodies,
 	};
 
 	struct CMenuCmdInfo

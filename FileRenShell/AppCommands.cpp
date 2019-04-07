@@ -42,18 +42,33 @@ namespace cmd
 		return NULL == pCmd;
 	}
 
-	bool StripTimestamp( std::tstring& rText, const utl::ICommand* pCmd )
+
+	// command formatting
+
+	const std::tstring& FormatCmdTag( const utl::ICommand* pCmd, utl::Verbosity verbosity )
 	{
-		if ( const cmd::IPersistentCmd* pPersistCmd = dynamic_cast< const cmd::IPersistentCmd* >( pCmd ) )
-		{
-			std::tstring timestampText = time_utl::FormatTimestamp( pPersistCmd->GetTimestamp() );
-			if ( str::Replace( rText, timestampText.c_str(), _T("") ) != 0 )
-			{
-				str::Trim( rText );
-				return true;
-			}
-		}
-		return false;
+		ASSERT_PTR( pCmd );
+		return GetTags_CommandType().Format( pCmd->GetTypeID(), utl::Brief == verbosity ? CEnumTags::KeyTag : CEnumTags::UiTag );
+	}
+
+	const TCHAR* GetSeparator( utl::Verbosity verbosity )
+	{
+		static const TCHAR s_space[] = _T(" "), s_field[] = _T("|");
+		return utl::DetailFields == verbosity ? s_field : s_space;
+	}
+
+	std::tstring FormatCmdLine( const utl::ICommand* pCmd, utl::Verbosity verbosity )
+	{
+		ASSERT_PTR( pCmd );
+		std::tstring text = pCmd->Format( verbosity );
+		if ( utl::DetailFields == verbosity )
+			str::Replace( text, GetSeparator( utl::DetailFields ), GetSeparator( utl::Detailed ) );
+		return text;
+	}
+
+	void QueryCmdFields( std::vector< std::tstring >& rFields, const utl::ICommand* pCmd )
+	{
+		str::Split( rFields, pCmd->Format( utl::DetailFields ).c_str(), GetSeparator( utl::DetailFields ) );
 	}
 }
 

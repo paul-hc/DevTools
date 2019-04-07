@@ -69,8 +69,13 @@ void CIconButton::SetButtonIcon( CButton* pButton, const CIconId& iconId, bool u
 {
 	ASSERT_PTR( pButton->GetSafeHwnd() );
 
+	HICON hOldIcon = pButton->GetIcon(), hNewIcon = NULL;
+
 	if ( const CIcon* pIcon = CImageStore::SharedStore()->RetrieveIcon( iconId ) )
-		pButton->SetIcon( pIcon->GetHandle() );
+		hNewIcon = pIcon->GetHandle();
+
+	if ( hNewIcon != hOldIcon )		// icon has changed?
+		pButton->SetIcon( hNewIcon );
 
 	UpdateCaption( pButton, useText, useTextSpacing );
 }
@@ -121,7 +126,7 @@ bool CIconButton::UpdateCaption( CButton* pButton, bool useText, bool useTextSpa
 		if ( useText )
 			return ui::SetWindowText( pButton->GetSafeHwnd(), CaptionToText( ui::GetWindowText( pButton->GetSafeHwnd() ), useText, useTextSpacing ) );
 		else
-			pButton->ModifyStyle( 0, BS_ICON );
+			return pButton->ModifyStyle( 0, BS_ICON ) != 0;
 
 	return false;
 }

@@ -17,6 +17,7 @@ public:
 	const CCommandModel* GetCommandModel( void ) const { return m_pCommandModel.get(); }
 
 	bool IsDirty( void ) const { return m_dirty; }
+	void SetDirty( void ) { m_dirty = true; }		// use with care, called in very special cases
 
 	// svc::ICommandService interface
 	virtual utl::ICommand* PeekCmd( svc::StackType stackType ) const;
