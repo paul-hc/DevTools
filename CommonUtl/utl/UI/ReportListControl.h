@@ -445,6 +445,8 @@ public:
 	int GetCurSel( void ) const;
 	bool SetCurSel( int index, bool doSelect = true );		// caret and selection
 
+	int GetSelCaretIndex( void ) const;						// if caret is not selected returns NULL, even if we have multiple selection (to allow NULL details when toggling an item unselected)
+
 	bool AnySelected( UINT stateMask = LVIS_SELECTED ) const { return HasItemWithState( stateMask ); }
 	bool SingleSelected( void ) const;
 
@@ -456,6 +458,8 @@ public:
 	void SetSelection( const std::vector< int >& selIndexes, int caretIndex = -1 );
 	void ClearSelection( void );
 	void SelectAll( void );
+
+	bool GetSelIndexBounds( int* pMinSelIndex, int* pMaxSelIndex ) const;
 
 	template< typename ObjectT >
 	ObjectT* GetSelected( void ) const;

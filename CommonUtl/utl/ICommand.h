@@ -5,8 +5,16 @@
 #include "ISubject.h"
 
 
+class CEnumTags;
+
+
 namespace utl
 {
+	enum ExecMode { ExecDefault, ExecDo, ExecUndo, ExecRedo };
+
+	const CEnumTags& GetTags_ExecMode( void );
+
+
 	interface ICommand
 		: public IMemoryManaged
 		, public IMessage
@@ -21,9 +29,6 @@ namespace utl
 		virtual bool Execute( ICommand* pCmd ) = 0;
 	};
 }
-
-
-class CEnumTags;
 
 
 namespace svc

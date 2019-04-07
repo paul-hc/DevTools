@@ -146,11 +146,11 @@ DROPEFFECT CClipboard::QueryDropFilePaths( std::vector< fs::CPath >& rSrcPaths )
 		if ( SUCCEEDED( ::OleGetClipboard( &pDataObject ) ) )
 		{
 			FORMATETC format = { CF_HDROP, NULL, DVASPECT_CONTENT, -1, TYMED_HGLOBAL };
-			STGMEDIUM storageMedium;
+			STGMEDIUM stgMedium = { 0 };	// defend against buggy data object
 
-			if ( SUCCEEDED( pDataObject->GetData( &format, &storageMedium ) ) )		// transfer the data
+			if ( SUCCEEDED( pDataObject->GetData( &format, &stgMedium ) ) )		// transfer the data
 			{
-				HDROP hDropInfo = (HDROP)storageMedium.hGlobal;
+				HDROP hDropInfo = (HDROP)stgMedium.hGlobal;
 				shell::QueryDroppedFiles( rSrcPaths, hDropInfo );
 			}
 

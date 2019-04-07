@@ -782,4 +782,21 @@ namespace utl
 }
 
 
+namespace pred
+{
+	template< typename ContainerT >
+	struct ContainsAny
+	{
+		ContainsAny( const ContainerT& items ) : m_items( items ) {}
+
+		bool operator()( const typename ContainerT::value_type& item ) const
+		{
+			return utl::Contains( m_items, item );
+		}
+	private:
+		const ContainerT& m_items;
+	};
+}
+
+
 #endif // ContainerUtilities_h

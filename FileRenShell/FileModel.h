@@ -40,6 +40,7 @@ public:
 	size_t SetupFromDropInfo( HDROP hDropInfo );
 
 	const std::vector< fs::CPath >& GetSourcePaths( void ) const { return m_sourcePaths; }
+	bool IsSourceSingleFolder( void ) const;						// single selected directory as paste target?
 
 	bool SafeExecuteCmd( IFileEditor* pEditor, utl::ICommand* pCmd );
 	void FetchFromStack( svc::StackType stackType );				// fetches data set from undo stack (macro command)
@@ -57,6 +58,8 @@ public:
 	void ResetDestinations( void );
 
 	IFileEditor* MakeFileEditor( cmd::CommandType cmdType, CWnd* pParent );
+	std::pair< IFileEditor*, bool > HandleUndoRedo( svc::StackType stackType, CWnd* pParent );			// from the corresponding stack top: if an editor-based cmd, return editor; otherwise execute it
+	static bool HasFileEditor( cmd::CommandType cmdType );
 
 	// RENAME
 	template< typename FuncType >

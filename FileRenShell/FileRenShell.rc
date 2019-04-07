@@ -211,6 +211,24 @@ BEGIN
     LTEXT           "<btns>",IDC_TOOLBAR_PLACEHOLDER,338,43,50,12,SS_CENTERIMAGE | WS_CLIPSIBLINGS | WS_BORDER
 END
 
+IDD_CMD_DASHBOARD_DIALOG DIALOGEX 0, 0, 269, 191
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME
+CAPTION "Undo-Redo Dashboard"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    LTEXT           "Action &history:",IDC_STATIC,7,29,48,8
+    CONTROL         "",IDC_COMMANDS_LIST,"SysListView32",LVS_REPORT | LVS_SHOWSELALWAYS | LVS_SHAREIMAGELISTS | LVS_NOSORTHEADER | WS_BORDER | WS_GROUP | WS_TABSTOP,7,40,254,57
+    LTEXT           "<strip1>",IDC_STRIP_BAR_1,211,26,50,12,SS_CENTERIMAGE | WS_CLIPSIBLINGS | WS_BORDER
+    LTEXT           "&Action:",IDC_CMD_HEADER_STATIC,9,106,24,8
+    EDITTEXT        IDC_CMD_HEADER_EDIT,38,104,224,12,ES_AUTOHSCROLL | ES_READONLY
+    LTEXT           "Details:",IDC_CMD_DETAILS_STATIC,8,121,25,8
+    EDITTEXT        IDC_CMD_DETAILS_EDIT,38,121,224,39,ES_MULTILINE | ES_READONLY | WS_VSCROLL | WS_HSCROLL
+    DEFPUSHBUTTON   "OK",IDOK,157,170,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,212,170,50,14
+    LTEXT           "&Execute:",IDC_STATIC,7,9,30,8
+    COMBOBOX        IDC_STACK_TYPE_COMBO,40,7,55,30,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -282,6 +300,14 @@ BEGIN
         RIGHTMARGIN, 388
         TOPMARGIN, 5
         BOTTOMMARGIN, 305
+    END
+
+    IDD_CMD_DASHBOARD_DIALOG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 262
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 184
     END
 END
 #endif    // APSTUDIO_INVOKED
@@ -505,6 +531,15 @@ BEGIN
     BUTTON      ID_MOVE_DUPLICATES
 END
 
+IDR_TOOL_STRIP TOOLBAR  16, 16
+BEGIN
+    BUTTON      ID_CMD_DELETE_FILES
+    BUTTON      ID_CMD_MOVE_FILES
+    BUTTON      ID_CMD_CHANGE_DEST_PATHS
+    BUTTON      ID_CMD_CHANGE_DEST_FILE_STATES
+    BUTTON      ID_CMD_RESET_DESTINATIONS
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -512,6 +547,7 @@ END
 //
 
 IDR_IMAGE_STRIP         BITMAP                  "res\\ImageStrip.bmp"
+IDR_TOOL_STRIP          BITMAP                  "res\\ToolStrip.bmp"
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -519,6 +555,7 @@ IDR_IMAGE_STRIP         BITMAP                  "res\\ImageStrip.bmp"
 //
 
 IDR_IMAGE_STRIP         PNG                     "res\\ImageStrip.png"
+IDR_TOOL_STRIP          PNG                     "res\\ToolStrip.png"
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -634,6 +671,11 @@ BEGIN
     ID_PICK_AS_ORIGINAL_FOLDER 
                             "Select all files in the parent folder as original files"
     ID_PASTE_DEEP_POPUP     "Paste deep folder image"
+END
+
+STRINGTABLE 
+BEGIN
+    IDC_COMMANDS_LIST       "Name=-1|Timestamp=125|File Count"
 END
 
 #endif    // English (U.S.) resources

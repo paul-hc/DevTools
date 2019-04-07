@@ -477,6 +477,14 @@
 				RelativePath=".\resource.h"
 				>
 			</File>
+			<File
+				RelativePath=".\res\ToolStrip.bmp"
+				>
+			</File>
+			<File
+				RelativePath=".\res\ToolStrip.png"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Source Files"
@@ -492,22 +500,6 @@
 			</File>
 			<File
 				RelativePath=".\Application_fwd.h"
-				>
-			</File>
-			<File
-				RelativePath=".\DuplicateFilesFinder.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\DuplicateFilesFinder.h"
-				>
-			</File>
-			<File
-				RelativePath=".\FileEditorBaseDialog.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\FileEditorBaseDialog.h"
 				>
 			</File>
 			<File
@@ -575,66 +567,6 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath=".\FindDuplicatesDialog.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\FindDuplicatesDialog.h"
-				>
-			</File>
-			<File
-				RelativePath=".\GeneralOptions.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\GeneralOptions.h"
-				>
-			</File>
-			<File
-				RelativePath=".\OptionsPages.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\OptionsPages.h"
-				>
-			</File>
-			<File
-				RelativePath=".\OptionsSheet.h"
-				>
-			</File>
-			<File
-				RelativePath=".\RenameFilesDialog.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\RenameFilesDialog.h"
-				>
-			</File>
-			<File
-				RelativePath=".\RenamePages.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\RenamePages.h"
-				>
-			</File>
-			<File
-				RelativePath=".\RenameService.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\RenameService.h"
-				>
-			</File>
-			<File
-				RelativePath=".\ReplaceDialog.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\ReplaceDialog.h"
-				>
-			</File>
-			<File
 				RelativePath=".\stdafx.cpp"
 				>
 				<FileConfiguration
@@ -678,30 +610,6 @@
 				RelativePath=".\stdafx.h"
 				>
 			</File>
-			<File
-				RelativePath=".\TextAlgorithms.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\TextAlgorithms.h"
-				>
-			</File>
-			<File
-				RelativePath=".\TitleCapitalizer.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\TitleCapitalizer.h"
-				>
-			</File>
-			<File
-				RelativePath=".\TouchFilesDialog.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\TouchFilesDialog.h"
-				>
-			</File>
 			<Filter
 				Name="model"
 				>
@@ -730,6 +638,14 @@
 					>
 				</File>
 				<File
+					RelativePath=".\GeneralOptions.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\GeneralOptions.h"
+					>
+				</File>
+				<File
 					RelativePath=".\IFileEditor.h"
 					>
 				</File>
@@ -739,6 +655,14 @@
 				</File>
 				<File
 					RelativePath=".\RenameItem.h"
+					>
+				</File>
+				<File
+					RelativePath=".\ShellMenuController.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\ShellMenuController.h"
 					>
 				</File>
 				<File
@@ -753,14 +677,6 @@
 			<Filter
 				Name="command"
 				>
-				<File
-					RelativePath=".\AppCmdService.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\AppCmdService.h"
-					>
-				</File>
 				<File
 					RelativePath=".\AppCommands.cpp"
 					>
@@ -801,12 +717,128 @@
 					RelativePath=".\FileMacroCommands.h"
 					>
 				</File>
+			</Filter>
+			<Filter
+				Name="User Interface"
+				>
+				<File
+					RelativePath=".\CmdDashboardDialog.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\CmdDashboardDialog.h"
+					>
+				</File>
+				<File
+					RelativePath=".\DuplicateFilesFinder.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\DuplicateFilesFinder.h"
+					>
+				</File>
+				<File
+					RelativePath=".\FileEditorBaseDialog.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\FileEditorBaseDialog.h"
+					>
+				</File>
+				<File
+					RelativePath=".\FindDuplicatesDialog.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\FindDuplicatesDialog.h"
+					>
+				</File>
+				<File
+					RelativePath=".\OptionsPages.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\OptionsPages.h"
+					>
+				</File>
+				<File
+					RelativePath=".\OptionsSheet.h"
+					>
+				</File>
+				<File
+					RelativePath=".\RenameFilesDialog.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\RenameFilesDialog.h"
+					>
+				</File>
+				<File
+					RelativePath=".\RenamePages.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\RenamePages.h"
+					>
+				</File>
+				<File
+					RelativePath=".\ReplaceDialog.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\ReplaceDialog.h"
+					>
+				</File>
+				<File
+					RelativePath=".\TouchFilesDialog.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\TouchFilesDialog.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="service"
+				>
+				<File
+					RelativePath=".\AppCmdService.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\AppCmdService.h"
+					>
+				</File>
 				<File
 					RelativePath=".\FileService.cpp"
 					>
 				</File>
 				<File
 					RelativePath=".\FileService.h"
+					>
+				</File>
+				<File
+					RelativePath=".\RenameService.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\RenameService.h"
+					>
+				</File>
+				<File
+					RelativePath=".\TextAlgorithms.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\TextAlgorithms.h"
+					>
+				</File>
+				<File
+					RelativePath=".\TitleCapitalizer.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\TitleCapitalizer.h"
 					>
 				</File>
 			</Filter>

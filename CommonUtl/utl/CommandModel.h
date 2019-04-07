@@ -6,9 +6,19 @@
 #include <deque>
 
 
+struct CScopedExecMode
+{
+	CScopedExecMode( utl::ExecMode execMode );
+	~CScopedExecMode();
+public:
+	utl::ExecMode m_oldExecMode;
+};
+
+
 class CCommandModel : public utl::ICommandExecutor
 					, private utl::noncopyable
 {
+	friend struct CScopedExecMode;
 public:
 	CCommandModel( void ) {}
 	~CCommandModel();
@@ -16,6 +26,8 @@ public:
 	bool IsUndoEmpty( void ) const { return m_undoStack.empty(); }
 	bool IsRedoEmpty( void ) const { return m_redoStack.empty(); }
 	void Clear( void );
+
+	static utl::ExecMode GetExecMode( void ) { return s_execMode; }
 
 	// utl::ICommandExecutor interface
 	virtual bool Execute( utl::ICommand* pCmd );
@@ -49,6 +61,8 @@ private:
 	// commands stored in UNDO and REDO must keep their objects alive
 	std::deque< utl::ICommand* > m_undoStack;			// stack top at end
 	std::deque< utl::ICommand* > m_redoStack;			// stack top at end
+
+	static utl::ExecMode s_execMode;
 };
 
 

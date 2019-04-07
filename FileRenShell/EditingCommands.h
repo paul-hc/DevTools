@@ -8,7 +8,9 @@
 class CFileModel;
 
 
-abstract class CBaseChangeDestCmd : public CCommand
+abstract class CBaseChangeDestCmd
+	: public CCommand
+	, public cmd::IFileDetailsCmd
 {
 protected:
 	CBaseChangeDestCmd( cmd::CommandType cmdType, CFileModel* pFileModel, const std::tstring& cmdTag );
@@ -37,6 +39,10 @@ class CChangeDestPathsCmd : public CBaseChangeDestCmd
 {
 public:
 	CChangeDestPathsCmd( CFileModel* pFileModel, std::vector< fs::CPath >& rNewDestPaths, const std::tstring& cmdTag = std::tstring() );
+
+	// cmd::IFileDetailsCmd
+	virtual size_t GetFileCount( void ) const;
+	virtual void QueryDetailLines( std::vector< std::tstring >& rLines ) const;
 private:
 	// base overrides
 	virtual ChangeType EvalChange( void ) const;
@@ -54,6 +60,10 @@ class CChangeDestFileStatesCmd : public CBaseChangeDestCmd
 {
 public:
 	CChangeDestFileStatesCmd( CFileModel* pFileModel, std::vector< fs::CFileState >& rNewDestStates, const std::tstring& cmdTag = std::tstring() );
+
+	// cmd::IFileDetailsCmd
+	virtual size_t GetFileCount( void ) const;
+	virtual void QueryDetailLines( std::vector< std::tstring >& rLines ) const;
 private:
 	// base overrides
 	virtual ChangeType EvalChange( void ) const;

@@ -4,6 +4,7 @@
 #include "FileModel.h"
 #include "RenameItem.h"
 #include "TouchItem.h"
+#include "utl/FmtUtils.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -77,7 +78,7 @@ CBaseChangeDestCmd::ChangeType CChangeDestPathsCmd::EvalChange( void ) const
 	{
 		const CRenameItem* pRenameItem = m_pFileModel->GetRenameItems()[ i ];
 
-		if ( pRenameItem->GetFilePath() != m_srcPaths[ i ] )						// keys different?
+		if ( pRenameItem->GetFilePath() != m_srcPaths[ i ] )					// keys different?
 			return Expired;
 		else if ( pRenameItem->GetDestPath().Get() != m_destPaths[ i ].Get() )	// case sensitive string compare
 			changeType = Changed;
@@ -106,6 +107,22 @@ bool CChangeDestPathsCmd::ToggleExecute( void )
 	NotifyObservers();
 	m_hasOldDests = !m_hasOldDests;				// m_dest..s swapped with OldDest..s
 	return true;
+}
+
+size_t CChangeDestPathsCmd::GetFileCount( void ) const
+{
+	return m_srcPaths.size();
+}
+
+void CChangeDestPathsCmd::QueryDetailLines( std::vector< std::tstring >& rLines ) const
+{
+	ASSERT( m_srcPaths.size() == m_destPaths.size() );
+
+	rLines.clear();
+	rLines.reserve( m_srcPaths.size() );
+
+	for ( size_t i = 0; i != m_srcPaths.size(); ++i )
+		rLines.push_back( fmt::FormatRenameEntry( m_srcPaths[ i ], m_destPaths[ i ] ) );
 }
 
 
@@ -167,6 +184,22 @@ bool CChangeDestFileStatesCmd::ToggleExecute( void )
 	NotifyObservers();
 	m_hasOldDests = !m_hasOldDests;				// m_dest..s swapped with OldDest..s
 	return true;
+}
+
+size_t CChangeDestFileStatesCmd::GetFileCount( void ) const
+{
+	return m_srcStates.size();
+}
+
+void CChangeDestFileStatesCmd::QueryDetailLines( std::vector< std::tstring >& rLines ) const
+{
+	ASSERT( m_srcStates.size() == m_destStates.size() );
+
+	rLines.clear();
+	rLines.reserve( m_srcStates.size() );
+
+	for ( size_t i = 0; i != m_srcStates.size(); ++i )
+		rLines.push_back( fmt::FormatTouchEntry( m_srcStates[ i ], m_destStates[ i ] ) );
 }
 
 

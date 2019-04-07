@@ -21,6 +21,7 @@
 #include "RenameFilesDialog.h"
 #include "TouchFilesDialog.h"
 #include "FindDuplicatesDialog.h"
+#include "CmdDashboardDialog.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -70,6 +71,11 @@ void CFileModel::StoreSourcePaths( const ContainerT& sourcePaths )
 
 	fs::SortPathsDirsFirst( m_sourcePaths );
 	m_commonParentPath = path::ExtractCommonParentPath( m_sourcePaths );
+}
+
+bool CFileModel::IsSourceSingleFolder( void ) const
+{
+	return 1 == m_sourcePaths.size() && fs::IsValidDirectory( m_sourcePaths.front().GetPtr() );
 }
 
 bool CFileModel::SafeExecuteCmd( IFileEditor* pEditor, utl::ICommand* pCmd )
@@ -326,10 +332,23 @@ void CFileModel::AddTouchItemFromCmd::operator()( const utl::ICommand* pCmd )
 	m_pFileModel->m_touchItems.push_back( pTouchItem );
 }
 
-IFileEditor* CFileModel::MakeFileEditor( cmd::CommandType cmdType, CWnd* pParent )
+bool CFileModel::HasFileEditor( cmd::CommandType cmdType )
 {
 	switch ( cmdType )
 	{
+		case cmd::RenameFile:
+		case cmd::ChangeDestPaths:
+		case cmd::TouchFile:
+		case cmd::FindDuplicates:
+			return true;
+	}
+	return false;
+}
+
+IFileEditor* CFileModel::MakeFileEditor( cmd::CommandType cmdType, CWnd* pParent )
+{
+	switch ( cmdType )
+	{	// keep case statements in sync with HasFileEditor()
 		case cmd::RenameFile:
 		case cmd::ChangeDestPaths:
 			return new CRenameFilesDialog( this, pParent );
@@ -338,9 +357,39 @@ IFileEditor* CFileModel::MakeFileEditor( cmd::CommandType cmdType, CWnd* pParent
 		case cmd::FindDuplicates:
 			return new CFindDuplicatesDialog( this, pParent );
 	}
+
 	// files group commands may be editor-less
 	//ASSERT( false );
 	return NULL;			// assume is a persistent command
+}
+
+std::pair< IFileEditor*, bool > CFileModel::HandleUndoRedo( svc::StackType stackType, CWnd* pParent )
+{
+	std::pair< IFileEditor*, bool > resultPair( NULL, false );
+
+	if ( utl::ICommand* pTopCmd = m_pCmdSvc->PeekCmd( stackType ) )
+	{
+		if ( !ui::IsKeyPressed( VK_CONTROL ) )			// force the dashboard dialog (even on editor-based commands)?
+			if ( IFileEditor* pEditor = MakeFileEditor( static_cast< cmd::CommandType >( pTopCmd->GetTypeID() ), pParent ) )
+			{
+				resultPair.first = pEditor;				// have an editor, not handled yet
+				return resultPair;
+			}
+
+		if ( cmd::IsPersistentCmd( pTopCmd ) )
+		{	// command has no editor in particular
+			if ( ui::IsKeyPressed( VK_SHIFT ) )			// skip the dashboard dialog?
+				m_pCmdSvc->UndoRedo( stackType );
+			else
+			{
+				CCmdDashboardDialog dlg( this, stackType, pParent );
+				dlg.DoModal();
+			}
+			resultPair.second = true;					// handled
+		}
+	}
+
+	return resultPair;
 }
 
 

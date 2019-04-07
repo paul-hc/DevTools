@@ -11,20 +11,32 @@ namespace cmd
 {
 	// abstract base for commands that operate on multiple files
 	//
-	abstract class CBaseFileGroupCmd : public CBaseSerialCmd
+	abstract class CBaseFileGroupCmd
+		: public CBaseSerialCmd
+		, public IPersistentCmd
 	{
 	protected:
 		CBaseFileGroupCmd( CommandType cmdType = CommandType(), const std::vector< fs::CPath >& filePaths = std::vector< fs::CPath >(), const CTime& timestamp = CTime::GetCurrentTime() );
 	public:
 		const std::vector< fs::CPath >& GetFilePaths( void ) const { return m_filePaths; }
-		const CTime& GetTimestamp( void ) const { return m_timestamp; }
 		void CopyTimestampOf( const CBaseFileGroupCmd& srcCmd ) { m_timestamp = srcCmd.GetTimestamp(); }
 
 		// base overrides
 		virtual std::tstring Format( utl::Verbosity verbosity ) const;
 
+		// cmd::IPersistentCmd
+		virtual bool IsValid( void ) const;
+		virtual const CTime& GetTimestamp( void ) const;
+
+		// cmd::IFileDetailsCmd
+		virtual size_t GetFileCount( void ) const;
+		virtual void QueryDetailLines( std::vector< std::tstring >& rLines ) const;
+
 		virtual void Serialize( CArchive& archive );
 	protected:
+		virtual std::tstring GetDestHeaderInfo( void ) const;
+		static void QueryFilePairLines( std::vector< std::tstring >& rLines, const std::vector< fs::CPath >& srcFilePaths, const std::vector< fs::CPath >& destFilePaths );
+
 		enum MultiFileStatus { AllExist, SomeExist, NoneExist };
 
 		struct CWorkingSet
@@ -42,8 +54,8 @@ namespace cmd
 
 		bool HandleExecuteResult( const CWorkingSet& workingSet, const std::tstring& groupDetails );
 	private:
-		CTime m_timestamp;
-		std::vector< fs::CPath > m_filePaths;
+		persist CTime m_timestamp;
+		persist std::vector< fs::CPath > m_filePaths;
 	protected:
 		static const TCHAR s_lineEnd[];
 	};
@@ -95,20 +107,20 @@ public:
 
 	// base overrides
 	virtual void Serialize( CArchive& archive );
+	virtual void QueryDetailLines( std::vector< std::tstring >& rLines ) const;
 
 	// ICommand interface
-	virtual std::tstring Format( utl::Verbosity verbosity ) const;
 	virtual bool Execute( void );
 	virtual bool Unexecute( void );
 	virtual bool IsUndoable( void ) const;
-private:
+protected:
+	virtual std::tstring GetDestHeaderInfo( void ) const;
+
 	void MakeDestFilePaths( std::vector< fs::CPath >& rDestFilePaths, const std::vector< fs::CPath >& srcFilePaths ) const;
 	fs::CPath MakeDeepDestFilePath( const fs::CPath& srcFilePath ) const;
-
-	static std::tstring FormatGroupDetails( const std::vector< fs::CPath >& srcFilePaths, std::vector< fs::CPath >& destFilePaths );
 private:
-	fs::CPath m_srcCommonDirPath;
-	fs::CPath m_destDirPath;
+	persist fs::CPath m_srcCommonDirPath;
+	persist fs::CPath m_destDirPath;
 };
 
 

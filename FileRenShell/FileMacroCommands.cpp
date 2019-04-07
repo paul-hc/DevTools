@@ -46,6 +46,33 @@ namespace cmd
 	{
 	}
 
+	bool CFileMacroCmd::IsValid( void ) const
+	{
+		return !IsEmpty();
+	}
+
+	const CTime& CFileMacroCmd::GetTimestamp( void ) const
+	{
+		return m_timestamp;
+	}
+
+	size_t CFileMacroCmd::GetFileCount( void ) const
+	{
+		return GetSubCommands().size();
+	}
+
+	void CFileMacroCmd::QueryDetailLines( std::vector< std::tstring >& rLines ) const
+	{
+		rLines.clear();
+		rLines.reserve( m_subCommands.size() );
+
+		for ( std::vector< utl::ICommand* >::const_iterator itCmd = m_subCommands.begin(); itCmd != m_subCommands.end(); ++itCmd )
+		{
+			CBaseFileCmd* pCmd = checked_static_cast< CBaseFileCmd* >( *itCmd );
+			rLines.push_back( pCmd->Format( utl::Detailed ) );
+		}
+	}
+
 	std::tstring CFileMacroCmd::Format( utl::Verbosity verbosity ) const
 	{
 		std::tstring text = GetTags_CommandType().Format( GetTypeID(), verbosity != utl::Brief ? CEnumTags::UiTag : CEnumTags::KeyTag );

@@ -53,12 +53,11 @@ private:
 	CDialogToolBar m_findToolbar;
 	CDialogToolBar m_replaceToolbar;
 public:
-	// generated overrides
+	// generated stuff
 	protected:
 	virtual void DoDataExchange( CDataExchange* pDX );
 	virtual void OnOK( void );
 protected:
-	// generated message map
 	afx_msg void OnDestroy( void );
 	afx_msg void OnChanged_FindWhat( void );
 	afx_msg void OnBnClicked_MatchCase( void );

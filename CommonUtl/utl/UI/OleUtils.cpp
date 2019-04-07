@@ -222,7 +222,7 @@ namespace ole
 		if ( !CanExtractFrom( pDataObject ) )
 			return false;
 
-		STGMEDIUM stgMedium;
+		STGMEDIUM stgMedium = { 0 };	// defend against buggy data object
 		if ( !pDataObject->GetData( m_clipFormat, &stgMedium ) )		// get the transfer data
 			return false;
 

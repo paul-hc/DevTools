@@ -105,16 +105,20 @@ int CFileEditorBaseDialog::PopStackRunCrossEditor( svc::StackType stackType )
 
 	CWnd* pParent = GetParent();
 
-	std::auto_ptr< IFileEditor > pFileEditor( m_pFileModel->MakeFileEditor( foreignCmdType, pParent ) );
-	if ( NULL == pFileEditor.get() )
-	{	// command has no editor in particular, just undo/redo it
-		m_pCmdSvc->UndoRedo( stackType );
-		SwitchMode( EditMode );					// signal the dirty state of this editor
+	std::pair< IFileEditor*, bool > editorPair = m_pFileModel->HandleUndoRedo( stackType, pParent );
+	if ( NULL == editorPair.first )				// we've got no editor to undo/redo?
+	{
+		if ( editorPair.second )				// command handled?
+			SwitchMode( EditMode );				// signal the dirty state of this editor
 		return 0;
 	}
 
+	// we've got a foreign editor to undo/redo
+	std::auto_ptr< IFileEditor > pFileEditor( editorPair.first );
+
 	m_pFileModel->RemoveObserver( this );		// reject further updates
 	OnCancel();									// end this dialog
+
 	pFileEditor->PopStackTop( stackType );
 
 	m_nModalResult = static_cast< int >( pFileEditor->GetDialog()->DoModal() );		// pass the modal result from the spawned editor dialog

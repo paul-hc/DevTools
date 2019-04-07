@@ -2,11 +2,40 @@
 #include "stdafx.h"
 #include "CommandModel.h"
 #include "ContainerUtilities.h"
+#include "EnumTags.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
 
+
+namespace utl
+{
+	const CEnumTags& GetTags_ExecMode( void )
+	{
+		static const CEnumTags tags( _T("|Do|Undo|Redo"), _T("|DO|UNDO|REDO") );
+		return tags;
+	}
+}
+
+
+// CScopedExecMode implementation
+
+CScopedExecMode::CScopedExecMode( utl::ExecMode execMode )
+	: m_oldExecMode( CCommandModel::s_execMode )
+{
+	CCommandModel::s_execMode = execMode;
+}
+
+CScopedExecMode::~CScopedExecMode()
+{
+	CCommandModel::s_execMode = m_oldExecMode;
+}
+
+
+// CCommandModel implementation
+
+utl::ExecMode CCommandModel::s_execMode = utl::ExecDefault;
 
 CCommandModel::~CCommandModel()
 {
@@ -46,6 +75,8 @@ bool CCommandModel::Execute( utl::ICommand* pCmd )
 {
 	ASSERT_PTR( pCmd );
 
+	CScopedExecMode scopedExec( utl::ExecDo );
+
 	if ( !pCmd->Execute() )
 	{
 		delete pCmd;
@@ -67,6 +98,7 @@ bool CCommandModel::Undo( size_t stepCount /*= 1*/ )
 {
 	ASSERT( stepCount != 0 && stepCount <= m_undoStack.size() );
 
+	CScopedExecMode scopedExec( utl::ExecUndo );
 	bool succeeded = false;
 
 	while ( stepCount-- != 0 && !m_undoStack.empty() )
@@ -86,6 +118,7 @@ bool CCommandModel::Redo( size_t stepCount /*= 1*/ )
 {
 	ASSERT( stepCount != 0 && stepCount <= m_redoStack.size() );
 
+	CScopedExecMode scopedExec( utl::ExecRedo );
 	bool succeeded = false;
 
 	while ( stepCount-- != 0 && !m_redoStack.empty() )

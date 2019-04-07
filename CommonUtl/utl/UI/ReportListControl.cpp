@@ -1521,7 +1521,7 @@ bool CReportListControl::SingleSelected( void ) const
 
 int CReportListControl::GetCurSel( void ) const
 {
-	int selIndex;
+	int selIndex = -1;
 	if ( IsMultiSelectionList() )
 	{
 		selIndex = FindItemWithState( LVNI_SELECTED | LVNI_FOCUSED );
@@ -1548,6 +1548,23 @@ bool CReportListControl::SetCurSel( int index, bool doSelect /*= true*/ )
 	return true;
 }
 
+int CReportListControl::GetSelCaretIndex( void ) const
+{
+	if ( !IsMultiSelectionList() )
+		return GetCurSel();
+
+	std::vector< int > selIndexes;
+	int caretIndex;
+
+	if ( GetSelection( selIndexes, &caretIndex ) )
+		if ( -1 == caretIndex )										// no caret?
+			return FindItemWithState( LVNI_SELECTED );
+		else if ( utl::Contains( selIndexes, caretIndex ) )			// caret is selected?
+			return caretIndex;
+
+	return -1;
+}
+
 bool CReportListControl::GetSelection( std::vector< int >& rSelIndexes, int* pCaretIndex /*= NULL*/, int* pTopIndex /*= NULL*/ ) const
 {
 	rSelIndexes.reserve( rSelIndexes.size() + GetSelectedCount() );
@@ -1563,6 +1580,21 @@ bool CReportListControl::GetSelection( std::vector< int >& rSelIndexes, int* pCa
 
 	std::sort( rSelIndexes.begin(), rSelIndexes.end() );		// sort indexes ascending
 	return !rSelIndexes.empty();
+}
+
+bool CReportListControl::GetSelIndexBounds( int* pMinSelIndex, int* pMaxSelIndex ) const
+{
+	std::vector< int > selIndexes;
+	if ( !GetSelection( selIndexes ) )
+	{
+		utl::AssignPtr( pMinSelIndex, -1 );
+		utl::AssignPtr( pMaxSelIndex, -1 );
+		return false;
+	}
+
+	utl::AssignPtr( pMinSelIndex, selIndexes.front() );
+	utl::AssignPtr( pMaxSelIndex, selIndexes.back() );
+	return true;
 }
 
 bool CReportListControl::Select( const void* pObject )

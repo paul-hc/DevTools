@@ -14,8 +14,10 @@ namespace cmd
 	enum UserFeedback { Abort, Retry, Ignore };
 
 
-	class CFileMacroCmd : public CObject
-						, public CMacroCommand
+	class CFileMacroCmd
+		: public CObject
+		, public CMacroCommand
+		, public IPersistentCmd
 	{
 		DECLARE_SERIAL( CFileMacroCmd )
 
@@ -23,12 +25,18 @@ namespace cmd
 	public:
 		CFileMacroCmd( CommandType subCmdType, const CTime& timestamp = CTime::GetCurrentTime() );
 
-		const CTime& GetTimestamp( void ) const { return m_timestamp; }
-
 		// base overrides
 		virtual std::tstring Format( utl::Verbosity verbosity ) const;
 		virtual bool Execute( void );
 		virtual bool Unexecute( void );
+
+		// cmd::IPersistentCmd
+		virtual bool IsValid( void ) const;
+		virtual const CTime& GetTimestamp( void ) const;
+
+		// cmd::IFileDetailsCmd
+		virtual size_t GetFileCount( void ) const;
+		virtual void QueryDetailLines( std::vector< std::tstring >& rLines ) const;
 
 		virtual void Serialize( CArchive& archive );
 	private:
@@ -36,7 +44,7 @@ namespace cmd
 
 		void ExecuteMacro( Mode mode );
 	private:
-		CTime m_timestamp;
+		persist CTime m_timestamp;
 	};
 
 
@@ -56,7 +64,7 @@ namespace cmd
 		UserFeedback HandleFileError( CException* pExc, const fs::CPath& srcPath ) const;
 		static std::tstring ExtractMessage( CException* pExc, const fs::CPath& srcPath );
 	public:
-		fs::CPath m_srcPath;
+		abstract persist fs::CPath m_srcPath;		// persistent for some commands
 	private:
 		static const TCHAR s_fmtError[];
 	};
@@ -81,7 +89,7 @@ public:
 	// base overrides
 	virtual void Serialize( CArchive& archive );
 public:
-	fs::CPath m_destPath;
+	persist fs::CPath m_destPath;
 };
 
 
@@ -106,8 +114,8 @@ public:
 	// base overrides
 	virtual void Serialize( CArchive& archive );
 public:
-	fs::CFileState m_srcState;
-	fs::CFileState m_destState;
+	persist fs::CFileState m_srcState;
+	persist fs::CFileState m_destState;
 };
 
 

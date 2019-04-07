@@ -24,9 +24,17 @@ namespace cmd
 	const CEnumTags& GetTags_CommandType( void );
 
 
-	bool IsPersistentCmd( const utl::ICommand* pCmd );		// some persistent commands are also editor-specific file action commands
-	bool IsZombieCmd( const utl::ICommand* pCmd );			// empty macro file action command with no effect?
+	interface IFileDetailsCmd
+	{
+		virtual size_t GetFileCount( void ) const = 0;
+		virtual void QueryDetailLines( std::vector< std::tstring >& rLines ) const = 0;
+	};
 
+	interface IPersistentCmd : public IFileDetailsCmd
+	{
+		virtual bool IsValid( void ) const = 0;
+		virtual const CTime& GetTimestamp( void ) const = 0;
+	};
 
 	interface IErrorObserver
 	{
@@ -34,7 +42,13 @@ namespace cmd
 		virtual void OnFileError( const fs::CPath& srcPath, const std::tstring& errMsg ) = 0;
 	};
 
+
 	enum FileFormat { TextFormat, BinaryFormat };
+
+
+	bool IsPersistentCmd( const utl::ICommand* pCmd );		// some persistent commands are also editor-specific file action commands
+	bool IsZombieCmd( const utl::ICommand* pCmd );			// empty macro file action command with no effect?
+	bool StripTimestamp( std::tstring& rText, const utl::ICommand* pCmd );
 }
 
 

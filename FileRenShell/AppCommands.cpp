@@ -3,6 +3,7 @@
 #include "AppCommands.h"
 #include "Application.h"
 #include "utl/EnumTags.h"
+#include "utl/TimeUtils.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -24,21 +25,35 @@ namespace cmd
 
 	bool IsPersistentCmd( const utl::ICommand* pCmd )
 	{
-		if ( is_a< CObject >( pCmd ) )
-			if ( const CMacroCommand* pMacroCmd = dynamic_cast< const CMacroCommand* >( pCmd ) )
-				return !pMacroCmd->IsEmpty();
-			else
-				return true;
+		if ( const IPersistentCmd* pPersistCmd = dynamic_cast< const IPersistentCmd* >( pCmd ) )
+			return pPersistCmd->IsValid();
 
 		return false;
 	}
 
 	bool IsZombieCmd( const utl::ICommand* pCmd )
 	{
+		if ( const IPersistentCmd* pPersistCmd = dynamic_cast< const IPersistentCmd* >( pCmd ) )
+			return !pPersistCmd->IsValid();
+
 		if ( const CMacroCommand* pMacroCmd = dynamic_cast< const CMacroCommand* >( pCmd ) )
 			return pMacroCmd->IsEmpty();
 
-		return NULL == pCmd || !IsPersistentCmd( pCmd );
+		return NULL == pCmd;
+	}
+
+	bool StripTimestamp( std::tstring& rText, const utl::ICommand* pCmd )
+	{
+		if ( const cmd::IPersistentCmd* pPersistCmd = dynamic_cast< const cmd::IPersistentCmd* >( pCmd ) )
+		{
+			std::tstring timestampText = time_utl::FormatTimestamp( pPersistCmd->GetTimestamp() );
+			if ( str::Replace( rText, timestampText.c_str(), _T("") ) != 0 )
+			{
+				str::Trim( rText );
+				return true;
+			}
+		}
+		return false;
 	}
 }
 

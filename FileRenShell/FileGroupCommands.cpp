@@ -28,15 +28,38 @@ namespace cmd
 	{
 	}
 
+	bool CBaseFileGroupCmd::IsValid( void ) const
+	{
+		return true;
+	}
+
+	const CTime& CBaseFileGroupCmd::GetTimestamp( void ) const
+	{
+		return m_timestamp;
+	}
+
+	size_t CBaseFileGroupCmd::GetFileCount( void ) const
+	{
+		return m_filePaths.size();
+	}
+
+	void CBaseFileGroupCmd::QueryDetailLines( std::vector< std::tstring >& rLines ) const
+	{
+		utl::Assign( rLines, m_filePaths, func::tor::StringOf() );
+	}
+
 	std::tstring CBaseFileGroupCmd::Format( utl::Verbosity verbosity ) const
 	{
+		static const TCHAR s_space[] = _T(" ");
 		std::tstring text = GetTags_CommandType().Format( GetTypeID(), verbosity != utl::Brief ? CEnumTags::UiTag : CEnumTags::KeyTag );
 
 		if ( verbosity != utl::Brief )
-			stream::Tag( text, str::Format( _T("[%d]"), m_filePaths.size() ), _T(" ") );
+			stream::Tag( text, str::Format( _T("[%d]"), m_filePaths.size() ), s_space );
+		if ( utl::DetailedLine == verbosity )
+			stream::Tag( text, GetDestHeaderInfo(), s_space );
 
 		if ( m_timestamp.GetTime() != 0 )
-			stream::Tag( text, time_utl::FormatTimestamp( m_timestamp, verbosity != utl::Brief ? time_utl::s_outFormatUi : time_utl::s_outFormat ), _T(" ") );
+			stream::Tag( text, time_utl::FormatTimestamp( m_timestamp, verbosity != utl::Brief ? time_utl::s_outFormatUi : time_utl::s_outFormat ), s_space );
 
 		return text;
 	}
@@ -47,6 +70,22 @@ namespace cmd
 
 		archive & m_timestamp;
 		serial::SerializeValues( archive, m_filePaths );
+	}
+
+	std::tstring CBaseFileGroupCmd::GetDestHeaderInfo( void ) const
+	{
+		return std::tstring();
+	}
+
+	void CBaseFileGroupCmd::QueryFilePairLines( std::vector< std::tstring >& rLines, const std::vector< fs::CPath >& srcFilePaths, const std::vector< fs::CPath >& destFilePaths )
+	{
+		ASSERT( srcFilePaths.size() == destFilePaths.size() );
+
+		rLines.clear();
+		rLines.reserve( srcFilePaths.size() );
+
+		for ( size_t i = 0; i != srcFilePaths.size(); ++i )
+			rLines.push_back( fmt::FormatRenameEntry( srcFilePaths[ i ], destFilePaths[ i ] ) );
 	}
 
 	bool CBaseFileGroupCmd::HandleExecuteResult( const CWorkingSet& workingSet, const std::tstring& groupDetails )
@@ -188,14 +227,12 @@ void CMoveFilesCmd::Serialize( CArchive& archive )
 	archive & m_srcCommonDirPath;
 }
 
-std::tstring CMoveFilesCmd::Format( utl::Verbosity verbosity ) const
+void CMoveFilesCmd::QueryDetailLines( std::vector< std::tstring >& rLines ) const
 {
-	std::tstring text = __super::Format( verbosity );
+	std::vector< fs::CPath > destFilePaths;
+	MakeDestFilePaths( destFilePaths, GetSrcFilePaths() );
 
-	if ( verbosity != utl::Brief )
-		stream::Tag( text, str::Format( _T("to folder: %s"), m_destDirPath.GetPtr() ), _T(" ") );
-
-	return text;
+	QueryFilePairLines( rLines, GetSrcFilePaths(), destFilePaths );
 }
 
 bool CMoveFilesCmd::Execute( void )
@@ -219,11 +256,11 @@ bool CMoveFilesCmd::Unexecute( void )
 	std::vector< fs::CPath > destFilePaths;
 	MakeDestFilePaths( destFilePaths, GetSrcFilePaths() );
 
-	CMoveFilesCmd undoCmd( destFilePaths, m_srcCommonDirPath );	// move back destination files to source common directory
+	CMoveFilesCmd undoCmd( destFilePaths, m_srcCommonDirPath );			// move back destination files to source common directory
 	undoCmd.CopyTimestampOf( *this );
 	if ( undoCmd.Execute() )
 	{
-		AfxMessageBox( undoCmd.Format( utl::Detailed ).c_str() );			// notify user that command was undone (editor-less command)
+		AfxMessageBox( undoCmd.Format( utl::Detailed ).c_str() );		// notify user that command was undone (editor-less command)
 		return true;
 	}
 
@@ -233,6 +270,11 @@ bool CMoveFilesCmd::Unexecute( void )
 bool CMoveFilesCmd::IsUndoable( void ) const
 {
 	return true;		// let it unexecute with error rather than being skipped in UNDO
+}
+
+std::tstring CMoveFilesCmd::GetDestHeaderInfo( void ) const
+{
+	return str::Format( _T("-> %s"), m_destDirPath.GetPtr() );
 }
 
 void CMoveFilesCmd::MakeDestFilePaths( std::vector< fs::CPath >& rDestFilePaths, const std::vector< fs::CPath >& srcFilePaths ) const
@@ -251,15 +293,4 @@ fs::CPath CMoveFilesCmd::MakeDeepDestFilePath( const fs::CPath& srcFilePath ) co
 
 	fs::CPath targetFullPath = m_destDirPath / destRelPath / srcFilePath.GetFilename();
 	return targetFullPath;
-}
-
-std::tstring CMoveFilesCmd::FormatGroupDetails( const std::vector< fs::CPath >& srcFilePaths, std::vector< fs::CPath >& destFilePaths )
-{
-	ASSERT( srcFilePaths.size() == destFilePaths.size() );
-
-	std::vector< std::tstring > lines; lines.reserve( srcFilePaths.size() );
-	for ( size_t i = 0; i != srcFilePaths.size(); ++i )
-		lines.push_back( fmt::FormatRenameEntry( srcFilePaths[ i ], destFilePaths[ i ] ) );
-
-	return str::Join( lines, s_lineEnd );
 }

@@ -18,11 +18,15 @@ struct CToolStrip
 
 	int GetImageCount( void ) const;		// buttons - separators
 	bool HasImages( void ) const { return m_pImageList.get() != NULL; }
+
 	CImageList* EnsureImageList( void );
 
 	bool LoadStrip( UINT toolStripId, COLORREF transpColor = color::Auto );
 
 	enum { UseSharedImage = -2, UseButtonId, NullIconId };
+
+	bool ContainsButton( UINT buttonId ) const { return FindButtonPos( buttonId ) != utl::npos; }
+	size_t FindButtonPos( UINT buttonId ) const;
 
 	CToolStrip& AddButton( UINT buttonId, CIconId iconId = CIconId( (UINT)UseButtonId ) );
 	CToolStrip& AddButton( UINT buttonId, HICON hIcon );

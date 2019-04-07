@@ -4,6 +4,7 @@
 #include "ImageStore.h"
 #include "ResourceData.h"
 #include "resource.h"
+#include "utl/ContainerUtilities.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -78,6 +79,11 @@ bool CToolStrip::LoadStrip( UINT toolStripId, COLORREF transpColor /*= color::Au
 			m_pImageList.reset( pImageList.release() );
 	}
 	return imageCount != 0;
+}
+
+size_t CToolStrip::FindButtonPos( UINT buttonId ) const
+{
+	return utl::FindPos( m_buttonIds, buttonId );
 }
 
 CToolStrip& CToolStrip::AddButton( UINT buttonId, CIconId iconId /*= CIconId( UseButtonId )*/ )
