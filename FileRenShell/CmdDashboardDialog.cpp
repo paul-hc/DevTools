@@ -129,8 +129,8 @@ namespace layout
 		{ IDC_CMD_HEADER_EDIT, SizeX | pctMoveY( TopPct ) },
 		{ IDC_CMD_DETAILS_STATIC, pctMoveY( TopPct ) },
 		{ IDC_CMD_DETAILS_EDIT, pctMoveY( TopPct ) | SizeX | pctSizeY( BottomPct ) },
-		{ IDOK, Move },
-		{ IDCANCEL, Move }
+		{ IDOK, MoveX },
+		{ IDCANCEL, MoveX }
 	};
 }
 
@@ -240,12 +240,9 @@ bool CCmdDashboardDialog::SelectCommandList( int selIndex )
 {
 	selIndex = std::min( selIndex, static_cast< int >( m_cmdItems.size() - 1 ) );
 
-	if ( -1 == selIndex )
-		return false;
-
 	m_commandsList.SetCurSel( selIndex );
 	UpdateSelCommand();
-	return true;
+	return selIndex != -1;
 }
 
 void CCmdDashboardDialog::UpdateSelCommand( void )
@@ -419,7 +416,7 @@ void CCmdDashboardDialog::OnSelCmds_Delete( void )
 		QuerySelectedCmds( selCommands );
 
 		GotoDlgCtrl( &m_commandsList );
-		if ( IDYES == AfxMessageBox( str::Format( _T("Are you sure you want to delete %d commands?"), selCommands.size() ).c_str(), MB_YESNO ) )
+		if ( IDYES == AfxMessageBox( str::Format( _T("Are you sure you want to delete %d actions?"), selCommands.size() ).c_str(), MB_YESNO ) )
 		{
 			GetCommandModel()->RemoveCommandsThat( pred::ContainsAny< std::vector< utl::ICommand* > >( selCommands ) );
 

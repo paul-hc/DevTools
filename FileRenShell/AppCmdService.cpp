@@ -4,6 +4,7 @@
 #include "CommandModelPersist.h"
 #include "GeneralOptions.h"
 #include "utl/CommandModel.h"
+#include "utl/RuntimeException.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -51,10 +52,10 @@ bool CAppCmdService::LoadCommandModel( void )
 
 bool CAppCmdService::UndoAt( size_t topPos )
 {
-	std::deque< utl::ICommand* >* pUndoStack = &const_cast< std::deque< utl::ICommand* >& >( GetCommandModel()->GetUndoStack() );
+	std::deque< utl::ICommand* >& rUndoStack = RefUndoStack();
 
-	size_t pos = pUndoStack->size() - topPos - 1;		// position from the begining
-	if ( pos >= pUndoStack->size() )
+	size_t pos = rUndoStack.size() - topPos - 1;		// position from the begining
+	if ( pos >= rUndoStack.size() )
 	{
 		ASSERT( false );
 		return false;
@@ -62,15 +63,24 @@ bool CAppCmdService::UndoAt( size_t topPos )
 
 	CScopedExecMode scopedExec( utl::ExecUndo );
 
-	std::deque< utl::ICommand* >::iterator itCmd = pUndoStack->begin() + pos;
+	std::deque< utl::ICommand* >::iterator itCmd = rUndoStack.begin() + pos;
 	std::auto_ptr< utl::ICommand > pCmd( *itCmd );
-	pUndoStack->erase( itCmd );
+	itCmd = rUndoStack.erase( itCmd );
 
-	if ( pCmd->IsUndoable() && pCmd->Unexecute() )
+	try
 	{
-		std::deque< utl::ICommand* >* pRedoStack = &const_cast< std::deque< utl::ICommand* >& >( GetCommandModel()->GetRedoStack() );
-		pRedoStack->push_back( pCmd.release() );
-		return true;
+		if ( pCmd->IsUndoable() && pCmd->Unexecute() )
+		{
+			std::deque< utl::ICommand* >& rRedoStack = RefRedoStack();
+			rRedoStack.push_back( pCmd.release() );
+			return true;
+		}
+	}
+	catch ( CUserAbortedException& exc )
+	{	// cancelled by the user: retain status-quo
+		TRACE( _T(" * Un-execute command %s: %s\n"), pCmd->Format( utl::Detailed ).c_str(), exc.GetMessage().c_str() );
+
+		rUndoStack.insert( itCmd, pCmd.release() );		// put it back, ready for unexecution again
 	}
 
 	return false;
@@ -78,10 +88,10 @@ bool CAppCmdService::UndoAt( size_t topPos )
 
 bool CAppCmdService::RedoAt( size_t topPos )
 {
-	std::deque< utl::ICommand* >* pRedoStack = &const_cast< std::deque< utl::ICommand* >& >( GetCommandModel()->GetRedoStack() );
+	std::deque< utl::ICommand* >& rRedoStack = RefRedoStack();
 
-	size_t pos = pRedoStack->size() - topPos - 1;		// position from the begining
-	if ( pos >= pRedoStack->size() )
+	size_t pos = rRedoStack.size() - topPos - 1;		// position from the begining
+	if ( pos >= rRedoStack.size() )
 	{
 		ASSERT( false );
 		return false;
@@ -89,16 +99,26 @@ bool CAppCmdService::RedoAt( size_t topPos )
 
 	CScopedExecMode scopedExec( utl::ExecUndo );
 
-	std::deque< utl::ICommand* >::iterator itCmd = pRedoStack->begin() + pos;
+	std::deque< utl::ICommand* >::iterator itCmd = rRedoStack.begin() + pos;
 	std::auto_ptr< utl::ICommand > pCmd( *itCmd );
-	pRedoStack->erase( itCmd );
+	itCmd = rRedoStack.erase( itCmd );
 
-	if ( pCmd->Execute() )
+	try
 	{
-		std::deque< utl::ICommand* >* pUndoStack = &const_cast< std::deque< utl::ICommand* >& >( GetCommandModel()->GetUndoStack() );
-		pUndoStack->push_back( pCmd.release() );
-		return true;
+		if ( pCmd->Execute() )
+		{
+			std::deque< utl::ICommand* >& rUndoStack = RefUndoStack();
+			rUndoStack.push_back( pCmd.release() );
+			return true;
+		}
 	}
+	catch ( CUserAbortedException& exc )
+	{	// cancelled by the user: retain status-quo
+		TRACE( _T(" * Re-execute command %s: %s\n"), pCmd->Format( utl::Detailed ).c_str(), exc.GetMessage().c_str() );
+
+		rRedoStack.insert( itCmd, pCmd.release() );		// put it back, ready for re-execution again
+	}
+
 	return false;
 }
 

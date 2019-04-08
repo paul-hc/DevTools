@@ -4,7 +4,9 @@
 #include "Application.h"
 #include "utl/EnumTags.h"
 #include "utl/FmtUtils.h"
+#include "utl/FileSystem.h"
 #include "utl/Logger.h"
+#include "utl/RuntimeException.h"
 #include "utl/SerializeStdTypes.h"
 #include "utl/TimeUtils.h"
 #include "utl/UI/ShellUtilities.h"
@@ -166,7 +168,7 @@ bool CDeleteFilesCmd::Execute( void )
 		if ( shell::DeleteFiles( workingSet.m_currFilePaths, app::GetMainWnd() ) )		// delete to RecycleBin
 			workingSet.m_succeeded = true;
 		else if ( shell::AnyOperationAborted() )
-			return false;			// silent if cancelled by user
+			throw CUserAbortedException();			// go silent if cancelled by user
 
 	return HandleExecuteResult( workingSet, str::Join( workingSet.m_currFilePaths, s_lineEnd ) );
 }
@@ -247,7 +249,7 @@ bool CMoveFilesCmd::Execute( void )
 		if ( shell::MoveFiles( workingSet.m_currFilePaths, destFilePaths, app::GetMainWnd() ) )		// undoable move files
 			workingSet.m_succeeded = true;
 		else if ( shell::AnyOperationAborted() )
-			return false;			// silent if cancelled by user
+			throw CUserAbortedException();			// go silent if cancelled by user
 
 	return HandleExecuteResult( workingSet, str::Join( workingSet.m_currFilePaths, s_lineEnd ) );
 }
@@ -261,7 +263,14 @@ bool CMoveFilesCmd::Unexecute( void )
 	undoCmd.CopyTimestampOf( *this );
 	if ( undoCmd.Execute() )
 	{
-		AfxMessageBox( undoCmd.Format( utl::Detailed ).c_str() );		// notify user that command was undone (editor-less command)
+		if ( size_t delSubdirCount = fs::CleanupPostUnmoveSubdirs( m_destDirPath, destFilePaths ) )
+		{
+			std::tstring message = str::Format( _T("Un-move Files Cleanup: delete %d empty remaining sub-folders"), delSubdirCount );
+			if ( s_pLogger != NULL )
+				s_pLogger->LogString( message );
+
+			AfxMessageBox( message.c_str() );		// notify user that command was undone (editor-less command)
+		}
 		return true;
 	}
 

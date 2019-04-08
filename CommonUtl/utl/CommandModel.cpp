@@ -3,6 +3,7 @@
 #include "CommandModel.h"
 #include "ContainerUtilities.h"
 #include "EnumTags.h"
+#include "RuntimeException.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -77,14 +78,21 @@ bool CCommandModel::Execute( utl::ICommand* pCmd )
 
 	CScopedExecMode scopedExec( utl::ExecDo );
 
-	if ( !pCmd->Execute() )
+	try
 	{
-		delete pCmd;
-		return false;
+		if ( pCmd->Execute() )
+		{
+			Push( pCmd );
+			return true;
+		}
+	}
+	catch ( CUserAbortedException& exc )
+	{	// cancelled by the user
+		TRACE( _T(" * Execute command %s: %s\n"), pCmd->Format( utl::Detailed ).c_str(), exc.GetMessage().c_str() );
 	}
 
-	Push( pCmd );
-	return true;
+	delete pCmd;
+	return false;
 }
 
 void CCommandModel::Push( utl::ICommand* pCmd )
@@ -106,9 +114,18 @@ bool CCommandModel::Undo( size_t stepCount /*= 1*/ )
 		std::auto_ptr< utl::ICommand > pCmd( m_undoStack.back() );
 		m_undoStack.pop_back();
 
-		succeeded = pCmd->IsUndoable() && pCmd->Unexecute();
-		if ( succeeded )								// not a zombie command?
-			m_redoStack.push_back( pCmd.release() );
+		try
+		{
+			succeeded = pCmd->IsUndoable() && pCmd->Unexecute();
+			if ( succeeded )								// not a zombie command?
+				m_redoStack.push_back( pCmd.release() );
+		}
+		catch ( CUserAbortedException& exc )
+		{	// cancelled by the user: retain status-quo
+			TRACE( _T(" * Un-execute command %s: %s\n"), pCmd->Format( utl::Detailed ).c_str(), exc.GetMessage().c_str() );
+
+			m_undoStack.push_back( pCmd.release() );		// put it back, ready for unexecution again
+		}
 	}
 
 	return succeeded;
@@ -126,9 +143,18 @@ bool CCommandModel::Redo( size_t stepCount /*= 1*/ )
 		std::auto_ptr< utl::ICommand > pCmd( m_redoStack.back() );
 		m_redoStack.pop_back();
 
-		succeeded = pCmd->Execute();
-		if ( succeeded )
-			m_undoStack.push_back( pCmd.release() );
+		try
+		{
+			succeeded = pCmd->Execute();
+			if ( succeeded )
+				m_undoStack.push_back( pCmd.release() );
+		}
+		catch ( CUserAbortedException& exc )
+		{	// cancelled by the user: retain status-quo
+			TRACE( _T(" * Re-execute command %s: %s\n"), pCmd->Format( utl::Detailed ).c_str(), exc.GetMessage().c_str() );
+
+			m_redoStack.push_back( pCmd.release() );		// put it back, ready for re-execution again
+		}
 	}
 
 	return succeeded;

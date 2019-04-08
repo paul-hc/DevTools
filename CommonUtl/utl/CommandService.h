@@ -2,10 +2,7 @@
 #define CommandService_h
 #pragma once
 
-#include "ICommand.h"
-
-
-class CCommandModel;
+#include "CommandModel.h"
 
 
 class CCommandService : public svc::ICommandService
@@ -31,6 +28,10 @@ public:
 		m_pCommandModel->RemoveCommandsThat( pred );
 		m_dirty = true;
 	}
+
+	// mutable acces (for special cases)
+	std::deque< utl::ICommand* >& RefUndoStack( void ) { return const_cast< std::deque< utl::ICommand* >& >( GetCommandModel()->GetUndoStack() ); }
+	std::deque< utl::ICommand* >& RefRedoStack( void ) { return const_cast< std::deque< utl::ICommand* >& >( GetCommandModel()->GetRedoStack() ); }
 protected:
 	void SetDirty( bool dirty = true ) { m_dirty = dirty; }
 protected:

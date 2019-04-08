@@ -201,6 +201,8 @@ namespace fs
 		const TCHAR* GetPtr( void ) const { return m_filePath.c_str(); }
 		std::string GetUtf8( void ) const { return str::ToUtf8( GetPtr() ); }
 
+		size_t GetDepth( void ) const;		// count of path elements up to the root
+
 		bool HasParentPath( void ) const { return GetNameExt() != GetPtr(); }		// has a directory path?
 		CPath GetParentPath( bool trailSlash = false ) const;						// always a directory path
 		CPath& SetBackslash( bool trailSlash = true );
@@ -276,6 +278,19 @@ namespace func
 	{
 		const TCHAR* operator()( const fs::CPath& fullPath ) const { return fullPath.GetNameExt(); }
 		const TCHAR* operator()( const TCHAR* pFullPath ) const { return path::FindFilename( pFullPath ); }
+	};
+
+	struct HasCommonPathPrefix
+	{
+		HasCommonPathPrefix( const TCHAR* pDirPrefix ) : m_pDirPrefix( pDirPrefix ) { ASSERT( !str::IsEmpty( m_pDirPrefix ) ); }
+
+		template< typename StringyT >
+		bool operator()( const StringyT& filePath )
+		{
+			return path::HasPrefix( StringOf( filePath ).c_str(), m_pDirPrefix );
+		}
+	public:
+		const TCHAR* m_pDirPrefix;
 	};
 
 	struct StripPathCommonPrefix
@@ -439,6 +454,8 @@ namespace fs
 	{
 		SortPaths( rStrPaths.begin(), rStrPaths.end(), ascending );
 	}
+
+	void SortByPathDepth( std::vector< fs::CPath >& rFilePaths, bool ascending = true );
 }
 
 

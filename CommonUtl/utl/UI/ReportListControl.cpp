@@ -1540,6 +1540,12 @@ int CReportListControl::GetCurSel( void ) const
 
 bool CReportListControl::SetCurSel( int index, bool doSelect /*= true*/ )
 {
+	if ( -1 == index )
+	{
+		ClearSelection();
+		return false;
+	}
+
 	if ( !SetItemState( index, doSelect ? ( LVIS_SELECTED | LVIS_FOCUSED ) : 0, LVIS_SELECTED | LVIS_FOCUSED ) )
 		return false;
 

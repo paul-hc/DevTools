@@ -7,6 +7,7 @@
 #include "StringUtilities.h"
 #include "StringIntuitiveCompare.h"
 #include <xhash>
+#include <hash_map>
 #include <shlwapi.h>				// for PathCombine
 
 
@@ -645,6 +646,28 @@ namespace fs
 		str::Trim( m_filePath );
 	}
 
+	size_t CPath::GetDepth( void ) const
+	{
+		size_t depth = 0;
+
+		fs::CPath parentPath = *this;
+		parentPath.Normalize();
+
+		while ( !parentPath.IsEmpty() )
+		{
+			++depth;
+
+			fs::CPath newParentPath = parentPath.GetParentPath();
+
+			if ( newParentPath != parentPath )
+				parentPath = newParentPath;
+			else
+				break;
+		}
+
+		return depth;
+	}
+
 	CPath CPath::GetParentPath( bool trailSlash /*= false*/ ) const
 	{
 		ASSERT( !IsEmpty() );
@@ -714,6 +737,43 @@ namespace fs
 		::GetLongPathName( filePath.GetPtr(), longPath, COUNT_OF( longPath ) );						// convert to long path
 
 		return fs::CPath( longPath );
+	}
+}
+
+
+namespace pred
+{
+	struct ComparPathDepth
+	{
+		ComparPathDepth( const stdext::hash_map< fs::CPath, size_t >& rFilePathsToDepth ) : m_rFilePathsToDepth( rFilePathsToDepth ) {}
+
+		CompareResult operator()( const fs::CPath& leftPath, const fs::CPath& rightPath ) const
+		{
+			size_t leftDepth = utl::FindValue( m_rFilePathsToDepth, leftPath ), rightDepth = utl::FindValue( m_rFilePathsToDepth, rightPath );
+
+			CompareResult result = Compare_Scalar( leftDepth, rightDepth );
+			if ( Equal == result )
+				result = m_comparePath( leftPath, rightPath );
+
+			return result;
+		}
+	private:
+		const stdext::hash_map< fs::CPath, size_t >& m_rFilePathsToDepth;
+		pred::CompareNaturalPath m_comparePath;
+	};
+}
+
+
+namespace fs
+{
+	void SortByPathDepth( std::vector< fs::CPath >& rFilePaths, bool ascending /*= true*/ )
+	{
+		stdext::hash_map< fs::CPath, size_t > filePathsToDepth;
+
+		for ( std::vector< fs::CPath >::const_iterator itFilePath = rFilePaths.begin(); itFilePath != rFilePaths.end(); ++itFilePath )
+			filePathsToDepth[ *itFilePath ] = itFilePath->GetDepth();
+
+		std::sort( rFilePaths.begin(), rFilePaths.end(), pred::MakeOrderByValue( pred::ComparPathDepth( filePathsToDepth ), ascending ) );
 	}
 }
 

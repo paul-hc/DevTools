@@ -147,6 +147,23 @@ void CPathTests::TestPathUtilities( void )
 
 		ASSERT_EQUAL_STR( _T("name.ext"), path.GetNameExt() );
 	}
+
+	{	// path depth:
+		ASSERT_EQUAL( 0, fs::CPath( _T("") ).GetDepth() );
+
+		ASSERT_EQUAL( 1, fs::CPath( _T("\\") ).GetDepth() );
+		ASSERT_EQUAL( 2, fs::CPath( _T("\\\\server") ).GetDepth() );
+		ASSERT_EQUAL( 3, fs::CPath( _T("\\\\server\\share") ).GetDepth() );
+
+		ASSERT_EQUAL( 1, fs::CPath( _T("X:") ).GetDepth() );
+		ASSERT_EQUAL( 1, fs::CPath( _T("X:\\") ).GetDepth() );
+		ASSERT_EQUAL( 2, fs::CPath( _T("X:\\name.ext") ).GetDepth() );
+		ASSERT_EQUAL( 3, fs::CPath( _T("X:\\Dir/name.ext") ).GetDepth() );
+		ASSERT_EQUAL( 4, fs::CPath( _T("X:\\Dir\\Sub/name.ext") ).GetDepth() );
+
+		ASSERT_EQUAL( 4, fs::CPath( _T("X:\\Dir\\Sub/name.ext") ).GetDepth() );
+	}
+
 	{
 		fs::CPath path( _T("X:\\Dir\\Sub\\name.ext") );
 		path.SetDirPath( _T("C:/A/B") );
@@ -248,6 +265,35 @@ void CPathTests::TestPathSort( void )
 		ASSERT_EQUAL( _T("C:\\dir000/fn.txt"), *itPath++ );
 		ASSERT_EQUAL( _T("C:\\dir/fn.txt"), *itPath++ );
 		ASSERT_EQUAL( _T("C:\\dir/file.txt"), *itPath++ );
+		ASSERT( itPath == paths.end() );
+	}
+
+	{
+		std::vector< fs::CPath > paths;
+		paths.push_back( fs::CPath( _T("C:\\dir\\X\\Y\\Z\\file.txt") ) );
+		paths.push_back( fs::CPath( _T("C:\\dir\\X\\Y\\file.txt") ) );
+		paths.push_back( fs::CPath( _T("") ) );
+		paths.push_back( fs::CPath( _T("C:\\dir\\X\\file.txt") ) );
+		paths.push_back( fs::CPath( _T("C:\\dir/file.txt") ) );
+		paths.push_back( fs::CPath( _T("\\") ) );
+		paths.push_back( fs::CPath( _T("C:\\dir\\Image.jpg") ) );
+		paths.push_back( fs::CPath( _T("C:\\dir\\file.txt") ) );
+		paths.push_back( fs::CPath( _T("C:") ) );
+		paths.push_back( fs::CPath( _T("A:") ) );
+
+		fs::SortByPathDepth( paths );
+
+		std::vector< fs::CPath >::const_iterator itPath = paths.begin();
+		ASSERT_EQUAL( _T(""), *itPath++ );
+		ASSERT_EQUAL( _T("A:"), *itPath++ );
+		ASSERT_EQUAL( _T("C:"), *itPath++ );
+		ASSERT_EQUAL( _T("\\"), *itPath++ );
+		ASSERT_EQUAL( _T("C:\\dir/file.txt"), *itPath++ );
+		ASSERT_EQUAL( _T("C:\\dir\\file.txt"), *itPath++ );
+		ASSERT_EQUAL( _T("C:\\dir\\Image.jpg"), *itPath++ );
+		ASSERT_EQUAL( _T("C:\\dir\\X\\file.txt"), *itPath++ );
+		ASSERT_EQUAL( _T("C:\\dir\\X\\Y\\file.txt"), *itPath++ );
+		ASSERT_EQUAL( _T("C:\\dir\\X\\Y\\Z\\file.txt"), *itPath++ );
 		ASSERT( itPath == paths.end() );
 	}
 }

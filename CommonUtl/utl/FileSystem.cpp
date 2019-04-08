@@ -4,6 +4,7 @@
 #include "EnumTags.h"
 #include "FlexPath.h"
 #include "RuntimeException.h"
+#include "ContainerUtilities.h"
 #include "StringUtilities.h"
 #include "TimeUtils.h"
 #include <shlwapi.h>				// for PathRelativePathTo
@@ -26,6 +27,11 @@ namespace fs
 	{
 		DWORD attr = ::GetFileAttributes( pDirPath );
 		return attr != INVALID_FILE_ATTRIBUTES && HasFlag( attr, FILE_ATTRIBUTE_DIRECTORY );
+	}
+
+	bool IsValidEmptyDirectory( const TCHAR* pDirPath )
+	{
+		return ::PathIsDirectoryEmpty( pDirPath ) != FALSE;
 	}
 
 	bool IsReadOnlyFile( const TCHAR* pFilePath )
@@ -141,7 +147,7 @@ namespace fs
 		return fs::IsValidDirectory( dirPath.c_str() );
 	}
 
-	bool DeleteDir( const TCHAR* pDirPath )
+	bool DeleteDir( const TCHAR* pDirPath, RecursionDepth depth /*= Deep*/ )
 	{
 		DWORD dirAttr = ::GetFileAttributes( pDirPath );
 		if ( INVALID_FILE_ATTRIBUTES == dirAttr )
@@ -150,9 +156,11 @@ namespace fs
 		if ( HasFlag( dirAttr, FILE_ATTRIBUTE_READONLY ) )								// read-only file?
 			::SetFileAttributes( pDirPath, dirAttr & ~FILE_ATTRIBUTE_READONLY );		// make it writeable so that it can be deleted
 
-		return
-			DeleteAllFiles( pDirPath ) &&
-			::RemoveDirectory( pDirPath ) != FALSE;
+		if ( Deep == depth )
+			if ( !DeleteAllFiles( pDirPath ) )
+				return false;
+
+		return ::RemoveDirectory( pDirPath ) != FALSE;
 	}
 
 	bool DeleteAllFiles( const TCHAR* pDirPath )
@@ -176,6 +184,46 @@ namespace fs
 				++itFilePath;
 
 		return found.m_subDirPaths.empty() && found.m_filePaths.empty();			// deleted all existing
+	}
+
+
+	size_t DeleteEmptyRelativeSubdirs( const fs::CPath& dirPath, const fs::CPath& subFolderPath )
+	{
+		REQUIRE( path::HasPrefix( subFolderPath.GetPtr(), dirPath.GetPtr() ) );
+
+		size_t delSubdirCount = 0;
+
+		for ( fs::CPath parentPath = subFolderPath; !parentPath.IsEmpty(); parentPath = parentPath.GetParentPath() )
+			if ( parentPath == dirPath )
+				break;						// reached the common parent dir -> done
+			else if ( fs::IsValidEmptyDirectory( parentPath.GetPtr() ) )
+				if ( fs::DeleteDir( parentPath.GetPtr(), Shallow ) )
+					++delSubdirCount;
+
+		return delSubdirCount;
+	}
+
+	size_t DeleteEmptyRelativeMultiSubdirs( const fs::CPath& dirPath, std::vector< fs::CPath > subFolderPaths )
+	{
+		ASSERT( !path::HasTrailingSlash( dirPath.GetPtr() ) );
+		ASSERT( utl::All( subFolderPaths, func::HasCommonPathPrefix( dirPath.GetPtr() ) ) );
+
+		fs::SortByPathDepth( subFolderPaths, false );		// descending: deepest folder paths come first
+
+		size_t delSubdirCount = 0;
+
+		for ( std::vector< fs::CPath >::const_iterator itSubFolderPath = subFolderPaths.begin(); itSubFolderPath != subFolderPaths.end(); ++itSubFolderPath )
+			delSubdirCount += DeleteEmptyRelativeSubdirs( dirPath, *itSubFolderPath );
+
+		return delSubdirCount;
+	}
+
+	size_t CleanupPostUnmoveSubdirs( const fs::CPath& destDirPath, const std::vector< fs::CPath >& destFilePaths )
+	{
+		std::vector< fs::CPath > destFolderPaths;
+		path::QueryParentPaths( destFolderPaths, destFilePaths );
+
+		return DeleteEmptyRelativeMultiSubdirs( destDirPath, destFolderPaths );
 	}
 
 
