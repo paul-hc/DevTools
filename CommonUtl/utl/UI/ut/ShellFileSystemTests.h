@@ -22,6 +22,7 @@ private:
 	void TestPathShellApi( void );
 	void TestPathExplorerSort( void );
 	void TestRecycler( void );
+	void TestMultiFileContextMenu( void );
 };
 
 

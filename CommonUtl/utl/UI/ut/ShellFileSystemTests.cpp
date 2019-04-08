@@ -4,8 +4,10 @@
 #include "Recycler.h"
 #include "ShellTypes.h"
 #include "ShellUtilities.h"
+#include "ShellContextMenuHost.h"
 #include "WinExplorer.h"
 #include "StringUtilities.h"
+#include "utl/ContainerUtilities.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -226,6 +228,30 @@ void CShellFileSystemTests::TestRecycler( void )
 	ASSERT_EQUAL( poolDirPath / _T("XXX\\foo.txt"), errorFilePaths.front() );
 }
 
+void CShellFileSystemTests::TestMultiFileContextMenu( void )
+{
+	ut::CTempFilePool pool( _T("file1.txt|file2.txt|DIR\\file3.txt") );
+	const std::vector< fs::CPath >& filePaths = pool.GetFilePaths();
+
+	std::vector< CComPtr< IShellItem > > shellItems; shellItems.reserve( filePaths.size() );
+
+	for ( std::vector< fs::CPath >::const_iterator itFilePath = filePaths.begin(); itFilePath != filePaths.end(); ++itFilePath )
+	{
+		shellItems.push_back( shell::FindShellItem( *itFilePath ) );
+		ASSERT( shellItems.back() != NULL );
+	}
+
+	CComPtr< IContextMenu > pContextMenu;
+	if ( true )
+		pContextMenu = shell::MakeItemsContextMenu( shellItems, NULL );
+	else	//	for files in same folder - fails for DIR\\file3.txt
+	{
+		CComPtr< IShellItemArray > pShellItemArray = shell::MakeShellItemArray( shellItems );
+		ASSERT( HR_OK( pShellItemArray->BindToHandler( NULL, BHID_SFUIObject, IID_PPV_ARGS( &pContextMenu ) ) ) );
+	}
+	ASSERT_PTR( pContextMenu );
+}
+
 
 void CShellFileSystemTests::Run( void )
 {
@@ -236,6 +262,7 @@ void CShellFileSystemTests::Run( void )
 	TestPathShellApi();
 	TestPathExplorerSort();
 	TestRecycler();
+	TestMultiFileContextMenu();
 }
 
 

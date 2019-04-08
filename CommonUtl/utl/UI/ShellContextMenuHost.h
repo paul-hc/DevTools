@@ -30,6 +30,15 @@ namespace shell
 		return pCtxMenu;
 	}
 
+	template< typename ShellItemContainerT >
+	CComPtr< IContextMenu > MakeItemsContextMenu( const ShellItemContainerT& shellItems, HWND hWndOwner )
+	{
+		std::vector< fs::CPath > filePaths;
+		shell::QueryFilePaths( filePaths, shellItems );
+
+		return shell::MakeFilePathsContextMenu( filePaths, hWndOwner );
+	}
+
 	bool InvokeCommandByVerb( IContextMenu* pContextMenu, const char* pVerb, CWnd* pWndOwner );
 	bool InvokeDefaultVerb( IContextMenu* pContextMenu, CWnd* pWndOwner );
 	bool InvokeVerbOnItem( IShellItem* pShellItem, const wchar_t* pVerb, HWND hWnd );

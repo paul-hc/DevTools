@@ -165,7 +165,41 @@ namespace shell
 		std::vector< IShellItem2* > recycledItems;
 		QueryMultiRecycledItems( recycledItems, delFilePaths );
 
-		size_t undeletedCount = false;
+		std::vector< fs::CPath > errorFilePaths;
+
+		for ( size_t entryPos = 0; entryPos != recycledItems.size(); )
+		{
+			IShellItem2* pRecycledItem = recycledItems[ entryPos ];
+
+			if ( NULL == pRecycledItem )
+			{
+				errorFilePaths.push_back( delFilePaths[ entryPos ] );
+				recycledItems.erase( recycledItems.begin() + entryPos );		// remove NULL items
+			}
+			else
+				++entryPos;
+		}
+
+		size_t undeletedCount = 0;
+
+		if ( !recycledItems.empty() )
+			if ( CComPtr< IContextMenu > pContextMenu = shell::MakeItemsContextMenu( recycledItems, pWndOwner->GetSafeHwnd() ) )
+				if ( Undelete( pContextMenu, pWndOwner ) )
+					undeletedCount = recycledItems.size();
+
+		std::for_each( recycledItems.begin() + 1, recycledItems.end(), func::ReleaseCom() );		// release the unused, previously AddRef-ed interfaces
+
+		if ( pErrorFilePaths != NULL )
+			pErrorFilePaths->swap( errorFilePaths );
+		return undeletedCount;
+	}
+
+	size_t CRecycler::UndeleteMultiFiles2( const std::vector< fs::CPath >& delFilePaths, CWnd* pWndOwner, std::vector< fs::CPath >* pErrorFilePaths /*= NULL*/ )
+	{
+		std::vector< IShellItem2* > recycledItems;
+		QueryMultiRecycledItems( recycledItems, delFilePaths );
+
+		size_t undeletedCount = 0;
 		std::vector< fs::CPath > errorFilePaths;
 
 		for ( size_t entryPos = 0; entryPos != recycledItems.size(); ++entryPos )
@@ -191,14 +225,18 @@ namespace shell
 		return undeletedCount;
 	}
 
+	bool CRecycler::Undelete( IContextMenu* pContextMenu, CWnd* pWndOwner )
+	{
+		ASSERT_PTR( pContextMenu );
+		CShellContextMenuHost shellMenuHost( pWndOwner, pContextMenu );
+		return shellMenuHost.InvokeVerb( "undelete" );
+	}
+
 	bool CRecycler::UndeleteItem( IShellItem2* pRecycledItem, CWnd* pWndOwner )
 	{
 		ASSERT_PTR( pRecycledItem );
 		if ( CComPtr< IContextMenu > pContextMenu = shell::MakeItemContextMenu( pRecycledItem, pWndOwner->GetSafeHwnd() ) )
-		{
-			CShellContextMenuHost shellMenuHost( pWndOwner, pContextMenu );
-			return shellMenuHost.InvokeVerb( "undelete" );
-		}
+			return Undelete( pContextMenu, pWndOwner );
 		return false;
 	}
 

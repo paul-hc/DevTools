@@ -34,6 +34,14 @@ namespace shell
 	}
 
 
+	CComPtr< IShellItem > FindShellItem( const fs::CPath& fullPath )
+	{
+		CComPtr< IShellItem > pShellItem;
+		if ( HR_OK( ::SHCreateItemFromParsingName( fullPath.GetPtr(), NULL, IID_PPV_ARGS( &pShellItem ) ) ) )
+			return pShellItem;
+		return NULL;
+	}
+
 	CComPtr< IShellFolder2 > ToShellFolder( IShellItem* pFolderItem )
 	{
 		ASSERT_PTR( pFolderItem );

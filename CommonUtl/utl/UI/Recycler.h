@@ -27,8 +27,10 @@ namespace shell
 		IShellItem2* FindRecycledItem( const fs::CPath& delFilePath ) const;
 
 		bool UndeleteFile( const fs::CPath& delFilePath, CWnd* pWndOwner );
-		size_t UndeleteMultiFiles( const std::vector< fs::CPath >& delFilePaths, CWnd* pWndOwner, std::vector< fs::CPath >* pErrorFilePaths = NULL );
+		size_t UndeleteMultiFiles( const std::vector< fs::CPath >& delFilePaths, CWnd* pWndOwner, std::vector< fs::CPath >* pErrorFilePaths = NULL );		// all at once
+		size_t UndeleteMultiFiles2( const std::vector< fs::CPath >& delFilePaths, CWnd* pWndOwner, std::vector< fs::CPath >* pErrorFilePaths = NULL );		// one-by-one
 
+		static bool Undelete( IContextMenu* pContextMenu, CWnd* pWndOwner );
 		static bool UndeleteItem( IShellItem2* pRecycledItem, CWnd* pWndOwner );
 
 		static bool EmptyRecycleBin( HWND hWndOwner, const TCHAR* pRootPath = NULL, DWORD flags = 0 ) { return HR_OK( ::SHEmptyRecycleBin( hWndOwner, pRootPath, flags ) ); }

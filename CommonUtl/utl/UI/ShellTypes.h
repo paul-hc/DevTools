@@ -15,6 +15,7 @@ namespace shell
 	CComPtr< IShellFolder > FindShellFolder( const TCHAR* pDirPath );
 
 	// shell item
+	CComPtr< IShellItem > FindShellItem( const fs::CPath& fullPath );
 	CComPtr< IShellFolder2 > ToShellFolder( IShellItem* pFolderItem );
 	CComPtr< IShellFolder2 > GetParentFolderAndPidl( ITEMID_CHILD** pPidlItem, IShellItem* pShellItem );
 }
@@ -38,6 +39,8 @@ namespace shell
 	// IShellItem properties
 	std::tstring GetDisplayName( IShellItem* pItem, SIGDN sigdn );
 	inline std::tstring GetName( IShellItem* pItem ) { return GetDisplayName( pItem, SIGDN_NORMALDISPLAY ); }
+	inline fs::CPath GetFilePath( IShellItem* pItem ) { return GetDisplayName( pItem, SIGDN_FILESYSPATH ); }
+	inline fs::CPath GetRecycledPath( IShellItem* pRecycledItem ) { return GetFilePath( pRecycledItem ); }
 
 	// IShellItem2 properties
 	std::tstring GetStringProperty( IShellItem2* pItem, const PROPERTYKEY& propKey );
@@ -47,19 +50,51 @@ namespace shell
 }
 
 
+namespace func
+{
+	struct DeleteComHeap		// works with PIDLIST_ABSOLUTE, PIDLIST_RELATIVE, PITEMID_CHILD, etc
+	{
+		void operator()( void* pHeapPtr ) const
+		{
+			::CoTaskMemFree( pHeapPtr );
+		}
+	};
+
+	typedef DeleteComHeap DeletePidl;
+}
+
+
 namespace shell
 {
 	template< typename PathContainerT >
 	CComPtr< IShellFolder > MakeRelativePidlArray( std::vector< PIDLIST_RELATIVE >& rPidlItemsArray, const PathContainerT& filePaths );		// for mixed files having a common ancestor folder; caller must delete the PIDLs
 
+	template< typename ShellItemContainerT >		// ShellItemContainerT examples: std::vector< CComPtr< IShellItem2 > >, std::vector< IShellItem* >, etc
+	void MakeAbsolutePidlArray( std::vector< PIDLIST_ABSOLUTE >& rPidlVector, const ShellItemContainerT& shellItems );
+
 	template< typename ContainerT >
 	void ClearOwningPidls( ContainerT& rPidls )			// container of pointers to PIDLs, such as std::vector< LPITEMIDLIST >
 	{
-		std::for_each( rPidls.begin(), rPidls.end(), &pidl::Delete );
+		std::for_each( rPidls.begin(), rPidls.end(), func::DeletePidl() );
 		rPidls.clear();
 	}
 
+	template< typename ShellItemContainerT >
+	void QueryFilePaths( std::vector< fs::CPath >& rFilePaths, const ShellItemContainerT& shellItems, SIGDN sigdn = SIGDN_FILESYSPATH )
+	{
+		rFilePaths.reserve( rFilePaths.size() + shellItems.size() );
 
+		for ( typename ShellItemContainerT::const_iterator itShellItem = shellItems.begin(); itShellItem != shellItems.end(); ++itShellItem )
+			rFilePaths.push_back( shell::GetDisplayName( *itShellItem, sigdn ) );
+	}
+
+	template< typename ShellItemContainerT >
+	CComPtr< IShellItemArray > MakeShellItemArray( const ShellItemContainerT& shellItems );
+}
+
+
+namespace shell
+{
 	namespace pidl
 	{
 		// MSDN doc - Windows 2000+: CoTaskMemAlloc()/CoTaskMemFree() are preferred over SHAlloc()/ILFree()
@@ -237,6 +272,40 @@ namespace shell
 		}
 
 		return pCommonFolder;
+	}
+
+	template< typename ShellItemContainerT >		// ShellItemContainerT examples: std::vector< CComPtr< IShellItem2 > >, std::vector< IShellItem* >, etc
+	void MakeAbsolutePidlArray( std::vector< PIDLIST_ABSOLUTE >& rPidlVector, const ShellItemContainerT& shellItems )
+	{
+		REQUIRE( rPidlVector.empty() );
+
+		// caller must delete the allocated PIDLs:
+		//	utl::for_each( pidlVector, func::DeleteComHeap() );
+
+		rPidlVector.reserve( shellItems.size() );
+
+		for ( typename ShellItemContainerT::const_iterator itShellItem = shellItems.begin(); itShellItem != shellItems.end(); ++itShellItem )
+		{
+			ASSERT_PTR( *itShellItem );
+
+			PIDLIST_ABSOLUTE pidl;
+			ASSERT( HR_OK( ::SHGetIDListFromObject( *itShellItem, &pidl ) ) );
+			ASSERT_PTR( pidl );
+			rPidlVector.push_back( pidl );
+		}
+	}
+
+	template< typename ShellItemContainerT >
+	CComPtr< IShellItemArray > MakeShellItemArray( const ShellItemContainerT& shellItems )
+	{
+		std::vector< PIDLIST_ABSOLUTE > pidlVector;
+		MakeAbsolutePidlArray( pidlVector, shellItems );
+
+		CComPtr< IShellItemArray > pShellItemArray;
+		ASSERT( HR_OK( ::SHCreateShellItemArrayFromIDLists( static_cast< UINT >( pidlVector.size() ), (PCIDLIST_ABSOLUTE_ARRAY)&pidlVector.front(), &pShellItemArray ) ) );
+
+		ClearOwningPidls( pidlVector );
+		return pShellItemArray;
 	}
 }
 
