@@ -163,6 +163,8 @@ CCmdDashboardDialog::CCmdDashboardDialog( CFileModel* pFileModel, svc::StackType
 		.AddButton( ID_EDIT_SELECT_ALL )
 		.AddSeparator()
 		.AddButton( ID_REMOVE_ITEM );
+
+	m_cmdHeaderEdit.SetImageList( CCmdItem::GetCmdTypeStrip().m_pImageList.get() );
 }
 
 CCmdDashboardDialog::~CCmdDashboardDialog()
@@ -220,11 +222,11 @@ void CCmdDashboardDialog::SetupCommandList( void )
 	m_actionHistoryStatic.SetWindowText( str::Format( _T("%s History (%d actions):"), svc::GetTags_StackType().FormatUi( m_stackType ).c_str(), m_cmdItems.size() ) );
 }
 
-utl::ICommand* CCmdDashboardDialog::GetSelectedCmd( void ) const
+const CCmdItem* CCmdDashboardDialog::GetSelectedCmdItem( void ) const
 {
 	int selIndex = m_commandsList.GetSelCaretIndex();
 	if ( selIndex != -1 )
-		return m_commandsList.GetObjectAt< CCmdItem >( selIndex )->GetCmd();
+		return m_commandsList.GetObjectAt< CCmdItem >( selIndex );
 	return NULL;
 }
 
@@ -247,7 +249,8 @@ bool CCmdDashboardDialog::SelectCommandList( int selIndex )
 
 void CCmdDashboardDialog::UpdateSelCommand( void )
 {
-	utl::ICommand* pSelectedCmd = GetSelectedCmd();
+	const CCmdItem* pSelCmdItem = GetSelectedCmdItem();
+	const utl::ICommand* pSelectedCmd = pSelCmdItem != NULL ? pSelCmdItem->GetCmd() : NULL;
 	std::tstring headerText, detailsText;
 
 	if ( pSelectedCmd != NULL )
@@ -259,7 +262,7 @@ void CCmdDashboardDialog::UpdateSelCommand( void )
 
 		headerText = str::Join( fields, _T(" ") );
 
-		if ( cmd::IFileDetailsCmd* pDetailsCmd = dynamic_cast< cmd::IFileDetailsCmd* >( pSelectedCmd ) )
+		if ( const cmd::IFileDetailsCmd* pDetailsCmd = dynamic_cast< const cmd::IFileDetailsCmd* >( pSelectedCmd ) )
 		{
 			std::vector< std::tstring > lines;
 			pDetailsCmd->QueryDetailLines( lines );
@@ -268,6 +271,7 @@ void CCmdDashboardDialog::UpdateSelCommand( void )
 	}
 
 	m_cmdHeaderEdit.SetText( headerText );
+	m_cmdHeaderEdit.SetImageIndex( pSelCmdItem != NULL ? pSelCmdItem->GetImageIndex() : -1 );
 	m_cmdDetailsEdit.SetText( detailsText );
 
 	static const UINT ctrlIds[] = { IDC_CMD_HEADER_STATIC, IDC_CMD_HEADER_EDIT, IDC_CMD_DETAILS_STATIC, IDC_CMD_DETAILS_EDIT, IDOK };

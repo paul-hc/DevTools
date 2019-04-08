@@ -2,7 +2,7 @@
 #define WndInfoEdit_h
 #pragma once
 
-#include "utl/UI/TextEdit.h"
+#include "utl/UI/ImageEdit.h"
 
 
 class CWndInfoEdit : public CImageEdit

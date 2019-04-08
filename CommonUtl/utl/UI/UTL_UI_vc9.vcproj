@@ -1366,6 +1366,14 @@
 					>
 				</File>
 				<File
+					RelativePath=".\ImageEdit.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\ImageEdit.h"
+					>
+				</File>
+				<File
 					RelativePath=".\InternalChange.h"
 					>
 				</File>

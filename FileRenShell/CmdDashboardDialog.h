@@ -5,7 +5,7 @@
 #include "utl/UI/DialogToolBar.h"
 #include "utl/UI/LayoutDialog.h"
 #include "utl/UI/ReportListControl.h"
-#include "utl/UI/TextEdit.h"
+#include "utl/UI/ImageEdit.h"
 #include "utl/UI/ThemeStatic.h"
 #include "utl/ICommand.h"
 #include <deque>
@@ -32,7 +32,7 @@ private:
 	bool SelectCommandList( int selIndex );
 	void UpdateSelCommand( void );
 
-	utl::ICommand* GetSelectedCmd( void ) const;
+	const CCmdItem* GetSelectedCmdItem( void ) const;
 	void QuerySelectedCmds( std::vector< utl::ICommand* >& rSelCommands ) const;
 
 	// ui::ICmdCallback interface
@@ -54,7 +54,7 @@ private:
 	CDialogToolBar m_actionToolbar;
 	CDialogToolBar m_cmdsToolbar;
 	CReportListControl m_commandsList;
-	CTextEdit m_cmdHeaderEdit;
+	CImageEdit m_cmdHeaderEdit;
 	CTextEdit m_cmdDetailsEdit;
 
 	enum CmdColumn { CmdName, FileCount, Timestamp };
