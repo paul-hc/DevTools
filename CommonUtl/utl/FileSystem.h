@@ -14,6 +14,7 @@ namespace fs
 	bool IsReadOnlyFile( const TCHAR* pFilePath );
 	bool IsProtectedFile( const TCHAR* pFilePath );
 
+	void QueryFolderPaths( std::vector< fs::CPath >& rFolderPaths, const std::vector< fs::CPath >& filePaths, bool uniqueOnly = true );
 
 	fs::CPath GetModuleFilePath( HINSTANCE hInstance );		// pass AfxGetApp()->m_hInstance in GUI apps, or NULL for the .exe
 	fs::CPath GetTempDirPath( void );
@@ -33,11 +34,6 @@ namespace fs
 	bool CreateDirPath( const TCHAR* pDirPath );						// creates deep directory path, returns true if a valid directory path
 	bool DeleteDir( const TCHAR* pDirPath, RecursionDepth depth = Deep );
 	bool DeleteAllFiles( const TCHAR* pDirPath );						// delete even if read-only sub-directories or embedded files
-
-
-	size_t DeleteEmptyRelativeSubdirs( const fs::CPath& dirPath, const fs::CPath& subFolderPath );
-	size_t DeleteEmptyRelativeMultiSubdirs( const fs::CPath& dirPath, std::vector< fs::CPath > subFolderPaths );
-	size_t CleanupPostUnmoveSubdirs( const fs::CPath& destDirPath, const std::vector< fs::CPath >& destFilePaths );		// after shell::MoveFiles() of DEST -> SRC (cleanup empty remaining sub-directories)
 
 
 	enum ExcPolicy { RuntimeExc, MfcExc };

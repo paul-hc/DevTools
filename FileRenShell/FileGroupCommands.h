@@ -7,6 +7,9 @@
 #include "utl/Path.h"
 
 
+typedef WORD FILEOP_FLAGS;		// defined in <shlwapi.h>
+
+
 namespace cmd
 {
 	// abstract base for commands that operate on multiple files
@@ -21,8 +24,12 @@ namespace cmd
 		const std::vector< fs::CPath >& GetFilePaths( void ) const { return m_filePaths; }
 		void CopyTimestampOf( const CBaseFileGroupCmd& srcCmd ) { m_timestamp = srcCmd.GetTimestamp(); }
 
+		CWnd* GetParentOwner( void ) const { return m_pParentOwner; }
+		void SetParentOwner( CWnd* pParentOwner ) { m_pParentOwner = pParentOwner; }
+
 		// base overrides
 		virtual std::tstring Format( utl::Verbosity verbosity ) const;
+		virtual bool IsUndoable( void ) const;
 
 		// cmd::IPersistentCmd
 		virtual bool IsValid( void ) const;
@@ -56,8 +63,42 @@ namespace cmd
 	private:
 		persist CTime m_timestamp;
 		persist std::vector< fs::CPath > m_filePaths;
-	protected:
+		CWnd* m_pParentOwner;
+	public:
+		FILEOP_FLAGS m_opFlags;
 		static const TCHAR s_lineEnd[];
+	};
+
+
+	// abstract base for commands that operate deep transfers of multiple files
+	//
+	abstract class CBaseDeepTransferFilesCmd : public CBaseFileGroupCmd
+	{
+	protected:
+		CBaseDeepTransferFilesCmd( void ) {}
+		CBaseDeepTransferFilesCmd( CommandType cmdType, const std::vector< fs::CPath >& srcFilePaths, const fs::CPath& destDirPath );
+	public:
+		const std::vector< fs::CPath >& GetSrcFilePaths( void ) const { return GetFilePaths(); }
+		const fs::CPath& GetSrcCommonDirPath( void ) const { return m_srcCommonDirPath; }
+		const fs::CPath& GetDestDirPath( void ) const { return m_destDirPath; }
+		const fs::CPath& GetTopDestDirPath( void ) const { return m_topDestDirPath; }		// root for post-move cleanup
+
+		void SetDeepRelDirPath( const fs::CPath& deepRelSubfolderPath );		// for deeper transfers
+
+		// base overrides
+		virtual void Serialize( CArchive& archive );
+		virtual void QueryDetailLines( std::vector< std::tstring >& rLines ) const;
+
+		// ICommand interface
+	protected:
+		virtual std::tstring GetDestHeaderInfo( void ) const;
+
+		void MakeDestFilePaths( std::vector< fs::CPath >& rDestFilePaths, const std::vector< fs::CPath >& srcFilePaths ) const;
+		fs::CPath MakeDeepDestFilePath( const fs::CPath& srcFilePath ) const;
+	private:
+		persist fs::CPath m_srcCommonDirPath;
+		persist fs::CPath m_destDirPath;
+		persist fs::CPath m_topDestDirPath;		// parent folder of m_destDirPath (if using extra sub-folder depth), otherwise same as m_destDirPath
 	};
 }
 
@@ -76,7 +117,6 @@ public:
 	// ICommand interface
 	virtual bool Execute( void );
 	virtual bool Unexecute( void );
-	virtual bool IsUndoable( void ) const;
 private:
 	struct CUndeleteFilesCmd : public cmd::CBaseFileGroupCmd
 	{
@@ -90,37 +130,58 @@ private:
 };
 
 
-// Used for moving files (usually duplicates), using a deep destination directory structure.
+// Used for copying files, using a deep destination directory structure.
 //
-class CMoveFilesCmd : public cmd::CBaseFileGroupCmd
+class CCopyFilesCmd : public cmd::CBaseDeepTransferFilesCmd
+{
+	DECLARE_SERIAL( CCopyFilesCmd )
+
+	CCopyFilesCmd( void ) {}
+public:
+	CCopyFilesCmd( const std::vector< fs::CPath >& srcFilePaths, const fs::CPath& destDirPath, bool isPaste = false );
+	virtual ~CCopyFilesCmd();
+
+	// ICommand interface
+	virtual bool Execute( void );
+	virtual bool Unexecute( void );
+};
+
+
+// Used for moving files, using a deep destination directory structure.
+//
+class CMoveFilesCmd : public cmd::CBaseDeepTransferFilesCmd
 {
 	DECLARE_SERIAL( CMoveFilesCmd )
 
 	CMoveFilesCmd( void ) {}
 public:
-	CMoveFilesCmd( const std::vector< fs::CPath >& srcFilePaths, const fs::CPath& destDirPath );
+	CMoveFilesCmd( const std::vector< fs::CPath >& srcFilePaths, const fs::CPath& destDirPath, bool isPaste = false );
 	virtual ~CMoveFilesCmd();
-
-	const std::vector< fs::CPath >& GetSrcFilePaths( void ) const { return GetFilePaths(); }
-	const fs::CPath& GetSrcCommonDirPath( void ) const { return m_srcCommonDirPath; }
-	const fs::CPath& GetDestDirPath( void ) const { return m_destDirPath; }
-
-	// base overrides
-	virtual void Serialize( CArchive& archive );
-	virtual void QueryDetailLines( std::vector< std::tstring >& rLines ) const;
 
 	// ICommand interface
 	virtual bool Execute( void );
 	virtual bool Unexecute( void );
-	virtual bool IsUndoable( void ) const;
-protected:
-	virtual std::tstring GetDestHeaderInfo( void ) const;
+};
 
-	void MakeDestFilePaths( std::vector< fs::CPath >& rDestFilePaths, const std::vector< fs::CPath >& srcFilePaths ) const;
-	fs::CPath MakeDeepDestFilePath( const fs::CPath& srcFilePath ) const;
-private:
-	persist fs::CPath m_srcCommonDirPath;
-	persist fs::CPath m_destDirPath;
+
+// Used for copying files, using a deep destination directory structure.
+//
+class CCreateFoldersCmd : public cmd::CBaseDeepTransferFilesCmd
+{
+	DECLARE_SERIAL( CCreateFoldersCmd )
+
+	CCreateFoldersCmd( void ) {}
+public:
+	enum Structure { CreateNormal, PasteDirs, PasteDeepStruct };
+
+	CCreateFoldersCmd( const std::vector< fs::CPath >& srcFolderPaths, const fs::CPath& destDirPath, Structure structure = CreateNormal );
+	virtual ~CCreateFoldersCmd();
+
+	const std::vector< fs::CPath >& GetSrcFolderPaths( void ) const { return GetSrcFilePaths(); }
+
+	// ICommand interface
+	virtual bool Execute( void );
+	virtual bool Unexecute( void );
 };
 
 

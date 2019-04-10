@@ -344,6 +344,8 @@ namespace fs { class CPath; }
 
 namespace ui
 {
+	inline int MessageBox( const std::tstring& message, UINT mbFlags = MB_OK ) { return ::AfxMessageBox( message.c_str(), mbFlags ); }
+
 	bool BeepSignal( UINT beep = MB_OK );														// returns false for convenience
 	bool ReportError( const std::tstring& message, UINT mbFlags = MB_OK | MB_ICONERROR );		// returns false for convenience
 	int ReportException( const std::exception& exc, UINT mbFlags = MB_OK | MB_ICONERROR );

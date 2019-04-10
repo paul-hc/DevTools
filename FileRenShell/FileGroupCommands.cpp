@@ -2,6 +2,7 @@
 #include "stdafx.h"
 #include "FileGroupCommands.h"
 #include "Application.h"
+#include "utl/AppTools.h"
 #include "utl/EnumTags.h"
 #include "utl/FmtUtils.h"
 #include "utl/FileSystem.h"
@@ -10,6 +11,7 @@
 #include "utl/SerializeStdTypes.h"
 #include "utl/TimeUtils.h"
 #include "utl/UI/ShellUtilities.h"
+#include "utl/UI/Utilities.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -27,6 +29,8 @@ namespace cmd
 		: CBaseSerialCmd( cmdType )
 		, m_filePaths( filePaths )
 		, m_timestamp( timestamp )
+		, m_pParentOwner( app::GetMainWnd() )
+		, m_opFlags( FOF_ALLOWUNDO )
 	{
 	}
 
@@ -75,6 +79,11 @@ namespace cmd
 		serial::SerializeValues( archive, m_filePaths );
 	}
 
+	bool CBaseFileGroupCmd::IsUndoable( void ) const
+	{
+		return true;		// let it unexecute with error rather than being skipped in UNDO
+	}
+
 	std::tstring CBaseFileGroupCmd::GetDestHeaderInfo( void ) const
 	{
 		return std::tstring();
@@ -97,23 +106,20 @@ namespace cmd
 			for ( std::vector< fs::CPath >::const_iterator itBadFilePath = workingSet.m_badFilePaths.begin(); itBadFilePath != workingSet.m_badFilePaths.end(); ++itBadFilePath )
 				s_pErrorObserver->OnFileError( *itBadFilePath, str::Format( _T("Cannot access file: %s"), itBadFilePath->GetPtr() ) );
 
-		if ( s_pLogger != NULL )
+		std::tstring message = Format( utl::Detailed );
+
+		if ( !workingSet.m_succeeded )
+			stream::Tag( message, _T(" * ERROR"), s_lineEnd );
+		stream::Tag( message, groupDetails, s_lineEnd );
+
+		if ( !workingSet.m_succeeded )
+			message += _T("\n ERROR");
+		else if ( !workingSet.m_badFilePaths.empty() )
 		{
-			std::tstring message = Format( utl::Detailed );
-
-			if ( !workingSet.m_succeeded )
-				stream::Tag( message, _T(" * ERROR"), s_lineEnd );
-			stream::Tag( message, groupDetails, s_lineEnd );
-
-			if ( !workingSet.m_succeeded )
-				message += _T("\n ERROR");
-			else if ( !workingSet.m_badFilePaths.empty() )
-			{
-				stream::Tag( message, str::Format( _T(" WARNING: Cannot access %d files:"), workingSet.m_badFilePaths.size() ), s_lineEnd );
-				stream::Tag( message, str::Join( workingSet.m_badFilePaths, s_lineEnd ), s_lineEnd );
-			}
-			s_pLogger->LogString( message );
+			stream::Tag( message, str::Format( _T(" WARNING: Cannot access %d files:"), workingSet.m_badFilePaths.size() ), s_lineEnd );
+			stream::Tag( message, str::Join( workingSet.m_badFilePaths, s_lineEnd ), s_lineEnd );
 		}
+		LogExecution( message );
 
 		if ( !workingSet.m_succeeded )
 			return false;
@@ -144,6 +150,66 @@ namespace cmd
 		if ( m_currFilePaths.size() != filePaths.size() )
 			m_existStatus = !m_currFilePaths.empty() ? SomeExist : NoneExist;
 	}
+
+
+	// CBaseDeepTransferFilesCmd implementation
+
+	CBaseDeepTransferFilesCmd::CBaseDeepTransferFilesCmd( CommandType cmdType, const std::vector< fs::CPath >& srcFilePaths, const fs::CPath& destDirPath )
+		: cmd::CBaseFileGroupCmd( cmdType, srcFilePaths )
+		, m_srcCommonDirPath( path::ExtractCommonParentPath( srcFilePaths ) )
+		, m_destDirPath( destDirPath )
+		, m_topDestDirPath( m_destDirPath )
+	{
+	}
+
+	void CBaseDeepTransferFilesCmd::SetDeepRelDirPath( const fs::CPath& deepRelSubfolderPath )
+	{
+		REQUIRE( !deepRelSubfolderPath.IsEmpty() );
+		REQUIRE( path::IsRelative( deepRelSubfolderPath.GetPtr() ) );
+
+		m_topDestDirPath = m_destDirPath;
+		m_destDirPath /= deepRelSubfolderPath;		// move dest folder deeper
+	}
+
+	void CBaseDeepTransferFilesCmd::Serialize( CArchive& archive )
+	{
+		__super::Serialize( archive );
+
+		archive & m_srcCommonDirPath;
+		archive & m_destDirPath;
+		archive & m_topDestDirPath;
+	}
+
+	void CBaseDeepTransferFilesCmd::QueryDetailLines( std::vector< std::tstring >& rLines ) const
+	{
+		std::vector< fs::CPath > destFilePaths;
+		MakeDestFilePaths( destFilePaths, GetSrcFilePaths() );
+
+		QueryFilePairLines( rLines, GetSrcFilePaths(), destFilePaths );
+	}
+
+	std::tstring CBaseDeepTransferFilesCmd::GetDestHeaderInfo( void ) const
+	{
+		return str::Format( _T("-> %s"), m_destDirPath.GetPtr() );
+	}
+
+	void CBaseDeepTransferFilesCmd::MakeDestFilePaths( std::vector< fs::CPath >& rDestFilePaths, const std::vector< fs::CPath >& srcFilePaths ) const
+	{
+		rDestFilePaths.clear();
+		rDestFilePaths.reserve( srcFilePaths.size() );
+
+		for ( std::vector< fs::CPath >::const_iterator itSrcPath = srcFilePaths.begin(); itSrcPath != srcFilePaths.end(); ++itSrcPath )
+			rDestFilePaths.push_back( MakeDeepDestFilePath( *itSrcPath ) );
+	}
+
+	fs::CPath CBaseDeepTransferFilesCmd::MakeDeepDestFilePath( const fs::CPath& srcFilePath ) const
+	{
+		fs::CPath srcParentDirPath = srcFilePath.GetParentPath();
+		std::tstring destRelPath = path::StripCommonPrefix( srcParentDirPath.GetPtr(), m_srcCommonDirPath.GetPtr() );
+
+		fs::CPath targetFullPath = m_destDirPath / destRelPath / srcFilePath.GetFilename();
+		return targetFullPath;
+	}
 }
 
 
@@ -165,7 +231,7 @@ bool CDeleteFilesCmd::Execute( void )
 	CWorkingSet workingSet( *this, fs::Write );
 
 	if ( workingSet.IsValid() )
-		if ( shell::DeleteFiles( workingSet.m_currFilePaths, app::GetMainWnd() ) )		// delete to RecycleBin
+		if ( shell::DeleteFiles( workingSet.m_currFilePaths, GetParentOwner(), m_opFlags ) )		// delete to RecycleBin
 			workingSet.m_succeeded = true;
 		else if ( shell::AnyOperationAborted() )
 			throw CUserAbortedException();			// go silent if cancelled by user
@@ -177,18 +243,14 @@ bool CDeleteFilesCmd::Unexecute( void )
 {
 	CUndeleteFilesCmd undoCmd( GetFilePaths() );
 	undoCmd.CopyTimestampOf( *this );
+
 	if ( undoCmd.Execute() )
 	{
-		AfxMessageBox( undoCmd.Format( utl::Detailed ).c_str() );		// notify user that command was undone (editor-less command)
+		ui::MessageBox( undoCmd.Format( utl::Detailed ), MB_SETFOREGROUND );		// notify user that command was undone (editor-less command)
 		return true;
 	}
 
 	return false;
-}
-
-bool CDeleteFilesCmd::IsUndoable( void ) const
-{
-	return true;		// let it unexecute with error rather than being skipped in UNDO
 }
 
 
@@ -197,7 +259,7 @@ bool CDeleteFilesCmd::IsUndoable( void ) const
 bool CDeleteFilesCmd::CUndeleteFilesCmd::Execute( void )
 {
 	std::vector< fs::CPath > errorFilePaths;
-	size_t restoredCount = shell::UndeleteFiles( GetFilePaths(), app::GetMainWnd(), &errorFilePaths );
+	size_t restoredCount = shell::UndeleteFiles( GetFilePaths(), GetParentOwner(), &errorFilePaths );
 
 	CWorkingSet workingSet( *this );
 	workingSet.m_badFilePaths.swap( errorFilePaths );
@@ -207,35 +269,78 @@ bool CDeleteFilesCmd::CUndeleteFilesCmd::Execute( void )
 }
 
 
-// CMoveFilesCmd implementation
+// CCopyFilesCmd implementation
 
-IMPLEMENT_SERIAL( CMoveFilesCmd, CBaseSerialCmd, VERSIONABLE_SCHEMA | 1 )
+IMPLEMENT_SERIAL( CCopyFilesCmd, CBaseSerialCmd, VERSIONABLE_SCHEMA | 1 )
 
-CMoveFilesCmd::CMoveFilesCmd( const std::vector< fs::CPath >& srcFilePaths, const fs::CPath& destDirPath )
-	: cmd::CBaseFileGroupCmd( cmd::MoveFiles, srcFilePaths )
-	, m_srcCommonDirPath( path::ExtractCommonParentPath( srcFilePaths ) )
-	, m_destDirPath( destDirPath )
+CCopyFilesCmd::CCopyFilesCmd( const std::vector< fs::CPath >& srcFilePaths, const fs::CPath& destDirPath, bool isPaste /*= false*/ )
+	: cmd::CBaseDeepTransferFilesCmd( cmd::CopyFiles, srcFilePaths, destDirPath )
+{
+	if ( isPaste )
+		SetTypeID( cmd::PasteCopyFiles );
+}
+
+CCopyFilesCmd::~CCopyFilesCmd()
 {
 }
 
-CMoveFilesCmd::~CMoveFilesCmd()
+bool CCopyFilesCmd::Execute( void )
 {
+	CWorkingSet workingSet( *this, fs::ReadWrite );
+
+	std::vector< fs::CPath > destFilePaths;
+	MakeDestFilePaths( destFilePaths, workingSet.m_currFilePaths );
+
+	if ( workingSet.IsValid() )
+		if ( shell::CopyFiles( workingSet.m_currFilePaths, destFilePaths, GetParentOwner(), m_opFlags ) )		// undoable copy files
+			workingSet.m_succeeded = true;
+		else if ( shell::AnyOperationAborted() )
+			throw CUserAbortedException();			// go silent if cancelled by user
+
+	return HandleExecuteResult( workingSet, str::Join( workingSet.m_currFilePaths, s_lineEnd ) );
 }
 
-void CMoveFilesCmd::Serialize( CArchive& archive )
-{
-	__super::Serialize( archive );
-
-	archive & m_destDirPath;
-	archive & m_srcCommonDirPath;
-}
-
-void CMoveFilesCmd::QueryDetailLines( std::vector< std::tstring >& rLines ) const
+bool CCopyFilesCmd::Unexecute( void )
 {
 	std::vector< fs::CPath > destFilePaths;
 	MakeDestFilePaths( destFilePaths, GetSrcFilePaths() );
 
-	QueryFilePairLines( rLines, GetSrcFilePaths(), destFilePaths );
+	std::vector< fs::CPath > destFolderPaths;
+	fs::QueryFolderPaths( destFolderPaths, destFilePaths, true );		// store all dest folders for post-delete cleanup
+
+	CDeleteFilesCmd undoCmd( destFilePaths );		// delete destination files
+	undoCmd.CopyTimestampOf( *this );
+	ClearFlag( undoCmd.m_opFlags, FOF_ALLOWUNDO );
+
+	if ( undoCmd.Execute() )
+	{
+		if ( size_t delSubdirCount = shell::DeleteEmptyMultiSubdirs( GetTopDestDirPath(), destFolderPaths ) )
+		{
+			std::tstring message = str::Format( _T("Folders Cleanup: delete %d empty leftover sub-folders"), delSubdirCount );
+
+			LogMessage( message );
+			ui::MessageBox( message, MB_SETFOREGROUND );		// notify user that command was undone (editor-less command)
+		}
+		return true;
+	}
+
+	return false;
+}
+
+
+// CMoveFilesCmd implementation
+
+IMPLEMENT_SERIAL( CMoveFilesCmd, CBaseSerialCmd, VERSIONABLE_SCHEMA | 1 )
+
+CMoveFilesCmd::CMoveFilesCmd( const std::vector< fs::CPath >& srcFilePaths, const fs::CPath& destDirPath, bool isPaste /*= false*/ )
+	: cmd::CBaseDeepTransferFilesCmd( cmd::MoveFiles, srcFilePaths, destDirPath )
+{
+	if ( isPaste )
+		SetTypeID( cmd::PasteMoveFiles );
+}
+
+CMoveFilesCmd::~CMoveFilesCmd()
+{
 }
 
 bool CMoveFilesCmd::Execute( void )
@@ -246,7 +351,7 @@ bool CMoveFilesCmd::Execute( void )
 	MakeDestFilePaths( destFilePaths, workingSet.m_currFilePaths );
 
 	if ( workingSet.IsValid() )
-		if ( shell::MoveFiles( workingSet.m_currFilePaths, destFilePaths, app::GetMainWnd() ) )		// undoable move files
+		if ( shell::MoveFiles( workingSet.m_currFilePaths, destFilePaths, GetParentOwner(), m_opFlags ) )		// undoable move files
 			workingSet.m_succeeded = true;
 		else if ( shell::AnyOperationAborted() )
 			throw CUserAbortedException();			// go silent if cancelled by user
@@ -259,17 +364,20 @@ bool CMoveFilesCmd::Unexecute( void )
 	std::vector< fs::CPath > destFilePaths;
 	MakeDestFilePaths( destFilePaths, GetSrcFilePaths() );
 
-	CMoveFilesCmd undoCmd( destFilePaths, m_srcCommonDirPath );			// move back destination files to source common directory
+	std::vector< fs::CPath > destFolderPaths;
+	fs::QueryFolderPaths( destFolderPaths, destFilePaths, true );		// store all dest folders for post-delete cleanup
+
+	CMoveFilesCmd undoCmd( destFilePaths, GetSrcCommonDirPath(), cmd::PasteMoveFiles == GetTypeID() );			// move back destination files to source common directory
 	undoCmd.CopyTimestampOf( *this );
+
 	if ( undoCmd.Execute() )
 	{
-		if ( size_t delSubdirCount = fs::CleanupPostUnmoveSubdirs( m_destDirPath, destFilePaths ) )
+		if ( size_t delSubdirCount = shell::DeleteEmptyMultiSubdirs( GetTopDestDirPath(), destFolderPaths ) )
 		{
-			std::tstring message = str::Format( _T("Un-move Files Cleanup: delete %d empty remaining sub-folders"), delSubdirCount );
-			if ( s_pLogger != NULL )
-				s_pLogger->LogString( message );
+			std::tstring message = str::Format( _T("Folders Cleanup: delete %d empty leftover sub-folders"), delSubdirCount );
 
-			AfxMessageBox( message.c_str() );		// notify user that command was undone (editor-less command)
+			LogMessage( message );
+			ui::MessageBox( message, MB_SETFOREGROUND );		// notify user that command was undone (editor-less command)
 		}
 		return true;
 	}
@@ -277,30 +385,80 @@ bool CMoveFilesCmd::Unexecute( void )
 	return false;
 }
 
-bool CMoveFilesCmd::IsUndoable( void ) const
+
+// CCreateFoldersCmd implementation
+
+IMPLEMENT_SERIAL( CCreateFoldersCmd, CBaseSerialCmd, VERSIONABLE_SCHEMA | 1 )
+
+CCreateFoldersCmd::CCreateFoldersCmd( const std::vector< fs::CPath >& srcFilePaths, const fs::CPath& destDirPath, Structure structure /*= CreateNormal*/ )
+	: cmd::CBaseDeepTransferFilesCmd( cmd::CreateFolders, srcFilePaths, destDirPath )
 {
-	return true;		// let it unexecute with error rather than being skipped in UNDO
+	switch ( structure )
+	{
+		case PasteDirs:			SetTypeID( cmd::PasteCreateFolders ); break;
+		case PasteDeepStruct:	SetTypeID( cmd::PasteCreateDeepFolders ); break;
+	}
 }
 
-std::tstring CMoveFilesCmd::GetDestHeaderInfo( void ) const
+CCreateFoldersCmd::~CCreateFoldersCmd()
 {
-	return str::Format( _T("-> %s"), m_destDirPath.GetPtr() );
 }
 
-void CMoveFilesCmd::MakeDestFilePaths( std::vector< fs::CPath >& rDestFilePaths, const std::vector< fs::CPath >& srcFilePaths ) const
+bool CCreateFoldersCmd::Execute( void )
 {
-	rDestFilePaths.clear();
-	rDestFilePaths.reserve( srcFilePaths.size() );
+	CWorkingSet workingSet( *this, fs::Exist );
 
-	for ( std::vector< fs::CPath >::const_iterator itSrcPath = srcFilePaths.begin(); itSrcPath != srcFilePaths.end(); ++itSrcPath )
-		rDestFilePaths.push_back( MakeDeepDestFilePath( *itSrcPath ) );
+	std::vector< fs::CPath > destFolderPaths;
+	MakeDestFilePaths( destFolderPaths, workingSet.m_currFilePaths );
+	fs::SortByPathDepth( destFolderPaths );		// for creation order: folder -> sub-folder
+
+	if ( destFolderPaths.empty() )
+		return false;							// nothing to do
+
+	size_t createdCount = 0;
+
+	for ( std::vector< fs::CPath >::iterator itDestFolderPath = destFolderPaths.begin(); itDestFolderPath != destFolderPaths.end(); ++itDestFolderPath )
+		if ( !fs::IsValidDirectory( itDestFolderPath->GetPtr() ) )
+			try
+			{
+				fs::thr::CreateDirPath( itDestFolderPath->GetPtr() );
+				++createdCount;
+			}
+			catch ( CRuntimeException& exc )
+			{
+				app::TraceException( exc );
+				workingSet.m_badFilePaths.push_back( *itDestFolderPath );
+			}
+
+	workingSet.m_succeeded = destFolderPaths.empty() || createdCount != 0;
+	if ( workingSet.m_succeeded )
+		if ( createdCount != GetSrcFolderPaths().size() )	// created fewer directories?
+			app::ReportError( str::Format( _T("Created %d new folders out of %d total folders on clipboard."), createdCount, GetSrcFolderPaths().size() ), app::Info );
+
+	return HandleExecuteResult( workingSet, str::Join( workingSet.m_currFilePaths, s_lineEnd ) );
 }
 
-fs::CPath CMoveFilesCmd::MakeDeepDestFilePath( const fs::CPath& srcFilePath ) const
+bool CCreateFoldersCmd::Unexecute( void )
 {
-	fs::CPath srcParentDirPath = srcFilePath.GetParentPath();
-	std::tstring destRelPath = path::StripCommonPrefix( srcParentDirPath.GetPtr(), m_srcCommonDirPath.GetPtr() );
+	std::vector< fs::CPath > destFolderPaths;
+	MakeDestFilePaths( destFolderPaths, GetSrcFolderPaths() );
+	fs::SortByPathDepth( destFolderPaths, false );		// for deletion order: sub-folder -> folder
 
-	fs::CPath targetFullPath = m_destDirPath / destRelPath / srcFilePath.GetFilename();
-	return targetFullPath;
+	CDeleteFilesCmd undoCmd( destFolderPaths );			// delete destination files
+	undoCmd.CopyTimestampOf( *this );
+	ClearFlag( undoCmd.m_opFlags, FOF_ALLOWUNDO );
+
+	if ( undoCmd.Execute() )
+	{
+		if ( size_t delSubdirCount = shell::DeleteEmptyMultiSubdirs( GetTopDestDirPath(), destFolderPaths ) )
+		{
+			std::tstring message = str::Format( _T("Folders Cleanup: delete %d empty leftover sub-folders"), delSubdirCount );
+
+			LogMessage( message );
+			ui::MessageBox( message, MB_SETFOREGROUND );		// notify user that command was undone (editor-less command)
+		}
+		return true;
+	}
+
+	return false;
 }

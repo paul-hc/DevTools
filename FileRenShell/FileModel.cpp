@@ -6,7 +6,6 @@
 #include "IFileEditor.h"
 #include "RenameItem.h"
 #include "TouchItem.h"
-#include "GeneralOptions.h"
 #include "resource.h"
 #include "utl/Command.h"
 #include "utl/ContainerUtilities.h"
@@ -80,23 +79,7 @@ bool CFileModel::IsSourceSingleFolder( void ) const
 
 bool CFileModel::SafeExecuteCmd( IFileEditor* pEditor, utl::ICommand* pCmd )
 {
-	if ( NULL == pCmd )
-		return false;
-
-	bool execInline = false;
-
-	if ( pEditor != NULL && pEditor->IsRollMode() )
-		execInline = true;
-	else if ( !CGeneralOptions::Instance().m_undoEditingCmds )
-		execInline = !cmd::IsPersistentCmd( pCmd );				// local editing command?
-
-	if ( execInline )
-	{
-		std::auto_ptr< utl::ICommand > pEditCmd( pCmd );		// take ownership
-		return pEditCmd->Execute();
-	}
-
-	return m_pCmdSvc->Execute( pCmd );
+	return m_pCmdSvc->SafeExecuteCmd( pCmd, pEditor != NULL && pEditor->IsRollMode() );
 }
 
 void CFileModel::FetchFromStack( svc::StackType stackType )

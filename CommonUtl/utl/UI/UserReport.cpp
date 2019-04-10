@@ -4,6 +4,7 @@
 #include "ContainerUtilities.h"
 #include "EnumTags.h"
 #include "RuntimeException.h"
+#include "Utilities.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -69,7 +70,7 @@ namespace ui
 
 	int CInteractiveMode::MessageBox( const std::tstring& message, UINT mbType /*= MB_OK*/ )
 	{
-		return AfxMessageBox( message.c_str(), mbType );
+		return ui::MessageBox( message, mbType );
 	}
 
 	int CInteractiveMode::ReportError( CException* pExc, UINT mbType /*= MB_OK*/ )

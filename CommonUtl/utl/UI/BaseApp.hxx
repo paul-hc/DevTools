@@ -10,6 +10,7 @@
 #include "resource.h"
 #include <afxcontrolbars.h>			// MFC support for ribbons and control bars
 
+#include "utl/ut/Test.h"
 #include "utl/ut/UtlConsoleTests.h"
 #include "ut/UtlUserInterfaceTests.h"
 
@@ -21,6 +22,7 @@ CBaseApp< BaseClass >::CBaseApp( const TCHAR* pAppName /*= NULL*/ )
 	: BaseClass( pAppName )
 	, CAppTools()
 	, m_appRegistryKeyName( _T("Paul Cocoveanu") )
+	, m_lazyInitAppResources( false )
 {
 #if _MSC_VER >= 1800	// Visual C++ 2013
 	m_dwRestartManagerSupportFlags = AFX_RESTART_MANAGER_SUPPORT_RESTART;	// support Restart Manager
@@ -62,6 +64,24 @@ BOOL CBaseApp< BaseClass >::InitInstance( void )
 	if ( !m_profileSuffix.empty() )
 		AssignStringCopy( m_pszProfileName, m_pszProfileName + m_profileSuffix );
 
+	if ( !m_lazyInitAppResources )
+		OnInitAppResources();
+
+	return BaseClass::InitInstance();
+}
+
+template< typename BaseClass >
+int CBaseApp< BaseClass >::ExitInstance( void )
+{
+	m_pSharedResources.reset();					// release all shared resource
+	return BaseClass::ExitInstance();
+}
+
+template< typename BaseClass >
+void CBaseApp< BaseClass >::OnInitAppResources( void )
+{
+	ASSERT_NULL( m_pSharedResources.get() );		// init once
+
 	m_pSharedResources.reset( new utl::CResourcePool );
 	m_pLogger.reset( new CLogger );
 	m_pImageStore.reset( new CImageStore( true ) );
@@ -81,15 +101,24 @@ BOOL CBaseApp< BaseClass >::InitInstance( void )
 
 	ut::RegisterUtlConsoleTests();
 	ut::RegisterUtlUserInterfaceTests();
-
-	return BaseClass::InitInstance();
 }
 
 template< typename BaseClass >
-int CBaseApp< BaseClass >::ExitInstance( void )
+bool CBaseApp< BaseClass >::LazyInitAppResources( void )
 {
-	m_pSharedResources.reset();					// release all shared resource
-	return BaseClass::ExitInstance();
+	if ( m_lazyInitAppResources )
+	{
+		ASSERT_NULL( m_pSharedResources.get() );
+		TRACE( _T("\n *** Lazy initialize application resources of %s ***\n"), m_pszAppName );
+		OnInitAppResources();
+
+		if ( m_pSharedResources.get() )
+		{
+			m_lazyInitAppResources = false;		// done init
+			return true;
+		}
+	}
+	return false;
 }
 
 template< typename BaseClass >

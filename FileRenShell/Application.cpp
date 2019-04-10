@@ -43,6 +43,10 @@ CApplication g_app;
 
 CApplication::CApplication( void )
 {
+	// Extension DLLs: prevent heavy resource initialization when the dll gets registered by regsvr32.exe.
+	// Will initialize application resources later, when CFileRenameShell COM object gets instantiated.
+	SetLazyInitAppResources();
+
 	// use AFX_IDS_APP_TITLE="FileRenShell" - same app registry key for 32/64 bit executables
 	StoreAppNameSuffix( str::Format( _T(" [%d-bit]"), utl::GetPlatformBits() ) );		// identify the primary target platform
 }
@@ -58,8 +62,27 @@ BOOL CApplication::InitInstance( void )
 	app::InitModule( m_hInstance );
 	AfxSetResourceHandle( m_hInstance );
 
-	if ( !CBaseApp< CWinApp >::InitInstance() )
-		return FALSE;
+	return CBaseApp< CWinApp >::InitInstance();
+}
+
+int CApplication::ExitInstance( void )
+{
+	if ( IsInitAppResources() )
+	{
+		if ( m_pCmdSvc->IsDirty() )
+			m_pCmdSvc->SaveCommandModel();
+
+		m_pCmdSvc.reset();
+		CGeneralOptions::Instance().SaveToRegistry();
+	}
+
+	g_comModule.Term();
+	return CBaseApp< CWinApp >::ExitInstance();
+}
+
+void CApplication::OnInitAppResources( void )
+{
+	CBaseApp< CWinApp >::OnInitAppResources();
 
 	app::GetLogger()->m_logFileMaxSize = -1;					// unlimited log size
 
@@ -74,20 +97,6 @@ BOOL CApplication::InitInstance( void )
 
 	m_pCmdSvc.reset( new CAppCmdService );
 	m_pCmdSvc->LoadCommandModel();
-
-	return TRUE;
-}
-
-int CApplication::ExitInstance( void )
-{
-	if ( m_pCmdSvc->IsDirty() )
-		m_pCmdSvc->SaveCommandModel();
-
-	m_pCmdSvc.reset();
-	CGeneralOptions::Instance().SaveToRegistry();
-
-	g_comModule.Term();
-	return CBaseApp< CWinApp >::ExitInstance();
 }
 
 svc::ICommandService* CApplication::GetCommandService( void ) const

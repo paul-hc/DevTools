@@ -37,15 +37,15 @@ public:
 	const std::vector< fs::CPath >& GetRelFolderPathSeq( void ) const { return m_relFolderPathSeq; }
 	CBitmap* GetRelFolderItemInfo( std::tstring& rItemText, size_t fldSeqPos ) const;
 
-	bool CreateFolders( RecursionDepth depth ) { return CreateFolders( Shallow == depth ? m_srcFolderPaths : m_srcDeepFolderPaths ); }
+	bool CreateFolders( RecursionDepth depth ) { return CreateFolders( Shallow == depth ? m_srcFolderPaths : m_srcDeepFolderPaths, depth ); }
 	bool PasteDeep( const fs::CPath& relFolderPath, CWnd* pParentOwner );
 private:
 	void Init( const std::vector< fs::CPath >& dropPaths, DROPEFFECT dropEffect );
 	void InitSrcFolders( void );
 	void InitDeepPasteFolders( void );
 	void RegisterFolderImage( const fs::CPath& folderPath );
-	bool CreateFolders( const std::vector< fs::CPath >& srcFolderPaths );
-	fs::CPath MakeDeepTargetFilePath( const fs::CPath& srcFilePath, const fs::CPath& relFolderPath ) const;
+	bool CreateFolders( const std::vector< fs::CPath >& srcFolderPaths, RecursionDepth depth );
+	fs::CPath MakeDestFilePath( const fs::CPath& srcFilePath, const fs::CPath& destDirPath ) const;
 private:
 	fs::CPath m_destDirPath;
 	std::vector< fs::CPath > m_dropPaths;				// dropped files (copied or cut)

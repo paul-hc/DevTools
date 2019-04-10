@@ -30,6 +30,15 @@ DEBUG the shell extension (FileRenameShell64.dll/FileRenameShell32.dll)
 		attach: No
 	Explorer: load the FileRenameShell shell extension (right click on a file), the attach the debugger to the corresponding explorer.exe process instance.
 
+
+DEBUG the REGISTRATION of shell extension (through regsvr32.exe)
+=========================================
+	Command=regsvr32.exe
+	Command Arguments=$(TargetPath)
+Normal dll debug:
+	Command=C:\my\Tools\mine\ExplorerBrowser64.exe
+	Command Arguments=
+
 HISTORY
 =======
 1) 4 November 2018: According to Michael Dunn's article:		https://www.codeproject.com/Articles/441/The-Complete-Idiot-s-Guide-to-Writing-Shell-Extens

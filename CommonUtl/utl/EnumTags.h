@@ -6,8 +6,12 @@
 class CEnumTags
 {
 public:
+	CEnumTags( int defaultValue = -1, int baseValue = 0 );
 	CEnumTags( const std::tstring& uiTags, const TCHAR* pKeyTags = NULL, int defaultValue = -1, int baseValue = 0 );
 	~CEnumTags();
+
+	bool IsEmpty( void ) const { return m_uiTags.empty() && m_keyTags.empty(); }
+	void AddTagPair( const TCHAR uiTag[], const TCHAR* pKeyTag = NULL );
 
 	const std::vector< std::tstring >& GetUiTags( void ) const { return m_uiTags; }
 

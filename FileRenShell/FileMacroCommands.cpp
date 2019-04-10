@@ -145,7 +145,7 @@ namespace cmd
 
 	// CBaseFileCmd implementation
 
-	const TCHAR CBaseFileCmd::s_fmtError[] = _T("* %s\n ERROR: %s");
+	const TCHAR CBaseFileCmd::s_fmtError[] = _T("* %s\n ERROR: ");
 
 	CBaseFileCmd::CBaseFileCmd( CommandType cmdType /*= CommandType()*/, const fs::CPath& srcPath /*= fs::CPath()*/ )
 		: CBaseSerialCmd( cmdType )
@@ -159,8 +159,7 @@ namespace cmd
 		{
 			Execute();
 
-			if ( s_pLogger != NULL )
-				s_pLogger->LogString( Format( utl::Detailed ) );
+			LogMessage( Format( utl::Detailed ) );
 		}
 		catch ( CException* pExc )
 		{
@@ -191,8 +190,7 @@ namespace cmd
 			case IDIGNORE:	feedback = Ignore; break;
 		}
 
-		if ( s_pLogger != NULL )
-			s_pLogger->Log( s_fmtError, Format( utl::Detailed ).c_str(), errMsg.c_str() );
+		LogMessage( str::Format( s_fmtError, Format( utl::Detailed ).c_str() ) + errMsg );
 		return feedback;
 	}
 

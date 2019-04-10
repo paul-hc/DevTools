@@ -47,6 +47,27 @@ namespace fs
 	}
 
 
+	void QueryFolderPaths( std::vector< fs::CPath >& rFolderPaths, const std::vector< fs::CPath >& filePaths, bool uniqueOnly /*= true*/ )
+	{
+		for ( std::vector< fs::CPath >::const_iterator itFilePath = filePaths.begin(); itFilePath != filePaths.end(); ++itFilePath )
+		{
+			fs::CPath folderPath;
+
+			if ( fs::IsValidDirectory( itFilePath->GetPtr() ) )
+				folderPath = *itFilePath;
+			else if ( fs::IsValidFile( itFilePath->GetPtr() ) )
+				folderPath = itFilePath->GetParentPath();
+			else
+				continue;
+
+			if ( uniqueOnly )
+				utl::AddUnique( rFolderPaths, folderPath );
+			else
+				rFolderPaths.push_back( folderPath );
+		}
+	}
+
+
 	fs::CPath GetModuleFilePath( HINSTANCE hInstance )
 	{
 		TCHAR modulePath[ MAX_PATH ];
@@ -184,46 +205,6 @@ namespace fs
 				++itFilePath;
 
 		return found.m_subDirPaths.empty() && found.m_filePaths.empty();			// deleted all existing
-	}
-
-
-	size_t DeleteEmptyRelativeSubdirs( const fs::CPath& dirPath, const fs::CPath& subFolderPath )
-	{
-		REQUIRE( path::HasPrefix( subFolderPath.GetPtr(), dirPath.GetPtr() ) );
-
-		size_t delSubdirCount = 0;
-
-		for ( fs::CPath parentPath = subFolderPath; !parentPath.IsEmpty(); parentPath = parentPath.GetParentPath() )
-			if ( parentPath == dirPath )
-				break;						// reached the common parent dir -> done
-			else if ( fs::IsValidEmptyDirectory( parentPath.GetPtr() ) )
-				if ( fs::DeleteDir( parentPath.GetPtr(), Shallow ) )
-					++delSubdirCount;
-
-		return delSubdirCount;
-	}
-
-	size_t DeleteEmptyRelativeMultiSubdirs( const fs::CPath& dirPath, std::vector< fs::CPath > subFolderPaths )
-	{
-		ASSERT( !path::HasTrailingSlash( dirPath.GetPtr() ) );
-		ASSERT( utl::All( subFolderPaths, func::HasCommonPathPrefix( dirPath.GetPtr() ) ) );
-
-		fs::SortByPathDepth( subFolderPaths, false );		// descending: deepest folder paths come first
-
-		size_t delSubdirCount = 0;
-
-		for ( std::vector< fs::CPath >::const_iterator itSubFolderPath = subFolderPaths.begin(); itSubFolderPath != subFolderPaths.end(); ++itSubFolderPath )
-			delSubdirCount += DeleteEmptyRelativeSubdirs( dirPath, *itSubFolderPath );
-
-		return delSubdirCount;
-	}
-
-	size_t CleanupPostUnmoveSubdirs( const fs::CPath& destDirPath, const std::vector< fs::CPath >& destFilePaths )
-	{
-		std::vector< fs::CPath > destFolderPaths;
-		path::QueryParentPaths( destFolderPaths, destFilePaths );
-
-		return DeleteEmptyRelativeMultiSubdirs( destDirPath, destFolderPaths );
 	}
 
 

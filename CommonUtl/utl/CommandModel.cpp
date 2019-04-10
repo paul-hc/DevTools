@@ -14,7 +14,7 @@ namespace utl
 {
 	const CEnumTags& GetTags_ExecMode( void )
 	{
-		static const CEnumTags tags( _T("|Do|Undo|Redo"), _T("|DO|UNDO|REDO") );
+		static const CEnumTags tags( _T("|Undo|Redo"), _T("|UNDO|REDO") );
 		return tags;
 	}
 }
@@ -36,7 +36,7 @@ CScopedExecMode::~CScopedExecMode()
 
 // CCommandModel implementation
 
-utl::ExecMode CCommandModel::s_execMode = utl::ExecDefault;
+utl::ExecMode CCommandModel::s_execMode = utl::ExecDo;
 
 CCommandModel::~CCommandModel()
 {

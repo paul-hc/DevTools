@@ -5,6 +5,8 @@
 #include "Recycler.h"
 #include "Registry.h"
 #include "ContainerUtilities.h"
+#include "Utilities.h"
+#include "utl/FileSystem.h"
 #include <shlwapi.h>
 
 #ifdef _DEBUG
@@ -123,6 +125,45 @@ namespace shell
 	}
 
 
+	size_t DeleteEmptySubdirs( const fs::CPath& topDirPath, const fs::CPath& subFolderPath, std::vector< fs::CPath >* pDelFolderPaths /*= NULL*/ )
+	{
+		REQUIRE( path::HasPrefix( subFolderPath.GetPtr(), topDirPath.GetPtr() ) );
+
+		size_t delSubdirCount = 0;
+
+		for ( fs::CPath parentPath = subFolderPath; !parentPath.IsEmpty(); parentPath = parentPath.GetParentPath() )
+			if ( parentPath == topDirPath )
+				break;						// reached the top parent dir, we're done
+			else if ( fs::IsValidEmptyDirectory( parentPath.GetPtr() ) )
+				if ( shell::DeleteFile( parentPath, AfxGetMainWnd(), FOF_NORECURSION | FOF_NO_UI ) )
+				{
+					++delSubdirCount;
+
+					if ( pDelFolderPaths != NULL )
+						pDelFolderPaths->push_back( parentPath );
+				}
+
+		// Note: it's much better to use shell::DeleteFile() instead of fs::DeleteDir() since it prevents Explorer sometimes locking certain sub-folders,
+		// in which case fs::DeleteDir() could fail randomly.
+
+		return delSubdirCount;
+	}
+
+	size_t DeleteEmptyMultiSubdirs( const fs::CPath& topDirPath, std::vector< fs::CPath > subFolderPaths, std::vector< fs::CPath >* pDelFolderPaths /*= NULL*/ )
+	{
+		ASSERT( !path::HasTrailingSlash( topDirPath.GetPtr() ) );
+
+		fs::SortByPathDepth( subFolderPaths, false );		// descending: deepest folder paths come first
+
+		size_t delSubdirCount = 0;
+
+		for ( std::vector< fs::CPath >::const_iterator itSubFolderPath = subFolderPaths.begin(); itSubFolderPath != subFolderPaths.end(); ++itSubFolderPath )
+			delSubdirCount += DeleteEmptySubdirs( topDirPath, *itSubFolderPath, pDelFolderPaths );
+
+		return delSubdirCount;
+	}
+
+
 	// if SEE_MASK_FLAG_DDEWAIT mask is specified, the call will be modal for DDE conversations;
 	// otherwise (the default), the function returns before the DDE conversation is finished.
 
@@ -202,7 +243,7 @@ namespace shell
 
 		if ( hInstExec < HINSTANCE_ERROR )
 		{
-			AfxMessageBox( GetExecErrorMessage( pFullPath, (HINSTANCE)hInstExec ).c_str() );
+			ui::MessageBox( GetExecErrorMessage( pFullPath, (HINSTANCE)hInstExec ) );
 			return false;
 		}
 

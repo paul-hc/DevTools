@@ -924,18 +924,18 @@ namespace ui
 
 	bool ReportError( const std::tstring& message, UINT mbFlags /*= MB_OK | MB_ICONERROR*/ )
 	{
-		::AfxMessageBox( message.c_str(), mbFlags );
+		MessageBox( message, mbFlags );
 		return false;
 	}
 
 	int ReportException( const std::exception& exc, UINT mbFlags /*= MB_OK | MB_ICONERROR*/ )
 	{
-		return ::AfxMessageBox( CRuntimeException::MessageOf( exc ).c_str(), mbFlags );
+		return MessageBox( CRuntimeException::MessageOf( exc ), mbFlags );
 	}
 
 	int ReportException( const CException* pExc, UINT mbFlags /*= MB_OK | MB_ICONERROR*/ )
 	{
-		return ::AfxMessageBox( mfc::CRuntimeException::MessageOf( *pExc ).c_str(), mbFlags );
+		return MessageBox( mfc::CRuntimeException::MessageOf( *pExc ), mbFlags );
 	}
 
 

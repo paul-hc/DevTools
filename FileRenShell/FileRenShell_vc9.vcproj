@@ -614,6 +614,14 @@
 				Name="model"
 				>
 				<File
+					RelativePath=".\CommandItem.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\CommandItem.h"
+					>
+				</File>
+				<File
 					RelativePath=".\DropFilesModel.cpp"
 					>
 				</File>

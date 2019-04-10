@@ -475,6 +475,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\ut\UtlUserInterfaceTests.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\ut\UtlUserInterfaceTests.h"
 				>
 			</File>

@@ -913,6 +913,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\ut\UtlConsoleTests.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\ut\UtlConsoleTests.h"
 				>
 			</File>

@@ -31,9 +31,13 @@ namespace shell
 	bool AnyOperationAborted( void );		// aborted by user?
 
 	// Recycle Bin operations
-
 	bool UndeleteFile( const fs::CPath& delFilePath, CWnd* pWnd = AfxGetMainWnd() );
 	size_t UndeleteFiles( const std::vector< fs::CPath >& delFilePaths, CWnd* pWnd = AfxGetMainWnd(), std::vector< fs::CPath >* pErrorFilePaths = NULL );
+
+
+	// empty sub-folders cleanup after move/delete files
+	size_t DeleteEmptySubdirs( const fs::CPath& topDirPath, const fs::CPath& subFolderPath, std::vector< fs::CPath >* pDelFolderPaths = NULL );
+	size_t DeleteEmptyMultiSubdirs( const fs::CPath& topDirPath, std::vector< fs::CPath > subFolderPaths, std::vector< fs::CPath >* pDelFolderPaths = NULL );
 
 
 	HINSTANCE Execute( CWnd* pParentWnd, const TCHAR* pFilePath, const TCHAR* pParams = NULL, DWORD mask = 0, const TCHAR* pVerb = NULL,

@@ -15,6 +15,9 @@ public:
 	bool SaveCommandModel( void );
 	bool LoadCommandModel( void );
 
+	// base overrides
+	virtual bool SafeExecuteCmd( utl::ICommand* pCmd, bool execInline = false );
+
 	bool UndoRedoAt( svc::StackType stackType, size_t topPos );
 private:
 	bool UndoAt( size_t topPos );

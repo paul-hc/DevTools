@@ -13,7 +13,7 @@
 
 class CFileModel;
 class CCommandModel;
-class CCmdItem;
+class CCommandItem;
 
 
 class CCmdDashboardDialog : public CLayoutDialog
@@ -32,8 +32,9 @@ private:
 	bool SelectCommandList( int selIndex );
 	void UpdateSelCommand( void );
 
-	const CCmdItem* GetSelectedCmdItem( void ) const;
+	const CCommandItem* GetSelCaretCmdItem( void ) const;
 	void QuerySelectedCmds( std::vector< utl::ICommand* >& rSelCommands ) const;
+	static bool IsSelContiguousToTop( const std::vector< int >& selIndexes );
 
 	// ui::ICmdCallback interface
 	virtual void QueryTooltipText( std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const;
@@ -45,7 +46,7 @@ private:
 	svc::ICommandService* m_pCmdSvc;
 	svc::StackType m_stackType;
 
-	std::vector< CCmdItem > m_cmdItems;			// proxy items inserted into the list control
+	std::vector< CCommandItem > m_cmdItems;			// proxy items inserted into the list control
 	bool m_enableProperties;
 private:
 	// enum { IDD = IDD_CMD_DASHBOARD_DIALOG };
@@ -69,11 +70,13 @@ protected:
 	afx_msg void OnLvnItemChanged_CommandsList( NMHDR* pNmHdr, LRESULT* pResult );
 	afx_msg void OnStackType( UINT cmdId );
 	afx_msg void OnUpdateStackType( CCmdUI* pCmdUI );
-	afx_msg BOOL OnSelCmds_SelectAll( UINT cmdId );
-	afx_msg void OnSelCmds_Delete( void );
-	afx_msg void OnUpdateSelCmds_Delete( CCmdUI* pCmdUI );
 	afx_msg void OnOptions( void );
 	afx_msg void OnUpdateOptions( CCmdUI* pCmdUI );
+	afx_msg BOOL OnCmdList_SelectAll( UINT cmdId );
+	afx_msg void OnCmdList_SelectToTop( void );
+	afx_msg void OnUpdateCmdList_SelectToTop( CCmdUI* pCmdUI );
+	afx_msg void OnCmdList_Delete( void );
+	afx_msg void OnUpdateCmdList_Delete( CCmdUI* pCmdUI );
 
 	DECLARE_MESSAGE_MAP()
 };

@@ -2,6 +2,7 @@
 #include "stdafx.h"
 #include "CmdDashboardDialog.h"
 #include "FileModel.h"
+#include "CommandItem.h"
 #include "AppCommands.h"
 #include "AppCmdService.h"
 #include "Application.h"
@@ -9,104 +10,15 @@
 #include "utl/EnumTags.h"
 #include "utl/FmtUtils.h"
 #include "utl/StringUtilities.h"
-#include "utl/Subject.h"
 #include "utl/TimeUtils.h"
 #include "utl/UI/ImageStore.h"
 #include "utl/UI/UtilitiesEx.h"
-#include "utl/UI/ToolStrip.h"
 #include "utl/UI/resource.h"
 #include "resource.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
-
-
-// CCmdItem class
-
-class CCmdItem : public CSubject		// proxy items to be inserted into the list control
-{
-public:
-	CCmdItem( utl::ICommand* pCmd = NULL ) { SetCmd( pCmd ); }
-
-	utl::ICommand* GetCmd( void ) const { return m_pCmd; }
-	void SetCmd( utl::ICommand* pCmd );
-
-	template< typename Cmd_T >
-	Cmd_T* GetCmdAs( void ) const { return dynamic_cast< Cmd_T* >( m_pCmd ); }
-
-	int GetImageIndex( void ) const { return m_imageIndex; }
-
-	// ISubject interface
-	virtual const std::tstring& GetCode( void ) const;
-
-	static CToolStrip& GetCmdTypeStrip( void );
-	static int LookupImageIndex( utl::ICommand* pCmd );
-
-	struct ToCmd
-	{
-		utl::ICommand* operator()( const CCmdItem* pCmdItem ) const
-		{
-			return pCmdItem->GetCmd();
-		}
-	};
-private:
-	utl::ICommand* m_pCmd;
-	int m_imageIndex;
-	std::tstring m_code;
-};
-
-
-void CCmdItem::SetCmd( utl::ICommand* pCmd )
-{
-	m_pCmd = pCmd;
-	m_imageIndex = LookupImageIndex( m_pCmd );
-	m_code.clear();
-
-	if ( m_pCmd != NULL )
-	{
-		std::vector< std::tstring > fields;
-		cmd::QueryCmdFields( fields, m_pCmd );
-		if ( !fields.empty() )
-			m_code = fields.front();
-	}
-}
-
-const std::tstring& CCmdItem::GetCode( void ) const
-{
-	return m_code;
-}
-
-CToolStrip& CCmdItem::GetCmdTypeStrip( void )
-{
-	static CToolStrip s_strip;
-	if ( !s_strip.IsValid() )
-	{
-		s_strip.AddButton( UINT_MAX, ID_EDIT_DETAILS );			// unknown command image
-		s_strip.AddButton( cmd::RenameFile, ID_RENAME_ITEM );
-		s_strip.AddButton( cmd::TouchFile, ID_TOUCH_FILES );
-		s_strip.AddButton( cmd::FindDuplicates, ID_FIND_DUPLICATE_FILES );
-		s_strip.AddButton( cmd::DeleteFiles, ID_CMD_DELETE_FILES );
-		s_strip.AddButton( cmd::MoveFiles, ID_CMD_MOVE_FILES );
-		s_strip.AddButton( cmd::ChangeDestPaths, ID_CMD_CHANGE_DEST_PATHS );
-		s_strip.AddButton( cmd::ChangeDestFileStates, ID_CMD_CHANGE_DEST_FILE_STATES );
-		s_strip.AddButton( cmd::ResetDestinations, ID_CMD_RESET_DESTINATIONS );
-		s_strip.AddButton( cmd::EditOptions, ID_OPTIONS );
-	}
-	return s_strip;
-}
-
-int CCmdItem::LookupImageIndex( utl::ICommand* pCmd )
-{
-	const CToolStrip& strip = GetCmdTypeStrip();
-	size_t imagePos = strip.FindButtonPos( pCmd != NULL ? pCmd->GetTypeID() : UINT_MAX );
-
-	if ( utl::npos == imagePos )
-		imagePos = strip.FindButtonPos( UINT_MAX );
-
-	ENSURE( imagePos < strip.m_buttonIds.size() );
-	return static_cast< int >( imagePos );
-}
 
 
 // CCmdDashboardDialog implementation
@@ -151,7 +63,7 @@ CCmdDashboardDialog::CCmdDashboardDialog( CFileModel* pFileModel, svc::StackType
 	m_commandsList.SetSection( m_regSection + _T("\\List") );
 	m_commandsList.SetUseAlternateRowColoring();
 	m_commandsList.SetTextEffectCallback( this );
-	m_commandsList.StoreImageLists( CCmdItem::GetCmdTypeStrip().m_pImageList.get() );
+	m_commandsList.StoreImageLists( CCommandItem::GetImageList() );
 
 	m_actionToolbar.GetStrip()
 		.AddButton( IDC_UNDO_BUTTON, ID_EDIT_UNDO )
@@ -160,11 +72,12 @@ CCmdDashboardDialog::CCmdDashboardDialog( CFileModel* pFileModel, svc::StackType
 		.AddButton( ID_OPTIONS );
 
 	m_cmdsToolbar.GetStrip()
+		.AddButton( ID_SELECT_TO_TOP )
 		.AddButton( ID_EDIT_SELECT_ALL )
 		.AddSeparator()
 		.AddButton( ID_REMOVE_ITEM );
 
-	m_cmdHeaderEdit.SetImageList( CCmdItem::GetCmdTypeStrip().m_pImageList.get() );
+	m_cmdHeaderEdit.SetImageList( CCommandItem::GetImageList() );
 }
 
 CCmdDashboardDialog::~CCmdDashboardDialog()
@@ -191,7 +104,7 @@ void CCmdDashboardDialog::BuildCmdItems( void )
 	// go in reverse order since stack top is at the back
 	for ( std::deque< utl::ICommand* >::const_reverse_iterator itCmdStack = cmdStack.rbegin(); itCmdStack != cmdStack.rend(); ++itCmdStack )
 	{
-		m_cmdItems.push_back( CCmdItem() );
+		m_cmdItems.push_back( CCommandItem() );
 		m_cmdItems.back().SetCmd( *itCmdStack );
 	}
 }
@@ -208,7 +121,7 @@ void CCmdDashboardDialog::SetupCommandList( void )
 
 	for ( UINT index = 0; index != m_cmdItems.size(); ++index )
 	{
-		CCmdItem* pCmdItem = &m_cmdItems[ index ];
+		CCommandItem* pCmdItem = &m_cmdItems[ index ];
 
 		m_commandsList.InsertObjectItem( index, pCmdItem, pCmdItem->GetImageIndex() );		// Source
 
@@ -222,20 +135,33 @@ void CCmdDashboardDialog::SetupCommandList( void )
 	m_actionHistoryStatic.SetWindowText( str::Format( _T("%s History (%d actions):"), svc::GetTags_StackType().FormatUi( m_stackType ).c_str(), m_cmdItems.size() ) );
 }
 
-const CCmdItem* CCmdDashboardDialog::GetSelectedCmdItem( void ) const
+const CCommandItem* CCmdDashboardDialog::GetSelCaretCmdItem( void ) const
 {
 	int selIndex = m_commandsList.GetSelCaretIndex();
 	if ( selIndex != -1 )
-		return m_commandsList.GetObjectAt< CCmdItem >( selIndex );
+		return m_commandsList.GetObjectAt< CCommandItem >( selIndex );
 	return NULL;
 }
 
 void CCmdDashboardDialog::QuerySelectedCmds( std::vector< utl::ICommand* >& rSelCommands ) const
 {
-	std::vector< CCmdItem* > selItems;
+	std::vector< CCommandItem* > selItems;
 	m_commandsList.QuerySelectionAs( selItems );
 
-	utl::Assign( rSelCommands, selItems, CCmdItem::ToCmd() );
+	utl::Assign( rSelCommands, selItems, CCommandItem::ToCmd() );
+}
+
+bool CCmdDashboardDialog::IsSelContiguousToTop( const std::vector< int >& selIndexes )
+{
+	ASSERT( !selIndexes.empty() );
+	if ( selIndexes.front() != 0 )
+		return false;
+
+	for ( size_t i = 0; i != selIndexes.size(); ++i )
+		if ( selIndexes[ i ] != static_cast< int >( i ) )
+			return false;
+
+	return true;
 }
 
 bool CCmdDashboardDialog::SelectCommandList( int selIndex )
@@ -249,10 +175,11 @@ bool CCmdDashboardDialog::SelectCommandList( int selIndex )
 
 void CCmdDashboardDialog::UpdateSelCommand( void )
 {
-	const CCmdItem* pSelCmdItem = GetSelectedCmdItem();
+	const CCommandItem* pSelCmdItem = GetSelCaretCmdItem();
 	const utl::ICommand* pSelectedCmd = pSelCmdItem != NULL ? pSelCmdItem->GetCmd() : NULL;
 	std::tstring headerText, detailsText;
 
+	// action info acts on selected caret
 	if ( pSelectedCmd != NULL )
 	{
 		std::vector< std::tstring > fields;
@@ -274,8 +201,12 @@ void CCmdDashboardDialog::UpdateSelCommand( void )
 	m_cmdHeaderEdit.SetImageIndex( pSelCmdItem != NULL ? pSelCmdItem->GetImageIndex() : -1 );
 	m_cmdDetailsEdit.SetText( detailsText );
 
-	static const UINT ctrlIds[] = { IDC_CMD_HEADER_STATIC, IDC_CMD_HEADER_EDIT, IDC_CMD_DETAILS_STATIC, IDC_CMD_DETAILS_EDIT, IDOK };
+	static const UINT ctrlIds[] = { IDC_CMD_HEADER_STATIC, IDC_CMD_HEADER_EDIT, IDC_CMD_DETAILS_STATIC, IDC_CMD_DETAILS_EDIT };
 	ui::EnableControls( *this, ARRAY_PAIR( ctrlIds ), pSelectedCmd != NULL );
+
+	std::vector< int > selIndexes;
+	m_commandsList.GetSelection( selIndexes );
+	ui::EnableControl( *this, IDOK, !selIndexes.empty() );		// undo/redo acts strictly on selection
 }
 
 void CCmdDashboardDialog::QueryTooltipText( std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const
@@ -295,7 +226,7 @@ void CCmdDashboardDialog::CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPA
 	subItem, pCtrl;
 
 	static const ui::CTextEffect s_editorCmd( ui::Regular, color::Grey40, CLR_NONE );
-	const cmd::IPersistentCmd* pPersistCmd = CReportListControl::AsPtr< CCmdItem >( rowKey )->GetCmdAs< cmd::IPersistentCmd >();
+	const cmd::IPersistentCmd* pPersistCmd = CReportListControl::AsPtr< CCommandItem >( rowKey )->GetCmdAs< cmd::IPersistentCmd >();
 
 	if ( NULL == pPersistCmd )
 		rTextEffect.Combine( s_editorCmd );
@@ -341,11 +272,13 @@ BEGIN_MESSAGE_MAP( CCmdDashboardDialog, CLayoutDialog )
 	ON_NOTIFY( LVN_ITEMCHANGED, IDC_COMMANDS_LIST, OnLvnItemChanged_CommandsList )
 	ON_COMMAND_RANGE( IDC_UNDO_BUTTON, IDC_REDO_BUTTON, OnStackType )
 	ON_UPDATE_COMMAND_UI_RANGE( IDC_UNDO_BUTTON, IDC_REDO_BUTTON, OnUpdateStackType )
-	ON_COMMAND_EX( ID_EDIT_SELECT_ALL, OnSelCmds_SelectAll )
-	ON_COMMAND( ID_REMOVE_ITEM, OnSelCmds_Delete )
-	ON_UPDATE_COMMAND_UI( ID_REMOVE_ITEM, OnUpdateSelCmds_Delete )
 	ON_COMMAND( ID_OPTIONS, OnOptions )
 	ON_UPDATE_COMMAND_UI( ID_OPTIONS, OnUpdateOptions )
+	ON_COMMAND_EX( ID_EDIT_SELECT_ALL, OnCmdList_SelectAll )
+	ON_COMMAND( ID_SELECT_TO_TOP, OnCmdList_SelectToTop )
+	ON_UPDATE_COMMAND_UI( ID_SELECT_TO_TOP, OnUpdateCmdList_SelectToTop )
+	ON_COMMAND( ID_REMOVE_ITEM, OnCmdList_Delete )
+	ON_UPDATE_COMMAND_UI( ID_REMOVE_ITEM, OnUpdateCmdList_Delete )
 END_MESSAGE_MAP()
 
 BOOL CCmdDashboardDialog::OnInitDialog( void )
@@ -358,26 +291,61 @@ BOOL CCmdDashboardDialog::OnInitDialog( void )
 void CCmdDashboardDialog::OnOK( void )
 {
 	bool keepRunning = !ui::IsKeyPressed( VK_SHIFT );
+
+	std::vector< int > selIndexes;
+	m_commandsList.GetSelection( selIndexes );		// indexes sorted ascending
+	if ( selIndexes.empty() )
+		return;
+
 	bool succeeded = false;
 
-	int selIndex = m_commandsList.GetSelCaretIndex();
-	if ( 0 == selIndex )
+	if ( 1 == selIndexes.size() && 0 == selIndexes.front() )	// single command at top?
+	{
 		succeeded = m_pCmdSvc->UndoRedo( m_stackType );
+		UpdateData( DialogOutput );		// refresh the remaining commands on the stack
+	}
 	else
 	{
-		std::tstring message = str::Format( _T("Are you sure you want to %s the command not at the stack top?\n\nThis could have unforseen side effects."),
-			svc::GetTags_StackType().FormatUi( m_stackType ).c_str() );
+		if ( !IsSelContiguousToTop( selIndexes ) )
+			if ( ui::MessageBox( str::Format( _T("Are you sure you want to %s the action not in sequence from the top?\n\nThis could have unforseen side effects."),
+								 svc::GetTags_StackType().FormatKey( m_stackType ).c_str() ), MB_YESNO | MB_DEFBUTTON2 ) != IDYES )
+				return;
 
-		if ( IDYES == AfxMessageBox( message.c_str(), MB_YESNO | MB_DEFBUTTON2 ) )
+		CAppCmdService* m_pAppCmdSvc = checked_static_cast< CAppCmdService* >( m_pCmdSvc );
+		bool done = false;
+
+		std::vector< CCommandItem* > selCmdItems;
+		m_commandsList.QueryObjectsByIndex( selCmdItems, selIndexes );
+
+		for ( size_t pos = 0; !done && pos != selCmdItems.size(); ++pos )
 		{
-			CAppCmdService* m_pAppCmdSvc = checked_static_cast< CAppCmdService* >( m_pCmdSvc );
-			succeeded = m_pAppCmdSvc->UndoRedoAt( m_stackType, selIndex );
+			utl::ICommand* pCmd = selCmdItems[ pos ]->GetCmd();
+			size_t stackPos = m_pCmdSvc->FindCmdTopPos( m_stackType, pCmd );
+			if ( stackPos != utl::npos )
+				if ( m_pAppCmdSvc->UndoRedoAt( m_stackType, stackPos ) )
+					succeeded |= true;
+				else
+					done = true;
+
+			int itemIndex = m_commandsList.FindItemIndex( selCmdItems[ pos ] );
+			if ( itemIndex != -1 )
+				m_commandsList.DeleteItem( itemIndex );
 		}
+
+		ui::SetDlgItemText( this, IDOK, svc::GetTags_StackType().FormatUi( m_stackType ) );
 	}
-	UpdateData( DialogOutput );		// refresh the remaining commands on the stack
 
 	if ( succeeded && !keepRunning )
 		__super::OnOK();
+}
+
+void CCmdDashboardDialog::OnLvnItemChanged_CommandsList( NMHDR* pNmHdr, LRESULT* pResult )
+{
+	NMLISTVIEW* pNmList = (NMLISTVIEW*)pNmHdr;
+	*pResult = 0;
+
+	if ( CReportListControl::IsSelectionChangeNotify( pNmList, LVIS_SELECTED | LVIS_FOCUSED ) )
+		UpdateSelCommand();
 }
 
 void CCmdDashboardDialog::OnStackType( UINT cmdId )
@@ -394,47 +362,6 @@ void CCmdDashboardDialog::OnUpdateStackType( CCmdUI* pCmdUI )
 	pCmdUI->SetRadio( ( svc::Undo == m_stackType ) == ( IDC_UNDO_BUTTON == pCmdUI->m_nID ) );
 }
 
-void CCmdDashboardDialog::OnLvnItemChanged_CommandsList( NMHDR* pNmHdr, LRESULT* pResult )
-{
-	NMLISTVIEW* pNmList = (NMLISTVIEW*)pNmHdr;
-	*pResult = 0;
-
-	if ( CReportListControl::IsSelectionChangeNotify( pNmList, LVIS_SELECTED | LVIS_FOCUSED ) )
-		UpdateSelCommand();
-}
-
-BOOL CCmdDashboardDialog::OnSelCmds_SelectAll( UINT cmdId )
-{
-	cmdId;
-	GotoDlgCtrl( &m_commandsList );
-	return FALSE;		// continue routing (to m_commandsList)
-}
-
-void CCmdDashboardDialog::OnSelCmds_Delete( void )
-{
-	int minSelIndex;
-
-	if ( m_commandsList.GetSelIndexBounds( &minSelIndex, NULL ) )
-	{
-		std::vector< utl::ICommand* > selCommands;
-		QuerySelectedCmds( selCommands );
-
-		GotoDlgCtrl( &m_commandsList );
-		if ( IDYES == AfxMessageBox( str::Format( _T("Are you sure you want to delete %d actions?"), selCommands.size() ).c_str(), MB_YESNO ) )
-		{
-			GetCommandModel()->RemoveCommandsThat( pred::ContainsAny< std::vector< utl::ICommand* > >( selCommands ) );
-
-			SetupCommandList();
-			SelectCommandList( minSelIndex );
-		}
-	}
-}
-
-void CCmdDashboardDialog::OnUpdateSelCmds_Delete( CCmdUI* pCmdUI )
-{
-	pCmdUI->Enable( m_commandsList.AnySelected() );
-}
-
 void CCmdDashboardDialog::OnOptions( void )
 {
 	COptionsSheet sheet( m_pFileModel, this );
@@ -444,4 +371,61 @@ void CCmdDashboardDialog::OnOptions( void )
 void CCmdDashboardDialog::OnUpdateOptions( CCmdUI* pCmdUI )
 {
 	pCmdUI->Enable( m_enableProperties );
+}
+
+BOOL CCmdDashboardDialog::OnCmdList_SelectAll( UINT cmdId )
+{
+	cmdId;
+	GotoDlgCtrl( &m_commandsList );
+	return FALSE;		// continue routing (to m_commandsList)
+}
+
+void CCmdDashboardDialog::OnCmdList_SelectToTop( void )
+{
+	GotoDlgCtrl( &m_commandsList );
+
+	int maxSelIndex;
+	if ( m_commandsList.GetSelIndexBounds( NULL, &maxSelIndex ) )
+	{
+		std::vector< int > selIndexes( maxSelIndex + 1 );
+		for ( UINT i = 0; i != selIndexes.size(); ++i )
+			selIndexes[ i ] = i;
+
+		m_commandsList.SetSelection( selIndexes );
+	}
+}
+
+void CCmdDashboardDialog::OnUpdateCmdList_SelectToTop( CCmdUI* pCmdUI )
+{
+	bool enable = false;
+	std::vector< int > selIndexes;
+	if ( m_commandsList.GetSelection( selIndexes ) )
+		enable = !IsSelContiguousToTop( selIndexes );
+
+	pCmdUI->Enable( enable );
+}
+
+void CCmdDashboardDialog::OnCmdList_Delete( void )
+{
+	int minSelIndex;
+
+	if ( m_commandsList.GetSelIndexBounds( &minSelIndex, NULL ) )
+	{
+		std::vector< utl::ICommand* > selCommands;
+		QuerySelectedCmds( selCommands );
+
+		GotoDlgCtrl( &m_commandsList );
+		if ( IDYES == ui::MessageBox( str::Format( _T("Are you sure you want to delete %d actions?"), selCommands.size() ), MB_YESNO ) )
+		{
+			GetCommandModel()->RemoveCommandsThat( pred::ContainsAny< std::vector< utl::ICommand* > >( selCommands ) );
+
+			SetupCommandList();
+			SelectCommandList( minSelIndex );
+		}
+	}
+}
+
+void CCmdDashboardDialog::OnUpdateCmdList_Delete( CCmdUI* pCmdUI )
+{
+	pCmdUI->Enable( m_commandsList.AnySelected() );
 }

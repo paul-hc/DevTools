@@ -1,6 +1,8 @@
 
 #include "stdafx.h"
 #include "DropFilesModel.h"
+#include "FileGroupCommands.h"
+#include "AppCmdService.h"
 #include "utl/AppTools.h"
 #include "utl/ContainerUtilities.h"
 #include "utl/EnumTags.h"
@@ -163,85 +165,44 @@ CBitmap* CDropFilesModel::GetRelFolderItemInfo( std::tstring& rItemText, size_t 
 	return m_pImageStore->RetrieveBitmap( BaseImageId + static_cast< UINT >( fldSeqPos ), ::GetSysColor( COLOR_MENU ) );
 }
 
-bool CDropFilesModel::CreateFolders( const std::vector< fs::CPath >& srcFolderPaths )
-{
-	std::vector< fs::CPath > destPaths; destPaths.reserve( srcFolderPaths.size() );
-
-	size_t createdCount = 0;
-	std::deque< std::tstring > errorMsgs;
-
-	for ( std::vector< fs::CPath >::const_iterator itSrcFolderPath = srcFolderPaths.begin(); itSrcFolderPath != srcFolderPaths.end(); ++itSrcFolderPath )
-	{
-		fs::CPath targetFolderPath = MakeDeepTargetFilePath( *itSrcFolderPath, fs::CPath() );
-
-		if ( !fs::IsValidDirectory( targetFolderPath.GetPtr() ) )
-			try
-			{
-				fs::thr::CreateDirPath( targetFolderPath.GetPtr() );
-				++createdCount;
-			}
-			catch ( CRuntimeException& exc )
-			{
-				errorMsgs.push_back( exc.GetMessage() );
-			}
-	}
-
-	if ( !errorMsgs.empty() )
-	{
-		errorMsgs.push_front( _T("Error creating folder structure:\r\n") );
-		return app::ReportError( str::Join( errorMsgs, _T("\r\n") ) );
-	}
-	else if ( createdCount != srcFolderPaths.size() )	// created fewer directories?
-		app::ReportError( str::Format( _T("Created %d new folders out of %d total folders on clipboard."), createdCount, srcFolderPaths.size() ), app::Info );
-
-	return true;
-}
-
-bool CDropFilesModel::PasteDeep( const fs::CPath& relFolderPath, CWnd* pParentOwner )
-{
-	std::vector< fs::CPath > destPaths; destPaths.reserve( m_dropPaths.size() );
-
-	for ( std::vector< fs::CPath >::const_iterator itDropPath = m_dropPaths.begin(); itDropPath != m_dropPaths.end(); ++itDropPath )
-		destPaths.push_back( MakeDeepTargetFilePath( *itDropPath, relFolderPath ) );
-
-	PasteOperation pasteOperation = GetPasteOperation();
-	CLogger* pLogger = app::GetLogger();
-	if ( pLogger != NULL )
-	{
-		std::tstring message = str::Format( _T("%s: %d files to folder %s:\n"),
-			GetTags_PasteOperation().FormatUi( pasteOperation ).c_str(),
-			m_dropPaths.size(),
-			( m_destDirPath / relFolderPath ).GetPtr(),
-			m_destDirPath );
-
-		message += str::Join( m_dropPaths, _T("\n") );
-		pLogger->LogString( message );
-	}
-
-	bool succeeded = false;
-
-	switch ( pasteOperation )
-	{
-		case PasteCopyFiles:	succeeded = shell::CopyFiles( m_dropPaths, destPaths, pParentOwner ); break;
-		case PasteMoveFiles:	succeeded = shell::MoveFiles( m_dropPaths, destPaths, pParentOwner ); break;
-		default:
-			return false;
-	}
-
-	if ( succeeded )
-		CClipboard::CopyToLines( destPaths, pParentOwner );		// clear clipboard after Paste, and add the destination paths as text
-	else if ( !shell::AnyOperationAborted() )
-		if ( pLogger != NULL )
-			pLogger->LogLine( _T(" * ERROR"), false );
-
-	return succeeded;
-}
-
-fs::CPath CDropFilesModel::MakeDeepTargetFilePath( const fs::CPath& srcFilePath, const fs::CPath& relFolderPath ) const
+fs::CPath CDropFilesModel::MakeDestFilePath( const fs::CPath& srcFilePath, const fs::CPath& destDirPath ) const
 {
 	fs::CPath srcParentDirPath = srcFilePath.GetParentPath();
 	std::tstring targetRelPath = path::StripCommonPrefix( srcParentDirPath.GetPtr(), m_srcCommonFolderPath.GetPtr() );
 
-	fs::CPath targetFullPath = m_destDirPath / relFolderPath / targetRelPath / srcFilePath.GetFilename();
+	fs::CPath targetFullPath = destDirPath / targetRelPath / srcFilePath.GetFilename();
 	return targetFullPath;
+}
+
+bool CDropFilesModel::CreateFolders( const std::vector< fs::CPath >& srcFolderPaths, RecursionDepth depth )
+{
+	return app::GetCmdSvc()->SafeExecuteCmd( new CCreateFoldersCmd( srcFolderPaths, m_destDirPath, Shallow == depth ? CCreateFoldersCmd::PasteDirs : CCreateFoldersCmd::PasteDeepStruct ) );
+}
+
+bool CDropFilesModel::PasteDeep( const fs::CPath& relFolderPath, CWnd* pParentOwner )
+{
+	cmd::CBaseDeepTransferFilesCmd* pCmd = NULL;
+
+	switch ( GetPasteOperation() )
+	{
+		case PasteCopyFiles:	pCmd = new CCopyFilesCmd( m_dropPaths, m_destDirPath, true ); break;
+		case PasteMoveFiles:	pCmd = new CMoveFilesCmd( m_dropPaths, m_destDirPath, true ); break;
+		default:
+			return false;
+	}
+
+	pCmd->SetDeepRelDirPath( relFolderPath );
+	pCmd->SetParentOwner( pParentOwner );
+
+	fs::CPath destDeepDirPath = pCmd->GetDestDirPath();
+
+	if ( !app::GetCmdSvc()->SafeExecuteCmd( pCmd ) )
+		return false;
+
+	std::vector< fs::CPath > destPaths; destPaths.reserve( m_dropPaths.size() );
+	for ( std::vector< fs::CPath >::const_iterator itDropPath = m_dropPaths.begin(); itDropPath != m_dropPaths.end(); ++itDropPath )
+		destPaths.push_back( MakeDestFilePath( *itDropPath, destDeepDirPath ) );
+
+	CClipboard::CopyToLines( destPaths, pParentOwner );		// clear clipboard after Paste, and add the destination paths as text
+	return true;
 }

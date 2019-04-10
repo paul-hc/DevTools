@@ -3,6 +3,8 @@
 #include "FileRenShell.h"
 #include "FileRenameShell.h"
 #include "ShellMenuController.h"
+#include "Application.h"
+#include "utl/UI/BaseApp.hxx"
 
 #ifdef _DEBUG
 	#include "utl/FlagTags.h"
@@ -12,6 +14,7 @@
 
 CFileRenameShell::CFileRenameShell( void )
 {
+	app::GetApp().LazyInitAppResources();		// initialize once application resources since this is not a regsvr32.exe invocation
 }
 
 CFileRenameShell::~CFileRenameShell( void )

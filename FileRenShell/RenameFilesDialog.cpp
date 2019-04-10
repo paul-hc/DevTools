@@ -481,7 +481,7 @@ void CRenameFilesDialog::OnOK( void )
 			}
 			else
 			{
-				AfxMessageBox( str::Format( IDS_INVALID_FORMAT, renameFormat.c_str() ).c_str(), MB_ICONERROR | MB_OK );
+				ui::MessageBox( str::Format( IDS_INVALID_FORMAT, renameFormat.c_str() ), MB_ICONERROR | MB_OK );
 				ui::TakeFocus( m_formatCombo );
 			}
 			break;
@@ -645,7 +645,7 @@ void CRenameFilesDialog::OnBnClicked_ReplaceAllDelimitersDestFiles( void )
 	std::tstring delimiterSet = m_delimiterSetCombo.GetCurrentText();
 	if ( delimiterSet.empty() )
 	{
-		AfxMessageBox( str::Format( IDS_NO_DELIMITER_SET ).c_str() );
+		ui::MessageBox( str::Format( IDS_NO_DELIMITER_SET ) );
 		ui::TakeFocus( m_delimiterSetCombo );
 		return;
 	}

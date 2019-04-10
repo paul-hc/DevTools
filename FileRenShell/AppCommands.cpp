@@ -14,12 +14,27 @@ namespace cmd
 {
 	const CEnumTags& GetTags_CommandType( void )
 	{
-		static const CEnumTags tags(
-			_T("Rename Files|Touch Files|Find Duplicates|Delete Files|Move Files|Change Destination Paths|Change Destination File States|Reset Destinations|Edit|Undelete Files"),
-			_T("RENAME|TOUCH|FIND_DUPLICATES|DELETE_FILES|MOVE_FILES|CHANGE_DEST_PATHS|CHANGE_DEST_FILE_STATES|RESET_DESTINATIONS|EDIT|UNDELETE_FILES"),
-			-1, RenameFile );
-
-		return tags;
+		static CEnumTags s_tags( -1, RenameFile );
+		if ( s_tags.IsEmpty() )
+		{
+			s_tags.AddTagPair( _T("Rename Files"), _T("RENAME") );
+			s_tags.AddTagPair( _T("Touch Files"), _T("TOUCH") );
+			s_tags.AddTagPair( _T("Find Duplicates"), _T("FIND_DUPLICATES") );
+			s_tags.AddTagPair( _T("Delete Files"), _T("DELETE_FILES") );
+			s_tags.AddTagPair( _T("Copy Files"), _T("COPY_FILES") );
+			s_tags.AddTagPair( _T("Paste Copy Files"), _T("PASTE_COPY_FILES") );
+			s_tags.AddTagPair( _T("Move Files"), _T("MOVE_FILES") );
+			s_tags.AddTagPair( _T("Paste Move Files"), _T("PASTE_MOVE_FILES") );
+			s_tags.AddTagPair( _T("Create Folders"), _T("CREATE_FOLDERS") );
+			s_tags.AddTagPair( _T("Paste Create Folders"), _T("PASTE_CREATE_FOLDERS") );
+			s_tags.AddTagPair( _T("Paste Create Deep Folders"), _T("PASTE_CREATE_DEEP_FOLDERS") );
+			s_tags.AddTagPair( _T("Change Destination Paths"), _T("CHANGE_DEST_PATHS") );
+			s_tags.AddTagPair( _T("Change Destination File States"), _T("CHANGE_DEST_FILE_STATES") );
+			s_tags.AddTagPair( _T("Reset Destinations"), _T("RESET_DESTINATIONS") );
+			s_tags.AddTagPair( _T("Edit"), _T("EDIT") );
+			s_tags.AddTagPair( _T("Undelete Files"), _T("UNDELETE_FILES") );
+		}
+		return s_tags;
 	}
 
 
@@ -92,5 +107,21 @@ namespace cmd
 	void CBaseSerialCmd::Serialize( CArchive& archive )
 	{
 		CCommand::Serialize( archive );		// dis-ambiguate from CObject::Serialize()
+	}
+
+	bool CBaseSerialCmd::LogMessage( const std::tstring& message )
+	{
+		if ( s_pLogger != NULL )
+			s_pLogger->LogString( message );
+
+		return s_pLogger != NULL;
+	}
+
+	void CBaseSerialCmd::LogExecution( const std::tstring& message )
+	{
+		std::tstring execMessage = utl::GetTags_ExecMode().FormatUi( CCommandModel::GetExecMode() );
+		stream::Tag( execMessage, message, _T(": ") );
+
+		LogMessage( execMessage );
 	}
 }

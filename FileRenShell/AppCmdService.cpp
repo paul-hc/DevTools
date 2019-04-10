@@ -50,6 +50,15 @@ bool CAppCmdService::LoadCommandModel( void )
 	return false;
 }
 
+bool CAppCmdService::SafeExecuteCmd( utl::ICommand* pCmd, bool execInline /*= false*/ )
+{
+	if ( !execInline )
+		if ( !CGeneralOptions::Instance().m_undoEditingCmds )
+			execInline = !cmd::IsPersistentCmd( pCmd );				// local editing command?
+
+	return CCommandService::SafeExecuteCmd( pCmd, execInline );
+}
+
 bool CAppCmdService::UndoAt( size_t topPos )
 {
 	std::deque< utl::ICommand* >& rUndoStack = RefUndoStack();

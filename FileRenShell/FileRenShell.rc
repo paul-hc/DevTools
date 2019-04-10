@@ -222,10 +222,10 @@ BEGIN
     CONTROL         "",IDC_COMMANDS_LIST,"SysListView32",LVS_REPORT | LVS_SHOWSELALWAYS | LVS_SHAREIMAGELISTS | LVS_NOSORTHEADER | WS_BORDER | WS_GROUP | WS_TABSTOP,7,21,255,57
     LTEXT           "&Action:",IDC_CMD_HEADER_STATIC,9,87,24,8
     EDITTEXT        IDC_CMD_HEADER_EDIT,38,85,290,12,ES_AUTOHSCROLL | ES_READONLY
-    LTEXT           "Details:",IDC_CMD_DETAILS_STATIC,8,102,25,8
+    LTEXT           "&Details:",IDC_CMD_DETAILS_STATIC,8,102,25,8
     EDITTEXT        IDC_CMD_DETAILS_EDIT,38,102,290,64,ES_MULTILINE | ES_READONLY | WS_VSCROLL | WS_HSCROLL
     DEFPUSHBUTTON   "OK",IDOK,278,7,50,14,WS_GROUP
-    PUSHBUTTON      "Cancel",IDCANCEL,278,25,50,14
+    PUSHBUTTON      "&Close",IDCANCEL,278,24,50,14
     LTEXT           "<strip2>",IDC_STRIP_BAR_2,212,7,50,12,SS_CENTERIMAGE | WS_CLIPSIBLINGS | WS_BORDER
 END
 
@@ -347,8 +347,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 9,1,0,1
- PRODUCTVERSION 9,1,0,1
+ FILEVERSION 9,2,5,0
+ PRODUCTVERSION 9,2,5,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -367,12 +367,12 @@ BEGIN
             VALUE "CompanyName", "Paul Cocoveanu"
             VALUE "Email", "phc.2nd@gmail.com"
             VALUE "FileDescription", "Shell extension for manipulating files and folders"
-            VALUE "FileVersion", "9, 1, 0, 1"
+            VALUE "FileVersion", "9, 2, 5, 0"
             VALUE "InternalName", "FileRenShell"
             VALUE "LegalCopyright", "Copyfright © 2001-2019"
             VALUE "OriginalFilename", "FileRenShell64.dll"
             VALUE "ProductName", "FileRenShell Shell Extension DLL"
-            VALUE "ProductVersion", "9, 1, 0, 1"
+            VALUE "ProductVersion", "9, 2, 5, 0"
             VALUE "WrittenBy", "Written by Paul Cocoveanu"
         END
     END
@@ -534,11 +534,14 @@ END
 IDR_TOOL_STRIP TOOLBAR  16, 16
 BEGIN
     BUTTON      ID_OPEN_CMD_DASHBOARD
-    BUTTON      ID_CMD_DELETE_FILES
+    BUTTON      ID_CMD_COPY_FILES
     BUTTON      ID_CMD_MOVE_FILES
+    BUTTON      ID_CMD_DELETE_FILES
     BUTTON      ID_CMD_CHANGE_DEST_PATHS
     BUTTON      ID_CMD_CHANGE_DEST_FILE_STATES
     BUTTON      ID_CMD_RESET_DESTINATIONS
+    SEPARATOR
+    BUTTON      ID_SELECT_TO_TOP
 END
 
 
@@ -673,6 +676,7 @@ BEGIN
                             "Select all files in the parent folder as original files"
     ID_PASTE_DEEP_POPUP     "Paste deep folder image"
     ID_OPEN_CMD_DASHBOARD   "Open the command dashboard dialog"
+    ID_SELECT_TO_TOP        "Select all actions up to the top, starting with the current action"
 END
 
 STRINGTABLE 

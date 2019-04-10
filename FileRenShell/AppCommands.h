@@ -14,7 +14,7 @@ namespace cmd
 	enum CommandType
 	{
 		RenameFile = 100, TouchFile, FindDuplicates,
-		DeleteFiles, MoveFiles,
+		DeleteFiles, CopyFiles, PasteCopyFiles, MoveFiles, PasteMoveFiles, CreateFolders, PasteCreateFolders, PasteCreateDeepFolders,
 		ChangeDestPaths, ChangeDestFileStates, ResetDestinations,
 		EditOptions,
 
@@ -86,17 +86,26 @@ class CLogger;
 
 namespace cmd
 {
+	class CScopedLogger;
+
+
 	abstract class CBaseSerialCmd : public CObject
 								  , public CCommand
 	{
 		DECLARE_DYNAMIC( CBaseSerialCmd )
+
+		friend class CScopedLogger;
 	protected:
 		CBaseSerialCmd( CommandType cmdType = CommandType() );
 	public:
 		// base overrides
 		virtual void Serialize( CArchive& archive );
-	public:
+	protected:
+		static bool LogMessage( const std::tstring& message );
+		static void LogExecution( const std::tstring& message );
+	private:
 		static CLogger* s_pLogger;
+	public:
 		static IErrorObserver* s_pErrorObserver;
 	};
 

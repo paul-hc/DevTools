@@ -167,18 +167,20 @@
 #define ID_CREATE_FOLDERS               32835
 #define ID_CREATE_DEEP_FOLDER_STRUCT    32836
 #define ID_OPEN_CMD_DASHBOARD           32837
-#define ID_CMD_DELETE_FILES             32838
+#define ID_CMD_COPY_FILES               32838
 #define ID_CMD_MOVE_FILES               32839
-#define ID_CMD_CHANGE_DEST_PATHS        32840
-#define ID_CMD_CHANGE_DEST_FILE_STATES  32841
-#define ID_CMD_RESET_DESTINATIONS       32842
+#define ID_CMD_DELETE_FILES             32840
+#define ID_CMD_CHANGE_DEST_PATHS        32841
+#define ID_CMD_CHANGE_DEST_FILE_STATES  32842
+#define ID_CMD_RESET_DESTINATIONS       32843
+#define ID_SELECT_TO_TOP                32844
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        117
-#define _APS_NEXT_COMMAND_VALUE         32843
+#define _APS_NEXT_COMMAND_VALUE         32845
 #define _APS_NEXT_CONTROL_VALUE         1089
 #define _APS_NEXT_SYMED_VALUE           5004
 #endif

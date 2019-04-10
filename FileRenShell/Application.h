@@ -26,6 +26,7 @@ private:
 public:
     virtual BOOL InitInstance( void );
     virtual int ExitInstance( void );
+	virtual void OnInitAppResources( void );
 protected:
 	DECLARE_MESSAGE_MAP()
 };
@@ -37,7 +38,7 @@ struct CScopedMainWnd
 	~CScopedMainWnd();
 
 	static bool HasValidParentOwner( void ) { return ::IsWindow( s_pParentOwner->GetSafeHwnd() ) != FALSE; }
-	static CWnd* GetParentOwnerWnd( void ) { ASSERT( HasValidParentOwner() ); return s_pParentOwner; }
+	static CWnd* GetParentOwnerWnd( void ) { return s_pParentOwner != NULL ? s_pParentOwner : AfxGetMainWnd(); }		// during DLL registration there is no parent owner
 private:
 	CWnd* m_pOldMainWnd;
 	static CWnd* s_pParentOwner;

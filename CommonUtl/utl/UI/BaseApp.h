@@ -31,6 +31,9 @@ protected:
 	// call just before InitInstance:
 	void StoreAppNameSuffix( const std::tstring& appNameSuffix ) { m_appNameSuffix = appNameSuffix; }
 	void StoreProfileSuffix( const std::tstring& profileSuffix ) { m_profileSuffix = profileSuffix; }
+
+	bool IsInitAppResources( void ) const { return m_pSharedResources.get() != NULL; }
+	void SetLazyInitAppResources( void ) { m_lazyInitAppResources = true; }			// for extension DLLs: prevent heavy resource initialization when the dll gets registered by regsvr32.exe
 public:
 	const std::tstring& GetAppNameSuffix( void ) const { return m_appNameSuffix; }
 
@@ -42,6 +45,7 @@ public:
 	virtual int ReportException( const std::exception& exc );
 	virtual int ReportException( const CException* pExc );
 
+	bool LazyInitAppResources( void );
 	void RunUnitTests( void ) { OnRunUnitTests(); }
 protected:
 	static const TCHAR* AssignStringCopy( const TCHAR*& rpAppString, const std::tstring& value )
@@ -55,9 +59,13 @@ private:
 	std::auto_ptr< CImageStore > m_pImageStore;					// control the lifetime of shared resources
 	CAccelTable m_appAccel;
 	std::tstring m_appNameSuffix, m_profileSuffix;				// could be set to "_v2" when required
+	bool m_lazyInitAppResources;								// true for extension DLLs: prevent heavy resource initialization when the dll gets registered by regsvr32.exe
 protected:
 	std::tstring m_appRegistryKeyName;							// by default "Paul Cocoveanu"
 protected:
+	// overridables
+	virtual void OnInitAppResources( void );
+
 	// generated overrides
 	public:
 	virtual BOOL InitInstance( void );

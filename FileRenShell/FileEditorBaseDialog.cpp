@@ -160,7 +160,7 @@ bool CFileEditorBaseDialog::PromptCloseDialog( Prompt prompt /*= PromptNoFileCha
 	if ( PromptNoFileChanges == prompt )
 		message = s_noChangesPrefix + message;
 
-	return IDOK == AfxMessageBox( message.c_str(), MB_OKCANCEL );
+	return IDOK == ui::MessageBox( message, MB_OKCANCEL );
 }
 
 bool CFileEditorBaseDialog::IsErrorItem( const CPathItemBase* pItem ) const
