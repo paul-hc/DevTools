@@ -100,7 +100,7 @@ int CFileEditorBaseDialog::PopStackRunCrossEditor( svc::StackType stackType )
 {
 	// end this dialog and spawn the foreign dialog editor
 	cmd::CommandType foreignCmdType = static_cast< cmd::CommandType >( m_pCmdSvc->PeekCmd( stackType )->GetTypeID() );
-	ASSERT( foreignCmdType != m_nativeCmdTypes.front() );
+	ASSERT( foreignCmdType != m_nativeCmdTypes.front() ); foreignCmdType;
 	ASSERT( m_pCmdSvc->CanUndoRedo( stackType, foreignCmdType ) );
 
 	CWnd* pParent = GetParent();

@@ -4,10 +4,10 @@
 #include "FileRenameShell.h"
 #include "ShellMenuController.h"
 #include "Application.h"
+#include "utl/FlagTags.h"
 #include "utl/UI/BaseApp.hxx"
 
 #ifdef _DEBUG
-	#include "utl/FlagTags.h"
 	#define new DEBUG_NEW
 #endif
 

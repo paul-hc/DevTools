@@ -727,7 +727,7 @@
 				</File>
 			</Filter>
 			<Filter
-				Name="User Interface"
+				Name="UI"
 				>
 				<File
 					RelativePath=".\CmdDashboardDialog.cpp"
