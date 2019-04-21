@@ -1,7 +1,7 @@
 
 #include "stdafx.h"
-#include "FileRenShell.h"
-#include "FileRenameShell.h"
+#include "ShellGoodies.h"
+#include "ShellGoodiesCom.h"
 #include "ShellMenuController.h"
 #include "Application.h"
 #include "utl/FlagTags.h"
@@ -12,16 +12,16 @@
 #endif
 
 
-CFileRenameShell::CFileRenameShell( void )
+CShellGoodiesCom::CShellGoodiesCom( void )
 {
 	app::GetApp().LazyInitAppResources();		// initialize once application resources since this is not a regsvr32.exe invocation
 }
 
-CFileRenameShell::~CFileRenameShell( void )
+CShellGoodiesCom::~CShellGoodiesCom( void )
 {
 }
 
-size_t CFileRenameShell::ExtractDropInfo( IDataObject* pSelFileObjects )
+size_t CShellGoodiesCom::ExtractDropInfo( IDataObject* pSelFileObjects )
 {
 	ASSERT_PTR( pSelFileObjects );
 
@@ -40,9 +40,9 @@ size_t CFileRenameShell::ExtractDropInfo( IDataObject* pSelFileObjects )
 
 // ISupportErrorInfo interface implementation
 
-STDMETHODIMP CFileRenameShell::InterfaceSupportsErrorInfo( REFIID riid )
+STDMETHODIMP CShellGoodiesCom::InterfaceSupportsErrorInfo( REFIID riid )
 {
-	static const IID* s_pInterfaceIds[] = { &__uuidof( IShellExtInit ), &__uuidof( IContextMenu )/*, &__uuidof( IFileRenameShell )*/ };		// aka &IID_IContextMenu
+	static const IID* s_pInterfaceIds[] = { &__uuidof( IShellExtInit ), &__uuidof( IContextMenu )/*, &__uuidof( IShellGoodiesCom )*/ };		// aka &IID_IContextMenu
 
 	for ( unsigned int i = 0; i != COUNT_OF( s_pInterfaceIds ); ++i )
 		if ( ::InlineIsEqualGUID( *s_pInterfaceIds[ i ], riid ) )
@@ -54,15 +54,15 @@ STDMETHODIMP CFileRenameShell::InterfaceSupportsErrorInfo( REFIID riid )
 
 // IShellExtInit interface implementation
 
-STDMETHODIMP CFileRenameShell::Initialize( LPCITEMIDLIST folderPidl, IDataObject* pSelFileObjects, HKEY hKeyProgId )
+STDMETHODIMP CShellGoodiesCom::Initialize( LPCITEMIDLIST folderPidl, IDataObject* pSelFileObjects, HKEY hKeyProgId )
 {
 	folderPidl, hKeyProgId;
 	AFX_MANAGE_STATE( AfxGetStaticModuleState() )		// [PC 2018] required for loading resources
 
-	//TRACE( _T("CFileRenameShell::Initialize()\n") );
+	//TRACE( _T("CShellGoodiesCom::Initialize()\n") );
 	if ( pSelFileObjects != NULL )
 	{
-		//utl::CSectionGuard section( _T("CFileRenameShell::Initialize()") );
+		//utl::CSectionGuard section( _T("CShellGoodiesCom::Initialize()") );
 
 		ExtractDropInfo( pSelFileObjects );
 	}
@@ -72,15 +72,15 @@ STDMETHODIMP CFileRenameShell::Initialize( LPCITEMIDLIST folderPidl, IDataObject
 
 // IContextMenu interface implementation
 
-STDMETHODIMP CFileRenameShell::QueryContextMenu( HMENU hMenu, UINT indexMenu, UINT idCmdFirst, UINT idCmdLast, UINT flags )
+STDMETHODIMP CShellGoodiesCom::QueryContextMenu( HMENU hMenu, UINT indexMenu, UINT idCmdFirst, UINT idCmdLast, UINT flags )
 {
 	idCmdLast;
 
 	AFX_MANAGE_STATE( AfxGetStaticModuleState() )		// [PC 2018] required for loading resources
 
-	TRACE( _T(" CFileRenameShell::QueryContextMenu(): flags=0x%X {%s}\n"), flags, CShellMenuController::GetTags_ContextMenuFlags().FormatKey( flags ).c_str() );
+	TRACE( _T(" CShellGoodiesCom::QueryContextMenu(): flags=0x%X {%s}\n"), flags, CShellMenuController::GetTags_ContextMenuFlags().FormatKey( flags ).c_str() );
 
-	// res\FileRenameShell.rgs: this shell extension registers itself for both "*" and "lnkfile" types as ContextMenuHandlers.
+	// res\ShellGoodiesCom.rgs: this shell extension registers itself for both "*" and "lnkfile" types as ContextMenuHandlers.
 	//		http://microsoft.public.platformsdk.shell.narkive.com/yr1YoK9e/obtaining-selected-shortcut-lnk-files-inside-ishellextinit-initialize
 	//		https://stackoverflow.com/questions/21848694/windows-shell-extension-doesnt-give-exact-file-paths
 	//
@@ -89,23 +89,23 @@ STDMETHODIMP CFileRenameShell::QueryContextMenu( HMENU hMenu, UINT indexMenu, UI
 	{
 		if ( IsInit() )
 		{
-			//utl::CSectionGuard section( _T("CFileRenameShell::QueryContextMenu()") );
+			//utl::CSectionGuard section( _T("CShellGoodiesCom::QueryContextMenu()") );
 
 			if ( m_pController->EnsureCopyDropFilesAsPaths() )
-				TRACE( _T(" CFileRenameShell::QueryContextMenu(): found files copied or cut on clipboard - also store their paths as text!\n") );
+				TRACE( _T(" CShellGoodiesCom::QueryContextMenu(): found files copied or cut on clipboard - also store their paths as text!\n") );
 
 			UINT nextCmdId = m_pController->AugmentMenuItems( hMenu, indexMenu, idCmdFirst );
 
-			TRACE( " CFileRenameShell::QueryContextMenu(): indexMenu=%d idCmdFirst=%d idCmdLast=%d  nextCmdId=%d  flags=0x%X\n", indexMenu, idCmdFirst, idCmdLast, nextCmdId, flags );
+			TRACE( " CShellGoodiesCom::QueryContextMenu(): indexMenu=%d idCmdFirst=%d idCmdLast=%d  nextCmdId=%d  flags=0x%X\n", indexMenu, idCmdFirst, idCmdLast, nextCmdId, flags );
 			return MAKE_HRESULT( SEVERITY_SUCCESS, FACILITY_NULL, nextCmdId );
 		}
 	}
 
-	TRACE( _T(" ! CFileRenameShell::QueryContextMenu(): Ignoring add menu for flag: 0x%08X\n"), flags );
+	TRACE( _T(" ! CShellGoodiesCom::QueryContextMenu(): Ignoring add menu for flag: 0x%08X\n"), flags );
 	return S_OK;
 }
 
-STDMETHODIMP CFileRenameShell::InvokeCommand( CMINVOKECOMMANDINFO* pCmi )
+STDMETHODIMP CShellGoodiesCom::InvokeCommand( CMINVOKECOMMANDINFO* pCmi )
 {
 	AFX_MANAGE_STATE( AfxGetStaticModuleState() )		// [PC 2018] required for loading resources
 
@@ -116,7 +116,7 @@ STDMETHODIMP CFileRenameShell::InvokeCommand( CMINVOKECOMMANDINFO* pCmi )
 	if ( 0 == HIWORD( pCmi->lpVerb ) )
 		if ( IsInit() )
 		{
-			//utl::CSectionGuard section( str::Format( _T("CFileRenameShell::InvokeCommand(): %d files"), m_pFileModel->GetSourcePaths().size() ) );
+			//utl::CSectionGuard section( str::Format( _T("CShellGoodiesCom::InvokeCommand(): %d files"), m_pFileModel->GetSourcePaths().size() ) );
 
 			if ( !m_pController->ExecuteCommand( LOWORD( pCmi->lpVerb ), pCmi->hwnd ) )
 				ASSERT( false );			// unhandled command
@@ -124,16 +124,16 @@ STDMETHODIMP CFileRenameShell::InvokeCommand( CMINVOKECOMMANDINFO* pCmi )
 			return S_OK;
 		}
 
-	//TRACE( _T("CFileRenameShell::InvokeCommand(): Unrecognized command: %d\n") );
+	//TRACE( _T("CShellGoodiesCom::InvokeCommand(): Unrecognized command: %d\n") );
 	return E_INVALIDARG;
 }
 
-STDMETHODIMP CFileRenameShell::GetCommandString( UINT_PTR idCmd, UINT flags, UINT* pReserved, LPSTR pName, UINT cchMax )
+STDMETHODIMP CShellGoodiesCom::GetCommandString( UINT_PTR idCmd, UINT flags, UINT* pReserved, LPSTR pName, UINT cchMax )
 {
 	pReserved, cchMax;
 	AFX_MANAGE_STATE( AfxGetStaticModuleState() )		// [PC 2018] required for loading resources
 
-	//TRACE( _T("CFileRenameShell::GetCommandString(): flags=0x%08X, cchMax=%d\n"), flags, cchMax );
+	//TRACE( _T("CShellGoodiesCom::GetCommandString(): flags=0x%08X, cchMax=%d\n"), flags, cchMax );
 
 	if ( flags == GCS_HELPTEXTA || flags == GCS_HELPTEXTW )
 		if ( IsInit() )

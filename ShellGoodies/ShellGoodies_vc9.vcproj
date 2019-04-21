@@ -2,9 +2,9 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9.00"
-	Name="FileRenShell"
+	Name="ShellGoodies"
 	ProjectGUID="{613C4BC9-DD62-458F-B720-4812838B855C}"
-	RootNamespace="FileRenShell"
+	RootNamespace="ShellGoodies"
 	Keyword="AtlProj"
 	TargetFrameworkVersion="131072"
 	>
@@ -47,7 +47,7 @@
 			/>
 			<Tool
 				Name="VCMIDLTool"
-				TypeLibraryName="$(IntDir)/FileRenShell.tlb"
+				TypeLibraryName="$(IntDir)/ShellGoodies.tlb"
 				HeaderFileName=""
 			/>
 			<Tool
@@ -84,7 +84,7 @@
 				LinkIncremental="2"
 				SuppressStartupBanner="true"
 				AdditionalLibraryDirectories="$(UTL_INCLUDE)\lib\32"
-				ModuleDefinitionFile=".\FileRenShell.def"
+				ModuleDefinitionFile=".\ShellGoodies.def"
 				GenerateDebugInformation="true"
 				SubSystem="2"
 				RandomizedBaseAddress="1"
@@ -143,7 +143,7 @@
 			<Tool
 				Name="VCMIDLTool"
 				TargetEnvironment="3"
-				TypeLibraryName="$(IntDir)/FileRenShell.tlb"
+				TypeLibraryName="$(IntDir)/ShellGoodies.tlb"
 				HeaderFileName=""
 			/>
 			<Tool
@@ -180,7 +180,7 @@
 				LinkIncremental="2"
 				SuppressStartupBanner="true"
 				AdditionalLibraryDirectories="$(UTL_INCLUDE)\lib\64"
-				ModuleDefinitionFile=".\FileRenShell.def"
+				ModuleDefinitionFile=".\ShellGoodies.def"
 				GenerateDebugInformation="true"
 				SubSystem="2"
 				RandomizedBaseAddress="1"
@@ -238,7 +238,7 @@
 			/>
 			<Tool
 				Name="VCMIDLTool"
-				TypeLibraryName="$(IntDir)/FileRenShell.tlb"
+				TypeLibraryName="$(IntDir)/ShellGoodies.tlb"
 				HeaderFileName=""
 			/>
 			<Tool
@@ -277,7 +277,7 @@
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
 				AdditionalLibraryDirectories="$(UTL_INCLUDE)\lib\32"
-				ModuleDefinitionFile=".\FileRenShell.def"
+				ModuleDefinitionFile=".\ShellGoodies.def"
 				GenerateDebugInformation="true"
 				SubSystem="2"
 				OptimizeReferences="2"
@@ -338,7 +338,7 @@
 			<Tool
 				Name="VCMIDLTool"
 				TargetEnvironment="3"
-				TypeLibraryName="$(IntDir)/FileRenShell.tlb"
+				TypeLibraryName="$(IntDir)/ShellGoodies.tlb"
 				HeaderFileName=""
 			/>
 			<Tool
@@ -377,7 +377,7 @@
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
 				AdditionalLibraryDirectories="$(UTL_INCLUDE)\lib\64"
-				ModuleDefinitionFile=".\FileRenShell.def"
+				ModuleDefinitionFile=".\ShellGoodies.def"
 				GenerateDebugInformation="true"
 				SubSystem="2"
 				OptimizeReferences="2"
@@ -422,11 +422,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\res\FileRenameShell.rgs"
+				RelativePath=".\res\ShellGoodies.rgs"
 				>
 			</File>
 			<File
-				RelativePath=".\FileRenShell.rc"
+				RelativePath=".\ShellGoodies.rc"
 				>
 				<FileConfiguration
 					Name="DebugU|Win32"
@@ -503,23 +503,23 @@
 				>
 			</File>
 			<File
-				RelativePath=".\FileRenameShell.cpp"
+				RelativePath=".\ShellGoodiesCom.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\FileRenameShell.h"
+				RelativePath=".\ShellGoodiesCom.h"
 				>
 			</File>
 			<File
-				RelativePath=".\FileRenShell.cpp"
+				RelativePath=".\ShellGoodies.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\FileRenShell.def"
+				RelativePath=".\ShellGoodies.def"
 				>
 			</File>
 			<File
-				RelativePath="FileRenShell.idl"
+				RelativePath="ShellGoodies.idl"
 				>
 				<FileConfiguration
 					Name="DebugU|Win32"
@@ -527,9 +527,9 @@
 					<Tool
 						Name="VCMIDLTool"
 						GenerateStublessProxies="true"
-						TypeLibraryName="$(IntDir)/FileRenShell.tlb"
-						HeaderFileName="FileRenShell.h"
-						InterfaceIdentifierFileName="FileRenShell_i.c"
+						TypeLibraryName="$(IntDir)/ShellGoodies.tlb"
+						HeaderFileName="ShellGoodies.h"
+						InterfaceIdentifierFileName="ShellGoodies_i.c"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -538,9 +538,9 @@
 					<Tool
 						Name="VCMIDLTool"
 						GenerateStublessProxies="true"
-						TypeLibraryName="$(IntDir)/FileRenShell.tlb"
-						HeaderFileName="FileRenShell.h"
-						InterfaceIdentifierFileName="FileRenShell_i.c"
+						TypeLibraryName="$(IntDir)/ShellGoodies.tlb"
+						HeaderFileName="ShellGoodies.h"
+						InterfaceIdentifierFileName="ShellGoodies_i.c"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -549,9 +549,9 @@
 					<Tool
 						Name="VCMIDLTool"
 						GenerateStublessProxies="true"
-						TypeLibraryName="$(IntDir)/FileRenShell.tlb"
-						HeaderFileName="FileRenShell.h"
-						InterfaceIdentifierFileName="FileRenShell_i.c"
+						TypeLibraryName="$(IntDir)/ShellGoodies.tlb"
+						HeaderFileName="ShellGoodies.h"
+						InterfaceIdentifierFileName="ShellGoodies_i.c"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -560,9 +560,9 @@
 					<Tool
 						Name="VCMIDLTool"
 						GenerateStublessProxies="true"
-						TypeLibraryName="$(IntDir)/FileRenShell.tlb"
-						HeaderFileName="FileRenShell.h"
-						InterfaceIdentifierFileName="FileRenShell_i.c"
+						TypeLibraryName="$(IntDir)/ShellGoodies.tlb"
+						HeaderFileName="ShellGoodies.h"
+						InterfaceIdentifierFileName="ShellGoodies_i.c"
 					/>
 				</FileConfiguration>
 			</File>
@@ -891,7 +891,7 @@
 	<Globals>
 		<Global
 			Name="RESOURCE_FILE"
-			Value="FileRenShell.rc"
+			Value="ShellGoodies.rc"
 		/>
 	</Globals>
 </VisualStudioProject>

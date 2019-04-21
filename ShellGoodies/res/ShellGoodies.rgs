@@ -2,7 +2,7 @@ HKCR
 {
 	NoRemove CLSID
 	{
-		ForceRemove {1D4EA504-89A1-11D5-A57D-0050BA0E2E4A} = s 'FileRenameShell Class'
+		ForceRemove {1D4EA504-89A1-11D5-A57D-0050BA0E2E4A} = s 'ShellGoodiesCom Class'
 		{
 			ForceRemove 'Programmable'
 			InprocServer32 = s '%MODULE%'
@@ -21,7 +21,7 @@ HKCR
 		{
 			ContextMenuHandlers
 			{
-				FileRenShell = s '{1D4EA504-89A1-11D5-A57D-0050BA0E2E4A}'
+				ShellGoodies = s '{1D4EA504-89A1-11D5-A57D-0050BA0E2E4A}'
 			}
 		}
 	}
@@ -32,7 +32,7 @@ HKCR
 		{
 			ContextMenuHandlers
 			{
-				FileRenShell = s '{1D4EA504-89A1-11D5-A57D-0050BA0E2E4A}'
+				ShellGoodies = s '{1D4EA504-89A1-11D5-A57D-0050BA0E2E4A}'
 			}
 		}
 	}

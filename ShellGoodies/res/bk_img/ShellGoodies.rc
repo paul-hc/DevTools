@@ -169,7 +169,7 @@ BEGIN
     "#include ""afxres.rc""         // standard components: need it for CFileException::GetErrorMessage()\r\n"
     "#include ""utl/utl_ui.rc""\r\n"
     "\r\n"
-    "1 TYPELIB ""FileRenShell.tlb""\r\n"
+    "1 TYPELIB ""ShellGoodies.tlb""\r\n"
     "\0"
 END
 
@@ -203,10 +203,10 @@ BEGIN
             VALUE "Email", "phc.2nd@gmail.com"
             VALUE "FileDescription", "Shell extension for renaming files and folders"
             VALUE "FileVersion", "5, 1, 0, 3"
-            VALUE "InternalName", "FileRenShell"
+            VALUE "InternalName", "Shell Goodies"
             VALUE "LegalCopyright", "Copyright © 2001-2016"
-            VALUE "OriginalFilename", "FileRenShell64.dll"
-            VALUE "ProductName", "FileRenShell Shell Extension DLL"
+            VALUE "OriginalFilename", "ShellGoodies64.dll"
+            VALUE "ProductName", "ShellGoodies Shell Extension DLL"
             VALUE "ProductVersion", "5, 1, 0, 3"
             VALUE "WrittenBy", "Written by Paul Cocoveanu"
         END
@@ -223,7 +223,7 @@ END
 // REGISTRY
 //
 
-IDR_FILERENAMESHELL     REGISTRY                "FileRenameShell.rgs"
+IDR_SHELL_GOODIES_REG   REGISTRY                "ShellGoodies.rgs"
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -396,7 +396,7 @@ END
 #include "afxres.rc"         // standard components: need it for CFileException::GetErrorMessage()
 #include "utl/utl_ui.rc"
 
-1 TYPELIB "FileRenShell.tlb"
+1 TYPELIB "ShellGoodies.tlb"
 
 /////////////////////////////////////////////////////////////////////////////
 #endif    // not APSTUDIO_INVOKED

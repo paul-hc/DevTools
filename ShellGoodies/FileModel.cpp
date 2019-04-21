@@ -53,7 +53,7 @@ size_t CFileModel::SetupFromDropInfo( HDROP hDropInfo )
 	shell::QueryDroppedFiles( sourcePaths, hDropInfo );
 
 // to test multiple paths:
-//str::Split( sourcePaths, _T("C:\\dev\\DevTools\\CommonUtl\\DemoUtl\\DemoUtl.rc|C:\\dev\\DevTools\\CommonUtl\\utl\\utl_ui.rc|C:\\dev\\DevTools\\FileRenShell\\FileRenShell.rc"), _T("|") );
+//str::Split( sourcePaths, _T("C:\\dev\\DevTools\\CommonUtl\\DemoUtl\\DemoUtl.rc|C:\\dev\\DevTools\\CommonUtl\\utl\\utl_ui.rc|C:\\dev\\DevTools\\ShellGoodies\\ShellGoodies.rc"), _T("|") );
 
 	StoreSourcePaths( sourcePaths );
 	return m_sourcePaths.size();

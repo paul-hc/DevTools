@@ -1,20 +1,20 @@
 HKCR
 {
-	FileRenShell.FileRenameShell.1 = s 'FileRenameShell Class'
+	ShellGoodies.ShellGoodiesCom.1 = s 'ShellGoodiesCom Class'
 	{
 		CLSID = s '{1D4EA504-89A1-11D5-A57D-0050BA0E2E4A}'
 	}
-	FileRenShell.FileRenameShell = s 'FileRenameShell Class'
+	ShellGoodies.ShellGoodiesCom = s 'ShellGoodiesCom Class'
 	{
 		CLSID = s '{1D4EA504-89A1-11D5-A57D-0050BA0E2E4A}'
-		CurVer = s 'FileRenShell.FileRenameShell.1'
+		CurVer = s 'ShellGoodies.ShellGoodiesCom.1'
 	}
 	NoRemove CLSID
 	{
-		ForceRemove {1D4EA504-89A1-11D5-A57D-0050BA0E2E4A} = s 'FileRenameShell Class'
+		ForceRemove {1D4EA504-89A1-11D5-A57D-0050BA0E2E4A} = s 'ShellGoodiesCom Class'
 		{
-			ProgID = s 'FileRenShell.FileRenameShell.1'
-			VersionIndependentProgID = s 'FileRenShell.FileRenameShell'
+			ProgID = s 'ShellGoodies.ShellGoodiesCom.1'
+			VersionIndependentProgID = s 'ShellGoodies.ShellGoodiesCom'
 			ForceRemove 'Programmable'
 			InprocServer32 = s '%MODULE%'
 			{
@@ -33,7 +33,7 @@ HKCR
 		{
 			ContextMenuHandlers
 			{
-				FileRenShell = s '{1D4EA504-89A1-11D5-A57D-0050BA0E2E4A}'
+				ShellGoodies = s '{1D4EA504-89A1-11D5-A57D-0050BA0E2E4A}'
 			}
 		}
 	}
@@ -44,7 +44,7 @@ HKCR
 		{
 			ContextMenuHandlers
 			{
-				FileRenShell = s '{1D4EA504-89A1-11D5-A57D-0050BA0E2E4A}'
+				ShellGoodies = s '{1D4EA504-89A1-11D5-A57D-0050BA0E2E4A}'
 			}
 		}
 	}

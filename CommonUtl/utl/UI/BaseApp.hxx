@@ -165,7 +165,7 @@ template< typename BaseClass >
 BOOL CBaseApp< BaseClass >::PreTranslateMessage( MSG* pMsg )
 {
 	if ( CAccelTable::IsKeyMessage( pMsg ) )
-		if ( CWnd* pActiveWnd = CWnd::FromHandlePermanent( ::GetForegroundWindow() ) )		// prevent crash in FileRenameShell due to Explorer.exe being multi-threaded
+		if ( CWnd* pActiveWnd = CWnd::FromHandlePermanent( ::GetForegroundWindow() ) )		// prevent crash in ShellGoodies due to Explorer.exe being multi-threaded
 			if ( m_appAccel.Translate( pMsg, pActiveWnd->GetSafeHwnd() ) )
 				return TRUE;
 

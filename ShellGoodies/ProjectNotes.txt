@@ -7,12 +7,12 @@ BUILD the shell extension
 	- For proper registration in the final location use "Tools > Copy to Tools/mine/" and "Tools > Register DLL to Tools/mine/" while running as administrator.
 
 
-DEBUG the shell extension (FileRenameShell64.dll/FileRenameShell32.dll)
+DEBUG the shell extension (ShellGoodies64.dll/ShellGoodies32.dll)
 =========================
 1) Use ExplorerBrowser tool from CodeProject
 - this works like a charm for 32/64 bit shell extension.
 - it doesn't lock the dll, you can set breakpoints in the code for Debug or Release builds.
-	Solution > FileRenShell > Properties > Debugging:
+	Solution > ShellGoodies > Properties > Debugging:
 		For 32-bit:
 			command: C:\my\Tools\mine\ExplorerBrowser32.exe
 			working directory: C:\my\download\
@@ -24,11 +24,11 @@ DEBUG the shell extension (FileRenameShell64.dll/FileRenameShell32.dll)
 	Explorer: Tools > Folder Options > View:
 		[ ] Launch folder windows in a separate process
 		- easier to unload the dll due to not having multiple copies of explorer.exe
-	Solution > FileRenShell > Properties > Debugging:
+	Solution > ShellGoodies > Properties > Debugging:
 		command: C:\Windows\explorer.exe
 		command arguments: /select,"C:\my\download\env.txt"
 		attach: No
-	Explorer: load the FileRenameShell shell extension (right click on a file), the attach the debugger to the corresponding explorer.exe process instance.
+	Explorer: load the ShellGoodies shell extension (right click on a file), the attach the debugger to the corresponding explorer.exe process instance.
 
 
 DEBUG the REGISTRATION of shell extension (through regsvr32.exe)
@@ -44,11 +44,11 @@ HISTORY
 1) 4 November 2018: According to Michael Dunn's article:		https://www.codeproject.com/Articles/441/The-Complete-Idiot-s-Guide-to-Writing-Shell-Extens
 - This may have an impact on preventing context menu deadlocks in Explorer on Windows 10 (to verify).
 
-Remove OLE Automation features that we don't need (wizard-generated code) from res\FileRenameShell.rgs.
- - The original wizard-generated is backed up at res\FileRenameShell-old (wizard-generated).rgs.
-Remove the type library from FileRenShell.rc resources: Resource Includes > Compile-time directives, remove the line:
-	1 TYPELIB "FileRenShell.tlb"
-Change module server registration in FileRenShell.cpp:
+Remove OLE Automation features that we don't need (wizard-generated code) from res\ShellGoodies.rgs.
+ - The original wizard-generated is backed up at res\ShellGoodies-old (wizard-generated).rgs.
+Remove the type library from ShellGoodies.rc resources: Resource Includes > Compile-time directives, remove the line:
+	1 TYPELIB "ShellGoodies.tlb"
+Change module server registration in ShellGoodies.cpp:
 	return g_comModule.RegisterServer( FALSE );			// registers object, NO TYPELIB (read ProjectNotes.txt)
 	return g_comModule.UnregisterServer( FALSE );		// NO TYPELIB (read ProjectNotes.txt)
 
@@ -59,24 +59,24 @@ The list is stored in:
 
 In this key, we create a string value whose name is our GUID. The contents of the string can be anything.
 The code to do this goes in our DllRegisterServer() and DllUnregisterServer() functions.
-In FileRenShell.cpp:
+In ShellGoodies.cpp:
 	AddAsApprovedShellExtension();
 	RemoveAsApprovedShellExtension();
 
 BUGS
 ====
-1) Deadlock on loading FileRenShell*.dll (64/32 bit, RELEASE/DEBUG):
-When FileRenShell64.dll (or 32) is registered and enabled (ShellExView), sometimes when right clicking on a FOLDER *first time* in Explorer.exe (or ExplorerBrowser64.exe), a deadlock occurs.
+1) Deadlock on loading ShellGoodies*.dll (64/32 bit, RELEASE/DEBUG):
+When ShellGoodies64.dll (or 32) is registered and enabled (ShellExView), sometimes when right clicking on a FOLDER *first time* in Explorer.exe (or ExplorerBrowser64.exe), a deadlock occurs.
 This happens in global/static variables initialization, during initialization of "AFX_GLOBAL_DATA afxGlobalData;", when calling SHAppBarMessage():
  	shell32.dll!SHAppBarMessage()  + 0xf7 bytes	
->	FileRenShell64.dll!AFX_GLOBAL_DATA::OnSettingChange()  Line 546 + 0x10 bytes	C++
- 	FileRenShell64.dll!AFX_GLOBAL_DATA::AFX_GLOBAL_DATA()  Line 254	C++
- 	FileRenShell64.dll!`dynamic initializer for 'afxGlobalData''()  Line 149 + 0x10 bytes	C++
- 	FileRenShell64.dll!_initterm(void (void)* * pfbegin=0x0000000007f5ea98, void (void)* * pfend=0x0000000007f5f3c8)  Line 903	C
- 	FileRenShell64.dll!_cinit(int initFloatingPrecision=0x00000000)  Line 320	C
- 	FileRenShell64.dll!_CRT_INIT(void * hDllHandle=0x0000000007460000, unsigned long dwReason=0x00000001, void * lpreserved=0x0000000000000000)  Line 132 + 0x19 bytes	C
- 	FileRenShell64.dll!__DllMainCRTStartup(void * hDllHandle=0x0000000007460000, unsigned long dwReason=0x00000001, void * lpreserved=0x0000000000000000)  Line 312 + 0x13 bytes	C
- 	FileRenShell64.dll!_DllMainCRTStartup(void * hDllHandle=0x0000000007460000, unsigned long dwReason=0x00000001, void * lpreserved=0x0000000000000000)  Line 282	C
+>	ShellGoodies64.dll!AFX_GLOBAL_DATA::OnSettingChange()  Line 546 + 0x10 bytes	C++
+ 	ShellGoodies64.dll!AFX_GLOBAL_DATA::AFX_GLOBAL_DATA()  Line 254	C++
+ 	ShellGoodies64.dll!`dynamic initializer for 'afxGlobalData''()  Line 149 + 0x10 bytes	C++
+ 	ShellGoodies64.dll!_initterm(void (void)* * pfbegin=0x0000000007f5ea98, void (void)* * pfend=0x0000000007f5f3c8)  Line 903	C
+ 	ShellGoodies64.dll!_cinit(int initFloatingPrecision=0x00000000)  Line 320	C
+ 	ShellGoodies64.dll!_CRT_INIT(void * hDllHandle=0x0000000007460000, unsigned long dwReason=0x00000001, void * lpreserved=0x0000000000000000)  Line 132 + 0x19 bytes	C
+ 	ShellGoodies64.dll!__DllMainCRTStartup(void * hDllHandle=0x0000000007460000, unsigned long dwReason=0x00000001, void * lpreserved=0x0000000000000000)  Line 312 + 0x13 bytes	C
+ 	ShellGoodies64.dll!_DllMainCRTStartup(void * hDllHandle=0x0000000007460000, unsigned long dwReason=0x00000001, void * lpreserved=0x0000000000000000)  Line 282	C
 
 - Quick workaround is to right click on a file to open context menu, then it starts working for folders.
 - Read: https://answers.microsoft.com/en-us/windows/forum/all/windows-explorer-not-responding-loader-lock-active/fc695f5b-a4cb-47fd-a747-e95770e444bf

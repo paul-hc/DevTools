@@ -90,5 +90,5 @@ Build the solution, switch to ReleaseU configuration.
 Tools > "Copy to Tools/mine/"
 Tools > "Register DLL to Tools/mine/"
 Repeat for multiple platforms (32/64 bit).
-	D:\my\Tools\mine\FileRenShell32.dll
-	D:\my\Tools\mine\FileRenShell64.dll
+	D:\my\Tools\mine\ShellGoodies32.dll
+	D:\my\Tools\mine\ShellGoodies64.dll

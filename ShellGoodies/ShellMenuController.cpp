@@ -38,7 +38,7 @@ const CShellMenuController::CMenuCmdInfo CShellMenuController::s_commands[] =
 	{ Popup_MoreGoodies, _T("More &Goodies"), _T("Open more options"), 0 },
 #ifdef _DEBUG
 	{ Cmd_Separator },
-	{ Cmd_RunUnitTests, _T("# Run Unit Tests (FileRenameShell)"), _T("Run the unit tests (debug build only)"), ID_RUN_TESTS },
+	{ Cmd_RunUnitTests, _T("# Run Unit Tests (ShellGoodies)"), _T("Run the unit tests (debug build only)"), ID_RUN_TESTS },
 #endif
 	{ Cmd_Separator }
 };

@@ -368,10 +368,10 @@ BEGIN
             VALUE "Email", "phc.2nd@gmail.com"
             VALUE "FileDescription", "Shell extension for manipulating files and folders"
             VALUE "FileVersion", "9, 2, 5, 0"
-            VALUE "InternalName", "FileRenShell"
+            VALUE "InternalName", "Shell Goodies"
             VALUE "LegalCopyright", "Copyfright © 2001-2019"
-            VALUE "OriginalFilename", "FileRenShell64.dll"
-            VALUE "ProductName", "FileRenShell Shell Extension DLL"
+            VALUE "OriginalFilename", "ShellGoodies64.dll"
+            VALUE "ProductName", "ShellGoodies Shell Extension DLL"
             VALUE "ProductVersion", "9, 2, 5, 0"
             VALUE "WrittenBy", "Written by Paul Cocoveanu"
         END
@@ -388,7 +388,7 @@ END
 // REGISTRY
 //
 
-IDR_FILERENAMESHELL_REG REGISTRY                "res\\FileRenameShell.rgs"
+IDR_SHELL_GOODIES_REG   REGISTRY                "res\\ShellGoodies.rgs"
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -624,7 +624,7 @@ END
 
 STRINGTABLE 
 BEGIN
-    AFX_IDS_APP_TITLE       "FileRenShell"
+    AFX_IDS_APP_TITLE       "ShellGoodies"
 END
 
 STRINGTABLE 

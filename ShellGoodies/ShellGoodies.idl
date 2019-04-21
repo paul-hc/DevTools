@@ -1,8 +1,8 @@
-// FileRenShell.idl : IDL source for FileRenShell.dll
+// ShellGoodies.idl : IDL source for ShellGoodies.dll
 //
 
 // This file will be processed by the MIDL tool to
-// produce the type library (FileRenShell.tlb) and marshalling code.
+// produce the type library (ShellGoodies.tlb) and marshalling code.
 
 import "oaidl.idl";
 import "ocidl.idl";
@@ -10,29 +10,29 @@ import "ocidl.idl";
 		object,
 		uuid(1D4EA502-89A1-11D5-A57D-0050BA0E2E4A),
 		dual,
-		helpstring("IFileRenameShell Interface"),
+		helpstring("IShellGoodiesCom Interface"),
 		pointer_default(unique)
 	]
-	interface IFileRenameShell : IDispatch
+	interface IShellGoodiesCom : IDispatch
 	{
 	};
 
 [
 	uuid(1D4EA4F3-89A1-11D5-A57D-0050BA0E2E4A),
 	version(1.0),
-	helpstring("FileRenShell 1.0 Type Library")
+	helpstring("ShellGoodies 1.0 Type Library")
 ]
-library FILERENSHELLLib
+library SHELL_GOODIES_Lib
 {
 	importlib("stdole32.tlb");
 	importlib("stdole2.tlb");
 
 	[
 		uuid(1D4EA504-89A1-11D5-A57D-0050BA0E2E4A),
-		helpstring("FileRenameShell Class")
+		helpstring("ShellGoodiesCom Class")
 	]
-	coclass FileRenameShell
+	coclass ShellGoodiesCom
 	{
-		[default] interface IFileRenameShell;
+		[default] interface IShellGoodiesCom;
 	};
 };

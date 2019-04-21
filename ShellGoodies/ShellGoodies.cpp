@@ -1,4 +1,4 @@
-// FileRenShell.cpp : Implementation of DLL Exports.
+// ShellGoodies.cpp : Implementation of DLL Exports.
 
 
 // Note: Proxy/Stub Information
@@ -15,25 +15,25 @@
 //	  need to remove the following define from dlldatax.c.
 //	  #define USE_STUBLESS_PROXY
 //
-//	  Modify the custom build rule for FileRenShell.idl by adding the following
+//	  Modify the custom build rule for ShellGoodies.idl by adding the following
 //	  files to the Outputs.
-//		  FileRenShell_p.c
+//		  ShellGoodies_p.c
 //		  dlldata.c
 //	  To build a separate proxy/stub DLL,
-//	  run nmake -f FileRenShellps.mk in the project directory.
+//	  run nmake -f ShellGoodiesps.mk in the project directory.
 
 #include "stdafx.h"
-#include "FileRenShell.h"
+#include "ShellGoodies.h"
 #include "Application.h"
 #include "utl/Registry.h"
 #include <initguid.h>
 
-#include "FileRenShell_i.c"
-#include "FileRenameShell.h"
+#include "ShellGoodies_i.c"
+#include "ShellGoodiesCom.h"
 
 
 BEGIN_OBJECT_MAP( s_objectMap )
-	OBJECT_ENTRY( CLSID_FileRenameShell, CFileRenameShell )
+	OBJECT_ENTRY( CLSID_ShellGoodiesCom, CShellGoodiesCom )
 END_OBJECT_MAP()
 
 
@@ -41,7 +41,7 @@ namespace app
 {
 	void InitModule( HINSTANCE hInstance )
 	{
-		g_comModule.Init( s_objectMap, hInstance, &LIBID_FILERENSHELLLib );
+		g_comModule.Init( s_objectMap, hInstance, &LIBID_SHELL_GOODIES_Lib );
 	}
 
 	bool AddAsApprovedShellExtension( void );

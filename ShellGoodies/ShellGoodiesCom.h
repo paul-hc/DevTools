@@ -1,5 +1,5 @@
-#ifndef FileRenameShell_h
-#define FileRenameShell_h
+#ifndef ShellGoodiesCom_h
+#define ShellGoodiesCom_h
 #pragma once
 
 #include "resource.h"
@@ -8,16 +8,16 @@
 class CShellMenuController;
 
 
-class ATL_NO_VTABLE CFileRenameShell
+class ATL_NO_VTABLE CShellGoodiesCom
 	: public CComObjectRootEx< CComSingleThreadModel >
-	, public CComCoClass< CFileRenameShell, &CLSID_FileRenameShell >
+	, public CComCoClass< CShellGoodiesCom, &CLSID_ShellGoodiesCom >
 	, public ISupportErrorInfo
 	, public IShellExtInit
 	, public IContextMenu
 {
 public:
-	CFileRenameShell( void );
-	~CFileRenameShell();
+	CShellGoodiesCom( void );
+	~CShellGoodiesCom();
 private:
 	bool IsInit( void ) const { return m_pController.get() != NULL; }
 	size_t ExtractDropInfo( IDataObject* pSelFileObjects );
@@ -26,11 +26,11 @@ private:
 
 	// generated COM stuff
 public:
-	DECLARE_REGISTRY_RESOURCEID( IDR_FILERENAMESHELL_REG )
+	DECLARE_REGISTRY_RESOURCEID( IDR_SHELL_GOODIES_REG )
 
 	DECLARE_PROTECT_FINAL_CONSTRUCT()
 
-	BEGIN_COM_MAP( CFileRenameShell )
+	BEGIN_COM_MAP( CShellGoodiesCom )
 		COM_INTERFACE_ENTRY( ISupportErrorInfo )
 		COM_INTERFACE_ENTRY( IShellExtInit )
 		COM_INTERFACE_ENTRY( IContextMenu )
@@ -49,4 +49,4 @@ public:
 };
 
 
-#endif // FileRenameShell_h
+#endif // ShellGoodiesCom_h
