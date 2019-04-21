@@ -258,6 +258,7 @@
     <ClInclude Include="ut\NumericTests.h" />
     <ClInclude Include="ut\PathGeneratorTests.h" />
     <ClInclude Include="ut\PathTests.h" />
+    <ClInclude Include="ut\RegistryTests.h" />
     <ClInclude Include="ut\ResequenceTests.h" />
     <ClInclude Include="ut\StringRangeTests.h" />
     <ClInclude Include="ut\StringTests.h" />
@@ -321,12 +322,14 @@
     <ClCompile Include="ut\NumericTests.cpp" />
     <ClCompile Include="ut\PathGeneratorTests.cpp" />
     <ClCompile Include="ut\PathTests.cpp" />
+    <ClCompile Include="ut\RegistryTests.cpp" />
     <ClCompile Include="ut\ResequenceTests.cpp" />
     <ClCompile Include="ut\StringRangeTests.cpp" />
     <ClCompile Include="ut\StringTests.cpp" />
     <ClCompile Include="ut\Test.cpp" />
     <ClCompile Include="ut\ThreadingTests.cpp" />
     <ClCompile Include="ut\UnitTest.cpp" />
+    <ClCompile Include="ut\UtlConsoleTests.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="UTL Library.txt" />
