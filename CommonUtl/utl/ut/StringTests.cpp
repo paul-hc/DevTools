@@ -1,5 +1,7 @@
 
 #include "stdafx.h"
+
+#ifdef _DEBUG		// no UT code in release builds
 #include "ut/StringTests.h"
 #include "EnumTags.h"
 #include "FlagTags.h"
@@ -9,12 +11,7 @@
 #include "TimeUtils.h"
 #include "vector_map.h"
 
-#ifdef _DEBUG
 #define new DEBUG_NEW
-#endif
-
-
-#ifdef _DEBUG		// no UT code in release builds
 
 
 namespace func

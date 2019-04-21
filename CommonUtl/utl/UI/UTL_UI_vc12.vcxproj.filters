@@ -30,11 +30,11 @@
     <Filter Include="UI\Vista MFC">
       <UniqueIdentifier>{05b7717b-7ff4-4fa5-90dc-a661133d308d}</UniqueIdentifier>
     </Filter>
-    <Filter Include="UnitTest">
-      <UniqueIdentifier>{024ac24f-2026-4af9-8be8-1b2e0e607b41}</UniqueIdentifier>
-    </Filter>
     <Filter Include="UI\Registry">
       <UniqueIdentifier>{70ff721e-49ed-4872-908f-53ff515a7b1f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Tests">
+      <UniqueIdentifier>{024ac24f-2026-4af9-8be8-1b2e0e607b41}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -216,13 +216,13 @@
       <Filter>UI\Imaging</Filter>
     </ClInclude>
     <ClInclude Include="ut\BaseImageTestCase.h">
-      <Filter>UnitTest</Filter>
+      <Filter>Tests</Filter>
     </ClInclude>
     <ClInclude Include="ut\TestToolWnd.h">
-      <Filter>UnitTest</Filter>
+      <Filter>Tests</Filter>
     </ClInclude>
     <ClInclude Include="ut\WicImageTests.h">
-      <Filter>UnitTest</Filter>
+      <Filter>Tests</Filter>
     </ClInclude>
     <ClInclude Include="Thumbnailer.h">
       <Filter>UI\Imaging</Filter>
@@ -294,13 +294,13 @@
       <Filter>UI</Filter>
     </ClInclude>
     <ClInclude Include="ut\ColorTests.h">
-      <Filter>UnitTest</Filter>
+      <Filter>Tests</Filter>
     </ClInclude>
     <ClInclude Include="ut\SerializationTests.h">
-      <Filter>UnitTest</Filter>
+      <Filter>Tests</Filter>
     </ClInclude>
     <ClInclude Include="ut\ShellFileSystemTests.h">
-      <Filter>UnitTest</Filter>
+      <Filter>Tests</Filter>
     </ClInclude>
     <ClInclude Include="StdManifest.h">
       <Filter>Source Files</Filter>
@@ -456,7 +456,7 @@
       <Filter>UI\Controls</Filter>
     </ClInclude>
     <ClInclude Include="ut\UtlUserInterfaceTests.h">
-      <Filter>UnitTest</Filter>
+      <Filter>Tests</Filter>
     </ClInclude>
     <ClInclude Include="StdColors.h">
       <Filter>Source Files</Filter>
@@ -483,6 +483,18 @@
       <Filter>UI\Shell %28Explorer API%29</Filter>
     </ClInclude>
     <ClInclude Include="ShellDialogs_fwd.h">
+      <Filter>UI\Shell %28Explorer API%29</Filter>
+    </ClInclude>
+    <ClInclude Include="ImageEdit.h">
+      <Filter>UI\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="Recycler.h">
+      <Filter>UI\Shell %28Explorer API%29</Filter>
+    </ClInclude>
+    <ClInclude Include="ShellContextMenuBuilder.h">
+      <Filter>UI\Shell %28Explorer API%29</Filter>
+    </ClInclude>
+    <ClInclude Include="ShellRegistryAssoc.h">
       <Filter>UI\Shell %28Explorer API%29</Filter>
     </ClInclude>
   </ItemGroup>
@@ -632,13 +644,13 @@
       <Filter>UI\Imaging</Filter>
     </ClCompile>
     <ClCompile Include="ut\BaseImageTestCase.cpp">
-      <Filter>UnitTest</Filter>
+      <Filter>Tests</Filter>
     </ClCompile>
     <ClCompile Include="ut\TestToolWnd.cpp">
-      <Filter>UnitTest</Filter>
+      <Filter>Tests</Filter>
     </ClCompile>
     <ClCompile Include="ut\WicImageTests.cpp">
-      <Filter>UnitTest</Filter>
+      <Filter>Tests</Filter>
     </ClCompile>
     <ClCompile Include="Thumbnailer.cpp">
       <Filter>UI\Imaging</Filter>
@@ -698,13 +710,13 @@
       <Filter>UI</Filter>
     </ClCompile>
     <ClCompile Include="ut\ColorTests.cpp">
-      <Filter>UnitTest</Filter>
+      <Filter>Tests</Filter>
     </ClCompile>
     <ClCompile Include="ut\SerializationTests.cpp">
-      <Filter>UnitTest</Filter>
+      <Filter>Tests</Filter>
     </ClCompile>
     <ClCompile Include="ut\ShellFileSystemTests.cpp">
-      <Filter>UnitTest</Filter>
+      <Filter>Tests</Filter>
     </ClCompile>
     <ClCompile Include="BaseDetailHostCtrl.cpp">
       <Filter>UI\Controls</Filter>
@@ -849,6 +861,21 @@
     </ClCompile>
     <ClCompile Include="ShellDialogs.cpp">
       <Filter>UI\Shell %28Explorer API%29</Filter>
+    </ClCompile>
+    <ClCompile Include="ImageEdit.cpp">
+      <Filter>UI\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="Recycler.cpp">
+      <Filter>UI\Shell %28Explorer API%29</Filter>
+    </ClCompile>
+    <ClCompile Include="ShellContextMenuBuilder.cpp">
+      <Filter>UI\Shell %28Explorer API%29</Filter>
+    </ClCompile>
+    <ClCompile Include="ShellRegistryAssoc.cpp">
+      <Filter>UI\Shell %28Explorer API%29</Filter>
+    </ClCompile>
+    <ClCompile Include="ut\UtlUserInterfaceTests.cpp">
+      <Filter>Tests</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

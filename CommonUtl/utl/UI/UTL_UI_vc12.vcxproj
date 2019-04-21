@@ -218,6 +218,7 @@
     <ClInclude Include="EnumSplitButton.h" />
     <ClInclude Include="FilterStore.h" />
     <ClInclude Include="GdiPlus_fwd.h" />
+    <ClInclude Include="ImageEdit.h" />
     <ClInclude Include="ImagePathKey.h" />
     <ClInclude Include="ImageZoomViewD2D.h" />
     <ClInclude Include="Image_fwd.h" />
@@ -268,6 +269,7 @@
     <ClInclude Include="PostCall.h" />
     <ClInclude Include="ProcessUtils.h" />
     <ClInclude Include="ProgressDialog.h" />
+    <ClInclude Include="Recycler.h" />
     <ClInclude Include="RegistryOptions.h" />
     <ClInclude Include="RegistrySection.h" />
     <ClInclude Include="ReportListControl.h" />
@@ -277,12 +279,14 @@
     <ClInclude Include="SampleView.h" />
     <ClInclude Include="ScopedBitmapMemDC.h" />
     <ClInclude Include="ScopedGdi.h" />
+    <ClInclude Include="ShellContextMenuBuilder.h" />
     <ClInclude Include="ShellContextMenuHost.h" />
     <ClInclude Include="ShellDialogs.h" />
     <ClInclude Include="ShellDialogs_fwd.h" />
     <ClInclude Include="ShellDragImager.h" />
     <ClInclude Include="ShellDropTip.h" />
     <ClInclude Include="ShellFileDialog.h" />
+    <ClInclude Include="ShellRegistryAssoc.h" />
     <ClInclude Include="ShellTypes.h" />
     <ClInclude Include="ShellUtilities.h" />
     <ClInclude Include="SpinEdit.h" />
@@ -360,6 +364,7 @@
     <ClCompile Include="DragListCtrl.cpp" />
     <ClCompile Include="EnumSplitButton.cpp" />
     <ClCompile Include="FilterStore.cpp" />
+    <ClCompile Include="ImageEdit.cpp" />
     <ClCompile Include="ImageZoomViewD2D.cpp" />
     <ClCompile Include="Image_fwd.cpp" />
     <ClCompile Include="GroupIcon.cpp" />
@@ -403,17 +408,20 @@
     <ClCompile Include="PostCall.cpp" />
     <ClCompile Include="ProcessUtils.cpp" />
     <ClCompile Include="ProgressDialog.cpp" />
+    <ClCompile Include="Recycler.cpp" />
     <ClCompile Include="RegistryOptions.cpp" />
     <ClCompile Include="RegistrySection.cpp" />
     <ClCompile Include="ReportListControl.cpp" />
     <ClCompile Include="ReportListCustomDraw.cpp" />
     <ClCompile Include="ResourceData.cpp" />
     <ClCompile Include="SampleView.cpp" />
+    <ClCompile Include="ShellContextMenuBuilder.cpp" />
     <ClCompile Include="ShellContextMenuHost.cpp" />
     <ClCompile Include="ShellDialogs.cpp" />
     <ClCompile Include="ShellDragImager.cpp" />
     <ClCompile Include="ShellDropTip.cpp" />
     <ClCompile Include="ShellFileDialog.cpp" />
+    <ClCompile Include="ShellRegistryAssoc.cpp" />
     <ClCompile Include="ShellTypes.cpp" />
     <ClCompile Include="ShellUtilities.cpp" />
     <ClCompile Include="SpinEdit.cpp" />
@@ -447,6 +455,7 @@
     <ClCompile Include="ut\SerializationTests.cpp" />
     <ClCompile Include="ut\ShellFileSystemTests.cpp" />
     <ClCompile Include="ut\TestToolWnd.cpp" />
+    <ClCompile Include="ut\UtlUserInterfaceTests.cpp" />
     <ClCompile Include="ut\WicImageTests.cpp" />
     <ClCompile Include="VersionInfo.cpp" />
     <ClCompile Include="VisualTheme.cpp" />

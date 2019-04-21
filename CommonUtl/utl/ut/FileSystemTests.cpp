@@ -1,5 +1,7 @@
 
 #include "stdafx.h"
+
+#ifdef _DEBUG		// no UT code in release builds
 #include "ut/FileSystemTests.h"
 #include "Path.h"
 #include "FlexPath.h"
@@ -10,12 +12,7 @@
 #include "StringUtilities.h"
 #include "StructuredStorage.h"
 
-#ifdef _DEBUG
 #define new DEBUG_NEW
-#endif
-
-
-#ifdef _DEBUG		// no UT code in release builds
 
 
 namespace ut

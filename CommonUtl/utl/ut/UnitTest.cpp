@@ -1,5 +1,7 @@
 
 #include "stdafx.h"
+
+#ifdef _DEBUG		// no UT code in release builds
 #include "ut/UnitTest.h"
 #include "ContainerUtilities.h"
 #include "FileSystem.h"
@@ -10,12 +12,7 @@
 #include <math.h>
 #include <fstream>
 
-#ifdef _DEBUG
 #define new DEBUG_NEW
-#endif
-
-
-#ifdef _DEBUG		// no UT code in release builds
 
 
 namespace numeric

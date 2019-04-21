@@ -1,18 +1,14 @@
 
 #include "stdafx.h"
+
+#ifdef _DEBUG		// no UT code in release builds
 #include "ut/NumericTests.h"
 #include "StringUtilities.h"
 #include "Crc32.h"
-//#include "ut/BaseImageTestCase.h"
 #include "utl/AppTools.h"
 #include "utl/MemLeakCheck.h"
 
-#ifdef _DEBUG
-//#define new DEBUG_NEW
-#endif
-
-
-#ifdef _DEBUG		// no UT code in release builds
+#define new DEBUG_NEW
 
 
 CNumericTests::CNumericTests( void )

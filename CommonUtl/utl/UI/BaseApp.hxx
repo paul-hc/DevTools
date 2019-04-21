@@ -10,9 +10,11 @@
 #include "resource.h"
 #include <afxcontrolbars.h>			// MFC support for ribbons and control bars
 
+#ifdef _DEBUG
 #include "utl/ut/Test.h"
 #include "utl/ut/UtlConsoleTests.h"
 #include "ut/UtlUserInterfaceTests.h"
+#endif
 
 
 // CBaseApp template code
@@ -99,8 +101,10 @@ void CBaseApp< BaseClass >::OnInitAppResources( void )
 	// activate "Windows Native" visual manager for enabling themes in MFC controls
 	CMFCVisualManager::SetDefaultManager( RUNTIME_CLASS( CMFCVisualManagerWindows ) );
 
+#ifdef _DEBUG
 	ut::RegisterUtlConsoleTests();
 	ut::RegisterUtlUserInterfaceTests();
+#endif
 }
 
 template< typename BaseClass >

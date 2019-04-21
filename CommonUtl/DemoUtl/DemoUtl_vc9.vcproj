@@ -576,7 +576,7 @@
 			</File>
 		</Filter>
 		<Filter
-			Name="Unit Tests"
+			Name="Tests"
 			>
 			<File
 				RelativePath=".\ImageTests.cpp"

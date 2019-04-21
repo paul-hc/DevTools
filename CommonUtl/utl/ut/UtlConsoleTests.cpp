@@ -1,5 +1,7 @@
 
 #include "stdafx.h"
+
+#ifdef _DEBUG		// no UT code in release builds
 #include "UtlConsoleTests.h"
 #include "StringTests.h"
 #include "StringRangeTests.h"
@@ -13,16 +15,13 @@
 #include "PathGeneratorTests.h"
 #include "ThreadingTests.h"
 
-#ifdef _DEBUG
 #define new DEBUG_NEW
-#endif
 
 
 namespace ut
 {
 	void RegisterUtlConsoleTests( void )
 	{
-	#ifdef _DEBUG
 		// register UTL tests
 		CStringTests::Instance();
 		CStringRangeTests::Instance();
@@ -35,6 +34,8 @@ namespace ut
 		CPathTests::Instance();
 		CPathGeneratorTests::Instance();
 		//CThreadingTests::Instance();
-	#endif
 	}
 }
+
+
+#endif //_DEBUG

@@ -1,5 +1,7 @@
 
 #include "stdafx.h"
+
+#ifdef _DEBUG		// no UT code in release builds
 #include "ut/ShellFileSystemTests.h"
 #include "Recycler.h"
 #include "ShellTypes.h"
@@ -9,12 +11,7 @@
 #include "StringUtilities.h"
 #include "utl/ContainerUtilities.h"
 
-#ifdef _DEBUG
 #define new DEBUG_NEW
-#endif
-
-
-#ifdef _DEBUG		// no UT code in release builds
 
 
 namespace ut

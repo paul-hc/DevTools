@@ -1,14 +1,11 @@
 
 #include "stdafx.h"
+
+#ifdef _DEBUG		// no UT code in release builds
 #include "ut/BaseImageTestCase.h"
 #include "StringUtilities.h"
 
-#ifdef _DEBUG
 #define new DEBUG_NEW
-#endif
-
-
-#ifdef _DEBUG
 
 
 const TCHAR* CBaseImageTestCase::GetImageFilename( SrcImage srcImage )

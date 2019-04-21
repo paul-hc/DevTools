@@ -806,7 +806,7 @@
 			</Filter>
 		</Filter>
 		<Filter
-			Name="utl-UnitTest"
+			Name="Tests"
 			>
 			<File
 				RelativePath=".\ut\FileSystemTests.cpp"

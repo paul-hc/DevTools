@@ -1,17 +1,14 @@
 
 #include "stdafx.h"
+
+#ifdef _DEBUG		// no UT code in release builds
 #include "ThumbnailTests.h"
 #include "Application.h"
 #include "utl/StructuredStorage.h"
 #include "utl/UI/Thumbnailer.h"
 #include "utl/UI/ut/TestToolWnd.h"
 
-#ifdef _DEBUG
 #define new DEBUG_NEW
-#endif
-
-
-#ifdef _DEBUG
 
 
 namespace ut

@@ -1,17 +1,14 @@
 
 #include "stdafx.h"
+
+#ifdef _DEBUG		// no UT code in release builds
 #include "ut/PathTests.h"
 #include "Path.h"
 #include "FlexPath.h"
 #include "Resequence.hxx"
 #include "StringUtilities.h"
 
-#ifdef _DEBUG
 #define new DEBUG_NEW
-#endif
-
-
-#ifdef _DEBUG		// no UT code in release builds
 
 
 CPathTests::CPathTests( void )

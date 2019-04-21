@@ -1,17 +1,14 @@
 
 #include "stdafx.h"
+
+#ifdef _DEBUG		// no UT code in release builds
 #include "ut/LcsTests.h"
 #include "LongestCommonSubsequence.h"
 #include "LongestCommonDuplicate.h"
 #include "RandomUtilities.h"
 #include "StringUtilities.h"
 
-#ifdef _DEBUG
 #define new DEBUG_NEW
-#endif
-
-
-#ifdef _DEBUG		// no UT code in release builds
 
 
 namespace ut

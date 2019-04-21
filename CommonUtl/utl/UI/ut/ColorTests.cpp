@@ -1,15 +1,12 @@
 
 #include "stdafx.h"
+
+#ifdef _DEBUG		// no UT code in release builds
 #include "ut/ColorTests.h"
 #include "StringUtilities.h"
 #include "Color.h"
 
-#ifdef _DEBUG
 #define new DEBUG_NEW
-#endif
-
-
-#ifdef _DEBUG		// no UT code in release builds
 
 
 CColorTests::CColorTests( void )

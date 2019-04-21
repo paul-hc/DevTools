@@ -1,5 +1,7 @@
 
 #include "stdafx.h"
+
+#ifdef _DEBUG		// no UT code in release builds
 #include "ImagingD2DTests.h"
 #include "utl/UI/ImagingWic.h"
 #include "utl/UI/ImagingDirect2D.h"
@@ -7,12 +9,7 @@
 #include "utl/UI/WindowTimer.h"
 #include "utl/UI/ut/TestToolWnd.h"
 
-#ifdef _DEBUG
 #define new DEBUG_NEW
-#endif
-
-
-#ifdef _DEBUG
 
 
 CImagingD2DTests::CImagingD2DTests( void )

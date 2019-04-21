@@ -796,7 +796,7 @@
 			</Filter>
 		</Filter>
 		<Filter
-			Name="Unit Tests"
+			Name="Tests"
 			>
 			<File
 				RelativePath=".\UT\ImagingD2DTests.cpp"

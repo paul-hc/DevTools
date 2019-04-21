@@ -1,5 +1,7 @@
 
 #include "stdafx.h"
+
+#ifdef _DEBUG		// no UT code in release builds
 #include "CommandModelSerializerTests.h"
 #include "CommandModelPersist.h"
 #include "FileMacroCommands.h"
@@ -8,16 +10,9 @@
 #include "utl/FileSystem.h"
 #include "utl/FmtUtils.h"
 #include "utl/TimeUtils.h"
-
-#ifdef _DEBUG
-#define new DEBUG_NEW
-#endif
-
-
-#ifdef _DEBUG		// no UT code in release builds
-
-
 #include <fstream>
+
+#define new DEBUG_NEW
 
 
 namespace ut

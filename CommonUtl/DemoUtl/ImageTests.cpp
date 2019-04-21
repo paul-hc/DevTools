@@ -1,5 +1,7 @@
 
 #include "stdafx.h"
+
+#ifdef _DEBUG		// no UT code in release builds
 #include "ImageTests.h"
 #include "resource.h"
 #include "utl/UI/DibDraw.h"
@@ -13,12 +15,7 @@
 #include "utl/UI/ut/TestToolWnd.h"
 #include <sstream>
 
-#ifdef _DEBUG
 #define new DEBUG_NEW
-#endif
-
-
-#ifdef _DEBUG
 
 
 CImageTests::CImageTests( void )

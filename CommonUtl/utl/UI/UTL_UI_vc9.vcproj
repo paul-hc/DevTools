@@ -432,7 +432,7 @@
 			</File>
 		</Filter>
 		<Filter
-			Name="UnitTest"
+			Name="Tests"
 			>
 			<File
 				RelativePath=".\ut\BaseImageTestCase.cpp"

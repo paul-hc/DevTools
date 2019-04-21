@@ -1,5 +1,7 @@
 
 #include "stdafx.h"
+
+#ifdef _DEBUG		// no UT code in release builds
 #include "RenameFilesTests.h"
 #include "RenameItem.h"
 #include "FileService.h"
@@ -8,12 +10,7 @@
 #include "utl/Logger.h"
 #include "utl/PathGenerator.h"
 
-#ifdef _DEBUG
 #define new DEBUG_NEW
-#endif
-
-
-#ifdef _DEBUG		// no UT code in release builds
 
 
 namespace ut
