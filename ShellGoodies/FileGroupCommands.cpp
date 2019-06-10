@@ -164,7 +164,6 @@ namespace cmd
 
 	void CBaseDeepTransferFilesCmd::SetDeepRelDirPath( const fs::CPath& deepRelSubfolderPath )
 	{
-		REQUIRE( !deepRelSubfolderPath.IsEmpty() );
 		REQUIRE( path::IsRelative( deepRelSubfolderPath.GetPtr() ) );
 
 		m_topDestDirPath = m_destDirPath;
