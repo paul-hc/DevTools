@@ -10,7 +10,7 @@
 *.tlog/
 
 # DevTools Ignore:
-FileRenShell/FileRenShell.h
+ShellGoodies/ShellGoodies.h
 TestDataUtl/images/thumbnails/myThumbs.stg
 TestDataUtl/temp_ut/
 
