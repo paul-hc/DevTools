@@ -410,7 +410,7 @@ namespace code
 				++pos;
 		}
 
-		if ( text[ pos ] == _T('\0') )
+		if ( _T('\0') == text[ pos ] )
 			return TokenRange( -1 );
 
 		ASSERT( str::isNumberChar( text[ pos ] ) );
@@ -429,19 +429,35 @@ namespace code
 
 		ASSERT( numberRange.IsValid() );
 
-		FormattedNumber< unsigned int > parsedNumber( str::parseUnsignedInteger( text + numberRange.m_start ), _T("%u") );
+		unsigned int value;
+		str::NumType numType = str::parseUnsignedInteger( value, text + numberRange.m_start );
+		if ( str::NoNumber == numType )
+			throw CRuntimeException( str::Format( _T("invalid unsigned int number '%s'"), text + numberRange.m_start ) );
 
-		if ( 0 == _tcsnicmp( text + numberRange.m_start, _T("0x"), 2 ) )
+		FormattedNumber< unsigned int > parsedNumber( value, _T("%u") );
+
+		switch ( numType )
 		{
-			int hexDigitCount = 0;
+			case str::DecimalNum:
+			{
+				size_t digitCount = numberRange.getLength();
+				if ( digitCount > 1 )
+					parsedNumber.m_format.Format( _T("%%0%du"), digitCount );
+				break;
+			}
+			case str::HexNum:
+			{
+				int hexDigitCount = 0;
 
-			for ( int hexPos = numberRange.m_start + 2; _istxdigit( text[ hexPos ] ); ++hexPos )
-				++hexDigitCount;
+				for ( int hexPos = numberRange.m_start + 2; ::_istxdigit( text[ hexPos ] ); ++hexPos )
+					++hexDigitCount;
 
-			if ( 0 == hexDigitCount )
-				throw CRuntimeException( str::Format( _T("Invalid hex number in '%s'"), text ) );
+				if ( 0 == hexDigitCount )
+					throw CRuntimeException( str::Format( _T("Invalid hex number in '%s'"), text ) );
 
-			parsedNumber.m_format.Format( _T("0x%%0%dX"), hexDigitCount );
+				parsedNumber.m_format.Format( _T("0x%%0%dX"), hexDigitCount );
+				break;
+			}
 		}
 
 		return parsedNumber;

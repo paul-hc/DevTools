@@ -244,7 +244,7 @@ namespace code
 
 		FormattedNumber< unsigned int > number( startingNumber, _T("%u") );
 
-		if ( startingNumber == UINT_MAX )
+		if ( UINT_MAX == startingNumber )
 			number = m_languageEngine.extractNumber( linesOfCode.front() );
 
 		// format each line

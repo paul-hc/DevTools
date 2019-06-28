@@ -39,7 +39,9 @@ namespace str
 	bool parseInteger( int& rOutNumber, const TCHAR* pString );
 	int parseInteger( const TCHAR* pString ) throws_( CRuntimeException );
 
-	bool parseUnsignedInteger( unsigned int& rOutNumber, const TCHAR* pString );
+	enum NumType { DecimalNum, HexNum, OctalNum, NoNumber };
+
+	NumType parseUnsignedInteger( unsigned int& rOutNumber, const TCHAR* pString );
 	unsigned int parseUnsignedInteger( const TCHAR* pString ) throws_( CRuntimeException );
 
 	double parseDouble( const TCHAR* pString );

@@ -7,6 +7,7 @@
 #include "CodeUtilities.h"
 #include "TokenRange.h"
 
+
 namespace code
 {
 	enum CommentState { NoComment = -1, SingleLineComment, MultiLineComment };
@@ -30,7 +31,7 @@ namespace code
 	template< typename IntegralType >
 	struct FormattedNumber
 	{
-		FormattedNumber( IntegralType number, CString format )
+		FormattedNumber( IntegralType number, const CString& format )
 			: m_number( number )
 			, m_format( format )
 		{

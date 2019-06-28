@@ -243,43 +243,47 @@ namespace str
 		return number;
 	}
 
-	bool parseUnsignedInteger( unsigned int& rOutNumber, const TCHAR* pString )
+	NumType parseUnsignedInteger( unsigned int& rOutNumber, const TCHAR* pString )
 	{
-		ASSERT( pString != NULL );
+		ASSERT_PTR( pString );
 
 		const TCHAR* ptr = pString;
 
-		while ( *ptr != _T('\0') && _istspace( *ptr ) )
+		while ( *ptr != _T('\0') && ::_istspace( *ptr ) )
 			++ptr;
 
-		const TCHAR* format = _T("%u");
+		NumType numType = DecimalNum;
 
-		if ( 0 == _tcsncmp( ptr, _T("\"\\"), 2 ) )
+		if ( 0 == ::_tcsncmp( ptr, _T("\"\\"), 2 ) )
 		{	// ex: "\"\\23\"", "\"xFD\"", "\"\\023\""
 			ptr += 2;
-			switch ( _totlower( *ptr ) )
+
+			switch ( ::_totlower( *ptr ) )
 			{
-				case _T('0'): format = _T("%o"); ++ptr; break;
-				case _T('x'): format = _T("%x"); ++ptr; break;
+				case _T('x'): numType = HexNum; ++ptr; break;
+				case _T('0'): numType = OctalNum; ++ptr; break;
 			}
 		}
-		else if ( *ptr == _T('0') && *( ptr + 1 ) != _T('\0') )
-			if ( _totlower( *++ptr ) == _T('x') )
+		else if ( _T('0') == *ptr && *( ptr + 1 ) != _T('\0') )
+			if ( _T('x') == ::_totlower( *++ptr ) )
 			{
-				format = _T("%x"); // hex
+				numType = HexNum;
 				++ptr;
 			}
 			else
-				format = _T("%o"); // octal
+				numType = DecimalNum;		// assume zero-padded decimal
 
-		return 1 == _stscanf( ptr, format, &rOutNumber );
+		static const TCHAR* numFormats[] = { _T("%u"), _T("%x"), _T("%o") };
+
+		return 1 == ::_stscanf( ptr, numFormats[ numType ], &rOutNumber )
+			? numType
+			: NoNumber;
 	}
 
 	unsigned int parseUnsignedInteger( const TCHAR* pString ) throws_( CRuntimeException )
 	{
 		unsigned int number = 0;
-
-		if ( !parseUnsignedInteger( number, pString ) )
+		if ( NoNumber == parseUnsignedInteger( number, pString ) )
 			throw CRuntimeException( str::Format( _T("invalid unsigned int number '%s'"), pString ) );
 
 		return number;
