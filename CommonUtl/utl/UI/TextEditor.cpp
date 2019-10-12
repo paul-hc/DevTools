@@ -183,6 +183,7 @@ void CTextEditor::OnChangeCase( UINT cmdId )
 			hlp::ChangeCase( text.begin() + sel.m_start, text.begin() + sel.m_end, cmdId );
 			sel.m_start = sel.m_end;
 			ui::SetWindowText( m_hWnd, text );
+			SetModify();		// mark as dirty to enable dialog data exchange
 			break;
 		case SelSubText:
 		case SelAllText:
