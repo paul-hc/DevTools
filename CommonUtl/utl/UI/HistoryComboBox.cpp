@@ -90,6 +90,11 @@ std::tstring CHistoryComboBox::GetCurrentText( void ) const
 	return ui::GetComboSelText( *this );
 }
 
+std::pair< bool, ui::ComboField > CHistoryComboBox::SetEditText( const std::tstring& currText )
+{
+	return ui::SetComboEditText( *this, currText, m_caseType );
+}
+
 void CHistoryComboBox::StoreCurrentEditItem( void )
 {
 	ui::UpdateHistoryCombo( *this, m_maxCount, m_caseType );		// store edit item in the list (with validation)

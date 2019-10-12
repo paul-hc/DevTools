@@ -103,6 +103,8 @@ CRenameFilesDialog::CRenameFilesDialog( CFileModel* pFileModel, CWnd* pParent )
 	m_changeCaseButton.SetSelValue( AfxGetApp()->GetProfileInt( reg::section_mainDialog, reg::entry_changeCase, ExtLowerCase ) );
 	ClearFlag( m_delimiterSetCombo.RefItemContent().m_itemsFlags, ui::CItemContent::RemoveEmpty | ui::CItemContent::Trim );
 
+	m_accelPool.AddAccelTable( new CAccelTable( IDD_RENAME_FILES_DIALOG ) );
+
 	m_formatToolbar.GetStrip()
 		.AddButton( ID_PICK_FORMAT_TOKEN )
 		.AddSeparator()

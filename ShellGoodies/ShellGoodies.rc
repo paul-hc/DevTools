@@ -563,6 +563,17 @@ IDR_TOOL_STRIP          PNG                     "res\\ToolStrip.png"
 
 /////////////////////////////////////////////////////////////////////////////
 //
+// Accelerator
+//
+
+IDD_RENAME_FILES_DIALOG ACCELERATORS 
+BEGIN
+    "H",            IDC_REPLACE_FILES_BUTTON, VIRTKEY, CONTROL, NOINVERT
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
 // String Table
 //
 
@@ -570,7 +581,8 @@ STRINGTABLE
 BEGIN
     IDS_INVALID_FORMAT      "Invalid rename format: %s\n\nIt should contain *, ? or %% formatting characters\nin order to generate a sequence of unique filenames."
     IDS_NO_DELIMITER_SET    "Please enter the delimiters to replace!"
-    IDS_REPLACE_FILES_TIP_FORMAT "Ctrl+Click to replace ""%s"" with ""%s"""
+    IDS_REPLACE_FILES_TIP_FORMAT 
+                            "Shift+click to replace ""%s"" with ""%s"" (Ctrl+H)"
 END
 
 STRINGTABLE 

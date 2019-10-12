@@ -89,6 +89,13 @@ CReplaceDialog::~CReplaceDialog()
 
 std::tstring CReplaceDialog::LoadFindWhat( void )
 {
+	if ( CTextEdit* pFocusEdit = dynamic_cast< CTextEdit* >( GetFocus() ) )
+	{
+		std::tstring selText = pFocusEdit->GetSelText();
+		if ( !selText.empty() && std::tstring::npos == selText.find( _T('\n') ) )		// user is attempting to replace selected text in an edit box?
+			return selText;
+	}
+
 	return ui::LoadHistorySelItem( reg::section, reg::entry_findWhat, _T(""), specialSep );
 }
 
@@ -116,7 +123,7 @@ bool CReplaceDialog::Execute( void )
 
 bool CReplaceDialog::SkipDialog( void ) const
 {
-	if ( ui::IsKeyPressed( VK_CONTROL ) )
+	if ( ui::IsKeyPressed( VK_SHIFT ) )
 		if ( FindMatch() )
 			return true;
 
@@ -217,8 +224,10 @@ void CReplaceDialog::DoDataExchange( CDataExchange* pDX )
 			m_findWhatCombo.LimitText( MaxChars );
 			m_replaceWithCombo.LimitText( MaxChars );
 
-			m_findWhatCombo.LoadHistory( reg::section, reg::entry_findWhat );
+			m_findWhatCombo.LoadHistory( reg::section, reg::entry_findWhat, m_findWhat.c_str() );
 			m_replaceWithCombo.LoadHistory( reg::section, reg::entry_replaceWith );
+
+			m_findWhatCombo.SetEditText( m_findWhat );		// update current pattern (if passed from focused text edit)
 
 			if ( m_autoFillCommonPrefix )
 				FillCommonPrefix();
