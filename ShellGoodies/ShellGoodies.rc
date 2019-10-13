@@ -347,8 +347,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 9,2,5,0
- PRODUCTVERSION 9,2,5,0
+ FILEVERSION 9,2,6,0
+ PRODUCTVERSION 9,2,6,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -363,16 +363,16 @@ BEGIN
     BEGIN
         BLOCK "040904b0"
         BEGIN
-            VALUE "Comments", "Command Dashboard|Deep Paste|Split UTL_BASE/UTL_UI|Rename edit page|Highlight text diffs|Edit commands|Text/Binary undo log|Undo log text/binary|Replace dialog auto-fill common prefix|Report list uses callback text for diff items text|Rename of .lnk shortcut files|Options properties"
+            VALUE "Comments", "New Replace Dialog|Command Dashboard|Deep Paste|Split UTL_BASE/UTL_UI|Rename edit page|Highlight text diffs|Edit commands|Text/Binary undo log|Undo log text/binary|Replace dialog auto-fill common prefix|Report list uses callback text for diff items text|Rename of .lnk shortcut files|Options properti"
             VALUE "CompanyName", "Paul Cocoveanu"
             VALUE "Email", "phc.2nd@gmail.com"
             VALUE "FileDescription", "Shell extension for manipulating files and folders"
-            VALUE "FileVersion", "9, 2, 5, 0"
+            VALUE "FileVersion", "9, 2, 6, 0"
             VALUE "InternalName", "Shell Goodies"
             VALUE "LegalCopyright", "Copyfright © 2001-2019"
             VALUE "OriginalFilename", "ShellGoodies64.dll"
             VALUE "ProductName", "ShellGoodies Shell Extension DLL"
-            VALUE "ProductVersion", "9, 2, 5, 0"
+            VALUE "ProductVersion", "9, 2, 6, 0"
             VALUE "WrittenBy", "Written by Paul Cocoveanu"
         END
     END
@@ -582,7 +582,7 @@ BEGIN
     IDS_INVALID_FORMAT      "Invalid rename format: %s\n\nIt should contain *, ? or %% formatting characters\nin order to generate a sequence of unique filenames."
     IDS_NO_DELIMITER_SET    "Please enter the delimiters to replace!"
     IDS_REPLACE_FILES_TIP_FORMAT 
-                            "Shift+click to replace ""%s"" with ""%s"" (Ctrl+H)"
+                            "Ctrl+Click to replace ""%s"" with ""%s"" (Ctrl+H)"
 END
 
 STRINGTABLE 

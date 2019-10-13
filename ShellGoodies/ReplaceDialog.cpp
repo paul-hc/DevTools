@@ -117,7 +117,7 @@ bool CReplaceDialog::Execute( void )
 
 bool CReplaceDialog::SkipDialog( void ) const
 {
-	if ( ui::IsKeyPressed( VK_SHIFT ) )
+	if ( !m_externalFindWhat && ui::IsKeyPressed( VK_CONTROL ) )
 		if ( FindMatch() )
 			return true;
 
