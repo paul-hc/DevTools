@@ -5,6 +5,7 @@
 #include "TextAlgorithms.h"
 #include "resource.h"
 #include "utl/ContainerUtilities.h"
+#include "utl/LongestCommonDuplicate.h"
 #include "utl/PathGenerator.h"
 #include "utl/StringUtilities.h"
 #include "utl/UI/MenuUtilities.h"
@@ -164,20 +165,36 @@ std::tstring CRenameService::ApplyTextTool( UINT menuId, const std::tstring& tex
 // CPickDataset implementation
 
 CPickDataset::CPickDataset( std::vector< std::tstring >* pDestFnames )
+	: bestMatch( Empty )
 {
 	ASSERT_PTR( pDestFnames );
 	m_destFnames.swap( *pDestFnames );
 
 	if ( m_destFnames.size() > 1 )			// multiple files?
 	{
-		m_commonPrefix = ExtractLongestCommonPrefix();
-		str::Trim( m_commonPrefix );				// remove trailing spaces
+		std::tstring commonPrefix = ExtractLongestCommonPrefix();
+		std::tstring commonSubstring = str::FindLongestCommonSubstring( m_destFnames, pred::TCompareNoCase() );
+
+		str::Trim( commonPrefix );			// remove trailing spaces
+		str::Trim( commonSubstring );
+
+		if ( commonPrefix.size() > commonSubstring.size() )
+		{
+			bestMatch = CommonPrefix;
+			m_commonSequence = commonPrefix;
+		}
+		else if ( !commonSubstring.empty() )
+		{
+			bestMatch = CommonSubstring;
+			m_commonSequence = commonSubstring;
+		}
 	}
 
 	ENSURE( !m_destFnames.empty() );
 }
 
 CPickDataset::CPickDataset( const fs::CPath& firstDestPath )
+	: bestMatch( Empty )
 {
 	fs::CPathParts parts( firstDestPath.Get() );
 	str::Tokenize( m_subDirs, parts.m_dir.c_str(), _T("\\/") );
@@ -224,9 +241,9 @@ void CPickDataset::MakePickFnameMenu( CMenu* pPopupMenu, const TCHAR* pSelFname 
 	pPopupMenu->CreatePopupMenu();						// multiple pick menu
 	UINT cmdId = IDC_PICK_FILENAME_BASE, selId = 0;
 
-	if ( HasCommonPrefix() )
+	if ( HasCommonSequence() )
 	{
-		pPopupMenu->AppendMenu( MF_STRING, cmdId++, EscapeAmpersand( m_commonPrefix ) );
+		pPopupMenu->AppendMenu( MF_STRING, cmdId++, EscapeAmpersand( m_commonSequence ) );
 		pPopupMenu->AppendMenu( MF_SEPARATOR );
 	}
 
@@ -249,9 +266,9 @@ std::tstring CPickDataset::GetPickedFname( UINT cmdId ) const
 
 	size_t pos = cmdId - IDC_PICK_FILENAME_BASE;
 
-	if ( HasCommonPrefix() )
+	if ( HasCommonSequence() )
 		if ( 0 == pos )				// picked the common prefix?
-			return m_commonPrefix;
+			return m_commonSequence;
 		else
 			--pos;					// index in m_destFnames
 

@@ -515,7 +515,7 @@ BEGIN
     SEPARATOR
     BUTTON      ID_PICK_FILENAME
     BUTTON      ID_COPY_FIND_TO_REPLACE
-    BUTTON      ID_AUTO_FILL_COMMON_PREFIX_CK
+    BUTTON      ID_AUTO_FILL_COMMON_SEQ_CK
     BUTTON      ID_PICK_DIR_PATH
     BUTTON      ID_PARENT_FOLDER
     SEPARATOR
@@ -646,8 +646,8 @@ END
 
 STRINGTABLE 
 BEGIN
-    ID_AUTO_FILL_COMMON_PREFIX_CK 
-                            "Auto-fill pattern with the common prefix of the files"
+    ID_AUTO_FILL_COMMON_SEQ_CK 
+                            "Auto-fill pattern with the common sequence of the file names (common prefix or sub-string)"
     ID_FIND_DUPLICATE_FILES "Search selected folders for duplicate files"
     ID_CHECK_ALL_DUPLICATES "Check select duplicate files in all groups (to be deleted)\nCheck Select All Duplicates"
     ID_UNCHECK_ALL_DUPLICATES "Uncheck all files\nUncheck All"

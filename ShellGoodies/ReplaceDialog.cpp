@@ -30,7 +30,7 @@ namespace reg
 	const TCHAR entry_replaceWith[] = _T("Replace With");
 	const TCHAR entry_matchCase[] = _T("Match Case");
 	const TCHAR entry_findType[] = _T("Find Type");
-	const TCHAR entry_autoFillCommonPrefix[] = _T("AutoFillCommonPrefix");
+	const TCHAR entry_autoFillCommonSequence[] = _T("AutoFillCommonSequence");
 }
 
 
@@ -49,15 +49,16 @@ namespace layout
 }
 
 
-CReplaceDialog::CReplaceDialog( IFileEditor* pParentEditor, const CRenameService* pRenSvc )
+CReplaceDialog::CReplaceDialog( IFileEditor* pParentEditor, const CRenameService* pRenSvc, const std::tstring& findWhat /*= str::GetEmpty()*/ )
 	: CLayoutDialog( IDD_REPLACE_DIALOG, pParentEditor->GetDialog() )
 	, m_pParentEditor( pParentEditor )
 	, m_pRenSvc( pRenSvc )
-	, m_findWhat( LoadFindWhat() )
+	, m_findWhat( !findWhat.empty() ? findWhat : LoadFindWhat() )
 	, m_replaceWith( LoadReplaceWith() )
 	, m_matchCase( AfxGetApp()->GetProfileInt( reg::section, reg::entry_matchCase, true ) != FALSE )
 	, m_findType( static_cast< FindType >( AfxGetApp()->GetProfileInt( reg::section, reg::entry_findType, Find_Text ) ) )
-	, m_autoFillCommonPrefix( AfxGetApp()->GetProfileInt( reg::section, reg::entry_autoFillCommonPrefix, true ) != FALSE )
+	, m_externalFindWhat( !findWhat.empty() )
+	, m_autoFillCommonSequence( AfxGetApp()->GetProfileInt( reg::section, reg::entry_autoFillCommonSequence, true ) != FALSE )
 	, m_findWhatCombo( ui::HistoryMaxSize, specialSep, m_matchCase ? str::Case : str::IgnoreCase )
 	, m_replaceWithCombo( ui::HistoryMaxSize, specialSep, m_matchCase ? str::Case : str::IgnoreCase )
 {
@@ -76,7 +77,7 @@ CReplaceDialog::CReplaceDialog( IFileEditor* pParentEditor, const CRenameService
 		.AddButton( ID_PICK_FILENAME )
 		.AddButton( ID_COPY_FIND_TO_REPLACE )
 		.AddSeparator()
-		.AddButton( ID_AUTO_FILL_COMMON_PREFIX_CK );
+		.AddButton( ID_AUTO_FILL_COMMON_SEQ_CK );
 
 	m_replaceToolbar.GetStrip()
 		.AddButton( ID_PICK_TEXT_TOOLS )
@@ -89,13 +90,6 @@ CReplaceDialog::~CReplaceDialog()
 
 std::tstring CReplaceDialog::LoadFindWhat( void )
 {
-	if ( CTextEdit* pFocusEdit = dynamic_cast< CTextEdit* >( GetFocus() ) )
-	{
-		std::tstring selText = pFocusEdit->GetSelText();
-		if ( !selText.empty() && std::tstring::npos == selText.find( _T('\n') ) )		// user is attempting to replace selected text in an edit box?
-			return selText;
-	}
-
 	return ui::LoadHistorySelItem( reg::section, reg::entry_findWhat, _T(""), specialSep );
 }
 
@@ -130,13 +124,13 @@ bool CReplaceDialog::SkipDialog( void ) const
 	return false;
 }
 
-void CReplaceDialog::StoreFindWhatText( const std::tstring& text, const std::tstring& commonPrefix )
+void CReplaceDialog::StoreFindWhatText( const std::tstring& text, const std::tstring& commonSequence )
 {
 	GotoDlgCtrl( &m_findWhatCombo );
-	ui::SetComboEditText( m_findWhatCombo, text, m_matchCase ? str::Case : str::IgnoreCase );
+	m_findWhatCombo.SetEditText( text );
 
-	if ( !commonPrefix.empty() )
-		m_findWhatCombo.SetEditSel( static_cast< int >( commonPrefix.length() ), -1 );
+	if ( !commonSequence.empty() )
+		m_findWhatCombo.SetEditSel( static_cast< int >( commonSequence.length() ), -1 );
 
 	OnChanged_FindWhat();
 }
@@ -182,17 +176,17 @@ bool CReplaceDialog::ReplaceItems( bool commit /*= true*/ ) const
 		pFileModel->SafeExecuteCmd( m_pParentEditor, pReplaceCmd.release() );
 }
 
-bool CReplaceDialog::FillCommonPrefix( void )
+bool CReplaceDialog::FillCommonSequence( void )
 {
 	std::auto_ptr< CPickDataset > pPickDataset = m_pRenSvc->MakeFnamePickDataset();
 
-	if ( !pPickDataset->HasCommonPrefix() )
+	if ( !pPickDataset->HasCommonSequence() )
 	{
 		ui::FlashCtrlFrame( &m_findWhatCombo, color::Error );
 		return false;
 	}
 
-	StoreFindWhatText( pPickDataset->GetCommonPrefix(), pPickDataset->GetCommonPrefix() );
+	StoreFindWhatText( pPickDataset->GetCommonSequence(), pPickDataset->GetCommonSequence() );
 	ui::FlashCtrlFrame( &m_findWhatCombo, color::AzureBlue );
 	return true;
 }
@@ -227,10 +221,13 @@ void CReplaceDialog::DoDataExchange( CDataExchange* pDX )
 			m_findWhatCombo.LoadHistory( reg::section, reg::entry_findWhat, m_findWhat.c_str() );
 			m_replaceWithCombo.LoadHistory( reg::section, reg::entry_replaceWith );
 
-			m_findWhatCombo.SetEditText( m_findWhat );		// update current pattern (if passed from focused text edit)
-
-			if ( m_autoFillCommonPrefix )
-				FillCommonPrefix();
+			if ( m_externalFindWhat )
+			{
+				m_findWhatCombo.SetEditText( m_findWhat );		// enter current pattern (if passed externally)
+				PostMessage( WM_NEXTDLGCTL, (WPARAM)m_replaceWithCombo.m_hWnd, TRUE );
+			}
+			else if ( m_autoFillCommonSequence )
+				FillCommonSequence();
 		}
 		OnChanged_FindWhat();
 	}
@@ -256,8 +253,8 @@ BEGIN_MESSAGE_MAP( CReplaceDialog, CLayoutDialog )
 	ON_CBN_SELCHANGE( IDC_FIND_WHAT_COMBO, OnChanged_FindWhat )
 	ON_BN_CLICKED( IDC_MATCH_CASE_CHECK, OnBnClicked_MatchCase )
 	ON_BN_CLICKED( IDC_RESET_FILES_BUTTON, OnBnClicked_ResetDestFiles )
-	ON_COMMAND( ID_AUTO_FILL_COMMON_PREFIX_CK, OnToggle_AutoFillCommonPrefix )
-	ON_UPDATE_COMMAND_UI( ID_AUTO_FILL_COMMON_PREFIX_CK, OnUpdate_AutoFillCommonPrefix )
+	ON_COMMAND( ID_AUTO_FILL_COMMON_SEQ_CK, OnToggle_AutoFillCommonSequence )
+	ON_UPDATE_COMMAND_UI( ID_AUTO_FILL_COMMON_SEQ_CK, OnUpdate_AutoFillCommonSequence )
 	ON_COMMAND( ID_PICK_FILENAME, OnPickFilename )
 	ON_COMMAND( ID_COPY_FIND_TO_REPLACE, OnCopyFindToReplace )
 	ON_COMMAND( ID_PICK_DIR_PATH, OnPickDirPath )
@@ -282,7 +279,7 @@ void CReplaceDialog::OnOK( void )
 
 void CReplaceDialog::OnDestroy( void )
 {
-	AfxGetApp()->WriteProfileInt( reg::section, reg::entry_autoFillCommonPrefix, m_autoFillCommonPrefix );
+	AfxGetApp()->WriteProfileInt( reg::section, reg::entry_autoFillCommonSequence, m_autoFillCommonSequence );
 
 	__super::OnDestroy();
 }
@@ -312,31 +309,31 @@ void CReplaceDialog::OnBnClicked_ResetDestFiles( void )
 {
 	ui::SendCommand( GetParent()->GetSafeHwnd(), IDC_RESET_FILES_BUTTON );
 
-	if ( m_autoFillCommonPrefix )
-		FillCommonPrefix();
+	if ( m_autoFillCommonSequence )
+		FillCommonSequence();
 	else
 		OnChanged_FindWhat();			// update combo frame
 }
 
-void CReplaceDialog::OnToggle_AutoFillCommonPrefix( void )
+void CReplaceDialog::OnToggle_AutoFillCommonSequence( void )
 {
-	m_autoFillCommonPrefix = !m_autoFillCommonPrefix;
+	m_autoFillCommonSequence = !m_autoFillCommonSequence;
 
-	if ( m_autoFillCommonPrefix )
-		FillCommonPrefix();
+	if ( m_autoFillCommonSequence )
+		FillCommonSequence();
 }
 
-void CReplaceDialog::OnUpdate_AutoFillCommonPrefix( CCmdUI* pCmdUI )
+void CReplaceDialog::OnUpdate_AutoFillCommonSequence( CCmdUI* pCmdUI )
 {
-	pCmdUI->SetCheck( m_autoFillCommonPrefix );
+	pCmdUI->SetCheck( m_autoFillCommonSequence );
 }
 
 void CReplaceDialog::OnPickFilename( void )
 {
 	m_pPickDataset = m_pRenSvc->MakeFnamePickDataset();
 
-	if ( m_pPickDataset->HasCommonPrefix() && ui::IsKeyPressed( VK_CONTROL ) )
-		StoreFindWhatText( m_pPickDataset->GetCommonPrefix(), m_pPickDataset->GetCommonPrefix() );		// write the common prefix directly as find pattern
+	if ( m_pPickDataset->HasCommonSequence() && ui::IsKeyPressed( VK_CONTROL ) )
+		StoreFindWhatText( m_pPickDataset->GetCommonSequence(), m_pPickDataset->GetCommonSequence() );		// write the common prefix directly as find pattern
 	else
 	{
 		CMenu popupMenu;
@@ -349,7 +346,7 @@ void CReplaceDialog::OnFilenamePicked( UINT cmdId )
 {
 	ASSERT_PTR( m_pPickDataset.get() );
 
-	StoreFindWhatText( m_pPickDataset->GetPickedFname( cmdId ), m_pPickDataset->GetCommonPrefix() );
+	StoreFindWhatText( m_pPickDataset->GetPickedFname( cmdId ), m_pPickDataset->GetCommonSequence() );
 }
 
 void CReplaceDialog::OnPickDirPath( void )

@@ -316,6 +316,17 @@ std::tstring CRenameFilesDialog::JoinErrorDestPaths( void ) const
 	return str::Join( destPaths, _T("\r\n") );
 }
 
+std::tstring CRenameFilesDialog::GetSelFindWhat( void ) const
+{
+	if ( CTextEdit* pFocusEdit = dynamic_cast< CTextEdit* >( GetFocus() ) )
+	{
+		std::tstring selText = pFocusEdit->GetSelText();
+		if ( !selText.empty() && std::tstring::npos == selText.find( _T('\n') ) )
+			return selText;		// user is attempting to replace selected text in an edit box
+	}
+	return str::GetEmpty();
+}
+
 void CRenameFilesDialog::AutoGenerateFiles( void )
 {
 	std::tstring renameFormat = m_formatCombo.GetCurrentText();
@@ -636,7 +647,7 @@ void CRenameFilesDialog::OnBnClicked_ChangeCase( void )
 
 void CRenameFilesDialog::OnBnClicked_ReplaceDestFiles( void )
 {
-	CReplaceDialog dlg( this, m_pRenSvc.get() );
+	CReplaceDialog dlg( this, m_pRenSvc.get(), GetSelFindWhat() );
 	dlg.Execute();
 }
 

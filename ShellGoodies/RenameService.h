@@ -56,11 +56,14 @@ public:
 	CPickDataset( const fs::CPath& firstDestPath );					// for parent subdirs
 
 	// filenames
+	enum BestMatch { Empty, CommonPrefix, CommonSubstring };
+
 	bool IsSingleFile( void ) const { return 1 == m_destFnames.size(); }
-	bool HasCommonPrefix( void ) const { return !m_commonPrefix.empty(); }
+	BestMatch GetBestMatch( void ) const { return bestMatch; }
+	bool HasCommonSequence( void ) const { return m_commonSequence.size() > 1; }
 
 	const std::vector< std::tstring >& GetDestFnames( void ) const { ASSERT( !m_destFnames.empty() ); return m_destFnames; }
-	const std::tstring& GetCommonPrefix( void ) const { return m_commonPrefix; }
+	const std::tstring& GetCommonSequence( void ) const { return m_commonSequence; }
 
 	void MakePickFnameMenu( CMenu* pPopupMenu, const TCHAR* pSelFname = NULL ) const;
 	std::tstring GetPickedFname( UINT cmdId ) const;
@@ -79,7 +82,8 @@ private:
 private:
 	// filenames
 	std::vector< std::tstring > m_destFnames;
-	std::tstring m_commonPrefix;
+	BestMatch bestMatch;
+	std::tstring m_commonSequence;
 
 	// parent subdirs
 	std::vector< std::tstring > m_subDirs;

@@ -56,6 +56,7 @@ private:
 	CRenameItem* FindItemWithKey( const fs::CPath& srcPath ) const;
 	void MarkInvalidSrcItems( void );
 	std::tstring JoinErrorDestPaths( void ) const;
+	std::tstring GetSelFindWhat( void ) const;
 
 	bool GenerateDestPaths( const std::tstring& format, UINT* pSeqCount );
 	void ReplaceFormatEditText( const std::tstring& text );

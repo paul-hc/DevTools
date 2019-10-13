@@ -15,7 +15,7 @@ class CPickDataset;
 class CReplaceDialog : public CLayoutDialog
 {
 public:
-	CReplaceDialog( IFileEditor* pParentEditor, const CRenameService* pRenSvc );
+	CReplaceDialog( IFileEditor* pParentEditor, const CRenameService* pRenSvc, const std::tstring& findWhat = str::GetEmpty() );
 	virtual ~CReplaceDialog();
 
 	bool Execute( void );
@@ -26,13 +26,13 @@ private:
 	bool SkipDialog( void ) const;			// skip dialog and execute the last replace directly
 	bool ReplaceItems( bool commit = true ) const;
 	bool FindMatch( void ) const { return ReplaceItems( false ); }
-	bool FillCommonPrefix( void );
+	bool FillCommonSequence( void );
 
 	// last saved strings in history
 	static std::tstring LoadFindWhat( void );
 	static std::tstring LoadReplaceWith( void );
 
-	void StoreFindWhatText( const std::tstring& text, const std::tstring& commonPrefix );
+	void StoreFindWhatText( const std::tstring& text, const std::tstring& commonSequence );
 	void StoreReplaceWithText( const std::tstring& text );
 private:
 	IFileEditor* m_pParentEditor;
@@ -42,7 +42,8 @@ private:
 	std::tstring m_replaceWith;
 	bool m_matchCase;
 	FindType m_findType;
-	bool m_autoFillCommonPrefix;
+	bool m_externalFindWhat;
+	bool m_autoFillCommonSequence;
 
 	std::auto_ptr< CPickDataset > m_pPickDataset;
 private:
@@ -62,8 +63,8 @@ protected:
 	afx_msg void OnChanged_FindWhat( void );
 	afx_msg void OnBnClicked_MatchCase( void );
 	afx_msg void OnBnClicked_ResetDestFiles( void );
-	afx_msg void OnToggle_AutoFillCommonPrefix( void );
-	afx_msg void OnUpdate_AutoFillCommonPrefix( CCmdUI* pCmdUI );
+	afx_msg void OnToggle_AutoFillCommonSequence( void );
+	afx_msg void OnUpdate_AutoFillCommonSequence( CCmdUI* pCmdUI );
 	afx_msg void OnPickFilename( void );
 	afx_msg void OnCopyFindToReplace( void );
 	afx_msg void OnFilenamePicked( UINT cmdId );
