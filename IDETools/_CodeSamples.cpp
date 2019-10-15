@@ -11,6 +11,41 @@
 #endif
 
 
+// TestPathNaturalSort:
+
+	Ardeal\\1254 Biertan{DUP}.txt	// [0] -> [7]
+	ardeal/1254 Biertan-DUP.txt		// [1] -> [1]
+	ARDEAL\\1254 Biertan~DUP.txt	// [2] -> [8]
+	ARDeal\\1254 biertan[DUP].txt	// [3] -> [6]
+	ardEAL\\1254 biertan_DUP.txt	// [4] -> [3]
+	Ardeal\\1254 Biertan(DUP).txt	// [5] -> [5]
+	Ardeal\\1254 Biertan+DUP.txt	// [6] -> [2]
+	Ardeal\\1254 Biertan_noDUP.txt	// [7] -> [4]
+	Ardeal/1254 Biertan.txt			// [8] -> [0]
+	  
+
+21 Dordrecht.jpg	// [0] -> [9]
+3 Dordrecht.jpg		// [1] -> [5]
+2 Dordrecht.jpg		// [2] -> [4]
+10 Dordrecht.jpg	// [3] -> [8]
+3 DORDRECHT.jpg		// [4] -> [6]
+01 Dordrecht.jpg	// [5] -> [1]
+1 Dordrecht.jpg		// [6] -> [2]
+02 Dordrecht.jpg	// [7] -> [3]
+3 dordrecht.jpg		// [8] -> [7]
+00 Dordrecht.jpg	// [9] -> [0]
+
+
+// generateConsecutiveNumbers()
+Track 03 Trashed.flac
+Track 25 Stonehenge.flac
+Track 36 Disturbing the Priest.flac
+Track 47 The Dark.flac
+Track 58 Zero the Hero.flac
+Track 69 Digital Bitch.flac
+Track 71 Born Again.flac
+
+
 void f( void )
 {
 	// Structure used to store enumerated languages and code pages.

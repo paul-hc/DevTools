@@ -39,25 +39,22 @@ namespace code
 			UseSplitPrototypePolicy			// protect whitespaces up to the arg list (...)
 		};
 
-		CString formatCode( const TCHAR* codeText, bool protectLeadingWhiteSpace = true,
-							bool justAdjustWhiteSpace = false );
-		CString formatLineOfCode( const TCHAR* lineOfCode, bool protectLeadingWhiteSpace = true,
-								  bool justAdjustWhiteSpace = false );
+		CString formatCode( const TCHAR* pCodeText, bool protectLeadingWhiteSpace = true, bool justAdjustWhiteSpace = false );
+		CString formatLineOfCode( const TCHAR* lineOfCode, bool protectLeadingWhiteSpace = true, bool justAdjustWhiteSpace = false );
 
 		CString tabifyLineOfCode( const TCHAR* lineOfCode, bool doTabify = true );
 
-		CString splitArgumentList( const TCHAR* codeText, EditorColumn maxColumn = UINT_MAX,
-								   int targetBracketLevel = -1 );
+		CString splitArgumentList( const TCHAR* pCodeText, EditorColumn maxColumn = UINT_MAX, int targetBracketLevel = -1 );
 
-		CString toggleComment( const TCHAR* codeText );
+		CString toggleComment( const TCHAR* pCodeText );
 
-		CString generateConsecutiveNumbers( const TCHAR* codeText, unsigned int startingNumber = UINT_MAX ) throws_( CRuntimeException );
-		CString sortLines( const TCHAR* codeText, bool ascending ) throws_( CRuntimeException );
+		CString generateConsecutiveNumbers( const TCHAR* pCodeText, unsigned int startingNumber = UINT_MAX ) throws_( CRuntimeException );
+		CString sortLines( const TCHAR* pCodeText, bool ascending ) throws_( CRuntimeException );
 	protected:
 		void resetInternalState( void );
 	protected:
 		int splitMultipleLines( std::vector< CString >& outLinesOfCode, std::vector< CString >& outLineEnds,
-								const TCHAR* codeText );
+								const TCHAR* pCodeText );
 		CString unsplitMultipleLines( const std::vector< CString >& linesOfCode, const std::vector< CString >& lineEnds,
 									  int lineCount = -1 ) const;
 		CString getArgListCodeText( const std::vector< CString >& linesOfCode ) const;
@@ -67,12 +64,9 @@ namespace code
 		CString doAdjustWhitespaceLineOfCode( const TCHAR* lineOfCode );
 		TokenSpacing MustSpaceBrace( TCHAR chrBrace ) const;
 
-		int replaceMultipleWhiteSpace( CString& targetString, int pos,
-										const TCHAR* newWhitespace = _T(" ") );
-		int resolveSpaceAfterToken( CString& targetString, const TokenRange& tokenRange,
-									bool mustSpaceIt );
-		int resolveSpaceBeforeToken( CString& targetString, const TokenRange& tokenRange,
-									 bool mustSpaceIt );
+		int replaceMultipleWhiteSpace( CString& targetString, int pos, const TCHAR* newWhitespace = _T(" ") );
+		int resolveSpaceAfterToken( CString& targetString, const TokenRange& tokenRange, bool mustSpaceIt );
+		int resolveSpaceBeforeToken( CString& targetString, const TokenRange& tokenRange, bool mustSpaceIt );
 		int formatBrace( CString& targetString, int pos );
 		int formatUnicodePortableStringConstant( CString& targetString, int pos );
 		int formatDefault( CString& targetString, int pos );
@@ -80,15 +74,12 @@ namespace code
 		// line splitter
 		enum HandleSingleLineComments { RemoveComment, ToMultiLineComment };
 
-		CString makeNormalizedFormattedPrototype( const TCHAR* methodPrototype,
-												  bool forImplementation = false );
-		CString transformTrailingSingleLineComment( const TCHAR* lineOfCode,
-													HandleSingleLineComments handleComments = ToMultiLineComment );
-		int doSplitArgumentList( std::vector< CString >& brokenLines, const TokenRange& openBraceRange,
-								 int maxEditorColIndex );
+		CString makeNormalizedFormattedPrototype( const TCHAR* methodPrototype, bool forImplementation = false );
+		CString transformTrailingSingleLineComment( const TCHAR* lineOfCode, HandleSingleLineComments handleComments = ToMultiLineComment );
+		int doSplitArgumentList( std::vector< CString >& brokenLines, const TokenRange& openBraceRange, int maxEditorColIndex );
 
-		EditorColumn computeVisualEditorColumn( const TCHAR* codeText, int index ) const;
-		int computeVisualEditorIndex( const TCHAR* codeText, int index ) const { return (int)computeVisualEditorColumn( codeText, index ) - 1; }
+		EditorColumn computeVisualEditorColumn( const TCHAR* pCodeText, int index ) const;
+		int computeVisualEditorIndex( const TCHAR* pCodeText, int index ) const { return (int)computeVisualEditorColumn( pCodeText, index ) - 1; }
 		CString makeLineIndentWhiteSpace( int editorColIndex ) const;
 		CString makeLineIndentWhiteSpace( int editorColIndex, bool doUseTabs ) const;
 
@@ -96,11 +87,11 @@ namespace code
 		void cppFilterPrototypeForImplementation( CString& targetString ) const;
 
 		// comment/uncomment
-		CString comment( const TCHAR* codeText, bool isEntireLine, CommentState commentState ) const;
-		CString uncomment( const TCHAR* codeText, bool isEntireLine ) const;
+		CString comment( const TCHAR* pCodeText, bool isEntireLine, CommentState commentState ) const;
+		CString uncomment( const TCHAR* pCodeText, bool isEntireLine ) const;
 	protected:
 		LineBreakTokenMatch findLineBreakToken( TokenRange& outToken, const TCHAR* string, int startPos = 0 ) const;
-		TokenRange getWhiteSpaceRange( const TCHAR* codeText, int pos = 0, bool includingComments = true ) const;
+		TokenRange getWhiteSpaceRange( const TCHAR* pCodeText, int pos = 0, bool includingComments = true ) const;
 	protected:
 		// format/split parameters
 		const CFormatterOptions& m_options;

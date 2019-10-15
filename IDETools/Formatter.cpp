@@ -74,14 +74,14 @@ namespace code
 		m_languageEngine.setDocLanguage( m_docLanguage );
 	}
 
-	CString CFormatter::formatCode( const TCHAR* codeText, bool protectLeadingWhiteSpace /*= true*/, bool justAdjustWhiteSpace /*= false*/ )
+	CString CFormatter::formatCode( const TCHAR* pCodeText, bool protectLeadingWhiteSpace /*= true*/, bool justAdjustWhiteSpace /*= false*/ )
 	{
 		resetInternalState();
 
 		std::vector< CString > linesOfCode, lineEnds;
 
 		// break the code into lines
-		splitMultipleLines( linesOfCode, lineEnds, codeText );
+		splitMultipleLines( linesOfCode, lineEnds, pCodeText );
 
 		// format each line
 		for ( std::vector< CString >::iterator itLineOfCode = linesOfCode.begin(); itLineOfCode != linesOfCode.end(); ++itLineOfCode )
@@ -128,7 +128,7 @@ namespace code
 		return leadingWhiteSpace + leadingWhiteSpaceRange.getSuffixString( lineOfCode );
 	}
 
-	CString CFormatter::splitArgumentList( const TCHAR* codeText, EditorColumn maxColumn /*= UINT_MAX*/,
+	CString CFormatter::splitArgumentList( const TCHAR* pCodeText, EditorColumn maxColumn /*= UINT_MAX*/,
 										  int targetBracketLevel /*= -1*/ )
 	{
 		UNUSED_ALWAYS( targetBracketLevel );
@@ -139,7 +139,7 @@ namespace code
 		int maxEditorColIndex = std::max( maxColumn != UINT_MAX ? (int)maxColumn : (int)app::GetModuleSession().m_splitMaxColumn, 1 ) - 1;
 		std::vector< CString > brokenLines;
 
-		brokenLines.push_back( makeNormalizedFormattedPrototype( codeText ) );
+		brokenLines.push_back( makeNormalizedFormattedPrototype( pCodeText ) );
 
 		for ( TokenRange breakToken( 0 ); str::charAt( brokenLines.back(), breakToken.m_end ) != _T('\0'); )
 			if ( findLineBreakToken( breakToken, brokenLines.back(), breakToken.m_end ) == LBT_OpenBrace )
@@ -156,11 +156,11 @@ namespace code
 	/**
 		Sorry, not finished and buggy for now! The VBScript macro seems to be superior...
 	*/
-	CString CFormatter::toggleComment( const TCHAR* codeText )
+	CString CFormatter::toggleComment( const TCHAR* pCodeText )
 	{
 		resetInternalState();
 
-		CString newCodeText = codeText;
+		CString newCodeText = pCodeText;
 
 		code::convertToWindowsLineEnds( newCodeText );
 
@@ -227,12 +227,12 @@ namespace code
 			}
 	}
 
-	CString CFormatter::generateConsecutiveNumbers( const TCHAR* codeText, unsigned int startingNumber /*= UINT_MAX*/ ) throws_( CRuntimeException )
+	CString CFormatter::generateConsecutiveNumbers( const TCHAR* pCodeText, unsigned int startingNumber /*= UINT_MAX*/ ) throws_( CRuntimeException )
 	{
 		std::vector< CString > linesOfCode, lineEnds;
 
 		// break the code into lines
-		splitMultipleLines( linesOfCode, lineEnds, codeText );
+		splitMultipleLines( linesOfCode, lineEnds, pCodeText );
 
 		size_t lineCount = linesOfCode.size();
 
@@ -268,12 +268,12 @@ namespace code
 		return unsplitMultipleLines( linesOfCode, lineEnds );
 	}
 
-	CString CFormatter::sortLines( const TCHAR* codeText, bool ascending ) throws_( CRuntimeException )
+	CString CFormatter::sortLines( const TCHAR* pCodeText, bool ascending ) throws_( CRuntimeException )
 	{
 		std::vector< CString > linesOfCode, lineEnds;
 
 		// break the code into lines
-		splitMultipleLines( linesOfCode, lineEnds, codeText );
+		splitMultipleLines( linesOfCode, lineEnds, pCodeText );
 
 		size_t lineCount = linesOfCode.size();
 
@@ -283,18 +283,20 @@ namespace code
 		if ( lineCount < 2 )
 			throw CRuntimeException( _T("You must select at least 2 lines of code!") );
 
-		std::vector< CString >::iterator itStart = linesOfCode.begin();
-		std::vector< CString >::iterator itEnd = linesOfCode.end();
+		size_t lastBlankOffset = 0;
+		{
+			CString lastLine = linesOfCode.back();
+			lastLine.TrimLeft();
+			lastLine.TrimRight();
 
-		linesOfCode.back().TrimLeft();
-		linesOfCode.back().TrimRight();
-		if ( linesOfCode.back().IsEmpty() )
-			--itEnd;
+			if ( lastLine.IsEmpty() )
+				lastBlankOffset = 1;				// exclude blank last line from sorting
+		}
 
 		if ( ascending )
-			std::stable_sort( itStart, itEnd, str::StringLess() );
+			std::stable_sort( linesOfCode.begin(), linesOfCode.end() - lastBlankOffset, pred::TLess_NaturalPath() );		// str::StringLess()
 		else
-			std::stable_sort( itStart, itEnd, str::StringGreater() );
+			std::stable_sort( linesOfCode.rbegin() + lastBlankOffset, linesOfCode.rend(), pred::TLess_NaturalPath() );	// str::StringGreater()
 
 		return unsplitMultipleLines( linesOfCode, lineEnds );
 	}
@@ -568,31 +570,30 @@ namespace code
 		return ++pos;
 	}
 
-	int CFormatter::splitMultipleLines( std::vector< CString >& outLinesOfCode, std::vector< CString >& outLineEnds,
-									   const TCHAR* codeText )
+	int CFormatter::splitMultipleLines( std::vector< CString >& outLinesOfCode, std::vector< CString >& outLineEnds, const TCHAR* pCodeText )
 	{
-		if ( codeText != NULL && codeText[ 0 ] != _T('\0') )
+		if ( pCodeText != NULL && pCodeText[ 0 ] != _T('\0') )
 			for ( int pos = 0; ; )
 			{
-				TokenRange endOfLinePos = str::findStringPos( codeText, code::lineEnd, pos );
+				TokenRange endOfLinePos = str::findStringPos( pCodeText, code::lineEnd, pos );
 
 				if ( endOfLinePos.m_start > 1 )
-					if ( code::isLineBreakEscapeChar( codeText[ endOfLinePos.m_start - 1 ], m_docLanguage ) )
+					if ( code::isLineBreakEscapeChar( pCodeText[ endOfLinePos.m_start - 1 ], m_docLanguage ) )
 						--endOfLinePos.m_start; // e.g. include "_\r\n" in BASIC line end
 
 				if ( endOfLinePos.m_start != -1 )
 				{
 					TokenRange lineRange( pos, endOfLinePos.m_start );
 
-					outLinesOfCode.push_back( lineRange.getString( codeText ) );
-					outLineEnds.push_back( endOfLinePos.getString( codeText ) );
+					outLinesOfCode.push_back( lineRange.getString( pCodeText ) );
+					outLineEnds.push_back( endOfLinePos.getString( pCodeText ) );
 					pos = endOfLinePos.m_end;
 				}
 				else
 				{
-					TokenRange lastLineRange( codeText, pos );
+					TokenRange lastLineRange( pCodeText, pos );
 
-					outLinesOfCode.push_back( lastLineRange.getString( codeText ) );
+					outLinesOfCode.push_back( lastLineRange.getString( pCodeText ) );
 					outLineEnds.push_back( CString() );
 					break;
 				}
@@ -925,10 +926,10 @@ namespace code
 		return LBT_NoMatch;
 	}
 
-	EditorColumn CFormatter::computeVisualEditorColumn( const TCHAR* codeText, int index ) const
+	EditorColumn CFormatter::computeVisualEditorColumn( const TCHAR* pCodeText, int index ) const
 	{
 		// search for the start of line that contains 'index' position
-		int pos = str::reverseFindStringPos( codeText, code::lineEnd, index ).m_end;
+		int pos = str::reverseFindStringPos( pCodeText, code::lineEnd, index ).m_end;
 
 		if ( pos == -1 )
 			pos = 0; // 'index' belongs to the first line -> start at the beginning
@@ -938,7 +939,7 @@ namespace code
 		ASSERT( pos <= index );
 
 		for ( ; pos != index; ++pos )
-			if ( codeText[ pos ] == _T('\t') )
+			if ( pCodeText[ pos ] == _T('\t') )
 			{
 				int innerTabSize = m_tabSize - ( ( visualEditorColumn - 1 ) % m_tabSize );
 				visualEditorColumn += innerTabSize;
@@ -964,23 +965,23 @@ namespace code
 			return CString( _T(' '), editorColIndex );
 	}
 
-	TokenRange CFormatter::getWhiteSpaceRange( const TCHAR* codeText, int pos /*= 0*/, bool includingComments /*= true*/ ) const
+	TokenRange CFormatter::getWhiteSpaceRange( const TCHAR* pCodeText, int pos /*= 0*/, bool includingComments /*= true*/ ) const
 	{
 		TokenRange whitespacesRange( pos );
 
-		ASSERT( whitespacesRange.InStringBounds( codeText ) );
+		ASSERT( whitespacesRange.InStringBounds( pCodeText ) );
 
-		while ( code::isWhitespaceChar( codeText[ whitespacesRange.m_end ] ) )
+		while ( code::isWhitespaceChar( pCodeText[ whitespacesRange.m_end ] ) )
 			++whitespacesRange.m_end;
 
 		if ( includingComments )
 		{
 			int statementEndPos;
 
-			if ( m_languageEngine.isCommentStatement( statementEndPos, codeText, whitespacesRange.m_end ) )
+			if ( m_languageEngine.isCommentStatement( statementEndPos, pCodeText, whitespacesRange.m_end ) )
 			{
 				whitespacesRange.m_end = statementEndPos;
-				while ( code::isWhitespaceChar( codeText[ whitespacesRange.m_end ] ) )
+				while ( code::isWhitespaceChar( pCodeText[ whitespacesRange.m_end ] ) )
 					++whitespacesRange.m_end;
 			}
 		}
@@ -1019,7 +1020,7 @@ namespace code
 		leadingWhiteSpaceRange.replaceWithToken( targetString, _T("") );
 	}
 
-	CString CFormatter::comment( const TCHAR* codeText, bool isEntireLine, CommentState commentState ) const
+	CString CFormatter::comment( const TCHAR* pCodeText, bool isEntireLine, CommentState commentState ) const
 	{
 		ASSERT( commentState != NoComment );
 
@@ -1027,7 +1028,7 @@ namespace code
 		const TCHAR* openComment = langCommentTokens.getOpenToken( commentState );
 
 		static const TCHAR* leading4Spaces = _T("    ");
-		CString commentedCodeText = codeText;
+		CString commentedCodeText = pCodeText;
 		TokenRange leadingSpaceRange( 0 );
 
 		if ( isEntireLine )
@@ -1042,30 +1043,30 @@ namespace code
 		return commentedCodeText;
 	}
 
-	CString CFormatter::uncomment( const TCHAR* codeText, bool isEntireLine ) const
+	CString CFormatter::uncomment( const TCHAR* pCodeText, bool isEntireLine ) const
 	{
 		const CommentTokens& langCommentTokens = CommentTokens::getLanguageSpecific( m_docLanguage );
 
-		TokenRange coreRange( codeText );
+		TokenRange coreRange( pCodeText );
 
 		if ( langCommentTokens.m_singleLineComment != NULL &&
-			 str::isTokenMatch( codeText, langCommentTokens.m_singleLineComment, 0, getLanguageCase( m_docLanguage ) ) )
+			 str::isTokenMatch( pCodeText, langCommentTokens.m_singleLineComment, 0, getLanguageCase( m_docLanguage ) ) )
 		{
 			coreRange.m_start += str::Length( langCommentTokens.m_singleLineComment );
 		}
 		else if ( langCommentTokens.m_openComment != NULL && langCommentTokens.m_closeComment != NULL )
 		{
-			if ( str::isTokenMatch( codeText, langCommentTokens.m_openComment, 0, getLanguageCase( m_docLanguage ) ) )
+			if ( str::isTokenMatch( pCodeText, langCommentTokens.m_openComment, 0, getLanguageCase( m_docLanguage ) ) )
 				coreRange.m_start += str::Length( langCommentTokens.m_openComment );
 
 			int closeCommentLength = str::Length( langCommentTokens.m_closeComment );
 
 			if ( closeCommentLength <= coreRange.getLength() &&
-				 str::isTokenMatch( codeText, langCommentTokens.m_closeComment, coreRange.m_end - closeCommentLength, getLanguageCase( m_docLanguage ) ) )
+				 str::isTokenMatch( pCodeText, langCommentTokens.m_closeComment, coreRange.m_end - closeCommentLength, getLanguageCase( m_docLanguage ) ) )
 				coreRange.m_end -= closeCommentLength;
 		}
 
-		CString uncommentedCodeText = coreRange.getString( codeText );
+		CString uncommentedCodeText = coreRange.getString( pCodeText );
 
 		if ( isEntireLine && coreRange.m_start > 0 )
 			if ( uncommentedCodeText.Left( 2 ) == _T("  ") )
