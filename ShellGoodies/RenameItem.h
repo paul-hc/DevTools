@@ -29,7 +29,8 @@ namespace ren
 {
 	bool MakePairsFromItems( fs::TPathPairMap& rOutRenamePairs, const std::vector< CRenameItem* >& renameItems );
 	void MakePairsToItems( std::vector< CRenameItem* >& rOutRenameItems, const fs::TPathPairMap& renamePairs );
-	void AssignPairsToItems( const std::vector< CRenameItem* >& rOutRenameItems, const fs::TPathPairMap& renamePairs );
+	void AssignPairsToItems( const std::vector< CRenameItem* >& items, const fs::TPathPairMap& renamePairs );
+	void QueryDestFnames( std::vector< std::tstring >& rDestFnames, const std::vector< CRenameItem* >& items );
 }
 
 

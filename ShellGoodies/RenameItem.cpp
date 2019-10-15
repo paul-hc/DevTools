@@ -32,14 +32,14 @@ namespace ren
 		}
 	}
 
-	void AssignPairsToItems( const std::vector< CRenameItem* >& rOutRenameItems, const fs::TPathPairMap& renamePairs )
+	void AssignPairsToItems( const std::vector< CRenameItem* >& items, const fs::TPathPairMap& renamePairs )
 	{
-		REQUIRE( rOutRenameItems.size() == renamePairs.size() );
+		REQUIRE( items.size() == renamePairs.size() );
 
 		size_t pos = 0;
 		for ( fs::TPathPairMap::const_iterator itPair = renamePairs.begin(); itPair != renamePairs.end(); ++itPair, ++pos )
 		{
-			CRenameItem* pItem = rOutRenameItems[ pos ];
+			CRenameItem* pItem = items[ pos ];
 
 			if ( pItem->GetSrcPath() == itPair->first )			// both containers must be in the same order
 				pItem->RefDestPath() = itPair->second;
@@ -49,6 +49,15 @@ namespace ren
 				break;
 			}
 		}
+	}
+
+	void QueryDestFnames( std::vector< std::tstring >& rDestFnames, const std::vector< CRenameItem* >& items )
+	{
+		rDestFnames.clear();
+		rDestFnames.reserve( items.size() );
+
+		for ( std::vector< CRenameItem* >::const_iterator itItem = items.begin(); itItem != items.end(); ++itItem )
+			rDestFnames.push_back( fs::CPathParts( ( *itItem )->GetSafeDestPath().Get() ).m_fname );
 	}
 }
 

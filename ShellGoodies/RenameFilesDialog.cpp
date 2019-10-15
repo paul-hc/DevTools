@@ -15,6 +15,7 @@
 #include "utl/ContainerUtilities.h"
 #include "utl/EnumTags.h"
 #include "utl/FmtUtils.h"
+#include "utl/NumericProcessor.h"
 #include "utl/PathGenerator.h"
 #include "utl/RuntimeException.h"
 #include "utl/UI/CmdInfoStore.h"
@@ -458,8 +459,9 @@ BEGIN_MESSAGE_MAP( CRenameFilesDialog, CFileEditorBaseDialog )
 	ON_EN_CHANGE( IDC_NEW_DELIMITER_EDIT, OnFieldChanged )
 	ON_BN_CLICKED( IDC_PICK_RENAME_ACTIONS, OnBnClicked_PickRenameActions )
 	ON_BN_DOUBLECLICKED( IDC_PICK_RENAME_ACTIONS, OnBnClicked_PickRenameActions )
-	ON_COMMAND( ID_ENSURE_UNIFORM_ZERO_PADDING, OnEnsureUniformNumPadding )		// bottom-right pick DEST tool
 	ON_COMMAND_RANGE( ID_REPLACE_ALL_DELIMS, ID_SPACE_TO_UNDERBAR, OnChangeDestPathsTool )
+	ON_COMMAND( ID_ENSURE_UNIFORM_ZERO_PADDING, OnEnsureUniformNumPadding )		// bottom-right pick DEST tool
+	ON_COMMAND( ID_GENERATE_NUMERIC_SEQUENCE, OnGenerateNumericSequence )
 END_MESSAGE_MAP()
 
 BOOL CRenameFilesDialog::OnInitDialog( void )
@@ -767,19 +769,6 @@ void CRenameFilesDialog::OnBnClicked_PickRenameActions( void )
 	m_pickRenameActionsStatic.TrackMenu( this, IDR_CONTEXT_MENU, popup::MoreRenameActions );
 }
 
-void CRenameFilesDialog::OnEnsureUniformNumPadding( void )
-{
-	CommitLocalEdits();
-
-	std::vector< std::tstring > fnames; fnames.reserve( m_rRenameItems.size() );
-	for ( std::vector< CRenameItem* >::const_iterator itItem = m_rRenameItems.begin(); itItem != m_rRenameItems.end(); ++itItem )
-		fnames.push_back( fs::CPathParts( ( *itItem )->GetSafeDestPath().Get() ).m_fname );
-
-	num::EnsureUniformZeroPadding( fnames );
-
-	SafeExecuteCmd( m_pFileModel->MakeChangeDestPathsCmd( func::AssignFname( fnames.begin() ), str::Load( ID_ENSURE_UNIFORM_ZERO_PADDING ) ) );
-}
-
 void CRenameFilesDialog::OnChangeDestPathsTool( UINT menuId )
 {
 	CommitLocalEdits();
@@ -818,4 +807,35 @@ void CRenameFilesDialog::OnChangeDestPathsTool( UINT menuId )
 	}
 
 	SafeExecuteCmd( pCmd );
+}
+
+void CRenameFilesDialog::OnEnsureUniformNumPadding( void )
+{
+	CommitLocalEdits();
+
+	std::vector< std::tstring > destFnames;
+	ren::QueryDestFnames( destFnames, m_rRenameItems );
+
+	num::EnsureUniformZeroPadding( destFnames );
+
+	SafeExecuteCmd( m_pFileModel->MakeChangeDestPathsCmd( func::AssignFname( destFnames.begin() ), str::Load( ID_ENSURE_UNIFORM_ZERO_PADDING ) ) );
+}
+
+void CRenameFilesDialog::OnGenerateNumericSequence( void )
+{
+	CommitLocalEdits();
+
+	std::vector< std::tstring > destFnames;
+	ren::QueryDestFnames( destFnames, m_rRenameItems );
+
+	try
+	{
+		num::GenerateNumbersInSequence( destFnames );
+
+		SafeExecuteCmd( m_pFileModel->MakeChangeDestPathsCmd( func::AssignFname( destFnames.begin() ), str::Load( ID_GENERATE_NUMERIC_SEQUENCE ) ) );
+	}
+	catch ( CRuntimeException& exc )
+	{
+		exc.ReportError();
+	}
 }

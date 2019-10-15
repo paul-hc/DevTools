@@ -3,12 +3,27 @@
 
 #ifdef _DEBUG		// no UT code in release builds
 #include "ut/NumericTests.h"
+#include "NumericProcessor.h"
 #include "StringUtilities.h"
 #include "Crc32.h"
 #include "utl/AppTools.h"
 #include "utl/MemLeakCheck.h"
 
 #define new DEBUG_NEW
+
+
+namespace ut
+{
+	std::tstring GenerateNumbersInSequence( const TCHAR srcItems[], unsigned int startingNumber = UINT_MAX ) throws_( CRuntimeException )
+	{
+		static const TCHAR s_sep[] = _T("|");
+		std::vector< std::tstring > items;
+		str::Split( items, srcItems, s_sep );
+
+		num::GenerateNumbersInSequence( items, startingNumber );
+		return str::Join( items, s_sep );
+	}
+}
 
 
 CNumericTests::CNumericTests( void )
@@ -281,6 +296,35 @@ void CNumericTests::TestParseNumberUserLocale( void )
 	}
 }
 
+void CNumericTests::TestFindNumber( void )
+{
+	ASSERT_EQUAL( _T(""), num::FindNextNumber( _T("") ).Extract() );
+	ASSERT_EQUAL( _T(""), num::FindNextNumber( _T("ab-cd") ).Extract() );
+	ASSERT_EQUAL( _T(""), num::FindNextNumber( _T("0x") ).Extract() );
+	ASSERT_EQUAL( _T(""), num::FindNextNumber( _T("0X") ).Extract() );
+	ASSERT_EQUAL( _T(""), num::FindNextNumber( _T(" 0xGH") ).Extract() );
+
+	ASSERT_EQUAL( _T("1"), num::FindNextNumber( _T(" 1 ") ).Extract() );
+	ASSERT_EQUAL( _T("-30"), num::FindNextNumber( _T(" -30 ") ).Extract() );
+	ASSERT_EQUAL( _T("-30"), num::FindNextNumber( _T(" a-30b ") ).Extract() );
+	ASSERT_EQUAL( _T("321"), num::FindNextNumber( _T("321") ).Extract() );
+	ASSERT_EQUAL( _T("321"), num::FindNextNumber( _T(" #321# ") ).Extract() );
+
+	ASSERT_EQUAL( _T("0xDEADBEEF"), num::FindNextNumber( _T(" 0xDEADBEEF ") ).Extract() );
+	ASSERT_EQUAL( _T("0Xdeadbeef"), num::FindNextNumber( _T(" 0Xdeadbeef ") ).Extract() );
+
+	ASSERT_EQUAL( _T("0"), num::ExtractNumber( _T(" 0 ") ).FormatNextValue() );
+	ASSERT_EQUAL( _T("987"), num::ExtractNumber( _T(" 987 ") ).FormatNextValue() );
+	ASSERT_EQUAL( _T("DEADBEEF"), str::Format( _T("%X"), num::ExtractNumber( _T(" 0xDEADBEEF ") ).m_number ) );
+}
+
+void CNumericTests::TestGenerateNumericSequence( void )
+{
+	ASSERT_EQUAL( _T("file 10.txt|file 11.txt|file 12.txt"), ut::GenerateNumbersInSequence( _T("file 10.txt|file 20.txt|file 30.txt") ) );
+	ASSERT_EQUAL( _T("file 15.txt|file 16.txt|file 17.txt"), ut::GenerateNumbersInSequence( _T("file 10.txt|file 20.txt|file 30.txt"), 15 ) );
+	ASSERT_EQUAL( _T("file 0049.txt|file 0050.txt|file 0051.txt"), ut::GenerateNumbersInSequence( _T("file 0049.txt|file 2.txt|file 03.txt") ) );
+}
+
 void CNumericTests::TestConvertFileSize( void )
 {
 	ASSERT_EQUAL( std::make_pair( 0.0, num::Bytes ), num::ConvertFileSize( 0 ) );				// auto-conversion
@@ -456,6 +500,9 @@ void CNumericTests::Run( void )
 	TestFormatNumberUserLocale();
 	TestParseNumber();
 	TestParseNumberUserLocale();
+	TestFindNumber();
+	TestGenerateNumericSequence();
+
 	TestConvertFileSize();
 	TestFormatFileSize();
 	TestCrc32();

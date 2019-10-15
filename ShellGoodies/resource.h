@@ -174,13 +174,14 @@
 #define ID_CMD_CHANGE_DEST_FILE_STATES  32842
 #define ID_CMD_RESET_DESTINATIONS       32843
 #define ID_SELECT_TO_TOP                32844
+#define ID_GENERATE_NUMERIC_SEQUENCE    32845
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        117
-#define _APS_NEXT_COMMAND_VALUE         32845
+#define _APS_NEXT_COMMAND_VALUE         32846
 #define _APS_NEXT_CONTROL_VALUE         1089
 #define _APS_NEXT_SYMED_VALUE           5004
 #endif

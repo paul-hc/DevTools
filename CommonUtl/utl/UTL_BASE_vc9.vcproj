@@ -453,6 +453,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\NumericProcessor.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\NumericProcessor.h"
+				>
+			</File>
+			<File
 				RelativePath=".\ProcessCmd.cpp"
 				>
 			</File>

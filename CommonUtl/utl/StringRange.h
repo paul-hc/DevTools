@@ -51,11 +51,14 @@ namespace str
 			const StringT& GetText( void ) const { return m_text; }
 			const CharType* GetStartPtr( void ) const { REQUIRE( InBounds() ); return m_text.c_str() + m_pos.m_start; }
 			const CharType* GetEndPtr( void ) const { REQUIRE( InBounds() ); return m_text.c_str() + m_pos.m_end; }
+			CharType GetStartCh( void ) const { return *GetStartPtr(); }
 
 			void Reset( void ) { m_pos = MakeBounds( m_text ); }
 
 			StringT Extract( void ) const { return Extract( m_pos ); }
 			StringT Extract( const Range< size_t >& pos ) const { return range::Extract( pos, m_text ); }
+			StringT ExtractPrefix( void ) const { return range::Extract( utl::MakeRange( static_cast< size_t >( 0 ), m_pos.m_start ), m_text ); }
+			StringT ExtractSuffix( void ) const { return range::Extract( utl::MakeRange( m_pos.m_end, m_text.length() ), m_text ); }
 			StringT ExtractLead( size_t endPos ) const { return range::Extract( utl::MakeRange( m_pos.m_start, endPos ), m_text ); }
 			StringT ExtractTrail( size_t startPos ) const { return range::Extract( utl::MakeRange( startPos, m_pos.m_end ), m_text ); }
 

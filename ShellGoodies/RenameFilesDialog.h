@@ -120,8 +120,9 @@ protected:
 	afx_msg void OnUpdateAutoGenerate( CCmdUI* pCmdUI );
 	afx_msg void OnNumericSequence( UINT cmdId );
 	afx_msg void OnBnClicked_PickRenameActions( void );
-	afx_msg void OnEnsureUniformNumPadding( void );
 	afx_msg void OnChangeDestPathsTool( UINT menuId );
+	afx_msg void OnEnsureUniformNumPadding( void );
+	afx_msg void OnGenerateNumericSequence( void );
 
 	DECLARE_MESSAGE_MAP()
 };

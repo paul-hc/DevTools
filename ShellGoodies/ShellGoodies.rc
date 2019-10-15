@@ -433,6 +433,7 @@ BEGIN
         MENUITEM "Space to Underbar\t"" "" to ""_""", ID_SPACE_TO_UNDERBAR
         MENUITEM SEPARATOR
         MENUITEM "Uniform &Zero Padding\t""9"", ""010"" to ""09"", ""10""", ID_ENSURE_UNIFORM_ZERO_PADDING
+        MENUITEM "Generate Numeric &Sequence\t""Track 10"", ""Track 11"", ...", ID_GENERATE_NUMERIC_SEQUENCE
     END
     POPUP "<text tools>"
     BEGIN
@@ -689,6 +690,7 @@ BEGIN
     ID_PASTE_DEEP_POPUP     "Paste deep folder image"
     ID_OPEN_CMD_DASHBOARD   "Open the command dashboard dialog"
     ID_SELECT_TO_TOP        "Select all actions up to the top, starting with the current action"
+    ID_GENERATE_NUMERIC_SEQUENCE "Generate numeric sequence"
 END
 
 STRINGTABLE 
