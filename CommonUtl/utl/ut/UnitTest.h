@@ -19,21 +19,21 @@ namespace numeric
 namespace ut
 {
 	template< typename T >
-	bool Equal( const T& x, const T& y )
+	bool Equals( const T& x, const T& y )
 	{
 		return x == y;
 	}
 
 	template< typename T1, typename T2 >
-	bool Equal( const std::pair< T1, T2 >& x, const std::pair< T1, T2 >& y )
+	bool Equals( const std::pair< T1, T2 >& x, const std::pair< T1, T2 >& y )
 	{
 		return
-			Equal( x.first, y.first ) &&
-			Equal( x.second, y.second );
+			Equals( x.first, y.first ) &&
+			Equals( x.second, y.second );
 	}
 
 	template<>
-	inline bool Equal< double >( const double& x, const double& y )
+	inline bool Equals< double >( const double& x, const double& y )
 	{
 		return numeric::DoublesEqual( x, y );
 	}
@@ -54,7 +54,7 @@ namespace ut
 	template< typename ExpectedType, typename ActualType >
 	bool AssertEquals( const ExpectedType& expected, const ActualType& actual, std::tstring& rMsg )
 	{
-		if ( Equal( static_cast< ActualType >( expected ), actual ) )
+		if ( Equals( static_cast< ActualType >( expected ), actual ) )
 			return true;
 
 		rMsg = MakeNotEqualMessage( ToString( static_cast< ActualType >( expected ) ), ToString( actual ) );

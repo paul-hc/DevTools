@@ -80,9 +80,9 @@ namespace path
 			std::equal( leftPath.begin(), leftPath.end(), rightPath.begin(), pred::IsEquivalentPathChar() );
 	}
 
-	bool Equal( const std::tstring& leftPath, const std::tstring& rightPath )
+	bool EqualsPtr( const TCHAR* pLeftPath, const TCHAR* pRightPath )
 	{
-		return str::Equals< str::IgnoreCase >( leftPath.c_str(), rightPath.c_str() );
+		return str::Equals< str::IgnoreCase >( pLeftPath, pRightPath );
 	}
 
 	pred::CompareResult CompareNaturalPtr( const TCHAR* pLeft, const TCHAR* pRight )

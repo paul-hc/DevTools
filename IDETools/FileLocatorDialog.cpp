@@ -237,7 +237,7 @@ int CFileLocatorDialog::SearchForTag( const std::tstring& includeTag )
 			pTagStaticText = _T("#&import");
 			break;
 		case ft::Unknown:
-			if ( path::Equal( parts.m_ext.c_str(), _T(".dll") ) )
+			if ( path::EqualsPtr( parts.m_ext.c_str(), _T(".dll") ) )
 				pTagStaticText = _T("#&import");
 			break;
 	}

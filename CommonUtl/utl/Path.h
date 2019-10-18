@@ -37,9 +37,10 @@ namespace path
 	const TCHAR* DirDelims( void );
 
 	bool EquivalentPtr( const TCHAR* pLeftPath, const TCHAR* pRightPath );
-
 	bool Equivalent( const std::tstring& leftPath, const std::tstring& rightPath );
-	bool Equal( const std::tstring& leftPath, const std::tstring& rightPath );
+
+	bool EqualsPtr( const TCHAR* pLeftPath, const TCHAR* pRightPath );
+	inline bool Equals( const std::tstring& leftPath, const std::tstring& rightPath ) { return EqualsPtr( leftPath.c_str(), rightPath.c_str() ); }
 
 	pred::CompareResult CompareNaturalPtr( const TCHAR* pLeft, const TCHAR* pRight );
 
@@ -212,6 +213,8 @@ namespace fs
 		void SetNameExt( const std::tstring& nameExt );
 
 		const TCHAR* GetExt( void ) const { return path::FindExt( m_filePath.c_str() ); }
+		bool HasExt( const TCHAR* pExt ) const { return path::EquivalentPtr( GetExt(), pExt ); }
+
 		void ReplaceExt( const TCHAR* pExt ) { Set( GetRemoveExt().Get() + pExt ); }
 		void RemoveExt( void ) { Set( GetRemoveExt().Get() ); }
 		CPath GetRemoveExt( void ) const;
@@ -233,7 +236,7 @@ namespace fs
 		bool operator<( const CPath& right ) const;
 
 		bool Equivalent( const CPath& right ) const { return path::Equivalent( m_filePath, right.m_filePath ); }
-		bool Equal( const CPath& right ) const { return path::Equal( m_filePath, right.m_filePath ); }
+		bool Equals( const CPath& right ) const { return path::Equals( m_filePath, right.m_filePath ); }
 
 		bool FileExist( AccessMode accessMode = Exist ) const { return fs::FileExist( m_filePath.c_str(), accessMode ); }
 

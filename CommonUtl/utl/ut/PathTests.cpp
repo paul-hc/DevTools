@@ -465,10 +465,10 @@ void CPathTests::TestPathCompareFind( void )
 {
 	{
 		ASSERT( path::EquivalentPtr( _T("X:\\DIR\\SUB\\NAME.EXT"), _T("x:/dir/sub/name.ext") ) );
-		ASSERT( !path::Equal( _T("X:\\DIR\\SUB\\NAME.EXT"), _T("x:/dir/sub/name.ext") ) );
+		ASSERT( !path::EqualsPtr( _T("X:\\DIR\\SUB\\NAME.EXT"), _T("x:/dir/sub/name.ext") ) );
 
 		ASSERT( !path::EquivalentPtr( _T("a:\\list.txt"), _T("x:/fname.ext") ) );
-		ASSERT( !path::Equal( _T("a:\\list.txt"), _T("x:/fname.ext") ) );
+		ASSERT( !path::EqualsPtr( _T("a:\\list.txt"), _T("x:/fname.ext") ) );
 
 		ASSERT_EQUAL( pred::Equal, path::CompareNPtr( _T("X:\\DIR\\SUB\\NAME.EXT"), _T("x:/dir/sub/name.ext") ) );
 		ASSERT_EQUAL( pred::Less, path::CompareNPtr( _T("name 05.ext"), _T("name 10.ext") ) );
@@ -483,6 +483,11 @@ void CPathTests::TestPathCompareFind( void )
 		// check transitive
 		ASSERT( !( windowsPath < unixPath ) );
 		ASSERT( !( unixPath < windowsPath ) );
+
+		ASSERT( windowsPath.HasExt( _T(".EXT") ) );
+		ASSERT( windowsPath.HasExt( _T(".ext") ) );
+		ASSERT( windowsPath.HasExt( _T(".ExT") ) );
+		ASSERT( !windowsPath.HasExt( _T(".extx") ) );
 	}
 	{
 		path::GetMatch getMatchFunc;
