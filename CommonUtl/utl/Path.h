@@ -183,6 +183,9 @@ namespace fs
 	};
 
 
+	enum ExtensionMatch { MatchExt, MatchDiffCaseExt, MismatchDotsExt, MismatchExt };
+
+
 	class CPath
 	{
 	public:
@@ -214,6 +217,10 @@ namespace fs
 
 		const TCHAR* GetExt( void ) const { return path::FindExt( m_filePath.c_str() ); }
 		bool HasExt( const TCHAR* pExt ) const { return path::EquivalentPtr( GetExt(), pExt ); }
+		ExtensionMatch GetExtensionMatch( const fs::CPath& right ) const;
+
+		std::tstring GetFname( void ) const;
+		void SplitFilename( std::tstring& rFname, std::tstring& rExt ) const;
 
 		void ReplaceExt( const TCHAR* pExt ) { Set( GetRemoveExt().Get() + pExt ); }
 		void RemoveExt( void ) { Set( GetRemoveExt().Get() ); }

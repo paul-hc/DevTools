@@ -11,15 +11,15 @@
 
 namespace ut
 {
-	bool GeneratePathPairs( ut::CPathPairPool& rPool, const std::tstring& format, UINT seqCount = 1 )
+	bool GeneratePathPairs( ut::CPathPairPool& rPool, const std::tstring& format, UINT seqCount = 1, bool ignoreExtension = false )
 	{
-		CPathGenerator gen( &rPool.m_pathPairs, format, seqCount );
+		CPathGenerator gen( &rPool.m_pathPairs, CPathFormatter( format, ignoreExtension ), seqCount );
 		return gen.GeneratePairs();
 	}
 
-	UINT FindNextAvailSeqCount( const ut::CPathPairPool& pool, const std::tstring& format )
+	UINT FindNextAvailSeqCount( const ut::CPathPairPool& pool, const std::tstring& format, bool ignoreExtension = false )
 	{
-		CPathGenerator gen( pool.m_pathPairs, format, 1, false );
+		CPathGenerator gen( pool.m_pathPairs, CPathFormatter( format, ignoreExtension ), 1, false );
 		return gen.FindNextAvailSeqCount();
 	}
 }
@@ -84,13 +84,13 @@ void CPathGeneratorTests::TestPathFormatter( void )
 {
 	{
 		bool syntaxOk;
-		ASSERT_EQUAL( _T("foo 05"), CPathFormatter::FormatPart( _T("foo ##"), _T("filename"), 5, &syntaxOk ) );
+		ASSERT_EQUAL( _T("foo 05"), CPathFormatter::FormatPart( _T("filename"), _T("foo ##"), 5, &syntaxOk ) );
 		ASSERT( syntaxOk );
 
-		ASSERT_EQUAL( _T("foo 17"), CPathFormatter::FormatPart( _T("foo ##"), _T("filename"), 17, &syntaxOk ) );
+		ASSERT_EQUAL( _T("foo 17"), CPathFormatter::FormatPart( _T("filename"), _T("foo ##"), 17, &syntaxOk ) );
 		ASSERT( syntaxOk );
 
-		ASSERT_EQUAL( _T("foo_filename_end"), CPathFormatter::FormatPart( _T("foo_*_end"), _T("filename"), 5, &syntaxOk ) );
+		ASSERT_EQUAL( _T("foo_filename_end"), CPathFormatter::FormatPart( _T("filename"), _T("foo_*_end"), 5, &syntaxOk ) );
 		ASSERT( syntaxOk );
 	}
 	{
@@ -113,39 +113,45 @@ void CPathGeneratorTests::TestPathFormatter( void )
 	}
 	{
 		// wildcard
-		ASSERT_EQUAL( _T("foo.txt"), CPathFormatter( _T("*") ).FormatPath( _T("foo.txt"), 1 ).Get() );
-		ASSERT_EQUAL( _T("foo.txt"), CPathFormatter( _T("*.*") ).FormatPath( _T("foo.txt"), 1 ).Get() );
-		ASSERT_EQUAL( _T("foo.txt"), CPathFormatter( _T("*.*") ).FormatPath( _T("foo.txt"), 1, 1 ).Get() );
-		ASSERT_EQUAL( _T("foo"), CPathFormatter( _T("*.") ).FormatPath( _T("foo.txt"), 1 ).Get() );
-		ASSERT_EQUAL( _T(".txt"), CPathFormatter( _T(".*") ).FormatPath( _T("foo.txt"), 1 ).Get() );
+		ASSERT_EQUAL( _T("foo.txt"), CPathFormatter( _T("*"), false ).FormatPath( fs::CPath( _T("foo.txt") ), 1 ).Get() );
+		ASSERT_EQUAL( _T("foo.txt"), CPathFormatter( _T("*.*"), false ).FormatPath( fs::CPath( _T("foo.txt") ), 1 ).Get() );
+		ASSERT_EQUAL( _T("foo.txt"), CPathFormatter( _T("*.*"), false ).FormatPath( fs::CPath( _T("foo.txt") ), 1, 1 ).Get() );
+		ASSERT_EQUAL( _T("foo"), CPathFormatter( _T("*."), false ).FormatPath( fs::CPath( _T("foo.txt") ), 1 ).Get() );
+		ASSERT_EQUAL( _T(".txt"), CPathFormatter( _T(".*"), false ).FormatPath( fs::CPath( _T("foo.txt") ), 1 ).Get() );
 
-		ASSERT_EQUAL( _T("foo.txt"), CPathFormatter( _T("*.txt") ).FormatPath( _T("foo"), 1 ).Get() );
-		ASSERT_EQUAL( _T("foo.uk"), CPathFormatter( _T("*.uk") ).FormatPath( _T("foo"), 1 ).Get() );
-		ASSERT_EQUAL( _T("foo.co.uk"), CPathFormatter( _T("*.co.uk") ).FormatPath( _T("foo"), 1 ).Get() );
-		ASSERT_EQUAL( _T("foo.co.uk"), CPathFormatter( _T("??*.co.uk") ).FormatPath( _T("foo"), 1 ).Get() );
-		ASSERT_EQUAL( _T("fxy.co.uk"), CPathFormatter( _T("?xy.co.uk") ).FormatPath( _T("foo"), 1 ).Get() );
+		ASSERT_EQUAL( _T("foo.txt"), CPathFormatter( _T("*.txt"), false ).FormatPath( fs::CPath( _T("foo") ), 1 ).Get() );
+		ASSERT_EQUAL( _T("foo.uk"), CPathFormatter( _T("*.uk"), false ).FormatPath( fs::CPath( _T("foo") ), 1 ).Get() );
+		ASSERT_EQUAL( _T("foo.co.uk"), CPathFormatter( _T("*.co.uk"), false ).FormatPath( fs::CPath( _T("foo") ), 1 ).Get() );
+		ASSERT_EQUAL( _T("foo.co.uk"), CPathFormatter( _T("??*.co.uk"), false ).FormatPath( fs::CPath( _T("foo") ), 1 ).Get() );
+		ASSERT_EQUAL( _T("fxy.co.uk"), CPathFormatter( _T("?xy.co.uk"), false ).FormatPath( fs::CPath( _T("foo") ), 1 ).Get() );
 
-		ASSERT_EQUAL( _T("foo_$(3).txt"), CPathFormatter( _T("*.*") ).FormatPath( _T("foo.txt"), 1, 3 ).Get() );
+		ASSERT_EQUAL( _T("foo_$(3).txt"), CPathFormatter( _T("*.*"), false ).FormatPath( fs::CPath( _T("foo.txt") ), 1, 3 ).Get() );
+
+		ASSERT_EQUAL( _T("A foo.txt"), CPathFormatter( _T("A *"), true ).FormatPath( fs::CPath( _T("foo.txt") ), 1 ).Get() );
+		ASSERT_EQUAL( _T("A foo.jpg.txt"), CPathFormatter( _T("A *.jpg"), true ).FormatPath( fs::CPath( _T("foo.txt") ), 1 ).Get() );
 
 		// numeric
-		ASSERT_EQUAL( _T("foo 1.txt"), CPathFormatter( _T("foo #.txt") ).FormatPath( _T("fname.doc"), 1 ).Get() );
-		ASSERT_EQUAL( _T("foo 001.txt"), CPathFormatter( _T("foo ###.*") ).FormatPath( _T("fname.txt"), 1 ).Get() );
-		ASSERT_EQUAL( _T("foo 010.txt"), CPathFormatter( _T("foo ###.*") ).FormatPath( _T("fname.txt"), 10 ).Get() );
-		ASSERT_EQUAL( _T("foo 100.txt"), CPathFormatter( _T("foo ###.*") ).FormatPath( _T("fname.txt"), 100 ).Get() );
-		ASSERT_EQUAL( _T("foo 100.txt"), CPathFormatter( _T("foo ###.*") ).FormatPath( _T("fname.txt"), 100, 1 ).Get() );
-		ASSERT_EQUAL( _T("foo 100_$(2).txt"), CPathFormatter( _T("foo ###.*") ).FormatPath( _T("fname.txt"), 100, 2 ).Get() );
+		ASSERT_EQUAL( _T("foo 1.txt"), CPathFormatter( _T("foo #.txt"), false ).FormatPath( fs::CPath( _T("fname.doc") ), 1 ).Get() );
+		ASSERT_EQUAL( _T("foo 001.txt"), CPathFormatter( _T("foo ###.*"), false ).FormatPath( fs::CPath( _T("fname.txt") ), 1 ).Get() );
+		ASSERT_EQUAL( _T("foo 010.txt"), CPathFormatter( _T("foo ###.*"), false ).FormatPath( fs::CPath( _T("fname.txt") ), 10 ).Get() );
+		ASSERT_EQUAL( _T("foo 100.txt"), CPathFormatter( _T("foo ###.*"), false ).FormatPath( fs::CPath( _T("fname.txt") ), 100 ).Get() );
+		ASSERT_EQUAL( _T("foo 100.txt"), CPathFormatter( _T("foo ###.*"), false ).FormatPath( fs::CPath( _T("fname.txt") ), 100, 1 ).Get() );
+		ASSERT_EQUAL( _T("foo 100_$(2).txt"), CPathFormatter( _T("foo ###.*"), false ).FormatPath( fs::CPath( _T("fname.txt") ), 100, 2 ).Get() );
 
-		ASSERT_EQUAL( _T("foo 050 fname_$(3).txt"), CPathFormatter( _T("foo ### *.*") ).FormatPath( _T("fname.txt"), 50, 3 ).Get() );
-		ASSERT_EQUAL( _T("foo 050 fname_$(3).txt"), CPathFormatter( _T("foo %03d *.*") ).FormatPath( _T("fname.txt"), 50, 3 ).Get() );
-		ASSERT_EQUAL( _T("foo 50 fname_$(3).txt"), CPathFormatter( _T("foo %d *.*") ).FormatPath( _T("fname.txt"), 50, 3 ).Get() );
+		ASSERT_EQUAL( _T("foo 050 fname_$(3).txt"), CPathFormatter( _T("foo ### *.*"), false ).FormatPath( fs::CPath( _T("fname.txt") ), 50, 3 ).Get() );
+		ASSERT_EQUAL( _T("foo 050 fname_$(3).txt"), CPathFormatter( _T("foo %03d *.*"), false ).FormatPath( fs::CPath( _T("fname.txt") ), 50, 3 ).Get() );
+		ASSERT_EQUAL( _T("foo 50 fname_$(3).txt"), CPathFormatter( _T("foo %d *.*"), false ).FormatPath( fs::CPath( _T("fname.txt") ), 50, 3 ).Get() );
+
+		ASSERT_EQUAL( _T("foo 1-xy.doc"), CPathFormatter( _T("foo #-xy"), true ).FormatPath( fs::CPath( _T("fname.doc") ), 1 ).Get() );
+		ASSERT_EQUAL( _T("foo 1-xy.jpg.doc"), CPathFormatter( _T("foo #-xy.jpg"), true ).FormatPath( fs::CPath( _T("fname.doc") ), 1 ).Get() );
 	}
 	{
 		UINT seqCount;
 
-		ASSERT( CPathFormatter( _T("foo ###x.jpg") ).ParseSeqCount( seqCount, _T("C:\\my\\foo 73x.jpg") ) );
+		ASSERT( CPathFormatter( _T("foo ###x.jpg"), false ).ParseSeqCount( seqCount, fs::CPath( _T("C:\\my\\foo 73x.jpg") ) ) );
 		ASSERT_EQUAL( 73, seqCount );
 
-		ASSERT( !CPathFormatter( _T("foo ###Y.jpg") ).ParseSeqCount( seqCount, _T("C:\\my\\foo 73X.jpg") ) );
+		ASSERT( !CPathFormatter( _T("foo ###Y.jpg"), false ).ParseSeqCount( seqCount, fs::CPath( _T("C:\\my\\foo 73X.jpg") ) ) );
 	}
 }
 

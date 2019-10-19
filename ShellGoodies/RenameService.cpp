@@ -40,9 +40,9 @@ void CRenameService::StoreRenameItems( const std::vector< CRenameItem* >& rename
 	ENSURE( m_renamePairs.size() == renameItems.size() );			// all SRC keys unique?
 }
 
-UINT CRenameService::FindNextAvailSeqCount( const std::tstring& format ) const
+UINT CRenameService::FindNextAvailSeqCount( const CPathFormatter& formatter ) const
 {
-	CPathGenerator generator( m_renamePairs, format );
+	CPathGenerator generator( m_renamePairs, formatter );
 	return generator.FindNextAvailSeqCount();
 }
 

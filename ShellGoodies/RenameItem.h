@@ -40,6 +40,9 @@ private:
 #include "utl/UI/ObjectCtrlBase.h"
 
 
+namespace fmt { enum PathFormat; }
+
+
 class CDisplayFilenameAdapter : public ui::ISubjectAdapter
 {
 public:
@@ -52,6 +55,13 @@ public:
 
 	std::tstring FormatFilename( const fs::CPath& filePath ) const;
 	fs::CPath ParseFilename( const std::tstring& displayFilename, const fs::CPath& referencePath ) const;
+
+	std::tstring FormatPath( fmt::PathFormat format, const fs::CPath& filePath ) const;
+	fs::CPath ParsePath( const std::tstring& inputPath, const fs::CPath& referencePath ) const;
+
+	static bool IsExtensionChange( const fs::CPath& referencePath, const fs::CPath& destPath );			// ignore case changes
+private:
+	static std::tstring StripExtension( const TCHAR* pFilePath );
 private:
 	bool m_ignoreExtension;
 };

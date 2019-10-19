@@ -14,6 +14,7 @@
 #include "utl/RuntimeException.h"
 #include "utl/StringRange.h"
 #include "utl/UI/Clipboard.h"
+#include "utl/UI/ObjectCtrlBase.h"
 #include "utl/UI/ShellUtilities.h"
 
 // for CFileModel::MakeFileEditor
@@ -163,19 +164,26 @@ void CFileModel::ResetDestinations( void )
 	UpdateAllObservers( NULL );				// path items changed
 }
 
+std::tstring CFileModel::FormatPath( const fs::CPath& filePath, fmt::PathFormat format, const CDisplayFilenameAdapter* pDisplayAdapter )
+{
+	return pDisplayAdapter != NULL
+		? pDisplayAdapter->FormatPath( format, filePath )
+		: fmt::FormatPath( filePath, format );
+}
+
 
 // RENAME
 
-bool CFileModel::CopyClipSourcePaths( fmt::PathFormat format, CWnd* pWnd ) const
+bool CFileModel::CopyClipSourcePaths( fmt::PathFormat format, CWnd* pWnd, const CDisplayFilenameAdapter* pDisplayAdapter /*= NULL*/ ) const
 {
 	std::vector< std::tstring > sourcePaths;
 	for ( std::vector< fs::CPath >::const_iterator itSrcPath = m_sourcePaths.begin(); itSrcPath != m_sourcePaths.end(); ++itSrcPath )
-		sourcePaths.push_back( fmt::FormatPath( *itSrcPath, format ) );
+		sourcePaths.push_back( FormatPath( *itSrcPath, format, pDisplayAdapter ) );
 
 	return CClipboard::CopyToLines( sourcePaths, pWnd );
 }
 
-utl::ICommand* CFileModel::MakeClipPasteDestPathsCmd( CWnd* pWnd ) throws_( CRuntimeException )
+utl::ICommand* CFileModel::MakeClipPasteDestPathsCmd( CWnd* pWnd, const CDisplayFilenameAdapter* pDisplayAdapter ) throws_( CRuntimeException )
 {
 	REQUIRE( !m_renameItems.empty() );		// initialized?
 
@@ -201,16 +209,13 @@ utl::ICommand* CFileModel::MakeClipPasteDestPathsCmd( CWnd* pWnd ) throws_( CRun
 		throw CRuntimeException( str::Format( _T("Destination file count of %d doesn't match source file count of %d."),
 											  textPaths.size(), m_sourcePaths.size() ) );
 
-	std::vector< fs::CPath > destPaths; destPaths.reserve( GetRenameItems().size() );
+	std::vector< fs::CPath > destPaths; destPaths.reserve( m_renameItems.size() );
 	bool anyChanges = false;
 
 	for ( size_t i = 0; i != textPaths.size(); ++i )
 	{
 		const CRenameItem* pRenameItem = m_renameItems[ i ];
-		fs::CPath newFilePath( textPaths[ i ] );
-
-		if ( !newFilePath.HasParentPath() )
-			newFilePath.SetDirPath( pRenameItem->GetSrcPath().GetParentPath().Get() );		// qualify with SRC dir path
+		fs::CPath newFilePath = pDisplayAdapter->ParsePath( textPaths[ i ], pRenameItem->GetSafeDestPath() );
 
 		if ( newFilePath.Get() != pRenameItem->GetDestPath().Get() )		// case-sensitive string compare
 			anyChanges = true;
@@ -218,7 +223,35 @@ utl::ICommand* CFileModel::MakeClipPasteDestPathsCmd( CWnd* pWnd ) throws_( CRun
 		destPaths.push_back( newFilePath );
 	}
 
-	return anyChanges ? new CChangeDestPathsCmd( this, destPaths, _T("Paste destination file paths from clipboard") ) : NULL;
+	if ( !anyChanges )
+		return NULL;
+
+	if ( !PromptExtensionChanges( destPaths ) )
+		return NULL;
+
+	return new CChangeDestPathsCmd( this, destPaths, _T("Paste destination file paths from clipboard") );
+}
+
+bool CFileModel::PromptExtensionChanges( const std::vector< fs::CPath >& destPaths ) const
+{
+	ASSERT( m_renameItems.size() == destPaths.size() );
+
+	size_t extChangeCount = 0;
+
+	for ( size_t i = 0; i != m_renameItems.size(); ++i )
+		if ( CDisplayFilenameAdapter::IsExtensionChange( m_renameItems[ i ]->GetSafeDestPath(), destPaths[ i ] ) )
+			++extChangeCount;
+
+	if ( extChangeCount != 0 )
+	{
+		std::tstring prefix = str::Format( _T("You are about to change the extension on %s files!\n\nDo you want to proceed?"),
+			m_renameItems.size() == extChangeCount ? _T("all") : num::FormatNumber( extChangeCount ).c_str() );
+
+		if ( ui::MessageBox( prefix, MB_ICONWARNING | MB_YESNO ) != IDYES )
+			return false;
+	}
+
+	return true;
 }
 
 

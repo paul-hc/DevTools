@@ -11,12 +11,12 @@
 class CPathGenerator : public CPathMaker
 {
 public:
-	CPathGenerator( const std::tstring& format, UINT seqCount, bool avoidDups = true );			// allocates internal file map, with ownership
-	CPathGenerator( fs::TPathPairMap* pOutRenamePairs, const std::tstring& format, UINT seqCount, bool avoidDups = true );
-	CPathGenerator( const fs::TPathPairMap& renamePairs, const std::tstring& format, UINT seqCount = 1, bool avoidDups = true );		// read-only; for FindNextAvailSeqCount()
+	CPathGenerator( const CPathFormatter& formatter, UINT seqCount, bool avoidDups = true );			// allocates internal file map, with ownership
+	CPathGenerator( fs::TPathPairMap* pOutRenamePairs, const CPathFormatter& formatter, UINT seqCount, bool avoidDups = true );
+	CPathGenerator( const fs::TPathPairMap& renamePairs, const CPathFormatter& formatter, UINT seqCount = 1, bool avoidDups = true );		// read-only; for FindNextAvailSeqCount()
 
 	const CPathFormatter& GetFormat( void ) const { return m_formatter; }
-	void SetMoveDestDirPath( const std::tstring& moveDestDirPath );		// generate for moving to destDirPath
+	void SetMoveDestDirPath( const fs::CPath& moveDestDirPath );		// generate for moving to destDirPath
 
 	UINT GetSeqCount( void ) const { return m_seqCount; }
 

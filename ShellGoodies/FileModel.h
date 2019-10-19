@@ -9,10 +9,10 @@
 
 class CRenameItem;
 class CTouchItem;
+class CDisplayFilenameAdapter;
 interface IFileEditor;
 namespace fmt { enum PathFormat; }
 namespace cmd { enum CommandType; }
-
 
 namespace func
 {
@@ -65,13 +65,17 @@ public:
 	template< typename FuncType >
 	utl::ICommand* MakeChangeDestPathsCmd( const FuncType& func, const std::tstring& cmdTag );
 
-	bool CopyClipSourcePaths( fmt::PathFormat format, CWnd* pWnd ) const;
-	utl::ICommand* MakeClipPasteDestPathsCmd( CWnd* pWnd ) throws_( CRuntimeException );
+	bool CopyClipSourcePaths( fmt::PathFormat format, CWnd* pWnd, const CDisplayFilenameAdapter* pDisplayAdapter = NULL ) const;
+	utl::ICommand* MakeClipPasteDestPathsCmd( CWnd* pWnd, const CDisplayFilenameAdapter* pDisplayAdapter ) throws_( CRuntimeException );
+
+	bool PromptExtensionChanges( const std::vector< fs::CPath >& destPaths ) const;
 
 	// TOUCH
 	bool CopyClipSourceFileStates( CWnd* pWnd ) const;
 	utl::ICommand* MakeClipPasteDestFileStatesCmd( CWnd* pWnd ) throws_( CRuntimeException );
 private:
+	static std::tstring FormatPath( const fs::CPath& filePath, fmt::PathFormat format, const CDisplayFilenameAdapter* pDisplayAdapter );
+
 	template< typename ContainerT >
 	void StoreSourcePaths( const ContainerT& sourcePaths );
 

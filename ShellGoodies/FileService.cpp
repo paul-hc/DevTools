@@ -83,7 +83,7 @@ bool CFileService::IsDistinctWorkingSet( const std::vector< CRenameItem* >& rena
 
 fs::CPath CFileService::MakeUniqueIntermPath( const fs::CPath& destPath, const std::set< fs::CPath >& destToBeSet )
 {
-	static const CPathFormatter s_formatter( _T("*-[#].*") );
+	static const CPathFormatter s_formatter( _T("*-[#]"), true );
 
 	fs::CPath uniqueDestPath;
 	for ( UINT seqCount = 2; ; ++seqCount )

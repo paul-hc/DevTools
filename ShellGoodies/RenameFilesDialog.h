@@ -3,6 +3,7 @@
 #pragma once
 
 #include "utl/Path.h"
+#include "utl/PathFormatter.h"
 #include "utl/Subject.h"
 #include "utl/UI/LayoutChildPropertySheet.h"
 #include "utl/UI/DialogToolBar.h"
@@ -62,7 +63,10 @@ private:
 	std::tstring JoinErrorDestPaths( void ) const;
 	std::tstring GetSelFindWhat( void ) const;
 
-	bool GenerateDestPaths( const std::tstring& format, UINT* pSeqCount );
+	CPathFormatter InputRenameFormatter( void ) const;
+	bool EnsureConsistentFormat( CPathFormatter* pFormatter ) const;
+
+	bool GenerateDestPaths( const CPathFormatter& formatter, UINT* pSeqCount );
 	void ReplaceFormatEditText( const std::tstring& text );
 private:
 	const std::vector< CRenameItem* >& m_rRenameItems;

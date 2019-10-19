@@ -8,6 +8,7 @@
 
 class CRenameItem;
 class CPickDataset;
+class CPathFormatter;
 
 
 class CRenameService
@@ -17,7 +18,7 @@ public:
 
 	void StoreRenameItems( const std::vector< CRenameItem* >& renameItems );
 
-	UINT FindNextAvailSeqCount( const std::tstring& format ) const;
+	UINT FindNextAvailSeqCount( const CPathFormatter& formatter ) const;
 
 	bool CheckPathCollisions( cmd::IErrorObserver* pErrorObserver );
 

@@ -687,6 +687,41 @@ namespace fs
 		m_filePath = parts.MakePath().Get();
 	}
 
+	std::tstring CPath::GetFname( void ) const
+	{
+		const TCHAR* pNameExt = GetNameExt();
+		const TCHAR* pExt = GetExt();
+
+		return std::tstring( pNameExt, std::distance( pNameExt, pExt ) );
+	}
+
+	void CPath::SplitFilename( std::tstring& rFname, std::tstring& rExt ) const
+	{
+		rFname = GetFname();
+		rExt = GetExt();
+	}
+
+	namespace impl
+	{
+		size_t GetDotExtCount( const fs::CPath& filePath )
+		{
+			const TCHAR* pNameExt = filePath.GetNameExt();
+			return std::count( pNameExt, pNameExt + str::GetLength( pNameExt ), _T('.') );
+		}
+	}
+
+	ExtensionMatch CPath::GetExtensionMatch( const fs::CPath& right ) const
+	{
+		if ( impl::GetDotExtCount( *this ) != impl::GetDotExtCount( right ) )
+			return MismatchDotsExt;
+		else if ( !HasExt( right.GetExt() ) )		// ignore case changes
+			return MismatchExt;
+		else if ( std::tstring( GetExt() ) != std::tstring( right.GetExt() ) )
+			return MatchDiffCaseExt;
+
+		return MatchExt;
+	}
+
 	CPath CPath::GetRemoveExt( void ) const
 	{
 		size_t extPos = std::distance( GetPtr(), GetExt() );

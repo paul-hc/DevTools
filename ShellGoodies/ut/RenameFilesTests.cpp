@@ -15,10 +15,10 @@
 
 namespace ut
 {
-	bool FormatDestinations( ut::CPathPairPool* pPool, const std::tstring& format, UINT seqCount = 1 )
+	bool FormatDestinations( ut::CPathPairPool* pPool, const CPathFormatter& formatter, UINT seqCount = 1 )
 	{
 		ASSERT_PTR( pPool );
-		CPathGenerator gen( &pPool->m_pathPairs, format, seqCount );
+		CPathGenerator gen( &pPool->m_pathPairs, formatter, seqCount );
 		return gen.GeneratePairs();
 	}
 
@@ -52,7 +52,7 @@ void CRenameFilesTests::TestRenameSimple( void )
 
 	ut::CTempFilePairPool pool( _T("foo 1.txt|foo 3.txt|foo 5.txt") );
 
-	ASSERT( ut::FormatDestinations( &pool, _T("foo #.txt") ) );
+	ASSERT( ut::FormatDestinations( &pool, CPathFormatter( _T("foo #.txt"), false ) ) );
 
 	std::vector< CRenameItem* > renameItems;
 	ren::MakePairsToItems( renameItems, pool.m_pathPairs );
@@ -80,7 +80,7 @@ void CRenameFilesTests::TestRenameCollisionExisting( void )
 
 	ut::CTempFilePairPool pool( _T("foo 1.txt|foo 2.txt|foo 3.txt|foo 4.txt|foo 5.txt") );
 
-	ASSERT( ut::FormatDestinations( &pool, _T("foo #.txt"), 2 ) );
+	ASSERT( ut::FormatDestinations( &pool, CPathFormatter( _T("foo #.txt"), false ), 2 ) );
 
 	std::vector< CRenameItem* > renameItems;
 	ren::MakePairsToItems( renameItems, pool.m_pathPairs );

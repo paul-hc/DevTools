@@ -331,17 +331,30 @@ std::tstring CRenameFilesDialog::GetSelFindWhat( void ) const
 	return str::GetEmpty();
 }
 
-void CRenameFilesDialog::AutoGenerateFiles( void )
+CPathFormatter CRenameFilesDialog::InputRenameFormatter( void ) const
 {
-	std::tstring renameFormat = m_formatCombo.GetCurrentText();
-	UINT seqCount = m_seqCountEdit.GetNumericValue();
-	bool succeeded = GenerateDestPaths( renameFormat, &seqCount );
+	fs::CPath renameFormat = m_pDisplayFilenameAdapter->ParseFilename( m_formatCombo.GetCurrentText(), fs::CPath( _T("null") ) );
 
-	PostMakeDest( true );							// silent mode, no modal messages
-	m_formatCombo.SetFrameColor( succeeded ? CLR_NONE : color::Error );
+	return CPathFormatter( renameFormat.Get(), m_ignoreExtension );
 }
 
-bool CRenameFilesDialog::GenerateDestPaths( const std::tstring& format, UINT* pSeqCount )
+bool CRenameFilesDialog::EnsureConsistentFormat( CPathFormatter* pFormatter ) const
+{
+	ASSERT_PTR( pFormatter );
+	if ( !pFormatter->IsConsistent() )
+	{
+		std::tstring msg = str::Format( _T("The extension part \"%s\" in the format will be ignored\nwhen Ignore Extension is checked!\n\nDo you want to proceed?"),
+			pFormatter->GetFormat().GetExt() );
+
+		if ( IDCANCEL == ui::MessageBox( msg, MB_ICONWARNING | MB_OKCANCEL ) )
+			return false;
+
+		*pFormatter = pFormatter->MakeConsistent();
+	}
+	return true;
+}
+
+bool CRenameFilesDialog::GenerateDestPaths( const CPathFormatter& formatter, UINT* pSeqCount )
 {
 	ASSERT_PTR( pSeqCount );
 	ASSERT_PTR( m_pRenSvc.get() );
@@ -351,7 +364,7 @@ bool CRenameFilesDialog::GenerateDestPaths( const std::tstring& format, UINT* pS
 	fs::TPathPairMap renamePairs;
 	ren::MakePairsFromItems( renamePairs, m_rRenameItems );
 
-	CPathGenerator generator( &renamePairs, format, *pSeqCount );
+	CPathGenerator generator( &renamePairs, formatter, *pSeqCount );
 	if ( !generator.GeneratePairs() )
 		return false;
 
@@ -360,6 +373,15 @@ bool CRenameFilesDialog::GenerateDestPaths( const std::tstring& format, UINT* pS
 
 	m_pFileModel->UpdateAllObservers( NULL );
 	return true;
+}
+
+void CRenameFilesDialog::AutoGenerateFiles( void )
+{
+	UINT seqCount = m_seqCountEdit.GetNumericValue();
+	bool succeeded = GenerateDestPaths( InputRenameFormatter(), &seqCount );
+
+	PostMakeDest( true );							// silent mode, no modal messages
+	m_formatCombo.SetFrameColor( succeeded ? CLR_NONE : color::Error );
 }
 
 bool CRenameFilesDialog::ChangeSeqCount( UINT seqCount )
@@ -486,10 +508,13 @@ void CRenameFilesDialog::OnOK( void )
 	{
 		case EditMode:
 		{
-			std::tstring renameFormat = m_formatCombo.GetCurrentText();
+			CPathFormatter renameFormatter = InputRenameFormatter();
+			if ( !EnsureConsistentFormat( &renameFormatter ) )
+				return;
+
 			UINT oldSeqCount = m_seqCountEdit.GetNumericValue(), newSeqCount = oldSeqCount;
 
-			if ( GenerateDestPaths( renameFormat, &newSeqCount ) )
+			if ( GenerateDestPaths( renameFormatter, &newSeqCount ) )
 			{
 				if ( !m_seqCountAutoAdvance )
 					newSeqCount = oldSeqCount;
@@ -501,7 +526,7 @@ void CRenameFilesDialog::OnOK( void )
 			}
 			else
 			{
-				ui::MessageBox( str::Format( IDS_INVALID_FORMAT, renameFormat.c_str() ), MB_ICONERROR | MB_OK );
+				ui::MessageBox( str::Format( IDS_INVALID_FORMAT, renameFormatter.GetFormat().GetPtr() ), MB_ICONERROR | MB_OK );
 				ui::TakeFocus( m_formatCombo );
 			}
 			break;
@@ -561,7 +586,7 @@ void CRenameFilesDialog::OnChanged_Format( void )
 {
 	OnFieldChanged();
 
-	CPathFormatter formatter( m_formatCombo.GetCurrentText() );
+	CPathFormatter formatter = InputRenameFormatter();
 	m_formatCombo.SetFrameColor( formatter.IsValidFormat() ? CLR_NONE : color::Error );
 
 	if ( m_autoGenerate )
@@ -583,15 +608,15 @@ void CRenameFilesDialog::OnSeqCountFindNext( void )
 {
 	ASSERT_PTR( m_pRenSvc.get() );
 
-	UINT seqCount = m_pRenSvc->FindNextAvailSeqCount( m_formatCombo.GetCurrentText() );
+	UINT seqCount = m_pRenSvc->FindNextAvailSeqCount( InputRenameFormatter() );
 	ChangeSeqCount( seqCount );
 	GotoDlgCtrl( &m_seqCountEdit );
 }
 
 void CRenameFilesDialog::OnUpdateSeqCountFindNext( CCmdUI* pCmdUI )
 {
-	CPathFormatter format( m_formatCombo.GetCurrentText() );
-	pCmdUI->Enable( format.m_isNumericFormat );
+	CPathFormatter format = InputRenameFormatter();
+	pCmdUI->Enable( format.IsNumericFormat() );
 }
 
 void CRenameFilesDialog::OnSeqCountAutoAdvance( void )
@@ -614,8 +639,8 @@ void CRenameFilesDialog::OnToggle_IgnoreExtension( void )
 
 void CRenameFilesDialog::OnBnClicked_CopySourceFiles( void )
 {
-	if ( !m_pFileModel->CopyClipSourcePaths( fmt::FilenameExt, this ) )
-		AfxMessageBox( _T("Couldn't copy source files to clipboard!"), MB_ICONERROR | MB_OK );
+	if ( !m_pFileModel->CopyClipSourcePaths( fmt::FilenameExt, this, m_pDisplayFilenameAdapter.get() ) )
+		ui::MessageBox( _T("Couldn't copy source files to clipboard!"), MB_ICONERROR | MB_OK );
 }
 
 void CRenameFilesDialog::OnBnClicked_PasteDestFiles( void )
@@ -623,7 +648,7 @@ void CRenameFilesDialog::OnBnClicked_PasteDestFiles( void )
 	try
 	{
 		ClearFileErrors();
-		SafeExecuteCmd( m_pFileModel->MakeClipPasteDestPathsCmd( this ) );
+		SafeExecuteCmd( m_pFileModel->MakeClipPasteDestPathsCmd( this, m_pDisplayFilenameAdapter.get() ) );
 	}
 	catch ( CRuntimeException& exc )
 	{
@@ -663,7 +688,7 @@ void CRenameFilesDialog::OnBnClicked_ChangeCase( void )
 		static const ChangeCase s_altersTheExt[] = { LowerCase, UpperCase, ExtLowerCase, ExtUpperCase };
 
 		if ( utl::Contains( s_altersTheExt, END_OF( s_altersTheExt ), selCase ) )
-			if ( AfxMessageBox( _T("This operation may alter the hidden extension of certain files!\n\nDo you want to proceed?"), MB_ICONWARNING | MB_OKCANCEL ) != IDOK )
+			if ( ui::MessageBox( _T("This operation may alter the hidden extension of certain files!\n\nDo you want to proceed?"), MB_ICONWARNING | MB_YESNO ) != IDYES )
 				return;
 	}
 
@@ -739,6 +764,7 @@ void CRenameFilesDialog::OnPickTextTools( void )
 void CRenameFilesDialog::OnFormatTextToolPicked( UINT menuId )
 {
 	GotoDlgCtrl( &m_formatCombo );
+
 	std::tstring oldFormat = m_formatCombo.GetCurrentText();
 	std::tstring format = CRenameService::ApplyTextTool( menuId, oldFormat );
 

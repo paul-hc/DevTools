@@ -348,8 +348,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 9,2,6,2
- PRODUCTVERSION 9,2,6,2
+ FILEVERSION 9,2,6,3
+ PRODUCTVERSION 9,2,6,3
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -368,12 +368,12 @@ BEGIN
             VALUE "CompanyName", "Paul Cocoveanu"
             VALUE "Email", "phc.2nd@gmail.com"
             VALUE "FileDescription", "Shell extension for manipulating files and folders"
-            VALUE "FileVersion", "9, 2, 6, 2"
+            VALUE "FileVersion", "9, 2, 6, 3"
             VALUE "InternalName", "Shell Goodies"
             VALUE "LegalCopyright", "Copyfright © 2001-2019"
             VALUE "OriginalFilename", "ShellGoodies64.dll"
             VALUE "ProductName", "ShellGoodies Shell Extension DLL"
-            VALUE "ProductVersion", "9, 2, 6, 2"
+            VALUE "ProductVersion", "9, 2, 6, 3"
             VALUE "WrittenBy", "Written by Paul Cocoveanu"
         END
     END

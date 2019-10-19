@@ -7,27 +7,36 @@
 
 class CPathFormatter
 {
+	friend class CPathGeneratorTests;
 public:
-	CPathFormatter( const std::tstring& format );
+	CPathFormatter( const std::tstring& format, bool ignoreExtension );
 
 	bool IsValidFormat( void ) const { return m_isNumericFormat || m_isWildcardFormat; }
+	bool IsNumericFormat( void ) const { return m_isNumericFormat; }
+	bool IsWildcardFormat( void ) const { return m_isWildcardFormat; }
+	const fs::CPath& GetFormat( void ) const { return m_format; }
 
-	void SetMoveDestDirPath( const std::tstring& moveDestDirPath );
+	bool IsConsistent( void ) const;
+	CPathFormatter MakeConsistent( void ) const;
 
-	fs::CPath FormatPath( const std::tstring& srcPath, UINT seqCount, UINT dupCount = 0 ) const;
-	bool ParseSeqCount( UINT& rSeqCount, const std::tstring& srcPath ) const;
+	void SetMoveDestDirPath( const fs::CPath& moveDestDirPath );
 
-	static std::tstring FormatPart( const std::tstring& format, const std::tstring& src, UINT seqCount, bool* pSyntaxOk = NULL );
-	static bool ParsePart( UINT& rSeqCount, const std::tstring& format, const std::tstring& src );
+	fs::CPath FormatPath( const fs::CPath& srcPath, UINT seqCount, UINT dupCount = 0 ) const;
+	bool ParseSeqCount( UINT& rSeqCount, const fs::CPath& srcPath ) const;
 private:
+	static std::tstring FormatPart( const std::tstring& part, const std::tstring& format, UINT seqCount, bool* pSyntaxOk = NULL );
+	static bool ParsePart( UINT& rSeqCount, const std::tstring& format, const std::tstring& src );
+
 	static bool IsNumericFormat( const std::tstring& format );
 	static bool SkipStar( std::tistringstream& issSrc, std::tstring::const_iterator& itFmt, std::tstring::const_iterator itFmtEnd );
-public:
-	const bool m_isNumericFormat;
-	const bool m_isWildcardFormat;
 private:
-	fs::CPathParts m_formatParts;							// F-FNAME, F-EXT
-	std::auto_ptr< fs::CPathParts > m_pMoveDestDirPath;		// generate for moving to destDirPath
+	fs::CPath m_format;
+	bool m_ignoreExtension;
+	bool m_isNumericFormat;
+	bool m_isWildcardFormat;
+
+	std::tstring m_fnameFormat, m_extFormat;
+	fs::CPath m_moveDestDirPath;
 };
 
 

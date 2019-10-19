@@ -103,88 +103,116 @@ namespace hlp
 
 // CPathFormatter implementation
 
-CPathFormatter::CPathFormatter( const std::tstring& format )
-	: m_isNumericFormat( IsNumericFormat( format ) )
-	, m_isWildcardFormat( path::ContainsWildcards( format.c_str() ) )		// was fs::CPathParts( format ).m_fname.c_str(), but it doesn't work for ".*" which should remove fname
-	, m_formatParts( format )
+CPathFormatter::CPathFormatter( const std::tstring& format, bool ignoreExtension )
+	: m_format( format )
+	, m_ignoreExtension( ignoreExtension )
+	, m_isNumericFormat( IsNumericFormat( m_format.Get() ) )
+	, m_isWildcardFormat( path::ContainsWildcards( m_format.GetPtr() ) )		// was fs::CPathParts( format ).m_fname.c_str(), but it doesn't work for ".*" which should remove fname
 {
-	if ( IsValidFormat() )
+	if ( m_ignoreExtension )
+		m_fnameFormat = m_format.Get();
+	else
 	{
-		if ( m_formatParts.m_ext.empty() )
-			m_formatParts.m_ext = _T(".*");					// no extension -> use ".*"
-		else if ( _T(".") == m_formatParts.m_ext )
-			m_formatParts.m_ext.clear();					// "." -> no extension
+		m_format.SplitFilename( m_fnameFormat, m_extFormat );
 
-		hlp::CutLeadingDot( m_formatParts.m_ext );
+		if ( IsValidFormat() )
+		{
+			if ( m_extFormat.empty() )
+				m_extFormat = _T(".*");					// use ".*"
+			else if ( _T(".") == m_extFormat )
+				m_extFormat.clear();					// "." -> no extension
+
+			hlp::CutLeadingDot( m_extFormat );
+		}
 	}
 }
 
-void CPathFormatter::SetMoveDestDirPath( const std::tstring& moveDestDirPath )
+bool CPathFormatter::IsConsistent( void ) const
+{
+	if ( !IsValidFormat() )
+		return false;
+
+	if ( m_ignoreExtension )
+		if ( !str::IsEmpty( m_format.GetExt() ) && path::ContainsWildcards( m_format.GetExt() ) )
+			return false;
+
+	return true;
+}
+
+CPathFormatter CPathFormatter::MakeConsistent( void ) const
+{
+	if ( IsValidFormat() && !IsConsistent() )
+		return CPathFormatter( m_format.GetFname(), m_ignoreExtension );		// strip the extension in format
+
+	return *this;
+}
+
+void CPathFormatter::SetMoveDestDirPath( const fs::CPath& moveDestDirPath )
 {
 	// note: moveDestDirPath could be empty for doc storage destination (root files)
-	m_pMoveDestDirPath.reset( new fs::CPathParts( moveDestDirPath ) );
+	m_moveDestDirPath = moveDestDirPath;
 }
 
 bool CPathFormatter::IsNumericFormat( const std::tstring& format )
 {
 	if ( format.find( _T('#') ) != std::tstring::npos || format.find( _T('%') ) != std::tstring::npos )
 	{
-		static const TCHAR dummy[] = _T("dummy");
-		std::tstring genPath1 = FormatPart( format, dummy, 1 );
-		std::tstring genPath2 = FormatPart( format, dummy, 2 );
+		static const TCHAR s_dummy[] = _T("dummy");
+		std::tstring genPath1 = FormatPart( s_dummy, format, 1 );
+		std::tstring genPath2 = FormatPart( s_dummy, format, 2 );
+
 		return genPath1 != genPath2;
 	}
 	return false;
 }
 
-fs::CPath CPathFormatter::FormatPath( const std::tstring& srcPath, UINT seqCount, UINT dupCount /*= 0*/ ) const
+fs::CPath CPathFormatter::FormatPath( const fs::CPath& srcPath, UINT seqCount, UINT dupCount /*= 0*/ ) const
 {
-	fs::CPathParts output( srcPath );
+	const fs::CPath dirPath = !m_moveDestDirPath.IsEmpty() ? m_moveDestDirPath : srcPath.GetParentPath();
 
-	if ( m_pMoveDestDirPath.get() != NULL )		// use a single destination directory to move files?
-	{
-		output.m_drive = m_pMoveDestDirPath->m_drive;
-		output.m_dir = m_pMoveDestDirPath->m_dir;
-	}
+	std::tstring outFname, outExt;
+	srcPath.SplitFilename( outFname, outExt );
 
 	// format the filename: convert wildcards to filename source characters
 	bool syntaxOk;
-	output.m_fname = FormatPart( m_formatParts.m_fname, output.m_fname, seqCount, &syntaxOk );
+	outFname = FormatPart( outFname, m_fnameFormat, seqCount, &syntaxOk );
 	if ( !syntaxOk )
-		TRACE( _T("> bad fname format syntax: '%s'\n"), m_formatParts.m_fname.c_str() );
+		TRACE( _T("> bad fname format syntax: '%s'\n"), m_fnameFormat.c_str() );
 
 	if ( dupCount > 1 )
-		output.m_fname += str::Format( _T("_$(%d)"), dupCount );						// append dup count suffix
+		outFname += str::Format( _T("_$(%d)"), dupCount );			// append dup count suffix
 
-	// format the extension: convert wildcards to extension source characters (skip the point from source, if any)
-	hlp::CutLeadingDot( output.m_ext );
+	if ( !m_ignoreExtension )
+	{
+		// format the extension: convert wildcards to extension source characters (skip the point from source, if any)
+		hlp::CutLeadingDot( outExt );
 
-	output.m_ext = FormatPart( m_formatParts.m_ext, output.m_ext, 0, &syntaxOk );		// no counter for extension
-	if ( !syntaxOk )
-		TRACE( _T("> bad extension format syntax: '%s'\n"), m_formatParts.m_ext.c_str() );
+		outExt = FormatPart( outExt, m_extFormat, 0, &syntaxOk );	// no counter for extension
+		if ( !syntaxOk )
+			TRACE( _T("> bad extension format syntax: '%s'\n"), m_extFormat.c_str() );
 
-	hlp::PrependLeadingDot( output.m_ext );
+		hlp::PrependLeadingDot( outExt );
+	}
 
-	return output.MakePath();
+	return dirPath / ( outFname + outExt );
 }
 
-bool CPathFormatter::ParseSeqCount( UINT& rSeqCount, const std::tstring& srcPath ) const
+bool CPathFormatter::ParseSeqCount( UINT& rSeqCount, const fs::CPath& srcPath ) const
 {
-	fs::CPathParts srcParts( srcPath );
-	return ParsePart( rSeqCount, m_formatParts.m_fname, srcParts.m_fname );
+	return ParsePart( rSeqCount, m_fnameFormat, srcPath.GetFname() );
 }
 
 	// format uses tokens mixed with text:
 	//	numeric:	"#", "##", "%d", "%02d", "%02X"
 	//	wildcards:	"*.*", "?"
 
-std::tstring CPathFormatter::FormatPart( const std::tstring& format, const std::tstring& src, UINT seqCount, bool* pSyntaxOk /*= NULL*/ )
+std::tstring CPathFormatter::FormatPart( const std::tstring& part, const std::tstring& format, UINT seqCount, bool* pSyntaxOk /*= NULL*/ )
 {
 	std::vector< TCHAR > output;
-	output.reserve( _MAX_PATH );
+	output.reserve( MAX_PATH );
 
 	bool syntaxOk = true, doneSeq = false;
-	std::tstring::const_iterator itSrc = src.begin(), itSrcEnd = src.end();
+	std::tstring::const_iterator itPart = part.begin(), itPartEnd = part.end();
 
 	for ( std::tstring::const_iterator itFmt = format.begin(); itFmt != format.end(); )
 	{
@@ -217,21 +245,21 @@ std::tstring CPathFormatter::FormatPart( const std::tstring& format, const std::
 				output.push_back( *itFmt );
 				break;
 			case _T('*'):
-				if ( itSrc != itSrcEnd )
+				if ( itPart != itPartEnd )
 				{	// copy the whole source string
-					output.insert( output.end(), itSrc, itSrcEnd );
-					itSrc = itSrcEnd;
+					output.insert( output.end(), itPart, itPartEnd );
+					itPart = itPartEnd;
 				}
 				else
 					syntaxOk = false;
 				break;
 			case _T('?'):
 				// copy the source character rather than the format character (if current source position is within the valid range)
-				if ( itSrc < itSrcEnd )
-					output.push_back( *itSrc++ );
+				if ( itPart < itPartEnd )
+					output.push_back( *itPart++ );
 				else
 					TRACE( _T("> No source character for for wildcard '?' at position %d in source \"%s\"\n"),
-						   std::distance( src.begin(), itSrc ), src.c_str() );
+						   std::distance( part.begin(), itPart ), part.c_str() );
 				break;
 			default:
 				output.push_back( *itFmt );
@@ -251,10 +279,10 @@ std::tstring CPathFormatter::FormatPart( const std::tstring& format, const std::
 	return &output.front();
 }
 
-bool CPathFormatter::ParsePart( UINT& rSeqCount, const std::tstring& format, const std::tstring& src )
+bool CPathFormatter::ParsePart( UINT& rSeqCount, const std::tstring& format, const std::tstring& part )
 {
 	rSeqCount = 0;
-	std::tistringstream issSrc( src );
+	std::tistringstream issSrc( part );
 	issSrc.unsetf( std::ios::skipws );			// count whitespace as regular character
 
 	bool doneSeq = false;

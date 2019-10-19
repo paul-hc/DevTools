@@ -251,7 +251,7 @@ bool CShellMenuController::HandleCommand( MenuCommand menuCmd, CWnd* pParentOwne
 	switch ( menuCmd )
 	{
 		case Cmd_SendToCliboard:
-			m_fileModel.CopyClipSourcePaths( GetKeyState( VK_SHIFT ) & 0x8000 ? fmt::FilenameExt : fmt::FullPath, pParentOwner );
+			m_fileModel.CopyClipSourcePaths( ui::IsKeyPressed( VK_SHIFT ) ? fmt::FilenameExt : fmt::FullPath, pParentOwner );
 			return true;
 		case Cmd_RunUnitTests:
 			app::GetApp().RunUnitTests();

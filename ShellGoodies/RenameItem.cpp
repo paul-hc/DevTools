@@ -87,11 +87,7 @@ std::tstring CDisplayFilenameAdapter::FormatFilename( const fs::CPath& filePath 
 	const TCHAR* pNameExt = filePath.GetNameExt();
 
 	if ( m_ignoreExtension )
-	{
-		const TCHAR* pExt = path::FindExt( pNameExt );
-
-		return std::tstring( pNameExt, std::distance( pNameExt, pExt ) );		// strip the extension
-	}
+		return StripExtension( pNameExt );
 
 	return pNameExt;
 }
@@ -102,4 +98,46 @@ fs::CPath CDisplayFilenameAdapter::ParseFilename( const std::tstring& displayFil
 		return referencePath.GetParentPath() / ( displayFilename + referencePath.GetExt() );		// use the reference extension
 
 	return referencePath.GetParentPath() / displayFilename;			// use the input extension
+}
+
+std::tstring CDisplayFilenameAdapter::FormatPath( fmt::PathFormat format, const fs::CPath& filePath ) const
+{
+	std::tstring displayPath = fmt::FormatPath( filePath, format );
+
+	if ( m_ignoreExtension )
+		displayPath = StripExtension( displayPath.c_str() );
+
+	return displayPath;
+}
+
+fs::CPath CDisplayFilenameAdapter::ParsePath( const std::tstring& inputPath, const fs::CPath& referencePath ) const
+{
+	fs::CPath filePath( inputPath );
+
+	if ( m_ignoreExtension && !filePath.HasExt( referencePath.GetExt() ) )		// avoid doubling the same extension
+		filePath.Set( filePath.Get() + referencePath.GetExt() );
+
+	if ( !filePath.HasParentPath() )
+		filePath.SetDirPath( referencePath.GetParentPath().Get() );		// qualify with reference dir path
+
+	return filePath;
+}
+
+bool CDisplayFilenameAdapter::IsExtensionChange( const fs::CPath& referencePath, const fs::CPath& destPath )
+{
+	switch ( referencePath.GetExtensionMatch( destPath ) )
+	{
+		case fs::MismatchDotsExt:
+		case fs::MismatchExt:
+			return true;
+	}
+
+	return false;		// case change is not a major extension change
+}
+
+std::tstring CDisplayFilenameAdapter::StripExtension( const TCHAR* pFilePath )
+{
+	const TCHAR* pExt = path::FindExt( pFilePath );
+
+	return std::tstring( pFilePath, std::distance( pFilePath, pExt ) );		// strip the extension
 }
