@@ -64,8 +64,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 7,2,0,1
- PRODUCTVERSION 7,2,0,1
+ FILEVERSION 7,2,1,1
+ PRODUCTVERSION 7,2,1,1
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -80,16 +80,16 @@ BEGIN
     BEGIN
         BLOCK "040904b0"
         BEGIN
-            VALUE "Comments", "Split UTL_BASE/UTL_UI|V7: New IDETools with tracking static for menu file picker and other popup menus|Restore focus of IDE windows|V6: Directories page. Redesigned include options and paths. Removed .dsp additional include path."
+            VALUE "Comments", "Natural sort macro|Split UTL_BASE/UTL_UI|V7: New IDETools with tracking static for menu file picker and other popup menus|Restore focus of IDE windows|V6: Directories page. Redesigned include options and paths. Removed .dsp additional include path."
             VALUE "CompanyName", "Paul Cocoveanu"
             VALUE "Email", "phc.2nd@gmail.com"
             VALUE "FileDescription", "IDETools DLL"
-            VALUE "FileVersion", "7, 2, 0, 1"
+            VALUE "FileVersion", "7, 2, 1, 1"
             VALUE "InternalName", "IDETools"
             VALUE "LegalCopyright", "Copyright © 1998-2019"
             VALUE "OriginalFilename", "IDETools.dll"
             VALUE "ProductName", "IDETools Automation DLL"
-            VALUE "ProductVersion", "7, 2, 0, 1"
+            VALUE "ProductVersion", "7, 2, 1, 1"
             VALUE "WrittenBy", "Written by Paul Cocoveanu"
         END
     END
