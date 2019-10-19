@@ -5,6 +5,18 @@
 #include "utl/PathItemBase.h"
 
 
+class CRenameItem;
+
+
+namespace ren
+{
+	bool MakePairsFromItems( fs::TPathPairMap& rOutRenamePairs, const std::vector< CRenameItem* >& renameItems );
+	void MakePairsToItems( std::vector< CRenameItem* >& rOutRenameItems, const fs::TPathPairMap& renamePairs );
+	void AssignPairsToItems( const std::vector< CRenameItem* >& items, const fs::TPathPairMap& renamePairs );
+	void QueryDestFnames( std::vector< std::tstring >& rDestFnames, const std::vector< CRenameItem* >& items );
+}
+
+
 class CRenameItem : public CPathItemBase
 {
 public:
@@ -25,13 +37,24 @@ private:
 };
 
 
-namespace ren
+#include "utl/UI/ObjectCtrlBase.h"
+
+
+class CDisplayFilenameAdapter : public ui::ISubjectAdapter
 {
-	bool MakePairsFromItems( fs::TPathPairMap& rOutRenamePairs, const std::vector< CRenameItem* >& renameItems );
-	void MakePairsToItems( std::vector< CRenameItem* >& rOutRenameItems, const fs::TPathPairMap& renamePairs );
-	void AssignPairsToItems( const std::vector< CRenameItem* >& items, const fs::TPathPairMap& renamePairs );
-	void QueryDestFnames( std::vector< std::tstring >& rDestFnames, const std::vector< CRenameItem* >& items );
-}
+public:
+	CDisplayFilenameAdapter( bool ignoreExtension ) : m_ignoreExtension( ignoreExtension ) {}
+
+	void SetIgnoreExtension( bool ignoreExtension ) { m_ignoreExtension = ignoreExtension; }
+
+	// ui::ISubjectAdapter interface
+	virtual std::tstring FormatCode( const utl::ISubject* pSubject ) const;
+
+	std::tstring FormatFilename( const fs::CPath& filePath ) const;
+	fs::CPath ParseFilename( const std::tstring& displayFilename, const fs::CPath& referencePath ) const;
+private:
+	bool m_ignoreExtension;
+};
 
 
 #endif // RenameItem_h

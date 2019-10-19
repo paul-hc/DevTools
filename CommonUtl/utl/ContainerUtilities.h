@@ -180,10 +180,17 @@ namespace utl
 	}
 
 
-	template< typename ContainerT, typename ItemType >
-	inline bool Contains( const ContainerT& container, ItemType item )
+	template< typename ContainerT, typename ValueType >
+	inline bool Contains( const ContainerT& container, const ValueType& value )
 	{
-		return std::find( container.begin(), container.end(), item ) != container.end();
+		return std::find( container.begin(), container.end(), value ) != container.end();
+	}
+
+	template< typename IteratorT, typename ValueType >
+	inline bool Contains( IteratorT itStart, IteratorT itEnd, const ValueType& value )
+	{
+		IteratorT itFound = std::find( itStart, itEnd, value );
+		return itFound != itEnd;
 	}
 
 	template< typename DiffType, typename IteratorT >
@@ -193,31 +200,31 @@ namespace utl
 	}
 
 	template< typename IteratorT, typename ValueType >
-	inline size_t FindPos( IteratorT itStart, IteratorT itEnd, const ValueType& rValue )
+	inline size_t FindPos( IteratorT itStart, IteratorT itEnd, const ValueType& value )
 	{
-		IteratorT itFound = std::find( itStart, itEnd, rValue );
+		IteratorT itFound = std::find( itStart, itEnd, value );
 		return itFound != itEnd ? std::distance( itStart, itFound ) : size_t( -1 );
 	}
 
 	template< typename ContainerT, typename ValueType >
-	inline size_t FindPos( const ContainerT& container, const ValueType& rValue )
+	inline size_t FindPos( const ContainerT& container, const ValueType& value )
 	{
-		return FindPos( container.begin(), container.end(), rValue );
+		return FindPos( container.begin(), container.end(), value );
 	}
 
 	template< typename IteratorT, typename ValueType >
-	inline size_t LookupPos( IteratorT itStart, IteratorT itEnd, const ValueType& rValue )
+	inline size_t LookupPos( IteratorT itStart, IteratorT itEnd, const ValueType& value )
 	{
-		IteratorT itFound = std::find( itStart, itEnd, rValue );
+		IteratorT itFound = std::find( itStart, itEnd, value );
 
 		ASSERT( itFound != itEnd );
 		return std::distance( itStart, itFound );
 	}
 
 	template< typename ContainerT, typename ValueType >
-	inline size_t LookupPos( const ContainerT& container, const ValueType& rValue )
+	inline size_t LookupPos( const ContainerT& container, const ValueType& value )
 	{
-		return LookupPos( container.begin(), container.end(), rValue );
+		return LookupPos( container.begin(), container.end(), value );
 	}
 
 	template< typename IteratorT >
@@ -425,9 +432,9 @@ namespace utl
 	}
 
 	template< typename ContainerT >
-	inline bool RemoveValue( ContainerT& rContainer, const typename ContainerT::value_type& rValue )
+	inline bool RemoveValue( ContainerT& rContainer, const typename ContainerT::value_type& value )
 	{
-		typename ContainerT::iterator itFound = std::find( rContainer.begin(), rContainer.end(), rValue );
+		typename ContainerT::iterator itFound = std::find( rContainer.begin(), rContainer.end(), value );
 
 		if ( itFound == rContainer.end() )
 			return false;

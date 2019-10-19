@@ -62,6 +62,8 @@ namespace ren
 }
 
 
+// CRenameItem implementation
+
 CRenameItem::CRenameItem( const fs::CPath& srcPath )
 	: CPathItemBase( srcPath )
 {
@@ -69,4 +71,35 @@ CRenameItem::CRenameItem( const fs::CPath& srcPath )
 
 CRenameItem::~CRenameItem()
 {
+}
+
+
+// CDisplayFilenameAdapter implementation
+
+std::tstring CDisplayFilenameAdapter::FormatCode( const utl::ISubject* pSubject ) const
+{
+	ASSERT_PTR( pSubject );
+	return FormatFilename( pSubject->GetDisplayCode() );
+}
+
+std::tstring CDisplayFilenameAdapter::FormatFilename( const fs::CPath& filePath ) const
+{
+	const TCHAR* pNameExt = filePath.GetNameExt();
+
+	if ( m_ignoreExtension )
+	{
+		const TCHAR* pExt = path::FindExt( pNameExt );
+
+		return std::tstring( pNameExt, std::distance( pNameExt, pExt ) );		// strip the extension
+	}
+
+	return pNameExt;
+}
+
+fs::CPath CDisplayFilenameAdapter::ParseFilename( const std::tstring& displayFilename, const fs::CPath& referencePath ) const
+{
+	if ( m_ignoreExtension )
+		return referencePath.GetParentPath() / ( displayFilename + referencePath.GetExt() );		// use the reference extension
+
+	return referencePath.GetParentPath() / displayFilename;			// use the input extension
 }

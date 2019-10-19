@@ -17,6 +17,7 @@
 
 
 class CRenameItem;
+class CDisplayFilenameAdapter;
 class CRenameService;
 class CPickDataset;
 
@@ -28,8 +29,11 @@ public:
 	virtual ~CRenameFilesDialog();
 
 	const std::vector< CRenameItem* >& GetRenameItems( void ) const { return m_rRenameItems; }
+
 	bool IsInitialized( void ) const { return m_isInitialized; }
 	bool HasDestPaths( void ) const;
+
+	CDisplayFilenameAdapter* GetDisplayFilenameAdapter( void ) { return m_pDisplayFilenameAdapter.get(); }
 protected:
 	// IFileEditor interface (partial)
 	virtual void PostMakeDest( bool silent = false );
@@ -67,7 +71,9 @@ private:
 
 	bool m_autoGenerate;
 	bool m_seqCountAutoAdvance;
+	bool m_ignoreExtension;
 
+	std::auto_ptr< CDisplayFilenameAdapter > m_pDisplayFilenameAdapter;
 	std::auto_ptr< CPickDataset > m_pPickDataset;
 private:
 	// enum { IDD = IDD_RENAME_FILES_DIALOG };
@@ -104,6 +110,7 @@ protected:
 	afx_msg void OnSeqCountAutoAdvance( void );
 	afx_msg void OnUpdateSeqCountAutoAdvance( CCmdUI* pCmdUI );
 	afx_msg void OnBnClicked_CopySourceFiles( void );
+	afx_msg void OnToggle_IgnoreExtension( void );
 	afx_msg void OnBnClicked_PasteDestFiles( void );
 	afx_msg void OnBnClicked_ResetDestFiles( void );
 	afx_msg void OnBnClicked_CapitalizeDestFiles( void );

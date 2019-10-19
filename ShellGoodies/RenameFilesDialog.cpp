@@ -37,6 +37,7 @@ namespace reg
 	static const TCHAR entry_autoGenerate[] = _T("Auto Generate");
 	static const TCHAR entry_seqCount[] = _T("Sequence Count");
 	static const TCHAR entry_seqCountAutoAdvance[] = _T("Sequence Count Auto Advance");
+	static const TCHAR entry_ignoreExtension[] = _T("Ignore Extension");
 	static const TCHAR entry_changeCase[] = _T("Change Case");
 	static const TCHAR entry_delimiterSetHistory[] = _T("Delimiter Set History");
 	static const TCHAR entry_newDelimiterHistory[] = _T("New Delimiter History");
@@ -84,6 +85,8 @@ CRenameFilesDialog::CRenameFilesDialog( CFileModel* pFileModel, CWnd* pParent )
 	, m_isInitialized( false )
 	, m_autoGenerate( AfxGetApp()->GetProfileInt( reg::section_mainDialog, reg::entry_autoGenerate, false ) != FALSE )
 	, m_seqCountAutoAdvance( AfxGetApp()->GetProfileInt( reg::section_mainDialog, reg::entry_seqCountAutoAdvance, true ) != FALSE )
+	, m_ignoreExtension( AfxGetApp()->GetProfileInt( reg::section_mainDialog, reg::entry_ignoreExtension, false ) != FALSE )
+	, m_pDisplayFilenameAdapter( new CDisplayFilenameAdapter( m_ignoreExtension ) )
 	, m_formatCombo( ui::HistoryMaxSize, s_specialSep )
 	, m_changeCaseButton( &GetTags_ChangeCase() )
 	, m_delimiterSetCombo( ui::HistoryMaxSize, s_specialSep )
@@ -411,6 +414,7 @@ void CRenameFilesDialog::DoDataExchange( CDataExchange* pDX )
 		m_newDelimiterEdit.SetWindowText( AfxGetApp()->GetProfileString( m_regSection.c_str(), reg::entry_newDelimiterHistory, s_defaultNewDelimiter ) );
 
 		m_seqCountEdit.SetNumericValue( AfxGetApp()->GetProfileInt( m_regSection.c_str(), reg::entry_seqCount, 1 ) );
+		CheckDlgButton( IDC_IGNORE_EXTENSION_CHECK, m_ignoreExtension );
 
 		m_isInitialized = true;
 
@@ -446,6 +450,7 @@ BEGIN_MESSAGE_MAP( CRenameFilesDialog, CFileEditorBaseDialog )
 	ON_UPDATE_COMMAND_UI( ID_SEQ_COUNT_FIND_NEXT, OnUpdateSeqCountFindNext )
 	ON_COMMAND( ID_SEQ_COUNT_AUTO_ADVANCE, OnSeqCountAutoAdvance )
 	ON_UPDATE_COMMAND_UI( ID_SEQ_COUNT_AUTO_ADVANCE, OnUpdateSeqCountAutoAdvance )
+	ON_BN_CLICKED( IDC_IGNORE_EXTENSION_CHECK, OnToggle_IgnoreExtension )
 	ON_BN_CLICKED( IDC_COPY_SOURCE_PATHS_BUTTON, OnBnClicked_CopySourceFiles )
 	ON_BN_CLICKED( IDC_PASTE_FILES_BUTTON, OnBnClicked_PasteDestFiles )
 	ON_BN_CLICKED( IDC_RESET_FILES_BUTTON, OnBnClicked_ResetDestFiles )
@@ -534,6 +539,7 @@ void CRenameFilesDialog::OnDestroy( void )
 	AfxGetApp()->WriteProfileInt( reg::section_mainDialog, reg::entry_autoGenerate, m_autoGenerate );
 	AfxGetApp()->WriteProfileInt( reg::section_mainDialog, reg::entry_seqCountAutoAdvance, m_seqCountAutoAdvance );
 	AfxGetApp()->WriteProfileInt( reg::section_mainDialog, reg::entry_changeCase, m_changeCaseButton.GetSelValue() );
+	AfxGetApp()->WriteProfileInt( reg::section_mainDialog, reg::entry_ignoreExtension, m_ignoreExtension );
 
 	__super::OnDestroy();
 }
@@ -598,6 +604,14 @@ void CRenameFilesDialog::OnUpdateSeqCountAutoAdvance( CCmdUI* pCmdUI )
 	pCmdUI->SetCheck( m_seqCountAutoAdvance );
 }
 
+void CRenameFilesDialog::OnToggle_IgnoreExtension( void )
+{
+	m_ignoreExtension = IsDlgButtonChecked( IDC_IGNORE_EXTENSION_CHECK ) != FALSE;
+	m_pDisplayFilenameAdapter->SetIgnoreExtension( m_ignoreExtension );
+
+	OnUpdate( m_pFileModel, NULL );
+}
+
 void CRenameFilesDialog::OnBnClicked_CopySourceFiles( void )
 {
 	if ( !m_pFileModel->CopyClipSourcePaths( fmt::FilenameExt, this ) )
@@ -643,6 +657,15 @@ void CRenameFilesDialog::OnBnClicked_ChangeCase( void )
 
 	ChangeCase selCase = m_changeCaseButton.GetSelEnum< ChangeCase >();
 	std::tstring cmdTag = str::Format( _T("Change case to: %s"), GetTags_ChangeCase().FormatUi( selCase ).c_str() );
+
+	if ( m_ignoreExtension )
+	{
+		static const ChangeCase s_altersTheExt[] = { LowerCase, UpperCase, ExtLowerCase, ExtUpperCase };
+
+		if ( utl::Contains( s_altersTheExt, END_OF( s_altersTheExt ), selCase ) )
+			if ( AfxMessageBox( _T("This operation may alter the hidden extension of certain files!\n\nDo you want to proceed?"), MB_ICONWARNING | MB_OKCANCEL ) != IDOK )
+				return;
+	}
 
 	SafeExecuteCmd( m_pFileModel->MakeChangeDestPathsCmd( func::MakeCase( selCase ), cmdTag ) );
 }

@@ -50,6 +50,10 @@ CRenameListPage::CRenameListPage( CRenameFilesDialog* pParentDlg )
 	m_fileListCtrl.SetSection( reg::section_list );
 	m_fileListCtrl.SetUseAlternateRowColoring();
 	m_fileListCtrl.SetTextEffectCallback( this );
+
+	// display filenames depending on m_ignoreExtension
+	m_fileListCtrl.SetSubjectAdapter( m_pParentDlg->GetDisplayFilenameAdapter() );
+
 	CGeneralOptions::Instance().ApplyToListCtrl( &m_fileListCtrl );
 	// Note: focus retangle is not painted properly without double-buffering
 }
@@ -64,6 +68,7 @@ void CRenameListPage::SetupFileListView( void )
 
 	CScopedLockRedraw freeze( &m_fileListCtrl );
 	CScopedInternalChange internalChange( &m_fileListCtrl );
+	CDisplayFilenameAdapter* pDisplayAdapter = m_pParentDlg->GetDisplayFilenameAdapter();
 
 	m_fileListCtrl.DeleteAllItems();
 
@@ -72,7 +77,7 @@ void CRenameListPage::SetupFileListView( void )
 		CRenameItem* pRenameItem = m_pParentDlg->GetRenameItems()[ pos ];
 
 		m_fileListCtrl.InsertObjectItem( pos, pRenameItem );		// Source
-		m_fileListCtrl.SetSubItemText( pos, Destination, pRenameItem->GetDestPath().GetNameExt() );
+		m_fileListCtrl.SetSubItemText( pos, Destination, pDisplayAdapter->FormatFilename( pRenameItem->GetDestPath() ) );
 	}
 
 	m_fileListCtrl.SetupDiffColumnPair( Source, Destination, path::GetMatch() );
@@ -202,6 +207,7 @@ void CRenameEditPage::CommitLocalEdits( void )
 void CRenameEditPage::SetupFileEdits( void )
 {
 	const std::vector< CRenameItem* >& renameItems = m_pParentDlg->GetRenameItems();
+	CDisplayFilenameAdapter* pDisplayAdapter = m_pParentDlg->GetDisplayFilenameAdapter();
 
 	std::vector< std::tstring > srcPaths, destPaths;
 	srcPaths.reserve( renameItems.size() );
@@ -209,8 +215,8 @@ void CRenameEditPage::SetupFileEdits( void )
 
 	for ( std::vector< CRenameItem* >::const_iterator itRenameItem = renameItems.begin(); itRenameItem != renameItems.end(); ++itRenameItem )
 	{
-		srcPaths.push_back( ( *itRenameItem )->GetDisplayCode() );
-		destPaths.push_back( ( *itRenameItem )->GetDestPath().GetNameExt() );
+		srcPaths.push_back( pDisplayAdapter->FormatFilename( ( *itRenameItem )->GetSrcPath() ) );
+		destPaths.push_back( pDisplayAdapter->FormatFilename( ( *itRenameItem )->GetDestPath() ) );
 	}
 
 	bool firstSetup = 0 == ::GetWindowTextLength( m_srcEdit );
@@ -234,7 +240,7 @@ bool CRenameEditPage::InputDestPaths( void )
 	for ( std::vector< std::tstring >::iterator itFilename = filenames.begin(); itFilename != filenames.end(); ++itFilename )
 		if ( !path::IsValid( str::Trim( *itFilename ) ) )
 			return false;
-	
+
 	if ( !filenames.empty() )			// an extra line end?
 	{
 		std::vector< std::tstring >::iterator itLastPath = filenames.end() - 1;
@@ -247,10 +253,12 @@ bool CRenameEditPage::InputDestPaths( void )
 	if ( filenames.size() != renameItems.size() )
 		return false;
 
+	CDisplayFilenameAdapter* pDisplayAdapter = m_pParentDlg->GetDisplayFilenameAdapter();
+
 	m_newDestPaths.reserve( renameItems.size() );
 
 	for ( size_t i = 0; i != renameItems.size(); ++i )
-		m_newDestPaths.push_back( renameItems[ i ]->GetSrcPath().GetParentPath() / filenames[ i ] );		// SRC_dir_path/filename
+		m_newDestPaths.push_back( pDisplayAdapter->ParseFilename( filenames[ i ], renameItems[ i ]->GetSafeDestPath() ) );		// DEST[SRC]_dir_path/filename
 
 	return true;
 }
@@ -308,10 +316,7 @@ void CRenameEditPage::OnEnChange_DestPaths( void )
 {
 	CScopedInternalChange scopedInternal( this );
 
-	if ( InputDestPaths() )
-	{
-	}
-	else
+	if ( !InputDestPaths() )
 	{
 		m_destEditor.Undo();
 		ui::BeepSignal();
