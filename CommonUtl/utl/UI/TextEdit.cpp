@@ -157,10 +157,10 @@ std::tstring CTextEdit::GetLineText( Line linePos ) const
 
 CFont* CTextEdit::GetFixedFont( FontSize fontSize /*= Normal*/ )
 {
-	static CFont fixedFont[ 2 ];
-	if ( NULL == fixedFont[ fontSize ].GetSafeHandle() )
-		ui::MakeStandardControlFont( fixedFont[ fontSize ], ui::CFontInfo( _T("Consolas"), ui::Regular, Normal == fontSize ? 100 : 120 ) );		// "Courier New"
-	return &fixedFont[ fontSize ];
+	static CFont s_fixedFont[ 2 ];
+	if ( NULL == s_fixedFont[ fontSize ].GetSafeHandle() )
+		ui::MakeStandardControlFont( s_fixedFont[ fontSize ], ui::CFontInfo( _T("Consolas"), ui::Regular, Normal == fontSize ? 100 : 120 ) );		// "Courier New"
+	return &s_fixedFont[ fontSize ];
 }
 
 void CTextEdit::SetFixedFont( CWnd* pWnd )

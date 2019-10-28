@@ -308,9 +308,24 @@ void CRenameEditPage::DoDataExchange( CDataExchange* pDX )
 // message handlers
 
 BEGIN_MESSAGE_MAP( CRenameEditPage, CBaseRenamePage )
+	ON_WM_CTLCOLOR()
 	ON_EN_CHANGE( IDC_RENAME_DEST_FILES_EDIT, OnEnChange_DestPaths )
 	ON_EN_KILLFOCUS( IDC_RENAME_DEST_FILES_EDIT, OnEnKillFocus_DestPaths )
 END_MESSAGE_MAP()
+
+HBRUSH CRenameEditPage::OnCtlColor( CDC* pDC, CWnd* pWnd, UINT ctlType )
+{
+	HBRUSH hBrushFill = __super::OnCtlColor( pDC, pWnd, ctlType );
+
+	if ( pWnd == &m_srcEdit )
+	{
+		// Make the read-only edit box look read-only. Strangely by default is displayed with white background, like a writable edit box.
+		pDC->SetBkColor( ::GetSysColor( COLOR_BTNFACE ) );
+		return ::GetSysColorBrush( COLOR_BTNFACE );
+	}
+
+	return hBrushFill;
+}
 
 void CRenameEditPage::OnEnChange_DestPaths( void )
 {

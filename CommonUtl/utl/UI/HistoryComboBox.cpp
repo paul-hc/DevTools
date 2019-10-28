@@ -100,6 +100,12 @@ void CHistoryComboBox::StoreCurrentEditItem( void )
 	ui::UpdateHistoryCombo( *this, m_maxCount, m_caseType );		// store edit item in the list (with validation)
 }
 
+void CHistoryComboBox::SetEdit( CTextEditor* pEdit )
+{
+	ASSERT_NULL( m_hWnd );				// must be called before creation
+	m_pEdit.reset( pEdit );
+}
+
 int CHistoryComboBox::GetCmdSelIndex( void ) const
 {
 	if ( GetDroppedState() )			// allow user to delete selected items when the combo list is dropped down
@@ -131,12 +137,15 @@ void CHistoryComboBox::PreSubclassWindow( void )
 	COMBOBOXINFO cbInfo = { sizeof( COMBOBOXINFO ) };
 	if ( GetComboBoxInfo( &cbInfo ) )
 	{
-		if ( cbInfo.hwndList != NULL && NULL == m_pEdit.get() )
+		if ( cbInfo.hwndItem != NULL )
 		{
-			m_pEdit.reset( new CTextEditor );
+			if ( NULL == m_pEdit.get() )
+				m_pEdit.reset( new CTextEditor );
+
 			m_pEdit->SetShowFocus();						// enable focus display automatically for edit-based combos
 			m_pEdit->SubclassWindow( cbInfo.hwndItem );
 		}
+
 		if ( cbInfo.hwndList != NULL && NULL == m_pDropList.get() )
 		{
 			m_pDropList.reset( new CComboDropList( this ) );
@@ -165,7 +174,6 @@ BOOL CHistoryComboBox::PreTranslateMessage( MSG* pMsg )
 
 BEGIN_MESSAGE_MAP( CHistoryComboBox, BaseClass )
 	ON_WM_CONTEXTMENU()
-	ON_WM_PAINT()
 	ON_COMMAND( ID_ADD_ITEM, OnStoreEditItem )
 	ON_COMMAND( ID_REMOVE_ITEM, OnDeleteListItem )
 	ON_UPDATE_COMMAND_UI( ID_REMOVE_ITEM, OnUpdateSelectedListItem )

@@ -1296,6 +1296,7 @@ namespace ui
 		if ( !items.empty() )		// keep default items if nothing saved
 		{
 			ui::WriteComboItems( rHistoryCombo, items );
+
 			if ( rHistoryCombo.GetCount() != 0 )
 				rHistoryCombo.SetCurSel( 0 );
 		}

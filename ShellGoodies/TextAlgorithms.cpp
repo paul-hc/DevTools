@@ -72,6 +72,13 @@ namespace text_tool
 
 namespace func
 {
+	void TrimFname( std::tstring& rFname )
+	{
+		str::Trim( rFname );
+		str::EnsureSingleSpace( rFname );
+	}
+
+
 	// MakeCase implementation
 
 	void MakeCase::operator()( std::tstring& rDestText ) const
@@ -83,11 +90,14 @@ namespace func
 			case FnameLowerCase:	str::ToLower( rDestText ); break;
 			case FnameUpperCase:	str::ToUpper( rDestText ); break;
 		}
+
+		TrimFname( rDestText );
 	}
 
 	void MakeCase::operator()( fs::CPathParts& rDestParts ) const
 	{
 		operator()( rDestParts.m_fname );
+
 		switch ( m_changeCase )
 		{
 			case LowerCase:			str::ToLower( rDestParts.m_ext ); break;
@@ -106,8 +116,7 @@ namespace func
 		for ( std::vector< std::pair< std::tstring, std::tstring > >::const_iterator itPair = m_pDelimsToNewPairs->begin(); itPair != m_pDelimsToNewPairs->end(); ++itPair )
 			str::ReplaceDelimiters( rDestText, itPair->first.c_str(), itPair->second.c_str() );
 
-		str::Trim( rDestText );
-		str::EnsureSingleSpace( rDestText );
+		TrimFname( rDestText );
 	}
 
 
@@ -126,6 +135,8 @@ namespace func
 			}
 			else
 				newText += *pSource++;
+
+		TrimFname( newText );
 
 		if ( m_commit )
 			rDestText = newText;
@@ -146,6 +157,8 @@ namespace func
 			}
 			else
 				newText += *pSource;
+
+		TrimFname( newText );
 
 		if ( m_commit )
 			rDestText = newText;

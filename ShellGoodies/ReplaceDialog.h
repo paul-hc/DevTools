@@ -34,6 +34,7 @@ private:
 
 	void StoreFindWhatText( const std::tstring& text, const std::tstring& commonSequence );
 	void StoreReplaceWithText( const std::tstring& text );
+	void OutputFindWhat( void );
 private:
 	IFileEditor* m_pParentEditor;
 	const CRenameService* m_pRenSvc;

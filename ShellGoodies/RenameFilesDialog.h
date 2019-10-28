@@ -63,10 +63,9 @@ private:
 	std::tstring JoinErrorDestPaths( void ) const;
 	std::tstring GetSelFindWhat( void ) const;
 
-	CPathFormatter InputRenameFormatter( void ) const;
-	bool EnsureConsistentFormat( CPathFormatter* pFormatter ) const;
+	CPathFormatter InputRenameFormatter( bool checkConsistent ) const;
 
-	bool GenerateDestPaths( const CPathFormatter& formatter, UINT* pSeqCount );
+	bool GenerateDestPaths( const CPathFormatter& pathFormatter, UINT* pSeqCount );
 	void ReplaceFormatEditText( const std::tstring& text );
 private:
 	const std::vector< CRenameItem* >& m_rRenameItems;

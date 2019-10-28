@@ -44,6 +44,7 @@ public:
 	ui::CItemContent& RefItemContent( void ) { return m_itemContent; }
 
 	CTextEditor* GetEdit( void ) const { return m_pEdit.get(); }
+	void SetEdit( CTextEditor* pEdit );
 
 	// ui::IContentValidator interface
 	virtual void ValidateContent( void );

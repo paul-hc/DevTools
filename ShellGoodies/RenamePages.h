@@ -99,6 +99,7 @@ private:
 	protected:
 	virtual void DoDataExchange( CDataExchange* pDX );
 protected:
+	afx_msg HBRUSH OnCtlColor( CDC* pDC, CWnd* pWnd, UINT ctlType );
 	afx_msg void OnEnChange_DestPaths( void );
 	afx_msg void OnEnKillFocus_DestPaths( void );
 

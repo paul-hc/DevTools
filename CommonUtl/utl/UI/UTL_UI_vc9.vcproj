@@ -511,6 +511,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\BalloonMessageTip.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\BalloonMessageTip.h"
+				>
+			</File>
+			<File
 				RelativePath=".\BaseApp.cpp"
 				>
 			</File>

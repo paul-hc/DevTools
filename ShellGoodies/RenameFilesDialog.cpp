@@ -18,6 +18,7 @@
 #include "utl/NumericProcessor.h"
 #include "utl/PathGenerator.h"
 #include "utl/RuntimeException.h"
+#include "utl/UI/BalloonMessageTip.h"
 #include "utl/UI/CmdInfoStore.h"
 #include "utl/UI/MenuUtilities.h"
 #include "utl/UI/Thumbnailer.h"
@@ -331,30 +332,25 @@ std::tstring CRenameFilesDialog::GetSelFindWhat( void ) const
 	return str::GetEmpty();
 }
 
-CPathFormatter CRenameFilesDialog::InputRenameFormatter( void ) const
+CPathFormatter CRenameFilesDialog::InputRenameFormatter( bool checkConsistent ) const
 {
 	fs::CPath renameFormat = m_pDisplayFilenameAdapter->ParseFilename( m_formatCombo.GetCurrentText(), fs::CPath( _T("null") ) );
+	CPathFormatter pathFormatter( renameFormat.Get(), m_ignoreExtension );
 
-	return CPathFormatter( renameFormat.Get(), m_ignoreExtension );
+	if ( checkConsistent )
+		if ( !pathFormatter.IsConsistent() )
+		{
+			ui::ShowBalloonTip( &m_formatCombo, _T("Ignore Extension mode"),
+				str::Format( _T("Ignoring the extension part \"%s\" in the format!"), pathFormatter.GetFormat().GetExt() ),
+				(HICON)TTI_WARNING );
+
+			pathFormatter = pathFormatter.MakeConsistent();
+		}
+
+	return pathFormatter;
 }
 
-bool CRenameFilesDialog::EnsureConsistentFormat( CPathFormatter* pFormatter ) const
-{
-	ASSERT_PTR( pFormatter );
-	if ( !pFormatter->IsConsistent() )
-	{
-		std::tstring msg = str::Format( _T("The extension part \"%s\" in the format will be ignored\nwhen Ignore Extension is checked!\n\nDo you want to proceed?"),
-			pFormatter->GetFormat().GetExt() );
-
-		if ( IDCANCEL == ui::MessageBox( msg, MB_ICONWARNING | MB_OKCANCEL ) )
-			return false;
-
-		*pFormatter = pFormatter->MakeConsistent();
-	}
-	return true;
-}
-
-bool CRenameFilesDialog::GenerateDestPaths( const CPathFormatter& formatter, UINT* pSeqCount )
+bool CRenameFilesDialog::GenerateDestPaths( const CPathFormatter& pathFormatter, UINT* pSeqCount )
 {
 	ASSERT_PTR( pSeqCount );
 	ASSERT_PTR( m_pRenSvc.get() );
@@ -364,7 +360,7 @@ bool CRenameFilesDialog::GenerateDestPaths( const CPathFormatter& formatter, UIN
 	fs::TPathPairMap renamePairs;
 	ren::MakePairsFromItems( renamePairs, m_rRenameItems );
 
-	CPathGenerator generator( &renamePairs, formatter, *pSeqCount );
+	CPathGenerator generator( &renamePairs, pathFormatter, *pSeqCount );
 	if ( !generator.GeneratePairs() )
 		return false;
 
@@ -378,7 +374,7 @@ bool CRenameFilesDialog::GenerateDestPaths( const CPathFormatter& formatter, UIN
 void CRenameFilesDialog::AutoGenerateFiles( void )
 {
 	UINT seqCount = m_seqCountEdit.GetNumericValue();
-	bool succeeded = GenerateDestPaths( InputRenameFormatter(), &seqCount );
+	bool succeeded = GenerateDestPaths( InputRenameFormatter( true ), &seqCount );
 
 	PostMakeDest( true );							// silent mode, no modal messages
 	m_formatCombo.SetFrameColor( succeeded ? CLR_NONE : color::Error );
@@ -508,13 +504,10 @@ void CRenameFilesDialog::OnOK( void )
 	{
 		case EditMode:
 		{
-			CPathFormatter renameFormatter = InputRenameFormatter();
-			if ( !EnsureConsistentFormat( &renameFormatter ) )
-				return;
-
+			CPathFormatter pathFormatter = InputRenameFormatter( true );
 			UINT oldSeqCount = m_seqCountEdit.GetNumericValue(), newSeqCount = oldSeqCount;
 
-			if ( GenerateDestPaths( renameFormatter, &newSeqCount ) )
+			if ( GenerateDestPaths( pathFormatter, &newSeqCount ) )
 			{
 				if ( !m_seqCountAutoAdvance )
 					newSeqCount = oldSeqCount;
@@ -526,7 +519,7 @@ void CRenameFilesDialog::OnOK( void )
 			}
 			else
 			{
-				ui::MessageBox( str::Format( IDS_INVALID_FORMAT, renameFormatter.GetFormat().GetPtr() ), MB_ICONERROR | MB_OK );
+				ui::MessageBox( str::Format( IDS_INVALID_FORMAT, pathFormatter.GetFormat().GetPtr() ), MB_ICONERROR | MB_OK );
 				ui::TakeFocus( m_formatCombo );
 			}
 			break;
@@ -586,8 +579,8 @@ void CRenameFilesDialog::OnChanged_Format( void )
 {
 	OnFieldChanged();
 
-	CPathFormatter formatter = InputRenameFormatter();
-	m_formatCombo.SetFrameColor( formatter.IsValidFormat() ? CLR_NONE : color::Error );
+	CPathFormatter pathFormatter = InputRenameFormatter( false );
+	m_formatCombo.SetFrameColor( pathFormatter.IsValidFormat() ? CLR_NONE : color::Error );
 
 	if ( m_autoGenerate )
 		AutoGenerateFiles();
@@ -608,14 +601,14 @@ void CRenameFilesDialog::OnSeqCountFindNext( void )
 {
 	ASSERT_PTR( m_pRenSvc.get() );
 
-	UINT seqCount = m_pRenSvc->FindNextAvailSeqCount( InputRenameFormatter() );
+	UINT seqCount = m_pRenSvc->FindNextAvailSeqCount( InputRenameFormatter( false ) );
 	ChangeSeqCount( seqCount );
 	GotoDlgCtrl( &m_seqCountEdit );
 }
 
 void CRenameFilesDialog::OnUpdateSeqCountFindNext( CCmdUI* pCmdUI )
 {
-	CPathFormatter format = InputRenameFormatter();
+	CPathFormatter format = InputRenameFormatter( false );
 	pCmdUI->Enable( format.IsNumericFormat() );
 }
 

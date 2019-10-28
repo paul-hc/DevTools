@@ -44,6 +44,9 @@ namespace text_tool
 
 namespace func
 {
+	void TrimFname( std::tstring& rFname );
+
+
 	struct MakeCase
 	{
 		MakeCase( ChangeCase changeCase ) : m_changeCase( changeCase ) {}
@@ -62,10 +65,12 @@ namespace func
 		void operator()( std::tstring& rDestText ) const
 		{
 			m_pCapitalizer->Capitalize( rDestText );
+			TrimFname( rDestText );
 		}
 
 		void operator()( fs::CPathParts& rDestParts ) const
 		{
+			TrimFname( rDestParts.m_fname );
 			operator()( rDestParts.m_fname );
 			str::ToLower( rDestParts.m_ext );
 		}
@@ -82,9 +87,7 @@ namespace func
 		void operator()( std::tstring& rDestText ) const
 		{
 			str::ReplaceDelimiters( rDestText, m_delimiters.c_str(), m_newDelimiter.c_str() );
-
-			str::EnsureSingleSpace( rDestText );
-			str::Trim( rDestText );
+			TrimFname( rDestText );
 		}
 
 		void operator()( fs::CPathParts& rDestParts ) const
@@ -131,11 +134,7 @@ namespace func
 		}
 
 		void operator()( std::tstring& rDestText ) const;
-
-		void operator()( fs::CPathParts& rDestParts ) const
-		{
-			operator()( rDestParts.m_fname );
-		}
+		void operator()( fs::CPathParts& rDestParts ) const { operator()( rDestParts.m_fname ); }
 	private:
 		const std::tstring& m_pattern;
 		const std::tstring& m_replaceWith;
@@ -159,11 +158,7 @@ namespace func
 		}
 
 		void operator()( std::tstring& rDestText ) const;
-
-		void operator()( fs::CPathParts& rDestParts ) const
-		{
-			operator()( rDestParts.m_fname );
-		}
+		void operator()( fs::CPathParts& rDestParts ) const { operator()( rDestParts.m_fname ); }
 
 		bool IsOneOfFindCharSet( TCHAR ch ) const;
 	private:
@@ -181,6 +176,7 @@ namespace func
 		void operator()( std::tstring& rDestText ) const
 		{
 			str::EnsureSingleSpace( rDestText );
+			TrimFname( rDestText );
 		}
 
 		void operator()( fs::CPathParts& rDestParts ) const
@@ -196,6 +192,7 @@ namespace func
 		void operator()( std::tstring& rDestText ) const
 		{
 			str::ReplaceDelimiters( rDestText, _T(" \t"), _T("") );
+			TrimFname( rDestText );
 		}
 
 		void operator()( fs::CPathParts& rDestParts ) const

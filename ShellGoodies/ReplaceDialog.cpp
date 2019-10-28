@@ -9,12 +9,15 @@
 #include "TextAlgorithms.h"
 #include "Application_fwd.h"
 #include "resource.h"
+#include "utl/ContainerUtilities.h"
 #include "utl/UI/ImageStore.h"
 #include "utl/UI/LayoutEngine.h"
 #include "utl/UI/MenuUtilities.h"
+#include "utl/UI/PostCall.h"
 #include "utl/UI/TextEditor.h"
 #include "utl/UI/UtilitiesEx.h"
 #include "utl/UI/resource.h"
+
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -191,6 +194,14 @@ bool CReplaceDialog::FillCommonSequence( void )
 	return true;
 }
 
+void CReplaceDialog::OutputFindWhat( void )
+{
+	m_findWhatCombo.SetEditText( m_findWhat );
+
+	SendMessage( WM_NEXTDLGCTL, (WPARAM)m_replaceWithCombo.m_hWnd, TRUE );
+	OnChanged_FindWhat();
+}
+
 void CReplaceDialog::DoDataExchange( CDataExchange* pDX )
 {
 	const bool firstInit = NULL == m_findWhatCombo.m_hWnd;
@@ -209,6 +220,8 @@ void CReplaceDialog::DoDataExchange( CDataExchange* pDX )
 
 	if ( DialogOutput == pDX->m_bSaveAndValidate )
 	{
+		bool skipInputPattern = false;
+
 		if ( firstInit )
 		{
 			enum { MaxChars = _MAX_PATH };
@@ -223,13 +236,15 @@ void CReplaceDialog::DoDataExchange( CDataExchange* pDX )
 
 			if ( m_externalFindWhat )
 			{
-				m_findWhatCombo.SetEditText( m_findWhat );		// enter current pattern (if passed externally)
-				PostMessage( WM_NEXTDLGCTL, (WPARAM)m_replaceWithCombo.m_hWnd, TRUE );
+				ui::PostCall( this, &CReplaceDialog::OutputFindWhat );		// enter current pattern (if passed externally)
+				skipInputPattern = true;
 			}
 			else if ( m_autoFillCommonSequence )
 				FillCommonSequence();
 		}
-		OnChanged_FindWhat();
+
+		if ( !skipInputPattern )
+			OnChanged_FindWhat();
 	}
 	else
 	{
@@ -241,6 +256,7 @@ void CReplaceDialog::DoDataExchange( CDataExchange* pDX )
 		AfxGetApp()->WriteProfileInt( reg::section, reg::entry_matchCase, m_matchCase );
 		AfxGetApp()->WriteProfileInt( reg::section, reg::entry_findType, m_findType );
 	}
+
 	CLayoutDialog::DoDataExchange( pDX );
 }
 
