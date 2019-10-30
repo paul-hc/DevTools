@@ -237,9 +237,14 @@ bool CRenameEditPage::InputDestPaths( void )
 	std::vector< std::tstring > filenames;
 	str::Split( filenames, m_destEditor.GetText().c_str(), CTextEdit::s_lineEnd );
 
-	for ( std::vector< std::tstring >::iterator itFilename = filenames.begin(); itFilename != filenames.end(); ++itFilename )
-		if ( !path::IsValid( str::Trim( *itFilename ) ) )
+	for ( std::vector< std::tstring >::const_iterator itFilename = filenames.begin(); itFilename != filenames.end(); ++itFilename )
+	{
+		std::tstring coreFilename = *itFilename;
+		str::Trim( coreFilename );
+
+		if ( !path::IsValid( coreFilename ) )
 			return false;
+	}
 
 	if ( !filenames.empty() )			// an extra line end?
 	{

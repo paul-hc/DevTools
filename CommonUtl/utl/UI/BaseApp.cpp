@@ -7,6 +7,10 @@
 #include "resource.h"
 
 #ifdef _DEBUG
+#include "utl/ut/Test.h"
+#include "ImageStore.h"
+#include "Utilities.h"
+
 #define new DEBUG_NEW
 #endif
 
@@ -44,6 +48,28 @@ namespace app
 	{
 		TRACE( _T(" > Running on OS: %s\n"), win::GetTags_OsVersion().FormatUi( win::GetOsVersion() ).c_str() );
 	}
+
+#ifdef _DEBUG
+	void RunAllTests( void )
+	{
+		ui::RequestCloseAllBalloons();						// just in case running tests in quick succession
+
+		ut::RunAllTests();
+
+		std::vector< std::tstring > testNames;
+		ut::CTestSuite::Instance().QueryTestNames( testNames );
+
+		static HICON s_hToolIcon = CImageStore::SharedStore()->RetrieveIcon( ID_RUN_TESTS )->GetHandle();
+		ui::ShowBalloonTip(
+			CWnd::GetForegroundWindow(),
+			str::Format( _T("Completed %d Unit Tests!"), testNames.size() ).c_str(),
+			str::Join( testNames, _T("\n") ).c_str(),
+			s_hToolIcon
+		);
+
+		ui::BeepSignal( MB_ICONWARNING );					// last in chain, signal the end
+	}
+#endif
 }
 
 

@@ -3,6 +3,7 @@
 #include "FileModel.h"
 #include "FileMacroCommands.h"
 #include "EditingCommands.h"
+#include "GeneralOptions.h"
 #include "IFileEditor.h"
 #include "RenameItem.h"
 #include "TouchItem.h"
@@ -195,7 +196,8 @@ utl::ICommand* CFileModel::MakeClipPasteDestPathsCmd( CWnd* pWnd, const CDisplay
 
 	for ( std::vector< std::tstring >::iterator itPath = textPaths.begin(); itPath != textPaths.end(); )
 	{
-		str::Trim( *itPath );
+		if ( CGeneralOptions::Instance().m_trimFname )
+			str::Trim( *itPath );
 
 		if ( itPath->empty() )
 			itPath = textPaths.erase( itPath );
@@ -279,7 +281,8 @@ utl::ICommand* CFileModel::MakeClipPasteDestFileStatesCmd( CWnd* pWnd ) throws_(
 
 	for ( std::vector< std::tstring >::iterator itLine = lines.begin(); itLine != lines.end(); )
 	{
-		str::Trim( *itLine );
+		if ( CGeneralOptions::Instance().m_trimFname )
+			str::Trim( *itLine );
 
 		if ( itLine->empty() )
 			itLine = lines.erase( itLine );

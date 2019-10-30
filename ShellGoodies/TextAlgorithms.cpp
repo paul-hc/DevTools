@@ -1,6 +1,7 @@
 
 #include "stdafx.h"
 #include "TextAlgorithms.h"
+#include "GeneralOptions.h"
 #include "utl/EnumTags.h"
 #include "utl/StringUtilities.h"
 #include "resource.h"
@@ -74,8 +75,11 @@ namespace func
 {
 	void TrimFname( std::tstring& rFname )
 	{
-		str::Trim( rFname );
-		str::EnsureSingleSpace( rFname );
+		if ( CGeneralOptions::Instance().m_trimFname )
+			str::Trim( rFname );
+
+		if ( CGeneralOptions::Instance().m_normalizeWhitespace )
+			str::EnsureSingleSpace( rFname );
 	}
 
 

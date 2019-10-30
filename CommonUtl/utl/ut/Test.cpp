@@ -79,6 +79,14 @@ namespace ut
 		return true;
 	}
 
+	void CTestSuite::QueryTestNames( std::vector< std::tstring >& rTestNames ) const
+	{
+		rTestNames.reserve( rTestNames.size() + m_testCases.size() );
+
+		for ( std::vector< ITestCase* >::const_iterator itTestCase = m_testCases.begin(); itTestCase != m_testCases.end(); ++itTestCase )
+			rTestNames.push_back( str::GetTypeName( typeid( **itTestCase ) ) );
+	}
+
 } //namespace ut
 
 

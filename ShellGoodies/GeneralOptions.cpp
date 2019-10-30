@@ -23,6 +23,8 @@ namespace reg
 	static const TCHAR entry_undoLogPersist[] = _T("UndoLogPersist");
 	static const TCHAR entry_undoLogFormat[] = _T("UndoLogFormat");
 	static const TCHAR entry_undoEditingCmds[] = _T("UndoEditingCmds");
+	static const TCHAR entry_trimFname[] = _T("TrimFname");
+	static const TCHAR entry_normalizeWhitespace[] = _T("NormalizeWhitespace");
 }
 
 
@@ -35,6 +37,8 @@ CGeneralOptions::CGeneralOptions( void )
 	, m_undoLogPersist( true )
 	, m_undoLogFormat( cmd::BinaryFormat )
 	, m_undoEditingCmds( true )
+	, m_trimFname( true )
+	, m_normalizeWhitespace( true )
 {
 }
 
@@ -66,6 +70,8 @@ void CGeneralOptions::LoadFromRegistry( void )
 	m_undoLogPersist = pApp->GetProfileInt( reg::section, reg::entry_undoLogPersist, m_undoLogPersist ) != FALSE;
 	m_undoLogFormat = static_cast< cmd::FileFormat >( pApp->GetProfileInt( reg::section, reg::entry_undoLogFormat, m_undoLogFormat ) );
 	m_undoEditingCmds = pApp->GetProfileInt( reg::section, reg::entry_undoEditingCmds, m_undoEditingCmds ) != FALSE;
+	m_trimFname = pApp->GetProfileInt( reg::section, reg::entry_trimFname, m_trimFname ) != FALSE;
+	m_normalizeWhitespace = pApp->GetProfileInt( reg::section, reg::entry_normalizeWhitespace, m_normalizeWhitespace ) != FALSE;
 }
 
 void CGeneralOptions::SaveToRegistry( void ) const
@@ -80,6 +86,8 @@ void CGeneralOptions::SaveToRegistry( void ) const
 	pApp->WriteProfileInt( reg::section, reg::entry_undoLogPersist, m_undoLogPersist );
 	pApp->WriteProfileInt( reg::section, reg::entry_undoLogFormat, m_undoLogFormat );
 	pApp->WriteProfileInt( reg::section, reg::entry_undoEditingCmds, m_undoEditingCmds );
+	pApp->WriteProfileInt( reg::section, reg::entry_trimFname, m_trimFname );
+	pApp->WriteProfileInt( reg::section, reg::entry_normalizeWhitespace, m_normalizeWhitespace );
 }
 
 void CGeneralOptions::PostApply( void ) const
@@ -102,8 +110,9 @@ bool CGeneralOptions::operator==( const CGeneralOptions& right ) const
 		m_highlightTextDiffsFrame == right.m_highlightTextDiffsFrame &&
 		m_undoLogPersist == right.m_undoLogPersist &&
 		m_undoLogFormat == right.m_undoLogFormat &&
-		m_undoEditingCmds == right.m_undoEditingCmds
-		;
+		m_undoEditingCmds == right.m_undoEditingCmds &&
+		m_trimFname == right.m_trimFname &&
+		m_normalizeWhitespace == right.m_normalizeWhitespace;
 }
 
 void CGeneralOptions::ApplyToListCtrl( CReportListControl* pListCtrl ) const

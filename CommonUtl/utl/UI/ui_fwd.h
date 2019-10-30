@@ -37,6 +37,7 @@ namespace ui
 
 
 	CPoint GetCursorPos( HWND hWnd = NULL );			// return screen coordinates if NULL
+	const CPoint& GetNullPos( void );
 
 	// works for VK_CONTROL, VK_SHIFT, VK_MENU (alt), VK_LBUTTON, VK_RBUTTON, VK_MBUTTON, etc
 	inline bool IsKeyPressed( int virtKey ) { return ::GetKeyState( virtKey ) < 0; }
@@ -63,6 +64,22 @@ namespace ui
 
 
 	COLORREF AlterColorSlightly( COLORREF bkColor );		// slightly modified background colour used as transparent colour for bitmap masks, so that themes that render with alpha blending don't show weird colours (such as radio button)
+}
+
+
+class CBalloonHostWnd;
+
+
+namespace ui
+{
+	// baloon tips (modeless)
+	void RequestCloseAllBalloons( void );		// close the balloon quickly
+
+	CBalloonHostWnd* ShowBalloonTip( const TCHAR* pTitle, const std::tstring& message, HICON hToolIcon = TTI_NONE, const CPoint& screenPos = GetNullPos() );
+	CBalloonHostWnd* ShowBalloonTip( const CWnd* pCtrl, const TCHAR* pTitle, const std::tstring& message, HICON hToolIcon = TTI_NONE );
+
+	// show modeless balloon if available, otherwise modal ui::MessageBox
+	CBalloonHostWnd* SafeShowBalloonTip( UINT mbStyle, const TCHAR* pTitle, const std::tstring& message, CWnd* pCtrl );
 }
 
 

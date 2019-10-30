@@ -38,6 +38,8 @@ namespace ut
 
 		bool IsEmpty( void ) const { return m_testCases.empty(); }
 		bool RegisterTestCase( ut::ITestCase* pTestCase );
+
+		void QueryTestNames( std::vector< std::tstring >& rTestNames ) const;
 	private:
 		std::vector< ITestCase* > m_testCases;
 	};

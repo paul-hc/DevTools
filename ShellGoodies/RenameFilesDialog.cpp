@@ -86,7 +86,7 @@ CRenameFilesDialog::CRenameFilesDialog( CFileModel* pFileModel, CWnd* pParent )
 	, m_isInitialized( false )
 	, m_autoGenerate( AfxGetApp()->GetProfileInt( reg::section_mainDialog, reg::entry_autoGenerate, false ) != FALSE )
 	, m_seqCountAutoAdvance( AfxGetApp()->GetProfileInt( reg::section_mainDialog, reg::entry_seqCountAutoAdvance, true ) != FALSE )
-	, m_ignoreExtension( AfxGetApp()->GetProfileInt( reg::section_mainDialog, reg::entry_ignoreExtension, false ) != FALSE )
+	, m_ignoreExtension( AfxGetApp()->GetProfileInt( reg::section_mainDialog, reg::entry_ignoreExtension, true ) != FALSE )
 	, m_pDisplayFilenameAdapter( new CDisplayFilenameAdapter( m_ignoreExtension ) )
 	, m_formatCombo( ui::HistoryMaxSize, s_specialSep )
 	, m_changeCaseButton( &GetTags_ChangeCase() )
@@ -392,7 +392,7 @@ bool CRenameFilesDialog::ChangeSeqCount( UINT seqCount )
 
 void CRenameFilesDialog::ReplaceFormatEditText( const std::tstring& text )
 {
-	if ( CEdit* pComboEdit = (CEdit*)m_formatCombo.GetWindow( GW_CHILD ) )
+	if ( CEdit* pComboEdit = m_formatCombo.GetEdit() )
 	{
 		pComboEdit->SetFocus();
 		pComboEdit->ReplaceSel( text.c_str(), TRUE );
@@ -427,7 +427,7 @@ void CRenameFilesDialog::DoDataExchange( CDataExchange* pDX )
 		m_delimiterSetCombo.LimitText( 64 );
 		m_newDelimiterEdit.LimitText( 64 );
 
-		m_formatCombo.LoadHistory( m_regSection.c_str(), reg::entry_formatHistory, _T("## - *.*") );
+		m_formatCombo.LoadHistory( m_regSection.c_str(), reg::entry_formatHistory, m_ignoreExtension ? _T("## - *") : _T("## - *.*") );
 		m_delimiterSetCombo.LoadHistory( m_regSection.c_str(), reg::entry_delimiterSetHistory, delim::s_defaultDelimiterSet.c_str() );
 		m_newDelimiterEdit.SetWindowText( AfxGetApp()->GetProfileString( m_regSection.c_str(), reg::entry_newDelimiterHistory, s_defaultNewDelimiter ) );
 

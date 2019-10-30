@@ -88,6 +88,10 @@ namespace app
 	UINT ToMsgBoxFlags( app::MsgType msgType );
 
 	void TraceOsVersion( void );
+
+#ifdef _DEBUG
+	void RunAllTests( void );
+#endif
 }
 
 

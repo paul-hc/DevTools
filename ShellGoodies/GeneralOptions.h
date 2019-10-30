@@ -38,6 +38,10 @@ public:
 	bool m_undoLogPersist;
 	cmd::FileFormat m_undoLogFormat;
 	bool m_undoEditingCmds;
+
+	// Filename text processing
+	bool m_trimFname;
+	bool m_normalizeWhitespace;			// ensure single whitespaces
 };
 
 

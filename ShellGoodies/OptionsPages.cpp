@@ -126,6 +126,8 @@ void CGeneralOptionsPage::DoDataExchange( CDataExchange* pDX )
 	ui::DDX_Bool( pDX, IDC_UNDO_LOG_PERSIST_CHECK, m_options.m_undoLogPersist );
 	ui::DDX_RadioEnum( pDX, IDC_UNDO_LOG_TEXT_FMT_RADIO, m_options.m_undoLogFormat );
 	ui::DDX_Bool( pDX, IDC_UNDO_EDITING_CMDS_CHECK, m_options.m_undoEditingCmds );
+	ui::DDX_Bool( pDX, IDC_TRIM_FNAME_CHECK, m_options.m_trimFname );
+	ui::DDX_Bool( pDX, IDC_NORMALIZE_WHITESPACE_CHECK, m_options.m_normalizeWhitespace );
 
 	UpdateStatus();
 	CLayoutPropertyPage::DoDataExchange( pDX );
@@ -141,6 +143,8 @@ BEGIN_MESSAGE_MAP( CGeneralOptionsPage, CLayoutPropertyPage )
 	ON_BN_CLICKED( IDC_UNDO_LOG_TEXT_FMT_RADIO, OnFieldModified )
 	ON_BN_CLICKED( IDC_UNDO_LOG_BINARY_FMT_RADIO, OnFieldModified )
 	ON_BN_CLICKED( IDC_UNDO_EDITING_CMDS_CHECK, OnFieldModified )
+	ON_BN_CLICKED( IDC_TRIM_FNAME_CHECK, OnFieldModified )
+	ON_BN_CLICKED( IDC_NORMALIZE_WHITESPACE_CHECK, OnFieldModified )
 	ON_BN_CLICKED( IDC_SET_DEFAULT_ALL, OnBnClicked_ResetDefaultAll )
 	ON_BN_CLICKED( ID_OPEN_CMD_DASHBOARD, OnBnClicked_OpenCmdDashboard )
 END_MESSAGE_MAP()

@@ -45,27 +45,40 @@ namespace ui
 		return s_nullPosition;
 	}
 
-
-	void ShowBalloonTip( const TCHAR* pTitle, const std::tstring& message, HICON hToolIcon /*= TTI_NONE*/, const CPoint& screenPos /*= GetNullPos()*/ )
+	CPoint GetDisplayScreenPos( const CWnd* pCtrl )
 	{
-		CBalloonHostWnd::Display( pTitle, message, hToolIcon, screenPos );
-	}
-
-	void ShowBalloonTip( const CWnd* pCtrl, const TCHAR* pTitle, const std::tstring& message, HICON hToolIcon /*= TTI_NONE*/ )
-	{
-		CPoint screenPos = GetNullPos();
-
 		if ( pCtrl->GetSafeHwnd() != NULL )
 		{
-			CRect ctrlRect;
-			pCtrl->GetWindowRect( &ctrlRect );
-			screenPos = ctrlRect.CenterPoint();		// balloon will be centered in the ctrl
+			CRect windowRect;
+			pCtrl->GetWindowRect( &windowRect );
+
+			if ( HasFlag( pCtrl->GetStyle(), WS_DLGFRAME ) )		// has a caption (top-level or child)?
+			{
+				CRect clientRect;
+				pCtrl->GetClientRect( &clientRect );
+				ui::ClientToScreen( pCtrl->GetSafeHwnd(), clientRect );
+
+				windowRect.bottom = clientRect.top;		// center on the top caption area
+			}
+
+			return windowRect.CenterPoint();			// balloon will be centered in the ctrl area
 		}
 
-		ShowBalloonTip( pTitle, message, hToolIcon, screenPos );
+		return GetNullPos();
 	}
 
-	void SafeShowBalloonTip( UINT mbStyle, const TCHAR* pTitle, const std::tstring& message, CWnd* pCtrl )
+
+	CBalloonHostWnd* ShowBalloonTip( const TCHAR* pTitle, const std::tstring& message, HICON hToolIcon /*= TTI_NONE*/, const CPoint& screenPos /*= GetNullPos()*/ )
+	{
+		return CBalloonHostWnd::Display( pTitle, message, hToolIcon, screenPos );
+	}
+
+	CBalloonHostWnd* ShowBalloonTip( const CWnd* pCtrl, const TCHAR* pTitle, const std::tstring& message, HICON hToolIcon /*= TTI_NONE*/ )
+	{
+		return ShowBalloonTip( pTitle, message, hToolIcon, GetDisplayScreenPos( pCtrl ) );
+	}
+
+	CBalloonHostWnd* SafeShowBalloonTip( UINT mbStyle, const TCHAR* pTitle, const std::tstring& message, CWnd* pCtrl )
 	{
 		// these styles are inappropriate for Balloon presentation:
 		ASSERT( !HasFlag( mbStyle, MB_ABORTRETRYIGNORE | MB_OKCANCEL | MB_RETRYCANCEL | MB_YESNO | MB_YESNOCANCEL ) );
@@ -85,10 +98,11 @@ namespace ui
 			else if ( HasFlag( mbStyle, MB_ICONSTOP ) )
 				hToolIcon = (HICON)TTI_ERROR;
 
-			ShowBalloonTip( pCtrl, pTitle, message, hToolIcon );
+			return ShowBalloonTip( pCtrl, pTitle, message, hToolIcon );
 		}
-		else
-			ui::MessageBox( message, mbStyle );				// default handling when user has disabled balloons
+
+		ui::MessageBox( message, mbStyle );				// default handling when user has disabled balloons
+		return NULL;
 	}
 }
 
@@ -141,6 +155,7 @@ CBalloonHostWnd::CBalloonHostWnd( void )
 	, m_mainThreadId( ::GetCurrentThreadId() )		// assume that this is created from the main calling thread
 	, m_hToolIcon( TTI_NONE )
 	, m_screenPos( ui::GetNullPos() )
+	, m_autoPopTimeout( s_autoPopTimeout )
 	, m_timer( this, TimerEventId, EllapseMs )
 	, m_eventCount( 0 )
 {
@@ -197,7 +212,7 @@ bool CBalloonHostWnd::CreateToolTip( void )
 	toolInfo.uFlags = TTF_TRACK;
 	toolInfo.hwnd = m_hWnd;
 	toolInfo.lpszText = const_cast< TCHAR* >( m_message.c_str() ); //LPSTR_TEXTCALLBACK;
-	toolInfo.uId = 1;
+	toolInfo.uId = ToolId;
 	GetClientRect( &toolInfo.rect );
 
 	if ( !m_toolTipCtrl.SendMessage( TTM_ADDTOOL, 0, (LPARAM)(LPTOOLINFO)&toolInfo ) )
@@ -298,8 +313,8 @@ void CBalloonHostWnd::OnTimer( UINT_PTR eventId )
 		bool mustDestroy = false;
 
 		if ( IsTooltipDisplayed() )
-			if ( s_autoPopTimeout != 0 )
-				if ( ( EllapseMs * ++m_eventCount ) >= s_autoPopTimeout )		// auto-pop timeout?
+			if ( m_autoPopTimeout != 0 )
+				if ( ( EllapseMs * ++m_eventCount ) >= m_autoPopTimeout )		// auto-pop timeout?
 				{
 					TRACE( "CBalloonHostWnd::OnTimer: self-closing due to auto-pop timeout.\n" );
 					mustDestroy = true;

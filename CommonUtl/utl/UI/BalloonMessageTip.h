@@ -3,7 +3,7 @@
 #pragma once
 
 //
-// Inspired from Paul Roberts: https://www.codeproject.com/Articles/24155/CBalloonMsg-An-Easy-to-use-Non-modal-Balloon-Alter
+// Inspired from Paul Roberts' article: https://www.codeproject.com/Articles/24155/CBalloonMsg-An-Easy-to-use-Non-modal-Balloon-Alter
 //
 // Uses a small, transparent window to launch the tooltip in a separate thread.
 // This enables the tooltip to be used in almost any situation, without any big changes to the
@@ -12,50 +12,36 @@
 // Similar in functionality with CEdit::ShowBalloonTip(), but works for any control or window.
 //
 
+#include "ui_fwd.h"
 #include "WindowTimer.h"
 
 
 namespace ui
 {
 	bool BalloonsEnabled( void );				// balloons have been suppressed?
-	void RequestCloseAllBalloons( void );		// close the balloon quickly
-	static const CPoint& GetNullPos( void );
 
-	void ShowBalloonTip( const TCHAR* pTitle, const std::tstring& message, HICON hToolIcon = TTI_NONE, const CPoint& screenPos = GetNullPos() );
-	void ShowBalloonTip( const CWnd* pCtrl, const TCHAR* pTitle, const std::tstring& message, HICON hToolIcon = TTI_NONE );
-
-	// uses the balloon if available, otherwise defaults to AfxMessageBox
-	void SafeShowBalloonTip( UINT mbStyle, const TCHAR* pTitle, const std::tstring& message, CWnd* pCtrl );
+	CPoint GetDisplayScreenPos( const CWnd* pCtrl );
 }
 
 
 class CEnumTags;
-
-
-struct CGuiThreadInfo : public tagGUITHREADINFO
-{
-	CGuiThreadInfo( DWORD threadId = 0 );
-
-	void ReadInfo( DWORD threadId );
-
-	enum Change { None, FocusChanged, CaptureChanged, FlagsChanged };
-
-	Change Compare( const GUITHREADINFO& right ) const;
-	static const CEnumTags& GetTags_Change( void );
-};
+struct CGuiThreadInfo;
 
 
 class CBalloonHostWnd : public CWnd
 {	// a small transparent window that sits above the initial mouse position and is the parent for the tooltip
-public:
+	friend class CBalloonUiThread;
+
 	CBalloonHostWnd( void );
+
+	bool Create( CWnd* pParentWnd );
+public:
 	virtual ~CBalloonHostWnd();
 
 	static CBalloonHostWnd* Display( const TCHAR* pTitle, const std::tstring& message, HICON hToolIcon = TTI_NONE, const CPoint& screenPos = ui::GetNullPos() );
 
-	bool Create( CWnd* pParentWnd );
-
 	bool IsTooltipDisplayed( void ) const { return ::IsWindow( m_toolTipCtrl.GetSafeHwnd() ) && m_toolTipCtrl.IsWindowVisible(); }
+	void SetAutoPopTimeout( UINT autoPopTimeout ) { m_autoPopTimeout = autoPopTimeout; }
 private:
 	bool CreateToolTip( void );
 	bool CheckMainThreadChanges( void );
@@ -66,6 +52,7 @@ private:
 	std::tstring m_message;
 	HICON m_hToolIcon;
 	CPoint m_screenPos;
+	UINT m_autoPopTimeout;		// time before self-close (millisecs), set to zero for unlimited
 
 	CToolTipCtrl m_toolTipCtrl;
 	CWindowTimer m_timer;
@@ -124,6 +111,19 @@ public:
 	virtual BOOL InitInstance( void );
 	virtual int ExitInstance( void );
 	virtual BOOL OnIdle( LONG count );
+};
+
+
+struct CGuiThreadInfo : public tagGUITHREADINFO
+{
+	CGuiThreadInfo( DWORD threadId = 0 );
+
+	void ReadInfo( DWORD threadId );
+
+	enum Change { None, FocusChanged, CaptureChanged, FlagsChanged };
+
+	Change Compare( const GUITHREADINFO& right ) const;
+	static const CEnumTags& GetTags_Change( void );
 };
 
 

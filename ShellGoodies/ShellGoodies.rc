@@ -139,7 +139,7 @@ BEGIN
     PUSHBUTTON      "&Reset Default",IDC_SET_DEFAULT_ALL,7,225,63,14
 END
 
-IDD_OPTIONS_GENERAL_PAGE DIALOGEX 0, 0, 202, 217
+IDD_OPTIONS_GENERAL_PAGE DIALOGEX 0, 0, 202, 257
 STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_CAPTION | WS_SYSMENU
 CAPTION "General"
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
@@ -149,21 +149,26 @@ BEGIN
     COMBOBOX        IDC_SMALL_ICON_SIZE_COMBO,53,16,61,136,CBS_DROPDOWNLIST | WS_VSCROLL | WS_GROUP | WS_TABSTOP
     LTEXT           "Large icon:",IDC_STATIC,14,35,36,8
     COMBOBOX        IDC_LARGE_ICON_SIZE_COMBO,53,33,61,124,CBS_DROPDOWNLIST | WS_VSCROLL | WS_GROUP | WS_TABSTOP
-    CONTROL         "Display &thumbnails",IDC_USE_LIST_THUMBS_CHECK,"Button",BS_AUTOCHECKBOX | WS_GROUP | WS_TABSTOP,14,54,75,10
+    CONTROL         "Display thumb&nails",IDC_USE_LIST_THUMBS_CHECK,"Button",BS_AUTOCHECKBOX | WS_GROUP | WS_TABSTOP,14,54,75,10
     CONTROL         "Use &double-buffering (turn off for smooth scaling)",IDC_USE_LIST_DOUBLE_BUFFER_CHECK,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,14,68,175,10
     CONTROL         "&Highlight text differences with a filled frame",IDC_HIGHLIGHT_TEXT_DIFFS_FRAME_CHECK,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,14,82,155,10
-    GROUPBOX        "Undo/Redo Log",IDC_GROUP_BOX_2,7,104,188,46
+    GROUPBOX        "File Name Adjustment",IDC_GROUP_BOX_2,7,105,188,45,WS_GROUP
+    CONTROL         "&Trim file-names",IDC_TRIM_FNAME_CHECK,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,14,120,64,10
+    CONTROL         "Normalize &whitespace",IDC_NORMALIZE_WHITESPACE_CHECK,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,14,134,85,10
+    GROUPBOX        "Undo/Redo Log",IDC_GROUP_BOX_3,7,158,188,69
     CONTROL         "Save Undo/Redo actions in a log file",IDC_UNDO_LOG_PERSIST_CHECK,
-                    "Button",BS_AUTOCHECKBOX | WS_GROUP | WS_TABSTOP,14,118,131,10
-    LTEXT           "Log format:",IDC_STATIC,14,135,38,8
-    CONTROL         "Text (readable)",IDC_UNDO_LOG_TEXT_FMT_RADIO,"Button",BS_AUTORADIOBUTTON | WS_GROUP,58,134,66,10
-    CONTROL         "Binary (faster)",IDC_UNDO_LOG_BINARY_FMT_RADIO,"Button",BS_AUTORADIOBUTTON,130,134,63,10
-    PUSHBUTTON      "Open...",ID_OPEN_CMD_DASHBOARD,147,116,42,14
-    PUSHBUTTON      "&Reset Default",IDC_SET_DEFAULT_ALL,7,196,63,14
+                    "Button",BS_AUTOCHECKBOX | WS_GROUP | WS_TABSTOP,14,172,131,10
+    LTEXT           "Log format:",IDC_STATIC,14,189,38,8
+    CONTROL         "Text (readable)",IDC_UNDO_LOG_TEXT_FMT_RADIO,"Button",BS_AUTORADIOBUTTON | WS_GROUP,58,188,66,10
+    CONTROL         "Binary (faster)",IDC_UNDO_LOG_BINARY_FMT_RADIO,"Button",BS_AUTORADIOBUTTON,130,188,63,10
+    PUSHBUTTON      "Open...",ID_OPEN_CMD_DASHBOARD,147,170,42,14
+    CONTROL         "",IDC_STATIC,"Static",SS_ETCHEDFRAME,13,204,176,1
     CONTROL         "Undo/Redo local editing changes",IDC_UNDO_EDITING_CMDS_CHECK,
-                    "Button",BS_AUTOCHECKBOX | WS_GROUP | WS_TABSTOP,14,156,120,10
+                    "Button",BS_AUTOCHECKBOX | WS_GROUP | WS_TABSTOP,14,210,120,10
+    PUSHBUTTON      "&Reset Default",IDC_SET_DEFAULT_ALL,7,236,63,14
 END
 
 IDD_REN_LIST_PAGE DIALOGEX 0, 0, 144, 72
@@ -276,7 +281,7 @@ BEGIN
         LEFTMARGIN, 7
         RIGHTMARGIN, 195
         TOPMARGIN, 7
-        BOTTOMMARGIN, 210
+        BOTTOMMARGIN, 250
     END
 
     IDD_REN_LIST_PAGE, DIALOG
@@ -348,8 +353,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 9,2,6,3
- PRODUCTVERSION 9,2,6,3
+ FILEVERSION 9,2,6,4
+ PRODUCTVERSION 9,2,6,4
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -364,16 +369,16 @@ BEGIN
     BEGIN
         BLOCK "040904b0"
         BEGIN
-            VALUE "Comments", "Ignore Extention|New Replace Dialog|Command Dashboard|Deep Paste|Split UTL_BASE/UTL_UI|Rename edit page|Highlight text diffs|Edit commands|Text/Binary undo log|Undo log text/binary|Replace dialog auto-fill common prefix|Report list uses callback text for diff items text|Rename of .lnk shortcut files"
+            VALUE "Comments", "Baloon Tips|Ignore Extention|New Replace Dialog|Command Dashboard|Deep Paste|Split UTL_BASE/UTL_UI|Rename edit page|Highlight text diffs|Edit commands|Text/Binary undo log|Undo log text/binary|Replace dialog auto-fill common prefix|Report list uses callback text for diff items text"
             VALUE "CompanyName", "Paul Cocoveanu"
             VALUE "Email", "phc.2nd@gmail.com"
             VALUE "FileDescription", "Shell extension for manipulating files and folders"
-            VALUE "FileVersion", "9, 2, 6, 3"
+            VALUE "FileVersion", "9, 2, 6, 4"
             VALUE "InternalName", "Shell Goodies"
             VALUE "LegalCopyright", "Copyfright © 2001-2019"
             VALUE "OriginalFilename", "ShellGoodies64.dll"
             VALUE "ProductName", "ShellGoodies Shell Extension DLL"
-            VALUE "ProductVersion", "9, 2, 6, 3"
+            VALUE "ProductVersion", "9, 2, 6, 4"
             VALUE "WrittenBy", "Written by Paul Cocoveanu"
         END
     END

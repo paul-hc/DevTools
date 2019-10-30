@@ -326,7 +326,7 @@ BEGIN
     END
     POPUP "<app-debug>"
     BEGIN
-        MENUITEM "Run Unit Tests",              ID_RUN_TESTS
+        MENUITEM "Run Unit Tests\tCtrl+T",      ID_RUN_TESTS
         MENUITEM SEPARATOR
         MENUITEM "&About [InternalName]...\tF1", ID_APP_ABOUT
     END

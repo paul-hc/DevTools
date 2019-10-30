@@ -1,5 +1,7 @@
 
 #include "stdafx.h"
+#include "GeneralOptions.h"
+#include "utl/ScopedValue.h"
 
 #ifdef _DEBUG		// no UT code in release builds
 #include "TextAlgorithmsTests.h"
@@ -76,6 +78,11 @@ void CTextAlgorithmsTests::TestWhitespace( void )
 void CTextAlgorithmsTests::Run( void )
 {
 	__super::Run();
+
+	// temporary store the filename adjustments defaults
+	CGeneralOptions* pOptions = &CGeneralOptions::Instance();
+	CScopedValue< bool > scopedTrimFname( &pOptions->m_trimFname, true );
+	CScopedValue< bool > scopedNormalizeWhitespace( &pOptions->m_normalizeWhitespace, true );
 
 	TestMakeCase();
 	TestCapitalizeWords();

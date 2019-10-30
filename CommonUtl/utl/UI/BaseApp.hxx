@@ -201,8 +201,7 @@ template< typename BaseClass >
 void CBaseApp< BaseClass >::OnRunUnitTests( void )
 {
 #ifdef _DEBUG
-	ut::RunAllTests();
-	ui::BeepSignal( MB_ICONWARNING );					// last in chain, signal the end
+	app::RunAllTests();
 #endif
 }
 
