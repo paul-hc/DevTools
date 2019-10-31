@@ -34,7 +34,7 @@ DEBUG the shell extension (ShellGoodies64.dll/ShellGoodies32.dll)
 DEBUG the REGISTRATION of shell extension (through regsvr32.exe)
 =========================================
 	Command=regsvr32.exe
-	Command Arguments=$(TargetPath)
+	Command Arguments=-s $(TargetPath)
 Normal dll debug:
 	Command=C:\my\Tools\mine\ExplorerBrowser64.exe
 	Command Arguments=

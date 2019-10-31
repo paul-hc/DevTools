@@ -32,6 +32,75 @@ _MSC_VER == 1200 MSVC++ 6.0
 _MSC_VER == 1100 MSVC++ 5.0  
 
 
+Debug Output - regsvr32 -s C:\dev\DevTools\ShellGoodies\bin\x64_DebugU\ShellGoodies64.dll
+============
+ > Running on OS: Windows 7
+
+HKCR
+{
+	NoRemove CLSID
+	{
+		ForceRemove {1D4EA504-89A1-11D5-A57D-0050BA0E2E4A} = s 'ShellGoodiesCom Class'
+		{
+			ForceRemove 'Programmable'
+			InprocServer32 = s 'c:\dev\DevTools\ShellGoodies\bin\x64_DebugU\ShellGoodies64.dll'
+			{
+				val ThreadingModel = s 'Apartment'
+			}
+		}
+	}
+}
+
+HKCR
+{
+	*
+	{
+		shellex
+		{
+			ContextMenuHandlers
+			{
+				ShellGoodies = s '{1D4EA504-89A1-11D5-A57D-0050BA0E2E4A}'
+			}
+		}
+	}
+
+	lnkfile
+	{
+		shellex
+		{
+			ContextMenuHandlers
+			{
+				ShellGoodies = s '{1D4EA504-89A1-11D5-A57D-0050BA0E2E4A}'
+			}
+		}
+	}
+}
+
+HKLM
+{
+	SOFTWARE
+	{
+		Microsoft
+		{
+			Windows
+			{
+				CurrentVersion
+				{
+					val {1D4EA504-89A1-11D5-A57D-0050BA0E2E4A} = s 'Rename Files'
+					'Shell Extensions'
+					{
+						NoRemove Approved
+						{
+							val {1D4EA504-89A1-11D5-A57D-0050BA0E2E4A} = s 'Rename Files'
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+
 BeginBufferedPaint
 HPAINTBUFFER _AfxBeginBufferedPaint(HDC hdcTarget, const RECT *prcTarget, BP_BUFFERFORMAT dwFormat, __in BP_PAINTPARAMS *pPaintParams, __out HDC *phdc)
 CMemDC::CMemDC(CDC& dc, const CRect& rect)		// C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\atlmfc\src\mfc\afxglobals.cpp

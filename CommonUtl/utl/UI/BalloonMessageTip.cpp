@@ -184,18 +184,19 @@ CBalloonHostWnd* CBalloonHostWnd::Display( const TCHAR* pTitle, const std::tstri
 
 bool CBalloonHostWnd::Create( CWnd* pParentWnd )
 {
-	static const std::tstring s_wndClass = ::AfxRegisterWndClass( NULL, ::AfxGetApp()->LoadStandardCursor( IDC_ARROW ) );		// register class with all defaults
-	CRect cursorRect( ui::GetCursorPos(), CSize( 0, 0 ) );
+	static const CBrush s_debugBk( color::Red );				// to help visualize the host window
+	static const std::tstring s_wndClass = ::AfxRegisterWndClass( 0, NULL, NULL /*s_debugBk*/ );		// register class with all defaults
+	CRect mouseRect( m_screenPos != ui::GetNullPos() ? m_screenPos : ui::GetCursorPos(), CSize( 0, 0 ) );
 
-	cursorRect.InflateRect( s_toolBorder, s_toolBorder );
+	mouseRect.InflateRect( s_toolBorder, s_toolBorder );
 
-	// create the transparent window
+	// create the transparent host window
 	return CreateEx( WS_EX_TRANSPARENT | WS_EX_TOOLWINDOW,
 					 s_wndClass.c_str(),
 					 _T("<balloon_host>"),
 					 WS_POPUP,
-					 cursorRect.left, cursorRect.top,
-					 cursorRect.Width(), cursorRect.Height(),
+					 mouseRect.left, mouseRect.top,
+					 mouseRect.Width(), mouseRect.Height(),
 					 pParentWnd->GetSafeHwnd(),
 					 NULL ) != FALSE;
 }
