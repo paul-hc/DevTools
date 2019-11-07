@@ -45,7 +45,7 @@ namespace ui
 		return s_nullPosition;
 	}
 
-	CPoint GetDisplayScreenPos( const CWnd* pCtrl )
+	CPoint GetTipScreenPos( const CWnd* pCtrl )
 	{
 		if ( pCtrl->GetSafeHwnd() != NULL )
 		{
@@ -57,6 +57,14 @@ namespace ui
 				CRect clientRect;
 				pCtrl->GetClientRect( &clientRect );
 				ui::ClientToScreen( pCtrl->GetSafeHwnd(), clientRect );
+
+				if ( pCtrl->GetMenu() != NULL )
+				{
+					MENUBARINFO menuBarInfo;
+					utl::ZeroWinStruct( &menuBarInfo );
+					if ( ::GetMenuBarInfo( pCtrl->m_hWnd, OBJID_MENU, 0, &menuBarInfo ) )
+						clientRect.top -= ( menuBarInfo.rcBar.bottom - menuBarInfo.rcBar.top );			// subtract the menu bar area to center in the caption bar
+				}
 
 				windowRect.bottom = clientRect.top;		// center on the top caption area
 			}
@@ -75,7 +83,7 @@ namespace ui
 
 	CBalloonHostWnd* ShowBalloonTip( const CWnd* pCtrl, const TCHAR* pTitle, const std::tstring& message, HICON hToolIcon /*= TTI_NONE*/ )
 	{
-		return ShowBalloonTip( pTitle, message, hToolIcon, GetDisplayScreenPos( pCtrl ) );
+		return ShowBalloonTip( pTitle, message, hToolIcon, GetTipScreenPos( pCtrl ) );
 	}
 
 	CBalloonHostWnd* SafeShowBalloonTip( UINT mbStyle, const TCHAR* pTitle, const std::tstring& message, CWnd* pCtrl )
@@ -226,6 +234,21 @@ bool CBalloonHostWnd::CreateToolTip( void )
 
 	m_toolTipCtrl.SendMessage( TTM_TRACKACTIVATE, (WPARAM)TRUE, (LPARAM)&toolInfo );		// activate the tracking tooltip
 	return true;
+}
+
+void CBalloonHostWnd::UpdateTitle( const TCHAR* pTitle, HICON hToolIcon /*= TTI_NONE*/ )
+{
+	m_title = pTitle;
+	m_hToolIcon = hToolIcon;
+
+	m_toolTipCtrl.SetTitle( (UINT)(UINT_PTR)m_hToolIcon, m_title.c_str() );					// store the icon and title
+}
+
+void CBalloonHostWnd::UpdateMessage( const std::tstring& message )
+{
+	m_message = message;
+
+	m_toolTipCtrl.UpdateTipText( m_message.c_str(), this, ToolId );
 }
 
 bool CBalloonHostWnd::CheckMainThreadChanges( void )

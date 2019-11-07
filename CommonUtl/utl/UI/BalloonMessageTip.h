@@ -20,7 +20,7 @@ namespace ui
 {
 	bool BalloonsEnabled( void );				// balloons have been suppressed?
 
-	CPoint GetDisplayScreenPos( const CWnd* pCtrl );
+	CPoint GetTipScreenPos( const CWnd* pCtrl );
 }
 
 
@@ -42,6 +42,10 @@ public:
 
 	bool IsTooltipDisplayed( void ) const { return ::IsWindow( m_toolTipCtrl.GetSafeHwnd() ) && m_toolTipCtrl.IsWindowVisible(); }
 	void SetAutoPopTimeout( UINT autoPopTimeout ) { m_autoPopTimeout = autoPopTimeout; }
+
+	CToolTipCtrl* GetToolTipCtrl( void ) { return &m_toolTipCtrl; }
+	void UpdateTitle( const TCHAR* pTitle, HICON hToolIcon = TTI_NONE );
+	void UpdateMessage( const std::tstring& message );
 private:
 	bool CreateToolTip( void );
 	bool CheckMainThreadChanges( void );
