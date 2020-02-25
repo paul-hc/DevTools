@@ -110,7 +110,9 @@ fs::CPath CRenameService::GetDestPath( fs::TPathPairMap::const_iterator itPair )
 
 std::tstring CRenameService::GetDestFname( fs::TPathPairMap::const_iterator itPair )
 {
-	return fs::CPathParts( GetDestPath( itPair ).Get() ).m_fname;		// DEST (if not empty) or SRC
+	fs::CPathParts destParts;
+	ren::SplitPath( &destParts, &itPair->first, GetDestPath( itPair ) );
+	return destParts.m_fname;		// DEST (if not empty) or SRC
 }
 
 std::tstring CRenameService::ApplyTextTool( UINT menuId, const std::tstring& text )
@@ -165,7 +167,7 @@ std::tstring CRenameService::ApplyTextTool( UINT menuId, const std::tstring& tex
 // CPickDataset implementation
 
 CPickDataset::CPickDataset( std::vector< std::tstring >* pDestFnames )
-	: bestMatch( Empty )
+	: m_bestMatch( Empty )
 {
 	ASSERT_PTR( pDestFnames );
 	m_destFnames.swap( *pDestFnames );
@@ -180,12 +182,12 @@ CPickDataset::CPickDataset( std::vector< std::tstring >* pDestFnames )
 
 		if ( commonPrefix.size() > commonSubstring.size() )
 		{
-			bestMatch = CommonPrefix;
+			m_bestMatch = CommonPrefix;
 			m_commonSequence = commonPrefix;
 		}
 		else if ( !commonSubstring.empty() )
 		{
-			bestMatch = CommonSubstring;
+			m_bestMatch = CommonSubstring;
 			m_commonSequence = commonSubstring;
 		}
 	}
@@ -194,7 +196,7 @@ CPickDataset::CPickDataset( std::vector< std::tstring >* pDestFnames )
 }
 
 CPickDataset::CPickDataset( const fs::CPath& firstDestPath )
-	: bestMatch( Empty )
+	: m_bestMatch( Empty )
 {
 	fs::CPathParts parts( firstDestPath.Get() );
 	str::Tokenize( m_subDirs, parts.m_dir.c_str(), _T("\\/") );

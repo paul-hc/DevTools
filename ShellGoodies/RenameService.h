@@ -60,7 +60,7 @@ public:
 	enum BestMatch { Empty, CommonPrefix, CommonSubstring };
 
 	bool IsSingleFile( void ) const { return 1 == m_destFnames.size(); }
-	BestMatch GetBestMatch( void ) const { return bestMatch; }
+	BestMatch GetBestMatch( void ) const { return m_bestMatch; }
 	bool HasCommonSequence( void ) const { return m_commonSequence.size() > 1; }
 
 	const std::vector< std::tstring >& GetDestFnames( void ) const { ASSERT( !m_destFnames.empty() ); return m_destFnames; }
@@ -83,7 +83,7 @@ private:
 private:
 	// filenames
 	std::vector< std::tstring > m_destFnames;
-	BestMatch bestMatch;
+	BestMatch m_bestMatch;
 	std::tstring m_commonSequence;
 
 	// parent subdirs

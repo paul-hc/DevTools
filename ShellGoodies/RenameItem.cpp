@@ -1,6 +1,7 @@
 
 #include "stdafx.h"
 #include "RenameItem.h"
+#include "utl/FileSystem.h"
 #include "utl/FmtUtils.h"
 
 #ifdef _DEBUG
@@ -57,7 +58,35 @@ namespace ren
 		rDestFnames.reserve( items.size() );
 
 		for ( std::vector< CRenameItem* >::const_iterator itItem = items.begin(); itItem != items.end(); ++itItem )
-			rDestFnames.push_back( fs::CPathParts( ( *itItem )->GetSafeDestPath().Get() ).m_fname );
+		{
+			fs::CPathParts destParts;
+			( *itItem )->SplitSafeDestPath( &destParts );
+			rDestFnames.push_back( destParts.m_fname );
+		}
+	}
+
+
+	bool AdjustDirectoryFilename( fs::CPathParts* pOutParts, const fs::CPath* pSrcFilePath )
+	{
+		ASSERT_PTR( pOutParts );
+		ASSERT_PTR( pSrcFilePath );
+
+		if ( fs::IsValidDirectory( pSrcFilePath->GetPtr() ) )
+		{
+			// for directories treat extension as being part of the fname (dirs have no file type)
+			pOutParts->m_fname += pOutParts->m_ext;
+			pOutParts->m_ext.clear();
+			return true;
+		}
+
+		return false;
+	}
+
+	bool SplitPath( fs::CPathParts* pOutParts, const fs::CPath* pSrcFilePath, const fs::CPath& filePath )
+	{
+		ASSERT_PTR( pOutParts );
+		pOutParts->SplitPath( filePath.Get() );
+		return AdjustDirectoryFilename( pOutParts, pSrcFilePath );
 	}
 }
 

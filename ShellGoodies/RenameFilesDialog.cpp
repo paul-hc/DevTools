@@ -432,7 +432,7 @@ void CRenameFilesDialog::DoDataExchange( CDataExchange* pDX )
 		m_newDelimiterEdit.SetWindowText( AfxGetApp()->GetProfileString( m_regSection.c_str(), reg::entry_newDelimiterHistory, s_defaultNewDelimiter ) );
 
 		m_seqCountEdit.SetNumericValue( AfxGetApp()->GetProfileInt( m_regSection.c_str(), reg::entry_seqCount, 1 ) );
-		CheckDlgButton( IDC_IGNORE_EXTENSION_CHECK, m_ignoreExtension );
+		CheckDlgButton( IDC_SHOW_EXTENSION_CHECK, !m_ignoreExtension );			// checkbox has inverted logic
 
 		m_isInitialized = true;
 
@@ -468,7 +468,7 @@ BEGIN_MESSAGE_MAP( CRenameFilesDialog, CFileEditorBaseDialog )
 	ON_UPDATE_COMMAND_UI( ID_SEQ_COUNT_FIND_NEXT, OnUpdateSeqCountFindNext )
 	ON_COMMAND( ID_SEQ_COUNT_AUTO_ADVANCE, OnSeqCountAutoAdvance )
 	ON_UPDATE_COMMAND_UI( ID_SEQ_COUNT_AUTO_ADVANCE, OnUpdateSeqCountAutoAdvance )
-	ON_BN_CLICKED( IDC_IGNORE_EXTENSION_CHECK, OnToggle_IgnoreExtension )
+	ON_BN_CLICKED( IDC_SHOW_EXTENSION_CHECK, OnToggle_ShowExtension )
 	ON_BN_CLICKED( IDC_COPY_SOURCE_PATHS_BUTTON, OnBnClicked_CopySourceFiles )
 	ON_BN_CLICKED( IDC_PASTE_FILES_BUTTON, OnBnClicked_PasteDestFiles )
 	ON_BN_CLICKED( IDC_RESET_FILES_BUTTON, OnBnClicked_ResetDestFiles )
@@ -622,9 +622,9 @@ void CRenameFilesDialog::OnUpdateSeqCountAutoAdvance( CCmdUI* pCmdUI )
 	pCmdUI->SetCheck( m_seqCountAutoAdvance );
 }
 
-void CRenameFilesDialog::OnToggle_IgnoreExtension( void )
+void CRenameFilesDialog::OnToggle_ShowExtension( void )
 {
-	m_ignoreExtension = IsDlgButtonChecked( IDC_IGNORE_EXTENSION_CHECK ) != FALSE;
+	m_ignoreExtension = !IsDlgButtonChecked( IDC_SHOW_EXTENSION_CHECK );		// checkbox has inverted logic
 	m_pDisplayFilenameAdapter->SetIgnoreExtension( m_ignoreExtension );
 
 	OnUpdate( m_pFileModel, NULL );

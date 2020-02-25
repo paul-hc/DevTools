@@ -74,7 +74,7 @@ private:
 
 	bool m_autoGenerate;
 	bool m_seqCountAutoAdvance;
-	bool m_ignoreExtension;
+	bool m_ignoreExtension;				// "Show Extension" checkbox has inverted logic
 
 	std::auto_ptr< CDisplayFilenameAdapter > m_pDisplayFilenameAdapter;
 	std::auto_ptr< CPickDataset > m_pPickDataset;
@@ -113,7 +113,7 @@ protected:
 	afx_msg void OnSeqCountAutoAdvance( void );
 	afx_msg void OnUpdateSeqCountAutoAdvance( CCmdUI* pCmdUI );
 	afx_msg void OnBnClicked_CopySourceFiles( void );
-	afx_msg void OnToggle_IgnoreExtension( void );
+	afx_msg void OnToggle_ShowExtension( void );
 	afx_msg void OnBnClicked_PasteDestFiles( void );
 	afx_msg void OnBnClicked_ResetDestFiles( void );
 	afx_msg void OnBnClicked_CapitalizeDestFiles( void );

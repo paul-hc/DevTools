@@ -14,6 +14,9 @@ namespace ren
 	void MakePairsToItems( std::vector< CRenameItem* >& rOutRenameItems, const fs::TPathPairMap& renamePairs );
 	void AssignPairsToItems( const std::vector< CRenameItem* >& items, const fs::TPathPairMap& renamePairs );
 	void QueryDestFnames( std::vector< std::tstring >& rDestFnames, const std::vector< CRenameItem* >& items );
+
+	// special directory handling: treat ext as part of fname (no file type by extension)
+	bool SplitPath( fs::CPathParts* pOutParts, const fs::CPath* pSrcFilePath, const fs::CPath& filePath );
 }
 
 
@@ -32,6 +35,10 @@ public:
 
 	void Reset( void ) { m_destPath = GetSrcPath(); }
 	fs::CPath& RefDestPath( void ) { return m_destPath; }
+
+	// special directory handling
+	bool SplitPath( fs::CPathParts* pOutParts, const fs::CPath& filePath ) const { return ren::SplitPath( pOutParts, &GetSrcPath(), filePath ); }
+	bool SplitSafeDestPath( fs::CPathParts* pOutParts ) const { return SplitPath( pOutParts, GetSafeDestPath() ); }
 private:
 	fs::CPath m_destPath;
 };

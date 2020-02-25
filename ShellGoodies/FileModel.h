@@ -138,7 +138,9 @@ utl::ICommand* CFileModel::MakeChangeDestPathsCmd( const FuncType& func, const s
 
 	for ( std::vector< CRenameItem* >::const_iterator itItem = m_renameItems.begin(); itItem != m_renameItems.end(); ++itItem )
 	{
-		fs::CPathParts destParts( ( *itItem )->GetSafeDestPath().Get() );
+		fs::CPathParts destParts;
+		( *itItem )->SplitSafeDestPath( &destParts );							// for directories treat extension as part of the fname
+
 		func( destParts );
 
 		destPaths.push_back( destParts.MakePath() );
@@ -147,7 +149,10 @@ utl::ICommand* CFileModel::MakeChangeDestPathsCmd( const FuncType& func, const s
 			anyChanges = true;
 	}
 
-	return anyChanges ? new CChangeDestPathsCmd( this, destPaths, cmdTag ) : NULL;
+	if ( anyChanges )
+		return new CChangeDestPathsCmd( this, destPaths, cmdTag );
+
+	return NULL;
 }
 
 

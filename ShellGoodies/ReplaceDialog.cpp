@@ -174,9 +174,10 @@ bool CReplaceDialog::ReplaceItems( bool commit /*= true*/ ) const
 			return false;
 	}
 
-	return
-		!commit ||
-		pFileModel->SafeExecuteCmd( m_pParentEditor, pReplaceCmd.release() );
+	if ( !commit )
+		return true;
+
+	return pFileModel->SafeExecuteCmd( m_pParentEditor, pReplaceCmd.release() );
 }
 
 bool CReplaceDialog::FillCommonSequence( void )
