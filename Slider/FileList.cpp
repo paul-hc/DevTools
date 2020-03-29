@@ -245,9 +245,10 @@ bool CFileList::ReparentStgFileAttrsImpl( const fs::CFlexPath& stgDocPath, Persi
 
 void CFileList::SetFileOrder( Order fileOrder )
 {
-	if ( fileOrder == CustomOrder && m_fileOrder != CustomOrder )
+	if ( CustomOrder == fileOrder && m_fileOrder != CustomOrder )
 	{	// reset custom order to the initial order
 		m_customOrder.resize( m_fileAttributes.size() );
+
 		for ( size_t i = 0; i != m_customOrder.size(); ++i )
 			m_customOrder[ i ] = static_cast< int >( i );
 	}

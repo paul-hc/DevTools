@@ -163,7 +163,7 @@ bool CArchiveImagesContext::CanCommitOperations( std::vector< std::pair< fs::CFl
 
 bool CArchiveImagesContext::IsValidFormat( const std::tstring& format )
 {
-	CPathFormatter formatter( format );
+	CPathFormatter formatter( format, false );
 	return formatter.IsValidFormat();
 }
 
@@ -178,7 +178,8 @@ bool CArchiveImagesContext::GenerateDestPaths( const fs::CPath& destPath, const 
 	if ( m_pathPairs.empty() )
 		return false;
 
-	CPathGenerator generator( format, *pSeqCount );
+	CPathFormatter formatter( format, false );
+	CPathGenerator generator( formatter, *pSeqCount );
 	generator.StoreSrcFromPairs( m_pathPairs );							// copy source paths from vector to map
 
 	switch ( destType )

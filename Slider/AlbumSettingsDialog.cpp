@@ -132,6 +132,7 @@ void CAlbumSettingsDialog::UpdateFileSortOrder( void )
 	// - so that CFileList::m_fileAttributes keeps the original order, and is immutable
 #if 1
 	SetDirty( true );
+
 	if ( m_fileList.GetFileAttrCount() < InplaceSortMaxCount )
 		PostMessage( WM_COMMAND, CM_SEARCH_FOR_FILES );
 #else
@@ -337,6 +338,10 @@ bool CAlbumSettingsDialog::SearchSourceFiles( void )
 {
 	CWaitCursor wait;
 	bool success = true;
+
+	// Note:
+	// Freeze list redraw since file search progress notifications force listCtrl redraw while old image items in m_fileList have been deleted, leaving dangling references in the list.
+	CScopedLockRedraw freeze( &m_foundFilesListCtrl );			// to prevent list redraw crash due to dangling reference image items
 
 	try
 	{
