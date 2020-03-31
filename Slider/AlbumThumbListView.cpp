@@ -612,9 +612,9 @@ bool CAlbumThumbListView::CheckListLayout( CheckLayoutMode checkMode /*= Splitte
 		GetParentFrame()->SetActiveView( m_pPeerImageView );					// make the album view active (focused)
 
 	// must recreate view if single column and has LBS_MULTICOLUMN, or multiple column and hasn't LBS_MULTICOLUMN
-	bool recreated = ( columnCount == 1 ) ^ !( GetStyle() & LBS_MULTICOLUMN );
+	bool recreate = ( 1 == columnCount ) == HasFlag( GetStyle(), LBS_MULTICOLUMN );
 
-	if ( !recreated )
+	if ( !recreate )
 	{
 		if ( ShowCommand == checkMode )
 			m_pSplitterWnd->MoveColumnToPos( GetListWindowRect( columnCount ).right, 0 );		// set column width
@@ -631,12 +631,12 @@ bool CAlbumThumbListView::RecreateView( int columnCount )
 	CFrameWnd* pFrame = GetParentFrame();
 	bool wasActive = pFrame != NULL && pFrame->GetActiveView() == this;
 
-	m_autoDelete = false;				// Prevent view object delete on window destroy
+	m_autoDelete = false;				// prevent view object delete on window destroy
 	GetDocument()->RemoveView( this );
 	DestroyWindow();
-	m_autoDelete = true;				// Restore to view object auto-deletion
+	m_autoDelete = true;				// restore to view object auto-deletion
 
-	// Initialize the appropriate creation style
+	// initialize the appropriate creation style
 	s_listCreationStyle = CAlbumThumbListView::GetListCreationStyle( columnCount );
 
 	CRect thumbRect = GetListWindowRect( columnCount );
@@ -644,9 +644,12 @@ bool CAlbumThumbListView::RecreateView( int columnCount )
 	if ( !m_pSplitterWnd->DoRecreateWindow( *this, thumbRect.Size() ) )
 		return false;
 
+	m_pPeerImageView->LateInitialUpdate();			// display this thumb (re-created initially hidden)
+
 	orgViewData.Restore( this );
 	m_pSplitterWnd->RecalcLayout();
-	// Restore view activation (if was previously active)
+
+	// restore view activation (if was previously active)
 	if ( wasActive )
 		pFrame->SetActiveView( this );
 	return true;

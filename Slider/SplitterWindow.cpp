@@ -88,7 +88,7 @@ bool CSplitterWindow::DoRecreateWindow( CAlbumThumbListView& rThumbView, const C
 		TRACE( _T("Warning: couldn't re-create the thumb view for splitter.\n") );
 		return false;		// View will be cleaned up by PostNcDestroy
 	}
-//	rThumbView.SendMessage( WM_INITIALUPDATE );		// send initial notification message
+	//rThumbView.SendMessage( WM_INITIALUPDATE );		// send initial notification message
 	return true;
 }
 
