@@ -50,7 +50,7 @@ namespace fs
 		bool Contains( const PathType& pathKey, bool checkValid = false ) const { return Find( pathKey, checkValid ) != NULL; }
 		ObjectType* Find( const PathType& pathKey, bool checkValid = false ) const;
 
-		void Add( const PathType& pathKey, ObjectType* pObject ) { mt::CAutoLock lock( &m_cs ); return _Add( pathKey, pObject ); }
+		bool Add( const PathType& pathKey, ObjectType* pObject ) { mt::CAutoLock lock( &m_cs ); return _Add( pathKey, pObject ); }
 		bool Remove( const PathType& pathKey ) { mt::CAutoLock lock( &m_cs ); return _Remove( pathKey, cache::Remove ); }
 
 		template< typename Iterator >
@@ -72,7 +72,7 @@ namespace fs
 	protected:
 		// not synchronized
 		const CachedEntry* _FindEntry( const PathType& pathKey, bool checkValid ) const;
-		void _Add( const PathType& pathKey, ObjectType* pObject );
+		bool _Add( const PathType& pathKey, ObjectType* pObject );
 		bool _Remove( const PathType& pathKey, int cacheFlag = cache::RemoveExpired );
 		void _RemoveExpired( void );
 

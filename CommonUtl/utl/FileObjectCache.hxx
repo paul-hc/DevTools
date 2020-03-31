@@ -48,19 +48,32 @@ namespace fs
 	}
 
 	template< typename PathType, typename ObjectType >
-	void CFileObjectCache< PathType, ObjectType >::_Add( const PathType& pathKey, ObjectType* pObject )
+	bool CFileObjectCache< PathType, ObjectType >::_Add( const PathType& pathKey, ObjectType* pObject )
 	{
 		mt::CAutoLock lock( &m_cs );
 
 		ASSERT_PTR( pObject );
 		ASSERT( m_cachedEntries.size() == m_expireQueue.size() );				// consistent
-		ASSERT( m_cachedEntries.find( pathKey ) == m_cachedEntries.end() );		// must be new entry
+
+		// bug fix [2020-03-31] - sometimes _Add collides with an existing thumb
+		//ASSERT( m_cachedEntries.find( pathKey ) == m_cachedEntries.end() );		// must be new entry (before the fix above)
+		stdext::hash_map< PathType, CachedEntry >::const_iterator itFound = m_cachedEntries.find( pathKey );
+		if ( itFound != m_cachedEntries.end() )
+			if ( itFound->second.first == pObject )
+			{
+				TRACE( _T("[?] Attempt to add an already cached thumbnail for: ") ); TraceObject( pathKey, itFound->second.first, cache::CacheHit );
+				return false;			// skip caching same thumb if already cached
+			}
+			else
+				_Remove( pathKey );
+
 		ASSERT( !utl::Contains( m_expireQueue, pathKey ) );
 
 		m_cachedEntries[ pathKey ] = std::make_pair( pObject, fs::ReadLastModifyTime( fs::CastFlexPath( pathKey ) ) );
 		m_expireQueue.push_back( pathKey );
 
 		_RemoveExpired();
+		return true;					// thumb cached
 	}
 
 	template< typename PathType, typename ObjectType >
