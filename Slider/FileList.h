@@ -179,7 +179,7 @@ namespace func
 				rPath.Set( pSrcEmbedded );
 		}
 
-		void operator()( CFileAttr& rFileAttr ) const { operator()( rFileAttr.m_pathKey.first ); }
+		void operator()( CFileAttr& rFileAttr ) const { operator()( rFileAttr.RefPath() ); }
 	};
 
 
@@ -194,7 +194,7 @@ namespace func
 			rPath = fs::CFlexPath::MakeComplexPath( m_stgDocPath.Get(), Flat == m_depth ? rPath.GetNameExt() : rPath.GetPtr() );
 		}
 
-		void operator()( CFileAttr& rFileAttr ) const { operator()( rFileAttr.m_pathKey.first ); }
+		void operator()( CFileAttr& rFileAttr ) const { operator()( rFileAttr.RefPath() ); }
 	private:
 		fs::CPath m_stgDocPath;
 		EmbeddedDepth m_depth;

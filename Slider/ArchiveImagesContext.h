@@ -9,7 +9,7 @@
 
 class CEnumTags;
 class CFileList;
-struct CFileAttr;
+class CFileAttr;
 
 
 // (*) don't change constant values

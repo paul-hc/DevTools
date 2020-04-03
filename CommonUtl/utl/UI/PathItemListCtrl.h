@@ -6,10 +6,10 @@
 #include "Path.h"
 
 
-class CPathItemBase;
 class CShellContextMenuHost;
 
 
+// List control made of path items that implement utl::ISubject, typically CPathItemBase
 class CPathItemListCtrl : public CReportListControl
 {
 public:
@@ -60,7 +60,7 @@ protected:
 template< typename PathType >
 bool CPathItemListCtrl::QuerySelectedItemPaths( std::vector< PathType >& rSelFilePaths ) const
 {
-	std::vector< CPathItemBase* > selItems;
+	std::vector< utl::ISubject* > selItems;		// stands for CPathItemBase
 	QuerySelectionAs( selItems );
 
 	if ( selItems.empty() )

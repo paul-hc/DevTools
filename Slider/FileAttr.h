@@ -10,12 +10,17 @@
 enum FileType { FT_Generic, FT_BMP, FT_JPEG, FT_GIFF, FT_TIFF };
 
 
-struct CFileAttr : public CSubject
+class CFileAttr : public CSubject
 {
+public:
 	CFileAttr( void );
 	CFileAttr( const fs::CPath& filePath );				// only for concrete files
 	CFileAttr( const CFileFind& foundFile );			// get file attributes
 	~CFileAttr();
+
+	// utl::ISubject interface
+	virtual const std::tstring& GetCode( void ) const;
+	virtual std::tstring GetDisplayCode( void ) const;
 
 	bool operator==( const CFileAttr& right ) const { return GetPath() == right.GetPath(); }
 	bool operator!=( const CFileAttr& right ) const { return !operator==( right ); }
@@ -25,24 +30,30 @@ struct CFileAttr : public CSubject
 
 	bool IsValid( void ) const { return GetPath().FileExist(); }
 
+	const fs::ImagePathKey& GetPathKey( void ) const { return m_pathKey; }
+	void SetPathKey( const fs::ImagePathKey& pathKey ) { m_pathKey = pathKey; }
+
 	const fs::CFlexPath& GetPath( void ) const { return m_pathKey.first; }
+	fs::CFlexPath& RefPath( void ) { return m_pathKey.first; }
+	void SetPath( const fs::CPath& filePath, UINT framePos = 0 ) { m_pathKey.first = filePath.Get(); m_pathKey.second = framePos; }
+
+	FileType GetFileType( void ) const { return m_type; }
+	const FILETIME& GetLastModifTime( void ) const { return m_lastModifTime; }
+	UINT GetFileSize( void ) const { return m_fileSize; }
 	const CSize& GetImageDim( void ) const;
+
 	std::tstring FormatFileSize( DWORD divideBy = KiloByte, const TCHAR* pFormat = _T("%s KB") ) const;
 	std::tstring FormatLastModifTime( LPCTSTR format = _T("%d-%m-%Y %H:%M:%S") ) const { return CTime( m_lastModifTime ).Format( format ).GetString(); }
-
-	// utl::ISubject interface
-	virtual const std::tstring& GetCode( void ) const;
-	virtual std::tstring GetDisplayCode( void ) const;
 
 	static FileType LookupFileType( const TCHAR* pFilePath );
 private:
 	bool ReadFileStatus( void );
-public:
+private:
 	persist fs::ImagePathKey m_pathKey;
 	persist FileType m_type;
 	persist FILETIME m_lastModifTime;
 	persist UINT m_fileSize;
-private:
+
 	persist mutable CSize m_imageDim;			// used for image dimensions comparison
 };
 
@@ -52,7 +63,7 @@ namespace fs
 	namespace traits
 	{
 		inline const fs::CPath& GetPath( const CFileAttr& fileAttr ) { return fileAttr.GetPath(); }
-		inline void SetPath( CFileAttr& rDestFileAttr, const fs::CPath& filePath ) { rDestFileAttr.m_pathKey.first.Set( filePath.Get() ); }
+		inline void SetPath( CFileAttr& rFileAttr, const fs::CPath& filePath ) { rFileAttr.SetPath( filePath ); }
 	}
 }
 
@@ -71,7 +82,7 @@ namespace func
 	{
 		UINT operator()( const CFileAttr& fileAttr ) const
 		{
-			return fileAttr.m_fileSize;
+			return fileAttr.GetFileSize();
 		}
 	};
 
@@ -109,7 +120,7 @@ namespace func
 	{
 		size_t operator()( size_t totalFileSize, const CFileAttr& right ) const
 		{
-			return totalFileSize + right.m_fileSize;
+			return totalFileSize + right.GetFileSize();
 		}
 	};
 }

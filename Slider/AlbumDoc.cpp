@@ -120,7 +120,7 @@ CImageState* CAlbumDoc::GetImageState( void ) const
 const fs::ImagePathKey& CAlbumDoc::GetImageFilePathAt( int index ) const
 {
 	if ( IsValidIndex( index ) )
-		return m_fileList.GetFileAttr( index ).m_pathKey;
+		return m_fileList.GetFileAttr( index ).GetPathKey();
 
 	return CWicImage::s_nullKey;
 }
@@ -128,9 +128,9 @@ const fs::ImagePathKey& CAlbumDoc::GetImageFilePathAt( int index ) const
 void CAlbumDoc::QueryNeighboringPathKeys( std::vector< fs::ImagePathKey >& rNeighbours, size_t index ) const
 {
 	if ( index > 0 )
-		rNeighbours.push_back( m_fileList.GetFileAttr( index - 1 ).m_pathKey );
+		rNeighbours.push_back( m_fileList.GetFileAttr( index - 1 ).GetPathKey() );
 	if ( index < GetImageCount() - 1 )
-		rNeighbours.push_back( m_fileList.GetFileAttr( index + 1 ).m_pathKey );
+		rNeighbours.push_back( m_fileList.GetFileAttr( index + 1 ).GetPathKey() );
 }
 
 // use this with care since it violates Model/View design pattern

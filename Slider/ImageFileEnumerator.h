@@ -8,7 +8,7 @@
 #include "Application_fwd.h"
 
 
-struct CFileAttr;
+class CFileAttr;
 class CSearchSpec;
 
 

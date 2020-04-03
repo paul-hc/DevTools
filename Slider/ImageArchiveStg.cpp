@@ -234,7 +234,7 @@ void CImageArchiveStg::LoadImagesMetadata( std::vector< CFileAttr >& rFileAttrib
 				std::tstring streamPath = itFileAttr->GetPath().Get();
 				DecodeDeepStreamPath( streamPath.begin(), streamPath.end() );		// decode deep stream paths: '*' -> '\'
 
-				itFileAttr->m_pathKey.first = fs::CFlexPath::MakeComplexPath( docFilePath.Get(), streamPath.c_str() );
+				itFileAttr->SetPath( fs::CFlexPath::MakeComplexPath( docFilePath.Get(), streamPath.c_str() ) );
 			}
 		}
 		catch ( CException* pExc )

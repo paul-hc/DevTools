@@ -548,7 +548,7 @@ namespace pred
 				break;
 			case CFileList::ByDateAsc:
 			case CFileList::ByDateDesc:
-				result = CompareFileTime( left.m_lastModifTime, right.m_lastModifTime );
+				result = CompareFileTime( left.GetLastModifTime(), right.GetLastModifTime() );
 				break;
 			case CFileList::ByDimensionAsc:
 			case CFileList::ByDimensionDesc:
