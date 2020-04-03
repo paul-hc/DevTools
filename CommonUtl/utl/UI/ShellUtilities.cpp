@@ -65,7 +65,7 @@ namespace shell
 		fileOp.lpszProgressTitle = pShellOpTags[ shellOp ];
 
 		if ( shellOp != FO_DELETE )
-			if ( pDestPaths != NULL && pDestPaths->size() == srcPaths.size() )
+			if ( srcPaths.size() > 1 && pDestPaths != NULL && pDestPaths->size() == srcPaths.size() )
 				SetFlag( fileOp.fFlags, FOF_MULTIDESTFILES );							// each SRC file has a DEST file
 
 		s_anyOperationAborted = false;
