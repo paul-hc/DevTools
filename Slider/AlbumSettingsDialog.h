@@ -7,6 +7,7 @@
 #include "utl/UI/AccelTable.h"
 #include "utl/UI/DialogToolBar.h"
 #include "utl/UI/DragListCtrl.h"
+#include "utl/UI/PathItemListCtrl.h"
 #include "utl/UI/LayoutDialog.h"
 #include "utl/UI/OleUtils.h"
 #include "utl/UI/SpinEdit.h"
@@ -22,6 +23,7 @@ public:
 	CAlbumSettingsDialog( const CFileList& fileList, int currentIndex = -1, CWnd* pParent = NULL );
 	virtual ~CAlbumSettingsDialog();
 private:
+	static CMenu& GetFileListPopupMenu( void );
 	bool InitSymbolFont( void );
 
 	void SetDirty( bool dirty = true );
@@ -65,7 +67,7 @@ private:
 	CComboBox m_sortOrderCombo;
 	CThumbPreviewCtrl m_thumbPreviewCtrl;
 	CDialogToolBar m_toolbar;
-	CDragListCtrl< CReportListControl > m_foundFilesListCtrl;
+	CDragListCtrl< CPathItemListCtrl > m_foundFilesListCtrl;
 
 	// generated stuff
 	public:
@@ -95,7 +97,6 @@ protected:
 	afx_msg void OnDelete_SearchSpec( void );
 	afx_msg void OnSearchSourceFiles( void );
 	afx_msg void OnLVnColumnClick_FoundFiles( NMHDR* pNmHdr, LRESULT* pResult );
-	afx_msg void OnLVnDblclk_FoundFiles( NMHDR* pNmHdr, LRESULT* pResult );
 	afx_msg void OnLVnItemChanged_FoundFiles( NMHDR* pNmHdr, LRESULT* pResult );
 	afx_msg void OnLVnGetDispInfo_FoundFiles( NMHDR* pNmHdr, LRESULT* pResult );
 	afx_msg void OnLVnItemsReorder_FoundFiles( void );

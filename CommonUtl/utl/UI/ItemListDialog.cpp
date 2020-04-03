@@ -487,8 +487,6 @@ CItemsEditPage::CItemsEditPage( CItemListDialog* pDialog )
 	m_mlEdit.SetKeepSelOnFocus();
 }
 
-//	int currentLineIndex = m_mlEdit.LineFromChar();
-
 bool CItemsEditPage::InEditMode( void ) const
 {
 	return false;

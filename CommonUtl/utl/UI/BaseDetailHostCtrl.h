@@ -72,8 +72,8 @@ protected:
 #include "ItemContent.h"
 
 
-#define ON_CN_EDITDETAILS( id, memberFxn )		ON_CONTROL( CItemListEdit::CN_EDITDETAILS, id, memberFxn )
-#define ON_CN_DETAILSCHANGED( id, memberFxn )	ON_CONTROL( CItemListEdit::CN_DETAILSCHANGED, id, memberFxn )
+#define ON_CN_EDITDETAILS( id, memberFxn )		ON_CONTROL( CBaseItemContentCtrl< CStatic >::CN_EDITDETAILS, id, memberFxn )
+#define ON_CN_DETAILSCHANGED( id, memberFxn )	ON_CONTROL( CBaseItemContentCtrl< CStatic >::CN_DETAILSCHANGED, id, memberFxn )
 
 
 // content control with details button

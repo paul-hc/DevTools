@@ -2,6 +2,7 @@
 #include "stdafx.h"
 #include "MoveFileDialog.h"
 #include "resource.h"
+#include "utl/ContainerUtilities.h"
 #include "utl/FileSystem.h"
 #include "utl/UI/ItemContentHistoryCombo.h"
 #include "utl/UI/ShellUtilities.h"
@@ -23,8 +24,7 @@ namespace layout
 {
 	static const CLayoutStyle styles[] =
 	{
-		{ IDC_SOURCE_EDIT, SizeX },
-		{ IDC_DEST_FOLDER_COMBO, Size },
+		{ IDC_SOURCE_EDIT, Size },
 		{ IDOK, Move },
 		{ IDCANCEL, Move }
 	};
@@ -39,12 +39,11 @@ CMoveFileDialog::CMoveFileDialog( const std::vector< std::tstring >& filesToMove
 	RegisterCtrlLayout( layout::styles, COUNT_OF( layout::styles ) );
 	m_pDestFolderCombo->GetContent().m_itemsFlags = ui::CItemContent::All | ui::CItemContent::EnsurePathExist;
 
-	m_filesToMove.reserve( filesToMove.size() );
-	for ( std::vector< std::tstring >::const_iterator itSrc = filesToMove.begin(); itSrc != filesToMove.end(); ++itSrc )
-		m_filesToMove.push_back( fs::CPath( *itSrc ) );
+	m_srcFilesEdit.SetUseFixedFont( false );
+	m_srcFilesEdit.SetKeepSelOnFocus();
 
+	utl::Assign( m_filesToMove, filesToMove, func::tor::StringOf() );
 	ENSURE( !m_filesToMove.empty() );
-
 }
 
 CMoveFileDialog::~CMoveFileDialog()
@@ -56,6 +55,8 @@ void CMoveFileDialog::DoDataExchange( CDataExchange* pDX )
 	bool firstInit = NULL == m_pDestFolderCombo->m_hWnd;
 
 	DDX_Control( pDX, IDC_DEST_FOLDER_COMBO, *m_pDestFolderCombo );
+	DDX_Control( pDX, IDC_SOURCE_EDIT, m_srcFilesEdit );
+
 	if ( DialogOutput == pDX->m_bSaveAndValidate )
 	{
 		if ( firstInit )
@@ -63,6 +64,8 @@ void CMoveFileDialog::DoDataExchange( CDataExchange* pDX )
 			m_pDestFolderCombo->LimitText( MAX_PATH );
 			m_pDestFolderCombo->LoadHistory( reg::section_dialog, reg::entry_destFolderHistory );
 			m_destFolderPath = m_pDestFolderCombo->GetCurrentText();		// store last selected dir path
+
+			m_srcFilesEdit.SetText( str::Join( m_filesToMove, CTextEdit::s_lineEnd ) );
 
 			DragAcceptFiles( TRUE );
 		}
@@ -81,74 +84,44 @@ void CMoveFileDialog::DoDataExchange( CDataExchange* pDX )
 // message handlers
 
 BEGIN_MESSAGE_MAP( CMoveFileDialog, CLayoutDialog )
-	ON_CBN_EDITCHANGE( IDC_DEST_FOLDER_COMBO, OnCBnEditChangeDestFolder )
-	ON_CBN_SELCHANGE( IDC_DEST_FOLDER_COMBO, OnCBnSelChangeDestFolder )
 	ON_WM_DROPFILES()
+	ON_CBN_EDITCHANGE( IDC_DEST_FOLDER_COMBO, OnCBnEditChange_DestFolder )
+	ON_CBN_SELCHANGE( IDC_DEST_FOLDER_COMBO, OnCBnSelChange_DestFolder )
+	ON_CN_DETAILSCHANGED( IDC_DEST_FOLDER_COMBO, OnCnDetailsChanged_DestFolder )
 END_MESSAGE_MAP()
-
-BOOL CMoveFileDialog::OnInitDialog( void )
-{
-	CLayoutDialog::OnInitDialog();
-
-	std::tstring filesToMoveText;
-
-	ASSERT( !m_filesToMove.empty() );
-	if ( 1 == m_filesToMove.size() )
-		filesToMoveText = m_filesToMove.front().Get();
-	else
-	{
-		fs::CPath refDirPath = m_filesToMove.front().GetParentPath();
-
-		for ( std::vector< fs::CPath >::const_iterator itSrc = m_filesToMove.begin(); itSrc != m_filesToMove.end(); ++itSrc )
-		{
-			fs::CPath dirPath = itSrc->GetParentPath();
-
-			if ( !filesToMoveText.empty() )
-				filesToMoveText += _T("; ");
-
-			if ( dirPath == refDirPath )
-				filesToMoveText += itSrc->GetNameExt();
-			else
-				filesToMoveText += itSrc->Get();
-		}
-		filesToMoveText = refDirPath.Get() + _T(": ") + filesToMoveText;
-	}
-
-	ui::SetDlgItemText( m_hWnd, IDC_SOURCE_EDIT, filesToMoveText );
-	return TRUE;
-}
 
 void CMoveFileDialog::OnDropFiles( HDROP hDropInfo )
 {
-	UINT fileCount = ::DragQueryFile( hDropInfo, UINT_MAX, NULL, 0 );
-
 	SetForegroundWindow();				// activate us first
-	if ( 1 == fileCount )
-	{
-		TCHAR folderPath[ MAX_PATH ];
-		::DragQueryFile( hDropInfo, 0, folderPath, COUNT_OF( folderPath ) );
-		if ( fs::IsValidDirectory( folderPath ) )
+
+	std::vector< fs::CPath > dirPaths;
+	shell::QueryDroppedFiles( dirPaths, hDropInfo );
+
+	if ( 1 == dirPaths.size() )
+		if ( fs::IsValidDirectory( dirPaths.front().GetPtr() ) )
 		{
-			m_destFolderPath.Set( folderPath );
+			m_pDestFolderCombo->SetEditText( dirPaths.front().Get() );
 			UpdateData( DialogSaveChanges );
 		}
 		else
 			AfxMessageBox( IDS_DROPONLYONEFOLDER );
-	}
 	else
 		AfxMessageBox( IDS_DROPONLYONEFOLDER );
-
-	::DragFinish( hDropInfo );
 }
 
-void CMoveFileDialog::OnCBnEditChangeDestFolder( void )
+void CMoveFileDialog::OnCBnEditChange_DestFolder( void )
 {
 	m_destFolderPath.Set( ui::GetComboSelText( *m_pDestFolderCombo, ui::ByEdit ) );
 	ui::EnableControl( m_hWnd, IDOK, fs::IsValidDirectory( m_destFolderPath.GetPtr() ) );
 }
 
-void CMoveFileDialog::OnCBnSelChangeDestFolder( void )
+void CMoveFileDialog::OnCBnSelChange_DestFolder( void )
 {
 	m_destFolderPath.Set( ui::GetComboSelText( *m_pDestFolderCombo, ui::BySel ) );
 	ui::EnableControl( m_hWnd, IDOK, fs::IsValidDirectory( m_destFolderPath.GetPtr() ) );
+}
+
+void CMoveFileDialog::OnCnDetailsChanged_DestFolder( void )
+{
+	UpdateData( DialogSaveChanges );
 }

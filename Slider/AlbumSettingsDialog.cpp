@@ -83,8 +83,9 @@ CAlbumSettingsDialog::CAlbumSettingsDialog( const CFileList& fileList, int curre
 	m_foundFilesListCtrl.SetCustomImageDraw( app::GetThumbnailer() );
 	m_foundFilesListCtrl.SetSortInternally( false );
 	m_foundFilesListCtrl.SetUseAlternateRowColoring();
-	m_foundFilesListCtrl.SetDataSourceFactory( this );									// uses temporary file clones for embedded images
-	m_foundFilesListCtrl.SetPopupMenu( CReportListControl::OnSelection, NULL );			// let dialog track the custom menu
+	m_foundFilesListCtrl.SetDataSourceFactory( this );						// uses temporary file clones for embedded images
+	m_foundFilesListCtrl.SetPopupMenu( CReportListControl::OnSelection, &GetFileListPopupMenu() );
+	m_foundFilesListCtrl.SetTrackMenuTarget( this );						// let dialog track SPECIFIC custom menu commands (Explorer verbs handled by the listctrl)
 	m_foundFilesListCtrl
 		.AddTileColumn( Dimensions )
 		.AddTileColumn( Size )
@@ -94,6 +95,18 @@ CAlbumSettingsDialog::CAlbumSettingsDialog( const CFileList& fileList, int curre
 
 CAlbumSettingsDialog::~CAlbumSettingsDialog()
 {
+}
+
+CMenu& CAlbumSettingsDialog::GetFileListPopupMenu( void )
+{
+	static CMenu s_popupMenu;
+	if ( NULL == s_popupMenu.GetSafeHmenu() )
+	{
+		CMenu popupMenu;
+		ui::LoadPopupSubMenu( s_popupMenu, IDR_CONTEXT_MENU, app::AlbumFoundListPopup );
+		ui::JoinMenuItems( s_popupMenu, CPathItemListCtrl::GetStdPathListPopupMenu( CReportListControl::OnSelection ) );
+	}
+	return s_popupMenu;
 }
 
 bool CAlbumSettingsDialog::InitSymbolFont( void )
@@ -397,51 +410,28 @@ void CAlbumSettingsDialog::SetupFoundListView( void )
 
 void CAlbumSettingsDialog::QueryFoundListSelection( std::vector< std::tstring >& rSelFilePaths, bool clearInvalidFiles /*= true*/ )
 {
-	std::vector< int > invalidFilesIndexes;
+	std::vector< CFileAttr* > selFileAttrs;
+	m_foundFilesListCtrl.QuerySelectionAs( selFileAttrs );
 
 	rSelFilePaths.clear();
-	if ( !m_foundFilesListCtrl.IsMultiSelectionList() )
-	{	// single selection
-		int selIndex = m_foundFilesListCtrl.GetCurSel();
+	rSelFilePaths.reserve( selFileAttrs.size() );
 
-		if ( selIndex != -1 )
+	bool foundInvalid = false;
+
+	for ( std::vector< CFileAttr* >::const_iterator itSelFileAttr = selFileAttrs.begin(); itSelFileAttr != selFileAttrs.end(); ++itSelFileAttr )
+		if ( ( *itSelFileAttr )->IsValid() )
+			rSelFilePaths.push_back( ( *itSelFileAttr )->GetPath().Get() );
+		else if ( clearInvalidFiles )
 		{
-			const fs::CFlexPath& selFilePath = m_fileList.GetFileAttr( selIndex ).GetPath();
-
-			if ( selFilePath.FileExist() )
-				rSelFilePaths.push_back( selFilePath.GetPtr() );			// only consider existing files for drag&drop
-			else
-				invalidFilesIndexes.push_back( selIndex );
+			foundInvalid = true;
+			m_foundFilesListCtrl.SetSelected( m_foundFilesListCtrl.FindItemIndex( *itSelFileAttr ), false );		// un-select invalid image path
 		}
-	}
-	else
-	{	// multiple selection
-		int selCount = m_foundFilesListCtrl.GetSelectedCount();
-		if ( selCount > 0 )
-		{
-			rSelFilePaths.reserve( selCount );
 
-			for ( POSITION pos = m_foundFilesListCtrl.GetFirstSelectedItemPosition(); pos != NULL; )
-			{
-				int selIndex = m_foundFilesListCtrl.GetNextSelectedItem( pos );
-				const fs::CFlexPath& selFilePath = m_fileList.GetFileAttr( selIndex ).GetPath();
-
-				if ( selFilePath.FileExist() )
-					rSelFilePaths.push_back( selFilePath.GetPtr() );		// only consider existing files for drag&drop
-				else
-					invalidFilesIndexes.push_back( selIndex );
-			}
-		}
-	}
 	// clear selection for non-existing files (if any)
-	if ( clearInvalidFiles && invalidFilesIndexes.size() > 0 )
+	if ( foundInvalid )
 	{
 		ui::BeepSignal();
-		for ( std::vector< int >::const_iterator it = invalidFilesIndexes.begin(); it != invalidFilesIndexes.end(); ++it )
-			m_foundFilesListCtrl.SetCurSel( *it, false );
-
 		m_foundFilesListCtrl.Invalidate();
-		m_foundFilesListCtrl.UpdateWindow();
 	}
 }
 
@@ -550,7 +540,6 @@ void CAlbumSettingsDialog::DoDataExchange( CDataExchange* pDX )
 BEGIN_MESSAGE_MAP( CAlbumSettingsDialog, CLayoutDialog )
 	ON_WM_DESTROY()
 	ON_WM_DROPFILES()
-	ON_WM_CONTEXTMENU()
 	ON_CBN_SELCHANGE( IDC_LIST_ORDER_COMBO, OnCBnSelChange_SortOrder )
 	ON_BN_CLICKED( IDC_MIN_FILE_SIZE_CHECK, OnToggle_MinSize )
 	ON_BN_CLICKED( IDC_MAX_FILE_SIZE_CHECK, OnToggle_MaxSize )
@@ -567,7 +556,6 @@ BEGIN_MESSAGE_MAP( CAlbumSettingsDialog, CLayoutDialog )
 	ON_BN_CLICKED( CM_DELETE_SEARCH_SPEC, OnDelete_SearchSpec )
 	ON_BN_CLICKED( CM_SEARCH_FOR_FILES, OnSearchSourceFiles )
 	ON_NOTIFY( LVN_COLUMNCLICK, IDC_FOUND_FILES_LISTVIEW, OnLVnColumnClick_FoundFiles )
-	ON_NOTIFY( NM_DBLCLK, IDC_FOUND_FILES_LISTVIEW, OnLVnDblclk_FoundFiles )
 	ON_NOTIFY( LVN_ITEMCHANGED, IDC_FOUND_FILES_LISTVIEW, OnLVnItemChanged_FoundFiles )
 	ON_NOTIFY( LVN_GETDISPINFO, IDC_FOUND_FILES_LISTVIEW, OnLVnGetDispInfo_FoundFiles )
 	ON_CONTROL( lv::LVN_ItemsReorder, IDC_FOUND_FILES_LISTVIEW, OnLVnItemsReorder_FoundFiles )
@@ -589,8 +577,8 @@ BOOL CAlbumSettingsDialog::PreTranslateMessage( MSG* pMsg )
 BOOL CAlbumSettingsDialog::OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo )
 {
 	return
-		m_foundFilesListCtrl.OnCmdMsg( id, code, pExtra, pHandlerInfo ) ||
-		CLayoutDialog::OnCmdMsg( id, code, pExtra, pHandlerInfo );
+		__super::OnCmdMsg( id, code, pExtra, pHandlerInfo ) ||
+		m_foundFilesListCtrl.OnCmdMsg( id, code, pExtra, pHandlerInfo );
 }
 
 BOOL CAlbumSettingsDialog::OnInitDialog( void )
@@ -835,14 +823,6 @@ void CAlbumSettingsDialog::OnLVnColumnClick_FoundFiles( NMHDR* pNmHdr, LRESULT* 
 	m_fileList.SetFileOrder( fileOrder );
 	m_sortOrderCombo.SetCurSel( fileOrder );
 	UpdateFileSortOrder();
-	*pResult = 0;
-}
-
-void CAlbumSettingsDialog::OnLVnDblclk_FoundFiles( NMHDR* pNmHdr, LRESULT* pResult )
-{
-	NMLISTVIEW* pNmListView = (NMLISTVIEW*)pNmHdr; pNmListView;
-
-	PostMessage( WM_COMMAND, IDC_OPEN_IMAGE );
 	*pResult = 0;
 }
 
