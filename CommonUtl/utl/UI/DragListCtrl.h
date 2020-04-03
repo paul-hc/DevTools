@@ -13,7 +13,8 @@ namespace ole { class CDropTarget; class CDataSource; }
 // A list control capable of OLE drag & drop with visual selected items feedback.
 // It can initiate drag-drop operation internally, or let the owner window do it on LVN_BEGINDRAG notification.
 //
-class CDragListCtrl : public CReportListControl
+template< typename BaseListCtrl >
+class CDragListCtrl : public BaseListCtrl
 					, public ole::IDropTargetEventsStub
 {
 public:

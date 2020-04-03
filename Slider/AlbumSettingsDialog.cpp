@@ -14,6 +14,7 @@
 #include "utl/UI/ShellUtilities.h"
 #include "utl/UI/UtilitiesEx.h"
 #include "utl/UI/resource.h"
+#include "utl/UI/DragListCtrl.hxx"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

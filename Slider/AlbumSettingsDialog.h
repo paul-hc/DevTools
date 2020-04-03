@@ -65,7 +65,7 @@ private:
 	CComboBox m_sortOrderCombo;
 	CThumbPreviewCtrl m_thumbPreviewCtrl;
 	CDialogToolBar m_toolbar;
-	CDragListCtrl m_foundFilesListCtrl;
+	CDragListCtrl< CReportListControl > m_foundFilesListCtrl;
 
 	// generated stuff
 	public:
