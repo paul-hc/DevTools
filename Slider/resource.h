@@ -20,6 +20,7 @@
 #define IDD_LAYOUT_DIALOG               166
 #define IDD_UNDO_REDO_DIALOG            168
 #define IDD_INPUT_PASSWORD_DIALOG       171
+#define IDR_APP_TOOL_STRIP              174
 #define IDD_ARCHIVE_IMAGES_DIALOG       201
 #define IDC_FILE_PATHS_LIST             201
 #define IDD_DEFINE_PASSWORD_DIALOG      202
@@ -28,9 +29,7 @@
 #define IDC_SEARCH_FOLDER_COMBO         1001
 #define IDC_BROWSE_FOLDER_BUTTON        1002
 #define IDC_SEARCH_FILTERS_COMBO        1003
-#define IDC_RAND_SHUFFLE_CHECK          1004
 #define IDC_BROWSE_FILE_BUTTON          1004
-#define IDC_RAND_EACH_TIME_CHECK        1005
 #define IDC_FOUND_FILES_LIST            1006
 #define IDC_RECURSE_CHECK               1007
 #define CK_AUTOSAVE                     1007
@@ -201,14 +200,16 @@
 #define CM_CLEAR_TEMP_EMBEDDED_CLONES   32853
 #define ID_FILE_OPEN_ALBUM_FOLDER       32854
 #define ID_EDIT_ARCHIVE_PASSWORD        32855
+#define ID_RAND_SHUFFLE                 32869
+#define ID_ORDER_RANDOM_SHUFFLE         32869
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
-#define _APS_NEXT_RESOURCE_VALUE        174
-#define _APS_NEXT_COMMAND_VALUE         32864
+#define _APS_NEXT_RESOURCE_VALUE        176
+#define _APS_NEXT_COMMAND_VALUE         32870
 #define _APS_NEXT_CONTROL_VALUE         1092
 #define _APS_NEXT_SYMED_VALUE           108
 #endif

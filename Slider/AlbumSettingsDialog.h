@@ -96,6 +96,8 @@ protected:
 	afx_msg void OnModify_SearchSpec( void );
 	afx_msg void OnDelete_SearchSpec( void );
 	afx_msg void OnSearchSourceFiles( void );
+	afx_msg void OnOrderRandomShuffle( void );
+	afx_msg void OnUpdateOrderRandomShuffle( CCmdUI* pCmdUI );
 	afx_msg void OnLVnColumnClick_FoundFiles( NMHDR* pNmHdr, LRESULT* pResult );
 	afx_msg void OnLVnItemChanged_FoundFiles( NMHDR* pNmHdr, LRESULT* pResult );
 	afx_msg void OnLVnGetDispInfo_FoundFiles( NMHDR* pNmHdr, LRESULT* pResult );

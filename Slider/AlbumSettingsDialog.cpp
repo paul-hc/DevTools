@@ -55,7 +55,7 @@ namespace layout
 }
 
 
-CAlbumSettingsDialog::CAlbumSettingsDialog( const CFileList& fileList, int currentIndex /*= -1*/, CWnd* pParent /*=NULL*/ )
+CAlbumSettingsDialog::CAlbumSettingsDialog( const CFileList& fileList, int currentIndex /*= -1*/, CWnd* pParent /*= NULL*/ )
 	: CLayoutDialog( IDD_ALBUM_SETTINGS_DIALOG, pParent )
 	, m_dlgAccel( IDR_ALBUM_DLG_ACCEL )
 	, m_searchListAccel( IDR_ALBUM_DLG_SEARCH_SPEC_ACCEL )
@@ -77,7 +77,9 @@ CAlbumSettingsDialog::CAlbumSettingsDialog( const CFileList& fileList, int curre
 		.AddButton( ID_MOVE_UP_ITEM )
 		.AddButton( ID_MOVE_DOWN_ITEM )
 		.AddButton( ID_MOVE_TOP_ITEM )
-		.AddButton( ID_MOVE_BOTTOM_ITEM );
+		.AddButton( ID_MOVE_BOTTOM_ITEM )
+		.AddSeparator()
+		.AddButton( ID_ORDER_RANDOM_SHUFFLE );
 
 	m_foundFilesListCtrl.SetSection( m_regSection + _T("\\List") );
 	m_foundFilesListCtrl.SetCustomImageDraw( app::GetThumbnailer() );
@@ -86,6 +88,7 @@ CAlbumSettingsDialog::CAlbumSettingsDialog( const CFileList& fileList, int curre
 	m_foundFilesListCtrl.SetDataSourceFactory( this );						// uses temporary file clones for embedded images
 	m_foundFilesListCtrl.SetPopupMenu( CReportListControl::OnSelection, &GetFileListPopupMenu() );
 	m_foundFilesListCtrl.SetTrackMenuTarget( this );						// let dialog track SPECIFIC custom menu commands (Explorer verbs handled by the listctrl)
+
 	m_foundFilesListCtrl
 		.AddTileColumn( Dimensions )
 		.AddTileColumn( Size )
@@ -555,6 +558,8 @@ BEGIN_MESSAGE_MAP( CAlbumSettingsDialog, CLayoutDialog )
 	ON_BN_CLICKED( CM_MODIFY_SEARCH_SPEC, OnModify_SearchSpec )
 	ON_BN_CLICKED( CM_DELETE_SEARCH_SPEC, OnDelete_SearchSpec )
 	ON_BN_CLICKED( CM_SEARCH_FOR_FILES, OnSearchSourceFiles )
+	ON_COMMAND( ID_ORDER_RANDOM_SHUFFLE, OnOrderRandomShuffle )
+	ON_UPDATE_COMMAND_UI( ID_ORDER_RANDOM_SHUFFLE, OnUpdateOrderRandomShuffle )
 	ON_NOTIFY( LVN_COLUMNCLICK, IDC_FOUND_FILES_LISTVIEW, OnLVnColumnClick_FoundFiles )
 	ON_NOTIFY( LVN_ITEMCHANGED, IDC_FOUND_FILES_LISTVIEW, OnLVnItemChanged_FoundFiles )
 	ON_NOTIFY( LVN_GETDISPINFO, IDC_FOUND_FILES_LISTVIEW, OnLVnGetDispInfo_FoundFiles )
@@ -576,6 +581,13 @@ BOOL CAlbumSettingsDialog::PreTranslateMessage( MSG* pMsg )
 
 BOOL CAlbumSettingsDialog::OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo )
 {
+	switch ( id )
+	{
+		case ID_EDIT_COPY:
+			// special case: handled by the file list (since CDialog::OnCmdMsg() routes to the parent frame window)
+			return m_foundFilesListCtrl.OnCmdMsg( id, code, pExtra, pHandlerInfo );
+	}
+
 	return
 		__super::OnCmdMsg( id, code, pExtra, pHandlerInfo ) ||
 		m_foundFilesListCtrl.OnCmdMsg( id, code, pExtra, pHandlerInfo );
@@ -753,6 +765,20 @@ void CAlbumSettingsDialog::OnDelete_SearchSpec( void )
 void CAlbumSettingsDialog::OnSearchSourceFiles( void )
 {
 	SearchSourceFiles();
+}
+
+void CAlbumSettingsDialog::OnOrderRandomShuffle( void )
+{
+	CFileList::Order fileOrder = CFileList::Shuffle;
+
+	m_fileList.SetFileOrder( fileOrder );
+	m_sortOrderCombo.SetCurSel( fileOrder );
+	UpdateFileSortOrder();
+}
+
+void CAlbumSettingsDialog::OnUpdateOrderRandomShuffle( CCmdUI* pCmdUI )
+{
+	pCmdUI->Enable( !m_fileList.InGeneration() );
 }
 
 void CAlbumSettingsDialog::OnImageFileOp( UINT cmdId )

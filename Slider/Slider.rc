@@ -82,6 +82,7 @@ IDR_IMAGETYPE           ICON                    "res\\ImageDoc.ico"
 //
 
 IDR_MAINFRAME           BITMAP                  "res\\Toolbar.bmp"
+IDR_APP_TOOL_STRIP      BITMAP                  "res\\AppToolStrip.bmp"
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -89,6 +90,7 @@ IDR_MAINFRAME           BITMAP                  "res\\Toolbar.bmp"
 //
 
 IDR_MAINFRAME           PNG                     "res\\Toolbar.png"
+IDR_APP_TOOL_STRIP      PNG                     "res\\AppToolStrip.png"
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -126,6 +128,11 @@ BEGIN
     BUTTON      CM_EXPLORE_IMAGE
     BUTTON      CM_EDIT_BK_COLOR
     BUTTON      ID_EDIT_ARCHIVE_PASSWORD
+END
+
+IDR_APP_TOOL_STRIP TOOLBAR  16, 16
+BEGIN
+    BUTTON      ID_ORDER_RANDOM_SHUFFLE
 END
 
 
@@ -662,9 +669,13 @@ END
 
 IDR_ALBUM_DLG_ACCEL ACCELERATORS 
 BEGIN
+    VK_F5,          CM_SEARCH_FOR_FILES,    VIRTKEY, NOINVERT
     "E",            IDC_EXPLORE_IMAGE,      VIRTKEY, CONTROL, NOINVERT
     VK_F4,          IDC_OPEN_IMAGE,         VIRTKEY, NOINVERT
-    VK_F5,          CM_SEARCH_FOR_FILES,    VIRTKEY, NOINVERT
+    "M",            CM_MOVE_FILE,           VIRTKEY, CONTROL, NOINVERT
+    VK_DELETE,      CM_DELETE_FILE,         VIRTKEY, NOINVERT
+    VK_DELETE,      CM_DELETE_FILE_NO_UNDO, VIRTKEY, SHIFT, NOINVERT
+    "O",            CM_OPEN_IMAGE_FILE,     VIRTKEY, SHIFT, CONTROL, NOINVERT
 END
 
 IDR_ALBUMTYPE_NAV ACCELERATORS 
@@ -1345,6 +1356,11 @@ BEGIN
     IDS_OVERWRITE_PROMPT    "The file ""%s"" already exists!\n\nDo you want to overwrite it?"
     IDS_INVALID_FORMAT_FMT  "Invalid format: %s\n\nA valid format must contain numeric or wildcards specs in the filename part."
     IDS_PROMPT_FILE_OP      "Are you sure you want to %s %d files to destination:\n\n%s ?\n\n"
+END
+
+STRINGTABLE 
+BEGIN
+    ID_ORDER_RANDOM_SHUFFLE "Shuffle images in random order\nRandom Shuffle"
 END
 
 #endif    // English (U.S.) resources

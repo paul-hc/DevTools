@@ -345,6 +345,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\res\AppToolStrip.bmp"
+				>
+			</File>
+			<File
+				RelativePath=".\res\AppToolStrip.png"
+				>
+			</File>
+			<File
 				RelativePath=".\res\ImageDoc.ico"
 				>
 			</File>

@@ -312,6 +312,7 @@ BOOL CApplication::InitInstance( void )
 	CAboutBox::m_appIconId = IDR_MAINFRAME;
 	m_sharedAccel.Load( IDR_COMMAND_BAR_ACCEL );
 	CToolStrip::RegisterStripButtons( IDR_MAINFRAME );
+	CToolStrip::RegisterStripButtons( IDR_APP_TOOL_STRIP );
 	CImageStore::SharedStore()->RegisterAliases( cmdAliases, COUNT_OF( cmdAliases ) );
 
 	app::CDocManager* pAppDocManager = new app::CDocManager;

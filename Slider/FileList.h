@@ -29,6 +29,7 @@ public:
 	bool SetupSearchPath( const fs::CPath& filePath );
 	void SearchForFiles( bool reportEmpty = true ) throws_( CException* );
 
+	bool InGeneration( void ) const { return m_inGeneration; }
 	bool CancelGeneration( void );
 	void CloseAssocImageArchiveStgs( void );
 
