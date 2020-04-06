@@ -54,14 +54,18 @@ private:
 	bool QueryCheckedDupFilePaths( std::vector< fs::CPath >& rDupFilePaths ) const;
 
 	// output
-	void SetupSrcPathsList( void );
+	static void SetupPathsListItems( CPathItemListCtrl* pPathsListCtrl, const std::vector< CPathItem* >& pathItems );
+	static bool InputNewPath( std::vector< CPathItem* >& rPathItems, CPathItem* pTargetItem, const fs::CPath& newPath );
+	bool EditPathsListItems( CPathItemListCtrl* pPathsListCtrl, std::vector< CPathItem* >& rPathItems );
+	void PushNewPathsListItems( CPathItemListCtrl* pPathsListCtrl, std::vector< CPathItem* >& rPathItems, const std::vector< fs::CPath >& newPaths, size_t atPos = utl::npos );
+
 	void SetupDuplicateFileList( void );
 
 	// input
 	void ClearDuplicates( void );
 	bool SearchForDuplicateFiles( void );
 
-	CDuplicateFileItem* FindItemWithKey( const fs::CPath& srcPath ) const;
+	CDuplicateFileItem* FindItemWithKey( const fs::CPath& keyPath ) const;
 	void MarkInvalidSrcItems( void );
 	void EnsureVisibleFirstError( void );
 
@@ -73,6 +77,7 @@ private:
 
 	// duplicates
 	static CMenu& GetDupListPopupMenu( CReportListControl::ListPopup popupType );
+	bool IsGroupFullyChecked( const CDuplicateFilesGroup* pGroup ) const;
 	void ToggleCheckGroupDuplicates( unsigned int groupId );
 
 	static pred::CompareResult CALLBACK CompareGroupFileName( int leftGroupId, int rightGroupId, const CFindDuplicatesDialog* pThis );
@@ -88,7 +93,8 @@ private:
 	template< typename CompareItemPtr >
 	pred::CompareResult CompareGroupsByItemField( int leftGroupId, int rightGroupId, CompareItemPtr compareItem ) const;
 private:
-	std::vector< CPathItem* > m_srcPathItems;
+	std::vector< CPathItem* > m_searchPathItems;
+	std::vector< CPathItem* > m_ignorePathItems;
 	std::vector< CDuplicateFilesGroup* > m_duplicateGroups;
 	std::vector< std::tstring > m_fileTypeSpecs;
 private:
@@ -96,8 +102,10 @@ private:
 	enum DupFileColumn { FileName, FolderPath, Size, Crc32, DateModified, DuplicateCount };
 	enum SubPopup { DupListNowhere, DupListOnSelection };
 
-	CPathItemListCtrl m_srcPathsListCtrl;
-	CDialogToolBar m_srcPathsToolbar;
+	CPathItemListCtrl m_searchPathsListCtrl;
+	CPathItemListCtrl m_ignorePathsListCtrl;
+	CDialogToolBar m_searchPathsToolbar;
+	CDialogToolBar m_ignorePathsToolbar;
 	CComboBox m_fileTypeCombo;
 	CTextEdit m_fileSpecEdit;
 	CHistoryComboBox m_minFileSizeCombo;
@@ -106,43 +114,56 @@ private:
 	CDialogToolBar m_dupsToolbar;
 	CStatusStatic m_outcomeStatic;
 	CRegularStatic m_commitInfoStatic;
+	CAccelTable m_accel;
 
 	bool m_highlightDuplicates;
+	static const ui::CItemContent s_pathItemsContent;
 
 	// generated stuff
 public:
 	virtual BOOL OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo );
+	virtual BOOL PreTranslateMessage( MSG* pMsg );
 protected:
 	virtual void DoDataExchange( CDataExchange* pDX );
 protected:
 	virtual void OnOK( void );
 	afx_msg void OnDestroy( void );
 	virtual void OnIdleUpdateControls( void );
-	afx_msg void OnUpdateUndoRedo( CCmdUI* pCmdUI );
+	afx_msg void OnUpdate_UndoRedo( CCmdUI* pCmdUI );
 	afx_msg void OnFieldChanged( void );
-	afx_msg void OnEditSrcPaths( void );
-	afx_msg void OnUpdateEditSrcPaths( CCmdUI* pCmdUI );
+
+	afx_msg void On_EditSearchPathsList( void );
+	afx_msg void OnUpdate_EditSearchPathsList( CCmdUI* pCmdUI );
+	afx_msg void On_EditIgnorePathsList( void );
+	afx_msg void OnUpdate_EditIgnorePathsList( CCmdUI* pCmdUI );
 	afx_msg void OnCbnSelChange_FileType( void );
 	afx_msg void OnEnChange_FileSpec( void );
 	afx_msg void OnCbnChanged_MinFileSize( void );
 
-	afx_msg void OnCheckAllDuplicates( UINT cmdId );
-	afx_msg void OnUpdateCheckAllDuplicates( CCmdUI* pCmdUI );
-	afx_msg void OnToggleCheckGroupDups( void );
-	afx_msg void OnUpdateToggleCheckGroupDups( CCmdUI* pCmdUI );
-	afx_msg void OnKeepAsOriginalFile( void );
-	afx_msg void OnUpdateKeepAsOriginalFile( CCmdUI* pCmdUI );
-	afx_msg void OnPickAsOriginalFolder( void );
-	afx_msg void OnUpdatePickAsOriginalFolder( CCmdUI* pCmdUI );
-	afx_msg void OnClearCrc32Cache( void );
-	afx_msg void OnUpdateClearCrc32Cache( CCmdUI* pCmdUI );
-	afx_msg void OnToggleHighlightDuplicates( void );
-	afx_msg void OnUpdateHighlightDuplicates( CCmdUI* pCmdUI );
+	afx_msg void On_CheckAllDuplicates( UINT cmdId );
+	afx_msg void OnUpdate_CheckAllDuplicates( CCmdUI* pCmdUI );
+	afx_msg void On_ToggleCheckGroupDups( void );
+	afx_msg void OnUpdate_ToggleCheckGroupDups( CCmdUI* pCmdUI );
+	afx_msg void On_KeepAsOriginalFile( void );
+	afx_msg void OnUpdate_KeepAsOriginalFile( CCmdUI* pCmdUI );
+	afx_msg void On_PickAsOriginalFolder( void );
+	afx_msg void OnUpdate_PickAsOriginalFolder( CCmdUI* pCmdUI );
+	afx_msg void On_DemoteAsDuplicateFolder( void );
+	afx_msg void OnUpdate_DemoteAsDuplicateFolder( CCmdUI* pCmdUI );
+	afx_msg void On_PushIgnoreFile( void );
+	afx_msg void OnUpdate_PushIgnoreFile( CCmdUI* pCmdUI );
+	afx_msg void On_PushIgnoreFolder( void );
+	afx_msg void OnUpdate_PushIgnoreFolder( CCmdUI* pCmdUI );
+	afx_msg void On_ClearCrc32Cache( void );
+	afx_msg void OnUpdate_ClearCrc32Cache( CCmdUI* pCmdUI );
+	afx_msg void On_ToggleHighlightDuplicates( void );
+	afx_msg void OnUpdate_ToggleHighlightDuplicates( CCmdUI* pCmdUI );
 
 	afx_msg void OnBnClicked_DeleteDuplicates( void );
 	afx_msg void OnBnClicked_MoveDuplicates( void );
-	afx_msg void OnUpdateSelListItem( CCmdUI* pCmdUI );
-	afx_msg void OnLvnDropFiles_SrcList( NMHDR* pNmHdr, LRESULT* pResult );
+	afx_msg void OnUpdate_SelListItem( CCmdUI* pCmdUI );
+	afx_msg void OnLvnDropFiles_PathsList( NMHDR* pNmHdr, LRESULT* pResult );
+	afx_msg void OnLvnEndLabelEdit_PathsList( NMHDR* pNmHdr, LRESULT* pResult );
 	afx_msg void OnLvnLinkClick_DuplicateList( NMHDR* pNmHdr, LRESULT* pResult );
 	afx_msg void OnLvnCheckStatesChanged_DuplicateList( NMHDR* pNmHdr, LRESULT* pResult );
 	afx_msg void OnLvnCustomSortList_DuplicateList( NMHDR* pNmHdr, LRESULT* pResult );

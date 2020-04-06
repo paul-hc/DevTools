@@ -32,6 +32,11 @@ bool CDuplicateFileItem::MakeOriginalItem( void )
 	return m_pParentGroup->MakeOriginalItem( this );
 }
 
+bool CDuplicateFileItem::MakeDuplicateItem( void )
+{
+	return m_pParentGroup->MakeDuplicateItem( this );
+}
+
 
 // CDuplicateFilesGroup implementation
 
@@ -51,7 +56,7 @@ CDuplicateFileItem* CDuplicateFilesGroup::FindItem( const fs::CPath& filePath ) 
 
 bool CDuplicateFilesGroup::MakeOriginalItem( CDuplicateFileItem* pItem )
 {
-	ASSERT_PTR( pItem != NULL );
+	ASSERT_PTR( pItem );
 	std::vector< CDuplicateFileItem* >::iterator itFountItem = std::find( m_items.begin(), m_items.end(), pItem );
 	ASSERT( itFountItem != m_items.end() );
 
@@ -60,6 +65,20 @@ bool CDuplicateFilesGroup::MakeOriginalItem( CDuplicateFileItem* pItem )
 
 	m_items.erase( itFountItem );
 	m_items.insert( m_items.begin(), pItem );
+	return true;
+}
+
+bool CDuplicateFilesGroup::MakeDuplicateItem( CDuplicateFileItem* pItem )
+{
+	ASSERT_PTR( pItem );
+	std::vector< CDuplicateFileItem* >::iterator itFountItem = std::find( m_items.begin(), m_items.end(), pItem );
+	ASSERT( itFountItem != m_items.end() );
+
+	if ( !pItem->IsOriginalItem() )
+		return false;
+
+	m_items.erase( itFountItem );
+	m_items.insert( m_items.end(), pItem );
 	return true;
 }
 

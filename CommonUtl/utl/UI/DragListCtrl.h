@@ -21,7 +21,7 @@ public:
 	CDragListCtrl( UINT columnLayoutId = 0, DWORD listStyleEx = lv::DefaultStyleEx );
 	virtual ~CDragListCtrl();
 
-	enum DraggingMode { NoDragging, InternalDragging, ExternalDragging };
+	enum DraggingMode { NoDragging, InternalDragging, ParentDragging };
 
 	DraggingMode GetDraggingMode( void ) const { return m_draggingMode; }
 	void SetDraggingMode( DraggingMode draggingMode );

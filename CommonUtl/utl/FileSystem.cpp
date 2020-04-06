@@ -558,9 +558,24 @@ namespace fs
 		m_subDirPaths.clear();
 	}
 
+	void CEnumerator::SetIgnorePathMatches( const std::vector< fs::CPath >& ignorePaths )
+	{
+		m_pIgnorePathMatches.reset( !ignorePaths.empty() ? new CPathMatches( ignorePaths ) : NULL );
+
+		if ( m_pIgnorePathMatches.get() != NULL && m_pIgnorePathMatches->IsEmpty() )
+			m_pIgnorePathMatches.reset();
+	}
+
 	void CEnumerator::AddFoundFile( const TCHAR* pFilePath )
 	{
 		fs::CPath filePath( pFilePath );
+
+		if ( m_pIgnorePathMatches.get() != NULL )
+			if ( m_pIgnorePathMatches->IsFileMatch( filePath ) )
+			{
+				TRACE( _T(" CEnumerator::AddFoundFile(): Ignoring file: %s\n"), filePath.GetPtr() );
+				return;
+			}
 
 		if ( !m_relativeDirPath.IsEmpty() )
 			filePath = fs::StripDirPrefix( filePath, m_relativeDirPath );
@@ -572,9 +587,16 @@ namespace fs
 			m_pChainEnum->AddFoundFile( pFilePath );
 	}
 
-	void CEnumerator::AddFoundSubDir( const TCHAR* pSubDirPath )
+	bool CEnumerator::AddFoundSubDir( const TCHAR* pSubDirPath )
 	{
 		fs::CPath subDirPath( pSubDirPath );
+
+		if ( m_pIgnorePathMatches.get() != NULL )
+			if ( m_pIgnorePathMatches->IsDirMatch( subDirPath ) )
+			{
+				TRACE( _T(" CEnumerator::AddFoundFile(): Ignoring sub-directory: %s\n"), subDirPath.GetPtr() );
+				return false;
+			}
 
 		if ( !m_relativeDirPath.IsEmpty() )
 			subDirPath = fs::StripDirPrefix( subDirPath, m_relativeDirPath );
@@ -584,6 +606,8 @@ namespace fs
 
 		if ( m_pChainEnum != NULL )
 			m_pChainEnum->AddFoundSubDir( pSubDirPath );
+
+		return true;
 	}
 
 	bool CEnumerator::MustStop( void ) const
@@ -615,11 +639,9 @@ namespace fs
 			if ( finder.IsDirectory() )
 			{
 				if ( !finder.IsDots() )						// skip "." and ".." dir entries
-				{
-					pEnumerator->AddFoundSubDir( foundPath.c_str() );
-					if ( Deep == depth )
-						subDirPaths.push_back( fs::CPath( foundPath ) );
-				}
+					if ( pEnumerator->AddFoundSubDir( foundPath.c_str() ) )
+						if ( Deep == depth )
+							subDirPaths.push_back( fs::CPath( foundPath ) );
 			}
 			else
 			{
@@ -753,5 +775,50 @@ namespace fs
 		ENSURE( !uniqueFilePath.FileExist() );		// hashed path is supposed to be be unique
 
 		return uniqueFilePath;
+	}
+
+
+	// CPathMatches implementation
+
+	CPathMatches::CPathMatches( const std::vector< fs::CPath >& paths )
+	{
+		for ( std::vector< fs::CPath >::const_iterator itPath = paths.begin(); itPath != paths.end(); ++itPath )
+			if ( path::ContainsWildcards( ( *itPath ).GetPtr() ) )
+				m_wildSpecs.push_back( ( *itPath ).Get() );
+			else if ( fs::IsValidDirectory( ( *itPath ).GetPtr() ) )
+				m_dirPaths.push_back( *itPath );
+			else if ( fs::IsValidFile( ( *itPath ).GetPtr() ) )
+				m_filePaths.push_back( *itPath );
+	}
+
+	CPathMatches::~CPathMatches()
+	{
+	}
+
+	bool CPathMatches::IsDirMatch( const fs::CPath& dirPath ) const
+	{
+		for ( std::vector< fs::CPath >::const_iterator itDirPath = m_dirPaths.begin(); itDirPath != m_dirPaths.end(); ++itDirPath )
+			if ( path::HasPrefix( dirPath.GetPtr(), ( *itDirPath ).GetPtr() ) )
+				return true;
+
+		return IsWildcardMatch( dirPath );
+	}
+
+	bool CPathMatches::IsFileMatch( const fs::CPath& filePath ) const
+	{
+		for ( std::vector< fs::CPath >::const_iterator itFilePath = m_filePaths.begin(); itFilePath != m_filePaths.end(); ++itFilePath )
+			if ( filePath == *itFilePath )
+				return true;
+
+		return IsWildcardMatch( filePath );
+	}
+
+	bool CPathMatches::IsWildcardMatch( const fs::CPath& anyPath ) const
+	{
+		for ( std::vector< std::tstring >::const_iterator itWildSpec = m_wildSpecs.begin(); itWildSpec != m_wildSpecs.end(); ++itWildSpec )
+			if ( path::MatchWildcard( anyPath.GetPtr(), ( *itWildSpec ).c_str() ) )
+				return true;
+
+		return false;
 	}
 }

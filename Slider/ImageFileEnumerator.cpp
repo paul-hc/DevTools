@@ -113,9 +113,10 @@ void CImageFileEnumerator::PushMany( const std::vector< CFileAttr >& fileAttrs )
 	m_pProgress->OffsetPos( static_cast< int >( fileAttrs.size() ) );
 }
 
-void CImageFileEnumerator::AddFoundSubDir( const TCHAR* pSubDirPath )
+bool CImageFileEnumerator::AddFoundSubDir( const TCHAR* pSubDirPath )
 {
 	pSubDirPath;
+	return true;
 }
 
 void CImageFileEnumerator::AddFoundFile( const TCHAR* pFilePath )

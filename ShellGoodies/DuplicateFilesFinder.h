@@ -25,9 +25,15 @@ public:
 
 	const CDupsOutcome& GetOutcome( void ) const { return m_outcome; }
 
-	void FindDuplicates( std::vector< CDuplicateFilesGroup* >& rDuplicateGroups, const std::vector< CPathItem* >& srcPathItems, CWnd* pParent ) throws_( CUserAbortedException );
+	void FindDuplicates( std::vector< CDuplicateFilesGroup* >& rDuplicateGroups,
+						 const std::vector< CPathItem* >& srcPathItems,
+						 const std::vector< CPathItem* >& ignorePathItems,
+						 CWnd* pParent ) throws_( CUserAbortedException );
 private:
-	void SearchForFiles( std::vector< fs::CPath >& rFoundPaths, const std::vector< CPathItem* >& srcPathItems, fs::IEnumerator* pProgressEnum );
+	void SearchForFiles( std::vector< fs::CPath >& rFoundPaths,
+						 const std::vector< CPathItem* >& srcPathItems,
+						 const std::vector< CPathItem* >& ignorePathItems,
+						 fs::IEnumerator* pProgressEnum );
 	void GroupByFileSize( CDuplicateGroupStore* pGroupsStore, const std::vector< fs::CPath >& foundPaths, ui::IProgressCallback* pProgress );
 	void GroupByCrc32( std::vector< CDuplicateFilesGroup* >& rDuplicateGroups, CDuplicateGroupStore* pGroupsStore, ui::IProgressCallback* pProgress );
 private:
@@ -56,7 +62,7 @@ public:
 
 	// file enumerator callback
 	virtual void AddFoundFile( const TCHAR* pFilePath ) throws_( CUserAbortedException );
-	virtual void AddFoundSubDir( const TCHAR* pSubDirPath ) throws_( CUserAbortedException );
+	virtual bool AddFoundSubDir( const TCHAR* pSubDirPath ) throws_( CUserAbortedException );
 private:
 	CProgressDialog m_dlg;
 };

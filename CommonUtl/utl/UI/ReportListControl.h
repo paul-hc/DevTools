@@ -3,6 +3,7 @@
 #pragma once
 
 #include "ListLikeCtrlBase.h"
+#include "Path.h"
 #include "SubjectPredicates.h"
 #include "OleUtils.h"
 #include "MatchSequence.h"
@@ -67,7 +68,7 @@ namespace lv
 		ui::CNmHdr m_nmHdr;
 		CPoint m_dropPoint;							// client coordinates
 		int m_dropItemIndex;
-		std::vector< std::tstring > m_filePaths;	// sorted intuitively
+		std::vector< fs::CPath > m_filePaths;		// sorted
 	};
 
 

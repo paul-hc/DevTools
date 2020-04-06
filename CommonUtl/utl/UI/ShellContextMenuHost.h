@@ -24,7 +24,8 @@ namespace shell
 
 		std::vector< PIDLIST_RELATIVE > pidlItemsArray;
 		if ( CComPtr< IShellFolder > pParentFolder = MakeRelativePidlArray( pidlItemsArray, filePaths ) )
-			pCtxMenu = MakeFolderItemsContextMenu( &*pParentFolder, (PCUITEMID_CHILD_ARRAY)&pidlItemsArray.front(), pidlItemsArray.size(), hWndOwner );
+			if ( !pidlItemsArray.empty() )		// may be empty if a single file was deleted/renamed during the lifetime of filePaths
+				pCtxMenu = MakeFolderItemsContextMenu( &*pParentFolder, (PCUITEMID_CHILD_ARRAY)&pidlItemsArray.front(), pidlItemsArray.size(), hWndOwner );
 
 		ClearOwningPidls( pidlItemsArray );
 		return pCtxMenu;

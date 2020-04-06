@@ -17,8 +17,6 @@ CListLikeCtrlBase::CListLikeCtrlBase( CWnd* pCtrl, UINT ctrlAccelId /*= 0*/ )
 	, m_useExplorerTheme( true )
 	, m_pTextEffectCallback( NULL )
 {
-	std::fill_n( m_parentHandles, (int)_PN_Count, -1 );
-
 	CFileItemsThumbnailStore::Instance().RegisterControl( this );
 }
 
@@ -72,23 +70,14 @@ void CListLikeCtrlBase::ModifyDiffTextEffectAt( lv::CMatchEffects& rEffects, LPA
 		m_pTextEffectCallback->ModifyDiffTextEffectAt( rEffects, rowKey, subItem, pCtrl );
 }
 
-bool CListLikeCtrlBase::ParentHandles( ParentNotif notif )
+bool CListLikeCtrlBase::ParentHandles( UINT notifyCode )
 {
-	ASSERT( notif < COUNT_OF( m_parentHandles ) );
-	if ( -1 == m_parentHandles[ notif ] )
-		switch ( notif )
-		{
-			case PN_DispInfo:
-				m_parentHandles[ notif ] = ui::ParentContainsMessageHandler( m_pCtrl, WM_NOTIFY, LVN_GETDISPINFO );
-				break;
-			case PN_CustomDraw:
-				m_parentHandles[ notif ] = ui::ParentContainsMessageHandler( m_pCtrl, WM_NOTIFY, NM_CUSTOMDRAW );
-				break;
-			default:
-				ASSERT( false );
-		}
+	CachedBool& rParentHandles = m_parentHandlesNotifyCodes[ notifyCode ];
 
-	return m_parentHandles[ notif ] != FALSE;
+	if ( NotCached == rParentHandles )
+		rParentHandles = ui::ParentContainsMessageHandler( m_pCtrl, WM_NOTIFY, notifyCode ) ? Yes : No;
+
+	return Yes == rParentHandles;
 }
 
 

@@ -8,7 +8,13 @@ class CEnumTags;
 
 namespace ui
 {
-	enum ContentType { String, DirPath, FilePath };
+	enum ContentType
+	{
+		String,
+		DirPath,
+		FilePath,
+		MixedPath		// a mix of directory/file/wildcard-spec
+	};
 
 	const CEnumTags& GetTags_ContentType( void );
 
@@ -27,11 +33,13 @@ namespace ui
 		CItemContent( ui::ContentType type = ui::String, const TCHAR* pFileFilter = NULL, int itemsFlags = All )
 			: m_type( type ), m_pFileFilter( pFileFilter ), m_itemsFlags( itemsFlags ) {}
 
+		bool IsValidItem( const std::tstring& item ) const;
 		std::tstring EditItem( const TCHAR* pItem, CWnd* pParent ) const;
 
 		void SplitItems( std::vector< std::tstring >& rItems, const std::tstring& source, const TCHAR sep[] ) const;
 		void FilterItems( std::vector< std::tstring >& rItems ) const;
 
+		bool IsValidPathItem( const std::tstring& pathItem ) const;
 		bool AutoBrowsePath( std::tstring& rNewItem, CWnd* pParent ) const;
 	public:
 		ui::ContentType m_type;

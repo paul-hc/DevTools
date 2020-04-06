@@ -2234,7 +2234,9 @@ BOOL CReportListControl::OnLvnEndLabelEdit_Reflect( NMHDR* pNmHdr, LRESULT* pRes
 			m_pLabelEdit->m_done = true;
 			m_pLabelEdit->m_newLabel = pDispInfo->item.pszText;
 			*pResult = TRUE;		// assume valid input
-			return TRUE;
+
+			if ( !ParentHandles( LVN_ENDLABELEDIT ) )
+				return TRUE;		// mark as handled so changes are applied
 		}
 		else
 			m_pLabelEdit.reset();
@@ -2256,7 +2258,7 @@ BOOL CReportListControl::OnLvnGetDispInfo_Reflect( NMHDR* pNmHdr, LRESULT* pResu
 
 	*pResult = 0;
 
-	if ( !ParentHandles( PN_DispInfo ) )
+	if ( !ParentHandles( LVN_GETDISPINFO ) )
 		return TRUE;			// mark as handled so changes are applied
 
 	return FALSE;				// continue handling by parent, even if changed (additive logic)
@@ -2312,7 +2314,7 @@ BOOL CReportListControl::OnNmCustomDraw_Reflect( NMHDR* pNmHdr, LRESULT* pResult
 			break;
 	}
 
-	if ( !ParentHandles( PN_CustomDraw ) )
+	if ( !ParentHandles( NM_CUSTOMDRAW ) )
 		return TRUE;			// mark as handled so changes are applied
 
 	return FALSE;				// continue handling by parent, even if changed (additive logic)

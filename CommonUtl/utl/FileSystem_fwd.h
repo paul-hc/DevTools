@@ -30,7 +30,7 @@ namespace fs
 	interface IEnumerator
 	{
 		virtual void AddFoundFile( const TCHAR* pFilePath ) = 0;
-		virtual void AddFoundSubDir( const TCHAR* pSubDirPath ) { pSubDirPath; }
+		virtual bool AddFoundSubDir( const TCHAR* pSubDirPath ) { pSubDirPath; return true; }
 
 		// advanced, provides extra info
 		virtual void AddFile( const CFileFind& foundFile ) { AddFoundFile( foundFile.GetFilePath() ); }

@@ -13,14 +13,17 @@
 
 // CDuplicateFilesFinder implementation
 
-void CDuplicateFilesFinder::FindDuplicates( std::vector< CDuplicateFilesGroup* >& rDuplicateGroups, const std::vector< CPathItem* >& srcPathItems, CWnd* pParent ) throws_( CUserAbortedException )
+void CDuplicateFilesFinder::FindDuplicates( std::vector< CDuplicateFilesGroup* >& rDuplicateGroups,
+											const std::vector< CPathItem* >& srcPathItems,
+											const std::vector< CPathItem* >& ignorePathItems,
+											CWnd* pParent ) throws_( CUserAbortedException )
 {
 	CDuplicatesProgress progress( pParent );
 	ui::IProgressCallback* pProgress = progress.GetProgress();
 
 	std::vector< fs::CPath > foundPaths;
 
-	SearchForFiles( foundPaths, srcPathItems, progress.GetProgressEnumerator() );
+	SearchForFiles( foundPaths, srcPathItems, ignorePathItems, progress.GetProgressEnumerator() );
 
 	// optimize performance:
 	//	step 1: compute file-size part of the content key, grouping duplicate candidates by file-size only
@@ -35,9 +38,15 @@ void CDuplicateFilesFinder::FindDuplicates( std::vector< CDuplicateFilesGroup* >
 	GroupByCrc32( rDuplicateGroups, &groupsStore, pProgress );
 }
 
-void CDuplicateFilesFinder::SearchForFiles( std::vector< fs::CPath >& rFoundPaths, const std::vector< CPathItem* >& srcPathItems, fs::IEnumerator* pProgressEnum )
+void CDuplicateFilesFinder::SearchForFiles( std::vector< fs::CPath >& rFoundPaths,
+											const std::vector< CPathItem* >& srcPathItems,
+											const std::vector< CPathItem* >& ignorePathItems,
+											fs::IEnumerator* pProgressEnum )
 {
 	utl::CSectionGuard section( _T("# SearchForFiles") );
+
+	std::vector< fs::CPath > ignorePaths;
+	func::QueryItemsPaths( ignorePaths, ignorePathItems );
 
 	stdext::hash_set< fs::CPath > uniquePaths;
 
@@ -47,6 +56,7 @@ void CDuplicateFilesFinder::SearchForFiles( std::vector< fs::CPath >& rFoundPath
 		if ( fs::IsValidDirectory( srcPath.GetPtr() ) )
 		{
 			fs::CEnumerator found( pProgressEnum );
+			found.SetIgnorePathMatches( ignorePaths );
 			fs::EnumFiles( &found, srcPath, m_wildSpec.c_str(), Deep );
 
 			fs::SortPaths( found.m_filePaths );
@@ -142,7 +152,8 @@ void CDuplicatesProgress::AddFoundFile( const TCHAR* pFilePath ) throws_( CUserA
 	m_dlg.AdvanceItem( pFilePath );
 }
 
-void CDuplicatesProgress::AddFoundSubDir( const TCHAR* pSubDirPath ) throws_( CUserAbortedException )
+bool CDuplicatesProgress::AddFoundSubDir( const TCHAR* pSubDirPath ) throws_( CUserAbortedException )
 {
 	m_dlg.AdvanceStage( pSubDirPath );
+	return true;
 }

@@ -241,7 +241,7 @@ BOOL CDragListCtrl< BaseListCtrl >::OnLvnBeginDrag_Reflect( NMHDR* pNmHdr, LRESU
 	switch ( m_draggingMode )
 	{
 		default: ASSERT( false );
-		case ExternalDragging:
+		case ParentDragging:
 			return FALSE;				// allow handling by the parent, so that it can start dragging
 		case InternalDragging:
 			DragSelection( pNmListView->ptAction );			// pNmListView->iItem, pNmListView->ptAction

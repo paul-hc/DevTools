@@ -85,9 +85,10 @@ void CFileTransfer::SearchSourceFiles( const fs::CPath& dirPath )
 		fs::EnumFiles( this, dirPath, m_pOptions->m_searchSpecs.c_str(), m_pOptions->m_recurseSubDirectories ? Deep : Shallow );
 }
 
-void CFileTransfer::AddFoundSubDir( const TCHAR* pSubDirPath )
+bool CFileTransfer::AddFoundSubDir( const TCHAR* pSubDirPath )
 {
 	pSubDirPath;
+	return true;
 }
 
 void CFileTransfer::AddFile( const CFileFind& foundFile )

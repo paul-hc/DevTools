@@ -132,12 +132,13 @@ namespace shell
 		{
 			SetFlag( flags, OFN_NOTESTFILECREATE | OFN_PATHMUSTEXIST | OFN_ENABLESIZING );
 
-			if ( FileOpen == browseMode )
-				SetFlag( flags, OFN_FILEMUSTEXIST );
-			else
-				SetFlag( flags, OFN_OVERWRITEPROMPT );
+			switch ( browseMode )
+			{
+				case FileSaveAs:	SetFlag( flags, OFN_OVERWRITEPROMPT ); break;
+				case FileOpen:		SetFlag( flags, OFN_FILEMUSTEXIST ); break;
+			}
 
-			CFileDialog* pDlg = new CFileDialog( browseMode, NULL, filePath.c_str(), flags, fileFilter.c_str(), pParentWnd, 0, s_useVistaStyle );
+			CFileDialog* pDlg = new CFileDialog( browseMode != FileSaveAs, NULL, filePath.c_str(), flags, fileFilter.c_str(), pParentWnd, 0, s_useVistaStyle );
 
 			if ( pTitle != NULL )
 				pDlg->m_ofn.lpstrTitle = pTitle;

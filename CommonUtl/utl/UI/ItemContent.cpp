@@ -16,7 +16,7 @@ namespace ui
 {
 	const CEnumTags& GetTags_ContentType( void )
 	{
-		static const CEnumTags s_tags( _T("Text|Folder|File") );
+		static const CEnumTags s_tags( _T("Text|Folder|File|Folder, File or Wildcard") );
 		return s_tags;
 	}
 
@@ -29,32 +29,42 @@ namespace ui
 		FilterItems( rItems );
 	}
 
+	bool CItemContent::IsValidItem( const std::tstring& item ) const
+	{
+		if ( HasFlag( m_itemsFlags, RemoveEmpty ) )
+			if ( item.empty() )
+				return false;
+
+		if ( HasFlag( m_itemsFlags, EnsurePathExist ) )
+			switch ( m_type )
+			{
+				case ui::DirPath:
+				case ui::FilePath:
+				case ui::MixedPath:
+					if ( !IsValidPathItem( item ) )
+						return false;
+					break;
+			}
+
+		return true;
+	}
+
 	void CItemContent::FilterItems( std::vector< std::tstring >& rItems ) const
 	{
 		if ( HasFlag( m_itemsFlags, Trim ) )
 			str::TrimItems( rItems );
 
-		if ( HasFlag( m_itemsFlags, RemoveEmpty ) )
-			str::RemoveEmptyItems( rItems );
+		for ( std::vector< std::tstring >::const_iterator itItem = rItems.begin(); itItem != rItems.end(); )
+			if ( IsValidItem( *itItem ) )
+				++itItem;
+			else
+				itItem = rItems.erase( itItem );
 
 		if ( HasFlag( m_itemsFlags, EnsureUnique ) )
 			if ( ui::String == m_type )
 				utl::RemoveDuplicates< pred::EqualString< std::tstring > >( rItems );
 			else
 				utl::RemoveDuplicates< pred::IsEquivalentPathString >( rItems );
-
-		if ( HasFlag( m_itemsFlags, EnsurePathExist ) )
-			if ( ui::DirPath == m_type || ui::FilePath == m_type )
-				for ( std::vector< std::tstring >::const_iterator itItem = rItems.begin(); itItem != rItems.end(); )
-				{
-					std::tstring path = str::ExpandEnvironmentStrings( itItem->c_str() );
-
-					if ( ( ui::DirPath == m_type ? fs::IsValidDirectory( path.c_str() ) : fs::IsValidFile( path.c_str() ) ) ||
-						 path::ContainsWildcards( path.c_str() ) )
-						++itItem;
-					else
-						itItem = rItems.erase( itItem );
-				}
 	}
 
 	std::tstring CItemContent::EditItem( const TCHAR* pItem, CWnd* pParent ) const
@@ -70,6 +80,7 @@ namespace ui
 			case ui::String:
 				return emptyText;
 			case ui::DirPath:
+			case ui::MixedPath:
 				newItem = str::ExpandEnvironmentStrings( pItem );
 				if ( !AutoBrowsePath( newItem, pParent ) )
 					return emptyText;
@@ -85,6 +96,7 @@ namespace ui
 		{
 			case ui::DirPath:
 			case ui::FilePath:
+			case ui::MixedPath:
 			{
 				std::vector< std::tstring > variables;
 				str::QueryEnvironmentVariables( variables, pItem );
@@ -103,10 +115,35 @@ namespace ui
 		return newItem;
 	}
 
+	bool CItemContent::IsValidPathItem( const std::tstring& pathItem ) const
+	{
+		ASSERT( ui::DirPath == m_type || ui::FilePath == m_type || ui::MixedPath == m_type );
+
+		std::tstring path = str::ExpandEnvironmentStrings( pathItem.c_str() );
+
+		switch ( m_type )
+		{
+			case ui::DirPath:
+				if ( fs::IsValidDirectory( path.c_str() ) )
+					return true;
+				break;
+			case ui::FilePath:
+				if ( fs::IsValidFile( path.c_str() ) )
+					return true;
+				break;
+			case ui::MixedPath:
+				if ( fs::FileExist( path.c_str() ) )
+					return true;
+				break;
+		}
+
+		return path::ContainsWildcards( path.c_str() );
+	}
+
 	bool CItemContent::AutoBrowsePath( std::tstring& rNewItem, CWnd* pParent ) const
 	{
-		if ( FilePath == m_type || fs::IsValidFile( rNewItem.c_str() ) )
-			return shell::BrowseForFile( rNewItem, pParent, shell::FileOpen, m_pFileFilter );
+		if ( ui::FilePath == m_type || fs::IsValidFile( rNewItem.c_str() ) || path::ContainsWildcards( rNewItem.c_str() ) )
+			return shell::BrowseForFile( rNewItem, pParent, MixedPath == m_type ? shell::FileBrowse : shell::FileOpen, m_pFileFilter );
 
 		return shell::PickFolder( rNewItem, pParent );
 	}

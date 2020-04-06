@@ -117,6 +117,7 @@ protected:
 	virtual void DoDataExchange( CDataExchange* pDX );
 protected:
 	afx_msg void OnLvnItemChanged_Items( NMHDR* pNmHdr, LRESULT* pResult );
+	afx_msg void OnLvnEndLabelEdit_Items( NMHDR* pNmHdr, LRESULT* pResult );
 
 	DECLARE_MESSAGE_MAP()
 };

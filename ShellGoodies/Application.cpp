@@ -121,33 +121,42 @@ CWnd* CScopedMainWnd::s_pParentOwner = NULL;
 
 CScopedMainWnd::CScopedMainWnd( HWND hWnd )
 	: m_pOldMainWnd( NULL )
+	, m_inEffect( false )
 {
-	ASSERT_NULL( s_pParentOwner );
+	if ( NULL == s_pParentOwner )
+	{
+		m_inEffect = true;
 
-	CWnd* pMainWnd = AfxGetMainWnd();
-	bool fromThisModule = ui::IsPermanentWnd( pMainWnd->GetSafeHwnd() );
+		CWnd* pMainWnd = AfxGetMainWnd();
+		bool fromThisModule = ui::IsPermanentWnd( pMainWnd->GetSafeHwnd() );
 
-	if ( hWnd != NULL && ::IsWindow( hWnd ) )
-		if ( fromThisModule )
-			s_pParentOwner = CWnd::FromHandlePermanent( ui::GetTopLevelParent( hWnd ) );
-		else
-			s_pParentOwner = CWnd::FromHandle( hWnd )->GetTopLevelParent();
+		if ( hWnd != NULL && ::IsWindow( hWnd ) )
+			if ( fromThisModule )
+				s_pParentOwner = CWnd::FromHandlePermanent( ui::GetTopLevelParent( hWnd ) );
+			else
+				s_pParentOwner = CWnd::FromHandle( hWnd )->GetTopLevelParent();
 
-	if ( ::IsWindow( s_pParentOwner->GetSafeHwnd() ) )
-		if ( pMainWnd != NULL )
-			if ( NULL == pMainWnd->m_hWnd )							// it happens sometimes, kind of transitory state when invoking from Explorer.exe
-				if ( CWinThread* pCurrThread = AfxGetThread() )
-				{
-					m_pOldMainWnd = pMainWnd;
-					pCurrThread->m_pMainWnd = s_pParentOwner;		// temporarily substitute main window
-				}
+		if ( ::IsWindow( s_pParentOwner->GetSafeHwnd() ) )
+			if ( pMainWnd != NULL )
+				if ( NULL == pMainWnd->m_hWnd )							// it happens sometimes, kind of transitory state when invoking from Explorer.exe
+					if ( CWinThread* pCurrThread = AfxGetThread() )
+					{
+						m_pOldMainWnd = pMainWnd;
+						pCurrThread->m_pMainWnd = s_pParentOwner;		// temporarily substitute main window
+					}
+	}
+
+	// note: m_inEffect is false if created in an embedded scope (e.g. with root scope from ExplorerBrowser32.exe)
 }
 
 CScopedMainWnd::~CScopedMainWnd()
 {
-	if ( m_pOldMainWnd != NULL )
-		if ( CWinThread* pCurrThread = AfxGetThread() )
-			pCurrThread->m_pMainWnd = m_pOldMainWnd;				// restore original main window
+	if ( m_inEffect )
+	{
+		if ( m_pOldMainWnd != NULL )
+			if ( CWinThread* pCurrThread = AfxGetThread() )
+				pCurrThread->m_pMainWnd = m_pOldMainWnd;				// restore original main window
 
-	s_pParentOwner = NULL;
+		s_pParentOwner = NULL;
+	}
 }

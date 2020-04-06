@@ -5,7 +5,7 @@
 
 namespace shell
 {
-	enum BrowseMode { FileSaveAs, FileOpen };
+	enum BrowseMode { FileSaveAs, FileOpen, FileBrowse };
 
 	enum BrowseFlags
 	{

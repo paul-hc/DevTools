@@ -85,9 +85,9 @@ bool CItemListDialog::InputItem( size_t itemPos, const std::tstring& newItem )
 	if ( itemPos >= m_items.size() )
 		return false;
 
-	if ( newItem.empty() )
+	if ( !m_content.IsValidItem( newItem ) )
 	{
-		ui::ReportError( _T("Input error: the item cannot be empty.") );
+		ui::ReportError( _T("Input error: the item must be valid.") );
 		UpdateData( DialogOutput );					// rollback to old item value
 		return false;
 	}
@@ -427,6 +427,7 @@ void CItemsListPage::DoDataExchange( CDataExchange* pDX )
 				break;
 			case ui::DirPath:
 			case ui::FilePath:
+			case ui::MixedPath:
 				//m_listCtrl.SetCustomFileGlyphDraw();
 				break;
 		}
@@ -440,6 +441,7 @@ void CItemsListPage::DoDataExchange( CDataExchange* pDX )
 
 BEGIN_MESSAGE_MAP( CItemsListPage, CLayoutPropertyPage )
 	ON_NOTIFY( LVN_ITEMCHANGED, IDC_ITEMS_LIST, OnLvnItemChanged_Items )
+	ON_NOTIFY( LVN_ENDLABELEDIT, IDC_ITEMS_LIST, OnLvnEndLabelEdit_Items )
 END_MESSAGE_MAP()
 
 BOOL CItemsListPage::PreTranslateMessage( MSG* pMsg )
@@ -460,6 +462,16 @@ void CItemsListPage::OnLvnItemChanged_Items( NMHDR* pNmHdr, LRESULT* pResult )
 		if ( selIndex != -1 )
 			m_pDialog->SetSelItemPos( selIndex );
 	}
+}
+
+void CItemsListPage::OnLvnEndLabelEdit_Items( NMHDR* pNmHdr, LRESULT* pResult )
+{
+	NMLVDISPINFO* pDispInfo = (NMLVDISPINFO*)pNmHdr;
+	*pResult = 0;					// rollback input
+
+	if ( pDispInfo->item.pszText != NULL )
+		if ( m_pDialog->InputItem( pDispInfo->item.iItem, pDispInfo->item.pszText ) )
+			*pResult = TRUE;		// signal valid input so it will commit the changes
 }
 
 

@@ -9,11 +9,12 @@
 abstract class CPathItemBase : public CSubject
 {
 protected:
-	CPathItemBase( const fs::CPath& filePath );
+	CPathItemBase( const fs::CPath& filePath ) { ResetFilePath( filePath ); }
 public:
 	virtual ~CPathItemBase();
 
 	const fs::CPath& GetFilePath( void ) const { return m_filePath; }
+	void ResetFilePath( const fs::CPath& filePath );
 
 	void SetDisplayCode( const std::tstring& displayPath ) { m_displayPath = displayPath; }
 	void StripDisplayCode( const fs::CPath& commonParentPath );

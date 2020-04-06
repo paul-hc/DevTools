@@ -7,14 +7,14 @@
 #endif
 
 
-CPathItemBase::CPathItemBase( const fs::CPath& filePath )
-	: m_filePath( filePath )
-	, m_displayPath( m_filePath.GetNameExt() )
+CPathItemBase::~CPathItemBase()
 {
 }
 
-CPathItemBase::~CPathItemBase()
+void CPathItemBase::ResetFilePath( const fs::CPath& filePath )
 {
+	m_filePath = filePath;
+	m_displayPath = m_filePath.GetNameExt();
 }
 
 void CPathItemBase::StripDisplayCode( const fs::CPath& commonParentPath )

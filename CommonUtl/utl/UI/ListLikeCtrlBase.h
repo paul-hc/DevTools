@@ -5,6 +5,7 @@
 #include "ObjectCtrlBase.h"
 #include "TextEffect.h"
 #include "CustomDrawImager_fwd.h"
+#include <map>
 
 
 class CListLikeCtrlBase;
@@ -61,18 +62,18 @@ protected:
 
 	ui::CFontEffectCache* GetFontEffectCache( void );
 
-	enum ParentNotif { PN_DispInfo, PN_CustomDraw, _PN_Count };
-
-	bool ParentHandles( ParentNotif notif );
+	bool ParentHandles( UINT notifyCode );
 private:
+	enum CachedBool { NotCached, No, Yes };
+
 	bool m_useExplorerTheme;
-	BOOL m_parentHandles[ _PN_Count ];						// self-encapsulated 'parent handles' flags array
+	std::map< UINT, CachedBool > m_parentHandlesNotifyCodes;	// self-encapsulated 'parent handles' map <notifyCode, parent_handles>
 protected:
-	std::auto_ptr< ui::CFontEffectCache > m_pFontCache;		// self-encapsulated
+	std::auto_ptr< ui::CFontEffectCache > m_pFontCache;			// self-encapsulated
 	ui::ITextEffectCallback* m_pTextEffectCallback;
 	std::auto_ptr< CBaseCustomDrawImager > m_pCustomImager;
 public:
-	ui::CTextEffect m_ctrlTextEffect;						// for all items in the list
+	ui::CTextEffect m_ctrlTextEffect;							// for all items in the list
 };
 
 

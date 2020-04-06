@@ -32,7 +32,7 @@ public:
 private:
 	// fs::IEnumerator interface (files only)
 	virtual void AddFoundFile( const TCHAR* pFilePath );
-	virtual void AddFoundSubDir( const TCHAR* pSubDirPath );
+	virtual bool AddFoundSubDir( const TCHAR* pSubDirPath );
 	virtual void AddFile( const CFileFind& foundFile );
 
 	bool PassFilter( const CFileFind& foundFile ) const;

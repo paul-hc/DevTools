@@ -180,6 +180,9 @@ namespace fs
 
 namespace fs
 {
+	class CPathMatches;
+
+
 	// files and sub-dirs in existing file-system order; stored paths are relative to m_relativeDirPath (if specified).
 	//
 	struct CEnumerator : public IEnumerator, private utl::noncopyable
@@ -188,18 +191,21 @@ namespace fs
 
 		void SetRelativeDirPath( const fs::CPath& relativeDirPath ) { ASSERT( IsEmpty() ); m_relativeDirPath = relativeDirPath; }
 		void SetMaxFiles( size_t maxFiles ) { ASSERT( IsEmpty() ); m_maxFiles = maxFiles; }
+		void SetIgnorePathMatches( const std::vector< fs::CPath >& ignorePaths );
 
 		bool IsEmpty( void ) const { return m_filePaths.empty() && m_subDirPaths.empty(); }
 		void Clear( void );
 
 		// IEnumerator interface
 		virtual void AddFoundFile( const TCHAR* pFilePath );
-		virtual void AddFoundSubDir( const TCHAR* pSubDirPath );
+		virtual bool AddFoundSubDir( const TCHAR* pSubDirPath );
 		virtual bool MustStop( void ) const;
 	protected:
 		IEnumerator* m_pChainEnum;					// allows chaining for progress reporting
 		fs::CPath m_relativeDirPath;				// to remove if it's common prefix
 		size_t m_maxFiles;
+	private:
+		std::auto_ptr< CPathMatches > m_pIgnorePathMatches;
 	public:
 		std::vector< fs::CPath > m_filePaths;
 		std::vector< fs::CPath > m_subDirPaths;
@@ -236,6 +242,25 @@ namespace fs
 	// generate a path of a unique filename using a suffix, by avoiding collisions with existing files
 	fs::CPath MakeUniqueNumFilename( const fs::CPath& filePath, const TCHAR fmtNumSuffix[] = _T("_[%d]") ) throws_( CRuntimeException );	// with numeric suffix
 	fs::CPath MakeUniqueHashedFilename( const fs::CPath& filePath, const TCHAR fmtHashSuffix[] = _T("_%08X") );								// with hash suffix
+
+
+	class CPathMatches : private utl::noncopyable
+	{
+	public:
+		CPathMatches( const std::vector< fs::CPath >& paths );
+		~CPathMatches();
+
+		bool IsEmpty( void ) const { return m_dirPaths.empty() && m_filePaths.empty() && m_wildSpecs.empty(); }
+
+		bool IsDirMatch( const fs::CPath& dirPath ) const;
+		bool IsFileMatch( const fs::CPath& filePath ) const;
+	private:
+		bool IsWildcardMatch( const fs::CPath& anyPath ) const;
+	private:
+		std::vector< fs::CPath > m_dirPaths;			// deep matching (including subdirectories)
+		std::vector< fs::CPath > m_filePaths;
+		std::vector< std::tstring > m_wildSpecs;
+	};
 }
 
 

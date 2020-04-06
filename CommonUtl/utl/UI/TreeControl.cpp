@@ -411,7 +411,7 @@ BOOL CTreeControl::OnNmCustomDraw_Reflect( NMHDR* pNmHdr, LRESULT* pResult )
 			break;
 	}
 
-	if ( !ParentHandles( PN_CustomDraw ) )
+	if ( !ParentHandles( NM_CUSTOMDRAW ) )
 		return TRUE;			// mark as handled so changes are applied
 
 	return FALSE;				// continue handling by parent, even if changed (additive logic)

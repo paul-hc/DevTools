@@ -22,6 +22,7 @@ public:
 	bool IsOriginalItem( void ) const;				// first item in the group?
 	bool IsDuplicateItem( void ) const { return !IsOriginalItem(); }
 	bool MakeOriginalItem( void );
+	bool MakeDuplicateItem( void );
 
 	const CTime& GetModifyTime( void ) const { return m_modifyTime; }
 
@@ -50,6 +51,8 @@ public:
 
 	const std::vector< CDuplicateFileItem* >& GetItems( void ) const { return m_items; }
 	size_t GetDuplicatesCount( void ) const { ASSERT( !m_items.empty() ); return m_items.size() - 1; }		// excluding the original item
+
+	CDuplicateFileItem* GetOriginalItem( void ) const { return !m_items.empty() ? m_items.front() : NULL; }
 	CDuplicateFileItem* FindItem( const fs::CPath& filePath ) const;
 	bool ContainsItem( const fs::CPath& filePath ) const { return FindItem( filePath ) != NULL; }
 
@@ -61,6 +64,7 @@ public:
 	void __ExtractCrc32Duplicates( std::vector< CDuplicateFilesGroup* >& rDuplicateGroups, size_t& rIgnoredCount, ui::IProgressCallback* pProgress = NULL ) throws_( CUserAbortedException );	// old version using group stores
 
 	bool MakeOriginalItem( CDuplicateFileItem* pItem );
+	bool MakeDuplicateItem( CDuplicateFileItem* pItem );
 
 	template< typename CompareT >
 	const CDuplicateFileItem* GetSortingItem( CompareT compare )
