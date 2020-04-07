@@ -3,7 +3,6 @@
 #pragma once
 
 #include "FileList.h"
-#include "ThumbPreviewCtrl.h"
 #include "utl/UI/AccelTable.h"
 #include "utl/UI/DialogToolBar.h"
 #include "utl/UI/DragListCtrl.h"
@@ -11,6 +10,7 @@
 #include "utl/UI/LayoutDialog.h"
 #include "utl/UI/OleUtils.h"
 #include "utl/UI/SpinEdit.h"
+#include "utl/UI/ThumbPreviewCtrl.h"
 
 
 class CImageView;

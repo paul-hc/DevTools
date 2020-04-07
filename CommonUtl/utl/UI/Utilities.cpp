@@ -45,7 +45,7 @@ namespace ui
 		static const CSize minSize( 1, 1 );
 		CSize destSize = MaxSize( destBoundsSize, minSize );		// ensure positive size when stretching with extreme spacing
 
-		double srcAspect = GetAspectRatio( srcSize ), destAspect = GetAspectRatio( destSize );
+		const double srcAspect = GetAspectRatio( srcSize ), destAspect = GetAspectRatio( destSize );
 
 		if ( destAspect > srcAspect )
 			destSize.cx = static_cast< long >( (double)destSize.cy * srcAspect );

@@ -447,14 +447,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\ArchiveImagesContext.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\ArchiveImagesContext.h"
-				>
-			</File>
-			<File
 				RelativePath=".\ArchiveImagesDialog.cpp"
 				>
 			</File>
@@ -463,27 +455,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\AutoDrop.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\AutoDrop.h"
-				>
-			</File>
-			<File
 				RelativePath=".\ChildFrame.cpp"
 				>
 			</File>
 			<File
 				RelativePath=".\ChildFrame.h"
-				>
-			</File>
-			<File
-				RelativePath=".\CustomOrderUndoRedo.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\CustomOrderUndoRedo.h"
 				>
 			</File>
 			<File
@@ -511,35 +487,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\FileAttr.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\FileAttr.h"
-				>
-			</File>
-			<File
-				RelativePath=".\FileList.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\FileList.h"
-				>
-			</File>
-			<File
 				RelativePath=".\FileListDisplayPaths.cpp"
 				>
 			</File>
 			<File
 				RelativePath=".\FileListDisplayPaths.h"
-				>
-			</File>
-			<File
-				RelativePath=".\FileOperation.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\FileOperation.h"
 				>
 			</File>
 			<File
@@ -647,14 +599,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\SearchSpec.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\SearchSpec.h"
-				>
-			</File>
-			<File
 				RelativePath=".\SearchSpecDialog.cpp"
 				>
 			</File>
@@ -716,14 +660,6 @@
 			</File>
 			<File
 				RelativePath=".\stdafx.h"
-				>
-			</File>
-			<File
-				RelativePath=".\ThumbPreviewCtrl.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\ThumbPreviewCtrl.h"
 				>
 			</File>
 			<File
@@ -799,6 +735,70 @@
 				</File>
 				<File
 					RelativePath=".\AutoScrollDropTarget.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="model"
+				>
+				<File
+					RelativePath=".\ArchiveImagesContext.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\ArchiveImagesContext.h"
+					>
+				</File>
+				<File
+					RelativePath=".\AutoDrop.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\AutoDrop.h"
+					>
+				</File>
+				<File
+					RelativePath=".\CustomOrderUndoRedo.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\CustomOrderUndoRedo.h"
+					>
+				</File>
+				<File
+					RelativePath=".\FileAttr.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\FileAttr.h"
+					>
+				</File>
+				<File
+					RelativePath=".\FileList.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\FileList.h"
+					>
+				</File>
+				<File
+					RelativePath=".\SearchSpec.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\SearchSpec.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="service"
+				>
+				<File
+					RelativePath=".\FileOperation.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\FileOperation.h"
 					>
 				</File>
 			</Filter>

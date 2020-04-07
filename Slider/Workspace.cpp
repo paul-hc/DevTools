@@ -387,7 +387,7 @@ void CWorkspace::CmEditWorkspace( void )
 
 			changed = std::make_pair( Hint_ViewUpdate, true );
 		}
-		if ( utl::ModifyValue( d2d::CDrawBitmapTraits::s_enlargeInterpolationMode, dlg.m_enlargeSmoothing ? D2D1_BITMAP_INTERPOLATION_MODE_LINEAR : D2D1_BITMAP_INTERPOLATION_MODE_NEAREST_NEIGHBOR ) )
+		if ( d2d::CDrawBitmapTraits::SetSmoothingMode( dlg.m_enlargeSmoothing ) )
 		{
 			SaveRegSettings();
 			changed.first = Hint_ViewUpdate;

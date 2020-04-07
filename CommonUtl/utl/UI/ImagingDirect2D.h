@@ -80,6 +80,9 @@ namespace d2d
 		void SetAutoInterpolationMode( const CSize& destBoundsSize, const CSize& bmpSize );
 
 		void Draw( ID2D1RenderTarget* pRenderTarget, ID2D1Bitmap* pBitmap, const CRect& destRect, const CRect* pSrcRect = NULL ) const;
+
+		static bool IsSmoothingMode( void ) { return s_enlargeInterpolationMode != D2D1_BITMAP_INTERPOLATION_MODE_NEAREST_NEIGHBOR; }
+		static bool SetSmoothingMode( bool smoothingMode = true );
 	public:
 		COLORREF m_bkColor;
 		float m_opacity;

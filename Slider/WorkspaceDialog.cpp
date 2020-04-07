@@ -21,7 +21,7 @@ CWorkspaceDialog::CWorkspaceDialog( CWnd* pParent /*= NULL*/ )
 	: CDialog( IDD_WORKSPACE_DIALOG, pParent )
 	, m_data( CWorkspace::GetData() )
 	, m_thumbnailerFlags( app::GetThumbnailer()->m_flags )
-	, m_enlargeSmoothing( d2d::CDrawBitmapTraits::s_enlargeInterpolationMode != D2D1_BITMAP_INTERPOLATION_MODE_NEAREST_NEIGHBOR )
+	, m_enlargeSmoothing( d2d::CDrawBitmapTraits::IsSmoothingMode() )
 {
 	m_mruCountEdit.SetValidRange( Range< int >( 0, 16 ) );
 	m_thumbListColCountEdit.SetValidRange( Range< int >( 1, 25 ) );

@@ -2,6 +2,7 @@
 
 #include "utl/UI/BaseMainDialog.h"
 #include "utl/UI/ReportListControl.h"
+#include "utl/UI/ImageEdit.h"
 #include "utl/UI/TextEdit.h"
 
 

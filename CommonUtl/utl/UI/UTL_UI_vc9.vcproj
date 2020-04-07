@@ -1518,6 +1518,14 @@
 					>
 				</File>
 				<File
+					RelativePath=".\ThumbPreviewCtrl.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\ThumbPreviewCtrl.h"
+					>
+				</File>
+				<File
 					RelativePath=".\ToolbarStrip.cpp"
 					>
 				</File>

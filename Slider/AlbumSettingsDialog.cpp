@@ -83,6 +83,7 @@ CAlbumSettingsDialog::CAlbumSettingsDialog( const CFileList& fileList, int curre
 	, m_dlgAccel( IDR_ALBUM_DLG_ACCEL )
 	, m_searchListAccel( IDR_ALBUM_DLG_SEARCH_SPEC_ACCEL )
 	, m_isDirty( Undefined )
+	, m_thumbPreviewCtrl( app::GetThumbnailer() )
 	, m_foundFilesListCtrl( IDC_FOUND_FILES_LISTVIEW )
 {
 	// base init
@@ -118,6 +119,8 @@ CAlbumSettingsDialog::CAlbumSettingsDialog( const CFileList& fileList, int curre
 	m_foundFilesListCtrl.SetDataSourceFactory( this );						// uses temporary file clones for embedded images
 	m_foundFilesListCtrl.SetPopupMenu( CReportListControl::OnSelection, &GetFileListPopupMenu() );
 	m_foundFilesListCtrl.SetTrackMenuTarget( this );						// let dialog track SPECIFIC custom menu commands (Explorer verbs handled by the listctrl)
+
+	ClearFlag( m_foundFilesListCtrl.RefListStyleEx(), LVS_EX_DOUBLEBUFFER );
 
 	m_foundFilesListCtrl
 		.AddTileColumn( Dimensions )
@@ -185,12 +188,6 @@ void CAlbumSettingsDialog::SetDirty( bool dirty /*= true*/ )
 	m_foundFilesListCtrl.Invalidate();
 	m_foundFilesListCtrl.UpdateWindow();
 
-/*	bool listWasFocused = ui::OwnsFocus( m_foundFilesListCtrl.m_hWnd );
-
-	if ( ui::EnableWindow( m_foundFilesListCtrl, False == m_isDirty ) && m_isDirty && listWasFocused )
-		if ( NULL == ::GetFocus() )
-			GotoDlgCtrl( &m_sortOrderCombo );		// focus on order combo when list gets disabled
-*/
 	static const std::tstring okLabel[] = { _T("OK"), _T("&Search") };
 	ui::SetDlgItemText( m_hWnd, IDOK, okLabel[ m_isDirty ] );
 	ui::EnableControl( m_hWnd, IDOK, True == m_isDirty || m_fileList.GetFileOrder() != CFileList::CorruptedFiles );

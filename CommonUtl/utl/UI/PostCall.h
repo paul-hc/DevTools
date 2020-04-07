@@ -25,90 +25,90 @@ private:
 };
 
 
-// void WndType::WndMethod( void );
+// void HostType::HostMethod( void );
 
-template< typename WndType, typename WndMethod >
+template< typename HostType, typename HostMethod >
 class CPostCall : public CBasePostCall
 {
 public:
-	CPostCall( WndType* pWnd, WndMethod pMethod )
-		: CBasePostCall( pWnd ), m_pWnd( pWnd ), m_pMethod( pMethod )
+	CPostCall( HostType* pHost, HostMethod pMethod )
+		: CBasePostCall( dynamic_cast< CWnd* >( pHost ) ), m_pHost( pHost ), m_pMethod( pMethod )		// use dynamic_cast so that HostType could be a different base of the host object
 	{
 	}
 protected:
 	virtual void OnCall( void )
 	{
-		(m_pWnd->*m_pMethod)();
+		(m_pHost->*m_pMethod)();
 	}
 private:
-	WndType* m_pWnd;
-	WndMethod m_pMethod; // the member function pointer
+	HostType* m_pHost;
+	HostMethod m_pMethod;		// pointer to method
 };
 
 
-// void WndType::WndMethod( Arg1 arg );
+// void HostType::HostMethod( Arg1 arg );
 
-template< typename WndType, typename WndMethod, typename Arg1 >
+template< typename HostType, typename HostMethod, typename Arg1 >
 class CPostCallArg1 : public CBasePostCall
 {
 public:
-	CPostCallArg1( WndType* pWnd, WndMethod pMethod, Arg1 arg1 )
-		: CBasePostCall( pWnd ), m_pWnd( pWnd ), m_pMethod( pMethod ), m_arg1( arg1 )
+	CPostCallArg1( HostType* pHost, HostMethod pMethod, Arg1 arg1 )
+		: CBasePostCall( dynamic_cast< CWnd* >( pHost ) ), m_pHost( pHost ), m_pMethod( pMethod ), m_arg1( arg1 )
 	{
 	}
 protected:
 	virtual void OnCall( void )
 	{
-		(m_pWnd->*m_pMethod)( m_arg1 );
+		(m_pHost->*m_pMethod)( m_arg1 );
 	}
 private:
-	WndType* m_pWnd;
-	WndMethod m_pMethod; // pointer to method
+	HostType* m_pHost;
+	HostMethod m_pMethod;		// pointer to method
 	Arg1 m_arg1;
 };
 
 
-// void WndType::WndMethod( Arg1 arg, Arg2 arg2 );
+// void HostType::HostMethod( Arg1 arg, Arg2 arg2 );
 
-template< typename WndType, typename WndMethod, typename Arg1, typename Arg2 >
+template< typename HostType, typename HostMethod, typename Arg1, typename Arg2 >
 class CPostCallArg2 : public CBasePostCall
 {
 public:
-	CPostCallArg2( WndType* pWnd, WndMethod pMethod, Arg1 arg1, Arg2 arg2 )
-		: CBasePostCall( pWnd ), m_pWnd( pWnd ), m_pMethod( pMethod ), m_arg1( arg1 ), m_arg2( arg2 )
+	CPostCallArg2( HostType* pHost, HostMethod pMethod, Arg1 arg1, Arg2 arg2 )
+		: CBasePostCall( dynamic_cast< CWnd* >( pHost ) ), m_pHost( pHost ), m_pMethod( pMethod ), m_arg1( arg1 ), m_arg2( arg2 )
 	{
 	}
 protected:
 	virtual void OnCall( void )
 	{
-		(m_pWnd->*m_pMethod)( m_arg1, m_arg2 );
+		(m_pHost->*m_pMethod)( m_arg1, m_arg2 );
 	}
 private:
-	WndType* m_pWnd;
-	WndMethod m_pMethod; // pointer to method
+	HostType* m_pHost;
+	HostMethod m_pMethod;		// pointer to method
 	Arg1 m_arg1;
 	Arg2 m_arg2;
 };
 
 
-// void WndType::WndMethod( Arg1 arg, Arg2 arg2, Arg3 arg3 );
+// void HostType::HostMethod( Arg1 arg, Arg2 arg2, Arg3 arg3 );
 
-template< typename WndType, typename WndMethod, typename Arg1, typename Arg2, typename Arg3 >
+template< typename HostType, typename HostMethod, typename Arg1, typename Arg2, typename Arg3 >
 class CPostCallArg3 : public CBasePostCall
 {
 public:
-	CPostCallArg3( WndType* pWnd, WndMethod pMethod, Arg1 arg1, Arg2 arg2, Arg3 arg3 )
-		: CBasePostCall( pWnd ), m_pWnd( pWnd ), m_pMethod( pMethod ), m_arg1( arg1 ), m_arg2( arg2 ), m_arg3( arg3 )
+	CPostCallArg3( HostType* pHost, HostMethod pMethod, Arg1 arg1, Arg2 arg2, Arg3 arg3 )
+		: CBasePostCall( dynamic_cast< CWnd* >( pHost ) ), m_pHost( pHost ), m_pMethod( pMethod ), m_arg1( arg1 ), m_arg2( arg2 ), m_arg3( arg3 )
 	{
 	}
 protected:
 	virtual void OnCall( void )
 	{
-		(m_pWnd->*m_pMethod)( m_arg1, m_arg2, m_arg3 );
+		(m_pHost->*m_pMethod)( m_arg1, m_arg2, m_arg3 );
 	}
 private:
-	WndType* m_pWnd;
-	WndMethod m_pMethod; // pointer to method
+	HostType* m_pHost;
+	HostMethod m_pMethod;		// pointer to method
 	Arg1 m_arg1;
 	Arg2 m_arg2;
 	Arg3 m_arg3;
@@ -119,28 +119,28 @@ namespace ui
 {
 	// utilities for delayed method calls
 
-	template< typename WndType, typename WndMethod >
-	void PostCall( WndType* pWnd, WndMethod pMethod )
+	template< typename HostType, typename HostMethod >
+	void PostCall( HostType* pHost, HostMethod pMethod )
 	{
-		new CPostCall< WndType, WndMethod >( pWnd, pMethod );
+		new CPostCall< HostType, HostMethod >( pHost, pMethod );
 	}
 
-	template< typename WndType, typename WndMethod, typename Arg1 >
-	void PostCall( WndType* pWnd, WndMethod pMethod, Arg1 arg1 )
+	template< typename HostType, typename HostMethod, typename Arg1 >
+	void PostCall( HostType* pHost, HostMethod pMethod, Arg1 arg1 )
 	{
-		new CPostCallArg1< WndType, WndMethod, Arg1 >( pWnd, pMethod, arg1 );
+		new CPostCallArg1< HostType, HostMethod, Arg1 >( pHost, pMethod, arg1 );
 	}
 
-	template< typename WndType, typename WndMethod, typename Arg1, typename Arg2 >
-	void PostCall( WndType* pWnd, WndMethod pMethod, Arg1 arg1, Arg2 arg2 )
+	template< typename HostType, typename HostMethod, typename Arg1, typename Arg2 >
+	void PostCall( HostType* pHost, HostMethod pMethod, Arg1 arg1, Arg2 arg2 )
 	{
-		new CPostCallArg2< WndType, WndMethod, Arg1, Arg2 >( pWnd, pMethod, arg1, arg2 );
+		new CPostCallArg2< HostType, HostMethod, Arg1, Arg2 >( pHost, pMethod, arg1, arg2 );
 	}
 
-	template< typename WndType, typename WndMethod, typename Arg1, typename Arg2, typename Arg3 >
-	void PostCall( WndType* pWnd, WndMethod pMethod, Arg1 arg1, Arg2 arg2, Arg3 arg3 )
+	template< typename HostType, typename HostMethod, typename Arg1, typename Arg2, typename Arg3 >
+	void PostCall( HostType* pHost, HostMethod pMethod, Arg1 arg1, Arg2 arg2, Arg3 arg3 )
 	{
-		new CPostCallArg3< WndType, WndMethod, Arg1, Arg2, Arg3 >( pWnd, pMethod, arg1, arg2, arg3 );
+		new CPostCallArg3< HostType, HostMethod, Arg1, Arg2, Arg3 >( pHost, pMethod, arg1, arg2, arg3 );
 	}
 }
 

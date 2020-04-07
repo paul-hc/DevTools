@@ -45,6 +45,12 @@ namespace d2d
 
 	D2D1_BITMAP_INTERPOLATION_MODE CDrawBitmapTraits::s_enlargeInterpolationMode = D2D1_BITMAP_INTERPOLATION_MODE_NEAREST_NEIGHBOR;		// by default no smoothing
 
+	bool CDrawBitmapTraits::SetSmoothingMode( bool smoothingMode /*= true*/ )
+	{
+		return utl::ModifyValue( s_enlargeInterpolationMode,
+			smoothingMode ? D2D1_BITMAP_INTERPOLATION_MODE_LINEAR : D2D1_BITMAP_INTERPOLATION_MODE_NEAREST_NEIGHBOR );
+	}
+
 	void CDrawBitmapTraits::SetAutoInterpolationMode( const CSize& destBoundsSize, const CSize& bmpSize )
 	{
 		m_interpolationMode = ui::FitsInside( destBoundsSize, bmpSize )
