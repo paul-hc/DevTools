@@ -34,9 +34,11 @@ BOOL CThumbPreviewCtrl::OnEraseBkgnd( CDC* pDC )
 
 void CThumbPreviewCtrl::OnPaint( void )
 {
-	CPaintDC dc( this );
-	CWicDibSection* pThumb = !m_imageFilePath.IsEmpty() ? pThumb = app::GetThumbnailer()->AcquireThumbnail( m_imageFilePath ) : NULL;
+	CWicDibSection* pThumb = NULL;
+	if ( !m_imageFilePath.IsEmpty() )
+		pThumb = app::GetThumbnailer()->AcquireThumbnail( m_imageFilePath );
 
+	CPaintDC dc( this );
 	CRect clientRect;
 	GetClientRect( &clientRect );
 	::FillRect( dc, clientRect, GetSysColorBrush( COLOR_BTNFACE ) );

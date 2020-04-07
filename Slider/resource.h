@@ -200,8 +200,14 @@
 #define CM_CLEAR_TEMP_EMBEDDED_CLONES   32853
 #define ID_FILE_OPEN_ALBUM_FOLDER       32854
 #define ID_EDIT_ARCHIVE_PASSWORD        32855
-#define ID_RAND_SHUFFLE                 32869
-#define ID_ORDER_RANDOM_SHUFFLE         32869
+#define ID_ORDER_ORIGINAL               32856
+#define ID_ORDER_CUSTOM                 32857
+#define ID_ORDER_RANDOM_SHUFFLE         32858
+#define ID_ORDER_RANDOM_SHUFFLE_SAME_SEED 32859
+#define ID_ORDER_BY_FULL_PATH_ASC       32860
+#define ID_ORDER_BY_FULL_PATH_DESC      32861
+#define ID_ORDER_BY_DIMENSION_ASC       32862
+#define ID_ORDER_BY_DIMENSION_DESC      32863
 
 // Next default values for new objects
 // 
@@ -209,7 +215,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        176
-#define _APS_NEXT_COMMAND_VALUE         32870
+#define _APS_NEXT_COMMAND_VALUE         32877
 #define _APS_NEXT_CONTROL_VALUE         1092
 #define _APS_NEXT_SYMED_VALUE           108
 #endif

@@ -21,6 +21,26 @@
 #endif
 
 
+namespace hlp
+{
+	CFileList::Order OrderOfCmd( UINT cmdId )
+	{
+		switch ( cmdId )
+		{
+			default: ASSERT( false );
+			case ID_ORDER_ORIGINAL:						return CFileList::OriginalOrder;
+			case ID_ORDER_CUSTOM:						return CFileList::CustomOrder;
+			case ID_ORDER_RANDOM_SHUFFLE:				return CFileList::Shuffle;
+			case ID_ORDER_RANDOM_SHUFFLE_SAME_SEED:		return CFileList::ShuffleSameSeed;
+			case ID_ORDER_BY_FULL_PATH_ASC:				return CFileList::ByFullPathAsc;
+			case ID_ORDER_BY_FULL_PATH_DESC:			return CFileList::ByFullPathDesc;
+			case ID_ORDER_BY_DIMENSION_ASC:				return CFileList::ByDimensionAsc;
+			case ID_ORDER_BY_DIMENSION_DESC:			return CFileList::ByDimensionDesc;
+		}
+	}
+}
+
+
 namespace layout
 {
 	static const CLayoutStyle styles[] =
@@ -79,7 +99,15 @@ CAlbumSettingsDialog::CAlbumSettingsDialog( const CFileList& fileList, int curre
 		.AddButton( ID_MOVE_TOP_ITEM )
 		.AddButton( ID_MOVE_BOTTOM_ITEM )
 		.AddSeparator()
-		.AddButton( ID_ORDER_RANDOM_SHUFFLE );
+		.AddButton( ID_ORDER_ORIGINAL )
+		.AddButton( ID_ORDER_CUSTOM )
+		.AddButton( ID_ORDER_RANDOM_SHUFFLE )
+		.AddButton( ID_ORDER_RANDOM_SHUFFLE_SAME_SEED )
+		.AddButton( ID_ORDER_BY_FULL_PATH_ASC )
+		.AddButton( ID_ORDER_BY_FULL_PATH_DESC )
+		.AddButton( ID_ORDER_BY_DIMENSION_ASC )
+		.AddButton( ID_ORDER_BY_DIMENSION_DESC )
+		.AddSeparator();
 
 	m_foundFilesListCtrl.SetSection( m_regSection + _T("\\List") );
 	m_foundFilesListCtrl.SetCustomImageDraw( app::GetThumbnailer() );
@@ -558,12 +586,13 @@ BEGIN_MESSAGE_MAP( CAlbumSettingsDialog, CLayoutDialog )
 	ON_BN_CLICKED( CM_MODIFY_SEARCH_SPEC, OnModify_SearchSpec )
 	ON_BN_CLICKED( CM_DELETE_SEARCH_SPEC, OnDelete_SearchSpec )
 	ON_BN_CLICKED( CM_SEARCH_FOR_FILES, OnSearchSourceFiles )
-	ON_COMMAND( ID_ORDER_RANDOM_SHUFFLE, OnOrderRandomShuffle )
-	ON_UPDATE_COMMAND_UI( ID_ORDER_RANDOM_SHUFFLE, OnUpdateOrderRandomShuffle )
+	ON_COMMAND_RANGE( ID_ORDER_ORIGINAL, ID_ORDER_BY_DIMENSION_DESC, On_OrderRandomShuffle )
+	ON_UPDATE_COMMAND_UI_RANGE( ID_ORDER_ORIGINAL, ID_ORDER_BY_DIMENSION_DESC, OnUpdate_OrderRandomShuffle )
 	ON_NOTIFY( LVN_COLUMNCLICK, IDC_FOUND_FILES_LISTVIEW, OnLVnColumnClick_FoundFiles )
 	ON_NOTIFY( LVN_ITEMCHANGED, IDC_FOUND_FILES_LISTVIEW, OnLVnItemChanged_FoundFiles )
 	ON_NOTIFY( LVN_GETDISPINFO, IDC_FOUND_FILES_LISTVIEW, OnLVnGetDispInfo_FoundFiles )
 	ON_CONTROL( lv::LVN_ItemsReorder, IDC_FOUND_FILES_LISTVIEW, OnLVnItemsReorder_FoundFiles )
+	ON_STN_CLICKED( IDC_THUMB_PREVIEW_STATIC, &CAlbumSettingsDialog::OnStnClickedThumbPreviewStatic )
 	// image file operations: CM_OPEN_IMAGE_FILE, CM_DELETE_FILE, CM_DELETE_FILE_NO_UNDO, CM_MOVE_FILE, CM_EXPLORE_IMAGE
 	ON_COMMAND_RANGE( CM_OPEN_IMAGE_FILE, CM_EXPLORE_IMAGE, OnImageFileOp )
 END_MESSAGE_MAP()
@@ -767,18 +796,21 @@ void CAlbumSettingsDialog::OnSearchSourceFiles( void )
 	SearchSourceFiles();
 }
 
-void CAlbumSettingsDialog::OnOrderRandomShuffle( void )
+void CAlbumSettingsDialog::On_OrderRandomShuffle( UINT cmdId )
 {
-	CFileList::Order fileOrder = CFileList::Shuffle;
+	CFileList::Order fileOrder = hlp::OrderOfCmd( cmdId );
 
 	m_fileList.SetFileOrder( fileOrder );
 	m_sortOrderCombo.SetCurSel( fileOrder );
 	UpdateFileSortOrder();
 }
 
-void CAlbumSettingsDialog::OnUpdateOrderRandomShuffle( CCmdUI* pCmdUI )
+void CAlbumSettingsDialog::OnUpdate_OrderRandomShuffle( CCmdUI* pCmdUI )
 {
+	CFileList::Order fileOrder = hlp::OrderOfCmd( pCmdUI->m_nID );
+
 	pCmdUI->Enable( !m_fileList.InGeneration() );
+	pCmdUI->SetCheck( fileOrder == m_fileList.GetFileOrder() );
 }
 
 void CAlbumSettingsDialog::OnImageFileOp( UINT cmdId )
@@ -906,4 +938,9 @@ void CAlbumSettingsDialog::OnLVnItemsReorder_FoundFiles( void )
 	m_sortOrderCombo.SetCurSel( fileOrder );
 	std::pair< Column, bool > sortPair = ToListSortOrder( fileOrder );
 	m_foundFilesListCtrl.SetSortByColumn( sortPair.first, sortPair.second );
+}
+
+void CAlbumSettingsDialog::OnStnClickedThumbPreviewStatic( void )
+{
+	shell::Execute( this, m_thumbPreviewCtrl.GetImagePath().GetPtr() );
 }
