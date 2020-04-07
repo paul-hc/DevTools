@@ -9,6 +9,7 @@
 #include "resource.h"
 #include "utl/EnumTags.h"
 #include "utl/Path.h"
+#include "utl/UI/Color.h"
 #include "utl/UI/MenuUtilities.h"
 #include "utl/UI/Thumbnailer.h"
 #include "utl/UI/ShellUtilities.h"
@@ -77,11 +78,11 @@ namespace layout
 
 CAlbumSettingsDialog::CAlbumSettingsDialog( const CFileList& fileList, int currentIndex /*= -1*/, CWnd* pParent /*= NULL*/ )
 	: CLayoutDialog( IDD_ALBUM_SETTINGS_DIALOG, pParent )
+	, m_fileList( fileList )
+	, m_currentIndex( currentIndex )
 	, m_dlgAccel( IDR_ALBUM_DLG_ACCEL )
 	, m_searchListAccel( IDR_ALBUM_DLG_SEARCH_SPEC_ACCEL )
 	, m_isDirty( Undefined )
-	, m_fileList( fileList )
-	, m_currentIndex( currentIndex )
 	, m_foundFilesListCtrl( IDC_FOUND_FILES_LISTVIEW )
 {
 	// base init
@@ -111,6 +112,7 @@ CAlbumSettingsDialog::CAlbumSettingsDialog( const CFileList& fileList, int curre
 
 	m_foundFilesListCtrl.SetSection( m_regSection + _T("\\List") );
 	m_foundFilesListCtrl.SetCustomImageDraw( app::GetThumbnailer() );
+	m_foundFilesListCtrl.SetTextEffectCallback( this );
 	m_foundFilesListCtrl.SetSortInternally( false );
 	m_foundFilesListCtrl.SetUseAlternateRowColoring();
 	m_foundFilesListCtrl.SetDataSourceFactory( this );						// uses temporary file clones for embedded images
@@ -153,22 +155,45 @@ bool CAlbumSettingsDialog::InitSymbolFont( void )
 	return m_symbolFont.CreateFontIndirect( &logFont ) != FALSE;
 }
 
+ole::CDataSource* CAlbumSettingsDialog::NewDataSource( void )
+{
+	return new ole::CImagesDataSource();
+}
+
+void CAlbumSettingsDialog::CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARAM rowKey, int subItem, CListLikeCtrlBase* pCtrl ) const
+{
+	subItem;
+	if ( pCtrl != &m_foundFilesListCtrl )
+		return;
+
+	static const ui::CTextEffect s_errorBk( ui::Regular, app::ColorErrorText, app::ColorErrorBk );
+	const CFileAttr* pFileAttr = CReportListControl::AsPtr< CFileAttr >( rowKey );
+
+	if ( !pFileAttr->IsValid() )
+		rTextEffect |= s_errorBk;							// highlight error row background
+
+	if ( True == m_isDirty )
+		rTextEffect.m_textColor = ui::GetBlendedColor( rTextEffect.m_textColor != CLR_NONE ? rTextEffect.m_textColor : m_foundFilesListCtrl.GetTextColor(), color::White );		// blend to washed out gray effect
+}
+
 void CAlbumSettingsDialog::SetDirty( bool dirty /*= true*/ )
 {
 	if ( Undefined == m_isDirty )
 		return;			// dialog not yet initialized, avoid altering dirty flag
 
 	m_isDirty = dirty ? True : False;
+	m_foundFilesListCtrl.Invalidate();
+	m_foundFilesListCtrl.UpdateWindow();
 
-	bool listWasFocused = ui::OwnsFocus( m_foundFilesListCtrl.m_hWnd );
+/*	bool listWasFocused = ui::OwnsFocus( m_foundFilesListCtrl.m_hWnd );
 
 	if ( ui::EnableWindow( m_foundFilesListCtrl, False == m_isDirty ) && m_isDirty && listWasFocused )
 		if ( NULL == ::GetFocus() )
 			GotoDlgCtrl( &m_sortOrderCombo );		// focus on order combo when list gets disabled
-
+*/
 	static const std::tstring okLabel[] = { _T("OK"), _T("&Search") };
 	ui::SetDlgItemText( m_hWnd, IDOK, okLabel[ m_isDirty ] );
-	ui::EnableControl( m_hWnd, IDOK, m_isDirty != False || m_fileList.GetFileOrder() != CFileList::CorruptedFiles );
+	ui::EnableControl( m_hWnd, IDOK, True == m_isDirty || m_fileList.GetFileOrder() != CFileList::CorruptedFiles );
 }
 
 void CAlbumSettingsDialog::UpdateFileSortOrder( void )
@@ -201,16 +226,16 @@ std::pair< CAlbumSettingsDialog::Column, bool > CAlbumSettingsDialog::ToListSort
 {
 	switch ( fileOrder )
 	{
-		case CFileList::ByFileNameAsc:	return std::make_pair( FileName, true );
-		case CFileList::ByFileNameDesc:	return std::make_pair( FileName, false ); break;
-		case CFileList::ByFullPathAsc:	return std::make_pair( Folder, true ); break;
-		case CFileList::ByFullPathDesc:	return std::make_pair( Folder, false ); break;
-		case CFileList::ByDimensionAsc:	return std::make_pair( Dimensions, true ); break;
-		case CFileList::ByDimensionDesc: return std::make_pair( Dimensions, false ); break;
-		case CFileList::BySizeAsc:		return std::make_pair( Size, true ); break;
-		case CFileList::BySizeDesc:		return std::make_pair( Size, false ); break;
-		case CFileList::ByDateAsc:		return std::make_pair( Date, true ); break;
-		case CFileList::ByDateDesc:		return std::make_pair( Date, false ); break;
+		case CFileList::ByFileNameAsc:		return std::make_pair( FileName, true );
+		case CFileList::ByFileNameDesc:		return std::make_pair( FileName, false ); break;
+		case CFileList::ByFullPathAsc:		return std::make_pair( Folder, true ); break;
+		case CFileList::ByFullPathDesc:		return std::make_pair( Folder, false ); break;
+		case CFileList::ByDimensionAsc:		return std::make_pair( Dimensions, true ); break;
+		case CFileList::ByDimensionDesc:	return std::make_pair( Dimensions, false ); break;
+		case CFileList::BySizeAsc:			return std::make_pair( Size, true ); break;
+		case CFileList::BySizeDesc:			return std::make_pair( Size, false ); break;
+		case CFileList::ByDateAsc:			return std::make_pair( Date, true ); break;
+		case CFileList::ByDateDesc:			return std::make_pair( Date, false ); break;
 	}
 	return std::make_pair( Unordered, false );
 }
@@ -882,11 +907,6 @@ void CAlbumSettingsDialog::OnLVnColumnClick_FoundFiles( NMHDR* pNmHdr, LRESULT* 
 	m_sortOrderCombo.SetCurSel( fileOrder );
 	UpdateFileSortOrder();
 	*pResult = 0;
-}
-
-ole::CDataSource* CAlbumSettingsDialog::NewDataSource( void )
-{
-	return new ole::CImagesDataSource;
 }
 
 void CAlbumSettingsDialog::OnLVnItemChanged_FoundFiles( NMHDR* pNmHdr, LRESULT* pResult )

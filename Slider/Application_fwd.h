@@ -65,4 +65,10 @@ namespace app
 }
 
 
+namespace app
+{
+	enum CustomColors { ColorErrorBk = color::LightPastelPink, ColorErrorText = color::Red };
+}
+
+
 #endif // Application_fwd_h

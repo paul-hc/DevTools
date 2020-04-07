@@ -80,6 +80,7 @@ namespace color
 		Salmon = RGB( 255, 128, 128 ),
 		Pink = RGB( 255, 128, 255 ),
 		PastelPink = RGB( 255, 200, 200 ),
+		LightPastelPink = RGB( 255, 230, 230 ),
 		ToolStripPink = RGB( 255, 174, 201 ),
 		TranspPink = RGB( 255, 127, 182 ),			// rightmost pink in Paint.NET palette, used for transparent background mask
 		SolidOrange = RGB( 255, 128, 0 ),

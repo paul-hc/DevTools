@@ -18,6 +18,7 @@ class CImageView;
 
 class CAlbumSettingsDialog : public CLayoutDialog
 						   , public ole::IDataSourceFactory
+						   , private ui::ITextEffectCallback
 {
 public:
 	CAlbumSettingsDialog( const CFileList& fileList, int currentIndex = -1, CWnd* pParent = NULL );
@@ -26,6 +27,12 @@ private:
 	static CMenu& GetFileListPopupMenu( void );
 	bool InitSymbolFont( void );
 
+	// ole::IDataSourceFactory interface
+	virtual ole::CDataSource* NewDataSource( void );
+
+	// ui::ITextEffectCallback interface
+	virtual void CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARAM rowKey, int subItem, CListLikeCtrlBase* pCtrl ) const;
+private:
 	void SetDirty( bool dirty = true );
 	void UpdateFileSortOrder( void );
 
@@ -45,16 +52,15 @@ private:
 
 	void QueryFoundListSelection( std::vector< std::tstring >& rSelFilePaths, bool clearInvalidFiles = true );
 	int GetCheckStateAutoRegen( void ) const;
-
-	// ole::IDataSourceFactory interface
-	virtual ole::CDataSource* NewDataSource( void );
-private:
-	CAccelTable m_dlgAccel, m_searchListAccel;
-	enum { Undefined = -1, False, True, Toggle } m_isDirty;
-	CFont m_symbolFont;
 public:
 	CFileList m_fileList;
 	int m_currentIndex;
+private:
+	enum DirtyState { Undefined = -1, False, True };
+
+	CAccelTable m_dlgAccel, m_searchListAccel;
+	DirtyState m_isDirty;
+	CFont m_symbolFont;
 private:
 	// enum { IDD = IDD_ALBUM_SETTINGS_DIALOG };
 	enum { InplaceSortMaxCount = 5000 };
