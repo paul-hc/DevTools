@@ -153,8 +153,11 @@ CComPtr< IWICBitmapSource > CShellThumbCache::ScaleToThumbBitmap( IWICBitmapSour
 	ASSERT_PTR( pSrcBitmap );
 
 	const CSize srcSize = wic::GetBitmapSize( pSrcBitmap );
+
 	if ( ui::FitsExactly( m_boundsSize, srcSize ) )
-		return pSrcBitmap;								// optimization: it's got the right fit -> no need to scale
+		return pSrcBitmap;									// optimization: it's got the right fit -> no need to scale
+	else if ( ui::FitsInside( m_boundsSize, srcSize ) )
+		return pSrcBitmap;									// optimization: image smaller than the thumb size -> avoid scaling, since the thumb looks "smeared"
 
 	// convert to WIC bitmap and scale to m_boundsSize
 	CComPtr< IWICBitmapSource > pScaledThumbBitmap = wic::ScaleBitmapToBounds( pSrcBitmap, m_boundsSize, WICBitmapInterpolationModeFant );		// or WICBitmapInterpolationModeHighQualityCubic
