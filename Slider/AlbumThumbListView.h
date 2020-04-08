@@ -4,6 +4,7 @@
 
 #include "FileList.h"
 #include "ListViewState.h"
+#include "utl/UI/ObjectCtrlBase.h"
 #include "utl/UI/OleDragDrop_fwd.h"
 #include "utl/UI/OleDropTarget.h"
 #include "utl/UI/WindowTimer.h"
@@ -16,6 +17,7 @@ class CWicDibSection;
 
 
 class CAlbumThumbListView : public CCtrlView
+						  , public CObjectCtrlBase
 {
 	DECLARE_DYNCREATE( CAlbumThumbListView )
 protected:
@@ -35,6 +37,7 @@ public:
 	bool IsMultiSelection( void ) const { return HasFlag( AsListBox()->GetStyle(), LBS_EXTENDEDSEL | LBS_MULTIPLESEL ); }
 	int GetCurSel( void ) const;
 	bool SetCurSel( int selIndex, bool notifySelChanged = false );
+	bool QuerySelItemPaths( std::vector< fs::CPath >& rSelFilePaths ) const;
 
 	void GetListViewState( CListViewState& rLvState, bool filesMustExist = true, bool sortAscending = true ) const;
 	void SetListViewState( const CListViewState& lvState, bool notifySelChanged = false, const TCHAR* pDoRestore = _T("TSC") );
@@ -58,7 +61,7 @@ public:
 	static CRect GetListWindowRect( int columnCount = 1, CWnd* pListWnd = NULL );
 private:
 	CWicDibSection* GetItemThumb( int displayIndex ) const throws_();
-	std::tstring GetItemFilename( int displayIndex ) const;
+	const fs::CFlexPath* GetItemPath( int displayIndex ) const;
 
 	bool DoDragDrop( void );
 	void CancelDragCapture( void );
@@ -145,7 +148,7 @@ protected:
 	afx_msg void OnRButtonDown( UINT mkFlags, CPoint point );
 	afx_msg void OnMouseMove( UINT mkFlags, CPoint point );
 	afx_msg BOOL OnMouseWheel( UINT mkFlags, short zDelta, CPoint pt );
-	afx_msg void OnContextMenu( CWnd* pWnd, CPoint point );
+	afx_msg void OnContextMenu( CWnd* pWnd, CPoint screenPos );
 	afx_msg void OnTimer( UINT_PTR eventId );
 	afx_msg void OnToggleShowThumbView( void );
 	afx_msg void OnUpdateShowThumbView( CCmdUI* pCmdUI );

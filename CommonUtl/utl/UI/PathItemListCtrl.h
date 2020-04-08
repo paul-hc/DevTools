@@ -6,22 +6,12 @@
 #include "Path.h"
 
 
-class CShellContextMenuHost;
-
-
 // List control made of path items that implement utl::ISubject, typically CPathItemBase
 class CPathItemListCtrl : public CReportListControl
 {
 public:
 	CPathItemListCtrl( UINT columnLayoutId = 0, DWORD listStyleEx = lv::DefaultStyleEx );
 	virtual ~CPathItemListCtrl();
-
-	enum ShellContextMenuStyle { NoShellMenu, ExplorerSubMenu, ShellMenuFirst, ShellMenuLast };
-
-	bool UseShellContextMenu( void ) const { return m_cmStyle != NoShellMenu; }
-	void SetShellContextMenuStyle( ShellContextMenuStyle cmStyle, UINT cmQueryFlags = UINT_MAX );
-
-	bool IsShellMenuCmd( int cmdId ) const;
 
 	static CMenu& GetStdPathListPopupMenu( ListPopup popupType );
 
@@ -30,18 +20,10 @@ public:
 	bool QuerySelectedItemPaths( std::vector< PathType >& rSelFilePaths ) const;
 
 	// base overrides
-	virtual bool IsInternalCmdId( int cmdId ) const;
 	virtual CMenu* GetPopupMenu( ListPopup popupType );
 protected:
 	virtual bool TrackContextMenu( ListPopup popupType, const CPoint& screenPos );
 private:
-	CMenu* MakeContextMenuHost( CMenu* pSrcPopupMenu, const std::vector< std::tstring >& selFilePaths );
-	void ResetShellContextMenu( void );
-private:
-	ShellContextMenuStyle m_cmStyle;
-	UINT m_cmQueryFlags;
-	std::auto_ptr< CShellContextMenuHost > m_pShellMenuHost;
-
 	// generated stuff
 public:
 	virtual BOOL OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo );

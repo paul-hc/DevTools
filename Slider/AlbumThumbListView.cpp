@@ -60,6 +60,7 @@ IMPLEMENT_DYNCREATE( CAlbumThumbListView, CCtrlView )
 
 CAlbumThumbListView::CAlbumThumbListView( void )
 	: CCtrlView( _T("LISTBOX"), AFX_WS_DEFAULT_VIEW )
+	, CObjectCtrlBase( this )
 	, m_autoDelete( true )
 	, m_pFileList( NULL )
 	, m_pPeerImageView( NULL )
@@ -70,6 +71,8 @@ CAlbumThumbListView::CAlbumThumbListView( void )
 	, m_scrollTimerCounter( 0, 0 )
 	, m_selectionBackup( StoreByString )
 {
+	SetTrackMenuTarget( app::GetMainFrame() );
+
 	EnsureCaptionFontCreated();
 }
 
@@ -164,6 +167,34 @@ bool CAlbumThumbListView::SetCurSel( int selIndex, bool notifySelChanged /*= fal
 	singleSelState.m_pIndexImpl->m_caret = selIndex;
 	SetListViewState( singleSelState, notifySelChanged, _T("SC") );
 	return true;
+}
+
+bool CAlbumThumbListView::QuerySelItemPaths( std::vector< fs::CPath >& rSelFilePaths ) const
+{
+	const CListBox* pListBox = AsListBox();
+
+	rSelFilePaths.clear();
+
+	if ( IsMultiSelection() )
+	{
+		if ( size_t selCount = pListBox->GetSelCount() )
+		{
+			std::vector< int > selIndexes;
+			selIndexes.resize( selCount );
+			pListBox->GetSelItems( selCount, &selIndexes.front() );
+
+			for ( std::vector< int >::const_iterator itSelIndex = selIndexes.begin(); itSelIndex != selIndexes.end(); ++itSelIndex )
+				if ( const fs::CFlexPath* pFlexPath = GetItemPath( *itSelIndex ) )
+					rSelFilePaths.push_back( *pFlexPath );
+		}
+	}
+	else
+	{
+		if ( const fs::CFlexPath* pFlexPath = GetItemPath( GetCurSel() ) )
+			rSelFilePaths.push_back( *pFlexPath );
+	}
+
+	return !rSelFilePaths.empty();
 }
 
 // fetch the current list box lvState (selection, top, caret) into destination
@@ -400,7 +431,10 @@ void CAlbumThumbListView::DrawItem( DRAWITEMSTRUCT* pDIS )
 		case ODA_DRAWENTIRE:
 		case ODA_SELECT:
 		{
+			const fs::CFlexPath* pFilePath = GetItemPath( pDIS->itemID );
+			bool validFile = pFilePath->FileExist();
 			CWicDibSection* pThumbDib = GetItemThumb( pDIS->itemID );
+
 			CDC dc;
 			CRgn bkRegion;
 			CSize thumbSize = pThumbDib != NULL ? pThumbDib->GetBmpFmt().m_size : CSize( 0, 0 );
@@ -417,46 +451,47 @@ void CAlbumThumbListView::DrawItem( DRAWITEMSTRUCT* pDIS )
 			else
 				bkRegion.CreateRectRgnIndirect( &pDIS->rcItem );		// no thumb image, fill the background anyway
 
-			if ( pDIS->itemState & ODS_SELECTED )
+			if ( HasFlag( pDIS->itemState, ODS_SELECTED ) )
 			{
 				FillRgn( dc, bkRegion, CWorkspace::Instance().GetImageSelColorBrush() );
 				itemRect.DeflateRect( 1, 1 );
 				::FrameRect( dc, &itemRect, GetSysColorBrush( COLOR_WINDOW ) );
 			}
 			else
-				FillRgn( dc, bkRegion, GetSysColorBrush( COLOR_BTNFACE ) );
+			{
+				CBrush bkBrush( validFile ? ::GetSysColor( COLOR_BTNFACE ) : app::ColorErrorBk );
+				FillRgn( dc, bkRegion, bkBrush );
+			}
 
 			if ( ODA_DRAWENTIRE == pDIS->itemAction )
 				if ( pThumbDib != NULL )
 					pThumbDib->DrawAtPos( &dc, thumbRect.TopLeft() );
 
-			if ( pThumbDib != NULL )
-			{
-				std::tstring fileName = GetItemFilename( pDIS->itemID );
-				if ( !fileName.empty() )
-				{
-					CRect rectText( pDIS->rcItem );
+			const TCHAR* pFileName = pFilePath->GetNameExt();
+			CRect rectText( pDIS->rcItem );
 
-					rectText.top = rectText.bottom - ( 2 * cyTextSpace + s_fontHeight + 2 );
-					rectText.DeflateRect( cxSide, cyTextSpace );
-					rectText.OffsetRect( 1, -1 );		// Extra step: fine adjust text position
+			rectText.top = rectText.bottom - ( 2 * cyTextSpace + s_fontHeight + 2 );
+			rectText.DeflateRect( cxSide, cyTextSpace );
+			rectText.OffsetRect( 1, -1 );		// Extra step: fine adjust text position
 
-					HGDIOBJ hFontOld = SelectObject( dc, HGDIOBJ( s_fontCaption ) );
-					COLORREF textColorOld;
-					int bkModeOld = dc.SetBkMode( TRANSPARENT );
+			HGDIOBJ hFontOld = SelectObject( dc, HGDIOBJ( s_fontCaption ) );
+			COLORREF textColorOld;
+			int bkModeOld = dc.SetBkMode( TRANSPARENT );
 
-					if ( pDIS->itemState & ODS_SELECTED )
-						textColorOld = dc.SetTextColor( CWorkspace::Instance().GetImageSelTextColor() );
-					else
-						textColorOld = dc.SetTextColor( GetSysColor( COLOR_BTNTEXT ) );
+			if ( validFile )
+				if ( HasFlag( pDIS->itemState, ODS_SELECTED ) )
+					textColorOld = dc.SetTextColor( CWorkspace::Instance().GetImageSelTextColor() );
+				else
+					textColorOld = dc.SetTextColor( GetSysColor( COLOR_BTNTEXT ) );
+			else
+				textColorOld = dc.SetTextColor( app::ColorErrorText );
 
-					dc.DrawText( fileName.c_str(), -1, rectText, DT_CENTER | DT_VCENTER | DT_WORD_ELLIPSIS | DT_NOCLIP | DT_NOPREFIX | DT_SINGLELINE );
+			dc.DrawText( pFileName, -1, rectText, DT_CENTER | DT_VCENTER | DT_WORD_ELLIPSIS | DT_NOCLIP | DT_NOPREFIX | DT_SINGLELINE );
 
-					SelectObject( dc, hFontOld );
-					dc.SetTextColor( textColorOld );
-					dc.SetBkMode( bkModeOld );
-				}
-			}
+			SelectObject( dc, hFontOld );
+			dc.SetTextColor( textColorOld );
+			dc.SetBkMode( bkModeOld );
+
 //#define DRAW_PERFECT_FRAME
 
 #ifdef	_DEBUG
@@ -681,12 +716,12 @@ CWicDibSection* CAlbumThumbListView::GetItemThumb( int displayIndex ) const thro
 	return app::GetThumbnailer()->AcquireThumbnailNoThrow( imageFilePath );
 }
 
-std::tstring CAlbumThumbListView::GetItemFilename( int displayIndex ) const
+const fs::CFlexPath* CAlbumThumbListView::GetItemPath( int displayIndex ) const
 {
 	if ( !IsValidImageIndex( displayIndex ) )
-		return std::tstring();					// Index violation, could happen in transient draws
+		return NULL;					// Index violation, could happen in transient draws
 
-	return m_pFileList->GetFileAttr( displayIndex ).GetPath().GetNameExt();
+	return &m_pFileList->GetFileAttr( displayIndex ).GetPath();
 }
 
 CSize CAlbumThumbListView::GetPageScrollExtent( void ) const
@@ -937,6 +972,9 @@ void CAlbumThumbListView::OnUpdate( CView* pSender, LPARAM lHint, CObject* pHint
 
 BOOL CAlbumThumbListView::OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo )
 {
+	if ( HandleCmdMsg( id, code, pExtra, pHandlerInfo ) )
+		return true;
+
 	return
 		CCtrlView::OnCmdMsg( id, code, pExtra, pHandlerInfo ) ||
 		m_pPeerImageView->CImageView::OnCmdMsg( id, code, pExtra, pHandlerInfo );		// redirect to album view for common cmdIds; non-virtual call CImageView::OnCmdMsg() to avoid infinite recursion
@@ -1093,10 +1131,22 @@ BOOL CAlbumThumbListView::OnMouseWheel( UINT mkFlags, short zDelta, CPoint pt )
 		return CCtrlView::OnMouseWheel( mkFlags, zDelta, pt );
 }
 
-void CAlbumThumbListView::OnContextMenu( CWnd* pWnd, CPoint point )
+void CAlbumThumbListView::OnContextMenu( CWnd* pWnd, CPoint screenPos )
 {
 	pWnd;
-	GetContextMenu().TrackPopupMenu( TPM_RIGHTBUTTON, point.x, point.y, app::GetMainFrame() );
+
+	CMenu* pSrcPopupMenu = &GetContextMenu();
+	if ( pSrcPopupMenu->GetSafeHmenu() != NULL )
+	{
+		std::vector< fs::CPath > selFilePaths;
+		if ( QuerySelItemPaths( selFilePaths ) && !selFilePaths.front().IsComplexPath() )
+		{
+			if ( CMenu* pContextPopup = MakeContextMenuHost( pSrcPopupMenu, selFilePaths ) )
+				DoTrackContextMenu( pContextPopup, screenPos );
+		}
+		else
+			DoTrackContextMenu( pSrcPopupMenu, screenPos );
+	}
 }
 
 void CAlbumThumbListView::OnTimer( UINT_PTR eventId )

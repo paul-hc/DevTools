@@ -132,7 +132,7 @@ class CShellLazyContextMenuHost : public CShellContextMenuHost
 {
 	friend class CExplorerSubMenuHook;
 public:
-	CShellLazyContextMenuHost( CWnd* pWndOwner, const std::vector< std::tstring >& filePaths, UINT queryFlags = CMF_NORMAL );
+	CShellLazyContextMenuHost( CWnd* pWndOwner, const std::vector< fs::CPath >& filePaths, UINT queryFlags = CMF_NORMAL );
 	virtual ~CShellLazyContextMenuHost();
 
 	// base overrides
@@ -141,7 +141,7 @@ protected:
 	virtual bool IsLazyUninit( void ) const;
 	bool LazyInit( void );
 private:
-	std::vector< std::tstring > m_filePaths;
+	std::vector< fs::CPath > m_filePaths;
 	UINT m_queryFlags;
 	bool m_isLazyInit;
 	std::auto_ptr< CExplorerSubMenuHook > m_pExplorerSubMenuHook;		// for lazy init: monitors when "Explorer" sub-menu gets expanded first time

@@ -5,6 +5,7 @@
 #include "IImageView.h"
 #include "utl/UI/AccelTable.h"
 #include "utl/UI/ImageZoomViewD2D.h"
+#include "utl/UI/ObjectCtrlBase.h"
 
 
 class CImageState;
@@ -15,6 +16,7 @@ namespace fs { class CPath; }
 
 
 class CImageView : public CImageZoomViewD2D
+				 , public CObjectCtrlBase
 				 , public IImageView
 {
 	typedef CImageZoomViewD2D BaseClass;
@@ -65,13 +67,14 @@ public:
 	// generated stuff
 	public:
 	virtual void OnInitialUpdate( void );		// first time after construct
+	virtual BOOL OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo );
 	virtual BOOL PreTranslateMessage( MSG* pMsg );
 	protected:
 	virtual void OnActivateView( BOOL bActivate, CView* pActivateView, CView* pDeactiveView );
 	virtual void OnUpdate( CView* pSender, LPARAM lHint, CObject* pHint );
 protected:
 	afx_msg int OnCreate( CREATESTRUCT* pCS );
-	afx_msg void OnContextMenu( CWnd* pWnd, CPoint point );
+	afx_msg void OnContextMenu( CWnd* pWnd, CPoint screenPos );
 	afx_msg void OnLButtonDown( UINT mkFlags, CPoint point );
 	afx_msg void OnLButtonDblClk( UINT mkFlags, CPoint point );
 	afx_msg void OnMButtonDown( UINT mkFlags, CPoint point );

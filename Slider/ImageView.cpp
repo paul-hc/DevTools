@@ -32,11 +32,13 @@ IMPLEMENT_DYNCREATE( CImageView, CScrollView )
 
 CImageView::CImageView( void )
 	: BaseClass()
+	, CObjectCtrlBase( this )
 	, m_pNavigBar( app::GetMainFrame()->GetToolbar() )
 	, m_pMdiChildFrame( NULL )
 	, m_bkColor( CLR_DEFAULT )
 {
 	s_imageAccel.LoadOnce( IDR_IMAGEVIEW );
+	SetTrackMenuTarget( app::GetMainFrame() );
 
 	SetZoomBar( app::GetMainFrame()->GetToolbar() );
 	SetScaleZoom( CWorkspace::GetData().m_autoImageSize, 100 );
@@ -189,7 +191,8 @@ bool CImageView::CanEnterDragMode( void ) const
 
 void CImageView::OnActivateView( BOOL bActivate, CView* pActivateView, CView* pDeactiveView )
 {
-	BaseClass::OnActivateView( bActivate, pActivateView, pDeactiveView );
+	__super::OnActivateView( bActivate, pActivateView, pDeactiveView );
+
 	if ( bActivate )
 		if ( pDeactiveView == NULL || pDeactiveView == pActivateView || pDeactiveView->GetParentFrame() != m_pMdiChildFrame )
 			EventChildFrameActivated();		// call only if is a frame activation, that is avoid calling when is a sibling view activation, as in case of CAlbumThumbListView for the CAlbumImageView derived
@@ -207,14 +210,22 @@ void CImageView::OnUpdate( CView* pSender, LPARAM lHint, CObject* pHint )
 			break;
 	}
 
-	BaseClass::OnUpdate( pSender, lHint, pHint );
+	__super::OnUpdate( pSender, lHint, pHint );
+}
+
+BOOL CImageView::OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo )
+{
+	if ( HandleCmdMsg( id, code, pExtra, pHandlerInfo ) )
+		return true;
+
+	return __super::OnCmdMsg( id, code, pExtra, pHandlerInfo );
 }
 
 BOOL CImageView::PreTranslateMessage( MSG* pMsg )
 {
 	return
 		s_imageAccel.Translate( pMsg, m_hWnd ) ||
-		BaseClass::PreTranslateMessage( pMsg );
+		__super::PreTranslateMessage( pMsg );
 }
 
 
@@ -255,8 +266,9 @@ END_MESSAGE_MAP()
 
 int CImageView::OnCreate( CREATESTRUCT* pCS )
 {
-	if ( -1 == BaseClass::OnCreate( pCS ) )
+	if ( -1 == __super::OnCreate( pCS ) )
 		return -1;
+
 	m_pMdiChildFrame = checked_static_cast< CChildFrame* >( GetParentFrame() );
 	ASSERT_PTR( m_pMdiChildFrame );
 	return 0;
@@ -264,7 +276,7 @@ int CImageView::OnCreate( CREATESTRUCT* pCS )
 
 void CImageView::OnInitialUpdate( void )
 {
-	BaseClass::OnInitialUpdate();
+	__super::OnInitialUpdate();
 
 	if ( HICON hIconType = GetDocTypeIcon() )
 		m_pMdiChildFrame->SetIcon( hIconType, FALSE );
@@ -280,17 +292,25 @@ void CImageView::OnInitialUpdate( void )
 	}
 }
 
-void CImageView::OnContextMenu( CWnd* pWnd, CPoint point )
+void CImageView::OnContextMenu( CWnd* pWnd, CPoint screenPos )
 {
 	pWnd;
-	CMenu& rContextMenu = GetDocContextMenu();
-	if ( (HMENU)rContextMenu != NULL )
-		rContextMenu.TrackPopupMenu( TPM_RIGHTBUTTON, point.x, point.y, app::GetMainFrame() );
+
+	CMenu* pSrcPopupMenu = &GetDocContextMenu();
+	if ( pSrcPopupMenu->GetSafeHmenu() != NULL )
+	{
+		fs::CFlexPath imagePath = GetImagePathKey().first;
+
+		if ( imagePath.IsComplexPath() )
+			DoTrackContextMenu( pSrcPopupMenu, screenPos );
+		else if ( CMenu* pContextPopup = MakeContextMenuHost( pSrcPopupMenu, std::vector< fs::CPath >( 1, imagePath ) ) )
+			DoTrackContextMenu( pContextPopup, screenPos );
+	}
 }
 
 void CImageView::OnLButtonDown( UINT mkFlags, CPoint point )
 {
-	BaseClass::OnLButtonDown( mkFlags, point );
+	__super::OnLButtonDown( mkFlags, point );
 
 	SetFocus();
 	if ( CWicImage* pImage = GetImage() )
@@ -313,7 +333,7 @@ void CImageView::OnLButtonDown( UINT mkFlags, CPoint point )
 
 void CImageView::OnLButtonDblClk( UINT mkFlags, CPoint point )
 {
-	BaseClass::OnLButtonDblClk( mkFlags, point );
+	__super::OnLButtonDblClk( mkFlags, point );
 
 	if ( !GetContentRect().PtInRect( point ) )			// outside of image
 		CmEditBkColor();
@@ -333,7 +353,7 @@ void CImageView::OnLButtonDblClk( UINT mkFlags, CPoint point )
 
 void CImageView::OnMButtonDown( UINT mkFlags, CPoint point )
 {
-	BaseClass::OnMButtonDown( mkFlags, point );
+	__super::OnMButtonDown( mkFlags, point );
 	SetFocus();
 
 	if ( GetImage() != NULL )
@@ -342,7 +362,7 @@ void CImageView::OnMButtonDown( UINT mkFlags, CPoint point )
 
 void CImageView::OnRButtonDown( UINT mkFlags, CPoint point )
 {
-	BaseClass::OnRButtonDown( mkFlags, point );
+	__super::OnRButtonDown( mkFlags, point );
 	SetFocus();
 }
 
@@ -356,7 +376,7 @@ BOOL CImageView::OnMouseWheel( UINT mkFlags, short zDelta, CPoint point )
 			ZoomRelative( delta > 0 ? ZoomOut : ZoomIn );
 		return TRUE;		// message processed
 	}
-	return FALSE;		//BaseClass::OnMouseWheel( mkFlags, zDelta, point );
+	return FALSE;		//__super::OnMouseWheel( mkFlags, zDelta, point );
 }
 
 void CImageView::OnEditCopy( void )

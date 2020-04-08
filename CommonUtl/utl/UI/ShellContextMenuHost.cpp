@@ -409,7 +409,7 @@ LRESULT CExplorerSubMenuHook::WindowProc( UINT message, WPARAM wParam, LPARAM lP
 
 // CShellLazyContextMenuHost implementation
 
-CShellLazyContextMenuHost::CShellLazyContextMenuHost( CWnd* pWndOwner, const std::vector< std::tstring >& filePaths, UINT queryFlags /*= CMF_NORMAL*/ )
+CShellLazyContextMenuHost::CShellLazyContextMenuHost( CWnd* pWndOwner, const std::vector< fs::CPath >& filePaths, UINT queryFlags /*= CMF_NORMAL*/ )
 	: CShellContextMenuHost( pWndOwner )
 	, m_filePaths( filePaths )
 	, m_queryFlags( queryFlags )
