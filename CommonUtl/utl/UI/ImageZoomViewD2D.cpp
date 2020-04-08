@@ -152,24 +152,28 @@ void CImageZoomViewD2D::PrintImageGdi( CDC* pPrnDC, CWicImage* pImage )
 
 void CImageZoomViewD2D::OnDraw( CDC* pDC )
 {
-	if ( CWicImage* pImage = GetImage() )
-		if ( pDC->IsPrinting() )
+	CWicImage* pImage = GetImage();
+
+	if ( pDC->IsPrinting() )
+	{
+		if ( pImage != NULL )
 			PrintImageGdi( pDC, pImage );
-		else if ( m_pImageRT.get() != NULL )
+	}
+	else if ( m_pImageRT.get() != NULL )
+	{
+		m_pImageRT->EnsureResources();
+
+		if ( m_pImageRT->IsValid() )
 		{
-			m_pImageRT->EnsureResources();
+			// apply translation transform according to view's scroll position
+			CPoint point = GetScrollPosition();
+			m_drawTraits.m_transform = D2D1::Matrix3x2F::Translation( (float)-point.x, (float)-point.y );
 
-			if ( m_pImageRT->IsValid() )
-			{
-				// apply translation transform according to view's scroll position
-				CPoint point = GetScrollPosition();
-				m_drawTraits.m_transform = D2D1::Matrix3x2F::Translation( (float)-point.x, (float)-point.y );
+			m_drawTraits.SetAutoInterpolationMode( GetContentRect().Size(), GetSourceSize() );
 
-				m_drawTraits.SetAutoInterpolationMode( GetContentRect().Size(), GetSourceSize() );
-
-				m_pImageRT->DrawImage( m_drawTraits );
-			}
+			m_pImageRT->DrawImage( m_drawTraits );
 		}
+	}
 }
 
 
