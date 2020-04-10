@@ -12,15 +12,21 @@ class CFileAttr;
 class CSearchSpec;
 
 
-class CImageFileEnumerator : private fs::IEnumerator, private utl::noncopyable
+class CImageFileEnumerator : private fs::IEnumerator
+						   , private utl::noncopyable
 {
 public:
-	CImageFileEnumerator( const Range< size_t >& fileSizeRange = Range< size_t >( 0, UINT_MAX ) );
+	CImageFileEnumerator( void );
 	~CImageFileEnumerator();
 
+	void SetFileSizeFilter( const Range< size_t >& fileSizeRange ) { m_fileSizeRange = fileSizeRange; ENSURE( m_fileSizeRange.IsNormalized() ); }
+//	private:
 	void Search( const std::vector< CSearchSpec >& searchSpecs ) throws_( CException* );
+	public:
 	void Search( const CSearchSpec& searchSpec ) throws_( CException* );
+//	private:
 	void SearchImageArchive( const fs::CPath& stgDocPath ) throws_( CException* );
+	public:
 
 	// found files
 	bool AnyFound( void ) const { return !m_fileAttrs.empty(); }
@@ -47,6 +53,8 @@ private:
 	// found
 	std::vector< CFileAttr > m_fileAttrs;
 	std::vector< fs::CPath > m_archiveStgPaths;
+public:
+	static const Range< size_t > s_allFileSizesRange;
 };
 
 

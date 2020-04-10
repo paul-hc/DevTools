@@ -70,9 +70,9 @@ protected:
 private:
 	std::auto_ptr< d2d::CImageRenderTarget > m_pImageRT;
 	d2d::CDrawBitmapTraits m_drawTraits;
+
+// generated stuff
 protected:
-	// generated stuff
-	protected:
 	virtual void OnDraw( CDC* pDC );
 protected:
 	afx_msg int OnCreate( CREATESTRUCT* pCreateStruct );

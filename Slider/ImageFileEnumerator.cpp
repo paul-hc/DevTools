@@ -14,8 +14,10 @@
 #endif
 
 
-CImageFileEnumerator::CImageFileEnumerator( const Range< size_t >& fileSizeRange /*= Range< size_t >( 0, UINT_MAX )*/ )
-	: m_fileSizeRange( fileSizeRange )
+const Range< size_t > CImageFileEnumerator::s_allFileSizesRange( 0, UINT_MAX );
+
+CImageFileEnumerator::CImageFileEnumerator( void )
+	: m_fileSizeRange( s_allFileSizesRange )
 	, m_issueStore( _T("Searching for images") )
 	, m_pProgress( new app::CScopedProgress( 0, 100, 1, m_issueStore.GetHeader().c_str() ) )
 	, m_pCurrSpec( NULL )

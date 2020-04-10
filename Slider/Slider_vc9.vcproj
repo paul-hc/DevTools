@@ -599,6 +599,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\SearchImagesProgressCallback.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\SearchImagesProgressCallback.h"
+				>
+			</File>
+			<File
 				RelativePath=".\SearchSpecDialog.cpp"
 				>
 			</File>

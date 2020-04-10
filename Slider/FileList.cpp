@@ -385,7 +385,8 @@ void CFileList::SearchForFiles( bool reportEmpty /*= true*/ ) throws_( CExceptio
 	ClearArchiveStgPaths();
 
 	{	// scope for "Searching..." progress
-		CImageFileEnumerator imageEnum( m_fileSizeRange );
+		CImageFileEnumerator imageEnum;
+		imageEnum.SetFileSizeFilter( m_fileSizeRange );
 
 		if ( !m_stgDocPath.IsEmpty() )
 			imageEnum.SearchImageArchive( m_stgDocPath );

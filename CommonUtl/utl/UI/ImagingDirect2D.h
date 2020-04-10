@@ -105,7 +105,12 @@ namespace d2d
 		virtual bool CanDraw( void ) const { return IsValid(); }
 
 		bool IsValid( void ) const { return GetRenderTarget() != NULL; }
-		void EnsureResources( void ) { if ( !IsValid() ) CreateResources(); }			// lazy resource aquisition
+
+		void EnsureResources( void )
+		{
+			if ( !IsValid() )
+				CreateResources();			// lazy resource aquisition
+		}
 	};
 
 

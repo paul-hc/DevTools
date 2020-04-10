@@ -9,8 +9,6 @@
 #include "FileAttr.h"
 
 
-
-
 namespace app { class CScopedProgress; }
 class CEnumTags;
 
