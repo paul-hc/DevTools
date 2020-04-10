@@ -1219,7 +1219,7 @@ BEGIN
     IDW_ZOOM_COMBO          "Zoom\nZoom (Ctrl+Z)"
     IDW_NAV_SLIDER          "Navigation slider\nNavigation Slider"
     IDW_SMOOTHING_MODE_CHECK 
-                            "Toggle the smoothing effect when scaling up an image\nSmooth Mode"
+                            "Toggle the smoothing effect when scaling up an image\nSmooth Mode (toggle off for icons and glyps)"
     CM_MDI_CLOSE_ALL        "Close all opened documents\nClose All"
     CM_MDI_WINDOWS          "View opened window list\nView Windows"
     ID_VIEW_ALBUMDIALOGBAR  "Show or hide album information bar\nToggle Album Info Bar"
