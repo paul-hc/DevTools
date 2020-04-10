@@ -118,6 +118,8 @@ protected:
 	afx_msg void CmSaveWorkspace( void );
 	afx_msg void CmEditWorkspace( void );
 	afx_msg void CmLoadWorkspaceDocs( void );
+	afx_msg void OnToggle_SmoothingMode( void );
+	afx_msg void OnUpdate_SmoothingMode( CCmdUI* pCmdUI );
 
 	DECLARE_MESSAGE_MAP()
 };

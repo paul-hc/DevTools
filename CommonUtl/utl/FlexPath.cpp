@@ -2,6 +2,7 @@
 #include "stdafx.h"
 #include "FlexPath.h"
 #include "StructuredStorage.h"
+#include "ContainerUtilities.h"
 #include "StringUtilities.h"
 
 #ifdef _DEBUG
@@ -82,3 +83,26 @@ namespace fs
 	}
 
 } //namespace fs
+
+
+#include <functional>
+
+namespace path
+{
+	void QueryPhysicalPaths( std::vector< fs::CPath >& rPhysicalPaths, const std::vector< fs::CFlexPath >& flexPaths )
+	{
+		for ( std::vector< fs::CFlexPath >::const_iterator itFlexPath = flexPaths.begin(); itFlexPath != flexPaths.end(); ++itFlexPath )
+			utl::AddUnique( rPhysicalPaths, itFlexPath->IsComplexPath() ? itFlexPath->GetPhysicalPath() : *itFlexPath );
+	}
+
+	void ConvertToPhysicalPaths( std::vector< fs::CFlexPath >& rFlexPaths )
+	{
+		for ( std::vector< fs::CFlexPath >::iterator itFlexPath = rFlexPaths.begin(); itFlexPath != rFlexPaths.end(); ++itFlexPath )
+			if ( itFlexPath->IsComplexPath() )
+			{
+				itFlexPath->Set( itFlexPath->GetPhysicalPath().Get() );
+			}
+
+		utl::RemoveDuplicates< pred::IsEquivalentPath >( rFlexPaths );		// remove duplicates that may have been created (multiple embedded patch with same storage path)
+	}
+}

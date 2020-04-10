@@ -122,6 +122,8 @@ void CMainFrame::CleanupWindow( void )
 {
 	if ( CWorkspace::GetData().m_autoSave )
 		CWorkspace::Instance().SaveSettings();
+	else
+		CWorkspace::Instance().SaveRegSettings();		// registry settings always get saved
 }
 
 bool CMainFrame::CreateProgressCtrl( void )

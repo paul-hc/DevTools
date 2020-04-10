@@ -205,7 +205,7 @@ bool CFileList::HasConsistentDeepStreams( void ) const
 
 bool CFileList::CheckReparentFileAttrs( const TCHAR* pDocPath, PersistOp op )
 {
-	fs::CFlexPath docPath( fs::CFlexPath( pDocPath ).GetPhysicalPath() );			// extract "C:\Images\storage.ias" from "C:\Images\storage.ias>_Album.sld"
+	fs::CFlexPath docPath( fs::CFlexPath( pDocPath ).GetPhysicalPath().Get() );			// extract "C:\Images\storage.ias" from "C:\Images\storage.ias>_Album.sld"
 
 	return
 		app::IsImageArchiveDoc( docPath.GetPtr() ) &&

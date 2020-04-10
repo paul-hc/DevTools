@@ -29,9 +29,9 @@ namespace ui
 
 		for ( int i = 0, count = ::GetMenuItemCount( hMenu ); i != count; ++i )
 		{
-			MENUITEMINFO itemInfo;
+			ui::MENUITEMINFO_BUFF itemInfo;
 
-			if ( ui::GetMenuItemInfo( &itemInfo, hMenu, i ) )
+			if ( itemInfo.GetMenuItemInfo( hMenu, i ) )
 			{
 				if ( itemInfo.wID != 0 && !HasFlag( itemInfo.fType, MFT_SEPARATOR /*| MFT_MENUBARBREAK | MFT_MENUBREAK*/ ) )
 					m_cmdIds.insert( ui::ToCmdId( itemInfo.wID ) );

@@ -203,6 +203,8 @@ bool CWorkspace::LoadSettings( void )
 
 bool CWorkspace::SaveSettings( void )
 {
+	SaveRegSettings();
+
 	ui::CAdapterDocument doc( this, m_filePath );
 	return doc.Save();
 }
@@ -358,6 +360,8 @@ BEGIN_MESSAGE_MAP( CWorkspace, CCmdTarget )
 	ON_COMMAND( CM_SAVE_WORKSPACE, CmSaveWorkspace )
 	ON_COMMAND( CM_EDIT_WORKSPACE, CmEditWorkspace )
 	ON_COMMAND( CM_LOAD_WORKSPACE_DOCS, CmLoadWorkspaceDocs )
+	ON_COMMAND( IDW_SMOOTHING_MODE_CHECK, OnToggle_SmoothingMode )
+	ON_UPDATE_COMMAND_UI( IDW_SMOOTHING_MODE_CHECK, OnUpdate_SmoothingMode )
 END_MESSAGE_MAP()
 
 void CWorkspace::CmLoadWorkspaceDocs( void )
@@ -411,4 +415,16 @@ void CWorkspace::CmEditWorkspace( void )
 
 	if ( CM_SAVE_WORKSPACE == result )
 		CmSaveWorkspace();
+}
+
+void CWorkspace::OnToggle_SmoothingMode( void )
+{
+	d2d::CDrawBitmapTraits::SetSmoothingMode( !d2d::CDrawBitmapTraits::IsSmoothingMode() );
+
+	app::GetApp()->UpdateAllViews( Hint_RedrawAll );
+}
+
+void CWorkspace::OnUpdate_SmoothingMode( CCmdUI* pCmdUI )
+{
+	pCmdUI->SetCheck( d2d::CDrawBitmapTraits::IsSmoothingMode() );
 }

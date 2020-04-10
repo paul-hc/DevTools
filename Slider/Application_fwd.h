@@ -45,7 +45,7 @@ enum UpdateViewHint
 	Hint_FileListChanged,				// file list has changed; reason: (FileListChangeType)pHint
 	Hint_ReloadImage,					// force reloading each image
 	Hint_FileChanged,					// an image file has been changed (copied, moved, deleted, etc)
-	Hint_DocSlideDataChanged,				// update navigation attribute from the document
+	Hint_DocSlideDataChanged,			// update navigation attribute from the document
 	Hint_BackupCurrSelection,			// save the current selection (for further selection restore)
 	Hint_BackupNearSelection,			// save the element near the current selection (for further selection restore)
 	Hint_SmartBackupSelection,			// save the selection either current or near based on intersection between current selection and move operation (for further selection restore)

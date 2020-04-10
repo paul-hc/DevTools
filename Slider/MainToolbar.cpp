@@ -43,6 +43,7 @@ const UINT CMainToolbar::s_buttons[] =
 		ID_SEPARATOR,
 	IDW_AUTO_IMAGE_SIZE_COMBO,
 	IDW_ZOOM_COMBO,
+	IDW_SMOOTHING_MODE_CHECK,
 	CM_ZOOM_NORMAL,
 	CM_ZOOM_IN,
 	CM_ZOOM_OUT,
@@ -66,7 +67,7 @@ const UINT CMainToolbar::s_buttons[] =
 CMainToolbar::CMainToolbar( void )
 	: CToolbarStrip()
 {
-	ui::MakeStandardControlFont( m_comboFont );
+	ui::MakeStandardControlFont( m_ctrlFont );
 }
 
 CMainToolbar::~CMainToolbar()
@@ -80,9 +81,12 @@ bool CMainToolbar::InitToolbar( void )
 	if ( !InitToolbarButtons() )
 		return false;
 
-	enum { AutoImageSizeComboWidth = 130, ZoomComboWidth = 90 };
-	VERIFY( CreateBarCombo( &m_autoImageSizeCombo, IDW_AUTO_IMAGE_SIZE_COMBO, CBS_DROPDOWNLIST | CBS_DISABLENOSCROLL, AutoImageSizeComboWidth ) );
-	VERIFY( CreateBarCombo( &m_zoomCombo, IDW_ZOOM_COMBO, CBS_DROPDOWN | CBS_DISABLENOSCROLL, ZoomComboWidth ) );
+	enum { AutoImageSizeComboWidth = 130, ZoomComboWidth = 90, SmoothCheckWidth = 67 };
+
+	VERIFY( CreateBarCtrl( &m_autoImageSizeCombo, IDW_AUTO_IMAGE_SIZE_COMBO, CBS_DROPDOWNLIST | CBS_DISABLENOSCROLL, AutoImageSizeComboWidth ) );
+	VERIFY( CreateBarCtrl( &m_zoomCombo, IDW_ZOOM_COMBO, CBS_DROPDOWN | CBS_DISABLENOSCROLL, ZoomComboWidth ) );
+	VERIFY( CreateBarCtrl( &m_smoothCheck, IDW_SMOOTHING_MODE_CHECK, BS_CHECKBOX | WS_DLGFRAME, SmoothCheckWidth ) );
+	m_smoothCheck.SetWindowText( _T("Smooth") );
 
 	// setup items for the combos
 	ui::WriteComboItems( m_autoImageSizeCombo, ui::GetTags_AutoImageSize().GetUiTags() );
@@ -97,39 +101,40 @@ bool CMainToolbar::InitToolbar( void )
 	CRect ctrlRect;
 	GetItemRect( buttonPos, &ctrlRect );
 	VERIFY( m_navigSlider.Create( TBS_HORZ | TBS_AUTOTICKS | TBS_TOOLTIPS | WS_VISIBLE | WS_TABSTOP, ctrlRect, this, IDW_NAV_SLIDER ) );
-	m_navigSlider.SetFont( &m_comboFont );
+	m_navigSlider.SetFont( &m_ctrlFont );
 	return true;
 }
 
-bool CMainToolbar::HandleCmdMsg( UINT cmdId, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo )
+template< typename CtrlType >
+bool CMainToolbar::CreateBarCtrl( CtrlType* pCtrl, UINT ctrlId, DWORD style, int width, UINT tbButtonStyle /*= TBBS_SEPARATOR*/ )
 {
-	switch ( cmdId )
-	{
-		case CM_ESCAPE_KEY:
-		case CM_FOCUS_ZOOM:
-		case CM_FOCUS_SLIDER:
-			return OnCmdMsg( cmdId, code, pExtra, pHandlerInfo ) != FALSE;
-	}
-	return false;
-}
-
-bool CMainToolbar::CreateBarCombo( CComboBox* pCombo, UINT comboId, DWORD style, int width )
-{
-	ASSERT_PTR( pCombo );
-	int buttonPos = CommandToIndex( comboId );
+	ASSERT_PTR( pCtrl );
+	int buttonPos = CommandToIndex( ctrlId );
 	if ( -1 == buttonPos )
 		return false;
 
-	SetButtonInfo( buttonPos, comboId, TBBS_SEPARATOR, width );		// set combo width with underlying button as separator
+	SetButtonInfo( buttonPos, ctrlId, tbButtonStyle, width );		// set combo width with underlying button as separator
 
 	CRect ctrlRect;
 	GetItemRect( buttonPos, &ctrlRect );
 	ctrlRect.left += 2;							// some more gap on left and right
 	ctrlRect.right -= 5;
 
-	VERIFY( pCombo->Create( style | WS_VISIBLE | WS_TABSTOP, ctrlRect, this, comboId ) );
-	pCombo->SetFont( &m_comboFont );
+	VERIFY( CreateControl( pCtrl, ctrlId, style, ctrlRect ) );
+	pCtrl->SetFont( &m_ctrlFont );
 	return true;
+}
+
+template<>
+bool CMainToolbar::CreateControl( CComboBox* pCombo, UINT comboId, DWORD style, const CRect& ctrlRect )
+{
+	return pCombo->Create( style | WS_VISIBLE | WS_TABSTOP, ctrlRect, this, comboId ) != FALSE;
+}
+
+template<>
+bool CMainToolbar::CreateControl( CButton* pButton, UINT buttonId, DWORD style, const CRect& ctrlRect )
+{
+	return pButton->Create( _T("<ck>"), style | WS_VISIBLE | WS_TABSTOP, ctrlRect, this, buttonId ) != FALSE;
 }
 
 bool CMainToolbar::OutputAutoSize( ui::AutoImageSize autoImageSize )
@@ -184,6 +189,18 @@ bool CMainToolbar::OutputNavigPos( int imagePos )
 int CMainToolbar::InputNavigPos( void ) const
 {
 	return m_navigSlider.GetPos();
+}
+
+bool CMainToolbar::HandleCmdMsg( UINT cmdId, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo )
+{
+	switch ( cmdId )
+	{
+		case CM_ESCAPE_KEY:
+		case CM_FOCUS_ZOOM:
+		case CM_FOCUS_SLIDER:
+			return OnCmdMsg( cmdId, code, pExtra, pHandlerInfo ) != FALSE;
+	}
+	return false;
 }
 
 

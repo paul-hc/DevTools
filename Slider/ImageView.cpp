@@ -298,14 +298,8 @@ void CImageView::OnContextMenu( CWnd* pWnd, CPoint screenPos )
 
 	CMenu* pSrcPopupMenu = &GetDocContextMenu();
 	if ( pSrcPopupMenu->GetSafeHmenu() != NULL )
-	{
-		fs::CFlexPath imagePath = GetImagePathKey().first;
-
-		if ( imagePath.IsComplexPath() )
-			DoTrackContextMenu( pSrcPopupMenu, screenPos );
-		else if ( CMenu* pContextPopup = MakeContextMenuHost( pSrcPopupMenu, std::vector< fs::CPath >( 1, imagePath ) ) )
+		if ( CMenu* pContextPopup = MakeContextMenuHost( pSrcPopupMenu, std::vector< fs::CPath >( 1, GetImagePathKey().first.GetPhysicalPath() ) ) )
 			DoTrackContextMenu( pContextPopup, screenPos );
-	}
 }
 
 void CImageView::OnLButtonDown( UINT mkFlags, CPoint point )
@@ -337,6 +331,12 @@ void CImageView::OnLButtonDblClk( UINT mkFlags, CPoint point )
 
 	if ( !GetContentRect().PtInRect( point ) )			// outside of image
 		CmEditBkColor();
+	else if ( ui::IsKeyPressed( VK_CONTROL ) )
+	{
+		const fs::CFlexPath& filePath = GetImagePathKey().first;
+		if ( !filePath.IsComplexPath() )
+			ShellInvokeDefaultVerb( std::vector< fs::CPath >( 1, filePath ) );
+	}
 	else
 	{	// zoom to defaults: stretch to fit / 100%
 		switch ( GetAutoImageSize() )

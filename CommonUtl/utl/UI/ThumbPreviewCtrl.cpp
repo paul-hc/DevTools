@@ -9,6 +9,14 @@
 #endif
 
 
+CThumbPreviewCtrl::CThumbPreviewCtrl( CThumbnailer* pThumbnailer )
+	: CStatic()
+	, CObjectCtrlBase( this )
+	, m_pThumbnailer( pThumbnailer )
+{
+	ASSERT_PTR( m_pThumbnailer );
+}
+
 void CThumbPreviewCtrl::SetImagePath( const fs::CFlexPath& imageFilePath, bool doRedraw /*= true*/ )
 {
 	m_imageFilePath = imageFilePath;
@@ -70,13 +78,33 @@ bool CThumbPreviewCtrl::DrawDualThumbnailFlow( CDC* pDC, const CRect& clientRect
 	return false;
 }
 
+BOOL CThumbPreviewCtrl::OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo )
+{
+	if ( HandleCmdMsg( id, code, pExtra, pHandlerInfo ) )
+		return true;
+
+	return __super::OnCmdMsg( id, code, pExtra, pHandlerInfo );
+}
+
 
 // message handlers
 
 BEGIN_MESSAGE_MAP( CThumbPreviewCtrl, CStatic )
+	ON_WM_CONTEXTMENU()
 	ON_WM_ERASEBKGND()
 	ON_WM_PAINT()
 END_MESSAGE_MAP()
+
+void CThumbPreviewCtrl::OnContextMenu( CWnd* pWnd, CPoint screenPos )
+{
+	pWnd;
+
+	fs::CPath filePath = m_imageFilePath.GetPhysicalPath();
+
+	if ( filePath.FileExist() )
+		if ( CMenu* pContextPopup = MakeContextMenuHost( NULL, std::vector< fs::CPath >( 1, filePath ) ) )
+			DoTrackContextMenu( pContextPopup, screenPos );
+}
 
 BOOL CThumbPreviewCtrl::OnEraseBkgnd( CDC* pDC )
 {

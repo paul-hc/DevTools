@@ -44,6 +44,7 @@ class CShellContextMenuHost;
 
 
 abstract class CObjectCtrlBase : public CInternalChange
+							   , private utl::noncopyable
 {
 protected:
 	CObjectCtrlBase( CWnd* pCtrl, UINT ctrlAccelId = 0 );
@@ -70,13 +71,13 @@ public:
 	void SetShellContextMenuStyle( ShellContextMenuStyle shCtxStyle, UINT shCtxQueryFlags = UINT_MAX );
 
 	bool IsShellMenuCmd( int cmdId ) const;
+
+	bool ShellInvokeDefaultVerb( const std::vector< fs::CPath >& filePaths );
+	bool ShellInvokeProperties( const std::vector< fs::CPath >& filePaths );
 protected:
 	CMenu* MakeContextMenuHost( CMenu* pSrcPopupMenu, const std::vector< fs::CPath >& filePaths );
 	bool DoTrackContextMenu( CMenu* pPopupMenu, const CPoint& screenPos );
 	void ResetShellContextMenu( void );
-
-	bool ShellInvokeDefaultVerb( const std::vector< fs::CPath >& filePaths );
-	bool ShellInvokeProperties( const std::vector< fs::CPath >& filePaths );
 private:
 	ui::ISubjectAdapter* m_pSubjectAdapter;			// by default ui::CDisplayCodeAdapter
 protected:

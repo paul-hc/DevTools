@@ -410,6 +410,7 @@ BEGIN
         MENUITEM "Fit Height",                  CM_IMAGE_SIZE_FIT_HEIGHT
         MENUITEM SEPARATOR
         MENUITEM "Resize View to Fit\tCtrl+Shift+F", CM_RESIZE_VIEW_TO_FIT
+        MENUITEM "&Smooth Mode",                IDW_SMOOTHING_MODE_CHECK
         MENUITEM SEPARATOR
         MENUITEM "Zoom In\tCtrl+Add",           CM_ZOOM_IN
         MENUITEM "Zoom Out\tCtrl+Sub",          CM_ZOOM_OUT
@@ -450,6 +451,7 @@ BEGIN
         MENUITEM "Fit Height",                  CM_IMAGE_SIZE_FIT_HEIGHT
         MENUITEM SEPARATOR
         MENUITEM "Resize View to Fit\tCtrl+Shift+F", CM_RESIZE_VIEW_TO_FIT
+        MENUITEM "&Smooth Mode",                IDW_SMOOTHING_MODE_CHECK
         MENUITEM SEPARATOR
         MENUITEM "Zoom In\tCtrl+Add",           CM_ZOOM_IN
         MENUITEM "Zoom Out\tCtrl+Sub",          CM_ZOOM_OUT
@@ -1216,6 +1218,8 @@ BEGIN
     IDW_AUTO_IMAGE_SIZE_COMBO "Edit the auto image size mode\nAuto Image Size"
     IDW_ZOOM_COMBO          "Zoom\nZoom (Ctrl+Z)"
     IDW_NAV_SLIDER          "Navigation slider\nNavigation Slider"
+    IDW_SMOOTHING_MODE_CHECK 
+                            "Toggle the smoothing effect when scaling up an image\nSmooth Mode"
     CM_MDI_CLOSE_ALL        "Close all opened documents\nClose All"
     CM_MDI_WINDOWS          "View opened window list\nView Windows"
     ID_VIEW_ALBUMDIALOGBAR  "Show or hide album information bar\nToggle Album Info Bar"
@@ -1224,12 +1228,12 @@ BEGIN
     CM_IMAGE_SIZE_AUTO_FIT_ALL 
                             "Scale image for best fit in the view\nBest Fit (All)"
     CM_IMAGE_SIZE_FIT_WIDTH "Scale image to fit the entire width in the view\nFit Width"
-    CM_IMAGE_SIZE_FIT_HEIGHT 
-                            "Scale image to fit the entire heigh in the view\nFit Height"
 END
 
 STRINGTABLE 
 BEGIN
+    CM_IMAGE_SIZE_FIT_HEIGHT 
+                            "Scale image to fit the entire heigh in the view\nFit Height"
     CM_IMAGE_SIZE_ACTUAL_SIZE 
                             "Display the image with the actual dimensions (using scroll bars)\nActual Size"
     CM_IMAGE_SIZE_USE_ZOOM_PCT 

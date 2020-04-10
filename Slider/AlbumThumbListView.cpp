@@ -169,7 +169,7 @@ bool CAlbumThumbListView::SetCurSel( int selIndex, bool notifySelChanged /*= fal
 	return true;
 }
 
-bool CAlbumThumbListView::QuerySelItemPaths( std::vector< fs::CPath >& rSelFilePaths ) const
+bool CAlbumThumbListView::QuerySelItemPaths( std::vector< fs::CFlexPath >& rSelFilePaths ) const
 {
 	const CListBox* pListBox = AsListBox();
 
@@ -1138,10 +1138,13 @@ void CAlbumThumbListView::OnContextMenu( CWnd* pWnd, CPoint screenPos )
 	CMenu* pSrcPopupMenu = &GetContextMenu();
 	if ( pSrcPopupMenu->GetSafeHmenu() != NULL )
 	{
-		std::vector< fs::CPath > selFilePaths;
-		if ( QuerySelItemPaths( selFilePaths ) && !selFilePaths.front().IsComplexPath() )
+		std::vector< fs::CFlexPath > selFilePaths;
+		if ( QuerySelItemPaths( selFilePaths ) )
 		{
-			if ( CMenu* pContextPopup = MakeContextMenuHost( pSrcPopupMenu, selFilePaths ) )
+			std::vector< fs::CPath > physicalPaths;
+			path::QueryPhysicalPaths( physicalPaths, selFilePaths );
+
+			if ( CMenu* pContextPopup = MakeContextMenuHost( pSrcPopupMenu, physicalPaths ) )
 				DoTrackContextMenu( pContextPopup, screenPos );
 		}
 		else

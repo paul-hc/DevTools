@@ -30,12 +30,17 @@ public:
 	virtual bool OutputNavigPos( int imagePos );
 	virtual int InputNavigPos( void ) const;
 private:
-	bool CreateBarCombo( CComboBox* pCombo, UINT comboId, DWORD style, int width );
+	template< typename CtrlType >
+	bool CreateBarCtrl( CtrlType* pCtrl, UINT ctrlId, DWORD style, int width, UINT tbButtonStyle = TBBS_SEPARATOR );
+
+	template< typename CtrlType >
+	bool CreateControl( CtrlType* pCtrl, UINT ctrlId, DWORD style, const CRect& ctrlRect );
 private:
 	CComboBox m_autoImageSizeCombo;
 	CComboBox m_zoomCombo;
+	CButton m_smoothCheck;
 	CSliderCtrl m_navigSlider;
-	CFont m_comboFont;
+	CFont m_ctrlFont;
 
 	static const UINT s_buttons[];
 public:

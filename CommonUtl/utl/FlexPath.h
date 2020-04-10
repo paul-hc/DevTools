@@ -28,7 +28,7 @@ namespace fs
 		static CFlexPath MakeComplexPath( const std::tstring& physicalPath, const TCHAR* pEmbeddedPath ) { return path::MakeComplex( physicalPath, pEmbeddedPath ); }
 		bool SplitComplexPath( std::tstring& rPhysicalPath, std::tstring& rEmbeddedPath ) const { return path::SplitComplex( rPhysicalPath, rEmbeddedPath, Get() ); }
 
-		std::tstring GetPhysicalPath( void ) const { return path::GetPhysical( Get() ); }
+		fs::CPath GetPhysicalPath( void ) const { return path::GetPhysical( Get() ); }
 		const TCHAR* GetEmbeddedPath( void ) const { return path::GetEmbedded( GetPtr() ); }
 
 		const TCHAR* GetLeafSubPath( void ) const { return IsComplexPath() ? GetEmbeddedPath() : GetNameExt(); }
@@ -46,6 +46,13 @@ namespace fs
 
 	inline CFlexPath ToFlexPath( const CPath& path ) { return CFlexPath( path.Get() ); }									// convenience downcast
 	inline const CFlexPath& CastFlexPath( const CPath& path ) { return reinterpret_cast< const CFlexPath& >( path ); }		// convenience reference downcast
+}
+
+
+namespace path
+{
+	void QueryPhysicalPaths( std::vector< fs::CPath >& rPhysicalPaths, const std::vector< fs::CFlexPath >& flexPaths );
+	void ConvertToPhysicalPaths( std::vector< fs::CFlexPath >& rFlexPaths );			// strip-out complex paths to physical paths (retaining existing physical paths)
 }
 
 

@@ -2,8 +2,8 @@
 #define ThumbPreviewCtrl_h
 #pragma once
 
-
 #include "utl/FlexPath.h"
+#include "ObjectCtrlBase.h"
 
 
 class CThumbnailer;
@@ -11,9 +11,10 @@ class CWicDibSection;
 
 
 class CThumbPreviewCtrl : public CStatic
+						, public CObjectCtrlBase
 {
 public:
-	CThumbPreviewCtrl( CThumbnailer* pThumbnailer ) : m_pThumbnailer( pThumbnailer ) { ASSERT_PTR( m_pThumbnailer ); }
+	CThumbPreviewCtrl( CThumbnailer* pThumbnailer );
 
 	const fs::CFlexPath& GetImagePath( void ) const { return m_imageFilePath; }
 	void SetImagePath( const fs::CFlexPath& imageFilePath, bool doRedraw = true );
@@ -23,11 +24,14 @@ private:
 private:
 	CThumbnailer* m_pThumbnailer;
 	fs::CFlexPath m_imageFilePath;
-public:
+
 	// generated stuff
+public:
+	virtual BOOL OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo );
 protected:
+	afx_msg void OnContextMenu( CWnd* pWnd, CPoint screenPos );
 	afx_msg BOOL OnEraseBkgnd( CDC* pDC );
-	afx_msg void OnPaint();
+	afx_msg void OnPaint( void );
 
 	DECLARE_MESSAGE_MAP()
 };

@@ -221,26 +221,53 @@ namespace ui
 
 		return true;
 	}
+}
 
 
-	bool GetMenuItemInfo( MENUITEMINFO* pItemInfo, HMENU hMenu, UINT item, bool byPos /*= true*/,
-						  UINT mask /*= MIIM_ID | MIIM_SUBMENU | MIIM_DATA | MIIM_STATE | MIIM_FTYPE | MIIM_STRING | MIIM_BITMAP*/ )
+namespace ui
+{
+	// MENUITEMINFO_BUFF implementation
+
+	MENUITEMINFO_BUFF::MENUITEMINFO_BUFF( void )
 	{
-		ASSERT_PTR( pItemInfo );
-		ASSERT_PTR( ::IsMenu( hMenu ) );
-
-		static TCHAR s_itemText[ 512 ];
-		utl::ZeroWinStruct( pItemInfo );
-		s_itemText[ 0 ] = _T('\0');
-
-		pItemInfo->fMask = mask;					// MIIM_TYPE replaced by MIIM_FTYPE | MIIM_STRING | MIIM_BITMAP
-		pItemInfo->dwTypeData = s_itemText;
-		pItemInfo->cch = COUNT_OF( s_itemText );
-
-		return ::GetMenuItemInfo( hMenu, item, byPos, pItemInfo ) != FALSE;
+		utl::ZeroWinStruct( static_cast< MENUITEMINFO* >( this ) );
 	}
 
+	void MENUITEMINFO_BUFF::ClearTextBuffer( void )
+	{
+		if ( dwTypeData != NULL && HasFlag( fType, MFT_STRING ) )		// text buffer allocated internally?
+			delete[] dwTypeData;
 
+		dwTypeData = NULL;
+		cch = 0;
+	}
+
+	bool MENUITEMINFO_BUFF::GetMenuItemInfo( HMENU hMenu, UINT item, bool byPos /*= true*/,
+											 UINT mask /*= MIIM_ID | MIIM_SUBMENU | MIIM_DATA | MIIM_STATE | MIIM_FTYPE | MIIM_STRING | MIIM_BITMAP*/ )
+	{
+		ASSERT_PTR( ::IsMenu( hMenu ) );
+
+		ClearTextBuffer();
+		utl::ZeroWinStruct( static_cast< MENUITEMINFO* >( this ) );
+
+		fMask = mask;					// MIIM_TYPE replaced by MIIM_FTYPE | MIIM_STRING | MIIM_BITMAP
+
+		if ( !::GetMenuItemInfo( hMenu, item, byPos, this ) )
+			return false;
+
+		if ( HasFlag( fMask, MIIM_STRING ) && cch != 0 )
+		{
+			dwTypeData = new TCHAR[ ++cch ];									// enlarge text buffer with EOS & allocate it
+			return ::GetMenuItemInfo( hMenu, item, byPos, this ) != FALSE;		// also fetch item text
+		}
+
+		return true;
+	}
+}
+
+
+namespace ui
+{
 	int FindMenuItemIndex( HMENU hMenu, UINT itemId, unsigned int iFirst /*= 0*/ )
 	{
 		ASSERT_PTR( hMenu );
@@ -312,15 +339,15 @@ namespace ui
 
 		for ( int i = 0, count = ::GetMenuItemCount( hSrcMenu ); i != count; ++i )
 		{
-			MENUITEMINFO itemInfo;
-			if ( ui::GetMenuItemInfo( &itemInfo, hSrcMenu, i ) )
+			MENUITEMINFO_BUFF itemInfo;
+			if ( itemInfo.GetMenuItemInfo( hSrcMenu, i ) )
 			{
 				if ( itemInfo.hSubMenu != NULL )
 					itemInfo.hSubMenu = ui::CloneMenu( itemInfo.hSubMenu );		// clone the sub-menu inplace
 
 				VERIFY( destMenu.InsertMenuItem( i, &itemInfo, TRUE ) );
 
-				if ( !ui::IsSeparatorItem( itemInfo ) )
+				if ( !itemInfo.IsSeparator() )
 					SetMenuItemImage( destMenu, itemInfo.wID );
 			}
 			else
@@ -340,12 +367,12 @@ namespace ui
 
 			if ( NULL == pSrcIds || ( 0 == srcId || std::find( pSrcIds->begin(), pSrcIds->end(), srcId ) != pSrcIds->end() ) )
 			{
-				MENUITEMINFO itemInfo;
-				if ( ui::GetMenuItemInfo( &itemInfo, srcMenu, i ) )
+				MENUITEMINFO_BUFF itemInfo;
+				if ( itemInfo.GetMenuItemInfo( srcMenu, i ) )
 				{
 					VERIFY( rDestMenu.InsertMenuItem( destIndex, &itemInfo, TRUE ) );
 
-					if ( !ui::IsSeparatorItem( itemInfo ) )
+					if ( !itemInfo.IsSeparator() )
 						SetMenuItemImage( rDestMenu, itemInfo.wID );
 
 					++copiedCount;
@@ -615,9 +642,9 @@ namespace dbg
 
 		for ( int i = 0, count = ::GetMenuItemCount( hMenu ); i != count; ++i )
 		{
-			MENUITEMINFO itemInfo;
+			ui::MENUITEMINFO_BUFF itemInfo;
 
-			if ( ui::GetMenuItemInfo( &itemInfo, hMenu, i ) )
+			if ( itemInfo.GetMenuItemInfo( hMenu, i ) )
 				TraceMenuItem( itemInfo, i, indentLevel );
 			else
 				ASSERT( false );
@@ -633,9 +660,9 @@ namespace dbg
 	void TraceMenuItem( HMENU hMenu, int itemPos )
 	{
 	#ifdef _DEBUG
-		MENUITEMINFO itemInfo;
+		ui::MENUITEMINFO_BUFF itemInfo;
 
-		if ( ui::GetMenuItemInfo( &itemInfo, hMenu, itemPos ) )
+		if ( itemInfo.GetMenuItemInfo( hMenu, itemPos ) )
 			TraceMenuItem( itemInfo, itemPos );
 		else
 			TRACE( _T("?? Invalid menu item: hMenu=0x%08x itemPos=%d\n"), hMenu, itemPos );
@@ -644,18 +671,18 @@ namespace dbg
 	#endif
 	}
 
-	void TraceMenuItem( const MENUITEMINFO& itemInfo, int itemPos, unsigned int indentLevel /*= 0*/ )
+	void TraceMenuItem( const ui::MENUITEMINFO_BUFF& itemInfo, int itemPos, unsigned int indentLevel /*= 0*/ )
 	{
 	#ifdef _DEBUG
 		static const TCHAR s_space[] = _T(", "), s_fieldSep[] = _T(", "), s_flagsSep[] = _T("   ");
 		std::tstring text;
 
-		if ( ui::IsSubMenuItem( itemInfo ) )
+		if ( itemInfo.IsSubMenu() )
 			stream::Tag( text, str::Format( _T("hSubMenu=0x%08X"), itemInfo.hSubMenu ), s_space );
-		else if ( ui::IsCommandItem( itemInfo ) )
+		else if ( itemInfo.IsCommand() )
 			stream::Tag( text, str::Format( _T("cmdId=%d (0x%X)"), itemInfo.wID, itemInfo.wID ), s_space );
 
-		if ( ui::IsCommandItem( itemInfo ) )
+		if ( itemInfo.IsCommand() )
 			stream::Tag( text, str::Format( _T("\"%s\""), itemInfo.dwTypeData ), s_fieldSep );		// text
 
 		stream::Tag( text, FormatFlags( _T("Type={%s}"), GetTags_MenuItemType(), itemInfo.fType ), s_flagsSep );				// type flags

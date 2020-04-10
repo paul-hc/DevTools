@@ -14,9 +14,6 @@ void AFXAPI AfxCancelModes( HWND hWndRcvr );
 
 namespace ui
 {
-	enum UseMenuImages { NoMenuImages, NormalMenuImages, CheckedMenuImages };
-
-
 	struct CMenuItemRef
 	{
 		CMenuItemRef( UINT itemRef, UINT refFlags = MF_BYCOMMAND )			// item qualified with ID by default
@@ -31,6 +28,32 @@ namespace ui
 		UINT m_itemRef;
 		UINT m_refFlags;
 	};
+
+
+	// with managed memory for the text buffer
+	struct MENUITEMINFO_BUFF : public MENUITEMINFO
+							 , private utl::noncopyable
+	{
+		MENUITEMINFO_BUFF( void );
+		~MENUITEMINFO_BUFF() { ClearTextBuffer(); }
+
+		void ClearTextBuffer( void );
+
+		bool GetMenuItemInfo( HMENU hMenu, UINT item, bool byPos = true,
+							  UINT mask = MIIM_ID | MIIM_SUBMENU | MIIM_DATA | MIIM_STATE | MIIM_FTYPE | MIIM_STRING | MIIM_BITMAP );
+
+		bool HasText( void ) const { return HasFlag( fType, MFT_STRING ); }
+
+		bool IsSeparator( void ) const { return HasFlag( fType, MFT_SEPARATOR ); }
+		bool IsSubMenu( void ) const { return hSubMenu != NULL; }
+		bool IsCommand( void ) const { return !IsSeparator() && !IsSubMenu() && wID != 0; }
+	};
+}
+
+
+namespace ui
+{
+	enum UseMenuImages { NoMenuImages, NormalMenuImages, CheckedMenuImages };
 
 
 	void LoadPopupMenu( CMenu& rContextMenu, UINT menuResId, int popupIndex, UseMenuImages useMenuImages = NormalMenuImages, std::tstring* pPopupText = NULL );
@@ -53,13 +76,6 @@ namespace ui
 
 
 	// menu item
-	bool GetMenuItemInfo( MENUITEMINFO* pItemInfo, HMENU hMenu, UINT item, bool byPos = true,
-						  UINT mask = MIIM_ID | MIIM_SUBMENU | MIIM_DATA | MIIM_STATE | MIIM_FTYPE | MIIM_STRING | MIIM_BITMAP );
-
-	inline bool IsSeparatorItem( const MENUITEMINFO& itemInfo ) { return HasFlag( itemInfo.fType, MFT_SEPARATOR ); }
-	inline bool IsSubMenuItem( const MENUITEMINFO& itemInfo ) { return itemInfo.hSubMenu != NULL; }
-	inline bool IsCommandItem( const MENUITEMINFO& itemInfo ) { return !IsSeparatorItem( itemInfo ) && !IsSubMenuItem( itemInfo ) && itemInfo.wID != 0; }
-
 	inline std::tstring GetMenuItemText( const CMenu& menu, UINT itemId, UINT flags = MF_BYCOMMAND )
 	{
 		CString itemText;
@@ -107,7 +123,7 @@ namespace dbg
 {
 	void TraceMenu( HMENU hMenu, unsigned int indentLevel = 0 );
 	void TraceMenuItem( HMENU hMenu, int itemPos );
-	void TraceMenuItem( const MENUITEMINFO& itemInfo, int itemPos, unsigned int indentLevel = 0 );
+	void TraceMenuItem( const ui::MENUITEMINFO_BUFF& itemInfo, int itemPos, unsigned int indentLevel = 0 );
 }
 
 

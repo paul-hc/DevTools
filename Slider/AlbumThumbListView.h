@@ -37,7 +37,7 @@ public:
 	bool IsMultiSelection( void ) const { return HasFlag( AsListBox()->GetStyle(), LBS_EXTENDEDSEL | LBS_MULTIPLESEL ); }
 	int GetCurSel( void ) const;
 	bool SetCurSel( int selIndex, bool notifySelChanged = false );
-	bool QuerySelItemPaths( std::vector< fs::CPath >& rSelFilePaths ) const;
+	bool QuerySelItemPaths( std::vector< fs::CFlexPath >& rSelFilePaths ) const;
 
 	void GetListViewState( CListViewState& rLvState, bool filesMustExist = true, bool sortAscending = true ) const;
 	void SetListViewState( const CListViewState& lvState, bool notifySelChanged = false, const TCHAR* pDoRestore = _T("TSC") );
