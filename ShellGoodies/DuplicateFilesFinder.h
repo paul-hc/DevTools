@@ -59,8 +59,8 @@ public:
 
 	void Section_GroupByFileSize( size_t fileCount );
 	void Section_GroupByCrc32( size_t itemCount );
-
-	// file enumerator callback
+private:
+	// file enumerator callbacks
 	virtual void AddFoundFile( const TCHAR* pFilePath ) throws_( CUserAbortedException );
 	virtual bool AddFoundSubDir( const TCHAR* pSubDirPath ) throws_( CUserAbortedException );
 private:
