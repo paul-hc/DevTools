@@ -71,7 +71,7 @@ void CImageFileEnumerator::Search( const CSearchSpec& searchSpec ) throws_( CExc
 void CImageFileEnumerator::SearchImageArchive( const fs::CPath& stgDocPath ) throws_( CException* )
 {
 	if ( !stgDocPath.FileExist() )
-		AfxThrowFileException( CFileException::fileNotFound, -1, stgDocPath.GetPtr() );		// folder path doesn't exist
+		AfxThrowFileException( CFileException::fileNotFound, -1, stgDocPath.GetPtr() );		// storage file path does not exist
 
 	CWaitCursor wait;
 	CPushThrowMode pushThrow( &CImageArchiveStg::Factory(), true );			// report storage sharing violations, etc

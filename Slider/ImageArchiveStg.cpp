@@ -8,6 +8,7 @@
 #include "utl/FileSystem.h"
 #include "utl/RuntimeException.h"
 #include "utl/Serialization.h"
+#include "utl/UI/MfcUtilities.h"
 #include "utl/UI/Thumbnailer.h"
 #include "utl/UI/WicImageCache.h"
 #include <numeric>
@@ -53,6 +54,7 @@ const TCHAR CImageArchiveStg::s_subPathSep = _T('*');
 CImageArchiveStg::CImageArchiveStg( IStorage* pRootStorage /*= NULL*/ )
 	: fs::CStructuredStorage( pRootStorage )
 	, m_pThumbsDecoderId( NULL )
+	, m_fileModelSchema( app::Slider_LatestModelSchema )
 {
 }
 
@@ -220,6 +222,8 @@ void CImageArchiveStg::LoadImagesMetadata( std::vector< CFileAttr >& rFileAttrib
 		CArchive archive( pMetaDataFile.get(), CArchive::load );
 		archive.m_bForceFlat = FALSE;			// same as CDocument::OnOpenDocument()
 
+		serial::CScopedLoadingArchive scopedLoadingArchive( archive, m_fileModelSchema );
+
 		try
 		{	// load metadata
 			UINT totalImagesSize;
@@ -306,6 +310,7 @@ bool CImageArchiveStg::LoadAlbumDoc( CObject* pAlbumDoc )
 		CPushThrowMode pushNoThrow( this, false );				// album not found is not an error
 		pAlbumFile.reset( OpenFile( CImageArchiveStg::s_albumNameExt ) );
 	}
+
 	if ( NULL == pAlbumFile.get() )
 		return false;
 
@@ -383,6 +388,9 @@ std::tstring CImageArchiveStg::LoadPassword( void )
 
 	CArchive archive( pPwdFile.get(), CArchive::load );
 	archive.m_bForceFlat = FALSE;			// same as CDocument::OnOpenDocument()
+
+	serial::CScopedLoadingArchive scopedLoadingArchive( archive, m_fileModelSchema );
+
 	try
 	{
 		if ( PwdWide == pwdFmt )

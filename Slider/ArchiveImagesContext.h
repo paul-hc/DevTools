@@ -3,7 +3,7 @@
 #pragma once
 
 #include "utl/FlexPath.h"
-#include "Application_fwd.h"
+#include "ModelSchema.h"
 #include <set>
 
 

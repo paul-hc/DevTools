@@ -34,7 +34,9 @@ public:
 	CSlideData( void );
 	~CSlideData();
 
-	void Stream( CArchive& archive, UINT* pSlideElapsed = NULL );
+	typedef UINT TFirstDataMember;
+
+	void Stream( CArchive& archive, TFirstDataMember* pExtracted_SlideElapsed = NULL );
 
 	const CListViewState& GetCurrListState( void ) const { return m_currListState; }
 	CListViewState& RefCurrListState( void ) { return m_currListState; }
@@ -43,7 +45,7 @@ public:
 	bool SetCurrentIndex( int currIndex, bool resetListState = true );
 public:
 	// sliding
-	persist UINT m_slideElapsed;
+	persist TFirstDataMember m_slideElapsed;
 	persist bool m_dirForward;
 	persist bool m_circular;
 

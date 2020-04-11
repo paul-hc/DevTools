@@ -51,11 +51,11 @@ void CWorkspaceData::Save( CArchive& archive )
 
 	// note: bool serializes as BOOL with streaming operator&()
 
-	BOOL versionAsBool = static_cast< BOOL >( app::Slider_LatestVersion );
+	BOOL versionAsBool = static_cast< BOOL >( app::Slider_LatestModelSchema );
 
-	archive << versionAsBool;				// save as BOOL for backwards compat: could be CWorkspace::m_autoSave (bool) or (app::SliderVersion)
+	archive << versionAsBool;				// save as BOOL for backwards compat: could be CWorkspace::m_autoSave (bool) or (slider::ModelSchema)
 
-	std::string versionTag = str::AsNarrow( app::FormatSliderVersion( app::Slider_LatestVersion ) + _T(" Workspace") );
+	std::string versionTag = str::AsNarrow( app::FormatSliderVersion( app::Slider_LatestModelSchema ) + _T(" Workspace") );
 	archive << versionTag;					// user-readable version tag
 
 	archive & m_autoSave;
@@ -71,7 +71,7 @@ void CWorkspaceData::Save( CArchive& archive )
 	archive << (int&)m_autoImageSize;
 }
 
-app::SliderVersion CWorkspaceData::Load( CArchive& archive )
+app::ModelSchema CWorkspaceData::Load( CArchive& archive )
 {
 	ASSERT( archive.IsLoading() );
 
@@ -79,7 +79,7 @@ app::SliderVersion CWorkspaceData::Load( CArchive& archive )
 	BOOL versionAsBool;
 	archive >> versionAsBool;						// save as BOOL for backwards compat: could be CWorkspace::m_autoSave
 
-	app::SliderVersion savedVersion = static_cast< app::SliderVersion >( versionAsBool );
+	app::ModelSchema savedModelSchema = static_cast< app::ModelSchema >( versionAsBool );
 
 	if ( FALSE == versionAsBool || TRUE == versionAsBool )		// old workspace format?
 		m_autoSave = versionAsBool != FALSE;		// used to be streamed first; skip loading, will load with the old format
@@ -97,15 +97,15 @@ app::SliderVersion CWorkspaceData::Load( CArchive& archive )
 		archive >> m_imageSelColor;
 		archive >> m_imageSelTextColor;
 
-		if ( savedVersion >= app::Slider_v3_6 )
+		if ( savedModelSchema >= app::Slider_v3_6 )
 			archive >> m_thumbBoundsSize;
 
-		if ( savedVersion >= app::Slider_v4_0 )
+		if ( savedModelSchema >= app::Slider_v4_0 )
 			archive >> (int&)m_autoImageSize;
 		else
 			m_autoImageSize = HasFlag( m_wkspFlags, wf::Old_InitStretchToFit ) ? ui::AutoFitLargeOnly : ui::ActualSize;
 	}
-	return savedVersion;
+	return savedModelSchema;
 }
 
 
@@ -150,9 +150,9 @@ void CWorkspace::Serialize( CArchive& archive )
 	}
 	else
 	{
-		app::SliderVersion savedVersion = m_data.Load( archive );
+		app::ModelSchema savedModelSchema = m_data.Load( archive );
 
-		if ( savedVersion >= app::Slider_v3_5 )
+		if ( savedModelSchema >= app::Slider_v3_5 )
 		{
 			archive & m_delayFullScreen;			// temporary replacer for m_isFullScreen
 			archive >> m_mainPlacement;
@@ -171,7 +171,7 @@ void CWorkspace::Serialize( CArchive& archive )
 			archive >> m_data.m_imageSelTextColor;
 			archive >> m_data.m_thumbListColCount;
 			archive >> m_mainPlacement;
-			archive >> (int&)savedVersion;			// the real saved old version
+			archive >> (int&)savedModelSchema;			// the real saved old version
 			archive >> m_reserved;
 		}
 
@@ -185,7 +185,7 @@ void CWorkspace::Serialize( CArchive& archive )
 		if ( app::GetThumbnailer()->SetBoundsSize( m_data.GetThumbBoundsSize() ) )
 			app::GetApp()->UpdateAllViews( Hint_ThumbBoundsResized );			// notify thumb bounds change
 
-		if ( savedVersion < app::Slider_v3_2 )
+		if ( savedModelSchema < app::Slider_v3_2 )
 			return;									// skip loading old m_imageStates that were using DECLARE_SERIAL( CImageState )
 	}
 

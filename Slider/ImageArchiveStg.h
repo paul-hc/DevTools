@@ -2,10 +2,11 @@
 #define ImageArchiveStg_h
 #pragma once
 
-#include "FileAttr.h"
 #include "utl/FlexPath.h"
 #include "utl/StructuredStorage.h"
 #include "utl/UI/Thumbnailer_fwd.h"
+#include "ModelSchema.h"
+#include "FileAttr.h"
 #include <set>
 #include <hash_map>
 
@@ -30,6 +31,9 @@ public:
 
 	bool SavePassword( const std::tstring& password );
 	std::tstring LoadPassword( void );
+
+	app::ModelSchema GetFileModelSchema( void ) const { return m_fileModelSchema; }
+	void StoreFileModelSchema( app::ModelSchema docModelSchema ) { m_fileModelSchema = docModelSchema; }
 
 	// .sld file format
 	void SaveAlbumDoc( CObject* pAlbumDoc );
@@ -60,6 +64,8 @@ private:
 private:
 	CComPtr< IStorage > m_pThumbsStorage;
 	const GUID* m_pThumbsDecoderId;
+	app::ModelSchema m_fileModelSchema;			// transient: loaded model schema from file, stored by the album doc
+
 private:
 	enum ExtensionType { Ext_ias, Ext_cid, Ext_icf, _Ext_Count };
 	enum PwdFmt

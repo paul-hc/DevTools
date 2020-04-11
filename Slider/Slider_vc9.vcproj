@@ -499,14 +499,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\ImageArchiveStg.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\ImageArchiveStg.h"
-				>
-			</File>
-			<File
 				RelativePath=".\ImageDoc.cpp"
 				>
 			</File>
@@ -787,6 +779,18 @@
 				</File>
 				<File
 					RelativePath=".\FileList.h"
+					>
+				</File>
+				<File
+					RelativePath=".\ImageArchiveStg.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\ImageArchiveStg.h"
+					>
+				</File>
+				<File
+					RelativePath=".\ModelSchema.h"
 					>
 				</File>
 				<File

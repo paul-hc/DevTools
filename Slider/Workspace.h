@@ -2,10 +2,10 @@
 #define Workspace_h
 #pragma once
 
-#include "Application_fwd.h"
+#include "ModelSchema.h"
 #include "ImageState.h"
 #include "WindowPlacement.h"
-#include "utl/Path.h"		// ui::AutoImageSize
+#include "utl/Path.h"
 #include "utl/UI/Image_fwd.h"		// ui::AutoImageSize
 
 
@@ -38,7 +38,7 @@ struct CWorkspaceData
 	CWorkspaceData( void );
 
 	void Save( CArchive& archive );
-	app::SliderVersion Load( CArchive& archive );
+	app::ModelSchema Load( CArchive& archive );
 
 	bool operator==( const CWorkspaceData& right ) const { return pred::Equal == memcmp( this, &right, sizeof( CWorkspaceData ) ); }
 	bool operator!=( const CWorkspaceData& right ) const { return !operator==( right ); }

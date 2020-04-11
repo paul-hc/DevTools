@@ -24,7 +24,7 @@ CSlideData::~CSlideData()
 {
 }
 
-void CSlideData::Stream( CArchive& archive, UINT* pSlideElapsed /*= NULL*/ )
+void CSlideData::Stream( CArchive& archive, TFirstDataMember* pExtracted_SlideElapsed /*= NULL*/ )
 {
 	if ( archive.IsStoring() )
 	{
@@ -35,8 +35,8 @@ void CSlideData::Stream( CArchive& archive, UINT* pSlideElapsed /*= NULL*/ )
 	}
 	else
 	{	// check version backwards compatibility hack
-		if ( pSlideElapsed != NULL )
-			m_slideElapsed = *pSlideElapsed;		// was already extracted from old archive version
+		if ( pExtracted_SlideElapsed != NULL )
+			m_slideElapsed = *pExtracted_SlideElapsed;		// was already extracted from Slider_v3_1 old archive version
 		else
 			archive >> m_slideElapsed;
 

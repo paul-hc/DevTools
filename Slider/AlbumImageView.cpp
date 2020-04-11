@@ -79,9 +79,11 @@ const fs::ImagePathKey& CAlbumImageView::GetImagePathKey( void ) const
 CWicImage* CAlbumImageView::GetImage( void ) const
 {
 	const fs::ImagePathKey& imagePathKey = GetImagePathKey();
-	if ( !imagePathKey.first.IsEmpty() )
-		return CWicImageCache::Instance().Acquire( imagePathKey ).first;
-	return NULL;
+
+	if ( imagePathKey.first.IsEmpty() )
+		return NULL;
+
+	return CWicImageCache::Instance().Acquire( imagePathKey ).first;
 }
 
 void CAlbumImageView::OnImageContentChanged( void )

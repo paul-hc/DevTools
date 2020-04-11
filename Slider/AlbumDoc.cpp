@@ -28,6 +28,7 @@ IMPLEMENT_DYNCREATE( CAlbumDoc, CDocumentBase )
 
 CAlbumDoc::CAlbumDoc( void )
 	: CDocumentBase()
+	, m_fileModelSchema( app::Slider_LatestModelSchema )
 	, m_bkColor( CLR_DEFAULT )
 	, m_docFlags( 0 )
 {
@@ -47,6 +48,8 @@ BOOL CAlbumDoc::OnNewDocument( void )
 void CAlbumDoc::Serialize( CArchive& archive )
 {
 	CAlbumImageView* pActiveView = GetOwnActiveAlbumView();
+	REQUIRE( serial::IsFileBasedArchive( archive ) );			// mem-based document serialization not supported/necessary (for now)
+
 	if ( archive.IsStoring() )
 	{
 		SetFlag( m_docFlags, PresistImageState, HasFlag( CWorkspace::GetFlags(), wf::PersistAlbumImageState ) );
@@ -60,23 +63,49 @@ void CAlbumDoc::Serialize( CArchive& archive )
 			m_pImageState.reset( new CImageState );
 			pActiveView->MakeImageState( m_pImageState.get() );
 		}
+
+		if ( m_fileModelSchema != app::Slider_LatestModelSchema )
+		{
+			std::tstring message = str::Format( _T("(!) Attempt to save older document to the latest version:\n  %s\n  Old version: %s\n  Latest version: %s"),
+				archive.GetFile()->GetFileName().GetString(),
+				app::FormatSliderVersion( m_fileModelSchema ).c_str(),
+				app::FormatSliderVersion( app::Slider_LatestModelSchema ).c_str() );
+
+			bool proceed = IDOK == AfxMessageBox( message.c_str(), MB_OKCANCEL | MB_ICONQUESTION );
+			if ( !proceed )
+				message += _T("\n CANCELLED by user!");
+
+			app::LogLine( message.c_str() );
+
+			if ( proceed )
+				m_fileModelSchema = app::Slider_LatestModelSchema;
+			else
+				throw new mfc::CUserAbortedException;
+		}
 	}
 
-	// version backwards compatibility hack: check if a valid version is saved in the HIWORD
-	UINT firstValue = UINT_MAX;
+	// version backwards compatibility hack: check if a valid version is saved as first UINT
+	CSlideData::TFirstDataMember firstValue = UINT_MAX;
 	std::auto_ptr< serial::CScopedLoadingArchive > pLoadingArchive;
+
 	if ( archive.IsLoading() )
 	{
 		archive >> firstValue;
-		if ( firstValue >= app::Slider_v3_2 && firstValue <= app::Slider_LatestVersion )			// valid version saved?
-		{
-			pLoadingArchive.reset( new serial::CScopedLoadingArchive( &archive, firstValue ) );		// let composite parts know the loading archive version
-			firstValue = UINT_MAX;
+
+		if ( firstValue >= app::Slider_v3_2 && firstValue <= app::Slider_LatestModelSchema )	// valid version saved?
+		{	// let model details know the loading archive version
+			m_fileModelSchema = static_cast< app::ModelSchema >( firstValue );					// store original document model schema (required for further storage access/metadata lookups)
+			firstValue = UINT_MAX;			// mark as extracted (as file ModelSchema)
 		}
+		else
+			m_fileModelSchema = app::Slider_v3_1;												// assume an old backwards-compatible model schema (not saved back in the day)
+
+		pLoadingArchive.reset( new serial::CScopedLoadingArchive( archive, m_fileModelSchema ) );
 	}
 	else
-		archive << app::Slider_LatestVersion;
+		archive << m_fileModelSchema;				// always save the latest model schema version as first UINT in the archive
 
+	// backwards compatibility: pass firstValue read
 	m_slideData.Stream( archive, firstValue != UINT_MAX ? &firstValue : NULL );
 
 	if ( archive.IsStoring() )
@@ -107,6 +136,14 @@ void CAlbumDoc::Serialize( CArchive& archive )
 
 	if ( HasFlag( m_docFlags, PresistImageState ) )
 		serial::StreamPtr( archive, m_pImageState );
+
+	if ( archive.IsStoring() )
+		SetModifiedFlag( Clean );
+
+	app::LogLine( _T("%s album %s with model schema version %s"),
+		archive.IsLoading() ? _T("Loaded") : _T("Saved"),
+		archive.GetFile()->GetFileName().GetString(),
+		app::FormatSliderVersion( m_fileModelSchema ).c_str() );
 }
 
 CImageState* CAlbumDoc::GetImageState( void ) const
@@ -188,7 +225,13 @@ bool CAlbumDoc::SaveAsArchiveStg( const fs::CPath& newStgPath )
 		{
 			CPushThrowMode pushThrow( &CImageArchiveStg::Factory(), true );
 			m_fileList.CheckReparentFileAttrs( newStgPath.GetPtr(), CFileList::Saving );		// reparent with newStgPath before saving the album info
-			CImageArchiveStg::Factory().SaveAlbumDoc( this, newStgPath );
+
+			if ( CImageArchiveStg::Factory().SaveAlbumDoc( this, newStgPath ) )
+			{
+				CImageArchiveStg* pSavedImageStg = CImageArchiveStg::Factory().FindStorage( newStgPath );
+				ASSERT_PTR( pSavedImageStg );
+				pSavedImageStg->StoreFileModelSchema( m_fileModelSchema );
+			}
 		}
 
 		return !saveAs || BuildAlbum( newStgPath );				// reload from the new archive document file so that we reinitialize m_fileList
@@ -211,12 +254,20 @@ bool CAlbumDoc::BuildAlbum( const fs::CPath& filePath )
 		if ( app::IsImageArchiveDoc( filePath.GetPtr() ) )
 		{
 			if ( CImageArchiveStg::Factory().VerifyPassword( filePath ) )
+			{
 				loadedStgAlbumStream = CImageArchiveStg::Factory().LoadAlbumDoc( this, filePath );		// album stream is optional for older archives: not an error if missing
+				if ( loadedStgAlbumStream )
+				{
+					CImageArchiveStg* pLoadedImageStg = CImageArchiveStg::Factory().FindStorage( filePath );
+					ASSERT_PTR( pLoadedImageStg );
+					pLoadedImageStg->StoreFileModelSchema( m_fileModelSchema );
+				}
+			}
 			else
 				return false;
 		}
 
-		if ( !loadedStgAlbumStream )			// directory path or archive stg missing album stream?
+		if ( !loadedStgAlbumStream )				// directory path or archive stg missing album stream?
 			if ( m_fileList.SetupSearchPath( filePath ) )
 				m_fileList.SearchForFiles();
 			else

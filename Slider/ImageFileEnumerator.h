@@ -5,7 +5,9 @@
 #include "utl/FileSystem.h"
 #include "utl/Range.h"
 #include "utl/UI/UserReport.h"
-#include "Application_fwd.h"
+#include "ModelSchema.h"
+
+#include "Application_fwd.h"		// TEMP: for app::CScopedProgress
 
 
 class CFileAttr;

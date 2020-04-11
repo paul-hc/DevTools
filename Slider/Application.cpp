@@ -16,6 +16,7 @@
 #include "utl/UI/AboutBox.h"
 #include "utl/UI/DragListCtrl.h"
 #include "utl/UI/GdiPlus_fwd.h"
+#include "utl/UI/MfcUtilities.h"
 #include "utl/UI/ShellDialogs.h"
 #include "utl/UI/ShellUtilities.h"
 #include "utl/UI/UtilitiesEx.h"
@@ -114,9 +115,12 @@ namespace app
 		return CImageArchiveStg::HasImageArchiveExt( pFilePath );
 	}
 
-	std::tstring FormatSliderVersion( SliderVersion version )
+	std::tstring FormatSliderVersion( ModelSchema modelSchemaVersion )
 	{
-		return str::Format( _T("Slider v%x.%x"), ( version & 0xF0 ) >> 4, version & 0x0F );
+		if ( Slider_v3_1 == modelSchemaVersion )
+			return _T("Slider v3_1(-)");			// avoid reporting "Slider v0.0"
+
+		return str::Format( _T("Slider v%x.%x"), ( modelSchemaVersion & 0xF0 ) >> 4, modelSchemaVersion & 0x0F );
 	}
 
 	bool MoveFiles( const std::vector< std::tstring >& filesToMove, CWnd* pParentWnd /*= AfxGetMainWnd()*/ )
@@ -290,6 +294,8 @@ BOOL CApplication::InitInstance( void )
 		return FALSE;
 
 	LoadStdProfileSettings( 10 );		// load standard INI file options (including MRU)
+
+	serial::CScopedLoadingArchive::SetLatestModelSchema( app::Slider_LatestModelSchema );			// set up the latest model schema version (assumed by default for in-memory serialization)
 
 	GetLogger().m_enabled = GetProfileInt( reg::section_Settings, _T("FileLogger_Enabled"), false ) != FALSE;			// disable logging by default
 	GetLogger().m_prependTimestamp = GetProfileInt( reg::section_Settings, _T("FileLogger_PrependTimestamp"), GetLogger().m_prependTimestamp ) != FALSE;

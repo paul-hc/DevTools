@@ -1,7 +1,7 @@
 
 #include "stdafx.h"
 #include "ImageState.h"
-#include "Application_fwd.h"
+#include "ModelSchema.h"
 #include "utl/Serialization.h"
 #include "utl/SerializeStdTypes.h"
 
@@ -28,7 +28,7 @@ CImageState::~CImageState()
 void CImageState::Stream( CArchive& archive )
 {
 	if ( archive.IsStoring() )
-		archive << (int)app::Slider_LatestVersion;
+		archive << (int)app::Slider_LatestModelSchema;
 
 	bool _stretchToFit = true, _shrinkIfLarger = true;		// dummy old flags
 
@@ -46,12 +46,12 @@ void CImageState::Stream( CArchive& archive )
 	}
 	else
 	{
-		app::SliderVersion savedVersion;
-		archive >> (int&)savedVersion;
+		app::ModelSchema savedModelSchema;
+		archive >> (int&)savedModelSchema;
 
-		if ( savedVersion < app::Slider_LatestVersion )
+		if ( savedModelSchema < app::Slider_LatestModelSchema )
 			TRACE( _T("-- Converting CImageState from version %s to current version %s\n"),
-				app::FormatSliderVersion( savedVersion ).c_str(), app::FormatSliderVersion( app::Slider_LatestVersion ).c_str() );
+				app::FormatSliderVersion( savedModelSchema ).c_str(), app::FormatSliderVersion( app::Slider_LatestModelSchema ).c_str() );
 
 		archive >> m_docFilePath;
 		archive >> m_framePlacement;
@@ -62,7 +62,7 @@ void CImageState::Stream( CArchive& archive )
 		archive >> m_bkColor;
 		archive >> m_scrollPos;
 
-		if ( savedVersion >= app::Slider_v4_0 )
+		if ( savedModelSchema >= app::Slider_v4_0 )
 			archive >> (int&)m_autoImageSize;
 	}
 }

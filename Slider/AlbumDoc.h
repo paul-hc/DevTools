@@ -24,6 +24,8 @@ public:
 	// base overrides
 	virtual void Serialize( CArchive& archive );
 
+	app::ModelSchema GetFileModelSchema( void ) const { return m_fileModelSchema; }
+
 	COLORREF GetBkColor( void ) const { return m_bkColor; }
 
 	bool HasImages( void ) const { return m_fileList.AnyFoundFiles(); }
@@ -63,6 +65,7 @@ private:
 	CAlbumImageView* GetOwnActiveAlbumView( void ) const;
 	CSlideData* GetActiveSlideData( void );
 public:
+	persist app::ModelSchema m_fileModelSchema;			// loaded model schema from file
 	persist CFileList m_fileList;						// image file list (search specifiers + found files)
 	persist CSlideData m_slideData;						// always altered by CAlbumImageView::OnActivateView()
 private:

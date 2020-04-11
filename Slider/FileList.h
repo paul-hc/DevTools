@@ -4,7 +4,7 @@
 
 #include "utl/FlexPath.h"
 #include "utl/Range.h"
-#include "Application_fwd.h"
+#include "ModelSchema.h"
 #include "SearchSpec.h"
 #include "FileAttr.h"
 

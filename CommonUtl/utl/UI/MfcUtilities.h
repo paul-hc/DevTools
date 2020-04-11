@@ -91,32 +91,41 @@ namespace serial
 	interface IStreamable;
 
 
+	bool IsFileBasedArchive( const CArchive& rArchive );
+
+
+	// Must have been created in the scope of loading a FILE with backwards compatibility.
+	// Not necessary to create when loading from a CMemFile archive - it will assume s_latestModelSchema.
+	//
 	class CScopedLoadingArchive
 	{
 	public:
-		CScopedLoadingArchive( const CArchive* pArchive, int version )
-		{
-			ASSERT_NULL( s_loadingArchive.first );			// nesting of loading archives not allowed
-			ASSERT_PTR( pArchive );
-			ASSERT( pArchive->IsLoading() );
-			s_loadingArchive.first = pArchive;
-			s_loadingArchive.second = version;
-		}
+		CScopedLoadingArchive( const CArchive& rLoadingArchive, int fileLoadingModelSchema );
+		~CScopedLoadingArchive();
 
-		~CScopedLoadingArchive()
-		{
-			s_loadingArchive.first = NULL;
-			s_loadingArchive.second = 0;
-		}
+		static void SetLatestModelSchema( int latestModelSchema ) { s_latestModelSchema = latestModelSchema; }
+
+		static bool IsValidLoadingArchive( const CArchive& rArchive );
 
 		template< typename EnumType >
-		static EnumType GetVersion( const CArchive* pArchive, EnumType defaultVersion )
+		static EnumType GetModelSchema( const CArchive& rArchive )
 		{
-			ASSERT_PTR( pArchive );
-			return s_loadingArchive.first == pArchive ? static_cast< EnumType >( s_loadingArchive.second ) : defaultVersion;
+			ASSERT( s_latestModelSchema != UnitializedVersion );		// (!) must have beeen initialized at application startup
+			ASSERT( IsValidLoadingArchive( rArchive ) );				// if a file archive, ensure CScopedLoadingArchive is created in the scope of loading
+
+			if ( &rArchive == s_pLoadingArchive )
+				return static_cast< EnumType >( s_fileLoadingModelSchema );
+
+			return static_cast< EnumType >( s_latestModelSchema );
 		}
 	private:
-		static std::pair< const CArchive*, int > s_loadingArchive;
+		enum { UnitializedVersion = -1 };
+
+		static int s_latestModelSchema;
+
+		// file loading only
+		static const CArchive* s_pLoadingArchive;
+		static int s_fileLoadingModelSchema;
 	};
 }
 
@@ -127,7 +136,7 @@ namespace fs { class CPath; }
 namespace ui
 {
 	// takes advantage of safe saving through a CMirrorFile provided by CDocument; redirects to m_pObject->Serialize()
-
+	//
 	class CAdapterDocument : public CDocument
 	{
 	public:

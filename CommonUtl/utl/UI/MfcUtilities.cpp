@@ -60,9 +60,44 @@ namespace utl
 
 namespace serial
 {
+	bool IsFileBasedArchive( const CArchive& rArchive )
+	{
+		return !rArchive.GetFile()->GetFileName().IsEmpty();
+	}
+
+
 	// CScopedLoadingArchive implementation
 
-	std::pair< const CArchive*, int > CScopedLoadingArchive::s_loadingArchive( NULL, 0 );
+	int CScopedLoadingArchive::s_latestModelSchema = UnitializedVersion;
+	const CArchive* CScopedLoadingArchive::s_pLoadingArchive = NULL;
+	int CScopedLoadingArchive::s_fileLoadingModelSchema = UnitializedVersion;
+
+	CScopedLoadingArchive::CScopedLoadingArchive( const CArchive& rArchiveLoading, int fileLoadingModelSchema )
+	{
+		REQUIRE( s_latestModelSchema != UnitializedVersion );		// (!) must have beeen initialized at application startup
+		ASSERT_NULL( s_pLoadingArchive );							// nesting of loading archives not allowed
+		REQUIRE( rArchiveLoading.IsLoading() );
+
+		s_pLoadingArchive = &rArchiveLoading;
+		s_fileLoadingModelSchema = fileLoadingModelSchema;
+	}
+
+	CScopedLoadingArchive::~CScopedLoadingArchive()
+	{
+		s_pLoadingArchive = NULL;
+		s_fileLoadingModelSchema = -1;
+	}
+
+	bool CScopedLoadingArchive::IsValidLoadingArchive( const CArchive& rArchive )
+	{
+		if ( !rArchive.IsLoading() )
+			return false;
+
+		if ( IsFileBasedArchive( rArchive ) )
+			return s_pLoadingArchive != NULL;			// must have been created in the scope of loading a FILE with backwards compatibility
+
+		return true;
+	}
 }
 
 

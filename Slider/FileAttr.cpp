@@ -1,7 +1,7 @@
 
 #include "stdafx.h"
 #include "FileAttr.h"
-#include "Application_fwd.h"
+#include "ModelSchema.h"
 #include "utl/Serialization.h"
 #include "utl/SerializeStdTypes.h"
 #include "utl/StringUtilities.h"
@@ -47,8 +47,8 @@ CFileAttr::~CFileAttr()
 
 void CFileAttr::SetFromTransferPair( const fs::CFlexPath& srcPath, const fs::CFlexPath& destPath )
 {
-	*this = CFileAttr( srcPath );			// inherit src attributes
-	GetImageDim();							// force init image dim through image loading
+	*this = CFileAttr( srcPath );					// inherit src attributes
+	GetImageDim();									// force init image dim through image loading
 	m_pathKey.first.Set( destPath.GetPtr() );		// restore the true destination path
 }
 
@@ -64,8 +64,9 @@ void CFileAttr::Stream( CArchive& archive )
 	}
 	else
 	{
-		app::SliderVersion savedVersion = serial::CScopedLoadingArchive::GetVersion< app::SliderVersion >( &archive, app::Slider_v3_1 );
-		if ( savedVersion >= app::Slider_v3_8 )
+		app::ModelSchema savedModelSchema = serial::CScopedLoadingArchive::GetModelSchema< app::ModelSchema >( archive );
+
+		if ( savedModelSchema >= app::Slider_v3_8 )
 			archive >> m_pathKey;
 		else
 		{	// backwards compatible: just the path was saved

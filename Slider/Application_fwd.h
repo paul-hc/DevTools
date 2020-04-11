@@ -2,6 +2,8 @@
 #define Application_fwd_h
 #pragma once
 
+#include "ModelSchema.h"
+
 
 class CListSelectionData;
 namespace ui { interface IUserReport; }
@@ -9,22 +11,6 @@ namespace ui { interface IUserReport; }
 
 namespace app
 {
-	enum SliderVersion
-	{
-		Slider_v3_1 = 0,				// original workspace document format up to this version
-		Slider_v3_2 = 0x32,				// persist CWorkspace::m_imageStates
-		Slider_v3_5 = 0x35,				// persist the new CWorkspaceData struct
-		Slider_v3_6 = 0x36,				// persist CWorkspaceData::m_thumbBoundsSize
-		Slider_v3_7 = 0x37,				// persist CFileAttr::GetImageDim() - evaluate real image dimensions
-		Slider_v3_8 = 0x38,				// persist CFileAttr::GetImageDim() - evaluate real image dimensions
-		Slider_v4_0 = 0x40,				// persist CFileAttr::GetImageDim() - evaluate real image dimensions
-			// * always update to the LATEST VERSION *
-			Slider_LatestVersion = Slider_v4_0
-	};
-
-	std::tstring FormatSliderVersion( SliderVersion version );
-
-
 	enum ContextPopup { ImagePopup, AlbumPopup, AlbumThumbsPopup, AlbumFoundListPopup, DropPopup };
 
 
