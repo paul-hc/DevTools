@@ -91,7 +91,7 @@ namespace serial
 	interface IStreamable;
 
 
-	bool IsFileBasedArchive( const CArchive& rArchive );
+	inline bool IsFileBasedArchive( const CArchive& rArchive ) { return !rArchive.m_strFileName.IsEmpty(); }
 
 
 	// Must have been created in the scope of loading a FILE with backwards compatibility.

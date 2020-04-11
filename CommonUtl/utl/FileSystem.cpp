@@ -333,7 +333,7 @@ namespace fs
 	CTime ReadFileTime( const fs::CPath& filePath, TimeField timeField )
 	{
 		_stat64i32 fileStatus;
-		if ( 0 == _tstat( path::GetPhysical( filePath.Get() ).c_str(), &fileStatus ) )			// translate to physical path
+		if ( 0 == _tstat( path::ExtractPhysical( filePath.Get() ).c_str(), &fileStatus ) )			// translate to physical path
 			switch ( timeField )
 			{
 				case CreatedDate:	return fileStatus.st_ctime;
@@ -373,7 +373,7 @@ namespace fs
 							fs::ExcPolicy policy /*= fs::RuntimeExc*/ ) throws_( CRuntimeException, CFileException* )
 		{
 			_stat64i32 fileStatus;
-			int result = _tstat( path::GetPhysical( filePath.Get() ).c_str(), &fileStatus );			// translate to physical path
+			int result = _tstat( path::ExtractPhysical( filePath.Get() ).c_str(), &fileStatus );			// translate to physical path
 			if ( 0 == result )
 				switch ( timeField )
 				{

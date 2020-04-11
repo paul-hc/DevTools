@@ -662,8 +662,8 @@ void CPathTests::TestComplexPath( void )
 	ASSERT_EQUAL_STR( _T(".jpg"), path::FindExt( _T("C:\\Images\\fruit.stg>apple.jpg") ) );
 	ASSERT_EQUAL_STR( _T(".jpg"), path::FindExt( _T("C:\\Images\\fruit.stg>World\\Europe\\apple.fruit.jpg") ) );
 
-	ASSERT_EQUAL( _T("C:\\Images\\Europe/apple.jpg"), path::GetPhysical( _T("C:\\Images\\Europe/apple.jpg") ) );
-	ASSERT_EQUAL( _T("C:\\Images\\fruit.stg"), path::GetPhysical( _T("C:\\Images\\fruit.stg>apple.jpg") ) );
+	ASSERT_EQUAL( _T("C:\\Images\\Europe/apple.jpg"), path::ExtractPhysical( _T("C:\\Images\\Europe/apple.jpg") ) );
+	ASSERT_EQUAL( _T("C:\\Images\\fruit.stg"), path::ExtractPhysical( _T("C:\\Images\\fruit.stg>apple.jpg") ) );
 
 	ASSERT_EQUAL_STR( _T(""), path::GetEmbedded( _T("C:\\Images\\Europe/apple.jpg") ) );
 	ASSERT_EQUAL_STR( _T("apple.jpg"), path::GetEmbedded( _T("C:\\Images\\fruit.stg>apple.jpg") ) );

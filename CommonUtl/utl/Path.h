@@ -96,14 +96,14 @@ namespace path
 	inline bool MatchExt( const TCHAR* pPath, const TCHAR* pExt ) { return EquivalentPtr( FindExt( pPath ), pExt ); }		// pExt: ".txt"
 
 	// complex path
-	extern const TCHAR s_complexPathSep;						// '>' character that separates the storage file path from the stream/storage embedded sub-path
+	extern const TCHAR s_complexPathSep;							// '>' character that separates the storage file path from the stream/storage embedded sub-path
 
 	inline bool IsComplex( const TCHAR* pPath ) { return pPath != NULL && _tcschr( pPath, s_complexPathSep ) != NULL; }
 	bool IsWellFormed( const TCHAR* pFilePath );
 	size_t FindComplexSepPos( const TCHAR* pPath );
-	std::tstring GetPhysical( const std::tstring& filePath );	// "C:\Images\fruit.stg" <- "C:\Images\fruit.stg>apple.jpg";  "C:\Images\orange.png" <- "C:\Images\orange.png"
-	const TCHAR* GetEmbedded( const TCHAR* pPath );				// "Normal\apple.jpg" <- "C:\Images\fruit.stg>Normal\apple.jpg";  "" <- "C:\Images\orange.png"
-	const TCHAR* GetSubPath( const TCHAR* pPath );				// IsComplex() ? GetEmbedded() : pPath
+	std::tstring ExtractPhysical( const std::tstring& filePath );	// "C:\Images\fruit.stg" <- "C:\Images\fruit.stg>apple.jpg";  "C:\Images\orange.png" <- "C:\Images\orange.png"
+	const TCHAR* GetEmbedded( const TCHAR* pPath );					// "Normal\apple.jpg" <- "C:\Images\fruit.stg>Normal\apple.jpg";  "" <- "C:\Images\orange.png"
+	const TCHAR* GetSubPath( const TCHAR* pPath );					// IsComplex() ? GetEmbedded() : pPath
 
 	std::tstring MakeComplex( const std::tstring& physicalPath, const TCHAR* pEmbeddedPath );
 	bool SplitComplex( std::tstring& rPhysicalPath, std::tstring& rEmbeddedPath, const std::tstring& filePath );

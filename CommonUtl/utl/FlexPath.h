@@ -28,7 +28,7 @@ namespace fs
 		static CFlexPath MakeComplexPath( const std::tstring& physicalPath, const TCHAR* pEmbeddedPath ) { return path::MakeComplex( physicalPath, pEmbeddedPath ); }
 		bool SplitComplexPath( std::tstring& rPhysicalPath, std::tstring& rEmbeddedPath ) const { return path::SplitComplex( rPhysicalPath, rEmbeddedPath, Get() ); }
 
-		fs::CPath GetPhysicalPath( void ) const { return path::GetPhysical( Get() ); }
+		fs::CPath GetPhysicalPath( void ) const { return path::ExtractPhysical( Get() ); }
 		const TCHAR* GetEmbeddedPath( void ) const { return path::GetEmbedded( GetPtr() ); }
 
 		const TCHAR* GetLeafSubPath( void ) const { return IsComplexPath() ? GetEmbeddedPath() : GetNameExt(); }
@@ -39,7 +39,7 @@ namespace fs
 		std::tstring FormatPretty( void ) const;		// "C:\Images\fruit.stg>StgDir/apple.jpg" <- "C:\Images/fruit.stg>StgDir\apple.jpg"
 		std::tstring FormatPrettyLeaf( void ) const;	// "StgDir/apple.jpg";  "C:\Images\orange.png" -> "orange.png" <- "C:\Images/fruit.stg>StgDir\apple.jpg"
 
-		bool FileExist( AccessMode accessMode = Exist ) const { return fs::FileExist( path::GetPhysical( Get() ).c_str(), accessMode ); }
+		bool FileExist( AccessMode accessMode = Exist ) const { return fs::FileExist( path::ExtractPhysical( Get() ).c_str(), accessMode ); }
 		bool FlexFileExist( AccessMode accessMode = Exist ) const;
 	};
 

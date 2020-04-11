@@ -60,12 +60,6 @@ namespace utl
 
 namespace serial
 {
-	bool IsFileBasedArchive( const CArchive& rArchive )
-	{
-		return !rArchive.GetFile()->GetFileName().IsEmpty();
-	}
-
-
 	// CScopedLoadingArchive implementation
 
 	int CScopedLoadingArchive::s_latestModelSchema = UnitializedVersion;

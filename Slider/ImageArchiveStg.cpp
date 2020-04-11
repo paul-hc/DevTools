@@ -66,14 +66,18 @@ CImageArchiveStg::CFactory& CImageArchiveStg::Factory( void )
 
 void CImageArchiveStg::Close( void )
 {
-	const fs::CPath& stgFilePath = GetDocFilePath();
-	if ( !stgFilePath.IsEmpty() )
-		CWicImageCache::Instance().DiscardWithPrefix( stgFilePath.GetPtr() );		// discard cached images based on this storage
+	DiscardCachedImages( GetDocFilePath() );
 
 	if ( m_pThumbsStorage != NULL )
 		m_pThumbsStorage = NULL;
 
 	fs::CStructuredStorage::Close();
+}
+
+void CImageArchiveStg::DiscardCachedImages( const fs::CPath& stgFilePath )
+{
+	if ( !stgFilePath.IsEmpty() )
+		CWicImageCache::Instance().DiscardWithPrefix( stgFilePath.GetPtr() );		// discard cached images based on this storage
 }
 
 CStringW CImageArchiveStg::EncodeStreamName( const TCHAR* pStreamName ) const
@@ -110,6 +114,11 @@ void CImageArchiveStg::CreateImageArchive( const TCHAR* pStgFilePath, const std:
 
 void CImageArchiveStg::CreateImageFiles( std::vector< CFileAttr >& rFileAttributes, const std::vector< std::pair< fs::CFlexPath, fs::CFlexPath > >& filePairs ) throws_( CException* )
 {
+	// Prevent sharing violations on SRC stream open.
+	//	2020-04-11: Still doesn't work, I get exception on open. I suspect the source stream (image file) must be kept open with CFile::shareExclusive by some indirect COM interface.
+	if ( !filePairs.empty() )
+		DiscardCachedImages( filePairs.front().first.GetPhysicalPath() );
+
 	rFileAttributes.reserve( filePairs.size() );
 
 	CPushThrowMode pushThrow( &Factory(), true );
@@ -120,7 +129,7 @@ void CImageArchiveStg::CreateImageFiles( std::vector< CFileAttr >& rFileAttribut
 		if ( !it->first.FileExist() )
 		{
 			CFileException error( CFileException::fileNotFound, -1, it->first.GetPtr() );		// source image doesn't exist
-			app::GetUserReport().ReportError( &error, MB_OK | MB_ICONWARNING );					// just a warning, keep going
+			app::GetUserReport().ReportError( &error, MB_OK | MB_ICONWARNING );					// just warn & keep going
 		}
 		else
 			try
@@ -293,7 +302,9 @@ CCachedThumbBitmap* CImageArchiveStg::LoadThumbnail( const fs::CFlexPath& imageC
 void CImageArchiveStg::SaveAlbumDoc( CObject* pAlbumDoc )
 {
 	ASSERT_PTR( pAlbumDoc );
+
 	std::auto_ptr< COleStreamFile > pAlbumFile( CreateFile( CImageArchiveStg::s_albumNameExt ) );
+
 	if ( NULL == pAlbumFile.get() )
 		return;
 

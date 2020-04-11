@@ -47,8 +47,10 @@ BOOL CAlbumDoc::OnNewDocument( void )
 
 void CAlbumDoc::Serialize( CArchive& archive )
 {
-	CAlbumImageView* pActiveView = GetOwnActiveAlbumView();
 	REQUIRE( serial::IsFileBasedArchive( archive ) );			// mem-based document serialization not supported/necessary (for now)
+
+	CAlbumImageView* pActiveView = GetOwnActiveAlbumView();
+	fs::CPath archiveStgPath = path::ExtractPhysical( archive.m_strFileName.GetString() );
 
 	if ( archive.IsStoring() )
 	{
@@ -64,10 +66,12 @@ void CAlbumDoc::Serialize( CArchive& archive )
 			pActiveView->MakeImageState( m_pImageState.get() );
 		}
 
-		if ( m_fileModelSchema != app::Slider_LatestModelSchema )
+		bool isSaveAs = !path::EquivalentPtr( m_strPathName, archiveStgPath.GetPtr() );
+
+		if ( !isSaveAs && m_fileModelSchema != app::Slider_LatestModelSchema )
 		{
 			std::tstring message = str::Format( _T("(!) Attempt to save older document to the latest version:\n  %s\n  Old version: %s\n  Latest version: %s"),
-				archive.GetFile()->GetFileName().GetString(),
+				archiveStgPath.GetPtr(),
 				app::FormatSliderVersion( m_fileModelSchema ).c_str(),
 				app::FormatSliderVersion( app::Slider_LatestModelSchema ).c_str() );
 
@@ -103,7 +107,7 @@ void CAlbumDoc::Serialize( CArchive& archive )
 		pLoadingArchive.reset( new serial::CScopedLoadingArchive( archive, m_fileModelSchema ) );
 	}
 	else
-		archive << m_fileModelSchema;				// always save the latest model schema version as first UINT in the archive
+		archive << app::Slider_LatestModelSchema;				// always save the latest model schema version as first UINT in the archive
 
 	// backwards compatibility: pass firstValue read
 	m_slideData.Stream( archive, firstValue != UINT_MAX ? &firstValue : NULL );
@@ -122,7 +126,7 @@ void CAlbumDoc::Serialize( CArchive& archive )
 	m_fileList.Stream( archive );
 
 	if ( archive.IsLoading() )
-		m_fileList.CheckReparentFileAttrs( archive.m_strFileName, CFileList::Loading );		// reparent embedded image paths with current doc stg path
+		m_fileList.CheckReparentFileAttrs( archiveStgPath.GetPtr(), CFileList::Loading );		// reparent embedded image paths with current doc stg path
 
 	m_dropUndoStack.Stream( archive );
 	m_dropRedoStack.Stream( archive );
@@ -142,7 +146,7 @@ void CAlbumDoc::Serialize( CArchive& archive )
 
 	app::LogLine( _T("%s album %s with model schema version %s"),
 		archive.IsLoading() ? _T("Loaded") : _T("Saved"),
-		archive.GetFile()->GetFileName().GetString(),
+		archiveStgPath.GetPtr(),
 		app::FormatSliderVersion( m_fileModelSchema ).c_str() );
 }
 
@@ -204,13 +208,25 @@ bool CAlbumDoc::SaveAsArchiveStg( const fs::CPath& newStgPath )
 
 		if ( saveAs )
 		{
-			if ( app::IsImageArchiveDoc( oldDocPath.GetPtr() ) && m_fileList.HasConsistentDeepStreams() )
+			bool straightStgFileCopy = false;
+
+			if ( !IsModified() )												// in synch with the file?
+				if ( app::Slider_LatestModelSchema == m_fileModelSchema )		// latest model schema? (will always save with Slider_LatestModelSchema)
+					if ( app::IsImageArchiveDoc( oldDocPath.GetPtr() ) )
+						if ( m_fileList.HasConsistentDeepStreams() )
+							straightStgFileCopy = true;
+
+			if ( straightStgFileCopy )
 			{
 				CFileOperation fileOp( true );
+
 				fileOp.Copy( fs::ToFlexPath( oldDocPath ), fs::ToFlexPath( newStgPath ) );		// optimization: straight stg file copy
+				fs::MakeFileWritable( newStgPath.GetPtr() );									// just in case source was read-only
 			}
 			else
 			{
+				CImageArchiveStg::DiscardCachedImages( oldDocPath );
+
 				CArchiveImagesContext archiveContext;
 				CFileList tempFileList = m_fileList;			// temp copy so that it can display original thumbnails while creating, avoiding sharing errors
 
@@ -227,11 +243,8 @@ bool CAlbumDoc::SaveAsArchiveStg( const fs::CPath& newStgPath )
 			m_fileList.CheckReparentFileAttrs( newStgPath.GetPtr(), CFileList::Saving );		// reparent with newStgPath before saving the album info
 
 			if ( CImageArchiveStg::Factory().SaveAlbumDoc( this, newStgPath ) )
-			{
-				CImageArchiveStg* pSavedImageStg = CImageArchiveStg::Factory().FindStorage( newStgPath );
-				ASSERT_PTR( pSavedImageStg );
-				pSavedImageStg->StoreFileModelSchema( m_fileModelSchema );
-			}
+				if ( CImageArchiveStg* pSavedImageStg = CImageArchiveStg::Factory().FindStorage( newStgPath ) )
+					pSavedImageStg->StoreFileModelSchema( m_fileModelSchema );
 		}
 
 		return !saveAs || BuildAlbum( newStgPath );				// reload from the new archive document file so that we reinitialize m_fileList

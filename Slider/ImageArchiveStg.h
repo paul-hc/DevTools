@@ -25,6 +25,7 @@ public:
 
 	// operations
 	void Close( void );
+	static void DiscardCachedImages( const fs::CPath& stgFilePath );		// to avoid sharing violations on stream access
 
 	void CreateImageArchive( const TCHAR* pStgFilePath, const std::tstring& password, const std::vector< std::pair< fs::CFlexPath, fs::CFlexPath > >& filePairs,
 							 CObject* pAlbumDoc ) throws_( CException* );

@@ -305,7 +305,7 @@ namespace path
 		return utl::FindPos( str::begin( pPath ), str::end( pPath ), s_complexPathSep );
 	}
 
-	std::tstring GetPhysical( const std::tstring& filePath )
+	std::tstring ExtractPhysical( const std::tstring& filePath )
 	{
 		size_t sepPos = FindComplexSepPos( filePath.c_str() );
 		if ( std::tstring::npos == sepPos )

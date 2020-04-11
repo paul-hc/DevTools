@@ -66,7 +66,7 @@ namespace fs
 
 	bool CFlexPath::FlexFileExist( AccessMode accessMode /*= Exist*/ ) const
 	{
-		const fs::CPath physicalPath( path::GetPhysical( Get() ) );
+		const fs::CPath physicalPath( path::ExtractPhysical( Get() ) );
 		if ( !physicalPath.FileExist( accessMode ) )
 			return false;
 
