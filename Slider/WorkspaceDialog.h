@@ -3,6 +3,7 @@
 #pragma once
 
 #include "utl/UI/SpinEdit.h"
+#include "utl/UI/StockValuesComboBox.h"
 #include "Workspace.h"
 
 
@@ -23,6 +24,7 @@ private:
 	CSpinEdit m_mruCountEdit;
 	CSpinEdit m_thumbListColCountEdit;
 	CComboBox m_thumbBoundsSizeCombo;
+	CDurationComboBox m_slideDelayCombo;
 
 	// generated stuff
 	protected:

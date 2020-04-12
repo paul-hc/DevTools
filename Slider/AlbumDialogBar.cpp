@@ -59,7 +59,7 @@ bool CAlbumDialogBar::SetCurrentPos( int currIndex, bool forceLoad /*= false*/ )
 bool CAlbumDialogBar::InputSlideDelay( ui::ComboField byField )
 {
 	UINT slideDelay;
-	if ( !m_pSlideDelayCombo->InputValue( &slideDelay, byField ) )
+	if ( !m_pSlideDelayCombo->InputValue( &slideDelay, byField, true ) )
 		return false;		// invalid delay
 
 	m_pAlbumView->SetSlideDelay( slideDelay );
@@ -140,6 +140,7 @@ BEGIN_MESSAGE_MAP( CAlbumDialogBar, CDialogBar )
 	ON_COMMAND( CM_ESCAPE_KEY, CmEscapeKey )
 	ON_CBN_SELCHANGE( IDC_PLAY_DELAY_COMBO, OnCBnSelChange_SlideDelay )
 	ON_CBN_CLOSEUP( IDC_PLAY_DELAY_COMBO, OnCBnCloseUp_SlideDelay )
+	ON_CN_INPUTERROR( IDC_PLAY_DELAY_COMBO, OnCBnInputError_SlideDelay )
 	ON_UPDATE_COMMAND_UI( IDC_PLAY_DELAY_COMBO, OnUpdate_SlideDelay )
 	ON_EN_KILLFOCUS( IDC_SCROLL_POS_EDIT, OnEnKillFocusCurrPos )
 	ON_MESSAGE( WM_INITDIALOG, HandleInitDialog )
@@ -240,6 +241,11 @@ void CAlbumDialogBar::OnCBnSelChange_SlideDelay( void )
 void CAlbumDialogBar::OnCBnCloseUp_SlideDelay( void )
 {
 	m_pAlbumView->SetFocus();
+}
+
+void CAlbumDialogBar::OnCBnInputError_SlideDelay( void )
+{
+	OnSlideDelayChanged();
 }
 
 void CAlbumDialogBar::OnEnKillFocusCurrPos( void )

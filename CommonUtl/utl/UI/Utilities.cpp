@@ -858,6 +858,55 @@ namespace ui
 		return className;
 	}
 
+	bool IsEditLikeCtrl( HWND hCtrl )
+	{
+		ASSERT_PTR( hCtrl );
+
+		if ( HasFlag( ::SendMessage( hCtrl, WM_GETDLGCODE, 0, 0 ), DLGC_HASSETSEL ) )
+			return true;
+
+		return
+			IsEditBox( hCtrl ) ||
+			IsComboWithEdit( hCtrl );
+	}
+
+	bool IsEditBox( HWND hCtrl )
+	{
+		if ( CEdit* pEdit = dynamic_cast< CEdit* >( CWnd::FromHandlePermanent( hCtrl ) ) )
+			return true;
+
+		std::tstring className = GetClassName( hCtrl );
+
+		if ( className == WC_EDITW || className == _T( WC_EDITA ) )
+			return true;
+
+		return false;
+	}
+
+	bool IsComboWithEdit( HWND hCtrl )
+	{
+		DWORD comboStyle = 0;
+
+		if ( CComboBox* pComboBox = dynamic_cast< CComboBox* >( CWnd::FromHandlePermanent( hCtrl ) ) )
+			comboStyle = pComboBox->GetStyle();
+		else
+		{
+			std::tstring className = GetClassName( hCtrl );
+
+			if ( className == WC_COMBOBOXEXW || className == _T( WC_COMBOBOXEXA ) )
+				comboStyle = GetStyle( hCtrl );
+		}
+
+		switch ( comboStyle & 0x0F )
+		{
+			case CBS_DROPDOWN:
+			case CBS_SIMPLE:
+				return true;
+			default:
+				return false;
+		}
+	}
+
 	bool IsGroupBox( HWND hWnd )
 	{
 		if ( EqMaskedValue( GetStyle( hWnd ), BS_TYPEMASK, BS_GROUPBOX ) )
@@ -878,6 +927,19 @@ namespace ui
 		return GetClassName( hWnd ) == _T("#32768");
 	}
 
+
+	bool SelectAllEditLikeText( CWnd* pCtrl )
+	{
+		if ( CEdit* pEdit = dynamic_cast< CEdit* >( pCtrl ) )
+		{
+			pEdit->SetSel( 0, -1 );
+			return true;
+		}
+		else if ( CComboBox* pComboBox = dynamic_cast< CComboBox* >( pCtrl ) )
+			return pComboBox->SetEditSel( 0, -1 ) != FALSE;
+
+		return false;
+	}
 
 	bool ModifyBorder( CWnd* pWnd, bool useBorder /*= true*/ )
 	{
@@ -939,8 +1001,50 @@ namespace ui
 	}
 
 
+	bool ShowInputError( CWnd* pCtrl, const std::tstring& message )
+	{
+		ASSERT_PTR( pCtrl->GetSafeHwnd() );
+
+		static const TCHAR s_title[] = _T("Input Validation Error");
+
+		if ( CEdit* pEdit = dynamic_cast< CEdit* >( pCtrl ) )
+			pEdit->ShowBalloonTip( s_title,  message.c_str(), TTI_ERROR );
+		else
+			ui::ShowBalloonTip( pCtrl, s_title,  message.c_str(), (HICON)TTI_ERROR );
+
+		pCtrl->SetFocus();
+		SelectAllEditLikeText( pCtrl );
+
+		return BeepSignal( MB_ICONERROR );
+	}
+
+
 	namespace ddx
 	{
+		void FailInput( CDataExchange* pDX, UINT ctrlId, const std::tstring& validationError )
+		{
+			ASSERT( DialogSaveChanges == pDX->m_bSaveAndValidate );
+
+			HWND hCtrl;
+			pDX->m_pDlgWnd->GetDlgItem( ctrlId, &hCtrl );
+
+			if ( hCtrl != NULL )
+				IsEditLikeCtrl( hCtrl ) ? pDX->PrepareEditCtrl( ctrlId ) : pDX->PrepareCtrl( ctrlId );
+
+			if ( !validationError.empty() )
+				ReportError( validationError );
+
+			if ( hCtrl != NULL )
+			{
+				::SetFocus( hCtrl );
+				if ( pDX->m_bEditLastControl )
+					::SendMessage( hCtrl, EM_SETSEL, 0, -1 );		// select all in edit item
+			}
+
+			pDX->Fail();	// will throw a CUserException, handled by CWnd::UpdateData()
+		}
+
+
 		std::tstring GetItemText( CDataExchange* pDX, UINT ctrlId )
 		{
 			CWnd* pCtrl = pDX->m_pDlgWnd->GetDlgItem( ctrlId );

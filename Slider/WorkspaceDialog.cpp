@@ -16,12 +16,15 @@
 #define new DEBUG_NEW
 #endif
 
+#include "utl/UI/StockValuesComboBox.hxx"
+
 
 CWorkspaceDialog::CWorkspaceDialog( CWnd* pParent /*= NULL*/ )
 	: CDialog( IDD_WORKSPACE_DIALOG, pParent )
 	, m_data( CWorkspace::GetData() )
 	, m_thumbnailerFlags( app::GetThumbnailer()->m_flags )
 	, m_enlargeSmoothing( d2d::CDrawBitmapTraits::IsSmoothingMode() )
+	, m_defaultSlideDelay( CWorkspace::Instance().GetDefaultSlideDelay() )
 {
 	m_mruCountEdit.SetValidRange( Range< int >( 0, 16 ) );
 	m_thumbListColCountEdit.SetValidRange( Range< int >( 1, 25 ) );
@@ -63,6 +66,8 @@ void CWorkspaceDialog::DoDataExchange( CDataExchange* pDX )
 
 	ui::DDX_Number( pDX, IDC_THUMB_BOUNDS_SIZE_COMBO, m_data.m_thumbBoundsSize );
 	ui::DDV_NumberMinMax( pDX, IDC_THUMB_BOUNDS_SIZE_COMBO, m_data.m_thumbBoundsSize, thumb::MinBoundsSize, thumb::MaxBoundsSize );
+
+	m_slideDelayCombo.DDX_Value( pDX, m_defaultSlideDelay, IDC_DEFAULT_SLIDE_DELAY_COMBO );
 
 	CDialog::DoDataExchange( pDX );
 }

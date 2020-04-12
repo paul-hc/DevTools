@@ -11,7 +11,7 @@
 
 
 CSlideData::CSlideData( void )
-	: m_slideDelay( 3000 )
+	: m_slideDelay( CWorkspace::Instance().GetDefaultSlideDelay() )
 	, m_dirForward( true )
 	, m_circular( false )
 	, m_currListState( StoreByIndex )

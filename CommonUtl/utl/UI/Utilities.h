@@ -238,6 +238,7 @@ namespace ui
 	}
 
 	inline void GotoDlgItem( CDialog* pDlg, UINT ctrlId ) { pDlg->GotoDlgCtrl( pDlg->GetDlgItem( ctrlId ) ); }
+	inline void GotoDlgItem( HWND hCtrl ) { ASSERT_PTR( hCtrl ); ::SendMessage( ::GetParent( hCtrl ), WM_NEXTDLGCTL, (WPARAM)hCtrl, 1L ); }
 
 
 	bool EnableWindow( HWND hWnd, bool enable = true );
@@ -283,6 +284,14 @@ namespace ui
 					   (LPARAM)hCtrl );
 	}
 
+	inline void PostCommandToParent( HWND hCtrl, int notifCode = BN_CLICKED )
+	{
+		ASSERT( hCtrl != NULL && ::GetParent( hCtrl ) != NULL );
+		::PostMessage( ::GetParent( hCtrl ),
+					   WM_COMMAND, MAKEWPARAM( ::GetDlgCtrlID( hCtrl ), notifCode ),
+					   (LPARAM)hCtrl );
+	}
+
 	inline LRESULT SendNotifyToParent( HWND hCtrl, int notifCode, NMHDR* pNmHdr )
 	{
 		ASSERT( hCtrl != NULL && ::GetParent( hCtrl ) != NULL );
@@ -310,9 +319,14 @@ namespace ui
 
 
 	std::tstring GetClassName( HWND hWnd );
+	bool IsEditLikeCtrl( HWND hCtrl );
+	bool IsEditBox( HWND hCtrl );
+	bool IsComboWithEdit( HWND hCtrl );
 	bool IsGroupBox( HWND hWnd );
 	bool IsDialogBox( HWND hWnd );
 	bool IsMenuWnd( HWND hWnd );
+
+	bool SelectAllEditLikeText( CWnd* pCtrl );			// works for edit-box and combo-box
 
 	bool ModifyBorder( CWnd* pWnd, bool useBorder = true );
 
@@ -347,15 +361,20 @@ namespace ui
 	inline int MessageBox( const std::tstring& message, UINT mbFlags = MB_OK ) { return ::AfxMessageBox( message.c_str(), mbFlags ); }
 
 	bool BeepSignal( UINT beep = MB_OK );														// returns false for convenience
+
 	bool ReportError( const std::tstring& message, UINT mbFlags = MB_OK | MB_ICONERROR );		// returns false for convenience
 	int ReportException( const std::exception& exc, UINT mbFlags = MB_OK | MB_ICONERROR );
 	int ReportException( const CException* pExc, UINT mbFlags = MB_OK | MB_ICONERROR );
+
+	bool ShowInputError( CWnd* pCtrl, const std::tstring& message );							// returns false for convenience
 
 	bool& RefAsyncApiEnabled( void );
 
 
 	namespace ddx
 	{
+		void FailInput( CDataExchange* pDX, UINT ctrlId, const std::tstring& validationError );
+
 		// combo-friendly control IO
 		std::tstring GetItemText( CDataExchange* pDX, UINT ctrlId );
 		bool SetItemText( CDataExchange* pDX, UINT ctrlId, const std::tstring& text );

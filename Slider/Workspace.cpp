@@ -26,6 +26,7 @@ namespace reg
 {
 	const TCHAR section_Workspace[] = _T("Settings\\Workspace");
 	const TCHAR entry_enlargeInterpolationMode[] = _T("EnlargeImageSmoothing");
+	const TCHAR entry_defaultSlideDelay[] = _T("DefaultSlideDelay");
 }
 
 
@@ -212,12 +213,15 @@ bool CWorkspace::SaveSettings( void )
 
 void CWorkspace::LoadRegSettings( void )
 {
+	m_defaultSlideDelay = AfxGetApp()->GetProfileInt( reg::section_Workspace, reg::entry_defaultSlideDelay, m_defaultSlideDelay );
+
 	d2d::CDrawBitmapTraits::s_enlargeInterpolationMode =
 		static_cast< D2D1_BITMAP_INTERPOLATION_MODE >( AfxGetApp()->GetProfileInt( reg::section_Workspace, reg::entry_enlargeInterpolationMode, d2d::CDrawBitmapTraits::s_enlargeInterpolationMode ) );
 }
 
 void CWorkspace::SaveRegSettings( void )
 {
+	AfxGetApp()->WriteProfileInt( reg::section_Workspace, reg::entry_defaultSlideDelay, m_defaultSlideDelay );
 	AfxGetApp()->WriteProfileInt( reg::section_Workspace, reg::entry_enlargeInterpolationMode, d2d::CDrawBitmapTraits::s_enlargeInterpolationMode );
 }
 
@@ -394,6 +398,12 @@ void CWorkspace::CmEditWorkspace( void )
 		}
 		if ( d2d::CDrawBitmapTraits::SetSmoothingMode( dlg.m_enlargeSmoothing ) )
 		{
+			SaveRegSettings();
+			changed.first = Hint_ViewUpdate;
+		}
+		if ( dlg.m_defaultSlideDelay != m_defaultSlideDelay )
+		{
+			m_defaultSlideDelay = dlg.m_defaultSlideDelay;
 			SaveRegSettings();
 			changed.first = Hint_ViewUpdate;
 		}

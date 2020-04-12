@@ -39,6 +39,10 @@ namespace ui
 	};
 
 
+	template< typename ValueT >
+	std::tstring FormatValidationMessage( const IValueSetAdapter< ValueT >* pAdapter, ui::TValueSetFlags flags, const Range< ValueT >& validRange );
+
+
 	// timespan duration field (miliseconds) displayed as seconds (double)
 	class CDurationInSecondsAdapter : public ui::IDisplayValueSetAdapter< UINT, double >		// UINT stands for __time64_t (timespan in miliseconds)
 	{
@@ -106,9 +110,12 @@ public:
 
 	// input/output
 	bool OutputValue( ValueT value );
-	bool InputValue( ValueT* pOutValue, ui::ComboField byField ) const;
+	bool InputValue( ValueT* pOutValue, ui::ComboField byField, bool showErrors = false ) const;
 
 	bool IsValidValue( ValueT value ) const;
+
+	void DDX_Value( CDataExchange* pDX, ValueT& rValue, int comboId );
+	std::tstring FormatValidationError( void ) const;
 protected:
 	void InitStockItems( void );
 

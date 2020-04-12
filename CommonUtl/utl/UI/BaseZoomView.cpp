@@ -40,7 +40,7 @@ bool CBaseZoomView::ModifyZoomPct( UINT zoomPct )
 	const Range< UINT >& zoomLimits = ui::CStdZoom::Instance().m_limits;
 	if ( !zoomLimits.Contains( zoomPct ) )			// zoom out of range?
 	{
-		ui::MessageBox( str::Format( _T("Zoom factor must be between %d and %d."), zoomLimits.m_start, zoomLimits.m_end ), MB_ICONERROR );
+		OutputZoomPct();
 		return false;
 	}
 

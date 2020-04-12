@@ -160,7 +160,7 @@ UINT CMainToolbar::InputZoomPct( ui::ComboField byField ) const
 {
 	UINT zoomPct;
 
-	if ( !m_pZoomCombo->InputValue( &zoomPct, byField ) )
+	if ( !m_pZoomCombo->InputValue( &zoomPct, byField, true ) )
 		zoomPct = 0;
 
 	return zoomPct;

@@ -92,6 +92,8 @@ public:
 
 	CImageState* GetLoadingImageState( void ) { return m_pLoadingImageState; }
 
+	UINT GetDefaultSlideDelay( void ) const { return m_defaultSlideDelay; }
+
 	// operations
 	void FetchSettings( void );
 	bool LoadDocuments( void );
@@ -115,7 +117,7 @@ private:
 	persist std::vector< CImageState > m_imageStates;
 
 	// registry-based options
-	persist UINT m_defaultSlideDelay;			// in miliseconds
+	persist UINT m_defaultSlideDelay;				// in miliseconds
 protected:
 	// generated stuff
 	afx_msg void CmSaveWorkspace( void );

@@ -3,6 +3,9 @@
 #pragma once
 
 
+#define ON_CN_INPUTERROR( id, memberFxn )		ON_CONTROL( ui::CN_INPUTERROR, id, memberFxn )
+
+
 enum Alignment
 {
 	NoAlign = 0,
@@ -48,6 +51,10 @@ namespace ui
 
 	inline RawCheckState CheckStateToRaw( int checkState ) { return INDEXTOSTATEIMAGEMASK( checkState + 1 ); }
 	inline int CheckStateFromRaw( RawCheckState rawCheckState )	{ return ( rawCheckState >> 12 ) - 1; }
+
+
+	// standard notifications
+	enum NotifCode { CN_INPUTERROR = CBN_SELENDCANCEL + 20 };		// note: notifications are suppressed during parent's UpdateData()
 
 
 	struct CNmHdr : public tagNMHDR

@@ -178,6 +178,9 @@ void CAlbumImageView::SetSlideDelay( UINT slideDelay )
 
 void CAlbumImageView::HandleNavTick( void )
 {
+	if ( ui::IsKeyPressed( VK_CONTROL ) )
+		return;				// temporarily freeze navigation
+
 	bool dirForward = m_slideData.m_dirForward == !ui::IsKeyPressed( VK_SHIFT );
 	size_t currPos = m_slideData.GetCurrentIndex();
 

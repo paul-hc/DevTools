@@ -15,7 +15,7 @@ namespace ui
 {
 	// CDurationInSecondsAdapter implementation
 
-	const UINT CDurationInSecondsAdapter::s_defaultMiliseconds[] = { 100, 250, 500, 1000, 1500, 2000, 3000, 4000, 5000, 8000, 10000, 12000, 15000, 17000, 20000, 25000, 30000 };
+	const UINT CDurationInSecondsAdapter::s_defaultMiliseconds[] = { 100, 250, 500, 750, 1000, 1500, 2000, 3000, 4000, 5000, 8000, 10000, 12000, 15000, 17000, 20000, 25000, 30000 };
 
 	CDurationInSecondsAdapter::CDurationInSecondsAdapter( void )
 		: m_stockMiliseconds( s_defaultMiliseconds, END_OF( s_defaultMiliseconds ) )
@@ -43,7 +43,7 @@ namespace ui
 		ASSERT_PTR( pOutMiliseconds );
 
 		double seconds;
-		if ( !num::ParseNumber( *pOutMiliseconds, text ) )
+		if ( !num::ParseNumber( seconds, text ) )
 			return false;			// invalid duration
 
 		*pOutMiliseconds = FromDisplayValue( seconds );
