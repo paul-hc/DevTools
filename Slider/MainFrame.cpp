@@ -323,7 +323,7 @@ int CMainFrame::OnCreate( CREATESTRUCT* pCS )
 	if ( const CWindowPlacement* pLoadedPlacement = CWorkspace::Instance().GetLoadedPlacement() )
 		pLoadedPlacement->SetPlacement( this );						// 1st step: restore persistent placement, but with SW_HIDE; 2nd step will use the persisted AfxGetApp()->m_nCmdShow in app InitInstance()
 
-	if ( !m_pToolbar->CreateEx( this, TBSTYLE_FLAT,
+	if ( !m_pToolbar->CreateEx( this, TBSTYLE_FLAT | TBSTYLE_TRANSPARENT,
 								WS_CHILD | WS_VISIBLE |
 								CBRS_TOP | CBRS_GRIPPER | CBRS_TOOLTIPS | CBRS_FLYBY | CBRS_SIZE_DYNAMIC,
 								CRect( 0, 2, 0, 2 ) ) ||

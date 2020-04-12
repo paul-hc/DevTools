@@ -119,6 +119,16 @@ void CAlbumDialogBar::LayoutControls( void )
 	m_fileNameEdit.MoveWindow( rectEdit );
 }
 
+BOOL CAlbumDialogBar::PreTranslateMessage( MSG* pMsg )
+{
+// it doesn't hit here
+//	if ( CAccelTable::IsKeyMessage( pMsg ) )
+//		if ( app::GetApp()->m_sharedAccel.TranslateIfOwnsFocus( pMsg, m_hWnd, m_hWnd ) )
+//			return TRUE;
+
+	return CDialogBar::PreTranslateMessage( pMsg );
+}
+
 
 // message handlers
 
@@ -136,16 +146,6 @@ BEGIN_MESSAGE_MAP( CAlbumDialogBar, CDialogBar )
 	ON_NOTIFY_EX_RANGE( TTN_NEEDTEXTA, 0, 0xFFFF, OnToolTipText )
 	ON_NOTIFY_EX_RANGE( TTN_NEEDTEXTW, 0, 0xFFFF, OnToolTipText )
 END_MESSAGE_MAP()
-
-BOOL CAlbumDialogBar::PreTranslateMessage( MSG* pMsg )
-{
-// it doesn't hit here
-//	if ( CAccelTable::IsKeyMessage( pMsg ) )
-//		if ( app::GetApp()->m_sharedAccel.TranslateIfOwnsFocus( pMsg, m_hWnd, m_hWnd ) )
-//			return TRUE;
-
-	return CDialogBar::PreTranslateMessage( pMsg );
-}
 
 LRESULT CAlbumDialogBar::HandleInitDialog( WPARAM wParam, LPARAM lParam )
 {

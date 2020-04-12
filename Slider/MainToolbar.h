@@ -34,7 +34,7 @@ public:
 	virtual int InputNavigPos( void ) const;
 private:
 	template< typename CtrlType >
-	bool CreateBarCtrl( CtrlType* pCtrl, UINT ctrlId, DWORD style, int width, UINT tbButtonStyle = TBBS_SEPARATOR );
+	bool CreateBarCtrl( CtrlType* pCtrl, UINT ctrlId, DWORD style, int width, int padLeft = 0 );
 
 	template< typename CtrlType >
 	bool CreateControl( CtrlType* pCtrl, UINT ctrlId, DWORD style, const CRect& ctrlRect );

@@ -36,9 +36,9 @@ private:
 
 	CFont m_boldFont;
 	CAlbumImageView* m_pAlbumView;
-public:
+
 	// generated stuff
-	public:
+public:
 	virtual BOOL PreTranslateMessage( MSG* pMsg );
 protected:
 	afx_msg void OnOk( void );

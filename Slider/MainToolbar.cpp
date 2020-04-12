@@ -37,10 +37,10 @@ const UINT CMainToolbar::s_buttons[] =
 		ID_SEPARATOR,
 	IDW_AUTO_IMAGE_SIZE_COMBO,
 	IDW_ZOOM_COMBO,
-	IDW_SMOOTHING_MODE_CHECK,
 	CM_ZOOM_NORMAL,
 	CM_ZOOM_IN,
 	CM_ZOOM_OUT,
+	IDW_SMOOTHING_MODE_CHECK,
 		ID_SEPARATOR,
 	CM_NAV_PLAY,
 		ID_SEPARATOR,
@@ -76,11 +76,11 @@ bool CMainToolbar::InitToolbar( void )
 	if ( !InitToolbarButtons() )
 		return false;
 
-	enum { AutoImageSizeComboWidth = 130, ZoomComboWidth = 90, SmoothCheckWidth = 67 };
+	enum { AutoImageSizeComboWidth = 130, ZoomComboWidth = 90, SmoothCheckWidth = 65 };
 
 	VERIFY( CreateBarCtrl( &m_autoImageSizeCombo, IDW_AUTO_IMAGE_SIZE_COMBO, CBS_DROPDOWNLIST | CBS_DISABLENOSCROLL, AutoImageSizeComboWidth ) );
 	VERIFY( CreateBarCtrl( m_pZoomCombo.get(), IDW_ZOOM_COMBO, CBS_DROPDOWN | CBS_DISABLENOSCROLL, ZoomComboWidth ) );
-	VERIFY( CreateBarCtrl( &m_smoothCheck, IDW_SMOOTHING_MODE_CHECK, BS_CHECKBOX | WS_DLGFRAME, SmoothCheckWidth ) );
+	VERIFY( CreateBarCtrl( &m_smoothCheck, IDW_SMOOTHING_MODE_CHECK, BS_CHECKBOX, SmoothCheckWidth, 6 ) );	// push right to avoid overlap on background separator button
 	m_smoothCheck.SetWindowText( _T("Smooth") );
 
 	// setup items for the combos
@@ -100,18 +100,18 @@ bool CMainToolbar::InitToolbar( void )
 }
 
 template< typename CtrlType >
-bool CMainToolbar::CreateBarCtrl( CtrlType* pCtrl, UINT ctrlId, DWORD style, int width, UINT tbButtonStyle /*= TBBS_SEPARATOR*/ )
+bool CMainToolbar::CreateBarCtrl( CtrlType* pCtrl, UINT ctrlId, DWORD style, int width, int padLeft /*= 0*/ )
 {
 	ASSERT_PTR( pCtrl );
 	int buttonPos = CommandToIndex( ctrlId );
 	if ( -1 == buttonPos )
 		return false;
 
-	SetButtonInfo( buttonPos, ctrlId, tbButtonStyle, width );		// set combo width with underlying button as separator
+	SetButtonInfo( buttonPos, ctrlId, TBBS_SEPARATOR, width );		// set combo width with underlying button as separator
 
 	CRect ctrlRect;
 	GetItemRect( buttonPos, &ctrlRect );
-	ctrlRect.left += 2;							// some more gap on left and right
+	ctrlRect.left += 2 + padLeft;									// some more gap on left and right
 	ctrlRect.right -= 5;
 
 	VERIFY( CreateControl( pCtrl, ctrlId, style, ctrlRect ) );
