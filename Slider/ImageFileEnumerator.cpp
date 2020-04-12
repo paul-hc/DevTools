@@ -61,7 +61,7 @@ void CImageFileEnumerator::Search( const std::vector< CSearchSpec >& searchSpecs
 		++itSpec;
 	}
 }
- 
+
 void CImageFileEnumerator::Search( const CSearchSpec& searchSpec ) throws_( CException* )
 {
 	std::vector< CSearchSpec > searchSpecs( 1, searchSpec );
@@ -84,6 +84,7 @@ void CImageFileEnumerator::SearchImageArchive( const fs::CPath& stgDocPath ) thr
 void CImageFileEnumerator::SwapResults( std::vector< CFileAttr >& rFileAttrs, std::vector< fs::CPath >* pArchiveStgPaths /*= NULL*/ )
 {
 	rFileAttrs.swap( m_fileAttrs );
+
 	if ( pArchiveStgPaths != NULL )
 		pArchiveStgPaths->swap( m_archiveStgPaths );
 }

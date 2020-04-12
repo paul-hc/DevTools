@@ -119,6 +119,7 @@ CWorkspace::CWorkspace( void )
 	, m_pLoadingImageState( NULL )
 	, m_isFullScreen( false )
 	, m_reserved( 0 )
+	, m_defaultSlideDelay( 5000 )
 {
 	fs::CPathParts parts( app::GetModulePath().Get() );
 	parts.m_ext = _T(".slw");

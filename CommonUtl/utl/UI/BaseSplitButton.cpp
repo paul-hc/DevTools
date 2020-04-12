@@ -61,14 +61,14 @@ void CBaseSplitButton::RedrawRhsPart( void )
 
 void CBaseSplitButton::DrawItem( DRAWITEMSTRUCT* pDrawItem )
 {
-	CIconButton::DrawItem( pDrawItem );
+	__super::DrawItem( pDrawItem );
 	if ( HasRhsPart() )
 		DrawRhsPart( CDC::FromHandle( pDrawItem->hDC ), pDrawItem->rcItem );
 }
 
 void CBaseSplitButton::PreSubclassWindow( void )
 {
-	CIconButton::PreSubclassWindow();
+	__super::PreSubclassWindow();
 	ModifyStyle( 0, BS_LEFT );
 }
 
@@ -83,7 +83,7 @@ END_MESSAGE_MAP()
 
 void CBaseSplitButton::OnMouseMove( UINT flags, CPoint point )
 {
-	CIconButton::OnMouseMove( flags, point );
+	__super::OnMouseMove( flags, point );
 
 	if ( m_splitState != RhsPressed )
 	{
@@ -103,7 +103,7 @@ LRESULT CBaseSplitButton::OnMouseLeave( WPARAM, LPARAM )
 
 void CBaseSplitButton::OnPaint( void )
 {
-	CIconButton::OnPaint();
+	__super::OnPaint();
 
 	if ( HasRhsPart() && !IsOwnerDraw() )
 	{

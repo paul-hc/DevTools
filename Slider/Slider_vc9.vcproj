@@ -515,14 +515,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\ImageState.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\ImageState.h"
-				>
-			</File>
-			<File
 				RelativePath=".\ImageView.cpp"
 				>
 			</File>
@@ -604,14 +596,6 @@
 			</File>
 			<File
 				RelativePath=".\SearchSpecDialog.h"
-				>
-			</File>
-			<File
-				RelativePath=".\SlideData.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\SlideData.h"
 				>
 			</File>
 			<File
@@ -790,6 +774,14 @@
 					>
 				</File>
 				<File
+					RelativePath=".\ImageState.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\ImageState.h"
+					>
+				</File>
+				<File
 					RelativePath=".\ModelSchema.h"
 					>
 				</File>
@@ -799,6 +791,14 @@
 				</File>
 				<File
 					RelativePath=".\SearchSpec.h"
+					>
+				</File>
+				<File
+					RelativePath=".\SlideData.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\SlideData.h"
 					>
 				</File>
 			</Filter>

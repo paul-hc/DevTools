@@ -6,6 +6,7 @@
 
 
 class CAlbumImageView;
+class CDurationComboBox;
 
 
 class CAlbumDialogBar : public CDialogBar
@@ -27,7 +28,7 @@ public:
 protected:
 	void LayoutControls( void );
 private:
-	CComboBox m_slideDelayCombo;
+	std::auto_ptr< CDurationComboBox > m_pSlideDelayCombo;
 	CEdit m_navEdit;
 	CSpinButtonCtrl m_scrollSpin;
 	CStatic m_infoStatic;

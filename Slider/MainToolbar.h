@@ -2,10 +2,13 @@
 #define MainToolbar_h
 #pragma once
 
-#include "utl/UI/ToolbarStrip.h"
-#include "utl/UI/IZoomBar.h"
 #include "utl/UI/ui_fwd.h"
+#include "utl/UI/IZoomBar.h"
+#include "utl/UI/ToolbarStrip.h"
 #include "INavigationBar.h"
+
+
+class CZoomComboBox;
 
 
 class CMainToolbar : public CToolbarStrip
@@ -37,7 +40,7 @@ private:
 	bool CreateControl( CtrlType* pCtrl, UINT ctrlId, DWORD style, const CRect& ctrlRect );
 private:
 	CComboBox m_autoImageSizeCombo;
-	CComboBox m_zoomCombo;
+	std::auto_ptr< CZoomComboBox > m_pZoomCombo;
 	CButton m_smoothCheck;
 	CSliderCtrl m_navigSlider;
 	CFont m_ctrlFont;

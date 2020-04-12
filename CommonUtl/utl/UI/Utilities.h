@@ -533,12 +533,18 @@ namespace ui
 	void ReadComboItems( std::vector< std::tstring >& rOutItems, const CComboBox& combo );
 	void WriteComboItems( CComboBox& rCombo, const std::vector< std::tstring >& items );
 
-	template< typename ContainerType, typename FormatFunc >
-	void WriteComboItems( CComboBox& rCombo, const ContainerType& itemValues, FormatFunc formatFunc )
+	template< typename ValueIterator_T, typename FormatFunc >
+	void WriteComboItemValues( CComboBox& rCombo, ValueIterator_T itStartValue, ValueIterator_T itEndValue, FormatFunc formatFunc )
 	{
 		rCombo.ResetContent();
-		for ( typename ContainerType::const_iterator itValue = itemValues.begin(); itValue != itemValues.end(); ++itValue )
-			rCombo.AddString( formatFunc( *itValue ).c_str() );
+		for ( ; itStartValue != itEndValue; ++itStartValue )
+			rCombo.AddString( formatFunc( *itStartValue ).c_str() );
+	}
+
+	template< typename Container_T, typename FormatFunc >
+	inline void WriteComboItemValues( CComboBox& rCombo, const Container_T& itemValues, FormatFunc formatFunc )
+	{
+		WriteComboItemValues( rCombo, itemValues.begin(), itemValues.end(), formatFunc );
 	}
 
 	CEdit* GetComboEdit( const CComboBox& rCombo );

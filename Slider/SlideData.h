@@ -36,7 +36,7 @@ public:
 
 	typedef UINT TFirstDataMember;
 
-	void Stream( CArchive& archive, TFirstDataMember* pExtracted_SlideElapsed = NULL );
+	void Stream( CArchive& archive, TFirstDataMember* pExtracted_SlideDelay = NULL );
 
 	const CListViewState& GetCurrListState( void ) const { return m_currListState; }
 	CListViewState& RefCurrListState( void ) { return m_currListState; }
@@ -45,7 +45,7 @@ public:
 	bool SetCurrentIndex( int currIndex, bool resetListState = true );
 public:
 	// sliding
-	persist TFirstDataMember m_slideElapsed;
+	persist TFirstDataMember m_slideDelay;		// in miliseconds
 	persist bool m_dirForward;
 	persist bool m_circular;
 

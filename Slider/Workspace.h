@@ -113,6 +113,9 @@ private:
 	persist CWindowPlacement m_mainPlacement;		// placement of the main frame
 	persist DWORD m_reserved;
 	persist std::vector< CImageState > m_imageStates;
+
+	// registry-based options
+	persist UINT m_defaultSlideDelay;			// in miliseconds
 protected:
 	// generated stuff
 	afx_msg void CmSaveWorkspace( void );

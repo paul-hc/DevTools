@@ -29,7 +29,7 @@ CAccelTable CAlbumImageView::s_accelNavigate;
 
 CAlbumImageView::CAlbumImageView( void )
 	: CImageView()
-	, m_navTimer( this, ID_NAVIGATION_TIMER, m_slideData.m_slideElapsed )
+	, m_navTimer( this, ID_NAVIGATION_TIMER, m_slideData.m_slideDelay )
 	, m_isDropTargetEnabled( false )
 	, m_pPeerThumbView( NULL )
 	, m_pAlbumDialogBar( NULL )
@@ -173,7 +173,7 @@ bool CAlbumImageView::TogglePlay( bool doBeep /*= true*/ )
 
 void CAlbumImageView::SetSlideDelay( UINT slideDelay )
 {
-	m_navTimer.SetElapsed( m_slideData.m_slideElapsed = slideDelay );
+	m_navTimer.SetElapsed( m_slideData.m_slideDelay = slideDelay );
 }
 
 void CAlbumImageView::HandleNavTick( void )
@@ -301,7 +301,7 @@ void CAlbumImageView::OnSlideDataChanged( bool setToModified /*= true*/ )
 void CAlbumImageView::OnDocSlideDataChanged( void )
 {
 	m_slideData = GetDocument()->m_slideData;
-	m_navTimer.SetElapsed( m_slideData.m_slideElapsed );
+	m_navTimer.SetElapsed( m_slideData.m_slideDelay );
 	UpdateImage();
 }
 

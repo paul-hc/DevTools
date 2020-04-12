@@ -7,41 +7,19 @@
 #include "resource.h"
 #include "utl/StringUtilities.h"
 #include "utl/UI/CmdInfoStore.h"
+#include "utl/UI/StockValuesComboBox.h"
 #include "utl/UI/Utilities.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
 
-
-namespace func
-{
-	struct FormatSlideDelay
-	{
-		std::tstring operator()( double delaySecs ) const
-		{
-			std::tstring text = str::Format( _T("%.1f s"), delaySecs );
-			str::Replace( text, _T(".0 "), _T(" ") );
-			return text;
-		}
-
-		std::tstring operator()( UINT delayMilisecs ) const
-		{
-			return operator()( (double)delayMilisecs / 1000.0 );
-		}
-	};
-
-	const std::vector< double >& GetStdDelays( void )
-	{
-		static const double delays[] = { 0.1, 0.2, 0.3, 0.5, 1.0, 1.5, 2., 3., 4., 5., 8., 10., 12., 15., 17., 20., 25., 30. };
-		static const std::vector< double > stdDelays( delays, delays + COUNT_OF( delays ) );
-		return stdDelays;
-	}
-}
+#include "utl/UI/StockValuesComboBox.hxx"
 
 
 CAlbumDialogBar::CAlbumDialogBar( void )
 	: CDialogBar()
+	, m_pSlideDelayCombo( new CDurationComboBox() )
 	, m_pAlbumView( NULL )
 {
 }
@@ -80,14 +58,11 @@ bool CAlbumDialogBar::SetCurrentPos( int currIndex, bool forceLoad /*= false*/ )
 
 bool CAlbumDialogBar::InputSlideDelay( ui::ComboField byField )
 {
-	double delay;
-	if ( !num::ParseNumber( delay, ui::GetComboSelText( m_slideDelayCombo, byField ) ) )
+	UINT slideDelay;
+	if ( !m_pSlideDelayCombo->InputValue( &slideDelay, byField ) )
 		return false;		// invalid delay
 
-	if ( delay < 0.1 )
-		return false;		// invalid delay
-
-	m_pAlbumView->SetSlideDelay( static_cast< UINT >( delay * 1000.0 ) );
+	m_pAlbumView->SetSlideDelay( slideDelay );
 	m_pAlbumView->OnSlideDataChanged( false );		// don't set modified flag for this change
 	OnSlideDelayChanged();			// update the content of combo box
 	return true;
@@ -127,7 +102,7 @@ void CAlbumDialogBar::OnCurrPosChanged( void )
 
 void CAlbumDialogBar::OnSlideDelayChanged( void )
 {
-	ui::SetComboEditText( m_slideDelayCombo, func::FormatSlideDelay()( m_pAlbumView->GetSlideData().m_slideElapsed ), str::IgnoreCase );
+	m_pSlideDelayCombo->OutputValue( m_pAlbumView->GetSlideData().m_slideDelay );
 }
 
 void CAlbumDialogBar::LayoutControls( void )
@@ -176,13 +151,11 @@ LRESULT CAlbumDialogBar::HandleInitDialog( WPARAM wParam, LPARAM lParam )
 {
 	CDialogBar::HandleInitDialog( wParam, lParam );
 
-	VERIFY( m_slideDelayCombo.SubclassDlgItem( IDC_PLAY_DELAY_COMBO, this ) );
+	VERIFY( m_pSlideDelayCombo->SubclassDlgItem( IDC_PLAY_DELAY_COMBO, this ) );
 	VERIFY( m_navEdit.SubclassDlgItem( IDC_SCROLL_POS_EDIT, this ) );
 	VERIFY( m_scrollSpin.SubclassDlgItem( IDC_SCROLL_POS_SPIN, this ) );
 	VERIFY( m_infoStatic.SubclassDlgItem( IDC_NAV_COUNT_STATIC, this ) );
 	VERIFY( m_fileNameEdit.SubclassDlgItem( IDC_CURR_FILE_EDIT, this ) );
-
-	ui::WriteComboItems( m_slideDelayCombo, func::GetStdDelays(), func::FormatSlideDelay() );
 
 	LOGFONT logFont;
 	if ( GetFont()->GetLogFont( &logFont ) )
@@ -239,7 +212,7 @@ void CAlbumDialogBar::OnOk( void )
 	if ( !ui::OwnsFocus( m_hWnd ) )
 		return;
 
-	if ( ui::OwnsFocus( m_slideDelayCombo ) )
+	if ( ui::OwnsFocus( *m_pSlideDelayCombo ) )
 	{
 		if ( InputSlideDelay( ui::ByEdit ) )
 			m_pAlbumView->SetFocus();

@@ -1494,6 +1494,18 @@
 					>
 				</File>
 				<File
+					RelativePath=".\StockValuesComboBox.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\StockValuesComboBox.h"
+					>
+				</File>
+				<File
+					RelativePath=".\StockValuesComboBox.hxx"
+					>
+				</File>
+				<File
 					RelativePath=".\TextEdit.cpp"
 					>
 				</File>

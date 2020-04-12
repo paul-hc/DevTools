@@ -107,7 +107,10 @@ void CAlbumDoc::Serialize( CArchive& archive )
 		pLoadingArchive.reset( new serial::CScopedLoadingArchive( archive, m_fileModelSchema ) );
 	}
 	else
-		archive << app::Slider_LatestModelSchema;				// always save the latest model schema version as first UINT in the archive
+	{
+		m_fileModelSchema = app::Slider_LatestModelSchema;				// always save the latest model schema version as first UINT in the archive
+		archive << m_fileModelSchema;
+	}
 
 	// backwards compatibility: pass firstValue read
 	m_slideData.Stream( archive, firstValue != UINT_MAX ? &firstValue : NULL );

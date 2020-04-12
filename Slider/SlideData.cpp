@@ -11,7 +11,7 @@
 
 
 CSlideData::CSlideData( void )
-	: m_slideElapsed( 3000 )
+	: m_slideDelay( 3000 )
 	, m_dirForward( true )
 	, m_circular( false )
 	, m_currListState( StoreByIndex )
@@ -24,21 +24,21 @@ CSlideData::~CSlideData()
 {
 }
 
-void CSlideData::Stream( CArchive& archive, TFirstDataMember* pExtracted_SlideElapsed /*= NULL*/ )
+void CSlideData::Stream( CArchive& archive, TFirstDataMember* pExtracted_SlideDelay /*= NULL*/ )
 {
 	if ( archive.IsStoring() )
 	{
-		archive << m_slideElapsed;
+		archive << m_slideDelay;
 		archive & m_dirForward & m_circular;
 		archive << m_viewFlags;
 		archive << m_thumbListColCount;
 	}
 	else
 	{	// check version backwards compatibility hack
-		if ( pExtracted_SlideElapsed != NULL )
-			m_slideElapsed = *pExtracted_SlideElapsed;		// was already extracted from Slider_v3_1 old archive version
+		if ( pExtracted_SlideDelay != NULL )
+			m_slideDelay = *pExtracted_SlideDelay;		// was already extracted from Slider_v3_1 old archive version
 		else
-			archive >> m_slideElapsed;
+			archive >> m_slideDelay;
 
 		archive & m_dirForward & m_circular;
 		archive >> m_viewFlags;

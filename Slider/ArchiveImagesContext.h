@@ -32,7 +32,7 @@ public:
 	// simple archive stg creation
 	bool CreateArchiveStgFile( CFileList* pFileList, const fs::CPath& destStgPath, CObject* pAlbumDoc );
 
-	// piecemeal generation
+	// piece-meal generation
 	const std::vector< std::pair< fs::CFlexPath, fs::CFlexPath > >& GetPathPairs( void ) const { return m_pathPairs; }
 	void SetupSourcePaths( const std::vector< CFileAttr* >& srcFiles );
 	void ResetDestPaths( void );

@@ -14,8 +14,8 @@ namespace ui
 	CStdZoom::CStdZoom( void )
 		: m_limits( MinZoomPct, MaxZoomPct )
 	{
-		static const UINT zoomPcts[] = { 5, 10, 25, 50, 75, 100, 125, 150, 200, 400, 800, 1200, 1800, 2400, 3000 };
-		m_zoomPcts.assign( zoomPcts, zoomPcts + COUNT_OF( zoomPcts ) );
+		static const UINT s_zoomPcts[] = { 5, 10, 25, 50, 75, 100, 125, 150, 200, 400, 800, 1200, 1800, 2400, 3000 };
+		m_zoomPcts.assign( s_zoomPcts, END_OF( s_zoomPcts ) );
 	}
 
 	CStdZoom& CStdZoom::Instance( void )

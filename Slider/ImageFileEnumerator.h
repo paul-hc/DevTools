@@ -22,10 +22,12 @@ public:
 	~CImageFileEnumerator();
 
 	void SetFileSizeFilter( const Range< size_t >& fileSizeRange ) { m_fileSizeRange = fileSizeRange; ENSURE( m_fileSizeRange.IsNormalized() ); }
+
+	void Search( const CSearchSpec& searchSpec ) throws_( CException* );
+
 //	private:
 	void Search( const std::vector< CSearchSpec >& searchSpecs ) throws_( CException* );
 	public:
-	void Search( const CSearchSpec& searchSpec ) throws_( CException* );
 //	private:
 	void SearchImageArchive( const fs::CPath& stgDocPath ) throws_( CException* );
 	public:
@@ -57,6 +59,15 @@ private:
 	std::vector< fs::CPath > m_archiveStgPaths;
 public:
 	static const Range< size_t > s_allFileSizesRange;
+};
+
+
+class CImageDiscoverer
+{
+public:
+	CImageDiscoverer( void );
+	~CImageDiscoverer();
+private:
 };
 
 

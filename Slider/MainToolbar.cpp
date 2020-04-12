@@ -9,21 +9,15 @@
 #include "utl/EnumTags.h"
 #include "utl/StringUtilities.h"
 #include "utl/UI/CmdInfoStore.h"
+#include "utl/UI/StockValuesComboBox.h"
 #include "utl/UI/Utilities.h"
 #include "utl/UI/resource.h"
+
+#include "utl/UI/StockValuesComboBox.hxx"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
-
-
-namespace func
-{
-	struct FormatZoomPct
-	{
-		std::tstring operator()( UINT zoomPct ) const { return str::Format( _T("%d %%"), zoomPct ); }
-	};
-}
 
 
 const UINT CMainToolbar::s_buttons[] =
@@ -66,6 +60,7 @@ const UINT CMainToolbar::s_buttons[] =
 
 CMainToolbar::CMainToolbar( void )
 	: CToolbarStrip()
+	, m_pZoomCombo( new CZoomComboBox() )
 {
 	ui::MakeStandardControlFont( m_ctrlFont );
 }
@@ -84,7 +79,7 @@ bool CMainToolbar::InitToolbar( void )
 	enum { AutoImageSizeComboWidth = 130, ZoomComboWidth = 90, SmoothCheckWidth = 67 };
 
 	VERIFY( CreateBarCtrl( &m_autoImageSizeCombo, IDW_AUTO_IMAGE_SIZE_COMBO, CBS_DROPDOWNLIST | CBS_DISABLENOSCROLL, AutoImageSizeComboWidth ) );
-	VERIFY( CreateBarCtrl( &m_zoomCombo, IDW_ZOOM_COMBO, CBS_DROPDOWN | CBS_DISABLENOSCROLL, ZoomComboWidth ) );
+	VERIFY( CreateBarCtrl( m_pZoomCombo.get(), IDW_ZOOM_COMBO, CBS_DROPDOWN | CBS_DISABLENOSCROLL, ZoomComboWidth ) );
 	VERIFY( CreateBarCtrl( &m_smoothCheck, IDW_SMOOTHING_MODE_CHECK, BS_CHECKBOX | WS_DLGFRAME, SmoothCheckWidth ) );
 	m_smoothCheck.SetWindowText( _T("Smooth") );
 
@@ -92,7 +87,6 @@ bool CMainToolbar::InitToolbar( void )
 	ui::WriteComboItems( m_autoImageSizeCombo, ui::GetTags_AutoImageSize().GetUiTags() );
 	OutputAutoSize( CWorkspace::GetData().m_autoImageSize );
 
-	ui::WriteComboItems( m_zoomCombo, ui::CStdZoom::Instance().m_zoomPcts, func::FormatZoomPct() );
 	OutputZoomPct( 100 );
 
 	// create the slider control
@@ -132,6 +126,12 @@ bool CMainToolbar::CreateControl( CComboBox* pCombo, UINT comboId, DWORD style, 
 }
 
 template<>
+bool CMainToolbar::CreateControl( CZoomComboBox* pCombo, UINT comboId, DWORD style, const CRect& ctrlRect )
+{
+	return pCombo->Create( style | WS_VISIBLE | WS_TABSTOP, ctrlRect, this, comboId ) != FALSE;
+}
+
+template<>
 bool CMainToolbar::CreateControl( CButton* pButton, UINT buttonId, DWORD style, const CRect& ctrlRect )
 {
 	return pButton->Create( _T("<ck>"), style | WS_VISIBLE | WS_TABSTOP, ctrlRect, this, buttonId ) != FALSE;
@@ -153,13 +153,17 @@ ui::AutoImageSize CMainToolbar::InputAutoSize( void ) const
 
 bool CMainToolbar::OutputZoomPct( UINT zoomPct )
 {
-	return ui::SetComboEditText( m_zoomCombo, func::FormatZoomPct()( zoomPct ) ).first;
+	return m_pZoomCombo->OutputValue( zoomPct );
 }
 
 UINT CMainToolbar::InputZoomPct( ui::ComboField byField ) const
 {
 	UINT zoomPct;
-	return num::ParseNumber( zoomPct, ui::GetComboSelText( m_zoomCombo, byField ) ) ? zoomPct : 0;
+
+	if ( !m_pZoomCombo->InputValue( &zoomPct, byField ) )
+		zoomPct = 0;
+
+	return zoomPct;
 }
 
 bool CMainToolbar::OutputNavigRange( UINT imageCount )
@@ -265,8 +269,8 @@ void CMainToolbar::OnOk( void )
 {
 	if ( ui::OwnsFocus( m_hWnd ) )
 		if ( IImageView* pImageView = app::GetMainFrame()->GetActiveImageView() )
-			if ( ui::OwnsFocus( m_zoomCombo ) )
-				pImageView->RegainFocus( IImageView::Enter, m_zoomCombo.GetDlgCtrlID() );
+			if ( ui::OwnsFocus( *m_pZoomCombo ) )
+				pImageView->RegainFocus( IImageView::Enter, m_pZoomCombo->GetDlgCtrlID() );
 			else
 				pImageView->RegainFocus( IImageView::Escape );
 }
@@ -284,8 +288,8 @@ BOOL CMainToolbar::CmEscapeKey( UINT cmdId )
 
 void CMainToolbar::CmFocusZoom( void )
 {
-	if ( !ui::OwnsFocus( m_zoomCombo ) && app::GetMainFrame()->MDIGetActive() != NULL )
-		m_zoomCombo.SetFocus();
+	if ( !ui::OwnsFocus( *m_pZoomCombo ) && app::GetMainFrame()->MDIGetActive() != NULL )
+		m_pZoomCombo->SetFocus();
 }
 
 void CMainToolbar::CmFocusSlider( void )
