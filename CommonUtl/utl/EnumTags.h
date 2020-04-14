@@ -43,6 +43,8 @@ public:
 	}
 
 	// offset by base value
+	bool ContainsValue( int value ) const;
+
 	int GetBaseValue( void ) const { return m_baseValue; }
 	unsigned int GetTagIndex( int value ) const { return value - m_baseValue; }
 

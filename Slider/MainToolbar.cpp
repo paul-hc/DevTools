@@ -80,8 +80,8 @@ bool CMainToolbar::InitToolbar( void )
 
 	enum { ScalingModeComboWidth = 130, ZoomComboWidth = 90, SmoothCheckWidth = 65, NavigSliderCtrlWidth = 150 };
 
-	CreateBarCtrl( m_pScalingCombo.get(), IDW_IMAGE_SCALING_COMBO, CBS_DROPDOWNLIST | CBS_DISABLENOSCROLL, ScalingModeComboWidth );
-	CreateBarCtrl( m_pZoomCombo.get(), IDW_ZOOM_COMBO, CBS_DROPDOWN | CBS_DISABLENOSCROLL, ZoomComboWidth );
+	CreateBarCtrl( (CComboBox*)m_pScalingCombo.get(), IDW_IMAGE_SCALING_COMBO, CBS_DROPDOWNLIST | CBS_DISABLENOSCROLL, ScalingModeComboWidth );
+	CreateBarCtrl( (CComboBox*)m_pZoomCombo.get(), IDW_ZOOM_COMBO, CBS_DROPDOWN | CBS_DISABLENOSCROLL, ZoomComboWidth );
 	CreateBarCtrl( &m_smoothCheck, IDW_SMOOTHING_MODE_CHECK, BS_CHECKBOX, SmoothCheckWidth, PadLeft + 6 );		// push right to avoid overlap on background separator button
 	CreateBarCtrl( &m_navigSliderCtrl, IDW_NAVIG_SLIDER_CTRL, TBS_HORZ | TBS_AUTOTICKS | TBS_TRANSPARENTBKGND | TBS_TOOLTIPS, NavigSliderCtrlWidth, 0, 0 );		// no padding
 
@@ -114,15 +114,9 @@ void CMainToolbar::CreateBarCtrl( CtrlType* pCtrl, UINT ctrlId, DWORD style, int
 }
 
 template<>
-bool CMainToolbar::CreateControl( CEnumComboBox* pCombo, UINT comboId, DWORD style, const CRect& ctrlRect )
+bool CMainToolbar::CreateControl( CComboBox* pComboBox, UINT comboId, DWORD style, const CRect& ctrlRect )
 {
-	return pCombo->Create( style | WS_VISIBLE | WS_TABSTOP, ctrlRect, this, comboId ) != FALSE;
-}
-
-template<>
-bool CMainToolbar::CreateControl( CZoomComboBox* pCombo, UINT comboId, DWORD style, const CRect& ctrlRect )
-{
-	return pCombo->Create( style | WS_VISIBLE | WS_TABSTOP, ctrlRect, this, comboId ) != FALSE;
+	return pComboBox->Create( style | WS_VISIBLE | WS_TABSTOP, ctrlRect, this, comboId ) != FALSE;
 }
 
 template<>
