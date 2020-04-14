@@ -36,7 +36,7 @@ CAlbumImageView::CAlbumImageView( void )
 {
 	s_accelNavigate.LoadOnce( IDR_ALBUMTYPE_NAV );
 
-	ModifyAutoImageSize( ui::AutoFitLargeOnly );			// for albums use auto-fit by default
+	ModifyScalingMode( ui::AutoFitLargeOnly );			// for albums use auto-fit by default
 }
 
 CAlbumImageView::~CAlbumImageView()
@@ -331,7 +331,7 @@ void CAlbumImageView::OnSelChangeThumbList( void )
 void CAlbumImageView::EventChildFrameActivated( void )
 {
 	// called when the parent frame activates -> this will be the curent image view
-	CImageView::EventChildFrameActivated();
+	__super::EventChildFrameActivated();
 	GetDocument()->m_slideData = m_slideData;		// copy current navigation attributes to document (i.e. persistent attributes)
 }
 
@@ -378,12 +378,12 @@ void CAlbumImageView::OnUpdate( CView* pSender, LPARAM lHint, CObject* pHint )
 			break;
 	}
 
-	CImageView::OnUpdate( pSender, lHint, pHint );
+	__super::OnUpdate( pSender, lHint, pHint );
 }
 
 BOOL CAlbumImageView::OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo )
 {
-	if ( CImageView::OnCmdMsg( id, code, pExtra, pHandlerInfo ) )
+	if ( __super::OnCmdMsg( id, code, pExtra, pHandlerInfo ) )
 		return TRUE;
 
 	// redirect to thumb view for processing common IDs (if that's the case)
@@ -397,7 +397,7 @@ BOOL CAlbumImageView::PreTranslateMessage( MSG* pMsg )
 {
 	return
 		s_accelNavigate.Translate( pMsg, m_hWnd ) ||
-		CImageView::PreTranslateMessage( pMsg );
+		__super::PreTranslateMessage( pMsg );
 }
 
 
@@ -407,24 +407,24 @@ BEGIN_MESSAGE_MAP( CAlbumImageView, CImageView )
 	ON_WM_DROPFILES()
 	ON_WM_KEYDOWN()
 	ON_WM_TIMER()
-	ON_COMMAND( CM_EDIT_ALBUM, CmEditAlbum )
+	ON_COMMAND( ID_EDIT_ALBUM, On_EditAlbum )
 	ON_COMMAND( CM_TOGGLE_SIBLING_VIEW, OnToggleSiblingView )
 	ON_UPDATE_COMMAND_UI( CM_TOGGLE_SIBLING_VIEW, OnUpdateSiblingView )
-	ON_COMMAND( CM_NAV_PLAY, OnToggleNavPlay )
-	ON_UPDATE_COMMAND_UI( CM_NAV_PLAY, OnUpdateNavPlay )
-	ON_COMMAND( CM_NAV_BEGIN, CmNavBegin )
-	ON_UPDATE_COMMAND_UI( CM_NAV_BEGIN, OnUpdateNavBegin )
-	ON_COMMAND( CM_NAV_END, CmNavEnd )
-	ON_UPDATE_COMMAND_UI( CM_NAV_END, OnUpdateNavEnd )
-	ON_COMMAND( CM_NAV_PREV, CmNavPrev )
-	ON_UPDATE_COMMAND_UI( CM_NAV_PREV, OnUpdateNavPrev )
-	ON_COMMAND( CM_NAV_NEXT, CmNavNext )
-	ON_UPDATE_COMMAND_UI( CM_NAV_NEXT, OnUpdateNavNext )
-	ON_COMMAND_RANGE( CM_NAV_DIR_FWD, CM_NAV_DIR_REV, OnRadioNavigDirection )
-	ON_UPDATE_COMMAND_UI_RANGE( CM_NAV_DIR_FWD, CM_NAV_DIR_REV, OnUpdateNavigDirection )
-	ON_COMMAND( CM_NAV_CIRCULAR, OnToggleNavCircular )
-	ON_UPDATE_COMMAND_UI( CM_NAV_CIRCULAR, OnUpdateNavCircular )
-	ON_UPDATE_COMMAND_UI( IDW_NAV_SLIDER, OnUpdateNavSlider )
+	ON_COMMAND( ID_TOGGLE_NAVIG_PLAY, OnToggle_NavigPlay )
+	ON_UPDATE_COMMAND_UI( ID_TOGGLE_NAVIG_PLAY, OnUpdate_NavigPlay )
+	ON_COMMAND( ID_NAVIG_SEEK_BEGIN, On_NavigSeek_Begin )
+	ON_UPDATE_COMMAND_UI( ID_NAVIG_SEEK_BEGIN, OnUpdate_NavigSeek_Begin )
+	ON_COMMAND( ID_NAVIG_SEEK_END, On_NavigSeek_End )
+	ON_UPDATE_COMMAND_UI( ID_NAVIG_SEEK_END, OnUpdate_NavigSeek_End )
+	ON_COMMAND( ID_NAVIG_SEEK_PREV, On_NavigSeek_Prev )
+	ON_UPDATE_COMMAND_UI( ID_NAVIG_SEEK_PREV, OnUpdate_NavigSeek_Prev )
+	ON_COMMAND( ID_NAVIG_SEEK_NEXT, On_NavigSeek_Next )
+	ON_UPDATE_COMMAND_UI( ID_NAVIG_SEEK_NEXT, OnUpdate_NavigSeek_Next )
+	ON_COMMAND_RANGE( ID_TOGGLE_NAVIG_DIR_FWD, ID_TOGGLE_NAVIG_DIR_REV, OnRadio_NavigDirection )
+	ON_UPDATE_COMMAND_UI_RANGE( ID_TOGGLE_NAVIG_DIR_FWD, ID_TOGGLE_NAVIG_DIR_REV, OnUpdate_NavigDirection )
+	ON_COMMAND( ID_TOGGLE_NAVIG_WRAP_MODE, OnToggle_NavigWrapMode )
+	ON_UPDATE_COMMAND_UI( ID_TOGGLE_NAVIG_WRAP_MODE, OnUpdate_NavigWrapMode )
+	ON_UPDATE_COMMAND_UI( IDW_NAVIG_SLIDER_CTRL, OnUpdate_NavigSliderCtrl )
 	ON_COMMAND( CM_OPEN_IMAGE_FILE, CmOpenImageFile )
 	ON_UPDATE_COMMAND_UI( CM_OPEN_IMAGE_FILE, CImageView::OnUpdateAnyFileShellOperation )
 	ON_COMMAND_RANGE( CM_DROP_MOVE_IMAGE, CM_CANCEL_DROP, CmAutoDropImage )
@@ -452,7 +452,7 @@ void CAlbumImageView::OnInitialUpdate( void )
 
 	UpdateImage();			// only after this call image become valid (with proper metrics)
 
-	CImageView::OnInitialUpdate();
+	__super::OnInitialUpdate();
 
 	UpdateWindow();
 	ui::PostCall( this, &CAlbumImageView::LateInitialUpdate );
@@ -465,13 +465,12 @@ void CAlbumImageView::OnDropFiles( HDROP hDropInfo )
 
 void CAlbumImageView::OnKeyDown( UINT chr, UINT repCnt, UINT vkFlags )
 {
-	CImageView::OnKeyDown( chr, repCnt, vkFlags );
+	__super::OnKeyDown( chr, repCnt, vkFlags );
+
 	switch ( chr )
 	{
 		case VK_PRIOR:
 		case VK_NEXT:
-		case VK_LEFT:
-		case VK_RIGHT:
 			// mirror these navigation keys to the thumb list view (only if non SHIFT or CONTROL - careful: multiple selection)
 			if ( !ui::IsKeyPressed( VK_SHIFT ) && !ui::IsKeyPressed( VK_CONTROL ) )
 				m_pPeerThumbView->SendMessage( WM_KEYDOWN, chr, MAKELPARAM( repCnt, vkFlags ) );
@@ -484,7 +483,7 @@ void CAlbumImageView::OnTimer( UINT_PTR eventId )
 	if ( m_navTimer.IsHit( eventId ) )
 		HandleNavTick();
 	else
-		CImageView::OnTimer( eventId );
+		__super::OnTimer( eventId );
 }
 
 BOOL CAlbumImageView::OnMouseWheel( UINT mkFlags, short zDelta, CPoint point )
@@ -503,10 +502,10 @@ BOOL CAlbumImageView::OnMouseWheel( UINT mkFlags, short zDelta, CPoint point )
 		}
 		return TRUE;		// message processed
 	}
-	return CImageView::OnMouseWheel( mkFlags, zDelta, point );
+	return __super::OnMouseWheel( mkFlags, zDelta, point );
 }
 
-void CAlbumImageView::CmEditAlbum( void )
+void CAlbumImageView::On_EditAlbum( void )
 {
 	GetDocument()->EditAlbum( this );
 }
@@ -527,12 +526,12 @@ void CAlbumImageView::OnUpdateSiblingView( CCmdUI* pCmdUI )
 	pCmdUI->Enable( HasFlag( m_slideData.m_viewFlags, af::ShowThumbView ) );
 }
 
-void CAlbumImageView::OnToggleNavPlay( void )
+void CAlbumImageView::OnToggle_NavigPlay( void )
 {
 	TogglePlay();
 }
 
-void CAlbumImageView::OnUpdateNavPlay( CCmdUI* pCmdUI )
+void CAlbumImageView::OnUpdate_NavigPlay( CCmdUI* pCmdUI )
 {
 	CAlbumDoc* pDoc = GetDocument();
 	int imageCount = (int)pDoc->GetImageCount();
@@ -549,7 +548,7 @@ void CAlbumImageView::OnUpdateNavPlay( CCmdUI* pCmdUI )
 	pCmdUI->SetCheck( IsPlayOn() );
 }
 
-void CAlbumImageView::CmNavBegin( void )
+void CAlbumImageView::On_NavigSeek_Begin( void )
 {
 	if ( IsPlayOn() )
 		TogglePlay( false );
@@ -557,14 +556,14 @@ void CAlbumImageView::CmNavBegin( void )
 	UpdateImage();
 }
 
-void CAlbumImageView::OnUpdateNavBegin( CCmdUI* pCmdUI )
+void CAlbumImageView::OnUpdate_NavigSeek_Begin( CCmdUI* pCmdUI )
 {
 	bool hasImages = GetDocument()->HasImages();
 
 	pCmdUI->Enable( hasImages && m_slideData.GetCurrentIndex() != 0 );
 }
 
-void CAlbumImageView::CmNavEnd( void )
+void CAlbumImageView::On_NavigSeek_End( void )
 {
 	if ( IsPlayOn() )
 		TogglePlay( false );
@@ -572,7 +571,7 @@ void CAlbumImageView::CmNavEnd( void )
 	UpdateImage();
 }
 
-void CAlbumImageView::OnUpdateNavEnd( CCmdUI* pCmdUI )
+void CAlbumImageView::OnUpdate_NavigSeek_End( CCmdUI* pCmdUI )
 {
 	CAlbumDoc* pDoc = GetDocument();
 	bool hasImages = pDoc->HasImages();
@@ -581,7 +580,7 @@ void CAlbumImageView::OnUpdateNavEnd( CCmdUI* pCmdUI )
 	pCmdUI->Enable( hasImages && !atEnd );
 }
 
-void CAlbumImageView::CmNavPrev( void )
+void CAlbumImageView::On_NavigSeek_Prev( void )
 {
 	int imageCount = (int)GetDocument()->GetImageCount();
 	int currIndex = m_slideData.GetCurrentIndex();
@@ -595,7 +594,7 @@ void CAlbumImageView::CmNavPrev( void )
 	UpdateImage();
 }
 
-void CAlbumImageView::OnUpdateNavPrev( CCmdUI* pCmdUI )
+void CAlbumImageView::OnUpdate_NavigSeek_Prev( CCmdUI* pCmdUI )
 {
 	CAlbumDoc* pDoc = GetDocument();
 	bool hasImages = pDoc->HasImages();
@@ -603,21 +602,22 @@ void CAlbumImageView::OnUpdateNavPrev( CCmdUI* pCmdUI )
 	pCmdUI->Enable( hasImages && ( m_slideData.m_circular || m_slideData.GetCurrentIndex() > 0 ) );
 }
 
-void CAlbumImageView::CmNavNext( void )
+void CAlbumImageView::On_NavigSeek_Next( void )
 {
 	int imageCount = (int)GetDocument()->GetImageCount();
 	int currIndex = m_slideData.GetCurrentIndex();
 
 	if ( IsPlayOn() )
 		TogglePlay( false );
-	++currIndex;
-	if ( currIndex >= imageCount )
+
+	if ( ++currIndex >= imageCount )
 		currIndex = 0;
+
 	m_slideData.SetCurrentIndex( currIndex );
 	UpdateImage();
 }
 
-void CAlbumImageView::OnUpdateNavNext( CCmdUI* pCmdUI )
+void CAlbumImageView::OnUpdate_NavigSeek_Next( CCmdUI* pCmdUI )
 {
 	CAlbumDoc* pDoc = GetDocument();
 	bool hasImages = pDoc->HasImages();
@@ -626,29 +626,29 @@ void CAlbumImageView::OnUpdateNavNext( CCmdUI* pCmdUI )
 	pCmdUI->Enable( hasImages && ( m_slideData.m_circular || m_slideData.GetCurrentIndex() < imageCount - 1 ) );
 }
 
-void CAlbumImageView::OnRadioNavigDirection( UINT cmdId )
+void CAlbumImageView::OnRadio_NavigDirection( UINT cmdId )
 {
-	m_slideData.m_dirForward = CM_NAV_DIR_FWD == cmdId;
+	m_slideData.m_dirForward = ID_TOGGLE_NAVIG_DIR_FWD == cmdId;
 	OnSlideDataChanged();
 }
 
-void CAlbumImageView::OnUpdateNavigDirection( CCmdUI* pCmdUI )
+void CAlbumImageView::OnUpdate_NavigDirection( CCmdUI* pCmdUI )
 {
-	ui::SetRadio( pCmdUI, m_slideData.m_dirForward == ( CM_NAV_DIR_FWD == pCmdUI->m_nID ) );
+	ui::SetRadio( pCmdUI, m_slideData.m_dirForward == ( ID_TOGGLE_NAVIG_DIR_FWD == pCmdUI->m_nID ) );
 }
 
-void CAlbumImageView::OnToggleNavCircular( void )
+void CAlbumImageView::OnToggle_NavigWrapMode( void )
 {
 	m_slideData.m_circular = !m_slideData.m_circular;
 	OnSlideDataChanged();
 }
 
-void CAlbumImageView::OnUpdateNavCircular( CCmdUI* pCmdUI )
+void CAlbumImageView::OnUpdate_NavigWrapMode( CCmdUI* pCmdUI )
 {
 	pCmdUI->SetCheck( m_slideData.m_circular );
 }
 
-void CAlbumImageView::OnUpdateNavSlider( CCmdUI* pCmdUI )
+void CAlbumImageView::OnUpdate_NavigSliderCtrl( CCmdUI* pCmdUI )
 {
 	pCmdUI->Enable( GetDocument()->HasImages() );
 }

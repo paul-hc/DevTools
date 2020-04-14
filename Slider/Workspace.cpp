@@ -35,7 +35,7 @@ namespace reg
 CWorkspaceData::CWorkspaceData( void )
 	: m_autoSave( false )
 	, m_wkspFlags( wf::DefaultFlags )
-	, m_autoImageSize( ui::AutoFitLargeOnly )
+	, m_scalingMode( ui::AutoFitLargeOnly )
 	, m_albumViewFlags( af::DefaultFlags )
 	, m_mruCount( 10 )
 	, m_defBkColor( color::VeryDarkGrey )
@@ -69,7 +69,7 @@ void CWorkspaceData::Save( CArchive& archive )
 	archive << m_imageSelTextColor;
 
 	archive << m_thumbBoundsSize;
-	archive << (int&)m_autoImageSize;
+	archive << (int&)m_scalingMode;
 }
 
 app::ModelSchema CWorkspaceData::Load( CArchive& archive )
@@ -102,9 +102,9 @@ app::ModelSchema CWorkspaceData::Load( CArchive& archive )
 			archive >> m_thumbBoundsSize;
 
 		if ( savedModelSchema >= app::Slider_v4_0 )
-			archive >> (int&)m_autoImageSize;
+			archive >> (int&)m_scalingMode;
 		else
-			m_autoImageSize = HasFlag( m_wkspFlags, wf::Old_InitStretchToFit ) ? ui::AutoFitLargeOnly : ui::ActualSize;
+			m_scalingMode = HasFlag( m_wkspFlags, wf::Old_InitStretchToFit ) ? ui::AutoFitLargeOnly : ui::ActualSize;
 	}
 	return savedModelSchema;
 }

@@ -83,11 +83,11 @@ protected:
 
 	afx_msg void OnEditCopy( void );
 	afx_msg void OnUpdateEditCopy( CCmdUI* pCmdUI );
-	afx_msg void OnUpdateNavSlider( CCmdUI* pCmdUI );
-	afx_msg void OnRadioAutoImageSize( UINT cmdId );
-	afx_msg void OnUpdateAutoImageSize( CCmdUI* pCmdUI );
-	afx_msg void CmZoomNormal( void );
-	afx_msg void CmZoom( UINT cmdId );
+	afx_msg void OnUpdate_NavigSliderCtrl( CCmdUI* pCmdUI );
+	afx_msg void OnRadio_ImageScalingMode( UINT cmdId );
+	afx_msg void OnUpdate_ImageScalingMode( CCmdUI* pCmdUI );
+	afx_msg void On_ZoomNormal100( void );
+	afx_msg void On_Zoom( UINT cmdId );
 	afx_msg void CmResizeViewToFit( void );
 	afx_msg void CmEditBkColor( void );
 	afx_msg void CmExploreImage( void );
@@ -96,7 +96,7 @@ protected:
 	virtual void CmDeleteFile( UINT cmdId );
 	virtual void CmMoveFile( void );
 	afx_msg void CmScroll( UINT cmdId );
-	afx_msg void OnCBnSelChange_AutoImageSizeCombo( void );
+	afx_msg void OnCBnSelChange_ImageScalingModeCombo( void );
 	afx_msg void OnCBnSelChange_ZoomCombo( void );
 
 	DECLARE_MESSAGE_MAP()

@@ -14,7 +14,7 @@ const CPoint CImageState::s_noScrollPos( CW_USEDEFAULT, CW_USEDEFAULT );
 
 CImageState::CImageState( void )
 	: m_polyFlags( 0 )
-	, m_autoImageSize( ui::AutoFitLargeOnly )
+	, m_scalingMode( ui::AutoFitLargeOnly )
 	, m_zoomPct( 100 )
 	, m_bkColor( CLR_DEFAULT )
 	, m_scrollPos( CImageState::s_noScrollPos )
@@ -42,7 +42,7 @@ void CImageState::Stream( CArchive& archive )
 		archive & _stretchToFit & _shrinkIfLarger;			// bin compat
 		archive << m_bkColor;
 		archive << m_scrollPos;
-		archive << m_autoImageSize;
+		archive << m_scalingMode;
 	}
 	else
 	{
@@ -63,6 +63,6 @@ void CImageState::Stream( CArchive& archive )
 		archive >> m_scrollPos;
 
 		if ( savedModelSchema >= app::Slider_v4_0 )
-			archive >> (int&)m_autoImageSize;
+			archive >> (int&)m_scalingMode;
 	}
 }

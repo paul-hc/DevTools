@@ -29,7 +29,7 @@ namespace layout
 	{
 		{ IDC_DEST_DIR_PATH_EDIT, SizeX },
 		{ IDC_BROWSE_DEST_FOLDER_BUTTON, MoveX },
-		{ CM_CREATE_DEST_FOLDER, MoveX },
+		{ IDC_CREATE_DEST_FOLDER, MoveX },
 		{ ID_EDIT_ARCHIVE_PASSWORD, MoveX },
 		{ IDC_FILE_PATHS_LIST, Size },
 		{ IDC_TARGET_GROUP, SizeX | DoRepaint },
@@ -169,7 +169,7 @@ void CArchiveImagesDialog::SetupFilesView( bool firstTimeInit /*= false*/ )
 void CArchiveImagesDialog::UpdateDirty( void )
 {
 	ui::SetDlgItemText( m_hWnd, IDOK, m_dirty ? _T("&Make Files") : ( FOP_FileCopy == m_fileOp ? _T("COPY Files") : _T("MOVE Files") ) );
-	ui::EnableControl( m_hWnd, CM_CREATE_DEST_FOLDER, m_destType == ToDirectory );
+	ui::EnableControl( m_hWnd, IDC_CREATE_DEST_FOLDER, m_destType == ToDirectory );
 
 	UpdateTargetFileCountStatic();
 }
@@ -314,7 +314,7 @@ BEGIN_MESSAGE_MAP( CArchiveImagesDialog, CLayoutDialog )
 	ON_BN_CLICKED( IDC_COPY_FILES_RADIO, OnToggleCopyFilesRadio )
 	ON_BN_CLICKED( IDC_RENAME_FILES_RADIO, OnToggleRenameFilesRadio )
 	ON_EN_CHANGE( IDC_DEST_DIR_PATH_EDIT, OnEnChangeDestFolder )
-	ON_BN_CLICKED( CM_CREATE_DEST_FOLDER, CmCreateDestFolder )
+	ON_BN_CLICKED( IDC_CREATE_DEST_FOLDER, OnBnClicked_CreateDestFolder )
 	ON_BN_CLICKED( ID_EDIT_ARCHIVE_PASSWORD, OnEditArchivePassword )
 	ON_BN_CLICKED( IDC_TO_FOLDER_RADIO, OnToggleToFolderRadio )
 	ON_BN_CLICKED( IDC_TO_COMPOUND_FILE_RADIO, OnToggleToCompoundFileRadio )
@@ -445,7 +445,7 @@ void CArchiveImagesDialog::OnEnChangeDestFolder( void )
 		SetDirty();
 	}
 
-	ui::EnableControl( m_hWnd, CM_CREATE_DEST_FOLDER,
+	ui::EnableControl( m_hWnd, IDC_CREATE_DEST_FOLDER,
 		!m_destPath.IsEmpty() &&
 		!m_destPath.FileExist() &&
 		!app::IsImageArchiveDoc( m_destPath.GetPtr() ) );
@@ -473,7 +473,7 @@ void CArchiveImagesDialog::CmBrowseDestPath( void )
 	CheckDestFolder();
 }
 
-void CArchiveImagesDialog::CmCreateDestFolder( void )
+void CArchiveImagesDialog::OnBnClicked_CreateDestFolder( void )
 {
 	bool success = fs::CreateDirPath( m_destPath.GetPtr() );
 	AfxMessageBox( str::Format( success ? IDS_PROMPT_CREATED_DEST_FOLDER : IDS_PROMPT_CANT_CREATE_DEST_FOLDER, m_destPath.GetPtr() ).c_str(), MB_ICONINFORMATION );

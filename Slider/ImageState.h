@@ -28,7 +28,7 @@ private:
 	persist CWindowPlacement m_framePlacement;
 public:
 	persist DWORD m_polyFlags;					// view specific flags (can be polymorphic for CImageView and CAlbumImageView)
-	persist ui::AutoImageSize m_autoImageSize;	// app::Slider_v4_0+
+	persist ui::ImageScalingMode m_scalingMode;	// app::Slider_v4_0+
 	persist int m_zoomPct;
 	persist COLORREF m_bkColor;
 	persist CPoint m_scrollPos;

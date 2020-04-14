@@ -18,10 +18,10 @@ HKEY_CLASSES_ROOT\%s\shell\Open with &Slider\ddeexec
 HKEY_CLASSES_ROOT\jpegfile\shell\Open with &Slider\command
 
 
-    VK_LEFT,        CM_NAV_LEFT,            VIRTKEY, NOINVERT
-    VK_NEXT,        CM_NAV_NEXT_PAGE,       VIRTKEY, NOINVERT
-    VK_PRIOR,       CM_NAV_PREV_PAGE,       VIRTKEY, NOINVERT
-    VK_RIGHT,       CM_NAV_RIGHT,           VIRTKEY, NOINVERT
+    VK_LEFT,        ID_NAVIG_SEEK_LEFT,     VIRTKEY, NOINVERT
+    VK_NEXT,        ID_NAVIG_SEEK_NEXT_PAGE, VIRTKEY, NOINVERT
+    VK_PRIOR,       ID_NAVIG_SEEK_PREV_PAGE, VIRTKEY, NOINVERT
+    VK_RIGHT,       ID_NAVIG_SEEK_RIGHT,    VIRTKEY, NOINVERT
 
 Normal
 ======

@@ -48,11 +48,11 @@ namespace layout
 	{
 		{ IDC_SEARCH_SPEC_STATIC, SizeX | DoRepaint },
 		{ IDC_SEARCH_SPEC_LIST, SizeX },
-		{ CM_ADD_SEARCH_SPEC, None },
-		{ CM_MODIFY_SEARCH_SPEC, None },
-		{ CM_DELETE_SEARCH_SPEC, None },
-		{ CM_MOVE_UP_SEARCH_SPEC, MoveX },
-		{ CM_MOVE_DOWN_SEARCH_SPEC, MoveX },
+		{ ID_ADD_ITEM, None },
+		{ ID_EDIT_ITEM, None },
+		{ ID_REMOVE_ITEM, None },
+		{ IDC_SEARCH_SPEC_MOVE_UP, MoveX },
+		{ IDC_SEARCH_SPEC_MOVE_DOWN, MoveX },
 		{ IDC_MIN_FILE_SIZE_CHECK, None },
 		{ IDC_MIN_FILE_SIZE_EDIT, None },
 		{ IDC_MAX_FILE_SIZE_CHECK, None },
@@ -90,7 +90,7 @@ CAlbumSettingsDialog::CAlbumSettingsDialog( const CFileList& fileList, int curre
 	m_regSection = _T("AlbumSettingsDialog");
 	RegisterCtrlLayout( layout::styles, COUNT_OF( layout::styles ) );
 	m_initCentered = false;
-	LoadDlgIcon( CM_EDIT_ALBUM );
+	LoadDlgIcon( ID_EDIT_ALBUM );
 
 	m_toolbar.GetStrip()
 		.AddButton( ID_EDIT_COPY )
@@ -201,7 +201,7 @@ void CAlbumSettingsDialog::UpdateFileSortOrder( void )
 	SetDirty( true );
 
 	if ( m_fileList.GetFileAttrCount() < InplaceSortMaxCount )
-		PostMessage( WM_COMMAND, CM_SEARCH_FOR_FILES );
+		PostMessage( WM_COMMAND, IDC_SEARCH_FOR_FILES );
 #else
 	switch ( m_fileList.GetFileOrder() )
 	{
@@ -210,7 +210,7 @@ void CAlbumSettingsDialog::UpdateFileSortOrder( void )
 		case CFileList::CorruptedFiles:
 			SetDirty( true );
 			if ( m_fileList.GetFileAttrCount() < InplaceSortMaxCount )
-				PostMessage( WM_COMMAND, CM_SEARCH_FOR_FILES );
+				PostMessage( WM_COMMAND, IDC_SEARCH_FOR_FILES );
 			break;
 		default:
 			SetupFoundListView();		// fill in the found files list
@@ -503,8 +503,8 @@ void CAlbumSettingsDialog::DoDataExchange( CDataExchange* pDX )
 
 	DDX_Control( pDX, IDC_MIN_FILE_SIZE_EDIT, m_minSizeEdit );
 	DDX_Control( pDX, IDC_MAX_FILE_SIZE_EDIT, m_maxSizeEdit );
-	DDX_Control( pDX, CM_MOVE_DOWN_SEARCH_SPEC, m_moveDownButton );
-	DDX_Control( pDX, CM_MOVE_UP_SEARCH_SPEC, m_moveUpButton );
+	DDX_Control( pDX, IDC_SEARCH_SPEC_MOVE_DOWN, m_moveDownButton );
+	DDX_Control( pDX, IDC_SEARCH_SPEC_MOVE_UP, m_moveUpButton );
 	DDX_Control( pDX, IDC_SEARCH_SPEC_LIST, m_searchSpecListBox );
 	ui::DDX_EnumCombo( pDX, IDC_LIST_ORDER_COMBO, m_sortOrderCombo, fileOrder, CFileList::GetTags_Order() );
 	DDX_Control( pDX, IDC_FOUND_FILES_LISTVIEW, m_foundFilesListCtrl );
@@ -602,12 +602,12 @@ BEGIN_MESSAGE_MAP( CAlbumSettingsDialog, CLayoutDialog )
 	ON_BN_CLICKED( IDC_AUTO_DROP_CHECK, OnToggle_AutoDrop )
 	ON_LBN_SELCHANGE( IDC_SEARCH_SPEC_LIST, OnLBnSelChange_SearchSpec )
 	ON_LBN_DBLCLK( IDC_SEARCH_SPEC_LIST, OnLBnDblclk_SearchSpec )
-	ON_BN_CLICKED( CM_MOVE_UP_SEARCH_SPEC, OnMoveUp_SearchSpec )
-	ON_BN_CLICKED( CM_MOVE_DOWN_SEARCH_SPEC, OnMoveDown_SearchSpec )
-	ON_BN_CLICKED( CM_ADD_SEARCH_SPEC, OnAdd_SearchSpec )
-	ON_BN_CLICKED( CM_MODIFY_SEARCH_SPEC, OnModify_SearchSpec )
-	ON_BN_CLICKED( CM_DELETE_SEARCH_SPEC, OnDelete_SearchSpec )
-	ON_BN_CLICKED( CM_SEARCH_FOR_FILES, OnSearchSourceFiles )
+	ON_BN_CLICKED( IDC_SEARCH_SPEC_MOVE_UP, On_MoveUp_SearchSpec )
+	ON_BN_CLICKED( IDC_SEARCH_SPEC_MOVE_DOWN, On_MoveDown_SearchSpec )
+	ON_BN_CLICKED( ID_ADD_ITEM, OnAdd_SearchSpec )
+	ON_BN_CLICKED( ID_EDIT_ITEM, OnModify_SearchSpec )
+	ON_BN_CLICKED( ID_REMOVE_ITEM, OnDelete_SearchSpec )
+	ON_BN_CLICKED( IDC_SEARCH_FOR_FILES, OnSearchSourceFiles )
 	ON_COMMAND_RANGE( ID_ORDER_ORIGINAL, ID_ORDER_BY_DIMENSION_DESC, On_OrderRandomShuffle )
 	ON_UPDATE_COMMAND_UI_RANGE( ID_ORDER_ORIGINAL, ID_ORDER_BY_DIMENSION_DESC, OnUpdate_OrderRandomShuffle )
 	ON_NOTIFY( LVN_COLUMNCLICK, IDC_FOUND_FILES_LISTVIEW, OnLVnColumnClick_FoundFiles )
@@ -762,8 +762,8 @@ void CAlbumSettingsDialog::OnLBnSelChange_SearchSpec( void )
 	ui::EnableWindow( m_moveUpButton, selIndex > 0 );
 	ui::EnableWindow( m_moveDownButton, selIndex < attrCount - 1 );
 
-	ui::EnableControl( m_hWnd, CM_MODIFY_SEARCH_SPEC, selIndex != LB_ERR );
-	ui::EnableControl( m_hWnd, CM_DELETE_SEARCH_SPEC, selIndex != LB_ERR );
+	ui::EnableControl( m_hWnd, ID_EDIT_ITEM, selIndex != LB_ERR );
+	ui::EnableControl( m_hWnd, ID_REMOVE_ITEM, selIndex != LB_ERR );
 
 	CheckDlgButton( IDC_AUTO_REGENERATE_CHECK, GetCheckStateAutoRegen() );
 	CheckDlgButton( IDC_AUTO_DROP_CHECK, m_fileList.IsAutoDropRecipient() );
@@ -775,12 +775,12 @@ void CAlbumSettingsDialog::OnLBnDblclk_SearchSpec( void )
 		OnModify_SearchSpec();
 }
 
-void CAlbumSettingsDialog::OnMoveUp_SearchSpec( void )
+void CAlbumSettingsDialog::On_MoveUp_SearchSpec( void )
 {
 	MoveSearchSpec( -1 );
 }
 
-void CAlbumSettingsDialog::OnMoveDown_SearchSpec( void )
+void CAlbumSettingsDialog::On_MoveDown_SearchSpec( void )
 {
 	MoveSearchSpec( 1 );
 }

@@ -23,8 +23,8 @@ protected:
 	virtual void OnOK( void );
 	virtual void OnCancel( void );
 	afx_msg void OnCBnSelChangeLogger( void );
-	afx_msg void OnToggleLoggerEnabled( void );
-	afx_msg void OnTogglePrependTimestamp( void );
+	afx_msg void OnToggle_LoggerEnabled( void );
+	afx_msg void OnToggle_TimestampPrefix( void );
 	afx_msg void OnViewLogFileButton( void );
 	afx_msg void OnClearLogFileButton( void );
 

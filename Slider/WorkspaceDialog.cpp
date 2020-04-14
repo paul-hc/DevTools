@@ -38,11 +38,11 @@ void CWorkspaceDialog::DoDataExchange( CDataExchange* pDX )
 {
 	bool firstInit = NULL == m_mruCountEdit.m_hWnd;
 
-	ui::DDX_Bool( pDX, CK_AUTOSAVE, m_data.m_autoSave );
+	ui::DDX_Bool( pDX, IDC_AUTOSAVE_CHECK, m_data.m_autoSave );
 	ui::DDX_Bool( pDX, IDC_ENLARGE_SMOOTHING_CHECK, m_enlargeSmoothing );
 
-	ui::DDX_Flag( pDX, CK_PERSIST_OPEN_DOCS, m_data.m_wkspFlags, wf::PersistOpenDocs );
-	ui::DDX_Flag( pDX, CK_PERSIST_ALBUM_IMAGE_STATE, m_data.m_wkspFlags, wf::PersistAlbumImageState );
+	ui::DDX_Flag( pDX, IDC_PERSIST_OPEN_DOCS_CHECK, m_data.m_wkspFlags, wf::PersistOpenDocs );
+	ui::DDX_Flag( pDX, IDC_PERSIST_ALBUM_IMAGE_STATE_CHECK, m_data.m_wkspFlags, wf::PersistAlbumImageState );
 	ui::DDX_Flag( pDX, ID_VIEW_ALBUMDIALOGBAR, m_data.m_albumViewFlags, af::ShowAlbumDialogBar );
 	ui::DDX_Flag( pDX, IDC_SAVECUSTOMORDERUNDOREDO_CHECK, m_data.m_albumViewFlags, af::SaveCustomOrderUndoRedo );
 	ui::DDX_Flag( pDX, IDC_PREFIX_DEEP_STREAM_NAMES_CHECK, m_data.m_wkspFlags, wf::PrefixDeepStreamNames );
@@ -53,7 +53,7 @@ void CWorkspaceDialog::DoDataExchange( CDataExchange* pDX )
 
 	ui::DDX_Flag( pDX, IDC_AUTO_REGEN_SMALL_STG_THUMBS_CHECK, m_thumbnailerFlags, CThumbnailer::AutoRegenSmallStgThumbs );
 
-	ui::DDX_EnumCombo( pDX, IDW_AUTO_IMAGE_SIZE_COMBO, m_autoImageSizeCombo, m_data.m_autoImageSize, ui::GetTags_AutoImageSize() );
+	ui::DDX_EnumCombo( pDX, IDW_IMAGE_SCALING_COMBO, m_imageScalingCombo, m_data.m_scalingMode, ui::GetTags_ImageScalingMode() );
 
 	m_mruCountEdit.DDX_Number( pDX, m_data.m_mruCount, IDC_MAX_MRU_COUNT_EDIT );
 	m_thumbListColCountEdit.DDX_Number( pDX, m_data.m_thumbListColCount, IDC_THUMB_COL_COUNT_EDIT );

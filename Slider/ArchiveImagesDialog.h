@@ -74,7 +74,7 @@ protected:
 	afx_msg void OnToggleCopyFilesRadio( void );
 	afx_msg void OnToggleRenameFilesRadio( void );
 	afx_msg void OnEnChangeDestFolder( void );
-	afx_msg void CmCreateDestFolder( void );
+	afx_msg void OnBnClicked_CreateDestFolder( void );
 	afx_msg void OnToggleToFolderRadio( void );
 	afx_msg void OnToggleToCompoundFileRadio( void );
 	afx_msg void OnToggleTargetSelectedFilesRadio( void );

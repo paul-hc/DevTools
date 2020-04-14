@@ -13,7 +13,7 @@ namespace ui
 {
 	// image display
 
-	enum AutoImageSize
+	enum ImageScalingMode
 	{
 		AutoFitLargeOnly,
 		AutoFitAll,
@@ -23,7 +23,7 @@ namespace ui
 		UseZoomPct
 	};
 
-	const CEnumTags& GetTags_AutoImageSize( void );
+	const CEnumTags& GetTags_ImageScalingMode( void );
 }
 
 

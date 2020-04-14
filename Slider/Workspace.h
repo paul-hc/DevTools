@@ -6,7 +6,7 @@
 #include "ImageState.h"
 #include "WindowPlacement.h"
 #include "utl/Path.h"
-#include "utl/UI/Image_fwd.h"		// ui::AutoImageSize
+#include "utl/UI/Image_fwd.h"		// ui::ImageScalingMode
 
 
 class CMainFrame;
@@ -20,7 +20,7 @@ namespace wf
 		MdiMaximized				= BIT_FLAG( 1 ),		// open MDI childred maximized
 		ShowToolBar					= BIT_FLAG( 2 ),		// show main toolbar
 		ShowStatusBar				= BIT_FLAG( 3 ),		// show statusbar
-		Old_InitStretchToFit		= BIT_FLAG( 4 ),		// opens each image in stretch to fit mode (obsolete, relaced by m_autoImageSize)
+		Old_InitStretchToFit		= BIT_FLAG( 4 ),		// opens each image in stretch to fit mode (obsolete, relaced by m_scalingMode)
 		AllowEmbeddedFileTransfers	= BIT_FLAG( 7 ),		// allows logical files to be temporary backed-up to physical files on file operations
 		PersistAlbumImageState		= BIT_FLAG( 8 ),		// save zoom/scroll info in albums
 		PrefixDeepStreamNames		= BIT_FLAG( 9 ),		// prefix image stream names with the relative path to original reference folder
@@ -53,7 +53,7 @@ public:
 	persist int m_mruCount;							// maximum count of files in the MRU list [0-10]
 	persist int m_thumbListColCount;				// default count of columns in the thumb list
 	persist int m_thumbBoundsSize;					// size of the square bounds of the thumbnails (app::Slider_v3_6+)
-	persist ui::AutoImageSize m_autoImageSize;		// default auto image size (app::Slider_v4_0+)
+	persist ui::ImageScalingMode m_scalingMode;		// default image scaling mode (app::Slider_v4_0+)
 	persist COLORREF m_defBkColor;					// default background color
 	persist COLORREF m_imageSelColor;				// image selection color
 	persist COLORREF m_imageSelTextColor;			// image selection text color

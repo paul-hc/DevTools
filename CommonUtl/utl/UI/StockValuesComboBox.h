@@ -130,6 +130,8 @@ protected:
 
 	// generated stuff
 public:
+	// special pre-creation and window rect adjustment hooks
+//	virtual BOOL PreCreateWindow( CREATESTRUCT& cs );
 	virtual BOOL Create( DWORD style, const RECT& rect, CWnd* pParentWnd, UINT comboId );
 	virtual void PreSubclassWindow( void );
 private:

@@ -35,26 +35,26 @@ const UINT CMainToolbar::s_buttons[] =
 	CK_FULL_SCREEN,
 	CK_SHOW_THUMB_VIEW,
 		ID_SEPARATOR,
-	IDW_AUTO_IMAGE_SIZE_COMBO,
+	IDW_IMAGE_SCALING_COMBO,
 	IDW_ZOOM_COMBO,
-	CM_ZOOM_NORMAL,
-	CM_ZOOM_IN,
-	CM_ZOOM_OUT,
+	ID_ZOOM_NORMAL_100,
+	ID_ZOOM_IN,
+	ID_ZOOM_OUT,
 	IDW_SMOOTHING_MODE_CHECK,
 		ID_SEPARATOR,
-	CM_NAV_PLAY,
+	ID_TOGGLE_NAVIG_PLAY,
 		ID_SEPARATOR,
-	CM_NAV_BEGIN,
-	CM_NAV_PREV,
-	CM_NAV_NEXT,
-	CM_NAV_END,
+	ID_NAVIG_SEEK_BEGIN,
+	ID_NAVIG_SEEK_PREV,
+	ID_NAVIG_SEEK_NEXT,
+	ID_NAVIG_SEEK_END,
 		ID_SEPARATOR,
-	CM_NAV_DIR_REV,
-	CM_NAV_DIR_FWD,
+	ID_TOGGLE_NAVIG_DIR_REV,
+	ID_TOGGLE_NAVIG_DIR_FWD,
 		ID_SEPARATOR,
-	CM_NAV_CIRCULAR,
+	ID_TOGGLE_NAVIG_WRAP_MODE,
 		ID_SEPARATOR,
-	IDW_NAV_SLIDER
+	IDW_NAVIG_SLIDER_CTRL
 };
 
 
@@ -76,47 +76,40 @@ bool CMainToolbar::InitToolbar( void )
 	if ( !InitToolbarButtons() )
 		return false;
 
-	enum { AutoImageSizeComboWidth = 130, ZoomComboWidth = 90, SmoothCheckWidth = 65 };
+	enum { ScalingModeComboWidth = 130, ZoomComboWidth = 90, SmoothCheckWidth = 65, NavigSliderCtrlWidth = 150 };
 
-	VERIFY( CreateBarCtrl( &m_autoImageSizeCombo, IDW_AUTO_IMAGE_SIZE_COMBO, CBS_DROPDOWNLIST | CBS_DISABLENOSCROLL, AutoImageSizeComboWidth ) );
-	VERIFY( CreateBarCtrl( m_pZoomCombo.get(), IDW_ZOOM_COMBO, CBS_DROPDOWN | CBS_DISABLENOSCROLL, ZoomComboWidth ) );
-	VERIFY( CreateBarCtrl( &m_smoothCheck, IDW_SMOOTHING_MODE_CHECK, BS_CHECKBOX, SmoothCheckWidth, 6 ) );	// push right to avoid overlap on background separator button
+	CreateBarCtrl( &m_imageScalingCombo, IDW_IMAGE_SCALING_COMBO, CBS_DROPDOWNLIST | CBS_DISABLENOSCROLL, ScalingModeComboWidth );
+	CreateBarCtrl( m_pZoomCombo.get(), IDW_ZOOM_COMBO, CBS_DROPDOWN | CBS_DISABLENOSCROLL, ZoomComboWidth );
+	CreateBarCtrl( &m_smoothCheck, IDW_SMOOTHING_MODE_CHECK, BS_CHECKBOX, SmoothCheckWidth, PadLeft + 6 );		// push right to avoid overlap on background separator button
+	CreateBarCtrl( &m_navigSliderCtrl, IDW_NAVIG_SLIDER_CTRL, TBS_HORZ | TBS_AUTOTICKS | TBS_TRANSPARENTBKGND | TBS_TOOLTIPS, NavigSliderCtrlWidth, 0, 0 );		// no padding
+
 	m_smoothCheck.SetWindowText( _T("Smooth") );
 
 	// setup items for the combos
-	ui::WriteComboItems( m_autoImageSizeCombo, ui::GetTags_AutoImageSize().GetUiTags() );
-	OutputAutoSize( CWorkspace::GetData().m_autoImageSize );
+	ui::WriteComboItems( m_imageScalingCombo, ui::GetTags_ImageScalingMode().GetUiTags() );
+	OutputScalingMode( CWorkspace::GetData().m_scalingMode );
 
 	OutputZoomPct( 100 );
-
-	// create the slider control
-	int buttonPos = CommandToIndex( IDW_NAV_SLIDER );
-	SetButtonInfo( buttonPos, IDW_NAV_SLIDER, TBBS_SEPARATOR, 150 );					// set slider width with underlying button as separator
-	CRect ctrlRect;
-	GetItemRect( buttonPos, &ctrlRect );
-	VERIFY( m_navigSlider.Create( TBS_HORZ | TBS_AUTOTICKS | TBS_TOOLTIPS | WS_VISIBLE | WS_TABSTOP, ctrlRect, this, IDW_NAV_SLIDER ) );
-	m_navigSlider.SetFont( &m_ctrlFont );
 	return true;
 }
 
 template< typename CtrlType >
-bool CMainToolbar::CreateBarCtrl( CtrlType* pCtrl, UINT ctrlId, DWORD style, int width, int padLeft /*= 0*/ )
+void CMainToolbar::CreateBarCtrl( CtrlType* pCtrl, UINT ctrlId, DWORD style, int width, int padLeft /*= PadLeft*/, int padRight /*= PadRight*/ )
 {
 	ASSERT_PTR( pCtrl );
 	int buttonPos = CommandToIndex( ctrlId );
-	if ( -1 == buttonPos )
-		return false;
+	VERIFY( buttonPos != -1 );
 
 	SetButtonInfo( buttonPos, ctrlId, TBBS_SEPARATOR, width );		// set combo width with underlying button as separator
 
 	CRect ctrlRect;
 	GetItemRect( buttonPos, &ctrlRect );
-	ctrlRect.left += 2 + padLeft;									// some more gap on left and right
-	ctrlRect.right -= 5;
+	// extra padding on left & right
+	ctrlRect.left += padLeft;
+	ctrlRect.right -= padRight;
 
 	VERIFY( CreateControl( pCtrl, ctrlId, style, ctrlRect ) );
 	pCtrl->SetFont( &m_ctrlFont );
-	return true;
 }
 
 template<>
@@ -137,18 +130,25 @@ bool CMainToolbar::CreateControl( CButton* pButton, UINT buttonId, DWORD style, 
 	return pButton->Create( _T("<ck>"), style | WS_VISIBLE | WS_TABSTOP, ctrlRect, this, buttonId ) != FALSE;
 }
 
-bool CMainToolbar::OutputAutoSize( ui::AutoImageSize autoImageSize )
+template<>
+bool CMainToolbar::CreateControl( CSliderCtrl* pSliderCtrl, UINT ctrlId, DWORD style, const CRect& ctrlRect )
 {
-	if ( m_autoImageSizeCombo.GetCurSel() == autoImageSize )
+	return pSliderCtrl->Create( style | WS_VISIBLE | WS_TABSTOP, ctrlRect, this, ctrlId ) != FALSE;
+}
+
+
+bool CMainToolbar::OutputScalingMode( ui::ImageScalingMode scalingMode )
+{
+	if ( m_imageScalingCombo.GetCurSel() == scalingMode )
 		return false;
 
-	m_autoImageSizeCombo.SetCurSel( autoImageSize );
+	m_imageScalingCombo.SetCurSel( scalingMode );
 	return true;
 }
 
-ui::AutoImageSize CMainToolbar::InputAutoSize( void ) const
+ui::ImageScalingMode CMainToolbar::InputScalingMode( void ) const
 {
-	return static_cast< ui::AutoImageSize >( m_autoImageSizeCombo.GetCurSel() );
+	return static_cast< ui::ImageScalingMode >( m_imageScalingCombo.GetCurSel() );
 }
 
 bool CMainToolbar::OutputZoomPct( UINT zoomPct )
@@ -171,37 +171,37 @@ bool CMainToolbar::OutputNavigRange( UINT imageCount )
 	enum { ThresholdCount = 30 };
 
 	int maxIndex = std::max( 2u, imageCount - 1 );
-	if ( 0 == m_navigSlider.GetRangeMin() && maxIndex == m_navigSlider.GetRangeMax() )
+	if ( 0 == m_navigSliderCtrl.GetRangeMin() && maxIndex == m_navigSliderCtrl.GetRangeMax() )
 		return false;
 
-	m_navigSlider.SetRange( 0, imageCount - 1, TRUE );
-	m_navigSlider.SetTicFreq( 1 + imageCount / ThresholdCount );
+	m_navigSliderCtrl.SetRange( 0, imageCount - 1, TRUE );
+	m_navigSliderCtrl.SetTicFreq( 1 + imageCount / ThresholdCount );
 	return true;
 }
 
 bool CMainToolbar::OutputNavigPos( int imagePos )
 {
-	if ( imagePos < 0 || imagePos > m_navigSlider.GetRangeMax() )
+	if ( imagePos < 0 || imagePos > m_navigSliderCtrl.GetRangeMax() )
 		imagePos = 0;
-	if ( m_navigSlider.GetPos() == imagePos )
+	if ( m_navigSliderCtrl.GetPos() == imagePos )
 		return false;
 
-	m_navigSlider.SetPos( imagePos );
+	m_navigSliderCtrl.SetPos( imagePos );
 	return true;
 }
 
 int CMainToolbar::InputNavigPos( void ) const
 {
-	return m_navigSlider.GetPos();
+	return m_navigSliderCtrl.GetPos();
 }
 
 bool CMainToolbar::HandleCmdMsg( UINT cmdId, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo )
 {
 	switch ( cmdId )
 	{
-		case CM_ESCAPE_KEY:
-		case CM_FOCUS_ZOOM:
-		case CM_FOCUS_SLIDER:
+		case ID_CM_ESCAPE_KEY:
+		case ID_FOCUS_ON_ZOOM_COMBO:
+		case ID_FOCUS_ON_SLIDER_CTRL:
 			return OnCmdMsg( cmdId, code, pExtra, pHandlerInfo ) != FALSE;
 	}
 	return false;
@@ -214,12 +214,12 @@ BEGIN_MESSAGE_MAP( CMainToolbar, CToolbarStrip )
 	ON_WM_ERASEBKGND()
 	ON_WM_HSCROLL()
 	ON_COMMAND( IDOK, OnOk )
-	ON_COMMAND_EX( CM_ESCAPE_KEY, CmEscapeKey )
-	ON_COMMAND( CM_FOCUS_ZOOM, CmFocusZoom )
-	ON_COMMAND( CM_FOCUS_SLIDER, CmFocusSlider )
+	ON_COMMAND_EX( ID_CM_ESCAPE_KEY, On_EscapeKey )
+	ON_COMMAND( ID_FOCUS_ON_ZOOM_COMBO, On_FocusOnZoomCombo )
+	ON_COMMAND( ID_FOCUS_ON_SLIDER_CTRL, On_FocusOnSliderCtrl )
 	ON_CBN_CLOSEUP( IDW_ZOOM_COMBO, OnCBnCloseUp_ZoomCombo )
-	ON_NOTIFY_EX_RANGE( TTN_NEEDTEXTA, 0, 0xFFFF, OnToolTipText_NavigSlider )
-	ON_NOTIFY_EX_RANGE( TTN_NEEDTEXTW, 0, 0xFFFF, OnToolTipText_NavigSlider )
+	ON_NOTIFY_EX_RANGE( TTN_NEEDTEXTA, 0, 0xFFFF, OnToolTipText_NavigSliderCtrl )
+	ON_NOTIFY_EX_RANGE( TTN_NEEDTEXTW, 0, 0xFFFF, OnToolTipText_NavigSliderCtrl )
 END_MESSAGE_MAP()
 
 BOOL CMainToolbar::OnEraseBkgnd( CDC* pDC )
@@ -236,7 +236,7 @@ BOOL CMainToolbar::OnEraseBkgnd( CDC* pDC )
 void CMainToolbar::OnHScroll( UINT sbCode, UINT nPos, CScrollBar* pScrollBar )
 {
 	CToolbarStrip::OnHScroll( sbCode, nPos, pScrollBar );
-	if ( pScrollBar != NULL && pScrollBar->m_hWnd == m_navigSlider.m_hWnd )
+	if ( pScrollBar != NULL && pScrollBar->m_hWnd == m_navigSliderCtrl.m_hWnd )
 	{
 		BOOL doCommit = true;
 		int pos;
@@ -250,7 +250,7 @@ void CMainToolbar::OnHScroll( UINT sbCode, UINT nPos, CScrollBar* pScrollBar )
 			case SB_LEFT:
 			case SB_RIGHT:
 			case SB_ENDSCROLL:
-				pos = m_navigSlider.GetPos();
+				pos = m_navigSliderCtrl.GetPos();
 				break;
 			case SB_THUMBTRACK:
 				pos = nPos;
@@ -275,7 +275,7 @@ void CMainToolbar::OnOk( void )
 				pImageView->RegainFocus( IImageView::Escape );
 }
 
-BOOL CMainToolbar::CmEscapeKey( UINT cmdId )
+BOOL CMainToolbar::On_EscapeKey( UINT cmdId )
 {
 	cmdId;
 	if ( !ui::OwnsFocus( m_hWnd ) )		// any control on the toolbar has focus?
@@ -286,32 +286,32 @@ BOOL CMainToolbar::CmEscapeKey( UINT cmdId )
 	return TRUE;
 }
 
-void CMainToolbar::CmFocusZoom( void )
+void CMainToolbar::On_FocusOnZoomCombo( void )
 {
 	if ( !ui::OwnsFocus( *m_pZoomCombo ) && app::GetMainFrame()->MDIGetActive() != NULL )
 		m_pZoomCombo->SetFocus();
 }
 
-void CMainToolbar::CmFocusSlider( void )
+void CMainToolbar::On_FocusOnSliderCtrl( void )
 {
-	if ( !ui::OwnsFocus( m_navigSlider ) && m_navigSlider.IsWindowEnabled() )
-		m_navigSlider.SetFocus();
+	if ( !ui::OwnsFocus( m_navigSliderCtrl ) && m_navigSliderCtrl.IsWindowEnabled() )
+		m_navigSliderCtrl.SetFocus();
 }
 
 void CMainToolbar::OnCBnCloseUp_ZoomCombo( void )
 {
-	CmEscapeKey( IDW_ZOOM_COMBO );
+	On_EscapeKey( IDW_ZOOM_COMBO );
 }
 
-BOOL CMainToolbar::OnToolTipText_NavigSlider( UINT, NMHDR* pNmHdr, LRESULT* pResult )
+BOOL CMainToolbar::OnToolTipText_NavigSliderCtrl( UINT, NMHDR* pNmHdr, LRESULT* pResult )
 {
 	ui::CTooltipTextMessage message( pNmHdr );
 	IImageView* pImageView = app::GetMainFrame()->GetActiveImageView();
-	if ( !message.IsValidNotification() || message.m_cmdId != IDW_NAV_SLIDER || NULL == pImageView )
-		return FALSE;		// not handled
+	if ( !message.IsValidNotification() || message.m_cmdId != IDW_NAVIG_SLIDER_CTRL || NULL == pImageView )
+		return FALSE;		// not handled, countinue routing
 
 	if ( !message.AssignTooltipText( pImageView->GetImagePathKey().first.GetPtr() ) )
-		return FALSE;
+		return FALSE;		// countinue routing
 
 	*pResult = 0;
 	return TRUE;			// message was handled

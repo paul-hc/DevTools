@@ -11,9 +11,9 @@
 
 // CBaseZoomView implementation
 
-CBaseZoomView::CBaseZoomView( ui::AutoImageSize autoImageSize, UINT zoomPct )
+CBaseZoomView::CBaseZoomView( ui::ImageScalingMode scalingMode, UINT zoomPct )
 	: CScrollView()
-	, m_autoImageSize( autoImageSize )
+	, m_scalingMode( scalingMode )
 	, m_zoomPct( zoomPct )
 	, m_pZoomBar( NULL )
 {
@@ -23,10 +23,10 @@ CBaseZoomView::~CBaseZoomView()
 {
 }
 
-void CBaseZoomView::ModifyAutoImageSize( ui::AutoImageSize autoImageSize )
+void CBaseZoomView::ModifyScalingMode( ui::ImageScalingMode scalingMode )
 {
-	AssignAutoSize( autoImageSize );
-	switch ( m_autoImageSize )
+	AssignScalingMode( scalingMode );
+	switch ( m_scalingMode )
 	{
 		case ui::ActualSize:
 			AssignZoomPct( 100 );
@@ -45,7 +45,7 @@ bool CBaseZoomView::ModifyZoomPct( UINT zoomPct )
 	}
 
 	AssignZoomPct( zoomPct );
-	switch ( m_autoImageSize )
+	switch ( m_scalingMode )
 	{
 		case ui::UseZoomPct:
 			break;
@@ -54,15 +54,15 @@ bool CBaseZoomView::ModifyZoomPct( UINT zoomPct )
 				break;
 			// fall-through
 		default:
-			AssignAutoSize( ui::UseZoomPct );
+			AssignScalingMode( ui::UseZoomPct );
 	}
 	SetupContentMetrics();
 	return true;
 }
 
-void CBaseZoomView::SetScaleZoom( ui::AutoImageSize autoImageSize, UINT zoomPct )
+void CBaseZoomView::SetScaleZoom( ui::ImageScalingMode scalingMode, UINT zoomPct )
 {
-	AssignAutoSize( autoImageSize );
+	AssignScalingMode( scalingMode );
 	AssignZoomPct( zoomPct );
 	SetupContentMetrics();
 }
@@ -105,7 +105,7 @@ void CBaseZoomView::SetupContentMetrics( bool doRedraw /*= true*/ )
 		UINT zoomPct = m_zoomPct;
 		CSize displaySize = srcSize;
 
-		switch ( m_autoImageSize )
+		switch ( m_scalingMode )
 		{
 			case ui::AutoFitLargeOnly:
 				if ( ui::FitsInside( clientSize, srcSize ) )
@@ -244,17 +244,17 @@ BOOL CBaseZoomView::OnEraseBkgnd( CDC* pDC )
 
 // CScopedScaleZoom implementation
 
-CScopedScaleZoom::CScopedScaleZoom( CBaseZoomView* pZoomView, ui::AutoImageSize autoImageSize, UINT zoomPct, const CPoint* pClientPoint /*= NULL*/ )
+CScopedScaleZoom::CScopedScaleZoom( CBaseZoomView* pZoomView, ui::ImageScalingMode scalingMode, UINT zoomPct, const CPoint* pClientPoint /*= NULL*/ )
 	: m_pZoomView( pZoomView )
-	, m_oldAutoImageSize( pZoomView->GetAutoImageSize() )
+	, m_oldScalingMode( pZoomView->GetScalingMode() )
 	, m_oldZoomPct( pZoomView->GetZoomPct() )
 	, m_oldScrollPosition( pZoomView->GetScrollPosition() )
 	, m_refPointedPct( m_pZoomView->GetContentPointedPct( pClientPoint ) )
-	, m_changed( autoImageSize != m_oldAutoImageSize || zoomPct != m_oldZoomPct )
+	, m_changed( scalingMode != m_oldScalingMode || zoomPct != m_oldZoomPct )
 {
 	if ( m_changed )
 	{
-		m_pZoomView->SetScaleZoom( autoImageSize, zoomPct );
+		m_pZoomView->SetScaleZoom( scalingMode, zoomPct );
 		m_pZoomView->CenterOnPoint( m_pZoomView->TranslatePointedPct( m_refPointedPct ) );		// center on the equivalent of the clicked point
 		m_pZoomView->UpdateWindow();
 	}
@@ -264,7 +264,7 @@ CScopedScaleZoom::~CScopedScaleZoom()
 {
 	if ( m_changed )
 	{
-		m_pZoomView->SetScaleZoom( m_oldAutoImageSize, m_oldZoomPct );
+		m_pZoomView->SetScaleZoom( m_oldScalingMode, m_oldZoomPct );
 		m_pZoomView->ScrollToPosition( m_oldScrollPosition );
 		m_pZoomView->UpdateWindow();
 	}
@@ -279,7 +279,7 @@ CZoomViewMouseTracker::CZoomViewMouseTracker( CBaseZoomView* pZoomView, CPoint p
 	, m_trackOp( trackOp )
 	, m_origPoint( point )
 	, m_origScrollPos( m_pZoomView->GetScrollPosition() )
-	, m_origAutoImageSize( m_pZoomView->GetAutoImageSize() )
+	, m_origScalingMode( m_pZoomView->GetScalingMode() )
 	, m_origZoomPct( m_pZoomView->GetZoomPct() )
 	, m_hOrigCursor( NULL )
 {
@@ -369,7 +369,7 @@ void CZoomViewMouseTracker::Cancel( void )
 	// reset to the original metrics
 	switch ( m_trackOp )
 	{
-		case OpZoom:		m_pZoomView->SetScaleZoom( m_origAutoImageSize, m_origZoomPct ); break;
+		case OpZoom:		m_pZoomView->SetScaleZoom( m_origScalingMode, m_origZoomPct ); break;
 		case OpScroll:		m_pZoomView->ScrollToPosition( m_origScrollPos ); break;
 		case OpZoomNormal:	break;
 	}

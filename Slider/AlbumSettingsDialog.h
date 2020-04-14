@@ -96,8 +96,8 @@ protected:
 	afx_msg void OnToggle_AutoDrop( void );
 	afx_msg void OnLBnSelChange_SearchSpec( void );
 	afx_msg void OnLBnDblclk_SearchSpec( void );
-	afx_msg void OnMoveUp_SearchSpec( void );
-	afx_msg void OnMoveDown_SearchSpec( void );
+	afx_msg void On_MoveUp_SearchSpec( void );
+	afx_msg void On_MoveDown_SearchSpec( void );
 	afx_msg void OnAdd_SearchSpec( void );
 	afx_msg void OnModify_SearchSpec( void );
 	afx_msg void OnDelete_SearchSpec( void );

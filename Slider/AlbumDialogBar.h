@@ -42,11 +42,11 @@ public:
 	virtual BOOL PreTranslateMessage( MSG* pMsg );
 protected:
 	afx_msg void OnOk( void );
-	afx_msg void CmEscapeKey( void );
+	afx_msg void On_EscapeKey( void );
 	afx_msg void OnCBnSelChange_SlideDelay( void );
 	afx_msg void OnCBnCloseUp_SlideDelay( void );
 	afx_msg void OnCBnInputError_SlideDelay( void );
-	afx_msg void OnEnKillFocusCurrPos( void );
+	afx_msg void OnEnKillFocus_SeekCurrPos( void );
 	afx_msg void OnSize( UINT sizeType, int cx, int cy );
 	afx_msg HBRUSH OnCtlColor( CDC* pDC, CWnd* pWnd, UINT ctlColor );
 	afx_msg void OnVScroll( UINT sbCode, UINT pos, CScrollBar* pScrollBar );

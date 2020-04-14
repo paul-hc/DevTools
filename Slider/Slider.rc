@@ -102,21 +102,21 @@ BEGIN
     BUTTON      CK_FULL_SCREEN
     BUTTON      CK_SHOW_THUMB_VIEW
     SEPARATOR
-    BUTTON      CM_ZOOM_NORMAL
-    BUTTON      CM_ZOOM_IN
-    BUTTON      CM_ZOOM_OUT
+    BUTTON      ID_ZOOM_NORMAL_100
+    BUTTON      ID_ZOOM_IN
+    BUTTON      ID_ZOOM_OUT
     SEPARATOR
-    BUTTON      CM_NAV_PLAY
+    BUTTON      ID_TOGGLE_NAVIG_PLAY
     SEPARATOR
-    BUTTON      CM_NAV_BEGIN
-    BUTTON      CM_NAV_PREV
-    BUTTON      CM_NAV_NEXT
-    BUTTON      CM_NAV_END
+    BUTTON      ID_NAVIG_SEEK_BEGIN
+    BUTTON      ID_NAVIG_SEEK_PREV
+    BUTTON      ID_NAVIG_SEEK_NEXT
+    BUTTON      ID_NAVIG_SEEK_END
     SEPARATOR
-    BUTTON      CM_NAV_DIR_REV
-    BUTTON      CM_NAV_DIR_FWD
+    BUTTON      ID_TOGGLE_NAVIG_DIR_REV
+    BUTTON      ID_TOGGLE_NAVIG_DIR_FWD
     SEPARATOR
-    BUTTON      CM_NAV_CIRCULAR
+    BUTTON      ID_TOGGLE_NAVIG_WRAP_MODE
     SEPARATOR
     BUTTON      CM_ARCHIVE_IMAGES
     BUTTON      CM_REGENERATE_ALBUM
@@ -239,17 +239,17 @@ BEGIN
     END
     POPUP "&Album"
     BEGIN
-        MENUITEM "&Play\tSpace",                CM_NAV_PLAY
+        MENUITEM "&Play\tSpace",                ID_TOGGLE_NAVIG_PLAY
         MENUITEM SEPARATOR
-        MENUITEM "Goto &Begin\tHome",           CM_NAV_BEGIN
-        MENUITEM "Goto Pre&vious\tUp",          CM_NAV_PREV
-        MENUITEM "Goto &Next\tDown",            CM_NAV_NEXT
-        MENUITEM "Goto &End\tEnd",              CM_NAV_END
+        MENUITEM "Goto &Begin\tHome",           ID_NAVIG_SEEK_BEGIN
+        MENUITEM "Goto Pre&vious\tUp",          ID_NAVIG_SEEK_PREV
+        MENUITEM "Goto &Next\tDown",            ID_NAVIG_SEEK_NEXT
+        MENUITEM "Goto &End\tEnd",              ID_NAVIG_SEEK_END
         MENUITEM SEPARATOR
-        MENUITEM "&Forward Direction",          CM_NAV_DIR_FWD
-        MENUITEM "&Reverse Direction",          CM_NAV_DIR_REV
+        MENUITEM "&Forward Direction",          ID_TOGGLE_NAVIG_DIR_FWD
+        MENUITEM "&Reverse Direction",          ID_TOGGLE_NAVIG_DIR_REV
         MENUITEM SEPARATOR
-        MENUITEM "Navigate &Circular",          CM_NAV_CIRCULAR
+        MENUITEM "&Wrap Mode",                  ID_TOGGLE_NAVIG_WRAP_MODE
         MENUITEM SEPARATOR
         MENUITEM "Bac&kground Color...\tCtrl+K", CM_EDIT_BK_COLOR
         MENUITEM SEPARATOR
@@ -266,7 +266,7 @@ BEGIN
         END
         MENUITEM SEPARATOR
         MENUITEM "Regenerate Album\tCtrl+Shift+F5", CM_REGENERATE_ALBUM
-        MENUITEM "Album &Settings...\tCtrl+Space", CM_EDIT_ALBUM
+        MENUITEM "Album &Settings...\tCtrl+Space", ID_EDIT_ALBUM
     END
     POPUP "&View"
     BEGIN
@@ -280,18 +280,18 @@ BEGIN
         MENUITEM SEPARATOR
         POPUP "&Auto Image Size"
         BEGIN
-            MENUITEM "Actual Size (Zoom to 100%)\tCtrl+1", CM_IMAGE_SIZE_ACTUAL_SIZE
-            MENUITEM "Best Fit (Large Only)\tCtrl+0", CM_IMAGE_SIZE_AUTO_FIT_LARGE
-            MENUITEM "Best Fit (All)\tCtrl+Shift+0", CM_IMAGE_SIZE_AUTO_FIT_ALL
-            MENUITEM "Fit Width",                   CM_IMAGE_SIZE_FIT_WIDTH
-            MENUITEM "Fit Height",                  CM_IMAGE_SIZE_FIT_HEIGHT
+            MENUITEM "Actual Size (Zoom to 100%)\tCtrl+1", ID_TOGGLE_SCALING_ACTUAL_SIZE
+            MENUITEM "Best Fit (Large Only)\tCtrl+0", ID_TOGGLE_SCALING_AUTO_FIT_LARGE
+            MENUITEM "Best Fit (All)\tCtrl+Shift+0", ID_TOGGLE_SCALING_AUTO_FIT_ALL
+            MENUITEM "Fit Width",                   ID_TOGGLE_SCALING_FIT_WIDTH
+            MENUITEM "Fit Height",                  ID_TOGGLE_SCALING_FIT_HEIGHT
         END
         MENUITEM SEPARATOR
-        MENUITEM "Zoom Normal",                 CM_ZOOM_NORMAL
-        MENUITEM "Zoom &In\tCtrl+Add",          CM_ZOOM_IN
-        MENUITEM "Zoom Out\tCtrl+Sub",          CM_ZOOM_OUT
+        MENUITEM "Zoom Normal",                 ID_ZOOM_NORMAL_100
+        MENUITEM "Zoom &In\tCtrl+Add",          ID_ZOOM_IN
+        MENUITEM "Zoom Out\tCtrl+Sub",          ID_ZOOM_OUT
         MENUITEM SEPARATOR
-        MENUITEM "Resize View to Fit\tCtrl+Shift+F", CM_RESIZE_VIEW_TO_FIT
+        MENUITEM "Resize View to Fit\tCtrl+Shift+F", ID_RESIZE_VIEW_TO_FIT
         MENUITEM SEPARATOR
         MENUITEM "Refresh Content\tF5",         CM_REFRESH_CONTENT
         MENUITEM "Clear Image Cache\tCtrl+F5",  CM_CLEAR_IMAGE_CACHE
@@ -306,7 +306,7 @@ BEGIN
         MENUITEM "Tile &Horizontal",            ID_WINDOW_TILE_HORZ
         MENUITEM "&Arrange Icons",              ID_WINDOW_ARRANGE
         MENUITEM SEPARATOR
-        MENUITEM "C&lose All\tAlt+X",           CM_MDI_CLOSE_ALL
+        MENUITEM "C&lose All\tAlt+X",           ID_CM_MDI_CLOSE_ALL
     END
     POPUP "&Help"
     BEGIN
@@ -366,18 +366,18 @@ BEGIN
         MENUITEM SEPARATOR
         POPUP "&Auto Image Size"
         BEGIN
-            MENUITEM "Actual Size (Zoom to 100%)\tCtrl+1", CM_IMAGE_SIZE_ACTUAL_SIZE
-            MENUITEM "Best Fit (Large Only)\tCtrl+0", CM_IMAGE_SIZE_AUTO_FIT_LARGE
-            MENUITEM "Best Fit (All)\tCtrl+Shift+0", CM_IMAGE_SIZE_AUTO_FIT_ALL
-            MENUITEM "Fit Width",                   CM_IMAGE_SIZE_FIT_WIDTH
-            MENUITEM "Fit Height",                  CM_IMAGE_SIZE_FIT_HEIGHT
+            MENUITEM "Actual Size (Zoom to 100%)\tCtrl+1", ID_TOGGLE_SCALING_ACTUAL_SIZE
+            MENUITEM "Best Fit (Large Only)\tCtrl+0", ID_TOGGLE_SCALING_AUTO_FIT_LARGE
+            MENUITEM "Best Fit (All)\tCtrl+Shift+0", ID_TOGGLE_SCALING_AUTO_FIT_ALL
+            MENUITEM "Fit Width",                   ID_TOGGLE_SCALING_FIT_WIDTH
+            MENUITEM "Fit Height",                  ID_TOGGLE_SCALING_FIT_HEIGHT
         END
         MENUITEM SEPARATOR
-        MENUITEM "Zoom Normal",                 CM_ZOOM_NORMAL
-        MENUITEM "Zoom &In\tCtrl+Add",          CM_ZOOM_IN
-        MENUITEM "Zoom Out\tCtrl+Sub",          CM_ZOOM_OUT
+        MENUITEM "Zoom Normal",                 ID_ZOOM_NORMAL_100
+        MENUITEM "Zoom &In\tCtrl+Add",          ID_ZOOM_IN
+        MENUITEM "Zoom Out\tCtrl+Sub",          ID_ZOOM_OUT
         MENUITEM SEPARATOR
-        MENUITEM "Resize View to Fit\tCtrl+Shift+F", CM_RESIZE_VIEW_TO_FIT
+        MENUITEM "Resize View to Fit\tCtrl+Shift+F", ID_RESIZE_VIEW_TO_FIT
         MENUITEM SEPARATOR
         MENUITEM "Refresh Content\tF5",         CM_REFRESH_CONTENT
         MENUITEM "Clear Image Cache\tCtrl+F5",  CM_CLEAR_IMAGE_CACHE
@@ -391,7 +391,7 @@ BEGIN
         MENUITEM "Tile &Horizontal",            ID_WINDOW_TILE_HORZ
         MENUITEM "&Arrange Icons",              ID_WINDOW_ARRANGE
         MENUITEM SEPARATOR
-        MENUITEM "C&lose All\tAlt+X",           CM_MDI_CLOSE_ALL
+        MENUITEM "C&lose All\tAlt+X",           ID_CM_MDI_CLOSE_ALL
     END
     POPUP "&Help"
     BEGIN
@@ -403,17 +403,17 @@ IDR_CONTEXT_MENU MENU
 BEGIN
     POPUP "<image>"
     BEGIN
-        MENUITEM "Actual Size (Zoom to 100%)\tCtrl+1", CM_IMAGE_SIZE_ACTUAL_SIZE
-        MENUITEM "Best Fit (Large Only)\tCtrl+0", CM_IMAGE_SIZE_AUTO_FIT_LARGE
-        MENUITEM "Best Fit (All)\tCtrl+Shift+0", CM_IMAGE_SIZE_AUTO_FIT_ALL
-        MENUITEM "Fit Width",                   CM_IMAGE_SIZE_FIT_WIDTH
-        MENUITEM "Fit Height",                  CM_IMAGE_SIZE_FIT_HEIGHT
+        MENUITEM "Actual Size (Zoom to 100%)\tCtrl+1", ID_TOGGLE_SCALING_ACTUAL_SIZE
+        MENUITEM "Best Fit (Large Only)\tCtrl+0", ID_TOGGLE_SCALING_AUTO_FIT_LARGE
+        MENUITEM "Best Fit (All)\tCtrl+Shift+0", ID_TOGGLE_SCALING_AUTO_FIT_ALL
+        MENUITEM "Fit Width",                   ID_TOGGLE_SCALING_FIT_WIDTH
+        MENUITEM "Fit Height",                  ID_TOGGLE_SCALING_FIT_HEIGHT
         MENUITEM SEPARATOR
-        MENUITEM "Resize View to Fit\tCtrl+Shift+F", CM_RESIZE_VIEW_TO_FIT
+        MENUITEM "Resize View to Fit\tCtrl+Shift+F", ID_RESIZE_VIEW_TO_FIT
         MENUITEM "&Smooth Mode",                IDW_SMOOTHING_MODE_CHECK
         MENUITEM SEPARATOR
-        MENUITEM "Zoom In\tCtrl+Add",           CM_ZOOM_IN
-        MENUITEM "Zoom Out\tCtrl+Sub",          CM_ZOOM_OUT
+        MENUITEM "Zoom In\tCtrl+Add",           ID_ZOOM_IN
+        MENUITEM "Zoom Out\tCtrl+Sub",          ID_ZOOM_OUT
         MENUITEM SEPARATOR
         MENUITEM "Bac&kground Color...\tCtrl+K", CM_EDIT_BK_COLOR
         MENUITEM SEPARATOR
@@ -428,33 +428,33 @@ BEGIN
     END
     POPUP "<album>"
     BEGIN
-        MENUITEM "&Play\tSpace",                CM_NAV_PLAY
+        MENUITEM "&Play\tSpace",                ID_TOGGLE_NAVIG_PLAY
         MENUITEM SEPARATOR
         POPUP "&Goto"
         BEGIN
-            MENUITEM "Pre&vious\tUp",               CM_NAV_PREV
-            MENUITEM "&Next\tDown",                 CM_NAV_NEXT
+            MENUITEM "Pre&vious\tUp",               ID_NAVIG_SEEK_PREV
+            MENUITEM "&Next\tDown",                 ID_NAVIG_SEEK_NEXT
             MENUITEM SEPARATOR
-            MENUITEM "&Begin\tHome",                CM_NAV_BEGIN
-            MENUITEM "&End\tEnd",                   CM_NAV_END
+            MENUITEM "&Begin\tHome",                ID_NAVIG_SEEK_BEGIN
+            MENUITEM "&End\tEnd",                   ID_NAVIG_SEEK_END
         END
         MENUITEM SEPARATOR
-        MENUITEM "For&ward Direction",          CM_NAV_DIR_FWD
-        MENUITEM "&Reverse Direction",          CM_NAV_DIR_REV
+        MENUITEM "For&ward Direction",          ID_TOGGLE_NAVIG_DIR_FWD
+        MENUITEM "&Reverse Direction",          ID_TOGGLE_NAVIG_DIR_REV
         MENUITEM SEPARATOR
-        MENUITEM "Navigate &Circular",          CM_NAV_CIRCULAR
+        MENUITEM "&Wrap Mode",                  ID_TOGGLE_NAVIG_WRAP_MODE
         MENUITEM SEPARATOR
-        MENUITEM "Actual Size (Zoom to 100%)\tCtrl+1", CM_IMAGE_SIZE_ACTUAL_SIZE
-        MENUITEM "Best Fit (Large Only)\tCtrl+0", CM_IMAGE_SIZE_AUTO_FIT_LARGE
-        MENUITEM "Best Fit (All)\tCtrl+Shift+0", CM_IMAGE_SIZE_AUTO_FIT_ALL
-        MENUITEM "Fit Width",                   CM_IMAGE_SIZE_FIT_WIDTH
-        MENUITEM "Fit Height",                  CM_IMAGE_SIZE_FIT_HEIGHT
+        MENUITEM "Actual Size (Zoom to 100%)\tCtrl+1", ID_TOGGLE_SCALING_ACTUAL_SIZE
+        MENUITEM "Best Fit (Large Only)\tCtrl+0", ID_TOGGLE_SCALING_AUTO_FIT_LARGE
+        MENUITEM "Best Fit (All)\tCtrl+Shift+0", ID_TOGGLE_SCALING_AUTO_FIT_ALL
+        MENUITEM "Fit Width",                   ID_TOGGLE_SCALING_FIT_WIDTH
+        MENUITEM "Fit Height",                  ID_TOGGLE_SCALING_FIT_HEIGHT
         MENUITEM SEPARATOR
-        MENUITEM "Resize View to Fit\tCtrl+Shift+F", CM_RESIZE_VIEW_TO_FIT
+        MENUITEM "Resize View to Fit\tCtrl+Shift+F", ID_RESIZE_VIEW_TO_FIT
         MENUITEM "&Smooth Mode",                IDW_SMOOTHING_MODE_CHECK
         MENUITEM SEPARATOR
-        MENUITEM "Zoom In\tCtrl+Add",           CM_ZOOM_IN
-        MENUITEM "Zoom Out\tCtrl+Sub",          CM_ZOOM_OUT
+        MENUITEM "Zoom In\tCtrl+Add",           ID_ZOOM_IN
+        MENUITEM "Zoom Out\tCtrl+Sub",          ID_ZOOM_OUT
         MENUITEM SEPARATOR
         MENUITEM "Bac&kground Color...\tCtrl+K", CM_EDIT_BK_COLOR
         MENUITEM SEPARATOR
@@ -498,11 +498,11 @@ BEGIN
         END
         MENUITEM SEPARATOR
         MENUITEM "Regenerate Album\tCtrl+Shift+F5", CM_REGENERATE_ALBUM
-        MENUITEM "Album &Settings...\tCtrl+Space", CM_EDIT_ALBUM
+        MENUITEM "Album &Settings...\tCtrl+Space", ID_EDIT_ALBUM
     END
     POPUP "<album thumbs>"
     BEGIN
-        MENUITEM "&Play\tSpace",                CM_NAV_PLAY
+        MENUITEM "&Play\tSpace",                ID_TOGGLE_NAVIG_PLAY
         MENUITEM SEPARATOR
         POPUP "&Image File"
         BEGIN
@@ -543,7 +543,7 @@ BEGIN
         END
         MENUITEM SEPARATOR
         MENUITEM "Regenerate Album\tCtrl+Shift+F5", CM_REGENERATE_ALBUM
-        MENUITEM "Album &Settings...\tCtrl+Space", CM_EDIT_ALBUM
+        MENUITEM "Album &Settings...\tCtrl+Space", ID_EDIT_ALBUM
     END
     POPUP "<album found list>"
     BEGIN
@@ -582,21 +582,21 @@ BEGIN
     VK_DELETE,      CM_DELETE_FILE_NO_UNDO, VIRTKEY, SHIFT, NOINVERT
     "K",            CM_EDIT_BK_COLOR,       VIRTKEY, CONTROL, NOINVERT
     "W",            CM_EDIT_WORKSPACE,      VIRTKEY, CONTROL, NOINVERT
-    VK_ESCAPE,      CM_ESCAPE_KEY,          VIRTKEY, NOINVERT
+    VK_ESCAPE,      ID_CM_ESCAPE_KEY,       VIRTKEY, NOINVERT
     "E",            CM_EXPLORE_IMAGE,       VIRTKEY, CONTROL, NOINVERT
-    "Z",            CM_FOCUS_ZOOM,          VIRTKEY, CONTROL, NOINVERT
-    "1",            CM_IMAGE_SIZE_ACTUAL_SIZE, VIRTKEY, CONTROL, NOINVERT
-    "0",            CM_IMAGE_SIZE_AUTO_FIT_ALL, VIRTKEY, SHIFT, CONTROL, NOINVERT
-    "0",            CM_IMAGE_SIZE_AUTO_FIT_LARGE, VIRTKEY, CONTROL, NOINVERT
+    "Z",            ID_FOCUS_ON_ZOOM_COMBO, VIRTKEY, CONTROL, NOINVERT
+    "1",            ID_TOGGLE_SCALING_ACTUAL_SIZE, VIRTKEY, CONTROL, NOINVERT
+    "0",            ID_TOGGLE_SCALING_AUTO_FIT_ALL, VIRTKEY, SHIFT, CONTROL, NOINVERT
+    "0",            ID_TOGGLE_SCALING_AUTO_FIT_LARGE, VIRTKEY, CONTROL, NOINVERT
     "W",            CM_LOAD_WORKSPACE_DOCS, VIRTKEY, SHIFT, CONTROL, ALT, NOINVERT
-    "X",            CM_MDI_CLOSE_ALL,       VIRTKEY, CONTROL, ALT, NOINVERT
+    "X",            ID_CM_MDI_CLOSE_ALL,    VIRTKEY, CONTROL, ALT, NOINVERT
     "M",            CM_MOVE_FILE,           VIRTKEY, CONTROL, NOINVERT
     VK_F5,          CM_REFRESH_CONTENT,     VIRTKEY, NOINVERT
-    "F",            CM_RESIZE_VIEW_TO_FIT,  VIRTKEY, SHIFT, CONTROL, NOINVERT
+    "F",            ID_RESIZE_VIEW_TO_FIT,  VIRTKEY, SHIFT, CONTROL, NOINVERT
     "S",            CM_SAVE_WORKSPACE,      VIRTKEY, SHIFT, CONTROL, NOINVERT
     VK_F8,          CM_TOGGLE_MAXIMIZE,     VIRTKEY, NOINVERT
-    VK_ADD,         CM_ZOOM_IN,             VIRTKEY, CONTROL, NOINVERT
-    VK_SUBTRACT,    CM_ZOOM_OUT,            VIRTKEY, CONTROL, NOINVERT
+    VK_ADD,         ID_ZOOM_IN,             VIRTKEY, CONTROL, NOINVERT
+    VK_SUBTRACT,    ID_ZOOM_OUT,            VIRTKEY, CONTROL, NOINVERT
     "C",            ID_EDIT_COPY,           VIRTKEY, CONTROL, NOINVERT
     VK_INSERT,      ID_EDIT_COPY,           VIRTKEY, CONTROL, NOINVERT
     "X",            ID_EDIT_CUT,            VIRTKEY, CONTROL, NOINVERT
@@ -640,7 +640,7 @@ END
 
 IDR_COMMAND_BAR_ACCEL ACCELERATORS 
 BEGIN
-    VK_ESCAPE,      CM_ESCAPE_KEY,          VIRTKEY, NOINVERT
+    VK_ESCAPE,      ID_CM_ESCAPE_KEY,       VIRTKEY, NOINVERT
     "O",            ID_FILE_OPEN_ALBUM_FOLDER, VIRTKEY, SHIFT, CONTROL, NOINVERT
 END
 
@@ -651,14 +651,14 @@ BEGIN
     "B",            ID_VIEW_ALBUMDIALOGBAR, VIRTKEY, CONTROL, NOINVERT
     "N",            ID_WINDOW_NEW,          VIRTKEY, SHIFT, CONTROL, NOINVERT
     "O",            CM_OPEN_IMAGE_FILE,     VIRTKEY, SHIFT, CONTROL, NOINVERT
-    "Q",            CM_FOCUS_SLIDER,        VIRTKEY, CONTROL, NOINVERT
+    "Q",            ID_FOCUS_ON_SLIDER_CTRL, VIRTKEY, CONTROL, NOINVERT
     "T",            CK_SHOW_THUMB_VIEW,     VIRTKEY, SHIFT, CONTROL, NOINVERT
     VK_BACK,        CM_CUSTOM_ORDER_UNDO,   VIRTKEY, ALT, NOINVERT
     VK_BACK,        CM_CUSTOM_ORDER_REDO,   VIRTKEY, SHIFT, ALT, NOINVERT
     VK_F5,          CM_REGENERATE_ALBUM,    VIRTKEY, SHIFT, CONTROL, NOINVERT
     VK_INSERT,      CM_CUSTOM_ORDER_REDO,   VIRTKEY, ALT, NOINVERT
-    VK_SPACE,       CM_NAV_PLAY,            VIRTKEY, NOINVERT
-    VK_SPACE,       CM_EDIT_ALBUM,          VIRTKEY, CONTROL, NOINVERT
+    VK_SPACE,       ID_TOGGLE_NAVIG_PLAY,   VIRTKEY, NOINVERT
+    VK_SPACE,       ID_EDIT_ALBUM,          VIRTKEY, CONTROL, NOINVERT
     VK_TAB,         CM_TOGGLE_SIBLING_VIEW, VIRTKEY, NOINVERT
     "Y",            CM_CUSTOM_ORDER_REDO,   VIRTKEY, CONTROL, NOINVERT
 END
@@ -671,15 +671,15 @@ END
 
 IDR_ALBUM_DLG_SEARCH_SPEC_ACCEL ACCELERATORS 
 BEGIN
-    VK_DELETE,      CM_DELETE_SEARCH_SPEC,  VIRTKEY, NOINVERT
-    VK_DELETE,      CM_DELETE_SEARCH_SPEC,  VIRTKEY, SHIFT, NOINVERT
-    VK_DOWN,        CM_MOVE_DOWN_SEARCH_SPEC, VIRTKEY, CONTROL, NOINVERT
-    VK_UP,          CM_MOVE_UP_SEARCH_SPEC, VIRTKEY, CONTROL, NOINVERT
+    VK_DELETE,      ID_REMOVE_ITEM,         VIRTKEY, NOINVERT
+    VK_DELETE,      ID_REMOVE_ITEM,         VIRTKEY, SHIFT, NOINVERT
+    VK_DOWN,        IDC_SEARCH_SPEC_MOVE_DOWN, VIRTKEY, CONTROL, NOINVERT
+    VK_UP,          IDC_SEARCH_SPEC_MOVE_UP, VIRTKEY, CONTROL, NOINVERT
 END
 
 IDR_ALBUM_DLG_ACCEL ACCELERATORS 
 BEGIN
-    VK_F5,          CM_SEARCH_FOR_FILES,    VIRTKEY, NOINVERT
+    VK_F5,          IDC_SEARCH_FOR_FILES,   VIRTKEY, NOINVERT
     "E",            IDC_EXPLORE_IMAGE,      VIRTKEY, CONTROL, NOINVERT
     VK_F4,          IDC_OPEN_IMAGE,         VIRTKEY, NOINVERT
     "M",            CM_MOVE_FILE,           VIRTKEY, CONTROL, NOINVERT
@@ -690,10 +690,10 @@ END
 
 IDR_ALBUMTYPE_NAV ACCELERATORS 
 BEGIN
-    VK_DOWN,        CM_NAV_NEXT,            VIRTKEY, NOINVERT
-    VK_END,         CM_NAV_END,             VIRTKEY, NOINVERT
-    VK_HOME,        CM_NAV_BEGIN,           VIRTKEY, NOINVERT
-    VK_UP,          CM_NAV_PREV,            VIRTKEY, NOINVERT
+    VK_DOWN,        ID_NAVIG_SEEK_NEXT,     VIRTKEY, NOINVERT
+    VK_END,         ID_NAVIG_SEEK_END,      VIRTKEY, NOINVERT
+    VK_HOME,        ID_NAVIG_SEEK_BEGIN,    VIRTKEY, NOINVERT
+    VK_UP,          ID_NAVIG_SEEK_PREV,     VIRTKEY, NOINVERT
 END
 
 
@@ -708,9 +708,11 @@ CAPTION "Workspace Preferences"
 FONT 8, "MS Sans Serif", 0, 0, 0x1
 BEGIN
     GROUPBOX        "General",IDC_STATIC,7,7,169,162
-    CONTROL         "&Automatically save workspace",CK_AUTOSAVE,"Button",BS_AUTOCHECKBOX | WS_GROUP | WS_TABSTOP,13,18,108,10
-    CONTROL         "&Restore opened documents",CK_PERSIST_OPEN_DOCS,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,13,30,108,10
-    CONTROL         "Restore zoom and scroll state in albums",CK_PERSIST_ALBUM_IMAGE_STATE,
+    CONTROL         "&Automatically save workspace",IDC_AUTOSAVE_CHECK,
+                    "Button",BS_AUTOCHECKBOX | WS_GROUP | WS_TABSTOP,13,18,108,10
+    CONTROL         "&Restore opened documents",IDC_PERSIST_OPEN_DOCS_CHECK,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,13,30,108,10
+    CONTROL         "Restore zoom and scroll state in albums",IDC_PERSIST_ALBUM_IMAGE_STATE_CHECK,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,13,42,140,10
     CONTROL         "Show the information bar in albums",ID_VIEW_ALBUMDIALOGBAR,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,13,54,145,10
@@ -725,7 +727,7 @@ BEGIN
     CONTROL         "Use smooting when enlarging images",IDC_ENLARGE_SMOOTHING_CHECK,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,13,115,133,10
     RTEXT           "Auto Image Size:",IDC_STATIC,20,135,54,8
-    COMBOBOX        IDW_AUTO_IMAGE_SIZE_COMBO,76,132,90,114,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDW_IMAGE_SCALING_COMBO,76,132,90,114,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
     RTEXT           "Recent files (0-16):",IDC_STATIC,13,153,61,8
     EDITTEXT        IDC_MAX_MRU_COUNT_EDIT,76,151,36,12,ES_AUTOHSCROLL | ES_NUMBER | WS_GROUP
     LTEXT           "Default Slide &Delay:",IDC_STATIC,11,178,63,8
@@ -757,7 +759,7 @@ STYLE DS_SETFONT | WS_CHILD
 FONT 8, "MS Sans Serif", 0, 0, 0x0
 BEGIN
     COMBOBOX        IDC_PLAY_DELAY_COMBO,2,2,46,129,CBS_DROPDOWN | WS_VSCROLL | WS_GROUP | WS_TABSTOP
-    EDITTEXT        IDC_SCROLL_POS_EDIT,54,2,37,12,ES_RIGHT | ES_AUTOHSCROLL | ES_NUMBER | WS_GROUP
+    EDITTEXT        IDC_SEEK_CURR_POS_EDIT,54,2,37,12,ES_RIGHT | ES_AUTOHSCROLL | ES_NUMBER | WS_GROUP
     CONTROL         "Spin1",IDC_SCROLL_POS_SPIN,"msctls_updown32",UDS_SETBUDDYINT | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS,83,2,11,12
     LTEXT           "10000 image(s)",IDC_NAV_COUNT_STATIC,95,4,53,8
     EDITTEXT        IDC_CURR_FILE_EDIT,151,4,367,12,ES_AUTOHSCROLL | ES_READONLY | NOT WS_BORDER | WS_GROUP
@@ -776,11 +778,11 @@ BEGIN
     COMBOBOX        IDC_LIST_ORDER_COMBO,339,127,153,177,CBS_DROPDOWNLIST | WS_VSCROLL | WS_GROUP | WS_TABSTOP
     GROUPBOX        "Search &Path Specifiers:",IDC_SEARCH_SPEC_STATIC,7,2,325,83
     LISTBOX         IDC_SEARCH_SPEC_LIST,12,12,314,52,WS_VSCROLL | WS_HSCROLL | WS_GROUP | WS_TABSTOP
-    PUSHBUTTON      "&Add...",CM_ADD_SEARCH_SPEC,12,66,42,14,WS_GROUP
-    PUSHBUTTON      "&Modify...",CM_MODIFY_SEARCH_SPEC,59,66,42,14
-    PUSHBUTTON      "&Delete",CM_DELETE_SEARCH_SPEC,106,66,42,14
-    PUSHBUTTON      "ñ",CM_MOVE_UP_SEARCH_SPEC,294,66,14,14,WS_GROUP | NOT WS_TABSTOP
-    PUSHBUTTON      "ò",CM_MOVE_DOWN_SEARCH_SPEC,311,66,14,14,NOT WS_TABSTOP
+    PUSHBUTTON      "&Add...",ID_ADD_ITEM,12,66,42,14,WS_GROUP
+    PUSHBUTTON      "&Modify...",ID_EDIT_ITEM,59,66,42,14
+    PUSHBUTTON      "&Delete",ID_REMOVE_ITEM,106,66,42,14
+    PUSHBUTTON      "ñ",IDC_SEARCH_SPEC_MOVE_UP,294,66,14,14,WS_GROUP | NOT WS_TABSTOP
+    PUSHBUTTON      "ò",IDC_SEARCH_SPEC_MOVE_DOWN,311,66,14,14,NOT WS_TABSTOP
     CONTROL         "Mi&nimum file size (KB):",IDC_MIN_FILE_SIZE_CHECK,
                     "Button",BS_AUTOCHECKBOX | WS_GROUP | WS_TABSTOP,12,92,82,10
     EDITTEXT        IDC_MIN_FILE_SIZE_EDIT,98,91,48,12,ES_AUTOHSCROLL | ES_NUMBER | WS_GROUP
@@ -833,8 +835,8 @@ FONT 8, "MS Sans Serif"
 BEGIN
     LTEXT           "&Select logger:",IDC_STATIC,7,7,44,8
     COMBOBOX        IDC_LOGGER_COMBO,7,17,112,65,CBS_DROPDOWNLIST | WS_VSCROLL | WS_GROUP | WS_TABSTOP
-    CONTROL         "Logging &Enabled",CK_LOGGER_ENABLED,"Button",BS_AUTOCHECKBOX | WS_GROUP | WS_TABSTOP,7,36,73,10
-    CONTROL         "&Prepend timestamp to each line",CK_PREPEND_TIMESTAMP,
+    CONTROL         "Logging &Enabled",IDC_LOGGER_ENABLED_CHECK,"Button",BS_AUTOCHECKBOX | WS_GROUP | WS_TABSTOP,7,36,73,10
+    CONTROL         "&Prepend timestamp to each line",IDC_TIMESTAMP_PREFIX_CHECK,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,49,115,10
     DEFPUSHBUTTON   "Close",IDOK,149,7,57,14
     PUSHBUTTON      "&View Log File...",IDC_VIEW_LOG_FILE_BUTTON,149,26,57,14
@@ -884,7 +886,7 @@ BEGIN
     LTEXT           "Destination folder/compound file:",IDC_STATIC,7,85,105,8
     EDITTEXT        IDC_DEST_DIR_PATH_EDIT,7,95,201,12,ES_AUTOHSCROLL | WS_GROUP
     PUSHBUTTON      ".&..",IDC_BROWSE_DEST_FOLDER_BUTTON,209,95,11,12,NOT WS_TABSTOP
-    PUSHBUTTON      "Create Folder",CM_CREATE_DEST_FOLDER,227,94,68,14,WS_GROUP | NOT WS_TABSTOP
+    PUSHBUTTON      "Create Folder",IDC_CREATE_DEST_FOLDER,227,94,68,14,WS_GROUP | NOT WS_TABSTOP
     PUSHBUTTON      "&Password...",ID_EDIT_ARCHIVE_PASSWORD,227,111,68,14,WS_GROUP
     LTEXT           "Fi&les:",IDC_STATIC,7,118,17,8
     CONTROL         "List1",IDC_FILE_PATHS_LIST,"SysListView32",LVS_REPORT | LVS_SHOWSELALWAYS | WS_BORDER | WS_GROUP | WS_TABSTOP,7,129,288,87
@@ -941,7 +943,7 @@ BEGIN
     BEGIN
         BLOCK "040904b0"
         BEGIN
-            VALUE "Comments", "[4.0] Split UTL_BASE/UTL_UI|Image viewer with slide albums|[3.9] ui::AutoImageSize|[3.8] use image path keys"
+            VALUE "Comments", "[4.0] Split UTL_BASE/UTL_UI|Image viewer with slide albums|[3.9] ui::ImageScalingMode|[3.8] use image path keys"
             VALUE "CompanyName", "Paul Cocoveanu"
             VALUE "Email", "phc.2nd@gmail.com"
             VALUE "FileDescription", "Slider Application"
@@ -1217,46 +1219,47 @@ STRINGTABLE
 BEGIN
     IDW_SB_PROGRESS_CAPTION "<progress bar caption field>"
     IDW_SB_PROGRESS_BAR     "<progress bar text>"
-    IDW_AUTO_IMAGE_SIZE_COMBO "Edit the auto image size mode\nAuto Image Size"
+    IDW_IMAGE_SCALING_COMBO "Edit the auto image size mode\nAuto Image Size"
     IDW_ZOOM_COMBO          "Zoom\nZoom (Ctrl+Z)"
-    IDW_NAV_SLIDER          "Navigation slider\nNavigation Slider"
+    IDW_NAVIG_SLIDER_CTRL   "Navigation slider\nNavigation Slider"
     IDW_SMOOTHING_MODE_CHECK 
                             "Toggle the smoothing effect when scaling up an image\nSmooth Mode (toggle off for icons and glyps)"
-    CM_MDI_CLOSE_ALL        "Close all opened documents\nClose All"
-    CM_MDI_WINDOWS          "View opened window list\nView Windows"
+    ID_CM_MDI_CLOSE_ALL     "Close all opened documents\nClose All"
     ID_VIEW_ALBUMDIALOGBAR  "Show or hide album information bar\nToggle Album Info Bar"
-    CM_IMAGE_SIZE_AUTO_FIT_LARGE 
+    ID_TOGGLE_SCALING_AUTO_FIT_LARGE 
                             "Shrink large images to best fit the view\nBest Fit (Large Only)"
-    CM_IMAGE_SIZE_AUTO_FIT_ALL 
+    ID_TOGGLE_SCALING_AUTO_FIT_ALL 
                             "Scale image for best fit in the view\nBest Fit (All)"
-    CM_IMAGE_SIZE_FIT_WIDTH "Scale image to fit the entire width in the view\nFit Width"
+    ID_TOGGLE_SCALING_FIT_WIDTH 
+                            "Scale image to fit the entire width in the view\nFit Width"
 END
 
 STRINGTABLE 
 BEGIN
-    CM_IMAGE_SIZE_FIT_HEIGHT 
+    ID_TOGGLE_SCALING_FIT_HEIGHT 
                             "Scale image to fit the entire heigh in the view\nFit Height"
-    CM_IMAGE_SIZE_ACTUAL_SIZE 
+    ID_TOGGLE_SCALING_ACTUAL_SIZE 
                             "Display the image with the actual dimensions (using scroll bars)\nActual Size"
-    CM_IMAGE_SIZE_USE_ZOOM_PCT 
+    ID_TOGGLE_SCALING_USE_ZOOM_PCT 
                             "Scale the image with the current zoom level (using scroll bars)\nUse Zoom Level"
-    CM_ZOOM_NORMAL          "Zoom to actual image dimension (100%)\nZoom to 100%"
-    CM_ZOOM_IN              "Increase zoom factor\nZoom In"
-    CM_ZOOM_OUT             "Decrease zoom factor\nZoom Out"
-    CM_RESIZE_VIEW_TO_FIT   "Resize current view to fit entire image\nResize View to Fit"
-    CM_EDIT_ALBUM           "Edit album settings\nEdit Album Settings"
-    CM_NAV_PLAY             "Toggle auto sliding\nToggle Play (Space)"
-    CM_NAV_DIR_FWD          "Play in forward direction\nForward Direction"
-    CM_NAV_DIR_REV          "Play in reverse direction\nReverse Direction"
-    CM_NAV_BEGIN            "Move to first image\nFirst Image (Home)"
+    ID_ZOOM_NORMAL_100      "Zoom to actual image dimension (100%)\nZoom to 100%"
+    ID_ZOOM_IN              "Increase zoom factor\nZoom In"
+    ID_ZOOM_OUT             "Decrease zoom factor\nZoom Out"
+    ID_RESIZE_VIEW_TO_FIT   "Resize current view to fit entire image\nResize View to Fit"
+    ID_EDIT_ALBUM           "Edit album settings\nEdit Album Settings"
+    ID_TOGGLE_NAVIG_PLAY    "Toggle auto sliding\nToggle Play (Space)"
+    ID_TOGGLE_NAVIG_DIR_FWD "Play in forward direction\nForward Direction"
+    ID_TOGGLE_NAVIG_DIR_REV "Play in reverse direction\nReverse Direction"
+    ID_TOGGLE_NAVIG_WRAP_MODE 
+                            "Toggle wrap navigation mode (circular play)\nToggle Wrap Mode"
 END
 
 STRINGTABLE 
 BEGIN
-    CM_NAV_PREV             "Move to previous image\nPrevious Image (Up/Left Arrow)"
-    CM_NAV_NEXT             "Move to next image\nNext Image (Down/Right Arrow)"
-    CM_NAV_END              "Move to last image\nLast Image (End)"
-    CM_NAV_CIRCULAR         "Toggle circular navigation mode\nCircular Navigation"
+    ID_NAVIG_SEEK_BEGIN     "Move to first image\nFirst Image (Home)"
+    ID_NAVIG_SEEK_PREV      "Move to previous image\nPrevious Image (Up/Left Arrow)"
+    ID_NAVIG_SEEK_NEXT      "Move to next image\nNext Image (Down/Right Arrow)"
+    ID_NAVIG_SEEK_END       "Move to last image\nLast Image (End)"
 END
 
 STRINGTABLE 
@@ -1326,7 +1329,7 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDC_SCROLL_POS_EDIT     "Index of the current slide image\nSlide Image Position"
+    IDC_SEEK_CURR_POS_EDIT  "Position of the current slide image\nSlide Image Position"
     IDC_CURR_FILE_EDIT      "Full path name of the current image file\nImage File Path"
     IDC_NAV_COUNT_STATIC    "The total number of images in this album\nTotal Image Count"
     IDC_PLAY_DELAY_COMBO    "Set the delay in seconds for animated album play\nPlay Animation Delay (seconds)"

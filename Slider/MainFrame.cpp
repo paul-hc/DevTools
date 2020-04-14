@@ -33,7 +33,7 @@ IMPLEMENT_DYNAMIC( CMainFrame, CMDIFrameWnd )
 
 CMainFrame::CMainFrame( void )
 	: CMDIFrameWnd()
-	, m_pToolbar( new CMainToolbar )
+	, m_pToolbar( new CMainToolbar() )
 	, m_messageClearTimer( this, MessageTimerId, 5000 )
 	, m_queueTimer( this, QueueTimerId, 750 )
 	, m_progBarResetTimer( this, ProgressResetTimerId, 250 )
@@ -293,9 +293,9 @@ BEGIN_MESSAGE_MAP( CMainFrame, CMDIFrameWnd )
 	ON_WM_SHOWWINDOW()
 	ON_WM_DROPFILES()
 	ON_WM_TIMER()
-	ON_COMMAND( CM_ESCAPE_KEY, CmMdiClose )
-	ON_COMMAND( CM_MDI_CLOSE_ALL, CmMdiCloseAll )
-	ON_UPDATE_COMMAND_UI( CM_MDI_CLOSE_ALL, OnUpdateAnyMDIChild )
+	ON_COMMAND( ID_CM_ESCAPE_KEY, On_MdiClose )
+	ON_COMMAND( ID_CM_MDI_CLOSE_ALL, On_MdiCloseAll )
+	ON_UPDATE_COMMAND_UI( ID_CM_MDI_CLOSE_ALL, OnUpdateAnyMDIChild )
 	ON_COMMAND( CM_TOGGLE_MAXIMIZE, OnToggleMaximize )
 	ON_UPDATE_COMMAND_UI( CM_TOGGLE_MAXIMIZE, OnUpdateMaximize )
 	ON_COMMAND( CK_FULL_SCREEN, OnToggleFullScreen )
@@ -423,7 +423,7 @@ void CMainFrame::OnTimer( UINT_PTR eventId )
 		CMDIFrameWnd::OnTimer( eventId );
 }
 
-void CMainFrame::CmMdiClose( void )
+void CMainFrame::On_MdiClose( void )
 {
 	CFrameWnd* pActiveFrame = MDIGetActive();
 	if ( NULL == pActiveFrame )
@@ -431,7 +431,7 @@ void CMainFrame::CmMdiClose( void )
 	pActiveFrame->SendMessage( WM_SYSCOMMAND, SC_CLOSE );
 }
 
-void CMainFrame::CmMdiCloseAll( void )
+void CMainFrame::On_MdiCloseAll( void )
 {
 	AfxGetApp()->CloseAllDocuments( FALSE );
 }

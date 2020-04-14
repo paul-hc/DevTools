@@ -20,7 +20,7 @@ public:
 private:
 	// enum { IDD = IDD_WORKSPACE_DIALOG };
 
-	CComboBox m_autoImageSizeCombo;
+	CComboBox m_imageScalingCombo;
 	CSpinEdit m_mruCountEdit;
 	CSpinEdit m_thumbListColCountEdit;
 	CComboBox m_thumbBoundsSizeCombo;

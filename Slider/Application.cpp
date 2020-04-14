@@ -36,16 +36,18 @@ static const CImageStore::CCmdAlias cmdAliases[] =
 {
 	{ CM_OPEN_IMAGE_FILE, ID_FILE_OPEN },
 	{ CM_DELETE_FILE, ID_REMOVE_ITEM },
-	{ CM_EDIT_ALBUM, ID_EDIT_ITEM },
+	{ ID_EDIT_ALBUM, ID_EDIT_ITEM },
 	{ CM_REFRESH_CONTENT, ID_REFRESH },
 	{ ID_FILE_OPEN_ALBUM_FOLDER, ID_BROWSE_FOLDER },
 	{ CM_CUSTOM_ORDER_UNDO, ID_EDIT_UNDO },
 	{ CM_CUSTOM_ORDER_REDO, ID_EDIT_REDO },
+	{ IDC_SEARCH_SPEC_MOVE_UP, ID_MOVE_UP_ITEM },
+	{ IDC_SEARCH_SPEC_MOVE_DOWN, ID_MOVE_DOWN_ITEM },
 
 	// * special case: toolbar buttons that use controls must have a placeholder image associated; otherwise the image list gets shifted completely
-	{ IDW_AUTO_IMAGE_SIZE_COMBO, ID_EDIT_DETAILS },
+	{ IDW_IMAGE_SCALING_COMBO, ID_EDIT_DETAILS },
 	{ IDW_ZOOM_COMBO, ID_EDIT_DETAILS },
-	{ IDW_NAV_SLIDER, ID_EDIT_DETAILS }
+	{ IDW_NAVIG_SLIDER_CTRL, ID_EDIT_DETAILS }
 };
 
 

@@ -137,12 +137,12 @@ BEGIN_MESSAGE_MAP( CAlbumDialogBar, CDialogBar )
 	ON_WM_CTLCOLOR()
 	ON_WM_VSCROLL()
 	ON_COMMAND( IDOK, OnOk )
-	ON_COMMAND( CM_ESCAPE_KEY, CmEscapeKey )
+	ON_COMMAND( ID_CM_ESCAPE_KEY, On_EscapeKey )
 	ON_CBN_SELCHANGE( IDC_PLAY_DELAY_COMBO, OnCBnSelChange_SlideDelay )
 	ON_CBN_CLOSEUP( IDC_PLAY_DELAY_COMBO, OnCBnCloseUp_SlideDelay )
 	ON_CN_INPUTERROR( IDC_PLAY_DELAY_COMBO, OnCBnInputError_SlideDelay )
 	ON_UPDATE_COMMAND_UI( IDC_PLAY_DELAY_COMBO, OnUpdate_SlideDelay )
-	ON_EN_KILLFOCUS( IDC_SCROLL_POS_EDIT, OnEnKillFocusCurrPos )
+	ON_EN_KILLFOCUS( IDC_SEEK_CURR_POS_EDIT, OnEnKillFocus_SeekCurrPos )
 	ON_MESSAGE( WM_INITDIALOG, HandleInitDialog )
 	ON_NOTIFY_EX_RANGE( TTN_NEEDTEXTA, 0, 0xFFFF, OnToolTipText )
 	ON_NOTIFY_EX_RANGE( TTN_NEEDTEXTW, 0, 0xFFFF, OnToolTipText )
@@ -153,7 +153,7 @@ LRESULT CAlbumDialogBar::HandleInitDialog( WPARAM wParam, LPARAM lParam )
 	CDialogBar::HandleInitDialog( wParam, lParam );
 
 	VERIFY( m_pSlideDelayCombo->SubclassDlgItem( IDC_PLAY_DELAY_COMBO, this ) );
-	VERIFY( m_navEdit.SubclassDlgItem( IDC_SCROLL_POS_EDIT, this ) );
+	VERIFY( m_navEdit.SubclassDlgItem( IDC_SEEK_CURR_POS_EDIT, this ) );
 	VERIFY( m_scrollSpin.SubclassDlgItem( IDC_SCROLL_POS_SPIN, this ) );
 	VERIFY( m_infoStatic.SubclassDlgItem( IDC_NAV_COUNT_STATIC, this ) );
 	VERIFY( m_fileNameEdit.SubclassDlgItem( IDC_CURR_FILE_EDIT, this ) );
@@ -227,7 +227,7 @@ void CAlbumDialogBar::OnOk( void )
 	}
 }
 
-void CAlbumDialogBar::CmEscapeKey( void )
+void CAlbumDialogBar::On_EscapeKey( void )
 {
 	if ( ui::OwnsFocus( m_hWnd ) )
 		m_pAlbumView->SetFocus();
@@ -248,10 +248,10 @@ void CAlbumDialogBar::OnCBnInputError_SlideDelay( void )
 	OnSlideDelayChanged();
 }
 
-void CAlbumDialogBar::OnEnKillFocusCurrPos( void )
+void CAlbumDialogBar::OnEnKillFocus_SeekCurrPos( void )
 {
 	BOOL validInput;
-	int currIndex = GetDlgItemInt( IDC_SCROLL_POS_EDIT, &validInput ) - 1;
+	int currIndex = GetDlgItemInt( IDC_SEEK_CURR_POS_EDIT, &validInput ) - 1;
 
 	if ( !validInput || currIndex != m_pAlbumView->GetSlideData().GetCurrentIndex() )
 		OnCurrPosChanged();

@@ -41,7 +41,7 @@ CImageView::CImageView( void )
 	SetTrackMenuTarget( app::GetMainFrame() );
 
 	SetZoomBar( app::GetMainFrame()->GetToolbar() );
-	SetScaleZoom( CWorkspace::GetData().m_autoImageSize, 100 );
+	SetScaleZoom( CWorkspace::GetData().m_scalingMode, 100 );
 }
 
 CImageView::~CImageView()
@@ -112,7 +112,7 @@ void CImageView::RegainFocus( RegainAction regainAction, int ctrlId /*= 0*/ )
 void CImageView::EventChildFrameActivated( void )
 {
 	// called when this view or a sibling view is activated (i.e. CAlbumThumbListView)
-	OutputAutoSize();
+	OutputScalingMode();
 	OutputZoomPct();
 	OutputNavigSlider();
 }
@@ -136,7 +136,7 @@ void CImageView::MakeImageState( CImageState* pImageState ) const
 	pImageState->RefFramePlacement().GetPlacement( m_pMdiChildFrame );
 
 	pImageState->m_polyFlags = 0;
-	pImageState->m_autoImageSize = GetAutoImageSize();
+	pImageState->m_scalingMode = GetScalingMode();
 	pImageState->m_zoomPct = GetZoomPct();
 	pImageState->m_bkColor = m_bkColor;			// raw color
 
@@ -149,7 +149,7 @@ void CImageView::RestoreState( const CImageState& loadingImageState )
 	if ( !HasFlag( loadingImageState.m_polyFlags, CImageState::IgnorePlacement ) )
 		loadingImageState.GetFramePlacement().SetPlacement( m_pMdiChildFrame );
 
-	SetScaleZoom( loadingImageState.m_autoImageSize, loadingImageState.m_zoomPct );
+	SetScaleZoom( loadingImageState.m_scalingMode, loadingImageState.m_zoomPct );
 	m_bkColor = loadingImageState.m_bkColor;
 
 	if ( loadingImageState.HasScrollPos() )
@@ -174,7 +174,7 @@ void CImageView::OnImageContentChanged( void )
 	if ( GetImage() != NULL )
 		app::GetMainFrame()->ResizeViewToFit( this );				// first allow view to resize in order to fit with contents (resize to image aspect ratio)
 
-	AssignAutoSize( CWorkspace::GetData().m_autoImageSize );		// TRICKY: switch to initial value without any recalculations
+	AssignScalingMode( CWorkspace::GetData().m_scalingMode );			// TRICKY: switch to initial value without any recalculations
 	Invalidate( TRUE );
 }
 
@@ -241,12 +241,12 @@ BEGIN_MESSAGE_MAP( CImageView, BaseClass )
 	ON_WM_MOUSEWHEEL()
 	ON_COMMAND( ID_EDIT_COPY, OnEditCopy )
 	ON_UPDATE_COMMAND_UI( ID_EDIT_COPY, OnUpdateEditCopy )
-	ON_UPDATE_COMMAND_UI( IDW_NAV_SLIDER, OnUpdateNavSlider )
-	ON_COMMAND_RANGE( CM_IMAGE_SIZE_AUTO_FIT_LARGE, CM_IMAGE_SIZE_USE_ZOOM_PCT, OnRadioAutoImageSize )
-	ON_UPDATE_COMMAND_UI_RANGE( CM_IMAGE_SIZE_AUTO_FIT_LARGE, CM_IMAGE_SIZE_USE_ZOOM_PCT, OnUpdateAutoImageSize )
-	ON_COMMAND( CM_ZOOM_NORMAL, CmZoomNormal )		// CM_ZOOM_NORMAL is kind of synonym with CM_IMAGE_SIZE_ACTUAL_SIZE, but with an image
-	ON_COMMAND_RANGE( CM_ZOOM_IN, CM_ZOOM_OUT, CmZoom )
-	ON_COMMAND( CM_RESIZE_VIEW_TO_FIT, CmResizeViewToFit )
+	ON_UPDATE_COMMAND_UI( IDW_NAVIG_SLIDER_CTRL, OnUpdate_NavigSliderCtrl )
+	ON_COMMAND_RANGE( ID_TOGGLE_SCALING_AUTO_FIT_LARGE, ID_TOGGLE_SCALING_USE_ZOOM_PCT, OnRadio_ImageScalingMode )
+	ON_UPDATE_COMMAND_UI_RANGE( ID_TOGGLE_SCALING_AUTO_FIT_LARGE, ID_TOGGLE_SCALING_USE_ZOOM_PCT, OnUpdate_ImageScalingMode )
+	ON_COMMAND( ID_ZOOM_NORMAL_100, On_ZoomNormal100 )		// ID_ZOOM_NORMAL_100 is kind of synonym with ID_TOGGLE_SCALE_ACTUAL_SIZE, but with an image
+	ON_COMMAND_RANGE( ID_ZOOM_IN, ID_ZOOM_OUT, On_Zoom )
+	ON_COMMAND( ID_RESIZE_VIEW_TO_FIT, CmResizeViewToFit )
 	ON_COMMAND( CM_EDIT_BK_COLOR, CmEditBkColor )
 	ON_COMMAND( CM_EXPLORE_IMAGE, CmExploreImage )
 	ON_UPDATE_COMMAND_UI( CM_EXPLORE_IMAGE, OnUpdatePhysicalFileShellOperation )
@@ -256,7 +256,7 @@ BEGIN_MESSAGE_MAP( CImageView, BaseClass )
 	ON_UPDATE_COMMAND_UI_RANGE( CM_DELETE_FILE, CM_DELETE_FILE_NO_UNDO, OnUpdatePhysicalFileShellOperation )
 	ON_COMMAND_RANGE( CM_SCROLL_LEFT, CM_SCROLL_PAGE_DOWN, CmScroll )
 
-	ON_CBN_SELCHANGE( IDW_AUTO_IMAGE_SIZE_COMBO, OnCBnSelChange_AutoImageSizeCombo )
+	ON_CBN_SELCHANGE( IDW_IMAGE_SCALING_COMBO, OnCBnSelChange_ImageScalingModeCombo )
 	ON_CBN_SELCHANGE( IDW_ZOOM_COMBO, OnCBnSelChange_ZoomCombo )
 	// standard printing
 	ON_COMMAND( ID_FILE_PRINT, CScrollView::OnFilePrint )
@@ -339,14 +339,14 @@ void CImageView::OnLButtonDblClk( UINT mkFlags, CPoint point )
 	}
 	else
 	{	// zoom to defaults: stretch to fit / 100%
-		switch ( GetAutoImageSize() )
+		switch ( GetScalingMode() )
 		{
 			case ui::AutoFitLargeOnly:
 			case ui::AutoFitAll:
 				SetScaleZoom( ui::ActualSize, 100 );
 				break;
 			default:
-				ModifyAutoImageSize( ui::AutoFitLargeOnly );
+				ModifyScalingMode( ui::AutoFitLargeOnly );
 		}
 	}
 }
@@ -395,7 +395,7 @@ void CImageView::OnUpdateEditCopy( CCmdUI* pCmdUI )
 	pCmdUI->Enable( pImage != NULL && !pImage->GetImagePath().IsEmpty() );
 }
 
-void CImageView::OnUpdateNavSlider( CCmdUI* pCmdUI )
+void CImageView::OnUpdate_NavigSliderCtrl( CCmdUI* pCmdUI )
 {
 	pCmdUI->Enable( false );
 }
@@ -416,24 +416,24 @@ void CImageView::CmScroll( UINT cmdId )
 	}
 }
 
-void CImageView::OnRadioAutoImageSize( UINT cmdId )
+void CImageView::OnRadio_ImageScalingMode( UINT cmdId )
 {
-	ModifyAutoImageSize( static_cast< ui::AutoImageSize >( cmdId - CM_IMAGE_SIZE_AUTO_FIT_LARGE ) );
+	ModifyScalingMode( static_cast< ui::ImageScalingMode >( cmdId - ID_TOGGLE_SCALING_AUTO_FIT_LARGE ) );
 }
 
-void CImageView::OnUpdateAutoImageSize( CCmdUI* pCmdUI )
+void CImageView::OnUpdate_ImageScalingMode( CCmdUI* pCmdUI )
 {
-	ui::SetRadio( pCmdUI, GetAutoImageSize() == static_cast< ui::AutoImageSize >( pCmdUI->m_nID - CM_IMAGE_SIZE_AUTO_FIT_LARGE ) );
+	ui::SetRadio( pCmdUI, GetScalingMode() == static_cast< ui::ImageScalingMode >( pCmdUI->m_nID - ID_TOGGLE_SCALING_AUTO_FIT_LARGE ) );
 }
 
-void CImageView::CmZoomNormal( void )
+void CImageView::On_ZoomNormal100( void )
 {
 	ModifyZoomPct( 100 );
 }
 
-void CImageView::CmZoom( UINT cmdId )
+void CImageView::On_Zoom( UINT cmdId )
 {
-	ZoomRelative( CM_ZOOM_IN == cmdId ? ZoomIn : ZoomOut );
+	ZoomRelative( ID_ZOOM_IN == cmdId ? ZoomIn : ZoomOut );
 }
 
 void CImageView::CmResizeViewToFit( void )
@@ -495,9 +495,9 @@ void CImageView::OnUpdatePhysicalFileShellOperation( CCmdUI* pCmdUI )
 	pCmdUI->Enable( pImage != NULL && pImage->IsValidPhysicalFile( fs::Write ) );
 }
 
-void CImageView::OnCBnSelChange_AutoImageSizeCombo( void )
+void CImageView::OnCBnSelChange_ImageScalingModeCombo( void )
 {
-	InputAutoSize();
+	InputScalingMode();
 }
 
 void CImageView::OnCBnSelChange_ZoomCombo( void )

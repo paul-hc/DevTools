@@ -730,10 +730,18 @@ namespace ui
 
 		if ( !HasFlag( GetStyle( hWnd ), WS_CHILD ) )
 			::SetFocus( hWnd );
-		else if ( HWND hParent = ::GetParent( hWnd ) )
-			::SendMessage( hParent, WM_NEXTDLGCTL, (WPARAM)hWnd, 1L );
+		else
+			ui::GotoDlgCtrl( hWnd );
 
 		return true;
+	}
+
+	void GotoDlgCtrl( HWND hCtrl )
+	{
+		ASSERT_PTR( hCtrl );
+
+		if ( HWND hParent = ::GetParent( hCtrl ) )
+			::SendMessage( ::GetParent( hCtrl ), WM_NEXTDLGCTL, (WPARAM)hCtrl, 1L );
 	}
 
 	bool TriggerInput( HWND hParent )
@@ -742,9 +750,10 @@ namespace ui
 			if ( CWnd* pFocusCtrl = CWnd::GetFocus() )
 				if ( ( (CEdit*)pFocusCtrl )->GetModify() )
 					if ( is_a< CEdit >( pFocusCtrl ) ||
-						 HasFlag( (LONG)pFocusCtrl->SendMessage( WM_GETDLGCODE, VK_RETURN ), DLGC_HASSETSEL | DLGC_WANTCHARS ) )	// edit-like
+						 IsEditLikeCtrl( pFocusCtrl->m_hWnd ) )
 					{
 						::SetFocus( NULL );			// this will eventually trigger input on EN_KILLFOCUS
+
 						if ( IsWindow( pFocusCtrl->GetSafeHwnd() ) )
 							TakeFocus( *pFocusCtrl );
 						return true;
@@ -753,10 +762,37 @@ namespace ui
 		return false;		// nothing changed
 	}
 
+
+	bool IsEditLikeCtrl( HWND hCtrl )
+	{
+		ASSERT_PTR( hCtrl );
+		return HasFlag( ::SendMessage( hCtrl, WM_GETDLGCODE, VK_RETURN, 0 ), DLGC_HASSETSEL | DLGC_WANTCHARS );
+	}
+
+	bool SelectAllText( CWnd* pCtrl )
+	{
+		if ( CEdit* pEdit = dynamic_cast< CEdit* >( pCtrl ) )
+		{
+			pEdit->SetSel( 0, -1 );
+			return true;
+		}
+		else if ( CComboBox* pComboBox = dynamic_cast< CComboBox* >( pCtrl ) )
+			return pComboBox->SetEditSel( 0, -1 ) != FALSE;
+
+		return false;
+	}
+
+
 	struct CTestCmdUI : public CCmdUI		// used to test for disabled commands before dispatching
 	{
 	public:
-		CTestCmdUI( void ) : CCmdUI() { m_enabled = true; }			// assume it's enabled
+		CTestCmdUI( UINT cmdId )
+			: CCmdUI()
+			, m_enabled( true )			// assume it's enabled
+		{
+			ASSERT( cmdId != 0 );		// zero IDs for normal commands are not allowed
+			m_nID = cmdId;
+		}
 
 		// base overrides
 		virtual void Enable( BOOL enabled ) { m_enabled = enabled != FALSE; m_bEnableChanged = TRUE; }
@@ -768,23 +804,32 @@ namespace ui
 	};
 
 
+	bool IsCommandEnabled( CCmdTarget* pCmdTarget, UINT cmdId )
+	{
+		ASSERT_PTR( pCmdTarget );
+
+		// make sure command has not become disabled before routing
+		CTestCmdUI state( cmdId );
+
+		if ( !pCmdTarget->OnCmdMsg( cmdId, CN_UPDATE_COMMAND_UI, &state, NULL ) )
+			return false;			// not handled by this target
+
+		if ( state.m_enabled )
+			return true;
+
+		TRACE( "Warning: skip executing disabled command %d\n", cmdId );
+		return false;
+	}
+
 	bool HandleCommand( CCmdTarget* pCmdTarget, UINT cmdId )
 	{
 		ASSERT_PTR( pCmdTarget );
 
-		// zero IDs for normal commands are not allowed
 		if ( 0 == cmdId )
-			return false;
+			return false;		// not handled: zero IDs for normal commands are not allowed
 
-		// make sure command has not become disabled before routing
-		CTestCmdUI state;
-		state.m_nID = cmdId;
-		pCmdTarget->OnCmdMsg( cmdId, CN_UPDATE_COMMAND_UI, &state, NULL );
-		if ( !state.m_enabled )
-		{
-			TRACE( "Warning: not executing disabled command %d\n", cmdId );
-			return TRUE;
-		}
+		if ( !IsCommandEnabled( pCmdTarget, cmdId ) )
+			return true;		// handled: command disabled
 
 		return pCmdTarget->OnCmdMsg( cmdId, CN_COMMAND, NULL, NULL ) != FALSE;
 	}
@@ -858,18 +903,6 @@ namespace ui
 		return className;
 	}
 
-	bool IsEditLikeCtrl( HWND hCtrl )
-	{
-		ASSERT_PTR( hCtrl );
-
-		if ( HasFlag( ::SendMessage( hCtrl, WM_GETDLGCODE, 0, 0 ), DLGC_HASSETSEL ) )
-			return true;
-
-		return
-			IsEditBox( hCtrl ) ||
-			IsComboWithEdit( hCtrl );
-	}
-
 	bool IsEditBox( HWND hCtrl )
 	{
 		if ( CEdit* pEdit = dynamic_cast< CEdit* >( CWnd::FromHandlePermanent( hCtrl ) ) )
@@ -927,19 +960,6 @@ namespace ui
 		return GetClassName( hWnd ) == _T("#32768");
 	}
 
-
-	bool SelectAllEditLikeText( CWnd* pCtrl )
-	{
-		if ( CEdit* pEdit = dynamic_cast< CEdit* >( pCtrl ) )
-		{
-			pEdit->SetSel( 0, -1 );
-			return true;
-		}
-		else if ( CComboBox* pComboBox = dynamic_cast< CComboBox* >( pCtrl ) )
-			return pComboBox->SetEditSel( 0, -1 ) != FALSE;
-
-		return false;
-	}
 
 	bool ModifyBorder( CWnd* pWnd, bool useBorder /*= true*/ )
 	{
@@ -1001,21 +1021,32 @@ namespace ui
 	}
 
 
-	bool ShowInputError( CWnd* pCtrl, const std::tstring& message )
+	bool ShowInputError( CWnd* pCtrl, const std::tstring& message, UINT iconFlag /*= MB_ICONERROR*/ )
 	{
 		ASSERT_PTR( pCtrl->GetSafeHwnd() );
 
 		static const TCHAR s_title[] = _T("Input Validation Error");
+		int ttiIcon = TTI_NONE;
+		enum { MB_IconMask = MB_ICONERROR | MB_ICONWARNING | MB_ICONINFORMATION | MB_ICONQUESTION };
+
+		switch ( iconFlag & MB_IconMask )
+		{
+			case MB_ICONERROR:			ttiIcon = TTI_ERROR_LARGE; break;
+			case MB_ICONWARNING:		ttiIcon = TTI_WARNING_LARGE; break;
+			case MB_ICONINFORMATION:	ttiIcon = TTI_INFO; break;
+			case MB_ICONQUESTION:		ttiIcon = TTI_NONE; break;
+			default: ASSERT( false );
+		}
 
 		if ( CEdit* pEdit = dynamic_cast< CEdit* >( pCtrl ) )
-			pEdit->ShowBalloonTip( s_title,  message.c_str(), TTI_ERROR );
+			pEdit->ShowBalloonTip( s_title,  message.c_str(), ttiIcon );
 		else
-			ui::ShowBalloonTip( pCtrl, s_title,  message.c_str(), (HICON)TTI_ERROR );
+			ui::ShowBalloonTip( pCtrl, s_title,  message.c_str(), (HICON)ttiIcon );
 
-		pCtrl->SetFocus();
-		SelectAllEditLikeText( pCtrl );
+		TakeFocus( pCtrl->m_hWnd );
+		SelectAllText( pCtrl );
 
-		return BeepSignal( MB_ICONERROR );
+		return BeepSignal( iconFlag );
 	}
 
 
@@ -1025,21 +1056,13 @@ namespace ui
 		{
 			ASSERT( DialogSaveChanges == pDX->m_bSaveAndValidate );
 
-			HWND hCtrl;
-			pDX->m_pDlgWnd->GetDlgItem( ctrlId, &hCtrl );
+			CWnd* pCtrl = pDX->m_pDlgWnd->GetDlgItem( ctrlId );
 
-			if ( hCtrl != NULL )
-				IsEditLikeCtrl( hCtrl ) ? pDX->PrepareEditCtrl( ctrlId ) : pDX->PrepareCtrl( ctrlId );
+			if ( pCtrl != NULL )
+				IsEditLikeCtrl( pCtrl->m_hWnd ) ? pDX->PrepareEditCtrl( ctrlId ) : pDX->PrepareCtrl( ctrlId );
 
 			if ( !validationError.empty() )
-				ReportError( validationError );
-
-			if ( hCtrl != NULL )
-			{
-				::SetFocus( hCtrl );
-				if ( pDX->m_bEditLastControl )
-					::SendMessage( hCtrl, EM_SETSEL, 0, -1 );		// select all in edit item
-			}
+				ShowInputError( pCtrl != NULL ? pCtrl : pDX->m_pDlgWnd, validationError );		// will also focus and select all text
 
 			pDX->Fail();	// will throw a CUserException, handled by CWnd::UpdateData()
 		}
@@ -1428,7 +1451,7 @@ namespace ui
 
 		if ( items.empty() )
 			return std::tstring();
-		
+
 		return items.front();		// top item is the selected one
 	}
 

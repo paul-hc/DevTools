@@ -238,7 +238,7 @@ namespace ui
 	}
 
 	inline void GotoDlgItem( CDialog* pDlg, UINT ctrlId ) { pDlg->GotoDlgCtrl( pDlg->GetDlgItem( ctrlId ) ); }
-	inline void GotoDlgItem( HWND hCtrl ) { ASSERT_PTR( hCtrl ); ::SendMessage( ::GetParent( hCtrl ), WM_NEXTDLGCTL, (WPARAM)hCtrl, 1L ); }
+	void GotoDlgCtrl( HWND hCtrl );
 
 
 	bool EnableWindow( HWND hWnd, bool enable = true );
@@ -265,9 +265,13 @@ namespace ui
 
 	bool OwnsFocus( HWND hWnd );
 	bool TakeFocus( HWND hWnd );
-	bool TriggerInput( HWND hParent );		// trigger input if a modified edit is focused, i.e. uncommited
+	bool TriggerInput( HWND hParent );					// trigger input if a modified edit is focused, i.e. uncommited
+
+	bool IsEditLikeCtrl( HWND hCtrl );					// edit-box and combo-box?
+	bool SelectAllText( CWnd* pCtrl );					// works for edit-box and combo-box
 
 
+	bool IsCommandEnabled( CCmdTarget* pCmdTarget, UINT cmdId );	// check via CN_UPDATE_COMMAND_UI handler
 	bool HandleCommand( CCmdTarget* pCmdTarget, UINT cmdId );		// menu or accelerator
 
 	inline LRESULT SendCommand( HWND hTargetWnd, UINT cmdId, int notifCode = BN_CLICKED, HWND hCtrl = NULL )
@@ -319,14 +323,11 @@ namespace ui
 
 
 	std::tstring GetClassName( HWND hWnd );
-	bool IsEditLikeCtrl( HWND hCtrl );
 	bool IsEditBox( HWND hCtrl );
 	bool IsComboWithEdit( HWND hCtrl );
 	bool IsGroupBox( HWND hWnd );
 	bool IsDialogBox( HWND hWnd );
 	bool IsMenuWnd( HWND hWnd );
-
-	bool SelectAllEditLikeText( CWnd* pCtrl );			// works for edit-box and combo-box
 
 	bool ModifyBorder( CWnd* pWnd, bool useBorder = true );
 
@@ -366,7 +367,7 @@ namespace ui
 	int ReportException( const std::exception& exc, UINT mbFlags = MB_OK | MB_ICONERROR );
 	int ReportException( const CException* pExc, UINT mbFlags = MB_OK | MB_ICONERROR );
 
-	bool ShowInputError( CWnd* pCtrl, const std::tstring& message );							// returns false for convenience
+	bool ShowInputError( CWnd* pCtrl, const std::tstring& message, UINT iconFlag = MB_ICONERROR );		// returns false for convenience
 
 	bool& RefAsyncApiEnabled( void );
 

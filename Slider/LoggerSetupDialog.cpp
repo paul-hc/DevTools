@@ -29,8 +29,8 @@ void CLoggerSetupDialog::DoDataExchange( CDataExchange* pDX )
 
 BEGIN_MESSAGE_MAP( CLoggerSetupDialog, CDialog )
 	ON_CBN_SELCHANGE( IDC_LOGGER_COMBO, OnCBnSelChangeLogger )
-	ON_BN_CLICKED( CK_LOGGER_ENABLED, OnToggleLoggerEnabled )
-	ON_BN_CLICKED( CK_PREPEND_TIMESTAMP, OnTogglePrependTimestamp )
+	ON_BN_CLICKED( IDC_LOGGER_ENABLED_CHECK, OnToggle_LoggerEnabled )
+	ON_BN_CLICKED( IDC_TIMESTAMP_PREFIX_CHECK, OnToggle_TimestampPrefix )
 	ON_BN_CLICKED( IDC_VIEW_LOG_FILE_BUTTON, OnViewLogFileButton )
 	ON_BN_CLICKED( IDC_CLEAR_LOG_FILE_BUTTON, OnClearLogFileButton )
 END_MESSAGE_MAP()
@@ -62,21 +62,21 @@ void CLoggerSetupDialog::OnCBnSelChangeLogger( void )
 	m_pCurrLogger = (CLogger*)m_selLogCombo.GetItemDataPtr( m_selLogCombo.GetCurSel() );
 	ASSERT_PTR( m_pCurrLogger );
 
-	CheckDlgButton( CK_LOGGER_ENABLED, m_pCurrLogger->m_enabled );
-	CheckDlgButton( CK_PREPEND_TIMESTAMP, m_pCurrLogger->m_prependTimestamp );
+	CheckDlgButton( IDC_LOGGER_ENABLED_CHECK, m_pCurrLogger->m_enabled );
+	CheckDlgButton( IDC_TIMESTAMP_PREFIX_CHECK, m_pCurrLogger->m_prependTimestamp );
 	GetDlgItem( IDC_VIEW_LOG_FILE_BUTTON )->EnableWindow( m_pCurrLogger->GetLogFilePath().FileExist() );
 }
 
-void CLoggerSetupDialog::OnToggleLoggerEnabled( void )
+void CLoggerSetupDialog::OnToggle_LoggerEnabled( void )
 {
 	ASSERT_PTR( m_pCurrLogger );
-	m_pCurrLogger->m_enabled = IsDlgButtonChecked( CK_LOGGER_ENABLED ) != FALSE;
+	m_pCurrLogger->m_enabled = IsDlgButtonChecked( IDC_LOGGER_ENABLED_CHECK ) != FALSE;
 }
 
-void CLoggerSetupDialog::OnTogglePrependTimestamp( void )
+void CLoggerSetupDialog::OnToggle_TimestampPrefix( void )
 {
 	ASSERT_PTR( m_pCurrLogger );
-	m_pCurrLogger->m_prependTimestamp = IsDlgButtonChecked( CK_PREPEND_TIMESTAMP ) != FALSE;
+	m_pCurrLogger->m_prependTimestamp = IsDlgButtonChecked( IDC_TIMESTAMP_PREFIX_CHECK ) != FALSE;
 }
 
 void CLoggerSetupDialog::OnViewLogFileButton( void )

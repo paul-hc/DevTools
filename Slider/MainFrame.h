@@ -78,8 +78,8 @@ protected:
 	afx_msg void OnSize( UINT sizeType, int cx, int cy );
 	afx_msg void OnWindowPosChanging( WINDOWPOS* wndPos );
 	afx_msg void OnGetMinMaxInfo( MINMAXINFO* mmi );
-	afx_msg void CmMdiClose( void );
-	afx_msg void CmMdiCloseAll( void );
+	afx_msg void On_MdiClose( void );
+	afx_msg void On_MdiCloseAll( void );
 	afx_msg void OnUpdateAnyMDIChild( CCmdUI* pCmdUI );
 	afx_msg void OnToggleMaximize( void );
 	afx_msg void OnUpdateMaximize( CCmdUI* pCmdUI );

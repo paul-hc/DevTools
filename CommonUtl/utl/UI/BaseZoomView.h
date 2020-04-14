@@ -12,7 +12,7 @@ abstract class CBaseZoomView : public CScrollView
 							 , public CInternalChange
 {
 protected:
-	CBaseZoomView( ui::AutoImageSize autoImageSize, UINT zoomPct );
+	CBaseZoomView( ui::ImageScalingMode scalingMode, UINT zoomPct );
 	virtual ~CBaseZoomView();
 
 	void StoreScrollExtent( void );
@@ -39,17 +39,17 @@ public:
 	CPoint TranslatePointedPct( const CSize& pointedPct ) const;					// equivalent point after rescaling
 
 	// zoom editor
-	ui::AutoImageSize GetAutoImageSize( void ) const { return m_autoImageSize; }
-	void ModifyAutoImageSize( ui::AutoImageSize autoImageSize );
+	ui::ImageScalingMode GetScalingMode( void ) const { return m_scalingMode; }
+	void ModifyScalingMode( ui::ImageScalingMode scalingMode );
 
 	UINT GetZoomPct( void ) const { return m_zoomPct; }
 	bool ModifyZoomPct( UINT zoomPct );
 
-	void SetScaleZoom( ui::AutoImageSize autoImageSize, UINT zoomPct );
+	void SetScaleZoom( ui::ImageScalingMode scalingMode, UINT zoomPct );
 protected:
-	bool AssignAutoSize( ui::AutoImageSize autoImageSize ) { return utl::ModifyValue( m_autoImageSize, autoImageSize ) && OutputAutoSize(); }
-	bool OutputAutoSize( void ) { return m_pZoomBar != NULL && m_pZoomBar->OutputAutoSize( m_autoImageSize ); }
-	void InputAutoSize( void ) { if ( m_pZoomBar != NULL ) ModifyAutoImageSize( m_pZoomBar->InputAutoSize() ); }
+	bool AssignScalingMode( ui::ImageScalingMode scalingMode ) { return utl::ModifyValue( m_scalingMode, scalingMode ) && OutputScalingMode(); }
+	bool OutputScalingMode( void ) { return m_pZoomBar != NULL && m_pZoomBar->OutputScalingMode( m_scalingMode ); }
+	void InputScalingMode( void ) { if ( m_pZoomBar != NULL ) ModifyScalingMode( m_pZoomBar->InputScalingMode() ); }
 
 	bool AssignZoomPct( UINT zoomPct ) { return utl::ModifyValue( m_zoomPct, zoomPct ) && OutputZoomPct(); }
 	bool OutputZoomPct( void ) { return m_pZoomBar != NULL && m_pZoomBar->OutputZoomPct( m_zoomPct ); }
@@ -61,7 +61,7 @@ protected:
 	ui::IZoomBar* GetZoomBar( void ) const { return m_pZoomBar; }
 	void SetZoomBar( ui::IZoomBar* pZoomBar ) { m_pZoomBar = pZoomBar; }
 private:
-	ui::AutoImageSize m_autoImageSize;		// default auto image size (app::Slider_v4_0+)
+	ui::ImageScalingMode m_scalingMode;		// default auto image size (app::Slider_v4_0+)
 	UINT m_zoomPct;
 	ui::IZoomBar* m_pZoomBar;
 
@@ -82,11 +82,11 @@ protected:
 class CScopedScaleZoom
 {
 public:
-	CScopedScaleZoom( CBaseZoomView* pZoomView, ui::AutoImageSize autoImageSize, UINT zoomPct, const CPoint* pClientPoint = NULL );
+	CScopedScaleZoom( CBaseZoomView* pZoomView, ui::ImageScalingMode scalingMode, UINT zoomPct, const CPoint* pClientPoint = NULL );
 	~CScopedScaleZoom();
 private:
 	CBaseZoomView* m_pZoomView;
-	ui::AutoImageSize m_oldAutoImageSize;
+	ui::ImageScalingMode m_oldScalingMode;
 	UINT m_oldZoomPct;
 	CPoint m_oldScrollPosition;
 	CSize m_refPointedPct;						// percentage of clicked point to old content origin
@@ -118,7 +118,7 @@ private:
 	// original data
 	const CPoint m_origPoint;
 	const CPoint m_origScrollPos;
-	const ui::AutoImageSize m_origAutoImageSize;
+	const ui::ImageScalingMode m_origScalingMode;
 	const UINT m_origZoomPct;
 	HCURSOR m_hOrigCursor;
 };

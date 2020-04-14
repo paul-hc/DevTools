@@ -19,7 +19,7 @@
 
 namespace ui
 {
-	const CEnumTags& GetTags_AutoImageSize( void )
+	const CEnumTags& GetTags_ImageScalingMode( void )
 	{
 		static const CEnumTags s_tags( _T("Auto Fit (Large Only)|Auto Fit (All)|Fit Width|Fit Height|Actual Size (100%)|Use Zoom Level") );
 		return s_tags;
