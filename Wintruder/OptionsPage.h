@@ -3,6 +3,7 @@
 #pragma once
 
 #include "utl/UI/LayoutPropertyPage.h"
+#include "utl/UI/EnumComboBox.h"
 #include "utl/UI/SpinEdit.h"
 #include "Observers.h"
 
@@ -24,10 +25,10 @@ private:
 	COptions* m_pOptions;
 
 	// enum { IDD = IDD_OPTIONS_PAGE };
-	CComboBox m_frameStyleCombo;
+	CEnumComboBox m_frameStyleCombo;
 	CSpinEdit m_frameSizeEdit;
-	CComboBox m_queryWndIconsCombo;
-	CComboBox m_auTargetCombo;
+	CEnumComboBox m_queryWndIconsCombo;
+	CEnumComboBox m_auTargetCombo;
 	CSpinEdit m_auTimeoutEdit;
 
 	// generated stuff

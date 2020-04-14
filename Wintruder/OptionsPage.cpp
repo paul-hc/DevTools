@@ -17,6 +17,9 @@
 COptionsPage::COptionsPage( void )
 	: CLayoutPropertyPage( IDD_OPTIONS_PAGE )
 	, m_pOptions( app::GetOptions() )
+	, m_frameStyleCombo( &opt::GetTags_FrameStyle() )
+	, m_queryWndIconsCombo( &opt::GetTags_QueryWndIcons() )
+	, m_auTargetCombo( &opt::GetTags_AutoUpdateTarget() )
 {
 	app::GetSvc().AddObserver( this );
 }
@@ -51,10 +54,6 @@ void COptionsPage::DoDataExchange( CDataExchange* pDX )
 	{
 		EnableToolTips( TRUE );
 
-		ui::WriteComboItems( m_frameStyleCombo, opt::GetTags_FrameStyle().GetUiTags() );
-		ui::WriteComboItems( m_queryWndIconsCombo, opt::GetTags_QueryWndIcons().GetUiTags() );
-		ui::WriteComboItems( m_auTargetCombo, opt::GetTags_AutoUpdateTarget().GetUiTags() );
-
 		m_frameSizeEdit.SetValidRange( Range< int >( 1, 50 ) );
 		m_auTimeoutEdit.SetValidRange( Range< int >( 1, 60 ) );
 	}
@@ -64,9 +63,9 @@ void COptionsPage::DoDataExchange( CDataExchange* pDX )
 		m_pOptions->UpdateControls( this );		// update check-boxes (check-state and enabling)
 
 		m_frameSizeEdit.SetNumber( m_pOptions->m_frameSize );
-		m_frameStyleCombo.SetCurSel( m_pOptions->m_frameStyle );
-		m_queryWndIconsCombo.SetCurSel( m_pOptions->m_queryWndIcons );
-		m_auTargetCombo.SetCurSel( m_pOptions->m_updateTarget );
+		m_frameStyleCombo.SetValue( m_pOptions->m_frameStyle );
+		m_queryWndIconsCombo.SetValue( m_pOptions->m_queryWndIcons );
+		m_auTargetCombo.SetValue( m_pOptions->m_updateTarget );
 		m_auTimeoutEdit.SetNumber( m_pOptions->m_autoUpdateTimeout );
 	}
 
@@ -94,7 +93,7 @@ END_MESSAGE_MAP()
 
 void COptionsPage::OnCbnSelchange_FrameStyle( void )
 {
-	m_pOptions->ModifyOption( &m_pOptions->m_frameStyle, static_cast< opt::FrameStyle >( m_frameStyleCombo.GetCurSel() ) );
+	m_pOptions->ModifyOption( &m_pOptions->m_frameStyle, m_frameStyleCombo.GetEnum< opt::FrameStyle >() );
 }
 
 void COptionsPage::OnEnChange_FrameSize( void )
@@ -106,12 +105,12 @@ void COptionsPage::OnEnChange_FrameSize( void )
 
 void COptionsPage::OnCbnSelchange_QueryWndIcons( void )
 {
-	m_pOptions->ModifyOption( &m_pOptions->m_queryWndIcons, static_cast< opt::QueryWndIcons >( m_queryWndIconsCombo.GetCurSel() ) );
+	m_pOptions->ModifyOption( &m_pOptions->m_queryWndIcons, m_queryWndIconsCombo.GetEnum< opt::QueryWndIcons >() );
 }
 
 void COptionsPage::OnCbnSelchange_AutoUpdateTarget( void )
 {
-	m_pOptions->ModifyOption( &m_pOptions->m_updateTarget, static_cast< opt::UpdateTarget >( m_auTargetCombo.GetCurSel() ) );
+	m_pOptions->ModifyOption( &m_pOptions->m_updateTarget, m_auTargetCombo.GetEnum< opt::UpdateTarget >() );
 }
 
 void COptionsPage::OnEnChange_AutoUpdateRate( void )

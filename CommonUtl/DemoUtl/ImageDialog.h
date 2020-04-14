@@ -3,6 +3,7 @@
 #pragma once
 
 #include "utl/UI/DibSection.h"
+#include "utl/UI/EnumComboBox.h"
 #include "utl/UI/HistoryComboBox.h"
 #include "utl/UI/ItemContentEdit.h"
 #include "utl/UI/ItemContentHistoryCombo.h"
@@ -103,11 +104,11 @@ private:
 	CItemContentHistoryCombo m_imagePathCombo;
 	CItemContentHistoryCombo m_bkColorCombo;
 	CSpinEdit m_framePosEdit;
-	CComboBox m_imagingApiCombo;
-	CComboBox m_forceResolutionCombo;
-	CComboBox m_zoomCombo;
-	CComboBox m_stackingCombo;
-	CComboBox m_colorTableModeCombo;
+	CEnumComboBox m_imagingApiCombo;
+	CEnumComboBox m_forceResolutionCombo;
+	CEnumComboBox m_zoomCombo;
+	CEnumComboBox m_stackingCombo;
+	CEnumComboBox m_colorTableModeCombo;
 	CSpinEdit m_spacingEdit;
 	CColorSample m_transpColorSample;
 	std::auto_ptr< CDialogToolBar > m_pImageToolbar;

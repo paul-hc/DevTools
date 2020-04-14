@@ -55,7 +55,10 @@ CFileTreeDialog::CFileTreeDialog( const std::tstring& rootPath, CWnd* pParent )
 
 	, m_sourceLineNo( 0 )
 	, m_nestingLevel( 0 )
+	, m_depthLevelCombo( &CIncludeOptions::GetTags_DepthLevel() )
 	, m_selFilePathEdit( ui::FilePath )
+	, m_viewModeCombo( &CIncludeOptions::GetTags_ViewMode() )
+	, m_orderCombo( &CIncludeOptions::GetTags_Ordering() )
 	, m_accelTreeFocus( IDR_FILETREEFOCUS_ACCEL )
 {
 	m_regSection = _T("FileTreeDialog");
@@ -462,7 +465,7 @@ void CFileTreeDialog::UpdateOptionCtrl( void )
 
 	ui::EnableWindow( m_depthLevelCombo, !m_rOpt.m_lazyParsing );
 	if ( !m_rOpt.m_lazyParsing )
-		m_depthLevelCombo.SetCurSel( m_rOpt.m_maxNestingLevel );
+		m_depthLevelCombo.SetValue( m_rOpt.m_maxNestingLevel );
 }
 
 void CFileTreeDialog::DoDataExchange( CDataExchange* pDX )
@@ -493,14 +496,11 @@ void CFileTreeDialog::DoDataExchange( CDataExchange* pDX )
 			pTreeTooltip->SetDelayTime( TTDT_INITIAL, 500 );		// modify the initial delay for item hover
 
 		m_depthLevelCombo.SetExtendedUI();
-		ui::WriteComboItems( m_depthLevelCombo, CIncludeOptions::GetTags_DepthLevel().GetUiTags() );
-		ui::WriteComboItems( m_viewModeCombo, CIncludeOptions::GetTags_ViewMode().GetUiTags() );
-		ui::WriteComboItems( m_orderCombo, CIncludeOptions::GetTags_Ordering().GetUiTags() );
 
 		UpdateOptionCtrl();
 		OnToggle_LazyParsing();
-		m_viewModeCombo.SetCurSel( m_rOpt.m_viewMode );
-		m_orderCombo.SetCurSel( m_rOpt.m_ordering );
+		m_viewModeCombo.SetValue( m_rOpt.m_viewMode );
+		m_orderCombo.SetValue( m_rOpt.m_ordering );
 
 		BuildIncludeTree();
 	}
@@ -749,7 +749,7 @@ void CFileTreeDialog::CBnCloseupDepthLevel( void )
 {
 	int maxNestingLevelOrg = m_rOpt.m_maxNestingLevel;
 
-	m_rOpt.m_maxNestingLevel = m_depthLevelCombo.GetCurSel();
+	m_rOpt.m_maxNestingLevel = m_depthLevelCombo.GetValue();
 	if ( m_rOpt.m_maxNestingLevel != maxNestingLevelOrg )
 		OutputRootPath();
 }
@@ -758,7 +758,7 @@ void CFileTreeDialog::OnToggle_LazyParsing( void )
 {
 	m_rOpt.m_lazyParsing = IsDlgButtonChecked( IDC_LAZY_PARSING_CHECK ) != FALSE;
 	ui::EnableWindow( m_depthLevelCombo, !m_rOpt.m_lazyParsing );
-	m_depthLevelCombo.SetCurSel( m_rOpt.m_lazyParsing ? 0 : m_rOpt.m_maxNestingLevel );
+	m_depthLevelCombo.SetValue( m_rOpt.m_lazyParsing ? 0 : m_rOpt.m_maxNestingLevel );
 }
 
 void CFileTreeDialog::OnToggle_NoDuplicates( void )
@@ -769,16 +769,12 @@ void CFileTreeDialog::OnToggle_NoDuplicates( void )
 
 void CFileTreeDialog::CBnSelChangeViewModeCombo( void )
 {
-	int selIndex = m_viewModeCombo.GetCurSel();
-	if ( selIndex != CB_ERR )
-		SetViewMode( (ViewMode)selIndex );
+	SetViewMode( m_viewModeCombo.GetEnum< ViewMode >() );
 }
 
 void CFileTreeDialog::CBnSelChangeOrder( void )
 {
-	int selIndex = m_orderCombo.GetCurSel();
-	if ( selIndex != CB_ERR )
-		SetOrder( (Ordering)selIndex );
+	SetOrder( m_orderCombo.GetEnum< Ordering >() );
 }
 
 void CFileTreeDialog::CmOptions( void )

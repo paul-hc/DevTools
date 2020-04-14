@@ -9,6 +9,7 @@
 #include "utl/EnumTags.h"
 #include "utl/StringUtilities.h"
 #include "utl/UI/CmdInfoStore.h"
+#include "utl/UI/EnumComboBox.h"
 #include "utl/UI/StockValuesComboBox.h"
 #include "utl/UI/Utilities.h"
 #include "utl/UI/resource.h"
@@ -60,6 +61,7 @@ const UINT CMainToolbar::s_buttons[] =
 
 CMainToolbar::CMainToolbar( void )
 	: CToolbarStrip()
+	, m_pScalingCombo( new CEnumComboBox( &ui::GetTags_ImageScalingMode() ) )
 	, m_pZoomCombo( new CZoomComboBox() )
 {
 	ui::MakeStandardControlFont( m_ctrlFont );
@@ -78,7 +80,7 @@ bool CMainToolbar::InitToolbar( void )
 
 	enum { ScalingModeComboWidth = 130, ZoomComboWidth = 90, SmoothCheckWidth = 65, NavigSliderCtrlWidth = 150 };
 
-	CreateBarCtrl( &m_imageScalingCombo, IDW_IMAGE_SCALING_COMBO, CBS_DROPDOWNLIST | CBS_DISABLENOSCROLL, ScalingModeComboWidth );
+	CreateBarCtrl( m_pScalingCombo.get(), IDW_IMAGE_SCALING_COMBO, CBS_DROPDOWNLIST | CBS_DISABLENOSCROLL, ScalingModeComboWidth );
 	CreateBarCtrl( m_pZoomCombo.get(), IDW_ZOOM_COMBO, CBS_DROPDOWN | CBS_DISABLENOSCROLL, ZoomComboWidth );
 	CreateBarCtrl( &m_smoothCheck, IDW_SMOOTHING_MODE_CHECK, BS_CHECKBOX, SmoothCheckWidth, PadLeft + 6 );		// push right to avoid overlap on background separator button
 	CreateBarCtrl( &m_navigSliderCtrl, IDW_NAVIG_SLIDER_CTRL, TBS_HORZ | TBS_AUTOTICKS | TBS_TRANSPARENTBKGND | TBS_TOOLTIPS, NavigSliderCtrlWidth, 0, 0 );		// no padding
@@ -86,7 +88,6 @@ bool CMainToolbar::InitToolbar( void )
 	m_smoothCheck.SetWindowText( _T("Smooth") );
 
 	// setup items for the combos
-	ui::WriteComboItems( m_imageScalingCombo, ui::GetTags_ImageScalingMode().GetUiTags() );
 	OutputScalingMode( CWorkspace::GetData().m_scalingMode );
 
 	OutputZoomPct( 100 );
@@ -113,7 +114,7 @@ void CMainToolbar::CreateBarCtrl( CtrlType* pCtrl, UINT ctrlId, DWORD style, int
 }
 
 template<>
-bool CMainToolbar::CreateControl( CComboBox* pCombo, UINT comboId, DWORD style, const CRect& ctrlRect )
+bool CMainToolbar::CreateControl( CEnumComboBox* pCombo, UINT comboId, DWORD style, const CRect& ctrlRect )
 {
 	return pCombo->Create( style | WS_VISIBLE | WS_TABSTOP, ctrlRect, this, comboId ) != FALSE;
 }
@@ -139,16 +140,12 @@ bool CMainToolbar::CreateControl( CSliderCtrl* pSliderCtrl, UINT ctrlId, DWORD s
 
 bool CMainToolbar::OutputScalingMode( ui::ImageScalingMode scalingMode )
 {
-	if ( m_imageScalingCombo.GetCurSel() == scalingMode )
-		return false;
-
-	m_imageScalingCombo.SetCurSel( scalingMode );
-	return true;
+	return m_pScalingCombo->SetValue( scalingMode );
 }
 
 ui::ImageScalingMode CMainToolbar::InputScalingMode( void ) const
 {
-	return static_cast< ui::ImageScalingMode >( m_imageScalingCombo.GetCurSel() );
+	return m_pScalingCombo->GetEnum< ui::ImageScalingMode >();
 }
 
 bool CMainToolbar::OutputZoomPct( UINT zoomPct )

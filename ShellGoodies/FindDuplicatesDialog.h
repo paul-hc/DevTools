@@ -5,6 +5,7 @@
 #include "utl/ISubject.h"
 #include "utl/FileSystem_fwd.h"
 #include "utl/UI/DialogToolBar.h"
+#include "utl/UI/EnumComboBox.h"
 #include "utl/UI/HistoryComboBox.h"
 #include "utl/UI/PathItemListCtrl.h"
 #include "utl/UI/TextEdit.h"
@@ -106,7 +107,7 @@ private:
 	CPathItemListCtrl m_ignorePathsListCtrl;
 	CDialogToolBar m_searchPathsToolbar;
 	CDialogToolBar m_ignorePathsToolbar;
-	CComboBox m_fileTypeCombo;
+	CEnumComboBox m_fileTypeCombo;
 	CTextEdit m_fileSpecEdit;
 	CHistoryComboBox m_minFileSizeCombo;
 

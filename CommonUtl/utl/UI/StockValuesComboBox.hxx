@@ -30,10 +30,9 @@ namespace ui
 
 template< typename ValueT >
 CStockValuesComboBox< ValueT >::CStockValuesComboBox( const ui::IValueSetAdapter< ValueT >* pStockAdapter, ui::TValueSetFlags flags /*= 0*/ )
-	: CComboBox()
+	: CBaseStockContentCtrl< CComboBox >()
 	, m_pStockAdapter( NULL )
 	, m_flags( flags )
-	, m_duringCreation( false )
 {
 	SetAdapter( pStockAdapter );
 }
@@ -52,7 +51,7 @@ inline void CStockValuesComboBox< ValueT >::SetAdapter( const ui::IValueSetAdapt
 	}
 
 	if ( m_hWnd != NULL )
-		InitStockItems();
+		InitStockContent();
 }
 
 template< typename ValueT >
@@ -102,31 +101,9 @@ bool CStockValuesComboBox< ValueT >::IsValidValue( ValueT value ) const
 }
 
 template< typename ValueT >
-inline void CStockValuesComboBox< ValueT >::InitStockItems( void )
+void CStockValuesComboBox< ValueT >::InitStockContent( void )
 {
 	ui::WriteComboItemValues( *this, m_pStockAdapter->GetStockValues(), OutputFormatter( m_pStockAdapter ) );
-}
-
-template< typename ValueT >
-inline BOOL CStockValuesComboBox< ValueT >::Create( DWORD style, const RECT& rect, CWnd* pParentWnd, UINT comboId )
-{
-	m_duringCreation = true;
-
-	if ( !__super::Create( style, rect, pParentWnd, comboId ) )
-		return false;
-
-	InitStockItems();		// post-creation set-up
-	m_duringCreation = false;
-	return true;
-}
-
-template< typename ValueT >
-void CStockValuesComboBox< ValueT >::PreSubclassWindow( void )
-{
-	__super::PreSubclassWindow();
-
-	if ( !m_duringCreation )
-		InitStockItems();			// CComboBox::AddString() fails during creation
 }
 
 template< typename ValueT >

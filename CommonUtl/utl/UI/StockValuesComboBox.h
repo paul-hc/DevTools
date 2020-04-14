@@ -3,7 +3,7 @@
 #pragma once
 
 #include "utl/Range.h"
-#include "utl/UI/ui_fwd.h"
+#include "ui_fwd.h"
 
 
 namespace ui
@@ -92,9 +92,12 @@ namespace ui
 }
 
 
+#include "BaseStockContentCtrl.h"
+
+
 // edits a predefined value set augmented with custom values
 template< typename ValueT >
-class CStockValuesComboBox : public CComboBox
+class CStockValuesComboBox : public CBaseStockContentCtrl< CComboBox >
 {
 public:
 	CStockValuesComboBox( const ui::IValueSetAdapter< ValueT >* pStockAdapter, ui::TValueSetFlags flags = 0 );
@@ -117,7 +120,8 @@ public:
 	void DDX_Value( CDataExchange* pDX, ValueT& rValue, int comboId );
 	std::tstring FormatValidationError( void ) const;
 protected:
-	void InitStockItems( void );
+	// base overrides
+	virtual void InitStockContent( void );
 
 	struct OutputFormatter
 	{
@@ -129,16 +133,10 @@ protected:
 	};
 
 	// generated stuff
-public:
-	// special pre-creation and window rect adjustment hooks
-//	virtual BOOL PreCreateWindow( CREATESTRUCT& cs );
-	virtual BOOL Create( DWORD style, const RECT& rect, CWnd* pParentWnd, UINT comboId );
-	virtual void PreSubclassWindow( void );
 private:
 	const ui::IValueSetAdapter< ValueT >* m_pStockAdapter;
 	ui::TValueSetFlags m_flags;
 	Range< ValueT > m_validRange;
-	bool m_duringCreation;				// since cannot add combo items when creating via CComboBox::Create()
 };
 
 

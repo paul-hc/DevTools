@@ -4,6 +4,7 @@
 
 #include "utl/Range.h"
 #include "utl/UI/BaseMainDialog.h"
+#include "utl/UI/EnumComboBox.h"
 #include "utl/UI/InternalChange.h"
 #include "utl/UI/SyncScrolling.h"
 #include "utl/UI/TextEditor.h"
@@ -41,7 +42,7 @@ private:
 	CTextEditor m_inputEdit;
 	CTextEdit m_resultsEdit;
 	CDateTimeCtrl m_currPicker;
-	CComboBox m_currTypeCombo;
+	CEnumComboBox m_currTypeCombo;
 	CInternalChange m_lineChange;
 	CSyncScrolling m_syncScrolling;
 

@@ -1290,6 +1290,14 @@
 					>
 				</File>
 				<File
+					RelativePath=".\BaseStockContentCtrl.h"
+					>
+				</File>
+				<File
+					RelativePath=".\BaseStockContentCtrl.hxx"
+					>
+				</File>
+				<File
 					RelativePath=".\BufferedStatic.cpp"
 					>
 				</File>
@@ -1355,6 +1363,14 @@
 				</File>
 				<File
 					RelativePath=".\DragListCtrl.hxx"
+					>
+				</File>
+				<File
+					RelativePath=".\EnumComboBox.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\EnumComboBox.h"
 					>
 				</File>
 				<File

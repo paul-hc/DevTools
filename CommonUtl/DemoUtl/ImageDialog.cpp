@@ -97,6 +97,12 @@ CImageDialog::CImageDialog( CWnd* pParent )
 	, m_bkColorText( AfxGetApp()->GetProfileString( reg::section, reg::entry_bkColor ) )
 
 	, m_imagePathCombo( ui::FilePath, gdi::g_imageFileFilter )
+	, m_imagingApiCombo( &ui::GetTags_ImagingApi() )
+	, m_forceResolutionCombo( &GetTags_Resolution() )
+	, m_zoomCombo( &GetTags_Zoom() )
+	, m_stackingCombo( &CMultiZone::GetTags_Stacking() )
+	, m_colorTableModeCombo( &CColorTable::GetTags_Mode() )
+
 	, m_transpColorSample( this )
 	, m_pImageToolbar( new CDialogToolBar )
 	, m_sampleView( this )
@@ -365,7 +371,7 @@ CSize CImageDialog::ComputeContentSize( void )
 	else if ( m_pDibSection.get() != NULL )
 	{
 		m_multiZone.Init( ui::ScaleSize( m_pDibSection->GetSize(), GetZoomPct(), 100 ) + GetModeExtraSpacing(), pModeData->GetZoneCount() );
-		m_multiZone.SetStacking( static_cast< CMultiZone::Stacking >( m_stackingCombo.GetCurSel() ) );
+		m_multiZone.SetStacking( m_stackingCombo.GetEnum< CMultiZone::Stacking >() );
 
 		if ( !StretchImage() )
 			return m_multiZone.GetTotalSize();
@@ -480,16 +486,11 @@ void CImageDialog::DoDataExchange( CDataExchange* pDX )
 	DDX_Control( pDX, IDC_IMAGE_PATH_COMBO, m_imagePathCombo );
 	DDX_Control( pDX, IDC_FRAME_POS_EDIT, m_framePosEdit );
 	DDX_Control( pDX, IDC_BK_COLOR_COMBO, m_bkColorCombo );
-	DDX_Control( pDX, IDC_IMAGE_API_COMBO, m_imagingApiCombo );
-	DDX_Control( pDX, IDC_FORCE_RESOLUTION_COMBO, m_forceResolutionCombo );
 	ui::DDX_Flag( pDX, IDC_FORCE_CVT_EQUAL_BPP_CHECK, m_convertFlags, CDibSection::ForceCvtEqualBpp );
-	DDX_Control( pDX, IDC_ZOOM_COMBO, m_zoomCombo );
-	DDX_Control( pDX, IDC_STACKING_COMBO, m_stackingCombo );
 	ui::DDX_Flag( pDX, IDC_SHOW_GUIDES_CHECK, m_showFlags, ShowGuides );
 	ui::DDX_Flag( pDX, IDC_SHOW_LABELS_CHECK, m_showFlags, ShowLabels );
 	m_spacingEdit.DDX_Number( pDX, m_multiZone.m_zoneSpacing, IDC_SPACING_EDIT );
 	m_statusAlphaEdit.DDX_Channel( pDX );
-	DDX_Control( pDX, IDC_COLOR_TABLE_MODE_COMBO, m_colorTableModeCombo );
 	ui::DDX_ButtonIcon( pDX, ID_REFRESH );
 	m_modeSheet.DDX_DetailSheet( pDX, IDC_SAMPLE_MODE_SHEET, true );
 
@@ -498,11 +499,6 @@ void CImageDialog::DoDataExchange( CDataExchange* pDX )
 		DragAcceptFiles();
 		m_imagePathCombo.LoadHistory( reg::section, reg::entry_imagePathHistory );
 		m_bkColorCombo.LoadHistory( reg::section, reg::entry_bkColorHistory, bkColorSet );
-		ui::WriteComboItems( m_imagingApiCombo, ui::GetTags_ImagingApi().GetUiTags() );
-		ui::WriteComboItems( m_forceResolutionCombo, GetTags_Resolution().GetUiTags() );
-		ui::WriteComboItems( m_zoomCombo, GetTags_Zoom().GetUiTags() );
-		ui::WriteComboItems( m_stackingCombo, CMultiZone::GetTags_Stacking().GetUiTags() );
-		ui::WriteComboItems( m_colorTableModeCombo, CColorTable::GetTags_Mode().GetUiTags() );
 
 		m_framePosEdit.SetWrap();
 
@@ -513,11 +509,11 @@ void CImageDialog::DoDataExchange( CDataExchange* pDX )
 
 	ui::DDX_Text( pDX, IDC_IMAGE_PATH_COMBO, m_imagePath );
 	ui::DDX_Text( pDX, IDC_BK_COLOR_COMBO, m_bkColorText );
-	DDX_CBIndex( pDX, IDC_IMAGE_API_COMBO, (int&)m_imagingApi );
-	DDX_CBIndex( pDX, IDC_FORCE_RESOLUTION_COMBO, (int&)m_forceResolution );
-	DDX_CBIndex( pDX, IDC_ZOOM_COMBO, (int&)m_zoom );
-	DDX_CBIndex( pDX, IDC_STACKING_COMBO, (int&)m_multiZone.RefStacking() );
-	DDX_CBIndex( pDX, IDC_COLOR_TABLE_MODE_COMBO, (int&)m_colorTable.m_mode );
+	m_imagingApiCombo.DDX_EnumValue( pDX, IDC_IMAGE_API_COMBO, m_imagingApi );
+	m_forceResolutionCombo.DDX_EnumValue( pDX, IDC_FORCE_RESOLUTION_COMBO, m_forceResolution );
+	m_zoomCombo.DDX_EnumValue( pDX, IDC_ZOOM_COMBO, m_zoom );
+	m_stackingCombo.DDX_EnumValue( pDX, IDC_STACKING_COMBO, m_multiZone.RefStacking() );
+	m_colorTableModeCombo.DDX_EnumValue( pDX, IDC_COLOR_TABLE_MODE_COMBO, m_colorTable.m_mode );
 	ui::DDX_Bool( pDX, IDC_UNIQUE_COLORS_CHECK, m_colorTable.m_uniqueColors );
 	ui::DDX_Bool( pDX, IDC_SHOW_COLOR_LABELS_CHECK, m_colorTable.m_showLabels );
 
@@ -668,21 +664,21 @@ void CImageDialog::OnChange_SampleMode( void )
 
 void CImageDialog::OnChange_ImagingApi( void )
 {
-	m_imagingApi = static_cast< ui::ImagingApi >( m_imagingApiCombo.GetCurSel() );
+	m_imagingApi = m_imagingApiCombo.GetEnum< ui::ImagingApi >();
 	m_transpColorCache.Unregister( m_imagePath );			// reset transparent color
 	LoadSampleImage();
 }
 
 void CImageDialog::OnChange_ForceResolution( void )
 {
-	m_forceResolution = static_cast< Resolution >( m_forceResolutionCombo.GetCurSel() );
+	m_forceResolution = m_forceResolutionCombo.GetEnum< Resolution >();
 	LoadSampleImage();
 	GetDlgItem( IDC_FORCE_RESOLUTION_LABEL )->Invalidate();
 }
 
 void CImageDialog::OnToggle_ForceResolution( void )
 {
-	m_forceResolutionCombo.SetCurSel( Auto == m_forceResolution ? Color24 : Auto );
+	m_forceResolutionCombo.SetValue( Auto == m_forceResolution ? Color24 : Auto );
 	OnChange_ForceResolution();
 }
 
@@ -694,19 +690,19 @@ void CImageDialog::OnToggle_SkipCopyImage( void )
 
 void CImageDialog::OnChange_Zoom( void )
 {
-	m_zoom = static_cast< Zoom >( m_zoomCombo.GetCurSel() );
+	m_zoom = m_zoomCombo.GetEnum< Zoom >();
 	RedrawSample();
 }
 
 void CImageDialog::OnToggle_Zoom( void )
 {
-	m_zoomCombo.SetCurSel( m_zoom != StretchToFit ? StretchToFit : Zoom100 );
+	m_zoomCombo.SetValue( m_zoom != StretchToFit ? StretchToFit : Zoom100 );
 	OnChange_Zoom();
 }
 
 void CImageDialog::OnChange_Stacking( void )
 {
-	m_multiZone.SetStacking( static_cast< CMultiZone::Stacking >( m_stackingCombo.GetCurSel() ) );
+	m_multiZone.SetStacking( m_stackingCombo.GetEnum< CMultiZone::Stacking >() );
 	RedrawSample();
 }
 
@@ -734,7 +730,7 @@ void CImageDialog::OnChange_Spacing( void )
 
 void CImageDialog::OnChange_ColorTableMode( void )
 {
-	m_colorTable.m_mode = static_cast< CColorTable::Mode >( m_colorTableModeCombo.GetCurSel() );
+	m_colorTable.m_mode = m_colorTableModeCombo.GetEnum< CColorTable::Mode >();
 	BuildColorTable();
 }
 

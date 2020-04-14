@@ -5,6 +5,7 @@
 #include <map>
 #include "utl/Path.h"
 #include "utl/UI/AccelTable.h"
+#include "utl/UI/EnumComboBox.h"
 #include "utl/UI/ItemContentEdit.h"
 #include "utl/UI/LayoutDialog.h"
 #include "utl/UI/TreeControl.h"
@@ -108,11 +109,11 @@ private:
 public:
 	// enum { IDD = IDD_FILE_TREE_DIALOG };
 
-	CComboBox m_depthLevelCombo;
+	CEnumComboBox m_depthLevelCombo;
 	CTreeControl m_treeCtrl;
 	CItemContentEdit m_selFilePathEdit;
-	CComboBox m_viewModeCombo;
-	CComboBox m_orderCombo;
+	CEnumComboBox m_viewModeCombo;
+	CEnumComboBox m_orderCombo;
 
 	CAccelTable m_accelTreeFocus;
 

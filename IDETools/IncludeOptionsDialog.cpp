@@ -31,6 +31,7 @@ namespace layout
 CIncludeOptionsDialog::CIncludeOptionsDialog( CIncludeOptions* pOptions, CWnd* pParent )
 	: CLayoutDialog( IDD_INCLUDE_OPTIONS_DIALOG, pParent )
 	, m_pOptions( pOptions )
+	, m_depthLevelCombo( &CIncludeOptions::GetTags_DepthLevel() )
 {
 	ASSERT_PTR( m_pOptions );
 	m_regSection = _T("IncludeOptionsDialog");
@@ -46,16 +47,11 @@ CIncludeOptionsDialog::CIncludeOptionsDialog( CIncludeOptions* pOptions, CWnd* p
 
 void CIncludeOptionsDialog::DoDataExchange( CDataExchange* pDX )
 {
-	bool firstInit = NULL == m_depthLevelCombo.m_hWnd;
-
 	DDX_Control( pDX, IDC_DEPTH_LEVEL_COMBO, m_depthLevelCombo );
 	DDX_Control( pDX, IDC_MAX_PARSED_LINES_EDIT, m_maxParseLinesEdit );
 	DDX_Control( pDX, IDC_FN_IGNORED_EDIT, m_ignoredEdit );
 	DDX_Control( pDX, IDC_FN_ADDED_EDIT, m_addedEdit );
 	DDX_Control( pDX, IDC_ADDITIONAL_INC_PATH_EDIT, m_additionalIncPathEdit );
-
-	if ( firstInit )
-		ui::WriteComboItems( m_depthLevelCombo, CIncludeOptions::GetTags_DepthLevel().GetUiTags() );
 
 	DDX_Text( pDX, IDC_MAX_PARSED_LINES_EDIT, m_pOptions->m_maxParseLines );
 	ui::DDX_Bool( pDX, IDC_REMOVE_DUPLICATES_CHECK, m_pOptions->m_noDuplicates );
@@ -104,5 +100,5 @@ void CIncludeOptionsDialog::OnToggle_DelayedParsing( void )
 	int indexToSelect = isDelayedParsing ? 0 : m_pOptions->m_maxNestingLevel;
 
 	m_depthLevelCombo.EnableWindow( !isDelayedParsing );
-	m_depthLevelCombo.SetCurSel( indexToSelect );
+	m_depthLevelCombo.SetValue( indexToSelect );
 }

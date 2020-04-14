@@ -2,6 +2,7 @@
 #define IncludeOptionsDialog_h
 #pragma once
 
+#include "utl/UI/EnumComboBox.h"
 #include "utl/UI/ItemContentEdit.h"
 #include "utl/UI/LayoutDialog.h"
 #include "utl/UI/SpinEdit.h"
@@ -19,7 +20,7 @@ public:
 private:
 	// enum { IDD = IDD_INCLUDE_OPTIONS_DIALOG };
 
-	CComboBox m_depthLevelCombo;
+	CEnumComboBox m_depthLevelCombo;
 	CSpinEdit m_maxParseLinesEdit;
 	CItemListEdit m_ignoredEdit;				// CIncludeOptions::m_fnIgnored
 	CItemListEdit m_addedEdit;					// CIncludeOptions::m_fnAdded

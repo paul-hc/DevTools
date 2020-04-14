@@ -132,7 +132,7 @@ void CHistoryComboBox::ValidateContent( void )
 
 void CHistoryComboBox::PreSubclassWindow( void )
 {
-	BaseClass::PreSubclassWindow();
+	__super::PreSubclassWindow();
 
 	COMBOBOXINFO cbInfo = { sizeof( COMBOBOXINFO ) };
 	if ( GetComboBoxInfo( &cbInfo ) )
@@ -166,7 +166,7 @@ BOOL CHistoryComboBox::PreTranslateMessage( MSG* pMsg )
 			return true;
 	}
 
-	return BaseClass::PreTranslateMessage( pMsg );
+	return __super::PreTranslateMessage( pMsg );
 }
 
 
@@ -208,7 +208,7 @@ void CHistoryComboBox::OnContextMenu( CWnd* pWnd, CPoint point )
 		return;
 	}
 
-	BaseClass::OnContextMenu( pWnd, point );
+	__super::OnContextMenu( pWnd, point );
 }
 
 void CHistoryComboBox::OnUpdateSelectedListItem( CCmdUI* pCmdUI )

@@ -73,6 +73,7 @@ CMainDialog::CMainDialog( CWnd* pParent /*= NULL*/ )
 	, m_inputText( (LPCTSTR)AfxGetApp()->GetProfileString( reg::section, reg::entry_inputText, GetDefaultInputText().c_str() ) )
 	, m_inputSel( 0, -1 )
 	, m_inputEdit( true )
+	, m_currTypeCombo( &CDateTimeInfo::GetTags_Type() )
 	, m_syncScrolling( SB_VERT )
 {
 	m_regSection = reg::section;
@@ -160,7 +161,7 @@ void CMainDialog::ReadInputSelLine( void )
 		m_currPicker.SetTime( pNullTime );
 	}
 
-	m_currTypeCombo.SetCurSel( lineInfo.m_type );
+	m_currTypeCombo.SetValue( lineInfo.m_type );
 	ui::EnableControl( m_hWnd, IDC_CURRLINE_APPLY_BUTTON, false );
 }
 
@@ -215,7 +216,6 @@ void CMainDialog::DoDataExchange( CDataExchange* pDX )
 				.AddCtrl( &m_resultsEdit );
 
 			SetFormatCurrLinePicker( FmtDateTime );
-			ui::WriteComboItems( m_currTypeCombo, CDateTimeInfo::GetTags_Type().GetUiTags() );
 			m_inputEdit.EnsureCaretVisible();
 		}
 	}
@@ -282,7 +282,7 @@ void CMainDialog::OnCurrLineApply( void )
 	CTime time;
 
 	if ( GDT_VALID == m_currPicker.GetTime( time ) )
-		switch ( m_currTypeCombo.GetCurSel() )
+		switch ( m_currTypeCombo.GetEnum< CDateTimeInfo::Type >() )
 		{
 			case CDateTimeInfo::Null: break;
 			case CDateTimeInfo::Time: lineText = num::FormatNumber( time.GetTime() ); break;

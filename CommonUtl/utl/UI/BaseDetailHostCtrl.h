@@ -58,11 +58,10 @@ private:
 	std::auto_ptr< CDetailButton > m_pDetailButton;
 	bool m_ignoreResize;
 
-	// generated overrides
-	public:
+	// generated stuff
+public:
 	virtual void PreSubclassWindow( void );
 protected:
-	// generated message map
 	afx_msg void OnSize( UINT sizeType, int cx, int cy );
 
 	DECLARE_MESSAGE_MAP()

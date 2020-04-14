@@ -212,6 +212,7 @@ CFindDuplicatesDialog::CFindDuplicatesDialog( CFileModel* pFileModel, CWnd* pPar
 	: CFileEditorBaseDialog( pFileModel, cmd::FindDuplicates, IDD_FIND_DUPLICATES_DIALOG, pParent )
 	, m_searchPathsListCtrl( IDC_SEARCH_PATHS_LIST )
 	, m_ignorePathsListCtrl( IDC_IGNORE_PATHS_LIST )
+	, m_fileTypeCombo( &GetTags_FileType() )
 	, m_dupsListCtrl( IDC_DUPLICATE_FILES_LIST )
 	, m_commitInfoStatic( CRegularStatic::Bold )
 	, m_accel( IDC_DUPLICATE_FILES_LIST )
@@ -818,9 +819,8 @@ void CFindDuplicatesDialog::DoDataExchange( CDataExchange* pDX )
 
 	if ( firstInit )
 	{
-		ui::WriteComboItems( m_fileTypeCombo, GetTags_FileType().GetUiTags() );
-		m_fileTypeCombo.SetCurSel( AfxGetApp()->GetProfileInt( reg::section_dialog, reg::entry_fileType, All ) );
-		m_fileSpecEdit.SetText( m_fileTypeSpecs[ m_fileTypeCombo.GetCurSel() ] );
+		m_fileTypeCombo.SetValue( AfxGetApp()->GetProfileInt( reg::section_dialog, reg::entry_fileType, All ) );
+		m_fileSpecEdit.SetText( m_fileTypeSpecs[ m_fileTypeCombo.GetValue() ] );
 		m_minFileSizeCombo.LoadHistory( m_regSection.c_str(), reg::entry_minFileSize, _T("0|1|10|50|100|500|1000") );
 
 		m_dupsListCtrl.GetStateImageList()->Add( CImageStore::SharedStore()->RetrieveIcon( ID_ORIGINAL_FILE )->GetHandle() );		// OriginalItem
@@ -910,7 +910,7 @@ void CFindDuplicatesDialog::OnOK( void )
 
 void CFindDuplicatesDialog::OnDestroy( void )
 {
-	AfxGetApp()->WriteProfileInt( reg::section_dialog, reg::entry_fileType, m_fileTypeCombo.GetCurSel() );
+	AfxGetApp()->WriteProfileInt( reg::section_dialog, reg::entry_fileType, m_fileTypeCombo.GetValue() );
 	AfxGetApp()->WriteProfileString( reg::section_dialog, reg::entry_fileTypeSpecs, str::Join( m_fileTypeSpecs, _T("|") ).c_str() );
 	AfxGetApp()->WriteProfileInt( reg::section_dialog, reg::entry_highlightDuplicates, m_highlightDuplicates );
 	m_minFileSizeCombo.SaveHistory( m_regSection.c_str(), reg::entry_minFileSize );
@@ -964,13 +964,13 @@ void CFindDuplicatesDialog::OnUpdate_EditIgnorePathsList( CCmdUI* pCmdUI )
 
 void CFindDuplicatesDialog::OnCbnSelChange_FileType( void )
 {
-	m_fileSpecEdit.SetText( m_fileTypeSpecs[ m_fileTypeCombo.GetCurSel() ] );
+	m_fileSpecEdit.SetText( m_fileTypeSpecs[ m_fileTypeCombo.GetValue() ] );
 	OnFieldChanged();
 }
 
 void CFindDuplicatesDialog::OnEnChange_FileSpec( void )
 {
-	m_fileTypeSpecs[ m_fileTypeCombo.GetCurSel() ] = m_fileSpecEdit.GetText();
+	m_fileTypeSpecs[ m_fileTypeCombo.GetValue() ] = m_fileSpecEdit.GetText();
 	OnFieldChanged();
 }
 
