@@ -61,11 +61,18 @@ namespace ui
 
 namespace ui
 {
-	// accurate colour algorithms
+	// accurate colour algorithms (using geometric averaging)
 
-	BYTE GetAverageComponent( UINT component1, UINT component2 );
+	BYTE GetAverageComponent( UINT comp1, UINT comp2 );
+	BYTE GetAverageComponent( UINT comp1, UINT comp2, UINT comp3 );
+	BYTE GetWeightedMixComponent( UINT comp1, UINT comp2, double weight1 );		// weight1 from 0.0 to 1.0
+
 	COLORREF GetBlendedColor( COLORREF color1, COLORREF color2 );
+	COLORREF GetBlendedColor( COLORREF color1, COLORREF color2, COLORREF color3 );
+	COLORREF GetWeightedMixColor( COLORREF color1, COLORREF color2, int pct1 );
+
 	inline COLORREF& BlendWithColor( COLORREF& rColor1, COLORREF color2 ) { return rColor1 = GetBlendedColor( rColor1, color2 ); }
+	inline COLORREF& WeightedMixWithColor( COLORREF& rColor1, COLORREF color2, int pct1 ) { return rColor1 = GetWeightedMixColor( rColor1, color2, pct1 ); }
 
 
 	struct CHslColor
@@ -82,13 +89,17 @@ namespace ui
 		CHslColor& ScaleSaturation( int byPct ) { m_saturation = ModifyBy( m_saturation, byPct ); return *this; }
 		CHslColor& ScaleLuminance( int byPct ) { m_luminance = ModifyBy( m_luminance, byPct ); return *this; }
 
+		CHslColor GetScaledHue( int byPct ) { CHslColor newColor = *this; return newColor.ScaleHue( byPct ); }
+		CHslColor GetScaledSaturation( int byPct ) { CHslColor newColor = *this; return newColor.ScaleSaturation( byPct ); }
+		CHslColor GetScaledLuminance( int byPct ) { CHslColor newColor = *this; return newColor.ScaleLuminance( byPct ); }
+
 		static WORD ModifyBy( WORD component, int byPercentage );
 	public:
 		WORD m_hue;
 		WORD m_saturation;
 		WORD m_luminance;
 
-		static const Range< WORD > s_validRange;
+		static const Range< WORD > s_validRange;		// [0, 240]
 	};
 }
 

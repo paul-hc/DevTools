@@ -168,16 +168,38 @@ namespace ui
 
 namespace ui
 {
+	inline double Square( UINT comp ) { ASSERT( comp >= 0 && comp <= 255 ); return static_cast< double >( comp * comp ); }
+	inline double PercentToFactor( int pct ) { ASSERT( pct >= 0 && pct <= 100 ); return static_cast< double >( pct ) / 100.0; }
+	inline BYTE AsComponent( double component ) { ASSERT( component >= 0.0 && component < 256.0 ); return static_cast< BYTE >( component ); }
+
+
 	// accurate colour algorithms
 
-	BYTE GetAverageComponent( UINT component1, UINT component2 )		// cast to UINT to allow squaring
+	BYTE GetAverageComponent( UINT comp1, UINT comp2 )		// cast to UINT to allow squaring
 	{
-		// Average by extracting square root of sum of square components.
+		// Average by extracting square root of sum of square components (same for G, B): NewColorR = sqrt( (R1^2 + R2^2) / 2 )
 		// Details: check arntjw's entry at:
 		//	https://stackoverflow.com/questions/649454/what-is-the-best-way-to-average-two-colors-that-define-a-linear-gradient?utm_medium=organic&utm_source=google_rich_qa&utm_campaign=google_rich_qa
 
-		return static_cast< BYTE >( sqrt( ( static_cast< double >( component1 * component1 ) + static_cast< double >( component2 * component2 ) ) / 2 ) );
+		return AsComponent( sqrt( ( Square(comp1) + Square(comp2) ) / 2 ) );
 	}
+
+	BYTE GetAverageComponent( UINT comp1, UINT comp2, UINT comp3 )
+	{
+		// Average of 3 colours (same for G, B): NewColorR = sqrt( (R1^2 + R2^2 + R3^2) / 3 )
+
+		return AsComponent( sqrt( ( Square(comp1) + Square(comp2) + Square(comp3) ) / 3 ) );
+	}
+
+	BYTE GetWeightedMixComponent( UINT comp1, UINT comp2, double weight1 )
+	{
+		// For weighted mixes (i.e. 75% colour A, and 25% colour B) (same for G, B): NewColorR = sqrt( R1^2 * w + R2^2 * (1 - w) )
+		//   weight1 from 0.0 to 1.0
+
+		ASSERT( weight1 >= 0.0 && weight1 <= 1.0 );
+		return AsComponent( sqrt( ( Square(comp1) * ( 1.0 - weight1 ) + Square(comp2) * weight1 ) ) );
+	}
+
 
 	COLORREF GetBlendedColor( COLORREF color1, COLORREF color2 )
 	{
@@ -186,10 +208,36 @@ namespace ui
 		else if ( CLR_NONE == color2 )
 			return color1;
 
+		ASSERT( IsActualColor( color1 ) && IsActualColor( color2 ) );
+
 		return RGB(
 			GetAverageComponent( GetRValue( color1 ), GetRValue( color2 ) ),
 			GetAverageComponent( GetGValue( color1 ), GetGValue( color2 ) ),
 			GetAverageComponent( GetBValue( color1 ), GetBValue( color2 ) )
+		);
+	}
+
+	COLORREF GetBlendedColor( COLORREF color1, COLORREF color2, COLORREF color3 )
+	{
+		ASSERT( IsActualColor( color1 ) && IsActualColor( color2 ) && IsActualColor( color3 ) );
+
+		return RGB(
+			GetAverageComponent( GetRValue( color1 ), GetRValue( color2 ), GetRValue( color3 ) ),
+			GetAverageComponent( GetGValue( color1 ), GetGValue( color2 ), GetGValue( color3 ) ),
+			GetAverageComponent( GetBValue( color1 ), GetBValue( color2 ), GetBValue( color3 ) )
+		);
+	}
+
+	COLORREF GetWeightedMixColor( COLORREF color1, COLORREF color2, int pct1 )
+	{
+		ASSERT( IsActualColor( color1 ) && IsActualColor( color2 ) );
+
+		double weight1 = PercentToFactor( pct1 );
+
+		return RGB(
+			GetWeightedMixComponent( GetRValue( color1 ), GetRValue( color2 ), weight1 ),
+			GetWeightedMixComponent( GetGValue( color1 ), GetGValue( color2 ), weight1 ),
+			GetWeightedMixComponent( GetBValue( color1 ), GetBValue( color2 ), weight1 )
 		);
 	}
 
