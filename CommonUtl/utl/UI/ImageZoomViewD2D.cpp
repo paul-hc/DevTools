@@ -165,10 +165,10 @@ void CImageZoomViewD2D::OnDraw( CDC* pDC )
 
 		if ( m_pImageRT->IsValid() )
 		{
-			// apply translation transform according to view's scroll position
 			CPoint point = GetScrollPosition();
-			m_drawTraits.m_transform = D2D1::Matrix3x2F::Translation( (float)-point.x, (float)-point.y );
 
+			// apply translation transform according to view's scroll position
+			m_drawTraits.m_transform = D2D1::Matrix3x2F::Translation( (float)-point.x, (float)-point.y );
 			m_drawTraits.SetAutoInterpolationMode( GetContentRect().Size(), GetSourceSize() );
 
 			m_pImageRT->DrawImage( m_drawTraits );
@@ -182,11 +182,12 @@ void CImageZoomViewD2D::OnDraw( CDC* pDC )
 BEGIN_MESSAGE_MAP( CImageZoomViewD2D, CBaseZoomView )
 	ON_WM_CREATE()
 	ON_WM_TIMER()
+	ON_MESSAGE( WM_DISPLAYCHANGE, OnDisplayChange )
 END_MESSAGE_MAP()
 
 int CImageZoomViewD2D::OnCreate( CREATESTRUCT* pCreateStruct )
 {
-	if ( -1 == CBaseZoomView::OnCreate( pCreateStruct ) )
+	if ( -1 == __super::OnCreate( pCreateStruct ) )
 		return -1;
 
 	m_pImageRT.reset( new d2d::CImageRenderTarget( this ) );
@@ -196,7 +197,7 @@ int CImageZoomViewD2D::OnCreate( CREATESTRUCT* pCreateStruct )
 
 void CImageZoomViewD2D::OnSize( UINT sizeType, int cx, int cy )
 {
-	CBaseZoomView::OnSize( sizeType, cx, cy );
+	__super::OnSize( sizeType, cx, cy );
 
 	if ( SIZE_MAXIMIZED == sizeType || SIZE_RESTORED == sizeType )
 		if ( IsValidRenderTarget() )
@@ -208,5 +209,13 @@ void CImageZoomViewD2D::OnTimer( UINT_PTR eventId )
 	if ( m_pImageRT.get() != NULL && m_pImageRT->IsAnimEvent( eventId ) )
 		m_pImageRT->HandleAnimEvent();
 	else
-		CBaseZoomView::OnTimer( eventId );
+		__super::OnTimer( eventId );
+}
+
+LRESULT CImageZoomViewD2D::OnDisplayChange( WPARAM bitsPerPixel, LPARAM lParam )
+{
+	CSize screenResolution( lParam ); screenResolution;		// just for illustration
+
+	Invalidate();
+	return __super::OnDisplayChange( bitsPerPixel, lParam );
 }

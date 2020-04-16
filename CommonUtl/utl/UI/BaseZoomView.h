@@ -27,6 +27,11 @@ public:
 	const CRect& GetContentRect( void ) const { return m_contentRect; }
 	const CRect& _GetClientRect( void ) const { return m_clientRect; }
 
+	// hit test (client coordinates)
+	bool InClientRect( const CPoint& point ) const { return _GetClientRect().PtInRect( point ) != FALSE; }
+	bool InContentRect( const CPoint& point ) const { return GetContentRect().PtInRect( point ) != FALSE; }
+	bool InBackgroundRect( const CPoint& point ) const { return !InContentRect( point ) && InClientRect( point ); }
+
 	DWORD GetScrollStyle( void ) const;
 	bool AnyScrollBar( void ) const { return GetScrollStyle() != 0; }
 	bool ClampScrollPos( CPoint& rScrollPos );								// limit to valid H/V scroll range
@@ -60,6 +65,9 @@ protected:
 
 	ui::IZoomBar* GetZoomBar( void ) const { return m_pZoomBar; }
 	void SetZoomBar( ui::IZoomBar* pZoomBar ) { m_pZoomBar = pZoomBar; }
+protected:
+	// background highlighting
+	static COLORREF MakeAccentedBkColor( COLORREF bkColor );
 private:
 	ui::ImageScalingMode m_scalingMode;		// default auto image size (app::Slider_v4_0+)
 	UINT m_zoomPct;

@@ -165,7 +165,7 @@
 #define CM_LOAD_WORKSPACE_DOCS          32818
 #define CK_FULL_SCREEN                  32821
 #define CM_TOGGLE_MAXIMIZE              32822
-#define CM_EDIT_BK_COLOR                32823
+#define ID_EDIT_BK_COLOR                32823
 #define CM_EDIT_IMAGE_SEL_COLOR         32825
 #define CK_SHOW_THUMB_VIEW              32827
 #define CM_OPEN_IMAGE_FILE              32828

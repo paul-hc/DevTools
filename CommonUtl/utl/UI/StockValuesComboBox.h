@@ -95,7 +95,7 @@ namespace ui
 #include "BaseStockContentCtrl.h"
 
 
-// edits a predefined value set augmented with custom values
+// edits a formatted predefined value set augmented with custom values
 template< typename ValueT >
 class CStockValuesComboBox : public CBaseStockContentCtrl< CComboBox >
 {

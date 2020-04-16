@@ -1,6 +1,7 @@
 
 #include "stdafx.h"
 #include "BaseZoomView.h"
+#include "Color.h"
 #include "Utilities.h"
 #include "resource.h"
 
@@ -212,6 +213,25 @@ CPoint CBaseZoomView::TranslatePointedPct( const CSize& pointedPct ) const
 		MulDiv( m_contentRect.Width(), pointedPct.cx, 100 ),
 		MulDiv( m_contentRect.Height(), pointedPct.cy, 100 ) );
 	return pos;
+}
+
+COLORREF CBaseZoomView::MakeAccentedBkColor( COLORREF bkColor )
+{
+	if ( !ui::IsActualColor( bkColor ) )
+		return bkColor;			// ignore not evaluated
+
+	COLORREF newColor = bkColor;
+	ui::CHslColor hslBkColor( bkColor );
+
+	if ( 0 == hslBkColor.m_saturation )		// B/W/Gray
+	{
+		COLORREF sysAccentColor = ::GetSysColor( COLOR_ACTIVECAPTION );
+		newColor = ui::GetWeightedMixColor( bkColor, sysAccentColor, hslBkColor.m_luminance < 200 ? 3 : 10 );
+	}
+	else
+		newColor = hslBkColor.GetScaledLuminance( hslBkColor.m_luminance < 200 ? 10 : -10 ).GetRGB();
+
+	return newColor;
 }
 
 BOOL CBaseZoomView::OnPreparePrinting( CPrintInfo* pInfo )

@@ -74,6 +74,8 @@ public:
 	virtual void OnUpdate( CView* pSender, LPARAM lHint, CObject* pHint );
 protected:
 	afx_msg int OnCreate( CREATESTRUCT* pCS );
+	afx_msg void OnSetFocus( CWnd* pOldWnd );
+	afx_msg void OnKillFocus( CWnd* pNewWnd );
 	afx_msg void OnContextMenu( CWnd* pWnd, CPoint screenPos );
 	afx_msg void OnLButtonDown( UINT mkFlags, CPoint point );
 	afx_msg void OnLButtonDblClk( UINT mkFlags, CPoint point );
@@ -89,7 +91,7 @@ protected:
 	afx_msg void On_ZoomNormal100( void );
 	afx_msg void On_Zoom( UINT cmdId );
 	afx_msg void CmResizeViewToFit( void );
-	afx_msg void CmEditBkColor( void );
+	afx_msg void On_EditBkColor( void );
 	afx_msg void CmExploreImage( void );
 	afx_msg void OnUpdateAnyFileShellOperation( CCmdUI* pCmdUI );
 	afx_msg void OnUpdatePhysicalFileShellOperation( CCmdUI* pCmdUI );

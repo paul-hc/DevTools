@@ -876,13 +876,13 @@ BOOL CAlbumThumbListView::PreCreateWindow( CREATESTRUCT& rCS )
 	// during view recreation (for LBS_MULTICOLUMN style change)
 	rCS.style |= CAlbumThumbListView::s_listCreationStyle;
 
-	return CCtrlView::PreCreateWindow( rCS );
+	return __super::PreCreateWindow( rCS );
 }
 
 void CAlbumThumbListView::PostNcDestroy( void )
 {
 	if ( m_autoDelete )
-		CCtrlView::PostNcDestroy();
+		__super::PostNcDestroy();
 }
 
 BOOL CAlbumThumbListView::OnScroll( UINT scrollCode, UINT pos, BOOL doScroll /*= TRUE*/ )
@@ -946,7 +946,7 @@ BOOL CAlbumThumbListView::OnScrollBy( CSize sizeScroll, BOOL doScroll )
 
 void CAlbumThumbListView::OnActivateView( BOOL activate, CView* pActivateView, CView* pDeactiveView )
 {
-	CCtrlView::OnActivateView( activate, pActivateView, pDeactiveView );
+	__super::OnActivateView( activate, pActivateView, pDeactiveView );
 
 	if ( activate )
 		if ( NULL == pDeactiveView || pDeactiveView == pActivateView || pDeactiveView->GetParentFrame() != GetParentFrame() )		// not a peer activation?
@@ -967,7 +967,7 @@ void CAlbumThumbListView::OnUpdate( CView* pSender, LPARAM lHint, CObject* pHint
 			return;
 	}
 
-	CCtrlView::OnUpdate( pSender, lHint, pHint );
+	__super::OnUpdate( pSender, lHint, pHint );
 }
 
 BOOL CAlbumThumbListView::OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo )
@@ -976,7 +976,7 @@ BOOL CAlbumThumbListView::OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHAND
 		return true;
 
 	return
-		CCtrlView::OnCmdMsg( id, code, pExtra, pHandlerInfo ) ||
+		__super::OnCmdMsg( id, code, pExtra, pHandlerInfo ) ||
 		m_pPeerImageView->CImageView::OnCmdMsg( id, code, pExtra, pHandlerInfo );		// redirect to album view for common cmdIds; non-virtual call CImageView::OnCmdMsg() to avoid infinite recursion
 }
 
@@ -1007,14 +1007,14 @@ BOOL CAlbumThumbListView::OnChildNotify( UINT message, WPARAM wParam, LPARAM lPa
 	{
 		case WM_MEASUREITEM: MeasureItem( (MEASUREITEMSTRUCT*)lParam ); break;
 		case WM_DRAWITEM: DrawItem( (DRAWITEMSTRUCT*)lParam ); break;
-		default: return CCtrlView::OnChildNotify( message, wParam, lParam, pResult );
+		default: return __super::OnChildNotify( message, wParam, lParam, pResult );
 	}
 	return TRUE;
 }
 
 int CAlbumThumbListView::OnCreate( CREATESTRUCT* pCS )
 {
-	if ( -1 == CCtrlView::OnCreate( pCS ) )
+	if ( -1 == __super::OnCreate( pCS ) )
 		return -1;
 
 // TODO: refine the details of auto-scrolling, custom drop-tips
@@ -1044,12 +1044,12 @@ void CAlbumThumbListView::OnDropFiles( HDROP hDropInfo )
 
 void CAlbumThumbListView::OnSetFocus( CWnd* pOldWnd )
 {
-	CCtrlView::OnSetFocus( pOldWnd );
+	__super::OnSetFocus( pOldWnd );
 }
 
 void CAlbumThumbListView::OnLButtonDown( UINT mkFlags, CPoint point )
 {
-	CCtrlView::OnLButtonDown( mkFlags, point );
+	__super::OnLButtonDown( mkFlags, point );
 
 	// prepare the drag rect
 	int dragDropIndex = GetImageIndexFromPoint( point );
@@ -1066,7 +1066,7 @@ void CAlbumThumbListView::OnLButtonDown( UINT mkFlags, CPoint point )
 
 void CAlbumThumbListView::OnLButtonUp( UINT mkFlags, CPoint point )
 {
-	CCtrlView::OnLButtonUp( mkFlags, point );
+	__super::OnLButtonUp( mkFlags, point );
 	CancelDragCapture();
 }
 
@@ -1085,12 +1085,12 @@ void CAlbumThumbListView::OnRButtonDown( UINT mkFlags, CPoint point )
 			else
 				pListBox->SetCurSel( hitIndex );
 
-	CCtrlView::OnRButtonDown( mkFlags, point );
+	__super::OnRButtonDown( mkFlags, point );
 }
 
 void CAlbumThumbListView::OnMouseMove( UINT mkFlags, CPoint point )
 {
-	CCtrlView::OnMouseMove( mkFlags, point );
+	__super::OnMouseMove( mkFlags, point );
 
 	if ( HasFlag( mkFlags, MK_LBUTTON ) )
 		if ( !m_startDragRect.IsRectNull() && !m_startDragRect.PtInRect( point ) )
@@ -1128,7 +1128,7 @@ BOOL CAlbumThumbListView::OnMouseWheel( UINT mkFlags, short zDelta, CPoint pt )
 		return TRUE;		// message processed
 	}
 	else
-		return CCtrlView::OnMouseWheel( mkFlags, zDelta, pt );
+		return __super::OnMouseWheel( mkFlags, zDelta, pt );
 }
 
 void CAlbumThumbListView::OnContextMenu( CWnd* pWnd, CPoint screenPos )
@@ -1157,7 +1157,7 @@ void CAlbumThumbListView::OnTimer( UINT_PTR eventId )
 	if ( m_beginDragTimer.IsHit( eventId ) )
 		DoDragDrop();
 	else
-		CCtrlView::OnTimer( eventId );
+		__super::OnTimer( eventId );
 }
 
 void CAlbumThumbListView::OnToggleShowThumbView( void )

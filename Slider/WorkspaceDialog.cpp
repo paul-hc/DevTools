@@ -77,7 +77,7 @@ void CWorkspaceDialog::DoDataExchange( CDataExchange* pDX )
 
 BEGIN_MESSAGE_MAP( CWorkspaceDialog, CDialog )
 	ON_WM_DRAWITEM()
-	ON_BN_CLICKED( CM_EDIT_BK_COLOR, CmEditBkColor )
+	ON_BN_CLICKED( ID_EDIT_BK_COLOR, On_EditBkColor )
 	ON_BN_CLICKED( CM_SAVE_WORKSPACE, OnSaveAndClose )
 	ON_BN_CLICKED( IDC_CLEAR_THUMB_CACHE_BUTTON, CmClearThumbCache )
 	ON_BN_CLICKED( CM_EDIT_IMAGE_SEL_COLOR, CmEditImageSelColor )
@@ -88,7 +88,7 @@ void CWorkspaceDialog::OnDrawItem( int ctlId, DRAWITEMSTRUCT* pDIS )
 {
 	switch ( ctlId )
 	{
-		case CM_EDIT_BK_COLOR:				FillRect( pDIS->hDC, &pDIS->rcItem, CBrush( m_data.m_defBkColor ) ); break;
+		case ID_EDIT_BK_COLOR:				FillRect( pDIS->hDC, &pDIS->rcItem, CBrush( m_data.m_defBkColor ) ); break;
 		case CM_EDIT_IMAGE_SEL_COLOR:		FillRect( pDIS->hDC, &pDIS->rcItem, CBrush( m_data.GetImageSelColor() ) ); break;
 		case CM_EDIT_IMAGE_SEL_TEXT_COLOR:	FillRect( pDIS->hDC, &pDIS->rcItem, CBrush( m_data.GetImageSelTextColor() ) ); break;
 		default:
@@ -96,13 +96,13 @@ void CWorkspaceDialog::OnDrawItem( int ctlId, DRAWITEMSTRUCT* pDIS )
 	}
 }
 
-void CWorkspaceDialog::CmEditBkColor( void )
+void CWorkspaceDialog::On_EditBkColor( void )
 {
 	CColorDialog colorDialog( m_data.m_defBkColor, CC_FULLOPEN | CC_RGBINIT | CC_ANYCOLOR, this );
 	if ( IDOK == colorDialog.DoModal() )
 	{
 		m_data.m_defBkColor = colorDialog.GetColor();
-		GetDlgItem( CM_EDIT_BK_COLOR )->Invalidate();
+		GetDlgItem( ID_EDIT_BK_COLOR )->Invalidate();
 	}
 }
 

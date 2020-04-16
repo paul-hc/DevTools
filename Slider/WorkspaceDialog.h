@@ -31,7 +31,7 @@ private:
 	virtual void DoDataExchange( CDataExchange* pDX );			// DDX/DDV support
 protected:
 	afx_msg void OnDrawItem( int ctlId, DRAWITEMSTRUCT* pDIS );
-	afx_msg void CmEditBkColor( void );
+	afx_msg void On_EditBkColor( void );
 	afx_msg void OnSaveAndClose( void );
 	afx_msg void CmEditImageSelColor( void );
 	afx_msg void CmEditImageSelTextColor( void );

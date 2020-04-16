@@ -126,7 +126,7 @@ BEGIN
     BUTTON      CM_EDIT_WORKSPACE
     BUTTON      CM_MOVE_FILE
     BUTTON      CM_EXPLORE_IMAGE
-    BUTTON      CM_EDIT_BK_COLOR
+    BUTTON      ID_EDIT_BK_COLOR
     BUTTON      ID_EDIT_ARCHIVE_PASSWORD
 END
 
@@ -251,7 +251,7 @@ BEGIN
         MENUITEM SEPARATOR
         MENUITEM "&Wrap Mode",                  ID_TOGGLE_NAVIG_WRAP_MODE
         MENUITEM SEPARATOR
-        MENUITEM "Bac&kground Color...\tCtrl+K", CM_EDIT_BK_COLOR
+        MENUITEM "Bac&kground Color...\tCtrl+K", ID_EDIT_BK_COLOR
         MENUITEM SEPARATOR
         POPUP "&Auto-Drop Recipient"
         BEGIN
@@ -353,7 +353,7 @@ BEGIN
         MENUITEM "&Copy\tCtrl+C",               ID_EDIT_COPY
         MENUITEM "&Paste\tCtrl+V",              ID_EDIT_PASTE
         MENUITEM SEPARATOR
-        MENUITEM "Bac&kground Color...\tCtrl+K", CM_EDIT_BK_COLOR
+        MENUITEM "Bac&kground Color...\tCtrl+K", ID_EDIT_BK_COLOR
         MENUITEM SEPARATOR
         MENUITEM "Wor&kspace Preferences...\tCtrl+W", CM_EDIT_WORKSPACE
     END
@@ -415,7 +415,7 @@ BEGIN
         MENUITEM "Zoom In\tCtrl+Add",           ID_ZOOM_IN
         MENUITEM "Zoom Out\tCtrl+Sub",          ID_ZOOM_OUT
         MENUITEM SEPARATOR
-        MENUITEM "Bac&kground Color...\tCtrl+K", CM_EDIT_BK_COLOR
+        MENUITEM "Bac&kground Color...\tCtrl+K", ID_EDIT_BK_COLOR
         MENUITEM SEPARATOR
         POPUP "&Image File"
         BEGIN
@@ -456,7 +456,7 @@ BEGIN
         MENUITEM "Zoom In\tCtrl+Add",           ID_ZOOM_IN
         MENUITEM "Zoom Out\tCtrl+Sub",          ID_ZOOM_OUT
         MENUITEM SEPARATOR
-        MENUITEM "Bac&kground Color...\tCtrl+K", CM_EDIT_BK_COLOR
+        MENUITEM "Bac&kground Color...\tCtrl+K", ID_EDIT_BK_COLOR
         MENUITEM SEPARATOR
         POPUP "&Image File"
         BEGIN
@@ -580,7 +580,7 @@ BEGIN
     VK_F5,          CM_CLEAR_IMAGE_CACHE,   VIRTKEY, CONTROL, NOINVERT
     VK_DELETE,      CM_DELETE_FILE,         VIRTKEY, NOINVERT
     VK_DELETE,      CM_DELETE_FILE_NO_UNDO, VIRTKEY, SHIFT, NOINVERT
-    "K",            CM_EDIT_BK_COLOR,       VIRTKEY, CONTROL, NOINVERT
+    "K",            ID_EDIT_BK_COLOR,       VIRTKEY, CONTROL, NOINVERT
     "W",            CM_EDIT_WORKSPACE,      VIRTKEY, CONTROL, NOINVERT
     VK_ESCAPE,      ID_CM_ESCAPE_KEY,       VIRTKEY, NOINVERT
     "E",            CM_EXPLORE_IMAGE,       VIRTKEY, CONTROL, NOINVERT
@@ -734,7 +734,7 @@ BEGIN
     COMBOBOX        IDC_DEFAULT_SLIDE_DELAY_COMBO,76,176,72,30,CBS_DROPDOWN | WS_VSCROLL | WS_GROUP | WS_TABSTOP
     GROUPBOX        "Colours",IDC_STATIC,186,7,153,62
     RTEXT           "Default background colour:",IDC_STATIC,188,18,90,8
-    CONTROL         "Bk Color",CM_EDIT_BK_COLOR,"Button",BS_OWNERDRAW,282,16,36,14,WS_EX_DLGMODALFRAME | WS_EX_CLIENTEDGE
+    CONTROL         "Bk Color",ID_EDIT_BK_COLOR,"Button",BS_OWNERDRAW,282,16,36,14,WS_EX_DLGMODALFRAME | WS_EX_CLIENTEDGE
     RTEXT           "Image selection colour:",IDC_STATIC,188,34,90,8
     CONTROL         "Selection Color",CM_EDIT_IMAGE_SEL_COLOR,"Button",BS_OWNERDRAW,282,32,36,14,WS_EX_DLGMODALFRAME | WS_EX_CLIENTEDGE
     RTEXT           "Image selection text colour:",IDC_STATIC,188,50,90,8
@@ -1268,7 +1268,7 @@ BEGIN
     CM_EDIT_WORKSPACE       "Edit current workspace settings\nWorkspace Settings"
     CK_FULL_SCREEN          "Toggle between normal and full screen mode\nToggle Full Screen (F11)"
     CM_TOGGLE_MAXIMIZE      "Toggle between maximize and restore modes\nMaximize/Restore"
-    CM_EDIT_BK_COLOR        "Edit image view background color\nBackground Color"
+    ID_EDIT_BK_COLOR        "Edit image view background color\nBackground Color"
     CK_SHOW_THUMB_VIEW      "Displays the thumbnail view\nShow Thumbnail View (Ctrl+Shift+T)"
     CM_OPEN_IMAGE_FILE      "Opens the selected image file(s) as standalone images\nOpen Selected Images"
     CM_DELETE_FILE          "Delete the file using shell operation\nDelete"

@@ -137,6 +137,9 @@ namespace d2d
 	private:
 		CComPtr< IWICBitmapSource > m_pWicBitmap;						// source bitmap
 		CComPtr< ID2D1Bitmap > m_pBitmap;								// self-encapsulated, released on device loss
+
+		// optional drawing resources
+		CComPtr< ID2D1SolidColorBrush > m_pAccentBrush;
 	};
 
 

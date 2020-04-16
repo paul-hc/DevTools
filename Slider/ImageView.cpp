@@ -69,7 +69,12 @@ CImageDoc* CImageView::GetDocument( void ) const
 
 COLORREF CImageView::GetBkColor( void ) const
 {
-	return m_bkColor != CLR_DEFAULT ? m_bkColor : CWorkspace::GetData().m_defBkColor;
+	COLORREF bkColor = m_bkColor != CLR_DEFAULT ? m_bkColor : CWorkspace::GetData().m_defBkColor;
+
+	if ( m_hWnd == ::GetFocus() )
+		bkColor = MakeAccentedBkColor( bkColor );
+
+	return bkColor;
 }
 
 void CImageView::SetBkColor( COLORREF bkColor, bool doRedraw /*= true*/ )
@@ -233,6 +238,8 @@ BOOL CImageView::PreTranslateMessage( MSG* pMsg )
 
 BEGIN_MESSAGE_MAP( CImageView, BaseClass )
 	ON_WM_CREATE()
+	ON_WM_SETFOCUS()
+	ON_WM_KILLFOCUS()
 	ON_WM_CONTEXTMENU()
 	ON_WM_LBUTTONDOWN()
 	ON_WM_LBUTTONDBLCLK()
@@ -247,7 +254,7 @@ BEGIN_MESSAGE_MAP( CImageView, BaseClass )
 	ON_COMMAND( ID_ZOOM_NORMAL_100, On_ZoomNormal100 )		// ID_ZOOM_NORMAL_100 is kind of synonym with ID_TOGGLE_SCALE_ACTUAL_SIZE, but with an image
 	ON_COMMAND_RANGE( ID_ZOOM_IN, ID_ZOOM_OUT, On_Zoom )
 	ON_COMMAND( ID_RESIZE_VIEW_TO_FIT, CmResizeViewToFit )
-	ON_COMMAND( CM_EDIT_BK_COLOR, CmEditBkColor )
+	ON_COMMAND( ID_EDIT_BK_COLOR, On_EditBkColor )
 	ON_COMMAND( CM_EXPLORE_IMAGE, CmExploreImage )
 	ON_UPDATE_COMMAND_UI( CM_EXPLORE_IMAGE, OnUpdatePhysicalFileShellOperation )
 	ON_UPDATE_COMMAND_UI( CM_MOVE_FILE, OnUpdateAnyFileShellOperation )
@@ -292,6 +299,20 @@ void CImageView::OnInitialUpdate( void )
 	}
 }
 
+void CImageView::OnSetFocus( CWnd* pOldWnd )
+{
+	__super::OnSetFocus( pOldWnd );
+
+	Invalidate( TRUE );			// highlight when gaining focus
+}
+
+void CImageView::OnKillFocus( CWnd* pNewWnd )
+{
+	__super::OnSetFocus( pNewWnd );
+
+	Invalidate( TRUE );			// revert background when losing of focus
+}
+
 void CImageView::OnContextMenu( CWnd* pWnd, CPoint screenPos )
 {
 	pWnd;
@@ -307,11 +328,12 @@ void CImageView::OnLButtonDown( UINT mkFlags, CPoint point )
 	__super::OnLButtonDown( mkFlags, point );
 
 	SetFocus();
+
 	if ( CWicImage* pImage = GetImage() )
 		if ( ui::IsKeyPressed( VK_MENU ) )			// ALT is pressed: enter drag-drop
 		{
 			if ( CanEnterDragMode() )
-				if ( GetContentRect().PtInRect( point ) )
+				if ( InContentRect( point ) )
 					if ( pImage->IsValidFile() )
 					{
 						ole::CImagesDataSource dataSource;
@@ -321,7 +343,7 @@ void CImageView::OnLButtonDown( UINT mkFlags, CPoint point )
 						dataSource.DragAndDropImages( pThumbBitmap, DROPEFFECT_COPY | DROPEFFECT_MOVE | DROPEFFECT_LINK );
 					}
 		}
-		else
+		else if ( InContentRect( point ) )
 			CZoomViewMouseTracker::Run( this, mkFlags, point );
 }
 
@@ -329,8 +351,8 @@ void CImageView::OnLButtonDblClk( UINT mkFlags, CPoint point )
 {
 	__super::OnLButtonDblClk( mkFlags, point );
 
-	if ( !GetContentRect().PtInRect( point ) )			// outside of image
-		CmEditBkColor();
+	if ( InBackgroundRect( point ) )			// outside of image
+		On_EditBkColor();
 	else if ( ui::IsKeyPressed( VK_CONTROL ) )
 	{
 		const fs::CFlexPath& filePath = GetImagePathKey().first;
@@ -442,7 +464,7 @@ void CImageView::CmResizeViewToFit( void )
 		app::GetMainFrame()->ResizeViewToFit( this );				// first allow view to resize in order to fit with contents
 }
 
-void CImageView::CmEditBkColor( void )
+void CImageView::On_EditBkColor( void )
 {
 	if ( ui::IsKeyPressed( VK_CONTROL ) )
 		SetBkColor( CLR_DEFAULT );

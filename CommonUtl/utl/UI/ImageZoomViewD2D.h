@@ -78,6 +78,7 @@ protected:
 	afx_msg int OnCreate( CREATESTRUCT* pCreateStruct );
 	virtual void OnSize( UINT sizeType, int cx, int cy );
 	afx_msg void OnTimer( UINT_PTR eventId );
+	afx_msg LRESULT OnDisplayChange( WPARAM bitsPerPixel, LPARAM lParam );
 
 	DECLARE_MESSAGE_MAP()
 };
