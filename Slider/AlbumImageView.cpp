@@ -88,7 +88,10 @@ CWicImage* CAlbumImageView::GetImage( void ) const
 
 void CAlbumImageView::OnImageContentChanged( void )
 {
-	SetupContentMetrics( true );
+	// BUG - Windows Vista+ with scroll bar window theme: CScrollView::UpdateBars() succeeds for the SB_HORZ (1st) bar, but not for SB_VERT (2nd) bar.
+	//	workaround: force a WM_SIZE
+	ui::RecalculateScrollBars( m_hWnd );
+	//was: SetupContentMetrics( true );
 }
 
 bool CAlbumImageView::OutputNavigSlider( void )

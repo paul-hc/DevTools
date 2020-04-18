@@ -462,7 +462,7 @@ namespace ui
 		return pPlaceHolderWnd;
 	}
 
-	void RecalculateScrollbars( HWND hWnd )
+	void RecalculateScrollBars( HWND hWnd )
 	{
 		ASSERT_PTR( hWnd );
 

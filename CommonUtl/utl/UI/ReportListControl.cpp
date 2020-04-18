@@ -234,7 +234,7 @@ void CReportListControl::SetCustomFileGlyphDraw( bool showGlyphs /*= true*/ )
 			ChangeListViewMode( LV_VIEW_DETAILS );			// switch to report mode since other modes don't make sense without icons
 		}
 
-		ui::RecalculateScrollbars( m_hWnd );
+		ui::RecalculateScrollBars( m_hWnd );
 	}
 }
 
@@ -259,7 +259,7 @@ void CReportListControl::SetCustomImageDraw( ui::ICustomImageDraw* pCustomImageD
 			ChangeListViewMode( LV_VIEW_DETAILS );			// switch to report mode since other modes don't make sense without icons
 		}
 
-		ui::RecalculateScrollbars( m_hWnd );
+		ui::RecalculateScrollBars( m_hWnd );
 	}
 }
 

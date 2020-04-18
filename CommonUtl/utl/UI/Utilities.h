@@ -148,12 +148,16 @@ namespace ui
 
 	inline bool ScreenToClient( HWND hWnd, RECT& rRect )
 	{
-		return ::ScreenToClient( safe_ptr( hWnd ), reinterpret_cast< POINT* >( &rRect ) ) && ::ScreenToClient( hWnd, reinterpret_cast< POINT* >( &rRect ) + 1 );
+		return
+			::ScreenToClient( safe_ptr( hWnd ), reinterpret_cast< POINT* >( &rRect ) ) &&
+			::ScreenToClient( hWnd, reinterpret_cast< POINT* >( &rRect ) + 1 );
 	}
 
 	inline bool ClientToScreen( HWND hWnd, RECT& rRect )
 	{
-		return ::ClientToScreen( safe_ptr( hWnd ), reinterpret_cast< POINT* >( &rRect ) ) && ::ClientToScreen( hWnd, reinterpret_cast< POINT* >( &rRect ) + 1 );
+		return
+			::ClientToScreen( safe_ptr( hWnd ), reinterpret_cast< POINT* >( &rRect ) ) &&
+			::ClientToScreen( hWnd, reinterpret_cast< POINT* >( &rRect ) + 1 );
 	}
 
 	void ScreenToNonClient( HWND hWnd, CRect& rRect );		// IN: screen coordiantes, OUT: non-client coordiantes, relative to CWindowDC( pWnd )
@@ -172,7 +176,7 @@ namespace ui
 	CWnd* AlignToPlaceholder( int placeholderId, CWnd& rControl,
 							  const CSize* pCustomSize = NULL, int alignment = NoAlign, CSize addBottomRight = CSize( 0, 0 ) );
 
-	void RecalculateScrollbars( HWND hWnd );				// recalculates scrollbars and internal layout by forcing a resize
+	void RecalculateScrollBars( HWND hWnd );				// recalculates scrollbars and internal layout by forcing a resize
 
 
 	struct CCtrlPlace

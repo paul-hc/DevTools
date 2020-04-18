@@ -72,7 +72,7 @@ void CTreeControl::StoreImageList( CImageList* pImageList )
 			SetIndent( indent );
 
 		UpdateCustomImagerBoundsSize();
-		ui::RecalculateScrollbars( m_hWnd );
+		ui::RecalculateScrollBars( m_hWnd );
 	}
 }
 
