@@ -107,8 +107,11 @@ namespace d2d
 		const CRect& m_contentRect;			// bitmap scaled rect in the view (AKA destRect)
 		const CRect* m_pSrcBmpRect;			// source bitmap area as a subset (default null: entire bitmap)
 	};
+}
 
 
+namespace d2d
+{
 	interface IRenderHostWindow : public IMemoryManaged
 	{
 		virtual ID2D1RenderTarget* GetRenderTarget( void ) const = 0;
