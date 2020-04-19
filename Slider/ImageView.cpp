@@ -69,12 +69,12 @@ CImageDoc* CImageView::GetDocument( void ) const
 
 COLORREF CImageView::GetBkColor( void ) const
 {
-	COLORREF bkColor = m_bkColor != CLR_DEFAULT ? m_bkColor : CWorkspace::GetData().m_defBkColor;
+	return m_bkColor != CLR_DEFAULT ? m_bkColor : CWorkspace::GetData().m_defBkColor;
+}
 
-	if ( m_hWnd == ::GetFocus() )
-		bkColor = MakeAccentedBkColor( bkColor );
-
-	return bkColor;
+bool CImageView::IsAccented( void ) const
+{
+	return m_hWnd == ::GetFocus();
 }
 
 void CImageView::SetBkColor( COLORREF bkColor, bool doRedraw /*= true*/ )

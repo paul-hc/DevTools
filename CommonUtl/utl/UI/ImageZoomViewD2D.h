@@ -17,7 +17,7 @@ namespace d2d
 	class CAnimatedFrameComposer;
 
 
-	// owned by the view that displays the still or animated image using a timer and Direct 2D rendering
+	// Owned by the view that displays the STILL/ANIMATED image using a timer and Direct 2D rendering.
 	//
 	class CImageRenderTarget : public CWindowRenderTarget
 	{
@@ -26,11 +26,19 @@ namespace d2d
 		CImageRenderTarget( CImageZoomViewD2D* pZoomView );
 		~CImageRenderTarget();
 
+		void SetAccentFrameColor( COLORREF accentFrameColor ) { m_accentFrameColor = accentFrameColor; }
+
 		// base overrides
 		virtual void DiscardResources( void );
 		virtual bool CreateResources( void );
+		virtual void StartAnimation( UINT frameDelay );
+		virtual void StopAnimation( void );
 
-		bool DrawImage( const CDrawBitmapTraits& traits );
+		virtual void DrawBitmap( const CViewCoords& coords );		// draw still or animated bitmap
+		virtual void PreDraw( const CViewCoords& coords );
+		virtual void PostDraw( const CViewCoords& coords );
+
+		bool DrawImage( const CViewCoords& coords );
 
 		// animation timer
 		bool IsAnimEvent( UINT_PTR eventId ) const { return m_pAnimComposer.get() != NULL && m_animTimer.IsHit( eventId ); }
@@ -39,12 +47,14 @@ namespace d2d
 		void SetupCurrentImage( void );
 	private:
 		CWicImage* GetImage( void ) const;
-		CWicAnimatedImage* GetAnimImage( void ) const;
-		bool HasAnimatedImage( void );
 	private:
 		CImageZoomViewD2D* m_pZoomView;
-		std::auto_ptr< CAnimatedFrameComposer > m_pAnimComposer;		// animated frame composition
+		COLORREF m_accentFrameColor;
+		std::auto_ptr< CAnimatedFrameComposer > m_pAnimComposer;	// animated frame composition
 		CWindowTimer m_animTimer;
+
+		// additional drawing resources
+		CComPtr< ID2D1Brush > m_pAccentFrameBrush;					// to display a focus frame
 	};
 }
 
@@ -57,7 +67,9 @@ protected:
 	CImageZoomViewD2D( void );
 	virtual ~CImageZoomViewD2D();
 public:
+	// overrideables
 	virtual CWicImage* GetImage( void ) const = 0;
+	virtual bool IsAccented( void ) const;		// typically colour of the frame when focused
 
 	d2d::CDrawBitmapTraits& GetDrawParams( void ) { return m_drawTraits; }
 	d2d::CImageRenderTarget* GetImageRenderTarget( void ) { return m_pImageRT.get(); }
@@ -65,13 +77,13 @@ protected:
 	// base overrides
 	virtual CSize GetSourceSize( void ) const;
 
-	bool IsValidRenderTarget( void ) const { return m_pImageRT.get() != NULL && m_pImageRT->IsValid(); }
-	void PrintImageGdi( CDC* pPrnDC, CWicImage* pImage );
+	bool IsValidRenderTarget( void ) const { return m_pImageRT.get() != NULL && m_pImageRT->IsValidTarget(); }
+	void PrintImageGdi( CDC* pPrintDC, CWicImage* pImage );
 private:
 	std::auto_ptr< d2d::CImageRenderTarget > m_pImageRT;
 	d2d::CDrawBitmapTraits m_drawTraits;
 
-// generated stuff
+	// generated stuff
 protected:
 	virtual void OnDraw( CDC* pDC );
 protected:

@@ -66,8 +66,7 @@ protected:
 	ui::IZoomBar* GetZoomBar( void ) const { return m_pZoomBar; }
 	void SetZoomBar( ui::IZoomBar* pZoomBar ) { m_pZoomBar = pZoomBar; }
 protected:
-	// background highlighting
-	static COLORREF MakeAccentedBkColor( COLORREF bkColor );
+	static COLORREF MakeAccentedBkColor( COLORREF bkColor );	// background highlighting (no longer used)
 private:
 	ui::ImageScalingMode m_scalingMode;		// default auto image size (app::Slider_v4_0+)
 	UINT m_zoomPct;

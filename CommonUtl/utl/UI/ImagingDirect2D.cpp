@@ -45,6 +45,15 @@ namespace d2d
 
 	D2D1_BITMAP_INTERPOLATION_MODE CDrawBitmapTraits::s_enlargeInterpolationMode = D2D1_BITMAP_INTERPOLATION_MODE_NEAREST_NEIGHBOR;		// by default no smoothing
 
+	CDrawBitmapTraits::CDrawBitmapTraits( COLORREF bkColor /*= CLR_NONE*/, bool smoothing /*= true*/, UINT opacityPct /*= 100*/ )
+		: m_bkColor( bkColor )
+		, m_opacity( static_cast< float >( opacityPct ) / 100.f )
+		, m_interpolationMode( smoothing ? D2D1_BITMAP_INTERPOLATION_MODE_LINEAR : D2D1_BITMAP_INTERPOLATION_MODE_NEAREST_NEIGHBOR )
+		, m_transform( D2D1::Matrix3x2F::Identity() )
+		, m_frameColor( CLR_NONE )
+	{
+	}
+
 	bool CDrawBitmapTraits::SetSmoothingMode( bool smoothingMode /*= true*/ )
 	{
 		return utl::ModifyValue( s_enlargeInterpolationMode,
@@ -55,7 +64,7 @@ namespace d2d
 	{
 		m_interpolationMode = ui::FitsInside( destBoundsSize, bmpSize )
 			? s_enlargeInterpolationMode							// no smoothing on stretching (by default, user configurable)
-			: D2D1_BITMAP_INTERPOLATION_MODE_LINEAR;				// use smooting (dithering) when shrinking
+			: D2D1_BITMAP_INTERPOLATION_MODE_LINEAR;				// force using smooting (dithering) when shrinking
 	}
 
 	void CDrawBitmapTraits::Draw( ID2D1RenderTarget* pRenderTarget, ID2D1Bitmap* pBitmap, const CRect& destRect, const CRect* pSrcRect /*= NULL*/ ) const
@@ -113,13 +122,14 @@ namespace d2d
 			}
 	}
 
-	void CRenderTarget::SetWicBitmap( IWICBitmapSource* pWicBitmap )
+	bool CRenderTarget::SetWicBitmap( IWICBitmapSource* pWicBitmap )
 	{
-		if ( pWicBitmap != m_pWicBitmap )
-		{
-			m_pWicBitmap = pWicBitmap;
-			ReleaseBitmap();							// release previous D2D bitmap
-		}
+		if ( pWicBitmap == m_pWicBitmap )
+			return false;				// same bitmap as the old one
+
+		m_pWicBitmap = pWicBitmap;
+		ReleaseBitmap();				// release previous D2D bitmap
+		return true;
 	}
 
 	ID2D1Bitmap* CRenderTarget::GetBitmap( void )
@@ -137,19 +147,28 @@ namespace d2d
 			pRenderTarget->Clear( ToColor( bkColor ) );
 	}
 
-	RenderResult CRenderTarget::DrawBitmap( const CDrawBitmapTraits& traits, const CRect& destRect, const CRect* pSrcRect /*= NULL*/ )
+	RenderResult CRenderTarget::Render( const CViewCoords& coords )
 	{
 		EnsureResources();				// lazy render target (if not yet created or device lost)
 
-		if ( !CanDraw() )
+		if ( !CanRender() )
 			return RenderError;			// window is occluded
 
 		CScopedDraw scopedDraw( this );
-		traits.Draw( GetRenderTarget(), GetBitmap(), destRect, pSrcRect );
-		if ( !IsValid() )				// resources discarded?
+
+		PreDraw( coords );
+		DrawBitmap( coords );
+		PostDraw( coords );
+
+		if ( !IsValidTarget() )			// resources discarded?
 			return DeviceLoss;			// device was lost
 
 		return RenderDone;
+	}
+
+	void CRenderTarget::DrawBitmap( const CViewCoords& coords )
+	{
+		coords.m_dbmTraits.Draw( GetRenderTarget(), GetBitmap(), coords.m_contentRect, coords.m_pSrcBmpRect );
 	}
 
 
@@ -196,9 +215,9 @@ namespace d2d
 			&m_pWndRenderTarget ) );
 	}
 
-	bool CWindowRenderTarget::CanDraw( void ) const
+	bool CWindowRenderTarget::CanRender( void ) const
 	{
-		return IsValid() && !HasFlag( m_pWndRenderTarget->CheckWindowState(), D2D1_WINDOW_STATE_OCCLUDED );
+		return IsValidTarget() && !HasFlag( m_pWndRenderTarget->CheckWindowState(), D2D1_WINDOW_STATE_OCCLUDED );
 	}
 
 

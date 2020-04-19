@@ -176,7 +176,15 @@ void CAlbumSettingsDialog::CombineTextEffectAt( ui::CTextEffect& rTextEffect, LP
 		rTextEffect |= s_errorBk;							// highlight error row background
 
 	if ( True == m_isDirty )
-		rTextEffect.m_textColor = ui::GetBlendedColor( rTextEffect.m_textColor != CLR_NONE ? rTextEffect.m_textColor : m_foundFilesListCtrl.GetTextColor(), color::White );		// blend to washed out gray effect
+	{
+		if ( CLR_NONE == rTextEffect.m_textColor )
+			rTextEffect.m_textColor = m_foundFilesListCtrl.GetTextColor();
+
+		if ( CLR_DEFAULT == rTextEffect.m_textColor )
+			rTextEffect.m_textColor = ::GetSysColor( COLOR_WINDOWTEXT );
+
+		rTextEffect.m_textColor = ui::GetBlendedColor( rTextEffect.m_textColor, color::White );		// blend to washed out gray effect
+	}
 }
 
 void CAlbumSettingsDialog::SetDirty( bool dirty /*= true*/ )

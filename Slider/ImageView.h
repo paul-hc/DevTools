@@ -35,6 +35,7 @@ public:
 	virtual HICON GetDocTypeIcon( void ) const;
 	virtual CMenu& GetDocContextMenu( void ) const;
 	virtual COLORREF GetBkColor( void ) const;
+	virtual bool IsAccented( void ) const;
 
 	// IImageView interface
 	virtual const fs::ImagePathKey& GetImagePathKey( void ) const;

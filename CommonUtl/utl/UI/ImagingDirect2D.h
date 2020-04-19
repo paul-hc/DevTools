@@ -68,14 +68,7 @@ namespace d2d
 	//
 	struct CDrawBitmapTraits
 	{
-		CDrawBitmapTraits( COLORREF bkColor = CLR_NONE, bool smoothing = true, UINT opacityPct = 100 )
-			: m_bkColor( bkColor )
-			, m_opacity( static_cast< float >( opacityPct ) / 100.f )
-			, m_interpolationMode( smoothing ? D2D1_BITMAP_INTERPOLATION_MODE_LINEAR : D2D1_BITMAP_INTERPOLATION_MODE_NEAREST_NEIGHBOR )
-			, m_transform( D2D1::Matrix3x2F::Identity() )
-			, m_frameColor( CLR_NONE )
-		{
-		}
+		CDrawBitmapTraits( COLORREF bkColor = CLR_NONE, bool smoothing = true, UINT opacityPct = 100 );
 
 		void SetAutoInterpolationMode( const CSize& destBoundsSize, const CSize& bmpSize );
 
@@ -87,28 +80,56 @@ namespace d2d
 		COLORREF m_bkColor;
 		float m_opacity;
 		D2D1_BITMAP_INTERPOLATION_MODE m_interpolationMode;
-			// D2D1_BITMAP_INTERPOLATION_MODE_LINEAR: pixel smoothing (default)
-			// D2D1_BITMAP_INTERPOLATION_MODE_NEAREST_NEIGHBOR: no dithering (accurate pixel scaling)
 		D2D1_MATRIX_3X2_F m_transform;			// Identity, Scale, Translation, Rotation, etc
 		COLORREF m_frameColor;					// useful for debugging
 
 		static D2D1_BITMAP_INTERPOLATION_MODE s_enlargeInterpolationMode;		// by default no smoothing when enlarging images (raster image friendly)
+
+		/**
+			D2D1_BITMAP_INTERPOLATION_MODE_LINEAR: pixel smoothing (default)
+			D2D1_BITMAP_INTERPOLATION_MODE_NEAREST_NEIGHBOR: no dithering (accurate pixel scaling)
+		 */
 	};
 
 
-	interface IDeviceResources : public IMemoryManaged
+	struct CViewCoords : private utl::noncopyable
+	{
+		CViewCoords( const CDrawBitmapTraits& dbmTraits, const CRect& clientRect, const CRect& contentRect, const CRect* pSrcBmpRect = NULL )
+			: m_dbmTraits( dbmTraits )
+			, m_clientRect( clientRect )
+			, m_contentRect( contentRect )
+			, m_pSrcBmpRect( pSrcBmpRect )
+		{
+		}
+	public:
+		const CDrawBitmapTraits& m_dbmTraits;
+		const CRect& m_clientRect;
+		const CRect& m_contentRect;			// bitmap scaled rect in the view (AKA destRect)
+		const CRect* m_pSrcBmpRect;			// source bitmap area as a subset (default null: entire bitmap)
+	};
+
+
+	interface IRenderHostWindow : public IMemoryManaged
 	{
 		virtual ID2D1RenderTarget* GetRenderTarget( void ) const = 0;
 		virtual CWnd* GetWindow( void ) const = 0;
+		virtual bool CanRender( void ) const { return IsValidTarget(); }
+
+		virtual void StartAnimation( UINT frameDelay ) = 0;
+		virtual void StopAnimation( void ) = 0;
+
+		bool IsValidTarget( void ) const { return GetRenderTarget() != NULL; }
+	};
+
+
+	interface IDeviceResources : public IRenderHostWindow
+	{
 		virtual void DiscardResources( void ) = 0;
 		virtual bool CreateResources( void ) = 0;
-		virtual bool CanDraw( void ) const { return IsValid(); }
-
-		bool IsValid( void ) const { return GetRenderTarget() != NULL; }
 
 		void EnsureResources( void )
 		{
-			if ( !IsValid() )
+			if ( !IsValidTarget() )
 				CreateResources();			// lazy resource aquisition
 		}
 	};
@@ -125,21 +146,28 @@ namespace d2d
 		virtual void OnFirstAddInternalChange( void );				// calls BeginDraw()
 		virtual void OnFinalReleaseInternalChange( void );			// calls EndDraw()
 	public:
+		// IRenderHostWindow partial interface (assume no animation)
+		virtual void StartAnimation( UINT frameDelay ) { frameDelay; }
+		virtual void StopAnimation( void ) {}
+	public:
 		IWICBitmapSource* GetWicBitmap( void ) const { return m_pWicBitmap; }
-		void SetWicBitmap( IWICBitmapSource* pWicBitmap );
-
-		void ClearBackground( COLORREF bkColor );						// clears the entire render target
+		bool SetWicBitmap( IWICBitmapSource* pWicBitmap );			// returns true if a new bitmap
 
 		ID2D1Bitmap* GetBitmap( void );
-		RenderResult DrawBitmap( const CDrawBitmapTraits& traits, const CRect& destRect, const CRect* pSrcRect = NULL );	// invalidates window on device loss
+
+		void ClearBackground( COLORREF bkColor );					// clears the entire render target
+
+		RenderResult Render( const CViewCoords& coords );			// invalidates window on device loss
 	protected:
 		void ReleaseBitmap( void ) { m_pBitmap = NULL; }
-	private:
-		CComPtr< IWICBitmapSource > m_pWicBitmap;						// source bitmap
-		CComPtr< ID2D1Bitmap > m_pBitmap;								// self-encapsulated, released on device loss
 
-		// optional drawing resources
-		CComPtr< ID2D1SolidColorBrush > m_pAccentBrush;
+		// overrideables
+		virtual void DrawBitmap( const CViewCoords& coords );
+		virtual void PreDraw( const CViewCoords& coords ) { coords; }
+		virtual void PostDraw( const CViewCoords& coords ) { coords; }
+	private:
+		CComPtr< IWICBitmapSource > m_pWicBitmap;					// source bitmap
+		CComPtr< ID2D1Bitmap > m_pBitmap;							// self-encapsulated, released on device loss
 	};
 
 
@@ -153,17 +181,17 @@ namespace d2d
 	public:
 		CWindowRenderTarget( CWnd* pWnd ) : CRenderTarget(), m_pWnd( pWnd ) { ASSERT_PTR( m_pWnd ); }
 
-		bool IsValid( void ) const { return m_pWndRenderTarget != NULL; }
-
 		bool Resize( const CSize& clientSize );
 		bool Resize( void );
 
-		// IDeviceResources interface
+		// IRenderHostWindow interface
 		virtual ID2D1RenderTarget* GetRenderTarget( void ) const { return m_pWndRenderTarget; }
 		virtual CWnd* GetWindow( void ) const { return m_pWnd; }
+		virtual bool CanRender( void ) const;
+
+		// IDeviceResources interface
 		virtual void DiscardResources( void );
 		virtual bool CreateResources( void );
-		virtual bool CanDraw( void ) const;
 	private:
 		CWnd* m_pWnd;
 		CComPtr< ID2D1HwndRenderTarget > m_pWndRenderTarget;		// self-encapsulated, released on device loss
@@ -185,9 +213,11 @@ namespace d2d
 
 		bool Resize( const CRect& subRect );
 
-		// IDeviceResources interface
+		// IRenderHostWindow interface
 		virtual ID2D1RenderTarget* GetRenderTarget( void ) const { return m_pDcRenderTarget; }
 		virtual CWnd* GetWindow( void ) const { return safe_ptr( m_pDC->GetWindow() ); }
+
+		// IDeviceResources interface
 		virtual void DiscardResources( void );
 		virtual bool CreateResources( void );
 	private:

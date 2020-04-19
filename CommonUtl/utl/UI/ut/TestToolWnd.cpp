@@ -351,7 +351,9 @@ namespace ut
 		d2d::CDrawBitmapTraits dupTraits = traits;
 		dupTraits.m_frameColor = GetBitmapFrameColor( bmpSize, scaledBmpSize );
 
-		pBitmapRT->DrawBitmap( dupTraits, imageRect );
+		d2d::CViewCoords viewCoords( dupTraits, boundsRect, imageRect );
+
+		pBitmapRT->Render( viewCoords );
 		StoreTileRect( boundsRect );
 	}
 

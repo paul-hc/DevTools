@@ -6,10 +6,6 @@
 #include "ImagingDirect2D.h"
 
 
-class CImageZoomViewD2D;
-class CWindowTimer;
-
-
 namespace d2d
 {
 	// manages frame composing for animated images in a Direct 2D zoom view
@@ -17,15 +13,15 @@ namespace d2d
 	class CAnimatedFrameComposer
 	{
 	public:
-		CAnimatedFrameComposer( CImageZoomViewD2D* pZoomView, CWicAnimatedImage* pAnimImage, CWindowTimer* pAnimTimer );
+		CAnimatedFrameComposer( d2d::IRenderHostWindow* pRenderHostWnd, CWicAnimatedImage* pAnimImage );
 		~CAnimatedFrameComposer();
 
-		bool HasImage( CWicImage* pImage ) const { return m_pAnimImage == pImage; }
+		bool UsesImage( CWicImage* pImage ) const { return m_pAnimImage == pImage; }
 
 		void Reset( void );
 		bool Create( void );
 
-		RenderResult DrawBitmap( const CDrawBitmapTraits& traits, const CRect& destRect );
+		RenderResult DrawBitmap( const CViewCoords& coords );
 		void HandleAnimEvent( void );
 	private:
 		bool IsLastFrame( void ) const { return m_framePos == m_pAnimImage->GetFrameCount() - 1; }
@@ -41,9 +37,8 @@ namespace d2d
 		bool SaveComposedFrame( void );
 		bool RestoreSavedFrame( void );
 	private:
-		CImageZoomViewD2D* m_pZoomView;
+		d2d::IRenderHostWindow* m_pRenderHostWnd;
 		CWicAnimatedImage* m_pAnimImage;
-		CWindowTimer* m_pAnimTimer;
 		UINT m_framePos;
 		CWicAnimatedImage::CFrameMetadata m_frameMetadata;			// metadata of current frame
 

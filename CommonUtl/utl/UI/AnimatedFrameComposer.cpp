@@ -1,10 +1,8 @@
 
 #include "stdafx.h"
 #include "AnimatedFrameComposer.h"
-#include "ImageZoomViewD2D.h"
 #include "ImagingWic.h"
 #include "Utilities.h"
-#include "WindowTimer.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -13,16 +11,14 @@
 
 namespace d2d
 {
-	CAnimatedFrameComposer::CAnimatedFrameComposer( CImageZoomViewD2D* pZoomView, CWicAnimatedImage* pAnimImage, CWindowTimer* pAnimTimer )
-		: m_pZoomView( pZoomView )
+	CAnimatedFrameComposer::CAnimatedFrameComposer( d2d::IRenderHostWindow* pRenderHostWnd, CWicAnimatedImage* pAnimImage )
+		: m_pRenderHostWnd( pRenderHostWnd )
 		, m_pAnimImage( pAnimImage )
-		, m_pAnimTimer( pAnimTimer )
 	{
 		Reset();
 
-		ASSERT_PTR( m_pZoomView->GetSafeHwnd() );
+		ASSERT_PTR( m_pRenderHostWnd->GetWindow()->GetSafeHwnd() );
 		ASSERT_PTR( m_pAnimImage );
-		ASSERT_PTR( m_pAnimTimer );
 	}
 
 	CAnimatedFrameComposer::~CAnimatedFrameComposer()
@@ -31,7 +27,7 @@ namespace d2d
 
 	ID2D1RenderTarget* CAnimatedFrameComposer::GetWndRenderTarget( void ) const
 	{
-		return safe_ptr( m_pZoomView->GetImageRenderTarget()->GetRenderTarget() );
+		return safe_ptr( m_pRenderHostWnd->GetRenderTarget() );
 	}
 
 	void CAnimatedFrameComposer::Reset( void )
@@ -56,7 +52,7 @@ namespace d2d
 		if ( m_pAnimImage->GetFrameCount() > 0 )
 		{
 			ComposeNextFrame();
-			m_pZoomView->InvalidateRect( FALSE );
+			m_pRenderHostWnd->GetWindow()->InvalidateRect( FALSE );
 		}
 		return true;
 	}
@@ -82,7 +78,7 @@ namespace d2d
 
 	bool CAnimatedFrameComposer::ComposeNextFrame( void )
 	{
-		m_pAnimTimer->Stop();				// delay is no longer valid
+		m_pRenderHostWnd->StopAnimation();	// delay is no longer valid
 
 		if ( NULL == m_pFrameComposeRT )
 			return false;
@@ -95,7 +91,7 @@ namespace d2d
 
 		// set the timer regardless of whether we succeeded in composing a frame to try our best to continue displaying the animation
 		if ( m_pAnimImage->GetFrameCount() > 1 )
-			m_pAnimTimer->Start( m_frameMetadata.m_frameDelay );
+			m_pRenderHostWnd->StartAnimation( m_frameMetadata.m_frameDelay );
 
 		return succeeded;
 	}
@@ -198,19 +194,19 @@ namespace d2d
 		return SUCCEEDED( m_pFrameComposeRT->EndDraw() );
 	}
 
-	RenderResult CAnimatedFrameComposer::DrawBitmap( const CDrawBitmapTraits& traits, const CRect& destRect )
+	RenderResult CAnimatedFrameComposer::DrawBitmap( const CViewCoords& coords )
 	{
 		if ( NULL == m_pFrameComposeRT )
 			return RenderError;
 
-		traits.Draw( GetWndRenderTarget(), m_pFrameToRender, destRect, NULL );
+		coords.m_dbmTraits.Draw( GetWndRenderTarget(), m_pFrameToRender, coords.m_contentRect, coords.m_pSrcBmpRect );
 		return RenderDone;
 	}
 
 	void CAnimatedFrameComposer::HandleAnimEvent( void )
 	{
 		ComposeNextFrame();									// display next frame and set a new timer as needed
-		m_pZoomView->InvalidateRect( FALSE );
+		m_pRenderHostWnd->GetWindow()->InvalidateRect( FALSE );
 	}
 
 } //namespace d2d
