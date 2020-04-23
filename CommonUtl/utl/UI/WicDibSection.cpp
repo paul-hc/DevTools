@@ -1,7 +1,7 @@
 
 #include "stdafx.h"
 #include "WicDibSection.h"
-#include "Utilities.h"
+#include "GdiCoords.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

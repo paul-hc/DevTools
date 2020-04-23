@@ -17,6 +17,7 @@ CBaseZoomView::CBaseZoomView( ui::ImageScalingMode scalingMode, UINT zoomPct )
 	, m_scalingMode( scalingMode )
 	, m_zoomPct( zoomPct )
 	, m_pZoomBar( NULL )
+	, m_viewStatusFlags( 0 )
 {
 }
 
@@ -87,6 +88,22 @@ bool CBaseZoomView::ZoomRelative( ZoomBy zoomBy )
 		newPos < stdZoomPcts.size() &&				// in range
 		stdZoomPcts[ newPos ] != zoomPct &&			// has changed
 		ModifyZoomPct( stdZoomPcts[ newPos ] );
+}
+
+bool CBaseZoomView::SetViewStatusFlag( TViewStatusFlag flag, bool on /*= true*/ )
+{
+	ASSERT_PTR( m_hWnd );
+	if ( HasFlag( m_viewStatusFlags, flag ) == on )
+		return false;
+
+	SetFlag( m_viewStatusFlags, flag, on );
+	OnViewStatusChanged( flag );
+	return true;
+}
+
+void CBaseZoomView::OnViewStatusChanged( TViewStatusFlag flag )
+{
+	flag;
 }
 
 void CBaseZoomView::SetupContentMetrics( bool doRedraw /*= true*/ )
@@ -226,7 +243,7 @@ COLORREF CBaseZoomView::MakeAccentedBkColor( COLORREF bkColor )
 	if ( 0 == hslBkColor.m_saturation )		// B/W/Gray
 	{
 		COLORREF sysAccentColor = ::GetSysColor( COLOR_ACTIVECAPTION );
-		newColor = ui::GetWeightedMixColor( bkColor, sysAccentColor, hslBkColor.m_luminance < 200 ? 3 : 10 );
+		newColor = ui::GetWeightedMixColor( bkColor, sysAccentColor, hslBkColor.m_luminance < 200 ? 5 : 10 );
 	}
 	else
 		newColor = hslBkColor.GetScaledLuminance( hslBkColor.m_luminance < 200 ? 10 : -10 ).GetRGB();
@@ -249,7 +266,7 @@ END_MESSAGE_MAP()
 
 void CBaseZoomView::OnSize( UINT sizeType, int cx, int cy )
 {
-	CScrollView::OnSize( sizeType, cx, cy );
+	__super::OnSize( sizeType, cx, cy );
 
 	if ( SIZE_MAXIMIZED == sizeType || SIZE_RESTORED == sizeType )
 		SetupContentMetrics();							// layout content
@@ -266,12 +283,13 @@ BOOL CBaseZoomView::OnEraseBkgnd( CDC* pDC )
 
 CScopedScaleZoom::CScopedScaleZoom( CBaseZoomView* pZoomView, ui::ImageScalingMode scalingMode, UINT zoomPct, const CPoint* pClientPoint /*= NULL*/ )
 	: m_pZoomView( pZoomView )
-	, m_oldScalingMode( pZoomView->GetScalingMode() )
-	, m_oldZoomPct( pZoomView->GetZoomPct() )
-	, m_oldScrollPosition( pZoomView->GetScrollPosition() )
+	, m_oldScalingMode( m_pZoomView->GetScalingMode() )
+	, m_oldZoomPct( m_pZoomView->GetZoomPct() )
+	, m_oldScrollPosition( m_pZoomView->GetScrollPosition() )
 	, m_refPointedPct( m_pZoomView->GetContentPointedPct( pClientPoint ) )
 	, m_changed( scalingMode != m_oldScalingMode || zoomPct != m_oldZoomPct )
 {
+	m_pZoomView->SetViewStatusFlag( CBaseZoomView::ZoomMouseTracking );
 	if ( m_changed )
 	{
 		m_pZoomView->SetScaleZoom( scalingMode, zoomPct );
@@ -282,6 +300,7 @@ CScopedScaleZoom::CScopedScaleZoom( CBaseZoomView* pZoomView, ui::ImageScalingMo
 
 CScopedScaleZoom::~CScopedScaleZoom()
 {
+	m_pZoomView->SetViewStatusFlag( CBaseZoomView::ZoomMouseTracking, false );
 	if ( m_changed )
 	{
 		m_pZoomView->SetScaleZoom( m_oldScalingMode, m_oldZoomPct );
@@ -351,6 +370,7 @@ bool CZoomViewMouseTracker::RunLoop( void )
 	m_pZoomView->SetCapture();
 
 	MSG msg = { NULL };
+
 	for ( CPoint point; ::GetCapture() == m_pZoomView->m_hWnd; )
 		if ( ::PeekMessage( &msg, m_pZoomView->m_hWnd, 0, 0, PM_REMOVE ) )
 			switch ( msg.message )
@@ -361,9 +381,13 @@ bool CZoomViewMouseTracker::RunLoop( void )
 
 					switch ( m_trackOp )
 					{
-						case OpZoom:		TrackZoom( point ); break;
+						case OpZoom:
+							TrackZoom( point );
+							break;
 						case OpScroll:		// fall-through
-						case OpZoomNormal:	TrackScroll( point ); break;
+						case OpZoomNormal:
+							TrackScroll( point );
+							break;
 					}
 					break;
 				case WM_LBUTTONUP:

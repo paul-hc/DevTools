@@ -3,7 +3,7 @@
 #include "DibDraw.h"
 #include "DibSection.h"
 #include "DibPixels.h"
-#include "Utilities.h"
+#include "GdiCoords.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

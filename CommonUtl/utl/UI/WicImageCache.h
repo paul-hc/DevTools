@@ -35,9 +35,9 @@ public:
 
 	enum { MaxSize = 30u };
 
-	typedef fs::CCacheLoader< fs::ImagePathKey, CWicImage > CacheType;
+	typedef fs::CCacheLoader< fs::ImagePathKey, CWicImage > TCacheLoader;
 
-	CacheType* GetCache( void ) { return &m_imageCache; }
+	TCacheLoader* GetCache( void ) { return &m_imageCache; }
 
 	CComPtr< IWICBitmapSource > LookupBitmapSource( const fs::ImagePathKey& imageKey ) const;		// fast load if not cached, no bitmap copy
 	CSize LookupImageDim( const fs::ImagePathKey& imageKey ) const;
@@ -48,7 +48,7 @@ private:
 	virtual CWicImage* LoadObject( const fs::ImagePathKey& imageKey );
 	virtual void TraceObject( const fs::ImagePathKey& imageKey, CWicImage* pImage, int cacheFlags );
 private:
-	CacheType m_imageCache;
+	TCacheLoader m_imageCache;
 	static size_t s_traceCount;
 };
 

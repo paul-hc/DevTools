@@ -7,7 +7,7 @@
 #include "ImagingWic.h"
 #include "StreamStdTypes.h"
 #include "StructuredStorage.h"
-#include "Utilities.h"
+#include "GdiCoords.h"
 #include "TimeUtils.h"
 #include "BaseApp.h"
 #include "FileObjectCache.hxx"

@@ -2,7 +2,6 @@
 #include "stdafx.h"
 #include "AnimatedFrameComposer.h"
 #include "ImagingWic.h"
-#include "Utilities.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

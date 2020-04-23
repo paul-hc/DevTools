@@ -48,6 +48,7 @@
 
 // pass the pair of "array, arrayCount" in functions
 #define ARRAY_PAIR( array ) (array), COUNT_OF( (array) )
+#define ARRAY_PAIR_V( vect ) &(vect).front(), static_cast< unsigned int >( (vect).size() )
 
 
 #ifdef _DEBUG

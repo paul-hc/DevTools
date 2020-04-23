@@ -5,7 +5,7 @@
 #include "ResourceData.h"
 #include "StreamStdTypes.h"
 #include "StructuredStorage.h"
-#include "Utilities.h"
+#include "GdiCoords.h"
 #include "BaseApp.h"
 
 #pragma comment( lib, "windowscodecs.lib" )		// link to WIC

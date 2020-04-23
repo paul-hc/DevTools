@@ -3,8 +3,9 @@
 #include "ImageZoomViewD2D.h"
 #include "ImagingWic.h"
 #include "AnimatedFrameComposer.h"
+#include "RenderingDirect2D.h"
 #include "Color.h"
-#include "Utilities.h"
+#include "GdiCoords.h"
 #include "WicAnimatedImage.h"
 #include "WicDibSection.h"			// for printing
 
@@ -20,14 +21,32 @@ namespace d2d
 	CImageRenderTarget::CImageRenderTarget( CImageZoomViewD2D* pZoomView )
 		: CWindowRenderTarget( pZoomView )
 		, m_pZoomView( pZoomView )
-		, m_accentFrameColor( ::GetSysColor( COLOR_ACTIVECAPTION ) )
+		, m_accentFrameColor( ::GetSysColor( COLOR_ACTIVECAPTION ) )	//COLOR_HIGHLIGHT
 		, m_animTimer( m_pZoomView, AnimateTimer, 1000 )
 	{
 		ASSERT_PTR( m_pZoomView->GetSafeHwnd() );
+
+		const D2D1_COLOR_F colors[] = { ToColor( m_accentFrameColor, 70 ), ToColor( color::White, 20 ) };
+		m_pAccentFrame.reset( new CFrameFacet( 3, ARRAY_PAIR( colors ) ) );
+		m_pAccentFrame->SetFrameStyle( GradientFrameRadialCorners );
+
+	#if 0
+		// debugging: use high contrast colours
+		static const D2D1_COLOR_F s_debugColors[] = { ToColor( color::Red, 90 ), ToColor( color::Yellow, 80 ), ToColor( color::BrightGreen, 70 ) };
+		m_pAccentFrame->SetColors( ARRAY_PAIR( s_debugColors ) );
+		m_pAccentFrame->SetFrameSize( 10 );
+		m_pAccentFrame->SetFrameStyle( OutlineGradientFrame );
+	#endif
 	}
 
 	CImageRenderTarget::~CImageRenderTarget()
 	{
+	}
+
+	void CImageRenderTarget::SetAccentFrameColor( COLORREF accentFrameColor )
+	{
+		m_accentFrameColor = accentFrameColor;
+		m_pAccentFrame->DiscardResources();
 	}
 
 	CWicImage* CImageRenderTarget::GetImage( void ) const
@@ -61,14 +80,15 @@ namespace d2d
 		}
 	}
 
+
 	void CImageRenderTarget::DiscardResources( void )
 	{
 		CWindowRenderTarget::DiscardResources();
 
-		m_pAccentFrameBrush = NULL;
-
 		if ( m_pAnimComposer.get() != NULL )
 			m_pAnimComposer->Reset();
+
+		m_pAccentFrame->DiscardResources();
 	}
 
 	bool CImageRenderTarget::CreateResources( void )
@@ -79,7 +99,7 @@ namespace d2d
 		if ( ID2D1RenderTarget* pRenderTarget = GetRenderTarget() )
 		{
 			if ( m_accentFrameColor != CLR_NONE )
-				HR_AUDIT( pRenderTarget->CreateSolidColorBrush( ToColor( m_accentFrameColor, 50 ), (ID2D1SolidColorBrush**)&m_pAccentFrameBrush ) );
+				m_pAccentFrame->CreateResources( pRenderTarget );
 		}
 
 		return NULL == m_pAnimComposer.get() || m_pAnimComposer->Create();
@@ -106,15 +126,22 @@ namespace d2d
 	void CImageRenderTarget::PreDraw( const CViewCoords& coords )
 	{
 		coords;
-		ClearBackground( m_pZoomView->GetBkColor() );
+		COLORREF bkColor = m_pZoomView->GetBkColor();
+
+		if ( m_pZoomView->IsAccented() )
+			if ( m_pZoomView->HasViewStatusFlag( CBaseZoomView::FullScreen | CBaseZoomView::ZoomMouseTracking ) )
+				bkColor = CBaseZoomView::MakeAccentedBkColor( bkColor );					// use accented background highlight
+
+		ClearBackground( bkColor );
 	}
 
 	void CImageRenderTarget::PostDraw( const CViewCoords& coords )
 	{
-		D2D_RECT_F destRectF = d2d::ToRectF( coords.m_contentRect );
+		enum { FrameSize = 50 };
 
-		if ( m_pZoomView->IsAccented() && m_pAccentFrameBrush != NULL )
-			GetRenderTarget()->DrawRectangle( &destRectF, m_pAccentFrameBrush, 5 );		// draw the outline
+		if ( m_pZoomView->IsAccented() )
+			if ( !m_pZoomView->HasViewStatusFlag( CBaseZoomView::FullScreen | CBaseZoomView::ZoomMouseTracking ) )		// don't show the frame in zoom tracking mode
+				m_pAccentFrame->Draw( GetRenderTarget(), coords.m_contentRect );
 	}
 
 
@@ -194,8 +221,8 @@ void CImageZoomViewD2D::OnDraw( CDC* pDC )
 		{
 			CPoint scrollPos = GetScrollPosition();
 
-			m_drawTraits.m_transform = D2D1::Matrix3x2F::Translation( (float)-scrollPos.x, (float)-scrollPos.y );	// apply translation transform according to view's scroll position
-			m_drawTraits.SetAutoInterpolationMode( GetContentRect().Size(), GetSourceSize() );
+			m_drawTraits.SetScrollPos( scrollPos );												// apply translation transform according to view's scroll position
+			m_drawTraits.SetAutoInterpolationMode( GetContentRect().Size(), GetSourceSize() );	// force smooth mode when shrinking bitmap
 
 			d2d::CViewCoords viewCoords( m_drawTraits, _GetClientRect(), GetContentRect() );
 

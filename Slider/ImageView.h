@@ -50,7 +50,7 @@ public:
 
 	CWicImage* ForceReloadImage( void ) const;
 
-	// view status persistence
+	// view state persistence
 	void MakeImageState( CImageState* pImageState ) const;
 private:
 	void RestoreState( const CImageState& loadingImageState );

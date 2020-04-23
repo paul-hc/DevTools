@@ -595,6 +595,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\GdiCoords.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\GdiCoords.h"
+				>
+			</File>
+			<File
 				RelativePath=".\GdiPlus_fwd.h"
 				>
 			</File>
@@ -971,6 +979,14 @@
 				</File>
 				<File
 					RelativePath=".\Pixel.h"
+					>
+				</File>
+				<File
+					RelativePath=".\RenderingDirect2D.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\RenderingDirect2D.h"
 					>
 				</File>
 				<File

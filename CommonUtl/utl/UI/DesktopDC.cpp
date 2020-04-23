@@ -1,7 +1,6 @@
 
 #include "stdafx.h"
 #include "DesktopDC.h"
-#include "Utilities.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

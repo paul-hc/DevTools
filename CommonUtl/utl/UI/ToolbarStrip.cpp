@@ -32,7 +32,7 @@ bool CToolbarStrip::InitToolbarButtons( void )
 	ASSERT_PTR( m_hWnd );
 	ASSERT( m_strip.IsValid() );
 
-	if ( !SetButtons( &m_strip.m_buttonIds.front(), static_cast< int >( m_strip.m_buttonIds.size() ) ) )
+	if ( !SetButtons( ARRAY_PAIR_V( m_strip.m_buttonIds ) ) )
 		return false;
 
 	CSize buttonSize = m_strip.m_imageSize + CSize( BtnEdgeWidth, BtnEdgeHeight );

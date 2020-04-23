@@ -51,6 +51,20 @@ public:
 	bool ModifyZoomPct( UINT zoomPct );
 
 	void SetScaleZoom( ui::ImageScalingMode scalingMode, UINT zoomPct );
+
+	// view state
+	enum ViewStatusFlags
+	{
+		FullScreen			= BIT_FLAG( 0 ),
+		ZoomMouseTracking	= BIT_FLAG( 1 )
+	};
+	typedef int TViewStatusFlag;
+
+	bool HasViewStatusFlag( TViewStatusFlag flag ) const { return HasFlag( m_viewStatusFlags, flag ); }
+	bool SetViewStatusFlag( TViewStatusFlag flag, bool on = true );
+	virtual void OnViewStatusChanged( TViewStatusFlag flag );
+
+	static COLORREF MakeAccentedBkColor( COLORREF bkColor );	// background highlighting (used in full screen)
 protected:
 	bool AssignScalingMode( ui::ImageScalingMode scalingMode ) { return utl::ModifyValue( m_scalingMode, scalingMode ) && OutputScalingMode(); }
 	bool OutputScalingMode( void ) { return m_pZoomBar != NULL && m_pZoomBar->OutputScalingMode( m_scalingMode ); }
@@ -65,18 +79,17 @@ protected:
 
 	ui::IZoomBar* GetZoomBar( void ) const { return m_pZoomBar; }
 	void SetZoomBar( ui::IZoomBar* pZoomBar ) { m_pZoomBar = pZoomBar; }
-protected:
-	static COLORREF MakeAccentedBkColor( COLORREF bkColor );	// background highlighting (no longer used)
 private:
 	ui::ImageScalingMode m_scalingMode;		// default auto image size (app::Slider_v4_0+)
 	UINT m_zoomPct;
 	ui::IZoomBar* m_pZoomBar;
+	TViewStatusFlag m_viewStatusFlags;
 
 	CRect m_clientRect;
 	CRect m_contentRect;
-protected:
+
 	// generated stuff
-	protected:
+protected:
 	virtual BOOL OnPreparePrinting( CPrintInfo* pInfo );
 protected:
 	virtual void OnSize( UINT sizeType, int cx, int cy );
@@ -86,22 +99,10 @@ protected:
 };
 
 
-class CScopedScaleZoom
-{
-public:
-	CScopedScaleZoom( CBaseZoomView* pZoomView, ui::ImageScalingMode scalingMode, UINT zoomPct, const CPoint* pClientPoint = NULL );
-	~CScopedScaleZoom();
-private:
-	CBaseZoomView* m_pZoomView;
-	ui::ImageScalingMode m_oldScalingMode;
-	UINT m_oldZoomPct;
-	CPoint m_oldScrollPosition;
-	CSize m_refPointedPct;						// percentage of clicked point to old content origin
-	bool m_changed;
-};
+class CScopedScaleZoom;
 
 
-class CZoomViewMouseTracker
+class CZoomViewMouseTracker : private utl::noncopyable
 {
 public:
 	enum TrackOperation { OpZoom, OpScroll, OpZoomNormal, _Auto };
@@ -128,6 +129,21 @@ private:
 	const ui::ImageScalingMode m_origScalingMode;
 	const UINT m_origZoomPct;
 	HCURSOR m_hOrigCursor;
+};
+
+
+class CScopedScaleZoom
+{
+public:
+	CScopedScaleZoom( CBaseZoomView* pZoomView, ui::ImageScalingMode scalingMode, UINT zoomPct, const CPoint* pClientPoint = NULL );
+	~CScopedScaleZoom();
+private:
+	CBaseZoomView* m_pZoomView;
+	ui::ImageScalingMode m_oldScalingMode;
+	UINT m_oldZoomPct;
+	CPoint m_oldScrollPosition;
+	CSize m_refPointedPct;						// percentage of clicked point to old content origin
+	bool m_changed;
 };
 
 

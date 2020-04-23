@@ -6,89 +6,14 @@
 #include "Image_fwd.h"
 #include "Range.h"
 #include "ui_fwd.h"
+#include "GdiCoords.h"
 #include <hash_map>
 
 
 namespace ui
 {
-	// GDI utils
-
-	int CombineWithRegion( CRgn* pCombined, const RECT& rect, int combineMode );
-	int CombineRects( CRgn* pCombined, const RECT& outerRect, const RECT& innerRect, int combineMode = RGN_DIFF );
-
-	inline CPoint MaxPoint( const CPoint& left, const CPoint& right ) { return CPoint( std::max( left.x, right.x ), std::max( left.y, right.y ) ); }
-	inline CPoint MinPoint( const CPoint& left, const CPoint& right ) { return CPoint( std::min( left.x, right.x ), std::min( left.y, right.y ) ); }
-
-	inline CSize MaxSize( const CSize& left, const CSize& right ) { return CSize( std::max( left.cx, right.cx ), std::max( left.cy, right.cy ) ); }
-	inline CSize MinSize( const CSize& left, const CSize& right ) { return CSize( std::min( left.cx, right.cx ), std::min( left.cy, right.cy ) ); }
-
-	inline bool IsEmptySize( const CSize& size ) { return 0 == size.cx || 0 == size.cy; }
-
-	inline CSize ScaleSize( const CSize& size, int mulBy, int divBy = 100 )
-	{
-		return CSize( MulDiv( size.cx, mulBy, divBy ), MulDiv( size.cy, mulBy, divBy ) );
-	}
-
-	inline CSize ScaleSize( const CSize& size, double factor )
-	{
-		return CSize( static_cast< long >( factor * size.cx ), static_cast< long >( factor * size.cy ) );
-	}
-
-	inline CRect& SetRectSize( CRect& rRect, const CSize& size )
-	{
-		rRect.BottomRight() = rRect.TopLeft() + size;
-		return rRect;
-	}
-
-
-	inline bool FitsInside( const CSize& destBoundsSize, const CSize& srcSize )
-	{
-		return srcSize.cx <= destBoundsSize.cx && srcSize.cy <= destBoundsSize.cy;
-	}
-
-	inline bool FitsExactly( const CSize& destBoundsSize, const CSize& srcSize )
-	{
-		return
-			( srcSize.cx == destBoundsSize.cx && srcSize.cy <= destBoundsSize.cy ) ||
-			( srcSize.cx <= destBoundsSize.cx && srcSize.cy == destBoundsSize.cy );
-	}
-
-
-	// aspect ratio
-	inline double GetAspectRatio( const CSize& size ) { return (double)size.cx / size.cy; }
-	double GetDistFromSquareAspect( const CSize& size );
-	CSize StretchToFit( const CSize& destBoundsSize, const CSize& srcSize );
-	CRect StretchToFit( const CRect& destBoundsRect, const CSize& srcSize, CSize spacingSize = CSize( 0, 0 ), int alignment = H_AlignCenter | V_AlignCenter );
-
-	inline CSize ShrinkToFit( const CSize& destBoundsSize, const CSize& srcSize )
-	{
-		return FitsInside( destBoundsSize, srcSize )
-			? srcSize
-			: StretchToFit( destBoundsSize, srcSize );
-	}
-
-	CSize StretchSize( const CSize& destBoundsSize, const CSize& srcSize, StretchMode stretchMode );
-
-
 	int GetDrawTextAlignment( UINT dtFlags );
 	void SetDrawTextAlignment( UINT* pDtFlags, Alignment alignment );
-
-
-	CRect& AlignRect( CRect& rDest, const CRect& anchor, int alignment, bool limitDest = false );
-
-	inline CRect& AlignRectHV( CRect& rDest, const CRect& anchor, Alignment horz, Alignment vert, bool limitDest = false )
-	{
-		return AlignRect( rDest, anchor, horz | vert, limitDest );
-	}
-
-	CRect& CenterRect( CRect& rDest, const CRect& anchor, bool horiz = true, bool vert = true, bool limitDest = false, const CSize& offset = CSize( 0, 0 ) );
-
-	enum Stretch { Width, Height, Size };
-
-	void StretchRect( CRect& rDest, const CRect& anchor, Stretch stretch );
-
-	bool EnsureVisibleRect( CRect& rDest, const CRect& anchor, bool horiz = true, bool vert = true );
-	void EnsureMinEdge( CRect& rInner, const CRect& outer, int edge = 1 );
 
 
 	// multiple monitors

@@ -15,14 +15,16 @@ namespace d2d
 {
 	// type conversions: GDI -> D2D
 
-	inline D2D_POINT_2U ToPoint( const CPoint& pos ) { return D2D1::Point2U( pos.x, pos.y ); }
-	inline D2D_POINT_2F ToPointF( const CPoint& pos ) { return D2D1::Point2F( (float)pos.x, (float)pos.y ); }
+	inline D2D_POINT_2U ToPoint( const POINT& pos ) { return D2D1::Point2U( pos.x, pos.y ); }
+	inline D2D_POINT_2F ToPointF( const POINT& pos ) { return D2D1::Point2F( (float)pos.x, (float)pos.y ); }
+	inline D2D_POINT_2F ToPointF( int x, int y ) { return D2D1::Point2F( (float)x, (float)y ); }
 
-	inline D2D_SIZE_U ToSize( const CSize& size ) { return D2D1::SizeU( size.cx, size.cy ); }
-	inline D2D_SIZE_F ToSizeF( const CSize& size ) { return D2D1::SizeF( (float)size.cx, (float)size.cy ); }
+	inline D2D_SIZE_U ToSize( const SIZE& size ) { return D2D1::SizeU( size.cx, size.cy ); }
+	inline D2D_SIZE_F ToSizeF( const SIZE& size ) { return D2D1::SizeF( (float)size.cx, (float)size.cy ); }
+	inline D2D_SIZE_F ToSizeF( int cx, int cy ) { return D2D1::SizeF( (float)cx, (float)cy ); }
 
-	inline D2D_RECT_U ToRect( const CRect& rect ) { return D2D1::RectU( rect.left, rect.top, rect.right, rect.bottom ); }
-	inline D2D_RECT_F ToRectF( const CRect& rect ) { return D2D1::RectF( (float)rect.left, (float)rect.top, (float)rect.right, (float)rect.bottom ); }
+	inline D2D_RECT_U ToRect( const RECT& rect ) { return D2D1::RectU( rect.left, rect.top, rect.right, rect.bottom ); }
+	inline D2D_RECT_F ToRectF( const RECT& rect ) { return D2D1::RectF( (float)rect.left, (float)rect.top, (float)rect.right, (float)rect.bottom ); }
 
 	// D2D1_COLOR_F is equivalent with D2D_COLOR_F
 	inline D2D1_COLOR_F ToColor( COLORREF color, UINT opacityPct = 100 )
@@ -37,6 +39,18 @@ namespace d2d
 		return colorValue;
 	}
 
+	inline D2D1_COLOR_F ToColorAlpha( COLORREF color, BYTE alpha = 255 )
+	{
+		D2D1_COLOR_F colorValue =		// RGBA
+		{
+			static_cast< float >( GetRValue( color ) ) / 255.f,
+			static_cast< float >( GetGValue( color ) ) / 255.f,
+			static_cast< float >( GetBValue( color ) ) / 255.f,
+			static_cast< float >( alpha ) / 255.f
+		};
+		return colorValue;
+	}
+
 	inline float GetAlpha( WICColor argbColor ) { return ( argbColor >> 24 ) / 255.f; }
 
 
@@ -47,14 +61,14 @@ namespace d2d
 
 namespace d2d
 {
-	// singleton to create WIC COM objects for
+	// singleton to create Direct 2D COM objects for
 	//
-	class CImagingFactory
+	class CFactory
 	{
-		CImagingFactory( void );
-		~CImagingFactory();
+		CFactory( void );
+		~CFactory();
 	public:
-		static CImagingFactory& Instance( void );
+		static CFactory& Instance( void );
 		static ID2D1Factory* Factory( void ) { return &*Instance().m_pFactory; }
 	private:
 		CComPtr< ID2D1Factory > m_pFactory;
@@ -70,7 +84,8 @@ namespace d2d
 	{
 		CDrawBitmapTraits( COLORREF bkColor = CLR_NONE, bool smoothing = true, UINT opacityPct = 100 );
 
-		void SetAutoInterpolationMode( const CSize& destBoundsSize, const CSize& bmpSize );
+		void SetScrollPos( const POINT& scrollPos );
+		void SetAutoInterpolationMode( const SIZE& destBoundsSize, const SIZE& bmpSize );
 
 		void Draw( ID2D1RenderTarget* pRenderTarget, ID2D1Bitmap* pBitmap, const CRect& destRect, const CRect* pSrcRect = NULL ) const;
 
@@ -80,7 +95,7 @@ namespace d2d
 		COLORREF m_bkColor;
 		float m_opacity;
 		D2D1_BITMAP_INTERPOLATION_MODE m_interpolationMode;
-		D2D1_MATRIX_3X2_F m_transform;			// Identity, Scale, Translation, Rotation, etc
+		D2D1::Matrix3x2F m_transform;			// Identity, Scale, Translation, Rotation, etc
 		COLORREF m_frameColor;					// useful for debugging
 
 		static D2D1_BITMAP_INTERPOLATION_MODE s_enlargeInterpolationMode;		// by default no smoothing when enlarging images (raster image friendly)
@@ -104,7 +119,7 @@ namespace d2d
 	public:
 		const CDrawBitmapTraits& m_dbmTraits;
 		const CRect& m_clientRect;
-		const CRect& m_contentRect;			// bitmap scaled rect in the view (AKA destRect)
+		const CRect& m_contentRect;			// logical coordinates: bitmap scaled rect in the view (AKA destRect)
 		const CRect* m_pSrcBmpRect;			// source bitmap area as a subset (default null: entire bitmap)
 	};
 }
@@ -184,7 +199,7 @@ namespace d2d
 	public:
 		CWindowRenderTarget( CWnd* pWnd ) : CRenderTarget(), m_pWnd( pWnd ) { ASSERT_PTR( m_pWnd ); }
 
-		bool Resize( const CSize& clientSize );
+		bool Resize( const SIZE& clientSize );
 		bool Resize( void );
 
 		// IRenderHostWindow interface
@@ -214,7 +229,7 @@ namespace d2d
 			ASSERT_PTR( m_pDC->GetWindow() );						// DC's window is required for getting the client rect
 		}
 
-		bool Resize( const CRect& subRect );
+		bool Resize( const RECT& subRect );
 
 		// IRenderHostWindow interface
 		virtual ID2D1RenderTarget* GetRenderTarget( void ) const { return m_pDcRenderTarget; }

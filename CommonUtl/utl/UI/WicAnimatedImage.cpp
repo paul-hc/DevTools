@@ -3,7 +3,7 @@
 #include "WicAnimatedImage.h"
 #include "ImagingDirect2D.h"
 #include "MfcUtilities.h"
-#include "Utilities.h"
+#include "GdiCoords.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

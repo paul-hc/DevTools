@@ -49,7 +49,7 @@ CImageList* CToolStrip::EnsureImageList( void )
 		if ( CImageStore::HasSharedStore() )
 		{
 			std::auto_ptr< CImageList > pImageList( new CImageList );
-			int imageCount = CImageStore::GetSharedStore()->AddToImageList( *pImageList, &m_buttonIds.front(), m_buttonIds.size(), m_imageSize );
+			int imageCount = CImageStore::GetSharedStore()->AddToImageList( *pImageList, ARRAY_PAIR_V( m_buttonIds ), m_imageSize );
 			if ( imageCount == GetImageCount() )			// all buttons images found
 				m_pImageList.reset( pImageList.release() );
 		}
@@ -152,7 +152,7 @@ void CToolStrip::RegisterButtons( CImageStore* pImageStore )
 		pImageStore = CImageStore::SharedStore();
 
 	ASSERT( IsValid() && HasImages() );
-	pImageStore->RegisterButtonImages( *m_pImageList, &m_buttonIds.front(), m_buttonIds.size(), &m_imageSize );
+	pImageStore->RegisterButtonImages( *m_pImageList, ARRAY_PAIR_V( m_buttonIds ), &m_imageSize );
 }
 
 void CToolStrip::RegisterStripButtons( UINT toolStripId, COLORREF transpColor /*= color::Auto*/, CImageStore* pImageStore /*= NULL*/ )

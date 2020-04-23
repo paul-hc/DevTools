@@ -3,9 +3,6 @@
 #pragma once
 
 
-#define ON_CN_INPUTERROR( id, memberFxn )		ON_CONTROL( ui::CN_INPUTERROR, id, memberFxn )
-
-
 enum Alignment
 {
 	NoAlign = 0,
@@ -26,6 +23,14 @@ enum Alignment
 namespace ui
 {
 	enum StretchMode { OriginalSize, StretchFit, ShrinkFit };
+}
+
+
+#define ON_CN_INPUTERROR( id, memberFxn )		ON_CONTROL( ui::CN_INPUTERROR, id, memberFxn )
+
+
+namespace ui
+{
 	enum ComboField { BySel, ByEdit };
 
 	enum PopupAlign { DropRight, DropDown, DropLeft, DropUp };

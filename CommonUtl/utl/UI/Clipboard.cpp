@@ -3,7 +3,6 @@
 #include "Clipboard.h"
 #include "FileSystem.h"
 #include "OleUtils.h"
-#include "Utilities.h"
 #include "ShellUtilities.h"
 #include "utl/StringUtilities.h"
 

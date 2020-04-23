@@ -72,7 +72,7 @@ void CDialogToolBar::CreateToolbar( CWnd* pParent, UINT toolbarResId )
 		VERIFY( LoadToolStrip( toolbarResId ) );
 	else if ( m_strip.IsValid() )
 	{
-		VERIFY( SetButtons( &m_strip.m_buttonIds.front(), (int)m_strip.m_buttonIds.size() ) );
+		VERIFY( SetButtons( ARRAY_PAIR_V( m_strip.m_buttonIds ) ) );
 		CSize buttonSize = m_strip.m_imageSize + CSize( BtnEdgeWidth, BtnEdgeHeight );
 		SetSizes( buttonSize, m_strip.m_imageSize );			// set new sizes of the buttons
 

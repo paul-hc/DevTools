@@ -3,9 +3,9 @@
 #include "ImagingDirect2D.h"
 #include "ImagingWic.h"
 #include "BaseApp.h"
-#include "Utilities.h"
+#include "GdiCoords.h"
 
-#pragma comment( lib, "d2d1" )					// link to Direct2D
+#pragma comment( lib, "d2d1" )		// link to Direct2D
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -14,9 +14,9 @@
 
 namespace d2d
 {
-	// CImagingFactory implementation
+	// CFactory implementation
 
-	CImagingFactory::CImagingFactory( void )
+	CFactory::CFactory( void )
 	{
 	#ifdef DEBUG_DIRECT2D
 		D2D1_FACTORY_OPTIONS options;
@@ -30,13 +30,13 @@ namespace d2d
 		app::GetSharedResources().AddComPtr( m_pFactory );			// will release the factory singleton in ExitInstance()
 	}
 
-	CImagingFactory::~CImagingFactory()
+	CFactory::~CFactory()
 	{
 	}
 
-	CImagingFactory& CImagingFactory::Instance( void )
+	CFactory& CFactory::Instance( void )
 	{
-		static CImagingFactory factory;
+		static CFactory factory;
 		return factory;
 	}
 
@@ -60,7 +60,13 @@ namespace d2d
 			smoothingMode ? D2D1_BITMAP_INTERPOLATION_MODE_LINEAR : D2D1_BITMAP_INTERPOLATION_MODE_NEAREST_NEIGHBOR );
 	}
 
-	void CDrawBitmapTraits::SetAutoInterpolationMode( const CSize& destBoundsSize, const CSize& bmpSize )
+	void CDrawBitmapTraits::SetScrollPos( const POINT& scrollPos )
+	{
+		// apply translation transform according to view's scroll position
+		m_transform = D2D1::Matrix3x2F::Translation( (float)-scrollPos.x, (float)-scrollPos.y );
+	}
+
+	void CDrawBitmapTraits::SetAutoInterpolationMode( const SIZE& destBoundsSize, const SIZE& bmpSize )
 	{
 		m_interpolationMode = ui::FitsInside( destBoundsSize, bmpSize )
 			? s_enlargeInterpolationMode							// no smoothing on stretching (by default, user configurable)
@@ -72,7 +78,7 @@ namespace d2d
 		// caller should initiate BeginDraw
 		ASSERT_PTR( pRenderTarget );
 
-		pRenderTarget->SetTransform( m_transform );
+		pRenderTarget->SetTransform( &m_transform );
 
 		D2D_RECT_F destRectF = d2d::ToRectF( destRect );
 		if ( m_bkColor != CLR_NONE )
@@ -117,6 +123,7 @@ namespace d2d
 				TRACE( _T("** Direct 2D device loss **\n") );
 
 				DiscardResources();
+
 				if ( CWnd* pWnd = GetWindow() )
 					pWnd->Invalidate( TRUE );			// device loss: force a re-render
 			}
@@ -174,7 +181,7 @@ namespace d2d
 
 	// CWindowRenderTarget implementation
 
-	bool CWindowRenderTarget::Resize( const CSize& clientSize )
+	bool CWindowRenderTarget::Resize( const SIZE& clientSize )
 	{
 		if ( !HR_OK( m_pWndRenderTarget->Resize( ToSize( clientSize ) ) ) )			// IMP: if couldn't resize, release the device and we'll recreate it during the next render pass
 		{
@@ -207,9 +214,9 @@ namespace d2d
 		D2D1_RENDER_TARGET_PROPERTIES rtProps = D2D1::RenderTargetProperties();
 
 		// use the screen DPI to allow direct mapping between image pixels and desktop pixels in different system DPI settings
-		CImagingFactory::Factory()->GetDesktopDpi( &rtProps.dpiX, &rtProps.dpiY );		// usually 96 DPI
+		CFactory::Factory()->GetDesktopDpi( &rtProps.dpiX, &rtProps.dpiY );		// usually 96 DPI
 
-		return HR_OK( CImagingFactory::Factory()->CreateHwndRenderTarget(
+		return HR_OK( CFactory::Factory()->CreateHwndRenderTarget(
 			rtProps,
 			D2D1::HwndRenderTargetProperties( m_pWnd->GetSafeHwnd(), ToSize( clientRect.Size() ) ),
 			&m_pWndRenderTarget ) );
@@ -238,7 +245,7 @@ namespace d2d
 
 		// use the screen DPI to allow direct mapping between image pixels and desktop pixels in different system DPI settings
 		float dpiX, dpiY;
-		CImagingFactory::Factory()->GetDesktopDpi( &dpiX, &dpiY );			// usually 96 DPI
+		CFactory::Factory()->GetDesktopDpi( &dpiX, &dpiY );			// usually 96 DPI
 
 		D2D1_RENDER_TARGET_PROPERTIES rtProps = D2D1::RenderTargetProperties(
 			D2D1_RENDER_TARGET_TYPE_DEFAULT,
@@ -248,11 +255,11 @@ namespace d2d
 			D2D1_FEATURE_LEVEL_DEFAULT );
 
 		return
-			HR_OK( CImagingFactory::Factory()->CreateDCRenderTarget( &rtProps, &m_pDcRenderTarget ) ) &&
+			HR_OK( CFactory::Factory()->CreateDCRenderTarget( &rtProps, &m_pDcRenderTarget ) ) &&
 			Resize( clientRect );
 	}
 
-	bool CDCRenderTarget::Resize( const CRect& subRect )
+	bool CDCRenderTarget::Resize( const RECT& subRect )
 	{
 		ASSERT_PTR( m_pDC->GetSafeHdc() );
 

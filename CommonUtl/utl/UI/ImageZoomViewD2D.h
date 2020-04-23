@@ -15,6 +15,7 @@ class CImageZoomViewD2D;
 namespace d2d
 {
 	class CAnimatedFrameComposer;
+	class CFrameFacet;
 
 
 	// Owned by the view that displays the STILL/ANIMATED image using a timer and Direct 2D rendering.
@@ -26,7 +27,9 @@ namespace d2d
 		CImageRenderTarget( CImageZoomViewD2D* pZoomView );
 		~CImageRenderTarget();
 
-		void SetAccentFrameColor( COLORREF accentFrameColor ) { m_accentFrameColor = accentFrameColor; }
+		void SetAccentFrameColor( COLORREF accentFrameColor );
+
+		CFrameFacet* GetAccentFrame( void ) { return m_pAccentFrame.get(); }
 
 		// base overrides
 		virtual void DiscardResources( void );
@@ -54,7 +57,7 @@ namespace d2d
 		CWindowTimer m_animTimer;
 
 		// additional drawing resources
-		CComPtr< ID2D1Brush > m_pAccentFrameBrush;					// to display a focus frame
+		std::auto_ptr< CFrameFacet > m_pAccentFrame;				// frame drawn when view is focused
 	};
 }
 

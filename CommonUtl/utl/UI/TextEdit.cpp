@@ -149,7 +149,7 @@ std::tstring CTextEdit::GetLineText( Line linePos ) const
 	size_t length = GetLineRange( linePos ).GetSpan< size_t >();
 	std::vector< TCHAR > lineBuffer( length + 1 );
 
-	size_t newLength = GetLine( linePos, &lineBuffer.front(), static_cast< int >( lineBuffer.size() ) );
+	size_t newLength = GetLine( linePos, ARRAY_PAIR_V( lineBuffer ) );
 	ENSURE( length == newLength ); newLength;
 	lineBuffer[ length ] = _T('\0');
 	return &lineBuffer.front();

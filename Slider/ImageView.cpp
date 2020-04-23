@@ -208,6 +208,9 @@ void CImageView::OnUpdate( CView* pSender, LPARAM lHint, CObject* pHint )
 	UpdateViewHint hint = (UpdateViewHint)lHint;
 	switch ( hint )
 	{
+		case Hint_ToggleFullScreen:
+			SetViewStatusFlag( FullScreen, CWorkspace::Instance().IsFullScreen() );
+			break;
 		case Hint_FileListChanged:
 			break;
 		case Hint_ReloadImage:			// this could be send by CApplication::UpdateAllViews()
@@ -378,7 +381,7 @@ void CImageView::OnMButtonDown( UINT mkFlags, CPoint point )
 	__super::OnMButtonDown( mkFlags, point );
 	SetFocus();
 
-	if ( GetImage() != NULL )
+	if ( GetImage() != NULL && InContentRect( point ) )
 		CZoomViewMouseTracker::Run( this, mkFlags, point );
 }
 
@@ -396,7 +399,7 @@ BOOL CImageView::OnMouseWheel( UINT mkFlags, short zDelta, CPoint point )
 		int delta = -( zDelta / WHEEL_DELTA );
 		if ( delta != 0 )
 			ZoomRelative( delta > 0 ? ZoomOut : ZoomIn );
-		return TRUE;		// message processed
+		return TRUE;	// message processed
 	}
 	return FALSE;		//__super::OnMouseWheel( mkFlags, zDelta, point );
 }

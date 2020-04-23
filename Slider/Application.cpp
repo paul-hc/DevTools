@@ -353,7 +353,6 @@ BOOL CApplication::InitInstance( void )
 	m_pRecentFileList = NULL;
 	LoadStdProfileSettings( CWorkspace::GetData().m_mruCount );
 
-//ASSERT(0);
 	ParseCommandLine( cmdInfo );			// parse command line for standard shell commands, DDE, file open
 
 	EnableShellOpen();						// enable DDE Execute open

@@ -318,28 +318,33 @@ void CWorkspace::ToggleFullScreen( void )
 		m_mainPlacement.GetPlacement( m_pMainFrame );
 
 		// window is about to compute to full screen mode -> so compute the rect for full screen state
-		CRect rectMDIClient, rectDelta, rectWnd;
-
 		if ( m_pMainFrame->IsZoomed() )
 			m_pMainFrame->ShowWindow( SW_RESTORE );
-		m_pMainFrame->GetWindowRect( rectWnd );
-		::GetClientRect( m_pMainFrame->m_hWndMDIClient, rectMDIClient );
-		::MapWindowPoints( m_pMainFrame->m_hWndMDIClient, HWND_DESKTOP, &rectMDIClient.TopLeft(), 2 );
-		// Compute the MDI-Client to main-frame difference rectangle:
-		rectDelta.left = rectMDIClient.left - rectWnd.left;
-		rectDelta.top = rectMDIClient.top - rectWnd.top;
-		rectDelta.right = rectWnd.right - rectMDIClient.right;
-		rectDelta.bottom = rectWnd.bottom - rectMDIClient.bottom;
 
-		::GetWindowRect( ::GetDesktopWindow(), rectWnd );
-		rectWnd.InflateRect( rectDelta );
+		CRect mainWndRect;
+		m_pMainFrame->GetWindowRect( &mainWndRect );
 
-		static CSize borderSize( GetSystemMetrics( SM_CXEDGE ), GetSystemMetrics( SM_CYEDGE ) );
+		CRect mdiClientScreenRect;
+		::GetClientRect( m_pMainFrame->m_hWndMDIClient, &mdiClientScreenRect );
+		ui::ClientToScreen( m_pMainFrame->m_hWndMDIClient, mdiClientScreenRect );
 
-		rectWnd.InflateRect( borderSize );
+		// compute the MDI-Client to main-frame difference rectangle
+		CRect deltaRect;
+		deltaRect.left = mdiClientScreenRect.left - mainWndRect.left;
+		deltaRect.top = mdiClientScreenRect.top - mainWndRect.top;
+		deltaRect.right = mainWndRect.right - mdiClientScreenRect.right;
+		deltaRect.bottom = mainWndRect.bottom - mdiClientScreenRect.bottom;
+
+		mainWndRect = ui::FindMonitorRect( m_pMainFrame->m_hWnd, ui::Monitor );
+		//::GetWindowRect( ::GetDesktopWindow(), &mainWndRect );
+		mainWndRect.InflateRect( &deltaRect );
+
+		CSize borderSize( GetSystemMetrics( SM_CXEDGE ), GetSystemMetrics( SM_CYEDGE ) );
+
+		mainWndRect.InflateRect( borderSize );
 
 		// note that SWP_NOSENDCHANGING flag is mandatory since WM_WINDOWPOSCHANGING limits main frame's position
-		m_pMainFrame->SetWindowPos( &CWnd::wndTop, rectWnd.left, rectWnd.top, rectWnd.Width(), rectWnd.Height(),
+		m_pMainFrame->SetWindowPos( &CWnd::wndTop, mainWndRect.left, mainWndRect.top, mainWndRect.Width(), mainWndRect.Height(),
 			/*SWP_NOOWNERZORDER | SWP_NOZORDER |*/ SWP_SHOWWINDOW | SWP_NOSENDCHANGING );
 	}
 
