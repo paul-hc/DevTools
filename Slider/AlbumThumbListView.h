@@ -57,7 +57,7 @@ public:
 
 	bool CheckListLayout( CheckLayoutMode checkMode = SplitterTrack );
 
-	CSize GetPageScrollExtent( void ) const;
+	CSize GetPageItemCounts( void ) const;		// item counts in the list: (horizontal, vertical)
 	static CRect GetListWindowRect( int columnCount = 1, CWnd* pListWnd = NULL );
 private:
 	CWicDibSection* GetItemThumb( int displayIndex ) const throws_();

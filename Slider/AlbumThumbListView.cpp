@@ -177,7 +177,7 @@ bool CAlbumThumbListView::QuerySelItemPaths( std::vector< fs::CFlexPath >& rSelF
 
 	if ( IsMultiSelection() )
 	{
-		if ( size_t selCount = pListBox->GetSelCount() )
+		if ( int selCount = pListBox->GetSelCount() )
 		{
 			std::vector< int > selIndexes;
 			selIndexes.resize( selCount );
@@ -724,7 +724,7 @@ const fs::CFlexPath* CAlbumThumbListView::GetItemPath( int displayIndex ) const
 	return &m_pFileList->GetFileAttr( displayIndex ).GetPath();
 }
 
-CSize CAlbumThumbListView::GetPageScrollExtent( void ) const
+CSize CAlbumThumbListView::GetPageItemCounts( void ) const
 {
 	CListBox* pListBox = AsListBox();
 	CSize pageScrollSize( 1, 1 );
@@ -733,8 +733,8 @@ CSize CAlbumThumbListView::GetPageScrollExtent( void ) const
 	if ( pListBox->GetItemRect( pListBox->GetTopIndex(), &itemRect ) != LB_ERR )
 	{
 		CRect clientRect;
-
 		pListBox->GetClientRect( &clientRect );
+
 		pageScrollSize.cx = clientRect.Width() / itemRect.Width();
 		pageScrollSize.cy = clientRect.Height() / itemRect.Height();
 	}

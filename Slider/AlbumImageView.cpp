@@ -419,10 +419,13 @@ BEGIN_MESSAGE_MAP( CAlbumImageView, CImageView )
 	ON_UPDATE_COMMAND_UI( ID_NAVIG_SEEK_BEGIN, OnUpdate_NavigSeek_Begin )
 	ON_COMMAND( ID_NAVIG_SEEK_END, On_NavigSeek_End )
 	ON_UPDATE_COMMAND_UI( ID_NAVIG_SEEK_END, OnUpdate_NavigSeek_End )
+
 	ON_COMMAND( ID_NAVIG_SEEK_PREV, On_NavigSeek_Prev )
 	ON_UPDATE_COMMAND_UI( ID_NAVIG_SEEK_PREV, OnUpdate_NavigSeek_Prev )
+
 	ON_COMMAND( ID_NAVIG_SEEK_NEXT, On_NavigSeek_Next )
 	ON_UPDATE_COMMAND_UI( ID_NAVIG_SEEK_NEXT, OnUpdate_NavigSeek_Next )
+
 	ON_COMMAND_RANGE( ID_TOGGLE_NAVIG_DIR_FWD, ID_TOGGLE_NAVIG_DIR_REV, OnRadio_NavigDirection )
 	ON_UPDATE_COMMAND_UI_RANGE( ID_TOGGLE_NAVIG_DIR_FWD, ID_TOGGLE_NAVIG_DIR_REV, OnUpdate_NavigDirection )
 	ON_COMMAND( ID_TOGGLE_NAVIG_WRAP_MODE, OnToggle_NavigWrapMode )
@@ -472,8 +475,8 @@ void CAlbumImageView::OnKeyDown( UINT chr, UINT repCnt, UINT vkFlags )
 
 	switch ( chr )
 	{
-		case VK_PRIOR:
-		case VK_NEXT:
+		case VK_PRIOR:		// PAGE UP key
+		case VK_NEXT:		// PAGE DOWN key
 			// mirror these navigation keys to the thumb list view (only if non SHIFT or CONTROL - careful: multiple selection)
 			if ( !ui::IsKeyPressed( VK_SHIFT ) && !ui::IsKeyPressed( VK_CONTROL ) )
 				m_pPeerThumbView->SendMessage( WM_KEYDOWN, chr, MAKELPARAM( repCnt, vkFlags ) );
@@ -497,7 +500,7 @@ BOOL CAlbumImageView::OnMouseWheel( UINT mkFlags, short zDelta, CPoint point )
 		if ( delta != 0 )
 		{
 			size_t currPos = m_slideData.GetCurrentIndex();
-			size_t step = HasFlag( mkFlags, MK_SHIFT ) ? m_pPeerThumbView->GetPageScrollExtent().cy : 1;		// advance by vert-page is SHIFT pressed
+			size_t step = HasFlag( mkFlags, MK_SHIFT ) ? m_pPeerThumbView->GetPageItemCounts().cy : 1;		// advance by vert-page is SHIFT pressed
 
 			utl::AdvancePos( currPos, GetDocument()->GetImageCount(), false, delta < 0, step );		// forward for wheel forward
 			m_slideData.SetCurrentIndex( static_cast< int >( currPos ) );
@@ -505,6 +508,7 @@ BOOL CAlbumImageView::OnMouseWheel( UINT mkFlags, short zDelta, CPoint point )
 		}
 		return TRUE;		// message processed
 	}
+
 	return __super::OnMouseWheel( mkFlags, zDelta, point );
 }
 
@@ -590,9 +594,12 @@ void CAlbumImageView::On_NavigSeek_Prev( void )
 
 	if ( IsPlayOn() )
 		TogglePlay( false );
+
 	--currIndex;
+
 	if ( currIndex < 0 )
 		currIndex = imageCount - 1;
+
 	m_slideData.SetCurrentIndex( currIndex );
 	UpdateImage();
 }

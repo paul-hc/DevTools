@@ -269,7 +269,7 @@ void CImageZoomViewD2D::OnTimer( UINT_PTR eventId )
 
 LRESULT CImageZoomViewD2D::OnDisplayChange( WPARAM bitsPerPixel, LPARAM lParam )
 {
-	CSize screenResolution( lParam ); screenResolution;		// just for illustration
+	CSize screenResolution( (DWORD)lParam ); screenResolution;		// just for illustration
 
 	Invalidate();
 	return __super::OnDisplayChange( bitsPerPixel, lParam );
