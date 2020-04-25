@@ -5,6 +5,37 @@
 #include "ContainerUtilities.h"
 
 
+namespace portable
+{
+	// serializable numeric types that are portable across 32 bit/64 bit (Win32/x64)
+
+	typedef unsigned int size_t;
+    typedef unsigned __int64 DWORD_PTR;
+    typedef unsigned __int64 UINT_PTR;
+
+
+	/*	Note: with archive insertors/extractors, DON'T use:
+			size_t, DWORD_PTR, UINT_PTR
+
+	Storage:
+		Type				32 bit		64 bit
+		----				------		------
+		sizeof( bool )		1 bytes		1 bytes
+		sizeof( char )		1 bytes		1 bytes
+		sizeof( short )		2 bytes		2 bytes
+		sizeof( int )		4 bytes		4 bytes
+		sizeof( long )		4 bytes		4 bytes
+		sizeof( __int64 )	8 bytes		8 bytes
+		sizeof( long long )	8 bytes		8 bytes
+		sizeof( size_t )	4 bytes		8 bytes		AVOID!
+		sizeof( DWORD )		4 bytes		4 bytes
+		sizeof( DWORD_PTR )	4 bytes		8 bytes		AVOID!
+		sizeof( float )		4 bytes		4 bytes
+		sizeof( double )	8 bytes		8 bytes
+	*/
+}
+
+
 namespace serial
 {
 	interface IStreamable
@@ -70,7 +101,7 @@ namespace serial
 	template< typename ContainerT >
 	void SaveValues( CArchive& archive, const ContainerT& items )
 	{
-		archive << items.size();
+		archive << static_cast< ::portable::size_t >( items.size() );
 		for ( typename ContainerT::const_iterator it = items.begin(); it != items.end(); ++it )
 			archive << *it;			// save by value
 	}
@@ -78,7 +109,7 @@ namespace serial
 	template< typename ContainerT >
 	void LoadValues( CArchive& archive, ContainerT& rItems )
 	{
-		ContainerT::size_type size = 0;
+		::portable::size_t size = 0;
 		archive >> size;
 
 		rItems.resize( size );
@@ -173,10 +204,10 @@ namespace serial
 	void StreamItems( CArchive& archive, ContainerT& rItems )
 	{
 		if ( archive.IsStoring() )
-			archive << rItems.size();
+			archive << static_cast< ::portable::size_t >( rItems.size() );
 		else
 		{
-			ContainerT::size_type size = 0;
+			::portable::size_t size = 0;
 
 			archive >> size;
 			rItems.resize( size );
@@ -211,6 +242,7 @@ namespace serial
 			{
 				if ( NULL == rPtr.get() )
 					rPtr.reset( new Type );
+
 				rPtr->Stream( archive );
 			}
 			else

@@ -568,17 +568,17 @@ void CAlbumSettingsDialog::DoDataExchange( CDataExchange* pDX )
 		{
 			m_fileList.SetFileOrder( fileOrder );
 
-			size_t number = 0;
+			UINT number = 0;
 			bool validNumber;
 
 			validNumber = IsDlgButtonChecked( IDC_MIN_FILE_SIZE_CHECK ) != FALSE;
 			if ( validNumber )
-				number = m_minSizeEdit.GetNumber< size_t >( &validNumber ) * KiloByte;
+				number = m_minSizeEdit.GetNumber< UINT >( &validNumber ) * KiloByte;
 			m_fileList.m_fileSizeRange.m_start = validNumber ? number : 0;
 
 			validNumber = IsDlgButtonChecked( IDC_MAX_FILE_SIZE_CHECK ) != FALSE;
 			if ( validNumber )
-				number = m_maxSizeEdit.GetNumber< size_t >( &validNumber ) * KiloByte;
+				number = m_maxSizeEdit.GetNumber< UINT >( &validNumber ) * KiloByte;
 			m_fileList.m_fileSizeRange.m_end = validNumber ? number : UINT_MAX;
 
 			UINT ckState = IsDlgButtonChecked( IDC_AUTO_REGENERATE_CHECK );

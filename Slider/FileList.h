@@ -105,7 +105,7 @@ public:
 	};
 	static const CEnumTags& GetTags_Order( void );
 public:
-	persist Range< size_t > m_fileSizeRange;				// size filter for found files
+	persist Range< UINT > m_fileSizeRange;					// size filter for found files (UINT for 32/64 bit portability)
 	persist int m_perFlags;									// additional persistent flags
 
 	persist std::vector< CSearchSpec > m_searchSpecs;		// vector of file search specifiers used on file list generation

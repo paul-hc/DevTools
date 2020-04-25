@@ -55,6 +55,12 @@ const CEnumTags& GetTags_ChangeCase( void )
 }
 
 
+namespace hlp
+{
+	void CheckScalarTypes( void );
+}
+
+
 // CApplication implementation
 
 CApplication theApp;	// the one and only CApplication object
@@ -81,6 +87,8 @@ BOOL CApplication::InitInstance( void )
 
 	CLayoutEngine::m_defaultFlags = GetProfileInt( reg::section, reg::entry_disableSmooth, FALSE ) ? CLayoutEngine::Normal : CLayoutEngine::Smooth;
 	CVisualTheme::SetEnabled( !GetProfileInt( reg::section, reg::entry_disableThemes, FALSE ) );
+
+	hlp::CheckScalarTypes();
 
 	std::tstring imagePath;
 	if ( app::HasCommandLineOption( _T("image"), &imagePath ) )		// "-image=<img_path>"
@@ -163,3 +171,30 @@ BEGIN_MESSAGE_MAP( CApplication, CBaseApp< CWinApp > )
 	ON_COMMAND( ID_FILE_NEW, &CBaseApp< CWinApp >::OnFileNew )
 	ON_COMMAND( ID_FILE_OPEN, &CBaseApp< CWinApp >::OnFileOpen )
 END_MESSAGE_MAP()
+
+
+namespace hlp
+{
+	#define TRACE_SCALAR( type ) \
+		TRACE( _T("sizeof( %s ) = %d bytes\n"), _T(#type), sizeof( type ) );
+
+	void CheckScalarTypes( void )
+	{
+		TRACE( _T("*** CheckScalarTypes for %d bit build ***\n"), sizeof( void* ) * 8 );
+
+		TRACE_SCALAR( bool );
+		TRACE_SCALAR( char );
+		TRACE_SCALAR( short );
+		TRACE_SCALAR( int );
+		TRACE_SCALAR( long );
+		TRACE_SCALAR( __int64 );
+		TRACE_SCALAR( long long );
+
+		TRACE_SCALAR( size_t );
+		TRACE_SCALAR( DWORD );
+		TRACE_SCALAR( DWORD_PTR );
+
+		TRACE_SCALAR( float );
+		TRACE_SCALAR( double );
+	}
+}
