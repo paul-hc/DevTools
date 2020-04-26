@@ -280,6 +280,9 @@
     <ClInclude Include="ut\RegistryTests.h">
       <Filter>Tests</Filter>
     </ClInclude>
+    <ClInclude Include="NumericProcessor.h">
+      <Filter>utl</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -449,6 +452,9 @@
     </ClCompile>
     <ClCompile Include="ut\UtlConsoleTests.cpp">
       <Filter>Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="NumericProcessor.cpp">
+      <Filter>utl</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -215,6 +215,7 @@
     <ClInclude Include="MatchSequence.h" />
     <ClInclude Include="MemLeakCheck.h" />
     <ClInclude Include="MultiThreading.h" />
+    <ClInclude Include="NumericProcessor.h" />
     <ClInclude Include="Path.h" />
     <ClInclude Include="PathFormatter.h" />
     <ClInclude Include="PathGenerator.h" />
@@ -289,6 +290,7 @@
     <ClCompile Include="Logger.cpp" />
     <ClCompile Include="MemLeakCheck.cpp" />
     <ClCompile Include="MultiThreading.cpp" />
+    <ClCompile Include="NumericProcessor.cpp" />
     <ClCompile Include="Path.cpp" />
     <ClCompile Include="PathFormatter.cpp" />
     <ClCompile Include="PathGenerator.cpp" />

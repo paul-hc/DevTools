@@ -497,6 +497,36 @@
     <ClInclude Include="ShellRegistryAssoc.h">
       <Filter>UI\Shell %28Explorer API%29</Filter>
     </ClInclude>
+    <ClInclude Include="BalloonMessageTip.h">
+      <Filter>UI</Filter>
+    </ClInclude>
+    <ClInclude Include="BaseStockContentCtrl.h">
+      <Filter>UI\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="BaseStockContentCtrl.hxx">
+      <Filter>UI\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="DragListCtrl.hxx">
+      <Filter>UI\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="EnumComboBox.h">
+      <Filter>UI\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="StockValuesComboBox.h">
+      <Filter>UI\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="StockValuesComboBox.hxx">
+      <Filter>UI\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="ThumbPreviewCtrl.h">
+      <Filter>UI\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="GdiCoords.h">
+      <Filter>UI</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderingDirect2D.h">
+      <Filter>UI\Imaging</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -876,6 +906,24 @@
     </ClCompile>
     <ClCompile Include="ut\UtlUserInterfaceTests.cpp">
       <Filter>Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="BalloonMessageTip.cpp">
+      <Filter>UI</Filter>
+    </ClCompile>
+    <ClCompile Include="EnumComboBox.cpp">
+      <Filter>UI\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="StockValuesComboBox.cpp">
+      <Filter>UI\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="ThumbPreviewCtrl.cpp">
+      <Filter>UI\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="GdiCoords.cpp">
+      <Filter>UI</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderingDirect2D.cpp">
+      <Filter>UI\Imaging</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

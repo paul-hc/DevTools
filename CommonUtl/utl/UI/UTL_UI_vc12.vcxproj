@@ -184,6 +184,7 @@
     <ClInclude Include="AboutBox.h" />
     <ClInclude Include="AccelTable.h" />
     <ClInclude Include="AnimatedFrameComposer.h" />
+    <ClInclude Include="BalloonMessageTip.h" />
     <ClInclude Include="BaseApp.h" />
     <ClInclude Include="BaseApp.hxx" />
     <ClInclude Include="BaseDetailHostCtrl.h" />
@@ -192,6 +193,8 @@
     <ClInclude Include="BaseFrameHostCtrl.hxx" />
     <ClInclude Include="BaseMainDialog.h" />
     <ClInclude Include="BaseSplitButton.h" />
+    <ClInclude Include="BaseStockContentCtrl.h" />
+    <ClInclude Include="BaseStockContentCtrl.hxx" />
     <ClInclude Include="BaseZoomView.h" />
     <ClInclude Include="BufferedStatic.h" />
     <ClInclude Include="CheckStatePolicies.h" />
@@ -215,8 +218,11 @@
     <ClInclude Include="DibPixels.h" />
     <ClInclude Include="DibSection.h" />
     <ClInclude Include="DragListCtrl.h" />
+    <ClInclude Include="DragListCtrl.hxx" />
+    <ClInclude Include="EnumComboBox.h" />
     <ClInclude Include="EnumSplitButton.h" />
     <ClInclude Include="FilterStore.h" />
+    <ClInclude Include="GdiCoords.h" />
     <ClInclude Include="GdiPlus_fwd.h" />
     <ClInclude Include="ImageEdit.h" />
     <ClInclude Include="ImagePathKey.h" />
@@ -272,6 +278,7 @@
     <ClInclude Include="Recycler.h" />
     <ClInclude Include="RegistryOptions.h" />
     <ClInclude Include="RegistrySection.h" />
+    <ClInclude Include="RenderingDirect2D.h" />
     <ClInclude Include="ReportListControl.h" />
     <ClInclude Include="ReportListCustomDraw.h" />
     <ClInclude Include="resource.h" />
@@ -295,6 +302,8 @@
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="StdColors.h" />
     <ClInclude Include="StdManifest.h" />
+    <ClInclude Include="StockValuesComboBox.h" />
+    <ClInclude Include="StockValuesComboBox.hxx" />
     <ClInclude Include="SyncScrolling.h" />
     <ClInclude Include="TaskDialog.h" />
     <ClInclude Include="TextEdit.h" />
@@ -304,6 +313,7 @@
     <ClInclude Include="ThemeStatic.h" />
     <ClInclude Include="Thumbnailer.h" />
     <ClInclude Include="Thumbnailer_fwd.h" />
+    <ClInclude Include="ThumbPreviewCtrl.h" />
     <ClInclude Include="ToolbarStrip.h" />
     <ClInclude Include="ToolStrip.h" />
     <ClInclude Include="TooltipsHook.h" />
@@ -339,6 +349,7 @@
     <ClCompile Include="AboutBox.cpp" />
     <ClCompile Include="AccelTable.cpp" />
     <ClCompile Include="AnimatedFrameComposer.cpp" />
+    <ClCompile Include="BalloonMessageTip.cpp" />
     <ClCompile Include="BaseApp.cpp" />
     <ClCompile Include="BaseDetailHostCtrl.cpp" />
     <ClCompile Include="BaseMainDialog.cpp" />
@@ -362,8 +373,10 @@
     <ClCompile Include="DibPixels.cpp" />
     <ClCompile Include="DibSection.cpp" />
     <ClCompile Include="DragListCtrl.cpp" />
+    <ClCompile Include="EnumComboBox.cpp" />
     <ClCompile Include="EnumSplitButton.cpp" />
     <ClCompile Include="FilterStore.cpp" />
+    <ClCompile Include="GdiCoords.cpp" />
     <ClCompile Include="ImageEdit.cpp" />
     <ClCompile Include="ImageZoomViewD2D.cpp" />
     <ClCompile Include="Image_fwd.cpp" />
@@ -411,6 +424,7 @@
     <ClCompile Include="Recycler.cpp" />
     <ClCompile Include="RegistryOptions.cpp" />
     <ClCompile Include="RegistrySection.cpp" />
+    <ClCompile Include="RenderingDirect2D.cpp" />
     <ClCompile Include="ReportListControl.cpp" />
     <ClCompile Include="ReportListCustomDraw.cpp" />
     <ClCompile Include="ResourceData.cpp" />
@@ -433,6 +447,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='ReleaseU|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='ReleaseU|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="StockValuesComboBox.cpp" />
     <ClCompile Include="SyncScrolling.cpp" />
     <ClCompile Include="TaskDialog.cpp" />
     <ClCompile Include="TextEdit.cpp" />
@@ -441,6 +456,7 @@
     <ClCompile Include="ThemeItem.cpp" />
     <ClCompile Include="ThemeStatic.cpp" />
     <ClCompile Include="Thumbnailer.cpp" />
+    <ClCompile Include="ThumbPreviewCtrl.cpp" />
     <ClCompile Include="ToolbarStrip.cpp" />
     <ClCompile Include="ToolStrip.cpp" />
     <ClCompile Include="TooltipsHook.cpp" />

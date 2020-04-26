@@ -272,5 +272,11 @@ LRESULT CImageZoomViewD2D::OnDisplayChange( WPARAM bitsPerPixel, LPARAM lParam )
 	CSize screenResolution( (DWORD)lParam ); screenResolution;		// just for illustration
 
 	Invalidate();
+
+#if (_MFC_VER <= 0x0900)		// Microsoft Foundation Classes version 9.00 (up to Visual Studio 2008)
 	return __super::OnDisplayChange( bitsPerPixel, lParam );
+#else							// e.g. newer _MFC_VER 0x0C00 (Visual Studio 2013)
+	__super::OnDisplayChange( bitsPerPixel, screenResolution.cx, screenResolution.cy );
+	return Default();
+#endif
 }
