@@ -448,40 +448,43 @@ OR:
 int CReportListControl::HitTest( CPoint point, UINT* pFlags /*= NULL*/, TGroupId* pGroupId /*= NULL*/ ) const
 {
 	REQUIRE( NULL == pGroupId || pFlags != NULL );
-	int itemIndex = __super::HitTest( point, pFlags );
+	UINT hitFlags;
+	int itemIndex = __super::HitTest( point, &hitFlags );
+
+	if ( HasFlag( hitFlags, LVHT_NOWHERE ) )
+	{
+		if ( int itemCount = GetItemCount() )
+		{
+			CRect lastItemRect;
+			GetItemRect( itemCount - 1, &lastItemRect, LVIR_BOUNDS );
+
+			if ( point.y >= lastItemRect.bottom )		// note: use >= since when equals to bottom it returns index of -1 (no hit)
+				SetFlag( hitFlags, LVHT_MY_PASTEND );
+			else
+				switch ( GetView() )
+				{
+					case LV_VIEW_ICON:
+					case LV_VIEW_SMALLICON:
+					case LV_VIEW_TILE:
+						if ( !EqFlag( GetStyle(), LVS_ALIGNLEFT ) )
+							if ( point.x > lastItemRect.right && point.y > lastItemRect.top )		// to the right of last item?
+								SetFlag( hitFlags, LVHT_MY_PASTEND );
+				}
+		}
+		else
+			SetFlag( hitFlags, LVHT_MY_PASTEND );
+
+		if ( pGroupId != NULL )
+		{
+			*pGroupId = GroupHitTest( point );
+
+			if ( *pGroupId != -1 )
+				SetFlag( hitFlags, LVHT_EX_GROUP_HEADER );
+		}
+	}
 
 	if ( pFlags != NULL )
-		if ( HasFlag( *pFlags, LVHT_NOWHERE ) )
-		{
-			if ( int itemCount = GetItemCount() )
-			{
-				CRect lastItemRect;
-				GetItemRect( itemCount - 1, &lastItemRect, LVIR_BOUNDS );
-
-				if ( point.y > lastItemRect.bottom )
-					SetFlag( *pFlags, LVHT_MY_PASTEND );
-				else
-					switch ( GetView() )
-					{
-						case LV_VIEW_ICON:
-						case LV_VIEW_SMALLICON:
-						case LV_VIEW_TILE:
-							if ( !EqFlag( GetStyle(), LVS_ALIGNLEFT ) )
-								if ( point.x > lastItemRect.right && point.y > lastItemRect.top )		// to the right of last item?
-									SetFlag( *pFlags, LVHT_MY_PASTEND );
-					}
-			}
-			else
-				SetFlag( *pFlags, LVHT_MY_PASTEND );
-
-			if ( pGroupId != NULL )
-			{
-				*pGroupId = GroupHitTest( point );
-
-				if ( *pGroupId != -1 )
-					SetFlag( *pFlags, LVHT_EX_GROUP_HEADER );
-			}
-		}
+		*pFlags = hitFlags;
 
 	return itemIndex;
 }

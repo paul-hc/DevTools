@@ -17,6 +17,7 @@
 template< typename BaseListCtrl >
 CDragListCtrl< BaseListCtrl >::CDragListCtrl( UINT columnLayoutId /*= 0*/, DWORD listStyleEx /*= lv::DefaultStyleEx*/ )
 	: BaseListCtrl( columnLayoutId, listStyleEx )
+	, m_useExternalDropFiles( false )
 	, m_draggingMode( NoDragging )
 	, m_pSrcDragging( NULL )
 	, m_dropIndex( -1 )
@@ -129,12 +130,16 @@ void CDragListCtrl< BaseListCtrl >::HandleDragging( CPoint dragPos )
 template< typename BaseListCtrl >
 void CDragListCtrl< BaseListCtrl >::HighlightDropMark( int dropIndex )
 {
-	if ( dropIndex != m_dropIndex )
-	{
-		RedrawItem( m_dropIndex );
-		m_dropIndex = dropIndex;
+	if ( dropIndex == m_dropIndex )
+		return;
 
-		const Range< int > indexRange( 0, GetItemCount() - 1 );
+	RedrawItem( m_dropIndex );
+
+	m_dropIndex = dropIndex;
+
+	const Range< int > indexRange( 0, GetItemCount() - 1 );
+
+	if ( indexRange.IsNormalized() )					// list not empty?
 		if ( indexRange.Contains( dropIndex ) )
 		{
 			int prevIndex = std::max( dropIndex - 1, 0 );
@@ -142,13 +147,13 @@ void CDragListCtrl< BaseListCtrl >::HighlightDropMark( int dropIndex )
 
 			if ( indexRange.Contains( prevIndex ) )
 				EnsureVisible( prevIndex, FALSE );
+
 			if ( indexRange.Contains( nextIndex ) )
 				EnsureVisible( nextIndex, FALSE );
 		}
 
-		UpdateWindow();
-		DrawDropMark();
-	}
+	UpdateWindow();
+	DrawDropMark();
 }
 
 template< typename BaseListCtrl >
@@ -166,8 +171,6 @@ bool CDragListCtrl< BaseListCtrl >::DrawDropMark( void )
 template< typename BaseListCtrl >
 void CDragListCtrl< BaseListCtrl >::RedrawItem( int index )
 {
-	ASSERT( GetItemCount() != 0 );
-
 	if ( index != -1 )
 	{
 		CDropMark dropMark( this, index );
@@ -198,6 +201,10 @@ template< typename BaseListCtrl >
 DROPEFFECT CDragListCtrl< BaseListCtrl >::Event_OnDragOver( COleDataObject* pDataObject, DWORD keyState, CPoint point )
 {
 	pDataObject, keyState, point;
+
+	if ( !IsDragging() )					// external dragging from Explorer?
+		if ( !UseExternalDropFiles() )
+			return DROPEFFECT_NONE;			// reject external dragging
 
 	DROPEFFECT dropEffect = DROPEFFECT_NONE;
 	HandleDragging( point );
