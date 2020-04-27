@@ -42,11 +42,13 @@ namespace ui
 		bool GetMenuItemInfo( HMENU hMenu, UINT item, bool byPos = true,
 							  UINT mask = MIIM_ID | MIIM_SUBMENU | MIIM_DATA | MIIM_STATE | MIIM_FTYPE | MIIM_STRING | MIIM_BITMAP );
 
-		bool HasText( void ) const { return HasFlag( fType, MFT_STRING ); }
-
 		bool IsSeparator( void ) const { return HasFlag( fType, MFT_SEPARATOR ); }
 		bool IsSubMenu( void ) const { return hSubMenu != NULL; }
 		bool IsCommand( void ) const { return !IsSeparator() && !IsSubMenu() && wID != 0; }
+
+		enum { BaseTypeMask = MFT_STRING | MFT_BITMAP | MFT_SEPARATOR };
+
+		bool HasText( void ) const { return EqMaskedValue( fType, BaseTypeMask, MFT_STRING ); }
 	};
 }
 

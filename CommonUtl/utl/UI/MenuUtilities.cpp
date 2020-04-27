@@ -235,7 +235,7 @@ namespace ui
 
 	void MENUITEMINFO_BUFF::ClearTextBuffer( void )
 	{
-		if ( dwTypeData != NULL && HasFlag( fType, MFT_STRING ) )		// text buffer allocated internally?
+		if ( dwTypeData != NULL && HasText() )		// text buffer allocated internally?
 			delete[] dwTypeData;
 
 		dwTypeData = NULL;
