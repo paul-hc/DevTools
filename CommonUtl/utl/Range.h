@@ -3,20 +3,20 @@
 #pragma once
 
 
-template< typename ValueType >
+template< typename ValueT >
 struct Range
 {
-	typedef ValueType Value_Type;
+	typedef ValueT Value_Type;
 public:
 	Range( void ) {}
-	Range( ValueType start, ValueType end ) : m_start( start ), m_end( end ) {}
-	explicit Range( ValueType startAndEnd ) : m_start( startAndEnd ), m_end( startAndEnd ) {}		// empty range constructor
+	Range( ValueT start, ValueT end ) : m_start( start ), m_end( end ) {}
+	explicit Range( ValueT startAndEnd ) : m_start( startAndEnd ), m_end( startAndEnd ) {}		// empty range constructor
 
 	template< typename U >
-	Range( const Range< U >& right ) : m_start( static_cast< ValueType >( right.m_start ) ), m_end( static_cast< ValueType >( right.m_end ) ) {}
+	Range( const Range< U >& right ) : m_start( static_cast< ValueT >( right.m_start ) ), m_end( static_cast< ValueT >( right.m_end ) ) {}
 
-	void SetRange( ValueType start, ValueType end ) { m_start = start; m_end = end; }
-	void SetEmptyRange( ValueType value ) { m_start = m_end = value; }
+	void SetRange( ValueT start, ValueT end ) { m_start = start; m_end = end; }
+	void SetEmptyRange( ValueT value ) { m_start = m_end = value; }
 
 	void SwapBounds( void ) { std::swap( m_start, m_end ); }
 
@@ -28,10 +28,10 @@ public:
 
 	bool IsNormalized( void ) const { return m_start <= m_end; }
 
-	Range< ValueType > GetNormalized( void ) const
+	Range< ValueT > GetNormalized( void ) const
 	{
 		if ( !IsNormalized() )
-			return Range< ValueType >( m_end, m_start );
+			return Range< ValueT >( m_end, m_start );
 		return *this;
 	}
 
@@ -59,12 +59,12 @@ public:
 		return true;
 	}
 
-	bool ShiftInBounds( const Range< ValueType >& bounds )
+	bool ShiftInBounds( const Range< ValueT >& bounds )
 	{
 		REQUIRE( bounds.IsNormalized() );
 		REQUIRE( Intersects( bounds ) );
 
-		const Range< ValueType > orgRange = *this;
+		const Range< ValueT > orgRange = *this;
 
 		if ( m_start < bounds.m_start )
 		{
@@ -83,17 +83,17 @@ public:
 
 	// value relationships
 
-	bool InBucket( ValueType value ) const		// value in [m_start, m_end) - start inclusive, end exclusive
+	bool InBucket( ValueT value ) const		// value in [m_start, m_end) - start inclusive, end exclusive
 	{
 		ASSERT( IsNormalized() );
 		return value >= m_start && ( value < m_end || m_start == m_end );	// works for empty buckets
 	}
 
-	bool Constrain( ValueType& rValue ) const
+	bool Constrain( ValueT& rValue ) const
 	{
 		REQUIRE( IsNormalized() );
 
-		const ValueType oldValue = rValue;
+		const ValueT oldValue = rValue;
 
 		if ( rValue < m_start )
 			rValue = m_start;
@@ -106,7 +106,7 @@ public:
 
 	// range relationships
 
-	bool Contains( ValueType value, bool canTouchBounds = true ) const
+	bool Contains( ValueT value, bool canTouchBounds = true ) const
 	{
 		ASSERT( IsNormalized() );
 		if ( canTouchBounds )
@@ -127,8 +127,8 @@ public:
 	bool Intersects( const Range& right, bool onlyNonEmptyIntersection = true ) const
 	{
 		ASSERT( IsNormalized() && right.IsNormalized() );
-		ValueType intersectStart = (std::max)( m_start, right.m_start );
-		ValueType intersectEnd = (std::min)( m_end, right.m_end );
+		ValueT intersectStart = (std::max)( m_start, right.m_start );
+		ValueT intersectEnd = (std::min)( m_end, right.m_end );
 
 		if ( onlyNonEmptyIntersection )
 			return intersectStart < intersectEnd;
@@ -142,18 +142,18 @@ public:
 	template< typename SpanType >
 	void GetSpan( SpanType* pSpan ) const { ASSERT_PTR( pSpan ); *pSpan = m_end - m_start; }
 public:
-	ValueType m_start;
-	ValueType m_end;
+	ValueT m_start;
+	ValueT m_end;
 };
 
 
 namespace utl
 {
-	template< typename ValueType >
-	inline Range< ValueType > MakeRange( ValueType start, ValueType end ) { return Range< ValueType >( start, end ); }
+	template< typename ValueT >
+	inline Range< ValueT > MakeRange( ValueT start, ValueT end ) { return Range< ValueT >( start, end ); }
 
-	template< typename ValueType >
-	inline Range< ValueType > MakeEmptyRange( ValueType startAndEnd ) { return Range< ValueType >( startAndEnd, startAndEnd ); }
+	template< typename ValueT >
+	inline Range< ValueT > MakeEmptyRange( ValueT startAndEnd ) { return Range< ValueT >( startAndEnd, startAndEnd ); }
 }
 
 
@@ -161,8 +161,8 @@ namespace pred
 {
 	struct LessRangeStart
 	{
-		template< typename ValueType >
-		bool operator()( const Range< ValueType >& left, const Range< ValueType >& right ) const
+		template< typename ValueT >
+		bool operator()( const Range< ValueT >& left, const Range< ValueT >& right ) const
 		{
 			return ( left.m_start < right.m_start ) != 0; // keep it friendly with COleDateTime
 		}
@@ -170,8 +170,8 @@ namespace pred
 
 	struct LessRangeEnd
 	{
-		template< typename ValueType >
-		bool operator()( const Range< ValueType >& left, const Range< ValueType >& right ) const
+		template< typename ValueT >
+		bool operator()( const Range< ValueT >& left, const Range< ValueT >& right ) const
 		{
 			return ( left.m_end < right.m_end ) != 0; // keep it friendly with COleDateTime
 		}
@@ -181,8 +181,8 @@ namespace pred
 
 // template implementation
 
-template< typename ValueType >
-bool Range< ValueType >::Truncate( const Range& limit )
+template< typename ValueT >
+bool Range< ValueT >::Truncate( const Range& limit )
 {
 	// Please don't modify this implementation!
 	//
@@ -206,14 +206,14 @@ bool Range< ValueType >::Truncate( const Range& limit )
 
 #include <iosfwd>
 
-template< typename ValueType >
-std::ostream& operator<<( std::ostream& os, const Range< ValueType >& range )
+template< typename ValueT >
+std::ostream& operator<<( std::ostream& os, const Range< ValueT >& range )
 {
 	return os << "[" << range.m_start << "," << range.m_end << "]";
 }
 
-template< typename ValueType >
-std::wostream& operator<<( std::wostream& os, const Range< ValueType >& range )
+template< typename ValueT >
+std::wostream& operator<<( std::wostream& os, const Range< ValueT >& range )
 {
 	return os << L"[" << range.m_start << L"," << range.m_end << L"]";
 }

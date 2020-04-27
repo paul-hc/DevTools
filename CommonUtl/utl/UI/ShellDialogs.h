@@ -10,12 +10,14 @@ class CFileDialog;
 
 namespace shell
 {
+	// classic browse folder tree dialog
 	bool BrowseForFolder( std::tstring& rFolderPath, CWnd* pParentWnd, std::tstring* pDisplayedName = NULL,
 						  BrowseFlags flags = BF_FileSystem, const TCHAR* pTitle = NULL, bool useNetwork = false );
 
 	bool BrowseForFile( std::tstring& rFilePath, CWnd* pParentWnd, BrowseMode browseMode = FileOpen,
 						const TCHAR* pFileFilter = NULL, DWORD flags = 0, const TCHAR* pTitle = NULL );
 
+	// new Vista+ File Dialog for folders
 	bool PickFolder( std::tstring& rFilePath, CWnd* pParentWnd,
 					 FILEOPENDIALOGOPTIONS options = 0, const TCHAR* pTitle = NULL );
 

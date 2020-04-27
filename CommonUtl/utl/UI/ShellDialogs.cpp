@@ -116,7 +116,7 @@ namespace shell
 		if ( IFileOpenDialog* pFileOpenDialog = scopedDlg.m_pFileDlg->GetIFileOpenDialog() )
 		{
 			pFileOpenDialog->SetOptions( FOS_PICKFOLDERS | options );
-			pFileOpenDialog->Release();			// ** cannot use CComPtr< IFileOpenDialog > here since CFileDialog::~CFileDialog() fires an assertion any way, shape and form
+			pFileOpenDialog->Release();			// ** cannot use CComPtr< IFileOpenDialog > here since CFileDialog::~CFileDialog() fires an assertion any way, shape or form
 		}
 
 		return impl::RunFileDialog( rFilePath, scopedDlg.m_pFileDlg.get() );
