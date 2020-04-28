@@ -46,9 +46,11 @@
 #define IDC_MIN_FILE_SIZE_EDIT          1023
 #define IDC_MAX_FILE_SIZE_CHECK         1025
 #define IDC_MAX_FILE_SIZE_EDIT          1026
+#define IDC_MAX_FILE_COUNT_CHECK        1027
 #define IDC_FOUND_FILES_LISTVIEW        1028
 #define IDC_LIST_ORDER_COMBO            1029
 #define IDC_SEARCH_FOR_FILES            1030
+#define IDC_MAX_FILE_COUNT_EDIT         1030
 #define IDC_OPEN_IMAGE                  1031
 #define IDC_EXPLORE_IMAGE               1032
 #define IDC_MAX_MRU_COUNT_EDIT          1033
@@ -94,6 +96,8 @@
 #define IDC_AUTO_REGEN_SMALL_STG_THUMBS_CHECK 1088
 #define IDC_THUMB_BOUNDS_SIZE_COMBO     1089
 #define IDC_DEFAULT_SLIDE_DELAY_COMBO   1090
+#define IDC_DOC_VERSION_LABEL           1092
+#define IDC_DOC_VERSION_STATIC          1093
 #define IDS_ERROR_CANNOTEXPLORE         2001
 #define IDS_ERROR_NOSELECTION           2002
 #define IDS_DROPONLYONEFOLDER           2003
@@ -212,7 +216,7 @@
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        176
 #define _APS_NEXT_COMMAND_VALUE         32882
-#define _APS_NEXT_CONTROL_VALUE         1092
+#define _APS_NEXT_CONTROL_VALUE         1094
 #define _APS_NEXT_SYMED_VALUE           108
 #endif
 #endif

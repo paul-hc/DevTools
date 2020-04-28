@@ -37,9 +37,9 @@ void CSearchSpecDialog::DoDataExchange( CDataExchange* pDX )
 
 	DDX_Control( pDX, IDC_SEARCH_FOLDER_COMBO, m_searchPathCombo );
 	DDX_Control( pDX, IDC_SEARCH_FILTERS_COMBO, m_searchFiltersCombo );
-	ui::DDX_EnumSelValue( pDX, IDC_SEARCH_OPTIONS_COMBO, m_searchSpec.m_options );
+	ui::DDX_EnumSelValue( pDX, IDC_SEARCH_OPTIONS_COMBO, m_searchSpec.RefSearchMode() );
 
-	if ( !pDX->m_bSaveAndValidate )
+	if ( DialogOutput == pDX->m_bSaveAndValidate )
 	{
 		if ( firstInit )
 		{
@@ -51,15 +51,16 @@ void CSearchSpecDialog::DoDataExchange( CDataExchange* pDX )
 		}
 	}
 
-	ui::DDX_Path( pDX, IDC_SEARCH_FOLDER_COMBO, m_searchSpec.m_searchPath );
-	ui::DDX_Text( pDX, IDC_SEARCH_FILTERS_COMBO, m_searchSpec.m_searchFilters, true );
+	ui::DDX_PathItem( pDX, IDC_SEARCH_FOLDER_COMBO, &m_searchSpec );
+	ui::DDX_Text( pDX, IDC_SEARCH_FILTERS_COMBO, m_searchSpec.RefSearchFilters(), true );
 
-	if ( pDX->m_bSaveAndValidate )
+	if ( DialogSaveChanges == pDX->m_bSaveAndValidate )
 	{	// setup the search attributes from itself
-		m_searchSpec.Setup( m_searchSpec.m_searchPath, m_searchSpec.m_searchFilters, m_searchSpec.m_options );
+		m_searchSpec.SetAutoType();
 
 		if ( m_searchSpec.IsValidPath() )
 			m_searchPathCombo.SaveHistory( reg::section_search, reg::entry_FolderHist );
+
 		m_searchFiltersCombo.SaveHistory( reg::section_search, reg::entry_FilterHist );
 	}
 
@@ -115,9 +116,9 @@ void CSearchSpecDialog::OnDropFiles( HDROP hDropInfo )
 void CSearchSpecDialog::CmBrowseFolder( void )
 {
 	CSearchSpec editSearchSpec( m_searchPathCombo.GetCurrentText() );
-	if ( editSearchSpec.BrowseFilePath( CSearchSpec::PT_DirPath, this ) )
+	if ( editSearchSpec.BrowseFilePath( CSearchSpec::BrowseAsDirPath, this ) )
 	{
-		ui::SetComboEditText( m_searchPathCombo, editSearchSpec.m_searchPath.Get() );
+		ui::SetComboEditText( m_searchPathCombo, editSearchSpec.GetFilePath().Get() );
 		GotoDlgCtrl( &m_searchPathCombo );
 		ValidateOK();
 	}
@@ -126,9 +127,9 @@ void CSearchSpecDialog::CmBrowseFolder( void )
 void CSearchSpecDialog::CmBrowseFileButton( void )
 {
 	CSearchSpec editSearchSpec( m_searchPathCombo.GetCurrentText() );
-	if ( editSearchSpec.BrowseFilePath( CSearchSpec::PT_FilePath, this ) )
+	if ( editSearchSpec.BrowseFilePath( CSearchSpec::BrowseAsFilePath, this ) )
 	{
-		ui::SetComboEditText( m_searchPathCombo, editSearchSpec.m_searchPath.Get() );
+		ui::SetComboEditText( m_searchPathCombo, editSearchSpec.GetFilePath().Get() );
 		GotoDlgCtrl( &m_searchPathCombo );
 		ValidateOK();
 	}

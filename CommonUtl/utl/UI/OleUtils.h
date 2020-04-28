@@ -3,7 +3,7 @@
 #pragma once
 
 #include <afxole.h>
-#include "Serialization.h"
+#include "Serialization_fwd.h"
 
 
 class CClipboard;

@@ -8,6 +8,7 @@
 #include "Application.h"
 #include "resource.h"
 #include "utl/Path.h"
+#include "utl/FileSystem.h"
 #include "utl/Registry.h"
 #include "utl/StringUtilities.h"
 #include "utl/ScopedValue.h"
@@ -209,11 +210,7 @@ namespace app
 			AfxMessageBox( AFX_IDP_FAILED_TO_CREATE_DOC );
 		}
 		else
-		{
-			CDocTemplate* pTemplate = (CDocTemplate*)m_templateList.GetHead();
-			// avoid prompting for new template dialog since Slider template is a backing template
-			pTemplate->OpenDocumentFile( NULL );		// if returns NULL, the user has already been alerted
-		}
+			CAlbumDocTemplate::Instance()->OpenDocumentFile( NULL );
 	}
 
 	BOOL CDocManager::DoPromptFileName( CString& rFilePath, UINT titleId, DWORD flags, BOOL openDlg, CDocTemplate* pTemplate )

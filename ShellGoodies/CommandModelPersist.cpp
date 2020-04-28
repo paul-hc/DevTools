@@ -347,7 +347,7 @@ namespace cmd
 		std::tstring sectionTag = FormatSectionTag( GetTags_Section().FormatUi( section ).c_str() );
 		archive << &sectionTag;			// as Utf8; just for inspection
 
-		serial::Save_CObjects( archive, cmdStack );
+		serial::Save_CObjects_Mixed( archive, cmdStack );
 	}
 
 	void CBinaryLogSerializer::LoadStack( CArchive& archive, std::deque< utl::ICommand* >& rCmdStack )
@@ -355,7 +355,7 @@ namespace cmd
 		std::tstring sectionTag; sectionTag;
 		archive >> &sectionTag;			// as Utf8; just discard it
 
-		serial::Load_CObjects( archive, rCmdStack );
+		serial::Load_CObjects_Mixed( archive, rCmdStack );
 	}
 
 } //namespace cmd

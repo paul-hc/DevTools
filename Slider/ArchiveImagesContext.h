@@ -8,7 +8,7 @@
 
 
 class CEnumTags;
-class CFileList;
+class CAlbumModel;
 class CFileAttr;
 
 
@@ -30,7 +30,7 @@ public:
 	void StorePassword( const std::tstring& password ) { m_password = password; }
 
 	// simple archive stg creation
-	bool CreateArchiveStgFile( CFileList* pFileList, const fs::CPath& destStgPath, CObject* pAlbumDoc );
+	bool CreateArchiveStgFile( CAlbumModel* pModel, const fs::CPath& destStgPath );
 
 	// piece-meal generation
 	const std::vector< std::pair< fs::CFlexPath, fs::CFlexPath > >& GetPathPairs( void ) const { return m_pathPairs; }
@@ -40,7 +40,7 @@ public:
 	static bool IsValidFormat( const std::tstring& format );
 	bool GenerateDestPaths( const fs::CPath& destPath, const std::tstring& format, UINT* pSeqCount, bool forceShallowStreamNames = false );
 
-	bool BuildArchiveStgFile( const fs::CPath& destStgPath, FileOp fileOp, CObject* pAlbumDoc = NULL ) const;
+	bool BuildArchiveStorageFile( const fs::CPath& destStgPath, FileOp fileOp ) const;
 
 	bool CanCommitOperations( std::vector< std::pair< fs::CFlexPath, fs::CFlexPath > >& rErrorPairs, FileOp fileOp, bool isUndoOp ) const;
 	bool CommitOperations( FileOp fileOp, bool isUndoOp = false ) const;

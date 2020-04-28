@@ -1,5 +1,5 @@
-#ifndef SliderModelSchema_h
-#define SliderModelSchema_h
+#ifndef ModelSchema_h
+#define ModelSchema_h
 #pragma once
 
 
@@ -14,14 +14,19 @@ namespace app
 		Slider_v3_7 = 0x37,				// persist CFileAttr::GetImageDim() - evaluate real image dimensions
 		Slider_v3_8 = 0x38,				// persist CFileAttr::GetImageDim() - evaluate real image dimensions
 		Slider_v4_0 = 0x40,				// persist CFileAttr::GetImageDim() - evaluate real image dimensions
+		Slider_v4_1 = 0x41,				// new CSearchSpec::Type, ...
+		Slider_v4_2 = 0x42,				// extract CSearchModel, CSearchModel::m_maxFileCount
 
 			// * always update to the LATEST VERSION *
-			Slider_LatestModelSchema = Slider_v4_0
+			Slider_LatestModelSchema = Slider_v4_2
 	};
 
 
+	ModelSchema GetLoadingSchema( const CArchive& rArchive );
+
+	std::tstring FormatModelVersion( ModelSchema modelSchemaVersion );
 	std::tstring FormatSliderVersion( ModelSchema modelSchemaVersion );
 }
 
 
-#endif // SliderModelSchema_h
+#endif // ModelSchema_h

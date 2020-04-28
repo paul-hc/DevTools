@@ -726,6 +726,14 @@
 				Name="model"
 				>
 				<File
+					RelativePath=".\AlbumModel.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\AlbumModel.h"
+					>
+				</File>
+				<File
 					RelativePath=".\ArchiveImagesContext.cpp"
 					>
 				</File>
@@ -758,14 +766,6 @@
 					>
 				</File>
 				<File
-					RelativePath=".\FileList.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\FileList.h"
-					>
-				</File>
-				<File
 					RelativePath=".\ImageArchiveStg.cpp"
 					>
 				</File>
@@ -782,7 +782,19 @@
 					>
 				</File>
 				<File
+					RelativePath=".\ModelSchema.cpp"
+					>
+				</File>
+				<File
 					RelativePath=".\ModelSchema.h"
+					>
+				</File>
+				<File
+					RelativePath=".\SearchModel.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\SearchModel.h"
 					>
 				</File>
 				<File

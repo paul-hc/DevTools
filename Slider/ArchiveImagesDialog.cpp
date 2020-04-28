@@ -1,7 +1,7 @@
 
 #include "stdafx.h"
 #include "ArchiveImagesDialog.h"
-#include "FileList.h"
+#include "AlbumModel.h"
 #include "ImageArchiveStg.h"
 #include "DefinePasswordDialog.h"
 #include "Application.h"
@@ -43,9 +43,9 @@ namespace layout
 const TCHAR CArchiveImagesDialog::s_archiveFnameSuffix[] = _T("_stg");
 
 
-CArchiveImagesDialog::CArchiveImagesDialog( const CFileList* pFileList, const std::tstring& srcDocPath, CWnd* pParent /*= NULL*/ )
+CArchiveImagesDialog::CArchiveImagesDialog( const CAlbumModel* pModel, const std::tstring& srcDocPath, CWnd* pParent /*= NULL*/ )
 	: CLayoutDialog( IDD_ARCHIVE_IMAGES_DIALOG, pParent )
-	, m_pFileList( pFileList )
+	, m_pModel( pModel )
 	, m_srcDocPath( srcDocPath )
 	, m_fileOp( (FileOp)AfxGetApp()->GetProfileInt( reg::section, reg::entry_FileOperation, FOP_FileCopy ) )
 	, m_destType( (DestType)AfxGetApp()->GetProfileInt( reg::section, reg::entry_DestType, ToDirectory ) )
@@ -63,7 +63,7 @@ CArchiveImagesDialog::CArchiveImagesDialog( const CFileList* pFileList, const st
 
 	m_filesListCtrl.SetSection( m_regSection + _T("\\List") );
 
-	ASSERT_PTR( m_pFileList );
+	ASSERT_PTR( m_pModel );
 	ENSURE( FOP_FileCopy == m_fileOp || FOP_FileMove == m_fileOp );
 }
 
@@ -81,10 +81,10 @@ bool CArchiveImagesDialog::FetchFileContext( void )
 		size_t count = m_lvState.m_pIndexImpl->m_selItems.size();
 		srcFiles.reserve( count );
 		for ( size_t i = 0; i != count; ++i )
-			srcFiles.push_back( const_cast< CFileAttr* >( &m_pFileList->GetFileAttr( m_lvState.m_pIndexImpl->m_selItems[ i ] ) ) );
+			srcFiles.push_back( const_cast< CFileAttr* >( &m_pModel->GetFileAttr( m_lvState.m_pIndexImpl->m_selItems[ i ] ) ) );
 	}
 	else
-		m_pFileList->QueryFileAttrs( srcFiles );
+		m_pModel->QueryFileAttrs( srcFiles );
 
 	m_filesContext.SetupSourcePaths( srcFiles );
 	return !srcFiles.empty();
@@ -92,13 +92,13 @@ bool CArchiveImagesDialog::FetchFileContext( void )
 
 bool CArchiveImagesDialog::SetDefaultDestPath( void )
 {
-	if ( !m_pFileList->AnyFoundFiles() )
+	if ( !m_pModel->AnyFoundFiles() )
 	{
 		m_destPath.Clear();
 		return false;
 	}
 
-	std::tstring firstDirPath = m_pFileList->GetFileAttr( 0 ).GetPath().GetParentPath().Get();
+	std::tstring firstDirPath = m_pModel->GetFileAttr( 0 ).GetPath().GetParentPath().Get();
 	switch ( m_destType )
 	{
 		default: ASSERT( false );
@@ -130,9 +130,9 @@ void CArchiveImagesDialog::SetupFilesView( bool firstTimeInit /*= false*/ )
 			m_lvState.FromListCtrl( &m_filesListCtrl );
 
 		if ( firstTimeInit )
-			for ( UINT i = 0; i != m_pFileList->GetFileAttrCount(); ++i )
+			for ( UINT i = 0; i != m_pModel->GetFileAttrCount(); ++i )
 			{
-				const fs::CFlexPath& srcPath = m_pFileList->GetFileAttr( i ).GetPath();
+				const fs::CFlexPath& srcPath = m_pModel->GetFileAttr( i ).GetPath();
 
 				m_filesListCtrl.InsertItem( LVIF_TEXT, i, (LPTSTR)srcPath.GetOriginParentPath().GetPtr(), 0, 0, 0, 0 );
 				m_filesListCtrl.SetSubItemText( i, SrcFilename, srcPath.GetNameExt() );
@@ -221,8 +221,8 @@ bool CArchiveImagesDialog::GenerateDestFiles( void )
 
 	UINT prevCounter = GetDlgItemInt( IDC_COUNTER_EDIT ), newCounter = prevCounter;
 
-	// In dialog generation mode, we need to force shallow stream names (root-only) since we don't save an _Album.sld,
-	// so we can't persist CFileList::UseDeepStreamPaths flag for consistency on load.
+	// In dialog generation mode, we need to force shallow stream names (root-only) since we don't save an "_Album.sld",
+	// so we can't persist CAlbumModel::UseDeepStreamPaths flag for consistency on load.
 	//
 	if ( m_filesContext.GenerateDestPaths( m_destPath, format, &newCounter, true ) )
 	{
@@ -263,13 +263,13 @@ bool CArchiveImagesDialog::CommitFileOperation( void )
 				if ( app::GetUserReport().MessageBox( str::Format( IDS_OVERWRITE_PROMPT, m_destPath.GetPtr() ), MB_YESNO | MB_ICONQUESTION ) != IDYES )
 					return false;
 
-			return m_filesContext.BuildArchiveStgFile( m_destPath, m_fileOp );
+			return m_filesContext.BuildArchiveStorageFile( m_destPath, m_fileOp );
 	}
 }
 
 void CArchiveImagesDialog::UpdateTargetFileCountStatic( void )
 {
-	size_t fileCount = m_destOnSelection ? m_lvState.GetSelCount() : m_pFileList->GetFileAttrCount();
+	size_t fileCount = m_destOnSelection ? m_lvState.GetSelCount() : m_pModel->GetFileAttrCount();
 	ui::SetWindowText( m_targetFileCountStatic, str::Format( _T("%d files"), fileCount ) );
 }
 

@@ -27,14 +27,12 @@ public:
 	void Close( void );
 	static void DiscardCachedImages( const fs::CPath& stgFilePath );		// to avoid sharing violations on stream access
 
-	void CreateImageArchive( const TCHAR* pStgFilePath, const std::tstring& password, const std::vector< std::pair< fs::CFlexPath, fs::CFlexPath > >& filePairs,
-							 CObject* pAlbumDoc ) throws_( CException* );
+	void CreateImageArchive( const TCHAR* pStgFilePath, const std::tstring& password, const std::vector< std::pair< fs::CFlexPath, fs::CFlexPath > >& filePairs ) throws_( CException* );
 
 	bool SavePassword( const std::tstring& password );
 	std::tstring LoadPassword( void );
 
-	app::ModelSchema GetFileModelSchema( void ) const { return m_fileModelSchema; }
-	void StoreFileModelSchema( app::ModelSchema docModelSchema ) { m_fileModelSchema = docModelSchema; }
+	void StoreFileModelSchema( app::ModelSchema docModelSchema ) { m_docModelSchema = docModelSchema; }
 
 	// .sld file format
 	void SaveAlbumDoc( CObject* pAlbumDoc );
@@ -65,7 +63,7 @@ private:
 private:
 	CComPtr< IStorage > m_pThumbsStorage;
 	const GUID* m_pThumbsDecoderId;
-	app::ModelSchema m_fileModelSchema;			// transient: loaded model schema from file, stored by the album doc
+	app::ModelSchema m_docModelSchema;			// transient: loaded model schema from file, stored by the album doc
 
 private:
 	enum ExtensionType { Ext_ias, Ext_cid, Ext_icf, _Ext_Count };

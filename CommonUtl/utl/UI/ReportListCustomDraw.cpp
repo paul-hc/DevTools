@@ -4,6 +4,7 @@
 #include "Color.h"
 #include "GpUtilities.h"
 #include "Utilities.h"
+#include "utl/ContainerUtilities.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

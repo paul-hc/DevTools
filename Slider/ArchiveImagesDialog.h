@@ -11,13 +11,13 @@
 #include <vector>
 
 
-class CFileList;
+class CAlbumModel;
 
 
 class CArchiveImagesDialog : public CLayoutDialog
 {
 public:
-	CArchiveImagesDialog( const CFileList* pFileList, const std::tstring& srcDocPath, CWnd* pParent = NULL );
+	CArchiveImagesDialog( const CAlbumModel* pModel, const std::tstring& srcDocPath, CWnd* pParent = NULL );
 	virtual ~CArchiveImagesDialog();
 
 	void StoreSelection( const CListViewState& lvState ) { m_lvState = lvState; }
@@ -36,7 +36,7 @@ private:
 
 	void UpdateTargetFileCountStatic( void );
 private:
-	const CFileList* m_pFileList;
+	const CAlbumModel* m_pModel;
 	fs::CPath m_srcDocPath;					// source document file path
 public:
 	CArchiveImagesContext m_filesContext;

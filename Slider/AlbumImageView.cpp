@@ -108,7 +108,7 @@ bool CAlbumImageView::OutputNavigSlider( void )
 
 bool CAlbumImageView::CanEnterDragMode( void ) const
 {
-	return !GetDocument()->m_fileList.IsAutoDropRecipient( false );
+	return !GetDocument()->GetModel()->IsAutoDropRecipient( false );
 }
 
 CImageState* CAlbumImageView::GetLoadingImageState( void ) const
@@ -232,18 +232,18 @@ void CAlbumImageView::UpdateChildBarsState( bool onInit /*= false*/ )
 	m_pPeerThumbView->CheckListLayout( onInit ? CAlbumThumbListView::AlbumViewInit : CAlbumThumbListView::ShowCommand );
 }
 
-void CAlbumImageView::OnFileListChanged( FileListChangeType reason /*= FL_Init*/ )
+void CAlbumImageView::OnFileModelChanged( FileModelChangeType reason /*= FM_Init*/ )
 {
 	CAlbumDoc* pDoc = GetDocument();
 
 	switch ( reason )
 	{
-		case FL_Init:
+		case FM_Init:
 			m_slideData = pDoc->m_slideData;
 			break;
-		case FL_AutoDropOp:
+		case FM_AutoDropOp:
 			if ( !pDoc->m_autoDropContext.m_droppedDestFiles.empty() )
-				m_slideData.SetCurrentIndex( pDoc->m_fileList.FindFileAttr( fs::CFlexPath( pDoc->m_autoDropContext.m_droppedDestFiles[ 0 ] ) ) );		// that'd be the caret selected index
+				m_slideData.SetCurrentIndex( pDoc->GetModel()->FindFileAttr( fs::CFlexPath( pDoc->m_autoDropContext.m_droppedDestFiles[ 0 ] ) ) );		// that'd be the caret selected index
 
 			// replace with the standard one if invalid
 			if ( !IsValidIndex( m_slideData.GetCurrentIndex() ) )
@@ -251,25 +251,25 @@ void CAlbumImageView::OnFileListChanged( FileListChangeType reason /*= FL_Init*/
 			break;
 	}
 
-	m_pPeerThumbView->SetupFileList( &pDoc->m_fileList );
+	m_pPeerThumbView->SetupFileModel( pDoc->GetModel() );
 
 	switch ( reason )
 	{
-		case FL_Init:
-		case FL_Regeneration:
-		case FL_AutoDropOp:
+		case FM_Init:
+		case FM_Regeneration:
+		case FM_AutoDropOp:
 			m_pAlbumDialogBar->OnNavRangeChanged();
 			OutputNavigSlider();
 			break;
 	}
 
-	// FL_Regeneration: navigation range may have changed, and UpdateImage() will be called later when the selection backup is restored
-	// FL_CustomOrderChanged: navigation range is not changed for sure, and UpdateImage() will be called later when the selection backup is restored
+	// FM_Regeneration: navigation range may have changed, and UpdateImage() will be called later when the selection backup is restored
+	// FM_CustomOrderChanged: navigation range is not changed for sure, and UpdateImage() will be called later when the selection backup is restored
 	//
-	if ( FL_Init == reason || FL_AutoDropOp == reason )
+	if ( FM_Init == reason || FM_AutoDropOp == reason )
 		UpdateImage();
 
-	if ( FL_AutoDropOp == reason )
+	if ( FM_AutoDropOp == reason )
 	{
 		CListViewState autoDropSelState( pDoc->m_autoDropContext.m_droppedDestFiles );
 		m_pPeerThumbView->SetListViewState( autoDropSelState, true );
@@ -280,9 +280,9 @@ void CAlbumImageView::OnAutoDropRecipientChanged( void )
 {
 	CAlbumDoc* pDoc = GetDocument();
 
-	if ( pDoc->m_fileList.IsAutoDropRecipient() != m_isDropTargetEnabled )
+	if ( pDoc->GetModel()->IsAutoDropRecipient() != m_isDropTargetEnabled )
 	{	// auto drop has changed
-		m_isDropTargetEnabled = pDoc->m_fileList.IsAutoDropRecipient();
+		m_isDropTargetEnabled = pDoc->GetModel()->IsAutoDropRecipient();
 
 		pDoc->InitAutoDropRecipient();			// setup/clear the auto-drop recipient search spec
 
@@ -357,8 +357,8 @@ void CAlbumImageView::OnUpdate( CView* pSender, LPARAM lHint, CObject* pHint )
 		case Hint_ToggleFullScreen:
 			UpdateChildBarsState();
 			break;
-		case Hint_FileListChanged:
-			OnFileListChanged( app::FromHintPtr< FileListChangeType >( pHint ) );
+		case Hint_FileModelChanged:
+			OnFileModelChanged( app::FromHintPtr< FileModelChangeType >( pHint ) );
 			break;
 		case Hint_ReloadImage:
 			m_pPeerThumbView->Invalidate();		// also invalidate the peer thumb view
@@ -451,8 +451,8 @@ void CAlbumImageView::OnInitialUpdate( void )
 	m_pAlbumDialogBar->OnNavRangeChanged();
 	m_pAlbumDialogBar->OnSlideDelayChanged();
 
-	if ( NULL == m_pPeerThumbView->GetFileList() )		// avoid double setup on initialization (it might happen cause of different ways of init, e.g. load or drop)
-		m_pPeerThumbView->SetupFileList( &GetDocument()->m_fileList );
+	if ( NULL == m_pPeerThumbView->GetFileModel() )		// avoid double setup on initialization (it might happen cause of different ways of init, e.g. load or drop)
+		m_pPeerThumbView->SetupFileModel( GetDocument()->GetModel() );
 
 	OnAutoDropRecipientChanged();
 
@@ -702,11 +702,11 @@ void CAlbumImageView::CmAutoDropImage( UINT cmdId )
 	switch ( cmdId )
 	{
 		case CM_DROP_MOVE_IMAGE:
-			pDoc->m_autoDropContext.m_dropOperation = auto_drop::CContext::FileMove;
+			pDoc->m_autoDropContext.SetDropOperation( auto_drop::CContext::FileMove );
 			pDoc->ExecuteAutoDrop();
 			break;
 		case CM_DROP_COPY_IMAGE:
-			pDoc->m_autoDropContext.m_dropOperation = auto_drop::CContext::FileCopy;
+			pDoc->m_autoDropContext.SetDropOperation( auto_drop::CContext::FileCopy );
 			pDoc->ExecuteAutoDrop();
 			break;
 		case CM_CANCEL_DROP:

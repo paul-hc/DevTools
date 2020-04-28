@@ -14,7 +14,7 @@ public:
 	virtual ~CPathItemBase();
 
 	const fs::CPath& GetFilePath( void ) const { return m_filePath; }
-	void ResetFilePath( const fs::CPath& filePath );
+	virtual void SetFilePath( const fs::CPath& filePath );
 
 	void SetDisplayCode( const std::tstring& displayPath ) { m_displayPath = displayPath; }
 	void StripDisplayCode( const fs::CPath& commonParentPath );
@@ -38,8 +38,11 @@ public:
 	{
 		const TCHAR* operator()( const CPathItemBase* pItem ) const { return pItem->GetFilePath().GetNameExt(); }
 	};
+protected:
+	void ResetFilePath( const fs::CPath& filePath );
+	void Stream( CArchive& archive );
 private:
-	fs::CPath m_filePath;
+	persist fs::CPath m_filePath;
 	std::tstring m_displayPath;
 };
 

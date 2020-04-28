@@ -2,9 +2,8 @@
 #define AutoDrop_h
 #pragma once
 
-#include "utl/Serialization.h"
 #include "utl/FlexPath.h"
-#include "FileList.h"
+#include "AlbumModel.h"
 #include <deque>
 #include <vector>
 
@@ -62,11 +61,15 @@ namespace auto_drop
 		typedef std::deque< COpGroup > BaseType;
 	public:
 		COpStack( void ) {}
-
-		void Stream( CArchive& archive ) { serial::StreamItems( archive, *this ); }
 	};
+}
 
 
+class CSearchSpec;
+
+
+namespace auto_drop
+{
 	enum FileSetOperation { MoveSrcToDest, CopySrcToDest, DeleteSrc };
 
 
@@ -78,33 +81,39 @@ namespace auto_drop
 
 		void Clear( void );
 
-		bool IsValidDropRecipient( bool checkValidPath = true ) const { return m_destSearchSpec.IsAutoDropDirPath( checkValidPath ); }
-		size_t GetFileCount( void ) const { return m_droppedSrcFiles.size(); }
-
+		bool IsValidDropRecipient( bool checkValidPath = true ) const;
+		const fs::CPath& GetDestSearchPath( void ) const;
 		bool InitAutoDropRecipient( const CSearchSpec& destSearchSpec );
+
+		size_t GetFileCount( void ) const { return m_droppedSrcFiles.size(); }
 		size_t SetupDroppedFiles( HDROP hDropInfo, const fs::CFlexPath& insertBefore );
 
 		bool MakeAutoDrop( COpStack& dropUndoStack );
 		bool DefragmentFiles( COpStack& dropUndoStack );
 
 		bool UndoRedoOperation( COpStack& rFromStack, COpStack& rToStack, bool isUndoOp );
+
+		enum DropOperation { PromptUser, FileMove, FileCopy };
+
+		DropOperation GetDropOperation( void ) const { return m_dropOperation; }
+		void SetDropOperation( DropOperation dropOperation ) { m_dropOperation = dropOperation; }
 	protected:
 		bool DoAutoDropOperation( const COpStack& dropStack, bool isUndoOp ) const;
 
 		static bool DoFileSetOperation( const std::vector< fs::CPath >& srcPaths, const std::vector< fs::CPath >& destPaths,
 										FileSetOperation fileSetOp );
+
 		static FileSetOperation GetFileSetOperation( bool imageWasMoved, bool isUndoOp, int phaseNo )
 		{
 			// NOTE: undoing a COPY actually means DELETE
 			return ( imageWasMoved || ( phaseNo == ( isUndoOp ? 1 : 2 ) ) ) ? MoveSrcToDest : ( isUndoOp ? DeleteSrc : CopySrcToDest );
 		}
+	private:
+		DropOperation m_dropOperation;
+		std::auto_ptr< CSearchSpec > m_pDestSearchSpec;		// search specifier containing the destination folder for dropped files
 	public:
-		enum DropOperation { PromptUser, FileMove, FileCopy };
-
 		std::vector< std::tstring > m_droppedSrcFiles;
 		std::vector< std::tstring > m_droppedDestFiles;		// drop source and destionation files
-		DropOperation m_dropOperation;
-		CSearchSpec m_destSearchSpec;		// search specifier containing the destination folder for dropped files
 		fs::CFlexPath m_insertBefore;		// image file path pointed on drop (if any, otherwise empty)
 		CPoint m_dropScreenPos;				// screen position for drop
 

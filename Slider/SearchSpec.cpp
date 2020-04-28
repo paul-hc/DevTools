@@ -15,48 +15,86 @@
 #endif
 
 
+CSearchSpec::CSearchSpec( void )
+	: CPathItemBase( fs::CPath() )
+	, m_type( DirPath )
+	, m_searchMode( RecurseSubDirs )
+{
+}
+
+CSearchSpec::CSearchSpec( const fs::CPath& searchPath )
+	: CPathItemBase( fs::CPath() )
+{
+	SetFilePath( searchPath );
+}
+
 void CSearchSpec::Stream( CArchive& archive )
 {
+	__super::Stream( archive );
+
 	if ( archive.IsStoring() )
 	{
-		archive << m_searchPath;
 		archive << m_searchFilters;
 		archive << m_type;
-		archive << m_options;
+		archive << m_searchMode;
 	}
 	else
 	{
-		archive >> m_searchPath;
+		app::ModelSchema savedModelSchema = app::GetLoadingSchema( archive );
+
 		archive >> m_searchFilters;
 		archive >> (int&)m_type;
-		archive >> (int&)m_options;
+		archive >> (int&)m_searchMode;
+
+		if ( savedModelSchema < app::Slider_v4_1 )
+		{
+			enum OldType { old_Invalid, old_DirPath, old_ArchiveStgFile, old_ExplicitFile } oldType = static_cast< OldType >( m_type );
+
+			(int&)m_type = oldType != old_Invalid ? ( m_type - 1 ) : BestGuessType( GetFilePath() );		// old_Invalid was removed in v4.1
+		}
 	}
 }
 
-bool CSearchSpec::Setup( const fs::CPath& searchPath, const std::tstring& searchFilters /*= std::tstring()*/, Options options /*= RecurseSubDirs*/ )
+void CSearchSpec::SetFilePath( const fs::CPath& filePath )
 {
-	m_searchPath = searchPath;
+	__super::SetFilePath( filePath );
 
-	m_type = Invalid;
-	if ( m_searchPath.FileExist() )
-		if ( fs::IsValidDirectory( m_searchPath.GetPtr() ) )
-			m_type = DirPath;
-		else
-			m_type = CImageArchiveStg::HasImageArchiveExt( m_searchPath.GetPtr() ) ? ArchiveStgFile : ExplicitFile;
+	m_type = CheckType();
 
 	switch ( m_type )
 	{
 		case DirPath:
-			m_searchFilters = searchFilters;
-			m_options = options;
+			m_searchMode = RecurseSubDirs;
 			break;
 		case ArchiveStgFile:
 		case ExplicitFile:
 			m_searchFilters.clear();
-			m_options = Normal;
+			m_searchMode = ShallowDir;
 			break;
 	}
-	return m_type != Invalid;
+}
+
+CSearchSpec::Type CSearchSpec::CheckType( void ) const
+{
+	if ( fs::IsValidDirectory( GetFilePath().GetPtr() ) )
+		return DirPath;
+	else if ( GetFilePath().FileExist() )
+		if ( CImageArchiveStg::HasImageArchiveExt( GetFilePath().GetPtr() ) )
+			return ArchiveStgFile;
+		else
+			return ExplicitFile;
+
+	return BestGuessType( GetFilePath() );
+}
+
+CSearchSpec::Type CSearchSpec::BestGuessType( const fs::CPath& searchPath )
+{
+	if ( CImageArchiveStg::HasImageArchiveExt( searchPath.GetPtr() ) )
+		return ArchiveStgFile;
+	else if ( str::IsEmpty( searchPath.GetExt() ) )
+		return DirPath;
+
+	return ExplicitFile;
 }
 
 const std::tstring& CSearchSpec::GetImageSearchFilters( void ) const
@@ -64,19 +102,19 @@ const std::tstring& CSearchSpec::GetImageSearchFilters( void ) const
 	ASSERT( IsDirPath() ); return !m_searchFilters.empty() ? m_searchFilters : app::GetAllSourcesSpecs();
 }
 
-bool CSearchSpec::BrowseFilePath( PathType pathType /*= PT_AsIs*/, CWnd* pParentWnd /*= NULL*/, DWORD extraFlags /*= OFN_FILEMUSTEXIST*/ )
+bool CSearchSpec::BrowseFilePath( BrowseMode pathType /*= BrowseAsIs*/, CWnd* pParentWnd /*= NULL*/, DWORD extraFlags /*= OFN_FILEMUSTEXIST*/ )
 {
-	std::tstring filePath = m_searchPath.Get();
+	std::tstring filePath = GetFilePath().Get();
 
-	if ( PT_AsIs == pathType )
+	if ( BrowseAsIs == pathType )
 		if ( DirPath == m_type )
-			pathType = PT_DirPath;
+			pathType = BrowseAsDirPath;
 		else		// CompoundFile, ExplicitFile
-			pathType = PT_FilePath;
+			pathType = BrowseAsFilePath;
 
 	bool picked = false;
 
-	if ( PT_DirPath == pathType )
+	if ( BrowseAsDirPath == pathType )
 		picked = shell::BrowseForFolder( filePath, pParentWnd, NULL, shell::BF_FileSystem, _T("Select the image searching folder path:") );
 	else
 		if ( ArchiveStgFile == m_type )
@@ -84,22 +122,26 @@ bool CSearchSpec::BrowseFilePath( PathType pathType /*= PT_AsIs*/, CWnd* pParent
 		else	// ExplicitFile, Invalid
 			picked = shell::BrowseImageFile( filePath, shell::FileOpen, extraFlags, pParentWnd );
 
-	return picked && Setup( filePath, m_searchFilters, m_options );
+	if ( !picked )
+		return false;
+
+	SetFilePath( filePath );
+	return true;
 }
 
 void CSearchSpec::EnumImageFiles( fs::IEnumerator* pEnumerator ) const
 {
 	if ( !IsValidPath() )
-		AfxThrowFileException( CFileException::fileNotFound, -1, m_searchPath.GetPtr() );		// folder path doesn't exist
+		AfxThrowFileException( CFileException::fileNotFound, -1, GetFilePath().GetPtr() );		// folder path doesn't exist
 
 	switch ( m_type )
 	{
 		case DirPath:
-			fs::EnumFiles( pEnumerator, m_searchPath, GetImageSearchFilters().c_str(), RecurseSubDirs == m_options ? Deep : Shallow );
+			fs::EnumFiles( pEnumerator, GetFilePath(), GetImageSearchFilters().c_str(), RecurseSubDirs == m_searchMode ? Deep : Shallow );
 			break;
 		case ArchiveStgFile:
 		case ExplicitFile:
-			pEnumerator->AddFoundFile( m_searchPath.GetPtr() );
+			pEnumerator->AddFoundFile( GetFilePath().GetPtr() );
 			break;
 	}
 }

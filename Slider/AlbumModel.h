@@ -1,28 +1,40 @@
-#ifndef FileList_h
-#define FileList_h
+#ifndef AlbumModel_h
+#define AlbumModel_h
 #pragma once
 
 #include "utl/FlexPath.h"
-#include "utl/Range.h"
 #include "ModelSchema.h"
-#include "SearchSpec.h"
+#include "SearchModel.h"
 #include "FileAttr.h"
 
 
-namespace app { class CScopedProgress; }
 class CEnumTags;
+namespace app { class CScopedProgress; }
 
 
-class CFileList
+class CAlbumModel
 {
 public:
-	CFileList( void );
-	~CFileList();
+	CAlbumModel( void );
+	~CAlbumModel();
 
 	void Stream( CArchive& archive );
 
-	size_t GetSearchSpecCount( void ) const { return m_searchSpecs.size(); }
-	int FindSearchSpec( const fs::CPath& searchPath ) const;
+	app::ModelSchema GetModelSchema( void ) const { return m_modelSchema; }
+	void StoreModelSchema( app::ModelSchema modelSchema ) { m_modelSchema = modelSchema; }
+
+	const CSearchModel* GetSearchModel( void ) const { return &m_searchModel; }
+	CSearchModel* RefSearchModel( void ) { return &m_searchModel; }
+
+	enum PersistFlag
+	{
+		AutoRegenerate = BIT_FLAG( 0 ),			// auto re-generates after de-serialization
+		UseDeepStreamPaths = BIT_FLAG( 1 )		// in an archive doc m_fileAttributes has been encoded with flag wf::PrefixDeepStreamNames on
+	};
+
+	bool HasPersistFlag( PersistFlag persistFlag ) const { return HasFlag( m_persistFlags, persistFlag ); }
+	void SetPersistFlag( PersistFlag persistFlag, bool on = true ) { SetFlag( m_persistFlags, persistFlag, on ); }
+
 
 	bool SetupSearchPath( const fs::CPath& filePath );
 	void SearchForFiles( bool reportEmpty = true ) throws_( CException* );
@@ -31,11 +43,10 @@ public:
 	bool CancelGeneration( void );
 	void CloseAssocImageArchiveStgs( void );
 
-	bool MustAutoRegenerate( void ) const { return HasFlag( m_perFlags, AutoRegenerate ) || IsAutoDropRecipient(); }
+	bool MustAutoRegenerate( void ) const { return HasPersistFlag( AutoRegenerate ) || IsAutoDropRecipient(); }
 
 	// auto-drop file reorder & rename
-	bool IsAutoDropRecipient( bool checkValidPath = true ) const { return 1 == m_searchSpecs.size() && m_searchSpecs.front().IsAutoDropDirPath( checkValidPath ); }
-	CSearchSpec& GetAutoDropSearchSpec( void ) const { ASSERT( IsAutoDropRecipient( false ) ); return const_cast< CSearchSpec& >( m_searchSpecs.front() ); }
+	bool IsAutoDropRecipient( bool checkValidPath = true ) const;		// single search spec
 private:
 	void ClearArchiveStgPaths( void );
 
@@ -68,7 +79,7 @@ public:
 	bool HasConsistentDeepStreams( void ) const;
 	bool CheckReparentFileAttrs( const TCHAR* pDocPath, PersistOp op );					// if a stg doc path: reparent embedded image paths with current doc path (LOAD, SAVE AS)
 private:
-	bool ReparentStgFileAttrsImpl( const fs::CFlexPath& stgDocPath, PersistOp op );		// post load/save: replace physical storage path with the current stg path
+	bool ReparentStgFileAttrsImpl( const fs::CPath& stgDocPath, PersistOp op );			// post load/save: replace physical storage path with the current stg path
 
 	size_t FindPosFileAttr( const CFileAttr* pFileAttr ) const;
 
@@ -77,12 +88,6 @@ private:
 	//	- custom order: index into m_customOrder vector that points to the true index (in m_fileAttributes vector)
 	int DisplayToTrueFileIndex( size_t displayIndex ) const;
 public:
-	enum Flags
-	{
-		AutoRegenerate = BIT_FLAG( 0 ),			// auto re-generates after de-serialization
-		UseDeepStreamPaths = BIT_FLAG( 1 )		// in an archive doc m_fileAttributes has been encoded with flag wf::PrefixDeepStreamNames on
-	};
-
 	enum Order
 	{
 		OriginalOrder,			// don't order files at all
@@ -103,24 +108,27 @@ public:
 		FileSameSizeAndDim,		// special filter for file duplicates based on file size and dimensions
 		CorruptedFiles			// special filter for detecting files with errors (same sort effect as OriginalOrder)
 	};
-	static const CEnumTags& GetTags_Order( void );
-public:
-	persist Range< UINT > m_fileSizeRange;					// size filter for found files (UINT for 32/64 bit portability)
-	persist int m_perFlags;									// additional persistent flags
 
-	persist std::vector< CSearchSpec > m_searchSpecs;		// vector of file search specifiers used on file list generation
+	static const CEnumTags& GetTags_Order( void );
 private:
+	typedef int TPersistFlags;
+
+	// transient
+	app::ModelSchema m_modelSchema;							// model schema of this album document (persisted by the album document)
+	fs::CPath m_stgDocPath;									// set only for image archive docs, replaces m_searchSpecs
+	bool m_inGeneration;
+private:
+	// persistent
+	persist CSearchModel m_searchModel;
+
+	persist Order m_fileOrder;								// order of the generated files
+	persist int m_randomSeed;								// the value of the random seed currently used
+	persist TPersistFlags m_persistFlags;					// additional persistent flags
+
 	// found files
 	persist std::vector< CFileAttr > m_fileAttributes;		// found file attributes
 	persist std::vector< fs::CPath > m_archiveStgPaths;		// compound files found during the search (for automatic release of storages)
 	persist std::vector< int > m_customOrder;				// display indexes that points to a true index in m_fileAttributes
-
-	persist Order m_fileOrder;								// order of the generated files
-	persist int m_randomSeed;								// the value of the random seed currently used
-
-	// transient
-	fs::CPath m_stgDocPath;									// set only for image archive docs, replaces m_searchSpecs
-	bool m_inGeneration;
 };
 
 
@@ -137,7 +145,7 @@ namespace pred
 
 	struct CompareFileAttr
 	{
-		CompareFileAttr( CFileList::Order fileOrder, bool compareImageDim = false, app::CScopedProgress* pProgress = NULL )
+		CompareFileAttr( CAlbumModel::Order fileOrder, bool compareImageDim = false, app::CScopedProgress* pProgress = NULL )
 			: m_fileOrder( fileOrder )
 			, m_ascendingOrder( true )
 			, m_compareImageDim( compareImageDim )
@@ -146,18 +154,18 @@ namespace pred
 		{
 			switch ( m_fileOrder )
 			{
-				case CFileList::ByFileNameDesc:
-				case CFileList::ByFullPathDesc:
-				case CFileList::BySizeDesc:
-				case CFileList::ByDateDesc:
-				case CFileList::ByDimensionDesc:
+				case CAlbumModel::ByFileNameDesc:
+				case CAlbumModel::ByFullPathDesc:
+				case CAlbumModel::BySizeDesc:
+				case CAlbumModel::ByDateDesc:
+				case CAlbumModel::ByDimensionDesc:
 					m_ascendingOrder = false;
 			}
 		}
 
 		pred::CompareResult operator()( const CFileAttr& left, const CFileAttr& right ) const;
 	public:
-		CFileList::Order m_fileOrder;
+		CAlbumModel::Order m_fileOrder;
 		bool m_ascendingOrder;
 		bool m_compareImageDim;
 		bool m_useSecondaryComparison;
@@ -201,4 +209,4 @@ namespace func
 }
 
 
-#endif // FileList_h
+#endif // AlbumModel_h

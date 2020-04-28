@@ -83,7 +83,7 @@ void CAlbumDialogBar::OnCurrPosChanged( void )
 	std::tstring imageFileInfo;
 
 	if ( valid )
-		if ( const CFileAttr* pFileAttr = &m_pAlbumView->GetDocument()->m_fileList.GetFileAttr( currIndex ) )
+		if ( const CFileAttr* pFileAttr = &m_pAlbumView->GetDocument()->GetModel()->GetFileAttr( currIndex ) )
 			imageFileInfo = str::Format( _T("%s (%s)"), pFileAttr->GetPath().FormatPretty().c_str(), pFileAttr->FormatFileSize( 1, _T("%s B") ).c_str() );
 
 	ui::EnableWindow( m_navEdit, valid );

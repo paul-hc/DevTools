@@ -2,7 +2,7 @@
 #define AlbumThumbListView_h
 #pragma once
 
-#include "FileList.h"
+#include "AlbumModel.h"
 #include "ListViewState.h"
 #include "utl/UI/ObjectCtrlBase.h"
 #include "utl/UI/OleDragDrop_fwd.h"
@@ -29,8 +29,8 @@ public:
 	CAlbumImageView* GetAlbumImageView( void ) const { return safe_ptr( m_pPeerImageView ); }
 	CAlbumDoc* GetAlbumDoc( void ) const;
 
-	const CFileList* GetFileList( void ) const { return m_pFileList; }
-	void SetupFileList( const CFileList* pFileList, bool doRedraw = true );
+	const CAlbumModel* GetFileModel( void ) const { return m_pFileModel; }
+	void SetupFileModel( const CAlbumModel* pFileModel, bool doRedraw = true );
 
 	CListBox* AsListBox( void ) const { return (CListBox*)this; }
 
@@ -67,7 +67,7 @@ private:
 	void CancelDragCapture( void );
 
 	int GetImageIndexFromPoint( CPoint& clientPos ) const;
-	bool IsValidImageIndex( size_t displayIndex ) const { return m_pFileList != NULL && displayIndex < m_pFileList->GetFileAttrCount(); }
+	bool IsValidImageIndex( size_t displayIndex ) const { return m_pFileModel != NULL && displayIndex < m_pFileModel->GetFileAttrCount(); }
 	bool IsValidFileAt( int displayIndex ) const;
 
 	bool NotifySelChange( void );
@@ -84,7 +84,7 @@ public:
 	enum Metrics { cxSide = 2, cyTop = 2, cyTextSpace = 2, ID_BEGIN_DRAG_TIMER = 1000 };
 private:
 	bool m_autoDelete;
-	const CFileList* m_pFileList;
+	const CAlbumModel* m_pFileModel;
 
 	CAlbumImageView* m_pPeerImageView;
 	CSplitterWindow* m_pSplitterWnd;
@@ -111,7 +111,7 @@ private:
 
 		void Restore( CAlbumThumbListView* pDestThumbView );
 	public:
-		const CFileList* m_pFileList;
+		const CAlbumModel* m_pFileModel;
 		int m_topIndex;
 		int m_currIndex;
 		DWORD m_listCreationStyle;
@@ -164,7 +164,7 @@ inline bool CAlbumThumbListView::IsValidFileAt( int displayIndex ) const
 {
 	if ( !IsValidImageIndex( displayIndex ) )
 		return false;
-	return m_pFileList->GetFileAttr( displayIndex ).GetPath().FileExist();
+	return m_pFileModel->GetFileAttr( displayIndex ).GetPath().FileExist();
 }
 
 

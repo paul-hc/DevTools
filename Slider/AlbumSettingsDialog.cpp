@@ -16,6 +16,7 @@
 #include "utl/UI/UtilitiesEx.h"
 #include "utl/UI/resource.h"
 #include "utl/UI/DragListCtrl.hxx"
+#include "utl/Resequence.hxx"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -24,19 +25,19 @@
 
 namespace hlp
 {
-	CFileList::Order OrderOfCmd( UINT cmdId )
+	CAlbumModel::Order OrderOfCmd( UINT cmdId )
 	{
 		switch ( cmdId )
 		{
 			default: ASSERT( false );
-			case ID_ORDER_ORIGINAL:						return CFileList::OriginalOrder;
-			case ID_ORDER_CUSTOM:						return CFileList::CustomOrder;
-			case ID_ORDER_RANDOM_SHUFFLE:				return CFileList::Shuffle;
-			case ID_ORDER_RANDOM_SHUFFLE_SAME_SEED:		return CFileList::ShuffleSameSeed;
-			case ID_ORDER_BY_FULL_PATH_ASC:				return CFileList::ByFullPathAsc;
-			case ID_ORDER_BY_FULL_PATH_DESC:			return CFileList::ByFullPathDesc;
-			case ID_ORDER_BY_DIMENSION_ASC:				return CFileList::ByDimensionAsc;
-			case ID_ORDER_BY_DIMENSION_DESC:			return CFileList::ByDimensionDesc;
+			case ID_ORDER_ORIGINAL:						return CAlbumModel::OriginalOrder;
+			case ID_ORDER_CUSTOM:						return CAlbumModel::CustomOrder;
+			case ID_ORDER_RANDOM_SHUFFLE:				return CAlbumModel::Shuffle;
+			case ID_ORDER_RANDOM_SHUFFLE_SAME_SEED:		return CAlbumModel::ShuffleSameSeed;
+			case ID_ORDER_BY_FULL_PATH_ASC:				return CAlbumModel::ByFullPathAsc;
+			case ID_ORDER_BY_FULL_PATH_DESC:			return CAlbumModel::ByFullPathDesc;
+			case ID_ORDER_BY_DIMENSION_ASC:				return CAlbumModel::ByDimensionAsc;
+			case ID_ORDER_BY_DIMENSION_DESC:			return CAlbumModel::ByDimensionDesc;
 		}
 	}
 }
@@ -48,41 +49,36 @@ namespace layout
 	{
 		{ IDC_SEARCH_SPEC_STATIC, SizeX | DoRepaint },
 		{ IDC_SEARCH_SPEC_LIST, SizeX },
-		{ ID_ADD_ITEM, None },
-		{ ID_EDIT_ITEM, None },
-		{ ID_REMOVE_ITEM, None },
 		{ IDC_SEARCH_SPEC_MOVE_UP, MoveX },
 		{ IDC_SEARCH_SPEC_MOVE_DOWN, MoveX },
-		{ IDC_MIN_FILE_SIZE_CHECK, None },
-		{ IDC_MIN_FILE_SIZE_EDIT, None },
-		{ IDC_MAX_FILE_SIZE_CHECK, None },
-		{ IDC_MAX_FILE_SIZE_EDIT, None },
 
-		{ IDC_AUTO_REGENERATE_CHECK, None },
-		{ IDC_AUTO_DROP_CHECK, None },
+		{ IDC_THUMB_PREVIEW_STATIC, MoveX },
+		{ IDC_DOC_VERSION_LABEL, MoveX },
+		{ IDC_DOC_VERSION_STATIC, MoveX },
 
 		{ IDC_FOUND_FILES_GAP, SizeX | DoRepaint },
 
-		{ IDC_FOUND_FILES_STATIC, None },
 		{ IDC_FOUND_FILES_LISTVIEW, Size },
 		{ IDC_TOOLBAR_PLACEHOLDER, MoveX },
 		{ IDC_LIST_ORDER_STATIC, MoveX },
 		{ IDC_LIST_ORDER_COMBO, MoveX },
 
 		{ IDOK, Move },
-		{ IDCANCEL, Move },
-		{ IDC_THUMB_PREVIEW_STATIC, MoveX }
+		{ IDCANCEL, Move }
 	};
 }
 
 
-CAlbumSettingsDialog::CAlbumSettingsDialog( const CFileList& fileList, int currentIndex /*= -1*/, CWnd* pParent /*= NULL*/ )
+CAlbumSettingsDialog::CAlbumSettingsDialog( const CAlbumModel& model, int currentIndex /*= -1*/, CWnd* pParent /*= NULL*/ )
 	: CLayoutDialog( IDD_ALBUM_SETTINGS_DIALOG, pParent )
-	, m_fileList( fileList )
+	, m_model( model )
 	, m_currentIndex( currentIndex )
 	, m_dlgAccel( IDR_ALBUM_DLG_ACCEL )
 	, m_searchListAccel( IDR_ALBUM_DLG_SEARCH_SPEC_ACCEL )
 	, m_isDirty( Undefined )
+	, m_maxFileCountEdit( true, str::GetUserLocale() )
+	, m_minSizeEdit( true, str::GetUserLocale() )
+	, m_maxSizeEdit( true, str::GetUserLocale() )
 	, m_thumbPreviewCtrl( app::GetThumbnailer() )
 	, m_foundFilesListCtrl( IDC_FOUND_FILES_LISTVIEW )
 {
@@ -117,7 +113,7 @@ CAlbumSettingsDialog::CAlbumSettingsDialog( const CFileList& fileList, int curre
 	m_foundFilesListCtrl.SetSortInternally( false );
 	m_foundFilesListCtrl.SetUseAlternateRowColoring();
 	m_foundFilesListCtrl.SetDataSourceFactory( this );						// uses temporary file clones for embedded images
-	m_foundFilesListCtrl.SetPopupMenu( CReportListControl::OnSelection, &GetFileListPopupMenu() );
+	m_foundFilesListCtrl.SetPopupMenu( CReportListControl::OnSelection, &GetFileModelPopupMenu() );
 	m_foundFilesListCtrl.SetTrackMenuTarget( this );						// let dialog track SPECIFIC custom menu commands (Explorer verbs handled by the listctrl)
 
 	ClearFlag( m_foundFilesListCtrl.RefListStyleEx(), LVS_EX_DOUBLEBUFFER );		// better looking thumb rendering for tiny images (icons, small PNGs)
@@ -133,7 +129,7 @@ CAlbumSettingsDialog::~CAlbumSettingsDialog()
 {
 }
 
-CMenu& CAlbumSettingsDialog::GetFileListPopupMenu( void )
+CMenu& CAlbumSettingsDialog::GetFileModelPopupMenu( void )
 {
 	static CMenu s_popupMenu;
 	if ( NULL == s_popupMenu.GetSafeHmenu() )
@@ -198,26 +194,26 @@ void CAlbumSettingsDialog::SetDirty( bool dirty /*= true*/ )
 
 	static const std::tstring okLabel[] = { _T("OK"), _T("&Search") };
 	ui::SetDlgItemText( m_hWnd, IDOK, okLabel[ m_isDirty ] );
-	ui::EnableControl( m_hWnd, IDOK, True == m_isDirty || m_fileList.GetFileOrder() != CFileList::CorruptedFiles );
+	ui::EnableControl( m_hWnd, IDOK, True == m_isDirty || m_model.GetFileOrder() != CAlbumModel::CorruptedFiles );
 }
 
 void CAlbumSettingsDialog::UpdateFileSortOrder( void )
 {
-	// TODO: store display order in CFileList::m_displayOrder as std::vector< CFileAttr* >
-	// - so that CFileList::m_fileAttributes keeps the original order, and is immutable
+	// TODO: store display order in CAlbumModel::m_displayOrder as std::vector< CFileAttr* >
+	// - so that CAlbumModel::m_fileAttributes keeps the original order, and is immutable
 #if 1
 	SetDirty( true );
 
-	if ( m_fileList.GetFileAttrCount() < InplaceSortMaxCount )
+	if ( m_model.GetFileAttrCount() < InplaceSortMaxCount )
 		PostMessage( WM_COMMAND, IDC_SEARCH_FOR_FILES );
 #else
-	switch ( m_fileList.GetFileOrder() )
+	switch ( m_model.GetFileOrder() )
 	{
-		case CFileList::FileSameSize:
-		case CFileList::FileSameSizeAndDim:
-		case CFileList::CorruptedFiles:
+		case CAlbumModel::FileSameSize:
+		case CAlbumModel::FileSameSizeAndDim:
+		case CAlbumModel::CorruptedFiles:
 			SetDirty( true );
-			if ( m_fileList.GetFileAttrCount() < InplaceSortMaxCount )
+			if ( m_model.GetFileAttrCount() < InplaceSortMaxCount )
 				PostMessage( WM_COMMAND, IDC_SEARCH_FOR_FILES );
 			break;
 		default:
@@ -227,56 +223,60 @@ void CAlbumSettingsDialog::UpdateFileSortOrder( void )
 #endif
 }
 
-std::pair< CAlbumSettingsDialog::Column, bool > CAlbumSettingsDialog::ToListSortOrder( CFileList::Order fileOrder )
+std::pair< CAlbumSettingsDialog::Column, bool > CAlbumSettingsDialog::ToListSortOrder( CAlbumModel::Order fileOrder )
 {
 	switch ( fileOrder )
 	{
-		case CFileList::ByFileNameAsc:		return std::make_pair( FileName, true );
-		case CFileList::ByFileNameDesc:		return std::make_pair( FileName, false ); break;
-		case CFileList::ByFullPathAsc:		return std::make_pair( Folder, true ); break;
-		case CFileList::ByFullPathDesc:		return std::make_pair( Folder, false ); break;
-		case CFileList::ByDimensionAsc:		return std::make_pair( Dimensions, true ); break;
-		case CFileList::ByDimensionDesc:	return std::make_pair( Dimensions, false ); break;
-		case CFileList::BySizeAsc:			return std::make_pair( Size, true ); break;
-		case CFileList::BySizeDesc:			return std::make_pair( Size, false ); break;
-		case CFileList::ByDateAsc:			return std::make_pair( Date, true ); break;
-		case CFileList::ByDateDesc:			return std::make_pair( Date, false ); break;
+		case CAlbumModel::ByFileNameAsc:		return std::make_pair( FileName, true );
+		case CAlbumModel::ByFileNameDesc:		return std::make_pair( FileName, false ); break;
+		case CAlbumModel::ByFullPathAsc:		return std::make_pair( Folder, true ); break;
+		case CAlbumModel::ByFullPathDesc:		return std::make_pair( Folder, false ); break;
+		case CAlbumModel::ByDimensionAsc:		return std::make_pair( Dimensions, true ); break;
+		case CAlbumModel::ByDimensionDesc:		return std::make_pair( Dimensions, false ); break;
+		case CAlbumModel::BySizeAsc:			return std::make_pair( Size, true ); break;
+		case CAlbumModel::BySizeDesc:			return std::make_pair( Size, false ); break;
+		case CAlbumModel::ByDateAsc:			return std::make_pair( Date, true ); break;
+		case CAlbumModel::ByDateDesc:			return std::make_pair( Date, false ); break;
 	}
 	return std::make_pair( Unordered, false );
 }
 
-// if filePath is a directory or a file path, it adds/modifies the CSearchSpec entry in m_fileList.m_searchSpecs
+
+// if filePath is a directory or a file path, it adds/modifies the CSearchSpec entry in m_model.m_searchSpecs
 // if filePath points to an invalid path, it returns false.
-// it finally selects the latest altered entry in m_searchSpecListBox.
+// it finally selects the latest altered entry in the list
 bool CAlbumSettingsDialog::DropSearchSpec( const fs::CFlexPath& filePath, bool doPrompt /*= true*/ )
 {
 	if ( filePath.IsEmpty() || !filePath.FileExist() )
 		return false;
 
-	int index = m_fileList.FindSearchSpec( filePath );
+	CSearchModel* pSearchModel = m_model.RefSearchModel();
+	int index = pSearchModel->FindSpecPos( filePath );
+
 	if ( index != -1 )
 	{	// already exists -> prompt to modify
-		CSearchSpec& rSearchSpec = m_fileList.m_searchSpecs[ index ];
+		CSearchSpec* pSearchSpec = pSearchModel->GetSpecAt( index );
 
 		m_searchSpecListBox.SetCurSel( index );
 
 		if ( doPrompt )
 		{
-			CSearchSpecDialog dlg( rSearchSpec, this );
+			CSearchSpecDialog dlg( *pSearchSpec, this );
 			if ( IDCANCEL == dlg.DoModal() )
 				return false;
-			rSearchSpec = dlg.m_searchSpec;
+
+			*pSearchSpec = dlg.m_searchSpec;
 		}
 		m_searchSpecListBox.DeleteString( index );
-		m_searchSpecListBox.InsertString( index, rSearchSpec.m_searchPath.GetPtr() );
+		m_searchSpecListBox.InsertString( index, pSearchSpec->GetFilePath().GetPtr() );
 	}
 	else
 	{
-		CSearchSpec searchSpec( filePath );
+		pSearchModel->AddSearchPath( filePath );
+		index = static_cast<int>( pSearchModel->GetSpecs().size() - 1 );
+		CSearchSpec* pSearchSpec( pSearchModel->GetSpecAt( index ) );
 
-		m_fileList.m_searchSpecs.push_back( searchSpec );
-		index = (int)m_fileList.m_searchSpecs.size() - 1;
-		m_searchSpecListBox.AddString( searchSpec.m_searchPath.GetPtr() );
+		m_searchSpecListBox.AddString( pSearchSpec->GetFilePath().GetPtr() );
 	}
 	m_searchSpecListBox.SetCurSel( index );
 
@@ -285,22 +285,42 @@ bool CAlbumSettingsDialog::DropSearchSpec( const fs::CFlexPath& filePath, bool d
 	return true;
 }
 
-bool CAlbumSettingsDialog::MoveSearchSpec( int moveBy )
+bool CAlbumSettingsDialog::DeleteSearchSpec( int index, bool doPrompt /*= false*/ )
 {
-	int selIndex = m_searchSpecListBox.GetCurSel(), newIndex = selIndex + moveBy;
+	ASSERT( index != LB_ERR );
+	if ( doPrompt )
+		if ( IDCANCEL == AfxMessageBox( str::Format( IDS_DELETE_ATTR_PROMPT, m_model.GetSearchModel()->GetSpecAt( index )->GetFilePath().GetPtr() ).c_str(), MB_OKCANCEL ) )
+			return false;
+
+	m_model.RefSearchModel()->RemoveSpecAt( index );
+	m_searchSpecListBox.DeleteString( index );
+	index = std::min( index, m_searchSpecListBox.GetCount() - 1 );
+	m_searchSpecListBox.SetCurSel( index );
+
+	SetDirty();
+	OnLBnSelChange_SearchSpec();
+	return true;
+}
+
+bool CAlbumSettingsDialog::MoveSearchSpec( seq::Direction moveBy )
+{
+	int selIndex = m_searchSpecListBox.GetCurSel();
+	int newIndex = selIndex + moveBy;
 
 	ASSERT( selIndex != LB_ERR && moveBy != 0 );
 	m_searchSpecListBox.DeleteString( selIndex );
 
-	CSearchSpec searchSpec = m_fileList.m_searchSpecs[ selIndex ];
+	CSearchModel* pSearchModel = m_model.RefSearchModel();
+	const CSearchSpec* pSearchSpec = pSearchModel->GetSpecAt( selIndex );
 
-	m_fileList.m_searchSpecs.erase( m_fileList.m_searchSpecs.begin() + selIndex );
-	m_fileList.m_searchSpecs.insert( m_fileList.m_searchSpecs.begin() + newIndex, searchSpec );
+	seq::CArraySequence< CSearchSpec* > sequence( &pSearchModel->RefSpecs() );
+	seq::MoveSingleBy( sequence, selIndex, moveBy );
+	ENSURE( pSearchSpec == pSearchModel->GetSpecAt( newIndex ) );			// same spec at new index
 
 	if ( newIndex < m_searchSpecListBox.GetCount() )
-		m_searchSpecListBox.InsertString( newIndex, searchSpec.m_searchPath.GetPtr() );
+		m_searchSpecListBox.InsertString( newIndex, pSearchSpec->GetFilePath().GetPtr() );
 	else
-		m_searchSpecListBox.AddString( searchSpec.m_searchPath.GetPtr() );
+		m_searchSpecListBox.AddString( pSearchSpec->GetFilePath().GetPtr() );
 
 	VERIFY( m_searchSpecListBox.SetCurSel( newIndex ) != LB_ERR );
 	SetDirty();
@@ -316,15 +336,18 @@ bool CAlbumSettingsDialog::AddSearchSpec( int index )
 	if ( dlg.DoModal() != IDOK )
 		return false;
 
-	int dupIndex = CheckForDuplicates( dlg.m_searchSpec.m_searchPath.GetPtr() );
+	CSearchModel* pSearchModel = m_model.RefSearchModel();
+	int dupIndex = CheckForDuplicates( dlg.m_searchSpec.GetFilePath().GetPtr() );
+
 	if ( dupIndex != -1 )
 	{	// modify the same entry instead of
 		index = dupIndex;
-		m_fileList.m_searchSpecs.erase( m_fileList.m_searchSpecs.begin() + index );
+		pSearchModel->RemoveSpecAt( index )->GetFilePath();
 		m_searchSpecListBox.DeleteString( index );
 	}
-	m_fileList.m_searchSpecs.insert( m_fileList.m_searchSpecs.begin() + index, dlg.m_searchSpec );
-	m_searchSpecListBox.InsertString( index, m_fileList.m_searchSpecs[ index ].m_searchPath.GetPtr() );
+
+	pSearchModel->AddSpec( new CSearchSpec( dlg.m_searchSpec ), index );
+	m_searchSpecListBox.InsertString( index, pSearchModel->GetSpecAt( index )->GetFilePath().GetPtr() );
 
 	m_searchSpecListBox.SetCurSel( index );
 	SetDirty();
@@ -336,40 +359,29 @@ bool CAlbumSettingsDialog::ModifySearchSpec( int index )
 {
 	ASSERT( index != LB_ERR );
 
-	CSearchSpecDialog dlg( m_fileList.m_searchSpecs[ index ], this );
+	CSearchSpecDialog dlg( *m_model.GetSearchModel()->GetSpecAt( index ), this );
 	if ( dlg.DoModal() != IDOK )
 		return false;
 
-	int dupIndex = CheckForDuplicates( dlg.m_searchSpec.m_searchPath.GetPtr(), index );
+	CSearchModel* pSearchModel = m_model.RefSearchModel();
+	std::auto_ptr< CSearchSpec > pSearchSpec;
+	int dupIndex = CheckForDuplicates( dlg.m_searchSpec.GetFilePath().GetPtr(), index );
+
 	if ( dupIndex != -1 )
 	{	// modify the same entry
-		m_fileList.m_searchSpecs.erase( m_fileList.m_searchSpecs.begin() + index );
+		pSearchSpec = pSearchModel->RemoveSpecAt( index );
 		m_searchSpecListBox.DeleteString( index );
 		index = dupIndex;
 	}
+	else
+		pSearchSpec.reset( new CSearchSpec() );
 
-	m_fileList.m_searchSpecs[ index ] = dlg.m_searchSpec;
+	*pSearchSpec = dlg.m_searchSpec;
+
 	m_searchSpecListBox.DeleteString( index );
-	m_searchSpecListBox.InsertString( index, m_fileList.m_searchSpecs[ index ].m_searchPath.GetPtr() );
+	m_searchSpecListBox.InsertString( index, pSearchSpec->GetFilePath().GetPtr() );
 
 	m_searchSpecListBox.SetCurSel( index );
-	SetDirty();
-	OnLBnSelChange_SearchSpec();
-	return true;
-}
-
-bool CAlbumSettingsDialog::DeleteSearchSpec( int index, bool doPrompt /*= false*/ )
-{
-	ASSERT( index != LB_ERR );
-	if ( doPrompt )
-		if ( IDCANCEL == AfxMessageBox( str::Format( IDS_DELETE_ATTR_PROMPT, m_fileList.m_searchSpecs[ index ].m_searchPath.GetPtr() ).c_str(), MB_OKCANCEL ) )
-			return false;
-
-	m_fileList.m_searchSpecs.erase( m_fileList.m_searchSpecs.begin() + index );
-	m_searchSpecListBox.DeleteString( index );
-	index = std::min( index, m_searchSpecListBox.GetCount() - 1 );
-	m_searchSpecListBox.SetCurSel( index );
-
 	SetDirty();
 	OnLBnSelChange_SearchSpec();
 	return true;
@@ -414,13 +426,15 @@ bool CAlbumSettingsDialog::SearchSourceFiles( void )
 	CWaitCursor wait;
 	bool success = true;
 
+	ui::EnableControl( m_hWnd, IDCANCEL, false );
+
 	// Note:
-	// Freeze list redraw since file search progress notifications force listCtrl redraw while old image items in m_fileList have been deleted, leaving dangling references in the list.
+	// Freeze list redraw since file search progress notifications force listCtrl redraw while old image items in m_model have been deleted, leaving dangling references in the list.
 	CScopedLockRedraw freeze( &m_foundFilesListCtrl );			// to prevent list redraw crash due to dangling reference image items
 
 	try
 	{
-		m_fileList.SearchForFiles();
+		m_model.SearchForFiles();
 	}
 	catch ( CException* pExc )
 	{
@@ -430,6 +444,7 @@ bool CAlbumSettingsDialog::SearchSourceFiles( void )
 
 	SetupFoundListView();		// fill in the found files list
 	SetDirty( false );
+	ui::EnableControl( m_hWnd, IDCANCEL );
 	return success;
 }
 
@@ -437,7 +452,7 @@ void CAlbumSettingsDialog::SetupFoundListView( void )
 {
 	CScopedListTextSelection scopedSel( &m_foundFilesListCtrl );
 
-	size_t count = m_fileList.GetFileAttrCount();
+	size_t count = m_model.GetFileAttrCount();
 	{
 		CScopedInternalChange internalChange( &m_foundFilesListCtrl );
 		CScopedLockRedraw freeze( &m_foundFilesListCtrl );
@@ -447,17 +462,17 @@ void CAlbumSettingsDialog::SetupFoundListView( void )
 
 		for ( UINT i = 0; i != count; ++i )
 		{
-			const CFileAttr* pFileAttr = &m_fileList.GetFileAttr( i );
+			const CFileAttr* pFileAttr = &m_model.GetFileAttr( i );
 
 			m_foundFilesListCtrl.InsertObjectItem( i, const_cast< CFileAttr* >( pFileAttr ), ui::Transparent_Image );
 			m_foundFilesListCtrl.SetSubItemText( i, Folder, pFileAttr->GetPath().GetOriginParentPath().Get() );
 			m_foundFilesListCtrl.SetItemText( i, Dimensions, LPSTR_TEXTCALLBACK );			// defer CPU-intensive dimensions evaluation
 
 			std::tstring sizeText;
-			switch ( m_fileList.GetFileOrder() )
+			switch ( m_model.GetFileOrder() )
 			{
-				case CFileList::FileSameSize:		sizeText = pFileAttr->FormatFileSize( 1, _T("%s B") ); break;
-				case CFileList::FileSameSizeAndDim:	sizeText = pFileAttr->FormatFileSize( 1, _T("%s B (%dx%d)") ); break;
+				case CAlbumModel::FileSameSize:		sizeText = pFileAttr->FormatFileSize( 1, _T("%s B") ); break;
+				case CAlbumModel::FileSameSizeAndDim:	sizeText = pFileAttr->FormatFileSize( 1, _T("%s B (%dx%d)") ); break;
 				default:							sizeText = pFileAttr->FormatFileSize();
 			}
 
@@ -498,23 +513,24 @@ void CAlbumSettingsDialog::QueryFoundListSelection( std::vector< std::tstring >&
 
 int CAlbumSettingsDialog::GetCheckStateAutoRegen( void ) const
 {
-	if ( m_fileList.IsAutoDropRecipient() )
+	if ( m_model.IsAutoDropRecipient() )
 		return BST_INDETERMINATE;
 
-	return HasFlag( m_fileList.m_perFlags, CFileList::AutoRegenerate ) ? BST_CHECKED : BST_UNCHECKED;
+	return m_model.HasPersistFlag( CAlbumModel::AutoRegenerate ) ? BST_CHECKED : BST_UNCHECKED;
 }
 
 void CAlbumSettingsDialog::DoDataExchange( CDataExchange* pDX )
 {
 	bool firstInit = NULL == m_foundFilesListCtrl.m_hWnd;
-	CFileList::Order fileOrder = m_fileList.GetFileOrder();
+	CAlbumModel::Order fileOrder = m_model.GetFileOrder();
 
+	DDX_Control( pDX, IDC_MAX_FILE_COUNT_EDIT, m_maxFileCountEdit );
 	DDX_Control( pDX, IDC_MIN_FILE_SIZE_EDIT, m_minSizeEdit );
 	DDX_Control( pDX, IDC_MAX_FILE_SIZE_EDIT, m_maxSizeEdit );
 	DDX_Control( pDX, IDC_SEARCH_SPEC_MOVE_DOWN, m_moveDownButton );
 	DDX_Control( pDX, IDC_SEARCH_SPEC_MOVE_UP, m_moveUpButton );
 	DDX_Control( pDX, IDC_SEARCH_SPEC_LIST, m_searchSpecListBox );
-	ui::DDX_EnumCombo( pDX, IDC_LIST_ORDER_COMBO, m_sortOrderCombo, fileOrder, CFileList::GetTags_Order() );
+	ui::DDX_EnumCombo( pDX, IDC_LIST_ORDER_COMBO, m_sortOrderCombo, fileOrder, CAlbumModel::GetTags_Order() );
 	DDX_Control( pDX, IDC_FOUND_FILES_LISTVIEW, m_foundFilesListCtrl );
 	DDX_Control( pDX, IDC_THUMB_PREVIEW_STATIC, m_thumbPreviewCtrl );
 	m_toolbar.DDX_Placeholder( pDX, IDC_TOOLBAR_PLACEHOLDER, H_AlignRight | V_AlignCenter );
@@ -526,19 +542,27 @@ void CAlbumSettingsDialog::DoDataExchange( CDataExchange* pDX )
 	{
 		case DialogOutput:
 		{	// dialog setup
-			CheckDlgButton( IDC_MIN_FILE_SIZE_CHECK, m_fileList.m_fileSizeRange.m_start != 0 );
-			CheckDlgButton( IDC_MAX_FILE_SIZE_CHECK, m_fileList.m_fileSizeRange.m_end != UINT_MAX );
+			ui::SetDlgItemText( this, IDC_DOC_VERSION_STATIC, app::FormatModelVersion( m_model.GetModelSchema() ) );
+
+			const CSearchModel* pSearchModel = m_model.GetSearchModel();
+			CheckDlgButton( IDC_MAX_FILE_COUNT_CHECK, pSearchModel->GetMaxFileCount() != UINT_MAX );
+			CheckDlgButton( IDC_MIN_FILE_SIZE_CHECK, pSearchModel->GetFileSizeRange().m_start != CSearchModel::s_anyFileSizeRange.m_start );
+			CheckDlgButton( IDC_MAX_FILE_SIZE_CHECK, pSearchModel->GetFileSizeRange().m_end != CSearchModel::s_anyFileSizeRange.m_end );
+			OnToggle_MaxFileCount();
 			OnToggle_MinSize();
 			OnToggle_MaxSize();
 
 			// auto-drop side effect: also auto regenerate, but disable the check
 			CheckDlgButton( IDC_AUTO_REGENERATE_CHECK, GetCheckStateAutoRegen() );
-			CheckDlgButton( IDC_AUTO_DROP_CHECK, m_fileList.IsAutoDropRecipient() );
+			CheckDlgButton( IDC_AUTO_DROP_CHECK, m_model.IsAutoDropRecipient() );
 
 			// fill in the search attribute path list
 			m_searchSpecListBox.ResetContent();
-			for ( size_t i = 0; i != m_fileList.m_searchSpecs.size(); ++i )
-				m_searchSpecListBox.AddString( m_fileList.m_searchSpecs[ i ].m_searchPath.GetPtr() );
+
+			const std::vector< CSearchSpec* >& searchSpecs = m_model.GetSearchModel()->GetSpecs();
+			for ( std::vector< CSearchSpec* >::const_iterator itSpec = searchSpecs.begin(); itSpec != searchSpecs.end(); ++itSpec )
+				m_searchSpecListBox.AddString( ( *itSpec )->GetFilePath().GetPtr() );
+
 			m_searchSpecListBox.SetCurSel( 0 );
 			OnLBnSelChange_SearchSpec();
 
@@ -548,42 +572,50 @@ void CAlbumSettingsDialog::DoDataExchange( CDataExchange* pDX )
 
 			SetupFoundListView();		// fill in the found files list
 			if ( -1 == m_foundFilesListCtrl.GetCaretIndex() )
-				if ( (UINT)m_currentIndex < m_fileList.GetFileAttrCount() )
+				if ( (UINT)m_currentIndex < m_model.GetFileAttrCount() )
 					m_foundFilesListCtrl.SetCurSel( m_currentIndex );
-				else if ( m_fileList.AnyFoundFiles() )
+				else if ( m_model.AnyFoundFiles() )
 					m_foundFilesListCtrl.SetCurSel( 0 );
 
 			int selIndex = m_foundFilesListCtrl.GetCurSel();
 
 			if ( selIndex != -1 )
-				m_thumbPreviewCtrl.SetImagePath( m_fileList.GetFileAttr( selIndex ).GetPath() );
+				m_thumbPreviewCtrl.SetImagePath( m_model.GetFileAttr( selIndex ).GetPath() );
 			else
 				m_thumbPreviewCtrl.SetImagePath( fs::CFlexPath() );
 
 			// set initial dirty if auto-generation is turned on (either explicit or by auto-drop)
-			SetDirty( m_fileList.MustAutoRegenerate() );
+			SetDirty( m_model.MustAutoRegenerate() );
 			break;
 		}
 		case DialogSaveChanges:
 		{
-			m_fileList.SetFileOrder( fileOrder );
+			m_model.SetFileOrder( fileOrder );
 
-			UINT number = 0;
-			bool validNumber;
+			CSearchModel* pSearchModel = m_model.RefSearchModel();
+			UINT maxFileCount = UINT_MAX;
 
-			validNumber = IsDlgButtonChecked( IDC_MIN_FILE_SIZE_CHECK ) != FALSE;
-			if ( validNumber )
-				number = m_minSizeEdit.GetNumber< UINT >( &validNumber ) * KiloByte;
-			m_fileList.m_fileSizeRange.m_start = validNumber ? number : 0;
+			if ( IsDlgButtonChecked( IDC_MAX_FILE_COUNT_CHECK ) )
+				if ( !m_maxFileCountEdit.ParseNumber( &maxFileCount ) )
+					maxFileCount = UINT_MAX;
 
-			validNumber = IsDlgButtonChecked( IDC_MAX_FILE_SIZE_CHECK ) != FALSE;
-			if ( validNumber )
-				number = m_maxSizeEdit.GetNumber< UINT >( &validNumber ) * KiloByte;
-			m_fileList.m_fileSizeRange.m_end = validNumber ? number : UINT_MAX;
+			pSearchModel->SetMaxFileCount( maxFileCount );
+
+			Range< UINT > fileSizeRange = CSearchModel::s_anyFileSizeRange;
+
+			if ( IsDlgButtonChecked( IDC_MIN_FILE_SIZE_CHECK ) )
+				if ( m_minSizeEdit.ParseNumber( &fileSizeRange.m_start ) )
+					fileSizeRange.m_start *= KiloByte;
+
+			if ( IsDlgButtonChecked( IDC_MAX_FILE_SIZE_CHECK ) )
+				if ( m_maxSizeEdit.ParseNumber( &fileSizeRange.m_end ) )
+					fileSizeRange.m_end *= KiloByte;
+
+			pSearchModel->SetFileSizeRange( fileSizeRange );
 
 			UINT ckState = IsDlgButtonChecked( IDC_AUTO_REGENERATE_CHECK );
 			if ( ckState != BST_INDETERMINATE )
-				SetFlag( m_fileList.m_perFlags, CFileList::AutoRegenerate, BST_CHECKED == ckState );		// the button is checked naturally, and not as a side effect of auto-drop feature
+				m_model.SetPersistFlag( CAlbumModel::AutoRegenerate, BST_CHECKED == ckState );		// the button is checked naturally, and not as a side effect of auto-drop feature
 
 			m_currentIndex = m_foundFilesListCtrl.GetCaretIndex();
 			if ( -1 == m_currentIndex )
@@ -595,6 +627,31 @@ void CAlbumSettingsDialog::DoDataExchange( CDataExchange* pDX )
 	CLayoutDialog::DoDataExchange( pDX );
 }
 
+BOOL CAlbumSettingsDialog::OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo )
+{
+	switch ( id )
+	{
+		case ID_EDIT_COPY:
+			// special case: handled by the file list (since CDialog::OnCmdMsg() routes to the parent frame window)
+			return m_foundFilesListCtrl.OnCmdMsg( id, code, pExtra, pHandlerInfo );
+	}
+
+	return
+		__super::OnCmdMsg( id, code, pExtra, pHandlerInfo ) ||
+		m_foundFilesListCtrl.OnCmdMsg( id, code, pExtra, pHandlerInfo );
+}
+
+BOOL CAlbumSettingsDialog::PreTranslateMessage( MSG* pMsg )
+{
+	if ( CAccelTable::IsKeyMessage( pMsg ) )
+		if ( m_searchListAccel.TranslateIfOwnsFocus( pMsg, m_hWnd, m_searchSpecListBox ) )
+			return true;
+		else if ( m_dlgAccel.Translate( pMsg, m_hWnd ) )
+			return true;
+
+	return CLayoutDialog::PreTranslateMessage( pMsg );
+}
+
 
 // message handlers
 
@@ -602,8 +659,10 @@ BEGIN_MESSAGE_MAP( CAlbumSettingsDialog, CLayoutDialog )
 	ON_WM_DESTROY()
 	ON_WM_DROPFILES()
 	ON_CBN_SELCHANGE( IDC_LIST_ORDER_COMBO, OnCBnSelChange_SortOrder )
+	ON_BN_CLICKED( IDC_MAX_FILE_COUNT_CHECK, OnToggle_MaxFileCount )
 	ON_BN_CLICKED( IDC_MIN_FILE_SIZE_CHECK, OnToggle_MinSize )
 	ON_BN_CLICKED( IDC_MAX_FILE_SIZE_CHECK, OnToggle_MaxSize )
+	ON_EN_CHANGE( IDC_MAX_FILE_COUNT_EDIT, OnEnChange_MaxFileCount )
 	ON_EN_CHANGE( IDC_MIN_FILE_SIZE_EDIT, OnEnChange_MinMaxSize )
 	ON_EN_CHANGE( IDC_MAX_FILE_SIZE_EDIT, OnEnChange_MinMaxSize )
 	ON_BN_CLICKED( IDC_AUTO_REGENERATE_CHECK, OnToggle_AutoRegenerate )
@@ -627,34 +686,10 @@ BEGIN_MESSAGE_MAP( CAlbumSettingsDialog, CLayoutDialog )
 	ON_COMMAND_RANGE( CM_OPEN_IMAGE_FILE, CM_EXPLORE_IMAGE, OnImageFileOp )
 END_MESSAGE_MAP()
 
-BOOL CAlbumSettingsDialog::PreTranslateMessage( MSG* pMsg )
-{
-	if ( CAccelTable::IsKeyMessage( pMsg ) )
-		if ( m_searchListAccel.TranslateIfOwnsFocus( pMsg, m_hWnd, m_searchSpecListBox ) )
-			return true;
-		else if ( m_dlgAccel.Translate( pMsg, m_hWnd ) )
-			return true;
-
-	return CLayoutDialog::PreTranslateMessage( pMsg );
-}
-
-BOOL CAlbumSettingsDialog::OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo )
-{
-	switch ( id )
-	{
-		case ID_EDIT_COPY:
-			// special case: handled by the file list (since CDialog::OnCmdMsg() routes to the parent frame window)
-			return m_foundFilesListCtrl.OnCmdMsg( id, code, pExtra, pHandlerInfo );
-	}
-
-	return
-		__super::OnCmdMsg( id, code, pExtra, pHandlerInfo ) ||
-		m_foundFilesListCtrl.OnCmdMsg( id, code, pExtra, pHandlerInfo );
-}
-
 BOOL CAlbumSettingsDialog::OnInitDialog( void )
 {
 	CLayoutDialog::OnInitDialog();
+
 	DragAcceptFiles();
 	InitSymbolFont();
 
@@ -682,8 +717,8 @@ void CAlbumSettingsDialog::OnOK( void )
 
 void CAlbumSettingsDialog::OnCancel( void )
 {
-	if ( !m_fileList.CancelGeneration() )
-		CLayoutDialog::OnCancel();
+	ASSERT( !m_model.InGeneration() );
+	CLayoutDialog::OnCancel();
 }
 
 void CAlbumSettingsDialog::OnDropFiles( HDROP hDropInfo )
@@ -717,8 +752,8 @@ void CAlbumSettingsDialog::OnContextMenu( CWnd* pWnd, CPoint point )
 
 void CAlbumSettingsDialog::OnCBnSelChange_SortOrder( void )
 {
-	CFileList::Order fileOrder = static_cast< CFileList::Order >( m_sortOrderCombo.GetCurSel() );
-	m_fileList.SetFileOrder( fileOrder );
+	CAlbumModel::Order fileOrder = static_cast< CAlbumModel::Order >( m_sortOrderCombo.GetCurSel() );
+	m_model.SetFileOrder( fileOrder );
 
 	std::pair< Column, bool > sortPair = ToListSortOrder( fileOrder );
 	m_foundFilesListCtrl.SetSortByColumn( sortPair.first, sortPair.second );
@@ -726,12 +761,31 @@ void CAlbumSettingsDialog::OnCBnSelChange_SortOrder( void )
 	UpdateFileSortOrder();
 }
 
+void CAlbumSettingsDialog::OnToggle_MaxFileCount( void )
+{
+	if ( IsDlgButtonChecked( IDC_MAX_FILE_COUNT_CHECK ) )
+	{
+		UINT value = m_model.GetSearchModel()->GetMaxFileCount();
+		if ( UINT_MAX == value )
+			value = 1000;
+
+		ui::EnableWindow( m_maxFileCountEdit );
+		m_maxFileCountEdit.SetNumber( value );
+	}
+	else
+	{
+		ui::EnableWindow( m_maxFileCountEdit, false );
+		ui::SetWindowText( m_maxFileCountEdit, std::tstring() );
+	}
+	SetDirty();
+}
+
 void CAlbumSettingsDialog::OnToggle_MinSize( void )
 {
 	if ( IsDlgButtonChecked( IDC_MIN_FILE_SIZE_CHECK ) )
 	{
 		ui::EnableWindow( m_minSizeEdit );
-		m_minSizeEdit.SetNumber( m_fileList.m_fileSizeRange.m_start / KiloByte );
+		m_minSizeEdit.SetNumber( m_model.GetSearchModel()->GetFileSizeRange().m_start / KiloByte );
 	}
 	else
 	{
@@ -745,14 +799,23 @@ void CAlbumSettingsDialog::OnToggle_MaxSize( void )
 {
 	if ( IsDlgButtonChecked( IDC_MAX_FILE_SIZE_CHECK ) )
 	{
+		UINT value = m_model.GetSearchModel()->GetFileSizeRange().m_end;
+		if ( UINT_MAX == value )
+			value = MegaByte / 2;
+
 		ui::EnableWindow( m_maxSizeEdit );
-		m_maxSizeEdit.SetNumber( m_fileList.m_fileSizeRange.m_end / KiloByte );
+		m_maxSizeEdit.SetNumber( value / KiloByte );
 	}
 	else
 	{
 		ui::EnableWindow( m_maxSizeEdit, false );
 		ui::SetWindowText( m_maxSizeEdit, std::tstring() );
 	}
+	SetDirty();
+}
+
+void CAlbumSettingsDialog::OnEnChange_MaxFileCount( void )
+{
 	SetDirty();
 }
 
@@ -764,7 +827,7 @@ void CAlbumSettingsDialog::OnEnChange_MinMaxSize( void )
 void CAlbumSettingsDialog::OnLBnSelChange_SearchSpec( void )
 {
 	int selIndex = m_searchSpecListBox.GetCurSel();
-	int attrCount = (int)m_fileList.m_searchSpecs.size();
+	int attrCount = static_cast<int>( m_model.GetSearchModel()->GetSpecs().size() );
 
 	ASSERT( selIndex != LB_ERR || 0 == m_searchSpecListBox.GetCount() );
 	ui::EnableWindow( m_moveUpButton, selIndex > 0 );
@@ -774,7 +837,7 @@ void CAlbumSettingsDialog::OnLBnSelChange_SearchSpec( void )
 	ui::EnableControl( m_hWnd, ID_REMOVE_ITEM, selIndex != LB_ERR );
 
 	CheckDlgButton( IDC_AUTO_REGENERATE_CHECK, GetCheckStateAutoRegen() );
-	CheckDlgButton( IDC_AUTO_DROP_CHECK, m_fileList.IsAutoDropRecipient() );
+	CheckDlgButton( IDC_AUTO_DROP_CHECK, m_model.IsAutoDropRecipient() );
 }
 
 void CAlbumSettingsDialog::OnLBnDblclk_SearchSpec( void )
@@ -785,17 +848,17 @@ void CAlbumSettingsDialog::OnLBnDblclk_SearchSpec( void )
 
 void CAlbumSettingsDialog::On_MoveUp_SearchSpec( void )
 {
-	MoveSearchSpec( -1 );
+	MoveSearchSpec( seq::Prev );
 }
 
 void CAlbumSettingsDialog::On_MoveDown_SearchSpec( void )
 {
-	MoveSearchSpec( 1 );
+	MoveSearchSpec( seq::Next );
 }
 
 void CAlbumSettingsDialog::OnAdd_SearchSpec( void )
 {
-	int attrCount = (int)m_fileList.GetSearchSpecCount();
+	int attrCount = static_cast<int>( m_model.GetSearchModel()->GetSpecs().size() );
 	int atIndex = m_searchSpecListBox.GetCurSel();
 
 	if ( LB_ERR == atIndex )
@@ -828,19 +891,19 @@ void CAlbumSettingsDialog::OnSearchSourceFiles( void )
 
 void CAlbumSettingsDialog::On_OrderRandomShuffle( UINT cmdId )
 {
-	CFileList::Order fileOrder = hlp::OrderOfCmd( cmdId );
+	CAlbumModel::Order fileOrder = hlp::OrderOfCmd( cmdId );
 
-	m_fileList.SetFileOrder( fileOrder );
+	m_model.SetFileOrder( fileOrder );
 	m_sortOrderCombo.SetCurSel( fileOrder );
 	UpdateFileSortOrder();
 }
 
 void CAlbumSettingsDialog::OnUpdate_OrderRandomShuffle( CCmdUI* pCmdUI )
 {
-	CFileList::Order fileOrder = hlp::OrderOfCmd( pCmdUI->m_nID );
+	CAlbumModel::Order fileOrder = hlp::OrderOfCmd( pCmdUI->m_nID );
 
-	pCmdUI->Enable( !m_fileList.InGeneration() );
-	pCmdUI->SetCheck( fileOrder == m_fileList.GetFileOrder() );
+	pCmdUI->Enable( !m_model.InGeneration() );
+	pCmdUI->SetCheck( fileOrder == m_model.GetFileOrder() );
 }
 
 void CAlbumSettingsDialog::OnImageFileOp( UINT cmdId )
@@ -876,7 +939,7 @@ void CAlbumSettingsDialog::OnToggle_AutoRegenerate( void )
 {
 	UINT ckState = IsDlgButtonChecked( IDC_AUTO_REGENERATE_CHECK );
 	if ( ckState != BST_INDETERMINATE )
-		SetFlag( m_fileList.m_perFlags, CFileList::AutoRegenerate, BST_CHECKED == ckState );		// the button is checked naturally, and not as a side effect of auto-drop feature
+		m_model.SetPersistFlag( CAlbumModel::AutoRegenerate, BST_CHECKED == ckState );		// the button is checked naturally, and not as a side effect of auto-drop feature
 	SetDirty();
 }
 
@@ -888,27 +951,27 @@ void CAlbumSettingsDialog::OnToggle_AutoDrop( void )
 void CAlbumSettingsDialog::OnLVnColumnClick_FoundFiles( NMHDR* pNmHdr, LRESULT* pResult )
 {
 	NMLISTVIEW* pNmListView = (NMLISTVIEW*)pNmHdr;
-	CFileList::Order fileOrder = m_fileList.GetFileOrder();
+	CAlbumModel::Order fileOrder = m_model.GetFileOrder();
 
 	switch ( pNmListView->iSubItem )
 	{
 		case FileName:
-			fileOrder = fileOrder == CFileList::ByFileNameAsc ? CFileList::ByFileNameDesc : CFileList::ByFileNameAsc;
+			fileOrder = fileOrder == CAlbumModel::ByFileNameAsc ? CAlbumModel::ByFileNameDesc : CAlbumModel::ByFileNameAsc;
 			break;
 		case Folder:
-			fileOrder = fileOrder == CFileList::ByFullPathAsc ? CFileList::ByFullPathDesc : CFileList::ByFullPathAsc;
+			fileOrder = fileOrder == CAlbumModel::ByFullPathAsc ? CAlbumModel::ByFullPathDesc : CAlbumModel::ByFullPathAsc;
 			break;
 		case Dimensions:
-			fileOrder = fileOrder == CFileList::ByDimensionAsc ? CFileList::ByDimensionDesc : CFileList::ByDimensionAsc;
+			fileOrder = fileOrder == CAlbumModel::ByDimensionAsc ? CAlbumModel::ByDimensionDesc : CAlbumModel::ByDimensionAsc;
 			break;
 		case Size:
-			fileOrder = fileOrder == CFileList::BySizeAsc ? CFileList::BySizeDesc : CFileList::BySizeAsc;
+			fileOrder = fileOrder == CAlbumModel::BySizeAsc ? CAlbumModel::BySizeDesc : CAlbumModel::BySizeAsc;
 			break;
 		case Date:
-			fileOrder = fileOrder == CFileList::ByDateAsc ? CFileList::ByDateDesc : CFileList::ByDateAsc;
+			fileOrder = fileOrder == CAlbumModel::ByDateAsc ? CAlbumModel::ByDateDesc : CAlbumModel::ByDateAsc;
 			break;
 	}
-	m_fileList.SetFileOrder( fileOrder );
+	m_model.SetFileOrder( fileOrder );
 	m_sortOrderCombo.SetCurSel( fileOrder );
 	UpdateFileSortOrder();
 	*pResult = 0;
@@ -922,7 +985,7 @@ void CAlbumSettingsDialog::OnLVnItemChanged_FoundFiles( NMHDR* pNmHdr, LRESULT* 
 		if ( pNmListView->uChanged & LVIF_STATE )
 			if ( ( pNmListView->uNewState & ( LVIS_FOCUSED | LVIS_SELECTED ) ) != ( pNmListView->uOldState & ( LVIS_FOCUSED | LVIS_SELECTED ) ) )
 				if ( pNmListView->uNewState & LVIS_FOCUSED )
-					m_thumbPreviewCtrl.SetImagePath( m_fileList.GetFileAttr( pNmListView->iItem ).GetPath() );
+					m_thumbPreviewCtrl.SetImagePath( m_model.GetFileAttr( pNmListView->iItem ).GetPath() );
 
 	*pResult = 0;
 }
@@ -951,15 +1014,15 @@ void CAlbumSettingsDialog::OnLVnItemsReorder_FoundFiles( void )
 {
 	// input custom order
 	std::vector< CFileAttr* > customOrder;
-	customOrder.reserve( m_fileList.GetFileAttrCount() );
+	customOrder.reserve( m_model.GetFileAttrCount() );
 
 	for ( int i = 0, count = m_foundFilesListCtrl.GetItemCount(); i != count; ++i )
 		customOrder.push_back( m_foundFilesListCtrl.GetPtrAt< CFileAttr >( i ) );
 
-	m_fileList.SetCustomOrder( customOrder );
+	m_model.SetCustomOrder( customOrder );
 
 	// update UI
-	CFileList::Order fileOrder = m_fileList.GetFileOrder();
+	CAlbumModel::Order fileOrder = m_model.GetFileOrder();
 	m_sortOrderCombo.SetCurSel( fileOrder );
 	std::pair< Column, bool > sortPair = ToListSortOrder( fileOrder );
 	m_foundFilesListCtrl.SetSortByColumn( sortPair.first, sortPair.second );

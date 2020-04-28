@@ -2,6 +2,7 @@
 #define ReportListControl_h
 #pragma once
 
+#include "utl/StdHashValue.h"
 #include "ListLikeCtrlBase.h"
 #include "Path.h"
 #include "SubjectPredicates.h"

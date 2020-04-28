@@ -20,6 +20,7 @@ namespace serial
 			{
 				if ( char* pBuffer = rUtf8Str.GetBuffer( length ) )
 					::WideCharToMultiByte( CP_UTF8, 0, wideStr.c_str(), wideLength, pBuffer, length, 0, 0 );				// convert to UTF8
+
 				rUtf8Str.ReleaseBuffer();
 				return;
 			}

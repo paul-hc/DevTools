@@ -2,8 +2,6 @@
 #define SyncScrolling_h
 #pragma once
 
-#include "ContainerUtilities.h"
-
 
 class CThumbTrackScrollHook;
 
@@ -20,7 +18,7 @@ public:
 
 	void SetCtrls( CWnd* pDlg, const UINT ctrlIds[], size_t count );
 
-	CSyncScrolling& AddCtrl( CWnd* pCtrl ) { utl::PushUnique( m_ctrls, pCtrl ); return *this; }
+	CSyncScrolling& AddCtrl( CWnd* pCtrl );
 
 	void HookThumbTrack( void );			// track thumb track scrolling events (edit controls don't send EN_VSCROLL on thumb track scrolling)
 

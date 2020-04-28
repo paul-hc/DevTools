@@ -61,7 +61,7 @@ public:
 	void NavigateBy( int deltaPos ) { NavigateTo( deltaPos, true ); }
 
 	// events
-	void OnFileListChanged( FileListChangeType reason = FL_Init );
+	void OnFileModelChanged( FileModelChangeType reason = FM_Init );
 	void OnAutoDropRecipientChanged( void );
 	void OnCurrPosChanged( bool alsoSliderCtrl = true );
 	void OnSlideDataChanged( bool setToModified = true );

@@ -1,6 +1,7 @@
 
 #include "stdafx.h"
 #include "PathItemBase.h"
+#include "SerializeStdTypes.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -17,6 +18,11 @@ void CPathItemBase::ResetFilePath( const fs::CPath& filePath )
 	m_displayPath = m_filePath.GetNameExt();
 }
 
+void CPathItemBase::SetFilePath( const fs::CPath& filePath )
+{
+	ResetFilePath( filePath );
+}
+
 void CPathItemBase::StripDisplayCode( const fs::CPath& commonParentPath )
 {
 	m_displayPath = m_filePath.Get();
@@ -31,4 +37,16 @@ const std::tstring& CPathItemBase::GetCode( void ) const
 std::tstring CPathItemBase::GetDisplayCode( void ) const
 {
 	return m_displayPath;
+}
+
+void CPathItemBase::Stream( CArchive& archive )
+{
+	if ( archive.IsStoring() )
+		archive << m_filePath;
+	else
+	{
+		fs::CPath filePath;
+		archive >> filePath;
+		ResetFilePath( filePath );
+	}
 }

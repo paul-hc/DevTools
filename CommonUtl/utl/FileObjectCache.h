@@ -5,6 +5,7 @@
 #include <hash_map>
 #include <deque>
 #include <afxmt.h>
+#include "StdHashValue.h"
 
 
 class CFlagTags;

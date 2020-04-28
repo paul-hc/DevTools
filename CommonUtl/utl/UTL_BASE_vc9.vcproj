@@ -341,6 +341,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\StdHashValue.h"
+				>
+			</File>
+			<File
 				RelativePath=".\StdStl.h"
 				>
 			</File>
@@ -506,6 +510,10 @@
 			</File>
 			<File
 				RelativePath=".\Serialization.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Serialization_fwd.h"
 				>
 			</File>
 			<File

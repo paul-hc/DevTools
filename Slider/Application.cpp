@@ -117,14 +117,6 @@ namespace app
 		return CImageArchiveStg::HasImageArchiveExt( pFilePath );
 	}
 
-	std::tstring FormatSliderVersion( ModelSchema modelSchemaVersion )
-	{
-		if ( Slider_v3_1 == modelSchemaVersion )
-			return _T("Slider v3_1(-)");			// avoid reporting "Slider v0.0"
-
-		return str::Format( _T("Slider v%x.%x"), ( modelSchemaVersion & 0xF0 ) >> 4, modelSchemaVersion & 0x0F );
-	}
-
 	bool MoveFiles( const std::vector< std::tstring >& filesToMove, CWnd* pParentWnd /*= AfxGetMainWnd()*/ )
 	{
 		CMoveFileDialog moveToDialog( filesToMove, pParentWnd );

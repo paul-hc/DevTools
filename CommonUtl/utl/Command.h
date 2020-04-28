@@ -25,7 +25,7 @@ public:
 	// utl::IMessage interface (partial)
 	virtual int GetTypeID( void ) const;
 private:
-	int m_typeId;
+	persist int m_typeId;
 	utl::ISubject* m_pSubject;		// no ownership
 };
 
@@ -78,9 +78,9 @@ public:
 protected:
 	void Serialize( CArchive& archive );				// CObject-like serialization: called from the serializable derived class
 protected:
-	std::tstring m_userInfo;
-	std::vector< utl::ICommand* > m_subCommands;		// with ownership
-	utl::ICommand* m_pMainCmd;
+	persist std::tstring m_userInfo;
+	persist std::vector< utl::ICommand* > m_subCommands;		// with ownership
+	persist utl::ICommand* m_pMainCmd;
 };
 
 

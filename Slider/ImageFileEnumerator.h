@@ -10,8 +10,8 @@
 #include "Application_fwd.h"		// TEMP: for app::CScopedProgress
 
 
-class CFileAttr;
 class CSearchSpec;
+class CFileAttr;
 
 
 class CImageFileEnumerator : private fs::IEnumerator
@@ -21,12 +21,13 @@ public:
 	CImageFileEnumerator( void );
 	~CImageFileEnumerator();
 
+	void SetMaxFileCountFilter( size_t maxFileCount ) { m_maxFileCount = maxFileCount; }
 	void SetFileSizeFilter( const Range< size_t >& fileSizeRange ) { m_fileSizeRange = fileSizeRange; ENSURE( m_fileSizeRange.IsNormalized() ); }
 
 	void Search( const CSearchSpec& searchSpec ) throws_( CException* );
 
 //	private:
-	void Search( const std::vector< CSearchSpec >& searchSpecs ) throws_( CException* );
+	void Search( const std::vector< CSearchSpec* >& searchSpecs ) throws_( CException* );
 	public:
 //	private:
 	void SearchImageArchive( const fs::CPath& stgDocPath ) throws_( CException* );
@@ -49,6 +50,7 @@ private:
 	void Push( const CFileAttr& fileAttr );
 	void PushMany( const std::vector< CFileAttr >& fileAttrs );
 private:
+	size_t m_maxFileCount;
 	Range< size_t > m_fileSizeRange;
 	ui::CIssueStore m_issueStore;
 	std::auto_ptr< app::CScopedProgress > m_pProgress;

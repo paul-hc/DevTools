@@ -5,7 +5,6 @@
 #include "utl/Serialization.h"
 #include "utl/SerializeStdTypes.h"
 #include "utl/StringUtilities.h"
-#include "utl/UI/MfcUtilities.h"
 #include "utl/UI/WicImageCache.h"
 
 #ifdef _DEBUG
@@ -64,9 +63,9 @@ void CFileAttr::Stream( CArchive& archive )
 	}
 	else
 	{
-		app::ModelSchema savedModelSchema = serial::CScopedLoadingArchive::GetModelSchema< app::ModelSchema >( archive );
+		app::ModelSchema docModelSchema = app::GetLoadingSchema( archive );
 
-		if ( savedModelSchema >= app::Slider_v3_8 )
+		if ( docModelSchema >= app::Slider_v3_8 )
 			archive >> m_pathKey;
 		else
 		{	// backwards compatible: just the path was saved

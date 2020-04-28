@@ -4,7 +4,6 @@
 
 #include <deque>
 #include <vector>
-#include "utl/Serialization.h"
 #include "ArchiveImagesContext.h"
 
 
@@ -37,8 +36,6 @@ namespace custom_order
 		typedef std::deque< COpStep > Base;
 
 		COpStack( void ) {}
-
-		void Stream( CArchive& archive ) { serial::StreamItems( archive, *this ); }
 
 		void ClearStack( ClearMode clearMode = CM_ClearAll );
 	protected:

@@ -9,6 +9,7 @@
 #include "Utilities.h"
 #include "VersionInfo.h"
 #include "resource.h"
+#include "utl/ContainerUtilities.h"
 #include "utl/FileSystem.h"
 #include "utl/AppTools.h"
 

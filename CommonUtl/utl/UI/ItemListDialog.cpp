@@ -8,6 +8,7 @@
 #include "TextEdit.h"
 #include "Utilities.h"
 #include "resource.h"
+#include "utl/ContainerUtilities.h"
 #include <afxpriv.h>		// for WM_IDLEUPDATECMDUI
 
 #ifdef _DEBUG

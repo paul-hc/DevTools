@@ -4,6 +4,7 @@
 #include "LayoutMetrics.h"
 #include "ReportListControl.h"
 #include "ThemeStatic.h"
+#include "utl/ContainerUtilities.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

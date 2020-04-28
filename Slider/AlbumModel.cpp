@@ -1,6 +1,7 @@
 
 #include "stdafx.h"
-#include "FileList.h"
+#include "AlbumModel.h"
+#include "SearchSpec.h"
 #include "ImageArchiveStg.h"
 #include "ImageFileEnumerator.h"
 #include "Workspace.h"
@@ -41,22 +42,22 @@ namespace hlp
 }
 
 
-// CFileList implementation
+// CAlbumModel implementation
 
-CFileList::CFileList( void )
-	: m_fileOrder( OriginalOrder )
-	, m_randomSeed( GetTickCount() )
-	, m_fileSizeRange( 0, UINT_MAX )
-	, m_perFlags( 0 )
+CAlbumModel::CAlbumModel( void )
+	: m_modelSchema( app::Slider_LatestModelSchema )
 	, m_inGeneration( false )
+	, m_persistFlags( 0 )
+	, m_randomSeed( GetTickCount() )
+	, m_fileOrder( OriginalOrder )
 {
 }
 
-CFileList::~CFileList()
+CAlbumModel::~CAlbumModel()
 {
 }
 
-const CEnumTags& CFileList::GetTags_Order( void )
+const CEnumTags& CAlbumModel::GetTags_Order( void )
 {
 	static const CEnumTags tags
 	(
@@ -68,24 +69,37 @@ const CEnumTags& CFileList::GetTags_Order( void )
 	return tags;
 }
 
-void CFileList::Stream( CArchive& archive )
+void CAlbumModel::Stream( CArchive& archive )
 {
-	if ( archive.IsStoring() )
-	{
-		archive << (int)m_fileOrder;
-		archive << m_randomSeed;
-		archive << m_fileSizeRange;
-		archive << m_perFlags;
+	ASSERT( !archive.IsLoading() || m_modelSchema == app::GetLoadingSchema( archive ) );		// loading doc schema was stored before?
+
+	if ( archive.IsLoading() && m_modelSchema < app::Slider_v4_2 )
+	{	// backwards-compatible for app::Slider_v4_1 -
+		archive >> (int&)m_fileOrder;
+		archive >> m_randomSeed;
+		archive >> m_searchModel.m_fileSizeRange;
+		archive >> m_persistFlags;
+
+		serial::StreamOwningPtrs( archive, m_searchModel.m_searchSpecs );
 	}
 	else
 	{
-		archive >> (int&)m_fileOrder;
-		archive >> m_randomSeed;
-		archive >> m_fileSizeRange;
-		archive >> m_perFlags;
+		m_searchModel.Stream( archive );
+
+		if ( archive.IsStoring() )
+		{
+			archive << (int)m_fileOrder;
+			archive << m_randomSeed;
+			archive << m_persistFlags;
+		}
+		else
+		{
+			archive >> (int&)m_fileOrder;
+			archive >> m_randomSeed;
+			archive >> m_persistFlags;
+		}
 	}
 
-	serial::StreamItems( archive, m_searchSpecs );
 	serial::StreamItems( archive, m_fileAttributes );
 	serial::SerializeValues( archive, m_archiveStgPaths );
 	serial::SerializeValues( archive, m_customOrder );
@@ -102,16 +116,16 @@ void CFileList::Stream( CArchive& archive )
 			}
 }
 
-bool CFileList::SetupSearchPath( const fs::CPath& filePath )
+bool CAlbumModel::SetupSearchPath( const fs::CPath& filePath )
 {
 	if ( !filePath.FileExist() )
 		return false;
 
-	m_searchSpecs.clear();
+	m_searchModel.ClearSpecs();
 	m_stgDocPath.Clear();
 
 	if ( fs::IsValidDirectory( filePath.GetPtr() ) )
-		m_searchSpecs.push_back( CSearchSpec( filePath ) );
+		m_searchModel.AddSearchPath( filePath );
 	else if ( app::IsImageArchiveDoc( filePath.GetPtr() ) )
 		m_stgDocPath = filePath;
 	else
@@ -120,16 +134,17 @@ bool CFileList::SetupSearchPath( const fs::CPath& filePath )
 	return true;
 }
 
-int CFileList::FindSearchSpec( const fs::CPath& searchPath ) const
-{
-	for ( std::vector< CSearchSpec >::const_iterator itSearch = m_searchSpecs.begin(); itSearch != m_searchSpecs.end(); ++itSearch )
-		if ( itSearch->m_searchPath == searchPath )
-			return static_cast< int >( std::distance( m_searchSpecs.begin(), itSearch ) );
 
-	return -1;
+bool CAlbumModel::IsAutoDropRecipient( bool checkValidPath /*= true*/ ) const
+{
+	if ( const CSearchSpec* pSingleSpec = m_searchModel.GetSingleSpec() )
+		return pSingleSpec->IsAutoDropDirPath( checkValidPath );
+
+	return false;
 }
 
-bool CFileList::CancelGeneration( void )
+
+bool CAlbumModel::CancelGeneration( void )
 {
 	if ( !m_inGeneration )
 		return false;
@@ -139,19 +154,19 @@ bool CFileList::CancelGeneration( void )
 }
 
 // release the image storages associated with this (if any), as well as the ones found in the generation process
-void CFileList::CloseAssocImageArchiveStgs( void )
+void CAlbumModel::CloseAssocImageArchiveStgs( void )
 {
 	if ( !m_stgDocPath.IsEmpty() )
 		CImageArchiveStg::Factory().ReleaseStorage( m_stgDocPath );
 
-	for ( std::vector< CSearchSpec >::const_iterator itSearch = m_searchSpecs.begin(); itSearch != m_searchSpecs.end(); ++itSearch )
-		if ( itSearch->IsImageArchiveDoc() )
-			CImageArchiveStg::Factory().ReleaseStorage( itSearch->m_searchPath );
+	for ( std::vector< CSearchSpec* >::const_iterator itSearch = m_searchModel.GetSpecs().begin(); itSearch != m_searchModel.GetSpecs().end(); ++itSearch )
+		if ( ( *itSearch )->IsImageArchiveDoc() )
+			CImageArchiveStg::Factory().ReleaseStorage( ( *itSearch )->GetFilePath() );
 
 	ClearArchiveStgPaths();
 }
 
-size_t CFileList::FindPosFileAttr( const CFileAttr* pFileAttr ) const
+size_t CAlbumModel::FindPosFileAttr( const CFileAttr* pFileAttr ) const
 {
 	for ( size_t pos = 0; pos != m_fileAttributes.size(); ++pos )
 		if ( pFileAttr == &m_fileAttributes[ pos ] )
@@ -161,7 +176,7 @@ size_t CFileList::FindPosFileAttr( const CFileAttr* pFileAttr ) const
 	return utl::npos;
 }
 
-int CFileList::DisplayToTrueFileIndex( size_t displayIndex ) const
+int CAlbumModel::DisplayToTrueFileIndex( size_t displayIndex ) const
 {
 	// translate the display index if we have custom order
 	if ( CustomOrder == m_fileOrder )
@@ -175,7 +190,7 @@ int CFileList::DisplayToTrueFileIndex( size_t displayIndex ) const
 	return (int)displayIndex;
 }
 
-void CFileList::QueryFileAttrs( std::vector< CFileAttr* >& rFileAttrs ) const
+void CAlbumModel::QueryFileAttrs( std::vector< CFileAttr* >& rFileAttrs ) const
 {
 	rFileAttrs.clear();
 	rFileAttrs.reserve( m_fileAttributes.size() );
@@ -184,7 +199,7 @@ void CFileList::QueryFileAttrs( std::vector< CFileAttr* >& rFileAttrs ) const
 }
 
 // returns the display index of the found file
-int CFileList::FindFileAttr( const fs::CFlexPath& filePath, bool wantDisplayIndex /*= true*/ ) const
+int CAlbumModel::FindFileAttr( const fs::CFlexPath& filePath, bool wantDisplayIndex /*= true*/ ) const
 {
 	if ( !IsCustomOrder() )
 		wantDisplayIndex = false;
@@ -198,39 +213,41 @@ int CFileList::FindFileAttr( const fs::CFlexPath& filePath, bool wantDisplayInde
 	return -1;
 }
 
-bool CFileList::HasConsistentDeepStreams( void ) const
+bool CAlbumModel::HasConsistentDeepStreams( void ) const
 {
-	return HasFlag( CWorkspace::GetFlags(), wf::PrefixDeepStreamNames ) == HasFlag( m_perFlags, UseDeepStreamPaths );
+	return HasFlag( CWorkspace::GetFlags(), wf::PrefixDeepStreamNames ) == HasPersistFlag( UseDeepStreamPaths );
 }
 
-bool CFileList::CheckReparentFileAttrs( const TCHAR* pDocPath, PersistOp op )
+bool CAlbumModel::CheckReparentFileAttrs( const TCHAR* pDocPath, PersistOp op )
 {
-	fs::CFlexPath docPath( fs::CFlexPath( pDocPath ).GetPhysicalPath().Get() );			// extract "C:\Images\storage.ias" from "C:\Images\storage.ias>_Album.sld"
+	fs::CPath docPath = fs::CFlexPath( pDocPath ).GetPhysicalPath();			// extract "C:\Images\storage.ias" from "C:\Images\storage.ias>_Album.sld"
 
-	return
-		app::IsImageArchiveDoc( docPath.GetPtr() ) &&
-		ReparentStgFileAttrsImpl( docPath, op );
+	if ( app::IsImageArchiveDoc( docPath.GetPtr() ) )
+		return ReparentStgFileAttrsImpl( docPath, op );
+
+	return false;
 }
 
-bool CFileList::ReparentStgFileAttrsImpl( const fs::CFlexPath& stgDocPath, PersistOp op )
+bool CAlbumModel::ReparentStgFileAttrsImpl( const fs::CPath& stgDocPath, PersistOp op )
 {
 	ASSERT( app::IsImageArchiveDoc( stgDocPath.GetPtr() ) );
 
 	if ( stgDocPath != m_stgDocPath )								// different stgDocPath, need to store and reparent
 	{
-		m_searchSpecs.clear();
+		m_searchModel.ClearSpecs();
 		m_stgDocPath = stgDocPath;
 
 		// clear the common prefix to the actual logical root of the album
 		std::for_each( m_fileAttributes.begin(), m_fileAttributes.end(), func::StripStgDocPrefix() );		// clear stg prefix
 
-		if ( !HasFlag( m_perFlags, UseDeepStreamPaths ) && !m_fileAttributes.empty() )
-		{
-			CPathMaker maker;
-			maker.StoreSrcFromPaths( m_fileAttributes );
-			if ( maker.MakeDestStripCommonPrefix() )				// convert to relative paths based on common prefix
-				maker.QueryDestToPaths( m_fileAttributes );			// found and removed the common prefix
-		}
+		if ( !HasFlag( m_persistFlags, UseDeepStreamPaths ) )
+			if ( !m_fileAttributes.empty() )
+			{
+				CPathMaker maker;
+				maker.StoreSrcFromPaths( m_fileAttributes );
+				if ( maker.MakeDestStripCommonPrefix() )				// convert to relative paths based on common prefix
+					maker.QueryDestToPaths( m_fileAttributes );			// found and removed the common prefix
+			}
 
 		// reparent with the new doc stg
 		std::for_each( m_fileAttributes.begin(), m_fileAttributes.end(),
@@ -238,12 +255,12 @@ bool CFileList::ReparentStgFileAttrsImpl( const fs::CFlexPath& stgDocPath, Persi
 	}
 
 	if ( Saving == op )
-		SetFlag( m_perFlags, UseDeepStreamPaths, HasFlag( CWorkspace::GetFlags(), wf::PrefixDeepStreamNames ) );	// will save to keep track of saved mode
+		SetPersistFlag( UseDeepStreamPaths, HasFlag( CWorkspace::GetFlags(), wf::PrefixDeepStreamNames ) );	// will save to keep track of saved mode
 
 	return true;
 }
 
-void CFileList::SetFileOrder( Order fileOrder )
+void CAlbumModel::SetFileOrder( Order fileOrder )
 {
 	if ( CustomOrder == fileOrder && m_fileOrder != CustomOrder )
 	{	// reset custom order to the initial order
@@ -259,7 +276,7 @@ void CFileList::SetFileOrder( Order fileOrder )
 		m_customOrder.clear();
 }
 
-void CFileList::SetCustomOrder( const std::vector< CFileAttr* >& customOrder )
+void CAlbumModel::SetCustomOrder( const std::vector< CFileAttr* >& customOrder )
 {
 	m_fileOrder = CustomOrder;
 	m_customOrder.resize( m_fileAttributes.size() );
@@ -273,7 +290,7 @@ void CFileList::SetCustomOrder( const std::vector< CFileAttr* >& customOrder )
 //	- rToDestIndex: contains the moved position of the insertion index;
 //	- rToMoveIndexes: contains the moved display indexes;
 // Returns true if any display indexes were actually moved, otherwise false
-bool CFileList::MoveCustomOrderIndexes( int& rToDestIndex, std::vector< int >& rToMoveIndexes )
+bool CAlbumModel::MoveCustomOrderIndexes( int& rToDestIndex, std::vector< int >& rToMoveIndexes )
 {
 	// switch to custom order if not already
 	if ( m_fileOrder != CustomOrder )
@@ -319,7 +336,7 @@ bool CFileList::MoveCustomOrderIndexes( int& rToDestIndex, std::vector< int >& r
 	return true;
 }
 
-bool CFileList::MoveBackCustomOrderIndexes( int newDestIndex, const std::vector< int >& rToMoveIndexes )
+bool CAlbumModel::MoveBackCustomOrderIndexes( int newDestIndex, const std::vector< int >& rToMoveIndexes )
 {
 	// switch to custom order if not already
 	ASSERT( IsCustomOrder() );
@@ -362,20 +379,20 @@ bool CFileList::MoveBackCustomOrderIndexes( int newDestIndex, const std::vector<
 	return true;
 }
 
-void CFileList::FetchFilePathsFromIndexes( std::vector< fs::CPath >& rFilePaths, const std::vector< int >& displayIndexes ) const
+void CAlbumModel::FetchFilePathsFromIndexes( std::vector< fs::CPath >& rFilePaths, const std::vector< int >& displayIndexes ) const
 {
 	rFilePaths.resize( displayIndexes.size() );
 	for ( size_t i = 0; i != displayIndexes.size(); ++i )
 		rFilePaths[ i ] = GetFileAttr( displayIndexes[ i ] ).GetPath();
 }
 
-void CFileList::ClearArchiveStgPaths( void )
+void CAlbumModel::ClearArchiveStgPaths( void )
 {
 	CImageArchiveStg::Factory().ReleaseStorages( m_archiveStgPaths );
 	m_archiveStgPaths.clear();
 }
 
-void CFileList::SearchForFiles( bool reportEmpty /*= true*/ ) throws_( CException* )
+void CAlbumModel::SearchForFiles( bool reportEmpty /*= true*/ ) throws_( CException* )
 {
 	ASSERT( !m_inGeneration );
 	CScopedValue< bool > scopedGeneration( &m_inGeneration, true );
@@ -386,12 +403,14 @@ void CFileList::SearchForFiles( bool reportEmpty /*= true*/ ) throws_( CExceptio
 
 	{	// scope for "Searching..." progress
 		CImageFileEnumerator imageEnum;
-		imageEnum.SetFileSizeFilter( m_fileSizeRange );
+
+		imageEnum.SetMaxFileCountFilter( m_searchModel.GetMaxFileCount() );
+		imageEnum.SetFileSizeFilter( m_searchModel.GetFileSizeRange() );
 
 		if ( !m_stgDocPath.IsEmpty() )
 			imageEnum.SearchImageArchive( m_stgDocPath );
 		else
-			imageEnum.Search( m_searchSpecs );
+			imageEnum.Search( m_searchModel.GetSpecs() );
 
 		imageEnum.SwapResults( m_fileAttributes, &m_archiveStgPaths );
 
@@ -427,7 +446,7 @@ void CFileList::SearchForFiles( bool reportEmpty /*= true*/ ) throws_( CExceptio
 	}
 }
 
-bool CFileList::OrderFileList( void )
+bool CAlbumModel::OrderFileList( void )
 {
 	switch ( m_fileOrder )
 	{
@@ -451,7 +470,7 @@ bool CFileList::OrderFileList( void )
 }
 
 // removes all valid or non-existing files from this file list
-size_t CFileList::FilterCorruptFiles( void )
+size_t CAlbumModel::FilterCorruptFiles( void )
 {
 	size_t index = 0;
 	app::CScopedProgress progress( 0, (int)m_fileAttributes.size(), 1, _T("Checking for invalid files:") );
@@ -484,7 +503,7 @@ size_t CFileList::FilterCorruptFiles( void )
 }
 
 // removes files with single occurences according to m_fileOrder criteria, leaving only multiple occurences (e.g. files with the same size)
-bool CFileList::FilterFileDuplicates( bool compareImageDim /*= false*/ )
+bool CAlbumModel::FilterFileDuplicates( bool compareImageDim /*= false*/ )
 {
 	size_t count = m_fileAttributes.size();
 	pred::CompareFileAttr compare( m_fileOrder, compareImageDim );
@@ -526,33 +545,33 @@ namespace pred
 
 		switch ( m_fileOrder )
 		{
-			case CFileList::ByFullPathAsc:
-			case CFileList::ByFullPathDesc:
+			case CAlbumModel::ByFullPathAsc:
+			case CAlbumModel::ByFullPathDesc:
 				result = CompareFileAttrPath()( left, right );
 				break;
-			case CFileList::ByFileNameAsc:
-			case CFileList::ByFileNameDesc:
+			case CAlbumModel::ByFileNameAsc:
+			case CAlbumModel::ByFileNameDesc:
 				result = TCompareNameExt()( left.GetPath(), right.GetPath() );
 				break;
-			case CFileList::BySizeAsc:
-			case CFileList::BySizeDesc:
-			case CFileList::FileSameSize:
-			case CFileList::FileSameSizeAndDim:
+			case CAlbumModel::BySizeAsc:
+			case CAlbumModel::BySizeDesc:
+			case CAlbumModel::FileSameSize:
+			case CAlbumModel::FileSameSizeAndDim:
 				result = CompareFileAttrSize()( left, right );
 				if ( Equal == result )
-					if ( m_fileOrder == CFileList::FileSameSizeAndDim && m_compareImageDim )
+					if ( m_fileOrder == CAlbumModel::FileSameSizeAndDim && m_compareImageDim )
 						result = CompareImageDimensions()( left, right );
 
 				// also ordonate by filepath (if secondary comparison not disabled)
 				if ( result == Equal && m_useSecondaryComparison )
 					result = CompareFileAttrPath()( left, right );
 				break;
-			case CFileList::ByDateAsc:
-			case CFileList::ByDateDesc:
+			case CAlbumModel::ByDateAsc:
+			case CAlbumModel::ByDateDesc:
 				result = CompareFileTime( left.GetLastModifTime(), right.GetLastModifTime() );
 				break;
-			case CFileList::ByDimensionAsc:
-			case CFileList::ByDimensionDesc:
+			case CAlbumModel::ByDimensionAsc:
+			case CAlbumModel::ByDimensionDesc:
 				result = Compare_ImageDimensions()( left, right );
 				break;
 			default:

@@ -281,6 +281,7 @@ namespace ui
 #include <vector>
 
 
+class CPathItemBase;
 namespace pred { interface IComparator; }
 namespace num { const std::locale& GetEmptyLocale( void ); }
 namespace fs { class CPath; }
@@ -315,6 +316,7 @@ namespace ui
 
 	void DDX_Text( CDataExchange* pDX, int ctrlId, std::tstring& rValue, bool trim = false );		// Edit, Static, Combo, etc
 	void DDX_Path( CDataExchange* pDX, int ctrlId, fs::CPath& rValue );
+	void DDX_PathItem( CDataExchange* pDX, int ctrlId, CPathItemBase* pPathItem );
 
 	void DDX_Int( CDataExchange* pDX, int ctrlId, int& rValue, const int nullValue = INT_MAX );		// empty text for nullValue
 	void DDX_Bool( CDataExchange* pDX, int ctrlId, bool& rValue );

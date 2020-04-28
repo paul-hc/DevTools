@@ -2,7 +2,7 @@
 #include "stdafx.h"
 #include "ArchiveImagesContext.h"
 #include "ImageArchiveStg.h"
-#include "FileList.h"
+#include "AlbumModel.h"
 #include "FileOperation.h"
 #include "Workspace.h"
 #include "Application.h"
@@ -44,19 +44,19 @@ void CArchiveImagesContext::Stream( CArchive& archive )
 	serial::SerializeValues( archive, m_pathPairs );
 }
 
-bool CArchiveImagesContext::CreateArchiveStgFile( CFileList* pFileList, const fs::CPath& destStgPath, CObject* pAlbumDoc )
+bool CArchiveImagesContext::CreateArchiveStgFile( CAlbumModel* pModel, const fs::CPath& destStgPath )
 {
 	std::vector< CFileAttr* > srcFiles;
-	pFileList->QueryFileAttrs( srcFiles );
+	pModel->QueryFileAttrs( srcFiles );
 	SetupSourcePaths( srcFiles );
 
 	UINT seqCount = 0;
 	static const std::tstring formatCopySrc = _T("*.*");
 	GenerateDestPaths( destStgPath, formatCopySrc, &seqCount );							// make m_pathPairs: copy SRC as is into DEST
 
-	pFileList->CheckReparentFileAttrs( destStgPath.GetPtr(), CFileList::Saving );		// reparent with destStgPath before saving the album info
+	pModel->CheckReparentFileAttrs( destStgPath.GetPtr(), CAlbumModel::Saving );		// reparent with destStgPath before saving the album info
 
-	return BuildArchiveStgFile( destStgPath, FOP_FileCopy, pAlbumDoc );					// false: user declined overwrite
+	return BuildArchiveStorageFile( destStgPath, FOP_FileCopy );						// false: user declined overwrite
 }
 
 void CArchiveImagesContext::SetupSourcePaths( const std::vector< CFileAttr* >& srcFiles )
@@ -207,7 +207,7 @@ bool CArchiveImagesContext::GenerateDestPaths( const fs::CPath& destPath, const 
 	return true;
 }
 
-bool CArchiveImagesContext::BuildArchiveStgFile( const fs::CPath& destStgPath, FileOp fileOp, CObject* pAlbumDoc /*= NULL*/ ) const
+bool CArchiveImagesContext::BuildArchiveStorageFile( const fs::CPath& destStgPath, FileOp fileOp ) const
 {
 	try
 	{
@@ -215,7 +215,7 @@ bool CArchiveImagesContext::BuildArchiveStgFile( const fs::CPath& destStgPath, F
 
 		CTimer timer;
 		CImageArchiveStg imageArchiveStg;
-		imageArchiveStg.CreateImageArchive( destStgPath.GetPtr(), m_password, m_pathPairs, pAlbumDoc );
+		imageArchiveStg.CreateImageArchive( destStgPath.GetPtr(), m_password, m_pathPairs );
 
 		app::LogLine( _T("--- END building image archive %s - Elapsed %.2f seconds ---"), destStgPath.GetPtr(), timer.ElapsedSeconds() );
 	}

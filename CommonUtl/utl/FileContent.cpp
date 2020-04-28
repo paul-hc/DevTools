@@ -6,6 +6,7 @@
 #include "ContainerUtilities.h"
 #include "TimeUtils.h"
 #include "StringUtilities.h"
+#include "StdHashValue.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

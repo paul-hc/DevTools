@@ -1,6 +1,7 @@
 
 #include "stdafx.h"
 #include "VisualThemeFallback.h"
+#include "ContainerUtilities.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

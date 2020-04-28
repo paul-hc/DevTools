@@ -41,24 +41,30 @@ namespace seq
 	// see CArraySequence below for an example of sequence adapter; could be more sophisticated, such as a list ctrl adapter, etc.
 	//
 	template< typename Sequence, typename IndexType >
-	void MoveBy( Sequence& rSequence, const std::vector< IndexType >& selIndexes, Direction direction )
+	void MoveBy( Sequence& rSequence, const std::vector< IndexType >& selIndexes, Direction moveBy )
 	{
 		// assume that selIndexes are pre-sorted
 		ASSERT( !selIndexes.empty() );
 		ASSERT( selIndexes.size() < rSequence.GetSize() );
 
-		switch ( direction )
+		switch ( moveBy )
 		{
 			case Prev:
 				for ( typename std::vector< IndexType >::const_iterator itSelIndex = selIndexes.begin(); itSelIndex != selIndexes.end(); ++itSelIndex )
-					rSequence.Swap( *itSelIndex, *itSelIndex + direction );
+					rSequence.Swap( *itSelIndex, *itSelIndex + moveBy );
 				break;
 			case Next:
 				// go backwards when moving down
 				for ( typename std::vector< IndexType >::const_reverse_iterator itSelIndex = selIndexes.rbegin(); itSelIndex != selIndexes.rend(); ++itSelIndex )
-					rSequence.Swap( *itSelIndex, *itSelIndex + direction );
+					rSequence.Swap( *itSelIndex, *itSelIndex + moveBy );
 				break;
 		}
+	}
+
+	template< typename Sequence, typename IndexType >
+	inline void MoveSingleBy( Sequence& rSequence, IndexType selIndex, Direction moveBy )
+	{
+		MoveBy( rSequence, std::vector< IndexType >( 1, selIndex ), moveBy );
 	}
 
 
@@ -165,20 +171,20 @@ namespace seq
 		typedef Type Type;
 
 		template< typename Container >
-		CArraySequence( Container* pSequence ) : m_pSequence( &pSequence->front() ), m_size( pSequence->size() ) { ASSERT_PTR( m_pSequence ); }
+		CArraySequence( Container* pSequence ) : m_pSequence( &pSequence->front() ), m_count( pSequence->size() ) { ASSERT_PTR( m_pSequence ); }
 
-		CArraySequence( Type sequence[], size_t size ) : m_pSequence( sequence ), m_size( size ) { ASSERT_PTR( m_pSequence ); }
+		CArraySequence( Type sequence[], size_t count ) : m_pSequence( sequence ), m_count( count ) { ASSERT_PTR( m_pSequence ); }
 
 		void Swap( size_t leftIndex, size_t rightIndex )
 		{
-			ASSERT( leftIndex < m_size && rightIndex < m_size );
+			ASSERT( leftIndex < m_count && rightIndex < m_count );
 			std::swap( m_pSequence[ leftIndex ], m_pSequence[ rightIndex ] );
 		}
 
-		size_t GetSize( void ) const { return m_size; }
+		size_t GetSize( void ) const { return m_count; }
 	private:
 		Type* m_pSequence;
-		size_t m_size;
+		size_t m_count;
 	};
 
 }

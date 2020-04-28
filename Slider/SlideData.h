@@ -18,13 +18,13 @@ namespace af
 }
 
 
-// used as argument for CAlbumImageView::OnFileListChanged(0 and CAlbumDoc::OnFileListChanged()
-enum FileListChangeType
+// used as argument for CAlbumImageView::OnFileModelChanged(0 and CAlbumDoc::OnFileModelChanged()
+enum FileModelChangeType
 {
-	FL_Init,				// normal initialization
-	FL_Regeneration,		// file list was regenerated
-	FL_CustomOrderChanged,	// file list was changed as a result of a custom order drag&drop operation
-	FL_AutoDropOp			// file list was regenerated as a result of an auto-drop operation
+	FM_Init,				// normal initialization
+	FM_Regeneration,		// file list was regenerated
+	FM_CustomOrderChanged,	// file list was changed as a result of a custom order drag&drop operation
+	FM_AutoDropOp			// file list was regenerated as a result of an auto-drop operation
 };
 
 

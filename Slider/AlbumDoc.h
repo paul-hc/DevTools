@@ -4,7 +4,7 @@
 
 #include "utl/UI/ImagePathKey.h"
 #include "DocumentBase.h"
-#include "FileList.h"
+#include "AlbumModel.h"
 #include "SlideData.h"
 #include "AutoDrop.h"
 #include "CustomOrderUndoRedo.h"
@@ -24,12 +24,15 @@ public:
 	// base overrides
 	virtual void Serialize( CArchive& archive );
 
-	app::ModelSchema GetFileModelSchema( void ) const { return m_fileModelSchema; }
+	app::ModelSchema GetModelSchema( void ) const { return m_model.GetModelSchema(); }
+
+	const CAlbumModel* GetModel( void ) const { return &m_model; }
+	CAlbumModel* RefModel( void ) { return &m_model; }
 
 	COLORREF GetBkColor( void ) const { return m_bkColor; }
 
-	bool HasImages( void ) const { return m_fileList.AnyFoundFiles(); }
-	size_t GetImageCount( void ) const { return m_fileList.GetFileAttrCount(); }
+	bool HasImages( void ) const { return m_model.AnyFoundFiles(); }
+	size_t GetImageCount( void ) const { return m_model.GetFileAttrCount(); }
 	bool IsValidIndex( size_t index ) const { return index < GetImageCount(); }
 	const fs::ImagePathKey& GetImageFilePathAt( int index ) const;
 
@@ -40,7 +43,7 @@ public:
 	bool SaveAsArchiveStg( const fs::CPath& newStgPath );
 
 	bool BuildAlbum( const fs::CPath& filePath );
-	void RegenerateFileList( FileListChangeType reason = FL_Init );
+	void RegenerateFileModel( FileModelChangeType reason = FM_Init );
 
 	bool EditAlbum( CAlbumImageView* pActiveView );
 	bool AddExplicitFiles( const std::vector< std::tstring >& files, bool doUpdate = true );
@@ -58,17 +61,17 @@ public:
 	bool ExecuteAutoDrop( void );
 
 	// events
-	void OnFileListChanged( FileListChangeType reason = FL_Init );
+	void OnFileModelChanged( FileModelChangeType reason = FM_Init );
 private:
 	void OnAutoDropRecipientChanged( void );
+	bool PromptSaveConvertModelSchema( void ) const;
 private:
 	CAlbumImageView* GetOwnActiveAlbumView( void ) const;
 	CSlideData* GetActiveSlideData( void );
 public:
-	persist app::ModelSchema m_fileModelSchema;			// loaded model schema from file
-	persist CFileList m_fileList;						// image file list (search specifiers + found files)
 	persist CSlideData m_slideData;						// always altered by CAlbumImageView::OnActivateView()
 private:
+	persist CAlbumModel m_model;					// image file list (search specifiers + found files)
 	persist COLORREF m_bkColor;							// album background color
 	persist int m_docFlags;								// persistent document flags
 	persist custom_order::COpStack m_customOrderUndoStack;	

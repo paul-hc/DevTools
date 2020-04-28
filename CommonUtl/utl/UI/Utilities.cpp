@@ -7,6 +7,7 @@
 #include "ImageStore.h"
 #include "utl/ContainerUtilities.h"
 #include "utl/Path.h"
+#include "utl/PathItemBase.h"
 #include "utl/RuntimeException.h"
 #include "utl/StringUtilities.h"
 #include "utl/SubjectPredicates.h"
@@ -919,6 +920,21 @@ namespace ui
 	void DDX_Path( CDataExchange* pDX, int ctrlId, fs::CPath& rValue )
 	{
 		DDX_Text( pDX, ctrlId, const_cast< std::tstring& >( rValue.Get() ), true );
+	}
+
+	void DDX_PathItem( CDataExchange* pDX, int ctrlId, CPathItemBase* pPathItem )
+	{
+		ASSERT_PTR( pPathItem );
+
+		if ( DialogOutput == pDX->m_bSaveAndValidate )
+			ddx::SetItemText( pDX, ctrlId, pPathItem->GetFilePath().Get() );
+		else
+		{
+			fs::CPath filePath;
+			DDX_Path( pDX, ctrlId, filePath );
+
+			pPathItem->SetFilePath( filePath );
+		}
 	}
 
 	void DDX_Int( CDataExchange* pDX, int ctrlId, int& rValue, const int nullValue /*= INT_MAX*/ )

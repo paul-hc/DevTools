@@ -2,7 +2,8 @@
 #define AlbumSettingsDialog_h
 #pragma once
 
-#include "FileList.h"
+#include "AlbumModel.h"
+#include "utl/Resequence.h"
 #include "utl/UI/AccelTable.h"
 #include "utl/UI/DialogToolBar.h"
 #include "utl/UI/DragListCtrl.h"
@@ -21,10 +22,10 @@ class CAlbumSettingsDialog : public CLayoutDialog
 						   , private ui::ITextEffectCallback
 {
 public:
-	CAlbumSettingsDialog( const CFileList& fileList, int currentIndex = -1, CWnd* pParent = NULL );
+	CAlbumSettingsDialog( const CAlbumModel& model, int currentIndex = -1, CWnd* pParent = NULL );
 	virtual ~CAlbumSettingsDialog();
 private:
-	static CMenu& GetFileListPopupMenu( void );
+	static CMenu& GetFileModelPopupMenu( void );
 	bool InitSymbolFont( void );
 
 	// ole::IDataSourceFactory interface
@@ -37,11 +38,11 @@ private:
 	void UpdateFileSortOrder( void );
 
 	enum Column { FileName, Folder, Dimensions, Size, Date, Unordered = -1 };
-	static std::pair< Column, bool > ToListSortOrder( CFileList::Order fileOrder );		// < sortByColumn, sortAscending >
+	static std::pair< Column, bool > ToListSortOrder( CAlbumModel::Order fileOrder );		// < sortByColumn, sortAscending >
 
 	bool DropSearchSpec( const fs::CFlexPath& filePath, bool doPrompt = true );
 	bool DeleteSearchSpec( int index, bool doPrompt = true );
-	bool MoveSearchSpec( int moveBy );
+	bool MoveSearchSpec( seq::Direction moveBy );
 	bool AddSearchSpec( int index );
 	bool ModifySearchSpec( int index );
 
@@ -53,7 +54,7 @@ private:
 	void QueryFoundListSelection( std::vector< std::tstring >& rSelFilePaths, bool clearInvalidFiles = true );
 	int GetCheckStateAutoRegen( void ) const;
 public:
-	CFileList m_fileList;
+	CAlbumModel m_model;
 	int m_currentIndex;
 private:
 	enum DirtyState { Undefined = -1, False, True };
@@ -65,6 +66,7 @@ private:
 	// enum { IDD = IDD_ALBUM_SETTINGS_DIALOG };
 	enum { InplaceSortMaxCount = 5000 };
 
+	CSpinEdit m_maxFileCountEdit;
 	CSpinEdit m_minSizeEdit;
 	CSpinEdit m_maxSizeEdit;
 	CButton m_moveDownButton;
@@ -76,7 +78,7 @@ private:
 	CDragListCtrl< CPathItemListCtrl > m_foundFilesListCtrl;
 
 	// generated stuff
-	public:
+public:
 	virtual BOOL PreTranslateMessage( MSG* pMsg );
 	virtual BOOL OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo );
 	protected:
@@ -89,8 +91,10 @@ protected:
 	virtual void OnOK( void );
 	virtual void OnCancel( void );
 	afx_msg void OnCBnSelChange_SortOrder( void );
+	afx_msg void OnToggle_MaxFileCount( void );
 	afx_msg void OnToggle_MinSize( void );
 	afx_msg void OnToggle_MaxSize( void );
+	afx_msg void OnEnChange_MaxFileCount( void );
 	afx_msg void OnEnChange_MinMaxSize( void );
 	afx_msg void OnToggle_AutoRegenerate( void );
 	afx_msg void OnToggle_AutoDrop( void );

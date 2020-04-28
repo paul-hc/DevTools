@@ -89,6 +89,7 @@ END_MESSAGE_MAP()
 
 BOOL CImageDoc::OnNewDocument( void )
 {
+	ui::ReportError( _T("Cannot create an empty image document!"), MB_ICONWARNING );
 	return FALSE;
 }
 

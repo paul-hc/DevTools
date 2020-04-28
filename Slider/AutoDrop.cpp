@@ -1,9 +1,11 @@
 
 #include "stdafx.h"
 #include "AutoDrop.h"
+#include "SearchSpec.h"
 #include "ImageFileEnumerator.h"
 #include "Application.h"
 #include "resource.h"
+#include "utl/Serialization.h"
 #include "utl/SerializeStdTypes.h"
 #include "utl/UI/MenuUtilities.h"
 #include "utl/UI/ShellUtilities.h"
@@ -77,7 +79,11 @@ namespace auto_drop
 		serial::StreamItems( archive, *this );
 	}
 
+} // namespace auto_drop
 
+
+namespace auto_drop
+{
 	// CContext implementation
 
 	CMenu CContext::s_dropContextMenu;
@@ -86,7 +92,7 @@ namespace auto_drop
 		: m_dropOperation( PromptUser )
 		, m_dropScreenPos( -1, -1 )
 	{
-		if ( NULL == (HMENU)s_dropContextMenu )
+		if ( NULL == s_dropContextMenu.GetSafeHmenu() )
 			ui::LoadPopupMenu( s_dropContextMenu, IDR_CONTEXT_MENU, app::DropPopup );
 	}
 
@@ -96,6 +102,7 @@ namespace auto_drop
 
 	void CContext::Clear( void )
 	{
+		m_pDestSearchSpec.reset();
 		m_droppedSrcFiles.clear();
 		m_droppedDestFiles.clear();
 		m_dropOperation = PromptUser;
@@ -103,13 +110,28 @@ namespace auto_drop
 		m_dropScreenPos = CPoint( -1, -1 );
 	}
 
+	bool CContext::IsValidDropRecipient( bool checkValidPath /*= true*/ ) const
+	{
+		return m_pDestSearchSpec.get() != NULL && m_pDestSearchSpec->IsAutoDropDirPath( checkValidPath );
+	}
+
+	const fs::CPath& CContext::GetDestSearchPath( void ) const
+	{
+		ASSERT_PTR( m_pDestSearchSpec.get() );
+		return m_pDestSearchSpec->GetFilePath();
+	}
+
 	bool CContext::InitAutoDropRecipient( const CSearchSpec& destSearchSpec )
 	{
-		m_destSearchSpec = destSearchSpec;
+		if ( !destSearchSpec.IsEmpty() )
+			m_pDestSearchSpec.reset( new CSearchSpec( destSearchSpec ) );
+		else
+			m_pDestSearchSpec.reset();
+
 		if ( !IsValidDropRecipient() )
 			return false;
 
-		TRACE( _T("*** Initializing AutoDropRecipient for directory: %s\n"), m_destSearchSpec.m_searchPath.GetPtr() );
+		TRACE( _T("*** Initializing AutoDropRecipient for directory: %s\n"), GetDestSearchPath().GetPtr() );
 		return true;
 	}
 
@@ -158,7 +180,7 @@ namespace auto_drop
 			bool allSameSrcDestDir = true;
 
 			for ( std::vector< std::tstring >::const_iterator itDrop = m_droppedSrcFiles.begin(); allSameSrcDestDir && itDrop != m_droppedSrcFiles.end(); ++itDrop )
-				allSameSrcDestDir = m_destSearchSpec.m_searchPath == path::GetParentPath( itDrop->c_str() );
+				allSameSrcDestDir = GetDestSearchPath() == path::GetParentPath( itDrop->c_str() );
 
 			if ( allSameSrcDestDir )
 				m_dropOperation = FileMove;		// automatically set the MOVE operation
@@ -176,7 +198,7 @@ namespace auto_drop
 		CImageFileEnumerator imageEnum;
 		try
 		{
-			imageEnum.Search( m_destSearchSpec );
+			imageEnum.Search( *m_pDestSearchSpec );
 		}
 		catch ( CException* pExc )
 		{
@@ -231,7 +253,7 @@ namespace auto_drop
 			{	// different new number, so push it to the dropped group
 				COpEntry droppedEntry( *itDrop, fileNumberDrop, m_dropOperation == FileMove );
 
-				droppedEntry.CheckCopyOpConsistency( m_destSearchSpec.m_searchPath.GetPtr() );
+				droppedEntry.CheckCopyOpConsistency( GetDestSearchPath().GetPtr() );
 				rDroppedGroup.push_front( droppedEntry );
 			}
 
@@ -246,7 +268,7 @@ namespace auto_drop
 		std::vector< std::tstring >::iterator itDest = m_droppedDestFiles.begin();
 
 		for ( COpGroup::const_iterator itSrc = rDroppedGroup.begin(); itSrc != rDroppedGroup.end(); ++itSrc, ++itDest )
-			*itDest = itSrc->GetDestFullPath( m_destSearchSpec.m_searchPath.GetPtr() );
+			*itDest = itSrc->GetDestFullPath( GetDestSearchPath().GetPtr() );
 
 		// push to the undo stack the group of entries for the shifted existing files (src & dest)
 		if ( shiftMap.size() > 0 )
@@ -261,7 +283,7 @@ namespace auto_drop
 				{	// different new number, so push it to the shifted existing group
 					COpEntry existingEntry( itMap->first.GetPtr(), itMap->second, true );
 
-					existingEntry.CheckCopyOpConsistency( m_destSearchSpec.m_searchPath.GetPtr() );
+					existingEntry.CheckCopyOpConsistency( GetDestSearchPath().GetPtr() );
 					rShiftedGroup.push_front( existingEntry );
 				}
 			// remove the newly added group if is empty
@@ -285,7 +307,7 @@ namespace auto_drop
 		CImageFileEnumerator imageEnum;
 		try
 		{
-			imageEnum.Search( m_destSearchSpec );
+			imageEnum.Search( *m_pDestSearchSpec );
 		}
 		catch ( CException* pExc )
 		{
@@ -314,7 +336,7 @@ namespace auto_drop
 			{	// different new number, so push it to the shifted existing group
 				COpEntry existingEntry( filePath, fileNumber, true );
 
-				existingEntry.CheckCopyOpConsistency( m_destSearchSpec.m_searchPath.GetPtr() );
+				existingEntry.CheckCopyOpConsistency( GetDestSearchPath().GetPtr() );
 				rShiftedGroup.push_front( existingEntry );
 			}
 		}
@@ -371,13 +393,13 @@ namespace auto_drop
 				for ( COpGroup::const_iterator itOp = group.begin(); itOp != group.end(); ++itOp, ++itSrc, ++itDest )
 					if ( 1 == phaseNo )
 					{
-						*itSrc = isUndoOp ? itOp->GetDestFullPath( m_destSearchSpec.m_searchPath.Get() ) : itOp->m_srcFullPath;
-						*itDest = itOp->GetMidDestPath( m_destSearchSpec.m_searchPath.Get() );
+						*itSrc = isUndoOp ? itOp->GetDestFullPath( GetDestSearchPath().Get() ) : itOp->m_srcFullPath;
+						*itDest = itOp->GetMidDestPath( GetDestSearchPath().Get() );
 					}
 					else // 2 == phaseNo
 					{
-						*itSrc = itOp->GetMidDestPath( m_destSearchSpec.m_searchPath.Get() );
-						*itDest = isUndoOp ? itOp->m_srcFullPath : itOp->GetDestFullPath( m_destSearchSpec.m_searchPath.Get() );
+						*itSrc = itOp->GetMidDestPath( GetDestSearchPath().Get() );
+						*itDest = isUndoOp ? itOp->m_srcFullPath : itOp->GetDestFullPath( GetDestSearchPath().Get() );
 					}
 
 				// NOTE: undoing a COPY actually means DELETE !

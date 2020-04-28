@@ -18,6 +18,7 @@
 #include "PostCall.h"
 #include "Resequence.hxx"
 #include "resource.h"
+#include "utl/Serialization.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

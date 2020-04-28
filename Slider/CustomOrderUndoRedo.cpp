@@ -2,6 +2,7 @@
 #include "stdafx.h"
 #include "CustomOrderUndoRedo.h"
 #include "utl/EnumTags.h"
+#include "utl/Serialization.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

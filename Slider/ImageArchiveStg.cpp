@@ -54,7 +54,7 @@ const TCHAR CImageArchiveStg::s_subPathSep = _T('*');
 CImageArchiveStg::CImageArchiveStg( IStorage* pRootStorage /*= NULL*/ )
 	: fs::CStructuredStorage( pRootStorage )
 	, m_pThumbsDecoderId( NULL )
-	, m_fileModelSchema( app::Slider_LatestModelSchema )
+	, m_docModelSchema( app::Slider_LatestModelSchema )
 {
 }
 
@@ -92,8 +92,7 @@ CStringW CImageArchiveStg::EncodeStreamName( const TCHAR* pStreamName ) const
 	return streamName;
 }
 
-void CImageArchiveStg::CreateImageArchive( const TCHAR* pStgFilePath, const std::tstring& password, const std::vector< std::pair< fs::CFlexPath, fs::CFlexPath > >& filePairs,
-										   CObject* pAlbumDoc ) throws_( CException* )
+void CImageArchiveStg::CreateImageArchive( const TCHAR* pStgFilePath, const std::tstring& password, const std::vector< std::pair< fs::CFlexPath, fs::CFlexPath > >& filePairs ) throws_( CException* )
 {
 	CPushThrowMode pushThrow( this, true );
 
@@ -107,9 +106,6 @@ void CImageArchiveStg::CreateImageArchive( const TCHAR* pStgFilePath, const std:
 	CreateImageFiles( fileAttributes, filePairs );
 	CreateMetadataFile( fileAttributes );
 	CreateThumbnailsStorage( filePairs );
-
-	if ( pAlbumDoc != NULL )
-		SaveAlbumDoc( pAlbumDoc );
 }
 
 void CImageArchiveStg::CreateImageFiles( std::vector< CFileAttr >& rFileAttributes, const std::vector< std::pair< fs::CFlexPath, fs::CFlexPath > >& filePairs ) throws_( CException* )
@@ -231,7 +227,7 @@ void CImageArchiveStg::LoadImagesMetadata( std::vector< CFileAttr >& rFileAttrib
 		CArchive archive( pMetaDataFile.get(), CArchive::load );
 		archive.m_bForceFlat = FALSE;			// same as CDocument::OnOpenDocument()
 
-		serial::CScopedLoadingArchive scopedLoadingArchive( archive, m_fileModelSchema );
+		serial::CScopedLoadingArchive scopedLoadingArchive( archive, m_docModelSchema );
 
 		try
 		{	// load metadata
@@ -400,7 +396,7 @@ std::tstring CImageArchiveStg::LoadPassword( void )
 	CArchive archive( pPwdFile.get(), CArchive::load );
 	archive.m_bForceFlat = FALSE;			// same as CDocument::OnOpenDocument()
 
-	serial::CScopedLoadingArchive scopedLoadingArchive( archive, m_fileModelSchema );
+	serial::CScopedLoadingArchive scopedLoadingArchive( archive, m_docModelSchema );
 
 	try
 	{

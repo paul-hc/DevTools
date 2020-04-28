@@ -2,7 +2,8 @@
 #define SearchSpecDialog_h
 #pragma once
 
-#include "FileList.h"
+#include "AlbumModel.h"
+#include "SearchSpec.h"
 #include "utl/UI/HistoryComboBox.h"
 #include "utl/UI/ui_fwd.h"
 

@@ -17,7 +17,8 @@
 const Range< size_t > CImageFileEnumerator::s_allFileSizesRange( 0, UINT_MAX );
 
 CImageFileEnumerator::CImageFileEnumerator( void )
-	: m_fileSizeRange( s_allFileSizesRange )
+	: m_maxFileCount( UINT_MAX )
+	, m_fileSizeRange( s_allFileSizesRange )
 	, m_issueStore( _T("Searching for images") )
 	, m_pProgress( new app::CScopedProgress( 0, 100, 1, m_issueStore.GetHeader().c_str() ) )
 	, m_pCurrSpec( NULL )
@@ -28,21 +29,21 @@ CImageFileEnumerator::~CImageFileEnumerator()
 {
 }
 
-void CImageFileEnumerator::Search( const std::vector< CSearchSpec >& searchSpecs ) throws_( CException* )
+void CImageFileEnumerator::Search( const std::vector< CSearchSpec* >& searchSpecs ) throws_( CException* )
 {
 	CWaitCursor wait;
 	CPushThrowMode pushThrow( &CImageArchiveStg::Factory(), true );			// report storage sharing violations, etc
 
-	for ( std::vector< CSearchSpec >::const_iterator itSpec = searchSpecs.begin(); itSpec != searchSpecs.end(); )
+	for ( std::vector< CSearchSpec* >::const_iterator itSpec = searchSpecs.begin(); itSpec != searchSpecs.end(); )
 	{
-		m_pCurrSpec = &*itSpec;
+		m_pCurrSpec = *itSpec;
 		try
 		{
 			const size_t oldFoundSize = m_fileAttrs.size();
 			m_pCurrSpec->EnumImageFiles( this );
 
 			if ( oldFoundSize == m_fileAttrs.size() )		// no new matching files found
-				m_issueStore.AddIssue( str::Format( _T("No matching images found in: %s"), m_pCurrSpec->m_searchPath.GetPtr() ) );
+				m_issueStore.AddIssue( str::Format( _T("No matching images found in: %s"), m_pCurrSpec->GetFilePath().GetPtr() ) );
 		}
 		catch ( CException* pExc )
 		{
@@ -64,7 +65,7 @@ void CImageFileEnumerator::Search( const std::vector< CSearchSpec >& searchSpecs
 
 void CImageFileEnumerator::Search( const CSearchSpec& searchSpec ) throws_( CException* )
 {
-	std::vector< CSearchSpec > searchSpecs( 1, searchSpec );
+	std::vector< CSearchSpec* > searchSpecs( 1, const_cast< CSearchSpec* >( &searchSpec ) );
 	Search( searchSpecs );
 }
 
@@ -91,12 +92,15 @@ void CImageFileEnumerator::SwapResults( std::vector< CFileAttr >& rFileAttrs, st
 
 bool CImageFileEnumerator::PassFilter( const CFileFind& foundFile ) const
 {
+	if ( ( m_fileAttrs.size() + 1 ) > m_maxFileCount )
+		return false;
+
 	size_t fileLen = static_cast< size_t >( foundFile.GetLength() );
 	if ( !m_fileSizeRange.Contains( fileLen ) )
 		return false;
 
 	if ( m_pCurrSpec != NULL )
-		if ( CSearchSpec::AutoDropNumFormat == m_pCurrSpec->m_options )
+		if ( CSearchSpec::AutoDropNumFormat == m_pCurrSpec->GetSearchMode() )
 			if ( !CSearchSpec::IsNumFileName( foundFile.GetFilePath() ) )
 				return false;
 

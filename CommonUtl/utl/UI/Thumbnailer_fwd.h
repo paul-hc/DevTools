@@ -3,7 +3,7 @@
 #pragma once
 
 #include "ComparePredicates.h"
-#include "ContainerUtilities.h"		// for stdext::hash_value
+#include "StdHashValue.h"			// for stdext::hash_value
 #include "FlexPath.h"
 #include <thumbcache.h>				// IThumbnailCache, CLSID_ThumbnailCache
 

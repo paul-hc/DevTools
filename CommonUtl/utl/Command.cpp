@@ -156,6 +156,6 @@ void CMacroCommand::Serialize( CArchive& archive )
 	CBaseCommand::Serialize( archive );
 
 	archive & &m_userInfo;
-	serial::Serialize_CObjects( archive, m_subCommands );
-	serial::Serialize_CObject( archive, m_pMainCmd );
+	serial::Serialize_CObjects_Mixed( archive, m_subCommands );
+	serial::Serialize_CObject_Dynamic( archive, m_pMainCmd );
 }

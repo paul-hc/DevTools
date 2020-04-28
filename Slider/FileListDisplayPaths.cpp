@@ -1,19 +1,19 @@
 
 #include "stdafx.h"
 #include "FileListDisplayPaths.h"
-#include "FileList.h"
+#include "AlbumModel.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
 
 
-CFileListDisplayPaths::CFileListDisplayPaths( const CFileList& fileList, bool filesMustExist )
+CFileListDisplayPaths::CFileListDisplayPaths( const CAlbumModel& model, bool filesMustExist )
 	: m_filesMustExist( filesMustExist )
 {
-	m_paths.resize( fileList.GetFileAttrCount() );
+	m_paths.resize( model.GetFileAttrCount() );
 	for ( size_t dispPos = 0; dispPos != m_paths.size(); ++dispPos )
-		m_paths[ dispPos ] = &fileList.GetFileAttr( dispPos ).GetPath();		// translate display pos
+		m_paths[ dispPos ] = &model.GetFileAttr( dispPos ).GetPath();		// translate display pos
 }
 
 int CFileListDisplayPaths::GetPos( size_t pos ) const
@@ -44,20 +44,20 @@ void CFileListDisplayPaths::SetListState( CListViewState& rLvState, std::auto_pt
 	}
 }
 
-CListViewState::CImpl< int >* CFileListDisplayPaths::MakeIndexState( const CListViewState& lvState, const CFileList& fileList )
+CListViewState::CImpl< int >* CFileListDisplayPaths::MakeIndexState( const CListViewState& lvState, const CAlbumModel& model )
 {
 	if ( lvState.UseIndexes() )
 		return new CListViewState::CImpl< int >( *lvState.m_pIndexImpl );		// straight copy
 
 	CListViewState::CImpl< int >* pIndexState = new CListViewState::CImpl< int >;
-	pIndexState->m_caret = fileList.FindFileAttr( lvState.m_pStringImpl->m_caret );
-	pIndexState->m_top = fileList.FindFileAttr( lvState.m_pStringImpl->m_top );
+	pIndexState->m_caret = model.FindFileAttr( lvState.m_pStringImpl->m_caret );
+	pIndexState->m_top = model.FindFileAttr( lvState.m_pStringImpl->m_top );
 
 	std::vector< int > selIndexes;
 	selIndexes.reserve( lvState.m_pStringImpl->m_selItems.size() );
 	for ( std::vector< std::tstring >::const_iterator itSelItem = lvState.m_pStringImpl->m_selItems.begin(); itSelItem != lvState.m_pStringImpl->m_selItems.end(); ++itSelItem )
 	{
-		int selIndex = fileList.FindFileAttr( *itSelItem );
+		int selIndex = model.FindFileAttr( *itSelItem );
 		if ( selIndex != -1 )
 			selIndexes.push_back( selIndex );
 	}

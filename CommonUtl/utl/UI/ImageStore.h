@@ -2,8 +2,9 @@
 #define ImageStore_h
 #pragma once
 
-#include "Icon.h"
 #include <hash_map>
+#include "utl/StdHashValue.h"
+#include "Icon.h"
 
 
 struct CThemeItem;
