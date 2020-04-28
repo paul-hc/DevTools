@@ -146,7 +146,7 @@ bool CAlbumImageView::UpdateImage( void )
 				success = true;
 
 				std::vector< fs::ImagePathKey > neighbours;
-				pDoc->QueryNeighboringPathKeys( neighbours, currIndex );
+				pDoc->QueryNeighbouringPathKeys( neighbours, currIndex );
 				CWicImageCache::Instance().Enqueue( neighbours );			// pre-emptively load the neighboring images - enqueue and load on queue listener thread
 			}
 		}

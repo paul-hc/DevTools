@@ -116,18 +116,18 @@ void CAlbumModel::Stream( CArchive& archive )
 			}
 }
 
-bool CAlbumModel::SetupSearchPath( const fs::CPath& filePath )
+bool CAlbumModel::SetupSearchPath( const fs::CPath& searchPath )
 {
-	if ( !filePath.FileExist() )
+	if ( !searchPath.FileExist() )
 		return false;
 
 	m_searchModel.ClearSpecs();
 	m_stgDocPath.Clear();
 
-	if ( fs::IsValidDirectory( filePath.GetPtr() ) )
-		m_searchModel.AddSearchPath( filePath );
-	else if ( app::IsImageArchiveDoc( filePath.GetPtr() ) )
-		m_stgDocPath = filePath;
+	if ( fs::IsValidDirectory( searchPath.GetPtr() ) )
+		m_searchModel.AddSearchPath( searchPath );
+	else if ( app::IsImageArchiveDoc( searchPath.GetPtr() ) )
+		m_stgDocPath = searchPath;
 	else
 		return false;
 

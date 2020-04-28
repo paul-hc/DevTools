@@ -36,22 +36,15 @@ public:
 	bool IsValidIndex( size_t index ) const { return index < GetImageCount(); }
 	const fs::ImagePathKey& GetImageFilePathAt( int index ) const;
 
-	void QueryNeighboringPathKeys( std::vector< fs::ImagePathKey >& rNeighbours, size_t index ) const;
+	void QueryNeighbouringPathKeys( std::vector< fs::ImagePathKey >& rNeighbours, size_t index ) const;
 
 	CImageState* GetImageState( void ) const;
-
-	bool SaveAsArchiveStg( const fs::CPath& newStgPath );
-
-	bool BuildAlbum( const fs::CPath& filePath );
-	void RegenerateFileModel( FileModelChangeType reason = FM_Init );
-
+public:
 	bool EditAlbum( CAlbumImageView* pActiveView );
 	bool AddExplicitFiles( const std::vector< std::tstring >& files, bool doUpdate = true );
 
 	// custom order support
 	bool MakeCustomOrder( int& rToDestIndex, std::vector< int >& rToMoveIndexes );
-	bool UndoRedoCustomOrder( custom_order::COpStack& rFromStack, custom_order::COpStack& rToStack, bool isUndoOp );
-	void ClearCustomOrder( custom_order::ClearMode clearMode = custom_order::CM_ClearAll );
 
 	// auto-drop support
 	bool InitAutoDropRecipient( void );
@@ -64,6 +57,14 @@ public:
 	void OnFileModelChanged( FileModelChangeType reason = FM_Init );
 private:
 	void OnAutoDropRecipientChanged( void );
+
+	bool BuildAlbum( const fs::CPath& searchPath );
+	void RegenerateFileModel( FileModelChangeType reason = FM_Init );
+	bool SaveAsArchiveStg( const fs::CPath& newStgPath );
+
+	bool UndoRedoCustomOrder( custom_order::COpStack& rFromStack, custom_order::COpStack& rToStack, bool isUndoOp );
+	void ClearCustomOrder( custom_order::ClearMode clearMode = custom_order::CM_ClearAll );
+
 	bool PromptSaveConvertModelSchema( void ) const;
 private:
 	CAlbumImageView* GetOwnActiveAlbumView( void ) const;

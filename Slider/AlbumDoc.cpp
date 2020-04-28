@@ -72,7 +72,7 @@ void CAlbumDoc::Serialize( CArchive& archive )
 				if ( !PromptSaveConvertModelSchema() )
 					throw new mfc::CUserAbortedException;
 
-			m_model.StoreModelSchema( app::Slider_LatestModelSchema );		// save with latest model schema format
+			m_model.StoreModelSchema( app::Slider_LatestModelSchema );			// save with latest model schema format
 		}
 	}
 
@@ -84,11 +84,11 @@ void CAlbumDoc::Serialize( CArchive& archive )
 	{
 		archive >> firstValue;
 
-		app::ModelSchema docModelSchema = app::Slider_v3_1;									// assume an old backwards-compatible model schema (not saved back in the day)
+		app::ModelSchema docModelSchema = app::Slider_v3_1;										// assume an old backwards-compatible model schema (not saved back in the day)
 
 		if ( firstValue >= app::Slider_v3_2 && firstValue <= app::Slider_LatestModelSchema )	// valid version saved?
 		{	// let model details know the loading archive version
-			docModelSchema = static_cast< app::ModelSchema >( firstValue );					// store original document model schema (required for further storage access/metadata lookups)
+			docModelSchema = static_cast< app::ModelSchema >( firstValue );						// store original document model schema (required for further storage access/metadata lookups)
 			firstValue = UINT_MAX;			// mark as extracted (as file ModelSchema)
 		}
 
@@ -144,18 +144,25 @@ void CAlbumDoc::Serialize( CArchive& archive )
 
 bool CAlbumDoc::PromptSaveConvertModelSchema( void ) const
 {
-	std::tstring message = str::Format( _T("Save older %s document to the latest version %s?\n%s"),
+	const bool is_Album_sld = app::IsImageArchiveDoc( m_strPathName );
+	std::tstring message = str::Format( _T("Save older %s album document to the latest version %s%c\n\n%s"),
 		app::FormatModelVersion( GetModelSchema() ).c_str(),
 		app::FormatModelVersion( app::Slider_LatestModelSchema ).c_str(),
+		is_Album_sld ? _T('!') : _T('?'),
 		m_strPathName );
 
 	bool proceed = true;
 #ifdef _DEBUG
-	proceed = IDOK == AfxMessageBox( message.c_str(), MB_OKCANCEL | MB_ICONQUESTION );		// skip this annoying question in release build
+	// skip this annoying question in release build
+	if ( is_Album_sld )
+		ui::MessageBox( message, MB_OK | MB_ICONINFORMATION );		// saving "_Album.sld" in structured storage: user can't cancel saving (it would corrupt the embedded album file)
+	else
+		proceed = IDOK == ui::MessageBox( message, MB_OKCANCEL | MB_ICONQUESTION );
 #endif
 	if ( !proceed )
 		message += _T("\n CANCELLED by user!");
 
+	str::Replace( message, _T("\n\n"), _T("\n  "), 1 );				// compact the lines for logging
 	app::LogLine( message.c_str() );
 	return proceed;
 }
@@ -176,7 +183,7 @@ const fs::ImagePathKey& CAlbumDoc::GetImageFilePathAt( int index ) const
 	return CWicImage::s_nullKey;
 }
 
-void CAlbumDoc::QueryNeighboringPathKeys( std::vector< fs::ImagePathKey >& rNeighbours, size_t index ) const
+void CAlbumDoc::QueryNeighbouringPathKeys( std::vector< fs::ImagePathKey >& rNeighbours, size_t index ) const
 {
 	if ( index > 0 )
 		rNeighbours.push_back( m_model.GetFileAttr( index - 1 ).GetPathKey() );
@@ -266,7 +273,7 @@ bool CAlbumDoc::SaveAsArchiveStg( const fs::CPath& newStgPath )
 	}
 }
 
-bool CAlbumDoc::BuildAlbum( const fs::CPath& filePath )
+bool CAlbumDoc::BuildAlbum( const fs::CPath& searchPath )
 {
 	bool opening = DirtyOpening == IsModified();
 	bool loadedStgAlbumStream = false;
@@ -274,14 +281,14 @@ bool CAlbumDoc::BuildAlbum( const fs::CPath& filePath )
 	m_slideData.SetCurrentIndex( 0 );				// may get overridden by subsequent load of album doc
 	try
 	{
-		if ( app::IsImageArchiveDoc( filePath.GetPtr() ) )
+		if ( app::IsImageArchiveDoc( searchPath.GetPtr() ) )
 		{
-			if ( CImageArchiveStg::Factory().VerifyPassword( filePath ) )
+			if ( CImageArchiveStg::Factory().VerifyPassword( searchPath ) )
 			{
-				loadedStgAlbumStream = CImageArchiveStg::Factory().LoadAlbumDoc( this, filePath );		// album stream is optional for older archives: not an error if missing
+				loadedStgAlbumStream = CImageArchiveStg::Factory().LoadAlbumDoc( this, searchPath );		// album stream is optional for older archives: not an error if missing
 				if ( loadedStgAlbumStream )
 				{
-					CImageArchiveStg* pLoadedImageStg = CImageArchiveStg::Factory().FindStorage( filePath );
+					CImageArchiveStg* pLoadedImageStg = CImageArchiveStg::Factory().FindStorage( searchPath );
 					ASSERT_PTR( pLoadedImageStg );
 					pLoadedImageStg->StoreFileModelSchema( GetModelSchema() );
 				}
@@ -291,7 +298,7 @@ bool CAlbumDoc::BuildAlbum( const fs::CPath& filePath )
 		}
 
 		if ( !loadedStgAlbumStream )				// directory path or archive stg missing album stream?
-			if ( m_model.SetupSearchPath( filePath ) )
+			if ( m_model.SetupSearchPath( searchPath ) )
 				m_model.SearchForFiles();
 			else
 				return false;

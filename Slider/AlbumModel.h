@@ -28,15 +28,14 @@ public:
 
 	enum PersistFlag
 	{
-		AutoRegenerate = BIT_FLAG( 0 ),			// auto re-generates after de-serialization
+		AutoRegenerate = BIT_FLAG( 0 ),			// auto re-generates after loading (de-serialization)
 		UseDeepStreamPaths = BIT_FLAG( 1 )		// in an archive doc m_fileAttributes has been encoded with flag wf::PrefixDeepStreamNames on
 	};
 
 	bool HasPersistFlag( PersistFlag persistFlag ) const { return HasFlag( m_persistFlags, persistFlag ); }
 	void SetPersistFlag( PersistFlag persistFlag, bool on = true ) { SetFlag( m_persistFlags, persistFlag, on ); }
 
-
-	bool SetupSearchPath( const fs::CPath& filePath );
+	bool SetupSearchPath( const fs::CPath& searchPath );
 	void SearchForFiles( bool reportEmpty = true ) throws_( CException* );
 
 	bool InGeneration( void ) const { return m_inGeneration; }
