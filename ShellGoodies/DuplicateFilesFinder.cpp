@@ -57,6 +57,7 @@ void CDuplicateFilesFinder::SearchForFiles( std::vector< fs::CPath >& rFoundPath
 		{
 			fs::CEnumerator found( pProgressEnum );
 			found.SetIgnorePathMatches( ignorePaths );
+
 			fs::EnumFiles( &found, srcPath, m_wildSpec.c_str(), Deep );
 
 			fs::SortPaths( found.m_filePaths );

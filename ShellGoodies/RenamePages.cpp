@@ -7,6 +7,7 @@
 #include "FileModel.h"
 #include "EditingCommands.h"
 #include "resource.h"
+#include "utl/ContainerUtilities.h"
 #include "utl/LongestCommonSubsequence.h"
 #include "utl/UI/UtilitiesEx.h"
 

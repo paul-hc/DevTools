@@ -10,6 +10,7 @@
 #include "resource.h"
 #include "utl/CommandModel.h"
 #include "utl/CommandService.h"
+#include "utl/ContainerUtilities.h"
 #include "utl/EnumTags.h"
 #include "utl/StringUtilities.h"
 #include "utl/UI/Utilities.h"

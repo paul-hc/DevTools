@@ -470,7 +470,7 @@ bool CFindDuplicatesDialog::InputNewPath( std::vector< CPathItem* >& rPathItems,
 			if ( pFoundItem != pTargetItem )
 				return false;			// collision with an existing path item
 
-		pTargetItem->ResetFilePath( newPath );
+		pTargetItem->SetFilePath( newPath );
 	}
 
 	return true;
@@ -675,7 +675,7 @@ void CFindDuplicatesDialog::CombineTextEffectAt( ui::CTextEffect& rTextEffect, L
 	const ui::CTextEffect* pTextEffect = pFileItem->IsOriginalItem() ? &s_original : &s_duplicate;
 
 	if ( utl::Contains( m_errorItems, pFileItem ) )
-		rTextEffect |= s_errorBk;							// highlight error row background
+		rTextEffect |= s_errorBk;								// highlight error row background
 
 	if ( m_highlightDuplicates )
 		rTextEffect |= *pTextEffect;
@@ -683,8 +683,13 @@ void CFindDuplicatesDialog::CombineTextEffectAt( ui::CTextEffect& rTextEffect, L
 //	if ( FileName == subItem && pFileItem->IsOriginalItem() )
 //		SetFlag( rTextEffect.m_fontEffect, ui::Bold );
 
-	if ( EditMode == m_mode )								// duplicates list is dirty?
-		rTextEffect.m_textColor = ui::GetBlendedColor( rTextEffect.m_textColor != CLR_NONE ? rTextEffect.m_textColor : m_dupsListCtrl.GetTextColor(), color::White );		// blend to gray
+	if ( EditMode == m_mode )									// duplicates list is dirty?
+	{
+		if ( !ui::IsActualColor( rTextEffect.m_textColor ) )	// text color must be evaluated?
+			rTextEffect.m_textColor = ui::GetActualColorSysdef( m_dupsListCtrl.GetTextColor(), COLOR_WINDOWTEXT );
+
+		rTextEffect.m_textColor = ui::GetBlendedColor( rTextEffect.m_textColor, color::White );		// blend to gray
+	}
 }
 
 CDuplicateFileItem* CFindDuplicatesDialog::FindItemWithKey( const fs::CPath& keyPath ) const
