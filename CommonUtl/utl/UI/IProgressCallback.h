@@ -11,7 +11,7 @@ namespace ui
 	interface IProgressCallback
 	{
 		virtual void SetProgressRange( int lower, int upper, bool rewindPos = false ) = 0;
-		virtual bool SetMarqueeProgress( bool marquee = true ) = 0;
+		virtual bool SetMarqueeProgress( bool useMarquee = true ) = 0;
 		virtual void SetProgressState( int barState = PBST_NORMAL ) = 0;
 
 		// advancing

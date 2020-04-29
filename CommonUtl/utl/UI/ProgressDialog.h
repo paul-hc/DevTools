@@ -13,8 +13,9 @@ class CScopedPumpMessage;
 
 // Modeless dialog with some information fields and a progress-bar.
 // Allows keyboard and mouse user input (pumps pending messages) while performing long operations when advancing methods are called.
-// The object lifetime is controlled by the caller, but the dialog window gets destroyed internally when the Close button is pressed.
+// The object lifetime is controlled by the caller, but the dialog window may get destroyed internally when the Close button is pressed.
 // Throws a CUserAbortedException if the caller invokes any advancing method while the dialog window has been closed.
+// Note: uses Null Pattern for convenience, so that the client can continue using the IProgressCallback interface even after the user closed the dialog.
 //
 class CProgressDialog : public CLayoutDialog
 					  , public ui::IProgressCallback
@@ -22,24 +23,24 @@ class CProgressDialog : public CLayoutDialog
 public:
 	enum OptionFlag
 	{
-		HideStage = 1 << 1,
-		HideItem = 1 << 2,
-		HideProgress = 1 << 3,
+		HideStage		= 1 << 1,
+		HideItem		= 1 << 2,
+		HideProgress	= 1 << 3,
 
-		MarqueeProgress = 1 << 4,
-		StageLabelCount = 1 << 5,
-		ItemLabelCount = 1 << 6,
+		MarqueeProgress	= 1 << 4,
+		StageLabelCount	= 1 << 5,
+		ItemLabelCount	= 1 << 6,
 			LabelsCount = StageLabelCount | ItemLabelCount,
 	};
 
 	CProgressDialog( const std::tstring& operationLabel, int optionFlags = MarqueeProgress );
 	virtual ~CProgressDialog();
 
-	bool IsRunning( void ) const { return GetSafeHwnd() != NULL; }
+	bool IsRunning( void ) const { return m_hWnd != NULL; }
 	bool CheckRunning( void ) const throws_( CUserAbortedException );
 
 	bool Create( const std::tstring& title, CWnd* pParentWnd = NULL );
-	static void __declspec( noreturn ) Abort( void ) throws_( CUserAbortedException );
+	static void __declspec(noreturn) Abort( void ) throws_( CUserAbortedException );
 
 	void SetOperationLabel( const std::tstring& operationLabel );
 
@@ -55,7 +56,7 @@ public:
 
 	// ui::IProgressCallback interface
 	virtual void SetProgressRange( int lower, int upper, bool rewindPos = false );
-	virtual bool SetMarqueeProgress( bool marquee = true );
+	virtual bool SetMarqueeProgress( bool useMarquee = true );
 	virtual void SetProgressState( int barState = PBST_NORMAL );
 	virtual void AdvanceStage( const std::tstring& stageName ) throws_( CUserAbortedException );
 	virtual void AdvanceItem( const std::tstring& itemName ) throws_( CUserAbortedException );
@@ -76,6 +77,7 @@ private:
 	std::tstring m_itemLabel;
 	int m_optionFlags;
 	std::auto_ptr< CScopedPumpMessage > m_pMsgPump;
+	mutable bool m_isAborted;
 
 	// internal counters, correlated yet independent of m_progressBar.GetPos()
 	int m_stageCount;
@@ -98,6 +100,7 @@ protected:
 	virtual void DoDataExchange( CDataExchange* pDX );
 protected:
 	afx_msg void OnDestroy( void );
+	afx_msg LRESULT OnDisableModal( WPARAM, LPARAM );
 
 	DECLARE_MESSAGE_MAP()
 };

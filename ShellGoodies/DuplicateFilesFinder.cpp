@@ -19,7 +19,7 @@ void CDuplicateFilesFinder::FindDuplicates( std::vector< CDuplicateFilesGroup* >
 											CWnd* pParent ) throws_( CUserAbortedException )
 {
 	CDuplicatesProgress progress( pParent );
-	ui::IProgressCallback* pProgress = progress.GetProgress();
+	ui::IProgressCallback* pProgress = progress.GetCallback();
 
 	std::vector< fs::CPath > foundPaths;
 
@@ -135,7 +135,8 @@ void CDuplicatesProgress::Section_GroupByFileSize( size_t fileCount )
 	m_dlg.SetOperationLabel( _T("Group Files by Size") );
 	m_dlg.ShowStage( false );
 	m_dlg.SetItemLabel( _T("Compute file size") );
-	m_dlg.SetProgressItemCount( fileCount );
+
+	GetCallback()->SetProgressItemCount( fileCount );
 }
 
 void CDuplicatesProgress::Section_GroupByCrc32( size_t itemCount )
@@ -143,7 +144,9 @@ void CDuplicatesProgress::Section_GroupByCrc32( size_t itemCount )
 	m_dlg.SetOperationLabel( _T("Group Files by CRC32 Checksum") );
 	m_dlg.SetStageLabel( _T("Group of duplicates") );
 	m_dlg.SetItemLabel( _T("Compute file CRC32") );
-	m_dlg.SetProgressItemCount( itemCount );
+
+	GetCallback()->SetProgressItemCount( itemCount );
+
 	m_dlg.SetProgressStep( 1 );						// advance progress on each step since individual computations are slow
 	m_dlg.SetProgressState( PBST_PAUSED );			// yellow bar
 }

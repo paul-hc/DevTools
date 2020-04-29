@@ -7,6 +7,7 @@
 #include "StringUtilities.h"
 #include "UtilitiesEx.h"
 #include "resource.h"
+#include <afxpriv.h>		// for WM_DISABLEMODAL
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -31,6 +32,7 @@ CProgressDialog::CProgressDialog( const std::tstring& operationLabel, int option
 	: CLayoutDialog()
 	, m_operationLabel( operationLabel )
 	, m_optionFlags( optionFlags )
+	, m_isAborted( false )
 	, m_stageCount( 0 )
 	, m_itemNo( 0 )
 	, m_itemCount( 0 )
@@ -52,6 +54,7 @@ CProgressDialog::~CProgressDialog()
 bool CProgressDialog::Create( const std::tstring& title, CWnd* pParentWnd /*= NULL*/ )
 {
 	ASSERT( !IsRunning() );
+
 	if ( !__super::Create( IDD_PROGRESS_DIALOG, pParentWnd ) )
 		return false;
 
@@ -59,20 +62,26 @@ bool CProgressDialog::Create( const std::tstring& title, CWnd* pParentWnd /*= NU
 	ui::SetWindowText( m_hWnd, title );
 
 	m_pMsgPump.reset( new CScopedPumpMessage( 1, pParentWnd ) );		// disable the parent window during long operation to simulate a "modal-collaborative" long operation run
+	ENSURE( !ui::IsDisabled( m_hWnd ) );		// prevented by handling WM_DISABLEMODAL and rejecting?
+	m_isAborted = false;
 	return true;
 }
 
-void __declspec( noreturn ) CProgressDialog::Abort( void ) throws_( CUserAbortedException )
+void __declspec(noreturn) CProgressDialog::Abort( void ) throws_( CUserAbortedException )
 {
 	throw CUserAbortedException();
 }
 
 bool CProgressDialog::CheckRunning( void ) const throws_( CUserAbortedException )
 {
-	if ( IsRunning() )
-		return true;
+	if ( !IsRunning() )
+		if ( !m_isAborted )
+		{
+			m_isAborted = true;		// abort only once per session
+			Abort();				// this throws
+		}
 
-	Abort();						// this throws
+	return true;
 }
 
 void CProgressDialog::SetOperationLabel( const std::tstring& operationLabel )
@@ -85,13 +94,17 @@ void CProgressDialog::SetOperationLabel( const std::tstring& operationLabel )
 
 void CProgressDialog::ShowStage( bool show /*= true*/ )
 {
+	if ( !IsRunning() )
+		return;				// use Null Pattern for this dialog
+
 	ui::ShowWindow( m_stageLabelStatic, show );
 	ui::ShowWindow( m_stageStatic, show );
 }
 
 void CProgressDialog::SetStageLabel( const std::tstring& stageLabel )
 {
-	ASSERT( IsRunning() );
+	if ( !IsRunning() )
+		return;				// use Null Pattern for this dialog
 
 	m_stageLabel = stageLabel;
 	m_stageCount = 0;
@@ -102,13 +115,17 @@ void CProgressDialog::SetStageLabel( const std::tstring& stageLabel )
 
 void CProgressDialog::ShowItem( bool show /*= true*/ )
 {
+	if ( !IsRunning() )
+		return;				// use Null Pattern for this dialog
+
 	ui::ShowWindow( m_itemLabelStatic, show );
 	ui::ShowWindow( m_itemStatic, show );
 }
 
 void CProgressDialog::SetItemLabel( const std::tstring& itemLabel )
 {
-	ASSERT( IsRunning() );
+	if ( !IsRunning() )
+		return;				// use Null Pattern for this dialog
 
 	m_itemLabel = itemLabel;
 	m_itemNo = 0;
@@ -119,7 +136,9 @@ void CProgressDialog::SetItemLabel( const std::tstring& itemLabel )
 
 void CProgressDialog::SetProgressStep( int step )
 {
-	ASSERT( IsRunning() );
+	if ( !IsRunning() )
+		return;				// use Null Pattern for this dialog
+
 	m_progressBar.SetStep( step );
 }
 
@@ -128,6 +147,9 @@ void CProgressDialog::SetProgressStep( int step )
 
 void CProgressDialog::SetProgressRange( int lower, int upper, bool rewindPos /*= false*/ )
 {
+	if ( !IsRunning() )
+		return;				// use Null Pattern for this dialog
+
 	upper = std::max( upper, lower );
 
 	SetMarqueeProgress( false );			// switch to bounded progress
@@ -144,15 +166,18 @@ void CProgressDialog::SetProgressRange( int lower, int upper, bool rewindPos /*=
 	DisplayItemCounts();
 }
 
-bool CProgressDialog::SetMarqueeProgress( bool marquee /*= true*/ )
+bool CProgressDialog::SetMarqueeProgress( bool useMarquee /*= true*/ )
 {
-	if ( HasFlag( m_progressBar.GetStyle(), PBS_MARQUEE ) == marquee )
+	if ( !IsRunning() )
+		return false;			// use Null Pattern for this dialog
+
+	if ( useMarquee == HasFlag( m_progressBar.GetStyle(), PBS_MARQUEE ) )
 		return false;			// no change required
 
-	SetFlag( m_optionFlags, MarqueeProgress, marquee );
-	m_progressBar.ModifyStyle( marquee ? 0 : PBS_MARQUEE, marquee ? PBS_MARQUEE : 0 );
+	SetFlag( m_optionFlags, MarqueeProgress, useMarquee );
+	m_progressBar.ModifyStyle( useMarquee ? 0 : PBS_MARQUEE, useMarquee ? PBS_MARQUEE : 0 );
 
-	if ( marquee )
+	if ( useMarquee )
 	{
 		m_progressBar.SetMarquee( true, 0 );
 		m_itemCount = 0;
@@ -164,6 +189,9 @@ void CProgressDialog::SetProgressState( int barState /*= PBST_NORMAL*/ )
 {
 	ProcessInput();
 
+	if ( !IsRunning() )
+		return;				// use Null Pattern for this dialog
+
 	m_progressBar.Invalidate();
 	m_progressBar.UpdateWindow();
 	m_progressBar.SetState( barState );
@@ -172,6 +200,9 @@ void CProgressDialog::SetProgressState( int barState /*= PBST_NORMAL*/ )
 void CProgressDialog::AdvanceStage( const std::tstring& stageName ) throws_( CUserAbortedException )
 {
 	PumpMessages();
+
+	if ( !IsRunning() )
+		return;				// use Null Pattern for this dialog
 
 	++m_stageCount;
 
@@ -185,6 +216,9 @@ void CProgressDialog::AdvanceItem( const std::tstring& itemName ) throws_( CUser
 {
 	PumpMessages();
 
+	if ( !IsRunning() )
+		return;				// use Null Pattern for this dialog
+
 	StepIt();				// increment m_itemNo and show some progress
 
 	if ( HasFlag( m_optionFlags, ItemLabelCount ) )
@@ -197,6 +231,9 @@ void CProgressDialog::AdvanceItem( const std::tstring& itemName ) throws_( CUser
 void CProgressDialog::AdvanceItemToEnd( void ) throws_( CUserAbortedException )
 {
 	ProcessInput();
+
+	if ( !IsRunning() )
+		return;				// use Null Pattern for this dialog
 
 	int lower, upper;
 	m_progressBar.GetRange( lower, upper );
@@ -261,7 +298,9 @@ void CProgressDialog::DisplayItemCounts( void )
 void CProgressDialog::PumpMessages( void ) throws_( CUserAbortedException )
 {
 	ProcessInput();
-	ResizeLabelsContentsToFit();
+
+	if ( IsRunning() )
+		ResizeLabelsContentsToFit();
 }
 
 bool CProgressDialog::StepIt( void )
@@ -367,10 +406,16 @@ BOOL CProgressDialog::DestroyWindow( void )
 
 BEGIN_MESSAGE_MAP( CProgressDialog, CLayoutDialog )
 	ON_WM_DESTROY()
+	ON_MESSAGE( WM_DISABLEMODAL, OnDisableModal )
 END_MESSAGE_MAP()
 
 void CProgressDialog::OnDestroy( void )
 {
 	m_pMsgPump.reset();			// just in case, should've aleady been reset on CProgressDialog::DestroyWindow()
 	__super::OnDestroy();
+}
+
+LRESULT CProgressDialog::OnDisableModal( WPARAM, LPARAM )
+{	// send by parent in CFrameWnd::BeginModalState()
+	return TRUE;				// prevent disabling this dialog
 }

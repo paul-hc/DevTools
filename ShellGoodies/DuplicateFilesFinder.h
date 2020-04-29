@@ -54,7 +54,7 @@ public:
 	CDuplicatesProgress( CWnd* pParent );
 	~CDuplicatesProgress();
 
-	ui::IProgressCallback* GetProgress( void ) { return &m_dlg; }
+	ui::IProgressCallback* GetCallback( void ) { return &m_dlg; }
 	fs::IEnumerator* GetProgressEnumerator( void ) { return this; }
 
 	void Section_GroupByFileSize( size_t fileCount );
