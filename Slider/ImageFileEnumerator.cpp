@@ -129,7 +129,7 @@ void CImageFileEnumerator::AddFoundFile( const TCHAR* pFilePath )
 
 	if ( app::IsImageArchiveDoc( filePath.GetPtr() ) )
 	{
-		// found a compound image storage: load it's metadata as found images
+		// found a compound image storage: load its metadata as found images
 		if ( CImageArchiveStg::Factory().VerifyPassword( filePath ) )
 		{
 			AddFoundSubDir( filePath.GetPtr() );		// a storage counts as a sub-directory
