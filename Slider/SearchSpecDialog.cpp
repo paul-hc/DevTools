@@ -23,7 +23,7 @@ CSearchSpecDialog::CSearchSpecDialog( const CSearchSpec& searchSpec, CWnd* pPare
 	: CDialog( IDD_SEARCH_SPEC_DIALOG, pParent )
 	, m_searchSpec( searchSpec )
 	, m_searchPathCombo( ui::HistoryMaxSize, PROF_SEP )
-	, m_searchFiltersCombo( ui::HistoryMaxSize, PROF_SEP )
+	, m_wildFiltersCombo( ui::HistoryMaxSize, PROF_SEP )
 {
 }
 
@@ -36,7 +36,7 @@ void CSearchSpecDialog::DoDataExchange( CDataExchange* pDX )
 	bool firstInit = NULL == m_searchPathCombo.m_hWnd;
 
 	DDX_Control( pDX, IDC_SEARCH_FOLDER_COMBO, m_searchPathCombo );
-	DDX_Control( pDX, IDC_SEARCH_FILTERS_COMBO, m_searchFiltersCombo );
+	DDX_Control( pDX, IDC_SEARCH_FILTERS_COMBO, m_wildFiltersCombo );
 	ui::DDX_EnumSelValue( pDX, IDC_SEARCH_OPTIONS_COMBO, m_searchSpec.RefSearchMode() );
 
 	if ( DialogOutput == pDX->m_bSaveAndValidate )
@@ -44,15 +44,15 @@ void CSearchSpecDialog::DoDataExchange( CDataExchange* pDX )
 		if ( firstInit )
 		{
 			m_searchPathCombo.LimitText( _MAX_PATH );
-			m_searchFiltersCombo.LimitText( _MAX_PATH );
+			m_wildFiltersCombo.LimitText( _MAX_PATH );
 
 			m_searchPathCombo.LoadHistory( reg::section_search, reg::entry_FolderHist );
-			m_searchFiltersCombo.LoadHistory( reg::section_search, reg::entry_FilterHist );
+			m_wildFiltersCombo.LoadHistory( reg::section_search, reg::entry_FilterHist );
 		}
 	}
 
 	ui::DDX_PathItem( pDX, IDC_SEARCH_FOLDER_COMBO, &m_searchSpec );
-	ui::DDX_Text( pDX, IDC_SEARCH_FILTERS_COMBO, m_searchSpec.RefSearchFilters(), true );
+	ui::DDX_Text( pDX, IDC_SEARCH_FILTERS_COMBO, m_searchSpec.RefWildFilters(), true );
 
 	if ( DialogSaveChanges == pDX->m_bSaveAndValidate )
 	{	// setup the search attributes from itself
@@ -61,7 +61,7 @@ void CSearchSpecDialog::DoDataExchange( CDataExchange* pDX )
 		if ( m_searchSpec.IsValidPath() )
 			m_searchPathCombo.SaveHistory( reg::section_search, reg::entry_FolderHist );
 
-		m_searchFiltersCombo.SaveHistory( reg::section_search, reg::entry_FilterHist );
+		m_wildFiltersCombo.SaveHistory( reg::section_search, reg::entry_FilterHist );
 	}
 
 	CDialog::DoDataExchange( pDX );

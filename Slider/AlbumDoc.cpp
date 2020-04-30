@@ -49,21 +49,21 @@ void CAlbumDoc::Serialize( CArchive& archive )
 {
 	REQUIRE( serial::IsFileBasedArchive( archive ) );			// mem-based document serialization not supported/necessary (for now)
 
-	CAlbumImageView* pActiveView = GetOwnActiveAlbumView();
+	CAlbumImageView* pImageView = GetAlbumImageView();
 	fs::CPath docPath = path::ExtractPhysical( archive.m_strFileName.GetString() );
 
 	if ( archive.IsStoring() )
 	{
 		SetFlag( m_docFlags, PresistImageState, HasFlag( CWorkspace::GetFlags(), wf::PersistAlbumImageState ) );
 
-		if ( pActiveView != NULL )
+		if ( pImageView != NULL )
 		{
 			// explicitly copy the persistent attributes from active view
-			m_slideData = pActiveView->GetSlideData();
-			m_bkColor = pActiveView->GetRawBkColor();
+			m_slideData = pImageView->GetSlideData();
+			m_bkColor = pImageView->GetRawBkColor();
 
 			m_pImageState.reset( new CImageState );
-			pActiveView->MakeImageState( m_pImageState.get() );
+			pImageView->MakeImageState( m_pImageState.get() );
 		}
 
 		if ( GetModelSchema() != app::Slider_LatestModelSchema )
@@ -191,27 +191,15 @@ void CAlbumDoc::QueryNeighbouringPathKeys( std::vector< fs::ImagePathKey >& rNei
 		rNeighbours.push_back( m_model.GetFileAttr( index + 1 ).GetPathKey() );
 }
 
-// use this with care since it violates Model/View design pattern
-CAlbumImageView* CAlbumDoc::GetOwnActiveAlbumView( void ) const
+CAlbumImageView* CAlbumDoc::GetAlbumImageView( void ) const
 {
-	CFrameWnd* pParentFrame = NULL;
-	if ( POSITION pos = GetFirstViewPosition() )
-		pParentFrame = GetNextView( pos )->GetParentFrame();
-	if ( pParentFrame != NULL )
-	{
-		if ( CView* pActiveView = pParentFrame->GetActiveView() )
-			if ( CAlbumImageView* pActiveAlbumView = dynamic_cast< CAlbumImageView* >( pActiveView ) )
-				return pActiveAlbumView;
-			else if ( CAlbumThumbListView* pActiveThumbView = dynamic_cast< CAlbumThumbListView* >( pActiveView ) )
-				return pActiveThumbView->GetAlbumImageView();
-	}
-	return NULL;
+	return ui::FindDocumentView< CAlbumImageView >( this );
 }
 
 CSlideData* CAlbumDoc::GetActiveSlideData( void )
 {
-	CAlbumImageView* pActiveView = GetOwnActiveAlbumView();
-	return pActiveView != NULL ? &pActiveView->RefSlideData() : &m_slideData;
+	CAlbumImageView* pImageView = GetAlbumImageView();
+	return pImageView != NULL ? &pImageView->RefSlideData() : &m_slideData;
 }
 
 bool CAlbumDoc::SaveAsArchiveStg( const fs::CPath& newStgPath )
@@ -245,11 +233,11 @@ bool CAlbumDoc::SaveAsArchiveStg( const fs::CPath& newStgPath )
 				CImageArchiveStg::DiscardCachedImages( oldDocPath );
 
 				CArchiveImagesContext archiveContext;
-				CAlbumModel tempFileModel = m_model;				// temp copy so that it can display original thumbnails while creating, avoiding sharing errors
+				CAlbumModel tempModel = m_model;				// temp copy so that it can display original thumbnails while creating, avoiding sharing errors
 
-				// don't pass the document, it's too early to save the album stream, since we're working on a tempFileModel copy
-				if ( archiveContext.CreateArchiveStgFile( &tempFileModel, newStgPath ) )
-					m_model = tempFileModel;					// assign the results
+				// don't pass the document, it's too early to save the album stream, since we're working on a tempModel copy
+				if ( archiveContext.CreateArchiveStgFile( &tempModel, newStgPath ) )
+					m_model = tempModel;						// assign the results
 				else
 					return false;
 			}
@@ -261,7 +249,7 @@ bool CAlbumDoc::SaveAsArchiveStg( const fs::CPath& newStgPath )
 
 			if ( CImageArchiveStg::Factory().SaveAlbumDoc( this, newStgPath ) )
 				if ( CImageArchiveStg* pSavedImageStg = CImageArchiveStg::Factory().FindStorage( newStgPath ) )
-					pSavedImageStg->StoreFileModelSchema( GetModelSchema() );
+					pSavedImageStg->StoreDocModelSchema( GetModelSchema() );
 		}
 
 		return !saveAs || BuildAlbum( newStgPath );				// reload from the new archive document file so that we reinitialize m_model
@@ -290,7 +278,7 @@ bool CAlbumDoc::BuildAlbum( const fs::CPath& searchPath )
 				{
 					CImageArchiveStg* pLoadedImageStg = CImageArchiveStg::Factory().FindStorage( searchPath );
 					ASSERT_PTR( pLoadedImageStg );
-					pLoadedImageStg->StoreFileModelSchema( GetModelSchema() );
+					pLoadedImageStg->StoreDocModelSchema( GetModelSchema() );
 				}
 			}
 			else
@@ -299,7 +287,7 @@ bool CAlbumDoc::BuildAlbum( const fs::CPath& searchPath )
 
 		if ( !loadedStgAlbumStream )				// directory path or archive stg missing album stream?
 			if ( m_model.SetupSearchPath( searchPath ) )
-				m_model.SearchForFiles();
+				m_model.SearchForFiles( NULL );
 			else
 				return false;
 	}
@@ -313,7 +301,7 @@ bool CAlbumDoc::BuildAlbum( const fs::CPath& searchPath )
 
 	if ( !opening )					// not too early for view updates?
 	{
-		OnFileModelChanged();		// update the UI
+		OnAlbumModelChanged();		// update the UI
 
 		if ( loadedStgAlbumStream )
 			UpdateAllViews( NULL, Hint_DocSlideDataChanged );		// refresh view navigation from document (selected pos, etc)
@@ -322,7 +310,7 @@ bool CAlbumDoc::BuildAlbum( const fs::CPath& searchPath )
 	return true;		// keep it open regardless /*m_model.AnyFoundFiles();*/
 }
 
-void CAlbumDoc::RegenerateFileModel( FileModelChangeType reason /*= FM_Init*/ )
+void CAlbumDoc::RegenerateModel( AlbumModelChange reason /*= FM_Init*/ )
 {
 	if ( FM_Regeneration == reason )
 		UpdateAllViewsOfType< CAlbumImageView >( NULL, Hint_BackupCurrSelection );		// backup current selection for all the owned views before re-generating the m_model member
@@ -333,7 +321,7 @@ void CAlbumDoc::RegenerateFileModel( FileModelChangeType reason /*= FM_Init*/ )
 	try
 	{
 		CWaitCursor	wait;
-		m_model.SearchForFiles( false );
+		m_model.SearchForFiles( NULL, false );
 	}
 	catch ( CException* pExc )
 	{
@@ -342,7 +330,7 @@ void CAlbumDoc::RegenerateFileModel( FileModelChangeType reason /*= FM_Init*/ )
 	SetModifiedFlag( Dirty );
 
 	// update UI
-	OnFileModelChanged( reason );
+	OnAlbumModelChanged( reason );
 
 	if ( FM_Regeneration == reason )
 		UpdateAllViewsOfType< CAlbumImageView >( NULL, Hint_RestoreSelection );		// restore backed-up selection for all the views
@@ -367,7 +355,7 @@ bool CAlbumDoc::EditAlbum( CAlbumImageView* pActiveView )
 
 	SetModifiedFlag( Dirty );		// mark document as modified in order to prompt for saving
 
-	OnFileModelChanged();
+	OnAlbumModelChanged();
 	OnAutoDropRecipientChanged();
 	return true;
 }
@@ -433,14 +421,14 @@ bool CAlbumDoc::UndoRedoCustomOrder( custom_order::COpStack& rFromStack, custom_
 		rFromStack.pop_front();
 
 		if ( IDOK == AfxMessageBox( IDS_PROMPT_REGENERATE_ALBUM, MB_OKCANCEL | MB_ICONQUESTION ) )
-			RegenerateFileModel( FM_Regeneration );
+			RegenerateModel( FM_Regeneration );
 	}
 	else
 	{	// undo operation from FROM to TO stacks
 		rToStack.push_front( rFromStack.front() );		// transfer FROM->TO by value
 		rFromStack.pop_front();
 
-		CAlbumImageView* pAlbumViewTarget = GetOwnActiveAlbumView();
+		CAlbumImageView* pAlbumViewTarget = GetAlbumImageView();
 		ASSERT_PTR( pAlbumViewTarget );
 		// for the views != than the target view (if any), backup current/near selection before modifying the m_model
 		UpdateAllViewsOfType< CAlbumImageView >( pAlbumViewTarget, Hint_SmartBackupSelection );
@@ -460,7 +448,7 @@ bool CAlbumDoc::UndoRedoCustomOrder( custom_order::COpStack& rFromStack, custom_
 		else
 			SetModifiedFlag( Dirty );
 
-		OnFileModelChanged( FM_CustomOrderChanged );
+		OnAlbumModelChanged( FM_CustomOrderChanged );
 
 		UpdateAllViewsOfType< CAlbumImageView >( pAlbumViewTarget, Hint_RestoreSelection );
 
@@ -530,11 +518,11 @@ bool CAlbumDoc::ExecuteAutoDrop( void )
 	if ( !m_autoDropContext.MakeAutoDrop( m_dropUndoStack ) )
 		return false;
 
-	RegenerateFileModel( FM_AutoDropOp );
+	RegenerateModel( FM_AutoDropOp );
 	return true;
 }
 
-void CAlbumDoc::OnFileModelChanged( FileModelChangeType reason /*= FM_Init*/ )
+void CAlbumDoc::OnAlbumModelChanged( AlbumModelChange reason /*= FM_Init*/ )
 {
 	InitAutoDropRecipient();
 
@@ -545,14 +533,12 @@ void CAlbumDoc::OnFileModelChanged( FileModelChangeType reason /*= FM_Init*/ )
 		CWicImageCache::Instance().DiscardWithPrefix( m_autoDropContext.GetDestSearchPath().GetPtr() );
 	}
 
-	UpdateAllViews( NULL, Hint_FileModelChanged, app::ToHintPtr( reason ) );
+	UpdateAllViews( NULL, Hint_AlbumModelChanged, app::ToHintPtr( reason ) );
 }
 
 void CAlbumDoc::OnAutoDropRecipientChanged( void )
 {
-	for ( POSITION pos = GetFirstViewPosition(); pos != NULL; )
-		if ( CAlbumImageView* pAlbumView = dynamic_cast< CAlbumImageView* >( GetNextView( pos ) ) )
-			pAlbumView->OnAutoDropRecipientChanged();
+	GetAlbumImageView()->OnAutoDropRecipientChanged();
 }
 
 bool CAlbumDoc::AddExplicitFiles( const std::vector< std::tstring >& files, bool doUpdate /*= true*/ )
@@ -566,7 +552,7 @@ bool CAlbumDoc::AddExplicitFiles( const std::vector< std::tstring >& files, bool
 
 	try
 	{
-		m_model.SearchForFiles();
+		m_model.SearchForFiles( NULL );
 	}
 	catch ( CException* pExc )
 	{
@@ -575,10 +561,10 @@ bool CAlbumDoc::AddExplicitFiles( const std::vector< std::tstring >& files, bool
 	}
 
 	m_slideData.SetCurrentIndex( 0 );
-	SetModifiedFlag( Dirty );		// mark document as modified in order to prompt for saving.
+	SetModifiedFlag( Dirty );			// mark document as modified in order to prompt for saving.
 
 	if ( doUpdate )
-		OnFileModelChanged();
+		OnAlbumModelChanged();
 	return true;
 }
 
@@ -655,7 +641,7 @@ void CAlbumDoc::OnCloseDocument( void )
 void CAlbumDoc::CmAutoDropDefragment( void )
 {
 	if ( m_autoDropContext.DefragmentFiles( m_dropUndoStack ) )
-		RegenerateFileModel( FM_AutoDropOp );
+		RegenerateModel( FM_AutoDropOp );
 }
 
 void CAlbumDoc::OnUpdateAutoDropDefragment( CCmdUI* pCmdUI )
@@ -667,7 +653,7 @@ void CAlbumDoc::CmAutoDropUndo( void )
 {
 	// undo operation from UNDO to REDO staks
 	if ( m_autoDropContext.UndoRedoOperation( m_dropUndoStack, m_dropRedoStack, true ) )
-		RegenerateFileModel( FM_AutoDropOp );
+		RegenerateModel( FM_AutoDropOp );
 }
 
 void CAlbumDoc::OnUpdateAutoDropUndo( CCmdUI* pCmdUI )
@@ -679,7 +665,7 @@ void CAlbumDoc::CmAutoDropRedo( void )
 {
 	// redo operation from REDO to UNDO stacks
 	if ( m_autoDropContext.UndoRedoOperation( m_dropRedoStack, m_dropUndoStack, false ) )
-		RegenerateFileModel( FM_AutoDropOp );
+		RegenerateModel( FM_AutoDropOp );
 }
 
 void CAlbumDoc::OnUpdateAutoDropRedo( CCmdUI* pCmdUI )
@@ -699,7 +685,7 @@ void CAlbumDoc::OnUpdateAutoDropClearUndoRedoStacks( CCmdUI* pCmdUI )
 
 void CAlbumDoc::CmRegenerateAlbum( void )
 {
-	RegenerateFileModel( FM_Regeneration );
+	RegenerateModel( FM_Regeneration );
 }
 
 void CAlbumDoc::OnUpdateRegenerateAlbum( CCmdUI* pCmdUI )
@@ -723,7 +709,7 @@ void CAlbumDoc::OnToggleIsAutoDrop( void )
 	// regenerate the file list
 	try
 	{
-		m_model.SearchForFiles();
+		m_model.SearchForFiles( NULL );
 	}
 	catch ( CException* pExc )
 	{
@@ -736,7 +722,7 @@ void CAlbumDoc::OnToggleIsAutoDrop( void )
 
 	SetModifiedFlag();		// mark document as modified in order to prompt for saving
 
-	OnFileModelChanged();
+	OnAlbumModelChanged();
 	OnAutoDropRecipientChanged();
 }
 
@@ -790,11 +776,11 @@ void CAlbumDoc::OnUpdateClearCustomOrderUndoRedoStacks( CCmdUI* pCmdUI )
 void CAlbumDoc::CmArchiveImages( void )
 {
 	CArchiveImagesDialog dialog( &m_model, GetPathName().GetString() );
-	if ( CAlbumImageView* pActiveView = GetOwnActiveAlbumView() )
+	if ( CAlbumImageView* pImageView = GetAlbumImageView() )
 	{
 		CListViewState lvState( StoreByIndex );
 
-		pActiveView->GetPeerThumbView()->GetListViewState( lvState );
+		pImageView->GetPeerThumbView()->GetListViewState( lvState );
 		dialog.StoreSelection( lvState );
 	}
 	if ( dialog.DoModal() != IDCANCEL )
@@ -815,7 +801,7 @@ void CAlbumDoc::CmArchiveImages( void )
 
 		if ( FOP_FileMove == dialog.m_fileOp )			// current file set may have changed?
 			if ( IDOK == AfxMessageBox( IDS_PROMPT_REGENERATE_ALBUM, MB_OKCANCEL | MB_ICONQUESTION ) )
-				RegenerateFileModel( FM_Regeneration );
+				RegenerateModel( FM_Regeneration );
 	}
 }
 
@@ -869,12 +855,12 @@ void CAlbumDoc::OnUpdateSaveCOUndoRedoBuffer( CCmdUI* pCmdUI )
 
 void CAlbumDoc::CmSelectAllThumbs( void )
 {
-	if ( CAlbumImageView* pActiveView = GetOwnActiveAlbumView() )
-		pActiveView->GetPeerThumbView()->SelectAll();
+	if ( CAlbumImageView* pImageView = GetAlbumImageView() )
+		pImageView->GetPeerThumbView()->SelectAll();
 }
 
 void CAlbumDoc::OnUpdateSelectAllThumbs( CCmdUI* pCmdUI )
 {
-	CAlbumImageView* pActiveView = GetOwnActiveAlbumView();
-	pCmdUI->Enable( pActiveView != NULL && HasFlag( pActiveView->GetSlideData().m_viewFlags, af::ShowThumbView ) );
+	CAlbumImageView* pImageView = GetAlbumImageView();
+	pCmdUI->Enable( pImageView != NULL && HasFlag( pImageView->GetSlideData().m_viewFlags, af::ShowThumbView ) );
 }

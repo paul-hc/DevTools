@@ -9,6 +9,7 @@
 #include "resource.h"
 #include "utl/EnumTags.h"
 #include "utl/Path.h"
+#include "utl/RuntimeException.h"
 #include "utl/UI/Color.h"
 #include "utl/UI/MenuUtilities.h"
 #include "utl/UI/Thumbnailer.h"
@@ -113,7 +114,7 @@ CAlbumSettingsDialog::CAlbumSettingsDialog( const CAlbumModel& model, int curren
 	m_foundFilesListCtrl.SetSortInternally( false );
 	m_foundFilesListCtrl.SetUseAlternateRowColoring();
 	m_foundFilesListCtrl.SetDataSourceFactory( this );						// uses temporary file clones for embedded images
-	m_foundFilesListCtrl.SetPopupMenu( CReportListControl::OnSelection, &GetFileModelPopupMenu() );
+	m_foundFilesListCtrl.SetPopupMenu( CReportListControl::OnSelection, &GetAlbumModelPopupMenu() );
 	m_foundFilesListCtrl.SetTrackMenuTarget( this );						// let dialog track SPECIFIC custom menu commands (Explorer verbs handled by the listctrl)
 
 	ClearFlag( m_foundFilesListCtrl.RefListStyleEx(), LVS_EX_DOUBLEBUFFER );		// better looking thumb rendering for tiny images (icons, small PNGs)
@@ -129,7 +130,7 @@ CAlbumSettingsDialog::~CAlbumSettingsDialog()
 {
 }
 
-CMenu& CAlbumSettingsDialog::GetFileModelPopupMenu( void )
+CMenu& CAlbumSettingsDialog::GetAlbumModelPopupMenu( void )
 {
 	static CMenu s_popupMenu;
 	if ( NULL == s_popupMenu.GetSafeHmenu() )
@@ -434,7 +435,7 @@ bool CAlbumSettingsDialog::SearchSourceFiles( void )
 
 	try
 	{
-		m_model.SearchForFiles();
+		m_model.SearchForFiles( this );
 	}
 	catch ( CException* pExc )
 	{

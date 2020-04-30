@@ -156,4 +156,20 @@ namespace ui
 }
 
 
+namespace ui
+{
+	template< typename ViewT >
+	ViewT* FindDocumentView( const CDocument* pDoc )
+	{
+		ASSERT_PTR( pDoc );
+
+		for ( POSITION pos = pDoc->GetFirstViewPosition(); pos != NULL; )
+			if ( ViewT* pView = dynamic_cast< ViewT* >( pDoc->GetNextView( pos ) ) )
+				return pView;
+
+		return NULL;
+	}
+}
+
+
 #endif // MfcUtilities_h

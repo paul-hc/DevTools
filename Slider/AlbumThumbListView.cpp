@@ -62,7 +62,7 @@ CAlbumThumbListView::CAlbumThumbListView( void )
 	: CCtrlView( _T("LISTBOX"), AFX_WS_DEFAULT_VIEW )
 	, CObjectCtrlBase( this )
 	, m_autoDelete( true )
-	, m_pFileModel( NULL )
+	, m_pAlbumModel( NULL )
 	, m_pPeerImageView( NULL )
 	, m_pSplitterWnd( NULL )
 	, m_beginDragTimer( this, ID_BEGIN_DRAG_TIMER, 350 )
@@ -93,19 +93,19 @@ CAlbumDoc* CAlbumThumbListView::GetAlbumDoc( void ) const
 	return m_pPeerImageView->GetDocument();
 }
 
-void CAlbumThumbListView::SetupFileModel( const CAlbumModel* pFileModel, bool doRedraw /*= true*/ )
+void CAlbumThumbListView::SetupAlbumModel( const CAlbumModel* pAlbumModel, bool doRedraw /*= true*/ )
 {
 	CListBox* pListBox = AsListBox();
 	size_t countOld = pListBox->GetCount();
-	size_t countNew = pFileModel != NULL ? pFileModel->GetFileAttrCount() : 0;
-	bool doSmartUpdate = ( pFileModel == m_pFileModel && countOld > 0 && countNew > 0 );
+	size_t countNew = pAlbumModel != NULL ? pAlbumModel->GetFileAttrCount() : 0;
+	bool doSmartUpdate = ( pAlbumModel == m_pAlbumModel && countOld > 0 && countNew > 0 );
 
-	m_pFileModel = pFileModel;
+	m_pAlbumModel = pAlbumModel;
 
 	SetRedraw( FALSE );
 
 	// The thumb list has no real content!
-	// The content is actually referred from m_pFileModel member using the item index (display index)
+	// The content is actually referred from m_pAlbumModel member using the item index (display index)
 	if ( !doSmartUpdate )
 	{
 		pListBox->ResetContent();
@@ -120,7 +120,7 @@ void CAlbumThumbListView::SetupFileModel( const CAlbumModel* pFileModel, bool do
 	for ( ; countOld < countNew; ++countOld )
 		pListBox->AddString( _T("") );
 
-	ASSERT( pListBox->GetCount() == static_cast< int >( m_pFileModel != NULL ? m_pFileModel->GetFileAttrCount() : 0 ) );
+	ASSERT( pListBox->GetCount() == static_cast< int >( m_pAlbumModel != NULL ? m_pAlbumModel->GetFileAttrCount() : 0 ) );
 
 	SetRedraw( TRUE );
 	if ( doRedraw )
@@ -201,7 +201,7 @@ bool CAlbumThumbListView::QuerySelItemPaths( std::vector< fs::CFlexPath >& rSelF
 void CAlbumThumbListView::GetListViewState( CListViewState& rLvState, bool filesMustExist /*= true*/, bool sortAscending /*= true*/ ) const
 {
 	const CListBox* pListBox = AsListBox();
-	CFileListDisplayPaths displayPaths( *m_pFileModel, filesMustExist );
+	CFileListDisplayPaths displayPaths( *m_pAlbumModel, filesMustExist );
 
 	// work on an index state for simplicity
 	std::auto_ptr< CListViewState::CImpl< int > > pIndexState( new CListViewState::CImpl< int > );
@@ -235,7 +235,7 @@ void CAlbumThumbListView::SetListViewState( const CListViewState& lvState, bool 
 	CListBox* pListBox = AsListBox();
 
 	// work on an index state for simplicity
-	std::auto_ptr< CListViewState::CImpl< int > > pIndexState( CFileListDisplayPaths::MakeIndexState( lvState, *m_pFileModel ) );
+	std::auto_ptr< CListViewState::CImpl< int > > pIndexState( CFileListDisplayPaths::MakeIndexState( lvState, *m_pAlbumModel ) );
 
 	for ( ; *pDoRestore != _T('\0'); ++pDoRestore )
 	{
@@ -311,8 +311,8 @@ bool CAlbumThumbListView::BackupSelection( bool currentSelection /*= true*/ )
 		GetListViewState( m_selectionBackup );
 		if ( !m_selectionBackup.IsEmpty() )
 			hasSel = true;
-		else if ( m_pFileModel->AnyFoundFiles() )
-			m_selectionBackup.m_pStringImpl->m_selItems.push_back( m_pFileModel->GetFileAttr( 0 ).GetPath().Get() ), hasSel = true;
+		else if ( m_pAlbumModel->AnyFoundFiles() )
+			m_selectionBackup.m_pStringImpl->m_selItems.push_back( m_pAlbumModel->GetFileAttr( 0 ).GetPath().Get() ), hasSel = true;
 	}
 	else
 	{	// backup the OUTER selection lvState
@@ -324,19 +324,19 @@ bool CAlbumThumbListView::BackupSelection( bool currentSelection /*= true*/ )
 
 		if ( indexesState.IsEmpty() )
 		{	// no selection: assume first item selected
-			if ( m_pFileModel->GetFileAttrCount() > 0 && m_pFileModel->GetFileAttr( 0 ).IsValid() )
-				m_selectionBackup.m_pStringImpl->m_selItems.push_back( m_pFileModel->GetFileAttr( 0 ).GetPath().Get() ), hasSel = true;
+			if ( m_pAlbumModel->GetFileAttrCount() > 0 && m_pAlbumModel->GetFileAttr( 0 ).IsValid() )
+				m_selectionBackup.m_pStringImpl->m_selItems.push_back( m_pAlbumModel->GetFileAttr( 0 ).GetPath().Get() ), hasSel = true;
 		}
 		else
 		{	// search for a valid file next to selection
-			for ( nextSelIndex = selIndexes.back() + 1; !hasSel && nextSelIndex < m_pFileModel->GetFileAttrCount(); ++nextSelIndex )
-				if ( m_pFileModel->GetFileAttr( nextSelIndex ).IsValid() )
-					m_selectionBackup.m_pStringImpl->m_selItems.push_back( m_pFileModel->GetFileAttr( nextSelIndex ).GetPath().Get() ), hasSel = true;
+			for ( nextSelIndex = selIndexes.back() + 1; !hasSel && nextSelIndex < m_pAlbumModel->GetFileAttrCount(); ++nextSelIndex )
+				if ( m_pAlbumModel->GetFileAttr( nextSelIndex ).IsValid() )
+					m_selectionBackup.m_pStringImpl->m_selItems.push_back( m_pAlbumModel->GetFileAttr( nextSelIndex ).GetPath().Get() ), hasSel = true;
 
 			// Search for a valid file prior to selection
 			for ( nextSelIndex = selIndexes.front() - 1; !hasSel && nextSelIndex >= 0; --nextSelIndex )
-				if ( m_pFileModel->GetFileAttr( nextSelIndex ).IsValid() )
-					m_selectionBackup.m_pStringImpl->m_selItems.push_back( m_pFileModel->GetFileAttr( nextSelIndex ).GetPath().Get() ), hasSel = true;
+				if ( m_pAlbumModel->GetFileAttr( nextSelIndex ).IsValid() )
+					m_selectionBackup.m_pStringImpl->m_selItems.push_back( m_pAlbumModel->GetFileAttr( nextSelIndex ).GetPath().Get() ), hasSel = true;
 		}
 
 		// set caret to the selected item (outer selection)
@@ -345,7 +345,7 @@ bool CAlbumThumbListView::BackupSelection( bool currentSelection /*= true*/ )
 
 		// copy top from index to string
 		if ( indexesState.m_pIndexImpl->m_top != -1 )
-			m_selectionBackup.m_pStringImpl->m_top = m_pFileModel->GetFileAttr( indexesState.m_pIndexImpl->m_top ).GetPath().Get();
+			m_selectionBackup.m_pStringImpl->m_top = m_pAlbumModel->GetFileAttr( indexesState.m_pIndexImpl->m_top ).GetPath().Get();
 	}
 
 	TRACE( _T(" ** Backup %s Selection for: %s **\nm_selectionBackup=%s\n"),
@@ -358,8 +358,8 @@ void CAlbumThumbListView::RestoreSelection( void )
 {
 	// Last chance: select the first file if no selection backup
 	if ( m_selectionBackup.IsEmpty() )
-		if ( m_pFileModel->AnyFoundFiles() )
-			m_selectionBackup.m_pStringImpl->m_selItems.push_back( m_pFileModel->GetFileAttr( 0 ).GetPath().Get() );
+		if ( m_pAlbumModel->AnyFoundFiles() )
+			m_selectionBackup.m_pStringImpl->m_selItems.push_back( m_pAlbumModel->GetFileAttr( 0 ).GetPath().Get() );
 
 	TRACE( _T(" ** Restore Selection for frame: %s **\nm_selectionBackup=%s\n"),
 		ui::GetWindowText( GetParentFrame()->m_hWnd ).c_str(), m_selectionBackup.dbgFormat().c_str() );
@@ -378,7 +378,7 @@ bool CAlbumThumbListView::SelectionOverlapsWith( const std::vector< int >& displ
 	GetListViewState( currSelection );
 	if ( !currSelection.IsEmpty() && !displayIndexes.empty() )
 		for ( size_t i = 0; i != displayIndexes.size(); ++i )
-			if ( utl::Contains( currSelection.m_pStringImpl->m_selItems, m_pFileModel->GetFileAttr( displayIndexes[ i ] ).GetPath().Get() ) )
+			if ( utl::Contains( currSelection.m_pStringImpl->m_selItems, m_pAlbumModel->GetFileAttr( displayIndexes[ i ] ).GetPath().Get() ) )
 				return true;
 	return false;
 }
@@ -709,7 +709,7 @@ CWicDibSection* CAlbumThumbListView::GetItemThumb( int displayIndex ) const thro
 	if ( !IsValidImageIndex( displayIndex ) )
 		return NULL;					// index violation, could happen in transient draws
 
-	const fs::CFlexPath& imageFilePath = m_pFileModel->GetFileAttr( displayIndex ).GetPath();
+	const fs::CFlexPath& imageFilePath = m_pAlbumModel->GetFileAttr( displayIndex ).GetPath();
 	if ( imageFilePath.IsEmpty() )
 		return NULL;
 
@@ -721,7 +721,7 @@ const fs::CFlexPath* CAlbumThumbListView::GetItemPath( int displayIndex ) const
 	if ( !IsValidImageIndex( displayIndex ) )
 		return NULL;					// Index violation, could happen in transient draws
 
-	return &m_pFileModel->GetFileAttr( displayIndex ).GetPath();
+	return &m_pAlbumModel->GetFileAttr( displayIndex ).GetPath();
 }
 
 CSize CAlbumThumbListView::GetPageItemCounts( void ) const
@@ -758,7 +758,7 @@ bool CAlbumThumbListView::DoDragDrop( void )
 	selData.m_selIndexes = indexesToDropState.m_pIndexImpl->m_selItems;
 
 	std::vector< fs::CPath > filesToDrag;
-	m_pFileModel->FetchFilePathsFromIndexes( filesToDrag, selData.m_selIndexes );
+	m_pAlbumModel->FetchFilePathsFromIndexes( filesToDrag, selData.m_selIndexes );
 
 	ole::CImagesDataSource dataSource;
 	dataSource.CacheShellFilePaths( filesToDrag );
@@ -828,7 +828,7 @@ BOOL CAlbumThumbListView::OnDrop( COleDataObject* pDataObject, DROPEFFECT dropEf
 	s_toMoveIndexes.swap( selData.m_selIndexes );			// used for temporary storing display indexes to drop
 
 	if ( LB_ERR == toDestIndex )
-		toDestIndex = static_cast< int >( m_pFileModel->GetFileAttrCount() );		// if toDestIndex is -1, then move at back selected indexes
+		toDestIndex = static_cast< int >( m_pAlbumModel->GetFileAttrCount() );		// if toDestIndex is -1, then move at back selected indexes
 
 	if ( !pAlbumDoc->GetModel()->IsCustomOrder() )		// not yet in custom order: prompt the user to switch to custom order
 		if ( IDOK == AfxMessageBox( IDS_PROMPT_SWITCHTOCUSTOMORDER, MB_OKCANCEL | MB_ICONQUESTION ) )
@@ -838,14 +838,14 @@ BOOL CAlbumThumbListView::OnDrop( COleDataObject* pDataObject, DROPEFFECT dropEf
 
 	TRACE( _T("\tDropped to index=%d indexes: %s\n"), toDestIndex, str::FormatSet( s_toMoveIndexes ).c_str() );
 
-	// for the views != than the target view (if any), backup current/near selection before modifying the m_pFileModel member
+	// for the views != than the target view (if any), backup current/near selection before modifying the m_pAlbumModel member
 	pAlbumDoc->UpdateAllViewsOfType( m_pPeerImageView, Hint_SmartBackupSelection );
 
 	// move the selected indexes to their new position; after this call s_toMoveIndexes contains the new display indexes for the dropped files.
 	if ( pAlbumDoc->MakeCustomOrder( toDestIndex, s_toMoveIndexes ) )
 	{	// After move the display indexes have changed -> update the view
 		pAlbumDoc->SetModifiedFlag();
-		pAlbumDoc->OnFileModelChanged( FM_CustomOrderChanged );
+		pAlbumDoc->OnAlbumModelChanged( FM_CustomOrderChanged );
 
 		pAlbumDoc->UpdateAllViewsOfType( m_pPeerImageView, Hint_RestoreSelection );
 
@@ -1185,7 +1185,7 @@ void CAlbumThumbListView::OnLBnSelChange( void )
 // CAlbumThumbListView::CBackupData implementation
 
 CAlbumThumbListView::CBackupData::CBackupData( const CAlbumThumbListView* pSrcThumbView )
-	: m_pFileModel( pSrcThumbView->GetFileModel() )
+	: m_pAlbumModel( pSrcThumbView->GetAlbumModel() )
 	, m_topIndex( pSrcThumbView->AsListBox()->GetTopIndex() )
 	, m_currIndex( pSrcThumbView->GetCurSel() )
 	, m_listCreationStyle( CAlbumThumbListView::s_listCreationStyle )
@@ -1199,7 +1199,7 @@ CAlbumThumbListView::CBackupData::~CBackupData()
 
 void CAlbumThumbListView::CBackupData::Restore( CAlbumThumbListView* pDestThumbView )
 {
-	pDestThumbView->SetupFileModel( m_pFileModel, false );		// don't redraw yet
+	pDestThumbView->SetupAlbumModel( m_pAlbumModel, false );		// don't redraw yet
 
 	pDestThumbView->SetCurSel( m_currIndex );
 	pDestThumbView->AsListBox()->SetTopIndex( m_topIndex );

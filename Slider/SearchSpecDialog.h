@@ -20,7 +20,7 @@ public:
 private:
 	// enum { IDD = IDD_SEARCH_SPEC_DIALOG };
 	CHistoryComboBox m_searchPathCombo;
-	CHistoryComboBox m_searchFiltersCombo;
+	CHistoryComboBox m_wildFiltersCombo;
 
 	// generated stuff
 	protected:

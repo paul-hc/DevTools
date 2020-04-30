@@ -34,7 +34,7 @@ void CSearchSpec::Stream( CArchive& archive )
 
 	if ( archive.IsStoring() )
 	{
-		archive << m_searchFilters;
+		archive << m_wildFilters;
 		archive << m_type;
 		archive << m_searchMode;
 	}
@@ -42,7 +42,7 @@ void CSearchSpec::Stream( CArchive& archive )
 	{
 		app::ModelSchema savedModelSchema = app::GetLoadingSchema( archive );
 
-		archive >> m_searchFilters;
+		archive >> m_wildFilters;
 		archive >> (int&)m_type;
 		archive >> (int&)m_searchMode;
 
@@ -68,7 +68,7 @@ void CSearchSpec::SetFilePath( const fs::CPath& filePath )
 			break;
 		case ArchiveStgFile:
 		case ExplicitFile:
-			m_searchFilters.clear();
+			m_wildFilters.clear();
 			m_searchMode = ShallowDir;
 			break;
 	}
@@ -97,9 +97,14 @@ CSearchSpec::Type CSearchSpec::BestGuessType( const fs::CPath& searchPath )
 	return ExplicitFile;
 }
 
-const std::tstring& CSearchSpec::GetImageSearchFilters( void ) const
+const std::tstring& CSearchSpec::GetSafeWildFilters( void ) const
 {
-	ASSERT( IsDirPath() ); return !m_searchFilters.empty() ? m_searchFilters : app::GetAllSourcesSpecs();
+	ASSERT( IsDirPath() );
+
+	if ( m_wildFilters.empty() )
+		return app::GetAllSourcesWildSpecs();
+
+	return m_wildFilters;
 }
 
 bool CSearchSpec::BrowseFilePath( BrowseMode pathType /*= BrowseAsIs*/, CWnd* pParentWnd /*= NULL*/, DWORD extraFlags /*= OFN_FILEMUSTEXIST*/ )
@@ -137,7 +142,7 @@ void CSearchSpec::EnumImageFiles( fs::IEnumerator* pEnumerator ) const
 	switch ( m_type )
 	{
 		case DirPath:
-			fs::EnumFiles( pEnumerator, GetFilePath(), GetImageSearchFilters().c_str(), RecurseSubDirs == m_searchMode ? Deep : Shallow );
+			fs::EnumFiles( pEnumerator, GetFilePath(), GetSafeWildFilters().c_str(), RecurseSubDirs == m_searchMode ? Deep : Shallow );
 			break;
 		case ArchiveStgFile:
 		case ExplicitFile:

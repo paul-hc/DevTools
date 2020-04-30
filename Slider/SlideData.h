@@ -18,8 +18,8 @@ namespace af
 }
 
 
-// used as argument for CAlbumImageView::OnFileModelChanged(0 and CAlbumDoc::OnFileModelChanged()
-enum FileModelChangeType
+// used as argument for CAlbumImageView::OnAlbumModelChanged(0 and CAlbumDoc::OnAlbumModelChanged()
+enum AlbumModelChange
 {
 	FM_Init,				// normal initialization
 	FM_Regeneration,		// file list was regenerated

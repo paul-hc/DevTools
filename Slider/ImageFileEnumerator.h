@@ -7,31 +7,22 @@
 #include "utl/UI/UserReport.h"
 #include "ModelSchema.h"
 
-#include "Application_fwd.h"		// TEMP: for app::CScopedProgress
-
 
 class CSearchSpec;
 class CFileAttr;
 
 
-class CImageFileEnumerator : private fs::IEnumerator
-						   , private utl::noncopyable
+class CImageFileEnumerator : public fs::CEnumerator
 {
 public:
-	CImageFileEnumerator( void );
+	CImageFileEnumerator( IEnumerator* pProgressCallback = NULL );
 	~CImageFileEnumerator();
 
-	void SetMaxFileCountFilter( size_t maxFileCount ) { m_maxFileCount = maxFileCount; }
 	void SetFileSizeFilter( const Range< size_t >& fileSizeRange ) { m_fileSizeRange = fileSizeRange; ENSURE( m_fileSizeRange.IsNormalized() ); }
 
-	void Search( const CSearchSpec& searchSpec ) throws_( CException* );
-
-//	private:
-	void Search( const std::vector< CSearchSpec* >& searchSpecs ) throws_( CException* );
-	public:
-//	private:
-	void SearchImageArchive( const fs::CPath& stgDocPath ) throws_( CException* );
-	public:
+	void Search( const std::vector< CSearchSpec* >& searchSpecs ) throws_( CException*, CUserAbortedException );
+	void Search( const CSearchSpec& searchSpec ) throws_( CException*, CUserAbortedException );
+	void SearchImageArchive( const fs::CPath& stgDocPath ) throws_( CException*, CUserAbortedException );
 
 	// found files
 	bool AnyFound( void ) const { return !m_fileAttrs.empty(); }
@@ -43,17 +34,15 @@ public:
 private:
 	// fs::IEnumerator interface (files only)
 	virtual void AddFoundFile( const TCHAR* pFilePath );
-	virtual bool AddFoundSubDir( const TCHAR* pSubDirPath );
 	virtual void AddFile( const CFileFind& foundFile );
+	virtual bool MustStop( void ) const;
 
-	bool PassFilter( const CFileFind& foundFile ) const;
+	bool PassFilter( const CFileAttr& fileAttr ) const;
 	void Push( const CFileAttr& fileAttr );
 	void PushMany( const std::vector< CFileAttr >& fileAttrs );
 private:
-	size_t m_maxFileCount;
 	Range< size_t > m_fileSizeRange;
 	ui::CIssueStore m_issueStore;
-	std::auto_ptr< app::CScopedProgress > m_pProgress;
 	const CSearchSpec* m_pCurrSpec;
 
 	// found
@@ -64,12 +53,29 @@ public:
 };
 
 
-class CImageDiscoverer
+#include "utl/UI/ProgressDialog.h"
+
+
+class CImagesProgressCallback : private fs::IEnumerator
+							  , private utl::noncopyable
 {
 public:
-	CImageDiscoverer( void );
-	~CImageDiscoverer();
+	CImagesProgressCallback( CWnd* pParent, const std::tstring& operationLabel = s_searching );
+	~CImagesProgressCallback();
+
+	ui::IProgressCallback* GetCallback( void ) { return &m_dlg; }
+	fs::IEnumerator* GetProgressEnumerator( void ) { return this; }
+
+	bool IsValidDialog( void ) const { return m_dlg.IsRunning(); }		// i.e. not aborted by user?
+	void Section_OrderImageFiles( size_t fileCount );
 private:
+	// file enumerator callbacks
+	virtual void AddFoundFile( const TCHAR* pFilePath ) throws_( CUserAbortedException );
+	virtual bool AddFoundSubDir( const TCHAR* pSubDirPath ) throws_( CUserAbortedException );
+private:
+	CProgressDialog m_dlg;
+public:
+	static const std::tstring s_searching;
 };
 
 

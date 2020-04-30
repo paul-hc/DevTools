@@ -9,7 +9,7 @@
 
 
 class CEnumTags;
-namespace app { class CScopedProgress; }
+namespace ui { interface IProgressCallback; }
 
 
 class CAlbumModel
@@ -36,7 +36,7 @@ public:
 	void SetPersistFlag( PersistFlag persistFlag, bool on = true ) { SetFlag( m_persistFlags, persistFlag, on ); }
 
 	bool SetupSearchPath( const fs::CPath& searchPath );
-	void SearchForFiles( bool reportEmpty = true ) throws_( CException* );
+	void SearchForFiles( CWnd* pParentWnd, bool reportEmpty = true ) throws_( CException* );
 
 	bool InGeneration( void ) const { return m_inGeneration; }
 	bool CancelGeneration( void );
@@ -49,9 +49,9 @@ public:
 private:
 	void ClearArchiveStgPaths( void );
 
-	bool OrderFileList( void );
-	bool FilterFileDuplicates( bool compareImageDim = false );
-	size_t FilterCorruptFiles( void );
+	bool OrderFileList( ui::IProgressCallback* pProgressCallback );
+	void FilterFileDuplicates( ui::IProgressCallback* pProgressCallback, bool compareImageDim = false );
+	void FilterCorruptFiles( ui::IProgressCallback* pProgressCallback );
 public:
 	enum Order;
 
@@ -144,23 +144,7 @@ namespace pred
 
 	struct CompareFileAttr
 	{
-		CompareFileAttr( CAlbumModel::Order fileOrder, bool compareImageDim = false, app::CScopedProgress* pProgress = NULL )
-			: m_fileOrder( fileOrder )
-			, m_ascendingOrder( true )
-			, m_compareImageDim( compareImageDim )
-			, m_useSecondaryComparison( true )
-			, m_pProgress( pProgress )
-		{
-			switch ( m_fileOrder )
-			{
-				case CAlbumModel::ByFileNameDesc:
-				case CAlbumModel::ByFullPathDesc:
-				case CAlbumModel::BySizeDesc:
-				case CAlbumModel::ByDateDesc:
-				case CAlbumModel::ByDimensionDesc:
-					m_ascendingOrder = false;
-			}
-		}
+		CompareFileAttr( CAlbumModel::Order fileOrder, bool compareImageDim = false, ui::IProgressCallback* pProgressCallback = NULL );
 
 		pred::CompareResult operator()( const CFileAttr& left, const CFileAttr& right ) const;
 	public:
@@ -169,7 +153,7 @@ namespace pred
 		bool m_compareImageDim;
 		bool m_useSecondaryComparison;
 	private:
-		app::CScopedProgress* m_pProgress;
+		ui::IProgressCallback* m_pProgressCallback;
 	};
 }
 

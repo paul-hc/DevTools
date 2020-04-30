@@ -36,8 +36,9 @@ public:
 
 	void Stream( CArchive& archive );
 public:
-	const std::tstring& GetSearchFilters( void ) const { return m_searchFilters; }
-	std::tstring& RefSearchFilters( void ) { return m_searchFilters; }
+	const std::tstring& GetWildFilters( void ) const { return m_wildFilters; }
+	std::tstring& RefWildFilters( void ) { return m_wildFilters; }
+	const std::tstring& GetSafeWildFilters( void ) const;
 
 	Type GetType( void ) const { return m_type; }
 	void SetAutoType( void ) { m_type = CheckType(); }
@@ -56,7 +57,6 @@ public:
 	bool IsExplicitFile( void ) const { return ExplicitFile == m_type; }
 
 	bool IsAutoDropDirPath( bool checkValidPath = true ) const { return IsDirPath() && ( !checkValidPath || IsValidPath() ) && AutoDropNumFormat == m_searchMode; }
-	const std::tstring& GetImageSearchFilters( void ) const;
 
 	void EnumImageFiles( fs::IEnumerator* pEnumerator ) const;
 public:
@@ -70,7 +70,7 @@ private:
 	Type CheckType( void ) const;
 	static Type BestGuessType( const fs::CPath& searchPath );		// doesn't check for file existence
 private:
-	persist std::tstring m_searchFilters;	// multiple filters for searching
+	persist std::tstring m_wildFilters;		// multiple filters for searching
 	persist Type m_type;					// type of search attribute
 	persist SearchMode m_searchMode;		// search searchMode
 };

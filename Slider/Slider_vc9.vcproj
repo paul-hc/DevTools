@@ -507,14 +507,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\ImageFileEnumerator.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\ImageFileEnumerator.h"
-				>
-			</File>
-			<File
 				RelativePath=".\ImageView.cpp"
 				>
 			</File>
@@ -580,14 +572,6 @@
 			</File>
 			<File
 				RelativePath=".\OleImagesDataSource.h"
-				>
-			</File>
-			<File
-				RelativePath=".\SearchImagesProgressCallback.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\SearchImagesProgressCallback.h"
 				>
 			</File>
 			<File
@@ -823,6 +807,14 @@
 				</File>
 				<File
 					RelativePath=".\FileOperation.h"
+					>
+				</File>
+				<File
+					RelativePath=".\ImageFileEnumerator.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\ImageFileEnumerator.h"
 					>
 				</File>
 			</Filter>

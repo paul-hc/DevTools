@@ -25,7 +25,7 @@ public:
 	CAlbumSettingsDialog( const CAlbumModel& model, int currentIndex = -1, CWnd* pParent = NULL );
 	virtual ~CAlbumSettingsDialog();
 private:
-	static CMenu& GetFileModelPopupMenu( void );
+	static CMenu& GetAlbumModelPopupMenu( void );
 	bool InitSymbolFont( void );
 
 	// ole::IDataSourceFactory interface

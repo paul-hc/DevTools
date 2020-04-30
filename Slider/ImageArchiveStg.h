@@ -32,7 +32,7 @@ public:
 	bool SavePassword( const std::tstring& password );
 	std::tstring LoadPassword( void );
 
-	void StoreFileModelSchema( app::ModelSchema docModelSchema ) { m_docModelSchema = docModelSchema; }
+	void StoreDocModelSchema( app::ModelSchema docModelSchema ) { m_docModelSchema = docModelSchema; }
 
 	// .sld file format
 	void SaveAlbumDoc( CObject* pAlbumDoc );

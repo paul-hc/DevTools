@@ -28,7 +28,7 @@ enum UpdateViewHint
 	Hint_ViewUpdate,
 	Hint_RedrawAll,
 	Hint_ToggleFullScreen,				// sent whenever full screen mode is toggled on or off
-	Hint_FileModelChanged,				// file list has changed; reason: (FileListChangeType)pHint
+	Hint_AlbumModelChanged,				// file list has changed; reason: (FileListChangeType)pHint
 	Hint_ReloadImage,					// force reloading each image
 	Hint_FileChanged,					// an image file has been changed (copied, moved, deleted, etc)
 	Hint_DocSlideDataChanged,			// update navigation attribute from the document

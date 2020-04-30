@@ -14,6 +14,7 @@
 #include "utl/SerializeStdTypes.h"
 #include "utl/ScopedValue.h"
 #include "utl/StringUtilities.h"
+#include "utl/Timer.h"
 #include "utl/UI/Utilities.h"
 #include "utl/UI/WicImage.h"
 
@@ -48,7 +49,7 @@ CAlbumModel::CAlbumModel( void )
 	: m_modelSchema( app::Slider_LatestModelSchema )
 	, m_inGeneration( false )
 	, m_persistFlags( 0 )
-	, m_randomSeed( GetTickCount() )
+	, m_randomSeed( ::GetTickCount() )
 	, m_fileOrder( OriginalOrder )
 {
 }
@@ -108,7 +109,7 @@ void CAlbumModel::Stream( CArchive& archive )
 		if ( MustAutoRegenerate() )
 			try
 			{
-				SearchForFiles( false );			// regenerate the file list on archive load
+				SearchForFiles( NULL, false );			// regenerate the file list on archive load
 			}
 			catch ( CException* pExc )
 			{
@@ -392,25 +393,34 @@ void CAlbumModel::ClearArchiveStgPaths( void )
 	m_archiveStgPaths.clear();
 }
 
-void CAlbumModel::SearchForFiles( bool reportEmpty /*= true*/ ) throws_( CException* )
+void CAlbumModel::SearchForFiles( CWnd* pParentWnd, bool reportEmpty /*= true*/ ) throws_( CException* )
 {
 	ASSERT( !m_inGeneration );
 	CScopedValue< bool > scopedGeneration( &m_inGeneration, true );
 	std::auto_ptr< hlp::CRetainCustomOrder > pRetainCustomOrder( CustomOrder == m_fileOrder ? new hlp::CRetainCustomOrder( &m_fileAttributes, &m_customOrder ) : NULL );
 
+	CImagesProgressCallback progress( pParentWnd != NULL ? pParentWnd : AfxGetMainWnd() );
+
 	m_fileAttributes.clear();			// clear the file results
 	ClearArchiveStgPaths();
 
 	{	// scope for "Searching..." progress
-		CImageFileEnumerator imageEnum;
+		CImageFileEnumerator imageEnum( progress.GetProgressEnumerator() );
 
-		imageEnum.SetMaxFileCountFilter( m_searchModel.GetMaxFileCount() );
+		imageEnum.SetMaxFiles( m_searchModel.GetMaxFileCount() );
 		imageEnum.SetFileSizeFilter( m_searchModel.GetFileSizeRange() );
 
-		if ( !m_stgDocPath.IsEmpty() )
-			imageEnum.SearchImageArchive( m_stgDocPath );
-		else
-			imageEnum.Search( m_searchModel.GetSpecs() );
+		try
+		{
+			if ( !m_stgDocPath.IsEmpty() )
+				imageEnum.SearchImageArchive( m_stgDocPath );
+			else
+				imageEnum.Search( m_searchModel.GetSpecs() );
+		}
+		catch ( CUserAbortedException& exc )
+		{
+			app::TraceException( exc );		// cancelled by the user: keep the images found so far
+		}
 
 		imageEnum.SwapResults( m_fileAttributes, &m_archiveStgPaths );
 
@@ -418,7 +428,10 @@ void CAlbumModel::SearchForFiles( bool reportEmpty /*= true*/ ) throws_( CExcept
 			app::GetUserReport().ReportIssues( imageEnum.GetIssueStore(), MB_OK | MB_ICONEXCLAMATION );
 	}
 
-	OrderFileList();
+	ui::IProgressCallback* pProgressCallback = progress.GetCallback();
+	progress.Section_OrderImageFiles( m_fileAttributes.size() );
+
+	OrderFileList( pProgressCallback );
 
 	switch ( m_fileOrder )
 	{
@@ -427,86 +440,65 @@ void CAlbumModel::SearchForFiles( bool reportEmpty /*= true*/ ) throws_( CExcept
 			break;
 		case FileSameSize:
 		case FileSameSizeAndDim:
-			FilterFileDuplicates();
+			FilterFileDuplicates( pProgressCallback );
 			if ( FileSameSizeAndDim == m_fileOrder )
 			{
-				{
-					app::CScopedProgress progress( 0, (int)m_fileAttributes.size(), 1, _T("Check for images with same sizes:") );
-					progress.SetStepDivider( 7 );		// ~ empirically set to 7 as the best for the tested working set
+				pProgressCallback->SetProgressRange( 0, m_fileAttributes.size(), true );
+				std::sort( m_fileAttributes.begin(), m_fileAttributes.end(), pred::MakeOrderByValue( pred::CompareFileAttr( m_fileOrder, true, pProgressCallback ) ) );
+				pProgressCallback->AdvanceItemToEnd();
 
-					std::sort( m_fileAttributes.begin(), m_fileAttributes.end(), pred::MakeOrderByValue( pred::CompareFileAttr( m_fileOrder, true, &progress ) ) );
-					progress.GotoEnd();
-				}
-				FilterFileDuplicates( true );
+				FilterFileDuplicates( pProgressCallback, true );
 			}
 			break;
 		case CorruptedFiles:
-			FilterCorruptFiles();
+			FilterCorruptFiles( pProgressCallback );
 			break;
 	}
 }
 
-bool CAlbumModel::OrderFileList( void )
+bool CAlbumModel::OrderFileList( ui::IProgressCallback* pProgressCallback )
 {
+	ASSERT_PTR( pProgressCallback );
 	switch ( m_fileOrder )
 	{
 		case OriginalOrder:
 		case CustomOrder:
 		case CorruptedFiles:
 			return false;
+	}
+
+	pProgressCallback->AdvanceStage( _T("Sorting Images") );
+	pProgressCallback->SetProgressRange( 0, m_fileAttributes.size(), true );
+
+	switch ( m_fileOrder )
+	{
 		case Shuffle:
 			// init the random seed with current tick count
-			m_randomSeed = GetTickCount();
+			m_randomSeed = ::GetTickCount();
 			// fall-through
 		case ShuffleSameSeed:
 			srand( m_randomSeed % 0x7FFF );		// randomize on m_randomSeed
 			std::random_shuffle( m_fileAttributes.begin(), m_fileAttributes.end() );
 			break;
 		default:
-			std::sort( m_fileAttributes.begin(), m_fileAttributes.end(), pred::MakeOrderByValue( pred::CompareFileAttr( m_fileOrder ) ) );
+			std::sort( m_fileAttributes.begin(), m_fileAttributes.end(), pred::MakeOrderByValue( pred::CompareFileAttr( m_fileOrder, false, pProgressCallback ) ) );
 			break;
 	}
+
+	pProgressCallback->AdvanceItemToEnd();
 	return true;
 }
 
-// removes all valid or non-existing files from this file list
-size_t CAlbumModel::FilterCorruptFiles( void )
-{
-	size_t index = 0;
-	app::CScopedProgress progress( 0, (int)m_fileAttributes.size(), 1, _T("Checking for invalid files:") );
-	CTime initialTime = CTime::GetCurrentTime();
+void CAlbumModel::FilterFileDuplicates( ui::IProgressCallback* pProgressCallback, bool compareImageDim /*= false*/ )
+{	// removes files with single occurences according to m_fileOrder criteria, leaving only multiple occurences (e.g. files with the same size)
+	ASSERT_PTR( pProgressCallback );
 
-	app::LogEvent( _T("---------- Search for corrupt images ----------") );
-	while ( index < m_fileAttributes.size() )
-		if ( !m_inGeneration || !ui::PumpPendingMessages() )
-			break;
-		else
-		{
-			const CFileAttr& fileAttr = m_fileAttributes[ index ];
-
-			if ( CWicImage::IsCorruptFile( fileAttr.GetPath() ) )
-			{
-				app::LogEvent( _T("Found corrupt image file: %s"), fileAttr.GetPath().GetPtr() );
-				++index;
-			}
-			else
-				m_fileAttributes.erase( m_fileAttributes.begin() + index );
-			progress.StepIt();
-		}
-
-	progress.GotoEnd();
-
-	CTimeSpan duration = ( CTime::GetCurrentTime() - initialTime );
-
-	app::LogEvent( _T("---------- End of search, elapsed time [%s] ----------"), duration.Format( _T("%H:%M:%S") ).GetString() );
-	return m_fileAttributes.size();
-}
-
-// removes files with single occurences according to m_fileOrder criteria, leaving only multiple occurences (e.g. files with the same size)
-bool CAlbumModel::FilterFileDuplicates( bool compareImageDim /*= false*/ )
-{
 	size_t count = m_fileAttributes.size();
-	pred::CompareFileAttr compare( m_fileOrder, compareImageDim );
+
+	pProgressCallback->AdvanceStage( _T("Filter Duplicate Images") );
+	pProgressCallback->SetProgressRange( 0, count, true );
+
+	pred::CompareFileAttr compare( m_fileOrder, compareImageDim, pProgressCallback );
 	compare.m_useSecondaryComparison = false;		// turn on the accurate == comparisons
 
 	for ( size_t i = 0; i < count; )
@@ -525,7 +517,34 @@ bool CAlbumModel::FilterFileDuplicates( bool compareImageDim /*= false*/ )
 			i = j + 1;
 	}
 
-	return !m_fileAttributes.empty();			// true if any duplicates found
+	pProgressCallback->AdvanceItemToEnd();
+}
+
+void CAlbumModel::FilterCorruptFiles( ui::IProgressCallback* pProgressCallback )
+{	// removes all invalid/non-existing files from this file list
+	pProgressCallback->AdvanceStage( _T("Checking for invalid images") );
+	pProgressCallback->SetProgressRange( 0, m_fileAttributes.size(), true );
+
+	app::LogEvent( _T("---------- Search for corrupt images ----------") );
+
+	CTimer timer;
+
+	for ( std::vector< CFileAttr >::iterator itFileAttr = m_fileAttributes.begin(); itFileAttr != m_fileAttributes.end() && !m_inGeneration; )
+	{
+		pProgressCallback->AdvanceItem( itFileAttr->GetPath().Get() );
+
+		if ( CWicImage::IsCorruptFile( itFileAttr->GetPath() ) )
+		{
+			app::LogEvent( _T("Found corrupt image file: %s"), itFileAttr->GetPath().GetPtr() );
+			++itFileAttr;
+		}
+		else
+			itFileAttr = m_fileAttributes.erase( itFileAttr );
+	}
+
+	pProgressCallback->AdvanceItemToEnd();
+
+	app::LogEvent( _T("---------- End of search, elapsed %.2f seconds ----------"), timer.ElapsedSeconds() );
 }
 
 
@@ -536,10 +555,30 @@ namespace pred
 
 	// CompareFileAttr implementation
 
+	CompareFileAttr::CompareFileAttr( CAlbumModel::Order fileOrder, bool compareImageDim /*= false*/, ui::IProgressCallback* pProgressCallback /*= NULL*/ )
+		: m_fileOrder( fileOrder )
+		, m_ascendingOrder( true )
+		, m_compareImageDim( compareImageDim )
+		, m_useSecondaryComparison( true )
+		, m_pProgressCallback( pProgressCallback )
+	{
+		switch ( m_fileOrder )
+		{
+			case CAlbumModel::ByFileNameDesc:
+			case CAlbumModel::ByFullPathDesc:
+			case CAlbumModel::BySizeDesc:
+			case CAlbumModel::ByDateDesc:
+			case CAlbumModel::ByDimensionDesc:
+				m_ascendingOrder = false;
+		}
+	}
+
 	CompareResult CompareFileAttr::operator()( const CFileAttr& left, const CFileAttr& right ) const
 	{
-		if ( m_pProgress != NULL )
-			m_pProgress->StepIt();
+		static const std::tstring s_empty;
+
+		if ( m_pProgressCallback != NULL )
+			m_pProgressCallback->AdvanceItem( s_empty );
 
 		CompareResult result = Equal;
 
@@ -559,7 +598,7 @@ namespace pred
 			case CAlbumModel::FileSameSizeAndDim:
 				result = CompareFileAttrSize()( left, right );
 				if ( Equal == result )
-					if ( m_fileOrder == CAlbumModel::FileSameSizeAndDim && m_compareImageDim )
+					if ( CAlbumModel::FileSameSizeAndDim == m_fileOrder && m_compareImageDim )
 						result = CompareImageDimensions()( left, right );
 
 				// also ordonate by filepath (if secondary comparison not disabled)

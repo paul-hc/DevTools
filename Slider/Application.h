@@ -183,7 +183,7 @@ namespace app
 
 namespace app
 {
-	const std::tstring& GetAllSourcesSpecs( void );
+	const std::tstring& GetAllSourcesWildSpecs( void );
 
 	bool BrowseArchiveStgFile( std::tstring& rFullPath, CWnd* pParentWnd, shell::BrowseMode browseMode = shell::FileOpen, DWORD flags = 0 );
 }

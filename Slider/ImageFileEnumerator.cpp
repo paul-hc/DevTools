@@ -16,11 +16,10 @@
 
 const Range< size_t > CImageFileEnumerator::s_allFileSizesRange( 0, UINT_MAX );
 
-CImageFileEnumerator::CImageFileEnumerator( void )
-	: m_maxFileCount( UINT_MAX )
+CImageFileEnumerator::CImageFileEnumerator( IEnumerator* pProgressCallback /*= NULL*/ )
+	: fs::CEnumerator( pProgressCallback )
 	, m_fileSizeRange( s_allFileSizesRange )
 	, m_issueStore( _T("Searching for images") )
-	, m_pProgress( new app::CScopedProgress( 0, 100, 1, m_issueStore.GetHeader().c_str() ) )
 	, m_pCurrSpec( NULL )
 {
 }
@@ -29,7 +28,7 @@ CImageFileEnumerator::~CImageFileEnumerator()
 {
 }
 
-void CImageFileEnumerator::Search( const std::vector< CSearchSpec* >& searchSpecs ) throws_( CException* )
+void CImageFileEnumerator::Search( const std::vector< CSearchSpec* >& searchSpecs ) throws_( CException*, CUserAbortedException )
 {
 	CWaitCursor wait;
 	CPushThrowMode pushThrow( &CImageArchiveStg::Factory(), true );			// report storage sharing violations, etc
@@ -63,13 +62,13 @@ void CImageFileEnumerator::Search( const std::vector< CSearchSpec* >& searchSpec
 	}
 }
 
-void CImageFileEnumerator::Search( const CSearchSpec& searchSpec ) throws_( CException* )
+void CImageFileEnumerator::Search( const CSearchSpec& searchSpec ) throws_( CException*, CUserAbortedException )
 {
 	std::vector< CSearchSpec* > searchSpecs( 1, const_cast< CSearchSpec* >( &searchSpec ) );
 	Search( searchSpecs );
 }
 
-void CImageFileEnumerator::SearchImageArchive( const fs::CPath& stgDocPath ) throws_( CException* )
+void CImageFileEnumerator::SearchImageArchive( const fs::CPath& stgDocPath ) throws_( CException*, CUserAbortedException )
 {
 	if ( !stgDocPath.FileExist() )
 		AfxThrowFileException( CFileException::fileNotFound, -1, stgDocPath.GetPtr() );		// storage file path does not exist
@@ -90,18 +89,14 @@ void CImageFileEnumerator::SwapResults( std::vector< CFileAttr >& rFileAttrs, st
 		pArchiveStgPaths->swap( m_archiveStgPaths );
 }
 
-bool CImageFileEnumerator::PassFilter( const CFileFind& foundFile ) const
+bool CImageFileEnumerator::PassFilter( const CFileAttr& fileAttr ) const
 {
-	if ( ( m_fileAttrs.size() + 1 ) > m_maxFileCount )
-		return false;
-
-	size_t fileLen = static_cast< size_t >( foundFile.GetLength() );
-	if ( !m_fileSizeRange.Contains( fileLen ) )
+	if ( !m_fileSizeRange.Contains( fileAttr.GetFileSize() ) )
 		return false;
 
 	if ( m_pCurrSpec != NULL )
 		if ( CSearchSpec::AutoDropNumFormat == m_pCurrSpec->GetSearchMode() )
-			if ( !CSearchSpec::IsNumFileName( foundFile.GetFilePath() ) )
+			if ( !CSearchSpec::IsNumFileName( fileAttr.GetPath().GetPtr() ) )
 				return false;
 
 	return true;
@@ -109,21 +104,23 @@ bool CImageFileEnumerator::PassFilter( const CFileFind& foundFile ) const
 
 void CImageFileEnumerator::Push( const CFileAttr& fileAttr )
 {
+	if ( !PassFilter( fileAttr ) )
+		return;
+
 	m_fileAttrs.push_back( fileAttr );
-	m_pProgress->StepIt();
-	//Sleep( 100 );			// debug progress bar
+
+	if ( m_pChainEnum != NULL )
+		m_pChainEnum->AddFoundFile( fileAttr.GetPath().GetPtr() );
+
+//Sleep( 100 );			// debug progress bar
 }
 
 void CImageFileEnumerator::PushMany( const std::vector< CFileAttr >& fileAttrs )
 {
-	m_fileAttrs.insert( m_fileAttrs.end(), fileAttrs.begin(), fileAttrs.end() );
-	m_pProgress->OffsetPos( static_cast< int >( fileAttrs.size() ) );
-}
+	m_fileAttrs.reserve( std::min( m_fileAttrs.size() + fileAttrs.size(), m_maxFiles ) );
 
-bool CImageFileEnumerator::AddFoundSubDir( const TCHAR* pSubDirPath )
-{
-	pSubDirPath;
-	return true;
+	for ( std::vector< CFileAttr >::const_iterator itFileAttr = fileAttrs.begin(); itFileAttr != fileAttrs.end() && !MustStop(); ++itFileAttr )
+		Push( *itFileAttr );
 }
 
 void CImageFileEnumerator::AddFoundFile( const TCHAR* pFilePath )
@@ -135,6 +132,8 @@ void CImageFileEnumerator::AddFoundFile( const TCHAR* pFilePath )
 		// found a compound image storage: load it's metadata as found images
 		if ( CImageArchiveStg::Factory().VerifyPassword( filePath ) )
 		{
+			AddFoundSubDir( filePath.GetPtr() );		// a storage counts as a sub-directory
+
 			std::vector< CFileAttr > archiveImageAttrs;
 			CImageArchiveStg::Factory().LoadImagesMetadata( archiveImageAttrs, filePath );
 
@@ -155,6 +154,52 @@ void CImageFileEnumerator::AddFile( const CFileFind& foundFile )
 
 	if ( CImageArchiveStg::HasImageArchiveExt( filePath.GetPtr() ) )
 		AddFoundFile( filePath.GetPtr() );
-	else if ( PassFilter( foundFile ) )
+	else
 		Push( CFileAttr( foundFile ) );
+}
+
+bool CImageFileEnumerator::MustStop( void ) const
+{
+	return m_fileAttrs.size() >= m_maxFiles;
+}
+
+
+// CImagesProgressCallback implementation
+
+const std::tstring CImagesProgressCallback::s_searching = _T("Searching for Image Files");
+
+CImagesProgressCallback::CImagesProgressCallback( CWnd* pParent, const std::tstring& operationLabel /*= s_searching*/ )
+	: m_dlg( operationLabel, CProgressDialog::StageLabelCount )
+{
+	if ( m_dlg.Create( _T("Image Files"), pParent ) )
+	{
+		m_dlg.SetStageLabel( _T("Search directory") );
+		m_dlg.SetItemLabel( _T("Found image") );
+		m_dlg.SetMarqueeProgress();
+	}
+}
+
+CImagesProgressCallback::~CImagesProgressCallback()
+{
+	m_dlg.DestroyWindow();
+}
+
+void CImagesProgressCallback::Section_OrderImageFiles( size_t fileCount )
+{
+	m_dlg.SetOperationLabel( _T("Order Images") );
+	m_dlg.ShowStage( false );
+	m_dlg.SetItemLabel( _T("Compare image file attributes") );
+
+	GetCallback()->SetProgressItemCount( fileCount );
+}
+
+void CImagesProgressCallback::AddFoundFile( const TCHAR* pFilePath ) throws_( CUserAbortedException )
+{
+	GetCallback()->AdvanceItem( pFilePath );
+}
+
+bool CImagesProgressCallback::AddFoundSubDir( const TCHAR* pSubDirPath ) throws_( CUserAbortedException )
+{
+	GetCallback()->AdvanceStage( pSubDirPath );
+	return true;
 }

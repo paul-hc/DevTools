@@ -234,10 +234,10 @@ namespace app
 
 namespace app
 {
-	const std::tstring& GetAllSourcesSpecs( void )
+	const std::tstring& GetAllSourcesWildSpecs( void )
 	{
-		static const std::tstring imgSpecs = CSliderFilters::Instance().MakeSpecs( shell::FileOpen );
-		return imgSpecs;
+		static const std::tstring s_wildFilters = CSliderFilters::Instance().MakeSpecs( shell::FileOpen );
+		return s_wildFilters;
 	}
 
 	bool BrowseArchiveStgFile( std::tstring& rFullPath, CWnd* pParentWnd, shell::BrowseMode browseMode /*= shell::FileOpen*/, DWORD flags /*= 0*/ )

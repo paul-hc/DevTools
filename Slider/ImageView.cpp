@@ -211,7 +211,7 @@ void CImageView::OnUpdate( CView* pSender, LPARAM lHint, CObject* pHint )
 		case Hint_ToggleFullScreen:
 			SetViewStatusFlag( FullScreen, CWorkspace::Instance().IsFullScreen() );
 			break;
-		case Hint_FileModelChanged:
+		case Hint_AlbumModelChanged:
 			break;
 		case Hint_ReloadImage:			// this could be send by CApplication::UpdateAllViews()
 			ForceReloadImage();

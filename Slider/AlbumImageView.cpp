@@ -232,7 +232,7 @@ void CAlbumImageView::UpdateChildBarsState( bool onInit /*= false*/ )
 	m_pPeerThumbView->CheckListLayout( onInit ? CAlbumThumbListView::AlbumViewInit : CAlbumThumbListView::ShowCommand );
 }
 
-void CAlbumImageView::OnFileModelChanged( FileModelChangeType reason /*= FM_Init*/ )
+void CAlbumImageView::OnAlbumModelChanged( AlbumModelChange reason /*= FM_Init*/ )
 {
 	CAlbumDoc* pDoc = GetDocument();
 
@@ -251,7 +251,7 @@ void CAlbumImageView::OnFileModelChanged( FileModelChangeType reason /*= FM_Init
 			break;
 	}
 
-	m_pPeerThumbView->SetupFileModel( pDoc->GetModel() );
+	m_pPeerThumbView->SetupAlbumModel( pDoc->GetModel() );
 
 	switch ( reason )
 	{
@@ -357,8 +357,8 @@ void CAlbumImageView::OnUpdate( CView* pSender, LPARAM lHint, CObject* pHint )
 		case Hint_ToggleFullScreen:
 			UpdateChildBarsState();
 			break;
-		case Hint_FileModelChanged:
-			OnFileModelChanged( app::FromHintPtr< FileModelChangeType >( pHint ) );
+		case Hint_AlbumModelChanged:
+			OnAlbumModelChanged( app::FromHintPtr< AlbumModelChange >( pHint ) );
 			break;
 		case Hint_ReloadImage:
 			m_pPeerThumbView->Invalidate();		// also invalidate the peer thumb view
@@ -451,8 +451,8 @@ void CAlbumImageView::OnInitialUpdate( void )
 	m_pAlbumDialogBar->OnNavRangeChanged();
 	m_pAlbumDialogBar->OnSlideDelayChanged();
 
-	if ( NULL == m_pPeerThumbView->GetFileModel() )		// avoid double setup on initialization (it might happen cause of different ways of init, e.g. load or drop)
-		m_pPeerThumbView->SetupFileModel( GetDocument()->GetModel() );
+	if ( NULL == m_pPeerThumbView->GetAlbumModel() )		// avoid double setup on initialization (it might happen cause of different ways of init, e.g. load or drop)
+		m_pPeerThumbView->SetupAlbumModel( GetDocument()->GetModel() );
 
 	OnAutoDropRecipientChanged();
 

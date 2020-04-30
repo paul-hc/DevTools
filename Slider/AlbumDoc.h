@@ -54,12 +54,12 @@ public:
 	bool ExecuteAutoDrop( void );
 
 	// events
-	void OnFileModelChanged( FileModelChangeType reason = FM_Init );
+	void OnAlbumModelChanged( AlbumModelChange reason = FM_Init );
 private:
 	void OnAutoDropRecipientChanged( void );
 
 	bool BuildAlbum( const fs::CPath& searchPath );
-	void RegenerateFileModel( FileModelChangeType reason = FM_Init );
+	void RegenerateModel( AlbumModelChange reason = FM_Init );
 	bool SaveAsArchiveStg( const fs::CPath& newStgPath );
 
 	bool UndoRedoCustomOrder( custom_order::COpStack& rFromStack, custom_order::COpStack& rToStack, bool isUndoOp );
@@ -67,7 +67,7 @@ private:
 
 	bool PromptSaveConvertModelSchema( void ) const;
 private:
-	CAlbumImageView* GetOwnActiveAlbumView( void ) const;
+	CAlbumImageView* GetAlbumImageView( void ) const;
 	CSlideData* GetActiveSlideData( void );
 public:
 	persist CSlideData m_slideData;						// always altered by CAlbumImageView::OnActivateView()
