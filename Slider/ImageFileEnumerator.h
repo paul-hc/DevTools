@@ -5,7 +5,7 @@
 #include "utl/FileSystem.h"
 #include "utl/Range.h"
 #include "utl/UI/UserReport.h"
-#include "ModelSchema.h"
+#include "ImagesModel.h"
 
 
 class CSearchSpec;
@@ -27,7 +27,7 @@ public:
 	// found files
 	bool AnyFound( void ) const { return !m_fileAttrs.empty(); }
 	const std::vector< CFileAttr >& GetFileAttrs( void ) const { return m_fileAttrs; }
-	const std::vector< fs::CPath >& GetArchiveStgPaths( void ) const { return m_archiveStgPaths; }
+
 	void SwapResults( std::vector< CFileAttr >& rFileAttrs, std::vector< fs::CPath >* pArchiveStgPaths = NULL );
 
 	const ui::CIssueStore& GetIssueStore( void ) const { return m_issueStore; }
@@ -46,8 +46,9 @@ private:
 	const CSearchSpec* m_pCurrSpec;
 
 	// found
-	std::vector< CFileAttr > m_fileAttrs;
-	std::vector< fs::CPath > m_archiveStgPaths;
+	CImagesModel m_foundImages;
+		std::vector< CFileAttr > m_fileAttrs;
+		std::vector< fs::CPath > m_archiveStgPaths;
 public:
 	static const Range< size_t > s_allFileSizesRange;
 };

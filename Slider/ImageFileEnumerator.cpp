@@ -83,6 +83,8 @@ void CImageFileEnumerator::SearchImageArchive( const fs::CPath& stgDocPath ) thr
 
 void CImageFileEnumerator::SwapResults( std::vector< CFileAttr >& rFileAttrs, std::vector< fs::CPath >* pArchiveStgPaths /*= NULL*/ )
 {
+	m_foundImages.StoreBaselineSequence();			// keep track of the original found order
+
 	rFileAttrs.swap( m_fileAttrs );
 
 	if ( pArchiveStgPaths != NULL )

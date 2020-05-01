@@ -17,6 +17,7 @@ CFileAttr::CFileAttr( void )
 	, m_lastModifTime( CFileTime() )		// { 0, 0 }
 	, m_fileSize( 0 )
 	, m_imageDim( 0, 0 )
+	, m_baselinePos( utl::npos )
 {
 }
 
@@ -26,6 +27,7 @@ CFileAttr::CFileAttr( const fs::CPath& filePath )
 	, m_lastModifTime( CFileTime() )		// { 0, 0 }
 	, m_fileSize( 0 )
 	, m_imageDim( 0, 0 )
+	, m_baselinePos( utl::npos )
 {
 	if ( !ReadFileStatus() )
 		TRACE( _T("* CFileAttr::ReadFileStatus(): couldn't acces file status for file: %s\n"), GetPath().GetPtr() );
@@ -36,6 +38,7 @@ CFileAttr::CFileAttr( const CFileFind& foundFile )
 	, m_type( CFileAttr::LookupFileType( GetPath().GetNameExt() ) )
 	, m_fileSize( static_cast< UINT >( foundFile.GetLength() ) )
 	, m_imageDim( 0, 0 )
+	, m_baselinePos( utl::npos )
 {
 	foundFile.GetLastWriteTime( &m_lastModifTime );
 }

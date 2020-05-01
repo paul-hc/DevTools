@@ -758,6 +758,14 @@
 					>
 				</File>
 				<File
+					RelativePath=".\ImagesModel.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\ImagesModel.h"
+					>
+				</File>
+				<File
 					RelativePath=".\ImageState.cpp"
 					>
 				</File>

@@ -42,6 +42,9 @@ public:
 	UINT GetFileSize( void ) const { return m_fileSize; }
 	const CSize& GetImageDim( void ) const;
 
+	size_t GetBaselinePos( void ) const { ASSERT( m_baselinePos != utl::npos ); return m_baselinePos; }
+	void StoreBaselinePos( size_t baselinePos ) { ASSERT( utl::npos == m_baselinePos ); m_baselinePos = baselinePos; }
+
 	std::tstring FormatFileSize( DWORD divideBy = KiloByte, const TCHAR* pFormat = _T("%s KB") ) const;
 	std::tstring FormatLastModifTime( LPCTSTR format = _T("%d-%m-%Y %H:%M:%S") ) const { return CTime( m_lastModifTime ).Format( format ).GetString(); }
 
@@ -53,8 +56,10 @@ private:
 	persist FileType m_type;
 	persist FILETIME m_lastModifTime;
 	persist UINT m_fileSize;
-
 	persist mutable CSize m_imageDim;			// used for image dimensions comparison
+
+	// transient
+	size_t m_baselinePos;						// for baseline sequence: original found position on searching
 };
 
 
@@ -64,6 +69,21 @@ namespace fs
 	{
 		inline const fs::CPath& GetPath( const CFileAttr& fileAttr ) { return fileAttr.GetPath(); }
 		inline void SetPath( CFileAttr& rFileAttr, const fs::CPath& filePath ) { rFileAttr.SetPath( filePath ); }
+	}
+}
+
+
+namespace fattr
+{
+	template< typename IndexT >
+	void QueryDisplaySequence( std::vector< IndexT >* pDisplaySequence, const std::vector< CFileAttr* >& fileAttributes )
+	{	// pDisplaySequence contains baseline positions in current order
+		ASSERT_PTR( pDisplaySequence );
+
+		pDisplaySequence->resize( fileAttributes.size() );
+
+		for ( size_t pos = 0; pos != fileAttributes.size(); ++pos )
+			pDisplaySequence->at( pos ) = fileAttributes[ pos ]->GetBaselinePos();
 	}
 }
 
