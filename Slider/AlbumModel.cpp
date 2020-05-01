@@ -17,6 +17,7 @@
 #include "utl/Timer.h"
 #include "utl/UI/Utilities.h"
 #include "utl/UI/WicImage.h"
+#include <hash_map>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -37,7 +38,7 @@ namespace hlp
 		void RestoreInitialOrder( std::vector< CFileAttr >* pFileAttributes, std::vector< int >* pCustomOrder );
 	private:
 		// initial order
-		std::map< fs::CFlexPath, int > m_pathToDispIndexMap;
+		stdext::hash_map< fs::CFlexPath, int > m_pathToDispIndexMap;
 		std::vector< fs::CFlexPath > m_orderedFilePaths;
 	};
 }
@@ -177,7 +178,7 @@ size_t CAlbumModel::FindPosFileAttr( const CFileAttr* pFileAttr ) const
 	return utl::npos;
 }
 
-int CAlbumModel::DisplayToTrueFileIndex( size_t displayIndex ) const
+size_t CAlbumModel::DisplayToTrueFileIndex( size_t displayIndex ) const
 {
 	// translate the display index if we have custom order
 	if ( CustomOrder == m_fileOrder )
@@ -188,7 +189,7 @@ int CAlbumModel::DisplayToTrueFileIndex( size_t displayIndex ) const
 	else
 		ASSERT( m_customOrder.empty() );
 
-	return (int)displayIndex;
+	return displayIndex;
 }
 
 void CAlbumModel::QueryFileAttrs( std::vector< CFileAttr* >& rFileAttrs ) const
@@ -196,12 +197,13 @@ void CAlbumModel::QueryFileAttrs( std::vector< CFileAttr* >& rFileAttrs ) const
 	rFileAttrs.clear();
 	rFileAttrs.reserve( m_fileAttributes.size() );
 	for ( size_t i = 0; i != m_fileAttributes.size(); ++i )
-		rFileAttrs.push_back( const_cast< CFileAttr* >( &GetFileAttr( i ) ) );
+		rFileAttrs.push_back( const_cast< CFileAttr* >( GetFileAttr( i ) ) );
 }
 
 // returns the display index of the found file
-int CAlbumModel::FindFileAttr( const fs::CFlexPath& filePath, bool wantDisplayIndex /*= true*/ ) const
+int CAlbumModel::FindFileAttr( const fs::CFlexPath& filePath ) const
 {
+	bool wantDisplayIndex = true;
 	if ( !IsCustomOrder() )
 		wantDisplayIndex = false;
 
@@ -384,7 +386,7 @@ void CAlbumModel::FetchFilePathsFromIndexes( std::vector< fs::CPath >& rFilePath
 {
 	rFilePaths.resize( displayIndexes.size() );
 	for ( size_t i = 0; i != displayIndexes.size(); ++i )
-		rFilePaths[ i ] = GetFileAttr( displayIndexes[ i ] ).GetPath();
+		rFilePaths[ i ] = GetFileAttr( displayIndexes[ i ] )->GetPath();
 }
 
 void CAlbumModel::ClearArchiveStgPaths( void )

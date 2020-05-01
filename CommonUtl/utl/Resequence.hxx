@@ -26,11 +26,11 @@ namespace seq
 		return CanMoveIndex( itemCount, index, static_cast< MoveTo >( direction ) );
 	}
 
-	template< typename IndexType >
-	bool CanMoveSelection( size_t itemCount, const std::vector< IndexType >& selIndexes, MoveTo moveTo )
+	template< typename IndexT >
+	bool CanMoveSelection( size_t itemCount, const std::vector< IndexT >& selIndexes, MoveTo moveTo )
 	{
 		// assume that selIndexes are pre-sorted
-		for ( typename std::vector< IndexType >::const_iterator itSelIndex = selIndexes.begin(); itSelIndex != selIndexes.end(); ++itSelIndex )
+		for ( typename std::vector< IndexT >::const_iterator itSelIndex = selIndexes.begin(); itSelIndex != selIndexes.end(); ++itSelIndex )
 			if ( !CanMoveIndex( itemCount, *itSelIndex, moveTo ) )
 				return false;
 
@@ -38,67 +38,34 @@ namespace seq
 	}
 
 
-	// see CArraySequence below for an example of sequence adapter; could be more sophisticated, such as a list ctrl adapter, etc.
-	//
-	template< typename Sequence, typename IndexType >
-	void MoveBy( Sequence& rSequence, const std::vector< IndexType >& selIndexes, Direction moveBy )
-	{
-		// assume that selIndexes are pre-sorted
-		ASSERT( !selIndexes.empty() );
-		ASSERT( selIndexes.size() < rSequence.GetSize() );
+	// container-based API (vector, deque, string, etc):
 
-		switch ( moveBy )
-		{
-			case Prev:
-				for ( typename std::vector< IndexType >::const_iterator itSelIndex = selIndexes.begin(); itSelIndex != selIndexes.end(); ++itSelIndex )
-					rSequence.Swap( *itSelIndex, *itSelIndex + moveBy );
-				break;
-			case Next:
-				// go backwards when moving down
-				for ( typename std::vector< IndexType >::const_reverse_iterator itSelIndex = selIndexes.rbegin(); itSelIndex != selIndexes.rend(); ++itSelIndex )
-					rSequence.Swap( *itSelIndex, *itSelIndex + moveBy );
-				break;
-		}
+	template< typename ContainerT, typename IndexT >
+	inline void MoveBy( ContainerT* pItems, const std::vector< IndexT >& selIndexes, Direction moveBy )
+	{
+		CSequenceAdapter< typename ContainerT::value_type > sequence( pItems );
+		MoveBy( sequence, selIndexes, moveBy );
 	}
 
-	template< typename Sequence, typename IndexType >
-	inline void MoveSingleBy( Sequence& rSequence, IndexType selIndex, Direction moveBy )
+	template< typename ContainerT, typename IndexT >
+	inline void MoveBy( ContainerT* pItems, IndexT selIndex, Direction moveBy )
 	{
-		MoveBy( rSequence, std::vector< IndexType >( 1, selIndex ), moveBy );
+		CSequenceAdapter< typename ContainerT::value_type > sequence( pItems );
+		MoveBy( sequence, selIndex, moveBy );
 	}
 
 
-	template< typename Sequence, typename IndexType >
-	void Resequence( Sequence& rSequence, const std::vector< IndexType >& selIndexes, MoveTo moveTo )
+	template< typename ContainerT, typename IndexT >
+	inline void Resequence( ContainerT* pItems, const std::vector< IndexT >& selIndexes, MoveTo moveTo )
 	{
-		// assume that selIndexes are pre-sorted
-		ASSERT( !selIndexes.empty() );
-		ASSERT( selIndexes.size() < rSequence.GetSize() );
-
-		IndexType lastIndex = static_cast< IndexType >( rSequence.GetSize() - 1 );
-		switch ( moveTo )
-		{
-			case MovePrev:
-			case MoveNext:
-				MoveBy( rSequence, selIndexes, static_cast< Direction >( moveTo ) );
-				break;
-			case MoveToStart:
-				// shift selected one step back at a time, working on a copy of selected indexes which gets decremented each time
-				for ( std::vector< IndexType > indexes = selIndexes; indexes.front() != 0; std::for_each( indexes.begin(), indexes.end(), ModifyBy< Prev >() ) )
-					MoveBy( rSequence, indexes, Prev );
-				break;
-			case MoveToEnd:
-				// shift selected one step forth at a time, working on a copy of selected indexes which gets incremented each time
-				for ( std::vector< IndexType > indexes = selIndexes; indexes.back() < lastIndex; std::for_each( indexes.begin(), indexes.end(), ModifyBy< Next >() ) )
-					MoveBy( rSequence, indexes, Next );
-				break;
-		}
+		CSequenceAdapter< typename ContainerT::value_type > sequence( pItems );
+		Resequence( sequence, selIndexes, moveTo );
 	}
 
 
-	template< typename Type, typename IndexType >
+	template< typename Type, typename IndexT >
 	void MakeDropSequence( std::vector< Type >& rNewSequence, const std::vector< Type >& baselineSeq,
-						   IndexType dropIndex, const std::vector< IndexType >& selIndexes )
+						   IndexT dropIndex, const std::vector< IndexT >& selIndexes )
 	{
 		// assume that selIndexes are pre-sorted
 		ASSERT( !selIndexes.empty() );
@@ -110,10 +77,11 @@ namespace seq
 		revTemp.reserve( selIndexes.size() );
 
 		// go backwards
-		for ( typename std::vector< IndexType >::const_reverse_iterator itIndex = selIndexes.rbegin(); itIndex != selIndexes.rend(); ++itIndex )
+		for ( typename std::vector< IndexT >::const_reverse_iterator itIndex = selIndexes.rbegin(); itIndex != selIndexes.rend(); ++itIndex )
 		{
 			revTemp.push_back( rNewSequence[ *itIndex ] );
 			rNewSequence.erase( rNewSequence.begin() + *itIndex );
+
 			if ( *itIndex < dropIndex )
 				--dropIndex;
 		}
@@ -122,8 +90,8 @@ namespace seq
 	}
 
 
-	template< typename IndexType >
-	bool ChangesDropSequenceAt( size_t itemCount, IndexType dropIndex, const std::vector< IndexType >& selIndexes )
+	template< typename IndexT >
+	bool ChangesDropSequenceAt( size_t itemCount, IndexT dropIndex, const std::vector< IndexT >& selIndexes )
 	{
 		// assume that selIndexes are pre-sorted
 		if ( selIndexes.empty() ||
@@ -132,12 +100,72 @@ namespace seq
 			return false;				// invalid selection or drop index
 
 		// generate fake sequence with consecutive indexes - we just need to detect if the sequence changes for drop move
-		std::vector< IndexType > baselineSeq( itemCount );				// contains indexes in the range [0, size-1]
-		std::generate( baselineSeq.begin(), baselineSeq.end(), GenNumSeq< IndexType >( 0 ) );
+		std::vector< IndexT > baselineSeq( itemCount );				// contains indexes in the range [0, size-1]
+		std::generate( baselineSeq.begin(), baselineSeq.end(), GenNumSeq< IndexT >( 0 ) );
 
-		std::vector< IndexType > newSequence;
+		std::vector< IndexT > newSequence;
 		MakeDropSequence( newSequence, baselineSeq, dropIndex, selIndexes );
 		return newSequence != baselineSeq;
+	}
+
+
+	// CSequenceAdapter-based API:
+
+	// see CSequenceAdapter below for an example of sequence adapter; could be more sophisticated, such as a list ctrl adapter, etc.
+	//
+	template< typename SequenceT, typename IndexT >
+	void MoveBy( SequenceT& rSequence, const std::vector< IndexT >& selIndexes, Direction moveBy )
+	{
+		// assume that selIndexes are pre-sorted
+		ASSERT( !selIndexes.empty() );
+		ASSERT( selIndexes.size() < rSequence.GetSize() );
+
+		switch ( moveBy )
+		{
+			case Prev:
+				for ( typename std::vector< IndexT >::const_iterator itSelIndex = selIndexes.begin(); itSelIndex != selIndexes.end(); ++itSelIndex )
+					rSequence.Swap( *itSelIndex, *itSelIndex + moveBy );
+				break;
+			case Next:
+				// go backwards when moving down
+				for ( typename std::vector< IndexT >::const_reverse_iterator itSelIndex = selIndexes.rbegin(); itSelIndex != selIndexes.rend(); ++itSelIndex )
+					rSequence.Swap( *itSelIndex, *itSelIndex + moveBy );
+				break;
+		}
+	}
+
+	template< typename SequenceT, typename IndexT >
+	inline void MoveBy( SequenceT& rSequence, IndexT selIndex, Direction moveBy )
+	{
+		MoveBy( rSequence, std::vector< IndexT >( 1, selIndex ), moveBy );
+	}
+
+
+	template< typename SequenceT, typename IndexT >
+	void Resequence( SequenceT& rSequence, const std::vector< IndexT >& selIndexes, MoveTo moveTo )
+	{
+		// assume that selIndexes are pre-sorted
+		ASSERT( !selIndexes.empty() );
+		ASSERT( selIndexes.size() < rSequence.GetSize() );
+
+		IndexT lastIndex = static_cast< IndexT >( rSequence.GetSize() - 1 );
+		switch ( moveTo )
+		{
+			case MovePrev:
+			case MoveNext:
+				MoveBy( rSequence, selIndexes, static_cast< Direction >( moveTo ) );
+				break;
+			case MoveToStart:
+				// shift selected one step back at a time, working on a copy of selected indexes which gets decremented each time
+				for ( std::vector< IndexT > indexes = selIndexes; indexes.front() != 0; std::for_each( indexes.begin(), indexes.end(), ModifyBy< Prev >() ) )
+					MoveBy( rSequence, indexes, Prev );
+				break;
+			case MoveToEnd:
+				// shift selected one step forth at a time, working on a copy of selected indexes which gets incremented each time
+				for ( std::vector< IndexT > indexes = selIndexes; indexes.back() < lastIndex; std::for_each( indexes.begin(), indexes.end(), ModifyBy< Next >() ) )
+					MoveBy( rSequence, indexes, Next );
+				break;
+		}
 	}
 
 
@@ -146,8 +174,8 @@ namespace seq
 	template< Direction direction >
 	struct ModifyBy
 	{
-		template< typename IndexType >
-		void operator()( IndexType& rIndex ) { rIndex += static_cast< IndexType >( direction ); }
+		template< typename IndexT >
+		void operator()( IndexT& rIndex ) { rIndex += static_cast< IndexT >( direction ); }
 	};
 
 
@@ -165,15 +193,15 @@ namespace seq
 	// adapter for swapping items in a array-like sequence (array, vector, deque, string, etc)
 	//
 	template< typename Type >
-	class CArraySequence
+	class CSequenceAdapter
 	{
 	public:
 		typedef Type Type;
 
 		template< typename Container >
-		CArraySequence( Container* pSequence ) : m_pSequence( &pSequence->front() ), m_count( pSequence->size() ) { ASSERT_PTR( m_pSequence ); }
+		CSequenceAdapter( Container* pSequence ) : m_pSequence( &pSequence->front() ), m_count( pSequence->size() ) { ASSERT_PTR( m_pSequence ); }
 
-		CArraySequence( Type sequence[], size_t count ) : m_pSequence( sequence ), m_count( count ) { ASSERT_PTR( m_pSequence ); }
+		CSequenceAdapter( Type sequence[], size_t count ) : m_pSequence( sequence ), m_count( count ) { ASSERT_PTR( m_pSequence ); }
 
 		void Swap( size_t leftIndex, size_t rightIndex )
 		{
@@ -186,7 +214,6 @@ namespace seq
 		Type* m_pSequence;
 		size_t m_count;
 	};
-
 }
 
 

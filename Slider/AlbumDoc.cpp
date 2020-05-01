@@ -178,7 +178,7 @@ CImageState* CAlbumDoc::GetImageState( void ) const
 const fs::ImagePathKey& CAlbumDoc::GetImageFilePathAt( int index ) const
 {
 	if ( IsValidIndex( index ) )
-		return m_model.GetFileAttr( index ).GetPathKey();
+		return m_model.GetFileAttr( index )->GetPathKey();
 
 	return CWicImage::s_nullKey;
 }
@@ -186,9 +186,9 @@ const fs::ImagePathKey& CAlbumDoc::GetImageFilePathAt( int index ) const
 void CAlbumDoc::QueryNeighbouringPathKeys( std::vector< fs::ImagePathKey >& rNeighbours, size_t index ) const
 {
 	if ( index > 0 )
-		rNeighbours.push_back( m_model.GetFileAttr( index - 1 ).GetPathKey() );
+		rNeighbours.push_back( m_model.GetFileAttr( index - 1 )->GetPathKey() );
 	if ( index < GetImageCount() - 1 )
-		rNeighbours.push_back( m_model.GetFileAttr( index + 1 ).GetPathKey() );
+		rNeighbours.push_back( m_model.GetFileAttr( index + 1 )->GetPathKey() );
 }
 
 CAlbumImageView* CAlbumDoc::GetAlbumImageView( void ) const
@@ -498,7 +498,7 @@ bool CAlbumDoc::HandleDropRecipientFiles( HDROP hDropInfo, CAlbumImageView* pTar
 	fs::CFlexPath insertBefore;
 
 	if ( insertBeforeIndex != -1 )
-		insertBefore = m_model.GetFileAttr( insertBeforeIndex ).GetPath();
+		insertBefore = m_model.GetFileAttr( insertBeforeIndex )->GetPath();
 
 	if ( m_autoDropContext.SetupDroppedFiles( hDropInfo, insertBefore ) > 0 )
 		if ( auto_drop::CContext::PromptUser == m_autoDropContext.GetDropOperation() )

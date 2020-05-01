@@ -314,8 +314,7 @@ bool CAlbumSettingsDialog::MoveSearchSpec( seq::Direction moveBy )
 	CSearchModel* pSearchModel = m_model.RefSearchModel();
 	const CSearchSpec* pSearchSpec = pSearchModel->GetSpecAt( selIndex );
 
-	seq::CArraySequence< CSearchSpec* > sequence( &pSearchModel->RefSpecs() );
-	seq::MoveSingleBy( sequence, selIndex, moveBy );
+	seq::MoveBy( &pSearchModel->RefSpecs(), selIndex, moveBy );
 	ENSURE( pSearchSpec == pSearchModel->GetSpecAt( newIndex ) );			// same spec at new index
 
 	if ( newIndex < m_searchSpecListBox.GetCount() )
@@ -463,7 +462,7 @@ void CAlbumSettingsDialog::SetupFoundListView( void )
 
 		for ( UINT i = 0; i != count; ++i )
 		{
-			const CFileAttr* pFileAttr = &m_model.GetFileAttr( i );
+			const CFileAttr* pFileAttr = m_model.GetFileAttr( i );
 
 			m_foundFilesListCtrl.InsertObjectItem( i, const_cast< CFileAttr* >( pFileAttr ), ui::Transparent_Image );
 			m_foundFilesListCtrl.SetSubItemText( i, Folder, pFileAttr->GetPath().GetOriginParentPath().Get() );
@@ -581,7 +580,7 @@ void CAlbumSettingsDialog::DoDataExchange( CDataExchange* pDX )
 			int selIndex = m_foundFilesListCtrl.GetCurSel();
 
 			if ( selIndex != -1 )
-				m_thumbPreviewCtrl.SetImagePath( m_model.GetFileAttr( selIndex ).GetPath() );
+				m_thumbPreviewCtrl.SetImagePath( m_model.GetFileAttr( selIndex )->GetPath() );
 			else
 				m_thumbPreviewCtrl.SetImagePath( fs::CFlexPath() );
 
@@ -986,7 +985,7 @@ void CAlbumSettingsDialog::OnLVnItemChanged_FoundFiles( NMHDR* pNmHdr, LRESULT* 
 		if ( pNmListView->uChanged & LVIF_STATE )
 			if ( ( pNmListView->uNewState & ( LVIS_FOCUSED | LVIS_SELECTED ) ) != ( pNmListView->uOldState & ( LVIS_FOCUSED | LVIS_SELECTED ) ) )
 				if ( pNmListView->uNewState & LVIS_FOCUSED )
-					m_thumbPreviewCtrl.SetImagePath( m_model.GetFileAttr( pNmListView->iItem ).GetPath() );
+					m_thumbPreviewCtrl.SetImagePath( m_model.GetFileAttr( pNmListView->iItem )->GetPath() );
 
 	*pResult = 0;
 }

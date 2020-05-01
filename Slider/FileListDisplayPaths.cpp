@@ -12,8 +12,9 @@ CFileListDisplayPaths::CFileListDisplayPaths( const CAlbumModel& model, bool fil
 	: m_filesMustExist( filesMustExist )
 {
 	m_paths.resize( model.GetFileAttrCount() );
+
 	for ( size_t dispPos = 0; dispPos != m_paths.size(); ++dispPos )
-		m_paths[ dispPos ] = &model.GetFileAttr( dispPos ).GetPath();		// translate display pos
+		m_paths[ dispPos ] = &model.GetFileAttr( dispPos )->GetPath();		// translate display pos
 }
 
 int CFileListDisplayPaths::GetPos( size_t pos ) const

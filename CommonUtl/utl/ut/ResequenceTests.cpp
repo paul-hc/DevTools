@@ -14,7 +14,7 @@ namespace ut
 	std::tstring MoveBy( const TCHAR srcText[], const std::vector< int >& selIndexes, seq::Direction direction )
 	{
 		std::tstring chars = srcText;
-		seq::CArraySequence< TCHAR > sequence( &chars[ 0 ], chars.size() );
+		seq::CSequenceAdapter< TCHAR > sequence( &chars[ 0 ], chars.size() );
 
 		seq::MoveBy( sequence, selIndexes, direction );
 		return chars;
@@ -23,7 +23,7 @@ namespace ut
 	std::tstring Resequence( const TCHAR srcText[], const std::vector< int >& selIndexes, seq::MoveTo moveTo )
 	{
 		std::tstring chars = srcText;
-		seq::CArraySequence< TCHAR > sequence( &chars[ 0 ], chars.size() );
+		seq::CSequenceAdapter< TCHAR > sequence( &chars[ 0 ], chars.size() );
 
 		seq::Resequence( sequence, selIndexes, moveTo );
 		return chars;

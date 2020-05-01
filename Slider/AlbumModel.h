@@ -67,10 +67,10 @@ public:
 
 	bool AnyFoundFiles( void ) const { return !m_fileAttributes.empty(); }
 	size_t GetFileAttrCount( void ) const { return m_fileAttributes.size(); }
-	const CFileAttr& GetFileAttr( size_t displayIndex ) const { return const_cast< CFileAttr& >( m_fileAttributes[ DisplayToTrueFileIndex( displayIndex ) ] ); }
+	const CFileAttr* GetFileAttr( size_t displayIndex ) const { return &m_fileAttributes[ DisplayToTrueFileIndex( displayIndex ) ]; }
 	void QueryFileAttrs( std::vector< CFileAttr* >& rFileAttrs ) const;
 
-	int FindFileAttr( const fs::CFlexPath& filePath, bool wantDisplayIndex = true ) const;
+	int FindFileAttr( const fs::CFlexPath& filePath ) const;
 	void FetchFilePathsFromIndexes( std::vector< fs::CPath >& rFilePaths, const std::vector< int >& displayIndexes ) const;
 
 	enum PersistOp { Loading, Saving };
@@ -85,7 +85,7 @@ private:
 	// display index is:
 	//	- non-custom order: same with true index, that is index into m_fileAttributes vector
 	//	- custom order: index into m_customOrder vector that points to the true index (in m_fileAttributes vector)
-	int DisplayToTrueFileIndex( size_t displayIndex ) const;
+	size_t DisplayToTrueFileIndex( size_t displayIndex ) const;
 public:
 	enum Order
 	{
@@ -125,7 +125,7 @@ private:
 	persist TPersistFlags m_persistFlags;					// additional persistent flags
 
 	// found files
-	persist std::vector< CFileAttr > m_fileAttributes;		// found file attributes
+	persist std::vector< CFileAttr > m_fileAttributes;		// found file attributes (original order)
 	persist std::vector< fs::CPath > m_archiveStgPaths;		// compound files found during the search (for automatic release of storages)
 	persist std::vector< int > m_customOrder;				// display indexes that points to a true index in m_fileAttributes
 };

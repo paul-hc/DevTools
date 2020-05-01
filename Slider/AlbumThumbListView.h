@@ -68,7 +68,7 @@ private:
 
 	int GetImageIndexFromPoint( CPoint& clientPos ) const;
 	bool IsValidImageIndex( size_t displayIndex ) const { return m_pAlbumModel != NULL && displayIndex < m_pAlbumModel->GetFileAttrCount(); }
-	bool IsValidFileAt( int displayIndex ) const;
+	bool IsValidFileAt( size_t displayIndex ) const;
 
 	bool NotifySelChange( void );
 
@@ -156,16 +156,6 @@ protected:
 
 	DECLARE_MESSAGE_MAP()
 };
-
-
-// CAlbumThumbListView inline code
-
-inline bool CAlbumThumbListView::IsValidFileAt( int displayIndex ) const
-{
-	if ( !IsValidImageIndex( displayIndex ) )
-		return false;
-	return m_pAlbumModel->GetFileAttr( displayIndex ).GetPath().FileExist();
-}
 
 
 #endif // AlbumThumbListView_h

@@ -81,7 +81,7 @@ bool CArchiveImagesDialog::FetchFileContext( void )
 		size_t count = m_lvState.m_pIndexImpl->m_selItems.size();
 		srcFiles.reserve( count );
 		for ( size_t i = 0; i != count; ++i )
-			srcFiles.push_back( const_cast< CFileAttr* >( &m_pModel->GetFileAttr( m_lvState.m_pIndexImpl->m_selItems[ i ] ) ) );
+			srcFiles.push_back( const_cast< CFileAttr* >( m_pModel->GetFileAttr( m_lvState.m_pIndexImpl->m_selItems[ i ] ) ) );
 	}
 	else
 		m_pModel->QueryFileAttrs( srcFiles );
@@ -98,7 +98,7 @@ bool CArchiveImagesDialog::SetDefaultDestPath( void )
 		return false;
 	}
 
-	std::tstring firstDirPath = m_pModel->GetFileAttr( 0 ).GetPath().GetParentPath().Get();
+	std::tstring firstDirPath = m_pModel->GetFileAttr( 0 )->GetPath().GetParentPath().Get();
 	switch ( m_destType )
 	{
 		default: ASSERT( false );
@@ -132,7 +132,7 @@ void CArchiveImagesDialog::SetupFilesView( bool firstTimeInit /*= false*/ )
 		if ( firstTimeInit )
 			for ( UINT i = 0; i != m_pModel->GetFileAttrCount(); ++i )
 			{
-				const fs::CFlexPath& srcPath = m_pModel->GetFileAttr( i ).GetPath();
+				const fs::CFlexPath& srcPath = m_pModel->GetFileAttr( i )->GetPath();
 
 				m_filesListCtrl.InsertItem( LVIF_TEXT, i, (LPTSTR)srcPath.GetOriginParentPath().GetPtr(), 0, 0, 0, 0 );
 				m_filesListCtrl.SetSubItemText( i, SrcFilename, srcPath.GetNameExt() );
