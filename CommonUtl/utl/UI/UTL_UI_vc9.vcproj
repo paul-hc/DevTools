@@ -627,6 +627,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\IProgressCallback.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\IProgressCallback.h"
 				>
 			</File>

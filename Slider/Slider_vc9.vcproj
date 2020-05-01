@@ -825,6 +825,14 @@
 					RelativePath=".\ImageFileEnumerator.h"
 					>
 				</File>
+				<File
+					RelativePath=".\ImagesProgressCallback.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\ImagesProgressCallback.h"
+					>
+				</File>
 			</Filter>
 		</Filter>
 		<Filter

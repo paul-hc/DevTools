@@ -4,6 +4,7 @@
 
 #include "utl/FlexPath.h"
 #include "utl/StructuredStorage.h"
+#include "utl/UI/IProgressCallback.h"
 #include "utl/UI/Thumbnailer_fwd.h"
 #include "ModelSchema.h"
 #include "FileAttr.h"
@@ -27,7 +28,8 @@ public:
 	void Close( void );
 	static void DiscardCachedImages( const fs::CPath& stgFilePath );		// to avoid sharing violations on stream access
 
-	void CreateImageArchive( const TCHAR* pStgFilePath, const std::tstring& password, const std::vector< std::pair< fs::CFlexPath, fs::CFlexPath > >& filePairs ) throws_( CException* );
+	void CreateImageArchive( const TCHAR* pStgFilePath, const std::tstring& password, const std::vector< std::pair< fs::CFlexPath, fs::CFlexPath > >& filePairs,
+							 ui::IProgressCallback* pProgressCallback ) throws_( CException* );
 
 	bool SavePassword( const std::tstring& password );
 	std::tstring LoadPassword( void );
@@ -57,9 +59,10 @@ protected:
 	static void DecodeDeepStreamPath( Iterator itStart, Iterator itEnd ) { std::replace( itStart, itEnd, s_subPathSep, _T('\\') ); }			// '*' -> '\'
 private:
 	void CreateImageFiles( std::vector< CFileAttr >& rFileAttributes,
-						   const std::vector< std::pair< fs::CFlexPath, fs::CFlexPath > >& filePairs ) throws_( CException* );
+						   const std::vector< std::pair< fs::CFlexPath, fs::CFlexPath > >& filePairs,
+						   ui::IProgressCallback* pProgressCallback ) throws_( CException* );
 	void CreateMetadataFile( const std::vector< CFileAttr >& fileAttributes );
-	void CreateThumbnailsStorage( const std::vector< std::pair< fs::CFlexPath, fs::CFlexPath > >& filePairs );
+	void CreateThumbnailsStorage( const std::vector< std::pair< fs::CFlexPath, fs::CFlexPath > >& filePairs, ui::IProgressCallback* pProgressCallback );
 private:
 	CComPtr< IStorage > m_pThumbsStorage;
 	const GUID* m_pThumbsDecoderId;

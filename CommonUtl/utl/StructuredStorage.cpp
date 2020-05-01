@@ -3,6 +3,7 @@
 #include "StructuredStorage.h"
 #include "FlexPath.h"
 #include "StringUtilities.h"
+#include "utl/AppTools.h"
 #include <shlwapi.h>
 
 #ifdef _DEBUG
@@ -238,15 +239,16 @@ namespace fs
 		if ( IsThrowMode() )
 			throw &s_fileError;
 		else
+		{
+			app::TraceException( &s_fileError );
 			return NULL;
+		}
 	}
 
 	bool CStructuredStorage::HandleError( HRESULT hResult, const TCHAR* pStgFilePath /*= NULL*/ ) const
 	{
 		if ( SUCCEEDED( hResult ) )
 			return true;				// all good
-		else if ( !IsThrowMode() )
-			return false;
 
 		// error codes 255 or less are DOS/Win32 error codes
 		if ( SEVERITY_ERROR == HRESULT_SEVERITY( hResult ) &&
@@ -278,6 +280,12 @@ namespace fs
 		}
 
 		s_fileError.m_lOsError = (LONG)hResult;
+
+		if ( !IsThrowMode() )
+		{
+			app::TraceException( &s_fileError );
+			return false;
+		}
 
 		AfxThrowFileException( s_fileError.m_cause, s_fileError.m_lOsError, !str::IsEmpty( pStgFilePath ) ? pStgFilePath : GetDocFilePath().GetPtr() );
 	}

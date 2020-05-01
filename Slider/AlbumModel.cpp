@@ -4,6 +4,7 @@
 #include "SearchSpec.h"
 #include "ImageArchiveStg.h"
 #include "ImageFileEnumerator.h"
+#include "ImagesProgressCallback.h"
 #include "Workspace.h"
 #include "Application.h"
 #include "resource.h"

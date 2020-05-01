@@ -92,8 +92,11 @@ CStringW CImageArchiveStg::EncodeStreamName( const TCHAR* pStreamName ) const
 	return streamName;
 }
 
-void CImageArchiveStg::CreateImageArchive( const TCHAR* pStgFilePath, const std::tstring& password, const std::vector< std::pair< fs::CFlexPath, fs::CFlexPath > >& filePairs ) throws_( CException* )
+void CImageArchiveStg::CreateImageArchive( const TCHAR* pStgFilePath, const std::tstring& password, const std::vector< std::pair< fs::CFlexPath, fs::CFlexPath > >& filePairs,
+										   ui::IProgressCallback* pProgressCallback ) throws_( CException* )
 {
+	ASSERT_PTR( pProgressCallback );
+
 	CPushThrowMode pushThrow( this, true );
 
 	Create( pStgFilePath );
@@ -103,22 +106,25 @@ void CImageArchiveStg::CreateImageArchive( const TCHAR* pStgFilePath, const std:
 	std::vector< CFileAttr > fileAttributes;			// image storage metadata
 
 	SavePassword( password );
-	CreateImageFiles( fileAttributes, filePairs );
+	CreateImageFiles( fileAttributes, filePairs, pProgressCallback );
 	CreateMetadataFile( fileAttributes );
-	CreateThumbnailsStorage( filePairs );
+	CreateThumbnailsStorage( filePairs, pProgressCallback );
 }
 
-void CImageArchiveStg::CreateImageFiles( std::vector< CFileAttr >& rFileAttributes, const std::vector< std::pair< fs::CFlexPath, fs::CFlexPath > >& filePairs ) throws_( CException* )
+void CImageArchiveStg::CreateImageFiles( std::vector< CFileAttr >& rFileAttributes, const std::vector< std::pair< fs::CFlexPath, fs::CFlexPath > >& filePairs,
+										 ui::IProgressCallback* pProgressCallback ) throws_( CException* )
 {
 	// Prevent sharing violations on SRC stream open.
-	//	2020-04-11: Still doesn't work, I get exception on open. I suspect the source stream (image file) must be kept open with CFile::shareExclusive by some indirect COM interface.
+	//	2020-04-11: Still doesn't work, I get exception on open. I suspect the source stream (image file) must be kept open with CFile::shareExclusive by some WIC indirect COM interface.
 	if ( !filePairs.empty() )
 		DiscardCachedImages( filePairs.front().first.GetPhysicalPath() );
 
 	rFileAttributes.reserve( filePairs.size() );
 
 	CPushThrowMode pushThrow( &Factory(), true );
-	app::CScopedProgress progress( 0, (int)filePairs.size(), 1, _T("Save image files:") );
+
+	pProgressCallback->AdvanceStage( _T("Saving embedded image files") );
+	pProgressCallback->SetProgressRange( 0, static_cast<int>( filePairs.size() ), true );
 
 	for ( std::vector< std::pair< fs::CFlexPath, fs::CFlexPath > >::const_iterator it = filePairs.begin(); it != filePairs.end(); )
 	{
@@ -142,7 +148,7 @@ void CImageArchiveStg::CreateImageFiles( std::vector< CFileAttr >& rFileAttribut
 
 				rFileAttributes.push_back( fileAttr );
 
-				progress.StepIt();
+				pProgressCallback->AdvanceItem( it->second.Get() );
 			}
 			catch ( CException* pExc )
 			{
@@ -178,12 +184,13 @@ void CImageArchiveStg::CreateMetadataFile( const std::vector< CFileAttr >& fileA
 	pMetaDataFile->Close();
 }
 
-void CImageArchiveStg::CreateThumbnailsStorage( const std::vector< std::pair< fs::CFlexPath, fs::CFlexPath > >& filePairs )
+void CImageArchiveStg::CreateThumbnailsStorage( const std::vector< std::pair< fs::CFlexPath, fs::CFlexPath > >& filePairs, ui::IProgressCallback* pProgressCallback )
 {
 	CComPtr< IStorage > pThumbsStorage = CreateDir( CImageArchiveStg::s_thumbsSubStorageNames[ Thumbs_jpeg ] );
 	ASSERT_PTR( pThumbsStorage );
 
-	app::CScopedProgress progress( 0, (int)filePairs.size(), 1, _T("Save thumbnails:") );
+	pProgressCallback->AdvanceStage( _T("Saving thumbnails") );
+	pProgressCallback->SetProgressRange( 0, static_cast<int>( filePairs.size() ), true );
 
 	CThumbnailer* pThumbnailer = app::GetThumbnailer();
 	thumb::CPushBoundsSize largerBounds( pThumbnailer, 128 );			// generate larger thumbs to minimize regeneration later
@@ -212,8 +219,8 @@ void CImageArchiveStg::CreateThumbnailsStorage( const std::vector< std::pair< fs
 				}
 			}
 
+		pProgressCallback->AdvanceItem( it->second.Get() );
 		++it;
-		progress.StepIt();
 	}
 }
 

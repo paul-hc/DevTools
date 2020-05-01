@@ -263,7 +263,7 @@ bool CArchiveImagesDialog::CommitFileOperation( void )
 				if ( app::GetUserReport().MessageBox( str::Format( IDS_OVERWRITE_PROMPT, m_destPath.GetPtr() ), MB_YESNO | MB_ICONQUESTION ) != IDYES )
 					return false;
 
-			return m_filesContext.BuildArchiveStorageFile( m_destPath, m_fileOp );
+			return m_filesContext.BuildArchiveStorageFile( m_destPath, m_fileOp, this );
 	}
 }
 

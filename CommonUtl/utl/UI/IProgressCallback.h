@@ -25,4 +25,26 @@ namespace ui
 }
 
 
+namespace ui
+{
+	// Null Pattern: placeholder for a valid ui::IProgressCallback interface with empty implementation
+	//
+	class CNullProgress : public ui::IProgressCallback
+	{
+		CNullProgress( void ) {}
+
+		// ui::IProgressCallback interface
+		virtual void SetProgressRange( int lower, int upper, bool rewindPos = false );
+		virtual bool SetMarqueeProgress( bool useMarquee = true );
+		virtual void SetProgressState( int barState = PBST_NORMAL );
+		virtual void AdvanceStage( const std::tstring& stageName ) throws_( CUserAbortedException );
+		virtual void AdvanceItem( const std::tstring& itemName ) throws_( CUserAbortedException );
+		virtual void AdvanceItemToEnd( void ) throws_( CUserAbortedException );
+		virtual void ProcessInput( void ) const throws_( CUserAbortedException );
+	public:
+		static ui::IProgressCallback* Instance( void );
+	};
+}
+
+
 #endif // IProgressCallback_h

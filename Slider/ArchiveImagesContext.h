@@ -40,7 +40,7 @@ public:
 	static bool IsValidFormat( const std::tstring& format );
 	bool GenerateDestPaths( const fs::CPath& destPath, const std::tstring& format, UINT* pSeqCount, bool forceShallowStreamNames = false );
 
-	bool BuildArchiveStorageFile( const fs::CPath& destStgPath, FileOp fileOp ) const;
+	bool BuildArchiveStorageFile( const fs::CPath& destStgPath, FileOp fileOp, CWnd* pParentWnd = AfxGetMainWnd() ) const;
 
 	bool CanCommitOperations( std::vector< std::pair< fs::CFlexPath, fs::CFlexPath > >& rErrorPairs, FileOp fileOp, bool isUndoOp ) const;
 	bool CommitOperations( FileOp fileOp, bool isUndoOp = false ) const;

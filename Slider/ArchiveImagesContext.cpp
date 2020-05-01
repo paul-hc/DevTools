@@ -4,6 +4,7 @@
 #include "ImageArchiveStg.h"
 #include "AlbumModel.h"
 #include "FileOperation.h"
+#include "ImagesProgressCallback.h"
 #include "Workspace.h"
 #include "Application.h"
 #include "resource.h"
@@ -207,21 +208,30 @@ bool CArchiveImagesContext::GenerateDestPaths( const fs::CPath& destPath, const 
 	return true;
 }
 
-bool CArchiveImagesContext::BuildArchiveStorageFile( const fs::CPath& destStgPath, FileOp fileOp ) const
+bool CArchiveImagesContext::BuildArchiveStorageFile( const fs::CPath& destStgPath, FileOp fileOp, CWnd* pParentWnd /*= AfxGetMainWnd()*/ ) const
 {
+	CImagesProgressCallback progress( pParentWnd, _T("Building image archive storage file") );
+	ui::IProgressCallback* pProgressCallback = progress.GetCallback();
+
 	try
 	{
 		app::LogLine( _T("--- START building image archive %s ---"), destStgPath.GetPtr() );
 
 		CTimer timer;
 		CImageArchiveStg imageArchiveStg;
-		imageArchiveStg.CreateImageArchive( destStgPath.GetPtr(), m_password, m_pathPairs );
+		imageArchiveStg.CreateImageArchive( destStgPath.GetPtr(), m_password, m_pathPairs, pProgressCallback );
 
 		app::LogLine( _T("--- END building image archive %s - Elapsed %.2f seconds ---"), destStgPath.GetPtr(), timer.ElapsedSeconds() );
 	}
+	catch ( CUserAbortedException& exc )
+	{
+		app::TraceException( exc );						// cancelled by the user in progress dialog
+		::DeleteFile( destStgPath.GetPtr() );			// on exception delete archive file
+		return false;
+	}
 	catch ( mfc::CUserAbortedException* pAbortExc )
 	{	// aborted by user, don't prompt again
-		pAbortExc;
+		app::TraceException( pAbortExc );				// cancelled by the user: keep the images found so far
 		::DeleteFile( destStgPath.GetPtr() );			// on exception delete archive file
 		return false;
 	}
@@ -236,7 +246,8 @@ bool CArchiveImagesContext::BuildArchiveStorageFile( const fs::CPath& destStgPat
 	size_t errorCount = 0;
 	if ( FOP_FileMove == fileOp )
 	{
-		app::CScopedProgress progress( 0, (int)m_pathPairs.size(), 1, _T("Delete source images:") );
+		pProgressCallback->AdvanceStage( _T("Delete source image files") );
+		pProgressCallback->SetProgressRange( 0, static_cast<int>( m_pathPairs.size() ), true );
 
 		for ( std::vector< std::pair< fs::CFlexPath, fs::CFlexPath > >::const_iterator it = m_pathPairs.begin(); it != m_pathPairs.end(); )
 		{
@@ -257,8 +268,8 @@ bool CArchiveImagesContext::BuildArchiveStorageFile( const fs::CPath& destStgPat
 						}
 					}
 
+			pProgressCallback->AdvanceItem( it->second.Get() );
 			++it;
-			progress.StepIt();
 		}
 	}
 	return 0 == errorCount;
