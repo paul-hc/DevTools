@@ -11,6 +11,7 @@
 #include "utl/UI/LayoutDialog.h"
 #include "utl/UI/OleUtils.h"
 #include "utl/UI/SpinEdit.h"
+#include "utl/UI/ThemeStatic.h"
 #include "utl/UI/ThumbPreviewCtrl.h"
 
 
@@ -74,6 +75,8 @@ private:
 	CListBox m_searchSpecListBox;
 	CComboBox m_sortOrderCombo;
 	CThumbPreviewCtrl m_thumbPreviewCtrl;
+	CRegularStatic m_docVersionLabel;
+	CRegularStatic m_docVersionStatic;
 	CDialogToolBar m_toolbar;
 	CDragListCtrl< CPathItemListCtrl > m_foundFilesListCtrl;
 

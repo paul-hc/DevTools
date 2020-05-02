@@ -84,6 +84,65 @@ bool CProgressDialog::CheckRunning( void ) const throws_( CUserAbortedException 
 	return true;
 }
 
+void CProgressDialog::SetProgressStep( int step )
+{
+	if ( !IsRunning() )
+		return;				// use Null Pattern for this dialog
+
+	m_progressBar.SetStep( step );
+}
+
+bool CProgressDialog::SetProgressType( ProgressType progressType )
+{
+	if ( !IsRunning() )
+		return false;			// use Null Pattern for this dialog
+
+	bool useMarquee = MarqueeProgress == progressType;
+
+	if ( useMarquee == HasFlag( m_progressBar.GetStyle(), PBS_MARQUEE ) )
+		return false;			// no change required
+
+	SetFlag( m_optionFlags, MarqueeProgress, useMarquee );
+	m_progressBar.ModifyStyle( useMarquee ? 0 : PBS_MARQUEE, useMarquee ? PBS_MARQUEE : 0 );
+
+	if ( useMarquee )
+	{
+		m_progressBar.SetMarquee( true, 0 );
+		m_itemCount = 0;
+	}
+	return true;
+}
+
+void CProgressDialog::SetProgressRange( int lower, int upper, bool rewindPos )
+{
+	if ( !IsRunning() )
+		return;				// use Null Pattern for this dialog
+
+	upper = std::max( upper, lower );
+
+	SetProgressType( Bounded );			// switch to bounded progress
+	m_progressBar.SetRange32( lower, upper );
+	m_itemCount = upper + 1;
+
+	if ( rewindPos )
+	{
+		m_itemNo = 0;
+		m_progressBar.SetPos( lower );
+		m_progressBar.UpdateWindow();
+	}
+
+	DisplayItemCounts();
+}
+
+
+// ui::IProgressHeader interface implementation
+
+void CProgressDialog::SetDialogTitle( const std::tstring& title )
+{
+	if ( IsRunning() )
+		ui::SetWindowText( m_hWnd, title );
+}
+
 void CProgressDialog::SetOperationLabel( const std::tstring& operationLabel )
 {
 	m_operationLabel = operationLabel;
@@ -99,18 +158,22 @@ void CProgressDialog::ShowStage( bool show /*= true*/ )
 
 	ui::ShowWindow( m_stageLabelStatic, show );
 	ui::ShowWindow( m_stageStatic, show );
+
+	if ( show )
+		m_stageStatic.SetWindowText( str::GetEmpty() );
 }
 
 void CProgressDialog::SetStageLabel( const std::tstring& stageLabel )
 {
-	if ( !IsRunning() )
-		return;				// use Null Pattern for this dialog
-
 	m_stageLabel = stageLabel;
 	m_stageCount = 0;
 
+	if ( !IsRunning() )
+		return;				// use Null Pattern for this dialog
+
 	DisplayStageLabel();
 	ShowStage();
+	m_itemStatic.SetWindowText( str::GetEmpty() );
 }
 
 void CProgressDialog::ShowItem( bool show /*= true*/ )
@@ -120,6 +183,9 @@ void CProgressDialog::ShowItem( bool show /*= true*/ )
 
 	ui::ShowWindow( m_itemLabelStatic, show );
 	ui::ShowWindow( m_itemStatic, show );
+
+	if ( show )
+		m_itemStatic.SetWindowText( str::GetEmpty() );
 }
 
 void CProgressDialog::SetItemLabel( const std::tstring& itemLabel )
@@ -134,55 +200,22 @@ void CProgressDialog::SetItemLabel( const std::tstring& itemLabel )
 	ShowItem();
 }
 
-void CProgressDialog::SetProgressStep( int step )
-{
-	if ( !IsRunning() )
-		return;				// use Null Pattern for this dialog
 
-	m_progressBar.SetStep( step );
+// ui::IProgressService interface implementation
+
+ui::IProgressHeader* CProgressDialog::GetHeader( void )
+{
+	return this;
 }
 
-
-// ui::IProgressCallback interface implementation
-
-void CProgressDialog::SetProgressRange( int lower, int upper, bool rewindPos /*= false*/ )
+bool CProgressDialog::SetMarqueeProgress( void )
 {
-	if ( !IsRunning() )
-		return;				// use Null Pattern for this dialog
-
-	upper = std::max( upper, lower );
-
-	SetMarqueeProgress( false );			// switch to bounded progress
-	m_progressBar.SetRange32( lower, upper );
-	m_itemCount = upper + 1;
-
-	if ( rewindPos )
-	{
-		m_itemNo = 0;
-		m_progressBar.SetPos( lower );
-		m_progressBar.UpdateWindow();
-	}
-
-	DisplayItemCounts();
+	return SetProgressType( Marquee );
 }
 
-bool CProgressDialog::SetMarqueeProgress( bool useMarquee /*= true*/ )
+void CProgressDialog::SetBoundedProgressCount( size_t itemCount, bool rewindPos /*= true*/ )
 {
-	if ( !IsRunning() )
-		return false;			// use Null Pattern for this dialog
-
-	if ( useMarquee == HasFlag( m_progressBar.GetStyle(), PBS_MARQUEE ) )
-		return false;			// no change required
-
-	SetFlag( m_optionFlags, MarqueeProgress, useMarquee );
-	m_progressBar.ModifyStyle( useMarquee ? 0 : PBS_MARQUEE, useMarquee ? PBS_MARQUEE : 0 );
-
-	if ( useMarquee )
-	{
-		m_progressBar.SetMarquee( true, 0 );
-		m_itemCount = 0;
-	}
-	return true;
+	SetProgressRange( 0, std::max( static_cast<int>( itemCount - 1 ), 0 ), rewindPos );
 }
 
 void CProgressDialog::SetProgressState( int barState /*= PBST_NORMAL*/ )
@@ -388,7 +421,7 @@ void CProgressDialog::DoDataExchange( CDataExchange* pDX )
 			if ( HasFlag( m_optionFlags, HideProgress ) )
 				ui::ShowWindow( m_progressBar, false );
 
-			SetMarqueeProgress( IsMarqueeProgress() );
+			SetProgressType( IsMarqueeProgress() ? Marquee : Bounded );
 		}
 	}
 

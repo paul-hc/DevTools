@@ -15,7 +15,7 @@ class CFileAttr;
 class CImageFileEnumerator : public fs::CEnumerator
 {
 public:
-	CImageFileEnumerator( IEnumerator* pProgressCallback = NULL );
+	CImageFileEnumerator( IEnumerator* pProgressEnum = NULL );
 	~CImageFileEnumerator();
 
 	void SetFileSizeFilter( const Range< size_t >& fileSizeRange ) { m_fileSizeRange = fileSizeRange; ENSURE( m_fileSizeRange.IsNormalized() ); }

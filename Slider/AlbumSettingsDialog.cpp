@@ -81,6 +81,8 @@ CAlbumSettingsDialog::CAlbumSettingsDialog( const CAlbumModel& model, int curren
 	, m_minSizeEdit( true, str::GetUserLocale() )
 	, m_maxSizeEdit( true, str::GetUserLocale() )
 	, m_thumbPreviewCtrl( app::GetThumbnailer() )
+	, m_docVersionLabel( CRegularStatic::ControlLabel )
+	, m_docVersionStatic( CRegularStatic::Bold )
 	, m_foundFilesListCtrl( IDC_FOUND_FILES_LISTVIEW )
 {
 	// base init
@@ -533,6 +535,8 @@ void CAlbumSettingsDialog::DoDataExchange( CDataExchange* pDX )
 	ui::DDX_EnumCombo( pDX, IDC_LIST_ORDER_COMBO, m_sortOrderCombo, fileOrder, CAlbumModel::GetTags_Order() );
 	DDX_Control( pDX, IDC_FOUND_FILES_LISTVIEW, m_foundFilesListCtrl );
 	DDX_Control( pDX, IDC_THUMB_PREVIEW_STATIC, m_thumbPreviewCtrl );
+	DDX_Control( pDX, IDC_DOC_VERSION_LABEL, m_docVersionLabel );
+	DDX_Control( pDX, IDC_DOC_VERSION_STATIC, m_docVersionStatic );
 	m_toolbar.DDX_Placeholder( pDX, IDC_TOOLBAR_PLACEHOLDER, H_AlignRight | V_AlignCenter );
 
 	if ( firstInit )
@@ -542,7 +546,7 @@ void CAlbumSettingsDialog::DoDataExchange( CDataExchange* pDX )
 	{
 		case DialogOutput:
 		{	// dialog setup
-			ui::SetDlgItemText( this, IDC_DOC_VERSION_STATIC, app::FormatModelVersion( m_model.GetModelSchema() ) );
+			m_docVersionStatic.SetWindowText( app::FormatModelVersion( m_model.GetModelSchema() ) );
 
 			const CSearchModel* pSearchModel = m_model.GetSearchModel();
 			CheckDlgButton( IDC_MAX_FILE_COUNT_CHECK, pSearchModel->GetMaxFileCount() != UINT_MAX );

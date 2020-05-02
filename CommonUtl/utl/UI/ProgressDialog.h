@@ -2,7 +2,7 @@
 #define ProgressDialog_h
 #pragma once
 
-#include "IProgressCallback.h"
+#include "IProgressService.h"
 #include "LayoutDialog.h"
 #include "ThemeStatic.h"
 
@@ -15,10 +15,11 @@ class CScopedPumpMessage;
 // Allows keyboard and mouse user input (pumps pending messages) while performing long operations when advancing methods are called.
 // The object lifetime is controlled by the caller, but the dialog window may get destroyed internally when the Close button is pressed.
 // Throws a CUserAbortedException if the caller invokes any advancing method while the dialog window has been closed.
-// Note: uses Null Pattern for convenience, so that the client can continue using the IProgressCallback interface even after the user closed the dialog.
+// Note: uses Null Pattern for convenience, so that the client can continue using the IProgressService interface even after the user closed the dialog.
 //
 class CProgressDialog : public CLayoutDialog
-					  , public ui::IProgressCallback
+					  , private ui::IProgressHeader
+					  , private ui::IProgressService
 {
 public:
 	enum OptionFlag
@@ -42,22 +43,33 @@ public:
 	bool Create( const std::tstring& title, CWnd* pParentWnd = NULL );
 	static void __declspec(noreturn) Abort( void ) throws_( CUserAbortedException );
 
-	void SetOperationLabel( const std::tstring& operationLabel );
-
-	void ShowStage( bool show = true );
-	void SetStageLabel( const std::tstring& stageLabel );
-
-	void ShowItem( bool show = true );
-	void SetItemLabel( const std::tstring& itemLabel );
-
 	CProgressCtrl& GetProgressBar( void ) { return m_progressBar; }
 	bool IsMarqueeProgress( void ) const { return HasFlag( m_optionFlags, MarqueeProgress ); }
 	void SetProgressStep( int step );			// step divider for less granular progress updates (default is 10 for CProgressCtrl)
 
-	// ui::IProgressCallback interface
-	virtual void SetProgressRange( int lower, int upper, bool rewindPos = false );
-	virtual bool SetMarqueeProgress( bool useMarquee = true );
+	ui::IProgressService* GetService( void ) { return this; }
+protected:
+	enum ProgressType { Marquee, Bounded };
+
+	bool SetProgressType( ProgressType progressType );
+	void SetProgressRange( int lower, int upper, bool rewindPos );
+
+	// ui::IProgressHeader interface
+	virtual void SetDialogTitle( const std::tstring& title );
+	virtual void SetOperationLabel( const std::tstring& operationLabel );
+
+	virtual void ShowStage( bool show = true );
+	virtual void SetStageLabel( const std::tstring& stageLabel );
+
+	virtual void ShowItem( bool show = true );
+	virtual void SetItemLabel( const std::tstring& itemLabel );
+private:
+	// ui::IProgressService interface
+	virtual ui::IProgressHeader* GetHeader( void );
+	virtual bool SetMarqueeProgress( void );
+	virtual void SetBoundedProgressCount( size_t itemCount, bool rewindPos = true );
 	virtual void SetProgressState( int barState = PBST_NORMAL );
+
 	virtual void AdvanceStage( const std::tstring& stageName ) throws_( CUserAbortedException );
 	virtual void AdvanceItem( const std::tstring& itemName ) throws_( CUserAbortedException );
 	virtual void AdvanceItemToEnd( void ) throws_( CUserAbortedException );

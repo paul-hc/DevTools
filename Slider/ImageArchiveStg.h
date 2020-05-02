@@ -4,7 +4,7 @@
 
 #include "utl/FlexPath.h"
 #include "utl/StructuredStorage.h"
-#include "utl/UI/IProgressCallback.h"
+#include "utl/UI/IProgressService.h"
 #include "utl/UI/Thumbnailer_fwd.h"
 #include "ModelSchema.h"
 #include "FileAttr.h"
@@ -29,14 +29,14 @@ public:
 	static void DiscardCachedImages( const fs::CPath& stgFilePath );		// to avoid sharing violations on stream access
 
 	void CreateImageArchive( const TCHAR* pStgFilePath, const std::tstring& password, const std::vector< std::pair< fs::CFlexPath, fs::CFlexPath > >& filePairs,
-							 ui::IProgressCallback* pProgressCallback ) throws_( CException* );
+							 ui::IProgressService* pProgressService ) throws_( CException* );
 
 	bool SavePassword( const std::tstring& password );
 	std::tstring LoadPassword( void );
 
 	void StoreDocModelSchema( app::ModelSchema docModelSchema ) { m_docModelSchema = docModelSchema; }
 
-	// .sld file format
+	// .sld file format to "_Album.sld" stream
 	void SaveAlbumDoc( CObject* pAlbumDoc );
 	bool LoadAlbumDoc( CObject* pAlbumDoc );
 
@@ -60,9 +60,9 @@ protected:
 private:
 	void CreateImageFiles( std::vector< CFileAttr >& rFileAttributes,
 						   const std::vector< std::pair< fs::CFlexPath, fs::CFlexPath > >& filePairs,
-						   ui::IProgressCallback* pProgressCallback ) throws_( CException* );
+						   ui::IProgressService* pProgressService ) throws_( CException* );
 	void CreateMetadataFile( const std::vector< CFileAttr >& fileAttributes );
-	void CreateThumbnailsStorage( const std::vector< std::pair< fs::CFlexPath, fs::CFlexPath > >& filePairs, ui::IProgressCallback* pProgressCallback );
+	void CreateThumbnailsStorage( const std::vector< std::pair< fs::CFlexPath, fs::CFlexPath > >& filePairs, ui::IProgressService* pProgressService );
 private:
 	CComPtr< IStorage > m_pThumbsStorage;
 	const GUID* m_pThumbsDecoderId;

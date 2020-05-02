@@ -98,7 +98,7 @@ void CDuplicateFilesGroup::AddItem( CDuplicateFileItem* pItem )
 	pItem->SetParentGroup( this );
 }
 
-void CDuplicateFilesGroup::ExtractCrc32Duplicates( std::vector< CDuplicateFilesGroup* >& rDuplicateGroups, size_t& rIgnoredCount, ui::IProgressCallback* pProgress /*= NULL*/ ) throws_( CUserAbortedException )
+void CDuplicateFilesGroup::ExtractCrc32Duplicates( std::vector< CDuplicateFilesGroup* >& rDuplicateGroups, size_t& rIgnoredCount, ui::IProgressService* pProgress /*= NULL*/ ) throws_( CUserAbortedException )
 {
 	REQUIRE( HasDuplicates() );
 	REQUIRE( 0 == m_contentKey.m_crc32 );			// CRC32 is yet to be computed
@@ -161,7 +161,7 @@ void CDuplicateFilesGroup::ExtractCrc32Duplicates( std::vector< CDuplicateFilesG
 	}
 }
 
-void CDuplicateFilesGroup::__ExtractCrc32Duplicates( std::vector< CDuplicateFilesGroup* >& rDuplicateGroups, size_t& rIgnoredCount, ui::IProgressCallback* pProgress /*= NULL*/ ) throws_( CUserAbortedException )
+void CDuplicateFilesGroup::__ExtractCrc32Duplicates( std::vector< CDuplicateFilesGroup* >& rDuplicateGroups, size_t& rIgnoredCount, ui::IProgressService* pProgress /*= NULL*/ ) throws_( CUserAbortedException )
 {
 	// old version using group stores
 
@@ -240,7 +240,7 @@ void CDuplicateGroupStore::RegisterItem( CDuplicateFileItem* pItem, const fs::CF
 	rpGroup->AddItem( pItem );
 }
 
-void CDuplicateGroupStore::ExtractDuplicateGroups( std::vector< CDuplicateFilesGroup* >& rDuplicateGroups, size_t& rIgnoredCount, ui::IProgressCallback* pProgress /*= NULL*/ ) throws_( CUserAbortedException )
+void CDuplicateGroupStore::ExtractDuplicateGroups( std::vector< CDuplicateFilesGroup* >& rDuplicateGroups, size_t& rIgnoredCount, ui::IProgressService* pProgress /*= NULL*/ ) throws_( CUserAbortedException )
 {
 	utl::COwningContainer< std::vector< CDuplicateFilesGroup* > > scopedGroups;
 	scopedGroups.swap( m_groups );			// take scoped ownership for exception safety

@@ -392,7 +392,7 @@ bool CAlbumDoc::UndoRedoCustomOrder( custom_order::COpStack& rFromStack, custom_
 	{	// first prompt to undo/redo a file copy/move operation
 		std::tstring message = str::Format( IDS_PROMPT_COPYMOVEFILEOP,
 			isUndoOp ? _T("undo") : _T("redo"),
-			topStep.m_fileOp == FOP_FileCopy ? _T("copy") : _T("move") );
+			FOP_FileCopy == topStep.m_fileOp ? _T("copy") : _T("move") );
 
 		if ( AfxMessageBox( message.c_str(), MB_OKCANCEL | MB_ICONQUESTION ) != IDOK )
 			return false;
@@ -403,7 +403,7 @@ bool CAlbumDoc::UndoRedoCustomOrder( custom_order::COpStack& rFromStack, custom_
 			message = str::Format( IDS_UNDOREDO_INVALID_FILE_PAIRS,
 				isUndoOp ? _T("undo") : _T("redo"),
 				errorPairs.size(),
-				topStep.m_fileOp == FOP_FileCopy ? _T("copy") : _T("move"),
+				FOP_FileCopy == topStep.m_fileOp ? _T("copy") : _T("move"),
 				topStep.m_archivedImages.GetPathPairs().size() );
 			switch ( AfxMessageBox( message.c_str(), MB_ABORTRETRYIGNORE | MB_ICONEXCLAMATION ) )
 			{

@@ -34,8 +34,8 @@ private:
 						 const std::vector< CPathItem* >& srcPathItems,
 						 const std::vector< CPathItem* >& ignorePathItems,
 						 fs::IEnumerator* pProgressEnum );
-	void GroupByFileSize( CDuplicateGroupStore* pGroupsStore, const std::vector< fs::CPath >& foundPaths, ui::IProgressCallback* pProgress );
-	void GroupByCrc32( std::vector< CDuplicateFilesGroup* >& rDuplicateGroups, CDuplicateGroupStore* pGroupsStore, ui::IProgressCallback* pProgress );
+	void GroupByFileSize( CDuplicateGroupStore* pGroupsStore, const std::vector< fs::CPath >& foundPaths, ui::IProgressService* pProgress );
+	void GroupByCrc32( std::vector< CDuplicateFilesGroup* >& rDuplicateGroups, CDuplicateGroupStore* pGroupsStore, ui::IProgressService* pProgress );
 private:
 	std::tstring m_wildSpec;
 	UINT64 m_minFileSize;
@@ -47,14 +47,15 @@ private:
 #include "utl/UI/ProgressDialog.h"
 
 
-class CDuplicatesProgress : private fs::IEnumerator
-						  , private utl::noncopyable
+class CDuplicatesProgressService : private fs::IEnumerator
+								 , private utl::noncopyable
 {
 public:
-	CDuplicatesProgress( CWnd* pParent );
-	~CDuplicatesProgress();
+	CDuplicatesProgressService( CWnd* pParent );
+	~CDuplicatesProgressService();
 
-	ui::IProgressCallback* GetCallback( void ) { return &m_dlg; }
+	ui::IProgressService* GetService( void ) { return m_dlg.GetService(); }
+	ui::IProgressHeader* GetHeader( void ) { return GetService()->GetHeader(); }
 	fs::IEnumerator* GetProgressEnumerator( void ) { return this; }
 
 	void Section_GroupByFileSize( size_t fileCount );

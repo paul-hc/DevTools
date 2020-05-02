@@ -9,7 +9,7 @@
 
 
 class CEnumTags;
-namespace ui { interface IProgressCallback; }
+namespace ui { interface IProgressService; }
 
 
 class CAlbumModel
@@ -49,9 +49,9 @@ public:
 private:
 	void ClearArchiveStgPaths( void );
 
-	bool OrderFileList( ui::IProgressCallback* pProgressCallback );
-	void FilterFileDuplicates( ui::IProgressCallback* pProgressCallback, bool compareImageDim = false );
-	void FilterCorruptFiles( ui::IProgressCallback* pProgressCallback );
+	bool OrderFileList( void );
+	void FilterFileDuplicates( ui::IProgressService* pProgressSvc, bool compareImageDim = false );
+	void FilterCorruptFiles( ui::IProgressService* pProgressSvc );
 public:
 	enum Order;
 
@@ -144,7 +144,7 @@ namespace pred
 
 	struct CompareFileAttr
 	{
-		CompareFileAttr( CAlbumModel::Order fileOrder, bool compareImageDim = false, ui::IProgressCallback* pProgressCallback = NULL );
+		CompareFileAttr( CAlbumModel::Order fileOrder, bool compareImageDim = false );
 
 		pred::CompareResult operator()( const CFileAttr& left, const CFileAttr& right ) const;
 	public:
@@ -152,8 +152,6 @@ namespace pred
 		bool m_ascendingOrder;
 		bool m_compareImageDim;
 		bool m_useSecondaryComparison;
-	private:
-		ui::IProgressCallback* m_pProgressCallback;
 	};
 }
 

@@ -663,50 +663,6 @@
 				>
 			</File>
 			<Filter
-				Name="obsolete"
-				>
-				<File
-					RelativePath=".\AutoScrollDropTarget.cpp"
-					>
-					<FileConfiguration
-						Name="DebugU|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="DebugU|x64"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="ReleaseU|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="ReleaseU|x64"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-						/>
-					</FileConfiguration>
-				</File>
-				<File
-					RelativePath=".\AutoScrollDropTarget.h"
-					>
-				</File>
-			</Filter>
-			<Filter
 				Name="model"
 				>
 				<File
@@ -826,11 +782,11 @@
 					>
 				</File>
 				<File
-					RelativePath=".\ImagesProgressCallback.cpp"
+					RelativePath=".\ProgressService.cpp"
 					>
 				</File>
 				<File
-					RelativePath=".\ImagesProgressCallback.h"
+					RelativePath=".\ProgressService.h"
 					>
 				</File>
 			</Filter>

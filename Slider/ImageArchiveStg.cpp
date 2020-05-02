@@ -93,9 +93,10 @@ CStringW CImageArchiveStg::EncodeStreamName( const TCHAR* pStreamName ) const
 }
 
 void CImageArchiveStg::CreateImageArchive( const TCHAR* pStgFilePath, const std::tstring& password, const std::vector< std::pair< fs::CFlexPath, fs::CFlexPath > >& filePairs,
-										   ui::IProgressCallback* pProgressCallback ) throws_( CException* )
+										   ui::IProgressService* pProgressService ) throws_( CException* )
 {
-	ASSERT_PTR( pProgressCallback );
+	ASSERT_PTR( pProgressService );
+	pProgressService->GetHeader()->SetStageLabel( str::GetEmpty() );
 
 	CPushThrowMode pushThrow( this, true );
 
@@ -106,13 +107,14 @@ void CImageArchiveStg::CreateImageArchive( const TCHAR* pStgFilePath, const std:
 	std::vector< CFileAttr > fileAttributes;			// image storage metadata
 
 	SavePassword( password );
-	CreateImageFiles( fileAttributes, filePairs, pProgressCallback );
+
+	CreateImageFiles( fileAttributes, filePairs, pProgressService );
 	CreateMetadataFile( fileAttributes );
-	CreateThumbnailsStorage( filePairs, pProgressCallback );
+	CreateThumbnailsStorage( filePairs, pProgressService );
 }
 
 void CImageArchiveStg::CreateImageFiles( std::vector< CFileAttr >& rFileAttributes, const std::vector< std::pair< fs::CFlexPath, fs::CFlexPath > >& filePairs,
-										 ui::IProgressCallback* pProgressCallback ) throws_( CException* )
+										 ui::IProgressService* pProgressService ) throws_( CException* )
 {
 	// Prevent sharing violations on SRC stream open.
 	//	2020-04-11: Still doesn't work, I get exception on open. I suspect the source stream (image file) must be kept open with CFile::shareExclusive by some WIC indirect COM interface.
@@ -123,8 +125,8 @@ void CImageArchiveStg::CreateImageFiles( std::vector< CFileAttr >& rFileAttribut
 
 	CPushThrowMode pushThrow( &Factory(), true );
 
-	pProgressCallback->AdvanceStage( _T("Saving embedded image files") );
-	pProgressCallback->SetProgressRange( 0, static_cast<int>( filePairs.size() ), true );
+	pProgressService->AdvanceStage( _T("Saving embedded image files") );
+	pProgressService->SetBoundedProgressCount( filePairs.size() );
 
 	for ( std::vector< std::pair< fs::CFlexPath, fs::CFlexPath > >::const_iterator it = filePairs.begin(); it != filePairs.end(); )
 	{
@@ -148,7 +150,7 @@ void CImageArchiveStg::CreateImageFiles( std::vector< CFileAttr >& rFileAttribut
 
 				rFileAttributes.push_back( fileAttr );
 
-				pProgressCallback->AdvanceItem( it->second.Get() );
+				pProgressService->AdvanceItem( it->second.Get() );
 			}
 			catch ( CException* pExc )
 			{
@@ -184,13 +186,13 @@ void CImageArchiveStg::CreateMetadataFile( const std::vector< CFileAttr >& fileA
 	pMetaDataFile->Close();
 }
 
-void CImageArchiveStg::CreateThumbnailsStorage( const std::vector< std::pair< fs::CFlexPath, fs::CFlexPath > >& filePairs, ui::IProgressCallback* pProgressCallback )
+void CImageArchiveStg::CreateThumbnailsStorage( const std::vector< std::pair< fs::CFlexPath, fs::CFlexPath > >& filePairs, ui::IProgressService* pProgressService )
 {
 	CComPtr< IStorage > pThumbsStorage = CreateDir( CImageArchiveStg::s_thumbsSubStorageNames[ Thumbs_jpeg ] );
 	ASSERT_PTR( pThumbsStorage );
 
-	pProgressCallback->AdvanceStage( _T("Saving thumbnails") );
-	pProgressCallback->SetProgressRange( 0, static_cast<int>( filePairs.size() ), true );
+	pProgressService->AdvanceStage( _T("Saving thumbnails") );
+	pProgressService->SetBoundedProgressCount( filePairs.size() );
 
 	CThumbnailer* pThumbnailer = app::GetThumbnailer();
 	thumb::CPushBoundsSize largerBounds( pThumbnailer, 128 );			// generate larger thumbs to minimize regeneration later
@@ -219,7 +221,7 @@ void CImageArchiveStg::CreateThumbnailsStorage( const std::vector< std::pair< fs
 				}
 			}
 
-		pProgressCallback->AdvanceItem( it->second.Get() );
+		pProgressService->AdvanceItem( it->second.Get() );
 		++it;
 	}
 }

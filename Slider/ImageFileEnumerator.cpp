@@ -16,8 +16,8 @@
 
 const Range< size_t > CImageFileEnumerator::s_allFileSizesRange( 0, UINT_MAX );
 
-CImageFileEnumerator::CImageFileEnumerator( IEnumerator* pProgressCallback /*= NULL*/ )
-	: fs::CEnumerator( pProgressCallback )
+CImageFileEnumerator::CImageFileEnumerator( IEnumerator* pProgressEnum /*= NULL*/ )
+	: fs::CEnumerator( pProgressEnum )
 	, m_fileSizeRange( s_allFileSizesRange )
 	, m_issueStore( _T("Searching for images") )
 	, m_pCurrSpec( NULL )

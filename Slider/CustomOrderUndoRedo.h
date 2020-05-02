@@ -19,7 +19,7 @@ namespace custom_order
 		void Stream( CArchive& archive );
 
 		bool IsReorderOperation( void ) const { return FOP_Reorder == m_fileOp; }
-		bool IsArchivingOperation( void ) const { return m_fileOp != FOP_Reorder; }
+		bool IsArchivingOperation( void ) const { return FOP_FileCopy == m_fileOp || FOP_FileMove == m_fileOp; }
 
 		const std::tstring& GetOperationTag( void ) const;
 	public:
@@ -27,6 +27,7 @@ namespace custom_order
 		persist int m_toDestIndex;					// original insertion point (drop dest index)
 		persist int m_newDestIndex;					// destination index shifted after re-ordering
 		persist std::vector< int > m_toMoveIndexes;	// indexes to be moved
+	//private:
 		persist CArchiveImagesContext m_archivedImages;
 	};
 

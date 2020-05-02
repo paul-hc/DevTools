@@ -48,6 +48,8 @@ private:
 	static void CommitOperation( FileOp fileOp, const std::pair< fs::CFlexPath, fs::CFlexPath >& filePair, bool isUndoOp = false ) throws_( CException* );
 private:
 	persist std::vector< std::pair< fs::CFlexPath, fs::CFlexPath > > m_pathPairs;
+
+	// transient
 	std::tstring m_password;		// encrypted
 };
 

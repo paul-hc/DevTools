@@ -4,7 +4,7 @@
 #include "ImageArchiveStg.h"
 #include "AlbumModel.h"
 #include "FileOperation.h"
-#include "ImagesProgressCallback.h"
+#include "ProgressService.h"
 #include "Workspace.h"
 #include "Application.h"
 #include "resource.h"
@@ -210,8 +210,8 @@ bool CArchiveImagesContext::GenerateDestPaths( const fs::CPath& destPath, const 
 
 bool CArchiveImagesContext::BuildArchiveStorageFile( const fs::CPath& destStgPath, FileOp fileOp, CWnd* pParentWnd /*= AfxGetMainWnd()*/ ) const
 {
-	CImagesProgressCallback progress( pParentWnd, _T("Building image archive storage file") );
-	ui::IProgressCallback* pProgressCallback = progress.GetCallback();
+	CProgressService progress( pParentWnd, _T("Building image archive storage file") );
+	ui::IProgressService* pProgressService = progress.GetService();
 
 	try
 	{
@@ -219,7 +219,7 @@ bool CArchiveImagesContext::BuildArchiveStorageFile( const fs::CPath& destStgPat
 
 		CTimer timer;
 		CImageArchiveStg imageArchiveStg;
-		imageArchiveStg.CreateImageArchive( destStgPath.GetPtr(), m_password, m_pathPairs, pProgressCallback );
+		imageArchiveStg.CreateImageArchive( destStgPath.GetPtr(), m_password, m_pathPairs, pProgressService );
 
 		app::LogLine( _T("--- END building image archive %s - Elapsed %.2f seconds ---"), destStgPath.GetPtr(), timer.ElapsedSeconds() );
 	}
@@ -246,8 +246,8 @@ bool CArchiveImagesContext::BuildArchiveStorageFile( const fs::CPath& destStgPat
 	size_t errorCount = 0;
 	if ( FOP_FileMove == fileOp )
 	{
-		pProgressCallback->AdvanceStage( _T("Delete source image files") );
-		pProgressCallback->SetProgressRange( 0, static_cast<int>( m_pathPairs.size() ), true );
+		pProgressService->AdvanceStage( _T("Delete source image files") );
+		pProgressService->SetBoundedProgressCount( m_pathPairs.size() );
 
 		for ( std::vector< std::pair< fs::CFlexPath, fs::CFlexPath > >::const_iterator it = m_pathPairs.begin(); it != m_pathPairs.end(); )
 		{
@@ -268,7 +268,7 @@ bool CArchiveImagesContext::BuildArchiveStorageFile( const fs::CPath& destStgPat
 						}
 					}
 
-			pProgressCallback->AdvanceItem( it->second.Get() );
+			pProgressService->AdvanceItem( it->second.Get() );
 			++it;
 		}
 	}
