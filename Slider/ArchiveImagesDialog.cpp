@@ -86,7 +86,7 @@ bool CArchiveImagesDialog::FetchFileContext( void )
 	else
 		m_pModel->QueryFileAttrs( srcFiles );
 
-	m_filesContext.SetupSourcePaths( srcFiles );
+	m_archivingModel.SetupSourcePaths( srcFiles );
 	return !srcFiles.empty();
 }
 
@@ -140,20 +140,20 @@ void CArchiveImagesDialog::SetupFilesView( bool firstTimeInit /*= false*/ )
 			}
 
 		// setup the destination for selected items
-		const std::vector< std::pair< fs::CFlexPath, fs::CFlexPath > >& filePairs = m_filesContext.GetPathPairs();
+		const std::vector< TTransferPathPair >& xferPairs = m_archivingModel.GetPathPairs();
 		if ( m_destOnSelection )
 		{
-			for ( size_t i = 0; i != filePairs.size(); ++i )
+			for ( size_t i = 0; i != xferPairs.size(); ++i )
 			{
-				const fs::CFlexPath& srcPath = filePairs[ i ].second;
+				const fs::CFlexPath& srcPath = xferPairs[ i ].second;
 				m_filesListCtrl.SetSubItemText( m_lvState.m_pIndexImpl->m_selItems[ i ], DestFilename, (LPTSTR)srcPath.GetNameExt() );
 			}
 		}
 		else
 		{
-			for ( UINT i = 0; i != filePairs.size(); ++i )
+			for ( UINT i = 0; i != xferPairs.size(); ++i )
 			{
-				const fs::CFlexPath& srcPath = filePairs[ i ].second;
+				const fs::CFlexPath& srcPath = xferPairs[ i ].second;
 				m_filesListCtrl.SetSubItemText( i, DestFilename, (LPTSTR)srcPath.GetNameExt() );
 			}
 		}
@@ -178,7 +178,7 @@ void CArchiveImagesDialog::SetDirty( bool isDirty /*= true*/ )
 {
 	if ( isDirty && !m_dirty )
 	{
-		m_filesContext.ResetDestPaths();
+		m_archivingModel.ResetDestPaths();
 		SetupFilesView();
 		SetDlgItemInt( IDC_COUNTER_EDIT, m_seqCounter );
 	}
@@ -209,7 +209,7 @@ bool CArchiveImagesDialog::CheckDestFolder( void )
 bool CArchiveImagesDialog::GenerateDestFiles( void )
 {
 	std::tstring format = m_formatCombo.GetCurrentText();
-	bool validFormat = CArchiveImagesContext::IsValidFormat( format );
+	bool validFormat = CArchivingModel::IsValidFormat( format );
 	if ( !validFormat )
 	{
 		m_formatCombo.SetFrameColor( color::Error );
@@ -224,7 +224,7 @@ bool CArchiveImagesDialog::GenerateDestFiles( void )
 	// In dialog generation mode, we need to force shallow stream names (root-only) since we don't save an "_Album.sld",
 	// so we can't persist CAlbumModel::UseDeepStreamPaths flag for consistency on load.
 	//
-	if ( m_filesContext.GenerateDestPaths( m_destPath, format, &newCounter, true ) )
+	if ( m_archivingModel.GenerateDestPaths( m_destPath, format, &newCounter, true ) )
 	{
 		m_formatCombo.SetFrameColor( color::Null );
 		if ( newCounter != prevCounter )
@@ -247,7 +247,7 @@ bool CArchiveImagesDialog::CommitFileOperation( void )
 {
 	std::tstring message = str::Format( IDS_PROMPT_FILE_OP,
 		m_fileOp == FOP_FileCopy ? _T("copy") : _T("move"),
-		m_filesContext.GetPathPairs().size(),
+		m_archivingModel.GetPathPairs().size(),
 		m_destPath.GetPtr() );
 
 	if ( AfxMessageBox( message.c_str(), MB_OKCANCEL | MB_ICONQUESTION ) != IDOK )
@@ -257,13 +257,13 @@ bool CArchiveImagesDialog::CommitFileOperation( void )
 	{
 		default: ASSERT( false );
 		case ToDirectory:
-			return m_filesContext.CommitOperations( m_fileOp );
+			return m_archivingModel.CommitOperations( m_fileOp );
 		case ToArchiveStg:
 			if ( m_destPath.FileExist() )
 				if ( app::GetUserReport().MessageBox( str::Format( IDS_OVERWRITE_PROMPT, m_destPath.GetPtr() ), MB_YESNO | MB_ICONQUESTION ) != IDYES )
 					return false;
 
-			return m_filesContext.BuildArchiveStorageFile( m_destPath, m_fileOp, this );
+			return m_archivingModel.BuildArchiveStorageFile( m_destPath, m_fileOp, this );
 	}
 }
 
@@ -434,7 +434,7 @@ void CArchiveImagesDialog::OnCBnChange_Format( void )
 	if ( !m_inInit )
 		SetDirty();
 
-	m_formatCombo.SetFrameColor( CArchiveImagesContext::IsValidFormat( m_formatCombo.GetCurrentText() ) ? color::Null : color::Error );
+	m_formatCombo.SetFrameColor( CArchivingModel::IsValidFormat( m_formatCombo.GetCurrentText() ) ? color::Null : color::Error );
 }
 
 void CArchiveImagesDialog::OnEnChangeDestFolder( void )
@@ -485,7 +485,7 @@ void CArchiveImagesDialog::OnEditArchivePassword( void )
 	if ( dlg.Run() )
 	{
 		CImageArchiveStg::EncryptPassword( dlg.m_password );
-		m_filesContext.StorePassword( dlg.m_password );
+		m_archivingModel.StorePassword( dlg.m_password );
 	}
 }
 

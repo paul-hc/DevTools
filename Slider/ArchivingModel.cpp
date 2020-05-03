@@ -1,6 +1,6 @@
 
 #include "stdafx.h"
-#include "ArchiveImagesContext.h"
+#include "ArchivingModel.h"
 #include "ImageArchiveStg.h"
 #include "AlbumModel.h"
 #include "FileOperation.h"
@@ -30,22 +30,22 @@ const CEnumTags& GetTags_FileOp( void )
 }
 
 
-// CArchiveImagesContext implementation
+// CArchivingModel implementation
 
-CArchiveImagesContext::CArchiveImagesContext( void )
+CArchivingModel::CArchivingModel( void )
 {
 }
 
-CArchiveImagesContext::~CArchiveImagesContext()
+CArchivingModel::~CArchivingModel()
 {
 }
 
-void CArchiveImagesContext::Stream( CArchive& archive )
+void CArchivingModel::Stream( CArchive& archive )
 {
 	serial::SerializeValues( archive, m_pathPairs );
 }
 
-bool CArchiveImagesContext::CreateArchiveStgFile( CAlbumModel* pModel, const fs::CPath& destStgPath )
+bool CArchivingModel::CreateArchiveStgFile( CAlbumModel* pModel, const fs::CPath& destStgPath )
 {
 	std::vector< CFileAttr* > srcFiles;
 	pModel->QueryFileAttrs( srcFiles );
@@ -60,7 +60,7 @@ bool CArchiveImagesContext::CreateArchiveStgFile( CAlbumModel* pModel, const fs:
 	return BuildArchiveStorageFile( destStgPath, FOP_FileCopy );						// false: user declined overwrite
 }
 
-void CArchiveImagesContext::SetupSourcePaths( const std::vector< CFileAttr* >& srcFiles )
+void CArchivingModel::SetupSourcePaths( const std::vector< CFileAttr* >& srcFiles )
 {
 	m_pathPairs.clear();
 	m_pathPairs.resize( srcFiles.size() );
@@ -69,17 +69,17 @@ void CArchiveImagesContext::SetupSourcePaths( const std::vector< CFileAttr* >& s
 		m_pathPairs[ i ].first = srcFiles[ i ]->GetPath();
 }
 
-void CArchiveImagesContext::ResetDestPaths( void )
+void CArchivingModel::ResetDestPaths( void )
 {
-	for ( std::vector< std::pair< fs::CFlexPath, fs::CFlexPath > >::iterator it = m_pathPairs.begin(); it != m_pathPairs.end(); ++it )
+	for ( std::vector< TTransferPathPair >::iterator it = m_pathPairs.begin(); it != m_pathPairs.end(); ++it )
 		it->second.Clear();			// reset the destination filepath
 }
 
-bool CArchiveImagesContext::CommitOperations( FileOp fileOp, bool isUndoOp /*= false*/ ) const
+bool CArchivingModel::CommitOperations( FileOp fileOp, bool isUndoOp /*= false*/ ) const
 {
 	CWaitCursor wait;
 
-	for ( std::vector< std::pair< fs::CFlexPath, fs::CFlexPath > >::const_iterator it = m_pathPairs.begin(); it != m_pathPairs.end(); )
+	for ( std::vector< TTransferPathPair >::const_iterator it = m_pathPairs.begin(); it != m_pathPairs.end(); )
 	{
 		try
 		{
@@ -100,7 +100,7 @@ bool CArchiveImagesContext::CommitOperations( FileOp fileOp, bool isUndoOp /*= f
 	return true;
 }
 
-void CArchiveImagesContext::CommitOperation( FileOp fileOp, const std::pair< fs::CFlexPath, fs::CFlexPath >& filePair, bool isUndoOp /*= false*/ ) throws_( CException* )
+void CArchivingModel::CommitOperation( FileOp fileOp, const TTransferPathPair& xferPair, bool isUndoOp /*= false*/ ) throws_( CException* )
 {
 	CFileOperation fileOperation( true );
 	bool succeeded = false;
@@ -109,15 +109,15 @@ void CArchiveImagesContext::CommitOperation( FileOp fileOp, const std::pair< fs:
 	{
 		case FOP_FileCopy:
 			if ( !isUndoOp )
-				succeeded = fileOperation.Copy( filePair.first, filePair.second );		// copy SRC to DEST
+				succeeded = fileOperation.Copy( xferPair.first, xferPair.second );		// copy SRC to DEST
 			else
-				succeeded = fileOperation.Delete( filePair.second );					// delete DEST
+				succeeded = fileOperation.Delete( xferPair.second );					// delete DEST
 			break;
 		case FOP_FileMove:
 			if ( !isUndoOp )
-				succeeded = fileOperation.Move( filePair.first, filePair.second );		// move SRC to DEST
+				succeeded = fileOperation.Move( xferPair.first, xferPair.second );		// move SRC to DEST
 			else
-				succeeded = fileOperation.Move( filePair.second, filePair.first );		// move DEST to SRC
+				succeeded = fileOperation.Move( xferPair.second, xferPair.first );		// move DEST to SRC
 			break;
 		default:
 			ASSERT( false );
@@ -126,11 +126,11 @@ void CArchiveImagesContext::CommitOperation( FileOp fileOp, const std::pair< fs:
 	fileOperation.Log( app::GetApp()->GetLogger() );
 }
 
-bool CArchiveImagesContext::CanCommitOperations( std::vector< std::pair< fs::CFlexPath, fs::CFlexPath > >& rErrorPairs, FileOp fileOp, bool isUndoOp ) const
+bool CArchivingModel::CanCommitOperations( std::vector< TTransferPathPair >& rErrorPairs, FileOp fileOp, bool isUndoOp ) const
 {
 	rErrorPairs.clear();
 
-	for ( std::vector< std::pair< fs::CFlexPath, fs::CFlexPath > >::const_iterator it = m_pathPairs.begin(); it != m_pathPairs.end(); ++it )
+	for ( std::vector< TTransferPathPair >::const_iterator it = m_pathPairs.begin(); it != m_pathPairs.end(); ++it )
 		switch ( fileOp )
 		{
 			case FOP_FileCopy:
@@ -162,13 +162,13 @@ bool CArchiveImagesContext::CanCommitOperations( std::vector< std::pair< fs::CFl
 	return rErrorPairs.empty();		// true if no errors
 }
 
-bool CArchiveImagesContext::IsValidFormat( const std::tstring& format )
+bool CArchivingModel::IsValidFormat( const std::tstring& format )
 {
 	CPathFormatter formatter( format, false );
 	return formatter.IsValidFormat();
 }
 
-bool CArchiveImagesContext::GenerateDestPaths( const fs::CPath& destPath, const std::tstring& format, UINT* pSeqCount, bool forceShallowStreamNames /*= false*/ )
+bool CArchivingModel::GenerateDestPaths( const fs::CPath& destPath, const std::tstring& format, UINT* pSeqCount, bool forceShallowStreamNames /*= false*/ )
 {
 	ASSERT_PTR( pSeqCount );
 	ResetDestPaths();
@@ -208,7 +208,7 @@ bool CArchiveImagesContext::GenerateDestPaths( const fs::CPath& destPath, const 
 	return true;
 }
 
-bool CArchiveImagesContext::BuildArchiveStorageFile( const fs::CPath& destStgPath, FileOp fileOp, CWnd* pParentWnd /*= AfxGetMainWnd()*/ ) const
+bool CArchivingModel::BuildArchiveStorageFile( const fs::CPath& destStgPath, FileOp fileOp, CWnd* pParentWnd /*= AfxGetMainWnd()*/ ) const
 {
 	CProgressService progress( pParentWnd, _T("Building image archive storage file") );
 	ui::IProgressService* pProgressService = progress.GetService();
@@ -249,7 +249,7 @@ bool CArchiveImagesContext::BuildArchiveStorageFile( const fs::CPath& destStgPat
 		pProgressService->AdvanceStage( _T("Delete source image files") );
 		pProgressService->SetBoundedProgressCount( m_pathPairs.size() );
 
-		for ( std::vector< std::pair< fs::CFlexPath, fs::CFlexPath > >::const_iterator it = m_pathPairs.begin(); it != m_pathPairs.end(); )
+		for ( std::vector< TTransferPathPair >::const_iterator it = m_pathPairs.begin(); it != m_pathPairs.end(); )
 		{
 			if ( it->first.FileExist() )
 				if ( !it->first.IsComplexPath() )

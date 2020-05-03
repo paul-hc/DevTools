@@ -232,11 +232,11 @@ bool CAlbumDoc::SaveAsArchiveStg( const fs::CPath& newStgPath )
 			{
 				CImageArchiveStg::DiscardCachedImages( oldDocPath );
 
-				CArchiveImagesContext archiveContext;
+				CArchivingModel archivingModel;
 				CAlbumModel tempModel = m_model;				// temp copy so that it can display original thumbnails while creating, avoiding sharing errors
 
 				// don't pass the document, it's too early to save the album stream, since we're working on a tempModel copy
-				if ( archiveContext.CreateArchiveStgFile( &tempModel, newStgPath ) )
+				if ( archivingModel.CreateArchiveStgFile( &tempModel, newStgPath ) )
 					m_model = tempModel;						// assign the results
 				else
 					return false;
@@ -366,17 +366,17 @@ void CAlbumDoc::ClearCustomOrder( custom_order::ClearMode clearMode /*= custom_o
 	m_customOrderRedoStack.ClearStack( clearMode );
 }
 
-bool CAlbumDoc::MakeCustomOrder( int& rToDestIndex, std::vector< int >& rToMoveIndexes )
+bool CAlbumDoc::DropCustomOrder( int& rDropIndex, std::vector< int >& rSelIndexes )
 {
 	custom_order::COpStep step;
 
-	step.m_toMoveIndexes = rToMoveIndexes;
-	step.m_toDestIndex = rToDestIndex;
+	step.m_dragSelIndexes = rSelIndexes;
+	step.m_dropIndex = rDropIndex;
 
-	if ( !m_model.MoveCustomOrderIndexes( rToDestIndex, rToMoveIndexes ) )
+	if ( !m_model.DropCustomOrderIndexes( rDropIndex, rSelIndexes ) )
 		return false;
 
-	step.m_newDestIndex = rToDestIndex;
+	step.m_newDroppedIndex = rDropIndex;
 	m_customOrderUndoStack.push_front( step );		// push to the undo stack the current custom order step
 	m_customOrderRedoStack.ClearStack();			// after custom order must clear the redo stack
 	return true;
@@ -397,14 +397,16 @@ bool CAlbumDoc::UndoRedoCustomOrder( custom_order::COpStack& rFromStack, custom_
 		if ( AfxMessageBox( message.c_str(), MB_OKCANCEL | MB_ICONQUESTION ) != IDOK )
 			return false;
 
-		std::vector< std::pair< fs::CFlexPath, fs::CFlexPath > > errorPairs;
-		if ( !topStep.m_archivedImages.CanCommitOperations( errorPairs, topStep.m_fileOp, isUndoOp ) )
+		CArchivingModel& rArchivingModel = topStep.RefArchivingModel();
+		std::vector< TTransferPathPair > errorPairs;
+
+		if ( !rArchivingModel.CanCommitOperations( errorPairs, topStep.m_fileOp, isUndoOp ) )
 		{
 			message = str::Format( IDS_UNDOREDO_INVALID_FILE_PAIRS,
 				isUndoOp ? _T("undo") : _T("redo"),
 				errorPairs.size(),
 				FOP_FileCopy == topStep.m_fileOp ? _T("copy") : _T("move"),
-				topStep.m_archivedImages.GetPathPairs().size() );
+				rArchivingModel.GetPathPairs().size() );
 			switch ( AfxMessageBox( message.c_str(), MB_ABORTRETRYIGNORE | MB_ICONEXCLAMATION ) )
 			{
 				case IDABORT:	rFromStack.pop_front(); return false;		// remove the faulty entry from the stack
@@ -413,7 +415,7 @@ bool CAlbumDoc::UndoRedoCustomOrder( custom_order::COpStack& rFromStack, custom_
 			}
 		}
 
-		if ( !topStep.m_archivedImages.CommitOperations( topStep.m_fileOp, isUndoOp ) )
+		if ( !rArchivingModel.CommitOperations( topStep.m_fileOp, isUndoOp ) )
 			return false;
 
 		// undo operation from FROM to TO stacks
@@ -436,9 +438,9 @@ bool CAlbumDoc::UndoRedoCustomOrder( custom_order::COpStack& rFromStack, custom_
 		custom_order::COpStep step = rToStack.front();		// copy by value since redo modifies it
 
 		if ( isUndoOp )
-			m_model.MoveBackCustomOrderIndexes( step.m_newDestIndex, step.m_toMoveIndexes );
+			m_model.UndropCustomOrderIndexes( step.m_newDroppedIndex, step.m_dragSelIndexes );
 		else
-			m_model.MoveCustomOrderIndexes( step.m_toDestIndex, step.m_toMoveIndexes );
+			m_model.DropCustomOrderIndexes( step.m_dropIndex, step.m_dragSelIndexes );
 
 		if ( isUndoOp )
 		{
@@ -453,7 +455,7 @@ bool CAlbumDoc::UndoRedoCustomOrder( custom_order::COpStack& rFromStack, custom_
 		UpdateAllViewsOfType< CAlbumImageView >( pAlbumViewTarget, Hint_RestoreSelection );
 
 		// select the un-dropped images
-		CListViewState dropState( step.m_toMoveIndexes );
+		CListViewState dropState( step.m_dragSelIndexes );
 
 		pAlbumViewTarget->GetPeerThumbView()->SetListViewState( dropState, true );
 		pAlbumViewTarget->OnUpdate( NULL, 0, NULL );
@@ -776,6 +778,7 @@ void CAlbumDoc::OnUpdateClearCustomOrderUndoRedoStacks( CCmdUI* pCmdUI )
 void CAlbumDoc::CmArchiveImages( void )
 {
 	CArchiveImagesDialog dialog( &m_model, GetPathName().GetString() );
+
 	if ( CAlbumImageView* pImageView = GetAlbumImageView() )
 	{
 		CListViewState lvState( StoreByIndex );
@@ -783,6 +786,7 @@ void CAlbumDoc::CmArchiveImages( void )
 		pImageView->GetPeerThumbView()->GetListViewState( lvState );
 		dialog.StoreSelection( lvState );
 	}
+
 	if ( dialog.DoModal() != IDCANCEL )
 	{
 		if ( ToDirectory == dialog.m_destType )
@@ -790,7 +794,7 @@ void CAlbumDoc::CmArchiveImages( void )
 			custom_order::COpStep step;
 
 			step.m_fileOp = dialog.m_fileOp;
-			step.m_archivedImages = dialog.m_filesContext;
+			step.StoreArchivingModel( dialog.m_archivingModel );
 
 			// push to the undo stack the current custom order step
 			m_customOrderUndoStack.push_front( step );

@@ -53,7 +53,6 @@ int CAlbumThumbListView::s_fontHeight = 0;
 
 // init according to CWorkspace::Instance().m_thumbListColCount, which is 1 by default
 DWORD CAlbumThumbListView::s_listCreationStyle = WS_VSCROLL | LBS_DISABLENOSCROLL;
-std::vector< int > CAlbumThumbListView::s_toMoveIndexes;
 CSize CAlbumThumbListView::scrollTimerDivider( 3, 2 );
 
 IMPLEMENT_DYNCREATE( CAlbumThumbListView, CCtrlView )
@@ -371,15 +370,16 @@ void CAlbumThumbListView::RestoreSelection( void )
 // Returns true when some of the display indexes specified overlaps with some of the current selected files
 // Typically called to decide whether to use current or near selection backup on Hint_SmartBackupSelection notification
 //
-bool CAlbumThumbListView::SelectionOverlapsWith( const std::vector< int >& displayIndexes /*= s_toMoveIndexes*/ ) const
+bool CAlbumThumbListView::SelectionOverlapsWith( const std::vector< int >& displayIndexes ) const
 {
 	CListViewState currSelection( StoreByString );
-
 	GetListViewState( currSelection );
+
 	if ( !currSelection.IsEmpty() && !displayIndexes.empty() )
 		for ( size_t i = 0; i != displayIndexes.size(); ++i )
 			if ( utl::Contains( currSelection.m_pStringImpl->m_selItems, m_pAlbumModel->GetFileAttr( displayIndexes[ i ] )->GetPath().Get() ) )
 				return true;
+
 	return false;
 }
 
@@ -824,7 +824,7 @@ BOOL CAlbumThumbListView::OnDrop( COleDataObject* pDataObject, DROPEFFECT dropEf
 		return FALSE;
 
 	CAlbumDoc* pAlbumDoc = GetAlbumDoc();
-	int toDestIndex = GetImageIndexFromPoint( point );
+	int dropIndex = GetImageIndexFromPoint( point );
 
 	// custom order drag&drop was allowed only between views of the same document... TODO
 	if ( CAlbumThumbListView* pThumbView = dynamic_cast< CAlbumThumbListView* >( selData.m_pSrcWnd ) )
@@ -833,31 +833,32 @@ BOOL CAlbumThumbListView::OnDrop( COleDataObject* pDataObject, DROPEFFECT dropEf
 			ASSERT( false );	// TODO: drag&drop between albums
 		}
 
-	s_toMoveIndexes.swap( selData.m_selIndexes );			// used for temporary storing display indexes to drop
+	m_dragSelIndexes.swap( selData.m_selIndexes );			// used for temporary storing display indexes to drop
 
-	if ( LB_ERR == toDestIndex )
-		toDestIndex = static_cast< int >( m_pAlbumModel->GetFileAttrCount() );		// if toDestIndex is -1, then move at back selected indexes
+	if ( LB_ERR == dropIndex )
+		dropIndex = static_cast< int >( m_pAlbumModel->GetFileAttrCount() );		// if dropIndex is -1, then move at back selected indexes
 
-	if ( !pAlbumDoc->GetModel()->IsCustomOrder() )		// not yet in custom order: prompt the user to switch to custom order
+	if ( !pAlbumDoc->GetModel()->IsCustomOrder() )			// not yet in custom order: prompt the user to switch to custom order
 		if ( IDOK == AfxMessageBox( IDS_PROMPT_SWITCHTOCUSTOMORDER, MB_OKCANCEL | MB_ICONQUESTION ) )
 			pAlbumDoc->RefModel()->SetFileOrder( CAlbumModel::CustomOrder );
 		else
 			return FALSE;
 
-	TRACE( _T("\tDropped to index=%d indexes: %s\n"), toDestIndex, str::FormatSet( s_toMoveIndexes ).c_str() );
+	TRACE( _T("\tDropped to index=%d selIndexes: %s\n"), dropIndex, str::FormatSet( m_dragSelIndexes ).c_str() );
 
 	// for the views != than the target view (if any), backup current/near selection before modifying the m_pAlbumModel member
 	pAlbumDoc->UpdateAllViewsOfType( m_pPeerImageView, Hint_SmartBackupSelection );
 
-	// move the selected indexes to their new position; after this call s_toMoveIndexes contains the new display indexes for the dropped files.
-	if ( pAlbumDoc->MakeCustomOrder( toDestIndex, s_toMoveIndexes ) )
-	{	// After move the display indexes have changed -> update the view
+	// move the selected indexes to their new position; after this call m_dragSelIndexes contains the new display indexes for the dropped files.
+	if ( pAlbumDoc->DropCustomOrder( dropIndex, m_dragSelIndexes ) )
+	{
+		// after the drop, display indexes have changed: now they became 'droppedSelIndexes' - update the view
 		pAlbumDoc->SetModifiedFlag();
 		pAlbumDoc->OnAlbumModelChanged( FM_CustomOrderChanged );
 
 		pAlbumDoc->UpdateAllViewsOfType( m_pPeerImageView, Hint_RestoreSelection );
 
-		CListViewState dropState( s_toMoveIndexes );
+		CListViewState dropState( m_dragSelIndexes );
 
 		SetListViewState( dropState, true );
 		m_pPeerImageView->OnUpdate( NULL, 0, NULL );

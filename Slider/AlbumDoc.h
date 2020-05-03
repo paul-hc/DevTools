@@ -44,7 +44,7 @@ public:
 	bool AddExplicitFiles( const std::vector< std::tstring >& files, bool doUpdate = true );
 
 	// custom order support
-	bool MakeCustomOrder( int& rToDestIndex, std::vector< int >& rToMoveIndexes );
+	bool DropCustomOrder( int& rDropIndex, std::vector< int >& rSelIndexes );
 
 	// auto-drop support
 	bool InitAutoDropRecipient( void );

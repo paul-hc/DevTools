@@ -62,8 +62,8 @@ public:
 	// custom order
 	bool IsCustomOrder( void ) const { return CustomOrder == GetFileOrder(); }
 	void SetCustomOrder( const std::vector< CFileAttr* >& customOrder );			// explicit custom order
-	bool MoveCustomOrderIndexes( int& rToDestIndex, std::vector< int >& rToMoveIndexes );
-	bool MoveBackCustomOrderIndexes( int newDestIndex, const std::vector< int >& rToMoveIndexes );
+	bool DropCustomOrderIndexes( int& rDropIndex, std::vector< int >& rSelIndexes );
+	bool UndropCustomOrderIndexes( int newDroppedIndex, const std::vector< int >& rSelIndexes );
 
 	bool AnyFoundFiles( void ) const { return !m_fileAttributes.empty(); }
 	size_t GetFileAttrCount( void ) const { return m_fileAttributes.size(); }

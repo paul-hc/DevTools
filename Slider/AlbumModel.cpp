@@ -289,96 +289,103 @@ void CAlbumModel::SetCustomOrder( const std::vector< CFileAttr* >& customOrder )
 		m_customOrder[ i ] = static_cast< int >( FindPosFileAttr( customOrder[ i ] ) );
 }
 
-// Assumes that rToMoveIndexes is sorted ascending.
+// Assumes that rSelIndexes is sorted ascending.
+// At input:
+//	- rDropIndex: the drop position;
+//	- rSelIndexes: the drag selected display indexes;
 // At return:
-//	- rToDestIndex: contains the moved position of the insertion index;
-//	- rToMoveIndexes: contains the moved display indexes;
+//	- rDropIndex: the new dropped position (after dropping);
+//	- rSelIndexes: the dropped display indexes;
 // Returns true if any display indexes were actually moved, otherwise false
-bool CAlbumModel::MoveCustomOrderIndexes( int& rToDestIndex, std::vector< int >& rToMoveIndexes )
+bool CAlbumModel::DropCustomOrderIndexes( int& rDropIndex, std::vector< int >& rSelIndexes )
 {
 	// switch to custom order if not already
 	if ( m_fileOrder != CustomOrder )
 		SetFileOrder( CustomOrder );
 
-	// if toDestIndex == m_customOrder.size() then append indexes to move
-	ASSERT( rToDestIndex >= 0 && rToDestIndex <= (int)m_customOrder.size() );
-
+	int fileCount = static_cast<int>( m_fileAttributes.size() );
 	ASSERT( m_fileAttributes.size() == m_customOrder.size() );
-	ASSERT( rToMoveIndexes.size() > 0 && rToMoveIndexes.size() < m_customOrder.size() );
-	ASSERT( rToDestIndex >= 0 && rToDestIndex <= (int)m_customOrder.size() );
 
-	// copy the true indexes at the custom order indexes specified in rToMoveIndexes
-	std::vector< int > movedIndexes;
+	// if rDropIndex == fileCount then append indexes to move
+	ASSERT( rDropIndex >= 0 && rDropIndex <= fileCount );
 
-	movedIndexes.resize( rToMoveIndexes.size() );
-	for ( size_t i = 0; i != rToMoveIndexes.size(); ++i )
-		movedIndexes[ i ] = m_customOrder[ rToMoveIndexes[ i ] ];
+	ASSERT( rSelIndexes.size() > 0 && rSelIndexes.size() < m_customOrder.size() );
+	ASSERT( rDropIndex >= 0 && rDropIndex <= fileCount );
+
+	// copy the true indexes at the custom order indexes specified in rSelIndexes
+	std::vector< int > droppedSelIndexes;
+
+	droppedSelIndexes.resize( rSelIndexes.size() );
+	for ( size_t i = 0; i != rSelIndexes.size(); ++i )
+		droppedSelIndexes[ i ] = m_customOrder[ rSelIndexes[ i ] ];
 
 	// cut each custom index to move from m_customOrder in reverse order,
-	// assuming that display indexes in rToMoveIndexes are sorted ascending
-	for ( size_t i = rToMoveIndexes.size(); i-- != 0; )
+	// assuming that display indexes in rSelIndexes are sorted ascending
+	for ( size_t i = rSelIndexes.size(); i-- != 0; )
 	{
-		int toMoveIndex = rToMoveIndexes[ i ];
+		int selIndex = rSelIndexes[ i ];
 
-		m_customOrder.erase( m_customOrder.begin() + toMoveIndex );
-		// decrement rToDestIndex if removed display index is below it (offset to left destination index)
-		if ( toMoveIndex < rToDestIndex )
-			--rToDestIndex;
+		m_customOrder.erase( m_customOrder.begin() + selIndex );
+		// decrement rDropIndex if removed display index is below it (offset to left destination index)
+		if ( selIndex < rDropIndex )
+			--rDropIndex;
 	}
 
 	// insert the moved display indexes at the insertion point in their ascending order
-	for ( size_t i = 0; i != movedIndexes.size(); ++i, ++rToDestIndex )
+	for ( size_t i = 0; i != droppedSelIndexes.size(); ++i, ++rDropIndex )
 	{
-		m_customOrder.insert( m_customOrder.begin() + rToDestIndex, movedIndexes[ i ] );
+		m_customOrder.insert( m_customOrder.begin() + rDropIndex, droppedSelIndexes[ i ] );
 		// also store (replace) the new display index corresponding to each moved index in m_customOrder
-		movedIndexes[ i ] = rToDestIndex;
+		droppedSelIndexes[ i ] = rDropIndex;
 	}
-	if ( movedIndexes == rToMoveIndexes )
+	if ( droppedSelIndexes == rSelIndexes )
 		return false;			// after move nothing has changed
 
-	rToMoveIndexes.swap( movedIndexes );
+	rSelIndexes.swap( droppedSelIndexes );
 	return true;
 }
 
-bool CAlbumModel::MoveBackCustomOrderIndexes( int newDestIndex, const std::vector< int >& rToMoveIndexes )
+bool CAlbumModel::UndropCustomOrderIndexes( int newDroppedIndex, const std::vector< int >& rSelIndexes )
 {
 	// switch to custom order if not already
 	ASSERT( IsCustomOrder() );
-
-	// if newDestIndex == m_customOrder.size() then append indexes to move
-	ASSERT( newDestIndex >=0 && newDestIndex <= (int)m_customOrder.size() );
-
 	ASSERT( m_fileAttributes.size() == m_customOrder.size() );
-	ASSERT( rToMoveIndexes.size() > 0 && rToMoveIndexes.size() < m_customOrder.size() );
-	ASSERT( newDestIndex >= 0 && newDestIndex <= (int)m_customOrder.size() );
+
+	int fileCount = static_cast<int>( m_fileAttributes.size() );
+
+	// if newDroppedIndex == fileCount then append indexes to move
+	ASSERT( newDroppedIndex >= 0 && newDroppedIndex <= fileCount );
+
+	ASSERT( rSelIndexes.size() < m_customOrder.size() );
+	ASSERT( newDroppedIndex >= 0 && newDroppedIndex <= fileCount );
 
 	// extract the originally moved entries in m_customOrder
 	//
 	std::vector< int > movedIndexes;
-	std::vector< int >::iterator it;
-	int count = (int)rToMoveIndexes.size();
-	int toDestIndex = newDestIndex - count;		// dropped indexes are before the insertion point
+	int selCount = static_cast<int>( rSelIndexes.size() );
+	int dropIndex = newDroppedIndex - selCount;		// dropped indexes are before the insertion point
 
-	while ( count-- > 0 )
+	for ( std::vector< int >::iterator it; selCount-- > 0; )
 	{
-		int movedIndex = m_customOrder[ toDestIndex ];
+		int movedIndex = m_customOrder[ dropIndex ];
 
 		movedIndexes.push_back( movedIndex );
-		it = m_customOrder.erase( m_customOrder.begin() + toDestIndex );
+		it = m_customOrder.erase( m_customOrder.begin() + dropIndex );
 	}
 
 	for ( size_t i = 0; i != movedIndexes.size(); ++i )
 	{
-		int toMoveIndex = rToMoveIndexes[ i ];
+		int selIndex = rSelIndexes[ i ];
 
-		m_customOrder.insert( m_customOrder.begin() + toMoveIndex, movedIndexes[ i ] );
-		// decrement toDestIndex if current true index is before insertion point index
-		if ( toMoveIndex < toDestIndex )
-			++toDestIndex;
+		m_customOrder.insert( m_customOrder.begin() + selIndex, movedIndexes[ i ] );
+
+		// decrement dropIndex if current true index is before insertion point index
+		if ( selIndex < dropIndex )
+			++dropIndex;
 	}
 
-	TRACE( _T("toDestIndex=%d  %s\n"), toDestIndex, str::FormatSet( rToMoveIndexes ).c_str() );
-	TRACE( _T("newDestIndex=%d  %s\n"), newDestIndex, str::FormatSet( movedIndexes ).c_str() );
+	TRACE( _T("dropIndex=%d  %s\n"), dropIndex, str::FormatSet( rSelIndexes ).c_str() );
+	TRACE( _T("newDroppedIndex=%d  %s\n"), newDroppedIndex, str::FormatSet( movedIndexes ).c_str() );
 
 	return true;
 }

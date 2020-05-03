@@ -674,11 +674,15 @@
 					>
 				</File>
 				<File
-					RelativePath=".\ArchiveImagesContext.cpp"
+					RelativePath=".\ArchivingModel.cpp"
 					>
 				</File>
 				<File
-					RelativePath=".\ArchiveImagesContext.h"
+					RelativePath=".\ArchivingModel.h"
+					>
+				</File>
+				<File
+					RelativePath=".\ArchivingModel_fwd.h"
 					>
 				</File>
 				<File

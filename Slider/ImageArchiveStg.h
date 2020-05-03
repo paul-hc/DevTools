@@ -6,6 +6,7 @@
 #include "utl/StructuredStorage.h"
 #include "utl/UI/IProgressService.h"
 #include "utl/UI/Thumbnailer_fwd.h"
+#include "ArchivingModel_fwd.h"
 #include "ModelSchema.h"
 #include "FileAttr.h"
 #include <set>
@@ -28,7 +29,7 @@ public:
 	void Close( void );
 	static void DiscardCachedImages( const fs::CPath& stgFilePath );		// to avoid sharing violations on stream access
 
-	void CreateImageArchive( const TCHAR* pStgFilePath, const std::tstring& password, const std::vector< std::pair< fs::CFlexPath, fs::CFlexPath > >& filePairs,
+	void CreateImageArchive( const TCHAR* pStgFilePath, const std::tstring& password, const std::vector< TTransferPathPair >& xferPairs,
 							 ui::IProgressService* pProgressService ) throws_( CException* );
 
 	bool SavePassword( const std::tstring& password );
@@ -59,10 +60,10 @@ protected:
 	static void DecodeDeepStreamPath( Iterator itStart, Iterator itEnd ) { std::replace( itStart, itEnd, s_subPathSep, _T('\\') ); }			// '*' -> '\'
 private:
 	void CreateImageFiles( std::vector< CFileAttr >& rFileAttributes,
-						   const std::vector< std::pair< fs::CFlexPath, fs::CFlexPath > >& filePairs,
+						   const std::vector< TTransferPathPair >& xferPairs,
 						   ui::IProgressService* pProgressService ) throws_( CException* );
 	void CreateMetadataFile( const std::vector< CFileAttr >& fileAttributes );
-	void CreateThumbnailsStorage( const std::vector< std::pair< fs::CFlexPath, fs::CFlexPath > >& filePairs, ui::IProgressService* pProgressService );
+	void CreateThumbnailsStorage( const std::vector< TTransferPathPair >& xferPairs, ui::IProgressService* pProgressService );
 private:
 	CComPtr< IStorage > m_pThumbsStorage;
 	const GUID* m_pThumbsDecoderId;

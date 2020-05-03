@@ -2,7 +2,7 @@
 #define ArchiveImagesDialog_h
 #pragma once
 
-#include "ArchiveImagesContext.h"
+#include "ArchivingModel.h"
 #include "ListViewState.h"
 #include "utl/Path.h"
 #include "utl/UI/HistoryComboBox.h"
@@ -39,14 +39,14 @@ private:
 	const CAlbumModel* m_pModel;
 	fs::CPath m_srcDocPath;					// source document file path
 public:
-	CArchiveImagesContext m_filesContext;
+	CArchivingModel m_archivingModel;
 	FileOp m_fileOp;
 	DestType m_destType;
 	fs::CPath m_destPath;					// either a destination directory or compound file
 private:
 	CListViewState m_lvState;
 	int m_seqCounter;
-	bool m_destOnSelection;					// if true destination m_filesContext is built on selection, otherwise on all files
+	bool m_destOnSelection;					// if true destination m_archivingModel is built on selection, otherwise on all files
 	bool m_inInit;
 	bool m_dirty;
 	CFont m_largeBoldFont;
@@ -61,11 +61,11 @@ private:
 	CHistoryComboBox m_formatCombo;
 
 	// generated stuff
-	protected:
-	virtual void DoDataExchange( CDataExchange* pDX );
 protected:
+	virtual void DoDataExchange( CDataExchange* pDX );
 	virtual BOOL OnInitDialog( void );
 	virtual void OnOK( void );
+protected:
 	afx_msg HBRUSH OnCtlColor( CDC* pDC, CWnd* pWnd, UINT nCtlColor );
 	afx_msg void OnCBnChange_Format( void );
 	afx_msg void OnEnChangeCounter( void );

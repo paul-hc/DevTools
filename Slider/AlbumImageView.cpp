@@ -374,7 +374,7 @@ void CAlbumImageView::OnUpdate( CView* pSender, LPARAM lHint, CObject* pHint )
 			m_pPeerThumbView->BackupSelection( hint == Hint_BackupCurrSelection );
 			return;			// no base update (no redraw, etc)
 		case Hint_SmartBackupSelection:
-			m_pPeerThumbView->BackupSelection( !m_pPeerThumbView->SelectionOverlapsWith( CAlbumThumbListView::s_toMoveIndexes ) );
+			m_pPeerThumbView->BackupSelection( !m_pPeerThumbView->SelectionOverlapsWith( m_pPeerThumbView->GetDragSelIndexes() ) );
 			break;
 		case Hint_RestoreSelection:
 			m_pPeerThumbView->RestoreSelection();

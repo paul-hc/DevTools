@@ -18,23 +18,23 @@ namespace custom_order
 		if ( archive.IsStoring() )
 		{
 			archive << (int)m_fileOp;
-			archive << m_toDestIndex;
-			archive << m_newDestIndex;
+			archive << m_dropIndex;
+			archive << m_newDroppedIndex;
 		}
 		else
 		{
 			archive >> (int&)m_fileOp;
-			archive >> m_toDestIndex;
-			archive >> m_newDestIndex;
+			archive >> m_dropIndex;
+			archive >> m_newDroppedIndex;
 
-			enum { FOP_ReorderOld = -1 };
+			enum { FOP_ResequenceOld = -1 };
 
-			if ( FOP_ReorderOld == (int)m_fileOp )
-				m_fileOp = FOP_Reorder;						// backwards compat
+			if ( FOP_ResequenceOld == (int)m_fileOp )
+				m_fileOp = FOP_Resequence;					// backwards-compatibility
 		}
 
-		serial::SerializeValues( archive, m_toMoveIndexes );
-		m_archivedImages.Stream( archive );
+		serial::SerializeValues( archive, m_dragSelIndexes );
+		m_archivingModel.Stream( archive );
 	}
 
 	const std::tstring& COpStep::GetOperationTag( void ) const
@@ -54,7 +54,7 @@ namespace custom_order
 			std::deque< COpStep >::iterator it = begin();
 
 			while ( it != end() )
-				if ( ( CM_ClearReorder == clearMode && it->IsReorderOperation() ) ||
+				if ( ( CM_ClearReorder == clearMode && it->IsResequenceOperation() ) ||
 					 ( CM_ClearArchiveImages == clearMode && it->IsArchivingOperation() ) )
 					it = erase( it );
 				else
