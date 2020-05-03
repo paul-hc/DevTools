@@ -2,6 +2,7 @@
 #include "stdafx.h"
 #include "ImagesModel.h"
 #include "FileAttr.h"
+#include "ImageArchiveStg.h"
 #include "utl/ContainerUtilities.h"
 #include "utl/Serialization.h"
 #include "utl/SerializeStdTypes.h"
@@ -17,7 +18,20 @@ CImagesModel::CImagesModel( void )
 
 CImagesModel::~CImagesModel()
 {
-	ClearFileAttrs();
+	Clear();
+}
+
+void CImagesModel::Clear( void )
+{
+	utl::ClearOwningContainer( m_fileAttributes );
+
+	ReleaseStorages();
+	m_storagePaths.clear();
+}
+
+void CImagesModel::ReleaseStorages( void )
+{
+	CImageArchiveStg::Factory().ReleaseStorages( m_storagePaths );
 }
 
 void CImagesModel::Stream( CArchive& archive )
@@ -46,18 +60,38 @@ void CImagesModel::Stream( CArchive& archive )
 	}
 	else
 	{
-		fattr::QueryDisplaySequence( &displaySequence, m_fileAttributes );
+		fattr::QueryDisplayIndexSequence( &displaySequence, m_fileAttributes );
 		serial::SerializeValues( archive, displaySequence );		// basically persist CFileAttr::m_baselinePos
 	}
-}
-
-void CImagesModel::ClearFileAttrs( void )
-{
-	utl::ClearOwningContainer( m_fileAttributes );
 }
 
 void CImagesModel::StoreBaselineSequence( void )
 {
 	for ( size_t pos = 0; pos != m_fileAttributes.size(); ++pos )
 		m_fileAttributes[ pos ]->StoreBaselinePos( pos );
+}
+
+const CFileAttr* CImagesModel::FindFileAttrWithPath( const fs::CPath& filePath ) const
+{
+	return fattr::FindWithPath( m_fileAttributes, filePath );
+}
+
+bool CImagesModel::AddFileAttr( CFileAttr* pFileAttr )
+{
+	ASSERT_PTR( pFileAttr );
+	ASSERT( !utl::Contains( m_fileAttributes, pFileAttr ) );		// add once?
+
+	if ( const CFileAttr* pFound = FindFileAttrWithPath( pFileAttr->GetPath() ) )
+	{
+		delete pFileAttr;
+		return false;
+	}
+
+	m_fileAttributes.push_back( pFileAttr );
+	return true;
+}
+
+bool CImagesModel::AddStoragePath( const fs::CPath& storagePath )
+{
+	return utl::AddUnique( m_storagePaths, storagePath );
 }

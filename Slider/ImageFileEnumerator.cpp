@@ -81,10 +81,14 @@ void CImageFileEnumerator::SearchImageArchive( const fs::CPath& stgDocPath ) thr
 	AddFoundFile( stgDocPath.GetPtr() );
 }
 
+std::auto_ptr< CImagesModel > CImageFileEnumerator::ReleaseFoundImages( void )
+{
+	m_pFoundImages->StoreBaselineSequence();			// keep track of the original found order
+	return std::auto_ptr< CImagesModel >( m_pFoundImages.release() );
+}
+
 void CImageFileEnumerator::SwapResults( std::vector< CFileAttr >& rFileAttrs, std::vector< fs::CPath >* pArchiveStgPaths /*= NULL*/ )
 {
-	m_foundImages.StoreBaselineSequence();			// keep track of the original found order
-
 	rFileAttrs.swap( m_fileAttrs );
 
 	if ( pArchiveStgPaths != NULL )
@@ -122,7 +126,7 @@ void CImageFileEnumerator::PushMany( const std::vector< CFileAttr >& fileAttrs )
 	m_fileAttrs.reserve( std::min( m_fileAttrs.size() + fileAttrs.size(), m_maxFiles ) );
 
 	for ( std::vector< CFileAttr >::const_iterator itFileAttr = fileAttrs.begin(); itFileAttr != fileAttrs.end() && !MustStop(); ++itFileAttr )
-		Push( *itFileAttr );
+		Push( *itFileAttr );		// employ filtering
 }
 
 void CImageFileEnumerator::AddFoundFile( const TCHAR* pFilePath )

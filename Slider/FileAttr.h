@@ -43,7 +43,7 @@ public:
 	const CSize& GetImageDim( void ) const;
 
 	size_t GetBaselinePos( void ) const { ASSERT( m_baselinePos != utl::npos ); return m_baselinePos; }
-	void StoreBaselinePos( size_t baselinePos ) { ASSERT( utl::npos == m_baselinePos ); m_baselinePos = baselinePos; }
+	void StoreBaselinePos( size_t baselinePos ) { ASSERT( utl::npos == m_baselinePos ); m_baselinePos = baselinePos; }		// store it only once
 
 	std::tstring FormatFileSize( DWORD divideBy = KiloByte, const TCHAR* pFormat = _T("%s KB") ) const;
 	std::tstring FormatLastModifTime( LPCTSTR format = _T("%d-%m-%Y %H:%M:%S") ) const { return CTime( m_lastModifTime ).Format( format ).GetString(); }
@@ -75,8 +75,16 @@ namespace fs
 
 namespace fattr
 {
+	size_t FindPosWithPath( const std::vector< CFileAttr* >& fileAttributes, const fs::CPath& filePath );
+
+	inline const CFileAttr* FindWithPath( const std::vector< CFileAttr* >& fileAttributes, const fs::CPath& filePath )
+	{
+		size_t foundPos = FindPosWithPath( fileAttributes, filePath );
+		return foundPos != utl::npos ? fileAttributes[ foundPos ] : NULL;
+	}
+
 	template< typename IndexT >
-	void QueryDisplaySequence( std::vector< IndexT >* pDisplaySequence, const std::vector< CFileAttr* >& fileAttributes )
+	void QueryDisplayIndexSequence( std::vector< IndexT >* pDisplaySequence, const std::vector< CFileAttr* >& fileAttributes )
 	{	// pDisplaySequence contains baseline positions in current order
 		ASSERT_PTR( pDisplaySequence );
 

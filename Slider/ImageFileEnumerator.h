@@ -26,9 +26,10 @@ public:
 
 	// found files
 	bool AnyFound( void ) const { return !m_fileAttrs.empty(); }
-	const std::vector< CFileAttr >& GetFileAttrs( void ) const { return m_fileAttrs; }
+/**/ const std::vector< CFileAttr >& GetFileAttrs( void ) const { return m_fileAttrs; }
 
-	void SwapResults( std::vector< CFileAttr >& rFileAttrs, std::vector< fs::CPath >* pArchiveStgPaths = NULL );
+	std::auto_ptr< CImagesModel > ReleaseFoundImages( void );
+/**/ void SwapResults( std::vector< CFileAttr >& rFileAttrs, std::vector< fs::CPath >* pArchiveStgPaths = NULL );
 
 	const ui::CIssueStore& GetIssueStore( void ) const { return m_issueStore; }
 private:
@@ -46,9 +47,9 @@ private:
 	const CSearchSpec* m_pCurrSpec;
 
 	// found
-	CImagesModel m_foundImages;
-		std::vector< CFileAttr > m_fileAttrs;
-		std::vector< fs::CPath > m_archiveStgPaths;
+	std::auto_ptr< CImagesModel > m_pFoundImages;
+/**/ std::vector< CFileAttr > m_fileAttrs;
+/**/ std::vector< fs::CPath > m_archiveStgPaths;
 public:
 	static const Range< size_t > s_allFileSizesRange;
 };
