@@ -3,6 +3,7 @@
 #include "ArchivingModel.h"
 #include "ImageArchiveStg.h"
 #include "AlbumModel.h"
+#include "FileAttr.h"
 #include "FileOperation.h"
 #include "ProgressService.h"
 #include "Workspace.h"
@@ -47,9 +48,7 @@ void CArchivingModel::Stream( CArchive& archive )
 
 bool CArchivingModel::CreateArchiveStgFile( CAlbumModel* pModel, const fs::CPath& destStgPath )
 {
-	std::vector< CFileAttr* > srcFiles;
-	pModel->QueryFileAttrs( srcFiles );
-	SetupSourcePaths( srcFiles );
+	SetupSourcePaths( pModel->GetImagesModel().GetFileAttrs() );
 
 	UINT seqCount = 0;
 	static const std::tstring formatCopySrc = _T("*.*");

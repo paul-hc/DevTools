@@ -3,7 +3,7 @@
 #pragma once
 
 #include "utl/FlexPath.h"
-#include "AlbumModel.h"
+#include "ImagesModel.h"
 #include <deque>
 #include <vector>
 
@@ -97,7 +97,9 @@ namespace auto_drop
 
 		DropOperation GetDropOperation( void ) const { return m_dropOperation; }
 		void SetDropOperation( DropOperation dropOperation ) { m_dropOperation = dropOperation; }
-	protected:
+	private:
+		bool SearchForImages( CImagesModel* pFoundImagesModel ) const;
+
 		bool DoAutoDropOperation( const COpStack& dropStack, bool isUndoOp ) const;
 
 		static bool DoFileSetOperation( const std::vector< fs::CPath >& srcPaths, const std::vector< fs::CPath >& destPaths,

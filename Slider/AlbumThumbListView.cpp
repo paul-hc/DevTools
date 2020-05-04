@@ -5,6 +5,7 @@
 #include "MainFrame.h"
 #include "AlbumDoc.h"
 #include "AlbumImageView.h"
+#include "FileAttrAlgorithms.h"
 #include "SplitterWindow.h"
 #include "FileListDisplayPaths.h"
 #include "OleImagesDataSource.h"
@@ -765,8 +766,11 @@ bool CAlbumThumbListView::DoDragDrop( void )
 	CListSelectionData selData( this );
 	selData.m_selIndexes = indexesToDropState.m_pIndexImpl->m_selItems;
 
+	std::vector< CFileAttr* > selSequence;
+	m_pAlbumModel->QueryFileAttrsSequence( selSequence, selData.m_selIndexes );
+
 	std::vector< fs::CPath > filesToDrag;
-	m_pAlbumModel->FetchFilePathsFromIndexes( filesToDrag, selData.m_selIndexes );
+	utl::Assign( filesToDrag, selSequence, func::ToFilePath() );
 
 	ole::CImagesDataSource dataSource;
 	dataSource.CacheShellFilePaths( filesToDrag );
@@ -840,7 +844,7 @@ BOOL CAlbumThumbListView::OnDrop( COleDataObject* pDataObject, DROPEFFECT dropEf
 
 	if ( !pAlbumDoc->GetModel()->IsCustomOrder() )			// not yet in custom order: prompt the user to switch to custom order
 		if ( IDOK == AfxMessageBox( IDS_PROMPT_SWITCHTOCUSTOMORDER, MB_OKCANCEL | MB_ICONQUESTION ) )
-			pAlbumDoc->RefModel()->SetFileOrder( CAlbumModel::CustomOrder );
+			pAlbumDoc->RefModel()->StoreFileOrder( fattr::CustomOrder );
 		else
 			return FALSE;
 
@@ -852,13 +856,13 @@ BOOL CAlbumThumbListView::OnDrop( COleDataObject* pDataObject, DROPEFFECT dropEf
 	// move the selected indexes to their new position; after this call m_dragSelIndexes contains the new display indexes for the dropped files.
 	if ( pAlbumDoc->DropCustomOrder( dropIndex, m_dragSelIndexes ) )
 	{
-		// after the drop, display indexes have changed: now they became 'droppedSelIndexes' - update the view
+		// after the drop, display indexes have changed - update the view
 		pAlbumDoc->SetModifiedFlag();
 		pAlbumDoc->OnAlbumModelChanged( FM_CustomOrderChanged );
 
 		pAlbumDoc->UpdateAllViewsOfType( m_pPeerImageView, Hint_RestoreSelection );
 
-		CListViewState dropState( m_dragSelIndexes );
+		CListViewState dropState( m_dragSelIndexes );		// now it became 'droppedSelIndexes'
 
 		SetListViewState( dropState, true );
 		m_pPeerImageView->OnUpdate( NULL, 0, NULL );

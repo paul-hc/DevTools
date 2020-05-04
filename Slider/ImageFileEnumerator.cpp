@@ -38,10 +38,10 @@ void CImageFileEnumerator::Search( const std::vector< CSearchSpec* >& searchSpec
 		m_pCurrSpec = *itSpec;
 		try
 		{
-			const size_t oldFoundSize = m_fileAttrs.size();
+			const size_t oldFoundSize = m_foundImages.GetFileAttrs().size();
 			m_pCurrSpec->EnumImageFiles( this );
 
-			if ( oldFoundSize == m_fileAttrs.size() )		// no new matching files found
+			if ( oldFoundSize == m_foundImages.GetFileAttrs().size() )	// no new matching files found
 				m_issueStore.AddIssue( str::Format( _T("No matching images found in: %s"), m_pCurrSpec->GetFilePath().GetPtr() ) );
 		}
 		catch ( CException* pExc )
@@ -50,7 +50,7 @@ void CImageFileEnumerator::Search( const std::vector< CSearchSpec* >& searchSpec
 			{
 				case IDCANCEL:
 				case IDABORT:
-					CImageArchiveStg::Factory().ReleaseStorages( m_archiveStgPaths );
+					m_foundImages.ReleaseStorages();
 					throw new mfc::CUserAbortedException;
 				case IDTRYAGAIN:
 				case IDRETRY:	continue;
@@ -81,18 +81,10 @@ void CImageFileEnumerator::SearchImageArchive( const fs::CPath& stgDocPath ) thr
 	AddFoundFile( stgDocPath.GetPtr() );
 }
 
-std::auto_ptr< CImagesModel > CImageFileEnumerator::ReleaseFoundImages( void )
+void CImageFileEnumerator::SwapFoundImages( CImagesModel& rImagesModel )
 {
-	m_pFoundImages->StoreBaselineSequence();			// keep track of the original found order
-	return std::auto_ptr< CImagesModel >( m_pFoundImages.release() );
-}
-
-void CImageFileEnumerator::SwapResults( std::vector< CFileAttr >& rFileAttrs, std::vector< fs::CPath >* pArchiveStgPaths /*= NULL*/ )
-{
-	rFileAttrs.swap( m_fileAttrs );
-
-	if ( pArchiveStgPaths != NULL )
-		pArchiveStgPaths->swap( m_archiveStgPaths );
+	m_foundImages.StoreBaselineSequence();			// keep track of the original found order
+	m_foundImages.Swap( rImagesModel );
 }
 
 bool CImageFileEnumerator::PassFilter( const CFileAttr& fileAttr ) const
@@ -108,25 +100,24 @@ bool CImageFileEnumerator::PassFilter( const CFileAttr& fileAttr ) const
 	return true;
 }
 
-void CImageFileEnumerator::Push( const CFileAttr& fileAttr )
+void CImageFileEnumerator::Push( CFileAttr* pFileAttr )
 {
-	if ( !PassFilter( fileAttr ) )
+	if ( !PassFilter( *pFileAttr ) )
 		return;
 
-	m_fileAttrs.push_back( fileAttr );
+	m_foundImages.AddFileAttr( pFileAttr );
 
 	if ( m_pChainEnum != NULL )
-		m_pChainEnum->AddFoundFile( fileAttr.GetPath().GetPtr() );
+		m_pChainEnum->AddFoundFile( pFileAttr->GetPath().GetPtr() );
 
 //Sleep( 100 );			// debug progress bar
 }
 
-void CImageFileEnumerator::PushMany( const std::vector< CFileAttr >& fileAttrs )
+void CImageFileEnumerator::PushMany( const std::vector< CFileAttr* >& fileAttrs )
 {
-	m_fileAttrs.reserve( std::min( m_fileAttrs.size() + fileAttrs.size(), m_maxFiles ) );
-
-	for ( std::vector< CFileAttr >::const_iterator itFileAttr = fileAttrs.begin(); itFileAttr != fileAttrs.end() && !MustStop(); ++itFileAttr )
-		Push( *itFileAttr );		// employ filtering
+	// go via filtering
+	for ( std::vector< CFileAttr* >::const_iterator itFileAttr = fileAttrs.begin(); itFileAttr != fileAttrs.end() && !MustStop(); ++itFileAttr )
+		Push( *itFileAttr );
 }
 
 void CImageFileEnumerator::AddFoundFile( const TCHAR* pFilePath )
@@ -140,31 +131,31 @@ void CImageFileEnumerator::AddFoundFile( const TCHAR* pFilePath )
 		{
 			AddFoundSubDir( filePath.GetPtr() );		// a storage counts as a sub-directory
 
-			std::vector< CFileAttr > archiveImageAttrs;
+			std::vector< CFileAttr* > archiveImageAttrs;
 			CImageArchiveStg::Factory().LoadImagesMetadata( archiveImageAttrs, filePath );
 
 			if ( !archiveImageAttrs.empty() )
 			{
 				PushMany( archiveImageAttrs );
-				m_archiveStgPaths.push_back( filePath );
+				m_foundImages.AddStoragePath( filePath );
 			}
 		}
 	}
 	else if ( filePath.FileExist() )
-		Push( CFileAttr( filePath ) );
+		Push( new CFileAttr( filePath ) );
 }
 
 void CImageFileEnumerator::AddFile( const CFileFind& foundFile )
 {
-	fs::CPath filePath( foundFile.GetFilePath().GetString() );
+	fs::CPath filePath = foundFile.GetFilePath().GetString();
 
 	if ( CImageArchiveStg::HasImageArchiveExt( filePath.GetPtr() ) )
 		AddFoundFile( filePath.GetPtr() );
 	else
-		Push( CFileAttr( foundFile ) );
+		Push( new CFileAttr( foundFile ) );
 }
 
 bool CImageFileEnumerator::MustStop( void ) const
 {
-	return m_fileAttrs.size() >= m_maxFiles;
+	return m_foundImages.GetFileAttrs().size() >= m_maxFiles;
 }

@@ -1,6 +1,7 @@
 
 #include "stdafx.h"
 #include "CustomOrderUndoRedo.h"
+#include "ModelSchema.h"
 #include "utl/EnumTags.h"
 #include "utl/Serialization.h"
 
@@ -35,6 +36,17 @@ namespace custom_order
 
 		serial::SerializeValues( archive, m_dragSelIndexes );
 		m_archivingModel.Stream( archive );
+
+		if ( archive.IsLoading() )
+		{
+			app::ModelSchema docModelSchema = app::GetLoadingSchema( archive );
+			if ( docModelSchema <= app::Slider_v4_2 )
+			{
+				// backwards-compatibility: m_newDroppedIndex used to be PAST dropped selection (currently is AT dropped selection)
+				m_newDroppedIndex -= m_dragSelIndexes.size();
+				ENSURE( m_newDroppedIndex >= 0 );
+			}
+		}
 	}
 
 	const std::tstring& COpStep::GetOperationTag( void ) const

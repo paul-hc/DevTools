@@ -11,31 +11,31 @@
 
 namespace ut
 {
-	std::tstring MoveBy( const TCHAR srcText[], const std::vector< int >& selIndexes, seq::Direction direction )
+	std::string MoveBy( const char srcText[], const std::vector< int >& selIndexes, seq::Direction direction )
 	{
-		std::tstring chars = srcText;
-		seq::CSequenceAdapter< TCHAR > sequence( &chars[ 0 ], chars.size() );
+		std::string chars = srcText;
+		seq::CSequenceAdapter< char > sequence( &chars[ 0 ], chars.size() );
 
 		seq::MoveBy( sequence, selIndexes, direction );
 		return chars;
 	}
 
-	std::tstring Resequence( const TCHAR srcText[], const std::vector< int >& selIndexes, seq::MoveTo moveTo )
+	std::string Resequence( const char srcText[], const std::vector< int >& selIndexes, seq::MoveTo moveTo )
 	{
-		std::tstring chars = srcText;
-		seq::CSequenceAdapter< TCHAR > sequence( &chars[ 0 ], chars.size() );
+		std::string chars = srcText;
+		seq::CSequenceAdapter< char > sequence( &chars[ 0 ], chars.size() );
 
 		seq::Resequence( sequence, selIndexes, moveTo );
 		return chars;
 	}
 
-	std::tstring MakeDropSequence( const TCHAR srcText[], int dropIndex, const std::vector< int >& selIndexes )
+	std::string MakeDropSequence( const char srcText[], int dropIndex, const std::vector< int >& selIndexes )
 	{
-		std::vector< TCHAR > baselineSeq( srcText, str::end( srcText ) );
-		std::vector< TCHAR > newSequence;
+		std::vector< char > baselineSeq( srcText, str::end( srcText ) );
+		std::vector< char > newSequence;
 
 		seq::MakeDropSequence( newSequence, baselineSeq, dropIndex, selIndexes );
-		return std::tstring( &newSequence.front(), newSequence.size() );
+		return std::string( &newSequence.front(), newSequence.size() );
 	}
 }
 
@@ -70,56 +70,71 @@ void CResequenceTests::TestCanMove( void )
 
 void CResequenceTests::TestResequence( void )
 {
-	std::vector< int > selIndexes;
-	selIndexes.push_back( 2 );		// 'c'
-	selIndexes.push_back( 4 );		// 'e'
+	std::vector< int > sel_CE;
+	sel_CE.push_back( 2 );		// 'C'
+	sel_CE.push_back( 4 );		// 'E'
 
-	ASSERT_EQUAL( _T("AcBeDFG"), ut::MoveBy( _T("ABcDeFG"), selIndexes, seq::Prev ) );
-	ASSERT_EQUAL( _T("ABDcFeG"), ut::MoveBy( _T("ABcDeFG"), selIndexes, seq::Next ) );
+	ASSERT_EQUAL( "aCbEdfg", ut::MoveBy( "abCdEfg", sel_CE, seq::Prev ) );
+	ASSERT_EQUAL( "abdCfEg", ut::MoveBy( "abCdEfg", sel_CE, seq::Next ) );
 
-	ASSERT_EQUAL( _T("AcBeDFG"), ut::Resequence( _T("ABcDeFG"), selIndexes, seq::MovePrev ) );
-	ASSERT_EQUAL( _T("ABDcFeG"), ut::Resequence( _T("ABcDeFG"), selIndexes, seq::MoveNext ) );
+	ASSERT_EQUAL( "aCbEdfg", ut::Resequence( "abCdEfg", sel_CE, seq::MovePrev ) );
+	ASSERT_EQUAL( "abdCfEg", ut::Resequence( "abCdEfg", sel_CE, seq::MoveNext ) );
 
-	ASSERT_EQUAL( _T("cAeBDFG"), ut::Resequence( _T("ABcDeFG"), selIndexes, seq::MoveToStart ) );
-	ASSERT_EQUAL( _T("ABDFcGe"), ut::Resequence( _T("ABcDeFG"), selIndexes, seq::MoveToEnd ) );
+	ASSERT_EQUAL( "CaEbdfg", ut::Resequence( "abCdEfg", sel_CE, seq::MoveToStart ) );
+	ASSERT_EQUAL( "abdfCgE", ut::Resequence( "abCdEfg", sel_CE, seq::MoveToEnd ) );
 }
 
 void CResequenceTests::TestDropMove( void )
 {
-	{
-		std::vector< int > selIndexes;
-		selIndexes.push_back( 2 );		// 'c'
+if (0)
+{	// multiple selection
+	std::vector< int > sel_CEF;
+	sel_CEF.push_back( 2 );		// 'C'
+	sel_CEF.push_back( 4 );		// 'E'
+	sel_CEF.push_back( 5 );		// 'F'
 
-		ASSERT( seq::ChangesDropSequenceAt( 7, 0, selIndexes ) );
-		ASSERT( seq::ChangesDropSequenceAt( 7, 1, selIndexes ) );
-		ASSERT( !seq::ChangesDropSequenceAt( 7, 2, selIndexes ) );
-		ASSERT( !seq::ChangesDropSequenceAt( 7, 3, selIndexes ) );
-		ASSERT( seq::ChangesDropSequenceAt( 7, 4, selIndexes ) );
+	ASSERT_EQUAL( "abdCEFg", ut::MakeDropSequence( "abCdEFg", 3, sel_CEF ) );
+	ASSERT_EQUAL( "abdgCEF", ut::MakeDropSequence( "abCdEFg", 4, sel_CEF ) );
+}
 
-		ASSERT_EQUAL( _T("cABDeFG"), ut::MakeDropSequence( _T("ABcDeFG"), 0, selIndexes ) );
-		ASSERT_EQUAL( _T("AcBDeFG"), ut::MakeDropSequence( _T("ABcDeFG"), 1, selIndexes ) );
-		ASSERT_EQUAL( _T("ABcDeFG"), ut::MakeDropSequence( _T("ABcDeFG"), 2, selIndexes ) );
-		ASSERT_EQUAL( _T("ABcDeFG"), ut::MakeDropSequence( _T("ABcDeFG"), 3, selIndexes ) );
-		ASSERT_EQUAL( _T("ABDceFG"), ut::MakeDropSequence( _T("ABcDeFG"), 4, selIndexes ) );
-		ASSERT_EQUAL( _T("ABDecFG"), ut::MakeDropSequence( _T("ABcDeFG"), 5, selIndexes ) );
-		ASSERT_EQUAL( _T("ABDeFcG"), ut::MakeDropSequence( _T("ABcDeFG"), 6, selIndexes ) );
-		ASSERT_EQUAL( _T("ABDeFGc"), ut::MakeDropSequence( _T("ABcDeFG"), 7, selIndexes ) );
+	{	// single selection
+		std::vector< int > sel_C;
+		sel_C.push_back( 2 );		// 'C'
+
+		ASSERT( seq::ChangesDropSequenceAt( 7, 0, sel_C ) );
+		ASSERT( seq::ChangesDropSequenceAt( 7, 1, sel_C ) );
+		ASSERT( !seq::ChangesDropSequenceAt( 7, 2, sel_C ) );		// drop on itself (NIL for single selection)
+		ASSERT( !seq::ChangesDropSequenceAt( 7, 3, sel_C ) );		// drop on next (still NIL for single selection)
+		ASSERT( seq::ChangesDropSequenceAt( 7, 4, sel_C ) );
+
+		ASSERT_EQUAL( "Cabdefg", ut::MakeDropSequence( "abCdefg", 0, sel_C ) );
+		ASSERT_EQUAL( "aCbdefg", ut::MakeDropSequence( "abCdefg", 1, sel_C ) );
+		ASSERT_EQUAL( "abCdefg", ut::MakeDropSequence( "abCdefg", 2, sel_C ) );		// drop on itself (NIL)
+		ASSERT_EQUAL( "abCdefg", ut::MakeDropSequence( "abCdefg", 3, sel_C ) );		// drop on next (still NIL)
+
+		ASSERT_EQUAL( "abdCefg", ut::MakeDropSequence( "abCdefg", 4, sel_C ) );
+		ASSERT_EQUAL( "abdeCfg", ut::MakeDropSequence( "abCdefg", 5, sel_C ) );
+		ASSERT_EQUAL( "abdefCg", ut::MakeDropSequence( "abCdefg", 6, sel_C ) );
+		ASSERT_EQUAL( "abdefgC", ut::MakeDropSequence( "abCdefg", 7, sel_C ) );		// past end
 	}
 
-	{
-		std::vector< int > selIndexes;
-		selIndexes.push_back( 2 );		// 'c'
-		selIndexes.push_back( 4 );		// 'e'
-		selIndexes.push_back( 5 );		// 'f'
+	{	// multiple selection
+		std::vector< int > sel_CEF;
+		sel_CEF.push_back( 2 );		// 'C'
+		sel_CEF.push_back( 4 );		// 'E'
+		sel_CEF.push_back( 5 );		// 'F'
 
-		ASSERT( seq::ChangesDropSequenceAt( 7, 0, selIndexes ) );
-		ASSERT( seq::ChangesDropSequenceAt( 7, 2, selIndexes ) );
+		ASSERT( seq::ChangesDropSequenceAt( 7, 0, sel_CEF ) );
+		ASSERT( seq::ChangesDropSequenceAt( 7, 1, sel_CEF ) );
+		ASSERT( seq::ChangesDropSequenceAt( 7, 2, sel_CEF ) );
+		ASSERT( seq::ChangesDropSequenceAt( 7, 3, sel_CEF ) );
 
-		ASSERT_EQUAL( _T("cefABDG"), ut::MakeDropSequence( _T("ABcDefG"), 0, selIndexes ) );
-		ASSERT_EQUAL( _T("AcefBDG"), ut::MakeDropSequence( _T("ABcDefG"), 1, selIndexes ) );
-		ASSERT_EQUAL( _T("ABcefDG"), ut::MakeDropSequence( _T("ABcDefG"), 2, selIndexes ) );
-//		ASSERT_EQUAL( _T("ABDcefG"), ut::MakeDropSequence( _T("ABcDefG"), 3, selIndexes ) );
-//		ASSERT_EQUAL( _T("ABDGcef"), ut::MakeDropSequence( _T("ABcDefG"), 4, selIndexes ) );
+		ASSERT_EQUAL( "CEFabdg", ut::MakeDropSequence( "abCdEFg", 0, sel_CEF ) );
+		ASSERT_EQUAL( "aCEFbdg", ut::MakeDropSequence( "abCdEFg", 1, sel_CEF ) );
+		ASSERT_EQUAL( "abCEFdg", ut::MakeDropSequence( "abCdEFg", 2, sel_CEF ) );
+
+//		ASSERT_EQUAL( "abdCEFg", ut::MakeDropSequence( "abCdEFg", 3, sel_CEF ) );
+//		ASSERT_EQUAL( "abdgCEF", ut::MakeDropSequence( "abCdEFg", 4, sel_CEF ) );
 	}
 }
 

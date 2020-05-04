@@ -95,7 +95,7 @@ void CPathMaker::QueryDestToPaths( Container& rDestPaths ) const
 
 	for ( typename Container::iterator itDestPath = rDestPaths.begin(); itDestPath != rDestPaths.end(); ++itDestPath )
 	{
-		fs::TPathPairMap::const_iterator itFound = m_pRenamePairs->find( fs::traits::GetPath( *itDestPath ) );
+		typename fs::TPathPairMap::const_iterator itFound = m_pRenamePairs->find( fs::traits::GetPath( *itDestPath ) );
 		ASSERT( itFound != m_pRenamePairs->end() );
 		fs::traits::SetPath( *itDestPath, itFound->second );
 	}

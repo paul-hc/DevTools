@@ -1,6 +1,7 @@
 
 #include "stdafx.h"
 #include "ImageArchiveStg.h"
+#include "FileAttrAlgorithms.h"
 #include "InputPasswordDialog.h"
 #include "Application.h"
 #include "resource.h"
@@ -104,7 +105,7 @@ void CImageArchiveStg::CreateImageArchive( const TCHAR* pStgFilePath, const std:
 	ASSERT( IsOpen() );
 
 	CWaitCursor wait;
-	std::vector< CFileAttr > fileAttributes;			// image storage metadata
+	utl::COwningContainer< std::vector< CFileAttr* > > fileAttributes;		// image storage metadata - owning for exception safety
 
 	SavePassword( password );
 
@@ -113,7 +114,7 @@ void CImageArchiveStg::CreateImageArchive( const TCHAR* pStgFilePath, const std:
 	CreateThumbnailsStorage( xferPairs, pProgressService );
 }
 
-void CImageArchiveStg::CreateImageFiles( std::vector< CFileAttr >& rFileAttributes, const std::vector< TTransferPathPair >& xferPairs,
+void CImageArchiveStg::CreateImageFiles( std::vector< CFileAttr* >& rFileAttributes, const std::vector< TTransferPathPair >& xferPairs,
 										 ui::IProgressService* pProgressService ) throws_( CException* )
 {
 	// Prevent sharing violations on SRC stream open.
@@ -138,17 +139,17 @@ void CImageArchiveStg::CreateImageFiles( std::vector< CFileAttr >& rFileAttribut
 		else
 			try
 			{
-				CFileAttr fileAttr;
-				fileAttr.SetFromTransferPair( it->first, it->second );
+				std::auto_ptr< CFileAttr > pFileAttr( new CFileAttr() );
+				pFileAttr->SetFromTransferPair( it->first, it->second );
 
-				std::tstring& rStreamName = const_cast< std::tstring& >( fileAttr.GetPath().Get() );
+				std::tstring& rStreamName = const_cast< std::tstring& >( pFileAttr->GetPath().Get() );
 				EncodeDeepStreamPath( rStreamName.begin(), rStreamName.end() );
 
 				std::auto_ptr< CFile > pSrcImageFile( Factory().OpenFlexImageFile( it->first ) );
 				std::auto_ptr< COleStreamFile > pDestStreamFile( CreateFile( it->second.GetPtr() ) );
 				fs::BufferedCopy( *pDestStreamFile, *pSrcImageFile );
 
-				rFileAttributes.push_back( fileAttr );
+				rFileAttributes.push_back( pFileAttr.release() );
 
 				pProgressService->AdvanceItem( it->second.Get() );
 			}
@@ -171,7 +172,7 @@ void CImageArchiveStg::CreateImageFiles( std::vector< CFileAttr >& rFileAttribut
 #endif
 }
 
-void CImageArchiveStg::CreateMetadataFile( const std::vector< CFileAttr >& fileAttributes )
+void CImageArchiveStg::CreateMetadataFile( const std::vector< CFileAttr* >& fileAttributes )
 {
 	std::auto_ptr< COleStreamFile > pMetaDataFile( CreateFile( CImageArchiveStg::s_metadataNameExt ) );
 	CArchive archive( pMetaDataFile.get(), CArchive::store );
@@ -180,7 +181,7 @@ void CImageArchiveStg::CreateMetadataFile( const std::vector< CFileAttr >& fileA
 	// save metadata
 	size_t totalImagesSize = std::accumulate( fileAttributes.begin(), fileAttributes.end(), size_t( 0 ), func::AddFileSize() );
 	archive << static_cast< UINT >( totalImagesSize );		// for backwards compatibility
-	serial::StreamItems( archive, const_cast< std::vector< CFileAttr >& >( fileAttributes ) );
+	serial::StreamOwningPtrs( archive, const_cast< std::vector< CFileAttr* >& >( fileAttributes ) );
 
 	archive.Close();
 	pMetaDataFile->Close();
@@ -226,7 +227,7 @@ void CImageArchiveStg::CreateThumbnailsStorage( const std::vector< TTransferPath
 	}
 }
 
-void CImageArchiveStg::LoadImagesMetadata( std::vector< CFileAttr >& rFileAttributes )
+void CImageArchiveStg::LoadImagesMetadata( std::vector< CFileAttr* >& rFileAttributes )
 {
 	ASSERT( IsOpen() );
 
@@ -243,16 +244,16 @@ void CImageArchiveStg::LoadImagesMetadata( std::vector< CFileAttr >& rFileAttrib
 			UINT totalImagesSize;
 			archive >> totalImagesSize;
 
-			serial::StreamItems( archive, rFileAttributes );
+			serial::StreamOwningPtrs( archive, rFileAttributes );
 
 			// convert the persisted image sub-path to a fully qualified logical path
 			const fs::CPath& docFilePath = GetDocFilePath();
-			for ( std::vector< CFileAttr >::iterator itFileAttr = rFileAttributes.begin(); itFileAttr != rFileAttributes.end(); ++itFileAttr )
+			for ( std::vector< CFileAttr* >::iterator itFileAttr = rFileAttributes.begin(); itFileAttr != rFileAttributes.end(); ++itFileAttr )
 			{
-				std::tstring streamPath = itFileAttr->GetPath().Get();
+				std::tstring streamPath = ( *itFileAttr )->GetPath().Get();
 				DecodeDeepStreamPath( streamPath.begin(), streamPath.end() );		// decode deep stream paths: '*' -> '\'
 
-				itFileAttr->SetPath( fs::CFlexPath::MakeComplexPath( docFilePath.Get(), streamPath.c_str() ) );
+				( *itFileAttr )->SetPath( fs::CFlexPath::MakeComplexPath( docFilePath.Get(), streamPath.c_str() ) );
 			}
 		}
 		catch ( CException* pExc )
@@ -522,7 +523,7 @@ CFile* CImageArchiveStg::CFactory::OpenFlexImageFile( const fs::CFlexPath& flexI
 	return NULL;
 }
 
-void CImageArchiveStg::CFactory::LoadImagesMetadata( std::vector< CFileAttr >& rFileAttributes, const fs::CPath& stgFilePath )
+void CImageArchiveStg::CFactory::LoadImagesMetadata( std::vector< CFileAttr* >& rFileAttributes, const fs::CPath& stgFilePath )
 {
 	ASSERT( IsPasswordVerified( stgFilePath ) );
 

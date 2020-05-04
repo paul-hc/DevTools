@@ -2,6 +2,7 @@
 #include "stdafx.h"
 #include "FileListDisplayPaths.h"
 #include "AlbumModel.h"
+#include "FileAttr.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -51,14 +52,14 @@ CListViewState::CImpl< int >* CFileListDisplayPaths::MakeIndexState( const CList
 		return new CListViewState::CImpl< int >( *lvState.m_pIndexImpl );		// straight copy
 
 	CListViewState::CImpl< int >* pIndexState = new CListViewState::CImpl< int >;
-	pIndexState->m_caret = model.FindFileAttr( lvState.m_pStringImpl->m_caret );
-	pIndexState->m_top = model.FindFileAttr( lvState.m_pStringImpl->m_top );
+	pIndexState->m_caret = model.FindIndexFileAttrWithPath( lvState.m_pStringImpl->m_caret );
+	pIndexState->m_top = model.FindIndexFileAttrWithPath( lvState.m_pStringImpl->m_top );
 
 	std::vector< int > selIndexes;
 	selIndexes.reserve( lvState.m_pStringImpl->m_selItems.size() );
 	for ( std::vector< std::tstring >::const_iterator itSelItem = lvState.m_pStringImpl->m_selItems.begin(); itSelItem != lvState.m_pStringImpl->m_selItems.end(); ++itSelItem )
 	{
-		int selIndex = model.FindFileAttr( *itSelItem );
+		int selIndex = model.FindIndexFileAttrWithPath( *itSelItem );
 		if ( selIndex != -1 )
 			selIndexes.push_back( selIndex );
 	}

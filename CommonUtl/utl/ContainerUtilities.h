@@ -314,7 +314,62 @@ namespace utl
 
 namespace utl
 {
+	// check containers are in order
+
+	template< typename IteratorT, typename CompareValues >
+	bool IsOrdered( IteratorT itStart, IteratorT itEnd, CompareValues comparator )
+	{
+		if ( std::distance( itStart, itEnd ) > 2 )		// enough values for conflicting order?
+		{
+			IteratorT itNext = itStart;
+			++itNext;						// so that it works with std::list (not a random iterator)
+			pred::CompareResult cmpFirst = comparator( *itStart, *itNext );
+
+			for ( itStart = itNext; ++itNext != itEnd; itStart = itNext )
+				if ( comparator( *itStart, *itNext ) != cmpFirst )
+					return false;
+		}
+
+		return true;
+	}
+
+	template< typename ContainerT, typename CompareValues >
+	inline bool IsOrdered( const ContainerT& values, CompareValues comparator )
+	{
+		return IsOrdered( values.begin(), values.end(), comparator );
+	}
+
+
+	template< typename IteratorT >
+	inline bool IsOrdered( IteratorT itStart, IteratorT itEnd )
+	{
+		return IsOrdered( itStart, itEnd, pred::CompareValue() );
+	}
+
+	template< typename ContainerT >
+	inline bool IsOrdered( const ContainerT& values )
+	{
+		return IsOrdered( values.begin(), values.end() );
+	}
+}
+
+
+namespace utl
+{
 	// generic algoritms
+
+	template< typename ContainerT >
+	inline typename const ContainerT::value_type& Front( const ContainerT& rItems ) { ASSERT( !rItems.empty() ); return *rItems.begin(); }
+
+	template< typename ContainerT >
+	inline typename ContainerT::value_type& Front( ContainerT& rItems ) { ASSERT( !rItems.empty() ); return *rItems.begin(); }
+
+	template< typename ContainerT >
+	inline typename const ContainerT::value_type& Back( const ContainerT& rItems ) { ASSERT( !rItems.empty() ); return *--rItems.end(); }
+
+	template< typename ContainerT >
+	inline typename ContainerT::value_type& Back( ContainerT& rItems ) { ASSERT( !rItems.empty() ); return *--rItems.end(); }
+
 
 	template< typename ContainerT, typename Predicate >
 	void QueryThat( std::vector< typename ContainerT::value_type >& rSubset, const ContainerT& objects, Predicate pred )
@@ -526,8 +581,8 @@ namespace utl
 		return true;
 	}
 
-	template< typename Type >
-	inline bool SameContents( const std::vector< Type >& left, const std::vector< Type >& right )
+	template< typename ContainerT >
+	inline bool SameContents( const ContainerT& left, const ContainerT& right )
 	{
 		return SameContents( left.begin(), left.end(), right.begin(), right.end() );
 	}
@@ -727,7 +782,7 @@ namespace utl
 	}
 
 	template< typename PtrContainerT >
-	void CopyOwningContainerObjects( PtrContainerT& rItemPtrs, const PtrContainerT& srcItemPtrs )		// using copy constructor
+	void CloneOwningContainerObjects( PtrContainerT& rItemPtrs, const PtrContainerT& srcItemPtrs )		// using copy constructor
 	{
 		ClearOwningContainer( rItemPtrs );		// delete existing items
 

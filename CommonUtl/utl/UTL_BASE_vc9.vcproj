@@ -825,6 +825,14 @@
 			Name="Tests"
 			>
 			<File
+				RelativePath=".\ut\AlgorithmsTests.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\ut\AlgorithmsTests.h"
+				>
+			</File>
+			<File
 				RelativePath=".\ut\FileSystemTests.cpp"
 				>
 			</File>

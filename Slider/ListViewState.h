@@ -14,12 +14,11 @@ enum StoreMode { StoreByIndex, StoreByString };
 
 struct CListViewState
 {
-private:
 public:
 	CListViewState( void ) {}
 	CListViewState( StoreMode storeBy );
+	CListViewState( const std::vector< int >& selIndexes );
 	CListViewState( std::vector< std::tstring >& rSelStrings );
-	CListViewState( std::vector< int >& rSelIndexes );
 	CListViewState( const CListViewState& src );
 	~CListViewState();
 
@@ -36,6 +35,8 @@ public:
 	int GetSelCount( void ) const;
 
 	int GetCaretIndex( void ) const { return UseIndexes() ? m_pIndexImpl->m_caret : -1; }
+	void SetCaretIndex( int caretIndex ) { ASSERT( UseIndexes() ); m_pIndexImpl->m_caret = caretIndex; }
+	bool SetCaretOnSel( bool firstSel = true );
 
 	std::tstring dbgFormat( void );
 

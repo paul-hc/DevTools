@@ -29,8 +29,8 @@ namespace custom_order
 	public:
 		persist FileOp m_fileOp;
 		persist int m_dropIndex;						// original insertion point (drop dest index)
-		persist int m_newDroppedIndex;					// destination index shifted after re-ordering
 		persist std::vector< int > m_dragSelIndexes;	// selected indexes to be dropped
+		persist int m_newDroppedIndex;					// destination index shifted after re-ordering
 	private:
 		persist CArchivingModel m_archivingModel;
 	};

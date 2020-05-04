@@ -16,9 +16,10 @@ namespace app
 		Slider_v4_0 = 0x40,				// persist CFileAttr::GetImageDim() - evaluate real image dimensions
 		Slider_v4_1 = 0x41,				// new CSearchSpec::Type, ...
 		Slider_v4_2 = 0x42,				// extract CSearchModel, CSearchModel::m_maxFileCount
+		Slider_v5_0 = 0x50,				// CImagesModel, std::vector< CFileAttr* >, custom_order::COpStep::m_newDroppedIndex not shifted by m_dragSelIndexes.size()
 
 			// * always update to the LATEST VERSION *
-			Slider_LatestModelSchema = Slider_v4_2
+			Slider_LatestModelSchema = Slider_v5_0
 	};
 
 

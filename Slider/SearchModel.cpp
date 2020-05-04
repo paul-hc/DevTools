@@ -30,7 +30,7 @@ CSearchModel& CSearchModel::operator=( const CSearchModel& right )
 	{
 		m_maxFileCount = right.m_maxFileCount;
 		m_fileSizeRange = right.m_fileSizeRange;
-		utl::CopyOwningContainerObjects( m_searchSpecs, right.m_searchSpecs );
+		utl::CloneOwningContainerObjects( m_searchSpecs, right.m_searchSpecs );
 	}
 	return *this;
 }

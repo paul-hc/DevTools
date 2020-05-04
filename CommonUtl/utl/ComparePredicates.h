@@ -9,6 +9,39 @@ namespace func
 {
 	// adapters for comparison predicates
 
+	struct PtrToReference
+	{
+		template< typename ObjectT >
+		const ObjectT& operator()( const ObjectT* pObject ) const
+		{
+			ASSERT_PTR( pObject );
+			return *pObject;
+		}
+
+		template< typename ObjectT >
+		ObjectT& operator()( ObjectT* pObject ) const
+		{
+			ASSERT_PTR( pObject );
+			return *pObject;
+		}
+	};
+
+	struct ReferenceToPtr
+	{
+		template< typename ObjectT >
+		const ObjectT* operator()( const ObjectT& object ) const
+		{
+			return &object;
+		}
+
+		template< typename ObjectT >
+		ObjectT* operator()( ObjectT& object ) const
+		{
+			return &object;
+		}
+	};
+
+
 	template< typename SubType >
 	struct As
 	{

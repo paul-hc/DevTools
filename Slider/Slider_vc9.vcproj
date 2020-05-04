@@ -710,6 +710,18 @@
 					>
 				</File>
 				<File
+					RelativePath=".\FileAttr_fwd.h"
+					>
+				</File>
+				<File
+					RelativePath=".\FileAttrAlgorithms.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\FileAttrAlgorithms.h"
+					>
+				</File>
+				<File
 					RelativePath=".\ImageArchiveStg.cpp"
 					>
 				</File>

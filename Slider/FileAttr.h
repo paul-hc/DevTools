@@ -2,9 +2,9 @@
 #define FileAttr_h
 #pragma once
 
-#include "utl/ComparePredicates.h"
 #include "utl/Subject.h"
 #include "utl/UI/ImagePathKey.h"
+#include "FileAttr_fwd.h"
 
 
 enum FileType { FT_Generic, FT_BMP, FT_JPEG, FT_GIFF, FT_TIFF };
@@ -67,104 +67,9 @@ namespace fs
 {
 	namespace traits
 	{
-		inline const fs::CPath& GetPath( const CFileAttr& fileAttr ) { return fileAttr.GetPath(); }
-		inline void SetPath( CFileAttr& rFileAttr, const fs::CPath& filePath ) { rFileAttr.SetPath( filePath ); }
+		inline const fs::CPath& GetPath( const CFileAttr* pFileAttr ) { ASSERT_PTR( pFileAttr ); return pFileAttr->GetPath(); }
+		inline void SetPath( CFileAttr* pFileAttr, const fs::CPath& filePath ) { ASSERT_PTR( pFileAttr ); pFileAttr->SetPath( filePath ); }
 	}
-}
-
-
-namespace fattr
-{
-	size_t FindPosWithPath( const std::vector< CFileAttr* >& fileAttributes, const fs::CPath& filePath );
-
-	inline const CFileAttr* FindWithPath( const std::vector< CFileAttr* >& fileAttributes, const fs::CPath& filePath )
-	{
-		size_t foundPos = FindPosWithPath( fileAttributes, filePath );
-		return foundPos != utl::npos ? fileAttributes[ foundPos ] : NULL;
-	}
-
-	template< typename IndexT >
-	void QueryDisplayIndexSequence( std::vector< IndexT >* pDisplaySequence, const std::vector< CFileAttr* >& fileAttributes )
-	{	// pDisplaySequence contains baseline positions in current order
-		ASSERT_PTR( pDisplaySequence );
-
-		pDisplaySequence->resize( fileAttributes.size() );
-
-		for ( size_t pos = 0; pos != fileAttributes.size(); ++pos )
-			pDisplaySequence->at( pos ) = fileAttributes[ pos ]->GetBaselinePos();
-	}
-}
-
-
-namespace func
-{
-	struct ToFilePath
-	{
-		const fs::CFlexPath& operator()( const CFileAttr& fileAttr ) const
-		{
-			return fileAttr.GetPath();
-		}
-	};
-
-	struct ToFileSize
-	{
-		UINT operator()( const CFileAttr& fileAttr ) const
-		{
-			return fileAttr.GetFileSize();
-		}
-	};
-
-	struct ToImageArea
-	{
-		size_t operator()( const CFileAttr& fileAttr ) const
-		{
-			CSize imageDim = fileAttr.GetImageDim();
-			if ( imageDim.cx < 0 || imageDim.cy < 0 )		// error accessing the image file
-				return 0;
-			return static_cast< size_t >( imageDim.cx ) * static_cast< size_t >( imageDim.cy );
-		}
-	};
-
-	struct ToImageWidth
-	{
-		int operator()( const CFileAttr& fileAttr ) const
-		{
-			int imageWidth = fileAttr.GetImageDim().cx;
-			return imageWidth >= 0 ? imageWidth : 0;
-		}
-	};
-
-	struct ToImageHeight
-	{
-		int operator()( const CFileAttr& fileAttr ) const
-		{
-			int imageHeight = fileAttr.GetImageDim().cy;
-			return imageHeight >= 0 ? imageHeight : 0;
-		}
-	};
-
-
-	struct AddFileSize
-	{
-		size_t operator()( size_t totalFileSize, const CFileAttr& right ) const
-		{
-			return totalFileSize + right.GetFileSize();
-		}
-	};
-}
-
-
-namespace pred
-{
-	typedef CompareAdapter< CompareNaturalPath, func::ToFilePath > CompareFileAttrPath;
-
-	typedef CompareAdapter< CompareValue, func::ToFileSize > CompareFileAttrSize;
-
-	typedef CompareAdapter< CompareValue, func::ToImageArea > CompareImageArea;
-	typedef CompareAdapter< CompareValue, func::ToImageWidth > CompareImageWidth;
-	typedef CompareAdapter< CompareValue, func::ToImageHeight > CompareImageHeight;
-	
-	typedef JoinCompare< CompareImageArea, JoinCompare< CompareImageWidth, CompareImageHeight > > CompareImageDimensions;		// area | width | height
 }
 
 

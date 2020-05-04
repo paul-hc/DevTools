@@ -78,10 +78,10 @@ CListViewState::CListViewState( std::vector< std::tstring >& rSelStrings )
 	m_pStringImpl->m_selItems.swap( rSelStrings );
 }
 
-CListViewState::CListViewState( std::vector< int >& rSelIndexes )
+CListViewState::CListViewState( const std::vector< int >& selIndexes )
 	: m_pIndexImpl( new CImpl< int > )
 {
-	m_pIndexImpl->m_selItems.swap( rSelIndexes );
+	m_pIndexImpl->m_selItems = selIndexes;
 }
 
 CListViewState::~CListViewState()
@@ -133,6 +133,29 @@ int CListViewState::GetSelCount( void ) const
 		return (int)m_pStringImpl->m_selItems.size();
 	return 0;
 }
+
+namespace hlp
+{
+	template< typename Type >
+	bool SetCaretOnSel( CListViewState::CImpl< Type >& rDataSet, bool firstSel )
+	{
+		if ( rDataSet.m_selItems.empty() )
+			return false;
+
+		rDataSet.m_caret = firstSel ? rDataSet.m_selItems.front() : utl::Back( rDataSet.m_selItems );
+		return true;
+	}
+}
+
+bool CListViewState::SetCaretOnSel( bool firstSel /*= true*/ )
+{
+	if ( UseIndexes() )
+		return hlp::SetCaretOnSel( *m_pIndexImpl, firstSel );
+	else if ( UseStrings() )
+		return hlp::SetCaretOnSel( *m_pStringImpl, firstSel );
+	return 0;
+}
+
 
 template< typename Type >
 std::tostream& operator<<( std::tostream& oss, const CListViewState::CImpl< Type >& impl )

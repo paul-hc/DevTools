@@ -2,6 +2,7 @@
 #include "stdafx.h"
 
 #ifdef _DEBUG		// no UT code in release builds
+#include "AlgorithmsTests.h"
 #include "UtlConsoleTests.h"
 #include "StringTests.h"
 #include "StringRangeTests.h"
@@ -23,6 +24,7 @@ namespace ut
 	void RegisterUtlConsoleTests( void )
 	{
 		// register UTL tests
+		CAlgorithmsTests::Instance();
 		CStringTests::Instance();
 		CStringRangeTests::Instance();
 		CNumericTests::Instance();

@@ -39,7 +39,7 @@ private:
 	void UpdateFileSortOrder( void );
 
 	enum Column { FileName, Folder, Dimensions, Size, Date, Unordered = -1 };
-	static std::pair< Column, bool > ToListSortOrder( CAlbumModel::Order fileOrder );		// < sortByColumn, sortAscending >
+	static std::pair< Column, bool > ToListSortOrder( fattr::Order fileOrder );		// < sortByColumn, sortAscending >
 
 	bool DropSearchSpec( const fs::CFlexPath& filePath, bool doPrompt = true );
 	bool DeleteSearchSpec( int index, bool doPrompt = true );
@@ -65,7 +65,6 @@ private:
 	CFont m_symbolFont;
 private:
 	// enum { IDD = IDD_ALBUM_SETTINGS_DIALOG };
-	enum { InplaceSortMaxCount = 5000 };
 
 	CSpinEdit m_maxFileCountEdit;
 	CSpinEdit m_minSizeEdit;

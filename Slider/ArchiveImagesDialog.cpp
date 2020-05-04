@@ -2,6 +2,7 @@
 #include "stdafx.h"
 #include "ArchiveImagesDialog.h"
 #include "AlbumModel.h"
+#include "FileAttr.h"
 #include "ImageArchiveStg.h"
 #include "DefinePasswordDialog.h"
 #include "Application.h"
@@ -73,21 +74,19 @@ CArchiveImagesDialog::~CArchiveImagesDialog()
 
 bool CArchiveImagesDialog::FetchFileContext( void )
 {
-	std::vector< CFileAttr* > srcFiles;
 	if ( m_destOnSelection )
 	{
 		m_lvState.FromListCtrl( &m_filesListCtrl );
 
-		size_t count = m_lvState.m_pIndexImpl->m_selItems.size();
-		srcFiles.reserve( count );
-		for ( size_t i = 0; i != count; ++i )
-			srcFiles.push_back( const_cast< CFileAttr* >( m_pModel->GetFileAttr( m_lvState.m_pIndexImpl->m_selItems[ i ] ) ) );
-	}
-	else
-		m_pModel->QueryFileAttrs( srcFiles );
+		std::vector< CFileAttr* > selSrcFileAttrs;
+		m_pModel->QueryFileAttrsSequence( selSrcFileAttrs, m_lvState.m_pIndexImpl->m_selItems );
+		m_archivingModel.SetupSourcePaths( selSrcFileAttrs );
 
-	m_archivingModel.SetupSourcePaths( srcFiles );
-	return !srcFiles.empty();
+		return !selSrcFileAttrs.empty();
+	}
+
+	m_archivingModel.SetupSourcePaths( m_pModel->GetImagesModel().GetFileAttrs() );
+	return m_pModel->AnyFoundFiles();
 }
 
 bool CArchiveImagesDialog::SetDefaultDestPath( void )

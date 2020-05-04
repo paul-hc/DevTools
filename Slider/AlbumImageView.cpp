@@ -243,7 +243,7 @@ void CAlbumImageView::OnAlbumModelChanged( AlbumModelChange reason /*= FM_Init*/
 			break;
 		case FM_AutoDropOp:
 			if ( !pDoc->m_autoDropContext.m_droppedDestFiles.empty() )
-				m_slideData.SetCurrentIndex( pDoc->GetModel()->FindFileAttr( fs::CFlexPath( pDoc->m_autoDropContext.m_droppedDestFiles[ 0 ] ) ) );		// that'd be the caret selected index
+				m_slideData.SetCurrentIndex( pDoc->GetModel()->FindIndexFileAttrWithPath( fs::CFlexPath( pDoc->m_autoDropContext.m_droppedDestFiles[ 0 ] ) ) );		// that'd be the caret selected index
 
 			// replace with the standard one if invalid
 			if ( !IsValidIndex( m_slideData.GetCurrentIndex() ) )

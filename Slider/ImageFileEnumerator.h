@@ -25,11 +25,8 @@ public:
 	void SearchImageArchive( const fs::CPath& stgDocPath ) throws_( CException*, CUserAbortedException );
 
 	// found files
-	bool AnyFound( void ) const { return !m_fileAttrs.empty(); }
-/**/ const std::vector< CFileAttr >& GetFileAttrs( void ) const { return m_fileAttrs; }
-
-	std::auto_ptr< CImagesModel > ReleaseFoundImages( void );
-/**/ void SwapResults( std::vector< CFileAttr >& rFileAttrs, std::vector< fs::CPath >* pArchiveStgPaths = NULL );
+	bool AnyFound( void ) const { return !m_foundImages.IsEmpty(); }
+	void SwapFoundImages( CImagesModel& rImagesModel );
 
 	const ui::CIssueStore& GetIssueStore( void ) const { return m_issueStore; }
 private:
@@ -39,17 +36,14 @@ private:
 	virtual bool MustStop( void ) const;
 
 	bool PassFilter( const CFileAttr& fileAttr ) const;
-	void Push( const CFileAttr& fileAttr );
-	void PushMany( const std::vector< CFileAttr >& fileAttrs );
+	void Push( CFileAttr* pFileAttr );
+	void PushMany( const std::vector< CFileAttr* >& fileAttrs );		// transfer ownership
 private:
 	Range< size_t > m_fileSizeRange;
 	ui::CIssueStore m_issueStore;
 	const CSearchSpec* m_pCurrSpec;
 
-	// found
-	std::auto_ptr< CImagesModel > m_pFoundImages;
-/**/ std::vector< CFileAttr > m_fileAttrs;
-/**/ std::vector< fs::CPath > m_archiveStgPaths;
+	CImagesModel m_foundImages;
 public:
 	static const Range< size_t > s_allFileSizesRange;
 };

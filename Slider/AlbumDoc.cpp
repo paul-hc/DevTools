@@ -4,6 +4,7 @@
 #include "Workspace.h"
 #include "DocTemplates.h"
 #include "SearchSpec.h"
+#include "FileAttr.h"
 #include "AlbumSettingsDialog.h"
 #include "ArchiveImagesDialog.h"
 #include "DefinePasswordDialog.h"
@@ -456,6 +457,7 @@ bool CAlbumDoc::UndoRedoCustomOrder( custom_order::COpStack& rFromStack, custom_
 
 		// select the un-dropped images
 		CListViewState dropState( step.m_dragSelIndexes );
+		dropState.SetCaretOnSel();			// ensure that caret is visible: put caret on first selected item
 
 		pAlbumViewTarget->GetPeerThumbView()->SetListViewState( dropState, true );
 		pAlbumViewTarget->OnUpdate( NULL, 0, NULL );

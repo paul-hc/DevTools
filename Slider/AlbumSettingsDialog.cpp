@@ -1,6 +1,7 @@
 
 #include "stdafx.h"
 #include "AlbumSettingsDialog.h"
+#include "FileAttr.h"
 #include "MainFrame.h"
 #include "ImageView.h"
 #include "SearchSpecDialog.h"
@@ -26,19 +27,19 @@
 
 namespace hlp
 {
-	CAlbumModel::Order OrderOfCmd( UINT cmdId )
+	fattr::Order OrderOfCmd( UINT cmdId )
 	{
 		switch ( cmdId )
 		{
 			default: ASSERT( false );
-			case ID_ORDER_ORIGINAL:						return CAlbumModel::OriginalOrder;
-			case ID_ORDER_CUSTOM:						return CAlbumModel::CustomOrder;
-			case ID_ORDER_RANDOM_SHUFFLE:				return CAlbumModel::Shuffle;
-			case ID_ORDER_RANDOM_SHUFFLE_SAME_SEED:		return CAlbumModel::ShuffleSameSeed;
-			case ID_ORDER_BY_FULL_PATH_ASC:				return CAlbumModel::ByFullPathAsc;
-			case ID_ORDER_BY_FULL_PATH_DESC:			return CAlbumModel::ByFullPathDesc;
-			case ID_ORDER_BY_DIMENSION_ASC:				return CAlbumModel::ByDimensionAsc;
-			case ID_ORDER_BY_DIMENSION_DESC:			return CAlbumModel::ByDimensionDesc;
+			case ID_ORDER_ORIGINAL:						return fattr::OriginalOrder;
+			case ID_ORDER_CUSTOM:						return fattr::CustomOrder;
+			case ID_ORDER_RANDOM_SHUFFLE:				return fattr::Shuffle;
+			case ID_ORDER_RANDOM_SHUFFLE_SAME_SEED:		return fattr::ShuffleSameSeed;
+			case ID_ORDER_BY_FULL_PATH_ASC:				return fattr::ByFullPathAsc;
+			case ID_ORDER_BY_FULL_PATH_DESC:			return fattr::ByFullPathDesc;
+			case ID_ORDER_BY_DIMENSION_ASC:				return fattr::ByDimensionAsc;
+			case ID_ORDER_BY_DIMENSION_DESC:			return fattr::ByDimensionDesc;
 		}
 	}
 }
@@ -197,49 +198,28 @@ void CAlbumSettingsDialog::SetDirty( bool dirty /*= true*/ )
 
 	static const std::tstring okLabel[] = { _T("OK"), _T("&Search") };
 	ui::SetDlgItemText( m_hWnd, IDOK, okLabel[ m_isDirty ] );
-	ui::EnableControl( m_hWnd, IDOK, True == m_isDirty || m_model.GetFileOrder() != CAlbumModel::CorruptedFiles );
+	ui::EnableControl( m_hWnd, IDOK, True == m_isDirty || m_model.GetFileOrder() != fattr::FilterCorruptedFiles );
 }
 
 void CAlbumSettingsDialog::UpdateFileSortOrder( void )
 {
-	// TODO: store display order in CAlbumModel::m_displayOrder as std::vector< CFileAttr* >
-	// - so that CAlbumModel::m_fileAttributes keeps the original order, and is immutable
-#if 1
-	SetDirty( true );
-
-	if ( m_model.GetFileAttrCount() < InplaceSortMaxCount )
-		PostMessage( WM_COMMAND, IDC_SEARCH_FOR_FILES );
-#else
-	switch ( m_model.GetFileOrder() )
-	{
-		case CAlbumModel::FileSameSize:
-		case CAlbumModel::FileSameSizeAndDim:
-		case CAlbumModel::CorruptedFiles:
-			SetDirty( true );
-			if ( m_model.GetFileAttrCount() < InplaceSortMaxCount )
-				PostMessage( WM_COMMAND, IDC_SEARCH_FOR_FILES );
-			break;
-		default:
-			SetupFoundListView();		// fill in the found files list
-			SetDirty( false );
-	}
-#endif
+	SetupFoundListView();		// fill in the found files list
 }
 
-std::pair< CAlbumSettingsDialog::Column, bool > CAlbumSettingsDialog::ToListSortOrder( CAlbumModel::Order fileOrder )
+std::pair< CAlbumSettingsDialog::Column, bool > CAlbumSettingsDialog::ToListSortOrder( fattr::Order fileOrder )
 {
 	switch ( fileOrder )
 	{
-		case CAlbumModel::ByFileNameAsc:		return std::make_pair( FileName, true );
-		case CAlbumModel::ByFileNameDesc:		return std::make_pair( FileName, false ); break;
-		case CAlbumModel::ByFullPathAsc:		return std::make_pair( Folder, true ); break;
-		case CAlbumModel::ByFullPathDesc:		return std::make_pair( Folder, false ); break;
-		case CAlbumModel::ByDimensionAsc:		return std::make_pair( Dimensions, true ); break;
-		case CAlbumModel::ByDimensionDesc:		return std::make_pair( Dimensions, false ); break;
-		case CAlbumModel::BySizeAsc:			return std::make_pair( Size, true ); break;
-		case CAlbumModel::BySizeDesc:			return std::make_pair( Size, false ); break;
-		case CAlbumModel::ByDateAsc:			return std::make_pair( Date, true ); break;
-		case CAlbumModel::ByDateDesc:			return std::make_pair( Date, false ); break;
+		case fattr::ByFileNameAsc:		return std::make_pair( FileName, true );
+		case fattr::ByFileNameDesc:		return std::make_pair( FileName, false ); break;
+		case fattr::ByFullPathAsc:		return std::make_pair( Folder, true ); break;
+		case fattr::ByFullPathDesc:		return std::make_pair( Folder, false ); break;
+		case fattr::ByDimensionAsc:		return std::make_pair( Dimensions, true ); break;
+		case fattr::ByDimensionDesc:	return std::make_pair( Dimensions, false ); break;
+		case fattr::BySizeAsc:			return std::make_pair( Size, true ); break;
+		case fattr::BySizeDesc:			return std::make_pair( Size, false ); break;
+		case fattr::ByDateAsc:			return std::make_pair( Date, true ); break;
+		case fattr::ByDateDesc:			return std::make_pair( Date, false ); break;
 	}
 	return std::make_pair( Unordered, false );
 }
@@ -473,9 +453,9 @@ void CAlbumSettingsDialog::SetupFoundListView( void )
 			std::tstring sizeText;
 			switch ( m_model.GetFileOrder() )
 			{
-				case CAlbumModel::FileSameSize:		sizeText = pFileAttr->FormatFileSize( 1, _T("%s B") ); break;
-				case CAlbumModel::FileSameSizeAndDim:	sizeText = pFileAttr->FormatFileSize( 1, _T("%s B (%dx%d)") ); break;
-				default:							sizeText = pFileAttr->FormatFileSize();
+				case fattr::FilterFileSameSize:			sizeText = pFileAttr->FormatFileSize( 1, _T("%s B") ); break;
+				case fattr::FilterFileSameSizeAndDim:	sizeText = pFileAttr->FormatFileSize( 1, _T("%s B (%dx%d)") ); break;
+				default:								sizeText = pFileAttr->FormatFileSize();
 			}
 
 			m_foundFilesListCtrl.SetSubItemText( i, Size, sizeText );
@@ -524,7 +504,7 @@ int CAlbumSettingsDialog::GetCheckStateAutoRegen( void ) const
 void CAlbumSettingsDialog::DoDataExchange( CDataExchange* pDX )
 {
 	bool firstInit = NULL == m_foundFilesListCtrl.m_hWnd;
-	CAlbumModel::Order fileOrder = m_model.GetFileOrder();
+	fattr::Order fileOrder = m_model.GetFileOrder();
 
 	DDX_Control( pDX, IDC_MAX_FILE_COUNT_EDIT, m_maxFileCountEdit );
 	DDX_Control( pDX, IDC_MIN_FILE_SIZE_EDIT, m_minSizeEdit );
@@ -532,7 +512,7 @@ void CAlbumSettingsDialog::DoDataExchange( CDataExchange* pDX )
 	DDX_Control( pDX, IDC_SEARCH_SPEC_MOVE_DOWN, m_moveDownButton );
 	DDX_Control( pDX, IDC_SEARCH_SPEC_MOVE_UP, m_moveUpButton );
 	DDX_Control( pDX, IDC_SEARCH_SPEC_LIST, m_searchSpecListBox );
-	ui::DDX_EnumCombo( pDX, IDC_LIST_ORDER_COMBO, m_sortOrderCombo, fileOrder, CAlbumModel::GetTags_Order() );
+	ui::DDX_EnumCombo( pDX, IDC_LIST_ORDER_COMBO, m_sortOrderCombo, fileOrder, fattr::GetTags_Order() );
 	DDX_Control( pDX, IDC_FOUND_FILES_LISTVIEW, m_foundFilesListCtrl );
 	DDX_Control( pDX, IDC_THUMB_PREVIEW_STATIC, m_thumbPreviewCtrl );
 	DDX_Control( pDX, IDC_DOC_VERSION_LABEL, m_docVersionLabel );
@@ -594,7 +574,7 @@ void CAlbumSettingsDialog::DoDataExchange( CDataExchange* pDX )
 		}
 		case DialogSaveChanges:
 		{
-			m_model.SetFileOrder( fileOrder );
+			m_model.StoreFileOrder( fileOrder );
 
 			CSearchModel* pSearchModel = m_model.RefSearchModel();
 			UINT maxFileCount = UINT_MAX;
@@ -721,7 +701,6 @@ void CAlbumSettingsDialog::OnOK( void )
 
 void CAlbumSettingsDialog::OnCancel( void )
 {
-	ASSERT( !m_model.InGeneration() );
 	CLayoutDialog::OnCancel();
 }
 
@@ -756,12 +735,12 @@ void CAlbumSettingsDialog::OnContextMenu( CWnd* pWnd, CPoint point )
 
 void CAlbumSettingsDialog::OnCBnSelChange_SortOrder( void )
 {
-	CAlbumModel::Order fileOrder = static_cast< CAlbumModel::Order >( m_sortOrderCombo.GetCurSel() );
-	m_model.SetFileOrder( fileOrder );
+	fattr::Order fileOrder = static_cast< fattr::Order >( m_sortOrderCombo.GetCurSel() );
 
 	std::pair< Column, bool > sortPair = ToListSortOrder( fileOrder );
 	m_foundFilesListCtrl.SetSortByColumn( sortPair.first, sortPair.second );
 
+	m_model.ModifyFileOrder( fileOrder );
 	UpdateFileSortOrder();
 }
 
@@ -895,18 +874,17 @@ void CAlbumSettingsDialog::OnSearchSourceFiles( void )
 
 void CAlbumSettingsDialog::On_OrderRandomShuffle( UINT cmdId )
 {
-	CAlbumModel::Order fileOrder = hlp::OrderOfCmd( cmdId );
+	fattr::Order fileOrder = hlp::OrderOfCmd( cmdId );
 
-	m_model.SetFileOrder( fileOrder );
 	m_sortOrderCombo.SetCurSel( fileOrder );
+	m_model.ModifyFileOrder( fileOrder );
 	UpdateFileSortOrder();
 }
 
 void CAlbumSettingsDialog::OnUpdate_OrderRandomShuffle( CCmdUI* pCmdUI )
 {
-	CAlbumModel::Order fileOrder = hlp::OrderOfCmd( pCmdUI->m_nID );
+	fattr::Order fileOrder = hlp::OrderOfCmd( pCmdUI->m_nID );
 
-	pCmdUI->Enable( !m_model.InGeneration() );
 	pCmdUI->SetCheck( fileOrder == m_model.GetFileOrder() );
 }
 
@@ -955,29 +933,31 @@ void CAlbumSettingsDialog::OnToggle_AutoDrop( void )
 void CAlbumSettingsDialog::OnLVnColumnClick_FoundFiles( NMHDR* pNmHdr, LRESULT* pResult )
 {
 	NMLISTVIEW* pNmListView = (NMLISTVIEW*)pNmHdr;
-	CAlbumModel::Order fileOrder = m_model.GetFileOrder();
+	fattr::Order fileOrder = m_model.GetFileOrder();
 
 	switch ( pNmListView->iSubItem )
 	{
 		case FileName:
-			fileOrder = fileOrder == CAlbumModel::ByFileNameAsc ? CAlbumModel::ByFileNameDesc : CAlbumModel::ByFileNameAsc;
+			fileOrder = fileOrder == fattr::ByFileNameAsc ? fattr::ByFileNameDesc : fattr::ByFileNameAsc;
 			break;
 		case Folder:
-			fileOrder = fileOrder == CAlbumModel::ByFullPathAsc ? CAlbumModel::ByFullPathDesc : CAlbumModel::ByFullPathAsc;
+			fileOrder = fileOrder == fattr::ByFullPathAsc ? fattr::ByFullPathDesc : fattr::ByFullPathAsc;
 			break;
 		case Dimensions:
-			fileOrder = fileOrder == CAlbumModel::ByDimensionAsc ? CAlbumModel::ByDimensionDesc : CAlbumModel::ByDimensionAsc;
+			fileOrder = fileOrder == fattr::ByDimensionAsc ? fattr::ByDimensionDesc : fattr::ByDimensionAsc;
 			break;
 		case Size:
-			fileOrder = fileOrder == CAlbumModel::BySizeAsc ? CAlbumModel::BySizeDesc : CAlbumModel::BySizeAsc;
+			fileOrder = fileOrder == fattr::BySizeAsc ? fattr::BySizeDesc : fattr::BySizeAsc;
 			break;
 		case Date:
-			fileOrder = fileOrder == CAlbumModel::ByDateAsc ? CAlbumModel::ByDateDesc : CAlbumModel::ByDateAsc;
+			fileOrder = fileOrder == fattr::ByDateAsc ? fattr::ByDateDesc : fattr::ByDateAsc;
 			break;
 	}
-	m_model.SetFileOrder( fileOrder );
+
 	m_sortOrderCombo.SetCurSel( fileOrder );
+	m_model.ModifyFileOrder( fileOrder );
 	UpdateFileSortOrder();
+
 	*pResult = 0;
 }
 
@@ -1017,16 +997,16 @@ void CAlbumSettingsDialog::OnLVnGetDispInfo_FoundFiles( NMHDR* pNmHdr, LRESULT* 
 void CAlbumSettingsDialog::OnLVnItemsReorder_FoundFiles( void )
 {
 	// input custom order
-	std::vector< CFileAttr* > customOrder;
-	customOrder.reserve( m_model.GetFileAttrCount() );
+	std::vector< CFileAttr* > customSequence;
+	customSequence.reserve( m_model.GetFileAttrCount() );
 
 	for ( int i = 0, count = m_foundFilesListCtrl.GetItemCount(); i != count; ++i )
-		customOrder.push_back( m_foundFilesListCtrl.GetPtrAt< CFileAttr >( i ) );
+		customSequence.push_back( m_foundFilesListCtrl.GetPtrAt< CFileAttr >( i ) );
 
-	m_model.SetCustomOrder( customOrder );
+	m_model.SetCustomOrderSequence( customSequence );
 
 	// update UI
-	CAlbumModel::Order fileOrder = m_model.GetFileOrder();
+	fattr::Order fileOrder = m_model.GetFileOrder();
 	m_sortOrderCombo.SetCurSel( fileOrder );
 	std::pair< Column, bool > sortPair = ToListSortOrder( fileOrder );
 	m_foundFilesListCtrl.SetSortByColumn( sortPair.first, sortPair.second );

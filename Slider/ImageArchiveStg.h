@@ -8,11 +8,11 @@
 #include "utl/UI/Thumbnailer_fwd.h"
 #include "ArchivingModel_fwd.h"
 #include "ModelSchema.h"
-#include "FileAttr.h"
 #include <set>
 #include <hash_map>
 
 
+class CFileAttr;
 class CCachedThumbBitmap;
 
 
@@ -41,7 +41,7 @@ public:
 	void SaveAlbumDoc( CObject* pAlbumDoc );
 	bool LoadAlbumDoc( CObject* pAlbumDoc );
 
-	void LoadImagesMetadata( std::vector< CFileAttr >& rFileAttributes );
+	void LoadImagesMetadata( std::vector< CFileAttr* >& rFileAttributes );
 	CCachedThumbBitmap* LoadThumbnail( const fs::CFlexPath& imageComplexPath ) throws_();		// caller must delete the image
 
 	static bool HasImageArchiveExt( const TCHAR* pFilePath );
@@ -59,10 +59,10 @@ protected:
 	template< typename Iterator >
 	static void DecodeDeepStreamPath( Iterator itStart, Iterator itEnd ) { std::replace( itStart, itEnd, s_subPathSep, _T('\\') ); }			// '*' -> '\'
 private:
-	void CreateImageFiles( std::vector< CFileAttr >& rFileAttributes,
+	void CreateImageFiles( std::vector< CFileAttr* >& rFileAttributes,
 						   const std::vector< TTransferPathPair >& xferPairs,
 						   ui::IProgressService* pProgressService ) throws_( CException* );
-	void CreateMetadataFile( const std::vector< CFileAttr >& fileAttributes );
+	void CreateMetadataFile( const std::vector< CFileAttr* >& fileAttributes );
 	void CreateThumbnailsStorage( const std::vector< TTransferPathPair >& xferPairs, ui::IProgressService* pProgressService );
 private:
 	CComPtr< IStorage > m_pThumbsStorage;
@@ -107,7 +107,7 @@ public:
 		// FLEX: image path could refer to either physical image or archive-based image file
 		CFile* OpenFlexImageFile( const fs::CFlexPath& flexImagePath, DWORD mode = CFile::modeRead );
 
-		void LoadImagesMetadata( std::vector< CFileAttr >& rFileAttributes, const fs::CPath& stgFilePath );
+		void LoadImagesMetadata( std::vector< CFileAttr* >& rFileAttributes, const fs::CPath& stgFilePath );
 
 		bool SavePassword( const std::tstring& password, const fs::CPath& stgFilePath );
 		std::tstring LoadPassword( const fs::CPath& stgFilePath );

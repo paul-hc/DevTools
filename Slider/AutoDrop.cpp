@@ -2,7 +2,9 @@
 #include "stdafx.h"
 #include "AutoDrop.h"
 #include "SearchSpec.h"
+#include "FileAttr.h"
 #include "ImageFileEnumerator.h"
+#include "ProgressService.h"
 #include "Application.h"
 #include "resource.h"
 #include "utl/Serialization.h"
@@ -189,30 +191,43 @@ namespace auto_drop
 		return m_droppedSrcFiles.size();
 	}
 
-	bool CContext::MakeAutoDrop( COpStack& dropUndoStack )
+	bool CContext::SearchForImages( CImagesModel* pFoundImagesModel ) const
 	{
-		if ( !IsValidDropRecipient( true ) || 0 == GetFileCount() )
-			return false;
+		ASSERT_PTR( pFoundImagesModel );
 
-		// search for all the existing image files
-		CImageFileEnumerator imageEnum;
+		CProgressService progress( AfxGetMainWnd() );
+
 		try
 		{
+			CImageFileEnumerator imageEnum( progress.GetProgressEnumerator() );
+
 			imageEnum.Search( *m_pDestSearchSpec );
+			imageEnum.SwapFoundImages( *pFoundImagesModel );
 		}
 		catch ( CException* pExc )
 		{
 			app::HandleReportException( pExc );
 		}
 
-		const std::vector< CFileAttr >& existingFiles = imageEnum.GetFileAttrs();
+		return !pFoundImagesModel->IsEmpty();
+	}
+
+	bool CContext::MakeAutoDrop( COpStack& dropUndoStack )
+	{
+		if ( !IsValidDropRecipient( true ) || 0 == GetFileCount() )
+			return false;
+
+		CImagesModel foundImagesModel;
+		SearchForImages( &foundImagesModel );		// search for all the existing image files
+
+		const std::vector< CFileAttr* >& existingFiles = foundImagesModel.GetFileAttrs();
 
 		// NOTE: existingFiles contains only files that have numeric file-name
 		std::map< fs::CFlexPath, int > shiftMap;
 		std::map< fs::CFlexPath, int >::iterator itMap;
 
-		for ( size_t i = 0; i != existingFiles.size(); ++i )
-			shiftMap[ existingFiles[ i ].GetPath() ] = CSearchSpec::ParseNumFileNameNumber( existingFiles[ i ].GetPath().GetPtr() );
+		for ( std::vector< CFileAttr* >::const_iterator itFileAttr = existingFiles.begin(); itFileAttr != existingFiles.end(); ++itFileAttr )
+			shiftMap[ ( *itFileAttr )->GetPath() ] = CSearchSpec::ParseNumFileNameNumber( ( *itFileAttr )->GetPath().GetPtr() );
 
 		// exclude files dropped from the auto-drop directory
 		for ( std::vector< std::tstring >::const_iterator itDrop = m_droppedSrcFiles.begin(); itDrop != m_droppedSrcFiles.end(); ++itDrop )
@@ -303,33 +318,22 @@ namespace auto_drop
 		if ( !IsValidDropRecipient( true ) )
 			return false;			// invalid target search specifier
 
-		// search for all the existing image files
-		CImageFileEnumerator imageEnum;
-		try
-		{
-			imageEnum.Search( *m_pDestSearchSpec );
-		}
-		catch ( CException* pExc )
-		{
-			app::HandleReportException( pExc );
-		}
-
-		if ( !imageEnum.AnyFound() )
+		CImagesModel foundImagesModel;
+		if ( !SearchForImages( &foundImagesModel ) )		// search for all the existing image files
 			return false;			// no files found -> skip reorder
-
-		const std::vector< CFileAttr >& existingFiles = imageEnum.GetFileAttrs();
-
-		// NOTE: existingFiles contains only files that have numeric file-name
 
 		// push to the undo stack the group of entries for the shifted existing files
 		dropUndoStack.push_front( COpGroup( COpGroup::Existing, static_cast< int >( CTime::GetCurrentTime().GetTime() ) ) );
 
 		COpGroup& rShiftedGroup = dropUndoStack.front();
 
+		// NOTE: existingFiles contains only files that have numeric file-name
+		const std::vector< CFileAttr* >& existingFiles = foundImagesModel.GetFileAttrs();
+
 		// append rename entries for shifted existing files
 		for ( size_t i = 0; i != existingFiles.size(); ++i )
 		{
-			std::tstring filePath = existingFiles[ i ].GetPath().Get();
+			const std::tstring& filePath = existingFiles[ i ]->GetPath().Get();
 			const int fileNumber = 1 + static_cast< int >( i );
 
 			if ( CSearchSpec::ParseNumFileNameNumber( filePath.c_str() ) != fileNumber )
