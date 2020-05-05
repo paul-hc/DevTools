@@ -255,7 +255,7 @@ bool CAlbumModel::UndropCustomOrderIndexes( int droppedIndex, const std::vector<
 
 	m_imagesModel.RefFileAttrs().swap( origSequence );
 
-	TRACE( _T(" Undo drop: origDropIndex=%d  %s\n"), origDropIndex, str::FormatSet( origDragSelIndexes ).c_str() );
+	TRACE( _T(" Undo drop: origDropIndex=%d  %s\n"), origDropIndex, str::FormatSet( origDragSelIndexes ).c_str() ); origDropIndex;
 	return true;
 }
 

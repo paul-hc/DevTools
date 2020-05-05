@@ -115,7 +115,7 @@ protected:
 	afx_msg void OnLVnGetDispInfo_FoundFiles( NMHDR* pNmHdr, LRESULT* pResult );
 	afx_msg void OnLVnItemsReorder_FoundFiles( void );
 	afx_msg void OnImageFileOp( UINT cmdId );
-	afx_msg void OnStnClickedThumbPreviewStatic( void );
+	afx_msg void OnStnDblClk_ThumbPreviewStatic( void );
 
 	DECLARE_MESSAGE_MAP()
 };

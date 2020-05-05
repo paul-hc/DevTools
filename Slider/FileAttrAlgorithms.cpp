@@ -50,7 +50,7 @@ namespace fattr
 	void CRetainFileOrder::RestoreOriginalOrder( std::vector< CFileAttr* >* pNewSequence )
 	{
 		ASSERT_PTR( pNewSequence );
-		size_t seqCount = pNewSequence->size();
+		size_t seqCount = pNewSequence->size(); seqCount;
 
 		// restore what's left of the original order, and append new files at end
 

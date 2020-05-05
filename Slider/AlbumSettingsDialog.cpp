@@ -433,6 +433,7 @@ bool CAlbumSettingsDialog::SearchSourceFiles( void )
 void CAlbumSettingsDialog::SetupFoundListView( void )
 {
 	CScopedListTextSelection scopedSel( &m_foundFilesListCtrl );
+	CWaitCursor wait;
 
 	size_t count = m_model.GetFileAttrCount();
 	{
@@ -665,7 +666,7 @@ BEGIN_MESSAGE_MAP( CAlbumSettingsDialog, CLayoutDialog )
 	ON_NOTIFY( LVN_ITEMCHANGED, IDC_FOUND_FILES_LISTVIEW, OnLVnItemChanged_FoundFiles )
 	ON_NOTIFY( LVN_GETDISPINFO, IDC_FOUND_FILES_LISTVIEW, OnLVnGetDispInfo_FoundFiles )
 	ON_CONTROL( lv::LVN_ItemsReorder, IDC_FOUND_FILES_LISTVIEW, OnLVnItemsReorder_FoundFiles )
-	ON_STN_CLICKED( IDC_THUMB_PREVIEW_STATIC, &CAlbumSettingsDialog::OnStnClickedThumbPreviewStatic )
+	ON_STN_DBLCLK( IDC_THUMB_PREVIEW_STATIC, OnStnDblClk_ThumbPreviewStatic )
 	// image file operations: CM_OPEN_IMAGE_FILE, CM_DELETE_FILE, CM_DELETE_FILE_NO_UNDO, CM_MOVE_FILE, CM_EXPLORE_IMAGE
 	ON_COMMAND_RANGE( CM_OPEN_IMAGE_FILE, CM_EXPLORE_IMAGE, OnImageFileOp )
 END_MESSAGE_MAP()
@@ -1012,7 +1013,7 @@ void CAlbumSettingsDialog::OnLVnItemsReorder_FoundFiles( void )
 	m_foundFilesListCtrl.SetSortByColumn( sortPair.first, sortPair.second );
 }
 
-void CAlbumSettingsDialog::OnStnClickedThumbPreviewStatic( void )
+void CAlbumSettingsDialog::OnStnDblClk_ThumbPreviewStatic( void )
 {
 	shell::Execute( this, m_thumbPreviewCtrl.GetImagePath().GetPtr() );
 }

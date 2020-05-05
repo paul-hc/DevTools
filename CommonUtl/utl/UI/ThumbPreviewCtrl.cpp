@@ -98,7 +98,6 @@ END_MESSAGE_MAP()
 void CThumbPreviewCtrl::OnContextMenu( CWnd* pWnd, CPoint screenPos )
 {
 	pWnd;
-
 	fs::CPath filePath = m_imageFilePath.GetPhysicalPath();
 
 	if ( filePath.FileExist() )
