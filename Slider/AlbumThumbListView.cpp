@@ -15,6 +15,7 @@
 #include "utl/UI/MenuUtilities.h"
 #include "utl/UI/UtilitiesEx.h"
 #include "utl/UI/Thumbnailer.h"
+#include "utl/Resequence.hxx"
 #include <memory>
 #include <algorithm>
 
@@ -804,13 +805,16 @@ DROPEFFECT CAlbumThumbListView::OnDragEnter( COleDataObject* pDataObject, DWORD 
 DROPEFFECT CAlbumThumbListView::OnDragOver( COleDataObject* pDataObject, DWORD keyState, CPoint point )
 {
 	keyState;
-
 	CListSelectionData selData;
+
 	if ( selData.ExtractFrom( pDataObject ) && selData.IsValid() )
 		if ( selData.m_pSrcWnd != NULL /*&& selData.m_pThumbView->GetAlbumDoc() == GetAlbumDoc()*/ )		// custom order D&D is allowed only between views of the same document
 		{
-			int hitIndex = GetImageIndexFromPoint( point );
-			if ( -1 == hitIndex || !utl::Contains( selData.m_selIndexes, hitIndex ) )					// self-drop protection: avoid dropping to the current selection
+			int dropIndex = GetImageIndexFromPoint( point );
+			if ( -1 == dropIndex )
+				dropIndex = static_cast<int>( m_pAlbumModel->GetFileAttrCount() );			// drop append to end
+
+			if ( seq::ChangesDropSequenceAt( m_pAlbumModel->GetFileAttrCount(), dropIndex, selData.m_selIndexes ) )
 				return DROPEFFECT_MOVE;
 		}
 

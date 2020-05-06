@@ -29,8 +29,7 @@ namespace fattr
 	}
 
 
-	// Provide the ability to restore the existing file order, after searching again for files:
-	//	 - if new image files are found, they are appended at the end.
+	// To restore the existing file order, after searching again for files. New image found are appended.
 	//
 	class CRetainFileOrder
 	{

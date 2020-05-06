@@ -93,12 +93,27 @@ namespace ut
 
 namespace ut
 {
-	template< typename Container >
-	std::string JoinKeys( const Container& items, const TCHAR sep[] )
+	template< typename PtrContainerT >
+	std::string JoinPtrs( const PtrContainerT& itemPtrs, const TCHAR sep[] )
 	{
 		std::ostringstream oss;
 		size_t count = 0;
-		for ( typename Container::const_iterator itItem = items.begin(); itItem != items.end(); ++itItem )
+		for ( typename PtrContainerT::const_iterator itItem = itemPtrs.begin(); itItem != itemPtrs.end(); ++itItem )
+		{
+			if ( count++ != 0 )
+				oss << sep;
+
+			oss << **itItem;
+		}
+		return oss.str();
+	}
+
+	template< typename ContainerT >
+	std::string JoinKeys( const ContainerT& items, const TCHAR sep[] )
+	{
+		std::ostringstream oss;
+		size_t count = 0;
+		for ( typename ContainerT::const_iterator itItem = items.begin(); itItem != items.end(); ++itItem )
 		{
 			if ( count++ != 0 )
 				oss << sep;
@@ -108,12 +123,12 @@ namespace ut
 		return oss.str();
 	}
 
-	template< typename Container >
-	std::string JoinValues( const Container& items, const TCHAR sep[] )
+	template< typename ContainerT >
+	std::string JoinValues( const ContainerT& items, const TCHAR sep[] )
 	{
 		std::ostringstream oss;
 		size_t count = 0;
-		for ( typename Container::const_iterator itItem = items.begin(); itItem != items.end(); ++itItem )
+		for ( typename ContainerT::const_iterator itItem = items.begin(); itItem != items.end(); ++itItem )
 		{
 			if ( count++ != 0 )
 				oss << sep;
@@ -129,6 +144,45 @@ namespace ut
 		std::random_shuffle( rItems.begin(), rItems.end() );
 		std::sort( rItems.begin(), rItems.end(), lessPred );
 		return str::Join( rItems, pSep );
+	}
+
+
+	template< typename CharType, typename ContainerT >
+	void SplitValues( ContainerT& rItems, const CharType* pSource, const CharType* pSep, bool append = false )
+	{
+		ASSERT( !str::IsEmpty( pSep ) );
+		if ( !append )
+			rItems.clear();
+
+		if ( !str::IsEmpty( pSource ) )
+		{
+			const size_t sepLen = str::GetLength( pSep );
+			typedef const CharType* const_iterator;
+			typename ContainerT::value_type value;
+
+			for ( const_iterator itItemStart = str::begin( pSource ), itEnd = str::end( pSource ); ; )
+			{
+				const_iterator itItemEnd = std::search( itItemStart, itEnd, pSep, pSep + sepLen );
+				if ( itItemEnd != itEnd )
+				{
+					if ( str::ParseValue( value, std::basic_string< CharType >( itItemStart, std::distance( itItemStart, itItemEnd ) ) ) )
+						rItems.push_back( value );
+					else
+						ASSERT( false );
+
+					itItemStart = itItemEnd + sepLen;
+				}
+				else
+				{
+					if ( str::ParseValue( value, std::basic_string< CharType >( itItemStart ) ) )
+						rItems.push_back( value );
+					else
+						ASSERT( false );
+
+					break;			// last item
+				}
+			}
+		}
 	}
 }
 

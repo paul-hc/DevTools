@@ -57,7 +57,7 @@ namespace fs
 		str::Tokenize( m_specs, flat, delims );			// discard empty entries
 
 		std::for_each( m_specs.begin(), m_specs.end(), path::Normalize );
-		utl::RemoveDuplicates< pred::IsEquivalentPathString >( m_specs );
+		utl::Uniquify< pred::IsEquivalentPathString >( m_specs );
 		ExpandPaths();
 	}
 

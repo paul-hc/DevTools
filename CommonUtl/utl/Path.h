@@ -359,7 +359,7 @@ namespace pred
 	};
 
 
-	struct IsEquivalentPathChar
+	struct IsEquivalentPathChar : public std::unary_function< bool, TCHAR >
 	{
 		bool operator()( TCHAR left, TCHAR right ) const
 		{
@@ -368,7 +368,7 @@ namespace pred
 	};
 
 
-	struct IsEquivalentPathString
+	struct IsEquivalentPathString : public std::unary_function< bool, std::tstring >
 	{
 		IsEquivalentPathString( const std::tstring& path ) : m_path( path ) {}
 
@@ -381,7 +381,7 @@ namespace pred
 	};
 
 
-	struct IsEquivalentPath
+	struct IsEquivalentPath : public std::unary_function< bool, fs::CPath >
 	{
 		IsEquivalentPath( const fs::CPath& path ) : m_path( path ) {}
 
@@ -391,6 +391,15 @@ namespace pred
 		}
 	private:
 		const fs::CPath& m_path;
+	};
+
+
+	struct IsPathEquivalent : public std::binary_function< bool, fs::CPath, fs::CPath >
+	{
+		bool operator()( const fs::CPath& left, const fs::CPath& right ) const
+		{
+			return left.Equivalent( right );
+		}
 	};
 }
 

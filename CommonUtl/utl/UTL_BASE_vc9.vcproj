@@ -857,6 +857,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\ut\MockObject.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\ut\MockObject.h"
+				>
+			</File>
+			<File
 				RelativePath=".\ut\NumericTests.cpp"
 				>
 			</File>

@@ -17,7 +17,20 @@ public:
 	// ut::ITestCase interface
 	virtual void Run( void );
 private:
+	void TestBuffer( void );
+	void TestLookup( void );
+	void TestBinaryLookup( void );
 	void TestIsOrdered( void );
+	void TestQuery( void );
+	void TestAssignment( void );
+	void TestInsert( void );
+	void TestRemove( void );
+	void TestMixedTypes( void );
+	void TestCompareContents( void );
+	void TestAdvancePos( void );
+	void TestOwningContainer( void );
+private:
+	static const TCHAR s_sep[];
 };
 
 

@@ -81,7 +81,7 @@ namespace seq
 
 		// generate fake sequence with consecutive indexes - we just need to detect if the sequence changes for drop move
 		std::vector< IndexT > baselineSeq( itemCount );				// contains indexes in the range [0, size-1]
-		std::generate( baselineSeq.begin(), baselineSeq.end(), GenNumSeq< IndexT >( 0 ) );
+		std::generate( baselineSeq.begin(), baselineSeq.end(), func::GenNumSeq< IndexT >( 0 ) );
 
 		std::vector< IndexT > newSequence;
 		MakeDropSequence( newSequence, baselineSeq, dropIndex, dragSelIndexes );
@@ -126,7 +126,7 @@ namespace seq
 		if ( pDroppedSelIndexes != NULL )
 		{	// adjust dropped selected indexes according to the new dropped-index
 			pDroppedSelIndexes->resize( dragSelIndexes.size() );
-			std::generate( pDroppedSelIndexes->begin(), pDroppedSelIndexes->end(), GenNumSeq< IndexT >( static_cast<IndexT>( dropPos ) ) );
+			std::generate( pDroppedSelIndexes->begin(), pDroppedSelIndexes->end(), func::GenNumSeq< IndexT >( static_cast<IndexT>( dropPos ) ) );
 		}
 
 		ENSURE( utl::SameContents( rNewSequence, baselineSeq ) );
@@ -250,17 +250,6 @@ namespace seq
 	{
 		template< typename IndexT >
 		void operator()( IndexT& rIndex ) { rIndex += static_cast< IndexT >( direction ); }
-	};
-
-
-	template< typename Type >
-	struct GenNumSeq
-	{
-		GenNumSeq( Type initialValue = Type() ) : m_value( initialValue ) {}
-
-		Type operator()( void ) { return m_value++; }
-	private:
-		int m_value;
 	};
 
 

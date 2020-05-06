@@ -86,17 +86,6 @@ void CResequenceTests::TestResequence( void )
 
 void CResequenceTests::TestDropMove( void )
 {
-if (0)
-{	// multiple selection
-	std::vector< int > sel_CEF;
-	sel_CEF.push_back( 2 );		// 'C'
-	sel_CEF.push_back( 4 );		// 'E'
-	sel_CEF.push_back( 5 );		// 'F'
-
-	ASSERT_EQUAL( "abdCEFg", ut::MakeDropSequence( "abCdEFg", 3, sel_CEF ) );
-	ASSERT_EQUAL( "abdgCEF", ut::MakeDropSequence( "abCdEFg", 4, sel_CEF ) );
-}
-
 	{	// single selection
 		std::vector< int > sel_C;
 		sel_C.push_back( 2 );		// 'C'
@@ -133,8 +122,11 @@ if (0)
 		ASSERT_EQUAL( "aCEFbdg", ut::MakeDropSequence( "abCdEFg", 1, sel_CEF ) );
 		ASSERT_EQUAL( "abCEFdg", ut::MakeDropSequence( "abCdEFg", 2, sel_CEF ) );
 
-//		ASSERT_EQUAL( "abdCEFg", ut::MakeDropSequence( "abCdEFg", 3, sel_CEF ) );
-//		ASSERT_EQUAL( "abdgCEF", ut::MakeDropSequence( "abCdEFg", 4, sel_CEF ) );
+		ASSERT_EQUAL( "abCEFdg", ut::MakeDropSequence( "abCdEFg", 3, sel_CEF ) );		// same effect as drop at 2
+		ASSERT_EQUAL( "abdCEFg", ut::MakeDropSequence( "abCdEFg", 4, sel_CEF ) );
+		ASSERT_EQUAL( "abdCEFg", ut::MakeDropSequence( "abCdEFg", 5, sel_CEF ) );		// same effect as drop at 4
+		ASSERT_EQUAL( "abdCEFg", ut::MakeDropSequence( "abCdEFg", 6, sel_CEF ) );		// same effect as drop at 4, 5
+		ASSERT_EQUAL( "abdgCEF", ut::MakeDropSequence( "abCdEFg", 7, sel_CEF ) );		// drop past end
 	}
 }
 

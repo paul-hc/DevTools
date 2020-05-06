@@ -57,9 +57,63 @@ namespace utl
 #include <algorithm>
 
 
+namespace utl
+{
+	template< typename ContainerT, typename FuncT >
+	inline FuncT for_each( ContainerT& rObjects, FuncT func )
+	{
+		return std::for_each( rObjects.begin(), rObjects.end(), func );
+	}
+
+	template< typename ContainerT, typename FuncT >
+	inline FuncT for_each( const ContainerT& objects, FuncT func )
+	{
+		return std::for_each( objects.begin(), objects.end(), func );
+	}
+
+
+	template< typename ContainerT, typename UnaryPred >
+	void QueryThat( std::vector< typename ContainerT::value_type >& rSubset, const ContainerT& objects, UnaryPred pred )
+	{
+		// additive
+		for ( typename ContainerT::const_iterator itObject = objects.begin(); itObject != objects.end(); ++itObject )
+			if ( pred( *itObject ) )
+				rSubset.push_back( *itObject );
+	}
+
+
+	// container bounds: works with std::list (not random iterator)
+
+	template< typename ContainerT >
+	inline typename const ContainerT::value_type& Front( const ContainerT& rItems ) { ASSERT( !rItems.empty() ); return *rItems.begin(); }
+
+	template< typename ContainerT >
+	inline typename ContainerT::value_type& Front( ContainerT& rItems ) { ASSERT( !rItems.empty() ); return *rItems.begin(); }
+
+	template< typename ContainerT >
+	inline typename const ContainerT::value_type& Back( const ContainerT& rItems ) { ASSERT( !rItems.empty() ); return *--rItems.end(); }
+
+	template< typename ContainerT >
+	inline typename ContainerT::value_type& Back( ContainerT& rItems ) { ASSERT( !rItems.empty() ); return *--rItems.end(); }
+}
+
+
 namespace func
 {
-	/** usage:
+	template< typename NumericT >
+	struct GenNumSeq : public std::unary_function< void, NumericT >
+	{
+		GenNumSeq( NumericT initialValue = NumericT(), NumericT step = 1 ) : m_value( initialValue ), m_step( step ) {}
+
+		NumericT operator()( void ) { NumericT value = m_value; m_value += m_step; return value; }
+	private:
+		NumericT m_value;
+		NumericT m_step;
+	};
+
+
+	/*
+		usage:
 			std::vector< Element* > elements;
 			std::for_each( elements.begin(), elements.end(), func::Delete() );
 		or
@@ -111,23 +165,118 @@ namespace func
 
 namespace utl
 {
-	template< typename ContainerT, typename FuncT >
-	inline FuncT for_each( ContainerT& rObjects, FuncT func )
+	template< typename Type, typename SmartPtrType >
+	inline bool ResetPtr( SmartPtrType& rPtr, Type* pObject ) { rPtr.reset( pObject ); return pObject != NULL; }
+
+	template< typename SmartPtrType >
+	inline bool ResetPtr( SmartPtrType& rPtr ) { rPtr.reset( NULL ); return false; }
+
+
+	/**
+		object ownership helpers - for containers of pointers with ownership
+	*/
+
+	template< typename PtrType >
+	inline PtrType* ReleaseOwnership( PtrType*& rPtr )		// release item ownership in owning containers of pointers
 	{
-		return std::for_each( rObjects.begin(), rObjects.end(), func );
+		PtrType* ptr = rPtr;
+		rPtr = NULL;				// mark detached item as NULL to prevent being deleted
+		return ptr;
 	}
 
-	template< typename ContainerT, typename FuncT >
-	inline FuncT for_each( const ContainerT& objects, FuncT func )
+
+	template< typename PtrContainerT >
+	void ClearOwningContainer( PtrContainerT& rContainer )
 	{
-		return std::for_each( objects.begin(), objects.end(), func );
+		for_each( rContainer, func::Delete() );
+		rContainer.clear();
+	}
+
+	template< typename PtrContainerT >
+	void CreateOwningContainerObjects( PtrContainerT& rItemPtrs, size_t count )		// using default constructor
+	{
+		ClearOwningContainer( rItemPtrs );		// delete existing items
+
+		typedef typename std::tr1::remove_pointer< typename PtrContainerT::value_type >::type ItemType;
+
+		rItemPtrs.reserve( count );
+		for ( size_t i = 0; i != count; ++i )
+			rItemPtrs.push_back( new ItemType() );
+	}
+
+	template< typename PtrContainerT >
+	void CloneOwningContainerObjects( PtrContainerT& rItemPtrs, const PtrContainerT& srcItemPtrs )		// using copy constructor
+	{
+		ClearOwningContainer( rItemPtrs );		// delete existing items
+
+		typedef typename std::tr1::remove_pointer< typename PtrContainerT::value_type >::type ItemType;
+
+		rItemPtrs.reserve( srcItemPtrs.size() );
+		for ( PtrContainerT::const_iterator itSrcItem = srcItemPtrs.begin(); itSrcItem != srcItemPtrs.end(); ++itSrcItem )
+			rItemPtrs.push_back( new ItemType( **itSrcItem ) );
 	}
 
 
+	template< typename PtrContainer, typename ClearFunctor >
+	void ClearOwningContainer( PtrContainer& rContainer, ClearFunctor clearFunctor )
+	{
+		for_each( rContainer, clearFunctor );
+		rContainer.clear();
+	}
+
+	template< typename MapType >
+	void ClearOwningAssocContainer( MapType& rObjectToObjectMap )
+	{
+		for ( typename MapType::iterator it = rObjectToObjectMap.begin(); it != rObjectToObjectMap.end(); ++it )
+		{
+			delete it->first;
+			delete it->second;
+		}
+
+		rObjectToObjectMap.clear();
+	}
+
+	template< typename MapType >
+	void ClearOwningAssocContainerKeys( MapType& rObjectToValueMap )
+	{
+		for ( typename MapType::iterator it = rObjectToValueMap.begin(); it != rObjectToValueMap.end(); ++it )
+			delete it->first;
+
+		rObjectToValueMap.clear();
+	}
+
+	template< typename MapType >
+	void ClearOwningAssocContainerValues( MapType& rKeyToObjectMap )
+	{
+		for ( typename MapType::iterator it = rKeyToObjectMap.begin(); it != rKeyToObjectMap.end(); ++it )
+			delete it->second;
+
+		rKeyToObjectMap.clear();
+	}
+
+
+	// exception-safe owning container of pointers; use swap() at the end to exchange safely the new items (old items will be deleted by this).
+	//
+	template< typename ContainerType, typename DeleteFunc = func::Delete >
+	class COwningContainer : public ContainerType
+	{
+		using ContainerType::clear;
+	public:
+		COwningContainer( void ) : ContainerType() {}
+		~COwningContainer() { clear(); }
+
+		void clear( void ) { std::for_each( begin(), end(), DeleteFunc() ); Release(); }
+		void Release( void ) { ContainerType::clear(); }
+	};
+}
+
+
+namespace utl
+{
 	// linear search
 
-	template< typename ContainerT, typename Predicate >
-	inline typename ContainerT::value_type Find( const ContainerT& objects, Predicate pred )
+	template< typename ContainerT, typename UnaryPred >
+	inline typename ContainerT::value_type Find( const ContainerT& objects, UnaryPred pred )
 	{
 		typename ContainerT::const_iterator itFound = std::find_if( objects.begin(), objects.end(), pred );
 		if ( itFound == objects.end() )
@@ -136,8 +285,8 @@ namespace utl
 	}
 
 
-	template< typename IteratorT, typename Predicate >
-	IteratorT FindIfNot( IteratorT itFirst, IteratorT itEnd, Predicate pred )
+	template< typename IteratorT, typename UnaryPred >
+	IteratorT FindIfNot( IteratorT itFirst, IteratorT itEnd, UnaryPred pred )
 	{	// std::find_if_not() is missing on most Unix platforms
 		for ( ; itFirst != itEnd; ++itFirst )
 			if ( !pred( *itFirst ) )
@@ -146,14 +295,14 @@ namespace utl
 	}
 
 
-	template< typename ContainerT, typename Predicate >
-	inline bool Any( const ContainerT& objects, Predicate pred )
+	template< typename ContainerT, typename UnaryPred >
+	inline bool Any( const ContainerT& objects, UnaryPred pred )
 	{
 		return std::find_if( objects.begin(), objects.end(), pred ) != objects.end();
 	}
 
-	template< typename ContainerT, typename Predicate >
-	inline bool All( const ContainerT& objects, Predicate pred )
+	template< typename ContainerT, typename UnaryPred >
+	inline bool All( const ContainerT& objects, UnaryPred pred )
 	{
 		return !objects.empty() && FindIfNot( objects.begin(), objects.end(), pred ) == objects.end();
 	}
@@ -232,8 +381,8 @@ namespace utl
 
 
 	// find first satisfying binary predicate equalPred
-	template< typename IteratorT, typename ValueType, typename EqualBinaryPred >
-	inline IteratorT FindIfEqual( IteratorT iter, IteratorT itEnd, const ValueType& value, EqualBinaryPred equalPred )
+	template< typename IteratorT, typename ValueType, typename BinaryPred >
+	inline IteratorT FindIfEqual( IteratorT iter, IteratorT itEnd, const ValueType& value, BinaryPred equalPred )
 	{
 		for ( ; iter != itEnd; ++iter )
 			if ( equalPred( *iter, value ) )
@@ -356,51 +505,37 @@ namespace utl
 
 namespace utl
 {
-	// generic algoritms
-
-	template< typename ContainerT >
-	inline typename const ContainerT::value_type& Front( const ContainerT& rItems ) { ASSERT( !rItems.empty() ); return *rItems.begin(); }
-
-	template< typename ContainerT >
-	inline typename ContainerT::value_type& Front( ContainerT& rItems ) { ASSERT( !rItems.empty() ); return *rItems.begin(); }
-
-	template< typename ContainerT >
-	inline typename const ContainerT::value_type& Back( const ContainerT& rItems ) { ASSERT( !rItems.empty() ); return *--rItems.end(); }
-
-	template< typename ContainerT >
-	inline typename ContainerT::value_type& Back( ContainerT& rItems ) { ASSERT( !rItems.empty() ); return *--rItems.end(); }
-
-
-	template< typename ContainerT, typename Predicate >
-	void QueryThat( std::vector< typename ContainerT::value_type >& rSubset, const ContainerT& objects, Predicate pred )
-	{
-		// additive
-		for ( typename ContainerT::const_iterator itObject = objects.begin(); itObject != objects.end(); ++itObject )
-			if ( pred( *itObject ) )
-				rSubset.push_back( *itObject );
-	}
-
-
 	// copy items between containers using a conversion functor (unary)
 
-	template< typename DestContainerT, typename SrcContainerT, typename ConvertFunc >
-	inline void Assign( DestContainerT& rDestItems, const SrcContainerT& srcItems, ConvertFunc cvtFunc )
+	template< typename ContainerT, typename UnaryFunc >
+	void GenerateN( ContainerT& rItems, size_t count, UnaryFunc genFunc, size_t atPos = utl::npos )
+	{
+		if ( utl::npos == atPos )
+			atPos = rItems.size();
+
+		rItems.insert( rItems.begin() + atPos, count, typename ContainerT::value_type() );		// append SRC count
+		std::generate( rItems.begin() + atPos, rItems.begin() + atPos + count, genFunc );
+	}
+
+	template< typename DestContainerT, typename SrcContainerT, typename ConvertUnaryFunc >
+	inline void Assign( DestContainerT& rDestItems, const SrcContainerT& srcItems, ConvertUnaryFunc cvtFunc )
 	{
 		rDestItems.resize( srcItems.size() );
 		std::transform( srcItems.begin(), srcItems.end(), rDestItems.begin(), cvtFunc );
 	}
 
-	template< typename DestContainerT, typename SrcContainerT, typename ConvertFunc >
-	inline void Append( DestContainerT& rDestItems, const SrcContainerT& srcItems, ConvertFunc cvtFunc )
+	template< typename DestContainerT, typename SrcContainerT, typename ConvertUnaryFunc >
+	inline void Append( DestContainerT& rDestItems, const SrcContainerT& srcItems, ConvertUnaryFunc cvtFunc )
 	{
-		rDestItems.resize( rDestItems.size() + srcItems.size() );
-		std::transform( srcItems.begin(), srcItems.end(), rDestItems.end(), cvtFunc );
+		size_t origDestCount = rDestItems.size();
+		rDestItems.insert( rDestItems.end(), srcItems.size(), typename DestContainerT::value_type() );		// append SRC count
+		std::transform( srcItems.begin(), srcItems.end(), rDestItems.begin() + origDestCount, cvtFunc );
 	}
 
-	template< typename DestContainerT, typename SrcContainerT, typename ConvertFunc >
-	inline void Prepend( DestContainerT& rDestItems, const SrcContainerT& srcItems, ConvertFunc cvtFunc )
+	template< typename DestContainerT, typename SrcContainerT, typename ConvertUnaryFunc >
+	void Prepend( DestContainerT& rDestItems, const SrcContainerT& srcItems, ConvertUnaryFunc cvtFunc )
 	{
-		rDestItems.resize( rDestItems.size() + srcItems.size() );
+		rDestItems.insert( rDestItems.begin(), srcItems.size(), typename DestContainerT::value_type() );		// prepend SRC count
 		std::transform( srcItems.begin(), srcItems.end(), rDestItems.begin(), cvtFunc );
 	}
 
@@ -411,14 +546,14 @@ namespace utl
 		rDest.insert( std::upper_bound( rDest.begin(), rDest.end(), item ), item );
 	}
 
-	template< typename Type, typename ItemType, typename OrderPredicate >
-	inline void AddSorted( std::vector< Type >& rDest, ItemType item, OrderPredicate orderPred ) // predicate version
+	template< typename Type, typename ItemType, typename OrderBinaryPred >
+	inline void AddSorted( std::vector< Type >& rDest, ItemType item, OrderBinaryPred orderPred )		// predicate version
 	{
 		rDest.insert( std::upper_bound( rDest.begin(), rDest.end(), item, orderPred ), item );
 	}
 
-	template< typename Type, typename IteratorT, typename OrderPredicate >
-	void AddSorted( std::vector< Type >& rDest, IteratorT itFirst, IteratorT itEnd, OrderPredicate orderPred ) // sequence with predicate version
+	template< typename Type, typename IteratorT, typename OrderBinaryPred >
+	void AddSorted( std::vector< Type >& rDest, IteratorT itFirst, IteratorT itEnd, OrderBinaryPred orderPred )		// sequence with predicate version
 	{
 		for ( ; itFirst != itEnd; ++itFirst )
 			AddSorted( rDest, *itFirst, orderPred );
@@ -448,14 +583,64 @@ namespace utl
 		rContainer.insert( std::tstring::npos == pos ? rContainer.end() : ( rContainer.begin() + pos ), item );
 	}
 
-	template< typename ContainerT, typename Pred >
-	size_t RemoveIf( ContainerT& rItems, Pred pred )
+
+	template< typename ContainerT, typename ValueT >
+	size_t Remove( ContainerT& rItems, const ValueT& value )
+	{
+		typename ContainerT::iterator itRemove = std::remove( rItems.begin(), rItems.end(), value );	// doesn't actually remove, just move items to be removed at the end
+		size_t removedCount = std::distance( itRemove, rItems.end() );
+		rItems.erase( itRemove, rItems.end() );
+		return removedCount;
+	}
+
+	template< typename ContainerT, typename UnaryPred >
+	size_t RemoveIf( ContainerT& rItems, UnaryPred pred )
 	{
 		typename ContainerT::iterator itRemove = std::remove_if( rItems.begin(), rItems.end(), pred );		// doesn't actually remove, just move items to be removed at the end
 		size_t removedCount = std::distance( itRemove, rItems.end() );
 		rItems.erase( itRemove, rItems.end() );
 		return removedCount;
 	}
+
+
+	template< typename ContainerT >
+	size_t Uniquify( ContainerT& rItems )
+	{
+		size_t removedCount = 0;
+
+		for ( typename ContainerT::iterator itItem = rItems.begin(), itNext = itItem, itEnd = rItems.end(); itItem != itEnd; itNext = ++itItem )
+			if ( itNext++ != itEnd )
+			{
+				typename ContainerT::iterator itRemove = std::remove( itNext, itEnd, *itItem );		// doesn't actually remove, just move items to be removed at the end
+
+				removedCount += std::distance( itRemove, itEnd );
+				itEnd = rItems.erase( itRemove, itEnd );
+			}
+
+		return removedCount;
+	}
+
+	template< typename UnaryPred, typename ContainerT >
+	size_t Uniquify( ContainerT& rItems, ContainerT* pOutRemovedDups = static_cast< ContainerT* >( NULL ) )
+	{
+		size_t removedCount = 0;
+
+		for ( typename ContainerT::iterator itItem = rItems.begin(), itNext = itItem, itEnd = rItems.end(); itItem != itEnd; itNext = ++itItem )
+			if ( itNext++ != itEnd )
+			{
+				typename ContainerT::iterator itRemove = std::remove_if( itNext, itEnd, UnaryPred( *itItem ) );	// doesn't actually remove, just move items to be removed at the end
+
+				removedCount += std::distance( itRemove, itEnd );
+
+				if ( pOutRemovedDups != NULL )
+					pOutRemovedDups->insert( pOutRemovedDups->end(), itRemove, rItems.end() );		// for owning container of pointers: allow client to delete the removed duplicates
+
+				itEnd = rItems.erase( itRemove, itEnd );
+			}
+
+		return removedCount;
+	}
+
 
 	template< typename ContainerT >
 	inline void RemoveExisting( ContainerT& rContainer, const typename ContainerT::value_type& rItem )
@@ -476,6 +661,12 @@ namespace utl
 		rContainer.erase( itFound );
 		return true;
 	}
+}
+
+
+namespace utl
+{
+	// specific type
 
 	template< typename DesiredType, typename SourceType >
 	void QueryWithType( std::vector< DesiredType* >& rOutObjects, const std::vector< SourceType* >& rSource )
@@ -492,8 +683,7 @@ namespace utl
 	{
 		rDestObjects.reserve( rDestObjects.size() + rSourceObjects.size() );
 
-		for ( typename std::vector< SourceType* >::const_iterator itObject = rSourceObjects.begin();
-			  itObject != rSourceObjects.end(); ++itObject )
+		for ( typename std::vector< SourceType* >::const_iterator itObject = rSourceObjects.begin(); itObject != rSourceObjects.end(); ++itObject )
 			if ( is_a< TargetType >( *itObject ) )
 				rDestObjects.push_back( checked_static_cast< DestType* >( *itObject ) );
 	}
@@ -503,8 +693,7 @@ namespace utl
 	{
 		rDestObjects.reserve( rDestObjects.size() + rSourceObjects.size() );
 
-		for ( typename std::vector< SourceType* >::const_iterator itObject = rSourceObjects.begin();
-			  itObject != rSourceObjects.end(); ++itObject )
+		for ( typename std::vector< SourceType* >::const_iterator itObject = rSourceObjects.begin(); itObject != rSourceObjects.end(); ++itObject )
 			if ( !is_a< TargetType >( *itObject ) )
 				rDestObjects.push_back( checked_static_cast< DestType* >( *itObject ) );
 	}
@@ -527,7 +716,7 @@ namespace utl
 	}
 
 	template< typename PreserveType, typename ObjectType >
-	size_t RemoveNotType( std::vector< ObjectType* >& rObjects )
+	size_t RemoveWithoutType( std::vector< ObjectType* >& rObjects )
 	{
 		size_t removedCount = 0;
 
@@ -542,29 +731,12 @@ namespace utl
 
 		return removedCount;
 	}
+}
 
-	template< typename Type >
-	bool MoveAtEnd( std::vector< Type >& rOutVector, const Type& value )
-	{
-		if ( rOutVector.empty() )
-			return false;
-		else if ( rOutVector.back() != value ) // not already at the end
-		{
-			typename std::vector< Type >::iterator itFound = std::find( rOutVector.begin(), rOutVector.end(), value );
 
-			if ( itFound == rOutVector.end() )
-				return false; // value not found
-
-			rOutVector.erase( itFound );
-			rOutVector.push_back( value );
-		}
-
-		return true;
-	}
-
-	/**
-		algorithms
-	*/
+namespace utl
+{
+	// content algorithms
 
 	// returns true if containers have the same elements, eventually in different order
 	template< typename LeftIterator, typename RightIterator >
@@ -589,8 +761,8 @@ namespace utl
 
 
 	// returns true if containers have the same items, eventually in different order (predicate version)
-	template< typename Type, typename EqualBinaryPred >
-	bool SameContents( const std::vector< Type >& left, const std::vector< Type >& right, EqualBinaryPred equalPred )
+	template< typename Type, typename BinaryPred >
+	bool SameContents( const std::vector< Type >& left, const std::vector< Type >& right, BinaryPred equalPred )
 	{
 		if ( left.size() != right.size() )
 			return false;
@@ -604,11 +776,95 @@ namespace utl
 	}
 
 
+	template< typename IndexType, typename Type >
+	void QuerySubSequenceFromIndexes( std::vector< Type >& rSubSequence, const std::vector< Type >& source, const std::vector< IndexType >& selIndexes )
+	{
+		REQUIRE( selIndexes.size() <= source.size() );
+
+		rSubSequence.clear();
+		rSubSequence.reserve( selIndexes.size() );
+
+		for ( typename std::vector< IndexType >::const_iterator itSelIndex = selIndexes.begin(); itSelIndex != selIndexes.end(); ++itSelIndex )
+			rSubSequence.push_back( source[ *itSelIndex ] );
+	}
+
+	template< typename IndexType, typename ContainerT >
+	void QuerySubSequenceIndexes( std::vector< IndexType >& rIndexes, const ContainerT& source, const ContainerT& subSequence )
+	{	// note: N-squared complexity
+		rIndexes.clear();
+		rIndexes.reserve( subSequence.size() );
+
+		for ( typename ContainerT::const_iterator itSubItem = subSequence.begin(); itSubItem != subSequence.end(); ++itSubItem )
+			rIndexes.push_back( static_cast< IndexType >( utl::LookupPos( source.begin(), source.end(), *itSubItem ) ) );
+	}
+
+
+	template< typename LeftContainerT, typename RightContainer2T >
+	bool EmptyIntersection( const LeftContainerT& left, const RightContainer2T& right )
+	{
+		for ( typename LeftContainerT::const_iterator itLeft = left.begin(); itLeft != left.end(); ++itLeft )
+			if ( utl::Contains( right, *itLeft ) )
+				return false;
+
+		return true;
+	}
+
+
+	template< typename LeftContainerT, typename RightContainer2T >
+	void RemoveIntersection( LeftContainerT& rLeft, RightContainer2T& rRight )
+	{
+		for ( typename LeftContainerT::iterator itLeft = rLeft.begin(); itLeft != rLeft.end(); )
+			if ( Remove( rRight, *itLeft ) != 0 )
+				itLeft = rLeft.erase( itLeft );
+			else
+				++itLeft;
+	}
+
+	template< typename LeftContainerT, typename RightContainerT >
+	size_t RemoveLeftDuplicates( LeftContainerT& rLeft, const RightContainerT& right )
+	{
+		size_t removedCount = 0;
+
+		for ( typename LeftContainerT::iterator itLeft = rLeft.begin(); itLeft != rLeft.end(); )
+			if ( std::find( right.begin(), right.end(), *itLeft ) != right.end() )
+			{
+				itLeft = rLeft.erase( itLeft );
+				++removedCount;
+			}
+			else
+				++itLeft;
+
+		return removedCount;
+	}
+}
+
+
+namespace pred
+{
+	template< typename ContainerT >
+	struct ContainsAny
+	{
+		ContainsAny( const ContainerT& items ) : m_items( items ) {}
+
+		bool operator()( const typename ContainerT::value_type& item ) const
+		{
+			return utl::Contains( m_items, item );
+		}
+	private:
+		const ContainerT& m_items;
+	};
+}
+
+
+namespace utl
+{
+	// position navigation
+
 	template< typename PosType >
-	PosType CircularAdvance( PosType pos, PosType count, bool next = true )
+	PosType CircularAdvance( PosType pos, PosType count, bool forward = true )
 	{
 		ASSERT( pos < count );
-		if ( next )
+		if ( forward )
 		{	// circular next
 			if ( ++pos == count )
 				pos = 0;
@@ -621,8 +877,8 @@ namespace utl
 		return pos;
 	}
 
-	template< typename IteratorT, typename Value, typename Pred >
-	Value CircularFind( IteratorT itFirst, IteratorT itLast, Value startValue, Pred pred )
+	template< typename IteratorT, typename Value, typename UnaryPred >
+	Value CircularFind( IteratorT itFirst, IteratorT itLast, Value startValue, UnaryPred pred )
 	{
 		IteratorT itStart = std::find( itFirst, itLast, startValue );
 		if ( itStart != itLast )
@@ -671,197 +927,6 @@ namespace utl
 		}
 		return true;								// no overflow
 	}
-
-
-	template< typename IndexType, typename ObjectType >
-	void QuerySubsetIndexes( std::vector< IndexType >& rIndexes,
-							 const std::vector< ObjectType* >& source,
-							 const std::vector< ObjectType* >& subset )
-	{
-		rIndexes.resize( subset.size() );
-
-		for ( size_t i = 0; i != subset.size(); ++i )
-			rIndexes[ i ] = static_cast< IndexType >( utl::LookupPos( source.begin(), source.end(), subset[ i ] ) );
-	}
-
-
-	template< typename UnaryPred, typename ContainerT >
-	void RemoveDuplicates( ContainerT& rItems, ContainerT* pDuplicates = NULL )
-	{
-		ContainerT sourceItems;
-		sourceItems.swap( rItems );
-		rItems.reserve( sourceItems.size() );
-
-		for ( ContainerT::const_iterator itItem = sourceItems.begin(); itItem != sourceItems.end(); ++itItem )
-			if ( std::find_if( rItems.begin(), rItems.end(), UnaryPred( *itItem ) ) == rItems.end() )
-				rItems.push_back( *itItem );
-			else if ( pDuplicates != NULL )
-				pDuplicates->push_back( *itItem );		// store for deletion if items are owned
-	}
-
-
-	template< typename Container1, typename Container2 >
-	bool EmptyIntersection( const Container1& left, const Container2& right )
-	{
-		for ( typename Container1::const_iterator itLeft = left.begin(); itLeft != left.end(); ++itLeft )
-			if ( utl::Contains( right, *itLeft ) )
-				return false;
-
-		return true;
-	}
-
-
-	template< typename ObjectType >
-	void RemoveIntersection( std::vector< ObjectType >& rOutLeft, std::vector< ObjectType >& rOutRight )
-	{
-		for ( typename std::vector< ObjectType >::iterator itLeft = rOutLeft.begin(); itLeft != rOutLeft.end(); )
-		{
-			typename std::vector< ObjectType >::iterator itRight = std::find( rOutRight.begin(), rOutRight.end(), *itLeft );
-
-			if ( itRight != rOutRight.end() )
-			{
-				itLeft = rOutLeft.erase( itLeft );
-				rOutRight.erase( itRight );
-			}
-			else
-				++itLeft;
-		}
-	}
-
-	template< typename ObjectType >
-	void RemoveLeftDuplicates( std::vector< ObjectType >& rOutLeft, const std::vector< ObjectType >& right )
-	{
-		for ( typename std::vector< ObjectType >::iterator itLeft = rOutLeft.begin(); itLeft != rOutLeft.end(); )
-			if ( std::find( right.begin(), right.end(), *itLeft ) != right.end() )
-				itLeft = rOutLeft.erase( itLeft );
-			else
-				++itLeft;
-	}
-}
-
-
-namespace utl
-{
-	template< typename Type, typename SmartPtrType >
-	inline bool ResetPtr( SmartPtrType& rPtr, Type* pObject ) { rPtr.reset( pObject ); return pObject != NULL; }
-
-	template< typename SmartPtrType >
-	inline bool ResetPtr( SmartPtrType& rPtr ) { rPtr.reset( NULL ); return false; }
-
-
-	/**
-		object ownership helpers - for containers of pointers with ownership
-	*/
-
-	template< typename PtrType >
-	inline PtrType* ReleaseOwnership( PtrType*& rPtr )		// release item ownership in owning containers of pointers
-	{
-		PtrType* ptr = rPtr;
-		rPtr = NULL;				// mark detached item as NULL to prevent being deleted
-		return ptr;
-	}
-
-
-	template< typename PtrContainerT >
-	void ClearOwningContainer( PtrContainerT& rContainer )
-	{
-		for_each( rContainer, func::Delete() );
-		rContainer.clear();
-	}
-
-	template< typename PtrContainerT >
-	void CreateOwningContainerObjects( PtrContainerT& rItemPtrs, size_t count )		// using default constructor
-	{
-		ClearOwningContainer( rItemPtrs );		// delete existing items
-
-		typedef typename std::tr1::remove_pointer< typename PtrContainerT::value_type >::type ItemType;
-
-		rItemPtrs.reserve( count );
-		for ( size_t i = 0; i != count; ++i )
-			rItemPtrs.push_back( new ItemType() );
-	}
-
-	template< typename PtrContainerT >
-	void CloneOwningContainerObjects( PtrContainerT& rItemPtrs, const PtrContainerT& srcItemPtrs )		// using copy constructor
-	{
-		ClearOwningContainer( rItemPtrs );		// delete existing items
-
-		typedef typename std::tr1::remove_pointer< typename PtrContainerT::value_type >::type ItemType;
-
-		rItemPtrs.reserve( srcItemPtrs.size() );
-		for ( PtrContainerT::const_iterator itSrcItem = srcItemPtrs.begin(); itSrcItem != srcItemPtrs.end(); ++itSrcItem )
-			rItemPtrs.push_back( new ItemType( **itSrcItem ) );
-	}
-
-
-	template< typename PtrContainer, typename ClearFunctor >
-	void ClearOwningContainer( PtrContainer& rContainer, ClearFunctor clearFunctor )
-	{
-		for_each( rContainer, clearFunctor );
-		rContainer.clear();
-	}
-
-	template< typename MapType >
-	void ClearOwningAssocContainer( MapType& rObjectToObjectMap )
-	{
-		for ( typename MapType::iterator it = rObjectToObjectMap.begin(); it != rObjectToObjectMap.end(); ++it )
-		{
-			delete it->first;
-			delete it->second;
-		}
-
-		rObjectToObjectMap.clear();
-	}
-
-	template< typename MapType >
-	void ClearOwningAssocContainerKeys( MapType& rObjectToValueMap )
-	{
-		for ( typename MapType::iterator it = rObjectToValueMap.begin(); it != rObjectToValueMap.end(); ++it )
-			delete it->first;
-
-		rObjectToValueMap.clear();
-	}
-
-	template< typename MapType >
-	void ClearOwningAssocContainerValues( MapType& rKeyToObjectMap )
-	{
-		for ( typename MapType::iterator it = rKeyToObjectMap.begin(); it != rKeyToObjectMap.end(); ++it )
-			delete it->second;
-
-		rKeyToObjectMap.clear();
-	}
-
-
-	// exception-safe owning container of pointers; use swap() at the end to exchange safely the new items (old items will be deleted by this).
-	//
-	template< typename ContainerType, typename DeleteFunc = func::Delete >
-	class COwningContainer : public ContainerType
-	{
-		using ContainerType::clear;
-	public:
-		COwningContainer( void ) : ContainerType() {}
-		~COwningContainer() { clear(); }
-
-		void clear( void ) { std::for_each( begin(), end(), DeleteFunc() ); Release(); }
-		void Release( void ) { ContainerType::clear(); }
-	};
-}
-
-
-namespace pred
-{
-	template< typename ContainerT >
-	struct ContainsAny
-	{
-		ContainsAny( const ContainerT& items ) : m_items( items ) {}
-
-		bool operator()( const typename ContainerT::value_type& item ) const
-		{
-			return utl::Contains( m_items, item );
-		}
-	private:
-		const ContainerT& m_items;
-	};
 }
 
 
