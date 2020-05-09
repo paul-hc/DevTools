@@ -5,7 +5,7 @@
 #include "FileAttr.h"
 #include "ImageArchiveStg.h"
 #include "DefinePasswordDialog.h"
-#include "Application.h"
+#include "Application_fwd.h"
 #include "resource.h"
 #include "utl/UI/ShellDialogs.h"
 #include "utl/UI/UtilitiesEx.h"

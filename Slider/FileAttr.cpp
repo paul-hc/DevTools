@@ -2,10 +2,15 @@
 #include "stdafx.h"
 #include "FileAttr.h"
 #include "ModelSchema.h"
+#include "Application_fwd.h"
+#include "utl/EnumTags.h"
 #include "utl/Serialization.h"
 #include "utl/SerializeStdTypes.h"
 #include "utl/StringUtilities.h"
+#include "utl/UI/MfcUtilities.h"
+#include "utl/UI/TaskDialog.h"
 #include "utl/UI/WicImageCache.h"
+#include "resource.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -64,7 +69,7 @@ void CFileAttr::Stream( CArchive& archive )
 		archive << (int)m_type;
 		archive & m_lastModifTime;
 		archive << m_fileSize;
-		archive << GetImageDim();
+		archive << GetSavingImageDim();
 	}
 	else
 	{
@@ -111,6 +116,29 @@ const CSize& CFileAttr::GetImageDim( void ) const
 	return m_imageDim;
 }
 
+const CSize& CFileAttr::GetSavingImageDim( void ) const
+{
+	// OPTIMIZATION for documents with many images: speed up saving by saving unevaluated dimensions.
+	// note: GetImageDim() uses WIC to load each image, an expensive operation.
+	if ( serial::CStreamingTimeGuard* pTimeGuard = serial::CStreamingTimeGuard::GetTop() )
+		if ( pTimeGuard->HasStreamingFlag( Saving_SkipImageDimEvaluation ) )
+			return m_imageDim;
+		else
+			if ( pTimeGuard->IsTimeout( 15.0 ) )								// saving takes more that 15 seconds?
+				if ( !pTimeGuard->HasStreamingFlag( Saving_PromptedSpeedUp ) )
+				{
+					pTimeGuard->SetStreamingFlag( Saving_PromptedSpeedUp );		// user was asked
+
+					if ( PromptedSpeedUpSaving( pTimeGuard->GetTimer() ) )
+					{	// speed up saving by saving unevaluated dimensions (will be lazy evaluation for the rest of images)
+						pTimeGuard->SetStreamingFlag( Saving_SkipImageDimEvaluation );
+						app::LogLine( _T("Speeding up saving by saving unevaluated dimensions for album: %s"), serial::GetDocumentPath( pTimeGuard->GetArchive() ).GetPtr() );
+					}
+				}
+
+	return GetImageDim();
+}
+
 const std::tstring& CFileAttr::GetCode( void ) const
 {
 	return GetPath().Get();
@@ -141,4 +169,50 @@ FileType CFileAttr::LookupFileType( const TCHAR* pFilePath )
 std::tstring CFileAttr::FormatFileSize( DWORD divideBy /*= KiloByte*/, const TCHAR* pFormat /*= _T("%s KB")*/ ) const
 {
 	return str::Format( pFormat, num::FormatNumber( m_fileSize / divideBy, str::GetUserLocale() ).c_str(), m_imageDim.cx, m_imageDim.cy );	// assume m_imageDim is computed if used
+}
+
+
+bool CFileAttr::PromptedSpeedUpSaving( CTimer& rSavingTimer )
+{
+	static bool s_dontAsk = false, s_speedUp = false;
+	static const std::tstring s_contentText = _T("Saving is taking too long due to the evaluation of image dimensions, which requires loading of each image file.");
+
+	if ( !s_dontAsk )
+	{
+		CTimer promptTimer;
+
+		{
+			CTaskDialog dlg(
+				_T("Album Save Mode"),					// title
+				_T("Saving Album Optimization!"),		// instruction (blue)
+				s_contentText,							// content
+				ID_SKIP_IMAGE_DIM_EVALUATION_CMDLINK,	// speed-up
+				ID_KEEP_IMAGE_DIM_EVALUATION_CMDLINK,	// keep evaluating
+				TDCBF_CLOSE_BUTTON );
+
+			dlg.SetMainIcon( TD_WARNING_ICON );
+			dlg.SetFooterIcon( TD_INFORMATION_ICON );
+			dlg.SetFooterText( _T("You could speed-up saving by deferring image dimension evaluation for later, when required.\n") );
+
+			// verification checkbox
+			dlg.SetVerificationText( _T("Do not ask in the future") );
+			dlg.SetVerificationChecked( s_dontAsk );
+
+			switch ( dlg.DoModal( AfxGetMainWnd() ) )
+			{
+				case ID_SKIP_IMAGE_DIM_EVALUATION_CMDLINK:
+					s_speedUp = true;
+					break;
+				case ID_KEEP_IMAGE_DIM_EVALUATION_CMDLINK:
+				default:	// TDCBF_CLOSE_BUTTON
+					s_speedUp = false;
+			}
+
+			s_dontAsk = dlg.IsVerificationChecked() != FALSE;
+		}
+
+		rSavingTimer.SubtractByElapsed( promptTimer );		// ignore the user interaction elapsed time from the guard
+	}
+
+	return s_speedUp;
 }

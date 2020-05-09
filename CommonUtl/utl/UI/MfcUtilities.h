@@ -3,6 +3,7 @@
 #pragma once
 
 #include "utl/MultiThreading.h"
+#include "utl/Timer.h"
 
 
 namespace com
@@ -86,12 +87,16 @@ namespace utl
 }
 
 
+namespace fs { class CPath; }
+
+
 namespace serial
 {
 	interface IStreamable;
 
 
 	inline bool IsFileBasedArchive( const CArchive& rArchive ) { return !rArchive.m_strFileName.IsEmpty(); }
+	fs::CPath GetDocumentPath( const CArchive& archive );
 
 
 	// Must have been created in the scope of loading a FILE with backwards compatibility.
@@ -127,10 +132,32 @@ namespace serial
 		static const CArchive* s_pLoadingArchive;
 		static int s_fileLoadingModelSchema;
 	};
+
+
+	class CStreamingTimeGuard : private utl::noncopyable
+	{
+	public:
+		CStreamingTimeGuard( const CArchive& archive );
+		~CStreamingTimeGuard();
+
+		double GetElapsedSeconds( void ) const { return m_timer.ElapsedSeconds(); }
+		bool IsTimeout( double timeout ) const { return GetElapsedSeconds() > timeout; }
+		const CArchive& GetArchive( void ) const { return m_rArchive; }
+
+		CTimer& GetTimer( void ) { return m_timer; }
+
+		bool HasStreamingFlag( int flag ) const { return HasFlag( m_streamingFlags, flag ); }
+		void SetStreamingFlag( int flag, bool on = true ) { SetFlag( m_streamingFlags, flag, on ); }
+
+		static CStreamingTimeGuard* GetTop( void ) { return !s_instances.empty() ? s_instances.back() : NULL; }
+	private:
+		const CArchive& m_rArchive;
+		CTimer m_timer;
+		int m_streamingFlags;		// client code maintains the actual flags
+
+		static std::vector< CStreamingTimeGuard* > s_instances;		// could be stacked, the deepest at the top (back)
+	};
 }
-
-
-namespace fs { class CPath; }
 
 
 namespace ui

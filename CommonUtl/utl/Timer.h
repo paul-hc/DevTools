@@ -12,6 +12,7 @@ public:
 	double ElapsedSeconds( void ) const { return double( std::clock() - m_startTime ) / CLOCKS_PER_SEC; }
 
 	void Restart( void ) { m_startTime = std::clock(); }
+	void SubtractByElapsed( const CTimer& nestedTimer ) { m_startTime += nestedTimer.Elapsed(); }		// e.g. for excluding from a timed operation the user prompt time (message-box)
 
 	std::tstring FormatElapsedSeconds( unsigned int precision = 3, const TCHAR fmtSeconds[] = s_fmtSeconds ) const { FormatSeconds( ElapsedSeconds(), precision, fmtSeconds ); }
 	std::tstring FormatElapsedDuration( unsigned int precision = 0, const TCHAR* pFmtTimeSpan = s_fmtTimeSpan ) const { return FormatElapsedTimeSpan( ElapsedSeconds(), precision, pFmtTimeSpan ); }

@@ -184,6 +184,9 @@ namespace ut
 			}
 		}
 	}
+
+	template< typename CharType, typename ContainerT >
+	inline void PushSplitValues( ContainerT& rItems, const CharType* pSource, const CharType* pSep ) { SplitValues( rItems, pSource, pSep, true ); }
 }
 
 

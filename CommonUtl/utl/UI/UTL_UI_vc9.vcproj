@@ -851,6 +851,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\WindowPlacement.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\WindowPlacement.h"
+				>
+			</File>
+			<File
 				RelativePath=".\WindowTimer.cpp"
 				>
 			</File>
@@ -1495,6 +1503,10 @@
 				</File>
 				<File
 					RelativePath=".\ReportListControl.h"
+					>
+				</File>
+				<File
+					RelativePath=".\ReportListControl.hxx"
 					>
 				</File>
 				<File

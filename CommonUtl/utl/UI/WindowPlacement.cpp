@@ -1,7 +1,7 @@
 
 #include "stdafx.h"
 #include "WindowPlacement.h"
-#include "utl/UI/Utilities.h"
+#include "Utilities.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -18,13 +18,13 @@ CWindowPlacement::~CWindowPlacement()
 {
 }
 
-bool CWindowPlacement::GetPlacement( const CWnd* pWnd )
+bool CWindowPlacement::ReadWnd( const CWnd* pWnd )
 {
 	ASSERT_PTR( pWnd );
 	return pWnd->GetWindowPlacement( this ) != FALSE;
 }
 
-bool CWindowPlacement::SetPlacement( CWnd* pWnd, bool restoreToMax /*= false*/, bool setMinPos /*= false*/ ) const
+bool CWindowPlacement::CommitWnd( CWnd* pWnd, bool restoreToMax /*= false*/, bool setMinPos /*= false*/ )
 {
 	ASSERT_PTR( pWnd );
 	CWindowPlacement* pThis = const_cast< CWindowPlacement* >( this );
@@ -35,7 +35,12 @@ bool CWindowPlacement::SetPlacement( CWnd* pWnd, bool restoreToMax /*= false*/, 
 	if ( setMinPos )
 		pThis->flags |= WPF_SETMINPOSITION;
 
-	ui::EnsureVisibleWindowRect( (CRect&)rcNormalPosition, pWnd->GetSafeHwnd() );		// clamp to parent's rect
+	// clamp to visible monitor work-area
+	if ( ui::IsTopLevel( pWnd->m_hWnd ) )
+		ui::EnsureVisibleDesktopRect( (CRect&)rcNormalPosition );
+	else
+		ui::EnsureVisibleWindowRect( (CRect&)rcNormalPosition, pWnd->GetSafeHwnd() );		// clamp to parent's rect
+
 	return pWnd->SetWindowPlacement( this ) != FALSE;
 }
 

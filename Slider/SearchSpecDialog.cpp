@@ -1,7 +1,6 @@
 
 #include "stdafx.h"
 #include "SearchSpecDialog.h"
-#include "Application.h"
 #include "resource.h"
 #include "utl/Path.h"
 #include "utl/UI/Utilities.h"

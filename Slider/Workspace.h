@@ -4,9 +4,9 @@
 
 #include "ModelSchema.h"
 #include "ImageState.h"
-#include "WindowPlacement.h"
 #include "utl/Path.h"
 #include "utl/UI/Image_fwd.h"		// ui::ImageScalingMode
+#include "utl/UI/WindowPlacement.h"
 
 
 class CMainFrame;
@@ -84,7 +84,7 @@ public:
 	bool IsLoaded( void ) const { return m_isLoaded; }
 	bool IsFullScreen( void ) const { return m_isFullScreen; }
 
-	const CWindowPlacement* GetLoadedPlacement( void ) const { return m_isLoaded ? &m_mainPlacement : NULL; }
+	CWindowPlacement* GetLoadedPlacement( void ) { return m_isLoaded ? &m_mainPlacement : NULL; }
 
 	COLORREF GetImageSelTextColor( void ) const { return m_data.GetImageSelTextColor(); }
 	COLORREF GetImageSelColor( void ) const { return m_data.GetImageSelColor(); }

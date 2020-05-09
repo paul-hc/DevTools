@@ -4,7 +4,6 @@
 
 #include "utl/UI/InternalChange.h"
 #include "utl/UI/WindowTimer.h"
-#include "WindowPlacement.h"
 
 
 interface IImageView;

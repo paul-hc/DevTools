@@ -5,7 +5,7 @@
 #include "AlbumChildFrame.h"
 #include "AlbumImageView.h"
 #include "ImageDoc.h"
-#include "Application.h"
+#include "Application_fwd.h"
 #include "resource.h"
 #include "utl/Path.h"
 #include "utl/FileSystem.h"

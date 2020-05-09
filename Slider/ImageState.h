@@ -2,8 +2,8 @@
 #define ImageState_h
 #pragma once
 
-#include "WindowPlacement.h"
 #include "utl/UI/Image_fwd.h"
+#include "utl/UI/WindowPlacement.h"
 
 
 class CImageState
@@ -17,7 +17,6 @@ public:
 	const std::tstring& GetDocFilePath( void ) const { return m_docFilePath; }
 	void SetDocFilePath( const std::tstring& docFilePath ) { m_docFilePath = docFilePath; }
 
-	const CWindowPlacement& GetFramePlacement( void ) const { return m_framePlacement; }
 	CWindowPlacement& RefFramePlacement( void ) { return m_framePlacement; }
 
 	bool HasScrollPos( void ) const { return !( m_scrollPos == s_noScrollPos ); }

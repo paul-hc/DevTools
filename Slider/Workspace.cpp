@@ -179,7 +179,7 @@ void CWorkspace::Serialize( CArchive& archive )
 
 		SetImageSelColor( m_data.m_imageSelColor );
 
-		// workspace loaded: will use SW_HIDE on 1st show (SetPlacement), then pass the final mode from placement on 2nd step for MFC to show
+		// workspace loaded: will use SW_HIDE on 1st show (CommitWnd), then pass the final mode from placement on 2nd step for MFC to show
 		m_isLoaded = true;
 		AfxGetApp()->m_nCmdShow = m_mainPlacement.ChangeMaximizedShowCmd( SW_HIDE );
 		shell::s_useVistaStyle = HasFlag( m_data.m_wkspFlags, wf::UseVistaStyleFileDialog );
@@ -248,7 +248,7 @@ void CWorkspace::FetchSettings( void )
 	// re-read main window placement only if not in full-screen mode;
 	// if it is in full-screen, we assume that m_mainPlacement is already fetched (on switch time) with appropriate info.
 	if ( !m_isFullScreen )
-		m_mainPlacement.GetPlacement( m_pMainFrame );
+		m_mainPlacement.ReadWnd( m_pMainFrame );
 
 	BOOL isMaximized;
 	CChildFrame* pActiveChildFrame = checked_static_cast< CChildFrame* >( m_pMainFrame->MDIGetActive( &isMaximized ) );
@@ -311,11 +311,11 @@ void CWorkspace::ToggleFullScreen( void )
 	m_isFullScreen = !m_isFullScreen;
 
 	if ( !m_isFullScreen )
-		m_mainPlacement.SetPlacement( m_pMainFrame );		// restore to normal state
+		m_mainPlacement.CommitWnd( m_pMainFrame );		// restore to normal state
 	else
 	{
 		// store current placement for normal state (in order to be further resored).
-		m_mainPlacement.GetPlacement( m_pMainFrame );
+		m_mainPlacement.ReadWnd( m_pMainFrame );
 
 		// window is about to compute to full screen mode -> so compute the rect for full screen state
 		if ( m_pMainFrame->IsZoomed() )

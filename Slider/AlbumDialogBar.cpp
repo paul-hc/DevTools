@@ -4,7 +4,6 @@
 #include "AlbumDoc.h"
 #include "AlbumImageView.h"
 #include "FileAttr.h"
-#include "Application.h"
 #include "resource.h"
 #include "utl/StringUtilities.h"
 #include "utl/UI/CmdInfoStore.h"

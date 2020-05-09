@@ -122,6 +122,8 @@
 #define IDS_REPLACE_DUP_PROMPT          3012
 #define IDS_HELP_MESSAGE                3013
 #define IDS_NO_DIR_SEARCH_SPEC          3016
+#define ID_SKIP_IMAGE_DIM_EVALUATION_CMDLINK 3017
+#define ID_KEEP_IMAGE_DIM_EVALUATION_CMDLINK 3018
 #define IDW_SB_PROGRESS_CAPTION         32771
 #define IDW_SB_PROGRESS_BAR             32772
 #define IDW_IMAGE_SCALING_COMBO         32773
@@ -213,10 +215,10 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_3D_CONTROLS                     1
+#define _APS_3D_CONTROLS                1
 #define _APS_NEXT_RESOURCE_VALUE        176
 #define _APS_NEXT_COMMAND_VALUE         32882
 #define _APS_NEXT_CONTROL_VALUE         1094
-#define _APS_NEXT_SYMED_VALUE           108
+#define _APS_NEXT_SYMED_VALUE           3019
 #endif
 #endif

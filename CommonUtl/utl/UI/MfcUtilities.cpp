@@ -60,6 +60,12 @@ namespace utl
 
 namespace serial
 {
+	fs::CPath GetDocumentPath( const CArchive& archive )
+	{
+		return path::ExtractPhysical( archive.m_strFileName.GetString() );
+	}
+
+
 	// CScopedLoadingArchive implementation
 
 	int CScopedLoadingArchive::s_latestModelSchema = UnitializedVersion;
@@ -91,6 +97,24 @@ namespace serial
 			return s_pLoadingArchive != NULL;			// must have been created in the scope of loading a FILE with backwards compatibility
 
 		return true;
+	}
+
+
+	// CStreamingTimeGuard implementation
+
+	std::vector< CStreamingTimeGuard* > CStreamingTimeGuard::s_instances;
+
+	CStreamingTimeGuard::CStreamingTimeGuard( const CArchive& rArchive )
+		: m_rArchive( rArchive )
+		, m_streamingFlags( 0 )
+	{
+		s_instances.push_back( this );
+	}
+
+	CStreamingTimeGuard::~CStreamingTimeGuard()
+	{
+		ASSERT( s_instances.back() == this );
+		s_instances.pop_back();
 	}
 }
 

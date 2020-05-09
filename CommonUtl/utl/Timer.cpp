@@ -29,12 +29,16 @@ std::tstring CTimer::FormatTimeSpan( time_t seconds )
 		( seconds / SecondsPerMinute ) % MinutesPerHour,
 		seconds % SecondsPerMinute );
 
-	if ( seconds >= SecondsPerDay )
-		return str::Format( _T("%d days "), seconds / SecondsPerDay ) + timespan.Format( _T("%#H:%M:%S") ).GetString();
-	else if ( seconds >= SecondsPerHour )
-		return timespan.Format( _T("%#H:%M:%S") ).GetString();
+	static const TCHAR s_fmtHourMinSec[] = _T("%#Hh:%Mm:%Ss");
 
-	return timespan.Format( _T("%#M:%S") ).GetString();
+	if ( seconds >= SecondsPerDay )
+		return str::Format( _T("%d days "), seconds / SecondsPerDay ) + timespan.Format( s_fmtHourMinSec ).GetString();
+	else if ( seconds >= SecondsPerHour )
+		return timespan.Format( s_fmtHourMinSec ).GetString();
+	else if ( seconds >= SecondsPerMinute )
+		return timespan.Format( _T("%#Mm:%Ss") ).GetString();
+
+	return timespan.Format( _T("%#Ss") ).GetString();
 }
 
 std::tstring CTimer::FormatElapsedTimeSpan( double elapsedSeconds, unsigned int precision /*= 0*/, const TCHAR* pFmtTimeSpan /*= s_fmtTimeSpan*/ )

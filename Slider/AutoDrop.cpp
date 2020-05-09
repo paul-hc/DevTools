@@ -5,7 +5,7 @@
 #include "FileAttr.h"
 #include "ImageFileEnumerator.h"
 #include "ProgressService.h"
-#include "Application.h"
+#include "Application_fwd.h"
 #include "resource.h"
 #include "utl/Serialization.h"
 #include "utl/SerializeStdTypes.h"

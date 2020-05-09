@@ -138,7 +138,7 @@ void CImageView::MakeImageState( CImageState* pImageState ) const
 	ASSERT_PTR( pImageState );
 
 	pImageState->SetDocFilePath( m_pDocument->GetPathName().GetString() );
-	pImageState->RefFramePlacement().GetPlacement( m_pMdiChildFrame );
+	pImageState->RefFramePlacement().ReadWnd( m_pMdiChildFrame );
 
 	pImageState->m_polyFlags = 0;
 	pImageState->m_scalingMode = GetScalingMode();
@@ -152,7 +152,7 @@ void CImageView::MakeImageState( CImageState* pImageState ) const
 void CImageView::RestoreState( const CImageState& loadingImageState )
 {
 	if ( !HasFlag( loadingImageState.m_polyFlags, CImageState::IgnorePlacement ) )
-		loadingImageState.GetFramePlacement().SetPlacement( m_pMdiChildFrame );
+		const_cast< CImageState& >( loadingImageState ).RefFramePlacement().CommitWnd( m_pMdiChildFrame );
 
 	SetScaleZoom( loadingImageState.m_scalingMode, loadingImageState.m_zoomPct );
 	m_bkColor = loadingImageState.m_bkColor;

@@ -3,7 +3,7 @@
 #include "ImageDoc.h"
 #include "MainFrame.h"
 #include "ImageView.h"
-#include "Application.h"
+#include "Application_fwd.h"
 #include "utl/UI/Utilities.h"
 #include "utl/UI/WicImageCache.h"
 

@@ -65,6 +65,7 @@ private:
 	bool UndoRedoCustomOrder( custom_order::COpStack& rFromStack, custom_order::COpStack& rToStack, bool isUndoOp );
 	void ClearCustomOrder( custom_order::ClearMode clearMode = custom_order::CM_ClearAll );
 
+	void PrepareToSave( const fs::CPath& docPath );
 	bool PromptSaveConvertModelSchema( void ) const;
 private:
 	CAlbumImageView* GetAlbumImageView( void ) const;

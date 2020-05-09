@@ -4,7 +4,7 @@
 #include "FileAttr.h"
 #include "FileAttrAlgorithms.h"
 #include "ImageArchiveStg.h"
-#include "Application.h"
+#include "Application_fwd.h"
 #include "utl/ContainerUtilities.h"
 #include "utl/Serialization.h"
 #include "utl/SerializeStdTypes.h"

@@ -4,7 +4,7 @@
 #include "SearchSpec.h"
 #include "FileAttr.h"
 #include "ImageArchiveStg.h"
-#include "Application.h"
+#include "Application_fwd.h"
 #include "utl/ContainerUtilities.h"
 #include "utl/RuntimeException.h"
 #include "utl/ThrowMode.h"

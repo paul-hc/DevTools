@@ -9,8 +9,8 @@ public:
 	CWindowPlacement( void );
 	~CWindowPlacement();
 
-	bool GetPlacement( const CWnd* pWnd );
-	bool SetPlacement( CWnd* pWnd, bool restoreToMax = false, bool setMinPos = false ) const;
+	bool ReadWnd( const CWnd* pWnd );
+	bool CommitWnd( CWnd* pWnd, bool restoreToMax = false, bool setMinPos = false );
 
 	int ChangeMaximizedShowCmd( UINT showCmd );
 

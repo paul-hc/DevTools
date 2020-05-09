@@ -12,6 +12,7 @@
 #include "utl/UI/Utilities.h"
 #include "utl/UI/Thumbnailer.h"
 #include "utl/UI/WicImageCache.h"
+#include "utl/UI/WindowPlacement.h"
 #include "utl/UI/resource.h"
 #include <afxpriv.h>		// for WM_SETMESSAGESTRING
 #include <dde.h>
@@ -320,8 +321,8 @@ int CMainFrame::OnCreate( CREATESTRUCT* pCS )
 
 	DragAcceptFiles();			// enable drag/drop open
 
-	if ( const CWindowPlacement* pLoadedPlacement = CWorkspace::Instance().GetLoadedPlacement() )
-		pLoadedPlacement->SetPlacement( this );						// 1st step: restore persistent placement, but with SW_HIDE; 2nd step will use the persisted AfxGetApp()->m_nCmdShow in app InitInstance()
+	if ( CWindowPlacement* pLoadedPlacement = CWorkspace::Instance().GetLoadedPlacement() )
+		pLoadedPlacement->CommitWnd( this );						// 1st step: restore persistent placement, but with SW_HIDE; 2nd step will use the persisted AfxGetApp()->m_nCmdShow in app InitInstance()
 
 	if ( !m_pToolbar->CreateEx( this, TBSTYLE_FLAT | TBSTYLE_TRANSPARENT,
 								WS_CHILD | WS_VISIBLE |

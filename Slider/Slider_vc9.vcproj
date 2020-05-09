@@ -639,14 +639,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\WindowPlacement.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\WindowPlacement.h"
-				>
-			</File>
-			<File
 				RelativePath=".\Workspace.cpp"
 				>
 			</File>

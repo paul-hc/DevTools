@@ -7,6 +7,7 @@
 #include "FileAttr_fwd.h"
 
 
+class CTimer;
 enum FileType { FT_Generic, FT_BMP, FT_JPEG, FT_GIFF, FT_TIFF };
 
 
@@ -51,6 +52,14 @@ public:
 	static FileType LookupFileType( const TCHAR* pFilePath );
 private:
 	bool ReadFileStatus( void );
+	const CSize& GetSavingImageDim( void ) const;
+	static bool PromptedSpeedUpSaving( CTimer& rSavingTimer );
+
+	enum SavingFlags
+	{
+		Saving_PromptedSpeedUp = BIT_FLAG( 8 ),
+		Saving_SkipImageDimEvaluation = BIT_FLAG( 9 )
+	};
 private:
 	persist fs::ImagePathKey m_pathKey;
 	persist FileType m_type;

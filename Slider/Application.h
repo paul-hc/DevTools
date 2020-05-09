@@ -3,8 +3,6 @@
 #pragma once
 
 #include "utl/UI/BaseApp.h"
-#include "utl/UI/ShellDialogs_fwd.h"
-#include "utl/UI/UserReport.h"
 #include "Application_fwd.h"
 
 
@@ -104,12 +102,6 @@ namespace app
 	inline CMainFrame* GetMainFrame( void ) { return theApp.GetMainFrame(); }
 	inline CThumbnailer* GetThumbnailer( void ) { return theApp.GetThumbnailer(); }
 
-	void LogLine( const TCHAR* pFormat, ... );
-	void LogEvent( const TCHAR* pFormat, ... );
-	void HandleException( CException* pExc, UINT mbType = MB_ICONWARNING, bool doDelete = true );
-	int HandleReportException( CException* pExc, UINT mbType = MB_ICONERROR, UINT msgId = 0, bool doDelete = true );
-
-	ui::IUserReport& GetUserReport( void );
 	ui::CIssueStore& GetIssueStore( void );
 
 	bool MoveFiles( const std::vector< std::tstring >& filesToMove, CWnd* pParentWnd = AfxGetMainWnd() );
@@ -179,14 +171,6 @@ namespace app
 	};
 
 } //namespace app
-
-
-namespace app
-{
-	const std::tstring& GetAllSourcesWildSpecs( void );
-
-	bool BrowseArchiveStgFile( std::tstring& rFullPath, CWnd* pParentWnd, shell::BrowseMode browseMode = shell::FileOpen, DWORD flags = 0 );
-}
 
 
 #endif // Slider_h

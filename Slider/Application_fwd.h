@@ -2,6 +2,9 @@
 #define Application_fwd_h
 #pragma once
 
+#include "utl/AppTools.h"
+#include "utl/UI/UserReport.h"
+#include "utl/UI/ShellDialogs_fwd.h"
 #include "ModelSchema.h"
 
 
@@ -11,15 +14,22 @@ namespace ui { interface IUserReport; }
 
 namespace app
 {
+	enum CustomColors { ColorErrorBk = color::LightPastelPink, ColorErrorText = color::Red };
+
 	enum ContextPopup { ImagePopup, AlbumPopup, AlbumThumbsPopup, AlbumFoundListPopup, DropPopup };
 
+
+	void LogLine( const TCHAR* pFormat, ... );		// in normal runtime log
+	void LogEvent( const TCHAR* pFormat, ... );		// in the event log, that usually keeps track of major operations, detailed errors, etc.
+	void HandleException( CException* pExc, UINT mbType = MB_ICONWARNING, bool doDelete = true );
+	int HandleReportException( CException* pExc, UINT mbType = MB_ICONERROR, UINT msgId = 0, bool doDelete = true );
 
 	ui::IUserReport& GetUserReport( void );		// app::CInteractiveMode
 
 	bool IsImageArchiveDoc( const TCHAR* pFilePath );
 
-
-	class CScopedProgress;
+	const std::tstring& GetAllSourcesWildSpecs( void );
+	bool BrowseArchiveStgFile( std::tstring& rFullPath, CWnd* pParentWnd, shell::BrowseMode browseMode = shell::FileOpen, DWORD flags = 0 );
 }
 
 
@@ -48,12 +58,6 @@ namespace app
 
 	template< typename ValueType >
 	inline ValueType FromHintPtr( CObject* pHint ) { return static_cast< ValueType >( (UINT_PTR)pHint ); }
-}
-
-
-namespace app
-{
-	enum CustomColors { ColorErrorBk = color::LightPastelPink, ColorErrorText = color::Red };
 }
 
 

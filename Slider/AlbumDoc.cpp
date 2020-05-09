@@ -50,32 +50,13 @@ void CAlbumDoc::Serialize( CArchive& archive )
 {
 	REQUIRE( serial::IsFileBasedArchive( archive ) );			// mem-based document serialization not supported/necessary (for now)
 
-	CAlbumImageView* pImageView = GetAlbumImageView();
-	fs::CPath docPath = path::ExtractPhysical( archive.m_strFileName.GetString() );
+	fs::CPath docPath = serial::GetDocumentPath( archive );
 
 	if ( archive.IsStoring() )
-	{
-		SetFlag( m_docFlags, PresistImageState, HasFlag( CWorkspace::GetFlags(), wf::PersistAlbumImageState ) );
+		PrepareToSave( docPath );
 
-		if ( pImageView != NULL )
-		{
-			// explicitly copy the persistent attributes from active view
-			m_slideData = pImageView->GetSlideData();
-			m_bkColor = pImageView->GetRawBkColor();
-
-			m_pImageState.reset( new CImageState );
-			pImageView->MakeImageState( m_pImageState.get() );
-		}
-
-		if ( GetModelSchema() != app::Slider_LatestModelSchema )
-		{
-			if ( path::EquivalentPtr( m_strPathName, docPath.GetPtr() ) )		// Save? (not Save As)
-				if ( !PromptSaveConvertModelSchema() )
-					throw new mfc::CUserAbortedException;
-
-			m_model.StoreModelSchema( app::Slider_LatestModelSchema );			// save with latest model schema format
-		}
-	}
+	serial::CStreamingTimeGuard timeGuard( archive );
+	CWaitCursor wait;
 
 	// version backwards compatibility hack: check if a valid version is saved as first UINT
 	CSlideData::TFirstDataMember firstValue = UINT_MAX;
@@ -119,7 +100,7 @@ void CAlbumDoc::Serialize( CArchive& archive )
 	m_model.Stream( archive );
 
 	if ( archive.IsLoading() )
-		m_model.CheckReparentFileAttrs( docPath.GetPtr(), CAlbumModel::Loading );		// reparent embedded image paths with current doc stg path
+		m_model.CheckReparentFileAttrs( docPath.GetPtr(), CAlbumModel::Loading );		// re-parent embedded image paths with current doc stg path
 
 	serial::StreamItems( archive, m_dropUndoStack );
 	serial::StreamItems( archive, m_dropRedoStack );
@@ -137,10 +118,35 @@ void CAlbumDoc::Serialize( CArchive& archive )
 	if ( archive.IsStoring() )
 		SetModifiedFlag( Clean );
 
-	app::LogLine( _T("%s album %s with model schema version %s"),
+	app::LogLine( _T("%s album \"%s\" with model schema version %s - elapsed %s"),
 		archive.IsLoading() ? _T("Loaded") : _T("Saved"),
 		docPath.GetPtr(),
-		app::FormatSliderVersion( GetModelSchema() ).c_str() );
+		app::FormatSliderVersion( GetModelSchema() ).c_str(),
+		timeGuard.GetTimer().FormatElapsedDuration( 2 ).c_str() );
+}
+
+void CAlbumDoc::PrepareToSave( const fs::CPath& docPath )
+{
+	SetFlag( m_docFlags, PresistImageState, HasFlag( CWorkspace::GetFlags(), wf::PersistAlbumImageState ) );
+
+	if ( CAlbumImageView* pImageView = GetAlbumImageView() )
+	{
+		// explicitly copy the persistent attributes from active view
+		m_slideData = pImageView->GetSlideData();
+		m_bkColor = pImageView->GetRawBkColor();
+
+		m_pImageState.reset( new CImageState );
+		pImageView->MakeImageState( m_pImageState.get() );
+	}
+
+	if ( GetModelSchema() != app::Slider_LatestModelSchema )
+	{
+		if ( path::EquivalentPtr( m_strPathName, docPath.GetPtr() ) )		// Save? (not Save As)
+			if ( !PromptSaveConvertModelSchema() )
+				throw new mfc::CUserAbortedException;
+
+		m_model.StoreModelSchema( app::Slider_LatestModelSchema );			// save with latest model schema format
+	}
 }
 
 bool CAlbumDoc::PromptSaveConvertModelSchema( void ) const

@@ -8,7 +8,7 @@
 #include "ImageFileEnumerator.h"
 #include "ProgressService.h"
 #include "Workspace.h"
-#include "Application.h"
+#include "Application_fwd.h"
 #include "resource.h"
 #include "utl/ComparePredicates.h"
 #include "utl/PathMaker.h"
