@@ -24,6 +24,8 @@
 #define new DEBUG_NEW
 #endif
 
+#include "ReportListControl.hxx"
+
 
 namespace reg
 {

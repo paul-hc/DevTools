@@ -29,6 +29,8 @@
 #define new DEBUG_NEW
 #endif
 
+#include "utl/UI/ReportListControl.hxx"
+
 
 namespace reg
 {

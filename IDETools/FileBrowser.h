@@ -5,6 +5,7 @@
 #include "PathSortOrder.h"
 #include "utl/Path.h"
 #include "utl/PathItemBase.h"
+#include "utl/StdHashValue.h"
 #include <set>
 
 

@@ -167,7 +167,7 @@ namespace ui
 		return true;
 	}
 
-	void EnsureMinEdge( CRect& rInner, const CRect& outer, int edge /*= 1*/ )
+	void EnsureMinEdge( CRect& rInner, const RECT& outer, int edge /*= 1*/ )
 	{
 		if ( rInner.Width() * rInner.Height() != 0 )
 		{

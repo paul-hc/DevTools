@@ -13,6 +13,8 @@
 #define new DEBUG_NEW
 #endif
 
+#include "ReportListControl.hxx"
+
 
 CPathItemListCtrl::CPathItemListCtrl( UINT columnLayoutId /*= 0*/, DWORD listStyleEx /*= lv::DefaultStyleEx*/ )
 	: CReportListControl( columnLayoutId, listStyleEx )

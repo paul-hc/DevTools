@@ -2,8 +2,8 @@
 #define WndHighlighter_h
 #pragma once
 
-#include "WndSpot.h"
 #include "utl/UI/WindowTimer.h"
+#include "WndSpot.h"
 
 
 namespace opt { enum FrameStyle; }

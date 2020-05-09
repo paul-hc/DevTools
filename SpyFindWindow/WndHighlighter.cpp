@@ -103,7 +103,7 @@ void CWndHighlighter::DrawWindowFrame( CDC* pDC, const CWndSpot& wndSpot )
 			{
 				CRgn ncRegion;
 				ncRegion.CreateRectRgnIndirect( &windowRect );
-				ui::EnsureMinEdge( clientRect, windowRect, 1 );		// ensure a minimum non-client edge
+				ui::EnsureMinEdge( (CRect&)clientRect, windowRect, 1 );		// ensure a minimum non-client edge
 
 				if ( ui::CombineWithRegion( &ncRegion, clientRect, RGN_DIFF ) != NULLREGION )
 				{

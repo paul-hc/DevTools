@@ -33,6 +33,8 @@
 #define new DEBUG_NEW
 #endif
 
+#include "utl/UI/ReportListControl.hxx"
+
 
 struct CheckDup : public ui::ICheckStatePolicy
 {

@@ -144,7 +144,7 @@ CTaskDialog* CTestTaskDialog::MakeTaskDialog_Complete( void ) const
 		_T("Hide the additional information.") );
 
 	// verification checkbox
-	pDlg->SetVerificationText( s_verificationText );
+	pDlg->SetVerificationText( s_verificationText );			// "Remember the user's settings."
 	pDlg->SetVerificationChecked( m_verificationChecked );
 	return pDlg;
 }
