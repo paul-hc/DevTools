@@ -626,6 +626,10 @@ namespace fs
 		if ( str::IsEmpty( pWildSpec ) )
 			pWildSpec = _T("*");
 
+		// progress reporting: ensure the directory (stage) is always displayed first, then the files (items) under it
+		if ( !pEnumerator->AddFoundSubDir( dirPath.GetPtr() ) )
+			return;					// this directory is ignored
+
 		fs::CPath dirPathFilter = dirPath /
 			fs::CPath( Deep == depth || path::IsMultipleWildcard( pWildSpec )
 				? _T("*")			// need to relax filter to all so that it covers sub-directories
@@ -642,9 +646,8 @@ namespace fs
 			if ( finder.IsDirectory() )
 			{
 				if ( !finder.IsDots() )						// skip "." and ".." dir entries
-					if ( pEnumerator->AddFoundSubDir( foundPath.c_str() ) )
-						if ( Deep == depth )
-							subDirPaths.push_back( fs::CPath( foundPath ) );
+					if ( Deep == depth )
+						subDirPaths.push_back( fs::CPath( foundPath ) );
 			}
 			else
 			{

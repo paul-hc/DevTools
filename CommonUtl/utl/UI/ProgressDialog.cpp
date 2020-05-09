@@ -97,7 +97,7 @@ bool CProgressDialog::SetProgressType( ProgressType progressType )
 	if ( !IsRunning() )
 		return false;			// use Null Pattern for this dialog
 
-	bool useMarquee = MarqueeProgress == progressType;
+	bool useMarquee = Marquee == progressType;
 
 	if ( useMarquee == HasFlag( m_progressBar.GetStyle(), PBS_MARQUEE ) )
 		return false;			// no change required
@@ -243,6 +243,7 @@ void CProgressDialog::AdvanceStage( const std::tstring& stageName ) throws_( CUs
 		DisplayStageLabel();
 
 	m_stageStatic.SetWindowText( stageName );
+	m_itemStatic.SetWindowText( str::GetEmpty() );		// reset current item until first is found
 }
 
 void CProgressDialog::AdvanceItem( const std::tstring& itemName ) throws_( CUserAbortedException )
