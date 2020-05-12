@@ -330,7 +330,7 @@ namespace str
 	}
 
 	template< typename CharType >
-	std::basic_string< CharType >& TrimRight( std::basic_string< CharType >& rText, const TCHAR* pWhiteSpace = StdWhitespace< CharType >() )
+	std::basic_string< CharType >& TrimRight( std::basic_string< CharType >& rText, const CharType* pWhiteSpace = StdWhitespace< CharType >() )
 	{
 		size_t endPos = rText.find_last_not_of( pWhiteSpace );
 		if ( std::basic_string< CharType >::npos == endPos )
@@ -341,7 +341,7 @@ namespace str
 	}
 
 	template< typename CharType >
-	std::basic_string< CharType >& TrimLeft( std::basic_string< CharType >& rText, const TCHAR* pWhiteSpace = StdWhitespace< CharType >() )
+	std::basic_string< CharType >& TrimLeft( std::basic_string< CharType >& rText, const CharType* pWhiteSpace = StdWhitespace< CharType >() )
 	{
 		size_t startPos = rText.find_first_not_of( pWhiteSpace );
 		if ( std::basic_string< CharType >::npos == startPos )

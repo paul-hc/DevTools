@@ -2,10 +2,8 @@
 #define IRegistrySection_h
 #pragma once
 
-#include "ISubject.h"
 
-
-interface IRegistrySection : public IMemoryManaged
+interface IRegistrySection : public utl::IMemoryManaged
 {
 	virtual const std::tstring& GetSectionName( void ) const = 0;
 

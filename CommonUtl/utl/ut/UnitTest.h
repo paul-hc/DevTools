@@ -208,6 +208,7 @@ namespace ut
 
 
 class CLogger;
+namespace fs { struct CEnumerator; }
 
 
 namespace ut
@@ -273,8 +274,8 @@ namespace ut
 	};
 
 
-	inline std::tstring JoinFiles( const fs::CEnumerator& enumerator ) { return str::Join( enumerator.m_filePaths, ut::CTempFilePool::m_sep ); }
-	inline std::tstring JoinSubDirs( const fs::CEnumerator& enumerator ) { return str::Join( enumerator.m_subDirPaths, ut::CTempFilePool::m_sep ); }
+	std::tstring JoinFiles( const fs::CEnumerator& enumerator );
+	std::tstring JoinSubDirs( const fs::CEnumerator& enumerator );
 
 	// enumeration with relative paths
 	size_t EnumFiles( std::vector< fs::CPath >& rFilePaths, const fs::CPath& dirPath, SortType sortType = SortAscending, const TCHAR* pWildSpec = _T("*"), RecursionDepth depth = Deep );

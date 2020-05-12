@@ -2,6 +2,7 @@
 #include "stdafx.h"
 
 #ifdef _DEBUG		// no UT code in release builds
+#include "utl/FileEnumerator.h"
 #include "ut/WicImageTests.h"
 #include "ut/TestToolWnd.h"
 #include "WicImage.h"

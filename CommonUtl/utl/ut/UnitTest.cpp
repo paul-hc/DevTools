@@ -4,7 +4,7 @@
 #ifdef _DEBUG		// no UT code in release builds
 #include "ut/UnitTest.h"
 #include "ContainerUtilities.h"
-#include "FileSystem.h"
+#include "FileEnumerator.h"
 #include "Logger.h"
 #include "Path.h"
 #include "RuntimeException.h"
@@ -238,6 +238,19 @@ namespace ut
 		if ( IsValidPool() )
 			for ( std::vector< fs::CPath >::const_iterator itSrcPath = GetFilePaths().begin(); itSrcPath != GetFilePaths().end(); ++itSrcPath )
 				m_pathPairs[ *itSrcPath ] = fs::CPath();
+	}
+
+
+	// file enumeration
+
+	std::tstring JoinFiles( const fs::CEnumerator& enumerator )
+	{
+		return str::Join( enumerator.m_filePaths, ut::CTempFilePool::m_sep );
+	}
+
+	std::tstring JoinSubDirs( const fs::CEnumerator& enumerator )
+	{
+		return str::Join( enumerator.m_subDirPaths, ut::CTempFilePool::m_sep );
 	}
 
 

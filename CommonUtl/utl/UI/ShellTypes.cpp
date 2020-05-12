@@ -1,7 +1,7 @@
 
 #include "stdafx.h"
 #include "ShellTypes.h"
-#include <xhash>
+#include "utl/StdHashValue.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

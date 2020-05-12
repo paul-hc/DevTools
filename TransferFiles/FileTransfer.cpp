@@ -3,6 +3,7 @@
 #include "FileTransfer.h"
 #include "XferOptions.h"
 #include "utl/ContainerUtilities.h"
+#include "utl/FileEnumerator.h"
 #include "utl/FlagTags.h"
 #include "utl/RuntimeException.h"
 #include "utl/StringUtilities.h"

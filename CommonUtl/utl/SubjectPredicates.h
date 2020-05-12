@@ -17,7 +17,7 @@ namespace pred
 
 	// for implementing stateful object comparators
 
-	interface IComparator : public IMemoryManaged
+	interface IComparator : public utl::IMemoryManaged
 	{
 		virtual CompareResult CompareObjects( const utl::ISubject* pLeft, const utl::ISubject* pRight ) const = 0;
 	};

@@ -4,6 +4,7 @@
 #ifdef _DEBUG		// no UT code in release builds
 #include "ThumbnailTests.h"
 #include "Application.h"
+#include "utl/FileEnumerator.h"
 #include "utl/StructuredStorage.h"
 #include "utl/UI/Thumbnailer.h"
 #include "utl/UI/ut/TestToolWnd.h"

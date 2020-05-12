@@ -1,6 +1,7 @@
 
 #include "stdafx.h"
 #include "FileContent.h"
+#include "FileEnumerator.h"
 #include "FileSystem.h"
 #include "Crc32.h"
 #include "ContainerUtilities.h"

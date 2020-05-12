@@ -2,7 +2,7 @@
 #include "stdafx.h"
 #include "DuplicateFilesFinder.h"
 #include "utl/ContainerUtilities.h"
-#include "utl/FileSystem.h"
+#include "utl/FileEnumerator.h"
 #include "utl/Guards.h"
 #include <hash_set>
 
@@ -58,6 +58,7 @@ void CDuplicateFilesFinder::SearchForFiles( std::vector< fs::CPath >& rFoundPath
 			fs::CEnumerator found( pProgressEnum );
 			found.SetIgnorePathMatches( ignorePaths );
 
+			pProgressEnum->AddFoundSubDir( srcPath.GetPtr() );		// progress only: advance stage to the root directory
 			fs::EnumFiles( &found, srcPath, m_wildSpec.c_str(), Deep );
 
 			fs::SortPaths( found.m_filePaths );

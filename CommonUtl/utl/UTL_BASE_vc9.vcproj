@@ -640,6 +640,14 @@
 					>
 				</File>
 				<File
+					RelativePath=".\FileEnumerator.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\FileEnumerator.h"
+					>
+				</File>
+				<File
 					RelativePath=".\FileObjectCache.cpp"
 					>
 				</File>

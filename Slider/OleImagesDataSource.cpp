@@ -4,6 +4,7 @@
 #include "FileOperation.h"
 #include "Workspace.h"
 #include "Application.h"
+#include "utl/FileEnumerator.h"
 #include "utl/UI/ShellUtilities.h"
 #include "utl/UI/UtilitiesEx.h"
 #include "utl/UI/WicDibSection.h"

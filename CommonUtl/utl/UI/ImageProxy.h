@@ -2,8 +2,6 @@
 #define ImageProxy_h
 #pragma once
 
-#include "ISubject.h"
-
 
 enum
 {
@@ -14,7 +12,7 @@ enum
 };
 
 
-interface IImageProxy : public IMemoryManaged
+interface IImageProxy : public utl::IMemoryManaged
 {
 	virtual bool IsEmpty( void ) const = 0;
 	virtual const CSize& GetSize( void ) const = 0;

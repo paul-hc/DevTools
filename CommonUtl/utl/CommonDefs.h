@@ -87,6 +87,9 @@
 #endif
 
 
+#define HR_VERIFY( expr )	VERIFY( HR_OK( (expr) ) )
+
+
 namespace utl
 {
 	HRESULT Audit( HRESULT hResult, const char* pFuncName );
@@ -267,33 +270,17 @@ namespace utl
 		noncopyable( const noncopyable& );
 		noncopyable& operator=( const noncopyable& );
 	};
+
+
+	// implemented by managed objects or inherited by managed interfaces
+	//
+	interface IMemoryManaged
+	{
+		virtual ~IMemoryManaged() = 0
+		{
+		}
+	};
 }
-
-
-// hash function portable across different STL library versions
-//
-#if _MSC_VER > 1500		// MSVC++ 10.0 + (VStudio2010+)
-	#include <xstddef>
-
-	namespace utl
-	{
-		inline size_t HashValue( const void* pFirst, size_t count )
-		{
-			return std::_Hash_seq( static_cast< const BYTE* >( pFirst ), count );
-		}
-	}
-#else					// MSVC++ 9.0 (VStudio2009)
-	#include <xhash>
-
-	namespace utl
-	{
-		inline size_t HashValue( const void* pFirst, size_t count )
-		{
-			const BYTE* pFirstByte = static_cast< const BYTE* >( pFirst );
-			return stdext::_Hash_value( pFirstByte, pFirstByte + count );
-		}
-	}
-#endif //_MSC_VER
 
 
 #include "Compare_fwd.h"

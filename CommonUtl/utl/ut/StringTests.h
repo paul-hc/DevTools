@@ -23,6 +23,7 @@ private:
 	void TestIntuitiveSort( void );
 	void TestIntuitiveSortPunctuation( void );
 	void TestIgnoreCase( void );
+	void TestTrim( void );
 	void TestStringSplit( void );
 	void TestStringTokenize( void );
 	void TestStringPrefixSuffix( void );

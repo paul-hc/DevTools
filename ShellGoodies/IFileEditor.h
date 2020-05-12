@@ -10,7 +10,7 @@
 class CFileModel;
 
 
-interface IFileEditor : public IMemoryManaged
+interface IFileEditor : public utl::IMemoryManaged
 					  , public utl::IObserver
 					  , public cmd::IErrorObserver
 {

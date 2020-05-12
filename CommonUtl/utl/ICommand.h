@@ -16,7 +16,7 @@ namespace utl
 
 
 	interface ICommand
-		: public IMemoryManaged
+		: public utl::IMemoryManaged
 		, public IMessage
 	{
 		virtual bool Execute( void ) = 0;

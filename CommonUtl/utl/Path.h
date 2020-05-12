@@ -260,6 +260,33 @@ namespace fs
 
 	inline fs::CPath StripDirPrefix( const fs::CPath& filePath, const fs::CPath& dirPath ) { return path::StripCommonPrefix( filePath.GetPtr(), dirPath.GetPtr() ); }
 
+
+	template< typename ContainerT, typename SetT >
+	size_t UniquifyPaths( ContainerT& rPaths, SetT& rUniquePathIndex )
+	{
+		ContainerT tempPaths;
+		tempPaths.reserve( rPaths.size() );
+
+		size_t duplicateCount = 0;
+
+		for ( std::vector< fs::CPath >::const_iterator itPath = rPaths.begin(); itPath != rPaths.end(); ++itPath )
+			if ( rUniquePathIndex.insert( *itPath ).second )		// path is unique?
+				tempPaths.push_back( *itPath );
+			else
+				++duplicateCount;
+
+		rPaths.swap( tempPaths );
+		return duplicateCount;
+	}
+
+
+	template< typename ContainerT >
+	inline size_t UniquifyPaths( ContainerT& rPaths )
+	{
+		stdext::hash_set< typename ContainerT::value_type > uniquePathIndex;
+		return UniquifyPaths( rPaths, uniquePathIndex );
+	}
+
 } // namespace fs
 
 

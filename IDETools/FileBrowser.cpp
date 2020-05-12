@@ -5,7 +5,7 @@
 #include "TrackMenuWnd.h"
 #include "Application.h"
 #include "resource.h"
-#include "utl/FileSystem.h"
+#include "utl/FileEnumerator.h"
 #include "utl/ContainerUtilities.h"
 #include "utl/UI/ProcessUtils.h"
 #include "utl/UI/Clipboard.h"

@@ -2,7 +2,7 @@
 #define ImageFileEnumerator_h
 #pragma once
 
-#include "utl/FileSystem.h"
+#include "utl/FileEnumerator.h"
 #include "utl/Range.h"
 #include "utl/UI/UserReport.h"
 #include "ImagesModel.h"

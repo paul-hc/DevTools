@@ -3,7 +3,6 @@
 #pragma once
 
 #include <vector>
-#include "ISubject.h"
 #include "ContainerUtilities.h"
 
 
@@ -12,7 +11,7 @@ namespace utl
 	// owns a number of shared resources, and controls their destruction; a composite itself
 	// used in app::ExitInstance to release resources automatically
 
-	class CResourcePool : public IMemoryManaged
+	class CResourcePool : public utl::IMemoryManaged
 	{
 	public:
 		CResourcePool( void ) {}
@@ -30,12 +29,12 @@ namespace utl
 		template< typename ObjectType >
 		void AddAutoClear( ObjectType* pClearable ) { m_pResources.push_back( new CAutoClearResource< ObjectType >( pClearable ) ); }
 	private:
-		std::vector< IMemoryManaged* > m_pResources;
+		std::vector< utl::IMemoryManaged* > m_pResources;
 	};
 
 
 	template< typename Type >
-	class CAutoPtrResource : public IMemoryManaged
+	class CAutoPtrResource : public utl::IMemoryManaged
 	{
 	public:
 		CAutoPtrResource( std::auto_ptr< Type >* pPtr ) : m_pPtr( pPtr ) { ASSERT_PTR( m_pPtr ); }
@@ -46,7 +45,7 @@ namespace utl
 
 
 	template< typename ComPtrType >
-	class CComPtrResource : public IMemoryManaged
+	class CComPtrResource : public utl::IMemoryManaged
 	{
 	public:
 		CComPtrResource( ComPtrType& rComPtr ) : m_rComPtr( rComPtr ) {}
@@ -57,7 +56,7 @@ namespace utl
 
 
 	template< typename ObjectType >
-	class CAutoClearResource : public IMemoryManaged
+	class CAutoClearResource : public utl::IMemoryManaged
 	{
 	public:
 		CAutoClearResource( ObjectType* pClearable ) : m_pClearable( pClearable ) { ASSERT_PTR( pClearable ); }

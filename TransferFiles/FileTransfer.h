@@ -4,7 +4,7 @@
 
 #include <set>
 #include "utl/ConsoleApplication.h"
-#include "utl/FileSystem.h"
+#include "utl/FileSystem_fwd.h"
 #include "TransferItem.h"
 
 

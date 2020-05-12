@@ -7,6 +7,7 @@
 #include "FlexPath.h"
 #include "FileState.h"
 #include "FileContent.h"
+#include "FileEnumerator.h"
 #include "TimeUtils.h"
 #include "Resequence.hxx"
 #include "StringUtilities.h"

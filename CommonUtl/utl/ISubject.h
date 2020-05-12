@@ -3,16 +3,6 @@
 #pragma once
 
 
-// Implemented by managed objects or inherited by managed interfaces.
-//
-interface IMemoryManaged
-{
-	virtual ~IMemoryManaged() = 0
-	{
-	}
-};
-
-
 namespace utl
 {
 	enum Verbosity { Brief, Detailed, DetailFields };

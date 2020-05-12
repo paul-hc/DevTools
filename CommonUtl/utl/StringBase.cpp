@@ -8,6 +8,18 @@
 #endif
 
 
+namespace utl
+{
+	HRESULT Audit( HRESULT hResult, const char* pFuncName )
+	{
+		pFuncName;
+		if ( !SUCCEEDED( hResult ) )
+			TRACE( " * %s: hResult=0x%08x: '%s' in function %s\n", FAILED( hResult ) ? "FAILED" : "ERROR", hResult, CStringA( _com_error( hResult ).ErrorMessage() ).GetString(), pFuncName );
+		return hResult;
+	}
+}
+
+
 std::ostream& operator<<( std::ostream& os, const wchar_t* pWide )
 {
 	if ( NULL == pWide )
@@ -268,17 +280,6 @@ namespace str
 		std::tstring name( str::FromAnsi( pName ) );
 		str::Replace( name, _T(" "), _T("") );
 		return name;
-	}
-}
-
-namespace utl
-{
-	HRESULT Audit( HRESULT hResult, const char* pFuncName )
-	{
-		pFuncName;
-		if ( !SUCCEEDED( hResult ) )
-			TRACE( " * %s: hResult=0x%08x: '%s' in function %s\n", FAILED( hResult ) ? "FAILED" : "ERROR", hResult, CStringA( _com_error( hResult ).ErrorMessage() ).GetString(), pFuncName );
-		return hResult;
 	}
 }
 

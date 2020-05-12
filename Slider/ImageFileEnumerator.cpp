@@ -39,6 +39,10 @@ void CImageFileEnumerator::Search( const std::vector< CSearchSpec* >& searchSpec
 		try
 		{
 			const size_t oldFoundSize = m_foundImages.GetFileAttrs().size();
+
+			if ( m_pChainEnum != NULL && m_pCurrSpec->IsDirPath() )
+				m_pChainEnum->AddFoundSubDir( m_pCurrSpec->GetFilePath().GetPtr() );	// progress only: advance stage to the root directory
+
 			m_pCurrSpec->EnumImageFiles( this );
 
 			if ( oldFoundSize == m_foundImages.GetFileAttrs().size() )	// no new matching files found
@@ -60,6 +64,8 @@ void CImageFileEnumerator::Search( const std::vector< CSearchSpec* >& searchSpec
 		}
 		++itSpec;
 	}
+
+	UniquifyAll();
 }
 
 void CImageFileEnumerator::Search( const CSearchSpec& searchSpec ) throws_( CException*, CUserAbortedException )

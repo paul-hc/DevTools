@@ -355,15 +355,59 @@ void CStringTests::TestIgnoreCase( void )
 	}
 }
 
+void CStringTests::TestTrim( void )
+{
+	{
+		static const char srcText[] = "\t  ab c \t\t";
+
+		std::string text;
+
+		str::Trim( text );
+		ASSERT_EQUAL( "", text );
+
+		str::TrimLeft( text = srcText );
+		ASSERT_EQUAL( "ab c \t\t", text );
+
+		str::TrimRight( text = srcText );
+		ASSERT_EQUAL( "\t  ab c", text );
+
+		str::Trim( text = srcText );
+		ASSERT_EQUAL( "ab c", text );
+
+		str::Trim( text = srcText, srcText );		// entire text as whitespace
+		ASSERT_EQUAL( "", text );
+
+		str::Trim( text = "C:/Users/Paul/AppData/Local/Temp/SliderTempClones" );
+		ASSERT_EQUAL( "C:/Users/Paul/AppData/Local/Temp/SliderTempClones", text );
+	}
+
+	{
+		static const TCHAR srcText[] = _T("\t  ab c \t\t");
+
+		std::tstring text;
+
+		str::Trim( text );
+		ASSERT_EQUAL( _T(""), text );
+
+		str::TrimLeft( text = srcText );
+		ASSERT_EQUAL( _T("ab c \t\t"), text );
+
+		str::TrimRight( text = srcText );
+		ASSERT_EQUAL( _T("\t  ab c"), text );
+
+		str::Trim( text = srcText );
+		ASSERT_EQUAL( _T("ab c"), text );
+
+		str::Trim( text = srcText, srcText );		// entire text as whitespace
+		ASSERT_EQUAL( _T(""), text );
+
+		str::Trim( text = _T("C:/Users/Paul/AppData/Local/Temp/SliderTempClones") );
+		ASSERT_EQUAL( _T("C:/Users/Paul/AppData/Local/Temp/SliderTempClones"), text );
+	}
+}
+
 void CStringTests::TestStringSplit( void )
 {
-	static const TCHAR whitespaceText[] = _T("	  ab c 		");
-	std::tstring text;
-	ASSERT_EQUAL( _T("ab c 		"), str::TrimLeft( text = whitespaceText ) );
-	ASSERT_EQUAL( _T("	  ab c"), str::TrimRight( text = whitespaceText ) );
-
-	ASSERT_EQUAL( _T("ab c"), str::Trim( text = whitespaceText ) );
-
 	{	// WIDE strings
 		std::vector< std::tstring > items;
 		str::Split( items, _T(""), _T(",;") );
@@ -927,6 +971,7 @@ void CStringTests::Run( void )
 	TestIntuitiveSort();
 	TestIntuitiveSortPunctuation();
 	TestIgnoreCase();
+	TestTrim();
 	TestStringSplit();
 	TestStringTokenize();
 	TestStringPrefixSuffix();

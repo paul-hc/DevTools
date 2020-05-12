@@ -4,6 +4,7 @@
 #include "ImageArchiveStg.h"
 #include "Application_fwd.h"
 #include "resource.h"
+#include "utl/FileEnumerator.h"
 #include "utl/Serialization.h"
 #include "utl/SerializeStdTypes.h"
 #include "utl/StringUtilities.h"

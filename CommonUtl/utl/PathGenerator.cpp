@@ -2,7 +2,7 @@
 #include "stdafx.h"
 #include "PathGenerator.h"
 #include "ContainerUtilities.h"
-#include "FileSystem.h"
+#include "FileEnumerator.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
