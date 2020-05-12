@@ -2,10 +2,7 @@
 #include "stdafx.h"
 #include "ImagingDirect2D.h"
 #include "ImagingWic.h"
-#include "BaseApp.h"
 #include "GdiCoords.h"
-
-#pragma comment( lib, "d2d1" )		// link to Direct2D
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -14,33 +11,6 @@
 
 namespace d2d
 {
-	// CFactory implementation
-
-	CFactory::CFactory( void )
-	{
-	#ifdef DEBUG_DIRECT2D
-		D2D1_FACTORY_OPTIONS options;
-		options.debugLevel = D2D1_DEBUG_LEVEL_INFORMATION;
-
-		// Direct2D Debug Layer: see https://msdn.microsoft.com/en-us/library/dd940309%28VS.85%29.aspx
-		HR_OK( D2D1CreateFactory( D2D1_FACTORY_TYPE_SINGLE_THREADED, options, &m_pFactory ) );
-	#else
-		HR_OK( D2D1CreateFactory( D2D1_FACTORY_TYPE_SINGLE_THREADED, &m_pFactory ) );
-	#endif
-		app::GetSharedResources().AddComPtr( m_pFactory );			// will release the factory singleton in ExitInstance()
-	}
-
-	CFactory::~CFactory()
-	{
-	}
-
-	CFactory& CFactory::Instance( void )
-	{
-		static CFactory factory;
-		return factory;
-	}
-
-
 	// CDrawBitmapTraits implementation
 
 	D2D1_BITMAP_INTERPOLATION_MODE CDrawBitmapTraits::s_enlargeInterpolationMode = D2D1_BITMAP_INTERPOLATION_MODE_NEAREST_NEIGHBOR;		// by default no smoothing
@@ -92,7 +62,7 @@ namespace d2d
 		{
 			D2D_RECT_F srcRect = pSrcRect != NULL
 				? d2d::ToRectF( *pSrcRect )
-				: d2d::ToRectF( CRect( CPoint( 0, 0 ), FromSize( pBitmap->GetPixelSize() ) ) );
+				: d2d::ToRectF( CRect( CPoint( 0, 0 ), FromSizeU( pBitmap->GetPixelSize() ) ) );
 
 			pRenderTarget->DrawBitmap( pBitmap, destRectF, m_opacity, m_interpolationMode, pSrcRect != NULL ? &srcRect : NULL );
 		}
@@ -183,7 +153,7 @@ namespace d2d
 
 	bool CWindowRenderTarget::Resize( const SIZE& clientSize )
 	{
-		if ( !HR_OK( m_pWndRenderTarget->Resize( ToSize( clientSize ) ) ) )			// IMP: if couldn't resize, release the device and we'll recreate it during the next render pass
+		if ( !HR_OK( m_pWndRenderTarget->Resize( ToSizeU( clientSize ) ) ) )			// IMP: if couldn't resize, release the device and we'll recreate it during the next render pass
 		{
 			DiscardResources();
 			return false;
@@ -218,7 +188,7 @@ namespace d2d
 
 		return HR_OK( CFactory::Factory()->CreateHwndRenderTarget(
 			rtProps,
-			D2D1::HwndRenderTargetProperties( m_pWnd->GetSafeHwnd(), ToSize( clientRect.Size() ) ),
+			D2D1::HwndRenderTargetProperties( m_pWnd->GetSafeHwnd(), ToSizeU( clientRect.Size() ) ),
 			&m_pWndRenderTarget ) );
 	}
 

@@ -291,7 +291,7 @@ namespace stream
 		if ( tag.empty() )
 			return false;
 
-		if ( !rOutput.empty() && pPrefixSep != NULL )
+		if ( !rOutput.empty() && !str::IsEmpty( pPrefixSep ) )
 			rOutput += pPrefixSep;
 
 		rOutput += tag;

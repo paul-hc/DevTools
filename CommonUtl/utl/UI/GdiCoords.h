@@ -45,6 +45,9 @@ namespace ui
 	}
 
 
+	inline __int64 GetSizeArea( const SIZE& size ) { return static_cast<__int64>( size.cx ) * static_cast<__int64>( size.cy ); }
+
+
 	// aspect ratio
 	inline double GetAspectRatio( const SIZE& size ) { return (double)size.cx / size.cy; }
 	double GetDistFromSquareAspect( const SIZE& size );

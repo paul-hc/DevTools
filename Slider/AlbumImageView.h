@@ -29,9 +29,10 @@ public:
 
 	CAlbumThumbListView* GetPeerThumbView( void ) const { return safe_ptr( m_pPeerThumbView ); }
 
-	// overrides
+	// base overrides
 	virtual HICON GetDocTypeIcon( void ) const;
 	virtual CMenu& GetDocContextMenu( void ) const;
+	virtual void QueryImageFileDetails( ui::CImageFileDetails& rImageFileDetails ) const;
 
 	// IImageView overrides
 	virtual const fs::ImagePathKey& GetImagePathKey( void ) const;

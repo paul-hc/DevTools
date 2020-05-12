@@ -12,6 +12,23 @@
 
 namespace d2d
 {
+	CComPtr< ID2D1SolidColorBrush > CreateSolidBrush( ID2D1RenderTarget* pRenderTarget, const D2D1_COLOR_F& solidColor )
+	{
+		ASSERT_PTR( pRenderTarget );
+
+		CComPtr< ID2D1SolidColorBrush > pSolidBrush;
+		if ( HR_OK( pRenderTarget->CreateSolidColorBrush( &solidColor, NULL, &pSolidBrush ) ) )
+			return pSolidBrush;
+
+		return NULL;
+	}
+
+	bool CreateAsSolidBrush( CComPtr< ID2D1Brush >& rpBrush, ID2D1RenderTarget* pRenderTarget, const D2D1_COLOR_F& solidColor )
+	{
+		ASSERT_PTR( pRenderTarget );
+		return HR_OK( pRenderTarget->CreateSolidColorBrush( &solidColor, NULL, reinterpret_cast< ID2D1SolidColorBrush** >( &rpBrush ) ) );
+	}
+
 	CComPtr< ID2D1GradientStopCollection > CreateGradientStops( ID2D1RenderTarget* pRenderTarget, const D2D1_COLOR_F& fromColor, const D2D1_COLOR_F& toColor )
 	{
 		ASSERT_PTR( pRenderTarget );
@@ -452,7 +469,7 @@ namespace d2d
 				ASSERT( false );
 		}
 
-		if ( pGradientStops == NULL )
+		if ( NULL == pGradientStops )
 			pGradientStops = CreateGradientStops( pRenderTarget, ARRAY_PAIR_V( m_colors ) );
 
 		if ( pGradientStops != NULL )
@@ -472,7 +489,7 @@ namespace d2d
 
 	void COutlineFrame::CreateSolidBrush( ID2D1RenderTarget* pRenderTarget, const D2D1_COLOR_F& solidColor )
 	{
-		pRenderTarget->CreateSolidColorBrush( &solidColor, NULL, (ID2D1SolidColorBrush**)&m_pFrameBrush );
+		CreateAsSolidBrush( m_pFrameBrush, pRenderTarget, solidColor );
 	}
 
 	CComPtr< ID2D1GradientStopCollection > COutlineFrame::MakeMirrorGradientStops( ID2D1RenderTarget* pRenderTarget, const std::vector< D2D1_COLOR_F >& srcColors )

@@ -12,6 +12,7 @@
 #include "OleImagesDataSource.h"
 #include "Application.h"
 #include "resource.h"
+#include "utl/FileSystem.h"
 #include "utl/UI/Clipboard.h"
 #include "utl/UI/CmdUpdate.h"
 #include "utl/UI/MenuUtilities.h"
@@ -42,6 +43,7 @@ CImageView::CImageView( void )
 
 	SetZoomBar( app::GetMainFrame()->GetToolbar() );
 	SetScaleZoom( CWorkspace::GetData().m_scalingMode, 100 );
+	SetFlag( RefViewStatusFlags(), FullScreen, app::GetMainFrame()->IsFullScreen() );			// copy the actual FullScreen status
 }
 
 CImageView::~CImageView()
@@ -72,16 +74,34 @@ COLORREF CImageView::GetBkColor( void ) const
 	return m_bkColor != CLR_DEFAULT ? m_bkColor : CWorkspace::GetData().m_defBkColor;
 }
 
+void CImageView::SetBkColor( COLORREF bkColor, bool doRedraw /*= true*/ )
+{
+	m_bkColor = bkColor;
+
+	if ( doRedraw && m_hWnd != NULL )
+		Invalidate();
+}
+
 bool CImageView::IsAccented( void ) const
 {
 	return m_hWnd == ::GetFocus();
 }
 
-void CImageView::SetBkColor( COLORREF bkColor, bool doRedraw /*= true*/ )
+void CImageView::QueryImageFileDetails( ui::CImageFileDetails& rImageFileDetails ) const
 {
-	m_bkColor = bkColor;
-	if ( doRedraw && m_hWnd != NULL )
-		Invalidate();
+	if ( CWicImage* pImage = GetImage() )
+	{
+		rImageFileDetails.Reset( pImage );
+
+		if ( !pImage->GetImagePath().IsComplexPath() )
+			rImageFileDetails.m_fileSize = static_cast< UINT >( fs::GetFileSize( pImage->GetImagePath().GetPtr() ) );
+		else
+			rImageFileDetails.m_fileSize = 0;		// (!) must be overriden for embedded images
+
+		rImageFileDetails.m_dimensions = CWicImageCache::Instance().LookupImageDim( pImage->GetKey() );
+	}
+	else
+		rImageFileDetails.Reset();
 }
 
 const fs::ImagePathKey& CImageView::GetImagePathKey( void ) const

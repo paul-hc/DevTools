@@ -79,6 +79,8 @@ protected:
 
 	ui::IZoomBar* GetZoomBar( void ) const { return m_pZoomBar; }
 	void SetZoomBar( ui::IZoomBar* pZoomBar ) { m_pZoomBar = pZoomBar; }
+
+	TViewStatusFlag& RefViewStatusFlags( void ) { return m_viewStatusFlags; }
 private:
 	ui::ImageScalingMode m_scalingMode;		// default auto image size (app::Slider_v4_0+)
 	UINT m_zoomPct;

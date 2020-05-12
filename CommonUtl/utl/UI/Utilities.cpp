@@ -115,6 +115,11 @@ namespace ui
 
 		return !( rWindowRect == oldRect );									// changed?
 	}
+
+	CSize GetScreenSize( HWND hWnd /*= AfxGetMainWnd()->GetSafeHwnd()*/, MonitorArea area /*= ui::Monitor*/ )
+	{
+		return ui::FindMonitorRect( hWnd, area ).Size();
+	}
 }
 
 

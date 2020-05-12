@@ -2,16 +2,183 @@
 #include "stdafx.h"
 #include "ImageZoomViewD2D.h"
 #include "ImagingWic.h"
+#include "DirectWrite.h"
 #include "AnimatedFrameComposer.h"
 #include "RenderingDirect2D.h"
 #include "Color.h"
 #include "GdiCoords.h"
 #include "WicAnimatedImage.h"
 #include "WicDibSection.h"			// for printing
+#include "Utilities.h"
+#include "StringUtilities.h"
+#include "utl/FileSystem.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
+
+
+namespace ui
+{
+	void CImageFileDetails::Reset( const CWicImage* pImage /*= NULL*/ )
+	{
+		m_filePath.Clear();
+		m_isAnimated = false;
+		m_framePos = m_frameCount = m_fileSize = m_navigPos = m_navigCount = 0;
+		m_dimensions = CSize( 0, 0 );
+
+		if ( pImage != NULL )
+		{
+			m_filePath = pImage->GetImagePath();
+			m_isAnimated = pImage->IsAnimated();
+			m_framePos = pImage->GetFramePos();
+			m_frameCount = pImage->GetFrameCount();
+			m_navigCount = 1;
+		}
+	}
+
+	double CImageFileDetails::GetMegaPixels( void ) const
+	{
+		return num::ConvertFileSize( ui::GetSizeArea( m_dimensions ), num::MegaBytes ).first;
+	}
+}
+
+
+namespace dw
+{
+	class CImageInfoText
+	{
+	public:
+		CImageInfoText( CImageZoomViewD2D* pZoomView, IDWriteTextFormat* pInfoFont );
+		~CImageInfoText() {}
+
+		void BuildInfo( void );
+
+		void DiscardResources( void );
+		bool CreateResources( ID2D1RenderTarget* pRenderTarget );
+
+		bool IsValid( void ) const { return m_info.IsValid() && m_pTextLayout != NULL; }
+		bool MakeTextLayout( ID2D1RenderTarget* pRenderTarget );
+
+		void DrawImageInfoText( ID2D1RenderTarget* pRenderTarget, const d2d::CViewCoords& coords );
+	private:
+		CImageZoomViewD2D* m_pZoomView;
+		ui::CImageFileDetails m_info;
+
+		// device-independent
+		CComPtr< IDWriteTextFormat > m_pInfoFont;
+
+		// text rendering resources
+		CComPtr< ID2D1Brush > m_pBkBrush;
+		CComPtr< ID2D1Brush > m_pTextBrush;
+		CComPtr< ID2D1Brush > m_pDimensionsBrush;
+		CComPtr< ID2D1Brush > m_pNavigBrush;
+
+		CComPtr< IDWriteTextLayout > m_pTextLayout;
+	};
+
+
+	// CImageInfoText implementation
+
+	CImageInfoText::CImageInfoText( CImageZoomViewD2D* pZoomView, IDWriteTextFormat* pInfoFont )
+		: m_pZoomView( pZoomView )
+		, m_pInfoFont( pInfoFont )
+	{
+		ASSERT_PTR( m_pZoomView );
+		ASSERT_PTR( m_pInfoFont );
+	}
+
+	void CImageInfoText::DiscardResources( void )
+	{
+		m_pBkBrush = NULL;
+		m_pTextBrush = NULL;
+		m_pDimensionsBrush = NULL;
+		m_pNavigBrush = NULL;
+
+		m_pTextLayout = NULL;
+	}
+
+	bool CImageInfoText::CreateResources( ID2D1RenderTarget* pRenderTarget )
+	{
+		// text drawing objects
+		enum { MyOliveGreen = RGB(204, 251, 93) };
+
+		d2d::CreateAsSolidBrush( m_pBkBrush, pRenderTarget, d2d::ToColor( color::VeryDarkGrey, 60 ) );
+		d2d::CreateAsSolidBrush( m_pTextBrush, pRenderTarget, d2d::ToColor( color::BrightGreen, 100 ) );
+		d2d::CreateAsSolidBrush( m_pDimensionsBrush, pRenderTarget, d2d::ToColor( MyOliveGreen, 90 ) );
+		d2d::CreateAsSolidBrush( m_pNavigBrush, pRenderTarget, d2d::ToColor( color::LightOrange ) );
+		return true;
+	}
+
+	void CImageInfoText::BuildInfo( void )
+	{
+		m_pZoomView->QueryImageFileDetails( m_info );
+		m_pTextLayout = NULL;
+	}
+
+	bool CImageInfoText::MakeTextLayout( ID2D1RenderTarget* pRenderTarget )
+	{
+		ASSERT_PTR( pRenderTarget );
+
+		enum InfoField { FileName, Dimensions, NavigCounts, ZoomPercent,  _InfoFieldCount };
+
+		dw::CTextLayout textLayout( _InfoFieldCount, _T(" ") );		// effect ranges indexed by InfoField
+
+		textLayout.AddField( m_info.m_filePath.GetFilename() );
+
+		textLayout.AddField( str::Format( _T("(%d x %d = %.2f MP, %s)"),
+			m_info.m_dimensions.cx, m_info.m_dimensions.cy,
+			m_info.GetMegaPixels(),
+			num::FormatFileSize( m_info.m_fileSize ).c_str()
+		) );
+
+		textLayout.AddField( m_info.HasNavigInfo() ? str::Format( _T("[ %d / %d ]"), m_info.m_navigPos + 1, m_info.m_navigCount ) : str::GetEmpty() );
+		textLayout.AddField( str::Format( _T("%d %%"), m_pZoomView->GetZoomPct() ) );
+
+		D2D_SIZE_F boundsSize = d2d::ToSizeF( ui::GetScreenSize() );		// start with the entire screen
+
+		m_pTextLayout = NULL;
+		if ( !HR_OK( dw::CTextFactory::Factory()->CreateTextLayout( textLayout.GetFullText().c_str(), textLayout.GetFullTextLength(), m_pInfoFont, boundsSize.width, boundsSize.height, &m_pTextLayout ) ) )
+			return false;
+
+		// apply text effects
+		HR_VERIFY( m_pTextLayout->SetDrawingEffect( m_pDimensionsBrush, textLayout.GetFieldRangeAt( Dimensions ) ) );
+		HR_VERIFY( m_pTextLayout->SetFontWeight( DWRITE_FONT_WEIGHT_NORMAL, textLayout.GetFieldRangeAt( Dimensions ) ) );
+
+		HR_VERIFY( m_pTextLayout->SetDrawingEffect( m_pNavigBrush, textLayout.GetFieldRangeAt( NavigCounts ) ) );
+
+		HR_VERIFY( m_pTextLayout->SetFontWeight( DWRITE_FONT_WEIGHT_NORMAL, textLayout.GetFieldRangeAt( ZoomPercent ) ) );
+		//HR_VERIFY( m_pTextLayout->SetFontStyle( DWRITE_FONT_STYLE_ITALIC, textLayout.GetFieldRangeAt( ZoomPercent ) ) );
+		return true;
+	}
+
+	void CImageInfoText::DrawImageInfoText( ID2D1RenderTarget* pRenderTarget, const d2d::CViewCoords& coords )
+	{
+		ASSERT_PTR( pRenderTarget );
+		ASSERT_PTR( m_pTextLayout );
+
+		pRenderTarget->SetTransform( D2D1::IdentityMatrix() );
+
+		enum Metrics { EdgeH = 6, EdgeV = 3 };
+
+		CSize textSize = d2d::FromSizeF( dw::ComputeTextSize( m_pTextLayout ) );
+
+		CRect textRect = coords.m_clientRect;
+		textRect.DeflateRect( EdgeH, EdgeV );
+		textRect.top = textRect.bottom - textSize.cy;
+		textRect.right = textRect.left + textSize.cx;
+
+		CRect backgroundRect = textRect;
+		backgroundRect.InflateRect( 3, 1, 2, 2 );
+
+		static const float s_roundRadius = 3.0f;
+		D2D1_ROUNDED_RECT bkRoundRectF = { d2d::ToRectF( backgroundRect ), s_roundRadius, s_roundRadius };
+		pRenderTarget->FillRoundedRectangle( bkRoundRectF, m_pBkBrush );
+
+		D2D1_POINT_2F textOrigin = d2d::ToPointF( textRect.TopLeft() );
+		pRenderTarget->DrawTextLayout( textOrigin, m_pTextLayout, m_pTextBrush );
+	}
+}
 
 
 namespace d2d
@@ -23,6 +190,7 @@ namespace d2d
 		, m_pZoomView( pZoomView )
 		, m_accentFrameColor( ::GetSysColor( COLOR_ACTIVECAPTION ) )	//COLOR_HIGHLIGHT
 		, m_animTimer( m_pZoomView, AnimateTimer, 1000 )
+		, m_pImageInfoText( new dw::CImageInfoText( m_pZoomView, dw::CreateTextFormat( L"Arial" /*L"Calibri"*/, 10, DWRITE_FONT_WEIGHT_BOLD ) ) )
 	{
 		ASSERT_PTR( m_pZoomView->GetSafeHwnd() );
 
@@ -78,6 +246,11 @@ namespace d2d
 			m_pAnimComposer.reset();
 			m_animTimer.Stop();
 		}
+
+		m_pImageInfoText->BuildInfo();
+
+		if ( ID2D1RenderTarget* pRenderTarget = GetRenderTarget() )
+			m_pImageInfoText->MakeTextLayout( pRenderTarget );
 	}
 
 
@@ -88,6 +261,7 @@ namespace d2d
 		if ( m_pAnimComposer.get() != NULL )
 			m_pAnimComposer->Reset();
 
+		m_pImageInfoText->DiscardResources();
 		m_pAccentFrame->DiscardResources();
 	}
 
@@ -98,6 +272,8 @@ namespace d2d
 
 		if ( ID2D1RenderTarget* pRenderTarget = GetRenderTarget() )
 		{
+			m_pImageInfoText->CreateResources( pRenderTarget );
+
 			if ( m_accentFrameColor != CLR_NONE )
 				m_pAccentFrame->CreateResources( pRenderTarget );
 		}
@@ -139,9 +315,16 @@ namespace d2d
 	{
 		enum { FrameSize = 50 };
 
-		if ( m_pZoomView->IsAccented() )
-			if ( !m_pZoomView->HasViewStatusFlag( CBaseZoomView::FullScreen | CBaseZoomView::ZoomMouseTracking ) )		// don't show the frame in zoom tracking mode
-				m_pAccentFrame->Draw( GetRenderTarget(), coords.m_contentRect );
+		ID2D1RenderTarget* pRenderTarget = GetRenderTarget();
+
+		if ( !m_pZoomView->HasViewStatusFlag( CBaseZoomView::ZoomMouseTracking ) )			// don't show the text info in zoom tracking mode
+			if ( m_pImageInfoText.get() != NULL )
+				if ( m_pImageInfoText->IsValid() )
+					m_pImageInfoText->DrawImageInfoText( pRenderTarget, coords );
+
+		if ( !m_pZoomView->HasViewStatusFlag( CBaseZoomView::FullScreen | CBaseZoomView::ZoomMouseTracking ) )		// don't show the frame in zoom tracking mode
+			if ( m_pZoomView->IsAccented() )
+				m_pAccentFrame->Draw( pRenderTarget, coords.m_contentRect );
 	}
 
 

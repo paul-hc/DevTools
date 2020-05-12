@@ -5,6 +5,7 @@
 #include "AlbumDialogBar.h"
 #include "AlbumThumbListView.h"
 #include "INavigationBar.h"
+#include "FileAttr.h"
 #include "ChildFrame.h"
 #include "MainFrame.h"
 #include "Workspace.h"
@@ -74,6 +75,24 @@ CMenu& CAlbumImageView::GetDocContextMenu( void ) const
 const fs::ImagePathKey& CAlbumImageView::GetImagePathKey( void ) const
 {
 	return GetDocument()->GetImageFilePathAt( m_slideData.GetCurrentIndex() );
+}
+
+void CAlbumImageView::QueryImageFileDetails( ui::CImageFileDetails& rImageFileDetails ) const
+{
+	if ( CWicImage* pImage = GetImage() )
+	{
+		const CAlbumModel* pAlbumModel = GetDocument()->GetModel();
+		int currIndex = m_slideData.GetCurrentIndex();
+		const CFileAttr* pFileAttr = pAlbumModel->GetFileAttr( currIndex );
+
+		rImageFileDetails.Reset( pImage );
+		rImageFileDetails.m_fileSize = pFileAttr->GetFileSize();
+		rImageFileDetails.m_dimensions = pFileAttr->GetImageDim();
+		rImageFileDetails.m_navigPos = currIndex;
+		rImageFileDetails.m_navigCount = pAlbumModel->GetFileAttrCount();
+	}
+	else
+		__super::QueryImageFileDetails( rImageFileDetails );		// reset the details
 }
 
 CWicImage* CAlbumImageView::GetImage( void ) const

@@ -42,7 +42,7 @@ BOOL CImageDoc::OnOpenDocument( LPCTSTR pFilePath )
 		CWaitCursor wait;
 		m_imagePathKey.first.Set( pFilePath );
 		if ( NULL == GetImage() )
-			AfxThrowFileException( m_imagePathKey.first.FileExist( fs::Read ) ? CFileException::accessDenied : CFileException::fileNotFound );
+			AfxThrowFileException( m_imagePathKey.first.FileExist( fs::Read ) ? CFileException::accessDenied : CFileException::fileNotFound, -1, pFilePath );
 	}
 	catch ( CException* pExc )
 	{

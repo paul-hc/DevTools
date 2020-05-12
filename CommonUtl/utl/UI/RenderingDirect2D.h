@@ -9,6 +9,9 @@ namespace d2d
 {
 	// object creation
 
+	CComPtr< ID2D1SolidColorBrush > CreateSolidBrush( ID2D1RenderTarget* pRenderTarget, const D2D1_COLOR_F& solidColor );
+	bool CreateAsSolidBrush( CComPtr< ID2D1Brush >& rpBrush, ID2D1RenderTarget* pRenderTarget, const D2D1_COLOR_F& solidColor );
+
 	CComPtr< ID2D1GradientStopCollection > CreateGradientStops( ID2D1RenderTarget* pRenderTarget, const D2D1_COLOR_F& fromColor, const D2D1_COLOR_F& toColor );
 	CComPtr< ID2D1GradientStopCollection > CreateGradientStops( ID2D1RenderTarget* pRenderTarget, const D2D1_COLOR_F colors[], size_t count );
 	CComPtr< ID2D1GradientStopCollection > CreateReverseGradientStops( ID2D1RenderTarget* pRenderTarget, const ID2D1GradientStopCollection* pSrcGradientStops );
@@ -89,7 +92,7 @@ namespace d2d
 	const CEnumTags& GetTags_FrameStyle( void );
 
 
-	interface IRenderFrame : public IMemoryManaged
+	interface IRenderFrame : public utl::IMemoryManaged
 	{
 		virtual bool IsValid( void ) const = 0;
 		virtual void Create( ID2D1RenderTarget* pRenderTarget, ID2D1GradientStopCollection* pGradientStops ) = 0;

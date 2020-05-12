@@ -2,14 +2,44 @@
 #define ImageZoomViewD2D_h
 #pragma once
 
+#include "utl/FlexPath.h"
 #include "BaseZoomView.h"
 #include "ImagingDirect2D.h"
 #include "WindowTimer.h"
 
 
 class CWicImage;
-class CWicAnimatedImage;
+
+
+namespace ui
+{
+	struct CImageFileDetails
+	{
+		CImageFileDetails( void ) { Reset(); }
+
+		void Reset( const CWicImage* pImage = NULL );
+
+		bool IsValid( void ) const { return !m_filePath.IsEmpty(); }
+		bool HasNavigInfo( void ) const { return m_navigCount > 1; }
+		double GetMegaPixels( void ) const;
+	public:
+		fs::CFlexPath m_filePath;
+		bool m_isAnimated;
+		UINT m_framePos;
+		UINT m_frameCount;
+		UINT m_fileSize;
+		CSize m_dimensions;
+
+		UINT m_navigPos;
+		UINT m_navigCount;
+	};
+}
+
+
 class CImageZoomViewD2D;
+
+
+namespace dw { class CImageInfoText; }
 
 
 namespace d2d
@@ -57,6 +87,7 @@ namespace d2d
 		CWindowTimer m_animTimer;
 
 		// additional drawing resources
+		std::auto_ptr< dw::CImageInfoText > m_pImageInfoText;		// drawn at the bottom
 		std::auto_ptr< CFrameFacet > m_pAccentFrame;				// frame drawn when view is focused
 	};
 }
@@ -72,6 +103,7 @@ protected:
 public:
 	// overrideables
 	virtual CWicImage* GetImage( void ) const = 0;
+	virtual void QueryImageFileDetails( ui::CImageFileDetails& rImageFileDetails ) const = 0;
 	virtual bool IsAccented( void ) const;		// typically colour of the frame when focused
 
 	d2d::CDrawBitmapTraits& GetDrawParams( void ) { return m_drawTraits; }

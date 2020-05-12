@@ -2,79 +2,12 @@
 #define ImagingDirect2D_h
 #pragma once
 
-#include <d2d1.h>
-#include "ImagingWic_fwd.h"
+#include "Direct2D.h"
 #include "InternalChange.h"
-#include "ISubject.h"
-
-
-// D2D: Direct 2D
 
 
 namespace d2d
 {
-	// type conversions: GDI -> D2D
-
-	inline D2D_POINT_2U ToPoint( const POINT& pos ) { return D2D1::Point2U( pos.x, pos.y ); }
-	inline D2D_POINT_2F ToPointF( const POINT& pos ) { return D2D1::Point2F( (float)pos.x, (float)pos.y ); }
-	inline D2D_POINT_2F ToPointF( int x, int y ) { return D2D1::Point2F( (float)x, (float)y ); }
-
-	inline D2D_SIZE_U ToSize( const SIZE& size ) { return D2D1::SizeU( size.cx, size.cy ); }
-	inline D2D_SIZE_F ToSizeF( const SIZE& size ) { return D2D1::SizeF( (float)size.cx, (float)size.cy ); }
-	inline D2D_SIZE_F ToSizeF( int cx, int cy ) { return D2D1::SizeF( (float)cx, (float)cy ); }
-
-	inline D2D_RECT_U ToRect( const RECT& rect ) { return D2D1::RectU( rect.left, rect.top, rect.right, rect.bottom ); }
-	inline D2D_RECT_F ToRectF( const RECT& rect ) { return D2D1::RectF( (float)rect.left, (float)rect.top, (float)rect.right, (float)rect.bottom ); }
-
-	// D2D1_COLOR_F is equivalent with D2D_COLOR_F
-	inline D2D1_COLOR_F ToColor( COLORREF color, UINT opacityPct = 100 )
-	{
-		D2D1_COLOR_F colorValue =		// RGBA
-		{
-			static_cast< float >( GetRValue( color ) ) / 255.f,
-			static_cast< float >( GetGValue( color ) ) / 255.f,
-			static_cast< float >( GetBValue( color ) ) / 255.f,
-			static_cast< float >( opacityPct ) / 100.f
-		};
-		return colorValue;
-	}
-
-	inline D2D1_COLOR_F ToColorAlpha( COLORREF color, BYTE alpha = 255 )
-	{
-		D2D1_COLOR_F colorValue =		// RGBA
-		{
-			static_cast< float >( GetRValue( color ) ) / 255.f,
-			static_cast< float >( GetGValue( color ) ) / 255.f,
-			static_cast< float >( GetBValue( color ) ) / 255.f,
-			static_cast< float >( alpha ) / 255.f
-		};
-		return colorValue;
-	}
-
-	inline float GetAlpha( WICColor argbColor ) { return ( argbColor >> 24 ) / 255.f; }
-
-
-	// type conversions: D2D -> GDI
-	inline CSize FromSize( const D2D_SIZE_U& size ) { return CSize( size.width, size.height ); }
-}
-
-
-namespace d2d
-{
-	// singleton to create Direct 2D COM objects for
-	//
-	class CFactory
-	{
-		CFactory( void );
-		~CFactory();
-	public:
-		static CFactory& Instance( void );
-		static ID2D1Factory* Factory( void ) { return &*Instance().m_pFactory; }
-	private:
-		CComPtr< ID2D1Factory > m_pFactory;
-	};
-
-
 	enum RenderResult { RenderDone, RenderError, DeviceLoss };
 
 
@@ -127,7 +60,7 @@ namespace d2d
 
 namespace d2d
 {
-	interface IRenderHostWindow : public IMemoryManaged
+	interface IRenderHostWindow : public utl::IMemoryManaged
 	{
 		virtual ID2D1RenderTarget* GetRenderTarget( void ) const = 0;
 		virtual CWnd* GetWindow( void ) const = 0;
@@ -144,12 +77,6 @@ namespace d2d
 	{
 		virtual void DiscardResources( void ) = 0;
 		virtual bool CreateResources( void ) = 0;
-
-		void EnsureResources( void )
-		{
-			if ( !IsValidTarget() )
-				CreateResources();			// lazy resource aquisition
-		}
 	};
 
 
@@ -176,6 +103,12 @@ namespace d2d
 		void ClearBackground( COLORREF bkColor );					// clears the entire render target
 
 		RenderResult Render( const CViewCoords& coords );			// invalidates window on device loss
+
+		void EnsureResources( void )
+		{
+			if ( !IsValidTarget() )
+				CreateResources();			// lazy resource aquisition
+		}
 	protected:
 		void ReleaseBitmap( void ) { m_pBitmap = NULL; }
 

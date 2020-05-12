@@ -870,14 +870,6 @@
 				Name="Imaging"
 				>
 				<File
-					RelativePath=".\AnimatedFrameComposer.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\AnimatedFrameComposer.h"
-					>
-				</File>
-				<File
 					RelativePath=".\CustomDrawImager.cpp"
 					>
 				</File>
@@ -962,14 +954,6 @@
 					>
 				</File>
 				<File
-					RelativePath=".\ImagingDirect2D.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\ImagingDirect2D.h"
-					>
-				</File>
-				<File
 					RelativePath=".\ImagingGdiPlus.cpp"
 					>
 				</File>
@@ -991,14 +975,6 @@
 				</File>
 				<File
 					RelativePath=".\Pixel.h"
-					>
-				</File>
-				<File
-					RelativePath=".\RenderingDirect2D.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\RenderingDirect2D.h"
 					>
 				</File>
 				<File
@@ -1635,6 +1611,50 @@
 				</File>
 				<File
 					RelativePath=".\RegistrySection.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="DirectX"
+				>
+				<File
+					RelativePath=".\AnimatedFrameComposer.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\AnimatedFrameComposer.h"
+					>
+				</File>
+				<File
+					RelativePath=".\Direct2D.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Direct2D.h"
+					>
+				</File>
+				<File
+					RelativePath=".\DirectWrite.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\DirectWrite.h"
+					>
+				</File>
+				<File
+					RelativePath=".\ImagingDirect2D.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\ImagingDirect2D.h"
+					>
+				</File>
+				<File
+					RelativePath=".\RenderingDirect2D.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\RenderingDirect2D.h"
 					>
 				</File>
 			</Filter>

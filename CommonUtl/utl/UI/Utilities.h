@@ -30,6 +30,8 @@ namespace ui
 
 	bool EnsureVisibleWindowRect( CRect& rWindowRect, HWND hWnd, bool clampToParent = true );
 
+	CSize GetScreenSize( HWND hWnd = AfxGetMainWnd()->GetSafeHwnd(), MonitorArea area = ui::Monitor );
+
 
 	inline CSize GetTextSize( CDC* pDC, const TCHAR* pText, DWORD extraFormat = 0 )		// pass DT_EDITCONTROL for multi-line
 	{	// more accurate, takes care of line-ends
