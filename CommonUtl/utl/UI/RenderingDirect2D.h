@@ -100,30 +100,33 @@ namespace d2d
 	};
 
 
-	class CFrameFacet : private utl::noncopyable
+	class CFrameGadget : public CGadgetBase
 	{
 	public:
-		CFrameFacet( int frameSize, const D2D1_COLOR_F colors[], size_t count );
-		~CFrameFacet();
+		CFrameGadget( int frameSize, const D2D1_COLOR_F colors[], size_t count );
+		~CFrameGadget();
 
 		FrameStyle GetFrameStyle( void ) const { return m_frameStyle; }
-		void SetFrameStyle( FrameStyle frameStyle ) { m_frameStyle = frameStyle; DiscardResources(); }
+		void SetFrameStyle( FrameStyle frameStyle ) { m_frameStyle = frameStyle; DiscardDeviceResources(); }
 
 		int GetFrameSize( void ) const { return m_frameSize; }
-		void SetFrameSize( int frameSize ) { m_frameSize = frameSize; DiscardResources(); }
+		void SetFrameSize( int frameSize ) { m_frameSize = frameSize; DiscardDeviceResources(); }
 
 		const std::vector< D2D1_COLOR_F >& GetColors( void ) const { return m_colors; }
-		void SetColors( const D2D1_COLOR_F colors[], size_t count ) { m_colors.assign( colors, colors + count ); DiscardResources(); }
+		void SetColors( const D2D1_COLOR_F colors[], size_t count ) { m_colors.assign( colors, colors + count ); DiscardDeviceResources(); }
 
-		void DiscardResources( void );
-		bool CreateResources( ID2D1RenderTarget* pRenderTarget );
-		bool IsValid( void ) const { return GetRenderFrame() != NULL && GetRenderFrame()->IsValid(); }
-		void Draw( ID2D1RenderTarget* pRenderTarget, const RECT& boundsRect );
+		// IDeviceComponent interface
+		virtual void DiscardDeviceResources( void );
+		virtual bool CreateDeviceResources( void );
+
+		// IGadgetComponent interface
+		virtual bool IsValid( void ) const;
+		virtual void Draw( const CViewCoords& coords );
 
 		IRenderFrame* GetRenderFrame( void ) const { return m_pRenderFrame.get(); }
 
-		template< typename RenderFrame_T >
-		RenderFrame_T* GetRenderFrameAs( void ) const { return checked_static_cast< RenderFrame_T* >( m_pRenderFrame.get() ); }
+		template< typename RenderFrameT >
+		RenderFrameT* GetRenderFrameAs( void ) const { return checked_static_cast< RenderFrameT* >( m_pRenderFrame.get() ); }
 	protected:
 		int m_frameSize;
 		std::vector< D2D1_COLOR_F > m_colors;

@@ -84,4 +84,88 @@ namespace d2d
 }
 
 
+namespace d2d
+{
+	interface IDeviceComponent
+	{	// manages device-dependent resources (bitmaps, brushes, text layouts, etc)
+		virtual void DiscardDeviceResources( void ) = 0;
+		virtual bool CreateDeviceResources( void ) = 0;
+	};
+
+
+	interface IRenderHost;
+	struct CViewCoords;
+
+
+	interface IGadgetComponent : public IDeviceComponent
+	{	// a child gadget managed by a render host that can draw itself
+		virtual IRenderHost* GetRenderHost( void ) const = 0;
+		virtual bool IsValid( void ) const = 0;
+
+		// draw stages (in relation with drawing the content)
+		virtual void EraseBackground( const CViewCoords& coords ) = 0;
+		virtual void Draw( const CViewCoords& coords ) = 0;
+	};
+
+
+
+	interface IRenderHost
+	{	// provides access to the render target managed by the host, a composite of gadgets
+		virtual ID2D1RenderTarget* GetRenderTarget( void ) const = 0;
+		virtual bool CanRender( void ) const = 0;
+
+		// composite of gadgets
+		virtual void AddGadget( IGadgetComponent* pGadget ) = 0;
+		virtual bool IsGadgetVisible( const IGadgetComponent* pGadget ) const = 0;		// allows the host to prevent drawing of a certain gadget
+
+		bool IsValidTarget( void ) const { return GetRenderTarget() != NULL; }
+	};
+
+
+
+	interface IRenderHostWindow : public utl::IMemoryManaged
+								, public IRenderHost
+	{	// render host window capable of animation
+		virtual CWnd* GetWindow( void ) const = 0;
+
+		virtual void StartAnimation( UINT frameDelay ) = 0;
+		virtual void StopAnimation( void ) = 0;
+	};
+}
+
+
+namespace d2d
+{
+	struct CViewCoords : private utl::noncopyable
+	{
+		CViewCoords( const CRect& clientRect, const CRect& contentRect )
+			: m_clientRect( clientRect )
+			, m_contentRect( contentRect )
+		{
+		}
+	public:
+		const CRect& m_clientRect;
+		const CRect& m_contentRect;			// logical coordinates: bitmap scaled rect in the view (AKA destRect)
+	};
+
+
+	abstract class CGadgetBase : public IGadgetComponent
+							   , private utl::noncopyable
+	{
+	protected:
+		CGadgetBase( void ) : m_pRenderHost( NULL ) {}
+	public:
+		// IGadgetComponent interface (partial)
+		virtual IRenderHost* GetRenderHost( void ) const;
+		virtual void EraseBackground( const CViewCoords& coords );
+
+		void SetRenderHost( IRenderHost* pRenderHost );
+	protected:
+		virtual ID2D1RenderTarget* GetHostRenderTarget( void ) const { return GetRenderHost()->GetRenderTarget(); }
+	private:
+		IRenderHost* m_pRenderHost;
+	};
+}
+
+
 #endif // Direct2D_h

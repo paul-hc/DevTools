@@ -62,3 +62,27 @@ namespace d2d
 		return static_cast< int >( number + 0.5f );
 	}
 }
+
+
+namespace d2d
+{
+	// CGadgetBase implementation
+
+	void CGadgetBase::SetRenderHost( IRenderHost* pRenderHost )
+	{
+		ASSERT_NULL( m_pRenderHost );
+		m_pRenderHost = pRenderHost;
+		ASSERT_PTR( m_pRenderHost );
+	}
+
+	IRenderHost* CGadgetBase::GetRenderHost( void ) const
+	{
+		ASSERT_PTR( m_pRenderHost );
+		return m_pRenderHost;
+	}
+
+	void CGadgetBase::EraseBackground( const CViewCoords& coords )
+	{
+		coords;
+	}
+}

@@ -303,7 +303,7 @@ void CAlbumModel::SearchForFiles( CWnd* pParentWnd, bool reportEmpty /*= true*/ 
 		case fattr::OriginalOrder:
 			break;			// nothing to do: found files are already in original order
 		case fattr::CustomOrder:
-			pRetainCustomOrder->RestoreOriginalOrder( &m_imagesModel.RefFileAttrs() );
+			pRetainCustomOrder->RestoreOriginalOrder( &foundImagesModel.RefFileAttrs() );
 			break;
 		default:
 			DoOrderImagesModel( &foundImagesModel, pProgressSvc );

@@ -39,13 +39,11 @@ namespace ui
 class CImageZoomViewD2D;
 
 
-namespace dw { class CImageInfoText; }
-
-
 namespace d2d
 {
 	class CAnimatedFrameComposer;
-	class CFrameFacet;
+	class CFrameGadget;
+	class CImageInfoGadget;
 
 
 	// Owned by the view that displays the STILL/ANIMATED image using a timer and Direct 2D rendering.
@@ -57,28 +55,25 @@ namespace d2d
 		CImageRenderTarget( CImageZoomViewD2D* pZoomView );
 		~CImageRenderTarget();
 
-		void SetAccentFrameColor( COLORREF accentFrameColor );
-
-		CFrameFacet* GetAccentFrame( void ) { return m_pAccentFrame.get(); }
-
 		// base overrides
-		virtual void DiscardResources( void );
-		virtual bool CreateResources( void );
+		virtual void DiscardDeviceResources( void );
+		virtual bool CreateDeviceResources( void );
 		virtual void StartAnimation( UINT frameDelay );
 		virtual void StopAnimation( void );
 
-		virtual void DrawBitmap( const CViewCoords& coords );		// draw still or animated bitmap
+		virtual void DrawBitmap( const CViewCoords& coords, const CBitmapCoords& bmpCoords );		// draw still or animated bitmap
 		virtual void PreDraw( const CViewCoords& coords );
-		virtual void PostDraw( const CViewCoords& coords );
+		virtual bool IsGadgetVisible( const IGadgetComponent* pGadget ) const;
 
-		bool DrawImage( const CViewCoords& coords );
+		bool DrawImage( const CViewCoords& coords, const CBitmapCoords& bmpCoords );
 
 		// animation timer
 		bool IsAnimEvent( UINT_PTR eventId ) const { return m_pAnimComposer.get() != NULL && m_animTimer.IsHit( eventId ); }
 		void HandleAnimEvent( void );
 	private:
+		CFrameGadget* MakeAccentFrameGadget( void ) const;
 		void SetupCurrentImage( void );
-	private:
+
 		CWicImage* GetImage( void ) const;
 	private:
 		CImageZoomViewD2D* m_pZoomView;
@@ -87,8 +82,8 @@ namespace d2d
 		CWindowTimer m_animTimer;
 
 		// additional drawing resources
-		std::auto_ptr< dw::CImageInfoText > m_pImageInfoText;		// drawn at the bottom
-		std::auto_ptr< CFrameFacet > m_pAccentFrame;				// frame drawn when view is focused
+		std::auto_ptr< CImageInfoGadget > m_pImageInfoGadget;		// drawn at the bottom
+		std::auto_ptr< CFrameGadget > m_pAccentFrameGadget;			// frame drawn when view is focused
 	};
 }
 

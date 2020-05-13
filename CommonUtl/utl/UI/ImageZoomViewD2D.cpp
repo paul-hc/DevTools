@@ -44,23 +44,25 @@ namespace ui
 }
 
 
-namespace dw
+namespace d2d
 {
-	class CImageInfoText
+	class CImageInfoGadget : public CGadgetBase
 	{
 	public:
-		CImageInfoText( CImageZoomViewD2D* pZoomView, IDWriteTextFormat* pInfoFont );
-		~CImageInfoText() {}
+		CImageInfoGadget( CImageZoomViewD2D* pZoomView, IDWriteTextFormat* pInfoFont );
+		~CImageInfoGadget() {}
 
 		void BuildInfo( void );
 
-		void DiscardResources( void );
-		bool CreateResources( ID2D1RenderTarget* pRenderTarget );
+		// IDeviceComponent interface
+		virtual void DiscardDeviceResources( void );
+		virtual bool CreateDeviceResources( void );
 
-		bool IsValid( void ) const { return m_info.IsValid() && m_pTextLayout != NULL; }
-		bool MakeTextLayout( ID2D1RenderTarget* pRenderTarget );
-
-		void DrawImageInfoText( ID2D1RenderTarget* pRenderTarget, const d2d::CViewCoords& coords );
+		// IGadgetComponent interface
+		virtual bool IsValid( void ) const;
+		virtual void Draw( const CViewCoords& coords );
+	private:
+		bool MakeTextLayout( void );
 	private:
 		CImageZoomViewD2D* m_pZoomView;
 		ui::CImageFileDetails m_info;
@@ -78,9 +80,9 @@ namespace dw
 	};
 
 
-	// CImageInfoText implementation
+	// CImageInfoGadget implementation
 
-	CImageInfoText::CImageInfoText( CImageZoomViewD2D* pZoomView, IDWriteTextFormat* pInfoFont )
+	CImageInfoGadget::CImageInfoGadget( CImageZoomViewD2D* pZoomView, IDWriteTextFormat* pInfoFont )
 		: m_pZoomView( pZoomView )
 		, m_pInfoFont( pInfoFont )
 	{
@@ -88,7 +90,7 @@ namespace dw
 		ASSERT_PTR( m_pInfoFont );
 	}
 
-	void CImageInfoText::DiscardResources( void )
+	void CImageInfoGadget::DiscardDeviceResources( void )
 	{
 		m_pBkBrush = NULL;
 		m_pTextBrush = NULL;
@@ -98,26 +100,36 @@ namespace dw
 		m_pTextLayout = NULL;
 	}
 
-	bool CImageInfoText::CreateResources( ID2D1RenderTarget* pRenderTarget )
+	bool CImageInfoGadget::CreateDeviceResources( void )
 	{
+		ID2D1RenderTarget* pRenderTarget = GetHostRenderTarget();
+
 		// text drawing objects
 		enum { MyOliveGreen = RGB(204, 251, 93) };
 
-		d2d::CreateAsSolidBrush( m_pBkBrush, pRenderTarget, d2d::ToColor( color::VeryDarkGrey, 60 ) );
-		d2d::CreateAsSolidBrush( m_pTextBrush, pRenderTarget, d2d::ToColor( color::BrightGreen, 100 ) );
-		d2d::CreateAsSolidBrush( m_pDimensionsBrush, pRenderTarget, d2d::ToColor( MyOliveGreen, 90 ) );
-		d2d::CreateAsSolidBrush( m_pNavigBrush, pRenderTarget, d2d::ToColor( color::LightOrange ) );
+		CreateAsSolidBrush( m_pBkBrush, pRenderTarget, ToColor( color::VeryDarkGrey, 50 ) );
+		CreateAsSolidBrush( m_pTextBrush, pRenderTarget, ToColor( color::BrightGreen, 100 ) );
+		CreateAsSolidBrush( m_pDimensionsBrush, pRenderTarget, ToColor( MyOliveGreen, 90 ) );
+		CreateAsSolidBrush( m_pNavigBrush, pRenderTarget, ToColor( color::LightOrange ) );
+
+		if ( m_info.IsValid() )
+			MakeTextLayout();
+
 		return true;
 	}
 
-	void CImageInfoText::BuildInfo( void )
+	void CImageInfoGadget::BuildInfo( void )
 	{
 		m_pZoomView->QueryImageFileDetails( m_info );
-		m_pTextLayout = NULL;
+
+		MakeTextLayout();
 	}
 
-	bool CImageInfoText::MakeTextLayout( ID2D1RenderTarget* pRenderTarget )
+	bool CImageInfoGadget::MakeTextLayout( void )
 	{
+		m_pTextLayout = NULL;
+
+		ID2D1RenderTarget* pRenderTarget = GetHostRenderTarget();
 		ASSERT_PTR( pRenderTarget );
 
 		enum InfoField { FileName, Dimensions, NavigCounts, ZoomPercent,  _InfoFieldCount };
@@ -135,25 +147,30 @@ namespace dw
 		textLayout.AddField( m_info.HasNavigInfo() ? str::Format( _T("[ %d / %d ]"), m_info.m_navigPos + 1, m_info.m_navigCount ) : str::GetEmpty() );
 		textLayout.AddField( str::Format( _T("%d %%"), m_pZoomView->GetZoomPct() ) );
 
-		D2D_SIZE_F boundsSize = d2d::ToSizeF( ui::GetScreenSize() );		// start with the entire screen
+		D2D_SIZE_F boundsSize = ToSizeF( ui::GetScreenSize() );		// start with the entire screen
 
-		m_pTextLayout = NULL;
 		if ( !HR_OK( dw::CTextFactory::Factory()->CreateTextLayout( textLayout.GetFullText().c_str(), textLayout.GetFullTextLength(), m_pInfoFont, boundsSize.width, boundsSize.height, &m_pTextLayout ) ) )
 			return false;
 
 		// apply text effects
 		HR_VERIFY( m_pTextLayout->SetDrawingEffect( m_pDimensionsBrush, textLayout.GetFieldRangeAt( Dimensions ) ) );
 		HR_VERIFY( m_pTextLayout->SetFontWeight( DWRITE_FONT_WEIGHT_NORMAL, textLayout.GetFieldRangeAt( Dimensions ) ) );
-
 		HR_VERIFY( m_pTextLayout->SetDrawingEffect( m_pNavigBrush, textLayout.GetFieldRangeAt( NavigCounts ) ) );
-
 		HR_VERIFY( m_pTextLayout->SetFontWeight( DWRITE_FONT_WEIGHT_NORMAL, textLayout.GetFieldRangeAt( ZoomPercent ) ) );
-		//HR_VERIFY( m_pTextLayout->SetFontStyle( DWRITE_FONT_STYLE_ITALIC, textLayout.GetFieldRangeAt( ZoomPercent ) ) );
 		return true;
 	}
 
-	void CImageInfoText::DrawImageInfoText( ID2D1RenderTarget* pRenderTarget, const d2d::CViewCoords& coords )
+	bool CImageInfoGadget::IsValid( void ) const
 	{
+		return m_info.IsValid() && m_pTextLayout != NULL;
+	}
+
+	void CImageInfoGadget::Draw( const CViewCoords& coords )
+	{
+		if ( !IsValid() )
+			return;
+
+		ID2D1RenderTarget* pRenderTarget = GetHostRenderTarget();
 		ASSERT_PTR( pRenderTarget );
 		ASSERT_PTR( m_pTextLayout );
 
@@ -161,7 +178,7 @@ namespace dw
 
 		enum Metrics { EdgeH = 6, EdgeV = 3 };
 
-		CSize textSize = d2d::FromSizeF( dw::ComputeTextSize( m_pTextLayout ) );
+		CSize textSize = FromSizeF( dw::ComputeTextSize( m_pTextLayout ) );
 
 		CRect textRect = coords.m_clientRect;
 		textRect.DeflateRect( EdgeH, EdgeV );
@@ -172,10 +189,10 @@ namespace dw
 		backgroundRect.InflateRect( 3, 1, 2, 2 );
 
 		static const float s_roundRadius = 3.0f;
-		D2D1_ROUNDED_RECT bkRoundRectF = { d2d::ToRectF( backgroundRect ), s_roundRadius, s_roundRadius };
+		D2D1_ROUNDED_RECT bkRoundRectF = { ToRectF( backgroundRect ), s_roundRadius, s_roundRadius };
 		pRenderTarget->FillRoundedRectangle( bkRoundRectF, m_pBkBrush );
 
-		D2D1_POINT_2F textOrigin = d2d::ToPointF( textRect.TopLeft() );
+		D2D1_POINT_2F textOrigin = ToPointF( textRect.TopLeft() );
 		pRenderTarget->DrawTextLayout( textOrigin, m_pTextLayout, m_pTextBrush );
 	}
 }
@@ -190,31 +207,35 @@ namespace d2d
 		, m_pZoomView( pZoomView )
 		, m_accentFrameColor( ::GetSysColor( COLOR_ACTIVECAPTION ) )	//COLOR_HIGHLIGHT
 		, m_animTimer( m_pZoomView, AnimateTimer, 1000 )
-		, m_pImageInfoText( new dw::CImageInfoText( m_pZoomView, dw::CreateTextFormat( L"Arial" /*L"Calibri"*/, 10, DWRITE_FONT_WEIGHT_BOLD ) ) )
+		, m_pImageInfoGadget( new d2d::CImageInfoGadget( m_pZoomView, dw::CreateTextFormat( L"Arial" /*L"Calibri"*/, 10, DWRITE_FONT_WEIGHT_BOLD ) ) )
+		, m_pAccentFrameGadget( MakeAccentFrameGadget() )
 	{
 		ASSERT_PTR( m_pZoomView->GetSafeHwnd() );
 
-		const D2D1_COLOR_F colors[] = { ToColor( m_accentFrameColor, 70 ), ToColor( color::White, 20 ) };
-		m_pAccentFrame.reset( new CFrameFacet( 3, ARRAY_PAIR( colors ) ) );
-		m_pAccentFrame->SetFrameStyle( GradientFrameRadialCorners );
-
-	#if 0
-		// debugging: use high contrast colours
-		static const D2D1_COLOR_F s_debugColors[] = { ToColor( color::Red, 90 ), ToColor( color::Yellow, 80 ), ToColor( color::BrightGreen, 70 ) };
-		m_pAccentFrame->SetColors( ARRAY_PAIR( s_debugColors ) );
-		m_pAccentFrame->SetFrameSize( 10 );
-		m_pAccentFrame->SetFrameStyle( OutlineGradientFrame );
-	#endif
+		AddGadget( m_pImageInfoGadget.get() );
+		AddGadget( m_pAccentFrameGadget.get() );
 	}
 
 	CImageRenderTarget::~CImageRenderTarget()
 	{
 	}
 
-	void CImageRenderTarget::SetAccentFrameColor( COLORREF accentFrameColor )
+	CFrameGadget* CImageRenderTarget::MakeAccentFrameGadget( void ) const
 	{
-		m_accentFrameColor = accentFrameColor;
-		m_pAccentFrame->DiscardResources();
+		const D2D1_COLOR_F colors[] = { ToColor( m_accentFrameColor, 70 ), ToColor( color::White, 20 ) };
+		CFrameGadget* pAccentFrameGadget = new CFrameGadget( 3, ARRAY_PAIR( colors ) );
+
+		pAccentFrameGadget->SetFrameStyle( GradientFrameRadialCorners );
+
+	#if 0
+		// debugging: use high contrast colours
+		static const D2D1_COLOR_F s_debugColors[] = { ToColor( color::Red, 90 ), ToColor( color::Yellow, 80 ), ToColor( color::BrightGreen, 70 ) };
+		pAccentFrameGadget->SetColors( ARRAY_PAIR( s_debugColors ) );
+		pAccentFrameGadget->SetFrameSize( 10 );
+		pAccentFrameGadget->SetFrameStyle( OutlineGradientFrame );
+	#endif
+
+		return pAccentFrameGadget;
 	}
 
 	CWicImage* CImageRenderTarget::GetImage( void ) const
@@ -247,36 +268,22 @@ namespace d2d
 			m_animTimer.Stop();
 		}
 
-		m_pImageInfoText->BuildInfo();
-
-		if ( ID2D1RenderTarget* pRenderTarget = GetRenderTarget() )
-			m_pImageInfoText->MakeTextLayout( pRenderTarget );
+		m_pImageInfoGadget->BuildInfo();
 	}
 
 
-	void CImageRenderTarget::DiscardResources( void )
+	void CImageRenderTarget::DiscardDeviceResources( void )
 	{
-		CWindowRenderTarget::DiscardResources();
+		__super::DiscardDeviceResources();
 
 		if ( m_pAnimComposer.get() != NULL )
 			m_pAnimComposer->Reset();
-
-		m_pImageInfoText->DiscardResources();
-		m_pAccentFrame->DiscardResources();
 	}
 
-	bool CImageRenderTarget::CreateResources( void )
+	bool CImageRenderTarget::CreateDeviceResources( void )
 	{
-		if ( !CWindowRenderTarget::CreateResources() )
+		if ( !__super::CreateDeviceResources() )
 			return false;
-
-		if ( ID2D1RenderTarget* pRenderTarget = GetRenderTarget() )
-		{
-			m_pImageInfoText->CreateResources( pRenderTarget );
-
-			if ( m_accentFrameColor != CLR_NONE )
-				m_pAccentFrame->CreateResources( pRenderTarget );
-		}
 
 		return NULL == m_pAnimComposer.get() || m_pAnimComposer->Create();
 	}
@@ -291,12 +298,26 @@ namespace d2d
 		m_animTimer.Stop();
 	}
 
-	void CImageRenderTarget::DrawBitmap( const CViewCoords& coords )
+	bool CImageRenderTarget::IsGadgetVisible( const IGadgetComponent* pGadget ) const
+	{
+		if ( m_pZoomView->HasViewStatusFlag( CBaseZoomView::ZoomMouseTracking ) )			// don't show the text info in zoom tracking mode
+			return false;
+
+		if ( pGadget == m_pAccentFrameGadget.get() )
+			if ( m_pZoomView->HasViewStatusFlag( CBaseZoomView::FullScreen ) )				// we use background highlighting in full-screen mode
+				return false;
+			else if ( !m_pZoomView->IsAccented() )
+				return false;
+
+		return __super::IsGadgetVisible( pGadget );
+	}
+
+	void CImageRenderTarget::DrawBitmap( const CViewCoords& coords, const CBitmapCoords& bmpCoords )
 	{
 		if ( m_pAnimComposer.get() != NULL )
-			m_pAnimComposer->DrawBitmap( coords );			// draw current animated frame
+			m_pAnimComposer->DrawBitmap( coords, bmpCoords );			// draw current animated frame
 		else
-			__super::DrawBitmap( coords );					// draw static image
+			__super::DrawBitmap( coords, bmpCoords );					// draw static image
 	}
 
 	void CImageRenderTarget::PreDraw( const CViewCoords& coords )
@@ -309,33 +330,19 @@ namespace d2d
 				bkColor = CBaseZoomView::MakeAccentedBkColor( bkColor );					// use accented background highlight
 
 		ClearBackground( bkColor );
-	}
 
-	void CImageRenderTarget::PostDraw( const CViewCoords& coords )
-	{
-		enum { FrameSize = 50 };
-
-		ID2D1RenderTarget* pRenderTarget = GetRenderTarget();
-
-		if ( !m_pZoomView->HasViewStatusFlag( CBaseZoomView::ZoomMouseTracking ) )			// don't show the text info in zoom tracking mode
-			if ( m_pImageInfoText.get() != NULL )
-				if ( m_pImageInfoText->IsValid() )
-					m_pImageInfoText->DrawImageInfoText( pRenderTarget, coords );
-
-		if ( !m_pZoomView->HasViewStatusFlag( CBaseZoomView::FullScreen | CBaseZoomView::ZoomMouseTracking ) )		// don't show the frame in zoom tracking mode
-			if ( m_pZoomView->IsAccented() )
-				m_pAccentFrame->Draw( pRenderTarget, coords.m_contentRect );
+		__super::PreDraw( coords );			// erase the gadgets
 	}
 
 
-	bool CImageRenderTarget::DrawImage( const CViewCoords& coords )
+	bool CImageRenderTarget::DrawImage( const CViewCoords& coords, const CBitmapCoords& bmpCoords )
 	{
 		if ( !CanRender() )
 			return false;				// window is occluded
 
 		SetupCurrentImage();
 
-		return RenderDone == Render( coords );
+		return RenderDone == Render( coords, bmpCoords );
 	}
 
 } //namespace d2d
@@ -398,7 +405,7 @@ void CImageZoomViewD2D::OnDraw( CDC* pDC )
 	}
 	else if ( m_pImageRT.get() != NULL )
 	{
-		m_pImageRT->EnsureResources();
+		m_pImageRT->EnsureDeviceResources();
 
 		if ( m_pImageRT->IsValidTarget() )
 		{
@@ -407,9 +414,10 @@ void CImageZoomViewD2D::OnDraw( CDC* pDC )
 			m_drawTraits.SetScrollPos( scrollPos );												// apply translation transform according to view's scroll position
 			m_drawTraits.SetAutoInterpolationMode( GetContentRect().Size(), GetSourceSize() );	// force smooth mode when shrinking bitmap
 
-			d2d::CViewCoords viewCoords( m_drawTraits, _GetClientRect(), GetContentRect() );
+			d2d::CViewCoords viewCoords( _GetClientRect(), GetContentRect() );
+			d2d::CBitmapCoords bmpCoords( m_drawTraits );
 
-			m_pImageRT->DrawImage( viewCoords );
+			m_pImageRT->DrawImage( viewCoords, bmpCoords );
 		}
 	}
 }
@@ -429,7 +437,7 @@ int CImageZoomViewD2D::OnCreate( CREATESTRUCT* pCreateStruct )
 		return -1;
 
 	m_pImageRT.reset( new d2d::CImageRenderTarget( this ) );
-	m_pImageRT->CreateResources();
+	m_pImageRT->CreateDeviceResources();
 	return 0;
 }
 

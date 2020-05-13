@@ -21,7 +21,7 @@ namespace d2d
 		void Reset( void );
 		bool Create( void );
 
-		RenderResult DrawBitmap( const CViewCoords& coords );
+		RenderResult DrawBitmap( const CViewCoords& coords, const CBitmapCoords& bmpCoords );
 		void HandleAnimEvent( void );
 	private:
 		bool IsLastFrame( void ) const { return m_framePos == m_pAnimImage->GetFrameCount() - 1; }

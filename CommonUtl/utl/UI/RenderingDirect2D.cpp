@@ -423,27 +423,27 @@ namespace d2d
 	}
 
 
-	// CFrameFacet implementation
+	// CFrameGadget implementation
 
-	CFrameFacet::CFrameFacet( int frameSize, const D2D1_COLOR_F colors[], size_t count )
+	CFrameGadget::CFrameGadget( int frameSize, const D2D1_COLOR_F colors[], size_t count )
 		: m_frameSize( frameSize )
 		, m_colors( colors, colors + count )
 		, m_frameStyle( NoFrame )
 	{
 	}
 
-	CFrameFacet::~CFrameFacet()
+	CFrameGadget::~CFrameGadget()
 	{
 	}
 
-	void CFrameFacet::DiscardResources( void )
+	void CFrameGadget::DiscardDeviceResources( void )
 	{
 		m_pRenderFrame.reset();
 	}
 
-	bool CFrameFacet::CreateResources( ID2D1RenderTarget* pRenderTarget )
+	bool CFrameGadget::CreateDeviceResources( void )
 	{
-		DiscardResources();
+		ID2D1RenderTarget* pRenderTarget = GetHostRenderTarget();
 
 		CComPtr< ID2D1GradientStopCollection > pGradientStops;
 
@@ -478,10 +478,15 @@ namespace d2d
 		return m_pRenderFrame->IsValid();
 	}
 
-	void CFrameFacet::Draw( ID2D1RenderTarget* pRenderTarget, const RECT& boundsRect )
+	bool CFrameGadget::IsValid( void ) const
+	{
+		return GetRenderFrame() != NULL && GetRenderFrame()->IsValid();;
+	}
+
+	void CFrameGadget::Draw( const CViewCoords& coords )
 	{
 		if ( IsValid() )
-			m_pRenderFrame->Draw( pRenderTarget, boundsRect );
+			m_pRenderFrame->Draw( GetHostRenderTarget(), coords.m_contentRect );
 	}
 
 

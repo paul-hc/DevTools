@@ -193,12 +193,12 @@ namespace d2d
 		return SUCCEEDED( m_pFrameComposeRT->EndDraw() );
 	}
 
-	RenderResult CAnimatedFrameComposer::DrawBitmap( const CViewCoords& coords )
+	RenderResult CAnimatedFrameComposer::DrawBitmap( const CViewCoords& coords, const CBitmapCoords& bmpCoords )
 	{
 		if ( NULL == m_pFrameComposeRT )
 			return RenderError;
 
-		coords.m_dbmTraits.Draw( GetWndRenderTarget(), m_pFrameToRender, coords.m_contentRect, coords.m_pSrcBmpRect );
+		bmpCoords.m_dbmTraits.Draw( GetWndRenderTarget(), m_pFrameToRender, coords.m_contentRect, bmpCoords.m_pSrcBmpRect );
 		return RenderDone;
 	}
 

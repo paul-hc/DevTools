@@ -3,6 +3,7 @@
 #include "ImagingDirect2D.h"
 #include "ImagingWic.h"
 #include "GdiCoords.h"
+#include "utl/ContainerUtilities.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -55,7 +56,7 @@ namespace d2d
 		{
 			CComPtr< ID2D1SolidColorBrush > pBrush;
 			if ( HR_OK( pRenderTarget->CreateSolidColorBrush( ToColor( m_bkColor ), &pBrush ) ) )
-				pRenderTarget->FillRectangle( &destRectF, pBrush );				// clear image background
+				pRenderTarget->FillRectangle( &destRectF, pBrush );				// clear the image background (not the entire client rect)
 		}
 
 		if ( pBitmap != NULL )
@@ -78,26 +79,35 @@ namespace d2d
 
 	// CRenderTarget implementation
 
-	void CRenderTarget::OnFirstAddInternalChange( void )
+	bool CRenderTarget::CanRender( void ) const
 	{
-		if ( ID2D1RenderTarget* pRenderTarget = GetRenderTarget() )
-			pRenderTarget->BeginDraw();					// for window render target: window must not be occluded
+		return IsValidTarget();
 	}
 
-	void CRenderTarget::OnFinalReleaseInternalChange( void )
+	void CRenderTarget::AddGadget( IGadgetComponent* pGadget )
 	{
-		if ( ID2D1RenderTarget* pRenderTarget = GetRenderTarget() )
-			if ( D2DERR_RECREATE_TARGET == HR_AUDIT( pRenderTarget->EndDraw() ) )
-			{
-				// D2D device loss: display change, remoting, removal of video card, etc
-				TRACE( _T("** Direct 2D device loss **\n") );
-
-				DiscardResources();
-
-				if ( CWnd* pWnd = GetWindow() )
-					pWnd->Invalidate( TRUE );			// device loss: force a re-render
-			}
+		ASSERT_PTR( pGadget );
+		utl::PushUnique( m_gadgets, pGadget );
+		checked_static_cast< CGadgetBase* >( pGadget )->SetRenderHost( this );
 	}
+
+	bool CRenderTarget::IsGadgetVisible( const IGadgetComponent* pGadget ) const
+	{
+		ASSERT_PTR( pGadget );
+		return pGadget->IsValid();
+	}
+
+	void CRenderTarget::DiscardDeviceResources( void )
+	{
+		utl::for_each( m_gadgets, std::mem_fun( &IGadgetComponent::DiscardDeviceResources ) );
+	}
+
+	bool CRenderTarget::CreateDeviceResources( void )
+	{
+		utl::for_each( m_gadgets, std::mem_fun( &IGadgetComponent::CreateDeviceResources ) );
+		return true;
+	}
+
 
 	bool CRenderTarget::SetWicBitmap( IWICBitmapSource* pWicBitmap )
 	{
@@ -118,15 +128,36 @@ namespace d2d
 		return m_pBitmap;
 	}
 
+	void CRenderTarget::OnFirstAddInternalChange( void )
+	{
+		if ( ID2D1RenderTarget* pRenderTarget = GetRenderTarget() )
+			pRenderTarget->BeginDraw();					// for window render target: window must not be occluded
+	}
+
+	void CRenderTarget::OnFinalReleaseInternalChange( void )
+	{
+		if ( ID2D1RenderTarget* pRenderTarget = GetRenderTarget() )
+			if ( D2DERR_RECREATE_TARGET == HR_AUDIT( pRenderTarget->EndDraw() ) )
+			{
+				// D2D device loss: display change, remoting, removal of video card, etc
+				TRACE( _T("** Direct 2D device loss **\n") );
+
+				DiscardDeviceResources();
+
+				if ( CWnd* pWnd = GetWindow() )
+					pWnd->Invalidate( TRUE );			// device loss: force a re-render
+			}
+	}
+
 	void CRenderTarget::ClearBackground( COLORREF bkColor )
 	{
 		if ( ID2D1RenderTarget* pRenderTarget = GetRenderTarget() )
 			pRenderTarget->Clear( ToColor( bkColor ) );
 	}
 
-	RenderResult CRenderTarget::Render( const CViewCoords& coords )
+	RenderResult CRenderTarget::Render( const CViewCoords& coords, const CBitmapCoords& bmpCoords )
 	{
-		EnsureResources();				// lazy render target (if not yet created or device lost)
+		EnsureDeviceResources();		// lazy render target (if not yet created or device lost)
 
 		if ( !CanRender() )
 			return RenderError;			// window is occluded
@@ -134,7 +165,7 @@ namespace d2d
 		CScopedDraw scopedDraw( this );
 
 		PreDraw( coords );
-		DrawBitmap( coords );
+		DrawBitmap( coords, bmpCoords );
 		PostDraw( coords );
 
 		if ( !IsValidTarget() )			// resources discarded?
@@ -143,9 +174,22 @@ namespace d2d
 		return RenderDone;
 	}
 
-	void CRenderTarget::DrawBitmap( const CViewCoords& coords )
+	void CRenderTarget::DrawBitmap( const CViewCoords& coords, const CBitmapCoords& bmpCoords )
 	{
-		coords.m_dbmTraits.Draw( GetRenderTarget(), GetBitmap(), coords.m_contentRect, coords.m_pSrcBmpRect );
+		bmpCoords.m_dbmTraits.Draw( GetRenderTarget(), GetBitmap(), coords.m_contentRect, bmpCoords.m_pSrcBmpRect );
+	}
+
+	void CRenderTarget::PreDraw( const CViewCoords& coords )
+	{
+		for ( std::vector< IGadgetComponent* >::const_iterator itGadget = m_gadgets.begin(); itGadget != m_gadgets.end(); ++itGadget )
+			( *itGadget )->EraseBackground( coords );
+	}
+
+	void CRenderTarget::PostDraw( const CViewCoords& coords )
+	{
+		for ( std::vector< IGadgetComponent* >::const_iterator itGadget = m_gadgets.begin(); itGadget != m_gadgets.end(); ++itGadget )
+			if ( IsGadgetVisible( *itGadget ) )
+				( *itGadget )->Draw( coords );
 	}
 
 
@@ -155,7 +199,7 @@ namespace d2d
 	{
 		if ( !HR_OK( m_pWndRenderTarget->Resize( ToSizeU( clientSize ) ) ) )			// IMP: if couldn't resize, release the device and we'll recreate it during the next render pass
 		{
-			DiscardResources();
+			DiscardDeviceResources();
 			return false;
 		}
 		return true;
@@ -168,45 +212,49 @@ namespace d2d
 		return Resize( clientRect.Size() );
 	}
 
-	void CWindowRenderTarget::DiscardResources( void )
+	void CWindowRenderTarget::DiscardDeviceResources( void )
 	{
+		__super::DiscardDeviceResources();
+
 		m_pWndRenderTarget = NULL;
 		ReleaseBitmap();
 	}
 
-	bool CWindowRenderTarget::CreateResources( void )
+	bool CWindowRenderTarget::CreateDeviceResources( void )
 	{
 		ASSERT_NULL( m_pWndRenderTarget );
 
 		CRect clientRect;
 		m_pWnd->GetClientRect( &clientRect );
 
-		D2D1_RENDER_TARGET_PROPERTIES rtProps = D2D1::RenderTargetProperties();
+		D2D1_RENDER_TARGET_PROPERTIES rtProperties = D2D1::RenderTargetProperties();
 
 		// use the screen DPI to allow direct mapping between image pixels and desktop pixels in different system DPI settings
-		CFactory::Factory()->GetDesktopDpi( &rtProps.dpiX, &rtProps.dpiY );		// usually 96 DPI
+		CFactory::Factory()->GetDesktopDpi( &rtProperties.dpiX, &rtProperties.dpiY );		// usually 96 DPI
 
-		return HR_OK( CFactory::Factory()->CreateHwndRenderTarget(
-			rtProps,
-			D2D1::HwndRenderTargetProperties( m_pWnd->GetSafeHwnd(), ToSizeU( clientRect.Size() ) ),
-			&m_pWndRenderTarget ) );
+		if ( !HR_OK( CFactory::Factory()->CreateHwndRenderTarget( rtProperties,
+																  D2D1::HwndRenderTargetProperties( m_pWnd->GetSafeHwnd(), ToSizeU( clientRect.Size() ) ),
+																  &m_pWndRenderTarget ) ) )
+			return false;
+
+		return __super::CreateDeviceResources();
 	}
 
 	bool CWindowRenderTarget::CanRender( void ) const
 	{
-		return IsValidTarget() && !HasFlag( m_pWndRenderTarget->CheckWindowState(), D2D1_WINDOW_STATE_OCCLUDED );
+		return __super::CanRender() && !HasFlag( m_pWndRenderTarget->CheckWindowState(), D2D1_WINDOW_STATE_OCCLUDED );
 	}
 
 
 	// CDCRenderTarget implementation
 
-	void CDCRenderTarget::DiscardResources( void )
+	void CDCRenderTarget::DiscardDeviceResources( void )
 	{
 		m_pDcRenderTarget = NULL;
 		ReleaseBitmap();
 	}
 
-	bool CDCRenderTarget::CreateResources( void )
+	bool CDCRenderTarget::CreateDeviceResources( void )
 	{
 		ASSERT_NULL( m_pDcRenderTarget );
 
@@ -217,26 +265,29 @@ namespace d2d
 		float dpiX, dpiY;
 		CFactory::Factory()->GetDesktopDpi( &dpiX, &dpiY );			// usually 96 DPI
 
-		D2D1_RENDER_TARGET_PROPERTIES rtProps = D2D1::RenderTargetProperties(
+		D2D1_RENDER_TARGET_PROPERTIES rtProperties = D2D1::RenderTargetProperties(
 			D2D1_RENDER_TARGET_TYPE_DEFAULT,
 			D2D1::PixelFormat( DXGI_FORMAT_B8G8R8A8_UNORM, D2D1_ALPHA_MODE_IGNORE ),			// required for GDI rendering
 			dpiX, dpiY,
 			D2D1_RENDER_TARGET_USAGE_NONE,
 			D2D1_FEATURE_LEVEL_DEFAULT );
 
-		return
-			HR_OK( CFactory::Factory()->CreateDCRenderTarget( &rtProps, &m_pDcRenderTarget ) ) &&
-			Resize( clientRect );
+		if ( HR_OK( CFactory::Factory()->CreateDCRenderTarget( &rtProperties, &m_pDcRenderTarget ) ) )
+			if ( Resize( clientRect ) )
+				return true;
+
+		return false;
 	}
 
 	bool CDCRenderTarget::Resize( const RECT& subRect )
 	{
 		ASSERT_PTR( m_pDC->GetSafeHdc() );
 
-		EnsureResources();				// lazy render target (if not yet created or device lost)
+		EnsureDeviceResources();			// lazy render target (if not yet created or device lost)
+
 		if ( !HR_OK( m_pDcRenderTarget->BindDC( m_pDC->GetSafeHdc(), &subRect ) ) )			// bind the DC to the render target
 		{	// IMP: if couldn't resize, release the device and we'll recreate it during the next render pass
-			DiscardResources();
+			DiscardDeviceResources();
 			return false;
 		}
 		return true;
