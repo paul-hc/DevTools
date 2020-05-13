@@ -486,6 +486,14 @@ namespace word
 		return pos;
 	}
 
+	bool IsAlphaNumericWord( const std::tstring& text, const std::locale& loc /*= str::GetUserLocale()*/ )
+	{
+		return
+			!text.empty() &&
+			WordStart == GetWordStatus( text, 0, loc ) &&
+			FindNextWordBreak( text, 0, loc ) > 0;
+	}
+
 } //namespace word
 
 

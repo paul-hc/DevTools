@@ -19,7 +19,7 @@ namespace code
 		~CppImplementationFormatter();
 
 		// operations
-		CString extractTypeDescriptor( const TCHAR* functionImplLine, const TCHAR* docFileExt );
+		CString extractTypeDescriptor( const TCHAR* functionImplLine, const TCHAR* pDocFilename );
 		CString implementMethodBlock( const TCHAR* methodPrototypes, const TCHAR* typeDescriptor, bool isInline ) throws_( mfc::CRuntimeException );
 
 		CString autoMakeCode( const TCHAR* codeText );
@@ -34,7 +34,7 @@ namespace code
 
 		CString implementMethod( const TCHAR* methodPrototype, const TCHAR* templateDecl,
 								 const TCHAR* typeQualifier, bool isInline );
-		CString inputDocTypeDescriptor( const TCHAR* docFileExt ) const;
+		CString inputDocTypeDescriptor( const TCHAR* pDocFilename ) const;
 		void splitTypeDescriptor( CString& templateDecl, CString& typeQualifier, const TCHAR* typeDescriptor ) const throws_( mfc::CRuntimeException );
 
 		CString makeIteratorLoop( const TCHAR* codeText, bool isConstIterator ) throws_( mfc::CRuntimeException );
@@ -46,5 +46,6 @@ namespace code
 		CString m_commentDecorationTemplate;
 	};
 }
+
 
 #endif // CppImplementationFormatter_h

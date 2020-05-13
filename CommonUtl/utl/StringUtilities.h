@@ -435,6 +435,8 @@ namespace word
 	WordStatus GetWordStatus( const std::tstring& text, size_t pos, const std::locale& loc = str::GetUserLocale() );
 	size_t FindPrevWordBreak( const std::tstring& text, size_t pos, const std::locale& loc = str::GetUserLocale() );
 	size_t FindNextWordBreak( const std::tstring& text, size_t pos, const std::locale& loc = str::GetUserLocale() );
+
+	bool IsAlphaNumericWord( const std::tstring& text, const std::locale& loc = str::GetUserLocale() );
 }
 
 

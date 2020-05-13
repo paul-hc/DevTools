@@ -14,6 +14,8 @@
 #include "ModuleSession.h"
 #include "Application.h"
 #include "resource.h"
+#include "utl/StringUtilities.h"
+#include "utl/UI/Clipboard.h"
 #include "utl/UI/MenuUtilities.h"
 
 #ifdef _DEBUG
@@ -143,7 +145,7 @@ namespace code
 			"MyClass::"
 			"MyClass::NestedClass::"
 	*/
-	CString CppImplementationFormatter::extractTypeDescriptor( const TCHAR* functionImplLine, const TCHAR* docFileExt )
+	CString CppImplementationFormatter::extractTypeDescriptor( const TCHAR* functionImplLine, const TCHAR* pDocFilename )
 	{
 		resetInternalState();
 
@@ -162,7 +164,7 @@ namespace code
 
 		if ( typeQualifier.IsEmpty() )
 		{
-			CString userTypeDescriptor = inputDocTypeDescriptor( docFileExt );
+			CString userTypeDescriptor = inputDocTypeDescriptor( pDocFilename );
 
 			if ( userTypeDescriptor == m_cancelTag )
 				return userTypeDescriptor; // canceled by user
@@ -376,25 +378,42 @@ namespace code
 		}
 	}
 
-	CString CppImplementationFormatter::inputDocTypeDescriptor( const TCHAR* docFileExt ) const
+	CString CppImplementationFormatter::inputDocTypeDescriptor( const TCHAR* pDocFilename ) const
 	{
-		ASSERT( m_docLanguage == DocLang_Cpp );
+		ASSERT( DocLang_Cpp == m_docLanguage );
 
-		CString docTypeQualifier;
+		ide::CScopedWindow scopedIDE;
 
-		if ( docFileExt != NULL && docFileExt[ 0 ] != _T('\0') )
+		std::tstring docTypeQualifier;
+		if ( !str::IsEmpty( pDocFilename ) )
 		{
-			TCHAR fname[ _MAX_FNAME ];
+			std::tstring fname = fs::CPath( pDocFilename ).GetFname();
+			if ( !fname.empty() )
+				docTypeQualifier = str::Format( _T("%s%s::"), app::GetModuleSession().m_classPrefix.c_str(), fname.c_str() );
+		}
 
-			_tsplitpath( docFileExt, NULL, NULL, fname, NULL );
-			if ( fname[ 0 ] != _T('\0') )
-				docTypeQualifier.Format( _T("%s%s::"), app::GetModuleSession().m_classPrefix.c_str(), fname );
+		std::tstring clipTypeQualifier;
+		if ( CClipboard::CanPasteText() )
+		{
+			std::tstring clipText;
+			if ( CClipboard::PasteText( clipText, scopedIDE.GetMainWnd() ) )
+			{
+				str::Trim( clipText );
+				if ( word::IsAlphaNumericWord( clipText ) )
+				{
+					if ( !str::IsUpperMatch( clipText.c_str(), 2 ) )		// not a type-prefixed token?
+						clipTypeQualifier = app::GetModuleSession().m_classPrefix;
+
+					clipTypeQualifier += clipText + _T("::");
+				}
+			}
 		}
 
 		enum MenuCommand
 		{
 			cmdCancel = 0,
 			cmdUseDocQualifier = 789,
+			cmdUseClipboardQualifier,
 			cmdUseEmptyQualifier,
 			cmdUseCustomQualifier,
 		};
@@ -403,8 +422,11 @@ namespace code
 
 		typeChoiceMenu.CreatePopupMenu();
 
-		if ( !docTypeQualifier.IsEmpty() )
-			typeChoiceMenu.AppendMenu( MF_STRING, cmdUseDocQualifier, docTypeQualifier );
+		if ( !docTypeQualifier.empty() )
+			typeChoiceMenu.AppendMenu( MF_STRING, cmdUseDocQualifier, docTypeQualifier.c_str() );
+
+		if ( !clipTypeQualifier.empty() )
+			typeChoiceMenu.AppendMenu( MF_STRING, cmdUseClipboardQualifier, ( clipTypeQualifier + _T("\t(Paste)") ).c_str() );
 
 		typeChoiceMenu.AppendMenu( MF_STRING, cmdUseEmptyQualifier, _T("&Global Function (No Type Qualifier)") );
 		typeChoiceMenu.AppendMenu( MF_SEPARATOR, 0 );
@@ -414,18 +436,19 @@ namespace code
 
 		typeChoiceMenu.SetDefaultItem( cmdUseDocQualifier );
 
-		ide::CScopedWindow scopedIDE;
 		MenuCommand command = static_cast< MenuCommand >( scopedIDE.TrackPopupMenu( typeChoiceMenu, ide::GetMouseScreenPos() ) );
 
 		switch ( command )
 		{
 			case cmdUseDocQualifier:
-				return docTypeQualifier;
+				return docTypeQualifier.c_str();
+			case cmdUseClipboardQualifier:
+				return clipTypeQualifier.c_str();
 			case cmdUseEmptyQualifier:
 				break;
 			case cmdUseCustomQualifier:
 			{
-				CInputTypeQualifierDialog dlg( docTypeQualifier, scopedIDE.GetMainWnd() );
+				CInputTypeQualifierDialog dlg( docTypeQualifier.c_str(), scopedIDE.GetMainWnd() );
 				if ( dlg.DoModal() != IDCANCEL )
 					return dlg.m_typeQualifier;
 			}

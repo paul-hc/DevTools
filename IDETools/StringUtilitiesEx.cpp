@@ -428,6 +428,7 @@ namespace str
 										 : ( _tcsnicmp( pString + startPos, token, tokenLength ) == 0 );
 	}
 
+
 	int stringReplace( CString& rString, const TCHAR* match, const TCHAR* replacement,
 					   str::CaseType caseType /*= str::Case*/ )
 	{

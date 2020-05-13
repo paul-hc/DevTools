@@ -131,6 +131,31 @@ namespace str
 			? EqualsN( pLeft, pRight, count )
 			: EqualsIN( pLeft, pRight, count );
 	}
+
+
+	template< typename CharType >
+	bool IsUpperMatch( const CharType* pText, size_t count, const std::locale& loc = str::GetUserLocale() )
+	{
+		ASSERT_PTR( pText );
+
+		for ( size_t pos = 0; pos != count; ++pos )
+			if ( 0 == pText[ pos ] || !std::isupper( pText[ pos ], loc ) )
+				return false;
+
+		return count != 0;
+	}
+
+	template< typename CharType >
+	bool IsLowerMatch( const CharType* pText, size_t count, const std::locale& loc = str::GetUserLocale() )
+	{
+		ASSERT_PTR( pText );
+
+		for ( size_t pos = 0; pos != count; ++pos )
+			if ( 0 == pText[ pos ] || !std::islower( pText[ pos ], loc ) )
+				return false;
+
+		return count != 0;
+	}
 }
 
 
