@@ -25,6 +25,32 @@ CBaseZoomView::~CBaseZoomView()
 {
 }
 
+CScrollView* CBaseZoomView::GetScrollView( void )
+{
+	return this;
+}
+
+ui::ImageScalingMode CBaseZoomView::GetScalingMode( void ) const
+{
+	return m_scalingMode;
+}
+
+UINT CBaseZoomView::GetZoomPct( void ) const
+{
+	return m_zoomPct;
+}
+
+bool CBaseZoomView::IsAccented( void ) const
+{
+	return m_hWnd == ::GetFocus();
+}
+
+bool CBaseZoomView::HasViewStatusFlag( ui::TViewStatusFlag flag ) const
+{
+	return HasFlag( m_viewStatusFlags, flag );
+}
+
+
 void CBaseZoomView::ModifyScalingMode( ui::ImageScalingMode scalingMode )
 {
 	AssignScalingMode( scalingMode );
@@ -90,7 +116,7 @@ bool CBaseZoomView::ZoomRelative( ZoomBy zoomBy )
 		ModifyZoomPct( stdZoomPcts[ newPos ] );
 }
 
-bool CBaseZoomView::SetViewStatusFlag( TViewStatusFlag flag, bool on /*= true*/ )
+bool CBaseZoomView::SetViewStatusFlag( ui::TViewStatusFlag flag, bool on /*= true*/ )
 {
 	ASSERT_PTR( m_hWnd );
 	if ( HasFlag( m_viewStatusFlags, flag ) == on )
@@ -101,7 +127,7 @@ bool CBaseZoomView::SetViewStatusFlag( TViewStatusFlag flag, bool on /*= true*/ 
 	return true;
 }
 
-void CBaseZoomView::OnViewStatusChanged( TViewStatusFlag flag )
+void CBaseZoomView::OnViewStatusChanged( ui::TViewStatusFlag flag )
 {
 	flag;
 }
@@ -289,7 +315,7 @@ CScopedScaleZoom::CScopedScaleZoom( CBaseZoomView* pZoomView, ui::ImageScalingMo
 	, m_refPointedPct( m_pZoomView->GetContentPointedPct( pClientPoint ) )
 	, m_changed( scalingMode != m_oldScalingMode || zoomPct != m_oldZoomPct )
 {
-	m_pZoomView->SetViewStatusFlag( CBaseZoomView::ZoomMouseTracking );
+	m_pZoomView->SetViewStatusFlag( ui::ZoomMouseTracking );
 	if ( m_changed )
 	{
 		m_pZoomView->SetScaleZoom( scalingMode, zoomPct );
@@ -300,7 +326,7 @@ CScopedScaleZoom::CScopedScaleZoom( CBaseZoomView* pZoomView, ui::ImageScalingMo
 
 CScopedScaleZoom::~CScopedScaleZoom()
 {
-	m_pZoomView->SetViewStatusFlag( CBaseZoomView::ZoomMouseTracking, false );
+	m_pZoomView->SetViewStatusFlag( ui::ZoomMouseTracking, false );
 	if ( m_changed )
 	{
 		m_pZoomView->SetScaleZoom( m_oldScalingMode, m_oldZoomPct );

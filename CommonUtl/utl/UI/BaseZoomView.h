@@ -4,12 +4,14 @@
 
 #include "InternalChange.h"
 #include "IZoomBar.h"
+#include "IImageZoomView.h"
 
 
 // scroll view with zomming that displays scaled content of the original source object (e.g. image)
 //
 abstract class CBaseZoomView : public CScrollView
 							 , public CInternalChange
+							 , public ui::IZoomView
 {
 protected:
 	CBaseZoomView( ui::ImageScalingMode scalingMode, UINT zoomPct );
@@ -20,9 +22,12 @@ protected:
 public:
 	using CScrollView::CenterOnPoint;
 
-	// pure interface
-	virtual CSize GetSourceSize( void ) const = 0;
-	virtual COLORREF GetBkColor( void ) const = 0;
+	// ui::IZoomView interface (partial)
+	virtual CScrollView* GetScrollView( void );
+	virtual ui::ImageScalingMode GetScalingMode( void ) const;
+	virtual UINT GetZoomPct( void ) const;
+	virtual bool IsAccented( void ) const;
+	virtual bool HasViewStatusFlag( ui::TViewStatusFlag flag ) const;
 
 	const CRect& GetContentRect( void ) const { return m_contentRect; }
 	const CRect& _GetClientRect( void ) const { return m_clientRect; }
@@ -44,25 +49,13 @@ public:
 	CPoint TranslatePointedPct( const CSize& pointedPct ) const;					// equivalent point after rescaling
 
 	// zoom editor
-	ui::ImageScalingMode GetScalingMode( void ) const { return m_scalingMode; }
 	void ModifyScalingMode( ui::ImageScalingMode scalingMode );
-
-	UINT GetZoomPct( void ) const { return m_zoomPct; }
 	bool ModifyZoomPct( UINT zoomPct );
 
 	void SetScaleZoom( ui::ImageScalingMode scalingMode, UINT zoomPct );
 
 	// view state
-	enum ViewStatusFlags
-	{
-		FullScreen			= BIT_FLAG( 0 ),
-		ZoomMouseTracking	= BIT_FLAG( 1 )
-	};
-	typedef int TViewStatusFlag;
-
-	bool HasViewStatusFlag( TViewStatusFlag flag ) const { return HasFlag( m_viewStatusFlags, flag ); }
-	bool SetViewStatusFlag( TViewStatusFlag flag, bool on = true );
-	virtual void OnViewStatusChanged( TViewStatusFlag flag );
+	bool SetViewStatusFlag( ui::TViewStatusFlag flag, bool on = true );
 
 	static COLORREF MakeAccentedBkColor( COLORREF bkColor );	// background highlighting (used in full screen)
 protected:
@@ -80,12 +73,13 @@ protected:
 	ui::IZoomBar* GetZoomBar( void ) const { return m_pZoomBar; }
 	void SetZoomBar( ui::IZoomBar* pZoomBar ) { m_pZoomBar = pZoomBar; }
 
-	TViewStatusFlag& RefViewStatusFlags( void ) { return m_viewStatusFlags; }
+	ui::TViewStatusFlag& RefViewStatusFlags( void ) { return m_viewStatusFlags; }
+	virtual void OnViewStatusChanged( ui::TViewStatusFlag flag );
 private:
 	ui::ImageScalingMode m_scalingMode;		// default auto image size (app::Slider_v4_0+)
 	UINT m_zoomPct;
 	ui::IZoomBar* m_pZoomBar;
-	TViewStatusFlag m_viewStatusFlags;
+	ui::TViewStatusFlag m_viewStatusFlags;
 
 	CRect m_clientRect;
 	CRect m_contentRect;

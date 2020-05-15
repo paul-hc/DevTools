@@ -2,7 +2,7 @@
 #define RenderingDirect2D_h
 #pragma once
 
-#include "ImagingDirect2D.h"
+#include "Direct2D.h"
 
 
 namespace d2d

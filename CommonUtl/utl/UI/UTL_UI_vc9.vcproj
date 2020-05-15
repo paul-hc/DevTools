@@ -619,14 +619,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\ImageZoomViewD2D.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\ImageZoomViewD2D.h"
-				>
-			</File>
-			<File
 				RelativePath=".\IProgressService.cpp"
 				>
 			</File>
@@ -915,6 +907,10 @@
 				</File>
 				<File
 					RelativePath=".\Icon.h"
+					>
+				</File>
+				<File
+					RelativePath=".\IImageZoomView.h"
 					>
 				</File>
 				<File
@@ -1639,6 +1635,22 @@
 				</File>
 				<File
 					RelativePath=".\DirectWrite.h"
+					>
+				</File>
+				<File
+					RelativePath=".\ImageInfoGadget.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\ImageInfoGadget.h"
+					>
+				</File>
+				<File
+					RelativePath=".\ImageZoomViewD2D.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\ImageZoomViewD2D.h"
 					>
 				</File>
 				<File

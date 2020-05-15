@@ -77,6 +77,14 @@ namespace dw
 		return NULL;
 	}
 
+    CComPtr< IDWriteTextLayout > CreateTextLayout( const std::tstring& text, IDWriteTextFormat* pFont, D2D_SIZE_F maxSize /*= d2d::GetScreenSize()*/ )
+    {
+		CComPtr< IDWriteTextLayout > pTextLayout;
+		if ( HR_OK( CTextFactory::Factory()->CreateTextLayout( text.c_str(), static_cast<UINT32>( text.length() ), pFont, maxSize.width, maxSize.height, &pTextLayout ) ) )
+			return pTextLayout;
+		return NULL;
+    }
+
 
 	D2D_SIZE_F GetBoundsSize( IDWriteTextLayout* pTextLayout )
 	{
@@ -121,7 +129,7 @@ namespace dw
 		D2D_SIZE_F screenSize = d2d::ToSizeF( ui::GetScreenSize() );
 
 		CComPtr< IDWriteTextLayout > pTextLayout;
-		if ( HR_OK( CTextFactory::Factory()->CreateTextLayout( text, length, pFont, screenSize.width, screenSize.height, &pTextLayout ) ) )
+		if ( HR_OK( CTextFactory::Factory()->CreateTextLayout( text, static_cast<UINT32>( length ), pFont, screenSize.width, screenSize.height, &pTextLayout ) ) )
 			return ComputeTextSize( pTextLayout );
 
 		return D2D1::SizeF();

@@ -2,7 +2,9 @@
 #include "stdafx.h"
 #include "WicImage.h"
 #include "WicAnimatedImage.h"
+#include "GdiCoords.h"
 #include "StructuredStorage.h"
+#include "StringUtilities.h"
 #include "TimeUtils.h"
 
 #ifdef _DEBUG
@@ -145,6 +147,47 @@ std::tstring CWicImage::FormatDbg( void ) const
 }
 
 #endif // _DEBUG
+
+
+namespace ui
+{
+	// CImageFileDetails implementation
+
+	void CImageFileDetails::Reset( const CWicImage* pImage /*= NULL*/ )
+	{
+		m_filePath.Clear();
+		m_isAnimated = false;
+		m_framePos = m_frameCount = m_fileSize = m_navigPos = m_navigCount = 0;
+		m_dimensions = CSize( 0, 0 );
+
+		if ( pImage != NULL )
+		{
+			m_filePath = pImage->GetImagePath();
+			m_isAnimated = pImage->IsAnimated();
+			m_framePos = pImage->GetFramePos();
+			m_frameCount = pImage->GetFrameCount();
+			m_navigCount = 1;
+		}
+	}
+
+	double CImageFileDetails::GetMegaPixels( void ) const
+	{
+		return num::ConvertFileSize( ui::GetSizeArea( m_dimensions ), num::MegaBytes ).first;
+	}
+
+	bool CImageFileDetails::operator==( const CImageFileDetails& right ) const
+	{
+		return
+			m_filePath == right.m_filePath &&
+			m_isAnimated == right.m_isAnimated &&
+			m_framePos == right.m_framePos &&
+			m_frameCount == right.m_frameCount &&
+			m_fileSize == right.m_fileSize &&
+			m_dimensions == right.m_dimensions &&
+			m_navigPos == right.m_navigPos &&
+			m_navigCount == right.m_navigCount;
+	}
+}
 
 
 namespace fs

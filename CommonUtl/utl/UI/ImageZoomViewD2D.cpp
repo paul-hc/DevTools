@@ -5,11 +5,10 @@
 #include "DirectWrite.h"
 #include "AnimatedFrameComposer.h"
 #include "RenderingDirect2D.h"
-#include "Color.h"
+#include "ImageInfoGadget.h"
 #include "GdiCoords.h"
 #include "WicAnimatedImage.h"
 #include "WicDibSection.h"			// for printing
-#include "Utilities.h"
 #include "StringUtilities.h"
 #include "utl/FileSystem.h"
 
@@ -18,199 +17,19 @@
 #endif
 
 
-namespace ui
-{
-	void CImageFileDetails::Reset( const CWicImage* pImage /*= NULL*/ )
-	{
-		m_filePath.Clear();
-		m_isAnimated = false;
-		m_framePos = m_frameCount = m_fileSize = m_navigPos = m_navigCount = 0;
-		m_dimensions = CSize( 0, 0 );
-
-		if ( pImage != NULL )
-		{
-			m_filePath = pImage->GetImagePath();
-			m_isAnimated = pImage->IsAnimated();
-			m_framePos = pImage->GetFramePos();
-			m_frameCount = pImage->GetFrameCount();
-			m_navigCount = 1;
-		}
-	}
-
-	double CImageFileDetails::GetMegaPixels( void ) const
-	{
-		return num::ConvertFileSize( ui::GetSizeArea( m_dimensions ), num::MegaBytes ).first;
-	}
-}
-
-
-namespace d2d
-{
-	class CImageInfoGadget : public CGadgetBase
-	{
-	public:
-		CImageInfoGadget( CImageZoomViewD2D* pZoomView, IDWriteTextFormat* pInfoFont );
-		~CImageInfoGadget() {}
-
-		void BuildInfo( void );
-
-		// IDeviceComponent interface
-		virtual void DiscardDeviceResources( void );
-		virtual bool CreateDeviceResources( void );
-
-		// IGadgetComponent interface
-		virtual bool IsValid( void ) const;
-		virtual void Draw( const CViewCoords& coords );
-	private:
-		bool MakeTextLayout( void );
-	private:
-		CImageZoomViewD2D* m_pZoomView;
-		ui::CImageFileDetails m_info;
-
-		// device-independent
-		CComPtr< IDWriteTextFormat > m_pInfoFont;
-
-		// text rendering resources
-		CComPtr< ID2D1Brush > m_pBkBrush;
-		CComPtr< ID2D1Brush > m_pTextBrush;
-		CComPtr< ID2D1Brush > m_pDimensionsBrush;
-		CComPtr< ID2D1Brush > m_pNavigBrush;
-
-		CComPtr< IDWriteTextLayout > m_pTextLayout;
-	};
-
-
-	// CImageInfoGadget implementation
-
-	CImageInfoGadget::CImageInfoGadget( CImageZoomViewD2D* pZoomView, IDWriteTextFormat* pInfoFont )
-		: m_pZoomView( pZoomView )
-		, m_pInfoFont( pInfoFont )
-	{
-		ASSERT_PTR( m_pZoomView );
-		ASSERT_PTR( m_pInfoFont );
-	}
-
-	void CImageInfoGadget::DiscardDeviceResources( void )
-	{
-		m_pBkBrush = NULL;
-		m_pTextBrush = NULL;
-		m_pDimensionsBrush = NULL;
-		m_pNavigBrush = NULL;
-
-		m_pTextLayout = NULL;
-	}
-
-	bool CImageInfoGadget::CreateDeviceResources( void )
-	{
-		ID2D1RenderTarget* pRenderTarget = GetHostRenderTarget();
-
-		// text drawing objects
-		enum { MyOliveGreen = RGB(204, 251, 93) };
-
-		CreateAsSolidBrush( m_pBkBrush, pRenderTarget, ToColor( color::VeryDarkGrey, 50 ) );
-		CreateAsSolidBrush( m_pTextBrush, pRenderTarget, ToColor( color::BrightGreen, 100 ) );
-		CreateAsSolidBrush( m_pDimensionsBrush, pRenderTarget, ToColor( MyOliveGreen, 90 ) );
-		CreateAsSolidBrush( m_pNavigBrush, pRenderTarget, ToColor( color::LightOrange ) );
-
-		if ( m_info.IsValid() )
-			MakeTextLayout();
-
-		return true;
-	}
-
-	void CImageInfoGadget::BuildInfo( void )
-	{
-		m_pZoomView->QueryImageFileDetails( m_info );
-
-		MakeTextLayout();
-	}
-
-	bool CImageInfoGadget::MakeTextLayout( void )
-	{
-		m_pTextLayout = NULL;
-
-		ID2D1RenderTarget* pRenderTarget = GetHostRenderTarget();
-		ASSERT_PTR( pRenderTarget );
-
-		enum InfoField { FileName, Dimensions, NavigCounts, ZoomPercent,  _InfoFieldCount };
-
-		dw::CTextLayout textLayout( _InfoFieldCount, _T(" ") );		// effect ranges indexed by InfoField
-
-		textLayout.AddField( m_info.m_filePath.GetFilename() );
-
-		textLayout.AddField( str::Format( _T("(%d x %d = %.2f MP, %s)"),
-			m_info.m_dimensions.cx, m_info.m_dimensions.cy,
-			m_info.GetMegaPixels(),
-			num::FormatFileSize( m_info.m_fileSize ).c_str()
-		) );
-
-		textLayout.AddField( m_info.HasNavigInfo() ? str::Format( _T("[ %d / %d ]"), m_info.m_navigPos + 1, m_info.m_navigCount ) : str::GetEmpty() );
-		textLayout.AddField( str::Format( _T("%d %%"), m_pZoomView->GetZoomPct() ) );
-
-		D2D_SIZE_F boundsSize = ToSizeF( ui::GetScreenSize() );		// start with the entire screen
-
-		if ( !HR_OK( dw::CTextFactory::Factory()->CreateTextLayout( textLayout.GetFullText().c_str(), textLayout.GetFullTextLength(), m_pInfoFont, boundsSize.width, boundsSize.height, &m_pTextLayout ) ) )
-			return false;
-
-		// apply text effects
-		HR_VERIFY( m_pTextLayout->SetDrawingEffect( m_pDimensionsBrush, textLayout.GetFieldRangeAt( Dimensions ) ) );
-		HR_VERIFY( m_pTextLayout->SetFontWeight( DWRITE_FONT_WEIGHT_NORMAL, textLayout.GetFieldRangeAt( Dimensions ) ) );
-		HR_VERIFY( m_pTextLayout->SetDrawingEffect( m_pNavigBrush, textLayout.GetFieldRangeAt( NavigCounts ) ) );
-		HR_VERIFY( m_pTextLayout->SetFontWeight( DWRITE_FONT_WEIGHT_NORMAL, textLayout.GetFieldRangeAt( ZoomPercent ) ) );
-		return true;
-	}
-
-	bool CImageInfoGadget::IsValid( void ) const
-	{
-		return m_info.IsValid() && m_pTextLayout != NULL;
-	}
-
-	void CImageInfoGadget::Draw( const CViewCoords& coords )
-	{
-		if ( !IsValid() )
-			return;
-
-		ID2D1RenderTarget* pRenderTarget = GetHostRenderTarget();
-		ASSERT_PTR( pRenderTarget );
-		ASSERT_PTR( m_pTextLayout );
-
-		pRenderTarget->SetTransform( D2D1::IdentityMatrix() );
-
-		enum Metrics { EdgeH = 6, EdgeV = 3 };
-
-		CSize textSize = FromSizeF( dw::ComputeTextSize( m_pTextLayout ) );
-
-		CRect textRect = coords.m_clientRect;
-		textRect.DeflateRect( EdgeH, EdgeV );
-		textRect.top = textRect.bottom - textSize.cy;
-		textRect.right = textRect.left + textSize.cx;
-
-		CRect backgroundRect = textRect;
-		backgroundRect.InflateRect( 3, 1, 2, 2 );
-
-		static const float s_roundRadius = 3.0f;
-		D2D1_ROUNDED_RECT bkRoundRectF = { ToRectF( backgroundRect ), s_roundRadius, s_roundRadius };
-		pRenderTarget->FillRoundedRectangle( bkRoundRectF, m_pBkBrush );
-
-		D2D1_POINT_2F textOrigin = ToPointF( textRect.TopLeft() );
-		pRenderTarget->DrawTextLayout( textOrigin, m_pTextLayout, m_pTextBrush );
-	}
-}
-
-
 namespace d2d
 {
 	// CImageRenderTarget implementation
 
-	CImageRenderTarget::CImageRenderTarget( CImageZoomViewD2D* pZoomView )
-		: CWindowRenderTarget( pZoomView )
-		, m_pZoomView( pZoomView )
-		, m_accentFrameColor( ::GetSysColor( COLOR_ACTIVECAPTION ) )	//COLOR_HIGHLIGHT
-		, m_animTimer( m_pZoomView, AnimateTimer, 1000 )
-		, m_pImageInfoGadget( new d2d::CImageInfoGadget( m_pZoomView, dw::CreateTextFormat( L"Arial" /*L"Calibri"*/, 10, DWRITE_FONT_WEIGHT_BOLD ) ) )
+	CImageRenderTarget::CImageRenderTarget( ui::IImageZoomView* pImageView )
+		: CWindowRenderTarget( pImageView->GetZoomView()->GetScrollView() )
+		, m_pImageView( pImageView )
+		, m_accentFrameColor( ::GetSysColor( COLOR_ACTIVECAPTION ) )	// COLOR_HIGHLIGHT
+		, m_animTimer( m_pImageView->GetZoomView()->GetScrollView(), AnimateTimer, 1000 )
+		, m_pImageInfoGadget( new d2d::CImageInfoGadget( m_pImageView, dw::CreateTextFormat( L"Arial" /*L"Calibri"*/, 10, DWRITE_FONT_WEIGHT_BOLD ) ) )
 		, m_pAccentFrameGadget( MakeAccentFrameGadget() )
 	{
-		ASSERT_PTR( m_pZoomView->GetSafeHwnd() );
+		ASSERT_PTR( m_pImageView->GetZoomView()->GetScrollView()->GetSafeHwnd() );
 
 		AddGadget( m_pImageInfoGadget.get() );
 		AddGadget( m_pAccentFrameGadget.get() );
@@ -240,7 +59,7 @@ namespace d2d
 
 	CWicImage* CImageRenderTarget::GetImage( void ) const
 	{
-		return m_pZoomView->GetImage();
+		return m_pImageView->GetImage();
 	}
 
 	void CImageRenderTarget::HandleAnimEvent( void )
@@ -300,13 +119,15 @@ namespace d2d
 
 	bool CImageRenderTarget::IsGadgetVisible( const IGadgetComponent* pGadget ) const
 	{
-		if ( m_pZoomView->HasViewStatusFlag( CBaseZoomView::ZoomMouseTracking ) )			// don't show the text info in zoom tracking mode
+		const ui::IZoomView* pZoomView = m_pImageView->GetZoomView();
+
+		if ( pZoomView->HasViewStatusFlag( ui::ZoomMouseTracking ) )			// don't show the text info in zoom tracking mode
 			return false;
 
 		if ( pGadget == m_pAccentFrameGadget.get() )
-			if ( m_pZoomView->HasViewStatusFlag( CBaseZoomView::FullScreen ) )				// we use background highlighting in full-screen mode
+			if ( pZoomView->HasViewStatusFlag( ui::FullScreen ) )				// we use background highlighting in full-screen mode
 				return false;
-			else if ( !m_pZoomView->IsAccented() )
+			else if ( !pZoomView->IsAccented() )
 				return false;
 
 		return __super::IsGadgetVisible( pGadget );
@@ -323,10 +144,11 @@ namespace d2d
 	void CImageRenderTarget::PreDraw( const CViewCoords& coords )
 	{
 		coords;
-		COLORREF bkColor = m_pZoomView->GetBkColor();
+		const ui::IZoomView* pZoomView = m_pImageView->GetZoomView();
+		COLORREF bkColor = pZoomView->GetBkColor();
 
-		if ( m_pZoomView->IsAccented() )
-			if ( m_pZoomView->HasViewStatusFlag( CBaseZoomView::FullScreen | CBaseZoomView::ZoomMouseTracking ) )
+		if ( pZoomView->IsAccented() )
+			if ( pZoomView->HasViewStatusFlag( ui::FullScreen | ui::ZoomMouseTracking ) )
 				bkColor = CBaseZoomView::MakeAccentedBkColor( bkColor );					// use accented background highlight
 
 		ClearBackground( bkColor );
@@ -365,9 +187,9 @@ CSize CImageZoomViewD2D::GetSourceSize( void ) const
 	return pImage != NULL ? pImage->GetBmpSize() : CSize( 0, 0 );
 }
 
-bool CImageZoomViewD2D::IsAccented( void ) const
+ui::IZoomView* CImageZoomViewD2D::GetZoomView( void )
 {
-	return false;
+	return this;
 }
 
 void CImageZoomViewD2D::PrintImageGdi( CDC* pPrintDC, CWicImage* pImage )

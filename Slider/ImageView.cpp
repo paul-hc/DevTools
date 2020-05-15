@@ -43,7 +43,7 @@ CImageView::CImageView( void )
 
 	SetZoomBar( app::GetMainFrame()->GetToolbar() );
 	SetScaleZoom( CWorkspace::GetData().m_scalingMode, 100 );
-	SetFlag( RefViewStatusFlags(), FullScreen, app::GetMainFrame()->IsFullScreen() );			// copy the actual FullScreen status
+	SetFlag( RefViewStatusFlags(), ui::FullScreen, app::GetMainFrame()->IsFullScreen() );			// copy the actual FullScreen status
 }
 
 CImageView::~CImageView()
@@ -82,26 +82,26 @@ void CImageView::SetBkColor( COLORREF bkColor, bool doRedraw /*= true*/ )
 		Invalidate();
 }
 
-bool CImageView::IsAccented( void ) const
+CWicImage* CImageView::GetImage( void ) const
 {
-	return m_hWnd == ::GetFocus();
+	return GetDocument()->GetImage();
 }
 
-void CImageView::QueryImageFileDetails( ui::CImageFileDetails& rImageFileDetails ) const
+void CImageView::QueryImageFileDetails( ui::CImageFileDetails& rFileDetails ) const
 {
 	if ( CWicImage* pImage = GetImage() )
 	{
-		rImageFileDetails.Reset( pImage );
+		rFileDetails.Reset( pImage );
 
 		if ( !pImage->GetImagePath().IsComplexPath() )
-			rImageFileDetails.m_fileSize = static_cast< UINT >( fs::GetFileSize( pImage->GetImagePath().GetPtr() ) );
+			rFileDetails.m_fileSize = static_cast< UINT >( fs::GetFileSize( pImage->GetImagePath().GetPtr() ) );
 		else
-			rImageFileDetails.m_fileSize = 0;		// (!) must be overriden for embedded images
+			rFileDetails.m_fileSize = 0;		// (!) must be overriden for embedded images
 
-		rImageFileDetails.m_dimensions = CWicImageCache::Instance().LookupImageDim( pImage->GetKey() );
+		rFileDetails.m_dimensions = CWicImageCache::Instance().LookupImageDim( pImage->GetKey() );
 	}
 	else
-		rImageFileDetails.Reset();
+		rFileDetails.Reset();
 }
 
 const fs::ImagePathKey& CImageView::GetImagePathKey( void ) const
@@ -109,14 +109,9 @@ const fs::ImagePathKey& CImageView::GetImagePathKey( void ) const
 	return GetDocument()->m_imagePathKey;
 }
 
-CWicImage* CImageView::GetImage( void ) const
+CScrollView* CImageView::GetScrollView( void )
 {
-	return GetDocument()->GetImage();
-}
-
-CScrollView* CImageView::GetView( void )
-{
-	return this;
+	return BaseClass::GetScrollView();
 }
 
 void CImageView::RegainFocus( RegainAction regainAction, int ctrlId /*= 0*/ )
@@ -229,7 +224,7 @@ void CImageView::OnUpdate( CView* pSender, LPARAM lHint, CObject* pHint )
 	switch ( hint )
 	{
 		case Hint_ToggleFullScreen:
-			SetViewStatusFlag( FullScreen, CWorkspace::Instance().IsFullScreen() );
+			SetViewStatusFlag( ui::FullScreen, CWorkspace::Instance().IsFullScreen() );
 			break;
 		case Hint_AlbumModelChanged:
 			break;

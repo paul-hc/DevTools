@@ -2,41 +2,10 @@
 #define ImageZoomViewD2D_h
 #pragma once
 
-#include "utl/FlexPath.h"
 #include "BaseZoomView.h"
 #include "ImagingDirect2D.h"
 #include "WindowTimer.h"
-
-
-class CWicImage;
-
-
-namespace ui
-{
-	struct CImageFileDetails
-	{
-		CImageFileDetails( void ) { Reset(); }
-
-		void Reset( const CWicImage* pImage = NULL );
-
-		bool IsValid( void ) const { return !m_filePath.IsEmpty(); }
-		bool HasNavigInfo( void ) const { return m_navigCount > 1; }
-		double GetMegaPixels( void ) const;
-	public:
-		fs::CFlexPath m_filePath;
-		bool m_isAnimated;
-		UINT m_framePos;
-		UINT m_frameCount;
-		UINT m_fileSize;
-		CSize m_dimensions;
-
-		UINT m_navigPos;
-		UINT m_navigCount;
-	};
-}
-
-
-class CImageZoomViewD2D;
+#include "IImageZoomView.h"
 
 
 namespace d2d
@@ -52,7 +21,7 @@ namespace d2d
 	{
 		enum { AnimateTimer = 321 };
 	public:
-		CImageRenderTarget( CImageZoomViewD2D* pZoomView );
+		CImageRenderTarget( ui::IImageZoomView* pImageView );
 		~CImageRenderTarget();
 
 		// base overrides
@@ -76,7 +45,7 @@ namespace d2d
 
 		CWicImage* GetImage( void ) const;
 	private:
-		CImageZoomViewD2D* m_pZoomView;
+		ui::IImageZoomView* m_pImageView;
 		COLORREF m_accentFrameColor;
 		std::auto_ptr< CAnimatedFrameComposer > m_pAnimComposer;	// animated frame composition
 		CWindowTimer m_animTimer;
@@ -91,21 +60,20 @@ namespace d2d
 // scroll view with zomming that displays still or animated WIC images using Direct 2D rendering
 //
 abstract class CImageZoomViewD2D : public CBaseZoomView
+								 , public ui::IImageZoomView
 {
 protected:
 	CImageZoomViewD2D( void );
 	virtual ~CImageZoomViewD2D();
 public:
-	// overrideables
-	virtual CWicImage* GetImage( void ) const = 0;
-	virtual void QueryImageFileDetails( ui::CImageFileDetails& rImageFileDetails ) const = 0;
-	virtual bool IsAccented( void ) const;		// typically colour of the frame when focused
-
 	d2d::CDrawBitmapTraits& GetDrawParams( void ) { return m_drawTraits; }
 	d2d::CImageRenderTarget* GetImageRenderTarget( void ) { return m_pImageRT.get(); }
 protected:
-	// base overrides
+	// ui::IZoomView interface (partial)
 	virtual CSize GetSourceSize( void ) const;
+
+	// ui::IImageZoomView interface (partial)
+	virtual ui::IZoomView* GetZoomView( void );
 
 	bool IsValidRenderTarget( void ) const { return m_pImageRT.get() != NULL && m_pImageRT->IsValidTarget(); }
 	void PrintImageGdi( CDC* pPrintDC, CWicImage* pImage );

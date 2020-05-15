@@ -34,14 +34,17 @@ public:
 	// base overrides
 	virtual HICON GetDocTypeIcon( void ) const;
 	virtual CMenu& GetDocContextMenu( void ) const;
+
+	// ui::IScrollZoomView interface
 	virtual COLORREF GetBkColor( void ) const;
-	virtual void QueryImageFileDetails( ui::CImageFileDetails& rImageFileDetails ) const;
-	virtual bool IsAccented( void ) const;
+
+	// ui::IImageZoomView interface
+	virtual CWicImage* GetImage( void ) const;
+	virtual void QueryImageFileDetails( ui::CImageFileDetails& rFileDetails ) const;
 
 	// IImageView interface
 	virtual const fs::ImagePathKey& GetImagePathKey( void ) const;
-	virtual CWicImage* GetImage( void ) const;
-	virtual CScrollView* GetView( void );
+	virtual CScrollView* GetScrollView( void );
 	virtual void RegainFocus( RegainAction regainAction, int ctrlId = 0 );
 	virtual void EventChildFrameActivated( void );
 	virtual void EventNavigSliderPosChanged( bool thumbTracking );

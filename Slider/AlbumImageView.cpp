@@ -77,7 +77,7 @@ const fs::ImagePathKey& CAlbumImageView::GetImagePathKey( void ) const
 	return GetDocument()->GetImageFilePathAt( m_slideData.GetCurrentIndex() );
 }
 
-void CAlbumImageView::QueryImageFileDetails( ui::CImageFileDetails& rImageFileDetails ) const
+void CAlbumImageView::QueryImageFileDetails( ui::CImageFileDetails& rFileDetails ) const
 {
 	if ( CWicImage* pImage = GetImage() )
 	{
@@ -85,14 +85,14 @@ void CAlbumImageView::QueryImageFileDetails( ui::CImageFileDetails& rImageFileDe
 		int currIndex = m_slideData.GetCurrentIndex();
 		const CFileAttr* pFileAttr = pAlbumModel->GetFileAttr( currIndex );
 
-		rImageFileDetails.Reset( pImage );
-		rImageFileDetails.m_fileSize = pFileAttr->GetFileSize();
-		rImageFileDetails.m_dimensions = pFileAttr->GetImageDim();
-		rImageFileDetails.m_navigPos = currIndex;
-		rImageFileDetails.m_navigCount = pAlbumModel->GetFileAttrCount();
+		rFileDetails.Reset( pImage );
+		rFileDetails.m_fileSize = pFileAttr->GetFileSize();
+		rFileDetails.m_dimensions = pFileAttr->GetImageDim();
+		rFileDetails.m_navigPos = currIndex;
+		rFileDetails.m_navigCount = pAlbumModel->GetFileAttrCount();
 	}
 	else
-		__super::QueryImageFileDetails( rImageFileDetails );		// reset the details
+		__super::QueryImageFileDetails( rFileDetails );		// reset the details
 }
 
 CWicImage* CAlbumImageView::GetImage( void ) const

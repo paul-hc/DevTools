@@ -12,7 +12,7 @@ interface IImageView
 {
 	virtual const fs::ImagePathKey& GetImagePathKey( void ) const = 0;
 	virtual CWicImage* GetImage( void ) const = 0;
-	virtual CScrollView* GetView( void ) = 0;
+	virtual CScrollView* GetScrollView( void ) = 0;
 
 	enum RegainAction { Enter, Escape };
 	virtual void RegainFocus( RegainAction regainAction, int ctrlId = 0 ) = 0;

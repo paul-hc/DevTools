@@ -40,6 +40,9 @@ namespace dw
 												   DWRITE_FONT_STRETCH stretch = DWRITE_FONT_STRETCH_NORMAL,
 												   const wchar_t localeName[] = L"en-us" );
 
+    CComPtr< IDWriteTextLayout > CreateTextLayout( const std::tstring& text, IDWriteTextFormat* pFont, D2D_SIZE_F maxSize = d2d::GetScreenSize() );
+
+
 	D2D_SIZE_F GetBoundsSize( IDWriteTextLayout* pTextLayout );
 	D2D_SIZE_F ComputeTextSize( IDWriteTextLayout* pTextLayout );
 	D2D_SIZE_F ComputeOverhangTextSize( IDWriteTextLayout* pTextLayout );
@@ -64,7 +67,6 @@ namespace dw
 		void AddField( const std::tstring& fieldText, const TCHAR* pFieldSep = NULL );
 
 		const std::tstring& GetFullText( void ) const { return m_fullText; }
-		UINT GetFullTextLength( void ) const { return static_cast<UINT>( m_fullText.length() ); }
 
 		const DWRITE_TEXT_RANGE& GetFieldRangeAt( size_t field ) const { ASSERT( field < m_fieldRanges.size() ); return m_fieldRanges[ field ]; }
 	private:

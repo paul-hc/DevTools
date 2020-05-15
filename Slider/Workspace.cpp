@@ -272,7 +272,7 @@ void CWorkspace::FetchSettings( void )
 					if ( IImageView* pImageView = pChildFrame->GetImageView() )			// ensure not a print preview, etc
 					{
 						m_imageStates.push_back( CImageState() );
-						dynamic_cast< const CImageView* >( pChildFrame->GetImageView()->GetView() )->MakeImageState( &m_imageStates.back() );
+						dynamic_cast< const CImageView* >( pChildFrame->GetImageView()->GetScrollView() )->MakeImageState( &m_imageStates.back() );
 					}
 			}
 }

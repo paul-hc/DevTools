@@ -58,6 +58,34 @@ public:
 };
 
 
+namespace ui
+{
+	struct CImageFileDetails
+	{
+		CImageFileDetails( void ) { Reset(); }
+
+		void Reset( const CWicImage* pImage = NULL );
+
+		bool IsValid( void ) const { return !m_filePath.IsEmpty(); }
+		bool IsMultiFrameImage( void ) const { return m_frameCount > 1; }
+		bool HasNavigInfo( void ) const { return m_navigCount > 1; }
+		double GetMegaPixels( void ) const;
+
+		bool operator==( const CImageFileDetails& right ) const;
+	public:
+		fs::CFlexPath m_filePath;
+		bool m_isAnimated;
+		UINT m_framePos;
+		UINT m_frameCount;
+		UINT m_fileSize;
+		CSize m_dimensions;
+
+		UINT m_navigPos;
+		UINT m_navigCount;
+	};
+}
+
+
 #include "FilterStore.h"
 
 

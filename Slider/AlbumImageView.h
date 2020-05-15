@@ -32,7 +32,7 @@ public:
 	// base overrides
 	virtual HICON GetDocTypeIcon( void ) const;
 	virtual CMenu& GetDocContextMenu( void ) const;
-	virtual void QueryImageFileDetails( ui::CImageFileDetails& rImageFileDetails ) const;
+	virtual void QueryImageFileDetails( ui::CImageFileDetails& rFileDetails ) const;
 
 	// IImageView overrides
 	virtual const fs::ImagePathKey& GetImagePathKey( void ) const;

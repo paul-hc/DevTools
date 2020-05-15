@@ -28,6 +28,7 @@ namespace d2d
 namespace d2d
 {
 	D2D_SIZE_F GetScreenDpi( void );		// usually 96 DPI
+	D2D_SIZE_F GetScreenSize( void );		// for the monitor where the main window is located
 
 
 	// GDI -> D2D type conversions

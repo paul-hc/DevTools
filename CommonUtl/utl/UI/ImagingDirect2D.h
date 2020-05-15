@@ -8,9 +8,6 @@
 
 namespace d2d
 {
-	enum RenderResult { RenderDone, RenderError, DeviceLoss };
-
-
 	// renders a D2D bitmap to any type of render target (window, DC, etc)
 	//
 	struct CDrawBitmapTraits
@@ -56,6 +53,9 @@ namespace d2d
 
 namespace d2d
 {
+	enum RenderResult { RenderDone, RenderError, DeviceLoss };
+
+
 	abstract class CRenderTarget : public IRenderHostWindow
 								 , public IDeviceComponent
 								 , protected CInternalChange
@@ -64,7 +64,7 @@ namespace d2d
 	protected:
 		CRenderTarget( void ) {}
 	public:
-		// IRenderHost partial interface (assume no animation)
+		// IRenderHost partial interface
 		virtual bool CanRender( void ) const;
 		virtual void AddGadget( IGadgetComponent* pGadget );
 		virtual bool IsGadgetVisible( const IGadgetComponent* pGadget ) const;

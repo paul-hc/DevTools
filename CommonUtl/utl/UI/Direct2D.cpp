@@ -2,6 +2,7 @@
 #include "stdafx.h"
 #include "Direct2D.h"
 #include "BaseApp.h"
+#include "Utilities.h"
 #include <math.h>
 
 #pragma comment( lib, "d2d1" )		// link to Direct2D
@@ -50,6 +51,12 @@ namespace d2d
 		d2d::CFactory::Factory()->GetDesktopDpi( &dpiSize.width, &dpiSize.height );		// usually 96 DPI
 		return dpiSize;
 	}
+
+	D2D_SIZE_F GetScreenSize( void )
+	{	// for the monitor where the main window is located
+		return ToSizeF( ui::GetScreenSize() );
+	}
+
 
 	int GetCeiling( float number )
 	{

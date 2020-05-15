@@ -97,7 +97,7 @@ void CChildFrame::OnNcLButtonDblClk( UINT hitTest, CPoint point )
 		case HTBOTTOMLEFT:
 		case HTBOTTOMRIGHT:
 			if ( IImageView* pImageView = GetImageView() )
-				pImageView->GetView()->SendMessage( WM_COMMAND, ID_RESIZE_VIEW_TO_FIT );
+				pImageView->GetScrollView()->SendMessage( WM_COMMAND, ID_RESIZE_VIEW_TO_FIT );
 	}
 }
 
