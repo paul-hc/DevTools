@@ -3,6 +3,7 @@
 #include "MfcUtilities.h"
 #include "Path.h"
 #include "Serialization.h"
+#include "Utilities.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -172,5 +173,21 @@ namespace ui
 
 		TRACE( _T(" * Error saving document adapter file: %s\n"), GetPathName().GetString() );
 		return false;
+	}
+
+	void CAdapterDocument::ReportSaveLoadException( const TCHAR* pFilePath, CException* pExc, BOOL isSaving, UINT idDefaultPrompt )
+	{
+		if ( const CArchiveException* pArchiveExc = dynamic_cast< const CArchiveException* >( pExc ) )
+			switch ( pArchiveExc->m_cause )
+			{
+				case CArchiveException::badSchema:
+				case CArchiveException::badClass:
+				case CArchiveException::badIndex:
+				case CArchiveException::endOfFile:
+					ui::MessageBox( str::Format( _T("The loading binary file format is incompatible with current document schema version!\n\n%s"), pFilePath ) );
+					return;
+			}
+
+		__super::ReportSaveLoadException( pFilePath, pExc, isSaving, idDefaultPrompt );
 	}
 }

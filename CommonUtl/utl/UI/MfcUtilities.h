@@ -173,6 +173,8 @@ namespace ui
 
 		bool Load( void ) throws_();
 		bool Save( void ) throws_();
+
+		virtual void ReportSaveLoadException( const TCHAR* pFilePath, CException* pExc, BOOL isSaving, UINT idDefaultPrompt );
 	protected:
 		// base overrides
 		virtual void Serialize( CArchive& archive );
