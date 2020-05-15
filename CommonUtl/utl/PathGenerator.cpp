@@ -93,7 +93,7 @@ UINT CPathGenerator::FindNextAvailSeqCount( void ) const
 		fs::CPath dirPath = m_pRenamePairs->begin()->first.GetParentPath();			// use first source file dir path
 
 		std::vector< fs::CPath > existingFilePaths;
-		fs::EnumFiles( existingFilePaths, dirPath );
+		fs::EnumFilePaths( existingFilePaths, dirPath );
 
 		for ( std::vector< fs::CPath >::const_iterator itFilePath = existingFilePaths.begin(); itFilePath != existingFilePaths.end(); ++itFilePath )
 		{

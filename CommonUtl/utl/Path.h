@@ -287,6 +287,22 @@ namespace fs
 		return UniquifyPaths( rPaths, uniquePathIndex );
 	}
 
+
+	template< typename ContainerT, typename SrcContainerT >
+	size_t JoinUniquePaths( ContainerT& rDestPaths, const SrcContainerT& newPaths )
+	{
+		size_t oldCount = rDestPaths.size();
+
+		if ( oldCount + newPaths.size() < 100 )											// small total number?
+			return utl::JoinUnique( rDestPaths, newPaths.begin(), newPaths.end() );		// use linear unquifying
+
+		// many items optimization: add all and use hash unquifying
+		rDestPaths.insert( rDestPaths.end(), newPaths.begin(), newPaths.end() );
+		UniquifyPaths( rDestPaths );
+
+		return rDestPaths.size() - oldCount;		// added count
+	}
+
 } // namespace fs
 
 

@@ -278,8 +278,8 @@ namespace ut
 	std::tstring JoinSubDirs( const fs::CEnumerator& enumerator );
 
 	// enumeration with relative paths
-	size_t EnumFiles( std::vector< fs::CPath >& rFilePaths, const fs::CPath& dirPath, SortType sortType = SortAscending, const TCHAR* pWildSpec = _T("*"), RecursionDepth depth = Deep );
-	size_t EnumSubDirs( std::vector< fs::CPath >& rSubDirPaths, const fs::CPath& dirPath, SortType sortType = SortAscending, RecursionDepth depth = Deep );
+	size_t EnumFilePaths( std::vector< fs::CPath >& rFilePaths, const fs::CPath& dirPath, SortType sortType = SortAscending, const TCHAR* pWildSpec = _T("*"), RecursionDepth depth = Deep );
+	size_t EnumSubDirPaths( std::vector< fs::CPath >& rSubDirPaths, const fs::CPath& dirPath, SortType sortType = SortAscending, RecursionDepth depth = Deep );
 
 	std::tstring EnumJoinFiles( const fs::CPath& dirPath, SortType sortType = SortAscending, const TCHAR* pWildSpec = _T("*"), RecursionDepth depth = Deep );
 	std::tstring EnumJoinSubDirs( const fs::CPath& dirPath, SortType sortType = SortAscending, RecursionDepth depth = Deep );

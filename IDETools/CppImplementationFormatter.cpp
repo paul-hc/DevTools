@@ -426,7 +426,12 @@ namespace code
 			typeChoiceMenu.AppendMenu( MF_STRING, cmdUseDocQualifier, docTypeQualifier.c_str() );
 
 		if ( !clipTypeQualifier.empty() )
-			typeChoiceMenu.AppendMenu( MF_STRING, cmdUseClipboardQualifier, ( clipTypeQualifier + _T("\t(Paste)") ).c_str() );
+		{
+			static std::tstring s_itemText;
+
+			s_itemText = clipTypeQualifier + _T("\t(Paste)");
+			typeChoiceMenu.AppendMenu( MF_STRING, cmdUseClipboardQualifier, s_itemText.c_str() );
+		}
 
 		typeChoiceMenu.AppendMenu( MF_STRING, cmdUseEmptyQualifier, _T("&Global Function (No Type Qualifier)") );
 		typeChoiceMenu.AppendMenu( MF_SEPARATOR, 0 );

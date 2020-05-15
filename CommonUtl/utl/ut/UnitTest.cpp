@@ -10,6 +10,7 @@
 #include "RuntimeException.h"
 #include "StringUtilities.h"
 #include <math.h>
+#include <hash_set>
 #include <fstream>
 
 #define new DEBUG_NEW
@@ -256,32 +257,32 @@ namespace ut
 
 	// enumeration with relative paths
 
-	size_t EnumFiles( std::vector< fs::CPath >& rFilePaths, const fs::CPath& dirPath, SortType sortType /*= SortAscending*/,
-					  const TCHAR* pWildSpec /*= _T("*")*/, RecursionDepth depth /*= Deep*/ )
+	size_t EnumFilePaths( std::vector< fs::CPath >& rFilePaths, const fs::CPath& dirPath, SortType sortType /*= SortAscending*/,
+						  const TCHAR* pWildSpec /*= _T("*")*/, RecursionDepth depth /*= Deep*/ )
 	{
 		fs::CRelativeEnumerator found( dirPath );
 		fs::EnumFiles( &found, dirPath, pWildSpec, depth );
 
-		rFilePaths.assign( found.m_filePaths.begin(), found.m_filePaths.end() );
+		size_t addedCount = fs::JoinUniquePaths( rFilePaths, found.m_filePaths );
 
 		if ( sortType != NoSort )
 			fs::SortPaths( rFilePaths, SortAscending == sortType );
 
-		return rFilePaths.size();
+		return addedCount;
 	}
 
-	size_t EnumSubDirs( std::vector< fs::CPath >& rSubDirPaths, const fs::CPath& dirPath, SortType sortType /*= SortAscending*/,
-						RecursionDepth depth /*= Deep*/ )
+	size_t EnumSubDirPaths( std::vector< fs::CPath >& rSubDirPaths, const fs::CPath& dirPath, SortType sortType /*= SortAscending*/,
+							RecursionDepth depth /*= Deep*/ )
 	{
 		fs::CRelativeEnumerator found( dirPath );
 		fs::EnumFiles( &found, dirPath, _T("*"), depth );
 
-		rSubDirPaths.assign( found.m_subDirPaths.begin(), found.m_subDirPaths.end() );
+		size_t addedCount = fs::JoinUniquePaths( rSubDirPaths, found.m_subDirPaths );
 
 		if ( sortType != NoSort )
 			fs::SortPaths( rSubDirPaths, SortAscending == sortType );
 
-		return rSubDirPaths.size();
+		return addedCount;
 	}
 
 
@@ -289,7 +290,7 @@ namespace ut
 								RecursionDepth depth /*= Deep*/ )
 	{
 		std::vector< fs::CPath > filePaths;
-		EnumFiles( filePaths, dirPath, sortType, pWildSpec, depth );
+		EnumFilePaths( filePaths, dirPath, sortType, pWildSpec, depth );
 
 		return str::Join( filePaths, CTempFilePool::m_sep );
 	}
@@ -297,7 +298,7 @@ namespace ut
 	std::tstring EnumJoinSubDirs( const fs::CPath& dirPath, SortType sortType /*= SortAscending*/, RecursionDepth depth /*= Deep*/ )
 	{
 		std::vector< fs::CPath > subDirPaths;
-		EnumSubDirs( subDirPaths, dirPath, sortType, depth );
+		EnumSubDirPaths( subDirPaths, dirPath, sortType, depth );
 
 		return str::Join( subDirPaths, CTempFilePool::m_sep );
 	}

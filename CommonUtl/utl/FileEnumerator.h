@@ -7,6 +7,16 @@
 
 namespace fs
 {
+	// pWildSpec can be multiple: "*.*", "*.doc;*.txt"
+
+	void EnumFiles( IEnumerator* pEnumerator, const fs::CPath& dirPath, const TCHAR* pWildSpec = _T("*.*"), RecursionDepth depth = Shallow );
+
+	size_t EnumFilePaths( std::vector< fs::CPath >& rFilePaths, const fs::CPath& dirPath, const TCHAR* pWildSpec = _T("*.*"), RecursionDepth depth = Shallow );
+	size_t EnumSubDirPaths( std::vector< fs::CPath >& rSubDirPaths, const fs::CPath& dirPath, const TCHAR* pWildSpec = _T("*.*"), RecursionDepth depth = Shallow );
+
+	fs::CPath FindFirstFile( const fs::CPath& dirPath, const TCHAR* pWildSpec = _T("*.*"), RecursionDepth depth = Shallow );
+
+
 	// generate a path of a unique filename using a suffix, by avoiding collisions with existing files
 	fs::CPath MakeUniqueNumFilename( const fs::CPath& filePath, const TCHAR fmtNumSuffix[] = _T("_[%d]") ) throws_( CRuntimeException );	// with numeric suffix
 	fs::CPath MakeUniqueHashedFilename( const fs::CPath& filePath, const TCHAR fmtHashSuffix[] = _T("_%08X") );								// with hash suffix
@@ -60,16 +70,6 @@ namespace fs
 
 		fs::CPath GetFoundPath( void ) const { return !m_filePaths.empty() ? m_filePaths.front() : fs::CPath(); }
 	};
-
-
-	// pWildSpec can be multiple: "*.*", "*.doc;*.txt"
-
-	void EnumFiles( IEnumerator* pEnumerator, const fs::CPath& dirPath, const TCHAR* pWildSpec = _T("*.*"), RecursionDepth depth = Shallow );
-
-	void EnumFiles( std::vector< fs::CPath >& rFilePaths, const fs::CPath& dirPath, const TCHAR* pWildSpec = _T("*.*"), RecursionDepth depth = Shallow );
-	void EnumSubDirs( std::vector< fs::CPath >& rSubDirPaths, const fs::CPath& dirPath, const TCHAR* pWildSpec = _T("*.*"), RecursionDepth depth = Shallow );
-
-	fs::CPath FindFirstFile( const fs::CPath& dirPath, const TCHAR* pWildSpec = _T("*.*"), RecursionDepth depth = Shallow );
 }
 
 

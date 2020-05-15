@@ -96,10 +96,7 @@ void CDropFilesModel::InitSrcFolders( void )
 	{
 		m_srcDeepFolderPaths.push_back( *itSrcFolderPath );
 
-		std::vector< fs::CPath > subDirPaths;
-		fs::EnumSubDirs( subDirPaths, *itSrcFolderPath, _T("*"), Deep );
-
-		utl::JoinUnique( m_srcDeepFolderPaths, subDirPaths.begin(), subDirPaths.end() );
+		fs::EnumSubDirPaths( m_srcDeepFolderPaths, *itSrcFolderPath, _T("*"), Deep );
 	}
 	fs::SortPaths( m_srcDeepFolderPaths );
 }

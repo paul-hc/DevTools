@@ -569,11 +569,15 @@ namespace utl
 		return true;
 	}
 
-	template< typename Type, typename IteratorT >
-	inline void JoinUnique( std::vector< Type >& rDest, IteratorT itStart, IteratorT itEnd )
+	template< typename ContainerT, typename IteratorT >
+	size_t JoinUnique( ContainerT& rDest, IteratorT itStart, IteratorT itEnd )
 	{
+		size_t oldCount = rDest.size();
+
 		for ( ; itStart != itEnd; ++itStart )
 			AddUnique( rDest, *itStart );
+
+		return rDest.size() - oldCount;		// added count
 	}
 
 	template< typename ContainerT, typename ItemType >
