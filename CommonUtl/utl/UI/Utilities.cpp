@@ -285,7 +285,7 @@ namespace ui
 
 		enum { Flags = SWP_NOMOVE | SWP_NOREDRAW | SWP_NOACTIVATE | SWP_NOZORDER | SWP_NOOWNERZORDER };
 
-		::SetWindowPos( hWnd, NULL, 0, 0, windowRect.Width() - 1, windowRect.Height() - 1, Flags );		// shrink it by 1 pixel
+		::SetWindowPos( hWnd, NULL, 0, 0, windowRect.Width() - 1, windowRect.Height() - 1, Flags | SWP_NOSENDCHANGING );		// shrink it by 1 pixel
 		::SetWindowPos( hWnd, NULL, 0, 0, windowRect.Width(), windowRect.Height(), Flags );				// restore original size
 
 		::InvalidateRect( hWnd, NULL, TRUE );
