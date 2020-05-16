@@ -154,7 +154,7 @@ void CAlbumModel::QueryFileAttrsSequence( std::vector< CFileAttr* >& rSequence, 
 }
 
 // returns the display index of the found file
-int CAlbumModel::FindIndexFileAttrWithPath( const fs::CFlexPath& filePath ) const
+int CAlbumModel::FindIndexFileAttrWithPath( const fs::CPath& filePath ) const
 {
 	size_t foundPos = fattr::FindPosWithPath( m_imagesModel.GetFileAttrs(), filePath );
 	if ( utl::npos == foundPos )

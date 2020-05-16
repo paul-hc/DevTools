@@ -355,8 +355,8 @@ bool CAlbumDoc::EditAlbum( CAlbumImageView* pActiveView )
 	if ( dlg.DoModal() != IDOK )
 		return false;
 
-	m_model = dlg.m_model;
-	m_slideData.SetCurrentIndex( dlg.m_currentIndex );
+	m_model = dlg.GetModel();
+	m_slideData.SetCurrentIndex( dlg.GetCurrentIndex() );
 	// clear auto-drop context since the drop directory may have changed
 	ClearAutoDropContext();
 

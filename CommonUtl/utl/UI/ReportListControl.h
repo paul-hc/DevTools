@@ -451,6 +451,9 @@ public:
 
 	int GetSelCaretIndex( void ) const;						// if caret is not selected returns NULL, even if we have multiple selection (to allow NULL details when toggling an item unselected)
 
+	template< typename ObjectT >
+	ObjectT* GetCaretAs( void ) const;
+
 	bool AnySelected( UINT stateMask = LVIS_SELECTED ) const { return HasItemWithState( stateMask ); }
 	bool SingleSelected( void ) const;
 

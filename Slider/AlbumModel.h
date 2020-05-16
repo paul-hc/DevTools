@@ -59,7 +59,7 @@ public:
 
 	void QueryFileAttrsSequence( std::vector< CFileAttr* >& rSequence, const std::vector< int >& selIndexes ) const;
 
-	int FindIndexFileAttrWithPath( const fs::CFlexPath& filePath ) const;
+	int FindIndexFileAttrWithPath( const fs::CPath& filePath ) const;
 
 	// image files order
 	fattr::Order GetFileOrder( void ) const { return m_fileOrder; }

@@ -16,6 +16,7 @@ CIconButton::CIconButton( const CIconId& iconId /*= CIconId()*/, bool useText /*
 	: CButton()
 	, m_iconId( iconId )
 	, m_useText( useText )
+	, m_useTextSpacing( true )
 {
 }
 
@@ -37,14 +38,13 @@ void CIconButton::SetIconId( const CIconId& iconId )
 
 	if ( m_hWnd != NULL )
 	{
-		if ( const CIcon* pIcon = GetIconPtr() )
-		{
+		const CIcon* pIcon = GetIconPtr();
+		if ( pIcon != NULL )
 			if ( !m_useText )
 				ModifyStyle( 0, BS_ICON );
 
-			SetIcon( pIcon->GetHandle() );
-		}
-		UpdateCaption( this, m_useText, m_useTextSpacing );
+		SetIcon( pIcon != NULL ? pIcon->GetHandle() : NULL );
+		UpdateCaption( this, m_useText, m_useTextSpacing && pIcon != NULL );
 	}
 }
 

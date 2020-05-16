@@ -26,9 +26,10 @@ namespace fattr
 
 	size_t FindPosWithPath( const std::vector< CFileAttr* >& fileAttributes, const fs::CPath& filePath )
 	{
-		for ( size_t pos = 0; pos != fileAttributes.size(); ++pos )
-			if ( fileAttributes[ pos ]->GetPath() == filePath )
-				return pos;
+		if ( !filePath.IsEmpty() )
+			for ( size_t pos = 0; pos != fileAttributes.size(); ++pos )
+				if ( fileAttributes[ pos ]->GetPath() == filePath )
+					return pos;
 
 		return utl::npos;
 	}

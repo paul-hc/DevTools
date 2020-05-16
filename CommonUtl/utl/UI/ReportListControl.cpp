@@ -1641,7 +1641,7 @@ void CReportListControl::SetSelection( const std::vector< int >& selIndexes, int
 		SetItemState( selIndexes[ i ], LVNI_SELECTED, LVNI_SELECTED );
 
 	if ( -1 == caretIndex && !selIndexes.empty() )
-		caretIndex = selIndexes.back(); // caret on the last selected
+		caretIndex = selIndexes.back();				// caret on the last selected
 
 	if ( caretIndex != -1 )
 	{

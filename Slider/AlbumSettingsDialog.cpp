@@ -1,7 +1,7 @@
 
 #include "stdafx.h"
 #include "AlbumSettingsDialog.h"
-#include "FileAttr.h"
+#include "FileAttrAlgorithms.h"
 #include "MainFrame.h"
 #include "ImageView.h"
 #include "SearchSpecDialog.h"
@@ -73,16 +73,18 @@ namespace layout
 }
 
 
-CAlbumSettingsDialog::CAlbumSettingsDialog( const CAlbumModel& model, int currentIndex /*= -1*/, CWnd* pParent /*= NULL*/ )
+CAlbumSettingsDialog::CAlbumSettingsDialog( const CAlbumModel& model, size_t currentPos, CWnd* pParent /*= NULL*/ )
 	: CLayoutDialog( IDD_ALBUM_SETTINGS_DIALOG, pParent )
 	, m_model( model )
-	, m_currentIndex( currentIndex )
+	, m_pCaretFileAttr( currentPos < m_model.GetFileAttrCount() ? m_model.GetFileAttr( currentPos ) : NULL )
+	, m_isDirty( false )
+
 	, m_dlgAccel( IDR_ALBUM_DLG_ACCEL )
 	, m_searchListAccel( IDR_ALBUM_DLG_SEARCH_SPEC_ACCEL )
-	, m_isDirty( Undefined )
 	, m_maxFileCountEdit( true, str::GetUserLocale() )
 	, m_minSizeEdit( true, str::GetUserLocale() )
 	, m_maxSizeEdit( true, str::GetUserLocale() )
+	, m_sortOrderCombo( &fattr::GetTags_Order() )
 	, m_thumbPreviewCtrl( app::GetThumbnailer() )
 	, m_docVersionLabel( CRegularStatic::ControlLabel )
 	, m_docVersionStatic( CRegularStatic::Bold )
@@ -119,8 +121,8 @@ CAlbumSettingsDialog::CAlbumSettingsDialog( const CAlbumModel& model, int curren
 	m_foundFilesListCtrl.SetSortInternally( false );
 	m_foundFilesListCtrl.SetUseAlternateRowColoring();
 	m_foundFilesListCtrl.SetDataSourceFactory( this );						// uses temporary file clones for embedded images
-	m_foundFilesListCtrl.SetPopupMenu( CReportListControl::OnSelection, &GetAlbumModelPopupMenu() );
 	m_foundFilesListCtrl.SetTrackMenuTarget( this );						// let dialog track SPECIFIC custom menu commands (Explorer verbs handled by the listctrl)
+	m_foundFilesListCtrl.SetPopupMenu( CReportListControl::OnSelection, &GetAlbumModelPopupMenu() );
 
 	ClearFlag( m_foundFilesListCtrl.RefListStyleEx(), LVS_EX_DOUBLEBUFFER );		// better looking thumb rendering for tiny images (icons, small PNGs)
 
@@ -133,6 +135,14 @@ CAlbumSettingsDialog::CAlbumSettingsDialog( const CAlbumModel& model, int curren
 
 CAlbumSettingsDialog::~CAlbumSettingsDialog()
 {
+}
+
+int CAlbumSettingsDialog::GetCurrentIndex( void ) const
+{
+	if ( NULL == m_pCaretFileAttr )
+		return m_model.AnyFoundFiles() ? 0 : -1;
+
+	return utl::FindPos( m_model.GetImagesModel().GetFileAttrs(), m_pCaretFileAttr );
 }
 
 CMenu& CAlbumSettingsDialog::GetAlbumModelPopupMenu( void )
@@ -177,7 +187,7 @@ void CAlbumSettingsDialog::CombineTextEffectAt( ui::CTextEffect& rTextEffect, LP
 	if ( !pFileAttr->IsValid() )
 		rTextEffect |= s_errorBk;							// highlight error row background
 
-	if ( True == m_isDirty )
+	if ( m_isDirty )
 	{
 		if ( CLR_NONE == rTextEffect.m_textColor )
 			rTextEffect.m_textColor = m_foundFilesListCtrl.GetTextColor();
@@ -189,23 +199,21 @@ void CAlbumSettingsDialog::CombineTextEffectAt( ui::CTextEffect& rTextEffect, LP
 	}
 }
 
-void CAlbumSettingsDialog::SetDirty( bool dirty /*= true*/ )
+bool CAlbumSettingsDialog::SetDirty( bool dirty /*= true*/ )
 {
-	if ( Undefined == m_isDirty )
-		return;			// dialog not yet initialized, avoid altering dirty flag
+	if ( IsInternalChange() )
+		return false;			// during dialog output
 
-	m_isDirty = dirty ? True : False;
+	m_isDirty = dirty;
 	m_foundFilesListCtrl.Invalidate();
 	m_foundFilesListCtrl.UpdateWindow();
 
-	static const std::tstring okLabel[] = { _T("OK"), _T("&Search") };
-	ui::SetDlgItemText( m_hWnd, IDOK, okLabel[ m_isDirty ] );
-	ui::EnableControl( m_hWnd, IDOK, True == m_isDirty || m_model.GetFileOrder() != fattr::FilterCorruptedFiles );
-}
+	static const struct { std::tstring m_caption; UINT m_iconId; } s_okLabelIcon[] = { { _T("OK"), 0 }, { _T("&Search"), CM_EXPLORE_IMAGE } };
+	m_okButton.SetButtonCaption( s_okLabelIcon[ m_isDirty ].m_caption );
+	m_okButton.SetIconId( s_okLabelIcon[ m_isDirty ].m_iconId );
 
-void CAlbumSettingsDialog::UpdateFileSortOrder( void )
-{
-	SetupFoundListView();		// fill in the found files list
+	ui::EnableControl( m_hWnd, IDOK, m_isDirty || m_model.GetFileOrder() != fattr::FilterCorruptedFiles );
+	return true;
 }
 
 std::pair< CAlbumSettingsDialog::Column, bool > CAlbumSettingsDialog::ToListSortOrder( fattr::Order fileOrder )
@@ -412,9 +420,9 @@ bool CAlbumSettingsDialog::SearchSourceFiles( void )
 
 	ui::EnableControl( m_hWnd, IDCANCEL, false );
 
-	// Note:
-	// Freeze list redraw since file search progress notifications force listCtrl redraw while old image items in m_model have been deleted, leaving dangling references in the list.
-	CScopedLockRedraw freeze( &m_foundFilesListCtrl );			// to prevent list redraw crash due to dangling reference image items
+	fs::CFlexPath currFilePath;
+	if ( m_pCaretFileAttr != NULL )
+		currFilePath = m_pCaretFileAttr->GetPath();
 
 	try
 	{
@@ -426,6 +434,11 @@ bool CAlbumSettingsDialog::SearchSourceFiles( void )
 		success = false;
 	}
 
+	if ( !currFilePath.IsEmpty() )
+		m_pCaretFileAttr = fattr::FindWithPath( m_model.GetImagesModel().GetFileAttrs(), currFilePath );
+	else
+		m_pCaretFileAttr = NULL;
+
 	SetupFoundListView();		// fill in the found files list
 	SetDirty( false );
 	ui::EnableControl( m_hWnd, IDCANCEL );
@@ -434,8 +447,8 @@ bool CAlbumSettingsDialog::SearchSourceFiles( void )
 
 void CAlbumSettingsDialog::SetupFoundListView( void )
 {
-	CScopedListTextSelection scopedSel( &m_foundFilesListCtrl );
 	CWaitCursor wait;
+	CScopedListTextSelection scopedSel( &m_foundFilesListCtrl );
 
 	size_t count = m_model.GetFileAttrCount();
 	{
@@ -469,31 +482,15 @@ void CAlbumSettingsDialog::SetupFoundListView( void )
 	ui::SetDlgItemText( m_hWnd, IDC_FOUND_FILES_STATIC, str::Format( _T("&Found %d file(s):"), count ) );
 }
 
-void CAlbumSettingsDialog::QueryFoundListSelection( std::vector< std::tstring >& rSelFilePaths, bool clearInvalidFiles /*= true*/ )
+void CAlbumSettingsDialog::UpdateCurrentFile( void )
 {
-	std::vector< CFileAttr* > selFileAttrs;
-	m_foundFilesListCtrl.QuerySelectionAs( selFileAttrs );
+	fs::CFlexPath currFilePath;
+	int selCaretIndex = m_foundFilesListCtrl.GetSelCaretIndex();
 
-	rSelFilePaths.clear();
-	rSelFilePaths.reserve( selFileAttrs.size() );
+	if ( selCaretIndex != -1 )
+		currFilePath = m_foundFilesListCtrl.GetObjectAt< CFileAttr >( selCaretIndex )->GetPath();
 
-	bool foundInvalid = false;
-
-	for ( std::vector< CFileAttr* >::const_iterator itSelFileAttr = selFileAttrs.begin(); itSelFileAttr != selFileAttrs.end(); ++itSelFileAttr )
-		if ( ( *itSelFileAttr )->IsValid() )
-			rSelFilePaths.push_back( ( *itSelFileAttr )->GetPath().Get() );
-		else if ( clearInvalidFiles )
-		{
-			foundInvalid = true;
-			m_foundFilesListCtrl.SetSelected( m_foundFilesListCtrl.FindItemIndex( *itSelFileAttr ), false );		// un-select invalid image path
-		}
-
-	// clear selection for non-existing files (if any)
-	if ( foundInvalid )
-	{
-		ui::BeepSignal();
-		m_foundFilesListCtrl.Invalidate();
-	}
+	m_thumbPreviewCtrl.SetImagePath( currFilePath );
 }
 
 int CAlbumSettingsDialog::GetCheckStateAutoRegen( void ) const
@@ -504,10 +501,82 @@ int CAlbumSettingsDialog::GetCheckStateAutoRegen( void ) const
 	return m_model.HasPersistFlag( CAlbumModel::AutoRegenerate ) ? BST_CHECKED : BST_UNCHECKED;
 }
 
+void CAlbumSettingsDialog::OutputAll( void )
+{
+	CScopedInternalChange scopedDisableInput( this );
+
+	m_docVersionStatic.SetWindowText( app::FormatModelVersion( m_model.GetModelSchema() ) );
+
+	const CSearchModel* pSearchModel = m_model.GetSearchModel();
+	CheckDlgButton( IDC_MAX_FILE_COUNT_CHECK, pSearchModel->GetMaxFileCount() != UINT_MAX );
+	CheckDlgButton( IDC_MIN_FILE_SIZE_CHECK, pSearchModel->GetFileSizeRange().m_start != CSearchModel::s_anyFileSizeRange.m_start );
+	CheckDlgButton( IDC_MAX_FILE_SIZE_CHECK, pSearchModel->GetFileSizeRange().m_end != CSearchModel::s_anyFileSizeRange.m_end );
+	OnToggle_MaxFileCount();
+	OnToggle_MinSize();
+	OnToggle_MaxSize();
+
+	// auto-drop side effect: also auto regenerate, but disable the check
+	CheckDlgButton( IDC_AUTO_REGENERATE_CHECK, GetCheckStateAutoRegen() );
+	CheckDlgButton( IDC_AUTO_DROP_CHECK, m_model.IsAutoDropRecipient() );
+
+	// fill in the search attribute path list
+	m_sortOrderCombo.SetValue( m_model.GetFileOrder() );
+	m_searchSpecListBox.ResetContent();
+
+	const std::vector< CSearchSpec* >& searchSpecs = m_model.GetSearchModel()->GetSpecs();
+	for ( std::vector< CSearchSpec* >::const_iterator itSpec = searchSpecs.begin(); itSpec != searchSpecs.end(); ++itSpec )
+		m_searchSpecListBox.AddString( ( *itSpec )->GetFilePath().GetPtr() );
+
+	m_searchSpecListBox.SetCurSel( 0 );
+	OnLBnSelChange_SearchSpec();
+
+	// setup list-control
+	std::pair< Column, bool > sortPair = ToListSortOrder( m_model.GetFileOrder() );
+	m_foundFilesListCtrl.SetSortByColumn( sortPair.first, sortPair.second );
+
+	SetupFoundListView();		// fill in the found files list
+
+	if ( !m_foundFilesListCtrl.AnySelected() )
+		if ( m_pCaretFileAttr != NULL )
+			m_foundFilesListCtrl.Select( m_pCaretFileAttr );
+
+	m_thumbPreviewCtrl.SetImagePath( m_pCaretFileAttr != NULL ? m_pCaretFileAttr->GetPath() : fs::CFlexPath() );
+}
+
+void CAlbumSettingsDialog::InputAll( void )
+{
+	CSearchModel* pSearchModel = m_model.RefSearchModel();
+	UINT maxFileCount = UINT_MAX;
+
+	if ( IsDlgButtonChecked( IDC_MAX_FILE_COUNT_CHECK ) )
+		if ( !m_maxFileCountEdit.ParseNumber( &maxFileCount ) )
+			maxFileCount = UINT_MAX;
+
+	pSearchModel->SetMaxFileCount( maxFileCount );
+
+	Range< UINT > fileSizeRange = CSearchModel::s_anyFileSizeRange;
+
+	if ( IsDlgButtonChecked( IDC_MIN_FILE_SIZE_CHECK ) )
+		if ( m_minSizeEdit.ParseNumber( &fileSizeRange.m_start ) )
+			fileSizeRange.m_start *= KiloByte;
+
+	if ( IsDlgButtonChecked( IDC_MAX_FILE_SIZE_CHECK ) )
+		if ( m_maxSizeEdit.ParseNumber( &fileSizeRange.m_end ) )
+			fileSizeRange.m_end *= KiloByte;
+
+	pSearchModel->SetFileSizeRange( fileSizeRange );
+
+	UINT ckState = IsDlgButtonChecked( IDC_AUTO_REGENERATE_CHECK );
+	if ( ckState != BST_INDETERMINATE )
+		m_model.SetPersistFlag( CAlbumModel::AutoRegenerate, BST_CHECKED == ckState );		// the button is checked naturally, and not as a side effect of auto-drop feature
+
+	m_model.StoreFileOrder( m_sortOrderCombo.GetEnum< fattr::Order >() );
+	m_pCaretFileAttr = m_foundFilesListCtrl.GetSelected< CFileAttr >();
+}
+
 void CAlbumSettingsDialog::DoDataExchange( CDataExchange* pDX )
 {
 	bool firstInit = NULL == m_foundFilesListCtrl.m_hWnd;
-	fattr::Order fileOrder = m_model.GetFileOrder();
 
 	DDX_Control( pDX, IDC_MAX_FILE_COUNT_EDIT, m_maxFileCountEdit );
 	DDX_Control( pDX, IDC_MIN_FILE_SIZE_EDIT, m_minSizeEdit );
@@ -515,101 +584,31 @@ void CAlbumSettingsDialog::DoDataExchange( CDataExchange* pDX )
 	DDX_Control( pDX, IDC_SEARCH_SPEC_MOVE_DOWN, m_moveDownButton );
 	DDX_Control( pDX, IDC_SEARCH_SPEC_MOVE_UP, m_moveUpButton );
 	DDX_Control( pDX, IDC_SEARCH_SPEC_LIST, m_searchSpecListBox );
-	ui::DDX_EnumCombo( pDX, IDC_LIST_ORDER_COMBO, m_sortOrderCombo, fileOrder, fattr::GetTags_Order() );
+	DDX_Control( pDX, IDC_LIST_ORDER_COMBO, m_sortOrderCombo );
 	DDX_Control( pDX, IDC_FOUND_FILES_LISTVIEW, m_foundFilesListCtrl );
 	DDX_Control( pDX, IDC_THUMB_PREVIEW_STATIC, m_thumbPreviewCtrl );
 	DDX_Control( pDX, IDC_DOC_VERSION_LABEL, m_docVersionLabel );
 	DDX_Control( pDX, IDC_DOC_VERSION_STATIC, m_docVersionStatic );
 	m_toolbar.DDX_Placeholder( pDX, IDC_TOOLBAR_PLACEHOLDER, H_AlignRight | V_AlignCenter );
+	DDX_Control( pDX, IDOK, m_okButton );
 
 	if ( firstInit )
-		m_foundFilesListCtrl.SetCompactIconSpacing();
-
-	switch ( pDX->m_bSaveAndValidate )
 	{
-		case DialogOutput:
-		{	// dialog setup
-			m_docVersionStatic.SetWindowText( app::FormatModelVersion( m_model.GetModelSchema() ) );
+		DragAcceptFiles();
+		InitSymbolFont();
 
-			const CSearchModel* pSearchModel = m_model.GetSearchModel();
-			CheckDlgButton( IDC_MAX_FILE_COUNT_CHECK, pSearchModel->GetMaxFileCount() != UINT_MAX );
-			CheckDlgButton( IDC_MIN_FILE_SIZE_CHECK, pSearchModel->GetFileSizeRange().m_start != CSearchModel::s_anyFileSizeRange.m_start );
-			CheckDlgButton( IDC_MAX_FILE_SIZE_CHECK, pSearchModel->GetFileSizeRange().m_end != CSearchModel::s_anyFileSizeRange.m_end );
-			OnToggle_MaxFileCount();
-			OnToggle_MinSize();
-			OnToggle_MaxSize();
-
-			// auto-drop side effect: also auto regenerate, but disable the check
-			CheckDlgButton( IDC_AUTO_REGENERATE_CHECK, GetCheckStateAutoRegen() );
-			CheckDlgButton( IDC_AUTO_DROP_CHECK, m_model.IsAutoDropRecipient() );
-
-			// fill in the search attribute path list
-			m_searchSpecListBox.ResetContent();
-
-			const std::vector< CSearchSpec* >& searchSpecs = m_model.GetSearchModel()->GetSpecs();
-			for ( std::vector< CSearchSpec* >::const_iterator itSpec = searchSpecs.begin(); itSpec != searchSpecs.end(); ++itSpec )
-				m_searchSpecListBox.AddString( ( *itSpec )->GetFilePath().GetPtr() );
-
-			m_searchSpecListBox.SetCurSel( 0 );
-			OnLBnSelChange_SearchSpec();
-
-			// setup list-control
-			std::pair< Column, bool > sortPair = ToListSortOrder( fileOrder );
-			m_foundFilesListCtrl.SetSortByColumn( sortPair.first, sortPair.second );
-
-			SetupFoundListView();		// fill in the found files list
-			if ( -1 == m_foundFilesListCtrl.GetCaretIndex() )
-				if ( (UINT)m_currentIndex < m_model.GetFileAttrCount() )
-					m_foundFilesListCtrl.SetCurSel( m_currentIndex );
-				else if ( m_model.AnyFoundFiles() )
-					m_foundFilesListCtrl.SetCurSel( 0 );
-
-			int selIndex = m_foundFilesListCtrl.GetCurSel();
-
-			if ( selIndex != -1 )
-				m_thumbPreviewCtrl.SetImagePath( m_model.GetFileAttr( selIndex )->GetPath() );
-			else
-				m_thumbPreviewCtrl.SetImagePath( fs::CFlexPath() );
-
-			// set initial dirty if auto-generation is turned on (either explicit or by auto-drop)
-			SetDirty( m_model.MustAutoRegenerate() );
-			break;
-		}
-		case DialogSaveChanges:
-		{
-			m_model.StoreFileOrder( fileOrder );
-
-			CSearchModel* pSearchModel = m_model.RefSearchModel();
-			UINT maxFileCount = UINT_MAX;
-
-			if ( IsDlgButtonChecked( IDC_MAX_FILE_COUNT_CHECK ) )
-				if ( !m_maxFileCountEdit.ParseNumber( &maxFileCount ) )
-					maxFileCount = UINT_MAX;
-
-			pSearchModel->SetMaxFileCount( maxFileCount );
-
-			Range< UINT > fileSizeRange = CSearchModel::s_anyFileSizeRange;
-
-			if ( IsDlgButtonChecked( IDC_MIN_FILE_SIZE_CHECK ) )
-				if ( m_minSizeEdit.ParseNumber( &fileSizeRange.m_start ) )
-					fileSizeRange.m_start *= KiloByte;
-
-			if ( IsDlgButtonChecked( IDC_MAX_FILE_SIZE_CHECK ) )
-				if ( m_maxSizeEdit.ParseNumber( &fileSizeRange.m_end ) )
-					fileSizeRange.m_end *= KiloByte;
-
-			pSearchModel->SetFileSizeRange( fileSizeRange );
-
-			UINT ckState = IsDlgButtonChecked( IDC_AUTO_REGENERATE_CHECK );
-			if ( ckState != BST_INDETERMINATE )
-				m_model.SetPersistFlag( CAlbumModel::AutoRegenerate, BST_CHECKED == ckState );		// the button is checked naturally, and not as a side effect of auto-drop feature
-
-			m_currentIndex = m_foundFilesListCtrl.GetCaretIndex();
-			if ( -1 == m_currentIndex )
-				m_currentIndex = 0;
-			break;
-		}
+		m_moveUpButton.SetFont( &m_symbolFont );
+		m_moveDownButton.SetFont( &m_symbolFont );
+		m_foundFilesListCtrl.SetCompactIconSpacing();
 	}
+
+	if ( DialogOutput == pDX->m_bSaveAndValidate )
+	{
+		OutputAll();
+		SetDirty( m_model.MustAutoRegenerate() );		// set initial dirty if auto-generation is turned on (either explicit or by auto-drop)
+	}
+	else
+		InputAll();
 
 	CLayoutDialog::DoDataExchange( pDX );
 }
@@ -669,23 +668,10 @@ BEGIN_MESSAGE_MAP( CAlbumSettingsDialog, CLayoutDialog )
 	ON_NOTIFY( LVN_GETDISPINFO, IDC_FOUND_FILES_LISTVIEW, OnLVnGetDispInfo_FoundFiles )
 	ON_CONTROL( lv::LVN_ItemsReorder, IDC_FOUND_FILES_LISTVIEW, OnLVnItemsReorder_FoundFiles )
 	ON_STN_DBLCLK( IDC_THUMB_PREVIEW_STATIC, OnStnDblClk_ThumbPreviewStatic )
+
 	// image file operations: CM_OPEN_IMAGE_FILE, CM_DELETE_FILE, CM_DELETE_FILE_NO_UNDO, CM_MOVE_FILE, CM_EXPLORE_IMAGE
 	ON_COMMAND_RANGE( CM_OPEN_IMAGE_FILE, CM_EXPLORE_IMAGE, OnImageFileOp )
 END_MESSAGE_MAP()
-
-BOOL CAlbumSettingsDialog::OnInitDialog( void )
-{
-	CLayoutDialog::OnInitDialog();
-
-	DragAcceptFiles();
-	InitSymbolFont();
-
-	m_moveUpButton.SetFont( &m_symbolFont );
-	m_moveDownButton.SetFont( &m_symbolFont );
-
-	m_isDirty = False;
-	return TRUE;
-}
 
 void CAlbumSettingsDialog::OnDestroy( void )
 {
@@ -696,7 +682,7 @@ void CAlbumSettingsDialog::OnOK( void )
 {
 	if ( !UpdateData( DialogSaveChanges ) )
 		TRACE( _T("UpdateData failed during dialog termination.\n") );		// UpdateData() will set focus to correct item
-	else if ( True == m_isDirty )
+	else if ( m_isDirty )
 		SearchSourceFiles();
 	else
 		CLayoutDialog::OnOK();
@@ -738,13 +724,13 @@ void CAlbumSettingsDialog::OnContextMenu( CWnd* pWnd, CPoint point )
 
 void CAlbumSettingsDialog::OnCBnSelChange_SortOrder( void )
 {
-	fattr::Order fileOrder = static_cast< fattr::Order >( m_sortOrderCombo.GetCurSel() );
+	fattr::Order selFileOrder = m_sortOrderCombo.GetEnum< fattr::Order >();
 
-	std::pair< Column, bool > sortPair = ToListSortOrder( fileOrder );
+	std::pair< Column, bool > sortPair = ToListSortOrder( selFileOrder );
 	m_foundFilesListCtrl.SetSortByColumn( sortPair.first, sortPair.second );
 
-	m_model.ModifyFileOrder( fileOrder );
-	UpdateFileSortOrder();
+	m_model.ModifyFileOrder( selFileOrder );
+	SetupFoundListView();
 }
 
 void CAlbumSettingsDialog::OnToggle_MaxFileCount( void )
@@ -879,9 +865,9 @@ void CAlbumSettingsDialog::On_OrderRandomShuffle( UINT cmdId )
 {
 	fattr::Order fileOrder = hlp::OrderOfCmd( cmdId );
 
-	m_sortOrderCombo.SetCurSel( fileOrder );
+	m_sortOrderCombo.SetValue( fileOrder );
 	m_model.ModifyFileOrder( fileOrder );
-	UpdateFileSortOrder();
+	SetupFoundListView();
 }
 
 void CAlbumSettingsDialog::OnUpdate_OrderRandomShuffle( CCmdUI* pCmdUI )
@@ -894,7 +880,7 @@ void CAlbumSettingsDialog::OnUpdate_OrderRandomShuffle( CCmdUI* pCmdUI )
 void CAlbumSettingsDialog::OnImageFileOp( UINT cmdId )
 {
 	std::vector< std::tstring > targetFiles;
-	QueryFoundListSelection( targetFiles );
+	m_foundFilesListCtrl.QuerySelectedItemPaths( targetFiles );
 	if ( targetFiles.empty() )
 		return;
 
@@ -935,10 +921,10 @@ void CAlbumSettingsDialog::OnToggle_AutoDrop( void )
 
 void CAlbumSettingsDialog::OnLVnColumnClick_FoundFiles( NMHDR* pNmHdr, LRESULT* pResult )
 {
-	NMLISTVIEW* pNmListView = (NMLISTVIEW*)pNmHdr;
+	NMLISTVIEW* pNmList = (NMLISTVIEW*)pNmHdr;
 	fattr::Order fileOrder = m_model.GetFileOrder();
 
-	switch ( pNmListView->iSubItem )
+	switch ( pNmList->iSubItem )
 	{
 		case FileName:
 			fileOrder = fileOrder == fattr::ByFileNameAsc ? fattr::ByFileNameDesc : fattr::ByFileNameAsc;
@@ -957,24 +943,20 @@ void CAlbumSettingsDialog::OnLVnColumnClick_FoundFiles( NMHDR* pNmHdr, LRESULT* 
 			break;
 	}
 
-	m_sortOrderCombo.SetCurSel( fileOrder );
+	m_sortOrderCombo.SetValue( fileOrder );
 	m_model.ModifyFileOrder( fileOrder );
-	UpdateFileSortOrder();
+	SetupFoundListView();
 
 	*pResult = 0;
 }
 
 void CAlbumSettingsDialog::OnLVnItemChanged_FoundFiles( NMHDR* pNmHdr, LRESULT* pResult )
 {
-	NMLISTVIEW* pNmListView = (NMLISTVIEW*)pNmHdr;
-
-	if ( pNmListView->iItem != -1 )
-		if ( pNmListView->uChanged & LVIF_STATE )
-			if ( ( pNmListView->uNewState & ( LVIS_FOCUSED | LVIS_SELECTED ) ) != ( pNmListView->uOldState & ( LVIS_FOCUSED | LVIS_SELECTED ) ) )
-				if ( pNmListView->uNewState & LVIS_FOCUSED )
-					m_thumbPreviewCtrl.SetImagePath( m_model.GetFileAttr( pNmListView->iItem )->GetPath() );
-
+	NMLISTVIEW* pNmList = (NMLISTVIEW*)pNmHdr;
 	*pResult = 0;
+
+	if ( CReportListControl::IsSelectionChangeNotify( pNmList, LVIS_SELECTED | LVIS_FOCUSED ) )
+		UpdateCurrentFile();
 }
 
 void CAlbumSettingsDialog::OnLVnGetDispInfo_FoundFiles( NMHDR* pNmHdr, LRESULT* pResult )
@@ -1010,7 +992,7 @@ void CAlbumSettingsDialog::OnLVnItemsReorder_FoundFiles( void )
 
 	// update UI
 	fattr::Order fileOrder = m_model.GetFileOrder();
-	m_sortOrderCombo.SetCurSel( fileOrder );
+	m_sortOrderCombo.SetValue( fileOrder );
 	std::pair< Column, bool > sortPair = ToListSortOrder( fileOrder );
 	m_foundFilesListCtrl.SetSortByColumn( sortPair.first, sortPair.second );
 }

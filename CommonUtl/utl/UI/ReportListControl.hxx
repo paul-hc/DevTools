@@ -39,9 +39,15 @@ void CReportListControl::SetObjectsCheckedState( const std::vector< ObjectT* >* 
 
 
 template< typename ObjectT >
+ObjectT* CReportListControl::GetCaretAs( void ) const
+{
+	int caretIndex = GetCaretIndex();
+	return caretIndex != -1 ? GetPtrAt< ObjectT >( caretIndex ) : NULL;
+}
+
+template< typename ObjectT >
 ObjectT* CReportListControl::GetSelected( void ) const
 {
-	ASSERT( !IsMultiSelectionList() );
 	int selIndex = GetCurSel();
 	return selIndex != -1 ? GetPtrAt< ObjectT >( selIndex ) : NULL;
 }

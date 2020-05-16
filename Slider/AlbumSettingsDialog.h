@@ -9,6 +9,8 @@
 #include "utl/UI/DragListCtrl.h"
 #include "utl/UI/PathItemListCtrl.h"
 #include "utl/UI/LayoutDialog.h"
+#include "utl/UI/EnumComboBox.h"
+#include "utl/UI/IconButton.h"
 #include "utl/UI/OleUtils.h"
 #include "utl/UI/SpinEdit.h"
 #include "utl/UI/ThemeStatic.h"
@@ -19,12 +21,16 @@ class CImageView;
 
 
 class CAlbumSettingsDialog : public CLayoutDialog
+						   , public CInternalChange
 						   , public ole::IDataSourceFactory
 						   , private ui::ITextEffectCallback
 {
 public:
-	CAlbumSettingsDialog( const CAlbumModel& model, int currentIndex = -1, CWnd* pParent = NULL );
+	CAlbumSettingsDialog( const CAlbumModel& model, size_t currentPos, CWnd* pParent = NULL );
 	virtual ~CAlbumSettingsDialog();
+
+	const CAlbumModel& GetModel( void ) const { return m_model; }
+	int GetCurrentIndex( void ) const;
 private:
 	static CMenu& GetAlbumModelPopupMenu( void );
 	bool InitSymbolFont( void );
@@ -35,8 +41,10 @@ private:
 	// ui::ITextEffectCallback interface
 	virtual void CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARAM rowKey, int subItem, CListLikeCtrlBase* pCtrl ) const;
 private:
-	void SetDirty( bool dirty = true );
-	void UpdateFileSortOrder( void );
+	bool SetDirty( bool dirty = true );
+
+	void OutputAll( void );
+	void InputAll( void );
 
 	enum Column { FileName, Folder, Dimensions, Size, Date, Unordered = -1 };
 	static std::pair< Column, bool > ToListSortOrder( fattr::Order fileOrder );		// < sortByColumn, sortAscending >
@@ -52,16 +60,14 @@ private:
 	bool SearchSourceFiles( void );
 	void SetupFoundListView( void );
 
-	void QueryFoundListSelection( std::vector< std::tstring >& rSelFilePaths, bool clearInvalidFiles = true );
+	void UpdateCurrentFile( void );
 	int GetCheckStateAutoRegen( void ) const;
-public:
-	CAlbumModel m_model;
-	int m_currentIndex;
 private:
-	enum DirtyState { Undefined = -1, False, True };
+	CAlbumModel m_model;
+	const CFileAttr* m_pCaretFileAttr;
+	bool m_isDirty;
 
 	CAccelTable m_dlgAccel, m_searchListAccel;
-	DirtyState m_isDirty;
 	CFont m_symbolFont;
 private:
 	// enum { IDD = IDD_ALBUM_SETTINGS_DIALOG };
@@ -72,12 +78,13 @@ private:
 	CButton m_moveDownButton;
 	CButton m_moveUpButton;
 	CListBox m_searchSpecListBox;
-	CComboBox m_sortOrderCombo;
+	CEnumComboBox m_sortOrderCombo;
 	CThumbPreviewCtrl m_thumbPreviewCtrl;
 	CRegularStatic m_docVersionLabel;
 	CRegularStatic m_docVersionStatic;
 	CDialogToolBar m_toolbar;
 	CDragListCtrl< CPathItemListCtrl > m_foundFilesListCtrl;
+	CIconButton m_okButton;					// overloaded text/icon, depending on dirtyness
 
 	// generated stuff
 public:
@@ -86,7 +93,6 @@ public:
 	protected:
 	virtual void DoDataExchange( CDataExchange* pDX );	// DDX/DDV support
 protected:
-	virtual BOOL OnInitDialog( void );
 	afx_msg void OnDestroy( void );
 	afx_msg void OnDropFiles( HDROP hDropInfo );
 	afx_msg void OnContextMenu( CWnd* pWnd, CPoint point );
