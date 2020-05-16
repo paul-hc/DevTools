@@ -491,7 +491,7 @@ namespace word
 		return
 			!text.empty() &&
 			WordStart == GetWordStatus( text, 0, loc ) &&
-			FindNextWordBreak( text, 0, loc ) > 0;
+			FindNextWordBreak( text, 0, loc ) == text.length();
 	}
 
 } //namespace word

@@ -46,6 +46,9 @@ Track 69 Digital Bitch.flac
 Track 71 Born Again.flac
 
 
+	CAlbumNavigator( const CAlbumImageView* pAlbumView );
+
+
 void f( void )
 {
 	// Structure used to store enumerated languages and code pages.
