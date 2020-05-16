@@ -43,7 +43,7 @@ void CWicImageCache::TraceObject( const fs::ImagePathKey& imageKey, CWicImage* p
 {
 #ifdef _DEBUG
 	std::tstring flagsText = fs::cache::GetTags_StatusFlags().FormatUi( cacheFlags, _T(",") );
-	if ( !flagsText.empty() )
+	if ( !flagsText.empty() )		// prevent noise: not CacheHit?
 		TRACE_CACHE( _T("{%d} '%s' %s: %s\n"), s_traceCount++,
 			flagsText.c_str(),
 			imageKey.first.IsComplexPath() ? _T("EMBEDDED image") : _T("image"),

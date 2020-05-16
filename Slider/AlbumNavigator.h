@@ -48,8 +48,6 @@ private:
 	CImageInfo m_imageInfo;
 	int m_navigPos;
 	int m_navigCount;
-
-	//int m_currIndex;
 };
 
 
