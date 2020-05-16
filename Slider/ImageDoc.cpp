@@ -5,7 +5,7 @@
 #include "ImageView.h"
 #include "Application_fwd.h"
 #include "utl/UI/Utilities.h"
-#include "utl/UI/WicImageCache.h"
+#include "utl/UI/WicImage.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -25,10 +25,7 @@ CImageDoc::~CImageDoc()
 
 CWicImage* CImageDoc::GetImage( void ) const
 {
-	if ( !m_imagePathKey.first.IsEmpty() )
-		return CWicImageCache::Instance().Acquire( m_imagePathKey ).first;
-
-	return NULL;
+	return AcquireImage( m_imagePathKey );
 }
 
 // this overridden version won't call Serialize(), but loads directly the image file

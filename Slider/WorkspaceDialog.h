@@ -22,7 +22,7 @@ private:
 
 	CComboBox m_imageScalingCombo;
 	CSpinEdit m_mruCountEdit;
-	CSpinEdit m_thumbListColCountEdit;
+	CSpinEdit m_thumbListColumnCountEdit;
 	CComboBox m_thumbBoundsSizeCombo;
 	CDurationComboBox m_slideDelayCombo;
 

@@ -150,10 +150,10 @@
 #define ID_TOGGLE_NAVIG_DIR_FWD         32797
 #define ID_TOGGLE_NAVIG_DIR_REV         32798
 #define ID_TOGGLE_NAVIG_WRAP_MODE       32799
-#define ID_NAVIG_SEEK_BEGIN             32800
-#define ID_NAVIG_SEEK_PREV              32801
-#define ID_NAVIG_SEEK_NEXT              32802
-#define ID_NAVIG_SEEK_END               32803
+#define ID_NAVIG_SEEK_PREV              32800
+#define ID_NAVIG_SEEK_NEXT              32801
+#define ID_NAVIG_SEEK_FIRST             32802
+#define ID_NAVIG_SEEK_LAST              32803
 #define ID_NAVIG_SEEK_LEFT              32804
 #define ID_NAVIG_SEEK_RIGHT             32805
 #define ID_NAVIG_SEEK_PREV_PAGE         32806

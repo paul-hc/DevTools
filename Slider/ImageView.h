@@ -43,7 +43,7 @@ public:
 	virtual void QueryImageFileDetails( ui::CImageFileDetails& rFileDetails ) const;
 
 	// IImageView interface
-	virtual const fs::ImagePathKey& GetImagePathKey( void ) const;
+	virtual fs::ImagePathKey GetImagePathKey( void ) const;
 	virtual CScrollView* GetScrollView( void );
 	virtual void RegainFocus( RegainAction regainAction, int ctrlId = 0 );
 	virtual void EventChildFrameActivated( void );

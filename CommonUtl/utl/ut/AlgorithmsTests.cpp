@@ -171,6 +171,13 @@ void CAlgorithmsTests::TestAssignment( void )
 	str::Split( otherPaths, _T("o1,o2"), s_sep );
 
 	{
+		std::set< std::tstring > files;
+
+		utl::InsertFrom( std::inserter( files, files.end() ), paths, func::tor::StringOf() );
+		ASSERT_EQUAL( _T("f1,f2,f3"), str::Join( files, s_sep ) );
+	}
+
+	{
 		std::vector< std::tstring > files;
 
 		utl::Assign( files, paths, func::tor::StringOf() );

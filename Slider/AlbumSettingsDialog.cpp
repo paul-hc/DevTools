@@ -19,6 +19,7 @@
 #include "utl/UI/resource.h"
 #include "utl/UI/DragListCtrl.hxx"
 #include "utl/Resequence.hxx"
+#include <hash_set>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -424,6 +425,9 @@ bool CAlbumSettingsDialog::SearchSourceFiles( void )
 	if ( m_pCaretFileAttr != NULL )
 		currFilePath = m_pCaretFileAttr->GetPath();
 
+	stdext::hash_set< fs::CFlexPath > oldFilePaths;
+	utl::InsertFrom( std::inserter( oldFilePaths, oldFilePaths.end() ), m_model.GetImagesModel().GetFileAttrs(), func::ToFilePath() );
+
 	try
 	{
 		m_model.SearchForFiles( this );
@@ -438,6 +442,12 @@ bool CAlbumSettingsDialog::SearchSourceFiles( void )
 		m_pCaretFileAttr = fattr::FindWithPath( m_model.GetImagesModel().GetFileAttrs(), currFilePath );
 	else
 		m_pCaretFileAttr = NULL;
+
+	m_newFilePaths.clear();
+	const std::vector< CFileAttr* >& fileAttrs = m_model.GetImagesModel().GetFileAttrs();
+	for ( std::vector< CFileAttr* >::const_iterator itFileAttr = fileAttrs.begin(); itFileAttr != fileAttrs.end(); ++itFileAttr )
+		if ( oldFilePaths.find( ( *itFileAttr )->GetPath() ) == oldFilePaths.end() )
+			m_newFilePaths.push_back( ( *itFileAttr )->GetPath() );
 
 	SetupFoundListView();		// fill in the found files list
 	SetDirty( false );
@@ -476,6 +486,10 @@ void CAlbumSettingsDialog::SetupFoundListView( void )
 
 			m_foundFilesListCtrl.SetSubItemText( i, Size, sizeText );
 			m_foundFilesListCtrl.SetSubItemText( i, Date, pFileAttr->FormatLastModifTime() );
+
+			static const ui::CTextEffect s_newFileEffect( ui::Regular, color::Blue );
+			if ( utl::Contains( m_newFilePaths, pFileAttr->GetPath() ) )
+				m_foundFilesListCtrl.MarkRowAt( i, s_newFileEffect );
 		}
 	}
 

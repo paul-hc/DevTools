@@ -517,6 +517,14 @@ namespace utl
 		std::generate( rItems.begin() + atPos, rItems.begin() + atPos + count, genFunc );
 	}
 
+
+	template< typename InsertIteratorT, typename SrcContainerT, typename ConvertUnaryFunc >
+	inline void InsertFrom( InsertIteratorT destInserter, const SrcContainerT& srcItems, ConvertUnaryFunc cvtFunc )
+	{
+		std::transform( srcItems.begin(), srcItems.end(), destInserter, cvtFunc );
+	}
+
+
 	template< typename DestContainerT, typename SrcContainerT, typename ConvertUnaryFunc >
 	inline void Assign( DestContainerT& rDestItems, const SrcContainerT& srcItems, ConvertUnaryFunc cvtFunc )
 	{
@@ -899,7 +907,7 @@ namespace utl
 
 
 	template< typename PosType >
-	bool AdvancePos( PosType& rPos, PosType count, bool circular, bool next, PosType step = 1 )
+	bool AdvancePos( PosType& rPos, PosType count, bool wrap, bool next, PosType step = 1 )
 	{
 		ASSERT( rPos < count );
 		ASSERT( count > 0 );
@@ -909,7 +917,7 @@ namespace utl
 		{
 			rPos += step;
 			if ( rPos >= count )
-				if ( circular )
+				if ( wrap )
 					rPos = 0;
 				else
 				{
@@ -921,7 +929,7 @@ namespace utl
 		{
 			rPos -= step;
 			if ( rPos < 0 || rPos >= count )		// underflow for signed/unsigned?
-				if ( circular )
+				if ( wrap )
 					rPos = count - 1;
 				else
 				{

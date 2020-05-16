@@ -17,9 +17,10 @@ namespace app
 		Slider_v4_1 = 0x41,				// new CSearchSpec::Type, ...
 		Slider_v4_2 = 0x42,				// extract CSearchModel, CSearchModel::m_maxFileCount
 		Slider_v5_0 = 0x50,				// CImagesModel, std::vector< CFileAttr* >, custom_order::COpStep::m_newDroppedIndex not shifted by m_dragSelIndexes.size()
+		Slider_v5_1 = 0x51,				// add CSlideData::m_imageFramePos
 
 			// * always update to the LATEST VERSION *
-			Slider_LatestModelSchema = Slider_v5_0
+			Slider_LatestModelSchema = Slider_v5_1
 	};
 
 

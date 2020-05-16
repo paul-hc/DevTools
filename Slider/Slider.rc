@@ -108,10 +108,10 @@ BEGIN
     SEPARATOR
     BUTTON      ID_TOGGLE_NAVIG_PLAY
     SEPARATOR
-    BUTTON      ID_NAVIG_SEEK_BEGIN
+    BUTTON      ID_NAVIG_SEEK_FIRST
     BUTTON      ID_NAVIG_SEEK_PREV
     BUTTON      ID_NAVIG_SEEK_NEXT
-    BUTTON      ID_NAVIG_SEEK_END
+    BUTTON      ID_NAVIG_SEEK_LAST
     SEPARATOR
     BUTTON      ID_TOGGLE_NAVIG_DIR_REV
     BUTTON      ID_TOGGLE_NAVIG_DIR_FWD
@@ -241,10 +241,10 @@ BEGIN
     BEGIN
         MENUITEM "&Play\tSpace",                ID_TOGGLE_NAVIG_PLAY
         MENUITEM SEPARATOR
-        MENUITEM "Goto &Begin\tHome",           ID_NAVIG_SEEK_BEGIN
+        MENUITEM "Goto &Begin\tHome",           ID_NAVIG_SEEK_FIRST
         MENUITEM "Goto Pre&vious\tUp",          ID_NAVIG_SEEK_PREV
         MENUITEM "Goto &Next\tDown",            ID_NAVIG_SEEK_NEXT
-        MENUITEM "Goto &End\tEnd",              ID_NAVIG_SEEK_END
+        MENUITEM "Goto &End\tEnd",              ID_NAVIG_SEEK_LAST
         MENUITEM SEPARATOR
         MENUITEM "&Forward Direction",          ID_TOGGLE_NAVIG_DIR_FWD
         MENUITEM "&Reverse Direction",          ID_TOGGLE_NAVIG_DIR_REV
@@ -435,8 +435,8 @@ BEGIN
             MENUITEM "Pre&vious\tUp",               ID_NAVIG_SEEK_PREV
             MENUITEM "&Next\tDown",                 ID_NAVIG_SEEK_NEXT
             MENUITEM SEPARATOR
-            MENUITEM "&Begin\tHome",                ID_NAVIG_SEEK_BEGIN
-            MENUITEM "&End\tEnd",                   ID_NAVIG_SEEK_END
+            MENUITEM "&Begin\tHome",                ID_NAVIG_SEEK_FIRST
+            MENUITEM "&End\tEnd",                   ID_NAVIG_SEEK_LAST
         END
         MENUITEM SEPARATOR
         MENUITEM "For&ward Direction",          ID_TOGGLE_NAVIG_DIR_FWD
@@ -690,8 +690,8 @@ END
 
 IDR_ALBUMTYPE_NAV ACCELERATORS 
 BEGIN
-    VK_HOME,        ID_NAVIG_SEEK_BEGIN,    VIRTKEY, NOINVERT
-    VK_END,         ID_NAVIG_SEEK_END,      VIRTKEY, NOINVERT
+    VK_HOME,        ID_NAVIG_SEEK_FIRST,    VIRTKEY, NOINVERT
+    VK_END,         ID_NAVIG_SEEK_LAST,     VIRTKEY, NOINVERT
     VK_DOWN,        ID_NAVIG_SEEK_NEXT,     VIRTKEY, NOINVERT
     VK_UP,          ID_NAVIG_SEEK_PREV,     VIRTKEY, NOINVERT
     VK_RIGHT,       ID_NAVIG_SEEK_NEXT,     VIRTKEY, NOINVERT
@@ -933,8 +933,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 5,0,0,1
- PRODUCTVERSION 5,0,0,1
+ FILEVERSION 5,1,0,1
+ PRODUCTVERSION 5,1,0,1
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -949,17 +949,17 @@ BEGIN
     BEGIN
         BLOCK "040904b0"
         BEGIN
-            VALUE "Comments", "[5.0] Images Model (ptrs)|[4.2] New schema|[4.1]|Split UTL_BASE/UTL_UI|Image viewer with slide albums|[3.9] ui::ImageScalingMode|[3.8] use image path keys"
+            VALUE "Comments", "[5.1]Frame navigation|[5.0] Images Model (ptrs)|[4.2] New schema|[4.1]|Split UTL_BASE/UTL_UI|Image viewer with slide albums|[3.9] ui::ImageScalingMode|[3.8] use image path keys"
             VALUE "CompanyName", "Paul Cocoveanu"
             VALUE "Email", "phc.2nd@gmail.com"
             VALUE "FileDescription", "Slider Application"
-            VALUE "FileVersion", "5, 0, 0, 1"
+            VALUE "FileVersion", "5, 1, 0, 1"
             VALUE "InternalName", "Slider"
             VALUE "LegalCopyright", "Copyright (C) 2000-2020"
             VALUE "LegalTrademarks", "Enjoy it."
             VALUE "OriginalFilename", "Slider.exe"
             VALUE "ProductName", "Slider Application"
-            VALUE "ProductVersion", "5, 0, 0, 1"
+            VALUE "ProductVersion", "5, 1, 0, 1"
             VALUE "WrittenBy", "Written by Paul Cocoveanu"
         END
     END
@@ -1262,10 +1262,10 @@ END
 
 STRINGTABLE 
 BEGIN
-    ID_NAVIG_SEEK_BEGIN     "Move to first image\nFirst Image (Home)"
+    ID_NAVIG_SEEK_FIRST     "Move to first image\nFirst Image (Home)"
     ID_NAVIG_SEEK_PREV      "Move to previous image\nPrevious Image (Up/Left Arrow)"
     ID_NAVIG_SEEK_NEXT      "Move to next image\nNext Image (Down/Right Arrow)"
-    ID_NAVIG_SEEK_END       "Move to last image\nLast Image (End)"
+    ID_NAVIG_SEEK_LAST      "Move to last image\nLast Image (End)"
 END
 
 STRINGTABLE 

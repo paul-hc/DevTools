@@ -57,7 +57,7 @@ protected:
 	static void EncodeDeepStreamPath( Iterator itStart, Iterator itEnd ) { std::replace( itStart, itEnd, _T('\\'), s_subPathSep ); }		// '\' -> '*'
 
 	template< typename Iterator >
-	static void DecodeDeepStreamPath( Iterator itStart, Iterator itEnd ) { std::replace( itStart, itEnd, s_subPathSep, _T('\\') ); }			// '*' -> '\'
+	static void DecodeDeepStreamPath( Iterator itStart, Iterator itEnd ) { std::replace( itStart, itEnd, s_subPathSep, _T('\\') ); }		// '*' -> '\'
 private:
 	void CreateImageFiles( std::vector< CFileAttr* >& rFileAttributes,
 						   const std::vector< TTransferPathPair >& xferPairs,

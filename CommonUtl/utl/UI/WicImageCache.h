@@ -26,7 +26,7 @@ public:
 	size_t GetCount( void ) const;
 
 	void Clear( void );
-	std::pair< CWicImage*, int > Acquire( const fs::ImagePathKey& imageKey );
+	std::pair< CWicImage*, fs::cache::TStatusFlags > Acquire( const fs::ImagePathKey& imageKey );
 	bool Discard( const fs::ImagePathKey& imageKey );
 	size_t DiscardFrames( const fs::CFlexPath& imagePath );
 
@@ -46,7 +46,7 @@ public:
 private:
 	// fs::ICacheOwner< fs::ImagePathKey, CWicImage > interface
 	virtual CWicImage* LoadObject( const fs::ImagePathKey& imageKey );
-	virtual void TraceObject( const fs::ImagePathKey& imageKey, CWicImage* pImage, int cacheFlags );
+	virtual void TraceObject( const fs::ImagePathKey& imageKey, CWicImage* pImage, fs::cache::TStatusFlags cacheFlags );
 private:
 	TCacheLoader m_imageCache;
 	static size_t s_traceCount;

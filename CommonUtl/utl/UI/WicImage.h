@@ -67,7 +67,7 @@ namespace ui
 		void Reset( const CWicImage* pImage = NULL );
 
 		bool IsValid( void ) const { return !m_filePath.IsEmpty(); }
-		bool IsMultiFrameImage( void ) const { return m_frameCount > 1; }
+		bool IsMultiFrameImage( void ) const { return !m_isAnimated && m_frameCount > 1; }
 		bool HasNavigInfo( void ) const { return m_navigCount > 1; }
 		double GetMegaPixels( void ) const;
 

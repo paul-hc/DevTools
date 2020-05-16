@@ -2,7 +2,11 @@
 #define DocumentBase_h
 #pragma once
 
+#include "utl/UI/ImagePathKey.h"
 #include "Application_fwd.h"
+
+
+class CWicImage;
 
 
 class CDocumentBase : public CDocument
@@ -12,6 +16,8 @@ protected:
 	CDocumentBase( void );
 	virtual ~CDocumentBase();
 public:
+	static CWicImage* AcquireImage( const fs::ImagePathKey& imageKey );
+
 	template< typename ViewT >
 	void UpdateAllViewsOfType( ViewT* pSenderView, int hint = 0, CObject* pHintObject = NULL )
 	{
@@ -24,9 +30,9 @@ public:
 					pView->OnUpdate( pSenderView, hint, pHintObject );
 		}
 	}
-public:
-protected:
+
 	// generated stuff
+protected:
 	DECLARE_MESSAGE_MAP()
 };
 

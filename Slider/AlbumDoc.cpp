@@ -190,14 +190,6 @@ const fs::ImagePathKey& CAlbumDoc::GetImageFilePathAt( int index ) const
 	return CWicImage::s_nullKey;
 }
 
-void CAlbumDoc::QueryNeighbouringPathKeys( std::vector< fs::ImagePathKey >& rNeighbours, size_t index ) const
-{
-	if ( index > 0 )
-		rNeighbours.push_back( m_model.GetFileAttr( index - 1 )->GetPathKey() );
-	if ( index < GetImageCount() - 1 )
-		rNeighbours.push_back( m_model.GetFileAttr( index + 1 )->GetPathKey() );
-}
-
 CAlbumImageView* CAlbumDoc::GetAlbumImageView( void ) const
 {
 	return ui::FindDocumentView< CAlbumImageView >( this );

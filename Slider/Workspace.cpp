@@ -41,7 +41,7 @@ CWorkspaceData::CWorkspaceData( void )
 	, m_defBkColor( color::VeryDarkGrey )
 	, m_imageSelColor( color::Null )
 	, m_imageSelTextColor( color::Null )
-	, m_thumbListColCount( 1 )
+	, m_thumbListColumnCount( 1 )
 	, m_thumbBoundsSize( app::GetThumbnailer()->GetBoundsSize().cx )
 {
 }
@@ -63,7 +63,7 @@ void CWorkspaceData::Save( CArchive& archive )
 	archive << m_wkspFlags;
 	archive << m_albumViewFlags;
 	archive << m_mruCount;
-	archive << m_thumbListColCount;
+	archive << m_thumbListColumnCount;
 	archive << m_defBkColor;
 	archive << m_imageSelColor;
 	archive << m_imageSelTextColor;
@@ -93,7 +93,7 @@ app::ModelSchema CWorkspaceData::Load( CArchive& archive )
 		archive >> m_wkspFlags;
 		archive >> m_albumViewFlags;
 		archive >> m_mruCount;
-		archive >> m_thumbListColCount;
+		archive >> m_thumbListColumnCount;
 		archive >> m_defBkColor;
 		archive >> m_imageSelColor;
 		archive >> m_imageSelTextColor;
@@ -171,7 +171,7 @@ void CWorkspace::Serialize( CArchive& archive )
 			archive >> m_data.m_defBkColor;
 			archive >> m_data.m_imageSelColor;
 			archive >> m_data.m_imageSelTextColor;
-			archive >> m_data.m_thumbListColCount;
+			archive >> m_data.m_thumbListColumnCount;
 			archive >> m_mainPlacement;
 			archive >> (int&)savedModelSchema;			// the real saved old version
 			archive >> m_reserved;

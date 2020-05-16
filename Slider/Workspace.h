@@ -51,7 +51,7 @@ public:
 	persist int m_wkspFlags;						// workspace flags
 	persist int m_albumViewFlags;					// albume view inherited flags
 	persist int m_mruCount;							// maximum count of files in the MRU list [0-10]
-	persist int m_thumbListColCount;				// default count of columns in the thumb list
+	persist int m_thumbListColumnCount;				// default count of columns in the thumb list
 	persist int m_thumbBoundsSize;					// size of the square bounds of the thumbnails (app::Slider_v3_6+)
 	persist ui::ImageScalingMode m_scalingMode;		// default image scaling mode (app::Slider_v4_0+)
 	persist COLORREF m_defBkColor;					// default background color

@@ -4,6 +4,7 @@
 #include "AlbumDoc.h"
 #include "AlbumDialogBar.h"
 #include "AlbumThumbListView.h"
+#include "AlbumNavigator.h"
 #include "INavigationBar.h"
 #include "FileAttr.h"
 #include "ChildFrame.h"
@@ -49,6 +50,7 @@ void CAlbumImageView::StorePeerView( CAlbumThumbListView* pPeerThumbView, CAlbum
 	// called just after creation, before initial update
 	ASSERT_NULL( m_pPeerThumbView );
 	ASSERT_NULL( m_pAlbumDialogBar );
+
 	m_pPeerThumbView = pPeerThumbView;
 	m_pAlbumDialogBar = pAlbumDialogBar;
 }
@@ -66,26 +68,36 @@ HICON CAlbumImageView::GetDocTypeIcon( void ) const
 
 CMenu& CAlbumImageView::GetDocContextMenu( void ) const
 {
-	static CMenu contextMenu;
-	if ( NULL == (HMENU)contextMenu )
-		ui::LoadPopupMenu( contextMenu, IDR_CONTEXT_MENU, app::AlbumPopup );
-	return contextMenu;
+	static CMenu s_contextMenu;
+	if ( NULL == s_contextMenu.GetSafeHmenu() )
+		ui::LoadPopupMenu( s_contextMenu, IDR_CONTEXT_MENU, app::AlbumPopup );
+
+	return s_contextMenu;
 }
 
-const fs::ImagePathKey& CAlbumImageView::GetImagePathKey( void ) const
+fs::ImagePathKey CAlbumImageView::GetImagePathKey( void ) const
 {
-	return GetDocument()->GetImageFilePathAt( m_slideData.GetCurrentIndex() );
+	fs::ImagePathKey imagePathKey = GetDocument()->GetImageFilePathAt( m_slideData.GetCurrentIndex() );
+
+	imagePathKey.second = m_slideData.GetCurrentNavPos().second;
+	return imagePathKey;
+}
+
+CWicImage* CAlbumImageView::GetImage( void ) const
+{
+	return CAlbumDoc::AcquireImage( GetImagePathKey() );
 }
 
 void CAlbumImageView::QueryImageFileDetails( ui::CImageFileDetails& rFileDetails ) const
 {
 	if ( CWicImage* pImage = GetImage() )
 	{
+		rFileDetails.Reset( pImage );
+
 		const CAlbumModel* pAlbumModel = GetDocument()->GetModel();
 		int currIndex = m_slideData.GetCurrentIndex();
 		const CFileAttr* pFileAttr = pAlbumModel->GetFileAttr( currIndex );
 
-		rFileDetails.Reset( pImage );
 		rFileDetails.m_fileSize = pFileAttr->GetFileSize();
 		rFileDetails.m_dimensions = pFileAttr->GetImageDim();
 		rFileDetails.m_navigPos = currIndex;
@@ -93,16 +105,6 @@ void CAlbumImageView::QueryImageFileDetails( ui::CImageFileDetails& rFileDetails
 	}
 	else
 		__super::QueryImageFileDetails( rFileDetails );		// reset the details
-}
-
-CWicImage* CAlbumImageView::GetImage( void ) const
-{
-	const fs::ImagePathKey& imagePathKey = GetImagePathKey();
-
-	if ( imagePathKey.first.IsEmpty() )
-		return NULL;
-
-	return CWicImageCache::Instance().Acquire( imagePathKey ).first;
 }
 
 void CAlbumImageView::OnImageContentChanged( void )
@@ -146,7 +148,6 @@ bool CAlbumImageView::IsValidIndex( size_t index ) const
 bool CAlbumImageView::UpdateImage( void )
 {
 	bool success = false;
-	CAlbumDoc* pDoc = GetDocument();
 	int currIndex = m_slideData.GetCurrentIndex();
 
 	if ( IsValidIndex( currIndex ) )
@@ -165,7 +166,7 @@ bool CAlbumImageView::UpdateImage( void )
 				success = true;
 
 				std::vector< fs::ImagePathKey > neighbours;
-				pDoc->QueryNeighbouringPathKeys( neighbours, currIndex );
+				QueryNeighbouringPathKeys( neighbours );
 				CWicImageCache::Instance().Enqueue( neighbours );			// pre-emptively load the neighboring images - enqueue and load on queue listener thread
 			}
 		}
@@ -181,6 +182,20 @@ bool CAlbumImageView::UpdateImage( void )
 	return success;
 }
 
+void CAlbumImageView::QueryNeighbouringPathKeys( std::vector< fs::ImagePathKey >& rNeighbourKeys ) const
+{
+	CAlbumNavigator navigator( this );
+	nav::TIndexFramePosPair prevNavigInfo = navigator.GetNavigateInfo( nav::Previous );
+	nav::TIndexFramePosPair nextNavigInfo = navigator.GetNavigateInfo( nav::Next );
+	nav::TIndexFramePosPair currNavigInfo = navigator.GetCurrentInfo();
+
+	if ( prevNavigInfo != currNavigInfo )
+		rNeighbourKeys.push_back( navigator.MakePathKey( prevNavigInfo ) );
+
+	if ( nextNavigInfo != currNavigInfo && nextNavigInfo != prevNavigInfo )
+		rNeighbourKeys.push_back( navigator.MakePathKey( nextNavigInfo ) );
+}
+
 bool CAlbumImageView::TogglePlay( bool doBeep /*= true*/ )
 {
 	if ( !m_navTimer.IsStarted() )
@@ -193,6 +208,12 @@ bool CAlbumImageView::TogglePlay( bool doBeep /*= true*/ )
 	return IsPlayOn();
 }
 
+void CAlbumImageView::RestartPlayTimer( void )
+{
+	if ( m_navTimer.IsStarted() )
+		m_navTimer.Start();
+}
+
 void CAlbumImageView::SetSlideDelay( UINT slideDelay )
 {
 	m_navTimer.SetElapsed( m_slideData.m_slideDelay = slideDelay );
@@ -203,15 +224,15 @@ void CAlbumImageView::HandleNavTick( void )
 	if ( ui::IsKeyPressed( VK_CONTROL ) )
 		return;				// temporarily freeze navigation
 
-	bool dirForward = m_slideData.m_dirForward == !ui::IsKeyPressed( VK_SHIFT );
-	size_t currPos = m_slideData.GetCurrentIndex();
+	CAlbumNavigator navigator( this );
+	nav::TIndexFramePosPair newNavigInfo = navigator.GetNavigateInfo( !ui::IsKeyPressed( VK_SHIFT ) ? nav::Next : nav::Previous );
 
-	if ( !utl::AdvancePos( currPos, GetDocument()->GetImageCount(), m_slideData.m_circular, dirForward ) )		// overflow/underflow?
-		if ( IsPlayOn() )
-			TogglePlay();
-
-	m_slideData.SetCurrentIndex( static_cast< int >( currPos ) );
+	m_slideData.SetCurrentNavPos( newNavigInfo );
 	UpdateImage();
+
+	if ( !m_slideData.m_wrapMode && IsPlayOn() )			// must stop at limits?
+		if ( CAlbumNavigator::IsAtLimit( this ) )			// has reached the limit (post-navigation)?
+			TogglePlay();
 }
 
 void CAlbumImageView::NavigateTo( int pos, bool relative /*= false*/ )
@@ -434,17 +455,8 @@ BEGIN_MESSAGE_MAP( CAlbumImageView, CImageView )
 	ON_UPDATE_COMMAND_UI( CM_TOGGLE_SIBLING_VIEW, OnUpdateSiblingView )
 	ON_COMMAND( ID_TOGGLE_NAVIG_PLAY, OnToggle_NavigPlay )
 	ON_UPDATE_COMMAND_UI( ID_TOGGLE_NAVIG_PLAY, OnUpdate_NavigPlay )
-	ON_COMMAND( ID_NAVIG_SEEK_BEGIN, On_NavigSeek_Begin )
-	ON_UPDATE_COMMAND_UI( ID_NAVIG_SEEK_BEGIN, OnUpdate_NavigSeek_Begin )
-	ON_COMMAND( ID_NAVIG_SEEK_END, On_NavigSeek_End )
-	ON_UPDATE_COMMAND_UI( ID_NAVIG_SEEK_END, OnUpdate_NavigSeek_End )
-
-	ON_COMMAND( ID_NAVIG_SEEK_PREV, On_NavigSeek_Prev )
-	ON_UPDATE_COMMAND_UI( ID_NAVIG_SEEK_PREV, OnUpdate_NavigSeek_Prev )
-
-	ON_COMMAND( ID_NAVIG_SEEK_NEXT, On_NavigSeek_Next )
-	ON_UPDATE_COMMAND_UI( ID_NAVIG_SEEK_NEXT, OnUpdate_NavigSeek_Next )
-
+	ON_COMMAND_RANGE( ID_NAVIG_SEEK_PREV, ID_NAVIG_SEEK_LAST, On_NavigSeek )
+	ON_UPDATE_COMMAND_UI_RANGE( ID_NAVIG_SEEK_PREV, ID_NAVIG_SEEK_LAST, OnUpdate_NavigSeek )
 	ON_COMMAND_RANGE( ID_TOGGLE_NAVIG_DIR_FWD, ID_TOGGLE_NAVIG_DIR_REV, OnRadio_NavigDirection )
 	ON_UPDATE_COMMAND_UI_RANGE( ID_TOGGLE_NAVIG_DIR_FWD, ID_TOGGLE_NAVIG_DIR_REV, OnUpdate_NavigDirection )
 	ON_COMMAND( ID_TOGGLE_NAVIG_WRAP_MODE, OnToggle_NavigWrapMode )
@@ -564,7 +576,7 @@ void CAlbumImageView::OnUpdate_NavigPlay( CCmdUI* pCmdUI )
 	bool toEnable = imageCount > 0;
 	int currIndex = m_slideData.GetCurrentIndex();
 
-	if ( toEnable && !m_slideData.m_circular )
+	if ( toEnable && !m_slideData.m_wrapMode )
 		if ( m_slideData.m_dirForward )
 			toEnable &= ( currIndex < imageCount - 1 );
 		else
@@ -574,85 +586,41 @@ void CAlbumImageView::OnUpdate_NavigPlay( CCmdUI* pCmdUI )
 	pCmdUI->SetCheck( IsPlayOn() );
 }
 
-void CAlbumImageView::On_NavigSeek_Begin( void )
+
+namespace hlp
 {
-	if ( IsPlayOn() )
-		TogglePlay( false );
-	m_slideData.SetCurrentIndex( 0 );
+	nav::Navigate CmdToNavigate( UINT cmdId )
+	{
+		switch ( cmdId )
+		{
+			default:
+				ASSERT( false );
+			case ID_NAVIG_SEEK_PREV:	return nav::Previous;
+			case ID_NAVIG_SEEK_NEXT:	return nav::Next;
+			case ID_NAVIG_SEEK_FIRST:	return nav::First;
+			case ID_NAVIG_SEEK_LAST:	return nav::Last;
+		}
+	}
+}
+
+void CAlbumImageView::On_NavigSeek( UINT cmdId )
+{
+	nav::Navigate navigate = hlp::CmdToNavigate( cmdId );
+	CAlbumNavigator navigator( this );
+	nav::TIndexFramePosPair newNavigInfo = navigator.GetNavigateInfo( navigate );
+
+	m_slideData.SetCurrentNavPos( newNavigInfo );
+
 	UpdateImage();
+	RestartPlayTimer();
 }
 
-void CAlbumImageView::OnUpdate_NavigSeek_Begin( CCmdUI* pCmdUI )
+void CAlbumImageView::OnUpdate_NavigSeek( CCmdUI* pCmdUI )
 {
-	bool hasImages = GetDocument()->HasImages();
+	nav::Navigate navigate = hlp::CmdToNavigate( pCmdUI->m_nID );
+	CAlbumNavigator navigator( this );
 
-	pCmdUI->Enable( hasImages && m_slideData.GetCurrentIndex() != 0 );
-}
-
-void CAlbumImageView::On_NavigSeek_End( void )
-{
-	if ( IsPlayOn() )
-		TogglePlay( false );
-	m_slideData.SetCurrentIndex( (int)GetDocument()->GetImageCount() - 1 );
-	UpdateImage();
-}
-
-void CAlbumImageView::OnUpdate_NavigSeek_End( CCmdUI* pCmdUI )
-{
-	CAlbumDoc* pDoc = GetDocument();
-	bool hasImages = pDoc->HasImages();
-	bool atEnd = ( m_slideData.GetCurrentIndex() == static_cast< int >( pDoc->GetImageCount() - 1 ) );
-
-	pCmdUI->Enable( hasImages && !atEnd );
-}
-
-void CAlbumImageView::On_NavigSeek_Prev( void )
-{
-	int imageCount = (int)GetDocument()->GetImageCount();
-	int currIndex = m_slideData.GetCurrentIndex();
-
-	if ( IsPlayOn() )
-		TogglePlay( false );
-
-	--currIndex;
-
-	if ( currIndex < 0 )
-		currIndex = imageCount - 1;
-
-	m_slideData.SetCurrentIndex( currIndex );
-	UpdateImage();
-}
-
-void CAlbumImageView::OnUpdate_NavigSeek_Prev( CCmdUI* pCmdUI )
-{
-	CAlbumDoc* pDoc = GetDocument();
-	bool hasImages = pDoc->HasImages();
-
-	pCmdUI->Enable( hasImages && ( m_slideData.m_circular || m_slideData.GetCurrentIndex() > 0 ) );
-}
-
-void CAlbumImageView::On_NavigSeek_Next( void )
-{
-	int imageCount = (int)GetDocument()->GetImageCount();
-	int currIndex = m_slideData.GetCurrentIndex();
-
-	if ( IsPlayOn() )
-		TogglePlay( false );
-
-	if ( ++currIndex >= imageCount )
-		currIndex = 0;
-
-	m_slideData.SetCurrentIndex( currIndex );
-	UpdateImage();
-}
-
-void CAlbumImageView::OnUpdate_NavigSeek_Next( CCmdUI* pCmdUI )
-{
-	CAlbumDoc* pDoc = GetDocument();
-	bool hasImages = pDoc->HasImages();
-	int imageCount = (int)pDoc->GetImageCount();
-
-	pCmdUI->Enable( hasImages && ( m_slideData.m_circular || m_slideData.GetCurrentIndex() < imageCount - 1 ) );
+	pCmdUI->Enable( navigator.CanNavigate( navigate ) );
 }
 
 void CAlbumImageView::OnRadio_NavigDirection( UINT cmdId )
@@ -668,13 +636,13 @@ void CAlbumImageView::OnUpdate_NavigDirection( CCmdUI* pCmdUI )
 
 void CAlbumImageView::OnToggle_NavigWrapMode( void )
 {
-	m_slideData.m_circular = !m_slideData.m_circular;
+	m_slideData.m_wrapMode = !m_slideData.m_wrapMode;
 	OnSlideDataChanged();
 }
 
 void CAlbumImageView::OnUpdate_NavigWrapMode( CCmdUI* pCmdUI )
 {
-	pCmdUI->SetCheck( m_slideData.m_circular );
+	pCmdUI->SetCheck( m_slideData.m_wrapMode );
 }
 
 void CAlbumImageView::OnUpdate_NavigSliderCtrl( CCmdUI* pCmdUI )

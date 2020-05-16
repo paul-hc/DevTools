@@ -36,8 +36,6 @@ public:
 	bool IsValidIndex( size_t index ) const { return index < GetImageCount(); }
 	const fs::ImagePathKey& GetImageFilePathAt( int index ) const;
 
-	void QueryNeighbouringPathKeys( std::vector< fs::ImagePathKey >& rNeighbours, size_t index ) const;
-
 	CImageState* GetImageState( void ) const;
 public:
 	bool EditAlbum( CAlbumImageView* pActiveView );

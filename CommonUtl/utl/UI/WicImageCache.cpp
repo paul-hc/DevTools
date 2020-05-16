@@ -39,7 +39,7 @@ CWicImage* CWicImageCache::LoadObject( const fs::ImagePathKey& imageKey )
 	return CWicImage::CreateFromFile( imageKey, IsThrowMode() ).release();
 }
 
-void CWicImageCache::TraceObject( const fs::ImagePathKey& imageKey, CWicImage* pImage, int cacheFlags )
+void CWicImageCache::TraceObject( const fs::ImagePathKey& imageKey, CWicImage* pImage, fs::cache::TStatusFlags cacheFlags )
 {
 #ifdef _DEBUG
 	std::tstring flagsText = fs::cache::GetTags_StatusFlags().FormatUi( cacheFlags, _T(",") );
@@ -65,7 +65,7 @@ size_t CWicImageCache::GetCount( void ) const
 	return m_imageCache.GetCount();
 }
 
-std::pair< CWicImage*, int > CWicImageCache::Acquire( const fs::ImagePathKey& imageKey )
+std::pair< CWicImage*, fs::cache::TStatusFlags > CWicImageCache::Acquire( const fs::ImagePathKey& imageKey )
 {
 	return m_imageCache.Acquire( imageKey );
 }

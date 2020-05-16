@@ -21,7 +21,7 @@ namespace fs
 	interface ICacheOwner
 	{
 		virtual ObjectType* LoadObject( const PathType& pathKey ) = 0;
-		virtual void TraceObject( const PathType& pathKey, ObjectType* pObject, int cacheFlags ) = 0;
+		virtual void TraceObject( const PathType& pathKey, ObjectType* pObject, cache::TStatusFlags cacheFlags ) = 0;
 	};
 
 
@@ -30,19 +30,19 @@ namespace fs
 	{
 	public:
 		typedef std::function< ObjectType*( const PathType& ) > LoadFunc;
-		typedef std::function< void( const std::pair< ObjectType*, int >&, const PathType& ) > TraceFunc;
+		typedef std::function< void( const std::pair< ObjectType*, cache::TStatusFlags >&, const PathType& ) > TraceFunc;
 
 		CCacheLoader( size_t maxSize, ICacheOwner< PathType, ObjectType >* pCacheOwner );
 		~CCacheLoader();
 
-		std::pair< ObjectType*, int > Acquire( const PathType& pathKey );		// object, cacheStatusFlags
+		std::pair< ObjectType*, cache::TStatusFlags > Acquire( const PathType& pathKey );		// object, cacheStatusFlags
 
 		cache::EnqueueResult Enqueue( const PathType& pathKey );
 		void Enqueue( const std::vector< PathType >& pathKeys );
 		void WaitPendingQueue( void ) { m_pendingQueue.WaitCompletePending(); }
 	protected:
 		// base overrides
-		virtual void TraceObject( const PathType& pathKey, ObjectType* pObject, int cacheFlags )
+		virtual void TraceObject( const PathType& pathKey, ObjectType* pObject, cache::TStatusFlags cacheFlags )
 		{
 			m_pCacheOwner->TraceObject( pathKey, pObject, cacheFlags );
 		}

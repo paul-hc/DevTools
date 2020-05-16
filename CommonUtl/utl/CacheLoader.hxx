@@ -25,12 +25,12 @@ namespace fs
 	}
 
 	template< typename PathType, typename ObjectType >
-	std::pair< ObjectType*, int > CCacheLoader< PathType, ObjectType >::Acquire( const PathType& pathKey )
+	std::pair< ObjectType*, cache::TStatusFlags > CCacheLoader< PathType, ObjectType >::Acquire( const PathType& pathKey )
 	{
 		mt::CAutoLock lock( &m_cs );
 
 		ObjectType* pObject = NULL;
-		int cacheStatus = 0;
+		cache::TStatusFlags cacheStatus = 0;
 
 		if ( const std::pair< ObjectType*, CTime >* pCachedEntry = FindEntry( pathKey ) )
 		{
@@ -56,7 +56,7 @@ namespace fs
 		if ( pObject != NULL && !HasFlag( cacheStatus, cache::CacheHit ) )
 			_Add( pathKey, pObject );
 
-		std::pair< ObjectType*, int > objectPair( pObject, cacheStatus );
+		std::pair< ObjectType*, cache::TStatusFlags > objectPair( pObject, cacheStatus );
 
 		m_pCacheOwner->TraceObject( pathKey, objectPair.first, objectPair.second );
 		return objectPair;
@@ -142,6 +142,8 @@ namespace fs
 
 				pathKey = m_queue.back();
 			}
+
+			TRACE( "Background dequeueing..." );
 			m_acquireFunc( pathKey );
 		}
 	}

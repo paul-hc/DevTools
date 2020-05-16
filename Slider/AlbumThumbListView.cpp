@@ -53,7 +53,7 @@ namespace dbg
 CFont CAlbumThumbListView::s_fontCaption;
 int CAlbumThumbListView::s_fontHeight = 0;
 
-// init according to CWorkspace::Instance().m_thumbListColCount, which is 1 by default
+// init according to CWorkspace::Instance().m_thumbListColumnCount, which is 1 by default
 DWORD CAlbumThumbListView::s_listCreationStyle = WS_VSCROLL | LBS_DISABLENOSCROLL;
 CSize CAlbumThumbListView::scrollTimerDivider( 3, 2 );
 
@@ -638,7 +638,7 @@ bool CAlbumThumbListView::CheckListLayout( CheckLayoutMode checkMode /*= Splitte
 		}
 		case AlbumViewInit:
 		case ShowCommand:
-			columnCount = m_pPeerImageView->GetSlideData().m_thumbListColCount;
+			columnCount = m_pPeerImageView->GetSlideData().m_thumbListColumnCount;
 			if ( isFullScreen || !HasFlag( m_pPeerImageView->GetSlideData().m_viewFlags, af::ShowThumbView ) )
 				columnCount = 0;		// This thumb view is to be made invisible!
 			break;
@@ -652,7 +652,7 @@ bool CAlbumThumbListView::CheckListLayout( CheckLayoutMode checkMode /*= Splitte
 		SetFlag( m_pPeerImageView->RefSlideData().m_viewFlags, af::ShowThumbView, columnCount > 0 );
 
 	if ( columnCount > 0 )
-		m_pPeerImageView->RefSlideData().m_thumbListColCount = columnCount;		// store the current column count
+		m_pPeerImageView->RefSlideData().m_thumbListColumnCount = columnCount;		// store the current column count
 	else
 		GetParentFrame()->SetActiveView( m_pPeerImageView );					// make the album view active (focused)
 

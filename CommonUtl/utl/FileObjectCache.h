@@ -27,6 +27,8 @@ namespace fs
 			LoadingError	= BIT_FLAG( 4 )
 		};
 
+		typedef int TStatusFlags;
+
 		const CFlagTags& GetTags_StatusFlags( void );
 	}
 
@@ -74,10 +76,10 @@ namespace fs
 		// not synchronized
 		const CachedEntry* _FindEntry( const PathType& pathKey, bool checkValid ) const;
 		bool _Add( const PathType& pathKey, ObjectType* pObject );
-		bool _Remove( const PathType& pathKey, int cacheFlag = cache::RemoveExpired );
+		bool _Remove( const PathType& pathKey, cache::TStatusFlags cacheFlags = cache::RemoveExpired );
 		void _RemoveExpired( void );
 
-		virtual void TraceObject( const PathType& pathKey, ObjectType* pObject, int cacheFlags ) { pathKey, pObject, cacheFlags; }
+		virtual void TraceObject( const PathType& pathKey, ObjectType* pObject, cache::TStatusFlags cacheFlags ) { pathKey, pObject, cacheFlags; }
 	private:
 		static const CTime& GetLastModifyTime( const CachedEntry& entry ) { return entry.second; }
 		static void DeleteObject( CachedEntry& entry ) { delete entry.first; }

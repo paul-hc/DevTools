@@ -2,11 +2,7 @@
 #define ImageDoc_h
 #pragma once
 
-#include "utl/UI/ImagePathKey.h"
 #include "DocumentBase.h"
-
-
-class CWicImage;
 
 
 class CImageDoc : public CDocumentBase

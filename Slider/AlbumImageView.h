@@ -35,7 +35,7 @@ public:
 	virtual void QueryImageFileDetails( ui::CImageFileDetails& rFileDetails ) const;
 
 	// IImageView overrides
-	virtual const fs::ImagePathKey& GetImagePathKey( void ) const;
+	virtual fs::ImagePathKey GetImagePathKey( void ) const;
 	virtual CWicImage* GetImage( void ) const;
 	virtual void EventChildFrameActivated( void );
 	virtual void EventNavigSliderPosChanged( bool thumbTracking );
@@ -70,6 +70,9 @@ public:
 	void OnSelChangeThumbList( void );
 private:
 	void UpdateChildBarsState( bool onInit = false );
+	void RestartPlayTimer( void );
+
+	void QueryNeighbouringPathKeys( std::vector< fs::ImagePathKey >& rNeighbourKeys ) const;
 private:
 	CSlideData m_slideData;
 	CWindowTimer m_navTimer;
@@ -99,14 +102,8 @@ protected:
 	afx_msg void OnUpdateSiblingView( CCmdUI* pCmdUI );
 	afx_msg void OnToggle_NavigPlay( void );
 	afx_msg void OnUpdate_NavigPlay( CCmdUI* pCmdUI );
-	afx_msg void On_NavigSeek_Begin( void );
-	afx_msg void OnUpdate_NavigSeek_Begin( CCmdUI* pCmdUI );
-	afx_msg void On_NavigSeek_End( void );
-	afx_msg void OnUpdate_NavigSeek_End( CCmdUI* pCmdUI );
-	afx_msg void On_NavigSeek_Prev( void );
-	afx_msg void OnUpdate_NavigSeek_Prev( CCmdUI* pCmdUI );
-	afx_msg void On_NavigSeek_Next( void );
-	afx_msg void OnUpdate_NavigSeek_Next( CCmdUI* pCmdUI );
+	afx_msg void On_NavigSeek( UINT cmdId );
+	afx_msg void OnUpdate_NavigSeek( CCmdUI* pCmdUI );
 	afx_msg void OnRadio_NavigDirection( UINT cmdId );
 	afx_msg void OnUpdate_NavigDirection( CCmdUI* pCmdUI );
 	afx_msg void OnToggle_NavigWrapMode( void );

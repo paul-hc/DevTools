@@ -104,7 +104,7 @@ void CImageView::QueryImageFileDetails( ui::CImageFileDetails& rFileDetails ) co
 		rFileDetails.Reset();
 }
 
-const fs::ImagePathKey& CImageView::GetImagePathKey( void ) const
+fs::ImagePathKey CImageView::GetImagePathKey( void ) const
 {
 	return GetDocument()->m_imagePathKey;
 }

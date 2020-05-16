@@ -774,6 +774,18 @@
 				Name="service"
 				>
 				<File
+					RelativePath=".\AlbumNavigator.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\AlbumNavigator.h"
+					>
+				</File>
+				<File
+					RelativePath=".\AlbumNavigator_fwd.h"
+					>
+				</File>
+				<File
 					RelativePath=".\FileOperation.cpp"
 					>
 				</File>

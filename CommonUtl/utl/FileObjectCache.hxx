@@ -62,7 +62,7 @@ namespace fs
 			if ( itFound->second.first == pObject )
 			{
 				TRACE( _T("[?] Attempt to add an already cached thumbnail for: ") ); TraceObject( pathKey, itFound->second.first, cache::CacheHit );
-				return false;			// skip caching same thumb if already cached
+				return false;			// skip caching already cached thumb
 			}
 			else
 				_Remove( pathKey );
@@ -77,7 +77,7 @@ namespace fs
 	}
 
 	template< typename PathType, typename ObjectType >
-	bool CFileObjectCache< PathType, ObjectType >::_Remove( const PathType& pathKey, int cacheFlag /*= cache::RemoveExpired*/ )
+	bool CFileObjectCache< PathType, ObjectType >::_Remove( const PathType& pathKey, cache::TStatusFlags cacheFlag /*= cache::RemoveExpired*/ )
 	{
 		REQUIRE( m_cachedEntries.size() == m_expireQueue.size() );			// consistent
 

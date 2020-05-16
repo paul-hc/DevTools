@@ -10,7 +10,7 @@ class CWicImage;
 
 interface IImageView
 {
-	virtual const fs::ImagePathKey& GetImagePathKey( void ) const = 0;
+	virtual fs::ImagePathKey GetImagePathKey( void ) const = 0;
 	virtual CWicImage* GetImage( void ) const = 0;
 	virtual CScrollView* GetScrollView( void ) = 0;
 

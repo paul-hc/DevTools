@@ -27,7 +27,7 @@ CWorkspaceDialog::CWorkspaceDialog( CWnd* pParent /*= NULL*/ )
 	, m_defaultSlideDelay( CWorkspace::Instance().GetDefaultSlideDelay() )
 {
 	m_mruCountEdit.SetValidRange( Range< int >( 0, 16 ) );
-	m_thumbListColCountEdit.SetValidRange( Range< int >( 1, 25 ) );
+	m_thumbListColumnCountEdit.SetValidRange( Range< int >( 1, 25 ) );
 }
 
 CWorkspaceDialog::~CWorkspaceDialog()
@@ -56,7 +56,7 @@ void CWorkspaceDialog::DoDataExchange( CDataExchange* pDX )
 	ui::DDX_EnumCombo( pDX, IDW_IMAGE_SCALING_COMBO, m_imageScalingCombo, m_data.m_scalingMode, ui::GetTags_ImageScalingMode() );
 
 	m_mruCountEdit.DDX_Number( pDX, m_data.m_mruCount, IDC_MAX_MRU_COUNT_EDIT );
-	m_thumbListColCountEdit.DDX_Number( pDX, m_data.m_thumbListColCount, IDC_THUMB_COL_COUNT_EDIT );
+	m_thumbListColumnCountEdit.DDX_Number( pDX, m_data.m_thumbListColumnCount, IDC_THUMB_COL_COUNT_EDIT );
 	DDX_Control( pDX, IDC_THUMB_BOUNDS_SIZE_COMBO, m_thumbBoundsSizeCombo );
 
 	if ( firstInit )

@@ -199,7 +199,7 @@ bool CAlbumModel::ReparentStgFileAttrsImpl( const fs::CPath& stgDocPath, Persist
 					maker.QueryDestToPaths( rFileAttrs );			// found and removed the common prefix
 			}
 
-		// reparent with the new doc stg
+		// reparent with the new doc stg (physical path)
 		std::for_each( rFileAttrs.begin(), rFileAttrs.end(),
 			func::MakeComplexPath( m_stgDocPath, HasFlag( CWorkspace::GetFlags(), wf::PrefixDeepStreamNames ) ? func::Deep : func::Flat ) );
 	}

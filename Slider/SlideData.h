@@ -3,6 +3,7 @@
 #pragma once
 
 #include "ListViewState.h"
+#include "AlbumNavigator_fwd.h"
 
 
 namespace af
@@ -39,20 +40,25 @@ public:
 	void Stream( CArchive& archive, TFirstDataMember* pExtracted_SlideDelay = NULL );
 
 	const CListViewState& GetCurrListState( void ) const { return m_currListState; }
-	CListViewState& RefCurrListState( void ) { return m_currListState; }
+	CListViewState& RefCurrListState( void ) { m_imageFramePos = 0; return m_currListState; }
 
 	int GetCurrentIndex( void ) const { return m_currListState.GetCaretIndex(); }
 	bool SetCurrentIndex( int currIndex, bool resetListState = true );
+
+	// index pair: aware of multi-frame images
+	nav::TIndexFramePosPair GetCurrentNavPos( void ) const { return nav::TIndexFramePosPair( GetCurrentIndex(), m_imageFramePos ); }
+	bool SetCurrentNavPos( const nav::TIndexFramePosPair& currentPos );
 public:
 	// sliding
 	persist TFirstDataMember m_slideDelay;		// in miliseconds
 	persist bool m_dirForward;
-	persist bool m_circular;
+	persist bool m_wrapMode;
 
-	persist int m_viewFlags;				// slider inherited flags
-	persist int m_thumbListColCount;
+	persist int m_viewFlags;					// slider inherited flags
+	persist int m_thumbListColumnCount;
 private:
 	persist CListViewState m_currListState;
+	persist UINT m_imageFramePos;
 };
 
 

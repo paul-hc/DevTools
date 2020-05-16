@@ -67,6 +67,8 @@ private:
 	const CFileAttr* m_pCaretFileAttr;
 	bool m_isDirty;
 
+	std::vector< fs::CFlexPath > m_newFilePaths;		// for highlighting new found images
+
 	CAccelTable m_dlgAccel, m_searchListAccel;
 	CFont m_symbolFont;
 private:

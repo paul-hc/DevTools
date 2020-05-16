@@ -13,10 +13,11 @@
 CSlideData::CSlideData( void )
 	: m_slideDelay( CWorkspace::Instance().GetDefaultSlideDelay() )
 	, m_dirForward( true )
-	, m_circular( false )
+	, m_wrapMode( false )
 	, m_currListState( StoreByIndex )
 	, m_viewFlags( CWorkspace::GetData().m_albumViewFlags )
-	, m_thumbListColCount( CWorkspace::GetData().m_thumbListColCount )
+	, m_thumbListColumnCount( CWorkspace::GetData().m_thumbListColumnCount )
+	, m_imageFramePos( 0 )
 {
 }
 
@@ -29,9 +30,10 @@ void CSlideData::Stream( CArchive& archive, TFirstDataMember* pExtracted_SlideDe
 	if ( archive.IsStoring() )
 	{
 		archive << m_slideDelay;
-		archive & m_dirForward & m_circular;
+		archive & m_dirForward & m_wrapMode;
 		archive << m_viewFlags;
-		archive << m_thumbListColCount;
+		archive << m_thumbListColumnCount;
+		archive << m_imageFramePos;
 	}
 	else
 	{	// check version backwards compatibility hack
@@ -40,9 +42,14 @@ void CSlideData::Stream( CArchive& archive, TFirstDataMember* pExtracted_SlideDe
 		else
 			archive >> m_slideDelay;
 
-		archive & m_dirForward & m_circular;
+		archive & m_dirForward & m_wrapMode;
 		archive >> m_viewFlags;
-		archive >> m_thumbListColCount;
+		archive >> m_thumbListColumnCount;
+
+		if ( app::GetLoadingSchema( archive ) >= app::Slider_v5_1 )
+			archive >> m_imageFramePos;
+		else
+			m_imageFramePos = 0;
 	}
 	m_currListState.Stream( archive );
 }
@@ -54,10 +61,22 @@ bool CSlideData::SetCurrentIndex( int currIndex, bool resetListState /*= true*/ 
 	if ( resetListState || currChanged )
 	{
 		m_currListState.Clear();
+
 		m_currListState.m_pIndexImpl->m_caret = currIndex;
 		m_currListState.m_pIndexImpl->m_selItems.resize( 1 );
 		m_currListState.m_pIndexImpl->m_selItems[ 0 ] = m_currListState.m_pIndexImpl->m_caret;
 		m_currListState.m_pIndexImpl->m_top = LB_ERR;
+
+		m_imageFramePos = 0;
 	}
 	return currChanged;
+}
+
+bool CSlideData::SetCurrentNavPos( const nav::TIndexFramePosPair& currentPos )
+{
+	bool changed = SetCurrentIndex( currentPos.first );
+
+	if ( utl::ModifyValue( m_imageFramePos, currentPos.second ) )
+		changed = true;
+	return changed;
 }
