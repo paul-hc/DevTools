@@ -1609,6 +1609,13 @@ bool CReportListControl::GetSelIndexBounds( int* pMinSelIndex, int* pMaxSelIndex
 	return true;
 }
 
+Range< int > CReportListControl::GetSelIndexRange( void ) const
+{
+	Range< int > selRange;
+	GetSelIndexBounds( &selRange.m_start, &selRange.m_end );
+	return selRange;
+}
+
 bool CReportListControl::Select( const void* pObject )
 {
 	int indexFound = FindItemIndex( pObject );
@@ -1678,6 +1685,9 @@ void CReportListControl::MoveSelectionTo( seq::MoveTo moveTo )
 
 		CListCtrlSequence sequence( this );
 		seq::Resequence( sequence, selIndexes, moveTo );
+
+		Range< int > maxSelIndex = GetSelIndexRange();
+		EnsureVisible( seq::MovePrev == moveTo || seq::MoveToStart == moveTo ? maxSelIndex.m_start : maxSelIndex.m_end, FALSE );
 	}
 
 	ui::SendCommandToParent( m_hWnd, lv::LVN_ItemsReorder );

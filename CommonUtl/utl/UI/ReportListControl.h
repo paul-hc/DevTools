@@ -3,6 +3,7 @@
 #pragma once
 
 #include "utl/StdHashValue.h"
+#include "utl/Range.h"
 #include "ListLikeCtrlBase.h"
 #include "Path.h"
 #include "SubjectPredicates.h"
@@ -467,6 +468,7 @@ public:
 	void SelectAll( void );
 
 	bool GetSelIndexBounds( int* pMinSelIndex, int* pMaxSelIndex ) const;
+	Range< int > GetSelIndexRange( void ) const;
 
 	template< typename ObjectT >
 	ObjectT* GetSelected( void ) const;
