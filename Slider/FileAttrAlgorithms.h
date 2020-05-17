@@ -25,7 +25,7 @@ namespace fattr
 		pDisplaySequence->resize( fileAttributes.size() );
 
 		for ( size_t pos = 0; pos != fileAttributes.size(); ++pos )
-			pDisplaySequence->at( pos ) = fileAttributes[ pos ]->GetBaselinePos();
+			pDisplaySequence->at( pos ) = static_cast< IndexT >( fileAttributes[ pos ]->GetBaselinePos() );
 	}
 
 
@@ -98,7 +98,7 @@ namespace func
 
 	struct ToBaselinePos
 	{
-		int operator()( const CFileAttr* pFileAttr ) const
+		size_t operator()( const CFileAttr* pFileAttr ) const
 		{
 			ASSERT_PTR( pFileAttr );
 			return pFileAttr->GetBaselinePos();

@@ -143,7 +143,7 @@ int CAlbumSettingsDialog::GetCurrentIndex( void ) const
 	if ( NULL == m_pCaretFileAttr )
 		return m_model.AnyFoundFiles() ? 0 : -1;
 
-	return utl::FindPos( m_model.GetImagesModel().GetFileAttrs(), m_pCaretFileAttr );
+	return static_cast<int>( utl::FindPos( m_model.GetImagesModel().GetFileAttrs(), m_pCaretFileAttr ) );
 }
 
 CMenu& CAlbumSettingsDialog::GetAlbumModelPopupMenu( void )

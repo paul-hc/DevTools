@@ -101,7 +101,7 @@ void CAlbumImageView::QueryImageFileDetails( ui::CImageFileDetails& rFileDetails
 		rFileDetails.m_fileSize = pFileAttr->GetFileSize();
 		rFileDetails.m_dimensions = pFileAttr->GetImageDim();
 		rFileDetails.m_navigPos = currIndex;
-		rFileDetails.m_navigCount = pAlbumModel->GetFileAttrCount();
+		rFileDetails.m_navigCount = static_cast<UINT>( pAlbumModel->GetFileAttrCount() );
 	}
 	else
 		__super::QueryImageFileDetails( rFileDetails );		// reset the details

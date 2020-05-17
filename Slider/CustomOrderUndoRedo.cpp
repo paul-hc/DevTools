@@ -43,7 +43,7 @@ namespace custom_order
 			if ( docModelSchema <= app::Slider_v4_2 )
 			{
 				// backwards-compatibility: m_newDroppedIndex used to be PAST dropped selection (currently is AT dropped selection)
-				m_newDroppedIndex -= m_dragSelIndexes.size();
+				m_newDroppedIndex -= static_cast<int>( m_dragSelIndexes.size() );
 				ENSURE( m_newDroppedIndex >= 0 );
 			}
 		}
