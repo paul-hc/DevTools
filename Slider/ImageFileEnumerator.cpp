@@ -1,7 +1,7 @@
 
 #include "stdafx.h"
 #include "ImageFileEnumerator.h"
-#include "SearchSpec.h"
+#include "SearchPattern.h"
 #include "FileAttr.h"
 #include "ImageArchiveStg.h"
 #include "Application_fwd.h"
@@ -20,7 +20,7 @@ CImageFileEnumerator::CImageFileEnumerator( IEnumerator* pProgressEnum /*= NULL*
 	: fs::CEnumerator( pProgressEnum )
 	, m_fileSizeRange( s_allFileSizesRange )
 	, m_issueStore( _T("Searching for images") )
-	, m_pCurrSpec( NULL )
+	, m_pCurrPattern( NULL )
 {
 }
 
@@ -28,25 +28,25 @@ CImageFileEnumerator::~CImageFileEnumerator()
 {
 }
 
-void CImageFileEnumerator::Search( const std::vector< CSearchSpec* >& searchSpecs ) throws_( CException*, CUserAbortedException )
+void CImageFileEnumerator::Search( const std::vector< CSearchPattern* >& searchPatterns ) throws_( CException*, CUserAbortedException )
 {
 	CWaitCursor wait;
 	CPushThrowMode pushThrow( &CImageArchiveStg::Factory(), true );			// report storage sharing violations, etc
 
-	for ( std::vector< CSearchSpec* >::const_iterator itSpec = searchSpecs.begin(); itSpec != searchSpecs.end(); )
+	for ( std::vector< CSearchPattern* >::const_iterator itPattern = searchPatterns.begin(); itPattern != searchPatterns.end(); )
 	{
-		m_pCurrSpec = *itSpec;
+		m_pCurrPattern = *itPattern;
 		try
 		{
 			const size_t oldFoundSize = m_foundImages.GetFileAttrs().size();
 
-			if ( m_pChainEnum != NULL && m_pCurrSpec->IsDirPath() )
-				m_pChainEnum->AddFoundSubDir( m_pCurrSpec->GetFilePath().GetPtr() );	// progress only: advance stage to the root directory
+			if ( m_pChainEnum != NULL && m_pCurrPattern->IsDirPath() )
+				m_pChainEnum->AddFoundSubDir( m_pCurrPattern->GetFilePath().GetPtr() );	// progress only: advance stage to the root directory
 
-			m_pCurrSpec->EnumImageFiles( this );
+			m_pCurrPattern->EnumImageFiles( this );
 
 			if ( oldFoundSize == m_foundImages.GetFileAttrs().size() )	// no new matching files found
-				m_issueStore.AddIssue( str::Format( _T("No matching images found in: %s"), m_pCurrSpec->GetFilePath().GetPtr() ) );
+				m_issueStore.AddIssue( str::Format( _T("No matching images found in: %s"), m_pCurrPattern->GetFilePath().GetPtr() ) );
 		}
 		catch ( CException* pExc )
 		{
@@ -62,16 +62,16 @@ void CImageFileEnumerator::Search( const std::vector< CSearchSpec* >& searchSpec
 				case IDIGNORE:	break;
 			}
 		}
-		++itSpec;
+		++itPattern;
 	}
 
 	UniquifyAll();
 }
 
-void CImageFileEnumerator::Search( const CSearchSpec& searchSpec ) throws_( CException*, CUserAbortedException )
+void CImageFileEnumerator::Search( const CSearchPattern& searchPattern ) throws_( CException*, CUserAbortedException )
 {
-	std::vector< CSearchSpec* > searchSpecs( 1, const_cast< CSearchSpec* >( &searchSpec ) );
-	Search( searchSpecs );
+	std::vector< CSearchPattern* > searchPatterns( 1, const_cast< CSearchPattern* >( &searchPattern ) );
+	Search( searchPatterns );
 }
 
 void CImageFileEnumerator::SearchImageArchive( const fs::CPath& stgDocPath ) throws_( CException*, CUserAbortedException )
@@ -98,9 +98,9 @@ bool CImageFileEnumerator::PassFilter( const CFileAttr& fileAttr ) const
 	if ( !m_fileSizeRange.Contains( fileAttr.GetFileSize() ) )
 		return false;
 
-	if ( m_pCurrSpec != NULL )
-		if ( CSearchSpec::AutoDropNumFormat == m_pCurrSpec->GetSearchMode() )
-			if ( !CSearchSpec::IsNumFileName( fileAttr.GetPath().GetPtr() ) )
+	if ( m_pCurrPattern != NULL )
+		if ( CSearchPattern::AutoDropNumFormat == m_pCurrPattern->GetSearchMode() )
+			if ( !CSearchPattern::IsNumFileName( fileAttr.GetPath().GetPtr() ) )
 				return false;
 
 	return true;

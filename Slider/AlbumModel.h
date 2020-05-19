@@ -28,8 +28,8 @@ public:
 
 	enum PersistFlag
 	{
-		AutoRegenerate = BIT_FLAG( 0 ),			// auto re-generates after loading (de-serialization)
-		UseDeepStreamPaths = BIT_FLAG( 1 )		// in an archive doc m_fileAttributes has been encoded with flag wf::PrefixDeepStreamNames on
+		AutoRegenerate		= BIT_FLAG( 0 ),		// auto re-generates after loading (de-serialization)
+		UseDeepStreamPaths	= BIT_FLAG( 1 )			// in an archive doc m_fileAttributes has been encoded with flag wf::PrefixDeepStreamNames on
 	};
 
 	bool HasPersistFlag( PersistFlag persistFlag ) const { return HasFlag( m_persistFlags, persistFlag ); }
@@ -43,7 +43,7 @@ public:
 	bool MustAutoRegenerate( void ) const { return HasPersistFlag( AutoRegenerate ) || IsAutoDropRecipient(); }
 
 	// auto-drop file reorder & rename
-	bool IsAutoDropRecipient( bool checkValidPath = true ) const;		// single search spec
+	bool IsAutoDropRecipient( bool checkValidPath = true ) const;		// single search pattern
 
 	enum PersistOp { Loading, Saving };
 
@@ -81,7 +81,7 @@ private:
 
 	// transient
 	app::ModelSchema m_modelSchema;					// model schema of this album document (persisted by the album document)
-	fs::CPath m_stgDocPath;							// set only for image archive docs, replaces m_searchSpecs
+	fs::CPath m_stgDocPath;							// set only for image archive docs, replaces m_searchPatterns
 private:
 	// persistent
 	persist CSearchModel m_searchModel;

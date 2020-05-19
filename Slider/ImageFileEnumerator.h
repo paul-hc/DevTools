@@ -8,7 +8,7 @@
 #include "ImagesModel.h"
 
 
-class CSearchSpec;
+class CSearchPattern;
 class CFileAttr;
 
 
@@ -20,8 +20,8 @@ public:
 
 	void SetFileSizeFilter( const Range< size_t >& fileSizeRange ) { m_fileSizeRange = fileSizeRange; ENSURE( m_fileSizeRange.IsNormalized() ); }
 
-	void Search( const std::vector< CSearchSpec* >& searchSpecs ) throws_( CException*, CUserAbortedException );
-	void Search( const CSearchSpec& searchSpec ) throws_( CException*, CUserAbortedException );
+	void Search( const std::vector< CSearchPattern* >& searchPatterns ) throws_( CException*, CUserAbortedException );
+	void Search( const CSearchPattern& searchPattern ) throws_( CException*, CUserAbortedException );
 	void SearchImageArchive( const fs::CPath& stgDocPath ) throws_( CException*, CUserAbortedException );
 
 	// found files
@@ -41,7 +41,7 @@ private:
 private:
 	Range< size_t > m_fileSizeRange;
 	ui::CIssueStore m_issueStore;
-	const CSearchSpec* m_pCurrSpec;
+	const CSearchPattern* m_pCurrPattern;
 
 	CImagesModel m_foundImages;
 public:

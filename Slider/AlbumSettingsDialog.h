@@ -4,11 +4,11 @@
 
 #include "AlbumModel.h"
 #include "utl/Resequence.h"
-#include "utl/UI/AccelTable.h"
+#include "utl/UI/LayoutDialog.h"
 #include "utl/UI/DialogToolBar.h"
 #include "utl/UI/DragListCtrl.h"
 #include "utl/UI/PathItemListCtrl.h"
-#include "utl/UI/LayoutDialog.h"
+#include "utl/UI/ListCtrlEditorHost.h"
 #include "utl/UI/EnumComboBox.h"
 #include "utl/UI/IconButton.h"
 #include "utl/UI/OleUtils.h"
@@ -18,6 +18,7 @@
 
 
 class CImageView;
+typedef CDragListCtrl< CPathItemListCtrl > TDragPathItemListCtrl;
 
 
 class CAlbumSettingsDialog : public CLayoutDialog
@@ -46,19 +47,24 @@ private:
 	void OutputAll( void );
 	void InputAll( void );
 
-	enum Column { FileName, Folder, Dimensions, Size, Date, Unordered = -1 };
-	static std::pair< Column, bool > ToListSortOrder( fattr::Order fileOrder );		// < sortByColumn, sortAscending >
+	enum PatternsColumn { PatternPath, PatternType, PatternDepth };
 
-	bool DropSearchSpec( const fs::CFlexPath& filePath, bool doPrompt = true );
-	bool DeleteSearchSpec( int index, bool doPrompt = true );
-	bool MoveSearchSpec( seq::Direction moveBy );
-	bool AddSearchSpec( int index );
-	bool ModifySearchSpec( int index );
+	void SetupPatternsListView( void );
+
+	enum ImagesColumn { FileName, Folder, Dimensions, Size, Date, Unordered = -1 };
+	static std::pair< ImagesColumn, bool > ToListSortOrder( fattr::Order fileOrder );		// < sortByColumn, sortAscending >
+
+	void SetupFoundImagesListView( void );
+
+	bool DropSearchPattern( const fs::CFlexPath& filePath, bool doPrompt = true );
+	bool DeleteSearchPattern( int index, bool doPrompt = true );
+	bool MoveSearchPattern( seq::Direction moveBy );
+	bool AddSearchPattern( int index );
+	bool ModifySearchPattern( int index );
 
 	int CheckForDuplicates( const TCHAR* pFilePath, int ignoreIndex = -1 );
 
 	bool SearchSourceFiles( void );
-	void SetupFoundListView( void );
 
 	void UpdateCurrentFile( void );
 	int GetCheckStateAutoRegen( void ) const;
@@ -69,23 +75,29 @@ private:
 
 	std::vector< fs::CFlexPath > m_newFilePaths;		// for highlighting new found images
 
-	CAccelTable m_dlgAccel, m_searchListAccel;
 	CFont m_symbolFont;
+	static const ui::CTextEffect s_newFileEffect;
 private:
 	// enum { IDD = IDD_ALBUM_SETTINGS_DIALOG };
+
+	CDialogToolBar m_patternsToolbar;
+	TDragPathItemListCtrl m_patternsListCtrl;
+	CListCtrlEditorHost m_patternsEditor;
+
+		CButton m_moveDownButton;
+		CButton m_moveUpButton;
+		CListBox m_searchPatternListBox;
 
 	CSpinEdit m_maxFileCountEdit;
 	CSpinEdit m_minSizeEdit;
 	CSpinEdit m_maxSizeEdit;
-	CButton m_moveDownButton;
-	CButton m_moveUpButton;
-	CListBox m_searchSpecListBox;
+
 	CEnumComboBox m_sortOrderCombo;
 	CThumbPreviewCtrl m_thumbPreviewCtrl;
 	CRegularStatic m_docVersionLabel;
 	CRegularStatic m_docVersionStatic;
-	CDialogToolBar m_toolbar;
-	CDragListCtrl< CPathItemListCtrl > m_foundFilesListCtrl;
+	CDialogToolBar m_imagesToolbar;
+	TDragPathItemListCtrl m_imagesListCtrl;
 	CIconButton m_okButton;					// overloaded text/icon, depending on dirtyness
 
 	// generated stuff
@@ -108,20 +120,20 @@ protected:
 	afx_msg void OnEnChange_MinMaxSize( void );
 	afx_msg void OnToggle_AutoRegenerate( void );
 	afx_msg void OnToggle_AutoDrop( void );
-	afx_msg void OnLBnSelChange_SearchSpec( void );
-	afx_msg void OnLBnDblclk_SearchSpec( void );
-	afx_msg void On_MoveUp_SearchSpec( void );
-	afx_msg void On_MoveDown_SearchSpec( void );
-	afx_msg void OnAdd_SearchSpec( void );
-	afx_msg void OnModify_SearchSpec( void );
-	afx_msg void OnDelete_SearchSpec( void );
+	afx_msg void OnLBnSelChange_SearchPattern( void );
+	afx_msg void OnLBnDblclk_SearchPattern( void );
+	afx_msg void On_MoveUp_SearchPattern( void );
+	afx_msg void On_MoveDown_SearchPattern( void );
+	afx_msg void OnAdd_SearchPattern( void );
+	afx_msg void OnModify_SearchPattern( void );
+	afx_msg void OnDelete_SearchPattern( void );
 	afx_msg void OnSearchSourceFiles( void );
 	afx_msg void On_OrderRandomShuffle( UINT cmdId );
 	afx_msg void OnUpdate_OrderRandomShuffle( CCmdUI* pCmdUI );
-	afx_msg void OnLVnColumnClick_FoundFiles( NMHDR* pNmHdr, LRESULT* pResult );
-	afx_msg void OnLVnItemChanged_FoundFiles( NMHDR* pNmHdr, LRESULT* pResult );
-	afx_msg void OnLVnGetDispInfo_FoundFiles( NMHDR* pNmHdr, LRESULT* pResult );
-	afx_msg void OnLVnItemsReorder_FoundFiles( void );
+	afx_msg void OnLVnColumnClick_FoundImages( NMHDR* pNmHdr, LRESULT* pResult );
+	afx_msg void OnLVnItemChanged_FoundImages( NMHDR* pNmHdr, LRESULT* pResult );
+	afx_msg void OnLVnGetDispInfo_FoundImages( NMHDR* pNmHdr, LRESULT* pResult );
+	afx_msg void OnLVnItemsReorder_FoundImages( void );
 	afx_msg void OnImageFileOp( UINT cmdId );
 	afx_msg void OnStnDblClk_ThumbPreviewStatic( void );
 

@@ -320,7 +320,7 @@ CItemsListPage::CItemsListPage( CItemListDialog* pDialog )
 	, m_pDialog( pDialog )
 	, m_rContent( m_pDialog->GetContent() )
 	, m_listCtrl( IDC_ITEMS_LIST )
-	, m_accel( IDD_ITEMS_LIST_PAGE )
+	, m_accel( IDR_LIST_EDITOR_ACCEL )
 {
 	RegisterCtrlLayout( layout::listPageStyles, COUNT_OF( layout::listPageStyles ) );
 	SetUseLazyUpdateData();			// call UpdateData on page activation change

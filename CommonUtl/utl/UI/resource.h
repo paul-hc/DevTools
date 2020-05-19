@@ -17,6 +17,7 @@
 #define IDR_DROP_COPY_CURSOR            28014
 #define IDR_TRACK_SCROLL_CURSOR         28015
 #define IDD_ITEMS_LIST_PAGE             28015
+#define IDR_LIST_EDITOR_ACCEL           28015
 #define IDR_TRACK_ZOOM_CURSOR           28016
 #define IDD_ITEMS_EDIT_PAGE             28016
 #define IDD_PROGRESS_DIALOG             28017

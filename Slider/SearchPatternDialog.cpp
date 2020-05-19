@@ -1,6 +1,6 @@
 
 #include "stdafx.h"
-#include "SearchSpecDialog.h"
+#include "SearchPatternDialog.h"
 #include "resource.h"
 #include "utl/Path.h"
 #include "utl/UI/Utilities.h"
@@ -18,25 +18,25 @@ namespace reg
 	const TCHAR entry_FilterHist[] = _T("FilterHist");
 }
 
-CSearchSpecDialog::CSearchSpecDialog( const CSearchSpec& searchSpec, CWnd* pParent /*=NULL*/ )
-	: CDialog( IDD_SEARCH_SPEC_DIALOG, pParent )
-	, m_searchSpec( searchSpec )
+CSearchPatternDialog::CSearchPatternDialog( const CSearchPattern& searchPattern, CWnd* pParent /*=NULL*/ )
+	: CDialog( IDD_SEARCH_PATTERN_DIALOG, pParent )
+	, m_searchPattern( searchPattern )
 	, m_searchPathCombo( ui::HistoryMaxSize, PROF_SEP )
 	, m_wildFiltersCombo( ui::HistoryMaxSize, PROF_SEP )
 {
 }
 
-CSearchSpecDialog::~CSearchSpecDialog()
+CSearchPatternDialog::~CSearchPatternDialog()
 {
 }
 
-void CSearchSpecDialog::DoDataExchange( CDataExchange* pDX )
+void CSearchPatternDialog::DoDataExchange( CDataExchange* pDX )
 {
 	bool firstInit = NULL == m_searchPathCombo.m_hWnd;
 
 	DDX_Control( pDX, IDC_SEARCH_FOLDER_COMBO, m_searchPathCombo );
 	DDX_Control( pDX, IDC_SEARCH_FILTERS_COMBO, m_wildFiltersCombo );
-	ui::DDX_EnumSelValue( pDX, IDC_SEARCH_OPTIONS_COMBO, m_searchSpec.RefSearchMode() );
+	ui::DDX_EnumSelValue( pDX, IDC_SEARCH_OPTIONS_COMBO, m_searchPattern.RefSearchMode() );
 
 	if ( DialogOutput == pDX->m_bSaveAndValidate )
 	{
@@ -50,14 +50,14 @@ void CSearchSpecDialog::DoDataExchange( CDataExchange* pDX )
 		}
 	}
 
-	ui::DDX_PathItem( pDX, IDC_SEARCH_FOLDER_COMBO, &m_searchSpec );
-	ui::DDX_Text( pDX, IDC_SEARCH_FILTERS_COMBO, m_searchSpec.RefWildFilters(), true );
+	ui::DDX_PathItem( pDX, IDC_SEARCH_FOLDER_COMBO, &m_searchPattern );
+	ui::DDX_Text( pDX, IDC_SEARCH_FILTERS_COMBO, m_searchPattern.RefWildFilters(), true );
 
 	if ( DialogSaveChanges == pDX->m_bSaveAndValidate )
 	{	// setup the search attributes from itself
-		m_searchSpec.SetAutoType();
+		m_searchPattern.SetAutoType();
 
-		if ( m_searchSpec.IsValidPath() )
+		if ( m_searchPattern.IsValidPath() )
 			m_searchPathCombo.SaveHistory( reg::section_search, reg::entry_FolderHist );
 
 		m_wildFiltersCombo.SaveHistory( reg::section_search, reg::entry_FilterHist );
@@ -66,7 +66,7 @@ void CSearchSpecDialog::DoDataExchange( CDataExchange* pDX )
 	CDialog::DoDataExchange( pDX );
 }
 
-bool CSearchSpecDialog::ValidateOK( ui::ComboField byField /*= BySel*/ )
+bool CSearchPatternDialog::ValidateOK( ui::ComboField byField /*= BySel*/ )
 {
 	std::tstring searchPath = ui::GetComboSelText( m_searchPathCombo, byField );
 
@@ -82,7 +82,7 @@ bool CSearchSpecDialog::ValidateOK( ui::ComboField byField /*= BySel*/ )
 
 // message handlers
 
-BEGIN_MESSAGE_MAP( CSearchSpecDialog, CDialog )
+BEGIN_MESSAGE_MAP( CSearchPatternDialog, CDialog )
 	ON_WM_DROPFILES()
 	ON_BN_CLICKED( IDC_BROWSE_FOLDER_BUTTON, CmBrowseFolder )
 	ON_CBN_EDITCHANGE( IDC_SEARCH_FOLDER_COMBO, OnCBnEditChangeSearchFolder )
@@ -90,7 +90,7 @@ BEGIN_MESSAGE_MAP( CSearchSpecDialog, CDialog )
 	ON_BN_CLICKED( IDC_BROWSE_FILE_BUTTON, CmBrowseFileButton )
 END_MESSAGE_MAP()
 
-BOOL CSearchSpecDialog::OnInitDialog( void )
+BOOL CSearchPatternDialog::OnInitDialog( void )
 {
 	CDialog::OnInitDialog();
 	DragAcceptFiles();
@@ -99,7 +99,7 @@ BOOL CSearchSpecDialog::OnInitDialog( void )
 	return TRUE;
 }
 
-void CSearchSpecDialog::OnDropFiles( HDROP hDropInfo )
+void CSearchPatternDialog::OnDropFiles( HDROP hDropInfo )
 {
 	UINT fileCount = ::DragQueryFile( hDropInfo, (UINT)-1, NULL, 0 );
 	if ( fileCount >= 1 )
@@ -112,34 +112,34 @@ void CSearchSpecDialog::OnDropFiles( HDROP hDropInfo )
 	::DragFinish( hDropInfo );
 }
 
-void CSearchSpecDialog::CmBrowseFolder( void )
+void CSearchPatternDialog::CmBrowseFolder( void )
 {
-	CSearchSpec editSearchSpec( m_searchPathCombo.GetCurrentText() );
-	if ( editSearchSpec.BrowseFilePath( CSearchSpec::BrowseAsDirPath, this ) )
+	CSearchPattern editSearchPattern( m_searchPathCombo.GetCurrentText() );
+	if ( editSearchPattern.BrowseFilePath( CSearchPattern::BrowseAsDirPath, this ) )
 	{
-		ui::SetComboEditText( m_searchPathCombo, editSearchSpec.GetFilePath().Get() );
+		ui::SetComboEditText( m_searchPathCombo, editSearchPattern.GetFilePath().Get() );
 		GotoDlgCtrl( &m_searchPathCombo );
 		ValidateOK();
 	}
 }
 
-void CSearchSpecDialog::CmBrowseFileButton( void )
+void CSearchPatternDialog::CmBrowseFileButton( void )
 {
-	CSearchSpec editSearchSpec( m_searchPathCombo.GetCurrentText() );
-	if ( editSearchSpec.BrowseFilePath( CSearchSpec::BrowseAsFilePath, this ) )
+	CSearchPattern editSearchPattern( m_searchPathCombo.GetCurrentText() );
+	if ( editSearchPattern.BrowseFilePath( CSearchPattern::BrowseAsFilePath, this ) )
 	{
-		ui::SetComboEditText( m_searchPathCombo, editSearchSpec.GetFilePath().Get() );
+		ui::SetComboEditText( m_searchPathCombo, editSearchPattern.GetFilePath().Get() );
 		GotoDlgCtrl( &m_searchPathCombo );
 		ValidateOK();
 	}
 }
 
-void CSearchSpecDialog::OnCBnEditChangeSearchFolder( void )
+void CSearchPatternDialog::OnCBnEditChangeSearchFolder( void )
 {
 	ValidateOK( ui::ByEdit );
 }
 
-void CSearchSpecDialog::OnCBnSelChangeSearchFolder( void )
+void CSearchPatternDialog::OnCBnSelChangeSearchFolder( void )
 {
 	ValidateOK( ui::BySel );
 }

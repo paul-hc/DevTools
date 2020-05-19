@@ -1,19 +1,22 @@
-#ifndef SearchSpec_h
-#define SearchSpec_h
+#ifndef SearchPattern_h
+#define SearchPattern_h
 #pragma once
 
 #include "utl/FileSystem.h"
 #include "utl/PathItemBase.h"
 
 
-class CSearchSpec : public CPathItemBase
+class CEnumTags;
+
+
+class CSearchPattern : public CPathItemBase
 {
 public:
 	enum Type
 	{
 		DirPath,			// directory path
 		ArchiveStgFile,		// file-path of an OLE compound file of type .scf
-		ExplicitFile		// explicit file specifier
+		ExplicitFile		// explicit file specifier (not a pattern)
 	};
 
 	enum SearchMode
@@ -23,13 +26,16 @@ public:
 		AutoDropNumFormat	// filter only numeric format fnames (e.g. "0001.jpg")
 	};
 
+	static const CEnumTags& GetTags_Type( void );
+	static const CEnumTags& GetTags_SearchMode( void );
+
 	enum BrowseMode { BrowseAsIs, BrowseAsDirPath, BrowseAsFilePath };
 public:
-	CSearchSpec( void );
-	CSearchSpec( const fs::CPath& searchPath );
+	CSearchPattern( void );
+	CSearchPattern( const fs::CPath& searchPath );
 
-	bool operator==( const CSearchSpec& right ) const;
-	bool operator!=( const CSearchSpec& right ) const { return !operator==( right ); }
+	bool operator==( const CSearchPattern& right ) const;
+	bool operator!=( const CSearchPattern& right ) const { return !operator==( right ); }
 
 	// base overrides
 	virtual void SetFilePath( const fs::CPath& filePath );
@@ -76,4 +82,4 @@ private:
 };
 
 
-#endif // SearchSpec_h
+#endif // SearchPattern_h

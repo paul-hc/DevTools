@@ -1434,6 +1434,14 @@
 					>
 				</File>
 				<File
+					RelativePath=".\ListCtrlEditorHost.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\ListCtrlEditorHost.h"
+					>
+				</File>
+				<File
 					RelativePath=".\ListLikeCtrlBase.cpp"
 					>
 				</File>

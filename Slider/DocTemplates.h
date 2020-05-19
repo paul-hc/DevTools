@@ -7,7 +7,7 @@
 
 
 class CAlbumDoc;
-class CSearchSpec;
+class CSearchPattern;
 namespace fs { class CPath; }
 
 

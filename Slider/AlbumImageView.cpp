@@ -324,7 +324,7 @@ void CAlbumImageView::OnAutoDropRecipientChanged( void )
 	{	// auto drop has changed
 		m_isDropTargetEnabled = pDoc->GetModel()->IsAutoDropRecipient();
 
-		pDoc->InitAutoDropRecipient();			// setup/clear the auto-drop recipient search spec
+		pDoc->InitAutoDropRecipient();			// setup/clear the auto-drop recipient search pattern
 
 		DragAcceptFiles( m_isDropTargetEnabled );
 		m_pPeerThumbView->DragAcceptFiles( m_isDropTargetEnabled );

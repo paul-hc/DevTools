@@ -1,9 +1,10 @@
 
 #include "stdafx.h"
-#include "SearchSpec.h"
+#include "SearchPattern.h"
 #include "ImageArchiveStg.h"
 #include "Application_fwd.h"
 #include "resource.h"
+#include "utl/EnumTags.h"
 #include "utl/FileEnumerator.h"
 #include "utl/Serialization.h"
 #include "utl/SerializeStdTypes.h"
@@ -16,20 +17,20 @@
 #endif
 
 
-CSearchSpec::CSearchSpec( void )
+CSearchPattern::CSearchPattern( void )
 	: CPathItemBase( fs::CPath() )
 	, m_type( DirPath )
 	, m_searchMode( RecurseSubDirs )
 {
 }
 
-CSearchSpec::CSearchSpec( const fs::CPath& searchPath )
+CSearchPattern::CSearchPattern( const fs::CPath& searchPath )
 	: CPathItemBase( fs::CPath() )
 {
 	SetFilePath( searchPath );
 }
 
-void CSearchSpec::Stream( CArchive& archive )
+void CSearchPattern::Stream( CArchive& archive )
 {
 	__super::Stream( archive );
 
@@ -56,7 +57,7 @@ void CSearchSpec::Stream( CArchive& archive )
 	}
 }
 
-void CSearchSpec::SetFilePath( const fs::CPath& filePath )
+void CSearchPattern::SetFilePath( const fs::CPath& filePath )
 {
 	__super::SetFilePath( filePath );
 
@@ -75,7 +76,7 @@ void CSearchSpec::SetFilePath( const fs::CPath& filePath )
 	}
 }
 
-CSearchSpec::Type CSearchSpec::CheckType( void ) const
+CSearchPattern::Type CSearchPattern::CheckType( void ) const
 {
 	if ( fs::IsValidDirectory( GetFilePath().GetPtr() ) )
 		return DirPath;
@@ -88,7 +89,7 @@ CSearchSpec::Type CSearchSpec::CheckType( void ) const
 	return BestGuessType( GetFilePath() );
 }
 
-CSearchSpec::Type CSearchSpec::BestGuessType( const fs::CPath& searchPath )
+CSearchPattern::Type CSearchPattern::BestGuessType( const fs::CPath& searchPath )
 {
 	if ( CImageArchiveStg::HasImageArchiveExt( searchPath.GetPtr() ) )
 		return ArchiveStgFile;
@@ -98,7 +99,7 @@ CSearchSpec::Type CSearchSpec::BestGuessType( const fs::CPath& searchPath )
 	return ExplicitFile;
 }
 
-const std::tstring& CSearchSpec::GetSafeWildFilters( void ) const
+const std::tstring& CSearchPattern::GetSafeWildFilters( void ) const
 {
 	ASSERT( IsDirPath() );
 
@@ -108,7 +109,7 @@ const std::tstring& CSearchSpec::GetSafeWildFilters( void ) const
 	return m_wildFilters;
 }
 
-bool CSearchSpec::BrowseFilePath( BrowseMode pathType /*= BrowseAsIs*/, CWnd* pParentWnd /*= NULL*/, DWORD extraFlags /*= OFN_FILEMUSTEXIST*/ )
+bool CSearchPattern::BrowseFilePath( BrowseMode pathType /*= BrowseAsIs*/, CWnd* pParentWnd /*= NULL*/, DWORD extraFlags /*= OFN_FILEMUSTEXIST*/ )
 {
 	std::tstring filePath = GetFilePath().Get();
 
@@ -135,7 +136,7 @@ bool CSearchSpec::BrowseFilePath( BrowseMode pathType /*= BrowseAsIs*/, CWnd* pP
 	return true;
 }
 
-void CSearchSpec::EnumImageFiles( fs::IEnumerator* pEnumerator ) const
+void CSearchPattern::EnumImageFiles( fs::IEnumerator* pEnumerator ) const
 {
 	if ( !IsValidPath() )
 		AfxThrowFileException( CFileException::fileNotFound, -1, GetFilePath().GetPtr() );		// folder path doesn't exist
@@ -152,14 +153,14 @@ void CSearchSpec::EnumImageFiles( fs::IEnumerator* pEnumerator ) const
 	}
 }
 
-bool CSearchSpec::IsNumFileName( const TCHAR* pFullPath )
+bool CSearchPattern::IsNumFileName( const TCHAR* pFullPath )
 {
 	std::tstring fname( path::FindFilename( pFullPath ), path::FindExt( pFullPath ) );
 	Range< size_t > numSeq = num::FindNumericSequence( fname );
 	return numSeq.IsNonEmpty();
 }
 
-int CSearchSpec::ParseNumFileNameNumber( const TCHAR* pFullPath )
+int CSearchPattern::ParseNumFileNameNumber( const TCHAR* pFullPath )
 {
 	std::tstring fname( path::FindFilename( pFullPath ), path::FindExt( pFullPath ) );
 	Range< size_t > numSeq = num::FindNumericSequence( fname );
@@ -170,9 +171,21 @@ int CSearchSpec::ParseNumFileNameNumber( const TCHAR* pFullPath )
 	return number;
 }
 
-std::tstring CSearchSpec::FormatNumericFilePath( const TCHAR* pFullPath, int numSeq )
+std::tstring CSearchPattern::FormatNumericFilePath( const TCHAR* pFullPath, int numSeq )
 {
 	fs::CPathParts parts( pFullPath );
 	parts.m_fname = str::Format( _T("%04d"), numSeq );
 	return parts.MakePath().Get();
+}
+
+const CEnumTags& CSearchPattern::GetTags_Type( void )
+{
+	static const CEnumTags s_tags( _T("Folder|Image Archive|Image") );
+	return s_tags;
+}
+
+const CEnumTags& CSearchPattern::GetTags_SearchMode( void )
+{
+	static const CEnumTags s_tags( _T("Shallow|Recurse|Auto-drop") );
+	return s_tags;
 }

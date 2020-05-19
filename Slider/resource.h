@@ -11,9 +11,7 @@
 #define IDR_COMMAND_BAR_ACCEL           143
 #define IDR_CONTEXT_MENU                149
 #define IDD_ALBUM_SETTINGS_DIALOG       150
-#define IDD_SEARCH_SPEC_DIALOG          151
-#define IDR_ALBUM_DLG_ACCEL             152
-#define IDR_ALBUM_DLG_SEARCH_SPEC_ACCEL 153
+#define IDD_SEARCH_PATTERN_DIALOG       151
 #define IDR_ALBUMTYPE_NAV               159
 #define IDD_FILE_MOVE_DIALOG            161
 #define IDD_LOGGER_DIALOG               162
@@ -39,6 +37,7 @@
 #define IDC_SCROLL_POS_SPIN             1011
 #define IDC_NAV_COUNT_STATIC            1013
 #define IDC_PLAY_DELAY_COMBO            1014
+#define IDC_PATTERNS_LISTVIEW           1015
 #define IDC_SEARCH_SPEC_LIST            1016
 #define IDC_SEARCH_SPEC_MOVE_UP         1020
 #define IDC_SEARCH_SPEC_MOVE_DOWN       1021
@@ -47,7 +46,7 @@
 #define IDC_MAX_FILE_SIZE_CHECK         1025
 #define IDC_MAX_FILE_SIZE_EDIT          1026
 #define IDC_MAX_FILE_COUNT_CHECK        1027
-#define IDC_FOUND_FILES_LISTVIEW        1028
+#define IDC_FOUND_IMAGES_LISTVIEW       1028
 #define IDC_LIST_ORDER_COMBO            1029
 #define IDC_SEARCH_FOR_FILES            1030
 #define IDC_MAX_FILE_COUNT_EDIT         1030
@@ -65,8 +64,6 @@
 #define IDC_CLEAR_THUMB_CACHE_BUTTON    1048
 #define IDC_THUMB_COL_COUNT_EDIT        1050
 #define IDC_FOUND_FILES_STATIC          1053
-#define IDC_SEARCH_SPEC_STATIC          1054
-#define IDC_FOUND_FILES_GAP             1055
 #define IDC_LIST_ORDER_STATIC           1056
 #define IDC_THUMB_PREVIEW_STATIC        1057
 #define IDC_AUTO_DROP_CHECK             1059
@@ -215,7 +212,7 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_3D_CONTROLS                1
+#define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        176
 #define _APS_NEXT_COMMAND_VALUE         32882
 #define _APS_NEXT_CONTROL_VALUE         1094

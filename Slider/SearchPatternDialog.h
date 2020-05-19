@@ -1,24 +1,24 @@
-#ifndef SearchSpecDialog_h
-#define SearchSpecDialog_h
+#ifndef SearchPatternDialog_h
+#define SearchPatternDialog_h
 #pragma once
 
 #include "AlbumModel.h"
-#include "SearchSpec.h"
+#include "SearchPattern.h"
 #include "utl/UI/HistoryComboBox.h"
 #include "utl/UI/ui_fwd.h"
 
 
-class CSearchSpecDialog : public CDialog
+class CSearchPatternDialog : public CDialog
 {
 public:
-	CSearchSpecDialog( const CSearchSpec& searchSpec, CWnd* pParent = NULL );
-	virtual ~CSearchSpecDialog();
+	CSearchPatternDialog( const CSearchPattern& searchPattern, CWnd* pParent = NULL );
+	virtual ~CSearchPatternDialog();
 private:
 	bool ValidateOK( ui::ComboField byField = ui::BySel );
 public:
-	CSearchSpec m_searchSpec;
+	CSearchPattern m_searchPattern;
 private:
-	// enum { IDD = IDD_SEARCH_SPEC_DIALOG };
+	// enum { IDD = IDD_SEARCH_PATTERN_DIALOG };
 	CHistoryComboBox m_searchPathCombo;
 	CHistoryComboBox m_wildFiltersCombo;
 
@@ -37,4 +37,4 @@ protected:
 };
 
 
-#endif // SearchSpecDialog_h
+#endif // SearchPatternDialog_h

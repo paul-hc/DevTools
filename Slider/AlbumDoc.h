@@ -71,7 +71,7 @@ private:
 public:
 	persist CSlideData m_slideData;						// always altered by CAlbumImageView::OnActivateView()
 private:
-	persist CAlbumModel m_model;					// image file list (search specifiers + found files)
+	persist CAlbumModel m_model;					// image file list (search patterns + found files)
 	persist COLORREF m_bkColor;							// album background color
 	persist int m_docFlags;								// persistent document flags
 	persist custom_order::COpStack m_customOrderUndoStack;	

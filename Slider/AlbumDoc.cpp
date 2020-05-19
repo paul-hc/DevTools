@@ -3,7 +3,7 @@
 #include "AlbumDoc.h"
 #include "Workspace.h"
 #include "DocTemplates.h"
-#include "SearchSpec.h"
+#include "SearchPattern.h"
 #include "FileAttr.h"
 #include "AlbumSettingsDialog.h"
 #include "ArchiveImagesDialog.h"
@@ -465,14 +465,14 @@ bool CAlbumDoc::UndoRedoCustomOrder( custom_order::COpStack& rFromStack, custom_
 
 bool CAlbumDoc::InitAutoDropRecipient( void )
 {
-	CSearchSpec dropRecSearchSpec;
+	CSearchPattern dropRecSearchPattern;
 
 	if ( m_model.IsAutoDropRecipient( false ) )
-		dropRecSearchSpec = *m_model.RefSearchModel()->RefSingleSpec();
+		dropRecSearchPattern = *m_model.RefSearchModel()->RefSinglePattern();
 	else
 		m_autoDropContext.Clear();
 
-	return m_autoDropContext.InitAutoDropRecipient( dropRecSearchSpec );		// init auto-drop context's search attribute
+	return m_autoDropContext.InitAutoDropRecipient( dropRecSearchPattern );		// init auto-drop context's search attribute
 }
 
 // typically called when auto-drop turned off -> clear the undo buffer and all related data
@@ -697,16 +697,16 @@ void CAlbumDoc::OnUpdateRegenerateAlbum( CCmdUI* pCmdUI )
 
 void CAlbumDoc::OnToggleIsAutoDrop( void )
 {
-	CSearchSpec* pSearchSpec = m_model.RefSearchModel()->RefSingleSpec();
-	ASSERT_PTR( pSearchSpec );
-	ASSERT( pSearchSpec->IsDirPath() );
+	CSearchPattern* pSearchPattern = m_model.RefSearchModel()->RefSinglePattern();
+	ASSERT_PTR( pSearchPattern );
+	ASSERT( pSearchPattern->IsDirPath() );
 
 	CWaitCursor wait;
 
 	if ( !m_model.IsAutoDropRecipient( false ) )
-		pSearchSpec->SetSearchMode( CSearchSpec::AutoDropNumFormat );		// turn auto-drop ON
+		pSearchPattern->SetSearchMode( CSearchPattern::AutoDropNumFormat );		// turn auto-drop ON
 	else
-		pSearchSpec->SetSearchMode( CSearchSpec::RecurseSubDirs );			// turn auto-drop OFF
+		pSearchPattern->SetSearchMode( CSearchPattern::RecurseSubDirs );			// turn auto-drop OFF
 
 	// regenerate the file list
 	try
@@ -732,8 +732,8 @@ void CAlbumDoc::OnUpdateIsAutoDrop( CCmdUI* pCmdUI )
 {
 	bool enable = false;
 
-	if ( const CSearchSpec* pSearchSpec = m_model.GetSearchModel()->GetSingleSpec() )
-		enable = pSearchSpec->IsDirPath() && pSearchSpec->IsValidPath();
+	if ( const CSearchPattern* pSearchPattern = m_model.GetSearchModel()->GetSinglePattern() )
+		enable = pSearchPattern->IsDirPath() && pSearchPattern->IsValidPath();
 
 	pCmdUI->Enable( enable );
 	pCmdUI->SetCheck( m_model.IsAutoDropRecipient( false ) );

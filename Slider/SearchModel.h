@@ -5,7 +5,7 @@
 #include "utl/Range.h"
 
 
-class CSearchSpec;
+class CSearchPattern;
 namespace app { enum ModelSchema; }
 
 
@@ -27,23 +27,23 @@ public:
 	const Range< UINT >& GetFileSizeRange( void ) const { return m_fileSizeRange; }
 	void SetFileSizeRange( const Range< UINT >& fileSizeRange ) { m_fileSizeRange = fileSizeRange; }
 
-	const std::vector< CSearchSpec* >& GetSpecs( void ) const { return m_searchSpecs; }
-	std::vector< CSearchSpec* >& RefSpecs( void ) { return m_searchSpecs; }
+	const std::vector< CSearchPattern* >& GetPatterns( void ) const { return m_patterns; }
+	std::vector< CSearchPattern* >& RefPatterns( void ) { return m_patterns; }
 
-	CSearchSpec* GetSpecAt( size_t pos ) const { ASSERT( pos < m_searchSpecs.size() ); return m_searchSpecs[ pos ]; }
-	void AddSpec( CSearchSpec* pSearchSpec, size_t pos = utl::npos );
+	CSearchPattern* GetPatternAt( size_t pos ) const { ASSERT( pos < m_patterns.size() ); return m_patterns[ pos ]; }
+	void AddPattern( CSearchPattern* pPattern, size_t pos = utl::npos );
 	void AddSearchPath( const fs::CPath& searchPath, size_t pos = utl::npos );
-	std::auto_ptr< CSearchSpec > RemoveSpecAt( size_t pos );
-	void ClearSpecs( void );
-	int FindSpecPos( const fs::CPath& searchPath ) const;
+	std::auto_ptr< CSearchPattern > RemovePatternAt( size_t pos );
+	void ClearPatterns( void );
+	int FindPatternPos( const fs::CPath& searchPath ) const;
 
-	bool IsSingleSpec( void ) const { return 1 == m_searchSpecs.size(); }
-	const CSearchSpec* GetSingleSpec( void ) const { return IsSingleSpec() ? m_searchSpecs.front() : NULL; }
-	CSearchSpec* RefSingleSpec( void ) { ASSERT( 1 == m_searchSpecs.size() ); return m_searchSpecs.front(); }
+	bool IsSinglePattern( void ) const { return 1 == m_patterns.size(); }
+	const CSearchPattern* GetSinglePattern( void ) const { return IsSinglePattern() ? m_patterns.front() : NULL; }
+	CSearchPattern* RefSinglePattern( void ) { ASSERT( 1 == m_patterns.size() ); return m_patterns.front(); }
 private:
 	persist UINT m_maxFileCount;							// max count filter of found files (Slider_v4_2 +)
 	persist Range< UINT > m_fileSizeRange;					// size filter for found files (UINT for 32/64 bit portability)
-	persist std::vector< CSearchSpec* > m_searchSpecs;		// search specifiers used for searching the file list
+	persist std::vector< CSearchPattern* > m_patterns;		// search patterns used for searching the file list
 public:
 	static const Range< UINT > s_anyFileSizeRange;			// no file size filtering
 };

@@ -1,7 +1,7 @@
 
 #include "stdafx.h"
 #include "AlbumModel.h"
-#include "SearchSpec.h"
+#include "SearchPattern.h"
 #include "FileAttr.h"
 #include "FileAttrAlgorithms.h"
 #include "ImageArchiveStg.h"
@@ -70,7 +70,7 @@ void CAlbumModel::Stream( CArchive& archive )
 		archive >> m_searchModel.m_fileSizeRange;
 		archive >> m_persistFlags;
 
-		serial::StreamOwningPtrs( archive, m_searchModel.m_searchSpecs );
+		serial::StreamOwningPtrs( archive, m_searchModel.m_patterns );
 	}
 	else
 	{
@@ -109,7 +109,7 @@ bool CAlbumModel::SetupSearchPath( const fs::CPath& searchPath )
 	if ( !searchPath.FileExist() )
 		return false;
 
-	m_searchModel.ClearSpecs();
+	m_searchModel.ClearPatterns();
 	m_stgDocPath.Clear();
 
 	if ( fs::IsValidDirectory( searchPath.GetPtr() ) )
@@ -125,8 +125,8 @@ bool CAlbumModel::SetupSearchPath( const fs::CPath& searchPath )
 
 bool CAlbumModel::IsAutoDropRecipient( bool checkValidPath /*= true*/ ) const
 {
-	if ( const CSearchSpec* pSingleSpec = m_searchModel.GetSingleSpec() )
-		return pSingleSpec->IsAutoDropDirPath( checkValidPath );
+	if ( const CSearchPattern* pSinglePattern = m_searchModel.GetSinglePattern() )
+		return pSinglePattern->IsAutoDropDirPath( checkValidPath );
 
 	return false;
 }
@@ -137,9 +137,9 @@ void CAlbumModel::CloseAssocImageArchiveStgs( void )
 	if ( !m_stgDocPath.IsEmpty() )
 		CImageArchiveStg::Factory().ReleaseStorage( m_stgDocPath );
 
-	for ( std::vector< CSearchSpec* >::const_iterator itSearch = m_searchModel.GetSpecs().begin(); itSearch != m_searchModel.GetSpecs().end(); ++itSearch )
-		if ( ( *itSearch )->IsImageArchiveDoc() )
-			CImageArchiveStg::Factory().ReleaseStorage( ( *itSearch )->GetFilePath() );
+	for ( std::vector< CSearchPattern* >::const_iterator itPattern = m_searchModel.GetPatterns().begin(); itPattern != m_searchModel.GetPatterns().end(); ++itPattern )
+		if ( ( *itPattern )->IsImageArchiveDoc() )
+			CImageArchiveStg::Factory().ReleaseStorage( ( *itPattern )->GetFilePath() );
 
 	m_imagesModel.Clear();
 }
@@ -183,7 +183,7 @@ bool CAlbumModel::ReparentStgFileAttrsImpl( const fs::CPath& stgDocPath, Persist
 
 	if ( stgDocPath != m_stgDocPath )								// different stgDocPath, need to store and reparent
 	{
-		m_searchModel.ClearSpecs();
+		m_searchModel.ClearPatterns();
 		m_stgDocPath = stgDocPath;
 
 		// clear the common prefix to the actual logical root of the album
@@ -280,7 +280,7 @@ void CAlbumModel::SearchForFiles( CWnd* pParentWnd, bool reportEmpty /*= true*/ 
 			if ( !m_stgDocPath.IsEmpty() )
 				imageEnum.SearchImageArchive( m_stgDocPath );
 			else
-				imageEnum.Search( m_searchModel.GetSpecs() );
+				imageEnum.Search( m_searchModel.GetPatterns() );
 		}
 		catch ( CUserAbortedException& exc )
 		{

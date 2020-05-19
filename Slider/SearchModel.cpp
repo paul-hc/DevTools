@@ -1,7 +1,7 @@
 
 #include "stdafx.h"
 #include "SearchModel.h"
-#include "SearchSpec.h"
+#include "SearchPattern.h"
 #include "ModelSchema.h"
 #include "utl/Serialization.h"
 #include "utl/SerializeStdTypes.h"
@@ -21,7 +21,7 @@ CSearchModel::CSearchModel( void )
 
 CSearchModel::~CSearchModel()
 {
-	ClearSpecs();
+	ClearPatterns();
 }
 
 CSearchModel& CSearchModel::operator=( const CSearchModel& right )
@@ -30,7 +30,7 @@ CSearchModel& CSearchModel::operator=( const CSearchModel& right )
 	{
 		m_maxFileCount = right.m_maxFileCount;
 		m_fileSizeRange = right.m_fileSizeRange;
-		utl::CloneOwningContainerObjects( m_searchSpecs, right.m_searchSpecs );
+		utl::CloneOwningContainerObjects( m_patterns, right.m_patterns );
 	}
 	return *this;
 }
@@ -50,39 +50,39 @@ void CSearchModel::Stream( CArchive& archive )
 		archive >> m_fileSizeRange;
 	}
 
-	serial::StreamOwningPtrs( archive, m_searchSpecs );
+	serial::StreamOwningPtrs( archive, m_patterns );
 }
 
-void CSearchModel::ClearSpecs( void )
+void CSearchModel::ClearPatterns( void )
 {
-	utl::ClearOwningContainer( m_searchSpecs );
+	utl::ClearOwningContainer( m_patterns );
 }
 
-void CSearchModel::AddSpec( CSearchSpec* pSearchSpec, size_t pos /*= utl::npos*/ )
+void CSearchModel::AddPattern( CSearchPattern* pPattern, size_t pos /*= utl::npos*/ )
 {
-	m_searchSpecs.insert( m_searchSpecs.begin() + ( pos != utl::npos ? pos : m_searchSpecs.size() ), pSearchSpec );
+	m_patterns.insert( m_patterns.begin() + ( pos != utl::npos ? pos : m_patterns.size() ), pPattern );
 }
 
 void CSearchModel::AddSearchPath( const fs::CPath& searchPath, size_t pos /*= utl::npos*/ )
 {
-	AddSpec( new CSearchSpec( searchPath ), pos );
+	AddPattern( new CSearchPattern( searchPath ), pos );
 }
 
-std::auto_ptr< CSearchSpec > CSearchModel::RemoveSpecAt( size_t pos )
+std::auto_ptr< CSearchPattern > CSearchModel::RemovePatternAt( size_t pos )
 {
-	ASSERT( pos < m_searchSpecs.size() );
+	ASSERT( pos < m_patterns.size() );
 
-	std::auto_ptr< CSearchSpec > pSearchSpec( m_searchSpecs[ pos ] );
+	std::auto_ptr< CSearchPattern > pPattern( m_patterns[ pos ] );
 
-	m_searchSpecs.erase( m_searchSpecs.begin() + pos );
-	return pSearchSpec;
+	m_patterns.erase( m_patterns.begin() + pos );
+	return pPattern;
 }
 
-int CSearchModel::FindSpecPos( const fs::CPath& searchPath ) const
+int CSearchModel::FindPatternPos( const fs::CPath& searchPath ) const
 {
-	for ( std::vector< CSearchSpec* >::const_iterator itSearch = m_searchSpecs.begin(); itSearch != m_searchSpecs.end(); ++itSearch )
+	for ( std::vector< CSearchPattern* >::const_iterator itSearch = m_patterns.begin(); itSearch != m_patterns.end(); ++itSearch )
 		if ( ( *itSearch )->GetFilePath() == searchPath )
-			return static_cast< int >( std::distance( m_searchSpecs.begin(), itSearch ) );
+			return static_cast< int >( std::distance( m_patterns.begin(), itSearch ) );
 
 	return -1;
 }

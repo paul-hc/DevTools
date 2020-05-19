@@ -1,7 +1,7 @@
 
 #include "stdafx.h"
 #include "AutoDrop.h"
-#include "SearchSpec.h"
+#include "SearchPattern.h"
 #include "FileAttr.h"
 #include "ImageFileEnumerator.h"
 #include "ProgressService.h"
@@ -34,7 +34,7 @@ namespace auto_drop
 		: m_srcFullPath( srcFullPath )
 		, m_imageWasMoved( imageWasMoved )
 	{
-		m_destFileExt = CSearchSpec::FormatNumericFilePath( path::FindFilename( m_srcFullPath.c_str() ), fileNumber ).c_str();
+		m_destFileExt = CSearchPattern::FormatNumericFilePath( path::FindFilename( m_srcFullPath.c_str() ), fileNumber ).c_str();
 	}
 
 	void COpEntry::Stream( CArchive& archive )
@@ -104,7 +104,7 @@ namespace auto_drop
 
 	void CContext::Clear( void )
 	{
-		m_pDestSearchSpec.reset();
+		m_pDestSearchPattern.reset();
 		m_droppedSrcFiles.clear();
 		m_droppedDestFiles.clear();
 		m_dropOperation = PromptUser;
@@ -114,21 +114,21 @@ namespace auto_drop
 
 	bool CContext::IsValidDropRecipient( bool checkValidPath /*= true*/ ) const
 	{
-		return m_pDestSearchSpec.get() != NULL && m_pDestSearchSpec->IsAutoDropDirPath( checkValidPath );
+		return m_pDestSearchPattern.get() != NULL && m_pDestSearchPattern->IsAutoDropDirPath( checkValidPath );
 	}
 
 	const fs::CPath& CContext::GetDestSearchPath( void ) const
 	{
-		ASSERT_PTR( m_pDestSearchSpec.get() );
-		return m_pDestSearchSpec->GetFilePath();
+		ASSERT_PTR( m_pDestSearchPattern.get() );
+		return m_pDestSearchPattern->GetFilePath();
 	}
 
-	bool CContext::InitAutoDropRecipient( const CSearchSpec& destSearchSpec )
+	bool CContext::InitAutoDropRecipient( const CSearchPattern& destSearchPattern )
 	{
-		if ( !destSearchSpec.IsEmpty() )
-			m_pDestSearchSpec.reset( new CSearchSpec( destSearchSpec ) );
+		if ( !destSearchPattern.IsEmpty() )
+			m_pDestSearchPattern.reset( new CSearchPattern( destSearchPattern ) );
 		else
-			m_pDestSearchSpec.reset();
+			m_pDestSearchPattern.reset();
 
 		if ( !IsValidDropRecipient() )
 			return false;
@@ -201,7 +201,7 @@ namespace auto_drop
 		{
 			CImageFileEnumerator imageEnum( progress.GetProgressEnumerator() );
 
-			imageEnum.Search( *m_pDestSearchSpec );
+			imageEnum.Search( *m_pDestSearchPattern );
 			imageEnum.SwapFoundImages( *pFoundImagesModel );
 		}
 		catch ( CException* pExc )
@@ -227,7 +227,7 @@ namespace auto_drop
 		std::map< fs::CFlexPath, int >::iterator itMap;
 
 		for ( std::vector< CFileAttr* >::const_iterator itFileAttr = existingFiles.begin(); itFileAttr != existingFiles.end(); ++itFileAttr )
-			shiftMap[ ( *itFileAttr )->GetPath() ] = CSearchSpec::ParseNumFileNameNumber( ( *itFileAttr )->GetPath().GetPtr() );
+			shiftMap[ ( *itFileAttr )->GetPath() ] = CSearchPattern::ParseNumFileNameNumber( ( *itFileAttr )->GetPath().GetPtr() );
 
 		// exclude files dropped from the auto-drop directory
 		for ( std::vector< std::tstring >::const_iterator itDrop = m_droppedSrcFiles.begin(); itDrop != m_droppedSrcFiles.end(); ++itDrop )
@@ -264,7 +264,7 @@ namespace auto_drop
 
 		// push the dropped files renames to the undo vector
 		for ( std::vector< std::tstring >::const_iterator itDrop = m_droppedSrcFiles.begin(); itDrop != m_droppedSrcFiles.end(); ++itDrop, ++fileNumberDrop )
-			if ( CSearchSpec::ParseNumFileNameNumber( itDrop->c_str() ) != fileNumberDrop )
+			if ( CSearchPattern::ParseNumFileNameNumber( itDrop->c_str() ) != fileNumberDrop )
 			{	// different new number, so push it to the dropped group
 				COpEntry droppedEntry( *itDrop, fileNumberDrop, m_dropOperation == FileMove );
 
@@ -294,7 +294,7 @@ namespace auto_drop
 
 			// append rename entries for shifted existing files
 			for ( itMap = shiftMap.begin(); itMap != shiftMap.end(); ++itMap )
-				if ( CSearchSpec::ParseNumFileNameNumber( itMap->first.GetPtr() ) != itMap->second )
+				if ( CSearchPattern::ParseNumFileNameNumber( itMap->first.GetPtr() ) != itMap->second )
 				{	// different new number, so push it to the shifted existing group
 					COpEntry existingEntry( itMap->first.GetPtr(), itMap->second, true );
 
@@ -316,7 +316,7 @@ namespace auto_drop
 	bool CContext::DefragmentFiles( COpStack& dropUndoStack )
 	{
 		if ( !IsValidDropRecipient( true ) )
-			return false;			// invalid target search specifier
+			return false;			// invalid target search pattern
 
 		CImagesModel foundImagesModel;
 		if ( !SearchForImages( &foundImagesModel ) )		// search for all the existing image files
@@ -336,7 +336,7 @@ namespace auto_drop
 			const std::tstring& filePath = existingFiles[ i ]->GetPath().Get();
 			const int fileNumber = 1 + static_cast< int >( i );
 
-			if ( CSearchSpec::ParseNumFileNameNumber( filePath.c_str() ) != fileNumber )
+			if ( CSearchPattern::ParseNumFileNameNumber( filePath.c_str() ) != fileNumber )
 			{	// different new number, so push it to the shifted existing group
 				COpEntry existingEntry( filePath, fileNumber, true );
 

@@ -575,11 +575,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\SearchSpecDialog.cpp"
+				RelativePath=".\SearchPatternDialog.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\SearchSpecDialog.h"
+				RelativePath=".\SearchPatternDialog.h"
 				>
 			</File>
 			<File
@@ -754,11 +754,11 @@
 					>
 				</File>
 				<File
-					RelativePath=".\SearchSpec.cpp"
+					RelativePath=".\SearchPattern.cpp"
 					>
 				</File>
 				<File
-					RelativePath=".\SearchSpec.h"
+					RelativePath=".\SearchPattern.h"
 					>
 				</File>
 				<File
