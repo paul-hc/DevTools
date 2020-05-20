@@ -70,7 +70,7 @@ namespace utl
 		iterator Insert( const Key& key, const Value& value )
 		{	// replace the value of existing key or insert a new pair
 			iterator itWhere = lower_bound( key );
-			if ( itWhere == this->end() || !KeyEquals( key, itWhere->first ) )
+			if ( itWhere == this->end() || m_lessPred( key, itWhere->first ) )
 				itWhere = this->insert( itWhere, value_type( key, value ) );
 			else
 				itWhere->second = value;							// replace value at found the key
@@ -94,59 +94,57 @@ namespace utl
 		iterator find( const Key& key )
 		{	// find an element that matches key
 			iterator itFound = this->lower_bound( key );
-			return itFound == this->end() || !KeyEquals( key, itFound->first )
+			return itFound == this->end() || m_lessPred( key, itFound->first )
 				? this->end() : itFound;
 		}
 
 		const_iterator find( const Key& key ) const
 		{	// find an element that matches key
 			const_iterator itFound = this->lower_bound( key );
-			return itFound == this->end() || !KeyEquals( key, itFound->first )
+			return itFound == this->end() || m_lessPred( key, itFound->first )
 				? this->end() : itFound;
 		}
 
 		iterator lower_bound( const Key& key )
 		{	// find leftmost node not less than key
-			return std::lower_bound( this->begin(), this->end(), value_type( key, Value() ), m_keyPairPred );
+			return std::lower_bound( this->begin(), this->end(), value_type( key, Value() ), m_lessPred );
 		}
 
 		const_iterator lower_bound( const Key& key ) const
 		{	// find leftmost node not less than key
-			return std::lower_bound( this->begin(), this->end(), value_type( key, Value() ), m_keyPairPred );
+			return std::lower_bound( this->begin(), this->end(), value_type( key, Value() ), m_lessPred );
 		}
 
 		iterator upper_bound( const Key& key )
 		{	// find leftmost node greater than key
-			return std::upper_bound( this->begin(), this->end(), value_type( key, Value() ), m_keyPairPred );
+			return std::upper_bound( this->begin(), this->end(), value_type( key, Value() ), m_lessPred );
 		}
 
 		const_iterator upper_bound( const Key& key ) const
 		{	// find leftmost node greater than key
-			return std::upper_bound( this->begin(), this->end(), value_type( key, Value() ), m_keyPairPred );
+			return std::upper_bound( this->begin(), this->end(), value_type( key, Value() ), m_lessPred );
 		}
 	private:
-		bool KeyEquals( const Key& left, const Key& right ) const
+		struct SafeKeyPred
 		{
-			return !m_keyPred( left, right ) && !m_keyPred( right, left );
-		}
+			bool operator()( const Key& left, const Key& right ) const
+			{
+				if ( !m_keyPred( left, right ) )
+					return false;
+				else
+					ASSERT( !m_keyPred( right, left ) );		// key predicate should provide strict ordering
+				return true;
+			}
 
-		bool KeyEquals( const value_type& left, const value_type& right ) const
-		{
-			return KeyEquals( left.first, right.first );
-		}
-
-		struct KeyPairPred : public std::binary_function< value_type, value_type, bool >
-		{
 			bool operator()( const value_type& left, const value_type& right ) const
 			{
-				return m_keyPred( left.first, right.first );
+				return operator()( left.first, right.first );
 			}
 		private:
 			KeyPred m_keyPred;
 		};
 	private:
-		KeyPred m_keyPred;
-		KeyPairPred m_keyPairPred;
+		SafeKeyPred m_lessPred;
 	};
 }
 

@@ -238,6 +238,10 @@ namespace utl
 	__declspec( selectany ) extern const size_t npos = std::tstring::npos;
 
 
+	template< typename ContainerT >
+	inline size_t GetLastPos( const ContainerT& rItems ) { ASSERT( !rItems.empty() ); return rItems.size() - 1; }
+
+
 	template< typename ValueType >
 	inline void AssignPtr( ValueType* pField, const ValueType& value )
 	{

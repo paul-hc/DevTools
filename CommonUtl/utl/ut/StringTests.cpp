@@ -9,7 +9,6 @@
 #include "ContainerUtilities.h"
 #include "StringUtilities.h"
 #include "TimeUtils.h"
-#include "vector_map.h"
 
 #define new DEBUG_NEW
 
@@ -918,20 +917,6 @@ void CStringTests::TestEnsureUniformNumPadding( void )
 	}
 }
 
-void CStringTests::Test_vector_map( void )
-{
-	utl::vector_map< char, std::tstring > items;
-	items[ '7' ] = _T("i7");
-	items[ '9' ] = _T("i9");
-	items[ '3' ] = _T("i3");
-	items[ '1' ] = _T("i1");
-	ASSERT_EQUAL( "1 3 7 9", ut::JoinKeys( items, _T(" ") ) );
-	ASSERT_EQUAL( "i1,i3,i7,i9", ut::JoinValues( items, _T(",") ) );
-
-	items.EraseKey( '3' );
-	ASSERT_EQUAL( "1 7 9", ut::JoinKeys( items, _T(" ") ) );
-}
-
 void CStringTests::TestTimeFormatting( void )
 {
 	static const std::tstring text = _T("27-12-2017 19:54:20");
@@ -987,7 +972,6 @@ void CStringTests::Run( void )
 	TestExpandKeysToValues();
 	TestWordSelection();
 	TestEnsureUniformNumPadding();
-	Test_vector_map();
 	TestTimeFormatting();
 
 //	TestFunctional();

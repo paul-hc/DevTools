@@ -29,6 +29,7 @@ private:
 	void TestCompareContents( void );
 	void TestAdvancePos( void );
 	void TestOwningContainer( void );
+	void Test_vector_map( void );
 private:
 	static const TCHAR s_sep[];
 };

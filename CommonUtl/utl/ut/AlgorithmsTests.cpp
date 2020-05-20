@@ -6,6 +6,7 @@
 #include "ut/MockObject.h"
 #include "ContainerUtilities.h"
 #include "StringUtilities.h"
+#include "vector_map.h"
 #include "Resequence.hxx"
 #include <deque>
 
@@ -419,6 +420,31 @@ void CAlgorithmsTests::TestOwningContainer( void )
 {
 }
 
+void CAlgorithmsTests::Test_vector_map( void )
+{
+	utl::vector_map< int, std::tstring > items;
+	items[ 7 ] = _T("i7");
+	items[ 9 ] = _T("i9");
+	items[ 3 ] = _T("i3");
+	items[ 1 ] = _T("i1");
+	ASSERT_EQUAL( "1 3 7 9", ut::JoinKeys( items, _T(" ") ) );
+	ASSERT_EQUAL( "i1,i3,i7,i9", ut::JoinValues( items, _T(",") ) );
+
+	ASSERT( items.find( 3 ) != items.end() );
+	ASSERT_EQUAL( _T("i3"), items.find( 3 )->second );
+
+	ASSERT( items.find( 4 ) == items.end() );
+
+	items.EraseKey( 3 );
+	ASSERT_EQUAL( "1 7 9", ut::JoinKeys( items, _T(" ") ) );
+
+	items[ 7 ] = _T("i7 B");
+	ASSERT_EQUAL( _T("i7 B"), items.find( 7 )->second );
+
+	items[ 5 ] = _T("i5");
+	ASSERT_EQUAL( _T("i5"), items.find( 5 )->second );
+}
+
 
 void CAlgorithmsTests::Run( void )
 {
@@ -436,6 +462,7 @@ void CAlgorithmsTests::Run( void )
 	TestCompareContents();
 	TestAdvancePos();
 	TestOwningContainer();
+	Test_vector_map();
 }
 
 
