@@ -771,14 +771,8 @@ BEGIN
     COMBOBOX        IDC_LIST_ORDER_COMBO,339,143,153,177,CBS_DROPDOWNLIST | WS_VSCROLL | WS_GROUP | WS_TABSTOP
     GROUPBOX        "Search:",IDC_GROUP_BOX_1,7,2,325,137
     LTEXT           "&Patterns:",IDC_STATIC,12,15,29,8
-    CONTROL         "",IDC_PATTERNS_LISTVIEW,"SysListView32",LVS_REPORT | LVS_SHOWSELALWAYS | LVS_NOSORTHEADER | WS_BORDER | WS_GROUP | WS_TABSTOP,12,26,314,38
+    CONTROL         "",IDC_PATTERNS_LISTVIEW,"SysListView32",LVS_REPORT | LVS_SHOWSELALWAYS | LVS_NOSORTHEADER | WS_BORDER | WS_GROUP | WS_TABSTOP,12,26,314,59
     CTEXT           "<patterns_toolbar>",IDC_STRIP_BAR_1,77,14,249,8,NOT WS_VISIBLE | WS_BORDER
-    LISTBOX         IDC_SEARCH_SPEC_LIST,12,67,314,18,WS_VSCROLL | WS_HSCROLL | WS_GROUP | WS_TABSTOP
-    PUSHBUTTON      "&Add...",ID_ADD_ITEM,154,77,42,14,WS_GROUP
-    PUSHBUTTON      "&Modify...",ID_EDIT_ITEM,201,77,42,14
-    PUSHBUTTON      "&Delete",ID_REMOVE_ITEM,248,77,42,14
-    PUSHBUTTON      "ñ",IDC_SEARCH_SPEC_MOVE_UP,294,77,14,14,WS_GROUP | NOT WS_TABSTOP
-    PUSHBUTTON      "ò",IDC_SEARCH_SPEC_MOVE_DOWN,311,77,14,14,NOT WS_TABSTOP
     CONTROL         "Maximum file &count:",IDC_MAX_FILE_COUNT_CHECK,"Button",BS_AUTOCHECKBOX | WS_GROUP | WS_TABSTOP,12,92,86,10
     EDITTEXT        IDC_MAX_FILE_COUNT_EDIT,98,91,48,12,ES_AUTOHSCROLL | ES_NUMBER | WS_GROUP
     CONTROL         "Mi&nimum file size (KB):",IDC_MIN_FILE_SIZE_CHECK,
@@ -788,7 +782,7 @@ BEGIN
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,12,120,86,10
     EDITTEXT        IDC_MAX_FILE_SIZE_EDIT,98,119,48,12,ES_AUTOHSCROLL | ES_NUMBER | WS_GROUP
     CONTROL         "Auto file &search",IDC_AUTO_REGENERATE_CHECK,"Button",BS_AUTO3STATE | WS_TABSTOP,167,92,65,10
-    CHECKBOX        "Auto drop &recipient",IDC_AUTO_DROP_CHECK,167,106,75,10
+    CONTROL         "Auto drop &recipient",IDC_AUTO_DROP_CHECK,"Button",BS_3STATE | WS_TABSTOP,167,106,75,10
     LTEXT           "",IDC_THUMB_PREVIEW_STATIC,344,6,148,104,SS_NOTIFY | SS_SUNKEN
     LTEXT           "Document Version:",IDC_DOC_VERSION_LABEL,344,114,70,8
     LTEXT           "<version_no>",IDC_DOC_VERSION_STATIC,416,114,76,8,NOT WS_GROUP
@@ -796,23 +790,20 @@ BEGIN
     PUSHBUTTON      "Cancel",IDCANCEL,442,256,50,14
 END
 
-IDD_SEARCH_PATTERN_DIALOG DIALOGEX 0, 0, 266, 105
+IDD_SEARCH_PATTERN_DIALOG DIALOGEX 0, 0, 266, 99
 STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "File Search Attributes"
+CAPTION "Image Search Pattern"
 FONT 8, "MS Sans Serif", 0, 0, 0x0
 BEGIN
-    GROUPBOX        "Search Folder or Image File Path",IDC_STATIC,7,5,190,47
-    LTEXT           "&Path:",IDC_STATIC,13,19,18,8
-    COMBOBOX        IDC_SEARCH_FOLDER_COMBO,44,16,147,110,CBS_DROPDOWN | CBS_AUTOHSCROLL | WS_VSCROLL | WS_GROUP | WS_TABSTOP
-    PUSHBUTTON      "&Browse Folder...",IDC_BROWSE_FOLDER_BUTTON,57,32,64,14,NOT WS_TABSTOP
-    PUSHBUTTON      "Browse &File..",IDC_BROWSE_FILE_BUTTON,126,32,64,14,NOT WS_TABSTOP
-    GROUPBOX        "Search Attributes",IDC_STATIC,7,55,190,43
-    LTEXT           "F&ilter(s):",IDC_STATIC,13,67,25,8
-    COMBOBOX        IDC_SEARCH_FILTERS_COMBO,44,64,147,110,CBS_DROPDOWN | CBS_AUTOHSCROLL | WS_VSCROLL | WS_GROUP | WS_TABSTOP
-    LTEXT           "&Options:",IDC_STATIC,13,83,27,8
-    COMBOBOX        IDC_SEARCH_OPTIONS_COMBO,44,80,147,65,CBS_DROPDOWNLIST | WS_VSCROLL | WS_GROUP | WS_TABSTOP
-    DEFPUSHBUTTON   "OK",IDOK,209,8,50,14
-    PUSHBUTTON      "Cancel",IDCANCEL,209,24,50,14
+    LTEXT           "&Folder or Image File:",IDC_STATIC,7,10,64,8
+    COMBOBOX        IDC_SEARCH_PATH_COMBO,7,22,190,110,CBS_DROPDOWN | CBS_AUTOHSCROLL | WS_VSCROLL | WS_GROUP | WS_TABSTOP
+    CTEXT           "<brws>",IDC_STRIP_BAR_1,169,7,28,12,SS_CENTERIMAGE | NOT WS_VISIBLE | WS_BORDER
+    LTEXT           "Image F&ilters:",IDC_STATIC,13,57,42,8
+    COMBOBOX        IDC_SEARCH_FILTERS_COMBO,58,55,139,110,CBS_DROPDOWN | CBS_AUTOHSCROLL | WS_VSCROLL | WS_GROUP | WS_TABSTOP
+    LTEXT           "Search &Mode:",IDC_STATIC,9,75,46,8
+    COMBOBOX        IDC_SEARCH_MODE_COMBO,58,72,139,65,CBS_DROPDOWNLIST | WS_VSCROLL | WS_GROUP | WS_TABSTOP
+    DEFPUSHBUTTON   "OK",IDOK,209,7,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,209,23,50,14
 END
 
 IDD_FILE_MOVE_DIALOG DIALOGEX 0, 0, 278, 124
@@ -1000,8 +991,8 @@ BEGIN
     BEGIN
         LEFTMARGIN, 7
         RIGHTMARGIN, 259
-        TOPMARGIN, 5
-        BOTTOMMARGIN, 98
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 92
     END
 
     IDD_FILE_MOVE_DIALOG, DIALOG
@@ -1075,20 +1066,6 @@ BEGIN
 
     IDC_LOGGER_COMBO, 0x403, 13, 0
 0x7645, 0x6e65, 0x2074, 0x6f6c, 0x6767, 0x7265, "\000" 
-    0
-END
-
-IDD_SEARCH_PATTERN_DIALOG DLGINIT
-BEGIN
-    IDC_SEARCH_OPTIONS_COMBO, 0x403, 7, 0
-0x6f4e, 0x6d72, 0x6c61, "\000" 
-    IDC_SEARCH_OPTIONS_COMBO, 0x403, 24, 0
-0x6e49, 0x6c63, 0x6475, 0x2065, 0x7573, 0x2d62, 0x6964, 0x6572, 0x7463, 
-0x726f, 0x6569, 0x0073, 
-    IDC_SEARCH_OPTIONS_COMBO, 0x403, 44, 0
-0x7541, 0x6f74, 0x642d, 0x6f72, 0x2070, 0x6572, 0x6963, 0x6970, 0x6e65, 
-0x2074, 0x6628, 0x726f, 0x6e20, 0x6d75, 0x7265, 0x6369, 0x6620, 0x6c69, 
-0x6e65, 0x6d61, 0x7365, 0x0029, 
     0
 END
 
@@ -1374,7 +1351,6 @@ END
 STRINGTABLE 
 BEGIN
     IDS_DELETE_ATTR_PROMPT  "Are you sure you want to delete the path below ?\n\n%s"
-    IDS_REPLACE_DUP_PROMPT  "The search attribute path already exists!\n%s\n\nDo you want to replace it ?"
     IDS_HELP_MESSAGE        "Slider command line options:\n\nslider [/R[-]] [/F[-]] [/X[-]] [/T[-]] [/S[-]] [/?] [image_file] [image_folder]\n\n    /R\tRegister slider additional shell extensions.\n    /F\tOpen slider window in full screen mode.\n    /X\tOpen slider window maximized.\n    /T\tOpen slider window with toolbar displayed.\n    /S\tOpen slider window with status-bar displayed.\n    /?\tDisplay this help message.\n\n    image_file\tOne or many image file(s).\n    image_folder\tFolder to search images for.\n\n    Note:\tIf [-] suffix is specified, than the specified option is switched off.\n"
     IDS_NO_DIR_SEARCH_SPEC  "In order to enable the ""Auto Drop Recipient"" feature, you must have one valid directory search path specifier ""Auto-drop numeric filenames"" option selected!"
     ID_SKIP_IMAGE_DIM_EVALUATION_CMDLINK 

@@ -4,34 +4,43 @@
 
 #include "AlbumModel.h"
 #include "SearchPattern.h"
+#include "utl/UI/LayoutDialog.h"
 #include "utl/UI/HistoryComboBox.h"
+#include "utl/UI/DialogToolBar.h"
+#include "utl/UI/EnumComboBox.h"
 #include "utl/UI/ui_fwd.h"
 
 
-class CSearchPatternDialog : public CDialog
+class CSearchPatternDialog : public CLayoutDialog
 {
 public:
-	CSearchPatternDialog( const CSearchPattern& searchPattern, CWnd* pParent = NULL );
+	CSearchPatternDialog( const CSearchPattern* pSrcPattern, CWnd* pParent = NULL );
 	virtual ~CSearchPatternDialog();
 private:
-	bool ValidateOK( ui::ComboField byField = ui::BySel );
+	void ValidatePattern( ui::ComboField byField = ui::BySel );
 public:
-	CSearchPattern m_searchPattern;
+	std::auto_ptr< CSearchPattern > m_pSearchPattern;
 private:
 	// enum { IDD = IDD_SEARCH_PATTERN_DIALOG };
+
 	CHistoryComboBox m_searchPathCombo;
+	CDialogToolBar m_browseToolbar;
 	CHistoryComboBox m_wildFiltersCombo;
+	CEnumComboBox m_searchModeCombo;
 
 	// generated stuff
-	protected:
-	virtual void DoDataExchange( CDataExchange* pDX );	// DDX/DDV support
 protected:
-	virtual BOOL OnInitDialog();
+	virtual void DoDataExchange( CDataExchange* pDX );		// DDX/DDV support
+protected:
 	afx_msg void OnDropFiles( HDROP hDropInfo );
-	afx_msg void CmBrowseFolder( void );
-	afx_msg void OnCBnEditChangeSearchFolder();
-	afx_msg void OnCBnSelChangeSearchFolder();
-	afx_msg void CmBrowseFileButton();
+	afx_msg void OnBrowseFolder( void );
+	afx_msg void OnBrowseFile( void );
+	afx_msg void OnUpdate_BrowsePath( CCmdUI* pCmdUI );
+	afx_msg void OnCBnEditChange_SearchFolder( void );
+	afx_msg void OnCBnSelChange_SearchFolder( void );
+	afx_msg void OnCBnEditChange_WildFilters( void );
+	afx_msg void OnCBnSelChange_WildFilters( void );
+	afx_msg void OnCBnSelChange_SearchMode( void );
 
 	DECLARE_MESSAGE_MAP()
 };

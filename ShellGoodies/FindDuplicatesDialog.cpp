@@ -230,11 +230,11 @@ CFindDuplicatesDialog::CFindDuplicatesDialog( CFileModel* pFileModel, CWnd* pPar
 	LoadDlgIcon( ID_FIND_DUPLICATE_FILES );
 
 	m_searchPathsListCtrl.SetAcceptDropFiles();
-	m_searchPathsListCtrl.SetSubjectAdapter( ui::CCodeAdapter::Instance() );			// display full paths
+	m_searchPathsListCtrl.SetSubjectAdapter( ui::GetFullPathAdapter() );			// display full paths
 	CGeneralOptions::Instance().ApplyToListCtrl( &m_searchPathsListCtrl );
 
 	m_ignorePathsListCtrl.SetAcceptDropFiles();
-	m_ignorePathsListCtrl.SetSubjectAdapter( ui::CCodeAdapter::Instance() );		// display full paths
+	m_ignorePathsListCtrl.SetSubjectAdapter( ui::GetFullPathAdapter() );			// display full paths
 	CGeneralOptions::Instance().ApplyToListCtrl( &m_ignorePathsListCtrl );
 
 	m_dupsListCtrl.ModifyListStyleEx( 0, LVS_EX_CHECKBOXES );

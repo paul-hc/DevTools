@@ -31,11 +31,11 @@ public:
 	std::vector< CSearchPattern* >& RefPatterns( void ) { return m_patterns; }
 
 	CSearchPattern* GetPatternAt( size_t pos ) const { ASSERT( pos < m_patterns.size() ); return m_patterns[ pos ]; }
-	void AddPattern( CSearchPattern* pPattern, size_t pos = utl::npos );
-	void AddSearchPath( const fs::CPath& searchPath, size_t pos = utl::npos );
+	size_t AddPattern( CSearchPattern* pPattern, size_t pos = utl::npos );
+	std::pair< CSearchPattern*, bool > AddSearchPath( const fs::CPath& searchPath, size_t pos = utl::npos );		// returns the existing pattern if already exists
 	std::auto_ptr< CSearchPattern > RemovePatternAt( size_t pos );
 	void ClearPatterns( void );
-	int FindPatternPos( const fs::CPath& searchPath ) const;
+	size_t FindPatternPos( const fs::CPath& searchPath, size_t ignorePos = utl::npos ) const;
 
 	bool IsSinglePattern( void ) const { return 1 == m_patterns.size(); }
 	const CSearchPattern* GetSinglePattern( void ) const { return IsSinglePattern() ? m_patterns.front() : NULL; }

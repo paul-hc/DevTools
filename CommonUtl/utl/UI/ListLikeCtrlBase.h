@@ -15,6 +15,7 @@ namespace lv { struct CMatchEffects; }
 
 namespace ui
 {
+	class CHandledNotificationsCache;
 	class CFontEffectCache;
 
 
@@ -62,12 +63,13 @@ protected:
 
 	ui::CFontEffectCache* GetFontEffectCache( void );
 
-	bool ParentHandles( UINT notifyCode );
+	bool ParentHandlesWmCommand( UINT cmdNotifyCode ) { return ParentHandles( WM_COMMAND, cmdNotifyCode ); }
+	bool ParentHandlesWmNotify( UINT wmNotifyCode ) { return ParentHandles( WM_NOTIFY, wmNotifyCode ); }
 private:
-	enum CachedBool { NotCached, No, Yes };
-
+	bool ParentHandles( UINT cmdMessage, UINT notifyCode );
+private:
 	bool m_useExplorerTheme;
-	std::map< UINT, CachedBool > m_parentHandlesNotifyCodes;	// self-encapsulated 'parent handles' map <notifyCode, parent_handles>
+	std::auto_ptr< ui::CHandledNotificationsCache > m_pParentHandlesCache;
 protected:
 	std::auto_ptr< ui::CFontEffectCache > m_pFontCache;			// self-encapsulated
 	ui::ITextEffectCallback* m_pTextEffectCallback;

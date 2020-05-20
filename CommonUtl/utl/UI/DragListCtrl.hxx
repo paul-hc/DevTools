@@ -17,7 +17,6 @@
 template< typename BaseListCtrl >
 CDragListCtrl< BaseListCtrl >::CDragListCtrl( UINT columnLayoutId /*= 0*/, DWORD listStyleEx /*= lv::DefaultStyleEx*/ )
 	: BaseListCtrl( columnLayoutId, listStyleEx )
-	, m_useExternalDropFiles( false )
 	, m_draggingMode( NoDragging )
 	, m_pSrcDragging( NULL )
 	, m_dropIndex( -1 )
@@ -99,7 +98,17 @@ void CDragListCtrl< BaseListCtrl >::EndDragging( void )
 template< typename BaseListCtrl >
 bool CDragListCtrl< BaseListCtrl >::DropSelection( void )
 {
-	if ( !IsDragging() || !IsValidDropIndex() )
+	if ( !IsDragging() )
+	{
+		if ( UseExternalDropFiles() )
+		{
+			EndDragging();			// erase the drop mark
+			return true;
+		}
+		return false;
+	}
+
+	if ( !IsValidDropIndex() )
 		return false;
 
 	int dropIndex = m_dropIndex;
@@ -209,7 +218,7 @@ DROPEFFECT CDragListCtrl< BaseListCtrl >::Event_OnDragOver( COleDataObject* pDat
 	DROPEFFECT dropEffect = DROPEFFECT_NONE;
 	HandleDragging( point );
 	if ( IsValidDropIndex() )
-		dropEffect = DROPEFFECT_MOVE;
+		dropEffect = UseExternalDropFiles() ? DROPEFFECT_COPY : DROPEFFECT_MOVE;
 
 	return m_pDropTarget->FilterDropEffect( dropEffect );
 }

@@ -6,6 +6,12 @@
 #include "Path.h"
 
 
+namespace ui
+{
+	inline ui::ISubjectAdapter* GetFullPathAdapter( void ) { return ui::CCodeAdapter::Instance(); }
+}
+
+
 // List control made of path items that implement utl::ISubject, typically CPathItemBase
 class CPathItemListCtrl : public CReportListControl
 {

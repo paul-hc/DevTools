@@ -58,14 +58,28 @@ void CSearchModel::ClearPatterns( void )
 	utl::ClearOwningContainer( m_patterns );
 }
 
-void CSearchModel::AddPattern( CSearchPattern* pPattern, size_t pos /*= utl::npos*/ )
+size_t CSearchModel::AddPattern( CSearchPattern* pPattern, size_t atPos /*= utl::npos*/ )
 {
-	m_patterns.insert( m_patterns.begin() + ( pos != utl::npos ? pos : m_patterns.size() ), pPattern );
+	ASSERT_PTR( pPattern );
+	REQUIRE( utl::npos == FindPatternPos( pPattern->GetFilePath() ) );		// must be unique
+
+	if ( utl::npos == atPos )
+		atPos = m_patterns.size();
+
+	m_patterns.insert( m_patterns.begin() + atPos, pPattern );
+	return atPos;
 }
 
-void CSearchModel::AddSearchPath( const fs::CPath& searchPath, size_t pos /*= utl::npos*/ )
+std::pair< CSearchPattern*, bool > CSearchModel::AddSearchPath( const fs::CPath& searchPath, size_t pos /*= utl::npos*/ )
 {
-	AddPattern( new CSearchPattern( searchPath ), pos );
+	size_t foundPos = FindPatternPos( searchPath );
+	if ( foundPos != utl::npos )
+		return std::pair< CSearchPattern*, bool >( m_patterns[ foundPos ], false );			// pattern with path key already exists
+
+	CSearchPattern* pNewPattern = new CSearchPattern( searchPath );
+
+	AddPattern( pNewPattern, pos );
+	return std::pair< CSearchPattern*, bool >( pNewPattern, true );							// new pattern
 }
 
 std::auto_ptr< CSearchPattern > CSearchModel::RemovePatternAt( size_t pos )
@@ -78,11 +92,12 @@ std::auto_ptr< CSearchPattern > CSearchModel::RemovePatternAt( size_t pos )
 	return pPattern;
 }
 
-int CSearchModel::FindPatternPos( const fs::CPath& searchPath ) const
+size_t CSearchModel::FindPatternPos( const fs::CPath& searchPath, size_t ignorePos /*= utl::npos*/ ) const
 {
-	for ( std::vector< CSearchPattern* >::const_iterator itSearch = m_patterns.begin(); itSearch != m_patterns.end(); ++itSearch )
-		if ( ( *itSearch )->GetFilePath() == searchPath )
-			return static_cast< int >( std::distance( m_patterns.begin(), itSearch ) );
+	for ( size_t pos = 0; pos != m_patterns.size(); ++pos )
+		if ( m_patterns[ pos ]->GetFilePath() == searchPath )
+			if ( pos != ignorePos )
+				return pos;
 
-	return -1;
+	return utl::npos;
 }

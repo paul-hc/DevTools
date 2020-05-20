@@ -198,6 +198,11 @@ void CReportListControl::ClearData( void )
 	m_diffColumnPairs.clear();
 }
 
+bool CReportListControl::CommandsEnabled( void ) const
+{
+	return true; //!IsCommandFrame() || ui::OwnsFocus( m_hWnd );
+}
+
 void CReportListControl::StoreImageLists( CImageList* pImageList, CImageList* pLargeImageList /*= NULL*/ )
 {
 	m_pImageList = pImageList;
@@ -225,9 +230,15 @@ void CReportListControl::SetCustomFileGlyphDraw( bool showGlyphs /*= true*/ )
 	CListLikeCtrlBase::SetCustomFileGlyphDraw( showGlyphs );
 
 	if ( showGlyphs )
+	{
 		StoreImageLists( m_pCustomImager->GetImageList( ui::SmallGlyph ), m_pCustomImager->GetImageList( ui::LargeGlyph ) );
+		ModifyListStyleEx( LVS_EX_DOUBLEBUFFER, 0 );		// better looking thumb rendering for tiny images (icons, small PNGs)
+	}
 	else
+	{
 		StoreImageLists( NULL, NULL );
+		ModifyListStyleEx( 0, LVS_EX_DOUBLEBUFFER );
+	}
 
 	if ( m_hWnd != NULL )
 	{
@@ -247,11 +258,13 @@ void CReportListControl::SetCustomImageDraw( ui::ICustomImageDraw* pCustomImageD
 	{
 		m_pCustomImager.reset( new CSingleCustomDrawImager( pCustomImageDraw, smallImageSize, largeImageSize ) );
 		StoreImageLists( m_pCustomImager->GetImageList( ui::SmallGlyph ), m_pCustomImager->GetImageList( ui::LargeGlyph ) );
+		ModifyListStyleEx( LVS_EX_DOUBLEBUFFER, 0 );		// better looking thumb rendering for tiny images (icons, small PNGs)
 	}
 	else
 	{
 		m_pCustomImager.reset();
 		StoreImageLists( NULL, NULL );
+		ModifyListStyleEx( 0, LVS_EX_DOUBLEBUFFER );
 	}
 
 	if ( m_hWnd != NULL )
@@ -2019,6 +2032,35 @@ BOOL CReportListControl::PreTranslateMessage( MSG* pMsg )
 		__super::PreTranslateMessage( pMsg );
 }
 
+BOOL CReportListControl::OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo )
+{
+	if ( IsCommandFrame() )
+	{
+		/*	Special routing when this list is a CommandFrame:
+			- Toolbar and context menu commands are handled internally by the list - list is the Owner of its toolbar;
+			- Parent dialog may have its own handlerd that override list handlers: route the commands to dialog handlers in that case.
+
+			In this operationg mode the parent dialog works like "Don't call us, we'll call you":
+			- If it overrrides OnCmdMsg(), it should NOT route it to CReportListControl::OnCmdMsg();
+			- It works the other way around, list routes to parent dialog.
+		 */
+		switch ( code )
+		{
+			case CN_COMMAND:
+//				if ( ParentHandlesWmCommand( UINT cmdNotifyCode ) )
+				code = code;
+				break;
+			case CN_UPDATE_COMMAND_UI:
+				code = code;
+				break;
+		}
+		if ( GetParent()->OnCmdMsg( id, code, pExtra, pHandlerInfo ) )
+			return TRUE;			// handled by dialog custom handler, which take precedence default internal list handler
+	}
+
+	return CListCtrl::OnCmdMsg( id, code, pExtra, pHandlerInfo );
+}
+
 
 // message handlers
 
@@ -2251,7 +2293,7 @@ BOOL CReportListControl::OnLvnEndLabelEdit_Reflect( NMHDR* pNmHdr, LRESULT* pRes
 			m_pLabelEdit->m_newLabel = pDispInfo->item.pszText;
 			*pResult = TRUE;		// assume valid input
 
-			if ( !ParentHandles( LVN_ENDLABELEDIT ) )
+			if ( !ParentHandlesWmNotify( LVN_ENDLABELEDIT ) )
 				return TRUE;		// mark as handled so changes are applied
 		}
 		else
@@ -2274,7 +2316,7 @@ BOOL CReportListControl::OnLvnGetDispInfo_Reflect( NMHDR* pNmHdr, LRESULT* pResu
 
 	*pResult = 0;
 
-	if ( !ParentHandles( LVN_GETDISPINFO ) )
+	if ( !ParentHandlesWmNotify( LVN_GETDISPINFO ) )
 		return TRUE;			// mark as handled so changes are applied
 
 	return FALSE;				// continue handling by parent, even if changed (additive logic)
@@ -2330,7 +2372,7 @@ BOOL CReportListControl::OnNmCustomDraw_Reflect( NMHDR* pNmHdr, LRESULT* pResult
 			break;
 	}
 
-	if ( !ParentHandles( NM_CUSTOMDRAW ) )
+	if ( !ParentHandlesWmNotify( NM_CUSTOMDRAW ) )
 		return TRUE;			// mark as handled so changes are applied
 
 	return FALSE;				// continue handling by parent, even if changed (additive logic)
@@ -2347,7 +2389,7 @@ void CReportListControl::OnUpdateListViewMode( CCmdUI* pCmdUI )
 	DWORD viewMode = lv::CmdIdToListViewMode( pCmdUI->m_nID );
 	bool modeHasImages = ( LV_VIEW_ICON == viewMode ? m_pLargeImageList : m_pImageList ) != NULL;
 
-	pCmdUI->Enable( modeHasImages );
+	pCmdUI->Enable( modeHasImages && CommandsEnabled() );
 	ui::SetRadio( pCmdUI, viewMode == GetView() );
 }
 
@@ -2369,7 +2411,7 @@ void CReportListControl::OnUpdateListViewStacking( CCmdUI* pCmdUI )
 	DWORD stackingStyle = lv::CmdIdToListViewStacking( pCmdUI->m_nID );
 	DWORD viewMode = GetView();
 
-	pCmdUI->Enable( viewMode != LV_VIEW_DETAILS );
+	pCmdUI->Enable( viewMode != LV_VIEW_DETAILS && CommandsEnabled() );
 	ui::SetRadio( pCmdUI, stackingStyle == ( GetStyle() & LVS_ALIGNMASK ) );
 }
 
@@ -2380,7 +2422,7 @@ void CReportListControl::OnResetColumnLayout( void )
 
 void CReportListControl::OnUpdateResetColumnLayout( CCmdUI* pCmdUI )
 {
-	pCmdUI->Enable( m_columnLayoutId != 0 && LV_VIEW_DETAILS == GetView() );
+	pCmdUI->Enable( m_columnLayoutId != 0 && LV_VIEW_DETAILS == GetView() && CommandsEnabled() );
 }
 
 void CReportListControl::OnCopy( void )
@@ -2395,7 +2437,7 @@ void CReportListControl::OnSelectAll( void )
 
 void CReportListControl::OnUpdateSelectAll( CCmdUI* pCmdUI )
 {
-	pCmdUI->Enable( IsMultiSelectionList() );
+	pCmdUI->Enable( IsMultiSelectionList() && CommandsEnabled() );
 }
 
 void CReportListControl::OnMoveTo( UINT cmdId )
@@ -2408,7 +2450,7 @@ void CReportListControl::OnUpdateMoveTo( CCmdUI* pCmdUI )
 	std::vector< int > selIndexes;
 	GetSelection( selIndexes );
 
-	pCmdUI->Enable( seq::CanMoveSelection( GetItemCount(), selIndexes, lv::CmdIdToMoveTo( pCmdUI->m_nID ) ) );
+	pCmdUI->Enable( seq::CanMoveSelection( GetItemCount(), selIndexes, lv::CmdIdToMoveTo( pCmdUI->m_nID ) ) && CommandsEnabled() );
 }
 
 void CReportListControl::OnRename( void )
@@ -2418,7 +2460,7 @@ void CReportListControl::OnRename( void )
 
 void CReportListControl::OnUpdateRename( CCmdUI* pCmdUI )
 {
-	pCmdUI->Enable( HasFlag( GetStyle(), LVS_EDITLABELS ) && GetCurSel() != -1 );
+	pCmdUI->Enable( HasFlag( GetStyle(), LVS_EDITLABELS ) && GetCurSel() != -1 && CommandsEnabled() );
 }
 
 void CReportListControl::OnExpandCollapseGroups( UINT cmdId )
@@ -2433,22 +2475,23 @@ void CReportListControl::OnUpdateExpandCollapseGroups( CCmdUI* pCmdUI )
 {
 	bool anyToToggle = false;
 
-	for ( int i = 0, groupCount = GetGroupCount(); i != groupCount; ++i )
-	{
-		bool isCollapsed = HasGroupState( GetGroupId( i ), LVGS_COLLAPSED );
-		if ( ID_EXPAND == pCmdUI->m_nID ? isCollapsed : ( !isCollapsed ) )
+	if (  CommandsEnabled() )
+		for ( int i = 0, groupCount = GetGroupCount(); i != groupCount; ++i )
 		{
-			anyToToggle = true;
-			break;
+			bool isCollapsed = HasGroupState( GetGroupId( i ), LVGS_COLLAPSED );
+			if ( ID_EXPAND == pCmdUI->m_nID ? isCollapsed : ( !isCollapsed ) )
+			{
+				anyToToggle = true;
+				break;
+			}
 		}
-	}
 
 	pCmdUI->Enable( anyToToggle );
 }
 
 void CReportListControl::OnUpdateAnySelected( CCmdUI* pCmdUI )
 {
-	pCmdUI->Enable( AnySelected() );
+	pCmdUI->Enable( AnySelected() && CommandsEnabled() );
 }
 
 void CReportListControl::OnUpdateSingleSelected( CCmdUI* pCmdUI )
@@ -2494,6 +2537,7 @@ CScopedListTextSelection::~CScopedListTextSelection()
 	std::sort( selIndexes.begin(), selIndexes.end() );
 
 	int caretIndex = !m_caretText.empty() ? m_pListCtrl->FindItemIndex( m_caretText ) : -1;
+
 	CScopedInternalChange internalChange( m_pListCtrl );
 	m_pListCtrl->SetSelection( selIndexes, caretIndex );			// internal change
 }
@@ -2524,14 +2568,16 @@ CSelFlowSequence::CSelFlowSequence( CReportListControl* pListCtrl )
 		m_rowsPerPage = clientRect.Height() / itemRect.Height();
 	}
 
-int hSp, vSp, hSpSm, vSpSm;
-m_pListCtrl->GetItemSpacing( FALSE, &hSp, &vSp );
-m_pListCtrl->GetItemSpacing( TRUE, &hSpSm, &vSpSm );
+#if 0
+	int hSp, vSp, hSpSm, vSpSm;
+	m_pListCtrl->GetItemSpacing( FALSE, &hSp, &vSp );
+	m_pListCtrl->GetItemSpacing( TRUE, &hSpSm, &vSpSm );
 
-static int cnt = 0;
-TRACE( _T(" (%d) list-ctrl: caretIndex=%d, topIndex=%d, colsPerPage=%d, rowsPerPage=%d  hSp=%d, vSp=%d, hSpSm=%d, vSpSm=%d\n"),
-	cnt++, m_caretIndex, m_topIndex, m_colsPerPage, m_rowsPerPage,
-	hSp, vSp, hSpSm, vSpSm );
+	static int cnt = 0;
+	TRACE( _T(" (%d) list-ctrl: caretIndex=%d, topIndex=%d, colsPerPage=%d, rowsPerPage=%d  hSp=%d, vSp=%d, hSpSm=%d, vSpSm=%d\n"),
+		cnt++, m_caretIndex, m_topIndex, m_colsPerPage, m_rowsPerPage,
+		hSp, vSp, hSpSm, vSpSm );
+#endif
 }
 
 std::auto_ptr< CSelFlowSequence > CSelFlowSequence::MakeFlow( CReportListControl* pListCtrl )

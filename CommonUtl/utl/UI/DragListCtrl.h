@@ -21,9 +21,6 @@ public:
 	CDragListCtrl( UINT columnLayoutId = 0, DWORD listStyleEx = lv::DefaultStyleEx );
 	virtual ~CDragListCtrl();
 
-	bool UseExternalDropFiles( void ) const { return m_useExternalDropFiles; }
-	void SetUseExternalDropFiles( bool useExternalDropFiles ) { m_useExternalDropFiles = useExternalDropFiles; }
-
 	enum DraggingMode { NoDragging, InternalDragging, ParentDragging };
 
 	DraggingMode GetDraggingMode( void ) const { return m_draggingMode; }
@@ -43,6 +40,8 @@ protected:
 	// base overrides
 	virtual void SetupControl( void );
 private:
+	bool UseExternalDropFiles( void ) const { return GetAcceptDropFiles(); }		// drop external files from Explorer?
+
 	bool IsDragging( void ) const { return m_pSrcDragging != NULL; }
 	void EndDragging( void );
 	bool DropSelection( void );							// for InternalDragging mode
@@ -53,7 +52,6 @@ private:
 	void RedrawItem( int index );
 	bool IsValidDropIndex( void ) const;
 private:
-	bool m_useExternalDropFiles;						// drop external files from Explorer?
 	DraggingMode m_draggingMode;
 	std::auto_ptr< ole::CDropTarget > m_pDropTarget;	// list ctrl is registered as drop target to this data-member
 	CScopedGdiPlusInit m_gdiPlus;						// used to render the drop marker

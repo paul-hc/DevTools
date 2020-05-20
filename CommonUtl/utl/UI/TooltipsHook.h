@@ -5,15 +5,21 @@
 #include "WindowHook.h"
 
 
+namespace ui { interface ICustomCmdInfo; }
+
+
 class CTooltipsHook : public CWindowHook
 {
 public:
-	CTooltipsHook( HWND hWndToHook ) { if ( hWndToHook != NULL ) HookWindow( hWndToHook ); }
-	virtual ~CTooltipsHook() {}
+	CTooltipsHook( HWND hWndToHook = NULL );
+
+	void HookControl( CWnd* pCtrlToHook );
 protected:
 	virtual LRESULT WindowProc( UINT message, WPARAM wParam, LPARAM lParam );
 protected:
 	bool OnTtnNeedText( NMHDR* pNmHdr );
+protected:
+	ui::ICustomCmdInfo* m_pCustomCmdInfo;
 };
 
 

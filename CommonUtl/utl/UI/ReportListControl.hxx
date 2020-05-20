@@ -6,6 +6,16 @@
 
 // CReportListControl template code
 
+template< typename ObjectT >
+void CReportListControl::QueryObjectsSequence( std::vector< ObjectT* >& rObjects ) const
+{
+	UINT count = GetItemCount();
+	rObjects.clear();
+	rObjects.reserve( count );
+
+	for ( UINT i = 0; i != count; ++i )
+		rObjects.push_back( GetPtrAt< ObjectT >( i ) );
+}
 
 template< typename ObjectT >
 void CReportListControl::QueryObjectsByIndex( std::vector< ObjectT* >& rObjects, const std::vector< int >& itemIndexes ) const

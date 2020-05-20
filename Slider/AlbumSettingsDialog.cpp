@@ -11,21 +11,21 @@
 #include "utl/EnumTags.h"
 #include "utl/Path.h"
 #include "utl/RuntimeException.h"
+#include "utl/UI/ListCtrlEditorFrame.h"
 #include "utl/UI/Color.h"
 #include "utl/UI/MenuUtilities.h"
 #include "utl/UI/Thumbnailer.h"
 #include "utl/UI/ShellUtilities.h"
 #include "utl/UI/UtilitiesEx.h"
 #include "utl/UI/resource.h"
-#include "utl/UI/DragListCtrl.hxx"
-#include "utl/Resequence.hxx"
-#include <hash_set>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
 
+#include "utl/Resequence.hxx"
 #include "utl/UI/ReportListControl.hxx"
+#include "utl/UI/DragListCtrl.hxx"
 
 
 namespace hlp
@@ -52,13 +52,9 @@ namespace layout
 {
 	static const CLayoutStyle styles[] =
 	{
-		{ IDC_GROUP_BOX_1, SizeX | DoRepaint },
+		{ IDC_GROUP_BOX_1, SizeX /*| DoRepaint*/ },
 		{ IDC_PATTERNS_LISTVIEW, SizeX },
 		{ IDC_STRIP_BAR_1, MoveX },
-
-			{ IDC_SEARCH_SPEC_LIST, SizeX },
-			{ IDC_SEARCH_SPEC_MOVE_UP, MoveX },
-			{ IDC_SEARCH_SPEC_MOVE_DOWN, MoveX },
 
 		{ IDC_THUMB_PREVIEW_STATIC, MoveX },
 		{ IDC_DOC_VERSION_LABEL, MoveX },
@@ -75,8 +71,6 @@ namespace layout
 }
 
 
-const ui::CTextEffect CAlbumSettingsDialog::s_newFileEffect( ui::Regular, color::Blue );
-
 CAlbumSettingsDialog::CAlbumSettingsDialog( const CAlbumModel& model, size_t currentPos, CWnd* pParent /*= NULL*/ )
 	: CLayoutDialog( IDD_ALBUM_SETTINGS_DIALOG, pParent )
 	, m_model( model )
@@ -84,15 +78,14 @@ CAlbumSettingsDialog::CAlbumSettingsDialog( const CAlbumModel& model, size_t cur
 	, m_isDirty( false )
 
 	, m_patternsListCtrl( IDC_PATTERNS_LISTVIEW )
-	, m_patternsEditor( &m_patternsListCtrl )
 	, m_maxFileCountEdit( true, str::GetUserLocale() )
 	, m_minSizeEdit( true, str::GetUserLocale() )
 	, m_maxSizeEdit( true, str::GetUserLocale() )
+	, m_imagesListCtrl( IDC_FOUND_IMAGES_LISTVIEW )
 	, m_sortOrderCombo( &fattr::GetTags_Order() )
 	, m_thumbPreviewCtrl( app::GetThumbnailer() )
 	, m_docVersionLabel( CRegularStatic::ControlLabel )
 	, m_docVersionStatic( CRegularStatic::Bold )
-	, m_imagesListCtrl( IDC_FOUND_IMAGES_LISTVIEW )
 {
 	// base init
 	m_regSection = _T("AlbumSettingsDialog");
@@ -100,6 +93,26 @@ CAlbumSettingsDialog::CAlbumSettingsDialog( const CAlbumModel& model, size_t cur
 	m_initCentered = false;
 	LoadDlgIcon( ID_EDIT_ALBUM );
 	m_accelPool.AddAccelTable( new CAccelTable( IDD_ALBUM_SETTINGS_DIALOG ) );
+
+	m_patternsListCtrl.SetSection( m_regSection + _T("\\PatternsList") );
+	m_patternsListCtrl.SetAcceptDropFiles();
+	m_patternsListCtrl.SetSubjectAdapter( ui::GetFullPathAdapter() );			// display full paths
+	m_patternsListCtrl.SetTextEffectCallback( this );
+
+	m_imagesListCtrl.SetSection( m_regSection + _T("\\ImagesList") );
+	m_imagesListCtrl.SetCustomImageDraw( app::GetThumbnailer() );
+	m_imagesListCtrl.SetTextEffectCallback( this );
+	m_imagesListCtrl.SetSortInternally( false );
+	m_imagesListCtrl.SetUseAlternateRowColoring();
+	m_imagesListCtrl.SetDataSourceFactory( this );								// uses temporary file clones for embedded images
+	m_imagesListCtrl.SetTrackMenuTarget( this );								// let dialog track SPECIFIC custom menu commands (Explorer verbs handled by the listctrl)
+	m_imagesListCtrl.SetPopupMenu( CReportListControl::OnSelection, &GetAlbumModelPopupMenu() );
+
+	m_imagesListCtrl
+		.AddTileColumn( Dimensions )
+		.AddTileColumn( Size )
+		.AddTileColumn( Date )
+		.AddTileColumn( Folder );
 
 	m_patternsToolbar.GetStrip()
 		.AddButton( ID_ADD_ITEM )
@@ -112,6 +125,8 @@ CAlbumSettingsDialog::CAlbumSettingsDialog( const CAlbumModel& model, size_t cur
 		.AddButton( ID_MOVE_DOWN_ITEM )
 		.AddButton( ID_MOVE_TOP_ITEM )
 		.AddButton( ID_MOVE_BOTTOM_ITEM )
+		.AddSeparator()
+		.AddButton( ID_EDIT_COPY )
 		.AddSeparator()
 		.AddButton( IDC_SEARCH_FOR_FILES, CM_EXPLORE_IMAGE );
 
@@ -134,25 +149,8 @@ CAlbumSettingsDialog::CAlbumSettingsDialog( const CAlbumModel& model, size_t cur
 		.AddButton( ID_ORDER_BY_DIMENSION_DESC )
 		.AddSeparator();		// visual separator from order combo
 
-	m_patternsListCtrl.SetSection( m_regSection + _T("\\PatternsList") );
-	m_imagesListCtrl.SetCustomImageDraw( app::GetThumbnailer() );
-
-	m_imagesListCtrl.SetSection( m_regSection + _T("\\ImagesList") );
-	m_imagesListCtrl.SetCustomImageDraw( app::GetThumbnailer() );
-	m_imagesListCtrl.SetTextEffectCallback( this );
-	m_imagesListCtrl.SetSortInternally( false );
-	m_imagesListCtrl.SetUseAlternateRowColoring();
-	m_imagesListCtrl.SetDataSourceFactory( this );						// uses temporary file clones for embedded images
-	m_imagesListCtrl.SetTrackMenuTarget( this );						// let dialog track SPECIFIC custom menu commands (Explorer verbs handled by the listctrl)
-	m_imagesListCtrl.SetPopupMenu( CReportListControl::OnSelection, &GetAlbumModelPopupMenu() );
-
-	ClearFlag( m_imagesListCtrl.RefListStyleEx(), LVS_EX_DOUBLEBUFFER );		// better looking thumb rendering for tiny images (icons, small PNGs)
-
-	m_imagesListCtrl
-		.AddTileColumn( Dimensions )
-		.AddTileColumn( Size )
-		.AddTileColumn( Date )
-		.AddTileColumn( Folder );
+	utl::InsertFrom( std::inserter( m_origFilePaths, m_origFilePaths.end() ), m_model.GetSearchModel()->GetPatterns(), func::AsCode() );
+	utl::InsertFrom( std::inserter( m_origFilePaths, m_origFilePaths.end() ), m_model.GetImagesModel().GetFileAttrs(), func::ToFilePath() );
 }
 
 CAlbumSettingsDialog::~CAlbumSettingsDialog()
@@ -179,22 +177,26 @@ CMenu& CAlbumSettingsDialog::GetAlbumModelPopupMenu( void )
 	return s_popupMenu;
 }
 
-bool CAlbumSettingsDialog::InitSymbolFont( void )
-{
-	LOGFONT logFont;
-	GetFont()->GetLogFont( &logFont );
-
-	logFont.lfHeight = MulDiv( logFont.lfHeight, 120, 100 );
-	logFont.lfCharSet = SYMBOL_CHARSET;
-	logFont.lfQuality = PROOF_QUALITY;
-	logFont.lfPitchAndFamily = FF_DECORATIVE;
-	_tcscpy( logFont.lfFaceName, _T("Wingdings") );
-	return m_symbolFont.CreateFontIndirect( &logFont ) != FALSE;
-}
-
 ole::CDataSource* CAlbumSettingsDialog::NewDataSource( void )
 {
 	return new ole::CImagesDataSource();
+}
+
+bool CAlbumSettingsDialog::SetDirty( bool dirty /*= true*/ )
+{
+	if ( IsInternalChange() )
+		return false;			// during dialog output
+
+	m_isDirty = dirty;
+	m_imagesListCtrl.Invalidate();
+	m_imagesListCtrl.UpdateWindow();
+
+	static const struct { std::tstring m_caption; UINT m_iconId; } s_okLabelIcon[] = { { _T("OK"), 0 }, { _T("&Search"), CM_EXPLORE_IMAGE } };
+	m_okButton.SetButtonCaption( s_okLabelIcon[ m_isDirty ].m_caption );
+	m_okButton.SetIconId( s_okLabelIcon[ m_isDirty ].m_iconId );
+
+	ui::EnableControl( m_hWnd, IDOK, m_isDirty || m_model.GetFileOrder() != fattr::FilterCorruptedFiles );
+	return true;
 }
 
 void CAlbumSettingsDialog::SetupPatternsListView( void )
@@ -214,9 +216,6 @@ void CAlbumSettingsDialog::SetupPatternsListView( void )
 		m_patternsListCtrl.InsertObjectItem( i, pPattern, ui::Transparent_Image );
 		m_patternsListCtrl.SetSubItemText( i, PatternType, CSearchPattern::GetTags_Type().FormatUi( pPattern->GetType() ) );
 		m_patternsListCtrl.SetSubItemText( i, PatternDepth, CSearchPattern::GetTags_SearchMode().FormatUi( pPattern->GetSearchMode() ) );
-
-//		if ( utl::Contains( m_newFilePaths, pPattern->GetPath() ) )
-//			m_patternsListCtrl.MarkRowAt( i, s_newFileEffect );
 	}
 }
 
@@ -251,9 +250,6 @@ void CAlbumSettingsDialog::SetupFoundImagesListView( void )
 
 			m_imagesListCtrl.SetSubItemText( i, Size, sizeText );
 			m_imagesListCtrl.SetSubItemText( i, Date, pFileAttr->FormatLastModifTime() );
-
-			if ( utl::Contains( m_newFilePaths, pFileAttr->GetPath() ) )
-				m_imagesListCtrl.MarkRowAt( i, s_newFileEffect );
 		}
 	}
 
@@ -263,42 +259,37 @@ void CAlbumSettingsDialog::SetupFoundImagesListView( void )
 void CAlbumSettingsDialog::CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARAM rowKey, int subItem, CListLikeCtrlBase* pCtrl ) const
 {
 	subItem;
-	if ( pCtrl != &m_imagesListCtrl )
-		return;
-
 	static const ui::CTextEffect s_errorBk( ui::Regular, app::ColorErrorText, app::ColorErrorBk );
-	const CFileAttr* pFileAttr = CReportListControl::AsPtr< CFileAttr >( rowKey );
+	static const ui::CTextEffect s_newFileEffect( ui::Regular, color::Blue );
 
-	if ( !pFileAttr->IsValid() )
-		rTextEffect |= s_errorBk;							// highlight error row background
-
-	if ( m_isDirty )
+	if ( pCtrl == &m_patternsListCtrl )
 	{
-		if ( CLR_NONE == rTextEffect.m_textColor )
-			rTextEffect.m_textColor = m_imagesListCtrl.GetTextColor();
+		const CSearchPattern* pPattern = CReportListControl::AsPtr< CSearchPattern >( rowKey );
 
-		if ( CLR_DEFAULT == rTextEffect.m_textColor )
-			rTextEffect.m_textColor = ::GetSysColor( COLOR_WINDOWTEXT );
-
-		rTextEffect.m_textColor = ui::GetBlendedColor( rTextEffect.m_textColor, color::White );		// blend to washed out gray effect
+		if ( IsNewFilePath( pPattern->GetFilePath() ) )
+			rTextEffect |= s_newFileEffect;						// highlight new file text
 	}
-}
+	else if ( pCtrl == &m_imagesListCtrl )
+	{
+		const CFileAttr* pFileAttr = CReportListControl::AsPtr< CFileAttr >( rowKey );
 
-bool CAlbumSettingsDialog::SetDirty( bool dirty /*= true*/ )
-{
-	if ( IsInternalChange() )
-		return false;			// during dialog output
+		if ( IsNewFilePath( pFileAttr->GetPath() ) )
+			rTextEffect |= s_newFileEffect;						// highlight new file text
 
-	m_isDirty = dirty;
-	m_imagesListCtrl.Invalidate();
-	m_imagesListCtrl.UpdateWindow();
+		if ( !pFileAttr->IsValid() )
+			rTextEffect |= s_errorBk;							// highlight error row background
 
-	static const struct { std::tstring m_caption; UINT m_iconId; } s_okLabelIcon[] = { { _T("OK"), 0 }, { _T("&Search"), CM_EXPLORE_IMAGE } };
-	m_okButton.SetButtonCaption( s_okLabelIcon[ m_isDirty ].m_caption );
-	m_okButton.SetIconId( s_okLabelIcon[ m_isDirty ].m_iconId );
+		if ( m_isDirty )
+		{
+			if ( CLR_NONE == rTextEffect.m_textColor )
+				rTextEffect.m_textColor = m_imagesListCtrl.GetTextColor();
 
-	ui::EnableControl( m_hWnd, IDOK, m_isDirty || m_model.GetFileOrder() != fattr::FilterCorruptedFiles );
-	return true;
+			if ( CLR_DEFAULT == rTextEffect.m_textColor )
+				rTextEffect.m_textColor = ::GetSysColor( COLOR_WINDOWTEXT );
+
+			rTextEffect.m_textColor = ui::GetBlendedColor( rTextEffect.m_textColor, color::White );		// blend to washed out gray effect
+		}
+	}
 }
 
 std::pair< CAlbumSettingsDialog::ImagesColumn, bool > CAlbumSettingsDialog::ToListSortOrder( fattr::Order fileOrder )
@@ -319,185 +310,6 @@ std::pair< CAlbumSettingsDialog::ImagesColumn, bool > CAlbumSettingsDialog::ToLi
 	return std::make_pair( Unordered, false );
 }
 
-
-// if filePath is a directory or a file path, it adds/modifies the CSearchPattern entry in m_model.m_searchPatterns
-// if filePath points to an invalid path, it returns false.
-// it finally selects the latest altered entry in the list
-bool CAlbumSettingsDialog::DropSearchPattern( const fs::CFlexPath& filePath, bool doPrompt /*= true*/ )
-{
-	if ( filePath.IsEmpty() || !filePath.FileExist() )
-		return false;
-
-	CSearchModel* pSearchModel = m_model.RefSearchModel();
-	int index = pSearchModel->FindPatternPos( filePath );
-
-	if ( index != -1 )
-	{	// already exists -> prompt to modify
-		CSearchPattern* pSearchPattern = pSearchModel->GetPatternAt( index );
-
-		m_searchPatternListBox.SetCurSel( index );
-
-		if ( doPrompt )
-		{
-			CSearchPatternDialog dlg( *pSearchPattern, this );
-			if ( IDCANCEL == dlg.DoModal() )
-				return false;
-
-			*pSearchPattern = dlg.m_searchPattern;
-		}
-		m_searchPatternListBox.DeleteString( index );
-		m_searchPatternListBox.InsertString( index, pSearchPattern->GetFilePath().GetPtr() );
-	}
-	else
-	{
-		pSearchModel->AddSearchPath( filePath );
-		index = static_cast<int>( pSearchModel->GetPatterns().size() - 1 );
-		CSearchPattern* pSearchPattern( pSearchModel->GetPatternAt( index ) );
-
-		m_searchPatternListBox.AddString( pSearchPattern->GetFilePath().GetPtr() );
-	}
-	m_searchPatternListBox.SetCurSel( index );
-
-	SetDirty();
-	OnLBnSelChange_SearchPattern();
-	return true;
-}
-
-bool CAlbumSettingsDialog::DeleteSearchPattern( int index, bool doPrompt /*= false*/ )
-{
-	ASSERT( index != LB_ERR );
-	if ( doPrompt )
-		if ( IDCANCEL == AfxMessageBox( str::Format( IDS_DELETE_ATTR_PROMPT, m_model.GetSearchModel()->GetPatternAt( index )->GetFilePath().GetPtr() ).c_str(), MB_OKCANCEL ) )
-			return false;
-
-	m_model.RefSearchModel()->RemovePatternAt( index );
-	m_searchPatternListBox.DeleteString( index );
-	index = std::min( index, m_searchPatternListBox.GetCount() - 1 );
-	m_searchPatternListBox.SetCurSel( index );
-
-	SetDirty();
-	OnLBnSelChange_SearchPattern();
-	return true;
-}
-
-bool CAlbumSettingsDialog::MoveSearchPattern( seq::Direction moveBy )
-{
-	int selIndex = m_searchPatternListBox.GetCurSel();
-	int newIndex = selIndex + moveBy;
-
-	ASSERT( selIndex != LB_ERR && moveBy != 0 );
-	m_searchPatternListBox.DeleteString( selIndex );
-
-	CSearchModel* pSearchModel = m_model.RefSearchModel();
-	const CSearchPattern* pSearchPattern = pSearchModel->GetPatternAt( selIndex );
-
-	seq::MoveBy( &pSearchModel->RefPatterns(), selIndex, moveBy );
-	ENSURE( pSearchPattern == pSearchModel->GetPatternAt( newIndex ) );			// same pattern at new index
-
-	if ( newIndex < m_searchPatternListBox.GetCount() )
-		m_searchPatternListBox.InsertString( newIndex, pSearchPattern->GetFilePath().GetPtr() );
-	else
-		m_searchPatternListBox.AddString( pSearchPattern->GetFilePath().GetPtr() );
-
-	VERIFY( m_searchPatternListBox.SetCurSel( newIndex ) != LB_ERR );
-	SetDirty();
-	OnLBnSelChange_SearchPattern();
-	return true;
-}
-
-bool CAlbumSettingsDialog::AddSearchPattern( int index )
-{
-	ASSERT( index != LB_ERR );
-
-	CSearchPatternDialog dlg( CSearchPattern(), this );
-	if ( dlg.DoModal() != IDOK )
-		return false;
-
-	CSearchModel* pSearchModel = m_model.RefSearchModel();
-	int dupIndex = CheckForDuplicates( dlg.m_searchPattern.GetFilePath().GetPtr() );
-
-	if ( dupIndex != -1 )
-	{	// modify the same entry instead of
-		index = dupIndex;
-		pSearchModel->RemovePatternAt( index )->GetFilePath();
-		m_searchPatternListBox.DeleteString( index );
-	}
-
-	pSearchModel->AddPattern( new CSearchPattern( dlg.m_searchPattern ), index );
-	m_searchPatternListBox.InsertString( index, pSearchModel->GetPatternAt( index )->GetFilePath().GetPtr() );
-
-	m_searchPatternListBox.SetCurSel( index );
-	SetDirty();
-	OnLBnSelChange_SearchPattern();
-	return true;
-}
-
-bool CAlbumSettingsDialog::ModifySearchPattern( int index )
-{
-	ASSERT( index != LB_ERR );
-
-	CSearchPatternDialog dlg( *m_model.GetSearchModel()->GetPatternAt( index ), this );
-	if ( dlg.DoModal() != IDOK )
-		return false;
-
-	CSearchModel* pSearchModel = m_model.RefSearchModel();
-	std::auto_ptr< CSearchPattern > pSearchPattern;
-	int dupIndex = CheckForDuplicates( dlg.m_searchPattern.GetFilePath().GetPtr(), index );
-
-	if ( dupIndex != -1 )
-	{	// modify the same entry
-		pSearchPattern = pSearchModel->RemovePatternAt( index );
-		m_searchPatternListBox.DeleteString( index );
-		index = dupIndex;
-	}
-	else
-		pSearchPattern.reset( new CSearchPattern() );
-
-	*pSearchPattern = dlg.m_searchPattern;
-
-	m_searchPatternListBox.DeleteString( index );
-	m_searchPatternListBox.InsertString( index, pSearchPattern->GetFilePath().GetPtr() );
-
-	m_searchPatternListBox.SetCurSel( index );
-	SetDirty();
-	OnLBnSelChange_SearchPattern();
-	return true;
-}
-
-
-namespace hlp
-{
-	std::tstring GetItemText( const CListBox& rListBox, int pos )
-	{
-		CString itemText;
-		rListBox.GetText( pos, itemText );
-		return itemText.GetString();
-	}
-
-	int FindPathIndex( const CListBox& rListBox, const std::tstring& match, int ignoreIndex = -1 )
-	{
-		for ( int i = 0, count = rListBox.GetCount(); i < count; ++i )
-			if ( i != ignoreIndex )
-			{
-				std::tstring itemText = GetItemText( rListBox, i );
-				if ( path::Equivalent( itemText, match ) )
-					return i;
-			}
-
-		return -1;
-	}
-}
-
-int CAlbumSettingsDialog::CheckForDuplicates( const TCHAR* pFilePath, int ignoreIndex /*= -1*/ )
-{
-	int foundIndex = hlp::FindPathIndex( m_searchPatternListBox, pFilePath, ignoreIndex );
-	if ( foundIndex != -1 )
-		if ( AfxMessageBox( str::Format( IDS_REPLACE_DUP_PROMPT, pFilePath ).c_str(), MB_YESNO | MB_ICONQUESTION ) != IDYES )
-			return -1;		// allow the duplicate to exist
-
-	return foundIndex;
-}
-
 bool CAlbumSettingsDialog::SearchSourceFiles( void )
 {
 	CWaitCursor wait;
@@ -508,9 +320,6 @@ bool CAlbumSettingsDialog::SearchSourceFiles( void )
 	fs::CFlexPath currFilePath;
 	if ( m_pCaretFileAttr != NULL )
 		currFilePath = m_pCaretFileAttr->GetPath();
-
-	stdext::hash_set< fs::CFlexPath > oldFilePaths;
-	utl::InsertFrom( std::inserter( oldFilePaths, oldFilePaths.end() ), m_model.GetImagesModel().GetFileAttrs(), func::ToFilePath() );
 
 	try
 	{
@@ -526,12 +335,6 @@ bool CAlbumSettingsDialog::SearchSourceFiles( void )
 		m_pCaretFileAttr = fattr::FindWithPath( m_model.GetImagesModel().GetFileAttrs(), currFilePath );
 	else
 		m_pCaretFileAttr = NULL;
-
-	m_newFilePaths.clear();
-	const std::vector< CFileAttr* >& fileAttrs = m_model.GetImagesModel().GetFileAttrs();
-	for ( std::vector< CFileAttr* >::const_iterator itFileAttr = fileAttrs.begin(); itFileAttr != fileAttrs.end(); ++itFileAttr )
-		if ( oldFilePaths.find( ( *itFileAttr )->GetPath() ) == oldFilePaths.end() )
-			m_newFilePaths.push_back( ( *itFileAttr )->GetPath() );
 
 	SetupFoundImagesListView();		// fill in the found files list
 	SetDirty( false );
@@ -580,14 +383,8 @@ void CAlbumSettingsDialog::OutputAll( void )
 
 	// fill in the search attribute path list
 	m_sortOrderCombo.SetValue( m_model.GetFileOrder() );
-	m_searchPatternListBox.ResetContent();
 
-	const std::vector< CSearchPattern* >& searchPatterns = m_model.GetSearchModel()->GetPatterns();
-	for ( std::vector< CSearchPattern* >::const_iterator itPattern = searchPatterns.begin(); itPattern != searchPatterns.end(); ++itPattern )
-		m_searchPatternListBox.AddString( ( *itPattern )->GetFilePath().GetPtr() );
-
-	m_searchPatternListBox.SetCurSel( 0 );
-	OnLBnSelChange_SearchPattern();
+	m_patternsListCtrl.SetCurSel( 0 );
 
 	// setup list-control
 	std::pair< ImagesColumn, bool > sortPair = ToListSortOrder( m_model.GetFileOrder() );
@@ -640,29 +437,24 @@ void CAlbumSettingsDialog::DoDataExchange( CDataExchange* pDX )
 	DDX_Control( pDX, IDC_PATTERNS_LISTVIEW, m_patternsListCtrl );
 	m_patternsToolbar.DDX_Placeholder( pDX, IDC_STRIP_BAR_1, H_AlignRight | V_AlignCenter );
 
-		DDX_Control( pDX, IDC_SEARCH_SPEC_MOVE_DOWN, m_moveDownButton );
-		DDX_Control( pDX, IDC_SEARCH_SPEC_MOVE_UP, m_moveUpButton );
-		DDX_Control( pDX, IDC_SEARCH_SPEC_LIST, m_searchPatternListBox );
-
 	DDX_Control( pDX, IDC_MAX_FILE_COUNT_EDIT, m_maxFileCountEdit );
 	DDX_Control( pDX, IDC_MIN_FILE_SIZE_EDIT, m_minSizeEdit );
 	DDX_Control( pDX, IDC_MAX_FILE_SIZE_EDIT, m_maxSizeEdit );
 
 	DDX_Control( pDX, IDC_LIST_ORDER_COMBO, m_sortOrderCombo );
 	DDX_Control( pDX, IDC_FOUND_IMAGES_LISTVIEW, m_imagesListCtrl );
+	m_imagesToolbar.DDX_Placeholder( pDX, IDC_STRIP_BAR_2, H_AlignRight | V_AlignCenter );
+
 	DDX_Control( pDX, IDC_THUMB_PREVIEW_STATIC, m_thumbPreviewCtrl );
 	DDX_Control( pDX, IDC_DOC_VERSION_LABEL, m_docVersionLabel );
 	DDX_Control( pDX, IDC_DOC_VERSION_STATIC, m_docVersionStatic );
-	m_imagesToolbar.DDX_Placeholder( pDX, IDC_STRIP_BAR_2, H_AlignRight | V_AlignCenter );
 	DDX_Control( pDX, IDOK, m_okButton );
 
 	if ( firstInit )
 	{
-		DragAcceptFiles();
-		InitSymbolFont();
+		m_pPatternsEditor.reset( new CListCtrlEditorFrame( &m_patternsListCtrl, &m_patternsToolbar ) );
+		m_pImagesEditor.reset( new CListCtrlEditorFrame( &m_imagesListCtrl, &m_imagesToolbar ) );
 
-		m_moveUpButton.SetFont( &m_symbolFont );
-		m_moveDownButton.SetFont( &m_symbolFont );
 		m_imagesListCtrl.SetCompactIconSpacing();
 	}
 
@@ -679,29 +471,24 @@ void CAlbumSettingsDialog::DoDataExchange( CDataExchange* pDX )
 
 BOOL CAlbumSettingsDialog::OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo )
 {
+	// NOTE: no routing to the patterns or images lists - it works the other way around, read the notes in CReportListControl::OnCmdMsg().
+
 	switch ( id )
 	{
 		case ID_EDIT_COPY:
-			// special case: handled by the file list (since CDialog::OnCmdMsg() routes to the parent frame window)
-			return m_imagesListCtrl.OnCmdMsg( id, code, pExtra, pHandlerInfo );
+			// special commands: prevent base handling since command is handled in CImageView::OnEditCopy, via dialog's parent routing and MFC default routing
+			return FALSE;
 	}
 
-	if ( __super::OnCmdMsg( id, code, pExtra, pHandlerInfo ) )
-		return TRUE;
-
-	if ( m_patternsEditor.OnCmdMsg( id, code, pExtra, pHandlerInfo ) )
-		return TRUE;
-
-	if ( m_imagesListCtrl.OnCmdMsg( id, code, pExtra, pHandlerInfo ) )
-		return TRUE;
-
-	return FALSE;
+	return __super::OnCmdMsg( id, code, pExtra, pHandlerInfo );
 }
 
 BOOL CAlbumSettingsDialog::PreTranslateMessage( MSG* pMsg )
 {
 	if ( CAccelTable::IsKeyMessage( pMsg ) )
-		if ( m_patternsEditor.HandleTranslateMessage( pMsg ) )
+		if ( m_pPatternsEditor->HandleTranslateMessage( pMsg ) )
+			return true;
+		else if ( m_pImagesEditor->HandleTranslateMessage( pMsg ) )
 			return true;
 
 	return CLayoutDialog::PreTranslateMessage( pMsg );
@@ -712,8 +499,16 @@ BOOL CAlbumSettingsDialog::PreTranslateMessage( MSG* pMsg )
 
 BEGIN_MESSAGE_MAP( CAlbumSettingsDialog, CLayoutDialog )
 	ON_WM_DESTROY()
-	ON_WM_DROPFILES()
 	ON_CBN_SELCHANGE( IDC_LIST_ORDER_COMBO, OnCBnSelChange_SortOrder )
+
+	ON_NOTIFY( NM_DBLCLK, IDC_PATTERNS_LISTVIEW, OnLVnDblClk_Patterns )
+	ON_NOTIFY( lv::LVN_DropFiles, IDC_PATTERNS_LISTVIEW, OnLVnDropFiles_Patterns )
+	ON_NOTIFY( lv::LVN_ItemsRemoved, IDC_PATTERNS_LISTVIEW, OnLVnItemsRemoved_Patterns )
+	ON_CONTROL( lv::LVN_ItemsReorder, IDC_PATTERNS_LISTVIEW, OnLVnItemsReorder_Patterns )
+	ON_COMMAND( ID_ADD_ITEM, OnAdd_SearchPattern )			// validated by m_patternsEditor
+	ON_COMMAND( ID_EDIT_ITEM, OnModify_SearchPattern )		// validated by m_patternsEditor
+	ON_COMMAND( IDC_SEARCH_FOR_FILES, OnSearchSourceFiles )
+
 	ON_BN_CLICKED( IDC_MAX_FILE_COUNT_CHECK, OnToggle_MaxFileCount )
 	ON_BN_CLICKED( IDC_MIN_FILE_SIZE_CHECK, OnToggle_MinSize )
 	ON_BN_CLICKED( IDC_MAX_FILE_SIZE_CHECK, OnToggle_MaxSize )
@@ -723,21 +518,14 @@ BEGIN_MESSAGE_MAP( CAlbumSettingsDialog, CLayoutDialog )
 	ON_BN_CLICKED( IDC_AUTO_REGENERATE_CHECK, OnToggle_AutoRegenerate )
 	ON_BN_CLICKED( IDC_AUTO_DROP_CHECK, OnToggle_AutoDrop )
 
-	ON_LBN_SELCHANGE( IDC_SEARCH_SPEC_LIST, OnLBnSelChange_SearchPattern )
-	ON_LBN_DBLCLK( IDC_SEARCH_SPEC_LIST, OnLBnDblclk_SearchPattern )
-	ON_BN_CLICKED( IDC_SEARCH_SPEC_MOVE_UP, On_MoveUp_SearchPattern )
-	ON_BN_CLICKED( IDC_SEARCH_SPEC_MOVE_DOWN, On_MoveDown_SearchPattern )
-	ON_BN_CLICKED( ID_ADD_ITEM, OnAdd_SearchPattern )
-	ON_BN_CLICKED( ID_EDIT_ITEM, OnModify_SearchPattern )
-	ON_BN_CLICKED( ID_REMOVE_ITEM, OnDelete_SearchPattern )
-
-	ON_BN_CLICKED( IDC_SEARCH_FOR_FILES, OnSearchSourceFiles )
-	ON_COMMAND_RANGE( ID_ORDER_ORIGINAL, ID_ORDER_BY_DIMENSION_DESC, On_OrderRandomShuffle )
-	ON_UPDATE_COMMAND_UI_RANGE( ID_ORDER_ORIGINAL, ID_ORDER_BY_DIMENSION_DESC, OnUpdate_OrderRandomShuffle )
 	ON_NOTIFY( LVN_COLUMNCLICK, IDC_FOUND_IMAGES_LISTVIEW, OnLVnColumnClick_FoundImages )
 	ON_NOTIFY( LVN_ITEMCHANGED, IDC_FOUND_IMAGES_LISTVIEW, OnLVnItemChanged_FoundImages )
 	ON_NOTIFY( LVN_GETDISPINFO, IDC_FOUND_IMAGES_LISTVIEW, OnLVnGetDispInfo_FoundImages )
 	ON_CONTROL( lv::LVN_ItemsReorder, IDC_FOUND_IMAGES_LISTVIEW, OnLVnItemsReorder_FoundImages )
+
+	ON_COMMAND_RANGE( ID_ORDER_ORIGINAL, ID_ORDER_BY_DIMENSION_DESC, On_OrderRandomShuffle )
+	ON_UPDATE_COMMAND_UI_RANGE( ID_ORDER_ORIGINAL, ID_ORDER_BY_DIMENSION_DESC, OnUpdate_OrderRandomShuffle )
+
 	ON_STN_DBLCLK( IDC_THUMB_PREVIEW_STATIC, OnStnDblClk_ThumbPreviewStatic )
 
 	// image file operations: CM_OPEN_IMAGE_FILE, CM_DELETE_FILE, CM_DELETE_FILE_NO_UNDO, CM_MOVE_FILE, CM_EXPLORE_IMAGE
@@ -764,21 +552,6 @@ void CAlbumSettingsDialog::OnCancel( void )
 	CLayoutDialog::OnCancel();
 }
 
-void CAlbumSettingsDialog::OnDropFiles( HDROP hDropInfo )
-{
-	SetActiveWindow();
-
-	UINT fileCount = ::DragQueryFile( hDropInfo, ( UINT )-1, NULL, 0 );
-
-	for ( UINT i = 0; i != fileCount; ++i )
-	{
-		TCHAR filePath[ MAX_PATH ];
-		::DragQueryFile( hDropInfo, i, filePath, COUNT_OF( filePath ) );
-		DropSearchPattern( fs::CFlexPath( filePath ) );
-	}
-	::DragFinish( hDropInfo );
-}
-
 void CAlbumSettingsDialog::OnContextMenu( CWnd* pWnd, CPoint point )
 {
 	if ( pWnd == &m_imagesListCtrl )
@@ -792,6 +565,125 @@ void CAlbumSettingsDialog::OnContextMenu( CWnd* pWnd, CPoint point )
 				contextMenu.TrackPopupMenu( TPM_RIGHTBUTTON, point.x, point.y, this );
 	}
 }
+
+
+void CAlbumSettingsDialog::OnLVnDblClk_Patterns( NMHDR* pNmHdr, LRESULT* pResult )
+{
+	NMITEMACTIVATE* pNmItemActivate = (NMITEMACTIVATE*)pNmHdr;
+	*pResult = 0;
+
+	if ( pNmItemActivate->iItem != -1 )
+		ui::SendCommand( m_hWnd, ID_EDIT_ITEM, BN_CLICKED, pNmItemActivate->hdr.hwndFrom );
+}
+
+void CAlbumSettingsDialog::OnLVnDropFiles_Patterns( NMHDR* pNmHdr, LRESULT* pResult )
+{
+	const lv::CNmDropFiles* pNmDropFiles = (const lv::CNmDropFiles*)pNmHdr;
+	*pResult = 0;
+
+	CSearchModel* pSearchModel = m_model.RefSearchModel();
+	std::vector< CSearchPattern* > droppedPatterns;
+
+	size_t dropPos = pNmDropFiles->m_dropItemIndex;
+	for ( std::vector< fs::CPath >::const_iterator itSearchPath = pNmDropFiles->m_filePaths.begin(); itSearchPath != pNmDropFiles->m_filePaths.end(); ++itSearchPath )
+	{
+		std::pair< CSearchPattern*, bool > patternPair = pSearchModel->AddSearchPath( *itSearchPath, dropPos );
+
+		droppedPatterns.push_back( patternPair.first );
+		if ( patternPair.second )
+			++dropPos;
+	}
+
+	SetupPatternsListView();
+	m_patternsListCtrl.SelectObjects( droppedPatterns );
+	SetDirty();
+}
+
+void CAlbumSettingsDialog::OnLVnItemsRemoved_Patterns( NMHDR* pNmHdr, LRESULT* pResult )
+{
+	const lv::CNmItemsRemoved* pNmItemsRemoved = (const lv::CNmItemsRemoved*)pNmHdr;
+	*pResult = 0;
+
+	CSearchModel* pSearchModel = m_model.RefSearchModel();
+	std::vector< CSearchPattern* >& rSearchPatterns = pSearchModel->RefPatterns();
+
+	if ( pNmItemsRemoved->m_removedObjects.size() == rSearchPatterns.size() )		// remove all?
+		pSearchModel->ClearPatterns();
+	else
+	{
+		for ( std::vector< utl::ISubject* >::const_iterator itObject = pNmItemsRemoved->m_removedObjects.begin(); itObject != pNmItemsRemoved->m_removedObjects.end(); ++itObject )
+		{
+			utl::RemoveExisting( rSearchPatterns, checked_static_cast< CSearchPattern* >( *itObject ) );
+			delete *itObject;
+		}
+	}
+	SetDirty();
+}
+
+void CAlbumSettingsDialog::OnLVnItemsReorder_Patterns( void )
+{
+	// copy List sequence -> CSearchModel sequence
+	std::vector< CSearchPattern* > patternsSequence;
+	m_patternsListCtrl.QueryObjectsSequence( patternsSequence );
+
+	CSearchModel* pSearchModel = m_model.RefSearchModel();
+	ASSERT( utl::SameContents( patternsSequence, pSearchModel->GetPatterns() ) );
+
+	pSearchModel->RefPatterns().swap( patternsSequence );
+	SetDirty();
+}
+
+void CAlbumSettingsDialog::OnAdd_SearchPattern( void )
+{
+	CSearchPattern* pCaretPattern = m_patternsListCtrl.GetCaretAs< CSearchPattern >();
+	CSearchPatternDialog dlg( pCaretPattern, this );
+	if ( dlg.DoModal() != IDOK )
+		return;
+
+	CSearchModel* pSearchModel = m_model.RefSearchModel();
+
+	size_t pos = pSearchModel->FindPatternPos( dlg.m_pSearchPattern->GetFilePath() );
+	if ( pos != utl::npos )
+		*pSearchModel->GetPatternAt( pos ) = *dlg.m_pSearchPattern;				// modify existing pattern
+	else
+		pos = pSearchModel->AddPattern( dlg.m_pSearchPattern.release() );		// insert new pattern
+
+	SetupPatternsListView();
+	m_patternsListCtrl.SetCurSel( static_cast<int>( pos ) );
+	GotoDlgCtrl( &m_patternsListCtrl );
+	SetDirty();
+}
+
+void CAlbumSettingsDialog::OnModify_SearchPattern( void )
+{
+	size_t selIndex = m_patternsListCtrl.GetCurSel();
+	ASSERT( selIndex != utl::npos );		// should be validated
+
+	CSearchModel* pSearchModel = m_model.RefSearchModel();
+	std::vector< CSearchPattern* >& rSearchPatterns = pSearchModel->RefPatterns();
+
+	CSearchPattern* pEditedPattern = rSearchPatterns[ selIndex ];
+
+	CSearchPatternDialog dlg( pEditedPattern, this );
+	if ( dlg.DoModal() != IDOK )
+		return;
+
+	size_t dupPos = pSearchModel->FindPatternPos( dlg.m_pSearchPattern->GetFilePath(), selIndex );
+	if ( dupPos != utl::npos )
+	{
+		m_patternsListCtrl.SetCaretIndex( dupPos );
+		ui::MessageBox( str::Format( _T("The search pattern must be unique!\nCheck duplicate pattern no. %d."), dupPos + 1 ), MB_ICONERROR | MB_OK );
+		return;
+	}
+
+	*pEditedPattern = *dlg.m_pSearchPattern;
+
+	SetupPatternsListView();
+	m_patternsListCtrl.SetCurSel( static_cast<int>( selIndex ) );
+	GotoDlgCtrl( &m_patternsListCtrl );
+	SetDirty();
+}
+
 
 void CAlbumSettingsDialog::OnCBnSelChange_SortOrder( void )
 {
@@ -865,66 +757,6 @@ void CAlbumSettingsDialog::OnEnChange_MaxFileCount( void )
 void CAlbumSettingsDialog::OnEnChange_MinMaxSize( void )
 {
 	SetDirty();
-}
-
-void CAlbumSettingsDialog::OnLBnSelChange_SearchPattern( void )
-{
-	int selIndex = m_searchPatternListBox.GetCurSel();
-	int attrCount = static_cast<int>( m_model.GetSearchModel()->GetPatterns().size() );
-
-	ASSERT( selIndex != LB_ERR || 0 == m_searchPatternListBox.GetCount() );
-	ui::EnableWindow( m_moveUpButton, selIndex > 0 );
-	ui::EnableWindow( m_moveDownButton, selIndex < attrCount - 1 );
-
-	ui::EnableControl( m_hWnd, ID_EDIT_ITEM, selIndex != LB_ERR );
-	ui::EnableControl( m_hWnd, ID_REMOVE_ITEM, selIndex != LB_ERR );
-
-	CheckDlgButton( IDC_AUTO_REGENERATE_CHECK, GetCheckStateAutoRegen() );
-	CheckDlgButton( IDC_AUTO_DROP_CHECK, m_model.IsAutoDropRecipient() );
-}
-
-void CAlbumSettingsDialog::OnLBnDblclk_SearchPattern( void )
-{
-	if ( m_searchPatternListBox.GetCount() > 0 )
-		OnModify_SearchPattern();
-}
-
-void CAlbumSettingsDialog::On_MoveUp_SearchPattern( void )
-{
-	MoveSearchPattern( seq::Prev );
-}
-
-void CAlbumSettingsDialog::On_MoveDown_SearchPattern( void )
-{
-	MoveSearchPattern( seq::Next );
-}
-
-void CAlbumSettingsDialog::OnAdd_SearchPattern( void )
-{
-	int attrCount = static_cast<int>( m_model.GetSearchModel()->GetPatterns().size() );
-	int atIndex = m_searchPatternListBox.GetCurSel();
-
-	if ( LB_ERR == atIndex )
-		if ( 0 == attrCount )
-			atIndex = 0;
-		else
-			ASSERT( false );
-
-	if ( ui::IsKeyPressed( VK_SHIFT ) )
-		atIndex = attrCount;
-
-	AddSearchPattern( atIndex );
-}
-
-void CAlbumSettingsDialog::OnModify_SearchPattern( void )
-{
-	ModifySearchPattern( m_searchPatternListBox.GetCurSel() );
-}
-
-void CAlbumSettingsDialog::OnDelete_SearchPattern( void )
-{
-	bool doPrompt = !ui::IsKeyPressed( VK_SHIFT );
-	DeleteSearchPattern( m_searchPatternListBox.GetCurSel(), doPrompt );
 }
 
 void CAlbumSettingsDialog::OnSearchSourceFiles( void )
@@ -1054,10 +886,9 @@ void CAlbumSettingsDialog::OnLVnItemsReorder_FoundImages( void )
 {
 	// input custom order
 	std::vector< CFileAttr* > customSequence;
-	customSequence.reserve( m_model.GetFileAttrCount() );
+	m_imagesListCtrl.QueryObjectsSequence( customSequence );
 
-	for ( int i = 0, count = m_imagesListCtrl.GetItemCount(); i != count; ++i )
-		customSequence.push_back( m_imagesListCtrl.GetPtrAt< CFileAttr >( i ) );
+	ASSERT( utl::SameContents( customSequence, m_model.GetImagesModel().GetFileAttrs() ) );
 
 	m_model.SetCustomOrderSequence( customSequence );
 

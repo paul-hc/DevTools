@@ -117,7 +117,7 @@ namespace ui
 		if ( !message.AssignTooltipText( text ) )
 			return false;				// no tooltip info for this command
 
-		*pResult = 0;
+		utl::AssignPtr( pResult, 0L );
 		return true;					// message was handled
 	}
 

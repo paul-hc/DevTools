@@ -3,6 +3,7 @@
 #pragma once
 
 #include <set>
+#include "utl/vector_map.h"
 
 
 namespace ui
@@ -24,6 +25,35 @@ namespace ui
 		size_t Subtract( const CCmdIdStore& store );
 	private:
 		std::set< int > m_cmdIds;
+	};
+
+
+	// cached lookup message map handlers for a given command notification (WM_COMMAND/WM_NOTIFY)
+	//
+	class CHandledNotificationsCache : private utl::noncopyable
+	{
+	public:
+		CHandledNotificationsCache( CCmdTarget* pCmdTarget ) : m_pCmdTarget( pCmdTarget ) { ASSERT_PTR( m_pCmdTarget ); }
+
+		bool HandlesWmCommand( int cmdId, UINT cmdNotifyCode ) { return HandlesMessage( cmdId, WM_COMMAND, cmdNotifyCode ); }
+		bool HandlesWmNotify( int cmdId, UINT wmNotifyCode ) { return HandlesMessage( cmdId, WM_NOTIFY, wmNotifyCode ); }
+
+		bool HandlesMessage( int cmdId, UINT message, UINT notifyCode );
+	private:
+		struct CHandlerKey			// for the lack of std::tuple
+		{
+			CHandlerKey( void ) : m_cmdId( 0 ), m_message( 0 ), m_notifyCode( 0 ) {}
+			CHandlerKey( int cmdId, UINT message, UINT notifyCode ) : m_cmdId( cmdId ), m_message( message ), m_notifyCode( notifyCode ) {}
+
+			bool operator<( const CHandlerKey& right ) const;
+		public:
+			int m_cmdId;
+			UINT m_message;			// WM_COMMAND, WM_NOTIFY, etc
+			UINT m_notifyCode;
+		};
+	private:
+		CCmdTarget* m_pCmdTarget;
+		utl::vector_map< CHandlerKey, bool > m_handledNotifyCodes;		// <handler_key, handled>
 	};
 }
 

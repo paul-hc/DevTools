@@ -2,6 +2,7 @@
 #include "stdafx.h"
 #include "CmdIdStore.h"
 #include "MenuUtilities.h"
+#include "Utilities.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -10,6 +11,8 @@
 
 namespace ui
 {
+	// CCmdIdStore implementation
+
 	std::pair< int, int > CCmdIdStore::GetMinMaxIds( void ) const
 	{
 		std::pair< int, int > minMaxPair( 0, 0 );
@@ -62,5 +65,35 @@ namespace ui
 			m_cmdIds.erase( *itCmdId );
 
 		return m_cmdIds.size() - oldSize;		// subtracted count
+	}
+
+
+	// CHandledNotificationsCache implementation
+
+	bool CHandledNotificationsCache::HandlesMessage( int cmdId, UINT message, UINT notifyCode )
+	{
+		const CHandlerKey handlerKey( cmdId, message, notifyCode );
+		utl::vector_map< CHandlerKey, bool >::const_iterator itFound = m_handledNotifyCodes.find( handlerKey );
+
+		if ( itFound != m_handledNotifyCodes.end() )
+			return itFound->second;
+
+		bool isHandled = ui::ContainsMessageHandler( m_pCmdTarget, message, notifyCode, cmdId );
+
+		m_handledNotifyCodes[ handlerKey ] = isHandled;
+		return isHandled;
+	}
+
+	bool CHandledNotificationsCache::CHandlerKey::operator<( const CHandlerKey& right ) const
+	{
+		pred::CompareResult result = pred::Compare_Scalar( m_cmdId, right.m_cmdId );
+
+		if ( pred::Equal == result )
+			result = pred::Compare_Scalar( m_message, right.m_message );
+
+		if ( pred::Equal == result )
+			result = pred::Compare_Scalar( m_notifyCode, right.m_notifyCode );
+
+		return pred::Less == result;
 	}
 }

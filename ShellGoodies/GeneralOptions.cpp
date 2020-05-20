@@ -120,7 +120,6 @@ void CGeneralOptions::ApplyToListCtrl( CReportListControl* pListCtrl ) const
 	ASSERT_PTR( pListCtrl );
 
 	pListCtrl->SetHighlightTextDiffsFrame( m_highlightTextDiffsFrame );
-	pListCtrl->ModifyListStyleEx( m_useListDoubleBuffer ? 0 : LVS_EX_DOUBLEBUFFER, m_useListDoubleBuffer ? LVS_EX_DOUBLEBUFFER : 0 );
-
 	pListCtrl->SetCustomFileGlyphDraw( m_useListThumbs );
+	pListCtrl->ModifyListStyleEx( m_useListDoubleBuffer ? 0 : LVS_EX_DOUBLEBUFFER, m_useListDoubleBuffer ? LVS_EX_DOUBLEBUFFER : 0 );
 }

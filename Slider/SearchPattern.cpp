@@ -26,6 +26,8 @@ CSearchPattern::CSearchPattern( void )
 
 CSearchPattern::CSearchPattern( const fs::CPath& searchPath )
 	: CPathItemBase( fs::CPath() )
+	, m_type( DirPath )
+	, m_searchMode( RecurseSubDirs )
 {
 	SetFilePath( searchPath );
 }
@@ -61,32 +63,33 @@ void CSearchPattern::SetFilePath( const fs::CPath& filePath )
 {
 	__super::SetFilePath( filePath );
 
-	m_type = CheckType();
-
-	switch ( m_type )
-	{
-		case DirPath:
-			m_searchMode = RecurseSubDirs;
-			break;
-		case ArchiveStgFile:
-		case ExplicitFile:
-			m_wildFilters.clear();
-			m_searchMode = ShallowDir;
-			break;
-	}
+	if ( utl::ModifyValue( m_type, CheckType() ) )		// pattern type changed?
+		switch ( m_type )
+		{
+			case DirPath:
+				m_searchMode = RecurseSubDirs;
+				break;
+			case ArchiveStgFile:
+			case ExplicitFile:
+				m_wildFilters.clear();
+				m_searchMode = ShallowDir;
+				break;
+		}
 }
 
 CSearchPattern::Type CSearchPattern::CheckType( void ) const
 {
-	if ( fs::IsValidDirectory( GetFilePath().GetPtr() ) )
+	const fs::CPath& filePath = GetFilePath();
+
+	if ( fs::IsValidDirectory( filePath.GetPtr() ) )
 		return DirPath;
-	else if ( GetFilePath().FileExist() )
-		if ( CImageArchiveStg::HasImageArchiveExt( GetFilePath().GetPtr() ) )
+	else if ( filePath.FileExist() )
+		if ( CImageArchiveStg::HasImageArchiveExt( filePath.GetPtr() ) )
 			return ArchiveStgFile;
 		else
 			return ExplicitFile;
 
-	return BestGuessType( GetFilePath() );
+	return BestGuessType( filePath );
 }
 
 CSearchPattern::Type CSearchPattern::BestGuessType( const fs::CPath& searchPath )
@@ -122,11 +125,19 @@ bool CSearchPattern::BrowseFilePath( BrowseMode pathType /*= BrowseAsIs*/, CWnd*
 	bool picked = false;
 
 	if ( BrowseAsDirPath == pathType )
-		picked = shell::BrowseForFolder( filePath, pParentWnd, NULL, shell::BF_FileSystem, _T("Select the image searching folder path:") );
+	{
+		static const TCHAR s_dlgTitle[] = _T("Select Folder with Images");
+
+		if ( fs::IsValidFile( filePath.c_str() ) )
+			filePath = fs::CPath( filePath ).GetParentPath().Get();
+
+		picked = shell::PickFolder( filePath, pParentWnd, 0, s_dlgTitle );
+		//picked = shell::BrowseForFolder( filePath, pParentWnd, NULL, shell::BF_FileSystem, s_dlgTitle );
+	}
 	else
 		if ( ArchiveStgFile == m_type )
 			picked = app::BrowseArchiveStgFile( filePath, pParentWnd, shell::FileOpen, extraFlags );
-		else	// ExplicitFile, Invalid
+		else	// ExplicitFile
 			picked = shell::BrowseImageFile( filePath, shell::FileOpen, extraFlags, pParentWnd );
 
 	if ( !picked )
@@ -186,6 +197,6 @@ const CEnumTags& CSearchPattern::GetTags_Type( void )
 
 const CEnumTags& CSearchPattern::GetTags_SearchMode( void )
 {
-	static const CEnumTags s_tags( _T("Shallow|Recurse|Auto-drop") );
+	static const CEnumTags s_tags( _T("Shallow|Recurse|Auto-drop recipient (for numeric filenames)") );
 	return s_tags;
 }

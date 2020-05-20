@@ -326,7 +326,7 @@ CItemsListPage::CItemsListPage( CItemListDialog* pDialog )
 	SetUseLazyUpdateData();			// call UpdateData on page activation change
 
 	m_listCtrl.SetSection( reg::section_list );
-	m_listCtrl.SetSubjectAdapter( ui::CCodeAdapter::Instance() );				// display full paths
+	m_listCtrl.SetSubjectAdapter( ui::GetFullPathAdapter() );			// display full paths
 }
 
 CItemsListPage::~CItemsListPage()

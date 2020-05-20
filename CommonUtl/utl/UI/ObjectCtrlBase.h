@@ -50,13 +50,15 @@ protected:
 	CObjectCtrlBase( CWnd* pCtrl, UINT ctrlAccelId = 0 );
 	~CObjectCtrlBase();
 public:
+	CWnd* GetCtrl( void ) const { return m_pCtrl; }
+	CAccelTable& GetCtrlAccel( void ) { return m_ctrlAccel; }
+
+	void SetTrackMenuTarget( CWnd* pTrackMenuTarget ) { m_pTrackMenuTarget = pTrackMenuTarget; }
+
 	ui::ISubjectAdapter* GetSubjectAdapter( void ) const { return m_pSubjectAdapter; }
 	void SetSubjectAdapter( ui::ISubjectAdapter* pSubjectAdapter );
 
 	std::tstring FormatCode( const utl::ISubject* pSubject ) const { ASSERT_PTR( m_pSubjectAdapter ); return m_pSubjectAdapter->FormatCode( pSubject ); }
-
-	CAccelTable& GetCtrlAccel( void ) { return m_ctrlAccel; }
-	void SetTrackMenuTarget( CWnd* pTrackMenuTarget ) { m_pTrackMenuTarget = pTrackMenuTarget; }
 
 	virtual bool IsInternalCmdId( int cmdId ) const;
 protected:

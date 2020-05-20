@@ -58,6 +58,7 @@ namespace lv
 		LVN_ToggleCheckState,				// pass lv::CNmToggleCheckState; client could return TRUE to reject default toggle
 		LVN_CheckStatesChanged,				// pass lv::CNmCheckStatesChanged
 		LVN_DropFiles,						// pass lv::CNmDropFiles
+		LVN_ItemsRemoved,					// pass lv::CNmItemsRemoved
 			_LastNotify						// derived classes may define new WM_NOTIFY notifications starting from this value
 	};
 
@@ -71,6 +72,17 @@ namespace lv
 		CPoint m_dropPoint;							// client coordinates
 		int m_dropItemIndex;
 		std::vector< fs::CPath > m_filePaths;		// sorted
+	};
+
+
+	struct CNmItemsRemoved
+	{
+		CNmItemsRemoved( const CListCtrl* pListCtrl, int minSelIndex = -1 )
+			: m_nmHdr( pListCtrl, lv::LVN_ItemsRemoved ), m_minSelIndex( minSelIndex ) {}
+	public:
+		ui::CNmHdr m_nmHdr;
+		int m_minSelIndex;
+		std::vector< utl::ISubject* > m_removedObjects;
 	};
 
 
@@ -183,6 +195,9 @@ public:
 
 	bool GetAcceptDropFiles( void ) const { return HasFlag( m_optionFlags, AcceptDropFiles ); }
 	void SetAcceptDropFiles( bool acceptDropFiles = true ) { SetOptionFlag( AcceptDropFiles, acceptDropFiles ); }
+
+	bool IsCommandFrame( void ) const { return HasFlag( m_optionFlags, CommandFrame ); }
+	void SetCommandFrame( bool isCommandFrame = true ) { SetTrackMenuTarget( this ); SetOptionFlag( CommandFrame, isCommandFrame ); }
 
 	const std::tstring& GetSection( void ) const { return m_regSection; }
 	void SetSection( const std::tstring& regSection ) { m_regSection = regSection; }
@@ -330,6 +345,7 @@ private:
 	void InputColumnLayout( std::vector< std::tstring >& rRegColumnLayoutItems );
 protected:
 	void ClearData( void );
+	bool CommandsEnabled( void ) const;
 
 	virtual void SetupControl( void );
 	virtual bool CacheSelectionData( ole::CDataSource* pDataSource, int sourceFlags, const CListSelectionData& selData ) const;
@@ -350,6 +366,9 @@ public:
 
 	template< typename ObjectT >
 	ObjectT* GetObjectAt( int index ) const { return checked_static_cast< ObjectT* >( GetSubjectAt( index ) ); }
+
+	template< typename ObjectT >
+	void QueryObjectsSequence( std::vector< ObjectT* >& rObjects ) const;
 
 	template< typename ObjectT >
 	void QueryObjectsByIndex( std::vector< ObjectT* >& rObjects, const std::vector< int >& itemIndexes ) const;
@@ -578,8 +597,9 @@ private:
 		UseAlternateRowColoring		= BIT_FLAG( 0 ),
 		SortInternally				= BIT_FLAG( 1 ),
 		AcceptDropFiles				= BIT_FLAG( 2 ),		// enable as Explorer drop target, send LVN_DropFiles notification when files are dropped onto the list
-		HighlightTextDiffsFrame		= BIT_FLAG( 3 ),		// highlight text differences with a filled frame
-		ToggleCheckSelItems			= BIT_FLAG( 4 )			// multi-selection: toggle checked state for the selected items
+		CommandFrame				= BIT_FLAG( 3 ),		// list is the command target FIRST, also owner of the paired toolbar (for multiple lists in the same dialog, that have similar commands)
+		HighlightTextDiffsFrame		= BIT_FLAG( 4 ),		// highlight text differences with a filled frame
+		ToggleCheckSelItems			= BIT_FLAG( 5 )			// multi-selection: toggle checked state for the selected items
 	};
 
 	bool SetOptionFlag( ListOption flag, bool on );
@@ -591,7 +611,7 @@ private:
 	std::vector< UINT > m_tileColumns;						// columns to be displayed as tile additional text (in gray)
 	int m_optionFlags;
 	bool m_subjectBased;									// objects stored as pointers are derived from utl::ISubject (polymorphic type)
-	const TCHAR* m_pTabularSep;							// NULL by default (copy Code column text); could be set to "\t" for a tab-separated copy to clipboard
+	const TCHAR* m_pTabularSep;								// NULL by default (copy Code column text); could be set to "\t" for a tab-separated copy to clipboard
 
 	TColumn m_sortByColumn;
 	bool m_sortAscending;
@@ -632,6 +652,7 @@ private:
 public:
 	virtual void PreSubclassWindow( void );
 	virtual BOOL PreTranslateMessage( MSG* pMsg );
+	virtual BOOL OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo );
 protected:
 	afx_msg int OnCreate( CREATESTRUCT* pCreateStruct );
 	afx_msg void OnDestroy( void );

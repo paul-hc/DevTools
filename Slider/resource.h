@@ -24,10 +24,9 @@
 #define IDD_DEFINE_PASSWORD_DIALOG      202
 #define IDC_FORMAT_COMBO                203
 #define IDC_COUNTER_EDIT                204
-#define IDC_SEARCH_FOLDER_COMBO         1001
-#define IDC_BROWSE_FOLDER_BUTTON        1002
-#define IDC_SEARCH_FILTERS_COMBO        1003
-#define IDC_BROWSE_FILE_BUTTON          1004
+#define IDC_SEARCH_PATH_COMBO           1001
+#define IDC_SEARCH_FILTERS_COMBO        1002
+#define IDC_SEARCH_MODE_COMBO           1003
 #define IDC_FOUND_FILES_LIST            1006
 #define IDC_RECURSE_CHECK               1007
 #define IDC_AUTOSAVE_CHECK              1007
@@ -38,9 +37,6 @@
 #define IDC_NAV_COUNT_STATIC            1013
 #define IDC_PLAY_DELAY_COMBO            1014
 #define IDC_PATTERNS_LISTVIEW           1015
-#define IDC_SEARCH_SPEC_LIST            1016
-#define IDC_SEARCH_SPEC_MOVE_UP         1020
-#define IDC_SEARCH_SPEC_MOVE_DOWN       1021
 #define IDC_MIN_FILE_SIZE_CHECK         1022
 #define IDC_MIN_FILE_SIZE_EDIT          1023
 #define IDC_MAX_FILE_SIZE_CHECK         1025
@@ -67,7 +63,6 @@
 #define IDC_LIST_ORDER_STATIC           1056
 #define IDC_THUMB_PREVIEW_STATIC        1057
 #define IDC_AUTO_DROP_CHECK             1059
-#define IDC_SEARCH_OPTIONS_COMBO        1060
 #define IDC_AUTO_REGENERATE_CHECK       1061
 #define IDC_STACK_STEP_LIST             1064
 #define IDC_DEST_DIR_PATH_EDIT          1067
@@ -116,7 +111,6 @@
 #define IDS_SLIDE_ALBUM_FILTER_SPEC     3001
 #define IDS_ARCHIVE_STG_FILTER_SPEC     3002
 #define IDS_DELETE_ATTR_PROMPT          3011
-#define IDS_REPLACE_DUP_PROMPT          3012
 #define IDS_HELP_MESSAGE                3013
 #define IDS_NO_DIR_SEARCH_SPEC          3016
 #define ID_SKIP_IMAGE_DIM_EVALUATION_CMDLINK 3017

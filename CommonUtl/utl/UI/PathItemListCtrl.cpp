@@ -92,13 +92,17 @@ END_MESSAGE_MAP()
 BOOL CPathItemListCtrl::OnLvnDblclk_Reflect( NMHDR* pNmHdr, LRESULT* pResult )
 {
 	NMITEMACTIVATE* pNmItemActivate = (NMITEMACTIVATE*)pNmHdr;
-	*pResult = 0;
 
-	UINT flags;
-	int itemIndex = HitTest( pNmItemActivate->ptAction, &flags );
-	if ( itemIndex != -1 && !HasFlag( flags, LVHT_ONITEMSTATEICON ) )				// on item but not checkbox
-		if ( utl::ISubject* pCaretObject = GetSubjectAt( pNmItemActivate->iItem ) )
-			return ShellInvokeDefaultVerb( std::vector< fs::CPath >( 1, pCaretObject->GetCode() ) );
+	if ( !ParentHandlesWmNotify( NM_DBLCLK ) )
+	{
+		*pResult = 0;
+
+		UINT flags;
+		int itemIndex = HitTest( pNmItemActivate->ptAction, &flags );
+		if ( itemIndex != -1 && !HasFlag( flags, LVHT_ONITEMSTATEICON ) )				// on item but not checkbox
+			if ( utl::ISubject* pCaretObject = GetSubjectAt( pNmItemActivate->iItem ) )
+				return ShellInvokeDefaultVerb( std::vector< fs::CPath >( 1, pCaretObject->GetCode() ) );
+	}
 
 	return FALSE;			// raise the notification to parent
 }

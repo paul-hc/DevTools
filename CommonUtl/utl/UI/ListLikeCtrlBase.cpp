@@ -2,6 +2,7 @@
 #include "stdafx.h"
 #include "ListLikeCtrlBase.h"
 #include "CustomDrawImager.h"
+#include "CmdIdStore.h"
 #include "Utilities.h"
 #include "VisualTheme.h"
 
@@ -70,14 +71,12 @@ void CListLikeCtrlBase::ModifyDiffTextEffectAt( lv::CMatchEffects& rEffects, LPA
 		m_pTextEffectCallback->ModifyDiffTextEffectAt( rEffects, rowKey, subItem, pCtrl );
 }
 
-bool CListLikeCtrlBase::ParentHandles( UINT notifyCode )
+bool CListLikeCtrlBase::ParentHandles( UINT cmdMessage, UINT notifyCode )
 {
-	CachedBool& rParentHandles = m_parentHandlesNotifyCodes[ notifyCode ];
+	if ( NULL == m_pParentHandlesCache.get() )
+		m_pParentHandlesCache.reset( new ui::CHandledNotificationsCache( m_pCtrl->GetParent() ) );		// lazy instantiation so that list parent is available
 
-	if ( NotCached == rParentHandles )
-		rParentHandles = ui::ParentContainsMessageHandler( m_pCtrl, WM_NOTIFY, notifyCode ) ? Yes : No;
-
-	return Yes == rParentHandles;
+	return m_pParentHandlesCache->HandlesMessage( m_pCtrl->GetDlgCtrlID(), cmdMessage, notifyCode );
 }
 
 

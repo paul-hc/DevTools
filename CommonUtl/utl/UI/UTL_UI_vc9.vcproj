@@ -1434,11 +1434,11 @@
 					>
 				</File>
 				<File
-					RelativePath=".\ListCtrlEditorHost.cpp"
+					RelativePath=".\ListCtrlEditorFrame.cpp"
 					>
 				</File>
 				<File
-					RelativePath=".\ListCtrlEditorHost.h"
+					RelativePath=".\ListCtrlEditorFrame.h"
 					>
 				</File>
 				<File
