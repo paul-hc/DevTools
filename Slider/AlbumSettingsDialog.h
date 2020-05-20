@@ -95,10 +95,8 @@ public:
 protected:
 	virtual void DoDataExchange( CDataExchange* pDX );	// DDX/DDV support
 protected:
-	afx_msg void OnDestroy( void );
 	afx_msg void OnContextMenu( CWnd* pWnd, CPoint point );
 	virtual void OnOK( void );
-	virtual void OnCancel( void );
 
 	afx_msg void OnLVnDblClk_Patterns( NMHDR* pNmHdr, LRESULT* pResult );
 	afx_msg void OnLVnDropFiles_Patterns( NMHDR* pNmHdr, LRESULT* pResult );
@@ -106,8 +104,8 @@ protected:
 	afx_msg void OnLVnItemsReorder_Patterns( void );
 	afx_msg void OnAdd_SearchPattern( void );
 	afx_msg void OnModify_SearchPattern( void );
+	afx_msg void OnSearchSourceFiles( void );
 
-	afx_msg void OnCBnSelChange_SortOrder( void );
 	afx_msg void OnToggle_MaxFileCount( void );
 	afx_msg void OnToggle_MinSize( void );
 	afx_msg void OnToggle_MaxSize( void );
@@ -115,14 +113,15 @@ protected:
 	afx_msg void OnEnChange_MinMaxSize( void );
 	afx_msg void OnToggle_AutoRegenerate( void );
 	afx_msg void OnToggle_AutoDrop( void );
-	afx_msg void OnSearchSourceFiles( void );
-	afx_msg void On_OrderRandomShuffle( UINT cmdId );
-	afx_msg void OnUpdate_OrderRandomShuffle( CCmdUI* pCmdUI );
 
 	afx_msg void OnLVnColumnClick_FoundImages( NMHDR* pNmHdr, LRESULT* pResult );
 	afx_msg void OnLVnItemChanged_FoundImages( NMHDR* pNmHdr, LRESULT* pResult );
 	afx_msg void OnLVnGetDispInfo_FoundImages( NMHDR* pNmHdr, LRESULT* pResult );
 	afx_msg void OnLVnItemsReorder_FoundImages( void );
+
+	afx_msg void OnImageOrder( UINT cmdId );
+	afx_msg void OnUpdateImageOrder( CCmdUI* pCmdUI );
+	afx_msg void OnCBnSelChange_ImageOrder( void );
 
 	afx_msg void OnImageFileOp( UINT cmdId );
 	afx_msg void OnStnDblClk_ThumbPreviewStatic( void );

@@ -345,7 +345,6 @@ private:
 	void InputColumnLayout( std::vector< std::tstring >& rRegColumnLayoutItems );
 protected:
 	void ClearData( void );
-	bool CommandsEnabled( void ) const;
 
 	virtual void SetupControl( void );
 	virtual bool CacheSelectionData( ole::CDataSource* pDataSource, int sourceFlags, const CListSelectionData& selData ) const;

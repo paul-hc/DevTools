@@ -38,11 +38,6 @@ CListCtrlEditorFrame::~CListCtrlEditorFrame()
 {
 }
 
-bool CListCtrlEditorFrame::HasFocus( void ) const
-{
-	return ::GetFocus() == m_pListCtrl->GetSafeHwnd();
-}
-
 bool CListCtrlEditorFrame::InEditMode( void ) const
 {
 	return m_pListCtrl->IsInternalChange() || m_pListCtrl->GetEditControl() != NULL;

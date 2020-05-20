@@ -458,13 +458,15 @@ void CAlbumSettingsDialog::DoDataExchange( CDataExchange* pDX )
 		m_imagesListCtrl.SetCompactIconSpacing();
 	}
 
-	if ( DialogOutput == pDX->m_bSaveAndValidate )
+	switch ( pDX->m_bSaveAndValidate )
 	{
-		OutputAll();
-		SetDirty( m_model.MustAutoRegenerate() );		// set initial dirty if auto-generation is turned on (either explicit or by auto-drop)
+		case DialogOutput:
+			OutputAll();
+			SetDirty( m_model.MustAutoRegenerate() );		// set initial dirty if auto-generation is turned on (either explicit or by auto-drop)
+			break;
+		case DialogSaveChanges:
+			InputAll();
 	}
-	else
-		InputAll();
 
 	CLayoutDialog::DoDataExchange( pDX );
 }
@@ -476,8 +478,7 @@ BOOL CAlbumSettingsDialog::OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHAN
 	switch ( id )
 	{
 		case ID_EDIT_COPY:
-			// special commands: prevent base handling since command is handled in CImageView::OnEditCopy, via dialog's parent routing and MFC default routing
-			return FALSE;
+			return FALSE;		// special commands: prevent base handling since command gets wrongly handled in CImageView::OnEditCopy (via dialog's parent routing and MFC default routing)
 	}
 
 	return __super::OnCmdMsg( id, code, pExtra, pHandlerInfo );
@@ -498,9 +499,6 @@ BOOL CAlbumSettingsDialog::PreTranslateMessage( MSG* pMsg )
 // message handlers
 
 BEGIN_MESSAGE_MAP( CAlbumSettingsDialog, CLayoutDialog )
-	ON_WM_DESTROY()
-	ON_CBN_SELCHANGE( IDC_LIST_ORDER_COMBO, OnCBnSelChange_SortOrder )
-
 	ON_NOTIFY( NM_DBLCLK, IDC_PATTERNS_LISTVIEW, OnLVnDblClk_Patterns )
 	ON_NOTIFY( lv::LVN_DropFiles, IDC_PATTERNS_LISTVIEW, OnLVnDropFiles_Patterns )
 	ON_NOTIFY( lv::LVN_ItemsRemoved, IDC_PATTERNS_LISTVIEW, OnLVnItemsRemoved_Patterns )
@@ -522,34 +520,22 @@ BEGIN_MESSAGE_MAP( CAlbumSettingsDialog, CLayoutDialog )
 	ON_NOTIFY( LVN_ITEMCHANGED, IDC_FOUND_IMAGES_LISTVIEW, OnLVnItemChanged_FoundImages )
 	ON_NOTIFY( LVN_GETDISPINFO, IDC_FOUND_IMAGES_LISTVIEW, OnLVnGetDispInfo_FoundImages )
 	ON_CONTROL( lv::LVN_ItemsReorder, IDC_FOUND_IMAGES_LISTVIEW, OnLVnItemsReorder_FoundImages )
-
-	ON_COMMAND_RANGE( ID_ORDER_ORIGINAL, ID_ORDER_BY_DIMENSION_DESC, On_OrderRandomShuffle )
-	ON_UPDATE_COMMAND_UI_RANGE( ID_ORDER_ORIGINAL, ID_ORDER_BY_DIMENSION_DESC, OnUpdate_OrderRandomShuffle )
+	ON_COMMAND_RANGE( ID_ORDER_ORIGINAL, ID_ORDER_BY_DIMENSION_DESC, OnImageOrder )
+	ON_UPDATE_COMMAND_UI_RANGE( ID_ORDER_ORIGINAL, ID_ORDER_BY_DIMENSION_DESC, OnUpdateImageOrder )
+	ON_CBN_SELCHANGE( IDC_LIST_ORDER_COMBO, OnCBnSelChange_ImageOrder )
 
 	ON_STN_DBLCLK( IDC_THUMB_PREVIEW_STATIC, OnStnDblClk_ThumbPreviewStatic )
-
 	// image file operations: CM_OPEN_IMAGE_FILE, CM_DELETE_FILE, CM_DELETE_FILE_NO_UNDO, CM_MOVE_FILE, CM_EXPLORE_IMAGE
 	ON_COMMAND_RANGE( CM_OPEN_IMAGE_FILE, CM_EXPLORE_IMAGE, OnImageFileOp )
 END_MESSAGE_MAP()
 
-void CAlbumSettingsDialog::OnDestroy( void )
-{
-	CLayoutDialog::OnDestroy();
-}
-
 void CAlbumSettingsDialog::OnOK( void )
 {
-	if ( !UpdateData( DialogSaveChanges ) )
-		TRACE( _T("UpdateData failed during dialog termination.\n") );		// UpdateData() will set focus to correct item
-	else if ( m_isDirty )
-		SearchSourceFiles();
-	else
-		CLayoutDialog::OnOK();
-}
-
-void CAlbumSettingsDialog::OnCancel( void )
-{
-	CLayoutDialog::OnCancel();
+	if ( UpdateData( DialogSaveChanges ) )
+		if ( m_isDirty )
+			SearchSourceFiles();
+		else
+			CLayoutDialog::OnOK();
 }
 
 void CAlbumSettingsDialog::OnContextMenu( CWnd* pWnd, CPoint point )
@@ -610,13 +596,12 @@ void CAlbumSettingsDialog::OnLVnItemsRemoved_Patterns( NMHDR* pNmHdr, LRESULT* p
 	if ( pNmItemsRemoved->m_removedObjects.size() == rSearchPatterns.size() )		// remove all?
 		pSearchModel->ClearPatterns();
 	else
-	{
 		for ( std::vector< utl::ISubject* >::const_iterator itObject = pNmItemsRemoved->m_removedObjects.begin(); itObject != pNmItemsRemoved->m_removedObjects.end(); ++itObject )
 		{
 			utl::RemoveExisting( rSearchPatterns, checked_static_cast< CSearchPattern* >( *itObject ) );
 			delete *itObject;
 		}
-	}
+
 	SetDirty();
 }
 
@@ -684,17 +669,11 @@ void CAlbumSettingsDialog::OnModify_SearchPattern( void )
 	SetDirty();
 }
 
-
-void CAlbumSettingsDialog::OnCBnSelChange_SortOrder( void )
+void CAlbumSettingsDialog::OnSearchSourceFiles( void )
 {
-	fattr::Order selFileOrder = m_sortOrderCombo.GetEnum< fattr::Order >();
-
-	std::pair< ImagesColumn, bool > sortPair = ToListSortOrder( selFileOrder );
-	m_imagesListCtrl.SetSortByColumn( sortPair.first, sortPair.second );
-
-	m_model.ModifyFileOrder( selFileOrder );
-	SetupFoundImagesListView();
+	SearchSourceFiles();
 }
+
 
 void CAlbumSettingsDialog::OnToggle_MaxFileCount( void )
 {
@@ -759,56 +738,6 @@ void CAlbumSettingsDialog::OnEnChange_MinMaxSize( void )
 	SetDirty();
 }
 
-void CAlbumSettingsDialog::OnSearchSourceFiles( void )
-{
-	SearchSourceFiles();
-}
-
-void CAlbumSettingsDialog::On_OrderRandomShuffle( UINT cmdId )
-{
-	fattr::Order fileOrder = hlp::OrderOfCmd( cmdId );
-
-	m_sortOrderCombo.SetValue( fileOrder );
-	m_model.ModifyFileOrder( fileOrder );
-	SetupFoundImagesListView();
-}
-
-void CAlbumSettingsDialog::OnUpdate_OrderRandomShuffle( CCmdUI* pCmdUI )
-{
-	fattr::Order fileOrder = hlp::OrderOfCmd( pCmdUI->m_nID );
-
-	pCmdUI->SetCheck( fileOrder == m_model.GetFileOrder() );
-}
-
-void CAlbumSettingsDialog::OnImageFileOp( UINT cmdId )
-{
-	std::vector< std::tstring > targetFiles;
-	m_imagesListCtrl.QuerySelectedItemPaths( targetFiles );
-	if ( targetFiles.empty() )
-		return;
-
-	switch ( cmdId )
-	{
-		case CM_OPEN_IMAGE_FILE:
-			for ( std::vector< std::tstring >::const_iterator it = targetFiles.begin(); it != targetFiles.end(); ++it )
-				app::GetApp()->OpenDocumentFile( it->c_str() );
-			break;
-		case CM_DELETE_FILE:
-		case CM_DELETE_FILE_NO_UNDO:
-			app::DeleteFiles( targetFiles, CM_DELETE_FILE == cmdId );
-			break;
-		case CM_MOVE_FILE:
-			app::MoveFiles( targetFiles, this );
-			break;
-		case CM_EXPLORE_IMAGE:
-			for ( std::vector< std::tstring >::const_iterator it = targetFiles.begin(); it != targetFiles.end(); ++it )
-				shell::ExploreAndSelectFile( it->c_str() );
-			break;
-		default:
-			ASSERT( false );
-	}
-}
-
 void CAlbumSettingsDialog::OnToggle_AutoRegenerate( void )
 {
 	UINT ckState = IsDlgButtonChecked( IDC_AUTO_REGENERATE_CHECK );
@@ -821,6 +750,7 @@ void CAlbumSettingsDialog::OnToggle_AutoDrop( void )
 {
 	AfxMessageBox( IDS_NO_DIR_SEARCH_SPEC );
 }
+
 
 void CAlbumSettingsDialog::OnLVnColumnClick_FoundImages( NMHDR* pNmHdr, LRESULT* pResult )
 {
@@ -897,6 +827,63 @@ void CAlbumSettingsDialog::OnLVnItemsReorder_FoundImages( void )
 	m_sortOrderCombo.SetValue( fileOrder );
 	std::pair< ImagesColumn, bool > sortPair = ToListSortOrder( fileOrder );
 	m_imagesListCtrl.SetSortByColumn( sortPair.first, sortPair.second );
+}
+
+void CAlbumSettingsDialog::OnImageOrder( UINT cmdId )
+{
+	fattr::Order fileOrder = hlp::OrderOfCmd( cmdId );
+
+	m_sortOrderCombo.SetValue( fileOrder );
+	m_model.ModifyFileOrder( fileOrder );
+	SetupFoundImagesListView();
+}
+
+void CAlbumSettingsDialog::OnUpdateImageOrder( CCmdUI* pCmdUI )
+{
+	fattr::Order fileOrder = hlp::OrderOfCmd( pCmdUI->m_nID );
+
+	pCmdUI->SetCheck( fileOrder == m_model.GetFileOrder() );
+}
+
+void CAlbumSettingsDialog::OnCBnSelChange_ImageOrder( void )
+{
+	fattr::Order selFileOrder = m_sortOrderCombo.GetEnum< fattr::Order >();
+
+	std::pair< ImagesColumn, bool > sortPair = ToListSortOrder( selFileOrder );
+	m_imagesListCtrl.SetSortByColumn( sortPair.first, sortPair.second );
+
+	m_model.ModifyFileOrder( selFileOrder );
+	SetupFoundImagesListView();
+}
+
+
+void CAlbumSettingsDialog::OnImageFileOp( UINT cmdId )
+{
+	std::vector< std::tstring > targetFiles;
+	m_imagesListCtrl.QuerySelectedItemPaths( targetFiles );
+	if ( targetFiles.empty() )
+		return;
+
+	switch ( cmdId )
+	{
+		case CM_OPEN_IMAGE_FILE:
+			for ( std::vector< std::tstring >::const_iterator it = targetFiles.begin(); it != targetFiles.end(); ++it )
+				app::GetApp()->OpenDocumentFile( it->c_str() );
+			break;
+		case CM_DELETE_FILE:
+		case CM_DELETE_FILE_NO_UNDO:
+			app::DeleteFiles( targetFiles, CM_DELETE_FILE == cmdId );
+			break;
+		case CM_MOVE_FILE:
+			app::MoveFiles( targetFiles, this );
+			break;
+		case CM_EXPLORE_IMAGE:
+			for ( std::vector< std::tstring >::const_iterator it = targetFiles.begin(); it != targetFiles.end(); ++it )
+				shell::ExploreAndSelectFile( it->c_str() );
+			break;
+		default:
+			ASSERT( false );
+	}
 }
 
 void CAlbumSettingsDialog::OnStnDblClk_ThumbPreviewStatic( void )

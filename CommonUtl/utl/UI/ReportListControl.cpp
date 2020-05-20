@@ -198,11 +198,6 @@ void CReportListControl::ClearData( void )
 	m_diffColumnPairs.clear();
 }
 
-bool CReportListControl::CommandsEnabled( void ) const
-{
-	return true; //!IsCommandFrame() || ui::OwnsFocus( m_hWnd );
-}
-
 void CReportListControl::StoreImageLists( CImageList* pImageList, CImageList* pLargeImageList /*= NULL*/ )
 {
 	m_pImageList = pImageList;
@@ -2389,7 +2384,7 @@ void CReportListControl::OnUpdateListViewMode( CCmdUI* pCmdUI )
 	DWORD viewMode = lv::CmdIdToListViewMode( pCmdUI->m_nID );
 	bool modeHasImages = ( LV_VIEW_ICON == viewMode ? m_pLargeImageList : m_pImageList ) != NULL;
 
-	pCmdUI->Enable( modeHasImages && CommandsEnabled() );
+	pCmdUI->Enable( modeHasImages );
 	ui::SetRadio( pCmdUI, viewMode == GetView() );
 }
 
@@ -2411,7 +2406,7 @@ void CReportListControl::OnUpdateListViewStacking( CCmdUI* pCmdUI )
 	DWORD stackingStyle = lv::CmdIdToListViewStacking( pCmdUI->m_nID );
 	DWORD viewMode = GetView();
 
-	pCmdUI->Enable( viewMode != LV_VIEW_DETAILS && CommandsEnabled() );
+	pCmdUI->Enable( viewMode != LV_VIEW_DETAILS );
 	ui::SetRadio( pCmdUI, stackingStyle == ( GetStyle() & LVS_ALIGNMASK ) );
 }
 
@@ -2422,7 +2417,7 @@ void CReportListControl::OnResetColumnLayout( void )
 
 void CReportListControl::OnUpdateResetColumnLayout( CCmdUI* pCmdUI )
 {
-	pCmdUI->Enable( m_columnLayoutId != 0 && LV_VIEW_DETAILS == GetView() && CommandsEnabled() );
+	pCmdUI->Enable( m_columnLayoutId != 0 && LV_VIEW_DETAILS == GetView() );
 }
 
 void CReportListControl::OnCopy( void )
@@ -2437,7 +2432,7 @@ void CReportListControl::OnSelectAll( void )
 
 void CReportListControl::OnUpdateSelectAll( CCmdUI* pCmdUI )
 {
-	pCmdUI->Enable( IsMultiSelectionList() && CommandsEnabled() );
+	pCmdUI->Enable( IsMultiSelectionList() );
 }
 
 void CReportListControl::OnMoveTo( UINT cmdId )
@@ -2450,7 +2445,7 @@ void CReportListControl::OnUpdateMoveTo( CCmdUI* pCmdUI )
 	std::vector< int > selIndexes;
 	GetSelection( selIndexes );
 
-	pCmdUI->Enable( seq::CanMoveSelection( GetItemCount(), selIndexes, lv::CmdIdToMoveTo( pCmdUI->m_nID ) ) && CommandsEnabled() );
+	pCmdUI->Enable( seq::CanMoveSelection( GetItemCount(), selIndexes, lv::CmdIdToMoveTo( pCmdUI->m_nID ) ) );
 }
 
 void CReportListControl::OnRename( void )
@@ -2460,7 +2455,7 @@ void CReportListControl::OnRename( void )
 
 void CReportListControl::OnUpdateRename( CCmdUI* pCmdUI )
 {
-	pCmdUI->Enable( HasFlag( GetStyle(), LVS_EDITLABELS ) && GetCurSel() != -1 && CommandsEnabled() );
+	pCmdUI->Enable( HasFlag( GetStyle(), LVS_EDITLABELS ) && GetCurSel() != -1 );
 }
 
 void CReportListControl::OnExpandCollapseGroups( UINT cmdId )
@@ -2475,23 +2470,22 @@ void CReportListControl::OnUpdateExpandCollapseGroups( CCmdUI* pCmdUI )
 {
 	bool anyToToggle = false;
 
-	if (  CommandsEnabled() )
-		for ( int i = 0, groupCount = GetGroupCount(); i != groupCount; ++i )
+	for ( int i = 0, groupCount = GetGroupCount(); i != groupCount; ++i )
+	{
+		bool isCollapsed = HasGroupState( GetGroupId( i ), LVGS_COLLAPSED );
+		if ( ID_EXPAND == pCmdUI->m_nID ? isCollapsed : ( !isCollapsed ) )
 		{
-			bool isCollapsed = HasGroupState( GetGroupId( i ), LVGS_COLLAPSED );
-			if ( ID_EXPAND == pCmdUI->m_nID ? isCollapsed : ( !isCollapsed ) )
-			{
-				anyToToggle = true;
-				break;
-			}
+			anyToToggle = true;
+			break;
 		}
+	}
 
 	pCmdUI->Enable( anyToToggle );
 }
 
 void CReportListControl::OnUpdateAnySelected( CCmdUI* pCmdUI )
 {
-	pCmdUI->Enable( AnySelected() && CommandsEnabled() );
+	pCmdUI->Enable( AnySelected() );
 }
 
 void CReportListControl::OnUpdateSingleSelected( CCmdUI* pCmdUI )

@@ -16,7 +16,6 @@ public:
 	CListCtrlEditorFrame( CReportListControl* pListCtrl, CToolBar* pToolbar );
 	virtual ~CListCtrlEditorFrame();
 
-	bool HasFocus( void ) const;
 	bool InEditMode( void ) const;
 private:
 	CReportListControl* m_pListCtrl;
