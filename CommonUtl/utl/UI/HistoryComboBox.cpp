@@ -16,11 +16,7 @@
 class CComboDropList : public CWnd		// can't inherit from CListBox
 {
 public:
-	CComboDropList( CComboBox* pParentCombo )
-		: m_pParentCombo( pParentCombo )
-	{
-		ASSERT_PTR( m_pParentCombo->GetSafeHwnd() );
-	}
+	CComboDropList( CComboBox* pParentCombo ) : m_pParentCombo( pParentCombo ) { ASSERT_PTR( m_pParentCombo->GetSafeHwnd() ); }
 private:
 	CComboBox* m_pParentCombo;
 
@@ -44,12 +40,12 @@ void CComboDropList::OnContextMenu( CWnd* pWnd, CPoint point )
 
 // CHistoryComboBox implementation
 
-static ACCEL keys[] =
+static ACCEL s_keys[] =
 {
 	{ FVIRTKEY | FCONTROL, VK_RETURN, ID_ADD_ITEM }
 };
 
-static ACCEL dropDownKeys[] =
+static ACCEL s_dropDownKeys[] =
 {
 	{ FVIRTKEY, VK_DELETE, ID_REMOVE_ITEM }
 };
@@ -60,12 +56,14 @@ CHistoryComboBox::CHistoryComboBox( unsigned int maxCount /*= ui::HistoryMaxSize
 	, m_maxCount( maxCount )
 	, m_pItemSep( pItemSep )
 	, m_caseType( caseType )
-	, m_accel( keys, COUNT_OF( keys ) )
-	, m_dropDownAccel( dropDownKeys, COUNT_OF( dropDownKeys ) )
+	, m_accel( s_keys, COUNT_OF( s_keys ) )
+	, m_dropDownAccel( s_dropDownKeys, COUNT_OF( s_dropDownKeys ) )
 	, m_dropSelIndex( CB_ERR )
 	, m_pSection( NULL )
 	, m_pEntry( NULL )
 {
+	SetFocusMargins( 2, 2 );
+	SetShowFocus();
 }
 
 CHistoryComboBox::~CHistoryComboBox()
@@ -143,7 +141,6 @@ void CHistoryComboBox::PreSubclassWindow( void )
 			if ( NULL == m_pEdit.get() )
 				m_pEdit.reset( new CTextEditor );
 
-			m_pEdit->SetShowFocus();						// enable focus display automatically for edit-based combos
 			m_pEdit->SubclassWindow( cbInfo.hwndItem );
 		}
 

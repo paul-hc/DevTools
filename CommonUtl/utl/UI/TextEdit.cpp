@@ -244,6 +244,7 @@ END_MESSAGE_MAP()
 UINT CTextEdit::OnGetDlgCode( void )
 {
 	UINT code = BaseClass::OnGetDlgCode();
+
 	if ( m_keepSelOnFocus )
 		ClearFlag( code, DLGC_HASSETSEL );
 

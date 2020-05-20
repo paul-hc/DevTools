@@ -56,9 +56,9 @@ public:
 	SingleTransactionButtons m_singleTransactionButtons;
 	DWORD m_styleMinMax;		// WS_MINIMIZEBOX, WS_MAXIMIZEBOX extra style to apply on initialization
 	bool m_alwaysModified;		// always enable the OK/APPLY buttons, pages don't need to call OnFieldModified()
-private:
+
 	// generated stuff
-	public:
+public:
 	virtual void BuildPropPageArray( void );
 	virtual BOOL Create( CWnd* pParent = NULL, DWORD style = UINT_MAX, DWORD styleEx = 0 ); // for modeless creation
 	virtual void PostNcDestroy( void );

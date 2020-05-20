@@ -99,7 +99,7 @@ public:
 	static const TCHAR s_lineEnd[];
 
 	// generated function overrides
-	public:
+public:
 	virtual void PreSubclassWindow( void );
 	virtual BOOL PreTranslateMessage( MSG* pMsg );
 protected:

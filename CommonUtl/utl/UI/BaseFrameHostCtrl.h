@@ -24,13 +24,15 @@ public:
 	bool GetShowFocus( void ) const { return m_showFocus; }
 	bool SetShowFocus( bool showFocus = true );
 
-	void SetFrameMargins( int cx = 0, int cy = 0 ) { ASSERT_NULL( m_hWnd ); m_frameMargins.cx = cx; m_frameMargins.cy = cy; }
-	void SetFocusMargins( int cx = 0, int cy = 0 ) { ASSERT_NULL( m_hWnd ); m_focusMargins.cx = cx; m_focusMargins.cy = cy; }
+	void SetFrameMargins( int cx = 0, int cy = 0 ) { m_frameMargins.cx = cx; m_frameMargins.cy = cy; Refresh(); }
+	void SetFocusMargins( int cx = 0, int cy = 0 ) { m_focusMargins.cx = cx; m_focusMargins.cy = cy; Refresh(); }
 
 	enum FrameType { SolidFrame, FocusFrame };
 
 	CRect GetFrameRect( FrameType frameType ) const;
 	void InvalidateFrame( FrameType frameType );
+protected:
+	void Refresh( void );
 private:
 	COLORREF m_frameColor;
 	bool m_showFocus;

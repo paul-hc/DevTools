@@ -7,15 +7,20 @@
 // CBaseFrameHostCtrl template code
 
 template< typename BaseCtrl >
+void CBaseFrameHostCtrl< BaseCtrl >::Refresh( void )
+{
+	if ( m_hWnd != NULL )
+		Invalidate();
+}
+
+template< typename BaseCtrl >
 bool CBaseFrameHostCtrl< BaseCtrl >::SetFrameColor( COLORREF frameColor )
 {
 	if ( m_frameColor == frameColor )
 		return false;
 
 	m_frameColor = frameColor;
-
-	if ( m_hWnd != NULL )
-		Invalidate();
+	Refresh();
 	return true;
 }
 
@@ -26,9 +31,7 @@ bool CBaseFrameHostCtrl< BaseCtrl >::SetShowFocus( bool showFocus /*= true*/ )
 		return false;
 
 	m_showFocus = showFocus;
-
-	if ( m_hWnd != NULL )
-		Invalidate();
+	Refresh();
 	return true;
 }
 
@@ -84,7 +87,7 @@ void CBaseFrameHostCtrl< BaseCtrl >::OnPaint( void )
 
 		if ( m_showFocus && ui::OwnsFocus( m_hWnd ) )
 		{
-			CRect frameRect = GetFrameRect( SolidFrame );
+			CRect frameRect = GetFrameRect( FocusFrame );
 			dc.DrawFocusRect( &frameRect );
 		}
 	}
