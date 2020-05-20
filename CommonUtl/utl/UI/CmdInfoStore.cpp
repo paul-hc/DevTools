@@ -117,7 +117,7 @@ namespace ui
 		if ( !message.AssignTooltipText( text ) )
 			return false;				// no tooltip info for this command
 
-		utl::AssignPtr( pResult, 0L );
+		utl::AssignPtr( pResult, (LRESULT)0 );		// prevent 64 bit errors
 		return true;					// message was handled
 	}
 
