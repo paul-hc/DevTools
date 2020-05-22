@@ -13,6 +13,8 @@ namespace ui
 	void UpdateMenuUI( CWnd* pWindow, CMenu* pPopupMenu, bool autoMenuEnable = true );
 
 	bool UpdateControlUI( CWnd* pCtrl, CWnd* pTargetWnd = NULL );
+	inline bool UpdateDlgItemUI( CWnd* pDlg, UINT ctrlId ) { return UpdateControlUI( pDlg->GetDlgItem( ctrlId ), pDlg ); }
+
 	void UpdateControlsUI( CWnd* pParent, CWnd* pTargetWnd = NULL );
 	void UpdateControlsUI( CWnd* pParent, const UINT ctrlIds[], size_t count, CWnd* pTargetWnd = NULL );
 }

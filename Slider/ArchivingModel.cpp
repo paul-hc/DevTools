@@ -218,7 +218,7 @@ bool CArchivingModel::BuildArchiveStorageFile( const fs::CPath& destStgPath, Fil
 
 		CTimer timer;
 		CImageArchiveStg imageArchiveStg;
-		imageArchiveStg.CreateImageArchive( destStgPath.GetPtr(), m_password, m_pathPairs, pProgressService );
+		imageArchiveStg.CreateImageArchive( destStgPath, m_password, m_pathPairs, pProgressService );
 
 		app::LogLine( _T("--- END building image archive %s - Elapsed %.2f seconds ---"), destStgPath.GetPtr(), timer.ElapsedSeconds() );
 	}

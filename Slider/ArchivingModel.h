@@ -16,6 +16,7 @@ public:
 
 	void Stream( CArchive& archive );
 
+	const std::tstring& GetPassword( void ) const { return m_password; }
 	void StorePassword( const std::tstring& password ) { m_password = password; }
 
 	// piece-meal generation
@@ -38,7 +39,7 @@ private:
 	persist std::vector< TTransferPathPair > m_pathPairs;
 
 	// transient
-	std::tstring m_password;		// encrypted
+	std::tstring m_password;
 };
 
 

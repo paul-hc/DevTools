@@ -21,6 +21,7 @@
 #define IDR_TRACK_ZOOM_CURSOR           28016
 #define IDD_ITEMS_EDIT_PAGE             28016
 #define IDD_PROGRESS_DIALOG             28017
+#define IDD_PASSWORD_DIALOG             28018
 #define UTL_MIN_COMMAND_VALUE           28200
 #define ID_ADD_ITEM                     28201
 #define ID_REMOVE_ITEM                  28202
@@ -98,15 +99,20 @@
 #define IDC_ITEM_STATIC                 28528
 #define IDC_ITEM_COUNTS_STATIC          28529
 #define IDC_CLOCK_STATIC                28530
+#define IDC_DOCUMENT_NAME_STATIC        28531
+#define IDC_PASSWORD_EDIT               28532
+#define IDC_CONFIRM_PASSWORD_EDIT       28533
+#define IDC_CONFIRM_PASSWORD_STATIC     28534
+#define IDC_SHOW_PASSWORD_CHECK         28535
 #define UTL_MIN_SYMED_VALUE             28800
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        28018
+#define _APS_NEXT_RESOURCE_VALUE        28019
 #define _APS_NEXT_COMMAND_VALUE         28246
-#define _APS_NEXT_CONTROL_VALUE         28523
+#define _APS_NEXT_CONTROL_VALUE         28536
 #define _APS_NEXT_SYMED_VALUE           28801
 #endif
 #endif

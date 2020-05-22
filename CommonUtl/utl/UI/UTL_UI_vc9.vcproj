@@ -683,6 +683,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\PasswordDialog.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\PasswordDialog.h"
+				>
+			</File>
+			<File
 				RelativePath=".\PopupDlgBase.cpp"
 				>
 			</File>
@@ -1327,6 +1335,10 @@
 				</File>
 				<File
 					RelativePath=".\ContentFitBase.h"
+					>
+				</File>
+				<File
+					RelativePath=".\CtrlInterfaces.h"
 					>
 				</File>
 				<File

@@ -48,6 +48,12 @@ void CImagesModel::ReleaseStorages( void )
 	CImageArchiveStg::Factory().ReleaseStorages( m_storagePaths );
 }
 
+void CImagesModel::AcquireStorages( void ) const
+{
+	for ( std::vector< fs::CPath >::const_iterator itStoragePath = m_storagePaths.begin(); itStoragePath != m_storagePaths.end(); ++itStoragePath )
+		CImageArchiveStg::Factory().AcquireStorage( *itStoragePath );
+}
+
 void CImagesModel::Swap( CImagesModel& rImagesModel )
 {
 	m_fileAttributes.swap( rImagesModel.m_fileAttributes );

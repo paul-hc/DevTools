@@ -17,11 +17,9 @@
 #define IDD_LOGGER_DIALOG               162
 #define IDD_LAYOUT_DIALOG               166
 #define IDD_UNDO_REDO_DIALOG            168
-#define IDD_INPUT_PASSWORD_DIALOG       171
-#define IDR_APP_TOOL_STRIP              174
+#define IDR_APP_TOOL_STRIP              169
 #define IDD_ARCHIVE_IMAGES_DIALOG       201
 #define IDC_FILE_PATHS_LIST             201
-#define IDD_DEFINE_PASSWORD_DIALOG      202
 #define IDC_FORMAT_COMBO                203
 #define IDC_COUNTER_EDIT                204
 #define IDC_SEARCH_PATH_COMBO           1001
@@ -78,9 +76,6 @@
 #define IDC_RESETNUMCOUNTER_BUTTON      1079
 #define IDC_TARGET_FILE_COUNT_STATIC    1080
 #define IDC_TARGET_GROUP                1081
-#define IDC_PASSWORD_EDIT               1082
-#define IDC_FILE_PROTECTED_STATIC       1083
-#define IDC_CONFIRM_PASSWORD_EDIT       1084
 #define IDC_PERSIST_ALBUM_IMAGE_STATE_CHECK 1084
 #define IDC_PREFIX_DEEP_STREAM_NAMES_CHECK 1085
 #define IDC_VISTA_STYLE_FILE_DLG_CHECK  1086

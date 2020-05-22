@@ -207,8 +207,8 @@ void CDemoTemplate::OnBnClicked_OpenDialog( void )
 	switch ( m_dialogResizeStyle = m_dialogButton.GetSelEnum< ResizeStyle >() )
 	{
 		case ResizeHV:			break;
-		case ResizeH:			dialog.GetLayoutEngine().MaxClientSize().cy = 0; break;
-		case ResizeV:			dialog.GetLayoutEngine().MaxClientSize().cx = 0; break;
+		case ResizeH:			dialog.GetLayoutEngine().DisableResizeVertically(); break;
+		case ResizeV:			dialog.GetLayoutEngine().DisableResizeHorizontally(); break;
 		case ResizeMaxLimit:	dialog.GetLayoutEngine().MaxClientSize() = CSize( 700, 700 ); break;
 	}
 

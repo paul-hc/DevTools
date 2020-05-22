@@ -4,7 +4,6 @@
 
 #include <afxdlgs.h>
 #include "Dialog_fwd.h"
-#include "LayoutMetrics.h"
 
 
 class CLayoutPropertyPage;
@@ -55,7 +54,7 @@ public:
 
 	CToolTipCtrl* GetSheetTooltip( void ) const { return m_pTooltipCtrl.get(); }
 
-	// ui::ICmdCallback interface
+	// ui::ICustomCmdInfo interface
 	virtual void QueryTooltipText( std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const;
 
 	// overridables

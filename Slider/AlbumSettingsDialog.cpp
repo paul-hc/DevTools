@@ -12,6 +12,7 @@
 #include "utl/Path.h"
 #include "utl/RuntimeException.h"
 #include "utl/UI/ListCtrlEditorFrame.h"
+#include "utl/UI/CmdUpdate.h"
 #include "utl/UI/Color.h"
 #include "utl/UI/MenuUtilities.h"
 #include "utl/UI/Thumbnailer.h"
@@ -52,7 +53,7 @@ namespace layout
 {
 	static const CLayoutStyle styles[] =
 	{
-		{ IDC_GROUP_BOX_1, SizeX /*| DoRepaint*/ },
+		{ IDC_GROUP_BOX_1, SizeX },
 		{ IDC_PATTERNS_LISTVIEW, SizeX },
 		{ IDC_STRIP_BAR_1, MoveX },
 
@@ -65,6 +66,7 @@ namespace layout
 		{ IDC_LIST_ORDER_STATIC, MoveX },
 		{ IDC_LIST_ORDER_COMBO, MoveX },
 
+		{ ID_EDIT_ARCHIVE_PASSWORD, MoveY },
 		{ IDOK, Move },
 		{ IDCANCEL, Move }
 	};
@@ -89,7 +91,7 @@ CAlbumSettingsDialog::CAlbumSettingsDialog( const CAlbumModel& model, size_t cur
 {
 	// base init
 	m_regSection = _T("AlbumSettingsDialog");
-	RegisterCtrlLayout( layout::styles, COUNT_OF( layout::styles ) );
+	RegisterCtrlLayout( ARRAY_PAIR( layout::styles ) );
 	m_initCentered = false;
 	LoadDlgIcon( ID_EDIT_ALBUM );
 	m_accelPool.AddAccelTable( new CAccelTable( IDD_ALBUM_SETTINGS_DIALOG ) );
@@ -259,25 +261,32 @@ void CAlbumSettingsDialog::SetupFoundImagesListView( void )
 void CAlbumSettingsDialog::CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARAM rowKey, int subItem, CListLikeCtrlBase* pCtrl ) const
 {
 	subItem;
-	static const ui::CTextEffect s_errorBk( ui::Regular, app::ColorErrorText, app::ColorErrorBk );
+	static const ui::CTextEffect s_errorEffect( ui::Regular, app::ColorErrorText, app::ColorErrorBk );
 	static const ui::CTextEffect s_newFileEffect( ui::Regular, color::Blue );
+	static const ui::CTextEffect s_stgFileEffect( ui::Bold );
 
 	if ( pCtrl == &m_patternsListCtrl )
 	{
 		const CSearchPattern* pPattern = CReportListControl::AsPtr< CSearchPattern >( rowKey );
 
+		if ( pPattern->IsImageArchiveDoc() )
+			rTextEffect |= s_stgFileEffect;						// highlight storage item
+
 		if ( IsNewFilePath( pPattern->GetFilePath() ) )
-			rTextEffect |= s_newFileEffect;						// highlight new file text
+			rTextEffect |= s_newFileEffect;						// highlight new file item
+
+		if ( !pPattern->IsValidPath() )
+			rTextEffect |= s_errorEffect;						// highlight error item
 	}
 	else if ( pCtrl == &m_imagesListCtrl )
 	{
 		const CFileAttr* pFileAttr = CReportListControl::AsPtr< CFileAttr >( rowKey );
 
 		if ( IsNewFilePath( pFileAttr->GetPath() ) )
-			rTextEffect |= s_newFileEffect;						// highlight new file text
+			rTextEffect |= s_newFileEffect;
 
 		if ( !pFileAttr->IsValid() )
-			rTextEffect |= s_errorBk;							// highlight error row background
+			rTextEffect |= s_errorEffect;
 
 		if ( m_isDirty )
 		{
@@ -468,7 +477,7 @@ void CAlbumSettingsDialog::DoDataExchange( CDataExchange* pDX )
 			InputAll();
 	}
 
-	CLayoutDialog::DoDataExchange( pDX );
+	__super::DoDataExchange( pDX );
 }
 
 BOOL CAlbumSettingsDialog::OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo )
@@ -492,7 +501,7 @@ BOOL CAlbumSettingsDialog::PreTranslateMessage( MSG* pMsg )
 		else if ( m_pImagesEditor->HandleTranslateMessage( pMsg ) )
 			return true;
 
-	return CLayoutDialog::PreTranslateMessage( pMsg );
+	return __super::PreTranslateMessage( pMsg );
 }
 
 
@@ -535,7 +544,14 @@ void CAlbumSettingsDialog::OnOK( void )
 		if ( m_isDirty )
 			SearchSourceFiles();
 		else
-			CLayoutDialog::OnOK();
+			__super::OnOK();
+}
+
+void CAlbumSettingsDialog::OnIdleUpdateControls( void )
+{
+	__super::OnIdleUpdateControls();
+
+	ui::UpdateDlgItemUI( this, ID_EDIT_ARCHIVE_PASSWORD );		// update button icon for password protected state
 }
 
 void CAlbumSettingsDialog::OnContextMenu( CWnd* pWnd, CPoint point )

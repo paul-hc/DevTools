@@ -4,6 +4,7 @@
 #include "SearchPattern.h"
 #include "FileAttr.h"
 #include "ImageArchiveStg.h"
+#include "AlbumDoc.h"
 #include "Application_fwd.h"
 #include "utl/ContainerUtilities.h"
 #include "utl/RuntimeException.h"
@@ -133,12 +134,13 @@ void CImageFileEnumerator::AddFoundFile( const TCHAR* pFilePath )
 	if ( app::IsImageArchiveDoc( filePath.GetPtr() ) )
 	{
 		// found a compound image storage: load its metadata as found images
-		if ( CImageArchiveStg::Factory().VerifyPassword( filePath ) )
+		CAlbumDoc archiveDoc;
+		if ( CAlbumDoc::Succeeded == archiveDoc.LoadArchiveStorage( filePath ) )	// note: we need to load as CAlbumDoc since its document schema may be older (backwards compatibility)
 		{
-			AddFoundSubDir( filePath.GetPtr() );		// a storage counts as a sub-directory
+			AddFoundSubDir( filePath.GetPtr() );							// a storage counts as a sub-directory
 
 			std::vector< CFileAttr* > archiveImageAttrs;
-			CImageArchiveStg::Factory().LoadImagesMetadata( archiveImageAttrs, filePath );
+			archiveDoc.RefModel()->SwapFileAttrs( archiveImageAttrs );		// take ownership of found image attributes
 
 			if ( !archiveImageAttrs.empty() )
 			{

@@ -390,6 +390,21 @@ layout::CControlState* CLayoutEngine::LookupControlState( UINT ctrlId )
 	return utl::FindValuePtr( m_controlStates, ctrlId );
 }
 
+bool CLayoutEngine::RefreshControlHandle( UINT ctrlId )
+{
+	if ( m_pDialog != NULL )
+		if ( layout::CControlState* pControlState = LookupControlState( ctrlId ) )
+		{
+			if ( HWND hControlNew = ::GetDlgItem( m_pDialog->m_hWnd, ctrlId ) )
+				return utl::ModifyValue( pControlState->m_hControl, hControlNew );
+
+			pControlState->ResetCtrl();
+			return true;		// changed
+		}
+
+	return false;
+}
+
 void CLayoutEngine::AdjustControlInitialPosition( UINT ctrlId, const CSize& deltaOrigin, const CSize& deltaSize )
 {
 	// when stretching content to fit: to retain original layout behaviour

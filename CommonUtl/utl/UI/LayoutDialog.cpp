@@ -72,6 +72,11 @@ bool CLayoutDialog::HasControlLayout( void ) const
 	return m_pLayoutEngine->HasCtrlLayout();
 }
 
+void CLayoutDialog::QueryTooltipText( std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const
+{
+	rText, cmdId, pTooltip;
+}
+
 bool CLayoutDialog::UseWindowPlacement( void ) const
 {
 	DWORD style = GetStyle();

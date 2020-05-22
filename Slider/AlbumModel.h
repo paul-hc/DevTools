@@ -52,6 +52,7 @@ public:
 public:
 	// found image files
 	const CImagesModel& GetImagesModel( void ) const { return m_imagesModel; }
+	void SwapFileAttrs( std::vector< CFileAttr* >& rFileAttributes ) { m_imagesModel.RefFileAttrs().swap( rFileAttributes ); }
 
 	bool AnyFoundFiles( void ) const { return !m_imagesModel.IsEmpty(); }
 	size_t GetFileAttrCount( void ) const { return m_imagesModel.GetFileAttrs().size(); }

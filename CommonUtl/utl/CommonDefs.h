@@ -183,6 +183,13 @@ inline void SetFlag( FieldType& rField, unsigned int flag, bool on = true )
 }
 
 template< typename FieldType >
+inline FieldType MakeFlag( FieldType field, unsigned int flag, bool on = true )
+{
+	SetFlag( field, flag, on );
+	return field;
+}
+
+template< typename FieldType >
 inline void ToggleFlag( FieldType& rField, unsigned int flag )
 {
 	rField ^= flag;

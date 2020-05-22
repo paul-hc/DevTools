@@ -463,14 +463,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\DefinePasswordDialog.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\DefinePasswordDialog.h"
-				>
-			</File>
-			<File
 				RelativePath=".\DocTemplates.cpp"
 				>
 			</File>
@@ -516,14 +508,6 @@
 			</File>
 			<File
 				RelativePath=".\INavigationBar.h"
-				>
-			</File>
-			<File
-				RelativePath=".\InputPasswordDialog.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\InputPasswordDialog.h"
 				>
 			</File>
 			<File

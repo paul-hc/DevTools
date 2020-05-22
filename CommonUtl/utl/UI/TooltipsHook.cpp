@@ -1,8 +1,8 @@
 
 #include "stdafx.h"
 #include "TooltipsHook.h"
-#include "LayoutMetrics.h"
 #include "CmdInfoStore.h"
+#include "Dialog_fwd.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

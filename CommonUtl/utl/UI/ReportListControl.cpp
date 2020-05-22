@@ -121,6 +121,7 @@ CReportListControl::CReportListControl( UINT columnLayoutId /*= 0*/, DWORD listS
 	, m_pImageList( NULL )
 	, m_pLargeImageList( NULL )
 	, m_pCheckStatePolicy( NULL )
+	, m_pFrameEditor( NULL )
 	, m_pDataSourceFactory( ole::GetStdDataSourceFactory() )
 	, m_painting( false )
 	, m_stateIconSize( 0, 0 )
@@ -2039,18 +2040,15 @@ BOOL CReportListControl::OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDL
 			- If it overrrides OnCmdMsg(), it should NOT route it to CReportListControl::OnCmdMsg();
 			- It works the other way around, list routes to parent dialog.
 		 */
-		switch ( code )
+
+		if ( m_pFrameEditor != NULL )
 		{
-			case CN_COMMAND:
-//				if ( ParentHandlesWmCommand( UINT cmdNotifyCode ) )
-				code = code;
-				break;
-			case CN_UPDATE_COMMAND_UI:
-				code = code;
-				break;
+			if ( m_pFrameEditor->HandleCtrlCmdMsg( id, code, pExtra, pHandlerInfo ) )
+				return TRUE;			// handled by frame editor, which take precedence over internal handler
 		}
-		if ( GetParent()->OnCmdMsg( id, code, pExtra, pHandlerInfo ) )
-			return TRUE;			// handled by dialog custom handler, which take precedence default internal list handler
+		else
+			if ( GetParent()->OnCmdMsg( id, code, pExtra, pHandlerInfo ) )
+				return TRUE;			// handled by dialog custom handler, which take precedence over internal handler
 	}
 
 	return CListCtrl::OnCmdMsg( id, code, pExtra, pHandlerInfo );

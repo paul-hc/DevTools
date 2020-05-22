@@ -4,6 +4,7 @@
 
 #include "utl/StdHashValue.h"
 #include "utl/Range.h"
+#include "CtrlInterfaces.h"
 #include "ListLikeCtrlBase.h"
 #include "Path.h"
 #include "SubjectPredicates.h"
@@ -198,6 +199,7 @@ public:
 
 	bool IsCommandFrame( void ) const { return HasFlag( m_optionFlags, CommandFrame ); }
 	void SetCommandFrame( bool isCommandFrame = true ) { SetTrackMenuTarget( this ); SetOptionFlag( CommandFrame, isCommandFrame ); }
+	void SetFrameEditor( ui::ICommandFrame* pFrameEditor ) { m_pFrameEditor = pFrameEditor; SetCommandFrame( m_pFrameEditor != NULL ); }
 
 	const std::tstring& GetSection( void ) const { return m_regSection; }
 	void SetSection( const std::tstring& regSection ) { m_regSection = regSection; }
@@ -596,7 +598,7 @@ private:
 		UseAlternateRowColoring		= BIT_FLAG( 0 ),
 		SortInternally				= BIT_FLAG( 1 ),
 		AcceptDropFiles				= BIT_FLAG( 2 ),		// enable as Explorer drop target, send LVN_DropFiles notification when files are dropped onto the list
-		CommandFrame				= BIT_FLAG( 3 ),		// list is the command target FIRST, also owner of the paired toolbar (for multiple lists in the same dialog, that have similar commands)
+		CommandFrame				= BIT_FLAG( 3 ),		// list is the command target FIRST, also owner of the paired toolbar (for multiple lists in the same dialog, that have similar commands) - optionally may use m_pFrameEditor
 		HighlightTextDiffsFrame		= BIT_FLAG( 4 ),		// highlight text differences with a filled frame
 		ToggleCheckSelItems			= BIT_FLAG( 5 )			// multi-selection: toggle checked state for the selected items
 	};
@@ -632,6 +634,7 @@ private:
 	CMenu* m_pPopupMenu[ _ListPopupCount ];					// used when right clicking nowhere - on header or no list item
 	std::auto_ptr< CLabelEdit > m_pLabelEdit;				// stores the label info during inline editing
 
+	ui::ICommandFrame* m_pFrameEditor;						// for frame editor command handling mode
 	ole::IDataSourceFactory* m_pDataSourceFactory;			// creates ole::CDataSource for clipboard and drag-drop
 private:
 	bool m_painting;										// true during OnPaint() - supresses item text callback for diff columns to prevent default list sub-item draw (diffs are custom drawn)

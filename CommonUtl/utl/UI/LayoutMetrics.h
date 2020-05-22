@@ -57,25 +57,6 @@ namespace ui
 
 		virtual void OnCollapseChanged( bool collapsed ) { collapsed; }
 	};
-
-
-	// implemented by controls that act as a layout frame, having custom internal layout rules
-
-	interface ILayoutFrame
-	{
-		virtual void OnControlResized( UINT ctrlId ) = 0;
-	};
-
-
-	// implemented to customize command information (tooltips, message strings) by dialogs, frames, etc
-
-	interface ICustomCmdInfo
-	{
-		virtual void QueryTooltipText( std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const
-		{
-			rText, cmdId, pTooltip;
-		}
-	};
 }
 
 

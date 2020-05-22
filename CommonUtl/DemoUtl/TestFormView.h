@@ -16,7 +16,7 @@ protected:
 public:
 	virtual ~CTestFormView();
 
-	// ui::ICmdCallback interface
+	// ui::ICustomCmdInfo interface
 	virtual void QueryTooltipText( std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const;
 
 	CTestDoc* GetDocument( void ) const { return reinterpret_cast< CTestDoc* >( m_pDocument ); }

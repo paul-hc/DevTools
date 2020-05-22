@@ -2,6 +2,7 @@
 #include "stdafx.h"
 #include "Utilities.h"
 #include "Dialog_fwd.h"
+#include "LayoutEngine.h"
 #include "HistoryComboBox.h"
 #include "IconButton.h"
 #include "ImageStore.h"
@@ -594,6 +595,38 @@ namespace ui
 			return pComboBox->SetEditSel( 0, -1 ) != FALSE;
 
 		return false;
+	}
+
+	bool RecreateControl( CWnd* pCtrl, DWORD newStyle, DWORD newStyleEx /*= -1*/ )
+	{	// allows recreating a control for which is not possible to change certain styles at runtime
+		ASSERT_PTR( pCtrl->GetSafeHwnd() );
+
+		if ( -1 == newStyle )
+			newStyle = pCtrl->GetStyle();
+
+		if ( -1 == newStyleEx )
+			newStyleEx = pCtrl->GetExStyle();
+
+		CWnd* pParentDlg = pCtrl->GetParent();
+		CFont* pCtrlFont = pParentDlg->GetFont();
+
+		std::tstring className = ui::GetClassName( pCtrl->GetSafeHwnd() );
+		std::tstring caption = ui::GetWindowText( pCtrl->GetSafeHwnd() );
+		UINT ctrlId = pCtrl->GetDlgCtrlID();
+		CRect controlRect = ui::GetControlRect( pCtrl->GetSafeHwnd() );
+		CWnd* pPrevCtrl = pCtrl->GetNextWindow( GW_HWNDPREV );
+
+		pCtrl->DestroyWindow();
+		if ( !pCtrl->CreateEx( newStyleEx, className.c_str(), caption.c_str(), newStyle, controlRect, pParentDlg, ctrlId ) )
+			return false;
+
+		pCtrl->SetFont( pCtrlFont );		// note: it doesn't work for CEdit with ES_PASSWORD
+		pCtrl->SetWindowPos( pPrevCtrl != NULL ? pPrevCtrl : &CWnd::wndBottom, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE | SWP_NOACTIVATE );		// move in tab order after the previous control
+
+		if ( ui::ILayoutEngine* pParentLayout = dynamic_cast< ui::ILayoutEngine* >( pParentDlg ) )		// a layout dialog?
+			pParentLayout->GetLayoutEngine().RefreshControlHandle( ctrlId );						// we have a new m_hControl
+
+		return true;
 	}
 
 

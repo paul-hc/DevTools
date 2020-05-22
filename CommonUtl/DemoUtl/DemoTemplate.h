@@ -16,12 +16,13 @@ enum ResizeStyle;
 
 
 class CDemoTemplate : public CCmdTarget
+					, public ui::ICustomCmdInfo
 {
 public:
 	CDemoTemplate( CWnd* pOwner );
 	virtual ~CDemoTemplate();
 
-	// ui::ICmdCallback interface
+	// ui::ICustomCmdInfo interface
 	virtual void QueryTooltipText( std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const;
 
 	virtual void DoDataExchange( CDataExchange* pDX );
@@ -108,7 +109,7 @@ public:
 	CDemoPage( void );
 	virtual ~CDemoPage();
 
-	// ui::ICmdCallback interface
+	// ui::ICustomCmdInfo interface
 	virtual void QueryTooltipText( std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const { m_pDemo->QueryTooltipText( rText, cmdId, pTooltip ); }
 	virtual BOOL OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo );
 protected:

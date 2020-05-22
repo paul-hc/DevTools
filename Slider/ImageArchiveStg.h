@@ -29,7 +29,7 @@ public:
 	void Close( void );
 	static void DiscardCachedImages( const fs::CPath& stgFilePath );		// to avoid sharing violations on stream access
 
-	void CreateImageArchive( const TCHAR* pStgFilePath, const std::tstring& password, const std::vector< TTransferPathPair >& xferPairs,
+	void CreateImageArchive( const fs::CPath& stgFilePath, const std::tstring& password, const std::vector< TTransferPathPair >& xferPairs,
 							 ui::IProgressService* pProgressService ) throws_( CException* );
 
 	bool SavePassword( const std::tstring& password );
@@ -37,7 +37,7 @@ public:
 
 	void StoreDocModelSchema( app::ModelSchema docModelSchema ) { m_docModelSchema = docModelSchema; }
 
-	// .sld file format to "_Album.sld" stream
+	// "_Album.sld" stream (with .sld file format)
 	void SaveAlbumDoc( CObject* pAlbumDoc );
 	bool LoadAlbumDoc( CObject* pAlbumDoc );
 
@@ -46,9 +46,6 @@ public:
 
 	static bool HasImageArchiveExt( const TCHAR* pFilePath );
 	static const TCHAR* GetDefaultExtension( void ) { return s_compoundStgExts[ Ext_ias ]; }
-
-	static void EncryptPassword( std::tstring& rPassword );
-	static void DecryptPassword( std::tstring& rPassword );
 protected:
 	// base overrides
 	virtual CStringW EncodeStreamName( const TCHAR* pStreamName ) const;
@@ -87,8 +84,8 @@ private:
 	static const TCHAR* s_compoundStgExts[ _Ext_Count ];				// file extension for compound-files (".icf")
 	static const TCHAR* s_pwdStreamNames[ _PwdTypeCount ];				// PwdAnsi for backwards compatibility with old saved .icf files
 	static const TCHAR* s_thumbsSubStorageNames[ _ThumbsTypeCount ];	// name of the thumbs sub-storage (old "Thumbnails" in bmp format with .jpg extension)
-	static const TCHAR s_metadataNameExt[];								// meta-data file in a compound-file
-	static const TCHAR s_albumNameExt[];								// album info (superset of meta-data)
+	static const TCHAR s_metadataFilename[];							// meta-data file in a compound-file
+	static const TCHAR s_albumFilename[];								// album info (superset of meta-data)
 	static const TCHAR s_subPathSep;									// sub-path separator for deep stream names
 public:
 	class CFactory : public CThrowMode, public fs::IThumbProducer, private utl::noncopyable
@@ -111,7 +108,8 @@ public:
 
 		bool SavePassword( const std::tstring& password, const fs::CPath& stgFilePath );
 		std::tstring LoadPassword( const fs::CPath& stgFilePath );
-		bool VerifyPassword( const fs::CPath& stgFilePath );
+		bool CacheVerifiedPassword( const fs::CPath& stgFilePath, const std::tstring& password );		// for doc SaveAs
+		bool VerifyPassword( std::tstring* pOutPassword, const fs::CPath& stgFilePath );
 
 		bool SaveAlbumDoc( CObject* pAlbumDoc, const fs::CPath& stgFilePath );
 		bool LoadAlbumDoc( CObject* pAlbumDoc, const fs::CPath& stgFilePath );
@@ -125,7 +123,7 @@ public:
 	private:
 		stdext::hash_map< fs::CPath, CImageArchiveStg* > m_storageMap;		// owns values
 		stdext::hash_map< fs::CPath, std::tstring > m_passwordProtected;	// known password-protected storages to encrypted passwords
-		std::set< std::tstring > m_verifiedPasswords;						// encrypted
+		std::set< std::tstring > m_verifiedPasswords;
 	};
 
 	static CFactory& Factory( void );

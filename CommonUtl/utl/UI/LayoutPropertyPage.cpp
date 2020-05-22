@@ -44,6 +44,11 @@ bool CLayoutPropertyPage::HasControlLayout( void ) const
 	return m_pLayoutEngine->HasCtrlLayout();
 }
 
+void CLayoutPropertyPage::QueryTooltipText( std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const
+{
+	rText, cmdId, pTooltip;
+}
+
 CLayoutBasePropertySheet* CLayoutPropertyPage::GetParentSheet( void ) const
 {
 	CLayoutBasePropertySheet* pParentSheet = checked_static_cast< CLayoutBasePropertySheet* >( GetParent() );

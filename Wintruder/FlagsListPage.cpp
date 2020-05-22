@@ -20,7 +20,7 @@ namespace layout
 }
 
 
-CFlagsListPage::CFlagsListPage( IEmbeddedPageCallback* pParentCallback, const TCHAR* pTitle /*= NULL*/ )
+CFlagsListPage::CFlagsListPage( ui::IEmbeddedPageCallback* pParentCallback, const TCHAR* pTitle /*= NULL*/ )
 	: CLayoutPropertyPage( IDD_FLAG_LIST_PAGE )
 	, m_pParentCallback( pParentCallback )
 	, m_pFlagsListCtrl( new CFlagsListCtrl )

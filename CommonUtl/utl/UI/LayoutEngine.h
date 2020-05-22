@@ -3,6 +3,8 @@
 #pragma once
 
 #include <hash_map>
+#include "CtrlInterfaces.h"
+#include "Dialog_fwd.h"
 #include "LayoutMetrics.h"
 
 
@@ -64,6 +66,9 @@ public:
 	CSize GetMaxClientSize( void ) const;
 
 	CSize& MaxClientSize( void ) { ASSERT( !IsInitialized() ); return m_maxClientSize; }		// in default expanded state
+	void DisableResizeVertically( void ) { MaxClientSize().cy = 0; }
+	void DisableResizeHorizontally( void ) { MaxClientSize().cx = 0; }
+
 	CPoint GetMinWindowSize( void ) const { return GetMinClientSize() + m_nonClientSize; }
 
 	layout::Style FindLayoutStyle( UINT ctrlId ) const;
@@ -75,6 +80,7 @@ public:
 	// advanced control layout: use with care
 	layout::CControlState* LookupControlState( UINT ctrlId );
 	bool HasControlState( UINT ctrlId ) const { return m_controlStates.find( ctrlId ) != m_controlStates.end(); }
+	bool RefreshControlHandle( UINT ctrlId );			// call after control with same ID gets recreated
 	void AdjustControlInitialPosition( UINT ctrlId, const CSize& deltaOrigin, const CSize& deltaSize );		// when stretching content to fit: to retain original layout behaviour
 private:
 	void SetupControlStates( void );

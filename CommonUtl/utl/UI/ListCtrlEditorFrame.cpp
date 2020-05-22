@@ -25,7 +25,7 @@ CListCtrlEditorFrame::CListCtrlEditorFrame( CReportListControl* pListCtrl, CTool
 	// Special CommandFrame mode of the list - read the notes in CReportListControl::OnCmdMsg():
 	//	- the list receives the commands from the context menu & toolbar, but routes them to parent dialog if handlers are defined
 	//	- this allows proper command routing for multiple list frames in the same dialog.
-	m_pListCtrl->SetCommandFrame();
+	m_pListCtrl->SetFrameEditor( this );
 
 	if ( m_pToolbar != NULL )
 	{
@@ -38,9 +38,15 @@ CListCtrlEditorFrame::~CListCtrlEditorFrame()
 {
 }
 
-bool CListCtrlEditorFrame::InEditMode( void ) const
+bool CListCtrlEditorFrame::InInlineEditingMode( void ) const
 {
 	return m_pListCtrl->IsInternalChange() || m_pListCtrl->GetEditControl() != NULL;
+}
+
+
+CCmdTarget* CListCtrlEditorFrame::GetCmdTarget( void )
+{
+	return this;
 }
 
 bool CListCtrlEditorFrame::HandleTranslateMessage( MSG* pMsg )
@@ -51,6 +57,18 @@ bool CListCtrlEditorFrame::HandleTranslateMessage( MSG* pMsg )
 
 	return m_pListCtrl->PreTranslateMessage( pMsg ) != FALSE;
 }
+
+bool CListCtrlEditorFrame::HandleCtrlCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo )
+{
+	if ( m_pParentWnd->OnCmdMsg( id, code, pExtra, pHandlerInfo ) )
+		return true;			// handled by dialog custom handler, which take precedence over internal handler
+
+	if ( __super::OnCmdMsg( id, code, pExtra, pHandlerInfo ) )		// non-virtual call
+		return true;			// handled by THIS frame
+
+	return false;
+}
+
 
 BOOL CListCtrlEditorFrame::OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo )
 {
@@ -77,17 +95,17 @@ END_MESSAGE_MAP()
 
 void CListCtrlEditorFrame::OnUpdate_NotEditing( CCmdUI* pCmdUI )
 {
-	pCmdUI->Enable( !InEditMode() );
+	pCmdUI->Enable( !InInlineEditingMode() );
 }
 
 void CListCtrlEditorFrame::OnUpdate_AnySelected( CCmdUI* pCmdUI )
 {
-	pCmdUI->Enable( !InEditMode() && m_pListCtrl->AnySelected() );
+	pCmdUI->Enable( !InInlineEditingMode() && m_pListCtrl->AnySelected() );
 }
 
 void CListCtrlEditorFrame::OnUpdate_SingleSelected( CCmdUI* pCmdUI )
 {
-	pCmdUI->Enable( !InEditMode() && m_pListCtrl->SingleSelected() );
+	pCmdUI->Enable( !InInlineEditingMode() && m_pListCtrl->SingleSelected() );
 }
 
 void CListCtrlEditorFrame::OnRemoveItem( void )
@@ -131,5 +149,5 @@ void CListCtrlEditorFrame::OnRemoveAll( void )
 
 void CListCtrlEditorFrame::OnUpdate_RemoveAll( CCmdUI* pCmdUI )
 {
-	pCmdUI->Enable( !InEditMode() && m_pListCtrl->GetItemCount() != 0 );
+	pCmdUI->Enable( !InInlineEditingMode() && m_pListCtrl->GetItemCount() != 0 );
 }

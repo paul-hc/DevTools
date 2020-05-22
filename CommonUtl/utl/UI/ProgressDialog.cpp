@@ -42,7 +42,7 @@ CProgressDialog::CProgressDialog( const std::tstring& operationLabel, int option
 {
 	m_regSection = _T("utl\\ProgressDialog");
 	RegisterCtrlLayout( layout::styles, COUNT_OF( layout::styles ) );
-	GetLayoutEngine().MaxClientSize().cy = 0;		// no vertical resize
+	GetLayoutEngine().DisableResizeVertically();
 }
 
 CProgressDialog::~CProgressDialog()

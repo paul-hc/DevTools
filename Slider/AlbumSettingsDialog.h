@@ -95,8 +95,9 @@ public:
 protected:
 	virtual void DoDataExchange( CDataExchange* pDX );	// DDX/DDV support
 protected:
-	afx_msg void OnContextMenu( CWnd* pWnd, CPoint point );
 	virtual void OnOK( void );
+	virtual void OnIdleUpdateControls( void );
+	afx_msg void OnContextMenu( CWnd* pWnd, CPoint point );
 
 	afx_msg void OnLVnDblClk_Patterns( NMHDR* pNmHdr, LRESULT* pResult );
 	afx_msg void OnLVnDropFiles_Patterns( NMHDR* pNmHdr, LRESULT* pResult );

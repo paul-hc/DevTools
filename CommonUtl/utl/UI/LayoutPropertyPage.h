@@ -9,17 +9,8 @@
 #include <afxdlgs.h>
 
 
-class CLayoutPropertyPage;
 class CLayoutBasePropertySheet;
 class CMacroCommand;
-
-
-// implemented by the parent of an embedded child page; routes deep control notifications to the parent
-
-interface IEmbeddedPageCallback
-{
-	virtual void OnChildPageNotify( CLayoutPropertyPage* pEmbeddedPage, CWnd* pCtrl, int notifCode ) = 0;
-};
 
 
 class CLayoutPropertyPage : public CPropertyPage
@@ -48,6 +39,9 @@ public:
 	virtual CLayoutEngine& GetLayoutEngine( void );
 	virtual void RegisterCtrlLayout( const CLayoutStyle layoutStyles[], unsigned int count );
 	virtual bool HasControlLayout( void ) const;
+
+	// ui::ICustomCmdInfo interface
+	virtual void QueryTooltipText( std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const;
 
 	// overridables
 	virtual void ApplyPageChanges( void ) throws_( CRuntimeException );

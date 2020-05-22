@@ -1,7 +1,8 @@
 
 #include "stdafx.h"
 #include "CmdInfoStore.h"
-#include "LayoutMetrics.h"
+#include "CtrlInterfaces.h"
+#include "Dialog_fwd.h"
 #include "ReportListControl.h"
 #include "ThemeStatic.h"
 #include "utl/ContainerUtilities.h"

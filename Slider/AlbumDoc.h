@@ -37,6 +37,10 @@ public:
 	const fs::ImagePathKey& GetImageFilePathAt( int index ) const;
 
 	CImageState* GetImageState( void ) const;
+
+	enum ArchiveLoadResult { PasswordNotVerified, Failed, Succeeded };
+
+	ArchiveLoadResult LoadArchiveStorage( const fs::CPath& stgPath );		// called internally, or when loading an embedded archive as a search pattern
 public:
 	bool EditAlbum( CAlbumImageView* pActiveView );
 	bool AddExplicitFiles( const std::vector< std::tstring >& files, bool doUpdate = true );
@@ -71,7 +75,7 @@ private:
 public:
 	persist CSlideData m_slideData;						// always altered by CAlbumImageView::OnActivateView()
 private:
-	persist CAlbumModel m_model;					// image file list (search patterns + found files)
+	persist CAlbumModel m_model;						// image file list (search patterns + found files)
 	persist COLORREF m_bkColor;							// album background color
 	persist int m_docFlags;								// persistent document flags
 	persist custom_order::COpStack m_customOrderUndoStack;	
@@ -87,6 +91,7 @@ private:
 	enum DocStatus { Clean, Dirty, DirtyOpening = -1 };
 public:
 	// transient
+	std::tstring m_password;							// allow password edititng of any document (including .sld), in preparation for SaveAs .ias
 	auto_drop::CContext m_autoDropContext;				// contains the dropped files, used during an auto-drop operation
 public:
 	// generated stuff

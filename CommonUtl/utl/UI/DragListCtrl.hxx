@@ -98,17 +98,7 @@ void CDragListCtrl< BaseListCtrl >::EndDragging( void )
 template< typename BaseListCtrl >
 bool CDragListCtrl< BaseListCtrl >::DropSelection( void )
 {
-	if ( !IsDragging() )
-	{
-		if ( UseExternalDropFiles() )
-		{
-			EndDragging();			// erase the drop mark
-			return true;
-		}
-		return false;
-	}
-
-	if ( !IsValidDropIndex() )
+	if ( !IsDragging() || !IsValidDropIndex() )
 		return false;
 
 	int dropIndex = m_dropIndex;
@@ -229,7 +219,14 @@ DROPEFFECT CDragListCtrl< BaseListCtrl >::Event_OnDropEx( COleDataObject* pDataO
 	pDataObject, dropList, point;
 
 	if ( dropEffect != DROPEFFECT_NONE )
-		DropSelection();
+		if ( !IsDragging() && UseExternalDropFiles() )			// drop files externally from Explorer?
+		{
+			EndDragging();					// erase the drop mark
+			return DROPEFFECT_NONE;			// this will send the WM_DROPFILES (default handling of external drop)
+		}
+		else
+			DropSelection();
+
 	return dropEffect;
 }
 

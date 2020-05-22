@@ -47,7 +47,9 @@ CSearchPatternDialog::CSearchPatternDialog( const CSearchPattern* pSrcPattern, C
 	// base init
 	m_regSection = _T("SearchPatternDialog");
 	RegisterCtrlLayout( layout::styles, COUNT_OF( layout::styles ) );
-	GetLayoutEngine().MaxClientSize().cy = 0;		// no vertical resize
+	GetLayoutEngine().DisableResizeVertically();
+
+	ClearFlag( m_wildFiltersCombo.RefItemContent().m_itemsFlags, ui::CItemContent::RemoveEmpty );
 
 	m_browseToolbar.GetStrip()
 		.AddButton( ID_BROWSE_FOLDER )

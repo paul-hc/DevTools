@@ -41,6 +41,11 @@ bool CLayoutFormView::HasControlLayout( void ) const
 	return m_pLayoutEngine->HasCtrlLayout();
 }
 
+void CLayoutFormView::QueryTooltipText( std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const
+{
+	rText, cmdId, pTooltip;
+}
+
 void CLayoutFormView::DoDataExchange( CDataExchange* pDX )
 {
 	if ( DialogOutput == pDX->m_bSaveAndValidate )

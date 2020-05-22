@@ -32,7 +32,7 @@ public:
 	virtual CDialog* GetDialog( void );
 	virtual bool IsRollMode( void ) const;
 protected:
-	// ui::ICmdCallback interface
+	// ui::ICustomCmdInfo interface
 	virtual void QueryTooltipText( std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const;
 
 	enum Mode					// determines the OK button label

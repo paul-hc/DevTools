@@ -3,7 +3,6 @@
 #pragma once
 
 #include "LayoutBasePropertySheet.h"
-#include "LayoutMetrics.h"
 #include "AccelTable.h"
 
 

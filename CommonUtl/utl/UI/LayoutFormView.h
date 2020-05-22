@@ -21,6 +21,9 @@ public:
 	virtual CLayoutEngine& GetLayoutEngine( void );
 	virtual void RegisterCtrlLayout( const CLayoutStyle layoutStyles[], unsigned int count );
 	virtual bool HasControlLayout( void ) const;
+
+	// ui::ICustomCmdInfo interface
+	virtual void QueryTooltipText( std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const;
 private:
 	std::auto_ptr< CLayoutEngine > m_pLayoutEngine;
 protected:

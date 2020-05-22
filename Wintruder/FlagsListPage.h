@@ -13,15 +13,15 @@ class CFlagsListCtrl;
 class CFlagsListPage : public CLayoutPropertyPage
 {
 public:
-	CFlagsListPage( IEmbeddedPageCallback* pParentCallback, const TCHAR* pTitle = NULL );
+	CFlagsListPage( ui::IEmbeddedPageCallback* pParentCallback, const TCHAR* pTitle = NULL );
 	virtual ~CFlagsListPage();
 
 	CBaseFlagsCtrl* GetFlagsCtrl( void );
 
-	// ui::ICmdCallback interface
+	// ui::ICustomCmdInfo interface
 	virtual void QueryTooltipText( std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const;
 private:
-	IEmbeddedPageCallback* m_pParentCallback;
+	ui::IEmbeddedPageCallback* m_pParentCallback;
 private:
 	// enum { IDD = IDD_FLAG_LIST_PAGE };
 

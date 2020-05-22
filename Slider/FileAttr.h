@@ -44,7 +44,7 @@ public:
 	const CSize& GetImageDim( void ) const;
 
 	size_t GetBaselinePos( void ) const { ASSERT( m_baselinePos != utl::npos ); return m_baselinePos; }
-	void StoreBaselinePos( size_t baselinePos ) { ASSERT( utl::npos == m_baselinePos ); m_baselinePos = baselinePos; }		// store it only once
+	void StoreBaselinePos( size_t baselinePos ) { m_baselinePos = baselinePos; }		// store it only once (unless this is from an embedded image archive)
 
 	std::tstring FormatFileSize( DWORD divideBy = KiloByte, const TCHAR* pFormat = _T("%s KB") ) const;
 	std::tstring FormatLastModifTime( LPCTSTR format = _T("%d-%m-%Y %H:%M:%S") ) const { return CTime( m_lastModifTime ).Format( format ).GetString(); }

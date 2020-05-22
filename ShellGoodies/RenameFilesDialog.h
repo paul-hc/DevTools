@@ -47,7 +47,7 @@ protected:
 	virtual void ClearFileErrors( void );
 	virtual void OnFileError( const fs::CPath& srcPath, const std::tstring& errMsg );
 
-	// ui::ICmdCallback interface
+	// ui::ICustomCmdInfo interface
 	virtual void QueryTooltipText( std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const;
 
 	virtual void SwitchMode( Mode mode );

@@ -21,9 +21,10 @@ public:
 
 	void Clear( void );
 	void Swap( CImagesModel& rImagesModel );
+	void StoreBaselineSequence( void );
 
 	void ReleaseStorages( void );
-	void StoreBaselineSequence( void );
+	void AcquireStorages( void ) const;		// to enable image caching
 
 	bool IsEmpty( void ) const { return m_fileAttributes.empty(); }
 

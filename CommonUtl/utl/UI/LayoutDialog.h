@@ -38,6 +38,9 @@ public:
 	virtual void RegisterCtrlLayout( const CLayoutStyle layoutStyles[], unsigned int count );
 	virtual bool HasControlLayout( void ) const;
 
+	// ui::ICustomCmdInfo interface
+	virtual void QueryTooltipText( std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const;
+
 	// overridables
 	virtual void LoadFromRegistry( void );
 	virtual void SaveToRegistry( void );

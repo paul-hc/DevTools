@@ -4,9 +4,9 @@
 #include "AlbumModel.h"
 #include "FileAttr.h"
 #include "ImageArchiveStg.h"
-#include "DefinePasswordDialog.h"
 #include "Application_fwd.h"
 #include "resource.h"
+#include "utl/UI/PasswordDialog.h"
 #include "utl/UI/ShellDialogs.h"
 #include "utl/UI/UtilitiesEx.h"
 
@@ -480,12 +480,11 @@ void CArchiveImagesDialog::OnBnClicked_CreateDestFolder( void )
 
 void CArchiveImagesDialog::OnEditArchivePassword( void )
 {
-	CDefinePasswordDialog dlg( m_destPath.GetNameExt(), this );
-	if ( dlg.Run() )
-	{
-		CImageArchiveStg::EncryptPassword( dlg.m_password );
-		m_archivingModel.StorePassword( dlg.m_password );
-	}
+	CPasswordDialog dlg( this, &m_destPath );
+	dlg.SetPassword( m_archivingModel.GetPassword() );
+
+	if ( IDOK == dlg.DoModal() )
+		m_archivingModel.StorePassword( dlg.GetPassword() );
 }
 
 void CArchiveImagesDialog::LVnItemChangedFilePathsList( NMHDR* pNmHdr, LRESULT* pResult )

@@ -141,7 +141,7 @@ void CAlbumModel::CloseAssocImageArchiveStgs( void )
 		if ( ( *itPattern )->IsImageArchiveDoc() )
 			CImageArchiveStg::Factory().ReleaseStorage( ( *itPattern )->GetFilePath() );
 
-	m_imagesModel.Clear();
+	m_imagesModel.ReleaseStorages();			// for found embedded storages
 }
 
 void CAlbumModel::QueryFileAttrsSequence( std::vector< CFileAttr* >& rSequence, const std::vector< int >& selIndexes ) const

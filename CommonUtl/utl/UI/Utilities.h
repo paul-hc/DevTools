@@ -201,6 +201,8 @@ namespace ui
 	bool IsEditLikeCtrl( HWND hCtrl );					// edit-box and combo-box?
 	bool SelectAllText( CWnd* pCtrl );					// works for edit-box and combo-box
 
+	bool RecreateControl( CWnd* pCtrl, DWORD newStyle, DWORD newStyleEx = -1 );
+
 
 	bool IsCommandEnabled( CCmdTarget* pCmdTarget, UINT cmdId );	// check via CN_UPDATE_COMMAND_UI handler
 	bool HandleCommand( CCmdTarget* pCmdTarget, UINT cmdId );		// menu or accelerator

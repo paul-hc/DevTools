@@ -36,7 +36,7 @@ CIncludeOptionsDialog::CIncludeOptionsDialog( CIncludeOptions* pOptions, CWnd* p
 	ASSERT_PTR( m_pOptions );
 	m_regSection = _T("IncludeOptionsDialog");
 	RegisterCtrlLayout( layout::styles, COUNT_OF( layout::styles ) );
-	GetLayoutEngine().MaxClientSize().cy = 0;
+	GetLayoutEngine().DisableResizeVertically();
 	LoadDlgIcon( ID_OPTIONS );
 
 	m_maxParseLinesEdit.SetValidRange( Range< int >( 5, 50000 ) );

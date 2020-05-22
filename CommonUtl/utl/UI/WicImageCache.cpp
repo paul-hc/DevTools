@@ -30,8 +30,8 @@ CWicImageCache::~CWicImageCache()
 
 CWicImageCache& CWicImageCache::Instance( void )
 {
-	static CWicImageCache imageCache( MaxSize );
-	return imageCache;
+	static CWicImageCache s_imageCache( MaxSize );
+	return s_imageCache;
 }
 
 CWicImage* CWicImageCache::LoadObject( const fs::ImagePathKey& imageKey )
@@ -47,7 +47,7 @@ void CWicImageCache::TraceObject( const fs::ImagePathKey& imageKey, CWicImage* p
 		TRACE_CACHE( _T("{%d} '%s' %s: %s\n"), s_traceCount++,
 			flagsText.c_str(),
 			imageKey.first.IsComplexPath() ? _T("EMBEDDED image") : _T("image"),
-			pImage != NULL ? pImage->FormatDbg().c_str() : _T("NULL") );
+			pImage != NULL ? pImage->FormatDbg().c_str() : imageKey.first.GetPtr() );
 #else
 	imageKey, pImage, cacheFlags;
 #endif

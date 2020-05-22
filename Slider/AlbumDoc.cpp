@@ -7,7 +7,6 @@
 #include "FileAttr.h"
 #include "AlbumSettingsDialog.h"
 #include "ArchiveImagesDialog.h"
-#include "DefinePasswordDialog.h"
 #include "AlbumImageView.h"
 #include "AlbumThumbListView.h"
 #include "ImageArchiveStg.h"
@@ -16,6 +15,8 @@
 #include "resource.h"
 #include "utl/Serialization.h"
 #include "utl/UI/MfcUtilities.h"
+#include "utl/UI/IconButton.h"
+#include "utl/UI/PasswordDialog.h"
 #include "utl/UI/Utilities.h"
 #include "utl/UI/Thumbnailer.h"
 #include "utl/UI/WicImageCache.h"
@@ -201,6 +202,24 @@ CSlideData* CAlbumDoc::GetActiveSlideData( void )
 	return pImageView != NULL ? &pImageView->RefSlideData() : &m_slideData;
 }
 
+
+CAlbumDoc::ArchiveLoadResult CAlbumDoc::LoadArchiveStorage( const fs::CPath& stgPath )
+{
+	ASSERT( app::IsImageArchiveDoc( stgPath.GetPtr() ) );
+
+	if ( !CImageArchiveStg::Factory().VerifyPassword( &m_password, stgPath ) )
+		return PasswordNotVerified;
+
+	// note: album stream is optional for older archives: not an error if missing
+	if ( !CImageArchiveStg::Factory().LoadAlbumDoc( this, stgPath ) )
+		return Failed;			// possibly corrupted storage
+
+	CImageArchiveStg* pLoadedImageStg = CImageArchiveStg::Factory().FindStorage( stgPath );
+	ASSERT_PTR( pLoadedImageStg );
+	pLoadedImageStg->StoreDocModelSchema( GetModelSchema() );
+	return Succeeded;
+}
+
 bool CAlbumDoc::SaveAsArchiveStg( const fs::CPath& newStgPath )
 {
 	REQUIRE( app::IsImageArchiveDoc( newStgPath.GetPtr() ) );
@@ -232,6 +251,8 @@ bool CAlbumDoc::SaveAsArchiveStg( const fs::CPath& newStgPath )
 				CImageArchiveStg::DiscardCachedImages( oldDocPath );
 
 				CArchivingModel archivingModel;
+				archivingModel.StorePassword( m_password );
+
 				CAlbumModel tempModel = m_model;				// temp copy so that it can display original thumbnails while creating, avoiding sharing errors
 
 				// don't pass the document, it's too early to save the album stream, since we're working on a tempModel copy
@@ -251,7 +272,10 @@ bool CAlbumDoc::SaveAsArchiveStg( const fs::CPath& newStgPath )
 					pSavedImageStg->StoreDocModelSchema( GetModelSchema() );
 		}
 
-		return !saveAs || BuildAlbum( newStgPath );				// reload from the new archive document file so that we reinitialize m_model
+		if ( !saveAs )
+			return true;
+
+		return BuildAlbum( newStgPath );						// reload from the new archive document file so that we reinitialize m_model
 	}
 	catch ( CException* pExc )
 	{
@@ -269,26 +293,25 @@ bool CAlbumDoc::BuildAlbum( const fs::CPath& searchPath )
 	try
 	{
 		if ( app::IsImageArchiveDoc( searchPath.GetPtr() ) )
-		{
-			if ( CImageArchiveStg::Factory().VerifyPassword( searchPath ) )
+			switch ( LoadArchiveStorage( searchPath ) )
 			{
-				loadedStgAlbumStream = CImageArchiveStg::Factory().LoadAlbumDoc( this, searchPath );		// album stream is optional for older archives: not an error if missing
-				if ( loadedStgAlbumStream )
-				{
-					CImageArchiveStg* pLoadedImageStg = CImageArchiveStg::Factory().FindStorage( searchPath );
-					ASSERT_PTR( pLoadedImageStg );
-					pLoadedImageStg->StoreDocModelSchema( GetModelSchema() );
-				}
+				case PasswordNotVerified:
+					return false;
+				case Failed:
+					loadedStgAlbumStream = false;
+					break;
+				case Succeeded:
+					loadedStgAlbumStream = true;
+					break;
 			}
-			else
-				return false;
-		}
 
 		if ( !loadedStgAlbumStream )				// directory path or archive stg missing album stream?
 			if ( m_model.SetupSearchPath( searchPath ) )
 				m_model.SearchForFiles( NULL );
 			else
 				return false;
+
+		m_model.GetImagesModel().AcquireStorages();		// to enable image caching
 	}
 	catch ( CException* pExc )
 	{
@@ -614,7 +637,9 @@ BOOL CAlbumDoc::OnOpenDocument( LPCTSTR pPath )
 		case app::CAlbumDocTemplate::SlideAlbum:
 			if ( !CDocumentBase::OnOpenDocument( pPath ) )
 				return FALSE;
-			SetModifiedFlag( Clean );					// start off clean
+
+			m_model.GetImagesModel().AcquireStorages();		// to enable image caching
+			SetModifiedFlag( Clean );						// start off clean
 			return TRUE;
 		case app::CAlbumDocTemplate::DirPath:
 		case app::CAlbumDocTemplate::ImageArchiveDoc:
@@ -816,31 +841,27 @@ void CAlbumDoc::OnUpdateArchiveImages( CCmdUI* pCmdUI )
 
 void CAlbumDoc::OnEditArchivePassword( void )
 {
-	fs::CPath stgFilePath( GetPathName().GetString() );
-	ASSERT( app::IsImageArchiveDoc( stgFilePath.GetPtr() ) );
+	fs::CPath docFilePath( GetPathName().GetString() );
 
-	if ( stgFilePath.FileExist() )
-	{
-		std::tstring password = CImageArchiveStg::Factory().LoadPassword( stgFilePath );
-		CImageArchiveStg::DecryptPassword( password );
+	CPasswordDialog dlg( NULL, &docFilePath );
+	dlg.SetPassword( m_password );
 
-		CDefinePasswordDialog dlg( stgFilePath.GetNameExt() );
-		dlg.m_password = dlg.m_confirmPassword = password;
+	if ( dlg.DoModal() != IDOK )
+		return;
 
-		if ( dlg.Run() )
-		{
-			CImageArchiveStg::EncryptPassword( dlg.m_password );
-			CImageArchiveStg::Factory().SavePassword( dlg.m_password, stgFilePath );
-		}
-	}
-	else
-		ui::BeepSignal( MB_ICONEXCLAMATION );
+	m_password = dlg.GetPassword();
+
+	if ( app::IsImageArchiveDoc( docFilePath.GetPtr() ) )
+		if ( docFilePath.FileExist() )
+			CImageArchiveStg::Factory().SavePassword( m_password, docFilePath );
 }
 
 void CAlbumDoc::OnUpdateEditArchivePassword( CCmdUI* pCmdUI )
 {
-	fs::CPath docPath( GetPathName().GetString() );
-	pCmdUI->Enable( docPath.FileExist() && app::IsImageArchiveDoc( docPath.GetPtr() ) );
+	pCmdUI->Enable();		// enable editing for any document (including .sld), in preparation for SaveAs .ias
+
+	if ( CButton* pButton = (CButton*)pCmdUI->m_pOther )		// check-box button in album settings dialog?
+		CIconButton::SetButtonIcon( pButton, CIconId( !m_password.empty() ? pCmdUI->m_nID : 0 ) );
 }
 
 void CAlbumDoc::OnToggleSaveCOUndoRedoBuffer( void )

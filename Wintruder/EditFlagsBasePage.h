@@ -9,7 +9,7 @@
 
 
 abstract class CEditFlagsBasePage : public CDetailBasePage
-								  , public IEmbeddedPageCallback
+								  , public ui::IEmbeddedPageCallback
 {
 protected:
 	CEditFlagsBasePage( const std::tstring& section, UINT templateId = 0 );
@@ -22,10 +22,10 @@ public:
 
 	virtual void ApplyPageChanges( void ) throws_( CRuntimeException );
 
-	// ui::ICmdCallback interface
+	// ui::ICustomCmdInfo interface
 	virtual void QueryTooltipText( std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const;
 protected:
-	// IEmbeddedPageCallback interface
+	// ui::IEmbeddedPageCallback interface
 	virtual void OnChildPageNotify( CLayoutPropertyPage* pEmbeddedPage, CWnd* pCtrl, int notifCode );
 
 	enum FlagsPage { GeneralPage, SpecificPage, PageCount };

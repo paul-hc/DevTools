@@ -36,7 +36,7 @@ private:
 	void QuerySelectedCmds( std::vector< utl::ICommand* >& rSelCommands ) const;
 	static bool IsSelContiguousToTop( const std::vector< int >& selIndexes );
 
-	// ui::ICmdCallback interface
+	// ui::ICustomCmdInfo interface
 	virtual void QueryTooltipText( std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const;
 
 	// ui::ITextEffectCallback interface

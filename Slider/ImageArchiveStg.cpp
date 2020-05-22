@@ -2,7 +2,6 @@
 #include "stdafx.h"
 #include "ImageArchiveStg.h"
 #include "FileAttrAlgorithms.h"
-#include "InputPasswordDialog.h"
 #include "Application.h"
 #include "resource.h"
 #include "utl/ContainerUtilities.h"
@@ -10,6 +9,7 @@
 #include "utl/RuntimeException.h"
 #include "utl/Serialization.h"
 #include "utl/UI/MfcUtilities.h"
+#include "utl/UI/PasswordDialog.h"
 #include "utl/UI/Thumbnailer.h"
 #include "utl/UI/WicImageCache.h"
 #include <numeric>
@@ -39,6 +39,27 @@ namespace pwd
 		static const TCHAR charMask = _T('\xAD');
 		rChr ^= charMask;
 	}
+
+	std::tstring ToEncrypted( const std::tstring& displayPassword )
+	{
+		std::tstring encryptedPassword = displayPassword;
+		std::reverse( encryptedPassword.begin(), encryptedPassword.end() );
+
+		for ( size_t i = 0; i != encryptedPassword.size(); ++i )
+			Crypt( encryptedPassword[ i ] );
+
+		return encryptedPassword;
+	}
+
+	std::tstring ToDecrypted( const std::tstring& encryptedPassword )
+	{
+		std::tstring displayPassword = encryptedPassword;
+		for ( size_t i = 0; i != displayPassword.size(); ++i )
+			Crypt( displayPassword[ i ] );
+
+		std::reverse( displayPassword.begin(), displayPassword.end() );
+		return displayPassword;
+	}
 }
 
 
@@ -47,8 +68,8 @@ namespace pwd
 const TCHAR* CImageArchiveStg::s_compoundStgExts[ _Ext_Count ] = { _T(".ias"), _T(".cid"), _T(".icf") };
 const TCHAR* CImageArchiveStg::s_pwdStreamNames[ _PwdTypeCount ] = { _T("pwd"), _T("pwdW") };
 const TCHAR* CImageArchiveStg::s_thumbsSubStorageNames[ _ThumbsTypeCount ] = { _T("Thumbnails"), _T("Thumbs_jpeg") };
-const TCHAR CImageArchiveStg::s_metadataNameExt[] = _T("_Meta.data");
-const TCHAR CImageArchiveStg::s_albumNameExt[] = _T("_Album.sld");
+const TCHAR CImageArchiveStg::s_metadataFilename[] = _T("_Meta.data");
+const TCHAR CImageArchiveStg::s_albumFilename[] = _T("_Album.sld");
 const TCHAR CImageArchiveStg::s_subPathSep = _T('*');
 
 
@@ -93,7 +114,7 @@ CStringW CImageArchiveStg::EncodeStreamName( const TCHAR* pStreamName ) const
 	return streamName;
 }
 
-void CImageArchiveStg::CreateImageArchive( const TCHAR* pStgFilePath, const std::tstring& password, const std::vector< TTransferPathPair >& xferPairs,
+void CImageArchiveStg::CreateImageArchive( const fs::CPath& stgFilePath, const std::tstring& password, const std::vector< TTransferPathPair >& xferPairs,
 										   ui::IProgressService* pProgressService ) throws_( CException* )
 {
 	ASSERT_PTR( pProgressService );
@@ -101,13 +122,15 @@ void CImageArchiveStg::CreateImageArchive( const TCHAR* pStgFilePath, const std:
 
 	CPushThrowMode pushThrow( this, true );
 
-	Create( pStgFilePath );
+	Create( stgFilePath.GetPtr() );
 	ASSERT( IsOpen() );
 
 	CWaitCursor wait;
 	utl::COwningContainer< std::vector< CFileAttr* > > fileAttributes;		// image storage metadata - owning for exception safety
 
 	SavePassword( password );
+
+	Factory().CacheVerifiedPassword( stgFilePath, password );
 
 	CreateImageFiles( fileAttributes, xferPairs, pProgressService );
 	CreateMetadataFile( fileAttributes );
@@ -120,7 +143,10 @@ void CImageArchiveStg::CreateImageFiles( std::vector< CFileAttr* >& rFileAttribu
 	// Prevent sharing violations on SRC stream open.
 	//	2020-04-11: Still doesn't work, I get exception on open. I suspect the source stream (image file) must be kept open with CFile::shareExclusive by some WIC indirect COM interface.
 	if ( !xferPairs.empty() )
+	{
 		DiscardCachedImages( xferPairs.front().first.GetPhysicalPath() );
+		app::GetThumbnailer()->Clear();		// new: also discard the thumbs
+	}
 
 	rFileAttributes.reserve( xferPairs.size() );
 
@@ -174,7 +200,7 @@ void CImageArchiveStg::CreateImageFiles( std::vector< CFileAttr* >& rFileAttribu
 
 void CImageArchiveStg::CreateMetadataFile( const std::vector< CFileAttr* >& fileAttributes )
 {
-	std::auto_ptr< COleStreamFile > pMetaDataFile( CreateFile( CImageArchiveStg::s_metadataNameExt ) );
+	std::auto_ptr< COleStreamFile > pMetaDataFile( CreateFile( CImageArchiveStg::s_metadataFilename ) );
 	CArchive archive( pMetaDataFile.get(), CArchive::store );
 	archive.m_bForceFlat = FALSE;			// same as CDocument::OnOpenDocument()
 
@@ -231,7 +257,7 @@ void CImageArchiveStg::LoadImagesMetadata( std::vector< CFileAttr* >& rFileAttri
 {
 	ASSERT( IsOpen() );
 
-	std::auto_ptr< COleStreamFile > pMetaDataFile( OpenFile( s_metadataNameExt ) );
+	std::auto_ptr< COleStreamFile > pMetaDataFile( OpenFile( s_metadataFilename ) );
 	if ( pMetaDataFile.get() != NULL )
 	{
 		CArchive archive( pMetaDataFile.get(), CArchive::load );
@@ -309,7 +335,7 @@ void CImageArchiveStg::SaveAlbumDoc( CObject* pAlbumDoc )
 {
 	ASSERT_PTR( pAlbumDoc );
 
-	std::auto_ptr< COleStreamFile > pAlbumFile( CreateFile( CImageArchiveStg::s_albumNameExt ) );
+	std::auto_ptr< COleStreamFile > pAlbumFile( CreateFile( CImageArchiveStg::s_albumFilename ) );
 
 	if ( NULL == pAlbumFile.get() )
 		return;
@@ -325,7 +351,7 @@ bool CImageArchiveStg::LoadAlbumDoc( CObject* pAlbumDoc )
 	std::auto_ptr< COleStreamFile > pAlbumFile;
 	{
 		CPushThrowMode pushNoThrow( this, false );				// album not found is not an error
-		pAlbumFile.reset( OpenFile( CImageArchiveStg::s_albumNameExt ) );
+		pAlbumFile.reset( OpenFile( CImageArchiveStg::s_albumFilename ) );
 	}
 
 	if ( NULL == pAlbumFile.get() )
@@ -364,10 +390,11 @@ bool CImageArchiveStg::SavePassword( const std::tstring& password )
 		if ( NULL == pPwdFile.get() )
 			return false;
 
+		std::tstring encryptedPassword = pwd::ToEncrypted( password );
 		CArchive archive( pPwdFile.get(), CArchive::store );
 		archive.m_bForceFlat = FALSE;			// same as CDocument::OnOpenDocument()
 
-		archive << password;
+		archive << encryptedPassword;
 
 		archive.Close();
 		//pwdFile.Close();
@@ -429,23 +456,7 @@ std::tstring CImageArchiveStg::LoadPassword( void )
 	}
 	archive.Close();
 	//pwdFile.Close();
-	return password;			// encrypted
-}
-
-void CImageArchiveStg::EncryptPassword( std::tstring& rPassword )
-{
-	std::reverse( rPassword.begin(), rPassword.end() );
-
-	for ( size_t i = 0; i != rPassword.size(); ++i )
-		pwd::Crypt( rPassword[ i ] );
-}
-
-void CImageArchiveStg::DecryptPassword( std::tstring& rPassword )
-{
-	for ( size_t i = 0; i != rPassword.size(); ++i )
-		pwd::Crypt( rPassword[ i ] );
-
-	std::reverse( rPassword.begin(), rPassword.end() );
+	return pwd::ToDecrypted( password );
 }
 
 
@@ -541,12 +552,9 @@ bool CImageArchiveStg::CFactory::SavePassword( const std::tstring& password, con
 	{
 		CPushThrowMode pushMode( stg.Get(), IsThrowMode() );					// pass current factory throw mode to the storage
 
-		if ( !password.empty() )
-			m_passwordProtected[ stgFilePath ] = password;
-
 		if ( stg.Get()->SavePassword( password ) )
 		{
-			m_verifiedPasswords.insert( password );
+			CacheVerifiedPassword( stgFilePath, password );		// for doc SaveAs
 			return true;
 		}
 	}
@@ -567,34 +575,39 @@ std::tstring CImageArchiveStg::CFactory::LoadPassword( const fs::CPath& stgFileP
 	return password;
 }
 
-bool CImageArchiveStg::CFactory::VerifyPassword( const fs::CPath& stgFilePath )
+bool CImageArchiveStg::CFactory::CacheVerifiedPassword( const fs::CPath& stgFilePath, const std::tstring& password )
+{
+	if ( password.empty() )
+	{
+		stdext::hash_map< fs::CPath, std::tstring >::iterator itFound = m_passwordProtected.find( stgFilePath );
+		if ( itFound != m_passwordProtected.end() )
+		{
+			m_verifiedPasswords.erase( itFound->second );
+			m_passwordProtected.erase( itFound );
+		}
+		return false;
+	}
+
+	m_passwordProtected[ stgFilePath ] = password;
+	m_verifiedPasswords.insert( password );				// assume password was new/edited, so implicitly verified
+	return true;
+}
+
+bool CImageArchiveStg::CFactory::VerifyPassword( std::tstring* pOutPassword, const fs::CPath& stgFilePath )
 {
 	std::tstring password = LoadPassword( stgFilePath );
 	if ( !password.empty() )
 		if ( m_verifiedPasswords.find( password ) == m_verifiedPasswords.end() )
 		{
-			std::tstring displayPassword = password;
-			DecryptPassword( displayPassword );
+			CPasswordDialog dlg( AfxGetMainWnd(), &stgFilePath );
+			dlg.SetVerifyPassword( password );
+			if ( dlg.DoModal() != IDOK )
+				return false;
 
-			CInputPasswordDialog dlg( stgFilePath.GetNameExt(), AfxGetMainWnd() );
-
-			for ( ;; )
-			{
-				if ( dlg.DoModal() != IDOK )
-					return false;
-
-				CImageArchiveStg::EncryptPassword( dlg.m_password );
-				if ( dlg.m_password == password )
-					break;
-				else
-				{
-					app::GetApp()->SetStatusBarMessage( _T("Password is incorrect!") );
-					MessageBeep( MB_ICONERROR );
-				}
-			}
 			m_verifiedPasswords.insert( password );
 		}
 
+	utl::AssignPtr( pOutPassword, password );
 	return true;
 }
 
