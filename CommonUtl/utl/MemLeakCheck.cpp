@@ -62,13 +62,13 @@ std::tstring CMemLeakCheck::FormatMessage( int lineNo /*= 0*/ ) const
 	return std::tstring();
 }
 
-std::tstring CMemLeakCheck::FormatLeak( size_t leakedBytes, bool final ) const
+std::tstring CMemLeakCheck::FormatLeak( size_t leakedBytes, bool isFinal ) const
 {
 	if ( leakedBytes != 0 )
 		return str::Format( _T("heap checkpoint '%s' - %lu bytes %s"),
 			m_varName.c_str(),
 			leakedBytes,
-			final ? _T("LEAKED") : _T("ALIVE") );
+			isFinal ? _T("LEAKED") : _T("ALIVE") );
 
 	return std::tstring();
 }

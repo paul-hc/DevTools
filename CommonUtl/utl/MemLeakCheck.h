@@ -51,7 +51,7 @@ public:
 	std::tstring FormatMessage( int lineNo = 0 ) const;
 protected:
 	size_t GetHeapTotal( void ) const;
-	std::tstring FormatLeak( size_t leakedBytes, bool final ) const;
+	std::tstring FormatLeak( size_t leakedBytes, bool isFinal ) const;
 private:
 	std::tstring m_varName;
 	std::tstring m_filename;

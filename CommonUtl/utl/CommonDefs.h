@@ -38,9 +38,11 @@
 #define DEBUG_BREAK_IF( cond ) ASSERT( !cond )
 
 
-#define abstract
-#define persist
+#define abstract			// class not instantiable
+#define final				// don't override a method/don't subclass a class
+#define persist				// persistent data-member
 #define throws_( ... )
+
 #define COUNT_OF( array ) ( sizeof( array ) / sizeof( array[ 0 ] ) )
 
 // iterator-like access for STL algorithms
