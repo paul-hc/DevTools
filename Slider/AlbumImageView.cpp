@@ -88,23 +88,21 @@ CWicImage* CAlbumImageView::GetImage( void ) const
 	return CAlbumDoc::AcquireImage( GetImagePathKey() );
 }
 
-void CAlbumImageView::QueryImageFileDetails( ui::CImageFileDetails& rFileDetails ) const
+CWicImage* CAlbumImageView::QueryImageFileDetails( ui::CImageFileDetails& rFileDetails ) const
 {
-	if ( CWicImage* pImage = GetImage() )
-	{
-		rFileDetails.Reset( pImage );
+	CWicImage* pImage = __super::QueryImageFileDetails( rFileDetails );
 
+	if ( pImage != NULL )
+	{
 		const CAlbumModel* pAlbumModel = GetDocument()->GetModel();
 		int currIndex = m_slideData.GetCurrentIndex();
 		const CFileAttr* pFileAttr = pAlbumModel->GetFileAttr( currIndex );
 
 		rFileDetails.m_fileSize = pFileAttr->GetFileSize();
-		rFileDetails.m_dimensions = pFileAttr->GetImageDim();
 		rFileDetails.m_navigPos = currIndex;
 		rFileDetails.m_navigCount = static_cast<UINT>( pAlbumModel->GetFileAttrCount() );
 	}
-	else
-		__super::QueryImageFileDetails( rFileDetails );		// reset the details
+	return pImage;
 }
 
 void CAlbumImageView::OnImageContentChanged( void )

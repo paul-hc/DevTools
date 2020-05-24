@@ -40,7 +40,7 @@ public:
 
 	// ui::IImageZoomView interface
 	virtual CWicImage* GetImage( void ) const;
-	virtual void QueryImageFileDetails( ui::CImageFileDetails& rFileDetails ) const;
+	virtual CWicImage* QueryImageFileDetails( ui::CImageFileDetails& rFileDetails ) const;
 
 	// IImageView interface
 	virtual fs::ImagePathKey GetImagePathKey( void ) const;
@@ -52,7 +52,7 @@ public:
 	// overrideables
 	virtual CImageState* GetLoadingImageState( void ) const;
 
-	CWicImage* ForceReloadImage( void ) const;
+	CWicImage* ForceReloadImage( void );
 
 	// view state persistence
 	void MakeImageState( CImageState* pImageState ) const;

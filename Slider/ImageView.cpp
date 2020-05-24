@@ -87,21 +87,9 @@ CWicImage* CImageView::GetImage( void ) const
 	return GetDocument()->GetImage();
 }
 
-void CImageView::QueryImageFileDetails( ui::CImageFileDetails& rFileDetails ) const
+CWicImage* CImageView::QueryImageFileDetails( ui::CImageFileDetails& rFileDetails ) const
 {
-	if ( CWicImage* pImage = GetImage() )
-	{
-		rFileDetails.Reset( pImage );
-
-		if ( !pImage->GetImagePath().IsComplexPath() )
-			rFileDetails.m_fileSize = static_cast< UINT >( fs::GetFileSize( pImage->GetImagePath().GetPtr() ) );
-		else
-			rFileDetails.m_fileSize = 0;		// (!) must be overriden for embedded images
-
-		rFileDetails.m_dimensions = CWicImageCache::Instance().LookupImageDim( pImage->GetKey() );
-	}
-	else
-		rFileDetails.Reset();
+	return __super::QueryImageFileDetails( rFileDetails );		// TODO: make CImageView aware of multi-frame images, with frame navigation
 }
 
 fs::ImagePathKey CImageView::GetImagePathKey( void ) const
@@ -198,7 +186,7 @@ void CImageView::OnImageContentChanged( void )
 	Invalidate( TRUE );
 }
 
-CWicImage* CImageView::ForceReloadImage( void ) const
+CWicImage* CImageView::ForceReloadImage( void )
 {
 	CWicImageCache::Instance().DiscardFrames( GetImagePathKey().first );
 	return GetImage();
@@ -337,8 +325,17 @@ void CImageView::OnContextMenu( CWnd* pWnd, CPoint screenPos )
 
 	CMenu* pSrcPopupMenu = &GetDocContextMenu();
 	if ( pSrcPopupMenu->GetSafeHmenu() != NULL )
-		if ( CMenu* pContextPopup = MakeContextMenuHost( pSrcPopupMenu, std::vector< fs::CPath >( 1, GetImagePathKey().first.GetPhysicalPath() ) ) )
-			DoTrackContextMenu( pContextPopup, screenPos );
+	{
+		if ( CWicImage* pImage = GetImage() )
+			if ( !pImage->GetImagePath().IsComplexPath() )
+				if ( CMenu* pContextPopup = MakeContextMenuHost( pSrcPopupMenu, pImage->GetImagePath() ) )
+				{
+					DoTrackContextMenu( pContextPopup, screenPos );
+					return;
+				}
+
+		DoTrackContextMenu( pSrcPopupMenu, screenPos );
+	}
 }
 
 void CImageView::OnLButtonDown( UINT mkFlags, CPoint point )

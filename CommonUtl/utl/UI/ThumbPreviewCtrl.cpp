@@ -101,7 +101,7 @@ void CThumbPreviewCtrl::OnContextMenu( CWnd* pWnd, CPoint screenPos )
 	fs::CPath filePath = m_imageFilePath.GetPhysicalPath();
 
 	if ( filePath.FileExist() )
-		if ( CMenu* pContextPopup = MakeContextMenuHost( NULL, std::vector< fs::CPath >( 1, filePath ) ) )
+		if ( CMenu* pContextPopup = MakeContextMenuHost( NULL, filePath ) )
 			DoTrackContextMenu( pContextPopup, screenPos );
 }
 

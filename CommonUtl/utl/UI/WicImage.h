@@ -75,9 +75,10 @@ namespace ui
 	public:
 		fs::CFlexPath m_filePath;
 		bool m_isAnimated;
+		UINT m_fileSize;
+
 		UINT m_framePos;
 		UINT m_frameCount;
-		UINT m_fileSize;
 		CSize m_dimensions;
 
 		UINT m_navigPos;

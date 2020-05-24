@@ -146,12 +146,12 @@ namespace d2d
 		pRenderTarget->FillRoundedRectangle( bkRoundRectF, m_pBkBrush );
 
 		D2D1_POINT_2F textOrigin = ToPointF( textRect.TopLeft() );
-		pRenderTarget->DrawTextLayout( textOrigin, m_pInfoTextLayout, m_pTextBrush );
+		pRenderTarget->DrawTextLayout( textOrigin, m_pInfoTextLayout, m_pTextBrush );				// e.g. "Iggy Pop.tif (1920 x 945 = 1.37 MP, 8.83 MB) [ 16 / 28 ] 63%"
 
 		if ( m_pFrameTextLayout != NULL )
 		{
 			textOrigin.y = backgroundRect.top - ( dw::ComputeTextSize( m_pFrameTextLayout ).height + EdgeV );
-			pRenderTarget->DrawTextLayout( textOrigin, m_pFrameTextLayout, m_pFrameTextBrush );
+			pRenderTarget->DrawTextLayout( textOrigin, m_pFrameTextLayout, m_pFrameTextBrush );		// e.g. "Page: 1 of 4"
 		}
 	}
 }

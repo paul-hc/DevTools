@@ -121,7 +121,7 @@ namespace d2d
 	{
 		const ui::IZoomView* pZoomView = m_pImageView->GetZoomView();
 
-		if ( pZoomView->HasViewStatusFlag( ui::ZoomMouseTracking ) )			// don't show the text info in zoom tracking mode
+		if ( NULL == GetImage() || pZoomView->HasViewStatusFlag( ui::ZoomMouseTracking ) )			// don't show any gadget in zoom tracking mode
 			return false;
 
 		if ( pGadget == m_pAccentFrameGadget.get() )
@@ -148,7 +148,7 @@ namespace d2d
 		COLORREF bkColor = pZoomView->GetBkColor();
 
 		if ( pZoomView->IsAccented() )
-			if ( pZoomView->HasViewStatusFlag( ui::FullScreen | ui::ZoomMouseTracking ) )
+			if ( pZoomView->HasViewStatusFlag( ui::FullScreen | ui::ZoomMouseTracking ) || NULL == GetImage() )
 				bkColor = CBaseZoomView::MakeAccentedBkColor( bkColor );					// use accented background highlight
 
 		ClearBackground( bkColor );
@@ -190,6 +190,14 @@ CSize CImageZoomViewD2D::GetSourceSize( void ) const
 ui::IZoomView* CImageZoomViewD2D::GetZoomView( void )
 {
 	return this;
+}
+
+CWicImage* CImageZoomViewD2D::QueryImageFileDetails( ui::CImageFileDetails& rFileDetails ) const
+{
+	CWicImage* pImage = GetImage();
+
+	rFileDetails.Reset( pImage );
+	return pImage;						// may be reused by overrides
 }
 
 void CImageZoomViewD2D::PrintImageGdi( CDC* pPrintDC, CWicImage* pImage )

@@ -46,7 +46,7 @@ namespace ui
 		virtual ui::IZoomView* GetZoomView( void ) = 0;
 
 		virtual CWicImage* GetImage( void ) const = 0;
-		virtual void QueryImageFileDetails( ui::CImageFileDetails& rFileDetails ) const = 0;
+		virtual CWicImage* QueryImageFileDetails( ui::CImageFileDetails& rFileDetails ) const = 0;
 	};
 }
 

@@ -480,7 +480,7 @@ namespace d2d
 
 	bool CFrameGadget::IsValid( void ) const
 	{
-		return GetRenderFrame() != NULL && GetRenderFrame()->IsValid();;
+		return GetRenderFrame() != NULL && GetRenderFrame()->IsValid();
 	}
 
 	void CFrameGadget::Draw( const CViewCoords& coords )

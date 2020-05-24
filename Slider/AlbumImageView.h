@@ -32,11 +32,13 @@ public:
 	// base overrides
 	virtual HICON GetDocTypeIcon( void ) const;
 	virtual CMenu& GetDocContextMenu( void ) const;
-	virtual void QueryImageFileDetails( ui::CImageFileDetails& rFileDetails ) const;
+
+	// ui::IImageZoomView overrides
+	virtual CWicImage* GetImage( void ) const;					// also an IImageView override
+	virtual CWicImage* QueryImageFileDetails( ui::CImageFileDetails& rFileDetails ) const;
 
 	// IImageView overrides
 	virtual fs::ImagePathKey GetImagePathKey( void ) const;
-	virtual CWicImage* GetImage( void ) const;
 	virtual void EventChildFrameActivated( void );
 	virtual void EventNavigSliderPosChanged( bool thumbTracking );
 

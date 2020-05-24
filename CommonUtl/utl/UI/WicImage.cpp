@@ -157,16 +157,22 @@ namespace ui
 	{
 		m_filePath.Clear();
 		m_isAnimated = false;
-		m_framePos = m_frameCount = m_fileSize = m_navigPos = m_navigCount = 0;
+		m_fileSize = m_framePos = m_frameCount = m_navigPos = m_navigCount = 0;
 		m_dimensions = CSize( 0, 0 );
 
 		if ( pImage != NULL )
 		{
 			m_filePath = pImage->GetImagePath();
 			m_isAnimated = pImage->IsAnimated();
+
+			if ( !m_filePath.IsComplexPath() )
+				m_fileSize = static_cast< UINT >( fs::GetFileSize( m_filePath.GetPtr() ) );
+
 			m_framePos = pImage->GetFramePos();
 			m_frameCount = pImage->GetFrameCount();
-			m_navigCount = 1;
+			m_dimensions = pImage->GetBmpSize();
+
+			m_navigCount = m_frameCount;		// assume a single multi-frame image by default (overriden for embedded images)
 		}
 	}
 
@@ -180,9 +186,9 @@ namespace ui
 		return
 			m_filePath == right.m_filePath &&
 			m_isAnimated == right.m_isAnimated &&
+			m_fileSize == right.m_fileSize &&
 			m_framePos == right.m_framePos &&
 			m_frameCount == right.m_frameCount &&
-			m_fileSize == right.m_fileSize &&
 			m_dimensions == right.m_dimensions &&
 			m_navigPos == right.m_navigPos &&
 			m_navigCount == right.m_navigCount;

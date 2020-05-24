@@ -74,6 +74,7 @@ protected:
 
 	// ui::IImageZoomView interface (partial)
 	virtual ui::IZoomView* GetZoomView( void );
+	virtual CWicImage* QueryImageFileDetails( ui::CImageFileDetails& rFileDetails ) const;
 
 	bool IsValidRenderTarget( void ) const { return m_pImageRT.get() != NULL && m_pImageRT->IsValidTarget(); }
 	void PrintImageGdi( CDC* pPrintDC, CWicImage* pImage );
