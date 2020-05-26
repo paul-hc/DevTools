@@ -3,7 +3,7 @@
 #pragma once
 
 #include "ListViewState.h"
-#include "AlbumNavigator_fwd.h"
+#include "ImageNavigator_fwd.h"
 
 
 namespace af

@@ -36,6 +36,7 @@ void CChildFrame::ActivateFrame( int cmdShow )
 	if ( -1 == cmdShow )
 	{
 		CMainFrame* pMainFrame = app::GetMainFrame();
+
 		if ( HasFlag( CWorkspace::GetFlags(), wf::MdiMaximized ) && 1 == pMainFrame->GetMdiChildCount() )
 			cmdShow = SW_SHOWMAXIMIZED;
 	}

@@ -153,7 +153,7 @@ BEGIN
     BEGIN
         MENUITEM "&New\tCtrl+N",                ID_FILE_NEW
         MENUITEM "&Open...\tCtrl+O",            ID_FILE_OPEN
-        MENUITEM "Open Folder...\tCtrl+Shift+O", ID_FILE_OPEN_ALBUM_FOLDER
+        MENUITEM "Open Folder...\tCtrl+Shift+D", ID_FILE_OPEN_ALBUM_FOLDER
         MENUITEM SEPARATOR
         MENUITEM "Save &Workspace\tCtrl+Shift+S", CM_SAVE_WORKSPACE
         MENUITEM "&Logger Options...",          CM_LOGGER_OPTIONS
@@ -193,7 +193,7 @@ BEGIN
     BEGIN
         MENUITEM "&New\tCtrl+N",                ID_FILE_NEW
         MENUITEM "&Open...\tCtrl+O",            ID_FILE_OPEN
-        MENUITEM "Open Folder...\tCtrl+Shift+O", ID_FILE_OPEN_ALBUM_FOLDER
+        MENUITEM "Open Folder...\tCtrl+Shift+D", ID_FILE_OPEN_ALBUM_FOLDER
         MENUITEM "&Close",                      ID_FILE_CLOSE
         MENUITEM "&Save\tCtrl+S",               ID_FILE_SAVE
         MENUITEM "Save &As...",                 ID_FILE_SAVE_AS
@@ -319,7 +319,7 @@ BEGIN
     BEGIN
         MENUITEM "&New\tCtrl+N",                ID_FILE_NEW
         MENUITEM "&Open...\tCtrl+O",            ID_FILE_OPEN
-        MENUITEM "Open Folder...\tCtrl+Shift+O", ID_FILE_OPEN_ALBUM_FOLDER
+        MENUITEM "Open Folder...\tCtrl+Shift+D", ID_FILE_OPEN_ALBUM_FOLDER
         MENUITEM "&Close",                      ID_FILE_CLOSE
         MENUITEM "&Save\tCtrl+S",               ID_FILE_SAVE
         MENUITEM "Save &As...",                 ID_FILE_SAVE_AS
@@ -360,6 +360,15 @@ BEGIN
     BEGIN
         MENUITEM "&Toolbar",                    ID_VIEW_TOOLBAR
         MENUITEM "&Status Bar",                 ID_VIEW_STATUS_BAR
+        MENUITEM SEPARATOR
+        POPUP "Multi-page"
+        BEGIN
+            MENUITEM "Pre&vious\tUp",               ID_NAVIG_SEEK_PREV
+            MENUITEM "&Next\tDown",                 ID_NAVIG_SEEK_NEXT
+            MENUITEM SEPARATOR
+            MENUITEM "&Begin\tHome",                ID_NAVIG_SEEK_FIRST
+            MENUITEM "&End\tEnd",                   ID_NAVIG_SEEK_LAST
+        END
         MENUITEM SEPARATOR
         MENUITEM "&Full Screen\tF11",           CK_FULL_SCREEN
         MENUITEM SEPARATOR
@@ -624,23 +633,29 @@ END
 IDR_IMAGEVIEW ACCELERATORS 
 BEGIN
     VK_DOWN,        CM_SCROLL_DOWN,         VIRTKEY, CONTROL, NOINVERT
-    VK_DOWN,        CM_SCROLL_PAGE_DOWN,    VIRTKEY, ALT, NOINVERT
     VK_LEFT,        CM_SCROLL_LEFT,         VIRTKEY, CONTROL, NOINVERT
-    VK_LEFT,        CM_SCROLL_PAGE_LEFT,    VIRTKEY, ALT, NOINVERT
-    VK_NEXT,        CM_SCROLL_PAGE_RIGHT,   VIRTKEY, CONTROL, NOINVERT
+    VK_DOWN,        CM_SCROLL_PAGE_DOWN,    VIRTKEY, ALT, NOINVERT
     VK_NEXT,        CM_SCROLL_PAGE_DOWN,    VIRTKEY, SHIFT, NOINVERT
+    VK_LEFT,        CM_SCROLL_PAGE_LEFT,    VIRTKEY, ALT, NOINVERT
     VK_PRIOR,       CM_SCROLL_PAGE_LEFT,    VIRTKEY, CONTROL, NOINVERT
-    VK_PRIOR,       CM_SCROLL_PAGE_UP,      VIRTKEY, SHIFT, NOINVERT
-    VK_RIGHT,       CM_SCROLL_RIGHT,        VIRTKEY, CONTROL, NOINVERT
+    VK_NEXT,        CM_SCROLL_PAGE_RIGHT,   VIRTKEY, CONTROL, NOINVERT
     VK_RIGHT,       CM_SCROLL_PAGE_RIGHT,   VIRTKEY, ALT, NOINVERT
-    VK_UP,          CM_SCROLL_UP,           VIRTKEY, CONTROL, NOINVERT
+    VK_PRIOR,       CM_SCROLL_PAGE_UP,      VIRTKEY, SHIFT, NOINVERT
     VK_UP,          CM_SCROLL_PAGE_UP,      VIRTKEY, ALT, NOINVERT
+    VK_RIGHT,       CM_SCROLL_RIGHT,        VIRTKEY, CONTROL, NOINVERT
+    VK_UP,          CM_SCROLL_UP,           VIRTKEY, CONTROL, NOINVERT
+    VK_HOME,        ID_NAVIG_SEEK_FIRST,    VIRTKEY, NOINVERT
+    VK_END,         ID_NAVIG_SEEK_LAST,     VIRTKEY, NOINVERT
+    VK_DOWN,        ID_NAVIG_SEEK_NEXT,     VIRTKEY, NOINVERT
+    VK_RIGHT,       ID_NAVIG_SEEK_NEXT,     VIRTKEY, NOINVERT
+    VK_LEFT,        ID_NAVIG_SEEK_PREV,     VIRTKEY, NOINVERT
+    VK_UP,          ID_NAVIG_SEEK_PREV,     VIRTKEY, NOINVERT
 END
 
 IDR_COMMAND_BAR_ACCEL ACCELERATORS 
 BEGIN
     VK_ESCAPE,      ID_CM_ESCAPE_KEY,       VIRTKEY, NOINVERT
-    "O",            ID_FILE_OPEN_ALBUM_FOLDER, VIRTKEY, SHIFT, CONTROL, NOINVERT
+    "D",            ID_FILE_OPEN_ALBUM_FOLDER, VIRTKEY, SHIFT, CONTROL, NOINVERT
 END
 
 IDR_ALBUMTYPE ACCELERATORS 
@@ -677,16 +692,6 @@ BEGIN
     "E",            IDC_EXPLORE_IMAGE,      VIRTKEY, CONTROL, NOINVERT
     VK_F4,          IDC_OPEN_IMAGE,         VIRTKEY, NOINVERT
     VK_F5,          IDC_SEARCH_FOR_FILES,   VIRTKEY, NOINVERT
-END
-
-IDR_ALBUMTYPE_NAV ACCELERATORS 
-BEGIN
-    VK_HOME,        ID_NAVIG_SEEK_FIRST,    VIRTKEY, NOINVERT
-    VK_END,         ID_NAVIG_SEEK_LAST,     VIRTKEY, NOINVERT
-    VK_DOWN,        ID_NAVIG_SEEK_NEXT,     VIRTKEY, NOINVERT
-    VK_UP,          ID_NAVIG_SEEK_PREV,     VIRTKEY, NOINVERT
-    VK_RIGHT,       ID_NAVIG_SEEK_NEXT,     VIRTKEY, NOINVERT
-    VK_LEFT,        ID_NAVIG_SEEK_PREV,     VIRTKEY, NOINVERT
 END
 
 
@@ -1287,7 +1292,7 @@ BEGIN
     CK_SAVE_CU_UNDO_REDO_BUFFER 
                             "Stores in album file the undo/redo information for file re-ordering, copying and moving\nStore Undo/Redo Buffer"
     ID_FILE_OPEN_ALBUM_FOLDER 
-                            "Open folder in a new album\nOpen Album Folder (Ctrl+Shift+O)"
+                            "Open folder in a new album\nOpen Album Folder (Ctrl+Shift+D)"
     ID_EDIT_ARCHIVE_PASSWORD 
                             "Edit password in image archive storage\nEdit Password"
     ID_ORDER_ORIGINAL       "Original Search Order"

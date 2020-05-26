@@ -2,6 +2,7 @@
 #include "stdafx.h"
 #include "ImageView.h"
 #include "INavigationBar.h"
+#include "ImageNavigator.h"
 #include "Workspace.h"
 #include "MainFrame.h"
 #include "MainToolbar.h"
@@ -34,9 +35,11 @@ IMPLEMENT_DYNCREATE( CImageView, CScrollView )
 CImageView::CImageView( void )
 	: BaseClass()
 	, CObjectCtrlBase( this )
+	, m_imageFramePos( 0 )
+	, m_bkColor( CLR_DEFAULT )
+	, m_initialized( false )
 	, m_pNavigBar( app::GetMainFrame()->GetToolbar() )
 	, m_pMdiChildFrame( NULL )
-	, m_bkColor( CLR_DEFAULT )
 {
 	s_imageAccel.LoadOnce( IDR_IMAGEVIEW );
 	SetTrackMenuTarget( app::GetMainFrame() );
@@ -84,7 +87,7 @@ void CImageView::SetBkColor( COLORREF bkColor, bool doRedraw /*= true*/ )
 
 CWicImage* CImageView::GetImage( void ) const
 {
-	return GetDocument()->GetImage();
+	return GetDocument()->GetImage( m_imageFramePos );
 }
 
 CWicImage* CImageView::QueryImageFileDetails( ui::CImageFileDetails& rFileDetails ) const
@@ -94,7 +97,7 @@ CWicImage* CImageView::QueryImageFileDetails( ui::CImageFileDetails& rFileDetail
 
 fs::ImagePathKey CImageView::GetImagePathKey( void ) const
 {
-	return GetDocument()->m_imagePathKey;
+	return fs::ImagePathKey( GetDocument()->GetImagePath(), m_imageFramePos );
 }
 
 CScrollView* CImageView::GetScrollView( void )
@@ -177,10 +180,15 @@ bool CImageView::OutputNavigSlider( void )
 void CImageView::OnImageContentChanged( void )
 {
 	// the following sequence of calls is critical with subtle side-effects
-	SetupContentMetrics( false );
 
-	if ( GetImage() != NULL )
-		app::GetMainFrame()->ResizeViewToFit( this );				// first allow view to resize in order to fit with contents (resize to image aspect ratio)
+	// BUG - Windows Vista+ with scroll bar window theme: CScrollView::UpdateBars() succeeds for the SB_HORZ (1st) bar, but not for SB_VERT (2nd) bar.
+	//	workaround: force a WM_SIZE
+	ui::RecalculateScrollBars( m_hWnd );
+	//was: SetupContentMetrics( false );
+
+	if ( !m_initialized && !HasViewStatusFlag( ui::FullScreen ) )
+		if ( GetImage() != NULL )
+			app::GetMainFrame()->ResizeViewToFit( this );				// first allow view to resize in order to fit with contents (resize to image aspect ratio)
 
 	AssignScalingMode( CWorkspace::GetData().m_scalingMode );			// TRICKY: switch to initial value without any recalculations
 	Invalidate( TRUE );
@@ -195,6 +203,19 @@ CWicImage* CImageView::ForceReloadImage( void )
 bool CImageView::CanEnterDragMode( void ) const
 {
 	return true;
+}
+
+nav::Navigate CImageView::CmdToNavigate( UINT cmdId )
+{
+	switch ( cmdId )
+	{
+		default:
+			ASSERT( false );
+		case ID_NAVIG_SEEK_PREV:	return nav::Previous;
+		case ID_NAVIG_SEEK_NEXT:	return nav::Next;
+		case ID_NAVIG_SEEK_FIRST:	return nav::First;
+		case ID_NAVIG_SEEK_LAST:	return nav::Last;
+	}
 }
 
 void CImageView::OnActivateView( BOOL bActivate, CView* pActivateView, CView* pDeactiveView )
@@ -252,6 +273,8 @@ BEGIN_MESSAGE_MAP( CImageView, BaseClass )
 	ON_WM_MBUTTONDOWN()
 	ON_WM_RBUTTONDOWN()
 	ON_WM_MOUSEWHEEL()
+	ON_COMMAND_RANGE( ID_NAVIG_SEEK_PREV, ID_NAVIG_SEEK_LAST, On_NavigSeek )
+	ON_UPDATE_COMMAND_UI_RANGE( ID_NAVIG_SEEK_PREV, ID_NAVIG_SEEK_LAST, OnUpdate_NavigSeek )
 	ON_COMMAND( ID_EDIT_COPY, OnEditCopy )
 	ON_UPDATE_COMMAND_UI( ID_EDIT_COPY, OnUpdateEditCopy )
 	ON_UPDATE_COMMAND_UI( IDW_NAVIG_SLIDER_CTRL, OnUpdate_NavigSliderCtrl )
@@ -294,6 +317,7 @@ void CImageView::OnInitialUpdate( void )
 	if ( HICON hIconType = GetDocTypeIcon() )
 		m_pMdiChildFrame->SetIcon( hIconType, FALSE );
 
+	m_initialized = false;
 	OnImageContentChanged();
 
 	if ( CImageState* pLoadingImageState = GetLoadingImageState() )
@@ -303,6 +327,7 @@ void CImageView::OnInitialUpdate( void )
 
 		RestoreState( *pLoadingImageState );		// restore persistent image view status
 	}
+	m_initialized = true;
 }
 
 void CImageView::OnSetFocus( CWnd* pOldWnd )
@@ -414,6 +439,23 @@ BOOL CImageView::OnMouseWheel( UINT mkFlags, short zDelta, CPoint point )
 		return TRUE;	// message processed
 	}
 	return FALSE;		//__super::OnMouseWheel( mkFlags, zDelta, point );
+}
+
+void CImageView::On_NavigSeek( UINT cmdId )
+{
+	CImageFrameNavigator navigator( GetImage() );
+	nav::Navigate navigate = CmdToNavigate( cmdId );
+
+	m_imageFramePos = navigator.GetNavigateFramePos( navigate );
+	OnImageContentChanged();
+}
+
+void CImageView::OnUpdate_NavigSeek( CCmdUI* pCmdUI )
+{
+	CImageFrameNavigator navigator( GetImage() );
+	nav::Navigate navigate = CmdToNavigate( pCmdUI->m_nID );
+
+	pCmdUI->Enable( navigator.CanNavigate( navigate ) );
 }
 
 void CImageView::OnEditCopy( void )

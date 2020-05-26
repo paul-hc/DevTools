@@ -1,5 +1,5 @@
-#ifndef AlbumNavigator_fwd_h
-#define AlbumNavigator_fwd_h
+#ifndef ImageNavigator_fwd_h
+#define ImageNavigator_fwd_h
 #pragma once
 
 
@@ -11,4 +11,4 @@ namespace nav
 }
 
 
-#endif // AlbumNavigator_fwd_h
+#endif // ImageNavigator_fwd_h

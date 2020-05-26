@@ -4,7 +4,7 @@
 #include "AlbumDoc.h"
 #include "AlbumDialogBar.h"
 #include "AlbumThumbListView.h"
-#include "AlbumNavigator.h"
+#include "ImageNavigator.h"
 #include "INavigationBar.h"
 #include "FileAttr.h"
 #include "ChildFrame.h"
@@ -27,8 +27,6 @@
 
 IMPLEMENT_DYNCREATE( CAlbumImageView, CImageView )
 
-CAccelTable CAlbumImageView::s_accelNavigate;
-
 CAlbumImageView::CAlbumImageView( void )
 	: CImageView()
 	, m_navTimer( this, ID_NAVIGATION_TIMER, m_slideData.m_slideDelay )
@@ -36,8 +34,6 @@ CAlbumImageView::CAlbumImageView( void )
 	, m_pPeerThumbView( NULL )
 	, m_pAlbumDialogBar( NULL )
 {
-	s_accelNavigate.LoadOnce( IDR_ALBUMTYPE_NAV );
-
 	ModifyScalingMode( ui::AutoFitLargeOnly );			// for albums use auto-fit by default
 }
 
@@ -434,13 +430,6 @@ BOOL CAlbumImageView::OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERI
 	return FALSE;
 }
 
-BOOL CAlbumImageView::PreTranslateMessage( MSG* pMsg )
-{
-	return
-		s_accelNavigate.Translate( pMsg, m_hWnd ) ||
-		__super::PreTranslateMessage( pMsg );
-}
-
 
 // message handlers
 
@@ -453,8 +442,6 @@ BEGIN_MESSAGE_MAP( CAlbumImageView, CImageView )
 	ON_UPDATE_COMMAND_UI( CM_TOGGLE_SIBLING_VIEW, OnUpdateSiblingView )
 	ON_COMMAND( ID_TOGGLE_NAVIG_PLAY, OnToggle_NavigPlay )
 	ON_UPDATE_COMMAND_UI( ID_TOGGLE_NAVIG_PLAY, OnUpdate_NavigPlay )
-	ON_COMMAND_RANGE( ID_NAVIG_SEEK_PREV, ID_NAVIG_SEEK_LAST, On_NavigSeek )
-	ON_UPDATE_COMMAND_UI_RANGE( ID_NAVIG_SEEK_PREV, ID_NAVIG_SEEK_LAST, OnUpdate_NavigSeek )
 	ON_COMMAND_RANGE( ID_TOGGLE_NAVIG_DIR_FWD, ID_TOGGLE_NAVIG_DIR_REV, OnRadio_NavigDirection )
 	ON_UPDATE_COMMAND_UI_RANGE( ID_TOGGLE_NAVIG_DIR_FWD, ID_TOGGLE_NAVIG_DIR_REV, OnUpdate_NavigDirection )
 	ON_COMMAND( ID_TOGGLE_NAVIG_WRAP_MODE, OnToggle_NavigWrapMode )
@@ -584,26 +571,9 @@ void CAlbumImageView::OnUpdate_NavigPlay( CCmdUI* pCmdUI )
 	pCmdUI->SetCheck( IsPlayOn() );
 }
 
-
-namespace hlp
-{
-	nav::Navigate CmdToNavigate( UINT cmdId )
-	{
-		switch ( cmdId )
-		{
-			default:
-				ASSERT( false );
-			case ID_NAVIG_SEEK_PREV:	return nav::Previous;
-			case ID_NAVIG_SEEK_NEXT:	return nav::Next;
-			case ID_NAVIG_SEEK_FIRST:	return nav::First;
-			case ID_NAVIG_SEEK_LAST:	return nav::Last;
-		}
-	}
-}
-
 void CAlbumImageView::On_NavigSeek( UINT cmdId )
 {
-	nav::Navigate navigate = hlp::CmdToNavigate( cmdId );
+	nav::Navigate navigate = CmdToNavigate( cmdId );
 	CAlbumNavigator navigator( this );
 	nav::TIndexFramePosPair newNavigInfo = navigator.GetNavigateInfo( navigate );
 
@@ -615,7 +585,7 @@ void CAlbumImageView::On_NavigSeek( UINT cmdId )
 
 void CAlbumImageView::OnUpdate_NavigSeek( CCmdUI* pCmdUI )
 {
-	nav::Navigate navigate = hlp::CmdToNavigate( pCmdUI->m_nID );
+	nav::Navigate navigate = CmdToNavigate( pCmdUI->m_nID );
 	CAlbumNavigator navigator( this );
 
 	pCmdUI->Enable( navigator.CanNavigate( navigate ) );

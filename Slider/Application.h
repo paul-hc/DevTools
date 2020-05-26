@@ -78,9 +78,9 @@ private:
 	int m_forceMask;
 	int m_forceFlags;
 	std::vector< std::tstring > m_queuedAlbumFilePaths;
-public:
+
 	// generated stuff
-	public:
+public:
 	virtual BOOL InitInstance( void );
 	virtual int ExitInstance( void );
 	virtual BOOL PreTranslateMessage( MSG* pMsg );
@@ -106,6 +106,8 @@ namespace app
 
 	bool MoveFiles( const std::vector< std::tstring >& filesToMove, CWnd* pParentWnd = AfxGetMainWnd() );
 	bool DeleteFiles( const std::vector< std::tstring >& filesToDelete, bool allowUndo = true );
+
+	fs::CPath GetActiveDirPath( void );
 
 
 	class CInteractiveMode : public ui::CInteractiveMode

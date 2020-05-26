@@ -18,11 +18,11 @@ public:
 private:
 	IImageView* m_pImageView;
 	const CAccelTable* m_pImageAccel;
-public:
+
 	// generated stuff
-	protected:
+protected:
 	virtual BOOL OnCreateClient( CREATESTRUCT* pCS, CCreateContext* pContext );
-	public:
+public:
 	virtual BOOL PreCreateWindow( CREATESTRUCT& rCS );
 	virtual void ActivateFrame( int cmdShow = -1 );
 	virtual BOOL PreTranslateMessage( MSG* pMsg );

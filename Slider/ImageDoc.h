@@ -13,9 +13,10 @@ public:
 	CImageDoc( void );
 	virtual ~CImageDoc();
 
-	CWicImage* GetImage( void ) const;
-public:
-	fs::ImagePathKey m_imagePathKey;			// path, frame
+	CWicImage* GetImage( UINT framePos ) const;
+	const fs::CFlexPath& GetImagePath( void ) const { return m_imagePath; }
+private:
+	fs::CFlexPath m_imagePath;
 public:
 	// generated stuff
 	public:

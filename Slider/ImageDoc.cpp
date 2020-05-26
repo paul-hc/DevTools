@@ -23,9 +23,9 @@ CImageDoc::~CImageDoc()
 {
 }
 
-CWicImage* CImageDoc::GetImage( void ) const
+CWicImage* CImageDoc::GetImage( UINT framePos ) const
 {
-	return AcquireImage( m_imagePathKey );
+	return AcquireImage( fs::ImagePathKey( m_imagePath, framePos ) );
 }
 
 // this overridden version won't call Serialize(), but loads directly the image file
@@ -37,9 +37,9 @@ BOOL CImageDoc::OnOpenDocument( LPCTSTR pFilePath )
 	try
 	{
 		CWaitCursor wait;
-		m_imagePathKey.first.Set( pFilePath );
-		if ( NULL == GetImage() )
-			AfxThrowFileException( m_imagePathKey.first.FileExist( fs::Read ) ? CFileException::accessDenied : CFileException::fileNotFound, -1, pFilePath );
+		m_imagePath.Set( pFilePath );
+		if ( NULL == GetImage( 0 ) )
+			AfxThrowFileException( m_imagePath.FileExist( fs::Read ) ? CFileException::accessDenied : CFileException::fileNotFound, -1, pFilePath );
 	}
 	catch ( CException* pExc )
 	{
@@ -54,7 +54,7 @@ BOOL CImageDoc::OnOpenDocument( LPCTSTR pFilePath )
 
 BOOL CImageDoc::OnSaveDocument( LPCTSTR pFilePath )
 {
-	CWicImage* pImage = GetImage();
+	CWicImage* pImage = GetImage( 0 );
 	ASSERT_PTR( pImage );
 	ASSERT( pImage->IsValid() );
 
@@ -92,12 +92,12 @@ BOOL CImageDoc::OnNewDocument( void )
 
 void CImageDoc::OnUpdateFileSave( CCmdUI* pCmdUI )
 {
-	CWicImage* pImage = GetImage();
+	CWicImage* pImage = GetImage( 0 );
 	pCmdUI->Enable( pImage != NULL && pImage->IsValid() );
 }
 
 void CImageDoc::OnUpdateFileSaveAs( CCmdUI* pCmdUI )
 {
-	CWicImage* pImage = GetImage();
+	CWicImage* pImage = GetImage( 0 );
 	pCmdUI->Enable( pImage != NULL && pImage->IsValid() );
 }

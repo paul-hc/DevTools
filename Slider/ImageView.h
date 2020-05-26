@@ -2,10 +2,11 @@
 #define ImageView_h
 #pragma once
 
-#include "IImageView.h"
 #include "utl/UI/AccelTable.h"
 #include "utl/UI/ImageZoomViewD2D.h"
 #include "utl/UI/ObjectCtrlBase.h"
+#include "ImageNavigator_fwd.h"
+#include "IImageView.h"
 
 
 class CImageState;
@@ -62,12 +63,18 @@ protected:
 	virtual void OnImageContentChanged( void );
 	virtual bool OutputNavigSlider( void );
 	virtual bool CanEnterDragMode( void ) const;
+
+	static nav::Navigate CmdToNavigate( UINT cmdId );
+private:
+	UINT m_imageFramePos;						// only used for single-image view (not by album view sub-class)
+	COLORREF m_bkColor;							// self-encapsulated, call GetBkColor()
+
+	bool m_initialized;							// false, flipped to true on OnInitialUpdate
+
+	static CAccelTable s_imageAccel;
 protected:
 	INavigationBar* m_pNavigBar;
 	CChildFrame* m_pMdiChildFrame;
-private:
-	COLORREF m_bkColor;							// self-encapsulated, call GetBkColor()
-	static CAccelTable s_imageAccel;
 public:
 	// generated stuff
 	public:
@@ -88,6 +95,8 @@ protected:
 	afx_msg void OnRButtonDown( UINT mkFlags, CPoint point );
 	virtual BOOL OnMouseWheel( UINT mkFlags, short zDelta, CPoint point );
 
+	virtual void On_NavigSeek( UINT cmdId );
+	virtual void OnUpdate_NavigSeek( CCmdUI* pCmdUI );
 	afx_msg void OnEditCopy( void );
 	afx_msg void OnUpdateEditCopy( CCmdUI* pCmdUI );
 	afx_msg void OnUpdate_NavigSliderCtrl( CCmdUI* pCmdUI );

@@ -12,7 +12,6 @@
 #define IDR_CONTEXT_MENU                149
 #define IDD_ALBUM_SETTINGS_DIALOG       150
 #define IDD_SEARCH_PATTERN_DIALOG       151
-#define IDR_ALBUMTYPE_NAV               159
 #define IDD_FILE_MOVE_DIALOG            161
 #define IDD_LOGGER_DIALOG               162
 #define IDD_LAYOUT_DIALOG               166

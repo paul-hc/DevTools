@@ -254,7 +254,7 @@ bool CMainFrame::ResizeViewToFit( CScrollView* pScrollView )
 
 	if ( isMaximized )
 	{	// switch back to maximized and make visible again the MDI client window
-//		MDIMaximize( pActiveMdiChild );
+		//MDIMaximize( pActiveMdiChild );
 		::ShowWindow( m_hWndMDIClient, SW_SHOW );
 	}
 	return true;

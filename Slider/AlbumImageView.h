@@ -83,16 +83,13 @@ private:
 	CAlbumThumbListView* m_pPeerThumbView;
 	CAlbumDialogBar* m_pAlbumDialogBar;
 
-	static CAccelTable s_accelNavigate;
-
 	enum { ID_NAVIGATION_TIMER = 4000 };
-public:
+
 	// generated stuff
-	public:
+public:
 	virtual void OnUpdate( CView* pSender, LPARAM lHint, CObject* pHint );
-	public:
+
 	virtual void OnInitialUpdate( void );
-	virtual BOOL PreTranslateMessage( MSG* pMsg );
 	virtual BOOL OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo );
 protected:
 	afx_msg void OnDropFiles( HDROP hDropInfo );
@@ -104,8 +101,8 @@ protected:
 	afx_msg void OnUpdateSiblingView( CCmdUI* pCmdUI );
 	afx_msg void OnToggle_NavigPlay( void );
 	afx_msg void OnUpdate_NavigPlay( CCmdUI* pCmdUI );
-	afx_msg void On_NavigSeek( UINT cmdId );
-	afx_msg void OnUpdate_NavigSeek( CCmdUI* pCmdUI );
+	virtual void On_NavigSeek( UINT cmdId );
+	virtual void OnUpdate_NavigSeek( CCmdUI* pCmdUI );
 	afx_msg void OnRadio_NavigDirection( UINT cmdId );
 	afx_msg void OnUpdate_NavigDirection( CCmdUI* pCmdUI );
 	afx_msg void OnToggle_NavigWrapMode( void );

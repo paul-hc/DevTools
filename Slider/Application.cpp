@@ -5,6 +5,7 @@
 #include "MainFrame.h"
 #include "Workspace.h"
 #include "AlbumDoc.h"
+#include "IImageView.h"
 #include "ImageArchiveStg.h"
 #include "MoveFileDialog.h"
 #include "OleImagesDataSource.h"
@@ -100,6 +101,7 @@ namespace app
 		return result;
 	}
 
+
 	ui::IUserReport& GetUserReport( void )
 	{
 		return app::CInteractiveMode::Instance();
@@ -133,6 +135,23 @@ namespace app
 		utl::Assign( filePaths, filesToDelete, func::tor::StringOf() );
 
 		return shell::DeleteFiles( filePaths, AfxGetMainWnd(), allowUndo ? FOF_ALLOWUNDO : 0 );
+	}
+
+	fs::CPath GetActiveDirPath( void )
+	{
+		fs::CPath activePath;
+
+		if ( IImageView* pActiveView = app::GetMainFrame()->GetActiveImageView() )
+		{
+			activePath = pActiveView->GetImagePathKey().first.GetPhysicalPath();
+
+			if ( fs::IsValidFile( activePath.GetPtr() ) )
+				activePath = activePath.GetParentPath();
+
+			if ( !fs::IsValidDirectory( activePath.GetPtr() ) )
+				activePath.Clear();
+		}
+		return activePath;
 	}
 
 
@@ -480,9 +499,13 @@ END_MESSAGE_MAP()
 
 void CApplication::OnFileOpenAlbumFolder( void )
 {
-	static std::tstring folderPath;
-	if ( shell::BrowseForFolder( folderPath, AfxGetMainWnd(), NULL, shell::BF_FileSystem, _T("Browse Folder Images"), false ) )
-		OpenDocumentFile( folderPath.c_str() );
+	static std::tstring s_folderPath;
+
+	if ( s_folderPath.empty() || !fs::IsValidDirectory( s_folderPath.c_str() ) )
+		s_folderPath = app::GetActiveDirPath().Get();
+
+	if ( shell::BrowseForFolder( s_folderPath, AfxGetMainWnd(), NULL, shell::BF_FileSystem, _T("Browse Folder Images"), false ) )
+		OpenDocumentFile( s_folderPath.c_str() );
 }
 
 void CApplication::OnClearTempEmbeddedClones( void )
