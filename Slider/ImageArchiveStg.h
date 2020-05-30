@@ -64,7 +64,6 @@ private:
 	CComPtr< IStorage > m_pThumbsStorage;
 	const GUID* m_pThumbsDecoderId;
 	app::ModelSchema m_docModelSchema;			// transient: loaded model schema from file, stored by the album doc
-
 private:
 	enum ExtensionType { Ext_ias, Ext_cid, Ext_icf, _Ext_Count };
 	enum PwdFmt

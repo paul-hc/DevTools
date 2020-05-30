@@ -722,6 +722,14 @@
 					>
 				</File>
 				<File
+					RelativePath=".\ImageStorageModel.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\ImageStorageModel.h"
+					>
+				</File>
+				<File
 					RelativePath=".\ModelSchema.cpp"
 					>
 				</File>
@@ -751,14 +759,6 @@
 				</File>
 				<File
 					RelativePath=".\SlideData.h"
-					>
-				</File>
-				<File
-					RelativePath=".\TransferModel.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\TransferModel.h"
 					>
 				</File>
 			</Filter>

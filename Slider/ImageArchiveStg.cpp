@@ -1,7 +1,7 @@
 
 #include "stdafx.h"
 #include "ImageArchiveStg.h"
-#include "TransferModel.h"
+#include "ImageStorageModel.h"
 #include "FileAttrAlgorithms.h"
 #include "Application.h"
 #include "resource.h"
@@ -19,50 +19,6 @@
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
-
-
-namespace pwd
-{
-	std::tstring ToString( const char* pAnsiPwd )
-	{
-		// straight conversion through unsigned char - not using MultiByteToWideChar()
-		const unsigned char* pAnsi = (const unsigned char*)pAnsiPwd;			// (!) cast to unsigned char for proper negative sign chars
-		return std::tstring( pAnsi, pAnsi + str::GetLength( pAnsiPwd ) );
-	}
-
-	std::tstring ToString( const wchar_t* pWidePwd )
-	{
-		return std::tstring( pWidePwd );
-	}
-
-	template< typename CharType >
-	inline void Crypt( CharType& rChr )
-	{
-		static const TCHAR charMask = _T('\xAD');
-		rChr ^= charMask;
-	}
-
-	std::tstring ToEncrypted( const std::tstring& displayPassword )
-	{
-		std::tstring encryptedPassword = displayPassword;
-		std::reverse( encryptedPassword.begin(), encryptedPassword.end() );
-
-		for ( size_t i = 0; i != encryptedPassword.size(); ++i )
-			Crypt( encryptedPassword[ i ] );
-
-		return encryptedPassword;
-	}
-
-	std::tstring ToDecrypted( const std::tstring& encryptedPassword )
-	{
-		std::tstring displayPassword = encryptedPassword;
-		for ( size_t i = 0; i != displayPassword.size(); ++i )
-			Crypt( displayPassword[ i ] );
-
-		std::reverse( displayPassword.begin(), displayPassword.end() );
-		return displayPassword;
-	}
-}
 
 
 // CImageArchiveStg implementation
@@ -126,10 +82,10 @@ void CImageArchiveStg::CreateImageArchive( const fs::CPath& stgFilePath, const s
 {
 	ASSERT_PTR( pProgressService );
 
-	CTransferModel transferModel;													// image storage metadata - owning for exception safety
+	CImageStorageModel storageModel;												// image storage metadata - owning for exception safety
 
-	transferModel.Build( xferPairs, pProgressService, &app::GetUserReport() );		// also discards cached SRC images and storages
-	if ( transferModel.IsEmpty() )
+	storageModel.Build( xferPairs, pProgressService, &app::GetUserReport() );		// also discards cached SRC images and storages
+	if ( storageModel.IsEmpty() )
 		if ( app::GetUserReport().MessageBox( _T("There are no files to add to the image archive.\nDo you still want to create an empty image archive?"), MB_YESNO | MB_ICONQUESTION ) != IDYES )
 			return;
 
@@ -143,9 +99,9 @@ void CImageArchiveStg::CreateImageArchive( const fs::CPath& stgFilePath, const s
 	SavePassword( password );
 	Factory().CacheVerifiedPassword( stgFilePath, password );
 
-	CreateImageFiles( transferModel.RefFileAttribs(), pProgressService );
-	CreateMetadataFile( transferModel.GetFileAttribs() );
-	CreateThumbnailsSubStorage( transferModel.GetFileAttribs(), pProgressService );
+	CreateImageFiles( storageModel.RefFileAttribs(), pProgressService );
+	CreateMetadataFile( storageModel.GetFileAttribs() );
+	CreateThumbnailsSubStorage( storageModel.GetFileAttribs(), pProgressService );
 }
 
 void CImageArchiveStg::CreateImageFiles( std::vector< CTransferFileAttr* >& rTransferAttribs, ui::IProgressService* pProgressService ) throws_( CException* )
@@ -153,7 +109,7 @@ void CImageArchiveStg::CreateImageFiles( std::vector< CTransferFileAttr* >& rTra
 	// Prevent sharing violations on SRC stream open.
 	//	2020-04-11: Still doesn't work, I get exception on open. I suspect the source stream (image file) must be kept open with CFile::shareExclusive by some WIC indirect COM interface.
 	if ( !rTransferAttribs.empty() )
-		app::GetThumbnailer()->Clear();		// also discard the thumbs - note: cached SRC images were discarded by CTransferModel::Build()
+		app::GetThumbnailer()->Clear();		// also discard the thumbs - note: cached SRC images were discarded by CImageStorageModel::Build()
 
 	CPushThrowMode pushThrow( &Factory(), true );
 	CFactory& factory = Factory();

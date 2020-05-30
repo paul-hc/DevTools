@@ -385,8 +385,10 @@ namespace fs
 		rStatus.m_mtime = CTime( statStg.mtime );
 		rStatus.m_ctime = CTime( statStg.ctime );
 		rStatus.m_atime = CTime( statStg.atime );
+
 		ASSERT( 0 == statStg.cbSize.HighPart );			// not a huge stream
 		rStatus.m_size = statStg.cbSize.LowPart;
+
 		rStatus.m_attribute = 0;
 		rStatus.m_szFullName[ 0 ] = _T('\0');
 		if ( statStg.pwcsName != NULL )
