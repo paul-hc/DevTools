@@ -26,7 +26,6 @@ public:
 	bool operator==( const CFileAttr& right ) const { return GetPath() == right.GetPath(); }
 	bool operator!=( const CFileAttr& right ) const { return !operator==( right ); }
 
-	void SetFromTransferPair( const fs::CFlexPath& srcPath, const fs::CFlexPath& destPath );
 	void Stream( CArchive& archive );
 
 	bool IsValid( void ) const { return GetPath().FileExist(); }

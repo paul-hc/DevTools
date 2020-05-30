@@ -25,6 +25,11 @@ namespace fs
 	{
 	}
 
+	CStructuredStorage::~CStructuredStorage()
+	{
+		Close();
+	}
+
 	const fs::CPath& CStructuredStorage::GetDocFilePath( void ) const
 	{
 		if ( m_docFilePath.IsEmpty() && IsOpen() )

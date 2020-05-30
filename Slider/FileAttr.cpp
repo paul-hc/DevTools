@@ -36,8 +36,9 @@ CFileAttr::CFileAttr( const fs::CPath& filePath )
 	, m_imageDim( 0, 0 )
 	, m_baselinePos( utl::npos )
 {
-	if ( !ReadFileStatus() )
-		TRACE( _T("* CFileAttr::ReadFileStatus(): couldn't acces file status for file: %s\n"), GetPath().GetPtr() );
+	if ( !GetPath().IsEmpty() )
+		if ( !ReadFileStatus() )
+			TRACE( _T("* CFileAttr::ReadFileStatus(): couldn't acces file status for file: %s\n"), GetPath().GetPtr() );
 }
 
 CFileAttr::CFileAttr( const CFileFind& foundFile )
@@ -52,13 +53,6 @@ CFileAttr::CFileAttr( const CFileFind& foundFile )
 
 CFileAttr::~CFileAttr()
 {
-}
-
-void CFileAttr::SetFromTransferPair( const fs::CFlexPath& srcPath, const fs::CFlexPath& destPath )
-{
-	*this = CFileAttr( srcPath );					// inherit src attributes
-	GetImageDim();									// force init image dim through image loading
-	m_pathKey.first.Set( destPath.GetPtr() );		// restore the true destination path
 }
 
 void CFileAttr::Stream( CArchive& archive )

@@ -192,27 +192,41 @@ namespace serial
 	}
 
 
+	template< typename PtrContainerT >
+	void SaveOwningPtrs( CArchive& archive, const PtrContainerT& rItemPtrs )
+	{
+		archive << static_cast< ::portable::size_t >( rItemPtrs.size() );
+
+		// store each item in container
+		for ( typename PtrContainerT::const_iterator itItemPtr = rItemPtrs.begin(); itItemPtr != rItemPtrs.end(); ++itItemPtr )
+			( *itItemPtr )->Stream( archive );
+	}
+
+	template< typename PtrContainerT >
+	void LoadOwningPtrs( CArchive& archive, PtrContainerT& rItemPtrs )
+	{
+		::portable::size_t count = 0;
+
+		archive >> count;
+		utl::CreateOwningContainerObjects( rItemPtrs, count );
+
+		// load each new item in container
+		for ( typename PtrContainerT::const_iterator itItemPtr = rItemPtrs.begin(); itItemPtr != rItemPtrs.end(); ++itItemPtr )
+			( *itItemPtr )->Stream( archive );
+	}
+
 	// serialize ContainerT< Type* > - owning container of pointers to objects with:
 	//	- default constructor Type::Type()
 	//	- method: void Type::Stream( CArchive& archive )
 	// note: it has identical binary footprint as StreamItems()
 	//
 	template< typename PtrContainerT >
-	void StreamOwningPtrs( CArchive& archive, PtrContainerT& rItemPtrs )
+	inline void StreamOwningPtrs( CArchive& archive, PtrContainerT& rItemPtrs )
 	{
 		if ( archive.IsStoring() )
-			archive << static_cast< ::portable::size_t >( rItemPtrs.size() );
+			SaveOwningPtrs( archive, rItemPtrs );
 		else
-		{
-			::portable::size_t count = 0;
-
-			archive >> count;
-			utl::CreateOwningContainerObjects( rItemPtrs, count );
-		}
-
-		// stream (store/load) each item in container
-		for ( typename PtrContainerT::iterator itItemPtr = rItemPtrs.begin(); itItemPtr != rItemPtrs.end(); ++itItemPtr )
-			( *itItemPtr )->Stream( archive );
+			LoadOwningPtrs( archive, rItemPtrs );
 	}
 
 

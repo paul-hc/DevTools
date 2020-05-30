@@ -1,6 +1,7 @@
 
 #include "stdafx.h"
 #include "ImageArchiveStg.h"
+#include "TransferModel.h"
 #include "FileAttrAlgorithms.h"
 #include "Application.h"
 #include "resource.h"
@@ -8,6 +9,7 @@
 #include "utl/FileSystem.h"
 #include "utl/RuntimeException.h"
 #include "utl/Serialization.h"
+#include "utl/UI/IProgressService.h"
 #include "utl/UI/MfcUtilities.h"
 #include "utl/UI/PasswordDialog.h"
 #include "utl/UI/Thumbnailer.h"
@@ -80,6 +82,11 @@ CImageArchiveStg::CImageArchiveStg( IStorage* pRootStorage /*= NULL*/ )
 {
 }
 
+CImageArchiveStg::~CImageArchiveStg()
+{
+	Close();
+}
+
 CImageArchiveStg::CFactory& CImageArchiveStg::Factory( void )
 {
 	static CFactory factory;
@@ -99,7 +106,7 @@ void CImageArchiveStg::Close( void )
 void CImageArchiveStg::DiscardCachedImages( const fs::CPath& stgFilePath )
 {
 	if ( !stgFilePath.IsEmpty() )
-		CWicImageCache::Instance().DiscardWithPrefix( stgFilePath.GetPtr() );		// discard cached images based on this storage
+		CWicImageCache::Instance().DiscardWithPrefix( stgFilePath.GetPtr() );		// discard cached images for the storage
 }
 
 CStringW CImageArchiveStg::EncodeStreamName( const TCHAR* pStreamName ) const
@@ -118,7 +125,13 @@ void CImageArchiveStg::CreateImageArchive( const fs::CPath& stgFilePath, const s
 										   ui::IProgressService* pProgressService ) throws_( CException* )
 {
 	ASSERT_PTR( pProgressService );
-	pProgressService->GetHeader()->SetStageLabel( str::GetEmpty() );
+
+	CTransferModel transferModel;													// image storage metadata - owning for exception safety
+
+	transferModel.Build( xferPairs, pProgressService, &app::GetUserReport() );		// also discards cached SRC images and storages
+	if ( transferModel.IsEmpty() )
+		if ( app::GetUserReport().MessageBox( _T("There are no files to add to the image archive.\nDo you still want to create an empty image archive?"), MB_YESNO | MB_ICONQUESTION ) != IDYES )
+			return;
 
 	CPushThrowMode pushThrow( this, true );
 
@@ -126,134 +139,123 @@ void CImageArchiveStg::CreateImageArchive( const fs::CPath& stgFilePath, const s
 	ASSERT( IsOpen() );
 
 	CWaitCursor wait;
-	utl::COwningContainer< std::vector< CFileAttr* > > fileAttributes;		// image storage metadata - owning for exception safety
 
 	SavePassword( password );
-
 	Factory().CacheVerifiedPassword( stgFilePath, password );
 
-	CreateImageFiles( fileAttributes, xferPairs, pProgressService );
-	CreateMetadataFile( fileAttributes );
-	CreateThumbnailsStorage( xferPairs, pProgressService );
+	CreateImageFiles( transferModel.RefFileAttribs(), pProgressService );
+	CreateMetadataFile( transferModel.GetFileAttribs() );
+	CreateThumbnailsSubStorage( transferModel.GetFileAttribs(), pProgressService );
 }
 
-void CImageArchiveStg::CreateImageFiles( std::vector< CFileAttr* >& rFileAttributes, const std::vector< TTransferPathPair >& xferPairs,
-										 ui::IProgressService* pProgressService ) throws_( CException* )
+void CImageArchiveStg::CreateImageFiles( std::vector< CTransferFileAttr* >& rTransferAttribs, ui::IProgressService* pProgressService ) throws_( CException* )
 {
 	// Prevent sharing violations on SRC stream open.
 	//	2020-04-11: Still doesn't work, I get exception on open. I suspect the source stream (image file) must be kept open with CFile::shareExclusive by some WIC indirect COM interface.
-	if ( !xferPairs.empty() )
-	{
-		DiscardCachedImages( xferPairs.front().first.GetPhysicalPath() );
-		app::GetThumbnailer()->Clear();		// new: also discard the thumbs
-	}
-
-	rFileAttributes.reserve( xferPairs.size() );
+	if ( !rTransferAttribs.empty() )
+		app::GetThumbnailer()->Clear();		// also discard the thumbs - note: cached SRC images were discarded by CTransferModel::Build()
 
 	CPushThrowMode pushThrow( &Factory(), true );
+	CFactory& factory = Factory();
 
 	pProgressService->AdvanceStage( _T("Saving embedded image files") );
-	pProgressService->SetBoundedProgressCount( xferPairs.size() );
+	pProgressService->SetBoundedProgressCount( rTransferAttribs.size() );
 
-	for ( std::vector< TTransferPathPair >::const_iterator it = xferPairs.begin(); it != xferPairs.end(); )
+	for ( size_t pos = 0; pos != rTransferAttribs.size(); )
 	{
-		if ( !it->first.FileExist() )
+		CTransferFileAttr* pXferAttr = rTransferAttribs[ pos ];
+
+		pProgressService->AdvanceItem( pXferAttr->GetPath().Get() );
+
+		try
 		{
-			CFileException error( CFileException::fileNotFound, -1, it->first.GetPtr() );		// source image doesn't exist
-			app::GetUserReport().ReportError( &error, MB_OK | MB_ICONWARNING );					// just warn & keep going
+			std::tstring& rStreamName = const_cast< std::tstring& >( pXferAttr->GetPath().Get() );
+			EncodeDeepStreamPath( rStreamName.begin(), rStreamName.end() );
+
+			std::auto_ptr< CFile > pSrcImageFile( factory.OpenFlexImageFile( pXferAttr->GetSrcImagePath() ) );
+			std::auto_ptr< COleStreamFile > pDestStreamFile( CreateFile( pXferAttr->GetPath().GetPtr() ) );
+
+			fs::BufferedCopy( *pDestStreamFile, *pSrcImageFile );
 		}
-		else
-			try
+		catch ( CException* pExc )
+		{
+			switch ( app::GetUserReport().ReportError( pExc, MB_ABORTRETRYIGNORE | MB_ICONEXCLAMATION ) )
 			{
-				std::auto_ptr< CFileAttr > pFileAttr( new CFileAttr() );
-				pFileAttr->SetFromTransferPair( it->first, it->second );
-
-				std::tstring& rStreamName = const_cast< std::tstring& >( pFileAttr->GetPath().Get() );
-				EncodeDeepStreamPath( rStreamName.begin(), rStreamName.end() );
-
-				std::auto_ptr< CFile > pSrcImageFile( Factory().OpenFlexImageFile( it->first ) );
-				std::auto_ptr< COleStreamFile > pDestStreamFile( CreateFile( it->second.GetPtr() ) );
-				fs::BufferedCopy( *pDestStreamFile, *pSrcImageFile );
-
-				rFileAttributes.push_back( pFileAttr.release() );
-
-				pProgressService->AdvanceItem( it->second.Get() );
+				case IDABORT:	throw new mfc::CUserAbortedException;
+				case IDRETRY:	continue;
+				case IDIGNORE:
+					// remove the trouble-maker
+					delete pXferAttr;
+					rTransferAttribs.erase( rTransferAttribs.begin() + pos );
+					break;
 			}
-			catch ( CException* pExc )
-			{
-				switch ( app::GetUserReport().ReportError( pExc, MB_ABORTRETRYIGNORE | MB_ICONEXCLAMATION ) )
-				{
-					case IDABORT:	throw new mfc::CUserAbortedException;
-					case IDRETRY:	continue;
-					case IDIGNORE:	break;
-				}
-			}
+		}
 
-		++it;
+		++pos;
 	}
 
 #ifdef _DEBUG
-	size_t totalImagesSize = std::accumulate( rFileAttributes.begin(), rFileAttributes.end(), size_t( 0 ), func::AddFileSize() );
+	size_t totalImagesSize = std::accumulate( rTransferAttribs.begin(), rTransferAttribs.end(), size_t( 0 ), func::AddFileSize() );
 	TRACE( _T("(*) Total image archive file size: %d = %d KB\n"), totalImagesSize, totalImagesSize / KiloByte );
 #endif
 }
 
-void CImageArchiveStg::CreateMetadataFile( const std::vector< CFileAttr* >& fileAttributes )
+void CImageArchiveStg::CreateMetadataFile( const std::vector< CTransferFileAttr* >& transferAttribs )
 {
 	std::auto_ptr< COleStreamFile > pMetaDataFile( CreateFile( CImageArchiveStg::s_metadataFilename ) );
 	CArchive archive( pMetaDataFile.get(), CArchive::store );
 	archive.m_bForceFlat = FALSE;			// same as CDocument::OnOpenDocument()
 
 	// save metadata
-	size_t totalImagesSize = std::accumulate( fileAttributes.begin(), fileAttributes.end(), size_t( 0 ), func::AddFileSize() );
+	size_t totalImagesSize = std::accumulate( transferAttribs.begin(), transferAttribs.end(), size_t( 0 ), func::AddFileSize() );
 	archive << static_cast< UINT >( totalImagesSize );		// for backwards compatibility
-	serial::StreamOwningPtrs( archive, const_cast< std::vector< CFileAttr* >& >( fileAttributes ) );
+	serial::SaveOwningPtrs( archive, transferAttribs );		// stream as CFileAttr
 
 	archive.Close();
 	pMetaDataFile->Close();
 }
 
-void CImageArchiveStg::CreateThumbnailsStorage( const std::vector< TTransferPathPair >& xferPairs, ui::IProgressService* pProgressService )
+void CImageArchiveStg::CreateThumbnailsSubStorage( const std::vector< CTransferFileAttr* >& transferAttribs, ui::IProgressService* pProgressService )
 {
 	CComPtr< IStorage > pThumbsStorage = CreateDir( CImageArchiveStg::s_thumbsSubStorageNames[ Thumbs_jpeg ] );
 	ASSERT_PTR( pThumbsStorage );
 
 	pProgressService->AdvanceStage( _T("Saving thumbnails") );
-	pProgressService->SetBoundedProgressCount( xferPairs.size() );
+	pProgressService->SetBoundedProgressCount( transferAttribs.size() );
 
 	CThumbnailer* pThumbnailer = app::GetThumbnailer();
 	thumb::CPushBoundsSize largerBounds( pThumbnailer, 128 );			// generate larger thumbs to minimize regeneration later
 
-	for ( std::vector< TTransferPathPair >::const_iterator it = xferPairs.begin(); it != xferPairs.end(); )
+	for ( std::vector< CTransferFileAttr* >::const_iterator itXferAttr = transferAttribs.begin(); itXferAttr != transferAttribs.end(); )
 	{
-		if ( it->first.FileExist() )
-			try
+		try
+		{
+			if ( CCachedThumbBitmap* pThumbBitmap = pThumbnailer->AcquireThumbnail( ( *itXferAttr )->GetSrcImagePath() ) )
 			{
-				if ( CCachedThumbBitmap* pThumbBitmap = pThumbnailer->AcquireThumbnail( it->first ) )
-				{
-					CComPtr< IStream > pThumbStream = CreateStream( it->second.GetPtr(), pThumbsStorage );
-					CPushThrowMode pushThrow( &pThumbBitmap->GetOrigin(), true );
-					pThumbBitmap->GetOrigin().SaveBitmapToStream( pThumbStream, CThumbnailer::s_containerFormatId );
-				}
-				else
-					throw new mfc::CRuntimeException( str::Format( _T("Cannot generate a thumbnail for file:\n%s"), it->first.GetPtr() ) );
-			}
-			catch ( CException* pExc )
-			{
-				switch ( app::GetUserReport().ReportError( pExc, MB_CANCELTRYCONTINUE | MB_ICONEXCLAMATION | MB_DEFBUTTON3 ) )
-				{
-					case IDCANCEL:		throw new mfc::CUserAbortedException;
-					case IDTRYAGAIN:	continue;
-					case IDCONTINUE:	break;
-				}
-			}
+				CComPtr< IStream > pThumbStream = CreateStream( ( *itXferAttr )->GetPath().GetPtr(), pThumbsStorage );
+				CPushThrowMode pushThrow( &pThumbBitmap->GetOrigin(), true );
 
-		pProgressService->AdvanceItem( it->second.Get() );
-		++it;
+				pThumbBitmap->GetOrigin().SaveBitmapToStream( pThumbStream, CThumbnailer::PickSavingFormat( pThumbBitmap ) );
+			}
+			else
+				throw new mfc::CRuntimeException( str::Format( _T("Cannot generate a thumbnail for file:\n%s"), ( *itXferAttr )->GetSrcImagePath().GetPtr() ) );
+		}
+		catch ( CException* pExc )
+		{
+			switch ( app::GetUserReport().ReportError( pExc, MB_CANCELTRYCONTINUE | MB_ICONEXCLAMATION | MB_DEFBUTTON3 ) )
+			{
+				case IDCANCEL:		throw new mfc::CUserAbortedException;
+				case IDTRYAGAIN:	continue;
+				case IDCONTINUE:	break;
+			}
+		}
+
+		pProgressService->AdvanceItem( ( *itXferAttr )->GetPath().Get() );
+		++itXferAttr;
 	}
 }
 
-void CImageArchiveStg::LoadImagesMetadata( std::vector< CFileAttr* >& rFileAttributes )
+void CImageArchiveStg::LoadImagesMetadata( std::vector< CFileAttr* >& rOutFileAttribs )
 {
 	ASSERT( IsOpen() );
 
@@ -270,11 +272,11 @@ void CImageArchiveStg::LoadImagesMetadata( std::vector< CFileAttr* >& rFileAttri
 			UINT totalImagesSize;
 			archive >> totalImagesSize;
 
-			serial::StreamOwningPtrs( archive, rFileAttributes );
+			serial::StreamOwningPtrs( archive, rOutFileAttribs );
 
 			// convert the persisted image sub-path to a fully qualified logical path
 			const fs::CPath& docFilePath = GetDocFilePath();
-			for ( std::vector< CFileAttr* >::iterator itFileAttr = rFileAttributes.begin(); itFileAttr != rFileAttributes.end(); ++itFileAttr )
+			for ( std::vector< CFileAttr* >::iterator itFileAttr = rOutFileAttribs.begin(); itFileAttr != rOutFileAttribs.end(); ++itFileAttr )
 			{
 				std::tstring streamPath = ( *itFileAttr )->GetPath().Get();
 				DecodeDeepStreamPath( streamPath.begin(), streamPath.end() );		// decode deep stream paths: '*' -> '\'
@@ -509,13 +511,13 @@ CFile* CImageArchiveStg::CFactory::OpenFlexImageFile( const fs::CFlexPath& flexI
 	// could be either physical image or archive-based image file
 	if ( !flexImagePath.IsComplexPath() )
 	{
-		static mfc::CAutoException< CFileException > fileError;
-		fileError.m_strFileName = flexImagePath.GetPtr();
+		static mfc::CAutoException< CFileException > s_fileError;
+		s_fileError.m_strFileName = flexImagePath.GetPtr();
 
 		std::auto_ptr< CFile > pImageFile( new CFile );
-		if ( !pImageFile->Open( flexImagePath.GetPtr(), mode | CFile::shareDenyWrite, &fileError ) )		// note: CFile::shareExclusive causes sharing violation
+		if ( !pImageFile->Open( flexImagePath.GetPtr(), mode | CFile::shareDenyWrite, &s_fileError ) )		// note: CFile::shareExclusive causes sharing violation
 			if ( IsThrowMode() )
-				throw &fileError;
+				throw &s_fileError;
 			else
 				return NULL;
 
@@ -534,14 +536,14 @@ CFile* CImageArchiveStg::CFactory::OpenFlexImageFile( const fs::CFlexPath& flexI
 	return NULL;
 }
 
-void CImageArchiveStg::CFactory::LoadImagesMetadata( std::vector< CFileAttr* >& rFileAttributes, const fs::CPath& stgFilePath )
+void CImageArchiveStg::CFactory::LoadImagesMetadata( std::vector< CFileAttr* >& rOutFileAttribs, const fs::CPath& stgFilePath )
 {
 	ASSERT( IsPasswordVerified( stgFilePath ) );
 
 	if ( CImageArchiveStg* pArchiveStg = AcquireStorage( stgFilePath ) )
 	{
 		CPushThrowMode pushMode( pArchiveStg, IsThrowMode() );					// pass current factory throw mode to the storage
-		pArchiveStg->LoadImagesMetadata( rFileAttributes );
+		pArchiveStg->LoadImagesMetadata( rOutFileAttribs );
 	}
 }
 

@@ -23,7 +23,7 @@ namespace fs
 		enum { MaxFilenameLen = 31 };
 
 		CStructuredStorage( IStorage* pRootStorage = NULL );
-		virtual ~CStructuredStorage() { Close(); }
+		virtual ~CStructuredStorage();
 
 		static DWORD ToMode( DWORD mode );										// augment mode with default STGM_SHARE_EXCLUSIVE
 		static std::tstring MakeShortFilename( const TCHAR* pFilename );		// make short file name with length limited to MaxFilenameLen

@@ -90,6 +90,9 @@ CCachedThumbBitmap* CShellThumbCache::ExtractThumb( const ShellItemPair& imagePa
 				// use IThumbnailCache to produce a usually larger thumb bitmap, which will be scaled
 				if ( HR_OK( m_pShellThumbCache->GetThumbnail( imagePair.second, m_boundsSize.cx, WTS_EXTRACT, &pSharedThumb, &cacheFlags, &thumbKey ) ) )
 				{
+			        WTS_ALPHATYPE alphaType = WTSAT_UNKNOWN;
+			        HR_AUDIT( pSharedThumb->GetFormat( &alphaType ) );
+
 					HBITMAP hSharedBitmap = NULL;				// note: shared bitmap cannot be selected into a DC - must either Detach() or copy to a WIC bitmap
 					if ( HR_OK( pSharedThumb->GetSharedBitmap( &hSharedBitmap ) ) )
 						return NewScaledThumb( wic::cvt::ToWicBitmap( hSharedBitmap ), imagePair.first, &thumbKey );
@@ -167,8 +170,6 @@ CComPtr< IWICBitmapSource > CShellThumbCache::ScaleToThumbBitmap( IWICBitmapSour
 
 // CThumbnailer implementation
 
-const GUID& CThumbnailer::s_containerFormatId = GUID_ContainerFormatJpeg;
-
 CThumbnailer::CThumbnailer( size_t cacheMaxSize /*= MaxSize*/ )
 	: CShellThumbCache()
 	, m_thumbsCache( cacheMaxSize )
@@ -191,6 +192,18 @@ void CThumbnailer::Clear( void )
 	thumb::s_traceCount = 0;
 	TRACE_THUMBS( _T("<%d> (--) Clear all thumbnails: %d\n"), thumb::s_traceCount++, m_thumbsCache.GetCount() );
 	m_thumbsCache.Clear();
+}
+
+const GUID& CThumbnailer::PickSavingFormat( const CWicBitmap* pBitmap )
+{
+	static const GUID& s_jpegContainerFormatId = GUID_ContainerFormatJpeg;		// normal saving format
+	static const GUID& s_pngContainerFormatId = GUID_ContainerFormatPng;		// transparent saving format - for bitmaps with transparency (alpha channel)
+
+	if ( pBitmap != NULL )
+		if ( pBitmap->GetBmpFmt().m_hasAlphaChannel )
+			return s_pngContainerFormatId;
+
+	return s_jpegContainerFormatId;
 }
 
 const CFlagTags& CThumbnailer::GetTags_CacheStatusFlags( void )

@@ -9,6 +9,7 @@
 #include "utl/Serialization.h"
 #include "utl/SerializeStdTypes.h"
 #include "utl/Timer.h"
+#include "utl/UI/IProgressService.h"
 #include "utl/UI/WicImage.h"
 
 #ifdef _DEBUG

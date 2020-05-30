@@ -9,11 +9,12 @@
 #include "FileContent.h"
 #include "FileEnumerator.h"
 #include "TimeUtils.h"
-#include "Resequence.hxx"
 #include "StringUtilities.h"
 #include "StructuredStorage.h"
 
 #define new DEBUG_NEW
+
+#include "Resequence.hxx"
 
 
 namespace ut
