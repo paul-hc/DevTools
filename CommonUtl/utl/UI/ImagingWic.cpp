@@ -247,7 +247,9 @@ namespace wic
 		{
 			CBitmapFormat newFormat( pDetachedBitmap );
 			ASSERT( m_bmpFmt.Equals( newFormat ) );			// format should be invariant
+
 			m_bmpFmt = newFormat;
+			m_pSrcBitmap = pDetachedBitmap;		// possible bug fix: replace original bitmap source with the detached copy [2020-05-31]
 			return true;
 		}
 		TRACE( _T(" * DetachSourceToBitmap() failed!\n") );

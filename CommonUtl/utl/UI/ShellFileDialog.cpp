@@ -106,9 +106,9 @@ DWORD CShellFileDialog::FindFilterWithExt( const TCHAR* pFilePath ) const
 
 DWORD CShellFileDialog::FindMatchingFilterIndex( const std::tstring& spec, const TCHAR* pFilePath ) const
 {
-	DWORD filterIndex = FindFilterIndex( spec );			// try to find by spec
+	DWORD filterIndex = FindFilterWithExt( pFilePath );		// try to find by file extension (SaveAs mode)
 	if ( 0 == filterIndex )
-		filterIndex = FindFilterWithExt( pFilePath );		// not found by spec, try to find by extension
+		filterIndex = FindFilterIndex( spec );				// not found by current extension: try to find by last selected spec
 
 	return filterIndex;
 }

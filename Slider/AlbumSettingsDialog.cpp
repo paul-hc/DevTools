@@ -2,6 +2,7 @@
 #include "stdafx.h"
 #include "AlbumSettingsDialog.h"
 #include "FileAttrAlgorithms.h"
+#include "ImageArchiveStg.h"
 #include "MainFrame.h"
 #include "ImageView.h"
 #include "SearchPatternDialog.h"
@@ -263,13 +264,13 @@ void CAlbumSettingsDialog::CombineTextEffectAt( ui::CTextEffect& rTextEffect, LP
 	subItem;
 	static const ui::CTextEffect s_errorEffect( ui::Regular, app::ColorErrorText, app::ColorErrorBk );
 	static const ui::CTextEffect s_newFileEffect( ui::Regular, color::Blue );
-	static const ui::CTextEffect s_stgFileEffect( ui::Bold );
+	static const ui::CTextEffect s_stgFileEffect( ui::Underline );
 
 	if ( pCtrl == &m_patternsListCtrl )
 	{
 		const CSearchPattern* pPattern = CReportListControl::AsPtr< CSearchPattern >( rowKey );
 
-		if ( pPattern->IsImageArchiveDoc() )
+		if ( PatternPath == subItem && pPattern->IsImageArchiveDoc() )
 			rTextEffect |= s_stgFileEffect;						// highlight storage item
 
 		if ( IsNewFilePath( pPattern->GetFilePath() ) )
@@ -281,6 +282,9 @@ void CAlbumSettingsDialog::CombineTextEffectAt( ui::CTextEffect& rTextEffect, LP
 	else if ( pCtrl == &m_imagesListCtrl )
 	{
 		const CFileAttr* pFileAttr = CReportListControl::AsPtr< CFileAttr >( rowKey );
+
+		if ( Folder == subItem && CImageArchiveStg::HasImageArchiveExt( pFileAttr->GetPath().GetOriginParentPath().GetPtr() ) )
+			rTextEffect |= s_stgFileEffect;						// highlight storage item
 
 		if ( IsNewFilePath( pFileAttr->GetPath() ) )
 			rTextEffect |= s_newFileEffect;
