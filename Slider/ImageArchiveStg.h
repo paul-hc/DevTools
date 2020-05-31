@@ -17,8 +17,10 @@ class CCachedThumbBitmap;
 namespace ui { interface IProgressService; }
 
 
-// compound file storage with password protection for .ias, .cid and .icf structured document files
-// contains image files, files metadata, substorage with thumbnail files, encrypted password file
+// Compound file storage with password protection for .ias, .cid and .icf structured document files.
+// Contains image files, files metadata, sub-storage with thumbnail files, encrypted password file.
+// Maintains deep image stream paths from the source images (relative to SRC common root path).
+// Deep image stream paths are flattened using '|' as separator (formerly '*') - this avoids the use of sub-storages for images and thumbnails.
 
 class CImageArchiveStg : public fs::CStructuredStorage
 {
@@ -49,13 +51,12 @@ public:
 	static const TCHAR* GetDefaultExtension( void ) { return s_compoundStgExts[ Ext_ias ]; }
 protected:
 	// base overrides
-	virtual CStringW EncodeStreamName( const TCHAR* pStreamName ) const;
+	virtual std::tstring EncodeStreamName( const TCHAR* pStreamName ) const;
 
-	template< typename Iterator >
-	static void EncodeDeepStreamPath( Iterator itStart, Iterator itEnd ) { std::replace( itStart, itEnd, _T('\\'), s_subPathSep ); }		// '\' -> '*'
+	TCHAR GetSubPathSep( void ) const;
 
-	template< typename Iterator >
-	static void DecodeDeepStreamPath( Iterator itStart, Iterator itEnd ) { std::replace( itStart, itEnd, s_subPathSep, _T('\\') ); }		// '*' -> '\'
+	void FlattenDeepStreamPath( std::tstring& rDeepPath ) const { std::replace( rDeepPath.begin(), rDeepPath.end(), _T('\\'), GetSubPathSep() ); }			// '\' -> '|'
+	void UnflattenDeepStreamPath( std::tstring& rDeepPath ) const { std::replace( rDeepPath.begin(), rDeepPath.end(), GetSubPathSep(), _T('\\') ); }		// '|' or '*' -> '\'
 private:
 	void CreateImageFiles( std::vector< CTransferFileAttr* >& rTransferAttribs, ui::IProgressService* pProgressService ) throws_( CException* );
 	void CreateMetadataFile( const std::vector< CTransferFileAttr* >& transferAttribs );
@@ -86,7 +87,9 @@ private:
 	static const TCHAR s_albumFilename[];								// album info (superset of meta-data)
 	static const TCHAR s_subPathSep;									// sub-path separator for deep stream names
 public:
-	class CFactory : public CThrowMode, public fs::IThumbProducer, private utl::noncopyable
+	class CFactory : public CThrowMode
+				   , public fs::IThumbProducer
+				   , private utl::noncopyable
 	{
 	public:
 		CFactory( void ) : CThrowMode( false ) {}

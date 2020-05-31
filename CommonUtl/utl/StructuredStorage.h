@@ -4,6 +4,7 @@
 
 #include "FlexPath.h"
 #include "FileSystem.h"
+#include "PathObjectMap.h"
 #include "ThrowMode.h"
 #include "RuntimeException.h"
 #include <hash_map>
@@ -12,10 +13,10 @@
 
 namespace fs
 {
-	// structured storage corresponding to a compound document file;
-	// able to handle long filenames when using dir and file methods.
+	// Structured storage corresponding to a compound document file.
+	// Able to handle long filenames for sub-storages (sub directories) and file methods.
 	//
-	// MSDN: at least STGM_SHARE_EXCLUSIVE/CFile::shareExclusive is mandatory when opening streams/files
+	// MSDN: at least STGM_SHARE_EXCLUSIVE/CFile::shareExclusive is mandatory when opening streams/files.
 
 	class CStructuredStorage : public CThrowMode, private utl::noncopyable
 	{
@@ -61,13 +62,16 @@ namespace fs
 		bool StorageExist( const TCHAR* pStorageName, IStorage* pParentDir = NULL );
 		bool StreamExist( const TCHAR* pStreamSubPath, IStorage* pParentDir = NULL );
 
-		static CStructuredStorage* FindOpenedStorage( const fs::CPath& stgFilePath );
+		static CStructuredStorage* FindOpenedStorage( const fs::CPath& docStgPath );
 	private:
-		static stdext::hash_map< fs::CPath, CStructuredStorage* >& GetDocStgs( void );		// opened document storages (no embedded sub-storages)
+		typedef fs::CPathObjectMap< fs::CPath, CStructuredStorage > TStorageMap;		// document path to open root storage
+
+		static TStorageMap& GetOpenedDocStgs( void );			// singleton: opened document storages - only root storages!
+
 		static void RegisterDocStg( CStructuredStorage* pDocStg );
 		static void UnregisterDocStg( CStructuredStorage* pDocStg );
 	protected:
-		virtual CStringW EncodeStreamName( const TCHAR* pStreamName ) const;
+		virtual std::tstring EncodeStreamName( const TCHAR* pStreamName ) const;
 		COleStreamFile* NewOleStreamFile( const TCHAR* pStreamName, IStream* pStream = NULL ) const;
 
 		bool HandleError( HRESULT hResult, const TCHAR* pStgFilePath = NULL ) const;
@@ -99,11 +103,11 @@ namespace fs
 	class CAcquireStorage : private utl::noncopyable
 	{
 	public:
-		CAcquireStorage( const fs::CPath& stgFilePath, DWORD mode = STGM_READ )
-			: m_pFoundOpenStg( CStructuredStorage::FindOpenedStorage( stgFilePath ) )
+		CAcquireStorage( const fs::CPath& docStgPath, DWORD mode = STGM_READ )
+			: m_pFoundOpenStg( CStructuredStorage::FindOpenedStorage( docStgPath ) )
 		{
 			if ( NULL == m_pFoundOpenStg )
-				m_tempStorage.Open( stgFilePath.GetPtr(), mode );
+				m_tempStorage.Open( docStgPath.GetPtr(), mode );
 		}
 
 		~CAcquireStorage()

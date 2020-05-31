@@ -44,6 +44,7 @@ namespace fs
 
 		if ( HasFlag( mode, ShareMask ) )
 			return mode;
+
 		return mode | STGM_SHARE_EXCLUSIVE;		// MSDN: compound-file storages/streams must be opened at least with STGM_SHARE_EXCLUSIVE
 	}
 
@@ -60,7 +61,7 @@ namespace fs
 		if ( IsOpen() )
 			Close();
 
-		HRESULT hResult = HR_AUDIT( ::StgCreateDocfile( CStringW( pStgFilePath ), ToMode( mode ), 0, &m_pRootStorage ) );
+		HRESULT hResult = HR_AUDIT( ::StgCreateDocfile( pStgFilePath, ToMode( mode ), 0, &m_pRootStorage ) );
 		if ( SUCCEEDED( hResult ) && !IsEmbeddedStorage() )
 			RegisterDocStg( this );
 
@@ -72,7 +73,7 @@ namespace fs
 		if ( IsOpen() )
 			Close();
 
-		HRESULT hResult = HR_AUDIT( ::StgOpenStorage( CStringW( pStgFilePath ), NULL, ToMode( mode ), NULL, 0, &m_pRootStorage ) );		// StgOpenStorageEx
+		HRESULT hResult = HR_AUDIT( ::StgOpenStorage( pStgFilePath, NULL, ToMode( mode ), NULL, 0, &m_pRootStorage ) );		// StgOpenStorageEx
 		if ( FAILED( hResult ) )
 			return HandleError( hResult, pStgFilePath );
 
@@ -112,24 +113,22 @@ namespace fs
 
 	CComPtr< IStorage > CStructuredStorage::CreateDir( const TCHAR* pDirName, IStorage* pParentDir /*= NULL*/, DWORD mode /*= STGM_CREATE | STGM_WRITE*/ )
 	{
-		ASSERT( IsOpen() );
-		CStringW storageName = MakeShortFilename( pDirName ).c_str();
+		REQUIRE( IsOpen() );
+		std::tstring storageName = MakeShortFilename( pDirName );
 
-		ASSERT( IsOpen() );
 		CComPtr< IStorage > pDirStorage;
-		HRESULT hResult = ( pParentDir != NULL ? pParentDir : m_pRootStorage )->CreateStorage( storageName, ToMode( mode ), 0, 0, &pDirStorage );
+		HRESULT hResult = ( pParentDir != NULL ? pParentDir : m_pRootStorage )->CreateStorage( storageName.c_str(), ToMode( mode ), 0, 0, &pDirStorage );
 		HandleError( hResult );
 		return pDirStorage;
 	}
 
 	CComPtr< IStorage > CStructuredStorage::OpenDir( const TCHAR* pDirName, IStorage* pParentDir /*= NULL*/, DWORD mode /*= STGM_READ*/ )
 	{
-		ASSERT( IsOpen() );
-		CStringW storageName = MakeShortFilename( pDirName ).c_str();
+		REQUIRE( IsOpen() );
+		std::tstring storageName = MakeShortFilename( pDirName );
 
-		ASSERT( IsOpen() );
 		CComPtr< IStorage > pDirStorage;
-		HRESULT hResult = ( pParentDir != NULL ? pParentDir : m_pRootStorage )->OpenStorage( storageName, NULL, ToMode( mode ), NULL, 0, &pDirStorage );
+		HRESULT hResult = ( pParentDir != NULL ? pParentDir : m_pRootStorage )->OpenStorage( storageName.c_str(), NULL, ToMode( mode ), NULL, 0, &pDirStorage );
 		HandleError( hResult );
 		return pDirStorage;
 	}
@@ -150,26 +149,28 @@ namespace fs
 
 	bool CStructuredStorage::DeleteDir( const TCHAR* pDirName, IStorage* pParentDir /*= NULL*/ )
 	{
-		CStringW storageName = MakeShortFilename( pDirName ).c_str();
-		return HandleError( ( pParentDir != NULL ? pParentDir : m_pRootStorage )->DestroyElement( storageName ) );
+		std::tstring storageName = MakeShortFilename( pDirName );
+		return HandleError( ( pParentDir != NULL ? pParentDir : m_pRootStorage )->DestroyElement( storageName.c_str() ) );
 	}
 
 	CComPtr< IStream > CStructuredStorage::CreateStream( const TCHAR* pStreamName, IStorage* pParentDir /*= NULL*/, DWORD mode /*= STGM_CREATE | STGM_WRITE*/ )
 	{
-		ASSERT( IsOpen() );
-		CStringW streamName = EncodeStreamName( pStreamName );
+		REQUIRE( IsOpen() );
+		std::tstring streamName = EncodeStreamName( pStreamName );
 		CComPtr< IStream > pFileStream;
-		HRESULT hResult = ( pParentDir != NULL ? pParentDir : m_pRootStorage )->CreateStream( streamName, ToMode( mode ), NULL, 0, &pFileStream );
+
+		HRESULT hResult = ( pParentDir != NULL ? pParentDir : m_pRootStorage )->CreateStream( streamName.c_str(), ToMode( mode ), NULL, 0, &pFileStream );
 		HandleError( hResult );
 		return pFileStream;
 	}
 
 	CComPtr< IStream > CStructuredStorage::OpenStream( const TCHAR* pStreamName, IStorage* pParentDir /*= NULL*/, DWORD mode /*= STGM_READ*/ )
 	{
-		ASSERT( IsOpen() );
-		CStringW streamName = EncodeStreamName( pStreamName );
+		REQUIRE( IsOpen() );
+		std::tstring streamName = EncodeStreamName( pStreamName );
 		CComPtr< IStream > pFileStream;
-		HRESULT hResult = ( pParentDir != NULL ? pParentDir : m_pRootStorage )->OpenStream( streamName, NULL, ToMode( mode ), 0, &pFileStream );
+
+		HRESULT hResult = ( pParentDir != NULL ? pParentDir : m_pRootStorage )->OpenStream( streamName.c_str(), NULL, ToMode( mode ), 0, &pFileStream );
 		HandleError( hResult );
 		return pFileStream;
 	}
@@ -187,17 +188,17 @@ namespace fs
 
 	bool CStructuredStorage::DeleteStream( const TCHAR* pStreamName, IStorage* pParentDir /*= NULL*/ )
 	{
-		CStringW streamName = EncodeStreamName( pStreamName );
-		return HandleError( ( pParentDir != NULL ? pParentDir : m_pRootStorage )->DestroyElement( streamName ) );
+		std::tstring streamName = EncodeStreamName( pStreamName );
+		return HandleError( ( pParentDir != NULL ? pParentDir : m_pRootStorage )->DestroyElement( streamName.c_str() ) );
 	}
 
 	COleStreamFile* CStructuredStorage::CreateFile( const TCHAR* pFileName, IStorage* pParentDir /*= NULL*/, DWORD mode /*= CFile::modeCreate | CFile::modeWrite*/ )
 	{
-		ASSERT( IsOpen() );
-		CStringW streamName = EncodeStreamName( pFileName );
-		std::auto_ptr< COleStreamFile > pFile( NewOleStreamFile( streamName ) );
+		REQUIRE( IsOpen() );
+		std::tstring streamName = EncodeStreamName( pFileName );
+		std::auto_ptr< COleStreamFile > pFile( NewOleStreamFile( streamName.c_str() ) );
 
-		if ( !pFile->CreateStream( pParentDir != NULL ? pParentDir : m_pRootStorage, streamName, ToMode( mode ), &s_fileError ) )
+		if ( !pFile->CreateStream( pParentDir != NULL ? pParentDir : m_pRootStorage, streamName.c_str(), ToMode( mode ), &s_fileError ) )
 			return HandleStreamError( pFileName );
 
 		return pFile.release();
@@ -205,11 +206,11 @@ namespace fs
 
 	COleStreamFile* CStructuredStorage::OpenFile( const TCHAR* pFileName, IStorage* pParentDir /*= NULL*/, DWORD mode /*= CFile::modeRead*/ )
 	{
-		ASSERT( IsOpen() );
-		CStringW streamName = EncodeStreamName( pFileName );
-		std::auto_ptr< COleStreamFile > pFile( NewOleStreamFile( streamName ) );
+		REQUIRE( IsOpen() );
+		std::tstring streamName = EncodeStreamName( pFileName );
+		std::auto_ptr< COleStreamFile > pFile( NewOleStreamFile( streamName.c_str() ) );
 
-		if ( !pFile->OpenStream( pParentDir != NULL ? pParentDir : m_pRootStorage, streamName, ToMode( mode ), &s_fileError ) )
+		if ( !pFile->OpenStream( pParentDir != NULL ? pParentDir : m_pRootStorage, streamName.c_str(), ToMode( mode ), &s_fileError ) )
 			return HandleStreamError( pFileName );
 
 		return pFile.release();
@@ -223,9 +224,9 @@ namespace fs
 		return pStream != NULL ? NewOleStreamFile( pFileSubPath, pStream ) : NULL;
 	}
 
-	CStringW CStructuredStorage::EncodeStreamName( const TCHAR* pStreamName ) const
+	std::tstring CStructuredStorage::EncodeStreamName( const TCHAR* pStreamName ) const
 	{
-		return MakeShortFilename( pStreamName ).c_str();
+		return MakeShortFilename( pStreamName );
 	}
 
 	COleStreamFile* CStructuredStorage::NewOleStreamFile( const TCHAR* pStreamName, IStream* pStream /*= NULL*/ ) const
@@ -295,42 +296,41 @@ namespace fs
 		AfxThrowFileException( s_fileError.m_cause, s_fileError.m_lOsError, !str::IsEmpty( pStgFilePath ) ? pStgFilePath : GetDocFilePath().GetPtr() );
 	}
 
-	stdext::hash_map< fs::CPath, CStructuredStorage* >& CStructuredStorage::GetDocStgs( void )
+
+	CStructuredStorage::TStorageMap& CStructuredStorage::GetOpenedDocStgs( void )
 	{
-		static stdext::hash_map< fs::CPath, CStructuredStorage* > openedStgs;
-		return openedStgs;
+		static TStorageMap s_openedStgs;
+		return s_openedStgs;
 	}
 
-	CStructuredStorage* CStructuredStorage::FindOpenedStorage( const fs::CPath& stgFilePath )
+	CStructuredStorage* CStructuredStorage::FindOpenedStorage( const fs::CPath& docStgPath )
 	{
-		const stdext::hash_map< fs::CPath, CStructuredStorage* >& rDocStgs = GetDocStgs();
-		stdext::hash_map< fs::CPath, CStructuredStorage* >::const_iterator itFound = rDocStgs.find( stgFilePath );
-		return itFound != rDocStgs.end() ? itFound->second : NULL;
+		const TStorageMap& rOpenedStgs = GetOpenedDocStgs();
+		return rOpenedStgs.Find( docStgPath );
 	}
 
 	void CStructuredStorage::RegisterDocStg( CStructuredStorage* pDocStg )
 	{
 		ASSERT_PTR( pDocStg );
-		ASSERT( !pDocStg->IsEmbeddedStorage() );
+		REQUIRE( !pDocStg->IsEmbeddedStorage() );
 
-		const fs::CPath& docFilePath = pDocStg->GetDocFilePath();
-		ASSERT( NULL == FindOpenedStorage( docFilePath ) );
-		ASSERT( !docFilePath.IsEmpty() );
+		const fs::CPath& docStgPath = pDocStg->GetDocFilePath();
+		ENSURE( !docStgPath.IsEmpty() );
 
-		stdext::hash_map< fs::CPath, CStructuredStorage* >& rDocStgs = GetDocStgs();
-		rDocStgs[ docFilePath ] = pDocStg;
+		TStorageMap& rOpenedStgs = GetOpenedDocStgs();
+		rOpenedStgs.Add( docStgPath, pDocStg );
 	}
 
 	void CStructuredStorage::UnregisterDocStg( CStructuredStorage* pDocStg )
 	{
 		ASSERT_PTR( pDocStg );
-		ASSERT( !pDocStg->IsEmbeddedStorage() );
+		REQUIRE( !pDocStg->IsEmbeddedStorage() );
 
-		const fs::CPath& docFilePath = pDocStg->GetDocFilePath();
-		ASSERT( !docFilePath.IsEmpty() );
+		const fs::CPath& docStgPath = pDocStg->GetDocFilePath();
+		ASSERT( !docStgPath.IsEmpty() );
 
-		stdext::hash_map< fs::CPath, CStructuredStorage* >& rDocStgs = GetDocStgs();
-		VERIFY( 1 == rDocStgs.erase( docFilePath ) );
+		TStorageMap& rOpenedStgs = GetOpenedDocStgs();
+		VERIFY( rOpenedStgs.Remove( docStgPath ) );
 	}
 
 } //namespace fs

@@ -9,6 +9,7 @@
 #include "utl/FileSystem.h"
 #include "utl/RuntimeException.h"
 #include "utl/Serialization.h"
+#include "utl/StringUtilities.h"
 #include "utl/UI/IProgressService.h"
 #include "utl/UI/MfcUtilities.h"
 #include "utl/UI/PasswordDialog.h"
@@ -28,7 +29,7 @@ const TCHAR* CImageArchiveStg::s_pwdStreamNames[ _PwdTypeCount ] = { _T("pwd"), 
 const TCHAR* CImageArchiveStg::s_thumbsSubStorageNames[ _ThumbsTypeCount ] = { _T("Thumbnails"), _T("Thumbs_jpeg") };
 const TCHAR CImageArchiveStg::s_metadataFilename[] = _T("_Meta.data");
 const TCHAR CImageArchiveStg::s_albumFilename[] = _T("_Album.sld");
-const TCHAR CImageArchiveStg::s_subPathSep = _T('*');
+const TCHAR CImageArchiveStg::s_subPathSep = _T('|');		// was '*'
 
 
 CImageArchiveStg::CImageArchiveStg( IStorage* pRootStorage /*= NULL*/ )
@@ -56,7 +57,7 @@ void CImageArchiveStg::Close( void )
 	if ( m_pThumbsStorage != NULL )
 		m_pThumbsStorage = NULL;
 
-	fs::CStructuredStorage::Close();
+	__super::Close();
 }
 
 void CImageArchiveStg::DiscardCachedImages( const fs::CPath& stgFilePath )
@@ -65,16 +66,20 @@ void CImageArchiveStg::DiscardCachedImages( const fs::CPath& stgFilePath )
 		CWicImageCache::Instance().DiscardWithPrefix( stgFilePath.GetPtr() );		// discard cached images for the storage
 }
 
-CStringW CImageArchiveStg::EncodeStreamName( const TCHAR* pStreamName ) const
+std::tstring CImageArchiveStg::EncodeStreamName( const TCHAR* pStreamName ) const
 {
-	CStringW streamName( pStreamName );
+	std::tstring streamName = pStreamName;
 
-	wchar_t* pBuffer = streamName.GetBuffer();
-	EncodeDeepStreamPath( pBuffer, pBuffer + streamName.GetLength() );
-	streamName.ReleaseBuffer();
+	FlattenDeepStreamPath( streamName );
+	return __super::EncodeStreamName( streamName.c_str() );
+}
 
-	streamName = fs::CStructuredStorage::EncodeStreamName( streamName );
-	return streamName;
+TCHAR CImageArchiveStg::GetSubPathSep( void ) const
+{
+	if ( m_docModelSchema < app::Slider_v5_2 )
+		return _T('*');			// use old separator for backwards compatibility (the short 31 characters hash suffix uses the old separator)
+
+	return s_subPathSep;
 }
 
 void CImageArchiveStg::CreateImageArchive( const fs::CPath& stgFilePath, const std::tstring& password, const std::vector< TTransferPathPair >& xferPairs,
@@ -126,7 +131,7 @@ void CImageArchiveStg::CreateImageFiles( std::vector< CTransferFileAttr* >& rTra
 		try
 		{
 			std::tstring& rStreamName = const_cast< std::tstring& >( pXferAttr->GetPath().Get() );
-			EncodeDeepStreamPath( rStreamName.begin(), rStreamName.end() );
+			FlattenDeepStreamPath( rStreamName );
 
 			std::auto_ptr< CFile > pSrcImageFile( factory.OpenFlexImageFile( pXferAttr->GetSrcImagePath() ) );
 			std::auto_ptr< COleStreamFile > pDestStreamFile( CreateFile( pXferAttr->GetPath().GetPtr() ) );
@@ -140,7 +145,7 @@ void CImageArchiveStg::CreateImageFiles( std::vector< CTransferFileAttr* >& rTra
 				case IDABORT:	throw new mfc::CUserAbortedException;
 				case IDRETRY:	continue;
 				case IDIGNORE:
-					// remove the trouble-maker
+					// remove the offender
 					delete pXferAttr;
 					rTransferAttribs.erase( rTransferAttribs.begin() + pos );
 					break;
@@ -152,7 +157,7 @@ void CImageArchiveStg::CreateImageFiles( std::vector< CTransferFileAttr* >& rTra
 
 #ifdef _DEBUG
 	size_t totalImagesSize = std::accumulate( rTransferAttribs.begin(), rTransferAttribs.end(), size_t( 0 ), func::AddFileSize() );
-	TRACE( _T("(*) Total image archive file size: %d = %d KB\n"), totalImagesSize, totalImagesSize / KiloByte );
+	TRACE( _T("(*) Total image archive file size: %s (%s)\n"), num::FormatFileSize( totalImagesSize ).c_str(), num::FormatFileSize( totalImagesSize, num::Bytes ).c_str() );
 #endif
 }
 
@@ -235,7 +240,7 @@ void CImageArchiveStg::LoadImagesMetadata( std::vector< CFileAttr* >& rOutFileAt
 			for ( std::vector< CFileAttr* >::iterator itFileAttr = rOutFileAttribs.begin(); itFileAttr != rOutFileAttribs.end(); ++itFileAttr )
 			{
 				std::tstring streamPath = ( *itFileAttr )->GetPath().Get();
-				DecodeDeepStreamPath( streamPath.begin(), streamPath.end() );		// decode deep stream paths: '*' -> '\'
+				UnflattenDeepStreamPath( streamPath );		// decode deep stream paths: '|' -> '\'
 
 				( *itFileAttr )->SetPath( fs::CFlexPath::MakeComplexPath( docFilePath.Get(), streamPath.c_str() ) );
 			}
@@ -257,7 +262,7 @@ CCachedThumbBitmap* CImageArchiveStg::LoadThumbnail( const fs::CFlexPath& imageC
 			if ( StorageExist( s_thumbsSubStorageNames[ Thumbs_jpeg ] ) )
 			{
 				m_pThumbsStorage = OpenDir( s_thumbsSubStorageNames[ Thumbs_jpeg ] );
-				m_pThumbsDecoderId = &CLSID_WICJpegDecoder;
+				m_pThumbsDecoderId = wic::FindDecoderIdFromPath( imageComplexPath.GetPtr() );	// CLSID_WICJpegDecoder or CLSID_WICPngDecoder depending on ext
 			}
 			else if ( StorageExist( s_thumbsSubStorageNames[ Thumbs_bmp ] ) )		// backwards compatibility
 			{
@@ -611,8 +616,9 @@ CCachedThumbBitmap* CImageArchiveStg::CFactory::ExtractThumb( const fs::CFlexPat
 {
 	if ( srcImagePath.IsComplexPath() )
 	{
-		fs::CPath stgFilePath( srcImagePath.GetPhysicalPath() );
-		ASSERT( IsPasswordVerified( stgFilePath ) );
+		fs::CPath stgFilePath = srcImagePath.GetPhysicalPath();
+		REQUIRE( IsPasswordVerified( stgFilePath ) );
+
 		if ( CImageArchiveStg* pArchiveStg = AcquireStorage( stgFilePath ) )
 		{
 			CPushThrowMode pushMode( pArchiveStg, false );				// no exceptions for thumb extraction

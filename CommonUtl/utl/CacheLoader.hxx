@@ -32,7 +32,7 @@ namespace fs
 		ObjectType* pObject = NULL;
 		cache::TStatusFlags cacheStatus = 0;
 
-		if ( const std::pair< ObjectType*, CTime >* pCachedEntry = FindEntry( pathKey ) )
+		if ( const TCachedEntry* pCachedEntry = FindEntry( pathKey ) )
 		{
 			fs::FileExpireStatus expireStatus = CheckExpireStatus( pathKey, *pCachedEntry );
 			if ( fs::FileNotExpired == expireStatus )

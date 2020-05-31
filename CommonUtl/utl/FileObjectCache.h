@@ -53,8 +53,17 @@ namespace fs
 		bool Contains( const PathType& pathKey, bool checkValid = false ) const { return Find( pathKey, checkValid ) != NULL; }
 		ObjectType* Find( const PathType& pathKey, bool checkValid = false ) const;
 
-		bool Add( const PathType& pathKey, ObjectType* pObject ) { mt::CAutoLock lock( &m_cs ); return _Add( pathKey, pObject ); }
-		bool Remove( const PathType& pathKey ) { mt::CAutoLock lock( &m_cs ); return _Remove( pathKey, cache::Remove ); }
+		bool Add( const PathType& pathKey, ObjectType* pObject )
+		{
+			mt::CAutoLock lock( &m_cs );
+			return _Add( pathKey, pObject );
+		}
+
+		bool Remove( const PathType& pathKey )
+		{
+			mt::CAutoLock lock( &m_cs );
+			return _Remove( pathKey, cache::Remove );
+		}
 
 		template< typename Iterator >
 		void Remove( Iterator itPathKeyStart, Iterator itPathKeyEnd )
@@ -64,28 +73,32 @@ namespace fs
 				_Remove( *itPathKeyStart );
 		}
 
-		typedef std::pair< ObjectType*, CTime > CachedEntry;		// object, lastModifyTime
+		typedef std::pair< ObjectType*, CTime > TCachedEntry;		// object, lastModifyTime
 
-		const CachedEntry* FindEntry( const PathType& pathKey, bool checkValid = false ) const { mt::CAutoLock lock( &m_cs ); return _FindEntry( pathKey, checkValid ); }
+		const TCachedEntry* FindEntry( const PathType& pathKey, bool checkValid = false ) const
+		{
+			mt::CAutoLock lock( &m_cs );
+			return _FindEntry( pathKey, checkValid );
+		}
 
-		FileExpireStatus CheckExpireStatus( const PathType& pathKey, const CachedEntry& entry ) const;
+		FileExpireStatus CheckExpireStatus( const PathType& pathKey, const TCachedEntry& entry ) const;
 
 		size_t GetMaxSize( void ) const { return m_maxSize; }
 		void SetMaxSize( size_t maxSize );
 	protected:
 		// not synchronized
-		const CachedEntry* _FindEntry( const PathType& pathKey, bool checkValid ) const;
+		const TCachedEntry* _FindEntry( const PathType& pathKey, bool checkValid ) const;
 		bool _Add( const PathType& pathKey, ObjectType* pObject );
 		bool _Remove( const PathType& pathKey, cache::TStatusFlags cacheFlags = cache::RemoveExpired );
 		void _RemoveExpired( void );
 
 		virtual void TraceObject( const PathType& pathKey, ObjectType* pObject, cache::TStatusFlags cacheFlags ) { pathKey, pObject, cacheFlags; }
 	private:
-		static const CTime& GetLastModifyTime( const CachedEntry& entry ) { return entry.second; }
-		static void DeleteObject( CachedEntry& entry ) { delete entry.first; }
+		static const CTime& GetLastModifyTime( const TCachedEntry& entry ) { return entry.second; }
+		static void DeleteObject( TCachedEntry& entry ) { delete entry.first; }
 	private:
 		size_t m_maxSize;
-		stdext::hash_map< PathType, CachedEntry > m_cachedEntries;
+		stdext::hash_map< PathType, TCachedEntry > m_cachedEntries;
 		std::deque< PathType > m_expireQueue;		// at front the oldest, at back the latest
 	protected:
 		mutable CCriticalSection m_cs;				// serialize cache access for thread safety

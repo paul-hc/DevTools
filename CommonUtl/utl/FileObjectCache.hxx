@@ -12,7 +12,7 @@ namespace fs
 	inline void CFileObjectCache< PathType, ObjectType >::Clear( void )
 	{
 		mt::CAutoLock lock( &m_cs );
-		for ( typename stdext::hash_map< PathType, CachedEntry >::iterator it = m_cachedEntries.begin(); it != m_cachedEntries.end(); ++it )
+		for ( typename stdext::hash_map< PathType, TCachedEntry >::iterator it = m_cachedEntries.begin(); it != m_cachedEntries.end(); ++it )
 			DeleteObject( it->second );
 		m_cachedEntries.clear();
 		m_expireQueue.clear();
@@ -31,15 +31,15 @@ namespace fs
 	{
 		mt::CAutoLock lock( &m_cs );		// nested lock works fine (no deadlock) within the same calling thread
 
-		const CachedEntry* pCachedEntry = _FindEntry( pathKey, checkValid );
+		const TCachedEntry* pCachedEntry = _FindEntry( pathKey, checkValid );
 		return pCachedEntry != NULL ? pCachedEntry->first : NULL;
 	}
 
 	template< typename PathType, typename ObjectType >
-	typename const CFileObjectCache< PathType, ObjectType >::CachedEntry*
+	typename const CFileObjectCache< PathType, ObjectType >::TCachedEntry*
 	CFileObjectCache< PathType, ObjectType >::_FindEntry( const PathType& pathKey, bool checkValid ) const
 	{
-		stdext::hash_map< PathType, CachedEntry >::const_iterator itFound = m_cachedEntries.find( pathKey );
+		stdext::hash_map< PathType, TCachedEntry >::const_iterator itFound = m_cachedEntries.find( pathKey );
 		if ( itFound != m_cachedEntries.end() )
 			if ( !checkValid || fs::FileNotExpired == CheckExpireStatus( pathKey, itFound->second ) )
 				return &itFound->second;
@@ -57,11 +57,12 @@ namespace fs
 
 		// bug fix [2020-03-31] - sometimes _Add collides with an existing thumb
 		//ASSERT( m_cachedEntries.find( pathKey ) == m_cachedEntries.end() );		// must be new entry (before the fix above)
-		stdext::hash_map< PathType, CachedEntry >::const_iterator itFound = m_cachedEntries.find( pathKey );
+		stdext::hash_map< PathType, TCachedEntry >::const_iterator itFound = m_cachedEntries.find( pathKey );
 		if ( itFound != m_cachedEntries.end() )
 			if ( itFound->second.first == pObject )
 			{
-				TRACE( _T("[?] Attempt to add an already cached thumbnail for: ") ); TraceObject( pathKey, itFound->second.first, cache::CacheHit );
+				TRACE( _T("[?] Attempt to add an already cached thumbnail for: ") );
+				TraceObject( pathKey, itFound->second.first, cache::CacheHit );
 				return false;			// skip caching already cached thumb
 			}
 			else
@@ -81,7 +82,7 @@ namespace fs
 	{
 		REQUIRE( m_cachedEntries.size() == m_expireQueue.size() );			// consistent
 
-		stdext::hash_map< PathType, CachedEntry >::iterator itFound = m_cachedEntries.find( pathKey );
+		stdext::hash_map< PathType, TCachedEntry >::iterator itFound = m_cachedEntries.find( pathKey );
 		if ( itFound == m_cachedEntries.end() )
 			return false;
 
@@ -107,7 +108,7 @@ namespace fs
 	}
 
 	template< typename PathType, typename ObjectType >
-	inline FileExpireStatus CFileObjectCache< PathType, ObjectType >::CheckExpireStatus( const PathType& pathKey, const CachedEntry& entry ) const
+	inline FileExpireStatus CFileObjectCache< PathType, ObjectType >::CheckExpireStatus( const PathType& pathKey, const TCachedEntry& entry ) const
 	{
 		mt::CAutoLock lock( &m_cs );
 
