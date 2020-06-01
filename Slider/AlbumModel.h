@@ -94,38 +94,4 @@ private:
 };
 
 
-namespace func
-{
-	struct StripStgDocPrefix
-	{
-		void operator()( fs::CPath& rPath ) const
-		{
-			const TCHAR* pSrcEmbedded = path::GetEmbedded( rPath.GetPtr() );		// works for both fs::CPath and fs::CFlexPath
-			if ( !str::IsEmpty( pSrcEmbedded ) )
-				rPath.Set( pSrcEmbedded );
-		}
-
-		void operator()( CFileAttr* pFileAttr ) const;
-	};
-
-
-	enum EmbeddedDepth { Flat, Deep };
-
-	struct MakeComplexPath
-	{
-		MakeComplexPath( const fs::CPath& stgDocPath, EmbeddedDepth depth ) : m_stgDocPath( stgDocPath ), m_depth( depth ) {}
-
-		void operator()( fs::CFlexPath& rPath ) const
-		{
-			rPath = fs::CFlexPath::MakeComplexPath( m_stgDocPath.Get(), Flat == m_depth ? rPath.GetNameExt() : rPath.GetPtr() );
-		}
-
-		void operator()( CFileAttr* pFileAttr ) const;
-	private:
-		fs::CPath m_stgDocPath;
-		EmbeddedDepth m_depth;
-	};
-}
-
-
 #endif // AlbumModel_h

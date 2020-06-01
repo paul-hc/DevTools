@@ -26,6 +26,7 @@ namespace func
 		}
 	};
 
+
 	struct ReferenceToPtr
 	{
 		template< typename ObjectT >
@@ -52,6 +53,7 @@ namespace func
 		}
 	};
 
+
 	template< typename SubType >
 	struct DynamicAs
 	{
@@ -62,10 +64,27 @@ namespace func
 		}
 	};
 
+
 	struct ToSelf
 	{
 		template< typename ValueT >
 		const ValueT& operator()( const ValueT& value ) const { return value; }
+	};
+
+
+	template< typename Functor, typename Adapter >
+	struct FuncAdapter
+	{
+		FuncAdapter( Functor functor = Functor(), Adapter adapter = Adapter() ) : m_functor( functor ), m_adapter( adapter ) {}
+
+		template< typename ValueT >
+		void operator()( ValueT& rValue )
+		{
+			return m_functor( m_adapter( rValue ) );
+		}
+	private:
+		Functor m_functor;
+		Adapter m_adapter;
 	};
 }
 
@@ -361,6 +380,15 @@ namespace pred
 			return result;
 		}
 	};
+}
+
+
+namespace func
+{
+	// make template functions for compare primitives that work stateful functors
+
+	template< typename Functor, typename Adapter >
+	inline FuncAdapter< Functor, Adapter > MakeFuncAdapter( Functor functor, Adapter adapter ) { return FuncAdapter< Functor, Adapter >( functor, adapter ); }
 }
 
 

@@ -4,6 +4,7 @@
 #include "ImageArchiveStg.h"
 #include "AlbumModel.h"
 #include "FileAttr.h"
+#include "FileAttrAlgorithms.h"
 #include "FileOperation.h"
 #include "ProgressService.h"
 #include "Workspace.h"
@@ -51,10 +52,11 @@ bool CArchivingModel::CreateArchiveStgFile( CAlbumModel* pModel, const fs::CPath
 	SetupSourcePaths( pModel->GetImagesModel().GetFileAttrs() );
 
 	UINT seqCount = 0;
-	static const std::tstring formatCopySrc = _T("*.*");
-	GenerateDestPaths( destStgPath, formatCopySrc, &seqCount );							// make m_pathPairs: copy SRC as is into DEST
+	static const std::tstring s_fmtCopySrc = _T("*.*");
+	GenerateDestPaths( destStgPath, s_fmtCopySrc, &seqCount );							// make m_pathPairs: copy SRC as is into DEST
 
 	pModel->CheckReparentFileAttrs( destStgPath.GetPtr(), CAlbumModel::Saving );		// reparent with destStgPath before saving the album info
+	ENSURE( pModel->GetFileAttrCount() == m_pathPairs.size() );
 
 	return BuildArchiveStorageFile( destStgPath, FOP_FileCopy );						// false: user declined overwrite
 }
@@ -184,8 +186,8 @@ bool CArchivingModel::GenerateDestPaths( const fs::CPath& destPath, const std::t
 
 	switch ( destType )
 	{
-		case ToDirectory:	generator.SetMoveDestDirPath( destPath.GetParentPath( true ).Get() ); break;
-		case ToArchiveStg:	generator.SetMoveDestDirPath( std::tstring() ); break;					// flat embedded streams use no dir path
+		case ToDirectory:	generator.SetMoveDestDirPath( destPath.GetParentPath( true ) ); break;
+		case ToArchiveStg:	generator.SetMoveDestDirPath( fs::CPath() ); break;					// flat embedded streams use no dir path
 		default: ASSERT( false );
 	}
 
@@ -195,7 +197,8 @@ bool CArchivingModel::GenerateDestPaths( const fs::CPath& destPath, const std::t
 			if ( generator.MakeDestStripCommonPrefix() )					// prefix with subpaths from the common prefix of SRC image paths
 			{
 				generated = true;
-				generator.ForEachDestPath( func::StripStgDocPrefix() );		// clear stg doc prefix as it may be part of the common prefix
+
+				generator.ForEachDestPath( func::NormalizeEmbeddedPaths() );	// convert any deep embedded storage paths to directory paths
 			}
 
 	if ( !generated )

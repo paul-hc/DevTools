@@ -156,4 +156,65 @@ namespace pred
 }
 
 
+#include "ArchivingModel_fwd.h"			// for TTransferPathPair
+
+
+namespace func
+{
+	// CAlbumModel functors
+
+	struct RefFilePath
+	{
+		fs::CFlexPath& operator()( CFileAttr* pFileAttr )
+		{
+			ASSERT_PTR( pFileAttr ); 
+			return pFileAttr->RefPath();
+		}
+	};
+
+
+	struct StripDocPath
+	{
+		StripDocPath( const fs::CPath& docPath ) : m_stripFunc( docPath.GetPtr() ) {}
+
+		void operator()( fs::CPath& rPath )
+		{
+			m_stripFunc( rPath );
+		}
+
+		void operator()( CFileAttr* pFileAttr ) { ASSERT_PTR( pFileAttr ); operator()( pFileAttr->RefPath() ); }
+	private:
+		StripPathCommonPrefix m_stripFunc;
+	};
+
+
+	struct NormalizeEmbeddedPaths
+	{
+		void operator()( fs::CPath& rPath )
+		{
+			// saving: if an embedded image path, make it look like a deep path, where the doc storage path is treated like a normal directory path (replace '>' to '\\' )
+			std::replace( rPath.Ref().begin(), rPath.Ref().end(), path::s_complexPathSep, _T('\\') );
+		}
+	};
+
+
+	enum EmbeddedDepth { Flat, Deep };
+
+	struct MakeComplexPath
+	{
+		MakeComplexPath( const fs::CPath& stgDocPath, EmbeddedDepth depth ) : m_stgDocPath( stgDocPath ), m_depth( depth ) {}
+
+		void operator()( fs::CFlexPath& rPath ) const
+		{
+			rPath = fs::CFlexPath::MakeComplexPath( m_stgDocPath.Get(), Flat == m_depth ? rPath.GetNameExt() : rPath.GetPtr() );
+		}
+
+		void operator()( CFileAttr* pFileAttr ) const { ASSERT_PTR( pFileAttr ); operator()( pFileAttr->RefPath() ); }
+	private:
+		fs::CPath m_stgDocPath;
+		EmbeddedDepth m_depth;
+	};
+}
+
+
 #endif // FileAttrAlgorithms_h

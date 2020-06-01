@@ -19,4 +19,16 @@ enum DestType { ToDirectory, ToArchiveStg };
 const CEnumTags& GetTags_FileOp( void );
 
 
+namespace func
+{
+	struct RefPairDest
+	{
+		fs::CFlexPath& operator()( TTransferPathPair& rTransferPair )
+		{
+			return rTransferPair.second;
+		}
+	};
+}
+
+
 #endif // ArchivingModel_fwd_h

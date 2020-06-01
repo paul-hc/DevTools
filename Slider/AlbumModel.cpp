@@ -24,27 +24,6 @@
 #endif
 
 
-namespace func
-{
-	// StripStgDocPrefix implementation
-
-	void StripStgDocPrefix::operator()( CFileAttr* pFileAttr ) const
-	{
-		ASSERT_PTR( pFileAttr );
-		operator()( pFileAttr->RefPath() );
-	}
-
-
-	// MakeComplexPath implementation
-
-	void MakeComplexPath::operator()( CFileAttr* pFileAttr ) const
-	{
-		ASSERT_PTR( pFileAttr );
-		operator()( pFileAttr->RefPath() );
-	}
-}
-
-
 // CAlbumModel implementation
 
 CAlbumModel::CAlbumModel( void )
@@ -181,14 +160,27 @@ bool CAlbumModel::ReparentStgFileAttrsImpl( const fs::CPath& stgDocPath, Persist
 {
 	ASSERT( app::IsImageArchiveDoc( stgDocPath.GetPtr() ) );
 
+	std::vector< CFileAttr* >& rFileAttrs = m_imagesModel.RefFileAttrs();
+
 	if ( stgDocPath != m_stgDocPath )								// different stgDocPath, need to store and reparent
 	{
+		// clear the old stg prefix to the actual logical root of the album
+		switch ( op )
+		{
+			case Loading:
+				std::for_each( rFileAttrs.begin(), rFileAttrs.end(), func::FuncAdapter< func::StripComplexPath, func::RefFilePath >() );
+				break;
+			case Saving:
+				if ( !m_stgDocPath.IsEmpty() )
+					std::for_each( rFileAttrs.begin(), rFileAttrs.end(), func::StripDocPath( m_stgDocPath ) );
+
+				// convert any deep embedded storage paths to directory paths (so that '>' appears only once in the final embedded)
+				std::for_each( rFileAttrs.begin(), rFileAttrs.end(), func::FuncAdapter< func::NormalizeEmbeddedPaths, func::RefFilePath >() );
+				break;
+		}
+
 		m_searchModel.ClearPatterns();
 		m_stgDocPath = stgDocPath;
-
-		// clear the common prefix to the actual logical root of the album
-		std::vector< CFileAttr* >& rFileAttrs = m_imagesModel.RefFileAttrs();
-		std::for_each( rFileAttrs.begin(), rFileAttrs.end(), func::StripStgDocPrefix() );		// clear stg prefix
 
 		if ( !HasFlag( m_persistFlags, UseDeepStreamPaths ) )
 			if ( !m_imagesModel.IsEmpty() )

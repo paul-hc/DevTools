@@ -33,8 +33,14 @@ namespace wic
 	{
 	public:
 		CBitmapDecoder( bool throwMode = false ) : CThrowMode( throwMode ) {}
-		CBitmapDecoder( const fs::CFlexPath& imagePath, bool throwMode = false ) : CThrowMode( throwMode ), m_frameCount( 0 ) { CreateFromFile( imagePath ); }
 		CBitmapDecoder( const CBitmapDecoder& right ) : CThrowMode( false ), m_frameCount( right.m_frameCount ), m_pDecoder( right.m_pDecoder ) {}
+
+		CBitmapDecoder( const fs::CFlexPath& imagePath, bool throwMode = false )
+			: CThrowMode( throwMode )
+			, m_frameCount( 0 )
+		{
+			CreateFromFile( imagePath );
+		}
 
 		bool IsValid( void ) const { return m_frameCount != 0; }
 		UINT GetFrameCount( void ) const { return m_frameCount; }

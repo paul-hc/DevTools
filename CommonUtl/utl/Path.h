@@ -327,11 +327,13 @@ namespace func
 	inline const std::tstring& StringOf( const fs::CPath& filePath ) { return filePath.Get(); }		// for uniform string algorithms
 	inline const fs::CPath& PathOf( const fs::CPath& keyPath ) { return keyPath; }					// for uniform path algorithms
 
+
 	struct ToNameExt
 	{
 		const TCHAR* operator()( const fs::CPath& fullPath ) const { return fullPath.GetNameExt(); }
 		const TCHAR* operator()( const TCHAR* pFullPath ) const { return path::FindFilename( pFullPath ); }
 	};
+
 
 	struct HasCommonPathPrefix
 	{
@@ -345,6 +347,7 @@ namespace func
 	public:
 		const TCHAR* m_pDirPrefix;
 	};
+
 
 	struct StripPathCommonPrefix
 	{
@@ -363,6 +366,19 @@ namespace func
 	public:
 		const TCHAR* m_pDirPrefix;
 		size_t m_count;
+	};
+
+
+	struct StripComplexPath
+	{
+		void operator()( std::tstring& rFilePath )
+		{
+			const TCHAR* pSrcEmbedded = path::GetEmbedded( rFilePath.c_str() );
+			if ( !str::IsEmpty( pSrcEmbedded ) )
+				rFilePath = pSrcEmbedded;
+		}
+
+		void operator()( fs::CPath& rPath ) { return operator()( rPath.Ref() ); }
 	};
 }
 
