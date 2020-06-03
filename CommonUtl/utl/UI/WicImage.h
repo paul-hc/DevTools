@@ -2,8 +2,10 @@
 #define WicImage_h
 #pragma once
 
+#include "utl/PathObjectMap.h"
 #include "ImagePathKey.h"
 #include "WicBitmap.h"
+#include <hash_map>
 
 
 // defines a WIC bitmap frame from a multi-frame image file or embedded file
@@ -39,20 +41,52 @@ public:
 
 	std::tstring FormatDbg( void ) const;
 
+	bool IsMultiFrameStatic( void ) const { return m_frameCount > 1 && !IsAnimated(); }
+
 	// overridables
 	virtual bool IsAnimated( void ) const;
 	virtual const CSize& GetBmpSize( void ) const;
 protected:
 	virtual bool StoreFrame( IWICBitmapSource* pFrameBitmap, UINT framePos );
+private:
+	class CMultiFrameDecoder;
+	friend class CMultiFrameDecoder;
 
+	void SetSharedDecoder( CMultiFrameDecoder* pSharedDecoder );
 	bool LoadDecoderFrame( wic::CBitmapDecoder& decoder, const fs::ImagePathKey& imageKey );
 private:
 	// hidden base methods
 	using CWicBitmap::SetWicBitmap;
 private:
+	// shared bitmap decoder that keeps track of static (not animated) multi-frame images with same image path (typically from a .tif stream)
+	class CMultiFrameDecoder
+	{
+	public:
+		CMultiFrameDecoder( void ) {}
+		CMultiFrameDecoder( const wic::CBitmapDecoder& decoder );
+		~CMultiFrameDecoder();
+
+		const wic::CBitmapDecoder& GetDecoder( void ) const { return m_decoder; }
+		bool AnyFramesLoaded( void ) const { return !m_loadedFrames.empty(); }
+
+		std::auto_ptr< CWicImage > LoadFrame( const fs::ImagePathKey& imageKey );
+		bool UnloadFrame( CWicImage* pFrameImage );
+	private:
+		size_t FindPosLoaded( UINT framePos ) const;
+		bool IsLoaded( UINT framePos ) const { return FindPosLoaded( framePos ) != utl::npos; }
+	private:
+		wic::CBitmapDecoder m_decoder;					// share the same decoder for frame access (keep it alive to avoid sharing violations on embedded storage IStream-s)
+		std::vector< CWicImage* > m_loadedFrames;
+	};
+
+	typedef fs::CPathMap< fs::CFlexPath, CMultiFrameDecoder > TMultiFrameDecoderMap;
+
+	static TMultiFrameDecoderMap& LoadedMultiFrameDecoders( void );
+private:
 	fs::ImagePathKey m_key;								// path and frame pos
 	UINT m_frameCount;									// count of frames in a multiple image format
 	const WICPixelFormatGUID* m_pCvtPixelFormat;		// format to which the loaded frame bitmap is converted to (NULL for auto)
+	CMultiFrameDecoder* m_pSharedDecoder;				// only for multi-frame images, otherwise NULL
 public:
 	static const fs::ImagePathKey s_nullKey;
 };

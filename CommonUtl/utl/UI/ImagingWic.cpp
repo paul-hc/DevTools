@@ -39,6 +39,26 @@ namespace wic
 
 	// CBitmapDecoder implementation
 
+	CBitmapDecoder::CBitmapDecoder( bool throwMode /*= false*/ )
+		: CThrowMode( throwMode )
+		, m_frameCount( 0 )
+	{
+	}
+
+	CBitmapDecoder::CBitmapDecoder( const CBitmapDecoder& right )
+		: CThrowMode( false )
+		, m_frameCount( right.m_frameCount )
+		, m_pDecoder( right.m_pDecoder )
+	{
+	}
+
+	CBitmapDecoder::CBitmapDecoder( const fs::CFlexPath& imagePath, bool throwMode /*= false*/ )
+		: CThrowMode( throwMode )
+		, m_frameCount( 0 )
+	{
+		CreateFromFile( imagePath );
+	}
+
 	bool CBitmapDecoder::CreateFromFile( const fs::CFlexPath& flexPath )
 	{
 		if ( CComPtr< IStream > pStream = fs::OpenStreamOnFile( flexPath ) )

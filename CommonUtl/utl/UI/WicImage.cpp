@@ -19,22 +19,41 @@ CWicImage::CWicImage( const WICPixelFormatGUID* pCvtPixelFormat /*= &GUID_WICPix
 	, m_key( s_nullKey )
 	, m_frameCount( 0 )
 	, m_pCvtPixelFormat( pCvtPixelFormat )
+	, m_pSharedDecoder( NULL )
 {
 }
 
 CWicImage::~CWicImage()
 {
+	if ( m_pSharedDecoder != NULL )
+		if ( !m_pSharedDecoder->UnloadFrame( this ) )						// no frames loaded anymore?
+			VERIFY( LoadedMultiFrameDecoders().Remove( m_key.first ) );		// removed the registered shared decoder
 }
 
 std::auto_ptr< CWicImage > CWicImage::CreateFromFile( const fs::ImagePathKey& imageKey, bool throwMode /*= false*/ )
 {
-	wic::CBitmapDecoder decoder( imageKey.first, throwMode );
 	std::auto_ptr< CWicImage > pNewImage;
+
+	TMultiFrameDecoderMap& rSharedDecoders = LoadedMultiFrameDecoders();
+
+	if ( CMultiFrameDecoder* pSharedDecoder = rSharedDecoders.Find( imageKey.first ) )
+		return pSharedDecoder->LoadFrame( imageKey );
+
+	wic::CBitmapDecoder decoder( imageKey.first, throwMode );
+
 	if ( decoder.IsValid() )
 	{
 		int decoderFlags = decoder.GetDecoderFlags();
-		if ( HasFlag( decoderFlags, wic::CBitmapDecoder::MultiFrame ) && HasFlag( decoderFlags, wic::CBitmapDecoder::Animation ) )		// multi-frame GIF with animation?
-			pNewImage.reset( new CWicAnimatedImage( decoder ) );
+		if ( HasFlag( decoderFlags, wic::CBitmapDecoder::MultiFrame ) )		// multi-frame image?
+		{
+			if ( HasFlag( decoderFlags, wic::CBitmapDecoder::Animation ) )		// multi-frame GIF with animation?
+				pNewImage.reset( new CWicAnimatedImage( decoder ) );
+			else
+			{
+				rSharedDecoders.Add( imageKey.first, CMultiFrameDecoder( decoder ) );
+				return rSharedDecoders.Lookup( imageKey.first ).LoadFrame( imageKey );
+			}
+		}
 	}
 	if ( NULL == pNewImage.get() )
 		pNewImage.reset( new CWicImage );
@@ -50,12 +69,6 @@ void CWicImage::Clear( void )
 	CWicBitmap::Clear();
 	m_frameCount = 0;
 	m_key = s_nullKey;
-}
-
-bool CWicImage::LoadFromFile( const fs::ImagePathKey& imageKey )
-{
-	wic::CBitmapDecoder decoder( imageKey.first, IsThrowMode() );
-	return LoadDecoderFrame( decoder, imageKey );
 }
 
 bool CWicImage::LoadDecoderFrame( wic::CBitmapDecoder& decoder, const fs::ImagePathKey& imageKey )
@@ -74,6 +87,17 @@ bool CWicImage::LoadDecoderFrame( wic::CBitmapDecoder& decoder, const fs::ImageP
 			}
 
 	return false;
+}
+
+bool CWicImage::LoadFromFile( const fs::ImagePathKey& imageKey )
+{
+	wic::CBitmapDecoder decoder( imageKey.first, IsThrowMode() );
+	return LoadDecoderFrame( decoder, imageKey );
+}
+
+void CWicImage::SetSharedDecoder( CMultiFrameDecoder* pSharedDecoder )
+{
+	m_pSharedDecoder = pSharedDecoder;
 }
 
 bool CWicImage::LoadFrame( UINT framePos )
@@ -128,7 +152,6 @@ bool CWicImage::IsCorruptFrame( const fs::ImagePathKey& imageKey )
 		wic::GetBitmapSize( decoder.GetFrameAt( imageKey.second ) ) != CSize( 0, 0 );
 }
 
-
 #ifdef _DEBUG
 
 std::tstring CWicImage::FormatDbg( void ) const
@@ -147,6 +170,72 @@ std::tstring CWicImage::FormatDbg( void ) const
 }
 
 #endif // _DEBUG
+
+CWicImage::TMultiFrameDecoderMap& CWicImage::LoadedMultiFrameDecoders( void )
+{
+	static TMultiFrameDecoderMap s_loadedDecoders;
+	return s_loadedDecoders;
+}
+
+
+// CWicImage::CMultiFrameDecoder implementation
+
+CWicImage::CMultiFrameDecoder::CMultiFrameDecoder( const wic::CBitmapDecoder& decoder )
+	: m_decoder( decoder )
+{
+	int decoderFlags = decoder.GetDecoderFlags();
+	ASSERT( HasFlag( decoderFlags, wic::CBitmapDecoder::MultiFrame ) );
+	ASSERT( !HasFlag( decoderFlags, wic::CBitmapDecoder::Animation ) );
+	decoderFlags;
+}
+
+CWicImage::CMultiFrameDecoder::~CMultiFrameDecoder()
+{
+	ASSERT( m_loadedFrames.empty() );		// all frames within should have been destroyed
+}
+
+size_t CWicImage::CMultiFrameDecoder::FindPosLoaded( UINT framePos ) const
+{
+	ASSERT( framePos < m_decoder.GetFrameCount() );
+
+	for ( size_t pos = 0; pos != m_loadedFrames.size(); ++pos )
+		if ( m_loadedFrames[ pos ]->GetFramePos() == framePos )
+			return pos;
+
+	return utl::npos;
+}
+
+std::auto_ptr< CWicImage > CWicImage::CMultiFrameDecoder::LoadFrame( const fs::ImagePathKey& imageKey )
+{
+	REQUIRE( !IsLoaded( imageKey.second ) );
+
+	std::auto_ptr< CWicImage > pNewFrameImage( new CWicImage() );
+
+	if ( !pNewFrameImage->LoadDecoderFrame( m_decoder, imageKey ) )
+		pNewFrameImage.reset();			// invalid framePos?
+	else
+	{
+		pNewFrameImage->SetSharedDecoder( this );
+		m_loadedFrames.push_back( pNewFrameImage.get() );
+	}
+
+	return pNewFrameImage;
+}
+
+bool CWicImage::CMultiFrameDecoder::UnloadFrame( CWicImage* pFrameImage )
+{
+	ASSERT_PTR( pFrameImage );
+	size_t foundPos = FindPosLoaded( pFrameImage->GetFramePos() );
+	if ( foundPos != utl::npos )
+	{
+		pFrameImage->SetSharedDecoder( NULL );
+		m_loadedFrames.erase( m_loadedFrames.begin() + foundPos );
+	}
+	else
+		ASSERT( false );
+
+	return AnyFramesLoaded();
+}
 
 
 namespace ui

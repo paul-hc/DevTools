@@ -3,8 +3,70 @@
 #pragma once
 
 #include <hash_map>
-#include "MultiThreading.h"
 #include "StdHashValue.h"
+
+
+namespace fs
+{
+	// Simple map of PathT keys to file-based objects by value. No ownership, not thread-safe.
+	//
+	template< typename PathT, typename ValueT >
+	class CPathMap : private utl::noncopyable
+	{
+	public:
+		CPathMap( void ) {}
+		~CPathMap() { Clear(); }
+
+		void Clear( void ) { m_pathMap.clear(); }
+
+		size_t GetCount( void ) const { return m_pathMap.size(); }
+		bool Contains( const PathT& pathKey ) const { return Find( pathKey ) != NULL; }
+
+		const ValueT* Find( const PathT& pathKey ) const
+		{
+			stdext::hash_map< PathT, ValueT >::const_iterator itFound = m_pathMap.find( pathKey );
+			return itFound != m_pathMap.end() ? &itFound->second : NULL;
+		}
+
+		ValueT* Find( const PathT& pathKey )
+		{
+			stdext::hash_map< PathT, ValueT >::iterator itFound = m_pathMap.find( pathKey );
+			return itFound != m_pathMap.end() ? &itFound->second : NULL;
+		}
+
+		ValueT& Lookup( const PathT& pathKey )
+		{
+			ValueT* pFound = Find( pathKey );
+			ASSERT_PTR( pFound );
+			return *pFound;
+		}
+
+		void Add( const PathT& pathKey, const ValueT& value )
+		{
+			REQUIRE( !Contains( pathKey ) );
+			m_pathMap[ pathKey ] = value;
+		}
+
+		bool Remove( const PathT& pathKey )
+		{
+			stdext::hash_map< PathT, ValueT >::iterator itFound = m_pathMap.find( pathKey );
+			if ( itFound == m_pathMap.end() )
+				return false;
+
+			m_pathMap.erase( itFound );
+			return true;
+		}
+
+		template< typename Iterator >
+		void Remove( Iterator itPathKeyStart, Iterator itPathKeyEnd )
+		{
+			for ( ; itPathKeyStart != itPathKeyEnd; ++itPathKeyStart )
+				Remove( *itPathKeyStart );
+		}
+	protected:
+		stdext::hash_map< PathT, ValueT > m_pathMap;
+	};
+}
 
 
 namespace func
@@ -39,6 +101,9 @@ namespace func
 		}
 	};
 }
+
+
+#include "MultiThreading.h"
 
 
 namespace fs
