@@ -36,6 +36,7 @@ CWicImageCache& CWicImageCache::Instance( void )
 
 CWicImage* CWicImageCache::LoadObject( const fs::ImagePathKey& imageKey )
 {
+	// this method is already synchronized: could be called from both the main thread, or the cache loader thread (running in background)
 	return CWicImage::CreateFromFile( imageKey, IsThrowMode() ).release();
 }
 
@@ -43,7 +44,7 @@ void CWicImageCache::TraceObject( const fs::ImagePathKey& imageKey, CWicImage* p
 {
 #ifdef _DEBUG
 	std::tstring flagsText = fs::cache::GetTags_StatusFlags().FormatUi( cacheFlags, _T(",") );
-	if ( !flagsText.empty() )		// prevent noise: not CacheHit?
+	if ( !flagsText.empty() )		// prevent noise: not a CacheHit?
 		TRACE_CACHE( _T("{%d} '%s' %s: %s\n"), s_traceCount++,
 			flagsText.c_str(),
 			imageKey.first.IsComplexPath() ? _T("EMBEDDED image") : _T("image"),

@@ -65,7 +65,7 @@ namespace fs
 		if ( SUCCEEDED( hResult ) && !IsEmbeddedStorage() )
 			RegisterDocStg( this );
 
-		return HandleError( hResult, pStgFilePath );
+		return HandleError( hResult, NULL, pStgFilePath );
 	}
 
 	bool CStructuredStorage::Open( const TCHAR* pStgFilePath, DWORD mode /*= STGM_READ*/ )
@@ -75,7 +75,7 @@ namespace fs
 
 		HRESULT hResult = HR_AUDIT( ::StgOpenStorage( pStgFilePath, NULL, ToMode( mode ), NULL, 0, &m_pRootStorage ) );		// StgOpenStorageEx
 		if ( FAILED( hResult ) )
-			return HandleError( hResult, pStgFilePath );
+			return HandleError( hResult, NULL, pStgFilePath );
 
 		m_openMode = ToMode( mode );
 		if ( !IsEmbeddedStorage() )
@@ -118,7 +118,7 @@ namespace fs
 
 		CComPtr< IStorage > pDirStorage;
 		HRESULT hResult = ( pParentDir != NULL ? pParentDir : m_pRootStorage )->CreateStorage( storageName.c_str(), ToMode( mode ), 0, 0, &pDirStorage );
-		HandleError( hResult );
+		HandleError( hResult, pDirName );
 		return pDirStorage;
 	}
 
@@ -129,7 +129,7 @@ namespace fs
 
 		CComPtr< IStorage > pDirStorage;
 		HRESULT hResult = ( pParentDir != NULL ? pParentDir : m_pRootStorage )->OpenStorage( storageName.c_str(), NULL, ToMode( mode ), NULL, 0, &pDirStorage );
-		HandleError( hResult );
+		HandleError( hResult, pDirName );
 		return pDirStorage;
 	}
 
@@ -150,7 +150,8 @@ namespace fs
 	bool CStructuredStorage::DeleteDir( const TCHAR* pDirName, IStorage* pParentDir /*= NULL*/ )
 	{
 		std::tstring storageName = MakeShortFilename( pDirName );
-		return HandleError( ( pParentDir != NULL ? pParentDir : m_pRootStorage )->DestroyElement( storageName.c_str() ) );
+		HRESULT hResult = ( pParentDir != NULL ? pParentDir : m_pRootStorage )->DestroyElement( storageName.c_str() );
+		return HandleError( hResult, pDirName );
 	}
 
 	CComPtr< IStream > CStructuredStorage::CreateStream( const TCHAR* pStreamName, IStorage* pParentDir /*= NULL*/, DWORD mode /*= STGM_CREATE | STGM_WRITE*/ )
@@ -160,7 +161,7 @@ namespace fs
 		CComPtr< IStream > pFileStream;
 
 		HRESULT hResult = ( pParentDir != NULL ? pParentDir : m_pRootStorage )->CreateStream( streamName.c_str(), ToMode( mode ), NULL, 0, &pFileStream );
-		HandleError( hResult );
+		HandleError( hResult, pStreamName );
 		return pFileStream;
 	}
 
@@ -171,7 +172,7 @@ namespace fs
 		CComPtr< IStream > pFileStream;
 
 		HRESULT hResult = ( pParentDir != NULL ? pParentDir : m_pRootStorage )->OpenStream( streamName.c_str(), NULL, ToMode( mode ), 0, &pFileStream );
-		HandleError( hResult );
+		HandleError( hResult, pStreamName );
 		return pFileStream;
 	}
 
@@ -189,7 +190,8 @@ namespace fs
 	bool CStructuredStorage::DeleteStream( const TCHAR* pStreamName, IStorage* pParentDir /*= NULL*/ )
 	{
 		std::tstring streamName = EncodeStreamName( pStreamName );
-		return HandleError( ( pParentDir != NULL ? pParentDir : m_pRootStorage )->DestroyElement( streamName.c_str() ) );
+		HRESULT hResult = ( pParentDir != NULL ? pParentDir : m_pRootStorage )->DestroyElement( streamName.c_str() );
+		return HandleError( hResult, pStreamName );
 	}
 
 	COleStreamFile* CStructuredStorage::CreateFile( const TCHAR* pFileName, IStorage* pParentDir /*= NULL*/, DWORD mode /*= CFile::modeCreate | CFile::modeWrite*/ )
@@ -251,7 +253,7 @@ namespace fs
 		}
 	}
 
-	bool CStructuredStorage::HandleError( HRESULT hResult, const TCHAR* pStgFilePath /*= NULL*/ ) const
+	bool CStructuredStorage::HandleError( HRESULT hResult, const TCHAR* pSubPath, const TCHAR* pStgFilePath /*= NULL*/ ) const
 	{
 		if ( SUCCEEDED( hResult ) )
 			return true;				// all good
@@ -286,6 +288,7 @@ namespace fs
 		}
 
 		s_fileError.m_lOsError = (LONG)hResult;
+		s_fileError.m_strFileName = CFlexPath::MakeComplexPath( !str::IsEmpty( pStgFilePath ) ? pStgFilePath : GetDocFilePath().GetPtr(), pSubPath ).GetPtr();		// assign error file path
 
 		if ( !IsThrowMode() )
 		{
@@ -293,7 +296,7 @@ namespace fs
 			return false;
 		}
 
-		AfxThrowFileException( s_fileError.m_cause, s_fileError.m_lOsError, !str::IsEmpty( pStgFilePath ) ? pStgFilePath : GetDocFilePath().GetPtr() );
+		AfxThrowFileException( s_fileError.m_cause, s_fileError.m_lOsError, s_fileError.m_strFileName );
 	}
 
 

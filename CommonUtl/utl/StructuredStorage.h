@@ -74,7 +74,7 @@ namespace fs
 		virtual std::tstring EncodeStreamName( const TCHAR* pStreamName ) const;
 		COleStreamFile* NewOleStreamFile( const TCHAR* pStreamName, IStream* pStream = NULL ) const;
 
-		bool HandleError( HRESULT hResult, const TCHAR* pStgFilePath = NULL ) const;
+		bool HandleError( HRESULT hResult, const TCHAR* pSubPath, const TCHAR* pStgFilePath = NULL ) const;
 		COleStreamFile* HandleStreamError( const TCHAR* pStreamName ) const;		// may throw s_fileError
 	private:
 		CComPtr< IStorage > m_pRootStorage;			// root directory
