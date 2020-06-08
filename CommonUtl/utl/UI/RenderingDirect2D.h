@@ -127,6 +127,8 @@ namespace d2d
 
 		template< typename RenderFrameT >
 		RenderFrameT* GetRenderFrameAs( void ) const { return checked_static_cast< RenderFrameT* >( m_pRenderFrame.get() ); }
+	private:
+		CRect MakeFrameRect( const CViewCoords& coords ) const;
 	protected:
 		int m_frameSize;
 		std::vector< D2D1_COLOR_F > m_colors;

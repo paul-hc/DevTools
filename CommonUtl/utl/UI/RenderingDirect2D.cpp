@@ -483,10 +483,19 @@ namespace d2d
 		return GetRenderFrame() != NULL && GetRenderFrame()->IsValid();
 	}
 
+	CRect CFrameGadget::MakeFrameRect( const CViewCoords& coords ) const
+	{
+		CRect drawRect = coords.m_contentRect;
+
+		drawRect.InflateRect( m_frameSize, m_frameSize );			// try not to cover small images
+		ui::EnsureVisibleRect( drawRect, coords.m_clientRect );
+		return drawRect;
+	}
+
 	void CFrameGadget::Draw( const CViewCoords& coords )
 	{
 		if ( IsValid() )
-			m_pRenderFrame->Draw( GetHostRenderTarget(), coords.m_contentRect );
+			m_pRenderFrame->Draw( GetHostRenderTarget(), MakeFrameRect( coords ) );
 	}
 
 
