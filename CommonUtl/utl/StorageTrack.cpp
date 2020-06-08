@@ -27,6 +27,12 @@ namespace fs
 		return m_pRootStorage->GetStorage();
 	}
 
+	void CStorageTrack::Clear( void )
+	{
+		while ( !m_openSubStorages.empty() )
+			m_openSubStorages.pop_back();
+	}
+
 	void CStorageTrack::Push( IStorage* pSubStorage )
 	{
 		ASSERT_PTR( pSubStorage );
@@ -43,7 +49,7 @@ namespace fs
 		return pDeepStorage;
 	}
 
-	std::tstring CStorageTrack::MakeSubPath( void ) const
+	fs::TEmbeddedPath CStorageTrack::MakeSubPath( void ) const
 	{
 		std::tstring subPath;
 
@@ -65,6 +71,69 @@ namespace fs
 
 		return subPath;
 	}
+
+
+	void CStorageTrack::EnumElements( fs::IEnumerator* pEnumerator, RecursionDepth depth /*= Shallow*/ ) throws_( CFileException* )
+	{
+		CPushThrowMode scopedThrow( m_pRootStorage, true );			// to simplify recovery from error
+
+		DoEnumElements( pEnumerator, depth );
+	}
+
+	void CStorageTrack::DoEnumElements( fs::IEnumerator* pEnumerator, RecursionDepth depth ) throws_( CFileException* )
+	{
+		ASSERT_PTR( pEnumerator );
+
+		IStorage* pCurrStorage = GetCurrent();
+		fs::TEmbeddedPath embeddedPath = MakeSubPath();
+
+		CComPtr< IEnumSTATSTG > pEnumStat;
+
+		HRESULT hResult = pCurrStorage->EnumElements( 0, NULL, 0, &pEnumStat );
+		if ( FAILED( hResult ) )
+			m_pRootStorage->HandleError( hResult, embeddedPath.GetPtr() );
+
+		STATSTG stat;
+		std::vector< fs::CPath > subStgNames;
+
+		for ( ;; )
+		{
+			hResult = pEnumStat->Next( 1, &stat, NULL );
+			if ( FAILED( hResult ) )
+				m_pRootStorage->HandleError( hResult, embeddedPath.GetPtr() );
+			else if ( S_FALSE == hResult )		// done?
+				break;
+
+			switch ( stat.type )
+			{
+				case STGTY_STORAGE:
+					subStgNames.push_back( fs::CPath( stat.pwcsName ) );
+					break;
+				case STGTY_STREAM:
+				{
+					fs::TEmbeddedPath streamPath = embeddedPath / stat.pwcsName;
+					pEnumerator->AddFoundFile( streamPath.GetPtr() );
+					break;
+				}
+			}
+			::CoTaskMemFree( stat.pwcsName );
+		}
+
+		fs::SortPaths( subStgNames );		// natural path order
+
+		for ( std::vector< fs::CPath >::const_iterator itSubStgName = subStgNames.begin(); itSubStgName != subStgNames.end(); ++itSubStgName )
+		{
+			fs::TEmbeddedPath subDirPath = embeddedPath / *itSubStgName;
+			if ( pEnumerator->AddFoundSubDir( subDirPath.GetPtr() ) )		// sub-storage is not ignored?
+				if ( Deep == depth && !pEnumerator->MustStop() )
+				{
+					Push( m_pRootStorage->OpenDir( itSubStgName->GetPtr(), pCurrStorage ) );
+					DoEnumElements( pEnumerator, Deep );
+					Pop();
+				}
+		}
+	}
+
 
 	bool CStorageTrack::CreateDeepSubPath( const TCHAR* pDirSubPath, DWORD mode /*= STGM_CREATE | STGM_READWRITE*/ )
 	{

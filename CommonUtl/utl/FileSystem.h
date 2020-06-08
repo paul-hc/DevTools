@@ -54,7 +54,7 @@ namespace fs
 	}
 
 
-	std::auto_ptr< CFile > OpenFile( const fs::CPath& filePath, bool throwMode = false, DWORD mode = CFile::modeRead | CFile::typeBinary ) throws_( CFileException );
+	std::auto_ptr< CFile > OpenFile( const fs::CPath& filePath, bool throwMode = false, DWORD mode = CFile::modeRead | CFile::typeBinary ) throws_( CFileException* );
 
 	UINT64 BufferedCopy( CFile& rDestFile, CFile& srcFile, size_t chunkSize = 4 * KiloByte );		// 4096 works well because it's quicker to allocate
 }

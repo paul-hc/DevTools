@@ -208,7 +208,7 @@ namespace fs
 	}
 
 
-	std::auto_ptr< CFile > OpenFile( const fs::CPath& filePath, bool throwMode /*= false*/, DWORD mode /*= CFile::modeRead | CFile::typeBinary*/ )
+	std::auto_ptr< CFile > OpenFile( const fs::CPath& filePath, bool throwMode /*= false*/, DWORD mode /*= CFile::modeRead | CFile::typeBinary*/ ) throws_( CFileException* )
 	{
 		ASSERT( !filePath.IsComplexPath() );
 

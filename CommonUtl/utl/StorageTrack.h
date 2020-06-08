@@ -3,6 +3,7 @@
 #pragma once
 
 #include <afxole.h>			// for COleStreamFile
+#include "FileSystem_fwd.h"
 
 
 namespace fs
@@ -23,15 +24,20 @@ namespace fs
 		bool IsEmpty( void ) const { return m_openSubStorages.empty(); }
 		IStorage* GetRoot( void ) const;
 
+		void Clear( void );							// pop all sub-storages
 		void Push( IStorage* pSubStorage );			// push a sub-storage
 		CComPtr< IStorage > Pop( void );
 
 		IStorage* GetCurrent( void ) const { return !IsEmpty() ? m_openSubStorages.back() : GetRoot(); }
-		std::tstring MakeSubPath( void ) const;
+		fs::TEmbeddedPath MakeSubPath( void ) const;
 
 		size_t GetDepth( void ) const { return m_openSubStorages.size(); }
 		IStorage* GetStorageAtLevel( size_t depthLevel ) const { ASSERT( depthLevel < GetDepth() ); return m_openSubStorages[ depthLevel ]; }
 
+		// enumerate storages and streams (embedded storage paths, relative from the root)
+		void EnumElements( fs::IEnumerator* pEnumerator, RecursionDepth depth = Shallow ) throws_( CFileException* );
+
+		// deep storage access
 		bool CreateDeepSubPath( const TCHAR* pDirSubPath, DWORD mode = STGM_CREATE | STGM_READWRITE );
 		bool OpenDeepSubPath( const TCHAR* pDirSubPath, DWORD mode = STGM_READ );		// use STGM_READWRITE for writing (STGM_WRITE seems to be failing)
 
@@ -39,6 +45,8 @@ namespace fs
 		static CComPtr< IStream > OpenEmbeddedStream( CStructuredStorage* pRootStorage, const fs::TEmbeddedPath& streamSubPath, DWORD mode = STGM_READ );
 
 		static std::auto_ptr< COleStreamFile > OpenEmbeddedFile( CStructuredStorage* pRootStorage, const fs::TEmbeddedPath& streamSubPath, DWORD mode = CFile::modeRead );
+	private:
+		void DoEnumElements( fs::IEnumerator* pEnumerator, RecursionDepth depth ) throws_( CFileException* );
 	private:
 		CStructuredStorage* m_pRootStorage;
 		std::vector< CComPtr< IStorage > > m_openSubStorages;		// opened embedded storages

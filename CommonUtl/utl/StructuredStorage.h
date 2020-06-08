@@ -14,6 +14,9 @@
 
 namespace fs
 {
+	class CStorageTrack;
+
+
 	// Structured storage corresponding to a compound document file.
 	// Able to handle long filenames for sub-storages (sub directories) and file methods.
 	//
@@ -22,6 +25,7 @@ namespace fs
 	class CStructuredStorage : public CThrowMode
 							 , private utl::noncopyable
 	{
+		friend class fs::CStorageTrack;
 	public:
 		enum { MaxFilenameLen = 31 };
 
@@ -64,14 +68,14 @@ namespace fs
 		bool StorageExist( const TCHAR* pStorageName, IStorage* pParentDir = NULL );
 		bool StreamExist( const TCHAR* pStreamSubPath, IStorage* pParentDir = NULL );
 
-		std::auto_ptr< COleStreamFile > MakeOleStreamFile( const TCHAR* pStreamName, IStream* pStream = NULL ) const;
-
 		static DWORD ToMode( DWORD mode );										// augment mode with default STGM_SHARE_EXCLUSIVE (if no STGM_SHARE_DENY_* flag is present)
 		static std::tstring MakeShortFilename( const TCHAR* pFilename );		// make short file name with length limited to MaxFilenameLen
 
 		static CStructuredStorage* FindOpenedStorage( const fs::CPath& docStgPath );
 	protected:
 		virtual std::tstring EncodeStreamName( const TCHAR* pStreamName ) const;
+
+		std::auto_ptr< COleStreamFile > MakeOleStreamFile( const TCHAR* pStreamName, IStream* pStream = NULL ) const;
 
 		bool HandleError( HRESULT hResult, const TCHAR* pSubPath, const TCHAR* pDocFilePath = NULL ) const;
 		std::auto_ptr< COleStreamFile > HandleStreamError( const TCHAR* pStreamName ) const;			// may throw s_fileError

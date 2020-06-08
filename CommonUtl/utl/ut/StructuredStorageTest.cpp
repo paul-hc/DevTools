@@ -85,17 +85,71 @@ void CStructuredStorageTest::TestStructuredStorage( void )
 		ut::CTempFilePairPool pool( _T("a1.txt|a2.txt|B1\\b1.txt|B1\\b2.txt|B1\\SD\\ThisIsASuperLongFilenameOfAnUnknownImageFileThatKeepsGoing.txt") );
 		const fs::CPath& poolDirPath = pool.GetPoolDirPath();
 
-		fs::CRelativeEnumerator src( poolDirPath );
-		fs::EnumFiles( &src, poolDirPath, NULL, Deep );
-		ASSERT_EQUAL( _T("a1.txt|a2.txt|B1\\b1.txt|B1\\b2.txt|B1\\SD\\ThisIsASuperLongFilenameOfAnUnknownImageFileThatKeepsGoing.txt"), ut::JoinFiles( src ) );
+		fs::CRelativeEnumerator srcEnum( poolDirPath );
+		fs::EnumFiles( &srcEnum, poolDirPath, NULL, Deep );
+		ASSERT_EQUAL( _T("a1.txt|a2.txt|B1\\b1.txt|B1\\b2.txt|B1\\SD\\ThisIsASuperLongFilenameOfAnUnknownImageFileThatKeepsGoing.txt"), ut::JoinFiles( srcEnum ) );
 
+		fs::CStructuredStorage docStg;
+		ASSERT( docStg.CreateDocFile( docPath.GetPtr() ) );
+
+		ut::BuildStorage( &docStg, srcEnum );
+
+		fs::CStorageTrack track( &docStg );
+		fs::CEnumerator foundEnum;
+
+		track.EnumElements( &foundEnum );		// Shallow
+		ASSERT_EQUAL( _T("a1.txt|a2.txt"), ut::JoinFiles( foundEnum ) );
+	}
+
+	// load storage document
+	{
+		fs::CStructuredStorage docStg;
+		ASSERT( docStg.OpenDocFile( docPath.GetPtr() ) );
+
+		fs::CStorageTrack track( &docStg );
+
+		// enumerate compound document
 		{
-			fs::CStructuredStorage docStg;
-			ASSERT( docStg.CreateDocFile( docPath.GetPtr() ) );
-
-			ut::BuildStorage( &docStg, src );
+			fs::CEnumerator foundEnum;
+			track.EnumElements( &foundEnum, Deep );
+			ASSERT_EQUAL( _T("a1.txt|a2.txt|B1\\b1.txt|B1\\b2.txt|B1\\SD\\ThisIsASuperLongFi_478086F2.txt"), ut::JoinFiles( foundEnum ) );
 		}
-		src.GetRelativeDirPath();
+
+		// enumerate a sub-storage
+		{
+			fs::CEnumerator foundEnum;
+			track.Push( docStg.OpenDir( _T("B1") ) );
+
+			track.EnumElements( &foundEnum, Deep );
+			ASSERT_EQUAL( _T("B1\\b1.txt|B1\\b2.txt|B1\\SD\\ThisIsASuperLongFi_478086F2.txt"), ut::JoinFiles( foundEnum ) );
+
+			{	// relative to "B1"
+				fs::CRelativeEnumerator relEnum( track.MakeSubPath() );
+				track.EnumElements( &relEnum, Deep );
+				ASSERT_EQUAL( _T("b1.txt|b2.txt|SD\\ThisIsASuperLongFi_478086F2.txt"), ut::JoinFiles( relEnum ) );
+			}
+
+			track.Push( docStg.OpenDir( _T("SD"), track.GetCurrent() ) );		// go deeper
+			foundEnum.Clear();
+			track.EnumElements( &foundEnum, Deep );
+			ASSERT_EQUAL( _T("B1\\SD\\ThisIsASuperLongFi_478086F2.txt"), ut::JoinFiles( foundEnum ) );
+
+			{	// relative to "B1\\SD"
+				fs::CRelativeEnumerator relEnum( track.MakeSubPath() );
+				track.EnumElements( &relEnum, Deep );
+				ASSERT_EQUAL( _T("ThisIsASuperLongFi_478086F2.txt"), ut::JoinFiles( relEnum ) );
+			}
+		}
+
+		// enumerate deep a sub-storage
+		{
+			track.Clear();
+			track.OpenDeepSubPath( _T("B1\\SD") );
+
+			fs::CEnumerator foundEnum;
+			track.EnumElements( &foundEnum, Deep );
+			ASSERT_EQUAL( _T("B1\\SD\\ThisIsASuperLongFi_478086F2.txt"), ut::JoinFiles( foundEnum ) );
+		}
 	}
 }
 
