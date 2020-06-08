@@ -31,4 +31,22 @@ namespace mt
 }
 
 
+namespace st
+{
+	// Initialize OLE in the main application thread - current appartment, with the concurrency model as single-thread apartment (STA).
+	// Used by console applications not linking to MFC - with no CWinApp object.
+
+	class CScopedInitializeOle
+	{
+	public:
+		CScopedInitializeOle( void );
+		~CScopedInitializeOle() { Uninitialize(); }
+
+		void Uninitialize( void );
+	private:
+		bool m_oleInitialized;
+	};
+}
+
+
 #endif // MultiThreading_h

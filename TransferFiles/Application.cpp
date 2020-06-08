@@ -3,10 +3,15 @@
 #include "stdafx.h"
 #include "XferOptions.h"
 #include "FileTransfer.h"
-#include "ut/TransferFuncTests.h"
 #include "utl/ConsoleApplication.h"
+#include "utl/MultiThreading.h"
 #include "utl/StringUtilities.h"
 #include <iostream>
+
+#ifdef _DEBUG
+#include "utl/ut/UtlConsoleTests.h"
+#include "ut/TransferFuncTests.h"
+#endif
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -18,8 +23,8 @@ namespace ut
 	void RegisterAppUnitTests( bool debugChildProcs )
 	{
 	#ifdef _DEBUG
-		// register TransferFiles tests
-		CTransferFuncTests::Instance().SetDebugChildProcs( debugChildProcs );
+		ut::RegisterUtlConsoleTests();
+		CTransferFuncTests::Instance().SetDebugChildProcs( debugChildProcs );		// register TransferFiles tests
 	#else
 		debugChildProcs;
 	#endif
@@ -116,6 +121,8 @@ int _tmain( int argc, TCHAR* argv[] )
 	std::tstring value;
 	if ( app::HasCommandLineOption( _T("ut"), &value ) )
 	{
+		st::CScopedInitializeOle scopedOle;		// some unit tests require OLE ()
+
 		ut::RegisterAppUnitTests( value == _T("debug") );
 		ut::RunAllTests();
 		return 0;

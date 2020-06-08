@@ -24,7 +24,8 @@ private:
 public:
 	static UINT m_appIconId;
 private:
-	mt::CScopedInitializeCom m_scopedCom;		// enable clipboard
+	st::CScopedInitializeOle m_scopedOle;		// enable clipboard support
+
 	fs::CPath m_modulePath;
 	fs::CPath m_exePath;
 

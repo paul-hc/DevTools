@@ -81,7 +81,7 @@ void CRegistryTests::TestKey( void )
 		Test_StringValue( key );
 		Test_MultiStringValue( key );
 		Test_NumericValues( key );
-		Test_GuidValue( key );
+		Test_GuidValue( key );			// disable this since CScopedInitializeCom it mixes COINIT_MULTITHREADED vs COINIT_APARTMENTTHREADED (causing subsequent COM errors)
 		Test_BinaryValue( key );
 		Test_BinaryBuffer( key );
 
@@ -163,10 +163,9 @@ void CRegistryTests::Test_NumericValues( reg::CKey& rKey )
 
 void CRegistryTests::Test_GuidValue( reg::CKey& rKey )
 {
-	mt::CScopedInitializeCom scopedCom;
 	GUID itfID = IID_IShellFolder;
 
-	ASSERT( rKey.WriteGuidValue( _T("InterfaceID"), itfID ) );
+	ASSERT( rKey.WriteGuidValue( _T("InterfaceID"), itfID ) );		// this requires OLE initialization
 
 	itfID = IID_IUnknown;
 	ASSERT( rKey.QueryGuidValue( _T("InterfaceID"), itfID ) );

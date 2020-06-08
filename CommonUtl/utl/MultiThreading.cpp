@@ -14,9 +14,9 @@ namespace mt
 	{
 		HRESULT hResult =
 		#if ( ( _WIN32_WINNT >= 0x0400 ) || defined( _WIN32_DCOM ) )	// DCOM
-			CoInitializeEx( NULL, COINIT_MULTITHREADED );
+			::CoInitializeEx( NULL, COINIT_MULTITHREADED );
 		#else
-			CoInitialize( NULL );
+			::CoInitialize( NULL );
 		#endif
 
 		if ( HR_OK( hResult ) )
@@ -33,6 +33,24 @@ namespace mt
 		{
 			::CoUninitialize();
 			m_comInitialized = false;
+		}
+	}
+}
+
+
+namespace st
+{
+	CScopedInitializeOle::CScopedInitializeOle( void )
+		: m_oleInitialized( HR_OK( ::OleInitialize( NULL ) ) )
+	{
+	}
+
+	void CScopedInitializeOle::Uninitialize( void )
+	{
+		if ( m_oleInitialized )
+		{
+			::OleUninitialize();
+			m_oleInitialized = false;
 		}
 	}
 }
