@@ -12,6 +12,7 @@
 #include "ResequenceTests.h"
 #include "FmtUtilsTests.h"
 #include "FileSystemTests.h"
+#include "StructuredStorageTest.h"
 #include "PathTests.h"
 #include "PathGeneratorTests.h"
 #include "ThreadingTests.h"
@@ -33,9 +34,10 @@ namespace ut
 		CResequenceTests::Instance();
 		CFmtUtilsTests::Instance();
 		CFileSystemTests::Instance();
+		CStructuredStorageTest::Instance();
 		CPathTests::Instance();
 		CPathGeneratorTests::Instance();
-		//CThreadingTests::Instance();
+		CThreadingTests::Instance();
 	}
 }
 

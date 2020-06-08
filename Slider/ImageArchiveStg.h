@@ -103,7 +103,7 @@ public:
 		void ReleaseStorages( const std::vector< fs::CPath >& stgFilePaths );
 
 		// FLEX: image path could refer to either physical image or archive-based image file
-		CFile* OpenFlexImageFile( const fs::CFlexPath& flexImagePath, DWORD mode = CFile::modeRead );
+		std::auto_ptr< CFile > OpenFlexImageFile( const fs::CFlexPath& flexImagePath, DWORD mode = CFile::modeRead );
 
 		void LoadImagesMetadata( std::vector< CFileAttr* >& rOutFileAttribs, const fs::CPath& stgFilePath );
 

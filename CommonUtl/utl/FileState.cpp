@@ -19,6 +19,7 @@ namespace fs
 {
 	CFileState::CFileState( const ::CFileStatus* pFileStatus )
 		: m_fullPath( pFileStatus->m_szFullName )
+		, m_fileSize( static_cast< UINT64 >( pFileStatus->m_size ) )
 		, m_attributes( static_cast< BYTE >( pFileStatus->m_attribute ) )
 		, m_creationTime( pFileStatus->m_ctime )
 		, m_modifTime( pFileStatus->m_mtime )
@@ -59,6 +60,7 @@ namespace fs
 	{
 		return
 			m_fullPath == right.m_fullPath &&
+			m_fileSize == right.m_fileSize &&
 			m_attributes == right.m_attributes &&
 			m_creationTime == right.m_creationTime &&
 			m_modifTime == right.m_modifTime &&

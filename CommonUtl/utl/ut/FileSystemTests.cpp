@@ -4,13 +4,11 @@
 #ifdef _DEBUG		// no UT code in release builds
 #include "ut/FileSystemTests.h"
 #include "Path.h"
-#include "FlexPath.h"
 #include "FileState.h"
 #include "FileContent.h"
 #include "FileEnumerator.h"
 #include "TimeUtils.h"
 #include "StringUtilities.h"
-#include "StructuredStorage.h"
 
 #define new DEBUG_NEW
 
@@ -32,8 +30,8 @@ CFileSystemTests::CFileSystemTests( void )
 
 CFileSystemTests& CFileSystemTests::Instance( void )
 {
-	static CFileSystemTests testCase;
-	return testCase;
+	static CFileSystemTests s_testCase;
+	return s_testCase;
 }
 
 
@@ -140,22 +138,6 @@ void CFileSystemTests::TestNumericFilename( void )
 
 	pool.CreateFiles( _T("SeedFile5870.txt|SeedFile133.txt") );
 	ASSERT_EQUAL( _T("SeedFile_[5871].txt"), fs::StripDirPrefix( fs::MakeUniqueNumFilename( seedFilePath ), poolDirPath ) );
-}
-
-void CFileSystemTests::TestStgShortFilenames( void )
-{
-	ASSERT_EQUAL( _T(""), fs::CStructuredStorage::MakeShortFilename( _T("") ) );
-	ASSERT_EQUAL( _T("Not a long filename"), fs::CStructuredStorage::MakeShortFilename( _T("Not a long filename") ) );				// 19 chars
-	ASSERT_EQUAL( _T("Not a long filename ABCDEFG.txt"), fs::CStructuredStorage::MakeShortFilename( _T("Not a long filename ABCDEFG.txt") ) );		// 31 chars
-	ASSERT_EQUAL( _T("Documents\\Business\\Payroll\\Not a long filename.txt"), fs::CStructuredStorage::MakeShortFilename( _T("Documents\\Business\\Payroll\\Not a long filename.txt") ) );		// 23 chars
-
-	// fs::CStructuredStorage::MaxFilenameLen overflow
-	ASSERT_EQUAL( _T("This is a long fil_A7A42533.txt"), fs::CStructuredStorage::MakeShortFilename( _T("This is a long filename ABCD.txt") ) );		// 32 chars
-	ASSERT_EQUAL( _T("ThisIsASuperLongFi_3B36D197.jpg"), fs::CStructuredStorage::MakeShortFilename( _T("ThisIsASuperLongFilenameOfAnUnknownImageFileThatKeepsGoing.jpg") ) );	// 62 chars
-	ASSERT_EQUAL( _T("thisisasuperlongfi_3B36D197.JPG"), fs::CStructuredStorage::MakeShortFilename( _T("thisisasuperlongfilenameofanunknownimagefilethatkeepsgoing.JPG") ) );	// 62 chars
-
-	// sub-paths
-	ASSERT( fs::CStructuredStorage::MakeShortFilename( _T("my\\docs\\This is a long filename ABCDxy.txt") ) != fs::CStructuredStorage::MakeShortFilename( _T("This is a long filename ABCDxy.txt") ) );	// 34 chars
 }
 
 void CFileSystemTests::TestTempFilePool( void )
@@ -332,7 +314,6 @@ void CFileSystemTests::TestBackupFile( void )
 	}
 }
 
-
 void CFileSystemTests::Run( void )
 {
 	__super::Run();
@@ -340,7 +321,6 @@ void CFileSystemTests::Run( void )
 	TestFileSystem();
 	TestFileEnum();
 	TestNumericFilename();
-	TestStgShortFilenames();
 	TestTempFilePool();
 	TestFileAndDirectoryState();
 	TestTouchFile();

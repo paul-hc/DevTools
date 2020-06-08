@@ -96,7 +96,7 @@ void CImageArchiveStg::CreateImageArchive( const fs::CPath& stgFilePath, const s
 
 	CPushThrowMode pushThrow( this, true );
 
-	Create( stgFilePath.GetPtr() );
+	CreateDocFile( stgFilePath.GetPtr() );
 	ASSERT( IsOpen() );
 
 	CWaitCursor wait;
@@ -133,7 +133,7 @@ void CImageArchiveStg::CreateImageFiles( std::vector< CTransferFileAttr* >& rTra
 			std::tstring& rStreamName = const_cast< std::tstring& >( pXferAttr->GetPath().Get() );
 			FlattenDeepStreamPath( rStreamName );
 
-			std::auto_ptr< CFile > pSrcImageFile( factory.OpenFlexImageFile( pXferAttr->GetSrcImagePath() ) );
+			std::auto_ptr< CFile > pSrcImageFile = factory.OpenFlexImageFile( pXferAttr->GetSrcImagePath() );
 			std::auto_ptr< COleStreamFile > pDestStreamFile( CreateFile( pXferAttr->GetPath().GetPtr() ) );
 
 			fs::BufferedCopy( *pDestStreamFile, *pSrcImageFile );
@@ -314,7 +314,7 @@ bool CImageArchiveStg::LoadAlbumDoc( CObject* pAlbumDoc )
 	std::auto_ptr< COleStreamFile > pAlbumFile;
 	{
 		CPushThrowMode pushNoThrow( this, false );				// album not found is not an error
-		pAlbumFile.reset( OpenFile( CImageArchiveStg::s_albumFilename ) );
+		pAlbumFile = OpenFile( CImageArchiveStg::s_albumFilename );
 	}
 
 	if ( NULL == pAlbumFile.get() )
@@ -380,12 +380,12 @@ std::tstring CImageArchiveStg::LoadPassword( void )
 	std::auto_ptr< COleStreamFile > pPwdFile;
 	{
 		CPushThrowMode pushNoThrow( this, false );
-		pPwdFile.reset( OpenFile( s_pwdStreamNames[ PwdWide ] ) );
+		pPwdFile = OpenFile( s_pwdStreamNames[ PwdWide ] );
 		if ( pPwdFile.get() != NULL )
 			pwdFmt = PwdWide;				// found WIDE password
 		else
 		{
-			pPwdFile.reset( OpenFile( s_pwdStreamNames[ PwdAnsi ] ) );
+			pPwdFile = OpenFile( s_pwdStreamNames[ PwdAnsi ] );
 			if ( pPwdFile.get() != NULL )
 				pwdFmt = PwdAnsi;			// found ANSI password (backwards compatibility)
 			else
@@ -443,7 +443,7 @@ CImageArchiveStg* CImageArchiveStg::CFactory::AcquireStorage( const fs::CPath& s
 
 	std::auto_ptr< CImageArchiveStg > imageArchiveStgPtr( new CImageArchiveStg );
 	CPushThrowMode pushMode( imageArchiveStgPtr.get(), IsThrowMode() );		// pass current factory throw mode to the storage
-	if ( !imageArchiveStgPtr->Open( stgFilePath.GetPtr(), mode ) )
+	if ( !imageArchiveStgPtr->OpenDocFile( stgFilePath.GetPtr(), mode ) )
 		return NULL;
 
 	m_storageMap[ stgFilePath ] = imageArchiveStgPtr.get();
@@ -467,34 +467,27 @@ void CImageArchiveStg::CFactory::ReleaseStorages( const std::vector< fs::CPath >
 		CImageArchiveStg::Factory().ReleaseStorage( *itStgPath );
 }
 
-CFile* CImageArchiveStg::CFactory::OpenFlexImageFile( const fs::CFlexPath& flexImagePath, DWORD mode /*= CFile::modeRead*/ )
+std::auto_ptr< CFile > CImageArchiveStg::CFactory::OpenFlexImageFile( const fs::CFlexPath& flexImagePath, DWORD mode /*= CFile::modeRead*/ )
 {
+	std::auto_ptr< CFile > pFile;
+
 	// could be either physical image or archive-based image file
 	if ( !flexImagePath.IsComplexPath() )
+		pFile = fs::OpenFile( flexImagePath, IsThrowMode(), mode );
+	else
 	{
-		static mfc::CAutoException< CFileException > s_fileError;
-		s_fileError.m_strFileName = flexImagePath.GetPtr();
+		fs::CPath stgFilePath( flexImagePath.GetPhysicalPath() );
+		ASSERT( IsPasswordVerified( stgFilePath ) );
 
-		std::auto_ptr< CFile > pImageFile( new CFile );
-		if ( !pImageFile->Open( flexImagePath.GetPtr(), mode | CFile::shareDenyWrite, &s_fileError ) )		// note: CFile::shareExclusive causes sharing violation
-			if ( IsThrowMode() )
-				throw &s_fileError;
-			else
-				return NULL;
-
-		return pImageFile.release();
+		CScopedAcquireStorage stg( stgFilePath, mode );
+		if ( stg.Get() != NULL )
+		{
+			CPushThrowMode pushMode( stg.Get(), IsThrowMode() );							// pass current factory throw mode to the storage
+			pFile.reset( stg.Get()->OpenFile( flexImagePath.GetEmbeddedPath(), NULL, mode ).release() );		// OpenDeepFile fails when copying from deep.ias to shallow.ias
+		}
 	}
 
-	fs::CPath stgFilePath( flexImagePath.GetPhysicalPath() );
-	ASSERT( IsPasswordVerified( stgFilePath ) );
-
-	CScopedAcquireStorage stg( stgFilePath, mode );
-	if ( stg.Get() != NULL )
-	{
-		CPushThrowMode pushMode( stg.Get(), IsThrowMode() );							// pass current factory throw mode to the storage
-		return stg.Get()->OpenFile( flexImagePath.GetEmbeddedPath(), NULL, mode );		// OpenDeepFile fails when copying from deep.ias to shallow.ias
-	}
-	return NULL;
+	return pFile;
 }
 
 void CImageArchiveStg::CFactory::LoadImagesMetadata( std::vector< CFileAttr* >& rOutFileAttribs, const fs::CPath& stgFilePath )
@@ -674,8 +667,8 @@ CImageArchiveStg::CScopedAcquireStorage::CScopedAcquireStorage( const fs::CPath&
 				m_oldOpenMode = m_pArchiveStg->GetOpenMode();
 				// close and reopen the storage in the required writeable mode
 				if ( false == ( HasFlag( mode, STGM_CREATE )
-						? m_pArchiveStg->Create( m_stgFilePath.GetPtr(), mode )
-						: m_pArchiveStg->Open( m_stgFilePath.GetPtr(), mode ) ) )
+						? m_pArchiveStg->CreateDocFile( m_stgFilePath.GetPtr(), mode )
+						: m_pArchiveStg->OpenDocFile( m_stgFilePath.GetPtr(), mode ) ) )
 				{
 					m_pArchiveStg = NULL;
 					Factory().ReleaseStorage( m_stgFilePath );
@@ -690,5 +683,5 @@ CImageArchiveStg::CScopedAcquireStorage::~CScopedAcquireStorage()
 		if ( m_mustRelease )
 			Factory().ReleaseStorage( m_stgFilePath );
 		else if ( m_oldOpenMode != NotOpenMask )
-			m_pArchiveStg->Open( m_stgFilePath.GetPtr(), m_oldOpenMode );
+			m_pArchiveStg->OpenDocFile( m_stgFilePath.GetPtr(), m_oldOpenMode );
 }

@@ -732,6 +732,14 @@
 					>
 				</File>
 				<File
+					RelativePath=".\StorageTrack.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\StorageTrack.h"
+					>
+				</File>
+				<File
 					RelativePath=".\StructuredStorage.cpp"
 					>
 				</File>
@@ -930,6 +938,14 @@
 			</File>
 			<File
 				RelativePath=".\ut\StringTests.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ut\StructuredStorageTest.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\ut\StructuredStorageTest.h"
 				>
 			</File>
 			<File

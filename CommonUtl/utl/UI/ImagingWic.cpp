@@ -61,7 +61,7 @@ namespace wic
 
 	bool CBitmapDecoder::CreateFromFile( const fs::CFlexPath& flexPath )
 	{
-		if ( CComPtr< IStream > pStream = fs::OpenStreamOnFile( flexPath ) )
+		if ( CComPtr< IStream > pStream = fs::flex::OpenStreamOnFile( flexPath ) )
 			return CreateFromStream( pStream );
 
 		return false;

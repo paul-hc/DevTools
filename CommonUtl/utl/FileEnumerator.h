@@ -34,7 +34,9 @@ namespace fs
 	{
 		CEnumerator( IEnumerator* pChainEnum = NULL ) : m_pChainEnum( pChainEnum ), m_maxFiles( utl::npos ) {}
 
+		const fs::CPath& GetRelativeDirPath( void ) const { return m_relativeDirPath; }
 		void SetRelativeDirPath( const fs::CPath& relativeDirPath ) { ASSERT( IsEmpty() ); m_relativeDirPath = relativeDirPath; }
+
 		void SetMaxFiles( size_t maxFiles ) { ASSERT( IsEmpty() ); m_maxFiles = maxFiles; }
 		void SetIgnorePathMatches( const std::vector< fs::CPath >& ignorePaths );
 

@@ -26,8 +26,9 @@ bool CFileOperation::Copy( const fs::CFlexPath& srcFilePath, const fs::CFlexPath
 		{	// source file is an embedded file in a compound file
 			try
 			{
-				std::auto_ptr< CFile > pSrcFile( CImageArchiveStg::Factory().OpenFlexImageFile( srcFilePath, CFile::modeRead ) );
-				std::auto_ptr< CFile > pDestFile( CImageArchiveStg::Factory().OpenFlexImageFile( destFilePath, CFile::modeCreate | CFile::modeWrite ) );
+				std::auto_ptr< CFile > pSrcFile = CImageArchiveStg::Factory().OpenFlexImageFile( srcFilePath, CFile::modeRead );
+				std::auto_ptr< CFile > pDestFile = CImageArchiveStg::Factory().OpenFlexImageFile( destFilePath, CFile::modeCreate | CFile::modeWrite );
+
 				if ( pSrcFile.get() != NULL && pDestFile.get() != NULL )
 					fs::BufferedCopy( *pDestFile, *pSrcFile );
 				else

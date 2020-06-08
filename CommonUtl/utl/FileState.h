@@ -12,7 +12,7 @@ namespace fs
 {
 	struct CFileState
 	{
-		CFileState( void ) : m_attributes( s_invalidAttributes ) {}
+		CFileState( void ) : m_fileSize( 0 ), m_attributes( s_invalidAttributes ) {}
 		CFileState( const ::CFileStatus* pFileStatus );
 
 		void Clear( void ) { *this = CFileState(); }
@@ -40,6 +40,7 @@ namespace fs
 		void ThrowLastError( DWORD osLastError = ::GetLastError() ) const throws_( CFileException ) { CFileException::ThrowOsError( osLastError, m_fullPath.GetPtr() ); }
 	public:
 		CPath m_fullPath;
+		UINT64 m_fileSize;
 		BYTE m_attributes;			// CFile::Attribute enum values (low-byte)
 		CTime m_creationTime;		// creation time of file
 		CTime m_modifTime;			// last modification time of file

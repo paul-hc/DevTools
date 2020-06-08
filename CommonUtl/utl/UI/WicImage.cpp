@@ -101,7 +101,7 @@ void CWicImage::SetSharedDecoder( CMultiFrameDecoder* pSharedDecoder )
 }
 
 bool CWicImage::LoadFrame( UINT framePos )
-{
+{	// called from CWicImageTests only
 	ASSERT( framePos < m_frameCount );
 	return LoadFromFile( std::make_pair( GetImagePath(), framePos ) );
 }
@@ -254,8 +254,7 @@ namespace ui
 			m_filePath = pImage->GetImagePath();
 			m_isAnimated = pImage->IsAnimated();
 
-			if ( !m_filePath.IsComplexPath() )
-				m_fileSize = static_cast< UINT >( fs::GetFileSize( m_filePath.GetPtr() ) );
+			m_fileSize = static_cast< UINT >( fs::flex::GetFileSize( m_filePath ) );
 
 			m_framePos = pImage->GetFramePos();
 			m_frameCount = pImage->GetFrameCount();

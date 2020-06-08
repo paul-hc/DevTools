@@ -20,7 +20,6 @@ private:
 	void TestFileSystem( void );
 	void TestFileEnum( void );
 	void TestNumericFilename( void );
-	void TestStgShortFilenames( void );
 	void TestTempFilePool( void );
 	void TestFileAndDirectoryState( void );
 	void TestTouchFile( void );

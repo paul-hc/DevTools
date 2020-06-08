@@ -208,6 +208,23 @@ namespace fs
 	}
 
 
+	std::auto_ptr< CFile > OpenFile( const fs::CPath& filePath, bool throwMode /*= false*/, DWORD mode /*= CFile::modeRead | CFile::typeBinary*/ )
+	{
+		ASSERT( !filePath.IsComplexPath() );
+
+		static mfc::CAutoException< CFileException > s_fileError;
+		s_fileError.m_strFileName = filePath.GetPtr();
+
+		std::auto_ptr< CFile > pFile( new CFile );
+		if ( !pFile->Open( filePath.GetPtr(), mode | CFile::shareDenyWrite, &s_fileError ) )		// note: CFile::shareExclusive causes sharing violation
+			if ( throwMode )
+				throw &s_fileError;
+			else
+				pFile.reset();
+
+		return pFile;
+	}
+
 	UINT64 BufferedCopy( CFile& rDestFile, CFile& srcFile, size_t chunkSize /*= 4 * KiloByte*/ )
 	{
 		UINT64 fileSize = srcFile.GetLength();
