@@ -210,7 +210,7 @@ void CTreeWndPage::CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARAM row
 			rTextEffect.m_textColor = ::GetSysColor( COLOR_GRAYTEXT );
 
 		if ( wnd::IsSlowWindow( hWnd ) )
-			rTextEffect.m_textColor = ui::GetBlendedColor( rTextEffect.m_textColor != CLR_NONE ? rTextEffect.m_textColor : m_treeCtrl.GetTextColor(), SlowWndColor );
+			rTextEffect.m_textColor = ui::GetBlendedColor( rTextEffect.m_textColor != CLR_NONE ? rTextEffect.m_textColor : m_treeCtrl.GetActualTextColor(), SlowWndColor );
 	}
 }
 

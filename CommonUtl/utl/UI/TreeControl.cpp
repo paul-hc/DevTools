@@ -3,6 +3,7 @@
 #include "TreeControl.h"
 #include "TreeControlCustomDraw.h"
 #include "Clipboard.h"
+#include "Color.h"
 #include "CustomDrawImager.h"
 #include "Icon.h"
 #include "ContainerUtilities.h"
@@ -188,6 +189,11 @@ void CTreeControl::ClearMarkedItems( void )
 {
 	m_markedItems.clear();
 	Invalidate();
+}
+
+COLORREF CTreeControl::GetActualTextColor( void ) const
+{
+	return ui::GetActualColorSysdef( GetTextColor(), COLOR_WINDOWTEXT );
 }
 
 const ui::CTextEffect* CTreeControl::FindTextEffect( HTREEITEM hItem ) const

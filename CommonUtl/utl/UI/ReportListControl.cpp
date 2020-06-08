@@ -4,6 +4,7 @@
 #include "ReportListCustomDraw.h"
 #include "CustomDrawImager.h"
 #include "CmdUpdate.h"
+#include "Color.h"
 #include "MenuUtilities.h"
 #include "ShellDragImager.h"
 #include "OleDataSource.h"
@@ -177,6 +178,11 @@ bool CReportListControl::ModifyListStyleEx( DWORD dwRemove, DWORD dwAdd, UINT sw
 	}
 
 	return true;
+}
+
+COLORREF CReportListControl::GetActualTextColor( void ) const
+{
+	return ui::GetActualColorSysdef( GetTextColor(), COLOR_WINDOWTEXT );
 }
 
 bool CReportListControl::DeleteAllItems( void )

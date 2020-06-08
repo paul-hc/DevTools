@@ -40,6 +40,7 @@ public:
 	virtual ~CTreeControl();
 
 	CMenu& GetContextMenu( void ) { return m_contextMenu; }
+
 	void StoreImageList( CImageList* pImageList );
 	CImageList* SetImageList( CImageList* pImageList, int imageType );		// pseudo-override
 
@@ -60,6 +61,7 @@ public:
 	void UnmarkItem( HTREEITEM hItem );
 	void ClearMarkedItems( void );
 
+	COLORREF GetActualTextColor( void ) const;
 	const ui::CTextEffect* FindTextEffect( HTREEITEM hItem ) const;
 
 	// item interface

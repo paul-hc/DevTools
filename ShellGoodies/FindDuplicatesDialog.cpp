@@ -688,7 +688,7 @@ void CFindDuplicatesDialog::CombineTextEffectAt( ui::CTextEffect& rTextEffect, L
 	if ( EditMode == m_mode )									// duplicates list is dirty?
 	{
 		if ( !ui::IsActualColor( rTextEffect.m_textColor ) )	// text color must be evaluated?
-			rTextEffect.m_textColor = ui::GetActualColorSysdef( m_dupsListCtrl.GetTextColor(), COLOR_WINDOWTEXT );
+			rTextEffect.m_textColor = m_dupsListCtrl.GetActualTextColor();
 
 		rTextEffect.m_textColor = ui::GetBlendedColor( rTextEffect.m_textColor, color::White );		// blend to gray
 	}

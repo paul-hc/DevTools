@@ -295,7 +295,7 @@ void CAlbumSettingsDialog::CombineTextEffectAt( ui::CTextEffect& rTextEffect, LP
 		if ( m_isDirty )
 		{
 			if ( CLR_NONE == rTextEffect.m_textColor )
-				rTextEffect.m_textColor = m_imagesListCtrl.GetTextColor();
+				rTextEffect.m_textColor = m_imagesListCtrl.GetActualTextColor();
 
 			if ( CLR_DEFAULT == rTextEffect.m_textColor )
 				rTextEffect.m_textColor = ::GetSysColor( COLOR_WINDOWTEXT );

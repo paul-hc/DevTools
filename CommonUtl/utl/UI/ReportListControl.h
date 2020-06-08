@@ -206,6 +206,8 @@ public:
 
 	const TCHAR* GetTabularTextSep( void ) const { return m_pTabularSep; }
 	void SetTabularTextSep( const TCHAR* pTabularSep ) { m_pTabularSep = pTabularSep; }
+
+	COLORREF GetActualTextColor( void ) const;
 public:
 	enum ListPopup { Nowhere, OnSelection, OnGroup, _ListPopupCount };
 
@@ -217,8 +219,6 @@ public:
 
 	ole::IDataSourceFactory* GetDataSourceFactory( void ) const { return m_pDataSourceFactory; }
 	void SetDataSourceFactory( ole::IDataSourceFactory* pDataSourceFactory ) { ASSERT_PTR( pDataSourceFactory ); m_pDataSourceFactory = pDataSourceFactory; }
-
-	typedef int ImageListIndex;
 
 	ui::GlyphGauge GetViewModeGlyphGauge( void ) const { return GetViewModeGlyphGauge( GetView() ); }
 	static ui::GlyphGauge GetViewModeGlyphGauge( DWORD listViewMode );
