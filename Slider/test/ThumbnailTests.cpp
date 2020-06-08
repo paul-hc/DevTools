@@ -75,8 +75,8 @@ CThumbnailTests::CThumbnailTests( void )
 
 CThumbnailTests& CThumbnailTests::Instance( void )
 {
-	static CThumbnailTests testCase;
-	return testCase;
+	static CThumbnailTests s_testCase;
+	return s_testCase;
 }
 
 const fs::CPath& CThumbnailTests::GetThumbSaveDirPath( void )

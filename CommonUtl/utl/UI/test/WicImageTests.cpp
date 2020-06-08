@@ -19,8 +19,8 @@ CWicImageTests::CWicImageTests( void )
 
 CWicImageTests& CWicImageTests::Instance( void )
 {
-	static CWicImageTests testCase;
-	return testCase;
+	static CWicImageTests s_testCase;
+	return s_testCase;
 }
 
 void CWicImageTests::TestImage( ut::CTestDevice* pTestDev )

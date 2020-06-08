@@ -15,8 +15,8 @@ CStringRangeTests::CStringRangeTests( void )
 
 CStringRangeTests& CStringRangeTests::Instance( void )
 {
-	static CStringRangeTests testCase;
-	return testCase;
+	static CStringRangeTests s_testCase;
+	return s_testCase;
 }
 
 void CStringRangeTests::TestInit( void )

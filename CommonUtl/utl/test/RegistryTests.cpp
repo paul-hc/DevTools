@@ -19,8 +19,8 @@ CRegistryTests::CRegistryTests( void )
 
 CRegistryTests& CRegistryTests::Instance( void )
 {
-	static CRegistryTests testCase;
-	return testCase;
+	static CRegistryTests s_testCase;
+	return s_testCase;
 }
 
 void CRegistryTests::TestParseKeyFullPath( void )

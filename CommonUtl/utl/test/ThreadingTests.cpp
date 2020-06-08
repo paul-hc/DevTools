@@ -16,8 +16,8 @@ CThreadingTests::CThreadingTests( void )
 
 CThreadingTests& CThreadingTests::Instance( void )
 {
-	static CThreadingTests testCase;
-	return testCase;
+	static CThreadingTests s_testCase;
+	return s_testCase;
 }
 
 void CThreadingTests::TestNestedLocking( void )

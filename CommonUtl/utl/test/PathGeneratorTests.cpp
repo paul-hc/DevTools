@@ -32,8 +32,8 @@ CPathGeneratorTests::CPathGeneratorTests( void )
 
 CPathGeneratorTests& CPathGeneratorTests::Instance( void )
 {
-	static CPathGeneratorTests testCase;
-	return testCase;
+	static CPathGeneratorTests s_testCase;
+	return s_testCase;
 }
 
 void CPathGeneratorTests::TestPathMaker( void )

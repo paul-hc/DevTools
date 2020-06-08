@@ -18,8 +18,8 @@ CPathTests::CPathTests( void )
 
 CPathTests& CPathTests::Instance( void )
 {
-	static CPathTests testCase;
-	return testCase;
+	static CPathTests s_testCase;
+	return s_testCase;
 }
 
 void CPathTests::TestPathUtilities( void )

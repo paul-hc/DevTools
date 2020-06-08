@@ -33,8 +33,8 @@ CNumericTests::CNumericTests( void )
 
 CNumericTests& CNumericTests::Instance( void )
 {
-	static CNumericTests testCase;
-	return testCase;
+	static CNumericTests s_testCase;
+	return s_testCase;
 }
 
 const std::vector< UINT >& CNumericTests::GetReferenceCrc32Table( void )

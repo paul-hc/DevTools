@@ -33,8 +33,8 @@ CShellFileSystemTests::CShellFileSystemTests( void )
 
 CShellFileSystemTests& CShellFileSystemTests::Instance( void )
 {
-	static CShellFileSystemTests testCase;
-	return testCase;
+	static CShellFileSystemTests s_testCase;
+	return s_testCase;
 }
 
 void CShellFileSystemTests::TestShellPidl( void )

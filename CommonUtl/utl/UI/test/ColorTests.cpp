@@ -16,8 +16,8 @@ CColorTests::CColorTests( void )
 
 CColorTests& CColorTests::Instance( void )
 {
-	static CColorTests testCase;
-	return testCase;
+	static CColorTests s_testCase;
+	return s_testCase;
 }
 
 void CColorTests::TestColor( void )

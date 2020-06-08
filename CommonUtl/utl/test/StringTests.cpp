@@ -38,8 +38,8 @@ CStringTests::CStringTests( void )
 
 CStringTests& CStringTests::Instance( void )
 {
-	static CStringTests testCase;
-	return testCase;
+	static CStringTests s_testCase;
+	return s_testCase;
 }
 
 void CStringTests::TestCharTraits( void )

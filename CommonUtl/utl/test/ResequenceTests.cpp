@@ -47,8 +47,8 @@ CResequenceTests::CResequenceTests( void )
 
 CResequenceTests& CResequenceTests::Instance( void )
 {
-	static CResequenceTests testCase;
-	return testCase;
+	static CResequenceTests s_testCase;
+	return s_testCase;
 }
 
 void CResequenceTests::TestCanMove( void )

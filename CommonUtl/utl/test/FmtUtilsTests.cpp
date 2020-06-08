@@ -39,8 +39,8 @@ CFmtUtilsTests::CFmtUtilsTests( void )
 
 CFmtUtilsTests& CFmtUtilsTests::Instance( void )
 {
-	static CFmtUtilsTests testCase;
-	return testCase;
+	static CFmtUtilsTests s_testCase;
+	return s_testCase;
 }
 
 void CFmtUtilsTests::TestFileState( void )

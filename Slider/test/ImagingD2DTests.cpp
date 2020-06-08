@@ -19,8 +19,8 @@ CImagingD2DTests::CImagingD2DTests( void )
 
 CImagingD2DTests& CImagingD2DTests::Instance( void )
 {
-	static CImagingD2DTests testCase;
-	return testCase;
+	static CImagingD2DTests s_testCase;
+	return s_testCase;
 }
 
 void CImagingD2DTests::TestImage( ut::CTestDevice* pTestDev, d2d::CDCRenderTarget* pRenderTarget )

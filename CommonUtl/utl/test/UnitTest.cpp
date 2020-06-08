@@ -82,33 +82,33 @@ namespace ut
 
 	const fs::CPath& GetTestDataDirPath( void ) throws_( CRuntimeException )
 	{
-		static const fs::CPath dirPath = str::ExpandEnvironmentStrings( _T("%UTL_TESTDATA_PATH%") );
-		if ( !dirPath.IsEmpty() && !fs::IsValidDirectory( dirPath.GetPtr() ) )
-			throw CRuntimeException( str::Format( _T("Cannot find the local test directory path: %s\n\nTODO: define envirnoment variable UTL_TESTDATA_PATH."), dirPath.GetPtr() ) );
+		static const fs::CPath s_dirPath = str::ExpandEnvironmentStrings( _T("%UTL_TESTDATA_PATH%") );
+		if ( !s_dirPath.IsEmpty() && !fs::IsValidDirectory( s_dirPath.GetPtr() ) )
+			throw CRuntimeException( str::Format( _T("Cannot find the local test directory path: %s\n\nTODO: define envirnoment variable UTL_TESTDATA_PATH."), s_dirPath.GetPtr() ) );
 
-		return dirPath;
+		return s_dirPath;
 	}
 
 	const fs::CPath& GetImageSourceDirPath( void )
 	{
-		static fs::CPath imagesDirPath = str::ExpandEnvironmentStrings( _T("%UTL_THUMB_SRC_IMAGE_PATH%") );
-		if ( !imagesDirPath.IsEmpty() && !fs::IsValidDirectory( imagesDirPath.GetPtr() ) )
+		static fs::CPath s_imagesDirPath = str::ExpandEnvironmentStrings( _T("%UTL_THUMB_SRC_IMAGE_PATH%") );
+		if ( !s_imagesDirPath.IsEmpty() && !fs::IsValidDirectory( s_imagesDirPath.GetPtr() ) )
 		{
-			TRACE( _T("\n # Cannot find unit test images dir path: %s #\n"), imagesDirPath.GetPtr() );
-			imagesDirPath.Clear();
+			TRACE( _T("\n # Cannot find unit test images dir path: %s #\n"), s_imagesDirPath.GetPtr() );
+			s_imagesDirPath.Clear();
 		}
-		return imagesDirPath;
+		return s_imagesDirPath;
 	}
 
 	const fs::CPath& GetTestImagesDirPath( void )
 	{
-		static fs::CPath dirPath = GetTestDataDirPath() / fs::CPath( _T("images") );
-		if ( !dirPath.IsEmpty() && !fs::IsValidDirectory( dirPath.GetPtr() ) )
+		static fs::CPath s_dirPath = GetTestDataDirPath() / fs::CPath( _T("images") );
+		if ( !s_dirPath.IsEmpty() && !fs::IsValidDirectory( s_dirPath.GetPtr() ) )
 		{
-			TRACE( _T("\n * Cannot find the local test images dir path: %s\n"), dirPath.GetPtr() );
-			dirPath.Clear();
+			TRACE( _T("\n * Cannot find the local test images dir path: %s\n"), s_dirPath.GetPtr() );
+			s_dirPath.Clear();
 		}
-		return dirPath;
+		return s_dirPath;
 	}
 
 
