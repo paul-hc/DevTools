@@ -9,8 +9,8 @@
 #include "ImageArchiveStg.h"
 #include "MoveFileDialog.h"
 #include "OleImagesDataSource.h"
-#include "UT/ImagingD2DTests.h"
-#include "UT/ThumbnailTests.h"
+#include "test/ImagingD2DTests.h"
+#include "test/ThumbnailTests.h"
 #include "resource.h"
 #include "utl/RuntimeException.h"
 #include "utl/StringUtilities.h"
@@ -23,7 +23,7 @@
 #include "utl/UI/UtilitiesEx.h"
 #include "utl/UI/Thumbnailer.h"
 #include "utl/UI/WicImageCache.h"
-#include "utl/UI/ut/WicImageTests.h"
+#include "utl/UI/test/WicImageTests.h"
 #include <io.h>
 
 #ifdef _DEBUG

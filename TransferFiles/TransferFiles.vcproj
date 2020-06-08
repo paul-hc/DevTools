@@ -393,18 +393,18 @@
 			</File>
 		</Filter>
 		<Filter
-			Name="Unit Tests"
+			Name="Tests"
 			>
 			<File
-				RelativePath=".\ut\test.bat"
+				RelativePath=".\test\test.bat"
 				>
 			</File>
 			<File
-				RelativePath=".\ut\TransferFuncTests.cpp"
+				RelativePath=".\test\TransferFuncTests.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\ut\TransferFuncTests.h"
+				RelativePath=".\test\TransferFuncTests.h"
 				>
 			</File>
 		</Filter>

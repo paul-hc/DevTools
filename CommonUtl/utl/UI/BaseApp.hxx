@@ -11,9 +11,9 @@
 #include <afxcontrolbars.h>			// MFC support for ribbons and control bars
 
 #ifdef _DEBUG
-#include "utl/ut/Test.h"
-#include "utl/ut/UtlConsoleTests.h"
-#include "ut/UtlUserInterfaceTests.h"
+#include "utl/test/Test.h"
+#include "utl/test/UtlConsoleTests.h"
+#include "test/UtlUserInterfaceTests.h"
 #endif
 
 

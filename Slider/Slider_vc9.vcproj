@@ -807,19 +807,19 @@
 			Name="Tests"
 			>
 			<File
-				RelativePath=".\UT\ImagingD2DTests.cpp"
+				RelativePath=".\test\ImagingD2DTests.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\UT\ImagingD2DTests.h"
+				RelativePath=".\test\ImagingD2DTests.h"
 				>
 			</File>
 			<File
-				RelativePath=".\UT\ThumbnailTests.cpp"
+				RelativePath=".\test\ThumbnailTests.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\UT\ThumbnailTests.h"
+				RelativePath=".\test\ThumbnailTests.h"
 				>
 			</File>
 		</Filter>

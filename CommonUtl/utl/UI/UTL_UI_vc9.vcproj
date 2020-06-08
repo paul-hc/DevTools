@@ -435,59 +435,59 @@
 			Name="Tests"
 			>
 			<File
-				RelativePath=".\ut\BaseImageTestCase.cpp"
+				RelativePath=".\test\BaseImageTestCase.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\ut\BaseImageTestCase.h"
+				RelativePath=".\test\BaseImageTestCase.h"
 				>
 			</File>
 			<File
-				RelativePath=".\ut\ColorTests.cpp"
+				RelativePath=".\test\ColorTests.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\ut\ColorTests.h"
+				RelativePath=".\test\ColorTests.h"
 				>
 			</File>
 			<File
-				RelativePath=".\ut\SerializationTests.cpp"
+				RelativePath=".\test\SerializationTests.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\ut\SerializationTests.h"
+				RelativePath=".\test\SerializationTests.h"
 				>
 			</File>
 			<File
-				RelativePath=".\ut\ShellFileSystemTests.cpp"
+				RelativePath=".\test\ShellFileSystemTests.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\ut\ShellFileSystemTests.h"
+				RelativePath=".\test\ShellFileSystemTests.h"
 				>
 			</File>
 			<File
-				RelativePath=".\ut\TestToolWnd.cpp"
+				RelativePath=".\test\TestToolWnd.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\ut\TestToolWnd.h"
+				RelativePath=".\test\TestToolWnd.h"
 				>
 			</File>
 			<File
-				RelativePath=".\ut\UtlUserInterfaceTests.cpp"
+				RelativePath=".\test\UtlUserInterfaceTests.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\ut\UtlUserInterfaceTests.h"
+				RelativePath=".\test\UtlUserInterfaceTests.h"
 				>
 			</File>
 			<File
-				RelativePath=".\ut\WicImageTests.cpp"
+				RelativePath=".\test\WicImageTests.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\ut\WicImageTests.h"
+				RelativePath=".\test\WicImageTests.h"
 				>
 			</File>
 		</Filter>

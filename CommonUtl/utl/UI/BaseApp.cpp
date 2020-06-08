@@ -7,7 +7,7 @@
 #include "resource.h"
 
 #ifdef _DEBUG
-#include "utl/ut/Test.h"
+#include "utl/test/Test.h"
 #include "ImageStore.h"
 #include "Utilities.h"
 

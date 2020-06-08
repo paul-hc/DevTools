@@ -9,8 +9,8 @@
 #include <iostream>
 
 #ifdef _DEBUG
-#include "utl/ut/UtlConsoleTests.h"
-#include "ut/TransferFuncTests.h"
+#include "utl/test/UtlConsoleTests.h"
+#include "test/TransferFuncTests.h"
 #endif
 
 #ifdef _DEBUG

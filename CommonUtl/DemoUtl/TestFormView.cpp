@@ -7,7 +7,7 @@
 #include "DemoTemplate.h"
 #include "ImageDialog.h"
 #include "FileListDialog.h"
-#include "ImageTests.h"
+#include "test/ImageTests.h"
 #include "utl/UI/Utilities.h"
 #include "resource.h"
 

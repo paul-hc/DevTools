@@ -422,7 +422,15 @@
 				>
 			</File>
 			<File
-				RelativePath=".\res\ShellGoodies.rgs"
+				RelativePath=".\res\ImageStrip.bmp"
+				>
+			</File>
+			<File
+				RelativePath=".\res\ImageStrip.png"
+				>
+			</File>
+			<File
+				RelativePath=".\resource.h"
 				>
 			</File>
 			<File
@@ -466,15 +474,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath=".\res\ImageStrip.bmp"
-				>
-			</File>
-			<File
-				RelativePath=".\res\ImageStrip.png"
-				>
-			</File>
-			<File
-				RelativePath=".\resource.h"
+				RelativePath=".\res\ShellGoodies.rgs"
 				>
 			</File>
 			<File
@@ -500,14 +500,6 @@
 			</File>
 			<File
 				RelativePath=".\Application_fwd.h"
-				>
-			</File>
-			<File
-				RelativePath=".\ShellGoodiesCom.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\ShellGoodiesCom.h"
 				>
 			</File>
 			<File
@@ -565,6 +557,14 @@
 						InterfaceIdentifierFileName="ShellGoodies_i.c"
 					/>
 				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\ShellGoodiesCom.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\ShellGoodiesCom.h"
+				>
 			</File>
 			<File
 				RelativePath=".\stdafx.cpp"
@@ -855,27 +855,27 @@
 			Name="Tests"
 			>
 			<File
-				RelativePath=".\ut\CommandModelSerializerTests.cpp"
+				RelativePath=".\test\CommandModelSerializerTests.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\ut\CommandModelSerializerTests.h"
+				RelativePath=".\test\CommandModelSerializerTests.h"
 				>
 			</File>
 			<File
-				RelativePath=".\ut\RenameFilesTests.cpp"
+				RelativePath=".\test\RenameFilesTests.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\ut\RenameFilesTests.h"
+				RelativePath=".\test\RenameFilesTests.h"
 				>
 			</File>
 			<File
-				RelativePath=".\ut\TextAlgorithmsTests.cpp"
+				RelativePath=".\test\TextAlgorithmsTests.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\ut\TextAlgorithmsTests.h"
+				RelativePath=".\test\TextAlgorithmsTests.h"
 				>
 			</File>
 		</Filter>

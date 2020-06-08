@@ -845,139 +845,139 @@
 			Name="Tests"
 			>
 			<File
-				RelativePath=".\ut\AlgorithmsTests.cpp"
+				RelativePath=".\test\AlgorithmsTests.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\ut\AlgorithmsTests.h"
+				RelativePath=".\test\AlgorithmsTests.h"
 				>
 			</File>
 			<File
-				RelativePath=".\ut\FileSystemTests.cpp"
+				RelativePath=".\test\FileSystemTests.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\ut\FileSystemTests.h"
+				RelativePath=".\test\FileSystemTests.h"
 				>
 			</File>
 			<File
-				RelativePath=".\ut\FmtUtilsTests.cpp"
+				RelativePath=".\test\FmtUtilsTests.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\ut\FmtUtilsTests.h"
+				RelativePath=".\test\FmtUtilsTests.h"
 				>
 			</File>
 			<File
-				RelativePath=".\ut\LcsTests.cpp"
+				RelativePath=".\test\LcsTests.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\ut\LcsTests.h"
+				RelativePath=".\test\LcsTests.h"
 				>
 			</File>
 			<File
-				RelativePath=".\ut\MockObject.cpp"
+				RelativePath=".\test\MockObject.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\ut\MockObject.h"
+				RelativePath=".\test\MockObject.h"
 				>
 			</File>
 			<File
-				RelativePath=".\ut\NumericTests.cpp"
+				RelativePath=".\test\NumericTests.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\ut\NumericTests.h"
+				RelativePath=".\test\NumericTests.h"
 				>
 			</File>
 			<File
-				RelativePath=".\ut\PathGeneratorTests.cpp"
+				RelativePath=".\test\PathGeneratorTests.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\ut\PathGeneratorTests.h"
+				RelativePath=".\test\PathGeneratorTests.h"
 				>
 			</File>
 			<File
-				RelativePath=".\ut\PathTests.cpp"
+				RelativePath=".\test\PathTests.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\ut\PathTests.h"
+				RelativePath=".\test\PathTests.h"
 				>
 			</File>
 			<File
-				RelativePath=".\ut\RegistryTests.cpp"
+				RelativePath=".\test\RegistryTests.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\ut\RegistryTests.h"
+				RelativePath=".\test\RegistryTests.h"
 				>
 			</File>
 			<File
-				RelativePath=".\ut\ResequenceTests.cpp"
+				RelativePath=".\test\ResequenceTests.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\ut\ResequenceTests.h"
+				RelativePath=".\test\ResequenceTests.h"
 				>
 			</File>
 			<File
-				RelativePath=".\ut\StringRangeTests.cpp"
+				RelativePath=".\test\StringRangeTests.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\ut\StringRangeTests.h"
+				RelativePath=".\test\StringRangeTests.h"
 				>
 			</File>
 			<File
-				RelativePath=".\ut\StringTests.cpp"
+				RelativePath=".\test\StringTests.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\ut\StringTests.h"
+				RelativePath=".\test\StringTests.h"
 				>
 			</File>
 			<File
-				RelativePath=".\ut\StructuredStorageTest.cpp"
+				RelativePath=".\test\StructuredStorageTest.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\ut\StructuredStorageTest.h"
+				RelativePath=".\test\StructuredStorageTest.h"
 				>
 			</File>
 			<File
-				RelativePath=".\ut\Test.cpp"
+				RelativePath=".\test\Test.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\ut\Test.h"
+				RelativePath=".\test\Test.h"
 				>
 			</File>
 			<File
-				RelativePath=".\ut\ThreadingTests.cpp"
+				RelativePath=".\test\ThreadingTests.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\ut\ThreadingTests.h"
+				RelativePath=".\test\ThreadingTests.h"
 				>
 			</File>
 			<File
-				RelativePath=".\ut\UnitTest.cpp"
+				RelativePath=".\test\UnitTest.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\ut\UnitTest.h"
+				RelativePath=".\test\UnitTest.h"
 				>
 			</File>
 			<File
-				RelativePath=".\ut\UtlConsoleTests.cpp"
+				RelativePath=".\test\UtlConsoleTests.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\ut\UtlConsoleTests.h"
+				RelativePath=".\test\UtlConsoleTests.h"
 				>
 			</File>
 		</Filter>
