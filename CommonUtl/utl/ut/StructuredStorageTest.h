@@ -8,6 +8,9 @@
 #include "UnitTest.h"
 
 
+namespace fs { class CStructuredStorage; }
+
+
 class CStructuredStorageTest : public ut::CConsoleTestCase
 {
 	CStructuredStorageTest( void );
@@ -19,6 +22,7 @@ public:
 private:
 	void TestLongFilenames( void );
 	void TestStructuredStorage( void );
+	void _TestEnumerateElements( fs::CStructuredStorage* pDocStg );
 };
 
 
