@@ -97,6 +97,12 @@ namespace fs
 		return true;
 	}
 
+	bool CStructuredStorage::IsValidDocFile( const TCHAR* pDocFilePath )
+	{
+		HRESULT hResult = ::StgIsStorageFile( pDocFilePath );
+		return S_OK == hResult;
+	}
+
 	void CStructuredStorage::Close( void )
 	{
 		if ( !IsOpen() )
@@ -111,19 +117,6 @@ namespace fs
 		m_openedFileStates.Clear();
 	}
 
-	bool CStructuredStorage::StorageExist( const TCHAR* pStorageName, IStorage* pParentDir /*= NULL*/ )
-	{
-		CPushIgnoreMode pushNoThrow( this );		// failure is not an error
-		CComPtr< IStorage > pStorage = OpenDir( pStorageName, pParentDir, STGM_READ );
-		return pStorage != NULL;
-	}
-
-	bool CStructuredStorage::StreamExist( const TCHAR* pStreamSubPath, IStorage* pParentDir /*= NULL*/ )
-	{
-		CPushIgnoreMode pushNoThrow( this );		// failure is not an error
-		CComPtr< IStream > pStream = OpenStream( pStreamSubPath, pParentDir, STGM_READ );
-		return pStream != NULL;
-	}
 
 	CComPtr< IStorage > CStructuredStorage::CreateDir( const TCHAR* pDirName, IStorage* pParentDir /*= NULL*/, DWORD mode /*= STGM_CREATE | STGM_READWRITE*/ )
 	{
@@ -163,6 +156,14 @@ namespace fs
 
 		return HandleError( hResult, pDirName );
 	}
+
+	bool CStructuredStorage::StorageExist( const TCHAR* pStorageName, IStorage* pParentDir /*= NULL*/ )
+	{
+		CPushIgnoreMode ignoreErrors( this );		// failure is not an error
+		CComPtr< IStorage > pStorage = OpenDir( pStorageName, pParentDir, STGM_READ );
+		return pStorage != NULL;
+	}
+
 
 	CComPtr< IStream > CStructuredStorage::CreateStream( const TCHAR* pStreamName, IStorage* pParentDir /*= NULL*/, DWORD mode /*= STGM_CREATE | STGM_READWRITE*/ )
 	{
@@ -206,6 +207,14 @@ namespace fs
 		return HandleError( hResult, pStreamName );
 	}
 
+	bool CStructuredStorage::StreamExist( const TCHAR* pStreamSubPath, IStorage* pParentDir /*= NULL*/ )
+	{
+		CPushIgnoreMode ignoreErrors( this );		// failure is not an error
+		CComPtr< IStream > pStream = OpenStream( pStreamSubPath, pParentDir, STGM_READ );
+		return pStream != NULL;
+	}
+
+
 	std::auto_ptr< COleStreamFile > CStructuredStorage::CreateFile( const TCHAR* pFileName, IStorage* pParentDir /*= NULL*/, DWORD mode /*= CFile::modeCreate | CFile::modeWrite*/ )
 	{
 		REQUIRE( IsOpen() );
@@ -229,6 +238,7 @@ namespace fs
 
 		return pFile;
 	}
+
 
 	std::tstring CStructuredStorage::EncodeStreamName( const TCHAR* pStreamName ) const
 	{
@@ -289,8 +299,17 @@ namespace fs
 			}
 		}
 
+		if ( str::IsEmpty( pDocFilePath ) )
+			pDocFilePath = GetDocFilePath().GetPtr();
+
 		s_fileError.m_lOsError = (LONG)hResult;
-		s_fileError.m_strFileName = CFlexPath::MakeComplexPath( !str::IsEmpty( pDocFilePath ) ? pDocFilePath : GetDocFilePath().GetPtr(), pSubPath ).GetPtr();		// assign error file path
+
+		s_fileError.m_strFileName = pSubPath;
+		if ( !str::IsEmpty( pDocFilePath ) )
+			if ( !s_fileError.m_strFileName.IsEmpty() )
+				s_fileError.m_strFileName = CFlexPath::MakeComplexPath( pDocFilePath, s_fileError.m_strFileName.GetString() ).GetPtr();
+			else
+				s_fileError.m_strFileName = pDocFilePath;
 
 		if ( !IsThrowMode() )
 		{

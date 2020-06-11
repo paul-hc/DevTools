@@ -15,14 +15,14 @@
 
 namespace ut
 {
-	void BuildStorage( fs::CStructuredStorage* pDocStg, const fs::CRelativeEnumerator& src )
+	void BuildStorage( fs::CStructuredStorage* pDocStorage, const fs::CRelativeEnumerator& src )
 	{
-		ASSERT_PTR( pDocStg );
-		ASSERT( pDocStg->IsOpen() );
+		ASSERT_PTR( pDocStorage );
+		ASSERT( pDocStorage->IsOpen() );
 
 		for ( std::vector< fs::CPath >::const_iterator itSubDirPath = src.m_subDirPaths.begin(); itSubDirPath != src.m_subDirPaths.end(); ++itSubDirPath )
 		{
-			fs::CStorageTrack subDirTrack( pDocStg );
+			fs::CStorageTrack subDirTrack( pDocStorage );
 			ASSERT( subDirTrack.CreateDeepSubPath( itSubDirPath->GetPtr() ) );
 		}
 
@@ -35,12 +35,12 @@ namespace ut
 
 			fs::CPath subPath = itFilePath->GetParentPath();
 
-			fs::CStorageTrack subDirTrack( pDocStg );
+			fs::CStorageTrack subDirTrack( pDocStorage );
 			ASSERT( subDirTrack.OpenDeepSubPath( subPath.GetPtr(), STGM_READWRITE ) );
 
 			fs::CPath streamName( itFilePath->GetFilename() );
 
-			std::auto_ptr< COleStreamFile > pDestStreamFile( pDocStg->CreateFile( streamName.GetPtr(), subDirTrack.GetCurrent() ) );
+			std::auto_ptr< COleStreamFile > pDestStreamFile( pDocStorage->CreateFile( streamName.GetPtr(), subDirTrack.GetCurrent() ) );
 			ASSERT_PTR( pDestStreamFile.get() );
 
 			fs::BufferedCopy( *pDestStreamFile, *pSrcFile );
@@ -78,7 +78,7 @@ void CStructuredStorageTest::TestLongFilenames( void )
 
 void CStructuredStorageTest::TestStructuredStorage( void )
 {
-	const fs::CPath docPath = ut::CTempFilePool::MakePoolDirPath().GetParentPath() / _T("StorageDoc.bin");
+	const fs::CPath docStgPath = ut::CTempFilePool::MakePoolDirPath().GetParentPath() / _T("StorageDoc.bin");
 
 	// create storage document
 	{
@@ -89,30 +89,35 @@ void CStructuredStorageTest::TestStructuredStorage( void )
 		fs::EnumFiles( &srcEnum, poolDirPath, NULL, Deep );
 		ASSERT_EQUAL( _T("a1.txt|a2.txt|B1\\b1.txt|B1\\b2.txt|B1\\SD\\ThisIsASuperLongFilenameOfAnUnknownImageFileThatKeepsGoing.txt"), ut::JoinFiles( srcEnum ) );
 
-		fs::CStructuredStorage docStg;
-		ASSERT( docStg.CreateDocFile( docPath.GetPtr() ) );
+		fs::CStructuredStorage docStorage;
+		ASSERT( docStorage.CreateDocFile( docStgPath.GetPtr() ) );
+		ENSURE( fs::CStructuredStorage::IsValidDocFile( docStgPath.GetPtr() ) );
 
-		ut::BuildStorage( &docStg, srcEnum );
+		ut::BuildStorage( &docStorage, srcEnum );
 
-		fs::CStorageTrack track( &docStg );
+		fs::CStorageTrack track( &docStorage );
 		fs::CEnumerator foundEnum;
 
 		track.EnumElements( &foundEnum );		// Shallow
 		ASSERT_EQUAL( _T("a1.txt|a2.txt"), ut::JoinFiles( foundEnum ) );
+
+		ENSURE( fs::CStructuredStorage::IsValidDocFile( docStgPath.GetPtr() ) );
 	}
 
 	// load storage document
 	{
-		fs::CStructuredStorage docStg;
-		ASSERT( docStg.OpenDocFile( docPath.GetPtr() ) );
+		ENSURE( fs::CStructuredStorage::IsValidDocFile( docStgPath.GetPtr() ) );
 
-		_TestEnumerateElements( &docStg );
+		fs::CStructuredStorage docStorage;
+		ASSERT( docStorage.OpenDocFile( docStgPath.GetPtr() ) );
+
+		_TestEnumerateElements( &docStorage );
 	}
 }
 
-void CStructuredStorageTest::_TestEnumerateElements( fs::CStructuredStorage* pDocStg )
+void CStructuredStorageTest::_TestEnumerateElements( fs::CStructuredStorage* pDocStorage )
 {
-	fs::CStorageTrack track( pDocStg );
+	fs::CStorageTrack track( pDocStorage );
 
 	// enumerate compound document
 	{
@@ -124,7 +129,7 @@ void CStructuredStorageTest::_TestEnumerateElements( fs::CStructuredStorage* pDo
 	// enumerate a sub-storage
 	{
 		fs::CEnumerator foundEnum;
-		track.Push( pDocStg->OpenDir( _T("B1") ) );
+		track.Push( pDocStorage->OpenDir( _T("B1") ) );
 
 		track.EnumElements( &foundEnum, Deep );
 		ASSERT_EQUAL( _T("B1\\b1.txt|B1\\b2.txt|B1\\SD\\ThisIsASuperLongFi_478086F2.txt"), ut::JoinFiles( foundEnum ) );
@@ -135,7 +140,7 @@ void CStructuredStorageTest::_TestEnumerateElements( fs::CStructuredStorage* pDo
 			ASSERT_EQUAL( _T("b1.txt|b2.txt|SD\\ThisIsASuperLongFi_478086F2.txt"), ut::JoinFiles( relEnum ) );
 		}
 
-		track.Push( pDocStg->OpenDir( _T("SD"), track.GetCurrent() ) );		// go deeper
+		track.Push( pDocStorage->OpenDir( _T("SD"), track.GetCurrent() ) );		// go deeper
 		foundEnum.Clear();
 		track.EnumElements( &foundEnum, Deep );
 		ASSERT_EQUAL( _T("B1\\SD\\ThisIsASuperLongFi_478086F2.txt"), ut::JoinFiles( foundEnum ) );

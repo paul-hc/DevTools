@@ -22,7 +22,6 @@ namespace app
 		DocMaximize			= BIT_FLAG( 1 ),
 		ShowToolbar			= BIT_FLAG( 2 ),
 		ShowStatusBar		= BIT_FLAG( 3 ),
-		ShowHelp			= BIT_FLAG( 4 ),
 
 		// handled by CApplication
 		RegAdditionalExt	= BIT_FLAG( 8 )
@@ -50,6 +49,15 @@ public:
 
 	void UpdateAllViews( UpdateViewHint hint = Hint_ViewUpdate, CDocument* pSenderDoc = NULL, CView* pSenderView = NULL );
 private:
+	enum RunFlags
+	{
+		ShowHelp			= BIT_FLAG( 0 ),
+		RunTests			= BIT_FLAG( 8 ),
+		SkipUiTests			= BIT_FLAG( 9 )
+	};
+
+	bool HandleAppTests( void );
+private:
 	class CCmdLineInfo : public CCommandLineInfo
 	{
 	public:
@@ -60,6 +68,8 @@ private:
 
 		// base overrides
 		virtual void ParseParam( const TCHAR* pParam, BOOL isFlag, BOOL isLast );
+
+		static std::tstring GetHelpMsg( void );
 	private:
 		bool ParseSwitch( const TCHAR* pSwitch );
 	private:
@@ -75,9 +85,11 @@ private:
 
 	CMainFrame* m_pMainFrame;
 private:
+	int m_runFlags;
 	int m_forceMask;
 	int m_forceFlags;
 	std::vector< std::tstring > m_queuedAlbumFilePaths;
+	static std::tstring s_cmdLineHelpMsg;
 
 	// generated stuff
 public:

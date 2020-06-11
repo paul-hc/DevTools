@@ -7,6 +7,7 @@
 #include "StructuredStorage.h"
 #include "GdiCoords.h"
 #include "BaseApp.h"
+#include "utl/EnumTags.h"
 
 #pragma comment( lib, "windowscodecs.lib" )		// link to WIC
 
@@ -67,14 +68,14 @@ namespace wic
 		return false;
 	}
 
-	bool CBitmapDecoder::CreateFromStream( IStream* pStream, const IID* pDecoderId /*= NULL*/ )
+	bool CBitmapDecoder::CreateFromStream( IStream* pStream, const IID* pVendorId /*= NULL*/ )
 	{
 		ASSERT_PTR( pStream );
 		m_pDecoder = NULL;
 		m_frameCount = 0;
 
 		return
-			Good( CImagingFactory::Factory()->CreateDecoderFromStream( pStream, pDecoderId, WICDecodeMetadataCacheOnDemand, &m_pDecoder ) ) &&
+			Good( CImagingFactory::Factory()->CreateDecoderFromStream( pStream, pVendorId, WICDecodeMetadataCacheOnDemand, &m_pDecoder ) ) &&
 			Good( m_pDecoder->GetFrameCount( &m_frameCount ) );
 	}
 
@@ -458,7 +459,7 @@ namespace wic
 			if ( pImageStream != NULL )											// loaded the image data into stream?
 			{
 				// load the WIC bitmap
-				CComPtr< IWICBitmapSource > pBitmap = LoadBitmapFromStream( dibMeta, pImageStream, *pDecoderClsId );
+				CComPtr< IWICBitmapSource > pBitmap = LoadBitmapFromStream( dibMeta, pImageStream, pDecoderClsId );
 				if ( pBitmap != NULL )
 					CreateDibSection( dibMeta, pBitmap );				// create a DIB section containing the image
 			}
@@ -469,64 +470,157 @@ namespace wic
 		return dibMeta;
 	}
 
-	const IID* FindDecoderIdFromPath( const TCHAR* pFilePath )
+
+	const CEnumTags& GetTags_ImageFormat( void )
+	{
+		static const CEnumTags s_tags( _T("Bitmap Files|JPEG Files|TIFF Files|GIF Files|PNG Files|Icon Files|Windows Media Image Files|"),
+			_T(".bmp|.jpg|.tif|.gif|.png|.ico|.wmp|") );
+		return s_tags;
+	}
+
+	ImageFormat FindFileImageFormat( const TCHAR* pFilePath )
 	{
 		const TCHAR* pExt = path::FindExt( pFilePath );
 
 		if ( path::EquivalentPtr( _T(".bmp"), pExt ) ||
 			 path::EquivalentPtr( _T(".dib"), pExt ) )
-			return &CLSID_WICBmpDecoder;
-		else if ( path::EquivalentPtr( _T(".ico"), pExt ) ||
-				  path::EquivalentPtr( _T(".cur"), pExt ) )
-			return &CLSID_WICIcoDecoder;
+			return BmpFormat;
 		else if ( path::EquivalentPtr( _T(".jpg"), pExt ) ||
 			 path::EquivalentPtr( _T(".jpeg"), pExt ) ||
 			 path::EquivalentPtr( _T(".jpe"), pExt ) ||
 			 path::EquivalentPtr( _T(".jfif"), pExt ) )
-			return &CLSID_WICJpegDecoder;
+			return JpegFormat;
 		else if ( path::EquivalentPtr( _T(".tif"), pExt ) ||
 				  path::EquivalentPtr( _T(".tiff"), pExt ) )
-			return &CLSID_WICTiffDecoder;
+			return TiffFormat;
 		else if ( path::EquivalentPtr( _T(".gif"), pExt ) )
-			return &CLSID_WICGifDecoder;
+			return GifFormat;
 		else if ( path::EquivalentPtr( _T(".png"), pExt ) )
-			return &CLSID_WICPngDecoder;
+			return PngFormat;
+		else if ( path::EquivalentPtr( _T(".ico"), pExt ) ||
+				  path::EquivalentPtr( _T(".cur"), pExt ) )
+			return IcoFormat;
 		else if ( path::EquivalentPtr( _T(".wmp"), pExt ) )
-			return &CLSID_WICWmpDecoder;
+			return WmpFormat;
 
-		return &GUID_ContainerFormatBmp;			// default is bitmap encoding
+		return UnknownImageFormat;
 	}
 
-	const IID* FindDecoderIdFromResource( const TCHAR* pResType )
+	ImageFormat FindResourceImageFormat( const TCHAR* pResType )
 	{
 		if ( RT_CURSOR == pResType || RT_ICON == pResType )
-			return &CLSID_WICIcoDecoder;
+			return IcoFormat;
 		else if ( RT_BITMAP == pResType )
-			return &CLSID_WICBmpDecoder;
+			return BmpFormat;
 		else if ( !IS_INTRESOURCE( pResType ) )
 			if ( str::Equals< str::IgnoreCase >( pResType, _T("PNG") ) )
-				return &CLSID_WICPngDecoder;
+				return PngFormat;
 			else if ( str::Equals< str::IgnoreCase >( pResType, _T("GIF") ) )
-				return &CLSID_WICGifDecoder;
+				return GifFormat;
 			else if ( str::Equals< str::IgnoreCase >( pResType, _T("TIFF") ) )
-				return &CLSID_WICTiffDecoder;
+				return TiffFormat;
 			else if ( str::Equals< str::IgnoreCase >( pResType, _T("JPG") ) )
-				return &CLSID_WICJpegDecoder;
+				return JpegFormat;
 			else if ( str::Equals< str::IgnoreCase >( pResType, _T("WMP") ) )
-				return &CLSID_WICWmpDecoder;
+				return WmpFormat;
+
+		return UnknownImageFormat;
+	}
+
+	const TCHAR* GetDefaultImageFormatExt( ImageFormat imageType )
+	{
+		return GetTags_ImageFormat().FormatKey( imageType ).c_str();
+	}
+
+	bool ReplaceImagePathExt( fs::CPath& rSaveImagePath, ImageFormat imageType )
+	{
+		ASSERT( !rSaveImagePath.IsEmpty() );
+
+		if ( wic::FindFileImageFormat( rSaveImagePath.GetPtr() ) == imageType )
+			return false;			// it already has a matching extension
+
+		rSaveImagePath.ReplaceExt( wic::GetDefaultImageFormatExt( imageType ) );
+		return true;				// replaced the extension
+	}
+
+
+	const IID* GetDecoderId( ImageFormat imageType )
+	{
+		switch ( imageType )
+		{
+			case BmpFormat:		return &CLSID_WICBmpDecoder;
+			case JpegFormat:	return &CLSID_WICJpegDecoder;
+			case TiffFormat:	return &CLSID_WICTiffDecoder;
+			case GifFormat:		return &CLSID_WICGifDecoder;
+			case PngFormat:		return &CLSID_WICPngDecoder;
+			case IcoFormat:		return &CLSID_WICIcoDecoder;
+			case WmpFormat:		return &CLSID_WICWmpDecoder;
+			default:
+				ASSERT( false );
+			case UnknownImageFormat:
+				return NULL;
+		}
+	}
+
+	const IID* GetEncoderId( ImageFormat imageType )
+	{
+		switch ( imageType )
+		{
+			case BmpFormat:		return &CLSID_WICBmpEncoder;
+			case JpegFormat:	return &CLSID_WICJpegEncoder;
+			case TiffFormat:	return &CLSID_WICTiffEncoder;
+			case GifFormat:		return &CLSID_WICGifEncoder;
+			case IcoFormat:
+			case PngFormat:		return &CLSID_WICPngEncoder;
+			case WmpFormat:		return &CLSID_WICWmpEncoder;
+			default:
+				ASSERT( false );
+			case UnknownImageFormat:
+				return NULL;
+		}
+	}
+
+	const IID* GetContainerFormatId( ImageFormat imageType )
+	{
+		switch ( imageType )
+		{
+			case BmpFormat:		return &GUID_ContainerFormatBmp;
+			case JpegFormat:	return &GUID_ContainerFormatJpeg;
+			case TiffFormat:	return &GUID_ContainerFormatTiff;
+			case GifFormat:		return &GUID_ContainerFormatGif;
+			case PngFormat:		return &GUID_ContainerFormatPng;
+			case IcoFormat:		return &GUID_ContainerFormatIco;
+			case WmpFormat:		return &GUID_ContainerFormatWmp;
+			default:
+				ASSERT( false );
+			case UnknownImageFormat:
+				return NULL;
+		}
+	}
+
+
+	CComPtr< IWICBitmapSource > LoadBitmapFromStream( IStream* pImageStream, UINT framePos /*= 0*/ )
+	{	// using auto-decoder
+		CBitmapDecoder decoder;
+		if ( decoder.CreateFromStream( pImageStream ) )
+		{
+			ASSERT( framePos < decoder.GetFrameCount() );
+			return decoder.ConvertFrameAt( framePos );		// releases any source dependencies (IStream, HFILE, etc)
+		}
 
 		return NULL;
 	}
 
 	// load a PNG image from the specified stream (using Windows Imaging Component)
-	CComPtr< IWICBitmapSource > LoadBitmapFromStream( CDibMeta& rDibMeta, IStream* pImageStream, const IID& decoderId )
+	CComPtr< IWICBitmapSource > LoadBitmapFromStream( CDibMeta& rDibMeta, IStream* pImageStream, const IID* pDecoderId )
 	{
 		ASSERT_PTR( pImageStream );
+		ASSERT_PTR( pDecoderId );
 
 		CComPtr< IWICBitmapSource > pBitmap;
 
 		CComPtr< IWICBitmapDecoder > pDecoder;
-		if ( HR_OK( pDecoder.CoCreateInstance( decoderId, NULL, CLSCTX_INPROC_SERVER ) ) )			// create WIC's image decoder (PNG, JPG, etc)
+		if ( HR_OK( pDecoder.CoCreateInstance( *pDecoderId, NULL, CLSCTX_INPROC_SERVER ) ) )		// create WIC's image decoder (PNG, JPG, etc)
 			if ( HR_OK( pDecoder->Initialize( pImageStream, WICDecodeMetadataCacheOnLoad ) ) )		// load the image
 				pBitmap = ExtractFrameBitmap( rDibMeta, pDecoder, 0 );
 
@@ -590,10 +684,10 @@ namespace wic
 		return NULL;
 	}
 
-	CComPtr< IWICBitmapSource > LoadBitmapFromStream( IStream* pImageStream, const IID& decoderId )
+	CComPtr< IWICBitmapSource > LoadBitmapFromStream( IStream* pImageStream, const IID* pDecoderId )
 	{
 		CDibMeta dibMeta;
-		return LoadBitmapFromStream( dibMeta, pImageStream, decoderId );
+		return LoadBitmapFromStream( dibMeta, pImageStream, pDecoderId );
 	}
 
 

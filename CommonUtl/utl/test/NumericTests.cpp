@@ -466,7 +466,7 @@ void CNumericTests::TestCrc32( void )
 
 	ASSERT( utl::CCrc32::Instance().ComputeFileCrc32( app::GetModulePath() ) != 0 );				// exe file CRC32
 
-	const fs::CPath& imagesDirPath = ut::GetTestImagesDirPath();
+	const fs::CPath& imagesDirPath = ut::GetDestImagesDirPath();
 	if ( !imagesDirPath.IsEmpty() )
 	{
 		fs::CPath gifPath = imagesDirPath / fs::CPath( _T("Animated.gif") );

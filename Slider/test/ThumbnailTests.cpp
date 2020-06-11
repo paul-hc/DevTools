@@ -81,7 +81,7 @@ CThumbnailTests& CThumbnailTests::Instance( void )
 
 const fs::CPath& CThumbnailTests::GetThumbSaveDirPath( void )
 {
-	static fs::CPath dirPath = ut::GetTestImagesDirPath() / fs::CPath( _T("thumbnails") );
+	static fs::CPath dirPath = ut::GetDestImagesDirPath() / fs::CPath( _T("thumbnails") );
 	if ( !dirPath.IsEmpty() && !fs::CreateDirPath( dirPath.GetPtr() ) )
 	{
 		TRACE( _T("\n * Cannot create the local save directory for thumbs: %s\n"), dirPath.GetPtr() );

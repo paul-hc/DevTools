@@ -46,16 +46,19 @@ namespace fs
 		// document storage file
 		bool CreateDocFile( const TCHAR* pDocFilePath, DWORD mode = STGM_CREATE | STGM_READWRITE );
 		bool OpenDocFile( const TCHAR* pDocFilePath, DWORD mode = STGM_READ );
+		static bool IsValidDocFile( const TCHAR* pDocFilePath );			// a compound document file?
 
 		// embedded storages (sub-directories)
 		CComPtr< IStorage > CreateDir( const TCHAR* pDirName, IStorage* pParentDir = NULL, DWORD mode = STGM_CREATE | STGM_READWRITE );
 		CComPtr< IStorage > OpenDir( const TCHAR* pDirName, IStorage* pParentDir = NULL, DWORD mode = STGM_READ );
 		bool DeleteDir( const TCHAR* pDirName, IStorage* pParentDir = NULL );			// storage
+		bool StorageExist( const TCHAR* pStorageName, IStorage* pParentDir = NULL );
 
 		// embedded streams (files)
 		CComPtr< IStream > CreateStream( const TCHAR* pStreamName, IStorage* pParentDir = NULL, DWORD mode = STGM_CREATE | STGM_READWRITE );
 		CComPtr< IStream > OpenStream( const TCHAR* pStreamName, IStorage* pParentDir = NULL, DWORD mode = STGM_READ );
 		bool DeleteStream( const TCHAR* pStreamName, IStorage* pParentDir = NULL );
+		bool StreamExist( const TCHAR* pStreamSubPath, IStorage* pParentDir = NULL );
 
 		// embedded files (streams); caller must delete the returned file
 		std::auto_ptr< COleStreamFile > CreateFile( const TCHAR* pFileName, IStorage* pParentDir = NULL, DWORD mode = CFile::modeCreate | CFile::modeWrite );
@@ -64,9 +67,6 @@ namespace fs
 		// opened embedded streams file states
 		bool IsElementOpen( const fs::CPath& streamName ) const { return m_openedFileStates.Contains( streamName ); }
 		const fs::CFileState* FindOpenedElement( const fs::CPath& streamName ) const { return m_openedFileStates.Find( streamName ); }
-
-		bool StorageExist( const TCHAR* pStorageName, IStorage* pParentDir = NULL );
-		bool StreamExist( const TCHAR* pStreamSubPath, IStorage* pParentDir = NULL );
 
 		static DWORD ToMode( DWORD mode );										// augment mode with default STGM_SHARE_EXCLUSIVE (if no STGM_SHARE_DENY_* flag is present)
 		static std::tstring MakeShortFilename( const TCHAR* pFilename );		// make short file name with length limited to MaxFilenameLen

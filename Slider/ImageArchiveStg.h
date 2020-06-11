@@ -12,9 +12,10 @@
 
 
 class CFileAttr;
+class CImageStorageService;
 class CTransferFileAttr;
 class CCachedThumbBitmap;
-namespace ui { interface IProgressService; }
+namespace wic { enum ImageFormat; }
 
 
 // Compound file storage with password protection for .ias, .cid and .icf structured document files.
@@ -32,8 +33,7 @@ public:
 	void Close( void );
 	static void DiscardCachedImages( const fs::CPath& stgFilePath );		// to avoid sharing violations on stream access
 
-	void CreateImageArchive( const fs::CPath& stgFilePath, const std::tstring& password, const std::vector< TTransferPathPair >& xferPairs,
-							 ui::IProgressService* pProgressService ) throws_( CException* );
+	void CreateImageArchive( const fs::CPath& stgFilePath, CImageStorageService* pImagesSvc ) throws_( CException* );
 
 	bool SavePassword( const std::tstring& password );
 	std::tstring LoadPassword( void );
@@ -58,12 +58,13 @@ protected:
 	void FlattenDeepStreamPath( std::tstring& rDeepPath ) const { std::replace( rDeepPath.begin(), rDeepPath.end(), _T('\\'), GetSubPathSep() ); }			// '\' -> '|'
 	void UnflattenDeepStreamPath( std::tstring& rDeepPath ) const { std::replace( rDeepPath.begin(), rDeepPath.end(), GetSubPathSep(), _T('\\') ); }		// '|' or '*' -> '\'
 private:
-	void CreateImageFiles( std::vector< CTransferFileAttr* >& rTransferAttribs, ui::IProgressService* pProgressService ) throws_( CException* );
-	void CreateMetadataFile( const std::vector< CTransferFileAttr* >& transferAttribs );
-	void CreateThumbnailsSubStorage( const std::vector< CTransferFileAttr* >& transferAttribs, ui::IProgressService* pProgressService );
+	void CreateImageFiles( CImageStorageService* pImagesSvc ) throws_( CException* );
+	void CreateMetadataFile( const std::vector< CTransferFileAttr* >& transferAttrs );
+	void CreateThumbnailsSubStorage( const CImageStorageService* pImagesSvc );
+
+	static wic::ImageFormat MakeThumbStreamName( fs::CPath& rThumbStreamName, const TCHAR* pSrcImagePath );
 private:
 	CComPtr< IStorage > m_pThumbsStorage;
-	const GUID* m_pThumbsDecoderId;
 	app::ModelSchema m_docModelSchema;			// transient: loaded model schema from file, stored by the album doc
 private:
 	enum ExtensionType { Ext_ias, Ext_cid, Ext_icf, _Ext_Count };
@@ -81,10 +82,10 @@ private:
 	};
 
 	static const TCHAR* s_compoundStgExts[ _Ext_Count ];				// file extension for compound-files (".icf")
-	static const TCHAR* s_pwdStreamNames[ _PwdTypeCount ];				// PwdAnsi for backwards compatibility with old saved .icf files
-	static const TCHAR* s_thumbsSubStorageNames[ _ThumbsTypeCount ];	// name of the thumbs sub-storage (old "Thumbnails" in bmp format with .jpg extension)
-	static const TCHAR s_metadataFilename[];							// meta-data file in a compound-file
-	static const TCHAR s_albumFilename[];								// album info (superset of meta-data)
+	static const TCHAR* s_pwdStreamNames[ _PwdTypeCount ];				// "pwdW" - enchrypted password stream (PwdAnsi for backwards compatibility with old saved .icf files)
+	static const TCHAR* s_thumbsSubStorageNames[ _ThumbsTypeCount ];	// "Thumbs_jpeg" - thumbs sub-storage name (old "Thumbnails" in bmp format with .jpg extension)
+	static const TCHAR s_metadataFilename[];							// "_Meta.data" - meta-data stream in a compound-file (not really used on load)
+	static const TCHAR s_albumFilename[];								// "_Album.sld" - album info stream (superset of meta-data)
 	static const TCHAR s_subPathSep;									// sub-path separator for deep stream names
 public:
 	class CFactory : public CThrowMode
@@ -122,12 +123,12 @@ public:
 	private:
 		bool IsPasswordVerified( const fs::CPath& stgFilePath ) const;
 	private:
-		stdext::hash_map< fs::CPath, CImageArchiveStg* > m_storageMap;		// owns values
+		stdext::hash_map< fs::CPath, CImageArchiveStg* > m_storageMap;		// factory-managed (with ownership) archives
 		stdext::hash_map< fs::CPath, std::tstring > m_passwordProtected;	// known password-protected storages to encrypted passwords
 		std::set< std::tstring > m_verifiedPasswords;
 	};
 
-	static CFactory& Factory( void );
+	static CFactory* Factory( void );
 private:
 	enum { WriteableModeMask = STGM_CREATE | STGM_WRITE | STGM_READWRITE, NotOpenMask = -1 };
 

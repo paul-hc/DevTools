@@ -44,10 +44,10 @@ namespace ui
 {
 	// Null Pattern: placeholder for a valid ui::IProgressService interface with empty implementation
 	//
-	class CNullProgressService : private ui::IProgressHeader
+	class CNoProgressService : private ui::IProgressHeader
 							   , public ui::IProgressService
 	{
-		CNullProgressService( void ) {}
+		CNoProgressService( void ) {}
 
 		// ui::IProgressHeader interface
 		virtual void SetDialogTitle( const std::tstring& title );

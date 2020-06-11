@@ -1,6 +1,7 @@
 
 #include "stdafx.h"
-#include "ImageStorageModel.h"
+#include "ImageStorageService.h"
+#include "FileAttrAlgorithms.h"
 #include "utl/ContainerUtilities.h"
 #include "utl/UI/IProgressService.h"
 #include "utl/UI/UserReport.h"
@@ -43,27 +44,38 @@ namespace pwd
 }
 
 
-// CImageStorageModel implementation
+// CImageStorageService implementation
 
-CImageStorageModel::~CImageStorageModel()
+CImageStorageService::CImageStorageService( void )
+	: m_pProgressSvc( ui::CNoProgressService::Instance() )
+	, m_pUserReport( &ui::CSilentMode::Instance() )
 {
-	utl::ClearOwningContainer( m_fileAttribs );
 }
 
-void CImageStorageModel::Build( const std::vector< TTransferPathPair >& xferPairs, ui::IProgressService* pProgressService, ui::IUserReport* pUserReport )
+CImageStorageService::CImageStorageService( ui::IProgressService* pProgressSvc, ui::IUserReport* pUserReport )
+	: m_pProgressSvc( pProgressSvc )
+	, m_pUserReport( pUserReport )
 {
-	ASSERT_PTR( pProgressService );
-	ASSERT_PTR( pUserReport );
+	ASSERT_PTR( m_pProgressSvc );		// using null-pattern
+	ASSERT_PTR( m_pUserReport );
+}
 
-	pProgressService->AdvanceStage( _T("Building image file attributes") );
-	pProgressService->SetBoundedProgressCount( xferPairs.size() );
+CImageStorageService::~CImageStorageService()
+{
+	utl::ClearOwningContainer( m_transferAttrs );
+}
 
-	m_fileAttribs.reserve( xferPairs.size() );
+void CImageStorageService::Build( const std::vector< TTransferPathPair >& xferPairs )
+{
+	m_pProgressSvc->AdvanceStage( _T("Building image file attributes") );
+	m_pProgressSvc->SetBoundedProgressCount( xferPairs.size() );
+
+	m_transferAttrs.reserve( xferPairs.size() );
 
 	for ( std::vector< TTransferPathPair >::const_iterator itPair = xferPairs.begin(); itPair != xferPairs.end(); ++itPair )
 		if ( itPair->first.FileExist() )
 		{
-			m_fileAttribs.push_back( new CTransferFileAttr( *itPair ) );
+			m_transferAttrs.push_back( new CTransferFileAttr( *itPair ) );
 
 			if ( itPair->first.IsComplexPath() )
 				utl::AddUnique( m_srcStorages, itPair->first.GetPhysicalPath() );	// storage file to discard from cache at end
@@ -73,12 +85,31 @@ void CImageStorageModel::Build( const std::vector< TTransferPathPair >& xferPair
 		else
 		{
 			CFileException error( CFileException::fileNotFound, -1, itPair->first.GetPtr() );		// source image doesn't exist
-			pUserReport->ReportError( &error, MB_OK | MB_ICONWARNING );								// just warn & keep going
+			m_pUserReport->ReportError( &error, MB_OK | MB_ICONWARNING );							// just warn & keep going
 		}
+
+	fattr::StoreBaselineSequence( m_transferAttrs );
 
 	// Prevent sharing violations on SRC stream open.
 	//	2020-04-11: Still doesn't work, I get exception on open. I suspect the source stream (image file) must be kept open with CFile::shareExclusive by some WIC indirect COM interface.
 
 	for ( std::vector< fs::CPath >::const_iterator itSrcStorage = m_srcStorages.begin(); itSrcStorage != m_srcStorages.end(); ++itSrcStorage )
 		CWicImageCache::Instance().DiscardWithPrefix( itSrcStorage->GetPtr() );		// discard cached images for the storage
+}
+
+void CImageStorageService::BuildFromSrcPaths( const std::vector< fs::CPath >& srcImagePaths )
+{
+	std::vector< TTransferPathPair > xferPairs;
+	fattr::MakeTransferPathPairs( xferPairs, srcImagePaths, true );
+
+	Build( xferPairs );
+}
+
+void CImageStorageService::MakeAlbumFileAttrs( std::vector< CFileAttr* >& rFileAttrs ) const
+{
+	utl::ClearOwningContainer( rFileAttrs );
+	rFileAttrs.reserve( m_transferAttrs.size() );
+
+	for ( std::vector< CTransferFileAttr* >::const_iterator itTransferAttr = m_transferAttrs.begin(); itTransferAttr != m_transferAttrs.end(); ++itTransferAttr )
+		rFileAttrs.push_back( new CFileAttr( **itTransferAttr ) );
 }

@@ -1314,7 +1314,6 @@ END
 STRINGTABLE 
 BEGIN
     IDS_DELETE_ATTR_PROMPT  "Are you sure you want to delete the path below ?\n\n%s"
-    IDS_HELP_MESSAGE        "Slider command line options:\n\nslider [/R[-]] [/F[-]] [/X[-]] [/T[-]] [/S[-]] [/?] [image_file] [image_folder]\n\n    /R\tRegister slider additional shell extensions.\n    /F\tOpen slider window in full screen mode.\n    /X\tOpen slider window maximized.\n    /T\tOpen slider window with toolbar displayed.\n    /S\tOpen slider window with status-bar displayed.\n    /?\tDisplay this help message.\n\n    image_file\tOne or many image file(s).\n    image_folder\tFolder to search images for.\n\n    Note:\tIf [-] suffix is specified, than the specified option is switched off.\n"
     IDS_NO_DIR_SEARCH_SPEC  "In order to enable the ""Auto Drop Recipient"" feature, you must have one valid directory search path specifier ""Auto-drop numeric filenames"" option selected!"
     ID_SKIP_IMAGE_DIM_EVALUATION_CMDLINK 
                             "Speed-up saving (skip image dimension evaluation)"

@@ -26,8 +26,8 @@ bool CFileOperation::Copy( const fs::CFlexPath& srcFilePath, const fs::CFlexPath
 		{	// source file is an embedded file in a compound file
 			try
 			{
-				std::auto_ptr< CFile > pSrcFile = CImageArchiveStg::Factory().OpenFlexImageFile( srcFilePath, CFile::modeRead );
-				std::auto_ptr< CFile > pDestFile = CImageArchiveStg::Factory().OpenFlexImageFile( destFilePath, CFile::modeCreate | CFile::modeWrite );
+				std::auto_ptr< CFile > pSrcFile = CImageArchiveStg::Factory()->OpenFlexImageFile( srcFilePath, CFile::modeRead );
+				std::auto_ptr< CFile > pDestFile = CImageArchiveStg::Factory()->OpenFlexImageFile( destFilePath, CFile::modeCreate | CFile::modeWrite );
 
 				if ( pSrcFile.get() != NULL && pDestFile.get() != NULL )
 					fs::BufferedCopy( *pDestFile, *pSrcFile );
@@ -71,7 +71,7 @@ bool CFileOperation::Delete( const fs::CFlexPath& filePath ) throws_( CException
 	if ( filePath.FileExist() )
 		if ( filePath.IsComplexPath() )
 		{
-			CImageArchiveStg* pImageStg = CImageArchiveStg::Factory().AcquireStorage( filePath.GetPhysicalPath(), STGM_WRITE );
+			CImageArchiveStg* pImageStg = CImageArchiveStg::Factory()->AcquireStorage( filePath.GetPhysicalPath(), STGM_WRITE );
 			if ( NULL == pImageStg || !pImageStg->DeleteStream( filePath.GetEmbeddedPath() ) )
 				return HandleError( str::Format( _T("Cannot delete the embedded file '%s'"), filePath.GetPtr() ) );
 		}
@@ -95,10 +95,10 @@ const CEnumTags& CFileOperation::GetTags_Operation( void )
 
 void CFileOperation::ReleaseStgs( const fs::CPath& srcFilePath, const fs::CPath* pDestFilePath /*= NULL*/ )
 {
-	CImageArchiveStg::Factory().ReleaseStorage( srcFilePath );
+	CImageArchiveStg::Factory()->ReleaseStorage( srcFilePath );
 
 	if ( pDestFilePath != NULL )
-		CImageArchiveStg::Factory().ReleaseStorage( *pDestFilePath );
+		CImageArchiveStg::Factory()->ReleaseStorage( *pDestFilePath );
 }
 
 void CFileOperation::AddLogMessage( Operation operation, const fs::CPath& srcFilePath, const fs::CPath* pDestFilePath /*= NULL*/ )

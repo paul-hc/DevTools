@@ -17,6 +17,21 @@
 #endif
 
 
+namespace serial
+{
+	fs::ImagePathKey ToStorageRelativePathKey( const fs::ImagePathKey& pathKey )
+	{
+		return fs::ImagePathKey( fs::CFlexPath( path::GetSubPath( pathKey.first.GetPtr() ) ), pathKey.second );
+	}
+
+	void ToStorageComplexPath( fs::CFlexPath& rPath, const std::tstring& storagePath )
+	{
+		ASSERT( path::IsRelative( rPath.GetPtr() ) );
+		rPath.Set( path::MakeComplex( storagePath, rPath.GetPtr() ) );
+	}
+}
+
+
 // CFileAttr implementation
 
 CFileAttr::CFileAttr( void )
@@ -59,7 +74,11 @@ void CFileAttr::Stream( CArchive& archive )
 {
 	if ( archive.IsStoring() )
 	{
-		archive << m_pathKey;
+		if ( path::IsComplex( archive.m_strFileName ) )					// saving to an image archive storage?
+			archive << serial::ToStorageRelativePathKey( m_pathKey );	// only save the relative path from the root storage
+		else
+			archive << m_pathKey;
+
 		archive << (int)m_type;
 		archive & m_lastModifTime;
 		archive << m_fileSize;
@@ -76,6 +95,10 @@ void CFileAttr::Stream( CArchive& archive )
 			archive >> m_pathKey.first;
 			m_pathKey.second = 0;
 		}
+
+		if ( path::IsRelative( m_pathKey.first.GetPtr() ) )				// was saved as relative path to storage root?
+			if ( path::IsComplex( archive.m_strFileName ) )				// loading from an image archive storage?
+				serial::ToStorageComplexPath( m_pathKey.first, path::ExtractPhysical( archive.m_strFileName.GetString() ) );
 
 		archive >> (int&)m_type;
 		archive & m_lastModifTime;

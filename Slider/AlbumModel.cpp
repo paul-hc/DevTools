@@ -114,11 +114,11 @@ bool CAlbumModel::IsAutoDropRecipient( bool checkValidPath /*= true*/ ) const
 void CAlbumModel::CloseAssocImageArchiveStgs( void )
 {
 	if ( !m_stgDocPath.IsEmpty() )
-		CImageArchiveStg::Factory().ReleaseStorage( m_stgDocPath );
+		CImageArchiveStg::Factory()->ReleaseStorage( m_stgDocPath );
 
 	for ( std::vector< CSearchPattern* >::const_iterator itPattern = m_searchModel.GetPatterns().begin(); itPattern != m_searchModel.GetPatterns().end(); ++itPattern )
 		if ( ( *itPattern )->IsImageArchiveDoc() )
-			CImageArchiveStg::Factory().ReleaseStorage( ( *itPattern )->GetFilePath() );
+			CImageArchiveStg::Factory()->ReleaseStorage( ( *itPattern )->GetFilePath() );
 
 	m_imagesModel.ReleaseStorages();			// for found embedded storages
 }
@@ -151,12 +151,12 @@ bool CAlbumModel::CheckReparentFileAttrs( const TCHAR* pDocPath, PersistOp op )
 	fs::CPath docPath = fs::CFlexPath( pDocPath ).GetPhysicalPath();			// extract "C:\Images\storage.ias" from "C:\Images\storage.ias>_Album.sld"
 
 	if ( app::IsImageArchiveDoc( docPath.GetPtr() ) )
-		return ReparentStgFileAttrsImpl( docPath, op );
+		return ReparentStorageFileAttrsImpl( docPath, op );
 
 	return false;
 }
 
-bool CAlbumModel::ReparentStgFileAttrsImpl( const fs::CPath& stgDocPath, PersistOp op )
+bool CAlbumModel::ReparentStorageFileAttrsImpl( const fs::CPath& stgDocPath, PersistOp op )
 {
 	ASSERT( app::IsImageArchiveDoc( stgDocPath.GetPtr() ) );
 
@@ -175,7 +175,7 @@ bool CAlbumModel::ReparentStgFileAttrsImpl( const fs::CPath& stgDocPath, Persist
 					std::for_each( rFileAttrs.begin(), rFileAttrs.end(), func::StripDocPath( m_stgDocPath ) );
 
 				// convert any deep embedded storage paths to directory paths (so that '>' appears only once in the final embedded)
-				std::for_each( rFileAttrs.begin(), rFileAttrs.end(), func::FuncAdapter< func::NormalizeEmbeddedPaths, func::RefFilePath >() );
+				std::for_each( rFileAttrs.begin(), rFileAttrs.end(), func::FuncAdapter< func::NormalizeEmbeddedPath, func::RefFilePath >() );
 				break;
 		}
 
@@ -187,6 +187,7 @@ bool CAlbumModel::ReparentStgFileAttrsImpl( const fs::CPath& stgDocPath, Persist
 			{
 				CPathMaker maker;
 				maker.StoreSrcFromPaths( rFileAttrs );
+
 				if ( maker.MakeDestStripCommonPrefix() )			// convert to relative paths based on common prefix
 					maker.QueryDestToPaths( rFileAttrs );			// found and removed the common prefix
 			}
@@ -198,6 +199,20 @@ bool CAlbumModel::ReparentStgFileAttrsImpl( const fs::CPath& stgDocPath, Persist
 
 	if ( Saving == op )
 		SetPersistFlag( UseDeepStreamPaths, HasFlag( CWorkspace::GetFlags(), wf::PrefixDeepStreamNames ) );			// will save to keep track of saved mode
+
+	// ensure valid loaded m_imagesModel.m_storagePaths (for backwards compatibility with older saved archives)
+	if ( Loading == op )
+	{
+		std::vector< fs::CPath >& rDocFilePaths = m_imagesModel.RefStoragePaths();
+
+		for ( std::vector< fs::CPath >::iterator itDocFilePath = rDocFilePaths.begin(); itDocFilePath != rDocFilePaths.end(); )
+			if ( fs::CStructuredStorage::IsValidDocFile( itDocFilePath->GetPtr() ) )
+				++itDocFilePath;
+			else
+				itDocFilePath = rDocFilePaths.erase( itDocFilePath );		// remove non-existing storage doc
+
+		utl::AddUnique( rDocFilePaths, stgDocPath );						// add the document storage, which is guaranteed valid
+	}
 
 	return true;
 }
@@ -329,5 +344,5 @@ bool CAlbumModel::DoOrderImagesModel( CImagesModel* pImagesModel, ui::IProgressS
 bool CAlbumModel::ModifyFileOrder( fattr::Order fileOrder )
 {
 	StoreFileOrder( fileOrder );
-	return DoOrderImagesModel( &m_imagesModel, ui::CNullProgressService::Instance() );
+	return DoOrderImagesModel( &m_imagesModel, ui::CNoProgressService::Instance() );
 }

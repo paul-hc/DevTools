@@ -52,6 +52,7 @@ public:
 public:
 	// found image files
 	const CImagesModel& GetImagesModel( void ) const { return m_imagesModel; }
+	CImagesModel& RefImagesModel( void ) { return m_imagesModel; }
 	void SwapFileAttrs( std::vector< CFileAttr* >& rFileAttributes ) { m_imagesModel.RefFileAttrs().swap( rFileAttributes ); }
 
 	bool AnyFoundFiles( void ) const { return !m_imagesModel.IsEmpty(); }
@@ -76,7 +77,7 @@ public:
 	bool UndropCustomOrderIndexes( int droppedIndex, const std::vector< int >& origDragSelIndexes );
 private:
 	bool DoOrderImagesModel( CImagesModel* pImagesModel, ui::IProgressService* pProgressSvc );
-	bool ReparentStgFileAttrsImpl( const fs::CPath& stgDocPath, PersistOp op );			// post load/save: replace physical storage path with the current stg path
+	bool ReparentStorageFileAttrsImpl( const fs::CPath& stgDocPath, PersistOp op );			// post load/save: replace physical storage path with the current stg path
 private:
 	typedef int TPersistFlags;
 

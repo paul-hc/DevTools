@@ -1,6 +1,7 @@
 
 #include "stdafx.h"
 #include "ArchivingModel.h"
+#include "ImageStorageService.h"
 #include "ImageArchiveStg.h"
 #include "AlbumModel.h"
 #include "FileAttr.h"
@@ -198,7 +199,7 @@ bool CArchivingModel::GenerateDestPaths( const fs::CPath& destPath, const std::t
 			{
 				generated = true;
 
-				generator.ForEachDestPath( func::NormalizeEmbeddedPaths() );	// convert any deep embedded storage paths to directory paths
+				generator.ForEachDestPath( func::NormalizeEmbeddedPath() );	// convert any deep embedded storage paths to directory paths
 			}
 
 	if ( !generated )
@@ -213,15 +214,26 @@ bool CArchivingModel::GenerateDestPaths( const fs::CPath& destPath, const std::t
 bool CArchivingModel::BuildArchiveStorageFile( const fs::CPath& destStgPath, FileOp fileOp, CWnd* pParentWnd /*= AfxGetMainWnd()*/ ) const
 {
 	CProgressService progress( pParentWnd, _T("Building image archive storage file") );
-	ui::IProgressService* pProgressService = progress.GetService();
+	ui::IProgressService* pProgressSvc = progress.GetService();
+
+	CImageStorageService storageSvc( pProgressSvc, &app::GetUserReport() );		// image storage metadata - owning for exception safety
+
+	storageSvc.SetPassword( m_password );
+	storageSvc.Build( m_pathPairs );		// also discards cached SRC images and storages
+
+	if ( storageSvc.IsEmpty() )
+		if ( storageSvc.GetReport()->MessageBox( _T("There are no files to add to the image archive.\nDo you still want to create an empty image archive?"), MB_YESNO | MB_ICONQUESTION ) != IDYES )
+			return false;
 
 	try
 	{
 		app::LogLine( _T("--- START building image archive %s ---"), destStgPath.GetPtr() );
 
 		CTimer timer;
-		CImageArchiveStg imageArchiveStg;
-		imageArchiveStg.CreateImageArchive( destStgPath, m_password, m_pathPairs, pProgressService );
+
+		CImageArchiveStg imageArchiveStorage;
+
+		imageArchiveStorage.CreateImageArchive( destStgPath, &storageSvc );
 
 		app::LogLine( _T("--- END building image archive %s - Elapsed %.2f seconds ---"), destStgPath.GetPtr(), timer.ElapsedSeconds() );
 	}
@@ -248,8 +260,8 @@ bool CArchivingModel::BuildArchiveStorageFile( const fs::CPath& destStgPath, Fil
 	size_t errorCount = 0;
 	if ( FOP_FileMove == fileOp )
 	{
-		pProgressService->AdvanceStage( _T("Delete source image files") );
-		pProgressService->SetBoundedProgressCount( m_pathPairs.size() );
+		pProgressSvc->AdvanceStage( _T("Delete source image files") );
+		pProgressSvc->SetBoundedProgressCount( m_pathPairs.size() );
 
 		for ( std::vector< TTransferPathPair >::const_iterator it = m_pathPairs.begin(); it != m_pathPairs.end(); )
 		{
@@ -270,7 +282,7 @@ bool CArchivingModel::BuildArchiveStorageFile( const fs::CPath& destStgPath, Fil
 						}
 					}
 
-			pProgressService->AdvanceItem( it->second.Get() );
+			pProgressSvc->AdvanceItem( it->second.Get() );
 			++it;
 		}
 	}

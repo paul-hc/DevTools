@@ -207,20 +207,20 @@ CAlbumDoc::ArchiveLoadResult CAlbumDoc::LoadArchiveStorage( const fs::CPath& stg
 {
 	ASSERT( app::IsImageArchiveDoc( stgPath.GetPtr() ) );
 
-	if ( !CImageArchiveStg::Factory().VerifyPassword( &m_password, stgPath ) )
+	if ( !CImageArchiveStg::Factory()->VerifyPassword( &m_password, stgPath ) )
 		return PasswordNotVerified;
 
 	// note: album stream is optional for older archives: not an error if missing
-	if ( !CImageArchiveStg::Factory().LoadAlbumDoc( this, stgPath ) )
+	if ( !CImageArchiveStg::Factory()->LoadAlbumDoc( this, stgPath ) )
 		return Failed;			// possibly corrupted storage
 
-	CImageArchiveStg* pLoadedImageStg = CImageArchiveStg::Factory().FindStorage( stgPath );
+	CImageArchiveStg* pLoadedImageStg = CImageArchiveStg::Factory()->FindStorage( stgPath );
 	ASSERT_PTR( pLoadedImageStg );
 	pLoadedImageStg->StoreDocModelSchema( GetModelSchema() );
 	return Succeeded;
 }
 
-bool CAlbumDoc::SaveAsArchiveStg( const fs::CPath& newStgPath )
+bool CAlbumDoc::InternalSaveAsArchiveStg( const fs::CPath& newStgPath )
 {
 	REQUIRE( app::IsImageArchiveDoc( newStgPath.GetPtr() ) );
 
@@ -263,15 +263,7 @@ bool CAlbumDoc::SaveAsArchiveStg( const fs::CPath& newStgPath )
 			}
 		}
 
-		{
-			CPushThrowMode pushThrow( &CImageArchiveStg::Factory(), true );
-			m_model.CheckReparentFileAttrs( newStgPath.GetPtr(), CAlbumModel::Saving );		// reparent with newStgPath before saving the album info
-
-			if ( CImageArchiveStg::Factory().SaveAlbumDoc( this, newStgPath ) )
-				if ( CImageArchiveStg* pSavedImageStg = CImageArchiveStg::Factory().FindStorage( newStgPath ) )
-					pSavedImageStg->StoreDocModelSchema( GetModelSchema() );
-		}
-
+		SaveAlbumToArchiveStg( newStgPath );
 		if ( !saveAs )
 			return true;
 
@@ -282,6 +274,18 @@ bool CAlbumDoc::SaveAsArchiveStg( const fs::CPath& newStgPath )
 		app::HandleReportException( pExc );
 		return false;
 	}
+}
+
+void CAlbumDoc::SaveAlbumToArchiveStg( const fs::CPath& stgPath ) throws_( CException* )
+{
+	// save existing album to image archive as "_Album.sld" stream
+	CPushThrowMode pushThrow( CImageArchiveStg::Factory(), true );
+
+	m_model.CheckReparentFileAttrs( stgPath.GetPtr(), CAlbumModel::Saving );		// reparent with stgPath before saving the album info
+
+	if ( CImageArchiveStg::Factory()->SaveAlbumDoc( this, stgPath ) )
+		if ( CImageArchiveStg* pSavedImageStg = CImageArchiveStg::Factory()->FindStorage( stgPath ) )
+			pSavedImageStg->StoreDocModelSchema( GetModelSchema() );
 }
 
 bool CAlbumDoc::BuildAlbum( const fs::CPath& searchPath )
@@ -653,7 +657,7 @@ BOOL CAlbumDoc::OnOpenDocument( LPCTSTR pPath )
 BOOL CAlbumDoc::OnSaveDocument( LPCTSTR pPathName )
 {
 	if ( app::IsImageArchiveDoc( pPathName ) )
-		return SaveAsArchiveStg( fs::CPath( pPathName ) );
+		return InternalSaveAsArchiveStg( fs::CPath( pPathName ) );
 	else if ( fs::IsValidDirectory( pPathName ) )
 		return DoSave( NULL );					// in effect Save As
 
@@ -853,7 +857,7 @@ void CAlbumDoc::OnEditArchivePassword( void )
 
 	if ( app::IsImageArchiveDoc( docFilePath.GetPtr() ) )
 		if ( docFilePath.FileExist() )
-			CImageArchiveStg::Factory().SavePassword( m_password, docFilePath );
+			CImageArchiveStg::Factory()->SavePassword( m_password, docFilePath );
 }
 
 void CAlbumDoc::OnUpdateEditArchivePassword( CCmdUI* pCmdUI )

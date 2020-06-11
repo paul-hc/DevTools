@@ -290,6 +290,11 @@ namespace path
 		return ::PathFindExtension( pPath );
 	}
 
+	const TCHAR* SkipRoot( const TCHAR* pPath )
+	{
+		return ::PathSkipRoot( pPath );
+	}
+
 
 	// complex path
 

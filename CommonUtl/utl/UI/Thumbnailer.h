@@ -101,8 +101,6 @@ public:
 	virtual CSize GetItemImageSize( ui::GlyphGauge glyphGauge = ui::SmallGlyph ) const;
 	virtual bool SetItemImageSize( const CSize& imageBoundsSize );
 	virtual bool DrawItemImage( CDC* pDC, const utl::ISubject* pSubject, const CRect& itemImageRect );
-
-	static const GUID& PickSavingFormat( const CWicBitmap* pBitmap );			// GUID_ContainerFormatJpeg or GUID_ContainerFormatPng (if transparent)
 private:
 	enum { MaxSize = 500 };
 

@@ -194,18 +194,6 @@ void CThumbnailer::Clear( void )
 	m_thumbsCache.Clear();
 }
 
-const GUID& CThumbnailer::PickSavingFormat( const CWicBitmap* pBitmap )
-{
-	static const GUID& s_jpegContainerFormatId = GUID_ContainerFormatJpeg;		// normal saving format
-	static const GUID& s_pngContainerFormatId = GUID_ContainerFormatPng;		// transparent saving format - for bitmaps with transparency (alpha channel)
-
-	if ( pBitmap != NULL )
-		if ( pBitmap->GetBmpFmt().m_hasAlphaChannel )
-			return s_pngContainerFormatId;
-
-	return s_jpegContainerFormatId;
-}
-
 const CFlagTags& CThumbnailer::GetTags_CacheStatusFlags( void )
 {
 	static const CFlagTags::FlagDef flagDefs[] =

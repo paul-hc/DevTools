@@ -79,6 +79,27 @@ namespace fattr
 } //namespace fattr
 
 
+namespace fattr
+{
+	void TransformToEmbeddedPaths( std::vector< fs::CFlexPath >& rEmbeddedPaths, bool useDeepStreamPaths /*= true*/ )
+	{
+		if ( useDeepStreamPaths )
+		{
+			fs::CPath commonDirPath = path::ExtractCommonParentPath( rEmbeddedPaths );
+			if ( !commonDirPath.IsEmpty() )
+				path::StripDirPrefix( rEmbeddedPaths, commonDirPath.GetPtr() );
+			else
+				path::StripRootPrefix( rEmbeddedPaths );		// ignore drive letter
+
+			// convert any deep embedded storage paths to directory paths (so that '>' appears only once in the final embedded)
+			utl::for_each( rEmbeddedPaths, func::NormalizeEmbeddedPath() );
+		}
+		else
+			path::StripToFilename( rEmbeddedPaths );		// careful with duplicate filenames
+	}
+}
+
+
 namespace pred
 {
 	// CompareFileAttr implementation

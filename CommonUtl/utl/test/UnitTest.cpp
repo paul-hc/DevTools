@@ -84,7 +84,7 @@ namespace ut
 	{
 		static const fs::CPath s_dirPath = str::ExpandEnvironmentStrings( _T("%UTL_TESTDATA_PATH%") );
 		if ( !s_dirPath.IsEmpty() && !fs::IsValidDirectory( s_dirPath.GetPtr() ) )
-			throw CRuntimeException( str::Format( _T("Cannot find the local test directory path: %s\n\nTODO: define envirnoment variable UTL_TESTDATA_PATH."), s_dirPath.GetPtr() ) );
+			throw CRuntimeException( str::Format( _T("Cannot find the local test directory path: %s\n\nTODO: define envirnoment variable UTL_TESTDATA_PATH"), s_dirPath.GetPtr() ) );
 
 		return s_dirPath;
 	}
@@ -94,13 +94,13 @@ namespace ut
 		static fs::CPath s_imagesDirPath = str::ExpandEnvironmentStrings( _T("%UTL_THUMB_SRC_IMAGE_PATH%") );
 		if ( !s_imagesDirPath.IsEmpty() && !fs::IsValidDirectory( s_imagesDirPath.GetPtr() ) )
 		{
-			TRACE( _T("\n # Cannot find unit test images dir path: %s #\n"), s_imagesDirPath.GetPtr() );
+			TRACE( _T("\n # Cannot find unit test images dir path: %s #\nNo environment variable UTL_THUMB_SRC_IMAGE_PATH"), s_imagesDirPath.GetPtr() );
 			s_imagesDirPath.Clear();
 		}
 		return s_imagesDirPath;
 	}
 
-	const fs::CPath& GetTestImagesDirPath( void )
+	const fs::CPath& GetDestImagesDirPath( void )
 	{
 		static fs::CPath s_dirPath = GetTestDataDirPath() / fs::CPath( _T("images") );
 		if ( !s_dirPath.IsEmpty() && !fs::IsValidDirectory( s_dirPath.GetPtr() ) )
@@ -109,6 +109,17 @@ namespace ut
 			s_dirPath.Clear();
 		}
 		return s_dirPath;
+	}
+
+	const fs::CPath& GetStdImageDirPath( void )
+	{
+		static fs::CPath s_stdImagesDirPath = GetTestDataDirPath() / fs::CPath( _T("std_test_images") );
+		if ( !s_stdImagesDirPath.IsEmpty() && !fs::IsValidDirectory( s_stdImagesDirPath.GetPtr() ) )
+		{
+			TRACE( _T("\n # Cannot find unit test standard images dir path: %s #\nTODO: create directory %UTL_STD_SRC_IMAGE_PATH%\\std_test_images"), s_stdImagesDirPath.GetPtr() );
+			s_stdImagesDirPath.Clear();
+		}
+		return s_stdImagesDirPath;
 	}
 
 

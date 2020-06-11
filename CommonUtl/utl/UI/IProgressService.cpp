@@ -9,43 +9,43 @@
 
 namespace ui
 {
-	// CNullProgressService implementation
+	// CNoProgressService implementation
 
-	ui::IProgressService* CNullProgressService::Instance( void )
+	ui::IProgressService* CNoProgressService::Instance( void )
 	{
-		static CNullProgressService s_nullProgressPlaceholder;
+		static CNoProgressService s_nullProgressPlaceholder;
 		return &s_nullProgressPlaceholder;
 	}
 
 
 	// ui::IProgressHeader interface implementation
 
-	void CNullProgressService::SetDialogTitle( const std::tstring& title )
+	void CNoProgressService::SetDialogTitle( const std::tstring& title )
 	{
 		title;
 	}
 
-	void CNullProgressService::SetOperationLabel( const std::tstring& operationLabel )
+	void CNoProgressService::SetOperationLabel( const std::tstring& operationLabel )
 	{
 		operationLabel;
 	}
 
-	void CNullProgressService::ShowStage( bool show /*= true*/ )
+	void CNoProgressService::ShowStage( bool show /*= true*/ )
 	{
 		show;
 	}
 
-	void CNullProgressService::SetStageLabel( const std::tstring& stageLabel )
+	void CNoProgressService::SetStageLabel( const std::tstring& stageLabel )
 	{
 		stageLabel;
 	}
 
-	void CNullProgressService::ShowItem( bool show /*= true*/ )
+	void CNoProgressService::ShowItem( bool show /*= true*/ )
 	{
 		show;
 	}
 
-	void CNullProgressService::SetItemLabel( const std::tstring& itemLabel )
+	void CNoProgressService::SetItemLabel( const std::tstring& itemLabel )
 	{
 		itemLabel;
 	}
@@ -53,41 +53,41 @@ namespace ui
 
 	// ui::IProgressService interface implementation
 
-	ui::IProgressHeader* CNullProgressService::GetHeader( void )
+	ui::IProgressHeader* CNoProgressService::GetHeader( void )
 	{
 		return this;
 	}
 
-	bool CNullProgressService::SetMarqueeProgress( void )
+	bool CNoProgressService::SetMarqueeProgress( void )
 	{
 		return false;
 	}
 
-	void CNullProgressService::SetBoundedProgressCount( size_t itemCount, bool rewindPos /*= true*/ )
+	void CNoProgressService::SetBoundedProgressCount( size_t itemCount, bool rewindPos /*= true*/ )
 	{
 		itemCount, rewindPos;
 	}
 
-	void CNullProgressService::SetProgressState( int barState /*= PBST_NORMAL*/ )
+	void CNoProgressService::SetProgressState( int barState /*= PBST_NORMAL*/ )
 	{
 		barState;
 	}
 
-	void CNullProgressService::AdvanceStage( const std::tstring& stageName ) throws_( CUserAbortedException )
+	void CNoProgressService::AdvanceStage( const std::tstring& stageName ) throws_( CUserAbortedException )
 	{
 		stageName;
 	}
 
-	void CNullProgressService::AdvanceItem( const std::tstring& itemName ) throws_( CUserAbortedException )
+	void CNoProgressService::AdvanceItem( const std::tstring& itemName ) throws_( CUserAbortedException )
 	{
 		itemName;
 	}
 
-	void CNullProgressService::AdvanceItemToEnd( void ) throws_( CUserAbortedException )
+	void CNoProgressService::AdvanceItemToEnd( void ) throws_( CUserAbortedException )
 	{
 	}
 
-	void CNullProgressService::ProcessInput( void ) const throws_( CUserAbortedException )
+	void CNoProgressService::ProcessInput( void ) const throws_( CUserAbortedException )
 	{
 	}
 }

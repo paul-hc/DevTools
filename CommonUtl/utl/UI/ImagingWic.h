@@ -8,6 +8,9 @@
 #include "ImagingWic_fwd.h"
 
 
+class CEnumTags;
+
+
 // WIC: Windows Imaging Component (from DirectX)
 
 namespace wic
@@ -42,7 +45,7 @@ namespace wic
 		IWICBitmapDecoder* GetDecoder( void ) const { return m_pDecoder; }
 
 		bool CreateFromFile( const fs::CFlexPath& imagePath );
-		bool CreateFromStream( IStream* pStream, const IID* pDecoderId = NULL );
+		bool CreateFromStream( IStream* pStream, const IID* pVendorId = NULL );
 
 		bool HasContainerFormat( const GUID& containerFormatId ) const;
 		CComPtr< IWICBitmapFrameDecode > GetFrameAt( UINT framePos ) const;
@@ -142,7 +145,9 @@ namespace wic
 	CDibMeta LoadPngOrBitmap( const TCHAR* pResImageName, bool mapTo3DColors = false );		// PNG or BMP images
 	CDibMeta LoadImageWithType( const TCHAR* pResImageName, const TCHAR* pResType );
 
-	CComPtr< IWICBitmapSource > LoadBitmapFromStream( CDibMeta& rDibMeta, IStream* pImageStream, const IID& decoderId );
+	CComPtr< IWICBitmapSource > LoadBitmapFromStream( IStream* pImageStream, UINT framePos = 0 );				// using auto-decoder
+
+	CComPtr< IWICBitmapSource > LoadBitmapFromStream( CDibMeta& rDibMeta, IStream* pImageStream, const IID* pDecoderId );
 	UINT GetFrameCount( IWICBitmapDecoder* pDecoder );
 	CComPtr< IWICBitmapSource > ExtractFrameBitmap( CDibMeta& rDibMeta, IWICBitmapDecoder* pDecoder, UINT framePos = 0 );
 
@@ -170,15 +175,33 @@ namespace wic
 		inline CComPtr< IWICBitmapSource > ToWicBitmap( IWICBitmapSource* pWicBitmap ) { return pWicBitmap; }
 		CComPtr< IWICBitmapSource > ToWicBitmap( HBITMAP hBitmap, WICBitmapAlphaChannelOption alphaChannel = WICBitmapUsePremultipliedAlpha );
 	}
+}
 
 
+namespace wic
+{
 	// WIC bitmap persistence: load/save to file/stream
 
-	const IID* FindDecoderIdFromPath( const TCHAR* pFilePath );
-	const IID* FindDecoderIdFromResource( const TCHAR* pResType );
+	enum ImageFormat { BmpFormat, JpegFormat, TiffFormat, GifFormat, PngFormat, IcoFormat, WmpFormat, UnknownImageFormat };
+
+	const CEnumTags& GetTags_ImageFormat( void );
+
+	ImageFormat FindFileImageFormat( const TCHAR* pFilePath );
+	ImageFormat FindResourceImageFormat( const TCHAR* pResType );
+
+	const TCHAR* GetDefaultImageFormatExt( ImageFormat imageType );
+	bool ReplaceImagePathExt( fs::CPath& rSaveImagePath, ImageFormat imageType );
+
+	const IID* GetDecoderId( ImageFormat imageType );
+	const IID* GetEncoderId( ImageFormat imageType );
+	const IID* GetContainerFormatId( ImageFormat imageType );
+
+	inline const IID* FindDecoderIdFromPath( const TCHAR* pFilePath ) { return wic::GetDecoderId( wic::FindFileImageFormat( pFilePath ) ); }
+	inline const IID* FindDecoderIdFromResource( const TCHAR* pResType ) { return wic::GetDecoderId( wic::FindResourceImageFormat( pResType ) ); }
+
 
 	CComPtr< IWICBitmapSource > LoadBitmapFromFile( const TCHAR* pFilePath, UINT framePos = 0 );
-	CComPtr< IWICBitmapSource > LoadBitmapFromStream( IStream* pImageStream, const IID& decoderId );		// (*) will keep the stream alive for the lifetime of the bitmap; same if we scale the bitmap
+	CComPtr< IWICBitmapSource > LoadBitmapFromStream( IStream* pImageStream, const IID* pDecoderId );		// (*) will keep the stream alive for the lifetime of the bitmap; same if we scale the bitmap
 
 
 	// save bitmap: works with IWICBitmapSource*, HBITMAP, and other wic::cvt::ToWicBitmap defined conversions

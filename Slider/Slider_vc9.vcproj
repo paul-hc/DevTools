@@ -722,14 +722,6 @@
 					>
 				</File>
 				<File
-					RelativePath=".\ImageStorageModel.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\ImageStorageModel.h"
-					>
-				</File>
-				<File
 					RelativePath=".\ModelSchema.cpp"
 					>
 				</File>
@@ -794,6 +786,14 @@
 					>
 				</File>
 				<File
+					RelativePath=".\ImageStorageService.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\ImageStorageService.h"
+					>
+				</File>
+				<File
 					RelativePath=".\ProgressService.cpp"
 					>
 				</File>
@@ -806,6 +806,14 @@
 		<Filter
 			Name="Tests"
 			>
+			<File
+				RelativePath=".\test\ImageArchiveStgTests.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\test\ImageArchiveStgTests.h"
+				>
+			</File>
 			<File
 				RelativePath=".\test\ImagingD2DTests.cpp"
 				>

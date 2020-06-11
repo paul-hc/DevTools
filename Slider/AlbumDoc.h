@@ -40,7 +40,8 @@ public:
 
 	enum ArchiveLoadResult { PasswordNotVerified, Failed, Succeeded };
 
-	ArchiveLoadResult LoadArchiveStorage( const fs::CPath& stgPath );		// called internally, or when loading an embedded archive as a search pattern
+	ArchiveLoadResult LoadArchiveStorage( const fs::CPath& stgPath );					// called internally, or when loading an embedded archive as a search pattern
+	void SaveAlbumToArchiveStg( const fs::CPath& stgPath ) throws_( CException* );		// save existing album to image archive as "_Album.sld" stream
 public:
 	bool EditAlbum( CAlbumImageView* pActiveView );
 	bool AddExplicitFiles( const std::vector< std::tstring >& files, bool doUpdate = true );
@@ -62,7 +63,7 @@ private:
 
 	bool BuildAlbum( const fs::CPath& searchPath );
 	void RegenerateModel( AlbumModelChange reason = FM_Init );
-	bool SaveAsArchiveStg( const fs::CPath& newStgPath );
+	bool InternalSaveAsArchiveStg( const fs::CPath& newStgPath );
 
 	bool UndoRedoCustomOrder( custom_order::COpStack& rFromStack, custom_order::COpStack& rToStack, bool isUndoOp );
 	void ClearCustomOrder( custom_order::ClearMode clearMode = custom_order::CM_ClearAll );

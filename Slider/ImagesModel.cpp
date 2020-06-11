@@ -46,13 +46,13 @@ CImagesModel& CImagesModel::operator=( const CImagesModel& right )
 
 void CImagesModel::ReleaseStorages( void )
 {
-	CImageArchiveStg::Factory().ReleaseStorages( m_storagePaths );
+	CImageArchiveStg::Factory()->ReleaseStorages( m_storagePaths );
 }
 
 void CImagesModel::AcquireStorages( void ) const
 {
 	for ( std::vector< fs::CPath >::const_iterator itStoragePath = m_storagePaths.begin(); itStoragePath != m_storagePaths.end(); ++itStoragePath )
-		CImageArchiveStg::Factory().AcquireStorage( *itStoragePath );
+		CImageArchiveStg::Factory()->AcquireStorage( *itStoragePath );
 }
 
 void CImagesModel::Swap( CImagesModel& rImagesModel )
@@ -94,8 +94,7 @@ void CImagesModel::Stream( CArchive& archive )
 
 void CImagesModel::StoreBaselineSequence( void )
 {
-	for ( size_t pos = 0; pos != m_fileAttributes.size(); ++pos )
-		m_fileAttributes[ pos ]->StoreBaselinePos( pos );
+	fattr::StoreBaselineSequence( m_fileAttributes );
 }
 
 const CFileAttr* CImagesModel::FindFileAttrWithPath( const fs::CPath& filePath ) const

@@ -91,6 +91,7 @@ namespace path
 
 	const TCHAR* FindFilename( const TCHAR* pPath );
 	const TCHAR* FindExt( const TCHAR* pPath );
+	const TCHAR* SkipRoot( const TCHAR* pPath );		// ignore the drive letter or Universal Naming Convention (UNC) server/share path parts
 
 	inline bool IsFnameExt( const TCHAR* pPath ) { return pPath != NULL && pPath == FindFilename( pPath ); }				// true for "file.txt", "file", ".txt";  false for "dir\\file.txt"
 	inline bool MatchExt( const TCHAR* pPath, const TCHAR* pExt ) { return EquivalentPtr( FindExt( pPath ), pExt ); }		// pExt: ".txt"
@@ -259,8 +260,11 @@ namespace fs
 	fs::CPath GetLongFilePath( const fs::CPath& filePath );
 
 	inline fs::CPath StripDirPrefix( const fs::CPath& filePath, const fs::CPath& dirPath ) { return path::StripCommonPrefix( filePath.GetPtr(), dirPath.GetPtr() ); }
+}
 
 
+namespace fs
+{
 	template< typename ContainerT, typename SetT >
 	size_t UniquifyPaths( ContainerT& rPaths, SetT& rUniquePathIndex )
 	{
@@ -379,6 +383,28 @@ namespace func
 		}
 
 		void operator()( fs::CPath& rPath ) { return operator()( rPath.Ref() ); }
+	};
+
+
+	struct StripRootPrefix
+	{
+		void operator()( std::tstring& rFilePath ) const
+		{
+			rFilePath = path::SkipRoot( rFilePath.c_str() );
+		}
+
+		void operator()( fs::CPath& rPath ) { operator()( rPath.Ref() ); }
+	};
+
+
+	struct StripToFilename			// remove directory path
+	{
+		void operator()( std::tstring& rFilePath ) const
+		{
+			rFilePath = path::FindFilename( rFilePath.c_str() );
+		}
+
+		void operator()( fs::CPath& rPath ) { operator()( rPath.Ref() ); }
 	};
 }
 
@@ -578,6 +604,7 @@ namespace path
 		return commonPrefix;
 	}
 
+
 	template< typename ContainerT >
 	inline size_t StripDirPrefix( ContainerT& rPaths, const TCHAR* pDirPrefix )
 	{
@@ -590,6 +617,20 @@ namespace path
 		fs::CPath commonDirPath = ExtractCommonParentPath( rPaths );
 		return !commonDirPath.IsEmpty() ? StripDirPrefix( rPaths, commonDirPath.GetPtr() ) : 0;
 	}
+
+
+	template< typename ContainerT >
+	inline void StripRootPrefix( ContainerT& rPaths )		// cut the drive letter or UNC server/share
+	{
+		std::for_each( rPaths.begin(), rPaths.end(), func::StripRootPrefix() );
+	}
+
+	template< typename ContainerT >
+	inline void StripToFilename( ContainerT& rPaths )		// cut the directory path
+	{
+		std::for_each( rPaths.begin(), rPaths.end(), func::StripToFilename() );
+	}
+
 }
 
 

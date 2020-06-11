@@ -1,7 +1,7 @@
 
 #include "stdafx.h"
 #include "ImageArchiveStg.h"
-#include "ImageStorageModel.h"
+#include "ImageStorageService.h"
 #include "FileAttrAlgorithms.h"
 #include "Application.h"
 #include "resource.h"
@@ -13,6 +13,7 @@
 #include "utl/UI/IProgressService.h"
 #include "utl/UI/MfcUtilities.h"
 #include "utl/UI/PasswordDialog.h"
+#include "utl/UI/ImagingWic.h"
 #include "utl/UI/Thumbnailer.h"
 #include "utl/UI/WicImageCache.h"
 #include <numeric>
@@ -34,28 +35,25 @@ const TCHAR CImageArchiveStg::s_subPathSep = _T('|');		// was '*'
 
 CImageArchiveStg::CImageArchiveStg( IStorage* pRootStorage /*= NULL*/ )
 	: fs::CStructuredStorage( pRootStorage )
-	, m_pThumbsDecoderId( NULL )
 	, m_docModelSchema( app::Slider_LatestModelSchema )
 {
 }
 
 CImageArchiveStg::~CImageArchiveStg()
 {
-	Close();
+	Close();		// close early so that virtual methods are called properly
 }
 
-CImageArchiveStg::CFactory& CImageArchiveStg::Factory( void )
+CImageArchiveStg::CFactory* CImageArchiveStg::Factory( void )
 {
-	static CFactory factory;
-	return factory;
+	static CFactory s_factory;
+	return &s_factory;
 }
 
 void CImageArchiveStg::Close( void )
 {
 	DiscardCachedImages( GetDocFilePath() );
-
-	if ( m_pThumbsStorage != NULL )
-		m_pThumbsStorage = NULL;
+	m_pThumbsStorage = NULL;
 
 	__super::Close();
 }
@@ -82,17 +80,9 @@ TCHAR CImageArchiveStg::GetSubPathSep( void ) const
 	return s_subPathSep;
 }
 
-void CImageArchiveStg::CreateImageArchive( const fs::CPath& stgFilePath, const std::tstring& password, const std::vector< TTransferPathPair >& xferPairs,
-										   ui::IProgressService* pProgressService ) throws_( CException* )
+void CImageArchiveStg::CreateImageArchive( const fs::CPath& stgFilePath, CImageStorageService* pImagesSvc ) throws_( CException* )
 {
-	ASSERT_PTR( pProgressService );
-
-	CImageStorageModel storageModel;												// image storage metadata - owning for exception safety
-
-	storageModel.Build( xferPairs, pProgressService, &app::GetUserReport() );		// also discards cached SRC images and storages
-	if ( storageModel.IsEmpty() )
-		if ( app::GetUserReport().MessageBox( _T("There are no files to add to the image archive.\nDo you still want to create an empty image archive?"), MB_YESNO | MB_ICONQUESTION ) != IDYES )
-			return;
+	ASSERT_PTR( pImagesSvc );
 
 	CPushThrowMode pushThrow( this, true );
 
@@ -101,39 +91,41 @@ void CImageArchiveStg::CreateImageArchive( const fs::CPath& stgFilePath, const s
 
 	CWaitCursor wait;
 
-	SavePassword( password );
-	Factory().CacheVerifiedPassword( stgFilePath, password );
+	SavePassword( pImagesSvc->GetPassword() );
+	Factory()->CacheVerifiedPassword( stgFilePath, pImagesSvc->GetPassword() );
 
-	CreateImageFiles( storageModel.RefFileAttribs(), pProgressService );
-	CreateMetadataFile( storageModel.GetFileAttribs() );
-	CreateThumbnailsSubStorage( storageModel.GetFileAttribs(), pProgressService );
+	CreateImageFiles( pImagesSvc );
+	CreateMetadataFile( pImagesSvc->GetTransferAttrs() );
+	CreateThumbnailsSubStorage( pImagesSvc );
 }
 
-void CImageArchiveStg::CreateImageFiles( std::vector< CTransferFileAttr* >& rTransferAttribs, ui::IProgressService* pProgressService ) throws_( CException* )
+void CImageArchiveStg::CreateImageFiles( CImageStorageService* pImagesSvc ) throws_( CException* )
 {
 	// Prevent sharing violations on SRC stream open.
 	//	2020-04-11: Still doesn't work, I get exception on open. I suspect the source stream (image file) must be kept open with CFile::shareExclusive by some WIC indirect COM interface.
-	if ( !rTransferAttribs.empty() )
-		app::GetThumbnailer()->Clear();		// also discard the thumbs - note: cached SRC images were discarded by CImageStorageModel::Build()
+	if ( !pImagesSvc->IsEmpty() )
+		app::GetThumbnailer()->Clear();		// also discard the thumbs - note: cached SRC images were discarded by CImageStorageService::Build()
 
-	CPushThrowMode pushThrow( &Factory(), true );
-	CFactory& factory = Factory();
+	std::vector< CTransferFileAttr* >& rTransferAttrs = pImagesSvc->RefTransferAttrs();
 
-	pProgressService->AdvanceStage( _T("Saving embedded image files") );
-	pProgressService->SetBoundedProgressCount( rTransferAttribs.size() );
+	CPushThrowMode pushThrow( Factory(), true );
+	CFactory* pFactory = Factory();
 
-	for ( size_t pos = 0; pos != rTransferAttribs.size(); )
+	pImagesSvc->GetProgress()->AdvanceStage( _T("Saving embedded image files") );
+	pImagesSvc->GetProgress()->SetBoundedProgressCount( rTransferAttrs.size() );
+
+	for ( size_t pos = 0; pos != rTransferAttrs.size(); )
 	{
-		CTransferFileAttr* pXferAttr = rTransferAttribs[ pos ];
+		CTransferFileAttr* pXferAttr = rTransferAttrs[ pos ];
 
-		pProgressService->AdvanceItem( pXferAttr->GetPath().Get() );
+		pImagesSvc->GetProgress()->AdvanceItem( pXferAttr->GetPath().Get() );
 
 		try
 		{
 			std::tstring& rStreamName = const_cast< std::tstring& >( pXferAttr->GetPath().Get() );
 			FlattenDeepStreamPath( rStreamName );
 
-			std::auto_ptr< CFile > pSrcImageFile = factory.OpenFlexImageFile( pXferAttr->GetSrcImagePath() );
+			std::auto_ptr< CFile > pSrcImageFile = pFactory->OpenFlexImageFile( pXferAttr->GetSrcImagePath() );
 			std::auto_ptr< COleStreamFile > pDestStreamFile( CreateFile( pXferAttr->GetPath().GetPtr() ) );
 
 			fs::BufferedCopy( *pDestStreamFile, *pSrcImageFile );
@@ -147,7 +139,7 @@ void CImageArchiveStg::CreateImageFiles( std::vector< CTransferFileAttr* >& rTra
 				case IDIGNORE:
 					// remove the offender
 					delete pXferAttr;
-					rTransferAttribs.erase( rTransferAttribs.begin() + pos );
+					rTransferAttrs.erase( rTransferAttrs.begin() + pos );
 					break;
 			}
 		}
@@ -156,47 +148,53 @@ void CImageArchiveStg::CreateImageFiles( std::vector< CTransferFileAttr* >& rTra
 	}
 
 #ifdef _DEBUG
-	size_t totalImagesSize = std::accumulate( rTransferAttribs.begin(), rTransferAttribs.end(), size_t( 0 ), func::AddFileSize() );
+	size_t totalImagesSize = std::accumulate( rTransferAttrs.begin(), rTransferAttrs.end(), size_t( 0 ), func::AddFileSize() );
 	TRACE( _T("(*) Total image archive file size: %s (%s)\n"), num::FormatFileSize( totalImagesSize ).c_str(), num::FormatFileSize( totalImagesSize, num::Bytes ).c_str() );
 #endif
 }
 
-void CImageArchiveStg::CreateMetadataFile( const std::vector< CTransferFileAttr* >& transferAttribs )
+void CImageArchiveStg::CreateMetadataFile( const std::vector< CTransferFileAttr* >& transferAttrs )
 {
 	std::auto_ptr< COleStreamFile > pMetaDataFile( CreateFile( CImageArchiveStg::s_metadataFilename ) );
 	CArchive archive( pMetaDataFile.get(), CArchive::store );
 	archive.m_bForceFlat = FALSE;			// same as CDocument::OnOpenDocument()
 
 	// save metadata
-	size_t totalImagesSize = std::accumulate( transferAttribs.begin(), transferAttribs.end(), size_t( 0 ), func::AddFileSize() );
+	size_t totalImagesSize = std::accumulate( transferAttrs.begin(), transferAttrs.end(), size_t( 0 ), func::AddFileSize() );
 	archive << static_cast< UINT >( totalImagesSize );		// for backwards compatibility
-	serial::SaveOwningPtrs( archive, transferAttribs );		// stream as CFileAttr
+	serial::SaveOwningPtrs( archive, transferAttrs );		// stream as CFileAttr
 
 	archive.Close();
 	pMetaDataFile->Close();
 }
 
-void CImageArchiveStg::CreateThumbnailsSubStorage( const std::vector< CTransferFileAttr* >& transferAttribs, ui::IProgressService* pProgressService )
+void CImageArchiveStg::CreateThumbnailsSubStorage( const CImageStorageService* pImagesSvc )
 {
+	const std::vector< CTransferFileAttr* >& transferAttrs = pImagesSvc->GetTransferAttrs();
+
+	pImagesSvc->GetProgress()->AdvanceStage( _T("Saving thumbnails") );
+	pImagesSvc->GetProgress()->SetBoundedProgressCount( transferAttrs.size() );
+
 	CComPtr< IStorage > pThumbsStorage = CreateDir( CImageArchiveStg::s_thumbsSubStorageNames[ Thumbs_jpeg ] );
 	ASSERT_PTR( pThumbsStorage );
-
-	pProgressService->AdvanceStage( _T("Saving thumbnails") );
-	pProgressService->SetBoundedProgressCount( transferAttribs.size() );
 
 	CThumbnailer* pThumbnailer = app::GetThumbnailer();
 	thumb::CPushBoundsSize largerBounds( pThumbnailer, 128 );			// generate larger thumbs to minimize regeneration later
 
-	for ( std::vector< CTransferFileAttr* >::const_iterator itXferAttr = transferAttribs.begin(); itXferAttr != transferAttribs.end(); )
+	for ( std::vector< CTransferFileAttr* >::const_iterator itXferAttr = transferAttrs.begin(); itXferAttr != transferAttrs.end(); )
 	{
 		try
 		{
 			if ( CCachedThumbBitmap* pThumbBitmap = pThumbnailer->AcquireThumbnail( ( *itXferAttr )->GetSrcImagePath() ) )
 			{
-				CComPtr< IStream > pThumbStream = CreateStream( ( *itXferAttr )->GetPath().GetPtr(), pThumbsStorage );
+				fs::CPath thumbStreamName;
+				const GUID* pContainerFormatId = wic::GetContainerFormatId( MakeThumbStreamName( thumbStreamName, ( *itXferAttr )->GetPath().GetPtr() ) );
+				ASSERT_PTR( pContainerFormatId );
+
+				CComPtr< IStream > pThumbStream = CreateStream( thumbStreamName.GetPtr(), pThumbsStorage );
 				CPushThrowMode pushThrow( &pThumbBitmap->GetOrigin(), true );
 
-				pThumbBitmap->GetOrigin().SaveBitmapToStream( pThumbStream, CThumbnailer::PickSavingFormat( pThumbBitmap ) );
+				pThumbBitmap->GetOrigin().SaveBitmapToStream( pThumbStream, *pContainerFormatId );
 			}
 			else
 				throw new mfc::CRuntimeException( str::Format( _T("Cannot generate a thumbnail for file:\n%s"), ( *itXferAttr )->GetSrcImagePath().GetPtr() ) );
@@ -211,12 +209,43 @@ void CImageArchiveStg::CreateThumbnailsSubStorage( const std::vector< CTransferF
 			}
 		}
 
-		pProgressService->AdvanceItem( ( *itXferAttr )->GetPath().Get() );
+		pImagesSvc->GetProgress()->AdvanceItem( ( *itXferAttr )->GetPath().Get() );
 		++itXferAttr;
 	}
 }
 
-void CImageArchiveStg::LoadImagesMetadata( std::vector< CFileAttr* >& rOutFileAttribs )
+wic::ImageFormat CImageArchiveStg::MakeThumbStreamName( fs::CPath& rThumbStreamName, const TCHAR* pSrcImagePath )
+{
+	// GUID_ContainerFormatJpeg or GUID_ContainerFormatPng (for transparent formats)
+	// Note: for transparency we can't rely on CWicBitmap::GetBmpFmt().m_hasAlphaChannel, as is true even for a true color .jpg
+	// We have to infer the thumb save format from the source file extension.
+
+	rThumbStreamName.Set( pSrcImagePath );
+
+	wic::ImageFormat thumbImageFormat = wic::JpegFormat;
+
+	switch ( wic::FindFileImageFormat( pSrcImagePath ) )
+	{
+		case wic::BmpFormat:
+		case wic::JpegFormat:
+		case wic::TiffFormat:
+		case wic::WmpFormat:
+			thumbImageFormat = wic::JpegFormat;
+			break;
+		case wic::GifFormat:
+		case wic::PngFormat:
+		case wic::IcoFormat:
+			thumbImageFormat = wic::PngFormat;
+			break;
+		case wic::UnknownImageFormat:
+			return wic::UnknownImageFormat;
+	}
+
+	wic::ReplaceImagePathExt( rThumbStreamName, thumbImageFormat );
+	return thumbImageFormat;
+}
+
+void CImageArchiveStg::LoadImagesMetadata( std::vector< CFileAttr* >& rOutTransferAttrs )
 {
 	ASSERT( IsOpen() );
 
@@ -233,11 +262,11 @@ void CImageArchiveStg::LoadImagesMetadata( std::vector< CFileAttr* >& rOutFileAt
 			UINT totalImagesSize;
 			archive >> totalImagesSize;
 
-			serial::StreamOwningPtrs( archive, rOutFileAttribs );
+			serial::StreamOwningPtrs( archive, rOutTransferAttrs );
 
 			// convert the persisted image sub-path to a fully qualified logical path
 			const fs::CPath& docFilePath = GetDocFilePath();
-			for ( std::vector< CFileAttr* >::iterator itFileAttr = rOutFileAttribs.begin(); itFileAttr != rOutFileAttribs.end(); ++itFileAttr )
+			for ( std::vector< CFileAttr* >::iterator itFileAttr = rOutTransferAttrs.begin(); itFileAttr != rOutTransferAttrs.end(); ++itFileAttr )
 			{
 				std::tstring streamPath = ( *itFileAttr )->GetPath().Get();
 				UnflattenDeepStreamPath( streamPath );		// decode deep stream paths: '|' -> '\'
@@ -260,22 +289,21 @@ CCachedThumbBitmap* CImageArchiveStg::LoadThumbnail( const fs::CFlexPath& imageC
 	{
 		if ( NULL == m_pThumbsStorage )
 			if ( StorageExist( s_thumbsSubStorageNames[ Thumbs_jpeg ] ) )
-			{
 				m_pThumbsStorage = OpenDir( s_thumbsSubStorageNames[ Thumbs_jpeg ] );
-				m_pThumbsDecoderId = wic::FindDecoderIdFromPath( imageComplexPath.GetPtr() );	// CLSID_WICJpegDecoder or CLSID_WICPngDecoder depending on ext
-			}
 			else if ( StorageExist( s_thumbsSubStorageNames[ Thumbs_bmp ] ) )		// backwards compatibility
-			{
 				m_pThumbsStorage = OpenDir( s_thumbsSubStorageNames[ Thumbs_bmp ] );
-				m_pThumbsDecoderId = &CLSID_WICBmpDecoder;
-			}
 
 		if ( m_pThumbsStorage != NULL )
 		{
-			ASSERT_PTR( m_pThumbsDecoderId );
+			fs::CPath thumbStreamName;
+			MakeThumbStreamName( thumbStreamName, imageComplexPath.GetEmbeddedPath() );
 
-			if ( CComPtr< IStream > pThumbStream = OpenStream( imageComplexPath.GetEmbeddedPath(), m_pThumbsStorage ) )
-				if ( CComPtr< IWICBitmapSource > pSavedBitmap = wic::LoadBitmapFromStream( pThumbStream, *m_pThumbsDecoderId ) )
+			CComPtr< IStream > pThumbStream = OpenStream( thumbStreamName.GetPtr(), m_pThumbsStorage );
+			if ( pThumbStream == NULL )
+				pThumbStream = OpenStream( imageComplexPath.GetEmbeddedPath(), m_pThumbsStorage );		// backwards compatibility: try with straight SRC image path as stream name
+
+			if ( pThumbStream != NULL )
+				if ( CComPtr< IWICBitmapSource > pSavedBitmap = wic::LoadBitmapFromStream( pThumbStream/*, m_pThumbsDecoderId*/ ) )
 					if ( CCachedThumbBitmap* pThumbnail = app::GetThumbnailer()->NewScaledThumb( pSavedBitmap, imageComplexPath ) )
 					{
 						// IMP: the resulting bitmap, even the scaled bitmap will keep the stream alive for the lifetime of the bitmap; same if we scale the bitmap;
@@ -314,7 +342,7 @@ bool CImageArchiveStg::LoadAlbumDoc( CObject* pAlbumDoc )
 	std::auto_ptr< COleStreamFile > pAlbumFile;
 	{
 		CPushThrowMode pushNoThrow( this, false );				// album not found is not an error
-		pAlbumFile = OpenFile( CImageArchiveStg::s_albumFilename );
+		pAlbumFile = OpenFile( CImageArchiveStg::s_albumFilename );		// load stream "_Album.sld"
 	}
 
 	if ( NULL == pAlbumFile.get() )
@@ -375,23 +403,17 @@ std::tstring CImageArchiveStg::LoadPassword( void )
 	ASSERT( IsOpen() );
 
 	std::tstring password;
-	PwdFmt pwdFmt = PwdWide;
+	PwdFmt pwdFmt;
 
-	std::auto_ptr< COleStreamFile > pPwdFile;
-	{
-		CPushThrowMode pushNoThrow( this, false );
-		pPwdFile = OpenFile( s_pwdStreamNames[ PwdWide ] );
-		if ( pPwdFile.get() != NULL )
-			pwdFmt = PwdWide;				// found WIDE password
-		else
-		{
-			pPwdFile = OpenFile( s_pwdStreamNames[ PwdAnsi ] );
-			if ( pPwdFile.get() != NULL )
-				pwdFmt = PwdAnsi;			// found ANSI password (backwards compatibility)
-			else
-				return password;			// no password stored
-		}
-	}
+	if ( StreamExist( s_pwdStreamNames[ PwdWide ] ) )
+		pwdFmt = PwdWide;				// has WIDE password
+	else if ( StreamExist( s_pwdStreamNames[ PwdAnsi ] ) )
+		pwdFmt = PwdAnsi;				// has ANSI password (backwards compatibility)
+	else
+		return password;				// no password stored
+
+	std::auto_ptr< COleStreamFile > pPwdFile = OpenFile( s_pwdStreamNames[ pwdFmt ] );
+	ASSERT_PTR( pPwdFile.get() );
 
 	CArchive archive( pPwdFile.get(), CArchive::load );
 	archive.m_bForceFlat = FALSE;			// same as CDocument::OnOpenDocument()
@@ -433,7 +455,14 @@ void CImageArchiveStg::CFactory::Clear( void )
 CImageArchiveStg* CImageArchiveStg::CFactory::FindStorage( const fs::CPath& stgFilePath ) const
 {
 	stdext::hash_map< fs::CPath, CImageArchiveStg* >::const_iterator itFound = m_storageMap.find( stgFilePath );
-	return itFound != m_storageMap.end() ? itFound->second : NULL;
+
+	if ( itFound != m_storageMap.end() )
+		return itFound->second;
+
+	if ( CStructuredStorage* pOpenedStorage = fs::CStructuredStorage::FindOpenedStorage( stgFilePath ) )		// opened in testing?
+		return checked_static_cast< CImageArchiveStg* >( pOpenedStorage );
+
+	return NULL;
 }
 
 CImageArchiveStg* CImageArchiveStg::CFactory::AcquireStorage( const fs::CPath& stgFilePath, DWORD mode /*= STGM_READ*/ )
@@ -464,7 +493,7 @@ bool CImageArchiveStg::CFactory::ReleaseStorage( const fs::CPath& stgFilePath )
 void CImageArchiveStg::CFactory::ReleaseStorages( const std::vector< fs::CPath >& stgFilePaths )
 {
 	for ( std::vector< fs::CPath >::const_iterator itStgPath = stgFilePaths.begin(); itStgPath != stgFilePaths.end(); ++itStgPath )
-		CImageArchiveStg::Factory().ReleaseStorage( *itStgPath );
+		CImageArchiveStg::Factory()->ReleaseStorage( *itStgPath );
 }
 
 std::auto_ptr< CFile > CImageArchiveStg::CFactory::OpenFlexImageFile( const fs::CFlexPath& flexImagePath, DWORD mode /*= CFile::modeRead*/ )
@@ -490,14 +519,14 @@ std::auto_ptr< CFile > CImageArchiveStg::CFactory::OpenFlexImageFile( const fs::
 	return pFile;
 }
 
-void CImageArchiveStg::CFactory::LoadImagesMetadata( std::vector< CFileAttr* >& rOutFileAttribs, const fs::CPath& stgFilePath )
+void CImageArchiveStg::CFactory::LoadImagesMetadata( std::vector< CFileAttr* >& rOutTransferAttrs, const fs::CPath& stgFilePath )
 {
 	ASSERT( IsPasswordVerified( stgFilePath ) );
 
 	if ( CImageArchiveStg* pArchiveStg = AcquireStorage( stgFilePath ) )
 	{
 		CPushThrowMode pushMode( pArchiveStg, IsThrowMode() );					// pass current factory throw mode to the storage
-		pArchiveStg->LoadImagesMetadata( rOutFileAttribs );
+		pArchiveStg->LoadImagesMetadata( rOutTransferAttrs );
 	}
 }
 
@@ -650,13 +679,13 @@ CCachedThumbBitmap* CImageArchiveStg::CFactory::GenerateThumb( const fs::CFlexPa
 
 CImageArchiveStg::CScopedAcquireStorage::CScopedAcquireStorage( const fs::CPath& stgFilePath, DWORD mode )
 	: m_stgFilePath( stgFilePath )
-	, m_pArchiveStg( Factory().FindStorage( m_stgFilePath ) )
+	, m_pArchiveStg( Factory()->FindStorage( m_stgFilePath ) )
 	, m_mustRelease( false )
 	, m_oldOpenMode( (DWORD)NotOpenMask )
 {
 	if ( NULL == m_pArchiveStg )
 	{
-		m_pArchiveStg = Factory().AcquireStorage( m_stgFilePath, mode );
+		m_pArchiveStg = Factory()->AcquireStorage( m_stgFilePath, mode );
 		if ( m_pArchiveStg != NULL )
 			m_mustRelease = true;
 	}
@@ -671,7 +700,7 @@ CImageArchiveStg::CScopedAcquireStorage::CScopedAcquireStorage( const fs::CPath&
 						: m_pArchiveStg->OpenDocFile( m_stgFilePath.GetPtr(), mode ) ) )
 				{
 					m_pArchiveStg = NULL;
-					Factory().ReleaseStorage( m_stgFilePath );
+					Factory()->ReleaseStorage( m_stgFilePath );
 				}
 			}
 }
@@ -681,7 +710,7 @@ CImageArchiveStg::CScopedAcquireStorage::~CScopedAcquireStorage()
 	// restore original storage state
 	if ( m_pArchiveStg != NULL )
 		if ( m_mustRelease )
-			Factory().ReleaseStorage( m_stgFilePath );
+			Factory()->ReleaseStorage( m_stgFilePath );
 		else if ( m_oldOpenMode != NotOpenMask )
 			m_pArchiveStg->OpenDocFile( m_stgFilePath.GetPtr(), m_oldOpenMode );
 }

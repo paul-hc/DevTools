@@ -9,6 +9,7 @@
 #include "ImageArchiveStg.h"
 #include "MoveFileDialog.h"
 #include "OleImagesDataSource.h"
+#include "test/ImageArchiveStgTests.h"
 #include "test/ImagingD2DTests.h"
 #include "test/ThumbnailTests.h"
 #include "resource.h"
@@ -281,6 +282,7 @@ CApplication theApp;
 CApplication::CApplication( void )
 	: CBaseApp< CWinApp >()
 	, m_pMainFrame( NULL )
+	, m_runFlags( 0 )
 	, m_forceMask( 0 )
 	, m_forceFlags( 0 )
 	, m_pEventLogger( new CLogger( _T("%s-events") ) )
@@ -323,9 +325,9 @@ BOOL CApplication::InitInstance( void )
 
 	m_pThumbnailer.reset( new CThumbnailer );
 	GetSharedResources().AddAutoPtr( &m_pThumbnailer );
-	GetSharedResources().AddAutoClear( &CImageArchiveStg::Factory() );
+	GetSharedResources().AddAutoClear( CImageArchiveStg::Factory() );
 	GetSharedResources().AddAutoClear( &CWicImageCache::Instance() );
-	m_pThumbnailer->SetExternalProducer( &CImageArchiveStg::Factory() );		// add as producer of storage-based thumbnails
+	m_pThumbnailer->SetExternalProducer( CImageArchiveStg::Factory() );		// add as producer of storage-based thumbnails
 
 	CAboutBox::m_appIconId = IDR_MAINFRAME;
 	m_sharedAccel.Load( IDR_COMMAND_BAR_ACCEL );
@@ -343,9 +345,9 @@ BOOL CApplication::InitInstance( void )
 	if ( ui::IsKeyPressed( VK_SHIFT ) )
 		cmdInfo.SetForceFlag( app::FullScreen | app::DocMaximize, true );
 
-	if ( HasForceMask( app::ShowHelp ) && HasForceFlag( app::ShowHelp ) )
+	if ( HasFlag( m_runFlags, ShowHelp ) )
 	{
-		AfxMessageBox( IDS_HELP_MESSAGE );
+		AfxMessageBox( CCmdLineInfo::GetHelpMsg().c_str() );
 		return FALSE;
 	}
 
@@ -383,13 +385,8 @@ BOOL CApplication::InitInstance( void )
 	m_pMainFrame->ShowWindow( m_nCmdShow );
 	m_pMainFrame->UpdateWindow();
 
-
-#ifdef _DEBUG
-	// register UTL tests
-	CWicImageTests::Instance();
-	CThumbnailTests::Instance();
-	CImagingD2DTests::Instance();
-#endif
+	if ( HandleAppTests() )
+		return FALSE;
 
 	return TRUE;
 }
@@ -438,6 +435,28 @@ bool CApplication::OpenQueuedAlbum( void )
 
 	m_queuedAlbumFilePaths.clear();
 	return true;
+}
+
+bool CApplication::HandleAppTests( void )
+{
+#ifdef _DEBUG
+	// register Slider application's tests
+	CImageArchiveStgTests::Instance();
+
+	if ( !HasFlag( m_runFlags, SkipUiTests ) )	// UI tests are not skipped?
+	{
+		CWicImageTests::Instance();
+		CThumbnailTests::Instance();
+		CImagingD2DTests::Instance();
+	}
+
+	if ( HasFlag( m_runFlags, RunTests ) )
+	{
+		RunUnitTests();
+		return true;		// exit the application right away
+	}
+#endif
+	return false;
 }
 
 void CApplication::SetStatusBarMessage( const TCHAR* pMessage )
@@ -544,18 +563,25 @@ bool CApplication::CCmdLineInfo::ParseSwitch( const TCHAR* pSwitch )
 {
 	ASSERT_PTR( pSwitch );
 
-	switch ( func::ToUpper()( pSwitch[ 0 ] ) )
-	{
-		case _T('R'):	SetForceFlag( app::RegAdditionalExt, pSwitch[ 1 ] != _T('-') ); break;
-		case _T('F'):	SetForceFlag( app::FullScreen, pSwitch[ 1 ] != _T('-') ); break;
-		case _T('X'):	SetForceFlag( app::DocMaximize, pSwitch[ 1 ] != _T('-') ); break;
-		case _T('T'):	SetForceFlag( app::ShowToolbar, pSwitch[ 1 ] != _T('-') ); break;
-		case _T('S'):	SetForceFlag( app::ShowStatusBar, pSwitch[ 1 ] != _T('-') ); break;
-		case _T('H'):
-		case _T('?'):	SetForceFlag( app::ShowHelp, pSwitch[ 1 ] != _T('-') ); break;
-		default:
-			return false;
-	}
+	if ( arg::Equals( pSwitch, _T("TEST") ) || arg::Equals( pSwitch, _T("UT") ) )
+		SetFlag( m_pApp->m_runFlags, RunTests );
+	else if ( arg::Equals( pSwitch, _T("SKIP_UI_TESTS") ) )
+		SetFlag( m_pApp->m_runFlags, SkipUiTests );
+	else
+		switch ( func::ToUpper()( pSwitch[ 0 ] ) )
+		{
+			case _T('R'):	SetForceFlag( app::RegAdditionalExt, pSwitch[ 1 ] != _T('-') ); break;
+			case _T('F'):	SetForceFlag( app::FullScreen, pSwitch[ 1 ] != _T('-') ); break;
+			case _T('X'):	SetForceFlag( app::DocMaximize, pSwitch[ 1 ] != _T('-') ); break;
+			case _T('T'):	SetForceFlag( app::ShowToolbar, pSwitch[ 1 ] != _T('-') ); break;
+			case _T('S'):	SetForceFlag( app::ShowStatusBar, pSwitch[ 1 ] != _T('-') ); break;
+			case _T('H'):
+			case _T('?'):
+				SetFlag( m_pApp->m_runFlags, ShowHelp );
+				break;
+			default:
+				return false;
+		}
 	return true;
 }
 
@@ -563,4 +589,31 @@ void CApplication::CCmdLineInfo::SetForceFlag( int forceFlag, bool on )
 {
 	SetFlag( m_pApp->m_forceMask, forceFlag, true );
 	SetFlag( m_pApp->m_forceFlags, forceFlag, on );
+}
+
+std::tstring CApplication::CCmdLineInfo::GetHelpMsg( void )
+{
+	return str::FromAnsi(
+		"Slider command line options:\n"
+		"\n"
+		"slider [/R[-]] [/F[-]] [/X[-]] [/T[-]] [/S[-]] [/?] [image_file] [image_folder]\n"
+		"\n"
+		"    /R   Register slider additional shell extensions.\n"
+		"    /F   Open slider window in full screen mode.\n"
+		"    /X   Open slider window maximized.\n"
+		"    /T   Open slider window with toolbar displayed.\n"
+		"    /S   Open slider window with status-bar displayed.\n"
+		"    /?   Display this help message.\n"
+		"\n"
+		"    image_file     One or many image file(s).\n"
+		"    image_folder   Folder to search images for.\n"
+		"\n"
+		"    Note:\tIf [-] suffix is specified, than the specified option is switched off.\n"
+#ifdef _DEBUG
+		"\n"
+		"Debug build options:\n"
+		"    -TEST            Run unit tests and exit.\n"
+		"    -SKIP_UI_TESTS   Skip executing unit test that use the test window.\n"
+#endif
+	);
 }

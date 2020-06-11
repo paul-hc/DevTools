@@ -17,6 +17,13 @@ namespace fattr
 		return foundPos != utl::npos ? fileAttributes[ foundPos ] : NULL;
 	}
 
+	template< typename FileAttrT >
+	void StoreBaselineSequence( std::vector< FileAttrT* >& rFileAttributes )
+	{
+		for ( size_t pos = 0; pos != rFileAttributes.size(); ++pos )
+			rFileAttributes[ pos ]->StoreBaselinePos( pos );
+	}
+
 	template< typename IndexT >
 	void QueryDisplayIndexSequence( std::vector< IndexT >* pDisplaySequence, const std::vector< CFileAttr* >& fileAttributes )
 	{	// pDisplaySequence contains baseline positions in current order
@@ -41,6 +48,43 @@ namespace fattr
 		// original order
 		stdext::hash_map< fs::CFlexPath, size_t > m_pathToOrigPosMap;
 	};
+}
+
+
+#include "ArchivingModel_fwd.h"
+
+
+namespace fattr
+{
+	inline fs::CPath& NormalizeEmbeddedPath( fs::CPath& rPath )
+	{
+		// saving: if an embedded image path, make it look like a deep path, where the doc storage path is treated like a normal directory path (replace '>' to '\\' )
+		std::replace( rPath.Ref().begin(), rPath.Ref().end(), path::s_complexPathSep, _T('\\') );
+		return rPath;
+	}
+
+	void TransformToEmbeddedPaths( std::vector< fs::CFlexPath >& rEmbeddedPaths, bool useDeepStreamPaths = true );		// rEmbeddedPaths: IN source paths, OUT embedded stream paths
+
+	template< typename SrcPathT >
+	void MakeDestEmbeddedPaths( std::vector< fs::CFlexPath >& rDestImagePaths, const std::vector< SrcPathT >& srcImagePaths, bool useDeepStreamPaths = true )
+	{
+		utl::Assign( rDestImagePaths, srcImagePaths, func::tor::StringOf() );
+		fattr::TransformToEmbeddedPaths( rDestImagePaths, useDeepStreamPaths );
+	}
+
+	template< typename SrcPathT >
+	void MakeTransferPathPairs( std::vector< TTransferPathPair >& rTransferPairs, const std::vector< SrcPathT >& srcImagePaths, bool useDeepStreamPaths = true )
+	{
+		std::vector< fs::CFlexPath > destImagePaths;
+		fattr::MakeDestEmbeddedPaths( destImagePaths, srcImagePaths, useDeepStreamPaths );
+		ENSURE( srcImagePaths.size() == destImagePaths.size() );
+
+		rTransferPairs.clear();
+		rTransferPairs.reserve( srcImagePaths.size() );
+
+		for ( size_t i = 0; i != srcImagePaths.size(); ++i )
+			rTransferPairs.push_back( TTransferPathPair( srcImagePaths[ i ].Get(), destImagePaths[ i ] ) );
+	}
 }
 
 
@@ -156,9 +200,6 @@ namespace pred
 }
 
 
-#include "ArchivingModel_fwd.h"			// for TTransferPathPair
-
-
 namespace func
 {
 	// CAlbumModel functors
@@ -188,12 +229,11 @@ namespace func
 	};
 
 
-	struct NormalizeEmbeddedPaths
+	struct NormalizeEmbeddedPath
 	{
 		void operator()( fs::CPath& rPath )
 		{
-			// saving: if an embedded image path, make it look like a deep path, where the doc storage path is treated like a normal directory path (replace '>' to '\\' )
-			std::replace( rPath.Ref().begin(), rPath.Ref().end(), path::s_complexPathSep, _T('\\') );
+			fattr::NormalizeEmbeddedPath( rPath );
 		}
 	};
 

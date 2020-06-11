@@ -1,5 +1,5 @@
-#ifndef ImageStorageModel_h
-#define ImageStorageModel_h
+#ifndef ImageStorageService_h
+#define ImageStorageService_h
 #pragma once
 
 #include "ArchivingModel_fwd.h"
@@ -15,20 +15,35 @@ namespace ui
 }
 
 
-class CImageStorageModel
+class CImageStorageService : private utl::noncopyable
 {
 public:
-	CImageStorageModel( void ) {}
-	~CImageStorageModel();
+	CImageStorageService( void );			// using null-pattern, for testing
+	CImageStorageService( ui::IProgressService* pProgressSvc, ui::IUserReport* pUserReport );
+	~CImageStorageService();
 
-	void Build( const std::vector< TTransferPathPair >& xferPairs, ui::IProgressService* pProgressService, ui::IUserReport* pUserReport );
+	void Build( const std::vector< TTransferPathPair >& xferPairs );
 
-	bool IsEmpty( void ) const { return m_fileAttribs.empty(); }
-	const std::vector< CTransferFileAttr* >& GetFileAttribs( void ) const { return m_fileAttribs; }
-	std::vector< CTransferFileAttr* >& RefFileAttribs( void ) { return m_fileAttribs; }
+	// for testing
+	void BuildFromSrcPaths( const std::vector< fs::CPath >& srcImagePaths );
+	void MakeAlbumFileAttrs( std::vector< CFileAttr* >& rFileAttrs ) const;
+
+	bool IsEmpty( void ) const { return m_transferAttrs.empty(); }
+	const std::vector< CTransferFileAttr* >& GetTransferAttrs( void ) const { return m_transferAttrs; }
+	std::vector< CTransferFileAttr* >& RefTransferAttrs( void ) { return m_transferAttrs; }
+
+	const std::tstring& GetPassword( void ) const { return m_password; }
+	void SetPassword( const std::tstring& password ) { m_password = password; }
+
+	ui::IProgressService* GetProgress( void ) const { return m_pProgressSvc; }
+	ui::IUserReport* GetReport( void ) const { return m_pUserReport; }
 private:
-	std::vector< CTransferFileAttr* > m_fileAttribs;
+	ui::IProgressService* m_pProgressSvc;
+	ui::IUserReport* m_pUserReport;
+
+	std::vector< CTransferFileAttr* > m_transferAttrs;
 	std::vector< fs::CPath > m_srcStorages;
+	std::tstring m_password;
 };
 
 
@@ -69,4 +84,4 @@ namespace pwd
 }
 
 
-#endif // ImageStorageModel_h
+#endif // ImageStorageService_h
