@@ -676,7 +676,7 @@ void CAlbumSettingsDialog::OnModify_SearchPattern( void )
 	size_t dupPos = pSearchModel->FindPatternPos( dlg.m_pSearchPattern->GetFilePath(), selIndex );
 	if ( dupPos != utl::npos )
 	{
-		m_patternsListCtrl.SetCaretIndex( dupPos );
+		m_patternsListCtrl.SetCaretIndex( static_cast<int>( dupPos ) );
 		ui::MessageBox( str::Format( _T("The search pattern must be unique!\nCheck duplicate pattern no. %d."), dupPos + 1 ), MB_ICONERROR | MB_OK );
 		return;
 	}
