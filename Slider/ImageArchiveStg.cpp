@@ -338,7 +338,7 @@ bool CImageArchiveStg::SavePassword( const std::tstring& password )
 
 	try
 	{
-		if ( const TCHAR* pFoundStreamName = FindAlternate_DirName( ARRAY_PAIR( s_passwordStreamNames ) ).first )
+		if ( const TCHAR* pFoundStreamName = FindAlternate_StreamName( ARRAY_PAIR( s_passwordStreamNames ) ).first )
 			DeleteStream( pFoundStreamName );		// remove existing password stream
 
 		if ( password.empty() )
@@ -369,7 +369,7 @@ std::tstring CImageArchiveStg::LoadPassword( void )
 {
 	ASSERT( IsOpen() );
 
-	std::pair< const TCHAR*, size_t > streamName = FindAlternate_DirName( ARRAY_PAIR( s_passwordStreamNames ) );
+	std::pair< const TCHAR*, size_t > streamName = FindAlternate_StreamName( ARRAY_PAIR( s_passwordStreamNames ) );
 	bool hasWidePwd = streamName.second != ( COUNT_OF( s_passwordStreamNames ) - 1 );		// found a WIDE stream?
 
 	if ( NULL == streamName.first )
