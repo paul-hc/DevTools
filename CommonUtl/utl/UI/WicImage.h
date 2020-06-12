@@ -18,6 +18,7 @@ public:
 
 	// image factory
 	static std::auto_ptr< CWicImage > CreateFromFile( const fs::ImagePathKey& imageKey, bool throwMode = false );
+	static std::pair< UINT, wic::TDecoderFlags > LookupImageFileFrameCount( const fs::CFlexPath& imagePath );
 
 	void Clear( void );
 

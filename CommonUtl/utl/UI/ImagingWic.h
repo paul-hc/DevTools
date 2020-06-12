@@ -30,6 +30,9 @@ namespace wic
 	};
 
 
+	typedef int TDecoderFlags;
+
+
 	// wrapper for IWICBitmapDecoder: works with file streams and embedded file streams
 	//
 	class CBitmapDecoder : public CThrowMode
@@ -51,6 +54,8 @@ namespace wic
 		CComPtr< IWICBitmapFrameDecode > GetFrameAt( UINT framePos ) const;
 		CComPtr< IWICBitmapSource > ConvertFrameAt( UINT framePos, const WICPixelFormatGUID* pPixelFormat = &GUID_WICPixelFormat32bppPBGRA ) const;		// releases any source dependencies (IStream, HFILE, etc)
 
+        bool GetPixelFormatIds( std::vector< GUID* >& rPixelFormatIds ) const;
+
 		// metadata
 		CComPtr< IWICMetadataQueryReader > GetDecoderMetadata( void ) const;				// global
 		CComPtr< IWICMetadataQueryReader > GetFrameMetadataAt( UINT framePos ) const;		// per frame
@@ -59,10 +64,11 @@ namespace wic
 		{
 			MultiFrame	= BIT_FLAG( 0 ),
 			Animation	= BIT_FLAG( 1 ),
-			Lossless	= BIT_FLAG( 2 )
+			Lossless	= BIT_FLAG( 2 ),
+			ChromaKey	= BIT_FLAG( 3 )
 		};
 
-		int GetDecoderFlags( void ) const;
+		TDecoderFlags GetDecoderFlags( void ) const;
 	private:
 		CComPtr< IWICBitmapDecoder > m_pDecoder;
 		UINT m_frameCount;

@@ -43,8 +43,8 @@ std::auto_ptr< CWicImage > CWicImage::CreateFromFile( const fs::ImagePathKey& im
 
 	if ( decoder.IsValid() )
 	{
-		int decoderFlags = decoder.GetDecoderFlags();
-		if ( HasFlag( decoderFlags, wic::CBitmapDecoder::MultiFrame ) )		// multi-frame image?
+		wic::TDecoderFlags decoderFlags = decoder.GetDecoderFlags();
+		if ( HasFlag( decoderFlags, wic::CBitmapDecoder::MultiFrame ) )			// multi-frame image?
 		{
 			if ( HasFlag( decoderFlags, wic::CBitmapDecoder::Animation ) )		// multi-frame GIF with animation?
 				pNewImage.reset( new CWicAnimatedImage( decoder ) );
@@ -62,6 +62,26 @@ std::auto_ptr< CWicImage > CWicImage::CreateFromFile( const fs::ImagePathKey& im
 		pNewImage.reset();
 
 	return pNewImage;
+}
+
+std::pair< UINT, wic::TDecoderFlags > CWicImage::LookupImageFileFrameCount( const fs::CFlexPath& imagePath )
+{
+	std::pair< UINT, wic::TDecoderFlags > frameInfo( 0, 0 );
+
+	if ( CMultiFrameDecoder* pSharedDecoder = LoadedMultiFrameDecoders().Find( imagePath ) )
+	{
+		frameInfo.first = pSharedDecoder->GetDecoder().GetFrameCount();
+		frameInfo.second = pSharedDecoder->GetDecoder().GetDecoderFlags();
+	}
+	else
+	{
+		wic::CBitmapDecoder decoder( imagePath, false );
+
+		frameInfo.first = decoder.GetFrameCount();
+		frameInfo.second = decoder.GetDecoderFlags();
+	}
+
+	return frameInfo;
 }
 
 void CWicImage::Clear( void )
@@ -131,10 +151,10 @@ bool CWicImage::IsCorruptFile( const fs::CFlexPath& imagePath )
 	if ( !decoder.IsValid() || 0 == decoder.GetFrameCount() )
 		return false;
 
-	static const CSize emptySize( 0, 0 );
+	static const CSize s_emptySize( 0, 0 );
 
 	for ( UINT framePos = 0; framePos != decoder.GetFrameCount(); ++framePos )
-		if ( emptySize == wic::GetBitmapSize( decoder.GetFrameAt( framePos ) ) )
+		if ( s_emptySize == wic::GetBitmapSize( decoder.GetFrameAt( framePos ) ) )
 			return false;			// frame is corrupted
 
 	return true;
@@ -146,10 +166,12 @@ bool CWicImage::IsCorruptFrame( const fs::ImagePathKey& imageKey )
 		return false;				// file doesn't exist -> doesn't mean is corrupt!
 
 	wic::CBitmapDecoder decoder( imageKey.first );
-	return
-		decoder.IsValid() &&
-		decoder.GetFrameCount() != 0 &&
-		wic::GetBitmapSize( decoder.GetFrameAt( imageKey.second ) ) != CSize( 0, 0 );
+
+	if ( decoder.IsValid() )
+		if ( CSize( 0, 0 ) == wic::GetBitmapSize( decoder.GetFrameAt( imageKey.second ) ) )
+			return true;			// corrupt frame
+
+	return false;					// we can't say -> doesn't mean is corrupt!
 }
 
 #ifdef _DEBUG
@@ -183,7 +205,7 @@ CWicImage::TMultiFrameDecoderMap& CWicImage::LoadedMultiFrameDecoders( void )
 CWicImage::CMultiFrameDecoder::CMultiFrameDecoder( const wic::CBitmapDecoder& decoder )
 	: m_decoder( decoder )
 {
-	int decoderFlags = decoder.GetDecoderFlags();
+	wic::TDecoderFlags decoderFlags = decoder.GetDecoderFlags();
 	ASSERT( HasFlag( decoderFlags, wic::CBitmapDecoder::MultiFrame ) );
 	ASSERT( !HasFlag( decoderFlags, wic::CBitmapDecoder::Animation ) );
 	decoderFlags;

@@ -131,23 +131,19 @@ void CImageArchiveStgTests::_TestAlbumFileAttr( CImageArchiveStg* pImageStorage,
 
 	// test loading embedded images
 	{
-		std::auto_ptr< CWicImage > pImage( CWicImage::CreateFromFile( pFileAttr->GetPathKey(), true ) );
-		ASSERT_PTR( pImage.get() );
+		UINT imageFrameCount = CWicImage::LookupImageFileFrameCount( pFileAttr->GetPath() ).first;
 
-		if ( pImage->IsMultiFrameStatic() )
-		{	// verify each frame (except the already loaded)
-			fs::ImagePathKey frameKey = pFileAttr->GetPathKey();
+		// verify each frame
+		for ( UINT framePos = 0; framePos != imageFrameCount; ++framePos )
+			if ( framePos != pFileAttr->GetPathKey().second )
+			{
+				fs::ImagePathKey frameKey( pFileAttr->GetPath(), framePos );
 
-			for ( UINT framePos = 0, frameCount = pImage->GetFrameCount(); framePos != frameCount; ++framePos )
-				if ( framePos != pFileAttr->GetPathKey().second )
-				{
-					frameKey.second = framePos;
-					ASSERT( !CWicImage::IsCorruptFrame( frameKey ) );
+				ASSERT( !CWicImage::IsCorruptFrame( frameKey ) );
 
-					std::auto_ptr< CWicImage > pFrameImage( CWicImage::CreateFromFile( frameKey, true ) );
-					ASSERT_PTR( pFrameImage.get() );
-				}
-		}
+				std::auto_ptr< CWicImage > pFrameImage( CWicImage::CreateFromFile( frameKey, true ) );
+				ASSERT_PTR( pFrameImage.get() );
+			}
 	}
 
 	// test loading embedded thumbnails

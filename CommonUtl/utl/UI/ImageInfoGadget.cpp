@@ -105,7 +105,9 @@ namespace d2d
 			HR_VERIFY( m_pInfoTextLayout->SetFontWeight( DWRITE_FONT_WEIGHT_NORMAL, textLayout.GetFieldRangeAt( ZoomPercent ) ) );
 		}
 
-		if ( m_info.IsMultiFrameImage() )
+		if ( m_info.m_isAnimated )
+			m_pFrameTextLayout = dw::CreateTextLayout( str::Format( _T("Animated Frames: %d"), m_info.m_frameCount ), m_pInfoFont, maxSize );
+		else if ( m_info.IsMultiFrameImage() )
 			m_pFrameTextLayout = dw::CreateTextLayout( str::Format( _T("Page: %d of %d"), m_info.m_framePos + 1, m_info.m_frameCount ), m_pInfoFont, maxSize );
 		else
 			m_pFrameTextLayout = NULL;

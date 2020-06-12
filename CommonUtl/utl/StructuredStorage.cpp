@@ -240,6 +240,29 @@ namespace fs
 	}
 
 
+	std::pair< const TCHAR*, size_t > CStructuredStorage::FindAlternate_DirName( const TCHAR* altDirNames[], size_t altCount, IStorage* pParentDir /*= NULL*/ )
+	{
+		REQUIRE( altCount != 0 );
+
+		for ( size_t i = 0; i != altCount; ++i )
+			if ( StorageExist( altDirNames[ i ], pParentDir ) )
+				return std::pair< const TCHAR*, size_t >( altDirNames[ i ], i );
+
+		return std::pair< const TCHAR*, size_t >( NULL, utl::npos );			// no storage found
+	}
+
+	std::pair< const TCHAR*, size_t > CStructuredStorage::FindAlternate_StreamName( const TCHAR* altStreamNames[], size_t altCount, IStorage* pParentDir /*= NULL*/ )
+	{
+		REQUIRE( altCount != 0 );
+
+		for ( size_t i = 0; i != altCount; ++i )
+			if ( StreamExist( altStreamNames[ i ], pParentDir ) )
+				return std::pair< const TCHAR*, size_t >( altStreamNames[ i ], i );
+
+		return std::pair< const TCHAR*, size_t >( NULL, utl::npos );			// no stream found
+	}
+
+
 	std::tstring CStructuredStorage::EncodeStreamName( const TCHAR* pStreamName ) const
 	{
 		return MakeShortFilename( pStreamName );
@@ -395,7 +418,7 @@ namespace fs
 		if ( pStreamOpened != NULL )
 		{
 			pStreamOpened->AddRef();		// keep the stream alive when passed on contructor by e.g. OpenStream - it will be released on Close()
-			TRACE( _T(" CAutoOleStreamFile::CAutoOleStreamFile() - after opening m_lpStream: ") ); TRACE_ITF( m_lpStream );
+			TRACE_COM_ITF( m_lpStream, "fs::CAutoOleStreamFile::CAutoOleStreamFile() - after opening m_lpStream" );
 		}
 
 		m_bCloseOnDelete = TRUE;			// will close on destructor
@@ -403,7 +426,7 @@ namespace fs
 
 	CAutoOleStreamFile::~CAutoOleStreamFile()
 	{
-		TRACE( _T(" CAutoOleStreamFile::~CAutoOleStreamFile() - before closing m_lpStream: ") ); TRACE_ITF( m_lpStream );
+		TRACE_COM_ITF( m_lpStream, "fs::CAutoOleStreamFile::~CAutoOleStreamFile() - before closing m_lpStream" );
 	}
 
 

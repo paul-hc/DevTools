@@ -64,6 +64,10 @@ namespace fs
 		std::auto_ptr< COleStreamFile > CreateFile( const TCHAR* pFileName, IStorage* pParentDir = NULL, DWORD mode = CFile::modeCreate | CFile::modeWrite );
 		std::auto_ptr< COleStreamFile > OpenFile( const TCHAR* pFileName, IStorage* pParentDir = NULL, DWORD mode = CFile::modeRead );
 
+		// backwards compatibility: find existing object based on possible alternates
+		std::pair< const TCHAR*, size_t > FindAlternate_DirName( const TCHAR* altDirNames[], size_t altCount, IStorage* pParentDir = NULL );
+		std::pair< const TCHAR*, size_t > FindAlternate_StreamName( const TCHAR* altStreamNames[], size_t altCount, IStorage* pParentDir = NULL );
+
 		// opened embedded streams file states
 		bool IsElementOpen( const fs::CPath& streamName ) const { return m_openedFileStates.Contains( streamName ); }
 		const fs::CFileState* FindOpenedElement( const fs::CPath& streamName ) const { return m_openedFileStates.Find( streamName ); }

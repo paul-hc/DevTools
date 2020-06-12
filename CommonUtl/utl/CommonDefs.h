@@ -59,32 +59,36 @@
 
 	namespace dbg
 	{
-		template< typename Type >
-		inline std::tstring FormatRefCount( Type* pointer )
+		inline int GetRefCount( IUnknown* pInterface )
 		{
-			ULONG refCount = 0;
-			if ( pointer != NULL )
-			{
-				pointer->AddRef();
-				refCount = pointer->Release();
-			}
-			return str::Format( _T("<%s> ptr=0x%08x ref_count=%d"), str::GetTypeName( typeid( pointer ) ).c_str(), pointer, refCount );
+			if ( NULL == pInterface )
+				return 0;
+
+			pInterface->AddRef();
+			ULONG refCount = pInterface->Release();
+			return static_cast<int>( refCount );
+		}
+
+		template< typename InterfaceT >
+		inline std::tstring FormatRefCount( InterfaceT* pInterface )
+		{
+			return str::Format( _T("<%s> ptr=0x%08x ref_count=%d"), str::GetTypeName( typeid( pInterface ) ).c_str(), pInterface, GetRefCount( pInterface ) );
 		}
 	}
 
-	template< typename Type >
-	void TRACE_ITF( Type* pointer ) { TRACE( _T("@ TRACE_ITF%s\n"), dbg::FormatRefCount( pointer ).c_str() ); }
+	template< typename InterfaceT >
+	void TRACE_COM_ITF( InterfaceT* pInterface, const char* pSuffix ) { TRACE( "@ TRACE_COM_ITF%s  -  %s\n", str::AsNarrow( dbg::FormatRefCount( pInterface ) ).c_str(), pSuffix ); }
 
-	template< typename ComPtrType >
-	void TRACE_COM_PTR( const ComPtrType& ptr ) { TRACE( _T("@ TRACE_COM_PTR%s\n"), dbg::FormatRefCount( ptr.p ).c_str() ); }
+	template< typename CComPtr_T >
+	void TRACE_COM_PTR( const CComPtr_T& ptr, const char* pSuffix ) { TRACE_COM_ITF( ptr.p, pSuffix ); }
 
 #else
 
 	#define HR_AUDIT( expr ) utl::Audit( (expr), NULL )
 	#define HR_OK( expr ) utl::Check( (expr), NULL )
 
-	#define TRACE_ITF( pointer ) __noop
-	#define TRACE_COM_PTR( ptr ) __noop
+	#define TRACE_COM_ITF( pInterface, pSuffix ) __noop
+	#define TRACE_COM_PTR( ptr, pSuffix ) __noop
 
 #endif
 
@@ -262,8 +266,8 @@ namespace utl
 	inline unsigned int Is32bitPlatform( void ) { return 32 == GetPlatformBits(); }
 	inline unsigned int Is64bitPlatform( void ) { return 64 == GetPlatformBits(); }
 
-	template< typename Type >
-	inline bool ModifyValue( Type& rValue, const Type& newValue )
+	template< typename ValueT >
+	inline bool ModifyValue( ValueT& rValue, const ValueT& newValue )
 	{
 		if ( rValue == newValue )
 			return false;				// value not changed

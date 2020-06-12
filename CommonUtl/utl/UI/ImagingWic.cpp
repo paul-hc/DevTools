@@ -88,6 +88,24 @@ namespace wic
 			::IsEqualGUID( containerFormatId, format ) != FALSE;
 	}
 
+	bool CBitmapDecoder::GetPixelFormatIds( std::vector< GUID* >& rPixelFormatIds ) const
+	{
+		ASSERT_PTR( m_pDecoder );
+
+		CComPtr< IWICBitmapDecoderInfo > pDecoderInfo;
+        UINT formatCount = 0;
+
+		if ( HR_OK( m_pDecoder->GetDecoderInfo( &pDecoderInfo ) ) )
+			if ( HR_OK( pDecoderInfo->GetPixelFormats( 0, NULL, &formatCount ) ) )
+			{
+				rPixelFormatIds.resize( formatCount );
+				if ( HR_OK( pDecoderInfo->GetPixelFormats( formatCount, rPixelFormatIds.front(), NULL ) ) )
+					return true;
+			}
+
+		return false;
+	}
+
 	CComPtr< IWICBitmapFrameDecode > CBitmapDecoder::GetFrameAt( UINT framePos ) const
 	{
 		ASSERT_PTR( m_pDecoder );
@@ -139,23 +157,27 @@ namespace wic
 		return NULL;
 	}
 
-	int CBitmapDecoder::GetDecoderFlags( void ) const
+	TDecoderFlags CBitmapDecoder::GetDecoderFlags( void ) const
 	{
-		int decoderFlags = 0;
-
 		ASSERT_PTR( m_pDecoder );
+
+		TDecoderFlags decoderFlags = 0;
 		CComPtr< IWICBitmapDecoderInfo > pDecoderInfo;
+
 		if ( HR_OK( m_pDecoder->GetDecoderInfo( &pDecoderInfo ) ) )
 		{
 			BOOL flag;
-			if ( HR_OK( pDecoderInfo->DoesSupportMultiframe( &flag ) ) )
+			if ( SUCCEEDED( pDecoderInfo->DoesSupportMultiframe( &flag ) ) )
 				SetFlag( decoderFlags, MultiFrame, flag != FALSE );
 
-			if ( HR_OK( pDecoderInfo->DoesSupportAnimation( &flag ) ) )
+			if ( SUCCEEDED( pDecoderInfo->DoesSupportAnimation( &flag ) ) )
 				SetFlag( decoderFlags, Animation, flag != FALSE && m_frameCount > 1 );
 
-			if ( HR_OK( pDecoderInfo->DoesSupportLossless( &flag ) ) )
+			if ( SUCCEEDED( pDecoderInfo->DoesSupportLossless( &flag ) ) )
 				SetFlag( decoderFlags, Lossless, flag != FALSE );
+
+			if ( SUCCEEDED( pDecoderInfo->DoesSupportChromakey( &flag ) ) )
+				SetFlag( decoderFlags, ChromaKey, flag != FALSE );
 		}
 		return decoderFlags;
 	}

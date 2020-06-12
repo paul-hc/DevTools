@@ -25,12 +25,25 @@
 
 // CImageArchiveStg implementation
 
-const TCHAR* CImageArchiveStg::s_compoundStgExts[ _Ext_Count ] = { _T(".ias"), _T(".cid"), _T(".icf") };
-const TCHAR* CImageArchiveStg::s_pwdStreamNames[ _PwdTypeCount ] = { _T("pwd"), _T("pwdW") };
-const TCHAR* CImageArchiveStg::s_thumbsSubStorageNames[ _ThumbsTypeCount ] = { _T("Thumbnails"), _T("Thumbs_jpeg") };
-const TCHAR CImageArchiveStg::s_metadataFilename[] = _T("_Meta.data");
-const TCHAR CImageArchiveStg::s_albumFilename[] = _T("_Album.sld");
+const TCHAR* CImageArchiveStg::s_compoundStgExts[] = { _T(".ias"), _T(".cid"), _T(".icf") };
+
+const TCHAR* CImageArchiveStg::s_passwordStreamNames[] =
+{
+	_T("_pwd.w"),				// new WIDE password stream
+	_T("pwdW"),					// old WIDE password stream
+	_T("pwd")					// legacy ANSI password stream (for backwards compatibility with old saved .icf files)
+};
+
+const TCHAR* CImageArchiveStg::s_thumbsStorageNames[] =
+{
+	_T("Thumbnails"),			// current storage name Slider_v5_3+ (used to be the legacy one, but was promoted in light of the new implicit thumbnail encoder rules)
+	_T("Thumbs_jpeg")			// middle aged storage name (Slider_v3_1..Slider_v5_2)
+};
+
+const TCHAR CImageArchiveStg::s_albumStreamName[] = _T("_Album.sld");
 const TCHAR CImageArchiveStg::s_subPathSep = _T('|');		// was '*'
+
+const TCHAR CImageArchiveStg::s_legacy_metadataStreamName[] = _T("_Meta.data");		// no longer used
 
 
 CImageArchiveStg::CImageArchiveStg( IStorage* pRootStorage /*= NULL*/ )
@@ -95,7 +108,6 @@ void CImageArchiveStg::CreateImageArchive( const fs::CPath& stgFilePath, CImageS
 	Factory()->CacheVerifiedPassword( stgFilePath, pImagesSvc->GetPassword() );
 
 	CreateImageFiles( pImagesSvc );
-	CreateMetadataFile( pImagesSvc->GetTransferAttrs() );
 	CreateThumbnailsSubStorage( pImagesSvc );
 }
 
@@ -153,21 +165,6 @@ void CImageArchiveStg::CreateImageFiles( CImageStorageService* pImagesSvc ) thro
 #endif
 }
 
-void CImageArchiveStg::CreateMetadataFile( const std::vector< CTransferFileAttr* >& transferAttrs )
-{
-	std::auto_ptr< COleStreamFile > pMetaDataFile( CreateFile( CImageArchiveStg::s_metadataFilename ) );
-	CArchive archive( pMetaDataFile.get(), CArchive::store );
-	archive.m_bForceFlat = FALSE;			// same as CDocument::OnOpenDocument()
-
-	// save metadata
-	size_t totalImagesSize = std::accumulate( transferAttrs.begin(), transferAttrs.end(), size_t( 0 ), func::AddFileSize() );
-	archive << static_cast< UINT >( totalImagesSize );		// for backwards compatibility
-	serial::SaveOwningPtrs( archive, transferAttrs );		// stream as CFileAttr
-
-	archive.Close();
-	pMetaDataFile->Close();
-}
-
 void CImageArchiveStg::CreateThumbnailsSubStorage( const CImageStorageService* pImagesSvc )
 {
 	const std::vector< CTransferFileAttr* >& transferAttrs = pImagesSvc->GetTransferAttrs();
@@ -175,7 +172,7 @@ void CImageArchiveStg::CreateThumbnailsSubStorage( const CImageStorageService* p
 	pImagesSvc->GetProgress()->AdvanceStage( _T("Saving thumbnails") );
 	pImagesSvc->GetProgress()->SetBoundedProgressCount( transferAttrs.size() );
 
-	CComPtr< IStorage > pThumbsStorage = CreateDir( CImageArchiveStg::s_thumbsSubStorageNames[ Thumbs_jpeg ] );
+	CComPtr< IStorage > pThumbsStorage = CreateDir( CImageArchiveStg::s_thumbsStorageNames[ CurrentVer ] );
 	ASSERT_PTR( pThumbsStorage );
 
 	CThumbnailer* pThumbnailer = app::GetThumbnailer();
@@ -188,16 +185,16 @@ void CImageArchiveStg::CreateThumbnailsSubStorage( const CImageStorageService* p
 			if ( CCachedThumbBitmap* pThumbBitmap = pThumbnailer->AcquireThumbnail( ( *itXferAttr )->GetSrcImagePath() ) )
 			{
 				fs::CPath thumbStreamName;
-				const GUID* pContainerFormatId = wic::GetContainerFormatId( MakeThumbStreamName( thumbStreamName, ( *itXferAttr )->GetPath().GetPtr() ) );
-				ASSERT_PTR( pContainerFormatId );
+				if ( const GUID* pContainerFormatId = wic::GetContainerFormatId( MakeThumbStreamName( thumbStreamName, ( *itXferAttr )->GetPath().GetPtr() ) ) )	// good to save thumbnail?
+				{
+					CComPtr< IStream > pThumbStream = CreateStream( thumbStreamName.GetPtr(), pThumbsStorage );
+					CPushThrowMode pushThrow( &pThumbBitmap->GetOrigin(), true );
 
-				CComPtr< IStream > pThumbStream = CreateStream( thumbStreamName.GetPtr(), pThumbsStorage );
-				CPushThrowMode pushThrow( &pThumbBitmap->GetOrigin(), true );
-
-				pThumbBitmap->GetOrigin().SaveBitmapToStream( pThumbStream, *pContainerFormatId );
+					pThumbBitmap->GetOrigin().SaveBitmapToStream( pThumbStream, *pContainerFormatId );
+				}
 			}
 			else
-				throw new mfc::CRuntimeException( str::Format( _T("Cannot generate a thumbnail for file:\n%s"), ( *itXferAttr )->GetSrcImagePath().GetPtr() ) );
+				throw new mfc::CRuntimeException( str::Format( _T("Cannot generate a thumbnail for source image:\n%s"), ( *itXferAttr )->GetSrcImagePath().GetPtr() ) );
 		}
 		catch ( CException* pExc )
 		{
@@ -212,6 +209,55 @@ void CImageArchiveStg::CreateThumbnailsSubStorage( const CImageStorageService* p
 		pImagesSvc->GetProgress()->AdvanceItem( ( *itXferAttr )->GetPath().Get() );
 		++itXferAttr;
 	}
+}
+
+CCachedThumbBitmap* CImageArchiveStg::LoadThumbnail( const fs::CFlexPath& imageComplexPath ) throws_()
+{
+	ASSERT( IsOpen() );
+
+	try
+	{
+		if ( NULL == m_pThumbsStorage )
+			if ( const TCHAR* pThumbsDirName = FindAlternate_DirName( ARRAY_PAIR( s_thumbsStorageNames ) ).first )
+				m_pThumbsStorage = OpenDir( pThumbsDirName );
+
+		if ( m_pThumbsStorage != NULL )
+			if ( CComPtr< IStream > pThumbStream = OpenThumbnailImageStream( imageComplexPath.GetEmbeddedPath() ) )
+				if ( CComPtr< IWICBitmapSource > pSavedBitmap = wic::LoadBitmapFromStream( pThumbStream ) )
+					if ( CCachedThumbBitmap* pThumbnail = app::GetThumbnailer()->NewScaledThumb( pSavedBitmap, imageComplexPath ) )
+					{
+						// IMP: the resulting bitmap, even the scaled bitmap will keep the stream alive for the lifetime of the bitmap; same if we scale the bitmap;
+						// Since the thumb keeps alive the WIC bitmap, we need to copy to a memory bitmap.
+						// This way we unlock the doc stg stream for future access.
+						//
+						pThumbnail->GetOrigin().DetachSourceToBitmap();
+						return pThumbnail;
+					}
+	}
+	catch ( CException* pExc )
+	{
+		app::HandleException( pExc );
+	}
+	return NULL;
+}
+
+CComPtr< IStream > CImageArchiveStg::OpenThumbnailImageStream( const TCHAR* pImageEmbeddedPath )
+{
+	ASSERT_PTR( m_pThumbsStorage );
+
+	fs::CPath thumbStreamName;
+	MakeThumbStreamName( thumbStreamName, pImageEmbeddedPath );
+
+	const TCHAR* pThumbStreamName = thumbStreamName.GetPtr();
+
+	if ( !path::EquivalentPtr( pThumbStreamName, pImageEmbeddedPath ) )		// possibly an archive build with Slider_v5_2-
+		if ( StreamExist( pImageEmbeddedPath, m_pThumbsStorage ) )			// backwards compatibility: also try with straight SRC image path as stream name
+			pThumbStreamName = pImageEmbeddedPath;
+
+	if ( NULL == pThumbStreamName )
+		return NULL;
+
+	return OpenStream( pThumbStreamName, m_pThumbsStorage );
 }
 
 wic::ImageFormat CImageArchiveStg::MakeThumbStreamName( fs::CPath& rThumbStreamName, const TCHAR* pSrcImagePath )
@@ -233,6 +279,7 @@ wic::ImageFormat CImageArchiveStg::MakeThumbStreamName( fs::CPath& rThumbStreamN
 			thumbImageFormat = wic::JpegFormat;
 			break;
 		case wic::GifFormat:
+			return wic::GifFormat;			// keep it as it is
 		case wic::PngFormat:
 		case wic::IcoFormat:
 			thumbImageFormat = wic::PngFormat;
@@ -245,88 +292,11 @@ wic::ImageFormat CImageArchiveStg::MakeThumbStreamName( fs::CPath& rThumbStreamN
 	return thumbImageFormat;
 }
 
-void CImageArchiveStg::LoadImagesMetadata( std::vector< CFileAttr* >& rOutTransferAttrs )
-{
-	ASSERT( IsOpen() );
-
-	std::auto_ptr< COleStreamFile > pMetaDataFile( OpenFile( s_metadataFilename ) );
-	if ( pMetaDataFile.get() != NULL )
-	{
-		CArchive archive( pMetaDataFile.get(), CArchive::load );
-		archive.m_bForceFlat = FALSE;			// same as CDocument::OnOpenDocument()
-
-		serial::CScopedLoadingArchive scopedLoadingArchive( archive, m_docModelSchema );
-
-		try
-		{	// load metadata
-			UINT totalImagesSize;
-			archive >> totalImagesSize;
-
-			serial::StreamOwningPtrs( archive, rOutTransferAttrs );
-
-			// convert the persisted image sub-path to a fully qualified logical path
-			const fs::CPath& docFilePath = GetDocFilePath();
-			for ( std::vector< CFileAttr* >::iterator itFileAttr = rOutTransferAttrs.begin(); itFileAttr != rOutTransferAttrs.end(); ++itFileAttr )
-			{
-				std::tstring streamPath = ( *itFileAttr )->GetPath().Get();
-				UnflattenDeepStreamPath( streamPath );		// decode deep stream paths: '|' -> '\'
-
-				( *itFileAttr )->SetPath( fs::CFlexPath::MakeComplexPath( docFilePath.Get(), streamPath.c_str() ) );
-			}
-		}
-		catch ( CException* pExc )
-		{
-			app::HandleException( pExc );
-		}
-	}
-}
-
-CCachedThumbBitmap* CImageArchiveStg::LoadThumbnail( const fs::CFlexPath& imageComplexPath ) throws_()
-{
-	ASSERT( IsOpen() );
-
-	try
-	{
-		if ( NULL == m_pThumbsStorage )
-			if ( StorageExist( s_thumbsSubStorageNames[ Thumbs_jpeg ] ) )
-				m_pThumbsStorage = OpenDir( s_thumbsSubStorageNames[ Thumbs_jpeg ] );
-			else if ( StorageExist( s_thumbsSubStorageNames[ Thumbs_bmp ] ) )		// backwards compatibility
-				m_pThumbsStorage = OpenDir( s_thumbsSubStorageNames[ Thumbs_bmp ] );
-
-		if ( m_pThumbsStorage != NULL )
-		{
-			fs::CPath thumbStreamName;
-			MakeThumbStreamName( thumbStreamName, imageComplexPath.GetEmbeddedPath() );
-
-			CComPtr< IStream > pThumbStream = OpenStream( thumbStreamName.GetPtr(), m_pThumbsStorage );
-			if ( pThumbStream == NULL )
-				pThumbStream = OpenStream( imageComplexPath.GetEmbeddedPath(), m_pThumbsStorage );		// backwards compatibility: try with straight SRC image path as stream name
-
-			if ( pThumbStream != NULL )
-				if ( CComPtr< IWICBitmapSource > pSavedBitmap = wic::LoadBitmapFromStream( pThumbStream/*, m_pThumbsDecoderId*/ ) )
-					if ( CCachedThumbBitmap* pThumbnail = app::GetThumbnailer()->NewScaledThumb( pSavedBitmap, imageComplexPath ) )
-					{
-						// IMP: the resulting bitmap, even the scaled bitmap will keep the stream alive for the lifetime of the bitmap; same if we scale the bitmap;
-						// Since the thumb keeps alive the WIC bitmap, we need to copy to a memory bitmap.
-						// This way we unlock the doc stg stream for future access.
-						//
-						pThumbnail->GetOrigin().DetachSourceToBitmap();
-						return pThumbnail;
-					}
-		}
-	}
-	catch ( CException* pExc )
-	{
-		app::HandleException( pExc );
-	}
-	return NULL;
-}
-
 void CImageArchiveStg::SaveAlbumDoc( CObject* pAlbumDoc )
 {
 	ASSERT_PTR( pAlbumDoc );
 
-	std::auto_ptr< COleStreamFile > pAlbumFile( CreateFile( CImageArchiveStg::s_albumFilename ) );
+	std::auto_ptr< COleStreamFile > pAlbumFile( CreateFile( CImageArchiveStg::s_albumStreamName ) );
 
 	if ( NULL == pAlbumFile.get() )
 		return;
@@ -341,8 +311,8 @@ bool CImageArchiveStg::LoadAlbumDoc( CObject* pAlbumDoc )
 	ASSERT_PTR( pAlbumDoc );
 	std::auto_ptr< COleStreamFile > pAlbumFile;
 	{
-		CPushThrowMode pushNoThrow( this, false );				// album not found is not an error
-		pAlbumFile = OpenFile( CImageArchiveStg::s_albumFilename );		// load stream "_Album.sld"
+		CPushThrowMode pushNoThrow( this, false );						// album not found is not an error
+		pAlbumFile = OpenFile( CImageArchiveStg::s_albumStreamName );	// load stream "_Album.sld"
 	}
 
 	if ( NULL == pAlbumFile.get() )
@@ -368,16 +338,13 @@ bool CImageArchiveStg::SavePassword( const std::tstring& password )
 
 	try
 	{
-		// remove existing password streams
-		if ( StreamExist( s_pwdStreamNames[ PwdAnsi ] ) )
-			DeleteStream( s_pwdStreamNames[ PwdAnsi ] );
-		if ( StreamExist( s_pwdStreamNames[ PwdWide ] ) )
-			DeleteStream( s_pwdStreamNames[ PwdWide ] );
+		if ( const TCHAR* pFoundStreamName = FindAlternate_DirName( ARRAY_PAIR( s_passwordStreamNames ) ).first )
+			DeleteStream( pFoundStreamName );		// remove existing password stream
 
 		if ( password.empty() )
 			return true;			// no password, done
 
-		std::auto_ptr< COleStreamFile > pPwdFile( CreateFile( s_pwdStreamNames[ PwdWide ] ) );
+		std::auto_ptr< COleStreamFile > pPwdFile( CreateFile( s_passwordStreamNames[ CurrentVer ] ) );
 		if ( NULL == pPwdFile.get() )
 			return false;
 
@@ -402,27 +369,23 @@ std::tstring CImageArchiveStg::LoadPassword( void )
 {
 	ASSERT( IsOpen() );
 
-	std::tstring password;
-	PwdFmt pwdFmt;
+	std::pair< const TCHAR*, size_t > streamName = FindAlternate_DirName( ARRAY_PAIR( s_passwordStreamNames ) );
+	bool hasWidePwd = streamName.second != ( COUNT_OF( s_passwordStreamNames ) - 1 );		// found a WIDE stream?
 
-	if ( StreamExist( s_pwdStreamNames[ PwdWide ] ) )
-		pwdFmt = PwdWide;				// has WIDE password
-	else if ( StreamExist( s_pwdStreamNames[ PwdAnsi ] ) )
-		pwdFmt = PwdAnsi;				// has ANSI password (backwards compatibility)
-	else
-		return password;				// no password stored
+	if ( NULL == streamName.first )
+		return std::tstring();				// no password stored
 
-	std::auto_ptr< COleStreamFile > pPwdFile = OpenFile( s_pwdStreamNames[ pwdFmt ] );
+	std::auto_ptr< COleStreamFile > pPwdFile = OpenFile( streamName.first );
 	ASSERT_PTR( pPwdFile.get() );
 
+	std::tstring password;
 	CArchive archive( pPwdFile.get(), CArchive::load );
-	archive.m_bForceFlat = FALSE;			// same as CDocument::OnOpenDocument()
-
 	serial::CScopedLoadingArchive scopedLoadingArchive( archive, m_docModelSchema );
 
+	archive.m_bForceFlat = FALSE;			// same as CDocument::OnOpenDocument()
 	try
 	{
-		if ( PwdWide == pwdFmt )
+		if ( hasWidePwd )
 		{
 			std::wstring widePassword;
 			archive >> widePassword;
@@ -517,17 +480,6 @@ std::auto_ptr< CFile > CImageArchiveStg::CFactory::OpenFlexImageFile( const fs::
 	}
 
 	return pFile;
-}
-
-void CImageArchiveStg::CFactory::LoadImagesMetadata( std::vector< CFileAttr* >& rOutTransferAttrs, const fs::CPath& stgFilePath )
-{
-	ASSERT( IsPasswordVerified( stgFilePath ) );
-
-	if ( CImageArchiveStg* pArchiveStg = AcquireStorage( stgFilePath ) )
-	{
-		CPushThrowMode pushMode( pArchiveStg, IsThrowMode() );					// pass current factory throw mode to the storage
-		pArchiveStg->LoadImagesMetadata( rOutTransferAttrs );
-	}
 }
 
 bool CImageArchiveStg::CFactory::SavePassword( const std::tstring& password, const fs::CPath& stgFilePath )
@@ -665,9 +617,9 @@ CCachedThumbBitmap* CImageArchiveStg::CFactory::GenerateThumb( const fs::CFlexPa
 			// Since the thumb keeps alive the WIC bitmap, we need to copy to a memory bitmap.
 			// This way we unlock the doc stg stream for future access.
 			//
-			TRACE_COM_PTR( pBitmapSource );
+			TRACE_COM_PTR( pBitmapSource, "BEFORE DetachSourceToBitmap() in CImageArchiveStg::CFactory::GenerateThumb()" );
 			pThumbBitmap->GetOrigin().DetachSourceToBitmap();		// release any bitmap source dependencies (IStream, HFILE, etc)
-			TRACE_COM_PTR( pBitmapSource );
+			TRACE_COM_PTR( pBitmapSource, "AFTER DetachSourceToBitmap()" );
 			return pThumbBitmap;
 		}
 

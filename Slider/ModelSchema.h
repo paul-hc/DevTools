@@ -19,9 +19,10 @@ namespace app
 		Slider_v5_0 = 0x50,				// CImagesModel, std::vector< CFileAttr* >, custom_order::COpStep::m_newDroppedIndex not shifted by m_dragSelIndexes.size()
 		Slider_v5_1 = 0x51,				// add CSlideData::m_imageFramePos
 		Slider_v5_2 = 0x52,				// CImageArchiveStg: use '|' instead of '*' as deep sub-path separator
+		Slider_v5_3 = 0x53,				// CImageArchiveStg: use "Thumbnails" storage for thumbnails of mixed types; use "_pwd.w" as password stream; drop using the obsolete "_Meta.data" stream
 
 			// * always update to the LATEST VERSION *
-			Slider_LatestModelSchema = Slider_v5_2
+			Slider_LatestModelSchema = Slider_v5_3
 	};
 
 

@@ -19,7 +19,7 @@ namespace wic { enum ImageFormat; }
 
 
 // Compound file storage with password protection for .ias, .cid and .icf structured document files.
-// Contains image files, files metadata, sub-storage with thumbnail files, encrypted password file.
+// Contains the image files, sub-storage with thumbnail files, encrypted password file.
 // Maintains deep image stream paths from the source images (relative to SRC common root path).
 // Deep image stream paths are flattened using '|' as separator (formerly '*') - this avoids the use of sub-storages for images and thumbnails.
 
@@ -44,7 +44,6 @@ public:
 	void SaveAlbumDoc( CObject* pAlbumDoc );
 	bool LoadAlbumDoc( CObject* pAlbumDoc );
 
-	void LoadImagesMetadata( std::vector< CFileAttr* >& rOutFileAttribs );
 	CCachedThumbBitmap* LoadThumbnail( const fs::CFlexPath& imageComplexPath ) throws_();		// caller must delete the image
 
 	static bool HasImageArchiveExt( const TCHAR* pFilePath );
@@ -59,34 +58,25 @@ protected:
 	void UnflattenDeepStreamPath( std::tstring& rDeepPath ) const { std::replace( rDeepPath.begin(), rDeepPath.end(), GetSubPathSep(), _T('\\') ); }		// '|' or '*' -> '\'
 private:
 	void CreateImageFiles( CImageStorageService* pImagesSvc ) throws_( CException* );
-	void CreateMetadataFile( const std::vector< CTransferFileAttr* >& transferAttrs );
 	void CreateThumbnailsSubStorage( const CImageStorageService* pImagesSvc );
 
+	CComPtr< IStream > OpenThumbnailImageStream( const TCHAR* pImageEmbeddedPath );
 	static wic::ImageFormat MakeThumbStreamName( fs::CPath& rThumbStreamName, const TCHAR* pSrcImagePath );
 private:
 	CComPtr< IStorage > m_pThumbsStorage;
 	app::ModelSchema m_docModelSchema;			// transient: loaded model schema from file, stored by the album doc
 private:
-	enum ExtensionType { Ext_ias, Ext_cid, Ext_icf, _Ext_Count };
-	enum PwdFmt
-	{
-		PwdAnsi,							// old ANSI password stream
-		PwdWide,							// new WIDE password stream
-			_PwdTypeCount
-	};
-	enum ThumbsFmt
-	{
-		Thumbs_bmp,							// "Thumbnails" old sub-storage in BMP format (but with original extension .jpg, .png, etc)
-		Thumbs_jpeg,						// "Thumbs_jpeg" new thumbnails sub-storage in JPG format (but with original extension .jpg, .png, etc)
-			_ThumbsTypeCount
-	};
+	enum Alternates { CurrentVer };
+	enum ExtensionType { Ext_ias, Ext_cid, Ext_icf };
 
-	static const TCHAR* s_compoundStgExts[ _Ext_Count ];				// file extension for compound-files (".icf")
-	static const TCHAR* s_pwdStreamNames[ _PwdTypeCount ];				// "pwdW" - enchrypted password stream (PwdAnsi for backwards compatibility with old saved .icf files)
-	static const TCHAR* s_thumbsSubStorageNames[ _ThumbsTypeCount ];	// "Thumbs_jpeg" - thumbs sub-storage name (old "Thumbnails" in bmp format with .jpg extension)
-	static const TCHAR s_metadataFilename[];							// "_Meta.data" - meta-data stream in a compound-file (not really used on load)
-	static const TCHAR s_albumFilename[];								// "_Album.sld" - album info stream (superset of meta-data)
-	static const TCHAR s_subPathSep;									// sub-path separator for deep stream names
+	static const TCHAR* s_compoundStgExts[];			// file extension for compound-files (".icf")
+	static const TCHAR* s_passwordStreamNames[];		// "_pwd.w" - enchrypted password stream (with old variants)
+	static const TCHAR* s_thumbsStorageNames[];			// "Thumbnails" - thumbs sub-storage name (with old variants)
+	static const TCHAR s_albumStreamName[];				// "_Album.sld" - album info stream (superset of meta-data)
+	static const TCHAR s_subPathSep;					// sub-path separator for deep stream names
+
+	// legacy
+	static const TCHAR s_legacy_metadataStreamName[];	// "_Meta.data" - meta-data stream in a compound-file (obsolete)
 public:
 	class CFactory : public CThrowMode
 				   , public fs::IThumbProducer
@@ -105,8 +95,6 @@ public:
 
 		// FLEX: image path could refer to either physical image or archive-based image file
 		std::auto_ptr< CFile > OpenFlexImageFile( const fs::CFlexPath& flexImagePath, DWORD mode = CFile::modeRead );
-
-		void LoadImagesMetadata( std::vector< CFileAttr* >& rOutFileAttribs, const fs::CPath& stgFilePath );
 
 		bool SavePassword( const std::tstring& password, const fs::CPath& stgFilePath );
 		std::tstring LoadPassword( const fs::CPath& stgFilePath );
