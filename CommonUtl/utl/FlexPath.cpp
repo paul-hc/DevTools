@@ -2,7 +2,7 @@
 #include "stdafx.h"
 #include "FlexPath.h"
 #include "StructuredStorage.h"
-#include "StorageTrack.h"
+#include "StorageTrail.h"
 #include "ContainerUtilities.h"
 #include "StringUtilities.h"
 
@@ -76,7 +76,7 @@ namespace fs
 			fs::stg::CAcquireStorage scopedStg( physicalPath );
 			if ( CStructuredStorage* pRootStorage = scopedStg.Get() )
 			{
-				if ( fs::CStorageTrack::OpenEmbeddedStream( pRootStorage, fs::TEmbeddedPath( GetEmbeddedPath() ) ) != NULL )
+				if ( fs::CStorageTrail::OpenEmbeddedStream( pRootStorage, fs::TEmbeddedPath( GetEmbeddedPath() ) ) != NULL )
 					return true;
 			}
 		}

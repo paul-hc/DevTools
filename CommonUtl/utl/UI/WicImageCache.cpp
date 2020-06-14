@@ -19,7 +19,7 @@
 size_t CWicImageCache::s_traceCount = 0;
 
 CWicImageCache::CWicImageCache( size_t maxSize )
-	: CThrowMode( false )
+	: CErrorHandler( utl::CheckMode )
 	, m_imageCache( maxSize, this )
 {
 }
@@ -37,7 +37,7 @@ CWicImageCache& CWicImageCache::Instance( void )
 CWicImage* CWicImageCache::LoadObject( const fs::ImagePathKey& imageKey )
 {
 	// this method is already synchronized: could be called from both the main thread, or the cache loader thread (running in background)
-	return CWicImage::CreateFromFile( imageKey, IsThrowMode() ).release();
+	return CWicImage::CreateFromFile( imageKey, GetHandlingMode() ).release();
 }
 
 void CWicImageCache::TraceObject( const fs::ImagePathKey& imageKey, CWicImage* pImage, fs::cache::TStatusFlags cacheFlags )

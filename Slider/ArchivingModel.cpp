@@ -104,7 +104,7 @@ bool CArchivingModel::CommitOperations( FileOp fileOp, bool isUndoOp /*= false*/
 
 void CArchivingModel::CommitOperation( FileOp fileOp, const TTransferPathPair& xferPair, bool isUndoOp /*= false*/ ) throws_( CException* )
 {
-	CFileOperation fileOperation( true );
+	CFileOperation fileOperation( utl::ThrowMode );
 	bool succeeded = false;
 
 	switch ( fileOp )

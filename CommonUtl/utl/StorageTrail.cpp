@@ -1,6 +1,6 @@
 
 #include "stdafx.h"
-#include "StorageTrack.h"
+#include "StorageTrail.h"
 #include "StructuredStorage.h"
 #include "StringUtilities.h"
 
@@ -11,35 +11,35 @@
 
 namespace fs
 {
-	CStorageTrack::CStorageTrack( CStructuredStorage* pRootStorage )
+	CStorageTrail::CStorageTrail( CStructuredStorage* pRootStorage )
 		: m_pRootStorage( pRootStorage )
 	{
 		ASSERT_PTR( m_pRootStorage );
 		REQUIRE( m_pRootStorage->IsOpen() );
 	}
 
-	CStorageTrack::~CStorageTrack()
+	CStorageTrail::~CStorageTrail()
 	{
 	}
 
-	IStorage* CStorageTrack::GetRoot( void ) const
+	IStorage* CStorageTrail::GetRoot( void ) const
 	{
-		return m_pRootStorage->GetStorage();
+		return m_pRootStorage->GetRootStorage();
 	}
 
-	void CStorageTrack::Clear( void )
+	void CStorageTrail::Clear( void )
 	{
 		while ( !m_openSubStorages.empty() )
 			m_openSubStorages.pop_back();
 	}
 
-	void CStorageTrack::Push( IStorage* pSubStorage )
+	void CStorageTrail::Push( IStorage* pSubStorage )
 	{
 		ASSERT_PTR( pSubStorage );
 		m_openSubStorages.push_back( pSubStorage );
 	}
 
-	CComPtr< IStorage > CStorageTrack::Pop( void )
+	CComPtr< IStorage > CStorageTrail::Pop( void )
 	{
 		ASSERT( !m_openSubStorages.empty() );
 
@@ -49,43 +49,30 @@ namespace fs
 		return pDeepStorage;
 	}
 
-	fs::TEmbeddedPath CStorageTrack::MakeSubPath( void ) const
+	fs::TEmbeddedPath CStorageTrail::MakePath( void ) const
 	{
-		std::tstring subPath;
+		fs::TEmbeddedPath subPath;
 
-		if ( !IsEmpty() )
-		{
-			for ( std::vector< CComPtr< IStorage > >::const_iterator itSubStorage = m_openSubStorages.begin(); itSubStorage != m_openSubStorages.end(); ++itSubStorage )
-			{
-				STATSTG stat;
-				( *itSubStorage )->Stat( &stat, STATFLAG_DEFAULT );
-
-				if ( !subPath.empty() )
-					subPath += _T('/');
-
-				subPath += stat.pwcsName;
-
-				::CoTaskMemFree( stat.pwcsName );			// free the memory allocated by Stat()
-			}
-		}
+		for ( std::vector< CComPtr< IStorage > >::const_iterator itSubStorage = m_openSubStorages.begin(); itSubStorage != m_openSubStorages.end(); ++itSubStorage )
+			subPath /= fs::stg::GetElementName( &**itSubStorage );
 
 		return subPath;
 	}
 
 
-	void CStorageTrack::EnumElements( fs::IEnumerator* pEnumerator, RecursionDepth depth /*= Shallow*/ ) throws_( CFileException* )
+	void CStorageTrail::EnumElements( fs::IEnumerator* pEnumerator, RecursionDepth depth /*= Shallow*/ ) throws_( CFileException* )
 	{
-		CPushThrowMode scopedThrow( m_pRootStorage, true );			// to simplify recovery from error
+		CScopedErrorHandling scopedThrow( m_pRootStorage, utl::ThrowMode );		// to simplify recovery from error
 
 		DoEnumElements( pEnumerator, depth );
 	}
 
-	void CStorageTrack::DoEnumElements( fs::IEnumerator* pEnumerator, RecursionDepth depth ) throws_( CFileException* )
+	void CStorageTrail::DoEnumElements( fs::IEnumerator* pEnumerator, RecursionDepth depth ) throws_( CFileException* )
 	{
 		ASSERT_PTR( pEnumerator );
 
 		IStorage* pCurrStorage = GetCurrent();
-		fs::TEmbeddedPath embeddedPath = MakeSubPath();
+		fs::TEmbeddedPath embeddedPath = MakePath();
 
 		CComPtr< IEnumSTATSTG > pEnumStat;
 
@@ -135,7 +122,7 @@ namespace fs
 	}
 
 
-	bool CStorageTrack::CreateDeepSubPath( const TCHAR* pDirSubPath, DWORD mode /*= STGM_CREATE | STGM_READWRITE*/ )
+	bool CStorageTrail::CreateDeepSubPath( const TCHAR* pDirSubPath, DWORD mode /*= STGM_CREATE | STGM_READWRITE*/ )
 	{
 		std::vector< std::tstring > subDirs;
 		str::Tokenize( subDirs, pDirSubPath, path::DirDelims() );
@@ -148,7 +135,8 @@ namespace fs
 
 			CComPtr< IStorage > pStorage;
 			{	// first: try to open if it already exists
-				CPushIgnoreMode pushNoThrow( m_pRootStorage );		// failure is not an error
+				CScopedErrorHandling scopedCheck( m_pRootStorage, utl::CheckMode );		// failure should not throw
+
 				pStorage = m_pRootStorage->OpenDir( itSubDir->c_str(), GetCurrent(), openMode );
 			}
 
@@ -164,7 +152,7 @@ namespace fs
 		return true;			// all sub-storages successfully opened/created
 	}
 
-	bool CStorageTrack::OpenDeepSubPath( const TCHAR* pDirSubPath, DWORD mode /*= STGM_READ*/ )
+	bool CStorageTrail::OpenDeepSubPath( const TCHAR* pDirSubPath, DWORD mode /*= STGM_READ*/ )
 	{
 		std::vector< std::tstring > subDirs;
 		str::Tokenize( subDirs, pDirSubPath, path::DirDelims() );
@@ -183,19 +171,19 @@ namespace fs
 	}
 
 
-	CComPtr< IStorage > CStorageTrack::OpenEmbeddedStorage( CStructuredStorage* pRootStorage, const fs::TEmbeddedPath& dirSubPath, DWORD mode /*= STGM_READ*/ )
+	CComPtr< IStorage > CStorageTrail::OpenEmbeddedStorage( CStructuredStorage* pRootStorage, const fs::TEmbeddedPath& dirSubPath, DWORD mode /*= STGM_READ*/ )
 	{
 		ASSERT_PTR( pRootStorage );
 		REQUIRE( path::IsRelative( dirSubPath.GetPtr() ) );
 
-		CStorageTrack storageTrack( pRootStorage );
+		CStorageTrail storageTrack( pRootStorage );
 		if ( !storageTrack.OpenDeepSubPath( dirSubPath.GetPtr(), mode ) )
 			return NULL;
 
 		return storageTrack.GetCurrent();
 	}
 
-	CComPtr< IStream > CStorageTrack::OpenEmbeddedStream( CStructuredStorage* pRootStorage, const fs::TEmbeddedPath& streamSubPath, DWORD mode /*= STGM_READ*/ )
+	CComPtr< IStream > CStorageTrail::OpenEmbeddedStream( CStructuredStorage* pRootStorage, const fs::TEmbeddedPath& streamSubPath, DWORD mode /*= STGM_READ*/ )
 	{
 		ASSERT_PTR( pRootStorage );
 		REQUIRE( path::IsRelative( streamSubPath.GetPtr() ) );
@@ -206,7 +194,7 @@ namespace fs
 		return NULL;
 	}
 
-	std::auto_ptr< COleStreamFile > CStorageTrack::OpenEmbeddedFile( CStructuredStorage* pRootStorage, const fs::TEmbeddedPath& streamSubPath, DWORD mode /*= CFile::modeRead*/ )
+	std::auto_ptr< COleStreamFile > CStorageTrail::OpenEmbeddedFile( CStructuredStorage* pRootStorage, const fs::TEmbeddedPath& streamSubPath, DWORD mode /*= CFile::modeRead*/ )
 	{
 		if ( CComPtr< IStream > pStream = OpenEmbeddedStream( pRootStorage, streamSubPath, mode ) )		// CFile::OpenFlags match STGM_* flags
 			return pRootStorage->MakeOleStreamFile( streamSubPath.GetNameExt(), pStream );

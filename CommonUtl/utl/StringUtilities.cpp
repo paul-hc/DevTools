@@ -241,6 +241,13 @@ namespace num
 		return num::FormatNumber( sizeUnit.first, loc ) + _T(" ") + GetTags_BytesUnit().Format( sizeUnit.second, longUnitTag ? CEnumTags::UiTag : CEnumTags::KeyTag );
 	}
 
+	std::tstring FormatFileSizeAsPair( UINT64 byteFileSize, bool longUnitTag /*= false*/ )
+	{
+		return str::Format( _T("%s (%s)"),
+			num::FormatFileSize( byteFileSize, AutoBytes, longUnitTag ).c_str(),
+			num::FormatFileSize( byteFileSize, num::Bytes ).c_str() );
+	}
+
 
 	double GetRounded( double number, unsigned int fractDigits )
 	{

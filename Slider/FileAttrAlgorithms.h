@@ -152,7 +152,7 @@ namespace func
 
 	struct AddFileSize
 	{
-		size_t operator()( size_t totalFileSize, const CFileAttr* pRight ) const
+		UINT64 operator()( UINT64 totalFileSize, const CFileAttr* pRight ) const
 		{
 			ASSERT_PTR( pRight );
 			return totalFileSize + pRight->GetFileSize();

@@ -54,9 +54,27 @@ namespace fs
 	}
 
 
+	// MFC CFile helpers
+
 	std::auto_ptr< CFile > OpenFile( const fs::CPath& filePath, bool throwMode = false, DWORD mode = CFile::modeRead | CFile::typeBinary ) throws_( CFileException* );
 
 	UINT64 BufferedCopy( CFile& rDestFile, CFile& srcFile, size_t chunkSize = 4 * KiloByte );		// 4096 works well because it's quicker to allocate
+
+
+	class CTextFileWriter
+	{
+	public:
+		CTextFileWriter( CFile* pDestFile, bool isBinaryFile = true );
+
+		void WriteText( const std::tstring& text );
+		void WriteLine( const std::tstring& text ) { WriteText( text + m_lineEnd ); }
+		void WriteEmptyLine( void ) { WriteText( m_lineEnd ); }
+
+		void SeekToEnd( void ) { m_pDestFile->SeekToEnd(); }		// for appending
+	public:
+		CFile* m_pDestFile;
+		const std::tstring m_lineEnd;
+	};
 }
 
 

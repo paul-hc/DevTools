@@ -4,17 +4,17 @@
 
 #include "utl/FlexPath.h"
 #include "utl/FileSystem.h"
-#include "utl/ThrowMode.h"
+#include "utl/ErrorHandler.h"
 
 
 class CEnumTags;
 class CLogger;
 
 
-class CFileOperation : public CThrowMode
+class CFileOperation : public CErrorHandler
 {
 public:
-	CFileOperation( bool throwMode = false ) : CThrowMode( throwMode ) {}
+	CFileOperation( utl::ErrorHandling handlingMode = utl::CheckMode ) : CErrorHandler( handlingMode ) {}
 
 	bool Copy( const fs::CFlexPath& srcFilePath, const fs::CFlexPath& destFilePath ) throws_( CException* );
 	bool Move( const fs::CFlexPath& srcFilePath, const fs::CFlexPath& destFilePath ) throws_( CException* );

@@ -1,5 +1,5 @@
-#ifndef PathObjectMap_h
-#define PathObjectMap_h
+#ifndef PathMap_h
+#define PathMap_h
 #pragma once
 
 #include <hash_map>
@@ -22,15 +22,11 @@ namespace fs
 		size_t GetCount( void ) const { return m_pathMap.size(); }
 		bool Contains( const PathT& pathKey ) const { return Find( pathKey ) != NULL; }
 
-		const ValueT* Find( const PathT& pathKey ) const
-		{
-			stdext::hash_map< PathT, ValueT >::const_iterator itFound = m_pathMap.find( pathKey );
-			return itFound != m_pathMap.end() ? &itFound->second : NULL;
-		}
+		const ValueT* Find( const PathT& pathKey ) const { return const_cast< CPathMap* >( this )->Find( pathKey ); }
 
 		ValueT* Find( const PathT& pathKey )
 		{
-			stdext::hash_map< PathT, ValueT >::iterator itFound = m_pathMap.find( pathKey );
+			typename stdext::hash_map< PathT, ValueT >::iterator itFound = m_pathMap.find( pathKey );
 			return itFound != m_pathMap.end() ? &itFound->second : NULL;
 		}
 
@@ -49,7 +45,7 @@ namespace fs
 
 		bool Remove( const PathT& pathKey )
 		{
-			stdext::hash_map< PathT, ValueT >::iterator itFound = m_pathMap.find( pathKey );
+			typename stdext::hash_map< PathT, ValueT >::iterator itFound = m_pathMap.find( pathKey );
 			if ( itFound == m_pathMap.end() )
 				return false;
 
@@ -62,6 +58,19 @@ namespace fs
 		{
 			for ( ; itPathKeyStart != itPathKeyEnd; ++itPathKeyStart )
 				Remove( *itPathKeyStart );
+		}
+
+		size_t RemoveWithPrefix( const TCHAR* pDirPrefix )
+		{
+			size_t oldCount = m_pathMap.size();
+
+			for ( typename stdext::hash_map< PathT, ValueT >::iterator itPath = m_pathMap.begin(); itPath != m_pathMap.end(); )
+				if ( path::HasPrefix( str::traits::GetCharPtr( itPath->first ), pDirPrefix ) )
+					itPath = m_pathMap.erase( itPath );
+				else
+					++itPath;
+
+			return oldCount - m_pathMap.size();
 		}
 	protected:
 		stdext::hash_map< PathT, ValueT > m_pathMap;
@@ -191,7 +200,7 @@ namespace fs
 		// un-synchronized methods
 		const TEntry* _FindEntry( const PathT& pathKey ) const
 		{
-			stdext::hash_map< PathT, TEntry >::const_iterator itFound = m_pathMap.find( pathKey );
+			typename stdext::hash_map< PathT, TEntry >::const_iterator itFound = m_pathMap.find( pathKey );
 			if ( itFound != m_pathMap.end() )
 				return &itFound->second;
 
@@ -206,7 +215,7 @@ namespace fs
 
 		bool _RemoveEntry( const PathT& pathKey )
 		{
-			stdext::hash_map< PathT, TEntry >::iterator itFound = m_pathMap.find( pathKey );
+			typename stdext::hash_map< PathT, TEntry >::iterator itFound = m_pathMap.find( pathKey );
 			if ( itFound == m_pathMap.end() )
 				return false;
 
@@ -225,4 +234,4 @@ namespace fs
 }
 
 
-#endif // PathObjectMap_h
+#endif // PathMap_h

@@ -41,13 +41,12 @@ const TCHAR* CImageArchiveStg::s_thumbsStorageNames[] =
 };
 
 const TCHAR CImageArchiveStg::s_albumStreamName[] = _T("_Album.sld");
+const TCHAR CImageArchiveStg::s_albumMapStreamName[] = _T("_AlbumMap.txt");
 const TCHAR CImageArchiveStg::s_subPathSep = _T('|');		// was '*'
 
-const TCHAR CImageArchiveStg::s_legacy_metadataStreamName[] = _T("_Meta.data");		// no longer used
 
-
-CImageArchiveStg::CImageArchiveStg( IStorage* pRootStorage /*= NULL*/ )
-	: fs::CStructuredStorage( pRootStorage )
+CImageArchiveStg::CImageArchiveStg( void )
+	: fs::CStructuredStorage()
 	, m_docModelSchema( app::Slider_LatestModelSchema )
 {
 }
@@ -77,12 +76,39 @@ void CImageArchiveStg::DiscardCachedImages( const fs::CPath& stgFilePath )
 		CWicImageCache::Instance().DiscardWithPrefix( stgFilePath.GetPtr() );		// discard cached images for the storage
 }
 
+bool CImageArchiveStg::IsSpecialStreamName( const TCHAR* pStreamName )
+{
+	static std::vector< const TCHAR* > s_reservedStreamNames;
+	if ( s_reservedStreamNames.empty() )
+	{
+		s_reservedStreamNames.insert( s_reservedStreamNames.end(), s_passwordStreamNames, END_OF( s_passwordStreamNames ) );
+		s_reservedStreamNames.insert( s_reservedStreamNames.end(), s_passwordStreamNames, END_OF( s_thumbsStorageNames ) );
+		s_reservedStreamNames.push_back( s_albumStreamName );
+		s_reservedStreamNames.push_back( s_albumMapStreamName );
+	}
+
+	for ( size_t i = 0; i != s_reservedStreamNames.size(); ++i )
+		if ( path::EqualsPtr( s_reservedStreamNames[ i ], pStreamName ) )
+			return true;
+
+	return false;
+}
+
 std::tstring CImageArchiveStg::EncodeStreamName( const TCHAR* pStreamName ) const
 {
 	std::tstring streamName = pStreamName;
 
 	FlattenDeepStreamPath( streamName );
 	return __super::EncodeStreamName( streamName.c_str() );
+}
+
+bool CImageArchiveStg::RetainOpenedStream( const TCHAR* pStreamName, IStorage* pParentDir ) const
+{
+	if ( NULL == pParentDir )							// a root streams?
+		if ( !IsSpecialStreamName( pStreamName ) )		// not a pre-defined one?
+			return true;								// keep opened image streams alive for shared access
+
+	return __super::RetainOpenedStream( pStreamName, pParentDir );
 }
 
 TCHAR CImageArchiveStg::GetSubPathSep( void ) const
@@ -97,7 +123,7 @@ void CImageArchiveStg::CreateImageArchive( const fs::CPath& stgFilePath, CImageS
 {
 	ASSERT_PTR( pImagesSvc );
 
-	CPushThrowMode pushThrow( this, true );
+	CScopedErrorHandling scopedThrow( this, utl::ThrowMode );
 
 	CreateDocFile( stgFilePath.GetPtr() );
 	ASSERT( IsOpen() );
@@ -120,11 +146,14 @@ void CImageArchiveStg::CreateImageFiles( CImageStorageService* pImagesSvc ) thro
 
 	std::vector< CTransferFileAttr* >& rTransferAttrs = pImagesSvc->RefTransferAttrs();
 
-	CPushThrowMode pushThrow( Factory(), true );
 	CFactory* pFactory = Factory();
+	CScopedErrorHandling scopedThrow( pFactory, utl::ThrowMode );
 
 	pImagesSvc->GetProgress()->AdvanceStage( _T("Saving embedded image files") );
 	pImagesSvc->GetProgress()->SetBoundedProgressCount( rTransferAttrs.size() );
+
+	CAlbumMapWriter albumMap( CreateStreamFile( s_albumMapStreamName ) );		// binary mode
+	albumMap.WriteHeader();
 
 	for ( size_t pos = 0; pos != rTransferAttrs.size(); )
 	{
@@ -134,13 +163,14 @@ void CImageArchiveStg::CreateImageFiles( CImageStorageService* pImagesSvc ) thro
 
 		try
 		{
-			std::tstring& rStreamName = const_cast< std::tstring& >( pXferAttr->GetPath().Get() );
-			FlattenDeepStreamPath( rStreamName );
+			const fs::TEmbeddedPath& streamPath = pXferAttr->GetPath();
 
 			std::auto_ptr< CFile > pSrcImageFile = pFactory->OpenFlexImageFile( pXferAttr->GetSrcImagePath() );
-			std::auto_ptr< COleStreamFile > pDestStreamFile( CreateFile( pXferAttr->GetPath().GetPtr() ) );
+			std::auto_ptr< COleStreamFile > pDestStreamFile( CreateStreamFile( streamPath.GetPtr() ) );
 
 			fs::BufferedCopy( *pDestStreamFile, *pSrcImageFile );
+
+			albumMap.WriteEntry( EncodeStreamName( streamPath.GetPtr() ), streamPath.GetPtr() );
 		}
 		catch ( CException* pExc )
 		{
@@ -159,24 +189,25 @@ void CImageArchiveStg::CreateImageFiles( CImageStorageService* pImagesSvc ) thro
 		++pos;
 	}
 
-#ifdef _DEBUG
-	size_t totalImagesSize = std::accumulate( rTransferAttrs.begin(), rTransferAttrs.end(), size_t( 0 ), func::AddFileSize() );
-	TRACE( _T("(*) Total image archive file size: %s (%s)\n"), num::FormatFileSize( totalImagesSize ).c_str(), num::FormatFileSize( totalImagesSize, num::Bytes ).c_str() );
-#endif
+	UINT64 totalImagesSize = std::accumulate( rTransferAttrs.begin(), rTransferAttrs.end(), UINT64( 0 ), func::AddFileSize() );
+	albumMap.WriteImageTotals( totalImagesSize );
 }
 
-void CImageArchiveStg::CreateThumbnailsSubStorage( const CImageStorageService* pImagesSvc )
+void CImageArchiveStg::CreateThumbnailsSubStorage( const CImageStorageService* pImagesSvc ) throws_( CException* )
 {
 	const std::vector< CTransferFileAttr* >& transferAttrs = pImagesSvc->GetTransferAttrs();
 
 	pImagesSvc->GetProgress()->AdvanceStage( _T("Saving thumbnails") );
 	pImagesSvc->GetProgress()->SetBoundedProgressCount( transferAttrs.size() );
 
-	CComPtr< IStorage > pThumbsStorage = CreateDir( CImageArchiveStg::s_thumbsStorageNames[ CurrentVer ] );
+	CComPtr< IStorage > pThumbsStorage = CreateDir( s_thumbsStorageNames[ CurrentVer ] );
 	ASSERT_PTR( pThumbsStorage );
 
 	CThumbnailer* pThumbnailer = app::GetThumbnailer();
 	thumb::CPushBoundsSize largerBounds( pThumbnailer, 128 );			// generate larger thumbs to minimize regeneration later
+
+	size_t thumbCount = 0;
+	UINT64 totalThumbsSize = 0;
 
 	for ( std::vector< CTransferFileAttr* >::const_iterator itXferAttr = transferAttrs.begin(); itXferAttr != transferAttrs.end(); )
 	{
@@ -184,13 +215,16 @@ void CImageArchiveStg::CreateThumbnailsSubStorage( const CImageStorageService* p
 		{
 			if ( CCachedThumbBitmap* pThumbBitmap = pThumbnailer->AcquireThumbnail( ( *itXferAttr )->GetSrcImagePath() ) )
 			{
-				fs::CPath thumbStreamName;
+				fs::TEmbeddedPath thumbStreamName;
 				if ( const GUID* pContainerFormatId = wic::GetContainerFormatId( MakeThumbStreamName( thumbStreamName, ( *itXferAttr )->GetPath().GetPtr() ) ) )	// good to save thumbnail?
 				{
 					CComPtr< IStream > pThumbStream = CreateStream( thumbStreamName.GetPtr(), pThumbsStorage );
-					CPushThrowMode pushThrow( &pThumbBitmap->GetOrigin(), true );
+					CScopedErrorHandling scopedThrow( &pThumbBitmap->GetOrigin(), utl::ThrowMode );
 
 					pThumbBitmap->GetOrigin().SaveBitmapToStream( pThumbStream, *pContainerFormatId );
+
+					++thumbCount;
+					totalThumbsSize += fs::stg::GetStreamSize( &*pThumbStream );
 				}
 			}
 			else
@@ -209,6 +243,11 @@ void CImageArchiveStg::CreateThumbnailsSubStorage( const CImageStorageService* p
 		pImagesSvc->GetProgress()->AdvanceItem( ( *itXferAttr )->GetPath().Get() );
 		++itXferAttr;
 	}
+
+	CAlbumMapWriter albumMap( OpenStreamFile( s_albumMapStreamName, NULL, CFile::modeWrite ) );
+
+	albumMap.SeekToEnd();		// will append text
+	albumMap.WriteThumbnailTotals( thumbCount, totalThumbsSize );
 }
 
 CCachedThumbBitmap* CImageArchiveStg::LoadThumbnail( const fs::CFlexPath& imageComplexPath ) throws_()
@@ -245,7 +284,7 @@ CComPtr< IStream > CImageArchiveStg::OpenThumbnailImageStream( const TCHAR* pIma
 {
 	ASSERT_PTR( m_pThumbsStorage );
 
-	fs::CPath thumbStreamName;
+	fs::TEmbeddedPath thumbStreamName;
 	MakeThumbStreamName( thumbStreamName, pImageEmbeddedPath );
 
 	const TCHAR* pThumbStreamName = thumbStreamName.GetPtr();
@@ -260,11 +299,11 @@ CComPtr< IStream > CImageArchiveStg::OpenThumbnailImageStream( const TCHAR* pIma
 	return OpenStream( pThumbStreamName, m_pThumbsStorage );
 }
 
-wic::ImageFormat CImageArchiveStg::MakeThumbStreamName( fs::CPath& rThumbStreamName, const TCHAR* pSrcImagePath )
+wic::ImageFormat CImageArchiveStg::MakeThumbStreamName( fs::TEmbeddedPath& rThumbStreamName, const TCHAR* pSrcImagePath )
 {
-	// GUID_ContainerFormatJpeg or GUID_ContainerFormatPng (for transparent formats)
-	// Note: for transparency we can't rely on CWicBitmap::GetBmpFmt().m_hasAlphaChannel, as is true even for a true color .jpg
-	// We have to infer the thumb save format from the source file extension.
+	// Note: for transparency we can't rely on CWicBitmap::GetBmpFmt().m_hasAlphaChannel, as is true even for a true color .jpg,
+	// so we pick a thumbnail format that matches the qualities of the source image.
+	// As a result, the thumbnail stream extension may be different than the original embedded image file.
 
 	rThumbStreamName.Set( pSrcImagePath );
 
@@ -296,7 +335,7 @@ void CImageArchiveStg::SaveAlbumDoc( CObject* pAlbumDoc )
 {
 	ASSERT_PTR( pAlbumDoc );
 
-	std::auto_ptr< COleStreamFile > pAlbumFile( CreateFile( CImageArchiveStg::s_albumStreamName ) );
+	std::auto_ptr< COleStreamFile > pAlbumFile( CreateStreamFile( s_albumStreamName ) );
 
 	if ( NULL == pAlbumFile.get() )
 		return;
@@ -311,8 +350,8 @@ bool CImageArchiveStg::LoadAlbumDoc( CObject* pAlbumDoc )
 	ASSERT_PTR( pAlbumDoc );
 	std::auto_ptr< COleStreamFile > pAlbumFile;
 	{
-		CPushThrowMode pushNoThrow( this, false );						// album not found is not an error
-		pAlbumFile = OpenFile( CImageArchiveStg::s_albumStreamName );	// load stream "_Album.sld"
+		CScopedErrorHandling scopedCheck( this, utl::CheckMode );			// album not found is not an error
+		pAlbumFile = OpenStreamFile( s_albumStreamName );					// load stream "_Album.sld"
 	}
 
 	if ( NULL == pAlbumFile.get() )
@@ -344,7 +383,7 @@ bool CImageArchiveStg::SavePassword( const std::tstring& password )
 		if ( password.empty() )
 			return true;			// no password, done
 
-		std::auto_ptr< COleStreamFile > pPwdFile( CreateFile( s_passwordStreamNames[ CurrentVer ] ) );
+		std::auto_ptr< COleStreamFile > pPwdFile( CreateStreamFile( s_passwordStreamNames[ CurrentVer ] ) );
 		if ( NULL == pPwdFile.get() )
 			return false;
 
@@ -375,7 +414,7 @@ std::tstring CImageArchiveStg::LoadPassword( void )
 	if ( NULL == streamName.first )
 		return std::tstring();				// no password stored
 
-	std::auto_ptr< COleStreamFile > pPwdFile = OpenFile( streamName.first );
+	std::auto_ptr< COleStreamFile > pPwdFile = OpenStreamFile( streamName.first );
 	ASSERT_PTR( pPwdFile.get() );
 
 	std::tstring password;
@@ -434,7 +473,8 @@ CImageArchiveStg* CImageArchiveStg::CFactory::AcquireStorage( const fs::CPath& s
 		return pImageStg;					// cache hit
 
 	std::auto_ptr< CImageArchiveStg > imageArchiveStgPtr( new CImageArchiveStg );
-	CPushThrowMode pushMode( imageArchiveStgPtr.get(), IsThrowMode() );		// pass current factory throw mode to the storage
+	CScopedErrorHandling scopedHandling( imageArchiveStgPtr.get(), this );		// pass current factory throw mode to the storage
+
 	if ( !imageArchiveStgPtr->OpenDocFile( stgFilePath.GetPtr(), mode ) )
 		return NULL;
 
@@ -474,8 +514,8 @@ std::auto_ptr< CFile > CImageArchiveStg::CFactory::OpenFlexImageFile( const fs::
 		CScopedAcquireStorage stg( stgFilePath, mode );
 		if ( stg.Get() != NULL )
 		{
-			CPushThrowMode pushMode( stg.Get(), IsThrowMode() );							// pass current factory throw mode to the storage
-			pFile.reset( stg.Get()->OpenFile( flexImagePath.GetEmbeddedPath(), NULL, mode ).release() );		// OpenDeepFile fails when copying from deep.ias to shallow.ias
+			CScopedErrorHandling scopedHandling( stg.Get(), this );		// pass current factory throw mode to the storage
+			pFile.reset( stg.Get()->OpenStreamFile( flexImagePath.GetEmbeddedPath(), NULL, mode ).release() );		// OpenDeepFile fails when copying from deep.ias to shallow.ias
 		}
 	}
 
@@ -487,7 +527,7 @@ bool CImageArchiveStg::CFactory::SavePassword( const std::tstring& password, con
 	CScopedAcquireStorage stg( stgFilePath, STGM_READWRITE );					// stream creation requires STGM_WRITE access for storage
 	if ( stg.Get() != NULL )
 	{
-		CPushThrowMode pushMode( stg.Get(), IsThrowMode() );					// pass current factory throw mode to the storage
+		CScopedErrorHandling scopedHandling( stg.Get(), this );	// pass current factory throw mode to the storage
 
 		if ( stg.Get()->SavePassword( password ) )
 		{
@@ -504,7 +544,8 @@ std::tstring CImageArchiveStg::CFactory::LoadPassword( const fs::CPath& stgFileP
 	std::tstring password;
 	if ( CImageArchiveStg* pArchiveStg = AcquireStorage( stgFilePath ) )
 	{
-		CPushThrowMode pushMode( pArchiveStg, IsThrowMode() );		// pass current factory throw mode to the storage
+		CScopedErrorHandling scopedHandling( pArchiveStg, this );		// pass current factory throw mode to the storage
+
 		password = pArchiveStg->LoadPassword();
 		if ( !password.empty() )
 			m_passwordProtected[ stgFilePath ] = password;
@@ -562,7 +603,8 @@ bool CImageArchiveStg::CFactory::SaveAlbumDoc( CObject* pAlbumDoc, const fs::CPa
 	CScopedAcquireStorage stg( stgFilePath, STGM_READWRITE );		// stream creation requires STGM_WRITE access for storage
 	if ( stg.Get() != NULL )
 	{
-		CPushThrowMode pushMode( stg.Get(), IsThrowMode() );		// pass current factory throw mode to the storage
+		CScopedErrorHandling scopedHandling( stg.Get(), this );		// pass current factory throw mode to the storage
+
 		stg.Get()->SaveAlbumDoc( pAlbumDoc );
 		return true;
 	}
@@ -574,7 +616,8 @@ bool CImageArchiveStg::CFactory::LoadAlbumDoc( CObject* pAlbumDoc, const fs::CPa
 	if ( IsPasswordVerified( stgFilePath ) )
 		if ( CImageArchiveStg* pArchiveStg = AcquireStorage( stgFilePath ) )
 		{
-			CPushThrowMode pushMode( pArchiveStg, IsThrowMode() );		// pass current factory throw mode to the storage
+			CScopedErrorHandling scopedHandling( pArchiveStg, this );	// pass current factory throw mode to the storage
+
 			return pArchiveStg->LoadAlbumDoc( pAlbumDoc );
 		}
 
@@ -595,7 +638,8 @@ CCachedThumbBitmap* CImageArchiveStg::CFactory::ExtractThumb( const fs::CFlexPat
 
 		if ( CImageArchiveStg* pArchiveStg = AcquireStorage( stgFilePath ) )
 		{
-			CPushThrowMode pushMode( pArchiveStg, false );				// no exceptions for thumb extraction
+			CScopedErrorHandling scopedCheck( pArchiveStg, utl::CheckMode );		// no exceptions for thumb extraction
+
 			return pArchiveStg->LoadThumbnail( srcImagePath );
 		}
 	}
@@ -624,6 +668,63 @@ CCachedThumbBitmap* CImageArchiveStg::CFactory::GenerateThumb( const fs::CFlexPa
 		}
 
 	return NULL;
+}
+
+
+// CAlbumMapWriter implementation
+
+const TCHAR CImageArchiveStg::CAlbumMapWriter::s_lineFmt[] = _T("%-*s  %-*s%s");
+
+CImageArchiveStg::CAlbumMapWriter::CAlbumMapWriter( std::auto_ptr< COleStreamFile > pAlbumMapFile )
+	: fs::CTextFileWriter( pAlbumMapFile.get() )
+	, m_pAlbumMapFile( pAlbumMapFile )
+	, m_imageCount( 0 )
+{
+}
+
+void CImageArchiveStg::CAlbumMapWriter::WriteHeader( void )
+{
+	static const TCHAR* s_header[] = { _T("NO."), _T("STREAM NAME"), _T("IMAGE PATH") };
+	enum HeaderField { StreamNo, StreamName, ImagePath };
+
+	WriteLine( str::Format( s_lineFmt, StreamNoPadding, s_header[ StreamNo ], StreamNamePadding, s_header[ StreamName ], s_header[ ImagePath ] ) );
+
+	static const TCHAR s_underlineCh = _T('-');
+
+	WriteLine( str::Format( s_lineFmt,
+		StreamNoPadding, std::tstring( str::GetLength( s_header[ StreamNo ] ), s_underlineCh ).c_str(),
+		StreamNamePadding, std::tstring( str::GetLength( s_header[ StreamName ] ), s_underlineCh ).c_str(),
+		std::tstring( str::GetLength( s_header[ ImagePath ] ), s_underlineCh ).c_str() ) );
+}
+
+void CImageArchiveStg::CAlbumMapWriter::WriteEntry( const std::tstring& streamName, const TCHAR* pImageEmbeddedPath )
+{
+	++m_imageCount;
+
+	WriteLine( str::Format( s_lineFmt,
+		StreamNoPadding, num::FormatNumber( m_imageCount ).c_str(),
+		StreamNamePadding, streamName.c_str(),
+		pImageEmbeddedPath ) );
+}
+
+void CImageArchiveStg::CAlbumMapWriter::WriteImageTotals( UINT64 totalImagesSize )
+{
+	WriteEmptyLine();
+
+	std::tstring fileSizePair = num::FormatFileSizeAsPair( totalImagesSize );
+
+	WriteLine( str::Format( _T("Total images: %d"), m_imageCount ) );
+	WriteLine( str::Format( _T("Total size of images: %s"), fileSizePair.c_str() ) );
+
+	TRACE( _T("(*) Total image archive file size: %s\n"), fileSizePair.c_str() );
+}
+
+void CImageArchiveStg::CAlbumMapWriter::WriteThumbnailTotals( size_t thumbCount, UINT64 totalThumbsSize )
+{
+	WriteEmptyLine();
+
+	WriteLine( str::Format( _T("Total thumbnails: %d"), thumbCount ) );
+	WriteLine( str::Format( _T("Total size of thumbnails: %s"), num::FormatFileSizeAsPair( totalThumbsSize ).c_str() ) );
 }
 
 

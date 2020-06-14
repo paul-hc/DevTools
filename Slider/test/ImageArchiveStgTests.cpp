@@ -96,7 +96,6 @@ void CImageArchiveStgTests::TestBuildImageArchive( void )
 	}
 	catch ( CException* pExc )
 	{
-		app::TraceException( pExc );
 		ASSERT_EQUAL( _T(""), mfc::CRuntimeException::MessageOf( *pExc ) );
 		pExc->Delete();
 	}
@@ -131,19 +130,19 @@ void CImageArchiveStgTests::_TestAlbumFileAttr( CImageArchiveStg* pImageStorage,
 
 	// test loading embedded images
 	{
-		UINT imageFrameCount = CWicImage::LookupImageFileFrameCount( pFileAttr->GetPath() ).first;
+		UINT frameCount = CWicImage::LookupImageFileFrameCount( pFileAttr->GetPath() ).first;
+		ASSERT( frameCount >= 1 );
 
 		// verify each frame
-		for ( UINT framePos = 0; framePos != imageFrameCount; ++framePos )
-			if ( framePos != pFileAttr->GetPathKey().second )
-			{
-				fs::ImagePathKey frameKey( pFileAttr->GetPath(), framePos );
+		for ( UINT framePos = 0; framePos != frameCount; ++framePos )
+		{
+			fs::ImagePathKey frameKey( pFileAttr->GetPath(), framePos );
 
-				ASSERT( !CWicImage::IsCorruptFrame( frameKey ) );
+			ASSERT( !CWicImage::IsCorruptFrame( frameKey ) );
 
-				std::auto_ptr< CWicImage > pFrameImage( CWicImage::CreateFromFile( frameKey, true ) );
-				ASSERT_PTR( pFrameImage.get() );
-			}
+			std::auto_ptr< CWicImage > pFrameImage( CWicImage::CreateFromFile( frameKey, utl::ThrowMode ) );
+			ASSERT_PTR( pFrameImage.get() );
+		}
 	}
 
 	// test loading embedded thumbnails

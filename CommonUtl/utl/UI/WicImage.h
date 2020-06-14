@@ -2,7 +2,7 @@
 #define WicImage_h
 #pragma once
 
-#include "utl/PathObjectMap.h"
+#include "utl/PathMap.h"
 #include "ImagePathKey.h"
 #include "WicBitmap.h"
 #include <hash_map>
@@ -15,10 +15,6 @@ class CWicImage : public CWicBitmap
 public:
 	CWicImage( const WICPixelFormatGUID* pCvtPixelFormat = &GUID_WICPixelFormat32bppPBGRA );
 	virtual ~CWicImage();
-
-	// image factory
-	static std::auto_ptr< CWicImage > CreateFromFile( const fs::ImagePathKey& imageKey, bool throwMode = false );
-	static std::pair< UINT, wic::TDecoderFlags > LookupImageFileFrameCount( const fs::CFlexPath& imagePath );
 
 	void Clear( void );
 
@@ -37,9 +33,6 @@ public:
 	bool IsValidFile( fs::AccessMode accessMode = fs::Exist ) const { return IsValid() && IsValidFramePos( m_key.second ) && GetImagePath().FileExist( accessMode ); }
 	bool IsValidPhysicalFile( fs::AccessMode accessMode = fs::Exist ) const { return !GetImagePath().IsComplexPath() && IsValidFile( accessMode ); }
 
-	static bool IsCorruptFile( const fs::CFlexPath& imagePath );
-	static bool IsCorruptFrame( const fs::ImagePathKey& imageKey );
-
 	std::tstring FormatDbg( void ) const;
 
 	bool IsMultiFrameStatic( void ) const { return m_frameCount > 1 && !IsAnimated(); }
@@ -50,16 +43,21 @@ public:
 protected:
 	virtual bool StoreFrame( IWICBitmapSource* pFrameBitmap, UINT framePos );
 private:
-	class CMultiFrameDecoder;
-	friend class CMultiFrameDecoder;
-
-	void SetSharedDecoder( CMultiFrameDecoder* pSharedDecoder );
-	bool LoadDecoderFrame( wic::CBitmapDecoder& decoder, const fs::ImagePathKey& imageKey );
-private:
 	// hidden base methods
 	using CWicBitmap::SetWicBitmap;
+
+public:
+	// image factory methods
+	static std::auto_ptr< CWicImage > CreateFromFile( const fs::ImagePathKey& imageKey, utl::ErrorHandling handlingMode = utl::CheckMode );
+	static std::pair< UINT, wic::TDecoderFlags > LookupImageFileFrameCount( const fs::CFlexPath& imagePath );
+
+	static bool IsCorruptFile( const fs::CFlexPath& imagePath );
+	static bool IsCorruptFrame( const fs::ImagePathKey& imageKey );
+
 private:
-	// shared bitmap decoder that keeps track of static (not animated) multi-frame images with same image path (typically from a .tif stream)
+	// Shared bitmap decoder that keeps track of static (not animated) multi-frame images with same image path (typically from a .tif stream).
+	// These are shared resources since for multi-frame images we may need subsequent loading of other frames. The CWicAnimatedImage class manages its own shared decoder.
+	// This object destroys itself when none of its frames reference it.
 	class CMultiFrameDecoder
 	{
 	public:
@@ -79,10 +77,15 @@ private:
 		wic::CBitmapDecoder m_decoder;					// share the same decoder for frame access (keep it alive to avoid sharing violations on embedded storage IStream-s)
 		std::vector< CWicImage* > m_loadedFrames;
 	};
+	friend class CMultiFrameDecoder;
 
 	typedef fs::CPathMap< fs::CFlexPath, CMultiFrameDecoder > TMultiFrameDecoderMap;
 
-	static TMultiFrameDecoderMap& LoadedMultiFrameDecoders( void );
+	static TMultiFrameDecoderMap& SharedMultiFrameDecoders( void );
+	static wic::CBitmapDecoder AcquireDecoder( const fs::CFlexPath& imagePath, utl::ErrorHandling handlingMode );	// used in static methods that don't create a CWicImage object - wic::CBitmapDecoder is efficient to copy
+
+	void SetSharedDecoder( CMultiFrameDecoder* pSharedDecoder );
+	bool LoadDecoderFrame( wic::CBitmapDecoder& decoder, const fs::ImagePathKey& imageKey );
 private:
 	fs::ImagePathKey m_key;								// path and frame pos
 	UINT m_frameCount;									// count of frames in a multiple image format

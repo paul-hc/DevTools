@@ -151,7 +151,7 @@ bool CAlbumImageView::UpdateImage( void )
 		try
 		{
 			CWaitCursor wait;
-			CPushThrowMode pushMode( &CWicImageCache::Instance(), true );
+			CScopedErrorHandling scopedThrow( &CWicImageCache::Instance(), utl::ThrowMode );
 
 			pMainFrame->CancelStatusBarAutoClear();
 

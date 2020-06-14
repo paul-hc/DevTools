@@ -1,15 +1,15 @@
 
 #include "stdafx.h"
-#include "ThrowMode.h"
+#include "ErrorHandler.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
 
 
-bool CThrowMode::Good( HRESULT hResult, bool* pAllGood /*= NULL*/ ) const
+bool CErrorHandler::Handle( HRESULT hResult, bool* pAllGood /*= NULL*/ ) const throws_( COleException* )
 {
-	if ( m_ignoreMode || HR_OK( hResult ) )
+	if ( IsIgnoreMode() || HR_OK( hResult ) )
 		return true;				// all good
 	else
 	{

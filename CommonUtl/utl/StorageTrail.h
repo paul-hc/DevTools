@@ -1,35 +1,35 @@
-#ifndef StorageTrack_h
-#define StorageTrack_h
+#ifndef StorageTrail_h
+#define StorageTrail_h
 #pragma once
 
 #include <afxole.h>			// for COleStreamFile
 #include "FileSystem_fwd.h"
+#include "FlexPath.h"
 
 
 namespace fs
 {
 	class CStructuredStorage;
-	typedef fs::CPath TEmbeddedPath;
 
 
 	// An owning stack of deep opened storages starting from the root, of which the current (deepest) storage is at back.
 	// It represents an open sub-directory path to the current (deepest) storage.
 	//
-	class CStorageTrack : private utl::noncopyable
+	class CStorageTrail : private utl::noncopyable
 	{
 	public:
-		CStorageTrack( CStructuredStorage* pRootStorage );
-		~CStorageTrack();
+		CStorageTrail( CStructuredStorage* pRootStorage );
+		~CStorageTrail();
 
 		bool IsEmpty( void ) const { return m_openSubStorages.empty(); }
 		IStorage* GetRoot( void ) const;
 
-		void Clear( void );							// pop all sub-storages
+		void Clear( void );							// all sub-storages
 		void Push( IStorage* pSubStorage );			// push a sub-storage
 		CComPtr< IStorage > Pop( void );
 
 		IStorage* GetCurrent( void ) const { return !IsEmpty() ? m_openSubStorages.back() : GetRoot(); }
-		fs::TEmbeddedPath MakeSubPath( void ) const;
+		fs::TEmbeddedPath MakePath( void ) const;
 
 		size_t GetDepth( void ) const { return m_openSubStorages.size(); }
 		IStorage* GetStorageAtLevel( size_t depthLevel ) const { ASSERT( depthLevel < GetDepth() ); return m_openSubStorages[ depthLevel ]; }
@@ -54,4 +54,4 @@ namespace fs
 }
 
 
-#endif // StorageTrack_h
+#endif // StorageTrail_h

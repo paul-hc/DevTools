@@ -208,41 +208,6 @@ namespace fs
 	}
 
 
-	std::auto_ptr< CFile > OpenFile( const fs::CPath& filePath, bool throwMode /*= false*/, DWORD mode /*= CFile::modeRead | CFile::typeBinary*/ ) throws_( CFileException* )
-	{
-		ASSERT( !filePath.IsComplexPath() );
-
-		static mfc::CAutoException< CFileException > s_fileError;
-		s_fileError.m_strFileName = filePath.GetPtr();
-
-		std::auto_ptr< CFile > pFile( new CFile );
-		if ( !pFile->Open( filePath.GetPtr(), mode | CFile::shareDenyWrite, &s_fileError ) )		// note: CFile::shareExclusive causes sharing violation
-			if ( throwMode )
-				throw &s_fileError;
-			else
-				pFile.reset();
-
-		return pFile;
-	}
-
-	UINT64 BufferedCopy( CFile& rDestFile, CFile& srcFile, size_t chunkSize /*= 4 * KiloByte*/ )
-	{
-		UINT64 fileSize = srcFile.GetLength();
-		std::vector< BYTE > buffer;
-		buffer.resize( (std::min)( chunkSize, static_cast< size_t >( fileSize ) ) );		// grow the size of the copy buffer as needed
-
-		for ( UINT64 bytesLeft = fileSize; bytesLeft != 0; )
-		{
-			UINT bytesRead = srcFile.Read( &buffer.front(), static_cast< UINT >( buffer.size() ) );
-			rDestFile.Write( &buffer.front(), bytesRead );
-			bytesLeft -= bytesRead;
-
-			ENSURE( bytesLeft < fileSize );			// no underflow
-		}
-		return fileSize;
-	}
-
-
 	namespace thr
 	{
 		void MakeFileWritable( const TCHAR* pFilePath ) throws_( CRuntimeException )
@@ -320,6 +285,61 @@ namespace fs
 		}
 
 	} //namespace thr
+
+} //namespace fs
+
+
+namespace fs
+{
+	std::auto_ptr< CFile > OpenFile( const fs::CPath& filePath, bool throwMode /*= false*/, DWORD mode /*= CFile::modeRead | CFile::typeBinary*/ ) throws_( CFileException* )
+	{
+		ASSERT( !filePath.IsComplexPath() );
+
+		static mfc::CAutoException< CFileException > s_fileError;
+		s_fileError.m_strFileName = filePath.GetPtr();
+
+		std::auto_ptr< CFile > pFile( new CFile );
+		if ( !pFile->Open( filePath.GetPtr(), mode | CFile::shareDenyWrite, &s_fileError ) )		// note: CFile::shareExclusive causes sharing violation
+			if ( throwMode )
+				throw &s_fileError;
+			else
+				pFile.reset();
+
+		return pFile;
+	}
+
+	UINT64 BufferedCopy( CFile& rDestFile, CFile& srcFile, size_t chunkSize /*= 4 * KiloByte*/ )
+	{
+		UINT64 fileSize = srcFile.GetLength();
+		std::vector< BYTE > buffer;
+		buffer.resize( (std::min)( chunkSize, static_cast< size_t >( fileSize ) ) );		// grow the size of the copy buffer as needed
+
+		for ( UINT64 bytesLeft = fileSize; bytesLeft != 0; )
+		{
+			UINT bytesRead = srcFile.Read( &buffer.front(), static_cast< UINT >( buffer.size() ) );
+			rDestFile.Write( &buffer.front(), bytesRead );
+			bytesLeft -= bytesRead;
+
+			ENSURE( bytesLeft < fileSize );			// no underflow
+		}
+		return fileSize;
+	}
+
+
+	// CTextFileWriter implementation
+
+	CTextFileWriter::CTextFileWriter( CFile* pDestFile, bool isBinaryFile /*= true*/ )
+		: m_pDestFile( pDestFile )
+		, m_lineEnd( isBinaryFile ? _T("\r\n") : _T("\n") )
+	{
+		ASSERT_PTR( m_pDestFile );			// the file must be open for writing (or created)
+	}
+
+	void CTextFileWriter::WriteText( const std::tstring& text )
+	{
+		std::string textUtf8 = str::ToUtf8( text.c_str() );
+		m_pDestFile->Write( textUtf8.c_str(), textUtf8.length() );
+	}
 
 } //namespace fs
 

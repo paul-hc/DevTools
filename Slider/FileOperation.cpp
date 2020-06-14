@@ -116,8 +116,10 @@ void CFileOperation::AugmentLogError( const std::tstring& errorMessage )
 	ASSERT( !m_logLines.empty() );
 	std::tstring& rLine = m_logLines.back();
 	rLine += _T(" * FAILED ");
+
 	if ( !IsThrowMode() )
 		rLine += _T("\n\t") + errorMessage;
+
 	// else:in throw mode the error message is logged by the catch block
 
 	TRACE( _T("* %s\n"), rLine.c_str() );

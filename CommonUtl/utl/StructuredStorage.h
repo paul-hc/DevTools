@@ -3,10 +3,9 @@
 #pragma once
 
 #include "FlexPath.h"
-#include "FileState.h"
 #include "FileSystem.h"
-#include "PathObjectMap.h"
-#include "ThrowMode.h"
+#include "PathMap.h"
+#include "ErrorHandler.h"
 #include "RuntimeException.h"
 #include <hash_map>
 #include <afxole.h>
@@ -14,27 +13,28 @@
 
 namespace fs
 {
-	class CStorageTrack;
+	class CStorageTrail;
+	struct CStreamState;
 
 
 	// Structured storage corresponding to a compound document file.
-	// Able to handle long filenames for sub-storages (sub directories) and file methods.
+	// Able to handle long filenames for sub-storages (sub directories) and stream (file) methods.
 	//
 	// MSDN: at least STGM_SHARE_EXCLUSIVE/CFile::shareExclusive is mandatory when opening streams/files.
 
-	class CStructuredStorage : public CThrowMode
+	class CStructuredStorage : public CErrorHandler
 							 , private utl::noncopyable
 	{
-		friend class fs::CStorageTrack;
+		friend class fs::CStorageTrail;
 	public:
-		enum { MaxFilenameLen = 31 };
-
-		CStructuredStorage( IStorage* pRootStorage = NULL );
+		CStructuredStorage( void );
 		virtual ~CStructuredStorage();
 
-		IStorage* GetStorage( void ) const { return m_pRootStorage; }
-		bool IsEmbeddedStorage( void ) const { return m_isEmbeddedStg; }
-		bool IsRootStorage( void ) const { return GetStorage() != NULL && !IsEmbeddedStorage(); }
+		enum { MaxFilenameLen = 31 };			// limitation imposed by the COM standard implementation of a compound document storage
+
+		void SetUseStreamSharing( bool useStreamSharing = true );
+
+		IStorage* GetRootStorage( void ) const { return m_pRootStorage; }
 
 		// storage
 		bool IsOpen( void ) const { return m_pRootStorage != NULL; }
@@ -46,7 +46,7 @@ namespace fs
 		// document storage file
 		bool CreateDocFile( const TCHAR* pDocFilePath, DWORD mode = STGM_CREATE | STGM_READWRITE );
 		bool OpenDocFile( const TCHAR* pDocFilePath, DWORD mode = STGM_READ );
-		static bool IsValidDocFile( const TCHAR* pDocFilePath );			// a compound document file?
+		static bool IsValidDocFile( const TCHAR* pDocFilePath );						// an compound document file that exists?
 
 		// embedded storages (sub-directories)
 		CComPtr< IStorage > CreateDir( const TCHAR* pDirName, IStorage* pParentDir = NULL, DWORD mode = STGM_CREATE | STGM_READWRITE );
@@ -58,36 +58,45 @@ namespace fs
 		CComPtr< IStream > CreateStream( const TCHAR* pStreamName, IStorage* pParentDir = NULL, DWORD mode = STGM_CREATE | STGM_READWRITE );
 		CComPtr< IStream > OpenStream( const TCHAR* pStreamName, IStorage* pParentDir = NULL, DWORD mode = STGM_READ );
 		bool DeleteStream( const TCHAR* pStreamName, IStorage* pParentDir = NULL );
+
+		bool CloseStream( const TCHAR* pStreamName, IStorage* pParentDir = NULL );		// logical closing, to unload all references to the cached stream and stream clones
 		bool StreamExist( const TCHAR* pStreamSubPath, IStorage* pParentDir = NULL );
 
-		// embedded files (streams); caller must delete the returned file
-		std::auto_ptr< COleStreamFile > CreateFile( const TCHAR* pFileName, IStorage* pParentDir = NULL, DWORD mode = CFile::modeCreate | CFile::modeWrite );
-		std::auto_ptr< COleStreamFile > OpenFile( const TCHAR* pFileName, IStorage* pParentDir = NULL, DWORD mode = CFile::modeRead );
+		// opened embedded streams states
+		bool IsStreamOpen( const fs::TEmbeddedPath& streamPath ) const { return m_openedStreamStates.Contains( streamPath ); }
+		const fs::CStreamState* FindOpenedStream( const fs::TEmbeddedPath& streamPath ) const { return m_openedStreamStates.Find( streamPath ); }
+
+		// embedded files (on streams); caller must delete the returned file
+		std::auto_ptr< COleStreamFile > CreateStreamFile( const TCHAR* pStreamName, IStorage* pParentDir = NULL, DWORD mode = CFile::modeCreate | CFile::modeWrite );
+		std::auto_ptr< COleStreamFile > OpenStreamFile( const TCHAR* pStreamName, IStorage* pParentDir = NULL, DWORD mode = CFile::modeRead );
 
 		// backwards compatibility: find existing object based on possible alternates
 		std::pair< const TCHAR*, size_t > FindAlternate_DirName( const TCHAR* altDirNames[], size_t altCount, IStorage* pParentDir = NULL );
 		std::pair< const TCHAR*, size_t > FindAlternate_StreamName( const TCHAR* altStreamNames[], size_t altCount, IStorage* pParentDir = NULL );
-
-		// opened embedded streams file states
-		bool IsElementOpen( const fs::CPath& streamName ) const { return m_openedFileStates.Contains( streamName ); }
-		const fs::CFileState* FindOpenedElement( const fs::CPath& streamName ) const { return m_openedFileStates.Find( streamName ); }
 
 		static DWORD ToMode( DWORD mode );										// augment mode with default STGM_SHARE_EXCLUSIVE (if no STGM_SHARE_DENY_* flag is present)
 		static std::tstring MakeShortFilename( const TCHAR* pFilename );		// make short file name with length limited to MaxFilenameLen
 
 		static CStructuredStorage* FindOpenedStorage( const fs::CPath& docStgPath );
 	protected:
+		// overridables
 		virtual std::tstring EncodeStreamName( const TCHAR* pStreamName ) const;
+		virtual bool RetainOpenedStream( const TCHAR* pStreamName, IStorage* pParentDir ) const;	// if true: cache opened streams to allow later shared access (workaround sharing violations caused by STGM_SHARE_EXCLUSIVE)
 
 		std::auto_ptr< COleStreamFile > MakeOleStreamFile( const TCHAR* pStreamName, IStream* pStream = NULL ) const;
 
 		bool HandleError( HRESULT hResult, const TCHAR* pSubPath, const TCHAR* pDocFilePath = NULL ) const;
-		std::auto_ptr< COleStreamFile > HandleStreamError( const TCHAR* pStreamName ) const;			// may throw s_fileError
 
-		template< typename StgInterfaceT >
-		bool CacheElementFileState( const fs::CPath& elementSubPath, StgInterfaceT* pInterface );
+		static bool IsReadingMode( DWORD mode ) { return !HasFlag( mode, STGM_WRITE | STGM_READWRITE ); }
+	private:
+		IStorage* GetParentDir( const CStorageTrail* pParentTrail ) const;
 
-		static fs::CPath MakeElementSubPath( const TCHAR* pElementName, IStorage* pParentDir );
+		bool CacheStreamState( const TCHAR* pStreamName, IStorage* pParentDir, IStream* pStreamOrigin );
+		size_t CloseStreamsWithPrefix( const TCHAR* pSubDirPrefix ) { return m_openedStreamStates.RemoveWithPrefix( pSubDirPrefix ); }
+
+		CComPtr< IStream > CloneStream( const fs::CStreamState* pStreamState, const fs::TEmbeddedPath& streamPath );		// for stream logical re-opening
+
+		static fs::TEmbeddedPath MakeElementSubPath( const TCHAR* pElementName, IStorage* pParentDir );
 	private:
 		typedef fs::CPathObjectMap< fs::CPath, CStructuredStorage > TStorageMap;		// document path to open root storage
 
@@ -96,17 +105,46 @@ namespace fs
 		static void RegisterDocStg( CStructuredStorage* pDocStg );
 		static void UnregisterDocStg( CStructuredStorage* pDocStg );
 	private:
-		CComPtr< IStorage > m_pRootStorage;			// root directory
-		const bool m_isEmbeddedStg;					// true for storages passed on constructor (not opened internally)
+		CComPtr< IStorage > m_pRootStorage;		// root storage in a compound document file
+		bool m_useStreamSharing;				// keeps opened streams alive via caching, allowing stream cloning to circumvent exclusive sharing violations
 		DWORD m_openMode;
-		mutable fs::CPath m_docFilePath;			// self-encapsulated
+		mutable fs::CPath m_docFilePath;		// self-encapsulated: full path of the document storage file
 
-		typedef fs::CPathMap< fs::CPath, fs::CFileState > TElementStates;		// keys are embedded logical paths, whereas CFileState::m_fullPath is the physical element path
+		typedef fs::CPathMap< fs::TEmbeddedPath, fs::CStreamState > TStreamStates;		// keys are embedded logical paths, whereas CFileState::m_fullPath is the physical element path
 
-		TElementStates m_openedFileStates;			// metadata of opened sub-storages & streams (for reading only - immutable)
+		TStreamStates m_openedStreamStates;		// metadata of opened streams (for reading only - immutable)
 	protected:
 		static mfc::CAutoException< CFileException > s_fileError;
 	};
+}
+
+
+#include "FileState.h"
+
+
+namespace fs
+{
+	struct CStreamState : public fs::CFileState
+	{
+		CStreamState( void ) {}
+
+		bool Build( IStream* pStreamOrigin, bool keepStreamAlive );
+
+		bool HasStream( void ) const { return m_pStreamOrigin != NULL; }
+		void ReleaseStream( void ) { m_pStreamOrigin = NULL; }
+		HRESULT CloneStream( IStream** ppStreamDuplicate ) const;
+	private:
+		CComPtr< IStream > m_pStreamOrigin;			// stream sharing: optional, keeps the original opened stream, that can be cloned for subsequent stream reading
+	};
+
+
+	// stream utilities
+
+	bool SeekToPos( IStream* pStream, UINT64 position, DWORD origin = STREAM_SEEK_SET );
+	inline bool SeekToBegin( IStream* pStream ) { return SeekToPos( pStream, 0 ); }
+	inline bool SeekToEnd( IStream* pStream ) { return SeekToPos( pStream, 0, STREAM_SEEK_END ); }
+
+	inline IStream* GetSafeStream( const COleStreamFile* pFile ) { return pFile != NULL ? pFile->m_lpStream : NULL; }
 }
 
 
@@ -171,9 +209,6 @@ namespace fs
 
 namespace fs
 {
-	struct CFileState;
-
-
 	namespace stg
 	{
 		bool MakeFileState( fs::CFileState& rState, const STATSTG& stat );
@@ -185,7 +220,9 @@ namespace fs
 		bool GetElementState( fs::CFileState& rState, StgInterfaceT* pInterface, STATFLAG flag = STATFLAG_NONAME )		// works for IStorage/IStream/ILockBytes
 		{
 			ASSERT_PTR( pInterface );
+
 			STATSTG stat;
+
 			return
 				HR_OK( pInterface->Stat( &stat, flag ) ) &&
 				MakeFileState( rState, stat );

@@ -3,7 +3,7 @@
 #pragma once
 
 #include "Path.h"
-#include "ThrowMode.h"
+#include "ErrorHandler.h"
 #include <shlobj.h>
 #include <atlbase.h>
 
@@ -12,10 +12,10 @@ namespace shell
 {
 	// provide access to Windows Explorer's file system representation
 
-	class CWinExplorer : public CThrowMode
+	class CWinExplorer : public CErrorHandler
 	{
 	public:
-		CWinExplorer( bool throwMode = false ) : CThrowMode( throwMode ) {}
+		CWinExplorer( utl::ErrorHandling handlingMode = utl::CheckMode ) : CErrorHandler( handlingMode ) {}
 
 		// IShellFolder
 		CComPtr< IShellFolder > GetDesktopFolder( void ) const;
@@ -54,7 +54,7 @@ namespace shell
 		if ( ParsePidl( &pidlFile, pFolder, pFnameExt ) )
 		{
 			LPITEMIDLIST p_pidlFile = pidlFile;			// (!) pointer to pointer
-			Good( pFolder->GetUIObjectOf( NULL, 1, (PCUITEMID_CHILD_ARRAY)&p_pidlFile, __uuidof( Interface ), NULL, (void**)&pInterface ) );
+			Handle( pFolder->GetUIObjectOf( NULL, 1, (PCUITEMID_CHILD_ARRAY)&p_pidlFile, __uuidof( Interface ), NULL, (void**)&pInterface ) );
 		}
 		return pInterface;
 	}

@@ -27,19 +27,19 @@ CWicImage::~CWicImage()
 {
 	if ( m_pSharedDecoder != NULL )
 		if ( !m_pSharedDecoder->UnloadFrame( this ) )						// no frames loaded anymore?
-			VERIFY( LoadedMultiFrameDecoders().Remove( m_key.first ) );		// removed the registered shared decoder
+			VERIFY( SharedMultiFrameDecoders().Remove( m_key.first ) );		// removed the registered shared decoder
 }
 
-std::auto_ptr< CWicImage > CWicImage::CreateFromFile( const fs::ImagePathKey& imageKey, bool throwMode /*= false*/ )
+std::auto_ptr< CWicImage > CWicImage::CreateFromFile( const fs::ImagePathKey& imageKey, utl::ErrorHandling handlingMode /*= utl::CheckMode*/ )
 {
 	std::auto_ptr< CWicImage > pNewImage;
 
-	TMultiFrameDecoderMap& rSharedDecoders = LoadedMultiFrameDecoders();
+	TMultiFrameDecoderMap& rSharedDecoders = SharedMultiFrameDecoders();
 
 	if ( CMultiFrameDecoder* pSharedDecoder = rSharedDecoders.Find( imageKey.first ) )
 		return pSharedDecoder->LoadFrame( imageKey );
 
-	wic::CBitmapDecoder decoder( imageKey.first, throwMode );
+	wic::CBitmapDecoder decoder( imageKey.first, handlingMode );
 
 	if ( decoder.IsValid() )
 	{
@@ -66,22 +66,8 @@ std::auto_ptr< CWicImage > CWicImage::CreateFromFile( const fs::ImagePathKey& im
 
 std::pair< UINT, wic::TDecoderFlags > CWicImage::LookupImageFileFrameCount( const fs::CFlexPath& imagePath )
 {
-	std::pair< UINT, wic::TDecoderFlags > frameInfo( 0, 0 );
-
-	if ( CMultiFrameDecoder* pSharedDecoder = LoadedMultiFrameDecoders().Find( imagePath ) )
-	{
-		frameInfo.first = pSharedDecoder->GetDecoder().GetFrameCount();
-		frameInfo.second = pSharedDecoder->GetDecoder().GetDecoderFlags();
-	}
-	else
-	{
-		wic::CBitmapDecoder decoder( imagePath, false );
-
-		frameInfo.first = decoder.GetFrameCount();
-		frameInfo.second = decoder.GetDecoderFlags();
-	}
-
-	return frameInfo;
+	wic::CBitmapDecoder decoder = AcquireDecoder( imagePath, utl::CheckMode );
+	return std::pair< UINT, wic::TDecoderFlags >( decoder.GetFrameCount(), decoder.GetDecoderFlags() );
 }
 
 void CWicImage::Clear( void )
@@ -111,7 +97,7 @@ bool CWicImage::LoadDecoderFrame( wic::CBitmapDecoder& decoder, const fs::ImageP
 
 bool CWicImage::LoadFromFile( const fs::ImagePathKey& imageKey )
 {
-	wic::CBitmapDecoder decoder( imageKey.first, IsThrowMode() );
+	wic::CBitmapDecoder decoder = AcquireDecoder( imageKey.first, GetHandlingMode() );
 	return LoadDecoderFrame( decoder, imageKey );
 }
 
@@ -193,10 +179,21 @@ std::tstring CWicImage::FormatDbg( void ) const
 
 #endif // _DEBUG
 
-CWicImage::TMultiFrameDecoderMap& CWicImage::LoadedMultiFrameDecoders( void )
+CWicImage::TMultiFrameDecoderMap& CWicImage::SharedMultiFrameDecoders( void )
 {
 	static TMultiFrameDecoderMap s_loadedDecoders;
 	return s_loadedDecoders;
+}
+
+wic::CBitmapDecoder CWicImage::AcquireDecoder( const fs::CFlexPath& imagePath, utl::ErrorHandling handlingMode )
+{
+	if ( CMultiFrameDecoder* pSharedDecoder = SharedMultiFrameDecoders().Find( imagePath ) )
+		return pSharedDecoder->GetDecoder();
+	else
+	{
+		wic::CBitmapDecoder decoder( imagePath, handlingMode );
+		return decoder;
+	}
 }
 
 

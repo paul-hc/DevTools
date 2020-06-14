@@ -26,7 +26,7 @@ namespace wic { enum ImageFormat; }
 class CImageArchiveStg : public fs::CStructuredStorage
 {
 public:
-	CImageArchiveStg( IStorage* pRootStorage = NULL );
+	CImageArchiveStg( void );
 	virtual ~CImageArchiveStg();
 
 	// operations
@@ -51,6 +51,7 @@ public:
 protected:
 	// base overrides
 	virtual std::tstring EncodeStreamName( const TCHAR* pStreamName ) const;
+	virtual bool RetainOpenedStream( const TCHAR* pStreamName, IStorage* pParentDir ) const;
 
 	TCHAR GetSubPathSep( void ) const;
 
@@ -58,10 +59,11 @@ protected:
 	void UnflattenDeepStreamPath( std::tstring& rDeepPath ) const { std::replace( rDeepPath.begin(), rDeepPath.end(), GetSubPathSep(), _T('\\') ); }		// '|' or '*' -> '\'
 private:
 	void CreateImageFiles( CImageStorageService* pImagesSvc ) throws_( CException* );
-	void CreateThumbnailsSubStorage( const CImageStorageService* pImagesSvc );
+	void CreateThumbnailsSubStorage( const CImageStorageService* pImagesSvc ) throws_( CException* );
 
 	CComPtr< IStream > OpenThumbnailImageStream( const TCHAR* pImageEmbeddedPath );
-	static wic::ImageFormat MakeThumbStreamName( fs::CPath& rThumbStreamName, const TCHAR* pSrcImagePath );
+	static wic::ImageFormat MakeThumbStreamName( fs::TEmbeddedPath& rThumbStreamName, const TCHAR* pSrcImagePath );
+	static bool IsSpecialStreamName( const TCHAR* pStreamName );
 private:
 	CComPtr< IStorage > m_pThumbsStorage;
 	app::ModelSchema m_docModelSchema;			// transient: loaded model schema from file, stored by the album doc
@@ -73,17 +75,15 @@ private:
 	static const TCHAR* s_passwordStreamNames[];		// "_pwd.w" - enchrypted password stream (with old variants)
 	static const TCHAR* s_thumbsStorageNames[];			// "Thumbnails" - thumbs sub-storage name (with old variants)
 	static const TCHAR s_albumStreamName[];				// "_Album.sld" - album info stream (superset of meta-data)
+	static const TCHAR s_albumMapStreamName[];			// "_AlbumMap.txt" - meta-data stream in a compound-file (obsolete)
 	static const TCHAR s_subPathSep;					// sub-path separator for deep stream names
-
-	// legacy
-	static const TCHAR s_legacy_metadataStreamName[];	// "_Meta.data" - meta-data stream in a compound-file (obsolete)
 public:
-	class CFactory : public CThrowMode
+	class CFactory : public CErrorHandler
 				   , public fs::IThumbProducer
 				   , private utl::noncopyable
 	{
 	public:
-		CFactory( void ) : CThrowMode( false ) {}
+		CFactory( void ) : CErrorHandler( utl::CheckMode ) {}
 		~CFactory() { Clear(); }							// factory singleton must be cleared on ExitInstance (not later)
 
 		void Clear( void );
@@ -119,6 +119,23 @@ public:
 	static CFactory* Factory( void );
 private:
 	enum { WriteableModeMask = STGM_CREATE | STGM_WRITE | STGM_READWRITE, NotOpenMask = -1 };
+
+	class CAlbumMapWriter : public fs::CTextFileWriter
+	{
+	public:
+		CAlbumMapWriter( std::auto_ptr< COleStreamFile > pAlbumMapFile );
+
+		void WriteHeader( void );
+		void WriteEntry( const std::tstring& streamName, const TCHAR* pImageEmbeddedPath );
+		void WriteImageTotals( UINT64 totalImagesSize );
+		void WriteThumbnailTotals( size_t thumbCount, UINT64 totalThumbsSize );
+	private:
+		enum { StreamNoPadding = 5, StreamNamePadding = 34 };
+
+		std::auto_ptr< COleStreamFile > m_pAlbumMapFile;
+		size_t m_imageCount;
+		static const TCHAR s_lineFmt[];
+	};
 
 	// used mostly to get temporary writeable access to an image storage
 	//

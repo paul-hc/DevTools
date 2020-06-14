@@ -3,16 +3,26 @@
 #pragma once
 
 #include "ImagingWic.h"
-#include "ThrowMode.h"
+#include "ErrorHandler.h"
 
 
 // WIC bitmap that can be loaded from file/resource/stream and saved to file/stream using WIC utilities
 //
-class CWicBitmap : public CThrowMode, private utl::noncopyable
+class CWicBitmap : public CErrorHandler
+				 , private utl::noncopyable
 {
 public:
-	CWicBitmap( bool throwMode = false ) : CThrowMode( throwMode ) {}
-	CWicBitmap( IWICBitmapSource* pWicBitmap, bool throwMode = false ) : CThrowMode( throwMode ) { SetWicBitmap( pWicBitmap ); }
+	CWicBitmap( utl::ErrorHandling handlingMode = utl::CheckMode )
+		: CErrorHandler( handlingMode )
+	{
+	}
+
+	CWicBitmap( IWICBitmapSource* pWicBitmap, utl::ErrorHandling handlingMode = utl::CheckMode )
+		: CErrorHandler( handlingMode )
+	{
+		SetWicBitmap( pWicBitmap );
+	}
+
 	virtual ~CWicBitmap() {}
 
 	void Clear( void ) { m_pBitmapOrigin.reset(); }
@@ -21,7 +31,7 @@ public:
 
 	bool SetWicBitmap( IWICBitmapSource* pWicBitmap )
 	{
-		m_pBitmapOrigin.reset( new wic::CBitmapOrigin( safe_ptr( pWicBitmap ), IsThrowMode() ) );
+		m_pBitmapOrigin.reset( new wic::CBitmapOrigin( safe_ptr( pWicBitmap ), GetHandlingMode() ) );
 		return m_pBitmapOrigin->IsValid();
 	}
 

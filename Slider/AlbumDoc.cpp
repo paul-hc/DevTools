@@ -241,7 +241,7 @@ bool CAlbumDoc::InternalSaveAsArchiveStg( const fs::CPath& newStgPath )
 
 			if ( straightStgFileCopy )
 			{
-				CFileOperation fileOp( true );
+				CFileOperation fileOp( utl::ThrowMode );
 
 				fileOp.Copy( fs::ToFlexPath( oldDocPath ), fs::ToFlexPath( newStgPath ) );		// optimization: straight stg file copy
 				fs::MakeFileWritable( newStgPath.GetPtr() );									// just in case source was read-only
@@ -279,7 +279,7 @@ bool CAlbumDoc::InternalSaveAsArchiveStg( const fs::CPath& newStgPath )
 void CAlbumDoc::SaveAlbumToArchiveStg( const fs::CPath& stgPath ) throws_( CException* )
 {
 	// save existing album to image archive as "_Album.sld" stream
-	CPushThrowMode pushThrow( CImageArchiveStg::Factory(), true );
+	CScopedErrorHandling scopedThrow( CImageArchiveStg::Factory(), utl::ThrowMode );
 
 	m_model.CheckReparentFileAttrs( stgPath.GetPtr(), CAlbumModel::Saving );		// reparent with stgPath before saving the album info
 

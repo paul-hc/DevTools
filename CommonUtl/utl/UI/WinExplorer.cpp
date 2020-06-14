@@ -44,7 +44,7 @@ namespace shell
 	CComPtr< IShellFolder > CWinExplorer::GetDesktopFolder( void ) const
 	{
 		CComPtr< IShellFolder > pDesktopFolder;
-		Good( ::SHGetDesktopFolder( &pDesktopFolder ) );
+		Handle( ::SHGetDesktopFolder( &pDesktopFolder ) );
 		return pDesktopFolder;
 	}
 
@@ -57,7 +57,7 @@ namespace shell
 		TCHAR displayName[ MAX_PATH * 2 ];
 		_tcscpy( displayName, pFnameExt );
 
-		return Good( pFolder->ParseDisplayName( NULL, NULL, displayName, NULL, pPidl, NULL ) );
+		return Handle( pFolder->ParseDisplayName( NULL, NULL, displayName, NULL, pPidl, NULL ) );
 	}
 
 	CComPtr< IShellFolder > CWinExplorer::FindShellFolder( const TCHAR* pDirPath ) const
@@ -68,7 +68,7 @@ namespace shell
 			{
 				CComHeapPtr< ITEMIDLIST > workDirPidl;
 				if ( ParsePidl( &workDirPidl, pDesktopFolder, pDirPath ) )
-					Good( pDesktopFolder->BindToObject( workDirPidl, NULL, IID_PPV_ARGS( &pDirFolder ) ) );
+					Handle( pDesktopFolder->BindToObject( workDirPidl, NULL, IID_PPV_ARGS( &pDirFolder ) ) );
 			}
 
 		return pDirFolder;
@@ -78,7 +78,7 @@ namespace shell
 	CComPtr< IShellItem > CWinExplorer::FindShellItem( const fs::CPath& fullPath ) const
 	{
 		CComPtr< IShellItem > pShellItem;
-		Good( ::SHCreateItemFromParsingName( fullPath.GetPtr(), NULL, IID_PPV_ARGS( &pShellItem ) ) );
+		Handle( ::SHCreateItemFromParsingName( fullPath.GetPtr(), NULL, IID_PPV_ARGS( &pShellItem ) ) );
 		return pShellItem;
 	}
 
@@ -105,11 +105,11 @@ namespace shell
 				// define thumbnail properties
 				DWORD priority = IEIT_PRIORITY_NORMAL;
 				TCHAR pathBuffer[ MAX_PATH ];
-				if ( Good( pExtractImage->GetLocation( pathBuffer, MAX_PATH, &priority, &boundsSize, 16, &flags ) ) )
+				if ( Handle( pExtractImage->GetLocation( pathBuffer, MAX_PATH, &priority, &boundsSize, 16, &flags ) ) )
 				{
 					// generate thumbnail
 					HBITMAP hThumbBitmap = NULL;
-					if ( Good( pExtractImage->Extract( &hThumbBitmap ) ) )
+					if ( Handle( pExtractImage->Extract( &hThumbBitmap ) ) )
 						return hThumbBitmap;
 				}
 			}
@@ -122,7 +122,7 @@ namespace shell
 		HBITMAP hBitmap = NULL;
 		CComQIPtr< IShellItemImageFactory > pImageFactory( pShellItem );
 		if ( pImageFactory != NULL )
-			Good( pImageFactory->GetImage( boundsSize, flags, &hBitmap ) );
+			Handle( pImageFactory->GetImage( boundsSize, flags, &hBitmap ) );
 
 		return hBitmap;
 	}

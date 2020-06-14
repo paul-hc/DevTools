@@ -8,7 +8,7 @@
 #include "Application_fwd.h"
 #include "utl/ContainerUtilities.h"
 #include "utl/RuntimeException.h"
-#include "utl/ThrowMode.h"
+#include "utl/ErrorHandler.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -32,7 +32,7 @@ CImageFileEnumerator::~CImageFileEnumerator()
 void CImageFileEnumerator::Search( const std::vector< CSearchPattern* >& searchPatterns ) throws_( CException*, CUserAbortedException )
 {
 	CWaitCursor wait;
-	CPushThrowMode pushThrow( CImageArchiveStg::Factory(), true );			// report storage sharing violations, etc
+	CScopedErrorHandling scopedThrow( CImageArchiveStg::Factory(), utl::ThrowMode );		// report storage sharing violations, etc
 
 	for ( std::vector< CSearchPattern* >::const_iterator itPattern = searchPatterns.begin(); itPattern != searchPatterns.end(); )
 	{
@@ -81,7 +81,7 @@ void CImageFileEnumerator::SearchImageArchive( const fs::CPath& stgDocPath ) thr
 		AfxThrowFileException( CFileException::fileNotFound, -1, stgDocPath.GetPtr() );		// storage file path does not exist
 
 	CWaitCursor wait;
-	CPushThrowMode pushThrow( CImageArchiveStg::Factory(), true );			// report storage sharing violations, etc
+	CScopedErrorHandling scopedThrow( CImageArchiveStg::Factory(), utl::ThrowMode );		// report storage sharing violations, etc
 
 	m_issueStore.Reset( _T("Querying storage for images") );
 

@@ -397,6 +397,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\ErrorHandler.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\ErrorHandler.h"
+				>
+			</File>
+			<File
 				RelativePath=".\FlagTags.cpp"
 				>
 			</File>
@@ -577,14 +585,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\ThrowMode.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\ThrowMode.h"
-				>
-			</File>
-			<File
 				RelativePath=".\Timer.cpp"
 				>
 			</File>
@@ -728,15 +728,15 @@
 					>
 				</File>
 				<File
-					RelativePath=".\PathObjectMap.h"
+					RelativePath=".\PathMap.h"
 					>
 				</File>
 				<File
-					RelativePath=".\StorageTrack.cpp"
+					RelativePath=".\StorageTrail.cpp"
 					>
 				</File>
 				<File
-					RelativePath=".\StorageTrack.h"
+					RelativePath=".\StorageTrail.h"
 					>
 				</File>
 				<File

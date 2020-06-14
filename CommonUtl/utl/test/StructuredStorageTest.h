@@ -6,6 +6,7 @@
 #ifdef _DEBUG		// no UT code in release builds
 
 #include "UnitTest.h"
+#include "utl/FlexPath.h"
 
 
 namespace fs { class CStructuredStorage; }
@@ -22,7 +23,8 @@ public:
 private:
 	void TestLongFilenames( void );
 	void TestStructuredStorage( void );
-	void _TestEnumerateElements( fs::CStructuredStorage* pDocStg );
+	void _TestEnumerateElements( fs::CStructuredStorage* pDocStorage );
+	void _TestOpenSharedStreams( fs::CStructuredStorage* pDocStorage, const fs::TEmbeddedPath& streamPath );
 };
 
 

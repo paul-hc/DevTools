@@ -4,7 +4,7 @@
 
 #include "FlexPath.h"
 #include "Image_fwd.h"
-#include "ThrowMode.h"
+#include "ErrorHandler.h"
 #include "ImagingWic_fwd.h"
 
 
@@ -35,12 +35,12 @@ namespace wic
 
 	// wrapper for IWICBitmapDecoder: works with file streams and embedded file streams
 	//
-	class CBitmapDecoder : public CThrowMode
+	class CBitmapDecoder : public CErrorHandler
 	{
 	public:
-		CBitmapDecoder( bool throwMode = false );
+		CBitmapDecoder( utl::ErrorHandling handlingMode = utl::CheckMode );
 		CBitmapDecoder( const CBitmapDecoder& right );
-		CBitmapDecoder( const fs::CFlexPath& imagePath, bool throwMode = false );
+		CBitmapDecoder( const fs::CFlexPath& imagePath, utl::ErrorHandling handlingMode = utl::CheckMode );
 
 		bool IsValid( void ) const { return m_frameCount != 0; }
 		UINT GetFrameCount( void ) const { return m_frameCount; }
@@ -100,10 +100,10 @@ namespace wic
 
 	// WIC bitmap with format and save support
 	//
-	class CBitmapOrigin : public CThrowMode
+	class CBitmapOrigin : public CErrorHandler
 	{
 	public:
-		CBitmapOrigin( IWICBitmapSource* pSrcBitmap, bool throwMode = false );
+		CBitmapOrigin( IWICBitmapSource* pSrcBitmap, utl::ErrorHandling handlingMode = utl::CheckMode );
 
 		bool IsSourceTrueBitmap( void ) const;			// WICBitmap vs IWICBitmapFrameDecode, IWICBitmapScaler, etc
 

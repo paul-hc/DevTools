@@ -4,7 +4,7 @@
 
 #include "CacheLoader.h"
 #include "FlexPath.h"
-#include "ThrowMode.h"
+#include "ErrorHandler.h"
 #include "WicImage.h"
 #include <deque>
 
@@ -12,7 +12,7 @@
 namespace fs { enum FileExpireStatus; }
 
 
-class CWicImageCache : public CThrowMode
+class CWicImageCache : public CErrorHandler
 					 , private fs::ICacheOwner< fs::ImagePathKey, CWicImage >
 					 , private utl::noncopyable
 {

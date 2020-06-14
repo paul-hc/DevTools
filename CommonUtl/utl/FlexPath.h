@@ -13,6 +13,9 @@ namespace path
 
 namespace fs
 {
+	typedef fs::CPath TEmbeddedPath;
+
+
 	// Path that works uniformly with normal paths or structured storage complex paths to embedded storages and streams.
 	// Complex path: "physical_path>stg_embedded_path".
 	// Examples:
