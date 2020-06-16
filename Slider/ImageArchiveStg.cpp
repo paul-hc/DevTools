@@ -27,21 +27,23 @@
 
 const TCHAR* CImageArchiveStg::s_compoundStgExts[] = { _T(".ias"), _T(".cid"), _T(".icf") };
 
+const TCHAR* CImageArchiveStg::s_pAlbumFolderName = _T("Album");
+
+const TCHAR* CImageArchiveStg::s_thumbsFolderNames[] =
+{
+	_T("Thumbnails"),			// current storage name Slider_v5_3+ (used to be the legacy one, but was promoted in light of the new implicit thumbnail encoder rules)
+	_T("Thumbs_jpeg")			// middle aged storage name (Slider_v3_1..Slider_v5_2)
+};
+
+const TCHAR* CImageArchiveStg::s_pAlbumStreamName = _T("_Album.sld");
+const TCHAR* CImageArchiveStg::s_pAlbumMapStreamName = _T("_AlbumMap.txt");
+
 const TCHAR* CImageArchiveStg::s_passwordStreamNames[] =
 {
 	_T("_pwd.w"),				// new WIDE password stream
 	_T("pwdW"),					// old WIDE password stream
 	_T("pwd")					// legacy ANSI password stream (for backwards compatibility with old saved .icf files)
 };
-
-const TCHAR* CImageArchiveStg::s_thumbsStorageNames[] =
-{
-	_T("Thumbnails"),			// current storage name Slider_v5_3+ (used to be the legacy one, but was promoted in light of the new implicit thumbnail encoder rules)
-	_T("Thumbs_jpeg")			// middle aged storage name (Slider_v3_1..Slider_v5_2)
-};
-
-const TCHAR CImageArchiveStg::s_albumStreamName[] = _T("_Album.sld");
-const TCHAR CImageArchiveStg::s_albumMapStreamName[] = _T("_AlbumMap.txt");
 
 
 CImageArchiveStg::CImageArchiveStg( void )
@@ -85,9 +87,9 @@ bool CImageArchiveStg::IsSpecialStreamName( const TCHAR* pStreamName )
 	if ( s_reservedStreamNames.empty() )
 	{
 		s_reservedStreamNames.insert( s_reservedStreamNames.end(), s_passwordStreamNames, END_OF( s_passwordStreamNames ) );
-		s_reservedStreamNames.insert( s_reservedStreamNames.end(), s_passwordStreamNames, END_OF( s_thumbsStorageNames ) );
-		s_reservedStreamNames.push_back( s_albumStreamName );
-		s_reservedStreamNames.push_back( s_albumMapStreamName );
+		s_reservedStreamNames.insert( s_reservedStreamNames.end(), s_thumbsFolderNames, END_OF( s_thumbsFolderNames ) );
+		s_reservedStreamNames.push_back( s_pAlbumStreamName );
+		s_reservedStreamNames.push_back( s_pAlbumMapStreamName );
 	}
 
 	for ( size_t i = 0; i != s_reservedStreamNames.size(); ++i )
@@ -123,6 +125,8 @@ void CImageArchiveStg::CreateImageArchive( const fs::CPath& stgFilePath, CImageS
 	CreateDocFile( stgFilePath.GetPtr() );
 	ASSERT( IsOpen() );
 
+	CreateDir( s_pAlbumFolderName );		// create "Album" sub-storage
+
 	CWaitCursor wait;
 
 	SavePassword( pImagesSvc->GetPassword() );
@@ -147,8 +151,11 @@ void CImageArchiveStg::CreateImageFiles( CImageStorageService* pImagesSvc ) thro
 	pImagesSvc->GetProgress()->AdvanceStage( _T("Saving embedded image files") );
 	pImagesSvc->GetProgress()->SetBoundedProgressCount( rTransferAttrs.size() );
 
-	CAlbumMapWriter albumMap( CreateStreamFile( s_albumMapStreamName ) );		// binary mode
+	CScopedCurrentDir scopedAlbumFolder( this, s_pAlbumFolderName, STGM_READWRITE );		// location of "_AlbumMap.txt"
+	CAlbumMapWriter albumMap( CreateStreamFile( s_pAlbumMapStreamName ) );
 	albumMap.WriteHeader();
+
+	CScopedCurrentDir scopedRootFolder( this, s_rootFolderName, STGM_READWRITE );			// location of archived images
 
 	for ( size_t pos = 0; pos != rTransferAttrs.size(); )
 	{
@@ -185,6 +192,7 @@ void CImageArchiveStg::CreateImageFiles( CImageStorageService* pImagesSvc ) thro
 	}
 
 	UINT64 totalImagesSize = std::accumulate( rTransferAttrs.begin(), rTransferAttrs.end(), UINT64( 0 ), func::AddFileSize() );
+
 	albumMap.WriteImageTotals( totalImagesSize );
 }
 
@@ -195,7 +203,7 @@ void CImageArchiveStg::CreateThumbnailsSubStorage( const CImageStorageService* p
 	pImagesSvc->GetProgress()->AdvanceStage( _T("Saving thumbnails") );
 	pImagesSvc->GetProgress()->SetBoundedProgressCount( transferAttrs.size() );
 
-	CScopedCurrentDir scopedThumbsDir( this, CreateDir( s_thumbsStorageNames[ CurrentVer ] ) );
+	CScopedCurrentDir scopedThumbsFolder( this, CreateDir( s_thumbsFolderNames[ CurrentVer ] ) );
 
 	CThumbnailer* pThumbnailer = app::GetThumbnailer();
 	thumb::CPushBoundsSize largerBounds( pThumbnailer, 128 );			// generate larger thumbs to minimize regeneration later
@@ -240,7 +248,8 @@ void CImageArchiveStg::CreateThumbnailsSubStorage( const CImageStorageService* p
 
 	ResetToRootCurrentDir();
 
-	CAlbumMapWriter albumMap( OpenStreamFile( s_albumMapStreamName, CFile::modeWrite ) );
+	CScopedCurrentDir scopedAlbumFolder( this, s_pAlbumFolderName, STGM_READWRITE );		// location of "_AlbumMap.txt"
+	CAlbumMapWriter albumMap( OpenStreamFile( s_pAlbumMapStreamName, CFile::modeWrite ) );
 
 	albumMap.SeekToEnd();		// will append text
 	albumMap.WriteThumbnailTotals( thumbCount, totalThumbsSize );
@@ -253,12 +262,12 @@ CCachedThumbBitmap* CImageArchiveStg::LoadThumbnail( const fs::CFlexPath& imageC
 	try
 	{
 		CComPtr< IStorage > pThumbsStorage;
-		if ( const TCHAR* pThumbsDirName = FindAlternate_DirName( ARRAY_PAIR( s_thumbsStorageNames ) ).first )
-			pThumbsStorage = OpenDir( pThumbsDirName );
+		if ( const TCHAR* pThumbsFolderName = FindAlternate_DirName( ARRAY_PAIR( s_thumbsFolderNames ) ).first )
+			pThumbsStorage = OpenDir( pThumbsFolderName );
 
 		if ( pThumbsStorage != NULL )
 		{
-			CScopedCurrentDir scopedThumbsDir( this, pThumbsStorage );
+			CScopedCurrentDir scopedThumbsFolder( this, pThumbsStorage );
 
 			if ( CComPtr< IStream > pThumbStream = OpenThumbnailImageStream( imageComplexPath.GetEmbeddedPathPtr() ) )
 				if ( CComPtr< IWICBitmapSource > pSavedBitmap = wic::LoadBitmapFromStream( pThumbStream ) )
@@ -329,11 +338,37 @@ wic::ImageFormat CImageArchiveStg::MakeThumbStreamName( fs::TEmbeddedPath& rThum
 	return thumbImageFormat;
 }
 
+bool CImageArchiveStg::DeleteOldVersionStream( const TCHAR* pStreamName )
+{
+	CScopedCurrentDir scopedRootDir( this, s_rootFolderName, STGM_READWRITE );		// previously metadata files were located in the root storage
+
+	if ( StreamExist( pStreamName ) )
+		if ( DeleteStream( pStreamName ) )
+			return true;
+
+	return false;
+}
+
+bool CImageArchiveStg::DeleteAnyOldVersionStream( const TCHAR* altStreamNames[], size_t altCount )
+{
+	REQUIRE( altCount != 0 );
+
+	for ( size_t i = 0; i != altCount; ++i )
+		if ( DeleteOldVersionStream( altStreamNames[ i ] ) )
+			return true;
+
+	return false;
+}
+
+
 void CImageArchiveStg::SaveAlbumDoc( CObject* pAlbumDoc )
 {
 	ASSERT_PTR( pAlbumDoc );
 
-	std::auto_ptr< COleStreamFile > pAlbumFile( CreateStreamFile( s_albumStreamName ) );
+	DeleteOldVersionStream( s_pAlbumStreamName );		// File Save: delete old root stream - album files have been moved to "Album" folder
+
+	CScopedCurrentDir scopedAlbumFolder( this, s_pAlbumFolderName, STGM_READWRITE );
+	std::auto_ptr< COleStreamFile > pAlbumFile( CreateStreamFile( s_pAlbumStreamName ) );
 
 	if ( NULL == pAlbumFile.get() )
 		return;
@@ -346,11 +381,11 @@ void CImageArchiveStg::SaveAlbumDoc( CObject* pAlbumDoc )
 bool CImageArchiveStg::LoadAlbumDoc( CObject* pAlbumDoc )
 {
 	ASSERT_PTR( pAlbumDoc );
-	std::auto_ptr< COleStreamFile > pAlbumFile;
-	{
-		CScopedErrorHandling scopedCheck( this, utl::CheckMode );			// album not found is not an error
-		pAlbumFile = OpenStreamFile( s_albumStreamName );					// load stream "_Album.sld"
-	}
+
+	CScopedErrorHandling scopedCheck( this, utl::CheckMode );			// album not found is not an error
+	CScopedCurrentDir scopedAlbumFolder( this, StorageExist( s_pAlbumFolderName ) ? s_pAlbumFolderName : s_rootFolderName );
+
+	std::auto_ptr< COleStreamFile > pAlbumFile = OpenStreamFile( s_pAlbumStreamName );					// load stream "_Album.sld"
 
 	if ( NULL == pAlbumFile.get() )
 		return false;
@@ -375,13 +410,14 @@ bool CImageArchiveStg::SavePassword( const std::tstring& password )
 
 	try
 	{
-		if ( const TCHAR* pFoundStreamName = FindAlternate_StreamName( ARRAY_PAIR( s_passwordStreamNames ) ).first )
-			DeleteStream( pFoundStreamName );		// remove existing password stream
+		DeleteAnyOldVersionStream( ARRAY_PAIR( s_passwordStreamNames ) );		// remove existing password stream
 
 		if ( password.empty() )
 			return true;			// no password, done
 
+		CScopedCurrentDir scopedAlbumFolder( this, s_pAlbumFolderName, STGM_READWRITE );
 		std::auto_ptr< COleStreamFile > pPwdFile( CreateStreamFile( s_passwordStreamNames[ CurrentVer ] ) );
+
 		if ( NULL == pPwdFile.get() )
 			return false;
 
@@ -406,16 +442,31 @@ std::tstring CImageArchiveStg::LoadPassword( void )
 {
 	ASSERT( IsOpen() );
 
-	std::pair< const TCHAR*, size_t > streamName = FindAlternate_StreamName( ARRAY_PAIR( s_passwordStreamNames ) );
-	bool hasWidePwd = streamName.second != ( COUNT_OF( s_passwordStreamNames ) - 1 );		// found a WIDE stream?
+	std::tstring password;
+	const TCHAR* pPasswordStreamName = NULL;
+	bool hasWidePwd = true;				// found a WIDE stream?
 
-	if ( NULL == streamName.first )
-		return std::tstring();				// no password stored
+	CScopedCurrentDir scopedAlbumFolder( this, s_pAlbumFolderName );
 
-	std::auto_ptr< COleStreamFile > pPwdFile = OpenStreamFile( streamName.first );
+	if ( StreamExist( s_passwordStreamNames[ CurrentVer ] ) )
+		pPasswordStreamName = s_passwordStreamNames[ CurrentVer ];
+	else
+	{
+		ResetToRootCurrentDir();
+
+		std::pair< const TCHAR*, size_t > streamName = FindAlternate_StreamName( ARRAY_PAIR( s_passwordStreamNames ) );
+		pPasswordStreamName = streamName.first;
+
+		if ( streamName.first != NULL )			// password stream found in the root?
+			hasWidePwd = streamName.second != ( COUNT_OF( s_passwordStreamNames ) - 1 );		// oldest stream name uses ANSI stream?
+	}
+
+	if ( NULL == pPasswordStreamName )
+		return password;				// document is not password-protected
+
+	std::auto_ptr< COleStreamFile > pPwdFile = OpenStreamFile( pPasswordStreamName );
 	ASSERT_PTR( pPwdFile.get() );
 
-	std::tstring password;
 	CArchive archive( pPwdFile.get(), CArchive::load );
 	serial::CScopedLoadingArchive scopedLoadingArchive( archive, m_docModelSchema );
 
@@ -434,6 +485,8 @@ std::tstring CImageArchiveStg::LoadPassword( void )
 			archive >> ansiPassword;
 			password = pwd::ToString( ansiPassword.c_str() );
 		}
+
+		password = pwd::ToDecrypted( password );
 	}
 	catch ( CException* pExc )
 	{
@@ -441,7 +494,8 @@ std::tstring CImageArchiveStg::LoadPassword( void )
 	}
 	archive.Close();
 	//pwdFile.Close();
-	return pwd::ToDecrypted( password );
+
+	return password;
 }
 
 

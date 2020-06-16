@@ -28,8 +28,8 @@ namespace fs
 		CFlexPath( void ) {}
 		CFlexPath( const std::tstring& filePath ) : CPath( filePath ) { ASSERT( path::IsWellFormed( filePath.c_str() ) ); }
 
-		static CFlexPath MakeComplexPath( const std::tstring& physicalPath, const TCHAR* pEmbeddedPath ) { return path::MakeComplex( physicalPath, pEmbeddedPath ); }
-		bool SplitComplexPath( std::tstring& rPhysicalPath, std::tstring& rEmbeddedPath ) const { return path::SplitComplex( rPhysicalPath, rEmbeddedPath, Get() ); }
+		static CFlexPath MakeComplexPath( const fs::CPath& physicalPath, const fs::TEmbeddedPath& embeddedPath ) { return path::MakeComplex( physicalPath.Get(), embeddedPath.GetPtr() ); }
+		bool SplitComplexPath( fs::CPath& rPhysicalPath, TEmbeddedPath& rEmbeddedPath ) const { return path::SplitComplex( rPhysicalPath.Ref(), rEmbeddedPath.Ref(), Get() ); }
 
 		fs::CPath GetPhysicalPath( void ) const { return path::ExtractPhysical( Get() ); }
 		fs::TEmbeddedPath GetEmbeddedPath( void ) const { return fs::TEmbeddedPath( GetEmbeddedPathPtr() ); }

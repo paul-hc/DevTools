@@ -59,6 +59,9 @@ private:
 	CComPtr< IStream > OpenThumbnailImageStream( const TCHAR* pImageEmbeddedPath );
 	static wic::ImageFormat MakeThumbStreamName( fs::TEmbeddedPath& rThumbStreamName, const TCHAR* pSrcImagePath );
 	static bool IsSpecialStreamName( const TCHAR* pStreamName );
+
+	bool DeleteOldVersionStream( const TCHAR* pStreamName );
+	bool DeleteAnyOldVersionStream( const TCHAR* altStreamNames[], size_t altCount );
 private:
 	app::ModelSchema m_docModelSchema;			// transient: loaded model schema from file, stored by the album doc
 private:
@@ -66,11 +69,13 @@ private:
 	enum ExtensionType { Ext_ias, Ext_cid, Ext_icf };
 
 	static const TCHAR* s_compoundStgExts[];			// file extension for compound-files (".icf")
+
+	static const TCHAR* s_pAlbumFolderName;				// "Album" - album sub-storage name
+	static const TCHAR* s_thumbsFolderNames[];			// "Thumbnails" - thumbs sub-storage name (with old variants)
+
+	static const TCHAR* s_pAlbumStreamName;				// "_Album.sld" - album info stream (superset of meta-data)
+	static const TCHAR* s_pAlbumMapStreamName;			// "_AlbumMap.txt" - meta-data stream in a compound-file (obsolete)
 	static const TCHAR* s_passwordStreamNames[];		// "_pwd.w" - enchrypted password stream (with old variants)
-	static const TCHAR* s_thumbsStorageNames[];			// "Thumbnails" - thumbs sub-storage name (with old variants)
-	static const TCHAR s_albumStreamName[];				// "_Album.sld" - album info stream (superset of meta-data)
-	static const TCHAR s_albumMapStreamName[];			// "_AlbumMap.txt" - meta-data stream in a compound-file (obsolete)
-	static const TCHAR s_subPathSep;					// sub-path separator for deep stream names
 public:
 	class CFactory : public CErrorHandler
 				   , public fs::IThumbProducer

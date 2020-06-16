@@ -695,7 +695,8 @@ void CPathTests::TestFlexPath( void )
 		ASSERT_EQUAL( _T("C:\\Images\\fruit.stg"), path.GetParentFlexPath() );
 		ASSERT_EQUAL_STR( _T("apple.jpg"), path.GetNameExt() );
 
-		std::tstring physicalPath, embeddedPath;
+		fs::CPath physicalPath;
+		fs::TEmbeddedPath embeddedPath;
 		ASSERT( path.SplitComplexPath( physicalPath, embeddedPath ) );
 		ASSERT_EQUAL( _T("C:\\Images\\fruit.stg"), physicalPath );
 		ASSERT_EQUAL( _T("apple.jpg"), embeddedPath );
@@ -713,7 +714,8 @@ void CPathTests::TestFlexPath( void )
 		ASSERT_EQUAL_STR( _T("Europe\\apple.jpg"), path.GetLeafSubPath() );
 		ASSERT_EQUAL( _T("C:\\Images\\fruit.stg"), path.GetOriginParentPath() );
 
-		std::tstring physicalPath, embeddedPath;
+		fs::CPath physicalPath;
+		fs::TEmbeddedPath embeddedPath;
 		ASSERT( path.SplitComplexPath( physicalPath, embeddedPath ) );
 		ASSERT_EQUAL( _T("C:\\Images\\fruit.stg"), physicalPath );
 		ASSERT_EQUAL( _T("Europe\\apple.jpg"), embeddedPath );
@@ -728,7 +730,8 @@ void CPathTests::TestFlexPath( void )
 		ASSERT_EQUAL( _T("C:\\Images"), path.GetParentFlexPath() );
 		ASSERT_EQUAL_STR( _T("orange.png"), path.GetNameExt() );
 
-		std::tstring physicalPath, embeddedPath;
+		fs::CPath physicalPath;
+		fs::TEmbeddedPath embeddedPath;
 		ASSERT( !path.SplitComplexPath( physicalPath, embeddedPath ) );
 		ASSERT_EQUAL( _T("C:\\Images\\orange.png"), physicalPath );
 		ASSERT_EQUAL( _T(""), embeddedPath );

@@ -16,6 +16,7 @@ namespace fs
 	// CStructuredStorage implementation
 
 	mfc::CAutoException< CFileException > CStructuredStorage::s_fileError;
+	const TCHAR CStructuredStorage::s_rootFolderName[] = _T("");
 
 	CStructuredStorage::CStructuredStorage( void )
 		: CErrorHandler( utl::CheckMode )
@@ -284,7 +285,7 @@ namespace fs
 		HRESULT hResult = pStreamState->CloneStream( &pStreamReadingDuplicate );		// clone and rewind the stream origin
 
 		if ( FAILED( hResult ) )
-			HandleError( hResult, streamPath.GetPtr() );
+			HandleError( hResult, streamPath.GetNameExt() );
 
 		return pStreamReadingDuplicate;
 	}
@@ -343,11 +344,10 @@ namespace fs
 
 	std::auto_ptr< COleStreamFile > CStructuredStorage::CreateStreamFile( const TCHAR* pStreamName, DWORD mode /*= CFile::modeCreate | CFile::modeWrite*/ )
 	{
-		std::tstring streamName = EncodeStreamName( pStreamName );
 		std::auto_ptr< COleStreamFile > pNewFile;
 
 		if ( CComPtr< IStream > pNewStream = CreateStream( pStreamName, mode ) )		// use CreateStream() method for seamless error handling
-			pNewFile = MakeOleStreamFile( streamName.c_str(), pNewStream );
+			pNewFile = MakeOleStreamFile( pStreamName, pNewStream );
 
 		//TRACE_COM_ITF( fS::GetSafeStream( pNewFile.get() ), "CStructuredStorage::CreateStreamFile() - exiting" );
 		return pNewFile;
@@ -355,11 +355,10 @@ namespace fs
 
 	std::auto_ptr< COleStreamFile > CStructuredStorage::OpenStreamFile( const TCHAR* pStreamName, DWORD mode /*= CFile::modeRead*/ )
 	{
-		std::tstring streamName = EncodeStreamName( pStreamName );
 		std::auto_ptr< COleStreamFile > pOpenedFile;
 
 		if ( CComPtr< IStream > pStream = OpenStream( pStreamName, mode ) )				// use OpenStream() method for seamless error handling, stream sharing
-			pOpenedFile = MakeOleStreamFile( streamName.c_str(), pStream );
+			pOpenedFile = MakeOleStreamFile( pStreamName, pStream );
 
 		//TRACE_COM_ITF( fS::GetSafeStream( pOpenedFile.get() ), "CStructuredStorage::OpenStreamFile() - exiting" );
 		return pOpenedFile;
@@ -411,15 +410,11 @@ namespace fs
 
 	std::auto_ptr< COleStreamFile > CStructuredStorage::MakeOleStreamFile( const TCHAR* pStreamName, IStream* pStream /*= NULL*/ ) const
 	{
-		std::auto_ptr< COleStreamFile > pFile( new CManagedOleStreamFile( pStream ) );
-
-		// store the stream path so it gets assigned in CArchive objects;
-		// note: accurate with deep streams as well.
-		pFile->SetFilePath( fs::CFlexPath::MakeComplexPath( GetDocFilePath().Get(), pStreamName ).GetPtr() );
+		std::auto_ptr< COleStreamFile > pFile( new CManagedOleStreamFile( pStream, fs::CFlexPath::MakeComplexPath( GetDocFilePath(), GetCurrentDirPath() / pStreamName ) ) );
 		return pFile;
 	}
 
-	bool CStructuredStorage::HandleError( HRESULT hResult, const TCHAR* pSubPath, const TCHAR* pDocFilePath /*= NULL*/ ) const
+	bool CStructuredStorage::HandleError( HRESULT hResult, const TCHAR* pElementName, const TCHAR* pDocFilePath /*= NULL*/ ) const
 	{
 		if ( SUCCEEDED( hResult ) || IsIgnoreMode() )
 			return true;				// all good
@@ -453,17 +448,15 @@ namespace fs
 			}
 		}
 
+		fs::CFlexPath elementFullPath = CFlexPath::MakeComplexPath(
+			!str::IsEmpty( pDocFilePath ) ? fs::CPath( pDocFilePath ) : GetDocFilePath(),
+			GetCurrentDirPath() / pElementName );
+
 		if ( str::IsEmpty( pDocFilePath ) )
 			pDocFilePath = GetDocFilePath().GetPtr();
 
 		s_fileError.m_lOsError = (LONG)hResult;
-
-		s_fileError.m_strFileName = pSubPath;
-		if ( !str::IsEmpty( pDocFilePath ) )
-			if ( !s_fileError.m_strFileName.IsEmpty() )
-				s_fileError.m_strFileName = CFlexPath::MakeComplexPath( pDocFilePath, s_fileError.m_strFileName.GetString() ).GetPtr();
-			else
-				s_fileError.m_strFileName = pDocFilePath;
+		s_fileError.m_strFileName = elementFullPath.GetPtr();
 
 		if ( !IsThrowMode() )
 		{
@@ -592,7 +585,7 @@ namespace fs
 	{
 		if ( pTrail != NULL )
 		{
-			ASSERT( m_pOwner == pTrail->m_pOwner );
+			ASSERT( m_pDocStorage == pTrail->m_pDocStorage );
 
 			m_openSubStorages = pTrail->m_openSubStorages;
 			m_trailPath = pTrail->m_trailPath;
@@ -628,33 +621,34 @@ namespace fs
 
 	// CStructuredStorage::CScopedCurrentDir implementation
 
-	CStructuredStorage::CScopedCurrentDir::CScopedCurrentDir( CStructuredStorage* pOwner, const TCHAR* pDirSubPath /*= _T("")*/, DWORD mode /*= STGM_READ*/, bool fromRoot /*= true*/ )
-		: m_pOwner( pOwner )
-		, m_origCwdTrail( *m_pOwner->RefCwd() )
+	CStructuredStorage::CScopedCurrentDir::CScopedCurrentDir( CStructuredStorage* pDocStorage, const TCHAR* pDirSubPath /*= s_rootFolderName*/, DWORD mode /*= STGM_READ*/, bool fromRoot /*= true*/ )
+		: m_pDocStorage( pDocStorage )
+		, m_origCwdTrail( *m_pDocStorage->RefCwd() )
 	{
 		if ( fromRoot )
-			m_pOwner->ResetToRootCurrentDir();
+			m_pDocStorage->ResetToRootCurrentDir();
 
-		m_validDirPath = m_pOwner->ChangeCurrentDir( pDirSubPath, mode );
+		m_validDirPath = m_pDocStorage->ChangeCurrentDir( pDirSubPath, mode );
 	}
 
-	CStructuredStorage::CScopedCurrentDir::CScopedCurrentDir( CStructuredStorage* pOwner, IStorage* pSubStorage, bool fromRoot /*= true*/ )
-		: m_pOwner( pOwner )
-		, m_origCwdTrail( *m_pOwner->RefCwd() )
+	CStructuredStorage::CScopedCurrentDir::CScopedCurrentDir( CStructuredStorage* pDocStorage, IStorage* pSubStorage, bool fromRoot /*= true*/ )
+		: m_pDocStorage( pDocStorage )
+		, m_origCwdTrail( *m_pDocStorage->RefCwd() )
 		, m_validDirPath( true )
 	{
 		ASSERT_PTR( pSubStorage );
 
 		if ( fromRoot )
-			m_pOwner->ResetToRootCurrentDir();
+			m_pDocStorage->ResetToRootCurrentDir();
 
-		m_pOwner->RefCwd()->Push( pSubStorage );
+		if ( pSubStorage != NULL )
+			m_pDocStorage->RefCwd()->Push( pSubStorage );
 	}
 
 	CStructuredStorage::CScopedCurrentDir::~CScopedCurrentDir()
 	{
 		if ( m_validDirPath )
-			m_pOwner->RefCwd()->Reset( &m_origCwdTrail );
+			m_pDocStorage->RefCwd()->Reset( &m_origCwdTrail );
 	}
 
 
@@ -710,17 +704,21 @@ namespace fs
 {
 	// CManagedOleStreamFile implementation
 
-	CManagedOleStreamFile::CManagedOleStreamFile( IStream* pStreamOpened /*= NULL*/ )
+	CManagedOleStreamFile::CManagedOleStreamFile( IStream* pStreamOpened, const fs::CFlexPath& streamFullPath )
 		: COleStreamFile( pStreamOpened )
 	{
+		m_bCloseOnDelete = TRUE;			// will close on destructor
+
 		if ( pStreamOpened != NULL )
 			pStreamOpened->AddRef();		// keep the stream alive when passed on contructor by e.g. OpenStream - it will be released on Close()
 
-		m_bCloseOnDelete = TRUE;			// will close on destructor
+		// store the stream path so it gets assigned in CArchive objects;
+		SetFilePath( streamFullPath.GetPtr() );
 	}
 
 	CManagedOleStreamFile::~CManagedOleStreamFile()
 	{
+		ASSERT( m_bCloseOnDelete || NULL == GetStream() );
 		//TRACE_COM_ITF( m_lpStream, "CManagedOleStreamFile::~CManagedOleStreamFile() - before closing m_lpStream" );		// refCount=1 for straight usage
 	}
 

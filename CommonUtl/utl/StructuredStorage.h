@@ -54,7 +54,7 @@ namespace fs
 		CStorageTrail* RefCwd( void ) { return &m_cwdTrail; }
 
 		IStorage* GetCurrentDir( void ) const { ASSERT_PTR( IsOpen() ); return m_cwdTrail.GetCurrent(); }
-		const fs::TEmbeddedPath& GetCurrentDirPath( void ) const { ASSERT_PTR( IsOpen() ); return m_cwdTrail.GetCurrentPath(); }
+		const fs::TEmbeddedPath& GetCurrentDirPath( void ) const { return m_cwdTrail.GetCurrentPath(); }
 		bool IsRootCurrentDir( void ) const { return m_pRootStorage == GetCurrentDir(); }
 
 		void ResetToRootCurrentDir( void ) { ASSERT_PTR( IsOpen() ); m_cwdTrail.Reset(); }
@@ -103,7 +103,7 @@ namespace fs
 		virtual TCHAR GetFlattenPathSep( void ) const;
 		virtual bool RetainOpenedStream( const fs::TEmbeddedPath& streamPath ) const;		// if true: cache opened streams to allow later shared access (workaround sharing violations caused by STGM_SHARE_EXCLUSIVE)
 
-		bool HandleError( HRESULT hResult, const TCHAR* pSubPath, const TCHAR* pDocFilePath = NULL ) const;
+		bool HandleError( HRESULT hResult, const TCHAR* pElementName, const TCHAR* pDocFilePath = NULL ) const;
 
 		static bool IsReadingMode( DWORD mode ) { return !HasFlag( mode, STGM_WRITE | STGM_READWRITE ); }
 	private:
@@ -133,11 +133,11 @@ namespace fs
 		class CStorageTrail
 		{
 		public:
-			CStorageTrail( CStructuredStorage* pOwner ) : m_pOwner( pOwner ) { ASSERT_PTR( m_pOwner ); }
+			CStorageTrail( CStructuredStorage* pDocStorage ) : m_pDocStorage( pDocStorage ) { ASSERT_PTR( m_pDocStorage ); }
 			~CStorageTrail() { Reset(); }
 
 			bool IsEmpty( void ) const { return m_openSubStorages.empty(); }
-			IStorage* GetRoot( void ) const { return m_pOwner->GetRootStorage(); }
+			IStorage* GetRoot( void ) const { return m_pDocStorage->GetRootStorage(); }
 
 			void Reset( const CStorageTrail* pTrail = NULL );
 			void Push( IStorage* pSubStorage );				// go to sub-storage
@@ -149,7 +149,7 @@ namespace fs
 			size_t GetDepth( void ) const { return m_openSubStorages.size(); }
 			IStorage* GetStorageAtLevel( size_t depthLevel ) const { ASSERT( depthLevel < GetDepth() ); return m_openSubStorages[ depthLevel ]; }
 		private:
-			CStructuredStorage* m_pOwner;
+			CStructuredStorage* m_pDocStorage;
 			std::vector< CComPtr< IStorage > > m_openSubStorages;		// opened embedded storages: sub-directory path to the current (deepest) storage
 			fs::TEmbeddedPath m_trailPath;
 		};
@@ -158,13 +158,13 @@ namespace fs
 		class CScopedCurrentDir
 		{
 		public:
-			CScopedCurrentDir( CStructuredStorage* pOwner, const TCHAR* pDirSubPath = _T(""), DWORD mode = STGM_READ, bool fromRoot = true );
-			CScopedCurrentDir( CStructuredStorage* pOwner, IStorage* pSubStorage, bool fromRoot = true );
+			CScopedCurrentDir( CStructuredStorage* pDocStorage, const TCHAR* pDirSubPath = s_rootFolderName, DWORD mode = STGM_READ, bool fromRoot = true );
+			CScopedCurrentDir( CStructuredStorage* pDocStorage, IStorage* pSubStorage, bool fromRoot = true );
 			~CScopedCurrentDir();
 
 			bool IsValid( void ) const { return m_validDirPath; }
 		private:
-			CStructuredStorage* m_pOwner;
+			CStructuredStorage* m_pDocStorage;
 			CStorageTrail m_origCwdTrail;		// to be resored on destruction
 			bool m_validDirPath;
 		};
@@ -180,6 +180,8 @@ namespace fs
 		TStreamStates m_openedStreamStates;		// stream states of streams opened for reading (immutable, clonable)
 	protected:
 		static mfc::CAutoException< CFileException > s_fileError;
+	public:
+		static const TCHAR s_rootFolderName[];	// ""
 	};
 }
 
@@ -215,7 +217,7 @@ namespace fs
 	class CManagedOleStreamFile : public COleStreamFile		// auto-close on destructor
 	{
 	public:
-		CManagedOleStreamFile( IStream* pStreamOpened = NULL );
+		CManagedOleStreamFile( IStream* pStreamOpened, const fs::CFlexPath& streamFullPath );
 		virtual ~CManagedOleStreamFile();
 	};
 

@@ -246,7 +246,7 @@ namespace func
 
 		void operator()( fs::CFlexPath& rPath ) const
 		{
-			rPath = fs::CFlexPath::MakeComplexPath( m_stgDocPath.Get(), Flat == m_depth ? rPath.GetNameExt() : rPath.GetPtr() );
+			rPath = fs::CFlexPath::MakeComplexPath( m_stgDocPath, Flat == m_depth ? rPath.GetFilename() : rPath.Get() );
 		}
 
 		void operator()( CFileAttr* pFileAttr ) const { ASSERT_PTR( pFileAttr ); operator()( pFileAttr->RefPath() ); }
