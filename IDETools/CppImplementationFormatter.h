@@ -12,6 +12,7 @@ namespace code
 {
 	struct CppMethodComponents;
 
+
 	class CppImplementationFormatter : public CFormatter
 	{
 	public:
@@ -24,6 +25,8 @@ namespace code
 
 		CString autoMakeCode( const TCHAR* codeText );
 		CString tokenizeText( const TCHAR* codeText );
+
+		static bool isCppTypeQualifier( std::tstring typeQualifier );
 	protected:
 		bool loadCodeTemplates( void );
 		CString makeCommentDecoration( const TCHAR* decorationCore ) const;

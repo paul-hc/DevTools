@@ -37,6 +37,12 @@ namespace code
 	{
 	}
 
+	bool CppImplementationFormatter::isCppTypeQualifier( std::tstring typeQualifier )
+	{
+		str::Replace( typeQualifier, _T("::"), _T("") );
+		return word::IsAlphaNumericWord( typeQualifier );
+	}
+
 	CString CppImplementationFormatter::implementMethodBlock( const TCHAR* methodPrototypes, const TCHAR* typeDescriptor, bool isInline ) throws_( mfc::CRuntimeException )
 	{
 		resetInternalState();
@@ -399,7 +405,7 @@ namespace code
 			if ( CClipboard::PasteText( clipText, scopedIDE.GetMainWnd() ) )
 			{
 				str::Trim( clipText );
-				if ( word::IsAlphaNumericWord( clipText ) )
+				if ( isCppTypeQualifier( clipText ) )
 				{
 					if ( !str::IsUpperMatch( clipText.c_str(), 2 ) )		// not a type-prefixed token?
 						clipTypeQualifier = app::GetModuleSession().m_classPrefix;

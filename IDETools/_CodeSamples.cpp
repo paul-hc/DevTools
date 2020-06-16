@@ -45,8 +45,13 @@ Track 58 Zero the Hero.flac
 Track 69 Digital Bitch.flac
 Track 71 Born Again.flac
 
+CStructuredStorage::CAlbumNavigator
 
 	CAlbumNavigator( const CAlbumImageView* pAlbumView );
+	virtual ~CAlbumNavigator();
+
+	const fs::CPathSortParts& GetSortParts( void ) const { return m_sortParts; }
+	bool HasFilePath( const fs::CPath& rightFilePath ) const;
 
 
 void f( void )
