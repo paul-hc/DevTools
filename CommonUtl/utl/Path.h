@@ -195,6 +195,7 @@ namespace fs
 
 		bool IsEmpty( void ) const { return m_filePath.empty(); }
 		void Clear( void ) { m_filePath.clear(); }
+		void Swap( CPath& rOther ) { m_filePath.swap( rOther.m_filePath ); }
 
 		bool IsValid( void ) const { return path::IsValid( m_filePath ); }
 		bool IsComplexPath( void ) const { return path::IsComplex( GetPtr() ); }

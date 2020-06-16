@@ -89,7 +89,7 @@ void CImageArchiveStgTests::TestBuildImageArchive( void )
 			CImageArchiveStg imageStorage;
 			ut::CreateArchiveStorageFile( &imageStorage, docStgPath, srcFound.m_filePaths );
 
-			ENSURE( fs::CStructuredStorage::IsValidDocFile( docStgPath.GetPtr() ) );
+			ENSURE( fs::IsValidStructuredStorage( docStgPath.GetPtr() ) );
 		}
 
 		_TestLoadImageArchive( docStgPath, srcImageCount );

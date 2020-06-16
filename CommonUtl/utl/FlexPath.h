@@ -32,9 +32,10 @@ namespace fs
 		bool SplitComplexPath( std::tstring& rPhysicalPath, std::tstring& rEmbeddedPath ) const { return path::SplitComplex( rPhysicalPath, rEmbeddedPath, Get() ); }
 
 		fs::CPath GetPhysicalPath( void ) const { return path::ExtractPhysical( Get() ); }
-		const TCHAR* GetEmbeddedPath( void ) const { return path::GetEmbedded( GetPtr() ); }
+		fs::TEmbeddedPath GetEmbeddedPath( void ) const { return fs::TEmbeddedPath( GetEmbeddedPathPtr() ); }
+		const TCHAR* GetEmbeddedPathPtr( void ) const { return path::GetEmbedded( GetPtr() ); }
 
-		const TCHAR* GetLeafSubPath( void ) const { return IsComplexPath() ? GetEmbeddedPath() : GetNameExt(); }
+		const TCHAR* GetLeafSubPath( void ) const { return IsComplexPath() ? GetEmbeddedPathPtr() : GetNameExt(); }
 		fs::CPath GetOriginParentPath( void ) const { return IsComplexPath() ? GetPhysicalPath() : GetParentPath(); }		// storage path or parent directory path
 
 		CFlexPath GetParentFlexPath( bool trailSlash = false ) const;

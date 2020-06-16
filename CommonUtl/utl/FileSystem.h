@@ -10,6 +10,7 @@ namespace fs
 	bool IsValidFile( const TCHAR* pFilePath );
 	bool IsValidDirectory( const TCHAR* pDirPath );
 	bool IsValidEmptyDirectory( const TCHAR* pDirPath );
+	bool IsValidStructuredStorage( const TCHAR* pDocFilePath );			// a compound document file that exists?
 
 	bool IsReadOnlyFile( const TCHAR* pFilePath );
 	bool IsProtectedFile( const TCHAR* pFilePath );

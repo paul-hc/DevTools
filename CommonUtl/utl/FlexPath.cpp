@@ -2,7 +2,6 @@
 #include "stdafx.h"
 #include "FlexPath.h"
 #include "StructuredStorage.h"
-#include "StorageTrail.h"
 #include "ContainerUtilities.h"
 #include "StringUtilities.h"
 
@@ -67,27 +66,25 @@ namespace fs
 
 	bool CFlexPath::FlexFileExist( AccessMode accessMode /*= Exist*/ ) const
 	{
-		const fs::CPath physicalPath( path::ExtractPhysical( Get() ) );
-		if ( !physicalPath.FileExist( accessMode ) )
+		if ( !IsComplexPath() )
+			return FileExist( accessMode );
+
+		fs::CPath docFilePath = GetPhysicalPath();
+
+		if ( !fs::IsValidStructuredStorage( docFilePath.GetPtr() ) )
 			return false;
 
-		if ( IsComplexPath() )
+		if ( CStructuredStorage* pDocStorage = CStructuredStorage::FindOpenedStorage( docFilePath ) )
 		{
-			fs::stg::CAcquireStorage scopedStg( physicalPath );
-			if ( CStructuredStorage* pRootStorage = scopedStg.Get() )
-			{
-				if ( fs::CStorageTrail::OpenEmbeddedStream( pRootStorage, fs::TEmbeddedPath( GetEmbeddedPath() ) ) != NULL )
-					return true;
-			}
+			CScopedErrorHandling scopedIgnore( pDocStorage, utl::IgnoreMode );		// testing: failure not an error
+			return pDocStorage->LocateStream( GetEmbeddedPath() ) != NULL;
 		}
 
-		return true;
+		return true;		// assume is a valid stream path if the storage document is not open (don't bother opening)
 	}
 
 } //namespace fs
 
-
-#include <functional>
 
 namespace path
 {
@@ -101,9 +98,7 @@ namespace path
 	{
 		for ( std::vector< fs::CFlexPath >::iterator itFlexPath = rFlexPaths.begin(); itFlexPath != rFlexPaths.end(); ++itFlexPath )
 			if ( itFlexPath->IsComplexPath() )
-			{
 				itFlexPath->Set( itFlexPath->GetPhysicalPath().Get() );
-			}
 
 		utl::Uniquify< pred::IsEquivalentPath >( rFlexPaths );		// remove duplicates that may have been created (multiple embedded patch with same storage path)
 	}

@@ -34,6 +34,12 @@ namespace fs
 		return ::PathIsDirectoryEmpty( pDirPath ) != FALSE;
 	}
 
+	bool IsValidStructuredStorage( const TCHAR* pDocFilePath )
+	{
+		HRESULT hResult = ::StgIsStorageFile( pDocFilePath );
+		return S_OK == hResult;
+	}
+
 	bool IsReadOnlyFile( const TCHAR* pFilePath )
 	{
 		DWORD attr = ::GetFileAttributes( pFilePath );

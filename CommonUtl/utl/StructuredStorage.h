@@ -13,90 +13,114 @@
 
 namespace fs
 {
-	class CStorageTrail;
 	struct CStreamState;
 
 
 	// Structured storage corresponding to a compound document file.
 	// Able to handle long filenames for sub-storages (sub directories) and stream (file) methods.
+	// All methods that access storages and streams work in the context of the current working directory (current storage trail)
 	//
 	// MSDN: at least STGM_SHARE_EXCLUSIVE/CFile::shareExclusive is mandatory when opening streams/files.
 
 	class CStructuredStorage : public CErrorHandler
 							 , private utl::noncopyable
 	{
-		friend class fs::CStorageTrail;
 	public:
 		CStructuredStorage( void );
 		virtual ~CStructuredStorage();
 
 		enum { MaxFilenameLen = 31 };			// limitation imposed by the COM standard implementation of a compound document storage
 
+		bool UseStreamSharing( void ) const { return ::HasFlag( m_stgFlags, ReadingStreamSharing ); }
 		void SetUseStreamSharing( bool useStreamSharing = true );
 
-		IStorage* GetRootStorage( void ) const { return m_pRootStorage; }
-
-		// storage
-		bool IsOpen( void ) const { return m_pRootStorage != NULL; }
-		DWORD GetOpenMode( void ) const { return m_openMode; }
-		const fs::CPath& GetDocFilePath( void ) const;
-
-		void Close( void );
+		bool UseFlatStreamNames( void ) const { return ::HasFlag( m_stgFlags, FlatStreamNames ); }
+		void SetUseFlatStreamNames( bool useFlatStreamNames = true ) { ::SetFlag( m_stgFlags, FlatStreamNames, useFlatStreamNames ); }
 
 		// document storage file
 		bool CreateDocFile( const TCHAR* pDocFilePath, DWORD mode = STGM_CREATE | STGM_READWRITE );
 		bool OpenDocFile( const TCHAR* pDocFilePath, DWORD mode = STGM_READ );
-		static bool IsValidDocFile( const TCHAR* pDocFilePath );						// an compound document file that exists?
+		void CloseDocFile( void );
 
-		// embedded storages (sub-directories)
-		CComPtr< IStorage > CreateDir( const TCHAR* pDirName, IStorage* pParentDir = NULL, DWORD mode = STGM_CREATE | STGM_READWRITE );
-		CComPtr< IStorage > OpenDir( const TCHAR* pDirName, IStorage* pParentDir = NULL, DWORD mode = STGM_READ );
-		bool DeleteDir( const TCHAR* pDirName, IStorage* pParentDir = NULL );			// storage
-		bool StorageExist( const TCHAR* pStorageName, IStorage* pParentDir = NULL );
+		bool IsOpen( void ) const { return m_pRootStorage != NULL; }
+		DWORD GetOpenMode( void ) const { return m_openMode; }
+		const fs::CPath& GetDocFilePath( void ) const;
 
-		// embedded streams (files)
-		CComPtr< IStream > CreateStream( const TCHAR* pStreamName, IStorage* pParentDir = NULL, DWORD mode = STGM_CREATE | STGM_READWRITE );
-		CComPtr< IStream > OpenStream( const TCHAR* pStreamName, IStorage* pParentDir = NULL, DWORD mode = STGM_READ );
-		bool DeleteStream( const TCHAR* pStreamName, IStorage* pParentDir = NULL );
+		IStorage* GetRootStorage( void ) const { return m_pRootStorage; }
 
-		bool CloseStream( const TCHAR* pStreamName, IStorage* pParentDir = NULL );		// logical closing, to unload all references to the cached stream and stream clones
-		bool StreamExist( const TCHAR* pStreamSubPath, IStorage* pParentDir = NULL );
+		// current working directory (storage)
+		class CStorageTrail;
 
-		// opened embedded streams states
+		CStorageTrail* RefCwd( void ) { return &m_cwdTrail; }
+
+		IStorage* GetCurrentDir( void ) const { ASSERT_PTR( IsOpen() ); return m_cwdTrail.GetCurrent(); }
+		const fs::TEmbeddedPath& GetCurrentDirPath( void ) const { ASSERT_PTR( IsOpen() ); return m_cwdTrail.GetCurrentPath(); }
+		bool IsRootCurrentDir( void ) const { return m_pRootStorage == GetCurrentDir(); }
+
+		void ResetToRootCurrentDir( void ) { ASSERT_PTR( IsOpen() ); m_cwdTrail.Reset(); }
+		bool ChangeCurrentDir( const TCHAR* pDirSubPath, DWORD mode = STGM_READ );		// use STGM_READWRITE for writing (STGM_WRITE seems to be failing)
+		bool MakeDirPath( const TCHAR* pDirSubPath, bool enterCurrent, DWORD mode = STGM_CREATE | STGM_READWRITE );
+
+		// enumerate storages and streams in the current trail (embedded storage paths, relative from the root)
+		bool EnumElements( fs::IEnumerator* pEnumerator, RecursionDepth depth = Shallow );
+
+		// embedded storages (sub-directories) in current storage trail
+		CComPtr< IStorage > CreateDir( const TCHAR* pDirName, DWORD mode = STGM_CREATE | STGM_READWRITE );
+		CComPtr< IStorage > OpenDir( const TCHAR* pDirName, DWORD mode = STGM_READ );		// for writing use STGM_READWRITE (!)
+		bool DeleteDir( const TCHAR* pDirName );			// storage
+		bool StorageExist( const TCHAR* pStorageName );
+
+		// embedded streams (files) in current storage trail
+		CComPtr< IStream > CreateStream( const TCHAR* pStreamName, DWORD mode = STGM_CREATE | STGM_READWRITE );
+		CComPtr< IStream > OpenStream( const TCHAR* pStreamName, DWORD mode = STGM_READ );
+		bool DeleteStream( const TCHAR* pStreamName );
+		bool CloseStream( const TCHAR* pStreamName );		// logical closing, to unload all references to the cached stream and stream clones
+
+		bool StreamExist( const TCHAR* pStreamSubPath );
+		CComPtr< IStream > LocateStream( const fs::TEmbeddedPath& streamEmbeddedPath, DWORD mode = STGM_READ );		// try in root storage for flat representation, or deep sub-dir otherwise
+
+		// streams states opened for reading
 		bool IsStreamOpen( const fs::TEmbeddedPath& streamPath ) const { return m_openedStreamStates.Contains( streamPath ); }
 		const fs::CStreamState* FindOpenedStream( const fs::TEmbeddedPath& streamPath ) const { return m_openedStreamStates.Find( streamPath ); }
 
-		// embedded files (on streams); caller must delete the returned file
-		std::auto_ptr< COleStreamFile > CreateStreamFile( const TCHAR* pStreamName, IStorage* pParentDir = NULL, DWORD mode = CFile::modeCreate | CFile::modeWrite );
-		std::auto_ptr< COleStreamFile > OpenStreamFile( const TCHAR* pStreamName, IStorage* pParentDir = NULL, DWORD mode = CFile::modeRead );
+		// embedded files (on streams) in current storage trail
+		std::auto_ptr< COleStreamFile > CreateStreamFile( const TCHAR* pStreamName, DWORD mode = CFile::modeCreate | CFile::modeWrite );
+		std::auto_ptr< COleStreamFile > OpenStreamFile( const TCHAR* pStreamName, DWORD mode = CFile::modeRead );
 
-		// backwards compatibility: find existing object based on possible alternates
-		std::pair< const TCHAR*, size_t > FindAlternate_DirName( const TCHAR* altDirNames[], size_t altCount, IStorage* pParentDir = NULL );
-		std::pair< const TCHAR*, size_t > FindAlternate_StreamName( const TCHAR* altStreamNames[], size_t altCount, IStorage* pParentDir = NULL );
+		std::auto_ptr< COleStreamFile > MakeOleStreamFile( const TCHAR* pStreamName, IStream* pStream = NULL ) const;
+
+		// backwards compatibility: find existing object based on possible alternates (in current storage trail)
+		std::pair< const TCHAR*, size_t > FindAlternate_DirName( const TCHAR* altDirNames[], size_t altCount );
+		std::pair< const TCHAR*, size_t > FindAlternate_StreamName( const TCHAR* altStreamNames[], size_t altCount );
 
 		static DWORD ToMode( DWORD mode );										// augment mode with default STGM_SHARE_EXCLUSIVE (if no STGM_SHARE_DENY_* flag is present)
-		static std::tstring MakeShortFilename( const TCHAR* pFilename );		// make short file name with length limited to MaxFilenameLen
+		static std::tstring MakeShortFilename( const TCHAR* pElementName );		// make short file name with length limited to MaxFilenameLen
 
 		static CStructuredStorage* FindOpenedStorage( const fs::CPath& docStgPath );
 	protected:
 		// overridables
 		virtual std::tstring EncodeStreamName( const TCHAR* pStreamName ) const;
-		virtual bool RetainOpenedStream( const TCHAR* pStreamName, IStorage* pParentDir ) const;	// if true: cache opened streams to allow later shared access (workaround sharing violations caused by STGM_SHARE_EXCLUSIVE)
-
-		std::auto_ptr< COleStreamFile > MakeOleStreamFile( const TCHAR* pStreamName, IStream* pStream = NULL ) const;
+		virtual TCHAR GetFlattenPathSep( void ) const;
+		virtual bool RetainOpenedStream( const fs::TEmbeddedPath& streamPath ) const;		// if true: cache opened streams to allow later shared access (workaround sharing violations caused by STGM_SHARE_EXCLUSIVE)
 
 		bool HandleError( HRESULT hResult, const TCHAR* pSubPath, const TCHAR* pDocFilePath = NULL ) const;
 
 		static bool IsReadingMode( DWORD mode ) { return !HasFlag( mode, STGM_WRITE | STGM_READWRITE ); }
 	private:
-		IStorage* GetParentDir( const CStorageTrail* pParentTrail ) const;
-
-		bool CacheStreamState( const TCHAR* pStreamName, IStorage* pParentDir, IStream* pStreamOrigin );
+		bool CacheStreamState( const fs::TEmbeddedPath& streamPath, IStream* pStreamOrigin );
 		size_t CloseStreamsWithPrefix( const TCHAR* pSubDirPrefix ) { return m_openedStreamStates.RemoveWithPrefix( pSubDirPrefix ); }
 
 		CComPtr< IStream > CloneStream( const fs::CStreamState* pStreamState, const fs::TEmbeddedPath& streamPath );		// for stream logical re-opening
 
-		static fs::TEmbeddedPath MakeElementSubPath( const TCHAR* pElementName, IStorage* pParentDir );
+		fs::TEmbeddedPath MakeElementSubPath( const std::tstring& encodedElementName ) const { return GetCurrentDirPath() / encodedElementName; }
+
+		enum StorageFlags
+		{
+			ReadingStreamSharing	= BIT_FLAG( 0 ),		// keeps opened streams alive via caching, allowing stream cloning to circumvent exclusive sharing violations
+			FlatStreamNames			= BIT_FLAG( 1 )			// store encoded stream deep paths by replacing '\' with '|'
+		};
+
+		typedef int TStorageFlags;
 	private:
 		typedef fs::CPathObjectMap< fs::CPath, CStructuredStorage > TStorageMap;		// document path to open root storage
 
@@ -104,15 +128,56 @@ namespace fs
 
 		static void RegisterDocStg( CStructuredStorage* pDocStg );
 		static void UnregisterDocStg( CStructuredStorage* pDocStg );
+	public:
+		// owning stack of deep opened storages starting from the root, of which the current (deepest) storage is at the back.
+		class CStorageTrail
+		{
+		public:
+			CStorageTrail( CStructuredStorage* pOwner ) : m_pOwner( pOwner ) { ASSERT_PTR( m_pOwner ); }
+			~CStorageTrail() { Reset(); }
+
+			bool IsEmpty( void ) const { return m_openSubStorages.empty(); }
+			IStorage* GetRoot( void ) const { return m_pOwner->GetRootStorage(); }
+
+			void Reset( const CStorageTrail* pTrail = NULL );
+			void Push( IStorage* pSubStorage );				// go to sub-storage
+			CComPtr< IStorage > Pop( void );				// go to parent storage
+
+			IStorage* GetCurrent( void ) const { return !IsEmpty() ? m_openSubStorages.back() : GetRoot(); }
+			const fs::TEmbeddedPath& GetCurrentPath( void ) const { return m_trailPath; }
+
+			size_t GetDepth( void ) const { return m_openSubStorages.size(); }
+			IStorage* GetStorageAtLevel( size_t depthLevel ) const { ASSERT( depthLevel < GetDepth() ); return m_openSubStorages[ depthLevel ]; }
+		private:
+			CStructuredStorage* m_pOwner;
+			std::vector< CComPtr< IStorage > > m_openSubStorages;		// opened embedded storages: sub-directory path to the current (deepest) storage
+			fs::TEmbeddedPath m_trailPath;
+		};
+
+
+		class CScopedCurrentDir
+		{
+		public:
+			CScopedCurrentDir( CStructuredStorage* pOwner, const TCHAR* pDirSubPath = _T(""), DWORD mode = STGM_READ, bool fromRoot = true );
+			CScopedCurrentDir( CStructuredStorage* pOwner, IStorage* pSubStorage, bool fromRoot = true );
+			~CScopedCurrentDir();
+
+			bool IsValid( void ) const { return m_validDirPath; }
+		private:
+			CStructuredStorage* m_pOwner;
+			CStorageTrail m_origCwdTrail;		// to be resored on destruction
+			bool m_validDirPath;
+		};
 	private:
 		CComPtr< IStorage > m_pRootStorage;		// root storage in a compound document file
-		bool m_useStreamSharing;				// keeps opened streams alive via caching, allowing stream cloning to circumvent exclusive sharing violations
+		CStorageTrail m_cwdTrail;				// current working directory: trail of currently opened storages (initially empty: pointing to the root storage)
+		TStorageFlags m_stgFlags;
 		DWORD m_openMode;
 		mutable fs::CPath m_docFilePath;		// self-encapsulated: full path of the document storage file
 
-		typedef fs::CPathMap< fs::TEmbeddedPath, fs::CStreamState > TStreamStates;		// keys are embedded logical paths, whereas CFileState::m_fullPath is the physical element path
+		typedef fs::CPathMap< fs::TEmbeddedPath, fs::CStreamState > TStreamStates;		// keys are embedded encoded paths, whereas CFileState::m_fullPath is the storage name
 
-		TStreamStates m_openedStreamStates;		// metadata of opened streams (for reading only - immutable)
+		TStreamStates m_openedStreamStates;		// stream states of streams opened for reading (immutable, clonable)
 	protected:
 		static mfc::CAutoException< CFileException > s_fileError;
 	};
@@ -124,6 +189,15 @@ namespace fs
 
 namespace fs
 {
+	// stream utilities
+
+	bool SeekToPos( IStream* pStream, UINT64 position, DWORD origin = STREAM_SEEK_SET );
+	inline bool SeekToBegin( IStream* pStream ) { return SeekToPos( pStream, 0 ); }
+	inline bool SeekToEnd( IStream* pStream ) { return SeekToPos( pStream, 0, STREAM_SEEK_END ); }
+
+	inline IStream* GetSafeStream( const COleStreamFile* pFile ) { return pFile != NULL ? pFile->m_lpStream : NULL; }
+
+
 	struct CStreamState : public fs::CFileState
 	{
 		CStreamState( void ) {}
@@ -138,23 +212,11 @@ namespace fs
 	};
 
 
-	// stream utilities
-
-	bool SeekToPos( IStream* pStream, UINT64 position, DWORD origin = STREAM_SEEK_SET );
-	inline bool SeekToBegin( IStream* pStream ) { return SeekToPos( pStream, 0 ); }
-	inline bool SeekToEnd( IStream* pStream ) { return SeekToPos( pStream, 0, STREAM_SEEK_END ); }
-
-	inline IStream* GetSafeStream( const COleStreamFile* pFile ) { return pFile != NULL ? pFile->m_lpStream : NULL; }
-}
-
-
-namespace fs
-{
-	class CAutoOleStreamFile : public COleStreamFile		// auto-close on destructor
+	class CManagedOleStreamFile : public COleStreamFile		// auto-close on destructor
 	{
 	public:
-		CAutoOleStreamFile( IStream* pStreamOpened = NULL );
-		virtual ~CAutoOleStreamFile();
+		CManagedOleStreamFile( IStream* pStreamOpened = NULL );
+		virtual ~CManagedOleStreamFile();
 	};
 
 
@@ -163,33 +225,16 @@ namespace fs
 		class CAcquireStorage : private utl::noncopyable
 		{
 		public:
-			CAcquireStorage( const fs::CPath& docStgPath, DWORD mode = STGM_READ )
-				: m_pFoundOpenStg( CStructuredStorage::FindOpenedStorage( docStgPath ) )
-			{
-				if ( NULL == m_pFoundOpenStg )
-					m_tempStorage.OpenDocFile( docStgPath.GetPtr(), mode );
-			}
+			CAcquireStorage( const fs::CPath& docStgPath, DWORD mode = STGM_READ );
+			~CAcquireStorage();
 
-			~CAcquireStorage()
-			{
-			}
-
-			CStructuredStorage* Get( void )
-			{
-				if ( m_pFoundOpenStg != NULL )
-					return m_pFoundOpenStg;
-				else if ( m_tempStorage.IsOpen() )
-					return &m_tempStorage;
-
-				return NULL;
-			}
+			CStructuredStorage* Get( void );
 		private:
 			CStructuredStorage* m_pFoundOpenStg;
 			fs::CStructuredStorage m_tempStorage;
 		};
 	}
-
-} //namespace fs
+}
 
 
 namespace fs

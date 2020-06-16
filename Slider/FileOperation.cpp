@@ -72,7 +72,7 @@ bool CFileOperation::Delete( const fs::CFlexPath& filePath ) throws_( CException
 		if ( filePath.IsComplexPath() )
 		{
 			CImageArchiveStg* pImageStg = CImageArchiveStg::Factory()->AcquireStorage( filePath.GetPhysicalPath(), STGM_WRITE );
-			if ( NULL == pImageStg || !pImageStg->DeleteStream( filePath.GetEmbeddedPath() ) )
+			if ( NULL == pImageStg || !pImageStg->DeleteStream( filePath.GetEmbeddedPathPtr() ) )
 				return HandleError( str::Format( _T("Cannot delete the embedded file '%s'"), filePath.GetPtr() ) );
 		}
 		else

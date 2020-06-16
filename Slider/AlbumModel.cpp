@@ -206,7 +206,7 @@ bool CAlbumModel::ReparentStorageFileAttrsImpl( const fs::CPath& stgDocPath, Per
 		std::vector< fs::CPath >& rDocFilePaths = m_imagesModel.RefStoragePaths();
 
 		for ( std::vector< fs::CPath >::iterator itDocFilePath = rDocFilePaths.begin(); itDocFilePath != rDocFilePaths.end(); )
-			if ( fs::CStructuredStorage::IsValidDocFile( itDocFilePath->GetPtr() ) )
+			if ( fs::IsValidStructuredStorage( itDocFilePath->GetPtr() ) )
 				++itDocFilePath;
 			else
 				itDocFilePath = rDocFilePaths.erase( itDocFilePath );		// remove non-existing storage doc

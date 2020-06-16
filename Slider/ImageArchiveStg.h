@@ -30,7 +30,7 @@ public:
 	virtual ~CImageArchiveStg();
 
 	// operations
-	void Close( void );
+	void CloseDocFile( void );
 	static void DiscardCachedImages( const fs::CPath& stgFilePath );		// to avoid sharing violations on stream access
 
 	void CreateImageArchive( const fs::CPath& stgFilePath, CImageStorageService* pImagesSvc ) throws_( CException* );
@@ -50,13 +50,8 @@ public:
 	static const TCHAR* GetDefaultExtension( void ) { return s_compoundStgExts[ Ext_ias ]; }
 protected:
 	// base overrides
-	virtual std::tstring EncodeStreamName( const TCHAR* pStreamName ) const;
-	virtual bool RetainOpenedStream( const TCHAR* pStreamName, IStorage* pParentDir ) const;
-
-	TCHAR GetSubPathSep( void ) const;
-
-	void FlattenDeepStreamPath( std::tstring& rDeepPath ) const { std::replace( rDeepPath.begin(), rDeepPath.end(), _T('\\'), GetSubPathSep() ); }			// '\' -> '|'
-	void UnflattenDeepStreamPath( std::tstring& rDeepPath ) const { std::replace( rDeepPath.begin(), rDeepPath.end(), GetSubPathSep(), _T('\\') ); }		// '|' or '*' -> '\'
+	virtual TCHAR GetFlattenPathSep( void ) const;
+	virtual bool RetainOpenedStream( const fs::TEmbeddedPath& streamPath ) const;
 private:
 	void CreateImageFiles( CImageStorageService* pImagesSvc ) throws_( CException* );
 	void CreateThumbnailsSubStorage( const CImageStorageService* pImagesSvc ) throws_( CException* );
@@ -65,7 +60,6 @@ private:
 	static wic::ImageFormat MakeThumbStreamName( fs::TEmbeddedPath& rThumbStreamName, const TCHAR* pSrcImagePath );
 	static bool IsSpecialStreamName( const TCHAR* pStreamName );
 private:
-	CComPtr< IStorage > m_pThumbsStorage;
 	app::ModelSchema m_docModelSchema;			// transient: loaded model schema from file, stored by the album doc
 private:
 	enum Alternates { CurrentVer };

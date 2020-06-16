@@ -732,14 +732,6 @@
 					>
 				</File>
 				<File
-					RelativePath=".\StorageTrail.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\StorageTrail.h"
-					>
-				</File>
-				<File
 					RelativePath=".\StructuredStorage.cpp"
 					>
 				</File>

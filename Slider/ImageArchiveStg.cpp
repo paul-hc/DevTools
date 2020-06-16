@@ -42,18 +42,19 @@ const TCHAR* CImageArchiveStg::s_thumbsStorageNames[] =
 
 const TCHAR CImageArchiveStg::s_albumStreamName[] = _T("_Album.sld");
 const TCHAR CImageArchiveStg::s_albumMapStreamName[] = _T("_AlbumMap.txt");
-const TCHAR CImageArchiveStg::s_subPathSep = _T('|');		// was '*'
 
 
 CImageArchiveStg::CImageArchiveStg( void )
 	: fs::CStructuredStorage()
 	, m_docModelSchema( app::Slider_LatestModelSchema )
 {
+	SetUseFlatStreamNames( true );		// store deep image stream paths as flattened encoded root streams
 }
 
 CImageArchiveStg::~CImageArchiveStg()
 {
-	Close();		// close early so that virtual methods are called properly
+	if ( IsOpen() )
+		CloseDocFile();		// close early so that virtual methods are called properly
 }
 
 CImageArchiveStg::CFactory* CImageArchiveStg::Factory( void )
@@ -62,12 +63,14 @@ CImageArchiveStg::CFactory* CImageArchiveStg::Factory( void )
 	return &s_factory;
 }
 
-void CImageArchiveStg::Close( void )
+void CImageArchiveStg::CloseDocFile( void )
 {
-	DiscardCachedImages( GetDocFilePath() );
-	m_pThumbsStorage = NULL;
+	if ( !IsOpen() )
+		return;
 
-	__super::Close();
+	DiscardCachedImages( GetDocFilePath() );
+
+	__super::CloseDocFile();
 }
 
 void CImageArchiveStg::DiscardCachedImages( const fs::CPath& stgFilePath )
@@ -94,29 +97,21 @@ bool CImageArchiveStg::IsSpecialStreamName( const TCHAR* pStreamName )
 	return false;
 }
 
-std::tstring CImageArchiveStg::EncodeStreamName( const TCHAR* pStreamName ) const
-{
-	std::tstring streamName = pStreamName;
-
-	FlattenDeepStreamPath( streamName );
-	return __super::EncodeStreamName( streamName.c_str() );
-}
-
-bool CImageArchiveStg::RetainOpenedStream( const TCHAR* pStreamName, IStorage* pParentDir ) const
-{
-	if ( NULL == pParentDir )							// a root streams?
-		if ( !IsSpecialStreamName( pStreamName ) )		// not a pre-defined one?
-			return true;								// keep opened image streams alive for shared access
-
-	return __super::RetainOpenedStream( pStreamName, pParentDir );
-}
-
-TCHAR CImageArchiveStg::GetSubPathSep( void ) const
+TCHAR CImageArchiveStg::GetFlattenPathSep( void ) const
 {
 	if ( m_docModelSchema < app::Slider_v5_2 )
 		return _T('*');			// use old separator for backwards compatibility (the short 31 characters hash suffix uses the old separator)
 
-	return s_subPathSep;
+	return __super::GetFlattenPathSep();
+}
+
+bool CImageArchiveStg::RetainOpenedStream( const fs::TEmbeddedPath& streamPath ) const
+{
+	if ( !streamPath.HasParentPath() )							// a root stream?
+		if ( !IsSpecialStreamName( streamPath.GetPtr() ) )		// not a pre-defined one?
+			return true;										// keep opened image streams alive for shared access
+
+	return __super::RetainOpenedStream( streamPath );
 }
 
 void CImageArchiveStg::CreateImageArchive( const fs::CPath& stgFilePath, CImageStorageService* pImagesSvc ) throws_( CException* )
@@ -200,8 +195,7 @@ void CImageArchiveStg::CreateThumbnailsSubStorage( const CImageStorageService* p
 	pImagesSvc->GetProgress()->AdvanceStage( _T("Saving thumbnails") );
 	pImagesSvc->GetProgress()->SetBoundedProgressCount( transferAttrs.size() );
 
-	CComPtr< IStorage > pThumbsStorage = CreateDir( s_thumbsStorageNames[ CurrentVer ] );
-	ASSERT_PTR( pThumbsStorage );
+	CScopedCurrentDir scopedThumbsDir( this, CreateDir( s_thumbsStorageNames[ CurrentVer ] ) );
 
 	CThumbnailer* pThumbnailer = app::GetThumbnailer();
 	thumb::CPushBoundsSize largerBounds( pThumbnailer, 128 );			// generate larger thumbs to minimize regeneration later
@@ -218,7 +212,7 @@ void CImageArchiveStg::CreateThumbnailsSubStorage( const CImageStorageService* p
 				fs::TEmbeddedPath thumbStreamName;
 				if ( const GUID* pContainerFormatId = wic::GetContainerFormatId( MakeThumbStreamName( thumbStreamName, ( *itXferAttr )->GetPath().GetPtr() ) ) )	// good to save thumbnail?
 				{
-					CComPtr< IStream > pThumbStream = CreateStream( thumbStreamName.GetPtr(), pThumbsStorage );
+					CComPtr< IStream > pThumbStream = CreateStream( thumbStreamName.GetPtr() );
 					CScopedErrorHandling scopedThrow( &pThumbBitmap->GetOrigin(), utl::ThrowMode );
 
 					pThumbBitmap->GetOrigin().SaveBitmapToStream( pThumbStream, *pContainerFormatId );
@@ -244,7 +238,9 @@ void CImageArchiveStg::CreateThumbnailsSubStorage( const CImageStorageService* p
 		++itXferAttr;
 	}
 
-	CAlbumMapWriter albumMap( OpenStreamFile( s_albumMapStreamName, NULL, CFile::modeWrite ) );
+	ResetToRootCurrentDir();
+
+	CAlbumMapWriter albumMap( OpenStreamFile( s_albumMapStreamName, CFile::modeWrite ) );
 
 	albumMap.SeekToEnd();		// will append text
 	albumMap.WriteThumbnailTotals( thumbCount, totalThumbsSize );
@@ -256,12 +252,15 @@ CCachedThumbBitmap* CImageArchiveStg::LoadThumbnail( const fs::CFlexPath& imageC
 
 	try
 	{
-		if ( NULL == m_pThumbsStorage )
-			if ( const TCHAR* pThumbsDirName = FindAlternate_DirName( ARRAY_PAIR( s_thumbsStorageNames ) ).first )
-				m_pThumbsStorage = OpenDir( pThumbsDirName );
+		CComPtr< IStorage > pThumbsStorage;
+		if ( const TCHAR* pThumbsDirName = FindAlternate_DirName( ARRAY_PAIR( s_thumbsStorageNames ) ).first )
+			pThumbsStorage = OpenDir( pThumbsDirName );
 
-		if ( m_pThumbsStorage != NULL )
-			if ( CComPtr< IStream > pThumbStream = OpenThumbnailImageStream( imageComplexPath.GetEmbeddedPath() ) )
+		if ( pThumbsStorage != NULL )
+		{
+			CScopedCurrentDir scopedThumbsDir( this, pThumbsStorage );
+
+			if ( CComPtr< IStream > pThumbStream = OpenThumbnailImageStream( imageComplexPath.GetEmbeddedPathPtr() ) )
 				if ( CComPtr< IWICBitmapSource > pSavedBitmap = wic::LoadBitmapFromStream( pThumbStream ) )
 					if ( CCachedThumbBitmap* pThumbnail = app::GetThumbnailer()->NewScaledThumb( pSavedBitmap, imageComplexPath ) )
 					{
@@ -272,6 +271,7 @@ CCachedThumbBitmap* CImageArchiveStg::LoadThumbnail( const fs::CFlexPath& imageC
 						pThumbnail->GetOrigin().DetachSourceToBitmap();
 						return pThumbnail;
 					}
+		}
 	}
 	catch ( CException* pExc )
 	{
@@ -282,21 +282,19 @@ CCachedThumbBitmap* CImageArchiveStg::LoadThumbnail( const fs::CFlexPath& imageC
 
 CComPtr< IStream > CImageArchiveStg::OpenThumbnailImageStream( const TCHAR* pImageEmbeddedPath )
 {
-	ASSERT_PTR( m_pThumbsStorage );
-
 	fs::TEmbeddedPath thumbStreamName;
 	MakeThumbStreamName( thumbStreamName, pImageEmbeddedPath );
 
 	const TCHAR* pThumbStreamName = thumbStreamName.GetPtr();
 
 	if ( !path::EquivalentPtr( pThumbStreamName, pImageEmbeddedPath ) )		// possibly an archive build with Slider_v5_2-
-		if ( StreamExist( pImageEmbeddedPath, m_pThumbsStorage ) )			// backwards compatibility: also try with straight SRC image path as stream name
+		if ( StreamExist( pImageEmbeddedPath ) )			// backwards compatibility: also try with straight SRC image path as stream name
 			pThumbStreamName = pImageEmbeddedPath;
 
 	if ( NULL == pThumbStreamName )
 		return NULL;
 
-	return OpenStream( pThumbStreamName, m_pThumbsStorage );
+	return OpenStream( pThumbStreamName );
 }
 
 wic::ImageFormat CImageArchiveStg::MakeThumbStreamName( fs::TEmbeddedPath& rThumbStreamName, const TCHAR* pSrcImagePath )
@@ -512,10 +510,13 @@ std::auto_ptr< CFile > CImageArchiveStg::CFactory::OpenFlexImageFile( const fs::
 		ASSERT( IsPasswordVerified( stgFilePath ) );
 
 		CScopedAcquireStorage stg( stgFilePath, mode );
-		if ( stg.Get() != NULL )
+		if ( CImageArchiveStg* pImageArchiveStg = stg.Get() )
 		{
-			CScopedErrorHandling scopedHandling( stg.Get(), this );		// pass current factory throw mode to the storage
-			pFile.reset( stg.Get()->OpenStreamFile( flexImagePath.GetEmbeddedPath(), NULL, mode ).release() );		// OpenDeepFile fails when copying from deep.ias to shallow.ias
+			CScopedErrorHandling scopedHandling( pImageArchiveStg, this );		// pass current factory throw mode to the storage
+
+			ASSERT( pImageArchiveStg->IsRootCurrentDir() );
+			if ( CComPtr< IStream > pImageStream = pImageArchiveStg->LocateStream( flexImagePath.GetEmbeddedPath(), mode ) )		// (?) fails when copying from deep.ias to shallow.ias
+				pFile.reset( pImageArchiveStg->MakeOleStreamFile( flexImagePath.GetEmbeddedPathPtr(), pImageStream ).release() );
 		}
 	}
 

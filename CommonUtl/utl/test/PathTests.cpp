@@ -691,7 +691,7 @@ void CPathTests::TestFlexPath( void )
 		fs::CFlexPath path( _T("C:\\Images\\fruit.stg>apple.jpg") );
 		ASSERT( path.IsComplexPath() );
 		ASSERT_EQUAL( _T("C:\\Images\\fruit.stg"), path.GetPhysicalPath() );
-		ASSERT_EQUAL_STR( _T("apple.jpg"), path.GetEmbeddedPath() );
+		ASSERT_EQUAL_STR( _T("apple.jpg"), path.GetEmbeddedPathPtr() );
 		ASSERT_EQUAL( _T("C:\\Images\\fruit.stg"), path.GetParentFlexPath() );
 		ASSERT_EQUAL_STR( _T("apple.jpg"), path.GetNameExt() );
 
@@ -706,7 +706,7 @@ void CPathTests::TestFlexPath( void )
 		fs::CFlexPath path( _T("C:\\Images\\fruit.stg>Europe\\apple.jpg") );
 		ASSERT( path.IsComplexPath() );
 		ASSERT_EQUAL( _T("C:\\Images\\fruit.stg"), path.GetPhysicalPath() );
-		ASSERT_EQUAL_STR( _T("Europe\\apple.jpg"), path.GetEmbeddedPath() );
+		ASSERT_EQUAL_STR( _T("Europe\\apple.jpg"), path.GetEmbeddedPathPtr() );
 		ASSERT_EQUAL( _T("C:\\Images\\fruit.stg>Europe"), path.GetParentFlexPath() );
 		ASSERT_EQUAL_STR( _T("apple.jpg"), path.GetNameExt() );
 
@@ -724,7 +724,7 @@ void CPathTests::TestFlexPath( void )
 		fs::CFlexPath path( _T("C:\\Images\\orange.png") );
 		ASSERT( !path.IsComplexPath() );
 		ASSERT_EQUAL( _T("C:\\Images\\orange.png"), path.GetPhysicalPath() );
-		ASSERT_EQUAL_STR( _T(""), path.GetEmbeddedPath() );
+		ASSERT_EQUAL( _T(""), path.GetEmbeddedPath() );
 		ASSERT_EQUAL( _T("C:\\Images"), path.GetParentFlexPath() );
 		ASSERT_EQUAL_STR( _T("orange.png"), path.GetNameExt() );
 
