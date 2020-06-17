@@ -38,6 +38,15 @@ namespace fs
 		m_openedStreamStates.Clear();
 	}
 
+	std::tstring CStructuredStorage::MakeShortFilename( const TCHAR* pElementName )
+	{
+		// pFilename could refer to a dir, file, or a sub-path;
+		// encode with a hashed suffix if pFilename longer than the stream limit (compound document limitation).
+
+		REQUIRE( pElementName == path::FindFilename( pElementName ) );			// no slashes, should be encoded
+		return path::MakeShortHashedFilename( pElementName, MaxFilenameLen );
+	}
+
 	DWORD CStructuredStorage::ToMode( DWORD mode )
 	{
 		enum { AccessMask = 0x0000000F, ShareMask = 0x000000F0 };		// covers for STGM_SHARE_DENY_NONE | STGM_SHARE_DENY_READ | STGM_SHARE_DENY_WRITE | STGM_SHARE_EXCLUSIVE
@@ -46,15 +55,6 @@ namespace fs
 			return mode;
 
 		return mode | STGM_SHARE_EXCLUSIVE;		// MSDN: compound-file storages/streams must be opened at least with STGM_SHARE_EXCLUSIVE
-	}
-
-	std::tstring CStructuredStorage::MakeShortFilename( const TCHAR* pElementName )
-	{
-		// pFilename could refer to a dir, file, or a sub-path;
-		// encode with a hashed suffix if pFilename longer than the stream limit (compound document limitation).
-
-		REQUIRE( pElementName == path::FindFilename( pElementName ) );			// no slashes, should be encoded
-		return path::MakeShortHashedFilename( pElementName, MaxFilenameLen );
 	}
 
 
@@ -448,15 +448,8 @@ namespace fs
 			}
 		}
 
-		fs::CFlexPath elementFullPath = CFlexPath::MakeComplexPath(
-			!str::IsEmpty( pDocFilePath ) ? fs::CPath( pDocFilePath ) : GetDocFilePath(),
-			GetCurrentDirPath() / pElementName );
-
-		if ( str::IsEmpty( pDocFilePath ) )
-			pDocFilePath = GetDocFilePath().GetPtr();
-
 		s_fileError.m_lOsError = (LONG)hResult;
-		s_fileError.m_strFileName = elementFullPath.GetPtr();
+		s_fileError.m_strFileName = MakeElementFlexPath( pDocFilePath, pElementName ).GetPtr();
 
 		if ( !IsThrowMode() )
 		{
@@ -465,6 +458,19 @@ namespace fs
 		}
 
 		AfxThrowFileException( s_fileError.m_cause, s_fileError.m_lOsError, s_fileError.m_strFileName );
+	}
+
+	fs::CFlexPath CStructuredStorage::MakeElementFlexPath( const TCHAR* pDocFilePath, const TCHAR* pElementName ) const
+	{
+		fs::TEmbeddedPath elementPath = GetCurrentDirPath();
+		if ( !str::IsEmpty( pElementName ) )
+			elementPath /= pElementName;
+
+		fs::CFlexPath elementFullPath = !str::IsEmpty( pDocFilePath ) ? fs::CFlexPath( pDocFilePath ) : GetDocFilePath().Get();
+		if ( !elementPath.IsEmpty() )
+			elementFullPath = CFlexPath::MakeComplexPath( elementFullPath, elementPath );
+
+		return elementFullPath;
 	}
 
 

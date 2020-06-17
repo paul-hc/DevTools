@@ -214,7 +214,7 @@ CAlbumDoc::ArchiveLoadResult CAlbumDoc::LoadArchiveStorage( const fs::CPath& stg
 	if ( !CImageArchiveStg::Factory()->LoadAlbumDoc( this, stgPath ) )
 		return Failed;			// possibly corrupted storage
 
-	CImageArchiveStg* pLoadedImageStg = CImageArchiveStg::Factory()->FindStorage( stgPath );
+	IImageArchiveStg* pLoadedImageStg = CImageArchiveStg::Factory()->FindStorage( stgPath );
 	ASSERT_PTR( pLoadedImageStg );
 	pLoadedImageStg->StoreDocModelSchema( GetModelSchema() );
 	return Succeeded;
@@ -248,7 +248,8 @@ bool CAlbumDoc::InternalSaveAsArchiveStg( const fs::CPath& newStgPath )
 			}
 			else
 			{
-				CImageArchiveStg::DiscardCachedImages( oldDocPath );
+				if ( !oldDocPath.IsEmpty() )
+					CImageArchiveStg::DiscardCachedImages( oldDocPath );
 
 				CArchivingModel archivingModel;
 				archivingModel.StorePassword( m_password );
@@ -284,7 +285,7 @@ void CAlbumDoc::SaveAlbumToArchiveStg( const fs::CPath& stgPath ) throws_( CExce
 	m_model.CheckReparentFileAttrs( stgPath.GetPtr(), CAlbumModel::Saving );		// reparent with stgPath before saving the album info
 
 	if ( CImageArchiveStg::Factory()->SaveAlbumDoc( this, stgPath ) )
-		if ( CImageArchiveStg* pSavedImageStg = CImageArchiveStg::Factory()->FindStorage( stgPath ) )
+		if ( IImageArchiveStg* pSavedImageStg = CImageArchiveStg::Factory()->FindStorage( stgPath ) )
 			pSavedImageStg->StoreDocModelSchema( GetModelSchema() );
 }
 

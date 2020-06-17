@@ -9,7 +9,7 @@
 
 
 class CFileAttr;
-class CImageArchiveStg;
+interface IImageArchiveStg;
 
 
 class CImageArchiveStgTests : public ut::CConsoleTestCase
@@ -23,7 +23,7 @@ public:
 private:
 	void TestBuildImageArchive( void );
 	void _TestLoadImageArchive( const fs::CPath& docStgPath, size_t srcImageCount ) throws_( CException* );
-	void _TestAlbumFileAttr( CImageArchiveStg* pImageStorage, const CFileAttr* pFileAttr ) throws_( CException* );
+	void _TestAlbumFileAttr( IImageArchiveStg* pImageStorage, const CFileAttr* pFileAttr ) throws_( CException* );
 };
 
 

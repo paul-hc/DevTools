@@ -10,11 +10,12 @@
 #include "GdiCoords.h"
 #include "TimeUtils.h"
 #include "BaseApp.h"
-#include "FileObjectCache.hxx"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
+
+#include "FileObjectCache.hxx"
 
 
 //#define TRACE_THUMBS TRACE
@@ -177,8 +178,16 @@ CThumbnailer::CThumbnailer( size_t cacheMaxSize /*= MaxSize*/ )
 {
 }
 
-size_t CThumbnailer::GetCachedCount( void ) const
+void CThumbnailer::Clear( void )
 {
+	thumb::s_traceCount = 0;
+	TRACE_THUMBS( _T("<%d> (--) Clear all thumbnails: %d\n"), thumb::s_traceCount++, m_thumbsCache.GetCount() );
+
+	m_thumbsCache.Clear();
+}
+
+size_t CThumbnailer::GetCachedCount( void ) const
+{	// do not implement inline, in order to minimize dependency to FileObjectCache.hxx
 	return m_thumbsCache.GetCount();
 }
 
@@ -187,11 +196,16 @@ bool CThumbnailer::DiscardThumbnail( const fs::CFlexPath& srcImagePath )
 	return m_thumbsCache.Remove( srcImagePath );
 }
 
-void CThumbnailer::Clear( void )
+size_t CThumbnailer::DiscardWithPrefix( const TCHAR* pDirPrefix )
 {
-	thumb::s_traceCount = 0;
-	TRACE_THUMBS( _T("<%d> (--) Clear all thumbnails: %d\n"), thumb::s_traceCount++, m_thumbsCache.GetCount() );
-	m_thumbsCache.Clear();
+	std::vector< fs::CFlexPath > discardedKeys;
+
+	for ( std::deque< fs::CFlexPath >::const_iterator itPathKey = m_thumbsCache.GetPathKeys().begin(); itPathKey != m_thumbsCache.GetPathKeys().end(); ++itPathKey )
+		if ( path::MatchPrefix( itPathKey->GetPtr(), pDirPrefix ) )
+			discardedKeys.push_back( *itPathKey );
+
+	m_thumbsCache.Remove( discardedKeys.begin(), discardedKeys.end() );
+	return discardedKeys.size();
 }
 
 const CFlagTags& CThumbnailer::GetTags_CacheStatusFlags( void )

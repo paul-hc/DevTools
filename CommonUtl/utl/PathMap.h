@@ -78,6 +78,44 @@ namespace fs
 }
 
 
+#include <atlcomcli.h>
+
+
+namespace fs
+{
+	// Simple map of PathT keys to file-based COM interfaces with shared ownership, not thread-safe.
+	//
+	template< typename PathT, typename InterfaceT >
+	class CPathComPtrMap : public CPathMap< PathT, CAdapt< CComPtr< InterfaceT > > >
+	{
+		typedef CComPtr< InterfaceT > TComPtr;
+		typedef CAdapt< TComPtr > TValue;
+		typedef CPathMap< PathT, TValue > TBaseClass;
+
+		using TBaseClass::Find;
+		using TBaseClass::Lookup;
+	public:
+		CPathComPtrMap( void ) {}
+
+		InterfaceT* Find( const PathT& pathKey ) const
+		{
+			typename stdext::hash_map< PathT, TValue >::const_iterator itFound = m_pathMap.find( pathKey );
+			if ( itFound == m_pathMap.end() )
+				return NULL;
+
+			return itFound->second.m_T.p;
+		}
+
+		TComPtr& Lookup( const PathT& pathKey )
+		{
+			typename stdext::hash_map< PathT, TValue >::iterator itFound = m_pathMap.find( pathKey );
+			ASSERT( itFound != m_pathMap.end() );
+			return itFound->second.m_T;
+		}
+	};
+}
+
+
 namespace func
 {
 	struct NoDeleteEntry

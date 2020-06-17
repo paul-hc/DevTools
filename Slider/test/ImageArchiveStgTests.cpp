@@ -17,11 +17,8 @@
 
 namespace ut
 {
-	void CreateArchiveStorageFile( CImageArchiveStg* pImageStorage, const fs::CPath& docStgPath, const std::vector< fs::CPath >& srcImagePaths ) throws_( CException* )
+	CComPtr< IImageArchiveStg > CreateArchiveStorageFile( const fs::CPath& docStgPath, const std::vector< fs::CPath >& srcImagePaths ) throws_( CException* )
 	{
-		ASSERT_PTR( pImageStorage );
-		ASSERT( !pImageStorage->IsOpen() );
-
 		CImageStorageService storageSvc;
 		storageSvc.BuildFromSrcPaths( srcImagePaths );
 
@@ -29,6 +26,9 @@ namespace ut
 		storageSvc.MakeAlbumFileAttrs( albumFileAttrs );		// clone album file attributes before they get altered
 
 		// create the archive core content
+		CComPtr< IImageArchiveStg > pImageStorage;
+		CImageArchiveStg::CreateObject( &pImageStorage );
+
 		pImageStorage->CreateImageArchive( docStgPath, &storageSvc );
 
 		CAlbumDoc albumDoc;
@@ -38,6 +38,7 @@ namespace ut
 			albumDoc.m_slideData.SetCurrentIndex( 0 );
 
 		albumDoc.SaveAlbumToArchiveStg( docStgPath );
+		return pImageStorage;
 	}
 
 	std::auto_ptr< CImagesModel > LoadArchiveStorageAlbum( const fs::CPath& docStgPath )
@@ -86,8 +87,8 @@ void CImageArchiveStgTests::TestBuildImageArchive( void )
 			fs::EnumFiles( &srcFound, imageDirPath, NULL, Deep );
 			srcImageCount = srcFound.m_filePaths.size();
 
-			CImageArchiveStg imageStorage;
-			ut::CreateArchiveStorageFile( &imageStorage, docStgPath, srcFound.m_filePaths );
+			CComPtr< IImageArchiveStg > pImageStorage = ut::CreateArchiveStorageFile( docStgPath, srcFound.m_filePaths );
+			ASSERT_PTR( pImageStorage );
 
 			ENSURE( fs::IsValidStructuredStorage( docStgPath.GetPtr() ) );
 		}
@@ -105,8 +106,10 @@ void CImageArchiveStgTests::_TestLoadImageArchive( const fs::CPath& docStgPath, 
 {
 	// load the image archive storage
 	{
-		CImageArchiveStg imageStorage;
-		ASSERT( imageStorage.OpenDocFile( docStgPath.GetPtr(), STGM_READ ) );
+		CComPtr< IImageArchiveStg > pImageStorage;
+		CImageArchiveStg::CreateObject( &pImageStorage );
+
+		ASSERT( pImageStorage->GetDocStorage()->OpenDocFile( docStgPath.GetPtr(), STGM_READ ) );
 
 		std::auto_ptr< CImagesModel > pImagesModel = ut::LoadArchiveStorageAlbum( docStgPath );
 		ASSERT_PTR( pImagesModel.get() );
@@ -115,14 +118,14 @@ void CImageArchiveStgTests::_TestLoadImageArchive( const fs::CPath& docStgPath, 
 		const std::vector< CFileAttr* >& fileAttrs = pImagesModel->GetFileAttrs();
 
 		for ( size_t i = 0; i != fileAttrs.size(); ++i )
-			_TestAlbumFileAttr( &imageStorage, fileAttrs[ i ] );
+			_TestAlbumFileAttr( pImageStorage, fileAttrs[ i ] );
 	}
 }
 
-void CImageArchiveStgTests::_TestAlbumFileAttr( CImageArchiveStg* pImageStorage, const CFileAttr* pFileAttr ) throws_( CException* )
+void CImageArchiveStgTests::_TestAlbumFileAttr( IImageArchiveStg* pImageStorage, const CFileAttr* pFileAttr ) throws_( CException* )
 {
 	ASSERT_PTR( pImageStorage );
-	ASSERT( pImageStorage->IsOpen() );
+	ASSERT( pImageStorage->GetDocStorage()->IsOpen() );
 	ASSERT_PTR( pFileAttr );
 
 	ASSERT( pFileAttr->GetPath().IsComplexPath() );

@@ -3,51 +3,51 @@
 #pragma once
 
 #include "utl/FlexPath.h"
+#include "utl/IUnknownImpl.h"
 #include "utl/StructuredStorage.h"
 #include "utl/UI/Thumbnailer_fwd.h"
 #include "ArchivingModel_fwd.h"
-#include "ModelSchema.h"
+#include "IImageArchiveStg.h"
 #include <set>
 #include <hash_map>
 
 
-class CFileAttr;
-class CImageStorageService;
-class CTransferFileAttr;
-class CCachedThumbBitmap;
 namespace wic { enum ImageFormat; }
+
 
 
 // Compound file storage with password protection for .ias, .cid and .icf structured document files.
 // Contains the image files, sub-storage with thumbnail files, encrypted password file.
 // Maintains deep image stream paths from the source images (relative to SRC common root path).
 // Deep image stream paths are flattened using '|' as separator (formerly '*') - this avoids the use of sub-storages for images and thumbnails.
-
 class CImageArchiveStg : public fs::CStructuredStorage
+					   , public utl::IUnknownImpl< IImageArchiveStg >
 {
-public:
 	CImageArchiveStg( void );
 	virtual ~CImageArchiveStg();
-
+public:
 	// operations
 	void CloseDocFile( void );
-	static void DiscardCachedImages( const fs::CPath& stgFilePath );		// to avoid sharing violations on stream access
 
-	void CreateImageArchive( const fs::CPath& stgFilePath, CImageStorageService* pImagesSvc ) throws_( CException* );
+	static void CreateObject( IImageArchiveStg** ppArchiveStg );
 
-	bool SavePassword( const std::tstring& password );
-	std::tstring LoadPassword( void );
-
-	void StoreDocModelSchema( app::ModelSchema docModelSchema ) { m_docModelSchema = docModelSchema; }
-
-	// "_Album.sld" stream (with .sld file format)
-	void SaveAlbumDoc( CObject* pAlbumDoc );
-	bool LoadAlbumDoc( CObject* pAlbumDoc );
-
-	CCachedThumbBitmap* LoadThumbnail( const fs::CFlexPath& imageComplexPath ) throws_();		// caller must delete the image
+	static size_t DiscardCachedImages( const fs::CPath& stgFilePath );		// to avoid sharing violations on stream access
 
 	static bool HasImageArchiveExt( const TCHAR* pFilePath );
 	static const TCHAR* GetDefaultExtension( void ) { return s_compoundStgExts[ Ext_ias ]; }
+private:
+	// IImageArchiveStg interface
+	virtual fs::CStructuredStorage* GetDocStorage( void );
+	virtual void StoreDocModelSchema( app::ModelSchema docModelSchema );
+	virtual void CreateImageArchive( const fs::CPath& stgFilePath, CImageStorageService* pImagesSvc ) throws_( CException* );
+
+	virtual bool SavePassword( const std::tstring& password );
+	virtual std::tstring LoadPassword( void );
+
+	virtual void SaveAlbumDoc( CObject* pAlbumDoc );		// "_Album.sld" stream (with .sld file format)
+	virtual bool LoadAlbumDoc( CObject* pAlbumDoc );
+
+	virtual CCachedThumbBitmap* LoadThumbnail( const fs::CFlexPath& imageComplexPath ) throws_();		// caller must delete the image
 protected:
 	// base overrides
 	virtual TCHAR GetFlattenPathSep( void ) const;
@@ -87,8 +87,8 @@ public:
 
 		void Clear( void );
 
-		CImageArchiveStg* FindStorage( const fs::CPath& stgFilePath ) const;
-		CImageArchiveStg* AcquireStorage( const fs::CPath& stgFilePath, DWORD mode = STGM_READ );
+		IImageArchiveStg* FindStorage( const fs::CPath& stgFilePath ) const;
+		IImageArchiveStg* AcquireStorage( const fs::CPath& stgFilePath, DWORD mode = STGM_READ );
 		bool ReleaseStorage( const fs::CPath& stgFilePath );
 		void ReleaseStorages( const std::vector< fs::CPath >& stgFilePaths );
 
@@ -110,8 +110,10 @@ public:
 	private:
 		bool IsPasswordVerified( const fs::CPath& stgFilePath ) const;
 	private:
-		stdext::hash_map< fs::CPath, CImageArchiveStg* > m_storageMap;		// factory-managed (with ownership) archives
-		stdext::hash_map< fs::CPath, std::tstring > m_passwordProtected;	// known password-protected storages to encrypted passwords
+		typedef fs::CPathComPtrMap< fs::CPath, IImageArchiveStg > TArchiveStorageMap;		// keys are document file paths, shared ownership
+
+		TArchiveStorageMap m_storageMap;										// factory-managed archives (with shared ownership)
+		stdext::hash_map< fs::CPath, std::tstring > m_passwordProtected;		// known password-protected storages to encrypted passwords
 		std::set< std::tstring > m_verifiedPasswords;
 	};
 
@@ -144,10 +146,11 @@ private:
 		CScopedAcquireStorage( const fs::CPath& stgFilePath, DWORD mode );
 		~CScopedAcquireStorage();
 
-		CImageArchiveStg* Get( void ) const { return m_pArchiveStg; }
+		IImageArchiveStg* Get( void ) const { return m_pArchiveStg; }
+		fs::CStructuredStorage* GetDocStorage( void ) const { return m_pArchiveStg != NULL ? m_pArchiveStg->GetDocStorage() : NULL; }
 	private:
 		fs::CPath m_stgFilePath;
-		CImageArchiveStg* m_pArchiveStg;
+		CComPtr< IImageArchiveStg > m_pArchiveStg;
 		bool m_mustRelease;
 		DWORD m_oldOpenMode;
 	};

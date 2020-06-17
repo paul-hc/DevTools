@@ -1,6 +1,7 @@
 
 #include "stdafx.h"
 #include "ImageStorageService.h"
+#include "ImageArchiveStg.h"
 #include "FileAttrAlgorithms.h"
 #include "utl/ContainerUtilities.h"
 #include "utl/UI/IProgressService.h"
@@ -94,7 +95,7 @@ void CImageStorageService::Build( const std::vector< TTransferPathPair >& xferPa
 	//	2020-04-11: Still doesn't work, I get exception on open. I suspect the source stream (image file) must be kept open with CFile::shareExclusive by some WIC indirect COM interface.
 
 	for ( std::vector< fs::CPath >::const_iterator itSrcStorage = m_srcStorages.begin(); itSrcStorage != m_srcStorages.end(); ++itSrcStorage )
-		CWicImageCache::Instance().DiscardWithPrefix( itSrcStorage->GetPtr() );		// discard cached images for the storage
+		CImageArchiveStg::DiscardCachedImages( *itSrcStorage );		// discard cached images and thumbs for the storage
 }
 
 void CImageStorageService::BuildFromSrcPaths( const std::vector< fs::CPath >& srcImagePaths )

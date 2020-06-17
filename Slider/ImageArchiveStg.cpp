@@ -59,6 +59,16 @@ CImageArchiveStg::~CImageArchiveStg()
 		CloseDocFile();		// close early so that virtual methods are called properly
 }
 
+void CImageArchiveStg::CreateObject( IImageArchiveStg** ppArchiveStg )
+{
+	ASSERT_PTR( ppArchiveStg );
+
+	*ppArchiveStg = new CImageArchiveStg();			// initially with a refCount of 1
+
+	ENSURE( 1 == dbg::GetRefCount( *ppArchiveStg ) );
+	ENSURE( !( *ppArchiveStg )->GetDocStorage()->IsOpen() );
+}
+
 CImageArchiveStg::CFactory* CImageArchiveStg::Factory( void )
 {
 	static CFactory s_factory;
@@ -75,10 +85,15 @@ void CImageArchiveStg::CloseDocFile( void )
 	__super::CloseDocFile();
 }
 
-void CImageArchiveStg::DiscardCachedImages( const fs::CPath& stgFilePath )
+size_t CImageArchiveStg::DiscardCachedImages( const fs::CPath& stgFilePath )
 {
-	if ( !stgFilePath.IsEmpty() )
-		CWicImageCache::Instance().DiscardWithPrefix( stgFilePath.GetPtr() );		// discard cached images for the storage
+	REQUIRE( !stgFilePath.IsEmpty() );
+
+	// Release indirect references on any open streams for this image archive file - the streams open with CFile::shareExclusive are kept open indirectly by WIC COM interfaces.
+
+	size_t count = CWicImageCache::Instance().DiscardWithPrefix( stgFilePath.GetPtr() );	// discard cached images for the storage
+	count += app::GetThumbnailer()->DiscardWithPrefix( stgFilePath.GetPtr() );				// also discard the thumbs
+	return count;
 }
 
 bool CImageArchiveStg::IsSpecialStreamName( const TCHAR* pStreamName )
@@ -116,6 +131,21 @@ bool CImageArchiveStg::RetainOpenedStream( const fs::TEmbeddedPath& streamPath )
 	return __super::RetainOpenedStream( streamPath );
 }
 
+
+// IImageArchiveStg interface implementation
+
+DEFINE_GUID( IID_IImageArchiveStg, 0xC5078A69, 0xFF1C, 0x4B13, 0x92, 0x2, 0x1E, 0xEF, 0x5, 0x32, 0x25, 0x8D );		// {C5078A69-FF1C-4b13-9202-1EEF0532258D}
+
+fs::CStructuredStorage* CImageArchiveStg::GetDocStorage( void )
+{
+	return this;
+}
+
+void CImageArchiveStg::StoreDocModelSchema( app::ModelSchema docModelSchema )
+{
+	m_docModelSchema = docModelSchema;
+}
+
 void CImageArchiveStg::CreateImageArchive( const fs::CPath& stgFilePath, CImageStorageService* pImagesSvc ) throws_( CException* )
 {
 	ASSERT_PTR( pImagesSvc );
@@ -138,11 +168,6 @@ void CImageArchiveStg::CreateImageArchive( const fs::CPath& stgFilePath, CImageS
 
 void CImageArchiveStg::CreateImageFiles( CImageStorageService* pImagesSvc ) throws_( CException* )
 {
-	// Prevent sharing violations on SRC stream open.
-	//	2020-04-11: Still doesn't work, I get exception on open. I suspect the source stream (image file) must be kept open with CFile::shareExclusive by some WIC indirect COM interface.
-	if ( !pImagesSvc->IsEmpty() )
-		app::GetThumbnailer()->Clear();		// also discard the thumbs - note: cached SRC images were discarded by CImageStorageService::Build()
-
 	std::vector< CTransferFileAttr* >& rTransferAttrs = pImagesSvc->RefTransferAttrs();
 
 	CFactory* pFactory = Factory();
@@ -503,15 +528,13 @@ std::tstring CImageArchiveStg::LoadPassword( void )
 
 void CImageArchiveStg::CFactory::Clear( void )
 {
-	utl::ClearOwningAssocContainerValues( m_storageMap );
+	m_storageMap.Clear();
 }
 
-CImageArchiveStg* CImageArchiveStg::CFactory::FindStorage( const fs::CPath& stgFilePath ) const
+IImageArchiveStg* CImageArchiveStg::CFactory::FindStorage( const fs::CPath& stgFilePath ) const
 {
-	stdext::hash_map< fs::CPath, CImageArchiveStg* >::const_iterator itFound = m_storageMap.find( stgFilePath );
-
-	if ( itFound != m_storageMap.end() )
-		return itFound->second;
+	if ( IImageArchiveStg* pFoundArchiveStg = m_storageMap.Find( stgFilePath ) )
+		return pFoundArchiveStg;
 
 	if ( CStructuredStorage* pOpenedStorage = fs::CStructuredStorage::FindOpenedStorage( stgFilePath ) )		// opened in testing?
 		return checked_static_cast< CImageArchiveStg* >( pOpenedStorage );
@@ -519,36 +542,33 @@ CImageArchiveStg* CImageArchiveStg::CFactory::FindStorage( const fs::CPath& stgF
 	return NULL;
 }
 
-CImageArchiveStg* CImageArchiveStg::CFactory::AcquireStorage( const fs::CPath& stgFilePath, DWORD mode /*= STGM_READ*/ )
+IImageArchiveStg* CImageArchiveStg::CFactory::AcquireStorage( const fs::CPath& stgFilePath, DWORD mode /*= STGM_READ*/ )
 {
-	if ( CImageArchiveStg* pImageStg = FindStorage( stgFilePath ) )
-		return pImageStg;					// cache hit
+	if ( IImageArchiveStg* pFoundArchiveStg = FindStorage( stgFilePath ) )
+		return pFoundArchiveStg;					// cache hit
 
-	std::auto_ptr< CImageArchiveStg > imageArchiveStgPtr( new CImageArchiveStg );
-	CScopedErrorHandling scopedHandling( imageArchiveStgPtr.get(), this );		// pass current factory throw mode to the storage
+	CComPtr< IImageArchiveStg > pNewImageArchiveStg;
+	CImageArchiveStg::CreateObject( &pNewImageArchiveStg );
 
-	if ( !imageArchiveStgPtr->OpenDocFile( stgFilePath.GetPtr(), mode ) )
+	fs::CStructuredStorage* pDocStorage = pNewImageArchiveStg->GetDocStorage();
+	CScopedErrorHandling scopedHandling( pDocStorage, this );		// pass current factory throw mode to the storage
+
+	if ( !pDocStorage->OpenDocFile( stgFilePath.GetPtr(), mode ) )
 		return NULL;
 
-	m_storageMap[ stgFilePath ] = imageArchiveStgPtr.get();
-	return imageArchiveStgPtr.release();
+	m_storageMap.Add( stgFilePath, pNewImageArchiveStg );
+	return pNewImageArchiveStg;
 }
 
 bool CImageArchiveStg::CFactory::ReleaseStorage( const fs::CPath& stgFilePath )
 {
-	stdext::hash_map< fs::CPath, CImageArchiveStg* >::iterator itFound = m_storageMap.find( stgFilePath );
-	if ( itFound == m_storageMap.end() )
-		return false;
-
-	delete itFound->second;
-	m_storageMap.erase( itFound );
-	return true;
+	return m_storageMap.Remove( stgFilePath );
 }
 
 void CImageArchiveStg::CFactory::ReleaseStorages( const std::vector< fs::CPath >& stgFilePaths )
 {
 	for ( std::vector< fs::CPath >::const_iterator itStgPath = stgFilePaths.begin(); itStgPath != stgFilePaths.end(); ++itStgPath )
-		CImageArchiveStg::Factory()->ReleaseStorage( *itStgPath );
+		ReleaseStorage( *itStgPath );
 }
 
 std::auto_ptr< CFile > CImageArchiveStg::CFactory::OpenFlexImageFile( const fs::CFlexPath& flexImagePath, DWORD mode /*= CFile::modeRead*/ )
@@ -564,13 +584,13 @@ std::auto_ptr< CFile > CImageArchiveStg::CFactory::OpenFlexImageFile( const fs::
 		ASSERT( IsPasswordVerified( stgFilePath ) );
 
 		CScopedAcquireStorage stg( stgFilePath, mode );
-		if ( CImageArchiveStg* pImageArchiveStg = stg.Get() )
+		if ( fs::CStructuredStorage* pDocStorage = stg.GetDocStorage() )
 		{
-			CScopedErrorHandling scopedHandling( pImageArchiveStg, this );		// pass current factory throw mode to the storage
+			CScopedErrorHandling scopedHandling( pDocStorage, this );		// pass current factory throw mode to the storage
 
-			ASSERT( pImageArchiveStg->IsRootCurrentDir() );
-			if ( CComPtr< IStream > pImageStream = pImageArchiveStg->LocateStream( flexImagePath.GetEmbeddedPath(), mode ) )		// (?) fails when copying from deep.ias to shallow.ias
-				pFile.reset( pImageArchiveStg->MakeOleStreamFile( flexImagePath.GetEmbeddedPathPtr(), pImageStream ).release() );
+			ASSERT( pDocStorage->IsRootCurrentDir() );
+			if ( CComPtr< IStream > pImageStream = pDocStorage->LocateStream( flexImagePath.GetEmbeddedPath(), mode ) )		// (?) fails when copying from deep.ias to shallow.ias
+				pFile.reset( pDocStorage->MakeOleStreamFile( flexImagePath.GetEmbeddedPathPtr(), pImageStream ).release() );
 		}
 	}
 
@@ -580,11 +600,11 @@ std::auto_ptr< CFile > CImageArchiveStg::CFactory::OpenFlexImageFile( const fs::
 bool CImageArchiveStg::CFactory::SavePassword( const std::tstring& password, const fs::CPath& stgFilePath )
 {
 	CScopedAcquireStorage stg( stgFilePath, STGM_READWRITE );					// stream creation requires STGM_WRITE access for storage
-	if ( stg.Get() != NULL )
+	if ( IImageArchiveStg* pArchiveStg = stg.Get() )
 	{
-		CScopedErrorHandling scopedHandling( stg.Get(), this );	// pass current factory throw mode to the storage
+		CScopedErrorHandling scopedHandling( pArchiveStg->GetDocStorage(), this );		// pass current factory throw mode to the storage
 
-		if ( stg.Get()->SavePassword( password ) )
+		if ( pArchiveStg->SavePassword( password ) )
 		{
 			CacheVerifiedPassword( stgFilePath, password );		// for doc SaveAs
 			return true;
@@ -597,9 +617,9 @@ bool CImageArchiveStg::CFactory::SavePassword( const std::tstring& password, con
 std::tstring CImageArchiveStg::CFactory::LoadPassword( const fs::CPath& stgFilePath )
 {
 	std::tstring password;
-	if ( CImageArchiveStg* pArchiveStg = AcquireStorage( stgFilePath ) )
+	if ( IImageArchiveStg* pArchiveStg = AcquireStorage( stgFilePath ) )
 	{
-		CScopedErrorHandling scopedHandling( pArchiveStg, this );		// pass current factory throw mode to the storage
+		CScopedErrorHandling scopedHandling( pArchiveStg->GetDocStorage(), this );		// pass current factory throw mode to the storage
 
 		password = pArchiveStg->LoadPassword();
 		if ( !password.empty() )
@@ -656,11 +676,11 @@ bool CImageArchiveStg::CFactory::IsPasswordVerified( const fs::CPath& stgFilePat
 bool CImageArchiveStg::CFactory::SaveAlbumDoc( CObject* pAlbumDoc, const fs::CPath& stgFilePath )
 {
 	CScopedAcquireStorage stg( stgFilePath, STGM_READWRITE );		// stream creation requires STGM_WRITE access for storage
-	if ( stg.Get() != NULL )
+	if ( IImageArchiveStg* pArchiveStg = stg.Get() )
 	{
-		CScopedErrorHandling scopedHandling( stg.Get(), this );		// pass current factory throw mode to the storage
+		CScopedErrorHandling scopedHandling( pArchiveStg->GetDocStorage(), this );		// pass current factory throw mode to the storage
 
-		stg.Get()->SaveAlbumDoc( pAlbumDoc );
+		pArchiveStg->SaveAlbumDoc( pAlbumDoc );
 		return true;
 	}
 	return false;
@@ -669,9 +689,9 @@ bool CImageArchiveStg::CFactory::SaveAlbumDoc( CObject* pAlbumDoc, const fs::CPa
 bool CImageArchiveStg::CFactory::LoadAlbumDoc( CObject* pAlbumDoc, const fs::CPath& stgFilePath )
 {
 	if ( IsPasswordVerified( stgFilePath ) )
-		if ( CImageArchiveStg* pArchiveStg = AcquireStorage( stgFilePath ) )
+		if ( IImageArchiveStg* pArchiveStg = AcquireStorage( stgFilePath ) )
 		{
-			CScopedErrorHandling scopedHandling( pArchiveStg, this );	// pass current factory throw mode to the storage
+			CScopedErrorHandling scopedHandling( pArchiveStg->GetDocStorage(), this );	// pass current factory throw mode to the storage
 
 			return pArchiveStg->LoadAlbumDoc( pAlbumDoc );
 		}
@@ -691,9 +711,9 @@ CCachedThumbBitmap* CImageArchiveStg::CFactory::ExtractThumb( const fs::CFlexPat
 		fs::CPath stgFilePath = srcImagePath.GetPhysicalPath();
 		REQUIRE( IsPasswordVerified( stgFilePath ) );
 
-		if ( CImageArchiveStg* pArchiveStg = AcquireStorage( stgFilePath ) )
+		if ( IImageArchiveStg* pArchiveStg = AcquireStorage( stgFilePath ) )
 		{
-			CScopedErrorHandling scopedCheck( pArchiveStg, utl::CheckMode );		// no exceptions for thumb extraction
+			CScopedErrorHandling scopedCheck( pArchiveStg->GetDocStorage(), utl::CheckMode );		// no exceptions for thumb extraction
 
 			return pArchiveStg->LoadThumbnail( srcImagePath );
 		}
@@ -798,19 +818,26 @@ CImageArchiveStg::CScopedAcquireStorage::CScopedAcquireStorage( const fs::CPath&
 			m_mustRelease = true;
 	}
 	else	// cache hit, check if it need reopening for writeable access
-		if ( HasFlag( mode, WriteableModeMask ) )										// needs write or create access?
-			if ( !HasFlag( m_pArchiveStg->GetOpenMode(), WriteableModeMask ) )			// was read access?
+		if ( HasFlag( mode, WriteableModeMask ) )											// needs write/create access?
+		{
+			fs::CStructuredStorage* pDocStorage = m_pArchiveStg->GetDocStorage();
+
+			if ( !fs::CStructuredStorage::IsReadingMode( pDocStorage->GetOpenMode() ) )		// was read access?
 			{
-				m_oldOpenMode = m_pArchiveStg->GetOpenMode();
+				m_oldOpenMode = pDocStorage->GetOpenMode();
+
 				// close and reopen the storage in the required writeable mode
-				if ( false == ( HasFlag( mode, STGM_CREATE )
-						? m_pArchiveStg->CreateDocFile( m_stgFilePath.GetPtr(), mode )
-						: m_pArchiveStg->OpenDocFile( m_stgFilePath.GetPtr(), mode ) ) )
+				bool succeeded = HasFlag( mode, STGM_CREATE )
+					? pDocStorage->CreateDocFile( m_stgFilePath.GetPtr(), mode )
+					: pDocStorage->OpenDocFile( m_stgFilePath.GetPtr(), mode );
+
+				if ( !succeeded )
 				{
 					m_pArchiveStg = NULL;
 					Factory()->ReleaseStorage( m_stgFilePath );
 				}
 			}
+		}
 }
 
 CImageArchiveStg::CScopedAcquireStorage::~CScopedAcquireStorage()
@@ -820,5 +847,5 @@ CImageArchiveStg::CScopedAcquireStorage::~CScopedAcquireStorage()
 		if ( m_mustRelease )
 			Factory()->ReleaseStorage( m_stgFilePath );
 		else if ( m_oldOpenMode != NotOpenMask )
-			m_pArchiveStg->OpenDocFile( m_stgFilePath.GetPtr(), m_oldOpenMode );
+			m_pArchiveStg->GetDocStorage()->OpenDocFile( m_stgFilePath.GetPtr(), m_oldOpenMode );
 }

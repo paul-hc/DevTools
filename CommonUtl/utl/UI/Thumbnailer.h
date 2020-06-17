@@ -73,16 +73,18 @@ public:
 	CThumbnailer( size_t cacheMaxSize = MaxSize );
 	~CThumbnailer() { Clear(); }
 
-	size_t GetCachedCount( void ) const;
 	void SetCacheMaxSize( size_t cacheMaxSize = MaxSize ) { m_thumbsCache.SetMaxSize( cacheMaxSize ); }
 
 	void Clear( void );
 	bool SetBoundsSize( const CSize& boundsSize );
 
+	size_t GetCachedCount( void ) const;
+
 	CCachedThumbBitmap* AcquireThumbnail( const fs::CFlexPath& srcImagePath, int* pCacheStatusFlags = NULL );
 	CCachedThumbBitmap* AcquireThumbnailNoThrow( const fs::CFlexPath& srcImagePath ) throws_();
 
 	bool DiscardThumbnail( const fs::CFlexPath& srcImagePath );			// force discard a cached thumbnail, should't really be used
+	size_t DiscardWithPrefix( const TCHAR* pDirPrefix );
 private:
 	// hidden base methods
 	using CShellThumbCache::ExtractThumb;

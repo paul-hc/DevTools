@@ -429,6 +429,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\IUnknownImpl.h"
+				>
+			</File>
+			<File
 				RelativePath=".\Logger.cpp"
 				>
 			</File>

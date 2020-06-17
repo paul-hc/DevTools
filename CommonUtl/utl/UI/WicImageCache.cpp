@@ -78,15 +78,15 @@ bool CWicImageCache::Discard( const fs::ImagePathKey& imageKey )
 
 size_t CWicImageCache::DiscardFrames( const fs::CFlexPath& imagePath )
 {
-	std::vector< fs::ImagePathKey > toDiscardKeys;
+	std::vector< fs::ImagePathKey > discardedKeys;
 
 	const std::deque< fs::ImagePathKey >& pathKeys = m_imageCache.GetPathKeys();
 	for ( std::deque< fs::ImagePathKey >::const_iterator itPathKey = pathKeys.begin(); itPathKey != pathKeys.end(); ++itPathKey )
 		if ( imagePath == itPathKey->first )
-			toDiscardKeys.push_back( *itPathKey );
+			discardedKeys.push_back( *itPathKey );
 
-	m_imageCache.Remove( toDiscardKeys.begin(), toDiscardKeys.end() );
-	return toDiscardKeys.size();
+	m_imageCache.Remove( discardedKeys.begin(), discardedKeys.end() );
+	return discardedKeys.size();
 }
 
 fs::cache::EnqueueResult CWicImageCache::Enqueue( const fs::ImagePathKey& imageKey )
@@ -122,13 +122,13 @@ CSize CWicImageCache::LookupImageDim( const fs::ImagePathKey& imageKey ) const
 
 size_t CWicImageCache::DiscardWithPrefix( const TCHAR* pDirPrefix )
 {
-	std::vector< fs::ImagePathKey > toDiscardKeys;
+	std::vector< fs::ImagePathKey > discardedKeys;
 
 	const std::deque< fs::ImagePathKey >& pathKeys = m_imageCache.GetPathKeys();
 	for ( std::deque< fs::ImagePathKey >::const_iterator itPathKey = pathKeys.begin(); itPathKey != pathKeys.end(); ++itPathKey )
 		if ( path::MatchPrefix( itPathKey->first.GetPtr(), pDirPrefix ) )
-			toDiscardKeys.push_back( *itPathKey );
+			discardedKeys.push_back( *itPathKey );
 
-	m_imageCache.Remove( toDiscardKeys.begin(), toDiscardKeys.end() );
-	return toDiscardKeys.size();
+	m_imageCache.Remove( discardedKeys.begin(), discardedKeys.end() );
+	return discardedKeys.size();
 }

@@ -93,8 +93,9 @@ namespace fs
 		std::pair< const TCHAR*, size_t > FindAlternate_DirName( const TCHAR* altDirNames[], size_t altCount );
 		std::pair< const TCHAR*, size_t > FindAlternate_StreamName( const TCHAR* altStreamNames[], size_t altCount );
 
-		static DWORD ToMode( DWORD mode );										// augment mode with default STGM_SHARE_EXCLUSIVE (if no STGM_SHARE_DENY_* flag is present)
 		static std::tstring MakeShortFilename( const TCHAR* pElementName );		// make short file name with length limited to MaxFilenameLen
+		static DWORD ToMode( DWORD mode );										// augment mode with default STGM_SHARE_EXCLUSIVE (if no STGM_SHARE_DENY_* flag is present)
+		static bool IsReadingMode( DWORD mode ) { return !HasFlag( mode, STGM_WRITE | STGM_READWRITE ); }
 
 		static CStructuredStorage* FindOpenedStorage( const fs::CPath& docStgPath );
 	protected:
@@ -104,8 +105,7 @@ namespace fs
 		virtual bool RetainOpenedStream( const fs::TEmbeddedPath& streamPath ) const;		// if true: cache opened streams to allow later shared access (workaround sharing violations caused by STGM_SHARE_EXCLUSIVE)
 
 		bool HandleError( HRESULT hResult, const TCHAR* pElementName, const TCHAR* pDocFilePath = NULL ) const;
-
-		static bool IsReadingMode( DWORD mode ) { return !HasFlag( mode, STGM_WRITE | STGM_READWRITE ); }
+		fs::CFlexPath MakeElementFlexPath( const TCHAR* pDocFilePath, const TCHAR* pElementName ) const;
 	private:
 		bool CacheStreamState( const fs::TEmbeddedPath& streamPath, IStream* pStreamOrigin );
 		size_t CloseStreamsWithPrefix( const TCHAR* pSubDirPrefix ) { return m_openedStreamStates.RemoveWithPrefix( pSubDirPrefix ); }
