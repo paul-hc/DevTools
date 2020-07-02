@@ -37,6 +37,7 @@ public:
 	void ClearPatterns( void );
 	size_t FindPatternPos( const fs::CPath& searchPath, size_t ignorePos = utl::npos ) const;
 
+	bool IsEmpty( void ) const { return m_patterns.empty(); }
 	bool IsSinglePattern( void ) const { return 1 == m_patterns.size(); }
 	const CSearchPattern* GetSinglePattern( void ) const { return IsSinglePattern() ? m_patterns.front() : NULL; }
 	CSearchPattern* RefSinglePattern( void ) { ASSERT( 1 == m_patterns.size() ); return m_patterns.front(); }

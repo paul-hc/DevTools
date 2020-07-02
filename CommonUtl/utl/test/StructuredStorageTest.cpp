@@ -8,6 +8,7 @@
 #include "FileEnumerator.h"
 #include "StringUtilities.h"
 #include "StructuredStorage.h"
+#include <hash_set>
 
 #define new DEBUG_NEW
 
@@ -24,15 +25,17 @@ namespace ut
 
 		const fs::CPath& srcDirPath = src.GetRelativeDirPath();
 
+		fs::CStructuredStorage::CScopedCurrentDir scopedCurrDir( pDocStorage, fs::CStructuredStorage::s_rootFolderName, STGM_READWRITE );
+		stdext::hash_set< fs::TEmbeddedPath > createdFolderPaths;
+
 		for ( std::vector< fs::CPath >::const_iterator itFilePath = src.m_filePaths.begin(); itFilePath != src.m_filePaths.end(); ++itFilePath )
 		{
 			std::auto_ptr< CFile > pSrcFile = fs::OpenFile( srcDirPath / *itFilePath, false );
 			ASSERT_PTR( pSrcFile.get() );
 
-			fs::CPath dirSubPath = itFilePath->GetParentPath();
-
-			fs::CStructuredStorage::CScopedCurrentDir scopedCurrDir( pDocStorage, dirSubPath.GetPtr(), STGM_READWRITE );
-			ASSERT( scopedCurrDir.IsValid() );
+			fs::TEmbeddedPath parentFolderPath = itFilePath->GetParentPath();
+			if ( createdFolderPaths.insert( parentFolderPath ).second )									// first time insertion
+				pDocStorage->ResetToRootCurrentDir().MakeDirPath( parentFolderPath.GetPtr(), true );	// make the folder storage
 
 			const TCHAR* pStreamName = itFilePath->GetNameExt();
 
@@ -112,7 +115,7 @@ void CStructuredStorageTest::TestStructuredStorage( void )
 		ASSERT_EQUAL( _T("a1.txt|a2.txt|B1\\b1.txt|B1\\b2.txt|B1\\SD\\ThisIsASuperLongFilenameOfAnUnknownImageFileThatKeepsGoing.txt"), ut::JoinFiles( srcEnum ) );
 
 		fs::CStructuredStorage docStorage;
-		ASSERT( docStorage.CreateDocFile( docStgPath.GetPtr() ) );
+		ASSERT( docStorage.CreateDocFile( docStgPath ) );
 		ENSURE( fs::IsValidStructuredStorage( docStgPath.GetPtr() ) );
 
 		ut::BuildStorage( &docStorage, srcEnum );
@@ -130,7 +133,7 @@ void CStructuredStorageTest::TestStructuredStorage( void )
 		ENSURE( fs::IsValidStructuredStorage( docStgPath.GetPtr() ) );
 
 		fs::CStructuredStorage docStorage;
-		ASSERT( docStorage.OpenDocFile( docStgPath.GetPtr() ) );
+		ASSERT( docStorage.OpenDocFile( docStgPath ) );
 
 		_TestEnumerateElements( &docStorage );
 
@@ -163,9 +166,9 @@ void CStructuredStorageTest::TestStructuredStorage( void )
 		}
 
 		// locate deep streams
-		ASSERT_PTR( docStorage.LocateStream( fs::TEmbeddedPath( _T("a1.txt") ) ) );
-		ASSERT_PTR( docStorage.LocateStream( fs::TEmbeddedPath( _T("B1\\b2.txt") ) ) );
-		ASSERT_PTR( docStorage.LocateStream( fs::TEmbeddedPath( _T("B1\\SD\\ThisIsASuperLongFilenameOfAnUnknownImageFileThatKeepsGoing.txt") ) ) );
+		ASSERT_PTR( docStorage.LocateReadStream( fs::TEmbeddedPath( _T("a1.txt") ) ).get() );
+		ASSERT_PTR( docStorage.LocateReadStream( fs::TEmbeddedPath( _T("B1\\b2.txt") ) ).get() );
+		ASSERT_PTR( docStorage.LocateReadStream( fs::TEmbeddedPath( _T("B1\\SD\\ThisIsASuperLongFilenameOfAnUnknownImageFileThatKeepsGoing.txt") ) ).get() );
 	}
 }
 

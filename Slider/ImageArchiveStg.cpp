@@ -1,8 +1,9 @@
 
 #include "stdafx.h"
 #include "ImageArchiveStg.h"
-#include "ImageStorageService.h"
+#include "CatalogStorageService.h"
 #include "FileAttrAlgorithms.h"
+#include "ImagesModel.h"
 #include "Application.h"
 #include "resource.h"
 #include "utl/ContainerUtilities.h"
@@ -12,7 +13,6 @@
 #include "utl/StringUtilities.h"
 #include "utl/UI/IProgressService.h"
 #include "utl/UI/MfcUtilities.h"
-#include "utl/UI/PasswordDialog.h"
 #include "utl/UI/ImagingWic.h"
 #include "utl/UI/Thumbnailer.h"
 #include "utl/UI/WicImageCache.h"
@@ -24,8 +24,6 @@
 
 
 // CImageArchiveStg implementation
-
-const TCHAR* CImageArchiveStg::s_compoundStgExts[] = { _T(".ias"), _T(".cid"), _T(".icf") };
 
 const TCHAR* CImageArchiveStg::s_pAlbumFolderName = _T("Album");
 
@@ -59,20 +57,14 @@ CImageArchiveStg::~CImageArchiveStg()
 		CloseDocFile();		// close early so that virtual methods are called properly
 }
 
-void CImageArchiveStg::CreateObject( IImageArchiveStg** ppArchiveStg )
+void CImageArchiveStg::CreateObject( ICatalogStorage** ppCatalogStorage )
 {
-	ASSERT_PTR( ppArchiveStg );
+	ASSERT_PTR( ppCatalogStorage );
 
-	*ppArchiveStg = new CImageArchiveStg();			// initially with a refCount of 1
+	*ppCatalogStorage = new CImageArchiveStg();			// initially with a refCount of 1
 
-	ENSURE( 1 == dbg::GetRefCount( *ppArchiveStg ) );
-	ENSURE( !( *ppArchiveStg )->GetDocStorage()->IsOpen() );
-}
-
-CImageArchiveStg::CFactory* CImageArchiveStg::Factory( void )
-{
-	static CFactory s_factory;
-	return &s_factory;
+	ENSURE( 1 == dbg::GetRefCount( *ppCatalogStorage ) );
+	ENSURE( !( *ppCatalogStorage )->GetDocStorage()->IsOpen() );
 }
 
 void CImageArchiveStg::CloseDocFile( void )
@@ -85,14 +77,14 @@ void CImageArchiveStg::CloseDocFile( void )
 	__super::CloseDocFile();
 }
 
-size_t CImageArchiveStg::DiscardCachedImages( const fs::CPath& stgFilePath )
+size_t CImageArchiveStg::DiscardCachedImages( const fs::CPath& docStgPath )
 {
-	REQUIRE( !stgFilePath.IsEmpty() );
+	REQUIRE( !docStgPath.IsEmpty() );
 
 	// Release indirect references on any open streams for this image archive file - the streams open with CFile::shareExclusive are kept open indirectly by WIC COM interfaces.
 
-	size_t count = CWicImageCache::Instance().DiscardWithPrefix( stgFilePath.GetPtr() );	// discard cached images for the storage
-	count += app::GetThumbnailer()->DiscardWithPrefix( stgFilePath.GetPtr() );				// also discard the thumbs
+	size_t count = CWicImageCache::Instance().DiscardWithPrefix( docStgPath.GetPtr() );		// discard cached images for the storage
+	count += app::GetThumbnailer()->DiscardWithPrefix( docStgPath.GetPtr() );				// also discard the thumbs
 	return count;
 }
 
@@ -132,9 +124,9 @@ bool CImageArchiveStg::RetainOpenedStream( const fs::TEmbeddedPath& streamPath )
 }
 
 
-// IImageArchiveStg interface implementation
+// ICatalogStorage interface implementation
 
-DEFINE_GUID( IID_IImageArchiveStg, 0xC5078A69, 0xFF1C, 0x4B13, 0x92, 0x2, 0x1E, 0xEF, 0x5, 0x32, 0x25, 0x8D );		// {C5078A69-FF1C-4b13-9202-1EEF0532258D}
+DEFINE_GUID( IID_ICatalogStorage, 0xC5078A69, 0xFF1C, 0x4B13, 0x92, 0x2, 0x1E, 0xEF, 0x5, 0x32, 0x25, 0x8D );		// {C5078A69-FF1C-4B13-9202-1EEF0532258D}
 
 fs::CStructuredStorage* CImageArchiveStg::GetDocStorage( void )
 {
@@ -146,35 +138,46 @@ void CImageArchiveStg::StoreDocModelSchema( app::ModelSchema docModelSchema )
 	m_docModelSchema = docModelSchema;
 }
 
-void CImageArchiveStg::CreateImageArchive( const fs::CPath& stgFilePath, CImageStorageService* pImagesSvc ) throws_( CException* )
+void CImageArchiveStg::StorePassword( const std::tstring& password )
 {
-	ASSERT_PTR( pImagesSvc );
+	m_password = password;
 
-	CScopedErrorHandling scopedThrow( this, utl::ThrowMode );
-
-	CreateDocFile( stgFilePath.GetPtr() );
-	ASSERT( IsOpen() );
-
-	CreateDir( s_pAlbumFolderName );		// create "Album" sub-storage
-
-	CWaitCursor wait;
-
-	SavePassword( pImagesSvc->GetPassword() );
-	Factory()->CacheVerifiedPassword( stgFilePath, pImagesSvc->GetPassword() );
-
-	CreateImageFiles( pImagesSvc );
-	CreateThumbnailsSubStorage( pImagesSvc );
+	if ( !m_password.empty() )
+		CCatalogPasswordStore::Instance()->CacheVerifiedPassword( m_password );
 }
 
-void CImageArchiveStg::CreateImageFiles( CImageStorageService* pImagesSvc ) throws_( CException* )
+void CImageArchiveStg::CreateImageArchiveFile( const fs::CPath& docStgPath, CCatalogStorageService* pCatalogSvc ) throws_( CException* )
 {
-	std::vector< CTransferFileAttr* >& rTransferAttrs = pImagesSvc->RefTransferAttrs();
+	ASSERT_PTR( pCatalogSvc );
 
-	CFactory* pFactory = Factory();
+	CWaitCursor wait;
+	fs::stg::CScopedCreateDocMode scopedThrow( this, NULL );		// closes the archive when exiting the scope
+
+	CreateDocFile( docStgPath );
+	ASSERT( IsOpen() );
+
+	CreateDir( s_pAlbumFolderName );					// create "Album" sub-storage
+	CreateDir( s_thumbsFolderNames[ CurrentVer ] );		// create "Thumbnails" sub-storage
+
+	StorePassword( pCatalogSvc->GetPassword() );
+	SavePasswordStream();
+
+	CreateImageFiles( pCatalogSvc );
+	CreateThumbnailsSubStorage( pCatalogSvc );
+
+	if ( CObject* pAlbumDoc = pCatalogSvc->GetAlbumDoc() )
+		SaveAlbumStream( pAlbumDoc );			// also save the "_Album.sld" stream
+}
+
+void CImageArchiveStg::CreateImageFiles( CCatalogStorageService* pCatalogSvc ) throws_( CException* )
+{
+	std::vector< CTransferFileAttr* >& rTransferAttrs = pCatalogSvc->RefTransferAttrs();
+
+	CCatalogStorageFactory* pFactory = CCatalogStorageFactory::Instance();
 	CScopedErrorHandling scopedThrow( pFactory, utl::ThrowMode );
 
-	pImagesSvc->GetProgress()->AdvanceStage( _T("Saving embedded image files") );
-	pImagesSvc->GetProgress()->SetBoundedProgressCount( rTransferAttrs.size() );
+	pCatalogSvc->GetProgress()->AdvanceStage( _T("Saving embedded image files") );
+	pCatalogSvc->GetProgress()->SetBoundedProgressCount( rTransferAttrs.size() );
 
 	CScopedCurrentDir scopedAlbumFolder( this, s_pAlbumFolderName, STGM_READWRITE );		// location of "_AlbumMap.txt"
 	CAlbumMapWriter albumMap( CreateStreamFile( s_pAlbumMapStreamName ) );
@@ -186,7 +189,7 @@ void CImageArchiveStg::CreateImageFiles( CImageStorageService* pImagesSvc ) thro
 	{
 		CTransferFileAttr* pXferAttr = rTransferAttrs[ pos ];
 
-		pImagesSvc->GetProgress()->AdvanceItem( pXferAttr->GetPath().Get() );
+		pCatalogSvc->GetProgress()->AdvanceItem( pXferAttr->GetPath().Get() );
 
 		try
 		{
@@ -221,14 +224,14 @@ void CImageArchiveStg::CreateImageFiles( CImageStorageService* pImagesSvc ) thro
 	albumMap.WriteImageTotals( totalImagesSize );
 }
 
-void CImageArchiveStg::CreateThumbnailsSubStorage( const CImageStorageService* pImagesSvc ) throws_( CException* )
+void CImageArchiveStg::CreateThumbnailsSubStorage( const CCatalogStorageService* pCatalogSvc ) throws_( CException* )
 {
-	const std::vector< CTransferFileAttr* >& transferAttrs = pImagesSvc->GetTransferAttrs();
+	const std::vector< CTransferFileAttr* >& transferAttrs = pCatalogSvc->GetTransferAttrs();
 
-	pImagesSvc->GetProgress()->AdvanceStage( _T("Saving thumbnails") );
-	pImagesSvc->GetProgress()->SetBoundedProgressCount( transferAttrs.size() );
+	pCatalogSvc->GetProgress()->AdvanceStage( _T("Saving thumbnails") );
+	pCatalogSvc->GetProgress()->SetBoundedProgressCount( transferAttrs.size() );
 
-	CScopedCurrentDir scopedThumbsFolder( this, CreateDir( s_thumbsFolderNames[ CurrentVer ] ) );
+	CScopedCurrentDir scopedThumbsFolder( this, s_thumbsFolderNames[ CurrentVer ], STGM_READWRITE );
 
 	CThumbnailer* pThumbnailer = app::GetThumbnailer();
 	thumb::CPushBoundsSize largerBounds( pThumbnailer, 128 );			// generate larger thumbs to minimize regeneration later
@@ -267,7 +270,7 @@ void CImageArchiveStg::CreateThumbnailsSubStorage( const CImageStorageService* p
 			}
 		}
 
-		pImagesSvc->GetProgress()->AdvanceItem( ( *itXferAttr )->GetPath().Get() );
+		pCatalogSvc->GetProgress()->AdvanceItem( ( *itXferAttr )->GetPath().Get() );
 		++itXferAttr;
 	}
 
@@ -386,9 +389,10 @@ bool CImageArchiveStg::DeleteAnyOldVersionStream( const TCHAR* altStreamNames[],
 }
 
 
-void CImageArchiveStg::SaveAlbumDoc( CObject* pAlbumDoc )
+bool CImageArchiveStg::SaveAlbumStream( CObject* pAlbumDoc )
 {
 	ASSERT_PTR( pAlbumDoc );
+	REQUIRE( IsOpenForWriting() );
 
 	DeleteOldVersionStream( s_pAlbumStreamName );		// File Save: delete old root stream - album files have been moved to "Album" folder
 
@@ -396,21 +400,25 @@ void CImageArchiveStg::SaveAlbumDoc( CObject* pAlbumDoc )
 	std::auto_ptr< COleStreamFile > pAlbumFile( CreateStreamFile( s_pAlbumStreamName ) );
 
 	if ( NULL == pAlbumFile.get() )
-		return;
+		return false;
 
 	CArchive archive( pAlbumFile.get(), CArchive::store );
 	archive.m_bForceFlat = FALSE;			// same as CDocument::OnOpenDocument()
 	pAlbumDoc->Serialize( archive );
+	return true;
 }
 
-bool CImageArchiveStg::LoadAlbumDoc( CObject* pAlbumDoc )
+bool CImageArchiveStg::LoadAlbumStream( CObject* pAlbumDoc )
 {
 	ASSERT_PTR( pAlbumDoc );
 
 	CScopedErrorHandling scopedCheck( this, utl::CheckMode );			// album not found is not an error
 	CScopedCurrentDir scopedAlbumFolder( this, StorageExist( s_pAlbumFolderName ) ? s_pAlbumFolderName : s_rootFolderName );
 
-	std::auto_ptr< COleStreamFile > pAlbumFile = OpenStreamFile( s_pAlbumStreamName );					// load stream "_Album.sld"
+	std::auto_ptr< COleStreamFile > pAlbumFile;
+
+	if ( StreamExist( s_pAlbumStreamName ) )							// older catalogs may not contain the album stream (not an error)
+		pAlbumFile = OpenStreamFile( s_pAlbumStreamName );				// load stream "_Album.sld"
 
 	if ( NULL == pAlbumFile.get() )
 		return false;
@@ -421,23 +429,37 @@ bool CImageArchiveStg::LoadAlbumDoc( CObject* pAlbumDoc )
 	return true;
 }
 
-bool CImageArchiveStg::HasImageArchiveExt( const TCHAR* pFilePath )
+bool CImageArchiveStg::EnumerateImages( CImagesModel* pDestImagesModel )
 {
-	return
-		path::MatchExt( pFilePath, s_compoundStgExts[ Ext_ias ] ) ||
-		path::MatchExt( pFilePath, s_compoundStgExts[ Ext_cid ] ) ||
-		path::MatchExt( pFilePath, s_compoundStgExts[ Ext_icf ] );
+	ASSERT_PTR( pDestImagesModel );
+	ASSERT( IsOpenForReading() );
+
+	pDestImagesModel->Clear();
+
+	CScopedCurrentDir scopedAlbumFolder( this, s_rootFolderName );
+/*	fs::CEnumerator imagesEnum;
+
+	if ( !EnumElements( imagesEnum, Shallow ) )			// enumerate root files
+		return false;
+
+	for ( std::vector< fs::TEmbeddedPath >::const_iterator itStreamPath = imagesEnum.m_filePaths.begin(); itStreamPath != imagesEnum.m_filePaths.end(); ++itStreamPath )
+		if ( wic::FindFileImageFormat( itStreamPath->GetPtr() ) != wic::UnknownImageFormat )
+		{
+			pDestImagesModel->AddFileAttr( new CFileAttr(  ) );
+		}*/
+
+	return false;
 }
 
-bool CImageArchiveStg::SavePassword( const std::tstring& password )
+bool CImageArchiveStg::SavePasswordStream( void )
 {
-	ASSERT( IsOpen() );
+	REQUIRE( IsOpenForWriting() );
 
 	try
 	{
 		DeleteAnyOldVersionStream( ARRAY_PAIR( s_passwordStreamNames ) );		// remove existing password stream
 
-		if ( password.empty() )
+		if ( m_password.empty() )
 			return true;			// no password, done
 
 		CScopedCurrentDir scopedAlbumFolder( this, s_pAlbumFolderName, STGM_READWRITE );
@@ -446,7 +468,7 @@ bool CImageArchiveStg::SavePassword( const std::tstring& password )
 		if ( NULL == pPwdFile.get() )
 			return false;
 
-		std::tstring encryptedPassword = pwd::ToEncrypted( password );
+		std::tstring encryptedPassword = pwd::ToEncrypted( m_password );
 		CArchive archive( pPwdFile.get(), CArchive::store );
 		archive.m_bForceFlat = FALSE;			// same as CDocument::OnOpenDocument()
 
@@ -463,22 +485,16 @@ bool CImageArchiveStg::SavePassword( const std::tstring& password )
 	}
 }
 
-std::tstring CImageArchiveStg::LoadPassword( void )
+bool CImageArchiveStg::LoadPasswordStream( void )
 {
 	ASSERT( IsOpen() );
 
-	std::tstring password;
 	const TCHAR* pPasswordStreamName = NULL;
 	bool hasWidePwd = true;				// found a WIDE stream?
 
-	CScopedCurrentDir scopedAlbumFolder( this, s_pAlbumFolderName );
+	CScopedCurrentDir scopedAlbumFolder( this, s_rootFolderName );			// start lookup in root (for backwards compatibility)
 
-	if ( StreamExist( s_passwordStreamNames[ CurrentVer ] ) )
-		pPasswordStreamName = s_passwordStreamNames[ CurrentVer ];
-	else
 	{
-		ResetToRootCurrentDir();
-
 		std::pair< const TCHAR*, size_t > streamName = FindAlternate_StreamName( ARRAY_PAIR( s_passwordStreamNames ) );
 		pPasswordStreamName = streamName.first;
 
@@ -487,15 +503,29 @@ std::tstring CImageArchiveStg::LoadPassword( void )
 	}
 
 	if ( NULL == pPasswordStreamName )
-		return password;				// document is not password-protected
+		if ( StorageExist( s_pAlbumFolderName ) )
+		{
+			VERIFY( ChangeCurrentDir( s_pAlbumFolderName ) );
 
+			if ( StreamExist( s_passwordStreamNames[ CurrentVer ] ) )
+				pPasswordStreamName = s_passwordStreamNames[ CurrentVer ];
+		}
+
+	if ( NULL == pPasswordStreamName )
+	{
+		StorePassword( std::tstring() );
+		return true;					// document is not password-protected
+	}
+
+	std::tstring password;
+	bool succeeded = true;
 	std::auto_ptr< COleStreamFile > pPwdFile = OpenStreamFile( pPasswordStreamName );
 	ASSERT_PTR( pPwdFile.get() );
 
 	CArchive archive( pPwdFile.get(), CArchive::load );
 	serial::CScopedLoadingArchive scopedLoadingArchive( archive, m_docModelSchema );
 
-	archive.m_bForceFlat = FALSE;			// same as CDocument::OnOpenDocument()
+	archive.m_bForceFlat = FALSE;		// same as CDocument::OnOpenDocument()
 	try
 	{
 		if ( hasWidePwd )
@@ -511,238 +541,19 @@ std::tstring CImageArchiveStg::LoadPassword( void )
 			password = pwd::ToString( ansiPassword.c_str() );
 		}
 
-		password = pwd::ToDecrypted( password );
+		m_password = pwd::ToDecrypted( password );
+
+		succeeded = true;
 	}
 	catch ( CException* pExc )
 	{
 		app::GetUserReport().ReportError( pExc );
+		succeeded = false;
 	}
 	archive.Close();
 	//pwdFile.Close();
 
-	return password;
-}
-
-
-// CImageArchiveStg::CFactory implementation
-
-void CImageArchiveStg::CFactory::Clear( void )
-{
-	m_storageMap.Clear();
-}
-
-IImageArchiveStg* CImageArchiveStg::CFactory::FindStorage( const fs::CPath& stgFilePath ) const
-{
-	if ( IImageArchiveStg* pFoundArchiveStg = m_storageMap.Find( stgFilePath ) )
-		return pFoundArchiveStg;
-
-	if ( CStructuredStorage* pOpenedStorage = fs::CStructuredStorage::FindOpenedStorage( stgFilePath ) )		// opened in testing?
-		return checked_static_cast< CImageArchiveStg* >( pOpenedStorage );
-
-	return NULL;
-}
-
-IImageArchiveStg* CImageArchiveStg::CFactory::AcquireStorage( const fs::CPath& stgFilePath, DWORD mode /*= STGM_READ*/ )
-{
-	if ( IImageArchiveStg* pFoundArchiveStg = FindStorage( stgFilePath ) )
-		return pFoundArchiveStg;					// cache hit
-
-	CComPtr< IImageArchiveStg > pNewImageArchiveStg;
-	CImageArchiveStg::CreateObject( &pNewImageArchiveStg );
-
-	fs::CStructuredStorage* pDocStorage = pNewImageArchiveStg->GetDocStorage();
-	CScopedErrorHandling scopedHandling( pDocStorage, this );		// pass current factory throw mode to the storage
-
-	if ( !pDocStorage->OpenDocFile( stgFilePath.GetPtr(), mode ) )
-		return NULL;
-
-	m_storageMap.Add( stgFilePath, pNewImageArchiveStg );
-	return pNewImageArchiveStg;
-}
-
-bool CImageArchiveStg::CFactory::ReleaseStorage( const fs::CPath& stgFilePath )
-{
-	return m_storageMap.Remove( stgFilePath );
-}
-
-void CImageArchiveStg::CFactory::ReleaseStorages( const std::vector< fs::CPath >& stgFilePaths )
-{
-	for ( std::vector< fs::CPath >::const_iterator itStgPath = stgFilePaths.begin(); itStgPath != stgFilePaths.end(); ++itStgPath )
-		ReleaseStorage( *itStgPath );
-}
-
-std::auto_ptr< CFile > CImageArchiveStg::CFactory::OpenFlexImageFile( const fs::CFlexPath& flexImagePath, DWORD mode /*= CFile::modeRead*/ )
-{
-	std::auto_ptr< CFile > pFile;
-
-	// could be either physical image or archive-based image file
-	if ( !flexImagePath.IsComplexPath() )
-		pFile = fs::OpenFile( flexImagePath, IsThrowMode(), mode );
-	else
-	{
-		fs::CPath stgFilePath( flexImagePath.GetPhysicalPath() );
-		ASSERT( IsPasswordVerified( stgFilePath ) );
-
-		CScopedAcquireStorage stg( stgFilePath, mode );
-		if ( fs::CStructuredStorage* pDocStorage = stg.GetDocStorage() )
-		{
-			CScopedErrorHandling scopedHandling( pDocStorage, this );		// pass current factory throw mode to the storage
-
-			ASSERT( pDocStorage->IsRootCurrentDir() );
-			if ( CComPtr< IStream > pImageStream = pDocStorage->LocateStream( flexImagePath.GetEmbeddedPath(), mode ) )		// (?) fails when copying from deep.ias to shallow.ias
-				pFile.reset( pDocStorage->MakeOleStreamFile( flexImagePath.GetEmbeddedPathPtr(), pImageStream ).release() );
-		}
-	}
-
-	return pFile;
-}
-
-bool CImageArchiveStg::CFactory::SavePassword( const std::tstring& password, const fs::CPath& stgFilePath )
-{
-	CScopedAcquireStorage stg( stgFilePath, STGM_READWRITE );					// stream creation requires STGM_WRITE access for storage
-	if ( IImageArchiveStg* pArchiveStg = stg.Get() )
-	{
-		CScopedErrorHandling scopedHandling( pArchiveStg->GetDocStorage(), this );		// pass current factory throw mode to the storage
-
-		if ( pArchiveStg->SavePassword( password ) )
-		{
-			CacheVerifiedPassword( stgFilePath, password );		// for doc SaveAs
-			return true;
-		}
-	}
-
-	return false;
-}
-
-std::tstring CImageArchiveStg::CFactory::LoadPassword( const fs::CPath& stgFilePath )
-{
-	std::tstring password;
-	if ( IImageArchiveStg* pArchiveStg = AcquireStorage( stgFilePath ) )
-	{
-		CScopedErrorHandling scopedHandling( pArchiveStg->GetDocStorage(), this );		// pass current factory throw mode to the storage
-
-		password = pArchiveStg->LoadPassword();
-		if ( !password.empty() )
-			m_passwordProtected[ stgFilePath ] = password;
-	}
-	return password;
-}
-
-bool CImageArchiveStg::CFactory::CacheVerifiedPassword( const fs::CPath& stgFilePath, const std::tstring& password )
-{
-	if ( password.empty() )
-	{
-		stdext::hash_map< fs::CPath, std::tstring >::iterator itFound = m_passwordProtected.find( stgFilePath );
-		if ( itFound != m_passwordProtected.end() )
-		{
-			m_verifiedPasswords.erase( itFound->second );
-			m_passwordProtected.erase( itFound );
-		}
-		return false;
-	}
-
-	m_passwordProtected[ stgFilePath ] = password;
-	m_verifiedPasswords.insert( password );				// assume password was new/edited, so implicitly verified
-	return true;
-}
-
-bool CImageArchiveStg::CFactory::VerifyPassword( std::tstring* pOutPassword, const fs::CPath& stgFilePath )
-{
-	std::tstring password = LoadPassword( stgFilePath );
-	if ( !password.empty() )
-		if ( m_verifiedPasswords.find( password ) == m_verifiedPasswords.end() )
-		{
-			CPasswordDialog dlg( AfxGetMainWnd(), &stgFilePath );
-			dlg.SetVerifyPassword( password );
-			if ( dlg.DoModal() != IDOK )
-				return false;
-
-			m_verifiedPasswords.insert( password );
-		}
-
-	utl::AssignPtr( pOutPassword, password );
-	return true;
-}
-
-bool CImageArchiveStg::CFactory::IsPasswordVerified( const fs::CPath& stgFilePath ) const
-{
-	stdext::hash_map< fs::CPath, std::tstring >::const_iterator itFound = m_passwordProtected.find( stgFilePath );
-	if ( itFound == m_passwordProtected.end() )
-		return true;				// not password protected
-
-	return m_verifiedPasswords.find( itFound->second ) != m_verifiedPasswords.end();
-}
-
-bool CImageArchiveStg::CFactory::SaveAlbumDoc( CObject* pAlbumDoc, const fs::CPath& stgFilePath )
-{
-	CScopedAcquireStorage stg( stgFilePath, STGM_READWRITE );		// stream creation requires STGM_WRITE access for storage
-	if ( IImageArchiveStg* pArchiveStg = stg.Get() )
-	{
-		CScopedErrorHandling scopedHandling( pArchiveStg->GetDocStorage(), this );		// pass current factory throw mode to the storage
-
-		pArchiveStg->SaveAlbumDoc( pAlbumDoc );
-		return true;
-	}
-	return false;
-}
-
-bool CImageArchiveStg::CFactory::LoadAlbumDoc( CObject* pAlbumDoc, const fs::CPath& stgFilePath )
-{
-	if ( IsPasswordVerified( stgFilePath ) )
-		if ( IImageArchiveStg* pArchiveStg = AcquireStorage( stgFilePath ) )
-		{
-			CScopedErrorHandling scopedHandling( pArchiveStg->GetDocStorage(), this );	// pass current factory throw mode to the storage
-
-			return pArchiveStg->LoadAlbumDoc( pAlbumDoc );
-		}
-
-	return false;
-}
-
-bool CImageArchiveStg::CFactory::ProducesThumbFor( const fs::CFlexPath& srcImagePath ) const
-{
-	return srcImagePath.IsComplexPath();
-}
-
-CCachedThumbBitmap* CImageArchiveStg::CFactory::ExtractThumb( const fs::CFlexPath& srcImagePath )
-{
-	if ( srcImagePath.IsComplexPath() )
-	{
-		fs::CPath stgFilePath = srcImagePath.GetPhysicalPath();
-		REQUIRE( IsPasswordVerified( stgFilePath ) );
-
-		if ( IImageArchiveStg* pArchiveStg = AcquireStorage( stgFilePath ) )
-		{
-			CScopedErrorHandling scopedCheck( pArchiveStg->GetDocStorage(), utl::CheckMode );		// no exceptions for thumb extraction
-
-			return pArchiveStg->LoadThumbnail( srcImagePath );
-		}
-	}
-	return NULL;
-}
-
-CCachedThumbBitmap* CImageArchiveStg::CFactory::GenerateThumb( const fs::CFlexPath& srcImagePath )
-{
-	fs::CPath stgFilePath( srcImagePath.GetPhysicalPath() );
-	ASSERT( srcImagePath.IsComplexPath() );
-	ASSERT( IsPasswordVerified( stgFilePath ) );
-
-	const CThumbnailer* pThumbnailer = safe_ptr( app::GetThumbnailer() );
-
-	if ( CComPtr< IWICBitmapSource > pBitmapSource = CWicImageCache::Instance().LookupBitmapSource( fs::ImagePathKey( srcImagePath, 0 ) ) )		// use frame 0 for the thumbnail
-		if ( CCachedThumbBitmap* pThumbBitmap = pThumbnailer->NewScaledThumb( pBitmapSource, srcImagePath ) )
-		{
-			// IMP: the resulting bitmap, even the scaled bitmap will keep the stream alive for the lifetime of the bitmap; same if we scale the bitmap;
-			// Since the thumb keeps alive the WIC bitmap, we need to copy to a memory bitmap.
-			// This way we unlock the doc stg stream for future access.
-			//
-			TRACE_COM_PTR( pBitmapSource, "BEFORE DetachSourceToBitmap() in CImageArchiveStg::CFactory::GenerateThumb()" );
-			pThumbBitmap->GetOrigin().DetachSourceToBitmap();		// release any bitmap source dependencies (IStream, HFILE, etc)
-			TRACE_COM_PTR( pBitmapSource, "AFTER DetachSourceToBitmap()" );
-			return pThumbBitmap;
-		}
-
-	return NULL;
+	return succeeded;
 }
 
 
@@ -800,52 +611,4 @@ void CImageArchiveStg::CAlbumMapWriter::WriteThumbnailTotals( size_t thumbCount,
 
 	WriteLine( str::Format( _T("Total thumbnails: %d"), thumbCount ) );
 	WriteLine( str::Format( _T("Total size of thumbnails: %s"), num::FormatFileSizeAsPair( totalThumbsSize ).c_str() ) );
-}
-
-
-// CImageArchiveStg::CScopedAcquireStorage implementation
-
-CImageArchiveStg::CScopedAcquireStorage::CScopedAcquireStorage( const fs::CPath& stgFilePath, DWORD mode )
-	: m_stgFilePath( stgFilePath )
-	, m_pArchiveStg( Factory()->FindStorage( m_stgFilePath ) )
-	, m_mustRelease( false )
-	, m_oldOpenMode( (DWORD)NotOpenMask )
-{
-	if ( NULL == m_pArchiveStg )
-	{
-		m_pArchiveStg = Factory()->AcquireStorage( m_stgFilePath, mode );
-		if ( m_pArchiveStg != NULL )
-			m_mustRelease = true;
-	}
-	else	// cache hit, check if it need reopening for writeable access
-		if ( HasFlag( mode, WriteableModeMask ) )											// needs write/create access?
-		{
-			fs::CStructuredStorage* pDocStorage = m_pArchiveStg->GetDocStorage();
-
-			if ( !fs::CStructuredStorage::IsReadingMode( pDocStorage->GetOpenMode() ) )		// was read access?
-			{
-				m_oldOpenMode = pDocStorage->GetOpenMode();
-
-				// close and reopen the storage in the required writeable mode
-				bool succeeded = HasFlag( mode, STGM_CREATE )
-					? pDocStorage->CreateDocFile( m_stgFilePath.GetPtr(), mode )
-					: pDocStorage->OpenDocFile( m_stgFilePath.GetPtr(), mode );
-
-				if ( !succeeded )
-				{
-					m_pArchiveStg = NULL;
-					Factory()->ReleaseStorage( m_stgFilePath );
-				}
-			}
-		}
-}
-
-CImageArchiveStg::CScopedAcquireStorage::~CScopedAcquireStorage()
-{
-	// restore original storage state
-	if ( m_pArchiveStg != NULL )
-		if ( m_mustRelease )
-			Factory()->ReleaseStorage( m_stgFilePath );
-		else if ( m_oldOpenMode != NotOpenMask )
-			m_pArchiveStg->GetDocStorage()->OpenDocFile( m_stgFilePath.GetPtr(), m_oldOpenMode );
 }

@@ -26,10 +26,10 @@ namespace app
 
 	ui::IUserReport& GetUserReport( void );		// app::CInteractiveMode
 
-	bool IsImageArchiveDoc( const TCHAR* pFilePath );
+	bool IsCatalogFile( const TCHAR* pFilePath );
 
 	const std::tstring& GetAllSourcesWildSpecs( void );
-	bool BrowseArchiveStgFile( std::tstring& rFullPath, CWnd* pParentWnd, shell::BrowseMode browseMode = shell::FileOpen, DWORD flags = 0 );
+	bool BrowseCatalogFile( std::tstring& rFullPath, CWnd* pParentWnd, shell::BrowseMode browseMode = shell::FileOpen, DWORD flags = 0 );
 }
 
 

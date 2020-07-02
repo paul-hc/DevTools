@@ -102,13 +102,13 @@ namespace app
 		rFilePath;
 	}
 
-	bool CSharedDocTemplate::PromptFileDialog( CString& rFilePath, UINT titleId, DWORD flags, BOOL openDlg ) const
+	bool CSharedDocTemplate::PromptFileDialog( CString& rFilePath, UINT titleId, DWORD flags, shell::BrowseMode browseMode ) const
 	{
-		if ( shell::FileSaveAs == openDlg )
+		if ( shell::FileSaveAs == browseMode )
 			AlterSaveAsPath( rFilePath );
 
 		fs::CFilterJoiner filterJoiner( *m_pFilterStore );
-		return app::PromptFileDialogImpl( rFilePath, filterJoiner, titleId, flags, openDlg );
+		return app::PromptFileDialogImpl( rFilePath, filterJoiner, titleId, flags, browseMode );
 	}
 
 	void CSharedDocTemplate::RegisterAdditionalDocExtensions( void )
@@ -166,8 +166,8 @@ namespace app
 		else if ( fs::FileExist( pPath ) )
 			if ( path::MatchExt( pPath, _T(".sld") ) )
 				return SlideAlbum;
-			else if ( IsImageArchiveDoc( pPath ) )
-				return ImageArchiveDoc;
+			else if ( app::IsCatalogFile( pPath ) )
+				return CatalogStorageDoc;
 
 		return InvalidPath;
 	}
@@ -216,7 +216,7 @@ namespace app
 	BOOL CDocManager::DoPromptFileName( CString& rFilePath, UINT titleId, DWORD flags, BOOL openDlg, CDocTemplate* pTemplate )
 	{
 		if ( CSharedDocTemplate* pSharedTemplate = dynamic_cast< CSharedDocTemplate* >( pTemplate ) )
-			return pSharedTemplate->PromptFileDialog( rFilePath, titleId, flags, openDlg );
+			return pSharedTemplate->PromptFileDialog( rFilePath, titleId, flags, static_cast< shell::BrowseMode >( openDlg ) );
 
 		return app::PromptFileDialogImpl( rFilePath, CSliderFilters::Instance(), titleId, flags, openDlg );
 	}
@@ -269,7 +269,7 @@ namespace app
 	// CAlbumFilterStore implementation
 
 	CAlbumFilterStore::CAlbumFilterStore( void )
-		: fs::CFilterStore( _T("Albums") )
+		: fs::CFilterStore( _T("All Albums") )
 	{
 		AddFilter( str::LoadPair( IDS_SLIDE_ALBUM_FILTER_SPEC ) );
 		AddFilter( str::LoadPair( IDS_ARCHIVE_STG_FILTER_SPEC ) );

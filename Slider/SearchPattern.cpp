@@ -1,7 +1,7 @@
 
 #include "stdafx.h"
 #include "SearchPattern.h"
-#include "ImageArchiveStg.h"
+#include "ICatalogStorage.h"
 #include "Application_fwd.h"
 #include "resource.h"
 #include "utl/EnumTags.h"
@@ -52,7 +52,7 @@ void CSearchPattern::Stream( CArchive& archive )
 
 		if ( savedModelSchema < app::Slider_v4_1 )
 		{
-			enum OldType { old_Invalid, old_DirPath, old_ArchiveStgFile, old_ExplicitFile } oldType = static_cast< OldType >( m_type );
+			enum OldType { old_Invalid, old_DirPath, old_CatalogDocFile, old_ExplicitFile } oldType = static_cast< OldType >( m_type );
 
 			(int&)m_type = oldType != old_Invalid ? ( m_type - 1 ) : BestGuessType( GetFilePath() );		// old_Invalid was removed in v4.1
 		}
@@ -69,7 +69,7 @@ void CSearchPattern::SetFilePath( const fs::CPath& filePath )
 			case DirPath:
 				m_searchMode = RecurseSubDirs;
 				break;
-			case ArchiveStgFile:
+			case CatalogDocFile:
 			case ExplicitFile:
 				m_wildFilters.clear();
 				m_searchMode = ShallowDir;
@@ -84,8 +84,8 @@ CSearchPattern::Type CSearchPattern::CheckType( void ) const
 	if ( fs::IsValidDirectory( filePath.GetPtr() ) )
 		return DirPath;
 	else if ( filePath.FileExist() )
-		if ( CImageArchiveStg::HasImageArchiveExt( filePath.GetPtr() ) )
-			return ArchiveStgFile;
+		if ( CCatalogStorageFactory::HasCatalogExt( filePath.GetPtr() ) )
+			return CatalogDocFile;
 		else
 			return ExplicitFile;
 
@@ -94,8 +94,8 @@ CSearchPattern::Type CSearchPattern::CheckType( void ) const
 
 CSearchPattern::Type CSearchPattern::BestGuessType( const fs::CPath& searchPath )
 {
-	if ( CImageArchiveStg::HasImageArchiveExt( searchPath.GetPtr() ) )
-		return ArchiveStgFile;
+	if ( CCatalogStorageFactory::HasCatalogExt( searchPath.GetPtr() ) )
+		return CatalogDocFile;
 	else if ( str::IsEmpty( searchPath.GetExt() ) )
 		return DirPath;
 
@@ -110,6 +110,24 @@ const std::tstring& CSearchPattern::GetSafeWildFilters( void ) const
 		return app::GetAllSourcesWildSpecs();
 
 	return m_wildFilters;
+}
+
+bool CSearchPattern::IsValidPath( void ) const
+{
+	if ( IsEmpty() )
+		return false;
+
+	switch ( m_type )
+	{
+		case DirPath:
+			return fs::IsValidDirectory( GetFilePath().GetPtr() );
+		case CatalogDocFile:
+			return fs::IsValidStructuredStorage( GetFilePath().GetPtr() );
+		default:
+			ASSERT( false );
+		case ExplicitFile:
+			return fs::IsValidFile( GetFilePath().GetPtr() );
+	}
 }
 
 bool CSearchPattern::BrowseFilePath( BrowseMode pathType /*= BrowseAsIs*/, CWnd* pParentWnd /*= NULL*/, DWORD extraFlags /*= OFN_FILEMUSTEXIST*/ )
@@ -135,8 +153,8 @@ bool CSearchPattern::BrowseFilePath( BrowseMode pathType /*= BrowseAsIs*/, CWnd*
 		//picked = shell::BrowseForFolder( filePath, pParentWnd, NULL, shell::BF_FileSystem, s_dlgTitle );
 	}
 	else
-		if ( ArchiveStgFile == m_type )
-			picked = app::BrowseArchiveStgFile( filePath, pParentWnd, shell::FileOpen, extraFlags );
+		if ( CatalogDocFile == m_type )
+			picked = app::BrowseCatalogFile( filePath, pParentWnd, shell::FileOpen, extraFlags );
 		else	// ExplicitFile
 			picked = shell::BrowseImageFile( filePath, shell::FileOpen, extraFlags, pParentWnd );
 
@@ -157,7 +175,7 @@ void CSearchPattern::EnumImageFiles( fs::IEnumerator* pEnumerator ) const
 		case DirPath:
 			fs::EnumFiles( pEnumerator, GetFilePath(), GetSafeWildFilters().c_str(), RecurseSubDirs == m_searchMode ? Deep : Shallow );
 			break;
-		case ArchiveStgFile:
+		case CatalogDocFile:
 		case ExplicitFile:
 			pEnumerator->AddFoundFile( GetFilePath().GetPtr() );
 			break;

@@ -27,8 +27,6 @@ private:
 	enum Operation { CopyFile, MoveFile, DeleteFile };
 	static const CEnumTags& GetTags_Operation( void );
 
-	static void ReleaseStgs( const fs::CPath& srcFilePath, const fs::CPath* pDestFilePath = NULL );		// prevent any sharing issues
-
 	void AddLogMessage( Operation operation, const fs::CPath& srcFilePath, const fs::CPath* pDestFilePath = NULL );
 	void AugmentLogError( const std::tstring& errorMessage );
 

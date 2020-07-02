@@ -103,8 +103,8 @@ protected:
 	afx_msg void OnLVnDropFiles_Patterns( NMHDR* pNmHdr, LRESULT* pResult );
 	afx_msg void OnLVnItemsRemoved_Patterns( NMHDR* pNmHdr, LRESULT* pResult );
 	afx_msg void OnLVnItemsReorder_Patterns( void );
-	afx_msg void OnAdd_SearchPattern( void );
-	afx_msg void OnModify_SearchPattern( void );
+	afx_msg void On_AddSearchPattern( void );
+	afx_msg void On_ModifySearchPattern( void );
 	afx_msg void OnSearchSourceFiles( void );
 
 	afx_msg void OnToggle_MaxFileCount( void );

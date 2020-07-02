@@ -91,6 +91,12 @@ namespace path
 	}
 
 
+	const TCHAR* StdFormatNumSuffix( void )
+	{
+		static const TCHAR s_fmtNumSuffix[] = _T("_[%d]");
+		return s_fmtNumSuffix;
+	}
+
 	size_t GetHashValue( const TCHAR* pPath )
 	{
 		// compute hash value based on lower-case and normalized backslashes
@@ -692,6 +698,12 @@ namespace fs
 		m_filePath = parts.MakePath().Get();
 	}
 
+	void CPath::SplitFilename( std::tstring& rFname, std::tstring& rExt ) const
+	{
+		rFname = GetFname();
+		rExt = GetExt();
+	}
+
 	std::tstring CPath::GetFname( void ) const
 	{
 		const TCHAR* pNameExt = GetNameExt();
@@ -700,11 +712,6 @@ namespace fs
 		return std::tstring( pNameExt, std::distance( pNameExt, pExt ) );
 	}
 
-	void CPath::SplitFilename( std::tstring& rFname, std::tstring& rExt ) const
-	{
-		rFname = GetFname();
-		rExt = GetExt();
-	}
 
 	namespace impl
 	{

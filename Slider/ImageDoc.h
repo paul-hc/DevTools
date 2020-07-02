@@ -3,6 +3,7 @@
 #pragma once
 
 #include "DocumentBase.h"
+#include "CatalogStorageHost.h"
 
 
 class CImageDoc : public CDocumentBase
@@ -17,12 +18,13 @@ public:
 	const fs::CFlexPath& GetImagePath( void ) const { return m_imagePath; }
 private:
 	fs::CFlexPath m_imagePath;
-public:
+	CCatalogStorageHost m_storageHost;		// holds the storage if image is embedded
+
 	// generated stuff
-	public:
+public:
 	virtual BOOL OnOpenDocument( LPCTSTR pFilePath );
 	virtual BOOL OnSaveDocument( LPCTSTR pFilePath );
-	protected:
+protected:
 	virtual BOOL OnNewDocument( void );
 protected:
 	afx_msg void OnUpdateFileSave( CCmdUI* pCmdUI );

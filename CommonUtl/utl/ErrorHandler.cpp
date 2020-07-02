@@ -22,3 +22,21 @@ bool CErrorHandler::Handle( HRESULT hResult, bool* pAllGood /*= NULL*/ ) const t
 
 	AfxThrowOleException( hResult );
 }
+
+const CErrorHandler* CErrorHandler::Checker( void )
+{
+	static const CErrorHandler s_checkHandler( utl::CheckMode );
+	return &s_checkHandler;
+}
+
+const CErrorHandler* CErrorHandler::Thrower( void )
+{
+	static const CErrorHandler s_throwHandler( utl::ThrowMode );
+	return &s_throwHandler;
+}
+
+const CErrorHandler* CErrorHandler::Ignorer( void )
+{
+	static const CErrorHandler s_ignoreHandler( utl::IgnoreMode );
+	return &s_ignoreHandler;
+}

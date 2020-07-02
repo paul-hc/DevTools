@@ -6,10 +6,10 @@
 #include "Workspace.h"
 #include "AlbumDoc.h"
 #include "IImageView.h"
-#include "ImageArchiveStg.h"
+#include "ICatalogStorage.h"
 #include "MoveFileDialog.h"
 #include "OleImagesDataSource.h"
-#include "test/ImageArchiveStgTests.h"
+#include "test/CatalogStorageTests.h"
 #include "test/ImagingD2DTests.h"
 #include "test/ThumbnailTests.h"
 #include "resource.h"
@@ -110,13 +110,13 @@ namespace app
 
 	ui::CIssueStore& GetIssueStore( void )
 	{
-		static ui::CIssueStore issueStore;
-		return issueStore;
+		static ui::CIssueStore s_issueStore;
+		return s_issueStore;
 	}
 
-	bool IsImageArchiveDoc( const TCHAR* pFilePath )
+	bool IsCatalogFile( const TCHAR* pFilePath )
 	{
-		return CImageArchiveStg::HasImageArchiveExt( pFilePath );
+		return CCatalogStorageFactory::HasCatalogExt( pFilePath );
 	}
 
 	bool MoveFiles( const std::vector< std::tstring >& filesToMove, CWnd* pParentWnd /*= AfxGetMainWnd()*/ )
@@ -166,8 +166,8 @@ namespace app
 
 	ui::IUserReport& CInteractiveMode::Instance( void )
 	{
-		static CInteractiveMode interactiveMode;
-		return interactiveMode;
+		static CInteractiveMode s_interactiveMode;
+		return s_interactiveMode;
 	}
 
 	int CInteractiveMode::ReportError( CException* pExc, UINT mbType /*= MB_OK*/ )
@@ -259,7 +259,7 @@ namespace app
 		return s_wildFilters;
 	}
 
-	bool BrowseArchiveStgFile( std::tstring& rFullPath, CWnd* pParentWnd, shell::BrowseMode browseMode /*= shell::FileOpen*/, DWORD flags /*= 0*/ )
+	bool BrowseCatalogFile( std::tstring& rFullPath, CWnd* pParentWnd, shell::BrowseMode browseMode /*= shell::FileOpen*/, DWORD flags /*= 0*/ )
 	{
 		static const std::tstring stgFilters = CAlbumFilterStore::Instance().MakeArchiveStgFilters();
 		return shell::BrowseForFile( rFullPath, pParentWnd, browseMode, stgFilters.c_str(), flags );
@@ -325,9 +325,10 @@ BOOL CApplication::InitInstance( void )
 
 	m_pThumbnailer.reset( new CThumbnailer );
 	GetSharedResources().AddAutoPtr( &m_pThumbnailer );
-	GetSharedResources().AddAutoClear( CImageArchiveStg::Factory() );
+// obsolete with explicit ownership in CCatalogStorageHost
+//	GetSharedResources().AddAutoClear( CImageArchiveStg::Factory() );
 	GetSharedResources().AddAutoClear( &CWicImageCache::Instance() );
-	m_pThumbnailer->SetExternalProducer( CImageArchiveStg::Factory() );		// add as producer of storage-based thumbnails
+	m_pThumbnailer->SetExternalProducer( CCatalogStorageFactory::Instance() );		// add as producer of storage-based thumbnails
 
 	CAboutBox::m_appIconId = IDR_MAINFRAME;
 	m_sharedAccel.Load( IDR_COMMAND_BAR_ACCEL );
@@ -441,7 +442,7 @@ bool CApplication::HandleAppTests( void )
 {
 #ifdef _DEBUG
 	// register Slider application's tests
-	CImageArchiveStgTests::Instance();
+	CCatalogStorageTests::Instance();
 
 	if ( !HasFlag( m_runFlags, SkipUiTests ) )	// UI tests are not skipped?
 	{

@@ -32,7 +32,7 @@ namespace app
 		const std::vector< std::tstring >& GetAllExts( void ) const { return m_allExts; }
 
 		void RegisterAdditionalDocExtensions( void );
-		bool PromptFileDialog( CString& rFilePath, UINT titleId, DWORD flags, BOOL openDlg ) const;
+		bool PromptFileDialog( CString& rFilePath, UINT titleId, DWORD flags, shell::BrowseMode browseMode ) const;
 	protected:
 		virtual void AlterSaveAsPath( CString& rFilePath ) const;
 	protected:
@@ -62,7 +62,7 @@ namespace app
 	public:
 		static CAlbumDocTemplate* Instance( void );
 
-		enum OpenPathType { DirPath, SlideAlbum, ImageArchiveDoc, InvalidPath };
+		enum OpenPathType { DirPath, SlideAlbum, CatalogStorageDoc, InvalidPath };
 
 		static OpenPathType GetOpenPathType( const TCHAR* pPath );
 

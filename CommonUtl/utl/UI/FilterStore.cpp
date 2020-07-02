@@ -144,10 +144,12 @@ namespace fs
 			if ( CFilterStore* pFilterStore = CFilterRepository::Instance().Lookup( *itClassTag, browseMode ) )
 			{
 				pFilterStore->StreamFilters( oss );
-				pFilterStore->StreamClassFilter( oss );
+
+				if ( browseMode != shell::FileSaveAs )		// combined filers are useful only when loading (we need targeted file types)
+					pFilterStore->StreamClassFilter( oss );
 			}
 
-		if ( m_classTags.size() > 1 )						// "All File Types" makes sense only for multiple joiner; otherwise we already have the class filter
+		if ( m_classTags.size() > 1 )					// "All File Types" makes sense only for multiple joiner; otherwise we already have the class filter
 			CFilterStore::StreamFilter( oss, FilterPair( _T("All File Types"), MakeSpecs( browseMode ) ) );
 
 		CFilterStore::StreamAllFiles( oss );
@@ -210,6 +212,7 @@ namespace fs
 	{
 		stdext::hash_map< std::tstring, OpenSavePair >::const_iterator itFound = m_stores.find( classTag );
 		ASSERT( itFound != m_stores.end() );
+
 		if ( shell::FileSaveAs == browseMode && itFound->second.second != NULL )
 			return itFound->second.second;
 		return itFound->second.first;
@@ -217,8 +220,8 @@ namespace fs
 
 	CFilterRepository& CFilterRepository::Instance( void )
 	{
-		static CFilterRepository repo;
-		return repo;
+		static CFilterRepository s_repository;
+		return s_repository;
 	}
 
 	void CFilterRepository::Register( CFilterStore* pFilterStore, BrowseFlags browseFlags )

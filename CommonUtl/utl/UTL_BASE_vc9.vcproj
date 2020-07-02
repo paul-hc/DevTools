@@ -736,6 +736,14 @@
 					>
 				</File>
 				<File
+					RelativePath=".\PathUniqueMaker.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\PathUniqueMaker.h"
+					>
+				</File>
+				<File
 					RelativePath=".\StructuredStorage.cpp"
 					>
 				</File>

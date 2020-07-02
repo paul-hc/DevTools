@@ -34,6 +34,9 @@ std::auto_ptr< CWicImage > CWicImage::CreateFromFile( const fs::ImagePathKey& im
 {
 	std::auto_ptr< CWicImage > pNewImage;
 
+	if ( wic::IsImagingLocked() )
+		return pNewImage;				// prevent access while in global locked mode
+
 	TMultiFrameDecoderMap& rSharedDecoders = SharedMultiFrameDecoders();
 
 	if ( CMultiFrameDecoder* pSharedDecoder = rSharedDecoders.Find( imageKey.first ) )
@@ -133,7 +136,7 @@ bool CWicImage::IsCorruptFile( const fs::CFlexPath& imagePath )
 	if ( imagePath.IsEmpty() || !imagePath.FileExist( fs::Read ) )
 		return false;				// file doesn't exist -> doesn't mean is corrupt!
 
-	wic::CBitmapDecoder decoder( imagePath );
+	wic::CBitmapDecoder decoder = AcquireDecoder( imagePath, utl::CheckMode );
 	if ( !decoder.IsValid() || 0 == decoder.GetFrameCount() )
 		return false;
 
@@ -151,7 +154,7 @@ bool CWicImage::IsCorruptFrame( const fs::ImagePathKey& imageKey )
 	if ( imageKey.first.IsEmpty() || !imageKey.first.FileExist( fs::Read ) )
 		return false;				// file doesn't exist -> doesn't mean is corrupt!
 
-	wic::CBitmapDecoder decoder( imageKey.first );
+	wic::CBitmapDecoder decoder = AcquireDecoder( imageKey.first, utl::CheckMode );
 
 	if ( decoder.IsValid() )
 		if ( CSize( 0, 0 ) == wic::GetBitmapSize( decoder.GetFrameAt( imageKey.second ) ) )
@@ -185,7 +188,7 @@ CWicImage::TMultiFrameDecoderMap& CWicImage::SharedMultiFrameDecoders( void )
 	return s_loadedDecoders;
 }
 
-wic::CBitmapDecoder CWicImage::AcquireDecoder( const fs::CFlexPath& imagePath, utl::ErrorHandling handlingMode )
+wic::CBitmapDecoder CWicImage::AcquireDecoder( const fs::CFlexPath& imagePath, utl::ErrorHandling handlingMode /*= utl::CheckMode*/ )
 {
 	if ( CMultiFrameDecoder* pSharedDecoder = SharedMultiFrameDecoders().Find( imagePath ) )
 		return pSharedDecoder->GetDecoder();

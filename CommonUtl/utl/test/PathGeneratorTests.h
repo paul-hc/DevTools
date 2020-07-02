@@ -17,6 +17,7 @@ public:
 	// ut::ITestCase interface
 	virtual void Run( void );
 private:
+	void TestPathUniqueMaker( void );
 	void TestPathMaker( void );
 	void TestPathFormatter( void );
 	void TestNumSeqGeneration( void );

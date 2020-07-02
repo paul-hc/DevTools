@@ -12,11 +12,15 @@
 
 class CAlbumImageView;
 class CImageState;
+class CSearchPattern;
+interface ICatalogStorage;
 
 
 class CAlbumDoc : public CDocumentBase
 {
 	DECLARE_DYNCREATE( CAlbumDoc )
+
+	friend class CCatalogStorageTests;
 public:
 	CAlbumDoc( void );
 	virtual ~CAlbumDoc();
@@ -38,10 +42,13 @@ public:
 
 	CImageState* GetImageState( void ) const;
 
-	enum ArchiveLoadResult { PasswordNotVerified, Failed, Succeeded };
+	void CopyAlbumState( const CAlbumDoc* pSrcDoc );		// when saving as a new document (this)
+	void FetchViewState( void );
 
-	ArchiveLoadResult LoadArchiveStorage( const fs::CPath& stgPath );					// called internally, or when loading an embedded archive as a search pattern
-	void SaveAlbumToArchiveStg( const fs::CPath& stgPath ) throws_( CException* );		// save existing album to image archive as "_Album.sld" stream
+	bool IsStorageAlbum( void ) const;
+	ICatalogStorage* GetCatalogStorage( void );				// opened storage if album based on a catalog storage (compound document)
+
+	static std::auto_ptr< CAlbumDoc > LoadCatalogStorageAlbum( const fs::CPath& docStgPath );			// load a new image catalog storage
 public:
 	bool EditAlbum( CAlbumImageView* pActiveView );
 	bool AddExplicitFiles( const std::vector< std::tstring >& files, bool doUpdate = true );
@@ -61,9 +68,15 @@ public:
 private:
 	void OnAutoDropRecipientChanged( void );
 
-	bool BuildAlbum( const fs::CPath& searchPath );
+	bool BuildAlbum( const CSearchPattern& searchPattern );
+
+	bool LoadCatalogStorage( const fs::CPath& docStgPath );
+	bool SaveAsCatalogStorage( const fs::CPath& newDocStgPath );
+
+	void _SaveAlbumToArchiveStg( const fs::CPath& docStgPath ) throws_( CException* );		// save existing album to image archive as "_Album.sld" stream
+
+	bool _InternalSaveAsArchiveStg( const fs::CPath& newDocStgPath );		// old style
 	void RegenerateModel( AlbumModelChange reason = FM_Init );
-	bool InternalSaveAsArchiveStg( const fs::CPath& newStgPath );
 
 	bool UndoRedoCustomOrder( custom_order::COpStack& rFromStack, custom_order::COpStack& rToStack, bool isUndoOp );
 	void ClearCustomOrder( custom_order::ClearMode clearMode = custom_order::CM_ClearAll );
@@ -89,18 +102,18 @@ private:
 	{
 		PresistImageState	= BIT_FLAG( 0 )
 	};
+
 	enum DocStatus { Clean, Dirty, DirtyOpening = -1 };
 public:
 	// transient
 	std::tstring m_password;							// allow password edititng of any document (including .sld), in preparation for SaveAs .ias
 	auto_drop::CContext m_autoDropContext;				// contains the dropped files, used during an auto-drop operation
-public:
+
 	// generated stuff
-	public:
-	virtual BOOL OnNewDocument( void );
+public:
 	virtual BOOL OnOpenDocument( LPCTSTR pPathName );
 	virtual BOOL OnSaveDocument( LPCTSTR pPathName );
-	virtual void OnCloseDocument( void );
+	virtual void DeleteContents( void );				// delete doc items etc
 protected:
 	afx_msg void CmAutoDropDefragment( void );
 	afx_msg void OnUpdateAutoDropDefragment( CCmdUI* pCmdUI );

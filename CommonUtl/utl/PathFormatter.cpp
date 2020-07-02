@@ -103,6 +103,17 @@ namespace hlp
 
 // CPathFormatter implementation
 
+const std::tstring CPathFormatter::s_asIs = _T("*");
+
+CPathFormatter::CPathFormatter( void )
+	: m_format( s_asIs )
+	, m_fnameFormat( m_format.Get() )
+	, m_ignoreExtension( true )
+	, m_isNumericFormat( false )
+	, m_isWildcardFormat( true )
+{
+}
+
 CPathFormatter::CPathFormatter( const std::tstring& format, bool ignoreExtension )
 	: m_format( format )
 	, m_ignoreExtension( ignoreExtension )

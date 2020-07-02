@@ -18,8 +18,8 @@ namespace fs
 
 
 	// generate a path of a unique filename using a suffix, by avoiding collisions with existing files
-	fs::CPath MakeUniqueNumFilename( const fs::CPath& filePath, const TCHAR fmtNumSuffix[] = _T("_[%d]") ) throws_( CRuntimeException );	// with numeric suffix
-	fs::CPath MakeUniqueHashedFilename( const fs::CPath& filePath, const TCHAR fmtHashSuffix[] = _T("_%08X") );								// with hash suffix
+	fs::CPath MakeUniqueNumFilename( const fs::CPath& filePath, const TCHAR fmtNumSuffix[] = path::StdFormatNumSuffix() ) throws_( CRuntimeException );	// with numeric suffix
+	fs::CPath MakeUniqueHashedFilename( const fs::CPath& filePath, const TCHAR fmtHashSuffix[] = _T("_%08X") );											// with hash suffix
 }
 
 

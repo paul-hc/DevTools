@@ -9,6 +9,7 @@ class CPathFormatter
 {
 	friend class CPathGeneratorTests;
 public:
+	CPathFormatter( void );			// "*" format, ignoring extension
 	CPathFormatter( const std::tstring& format, bool ignoreExtension );
 
 	bool IsValidFormat( void ) const { return m_isNumericFormat || m_isWildcardFormat; }
@@ -37,6 +38,8 @@ private:
 
 	std::tstring m_fnameFormat, m_extFormat;
 	fs::CPath m_moveDestDirPath;
+public:
+	static const std::tstring s_asIs;
 };
 
 

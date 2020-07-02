@@ -1,7 +1,7 @@
 
 #include "stdafx.h"
 #include "FileOperation.h"
-#include "ImageArchiveStg.h"
+#include "ICatalogStorage.h"
 #include "utl/EnumTags.h"
 #include "utl/Logger.h"
 #include "utl/RuntimeException.h"
@@ -18,7 +18,6 @@ bool CFileOperation::Copy( const fs::CFlexPath& srcFilePath, const fs::CFlexPath
 	if ( srcFilePath.FileExist() )
 		if ( !srcFilePath.IsComplexPath() && !destFilePath.IsComplexPath() )
 		{
-			ReleaseStgs( srcFilePath, &destFilePath );
 			if ( !::CopyFile( srcFilePath.GetPtr(), destFilePath.GetPtr(), FALSE ) )
 				return HandleLastError();
 		}
@@ -26,8 +25,8 @@ bool CFileOperation::Copy( const fs::CFlexPath& srcFilePath, const fs::CFlexPath
 		{	// source file is an embedded file in a compound file
 			try
 			{
-				std::auto_ptr< CFile > pSrcFile = CImageArchiveStg::Factory()->OpenFlexImageFile( srcFilePath, CFile::modeRead );
-				std::auto_ptr< CFile > pDestFile = CImageArchiveStg::Factory()->OpenFlexImageFile( destFilePath, CFile::modeCreate | CFile::modeWrite );
+				std::auto_ptr< CFile > pSrcFile = CCatalogStorageFactory::Instance()->OpenFlexImageFile( srcFilePath, CFile::modeRead );
+				std::auto_ptr< CFile > pDestFile = CCatalogStorageFactory::Instance()->OpenFlexImageFile( destFilePath, CFile::modeCreate | CFile::modeWrite );
 
 				if ( pSrcFile.get() != NULL && pDestFile.get() != NULL )
 					fs::BufferedCopy( *pDestFile, *pSrcFile );
@@ -52,7 +51,6 @@ bool CFileOperation::Move( const fs::CFlexPath& srcFilePath, const fs::CFlexPath
 	if ( srcFilePath.FileExist() )
 		if ( !srcFilePath.IsComplexPath() )
 		{
-			ReleaseStgs( srcFilePath, &destFilePath );
 			if ( !::MoveFile( srcFilePath.GetPtr(), destFilePath.GetPtr() ) )
 				return HandleLastError();
 		}
@@ -71,13 +69,13 @@ bool CFileOperation::Delete( const fs::CFlexPath& filePath ) throws_( CException
 	if ( filePath.FileExist() )
 		if ( filePath.IsComplexPath() )
 		{
-			IImageArchiveStg* pImageStg = CImageArchiveStg::Factory()->AcquireStorage( filePath.GetPhysicalPath(), STGM_WRITE );
-			if ( NULL == pImageStg || !pImageStg->GetDocStorage()->DeleteStream( filePath.GetEmbeddedPathPtr() ) )
+			CComPtr< ICatalogStorage > pCatalogStorage = CCatalogStorageFactory::Instance()->AcquireStorage( filePath.GetPhysicalPath(), STGM_READWRITE );
+
+			if ( NULL == pCatalogStorage || !pCatalogStorage->GetDocStorage()->DeleteStream( filePath.GetEmbeddedPathPtr() ) )
 				return HandleError( str::Format( _T("Cannot delete the embedded file '%s'"), filePath.GetPtr() ) );
 		}
 		else
 		{
-			ReleaseStgs( filePath );
 			if ( !::DeleteFile( filePath.GetPtr() ) )
 				return HandleLastError();
 		}
@@ -91,14 +89,6 @@ const CEnumTags& CFileOperation::GetTags_Operation( void )
 {
 	static const CEnumTags tags( _T("COPY|MOVE|DELETE") );
 	return tags;
-}
-
-void CFileOperation::ReleaseStgs( const fs::CPath& srcFilePath, const fs::CPath* pDestFilePath /*= NULL*/ )
-{
-	CImageArchiveStg::Factory()->ReleaseStorage( srcFilePath );
-
-	if ( pDestFilePath != NULL )
-		CImageArchiveStg::Factory()->ReleaseStorage( *pDestFilePath );
 }
 
 void CFileOperation::AddLogMessage( Operation operation, const fs::CPath& srcFilePath, const fs::CPath* pDestFilePath /*= NULL*/ )

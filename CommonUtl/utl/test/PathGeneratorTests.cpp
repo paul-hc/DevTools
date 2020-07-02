@@ -3,8 +3,9 @@
 
 #ifdef _DEBUG		// no UT code in release builds
 #include "test/PathGeneratorTests.h"
+#include "PathUniqueMaker.h"
 #include "PathGenerator.h"
-#include "Path.h"
+#include "FlexPath.h"
 
 #define new DEBUG_NEW
 
@@ -34,6 +35,32 @@ CPathGeneratorTests& CPathGeneratorTests::Instance( void )
 {
 	static CPathGeneratorTests s_testCase;
 	return s_testCase;
+}
+
+void CPathGeneratorTests::TestPathUniqueMaker( void )
+{
+	CPathUniqueMaker uniquePathMaker;
+
+	ASSERT_EQUAL( _T("C:\\Tools\\storage.doc>a.txt"), uniquePathMaker.MakeUnique( fs::CFlexPath( _T("C:\\Tools\\storage.doc>a.txt") ) ) );
+
+	ASSERT_EQUAL( _T("C:\\Tools\\storage.doc>B\\b.txt"), uniquePathMaker.MakeUnique( fs::CFlexPath( _T("C:\\Tools\\storage.doc>B\\b.txt") ) ) );
+	ASSERT_EQUAL( _T("C:\\Tools\\storage.doc>B\\b_[2].txt"), uniquePathMaker.MakeUnique( fs::CFlexPath( _T("C:\\Tools\\storage.doc>B\\b.txt") ) ) );
+	ASSERT_EQUAL( _T("C:\\Tools\\storage.doc>B/b_[3].txt"), uniquePathMaker.MakeUnique( fs::CFlexPath( _T("C:\\Tools\\storage.doc>B/b.txt") ) ) );
+	ASSERT_EQUAL( _T("C:\\Tools\\storage.doc>B\\b_[470].txt"), uniquePathMaker.MakeUnique( fs::CFlexPath( _T("C:\\Tools\\storage.doc>B\\b_[470].txt") ) ) );	// force a jump to higher sequence number
+	ASSERT_EQUAL( _T("C:\\Tools\\storage.doc>B\\b_[471].txt"), uniquePathMaker.MakeUnique( fs::CFlexPath( _T("C:\\Tools\\storage.doc>B\\b.txt") ) ) );
+
+	ASSERT_EQUAL( _T("C:\\Tools\\storage.doc>a_[2].txt"), uniquePathMaker.MakeUnique( fs::CFlexPath( _T("C:\\Tools\\storage.doc>a.txt") ) ) );
+	ASSERT_EQUAL( _T("C:\\Tools\\storage.doc>a_[3].txt"), uniquePathMaker.MakeUnique( fs::CFlexPath( _T("C:\\Tools\\storage.doc>a.txt") ) ) );
+
+	ASSERT_EQUAL( _T("C:\\Tools\\storage.doc>a_[10].txt"), uniquePathMaker.MakeUnique( fs::CFlexPath( _T("C:\\Tools\\storage.doc>a_[10].txt") ) ) );		// force a jump to higher sequence number
+	ASSERT_EQUAL( _T("C:\\Tools\\storage.doc>a_[11].txt"), uniquePathMaker.MakeUnique( fs::CFlexPath( _T("C:\\Tools\\storage.doc>a.txt") ) ) );
+
+	// batch uniquify
+	std::vector< fs::CPath > paths;
+	str::Split( paths, _T("x|y|z|z|x|y_[15]|y|x|y"), _T("|") );
+
+	ASSERT_EQUAL( 5, uniquePathMaker.UniquifyPaths( paths ) );			// number of duplicates uniquified
+	ASSERT_EQUAL( _T("x|y|z|z_[2]|x_[2]|y_[15]|y_[16]|x_[3]|y_[17]"), str::Join( paths, _T("|") ) );
 }
 
 void CPathGeneratorTests::TestPathMaker( void )
@@ -113,6 +140,8 @@ void CPathGeneratorTests::TestPathFormatter( void )
 	}
 	{
 		// wildcard
+		ASSERT_EQUAL( _T("foo.txt"), CPathFormatter().FormatPath( fs::CPath( _T("foo.txt") ), 1 ).Get() );
+
 		ASSERT_EQUAL( _T("foo.txt"), CPathFormatter( _T("*"), false ).FormatPath( fs::CPath( _T("foo.txt") ), 1 ).Get() );
 		ASSERT_EQUAL( _T("foo.txt"), CPathFormatter( _T("*.*"), false ).FormatPath( fs::CPath( _T("foo.txt") ), 1 ).Get() );
 		ASSERT_EQUAL( _T("foo.txt"), CPathFormatter( _T("*.*"), false ).FormatPath( fs::CPath( _T("foo.txt") ), 1, 1 ).Get() );
@@ -277,6 +306,7 @@ void CPathGeneratorTests::Run( void )
 {
 	__super::Run();
 
+	TestPathUniqueMaker();
 	TestPathMaker();
 	TestPathFormatter();
 	TestNumSeqGeneration();

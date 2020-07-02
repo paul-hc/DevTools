@@ -51,39 +51,41 @@ namespace fattr
 }
 
 
+#include "utl/PathUniqueMaker.h"
 #include "ArchivingModel_fwd.h"
 
 
 namespace fattr
 {
+	template< typename PathT >
+	void QueryImagePaths( std::vector< PathT >& rDestFilePaths, const std::vector< CFileAttr* >& srcFileAttrs )
+	{
+		utl::Assign( rDestFilePaths, srcFileAttrs, func::ToFilePath() );
+	}
+
 	inline fs::CPath& NormalizeEmbeddedPath( fs::CPath& rPath )
 	{
-		// saving: if an embedded image path, make it look like a deep path, where the doc storage path is treated like a normal directory path (replace '>' to '\\' )
+		// saving: if an embedded image path, make it look like a deep path in DEST storage, where the doc storage path is treated like a normal directory path (replace '>' to '\\' )
 		std::replace( rPath.Ref().begin(), rPath.Ref().end(), path::s_complexPathSep, _T('\\') );
 		return rPath;
 	}
 
-	void TransformToEmbeddedPaths( std::vector< fs::CFlexPath >& rEmbeddedPaths, bool useDeepStreamPaths = true );		// rEmbeddedPaths: IN source paths, OUT embedded stream paths
-
-	template< typename SrcPathT >
-	void MakeDestEmbeddedPaths( std::vector< fs::CFlexPath >& rDestImagePaths, const std::vector< SrcPathT >& srcImagePaths, bool useDeepStreamPaths = true )
-	{
-		utl::Assign( rDestImagePaths, srcImagePaths, func::tor::StringOf() );
-		fattr::TransformToEmbeddedPaths( rDestImagePaths, useDeepStreamPaths );
-	}
+	size_t TransformDestEmbeddedPaths( std::vector< fs::TEmbeddedPath >& rDestStreamPaths, bool useDeepStreamPaths = true );
 
 	template< typename SrcPathT >
 	void MakeTransferPathPairs( std::vector< TTransferPathPair >& rTransferPairs, const std::vector< SrcPathT >& srcImagePaths, bool useDeepStreamPaths = true )
 	{
-		std::vector< fs::CFlexPath > destImagePaths;
-		fattr::MakeDestEmbeddedPaths( destImagePaths, srcImagePaths, useDeepStreamPaths );
-		ENSURE( srcImagePaths.size() == destImagePaths.size() );
+		std::vector< fs::TEmbeddedPath > destStreamPaths;
+		utl::Assign( destStreamPaths, srcImagePaths, func::tor::StringOf() );
+
+		fattr::TransformDestEmbeddedPaths( destStreamPaths, useDeepStreamPaths );
+		ENSURE( srcImagePaths.size() == destStreamPaths.size() );
 
 		rTransferPairs.clear();
 		rTransferPairs.reserve( srcImagePaths.size() );
 
 		for ( size_t i = 0; i != srcImagePaths.size(); ++i )
-			rTransferPairs.push_back( TTransferPathPair( srcImagePaths[ i ].Get(), destImagePaths[ i ] ) );
+			rTransferPairs.push_back( TTransferPathPair( srcImagePaths[ i ].Get(), fs::CastFlexPath( destStreamPaths[ i ] ) ) );
 	}
 }
 

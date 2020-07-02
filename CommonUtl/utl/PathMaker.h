@@ -5,18 +5,6 @@
 #include "Path.h"
 
 
-namespace fs
-{
-	namespace traits
-	{
-		inline const fs::CPath& GetPath( const fs::CPath& filePath ) { return filePath; }
-
-		template< typename DestType >
-		inline void SetPath( DestType& rDest, const fs::CPath& filePath ) { rDest.Set( filePath.Get() ); }
-	}
-}
-
-
 // simple path maker from SRC to DEST; not using a format
 
 class CPathMaker : private utl::noncopyable

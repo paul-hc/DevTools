@@ -98,7 +98,7 @@ void CFileAttr::Stream( CArchive& archive )
 
 		if ( path::IsRelative( m_pathKey.first.GetPtr() ) )				// was saved as relative path to storage root?
 			if ( path::IsComplex( archive.m_strFileName ) )				// loading from an image archive storage?
-				serial::ToStorageComplexPath( m_pathKey.first, path::ExtractPhysical( archive.m_strFileName.GetString() ) );
+				serial::ToStorageComplexPath( m_pathKey.first, path::ExtractPhysical( archive.m_strFileName.GetString() ) );		// convert to full flex image path
 
 		archive >> (int&)m_type;
 		archive & m_lastModifTime;

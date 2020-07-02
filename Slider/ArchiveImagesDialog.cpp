@@ -3,7 +3,7 @@
 #include "ArchiveImagesDialog.h"
 #include "AlbumModel.h"
 #include "FileAttr.h"
-#include "ImageArchiveStg.h"
+#include "ICatalogStorage.h"
 #include "Application_fwd.h"
 #include "resource.h"
 #include "utl/UI/PasswordDialog.h"
@@ -108,7 +108,7 @@ bool CArchiveImagesDialog::SetDefaultDestPath( void )
 		{
 			fs::CPathParts parts( firstDirPath );
 			parts.m_fname += parts.m_ext + s_archiveFnameSuffix;			// add to fname existing ext (for folders with extension)
-			parts.m_ext = CImageArchiveStg::GetDefaultExtension();
+			parts.m_ext = CCatalogStorageFactory::GetDefaultExtension();
 			m_destPath = parts.MakePath();
 			break;
 		}
@@ -447,7 +447,7 @@ void CArchiveImagesDialog::OnEnChangeDestFolder( void )
 	ui::EnableControl( m_hWnd, IDC_CREATE_DEST_FOLDER,
 		!m_destPath.IsEmpty() &&
 		!m_destPath.FileExist() &&
-		!app::IsImageArchiveDoc( m_destPath.GetPtr() ) );
+		!app::IsCatalogFile( m_destPath.GetPtr() ) );
 }
 
 void CArchiveImagesDialog::CmBrowseDestPath( void )
@@ -462,7 +462,7 @@ void CArchiveImagesDialog::CmBrowseDestPath( void )
 	else
 	{
 		std::tstring newDestPath = m_destPath.Get();
-		if ( app::BrowseArchiveStgFile( newDestPath, this, shell::FileSaveAs ) )
+		if ( app::BrowseCatalogFile( newDestPath, this, shell::FileSaveAs ) )
 			m_destPath.Set( newDestPath );
 		else
 			return;

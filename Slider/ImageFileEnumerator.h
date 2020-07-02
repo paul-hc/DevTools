@@ -22,7 +22,7 @@ public:
 
 	void Search( const std::vector< CSearchPattern* >& searchPatterns ) throws_( CException*, CUserAbortedException );
 	void Search( const CSearchPattern& searchPattern ) throws_( CException*, CUserAbortedException );
-	void SearchImageArchive( const fs::CPath& stgDocPath ) throws_( CException*, CUserAbortedException );
+	void SearchCatalogStorage( const fs::CPath& stgDocPath ) throws_( CException*, CUserAbortedException );
 
 	// found files
 	bool AnyFound( void ) const { return !m_foundImages.IsEmpty(); }
@@ -36,7 +36,7 @@ private:
 	virtual bool MustStop( void ) const;
 
 	bool PassFilter( const CFileAttr& fileAttr ) const;
-	void Push( CFileAttr* pFileAttr );
+	bool Push( CFileAttr* pFileAttr );
 	void PushMany( const std::vector< CFileAttr* >& fileAttrs );		// transfer ownership
 private:
 	Range< size_t > m_fileSizeRange;

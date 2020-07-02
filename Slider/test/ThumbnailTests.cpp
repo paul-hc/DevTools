@@ -49,7 +49,7 @@ namespace ut
 		static const TCHAR* extensions[] = { _T(".bmp"), _T(".jpg"), _T(".png"), _T(".tif"), _T(".gif") };
 
 		fs::CStructuredStorage docStg;
-		VERIFY( docStg.CreateDocFile( path::Combine( CThumbnailTests::GetThumbSaveDirPath().GetPtr(), _T("myThumbs.stg") ).c_str() ) );
+		VERIFY( docStg.CreateDocFile( CThumbnailTests::GetThumbSaveDirPath() / _T("myThumbs.stg") ) );
 
 		for ( UINT i = 0; i != COUNT_OF( extensions ); ++i )
 		{

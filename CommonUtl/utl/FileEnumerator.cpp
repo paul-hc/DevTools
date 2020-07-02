@@ -82,15 +82,16 @@ namespace fs
 	namespace impl { UINT QueryExistingSequenceCount( const fs::CPathParts& filePathParts ); }
 
 
-	fs::CPath MakeUniqueNumFilename( const fs::CPath& filePath, const TCHAR fmtNumSuffix[] /*= _T("_[%d]")*/ ) throws_( CRuntimeException )
+	fs::CPath MakeUniqueNumFilename( const fs::CPath& filePath, const TCHAR fmtNumSuffix[] /*= path::StdFormatNumSuffix()*/ ) throws_( CRuntimeException )
 	{
 		ASSERT( !filePath.IsEmpty() );
 		if ( !filePath.FileExist() )
-			return filePath;						// no filename collision
+			return filePath;						// no file-path collision
 
 		fs::CPathParts parts( filePath.Get() );
 		const std::tstring fnameBase = parts.m_fname;
 		std::tstring lastSuffix;
+
 		fs::CPath uniqueFilePath;
 
 		for ( UINT seqCount = std::max( 2u, impl::QueryExistingSequenceCount( parts ) + 1 ); ; ++seqCount )

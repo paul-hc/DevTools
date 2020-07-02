@@ -38,7 +38,7 @@ void CMemLeakCheck::Report( int lineNo /*= 0*/ ) const
 
 bool CMemLeakCheck::AssertReport( std::tstring& rMsg ) const
 {
-	if ( size_t leakedBytes = GetLeakedBytes() )
+	if ( ptrdiff_t leakedBytes = GetLeakedBytes() )
 	{
 		Report();
 		rMsg = FormatLeak( leakedBytes, true );
@@ -48,12 +48,18 @@ bool CMemLeakCheck::AssertReport( std::tstring& rMsg ) const
 	return true;
 }
 
+ptrdiff_t CMemLeakCheck::GetLeakedBytes( void ) const
+{
+	size_t heapTotal = GetHeapTotal();
+	return heapTotal - m_total;
+}
+
 std::tstring CMemLeakCheck::FormatMessage( int lineNo /*= 0*/ ) const
 {
 	// output format:
 	//	C:\dev\DevTools\CommonUtl\utl\Color.cpp(81): checkpoint '%s' - 12 bytes LEAKED.
 
-	if ( size_t leakedBytes = GetLeakedBytes() )
+	if ( ptrdiff_t leakedBytes = GetLeakedBytes() )
 		return str::Format( _T("%s(%d): %s."),
 			m_filename.c_str(),
 			lineNo != 0 ? lineNo : m_lineNo,
@@ -62,10 +68,10 @@ std::tstring CMemLeakCheck::FormatMessage( int lineNo /*= 0*/ ) const
 	return std::tstring();
 }
 
-std::tstring CMemLeakCheck::FormatLeak( size_t leakedBytes, bool isFinal ) const
+std::tstring CMemLeakCheck::FormatLeak( ptrdiff_t leakedBytes, bool isFinal ) const
 {
 	if ( leakedBytes != 0 )
-		return str::Format( _T("heap checkpoint '%s' - %lu bytes %s"),
+		return str::Format( _T("heap checkpoint '%s': %ld bytes %s"),
 			m_varName.c_str(),
 			leakedBytes,
 			isFinal ? _T("LEAKED") : _T("ALIVE") );

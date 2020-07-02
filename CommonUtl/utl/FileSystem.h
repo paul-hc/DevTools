@@ -8,8 +8,10 @@
 namespace fs
 {
 	bool IsValidFile( const TCHAR* pFilePath );
+
 	bool IsValidDirectory( const TCHAR* pDirPath );
 	bool IsValidEmptyDirectory( const TCHAR* pDirPath );
+
 	bool IsValidStructuredStorage( const TCHAR* pDocFilePath );			// a compound document file that exists?
 
 	bool IsReadOnlyFile( const TCHAR* pFilePath );
@@ -93,6 +95,9 @@ namespace fs
 	const CEnumTags& GetTags_FileExpireStatus( void );
 
 	FileExpireStatus CheckExpireStatus( const fs::CPath& filePath, const CTime& lastModifyTime );
+
+
+	FILETIME* MakeFileTime( FILETIME& rOutFileTime, const CTime& time );
 
 
 	namespace thr

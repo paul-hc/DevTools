@@ -4,7 +4,7 @@
 #include "SearchPattern.h"
 #include "FileAttr.h"
 #include "FileAttrAlgorithms.h"
-#include "ImageArchiveStg.h"
+#include "ICatalogStorage.h"
 #include "ImageFileEnumerator.h"
 #include "ProgressService.h"
 #include "Workspace.h"
@@ -24,8 +24,6 @@
 #endif
 
 
-// CAlbumModel implementation
-
 CAlbumModel::CAlbumModel( void )
 	: m_modelSchema( app::Slider_LatestModelSchema )
 	, m_persistFlags( 0 )
@@ -36,6 +34,70 @@ CAlbumModel::CAlbumModel( void )
 
 CAlbumModel::~CAlbumModel()
 {
+}
+
+void CAlbumModel::Clear( void )
+{
+	m_searchModel.ClearPatterns();
+	m_imagesModel.Clear();
+
+	CloseAllStorages();
+}
+
+ICatalogStorage* CAlbumModel::GetCatalogStorage( void ) const
+{
+	if ( !m_docStgPath.IsEmpty() )
+		return m_storageHost.Find( m_docStgPath );
+
+	return NULL;
+}
+
+void CAlbumModel::OpenAllStorages( void )
+{
+	if ( !m_docStgPath.IsEmpty() )				// catalog-based album?
+		m_storageHost.Push( m_docStgPath );
+
+	// open embedded storages in search model
+	for ( std::vector< CSearchPattern* >::const_iterator itPattern = m_searchModel.GetPatterns().begin(); itPattern != m_searchModel.GetPatterns().end(); ++itPattern )
+		if ( ( *itPattern )->IsCatalogDocFile() )
+			m_storageHost.Push( ( *itPattern )->GetFilePath() );
+
+	m_storageHost.PushMultiple( m_imagesModel.GetStoragePaths() );		// open embedded storages in image model
+}
+
+void CAlbumModel::CloseAllStorages( void )
+{
+	m_storageHost.Clear();
+}
+
+void CAlbumModel::StoreCatalogDocPath( const fs::CPath& docStgPath )
+{
+	REQUIRE( CCatalogStorageFactory::HasCatalogExt( docStgPath.GetPtr() ) );
+	REQUIRE( fs::IsValidStructuredStorage( docStgPath.GetPtr() ) );
+
+	REQUIRE( m_searchModel.IsEmpty() );			// no mixing with .sld album model
+
+	m_docStgPath = docStgPath;
+}
+
+bool CAlbumModel::SetupSingleSearchPattern( const CSearchPattern& searchPattern )
+{
+	m_searchModel.ClearPatterns();
+	m_docStgPath.Clear();
+
+	if ( searchPattern.IsValidPath() )
+		switch ( searchPattern.GetType() )
+		{
+			case CSearchPattern::DirPath:
+			case CSearchPattern::ExplicitFile:
+				m_searchModel.AddPattern( new CSearchPattern( searchPattern ) );
+				return true;
+			case CSearchPattern::CatalogDocFile:
+				StoreCatalogDocPath( searchPattern.GetFilePath() );
+				return true;
+		}
+
+	return false;
 }
 
 void CAlbumModel::Stream( CArchive& archive )
@@ -83,24 +145,11 @@ void CAlbumModel::Stream( CArchive& archive )
 			}
 }
 
-bool CAlbumModel::SetupSearchPath( const fs::CPath& searchPath )
+
+bool CAlbumModel::ShouldUseDeepStreamPaths( void )
 {
-	if ( !searchPath.FileExist() )
-		return false;
-
-	m_searchModel.ClearPatterns();
-	m_stgDocPath.Clear();
-
-	if ( fs::IsValidDirectory( searchPath.GetPtr() ) )
-		m_searchModel.AddSearchPath( searchPath );
-	else if ( app::IsImageArchiveDoc( searchPath.GetPtr() ) )
-		m_stgDocPath = searchPath;
-	else
-		return false;
-
-	return true;
+	return HasFlag( CWorkspace::GetFlags(), wf::PrefixDeepStreamNames );
 }
-
 
 bool CAlbumModel::IsAutoDropRecipient( bool checkValidPath /*= true*/ ) const
 {
@@ -108,19 +157,6 @@ bool CAlbumModel::IsAutoDropRecipient( bool checkValidPath /*= true*/ ) const
 		return pSinglePattern->IsAutoDropDirPath( checkValidPath );
 
 	return false;
-}
-
-// release the image storages associated with this (if any), as well as the ones found in the generation process
-void CAlbumModel::CloseAssocImageArchiveStgs( void )
-{
-	if ( !m_stgDocPath.IsEmpty() )
-		CImageArchiveStg::Factory()->ReleaseStorage( m_stgDocPath );
-
-	for ( std::vector< CSearchPattern* >::const_iterator itPattern = m_searchModel.GetPatterns().begin(); itPattern != m_searchModel.GetPatterns().end(); ++itPattern )
-		if ( ( *itPattern )->IsImageArchiveDoc() )
-			CImageArchiveStg::Factory()->ReleaseStorage( ( *itPattern )->GetFilePath() );
-
-	m_imagesModel.ReleaseStorages();			// for found embedded storages
 }
 
 void CAlbumModel::QueryFileAttrsSequence( std::vector< CFileAttr* >& rSequence, const std::vector< int >& selIndexes ) const
@@ -146,23 +182,23 @@ bool CAlbumModel::HasConsistentDeepStreams( void ) const
 	return HasFlag( CWorkspace::GetFlags(), wf::PrefixDeepStreamNames ) == HasPersistFlag( UseDeepStreamPaths );
 }
 
-bool CAlbumModel::CheckReparentFileAttrs( const TCHAR* pDocPath, PersistOp op )
+bool CAlbumModel::_CheckReparentFileAttrs( const TCHAR* pDocPath, PersistOp op )
 {
 	fs::CPath docPath = fs::CFlexPath( pDocPath ).GetPhysicalPath();			// extract "C:\Images\storage.ias" from "C:\Images\storage.ias>_Album.sld"
 
-	if ( app::IsImageArchiveDoc( docPath.GetPtr() ) )
-		return ReparentStorageFileAttrsImpl( docPath, op );
+	if ( app::IsCatalogFile( docPath.GetPtr() ) )
+		return _ReparentStorageFileAttrsImpl( docPath, op );
 
 	return false;
 }
 
-bool CAlbumModel::ReparentStorageFileAttrsImpl( const fs::CPath& stgDocPath, PersistOp op )
+bool CAlbumModel::_ReparentStorageFileAttrsImpl( const fs::CPath& docStgPath, PersistOp op )
 {
-	ASSERT( app::IsImageArchiveDoc( stgDocPath.GetPtr() ) );
+	ASSERT( app::IsCatalogFile( docStgPath.GetPtr() ) );
 
 	std::vector< CFileAttr* >& rFileAttrs = m_imagesModel.RefFileAttrs();
 
-	if ( stgDocPath != m_stgDocPath )								// different stgDocPath, need to store and reparent
+	if ( docStgPath != m_docStgPath )								// different docStgPath, need to store and reparent
 	{
 		// clear the old stg prefix to the actual logical root of the album
 		switch ( op )
@@ -171,8 +207,8 @@ bool CAlbumModel::ReparentStorageFileAttrsImpl( const fs::CPath& stgDocPath, Per
 				std::for_each( rFileAttrs.begin(), rFileAttrs.end(), func::FuncAdapter< func::StripComplexPath, func::RefFilePath >() );
 				break;
 			case Saving:
-				if ( !m_stgDocPath.IsEmpty() )
-					std::for_each( rFileAttrs.begin(), rFileAttrs.end(), func::StripDocPath( m_stgDocPath ) );
+				if ( !m_docStgPath.IsEmpty() )
+					std::for_each( rFileAttrs.begin(), rFileAttrs.end(), func::StripDocPath( m_docStgPath ) );
 
 				// convert any deep embedded storage paths to directory paths (so that '>' appears only once in the final embedded)
 				std::for_each( rFileAttrs.begin(), rFileAttrs.end(), func::FuncAdapter< func::NormalizeEmbeddedPath, func::RefFilePath >() );
@@ -180,7 +216,7 @@ bool CAlbumModel::ReparentStorageFileAttrsImpl( const fs::CPath& stgDocPath, Per
 		}
 
 		m_searchModel.ClearPatterns();
-		m_stgDocPath = stgDocPath;
+		m_docStgPath = docStgPath;
 
 		if ( !HasFlag( m_persistFlags, UseDeepStreamPaths ) )
 			if ( !m_imagesModel.IsEmpty() )
@@ -194,7 +230,7 @@ bool CAlbumModel::ReparentStorageFileAttrsImpl( const fs::CPath& stgDocPath, Per
 
 		// reparent with the new doc stg (physical path)
 		std::for_each( rFileAttrs.begin(), rFileAttrs.end(),
-			func::MakeComplexPath( m_stgDocPath, HasFlag( CWorkspace::GetFlags(), wf::PrefixDeepStreamNames ) ? func::Deep : func::Flat ) );
+			func::MakeComplexPath( m_docStgPath, HasFlag( CWorkspace::GetFlags(), wf::PrefixDeepStreamNames ) ? func::Deep : func::Flat ) );
 	}
 
 	if ( Saving == op )
@@ -211,7 +247,7 @@ bool CAlbumModel::ReparentStorageFileAttrsImpl( const fs::CPath& stgDocPath, Per
 			else
 				itDocFilePath = rDocFilePaths.erase( itDocFilePath );		// remove non-existing storage doc
 
-		utl::AddUnique( rDocFilePaths, stgDocPath );						// add the document storage, which is guaranteed valid
+		utl::AddUnique( rDocFilePaths, docStgPath );						// add the document storage, which is guaranteed valid
 	}
 
 	return true;
@@ -284,8 +320,8 @@ void CAlbumModel::SearchForFiles( CWnd* pParentWnd, bool reportEmpty /*= true*/ 
 
 		try
 		{
-			if ( !m_stgDocPath.IsEmpty() )
-				imageEnum.SearchImageArchive( m_stgDocPath );
+			if ( !m_docStgPath.IsEmpty() )
+				imageEnum.SearchCatalogStorage( m_docStgPath );
 			else
 				imageEnum.Search( m_searchModel.GetPatterns() );
 		}
@@ -318,7 +354,11 @@ void CAlbumModel::SearchForFiles( CWnd* pParentWnd, bool reportEmpty /*= true*/ 
 
 	progress.DestroyDialog();
 
-	m_imagesModel.Swap( foundImagesModel );		// commit the transaction
+	// commit the transaction
+	std::vector< fs::CPath > oldStoragePaths = m_imagesModel.GetStoragePaths();		// baseline: store old embedded storages
+
+	m_imagesModel.Swap( foundImagesModel );
+	m_storageHost.ModifyMultiple( m_imagesModel.GetStoragePaths(), oldStoragePaths );
 }
 
 bool CAlbumModel::DoOrderImagesModel( CImagesModel* pImagesModel, ui::IProgressService* pProgressSvc )
@@ -333,7 +373,7 @@ bool CAlbumModel::DoOrderImagesModel( CImagesModel* pImagesModel, ui::IProgressS
 			m_randomSeed = ::GetTickCount();	// randomly init the random seed (with current tick count)
 			// fall-through
 		case fattr::ShuffleSameSeed:
-			::srand( m_randomSeed % 0x7FFF );	// randomize on m_randomSeed - note: the client of the randomization with the seed is CImagesModel (for shuffling)
+			::srand( m_randomSeed % 0x7FFF );	// randomize on m_randomSeed - note: the client of the randomization with the seed is images model (for shuffling)
 			break;
 	}
 

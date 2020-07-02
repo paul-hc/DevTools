@@ -88,6 +88,8 @@ struct CDropMark
 	void Invalidate( CListCtrl* pListCtrl );
 
 	static Orientation GetOrientation( const CListCtrl* pListCtrl );
+private:
+	bool GetListItemRect( const CListCtrl* pListCtrl, int index, CRect* pRect ) const;
 public:
 	Placement m_placement;
 	Orientation m_orientation;

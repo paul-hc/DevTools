@@ -47,11 +47,11 @@ public:
 	void Report( int lineNo = 0 ) const;
 	bool AssertReport( std::tstring& rMsg ) const;
 
-	size_t GetLeakedBytes( void ) const { return GetHeapTotal() - m_total; }
+	ptrdiff_t GetLeakedBytes( void ) const;
 	std::tstring FormatMessage( int lineNo = 0 ) const;
 protected:
 	size_t GetHeapTotal( void ) const;
-	std::tstring FormatLeak( size_t leakedBytes, bool isFinal ) const;
+	std::tstring FormatLeak( ptrdiff_t leakedBytes, bool isFinal ) const;
 private:
 	std::tstring m_varName;
 	std::tstring m_filename;

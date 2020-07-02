@@ -2,7 +2,7 @@
 #include "stdafx.h"
 #include "AlbumSettingsDialog.h"
 #include "FileAttrAlgorithms.h"
-#include "ImageArchiveStg.h"
+#include "ICatalogStorage.h"
 #include "MainFrame.h"
 #include "ImageView.h"
 #include "SearchPatternDialog.h"
@@ -270,7 +270,7 @@ void CAlbumSettingsDialog::CombineTextEffectAt( ui::CTextEffect& rTextEffect, LP
 	{
 		const CSearchPattern* pPattern = CReportListControl::AsPtr< CSearchPattern >( rowKey );
 
-		if ( PatternPath == subItem && pPattern->IsImageArchiveDoc() )
+		if ( PatternPath == subItem && pPattern->IsCatalogDocFile() )
 			rTextEffect |= s_stgFileEffect;						// highlight storage item
 
 		if ( IsNewFilePath( pPattern->GetFilePath() ) )
@@ -283,7 +283,7 @@ void CAlbumSettingsDialog::CombineTextEffectAt( ui::CTextEffect& rTextEffect, LP
 	{
 		const CFileAttr* pFileAttr = CReportListControl::AsPtr< CFileAttr >( rowKey );
 
-		if ( Folder == subItem && CImageArchiveStg::HasImageArchiveExt( pFileAttr->GetPath().GetOriginParentPath().GetPtr() ) )
+		if ( Folder == subItem && CCatalogStorageFactory::HasCatalogExt( pFileAttr->GetPath().GetOriginParentPath().GetPtr() ) )
 			rTextEffect |= s_stgFileEffect;						// highlight storage item
 
 		if ( IsNewFilePath( pFileAttr->GetPath() ) )
@@ -468,6 +468,9 @@ void CAlbumSettingsDialog::DoDataExchange( CDataExchange* pDX )
 		m_pPatternsEditor.reset( new CListCtrlEditorFrame( &m_patternsListCtrl, &m_patternsToolbar ) );
 		m_pImagesEditor.reset( new CListCtrlEditorFrame( &m_imagesListCtrl, &m_imagesToolbar ) );
 
+		if ( m_model.GetCatalogStorage() != NULL )
+			m_patternsListCtrl.EnableWindow( false );		// disable search patterns editing for catalog-based albums
+
 		m_imagesListCtrl.SetCompactIconSpacing();
 	}
 
@@ -516,8 +519,8 @@ BEGIN_MESSAGE_MAP( CAlbumSettingsDialog, CLayoutDialog )
 	ON_NOTIFY( lv::LVN_DropFiles, IDC_PATTERNS_LISTVIEW, OnLVnDropFiles_Patterns )
 	ON_NOTIFY( lv::LVN_ItemsRemoved, IDC_PATTERNS_LISTVIEW, OnLVnItemsRemoved_Patterns )
 	ON_CONTROL( lv::LVN_ItemsReorder, IDC_PATTERNS_LISTVIEW, OnLVnItemsReorder_Patterns )
-	ON_COMMAND( ID_ADD_ITEM, OnAdd_SearchPattern )			// validated by m_patternsEditor
-	ON_COMMAND( ID_EDIT_ITEM, OnModify_SearchPattern )		// validated by m_patternsEditor
+	ON_COMMAND( ID_ADD_ITEM, On_AddSearchPattern )			// validated by m_patternsEditor
+	ON_COMMAND( ID_EDIT_ITEM, On_ModifySearchPattern )		// validated by m_patternsEditor
 	ON_COMMAND( IDC_SEARCH_FOR_FILES, OnSearchSourceFiles )
 
 	ON_BN_CLICKED( IDC_MAX_FILE_COUNT_CHECK, OnToggle_MaxFileCount )
@@ -638,7 +641,7 @@ void CAlbumSettingsDialog::OnLVnItemsReorder_Patterns( void )
 	SetDirty();
 }
 
-void CAlbumSettingsDialog::OnAdd_SearchPattern( void )
+void CAlbumSettingsDialog::On_AddSearchPattern( void )
 {
 	CSearchPattern* pCaretPattern = m_patternsListCtrl.GetCaretAs< CSearchPattern >();
 	CSearchPatternDialog dlg( pCaretPattern, this );
@@ -659,7 +662,7 @@ void CAlbumSettingsDialog::OnAdd_SearchPattern( void )
 	SetDirty();
 }
 
-void CAlbumSettingsDialog::OnModify_SearchPattern( void )
+void CAlbumSettingsDialog::On_ModifySearchPattern( void )
 {
 	size_t selIndex = m_patternsListCtrl.GetCurSel();
 	ASSERT( selIndex != utl::npos );		// should be validated

@@ -28,9 +28,15 @@ public:
 
 	bool IsThrowMode( void ) const { return utl::ThrowMode == m_handlingMode; }
 	bool IsIgnoreMode( void ) const { return utl::IgnoreMode == m_handlingMode; }
+
+	// specialized singletons
+	static const CErrorHandler* Checker( void );
+	static const CErrorHandler* Thrower( void );
+	static const CErrorHandler* Ignorer( void );
 private:
 	utl::ErrorHandling m_handlingMode;
 };
+
 
 
 class CScopedErrorHandling

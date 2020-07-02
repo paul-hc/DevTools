@@ -43,6 +43,11 @@ namespace fs
 			m_pathMap[ pathKey ] = value;
 		}
 
+		bool Register( const PathT& pathKey, const ValueT& value )
+		{
+			return m_pathMap.insert( stdext::hash_map< PathT, ValueT >::value_type( pathKey, value ) ).second;
+		}
+
 		bool Remove( const PathT& pathKey )
 		{
 			typename stdext::hash_map< PathT, ValueT >::iterator itFound = m_pathMap.find( pathKey );
@@ -88,10 +93,13 @@ namespace fs
 	template< typename PathT, typename InterfaceT >
 	class CPathComPtrMap : public CPathMap< PathT, CAdapt< CComPtr< InterfaceT > > >
 	{
+	public:
 		typedef CComPtr< InterfaceT > TComPtr;
 		typedef CAdapt< TComPtr > TValue;
 		typedef CPathMap< PathT, TValue > TBaseClass;
 
+		typedef typename stdext::hash_map< PathT, TValue >::const_iterator const_iterator;
+	private:
 		using TBaseClass::Find;
 		using TBaseClass::Lookup;
 	public:
@@ -112,6 +120,15 @@ namespace fs
 			ASSERT( itFound != m_pathMap.end() );
 			return itFound->second.m_T;
 		}
+
+		void ReleaseAll( void )
+		{
+			for ( stdext::hash_map< PathT, ValueT >::iterator itEntry = m_pathMap.begin(); itEntry != m_pathMap.end(); ++itEntry )
+				itEntry->second = NULL;
+		}
+
+		const_iterator Begin( void ) const { return m_pathMap.begin(); }
+		const_iterator End( void ) const { return m_pathMap.end(); }
 	};
 }
 

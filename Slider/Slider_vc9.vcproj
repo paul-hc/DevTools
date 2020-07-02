@@ -670,6 +670,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\CatalogStorageHost.h"
+					>
+				</File>
+				<File
 					RelativePath=".\CustomOrderUndoRedo.cpp"
 					>
 				</File>
@@ -698,7 +702,11 @@
 					>
 				</File>
 				<File
-					RelativePath=".\IImageArchiveStg.h"
+					RelativePath=".\ICatalogStorage.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\ICatalogStorage.h"
 					>
 				</File>
 				<File
@@ -762,6 +770,14 @@
 				Name="service"
 				>
 				<File
+					RelativePath=".\CatalogStorageService.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\CatalogStorageService.h"
+					>
+				</File>
+				<File
 					RelativePath=".\FileOperation.cpp"
 					>
 				</File>
@@ -790,14 +806,6 @@
 					>
 				</File>
 				<File
-					RelativePath=".\ImageStorageService.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\ImageStorageService.h"
-					>
-				</File>
-				<File
 					RelativePath=".\ProgressService.cpp"
 					>
 				</File>
@@ -811,11 +819,11 @@
 			Name="Tests"
 			>
 			<File
-				RelativePath=".\test\ImageArchiveStgTests.cpp"
+				RelativePath=".\test\CatalogStorageTests.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\test\ImageArchiveStgTests.h"
+				RelativePath=".\test\CatalogStorageTests.h"
 				>
 			</File>
 			<File

@@ -1,8 +1,8 @@
 
 #include "stdafx.h"
 #include "ImageDoc.h"
-#include "MainFrame.h"
 #include "ImageView.h"
+#include "MainFrame.h"
 #include "Application_fwd.h"
 #include "utl/UI/Utilities.h"
 #include "utl/UI/WicImage.h"
@@ -38,6 +38,13 @@ BOOL CImageDoc::OnOpenDocument( LPCTSTR pFilePath )
 	{
 		CWaitCursor wait;
 		m_imagePath.Set( pFilePath );
+
+		if ( m_imagePath.IsComplexPath() )
+		{
+			m_storageHost.Clear();
+			m_storageHost.Push( m_imagePath.GetPhysicalPath() );
+		}
+
 		if ( NULL == GetImage( 0 ) )
 			AfxThrowFileException( m_imagePath.FileExist( fs::Read ) ? CFileException::accessDenied : CFileException::fileNotFound, -1, pFilePath );
 	}
@@ -62,12 +69,17 @@ BOOL CImageDoc::OnSaveDocument( LPCTSTR pFilePath )
 	{
 		CWaitCursor wait;
 
-		if ( pImage->GetOrigin().SaveBitmapToFile( pFilePath ) )
+		if ( !m_imagePath.IsComplexPath() )
 		{
-			SetModifiedFlag( FALSE );		// back to unmodified
-			return TRUE;
+			if ( !pImage->GetOrigin().SaveBitmapToFile( pFilePath ) )
+				return FALSE;
 		}
-		return FALSE;
+		else
+		{
+			// TODO: SaveAs embedded image as normal image file (Save is disabled)
+		}
+		SetModifiedFlag( FALSE );		// back to unmodified
+		return TRUE;
 	}
 	catch ( CException* pExc )
 	{
@@ -93,7 +105,7 @@ BOOL CImageDoc::OnNewDocument( void )
 void CImageDoc::OnUpdateFileSave( CCmdUI* pCmdUI )
 {
 	CWicImage* pImage = GetImage( 0 );
-	pCmdUI->Enable( pImage != NULL && pImage->IsValid() );
+	pCmdUI->Enable( pImage != NULL && pImage->IsValid() && !m_imagePath.IsComplexPath() );
 }
 
 void CImageDoc::OnUpdateFileSaveAs( CCmdUI* pCmdUI )

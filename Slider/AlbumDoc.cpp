@@ -6,13 +6,16 @@
 #include "SearchPattern.h"
 #include "FileAttr.h"
 #include "AlbumSettingsDialog.h"
-#include "ArchiveImagesDialog.h"
+#include "CatalogStorageService.h"
+#include "ProgressService.h"
+  #include "ArchiveImagesDialog.h"
 #include "AlbumImageView.h"
 #include "AlbumThumbListView.h"
-#include "ImageArchiveStg.h"
+#include "ICatalogStorage.h"
 #include "FileOperation.h"
 #include "Application.h"
 #include "resource.h"
+#include "utl/MemLeakCheck.h"
 #include "utl/Serialization.h"
 #include "utl/UI/MfcUtilities.h"
 #include "utl/UI/IconButton.h"
@@ -28,7 +31,6 @@
 
 IMPLEMENT_DYNCREATE( CAlbumDoc, CDocumentBase )
 
-
 CAlbumDoc::CAlbumDoc( void )
 	: CDocumentBase()
 	, m_bkColor( CLR_DEFAULT )
@@ -38,13 +40,40 @@ CAlbumDoc::CAlbumDoc( void )
 
 CAlbumDoc::~CAlbumDoc()
 {
-	// at exit, close the image storages associated with this document (if any)
-	m_model.CloseAssocImageArchiveStgs();
+	m_model.CloseAllStorages();		// redundant, it happens anyway since the model manages open storages
 }
 
-BOOL CAlbumDoc::OnNewDocument( void )
+void CAlbumDoc::DeleteContents( void )
 {
-	return CDocumentBase::OnNewDocument();
+	__super::DeleteContents();		// does nothing
+
+	m_model.Clear();
+}
+
+void CAlbumDoc::CopyAlbumState( const CAlbumDoc* pSrcDoc )
+{
+	REQUIRE( this != pSrcDoc );
+	ASSERT_PTR( pSrcDoc );
+
+	const_cast< CAlbumDoc* >( pSrcDoc )->FetchViewState();		// input image state from its current view
+
+	m_slideData = pSrcDoc->m_slideData;
+	m_bkColor = pSrcDoc->m_bkColor;
+	m_pImageState.reset( pSrcDoc->m_pImageState.get() != NULL ? new CImageState( *pSrcDoc->m_pImageState ) : NULL );
+	m_password = pSrcDoc->m_password;
+}
+
+void CAlbumDoc::FetchViewState( void )
+{
+	if ( CAlbumImageView* pImageView = GetAlbumImageView() )
+	{
+		// explicitly copy the persistent attributes from active view
+		m_slideData = pImageView->GetSlideData();
+		m_bkColor = pImageView->GetRawBkColor();
+
+		m_pImageState.reset( new CImageState );
+		pImageView->MakeImageState( m_pImageState.get() );
+	}
 }
 
 void CAlbumDoc::Serialize( CArchive& archive )
@@ -76,7 +105,11 @@ void CAlbumDoc::Serialize( CArchive& archive )
 		}
 
 		pLoadingArchive.reset( new serial::CScopedLoadingArchive( archive, docModelSchema ) );
+
 		m_model.StoreModelSchema( docModelSchema );									// data-member in model but persisted by this document
+
+		if ( ICatalogStorage* pCatalogStorage = CCatalogStorageFactory::Instance()->FindStorage( docPath ) )
+			pCatalogStorage->StoreDocModelSchema( docModelSchema );
 	}
 	else
 	{
@@ -100,8 +133,8 @@ void CAlbumDoc::Serialize( CArchive& archive )
 
 	m_model.Stream( archive );
 
-	if ( archive.IsLoading() )
-		m_model.CheckReparentFileAttrs( docPath.GetPtr(), CAlbumModel::Loading );		// re-parent embedded image paths with current doc stg path
+//	if ( archive.IsLoading() )
+//		m_model._CheckReparentFileAttrs( docPath.GetPtr(), CAlbumModel::Loading );		// re-parent embedded image paths with current doc stg path
 
 	serial::StreamItems( archive, m_dropUndoStack );
 	serial::StreamItems( archive, m_dropRedoStack );
@@ -129,16 +162,7 @@ void CAlbumDoc::Serialize( CArchive& archive )
 void CAlbumDoc::PrepareToSave( const fs::CPath& docPath )
 {
 	SetFlag( m_docFlags, PresistImageState, HasFlag( CWorkspace::GetFlags(), wf::PersistAlbumImageState ) );
-
-	if ( CAlbumImageView* pImageView = GetAlbumImageView() )
-	{
-		// explicitly copy the persistent attributes from active view
-		m_slideData = pImageView->GetSlideData();
-		m_bkColor = pImageView->GetRawBkColor();
-
-		m_pImageState.reset( new CImageState );
-		pImageView->MakeImageState( m_pImageState.get() );
-	}
+	FetchViewState();
 
 	if ( GetModelSchema() != app::Slider_LatestModelSchema )
 	{
@@ -152,7 +176,7 @@ void CAlbumDoc::PrepareToSave( const fs::CPath& docPath )
 
 bool CAlbumDoc::PromptSaveConvertModelSchema( void ) const
 {
-	const bool is_Album_sld = app::IsImageArchiveDoc( m_strPathName );
+	const bool is_Album_sld = app::IsCatalogFile( m_strPathName );
 	std::tstring message = str::Format( _T("Save older %s album document to the latest version %s%c\n\n%s"),
 		app::FormatModelVersion( GetModelSchema() ).c_str(),
 		app::FormatModelVersion( app::Slider_LatestModelSchema ).c_str(),
@@ -203,31 +227,118 @@ CSlideData* CAlbumDoc::GetActiveSlideData( void )
 }
 
 
-CAlbumDoc::ArchiveLoadResult CAlbumDoc::LoadArchiveStorage( const fs::CPath& stgPath )
+bool CAlbumDoc::IsStorageAlbum( void ) const
 {
-	ASSERT( app::IsImageArchiveDoc( stgPath.GetPtr() ) );
-
-	if ( !CImageArchiveStg::Factory()->VerifyPassword( &m_password, stgPath ) )
-		return PasswordNotVerified;
-
-	// note: album stream is optional for older archives: not an error if missing
-	if ( !CImageArchiveStg::Factory()->LoadAlbumDoc( this, stgPath ) )
-		return Failed;			// possibly corrupted storage
-
-	IImageArchiveStg* pLoadedImageStg = CImageArchiveStg::Factory()->FindStorage( stgPath );
-	ASSERT_PTR( pLoadedImageStg );
-	pLoadedImageStg->StoreDocModelSchema( GetModelSchema() );
-	return Succeeded;
+	return CCatalogStorageFactory::HasCatalogExt( GetDocFilePath().GetPtr() );
 }
 
-bool CAlbumDoc::InternalSaveAsArchiveStg( const fs::CPath& newStgPath )
+ICatalogStorage* CAlbumDoc::GetCatalogStorage( void )
 {
-	REQUIRE( app::IsImageArchiveDoc( newStgPath.GetPtr() ) );
+	if ( IsStorageAlbum() )
+		return m_model.GetCatalogStorage();
+
+	return NULL;
+}
+
+std::auto_ptr< CAlbumDoc > CAlbumDoc::LoadCatalogStorageAlbum( const fs::CPath& docStgPath )
+{
+	std::auto_ptr< CAlbumDoc > pNewAlbumDoc( new CAlbumDoc() );
+	CComPtr< ICatalogStorage > pCatalogStorage = CCatalogStorageFactory::Instance()->AcquireStorage( docStgPath, STGM_READ );
+
+	if ( !pNewAlbumDoc->LoadCatalogStorage( docStgPath ) )
+		pNewAlbumDoc.reset();
+
+	return pNewAlbumDoc;
+}
+
+bool CAlbumDoc::LoadCatalogStorage( const fs::CPath& docStgPath )
+{
+	ASSERT( app::IsCatalogFile( docStgPath.GetPtr() ) );
+
+	CComPtr< ICatalogStorage > pCatalogStorage = CCatalogStorageFactory::Instance()->AcquireStorage( docStgPath, STGM_READ );
+
+	if ( NULL == pCatalogStorage )
+		return false;
+
+	if ( !CCatalogPasswordStore::Instance()->LoadPasswordVerify( &m_password, pCatalogStorage ) )
+		return false;
+
+	m_model.StoreCatalogDocPath( docStgPath );
+
+	// note: album stream is optional for older archives: not an error if missing
+
+	if ( pCatalogStorage->LoadAlbumStream( this ) )
+		pCatalogStorage->StoreDocModelSchema( GetModelSchema() );		// copy over the model schema saved in the album stream
+	else
+		if ( !pCatalogStorage->EnumerateImages( &m_model.RefImagesModel() ) )	// missing album stream (in old catalogs) -> backwards compatibility: enumerate existing images in the catalog
+			return false;
+
+	m_model.OpenAllStorages();
+	return true;				// succeeded
+}
+
+bool CAlbumDoc::SaveAsCatalogStorage( const fs::CPath& newDocStgPath )
+{
+	REQUIRE( app::IsCatalogFile( newDocStgPath.GetPtr() ) );
+
+	ui::IProgressService* pProgressSvc = ui::CNoProgressService::Instance();		// default for unit testing
+	std::auto_ptr< CProgressService > pProgress;
+
+	if ( GetAlbumImageView() != NULL )				// normal interactive mode?
+	{
+		pProgress.reset( new CProgressService( NULL, _T("Creating image archive storage file") ) );
+		pProgressSvc = pProgress->GetService();
+	}
+
+	try
+	{
+		fs::CPath oldDocStgPath = GetDocFilePath();
+
+		if ( oldDocStgPath.IsEmpty() ||										// never saved
+			 !fs::IsValidStructuredStorage( oldDocStgPath.GetPtr() ) ||		// was a .sld album
+			 newDocStgPath != oldDocStgPath ||								// SaveAs
+			 GetModelSchema() < app::Slider_LatestModelSchema )				// loaded catalog with older model schema -> must be converted to LATEST
+		{
+			{
+				CCatalogStorageService storageSvc( pProgressSvc, &app::GetUserReport() );		// catalog storage metadata
+
+				storageSvc.BuildFromAlbumSaveAs( this );
+
+				CComPtr< ICatalogStorage > pCatalogStorage = CCatalogStorageFactory::CreateStorageObject();
+
+				pCatalogStorage->CreateImageArchiveFile( newDocStgPath, &storageSvc );			// SaveAs: create the entire image catalog - works internally in utl::ThrowMode
+			}
+
+			// reload the newly saved document - takes care of saving .sld to .ias
+			DeleteContents();
+			BuildAlbum( CSearchPattern( newDocStgPath ) );
+		}
+		else
+		{
+			ICatalogStorage* pCatalogStorage = GetCatalogStorage();
+			fs::stg::CScopedWriteDocMode scopedDocWrite( pCatalogStorage->GetDocStorage(), NULL );		// switch storage to write/throw mode
+
+			pCatalogStorage->SavePasswordStream();
+			pCatalogStorage->SaveAlbumStream( this );
+		}
+	}
+	catch ( CException* pExc )
+	{
+		app::HandleReportException( pExc );
+		return false;
+	}
+
+	return true;
+}
+
+bool CAlbumDoc::_InternalSaveAsArchiveStg( const fs::CPath& newDocStgPath )
+{
+	REQUIRE( app::IsCatalogFile( newDocStgPath.GetPtr() ) );
 
 	try
 	{
 		fs::CPath oldDocPath( GetPathName().GetString() );
-		bool saveAs = newStgPath != oldDocPath;
+		bool saveAs = newDocStgPath != oldDocPath;
 
 		if ( saveAs )
 		{
@@ -235,7 +346,7 @@ bool CAlbumDoc::InternalSaveAsArchiveStg( const fs::CPath& newStgPath )
 
 			if ( !IsModified() )												// in synch with the file?
 				if ( app::Slider_LatestModelSchema == GetModelSchema() )		// latest model schema? (will always save with Slider_LatestModelSchema)
-					if ( app::IsImageArchiveDoc( oldDocPath.GetPtr() ) )
+					if ( app::IsCatalogFile( oldDocPath.GetPtr() ) )
 						if ( m_model.HasConsistentDeepStreams() )
 							straightStgFileCopy = true;
 
@@ -243,13 +354,13 @@ bool CAlbumDoc::InternalSaveAsArchiveStg( const fs::CPath& newStgPath )
 			{
 				CFileOperation fileOp( utl::ThrowMode );
 
-				fileOp.Copy( fs::ToFlexPath( oldDocPath ), fs::ToFlexPath( newStgPath ) );		// optimization: straight stg file copy
-				fs::MakeFileWritable( newStgPath.GetPtr() );									// just in case source was read-only
+				fileOp.Copy( fs::ToFlexPath( oldDocPath ), fs::ToFlexPath( newDocStgPath ) );		// optimization: straight stg file copy
+				fs::MakeFileWritable( newDocStgPath.GetPtr() );									// just in case source was read-only
 			}
 			else
 			{
-				if ( !oldDocPath.IsEmpty() )
-					CImageArchiveStg::DiscardCachedImages( oldDocPath );
+//				if ( !oldDocPath.IsEmpty() )
+//					CImageArchiveStg::DiscardCachedImages( oldDocPath );
 
 				CArchivingModel archivingModel;
 				archivingModel.StorePassword( m_password );
@@ -257,18 +368,18 @@ bool CAlbumDoc::InternalSaveAsArchiveStg( const fs::CPath& newStgPath )
 				CAlbumModel tempModel = m_model;				// temp copy so that it can display original thumbnails while creating, avoiding sharing errors
 
 				// don't pass the document, it's too early to save the album stream, since we're working on a tempModel copy
-				if ( archivingModel.CreateArchiveStgFile( &tempModel, newStgPath ) )
+				if ( archivingModel.CreateArchiveStgFile( &tempModel, newDocStgPath ) )
 					m_model = tempModel;						// assign the results
 				else
 					return false;
 			}
 		}
 
-		SaveAlbumToArchiveStg( newStgPath );
+		_SaveAlbumToArchiveStg( newDocStgPath );
 		if ( !saveAs )
 			return true;
 
-		return BuildAlbum( newStgPath );						// reload from the new archive document file so that we reinitialize m_model
+		return BuildAlbum( newDocStgPath );						// reload from the new archive document file so that we reinitialize m_model
 	}
 	catch ( CException* pExc )
 	{
@@ -277,46 +388,45 @@ bool CAlbumDoc::InternalSaveAsArchiveStg( const fs::CPath& newStgPath )
 	}
 }
 
-void CAlbumDoc::SaveAlbumToArchiveStg( const fs::CPath& stgPath ) throws_( CException* )
+void CAlbumDoc::_SaveAlbumToArchiveStg( const fs::CPath& docStgPath ) throws_( CException* )
 {
 	// save existing album to image archive as "_Album.sld" stream
-	CScopedErrorHandling scopedThrow( CImageArchiveStg::Factory(), utl::ThrowMode );
+//	CScopedErrorHandling scopedThrow( CImageArchiveStg::Factory(), utl::ThrowMode );
 
-	m_model.CheckReparentFileAttrs( stgPath.GetPtr(), CAlbumModel::Saving );		// reparent with stgPath before saving the album info
-
-	if ( CImageArchiveStg::Factory()->SaveAlbumDoc( this, stgPath ) )
-		if ( IImageArchiveStg* pSavedImageStg = CImageArchiveStg::Factory()->FindStorage( stgPath ) )
+	m_model._CheckReparentFileAttrs( docStgPath.GetPtr(), CAlbumModel::Saving );		// reparent with docStgPath before saving the album info
+/*
+	if ( CImageArchiveStg::Factory()->SaveAlbumStream( this, docStgPath ) )
+		if ( ICatalogStorage* pSavedImageStg = CImageArchiveStg::Factory()->FindStorage( docStgPath ) )
 			pSavedImageStg->StoreDocModelSchema( GetModelSchema() );
+*/
 }
 
-bool CAlbumDoc::BuildAlbum( const fs::CPath& searchPath )
+bool CAlbumDoc::BuildAlbum( const CSearchPattern& searchPattern )
 {
+	const fs::CPath& searchPath = searchPattern.GetFilePath();
 	bool opening = DirtyOpening == IsModified();
 	bool loadedStgAlbumStream = false;
 
 	m_slideData.SetCurrentIndex( 0 );				// may get overridden by subsequent load of album doc
 	try
 	{
-		if ( app::IsImageArchiveDoc( searchPath.GetPtr() ) )
-			switch ( LoadArchiveStorage( searchPath ) )
-			{
-				case PasswordNotVerified:
-					return false;
-				case Failed:
-					loadedStgAlbumStream = false;
-					break;
-				case Succeeded:
-					loadedStgAlbumStream = true;
-					break;
-			}
-
-		if ( !loadedStgAlbumStream )				// directory path or archive stg missing album stream?
-			if ( m_model.SetupSearchPath( searchPath ) )
-				m_model.SearchForFiles( NULL );
+		if ( app::IsCatalogFile( searchPath.GetPtr() ) )
+		{
+			if ( LoadCatalogStorage( searchPath ) )
+				loadedStgAlbumStream = true;
 			else
 				return false;
-
-		m_model.GetImagesModel().AcquireStorages();		// to enable image caching
+		}
+		else
+		{
+			if ( m_model.SetupSingleSearchPattern( searchPattern ) )
+			{
+				m_model.SearchForFiles( NULL );
+				m_model.OpenAllStorages();		// to enable image caching
+			}
+			else
+				return false;
+		}
 	}
 	catch ( CException* pExc )
 	{
@@ -599,6 +709,44 @@ bool CAlbumDoc::AddExplicitFiles( const std::vector< std::tstring >& files, bool
 }
 
 
+// MFC base overrides
+
+BOOL CAlbumDoc::OnOpenDocument( LPCTSTR pPath )
+{
+	DeleteContents();
+	SetModifiedFlag( DirtyOpening );			// dirty during loading, to prevent premature view updates
+
+	const fs::CPath filePath( pPath );
+
+	switch ( app::CAlbumDocTemplate::GetOpenPathType( filePath.GetPtr() ) )
+	{
+		case app::CAlbumDocTemplate::SlideAlbum:
+			if ( !CDocumentBase::OnOpenDocument( pPath ) )
+				return FALSE;
+
+			m_model.OpenAllStorages();			// to enable image caching
+			SetModifiedFlag( Clean );			// start off clean
+			return TRUE;
+		case app::CAlbumDocTemplate::DirPath:
+		case app::CAlbumDocTemplate::CatalogStorageDoc:
+			return BuildAlbum( filePath );
+		default:
+			app::GetUserReport().MessageBox( str::Format( _T("Cannot open unrecognized album file:\n\n%s"), filePath.GetPtr() ) );
+			return FALSE;
+	}
+}
+
+BOOL CAlbumDoc::OnSaveDocument( LPCTSTR pPathName )
+{
+	if ( app::IsCatalogFile( pPathName ) )
+		return SaveAsCatalogStorage( fs::CPath( pPathName ) );
+	else if ( fs::IsValidDirectory( pPathName ) )
+		return DoSave( NULL );					// in effect SaveAs
+
+	return CDocumentBase::OnSaveDocument( pPathName );
+}
+
+
 // message handlers
 
 BEGIN_MESSAGE_MAP( CAlbumDoc, CDocumentBase )
@@ -629,46 +777,6 @@ BEGIN_MESSAGE_MAP( CAlbumDoc, CDocumentBase )
 	ON_COMMAND( CM_SELECT_ALL_THUMBS, CmSelectAllThumbs )
 	ON_UPDATE_COMMAND_UI( CM_SELECT_ALL_THUMBS, OnUpdateSelectAllThumbs )
 END_MESSAGE_MAP()
-
-BOOL CAlbumDoc::OnOpenDocument( LPCTSTR pPath )
-{
-	DeleteContents();
-	SetModifiedFlag( DirtyOpening );			// dirty during loading, but prevent premature view updates
-
-	const fs::CPath filePath( pPath );
-
-	switch ( app::CAlbumDocTemplate::GetOpenPathType( filePath.GetPtr() ) )
-	{
-		case app::CAlbumDocTemplate::SlideAlbum:
-			if ( !CDocumentBase::OnOpenDocument( pPath ) )
-				return FALSE;
-
-			m_model.GetImagesModel().AcquireStorages();		// to enable image caching
-			SetModifiedFlag( Clean );						// start off clean
-			return TRUE;
-		case app::CAlbumDocTemplate::DirPath:
-		case app::CAlbumDocTemplate::ImageArchiveDoc:
-			return BuildAlbum( filePath );
-		default:
-			app::GetUserReport().MessageBox( str::Format( _T("Cannot open unrecognized album file:\n\n%s"), filePath.GetPtr() ) );
-			return FALSE;
-	}
-}
-
-BOOL CAlbumDoc::OnSaveDocument( LPCTSTR pPathName )
-{
-	if ( app::IsImageArchiveDoc( pPathName ) )
-		return InternalSaveAsArchiveStg( fs::CPath( pPathName ) );
-	else if ( fs::IsValidDirectory( pPathName ) )
-		return DoSave( NULL );					// in effect Save As
-
-	return CDocumentBase::OnSaveDocument( pPathName );
-}
-
-void CAlbumDoc::OnCloseDocument( void )
-{
-	CDocumentBase::OnCloseDocument();
-}
 
 void CAlbumDoc::CmAutoDropDefragment( void )
 {
@@ -847,18 +955,20 @@ void CAlbumDoc::OnUpdateArchiveImages( CCmdUI* pCmdUI )
 void CAlbumDoc::OnEditArchivePassword( void )
 {
 	fs::CPath docFilePath( GetPathName().GetString() );
-
 	CPasswordDialog dlg( NULL, &docFilePath );
 	dlg.SetPassword( m_password );
 
-	if ( dlg.DoModal() != IDOK )
-		return;
+	if ( IDOK == dlg.DoModal() )
+	{
+		m_password = dlg.GetPassword();
 
-	m_password = dlg.GetPassword();
-
-	if ( app::IsImageArchiveDoc( docFilePath.GetPtr() ) )
-		if ( docFilePath.FileExist() )
-			CImageArchiveStg::Factory()->SavePassword( m_password, docFilePath );
+		if ( IsStorageAlbum() )
+			if ( ICatalogStorage* pCatalogStorage = GetCatalogStorage() )
+			{
+				pCatalogStorage->StorePassword( m_password );
+				CCatalogPasswordStore::Instance()->SavePassword( pCatalogStorage );
+			}
+	}
 }
 
 void CAlbumDoc::OnUpdateEditArchivePassword( CCmdUI* pCmdUI )

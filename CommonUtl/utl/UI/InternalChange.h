@@ -5,7 +5,7 @@
 
 // base for controls that inhibit notifications on internal changes
 
-abstract class CInternalChange
+class CInternalChange
 {
 public:
 	CInternalChange( void ) : m_internalChange( 0 ) {}
@@ -15,14 +15,14 @@ public:
 
 	void AddInternalChange( void )
 	{
-		if ( 0 == m_internalChange++ )
+		if ( 1 == ::InterlockedIncrement( &m_internalChange ) )
 			OnFirstAddInternalChange();
 	}
 
 	void ReleaseInternalChange( void )
 	{
 		ASSERT( m_internalChange != 0 );
-		if ( 0 == --m_internalChange )
+		if ( 0 == ::InterlockedDecrement( &m_internalChange ) )
 			OnFinalReleaseInternalChange();
 	}
 protected:
@@ -30,7 +30,7 @@ protected:
 	virtual void OnFirstAddInternalChange( void ) {}
 	virtual void OnFinalReleaseInternalChange( void ) {}
 private:
-	unsigned int m_internalChange;
+	ULONG m_internalChange;
 };
 
 

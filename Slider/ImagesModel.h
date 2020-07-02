@@ -20,11 +20,9 @@ public:
 	void Stream( CArchive& archive );
 
 	void Clear( void );
-	void Swap( CImagesModel& rImagesModel );
 	void StoreBaselineSequence( void );
 
-	void ReleaseStorages( void );
-	void AcquireStorages( void ) const;		// to enable image caching
+	void Swap( CImagesModel& rImagesModel );
 
 	bool IsEmpty( void ) const { return m_fileAttributes.empty(); }
 
@@ -35,6 +33,7 @@ public:
 
 	const CFileAttr* FindFileAttrWithPath( const fs::CPath& filePath ) const;		// file-path key lookup
 
+	const std::vector< fs::CPath >& GetStoragePaths( void ) const { return m_storagePaths; }
 	std::vector< fs::CPath >& RefStoragePaths( void ) { return m_storagePaths; }
 	bool AddStoragePath( const fs::CPath& storagePath );
 public:
@@ -44,7 +43,7 @@ private:
 	void FilterCorruptFiles( ui::IProgressService* pProgressSvc );
 private:
 	persist std::vector< CFileAttr* > m_fileAttributes;			// owning container
-	persist std::vector< fs::CPath > m_storagePaths;			// such as .ias files, storages found during search
+	persist std::vector< fs::CPath > m_storagePaths;			// such as .ias files, storages found during search - the catalogs are managed by parent album model
 };
 
 

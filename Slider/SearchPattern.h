@@ -15,7 +15,7 @@ public:
 	enum Type
 	{
 		DirPath,			// directory path
-		ArchiveStgFile,		// file-path of an OLE compound file of type .scf
+		CatalogDocFile,		// file-path of an image catalog, i.e. OLE compound file storage (.ias, etc)
 		ExplicitFile		// explicit file specifier (not a pattern)
 	};
 
@@ -56,10 +56,10 @@ public:
 	bool BrowseFilePath( BrowseMode pathType = BrowseAsIs, CWnd* pParentWnd = NULL, DWORD extraFlags = OFN_FILEMUSTEXIST );
 
 	bool IsEmpty( void ) const { return GetFilePath().IsEmpty(); }
-	bool IsValidPath( void ) const { return !IsEmpty() && GetFilePath().FileExist(); }
+	bool IsValidPath( void ) const;
 
 	bool IsDirPath( void ) const { return DirPath == m_type; }
-	bool IsImageArchiveDoc( void ) const { return ArchiveStgFile == m_type; }
+	bool IsCatalogDocFile( void ) const { return CatalogDocFile == m_type; }
 	bool IsExplicitFile( void ) const { return ExplicitFile == m_type; }
 
 	bool IsAutoDropDirPath( bool checkValidPath = true ) const { return IsDirPath() && ( !checkValidPath || IsValidPath() ) && AutoDropNumFormat == m_searchMode; }

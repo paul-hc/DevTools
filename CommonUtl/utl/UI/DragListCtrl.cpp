@@ -16,20 +16,21 @@ CDropMark::CDropMark( const CListCtrl* pListCtrl, int dropIndex )
 	: m_placement( dropIndex < pListCtrl->GetItemCount() ? BeforeItem : AfterItem )
 	, m_orientation( GetOrientation( pListCtrl ) )
 {
-	ASSERT( pListCtrl->GetItemCount() != 0 );
 	ASSERT( dropIndex != -1 );
 
-	pListCtrl->GetItemRect( BeforeItem == m_placement ? dropIndex : ( dropIndex - 1 ), &m_markRect, LVIR_BOUNDS );
-	if ( BeforeItem == m_placement )
-		if ( HorizMark == m_orientation )
-			m_markRect.bottom = m_markRect.top;				// fold to top
+	GetListItemRect( pListCtrl, BeforeItem == m_placement ? dropIndex : ( dropIndex - 1 ), &m_markRect );
+
+	if ( pListCtrl->GetItemCount() != 0 )
+		if ( BeforeItem == m_placement )
+			if ( HorizMark == m_orientation )
+				m_markRect.bottom = m_markRect.top;				// fold to top
+			else
+				m_markRect.right = m_markRect.left;				// fold to left
 		else
-			m_markRect.right = m_markRect.left;				// fold to left
-	else
-		if ( HorizMark == m_orientation )
-			m_markRect.top = --m_markRect.bottom;			// fold to bottom
-		else
-			m_markRect.left = --m_markRect.right;			// fold to right
+			if ( HorizMark == m_orientation )
+				m_markRect.top = --m_markRect.bottom;			// fold to bottom
+			else
+				m_markRect.left = --m_markRect.right;			// fold to right
 
 	if ( HorizMark == m_orientation )
 		m_markRect.InflateRect( 0, PenWidth + ArrowExtent + 1 );
@@ -155,4 +156,19 @@ CDropMark::Orientation CDropMark::GetOrientation( const CListCtrl* pListCtrl )
 		case LV_VIEW_TILE:
 			return stacksVertically ? HorizMark : VertMark;
 	}
+}
+
+bool CDropMark::GetListItemRect( const CListCtrl* pListCtrl, int index, CRect* pRect ) const
+{
+	if ( pListCtrl->GetItemRect( index, pRect, LVIR_BOUNDS ) )
+		return true;
+
+	// empty list: simulate top item
+	pListCtrl->GetClientRect( pRect );
+
+	if ( HWND hHeaderWnd = pListCtrl->GetHeaderCtrl()->GetSafeHwnd() )
+		pRect->top += ui::GetControlRect( hHeaderWnd ).Height();
+
+	pRect->bottom = pRect->top + 16;
+	return false;
 }

@@ -45,7 +45,7 @@ void CWicImageCache::TraceObject( const fs::ImagePathKey& imageKey, CWicImage* p
 #ifdef _DEBUG
 	std::tstring flagsText = fs::cache::GetTags_StatusFlags().FormatUi( cacheFlags, _T(",") );
 	if ( !flagsText.empty() )		// prevent noise: not a CacheHit?
-		TRACE_CACHE( _T("{%d} '%s' %s: %s\n"), s_traceCount++,
+		TRACE_CACHE( _T("[%d] '%s' %s: %s\n"), s_traceCount++,
 			flagsText.c_str(),
 			imageKey.first.IsComplexPath() ? _T("EMBEDDED image") : _T("image"),
 			pImage != NULL ? pImage->FormatDbg().c_str() : imageKey.first.GetPtr() );
@@ -57,8 +57,9 @@ void CWicImageCache::TraceObject( const fs::ImagePathKey& imageKey, CWicImage* p
 void CWicImageCache::Clear( void )
 {
 	TRACE( _T(" (--) Clear all cached images: %d\n"), m_imageCache.GetCount() );
-	s_traceCount = 0;
+
 	m_imageCache.Clear();
+	s_traceCount = 0;
 }
 
 size_t CWicImageCache::GetCount( void ) const
@@ -107,7 +108,7 @@ CComPtr< IWICBitmapSource > CWicImageCache::LookupBitmapSource( const fs::ImageP
 		pBitmap = pFoundImage->GetWicBitmap();
 	else
 	{
-		wic::CBitmapDecoder decoder( imageKey.first );
+		wic::CBitmapDecoder decoder = CWicImage::AcquireDecoder( imageKey.first, utl::CheckMode );
 		if ( decoder.IsValid() )
 			pBitmap = decoder.GetFrameAt( imageKey.second );						// no conversion
 	}

@@ -17,7 +17,7 @@ public:
 	CFileAttr( void );
 	CFileAttr( const fs::CPath& filePath );				// only for concrete files
 	CFileAttr( const CFileFind& foundFile );			// get file attributes
-	~CFileAttr();
+	virtual ~CFileAttr();
 
 	// utl::ISubject interface
 	virtual const std::tstring& GetCode( void ) const;

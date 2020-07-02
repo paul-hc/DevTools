@@ -201,19 +201,19 @@ namespace wic
 			CComPtr< IWICPixelFormatInfo > pPixelFormatInfo = wic::GetPixelFormatInfo( pBitmap );
 			ASSERT_PTR( pPixelFormatInfo );
 
-			CErrorHandler check( utl::CheckMode );
+			const CErrorHandler* pChecker = CErrorHandler::Checker();
 
-			check.Handle( pPixelFormatInfo->GetFormatGUID( &m_pixelFormatId ), &allGood );
-			check.Handle( pPixelFormatInfo->GetBitsPerPixel( &m_bitsPerPixel ), &allGood );
-			check.Handle( pPixelFormatInfo->GetChannelCount( &m_channelCount ), &allGood );
+			pChecker->Handle( pPixelFormatInfo->GetFormatGUID( &m_pixelFormatId ), &allGood );
+			pChecker->Handle( pPixelFormatInfo->GetBitsPerPixel( &m_bitsPerPixel ), &allGood );
+			pChecker->Handle( pPixelFormatInfo->GetChannelCount( &m_channelCount ), &allGood );
 
 			if ( CComQIPtr< IWICPixelFormatInfo2 > pPixelFormatInfo2 = pPixelFormatInfo )
 			{
 				BOOL supportsTransparency = FALSE;
-				if ( check.Handle( pPixelFormatInfo2->SupportsTransparency( &supportsTransparency ) ) )
+				if ( pChecker->Handle( pPixelFormatInfo2->SupportsTransparency( &supportsTransparency ) ) )
 					m_hasAlphaChannel = supportsTransparency != FALSE;
 
-				check.Handle( pPixelFormatInfo2->GetNumericRepresentation( &m_numRepresentation ), &allGood );
+				pChecker->Handle( pPixelFormatInfo2->GetNumericRepresentation( &m_numRepresentation ), &allGood );
 			}
 			else
 				m_hasAlphaChannel = m_bitsPerPixel >= 32;
@@ -417,6 +417,9 @@ namespace wic
 
 namespace wic
 {
+	CInternalChange CScopedLockImaging::s_locked;
+
+
 	// WIC utilities
 
 	CDibMeta LoadImageFromFile( const TCHAR* pFilePath, UINT framePos /*= 0*/ )

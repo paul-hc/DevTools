@@ -201,6 +201,9 @@ DROPEFFECT CDragListCtrl< BaseListCtrl >::Event_OnDragOver( COleDataObject* pDat
 {
 	pDataObject, keyState, point;
 
+	if ( !IsWindowEnabled() )				// list disabled?
+		return DROPEFFECT_NONE;				// reject external dragging
+
 	if ( !IsDragging() )					// external dragging from Explorer?
 		if ( !UseExternalDropFiles() )
 			return DROPEFFECT_NONE;			// reject external dragging

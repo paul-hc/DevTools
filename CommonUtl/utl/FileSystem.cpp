@@ -410,6 +410,31 @@ namespace fs
 	}
 
 
+	FILETIME* MakeFileTime( FILETIME& rOutFileTime, const CTime& time )
+	{
+		if ( time_utl::IsValid( time ) )
+		{
+			SYSTEMTIME sysTime;
+			sysTime.wYear = (WORD)time.GetYear();
+			sysTime.wMonth = (WORD)time.GetMonth();
+			sysTime.wDay = (WORD)time.GetDay();
+			sysTime.wHour = (WORD)time.GetHour();
+			sysTime.wMinute = (WORD)time.GetMinute();
+			sysTime.wSecond = (WORD)time.GetSecond();
+			sysTime.wMilliseconds = 0;
+
+			FILETIME localTime;
+
+			if ( ::SystemTimeToFileTime( &sysTime, &localTime ) )					// convert system time to local file time
+				if ( ::LocalFileTimeToFileTime( &localTime, &rOutFileTime ) )		// convert local file time to UTC file time
+					return &rOutFileTime;
+		}
+
+		return NULL;
+
+	}
+
+
 	namespace thr
 	{
 		CTime ReadFileTime( const fs::CPath& filePath, TimeField timeField,
@@ -460,28 +485,12 @@ namespace fs
 		FILETIME* MakeFileTime( FILETIME& rOutFileTime, const CTime& time, const TCHAR* pFilePath,
 								fs::ExcPolicy policy /*= fs::RuntimeExc*/ ) throws_( CRuntimeException, CFileException* )
 		{
-			if ( !time_utl::IsValid( time ) )
-				return NULL;
+			FILETIME* pResult = fs::MakeFileTime( rOutFileTime, time );		// call the no-throw function
 
-			SYSTEMTIME sysTime;
-			sysTime.wYear = (WORD)time.GetYear();
-			sysTime.wMonth = (WORD)time.GetMonth();
-			sysTime.wDay = (WORD)time.GetDay();
-			sysTime.wHour = (WORD)time.GetHour();
-			sysTime.wMinute = (WORD)time.GetMinute();
-			sysTime.wSecond = (WORD)time.GetSecond();
-			sysTime.wMilliseconds = 0;
-
-			// convert system time to local file time
-			FILETIME localTime;
-			if ( !::SystemTimeToFileTime( &sysTime, &localTime ) )
+			if ( NULL == pResult && time_utl::IsValid( time ) )
 				impl::ThrowMfcErrorAs( policy, impl::NewLastErrorException( pFilePath ) );
 
-			// convert local file time to UTC file time
-			if ( !::LocalFileTimeToFileTime( &localTime, &rOutFileTime ) )
-				impl::ThrowMfcErrorAs( policy, impl::NewLastErrorException( pFilePath ) );
-
-			return &rOutFileTime;
+			return pResult;
 		}
 
 		void TouchFile( const fs::CPath& filePath, const CTime& time /*= CTime::GetCurrentTime()*/, TimeField timeField /*= ModifiedDate*/,

@@ -77,7 +77,7 @@ namespace fs
 		if ( CStructuredStorage* pDocStorage = CStructuredStorage::FindOpenedStorage( docFilePath ) )
 		{
 			CScopedErrorHandling scopedIgnore( pDocStorage, utl::IgnoreMode );		// testing: failure not an error
-			return pDocStorage->LocateStream( GetEmbeddedPath() ) != NULL;
+			return pDocStorage->LocateReadStream( GetEmbeddedPath() ).get() != NULL;
 		}
 
 		return true;		// assume is a valid stream path if the storage document is not open (don't bother opening)

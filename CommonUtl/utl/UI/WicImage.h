@@ -54,6 +54,8 @@ public:
 	static bool IsCorruptFile( const fs::CFlexPath& imagePath );
 	static bool IsCorruptFrame( const fs::ImagePathKey& imageKey );
 
+	static wic::CBitmapDecoder AcquireDecoder( const fs::CFlexPath& imagePath, utl::ErrorHandling handlingMode = utl::CheckMode );
+		// used in static methods that don't create a CWicImage object - wic::CBitmapDecoder is efficient to copy
 private:
 	// Shared bitmap decoder that keeps track of static (not animated) multi-frame images with same image path (typically from a .tif stream).
 	// These are shared resources since for multi-frame images we may need subsequent loading of other frames. The CWicAnimatedImage class manages its own shared decoder.
@@ -82,7 +84,6 @@ private:
 	typedef fs::CPathMap< fs::CFlexPath, CMultiFrameDecoder > TMultiFrameDecoderMap;
 
 	static TMultiFrameDecoderMap& SharedMultiFrameDecoders( void );
-	static wic::CBitmapDecoder AcquireDecoder( const fs::CFlexPath& imagePath, utl::ErrorHandling handlingMode );	// used in static methods that don't create a CWicImage object - wic::CBitmapDecoder is efficient to copy
 
 	void SetSharedDecoder( CMultiFrameDecoder* pSharedDecoder );
 	bool LoadDecoderFrame( wic::CBitmapDecoder& decoder, const fs::ImagePathKey& imageKey );

@@ -44,6 +44,7 @@ namespace path
 
 	pred::CompareResult CompareNaturalPtr( const TCHAR* pLeft, const TCHAR* pRight );
 
+	const TCHAR* StdFormatNumSuffix( void );		// "_[%d]"
 	size_t GetHashValue( const TCHAR* pPath );
 
 
@@ -221,8 +222,10 @@ namespace fs
 		bool HasExt( const TCHAR* pExt ) const { return path::EquivalentPtr( GetExt(), pExt ); }
 		ExtensionMatch GetExtensionMatch( const fs::CPath& right ) const;
 
-		std::tstring GetFname( void ) const;
 		void SplitFilename( std::tstring& rFname, std::tstring& rExt ) const;
+
+		std::tstring GetFname( void ) const;
+		void ReplaceFname( const TCHAR* pFname ) { ASSERT_PTR( pFname ); SetNameExt( std::tstring( pFname ) + GetExt() ); }
 
 		void ReplaceExt( const TCHAR* pExt ) { Set( GetRemoveExt().Get() + pExt ); }
 		void RemoveExt( void ) { Set( GetRemoveExt().Get() ); }
@@ -309,6 +312,20 @@ namespace fs
 	}
 
 } // namespace fs
+
+
+namespace fs
+{
+	namespace traits
+	{
+		// for path makers
+
+		inline const fs::CPath& GetPath( const fs::CPath& filePath ) { return filePath; }
+
+		template< typename DestType >
+		inline void SetPath( DestType& rDest, const fs::CPath& filePath ) { rDest.Set( filePath.Get() ); }
+	}
+}
 
 
 namespace stdext

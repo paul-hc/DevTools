@@ -3,7 +3,7 @@
 #include "ImageFileEnumerator.h"
 #include "SearchPattern.h"
 #include "FileAttr.h"
-#include "ImageArchiveStg.h"
+#include "ICatalogStorage.h"
 #include "AlbumDoc.h"
 #include "Application_fwd.h"
 #include "utl/ContainerUtilities.h"
@@ -32,7 +32,7 @@ CImageFileEnumerator::~CImageFileEnumerator()
 void CImageFileEnumerator::Search( const std::vector< CSearchPattern* >& searchPatterns ) throws_( CException*, CUserAbortedException )
 {
 	CWaitCursor wait;
-	CScopedErrorHandling scopedThrow( CImageArchiveStg::Factory(), utl::ThrowMode );		// report storage sharing violations, etc
+	CScopedErrorHandling scopedThrow( CCatalogStorageFactory::Instance(), utl::ThrowMode );		// report storage sharing violations, etc
 
 	for ( std::vector< CSearchPattern* >::const_iterator itPattern = searchPatterns.begin(); itPattern != searchPatterns.end(); )
 	{
@@ -42,7 +42,7 @@ void CImageFileEnumerator::Search( const std::vector< CSearchPattern* >& searchP
 			const size_t oldFoundSize = m_foundImages.GetFileAttrs().size();
 
 			if ( m_pChainEnum != NULL && m_pCurrPattern->IsDirPath() )
-				m_pChainEnum->AddFoundSubDir( m_pCurrPattern->GetFilePath().GetPtr() );	// progress only: advance stage to the root directory
+				m_pChainEnum->AddFoundSubDir( m_pCurrPattern->GetFilePath().GetPtr() );		// progress only: advance stage to the root directory
 
 			m_pCurrPattern->EnumImageFiles( this );
 
@@ -55,7 +55,6 @@ void CImageFileEnumerator::Search( const std::vector< CSearchPattern* >& searchP
 			{
 				case IDCANCEL:
 				case IDABORT:
-					m_foundImages.ReleaseStorages();
 					throw new mfc::CUserAbortedException;
 				case IDTRYAGAIN:
 				case IDRETRY:	continue;
@@ -75,13 +74,13 @@ void CImageFileEnumerator::Search( const CSearchPattern& searchPattern ) throws_
 	Search( searchPatterns );
 }
 
-void CImageFileEnumerator::SearchImageArchive( const fs::CPath& stgDocPath ) throws_( CException*, CUserAbortedException )
+void CImageFileEnumerator::SearchCatalogStorage( const fs::CPath& stgDocPath ) throws_( CException*, CUserAbortedException )
 {
 	if ( !stgDocPath.FileExist() )
 		AfxThrowFileException( CFileException::fileNotFound, -1, stgDocPath.GetPtr() );		// storage file path does not exist
 
 	CWaitCursor wait;
-	CScopedErrorHandling scopedThrow( CImageArchiveStg::Factory(), utl::ThrowMode );		// report storage sharing violations, etc
+	CScopedErrorHandling scopedThrow( CCatalogStorageFactory::Instance(), utl::ThrowMode );		// report storage sharing violations, etc
 
 	m_issueStore.Reset( _T("Querying storage for images") );
 
@@ -107,10 +106,13 @@ bool CImageFileEnumerator::PassFilter( const CFileAttr& fileAttr ) const
 	return true;
 }
 
-void CImageFileEnumerator::Push( CFileAttr* pFileAttr )
+bool CImageFileEnumerator::Push( CFileAttr* pFileAttr )
 {
 	if ( !PassFilter( *pFileAttr ) )
-		return;
+	{
+		delete pFileAttr;
+		return false;
+	}
 
 	m_foundImages.AddFileAttr( pFileAttr );
 
@@ -118,6 +120,7 @@ void CImageFileEnumerator::Push( CFileAttr* pFileAttr )
 		m_pChainEnum->AddFoundFile( pFileAttr->GetPath().GetPtr() );
 
 //Sleep( 100 );			// debug progress bar
+	return true;
 }
 
 void CImageFileEnumerator::PushMany( const std::vector< CFileAttr* >& fileAttrs )
@@ -131,20 +134,22 @@ void CImageFileEnumerator::AddFoundFile( const TCHAR* pFilePath )
 {
 	fs::CPath filePath( pFilePath );
 
-	if ( app::IsImageArchiveDoc( filePath.GetPtr() ) )
+	if ( app::IsCatalogFile( filePath.GetPtr() ) )
 	{
-		// found a compound image storage: load its metadata as found images
-		CAlbumDoc archiveDoc;
-		if ( CAlbumDoc::Succeeded == archiveDoc.LoadArchiveStorage( filePath ) )	// note: we need to load as CAlbumDoc since its document schema may be older (backwards compatibility)
+		// found a compound image catalog storage: load its metadata as found images
+		// note: we need to load as CAlbumDoc since its document schema may be older (backwards compatibility)
+
+		std::auto_ptr< CAlbumDoc > pAlbumDoc = CAlbumDoc::LoadCatalogStorageAlbum( filePath );
+		if ( pAlbumDoc.get() != NULL )
 		{
 			AddFoundSubDir( filePath.GetPtr() );							// a storage counts as a sub-directory
 
-			std::vector< CFileAttr* > archiveImageAttrs;
-			archiveDoc.RefModel()->SwapFileAttrs( archiveImageAttrs );		// take ownership of found image attributes
+			std::vector< CFileAttr* > catalogFileAttrs;
+			pAlbumDoc->RefModel()->SwapFileAttrs( catalogFileAttrs );		// take ownership of found image attributes
 
-			if ( !archiveImageAttrs.empty() )
+			if ( !catalogFileAttrs.empty() )
 			{
-				PushMany( archiveImageAttrs );
+				PushMany( catalogFileAttrs );
 				m_foundImages.AddStoragePath( filePath );
 			}
 		}
@@ -157,7 +162,7 @@ void CImageFileEnumerator::AddFile( const CFileFind& foundFile )
 {
 	fs::CPath filePath = foundFile.GetFilePath().GetString();
 
-	if ( CImageArchiveStg::HasImageArchiveExt( filePath.GetPtr() ) )
+	if ( CCatalogStorageFactory::HasCatalogExt( filePath.GetPtr() ) )
 		AddFoundFile( filePath.GetPtr() );
 	else
 		Push( new CFileAttr( foundFile ) );

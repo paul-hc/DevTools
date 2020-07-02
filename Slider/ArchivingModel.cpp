@@ -1,8 +1,8 @@
 
 #include "stdafx.h"
 #include "ArchivingModel.h"
-#include "ImageStorageService.h"
-#include "ImageArchiveStg.h"
+#include "CatalogStorageService.h"
+#include "ICatalogStorage.h"
 #include "AlbumModel.h"
 #include "FileAttr.h"
 #include "FileAttrAlgorithms.h"
@@ -56,7 +56,7 @@ bool CArchivingModel::CreateArchiveStgFile( CAlbumModel* pModel, const fs::CPath
 	static const std::tstring s_fmtCopySrc = _T("*.*");
 	GenerateDestPaths( destStgPath, s_fmtCopySrc, &seqCount );							// make m_pathPairs: copy SRC as is into DEST
 
-	pModel->CheckReparentFileAttrs( destStgPath.GetPtr(), CAlbumModel::Saving );		// reparent with destStgPath before saving the album info
+	pModel->_CheckReparentFileAttrs( destStgPath.GetPtr(), CAlbumModel::Saving );		// reparent with destStgPath before saving the album info
 	ENSURE( pModel->GetFileAttrCount() == m_pathPairs.size() );
 
 	return BuildArchiveStorageFile( destStgPath, FOP_FileCopy );						// false: user declined overwrite
@@ -175,7 +175,7 @@ bool CArchivingModel::GenerateDestPaths( const fs::CPath& destPath, const std::t
 	ASSERT_PTR( pSeqCount );
 	ResetDestPaths();
 
-	DestType destType = app::IsImageArchiveDoc( destPath.GetPtr() ) ? ToArchiveStg : ToDirectory;
+	DestType destType = app::IsCatalogFile( destPath.GetPtr() ) ? ToArchiveStg : ToDirectory;
 	if ( ToDirectory == destType && !destPath.FileExist() )
 		return false;
 	if ( m_pathPairs.empty() )
@@ -213,16 +213,20 @@ bool CArchivingModel::GenerateDestPaths( const fs::CPath& destPath, const std::t
 
 bool CArchivingModel::BuildArchiveStorageFile( const fs::CPath& destStgPath, FileOp fileOp, CWnd* pParentWnd /*= AfxGetMainWnd()*/ ) const
 {
+	// For now disable interactive progress since if current image is animated, it will acces its shared decoder, and the stream will be temporarily inaccessible.
+	// Still, error message boxes are still problematic... that should be non-interfactive too.
+	//
+		//pParentWnd;
 	CProgressService progress( pParentWnd, _T("Building image archive storage file") );
-	ui::IProgressService* pProgressSvc = progress.GetService();
+	ui::IProgressService* pProgressSvc = /*ui::CNoProgressService::Instance()*/ progress.GetService();
 
-	CImageStorageService storageSvc( pProgressSvc, &app::GetUserReport() );		// image storage metadata - owning for exception safety
+	CCatalogStorageService catalogSvc( pProgressSvc, &app::GetUserReport() );		// image storage metadata - owning for exception safety
 
-	storageSvc.SetPassword( m_password );
-	storageSvc.Build( m_pathPairs );		// also discards cached SRC images and storages
+	catalogSvc.SetPassword( m_password );
+	catalogSvc.BuildFromTransferPairs( m_pathPairs );		// also discards cached SRC images and storages
 
-	if ( storageSvc.IsEmpty() )
-		if ( storageSvc.GetReport()->MessageBox( _T("There are no files to add to the image archive.\nDo you still want to create an empty image archive?"), MB_YESNO | MB_ICONQUESTION ) != IDYES )
+	if ( catalogSvc.IsEmpty() )
+		if ( catalogSvc.GetReport()->MessageBox( _T("There are no files to add to the image archive.\nDo you still want to create an empty image archive?"), MB_YESNO | MB_ICONQUESTION ) != IDYES )
 			return false;
 
 	try
@@ -231,10 +235,9 @@ bool CArchivingModel::BuildArchiveStorageFile( const fs::CPath& destStgPath, Fil
 
 		CTimer timer;
 
-		CComPtr< IImageArchiveStg > pImageArchiveStorage;
-		CImageArchiveStg::CreateObject( &pImageArchiveStorage );
+		CComPtr< ICatalogStorage > pCatalogStorage = CCatalogStorageFactory::CreateStorageObject();
 
-		pImageArchiveStorage->CreateImageArchive( destStgPath, &storageSvc );
+		pCatalogStorage->CreateImageArchiveFile( destStgPath, &catalogSvc );
 
 		app::LogLine( _T("--- END building image archive %s - Elapsed %.2f seconds ---"), destStgPath.GetPtr(), timer.ElapsedSeconds() );
 	}
@@ -287,5 +290,6 @@ bool CArchivingModel::BuildArchiveStorageFile( const fs::CPath& destStgPath, Fil
 			++it;
 		}
 	}
+
 	return 0 == errorCount;
 }

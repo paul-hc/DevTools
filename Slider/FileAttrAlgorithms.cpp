@@ -81,21 +81,29 @@ namespace fattr
 
 namespace fattr
 {
-	void TransformToEmbeddedPaths( std::vector< fs::CFlexPath >& rEmbeddedPaths, bool useDeepStreamPaths /*= true*/ )
-	{
+	void TransformToEmbeddedPaths( std::vector< fs::TEmbeddedPath >& rDestStreamPaths, bool useDeepStreamPaths /*= true*/ )
+	{	// rDestStreamPaths: IN source paths, OUT embedded stream paths
 		if ( useDeepStreamPaths )
 		{
-			fs::CPath commonDirPath = path::ExtractCommonParentPath( rEmbeddedPaths );
+			fs::CPath commonDirPath = path::ExtractCommonParentPath( rDestStreamPaths );
 			if ( !commonDirPath.IsEmpty() )
-				path::StripDirPrefix( rEmbeddedPaths, commonDirPath.GetPtr() );
+				path::StripDirPrefix( rDestStreamPaths, commonDirPath.GetPtr() );
 			else
-				path::StripRootPrefix( rEmbeddedPaths );		// ignore drive letter
+				path::StripRootPrefix( rDestStreamPaths );		// ignore drive letter
 
 			// convert any deep embedded storage paths to directory paths (so that '>' appears only once in the final embedded)
-			utl::for_each( rEmbeddedPaths, func::NormalizeEmbeddedPath() );
+			utl::for_each( rDestStreamPaths, func::NormalizeEmbeddedPath() );
 		}
 		else
-			path::StripToFilename( rEmbeddedPaths );		// careful with duplicate filenames
+			path::StripToFilename( rDestStreamPaths );		// will take care to resolve duplicate filenames
+	}
+
+	size_t TransformDestEmbeddedPaths( std::vector< fs::TEmbeddedPath >& rDestStreamPaths, bool useDeepStreamPaths /*= true*/ )
+	{
+		fattr::TransformToEmbeddedPaths( rDestStreamPaths, useDeepStreamPaths );
+
+		CPathUniqueMaker uniqueMaker;
+		return uniqueMaker.UniquifyPaths( rDestStreamPaths );			// returns the number of duplicates uniquified
 	}
 }
 

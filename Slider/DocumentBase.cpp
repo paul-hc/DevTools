@@ -15,16 +15,16 @@ CDocumentBase::CDocumentBase( void )
 {
 }
 
+CDocumentBase::~CDocumentBase()
+{
+}
+
 CWicImage* CDocumentBase::AcquireImage( const fs::ImagePathKey& imageKey )
 {
 	if ( !imageKey.first.IsEmpty() )
 		return CWicImageCache::Instance().Acquire( imageKey ).first;
 
 	return NULL;
-}
-
-CDocumentBase::~CDocumentBase()
-{
 }
 
 

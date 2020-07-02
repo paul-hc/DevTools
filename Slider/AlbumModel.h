@@ -6,6 +6,7 @@
 #include "ModelSchema.h"
 #include "SearchModel.h"
 #include "ImagesModel.h"
+#include "CatalogStorageHost.h"
 
 
 class CFileAttr;
@@ -18,10 +19,20 @@ public:
 	CAlbumModel( void );
 	~CAlbumModel();
 
+	void Clear( void );
+
 	void Stream( CArchive& archive );
 
 	app::ModelSchema GetModelSchema( void ) const { return m_modelSchema; }
 	void StoreModelSchema( app::ModelSchema modelSchema ) { m_modelSchema = modelSchema; }
+
+	void StoreCatalogDocPath( const fs::CPath& docStgPath );
+
+	CCatalogStorageHost* GetStorageHost( void ) { return &m_storageHost; }
+	ICatalogStorage* GetCatalogStorage( void ) const;			// opened storage if model is based on a catalog storage
+
+	void OpenAllStorages( void );
+	void CloseAllStorages( void );
 
 	const CSearchModel* GetSearchModel( void ) const { return &m_searchModel; }
 	CSearchModel* RefSearchModel( void ) { return &m_searchModel; }
@@ -35,10 +46,10 @@ public:
 	bool HasPersistFlag( PersistFlag persistFlag ) const { return HasFlag( m_persistFlags, persistFlag ); }
 	void SetPersistFlag( PersistFlag persistFlag, bool on = true ) { SetFlag( m_persistFlags, persistFlag, on ); }
 
-	bool SetupSearchPath( const fs::CPath& searchPath );
-	void SearchForFiles( CWnd* pParentWnd, bool reportEmpty = true ) throws_( CException* );
+	static bool ShouldUseDeepStreamPaths( void );
 
-	void CloseAssocImageArchiveStgs( void );
+	bool SetupSingleSearchPattern( const CSearchPattern& searchPattern );
+	void SearchForFiles( CWnd* pParentWnd, bool reportEmpty = true ) throws_( CException* );
 
 	bool MustAutoRegenerate( void ) const { return HasPersistFlag( AutoRegenerate ) || IsAutoDropRecipient(); }
 
@@ -48,7 +59,7 @@ public:
 	enum PersistOp { Loading, Saving };
 
 	bool HasConsistentDeepStreams( void ) const;
-	bool CheckReparentFileAttrs( const TCHAR* pDocPath, PersistOp op );					// if a stg doc path: reparent embedded image paths with current doc path (LOAD, SAVE AS)
+	bool _CheckReparentFileAttrs( const TCHAR* pDocPath, PersistOp op );					// if a stg doc path: reparent embedded image paths with current doc path (LOAD, SAVE AS)
 public:
 	// found image files
 	const CImagesModel& GetImagesModel( void ) const { return m_imagesModel; }
@@ -77,14 +88,15 @@ public:
 	bool UndropCustomOrderIndexes( int droppedIndex, const std::vector< int >& origDragSelIndexes );
 private:
 	bool DoOrderImagesModel( CImagesModel* pImagesModel, ui::IProgressService* pProgressSvc );
-	bool ReparentStorageFileAttrsImpl( const fs::CPath& stgDocPath, PersistOp op );			// post load/save: replace physical storage path with the current stg path
+	bool _ReparentStorageFileAttrsImpl( const fs::CPath& docStgPath, PersistOp op );			// post load/save: replace physical storage path with the current stg path
+private:
+	// transient
+	app::ModelSchema m_modelSchema;					// model schema of this album document (persisted by the album document)
+	fs::CPath m_docStgPath;							// set only for image catalog docs, it replaces m_searchPatterns
+	CCatalogStorageHost m_storageHost;				// for both album and single image documents that can open embedded images
 private:
 	typedef int TPersistFlags;
 
-	// transient
-	app::ModelSchema m_modelSchema;					// model schema of this album document (persisted by the album document)
-	fs::CPath m_stgDocPath;							// set only for image archive docs, replaces m_searchPatterns
-private:
 	// persistent
 	persist CSearchModel m_searchModel;
 	persist CImagesModel m_imagesModel;				// found image file attributes

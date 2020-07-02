@@ -16,6 +16,8 @@ protected:
 	CDocumentBase( void );
 	virtual ~CDocumentBase();
 public:
+	fs::CPath GetDocFilePath( void ) const { return fs::CPath( GetPathName().GetString() ); }
+
 	static CWicImage* AcquireImage( const fs::ImagePathKey& imageKey );
 
 	template< typename ViewT >
@@ -30,6 +32,7 @@ public:
 					pView->OnUpdate( pSenderView, hint, pHintObject );
 		}
 	}
+protected:
 
 	// generated stuff
 protected:
