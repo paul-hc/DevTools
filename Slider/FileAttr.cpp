@@ -8,6 +8,7 @@
 #include "utl/SerializeStdTypes.h"
 #include "utl/StringUtilities.h"
 #include "utl/UI/MfcUtilities.h"
+#include "utl/UI/ImagingWic.h"
 #include "utl/UI/TaskDialog.h"
 #include "utl/UI/WicImageCache.h"
 #include "resource.h"
@@ -35,7 +36,7 @@ namespace serial
 // CFileAttr implementation
 
 CFileAttr::CFileAttr( void )
-	: m_type( FT_Generic )
+	: m_imageFormat( wic::UnknownImageFormat )
 	, m_lastModifTime( CFileTime() )		// { 0, 0 }
 	, m_fileSize( 0 )
 	, m_imageDim( 0, 0 )
@@ -45,7 +46,7 @@ CFileAttr::CFileAttr( void )
 
 CFileAttr::CFileAttr( const fs::CPath& filePath )
 	: m_pathKey( filePath.Get(), 0 )
-	, m_type( CFileAttr::LookupFileType( GetPath().GetPtr() ) )
+	, m_imageFormat( wic::FindFileImageFormat( GetPath().GetPtr() ) )
 	, m_lastModifTime( CFileTime() )		// { 0, 0 }
 	, m_fileSize( 0 )
 	, m_imageDim( 0, 0 )
@@ -58,7 +59,7 @@ CFileAttr::CFileAttr( const fs::CPath& filePath )
 
 CFileAttr::CFileAttr( const fs::CFileState& streamState )
 	: m_pathKey( streamState.m_fullPath.Get(), 0 )
-	, m_type( CFileAttr::LookupFileType( GetPath().GetPtr() ) )
+	, m_imageFormat( wic::FindFileImageFormat( GetPath().GetPtr() ) )
 	, m_lastModifTime( CFileTime( streamState.m_modifTime.GetTime() ) )
 	, m_fileSize( static_cast<UINT>( streamState.m_fileSize ) )
 	, m_imageDim( 0, 0 )
@@ -68,7 +69,7 @@ CFileAttr::CFileAttr( const fs::CFileState& streamState )
 
 CFileAttr::CFileAttr( const CFileFind& foundFile )
 	: m_pathKey( fs::CFlexPath( foundFile.GetFilePath().GetString() ), 0 )
-	, m_type( CFileAttr::LookupFileType( GetPath().GetNameExt() ) )
+	, m_imageFormat( wic::FindFileImageFormat( GetPath().GetPtr() ) )
 	, m_fileSize( static_cast< UINT >( foundFile.GetLength() ) )
 	, m_imageDim( 0, 0 )
 	, m_baselinePos( utl::npos )
@@ -89,7 +90,7 @@ void CFileAttr::Stream( CArchive& archive )
 		else
 			archive << m_pathKey;
 
-		archive << (int)m_type;
+		archive << (int)m_imageFormat;
 		archive & m_lastModifTime;
 		archive << m_fileSize;
 		archive << GetSavingImageDim();
@@ -110,7 +111,15 @@ void CFileAttr::Stream( CArchive& archive )
 			if ( path::IsComplex( archive.m_strFileName ) )				// loading from an image archive storage?
 				serial::ToStorageComplexPath( m_pathKey.first, path::ExtractPhysical( archive.m_strFileName.GetString() ) );		// convert to full flex image path
 
-		archive >> (int&)m_type;
+		if ( docModelSchema < app::Slider_v5_6 )
+			archive >> (int&)m_imageFormat;
+		else
+		{
+			int oldFileType;		// enum FileType { FT_Generic, FT_BMP, FT_JPEG, FT_GIFF, FT_TIFF };
+			archive >> oldFileType;
+			m_imageFormat = wic::FindFileImageFormat( GetPath().GetPtr() );
+		}
+
 		archive & m_lastModifTime;
 		archive >> m_fileSize;
 		archive >> m_imageDim;
@@ -174,23 +183,6 @@ const std::tstring& CFileAttr::GetCode( void ) const
 std::tstring CFileAttr::GetDisplayCode( void ) const
 {
 	return GetPath().FormatPrettyLeaf();
-}
-
-FileType CFileAttr::LookupFileType( const TCHAR* pFilePath )
-{
-	static struct { fs::CPath ext; FileType type; } knownTypes[] =
-	{
-		{ _T(".jpg"), FT_JPEG }, { _T(".jpeg"), FT_JPEG }, { _T(".spj"), FT_JPEG }, { _T(".bmp"), FT_BMP }, { _T(".dib"), FT_BMP },
-		{ _T(".gif"), FT_GIFF }, { _T(".giff"), FT_GIFF }, { _T(".tif"), FT_TIFF }, { _T(".tiff"), FT_TIFF }
-	};
-	fs::CPath ext( path::FindExt( pFilePath ) );
-
-	if ( !ext.IsEmpty() )
-		for ( size_t i = 0; i != COUNT_OF( knownTypes ); ++i )
-			if ( knownTypes[ i ].ext == ext )
-				return knownTypes[ i ].type;
-
-	return FT_Generic;
 }
 
 std::tstring CFileAttr::FormatFileSize( DWORD divideBy /*= KiloByte*/, const TCHAR* pFormat /*= _T("%s KB")*/ ) const

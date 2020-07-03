@@ -22,9 +22,10 @@ namespace app
 		Slider_v5_3 = 0x53,				// CImageArchiveStg: use "Thumbnails" storage for thumbnails of mixed types; use "_pwd.w" as password stream; drop using the obsolete "_Meta.data" stream
 		Slider_v5_4 = 0x54,				// CImageArchiveStg: store album streams under the "Album" sub-storage
 		Slider_v5_5 = 0x55,				// major redesign of catalog storage (no schema change); rename CImageArchiveStg to CImageCatalogStg
+		Slider_v5_6 = 0x56,				// replace CFileAttr::m_fileType with CFileAttr::m_imageFormat
 
 			// * always update to the LATEST VERSION *
-			Slider_LatestModelSchema = Slider_v5_5
+			Slider_LatestModelSchema = Slider_v5_6
 	};
 
 

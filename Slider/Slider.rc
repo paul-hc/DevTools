@@ -897,8 +897,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 5,5,0,1
- PRODUCTVERSION 5,5,0,1
+ FILEVERSION 5,6,0,1
+ PRODUCTVERSION 5,6,0,1
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -913,17 +913,17 @@ BEGIN
     BEGIN
         BLOCK "040904b0"
         BEGIN
-            VALUE "Comments", "[5.5] Catalog Storage redesign|[5.4] 'Album' sub-storage|[5.3] Image Storage w. Thumbnails dir|[5.2] New Image Storage|[5.1]Frame navigation|[5.0] Images Model (ptrs)|[4.2] New schema|[4.1]|Split UTL_BASE/UTL_UI|Image viewer with slide albums|[3.9] ui::ImageScalingMode|[3.8] use image path keys"
+            VALUE "Comments", "[5.6] CFileAttr::m_imageFormat|[5.5] Catalog Storage redesign|[5.4] 'Album' sub-storage|[5.3] Image Storage w. Thumbnails dir|[5.2] New Image Storage|[5.1]Frame navigation|[5.0] Images Model (ptrs)|[4.2] New schema|[4.1]|Split UTL_BASE/UTL_UI|Image viewer with slide albums|[3.9] ui::ImageScalingMode"
             VALUE "CompanyName", "Paul Cocoveanu"
             VALUE "Email", "phc.2nd@gmail.com"
             VALUE "FileDescription", "Slider Application"
-            VALUE "FileVersion", "5, 5, 0, 1"
+            VALUE "FileVersion", "5, 6, 0, 1"
             VALUE "InternalName", "Slider"
             VALUE "LegalCopyright", "Copyright (C) 2000-2020"
             VALUE "LegalTrademarks", "Enjoy it."
             VALUE "OriginalFilename", "Slider.exe"
             VALUE "ProductName", "Slider Application"
-            VALUE "ProductVersion", "5, 5, 0, 1"
+            VALUE "ProductVersion", "5, 6, 0, 1"
             VALUE "WrittenBy", "Written by Paul Cocoveanu"
         END
     END
