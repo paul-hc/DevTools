@@ -216,3 +216,16 @@ CAlbumDoc* CCatalogStorageService::CloneDestAlbumDoc( const CAlbumDoc* pSrcAlbum
 
 	return pDestAlbumDoc;
 }
+
+
+CAlbumModel* CCatalogStorageService::ToAlbumModel( CObject* pAlbumDoc )
+{
+	CAlbumDoc* pDestAlbumDoc = checked_static_cast< CAlbumDoc* >( pAlbumDoc );
+	ASSERT_PTR( pDestAlbumDoc );
+	return pDestAlbumDoc->RefModel();
+}
+
+CImagesModel& CCatalogStorageService::ToImagesModel( CObject* pAlbumDoc )
+{
+	return ToAlbumModel( pAlbumDoc )->RefImagesModel();
+}

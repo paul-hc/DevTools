@@ -267,11 +267,8 @@ bool CAlbumDoc::LoadCatalogStorage( const fs::CPath& docStgPath )
 
 	// note: album stream is optional for older archives: not an error if missing
 
-	if ( pCatalogStorage->LoadAlbumStream( this ) )
-		pCatalogStorage->StoreDocModelSchema( GetModelSchema() );		// copy over the model schema saved in the album stream
-	else
-		if ( !pCatalogStorage->EnumerateImages( &m_model.RefImagesModel() ) )	// missing album stream (in old catalogs) -> backwards compatibility: enumerate existing images in the catalog
-			return false;
+	if ( !pCatalogStorage->LoadAlbumStream( this ) )
+		return false;
 
 	m_model.OpenAllStorages();
 	return true;				// succeeded
@@ -360,7 +357,7 @@ bool CAlbumDoc::_InternalSaveAsArchiveStg( const fs::CPath& newDocStgPath )
 			else
 			{
 //				if ( !oldDocPath.IsEmpty() )
-//					CImageArchiveStg::DiscardCachedImages( oldDocPath );
+//					CImageCatalogStg::DiscardCachedImages( oldDocPath );
 
 				CArchivingModel archivingModel;
 				archivingModel.StorePassword( m_password );
@@ -391,12 +388,12 @@ bool CAlbumDoc::_InternalSaveAsArchiveStg( const fs::CPath& newDocStgPath )
 void CAlbumDoc::_SaveAlbumToArchiveStg( const fs::CPath& docStgPath ) throws_( CException* )
 {
 	// save existing album to image archive as "_Album.sld" stream
-//	CScopedErrorHandling scopedThrow( CImageArchiveStg::Factory(), utl::ThrowMode );
+//	CScopedErrorHandling scopedThrow( CImageCatalogStg::Factory(), utl::ThrowMode );
 
 	m_model._CheckReparentFileAttrs( docStgPath.GetPtr(), CAlbumModel::Saving );		// reparent with docStgPath before saving the album info
 /*
-	if ( CImageArchiveStg::Factory()->SaveAlbumStream( this, docStgPath ) )
-		if ( ICatalogStorage* pSavedImageStg = CImageArchiveStg::Factory()->FindStorage( docStgPath ) )
+	if ( CImageCatalogStg::Factory()->SaveAlbumStream( this, docStgPath ) )
+		if ( ICatalogStorage* pSavedImageStg = CImageCatalogStg::Factory()->FindStorage( docStgPath ) )
 			pSavedImageStg->StoreDocModelSchema( GetModelSchema() );
 */
 }

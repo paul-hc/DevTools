@@ -36,7 +36,7 @@ public:
 	// "_Album.sld" stream (with .sld file format)
 	virtual bool SaveAlbumStream( CObject* pAlbumDoc ) = 0;
 	virtual bool LoadAlbumStream( CObject* pAlbumDoc ) = 0;
-	virtual bool EnumerateImages( CImagesModel* pDestImagesModel ) = 0;
+	virtual bool EnumerateImages( CImagesModel& rImagesModel ) = 0;
 
 	virtual CCachedThumbBitmap* LoadThumbnail( const fs::CFlexPath& imageComplexPath ) throws_() = 0;		// caller must delete the image
 };

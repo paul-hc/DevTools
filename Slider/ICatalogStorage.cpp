@@ -2,7 +2,7 @@
 #include "stdafx.h"
 #include "ICatalogStorage.h"
 #include "CatalogStorageHost.h"
-#include "ImageArchiveStg.h"
+#include "ImageCatalogStg.h"
 #include "Application.h"
 #include "utl/UI/PasswordDialog.h"
 #include "utl/UI/Thumbnailer.h"
@@ -31,7 +31,7 @@ CComPtr< ICatalogStorage > CCatalogStorageFactory::CreateStorageObject( void )
 {
 	CComPtr< ICatalogStorage > pNewCatalogStorage;
 
-	CImageArchiveStg::CreateObject( &pNewCatalogStorage );
+	CImageCatalogStg::CreateObject( &pNewCatalogStorage );
 	return pNewCatalogStorage;
 }
 
@@ -46,7 +46,7 @@ bool CCatalogStorageFactory::HasCatalogExt( const TCHAR* pFilePath )
 ICatalogStorage* CCatalogStorageFactory::FindStorage( const fs::CPath& docStgPath ) const
 {
 	if ( fs::CStructuredStorage* pOpenedStorage = fs::CStructuredStorage::FindOpenedStorage( docStgPath ) )		// opened in testing?
-		return checked_static_cast< CImageArchiveStg* >( pOpenedStorage );
+		return checked_static_cast< CImageCatalogStg* >( pOpenedStorage );
 
 	return NULL;
 }

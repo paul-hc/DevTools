@@ -710,11 +710,11 @@
 					>
 				</File>
 				<File
-					RelativePath=".\ImageArchiveStg.cpp"
+					RelativePath=".\ImageCatalogStg.cpp"
 					>
 				</File>
 				<File
-					RelativePath=".\ImageArchiveStg.h"
+					RelativePath=".\ImageCatalogStg.h"
 					>
 				</File>
 				<File

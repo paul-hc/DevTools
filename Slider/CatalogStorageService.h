@@ -8,6 +8,7 @@
 
 
 class CAlbumDoc;
+class CAlbumModel;
 class CImagesModel;
 class CTransferFileAttr;
 
@@ -41,6 +42,10 @@ public:
 
 	ui::IProgressService* GetProgress( void ) const { return m_pProgressSvc; }
 	ui::IUserReport* GetReport( void ) const { return m_pUserReport; }
+
+	// decouple the dependency to AlbumDoc.h
+	static CAlbumModel* ToAlbumModel( CObject* pAlbumDoc );
+	static CImagesModel& ToImagesModel( CObject* pAlbumDoc );
 private:
 	void BuildTransferAttrs( const CImagesModel* pImagesModel, bool useDeepStreamPaths = true );
 	CAlbumDoc* CloneDestAlbumDoc( const CAlbumDoc* pSrcAlbumDoc );

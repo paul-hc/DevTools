@@ -325,8 +325,6 @@ BOOL CApplication::InitInstance( void )
 
 	m_pThumbnailer.reset( new CThumbnailer );
 	GetSharedResources().AddAutoPtr( &m_pThumbnailer );
-// obsolete with explicit ownership in CCatalogStorageHost
-//	GetSharedResources().AddAutoClear( CImageArchiveStg::Factory() );
 	GetSharedResources().AddAutoClear( &CWicImageCache::Instance() );
 	m_pThumbnailer->SetExternalProducer( CCatalogStorageFactory::Instance() );		// add as producer of storage-based thumbnails
 

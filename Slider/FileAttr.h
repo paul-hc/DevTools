@@ -8,6 +8,8 @@
 
 
 class CTimer;
+namespace fs { struct CFileState; }
+
 enum FileType { FT_Generic, FT_BMP, FT_JPEG, FT_GIFF, FT_TIFF };
 
 
@@ -16,6 +18,7 @@ class CFileAttr : public CSubject
 public:
 	CFileAttr( void );
 	CFileAttr( const fs::CPath& filePath );				// only for concrete files
+	CFileAttr( const fs::CFileState& streamState );		// only for embedded streams
 	CFileAttr( const CFileFind& foundFile );			// get file attributes
 	virtual ~CFileAttr();
 
