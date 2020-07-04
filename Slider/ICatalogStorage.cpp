@@ -146,10 +146,10 @@ CCachedThumbBitmap* CCatalogStorageFactory::GenerateThumb( const fs::CFlexPath& 
 			// IMP: the resulting bitmap, even the scaled bitmap will keep the stream alive for the lifetime of the bitmap; same if we scale the bitmap;
 			// Since the thumb keeps alive the WIC bitmap, we need to copy to a memory bitmap.
 			// This way we unlock the doc stg stream for future access.
-			//
-			TRACE_COM_PTR( pBitmapSource, "BEFORE DetachSourceToBitmap() in CCatalogStorageFactory::GenerateThumb()" );
+
+			//TRACE_COM_PTR( pBitmapSource, "BEFORE DetachSourceToBitmap() in CCatalogStorageFactory::GenerateThumb()" );
 			pThumbBitmap->GetOrigin().DetachSourceToBitmap();		// release any bitmap source dependencies (IStream, HFILE, etc)
-			TRACE_COM_PTR( pBitmapSource, "AFTER DetachSourceToBitmap()" );
+			//TRACE_COM_PTR( pBitmapSource, "AFTER DetachSourceToBitmap()" );
 			return pThumbBitmap;
 		}
 
@@ -218,8 +218,10 @@ bool CCatalogPasswordStore::IsPasswordVerified( const fs::CPath& docStgPath ) co
 			return true;		// not password protected?
 		else if ( m_verifiedPasswords.find( pCatalogStorage->GetPassword() ) != m_verifiedPasswords.end() )
 			return true;		// password already validated by user
+		else
+			return false;
 
-	return false;
+	return true;				// no assumption on closed storage
 }
 
 
@@ -305,4 +307,12 @@ size_t CCatalogStorageHost::FindPos( const fs::CPath& docStgPath ) const
 			return pos;
 
 	return utl::npos;
+}
+
+
+// CMirrorCatalogSave implementation
+
+bool CMirrorCatalogSave::CloseStorage( void )
+{
+	return m_pStorageHost->Remove( m_docStgPath );
 }

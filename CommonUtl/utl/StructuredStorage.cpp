@@ -4,6 +4,7 @@
 #include "FlexPath.h"
 #include "StringUtilities.h"
 #include "utl/AppTools.h"
+#include "utl/TimeUtils.h"
 #include <shlwapi.h>
 
 #ifdef _DEBUG
@@ -730,7 +731,7 @@ namespace fs
 			ENSURE( 1 == dbg::GetRefCount( *ppStreamDuplicate ) );
 
 			fs::SeekToBegin( *ppStreamDuplicate );			// rewind the stream for reading
-			TRACE_COM_PTR( m_pStreamOrigin, str::AsNarrow( str::Format( _T("stream origin after cloning %s"), m_fullPath.GetPtr() ) ).c_str() );
+			//TRACE_COM_PTR( m_pStreamOrigin, str::AsNarrow( str::Format( _T("stream origin after cloning %s"), m_fullPath.GetPtr() ) ).c_str() );
 		}
 		return hResult;
 	}
@@ -835,27 +836,62 @@ namespace fs
 		}
 
 
-		// CAcquireStorage implementation
+		// CMirrorStorageSave implementation
 
-		CAcquireStorage::CAcquireStorage( const fs::CPath& docStgPath, DWORD mode /*= STGM_READ*/ )
-			: m_pFoundOpenStg( CStructuredStorage::FindOpenedStorage( docStgPath ) )
+		CMirrorStorageSave::CMirrorStorageSave( const fs::CPath& docStgPath, const fs::CPath& oldDocStgPath )
+			: m_docStgPath( docStgPath )
 		{
-			if ( NULL == m_pFoundOpenStg )
-				m_tempStorage.OpenDocFile( docStgPath, mode );
+			REQUIRE( fs::IsValidStructuredStorage( m_docStgPath.GetPtr() ) );
+
+			if ( m_docStgPath == oldDocStgPath )
+			{
+				std::tstring mirrorFname = m_docStgPath.GetFname() + _T("_saving");
+
+				m_mirrorDocStgPath = m_docStgPath;
+				m_mirrorDocStgPath.ReplaceFname( mirrorFname.c_str() );
+			}
 		}
 
-		CAcquireStorage::~CAcquireStorage()
+		void CMirrorStorageSave::Commit( void ) throws_( CFileException* )
 		{
+			if ( UseMirroring() )
+			{
+				CloseStorage();
+
+				// backup original file properties
+				CTime createdTime = fs::ReadFileTime( m_docStgPath, fs::CreatedDate );
+				fs::CSecurityDescriptor securityDescriptor( m_docStgPath );
+
+				// rename mirror file as the original storage document
+				CFile::Remove( m_docStgPath.GetPtr() );
+				CFile::Rename( m_mirrorDocStgPath.GetPtr(), m_docStgPath.GetPtr() );
+
+				// restore file properties to the new document
+				if ( time_utl::IsValid( createdTime ) )
+					fs::thr::TouchFile( m_docStgPath, createdTime, fs::CreatedDate, fs::MfcExc );
+
+				if ( securityDescriptor.IsValid() )
+					securityDescriptor.WriteToFile( m_docStgPath );
+
+				m_mirrorDocStgPath.Clear();			// prevent rollback on destructor
+			}
 		}
 
-		CStructuredStorage* CAcquireStorage::Get( void )
+		void CMirrorStorageSave::Rollback( void )
 		{
-			if ( m_pFoundOpenStg != NULL )
-				return m_pFoundOpenStg;
-			else if ( m_tempStorage.IsOpen() )
-				return &m_tempStorage;
+			if ( UseMirroring() )
+				if ( !::DeleteFile( m_mirrorDocStgPath.GetPtr() ) )
+					TRACE( _T(" * CMirrorStorageSave::Rollback(): error deleting mirror storage file '%s'\n"), m_mirrorDocStgPath.GetPtr() );
+		}
 
-			return NULL;
+		bool CMirrorStorageSave::CloseStorage( void )
+		{
+			if ( fs::CStructuredStorage* pFoundStorage = fs::CStructuredStorage::FindOpenedStorage( m_docStgPath ) )
+			{
+				pFoundStorage->CloseDocFile();
+				return true;
+			}
+			return false;
 		}
 	}
 

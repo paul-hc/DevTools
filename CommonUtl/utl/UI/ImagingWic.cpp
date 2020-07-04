@@ -417,9 +417,6 @@ namespace wic
 
 namespace wic
 {
-	CInternalChange CScopedLockImaging::s_locked;
-
-
 	// WIC utilities
 
 	CDibMeta LoadImageFromFile( const TCHAR* pFilePath, UINT framePos /*= 0*/ )

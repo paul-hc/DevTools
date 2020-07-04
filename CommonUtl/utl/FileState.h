@@ -48,6 +48,24 @@ namespace fs
 	private:
 		static const BYTE s_invalidAttributes = 0xFF;
 	};
+
+
+	class CSecurityDescriptor
+	{
+	public:
+		CSecurityDescriptor( void ) {}
+		CSecurityDescriptor( const fs::CPath& filePath ) { ReadFromFile( filePath ); }
+
+		PSECURITY_DESCRIPTOR ReadFromFile( const fs::CPath& filePath );
+		bool WriteToFile( const fs::CPath& destFilePath ) const;
+
+		static bool CopyToFile( const fs::CPath& srcFilePath, const fs::CPath& destFilePath );
+
+		bool IsValid( void ) const { return !m_securityDescriptor.empty(); }
+		PSECURITY_DESCRIPTOR GetDescriptor( void ) const { return IsValid() ? (PSECURITY_DESCRIPTOR)&m_securityDescriptor.front() : NULL; }
+	private:
+		std::vector< BYTE > m_securityDescriptor;
+	};
 }
 
 

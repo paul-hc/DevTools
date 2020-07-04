@@ -270,8 +270,9 @@ bool CAlbumDoc::LoadCatalogStorage( const fs::CPath& docStgPath )
 	if ( !pCatalogStorage->LoadAlbumStream( this ) )
 		return false;
 
+	m_model.StoreModelSchema( pCatalogStorage->GetDocModelSchema() );
 	m_model.OpenAllStorages();
-	return true;				// succeeded
+	return true;
 }
 
 bool CAlbumDoc::SaveAsCatalogStorage( const fs::CPath& newDocStgPath )
@@ -301,9 +302,11 @@ bool CAlbumDoc::SaveAsCatalogStorage( const fs::CPath& newDocStgPath )
 
 				storageSvc.BuildFromAlbumSaveAs( this );
 
+				CMirrorCatalogSave mirrorSaving( newDocStgPath, oldDocStgPath, m_model.GetStorageHost() );		// use storage mirroring on Save (storage to itself), or no mirroring on SaveAs
 				CComPtr< ICatalogStorage > pCatalogStorage = CCatalogStorageFactory::CreateStorageObject();
 
-				pCatalogStorage->CreateImageArchiveFile( newDocStgPath, &storageSvc );			// SaveAs: create the entire image catalog - works internally in utl::ThrowMode
+				pCatalogStorage->CreateImageArchiveFile( mirrorSaving.GetDocStgPath(), &storageSvc );			// SaveAs: create the entire image catalog - works internally in utl::ThrowMode
+				mirrorSaving.Commit();			// rename temporary mirror file back to the storage file
 			}
 
 			// reload the newly saved document - takes care of saving .sld to .ias
@@ -317,6 +320,8 @@ bool CAlbumDoc::SaveAsCatalogStorage( const fs::CPath& newDocStgPath )
 
 			pCatalogStorage->SavePasswordStream();
 			pCatalogStorage->SaveAlbumStream( this );
+
+			UpdateAllViews( NULL, Hint_ViewUpdate );		// revive current animated image
 		}
 	}
 	catch ( CException* pExc )

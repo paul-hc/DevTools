@@ -34,9 +34,6 @@ std::auto_ptr< CWicImage > CWicImage::CreateFromFile( const fs::ImagePathKey& im
 {
 	std::auto_ptr< CWicImage > pNewImage;
 
-	if ( wic::IsImagingLocked() )
-		return pNewImage;				// prevent access while in global locked mode
-
 	TMultiFrameDecoderMap& rSharedDecoders = SharedMultiFrameDecoders();
 
 	if ( CMultiFrameDecoder* pSharedDecoder = rSharedDecoders.Find( imageKey.first ) )

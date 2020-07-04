@@ -32,6 +32,7 @@ private:
 	// ICatalogStorage interface
 	virtual fs::CStructuredStorage* GetDocStorage( void );
 
+	virtual app::ModelSchema GetDocModelSchema( void ) const;
 	virtual void StoreDocModelSchema( app::ModelSchema docModelSchema );
 
 	virtual const std::tstring& GetPassword( void ) const { return m_password; }

@@ -24,6 +24,8 @@
 #define new DEBUG_NEW
 #endif
 
+#include "utl/IUnknownImpl.hxx"
+
 
 // CImageCatalogStg implementation
 
@@ -133,6 +135,11 @@ DEFINE_GUID( IID_ICatalogStorage, 0xC5078A69, 0xFF1C, 0x4B13, 0x92, 0x2, 0x1E, 0
 fs::CStructuredStorage* CImageCatalogStg::GetDocStorage( void )
 {
 	return this;
+}
+
+app::ModelSchema CImageCatalogStg::GetDocModelSchema( void ) const
+{
+	return m_docModelSchema;
 }
 
 void CImageCatalogStg::StoreDocModelSchema( app::ModelSchema docModelSchema )

@@ -240,25 +240,4 @@ namespace wic
 } //namespace wic
 
 
-#include "InternalChange.h"
-
-
-namespace wic
-{
-	bool IsImagingLocked( void );
-
-
-	// lock access to imaging while executing critical operations (mainly painting)
-	//
-	struct CScopedLockImaging : public ::CScopedInternalChange
-	{
-		CScopedLockImaging( void ) : CScopedInternalChange( &s_locked ) {}
-
-		friend inline bool IsImagingLocked( void ) { return s_locked.IsInternalChange(); }
-	private:
-		static CInternalChange s_locked;
-	};
-}
-
-
 #endif // ImagingWic_h

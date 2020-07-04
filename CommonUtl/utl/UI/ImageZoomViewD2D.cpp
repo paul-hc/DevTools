@@ -64,7 +64,7 @@ namespace d2d
 
 	void CImageRenderTarget::HandleAnimEvent( void )
 	{
-		if ( m_pAnimComposer.get() != NULL )
+		if ( m_pAnimComposer.get() != NULL && m_pAnimComposer->UsesImage( GetImage() ) )
 			m_pAnimComposer->HandleAnimEvent();
 	}
 
@@ -238,18 +238,17 @@ void CImageZoomViewD2D::OnDraw( CDC* pDC )
 		m_pImageRT->EnsureDeviceResources();
 
 		if ( m_pImageRT->IsValidTarget() )
-			if ( !wic::IsImagingLocked() )
-			{
-				CPoint scrollPos = GetScrollPosition();
+		{
+			CPoint scrollPos = GetScrollPosition();
 
-				m_drawTraits.SetScrollPos( scrollPos );													// apply translation transform according to view's scroll position
-				m_drawTraits.SetAutoInterpolationMode( GetContentRect().Size(), GetSourceSize() );		// force smooth mode when shrinking bitmap
+			m_drawTraits.SetScrollPos( scrollPos );													// apply translation transform according to view's scroll position
+			m_drawTraits.SetAutoInterpolationMode( GetContentRect().Size(), GetSourceSize() );		// force smooth mode when shrinking bitmap
 
-				d2d::CViewCoords viewCoords( _GetClientRect(), GetContentRect() );
-				d2d::CBitmapCoords bmpCoords( m_drawTraits );
+			d2d::CViewCoords viewCoords( _GetClientRect(), GetContentRect() );
+			d2d::CBitmapCoords bmpCoords( m_drawTraits );
 
-				m_pImageRT->DrawImage( viewCoords, bmpCoords );
-			}
+			m_pImageRT->DrawImage( viewCoords, bmpCoords );
+		}
 	}
 }
 
@@ -284,10 +283,7 @@ void CImageZoomViewD2D::OnSize( UINT sizeType, int cx, int cy )
 void CImageZoomViewD2D::OnTimer( UINT_PTR eventId )
 {
 	if ( m_pImageRT.get() != NULL && m_pImageRT->IsAnimEvent( eventId ) )
-	{
-		if ( !wic::IsImagingLocked() )
-			m_pImageRT->HandleAnimEvent();
-	}
+		m_pImageRT->HandleAnimEvent();
 	else
 		__super::OnTimer( eventId );
 }

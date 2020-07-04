@@ -23,6 +23,7 @@ ICatalogStorage : public IUnknown
 public:
 	virtual fs::CStructuredStorage* GetDocStorage( void ) = 0;
 
+	virtual app::ModelSchema GetDocModelSchema( void ) const = 0;
 	virtual void StoreDocModelSchema( app::ModelSchema docModelSchema ) = 0;
 
 	virtual const std::tstring& GetPassword( void ) const = 0;
@@ -90,6 +91,25 @@ public:
 	bool IsPasswordVerified( const fs::CPath& docStgPath ) const;
 private:
 	stdext::hash_set< std::tstring > m_verifiedPasswords;
+};
+
+
+class CCatalogStorageHost;
+
+
+class CMirrorCatalogSave : public fs::stg::CMirrorStorageSave
+{
+public:
+	CMirrorCatalogSave( const fs::CPath& docStgPath, const fs::CPath& oldDocStgPath, CCatalogStorageHost* pStorageHost )
+		: fs::stg::CMirrorStorageSave( docStgPath, oldDocStgPath )
+		, m_pStorageHost( pStorageHost )
+	{
+		ASSERT_PTR( m_pStorageHost );
+	}
+protected:
+	virtual bool CloseStorage( void );
+private:
+	CCatalogStorageHost* m_pStorageHost;
 };
 
 

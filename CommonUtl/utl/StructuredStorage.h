@@ -282,16 +282,24 @@ namespace fs
 		};
 
 
-		class CAcquireStorage : private utl::noncopyable
+		// uses storage mirroring on Save (storage to itself), or no mirroring on SaveAs
+		class CMirrorStorageSave
 		{
 		public:
-			CAcquireStorage( const fs::CPath& docStgPath, DWORD mode = STGM_READ );
-			~CAcquireStorage();
+			CMirrorStorageSave( const fs::CPath& docStgPath, const fs::CPath& oldDocStgPath );
+			~CMirrorStorageSave() { Rollback(); }
 
-			CStructuredStorage* Get( void );
+			bool UseMirroring( void ) const { return !m_mirrorDocStgPath.IsEmpty(); }
+			const fs::CPath& GetDocStgPath( void ) const { return UseMirroring() ? m_mirrorDocStgPath : m_docStgPath; }
+
+			void Commit( void ) throws_( CFileException* );		// call at the end of a successful transaction (may throw)
+			void Rollback( void );								// delete the temporary mirror file in case of errors
+		protected:
+			virtual bool CloseStorage( void );
+		protected:
+			const fs::CPath& m_docStgPath;
 		private:
-			CStructuredStorage* m_pFoundOpenStg;
-			fs::CStructuredStorage m_tempStorage;
+			fs::CPath m_mirrorDocStgPath;
 		};
 	}
 }

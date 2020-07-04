@@ -17,6 +17,8 @@
 
 namespace fs
 {
+	// CFileState implementation
+
 	CFileState::CFileState( const ::CFileStatus* pFileStatus )
 		: m_fullPath( pFileStatus->m_szFullName )
 		, m_fileSize( static_cast< UINT64 >( pFileStatus->m_size ) )
@@ -123,7 +125,7 @@ namespace fs
 
 	const CFlagTags& CFileState::GetTags_FileAttributes( void )
 	{
-		static const CFlagTags::FlagDef flagDefs[] =
+		static const CFlagTags::FlagDef s_flagDefs[] =
 		{
 			{ FILE_ATTRIBUTE_READONLY, _T("R") },		// CFile::readOnly
 			{ FILE_ATTRIBUTE_HIDDEN, _T("H") },			// CFile::hidden
@@ -141,9 +143,45 @@ namespace fs
 			{ FILE_ATTRIBUTE_NOT_CONTENT_INDEXED, _T("n") },
 			{ FILE_ATTRIBUTE_ENCRYPTED, _T("e") },
 		};
-		static const std::tstring uiTags = _T("READ-ONLY|HIDDEN|SYSTEM|VOLUME|DIRECTORY|ARCHIVE|Device|NORMAL|Temporary|Sparse File|Reparse Point|Compressed|Offline|Not Content Indexed|Encrypted");
-		static const CFlagTags tags( flagDefs, COUNT_OF( flagDefs ), uiTags );
-		return tags;
+		static const std::tstring s_uiTags = _T("READ-ONLY|HIDDEN|SYSTEM|VOLUME|DIRECTORY|ARCHIVE|Device|NORMAL|Temporary|Sparse File|Reparse Point|Compressed|Offline|Not Content Indexed|Encrypted");
+
+		static const CFlagTags s_tags( s_flagDefs, COUNT_OF( s_flagDefs ), s_uiTags );
+
+		return s_tags;
+	}
+
+
+	// CSecurityDescriptor implementation
+
+	PSECURITY_DESCRIPTOR CSecurityDescriptor::ReadFromFile( const fs::CPath& filePath )
+	{
+		DWORD dwLength = 0;
+
+		if ( ::GetFileSecurity( filePath.GetPtr(), DACL_SECURITY_INFORMATION, NULL, dwLength, &dwLength ) )
+		{
+			m_securityDescriptor.resize( dwLength );
+
+			PSECURITY_DESCRIPTOR pSecurityDescriptor = GetDescriptor();
+
+			if ( ::GetFileSecurity( filePath.GetPtr(), DACL_SECURITY_INFORMATION, pSecurityDescriptor, dwLength, &dwLength ) )
+				return pSecurityDescriptor;
+		}
+
+		m_securityDescriptor.clear();
+		return NULL;
+	}
+
+	bool CSecurityDescriptor::WriteToFile( const fs::CPath& destFilePath ) const
+	{
+		REQUIRE( IsValid() );
+		return ::SetFileSecurity( destFilePath.GetPtr(), DACL_SECURITY_INFORMATION, GetDescriptor() ) != FALSE;
+	}
+
+	bool CSecurityDescriptor::CopyToFile( const fs::CPath& srcFilePath, const fs::CPath& destFilePath )
+	{
+		CSecurityDescriptor securityDescriptor( srcFilePath );
+
+		return securityDescriptor.IsValid() && securityDescriptor.WriteToFile( destFilePath );
 	}
 }
 
