@@ -433,6 +433,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\IUnknownImpl.hxx"
+				>
+			</File>
+			<File
 				RelativePath=".\Logger.cpp"
 				>
 			</File>

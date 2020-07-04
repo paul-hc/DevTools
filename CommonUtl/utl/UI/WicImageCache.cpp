@@ -4,12 +4,13 @@
 #include "WicImage.h"
 #include "FlagTags.h"
 #include "MfcUtilities.h"
-#include "CacheLoader.hxx"
 #include <functional>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
+
+#include "CacheLoader.hxx"
 
 
 #define TRACE_CACHE TRACE

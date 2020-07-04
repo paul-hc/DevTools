@@ -7,10 +7,11 @@
 #include "ContainerUtilities.h"
 #include "StringUtilities.h"
 #include "vector_map.h"
-#include "Resequence.hxx"
 #include <deque>
 
 #define new DEBUG_NEW
+
+#include "Resequence.hxx"
 
 
 namespace pred

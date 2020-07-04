@@ -7,9 +7,10 @@
 #include "test/TestToolWnd.h"
 #include "WicImage.h"
 #include "WicImageCache.h"
-#include "CacheLoader.hxx"		// WaitPendingQueue()
 
 #define new DEBUG_NEW
+
+#include "CacheLoader.hxx"		// WaitPendingQueue()
 
 
 CWicImageTests::CWicImageTests( void )

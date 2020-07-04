@@ -43,14 +43,7 @@ namespace utl
 			return m_refCount;
 		}
 
-		virtual ULONG STDMETHODCALLTYPE Release( void )
-		{
-			ULONG refCount = ::InterlockedDecrement( &m_refCount );
-			if ( 0 == m_refCount )
-				delete this;
-
-			return refCount;
-		}
+		virtual ULONG STDMETHODCALLTYPE Release( void );
 	private:
 		const IID& m_rIID;
 		ULONG m_refCount;

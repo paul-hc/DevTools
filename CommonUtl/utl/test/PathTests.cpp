@@ -5,10 +5,11 @@
 #include "test/PathTests.h"
 #include "Path.h"
 #include "FlexPath.h"
-#include "Resequence.hxx"
 #include "StringUtilities.h"
 
 #define new DEBUG_NEW
+
+#include "Resequence.hxx"
 
 
 CPathTests::CPathTests( void )

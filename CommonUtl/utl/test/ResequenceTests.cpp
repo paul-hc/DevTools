@@ -3,10 +3,11 @@
 
 #ifdef _DEBUG		// no UT code in release builds
 #include "test/ResequenceTests.h"
-#include "Resequence.hxx"
 #include "StringUtilities.h"
 
 #define new DEBUG_NEW
+
+#include "Resequence.hxx"
 
 
 namespace ut

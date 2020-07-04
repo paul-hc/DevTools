@@ -17,11 +17,12 @@
 #include "utl/ScopedValue.h"
 #include "utl/StringUtilities.h"
 #include "utl/UI/Utilities.h"
-#include "utl/Resequence.hxx"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
+
+#include "utl/Resequence.hxx"
 
 
 CAlbumModel::CAlbumModel( void )

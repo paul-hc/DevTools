@@ -17,7 +17,6 @@
 #include "FileSystem.h"
 #include "ShellUtilities.h"
 #include "PostCall.h"
-#include "Resequence.hxx"
 #include "resource.h"
 #include "utl/Serialization.h"
 
@@ -26,6 +25,7 @@
 #endif
 
 #include "ReportListControl.hxx"
+#include "Resequence.hxx"
 
 
 namespace reg

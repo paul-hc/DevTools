@@ -14,11 +14,11 @@
 #include "utl/UI/Utilities.h"
 #include "utl/UI/resource.h"
 
-#include "utl/UI/StockValuesComboBox.hxx"
-
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
+
+#include "utl/UI/StockValuesComboBox.hxx"
 
 
 const UINT CMainToolbar::s_buttons[] =
