@@ -7,6 +7,7 @@
 #include "ImageNavigator.h"
 #include "INavigationBar.h"
 #include "FileAttr.h"
+#include "FileOperation.h"
 #include "ChildFrame.h"
 #include "MainFrame.h"
 #include "Workspace.h"
@@ -16,6 +17,8 @@
 #include "utl/UI/CmdUpdate.h"
 #include "utl/UI/MenuUtilities.h"
 #include "utl/UI/PostCall.h"
+#include "utl/UI/ShellDialogs.h"
+#include "utl/UI/TaskDialog.h"
 #include "utl/UI/Utilities.h"
 #include "utl/UI/WicImageCache.h"
 #include <map>
@@ -382,6 +385,16 @@ void CAlbumImageView::EventNavigSliderPosChanged( bool thumbTracking )
 		UpdateImage();
 }
 
+template< typename PathContainerT >
+bool CAlbumImageView::QuerySelImagePaths( PathContainerT& rSelImagePaths ) const
+{
+	CListViewState files( StoreByString );
+	m_pPeerThumbView->GetListViewState( files );
+
+	utl::Assign( rSelImagePaths, files.m_pStringImpl->m_selItems, func::tor::StringOf() );
+	return !rSelImagePaths.empty();
+}
+
 void CAlbumImageView::OnUpdate( CView* pSender, LPARAM lHint, CObject* pHint )
 {
 	UpdateViewHint hint = (UpdateViewHint)lHint;
@@ -449,6 +462,8 @@ BEGIN_MESSAGE_MAP( CAlbumImageView, CImageView )
 	ON_UPDATE_COMMAND_UI( IDW_NAVIG_SLIDER_CTRL, OnUpdate_NavigSliderCtrl )
 	ON_COMMAND( CM_OPEN_IMAGE_FILE, CmOpenImageFile )
 	ON_UPDATE_COMMAND_UI( CM_OPEN_IMAGE_FILE, CImageView::OnUpdateAnyFileShellOperation )
+	ON_COMMAND( ID_IMAGE_FILE_SAVE_AS, On_ImageFileSaveAs )
+	ON_UPDATE_COMMAND_UI( ID_IMAGE_FILE_SAVE_AS, OnUpdate_ImageFileSaveAs )
 	ON_COMMAND_RANGE( CM_DROP_MOVE_IMAGE, CM_CANCEL_DROP, CmAutoDropImage )
 	ON_UPDATE_COMMAND_UI_RANGE( CM_DROP_MOVE_IMAGE, CM_CANCEL_DROP, OnUpdateAutoDropImage )
 END_MESSAGE_MAP()
@@ -626,6 +641,63 @@ void CAlbumImageView::CmOpenImageFile( void )
 	if ( !filesToOpen.m_pStringImpl->m_selItems.empty() )
 		for ( std::vector< std::tstring >::const_iterator it = filesToOpen.m_pStringImpl->m_selItems.begin(); it != filesToOpen.m_pStringImpl->m_selItems.end(); ++it )
 			AfxGetApp()->OpenDocumentFile( it->c_str() );
+}
+
+void CAlbumImageView::On_ImageFileSaveAs( void )
+{
+	std::vector< fs::CFlexPath > srcFilePaths;
+	if ( !QuerySelImagePaths( srcFilePaths ) )
+		return;
+
+	try
+	{
+		CFileOperation fileOp( utl::ThrowMode );
+
+		if ( 1 == srcFilePaths.size() )
+		{
+			fs::CFlexPath srcFilePath( srcFilePaths.front() );
+			fs::CPath destFilePath = srcFilePath;
+			if ( destFilePath.IsComplexPath() )
+				destFilePath = destFilePath.GetFilename();
+
+			if ( shell::BrowseImageFile( destFilePath, shell::FileSaveAs ) )
+				fileOp.Copy( srcFilePath, fs::CastFlexPath( destFilePath ) );
+		}
+		else
+		{
+			fs::CPath destFolderPath;
+			if ( shell::PickFolder( destFolderPath.Ref(), NULL ) )
+			{
+				std::vector< fs::CPath > destFilePaths;
+				utl::Assign( destFilePaths, srcFilePaths, func::tor::StringOf() );
+				utl::for_each( destFilePaths, func::StripToFilename() );
+				utl::for_each( destFilePaths, func::PrefixPath( destFolderPath ) );
+
+				if ( utl::Any( destFilePaths, pred::FileExist() ) )
+				{
+					std::vector< fs::CPath > destExistingPaths;
+					utl::QueryThat( destExistingPaths, destFilePaths, pred::FileExist() );
+
+					CTaskDialog dlg( _T("Confirm Save As"), _T("Override existing files?"), str::Join( destExistingPaths, _T("\n") ), TDCBF_YES_BUTTON | TDCBF_NO_BUTTON, 0 );
+					dlg.SetMainIcon( TD_WARNING_ICON );
+					if ( dlg.DoModal( NULL ) != IDYES )
+						return;
+				}
+
+				for ( size_t i = 0; i != destFilePaths.size(); ++i )
+					fileOp.Copy( srcFilePaths[ i ], fs::CastFlexPath( destFilePaths[ i ] ) );
+			}
+		}
+	}
+	catch ( CException* pExc )
+	{
+		app::HandleReportException( pExc, MB_ICONERROR );
+	}
+}
+
+void CAlbumImageView::OnUpdate_ImageFileSaveAs( CCmdUI* pCmdUI )
+{
+	pCmdUI->Enable( GetImage() != NULL );
 }
 
 void CAlbumImageView::CmDeleteFile( UINT cmdId )

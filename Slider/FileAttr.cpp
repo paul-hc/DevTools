@@ -25,10 +25,15 @@ namespace serial
 		return fs::ImagePathKey( fs::CFlexPath( path::GetSubPath( pathKey.first.GetPtr() ) ), pathKey.second );
 	}
 
-	void ToStorageComplexPath( fs::CFlexPath& rPath, const std::tstring& storagePath )
+	void PostLoadAdjustComplexPath( fs::CFlexPath& rPath, const fs::CPath& docStgPath )
 	{
-		ASSERT( path::IsRelative( rPath.GetPtr() ) );
-		rPath.Set( path::MakeComplex( storagePath, rPath.GetPtr() ) );
+		if ( path::IsRelative( rPath.GetPtr() ) )				// was saved as relative path to storage root?
+			rPath = fs::CFlexPath::MakeComplexPath( docStgPath, rPath );	// convert to full flex image path
+		else if ( path::IsComplex( rPath.GetPtr() ) )			// was saved as full complex path?
+		{
+			if ( rPath.GetPhysicalPath() != docStgPath )		// storage was renamed?
+				rPath = fs::CFlexPath::MakeComplexPath( docStgPath, rPath.GetEmbeddedPath() );		// backwards compatibility reparent: - replace old storage path with the current one (from the archive)
+		}
 	}
 }
 
@@ -107,9 +112,8 @@ void CFileAttr::Stream( CArchive& archive )
 			m_pathKey.second = 0;
 		}
 
-		if ( path::IsRelative( m_pathKey.first.GetPtr() ) )				// was saved as relative path to storage root?
-			if ( path::IsComplex( archive.m_strFileName ) )				// loading from an image archive storage?
-				serial::ToStorageComplexPath( m_pathKey.first, path::ExtractPhysical( archive.m_strFileName.GetString() ) );		// convert to full flex image path
+		if ( path::IsComplex( archive.m_strFileName.GetString() ) )			// loading from an image archive storage?
+			serial::PostLoadAdjustComplexPath( m_pathKey.first, path::ExtractPhysical( archive.m_strFileName.GetString() ) );
 
 		if ( docModelSchema < app::Slider_v5_6 )
 			archive >> (int&)m_imageFormat;

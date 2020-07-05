@@ -147,15 +147,6 @@ void CImageCatalogStg::StoreDocModelSchema( app::ModelSchema docModelSchema )
 	m_docModelSchema = docModelSchema;
 }
 
-bool CImageCatalogStg::AlterOlderDocModelSchema( app::ModelSchema docModelSchema )
-{
-	if ( docModelSchema >= m_docModelSchema )
-		return false;			// only allow altering to older model schema
-
-	StoreDocModelSchema( docModelSchema );
-	return true;
-}
-
 void CImageCatalogStg::StorePassword( const std::tstring& password )
 {
 	m_password = password;
@@ -451,22 +442,16 @@ bool CImageCatalogStg::LoadAlbumStream( CObject* pAlbumDoc )
 	// backwards compatibility:
 	CImagesModel& rImagesModel = CCatalogStorageService::ToImagesModel( pAlbumDoc );
 
-	if ( LoadAlbumMetadataStream( rImagesModel ) )			// load "_Meta.data" stream - older catalogs may not contain the album stream (not an error)
-	{
-		AlterOlderDocModelSchema( app::Slider_v4_0 );		// arbitrarily set an older version
+	if ( bkw_LoadAlbumMetadataStream( rImagesModel ) )			// load "_Meta.data" stream - older catalogs may not contain the album stream (not an error)
 		return true;
-	}
 
 	if ( EnumerateImages( rImagesModel ) )					// fallback to enumerating the image content in the root storage
-	{
-		AlterOlderDocModelSchema( app::Slider_v3_1 );		// arbitrarily set the oldest version
 		return true;
-	}
 
 	return false;
 }
 
-bool CImageCatalogStg::LoadAlbumMetadataStream( CImagesModel& rImagesModel )
+bool CImageCatalogStg::bkw_LoadAlbumMetadataStream( CImagesModel& rImagesModel )
 {
 	static const TCHAR s_metadataStreamName[] = _T("_Meta.data");
 	CScopedCurrentDir scopedAlbumFolder( this, s_rootFolderName );
@@ -493,6 +478,8 @@ bool CImageCatalogStg::LoadAlbumMetadataStream( CImagesModel& rImagesModel )
 				rImagesModel.StoreBaselineSequence();
 
 				ASSERT( rImagesModel.IsEmpty() || rImagesModel.GetFileAttrAt( 0 )->GetPath().IsComplexPath() );		// ensure deserialized to full complex path
+
+				bkw_AlterOlderDocModelSchema( app::Slider_v4_0 );		// arbitrarily set an older version
 				return true;
 			}
 			catch ( CException* pExc )
@@ -527,17 +514,44 @@ bool CImageCatalogStg::EnumerateImages( CImagesModel& rImagesModel )
 					fs::CFileState streamState = *pSrcStreamState;
 					std::tstring streamPath = itStreamPath->Get();
 
-					// un-flatten deep stream names: '|' -> '\' and '*' -> '\'
-					std::replace( streamPath.begin(), streamPath.end(), GetFlattenPathSep(), _T('\\') );		// '|' -> '\'
-					std::replace( streamPath.begin(), streamPath.end(), _T('*'), _T('\\') );					// '*' -> '\'
+					bkw_DecodeStreamPath( streamPath );		// un-flatten deep stream names, adjusting m_docModelSchema based on separator of deep stream names
 
 					streamState.m_fullPath = fs::CFlexPath::MakeComplexPath( docStgPath.Get(), streamPath );	// store the fully qualified flex-path of image
 
 					rImagesModel.AddFileAttr( new CFileAttr( streamState ) );
-					CloseStream( itStreamPath->GetPtr() );
+
+					// keep the cached stream open: otherwise it causes sharing violations later on LocateReadStream:
+					//CloseStream( itStreamPath->GetPtr() );
+					//TRACE_COM_PTR( pImageStream, "CImageCatalogStg::EnumerateImages() - after CloseStream" );
 				}
 
 	rImagesModel.StoreBaselineSequence();
+	return true;
+}
+
+void CImageCatalogStg::bkw_DecodeStreamPath( std::tstring& rStreamPath )
+{
+	// un-flatten deep stream names, heuristically adjusting m_docModelSchema based on separator of deep stream names
+	if ( rStreamPath.find( GetFlattenPathSep() ) != std::tstring::npos )
+	{
+		std::replace( rStreamPath.begin(), rStreamPath.end(), GetFlattenPathSep(), _T('\\') );		// deepify '|' -> '\'
+		bkw_AlterOlderDocModelSchema( app::Slider_v5_2 );		// arbitrarily assume the newest older version using '|' stream sepator
+	}
+	else if ( rStreamPath.find( _T('*') ) != std::tstring::npos )
+	{
+		std::replace( rStreamPath.begin(), rStreamPath.end(), _T('*'), _T('\\') );					// deepify '*' -> '\'
+		bkw_AlterOlderDocModelSchema( app::Slider_v4_2 );		// arbitrarily assume an older version using '*' stream sepator
+	}
+	else
+		bkw_AlterOlderDocModelSchema( app::Slider_v5_5 );		// arbitrarily assume the previous to current version (newest older version)
+}
+
+bool CImageCatalogStg::bkw_AlterOlderDocModelSchema( app::ModelSchema docModelSchema )
+{
+	if ( docModelSchema >= m_docModelSchema )
+		return false;			// only allow altering to older model schema
+
+	StoreDocModelSchema( docModelSchema );
 	return true;
 }
 

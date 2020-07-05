@@ -364,6 +364,16 @@ namespace path
 		return true;
 	}
 
+	bool NormalizeComplexPath( std::tstring& rFlexPath, TCHAR chNormalSep /*= _T('\\')*/ )
+	{	// treat storage document in rFlexPath as a directory
+		size_t sepPos = FindComplexSepPos( rFlexPath.c_str() );
+		if ( std::tstring::npos == sepPos )
+			return false;
+
+		rFlexPath[ sepPos ] = chNormalSep;
+		return true;
+	}
+
 
 	std::tstring& SetBackslash( std::tstring& rDirPath, TrailSlash trailSlash /*= AddSlash*/ )
 	{
@@ -498,6 +508,10 @@ namespace path
 		std::tstring leftPath = MakeNormal( pLeftPath );		// backslashes only
 		std::tstring rightPath = MakeNormal( pRightPath );
 
+		// ensure it works seamlessly with deep embedded paths (stoage doc treated as directory)
+		NormalizeComplexPath( leftPath );
+		NormalizeComplexPath( rightPath );
+
 		TCHAR commonPrefix[ _MAX_PATH ] = _T("");
 		::PathCommonPrefix( leftPath.c_str(), rightPath.c_str(), commonPrefix );
 		return commonPrefix;
@@ -530,8 +544,10 @@ namespace path
 		if ( size_t prefixLen = str::GetLength( pPrefix ) )
 			if ( pred::Equal == CompareNPtr( rPath.c_str(), pPrefix, prefixLen ) )
 			{
-				if ( IsSlash( rPath.c_str()[ prefixLen ] ) )
-					++prefixLen;			// cut leading slash
+				TCHAR chNext = rPath.c_str()[ prefixLen ];
+
+				if ( IsSlash( chNext ) || s_complexPathSep == chNext )
+					++prefixLen;			// cut leading slash or '>'
 
 				rPath.erase( 0, prefixLen );
 				return true;				// changed

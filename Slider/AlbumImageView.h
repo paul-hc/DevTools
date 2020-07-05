@@ -70,6 +70,9 @@ public:
 	void OnSlideDataChanged( bool setToModified = true );
 	void OnDocSlideDataChanged( void );
 	void OnSelChangeThumbList( void );
+
+	template< typename PathContainerT >
+	bool QuerySelImagePaths( PathContainerT& rSelImagePaths ) const;
 private:
 	void UpdateChildBarsState( bool onInit = false );
 	void RestartPlayTimer( void );
@@ -109,6 +112,8 @@ protected:
 	afx_msg void OnUpdate_NavigWrapMode( CCmdUI* pCmdUI );
 	afx_msg void OnUpdate_NavigSliderCtrl( CCmdUI* pCmdUI );
 	afx_msg void CmOpenImageFile( void );
+	afx_msg void On_ImageFileSaveAs( void );
+	afx_msg void OnUpdate_ImageFileSaveAs( CCmdUI* pCmdUI );
 	virtual void CmDeleteFile( UINT cmdId );
 	virtual void CmMoveFile( void );
 	afx_msg void CmAutoDropImage( UINT cmdId );

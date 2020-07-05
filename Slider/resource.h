@@ -194,6 +194,7 @@
 #define ID_ORDER_BY_FULL_PATH_DESC      32861
 #define ID_ORDER_BY_DIMENSION_ASC       32862
 #define ID_ORDER_BY_DIMENSION_DESC      32863
+#define ID_IMAGE_FILE_SAVE_AS           32882
 
 // Next default values for new objects
 // 
@@ -201,7 +202,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        176
-#define _APS_NEXT_COMMAND_VALUE         32882
+#define _APS_NEXT_COMMAND_VALUE         32883
 #define _APS_NEXT_CONTROL_VALUE         1094
 #define _APS_NEXT_SYMED_VALUE           3019
 #endif

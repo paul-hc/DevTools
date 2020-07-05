@@ -104,7 +104,7 @@ void CCatalogStorageService::BuildFromAlbumSaveAs( const CAlbumDoc* pSrcAlbumDoc
 	bool useDeepStreamPaths = pSrcModel->HasPersistFlag( CAlbumModel::UseDeepStreamPaths ) || CAlbumModel::ShouldUseDeepStreamPaths();
 
 	BuildTransferAttrs( &pSrcModel->GetImagesModel(), useDeepStreamPaths );
-	CloneDestAlbumDoc( pSrcAlbumDoc );
+	CloneDestAlbumDoc( pSrcAlbumDoc );			// clone the source album in order to facilitate transfer from any .sld or .ias source album
 }
 
 void CCatalogStorageService::BuildTransferAttrs( const CImagesModel* pImagesModel, bool useDeepStreamPaths /*= true*/ )

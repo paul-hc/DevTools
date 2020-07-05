@@ -91,11 +91,11 @@ namespace fattr
 			else
 				path::StripRootPrefix( rDestStreamPaths );		// ignore drive letter
 
-			// convert any deep embedded storage paths to directory paths (so that '>' appears only once in the final embedded)
+			// convert any deep embedded storage paths to directory paths (so that '>' appears only once in the final embedded path)
 			utl::for_each( rDestStreamPaths, func::NormalizeEmbeddedPath() );
 		}
 		else
-			path::StripToFilename( rDestStreamPaths );		// will take care to resolve duplicate filenames
+			path::StripToFilename( rDestStreamPaths );			// will take care to resolve duplicate filenames
 	}
 
 	size_t TransformDestEmbeddedPaths( std::vector< fs::TEmbeddedPath >& rDestStreamPaths, bool useDeepStreamPaths /*= true*/ )
@@ -103,7 +103,7 @@ namespace fattr
 		fattr::TransformToEmbeddedPaths( rDestStreamPaths, useDeepStreamPaths );
 
 		CPathUniqueMaker uniqueMaker;
-		return uniqueMaker.UniquifyPaths( rDestStreamPaths );			// returns the number of duplicates uniquified
+		return uniqueMaker.UniquifyPaths( rDestStreamPaths );	// returns the number of duplicate collisions (uniquified)
 	}
 }
 

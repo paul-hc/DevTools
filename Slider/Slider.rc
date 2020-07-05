@@ -469,6 +469,7 @@ BEGIN
         POPUP "&Image File"
         BEGIN
             MENUITEM "&Open\tCtrl+Shift+O",         CM_OPEN_IMAGE_FILE
+            MENUITEM "&Save As...",                 ID_IMAGE_FILE_SAVE_AS
             MENUITEM SEPARATOR
             MENUITEM "&Delete...\tDelete",          CM_DELETE_FILE
             MENUITEM "&Permanent Delete...\tShift+Delete", CM_DELETE_FILE_NO_UNDO
@@ -515,6 +516,7 @@ BEGIN
         POPUP "&Image File"
         BEGIN
             MENUITEM "&Open\tCtrl+Shift+O",         CM_OPEN_IMAGE_FILE
+            MENUITEM "&Save As...",                 ID_IMAGE_FILE_SAVE_AS
             MENUITEM SEPARATOR
             MENUITEM "&Delete...\tDelete",          CM_DELETE_FILE
             MENUITEM "&Permanent Delete...\tShift+Delete", CM_DELETE_FILE_NO_UNDO
@@ -556,6 +558,7 @@ BEGIN
     POPUP "<album found list>"
     BEGIN
         MENUITEM "&Open\tCtrl+Shift+O",         CM_OPEN_IMAGE_FILE
+        MENUITEM "&Save As...",                 ID_IMAGE_FILE_SAVE_AS
         MENUITEM SEPARATOR
         MENUITEM "&Delete...\tDelete",          CM_DELETE_FILE
         MENUITEM "&Permanent Delete...\tShift+Delete", CM_DELETE_FILE_NO_UNDO

@@ -109,6 +109,7 @@ namespace path
 
 	std::tstring MakeComplex( const std::tstring& physicalPath, const TCHAR* pEmbeddedPath );
 	bool SplitComplex( std::tstring& rPhysicalPath, std::tstring& rEmbeddedPath, const std::tstring& filePath );
+	bool NormalizeComplexPath( std::tstring& rFlexPath, TCHAR chNormalSep = _T('\\') );			// treat storage document as a directory: make a deep complex path look like a normal full path
 
 
 	enum TrailSlash { PreserveSlash, AddSlash, RemoveSlash };
@@ -357,6 +358,19 @@ namespace func
 	};
 
 
+	struct PrefixPath
+	{
+		PrefixPath( const fs::CPath& folderPath ) : m_folderPath( folderPath ) {}
+
+		void operator()( fs::CPath& rPath ) const
+		{
+			rPath = m_folderPath / rPath;
+		}
+	private:
+		fs::CPath m_folderPath;
+	};
+
+
 	struct HasCommonPathPrefix
 	{
 		HasCommonPathPrefix( const TCHAR* pDirPrefix ) : m_pDirPrefix( pDirPrefix ) { ASSERT( !str::IsEmpty( m_pDirPrefix ) ); }
@@ -448,7 +462,7 @@ namespace pred
 		template< typename PathKey >
 		bool operator()( const PathKey& pathKey ) const
 		{
-			return func::PathOf( path ).FileExist();
+			return func::PathOf( pathKey ).FileExist();
 		}
 	};
 

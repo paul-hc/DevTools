@@ -66,7 +66,7 @@ namespace fattr
 	inline fs::CPath& NormalizeEmbeddedPath( fs::CPath& rPath )
 	{
 		// saving: if an embedded image path, make it look like a deep path in DEST storage, where the doc storage path is treated like a normal directory path (replace '>' to '\\' )
-		std::replace( rPath.Ref().begin(), rPath.Ref().end(), path::s_complexPathSep, _T('\\') );
+		path::NormalizeComplexPath( rPath.Ref() );
 		return rPath;
 	}
 

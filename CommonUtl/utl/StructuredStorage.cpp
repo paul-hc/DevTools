@@ -841,8 +841,6 @@ namespace fs
 		CMirrorStorageSave::CMirrorStorageSave( const fs::CPath& docStgPath, const fs::CPath& oldDocStgPath )
 			: m_docStgPath( docStgPath )
 		{
-			REQUIRE( fs::IsValidStructuredStorage( m_docStgPath.GetPtr() ) );
-
 			if ( m_docStgPath == oldDocStgPath )
 			{
 				std::tstring mirrorFname = m_docStgPath.GetFname() + _T("_saving");

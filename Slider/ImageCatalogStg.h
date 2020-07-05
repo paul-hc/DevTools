@@ -63,8 +63,10 @@ private:
 	bool DeleteOldVersionStream( const TCHAR* pStreamName );
 	bool DeleteAnyOldVersionStream( const TCHAR* altStreamNames[], size_t altCount );
 
-	bool LoadAlbumMetadataStream( CImagesModel& rImagesModel );		// for backwards compatibility
-	bool AlterOlderDocModelSchema( app::ModelSchema docModelSchema );
+	// backwards compatibility
+	bool bkw_LoadAlbumMetadataStream( CImagesModel& rImagesModel );
+	void bkw_DecodeStreamPath( std::tstring& rStreamPath );
+	bool bkw_AlterOlderDocModelSchema( app::ModelSchema docModelSchema );
 private:
 	app::ModelSchema m_docModelSchema;			// transient: loaded model schema from file, stored by the album doc
 	std::tstring m_password;					// allow password edititng of any document (including .sld), in preparation for SaveAs .ias

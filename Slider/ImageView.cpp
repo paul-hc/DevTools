@@ -284,14 +284,14 @@ BEGIN_MESSAGE_MAP( CImageView, BaseClass )
 	ON_COMMAND_RANGE( ID_ZOOM_IN, ID_ZOOM_OUT, On_Zoom )
 	ON_COMMAND( ID_RESIZE_VIEW_TO_FIT, CmResizeViewToFit )
 	ON_COMMAND( ID_EDIT_BK_COLOR, On_EditBkColor )
-	ON_COMMAND( CM_EXPLORE_IMAGE, CmExploreImage )
-	ON_UPDATE_COMMAND_UI( CM_EXPLORE_IMAGE, OnUpdatePhysicalFileShellOperation )
-	ON_UPDATE_COMMAND_UI( CM_MOVE_FILE, OnUpdateAnyFileShellOperation )
-	ON_COMMAND_RANGE( CM_DELETE_FILE, CM_DELETE_FILE_NO_UNDO, CmDeleteFile )
-	ON_COMMAND( CM_MOVE_FILE, CmMoveFile )
-	ON_UPDATE_COMMAND_UI_RANGE( CM_DELETE_FILE, CM_DELETE_FILE_NO_UNDO, OnUpdatePhysicalFileShellOperation )
 	ON_COMMAND_RANGE( CM_SCROLL_LEFT, CM_SCROLL_PAGE_DOWN, CmScroll )
 
+	ON_COMMAND_RANGE( CM_DELETE_FILE, CM_DELETE_FILE_NO_UNDO, CmDeleteFile )
+	ON_UPDATE_COMMAND_UI_RANGE( CM_DELETE_FILE, CM_DELETE_FILE_NO_UNDO, OnUpdatePhysicalFileShellOperation )
+	ON_COMMAND( CM_MOVE_FILE, CmMoveFile )
+	ON_UPDATE_COMMAND_UI( CM_MOVE_FILE, OnUpdateAnyFileShellOperation )
+	ON_COMMAND( CM_EXPLORE_IMAGE, CmExploreImage )
+	ON_UPDATE_COMMAND_UI( CM_EXPLORE_IMAGE, OnUpdatePhysicalFileShellOperation )
 	ON_CBN_SELCHANGE( IDW_IMAGE_SCALING_COMBO, OnCBnSelChange_ImageScalingModeCombo )
 	ON_CBN_SELCHANGE( IDW_ZOOM_COMBO, OnCBnSelChange_ZoomCombo )
 	// standard printing
@@ -479,22 +479,6 @@ void CImageView::OnUpdate_NavigSliderCtrl( CCmdUI* pCmdUI )
 	pCmdUI->Enable( false );
 }
 
-void CImageView::CmScroll( UINT cmdId )
-{
-	switch ( cmdId )
-	{
-		case CM_SCROLL_LEFT:		OnScroll( MAKEWORD( SB_LINELEFT, -1 ), 0 ); break;
-		case CM_SCROLL_RIGHT:		OnScroll( MAKEWORD( SB_LINERIGHT, -1 ), 0 ); break;
-		case CM_SCROLL_UP:			OnScroll( MAKEWORD( -1, SB_LINEUP ), 0 ); break;
-		case CM_SCROLL_DOWN:		OnScroll( MAKEWORD( -1, SB_LINEDOWN ), 0 ); break;
-
-		case CM_SCROLL_PAGE_LEFT:	OnScroll( MAKEWORD( SB_PAGELEFT, -1 ), 0 ); break;
-		case CM_SCROLL_PAGE_RIGHT:	OnScroll( MAKEWORD( SB_PAGERIGHT, -1 ), 0 ); break;
-		case CM_SCROLL_PAGE_UP:		OnScroll( MAKEWORD( -1, SB_PAGEUP ), 0 ); break;
-		case CM_SCROLL_PAGE_DOWN:	OnScroll( MAKEWORD( -1, SB_PAGEDOWN ), 0 ); break;
-	}
-}
-
 void CImageView::OnRadio_ImageScalingMode( UINT cmdId )
 {
 	ModifyScalingMode( static_cast< ui::ImageScalingMode >( cmdId - ID_TOGGLE_SCALING_AUTO_FIT_LARGE ) );
@@ -535,12 +519,22 @@ void CImageView::On_EditBkColor( void )
 	}
 }
 
-void CImageView::CmExploreImage( void )
+void CImageView::CmScroll( UINT cmdId )
 {
-	if ( CWicImage* pImage = GetImage() )
-		if ( pImage->IsValidPhysicalFile() )
-			shell::ExploreAndSelectFile( pImage->GetImagePath().GetPtr() );
+	switch ( cmdId )
+	{
+		case CM_SCROLL_LEFT:		OnScroll( MAKEWORD( SB_LINELEFT, -1 ), 0 ); break;
+		case CM_SCROLL_RIGHT:		OnScroll( MAKEWORD( SB_LINERIGHT, -1 ), 0 ); break;
+		case CM_SCROLL_UP:			OnScroll( MAKEWORD( -1, SB_LINEUP ), 0 ); break;
+		case CM_SCROLL_DOWN:		OnScroll( MAKEWORD( -1, SB_LINEDOWN ), 0 ); break;
+
+		case CM_SCROLL_PAGE_LEFT:	OnScroll( MAKEWORD( SB_PAGELEFT, -1 ), 0 ); break;
+		case CM_SCROLL_PAGE_RIGHT:	OnScroll( MAKEWORD( SB_PAGERIGHT, -1 ), 0 ); break;
+		case CM_SCROLL_PAGE_UP:		OnScroll( MAKEWORD( -1, SB_PAGEUP ), 0 ); break;
+		case CM_SCROLL_PAGE_DOWN:	OnScroll( MAKEWORD( -1, SB_PAGEDOWN ), 0 ); break;
+	}
 }
+
 
 void CImageView::CmDeleteFile( UINT cmdId )
 {
@@ -560,6 +554,13 @@ void CImageView::CmMoveFile( void )
 		std::vector< std::tstring > filesToMove( 1, pImage->GetImagePath().Get() );
 		app::MoveFiles( filesToMove, this );
 	}
+}
+
+void CImageView::CmExploreImage( void )
+{
+	if ( CWicImage* pImage = GetImage() )
+		if ( pImage->IsValidPhysicalFile() )
+			shell::ExploreAndSelectFile( pImage->GetImagePath().GetPtr() );
 }
 
 void CImageView::OnUpdateAnyFileShellOperation( CCmdUI* pCmdUI )

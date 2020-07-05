@@ -106,12 +106,13 @@ protected:
 	afx_msg void On_Zoom( UINT cmdId );
 	afx_msg void CmResizeViewToFit( void );
 	afx_msg void On_EditBkColor( void );
-	afx_msg void CmExploreImage( void );
-	afx_msg void OnUpdateAnyFileShellOperation( CCmdUI* pCmdUI );
-	afx_msg void OnUpdatePhysicalFileShellOperation( CCmdUI* pCmdUI );
+	afx_msg void CmScroll( UINT cmdId );
+
 	virtual void CmDeleteFile( UINT cmdId );
 	virtual void CmMoveFile( void );
-	afx_msg void CmScroll( UINT cmdId );
+	afx_msg void CmExploreImage( void );
+	afx_msg void OnUpdatePhysicalFileShellOperation( CCmdUI* pCmdUI );
+	afx_msg void OnUpdateAnyFileShellOperation( CCmdUI* pCmdUI );
 	afx_msg void OnCBnSelChange_ImageScalingModeCombo( void );
 	afx_msg void OnCBnSelChange_ZoomCombo( void );
 
