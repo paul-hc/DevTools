@@ -71,22 +71,22 @@ namespace serial
 
 	int CScopedLoadingArchive::s_latestModelSchema = UnitializedVersion;
 	const CArchive* CScopedLoadingArchive::s_pLoadingArchive = NULL;
-	int CScopedLoadingArchive::s_fileLoadingModelSchema = UnitializedVersion;
+	int CScopedLoadingArchive::s_docLoadingModelSchema = UnitializedVersion;
 
-	CScopedLoadingArchive::CScopedLoadingArchive( const CArchive& rArchiveLoading, int fileLoadingModelSchema )
+	CScopedLoadingArchive::CScopedLoadingArchive( const CArchive& rArchiveLoading, int docLoadingModelSchema )
 	{
 		REQUIRE( s_latestModelSchema != UnitializedVersion );		// (!) must have beeen initialized at application startup
 		ASSERT_NULL( s_pLoadingArchive );							// nesting of loading archives not allowed
 		REQUIRE( rArchiveLoading.IsLoading() );
 
 		s_pLoadingArchive = &rArchiveLoading;
-		s_fileLoadingModelSchema = fileLoadingModelSchema;
+		s_docLoadingModelSchema = docLoadingModelSchema;
 	}
 
 	CScopedLoadingArchive::~CScopedLoadingArchive()
 	{
 		s_pLoadingArchive = NULL;
-		s_fileLoadingModelSchema = -1;
+		s_docLoadingModelSchema = -1;
 	}
 
 	bool CScopedLoadingArchive::IsValidLoadingArchive( const CArchive& rArchive )

@@ -105,7 +105,7 @@ namespace serial
 	class CScopedLoadingArchive
 	{
 	public:
-		CScopedLoadingArchive( const CArchive& rLoadingArchive, int fileLoadingModelSchema );
+		CScopedLoadingArchive( const CArchive& rLoadingArchive, int docLoadingModelSchema );
 		~CScopedLoadingArchive();
 
 		static void SetLatestModelSchema( int latestModelSchema ) { s_latestModelSchema = latestModelSchema; }
@@ -119,7 +119,7 @@ namespace serial
 			ASSERT( IsValidLoadingArchive( rArchive ) );				// if a file archive, ensure CScopedLoadingArchive is created in the scope of loading
 
 			if ( &rArchive == s_pLoadingArchive )
-				return static_cast< EnumType >( s_fileLoadingModelSchema );
+				return static_cast< EnumType >( s_docLoadingModelSchema );
 
 			return static_cast< EnumType >( s_latestModelSchema );
 		}
@@ -130,7 +130,7 @@ namespace serial
 
 		// file loading only
 		static const CArchive* s_pLoadingArchive;
-		static int s_fileLoadingModelSchema;
+		static int s_docLoadingModelSchema;
 	};
 
 
