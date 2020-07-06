@@ -74,17 +74,17 @@ void CImageFileEnumerator::Search( const CSearchPattern& searchPattern ) throws_
 	Search( searchPatterns );
 }
 
-void CImageFileEnumerator::SearchCatalogStorage( const fs::CPath& stgDocPath ) throws_( CException*, CUserAbortedException )
+void CImageFileEnumerator::SearchCatalogStorage( const fs::CPath& docStgPath ) throws_( CException*, CUserAbortedException )
 {
-	if ( !stgDocPath.FileExist() )
-		AfxThrowFileException( CFileException::fileNotFound, -1, stgDocPath.GetPtr() );		// storage file path does not exist
+	if ( !docStgPath.FileExist() )
+		AfxThrowFileException( CFileException::fileNotFound, -1, docStgPath.GetPtr() );			// storage file path does not exist
 
 	CWaitCursor wait;
 	CScopedErrorHandling scopedThrow( CCatalogStorageFactory::Instance(), utl::ThrowMode );		// report storage sharing violations, etc
 
 	m_issueStore.Reset( _T("Querying storage for images") );
 
-	AddFoundFile( stgDocPath.GetPtr() );
+	AddFoundFile( docStgPath.GetPtr() );
 }
 
 void CImageFileEnumerator::SwapFoundImages( CImagesModel& rImagesModel )

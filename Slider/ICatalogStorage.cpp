@@ -66,6 +66,10 @@ CComPtr< ICatalogStorage > CCatalogStorageFactory::AcquireStorage( const fs::CPa
 	if ( !pDocStorage->OpenDocFile( docStgPath, mode ) )
 		return NULL;
 
+	if ( fs::CStructuredStorage::IsReadingMode( mode ) )
+		if ( !CCatalogPasswordStore::Instance()->LoadPasswordVerify( pNewCatalogStorage ) )
+			return NULL;			// password not verified correctly by user
+
 	return pNewCatalogStorage;
 }
 
@@ -79,27 +83,26 @@ std::auto_ptr< CFile > CCatalogStorageFactory::OpenFlexImageFile( const fs::CFle
 	{	// storage-based image file:
 		fs::CPath docStgPath = flexImagePath.GetPhysicalPath();
 
-		ASSERT( IsPasswordVerified( docStgPath ) );
+		if ( IsPasswordVerified( docStgPath ) )
+			if ( ICatalogStorage* pCatalogStorage = FindStorage( docStgPath ) )
+			{
+				fs::CStructuredStorage* pDocStorage = pCatalogStorage->GetDocStorage();
+				CScopedErrorHandling scopedHandling( pDocStorage, this );					// pass current factory throw mode to the storage
 
-		if ( ICatalogStorage* pCatalogStorage = FindStorage( docStgPath ) )
-		{
-			fs::CStructuredStorage* pDocStorage = pCatalogStorage->GetDocStorage();
-			CScopedErrorHandling scopedHandling( pDocStorage, this );					// pass current factory throw mode to the storage
+				ASSERT( pDocStorage->IsOpenForWriting() == fs::CStructuredStorage::IsWritingMode( mode ) );		// IMP: the storage must be in compatible open mode for the type of file access
 
-			ASSERT( pDocStorage->IsOpenForWriting() == fs::CStructuredStorage::IsWritingMode( mode ) );		// IMP: the storage must be in compatible open mode for the type of file access
+				std::auto_ptr< fs::CStreamLocation > pStreamLocation;
 
-			std::auto_ptr< fs::CStreamLocation > pStreamLocation;
+				if ( fs::CStructuredStorage::IsReadingMode( mode ) )
+					pStreamLocation = pDocStorage->LocateReadStream( flexImagePath.GetEmbeddedPath(), mode );
+				else
+					pStreamLocation = pDocStorage->LocateWriteStream( flexImagePath.GetEmbeddedPath(), mode );
 
-			if ( fs::CStructuredStorage::IsReadingMode( mode ) )
-				pStreamLocation = pDocStorage->LocateReadStream( flexImagePath.GetEmbeddedPath(), mode );
+				if ( pStreamLocation.get() != NULL && pStreamLocation->IsValid() )
+					pFile.reset( new fs::CManagedOleStreamFile( pStreamLocation, flexImagePath ) );
+			}
 			else
-				pStreamLocation = pDocStorage->LocateWriteStream( flexImagePath.GetEmbeddedPath(), mode );
-
-			if ( pStreamLocation.get() != NULL && pStreamLocation->IsValid() )
-				pFile.reset( new fs::CManagedOleStreamFile( pStreamLocation, flexImagePath ) );
-		}
-		else
-			ASSERT( false );		// likely a programming error: storage is not alive in the calling context
+				ASSERT( false );		// likely a programming error: storage is not alive in the calling context
 	}
 
 	return pFile;
@@ -120,9 +123,8 @@ CCachedThumbBitmap* CCatalogStorageFactory::ExtractThumb( const fs::CFlexPath& s
 	if ( srcImagePath.IsComplexPath() )
 	{
 		fs::CPath docStgPath = srcImagePath.GetPhysicalPath();
-		REQUIRE( IsPasswordVerified( docStgPath ) );
 
-		if ( ICatalogStorage* pCatalogStorage = AcquireStorage( docStgPath ) )
+		if ( ICatalogStorage* pCatalogStorage = FindStorage( docStgPath ) )
 		{
 			CScopedErrorHandling scopedCheck( pCatalogStorage->GetDocStorage(), utl::CheckMode );		// no exceptions for thumb extraction
 
@@ -136,7 +138,6 @@ CCachedThumbBitmap* CCatalogStorageFactory::GenerateThumb( const fs::CFlexPath& 
 {
 	fs::CPath docStgPath( srcImagePath.GetPhysicalPath() );
 	REQUIRE( srcImagePath.IsComplexPath() );
-	REQUIRE( IsPasswordVerified( docStgPath ) );
 
 	const CThumbnailer* pThumbnailer = safe_ptr( app::GetThumbnailer() );
 
@@ -182,7 +183,7 @@ bool CCatalogPasswordStore::SavePassword( ICatalogStorage* pCatalogStorage )
 	}
 }
 
-bool CCatalogPasswordStore::LoadPasswordVerify( std::tstring* pOutPassword, ICatalogStorage* pCatalogStorage )
+bool CCatalogPasswordStore::LoadPasswordVerify( ICatalogStorage* pCatalogStorage, std::tstring* pOutPassword /*= NULL*/ )
 {
 	ASSERT_PTR( pCatalogStorage );
 
@@ -221,7 +222,7 @@ bool CCatalogPasswordStore::IsPasswordVerified( const fs::CPath& docStgPath ) co
 		else
 			return false;
 
-	return true;				// no assumption on closed storage
+	return false;				// assume not verified on closed storage
 }
 
 
@@ -249,6 +250,7 @@ ICatalogStorage* CCatalogStorageHost::Push( const fs::CPath& docStgPath, DWORD m
 	if ( pStorage != NULL )
 	{
 		REQUIRE( pStorage->GetDocStorage()->IsOpenForReading() == fs::CStructuredStorage::IsReadingMode( mode ) );
+
 		m_imageStorages.push_back( pStorage );
 	}
 

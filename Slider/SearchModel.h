@@ -21,6 +21,8 @@ public:
 
 	void Stream( CArchive& archive );
 
+	void AugmentStoragePaths( std::vector< fs::CPath >& rStoragePaths ) const;
+
 	UINT GetMaxFileCount( void ) const { return m_maxFileCount; }
 	void SetMaxFileCount( UINT maxFileCount ) { m_maxFileCount = maxFileCount; }
 

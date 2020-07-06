@@ -55,13 +55,11 @@ ICatalogStorage* CAlbumModel::GetCatalogStorage( void ) const
 
 void CAlbumModel::OpenAllStorages( void )
 {
-	if ( !m_docStgPath.IsEmpty() )				// catalog-based album?
+	if ( !m_docStgPath.IsEmpty() )							// catalog-based album?
 		m_storageHost.Push( m_docStgPath );
 
-	// open embedded storages in search model
-	for ( std::vector< CSearchPattern* >::const_iterator itPattern = m_searchModel.GetPatterns().begin(); itPattern != m_searchModel.GetPatterns().end(); ++itPattern )
-		if ( ( *itPattern )->IsCatalogDocFile() )
-			m_storageHost.Push( ( *itPattern )->GetFilePath() );
+	std::vector< fs::CPath > storagePaths = m_imagesModel.GetStoragePaths();
+	m_searchModel.AugmentStoragePaths( storagePaths );		// add embedded storages in search model
 
 	m_storageHost.PushMultiple( m_imagesModel.GetStoragePaths() );		// open embedded storages in image model
 }

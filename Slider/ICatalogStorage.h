@@ -61,7 +61,7 @@ public:
 	static const TCHAR* GetDefaultExtension( void ) { return s_imageStorageExts[ Ext_ias ]; }
 
 	ICatalogStorage* FindStorage( const fs::CPath& docStgPath ) const;
-	CComPtr< ICatalogStorage > AcquireStorage( const fs::CPath& docStgPath, DWORD mode = STGM_READ );
+	CComPtr< ICatalogStorage > AcquireStorage( const fs::CPath& docStgPath, DWORD mode = STGM_READ );		// for password-protected storage reading: also prompts user to verify password, returning NULL if not verified
 
 	std::auto_ptr< CFile > OpenFlexImageFile( const fs::CFlexPath& flexImagePath, DWORD mode = CFile::modeRead );		// either physical or storage-based image file
 
@@ -85,7 +85,7 @@ public:
 	static CCatalogPasswordStore* Instance( void );
 
 	bool SavePassword( ICatalogStorage* pCatalogStorage );
-	bool LoadPasswordVerify( std::tstring* pOutPassword, ICatalogStorage* pCatalogStorage );
+	bool LoadPasswordVerify( ICatalogStorage* pCatalogStorage, std::tstring* pOutPassword = NULL );
 	bool CacheVerifiedPassword( const std::tstring& password );
 
 	bool IsPasswordVerified( const fs::CPath& docStgPath ) const;

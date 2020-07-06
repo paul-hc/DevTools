@@ -53,6 +53,13 @@ void CSearchModel::Stream( CArchive& archive )
 	serial::StreamOwningPtrs( archive, m_patterns );
 }
 
+void CSearchModel::AugmentStoragePaths( std::vector< fs::CPath >& rStoragePaths ) const
+{
+	for ( std::vector< CSearchPattern* >::const_iterator itPattern = m_patterns.begin(); itPattern != m_patterns.end(); ++itPattern )
+		if ( ( *itPattern )->IsCatalogDocFile() )
+			utl::AddUnique( rStoragePaths, ( *itPattern )->GetFilePath() );		// unique augmentation to prevent pushing duplicates in CAlbumModel::m_storageHost
+}
+
 void CSearchModel::ClearPatterns( void )
 {
 	utl::ClearOwningContainer( m_patterns );

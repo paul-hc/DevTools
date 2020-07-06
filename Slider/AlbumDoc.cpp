@@ -134,9 +134,6 @@ void CAlbumDoc::Serialize( CArchive& archive )
 
 	m_model.Stream( archive );
 
-//	if ( archive.IsLoading() )
-//		m_model._CheckReparentFileAttrs( docPath.GetPtr(), CAlbumModel::Loading );		// re-parent embedded image paths with current doc stg path
-
 	serial::StreamItems( archive, m_dropUndoStack );
 	serial::StreamItems( archive, m_dropRedoStack );
 	InitAutoDropRecipient();
@@ -256,15 +253,13 @@ bool CAlbumDoc::LoadCatalogStorage( const fs::CPath& docStgPath )
 {
 	ASSERT( app::IsCatalogFile( docStgPath.GetPtr() ) );
 
-	CComPtr< ICatalogStorage > pCatalogStorage = CCatalogStorageFactory::Instance()->AcquireStorage( docStgPath, STGM_READ );
+	CComPtr< ICatalogStorage > pCatalogStorage = CCatalogStorageFactory::Instance()->AcquireStorage( docStgPath, STGM_READ );		// also prompts user to verify password (if password-protected)
 
 	if ( NULL == pCatalogStorage )
 		return false;
 
-	if ( !CCatalogPasswordStore::Instance()->LoadPasswordVerify( &m_password, pCatalogStorage ) )
-		return false;
-
 	m_model.StoreCatalogDocPath( docStgPath );
+	m_password = pCatalogStorage->GetPassword();
 
 	// note: album stream is optional for older archives: not an error if missing
 
