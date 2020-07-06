@@ -10,6 +10,7 @@
 class CTimer;
 namespace fs { struct CFileState; }
 namespace wic { enum ImageFormat; }
+namespace app { enum ModelSchema; }
 
 
 class CFileAttr : public CSubject
@@ -52,13 +53,16 @@ public:
 private:
 	bool ReadFileStatus( void );
 	const CSize& GetSavingImageDim( void ) const;
-	static bool PromptedSpeedUpSaving( CTimer& rSavingTimer );
 
 	enum SavingFlags
 	{
-		Saving_PromptedSpeedUp = BIT_FLAG( 8 ),
-		Saving_SkipImageDimEvaluation = BIT_FLAG( 9 )
+		Saving_PromptedSpeedUp			= BIT_FLAG( 8 ),
+		Saving_SkipImageDimEvaluation	= BIT_FLAG( 9 ),
+		Loading_InspectedPathEncoding	= BIT_FLAG( 10 )
 	};
+
+	static bool PromptedSpeedUpSaving( CTimer& rSavingTimer );
+	static app::ModelSchema EvalLoadingSchema( CArchive& rLoadArchive );
 private:
 	persist fs::ImagePathKey m_pathKey;
 	persist wic::ImageFormat m_imageFormat;		// formerly FileType in Slider_v5_5- (no longer needed, really)

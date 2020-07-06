@@ -276,6 +276,15 @@ namespace serial
 	public:
 		static UnicodeEncoding s_strEncoding;
 	};
+
+
+	UnicodeEncoding InspectSavedStringEncoding( ::CArchive& rLoadArchive, size_t* pLength = NULL );
+
+	const BYTE* GetLoadingCursor( const ::CArchive& rLoadArchive );
+	void UnreadBytes( ::CArchive& rLoadArchive, size_t bytes );
+
+	template< typename ValueT >
+	inline void UnreadValue( ::CArchive& rLoadArchive, ValueT& rValue ) { UnreadBytes( rLoadArchive, sizeof( rValue ) ); }
 }
 
 

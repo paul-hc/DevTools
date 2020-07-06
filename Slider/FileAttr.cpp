@@ -2,6 +2,8 @@
 #include "stdafx.h"
 #include "FileAttr.h"
 #include "ModelSchema.h"
+#include "CatalogStorageService.h"			// for ToAlbumModel()
+#include "AlbumModel.h"
 #include "Application_fwd.h"
 #include "utl/EnumTags.h"
 #include "utl/Serialization.h"
@@ -102,7 +104,7 @@ void CFileAttr::Stream( CArchive& archive )
 	}
 	else
 	{
-		app::ModelSchema docModelSchema = app::GetLoadingSchema( archive );
+		app::ModelSchema docModelSchema = EvalLoadingSchema( archive );
 
 		if ( docModelSchema >= app::Slider_v3_8 )
 			archive >> m_pathKey;
@@ -130,6 +132,87 @@ void CFileAttr::Stream( CArchive& archive )
 	}
 }
 
+app::ModelSchema CFileAttr::EvalLoadingSchema( CArchive& rLoadArchive )
+{
+	// NOTES:
+	//	1) All this complexity is required to maintain backwards compatibility to the very earliest Slider, since the ModelSchema was not saved.
+	//	2) It's fairly efficient, since we are checking only for the first loaded CFileAttr object.
+	//	3) This is messy, to keep CFileAttr::Stream() as clean as possible.
+
+	app::ModelSchema docModelSchema = app::GetLoadingSchema( rLoadArchive );
+	CAlbumModel* pAlbumModel = NULL;
+
+	if ( rLoadArchive.m_pDocument != NULL )
+		pAlbumModel = CCatalogStorageService::ToAlbumModel( rLoadArchive.m_pDocument );
+
+	if ( serial::CStreamingGuard* pLoadGuard = serial::CStreamingGuard::GetTop() )
+		if ( !pLoadGuard->HasStreamingFlag( Loading_InspectedPathEncoding ) )
+		{	// backwards compatibility with first versions of Slider, pre 2.1, that were serializing paths as wide encoded strings:
+			pLoadGuard->SetStreamingFlag( Loading_InspectedPathEncoding );						// check this only once
+
+			if ( serial::WideEncoding == serial::InspectSavedStringEncoding( rLoadArchive ) )		// found old wide-encoded path?
+			{
+				docModelSchema = app::Slider_v3_1;
+
+				if ( pAlbumModel != NULL )
+					pAlbumModel->StoreModelSchema( docModelSchema );					// mark model to earlier version
+
+				TRACE( _T(" (!) CFileAttr::Stream() - detected earliest version %s in document '%s' (using wide-encoded paths)\n"),
+					app::FormatModelVersion( docModelSchema ).c_str(), rLoadArchive.m_strFileName.GetString() );
+			}
+			else
+			{	// check whether is older than app::Slider_v3_8 (having saved just the path, not the framePos)
+				const BYTE* pOldCursor = serial::GetLoadingCursor( rLoadArchive );
+				persist fs::ImagePathKey pathKey;
+				persist int imageFormat;		// formerly FileType in Slider_v5_5- (no longer needed, really)
+
+				rLoadArchive >> pathKey;
+				rLoadArchive >> imageFormat;
+
+				serial::UnreadBytes( rLoadArchive, serial::GetLoadingCursor( rLoadArchive ) - pOldCursor );		// rewind back in order to re-read {m_pathKey, m_imageFormat}
+
+				if ( imageFormat < 0 || imageFormat > wic::UnknownImageFormat )			// out-of-range imageFormat?
+				{
+					docModelSchema = app::Slider_v3_7;									// we have a Slider_v3_7 (-) document
+
+					if ( pAlbumModel != NULL )
+						pAlbumModel->StoreModelSchema( docModelSchema );				// mark model to earlier version
+
+					TRACE( _T(" (!) CFileAttr::Stream() - detected earlier version than %s in document '%s' (not using framePos with path)\n"),
+						app::FormatModelVersion( docModelSchema ).c_str(), rLoadArchive.m_strFileName.GetString() );
+				}
+			}
+		}
+
+	if ( pAlbumModel != NULL )
+		docModelSchema = std::min( docModelSchema, pAlbumModel->GetModelSchema() );		// use the earliest marked schema version
+
+	return docModelSchema;
+}
+
+const CSize& CFileAttr::GetSavingImageDim( void ) const
+{
+	// OPTIMIZATION for documents with many images: speed up saving by saving unevaluated dimensions.
+	// note: GetImageDim() uses WIC to load each image, an expensive operation.
+	if ( serial::CStreamingGuard* pTimeGuard = serial::CStreamingGuard::GetTop() )
+		if ( pTimeGuard->HasStreamingFlag( Saving_SkipImageDimEvaluation ) )
+			return m_imageDim;
+		else
+			if ( pTimeGuard->IsTimeout( 15.0 ) )								// saving takes more that 15 seconds?
+				if ( !pTimeGuard->HasStreamingFlag( Saving_PromptedSpeedUp ) )
+				{
+					pTimeGuard->SetStreamingFlag( Saving_PromptedSpeedUp );		// user was asked
+
+					if ( PromptedSpeedUpSaving( pTimeGuard->GetTimer() ) )
+					{	// speed up saving by saving unevaluated dimensions (will be lazy evaluation for the rest of images)
+						pTimeGuard->SetStreamingFlag( Saving_SkipImageDimEvaluation );
+						app::LogLine( _T("Speeding up saving by saving unevaluated dimensions for album: %s"), serial::GetDocumentPath( pTimeGuard->GetArchive() ).GetPtr() );
+					}
+				}
+
+	return GetImageDim();
+}
+
 bool CFileAttr::ReadFileStatus( void )
 {
 	if ( GetPath().IsEmpty() || GetPath().IsComplexPath() )
@@ -154,29 +237,6 @@ const CSize& CFileAttr::GetImageDim( void ) const
 		m_imageDim = CWicImageCache::Instance().LookupImageDim( m_pathKey );
 
 	return m_imageDim;
-}
-
-const CSize& CFileAttr::GetSavingImageDim( void ) const
-{
-	// OPTIMIZATION for documents with many images: speed up saving by saving unevaluated dimensions.
-	// note: GetImageDim() uses WIC to load each image, an expensive operation.
-	if ( serial::CStreamingTimeGuard* pTimeGuard = serial::CStreamingTimeGuard::GetTop() )
-		if ( pTimeGuard->HasStreamingFlag( Saving_SkipImageDimEvaluation ) )
-			return m_imageDim;
-		else
-			if ( pTimeGuard->IsTimeout( 15.0 ) )								// saving takes more that 15 seconds?
-				if ( !pTimeGuard->HasStreamingFlag( Saving_PromptedSpeedUp ) )
-				{
-					pTimeGuard->SetStreamingFlag( Saving_PromptedSpeedUp );		// user was asked
-
-					if ( PromptedSpeedUpSaving( pTimeGuard->GetTimer() ) )
-					{	// speed up saving by saving unevaluated dimensions (will be lazy evaluation for the rest of images)
-						pTimeGuard->SetStreamingFlag( Saving_SkipImageDimEvaluation );
-						app::LogLine( _T("Speeding up saving by saving unevaluated dimensions for album: %s"), serial::GetDocumentPath( pTimeGuard->GetArchive() ).GetPtr() );
-					}
-				}
-
-	return GetImageDim();
 }
 
 const std::tstring& CFileAttr::GetCode( void ) const

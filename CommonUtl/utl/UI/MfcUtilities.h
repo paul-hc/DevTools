@@ -134,11 +134,11 @@ namespace serial
 	};
 
 
-	class CStreamingTimeGuard : private utl::noncopyable
+	class CStreamingGuard : private utl::noncopyable
 	{
 	public:
-		CStreamingTimeGuard( const CArchive& archive );
-		~CStreamingTimeGuard();
+		CStreamingGuard( const CArchive& archive );
+		~CStreamingGuard();
 
 		double GetElapsedSeconds( void ) const { return m_timer.ElapsedSeconds(); }
 		bool IsTimeout( double timeout ) const { return GetElapsedSeconds() > timeout; }
@@ -149,13 +149,13 @@ namespace serial
 		bool HasStreamingFlag( int flag ) const { return HasFlag( m_streamingFlags, flag ); }
 		void SetStreamingFlag( int flag, bool on = true ) { SetFlag( m_streamingFlags, flag, on ); }
 
-		static CStreamingTimeGuard* GetTop( void ) { return !s_instances.empty() ? s_instances.back() : NULL; }
+		static CStreamingGuard* GetTop( void ) { return !s_instances.empty() ? s_instances.back() : NULL; }
 	private:
 		const CArchive& m_rArchive;
 		CTimer m_timer;
 		int m_streamingFlags;		// client code maintains the actual flags
 
-		static std::vector< CStreamingTimeGuard* > s_instances;		// could be stacked, the deepest at the top (back)
+		static std::vector< CStreamingGuard* > s_instances;		// could be stacked, the deepest at the top (back)
 	};
 }
 

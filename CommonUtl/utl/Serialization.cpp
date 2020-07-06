@@ -40,6 +40,58 @@ namespace serial
 
 		rWideStr.clear();
 	}
+
+
+	class CArchiveGuts : public ::CArchive
+	{
+		CArchiveGuts( void );
+	public:
+		const BYTE* GetCursor( void ) const { return m_lpBufCur; }
+
+		void Rewind( size_t bytes )
+		{	// rollback the archive cursor to allow re-reading the bytes that were read
+			ASSERT( IsLoading() );
+
+			m_lpBufCur -= bytes;
+
+			ENSURE( m_lpBufCur >= m_lpBufStart );		// no underflow
+		}
+
+		UnicodeEncoding InspectSavedStringEncoding( size_t* pLength = NULL )
+		{
+			const BYTE* pOldCursor = GetCursor();
+
+			int savedCharSize;			// 1 = char, 2 = wchar_t
+			size_t length = static_cast<size_t>( AfxReadStringLength( *this, savedCharSize ) );
+
+			Rewind( m_lpBufCur - pOldCursor );			// go back to allow re-reading the string
+			utl::AssignPtr( pLength, length );
+
+			enum SavedCharSize { Char = 1, WideChar = 2 };
+			return WideChar == savedCharSize ? WideEncoding : Utf8Encoding;
+		}
+	};
+
+
+	// advanced archive utilities
+
+	const BYTE* GetLoadingCursor( const ::CArchive& rLoadArchive )
+	{
+		const CArchiveGuts* pArchiveGuts = reinterpret_cast< const CArchiveGuts* >( &rLoadArchive );
+		return pArchiveGuts->GetCursor();
+	}
+
+	void UnreadBytes( ::CArchive& rLoadArchive, size_t bytes )
+	{
+		CArchiveGuts* pArchiveGuts = reinterpret_cast< CArchiveGuts* >( &rLoadArchive );
+		pArchiveGuts->Rewind( bytes );
+	}
+
+	UnicodeEncoding InspectSavedStringEncoding( ::CArchive& rLoadArchive, size_t* pLength /*= NULL*/ )
+	{
+		CArchiveGuts* pArchiveGuts = reinterpret_cast< CArchiveGuts* >( &rLoadArchive );
+		return pArchiveGuts->InspectSavedStringEncoding( pLength );
+	}
 }
 
 

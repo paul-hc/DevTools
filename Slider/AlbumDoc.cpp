@@ -85,26 +85,28 @@ void CAlbumDoc::Serialize( CArchive& archive )
 	if ( archive.IsStoring() )
 		PrepareToSave( docPath );
 
-	serial::CStreamingTimeGuard timeGuard( archive );
+	serial::CStreamingGuard timeGuard( archive );
 	CWaitCursor wait;
 
-	// version backwards compatibility hack: check if a valid version is saved as first UINT
-	CSlideData::TFirstDataMember firstValue = UINT_MAX;
 	std::auto_ptr< serial::CScopedLoadingArchive > pLoadingArchive;
 
 	if ( archive.IsLoading() )
 	{
+		// version backwards compatibility hack: check if a valid version is saved as first UINT
+		persist UINT firstValue;
 		archive >> firstValue;
 
-		app::ModelSchema docModelSchema = app::Slider_v3_1;										// assume an old backwards-compatible model schema (not saved back in the day)
+		app::ModelSchema docModelSchema;
 
 		if ( firstValue >= app::Slider_v3_2 && firstValue <= app::Slider_LatestModelSchema )	// valid version saved?
-		{	// let model details know the loading archive version
-			docModelSchema = static_cast< app::ModelSchema >( firstValue );						// store original document model schema (required for further storage access/metadata lookups)
-			firstValue = UINT_MAX;			// mark as extracted (as file ModelSchema)
+			docModelSchema = static_cast< app::ModelSchema >( firstValue );						// use it as the original document model schema
+		else
+		{
+			docModelSchema = app::Slider_v3_1;					// assume an old backwards-compatible model schema (not saved back in the day)
+			serial::UnreadValue( archive, firstValue );			// rewind the UINT back into the archive, as model schema wasn't saved
 		}
 
-		pLoadingArchive.reset( new serial::CScopedLoadingArchive( archive, docModelSchema ) );
+		pLoadingArchive.reset( new serial::CScopedLoadingArchive( archive, docModelSchema ) );	// required for further storage access/metadata lookups
 
 		m_model.StoreModelSchema( docModelSchema );									// data-member in model but persisted by this document
 
@@ -117,8 +119,7 @@ void CAlbumDoc::Serialize( CArchive& archive )
 		archive << GetModelSchema();
 	}
 
-	// backwards compatibility: pass firstValue read
-	m_slideData.Stream( archive, firstValue != UINT_MAX ? &firstValue : NULL );
+	m_slideData.Stream( archive );
 
 	if ( archive.IsStoring() )
 	{

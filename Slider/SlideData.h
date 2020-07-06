@@ -35,9 +35,7 @@ public:
 	CSlideData( void );
 	~CSlideData();
 
-	typedef UINT TFirstDataMember;
-
-	void Stream( CArchive& archive, TFirstDataMember* pExtracted_SlideDelay = NULL );
+	void Stream( CArchive& archive );
 
 	const CListViewState& GetCurrListState( void ) const { return m_currListState; }
 	CListViewState& RefCurrListState( void ) { m_imageFramePos = 0; return m_currListState; }
@@ -50,11 +48,11 @@ public:
 	bool SetCurrentNavPos( const nav::TIndexFramePosPair& currentPos );
 public:
 	// sliding
-	persist TFirstDataMember m_slideDelay;		// in miliseconds
+	persist UINT m_slideDelay;				// in miliseconds
 	persist bool m_dirForward;
 	persist bool m_wrapMode;
 
-	persist int m_viewFlags;					// slider inherited flags
+	persist int m_viewFlags;				// slider inherited flags
 	persist int m_thumbListColumnCount;
 private:
 	persist CListViewState m_currListState;

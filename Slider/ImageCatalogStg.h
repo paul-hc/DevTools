@@ -64,7 +64,7 @@ private:
 	bool DeleteAnyOldVersionStream( const TCHAR* altStreamNames[], size_t altCount );
 
 	// backwards compatibility
-	bool bkw_LoadAlbumMetadataStream( CImagesModel& rImagesModel );
+	bool bkw_LoadAlbumMetadataStream( CObject* pAlbumDoc );
 	void bkw_DecodeStreamPath( std::tstring& rStreamPath );
 	bool bkw_AlterOlderDocModelSchema( app::ModelSchema docModelSchema );
 private:

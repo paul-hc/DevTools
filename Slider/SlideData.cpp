@@ -25,7 +25,7 @@ CSlideData::~CSlideData()
 {
 }
 
-void CSlideData::Stream( CArchive& archive, TFirstDataMember* pExtracted_SlideDelay /*= NULL*/ )
+void CSlideData::Stream( CArchive& archive )
 {
 	if ( archive.IsStoring() )
 	{
@@ -37,11 +37,7 @@ void CSlideData::Stream( CArchive& archive, TFirstDataMember* pExtracted_SlideDe
 	}
 	else
 	{	// check version backwards compatibility hack
-		if ( pExtracted_SlideDelay != NULL )
-			m_slideDelay = *pExtracted_SlideDelay;		// was already extracted from Slider_v3_1 old archive version
-		else
-			archive >> m_slideDelay;
-
+		archive >> m_slideDelay;
 		archive & m_dirForward & m_wrapMode;
 		archive >> m_viewFlags;
 		archive >> m_thumbListColumnCount;

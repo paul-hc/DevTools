@@ -101,18 +101,18 @@ namespace serial
 	}
 
 
-	// CStreamingTimeGuard implementation
+	// CStreamingGuard implementation
 
-	std::vector< CStreamingTimeGuard* > CStreamingTimeGuard::s_instances;
+	std::vector< CStreamingGuard* > CStreamingGuard::s_instances;
 
-	CStreamingTimeGuard::CStreamingTimeGuard( const CArchive& rArchive )
+	CStreamingGuard::CStreamingGuard( const CArchive& rArchive )
 		: m_rArchive( rArchive )
 		, m_streamingFlags( 0 )
 	{
 		s_instances.push_back( this );
 	}
 
-	CStreamingTimeGuard::~CStreamingTimeGuard()
+	CStreamingGuard::~CStreamingGuard()
 	{
 		ASSERT( s_instances.back() == this );
 		s_instances.pop_back();

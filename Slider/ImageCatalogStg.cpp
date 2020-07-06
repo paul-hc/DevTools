@@ -431,9 +431,11 @@ bool CImageCatalogStg::LoadAlbumStream( CObject* pAlbumDoc )
 		if ( NULL == pAlbumFile.get() )
 			return false;
 
-		CArchive archive( pAlbumFile.get(), CArchive::load );
-		archive.m_bForceFlat = FALSE;			// same as CDocument::OnOpenDocument()
-		pAlbumDoc->Serialize( archive );
+		CArchive loadArchive( pAlbumFile.get(), CArchive::load );
+		loadArchive.m_bForceFlat = FALSE;			// same as CDocument::OnOpenDocument()
+		loadArchive.m_pDocument = reinterpret_cast< CDocument* >( pAlbumDoc );
+
+		pAlbumDoc->Serialize( loadArchive );
 
 		StoreDocModelSchema( CCatalogStorageService::ToAlbumModel( pAlbumDoc )->GetModelSchema() );		// copy over the model schema saved in the album stream
 		return true;
@@ -441,8 +443,9 @@ bool CImageCatalogStg::LoadAlbumStream( CObject* pAlbumDoc )
 
 	// backwards compatibility:
 	CImagesModel& rImagesModel = CCatalogStorageService::ToImagesModel( pAlbumDoc );
+	rImagesModel.Clear();
 
-	if ( bkw_LoadAlbumMetadataStream( rImagesModel ) )			// load "_Meta.data" stream - older catalogs may not contain the album stream (not an error)
+	if ( bkw_LoadAlbumMetadataStream( pAlbumDoc ) )			// load "_Meta.data" stream - older catalogs may not contain the album stream (not an error)
 		return true;
 
 	if ( EnumerateImages( rImagesModel ) )					// fallback to enumerating the image content in the root storage
@@ -451,12 +454,13 @@ bool CImageCatalogStg::LoadAlbumStream( CObject* pAlbumDoc )
 	return false;
 }
 
-bool CImageCatalogStg::bkw_LoadAlbumMetadataStream( CImagesModel& rImagesModel )
+bool CImageCatalogStg::bkw_LoadAlbumMetadataStream( CObject* pAlbumDoc )
 {
 	static const TCHAR s_metadataStreamName[] = _T("_Meta.data");
 	CScopedCurrentDir scopedAlbumFolder( this, s_rootFolderName );
 
-	rImagesModel.Clear();
+	ASSERT_PTR( pAlbumDoc );
+	CImagesModel& rImagesModel = CCatalogStorageService::ToImagesModel( pAlbumDoc );
 
 	if ( StreamExist( s_metadataStreamName ) )
 	{
@@ -464,22 +468,26 @@ bool CImageCatalogStg::bkw_LoadAlbumMetadataStream( CImagesModel& rImagesModel )
 
 		if ( pMetadataFile.get() != NULL )
 		{
-			CArchive archive( pMetadataFile.get(), CArchive::load );
-			archive.m_bForceFlat = FALSE;			// same as CDocument::OnOpenDocument()
+			CArchive loadArchive( pMetadataFile.get(), CArchive::load );
+			loadArchive.m_bForceFlat = FALSE;			// same as CDocument::OnOpenDocument()
 
-			serial::CScopedLoadingArchive scopedLoadingArchive( archive, m_docModelSchema );
+			// needed for backwards compatibility
+			loadArchive.m_pDocument = reinterpret_cast< CDocument* >( pAlbumDoc );
+
+			bkw_AlterOlderDocModelSchema( app::Slider_v4_0 );		// arbitrarily set to an older version
+
+			serial::CStreamingGuard schemaGuard( loadArchive );
+			serial::CScopedLoadingArchive scopedLoadingArchive( loadArchive, m_docModelSchema );
 
 			try
 			{	// load metadata
 				persist UINT totalImagesSize;
-				archive >> totalImagesSize;
+				loadArchive >> totalImagesSize;
 
-				serial::StreamOwningPtrs( archive, rImagesModel.RefFileAttrs() );
+				serial::StreamOwningPtrs( loadArchive, rImagesModel.RefFileAttrs() );
 				rImagesModel.StoreBaselineSequence();
 
 				ASSERT( rImagesModel.IsEmpty() || rImagesModel.GetFileAttrAt( 0 )->GetPath().IsComplexPath() );		// ensure deserialized to full complex path
-
-				bkw_AlterOlderDocModelSchema( app::Slider_v4_0 );		// arbitrarily set an older version
 				return true;
 			}
 			catch ( CException* pExc )
@@ -573,12 +581,12 @@ bool CImageCatalogStg::SavePasswordStream( void )
 			return false;
 
 		std::tstring encryptedPassword = pwd::ToEncrypted( m_password );
-		CArchive archive( pPwdFile.get(), CArchive::store );
-		archive.m_bForceFlat = FALSE;			// same as CDocument::OnOpenDocument()
+		CArchive saveArchive( pPwdFile.get(), CArchive::store );
+		saveArchive.m_bForceFlat = FALSE;			// same as CDocument::OnOpenDocument()
 
-		archive << encryptedPassword;
+		saveArchive << encryptedPassword;
 
-		archive.Close();
+		saveArchive.Close();
 		//pwdFile.Close();
 		return true;
 	}
@@ -626,22 +634,22 @@ bool CImageCatalogStg::LoadPasswordStream( void )
 	std::auto_ptr< COleStreamFile > pPwdFile = OpenStreamFile( pPasswordStreamName );
 	ASSERT_PTR( pPwdFile.get() );
 
-	CArchive archive( pPwdFile.get(), CArchive::load );
-	serial::CScopedLoadingArchive scopedLoadingArchive( archive, m_docModelSchema );
+	CArchive loadArchive( pPwdFile.get(), CArchive::load );
+	serial::CScopedLoadingArchive scopedLoadingArchive( loadArchive, m_docModelSchema );
 
-	archive.m_bForceFlat = FALSE;		// same as CDocument::OnOpenDocument()
+	loadArchive.m_bForceFlat = FALSE;		// same as CDocument::OnOpenDocument()
 	try
 	{
 		if ( hasWidePwd )
 		{
 			std::wstring widePassword;
-			archive >> widePassword;
+			loadArchive >> widePassword;
 			password = pwd::ToString( widePassword.c_str() );
 		}
 		else
 		{
 			std::string ansiPassword;
-			archive >> ansiPassword;
+			loadArchive >> ansiPassword;
 			password = pwd::ToString( ansiPassword.c_str() );
 
 			StoreDocModelSchema( app::Slider_v3_1 );		// assume the oldest legacy version
@@ -656,7 +664,7 @@ bool CImageCatalogStg::LoadPasswordStream( void )
 		app::GetUserReport().ReportError( pExc );
 		succeeded = false;
 	}
-	archive.Close();
+	loadArchive.Close();
 	//pwdFile.Close();
 
 	return succeeded;
