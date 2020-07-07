@@ -55,7 +55,7 @@ void CAlbumDoc::CopyAlbumState( const CAlbumDoc* pSrcDoc )
 	REQUIRE( this != pSrcDoc );
 	ASSERT_PTR( pSrcDoc );
 
-	const_cast< CAlbumDoc* >( pSrcDoc )->FetchViewState();		// input image state from its current view
+	const_cast< CAlbumDoc* >( pSrcDoc )->FetchViewState( pSrcDoc->GetDocFilePath() );		// input image state from its current view
 
 	m_slideData = pSrcDoc->m_slideData;
 	m_bkColor = pSrcDoc->m_bkColor;
@@ -63,7 +63,7 @@ void CAlbumDoc::CopyAlbumState( const CAlbumDoc* pSrcDoc )
 	m_password = pSrcDoc->m_password;
 }
 
-void CAlbumDoc::FetchViewState( void )
+void CAlbumDoc::FetchViewState( const fs::CPath& docPath )
 {
 	if ( CAlbumImageView* pImageView = GetAlbumImageView() )
 	{
@@ -73,6 +73,7 @@ void CAlbumDoc::FetchViewState( void )
 
 		m_pImageState.reset( new CImageState );
 		pImageView->MakeImageState( m_pImageState.get() );
+		m_pImageState->SetDocFilePath( docPath.Get() );
 	}
 }
 
@@ -160,7 +161,7 @@ void CAlbumDoc::Serialize( CArchive& archive )
 void CAlbumDoc::PrepareToSave( const fs::CPath& docPath )
 {
 	SetFlag( m_docFlags, PresistImageState, HasFlag( CWorkspace::GetFlags(), wf::PersistAlbumImageState ) );
-	FetchViewState();
+	FetchViewState( docPath );
 
 	if ( GetModelSchema() != app::Slider_LatestModelSchema )
 	{
@@ -307,7 +308,7 @@ bool CAlbumDoc::SaveAsCatalogStorage( const fs::CPath& newDocStgPath )
 
 			// reload the newly saved document - takes care of saving .sld to .ias
 			DeleteContents();
-			BuildAlbum( CSearchPattern( newDocStgPath ) );
+			BuildAlbum( newDocStgPath );
 		}
 		else
 		{
@@ -399,28 +400,24 @@ void CAlbumDoc::_SaveAlbumToArchiveStg( const fs::CPath& docStgPath ) throws_( C
 */
 }
 
-bool CAlbumDoc::BuildAlbum( const CSearchPattern& searchPattern )
+bool CAlbumDoc::BuildAlbum( const fs::CPath& searchPath )
 {
-	const fs::CPath& searchPath = searchPattern.GetFilePath();
 	bool opening = DirtyOpening == IsModified();
-	bool loadedStgAlbumStream = false;
 
 	m_slideData.SetCurrentIndex( 0 );				// may get overridden by subsequent load of album doc
 	try
 	{
 		if ( app::IsCatalogFile( searchPath.GetPtr() ) )
 		{
-			if ( LoadCatalogStorage( searchPath ) )
-				loadedStgAlbumStream = true;
-			else
+			if ( !LoadCatalogStorage( searchPath ) )
 				return false;
 		}
 		else
 		{
-			if ( m_model.SetupSingleSearchPattern( searchPattern ) )
+			if ( m_model.SetupSingleSearchPattern( new CSearchPattern( searchPath ) ) )
 			{
 				m_model.SearchForFiles( NULL );
-				m_model.OpenAllStorages();		// to enable image caching
+				m_model.OpenAllStorages();			// to enable image caching
 			}
 			else
 				return false;
@@ -438,7 +435,7 @@ bool CAlbumDoc::BuildAlbum( const CSearchPattern& searchPattern )
 	{
 		OnAlbumModelChanged();		// update the UI
 
-		if ( loadedStgAlbumStream )
+		if ( IsStorageAlbum() )
 			UpdateAllViews( NULL, Hint_DocSlideDataChanged );		// refresh view navigation from document (selected pos, etc)
 	}
 
@@ -736,10 +733,16 @@ BOOL CAlbumDoc::OnOpenDocument( LPCTSTR pPath )
 
 BOOL CAlbumDoc::OnSaveDocument( LPCTSTR pPathName )
 {
+	fs::CPath newDocPath( pPathName );
+
 	if ( app::IsCatalogFile( pPathName ) )
-		return SaveAsCatalogStorage( fs::CPath( pPathName ) );
-	else if ( fs::IsValidDirectory( pPathName ) )
+		return SaveAsCatalogStorage( newDocPath );
+
+	if ( fs::IsValidDirectory( pPathName ) )
 		return DoSave( NULL );					// in effect SaveAs
+
+	if ( IsStorageAlbum() && app::CAlbumDocTemplate::IsSlideAlbumType( pPathName ) )	// save .ias -> .sld?
+		m_model.SetupSingleSearchPattern( new CSearchPattern( GetDocFilePath() ) );		// references to external catalog storage embedded images
 
 	return CDocumentBase::OnSaveDocument( pPathName );
 }

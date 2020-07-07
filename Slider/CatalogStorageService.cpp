@@ -1,16 +1,150 @@
 
 #include "stdafx.h"
 #include "CatalogStorageService.h"
-#include "AlbumDoc.h"
 #include "FileAttrAlgorithms.h"
+#include "AlbumDoc.h"
 #include "utl/ContainerUtilities.h"
+#include "utl/PathUniqueMaker.h"
 #include "utl/UI/IProgressService.h"
-#include "utl/UI/UserReport.h"
-#include "utl/UI/WicImageCache.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
+
+
+namespace svc
+{
+	CAlbumModel* ToAlbumModel( CObject* pAlbumDoc )
+	{
+		CAlbumDoc* pDestAlbumDoc = checked_static_cast< CAlbumDoc* >( pAlbumDoc );
+		ASSERT_PTR( pDestAlbumDoc );
+		return pDestAlbumDoc->RefModel();
+	}
+
+	CImagesModel& ToImagesModel( CObject* pAlbumDoc )
+	{
+		return ToAlbumModel( pAlbumDoc )->RefImagesModel();
+	}
+}
+
+
+// CTransferFileAttr implementation
+
+CTransferFileAttr::CTransferFileAttr( const TTransferPathPair& pathPair )
+	: CFileAttr( pathPair.first )		// inherit SRC file attribute
+	, m_srcImagePath( pathPair.first )
+{
+	GetImageDim();						// cache dimensions via image loading
+	SetPathKey( fs::ImagePathKey( pathPair.second, 0 ) );		// change to DEST path for transfer
+}
+
+CTransferFileAttr::CTransferFileAttr( const CFileAttr& srcFileAttr, const fs::TEmbeddedPath& destImagePath )
+	: CFileAttr( srcFileAttr )			// inherit all SRC
+	, m_srcImagePath( GetPath() )
+{
+	GetImageDim();						// cache dimensions
+	SetPathKey( fs::ImagePathKey( fs::CastFlexPath( destImagePath ), 0 ) );		// change to DEST path for transfer
+}
+
+CTransferFileAttr::~CTransferFileAttr()
+{
+}
+
+
+// CTransferAlbumService implementation
+
+const TCHAR CTransferAlbumService::s_buildTag[] = _T("Building image file attributes");
+
+CTransferAlbumService::CTransferAlbumService( void )
+	: m_pProgressSvc( ui::CNoProgressService::Instance() )
+	, m_pUserReport( &ui::CSilentMode::Instance() )
+{
+}
+
+CTransferAlbumService::CTransferAlbumService( ui::IProgressService* pProgressSvc, ui::IUserReport* pUserReport )
+	: m_pProgressSvc( pProgressSvc )
+	, m_pUserReport( pUserReport )
+{
+	ASSERT_PTR( m_pProgressSvc );		// using null-pattern
+	ASSERT_PTR( m_pUserReport );
+}
+
+CTransferAlbumService::~CTransferAlbumService()
+{
+	utl::ClearOwningContainer( m_transferAttrs );
+	m_pDestAlbumDoc.reset();
+}
+
+void CTransferAlbumService::BuildFromAlbumSaveAs( const CAlbumDoc* pSrcAlbumDoc )
+{
+	const CAlbumModel* pSrcModel = pSrcAlbumDoc->GetModel();
+	bool useDeepStreamPaths = pSrcModel->HasPersistFlag( CAlbumModel::UseDeepStreamPaths ) || CAlbumModel::ShouldUseDeepStreamPaths();
+
+	BuildTransferAttrs( &pSrcModel->GetImagesModel(), useDeepStreamPaths );
+	CloneDestAlbumDoc( pSrcAlbumDoc );			// clone the source album in order to facilitate transfer from any .sld or .ias source album
+}
+
+void CTransferAlbumService::CloneDestAlbumDoc( const CAlbumDoc* pSrcAlbumDoc )
+{
+	ASSERT_PTR( pSrcAlbumDoc );
+	REQUIRE( !m_transferAttrs.empty() );
+
+	m_pDestAlbumDoc.reset( checked_static_cast< CAlbumDoc* >( RUNTIME_CLASS( CAlbumDoc )->CreateObject() ) );	// new temporary DEST album to build and SaveAs
+
+	m_password = pSrcAlbumDoc->m_password;
+	m_pDestAlbumDoc->CopyAlbumState( pSrcAlbumDoc );		// copy album state (slide data, background color, etc)
+
+	CAlbumModel* pDestModel = m_pDestAlbumDoc->RefModel();
+	pDestModel->SetPersistFlag( CAlbumModel::UseDeepStreamPaths, CAlbumModel::ShouldUseDeepStreamPaths() );		// keep track of storage saving structure
+
+	CImagesModel* pDestImagesModel = &pDestModel->RefImagesModel();
+
+	// copy the transfer attributes as album attributes
+	for ( std::vector< CTransferFileAttr* >::const_iterator itTransferAttr = m_transferAttrs.begin(); itTransferAttr != m_transferAttrs.end(); ++itTransferAttr )
+		pDestImagesModel->AddFileAttr( new CFileAttr( **itTransferAttr ) );
+}
+
+
+namespace cvt
+{
+	// conversion to catalog storage .ias album
+
+	size_t ConvertToEmbeddedPaths( std::vector< fs::TEmbeddedPath >& rDestStreamPaths, bool useDeepStreamPaths = true )
+	{	// rDestStreamPaths: IN source paths, OUT embedded stream paths
+		if ( useDeepStreamPaths )
+		{
+			fs::CPath commonDirPath = path::ExtractCommonParentPath( rDestStreamPaths );
+			if ( !commonDirPath.IsEmpty() )
+				path::StripDirPrefix( rDestStreamPaths, commonDirPath.GetPtr() );
+			else
+				path::StripRootPrefix( rDestStreamPaths );		// ignore drive letter
+
+			// convert any deep embedded storage paths to directory paths (so that '>' appears only once in the final embedded path)
+			utl::for_each( rDestStreamPaths, func::NormalizeComplexPath() );
+		}
+		else
+			path::StripToFilename( rDestStreamPaths );			// will take care to resolve duplicate filenames
+
+		CPathUniqueMaker uniqueMaker;
+		return uniqueMaker.UniquifyPaths( rDestStreamPaths );	// returns the number of duplicate collisions (uniquified)
+	}
+
+	template< typename SrcPathT >
+	void MakeTransferPathPairs( std::vector< TTransferPathPair >& rTransferPairs, const std::vector< SrcPathT >& srcImagePaths, bool useDeepStreamPaths = true )
+	{
+		std::vector< fs::TEmbeddedPath > destStreamPaths;
+		utl::Assign( destStreamPaths, srcImagePaths, func::tor::StringOf() );
+
+		ConvertToEmbeddedPaths( destStreamPaths, useDeepStreamPaths );
+		ENSURE( srcImagePaths.size() == destStreamPaths.size() );
+
+		rTransferPairs.clear();
+		rTransferPairs.reserve( srcImagePaths.size() );
+
+		for ( size_t i = 0; i != srcImagePaths.size(); ++i )
+			rTransferPairs.push_back( TTransferPathPair( srcImagePaths[ i ].Get(), fs::CastFlexPath( destStreamPaths[ i ] ) ) );
+	}
+}
 
 
 namespace pwd
@@ -45,67 +179,7 @@ namespace pwd
 }
 
 
-// CTransferFileAttr implementation
-
-CTransferFileAttr::CTransferFileAttr( const TTransferPathPair& pathPair )
-	: CFileAttr( pathPair.first )		// inherit SRC file attribute
-	, m_srcImagePath( pathPair.first )
-{
-	GetImageDim();						// cache dimensions via image loading
-	SetPathKey( fs::ImagePathKey( pathPair.second, 0 ) );		// change to DEST path for transfer
-}
-
-CTransferFileAttr::CTransferFileAttr( const CFileAttr& srcFileAttr, const fs::TEmbeddedPath& destImagePath )
-	: CFileAttr( srcFileAttr )			// inherit all SRC
-	, m_srcImagePath( GetPath() )
-{
-	GetImageDim();						// cache dimensions
-	SetPathKey( fs::ImagePathKey( fs::CastFlexPath( destImagePath ), 0 ) );		// change to DEST path for transfer
-}
-
-CTransferFileAttr::~CTransferFileAttr()
-{
-}
-
-
 // CCatalogStorageService implementation
-
-const TCHAR CCatalogStorageService::s_buildTag[] = _T("Building image file attributes");
-
-CCatalogStorageService::CCatalogStorageService( void )
-	: m_pProgressSvc( ui::CNoProgressService::Instance() )
-	, m_pUserReport( &ui::CSilentMode::Instance() )
-	, m_pAlbumDoc( NULL )
-	, m_isManagedAlbum( false )
-{
-}
-
-CCatalogStorageService::CCatalogStorageService( ui::IProgressService* pProgressSvc, ui::IUserReport* pUserReport )
-	: m_pProgressSvc( pProgressSvc )
-	, m_pUserReport( pUserReport )
-	, m_pAlbumDoc( NULL )
-	, m_isManagedAlbum( false )
-{
-	ASSERT_PTR( m_pProgressSvc );		// using null-pattern
-	ASSERT_PTR( m_pUserReport );
-}
-
-CCatalogStorageService::~CCatalogStorageService()
-{
-	utl::ClearOwningContainer( m_transferAttrs );
-
-	if ( m_isManagedAlbum )
-		delete m_pAlbumDoc;
-}
-
-void CCatalogStorageService::BuildFromAlbumSaveAs( const CAlbumDoc* pSrcAlbumDoc )
-{
-	const CAlbumModel* pSrcModel = pSrcAlbumDoc->GetModel();
-	bool useDeepStreamPaths = pSrcModel->HasPersistFlag( CAlbumModel::UseDeepStreamPaths ) || CAlbumModel::ShouldUseDeepStreamPaths();
-
-	BuildTransferAttrs( &pSrcModel->GetImagesModel(), useDeepStreamPaths );
-	CloneDestAlbumDoc( pSrcAlbumDoc );			// clone the source album in order to facilitate transfer from any .sld or .ias source album
-}
 
 void CCatalogStorageService::BuildTransferAttrs( const CImagesModel* pImagesModel, bool useDeepStreamPaths /*= true*/ )
 {
@@ -119,7 +193,7 @@ void CCatalogStorageService::BuildTransferAttrs( const CImagesModel* pImagesMode
 
 	std::vector< fs::TEmbeddedPath > destImagePaths;
 	utl::Assign( destImagePaths, srcFileAttrs, func::ToFilePath() );
-	fattr::TransformDestEmbeddedPaths( destImagePaths, useDeepStreamPaths );
+	cvt::ConvertToEmbeddedPaths( destImagePaths, useDeepStreamPaths );
 	ENSURE( srcFileAttrs.size() == destImagePaths.size() );
 
 	m_transferAttrs.reserve( srcFileAttrs.size() );
@@ -144,24 +218,20 @@ void CCatalogStorageService::BuildTransferAttrs( const CImagesModel* pImagesMode
 void CCatalogStorageService::BuildFromSrcPaths( const std::vector< fs::CPath >& srcImagePaths )
 {
 	std::vector< TTransferPathPair > xferPairs;
-	fattr::MakeTransferPathPairs( xferPairs, srcImagePaths, true );
+	cvt::MakeTransferPathPairs( xferPairs, srcImagePaths, true );
 
 	BuildFromTransferPairs( xferPairs );
 
 	// create an ad-hoc album based on the transfer attributes, to save to "_Album.sld" stream
-	REQUIRE( NULL == m_pAlbumDoc && !m_isManagedAlbum );
+	m_pDestAlbumDoc.reset( checked_static_cast< CAlbumDoc* >( RUNTIME_CLASS( CAlbumDoc )->CreateObject() ) );
 
-	m_isManagedAlbum = true;
-	m_pAlbumDoc = RUNTIME_CLASS( CAlbumDoc )->CreateObject();
-
-	CAlbumDoc* pAlbumDoc = checked_static_cast< CAlbumDoc* >( m_pAlbumDoc );
-	CImagesModel* pImagesModel = &pAlbumDoc->RefModel()->RefImagesModel();
+	CImagesModel* pImagesModel = &m_pDestAlbumDoc->RefModel()->RefImagesModel();
 
 	for ( std::vector< CTransferFileAttr* >::const_iterator itTransferAttr = m_transferAttrs.begin(); itTransferAttr != m_transferAttrs.end(); ++itTransferAttr )
 		pImagesModel->AddFileAttr( new CFileAttr( **itTransferAttr ) );
 
 	if ( !IsEmpty() )
-		pAlbumDoc->m_slideData.SetCurrentIndex( 0 );
+		m_pDestAlbumDoc->m_slideData.SetCurrentIndex( 0 );
 }
 
 void CCatalogStorageService::BuildFromTransferPairs( const std::vector< TTransferPathPair >& xferPairs )
@@ -177,7 +247,7 @@ void CCatalogStorageService::BuildFromTransferPairs( const std::vector< TTransfe
 			m_transferAttrs.push_back( new CTransferFileAttr( *itPair ) );
 
 			if ( itPair->first.IsComplexPath() )
-				utl::AddUnique( m_srcDocStgPaths, itPair->first.GetPhysicalPath() );	// storage file to open for reading
+				utl::AddUnique( m_srcDocStgPaths, itPair->first.GetPhysicalPath() );				// storage file to open for reading
 		}
 		else
 		{
@@ -188,44 +258,4 @@ void CCatalogStorageService::BuildFromTransferPairs( const std::vector< TTransfe
 	fattr::StoreBaselineSequence( m_transferAttrs );		// reset baseline to existing order
 
 	m_srcStorageHost.PushMultiple( m_srcDocStgPaths );		// open source storages for reading
-}
-
-
-CAlbumDoc* CCatalogStorageService::CloneDestAlbumDoc( const CAlbumDoc* pSrcAlbumDoc )
-{
-	ASSERT_PTR( pSrcAlbumDoc );
-	REQUIRE( NULL == m_pAlbumDoc && !m_isManagedAlbum );
-	REQUIRE( !m_transferAttrs.empty() );
-
-	m_pAlbumDoc = RUNTIME_CLASS( CAlbumDoc )->CreateObject();		// new temporary DEST album to build and SaveAs
-	m_isManagedAlbum = true;
-
-	CAlbumDoc* pDestAlbumDoc = checked_static_cast< CAlbumDoc* >( m_pAlbumDoc );
-
-	m_password = pSrcAlbumDoc->m_password;
-	pDestAlbumDoc->CopyAlbumState( pSrcAlbumDoc );		// copy album state (slide data, background color, etc)
-
-	CAlbumModel* pDestModel = pDestAlbumDoc->RefModel();
-	pDestModel->SetPersistFlag( CAlbumModel::UseDeepStreamPaths, CAlbumModel::ShouldUseDeepStreamPaths() );			// keep track of saving structure
-
-	CImagesModel* pDestImagesModel = &pDestModel->RefImagesModel();
-
-	// copy the transfer attributes as album attributes
-	for ( std::vector< CTransferFileAttr* >::const_iterator itTransferAttr = m_transferAttrs.begin(); itTransferAttr != m_transferAttrs.end(); ++itTransferAttr )
-		pDestImagesModel->AddFileAttr( new CFileAttr( **itTransferAttr ) );
-
-	return pDestAlbumDoc;
-}
-
-
-CAlbumModel* CCatalogStorageService::ToAlbumModel( CObject* pAlbumDoc )
-{
-	CAlbumDoc* pDestAlbumDoc = checked_static_cast< CAlbumDoc* >( pAlbumDoc );
-	ASSERT_PTR( pDestAlbumDoc );
-	return pDestAlbumDoc->RefModel();
-}
-
-CImagesModel& CCatalogStorageService::ToImagesModel( CObject* pAlbumDoc )
-{
-	return ToAlbumModel( pAlbumDoc )->RefImagesModel();
 }

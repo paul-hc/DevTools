@@ -10,7 +10,6 @@
 class CAlbumDoc;
 class CAlbumModel;
 class CImagesModel;
-class CTransferFileAttr;
 
 namespace ui
 {
@@ -19,51 +18,13 @@ namespace ui
 }
 
 
-// supports the creation of an image archive compound document
-class CCatalogStorageService : private utl::noncopyable
+namespace svc
 {
-public:
-	CCatalogStorageService( void );			// using null-pattern, for testing
-	CCatalogStorageService( ui::IProgressService* pProgressSvc, ui::IUserReport* pUserReport );
-	~CCatalogStorageService();
-
-	void BuildFromAlbumSaveAs( const CAlbumDoc* pSrcAlbumDoc );								// preserve SRC album, create a new image storage doc file
-	void BuildFromSrcPaths( const std::vector< fs::CPath >& srcImagePaths );				// for testing
-	void BuildFromTransferPairs( const std::vector< TTransferPathPair >& xferPairs );		// legacy archiving model
-
-	bool IsEmpty( void ) const { return m_transferAttrs.empty(); }
-	const std::vector< CTransferFileAttr* >& GetTransferAttrs( void ) const { return m_transferAttrs; }
-	std::vector< CTransferFileAttr* >& RefTransferAttrs( void ) { return m_transferAttrs; }
-
-	const std::tstring& GetPassword( void ) const { return m_password; }
-	void SetPassword( const std::tstring& password ) { m_password = password; }
-
-	CObject* GetAlbumDoc( void ) const { return m_pAlbumDoc; }
-
-	ui::IProgressService* GetProgress( void ) const { return m_pProgressSvc; }
-	ui::IUserReport* GetReport( void ) const { return m_pUserReport; }
-
 	// decouple the dependency to AlbumDoc.h
-	static CAlbumModel* ToAlbumModel( CObject* pAlbumDoc );
-	static CImagesModel& ToImagesModel( CObject* pAlbumDoc );
-private:
-	void BuildTransferAttrs( const CImagesModel* pImagesModel, bool useDeepStreamPaths = true );
-	CAlbumDoc* CloneDestAlbumDoc( const CAlbumDoc* pSrcAlbumDoc );
-private:
-	ui::IProgressService* m_pProgressSvc;
-	ui::IUserReport* m_pUserReport;
 
-	std::tstring m_password;
-	std::vector< CTransferFileAttr* > m_transferAttrs;
-
-	std::vector< fs::CPath > m_srcDocStgPaths;
-	CCatalogStorageHost m_srcStorageHost;			// open for reading during image archive construction
-
-	CObject* m_pAlbumDoc;
-	bool m_isManagedAlbum;							// created internally when CREATING the image archive; passed externally when SAVING the image archive
-
-	static const TCHAR s_buildTag[];
-};
+	CAlbumModel* ToAlbumModel( CObject* pAlbumDoc );
+	CImagesModel& ToImagesModel( CObject* pAlbumDoc );
+}
 
 
 class CTransferFileAttr : public CFileAttr
@@ -76,6 +37,60 @@ public:
 	const fs::CFlexPath& GetSrcImagePath( void ) const { return m_srcImagePath; }
 private:
 	fs::CFlexPath m_srcImagePath;			// SRC image path in transfer
+};
+
+
+abstract class CTransferAlbumService : private utl::noncopyable
+{
+protected:
+	CTransferAlbumService( void );			// uses null-pattern, for testing
+	CTransferAlbumService( ui::IProgressService* pProgressSvc, ui::IUserReport* pUserReport );
+	~CTransferAlbumService();
+
+	// overridables
+	virtual void BuildTransferAttrs( const CImagesModel* pImagesModel, bool useDeepStreamPaths = true ) = 0;
+	virtual void CloneDestAlbumDoc( const CAlbumDoc* pSrcAlbumDoc );
+public:
+	void BuildFromAlbumSaveAs( const CAlbumDoc* pSrcAlbumDoc );				// preserve SRC album, create a new image storage doc file
+
+	bool IsEmpty( void ) const { return m_transferAttrs.empty(); }
+	const std::vector< CTransferFileAttr* >& GetTransferAttrs( void ) const { return m_transferAttrs; }
+	std::vector< CTransferFileAttr* >& RefTransferAttrs( void ) { return m_transferAttrs; }
+
+	ui::IProgressService* GetProgress( void ) const { return m_pProgressSvc; }
+	ui::IUserReport* GetReport( void ) const { return m_pUserReport; }
+protected:
+	ui::IProgressService* m_pProgressSvc;
+	ui::IUserReport* m_pUserReport;
+
+	std::vector< CTransferFileAttr* > m_transferAttrs;
+	std::auto_ptr< CAlbumDoc > m_pDestAlbumDoc;		// created ad-hoc as destination model conversion album
+	std::tstring m_password;						// used in catalog storages only
+
+	static const TCHAR s_buildTag[];
+};
+
+
+// supports the creation of an image catalog storage (compound document)
+class CCatalogStorageService : public CTransferAlbumService
+{
+public:
+	CCatalogStorageService( void ) {}			// uses null-pattern, for testing
+	CCatalogStorageService( ui::IProgressService* pProgressSvc, ui::IUserReport* pUserReport ) : CTransferAlbumService( pProgressSvc, pUserReport ) {}
+
+	void BuildFromSrcPaths( const std::vector< fs::CPath >& srcImagePaths );				// for testing
+	void BuildFromTransferPairs( const std::vector< TTransferPathPair >& xferPairs );		// legacy archiving model
+
+	const std::tstring& GetPassword( void ) const { return m_password; }
+	void SetPassword( const std::tstring& password ) { m_password = password; }
+
+	CObject* GetAlbumDoc( void ) const { return (CObject*)m_pDestAlbumDoc.get(); }
+protected:
+	// base overrides
+	virtual void BuildTransferAttrs( const CImagesModel* pImagesModel, bool useDeepStreamPaths = true );
+private:
+	std::vector< fs::CPath > m_srcDocStgPaths;
+	CCatalogStorageHost m_srcStorageHost;			// open for reading during image archive construction
 };
 
 

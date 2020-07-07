@@ -12,7 +12,6 @@
 
 class CAlbumImageView;
 class CImageState;
-class CSearchPattern;
 interface ICatalogStorage;
 
 
@@ -21,8 +20,9 @@ class CAlbumDoc : public CDocumentBase
 	DECLARE_DYNCREATE( CAlbumDoc )
 
 	friend class CCatalogStorageTests;
-public:
+
 	CAlbumDoc( void );
+public:
 	virtual ~CAlbumDoc();
 
 	// base overrides
@@ -43,7 +43,7 @@ public:
 	CImageState* GetImageState( void ) const;
 
 	void CopyAlbumState( const CAlbumDoc* pSrcDoc );		// when saving as a new document (this)
-	void FetchViewState( void );
+	void FetchViewState( const fs::CPath& docPath );
 
 	bool IsStorageAlbum( void ) const;
 	ICatalogStorage* GetCatalogStorage( void );				// opened storage if album based on a catalog storage (compound document)
@@ -68,10 +68,10 @@ public:
 private:
 	void OnAutoDropRecipientChanged( void );
 
-	bool BuildAlbum( const CSearchPattern& searchPattern );
+	bool BuildAlbum( const fs::CPath& searchPath );
 
 	bool LoadCatalogStorage( const fs::CPath& docStgPath );
-	bool SaveAsCatalogStorage( const fs::CPath& newDocStgPath );
+	bool SaveAsCatalogStorage( const fs::CPath& newDocStgPath );		// save .sld -> .ias, .ias -> .ias
 
 	void _SaveAlbumToArchiveStg( const fs::CPath& docStgPath ) throws_( CException* );		// save existing album to image archive as "_Album.sld" stream
 

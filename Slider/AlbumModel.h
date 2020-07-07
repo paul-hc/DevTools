@@ -48,7 +48,7 @@ public:
 
 	static bool ShouldUseDeepStreamPaths( void );
 
-	bool SetupSingleSearchPattern( const CSearchPattern& searchPattern );
+	bool SetupSingleSearchPattern( CSearchPattern* pSearchPattern );
 	void SearchForFiles( CWnd* pParentWnd, bool reportEmpty = true ) throws_( CException* );
 
 	bool MustAutoRegenerate( void ) const { return HasPersistFlag( AutoRegenerate ) || IsAutoDropRecipient(); }

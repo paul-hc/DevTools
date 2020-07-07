@@ -2,6 +2,7 @@
 #include "stdafx.h"
 
 #ifdef _DEBUG		// no UT code in release builds
+
 #include "CatalogStorageTests.h"
 #include "CatalogStorageService.h"
 #include "ICatalogStorage.h"
@@ -79,9 +80,9 @@ void CCatalogStorageTests::TestBuildImageArchive( void )
 void CCatalogStorageTests::TestAlbumSaveAs( void )
 {
 	CAlbumDoc albumDoc;
-	CSearchPattern testPattern( ut::GetDestImagesDirPath() );
+	fs::CPath imagesDirPath = ut::GetDestImagesDirPath();
 
-	ASSERT( albumDoc.BuildAlbum( testPattern ) );				// search for test images
+	ASSERT( albumDoc.BuildAlbum( imagesDirPath ) );				// search for test images
 	ASSERT( albumDoc.GetModel()->GetFileAttrCount() != 0 );		// has found files
 }
 

@@ -437,12 +437,12 @@ bool CImageCatalogStg::LoadAlbumStream( CObject* pAlbumDoc )
 
 		pAlbumDoc->Serialize( loadArchive );
 
-		StoreDocModelSchema( CCatalogStorageService::ToAlbumModel( pAlbumDoc )->GetModelSchema() );		// copy over the model schema saved in the album stream
+		StoreDocModelSchema( svc::ToAlbumModel( pAlbumDoc )->GetModelSchema() );		// copy over the model schema saved in the album stream
 		return true;
 	}
 
 	// backwards compatibility:
-	CImagesModel& rImagesModel = CCatalogStorageService::ToImagesModel( pAlbumDoc );
+	CImagesModel& rImagesModel = svc::ToImagesModel( pAlbumDoc );
 	rImagesModel.Clear();
 
 	if ( bkw_LoadAlbumMetadataStream( pAlbumDoc ) )			// load "_Meta.data" stream - older catalogs may not contain the album stream (not an error)
@@ -460,7 +460,7 @@ bool CImageCatalogStg::bkw_LoadAlbumMetadataStream( CObject* pAlbumDoc )
 	CScopedCurrentDir scopedAlbumFolder( this, s_rootFolderName );
 
 	ASSERT_PTR( pAlbumDoc );
-	CImagesModel& rImagesModel = CCatalogStorageService::ToImagesModel( pAlbumDoc );
+	CImagesModel& rImagesModel = svc::ToImagesModel( pAlbumDoc );
 
 	if ( StreamExist( s_metadataStreamName ) )
 	{

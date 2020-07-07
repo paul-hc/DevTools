@@ -61,7 +61,7 @@ void CAlbumModel::OpenAllStorages( void )
 	std::vector< fs::CPath > storagePaths = m_imagesModel.GetStoragePaths();
 	m_searchModel.AugmentStoragePaths( storagePaths );		// add embedded storages in search model
 
-	m_storageHost.PushMultiple( m_imagesModel.GetStoragePaths() );		// open embedded storages in image model
+	m_storageHost.PushMultiple( storagePaths );				// open embedded storages
 }
 
 void CAlbumModel::CloseAllStorages( void )
@@ -79,24 +79,18 @@ void CAlbumModel::StoreCatalogDocPath( const fs::CPath& docStgPath )
 	m_docStgPath = docStgPath;
 }
 
-bool CAlbumModel::SetupSingleSearchPattern( const CSearchPattern& searchPattern )
+bool CAlbumModel::SetupSingleSearchPattern( CSearchPattern* pSearchPattern )
 {
+	ASSERT_PTR( pSearchPattern );
+
 	m_searchModel.ClearPatterns();
 	m_docStgPath.Clear();
 
-	if ( searchPattern.IsValidPath() )
-		switch ( searchPattern.GetType() )
-		{
-			case CSearchPattern::DirPath:
-			case CSearchPattern::ExplicitFile:
-				m_searchModel.AddPattern( new CSearchPattern( searchPattern ) );
-				return true;
-			case CSearchPattern::CatalogDocFile:
-				StoreCatalogDocPath( searchPattern.GetFilePath() );
-				return true;
-		}
+	if ( !pSearchPattern->IsValidPath() )
+		return false;
 
-	return false;
+	m_searchModel.AddPattern( pSearchPattern );
+	return true;
 }
 
 void CAlbumModel::Stream( CArchive& archive )
@@ -210,7 +204,7 @@ bool CAlbumModel::_ReparentStorageFileAttrsImpl( const fs::CPath& docStgPath, Pe
 					std::for_each( rFileAttrs.begin(), rFileAttrs.end(), func::StripDocPath( m_docStgPath ) );
 
 				// convert any deep embedded storage paths to directory paths (so that '>' appears only once in the final embedded)
-				std::for_each( rFileAttrs.begin(), rFileAttrs.end(), func::FuncAdapter< func::NormalizeEmbeddedPath, func::RefFilePath >() );
+				std::for_each( rFileAttrs.begin(), rFileAttrs.end(), func::FuncAdapter< func::NormalizeComplexPath, func::RefFilePath >() );
 				break;
 		}
 

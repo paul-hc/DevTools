@@ -117,7 +117,7 @@ void CFileAttr::Stream( CArchive& archive )
 		if ( path::IsComplex( archive.m_strFileName.GetString() ) )			// loading from an image archive storage?
 			serial::PostLoadAdjustComplexPath( m_pathKey.first, path::ExtractPhysical( archive.m_strFileName.GetString() ) );
 
-		if ( docModelSchema < app::Slider_v5_6 )
+		if ( docModelSchema >= app::Slider_v5_6 )
 			archive >> (int&)m_imageFormat;
 		else
 		{
@@ -143,7 +143,7 @@ app::ModelSchema CFileAttr::EvalLoadingSchema( CArchive& rLoadArchive )
 	CAlbumModel* pAlbumModel = NULL;
 
 	if ( rLoadArchive.m_pDocument != NULL )
-		pAlbumModel = CCatalogStorageService::ToAlbumModel( rLoadArchive.m_pDocument );
+		pAlbumModel = svc::ToAlbumModel( rLoadArchive.m_pDocument );
 
 	if ( serial::CStreamingGuard* pLoadGuard = serial::CStreamingGuard::GetTop() )
 		if ( !pLoadGuard->HasStreamingFlag( Loading_InspectedPathEncoding ) )

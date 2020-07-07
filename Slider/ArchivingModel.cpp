@@ -199,7 +199,7 @@ bool CArchivingModel::GenerateDestPaths( const fs::CPath& destPath, const std::t
 			{
 				generated = true;
 
-				generator.ForEachDestPath( func::NormalizeEmbeddedPath() );	// convert any deep embedded storage paths to directory paths
+				generator.ForEachDestPath( func::NormalizeComplexPath() );	// convert any deep embedded storage paths to directory paths
 			}
 
 	if ( !generated )

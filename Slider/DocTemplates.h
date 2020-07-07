@@ -65,6 +65,7 @@ namespace app
 		enum OpenPathType { DirPath, SlideAlbum, CatalogStorageDoc, InvalidPath };
 
 		static OpenPathType GetOpenPathType( const TCHAR* pPath );
+		static bool IsSlideAlbumType( const TCHAR* pPath );
 
 		void RegisterAlbumShellDirectory( bool doRegister );
 	protected:
