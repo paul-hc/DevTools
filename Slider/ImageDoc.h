@@ -16,6 +16,10 @@ public:
 
 	CWicImage* GetImage( UINT framePos ) const;
 	const fs::CFlexPath& GetImagePath( void ) const { return m_imagePath; }
+protected:
+	// base overrides
+	virtual CWicImage* GetCurrentImage( void ) const;
+	virtual bool QuerySelectedImagePaths( std::vector< fs::CFlexPath >& rSelImagePaths ) const;
 private:
 	fs::CFlexPath m_imagePath;
 	CCatalogStorageHost m_storageHost;		// holds the storage if image is embedded
@@ -29,6 +33,9 @@ protected:
 protected:
 	afx_msg void OnUpdateFileSave( CCmdUI* pCmdUI );
 	afx_msg void OnUpdateFileSaveAs( CCmdUI* pCmdUI );
+	afx_msg void On_ImageDelete( void );
+	afx_msg void On_ImageMove( void );
+	afx_msg void OnUpdate_ImagePhysicalFileWriteOp( CCmdUI* pCmdUI );
 
 	DECLARE_MESSAGE_MAP()
 };

@@ -16,11 +16,15 @@
 #include "Application.h"
 #include "resource.h"
 #include "utl/MemLeakCheck.h"
+#include "utl/PathUniqueMaker.h"
 #include "utl/Serialization.h"
 #include "utl/UI/MfcUtilities.h"
 #include "utl/UI/IconButton.h"
 #include "utl/UI/PasswordDialog.h"
 #include "utl/UI/Utilities.h"
+#include "utl/UI/ShellDialogs.h"
+#include "utl/UI/ShellUtilities.h"
+#include "utl/UI/TaskDialog.h"
 #include "utl/UI/Thumbnailer.h"
 #include "utl/UI/WicImageCache.h"
 
@@ -65,14 +69,14 @@ void CAlbumDoc::CopyAlbumState( const CAlbumDoc* pSrcDoc )
 
 void CAlbumDoc::FetchViewState( const fs::CPath& docPath )
 {
-	if ( CAlbumImageView* pImageView = GetAlbumImageView() )
+	if ( CAlbumImageView* pAlbumView = GetAlbumImageView() )
 	{
 		// explicitly copy the persistent attributes from active view
-		m_slideData = pImageView->GetSlideData();
-		m_bkColor = pImageView->GetRawBkColor();
+		m_slideData = pAlbumView->GetSlideData();
+		m_bkColor = pAlbumView->GetRawBkColor();
 
 		m_pImageState.reset( new CImageState );
-		pImageView->MakeImageState( m_pImageState.get() );
+		pAlbumView->MakeImageState( m_pImageState.get() );
 		m_pImageState->SetDocFilePath( docPath.Get() );
 	}
 }
@@ -221,8 +225,8 @@ CAlbumImageView* CAlbumDoc::GetAlbumImageView( void ) const
 
 CSlideData* CAlbumDoc::GetActiveSlideData( void )
 {
-	CAlbumImageView* pImageView = GetAlbumImageView();
-	return pImageView != NULL ? &pImageView->RefSlideData() : &m_slideData;
+	CAlbumImageView* pAlbumView = GetAlbumImageView();
+	return pAlbumView != NULL ? &pAlbumView->RefSlideData() : &m_slideData;
 }
 
 
@@ -703,6 +707,18 @@ bool CAlbumDoc::AddExplicitFiles( const std::vector< std::tstring >& files, bool
 	return true;
 }
 
+CWicImage* CAlbumDoc::GetCurrentImage( void ) const
+{
+	CAlbumImageView* pAlbumView = GetAlbumImageView();
+	return pAlbumView != NULL ? pAlbumView->GetImage() : NULL;
+}
+
+bool CAlbumDoc::QuerySelectedImagePaths( std::vector< fs::CFlexPath >& rSelImagePaths ) const
+{
+	CAlbumImageView* pAlbumView = GetAlbumImageView();
+	return pAlbumView != NULL && pAlbumView->QuerySelImagePaths( rSelImagePaths );
+}
+
 
 // MFC base overrides
 
@@ -751,6 +767,19 @@ BOOL CAlbumDoc::OnSaveDocument( LPCTSTR pPathName )
 // message handlers
 
 BEGIN_MESSAGE_MAP( CAlbumDoc, CDocumentBase )
+	ON_COMMAND( ID_FILE_EXTRACT_CATALOG, OnExtractCatalog )
+	ON_UPDATE_COMMAND_UI( ID_FILE_EXTRACT_CATALOG, OnUpdate_IsCatalogStorage )
+
+	ON_COMMAND( ID_IMAGE_SAVE_AS, On_ImageSaveAs )
+	ON_UPDATE_COMMAND_UI( ID_IMAGE_SAVE_AS, OnUpdate_AnyCurrImage )
+
+	ON_COMMAND( ID_IMAGE_OPEN, On_ImageOpen )
+	ON_UPDATE_COMMAND_UI( ID_IMAGE_OPEN, OnUpdate_ImageFilesAllReadOp )
+	ON_COMMAND( ID_IMAGE_DELETE, On_ImageDelete )
+	ON_UPDATE_COMMAND_UI( ID_IMAGE_DELETE, OnUpdate_ImageFilesAllWriteOp )
+	ON_COMMAND( ID_IMAGE_MOVE, On_ImageMove )
+	ON_UPDATE_COMMAND_UI( ID_IMAGE_MOVE, OnUpdate_ImageFilesAllWriteOp )
+
 	ON_COMMAND( CM_AUTO_DROP_DEFRAGMENT, CmAutoDropDefragment )
 	ON_UPDATE_COMMAND_UI( CM_AUTO_DROP_DEFRAGMENT, OnUpdateAutoDropDefragment )
 	ON_COMMAND( CM_AUTO_DROP_UNDO, CmAutoDropUndo )
@@ -778,6 +807,128 @@ BEGIN_MESSAGE_MAP( CAlbumDoc, CDocumentBase )
 	ON_COMMAND( CM_SELECT_ALL_THUMBS, CmSelectAllThumbs )
 	ON_UPDATE_COMMAND_UI( CM_SELECT_ALL_THUMBS, OnUpdateSelectAllThumbs )
 END_MESSAGE_MAP()
+
+void CAlbumDoc::OnExtractCatalog( void )
+{
+	fs::CPath destFolderPath = GetDocFilePath().GetParentPath();
+
+	if ( shell::PickFolder( destFolderPath.Ref(), NULL, 0, _T("Select Extract Folder") ) )
+	{
+	}
+}
+
+void CAlbumDoc::OnUpdate_IsCatalogStorage( CCmdUI* pCmdUI )
+{
+	pCmdUI->Enable( IsStorageAlbum() );
+}
+
+
+void CAlbumDoc::On_ImageSaveAs( void )
+{
+	std::vector< fs::CFlexPath > srcFilePaths;
+	if ( !QuerySelectedImagePaths( srcFilePaths ) )
+		return;
+
+	try
+	{
+		CFileOperation fileOp( utl::ThrowMode );
+
+		if ( 1 == srcFilePaths.size() )
+		{
+			fs::CFlexPath srcFilePath( srcFilePaths.front() );
+			fs::CPath destFilePath = srcFilePath;
+			if ( destFilePath.IsComplexPath() )
+				destFilePath = destFilePath.GetFilename();
+
+			if ( shell::BrowseImageFile( destFilePath, shell::FileSaveAs ) )
+				fileOp.Copy( srcFilePath, fs::CastFlexPath( destFilePath ) );
+		}
+		else
+		{
+			fs::CPath destFolderPath;
+			if ( shell::PickFolder( destFolderPath.Ref(), NULL ) )
+			{
+				std::vector< fs::CPath > destFilePaths;
+				utl::Assign( destFilePaths, srcFilePaths, func::tor::StringOf() );
+				utl::for_each( destFilePaths, func::StripToFilename() );
+				utl::for_each( destFilePaths, func::PrefixPath( destFolderPath ) );
+
+				CPathUniqueMaker uniqueMaker;
+				uniqueMaker.UniquifyPaths( destFilePaths );
+
+				if ( utl::Any( destFilePaths, pred::FileExist() ) )
+				{
+					std::vector< fs::CPath > destExistingPaths;
+					utl::QueryThat( destExistingPaths, destFilePaths, pred::FileExist() );
+
+					CTaskDialog dlg( _T("Confirm Save As"), _T("Override existing files?"), str::Join( destExistingPaths, _T("\n") ), TDCBF_YES_BUTTON | TDCBF_NO_BUTTON, 0 );
+					dlg.SetMainIcon( TD_WARNING_ICON );
+					if ( dlg.DoModal( NULL ) != IDYES )
+						return;
+				}
+
+				for ( size_t i = 0; i != destFilePaths.size(); ++i )
+					fileOp.Copy( srcFilePaths[ i ], fs::CastFlexPath( destFilePaths[ i ] ) );
+			}
+		}
+	}
+	catch ( CException* pExc )
+	{
+		app::HandleReportException( pExc, MB_ICONERROR );
+	}
+}
+
+void CAlbumDoc::OnUpdate_AnyCurrImage( CCmdUI* pCmdUI )
+{
+	CWicImage* pCurrImage = GetCurrentImage();
+	pCmdUI->Enable( pCurrImage != NULL && pCurrImage->IsValidFile() );
+}
+
+void CAlbumDoc::OnUpdate_ImageFilesAllReadOp( CCmdUI* pCmdUI )
+{
+	std::vector< fs::CFlexPath > selImagePaths;
+	pCmdUI->Enable( QuerySelectedImagePaths( selImagePaths ) && utl::All( selImagePaths, pred::FlexFileExist() ) );
+}
+
+void CAlbumDoc::OnUpdate_ImageFilesAllWriteOp( CCmdUI* pCmdUI )
+{
+	std::vector< fs::CFlexPath > selImagePaths;
+	pCmdUI->Enable( QuerySelectedImagePaths( selImagePaths ) && utl::All( selImagePaths, pred::FlexFileExist( fs::ReadWrite ) ) );
+}
+
+void CAlbumDoc::On_ImageOpen( void )
+{
+	std::vector< fs::CFlexPath > selImagePaths;
+	QuerySelectedImagePaths( selImagePaths );
+
+	for ( std::vector< fs::CFlexPath >::const_iterator itImagePath = selImagePaths.begin(); itImagePath != selImagePaths.end(); ++itImagePath )
+		AfxGetApp()->OpenDocumentFile( itImagePath->GetPtr() );
+}
+
+void CAlbumDoc::On_ImageDelete( void )
+{
+	std::vector< fs::CFlexPath > selFilePaths;
+	QuerySelectedImagePaths( selFilePaths );
+
+	std::vector< fs::CFlexPath > complexPaths = selFilePaths;
+	std::vector< fs::CPath > physicalPaths;
+
+	if ( path::ExtractPhysicalPaths( physicalPaths, complexPaths ) )
+		shell::DeleteFiles( physicalPaths );
+}
+
+void CAlbumDoc::On_ImageMove( void )
+{
+	std::vector< fs::CFlexPath > selFilePaths;
+	QuerySelectedImagePaths( selFilePaths );
+
+	std::vector< fs::CFlexPath > complexPaths = selFilePaths;
+	std::vector< fs::CPath > physicalPaths;
+
+	if ( path::ExtractPhysicalPaths( physicalPaths, complexPaths ) )
+		app::MoveFiles( physicalPaths );
+}
+
 
 void CAlbumDoc::CmAutoDropDefragment( void )
 {
@@ -918,11 +1069,11 @@ void CAlbumDoc::CmArchiveImages( void )
 {
 	CArchiveImagesDialog dialog( &m_model, GetPathName().GetString() );
 
-	if ( CAlbumImageView* pImageView = GetAlbumImageView() )
+	if ( CAlbumImageView* pAlbumView = GetAlbumImageView() )
 	{
 		CListViewState lvState( StoreByIndex );
 
-		pImageView->GetPeerThumbView()->GetListViewState( lvState );
+		pAlbumView->GetPeerThumbView()->GetListViewState( lvState );
 		dialog.StoreSelection( lvState );
 	}
 
@@ -996,12 +1147,12 @@ void CAlbumDoc::OnUpdateSaveCOUndoRedoBuffer( CCmdUI* pCmdUI )
 
 void CAlbumDoc::CmSelectAllThumbs( void )
 {
-	if ( CAlbumImageView* pImageView = GetAlbumImageView() )
-		pImageView->GetPeerThumbView()->SelectAll();
+	if ( CAlbumImageView* pAlbumView = GetAlbumImageView() )
+		pAlbumView->GetPeerThumbView()->SelectAll();
 }
 
 void CAlbumDoc::OnUpdateSelectAllThumbs( CCmdUI* pCmdUI )
 {
-	CAlbumImageView* pImageView = GetAlbumImageView();
-	pCmdUI->Enable( pImageView != NULL && HasFlag( pImageView->GetSlideData().m_viewFlags, af::ShowThumbView ) );
+	CAlbumImageView* pAlbumView = GetAlbumImageView();
+	pCmdUI->Enable( pAlbumView != NULL && HasFlag( pAlbumView->GetSlideData().m_viewFlags, af::ShowThumbView ) );
 }

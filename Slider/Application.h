@@ -116,8 +116,8 @@ namespace app
 
 	ui::CIssueStore& GetIssueStore( void );
 
-	bool MoveFiles( const std::vector< std::tstring >& filesToMove, CWnd* pParentWnd = AfxGetMainWnd() );
-	bool DeleteFiles( const std::vector< std::tstring >& filesToDelete, bool allowUndo = true );
+	bool MoveFiles( const std::vector< fs::CPath >& filePaths, CWnd* pParentWnd = AfxGetMainWnd() );
+	bool DeleteFiles( const std::vector< fs::CPath >& filePaths, bool allowUndo = true );
 
 	fs::CPath GetActiveDirPath( void );
 

@@ -36,8 +36,9 @@
 
 static const CImageStore::CCmdAlias cmdAliases[] =
 {
-	{ CM_OPEN_IMAGE_FILE, ID_FILE_OPEN },
-	{ CM_DELETE_FILE, ID_REMOVE_ITEM },
+	{ ID_IMAGE_OPEN, ID_FILE_OPEN },
+	{ ID_IMAGE_SAVE_AS, ID_FILE_SAVE },
+	{ ID_IMAGE_DELETE, ID_REMOVE_ITEM },
 	{ ID_EDIT_ALBUM, ID_EDIT_ITEM },
 	{ ID_EDIT_ARCHIVE_PASSWORD, IDD_PASSWORD_DIALOG },
 	{ CM_REFRESH_CONTENT, ID_REFRESH },
@@ -119,22 +120,19 @@ namespace app
 		return CCatalogStorageFactory::HasCatalogExt( pFilePath );
 	}
 
-	bool MoveFiles( const std::vector< std::tstring >& filesToMove, CWnd* pParentWnd /*= AfxGetMainWnd()*/ )
+	bool MoveFiles( const std::vector< fs::CPath >& filePaths, CWnd* pParentWnd /*= AfxGetMainWnd()*/ )
 	{
-		CMoveFileDialog moveToDialog( filesToMove, pParentWnd );
+		CMoveFileDialog moveToDialog( filePaths, pParentWnd );
 		if ( moveToDialog.DoModal() != IDOK )
 			return false;
 
-		CTempCloneFileSet tempClone( filesToMove );		// make temporary copies for logical files (if any)
+		CTempCloneFileSet tempClone( filePaths );		// make temporary copies for logical files (if any)
 
 		return shell::MoveFiles( tempClone.GetPhysicalFilePaths(), moveToDialog.m_destFolderPath, pParentWnd );
 	}
 
-	bool DeleteFiles( const std::vector< std::tstring >& filesToDelete, bool allowUndo /*= true*/ )
+	bool DeleteFiles( const std::vector< fs::CPath >& filePaths, bool allowUndo /*= true*/ )
 	{
-		std::vector< fs::CPath > filePaths;
-		utl::Assign( filePaths, filesToDelete, func::tor::StringOf() );
-
 		return shell::DeleteFiles( filePaths, AfxGetMainWnd(), allowUndo ? FOF_ALLOWUNDO : 0 );
 	}
 

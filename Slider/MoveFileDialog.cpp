@@ -31,8 +31,9 @@ namespace layout
 }
 
 
-CMoveFileDialog::CMoveFileDialog( const std::vector< std::tstring >& filesToMove, CWnd* pParent /*= NULL*/ )
+CMoveFileDialog::CMoveFileDialog( const std::vector< fs::CPath >& filesToMove, CWnd* pParent /*= NULL*/ )
 	: CLayoutDialog( IDD_FILE_MOVE_DIALOG, pParent )
+	, m_filesToMove( filesToMove )
 	, m_pDestFolderCombo( new CItemContentHistoryCombo( ui::DirPath ) )
 {
 	m_regSection = reg::section_dialog;
@@ -42,7 +43,6 @@ CMoveFileDialog::CMoveFileDialog( const std::vector< std::tstring >& filesToMove
 	m_srcFilesEdit.SetUseFixedFont( false );
 	m_srcFilesEdit.SetKeepSelOnFocus();
 
-	utl::Assign( m_filesToMove, filesToMove, func::tor::StringOf() );
 	ENSURE( !m_filesToMove.empty() );
 }
 

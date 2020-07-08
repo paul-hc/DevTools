@@ -3,7 +3,9 @@
 #include "ImageDoc.h"
 #include "ImageView.h"
 #include "MainFrame.h"
-#include "Application_fwd.h"
+#include "Application.h"
+#include "resource.h"
+#include "utl/UI/ShellUtilities.h"
 #include "utl/UI/Utilities.h"
 #include "utl/UI/WicImage.h"
 
@@ -27,6 +29,18 @@ CWicImage* CImageDoc::GetImage( UINT framePos ) const
 {
 	return AcquireImage( fs::ImagePathKey( m_imagePath, framePos ) );
 }
+
+CWicImage* CImageDoc::GetCurrentImage( void ) const
+{
+	return GetImage( 0 );
+}
+
+bool CImageDoc::QuerySelectedImagePaths( std::vector< fs::CFlexPath >& rSelImagePaths ) const
+{
+	rSelImagePaths.push_back( m_imagePath );
+	return true;
+}
+
 
 // this overridden version won't call Serialize(), but loads directly the image file
 BOOL CImageDoc::OnOpenDocument( LPCTSTR pFilePath )
@@ -94,11 +108,16 @@ BOOL CImageDoc::OnSaveDocument( LPCTSTR pFilePath )
 BEGIN_MESSAGE_MAP( CImageDoc, CDocumentBase )
 	ON_UPDATE_COMMAND_UI( ID_FILE_SAVE, OnUpdateFileSave )
 	ON_UPDATE_COMMAND_UI( ID_FILE_SAVE_AS, OnUpdateFileSaveAs )
+
+	ON_COMMAND( ID_IMAGE_DELETE, On_ImageDelete )
+	ON_UPDATE_COMMAND_UI( ID_IMAGE_DELETE, OnUpdate_ImagePhysicalFileWriteOp )
+	ON_COMMAND( ID_IMAGE_MOVE, On_ImageMove )
+	ON_UPDATE_COMMAND_UI( ID_IMAGE_MOVE, OnUpdate_ImagePhysicalFileWriteOp )
 END_MESSAGE_MAP()
 
 BOOL CImageDoc::OnNewDocument( void )
 {
-	ui::ReportError( _T("Cannot create an empty image document!"), MB_ICONWARNING );
+	ASSERT( false );		// cannot create an empty image document
 	return FALSE;
 }
 
@@ -112,4 +131,31 @@ void CImageDoc::OnUpdateFileSaveAs( CCmdUI* pCmdUI )
 {
 	CWicImage* pImage = GetImage( 0 );
 	pCmdUI->Enable( pImage != NULL && pImage->IsValid() );
+}
+
+
+void CImageDoc::On_ImageDelete( void )
+{
+	std::vector< fs::CFlexPath > complexPaths;
+	std::vector< fs::CPath > physicalPaths;
+
+	if ( QuerySelectedImagePaths( complexPaths ) )
+		if ( path::ExtractPhysicalPaths( physicalPaths, complexPaths ) )
+			shell::DeleteFiles( physicalPaths );
+}
+
+void CImageDoc::On_ImageMove( void )
+{
+	std::vector< fs::CFlexPath > complexPaths;
+	std::vector< fs::CPath > physicalPaths;
+
+	if ( QuerySelectedImagePaths( complexPaths ) )
+		if ( path::ExtractPhysicalPaths( physicalPaths, complexPaths ) )
+			app::MoveFiles( physicalPaths );
+}
+
+void CImageDoc::OnUpdate_ImagePhysicalFileWriteOp( CCmdUI* pCmdUI )
+{
+	CWicImage* pImage = GetCurrentImage();
+	pCmdUI->Enable( pImage != NULL && pImage->IsValidPhysicalFile( fs::Write ) );
 }

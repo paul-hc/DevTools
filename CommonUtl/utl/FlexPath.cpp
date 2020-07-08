@@ -66,21 +66,30 @@ namespace fs
 
 	bool CFlexPath::FlexFileExist( AccessMode accessMode /*= Exist*/ ) const
 	{
-		if ( !IsComplexPath() )
+		if ( IsPhysicalPath() )
 			return FileExist( accessMode );
 
-		fs::CPath docFilePath = GetPhysicalPath();
+		fs::CPath docStgPath = GetPhysicalPath();
 
-		if ( !fs::IsValidStructuredStorage( docFilePath.GetPtr() ) )
+		if ( !fs::IsValidStructuredStorage( docStgPath.GetPtr() ) )
 			return false;
 
-		if ( CStructuredStorage* pDocStorage = CStructuredStorage::FindOpenedStorage( docFilePath ) )
+		switch ( accessMode )
+		{
+			case Write:
+			case ReadWrite:
+				if ( fs::IsReadOnlyFile( docStgPath.GetPtr() ) )
+					return false;			// cannot modify the read-only storage
+		}
+
+		if ( CStructuredStorage* pDocStorage = CStructuredStorage::FindOpenedStorage( docStgPath ) )
 		{
 			CScopedErrorHandling scopedIgnore( pDocStorage, utl::IgnoreMode );		// testing: failure not an error
 			return pDocStorage->LocateReadStream( GetEmbeddedPath() ).get() != NULL;
 		}
 
-		return true;		// assume is a valid stream path if the storage document is not open (don't bother opening)
+		return false;
+		//return true;		// assume is a valid stream path if the storage document is not open (don't bother opening)
 	}
 
 } //namespace fs

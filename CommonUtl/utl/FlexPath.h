@@ -56,13 +56,55 @@ namespace fs
 namespace path
 {
 	void QueryPhysicalPaths( std::vector< fs::CPath >& rPhysicalPaths, const std::vector< fs::CFlexPath >& flexPaths );
-	void ConvertToPhysicalPaths( std::vector< fs::CFlexPath >& rFlexPaths );			// strip-out complex paths to physical paths (retaining existing physical paths)
+	void ConvertToPhysicalPaths( IN OUT std::vector< fs::CFlexPath >& rFlexPaths );			// strip-out complex paths to physical paths (retaining existing physical paths)
+
+
+	template< typename PathT >
+	inline size_t GetComplexPathCount( const std::vector< PathT >& flexPaths )
+	{
+		return std::count_if( flexPaths.begin(), flexPaths.end(), std::mem_fun_ref( &fs::CPath::IsComplexPath ) );
+	}
+
+	template< typename PathT >
+	inline size_t GetPhysicalPathCount( const std::vector< PathT >& flexPaths )
+	{
+		return std::count_if( flexPaths.begin(), flexPaths.end(), std::mem_fun_ref( &fs::CPath::IsPhysicalPath ) );
+	}
+
+	template< typename PathT >
+	bool ExtractPhysicalPaths( OUT std::vector< fs::CPath >& rPhysicalPaths, IN OUT std::vector< PathT >& rFlexPaths )
+	{
+		typename std::vector< PathT >::iterator itRemove = std::remove_if( rFlexPaths.begin(), rFlexPaths.end(), std::mem_fun_ref( &fs::CPath::IsPhysicalPath ) );	// just move physical paths at the end
+
+		if ( (void*)&rPhysicalPaths != (void*)&rFlexPaths )
+			rPhysicalPaths.assign( itRemove, rFlexPaths.end() );
+
+		rFlexPaths.erase( itRemove, rFlexPaths.end() );		// OUT: leave only the complex paths
+		return !rPhysicalPaths.empty();
+	}
 }
 
 
 namespace stdext
 {
 	inline size_t hash_value( const fs::CFlexPath& path ) { return path.GetHashValue(); }
+}
+
+
+namespace pred
+{
+	struct FlexFileExist
+	{
+		FlexFileExist( fs::AccessMode accessMode = fs::Exist ) : m_accessMode( accessMode ) {}
+
+		template< typename PathKey >
+		bool operator()( const PathKey& pathKey ) const
+		{
+			return fs::CastFlexPath( func::PathOf( pathKey ) ).FlexFileExist( m_accessMode );
+		}
+	private:
+		fs::AccessMode m_accessMode;
+	};
 }
 
 

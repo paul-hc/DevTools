@@ -15,6 +15,9 @@ class CDocumentBase : public CDocument
 protected:
 	CDocumentBase( void );
 	virtual ~CDocumentBase();
+
+	virtual CWicImage* GetCurrentImage( void ) const = 0;
+	virtual bool QuerySelectedImagePaths( std::vector< fs::CFlexPath >& rSelImagePaths ) const = 0;
 public:
 	fs::CPath GetDocFilePath( void ) const { return fs::CPath( GetPathName().GetString() ); }
 
@@ -32,10 +35,12 @@ public:
 					pView->OnUpdate( pSenderView, hint, pHintObject );
 		}
 	}
-protected:
 
 	// generated stuff
 protected:
+	afx_msg void On_ImageExplore( void );
+	afx_msg void OnUpdate_ImageSingleFileReadOp( CCmdUI* pCmdUI );
+
 	DECLARE_MESSAGE_MAP()
 };
 

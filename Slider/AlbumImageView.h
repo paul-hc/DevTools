@@ -111,16 +111,24 @@ protected:
 	afx_msg void OnToggle_NavigWrapMode( void );
 	afx_msg void OnUpdate_NavigWrapMode( CCmdUI* pCmdUI );
 	afx_msg void OnUpdate_NavigSliderCtrl( CCmdUI* pCmdUI );
-	afx_msg void CmOpenImageFile( void );
-	afx_msg void On_ImageFileSaveAs( void );
-	afx_msg void OnUpdate_ImageFileSaveAs( CCmdUI* pCmdUI );
-	virtual void CmDeleteFile( UINT cmdId );
-	virtual void CmMoveFile( void );
 	afx_msg void CmAutoDropImage( UINT cmdId );
 	afx_msg void OnUpdateAutoDropImage( CCmdUI* pCmdUI );
 
 	DECLARE_MESSAGE_MAP()
 };
+
+
+// CAlbumImageView template code
+
+template< typename PathContainerT >
+bool CAlbumImageView::QuerySelImagePaths( PathContainerT& rSelImagePaths ) const
+{
+	CListViewState files( StoreByString );
+	m_pPeerThumbView->GetListViewState( files );
+
+	utl::Assign( rSelImagePaths, files.m_pStringImpl->m_selItems, func::tor::StringOf() );
+	return !rSelImagePaths.empty();
+}
 
 
 #endif // AlbumImageView_h

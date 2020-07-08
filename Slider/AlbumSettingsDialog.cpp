@@ -131,7 +131,7 @@ CAlbumSettingsDialog::CAlbumSettingsDialog( const CAlbumModel& model, size_t cur
 		.AddSeparator()
 		.AddButton( ID_EDIT_COPY )
 		.AddSeparator()
-		.AddButton( IDC_SEARCH_FOR_FILES, CM_EXPLORE_IMAGE );
+		.AddButton( IDC_SEARCH_FOR_FILES, ID_IMAGE_EXPLORE );
 
 	m_imagesToolbar.GetStrip()
 		.AddButton( ID_EDIT_COPY )
@@ -194,7 +194,7 @@ bool CAlbumSettingsDialog::SetDirty( bool dirty /*= true*/ )
 	m_imagesListCtrl.Invalidate();
 	m_imagesListCtrl.UpdateWindow();
 
-	static const struct { std::tstring m_caption; UINT m_iconId; } s_okLabelIcon[] = { { _T("OK"), 0 }, { _T("&Search"), CM_EXPLORE_IMAGE } };
+	static const struct { std::tstring m_caption; UINT m_iconId; } s_okLabelIcon[] = { { _T("OK"), 0 }, { _T("&Search"), ID_IMAGE_EXPLORE } };
 	m_okButton.SetButtonCaption( s_okLabelIcon[ m_isDirty ].m_caption );
 	m_okButton.SetIconId( s_okLabelIcon[ m_isDirty ].m_iconId );
 
@@ -541,8 +541,8 @@ BEGIN_MESSAGE_MAP( CAlbumSettingsDialog, CLayoutDialog )
 	ON_CBN_SELCHANGE( IDC_LIST_ORDER_COMBO, OnCBnSelChange_ImageOrder )
 
 	ON_STN_DBLCLK( IDC_THUMB_PREVIEW_STATIC, OnStnDblClk_ThumbPreviewStatic )
-	// image file operations: CM_OPEN_IMAGE_FILE, CM_DELETE_FILE, CM_DELETE_FILE_NO_UNDO, CM_MOVE_FILE, CM_EXPLORE_IMAGE
-	ON_COMMAND_RANGE( CM_OPEN_IMAGE_FILE, CM_EXPLORE_IMAGE, OnImageFileOp )
+	// image file operations: ID_IMAGE_OPEN, ID_IMAGE_DELETE, ID_IMAGE_MOVE, ID_IMAGE_EXPLORE
+	ON_COMMAND_RANGE( ID_IMAGE_OPEN, ID_IMAGE_EXPLORE, OnImageFileOp )
 END_MESSAGE_MAP()
 
 void CAlbumSettingsDialog::OnOK( void )
@@ -882,31 +882,28 @@ void CAlbumSettingsDialog::OnCBnSelChange_ImageOrder( void )
 
 void CAlbumSettingsDialog::OnImageFileOp( UINT cmdId )
 {
-	std::vector< std::tstring > targetFiles;
-	m_imagesListCtrl.QuerySelectedItemPaths( targetFiles );
-	if ( targetFiles.empty() )
-		return;
+	std::vector< fs::CPath > selFilePaths;
 
-	switch ( cmdId )
-	{
-		case CM_OPEN_IMAGE_FILE:
-			for ( std::vector< std::tstring >::const_iterator it = targetFiles.begin(); it != targetFiles.end(); ++it )
-				app::GetApp()->OpenDocumentFile( it->c_str() );
-			break;
-		case CM_DELETE_FILE:
-		case CM_DELETE_FILE_NO_UNDO:
-			app::DeleteFiles( targetFiles, CM_DELETE_FILE == cmdId );
-			break;
-		case CM_MOVE_FILE:
-			app::MoveFiles( targetFiles, this );
-			break;
-		case CM_EXPLORE_IMAGE:
-			for ( std::vector< std::tstring >::const_iterator it = targetFiles.begin(); it != targetFiles.end(); ++it )
-				shell::ExploreAndSelectFile( it->c_str() );
-			break;
-		default:
-			ASSERT( false );
-	}
+	if ( m_imagesListCtrl.QuerySelectedItemPaths( selFilePaths ) )
+		switch ( cmdId )
+		{
+			case ID_IMAGE_OPEN:
+				for ( std::vector< fs::CPath >::const_iterator itPath = selFilePaths.begin(); itPath != selFilePaths.end(); ++itPath )
+					app::GetApp()->OpenDocumentFile( itPath->GetPtr() );
+				break;
+			case ID_IMAGE_DELETE:
+				app::DeleteFiles( selFilePaths );
+				break;
+			case ID_IMAGE_MOVE:
+				app::MoveFiles( selFilePaths, this );
+				break;
+			case ID_IMAGE_EXPLORE:
+				for ( std::vector< fs::CPath >::const_iterator itPath = selFilePaths.begin(); itPath != selFilePaths.end(); ++itPath )
+					shell::ExploreAndSelectFile( itPath->GetPtr() );
+				break;
+			default:
+				ASSERT( false );
+		}
 }
 
 void CAlbumSettingsDialog::OnStnDblClk_ThumbPreviewStatic( void )

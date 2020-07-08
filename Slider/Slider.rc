@@ -124,8 +124,8 @@ BEGIN
     BUTTON      CM_AUTO_DROP_REDO
     BUTTON      CM_CLEAR_IMAGE_CACHE
     BUTTON      CM_EDIT_WORKSPACE
-    BUTTON      CM_MOVE_FILE
-    BUTTON      CM_EXPLORE_IMAGE
+    BUTTON      ID_IMAGE_MOVE
+    BUTTON      ID_IMAGE_EXPLORE
     BUTTON      ID_EDIT_BK_COLOR
 END
 
@@ -202,14 +202,16 @@ BEGIN
         MENUITEM "&Logger Options...",          CM_LOGGER_OPTIONS
         POPUP "&Image File"
         BEGIN
-            MENUITEM "&Open\tCtrl+Shift+O",         CM_OPEN_IMAGE_FILE
+            MENUITEM "&Open\tCtrl+Shift+O",         ID_IMAGE_OPEN
+            MENUITEM "Save &Image As...",           ID_IMAGE_SAVE_AS
             MENUITEM SEPARATOR
-            MENUITEM "&Delete...\tDelete",          CM_DELETE_FILE
-            MENUITEM "&Permanent Delete...\tShift+Delete", CM_DELETE_FILE_NO_UNDO
-            MENUITEM "&Move...\tCtrl+M",            CM_MOVE_FILE
+            MENUITEM "&Delete...\tDelete",          ID_IMAGE_DELETE
+            MENUITEM "&Move...\tCtrl+M",            ID_IMAGE_MOVE
             MENUITEM SEPARATOR
-            MENUITEM "&Explore Image\tCtrl+E",      CM_EXPLORE_IMAGE
+            MENUITEM "&Explore Image\tCtrl+E",      ID_IMAGE_EXPLORE
         END
+        MENUITEM SEPARATOR
+        MENUITEM "E&xtract Catalog Images...",  ID_FILE_EXTRACT_CATALOG
         MENUITEM SEPARATOR
         MENUITEM "Clear Image Cache",           CM_CLEAR_IMAGE_CACHE
         MENUITEM "Clear Temporary Embedded Clones", CM_CLEAR_TEMP_EMBEDDED_CLONES
@@ -328,11 +330,10 @@ BEGIN
         MENUITEM "&Logger Options...",          CM_LOGGER_OPTIONS
         POPUP "&Image File"
         BEGIN
-            MENUITEM "Delete...\tDelete",           CM_DELETE_FILE
-            MENUITEM "Permanent Delete...\tShift+Delete", CM_DELETE_FILE_NO_UNDO
-            MENUITEM "Move...\tCtrl+M",             CM_MOVE_FILE
+            MENUITEM "Delete...\tDelete",           ID_IMAGE_DELETE
+            MENUITEM "Move...\tCtrl+M",             ID_IMAGE_MOVE
             MENUITEM SEPARATOR
-            MENUITEM "&Explore Image\tCtrl+E",      CM_EXPLORE_IMAGE
+            MENUITEM "&Explore Image\tCtrl+E",      ID_IMAGE_EXPLORE
         END
         MENUITEM SEPARATOR
         MENUITEM "Clear Image Cache",           CM_CLEAR_IMAGE_CACHE
@@ -427,11 +428,10 @@ BEGIN
         MENUITEM SEPARATOR
         POPUP "&Image File"
         BEGIN
-            MENUITEM "Delete...\tDelete",           CM_DELETE_FILE
-            MENUITEM "Permanent Delete...\tShift+Delete", CM_DELETE_FILE_NO_UNDO
-            MENUITEM "Move...\tCtrl+M",             CM_MOVE_FILE
+            MENUITEM "Delete...\tDelete",           ID_IMAGE_DELETE
+            MENUITEM "Move...\tCtrl+M",             ID_IMAGE_MOVE
             MENUITEM SEPARATOR
-            MENUITEM "&Explore Image\tCtrl+E",      CM_EXPLORE_IMAGE
+            MENUITEM "&Explore Image\tCtrl+E",      ID_IMAGE_EXPLORE
         END
     END
     POPUP "<album>"
@@ -447,7 +447,7 @@ BEGIN
             MENUITEM "&End\tEnd",                   ID_NAVIG_SEEK_LAST
         END
         MENUITEM SEPARATOR
-        MENUITEM "For&ward Direction",          ID_TOGGLE_NAVIG_DIR_FWD
+        MENUITEM "Forwar&d Direction",          ID_TOGGLE_NAVIG_DIR_FWD
         MENUITEM "&Reverse Direction",          ID_TOGGLE_NAVIG_DIR_REV
         MENUITEM SEPARATOR
         MENUITEM "&Wrap Mode",                  ID_TOGGLE_NAVIG_WRAP_MODE
@@ -459,7 +459,7 @@ BEGIN
         MENUITEM "Fit Height",                  ID_TOGGLE_SCALING_FIT_HEIGHT
         MENUITEM SEPARATOR
         MENUITEM "Resize View to Fit\tCtrl+Shift+F", ID_RESIZE_VIEW_TO_FIT
-        MENUITEM "&Smooth Mode",                IDW_SMOOTHING_MODE_CHECK
+        MENUITEM "Sm&ooth Mode",                IDW_SMOOTHING_MODE_CHECK
         MENUITEM SEPARATOR
         MENUITEM "Zoom In\tCtrl+Add",           ID_ZOOM_IN
         MENUITEM "Zoom Out\tCtrl+Sub",          ID_ZOOM_OUT
@@ -468,14 +468,13 @@ BEGIN
         MENUITEM SEPARATOR
         POPUP "&Image File"
         BEGIN
-            MENUITEM "&Open\tCtrl+Shift+O",         CM_OPEN_IMAGE_FILE
-            MENUITEM "&Save As...",                 ID_IMAGE_FILE_SAVE_AS
+            MENUITEM "&Open\tCtrl+Shift+O",         ID_IMAGE_OPEN
+            MENUITEM "&Save As...",                 ID_IMAGE_SAVE_AS
             MENUITEM SEPARATOR
-            MENUITEM "&Delete...\tDelete",          CM_DELETE_FILE
-            MENUITEM "&Permanent Delete...\tShift+Delete", CM_DELETE_FILE_NO_UNDO
-            MENUITEM "&Move...\tCtrl+M",            CM_MOVE_FILE
+            MENUITEM "&Delete...\tDelete",          ID_IMAGE_DELETE
+            MENUITEM "&Move...\tCtrl+M",            ID_IMAGE_MOVE
             MENUITEM SEPARATOR
-            MENUITEM "&Explore Image\tCtrl+E",      CM_EXPLORE_IMAGE
+            MENUITEM "&Explore Image\tCtrl+E",      ID_IMAGE_EXPLORE
         END
         POPUP "&Edit"
         BEGIN
@@ -506,6 +505,8 @@ BEGIN
             MENUITEM "&Auto Drop Recipient",        CM_IS_AUTO_DROP
         END
         MENUITEM SEPARATOR
+        MENUITEM "E&xtract Catalog Images...",  ID_FILE_EXTRACT_CATALOG
+        MENUITEM SEPARATOR
         MENUITEM "Regenerate Album\tCtrl+Shift+F5", CM_REGENERATE_ALBUM
         MENUITEM "Album &Settings...\tCtrl+Space", ID_EDIT_ALBUM
     END
@@ -515,14 +516,13 @@ BEGIN
         MENUITEM SEPARATOR
         POPUP "&Image File"
         BEGIN
-            MENUITEM "&Open\tCtrl+Shift+O",         CM_OPEN_IMAGE_FILE
-            MENUITEM "&Save As...",                 ID_IMAGE_FILE_SAVE_AS
+            MENUITEM "&Open\tCtrl+Shift+O",         ID_IMAGE_OPEN
+            MENUITEM "&Save As...",                 ID_IMAGE_SAVE_AS
             MENUITEM SEPARATOR
-            MENUITEM "&Delete...\tDelete",          CM_DELETE_FILE
-            MENUITEM "&Permanent Delete...\tShift+Delete", CM_DELETE_FILE_NO_UNDO
-            MENUITEM "&Move...\tCtrl+M",            CM_MOVE_FILE
+            MENUITEM "&Delete...\tDelete",          ID_IMAGE_DELETE
+            MENUITEM "&Move...\tCtrl+M",            ID_IMAGE_MOVE
             MENUITEM SEPARATOR
-            MENUITEM "&Explore Image\tCtrl+E",      CM_EXPLORE_IMAGE
+            MENUITEM "&Explore Image\tCtrl+E",      ID_IMAGE_EXPLORE
         END
         POPUP "&Edit"
         BEGIN
@@ -557,14 +557,13 @@ BEGIN
     END
     POPUP "<album found list>"
     BEGIN
-        MENUITEM "&Open\tCtrl+Shift+O",         CM_OPEN_IMAGE_FILE
-        MENUITEM "&Save As...",                 ID_IMAGE_FILE_SAVE_AS
+        MENUITEM "&Open\tCtrl+Shift+O",         ID_IMAGE_OPEN
+        MENUITEM "&Save As...",                 ID_IMAGE_SAVE_AS
         MENUITEM SEPARATOR
-        MENUITEM "&Delete...\tDelete",          CM_DELETE_FILE
-        MENUITEM "&Permanent Delete...\tShift+Delete", CM_DELETE_FILE_NO_UNDO
-        MENUITEM "&Move...\tCtrl+M",            CM_MOVE_FILE
+        MENUITEM "&Delete...\tDelete",          ID_IMAGE_DELETE
+        MENUITEM "&Move...\tCtrl+M",            ID_IMAGE_MOVE
         MENUITEM SEPARATOR
-        MENUITEM "&Explore Image\tCtrl+E",      CM_EXPLORE_IMAGE
+        MENUITEM "&Explore Image\tCtrl+E",      ID_IMAGE_EXPLORE
         MENUITEM SEPARATOR
         MENUITEM "&Copy\tCtrl+C",               ID_EDIT_COPY
         MENUITEM SEPARATOR
@@ -589,19 +588,18 @@ IDR_MAINFRAME ACCELERATORS
 BEGIN
     VK_F11,         CK_FULL_SCREEN,         VIRTKEY, NOINVERT
     VK_F5,          CM_CLEAR_IMAGE_CACHE,   VIRTKEY, CONTROL, NOINVERT
-    VK_DELETE,      CM_DELETE_FILE,         VIRTKEY, NOINVERT
-    VK_DELETE,      CM_DELETE_FILE_NO_UNDO, VIRTKEY, SHIFT, NOINVERT
+    VK_DELETE,      ID_IMAGE_DELETE,        VIRTKEY, NOINVERT
     "K",            ID_EDIT_BK_COLOR,       VIRTKEY, CONTROL, NOINVERT
     "W",            CM_EDIT_WORKSPACE,      VIRTKEY, CONTROL, NOINVERT
     VK_ESCAPE,      ID_CM_ESCAPE_KEY,       VIRTKEY, NOINVERT
-    "E",            CM_EXPLORE_IMAGE,       VIRTKEY, CONTROL, NOINVERT
+    "E",            ID_IMAGE_EXPLORE,       VIRTKEY, CONTROL, NOINVERT
     "Z",            ID_FOCUS_ON_ZOOM_COMBO, VIRTKEY, CONTROL, NOINVERT
     "1",            ID_TOGGLE_SCALING_ACTUAL_SIZE, VIRTKEY, CONTROL, NOINVERT
     "0",            ID_TOGGLE_SCALING_AUTO_FIT_ALL, VIRTKEY, SHIFT, CONTROL, NOINVERT
     "0",            ID_TOGGLE_SCALING_AUTO_FIT_LARGE, VIRTKEY, CONTROL, NOINVERT
     "W",            CM_LOAD_WORKSPACE_DOCS, VIRTKEY, SHIFT, CONTROL, ALT, NOINVERT
     "X",            ID_CM_MDI_CLOSE_ALL,    VIRTKEY, CONTROL, ALT, NOINVERT
-    "M",            CM_MOVE_FILE,           VIRTKEY, CONTROL, NOINVERT
+    "M",            ID_IMAGE_MOVE,          VIRTKEY, CONTROL, NOINVERT
     VK_F5,          CM_REFRESH_CONTENT,     VIRTKEY, NOINVERT
     "F",            ID_RESIZE_VIEW_TO_FIT,  VIRTKEY, SHIFT, CONTROL, NOINVERT
     "S",            CM_SAVE_WORKSPACE,      VIRTKEY, SHIFT, CONTROL, NOINVERT
@@ -667,7 +665,7 @@ BEGIN
     "A",            CM_ARCHIVE_IMAGES,      VIRTKEY, SHIFT, CONTROL, NOINVERT
     "B",            ID_VIEW_ALBUMDIALOGBAR, VIRTKEY, CONTROL, NOINVERT
     "N",            ID_WINDOW_NEW,          VIRTKEY, SHIFT, CONTROL, NOINVERT
-    "O",            CM_OPEN_IMAGE_FILE,     VIRTKEY, SHIFT, CONTROL, NOINVERT
+    "O",            ID_IMAGE_OPEN,          VIRTKEY, SHIFT, CONTROL, NOINVERT
     "Q",            ID_FOCUS_ON_SLIDER_CTRL, VIRTKEY, CONTROL, NOINVERT
     "T",            CK_SHOW_THUMB_VIEW,     VIRTKEY, SHIFT, CONTROL, NOINVERT
     VK_BACK,        CM_CUSTOM_ORDER_UNDO,   VIRTKEY, ALT, NOINVERT
@@ -688,10 +686,9 @@ END
 
 IDD_ALBUM_SETTINGS_DIALOG ACCELERATORS 
 BEGIN
-    VK_DELETE,      CM_DELETE_FILE,         VIRTKEY, NOINVERT
-    VK_DELETE,      CM_DELETE_FILE_NO_UNDO, VIRTKEY, SHIFT, NOINVERT
-    "M",            CM_MOVE_FILE,           VIRTKEY, CONTROL, NOINVERT
-    "O",            CM_OPEN_IMAGE_FILE,     VIRTKEY, SHIFT, CONTROL, NOINVERT
+    VK_DELETE,      ID_IMAGE_DELETE,        VIRTKEY, NOINVERT
+    "M",            ID_IMAGE_MOVE,          VIRTKEY, CONTROL, NOINVERT
+    "O",            ID_IMAGE_OPEN,          VIRTKEY, SHIFT, CONTROL, NOINVERT
     "E",            IDC_EXPLORE_IMAGE,      VIRTKEY, CONTROL, NOINVERT
     VK_F4,          IDC_OPEN_IMAGE,         VIRTKEY, NOINVERT
     VK_F5,          IDC_SEARCH_FOR_FILES,   VIRTKEY, NOINVERT
@@ -1213,10 +1210,9 @@ BEGIN
     CM_TOGGLE_MAXIMIZE      "Toggle between maximize and restore modes\nMaximize/Restore"
     ID_EDIT_BK_COLOR        "Edit image view background color\nBackground Color"
     CK_SHOW_THUMB_VIEW      "Displays the thumbnail view\nShow Thumbnail View (Ctrl+Shift+T)"
-    CM_OPEN_IMAGE_FILE      "Opens the selected image file(s) as standalone images\nOpen Selected Images"
-    CM_DELETE_FILE          "Delete the file using shell operation\nDelete"
-    CM_DELETE_FILE_NO_UNDO  "Delete the file permanently using shell operation\nPermanent Delete"
-    CM_MOVE_FILE            "Move current image file to another folder\nMove File"
+    ID_IMAGE_OPEN           "Opens the selected image file(s) as standalone images\nOpen Selected Images"
+    ID_IMAGE_DELETE         "Delete the file using shell operation\nDelete"
+    ID_IMAGE_MOVE           "Move current image file to another folder\nMove File"
 END
 
 STRINGTABLE 
@@ -1254,7 +1250,7 @@ END
 
 STRINGTABLE 
 BEGIN
-    CM_EXPLORE_IMAGE        "Open Windows Explorer and select the current image file name\nExplore Image"
+    ID_IMAGE_EXPLORE        "Open Windows Explorer and select the current image file name\nExplore Image"
     CM_CLEAR_IMAGE_CACHE    "Clear the image and thumbnail cache\nClear Image and Thumbnail Cache (Ctrl+F5)"
     CM_REFRESH_CONTENT      "Refresh current content\nRefresh Content (F5)"
     CM_DROP_MOVE_IMAGE      "Move and rename the dropped image file\nMove and Rename Image File"
@@ -1329,6 +1325,12 @@ BEGIN
     IDS_OVERWRITE_PROMPT    "The file ""%s"" already exists!\n\nDo you want to overwrite it?"
     IDS_INVALID_FORMAT_FMT  "Invalid format: %s\n\nA valid format must contain numeric or wildcards specs in the filename part."
     IDS_PROMPT_FILE_OP      "Are you sure you want to %s %d files to destination:\n\n%s ?\n\n"
+END
+
+STRINGTABLE 
+BEGIN
+    ID_IMAGE_SAVE_AS        "Save selected images to files\tSave Image As"
+    ID_FILE_EXTRACT_CATALOG "Extract the image catalog storage contents to a directory\nExtract Catalog Images"
 END
 
 #endif    // English (U.S.) resources

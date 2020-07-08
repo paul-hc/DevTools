@@ -65,13 +65,17 @@ public:
 
 	// events
 	void OnAlbumModelChanged( AlbumModelChange reason = FM_Init );
+protected:
+	// base overrides
+	virtual CWicImage* GetCurrentImage( void ) const;
+	virtual bool QuerySelectedImagePaths( std::vector< fs::CFlexPath >& rSelImagePaths ) const;
 private:
 	void OnAutoDropRecipientChanged( void );
 
 	bool BuildAlbum( const fs::CPath& searchPath );
 
 	bool LoadCatalogStorage( const fs::CPath& docStgPath );
-	bool SaveAsCatalogStorage( const fs::CPath& newDocStgPath );		// save .sld -> .ias, .ias -> .ias
+	bool SaveAsCatalogStorage( const fs::CPath& newDocStgPath );			// save .sld -> .ias, .ias -> .ias
 
 	void _SaveAlbumToArchiveStg( const fs::CPath& docStgPath ) throws_( CException* );		// save existing album to image archive as "_Album.sld" stream
 
@@ -111,10 +115,22 @@ public:
 
 	// generated stuff
 public:
+	virtual void DeleteContents( void );				// delete doc items etc
 	virtual BOOL OnOpenDocument( LPCTSTR pPathName );
 	virtual BOOL OnSaveDocument( LPCTSTR pPathName );
-	virtual void DeleteContents( void );				// delete doc items etc
 protected:
+	afx_msg void OnExtractCatalog( void );
+	afx_msg void OnUpdate_IsCatalogStorage( CCmdUI* pCmdUI );
+
+	afx_msg void On_ImageSaveAs( void );
+	afx_msg void OnUpdate_AnyCurrImage( CCmdUI* pCmdUI );
+	afx_msg void OnUpdate_ImageFilesAllReadOp( CCmdUI* pCmdUI );
+	afx_msg void OnUpdate_ImageFilesAllWriteOp( CCmdUI* pCmdUI );
+
+	afx_msg void On_ImageOpen( void );
+	afx_msg void On_ImageDelete( void );
+	afx_msg void On_ImageMove( void );
+
 	afx_msg void CmAutoDropDefragment( void );
 	afx_msg void OnUpdateAutoDropDefragment( CCmdUI* pCmdUI );
 	afx_msg void CmAutoDropUndo( void );

@@ -201,6 +201,7 @@ namespace fs
 
 		bool IsValid( void ) const { return path::IsValid( m_filePath ); }
 		bool IsComplexPath( void ) const { return path::IsComplex( GetPtr() ); }
+		bool IsPhysicalPath( void ) const { return !IsComplexPath(); }
 
 		const std::tstring& Get( void ) const { return m_filePath; }
 		std::tstring& Ref( void ) { return m_filePath; }

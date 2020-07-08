@@ -75,13 +75,13 @@ private:
 protected:
 	INavigationBar* m_pNavigBar;
 	CChildFrame* m_pMdiChildFrame;
-public:
+
 	// generated stuff
-	public:
+public:
 	virtual void OnInitialUpdate( void );		// first time after construct
 	virtual BOOL OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo );
 	virtual BOOL PreTranslateMessage( MSG* pMsg );
-	protected:
+protected:
 	virtual void OnActivateView( BOOL bActivate, CView* pActivateView, CView* pDeactiveView );
 	virtual void OnUpdate( CView* pSender, LPARAM lHint, CObject* pHint );
 protected:
@@ -107,12 +107,6 @@ protected:
 	afx_msg void CmResizeViewToFit( void );
 	afx_msg void On_EditBkColor( void );
 	afx_msg void CmScroll( UINT cmdId );
-
-	virtual void CmDeleteFile( UINT cmdId );
-	virtual void CmMoveFile( void );
-	afx_msg void CmExploreImage( void );
-	afx_msg void OnUpdatePhysicalFileShellOperation( CCmdUI* pCmdUI );
-	afx_msg void OnUpdateAnyFileShellOperation( CCmdUI* pCmdUI );
 	afx_msg void OnCBnSelChange_ImageScalingModeCombo( void );
 	afx_msg void OnCBnSelChange_ZoomCombo( void );
 

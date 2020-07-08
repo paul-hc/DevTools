@@ -285,13 +285,6 @@ BEGIN_MESSAGE_MAP( CImageView, BaseClass )
 	ON_COMMAND( ID_RESIZE_VIEW_TO_FIT, CmResizeViewToFit )
 	ON_COMMAND( ID_EDIT_BK_COLOR, On_EditBkColor )
 	ON_COMMAND_RANGE( CM_SCROLL_LEFT, CM_SCROLL_PAGE_DOWN, CmScroll )
-
-	ON_COMMAND_RANGE( CM_DELETE_FILE, CM_DELETE_FILE_NO_UNDO, CmDeleteFile )
-	ON_UPDATE_COMMAND_UI_RANGE( CM_DELETE_FILE, CM_DELETE_FILE_NO_UNDO, OnUpdatePhysicalFileShellOperation )
-	ON_COMMAND( CM_MOVE_FILE, CmMoveFile )
-	ON_UPDATE_COMMAND_UI( CM_MOVE_FILE, OnUpdateAnyFileShellOperation )
-	ON_COMMAND( CM_EXPLORE_IMAGE, CmExploreImage )
-	ON_UPDATE_COMMAND_UI( CM_EXPLORE_IMAGE, OnUpdatePhysicalFileShellOperation )
 	ON_CBN_SELCHANGE( IDW_IMAGE_SCALING_COMBO, OnCBnSelChange_ImageScalingModeCombo )
 	ON_CBN_SELCHANGE( IDW_ZOOM_COMBO, OnCBnSelChange_ZoomCombo )
 	// standard printing
@@ -533,46 +526,6 @@ void CImageView::CmScroll( UINT cmdId )
 		case CM_SCROLL_PAGE_UP:		OnScroll( MAKEWORD( -1, SB_PAGEUP ), 0 ); break;
 		case CM_SCROLL_PAGE_DOWN:	OnScroll( MAKEWORD( -1, SB_PAGEDOWN ), 0 ); break;
 	}
-}
-
-
-void CImageView::CmDeleteFile( UINT cmdId )
-{
-	CWicImage* pImage = GetImage();
-	if ( pImage != NULL && pImage->IsValidPhysicalFile() )
-	{
-		std::vector< std::tstring > filesToDelete( 1, pImage->GetImagePath().Get() );
-		app::DeleteFiles( filesToDelete, CM_DELETE_FILE == cmdId );
-	}
-}
-
-void CImageView::CmMoveFile( void )
-{
-	CWicImage* pImage = GetImage();
-	if ( pImage != NULL && pImage->IsValidFile() )
-	{
-		std::vector< std::tstring > filesToMove( 1, pImage->GetImagePath().Get() );
-		app::MoveFiles( filesToMove, this );
-	}
-}
-
-void CImageView::CmExploreImage( void )
-{
-	if ( CWicImage* pImage = GetImage() )
-		if ( pImage->IsValidPhysicalFile() )
-			shell::ExploreAndSelectFile( pImage->GetImagePath().GetPtr() );
-}
-
-void CImageView::OnUpdateAnyFileShellOperation( CCmdUI* pCmdUI )
-{
-	CWicImage* pImage = GetImage();
-	pCmdUI->Enable( pImage != NULL && pImage->IsValidFile( fs::Write ) );
-}
-
-void CImageView::OnUpdatePhysicalFileShellOperation( CCmdUI* pCmdUI )
-{
-	CWicImage* pImage = GetImage();
-	pCmdUI->Enable( pImage != NULL && pImage->IsValidPhysicalFile( fs::Write ) );
 }
 
 void CImageView::OnCBnSelChange_ImageScalingModeCombo( void )
