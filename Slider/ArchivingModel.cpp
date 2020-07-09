@@ -48,20 +48,6 @@ void CArchivingModel::Stream( CArchive& archive )
 	serial::SerializeValues( archive, m_pathPairs );
 }
 
-bool CArchivingModel::CreateArchiveStgFile( CAlbumModel* pModel, const fs::CPath& destStgPath )
-{
-	SetupSourcePaths( pModel->GetImagesModel().GetFileAttrs() );
-
-	UINT seqCount = 0;
-	static const std::tstring s_fmtCopySrc = _T("*.*");
-	GenerateDestPaths( destStgPath, s_fmtCopySrc, &seqCount );							// make m_pathPairs: copy SRC as is into DEST
-
-	pModel->_CheckReparentFileAttrs( destStgPath.GetPtr(), CAlbumModel::Saving );		// reparent with destStgPath before saving the album info
-	ENSURE( pModel->GetFileAttrCount() == m_pathPairs.size() );
-
-	return BuildArchiveStorageFile( destStgPath, FOP_FileCopy );						// false: user declined overwrite
-}
-
 void CArchivingModel::SetupSourcePaths( const std::vector< CFileAttr* >& srcFiles )
 {
 	m_pathPairs.clear();

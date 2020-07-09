@@ -4,19 +4,13 @@
 #include "SearchPattern.h"
 #include "FileAttr.h"
 #include "FileAttrAlgorithms.h"
-#include "ICatalogStorage.h"
 #include "ImageFileEnumerator.h"
 #include "ProgressService.h"
 #include "Workspace.h"
 #include "Application_fwd.h"
 #include "resource.h"
-#include "utl/ComparePredicates.h"
-#include "utl/PathMaker.h"
-#include "utl/Serialization.h"
+#include "utl/RuntimeException.h"
 #include "utl/SerializeStdTypes.h"
-#include "utl/ScopedValue.h"
-#include "utl/StringUtilities.h"
-#include "utl/UI/Utilities.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -71,7 +65,7 @@ void CAlbumModel::CloseAllStorages( void )
 
 void CAlbumModel::StoreCatalogDocPath( const fs::CPath& docStgPath )
 {
-	REQUIRE( CCatalogStorageFactory::HasCatalogExt( docStgPath.GetPtr() ) );
+	REQUIRE( app::IsCatalogFile( docStgPath.GetPtr() ) );
 	REQUIRE( fs::IsValidStructuredStorage( docStgPath.GetPtr() ) );
 
 	REQUIRE( m_searchModel.IsEmpty() );			// no mixing with .sld album model
@@ -168,82 +162,6 @@ int CAlbumModel::FindIndexFileAttrWithPath( const fs::CPath& filePath ) const
 	if ( utl::npos == foundPos )
 		return -1;
 	return static_cast<int>( foundPos );
-}
-
-bool CAlbumModel::HasConsistentDeepStreams( void ) const
-{
-	return HasFlag( CWorkspace::GetFlags(), wf::PrefixDeepStreamNames ) == HasPersistFlag( UseDeepStreamPaths );
-}
-
-bool CAlbumModel::_CheckReparentFileAttrs( const TCHAR* pDocPath, PersistOp op )
-{
-	fs::CPath docPath = fs::CFlexPath( pDocPath ).GetPhysicalPath();			// extract "C:\Images\storage.ias" from "C:\Images\storage.ias>_Album.sld"
-
-	if ( app::IsCatalogFile( docPath.GetPtr() ) )
-		return _ReparentStorageFileAttrsImpl( docPath, op );
-
-	return false;
-}
-
-bool CAlbumModel::_ReparentStorageFileAttrsImpl( const fs::CPath& docStgPath, PersistOp op )
-{
-	ASSERT( app::IsCatalogFile( docStgPath.GetPtr() ) );
-
-	std::vector< CFileAttr* >& rFileAttrs = m_imagesModel.RefFileAttrs();
-
-	if ( docStgPath != m_docStgPath )								// different docStgPath, need to store and reparent
-	{
-		// clear the old stg prefix to the actual logical root of the album
-		switch ( op )
-		{
-			case Loading:
-				std::for_each( rFileAttrs.begin(), rFileAttrs.end(), func::FuncAdapter< func::StripComplexPath, func::RefFilePath >() );
-				break;
-			case Saving:
-				if ( !m_docStgPath.IsEmpty() )
-					std::for_each( rFileAttrs.begin(), rFileAttrs.end(), func::StripDocPath( m_docStgPath ) );
-
-				// convert any deep embedded storage paths to directory paths (so that '>' appears only once in the final embedded)
-				std::for_each( rFileAttrs.begin(), rFileAttrs.end(), func::FuncAdapter< func::NormalizeComplexPath, func::RefFilePath >() );
-				break;
-		}
-
-		m_searchModel.ClearPatterns();
-		m_docStgPath = docStgPath;
-
-		if ( !HasFlag( m_persistFlags, UseDeepStreamPaths ) )
-			if ( !m_imagesModel.IsEmpty() )
-			{
-				CPathMaker maker;
-				maker.StoreSrcFromPaths( rFileAttrs );
-
-				if ( maker.MakeDestStripCommonPrefix() )			// convert to relative paths based on common prefix
-					maker.QueryDestToPaths( rFileAttrs );			// found and removed the common prefix
-			}
-
-		// reparent with the new doc stg (physical path)
-		std::for_each( rFileAttrs.begin(), rFileAttrs.end(),
-			func::MakeComplexPath( m_docStgPath, HasFlag( CWorkspace::GetFlags(), wf::PrefixDeepStreamNames ) ? func::Deep : func::Flat ) );
-	}
-
-	if ( Saving == op )
-		SetPersistFlag( UseDeepStreamPaths, HasFlag( CWorkspace::GetFlags(), wf::PrefixDeepStreamNames ) );			// will save to keep track of saved mode
-
-	// ensure valid loaded m_imagesModel.m_storagePaths (for backwards compatibility with older saved archives)
-	if ( Loading == op )
-	{
-		std::vector< fs::CPath >& rDocFilePaths = m_imagesModel.RefStoragePaths();
-
-		for ( std::vector< fs::CPath >::iterator itDocFilePath = rDocFilePaths.begin(); itDocFilePath != rDocFilePaths.end(); )
-			if ( fs::IsValidStructuredStorage( itDocFilePath->GetPtr() ) )
-				++itDocFilePath;
-			else
-				itDocFilePath = rDocFilePaths.erase( itDocFilePath );		// remove non-existing storage doc
-
-		utl::AddUnique( rDocFilePaths, docStgPath );						// add the document storage, which is guaranteed valid
-	}
-
-	return true;
 }
 
 void CAlbumModel::SetCustomOrderSequence( const std::vector< CFileAttr* >& customSequence )

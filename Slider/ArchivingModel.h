@@ -28,7 +28,6 @@ public:
 	bool GenerateDestPaths( const fs::CPath& destPath, const std::tstring& format, UINT* pSeqCount, bool forceShallowStreamNames = false );
 
 	// service
-	bool CreateArchiveStgFile( CAlbumModel* pModel, const fs::CPath& destStgPath );		// simple archive storage creation
 	bool BuildArchiveStorageFile( const fs::CPath& destStgPath, FileOp fileOp, CWnd* pParentWnd = AfxGetMainWnd() ) const;
 
 	bool CanCommitOperations( std::vector< TTransferPathPair >& rErrorPairs, FileOp fileOp, bool isUndoOp ) const;

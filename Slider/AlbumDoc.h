@@ -77,9 +77,6 @@ private:
 	bool LoadCatalogStorage( const fs::CPath& docStgPath );
 	bool SaveAsCatalogStorage( const fs::CPath& newDocStgPath );			// save .sld -> .ias, .ias -> .ias
 
-	void _SaveAlbumToArchiveStg( const fs::CPath& docStgPath ) throws_( CException* );		// save existing album to image archive as "_Album.sld" stream
-
-	bool _InternalSaveAsArchiveStg( const fs::CPath& newDocStgPath );		// old style
 	void RegenerateModel( AlbumModelChange reason = FM_Init );
 
 	bool UndoRedoCustomOrder( custom_order::COpStack& rFromStack, custom_order::COpStack& rToStack, bool isUndoOp );

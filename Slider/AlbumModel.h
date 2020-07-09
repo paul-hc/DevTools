@@ -55,11 +55,6 @@ public:
 
 	// auto-drop file reorder & rename
 	bool IsAutoDropRecipient( bool checkValidPath = true ) const;		// single search pattern
-
-	enum PersistOp { Loading, Saving };
-
-	bool HasConsistentDeepStreams( void ) const;
-	bool _CheckReparentFileAttrs( const TCHAR* pDocPath, PersistOp op );					// if a stg doc path: reparent embedded image paths with current doc path (LOAD, SAVE AS)
 public:
 	// found image files
 	const CImagesModel& GetImagesModel( void ) const { return m_imagesModel; }
@@ -88,7 +83,6 @@ public:
 	bool UndropCustomOrderIndexes( int droppedIndex, const std::vector< int >& origDragSelIndexes );
 private:
 	bool DoOrderImagesModel( CImagesModel* pImagesModel, ui::IProgressService* pProgressSvc );
-	bool _ReparentStorageFileAttrsImpl( const fs::CPath& docStgPath, PersistOp op );			// post load/save: replace physical storage path with the current stg path
 private:
 	// transient
 	app::ModelSchema m_modelSchema;					// model schema of this album document (persisted by the album document)

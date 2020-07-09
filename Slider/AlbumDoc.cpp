@@ -245,7 +245,7 @@ std::auto_ptr< CAlbumDoc > CAlbumDoc::LoadAlbumDocument( const fs::CPath& docPat
 {
 	std::auto_ptr< CAlbumDoc > pNewAlbumDoc( new CAlbumDoc() );
 
-	if ( app::IsSlideFile( docPath.GetPtr() ) )
+	if ( app::IsSlideFile( docPath.GetPtr() ) || fs::IsValidDirectory( docPath.GetPtr() ) )
 	{
 		if ( !pNewAlbumDoc->OnOpenDocument( docPath.GetPtr() ) )
 			pNewAlbumDoc.reset();
@@ -340,76 +340,6 @@ bool CAlbumDoc::SaveAsCatalogStorage( const fs::CPath& newDocStgPath )
 	}
 
 	return true;
-}
-
-bool CAlbumDoc::_InternalSaveAsArchiveStg( const fs::CPath& newDocStgPath )
-{
-	REQUIRE( app::IsCatalogFile( newDocStgPath.GetPtr() ) );
-
-	try
-	{
-		fs::CPath oldDocPath( GetPathName().GetString() );
-		bool saveAs = newDocStgPath != oldDocPath;
-
-		if ( saveAs )
-		{
-			bool straightStgFileCopy = false;
-
-			if ( !IsModified() )												// in synch with the file?
-				if ( app::Slider_LatestModelSchema == GetModelSchema() )		// latest model schema? (will always save with Slider_LatestModelSchema)
-					if ( app::IsCatalogFile( oldDocPath.GetPtr() ) )
-						if ( m_model.HasConsistentDeepStreams() )
-							straightStgFileCopy = true;
-
-			if ( straightStgFileCopy )
-			{
-				CFileOperation fileOp( utl::ThrowMode );
-
-				fileOp.Copy( fs::ToFlexPath( oldDocPath ), fs::ToFlexPath( newDocStgPath ) );		// optimization: straight stg file copy
-				fs::MakeFileWritable( newDocStgPath.GetPtr() );									// just in case source was read-only
-			}
-			else
-			{
-//				if ( !oldDocPath.IsEmpty() )
-//					CImageCatalogStg::DiscardCachedImages( oldDocPath );
-
-				CArchivingModel archivingModel;
-				archivingModel.StorePassword( m_password );
-
-				CAlbumModel tempModel = m_model;				// temp copy so that it can display original thumbnails while creating, avoiding sharing errors
-
-				// don't pass the document, it's too early to save the album stream, since we're working on a tempModel copy
-				if ( archivingModel.CreateArchiveStgFile( &tempModel, newDocStgPath ) )
-					m_model = tempModel;						// assign the results
-				else
-					return false;
-			}
-		}
-
-		_SaveAlbumToArchiveStg( newDocStgPath );
-		if ( !saveAs )
-			return true;
-
-		return BuildAlbum( newDocStgPath );						// reload from the new archive document file so that we reinitialize m_model
-	}
-	catch ( CException* pExc )
-	{
-		app::HandleReportException( pExc );
-		return false;
-	}
-}
-
-void CAlbumDoc::_SaveAlbumToArchiveStg( const fs::CPath& docStgPath ) throws_( CException* )
-{
-	// save existing album to image archive as "_Album.sld" stream
-//	CScopedErrorHandling scopedThrow( CImageCatalogStg::Factory(), utl::ThrowMode );
-
-	m_model._CheckReparentFileAttrs( docStgPath.GetPtr(), CAlbumModel::Saving );		// reparent with docStgPath before saving the album info
-/*
-	if ( CImageCatalogStg::Factory()->SaveAlbumStream( this, docStgPath ) )
-		if ( ICatalogStorage* pSavedImageStg = CImageCatalogStg::Factory()->FindStorage( docStgPath ) )
-			pSavedImageStg->StoreDocModelSchema( GetModelSchema() );
-*/
 }
 
 bool CAlbumDoc::BuildAlbum( const fs::CPath& searchPath )
