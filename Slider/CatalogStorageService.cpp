@@ -87,7 +87,9 @@ void CTransferAlbumService::BuildFromAlbumSaveAs( const CAlbumDoc* pSrcAlbumDoc 
 void CTransferAlbumService::CloneDestAlbumDoc( const CAlbumDoc* pSrcAlbumDoc )
 {
 	ASSERT_PTR( pSrcAlbumDoc );
-	REQUIRE( !m_transferAttrs.empty() );
+
+	if ( m_transferAttrs.empty() )
+		TRACE( _T(" # Warning: creating an empty catalog storage for document '%s'\n"), pSrcAlbumDoc->GetDocFilePath().GetPtr() );
 
 	m_pDestAlbumDoc.reset( checked_static_cast< CAlbumDoc* >( RUNTIME_CLASS( CAlbumDoc )->CreateObject() ) );	// new temporary DEST album to build and SaveAs
 

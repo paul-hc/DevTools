@@ -172,9 +172,9 @@ namespace app
 		return InvalidPath;
 	}
 
-	bool CAlbumDocTemplate::IsSlideAlbumType( const TCHAR* pPath )
+	bool CAlbumDocTemplate::IsSlideAlbumFile( const TCHAR* pFilePath )
 	{
-		return path::MatchExt( pPath, _T(".sld") );
+		return path::MatchExt( pFilePath, _T(".sld") );
 	}
 
 	void CAlbumDocTemplate::AlterSaveAsPath( CString& rFilePath ) const

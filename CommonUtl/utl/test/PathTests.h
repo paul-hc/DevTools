@@ -17,6 +17,7 @@ public:
 	// ut::ITestCase interface
 	virtual void Run( void );
 private:
+	void TestPathBasics( void );
 	void TestPathUtilities( void );
 	void TestPathSort( void );
 	void TestPathSortExisting( void );

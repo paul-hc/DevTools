@@ -423,6 +423,7 @@ namespace fs
 
 	std::tstring CStructuredStorage::EncodeStreamName( const TCHAR* pStreamName ) const
 	{
+		REQUIRE( path::IsEmbedded( pStreamName ) );
 		std::tstring streamName = pStreamName;
 
 		// note: always flatten deep stream names

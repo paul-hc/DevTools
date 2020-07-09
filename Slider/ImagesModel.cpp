@@ -83,7 +83,12 @@ void CImagesModel::Stream( CArchive& archive )
 	}
 }
 
-const CFileAttr* CImagesModel::FindFileAttrWithPath( const fs::CPath& filePath ) const
+size_t CImagesModel::FindPosFileAttr( const fs::CPath& filePath ) const
+{
+	return fattr::FindPosWithPath( m_fileAttributes, filePath );
+}
+
+const CFileAttr* CImagesModel::FindFileAttr( const fs::CPath& filePath ) const
 {
 	return fattr::FindWithPath( m_fileAttributes, filePath );
 }
@@ -91,9 +96,9 @@ const CFileAttr* CImagesModel::FindFileAttrWithPath( const fs::CPath& filePath )
 bool CImagesModel::AddFileAttr( CFileAttr* pFileAttr )
 {
 	ASSERT_PTR( pFileAttr );
-	ASSERT( !utl::Contains( m_fileAttributes, pFileAttr ) );		// add once?
+	REQUIRE( !utl::Contains( m_fileAttributes, pFileAttr ) );		// added once?
 
-	if ( const CFileAttr* pFoundExisting = FindFileAttrWithPath( pFileAttr->GetPath() ) )
+	if ( const CFileAttr* pFoundExisting = FindFileAttr( pFileAttr->GetPath() ) )
 	{
 		pFoundExisting;
 		delete pFileAttr;
@@ -103,6 +108,17 @@ bool CImagesModel::AddFileAttr( CFileAttr* pFileAttr )
 	m_fileAttributes.push_back( pFileAttr );
 	return true;
 }
+
+std::auto_ptr< CFileAttr > CImagesModel::RemoveFileAttrAt( size_t pos )
+{
+	REQUIRE( pos < m_fileAttributes.size() );
+
+	std::auto_ptr< CFileAttr > pRemovedFileAttr( m_fileAttributes[ pos ] );
+
+	m_fileAttributes.erase( m_fileAttributes.begin() + pos );
+	return pRemovedFileAttr;
+}
+
 
 bool CImagesModel::AddStoragePath( const fs::CPath& storagePath )
 {

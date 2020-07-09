@@ -38,4 +38,10 @@ private:
 };
 
 
+namespace svc
+{
+	bool PickDestImagePaths( std::vector< fs::CPath >& rDestFilePaths, const std::vector< fs::CFlexPath >& srcFilePaths );
+}
+
+
 #endif // FileOperation_h

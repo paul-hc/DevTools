@@ -9,6 +9,7 @@
 #include "utl/ContainerUtilities.h"
 #include "utl/RuntimeException.h"
 #include "utl/ErrorHandler.h"
+#include "utl/UI/ImagingWic.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -66,6 +67,7 @@ void CImageFileEnumerator::Search( const std::vector< CSearchPattern* >& searchP
 	}
 
 	UniquifyAll();
+	m_pCurrPattern = NULL;
 }
 
 void CImageFileEnumerator::Search( const CSearchPattern& searchPattern ) throws_( CException*, CUserAbortedException )
@@ -114,7 +116,8 @@ bool CImageFileEnumerator::Push( CFileAttr* pFileAttr )
 		return false;
 	}
 
-	m_foundImages.AddFileAttr( pFileAttr );
+	if ( !m_foundImages.AddFileAttr( pFileAttr ) )
+		return false;			// found duplicate image path (could happen with multiple embedded albums referencing the same image)
 
 	if ( m_pChainEnum != NULL )
 		m_pChainEnum->AddFoundFile( pFileAttr->GetPath().GetPtr() );
@@ -134,36 +137,49 @@ void CImageFileEnumerator::AddFoundFile( const TCHAR* pFilePath )
 {
 	fs::CPath filePath( pFilePath );
 
-	if ( app::IsCatalogFile( filePath.GetPtr() ) )
+	if ( app::IsAlbumFile( filePath.GetPtr() ) )
 	{
-		// found a compound image catalog storage: load its metadata as found images
+		// found an album (slide file or compound image catalog storage): load its metadata as found images
 		// note: we need to load as CAlbumDoc since its document schema may be older (backwards compatibility)
 
-		std::auto_ptr< CAlbumDoc > pAlbumDoc = CAlbumDoc::LoadCatalogStorageAlbum( filePath );
+		std::auto_ptr< CAlbumDoc > pAlbumDoc = CAlbumDoc::LoadAlbumDocument( filePath );
 		if ( pAlbumDoc.get() != NULL )
 		{
-			AddFoundSubDir( filePath.GetPtr() );							// a storage counts as a sub-directory
+			AddFoundSubDir( filePath.GetPtr() );							// an album counts as a sub-directory
 
-			std::vector< CFileAttr* > catalogFileAttrs;
-			pAlbumDoc->RefModel()->SwapFileAttrs( catalogFileAttrs );		// take ownership of found image attributes
+			std::vector< CFileAttr* > albumFileAttrs;
+			pAlbumDoc->RefModel()->SwapFileAttrs( albumFileAttrs );			// take ownership of found image attributes
 
-			if ( !catalogFileAttrs.empty() )
+			if ( !albumFileAttrs.empty() )
 			{
-				PushMany( catalogFileAttrs );
-				m_foundImages.AddStoragePath( filePath );
+				PushMany( albumFileAttrs );
+
+				if ( app::IsCatalogFile( filePath.GetPtr() ) )
+					m_foundImages.AddStoragePath( filePath );
 			}
 		}
 	}
-	else if ( filePath.FileExist() )
+	else if ( wic::IsValidFileImageFormat( filePath.GetPtr() ) && filePath.FileExist() )
 		Push( new CFileAttr( filePath ) );
+}
+
+bool CImageFileEnumerator::CanRecurse( void ) const
+{
+	if ( m_pCurrPattern != NULL && m_pCurrPattern->IsDirPath() )
+		return CSearchPattern::RecurseSubDirs == m_pCurrPattern->GetSearchMode();
+
+	return true;
 }
 
 void CImageFileEnumerator::AddFile( const CFileFind& foundFile )
 {
 	fs::CPath filePath = foundFile.GetFilePath().GetString();
 
-	if ( CCatalogStorageFactory::HasCatalogExt( filePath.GetPtr() ) )
-		AddFoundFile( filePath.GetPtr() );
+	if ( app::IsAlbumFile( filePath.GetPtr() ) )		// found a catalog storage?
+	{
+		if ( CanRecurse() )		// treat found storages as sub-directories
+			AddFoundFile( filePath.GetPtr() );
+	}
 	else
 		Push( new CFileAttr( foundFile ) );
 }

@@ -31,9 +31,11 @@ namespace func
 
 namespace path
 {
+	extern const TCHAR s_complexPathSep;			// '>' character that separates the storage file path from the stream/storage embedded sub-path
+
 	inline bool IsSlash( TCHAR ch ) { return _T('\\') == ch || _T('/') == ch; }
 	inline TCHAR ToNormalChar( TCHAR ch ) { return _T('/') == ch ? _T('\\') : ch; }
-	inline TCHAR ToEquivalentChar( TCHAR ch ) { return _T('/') == ch ? _T('\\') : ::towlower( ch ); }
+	inline TCHAR ToEquivalentChar( TCHAR ch ) { return _T('/') == ch || s_complexPathSep == ch ? _T('\\') : ::towlower( ch ); }
 	const TCHAR* DirDelims( void );
 
 	bool EquivalentPtr( const TCHAR* pLeftPath, const TCHAR* pRightPath );
@@ -67,6 +69,14 @@ namespace path
 	typedef str::EvalMatch< ToNormal, ToEquivalent > GetMatch;
 
 
+	// path breaks and segment matching
+	inline bool IsBreakChar( TCHAR ch ) { return IsSlash( ch ) || s_complexPathSep == ch || _T('\0') == ch; }
+
+	const TCHAR* FindBreak( const TCHAR* pPath );
+	const TCHAR* SkipBreak( const TCHAR* pPathBreak );
+	bool MatchSegment( const TCHAR* pPath, const TCHAR* pSegment, size_t* pMatchLength = NULL );
+
+
 	const TCHAR* Wildcards( void );
 	const TCHAR* MultiSpecDelims( void );
 
@@ -98,8 +108,6 @@ namespace path
 	inline bool MatchExt( const TCHAR* pPath, const TCHAR* pExt ) { return EquivalentPtr( FindExt( pPath ), pExt ); }		// pExt: ".txt"
 
 	// complex path
-	extern const TCHAR s_complexPathSep;							// '>' character that separates the storage file path from the stream/storage embedded sub-path
-
 	inline bool IsComplex( const TCHAR* pPath ) { return pPath != NULL && _tcschr( pPath, s_complexPathSep ) != NULL; }
 	bool IsWellFormed( const TCHAR* pFilePath );
 	size_t FindComplexSepPos( const TCHAR* pPath );
@@ -121,11 +129,13 @@ namespace path
 	std::tstring GetParentPath( const TCHAR* pPath, TrailSlash trailSlash = PreserveSlash );
 
 
-	std::tstring MakeNormal( const TCHAR* pPath );							// backslashes only
-	inline std::tstring& Normalize( std::tstring& rPath ) { return rPath = MakeNormal( rPath.c_str() ); }
+	// normal: backslashes only
+	bool IsNormal( const TCHAR* pPath );
+	std::tstring MakeNormal( const TCHAR* pPath );
+	inline std::tstring& Normalize( IN OUT std::tstring& rPath ) { return rPath = MakeNormal( rPath.c_str() ); }
 
 	std::tstring MakeCanonical( const TCHAR* pPath );						// relative to absolute normalized: "X:/A\./B\..\C" -> "X:\A\C"
-	inline std::tstring& Canonicalize( std::tstring& rPath ) { return rPath = MakeCanonical( rPath.c_str() ); }
+	inline std::tstring& Canonicalize( IN OUT std::tstring& rPath ) { return rPath = MakeCanonical( rPath.c_str() ); }
 
 	std::tstring Combine( const TCHAR* pDirPath, const TCHAR* pRightPath );	// canonic merge, pRightPath could be a relative path, name.ext, sub-dir path, or other combinations
 
@@ -140,8 +150,11 @@ namespace path
 	bool HasPrefix( const TCHAR* pPath, const TCHAR* pPrefix );
 	bool MatchPrefix( const TCHAR* pPath, const TCHAR* pPrefix );						// normalized HasPrefix
 
+	bool HasRoot( const TCHAR* pPath );
 	bool HasSameRoot( const TCHAR* pLeftPath, const TCHAR* pRightPath );				// true for "C:\win\desktop\temp.txt" and "c:\win\tray\sample.txt"
 	std::tstring GetRootPath( const TCHAR* pPath );										// "C:\" for "C:\win\desktop\temp.txt"
+
+	size_t FindCommonPrefixLength( const TCHAR* pPath, const TCHAR* pPrefix );
 
 	std::tstring FindCommonPrefix( const TCHAR* pLeftPath, const TCHAR* pRightPath );	// "C:\win" for "C:\win\desktop\temp.txt" and "c:\win\tray\sample.txt"
 	std::tstring StripCommonPrefix( const TCHAR* pFullPath, const TCHAR* pDirPath );	// "desktop\temp.txt" for "C:\win\desktop\temp.txt" and "c:\win\system"
@@ -628,7 +641,7 @@ namespace path
 
 			for ( ; it != paths.end(); ++it )
 			{
-				commonPrefix = path::FindCommonPrefix( func::PathOf( *it ).GetParentPath().GetPtr(), commonPrefix.c_str() );
+				commonPrefix = path::FindCommonPrefix( commonPrefix.c_str(), func::PathOf( *it ).GetParentPath().GetPtr() );
 				if ( commonPrefix.empty() )
 					break;						// no common prefix, abort search
 			}

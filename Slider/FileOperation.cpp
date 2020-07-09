@@ -2,14 +2,73 @@
 #include "stdafx.h"
 #include "FileOperation.h"
 #include "ICatalogStorage.h"
+#include "utl/ContainerUtilities.h"
 #include "utl/EnumTags.h"
 #include "utl/Logger.h"
+#include "utl/PathUniqueMaker.h"
 #include "utl/RuntimeException.h"
+#include "utl/StringUtilities.h"
+#include "utl/UI/ShellDialogs.h"
+#include "utl/UI/TaskDialog.h"
+#include "utl/UI/WicImage.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
 
+
+namespace svc
+{
+	bool PickDestImagePaths( std::vector< fs::CPath >& rDestFilePaths, const std::vector< fs::CFlexPath >& srcFilePaths )
+	{
+		rDestFilePaths.clear();
+
+		if ( 1 == srcFilePaths.size() )		// single file: pick destination file
+		{
+			fs::CFlexPath srcFilePath = srcFilePaths.front();
+			fs::CPath destFilePath = srcFilePath;
+
+			if ( destFilePath.IsComplexPath() )
+				destFilePath = destFilePath.GetFilename();
+
+			if ( !shell::BrowseImageFile( destFilePath, shell::FileSaveAs ) )
+				return false;
+
+			rDestFilePaths.push_back( destFilePath );
+		}
+		else
+		{
+			fs::CPath destFolderPath;		// leave empty to pick the previous selected folder
+			if ( !shell::PickFolder( destFolderPath.Ref(), NULL ) )		// multiple files: pick destination folder
+				return false;
+
+			utl::Assign( rDestFilePaths, srcFilePaths, func::tor::StringOf() );
+			utl::for_each( rDestFilePaths, func::StripToFilename() );
+			utl::for_each( rDestFilePaths, func::PrefixPath( destFolderPath ) );
+
+			CPathUniqueMaker uniqueMaker;
+			uniqueMaker.UniquifyPaths( rDestFilePaths );
+
+			if ( utl::Any( rDestFilePaths, pred::FileExist() ) )
+			{
+				std::vector< fs::CPath > destExistingPaths;
+				utl::QueryThat( destExistingPaths, rDestFilePaths, pred::FileExist() );
+
+				CTaskDialog dlg( _T("Confirm Save As"), _T("Override existing files?"), str::ToNonBreakingSpace( str::Join( destExistingPaths, _T("\n") ) ),
+								 TDCBF_YES_BUTTON | TDCBF_NO_BUTTON, TDF_SIZE_TO_CONTENT );
+
+				dlg.SetMainIcon( TD_WARNING_ICON );
+				if ( dlg.DoModal( NULL ) != IDYES )
+					return false;
+			}
+		}
+
+		return true;
+	}
+}
+
+
+// CFileOperation implementation
 
 bool CFileOperation::Copy( const fs::CFlexPath& srcFilePath, const fs::CFlexPath& destFilePath ) throws_( CException* )
 {

@@ -20,6 +20,10 @@
 	#error CTaskDialog is not supported on Windows versions prior to Vista.
 #endif
 
+#ifndef TDF_SIZE_TO_CONTENT
+	#define TDF_SIZE_TO_CONTENT 0x01000000
+#endif
+
 
 #include <commctrl.h>
 #include "Range.h"

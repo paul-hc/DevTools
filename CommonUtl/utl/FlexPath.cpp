@@ -12,6 +12,17 @@
 
 namespace path
 {
+	bool IsEmbedded( const TCHAR* pPath )
+	{
+		if ( !IsRelative( pPath ) )
+			return false;
+
+		if ( HasPrefix( pPath, _T(".") ) || HasPrefix( pPath, _T("..") ) )
+			return false;
+
+		return true;
+	}
+
 	std::tstring MakeShortHashedFilename( const TCHAR* pFullPath, size_t maxFnameExtLen )
 	{
 		// pFullPath could refer to a dir, file, or a sub-path
@@ -37,14 +48,6 @@ namespace path
 namespace fs
 {
 	// CFlexPath implementation
-
-	CFlexPath CFlexPath::GetParentFlexPath( bool trailSlash /*= false*/ ) const
-	{
-		std::tstring parentPath = GetParentPath( trailSlash ).Get();
-
-		str::StripSuffix( parentPath, &path::s_complexPathSep, 1 );
-		return CFlexPath( parentPath );
-	}
 
 	std::tstring CFlexPath::FormatPretty( void ) const
 	{
@@ -97,10 +100,21 @@ namespace fs
 
 namespace path
 {
-	void QueryPhysicalPaths( std::vector< fs::CPath >& rPhysicalPaths, const std::vector< fs::CFlexPath >& flexPaths )
+	bool QueryPhysicalPaths( OUT std::vector< fs::CPath >& rPhysicalPaths, const std::vector< fs::CFlexPath >& flexPaths )
 	{
 		for ( std::vector< fs::CFlexPath >::const_iterator itFlexPath = flexPaths.begin(); itFlexPath != flexPaths.end(); ++itFlexPath )
-			utl::AddUnique( rPhysicalPaths, itFlexPath->IsComplexPath() ? itFlexPath->GetPhysicalPath() : *itFlexPath );
+			if ( itFlexPath->IsPhysicalPath() )
+				rPhysicalPaths.push_back( *itFlexPath );
+
+		return !rPhysicalPaths.empty();
+	}
+
+	bool QueryStorageDocPaths( OUT std::vector< fs::CPath >& rDocStgPaths, const std::vector< fs::CFlexPath >& flexPaths )
+	{
+		for ( std::vector< fs::CFlexPath >::const_iterator itFlexPath = flexPaths.begin(); itFlexPath != flexPaths.end(); ++itFlexPath )
+			utl::AddUnique( rDocStgPaths, itFlexPath->IsComplexPath() ? itFlexPath->GetPhysicalPath() : *itFlexPath );
+
+		return !rDocStgPaths.empty();
 	}
 
 	void ConvertToPhysicalPaths( std::vector< fs::CFlexPath >& rFlexPaths )

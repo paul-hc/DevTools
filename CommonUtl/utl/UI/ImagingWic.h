@@ -195,6 +195,8 @@ namespace wic
 	ImageFormat FindFileImageFormat( const TCHAR* pFilePath );
 	ImageFormat FindResourceImageFormat( const TCHAR* pResType );
 
+	inline bool IsValidFileImageFormat( const TCHAR* pFilePath ) { return FindFileImageFormat( pFilePath ) != UnknownImageFormat; }
+
 	const TCHAR* GetDefaultImageFormatExt( ImageFormat imageType );
 	bool ReplaceImagePathExt( fs::CPath& rSaveImagePath, ImageFormat imageType );
 

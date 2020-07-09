@@ -7,6 +7,8 @@
 
 namespace path
 {
+	bool IsEmbedded( const TCHAR* pPath );
+
 	std::tstring MakeShortHashedFilename( const TCHAR* pFullPath, size_t maxFnameExtLen );	// make short file name with length limited to maxFnameExtLen
 }
 
@@ -38,7 +40,7 @@ namespace fs
 		const TCHAR* GetLeafSubPath( void ) const { return IsComplexPath() ? GetEmbeddedPathPtr() : GetNameExt(); }
 		fs::CPath GetOriginParentPath( void ) const { return IsComplexPath() ? GetPhysicalPath() : GetParentPath(); }		// storage path or parent directory path
 
-		CFlexPath GetParentFlexPath( bool trailSlash = false ) const;
+		CFlexPath GetParentFlexPath( bool trailSlash = false ) const { return GetParentPath( trailSlash ).Get(); }
 
 		std::tstring FormatPretty( void ) const;		// "C:\Images\fruit.stg>StgDir/apple.jpg" <- "C:\Images/fruit.stg>StgDir\apple.jpg"
 		std::tstring FormatPrettyLeaf( void ) const;	// "StgDir/apple.jpg";  "C:\Images\orange.png" -> "orange.png" <- "C:\Images/fruit.stg>StgDir\apple.jpg"
@@ -55,18 +57,19 @@ namespace fs
 
 namespace path
 {
-	void QueryPhysicalPaths( std::vector< fs::CPath >& rPhysicalPaths, const std::vector< fs::CFlexPath >& flexPaths );
+	bool QueryPhysicalPaths( OUT std::vector< fs::CPath >& rPhysicalPaths, const std::vector< fs::CFlexPath >& flexPaths );
+	bool QueryStorageDocPaths( OUT std::vector< fs::CPath >& rDocStgPaths, const std::vector< fs::CFlexPath >& flexPaths );
 	void ConvertToPhysicalPaths( IN OUT std::vector< fs::CFlexPath >& rFlexPaths );			// strip-out complex paths to physical paths (retaining existing physical paths)
 
 
 	template< typename PathT >
-	inline size_t GetComplexPathCount( const std::vector< PathT >& flexPaths )
+	inline size_t FindComplexPathCount( const std::vector< PathT >& flexPaths )
 	{
 		return std::count_if( flexPaths.begin(), flexPaths.end(), std::mem_fun_ref( &fs::CPath::IsComplexPath ) );
 	}
 
 	template< typename PathT >
-	inline size_t GetPhysicalPathCount( const std::vector< PathT >& flexPaths )
+	inline size_t FindPhysicalPathCount( const std::vector< PathT >& flexPaths )
 	{
 		return std::count_if( flexPaths.begin(), flexPaths.end(), std::mem_fun_ref( &fs::CPath::IsPhysicalPath ) );
 	}

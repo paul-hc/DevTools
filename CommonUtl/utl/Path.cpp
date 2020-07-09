@@ -114,6 +114,62 @@ namespace path
 	}
 
 
+	const TCHAR* FindBreak( const TCHAR* pPath )
+	{
+		ASSERT_PTR( pPath );
+
+		if ( _T('\0') == *pPath )
+			return NULL;
+
+		while ( !IsBreakChar( *pPath ) )
+			++pPath;
+
+		return pPath;
+	}
+
+	const TCHAR* SkipBreak( const TCHAR* pPathBreak )
+	{
+		ASSERT( pPathBreak != NULL && IsBreakChar( *pPathBreak ) );
+
+		if ( _T('\0') == *pPathBreak )
+			return NULL;
+
+		while ( *pPathBreak != _T('\0') && IsBreakChar( *pPathBreak ) )
+			++pPathBreak;
+
+		return pPathBreak;
+	}
+
+	bool MatchRootSegment( const TCHAR* pPath, const TCHAR* pSegment, size_t* pMatchLength = NULL )
+	{
+		// workaround for: PathIsSameRoot fails for comparing dots (".", "..")
+		ASSERT_PTR( pPath );
+		ASSERT_PTR( pSegment );
+
+		if ( HasRoot( pPath ) || HasRoot( pSegment ) )		// must check for root match?
+			if ( !HasSameRoot( pPath, pSegment ) )
+				return false;
+
+		utl::AssignPtr( pMatchLength, Range< const TCHAR* >( pPath, SkipRoot( pPath ) ).GetSpan< size_t >() );
+		return true;
+	}
+
+	bool MatchSegment( const TCHAR* pPath, const TCHAR* pSegment, size_t* pMatchLength /*= NULL*/ )
+	{
+		ASSERT( pPath != NULL && !IsBreakChar( *pPath ) );
+		ASSERT( pSegment != NULL && !IsBreakChar( *pSegment ) );
+
+		size_t matchLength = 0;
+
+		for ( ; !IsBreakChar( *pPath ); ++matchLength, ++pPath, ++pSegment )
+			if ( ToEquivalentChar( *pPath ) != ToEquivalentChar( *pSegment ) )
+				break;
+
+		utl::AssignPtr( pMatchLength, matchLength );
+		return IsBreakChar( *pPath ) && IsBreakChar( *pSegment );		// true if both break at end of match
+	}
+
+
 /*	str::Match GetMatch( const TCHAR* pLeftPath, const TCHAR* pRightPath )
 	{
 		if ( pred::Equal == str::_CompareN( pLeftPath, pRightPath, &path::ToNormalChar ) )			// case sensitive
@@ -298,7 +354,10 @@ namespace path
 
 	const TCHAR* SkipRoot( const TCHAR* pPath )
 	{
-		return ::PathSkipRoot( pPath );
+		ASSERT( IsNormal( pPath ) );
+
+		const TCHAR* pRootEnd = ::PathSkipRoot( pPath );
+		return pRootEnd != NULL ? pRootEnd : pPath;
 	}
 
 
@@ -380,7 +439,7 @@ namespace path
 		if ( PreserveSlash == trailSlash /*|| IsComplex( rDirPath.c_str() )*/ )		// if complex path leave it alone
 			return rDirPath;
 
-		TCHAR dirPath[ _MAX_PATH ];
+		TCHAR dirPath[ MAX_PATH ];
 		str::Copy( dirPath, rDirPath );
 		if ( !rDirPath.empty() )
 		{	// just normalize last slash to make it compatible with the API
@@ -406,12 +465,23 @@ namespace path
 	{
 		const TCHAR* pFilename = FindFilename( pPath );
 		ASSERT_PTR( pFilename );
+
 		std::tstring dirPath( pPath, pFilename - pPath );
 
 		SetBackslash( dirPath, trailSlash );
+
+		if ( RemoveSlash == trailSlash )
+			str::StripSuffix( dirPath, &path::s_complexPathSep, 1 );		// flex paths: treat trailing '>' like a slash - remove it
+
 		return dirPath;
 	}
 
+
+	bool IsNormal( const TCHAR* pPath )
+	{
+		ASSERT_PTR( pPath );
+		return NULL == _tcschr( pPath, _T('/') );
+	}
 
 	std::tstring MakeNormal( const TCHAR* pPath )
 	{
@@ -424,7 +494,7 @@ namespace path
 	std::tstring MakeCanonical( const TCHAR* pPath )
 	{
 		std::tstring absolutePath = MakeNormal( pPath );		// PathCanonicalize works only with backslashes
-		TCHAR fullPath[ _MAX_PATH ];
+		TCHAR fullPath[ MAX_PATH ];
 		if ( ::PathCanonicalize( fullPath, absolutePath.c_str() ) )
 			absolutePath = fullPath;
 		return absolutePath;
@@ -434,7 +504,7 @@ namespace path
 	{
 		std::tstring dirPath = MakeNormal( pDirPath ), rightPath = MakeNormal( pRightPath );		// PathCombine works only with backslashes
 
-		TCHAR fullPath[ _MAX_PATH ];
+		TCHAR fullPath[ MAX_PATH ];
 		if ( NULL == ::PathCombine( fullPath, dirPath.c_str(), rightPath.c_str() ) )
 			return _T("<bad PathCombine>");
 		return fullPath;
@@ -480,8 +550,23 @@ namespace path
 
 	bool HasPrefix( const TCHAR* pPath, const TCHAR* pPrefix )
 	{
-		ASSERT_PTR( pPath ); ASSERT_PTR( pPrefix );
-		return ::PathIsPrefix( pPrefix, pPath ) != FALSE;
+		ASSERT_PTR( pPath );
+		ASSERT_PTR( pPrefix );
+
+		if ( str::IsEmpty( pPrefix ) )
+			return false;							// no match of empty prefix
+
+		if ( ::PathIsPrefix( pPrefix, pPath ) )		// this fails for dots matching
+			return true;
+
+		// handle case of non-normalized/complex paths
+		size_t matchLen = FindCommonPrefixLength( pPath, pPrefix );
+		size_t prefixLen = str::GetLength( pPrefix );
+
+		if ( IsBreakChar( pPrefix[ prefixLen - 1 ] ) )
+			--prefixLen;
+
+		return prefixLen == matchLen;
 	}
 
 	bool MatchPrefix( const TCHAR* pPath, const TCHAR* pPrefix )
@@ -489,22 +574,82 @@ namespace path
 		return !str::IsEmpty( pPrefix ) && pPath == Find( pPath, pPrefix );
 	}
 
+	bool HasRoot( const TCHAR* pPath )
+	{
+		return SkipRoot( pPath ) != pPath;
+	}
+
 	bool HasSameRoot( const TCHAR* pLeftPath, const TCHAR* pRightPath )
 	{
-		ASSERT_PTR( pLeftPath ); ASSERT_PTR( pRightPath );
+		ASSERT( IsNormal( pLeftPath ) );
+		ASSERT( IsNormal( pRightPath ) );
+
 		return ::PathIsSameRoot( pLeftPath, pRightPath ) != FALSE;
 	}
 
 	std::tstring GetRootPath( const TCHAR* pPath )
 	{
-		TCHAR rootPath[ _MAX_PATH ];
+		ASSERT( IsNormal( pPath ) );
+
+		TCHAR rootPath[ MAX_PATH ];
 		_tcscpy( rootPath, pPath );
+
 		::PathStripToRoot( rootPath );
 		return rootPath;
 	}
 
+
+	size_t FindCommonPrefixLength( const TCHAR* pPath, const TCHAR* pPrefix )
+	{
+		ASSERT_PTR( pPath );
+		ASSERT_PTR( pPrefix );
+
+		if ( str::IsEmpty( pPrefix ) )
+			return 0;
+
+		std::tstring path = MakeNormal( pPath );
+		std::tstring prefix = MakeNormal( pPrefix );
+
+		str::const_iterator itPath = path.c_str();
+		str::const_iterator itPrefix = prefix.c_str();
+
+		Range< const TCHAR* > commonRange( itPath );
+
+		size_t segmentLen;
+
+		if ( MatchRootSegment( itPath, itPrefix, &segmentLen ) )
+		{
+			itPath += segmentLen;
+			itPrefix += segmentLen;
+			commonRange.m_end = itPath;			// include the root segment
+
+			while ( !str::IsEmpty( itPath ) && !str::IsEmpty( itPrefix ) )
+			{
+				if ( !MatchSegment( itPath, itPrefix, &segmentLen ) )
+					break;
+
+				itPath += segmentLen;
+				commonRange.m_end = itPath;
+
+				itPath = SkipBreak( itPath );
+				itPrefix = SkipBreak( itPrefix + segmentLen );
+			}
+		}
+
+		return commonRange.GetSpan< size_t >();
+	}
+
 	std::tstring FindCommonPrefix( const TCHAR* pLeftPath, const TCHAR* pRightPath )
 	{
+		size_t commonLength = FindCommonPrefixLength( pLeftPath, pRightPath );
+		std::tstring commonPrefix( pLeftPath, pLeftPath + commonLength );
+
+		return commonPrefix;
+	}
+
+	std::tstring _FindCommonPrefix( const TCHAR* pLeftPath, const TCHAR* pRightPath )
+	{
+		size_t complSepPos = FindComplexSepPos( pLeftPath );
 		std::tstring leftPath = MakeNormal( pLeftPath );		// backslashes only
 		std::tstring rightPath = MakeNormal( pRightPath );
 
@@ -512,8 +657,13 @@ namespace path
 		NormalizeComplexPath( leftPath );
 		NormalizeComplexPath( rightPath );
 
-		TCHAR commonPrefix[ _MAX_PATH ] = _T("");
+		TCHAR commonPrefix[ MAX_PATH ] = _T("");
 		::PathCommonPrefix( leftPath.c_str(), rightPath.c_str(), commonPrefix );
+
+		// restore the complex path separator if it's still part of the resulting common prefix
+		if ( complSepPos != std::tstring::npos && complSepPos < str::GetLength( commonPrefix ) )
+			commonPrefix[ complSepPos ] = s_complexPathSep;
+
 		return commonPrefix;
 	}
 
@@ -598,7 +748,7 @@ namespace fs
 
 	fs::CPath CPathParts::MakePath( void ) const
 	{
-		TCHAR path[ _MAX_PATH * 2 ];
+		TCHAR path[ MAX_PATH * 2 ];
 		size_t sepPos = std::tstring::npos;
 
 		if ( !path::IsComplex( m_dir.c_str() ) )
@@ -654,7 +804,7 @@ namespace fs
 
 	std::tstring CPathParts::MakeFullPath( const TCHAR* pDrive, const TCHAR* pDir, const TCHAR* pFname, const TCHAR* pExt )
 	{
-		TCHAR path[ _MAX_PATH * 2 ];
+		TCHAR path[ MAX_PATH * 2 ];
 		_tmakepath( path, pDrive, pDir, pFname, pExt );
 		return path;
 	}

@@ -104,7 +104,7 @@ void CCatalogStorageTests::_TestLoadImageArchive( const fs::CPath& docStgPath, s
 			ASSERT( pOpenCatalogStorage->GetDocStorage()->IsOpenForReading() );
 		}
 
-		std::auto_ptr< CAlbumDoc > pAlbumDoc = CAlbumDoc::LoadCatalogStorageAlbum( docStgPath );
+		std::auto_ptr< CAlbumDoc > pAlbumDoc = CAlbumDoc::LoadAlbumDocument( docStgPath );
 		ASSERT_PTR( pAlbumDoc.get() );
 
 		const CImagesModel* pImagesModel = &pAlbumDoc->GetModel()->GetImagesModel();

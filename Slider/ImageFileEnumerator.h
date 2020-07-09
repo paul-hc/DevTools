@@ -38,6 +38,7 @@ private:
 	bool PassFilter( const CFileAttr& fileAttr ) const;
 	bool Push( CFileAttr* pFileAttr );
 	void PushMany( const std::vector< CFileAttr* >& fileAttrs );		// transfer ownership
+	bool CanRecurse( void ) const;
 private:
 	Range< size_t > m_fileSizeRange;
 	ui::CIssueStore m_issueStore;

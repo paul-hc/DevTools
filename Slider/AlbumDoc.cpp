@@ -16,7 +16,6 @@
 #include "Application.h"
 #include "resource.h"
 #include "utl/MemLeakCheck.h"
-#include "utl/PathUniqueMaker.h"
 #include "utl/Serialization.h"
 #include "utl/UI/MfcUtilities.h"
 #include "utl/UI/IconButton.h"
@@ -24,7 +23,6 @@
 #include "utl/UI/Utilities.h"
 #include "utl/UI/ShellDialogs.h"
 #include "utl/UI/ShellUtilities.h"
-#include "utl/UI/TaskDialog.h"
 #include "utl/UI/Thumbnailer.h"
 #include "utl/UI/WicImageCache.h"
 
@@ -243,13 +241,22 @@ ICatalogStorage* CAlbumDoc::GetCatalogStorage( void )
 	return NULL;
 }
 
-std::auto_ptr< CAlbumDoc > CAlbumDoc::LoadCatalogStorageAlbum( const fs::CPath& docStgPath )
+std::auto_ptr< CAlbumDoc > CAlbumDoc::LoadAlbumDocument( const fs::CPath& docPath )
 {
 	std::auto_ptr< CAlbumDoc > pNewAlbumDoc( new CAlbumDoc() );
-	CComPtr< ICatalogStorage > pCatalogStorage = CCatalogStorageFactory::Instance()->AcquireStorage( docStgPath, STGM_READ );
 
-	if ( !pNewAlbumDoc->LoadCatalogStorage( docStgPath ) )
-		pNewAlbumDoc.reset();
+	if ( app::IsSlideFile( docPath.GetPtr() ) )
+	{
+		if ( !pNewAlbumDoc->OnOpenDocument( docPath.GetPtr() ) )
+			pNewAlbumDoc.reset();
+	}
+	else if ( app::IsCatalogFile( docPath.GetPtr() ) )
+	{
+		CComPtr< ICatalogStorage > pCatalogStorage = CCatalogStorageFactory::Instance()->AcquireStorage( docPath, STGM_READ );
+
+		if ( !pNewAlbumDoc->LoadCatalogStorage( docPath ) )
+			pNewAlbumDoc.reset();
+	}
 
 	return pNewAlbumDoc;
 }
@@ -293,7 +300,8 @@ bool CAlbumDoc::SaveAsCatalogStorage( const fs::CPath& newDocStgPath )
 	{
 		fs::CPath oldDocStgPath = GetDocFilePath();
 
-		if ( oldDocStgPath.IsEmpty() ||										// never saved
+		if ( DirtyMustRecreate == IsModified() ||							// must delete garbage
+			 oldDocStgPath.IsEmpty() ||										// never saved
 			 !fs::IsValidStructuredStorage( oldDocStgPath.GetPtr() ) ||		// was a .sld album
 			 newDocStgPath != oldDocStgPath ||								// SaveAs
 			 GetModelSchema() < app::Slider_LatestModelSchema )				// loaded catalog with older model schema -> must be converted to LATEST
@@ -419,10 +427,7 @@ bool CAlbumDoc::BuildAlbum( const fs::CPath& searchPath )
 		else
 		{
 			if ( m_model.SetupSingleSearchPattern( new CSearchPattern( searchPath ) ) )
-			{
-				m_model.SearchForFiles( NULL );
-				m_model.OpenAllStorages();			// to enable image caching
-			}
+				m_model.SearchForFiles( NULL );		// this will open the embedded storgaes (to enable image caching)
 			else
 				return false;
 		}
@@ -757,7 +762,7 @@ BOOL CAlbumDoc::OnSaveDocument( LPCTSTR pPathName )
 	if ( fs::IsValidDirectory( pPathName ) )
 		return DoSave( NULL );					// in effect SaveAs
 
-	if ( IsStorageAlbum() && app::CAlbumDocTemplate::IsSlideAlbumType( pPathName ) )	// save .ias -> .sld?
+	if ( IsStorageAlbum() && app::IsSlideFile( pPathName ) )		// save .ias -> .sld?
 		m_model.SetupSingleSearchPattern( new CSearchPattern( GetDocFilePath() ) );		// references to external catalog storage embedded images
 
 	return CDocumentBase::OnSaveDocument( pPathName );
@@ -822,59 +827,19 @@ void CAlbumDoc::OnUpdate_IsCatalogStorage( CCmdUI* pCmdUI )
 	pCmdUI->Enable( IsStorageAlbum() );
 }
 
-
 void CAlbumDoc::On_ImageSaveAs( void )
 {
 	std::vector< fs::CFlexPath > srcFilePaths;
 	if ( !QuerySelectedImagePaths( srcFilePaths ) )
 		return;
 
-	try
+	std::vector< fs::CPath > destFilePaths;
+	if ( svc::PickDestImagePaths( destFilePaths, srcFilePaths ) )
 	{
-		CFileOperation fileOp( utl::ThrowMode );
+		CFileOperation fileOp;
 
-		if ( 1 == srcFilePaths.size() )
-		{
-			fs::CFlexPath srcFilePath( srcFilePaths.front() );
-			fs::CPath destFilePath = srcFilePath;
-			if ( destFilePath.IsComplexPath() )
-				destFilePath = destFilePath.GetFilename();
-
-			if ( shell::BrowseImageFile( destFilePath, shell::FileSaveAs ) )
-				fileOp.Copy( srcFilePath, fs::CastFlexPath( destFilePath ) );
-		}
-		else
-		{
-			fs::CPath destFolderPath;
-			if ( shell::PickFolder( destFolderPath.Ref(), NULL ) )
-			{
-				std::vector< fs::CPath > destFilePaths;
-				utl::Assign( destFilePaths, srcFilePaths, func::tor::StringOf() );
-				utl::for_each( destFilePaths, func::StripToFilename() );
-				utl::for_each( destFilePaths, func::PrefixPath( destFolderPath ) );
-
-				CPathUniqueMaker uniqueMaker;
-				uniqueMaker.UniquifyPaths( destFilePaths );
-
-				if ( utl::Any( destFilePaths, pred::FileExist() ) )
-				{
-					std::vector< fs::CPath > destExistingPaths;
-					utl::QueryThat( destExistingPaths, destFilePaths, pred::FileExist() );
-
-					CTaskDialog dlg( _T("Confirm Save As"), _T("Override existing files?"), str::Join( destExistingPaths, _T("\n") ), TDCBF_YES_BUTTON | TDCBF_NO_BUTTON, 0 );
-					dlg.SetMainIcon( TD_WARNING_ICON );
-					if ( dlg.DoModal( NULL ) != IDYES )
-						return;
-				}
-
-				for ( size_t i = 0; i != destFilePaths.size(); ++i )
-					fileOp.Copy( srcFilePaths[ i ], fs::CastFlexPath( destFilePaths[ i ] ) );
-			}
-		}
-	}
-	catch ( CException* pExc )
-	{
-		app::HandleReportException( pExc, MB_ICONERROR );
+		for ( size_t i = 0; i != destFilePaths.size(); ++i )
+			fileOp.Copy( srcFilePaths[ i ], fs::CastFlexPath( destFilePaths[ i ] ) );
 	}
 }
 
@@ -905,16 +870,47 @@ void CAlbumDoc::On_ImageOpen( void )
 		AfxGetApp()->OpenDocumentFile( itImagePath->GetPtr() );
 }
 
+void CAlbumDoc::DeleteFromAlbum( const std::vector< fs::CFlexPath >& selFilePaths )
+{
+	CImagesModel& rImagesModel = m_model.RefImagesModel();
+
+	std::vector< size_t > indexes;
+	indexes.reserve( selFilePaths.size() );
+
+	for ( std::vector< fs::CFlexPath >::const_iterator itImagePath = selFilePaths.begin(); itImagePath != selFilePaths.end(); ++itImagePath )
+	{
+		size_t foundPos = rImagesModel.FindPosFileAttr( *itImagePath );
+		if ( foundPos != utl::npos )
+			indexes.push_back( foundPos );
+	}
+
+	if ( !indexes.empty() )
+	{
+		for ( size_t i = indexes.size(); i-- != 0; )
+			rImagesModel.RemoveFileAttrAt( indexes[ i ] );
+
+		size_t newSelPos = std::min( indexes.front(), rImagesModel.GetFileAttrs().size() - 1 );
+		m_slideData.SetCurrentIndex( static_cast<int>( newSelPos ) );
+	}
+
+	// reset remaining attributes order as original (since the old baseline positions got invalidated)
+	rImagesModel.StoreBaselineSequence();
+	m_model.StoreFileOrder( fattr::OriginalOrder );
+
+	SetModifiedFlag( IsStorageAlbum() ? DirtyMustRecreate : Dirty );		// mark document as modified in order to prompt for saving - force storage recreation to collect garbage (deleted images)
+	OnAlbumModelChanged();
+}
+
 void CAlbumDoc::On_ImageDelete( void )
 {
 	std::vector< fs::CFlexPath > selFilePaths;
 	QuerySelectedImagePaths( selFilePaths );
 
-	std::vector< fs::CFlexPath > complexPaths = selFilePaths;
 	std::vector< fs::CPath > physicalPaths;
-
-	if ( path::ExtractPhysicalPaths( physicalPaths, complexPaths ) )
+	if ( path::QueryPhysicalPaths( physicalPaths, selFilePaths ) )
 		shell::DeleteFiles( physicalPaths );
+
+	DeleteFromAlbum( selFilePaths );
 }
 
 void CAlbumDoc::On_ImageMove( void )

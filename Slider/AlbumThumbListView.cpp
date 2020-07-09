@@ -1159,11 +1159,10 @@ void CAlbumThumbListView::OnContextMenu( CWnd* pWnd, CPoint screenPos )
 		std::vector< fs::CFlexPath > selFilePaths;
 		if ( QuerySelItemPaths( selFilePaths ) )
 		{
-			std::vector< fs::CPath > physicalPaths;
-			path::QueryPhysicalPaths( physicalPaths, selFilePaths );
-
-			if ( CMenu* pContextPopup = MakeContextMenuHost( pSrcPopupMenu, physicalPaths ) )
-				DoTrackContextMenu( pContextPopup, screenPos );
+			std::vector< fs::CPath > docStgPaths;
+			if ( path::QueryStorageDocPaths( docStgPaths, selFilePaths ) )
+				if ( CMenu* pContextPopup = MakeContextMenuHost( pSrcPopupMenu, docStgPaths ) )
+					DoTrackContextMenu( pContextPopup, screenPos );
 		}
 		else
 			DoTrackContextMenu( pSrcPopupMenu, screenPos );

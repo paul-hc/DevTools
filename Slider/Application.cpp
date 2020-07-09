@@ -120,6 +120,11 @@ namespace app
 		return CCatalogStorageFactory::HasCatalogExt( pFilePath );
 	}
 
+	bool IsSlideFile( const TCHAR* pFilePath )
+	{
+		return CAlbumDocTemplate::IsSlideAlbumFile( pFilePath );
+	}
+
 	bool MoveFiles( const std::vector< fs::CPath >& filePaths, CWnd* pParentWnd /*= AfxGetMainWnd()*/ )
 	{
 		CMoveFileDialog moveToDialog( filePaths, pParentWnd );

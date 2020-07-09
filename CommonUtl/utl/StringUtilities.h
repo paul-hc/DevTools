@@ -88,13 +88,27 @@ namespace str
 
 		return false;
 	}
+}
 
 
+#define NBSP '\xA0'
+
+
+namespace str
+{
 	std::tstring& Truncate( std::tstring& rText, size_t maxLen, const TCHAR suffix[] = g_ellipsis, bool atEnd = true );
 	std::tstring& SingleLine( std::tstring& rText, size_t maxLen = utl::npos, const TCHAR sepLineEnd[] = g_paragraph );
 
 	inline std::tstring FormatTruncate( std::tstring text, size_t maxLen, const TCHAR suffix[] = g_ellipsis, bool atEnd = true ) { return Truncate( text, maxLen, suffix, atEnd ); }
 	inline std::tstring FormatSingleLine( std::tstring text, size_t maxLen = utl::npos, const TCHAR sepLineEnd[] = g_paragraph ) { return SingleLine( text, maxLen, sepLineEnd ); }
+
+	template< typename StringT >
+	inline StringT ToNonBreakingSpace( const StringT& text )
+	{
+		StringT out = text;
+		std::replace( out.begin(), out.end(), StringT::value_type( ' ' ), StringT::value_type( NBSP ) );
+		return out;
+	}
 
 
 	// search & replace

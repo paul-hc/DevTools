@@ -48,7 +48,7 @@ public:
 	bool IsStorageAlbum( void ) const;
 	ICatalogStorage* GetCatalogStorage( void );				// opened storage if album based on a catalog storage (compound document)
 
-	static std::auto_ptr< CAlbumDoc > LoadCatalogStorageAlbum( const fs::CPath& docStgPath );			// load a new image catalog storage
+	static std::auto_ptr< CAlbumDoc > LoadAlbumDocument( const fs::CPath& docPath );			// load a new image album (slide or catalog storage)
 public:
 	bool EditAlbum( CAlbumImageView* pActiveView );
 	bool AddExplicitFiles( const std::vector< std::tstring >& files, bool doUpdate = true );
@@ -90,6 +90,8 @@ private:
 private:
 	CAlbumImageView* GetAlbumImageView( void ) const;
 	CSlideData* GetActiveSlideData( void );
+
+	void DeleteFromAlbum( const std::vector< fs::CFlexPath >& selFilePaths );
 public:
 	persist CSlideData m_slideData;						// always altered by CAlbumImageView::OnActivateView()
 private:
@@ -107,7 +109,7 @@ private:
 		PresistImageState	= BIT_FLAG( 0 )
 	};
 
-	enum DocStatus { Clean, Dirty, DirtyOpening = -1 };
+	enum DocStatus { Clean, Dirty, DirtyOpening, DirtyMustRecreate };
 public:
 	// transient
 	std::tstring m_password;							// allow password edititng of any document (including .sld), in preparation for SaveAs .ias

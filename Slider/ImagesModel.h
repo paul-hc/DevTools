@@ -30,8 +30,10 @@ public:
 	std::vector< CFileAttr* >& RefFileAttrs( void ) { return m_fileAttributes; }
 	const CFileAttr* GetFileAttrAt( size_t pos ) const { ASSERT( pos < m_fileAttributes.size() ); return m_fileAttributes[ pos ]; }
 	bool AddFileAttr( CFileAttr* pFileAttr );
+	std::auto_ptr< CFileAttr > RemoveFileAttrAt( size_t pos );
 
-	const CFileAttr* FindFileAttrWithPath( const fs::CPath& filePath ) const;		// file-path key lookup
+	size_t FindPosFileAttr( const fs::CPath& filePath ) const;				// file-path key lookup
+	const CFileAttr* FindFileAttr( const fs::CPath& filePath ) const;		// file-path key lookup
 
 	const std::vector< fs::CPath >& GetStoragePaths( void ) const { return m_storagePaths; }
 	std::vector< fs::CPath >& RefStoragePaths( void ) { return m_storagePaths; }

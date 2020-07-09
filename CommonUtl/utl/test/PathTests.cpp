@@ -23,6 +23,41 @@ CPathTests& CPathTests::Instance( void )
 	return s_testCase;
 }
 
+void CPathTests::TestPathBasics( void )
+{
+	{
+		ASSERT( !path::HasRoot( _T("") ) );
+		ASSERT( !path::HasRoot( _T("X") ) );
+		ASSERT( !path::HasRoot( _T("X:") ) );
+
+		ASSERT( path::HasRoot( _T("\\") ) );
+		ASSERT( path::HasRoot( _T("X:\\A\\file.txt") ) );
+		ASSERT( path::HasRoot( _T("X:\\A\\B\\file.txt") ) );
+
+		ASSERT( !path::HasRoot( _T("..\\Dir\\file.txt") ) );
+	}
+
+	{
+		ASSERT( !path::HasPrefix( _T("something"), _T("") ) );
+
+		ASSERT( path::HasPrefix( _T("..\\Dir\\file.txt"), _T("..") ) );
+		ASSERT( !path::HasPrefix( _T("..\\Dir\\file.txt"), _T(".") ) );
+
+		ASSERT( path::HasPrefix( _T(".\\Dir\\file.txt"), _T(".") ) );
+		ASSERT( !path::HasPrefix( _T(".\\Dir\\file.txt"), _T("..") ) );
+
+		ASSERT( !path::HasPrefix( _T("\\\\server"), _T("\\\\") ) );
+		ASSERT( path::HasPrefix( _T("\\\\server\\share"), _T("\\\\SERVER") ) );
+		ASSERT( path::HasPrefix( _T("\\\\server\\share"), _T("\\\\Server\\sHARE") ) );
+
+		ASSERT( path::HasPrefix( _T("X:\\A\\"), _T("X:\\A") ) );
+		ASSERT( path::HasPrefix( _T("X:\\A"), _T("X:\\A\\") ) );
+
+		ASSERT( path::HasPrefix( _T("X:\\A\\file.txt"), _T("X:\\A") ) );
+		ASSERT( path::HasPrefix( _T("X:\\A\\file.txt"), _T("X:\\A\\") ) );
+	}
+}
+
 void CPathTests::TestPathUtilities( void )
 {
 	// "\", , "\\server\share", or "\\server\"; paths such as "..\path2"
@@ -33,10 +68,10 @@ void CPathTests::TestPathUtilities( void )
 	ASSERT( !path::IsRoot( _T("") ) );
 	ASSERT( !path::IsRoot( _T("X:\\My") ) );
 
-	ASSERT( path::IsAbsolute( _T("X:\\My") ) );
-	ASSERT( path::IsAbsolute( _T("X:\\My\\file.txt") ) );
-	ASSERT( !path::IsAbsolute( _T("..\\My\\file.txt") ) );
-	ASSERT( path::IsRelative( _T("..\\My\\file.txt") ) );
+	ASSERT( path::IsAbsolute( _T("X:\\Dir") ) );
+	ASSERT( path::IsAbsolute( _T("X:\\Dir\\file.txt") ) );
+	ASSERT( !path::IsAbsolute( _T("..\\Dir\\file.txt") ) );
+	ASSERT( path::IsRelative( _T("..\\Dir\\file.txt") ) );
 	ASSERT( path::IsRelative( _T("file.txt") ) );
 
 	// rooth path:
@@ -645,6 +680,25 @@ void CPathTests::TestCommonSubpath( void )
 		ASSERT_EQUAL( _T("Fruit\\orange.jpg"), paths[ 1 ] );
 		ASSERT_EQUAL( _T("Drink\\coffee.jpg"), paths[ 2 ] );
 	}
+
+	{
+		ASSERT_EQUAL( _T("C:\\Images\\fruit.stg>Europe"), path::FindCommonPrefix( _T("C:\\Images\\fruit.stg>Europe\\apple.jpg"), _T("C:/Images/fruit.stg>Europe/Citrus/orange.jpg") ) );
+
+		std::vector< fs::CPath > paths;
+		paths.push_back( fs::CPath( _T("C:\\Images\\fruit.stg>Europe\\apple.jpg") ) );
+		paths.push_back( fs::CPath( _T("C:\\Images\\fruit.stg>Europe\\Citrus\\orange.jpg") ) );
+
+		ASSERT_EQUAL( _T("C:\\Images\\fruit.stg>Europe"), path::ExtractCommonParentPath( paths ) );
+
+		paths.push_back( fs::CPath( _T("C:\\Images\\fruit.stg>Africa\\coffee.jpg") ) );
+		ASSERT_EQUAL( _T("C:\\Images\\fruit.stg"), path::ExtractCommonParentPath( paths ) );
+
+		paths.push_back( fs::CPath( _T("C:\\Images\\Asia\\mango.jpg") ) );
+		ASSERT_EQUAL( _T("C:\\Images"), path::ExtractCommonParentPath( paths ) );
+
+		paths.push_back( fs::CPath( _T("X:\\Docs\\catalog.txt") ) );
+		ASSERT_EQUAL( _T(""), path::ExtractCommonParentPath( paths ) );
+	}
 }
 
 void CPathTests::TestComplexPath( void )
@@ -687,13 +741,20 @@ void CPathTests::TestComplexPath( void )
 
 void CPathTests::TestFlexPath( void )
 {
+	ASSERT( path::IsEmbedded( _T("file.txt") ) );
+	ASSERT( path::IsEmbedded( _T("Dir\\file.txt") ) );
+	ASSERT( path::IsEmbedded( _T("Dir/file.txt") ) );
+	ASSERT( !path::IsEmbedded( _T(".\\Dir\\file.txt") ) );
+	ASSERT( !path::IsEmbedded( _T("..\\Dir\\file.txt") ) );
+	ASSERT( !path::IsEmbedded( _T("X:\\Dir\\file.txt") ) );
+
 	// complex path
 	{
 		fs::CFlexPath path( _T("C:\\Images\\fruit.stg>apple.jpg") );
 		ASSERT( path.IsComplexPath() );
 		ASSERT_EQUAL( _T("C:\\Images\\fruit.stg"), path.GetPhysicalPath() );
 		ASSERT_EQUAL_STR( _T("apple.jpg"), path.GetEmbeddedPathPtr() );
-		ASSERT_EQUAL( _T("C:\\Images\\fruit.stg"), path.GetParentFlexPath() );
+		ASSERT_EQUAL( _T("C:\\Images\\fruit.stg"), path.GetParentPath() );
 		ASSERT_EQUAL_STR( _T("apple.jpg"), path.GetNameExt() );
 
 		fs::CPath physicalPath;
@@ -709,8 +770,15 @@ void CPathTests::TestFlexPath( void )
 		ASSERT( path.IsComplexPath() );
 		ASSERT_EQUAL( _T("C:\\Images\\fruit.stg"), path.GetPhysicalPath() );
 		ASSERT_EQUAL_STR( _T("Europe\\apple.jpg"), path.GetEmbeddedPathPtr() );
-		ASSERT_EQUAL( _T("C:\\Images\\fruit.stg>Europe"), path.GetParentFlexPath() );
 		ASSERT_EQUAL_STR( _T("apple.jpg"), path.GetNameExt() );
+
+		ASSERT( path.GetParentPath() == path.GetParentFlexPath() );
+
+		fs::CPath parentPath = path;
+		ASSERT_EQUAL( _T("C:\\Images\\fruit.stg>Europe"), parentPath = parentPath.GetParentPath() );
+		ASSERT_EQUAL( _T("C:\\Images\\fruit.stg"), parentPath = parentPath.GetParentPath() );
+		ASSERT_EQUAL( _T("C:\\Images"), parentPath = parentPath.GetParentPath() );
+		ASSERT_EQUAL( _T("C:\\"), parentPath = parentPath.GetParentPath() );
 
 		ASSERT_EQUAL_STR( _T("Europe\\apple.jpg"), path.GetLeafSubPath() );
 		ASSERT_EQUAL( _T("C:\\Images\\fruit.stg"), path.GetOriginParentPath() );
@@ -725,10 +793,11 @@ void CPathTests::TestFlexPath( void )
 	// normal file path
 	{
 		fs::CFlexPath path( _T("C:\\Images\\orange.png") );
+		ASSERT( path.IsPhysicalPath() );
 		ASSERT( !path.IsComplexPath() );
 		ASSERT_EQUAL( _T("C:\\Images\\orange.png"), path.GetPhysicalPath() );
 		ASSERT_EQUAL( _T(""), path.GetEmbeddedPath() );
-		ASSERT_EQUAL( _T("C:\\Images"), path.GetParentFlexPath() );
+		ASSERT_EQUAL( _T("C:\\Images"), path.GetParentPath() );
 		ASSERT_EQUAL_STR( _T("orange.png"), path.GetNameExt() );
 
 		fs::CPath physicalPath;
@@ -802,6 +871,7 @@ void CPathTests::Run( void )
 {
 	__super::Run();
 
+	TestPathBasics();
 	TestPathUtilities();
 	TestPathSort();
 	TestPathSortExisting();
