@@ -70,25 +70,24 @@ namespace ui
 	std::tstring CItemContent::EditItem( const TCHAR* pItem, CWnd* pParent ) const
 	{
 		ASSERT_PTR( pItem );
-		static const std::tstring emptyText;
 
-		std::tstring newItem;
+		fs::CPath newItem;
 
 		switch ( m_type )
 		{
 			default: ASSERT( false );
 			case ui::String:
-				return emptyText;
+				return str::GetEmpty();
 			case ui::DirPath:
 			case ui::MixedPath:
-				newItem = str::ExpandEnvironmentStrings( pItem );
+				newItem.Set( str::ExpandEnvironmentStrings( pItem ) );
 				if ( !AutoBrowsePath( newItem, pParent ) )
-					return emptyText;
+					return str::GetEmpty();
 				break;
 			case ui::FilePath:
-				newItem = str::ExpandEnvironmentStrings( pItem );
+				newItem.Set( str::ExpandEnvironmentStrings( pItem ) );
 				if ( !shell::BrowseForFile( newItem, pParent, shell::FileOpen, m_pFileFilter ) )
-					return emptyText;
+					return str::GetEmpty();
 				break;
 		}
 
@@ -106,13 +105,13 @@ namespace ui
 				ENSURE( variables.size() == values.size() );
 
 				for ( unsigned int i = 0; i != variables.size(); ++i )
-					str::Replace( newItem, values[ i ].c_str(), variables[ i ].c_str() );
+					str::Replace( newItem.Ref(), values[ i ].c_str(), variables[ i ].c_str() );
 				break;
 			}
 		}
 		if ( HasFlag( m_itemsFlags, Trim ) )
-			str::Trim( newItem );
-		return newItem;
+			str::Trim( newItem.Ref() );
+		return newItem.Get();
 	}
 
 	bool CItemContent::IsValidPathItem( const std::tstring& pathItem ) const
@@ -140,9 +139,9 @@ namespace ui
 		return path::ContainsWildcards( path.c_str() );
 	}
 
-	bool CItemContent::AutoBrowsePath( std::tstring& rNewItem, CWnd* pParent ) const
+	bool CItemContent::AutoBrowsePath( fs::CPath& rNewItem, CWnd* pParent ) const
 	{
-		if ( ui::FilePath == m_type || fs::IsValidFile( rNewItem.c_str() ) || path::ContainsWildcards( rNewItem.c_str() ) )
+		if ( ui::FilePath == m_type || fs::IsValidFile( rNewItem.GetPtr() ) || path::ContainsWildcards( rNewItem.GetPtr() ) )
 			return shell::BrowseForFile( rNewItem, pParent, MixedPath == m_type ? shell::FileBrowse : shell::FileOpen, m_pFileFilter );
 
 		return shell::PickFolder( rNewItem, pParent );

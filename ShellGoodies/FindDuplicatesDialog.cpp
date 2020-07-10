@@ -360,7 +360,7 @@ bool CFindDuplicatesDialog::MoveDuplicateFiles( void )
 	std::vector< fs::CPath > dupFilePaths;
 	if ( QueryCheckedDupFilePaths( dupFilePaths ) )
 	{
-		static std::tstring s_destFolderPath;
+		static fs::CPath s_destFolderPath;
 
 		if ( shell::PickFolder( s_destFolderPath, this, 0, _T("Move Selected Duplicates to Folder") ) )
 			return ExecuteDuplicatesCmd( new CMoveFilesCmd( dupFilePaths, s_destFolderPath ) );

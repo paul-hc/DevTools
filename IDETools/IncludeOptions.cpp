@@ -54,7 +54,7 @@ void CIncludeOptions::Load( void )
 	m_openBlownUp = pApp->GetProfileInt( reg::section, ENTRY_MEMBER( m_openBlownUp ), m_openBlownUp ) != FALSE;
 	m_selRecover = pApp->GetProfileInt( reg::section, ENTRY_MEMBER( m_selRecover ), m_selRecover ) != FALSE;
 	m_lazyParsing = pApp->GetProfileInt( reg::section, ENTRY_MEMBER( m_lazyParsing ), m_lazyParsing ) != FALSE;
-	m_lastBrowsedFile = pApp->GetProfileString( reg::section, ENTRY_MEMBER( m_lastBrowsedFile ), m_lastBrowsedFile.c_str() ).GetString();
+	m_lastBrowsedFile.Set( pApp->GetProfileString( reg::section, ENTRY_MEMBER( m_lastBrowsedFile ), m_lastBrowsedFile.GetPtr() ).GetString() );
 
 	reg::LoadPathGroup( m_fnIgnored, reg::section, ENTRY_MEMBER( m_fnIgnored ) );
 	reg::LoadPathGroup( m_fnAdded, reg::section, ENTRY_MEMBER( m_fnAdded ) );
@@ -73,7 +73,7 @@ void CIncludeOptions::Save( void ) const
 	pApp->WriteProfileInt( reg::section, ENTRY_MEMBER( m_openBlownUp ), m_openBlownUp );
 	pApp->WriteProfileInt( reg::section, ENTRY_MEMBER( m_selRecover ), m_selRecover );
 	pApp->WriteProfileInt( reg::section, ENTRY_MEMBER( m_lazyParsing ), m_lazyParsing );
-	pApp->WriteProfileString( reg::section, ENTRY_MEMBER( m_lastBrowsedFile ), m_lastBrowsedFile.c_str() );
+	pApp->WriteProfileString( reg::section, ENTRY_MEMBER( m_lastBrowsedFile ), m_lastBrowsedFile.GetPtr() );
 
 	reg::SavePathGroup( m_fnIgnored, reg::section, ENTRY_MEMBER( m_fnIgnored ) );
 	reg::SavePathGroup( m_fnAdded, reg::section, ENTRY_MEMBER( m_fnAdded ) );

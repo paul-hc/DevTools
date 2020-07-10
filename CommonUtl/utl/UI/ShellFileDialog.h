@@ -34,8 +34,8 @@ public:
 					  CWnd* pParentWnd = NULL, const TCHAR* pTitle = NULL );
 	virtual ~CShellFileDialog();
 
-	bool RunModal( std::tstring* pFilePath );
-	bool RunModal( std::vector< std::tstring >& rFilePaths );
+	bool RunModal( fs::CPath* pFilePath );
+	bool RunModal( std::vector< fs::CPath >& rFilePaths );
 private:
 	static const fs::CFilterJoiner& GetDefaultJoiner( void );			// "All files (*.*)"
 	static DWORD GetFlags( shell::BrowseMode browseMode, DWORD flags );

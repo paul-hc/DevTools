@@ -1257,7 +1257,7 @@ END
 STRINGTABLE 
 BEGIN
     IDS_SLIDE_ALBUM_FILTER_SPEC "Slide Albums|*.sld"
-    IDS_ARCHIVE_STG_FILTER_SPEC "Archive Storages|*.ias;*.cid;*.icf"
+    IDS_CATALOG_STG_FILTER_SPEC "Catalog Storage Albums|*.ias;*.cid;*.icf"
 END
 
 STRINGTABLE 

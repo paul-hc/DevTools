@@ -48,7 +48,7 @@ public:
 	virtual ~CFileTreeDialog();
 
 	const fs::CPath& GetRootPath( void ) const { return m_rootPath; }
-	void SetRootPath( const std::tstring& rootPath );
+	void SetRootPath( const fs::CPath& rootPath );
 	void OutputRootPath( void ) { SetRootPath( m_rootPath.Get() ); }
 
 	int GetSourceLineNo( void ) const { return m_sourceLineNo; }

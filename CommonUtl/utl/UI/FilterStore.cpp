@@ -167,11 +167,11 @@ namespace fs
 		return allKnownSpecs;
 	}
 
-	bool CFilterJoiner::BrowseFile( std::tstring& rFilePath, shell::BrowseMode browseMode,
+	bool CFilterJoiner::BrowseFile( fs::CPath& rFilePath, shell::BrowseMode browseMode,
 									DWORD flags /*= 0*/, const TCHAR* pDefaultExt /*= NULL*/,
 									CWnd* pParentWnd /*= NULL*/, const TCHAR* pTitle /*= NULL*/ ) const
 	{
-		CShellFileDialog dlg( browseMode, rFilePath.c_str(), this, flags, pDefaultExt, pParentWnd, pTitle );
+		CShellFileDialog dlg( browseMode, rFilePath.GetPtr(), this, flags, pDefaultExt, pParentWnd, pTitle );
 		return dlg.RunModal( &rFilePath );
 	}
 

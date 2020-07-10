@@ -32,7 +32,7 @@ namespace app
 	inline bool IsAlbumFile( const TCHAR* pFilePath ) { return IsSlideFile( pFilePath ) || IsCatalogFile( pFilePath ); }
 
 	const std::tstring& GetAllSourcesWildSpecs( void );
-	bool BrowseCatalogFile( std::tstring& rFullPath, CWnd* pParentWnd, shell::BrowseMode browseMode = shell::FileOpen, DWORD flags = 0 );
+	bool BrowseCatalogFile( fs::CPath& rFullPath, CWnd* pParentWnd, shell::BrowseMode browseMode = shell::FileOpen, DWORD flags = 0 );
 }
 
 

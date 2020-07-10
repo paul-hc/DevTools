@@ -131,7 +131,7 @@ bool CSearchPattern::IsValidPath( void ) const
 
 bool CSearchPattern::BrowseFilePath( BrowseMode pathType /*= BrowseAsIs*/, CWnd* pParentWnd /*= NULL*/, DWORD extraFlags /*= OFN_FILEMUSTEXIST*/ )
 {
-	std::tstring filePath = GetFilePath().Get();
+	fs::CPath filePath = GetFilePath();
 
 	if ( BrowseAsIs == pathType )
 		if ( DirPath == m_type )
@@ -145,8 +145,8 @@ bool CSearchPattern::BrowseFilePath( BrowseMode pathType /*= BrowseAsIs*/, CWnd*
 	{
 		static const TCHAR s_dlgTitle[] = _T("Select Folder with Images");
 
-		if ( fs::IsValidFile( filePath.c_str() ) )
-			filePath = fs::CPath( filePath ).GetParentPath().Get();
+		if ( fs::IsValidFile( filePath.GetPtr() ) )
+			filePath = filePath.GetParentPath();
 
 		picked = shell::PickFolder( filePath, pParentWnd, 0, s_dlgTitle );
 		//picked = shell::BrowseForFolder( filePath, pParentWnd, NULL, shell::BF_FileSystem, s_dlgTitle );

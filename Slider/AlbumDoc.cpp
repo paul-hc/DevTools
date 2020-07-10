@@ -747,7 +747,7 @@ void CAlbumDoc::OnExtractCatalog( void )
 {
 	fs::CPath destFolderPath = GetDocFilePath().GetFname() + _T("_extract");
 
-	if ( shell::PickFolder( destFolderPath.Ref(), NULL, 0, _T("Select Extract Folder") ) )
+	if ( shell::PickFolder( destFolderPath, NULL, 0, _T("Select Extract Folder") ) )
 	{
 		std::vector< fs::CFlexPath > srcImagePaths;
 		utl::Assign( srcImagePaths, m_model.GetImagesModel().GetFileAttrs(), func::ToFilePath() );
@@ -823,7 +823,7 @@ void CAlbumDoc::On_ImageDelete( void )
 void CAlbumDoc::On_ImageMove( void )
 {
 	fs::CPath destFolderPath;
-	if ( !shell::PickFolder( destFolderPath.Ref(), NULL, 0, _T("Select Destination Folder") ) )
+	if ( !shell::PickFolder( destFolderPath, NULL, 0, _T("Select Destination Folder") ) )
 		return;
 
 	std::vector< fs::CFlexPath > srcFilePaths;

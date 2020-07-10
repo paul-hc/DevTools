@@ -31,7 +31,7 @@ public:
 	bool m_openBlownUp;
 	bool m_selRecover;
 	bool m_lazyParsing;
-	std::tstring m_lastBrowsedFile;
+	fs::CPath m_lastBrowsedFile;
 
 	fs::TFilePathGroup m_fnIgnored;					// "Exclude files": force out
 	fs::TFilePathGroup m_fnAdded;					// "Also include files": force in

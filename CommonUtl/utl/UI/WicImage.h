@@ -149,8 +149,7 @@ namespace fs
 
 namespace shell
 {
-	bool BrowseImageFile( std::tstring& rFilePath, BrowseMode browseMode = FileOpen, DWORD flags = 0, CWnd* pParentWnd = NULL );
-	inline bool BrowseImageFile( fs::CPath& rFilePath, BrowseMode browseMode = FileOpen, DWORD flags = 0, CWnd* pParentWnd = NULL ) { return BrowseImageFile( rFilePath.Ref(), browseMode, flags, pParentWnd ); }
+	bool BrowseImageFile( fs::CPath& rFilePath, BrowseMode browseMode = FileOpen, DWORD flags = 0, CWnd* pParentWnd = NULL );
 }
 
 

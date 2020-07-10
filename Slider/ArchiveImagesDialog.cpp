@@ -454,17 +454,12 @@ void CArchiveImagesDialog::CmBrowseDestPath( void )
 {
 	if ( ToDirectory == m_destType )
 	{
-		std::tstring newDestPath = m_destPath.Get();
-		if ( !shell::BrowseForFolder( newDestPath, this, NULL, shell::BF_FileSystem, _T("Destination folder"), false ) )
+		if ( !shell::BrowseForFolder( m_destPath, this, NULL, shell::BF_FileSystem, _T("Destination folder"), false ) )
 			return;
-		m_destPath.Set( newDestPath );
 	}
 	else
 	{
-		std::tstring newDestPath = m_destPath.Get();
-		if ( app::BrowseCatalogFile( newDestPath, this, shell::FileSaveAs ) )
-			m_destPath.Set( newDestPath );
-		else
+		if ( !app::BrowseCatalogFile( m_destPath, this, shell::FileSaveAs ) )
 			return;
 	}
 

@@ -40,7 +40,7 @@ namespace ui
 		void FilterItems( std::vector< std::tstring >& rItems ) const;
 
 		bool IsValidPathItem( const std::tstring& pathItem ) const;
-		bool AutoBrowsePath( std::tstring& rNewItem, CWnd* pParent ) const;
+		bool AutoBrowsePath( fs::CPath& rNewItem, CWnd* pParent ) const;
 	public:
 		ui::ContentType m_type;
 		const TCHAR* m_pFileFilter;

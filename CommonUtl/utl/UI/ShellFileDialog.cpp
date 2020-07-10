@@ -24,23 +24,23 @@ CShellFileDialog::~CShellFileDialog()
 {
 }
 
-bool CShellFileDialog::RunModal( std::tstring* pFilePath )
+bool CShellFileDialog::RunModal( fs::CPath* pFilePath )
 {
 	ASSERT_PTR( pFilePath );
 	bool okay = IDOK == DoModal();
 	if ( okay )
-		*pFilePath = GetPathName().GetString();
+		pFilePath->Set( GetPathName().GetString() );
 	return okay;
 }
 
-bool CShellFileDialog::RunModal( std::vector< std::tstring >& rFilePaths )
+bool CShellFileDialog::RunModal( std::vector< fs::CPath >& rFilePaths )
 {
 	rFilePaths.clear();
 	if ( DoModal() != IDOK )
 		return false;
 
 	for ( POSITION pos = GetStartPosition(); pos != NULL; )
-		rFilePaths.push_back( GetNextPathName( pos ).GetString() );
+		rFilePaths.push_back( fs::CPath( GetNextPathName( pos ).GetString() ) );
 
 	return true;
 }

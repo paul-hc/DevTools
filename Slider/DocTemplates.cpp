@@ -28,13 +28,13 @@ namespace app
 {
 	bool PromptFileDialogImpl( CString& rFilePath, const fs::CFilterJoiner& filterJoiner, UINT titleId, DWORD flags, BOOL openDlg )
 	{
-		std::tstring filePath = rFilePath.GetString();
+		fs::CPath filePath( rFilePath.GetString() );
 		std::tstring title = str::Load( titleId );
 
 		if ( !filterJoiner.BrowseFile( filePath, static_cast< shell::BrowseMode >( openDlg ), flags, NULL, NULL, !title.empty() ? title.c_str() : NULL ) )
 			return false;
 
-		rFilePath = filePath.c_str();
+		rFilePath = filePath.GetPtr();
 		return true;
 	}
 
@@ -277,7 +277,7 @@ namespace app
 		: fs::CFilterStore( _T("All Albums") )
 	{
 		AddFilter( str::LoadPair( IDS_SLIDE_ALBUM_FILTER_SPEC ) );
-		AddFilter( str::LoadPair( IDS_ARCHIVE_STG_FILTER_SPEC ) );
+		AddFilter( str::LoadPair( IDS_CATALOG_STG_FILTER_SPEC ) );
 	}
 
 	CAlbumFilterStore& CAlbumFilterStore::Instance( void )
@@ -286,10 +286,10 @@ namespace app
 		return albumStore;
 	}
 
-	std::tstring CAlbumFilterStore::MakeArchiveStgFilters( void ) const
+	std::tstring CAlbumFilterStore::MakeCatalogStgFilters( void ) const
 	{
-		UINT positions = ArchiveStgFilter;
-		return MakeFilters( &positions, 1 );
+		const UINT positions[] = { CatalogStgFilter };
+		return MakeFilters( ARRAY_PAIR( positions ) );
 	}
 
 

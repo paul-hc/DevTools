@@ -91,7 +91,7 @@ namespace svc
 		else
 		{
 			fs::CPath destFolderPath;		// leave empty to pick the previous selected folder
-			if ( !shell::PickFolder( destFolderPath.Ref(), NULL ) )		// multiple files: pick destination folder
+			if ( !shell::PickFolder( destFolderPath, NULL ) )		// multiple files: pick destination folder
 				return false;
 
 			MakeDestFilePaths( rDestFilePaths, srcFilePaths, destFolderPath, Shallow );

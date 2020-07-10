@@ -78,15 +78,15 @@ CFileTreeDialog::~CFileTreeDialog()
 	Clear();
 }
 
-void CFileTreeDialog::SetRootPath( const std::tstring& rootPath )
+void CFileTreeDialog::SetRootPath( const fs::CPath& rootPath )
 {
-	bool restoreTreeUi = m_hWnd != NULL && m_rOpt.m_selRecover && m_rootPath.Equivalent( rootPath );
+	bool restoreTreeUi = m_hWnd != NULL && m_rOpt.m_selRecover && m_rootPath.Equivalent( rootPath.Get() );
 	CTreeCtrlUiState treeState;
 
 	if ( restoreTreeUi )
 		treeState.SaveVisualState( m_treeCtrl );
 
-	m_rootPath.Set( rootPath );
+	m_rootPath = rootPath;
 	BuildIncludeTree();
 
 	if ( restoreTreeUi )
@@ -580,13 +580,12 @@ void CFileTreeDialog::OnContextMenu( CWnd* pWnd, CPoint screenPos )
 
 void CFileTreeDialog::OnDropFiles( HDROP hDropInfo )
 {
-	TCHAR droppedFileName[ MAX_PATH ];
-	::DragQueryFile( hDropInfo, 0, droppedFileName, MAX_PATH );
-	::DragFinish( hDropInfo );
+	std::vector< fs::CPath > filePaths;
+	shell::QueryDroppedFiles( filePaths, hDropInfo );
 
-	if ( fs::IsValidFile( droppedFileName ) )
+	if ( !filePaths.empty() )
 	{
-		SetRootPath( droppedFileName );
+		SetRootPath( filePaths.front() );
 		SetForegroundWindow();
 	}
 }

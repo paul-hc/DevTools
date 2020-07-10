@@ -357,7 +357,7 @@ namespace fs
 
 namespace shell
 {
-	bool BrowseImageFile( std::tstring& rFilePath, BrowseMode browseMode /*= FileOpen*/, DWORD flags /*= 0*/, CWnd* pParentWnd /*= NULL*/ )
+	bool BrowseImageFile( fs::CPath& rFilePath, BrowseMode browseMode /*= FileOpen*/, DWORD flags /*= 0*/, CWnd* pParentWnd /*= NULL*/ )
 	{
 		fs::CFilterJoiner filterJoiner( fs::CImageFilterStore::Instance( browseMode ) );
 		return filterJoiner.BrowseFile( rFilePath, browseMode, flags, NULL, pParentWnd );

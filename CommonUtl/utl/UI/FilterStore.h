@@ -103,7 +103,7 @@ namespace fs
 		std::tstring MakeFilters( shell::BrowseMode browseMode ) const;
 		std::tstring MakeSpecs( shell::BrowseMode browseMode ) const;			// joined specs for all known extensions
 
-		bool BrowseFile( std::tstring& rFilePath, shell::BrowseMode browseMode,
+		bool BrowseFile( fs::CPath& rFilePath, shell::BrowseMode browseMode,
 						 DWORD flags = 0, const TCHAR* pDefaultExt = NULL,
 						 CWnd* pParentWnd = NULL, const TCHAR* pTitle = NULL ) const;
 

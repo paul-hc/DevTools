@@ -262,9 +262,9 @@ namespace app
 		return s_wildFilters;
 	}
 
-	bool BrowseCatalogFile( std::tstring& rFullPath, CWnd* pParentWnd, shell::BrowseMode browseMode /*= shell::FileOpen*/, DWORD flags /*= 0*/ )
+	bool BrowseCatalogFile( fs::CPath& rFullPath, CWnd* pParentWnd, shell::BrowseMode browseMode /*= shell::FileOpen*/, DWORD flags /*= 0*/ )
 	{
-		static const std::tstring stgFilters = CAlbumFilterStore::Instance().MakeArchiveStgFilters();
+		static const std::tstring stgFilters = CAlbumFilterStore::Instance().MakeCatalogStgFilters();
 		return shell::BrowseForFile( rFullPath, pParentWnd, browseMode, stgFilters.c_str(), flags );
 	}
 
@@ -520,13 +520,13 @@ END_MESSAGE_MAP()
 
 void CApplication::OnFileOpenAlbumFolder( void )
 {
-	static std::tstring s_folderPath;
+	static fs::CPath s_folderPath;
 
-	if ( s_folderPath.empty() || !fs::IsValidDirectory( s_folderPath.c_str() ) )
-		s_folderPath = app::GetActiveDirPath().Get();
+	if ( s_folderPath.IsEmpty() || !fs::IsValidDirectory( s_folderPath.GetPtr() ) )
+		s_folderPath = app::GetActiveDirPath();
 
 	if ( shell::BrowseForFolder( s_folderPath, AfxGetMainWnd(), NULL, shell::BF_FileSystem, _T("Browse Folder Images"), false ) )
-		OpenDocumentFile( s_folderPath.c_str() );
+		OpenDocumentFile( s_folderPath.GetPtr() );
 }
 
 void CApplication::OnClearTempEmbeddedClones( void )

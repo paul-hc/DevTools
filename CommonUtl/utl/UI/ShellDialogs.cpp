@@ -44,12 +44,12 @@ namespace shell
 	}
 
 
-	bool BrowseForFolder( std::tstring& rFolderPath, CWnd* pParentWnd, std::tstring* pDisplayedName /*= NULL*/,
+	bool BrowseForFolder( fs::CPath& rFolderPath, CWnd* pParentWnd, std::tstring* pDisplayedName /*= NULL*/,
 						  BrowseFlags flags /*= BF_FileSystem*/, const TCHAR* pTitle /*= NULL*/, bool useNetwork /*= false*/ )
 	{
 		bool isOk = false;
 
-		str::Copy( impl::s_initFolderPath, rFolderPath );
+		str::Copy( impl::s_initFolderPath, rFolderPath.Get() );
 
 		TCHAR displayName[ MAX_PATH ] = _T("");
 		BROWSEINFO bi;
@@ -83,12 +83,12 @@ namespace shell
 		{
 			if ( ::SHGetPathFromIDList( pidlFolder.Get(), impl::s_initFolderPath ) )
 			{
-				rFolderPath = impl::s_initFolderPath;
+				rFolderPath.Set( impl::s_initFolderPath );
 				isOk = true;
 			}
 			else if ( flags == BF_Computers || flags == BF_All || flags == BF_AllIncludeFiles )
 			{
-				rFolderPath = displayName;
+				rFolderPath.Set( displayName );
 				isOk = true;
 			}
 		}
@@ -97,7 +97,7 @@ namespace shell
 	}
 
 
-	bool BrowseForFile( std::tstring& rFilePath, CWnd* pParentWnd, BrowseMode browseMode /*= FileOpen*/,
+	bool BrowseForFile( fs::CPath& rFilePath, CWnd* pParentWnd, BrowseMode browseMode /*= FileOpen*/,
 						const TCHAR* pFileFilter /*= NULL*/, DWORD flags /*= 0*/, const TCHAR* pTitle /*= NULL*/ )
 	{
 		impl::CScopedFileDialog scopedDlg( pFileFilter );
@@ -106,7 +106,7 @@ namespace shell
 		return impl::RunFileDialog( rFilePath, scopedDlg.m_pFileDlg.get() );
 	}
 
-	bool PickFolder( std::tstring& rFilePath, CWnd* pParentWnd,
+	bool PickFolder( fs::CPath& rFilePath, CWnd* pParentWnd,
 					 FILEOPENDIALOGOPTIONS options /*= 0*/, const TCHAR* pTitle /*= NULL*/ )
 	{
 		impl::CScopedFileDialog scopedDlg( NULL );
@@ -127,7 +127,7 @@ namespace shell
 	{
 		// File Dialog
 
-		CFileDialog* MakeFileDialog( const std::tstring& filePath, CWnd* pParentWnd, BrowseMode browseMode, const std::tstring& fileFilter,
+		CFileDialog* MakeFileDialog( const fs::CPath& filePath, CWnd* pParentWnd, BrowseMode browseMode, const std::tstring& fileFilter,
 									 DWORD flags /*= 0*/, const TCHAR* pTitle /*= NULL*/ )
 		{
 			SetFlag( flags, OFN_NOTESTFILECREATE | OFN_PATHMUSTEXIST | OFN_ENABLESIZING );
@@ -138,7 +138,7 @@ namespace shell
 				case FileOpen:		SetFlag( flags, OFN_FILEMUSTEXIST ); break;
 			}
 
-			CFileDialog* pDlg = new CFileDialog( browseMode != FileSaveAs, NULL, filePath.c_str(), flags, fileFilter.c_str(), pParentWnd, 0, s_useVistaStyle );
+			CFileDialog* pDlg = new CFileDialog( browseMode != FileSaveAs, NULL, filePath.GetPtr(), flags, fileFilter.c_str(), pParentWnd, 0, s_useVistaStyle );
 
 			if ( pTitle != NULL )
 				pDlg->m_ofn.lpstrTitle = pTitle;
@@ -146,13 +146,13 @@ namespace shell
 			return pDlg;
 		}
 
-		bool RunFileDialog( std::tstring& rFilePath, CFileDialog* pFileDialog )
+		bool RunFileDialog( fs::CPath& rFilePath, CFileDialog* pFileDialog )
 		{
 			ASSERT_PTR( pFileDialog );
 			if ( pFileDialog->DoModal() != IDOK )
 				return false;
 
-			rFilePath = pFileDialog->GetPathName().GetString();
+			rFilePath.Set( pFileDialog->GetPathName().GetString() );
 			return true;
 		}
 
