@@ -87,8 +87,6 @@ private:
 private:
 	CAlbumImageView* GetAlbumImageView( void ) const;
 	CSlideData* GetActiveSlideData( void );
-
-	void DeleteFromAlbum( const std::vector< fs::CFlexPath >& selFilePaths );
 public:
 	persist CSlideData m_slideData;						// always altered by CAlbumImageView::OnActivateView()
 private:

@@ -560,12 +560,11 @@ BEGIN
         MENUITEM "&Open\tCtrl+Shift+O",         ID_IMAGE_OPEN
         MENUITEM "&Save As...",                 ID_IMAGE_SAVE_AS
         MENUITEM SEPARATOR
-        MENUITEM "&Delete...\tDelete",          ID_IMAGE_DELETE
-        MENUITEM "&Move...\tCtrl+M",            ID_IMAGE_MOVE
+        MENUITEM "&Remove\tDelete",             ID_IMAGE_DELETE
         MENUITEM SEPARATOR
         MENUITEM "&Explore Image\tCtrl+E",      ID_IMAGE_EXPLORE
         MENUITEM SEPARATOR
-        MENUITEM "&Copy\tCtrl+C",               ID_EDIT_COPY
+        MENUITEM "&Copy Path\tCtrl+C",          ID_EDIT_COPY
         MENUITEM SEPARATOR
         MENUITEM "Select All\tCtrl+A",          ID_EDIT_SELECT_ALL
     END
@@ -1206,13 +1205,26 @@ STRINGTABLE
 BEGIN
     CM_SAVE_WORKSPACE       "Save current workspace to the workspace file\nSave Workspace"
     CM_EDIT_WORKSPACE       "Edit current workspace settings\nWorkspace Settings"
+    ID_FILE_EXTRACT_CATALOG "Extract the image catalog storage contents to a directory\nExtract Catalog Images"
     CK_FULL_SCREEN          "Toggle between normal and full screen mode\nToggle Full Screen (F11)"
     CM_TOGGLE_MAXIMIZE      "Toggle between maximize and restore modes\nMaximize/Restore"
     ID_EDIT_BK_COLOR        "Edit image view background color\nBackground Color"
     CK_SHOW_THUMB_VIEW      "Displays the thumbnail view\nShow Thumbnail View (Ctrl+Shift+T)"
     ID_IMAGE_OPEN           "Opens the selected image file(s) as standalone images\nOpen Selected Images"
+    ID_IMAGE_SAVE_AS        "Save selected images to files\tSave Image As"
+END
+
+STRINGTABLE 
+BEGIN
     ID_IMAGE_DELETE         "Delete the file using shell operation\nDelete"
     ID_IMAGE_MOVE           "Move current image file to another folder\nMove File"
+    ID_IMAGE_EXPLORE        "Open Windows Explorer and select the current image file name\nExplore Image"
+    CM_CLEAR_IMAGE_CACHE    "Clear the image and thumbnail cache\nClear Image and Thumbnail Cache (Ctrl+F5)"
+    CM_REFRESH_CONTENT      "Refresh current content\nRefresh Content (F5)"
+    CM_DROP_MOVE_IMAGE      "Move and rename the dropped image file\nMove and Rename Image File"
+    CM_DROP_COPY_IMAGE      "Copy and rename the dropped image file\nCopy and Rename Image File"
+    CM_CANCEL_DROP          "Cancel the drop operation\nCancel Drop"
+    CM_AUTO_DROP_DEFRAGMENT "Renames files in an auto-drop recipient to ensure contiguos numeric filename\nDefragment Image Files"
 END
 
 STRINGTABLE 
@@ -1250,13 +1262,6 @@ END
 
 STRINGTABLE 
 BEGIN
-    ID_IMAGE_EXPLORE        "Open Windows Explorer and select the current image file name\nExplore Image"
-    CM_CLEAR_IMAGE_CACHE    "Clear the image and thumbnail cache\nClear Image and Thumbnail Cache (Ctrl+F5)"
-    CM_REFRESH_CONTENT      "Refresh current content\nRefresh Content (F5)"
-    CM_DROP_MOVE_IMAGE      "Move and rename the dropped image file\nMove and Rename Image File"
-    CM_DROP_COPY_IMAGE      "Copy and rename the dropped image file\nCopy and Rename Image File"
-    CM_CANCEL_DROP          "Cancel the drop operation\nCancel Drop"
-    CM_AUTO_DROP_DEFRAGMENT "Renames files in an auto-drop recipient to ensure contiguos numeric filename\nDefragment Image Files"
     CM_AUTO_DROP_UNDO       "Undo the last set of file operations\nUndo File Operation"
     CM_AUTO_DROP_REDO       "Redo the last set of undone file operations\nRedo File Operation"
     CM_AUTO_DROP_CLEAR_UNDO_REDO_STACKS 
@@ -1264,6 +1269,16 @@ BEGIN
     CM_REGENERATE_ALBUM     "Regenerates the files in the current album using the search specifiers' criteria\nRegenerate Album"
     CM_IS_AUTO_DROP         "Toggle this album as auto-drop recipient (four digit numeric filenames only)\tAuto Drop Recipient"
     CM_ARCHIVE_IMAGES       "Archive the image files in an album\nArchive Images"
+    CM_CUSTOM_ORDER_UNDO    "Undo the last drop reorder operation\nUndo Custom Order Operation"
+    CM_CUSTOM_ORDER_REDO    "Redo the last drop reorder operation\nRedo Custom Order Operation"
+    CM_CLEAR_CUSTOM_ORDER_UNDO_REDO_STACKS 
+                            "Clear the file operation undo and redo buffer\nClear File Operation Undo Buffer"
+    CK_SAVE_CU_UNDO_REDO_BUFFER 
+                            "Stores in album file the undo/redo information for file re-ordering, copying and moving\nStore Undo/Redo Buffer"
+    ID_FILE_OPEN_ALBUM_FOLDER 
+                            "Open folder in a new album\nOpen Album Folder (Ctrl+Shift+D)"
+    ID_EDIT_ARCHIVE_PASSWORD 
+                            "Edit password in image archive storage\nEdit Password"
 END
 
 STRINGTABLE 
@@ -1284,16 +1299,6 @@ END
 
 STRINGTABLE 
 BEGIN
-    CM_CUSTOM_ORDER_UNDO    "Undo the last drop reorder operation\nUndo Custom Order Operation"
-    CM_CUSTOM_ORDER_REDO    "Redo the last drop reorder operation\nRedo Custom Order Operation"
-    CM_CLEAR_CUSTOM_ORDER_UNDO_REDO_STACKS 
-                            "Clear the file operation undo and redo buffer\nClear File Operation Undo Buffer"
-    CK_SAVE_CU_UNDO_REDO_BUFFER 
-                            "Stores in album file the undo/redo information for file re-ordering, copying and moving\nStore Undo/Redo Buffer"
-    ID_FILE_OPEN_ALBUM_FOLDER 
-                            "Open folder in a new album\nOpen Album Folder (Ctrl+Shift+D)"
-    ID_EDIT_ARCHIVE_PASSWORD 
-                            "Edit password in image archive storage\nEdit Password"
     ID_ORDER_ORIGINAL       "Original Search Order"
     ID_ORDER_CUSTOM         "Custom Order"
     ID_ORDER_RANDOM_SHUFFLE "Shuffle images in random order\nRandom Shuffle"
@@ -1325,12 +1330,6 @@ BEGIN
     IDS_OVERWRITE_PROMPT    "The file ""%s"" already exists!\n\nDo you want to overwrite it?"
     IDS_INVALID_FORMAT_FMT  "Invalid format: %s\n\nA valid format must contain numeric or wildcards specs in the filename part."
     IDS_PROMPT_FILE_OP      "Are you sure you want to %s %d files to destination:\n\n%s ?\n\n"
-END
-
-STRINGTABLE 
-BEGIN
-    ID_IMAGE_SAVE_AS        "Save selected images to files\tSave Image As"
-    ID_FILE_EXTRACT_CATALOG "Extract the image catalog storage contents to a directory\nExtract Catalog Images"
 END
 
 #endif    // English (U.S.) resources

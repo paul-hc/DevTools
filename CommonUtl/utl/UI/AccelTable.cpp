@@ -8,6 +8,52 @@
 #endif
 
 
+// CAccelKeys implementation
+
+size_t CAccelKeys::FindPos( UINT cmdId )
+{
+	for ( size_t pos = 0; pos != m_keys.size(); ++pos )
+		if ( cmdId == m_keys[ pos ].cmd )
+			return pos;
+
+	return utl::npos;
+}
+
+void CAccelKeys::Augment( UINT cmdId, WORD vkKey, BYTE fVirtFlag /*= FVIRTKEY*/ )
+{
+	size_t foundPos = FindPos( cmdId );
+
+	ACCEL key = { fVirtFlag, vkKey, static_cast<WORD>( cmdId ) };
+
+	if ( foundPos != utl::npos )
+		m_keys[ foundPos ] = key;
+	else
+		m_keys.push_back( key );
+}
+
+bool CAccelKeys::Remove( UINT cmdId )
+{
+	size_t foundPos = FindPos( cmdId );
+	if ( utl::npos == foundPos )
+		return false;
+
+	m_keys.erase( m_keys.begin() + foundPos );
+	return true;
+}
+
+bool CAccelKeys::ReplaceCmdId( UINT cmdId, UINT newCmdId )
+{
+	size_t foundPos = FindPos( cmdId );
+	if ( utl::npos == foundPos )
+		return false;
+
+	m_keys[ foundPos ].cmd = static_cast<WORD>( newCmdId );
+	return true;
+}
+
+
+// CAccelTable implementation
+
 CAccelTable::CAccelTable( UINT accelId )
 	: m_hAccel( ::LoadAccelerators( CScopedResInst::Get(), MAKEINTRESOURCE( accelId ) ) )
 {
@@ -61,7 +107,7 @@ void CAccelTable::Create( ACCEL keys[], int count )
 	if ( m_hAccel != NULL )
 		::DestroyAcceleratorTable( m_hAccel );
 
-	m_hAccel = ::CreateAcceleratorTable( keys, count );
+	m_hAccel = ::CreateAcceleratorTable( const_cast< ACCEL* >( keys ), count );
 	ASSERT_PTR( m_hAccel );
 }
 

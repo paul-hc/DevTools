@@ -6,6 +6,7 @@
 #include "MainFrame.h"
 #include "ImageView.h"
 #include "SearchPatternDialog.h"
+#include "FileOperation.h"
 #include "OleImagesDataSource.h"
 #include "Application.h"
 #include "resource.h"
@@ -472,6 +473,12 @@ void CAlbumSettingsDialog::DoDataExchange( CDataExchange* pDX )
 			m_patternsListCtrl.EnableWindow( false );		// disable search patterns editing for catalog-based albums
 
 		m_imagesListCtrl.SetCompactIconSpacing();
+
+		CAccelTable* pImagesAccel = m_pImagesEditor->RefListAccel();
+		CAccelKeys imagesKeys;
+		pImagesAccel->QueryKeys( imagesKeys.m_keys );
+		imagesKeys.ReplaceCmdId( ID_REMOVE_ITEM, ID_IMAGE_DELETE );
+		pImagesAccel->Create( imagesKeys.m_keys );
 	}
 
 	switch ( pDX->m_bSaveAndValidate )
@@ -536,13 +543,18 @@ BEGIN_MESSAGE_MAP( CAlbumSettingsDialog, CLayoutDialog )
 	ON_NOTIFY( LVN_ITEMCHANGED, IDC_FOUND_IMAGES_LISTVIEW, OnLVnItemChanged_FoundImages )
 	ON_NOTIFY( LVN_GETDISPINFO, IDC_FOUND_IMAGES_LISTVIEW, OnLVnGetDispInfo_FoundImages )
 	ON_CONTROL( lv::LVN_ItemsReorder, IDC_FOUND_IMAGES_LISTVIEW, OnLVnItemsReorder_FoundImages )
+	ON_STN_DBLCLK( IDC_THUMB_PREVIEW_STATIC, OnStnDblClk_ThumbPreviewStatic )
+
 	ON_COMMAND_RANGE( ID_ORDER_ORIGINAL, ID_ORDER_BY_DIMENSION_DESC, OnImageOrder )
 	ON_UPDATE_COMMAND_UI_RANGE( ID_ORDER_ORIGINAL, ID_ORDER_BY_DIMENSION_DESC, OnUpdateImageOrder )
 	ON_CBN_SELCHANGE( IDC_LIST_ORDER_COMBO, OnCBnSelChange_ImageOrder )
 
-	ON_STN_DBLCLK( IDC_THUMB_PREVIEW_STATIC, OnStnDblClk_ThumbPreviewStatic )
-	// image file operations: ID_IMAGE_OPEN, ID_IMAGE_DELETE, ID_IMAGE_MOVE, ID_IMAGE_EXPLORE
-	ON_COMMAND_RANGE( ID_IMAGE_OPEN, ID_IMAGE_EXPLORE, OnImageFileOp )
+	// image file operations
+	ON_COMMAND( ID_IMAGE_OPEN, On_ImageOpen )
+	ON_COMMAND( ID_IMAGE_SAVE_AS, On_ImageSaveAs )
+	ON_COMMAND( ID_IMAGE_DELETE, On_ImageRemove )
+	ON_COMMAND( ID_IMAGE_EXPLORE, On_ImageExplore )
+	ON_UPDATE_COMMAND_UI_RANGE( ID_IMAGE_OPEN, ID_IMAGE_EXPLORE, OnUpdate_ImageFileOp )
 END_MESSAGE_MAP()
 
 void CAlbumSettingsDialog::OnOK( void )
@@ -852,6 +864,11 @@ void CAlbumSettingsDialog::OnLVnItemsReorder_FoundImages( void )
 	m_imagesListCtrl.SetSortByColumn( sortPair.first, sortPair.second );
 }
 
+void CAlbumSettingsDialog::OnStnDblClk_ThumbPreviewStatic( void )
+{
+	shell::Execute( this, m_thumbPreviewCtrl.GetImagePath().GetPtr() );
+}
+
 void CAlbumSettingsDialog::OnImageOrder( UINT cmdId )
 {
 	fattr::Order fileOrder = hlp::OrderOfCmd( cmdId );
@@ -879,34 +896,65 @@ void CAlbumSettingsDialog::OnCBnSelChange_ImageOrder( void )
 	SetupFoundImagesListView();
 }
 
-
-void CAlbumSettingsDialog::OnImageFileOp( UINT cmdId )
+void CAlbumSettingsDialog::On_ImageOpen( void )
 {
-	std::vector< fs::CPath > selFilePaths;
+	std::vector< fs::CFlexPath > selImagePaths;
+	m_imagesListCtrl.QuerySelectedItemPaths( selImagePaths );
 
-	if ( m_imagesListCtrl.QuerySelectedItemPaths( selFilePaths ) )
-		switch ( cmdId )
-		{
-			case ID_IMAGE_OPEN:
-				for ( std::vector< fs::CPath >::const_iterator itPath = selFilePaths.begin(); itPath != selFilePaths.end(); ++itPath )
-					app::GetApp()->OpenDocumentFile( itPath->GetPtr() );
-				break;
-			case ID_IMAGE_DELETE:
-				app::DeleteFiles( selFilePaths );
-				break;
-			case ID_IMAGE_MOVE:
-				app::MoveFiles( selFilePaths, this );
-				break;
-			case ID_IMAGE_EXPLORE:
-				for ( std::vector< fs::CPath >::const_iterator itPath = selFilePaths.begin(); itPath != selFilePaths.end(); ++itPath )
-					shell::ExploreAndSelectFile( itPath->GetPtr() );
-				break;
-			default:
-				ASSERT( false );
-		}
+	for ( std::vector< fs::CFlexPath >::const_iterator itImagePath = selImagePaths.begin(); itImagePath != selImagePaths.end(); ++itImagePath )
+		AfxGetApp()->OpenDocumentFile( itImagePath->GetPtr() );
 }
 
-void CAlbumSettingsDialog::OnStnDblClk_ThumbPreviewStatic( void )
+void CAlbumSettingsDialog::On_ImageSaveAs( void )
 {
-	shell::Execute( this, m_thumbPreviewCtrl.GetImagePath().GetPtr() );
+	std::vector< fs::CFlexPath > selImagePaths;
+	if ( !m_imagesListCtrl.QuerySelectedItemPaths( selImagePaths ) )
+		return;
+
+	std::vector< fs::CPath > destFilePaths;
+	if ( svc::PickDestImagePaths( destFilePaths, selImagePaths ) )
+	{
+		CFileOperation fileOp;
+
+		for ( size_t i = 0; i != destFilePaths.size(); ++i )
+			fileOp.Copy( selImagePaths[ i ], fs::CastFlexPath( destFilePaths[ i ] ) );
+	}
+}
+
+void CAlbumSettingsDialog::On_ImageRemove( void )
+{
+	std::vector< fs::CFlexPath > selImagePaths;
+	m_imagesListCtrl.QuerySelectedItemPaths( selImagePaths );
+
+	m_imagesListCtrl.DeleteSelection();
+	m_model.DeleteFromAlbum( selImagePaths );
+
+	SetDirty( false );			// allow changes to be applied: "OK"
+}
+
+void CAlbumSettingsDialog::On_ImageExplore( void )
+{
+	const CFileAttr* pCurrFileAttr = m_imagesListCtrl.GetSelected< CFileAttr >();
+	ASSERT_PTR( pCurrFileAttr );
+	shell::ExploreAndSelectFile( pCurrFileAttr->GetPath().GetPhysicalPath().GetPtr() );
+}
+
+void CAlbumSettingsDialog::OnUpdate_ImageFileOp( CCmdUI* pCmdUI )
+{
+	switch ( pCmdUI->m_nID )
+	{
+		case ID_IMAGE_OPEN:
+		case ID_IMAGE_SAVE_AS:
+		case ID_IMAGE_DELETE:
+			pCmdUI->Enable( m_imagesListCtrl.AnySelected() );
+			break;
+		case ID_IMAGE_EXPLORE:
+		{
+			const CFileAttr* pCurrFileAttr = m_imagesListCtrl.GetSelected< CFileAttr >();
+			pCmdUI->Enable( pCurrFileAttr != NULL && pCurrFileAttr->IsValid() );
+			break;
+		}
+		default:
+			pCmdUI->Enable( false );
+	}
 }

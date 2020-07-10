@@ -4,7 +4,7 @@
 #include "Workspace.h"
 #include "DocTemplates.h"
 #include "SearchPattern.h"
-#include "FileAttr.h"
+#include "FileAttrAlgorithms.h"
 #include "AlbumSettingsDialog.h"
 #include "CatalogStorageService.h"
 #include "ProgressService.h"
@@ -378,7 +378,7 @@ bool CAlbumDoc::BuildAlbum( const fs::CPath& searchPath )
 			UpdateAllViews( NULL, Hint_DocSlideDataChanged );		// refresh view navigation from document (selected pos, etc)
 	}
 
-	return true;		// keep it open regardless /*m_model.AnyFoundFiles();*/
+	return true;		// keep it open regardless of m_model.AnyFoundFiles();
 }
 
 void CAlbumDoc::RegenerateModel( AlbumModelChange reason /*= FM_Init*/ )
@@ -406,10 +406,10 @@ void CAlbumDoc::RegenerateModel( AlbumModelChange reason /*= FM_Init*/ )
 	if ( FM_Regeneration == reason )
 		UpdateAllViewsOfType< CAlbumImageView >( NULL, Hint_RestoreSelection );		// restore backed-up selection for all the views
 
+	// since auto-drop operation is usually done from opened albums (as well as Windows Explorer),
+	// also redraw any of the opened views that may be affected by this, except for those views
+	// belonging to this document, which is just updated.
 	if ( FM_AutoDropOp == reason )
-		// since auto-drop operation is usually done from opened albums (as well as Windows Explorer),
-		// also redraw any of the opened views that may be affected by this, except for those views
-		// belonging to this document, which is just updated.
 		app::GetApp()->UpdateAllViews( Hint_FileChanged, this );
 }
 
@@ -745,10 +745,19 @@ END_MESSAGE_MAP()
 
 void CAlbumDoc::OnExtractCatalog( void )
 {
-	fs::CPath destFolderPath = GetDocFilePath().GetParentPath();
+	fs::CPath destFolderPath = GetDocFilePath().GetFname() + _T("_extract");
 
 	if ( shell::PickFolder( destFolderPath.Ref(), NULL, 0, _T("Select Extract Folder") ) )
 	{
+		std::vector< fs::CFlexPath > srcImagePaths;
+		utl::Assign( srcImagePaths, m_model.GetImagesModel().GetFileAttrs(), func::ToFilePath() );
+
+		// make deep destination paths
+		std::vector< fs::CPath > destImagePaths( srcImagePaths.begin(), srcImagePaths.end() );
+		svc::MakeDestFilePaths( destImagePaths, srcImagePaths, destFolderPath, Deep );
+
+		if ( svc::CheckOverrideExistingFiles( destImagePaths ) )
+			svc::CopyFiles( srcImagePaths, destImagePaths, Deep );
 	}
 }
 
@@ -765,12 +774,7 @@ void CAlbumDoc::On_ImageSaveAs( void )
 
 	std::vector< fs::CPath > destFilePaths;
 	if ( svc::PickDestImagePaths( destFilePaths, srcFilePaths ) )
-	{
-		CFileOperation fileOp;
-
-		for ( size_t i = 0; i != destFilePaths.size(); ++i )
-			fileOp.Copy( srcFilePaths[ i ], fs::CastFlexPath( destFilePaths[ i ] ) );
-	}
+		svc::CopyFiles( srcFilePaths, destFilePaths, Shallow );
 }
 
 void CAlbumDoc::OnUpdate_AnyCurrImage( CCmdUI* pCmdUI )
@@ -800,37 +804,6 @@ void CAlbumDoc::On_ImageOpen( void )
 		AfxGetApp()->OpenDocumentFile( itImagePath->GetPtr() );
 }
 
-void CAlbumDoc::DeleteFromAlbum( const std::vector< fs::CFlexPath >& selFilePaths )
-{
-	CImagesModel& rImagesModel = m_model.RefImagesModel();
-
-	std::vector< size_t > indexes;
-	indexes.reserve( selFilePaths.size() );
-
-	for ( std::vector< fs::CFlexPath >::const_iterator itImagePath = selFilePaths.begin(); itImagePath != selFilePaths.end(); ++itImagePath )
-	{
-		size_t foundPos = rImagesModel.FindPosFileAttr( *itImagePath );
-		if ( foundPos != utl::npos )
-			indexes.push_back( foundPos );
-	}
-
-	if ( !indexes.empty() )
-	{
-		for ( size_t i = indexes.size(); i-- != 0; )
-			rImagesModel.RemoveFileAttrAt( indexes[ i ] );
-
-		size_t newSelPos = std::min( indexes.front(), rImagesModel.GetFileAttrs().size() - 1 );
-		m_slideData.SetCurrentIndex( static_cast<int>( newSelPos ) );
-	}
-
-	// reset remaining attributes order as original (since the old baseline positions got invalidated)
-	rImagesModel.StoreBaselineSequence();
-	m_model.StoreFileOrder( fattr::OriginalOrder );
-
-	SetModifiedFlag( IsStorageAlbum() ? DirtyMustRecreate : Dirty );		// mark document as modified in order to prompt for saving - force storage recreation to collect garbage (deleted images)
-	OnAlbumModelChanged();
-}
-
 void CAlbumDoc::On_ImageDelete( void )
 {
 	std::vector< fs::CFlexPath > selFilePaths;
@@ -840,19 +813,31 @@ void CAlbumDoc::On_ImageDelete( void )
 	if ( path::QueryPhysicalPaths( physicalPaths, selFilePaths ) )
 		shell::DeleteFiles( physicalPaths );
 
-	DeleteFromAlbum( selFilePaths );
+	TCurrImagePos newCurrentIndex = m_model.DeleteFromAlbum( selFilePaths );
+	m_slideData.SetCurrentIndex( newCurrentIndex );
+
+	SetModifiedFlag( IsStorageAlbum() ? DirtyMustRecreate : Dirty );		// mark document as modified in order to prompt for saving - force storage recreation to collect garbage (deleted images)
+	OnAlbumModelChanged();
 }
 
 void CAlbumDoc::On_ImageMove( void )
 {
-	std::vector< fs::CFlexPath > selFilePaths;
-	QuerySelectedImagePaths( selFilePaths );
+	fs::CPath destFolderPath;
+	if ( !shell::PickFolder( destFolderPath.Ref(), NULL, 0, _T("Select Destination Folder") ) )
+		return;
 
-	std::vector< fs::CFlexPath > complexPaths = selFilePaths;
-	std::vector< fs::CPath > physicalPaths;
+	std::vector< fs::CFlexPath > srcFilePaths;
+	QuerySelectedImagePaths( srcFilePaths );
 
-	if ( path::ExtractPhysicalPaths( physicalPaths, complexPaths ) )
-		app::MoveFiles( physicalPaths );
+	std::vector< fs::CPath > destFilePaths;
+	svc::MakeDestFilePaths( destFilePaths, srcFilePaths, destFolderPath, Shallow );
+
+	// move a mix of physical (MOVE) and complex (COPY) paths
+	size_t count = svc::RelocateFiles( srcFilePaths, destFilePaths, Shallow );
+	if ( count != srcFilePaths.size() )
+		ui::ReportError( str::Format( _T("%d out of %d files encountered a move issue!"), srcFilePaths.size() - count, srcFilePaths.size() ), MB_ICONWARNING );
+
+	On_ImageDelete();			// delete from the album the moved source files
 }
 
 

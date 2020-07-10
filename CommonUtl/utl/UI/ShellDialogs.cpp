@@ -149,7 +149,7 @@ namespace shell
 		bool RunFileDialog( std::tstring& rFilePath, CFileDialog* pFileDialog )
 		{
 			ASSERT_PTR( pFileDialog );
-			if ( !pFileDialog->DoModal() )
+			if ( pFileDialog->DoModal() != IDOK )
 				return false;
 
 			rFilePath = pFileDialog->GetPathName().GetString();

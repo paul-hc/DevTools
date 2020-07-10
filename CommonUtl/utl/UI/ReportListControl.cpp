@@ -1690,6 +1690,33 @@ void CReportListControl::SelectAll( void )
 		SetItemState( i, LVNI_SELECTED, LVNI_SELECTED );
 }
 
+
+int CReportListControl::DeleteSelection( void )
+{
+	std::vector< int > selIndexes;
+	if ( !GetSelection( selIndexes ) )
+		return GetCaretIndex();
+
+	lv::CNmItemsRemoved removeNotify( this, selIndexes.front() );
+	QueryObjectsByIndex( removeNotify.m_removedObjects, selIndexes );
+
+	{
+		CScopedInternalChange internalChange( this );
+
+		for ( std::vector< int >::const_reverse_iterator itSelIndex = selIndexes.rbegin(); itSelIndex != selIndexes.rend(); ++itSelIndex )
+			DeleteItem( *itSelIndex );
+	}
+
+	int newSelIndex = std::min( selIndexes.front(), GetItemCount() - 1 );
+
+	if ( newSelIndex != -1 )
+		SetCurSel( newSelIndex );
+
+	removeNotify.m_nmHdr.NotifyParent();			// lv::LVN_ItemsRemoved -> notify parent to delete owned objects
+
+	return newSelIndex;
+}
+
 void CReportListControl::MoveSelectionTo( seq::MoveTo moveTo )
 {
 	{

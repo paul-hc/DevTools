@@ -97,8 +97,6 @@ void CTransferAlbumService::CloneDestAlbumDoc( const CAlbumDoc* pSrcAlbumDoc )
 	m_pDestAlbumDoc->CopyAlbumState( pSrcAlbumDoc );		// copy album state (slide data, background color, etc)
 
 	CAlbumModel* pDestModel = m_pDestAlbumDoc->RefModel();
-	pDestModel->SetPersistFlag( CAlbumModel::UseDeepStreamPaths, CAlbumModel::ShouldUseDeepStreamPaths() );		// keep track of storage saving structure
-
 	CImagesModel* pDestImagesModel = &pDestModel->RefImagesModel();
 
 	// copy the transfer attributes as album attributes

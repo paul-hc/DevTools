@@ -463,7 +463,7 @@ private:
 	void NotifyCheckStatesChanged( void );
 	size_t ApplyCheckStateToSelectedItems( int toggledIndex, int checkState );
 public:
-	// caret and selection
+	// CARET and SELECTION
 	int GetCaretIndex( void ) const { return FindItemWithState( LVNI_FOCUSED ); }
 	bool SetCaretIndex( int index, bool doSet = true );
 
@@ -501,8 +501,9 @@ public:
 	template< typename ObjectT >
 	void SelectObjects( const std::vector< ObjectT* >& objects );
 
-	// resequence
-	void MoveSelectionTo( seq::MoveTo moveTo );
+	// selection service API
+	int DeleteSelection( void );						// sends lv::LVN_ItemsRemoved
+	void MoveSelectionTo( seq::MoveTo moveTo );			// sends lv::LVN_ItemsReorder (resequence)
 public:
 	// clipboard and drag-n-drop data
 	enum { ListSourcesMask = ds::Indexes | ds::ItemsText | ds::ShellFiles };

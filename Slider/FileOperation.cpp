@@ -9,6 +9,7 @@
 #include "utl/RuntimeException.h"
 #include "utl/StringUtilities.h"
 #include "utl/UI/ShellDialogs.h"
+#include "utl/UI/ShellUtilities.h"
 #include "utl/UI/TaskDialog.h"
 #include "utl/UI/WicImage.h"
 
@@ -19,6 +20,57 @@
 
 namespace svc
 {
+	size_t CopyFiles( const std::vector< fs::CFlexPath >& srcFilePaths, const std::vector< fs::CPath >& destFilePaths, RecursionDepth destDepth /*= Shallow*/ )
+	{
+		REQUIRE( srcFilePaths.size() == destFilePaths.size() );
+
+		CFileOperation fileOp;
+		size_t count = 0;
+
+		for ( size_t i = 0; i != srcFilePaths.size(); ++i )
+			if ( Shallow == destDepth || fs::CreateDirPath( destFilePaths[ i ].GetParentPath().GetPtr() ) )
+			{
+				if ( fileOp.Copy( srcFilePaths[ i ], fs::CastFlexPath( destFilePaths[ i ] ) ) )
+					++count;
+			}
+
+		return count;
+	}
+
+	size_t RelocateFiles( const std::vector< fs::CFlexPath >& srcFilePaths, const std::vector< fs::CPath >& destFilePaths, RecursionDepth destDepth /*= Shallow*/ )
+	{
+		REQUIRE( srcFilePaths.size() == destFilePaths.size() );
+
+		std::vector< fs::CPath > physicalSrc, physicalDest;
+
+		std::vector< fs::CFlexPath > complexSrc;
+		std::vector< fs::CPath > complexDest;
+
+		for ( size_t i = 0; i != srcFilePaths.size(); ++i )
+			if ( srcFilePaths[ i ].IsComplexPath() )
+			{
+				complexSrc.push_back( srcFilePaths[ i ] );
+				complexDest.push_back( destFilePaths[ i ] );
+			}
+			else
+			{
+				physicalSrc.push_back( srcFilePaths[ i ] );
+				physicalDest.push_back( destFilePaths[ i ] );
+			}
+
+		size_t count = 0;
+
+		if ( !physicalSrc.empty() )
+			if ( shell::MoveFiles( physicalSrc, physicalDest ) )
+				count += physicalSrc.size();
+
+		if ( !complexSrc.empty() )
+			count += svc::CopyFiles( complexSrc, complexDest, destDepth );
+
+		return count;
+	}
+
+
 	bool PickDestImagePaths( std::vector< fs::CPath >& rDestFilePaths, const std::vector< fs::CFlexPath >& srcFilePaths )
 	{
 		rDestFilePaths.clear();
@@ -42,28 +94,60 @@ namespace svc
 			if ( !shell::PickFolder( destFolderPath.Ref(), NULL ) )		// multiple files: pick destination folder
 				return false;
 
-			utl::Assign( rDestFilePaths, srcFilePaths, func::tor::StringOf() );
-			utl::for_each( rDestFilePaths, func::StripToFilename() );
-			utl::for_each( rDestFilePaths, func::PrefixPath( destFolderPath ) );
+			MakeDestFilePaths( rDestFilePaths, srcFilePaths, destFolderPath, Shallow );
 
-			CPathUniqueMaker uniqueMaker;
-			uniqueMaker.UniquifyPaths( rDestFilePaths );
-
-			if ( utl::Any( rDestFilePaths, pred::FileExist() ) )
-			{
-				std::vector< fs::CPath > destExistingPaths;
-				utl::QueryThat( destExistingPaths, rDestFilePaths, pred::FileExist() );
-
-				CTaskDialog dlg( _T("Confirm Save As"), _T("Override existing files?"), str::ToNonBreakingSpace( str::Join( destExistingPaths, _T("\n") ) ),
-								 TDCBF_YES_BUTTON | TDCBF_NO_BUTTON, TDF_SIZE_TO_CONTENT );
-
-				dlg.SetMainIcon( TD_WARNING_ICON );
-				if ( dlg.DoModal( NULL ) != IDYES )
-					return false;
-			}
+			if ( !CheckOverrideExistingFiles( rDestFilePaths ) )
+				return false;
 		}
 
 		return true;
+	}
+
+	bool CheckOverrideExistingFiles( const std::vector< fs::CPath > destFilePaths, const TCHAR* pTitle /*= NULL*/ )
+	{
+		std::vector< fs::CPath > existingPaths;
+		utl::QueryThat( existingPaths, destFilePaths, pred::FileExist() );
+
+		if ( !existingPaths.empty() )
+		{
+			if ( str::IsEmpty( pTitle ) )
+				pTitle = _T("Confirm Save As");
+
+			CTaskDialog dlg( pTitle, _T("Override existing files?"), str::ToNonBreakingSpace( str::Join( existingPaths, _T("\n") ) ),
+							 TDCBF_YES_BUTTON | TDCBF_NO_BUTTON, TDF_SIZE_TO_CONTENT );
+
+			dlg.SetMainIcon( TD_WARNING_ICON );
+			if ( dlg.DoModal( NULL ) != IDYES )
+				return false;			// cancelled by user
+		}
+
+		return true;
+	}
+
+
+	void MakeDestFilePaths( std::vector< fs::CPath >& rDestFilePaths, const std::vector< fs::CFlexPath >& srcFilePaths, const fs::CPath& destFolderPath, RecursionDepth destDepth /*= Shallow*/ )
+	{
+		utl::Assign( rDestFilePaths, srcFilePaths, func::tor::StringOf() );
+
+		if ( Shallow == destDepth )
+		{
+			utl::for_each( rDestFilePaths, func::StripToFilename() );
+
+			CPathUniqueMaker uniqueMaker;
+			uniqueMaker.UniquifyPaths( rDestFilePaths );
+		}
+		else
+		{
+			fs::CPath commonDirPath = path::ExtractCommonParentPath( rDestFilePaths );
+			if ( !commonDirPath.IsEmpty() )
+				path::StripDirPrefix( rDestFilePaths, commonDirPath.GetPtr() );
+			else
+				path::StripRootPrefix( rDestFilePaths );		// ignore drive letter
+		}
+
+		utl::for_each( rDestFilePaths, func::PrefixPath( destFolderPath ) );
+
+		ENSURE( srcFilePaths.size() == rDestFilePaths.size() );
 	}
 }
 

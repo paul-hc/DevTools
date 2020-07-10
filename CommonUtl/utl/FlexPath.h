@@ -111,4 +111,16 @@ namespace pred
 }
 
 
+namespace func
+{
+	struct StripPhysicalPath
+	{
+		void operator()( fs::CPath& rPath ) const
+		{
+			rPath.Set( path::GetEmbedded( rPath.GetPtr() ) );
+		}
+	};
+}
+
+
 #endif // FlexPath_h

@@ -1,7 +1,6 @@
 
 #include "stdafx.h"
 #include "SearchPattern.h"
-#include "ICatalogStorage.h"
 #include "Application_fwd.h"
 #include "resource.h"
 #include "utl/EnumTags.h"
@@ -84,7 +83,7 @@ CSearchPattern::Type CSearchPattern::CheckType( void ) const
 	if ( fs::IsValidDirectory( filePath.GetPtr() ) )
 		return DirPath;
 	else if ( filePath.FileExist() )
-		if ( CCatalogStorageFactory::HasCatalogExt( filePath.GetPtr() ) )
+		if ( app::IsCatalogFile( filePath.GetPtr() ) )
 			return CatalogDocFile;
 		else
 			return ExplicitFile;
@@ -94,7 +93,7 @@ CSearchPattern::Type CSearchPattern::CheckType( void ) const
 
 CSearchPattern::Type CSearchPattern::BestGuessType( const fs::CPath& searchPath )
 {
-	if ( CCatalogStorageFactory::HasCatalogExt( searchPath.GetPtr() ) )
+	if ( app::IsCatalogFile( searchPath.GetPtr() ) )
 		return CatalogDocFile;
 	else if ( str::IsEmpty( searchPath.GetExt() ) )
 		return DirPath;

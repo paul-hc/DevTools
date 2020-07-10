@@ -12,6 +12,8 @@
 class CFileAttr;
 namespace ui { interface IProgressService; }
 
+typedef int TCurrImagePos;
+
 
 class CAlbumModel
 {
@@ -31,12 +33,18 @@ public:
 	CCatalogStorageHost* GetStorageHost( void ) { return &m_storageHost; }
 	ICatalogStorage* GetCatalogStorage( void ) const;			// opened storage if model is based on a catalog storage
 
-	void OpenAllStorages( void );
-	void CloseAllStorages( void );
-
 	const CSearchModel* GetSearchModel( void ) const { return &m_searchModel; }
 	CSearchModel* RefSearchModel( void ) { return &m_searchModel; }
 
+	const CImagesModel& GetImagesModel( void ) const { return m_imagesModel; }
+	CImagesModel& RefImagesModel( void ) { return m_imagesModel; }
+
+	bool SetupSingleSearchPattern( CSearchPattern* pSearchPattern );
+	void SearchForFiles( CWnd* pParentWnd, bool reportEmpty = true ) throws_( CException* );
+
+	void OpenAllStorages( void );
+	void CloseAllStorages( void );
+public:
 	enum PersistFlag
 	{
 		AutoRegenerate		= BIT_FLAG( 0 ),		// auto re-generates after loading (de-serialization)
@@ -48,17 +56,12 @@ public:
 
 	static bool ShouldUseDeepStreamPaths( void );
 
-	bool SetupSingleSearchPattern( CSearchPattern* pSearchPattern );
-	void SearchForFiles( CWnd* pParentWnd, bool reportEmpty = true ) throws_( CException* );
-
 	bool MustAutoRegenerate( void ) const { return HasPersistFlag( AutoRegenerate ) || IsAutoDropRecipient(); }
 
 	// auto-drop file reorder & rename
 	bool IsAutoDropRecipient( bool checkValidPath = true ) const;		// single search pattern
 public:
 	// found image files
-	const CImagesModel& GetImagesModel( void ) const { return m_imagesModel; }
-	CImagesModel& RefImagesModel( void ) { return m_imagesModel; }
 	void SwapFileAttrs( std::vector< CFileAttr* >& rFileAttributes ) { m_imagesModel.RefFileAttrs().swap( rFileAttributes ); }
 
 	bool AnyFoundFiles( void ) const { return !m_imagesModel.IsEmpty(); }
@@ -77,6 +80,11 @@ public:
 	// custom order
 	bool IsCustomOrder( void ) const { return fattr::CustomOrder == GetFileOrder(); }
 	void SetCustomOrderSequence( const std::vector< CFileAttr* >& customSequence );			// explicit custom order
+public:
+	/** SERVICE API **/
+
+	// image file operations
+	TCurrImagePos DeleteFromAlbum( const std::vector< fs::CFlexPath >& selFilePaths );
 
 	// custom order Drag & Drop
 	bool DropCustomOrderIndexes( int& rDropIndex, std::vector< int >& rSelIndexes );

@@ -124,7 +124,7 @@ template< typename PathContainerT >
 bool CAlbumImageView::QuerySelImagePaths( PathContainerT& rSelImagePaths ) const
 {
 	CListViewState files( StoreByString );
-	m_pPeerThumbView->GetListViewState( files );
+	m_pPeerThumbView->GetListViewState( files, false );
 
 	utl::Assign( rSelImagePaths, files.m_pStringImpl->m_selItems, func::tor::StringOf() );
 	return !rSelImagePaths.empty();

@@ -24,6 +24,8 @@ public:
 	virtual CCmdTarget* GetCmdTarget( void );
 	virtual bool HandleTranslateMessage( MSG* pMsg );
 	virtual bool HandleCtrlCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo );
+
+	CAccelTable* RefListAccel( void ) { return &m_listAccel; }
 private:
 	CReportListControl* m_pListCtrl;
 	CToolBar* m_pToolbar;

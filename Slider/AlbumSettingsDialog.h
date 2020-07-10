@@ -119,13 +119,17 @@ protected:
 	afx_msg void OnLVnItemChanged_FoundImages( NMHDR* pNmHdr, LRESULT* pResult );
 	afx_msg void OnLVnGetDispInfo_FoundImages( NMHDR* pNmHdr, LRESULT* pResult );
 	afx_msg void OnLVnItemsReorder_FoundImages( void );
+	afx_msg void OnStnDblClk_ThumbPreviewStatic( void );
 
 	afx_msg void OnImageOrder( UINT cmdId );
 	afx_msg void OnUpdateImageOrder( CCmdUI* pCmdUI );
 	afx_msg void OnCBnSelChange_ImageOrder( void );
 
-	afx_msg void OnImageFileOp( UINT cmdId );
-	afx_msg void OnStnDblClk_ThumbPreviewStatic( void );
+	afx_msg void On_ImageOpen( void );
+	afx_msg void On_ImageSaveAs( void );
+	afx_msg void On_ImageRemove( void );
+	afx_msg void On_ImageExplore( void );
+	afx_msg void OnUpdate_ImageFileOp( CCmdUI* pCmdUI );
 
 	DECLARE_MESSAGE_MAP()
 };

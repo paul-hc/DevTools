@@ -110,27 +110,7 @@ void CListCtrlEditorFrame::OnUpdate_SingleSelected( CCmdUI* pCmdUI )
 
 void CListCtrlEditorFrame::OnRemoveItem( void )
 {
-	std::vector< int > selIndexes;
-	if ( !m_pListCtrl->GetSelection( selIndexes ) )
-		return;				// command not disabled?
-
-	lv::CNmItemsRemoved info( m_pListCtrl, selIndexes.front() );
-
-	m_pListCtrl->QueryObjectsByIndex( info.m_removedObjects, selIndexes );
-
-	{
-		CScopedInternalChange scopedChange( m_pListCtrl );
-
-		for ( size_t i = selIndexes.size(); i-- != 0; )
-			m_pListCtrl->DeleteItem( selIndexes[ i ] );
-	}
-
-	info.m_minSelIndex = std::min( info.m_minSelIndex, m_pListCtrl->GetItemCount() - 1 );
-
-	if ( info.m_minSelIndex != -1 )
-		m_pListCtrl->SetCaretIndex( info.m_minSelIndex );
-
-	info.m_nmHdr.NotifyParent();				// lv::LVN_ItemsRemoved -> notify parent to delete owned objects
+	m_pListCtrl->DeleteSelection();
 }
 
 void CListCtrlEditorFrame::OnRemoveAll( void )

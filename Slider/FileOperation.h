@@ -40,7 +40,15 @@ private:
 
 namespace svc
 {
+	size_t CopyFiles( const std::vector< fs::CFlexPath >& srcFilePaths, const std::vector< fs::CPath >& destFilePaths, RecursionDepth destDepth = Shallow );
+	size_t RelocateFiles( const std::vector< fs::CFlexPath >& srcFilePaths, const std::vector< fs::CPath >& destFilePaths, RecursionDepth destDepth = Shallow );		// mix: MOVE physical, COPY complex
+
+
 	bool PickDestImagePaths( std::vector< fs::CPath >& rDestFilePaths, const std::vector< fs::CFlexPath >& srcFilePaths );
+	bool CheckOverrideExistingFiles( const std::vector< fs::CPath > destFilePaths, const TCHAR* pTitle = NULL );
+
+
+	void MakeDestFilePaths( std::vector< fs::CPath >& rDestFilePaths, const std::vector< fs::CFlexPath >& srcFilePaths, const fs::CPath& destFolderPath, RecursionDepth destDepth = Shallow );
 }
 
 

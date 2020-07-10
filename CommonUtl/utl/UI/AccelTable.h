@@ -18,6 +18,7 @@ public:
 	void Load( UINT accelId );
 	bool LoadOnce( UINT accelId );								// convenient for static data member initialization
 	void Create( ACCEL keys[], int count );
+	void Create( std::vector< ACCEL >& keys ) { Create( ARRAY_PAIR_V( keys ) ); }
 
 	void Augment( UINT accelId );
 	void Augment( ACCEL keys[], int count );
@@ -28,6 +29,18 @@ public:
 	static bool IsKeyMessage( const MSG* pMsg ) { ASSERT_PTR( pMsg ); return pMsg->message >= WM_KEYFIRST && pMsg->message <= WM_KEYLAST; }
 private:
 	HACCEL m_hAccel;
+};
+
+
+struct CAccelKeys
+{
+	size_t FindPos( UINT cmdId );
+
+	void Augment( UINT cmdId, WORD vkKey, BYTE fVirtFlag = FVIRTKEY );
+	bool Remove( UINT cmdId );
+	bool ReplaceCmdId( UINT cmdId, UINT newCmdId );
+public:
+	std::vector< ACCEL > m_keys;
 };
 
 
