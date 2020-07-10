@@ -44,6 +44,7 @@ public:
 
 	void OpenAllStorages( void );
 	void CloseAllStorages( void );
+	void QueryEmbeddedStorages( std::vector< fs::CPath >& rSubStoragePaths ) const;
 public:
 	enum PersistFlag
 	{

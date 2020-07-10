@@ -119,7 +119,6 @@ std::auto_ptr< CFileAttr > CImagesModel::RemoveFileAttrAt( size_t pos )
 	return pRemovedFileAttr;
 }
 
-
 bool CImagesModel::AddStoragePath( const fs::CPath& storagePath )
 {
 	return utl::AddUnique( m_storagePaths, storagePath );

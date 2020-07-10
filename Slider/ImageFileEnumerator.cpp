@@ -156,6 +156,14 @@ void CImageFileEnumerator::AddFoundFile( const TCHAR* pFilePath )
 
 				if ( app::IsCatalogFile( filePath.GetPtr() ) )
 					m_foundImages.AddStoragePath( filePath );
+				else
+				{	// augment embedded catalog storages in a .sld
+					std::vector< fs::CPath > subStoragePaths;
+					pAlbumDoc->GetModel()->QueryEmbeddedStorages( subStoragePaths );
+
+					for ( std::vector< fs::CPath >::const_iterator itStoragePath = subStoragePaths.begin(); itStoragePath != subStoragePaths.end(); ++itStoragePath )
+						m_foundImages.AddStoragePath( *itStoragePath );
+				}
 			}
 		}
 	}

@@ -103,13 +103,15 @@ void CSearchPatternDialog::DoDataExchange( CDataExchange* pDX )
 
 void CSearchPatternDialog::ValidatePattern( ui::ComboField byField /*= BySel*/ )
 {
-	std::tstring searchPath = ui::GetComboSelText( m_searchPathCombo, byField );
-	bool isDirPath = fs::IsValidDirectory( searchPath.c_str() );
-	bool validPath = isDirPath || fs::IsValidFile( searchPath.c_str() );
+	fs::CPath searchPath = ui::GetComboSelText( m_searchPathCombo, byField );
 
-	ui::EnableControl( m_hWnd, IDOK, validPath );
+	const CSearchPattern pattern( searchPath );
+	bool validPattern = pattern.IsValidPath();
+	bool isDirPath = pattern.IsDirPath();
+
 	ui::EnableControl( m_hWnd, IDC_SEARCH_FILTERS_COMBO, isDirPath );
 	ui::EnableControl( m_hWnd, IDC_SEARCH_MODE_COMBO, isDirPath );
+	ui::EnableControl( m_hWnd, IDOK, validPattern );
 }
 
 

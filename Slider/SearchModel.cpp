@@ -56,7 +56,7 @@ void CSearchModel::Stream( CArchive& archive )
 void CSearchModel::AugmentStoragePaths( std::vector< fs::CPath >& rStoragePaths ) const
 {
 	for ( std::vector< CSearchPattern* >::const_iterator itPattern = m_patterns.begin(); itPattern != m_patterns.end(); ++itPattern )
-		if ( ( *itPattern )->IsCatalogDocFile() )
+		if ( ( *itPattern )->IsStorageAlbumFile() )
 			utl::AddUnique( rStoragePaths, ( *itPattern )->GetFilePath() );		// unique augmentation to prevent pushing duplicates in CAlbumModel::m_storageHost
 }
 
@@ -84,6 +84,12 @@ std::pair< CSearchPattern*, bool > CSearchModel::AddSearchPath( const fs::CPath&
 		return std::pair< CSearchPattern*, bool >( m_patterns[ foundPos ], false );			// pattern with path key already exists
 
 	CSearchPattern* pNewPattern = new CSearchPattern( searchPath );
+
+	if ( !pNewPattern->IsValidPath() )
+	{
+		delete pNewPattern;
+		return std::pair< CSearchPattern*, bool >( NULL, false );			// could be a stray file of incompatible type
+	}
 
 	AddPattern( pNewPattern, pos );
 	return std::pair< CSearchPattern*, bool >( pNewPattern, true );							// new pattern

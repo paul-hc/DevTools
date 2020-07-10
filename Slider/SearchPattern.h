@@ -4,6 +4,7 @@
 
 #include "utl/FileSystem.h"
 #include "utl/PathItemBase.h"
+#include "Application_fwd.h"
 
 
 class CEnumTags;
@@ -15,8 +16,8 @@ public:
 	enum Type
 	{
 		DirPath,			// directory path
-		CatalogDocFile,		// file-path of an image catalog, i.e. OLE compound file storage (.ias, etc)
-		ExplicitFile		// explicit file specifier (not a pattern)
+		AlbumFile,			// file-path of an album file: slide (.sld) or image catalog, i.e. OLE compound file storage (.ias, etc)
+		SingleImage			// image file path (not a pattern)
 	};
 
 	enum SearchMode
@@ -59,9 +60,10 @@ public:
 	bool IsValidPath( void ) const;
 
 	bool IsDirPath( void ) const { return DirPath == m_type; }
-	bool IsCatalogDocFile( void ) const { return CatalogDocFile == m_type; }
-	bool IsExplicitFile( void ) const { return ExplicitFile == m_type; }
+	bool IsAlbumFile( void ) const { return AlbumFile == m_type; }
+	bool IsSingleImage( void ) const { return SingleImage == m_type; }
 
+	bool IsStorageAlbumFile( void ) const { return IsAlbumFile() && app::IsCatalogFile( GetFilePath().GetPtr() ); }
 	bool IsAutoDropDirPath( bool checkValidPath = true ) const { return IsDirPath() && ( !checkValidPath || IsValidPath() ) && AutoDropNumFormat == m_searchMode; }
 
 	void EnumImageFiles( fs::IEnumerator* pEnumerator ) const;

@@ -262,6 +262,12 @@ namespace app
 		return s_wildFilters;
 	}
 
+	bool BrowseAlbumFile( fs::CPath& rFullPath, CWnd* pParentWnd, shell::BrowseMode browseMode /*= shell::FileOpen*/, DWORD flags /*= 0*/ )
+	{
+		static const std::tstring stgFilters = CAlbumFilterStore::Instance().MakeCatalogStgFilters();
+		return shell::BrowseForFile( rFullPath, pParentWnd, browseMode, stgFilters.c_str(), flags );
+	}
+
 	bool BrowseCatalogFile( fs::CPath& rFullPath, CWnd* pParentWnd, shell::BrowseMode browseMode /*= shell::FileOpen*/, DWORD flags /*= 0*/ )
 	{
 		static const std::tstring stgFilters = CAlbumFilterStore::Instance().MakeCatalogStgFilters();

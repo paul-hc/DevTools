@@ -271,7 +271,7 @@ void CAlbumSettingsDialog::CombineTextEffectAt( ui::CTextEffect& rTextEffect, LP
 	{
 		const CSearchPattern* pPattern = CReportListControl::AsPtr< CSearchPattern >( rowKey );
 
-		if ( PatternPath == subItem && pPattern->IsCatalogDocFile() )
+		if ( PatternPath == subItem && pPattern->IsStorageAlbumFile() )
 			rTextEffect |= s_stgFileEffect;						// highlight storage item
 
 		if ( IsNewFilePath( pPattern->GetFilePath() ) )
@@ -609,10 +609,13 @@ void CAlbumSettingsDialog::OnLVnDropFiles_Patterns( NMHDR* pNmHdr, LRESULT* pRes
 	for ( std::vector< fs::CPath >::const_iterator itSearchPath = pNmDropFiles->m_filePaths.begin(); itSearchPath != pNmDropFiles->m_filePaths.end(); ++itSearchPath )
 	{
 		std::pair< CSearchPattern*, bool > patternPair = pSearchModel->AddSearchPath( *itSearchPath, dropPos );
+		if ( patternPair.first != NULL )
+		{
+			droppedPatterns.push_back( patternPair.first );
 
-		droppedPatterns.push_back( patternPair.first );
-		if ( patternPair.second )
-			++dropPos;
+			if ( patternPair.second )
+				++dropPos;
+		}
 	}
 
 	SetupPatternsListView();

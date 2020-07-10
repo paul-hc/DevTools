@@ -98,6 +98,7 @@ namespace app
 	public:
 		static CAlbumFilterStore& Instance( void );
 
+		std::tstring MakeAlbumFilters( void ) const;
 		std::tstring MakeCatalogStgFilters( void ) const;
 
 		enum AlbumFilter { SlideFilter, CatalogStgFilter };
