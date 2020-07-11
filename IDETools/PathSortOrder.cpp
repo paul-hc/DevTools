@@ -94,7 +94,7 @@ namespace pred
 			case pfDirName:		return s_compare( left.m_parentDirName, right.m_parentDirName );
 			case pfDirPath:		return s_compare( left.m_parentDirPath, right.m_parentDirPath );
 			case pfDirNameExt:	return s_compare( left.m_parentDirName, right.m_parentDirName );
-			case pfNameExt:		return s_compare( left.GetNameExt(), right.GetNameExt() );
+			case pfNameExt:		return s_compare( left.GetFilename(), right.GetFilename() );
 			case pfCoreExt:		return s_compare( left.m_ext, right.m_ext );
 		}
 	}

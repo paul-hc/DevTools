@@ -9,7 +9,7 @@ namespace path
 {
 	bool IsEmbedded( const TCHAR* pPath );
 
-	std::tstring MakeShortHashedFilename( const TCHAR* pFullPath, size_t maxFnameExtLen );	// make short file name with length limited to maxFnameExtLen
+	std::tstring MakeShortHashedFilename( const TCHAR* pFullPath, size_t maxFilenameLen );	// make short file name with length limited to maxFilenameLen
 }
 
 
@@ -37,7 +37,7 @@ namespace fs
 		fs::TEmbeddedPath GetEmbeddedPath( void ) const { return fs::TEmbeddedPath( GetEmbeddedPathPtr() ); }
 		const TCHAR* GetEmbeddedPathPtr( void ) const { return path::GetEmbedded( GetPtr() ); }
 
-		const TCHAR* GetLeafSubPath( void ) const { return IsComplexPath() ? GetEmbeddedPathPtr() : GetNameExt(); }
+		const TCHAR* GetLeafSubPath( void ) const { return IsComplexPath() ? GetEmbeddedPathPtr() : GetFilenamePtr(); }
 		fs::CPath GetOriginParentPath( void ) const { return IsComplexPath() ? GetPhysicalPath() : GetParentPath(); }		// storage path or parent directory path
 
 		CFlexPath GetParentFlexPath( bool trailSlash = false ) const { return GetParentPath( trailSlash ).Get(); }

@@ -65,7 +65,7 @@ UINT CPathUniqueMaker::QueryExistingSequenceCount( const fs::CPath& filePath ) c
 		if ( filePath == *itUniquePath )							// direct collision?
 			seqCount = std::max( 1u, seqCount );
 		else if ( parentPath == itUniquePath->GetParentPath() )		// same parent path?
-			if ( path::MatchWildcard( itUniquePath->GetNameExt(), filenamePattern.c_str() ) )	// check filename collision
+			if ( path::MatchWildcard( itUniquePath->GetFilenamePtr(), filenamePattern.c_str() ) )	// check filename collision
 			{
 				std::tstring uniqueFnameBase = itUniquePath->GetFname();
 				UINT number;

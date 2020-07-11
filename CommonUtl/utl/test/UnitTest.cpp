@@ -33,7 +33,7 @@ namespace ut
 			return false;			// error creating sub dir
 
 		if ( NULL == pText )
-			pText = filePath.GetNameExt();		// use the filename as text content
+			pText = filePath.GetFilenamePtr();		// use the filename as text content
 
 		std::ofstream output( filePath.GetUtf8().c_str(), std::ios_base::out | std::ios_base::trunc );
 		output
@@ -54,7 +54,7 @@ namespace ut
 		std::auto_ptr< fs::CScopedFileTime > pScopedFileTime( retainModifyTime ? new fs::CScopedFileTime( filePath ) : NULL );
 
 		if ( NULL == pText )
-			pText = filePath.GetNameExt();		// use the filename as text content
+			pText = filePath.GetFilenamePtr();		// use the filename as text content
 
 		{
 			std::ofstream output( filePath.GetUtf8().c_str(), std::ios_base::out | std::ios_base::app );
@@ -230,7 +230,7 @@ namespace ut
 	{
 		std::vector< std::tstring > destFilenames; destFilenames.reserve( m_pathPairs.size() );
 		for ( fs::TPathPairMap::const_iterator itPair = m_pathPairs.begin(); itPair != m_pathPairs.end(); ++itPair )
-			destFilenames.push_back( m_fullDestPaths ? itPair->second.Get() : fs::CPathParts( itPair->second.Get() ).GetNameExt() );
+			destFilenames.push_back( m_fullDestPaths ? itPair->second.Get() : fs::CPathParts( itPair->second.Get() ).GetFilename() );
 
 		return str::Join( destFilenames, ut::CTempFilePool::m_sep );
 	}

@@ -66,7 +66,7 @@ namespace fmt
 			default: ASSERT( false );
 			case NoPath:		return NULL;
 			case FullPath:		return fullPath.GetPtr();
-			case FilenameExt:	return fullPath.GetNameExt();
+			case FilenameExt:	return fullPath.GetFilenamePtr();
 		}
 	}
 
@@ -141,7 +141,7 @@ namespace fmt
 
 	std::tstring FormatRenameEntry( const fs::CPath& srcPath, const fs::CPath& destPath )
 	{
-		return srcPath.Get() + s_pairSep + destPath.GetNameExt();
+		return srcPath.Get() + s_pairSep + destPath.GetFilenamePtr();
 	}
 
 	bool ParseRenameEntry( fs::CPath& rSrcPath, fs::CPath& rDestPath, const str::TStringRange& textRange )
@@ -157,7 +157,7 @@ namespace fmt
 			rSrcPath.Set( srcRange.Extract() );
 			rDestPath.Set( destRange.Extract() );
 
-			if ( path::IsNameExt( rDestPath.GetPtr() ) )
+			if ( path::IsFilename( rDestPath.GetPtr() ) )
 				rDestPath = rSrcPath.GetParentPath() / rDestPath;		// convert to full path
 
 			return !rSrcPath.IsEmpty() && !rDestPath.IsEmpty();

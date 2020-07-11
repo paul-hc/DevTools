@@ -23,21 +23,21 @@ namespace path
 		return true;
 	}
 
-	std::tstring MakeShortHashedFilename( const TCHAR* pFullPath, size_t maxFnameExtLen )
+	std::tstring MakeShortHashedFilename( const TCHAR* pFullPath, size_t maxFilenameLen )
 	{
 		// pFullPath could refer to a dir, file, or a sub-path
 		fs::CFlexPath shortFullPath( pFullPath );
-		if ( str::GetLength( shortFullPath.GetNameExt() ) > maxFnameExtLen )
+		if ( shortFullPath.GetFilename().length() > maxFilenameLen )
 		{
 			fs::CPathParts parts( shortFullPath.Get() );
 
-			const size_t prefixLen = maxFnameExtLen - str::GetLength( _T("_ABCDEFAB") ) - parts.m_ext.length();
+			const size_t prefixLen = maxFilenameLen - str::GetLength( _T("_ABCDEFAB") ) - parts.m_ext.length();
 			const UINT hashKey = static_cast< UINT >( path::GetHashValue( pFullPath ) );		// hash key is unique for the whole path
 
 			parts.m_fname = str::Format( _T("%s_%08X"), parts.m_fname.substr( 0, prefixLen ).c_str(), hashKey );	// "prefix_hexHashKey"
 			shortFullPath.Set( parts.MakePath().Get() );
 
-			ENSURE( str::GetLength( path::FindFilename( shortFullPath.GetPtr() ) ) <= maxFnameExtLen );
+			ENSURE( str::GetLength( path::FindFilename( shortFullPath.GetPtr() ) ) <= maxFilenameLen );
 		}
 		return shortFullPath.Get();
 	}

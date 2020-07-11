@@ -241,7 +241,7 @@ void CXferOptions::PostProcessArguments( void ) throws_( CRuntimeException )
 	// split m_sourceDirPath into path and search specifiers
 	if ( !fs::IsValidDirectory( m_sourceDirPath.GetPtr() ) )
 	{
-		m_searchSpecs = m_sourceDirPath.GetNameExt();
+		m_searchSpecs = m_sourceDirPath.GetFilename();
 		m_sourceDirPath = m_sourceDirPath.GetParentPath();
 	}
 

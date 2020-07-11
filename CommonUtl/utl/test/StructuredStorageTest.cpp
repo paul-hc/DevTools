@@ -37,7 +37,7 @@ namespace ut
 			if ( createdFolderPaths.insert( parentFolderPath ).second )									// first time insertion
 				pDocStorage->ResetToRootCurrentDir().MakeDirPath( parentFolderPath.GetPtr(), true );	// make the folder storage
 
-			const TCHAR* pStreamName = itFilePath->GetNameExt();
+			const TCHAR* pStreamName = itFilePath->GetFilenamePtr();
 
 			std::auto_ptr< COleStreamFile > pDestStreamFile( pDocStorage->CreateStreamFile( pStreamName ) );
 			ASSERT_PTR( pDestStreamFile.get() );
@@ -145,7 +145,7 @@ void CStructuredStorageTest::TestStructuredStorage( void )
 			ASSERT( !docStorage.UseStreamSharing() );
 			ASSERT( !docStorage.IsStreamOpen( streamPath ) );		// was not cached
 			{
-				CComPtr< IStream > pStream_a1 = docStorage.OpenStream( streamPath.GetNameExt() );
+				CComPtr< IStream > pStream_a1 = docStorage.OpenStream( streamPath.GetFilenamePtr() );
 				ASSERT_PTR( pStream_a1 );
 			}
 			ASSERT( docStorage.IsStreamOpen( streamPath ) );						// was cached
@@ -223,7 +223,7 @@ void CStructuredStorageTest::_TestEnumerateElements( fs::CStructuredStorage* pDo
 void CStructuredStorageTest::_TestOpenSharedStreams( fs::CStructuredStorage* pDocStorage, const fs::TEmbeddedPath& streamPath )
 {
 	fs::TEmbeddedPath streamFolderPath = streamPath.GetParentPath();
-	const TCHAR* pStreamName = streamPath.GetNameExt();
+	const TCHAR* pStreamName = streamPath.GetFilenamePtr();
 
 	fs::CStructuredStorage::CScopedCurrentDir scopedDir( pDocStorage, streamFolderPath.GetPtr() );
 

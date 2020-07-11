@@ -25,7 +25,7 @@ namespace reg
 		reg::CKey parentKey;
 		return
 			parentKey.Open( hParentKey, keySubPath.GetParentPath() ) &&
-			parentKey.DeleteSubKey( keySubPath.GetNameExt(), depth );
+			parentKey.DeleteSubKey( keySubPath.GetFilenamePtr(), depth );
 	}
 
 	bool OpenKey( CKey* pKey, const TCHAR* pKeyFullPath, REGSAM samDesired /*= KEY_READ | KEY_WRITE*/ )

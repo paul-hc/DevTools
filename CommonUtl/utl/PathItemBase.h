@@ -36,7 +36,7 @@ public:
 
 	struct ToNameExt
 	{
-		const TCHAR* operator()( const CPathItemBase* pItem ) const { return pItem->GetFilePath().GetNameExt(); }
+		const TCHAR* operator()( const CPathItemBase* pItem ) const { return pItem->GetFilePath().GetFilenamePtr(); }
 	};
 protected:
 	void ResetFilePath( const fs::CPath& filePath );

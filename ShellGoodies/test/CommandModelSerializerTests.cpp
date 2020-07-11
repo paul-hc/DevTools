@@ -300,7 +300,7 @@ void CCommandModelSerializerTests::TestLoadLog( void )
 		pRenameCmd = checked_static_cast< const CRenameFileCmd* >( *itSubCmd++ );
 		ASSERT_EQUAL( cmd::RenameFile, pRenameCmd->GetTypeID() );
 		ASSERT_EQUAL( _T("C:\\my\\download\\How to Talk.pdf"), pRenameCmd->m_srcPath );
-		ASSERT_EQUAL_STR( _T("How to Talk to Anyone.pdf"), pRenameCmd->m_destPath.GetNameExt() );
+		ASSERT_EQUAL( _T("How to Talk to Anyone.pdf"), pRenameCmd->m_destPath.GetFilename() );
 	}
 }
 

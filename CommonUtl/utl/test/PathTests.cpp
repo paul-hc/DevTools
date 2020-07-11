@@ -31,10 +31,16 @@ void CPathTests::TestPathBasics( void )
 		ASSERT( !path::HasRoot( _T("X:") ) );
 
 		ASSERT( path::HasRoot( _T("\\") ) );
+		ASSERT( path::HasRoot( _T("X:\\") ) );
 		ASSERT( path::HasRoot( _T("X:\\A\\file.txt") ) );
 		ASSERT( path::HasRoot( _T("X:\\A\\B\\file.txt") ) );
+			ASSERT( path::HasRoot( _T("/") ) );
+			ASSERT( path::HasRoot( _T("X:/") ) );
+			ASSERT( path::HasRoot( _T("X:/A/file.txt") ) );
+			ASSERT( path::HasRoot( _T("X:/A/B\\file.txt") ) );
 
 		ASSERT( !path::HasRoot( _T("..\\Dir\\file.txt") ) );
+			ASSERT( !path::HasRoot( _T("../Dir/file.txt") ) );
 	}
 
 	{
@@ -56,9 +62,36 @@ void CPathTests::TestPathBasics( void )
 		ASSERT( path::HasPrefix( _T("X:\\A\\file.txt"), _T("X:\\A") ) );
 		ASSERT( path::HasPrefix( _T("X:\\A\\file.txt"), _T("X:\\A\\") ) );
 	}
+
+	{
+		ASSERT( !path::HasDirectory( _T("") ) );
+		ASSERT( path::HasDirectory( _T("\\") ) );
+		ASSERT( path::HasDirectory( _T("/") ) );
+		ASSERT( path::HasDirectory( _T("\\name") ) );
+		ASSERT( path::HasDirectory( _T("/name") ) );
+
+		ASSERT( !path::HasDirectory( _T("name") ) );
+		ASSERT( !path::HasDirectory( _T("name.ext") ) );
+		ASSERT( path::HasDirectory( _T("..\\name.ext") ) );
+		ASSERT( path::HasDirectory( _T(".\\name.ext") ) );
+			ASSERT( path::HasDirectory( _T("../name.ext") ) );
+			ASSERT( path::HasDirectory( _T("./name.ext") ) );
+	}
+
+	{
+		ASSERT_EQUAL_STR( _T("apple"), path::FindFilename( _T("C:\\Images\\fruit.stg/apple") ) );
+		ASSERT_EQUAL_STR( _T("apple"), path::FindFilename( _T("C:\\Images/fruit.stg/apple") ) );
+		ASSERT_EQUAL_STR( _T("apple.jpg"), path::FindFilename( _T("C:\\Images\\fruit.stg/apple.jpg") ) );
+		ASSERT_EQUAL_STR( _T("apple.jpg"), path::FindFilename( _T("C:\\Images\\fruit.stg/World\\Europe\\apple.jpg") ) );
+		ASSERT_EQUAL_STR( _T("apple.jpg"), path::FindFilename( _T("C:\\Images\\fruit.stg/World\\Europe/apple.jpg") ) );
+
+		ASSERT_EQUAL_STR( _T(".jpg"), path::FindExt( _T("C:\\Images\\fruit.stg/apple.jpg") ) );
+		ASSERT_EQUAL_STR( _T(".jpg"), path::FindExt( _T("C:\\Images\\fruit.stg/World\\Europe\\apple.fruit.jpg") ) );
+		ASSERT_EQUAL_STR( _T(".jpg"), path::FindExt( _T("C:\\Images\\fruit.stg/World\\Europe/apple.fruit.jpg") ) );
+	}
 }
 
-void CPathTests::TestPathUtilities( void )
+void CPathTests::TestPathIs( void )
 {
 	// "\", , "\\server\share", or "\\server\"; paths such as "..\path2"
 	ASSERT( path::IsRoot( _T("\\") ) );
@@ -67,13 +100,27 @@ void CPathTests::TestPathUtilities( void )
 	ASSERT( path::IsRoot( _T("\\\\server\\share") ) );
 	ASSERT( !path::IsRoot( _T("") ) );
 	ASSERT( !path::IsRoot( _T("X:\\My") ) );
+		ASSERT( path::IsRoot( _T("/") ) );
+		ASSERT( path::IsRoot( _T("X:/") ) );
+		ASSERT( path::IsRoot( _T("//server") ) );
+		ASSERT( path::IsRoot( _T("//server/share") ) );
+		ASSERT( !path::IsRoot( _T("") ) );
+		ASSERT( !path::IsRoot( _T("X:/My") ) );
 
 	ASSERT( path::IsAbsolute( _T("X:\\Dir") ) );
 	ASSERT( path::IsAbsolute( _T("X:\\Dir\\file.txt") ) );
 	ASSERT( !path::IsAbsolute( _T("..\\Dir\\file.txt") ) );
 	ASSERT( path::IsRelative( _T("..\\Dir\\file.txt") ) );
 	ASSERT( path::IsRelative( _T("file.txt") ) );
+		ASSERT( path::IsAbsolute( _T("X:/Dir") ) );
+		ASSERT( path::IsAbsolute( _T("X:/Dir/file.txt") ) );
+		ASSERT( !path::IsAbsolute( _T("../Dir/file.txt") ) );
+		ASSERT( path::IsRelative( _T("../Dir/file.txt") ) );
+		ASSERT( path::IsRelative( _T("file.txt") ) );
+}
 
+void CPathTests::TestPathUtilities( void )
+{
 	// rooth path:
 	ASSERT_EQUAL( _T("\\"), path::GetRootPath( _T("\\") ) );
 	ASSERT_EQUAL( _T("X:\\"), path::GetRootPath( _T("X:\\") ) );
@@ -161,7 +208,7 @@ void CPathTests::TestPathUtilities( void )
 		ASSERT_EQUAL( _T(".ext"), parts.m_ext );
 
 		ASSERT_EQUAL( _T("X:\\Dir\\Sub"), parts.GetDirPath() );
-		ASSERT_EQUAL_STR( _T("name.ext"), parts.GetNameExt() );
+		ASSERT_EQUAL( _T("name.ext"), parts.GetFilename() );
 	}
 	{
 		const fs::CPathParts parts( _T("\\\\server\\share\\Dir\\name.ext") );
@@ -171,14 +218,14 @@ void CPathTests::TestPathUtilities( void )
 		ASSERT_EQUAL( _T(".ext"), parts.m_ext );
 
 		ASSERT_EQUAL( _T("\\\\server\\share\\Dir"), parts.GetDirPath() );
-		ASSERT_EQUAL_STR( _T("name.ext"), parts.GetNameExt() );
+		ASSERT_EQUAL( _T("name.ext"), parts.GetFilename() );
 	}
 	{
 		const fs::CPath path( _T("X:\\Dir\\Sub/name.ext") );
 		ASSERT_EQUAL( _T("X:\\Dir\\Sub"), path.GetParentPath() );
 		ASSERT_EQUAL( _T("X:\\Dir\\Sub/"), path.GetParentPath( true ) );
 
-		ASSERT_EQUAL_STR( _T("name.ext"), path.GetNameExt() );
+		ASSERT_EQUAL( _T("name.ext"), path.GetFilename() );
 	}
 
 	{	// path depth:
@@ -205,7 +252,7 @@ void CPathTests::TestPathUtilities( void )
 		path.SetDirPath( _T("C:/A/B/C/") );
 		ASSERT_EQUAL( _T("C:/A/B/C/name.ext"), path.Get() );
 
-		path.SetNameExt( _T("list.ini") );
+		path.SetFilename( _T("list.ini") );
 		ASSERT_EQUAL( _T("C:/A/B/C/list.ini"), path.Get() );
 
 		path.Normalize();
@@ -711,8 +758,11 @@ void CPathTests::TestComplexPath( void )
 	ASSERT( path::IsWellFormed( _T("C:\\Images\\fruit.stg>World/apple.jpg") ) );
 	ASSERT( !path::IsWellFormed( _T("C:\\Images\\fruit.stg>World>/apple.jpg") ) );
 
+	ASSERT_EQUAL_STR( _T("apple"), path::FindFilename( _T("C:\\Images\\fruit.stg>apple") ) );
+	ASSERT_EQUAL_STR( _T("apple"), path::FindFilename( _T("C:\\Images/fruit.stg>apple") ) );
 	ASSERT_EQUAL_STR( _T("apple.jpg"), path::FindFilename( _T("C:\\Images\\fruit.stg>apple.jpg") ) );
 	ASSERT_EQUAL_STR( _T("apple.jpg"), path::FindFilename( _T("C:\\Images\\fruit.stg>World\\Europe\\apple.jpg") ) );
+	ASSERT_EQUAL_STR( _T("apple.jpg"), path::FindFilename( _T("C:\\Images\\fruit.stg>World\\Europe/apple.jpg") ) );
 
 	ASSERT_EQUAL_STR( _T(".jpg"), path::FindExt( _T("C:\\Images\\fruit.stg>apple.jpg") ) );
 	ASSERT_EQUAL_STR( _T(".jpg"), path::FindExt( _T("C:\\Images\\fruit.stg>World\\Europe\\apple.fruit.jpg") ) );
@@ -755,7 +805,7 @@ void CPathTests::TestFlexPath( void )
 		ASSERT_EQUAL( _T("C:\\Images\\fruit.stg"), path.GetPhysicalPath() );
 		ASSERT_EQUAL_STR( _T("apple.jpg"), path.GetEmbeddedPathPtr() );
 		ASSERT_EQUAL( _T("C:\\Images\\fruit.stg"), path.GetParentPath() );
-		ASSERT_EQUAL_STR( _T("apple.jpg"), path.GetNameExt() );
+		ASSERT_EQUAL( _T("apple.jpg"), path.GetFilename() );
 
 		fs::CPath physicalPath;
 		fs::TEmbeddedPath embeddedPath;
@@ -770,7 +820,7 @@ void CPathTests::TestFlexPath( void )
 		ASSERT( path.IsComplexPath() );
 		ASSERT_EQUAL( _T("C:\\Images\\fruit.stg"), path.GetPhysicalPath() );
 		ASSERT_EQUAL_STR( _T("Europe\\apple.jpg"), path.GetEmbeddedPathPtr() );
-		ASSERT_EQUAL_STR( _T("apple.jpg"), path.GetNameExt() );
+		ASSERT_EQUAL( _T("apple.jpg"), path.GetFilename() );
 
 		ASSERT( path.GetParentPath() == path.GetParentFlexPath() );
 
@@ -798,7 +848,7 @@ void CPathTests::TestFlexPath( void )
 		ASSERT_EQUAL( _T("C:\\Images\\orange.png"), path.GetPhysicalPath() );
 		ASSERT_EQUAL( _T(""), path.GetEmbeddedPath() );
 		ASSERT_EQUAL( _T("C:\\Images"), path.GetParentPath() );
-		ASSERT_EQUAL_STR( _T("orange.png"), path.GetNameExt() );
+		ASSERT_EQUAL( _T("orange.png"), path.GetFilename() );
 
 		fs::CPath physicalPath;
 		fs::TEmbeddedPath embeddedPath;
@@ -872,6 +922,7 @@ void CPathTests::Run( void )
 	__super::Run();
 
 	TestPathBasics();
+	TestPathIs();
 	TestPathUtilities();
 	TestPathSort();
 	TestPathSortExisting();

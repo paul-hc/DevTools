@@ -15,7 +15,7 @@ CPathItemBase::~CPathItemBase()
 void CPathItemBase::ResetFilePath( const fs::CPath& filePath )
 {
 	m_filePath = filePath;
-	m_displayPath = m_filePath.GetNameExt();
+	m_displayPath = m_filePath.GetFilenamePtr();
 }
 
 void CPathItemBase::SetFilePath( const fs::CPath& filePath )

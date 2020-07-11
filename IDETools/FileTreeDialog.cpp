@@ -303,7 +303,7 @@ std::tstring CFileTreeDialog::BuildItemText( const CIncludeNode* pItemInfo, View
 	switch ( viewMode == vmDefaultMode ? m_rOpt.m_viewMode : viewMode )
 	{
 		case vmFileName:
-			return pItemInfo->m_path.GetNameExt();
+			return pItemInfo->m_path.GetFilename();
 		case vmRelPathFileName:
 			return pItemInfo->m_lineNo > 0 ? pItemInfo->m_includeTag.GetFilePath().Get() : BuildItemText( pItemInfo, vmFileName );
 		case vmIncDirective:
@@ -403,7 +403,7 @@ int CALLBACK SortCallback( const CIncludeNode* pLeft, const CIncludeNode* pRight
 		case ordAlphaText:
 			return lstrcmp( pDialog->BuildItemText( pLeft ).c_str(), pDialog->BuildItemText( pRight ).c_str() );
 		case ordAlphaFileName:
-			return pred::CompareNaturalPath()( pLeft->m_path.GetNameExt(), pRight->m_path.GetNameExt() );
+			return pred::CompareNaturalPath()( pLeft->m_path.GetFilenamePtr(), pRight->m_path.GetFilenamePtr() );
 		default:
 			ASSERT( false );
 			return 0;
@@ -814,7 +814,7 @@ void CFileTreeDialog::CmUpdateDialogTitle( void )
 		int uniqueIncCount = (int)m_originalItems.size() - 1, dupCount = incCount - uniqueIncCount;
 		title = str::Format( m_rOpt.m_noDuplicates || 0 == dupCount ? _T("%s - [%s] - %d files") : _T("%s - [%s] - %d items: %d files + %d duplicates"),
 			m_titlePrefix.c_str(),
-			m_rootPath.GetNameExt(),
+			m_rootPath.GetFilenamePtr(),
 			incCount, uniqueIncCount, dupCount );
 	}
 	ui::SetWindowText( m_hWnd, title );

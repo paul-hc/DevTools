@@ -110,7 +110,7 @@ void CDropFilesModel::InitDeepPasteFolders( void )
 
 	for ( fs::CPath relFolderPath = m_srcCommonFolderPath.GetFilename(), parentPath = m_srcCommonFolderPath;
 		  !parentPath.IsEmpty() && !path::IsRoot( parentPath.GetPtr() );
-		  relFolderPath = path::Combine( parentPath.GetNameExt(), relFolderPath.GetPtr() ) )
+		  relFolderPath = path::Combine( parentPath.GetFilenamePtr(), relFolderPath.GetPtr() ) )
 	{
 		m_relFolderPathSeq.push_back( relFolderPath );
 		RegisterFolderImage( parentPath );

@@ -80,7 +80,7 @@ void CShellFileSystemTests::TestShellPidl( void )
 		ASSERT( filePidl.CreateAbsolute( filePath.GetPtr() ) );
 		ASSERT( filePidl.GetCount() > 1 );
 		ASSERT_EQUAL( filePath, filePidl.GetAbsolutePath() );
-		ASSERT_EQUAL( _T("fa.txt"), filePidl.GetName() );		// filePath.GetNameExt()
+		ASSERT_EQUAL( _T("fa.txt"), filePidl.GetName() );		// filePath.GetFilename()
 
 		{	// last item ID
 			shell::CPidl lastPidl;
@@ -90,10 +90,10 @@ void CShellFileSystemTests::TestShellPidl( void )
 
 		{	// child PIDL
 			shell::CPidl itemPidl;
-			ASSERT( itemPidl.CreateRelative( pPoolFolder, filePath.GetNameExt() ) );
+			ASSERT( itemPidl.CreateRelative( pPoolFolder, filePath.GetFilenamePtr() ) );
 			ASSERT_EQUAL( 1, itemPidl.GetCount() );
 			ASSERT_EQUAL( desktopPath / itemPidl.GetName(), itemPidl.GetAbsolutePath() );		// strangely, for child PIDLs the desktop directory is implicitly prepended
-			ASSERT_EQUAL( _T("fa.txt"), itemPidl.GetName() );		// filePath.GetNameExt()
+			ASSERT_EQUAL( _T("fa.txt"), itemPidl.GetName() );		// filePath.GetFilename()
 
 			// shell item from child PIDL relative to parent folder
 			CComPtr< IShellItem > pChildFileItem = itemPidl.FindItem( pPoolFolder );
@@ -140,7 +140,7 @@ void CShellFileSystemTests::TestShellRelativePidl( void )
 	ASSERT_PTR( pCommonFolder );
 
 	ASSERT_EQUAL( 3, pidlItemsArray.size() );
-	ASSERT_EQUAL( pool.GetFilePaths()[ 0 ].GetNameExt(), shell::pidl::GetName( pidlItemsArray[ 0 ] ) );
+	ASSERT_EQUAL( pool.GetFilePaths()[ 0 ].GetFilename(), shell::pidl::GetName( pidlItemsArray[ 0 ] ) );
 
 	shell::ClearOwningPidls( pidlItemsArray );
 }

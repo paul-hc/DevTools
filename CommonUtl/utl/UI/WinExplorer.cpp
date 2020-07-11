@@ -99,7 +99,7 @@ namespace shell
 		CComPtr< IShellFolder > pDirFolder = FindShellFolder( filePath.GetParentPath().GetPtr() );
 		if ( pDirFolder != NULL )
 		{
-			CComPtr< IExtractImage > pExtractImage = BindFileTo< IExtractImage >( pDirFolder, filePath.GetNameExt() );
+			CComPtr< IExtractImage > pExtractImage = BindFileTo< IExtractImage >( pDirFolder, filePath.GetFilenamePtr() );
 			if ( pExtractImage != NULL )
 			{
 				// define thumbnail properties

@@ -69,7 +69,7 @@ protected:
 class CDisplayObject : public CSubject
 {
 public:
-	CDisplayObject( const TFileStatePair* pStatePair ) : m_pStatePair( safe_ptr( pStatePair ) ), m_displayPath( pStatePair->first.m_fullPath.GetNameExt() ) {}
+	CDisplayObject( const TFileStatePair* pStatePair ) : m_pStatePair( safe_ptr( pStatePair ) ), m_displayPath( pStatePair->first.m_fullPath.GetFilename() ) {}
 
 	const fs::CPath& GetKeyPath( void ) const { return GetSrcState().m_fullPath; }
 	const fs::CFileState& GetSrcState( void ) const { return m_pStatePair->first; }

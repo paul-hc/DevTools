@@ -118,7 +118,7 @@ bool CFileAssoc::IsValidKnownAssoc( void ) const
 //		"XyzRes.h" or "XyzRes.rh" (with complementary "Xyz.rc")
 bool CFileAssoc::IsResourceHeaderFile( const fs::CPathParts& parts )
 {
-	if ( path::Equals( parts.GetNameExt(), _T("resource.h") ) )
+	if ( path::Equals( parts.GetFilename(), _T("resource.h") ) )
 		return true;
 
 	if ( path::EqualsPtr( parts.m_ext.c_str(), _T(".h") ) || path::EqualsPtr( parts.m_ext.c_str(), _T(".rh") ) )
@@ -364,7 +364,7 @@ void CFileAssoc::FindVariationsOf( std::vector< fs::CPath >& rVariations, int& r
 
 		std::tstring foundFileName = (LPCTSTR)findVariations.GetFileName();
 
-		if ( path::Equals( foundFileName, m_parts.GetNameExt() ) )
+		if ( path::Equals( foundFileName, m_parts.GetFilename() ) )
 		{
 			ASSERT( rThisIdx == -1 );
 			rThisIdx = (int)rVariations.size();

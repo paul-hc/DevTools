@@ -41,7 +41,7 @@ CPasswordDialog::CPasswordDialog( CWnd* pParentWnd, const fs::CPath* pDocPath /*
 	LoadDlgIcon( IDD_PASSWORD_DIALOG );
 
 	if ( pDocPath != NULL )
-		m_documentLabel = str::Format( _T("Document: %s"), pDocPath->GetNameExt() );
+		m_documentLabel = str::Format( _T("Document: %s"), pDocPath->GetFilenamePtr() );
 }
 
 void CPasswordDialog::RecreateEditCtrls( void )

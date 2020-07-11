@@ -47,6 +47,73 @@ namespace func
 }
 
 
+namespace path
+{
+	// an efficient way of referring to the original path by pointer if it was originally normal, or a buffered normalized copy
+	class CNormalPath
+	{
+	public:
+		CNormalPath( const TCHAR rawPath[] )
+			: m_pRawPath( rawPath )
+		{
+			if ( m_pRawPath != NULL && !IsNormal( m_pRawPath ) )
+				EnsureBuffer();
+		}
+
+		const TCHAR* Get( void ) const { return m_normalizedPath.empty() ? m_pRawPath : m_normalizedPath.c_str(); }
+		const TCHAR* GetRaw( void ) const { return m_pRawPath; }
+		operator const TCHAR*( void ) const { return Get(); }
+
+		bool IsNormal( void ) const { return m_normalizedPath.empty() == str::IsEmpty( m_pRawPath ); }
+
+		TCHAR* Ref( void ) { return const_cast< TCHAR* >( EnsureBuffer().c_str() ); }
+
+		std::tstring& EnsureBuffer( void )
+		{
+			if ( m_normalizedPath.empty() )
+			{
+				m_normalizedPath = m_pRawPath;
+				std::replace( m_normalizedPath.begin(), m_normalizedPath.end(), _T('/'), _T('\\') );
+			}
+			return m_normalizedPath;
+		}
+
+		bool NormalizeComplex( void )
+		{
+			size_t sepPos = FindPos( s_complexPathSep );
+			if ( std::tstring::npos == sepPos )
+				return false;
+
+			EnsureBuffer()[ sepPos ] = _T('\\');
+			return true;
+		}
+
+		static bool IsNormal( const TCHAR* pPath )
+		{
+			ASSERT_PTR( pPath );
+			return NULL == _tcschr( pPath, _T('/') );
+		}
+
+		static bool IsComplex( const TCHAR* pPath )
+		{
+			ASSERT_PTR( pPath );
+			return NULL == _tcschr( pPath, s_complexPathSep );
+		}
+	private:
+		size_t FindPos( TCHAR ch ) const
+		{
+			const TCHAR* pPath = Get();
+			const TCHAR* pFound = _tcschr( pPath, ch );
+
+			return pFound != NULL ? std::distance( pPath, pFound ) : std::tstring::npos;
+		}
+	private:
+		const TCHAR* m_pRawPath;
+		std::tstring m_normalizedPath;
+	};
+}
+
+
 // this has no effect in VC2013; workaround in utl_ui_vc12.vcxproj: Solution Explorer > C++ > Advanced - Disable Specific Warnings: 4996
 #pragma warning( disable: 4996 )	// 'std::equal': Function call with parameters that may be unsafe - this call relies on the caller to check that the passed values are correct. To disable this warning, use -D_SCL_SECURE_NO_WARNINGS. See documentation on how to use Visual C++ 'Checked Iterators'
 
@@ -296,14 +363,14 @@ namespace path
 
 	const TCHAR* GetInvalidChars( void )
 	{
-		static const TCHAR invalidChars[] = _T("<>|?*\"");
-		return invalidChars;
+		static const TCHAR s_invalidChars[] = _T("<>|?*\"");
+		return s_invalidChars;
 	}
 
 	const TCHAR* GetReservedChars( void )
 	{
-		static const TCHAR reservedChars[] = _T(":/\\<>|?*\"");
-		return reservedChars;
+		static const TCHAR s_reservedChars[] = _T(":/\\<>|?*\"");
+		return s_reservedChars;
 	}
 
 
@@ -315,19 +382,24 @@ namespace path
 	bool IsRelative( const TCHAR* pPath )
 	{
 		ASSERT_PTR( pPath );
-		return ::PathIsRelative( pPath ) != FALSE;
+		return ::PathIsRelative( CNormalPath( pPath ) ) != FALSE;
 	}
 
 	bool IsDirectory( const TCHAR* pPath )
 	{
 		ASSERT_PTR( pPath );
-		return ::PathIsDirectory( pPath ) != FALSE;
+		return ::PathIsDirectory( CNormalPath( pPath ) ) != FALSE;
 	}
 
-	bool IsNameExt( const TCHAR* pPath )
+	bool IsFilename( const TCHAR* pPath )
 	{
 		ASSERT_PTR( pPath );
-		return ::PathIsFileSpec( pPath ) != FALSE;
+		return ::PathIsFileSpec( CNormalPath( pPath ) ) != FALSE;
+	}
+
+	bool HasDirectory( const TCHAR* pPath )
+	{
+		return _tcspbrk( pPath, DirDelims() ) != NULL;
 	}
 
 
@@ -354,10 +426,12 @@ namespace path
 
 	const TCHAR* SkipRoot( const TCHAR* pPath )
 	{
-		ASSERT( IsNormal( pPath ) );
+		CNormalPath pathCopy( pPath );
 
-		const TCHAR* pRootEnd = ::PathSkipRoot( pPath );
-		return pRootEnd != NULL ? pRootEnd : pPath;
+		if ( const TCHAR* pRootEnd = ::PathSkipRoot( pathCopy ) )
+			return pPath + std::distance( pathCopy.Get(), pRootEnd );
+
+		return pPath;
 	}
 
 
@@ -479,8 +553,7 @@ namespace path
 
 	bool IsNormal( const TCHAR* pPath )
 	{
-		ASSERT_PTR( pPath );
-		return NULL == _tcschr( pPath, _T('/') );
+		return CNormalPath::IsNormal( pPath );
 	}
 
 	std::tstring MakeNormal( const TCHAR* pPath )
@@ -513,8 +586,7 @@ namespace path
 
 	bool IsRoot( const TCHAR* pPath )
 	{
-		ASSERT_PTR( pPath );
-		return ::PathIsRoot( pPath ) != FALSE;
+		return ::PathIsRoot( CNormalPath( pPath ).Get() ) != FALSE;
 	}
 
 	bool IsNetwork( const TCHAR* pPath )
@@ -589,13 +661,10 @@ namespace path
 
 	std::tstring GetRootPath( const TCHAR* pPath )
 	{
-		ASSERT( IsNormal( pPath ) );
+		CNormalPath rootPath( pPath );
 
-		TCHAR rootPath[ MAX_PATH ];
-		_tcscpy( rootPath, pPath );
-
-		::PathStripToRoot( rootPath );
-		return rootPath;
+		::PathStripToRoot( rootPath.Ref() );
+		return rootPath.Ref();
 	}
 
 
@@ -729,9 +798,9 @@ namespace fs
 		return dirPath;
 	}
 
-	CPathParts& CPathParts::SetNameExt( const std::tstring& nameExt )
+	CPathParts& CPathParts::SetFilename( const std::tstring& filename )
 	{
-		CPathParts parts( nameExt );
+		CPathParts parts( filename );
 		m_fname = parts.m_fname;
 		m_ext = parts.m_ext;
 		return *this;
@@ -857,10 +926,10 @@ namespace fs
 		return *this;
 	}
 
-	void CPath::SetNameExt( const std::tstring& nameExt )
+	void CPath::SetFilename( const std::tstring& filename )
 	{
 		CPathParts parts( m_filePath );			// split into parts rather than use '/' operator in order to preserve fwd slashes
-		parts.SetNameExt( nameExt );
+		parts.SetFilename( filename );
 		m_filePath = parts.MakePath().Get();
 	}
 
@@ -872,7 +941,7 @@ namespace fs
 
 	std::tstring CPath::GetFname( void ) const
 	{
-		const TCHAR* pNameExt = GetNameExt();
+		const TCHAR* pNameExt = GetFilenamePtr();
 		const TCHAR* pExt = GetExt();
 
 		return std::tstring( pNameExt, std::distance( pNameExt, pExt ) );
@@ -883,7 +952,7 @@ namespace fs
 	{
 		size_t GetDotExtCount( const fs::CPath& filePath )
 		{
-			const TCHAR* pNameExt = filePath.GetNameExt();
+			const TCHAR* pNameExt = filePath.GetFilenamePtr();
 			return std::count( pNameExt, pNameExt + str::GetLength( pNameExt ), _T('.') );
 		}
 	}

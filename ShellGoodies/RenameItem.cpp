@@ -113,12 +113,12 @@ std::tstring CDisplayFilenameAdapter::FormatCode( const utl::ISubject* pSubject 
 
 std::tstring CDisplayFilenameAdapter::FormatFilename( const fs::CPath& filePath ) const
 {
-	const TCHAR* pNameExt = filePath.GetNameExt();
+	std::tstring filename = filePath.GetFilename();
 
 	if ( m_ignoreExtension )
-		return StripExtension( pNameExt );
+		return StripExtension( filename.c_str() );
 
-	return pNameExt;
+	return filename;
 }
 
 fs::CPath CDisplayFilenameAdapter::ParseFilename( const std::tstring& displayFilename, const fs::CPath& referencePath ) const

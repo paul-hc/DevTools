@@ -308,10 +308,10 @@ int CBscPathPage::MoveItemTo( int srcIndex, int destIndex, bool isDropped /*= fa
 
 bool CBscPathPage::CheckSearchFilter( fs::CPath& rPath )
 {
-	if ( !str::IsEmpty( rPath.GetNameExt() ) )
+	if ( !str::IsEmpty( rPath.GetFilenamePtr() ) )
 		return true;
 
-	rPath.SetNameExt( _T("*.bsc") );
+	rPath.SetFilename( _T("*.bsc") );
 	return false;
 }
 
@@ -386,7 +386,7 @@ void CBscPathPage::LBnSelChange_BrowseFilesPath( void )
 	int selIndex = m_pathsListBox.GetCurSel();
 	if ( selIndex != LB_ERR )
 	{
-		searchFilter = m_pathItems[ selIndex ].m_searchInfo.GetNameExt();
+		searchFilter = m_pathItems[ selIndex ].m_searchInfo.GetFilename();
 		m_displayName = m_pathItems[ selIndex ].m_displayName;
 	}
 
@@ -415,7 +415,7 @@ void CBscPathPage::EnChange_SearchFilter( void )
 	{
 		int selIndex = m_pathsListBox.GetCurSel();
 		if ( selIndex != LB_ERR )
-			m_pathItems[ selIndex ].m_searchInfo.SetNameExt( ui::GetWindowText( m_searchFilterEdit ) );
+			m_pathItems[ selIndex ].m_searchInfo.SetFilename( ui::GetWindowText( m_searchFilterEdit ) );
 	}
 }
 

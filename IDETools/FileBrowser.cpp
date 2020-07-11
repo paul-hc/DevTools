@@ -32,7 +32,7 @@ CFolderItem::CFolderItem( const std::tstring& alias )
 CFolderItem::CFolderItem( CFolderItem* pParentFolder, const fs::CPath& folderPath, const std::tstring& wildSpecs, const std::tstring& alias )
 	: CPathItemBase( folderPath )
 	, m_wildSpecs( wildSpecs )
-	, m_folderDirName( GetFilePath().GetNameExt() )
+	, m_folderDirName( GetFilePath().GetFilename() )
 	, m_alias( !alias.empty() ? alias : m_folderDirName )
 	, m_pParentFolder( pParentFolder )
 	, m_deepLeafCount( 0 )
@@ -42,7 +42,7 @@ CFolderItem::CFolderItem( CFolderItem* pParentFolder, const fs::CPath& folderPat
 CFolderItem::CFolderItem( CFolderItem* pParentFolder, const fs::CPath& folderPath )
 	: CPathItemBase( folderPath )
 	, m_wildSpecs( pParentFolder->m_wildSpecs )
-	, m_folderDirName( GetFilePath().GetNameExt() )
+	, m_folderDirName( GetFilePath().GetFilename() )
 	, m_alias( m_folderDirName )
 	, m_pParentFolder( safe_ptr( pParentFolder ) )
 	, m_deepLeafCount( 0 )
@@ -173,7 +173,7 @@ bool CFileItem::HasFilePath( const fs::CPath& rightFilePath ) const
 	if ( GetFilePath() == rightFilePath )
 		return true;
 
-	if ( path::EquivalentPtr( GetFilePath().GetNameExt(), rightFilePath.GetNameExt() ) )		// same filename?
+	if ( path::EquivalentPtr( GetFilePath().GetFilenamePtr(), rightFilePath.GetFilenamePtr() ) )		// same filename?
 		return path::IsRelative( rightFilePath.GetPtr() );
 
 	return false;

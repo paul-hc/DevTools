@@ -117,8 +117,8 @@ void CThumbnailTests::TestThumbConversion( void )
 	if ( !imagePath.IsEmpty() )
 		if ( CCachedThumbBitmap* pThumbBitmap = ut::GetThumbnailer()->AcquireThumbnail( imagePath ) )
 		{
-			ut::SaveThumbnailToFiles( pThumbBitmap->GetWicBitmap(), imagePath.GetNameExt() );
-			ut::SaveThumbnailToDocStorage( pThumbBitmap->GetWicBitmap(), imagePath.GetNameExt() );
+			ut::SaveThumbnailToFiles( pThumbBitmap->GetWicBitmap(), imagePath.GetFilenamePtr() );
+			ut::SaveThumbnailToDocStorage( pThumbBitmap->GetWicBitmap(), imagePath.GetFilenamePtr() );
 		}
 }
 

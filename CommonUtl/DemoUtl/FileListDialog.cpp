@@ -184,7 +184,7 @@ void CFileListDialog::SetupFileListView( void )
 			const CDisplayObject* pObject = m_displayItems[ pos ];
 
 			m_fileListCtrl.InsertObjectItem( pos, pObject, pos % _FlagStripCount );		// SrcFileName
-			m_fileListCtrl.SetSubItemText( pos, DestFileName, pObject->GetDestState().m_fullPath.GetNameExt() );
+			m_fileListCtrl.SetSubItemText( pos, DestFileName, pObject->GetDestState().m_fullPath.GetFilename() );
 
 			m_fileListCtrl.SetSubItemText( pos, SrcAttributes, fmt::FormatFileAttributes( pObject->GetSrcState().m_attributes ) );
 			m_fileListCtrl.SetSubItemText( pos, DestAttributes, fmt::FormatFileAttributes( pObject->GetDestState().m_attributes ) );

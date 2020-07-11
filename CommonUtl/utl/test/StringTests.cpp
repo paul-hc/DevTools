@@ -933,15 +933,11 @@ void CStringTests::TestFunctional( void )
 	// code demo - not a real unit test
 	fs::CPath path( _T("C:\\Fruit\\apple.jpg") );
 
-	// const TCHAR* GetNameExt( void ) const { return path::FindFilename( m_filePath.c_str() ); }
-
-	std::function< const TCHAR* ( void ) > getNameExtMethod = std::bind( &fs::CPath::GetNameExt, &path );
+	std::function< const TCHAR* ( void ) > getNameExtMethod = std::bind( &fs::CPath::GetFilenamePtr, &path );
 	ASSERT_EQUAL_STR( _T("apple.jpg"), getNameExtMethod() );
 
-	// void SetNameExt( const std::tstring& nameExt );
-
 	using std::placeholders::_1;
-	std::function< void ( const std::tstring& ) > setNameExtMethod = std::bind( &fs::CPath::SetNameExt, &path, _1 );
+	std::function< void ( const std::tstring& ) > setNameExtMethod = std::bind( &fs::CPath::SetFilename, &path, _1 );
 	setNameExtMethod( _T("orange.png") );
 	ASSERT_EQUAL_STR( _T("orange.png"), getNameExtMethod() );
 }

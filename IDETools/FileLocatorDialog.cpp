@@ -156,7 +156,7 @@ void CFileLocatorDialog::UpdateHistory( const std::tstring& selFile, bool doSave
 	fs::CPath path = parts.MakePath();
 	if ( path::IsRelative( path.GetPtr() ) )
 	{	// build a new include tag based on the selected file name+ext
-		selectedTag.Setup( parts.GetNameExt().c_str(), FALSE == IsDlgButtonChecked( IDC_SYSTEM_TAG_RADIO ) );
+		selectedTag.Setup( parts.GetFilename().c_str(), FALSE == IsDlgButtonChecked( IDC_SYSTEM_TAG_RADIO ) );
 		SetComboTag( selectedTag.GetTag() );
 	}
 
@@ -264,7 +264,7 @@ int CFileLocatorDialog::SearchForTag( const std::tstring& includeTag )
 		{
 			fs::CPathParts parts( m_foundFiles[ i ].first.Get() );
 
-			m_foundFilesListCtrl.InsertItem( i, parts.GetNameExt().c_str(), ft::FindTypeOfExtension( parts.m_ext.c_str() ) );
+			m_foundFilesListCtrl.InsertItem( i, parts.GetFilename().c_str(), ft::FindTypeOfExtension( parts.m_ext.c_str() ) );
 			m_foundFilesListCtrl.SetSubItemText( i, Directory, parts.GetDirPath().GetPtr() );
 			m_foundFilesListCtrl.SetSubItemText( i, Location, inc::GetTags_Location().FormatUi( m_foundFiles[ i ].second ) );
 		}

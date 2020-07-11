@@ -95,7 +95,9 @@ namespace path
 	bool IsAbsolute( const TCHAR* pPath );
 	bool IsRelative( const TCHAR* pPath );
 	bool IsDirectory( const TCHAR* pPath );
-	bool IsNameExt( const TCHAR* pPath );
+	bool IsFilename( const TCHAR* pPath );		// "basefilename[.ext]"
+
+	bool HasDirectory( const TCHAR* pPath );
 
 	const TCHAR* Find( const TCHAR* pPath, const TCHAR* pSubString );
 	inline bool Contains( const TCHAR* pPath, const TCHAR* pSubString ) { return !str::IsEmpty( Find( pPath, pSubString ) ); }
@@ -104,7 +106,6 @@ namespace path
 	const TCHAR* FindExt( const TCHAR* pPath );
 	const TCHAR* SkipRoot( const TCHAR* pPath );		// ignore the drive letter or Universal Naming Convention (UNC) server/share path parts
 
-	inline bool IsFnameExt( const TCHAR* pPath ) { return pPath != NULL && pPath == FindFilename( pPath ); }				// true for "file.txt", "file", ".txt";  false for "dir\\file.txt"
 	inline bool MatchExt( const TCHAR* pPath, const TCHAR* pExt ) { return EquivalentPtr( FindExt( pPath ), pExt ); }		// pExt: ".txt"
 
 	// complex path
@@ -180,9 +181,9 @@ namespace fs
 		bool IsEmpty( void ) const { return m_drive.empty() && m_dir.empty() && m_fname.empty() && m_ext.empty(); }
 		void Clear( void );
 
-		std::tstring GetNameExt( void ) const { return m_fname + m_ext; }
+		std::tstring GetFilename( void ) const { return m_fname + m_ext; }
 		fs::CPath GetDirPath( void ) const;
-		CPathParts& SetNameExt( const std::tstring& nameExt );
+		CPathParts& SetFilename( const std::tstring& nameExt );
 		CPathParts& SetDirPath( const std::tstring& dirPath );
 
 		fs::CPath MakePath( void ) const;
@@ -225,13 +226,13 @@ namespace fs
 
 		size_t GetDepth( void ) const;		// count of path elements up to the root
 
-		bool HasParentPath( void ) const { return GetNameExt() != GetPtr(); }		// has a directory path?
+		bool HasParentPath( void ) const { return GetFilenamePtr() != GetPtr(); }		// has a directory path?
 		CPath GetParentPath( bool trailSlash = false ) const;						// always a directory path
 		CPath& SetBackslash( bool trailSlash = true );
 
-		std::tstring GetFilename( void ) const { return GetNameExt(); }
-		const TCHAR* GetNameExt( void ) const { return path::FindFilename( m_filePath.c_str() ); }
-		void SetNameExt( const std::tstring& nameExt );
+		std::tstring GetFilename( void ) const { return GetFilenamePtr(); }
+		const TCHAR* GetFilenamePtr( void ) const { return path::FindFilename( m_filePath.c_str() ); }
+		void SetFilename( const std::tstring& filename );
 
 		const TCHAR* GetExt( void ) const { return path::FindExt( m_filePath.c_str() ); }
 		bool HasExt( const TCHAR* pExt ) const { return path::EquivalentPtr( GetExt(), pExt ); }
@@ -240,7 +241,7 @@ namespace fs
 		void SplitFilename( std::tstring& rFname, std::tstring& rExt ) const;
 
 		std::tstring GetFname( void ) const;
-		void ReplaceFname( const TCHAR* pFname ) { ASSERT_PTR( pFname ); SetNameExt( std::tstring( pFname ) + GetExt() ); }
+		void ReplaceFname( const TCHAR* pFname ) { ASSERT_PTR( pFname ); SetFilename( std::tstring( pFname ) + GetExt() ); }
 
 		void ReplaceExt( const TCHAR* pExt ) { Set( GetRemoveExt().Get() + pExt ); }
 		void RemoveExt( void ) { Set( GetRemoveExt().Get() ); }
@@ -367,7 +368,7 @@ namespace func
 
 	struct ToNameExt
 	{
-		const TCHAR* operator()( const fs::CPath& fullPath ) const { return fullPath.GetNameExt(); }
+		const TCHAR* operator()( const fs::CPath& fullPath ) const { return fullPath.GetFilenamePtr(); }
 		const TCHAR* operator()( const TCHAR* pFullPath ) const { return path::FindFilename( pFullPath ); }
 	};
 
