@@ -691,7 +691,7 @@ BOOL CAlbumDoc::OnSaveDocument( LPCTSTR pPathName )
 {
 	fs::CPath newDocPath( pPathName );
 
-	m_model.RefImagesModel().ClearInvalidStoragePaths();		// backwards copatibility: some old albums may contain invalid embedded storages
+	m_model.RefImagesModel().ClearInvalidStoragePaths();		// backwards compatibility: some old albums may contain invalid embedded storages
 
 	if ( app::IsCatalogFile( pPathName ) )
 		return SaveAsCatalogStorage( newDocPath );
