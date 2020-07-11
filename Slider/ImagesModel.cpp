@@ -5,6 +5,7 @@
 #include "FileAttrAlgorithms.h"
 #include "Application_fwd.h"
 #include "utl/ContainerUtilities.h"
+#include "utl/PathMap.h"
 #include "utl/Serialization.h"
 #include "utl/SerializeStdTypes.h"
 #include "utl/Timer.h"
@@ -18,6 +19,11 @@
 
 CImagesModel::CImagesModel( void )
 {
+}
+
+CImagesModel::CImagesModel( const CImagesModel& right )
+{
+	operator=( right );
 }
 
 CImagesModel::~CImagesModel()
@@ -39,6 +45,9 @@ void CImagesModel::Clear( void )
 {
 	utl::ClearOwningContainer( m_fileAttributes );
 	m_storagePaths.clear();
+
+	if ( m_pIndexer.get() != NULL )
+		m_pIndexer->Clear();
 }
 
 void CImagesModel::StoreBaselineSequence( void )
@@ -50,6 +59,12 @@ void CImagesModel::Swap( CImagesModel& rImagesModel )
 {
 	m_fileAttributes.swap( rImagesModel.m_fileAttributes );
 	m_storagePaths.swap( rImagesModel.m_storagePaths );
+}
+
+void CImagesModel::SetUseIndexing( bool useIndexing /*= true*/ )
+{
+	ASSERT( IsEmpty() );
+	m_pIndexer.reset( useIndexing ? new fs::CPathIndex< fs::CFlexPath >() : NULL );
 }
 
 void CImagesModel::Stream( CArchive& archive )
@@ -83,12 +98,20 @@ void CImagesModel::Stream( CArchive& archive )
 	}
 }
 
-size_t CImagesModel::FindPosFileAttr( const fs::CPath& filePath ) const
+bool CImagesModel::ContainsFileAttr( const fs::CFlexPath& filePath ) const
+{
+	if ( m_pIndexer.get() != NULL )
+		return m_pIndexer->Contains( filePath );
+
+	return FindPosFileAttr( filePath ) != utl::npos;
+}
+
+size_t CImagesModel::FindPosFileAttr( const fs::CFlexPath& filePath ) const
 {
 	return fattr::FindPosWithPath( m_fileAttributes, filePath );
 }
 
-const CFileAttr* CImagesModel::FindFileAttr( const fs::CPath& filePath ) const
+const CFileAttr* CImagesModel::FindFileAttr( const fs::CFlexPath& filePath ) const
 {
 	return fattr::FindWithPath( m_fileAttributes, filePath );
 }
@@ -96,11 +119,14 @@ const CFileAttr* CImagesModel::FindFileAttr( const fs::CPath& filePath ) const
 bool CImagesModel::AddFileAttr( CFileAttr* pFileAttr )
 {
 	ASSERT_PTR( pFileAttr );
-	REQUIRE( !utl::Contains( m_fileAttributes, pFileAttr ) );		// added once?
+	//REQUIRE( !utl::Contains( m_fileAttributes, pFileAttr ) );		// added once?
 
-	if ( const CFileAttr* pFoundExisting = FindFileAttr( pFileAttr->GetPath() ) )
+	bool exists = m_pIndexer.get() != NULL
+		? !m_pIndexer->Register( pFileAttr->GetPath() )
+		: ( FindPosFileAttr( pFileAttr->GetPath() ) != utl::npos );
+
+	if ( exists )
 	{
-		pFoundExisting;
 		delete pFileAttr;
 		return false;
 	}

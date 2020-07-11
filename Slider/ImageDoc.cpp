@@ -56,7 +56,7 @@ BOOL CImageDoc::OnOpenDocument( LPCTSTR pFilePath )
 		if ( m_imagePath.IsComplexPath() )
 		{
 			m_storageHost.Clear();
-			m_storageHost.Push( m_imagePath.GetPhysicalPath() );
+			m_storageHost.Push( m_imagePath.GetPhysicalPath(), EmbeddedStorage );
 		}
 
 		if ( NULL == GetImage( 0 ) )

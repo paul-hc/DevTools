@@ -112,7 +112,7 @@ bool CImageCatalogStg::IsSpecialStreamName( const TCHAR* pStreamName )
 
 TCHAR CImageCatalogStg::GetFlattenPathSep( void ) const
 {
-	if ( m_docModelSchema < app::Slider_v5_2 )
+	if ( m_docModelSchema <= app::Slider_v5_1 )
 		return _T('*');			// use old separator for backwards compatibility (the short 31 characters hash suffix uses the old separator)
 
 	return __super::GetFlattenPathSep();
@@ -474,7 +474,8 @@ bool CImageCatalogStg::bkw_LoadAlbumMetadataStream( CObject* pAlbumDoc )
 			// needed for backwards compatibility
 			loadArchive.m_pDocument = reinterpret_cast< CDocument* >( pAlbumDoc );
 
-			bkw_AlterOlderDocModelSchema( app::Slider_v4_0 );		// arbitrarily set to an older version
+			// bug fix: speculate less, and let the CFileAttr::EvalLoadingSchema() do the finer model schema evaluation (from the binary stream)
+			//bkw_AlterOlderDocModelSchema( app::Slider_v4_0 );		// arbitrarily set to an older version
 
 			serial::CStreamingGuard schemaGuard( loadArchive );
 			serial::CScopedLoadingArchive scopedLoadingArchive( loadArchive, m_docModelSchema );
@@ -486,6 +487,8 @@ bool CImageCatalogStg::bkw_LoadAlbumMetadataStream( CObject* pAlbumDoc )
 
 				serial::StreamOwningPtrs( loadArchive, rImagesModel.RefFileAttrs() );
 				rImagesModel.StoreBaselineSequence();
+
+				bkw_AlterOlderDocModelSchema( svc::ToAlbumModel( pAlbumDoc )->GetModelSchema() );					// alter with the older model version
 
 				ASSERT( rImagesModel.IsEmpty() || rImagesModel.GetFileAttrAt( 0 )->GetPath().IsComplexPath() );		// ensure deserialized to full complex path
 				return true;

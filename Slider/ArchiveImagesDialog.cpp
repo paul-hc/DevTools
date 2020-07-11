@@ -134,7 +134,7 @@ void CArchiveImagesDialog::SetupFilesView( bool firstTimeInit /*= false*/ )
 				const fs::CFlexPath& srcPath = m_pModel->GetFileAttr( i )->GetPath();
 
 				m_filesListCtrl.InsertItem( LVIF_TEXT, i, (LPTSTR)srcPath.GetOriginParentPath().GetPtr(), 0, 0, 0, 0 );
-				m_filesListCtrl.SetSubItemText( i, SrcFilename, srcPath.GetNameExt() );
+				m_filesListCtrl.SetSubItemText( i, SrcFilename, srcPath.GetFilename() );
 				m_filesListCtrl.SetSubItemText( i, DestFilename, _T("") );		// clear the dest fname-ext field
 			}
 
@@ -145,7 +145,7 @@ void CArchiveImagesDialog::SetupFilesView( bool firstTimeInit /*= false*/ )
 			for ( size_t i = 0; i != xferPairs.size(); ++i )
 			{
 				const fs::CFlexPath& srcPath = xferPairs[ i ].second;
-				m_filesListCtrl.SetSubItemText( m_lvState.m_pIndexImpl->m_selItems[ i ], DestFilename, (LPTSTR)srcPath.GetNameExt() );
+				m_filesListCtrl.SetSubItemText( m_lvState.m_pIndexImpl->m_selItems[ i ], DestFilename, srcPath.GetFilename() );
 			}
 		}
 		else
@@ -153,7 +153,7 @@ void CArchiveImagesDialog::SetupFilesView( bool firstTimeInit /*= false*/ )
 			for ( UINT i = 0; i != xferPairs.size(); ++i )
 			{
 				const fs::CFlexPath& srcPath = xferPairs[ i ].second;
-				m_filesListCtrl.SetSubItemText( i, DestFilename, (LPTSTR)srcPath.GetNameExt() );
+				m_filesListCtrl.SetSubItemText( i, DestFilename, srcPath.GetFilename() );
 			}
 		}
 	}

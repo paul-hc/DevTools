@@ -3,11 +3,29 @@
 #pragma once
 
 #include <hash_map>
+#include <hash_set>
 #include "StdHashValue.h"
 
 
 namespace fs
 {
+	template< typename PathT >
+	class CPathIndex : private utl::noncopyable
+	{
+	public:
+		CPathIndex( void ) {}
+
+		void Clear( void ) { m_paths.clear(); }
+
+		size_t GetCount( void ) const { return m_paths.size(); }
+		bool Contains( const PathT& pathKey ) const { return m_paths.find( pathKey ) != m_paths.end(); }
+
+		bool Register( const PathT& pathKey ) { return m_paths.insert( pathKey ).second; }
+	private:
+		stdext::hash_set< PathT > m_paths;
+	};
+
+
 	// Simple map of PathT keys to file-based objects by value. No ownership, not thread-safe.
 	//
 	template< typename PathT, typename ValueT >

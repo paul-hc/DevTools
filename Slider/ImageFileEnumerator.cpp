@@ -24,6 +24,7 @@ CImageFileEnumerator::CImageFileEnumerator( IEnumerator* pProgressEnum /*= NULL*
 	, m_issueStore( _T("Searching for images") )
 	, m_pCurrPattern( NULL )
 {
+	m_foundImages.SetUseIndexing();			// optimize lookup performance when searching a large number of image files
 }
 
 CImageFileEnumerator::~CImageFileEnumerator()

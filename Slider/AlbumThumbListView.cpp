@@ -478,7 +478,7 @@ void CAlbumThumbListView::DrawItem( DRAWITEMSTRUCT* pDIS )
 				if ( pThumbDib != NULL )
 					pThumbDib->DrawAtPos( &dc, thumbRect.TopLeft() );
 
-			const TCHAR* pFileName = pFilePath->GetNameExt();
+			const TCHAR* pFileName = pFilePath->GetFilenamePtr();
 			CRect rectText( pDIS->rcItem );
 
 			rectText.top = rectText.bottom - ( 2 * cyTextSpace + s_fontHeight + 2 );

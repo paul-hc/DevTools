@@ -2,7 +2,8 @@
 #include "stdafx.h"
 #include "FileAttr.h"
 #include "ModelSchema.h"
-#include "CatalogStorageService.h"			// for ToAlbumModel()
+#include "ICatalogStorage.h"			// for CCatalogStorageFactory::IsVintageCatalog()
+#include "CatalogStorageService.h"		// for ToAlbumModel()
 #include "AlbumModel.h"
 #include "Application_fwd.h"
 #include "utl/EnumTags.h"
@@ -137,7 +138,7 @@ app::ModelSchema CFileAttr::EvalLoadingSchema( CArchive& rLoadArchive )
 	// NOTES:
 	//	1) All this complexity is required to maintain backwards compatibility to the very earliest Slider, since the ModelSchema was not saved.
 	//	2) It's fairly efficient, since we are checking only for the first loaded CFileAttr object.
-	//	3) This is messy, to keep CFileAttr::Stream() as clean as possible.
+	//	3) This is messy, in order to keep CFileAttr::Stream() as clean as possible.
 
 	app::ModelSchema docModelSchema = app::GetLoadingSchema( rLoadArchive );
 	CAlbumModel* pAlbumModel = NULL;
@@ -148,39 +149,50 @@ app::ModelSchema CFileAttr::EvalLoadingSchema( CArchive& rLoadArchive )
 	if ( serial::CStreamingGuard* pLoadGuard = serial::CStreamingGuard::GetTop() )
 		if ( !pLoadGuard->HasStreamingFlag( Loading_InspectedPathEncoding ) )
 		{	// backwards compatibility with first versions of Slider, pre 2.1, that were serializing paths as wide encoded strings:
-			pLoadGuard->SetStreamingFlag( Loading_InspectedPathEncoding );						// check this only once
+			pLoadGuard->SetStreamingFlag( Loading_InspectedPathEncoding );		// check this only once
 
 			if ( serial::WideEncoding == serial::InspectSavedStringEncoding( rLoadArchive ) )		// found old wide-encoded path?
 			{
-				docModelSchema = app::Slider_v3_1;
-
-				if ( pAlbumModel != NULL )
-					pAlbumModel->StoreModelSchema( docModelSchema );					// mark model to earlier version
-
-				TRACE( _T(" (!) CFileAttr::Stream() - detected earliest version %s in document '%s' (using wide-encoded paths)\n"),
-					app::FormatModelVersion( docModelSchema ).c_str(), rLoadArchive.m_strFileName.GetString() );
-			}
-			else
-			{	// check whether is older than app::Slider_v3_8 (having saved just the path, not the framePos)
-				const BYTE* pOldCursor = serial::GetLoadingCursor( rLoadArchive );
-				persist fs::ImagePathKey pathKey;
-				persist int imageFormat;		// formerly FileType in Slider_v5_5- (no longer needed, really)
-
-				rLoadArchive >> pathKey;
-				rLoadArchive >> imageFormat;
-
-				serial::UnreadBytes( rLoadArchive, serial::GetLoadingCursor( rLoadArchive ) - pOldCursor );		// rewind back in order to re-read {m_pathKey, m_imageFormat}
-
-				if ( imageFormat < 0 || imageFormat > wic::UnknownImageFormat )			// out-of-range imageFormat?
+				if ( app::Slider_LatestModelSchema == docModelSchema )		// album did not persist model schema?
 				{
-					docModelSchema = app::Slider_v3_7;									// we have a Slider_v3_7 (-) document
+					docModelSchema = app::Slider_v4_0;						// assume an earlier schema
 
 					if ( pAlbumModel != NULL )
-						pAlbumModel->StoreModelSchema( docModelSchema );				// mark model to earlier version
-
-					TRACE( _T(" (!) CFileAttr::Stream() - detected earlier version than %s in document '%s' (not using framePos with path)\n"),
-						app::FormatModelVersion( docModelSchema ).c_str(), rLoadArchive.m_strFileName.GetString() );
+						pAlbumModel->StoreModelSchema( docModelSchema );	// mark model to earlier version
 				}
+
+				// note: versions up to Slider_v4_0 used WIDE encoding
+				TRACE( _T(" (!) CFileAttr::Stream() - detected earlier version %s (using WIDE-encoded paths) in document '%s'\n"),
+					app::FormatModelVersion( docModelSchema ).c_str(), rLoadArchive.m_strFileName.GetString() );
+			}
+
+			// check whether is older than app::Slider_v3_8 (having saved just the path, not the framePos)
+			const BYTE* pOldCursor = serial::GetLoadingCursor( rLoadArchive );
+			persist fs::ImagePathKey pathKey;
+			persist int imageFormat;
+
+			rLoadArchive >> pathKey;
+			rLoadArchive >> imageFormat;
+
+			serial::UnreadBytes( rLoadArchive, serial::GetLoadingCursor( rLoadArchive ) - pOldCursor );		// rewind back in order to re-read {m_pathKey, m_imageFormat}
+
+			if ( imageFormat < 0 || imageFormat > wic::UnknownImageFormat )			// out-of-range imageFormat?
+			{
+				docModelSchema = app::Slider_v3_7;									// we have a Slider_v3_7 (-) document
+
+				if ( path::IsComplex( rLoadArchive.m_strFileName.GetString() ) )	// loading from an image archive storage?
+				{
+					fs::CPath docStgPath = path::ExtractPhysical( rLoadArchive.m_strFileName.GetString() );
+
+					if ( CCatalogStorageFactory::IsVintageCatalog( docStgPath.GetPtr() ) )		// a .cid or .icf catalog?
+						docModelSchema = app::Slider_v3_1;							// assume the oldest Slider_v3_1 (-) document
+				}
+
+				if ( pAlbumModel != NULL )
+					pAlbumModel->StoreModelSchema( docModelSchema );				// mark model to earlier version
+
+				TRACE( _T(" (!) CFileAttr::Stream() - detected earlier version %s in document '%s' (not using framePos with path)\n"),
+					app::FormatModelVersion( docModelSchema ).c_str(), rLoadArchive.m_strFileName.GetString() );
 			}
 		}
 

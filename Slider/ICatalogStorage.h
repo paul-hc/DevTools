@@ -58,10 +58,12 @@ public:
 	static CComPtr< ICatalogStorage > CreateStorageObject( void );
 
 	static bool HasCatalogExt( const TCHAR* pFilePath );
-	static const TCHAR* GetDefaultExtension( void ) { return s_imageStorageExts[ Ext_ias ]; }
+	static bool IsVintageCatalog( const TCHAR* pFilePath );
+	static const TCHAR* GetDefaultExtension( void ) { return s_imageStorageExts[ CatStg_ias ]; }
 
 	ICatalogStorage* FindStorage( const fs::CPath& docStgPath ) const;
-	CComPtr< ICatalogStorage > AcquireStorage( const fs::CPath& docStgPath, DWORD mode = STGM_READ );		// for password-protected storage reading: also prompts user to verify password, returning NULL if not verified
+	CComPtr< ICatalogStorage > AcquireStorage( const fs::CPath& docStgPath, DWORD mode = STGM_READ );
+		// for password-protected storage reading: also prompts user to verify password, returning NULL if not verified
 
 	std::auto_ptr< CFile > OpenFlexImageFile( const fs::CFlexPath& flexImagePath, DWORD mode = CFile::modeRead );		// either physical or storage-based image file
 
@@ -71,8 +73,9 @@ public:
 	virtual CCachedThumbBitmap* GenerateThumb( const fs::CFlexPath& srcImagePath );
 private:
 	static bool IsPasswordVerified( const fs::CPath& docStgPath );
+	static bool HasSameOpenMode( ICatalogStorage* pCatalogStorage, DWORD mode );
 private:
-	enum ExtensionType { Ext_ias, Ext_cid, Ext_icf };
+	enum ExtensionType { CatStg_ias, CatStg_cid, CatStg_icf };
 
 	static const TCHAR* s_imageStorageExts[];			// file extension for compound-files (".icf")
 };

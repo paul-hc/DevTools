@@ -38,9 +38,21 @@ CComPtr< ICatalogStorage > CCatalogStorageFactory::CreateStorageObject( void )
 bool CCatalogStorageFactory::HasCatalogExt( const TCHAR* pFilePath )
 {
 	return
-		path::MatchExt( pFilePath, s_imageStorageExts[ Ext_ias ] ) ||
-		path::MatchExt( pFilePath, s_imageStorageExts[ Ext_cid ] ) ||
-		path::MatchExt( pFilePath, s_imageStorageExts[ Ext_icf ] );
+		path::MatchExt( pFilePath, s_imageStorageExts[ CatStg_ias ] ) ||
+		path::MatchExt( pFilePath, s_imageStorageExts[ CatStg_cid ] ) ||
+		path::MatchExt( pFilePath, s_imageStorageExts[ CatStg_icf ] );
+}
+
+bool CCatalogStorageFactory::IsVintageCatalog( const TCHAR* pFilePath )
+{
+	return
+		path::MatchExt( pFilePath, s_imageStorageExts[ CatStg_cid ] ) ||
+		path::MatchExt( pFilePath, s_imageStorageExts[ CatStg_icf ] );
+}
+
+bool CCatalogStorageFactory::HasSameOpenMode( ICatalogStorage* pCatalogStorage, DWORD mode )
+{
+	return pCatalogStorage->GetDocStorage()->IsOpenForReading() == fs::CStructuredStorage::IsReadingMode( mode );
 }
 
 ICatalogStorage* CCatalogStorageFactory::FindStorage( const fs::CPath& docStgPath ) const
@@ -55,7 +67,7 @@ CComPtr< ICatalogStorage > CCatalogStorageFactory::AcquireStorage( const fs::CPa
 {
 	if ( ICatalogStorage* pFoundCatalogStorage = FindStorage( docStgPath ) )
 	{
-		ASSERT( pFoundCatalogStorage->GetDocStorage()->IsOpenForReading() == fs::CStructuredStorage::IsReadingMode( mode ) );
+		ENSURE( HasSameOpenMode( pFoundCatalogStorage, mode ) );
 		return pFoundCatalogStorage;			// cache hit
 	}
 
@@ -223,92 +235,6 @@ bool CCatalogPasswordStore::IsPasswordVerified( const fs::CPath& docStgPath ) co
 			return false;
 
 	return false;				// assume not verified on closed storage
-}
-
-
-// CCatalogStorageHost implementation
-
-CCatalogStorageHost::CCatalogStorageHost( void )
-{
-}
-
-CCatalogStorageHost::~CCatalogStorageHost()
-{
-	Clear();
-}
-
-void CCatalogStorageHost::Clear( void )
-{
-	m_imageStorages.clear();
-}
-
-ICatalogStorage* CCatalogStorageHost::Push( const fs::CPath& docStgPath, DWORD mode /*= STGM_READ*/ )
-{
-	ASSERT_NULL( Find( docStgPath ) );			// add only once
-
-	CComPtr< ICatalogStorage > pStorage = CCatalogStorageFactory::Instance()->AcquireStorage( docStgPath, mode );
-	if ( pStorage != NULL )
-	{
-		REQUIRE( pStorage->GetDocStorage()->IsOpenForReading() == fs::CStructuredStorage::IsReadingMode( mode ) );
-
-		m_imageStorages.push_back( pStorage );
-	}
-
-	return pStorage;
-}
-
-bool CCatalogStorageHost::Remove( const fs::CPath& docStgPath )
-{
-	size_t foundPos = FindPos( docStgPath );
-	if ( utl::npos == foundPos )
-		return false;
-
-	m_imageStorages.erase( m_imageStorages.begin() + foundPos );
-	return true;
-}
-
-void CCatalogStorageHost::ModifyMultiple( const std::vector< fs::CPath >& newStgPaths, const std::vector< fs::CPath >& oldStgPaths,
-										  DWORD mode /*= STGM_READ*/ )
-{
-	// remove & close old storages that are no longer part of the new ones:
-	for ( std::vector< fs::CPath >::const_iterator itOldStgPath = oldStgPaths.begin(); itOldStgPath != oldStgPaths.end(); ++itOldStgPath )
-		if ( utl::FindPos( newStgPaths.begin(), newStgPaths.end(), *itOldStgPath ) != utl::npos )
-			Remove( *itOldStgPath );
-
-	// push & open new storages:
-	for ( std::vector< fs::CPath >::const_iterator itNewStgPath = newStgPaths.begin(); itNewStgPath != newStgPaths.end(); ++itNewStgPath )
-		if ( ICatalogStorage* pFoundCatalogStorage = Find( *itNewStgPath ) )		// found already open?
-			ASSERT( pFoundCatalogStorage->GetDocStorage()->IsOpenForReading() );
-		else
-			Push( *itNewStgPath, mode );
-}
-
-ICatalogStorage* CCatalogStorageHost::GetAt( size_t pos ) const
-{
-	ASSERT( pos < GetCount() );
-	return m_imageStorages[ pos ];
-}
-
-const fs::CPath& CCatalogStorageHost::GetDocFilePathAt( size_t pos ) const
-{
-	return GetAt( pos )->GetDocStorage()->GetDocFilePath();
-}
-
-ICatalogStorage* CCatalogStorageHost::Find( const fs::CPath& docStgPath ) const
-{
-	size_t foundPos = FindPos( docStgPath );
-	return foundPos != utl::npos ? GetAt( foundPos ) : NULL;
-}
-
-size_t CCatalogStorageHost::FindPos( const fs::CPath& docStgPath ) const
-{
-	REQUIRE( CCatalogStorageFactory::HasCatalogExt( docStgPath.GetPtr() ) );
-
-	for ( size_t pos = 0; pos != m_imageStorages.size(); ++pos )
-		if ( docStgPath == GetDocFilePathAt( pos ) )
-			return pos;
-
-	return utl::npos;
 }
 
 

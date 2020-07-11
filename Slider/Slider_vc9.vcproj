@@ -670,6 +670,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\CatalogStorageHost.cpp"
+					>
+				</File>
+				<File
 					RelativePath=".\CatalogStorageHost.h"
 					>
 				</File>

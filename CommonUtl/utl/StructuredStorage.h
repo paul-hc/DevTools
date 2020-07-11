@@ -16,6 +16,8 @@ namespace fs
 	struct CStreamState;
 	struct CStreamLocation;
 
+	typedef bool ( *TElementPred )( const fs::TEmbeddedPath& elementPath, const STATSTG& stgStat );
+
 
 	// Structured storage corresponding to a compound document file.
 	// Able to handle long filenames for sub-storages (sub directories) and stream (file) methods.
@@ -64,8 +66,9 @@ namespace fs
 		bool ChangeCurrentDir( const TCHAR* pDirSubPath, DWORD mode = STGM_READ );		// use STGM_READWRITE for writing (STGM_WRITE seems to be failing)
 		bool MakeDirPath( const TCHAR* pDirSubPath, bool enterCurrent, DWORD mode = STGM_CREATE | STGM_READWRITE );
 
-		// enumerate storages and streams in the current trail (embedded storage paths, relative from the root)
-		bool EnumElements( fs::IEnumerator* pEnumerator, RecursionDepth depth = Shallow );
+		// enumeration and search
+		bool EnumElements( fs::IEnumerator* pEnumerator, RecursionDepth depth = Shallow );		// enumerate storages and streams in the current trail (embedded storage paths, relative from the root)
+		bool FindFirstElementThat( fs::TEmbeddedPath& rFoundElementPath, TElementPred pElementPred, RecursionDepth depth = Shallow );		// find the first stream that satisfies the predicate
 
 		// embedded storages (sub-directories) in current storage trail
 		CComPtr< IStorage > CreateDir( const TCHAR* pDirName, DWORD mode = STGM_CREATE | STGM_READWRITE );

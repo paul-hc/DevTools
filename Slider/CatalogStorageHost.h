@@ -3,11 +3,12 @@
 #pragma once
 
 #include "utl/Path.h"
+#include "ModelSchema.h"
 #include <atlcomcli.h>
 
 
 interface ICatalogStorage;
-
+enum StorageType { MainStorage, EmbeddedStorage };
 
 // owns multiple image archives, opened for reading initially
 class CCatalogStorageHost
@@ -17,7 +18,7 @@ public:
 	~CCatalogStorageHost();
 
 	void Clear( void );
-	ICatalogStorage* Push( const fs::CPath& docStgPath, DWORD mode = STGM_READ );		// open image storage for reading
+	ICatalogStorage* Push( const fs::CPath& docStgPath, StorageType stgType );		// open catalog storage for reading
 	bool Remove( const fs::CPath& docStgPath );
 
 	bool IsEmpty( void ) const { return 0 == m_imageStorages.size(); }
@@ -28,10 +29,10 @@ public:
 	const fs::CPath& GetDocFilePathAt( size_t pos ) const;
 
 	template< typename PathContainerT >
-	void PushMultiple( const PathContainerT& docStgPaths, DWORD mode = STGM_READ )
+	void PushMultiple( const PathContainerT& docStgPaths, StorageType stgType = EmbeddedStorage )
 	{
 		for ( PathContainerT::const_iterator itDocFilePath = docStgPaths.begin(); itDocFilePath != docStgPaths.end(); ++itDocFilePath )
-			Push( *itDocFilePath, mode );
+			Push( *itDocFilePath, stgType );		// loaded an embedded storage?
 	}
 
 	template< typename PathContainerT >
@@ -41,9 +42,10 @@ public:
 			Remove( *itDocFilePath );
 	}
 
-	void ModifyMultiple( const std::vector< fs::CPath >& newStgPaths, const std::vector< fs::CPath >& oldStgPaths, DWORD mode = STGM_READ );
+	void ModifyMultiple( const std::vector< fs::CPath >& newStgPaths, const std::vector< fs::CPath >& oldStgPaths, StorageType stgType = EmbeddedStorage );
 private:
 	size_t FindPos( const fs::CPath& docStgPath ) const;
+	static bool RetrofitStreamEncodingSchema( ICatalogStorage* pEmbeddedCatalog );
 private:
 	std::vector< CComPtr< ICatalogStorage > > m_imageStorages;			// opened for reading
 };

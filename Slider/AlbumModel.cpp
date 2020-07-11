@@ -50,13 +50,13 @@ ICatalogStorage* CAlbumModel::GetCatalogStorage( void ) const
 
 void CAlbumModel::OpenAllStorages( void )
 {
-	if ( !m_docStgPath.IsEmpty() )							// catalog-based album?
-		m_storageHost.Push( m_docStgPath );					// main storage
+	if ( !m_docStgPath.IsEmpty() )										// catalog-based album?
+		m_storageHost.Push( m_docStgPath, MainStorage );
 
 	std::vector< fs::CPath > subStoragePaths;
 	QueryEmbeddedStorages( subStoragePaths );
 
-	m_storageHost.PushMultiple( subStoragePaths );			// open embedded storages
+	m_storageHost.PushMultiple( subStoragePaths, EmbeddedStorage );		// open embedded storages
 }
 
 void CAlbumModel::QueryEmbeddedStorages( std::vector< fs::CPath >& rSubStoragePaths ) const

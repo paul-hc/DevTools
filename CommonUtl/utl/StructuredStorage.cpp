@@ -278,7 +278,7 @@ namespace fs
 		HRESULT hResult = pStreamState->CloneStream( &pStreamReadingDuplicate );		// clone and rewind the stream origin
 
 		if ( FAILED( hResult ) )
-			HandleError( hResult, streamPath.GetNameExt() );
+			HandleError( hResult, streamPath.GetFilenamePtr() );
 
 		return pStreamReadingDuplicate;
 	}
@@ -339,7 +339,7 @@ namespace fs
 
 		// second: try to open the deep stream
 		pStreamLocation->m_pCurrDir.reset( new CScopedCurrentDir( this, streamEmbeddedPath.GetParentPath().GetPtr() ) );
-		pStreamLocation->m_pStream = OpenStream( streamEmbeddedPath.GetNameExt(), mode );			// open the deep stream
+		pStreamLocation->m_pStream = OpenStream( streamEmbeddedPath.GetFilenamePtr(), mode );			// open the deep stream
 		if ( !pStreamLocation->IsValid() )
 			pStreamLocation.reset();
 
@@ -581,6 +581,60 @@ namespace fs
 				}
 		}
 		return succeeded;
+	}
+
+	bool CStructuredStorage::FindFirstElementThat( fs::TEmbeddedPath& rFoundElementPath, TElementPred pElementPred, RecursionDepth depth /*= Shallow*/ )
+	{
+		ASSERT_PTR( pElementPred );
+		REQUIRE( rFoundElementPath.IsEmpty() );
+
+		fs::TEmbeddedPath embeddedPath = GetCurrentDirPath();
+
+		CComPtr< IEnumSTATSTG > pEnumStat;
+		HRESULT hResult = GetCurrentDir()->EnumElements( 0, NULL, 0, &pEnumStat );
+		if ( FAILED( hResult ) )
+			return HandleError( hResult, embeddedPath.GetPtr() );
+
+		STATSTG stat;
+		std::vector< fs::CPath > subStgNames;
+		bool found = false;
+
+		do
+		{
+			hResult = pEnumStat->Next( 1, &stat, NULL );
+			if ( FAILED( hResult ) )
+				return HandleError( hResult, embeddedPath.GetPtr() );
+			else if ( S_FALSE == hResult )		// done?
+				break;
+
+			fs::TEmbeddedPath elementPath = embeddedPath / stat.pwcsName;
+
+			if ( pElementPred( elementPath, stat ) )
+			{
+				rFoundElementPath = elementPath;
+				found = true;
+			}
+			else if ( STGTY_STORAGE == stat.type )
+				if ( Deep == depth )
+					subStgNames.push_back( fs::CPath( stat.pwcsName ) );
+
+			::CoTaskMemFree( stat.pwcsName );
+		}
+		while ( !found );
+
+		if ( !found && !subStgNames.empty() )
+		{
+			fs::SortPaths( subStgNames );		// natural path order
+
+			for ( std::vector< fs::CPath >::const_iterator itSubStgName = subStgNames.begin(); !found && itSubStgName != subStgNames.end(); ++itSubStgName )
+			{
+				m_cwdTrail.Push( OpenDir( itSubStgName->GetPtr() ) );
+				found = FindFirstElementThat( rFoundElementPath, pElementPred, Deep );		// recurse in sub-storage
+				m_cwdTrail.Pop();
+			}
+		}
+
+		return found;
 	}
 
 
