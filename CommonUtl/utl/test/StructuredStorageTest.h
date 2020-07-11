@@ -24,6 +24,7 @@ private:
 	void TestLongFilenames( void );
 	void TestStructuredStorage( void );
 	void _TestEnumerateElements( fs::CStructuredStorage* pDocStorage );
+	void _TestFindElements( fs::CStructuredStorage* pDocStorage );
 	void _TestOpenSharedStreams( fs::CStructuredStorage* pDocStorage, const fs::TEmbeddedPath& streamPath );
 };
 

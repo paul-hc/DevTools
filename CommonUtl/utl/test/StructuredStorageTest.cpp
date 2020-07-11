@@ -72,6 +72,21 @@ namespace ut
 }
 
 
+namespace pred
+{
+	typedef std::pair< STGTY, fs::CPath > TTypeFilenamePair;
+
+	static TTypeFilenamePair s_match( STGTY_STREAM, fs::CPath() );
+
+	static bool IsElementMatch( const fs::TEmbeddedPath& elementPath, const STATSTG& stgStat )
+	{
+		return
+			s_match.first == (STGTY)stgStat.type &&
+			s_match.second == elementPath.GetFilename();
+	}
+}
+
+
 // CStructuredStorageTest implementation
 
 CStructuredStorageTest::CStructuredStorageTest( void )
@@ -136,6 +151,7 @@ void CStructuredStorageTest::TestStructuredStorage( void )
 		ASSERT( docStorage.OpenDocFile( docStgPath ) );
 
 		_TestEnumerateElements( &docStorage );
+		_TestFindElements( &docStorage );
 
 		// test shared stream access
 		{
@@ -218,6 +234,42 @@ void CStructuredStorageTest::_TestEnumerateElements( fs::CStructuredStorage* pDo
 		pDocStorage->EnumElements( &foundEnum, Deep );
 		ASSERT_EQUAL( _T("B1\\SD\\ThisIsASuperLongFi_478086F2.txt"), ut::JoinFiles( foundEnum ) );
 	}
+}
+
+void CStructuredStorageTest::_TestFindElements( fs::CStructuredStorage* pDocStorage )
+{
+	fs::CStructuredStorage::CScopedCurrentDir scopedRootDir( pDocStorage );
+	fs::TEmbeddedPath foundPath;
+
+	// find root stream
+	pred::s_match.second.Set( _T("a2.txt") );
+	ASSERT( pDocStorage->FindFirstElementThat( foundPath, &pred::IsElementMatch, Shallow ) );
+	ASSERT_EQUAL( _T("a2.txt"), foundPath );
+	foundPath.Clear();
+
+	// find deep stream
+	pred::s_match.second.Set( _T("b2.txt") );
+	ASSERT( !pDocStorage->FindFirstElementThat( foundPath, &pred::IsElementMatch, Shallow ) );
+
+	ASSERT( pDocStorage->FindFirstElementThat( foundPath, &pred::IsElementMatch, Deep ) );
+	ASSERT_EQUAL( _T("B1\\b2.txt"), foundPath );
+	foundPath.Clear();
+
+	// find root STORAGE
+	pred::s_match.first = STGTY_STORAGE;
+	pred::s_match.second.Set( _T("GIGI") );			// inexistent
+	ASSERT( !pDocStorage->FindFirstElementThat( foundPath, &pred::IsElementMatch, Shallow ) );
+
+	pred::s_match.second.Set( _T("B1") );
+	ASSERT( pDocStorage->FindFirstElementThat( foundPath, &pred::IsElementMatch, Shallow ) );
+	ASSERT_EQUAL( _T("B1"), foundPath );
+	foundPath.Clear();
+
+	pred::s_match.second.Set( _T("SD") );
+	ASSERT( !pDocStorage->FindFirstElementThat( foundPath, &pred::IsElementMatch, Shallow ) );
+
+	ASSERT( pDocStorage->FindFirstElementThat( foundPath, &pred::IsElementMatch, Deep ) );
+	ASSERT_EQUAL( _T("B1\\SD"), foundPath );
 }
 
 void CStructuredStorageTest::_TestOpenSharedStreams( fs::CStructuredStorage* pDocStorage, const fs::TEmbeddedPath& streamPath )
