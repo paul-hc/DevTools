@@ -86,9 +86,13 @@ bool CAlbumModel::SetupSingleSearchPattern( CSearchPattern* pSearchPattern )
 
 	m_searchModel.ClearPatterns();
 	m_docStgPath.Clear();
+	m_imagesModel.ClearInvalidStoragePaths();
 
 	if ( !pSearchPattern->IsValidPath() )
+	{
+		delete pSearchPattern;
 		return false;
+	}
 
 	m_searchModel.AddPattern( pSearchPattern );
 	return true;

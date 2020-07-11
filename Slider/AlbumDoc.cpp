@@ -338,6 +338,11 @@ bool CAlbumDoc::SaveAsCatalogStorage( const fs::CPath& newDocStgPath )
 		app::HandleReportException( pExc );
 		return false;
 	}
+	catch ( CUserAbortedException& rExc )
+	{
+		app::TraceException( rExc );
+		return false;
+	}
 
 	return true;
 }
@@ -685,6 +690,8 @@ BOOL CAlbumDoc::OnOpenDocument( LPCTSTR pPath )
 BOOL CAlbumDoc::OnSaveDocument( LPCTSTR pPathName )
 {
 	fs::CPath newDocPath( pPathName );
+
+	m_model.RefImagesModel().ClearInvalidStoragePaths();		// backwards copatibility: some old albums may contain invalid embedded storages
 
 	if ( app::IsCatalogFile( pPathName ) )
 		return SaveAsCatalogStorage( newDocPath );

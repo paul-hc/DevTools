@@ -47,6 +47,7 @@ public:
 	const std::vector< fs::CPath >& GetStoragePaths( void ) const { return m_storagePaths; }
 	std::vector< fs::CPath >& RefStoragePaths( void ) { return m_storagePaths; }
 	bool AddStoragePath( const fs::CPath& storagePath );
+	void ClearInvalidStoragePaths( void );
 public:
 	void OrderFileAttrs( fattr::Order fileOrder, ui::IProgressService* pProgressSvc );
 private:

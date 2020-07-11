@@ -5,6 +5,7 @@
 #include "FileAttrAlgorithms.h"
 #include "Application_fwd.h"
 #include "utl/ContainerUtilities.h"
+#include "utl/FileSystem.h"
 #include "utl/PathMap.h"
 #include "utl/Serialization.h"
 #include "utl/SerializeStdTypes.h"
@@ -148,6 +149,16 @@ std::auto_ptr< CFileAttr > CImagesModel::RemoveFileAttrAt( size_t pos )
 bool CImagesModel::AddStoragePath( const fs::CPath& storagePath )
 {
 	return utl::AddUnique( m_storagePaths, storagePath );
+}
+
+void CImagesModel::ClearInvalidStoragePaths( void )
+{
+	// backwards compatibility: delete dangling embedded storages
+	for ( std::vector< fs::CPath >::iterator itStoragePath = m_storagePaths.begin(); itStoragePath != m_storagePaths.end(); )
+		if ( !fs::IsValidStructuredStorage( itStoragePath->GetPtr() ) )
+			itStoragePath = m_storagePaths.erase( itStoragePath );
+		else
+			++itStoragePath;
 }
 
 
