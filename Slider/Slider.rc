@@ -211,7 +211,7 @@ BEGIN
             MENUITEM "&Explore Image\tCtrl+E",      ID_IMAGE_EXPLORE
         END
         MENUITEM SEPARATOR
-        MENUITEM "E&xtract Catalog Images...",  ID_FILE_EXTRACT_CATALOG
+        MENUITEM "E&xtract Catalog...",         ID_FILE_EXTRACT_CATALOG
         MENUITEM SEPARATOR
         MENUITEM "Clear Image Cache",           CM_CLEAR_IMAGE_CACHE
         MENUITEM "Clear Temporary Embedded Clones", CM_CLEAR_TEMP_EMBEDDED_CLONES
@@ -505,7 +505,7 @@ BEGIN
             MENUITEM "&Auto Drop Recipient",        CM_IS_AUTO_DROP
         END
         MENUITEM SEPARATOR
-        MENUITEM "E&xtract Catalog Images...",  ID_FILE_EXTRACT_CATALOG
+        MENUITEM "E&xtract Catalog...",         ID_FILE_EXTRACT_CATALOG
         MENUITEM SEPARATOR
         MENUITEM "Regenerate Album\tCtrl+Shift+F5", CM_REGENERATE_ALBUM
         MENUITEM "Album &Settings...\tCtrl+Space", ID_EDIT_ALBUM

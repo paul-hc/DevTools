@@ -31,6 +31,22 @@
 #endif
 
 
+namespace pred
+{
+	struct CanAlterPhysicalImage
+	{
+		bool operator()( const fs::CFlexPath& imagePath ) const
+		{
+			return
+				imagePath.IsComplexPath() ||				// REMOVE from album embedded images
+				imagePath.FileExist( fs::ReadWrite );		// DELETE/MOVE physical file
+		}
+	};
+}
+
+
+// CAlbumDoc implementation
+
 IMPLEMENT_DYNCREATE( CAlbumDoc, CDocumentBase )
 
 CAlbumDoc::CAlbumDoc( void )
@@ -386,6 +402,76 @@ bool CAlbumDoc::BuildAlbum( const fs::CPath& searchPath )
 	return true;		// keep it open regardless of m_model.AnyFoundFiles();
 }
 
+void CAlbumDoc::OnAlbumModelChanged( AlbumModelChange reason /*= FM_Init*/ )
+{
+	InitAutoDropRecipient();
+
+	if ( FM_AutoDropOp == reason )
+	{	// also clear the thumb and image caches
+		app::GetThumbnailer()->Clear();
+
+		CWicImageCache::Instance().DiscardWithPrefix( m_autoDropContext.GetDestSearchPath().GetPtr() );
+	}
+
+	UpdateAllViews( NULL, Hint_AlbumModelChanged, app::ToHintPtr( reason ) );
+}
+
+
+bool CAlbumDoc::EditAlbum( CAlbumImageView* pActiveView )
+{
+	CAlbumSettingsDialog dlg( m_model, pActiveView->GetSlideData().GetCurrentIndex(), pActiveView );
+	if ( dlg.DoModal() != IDOK )
+		return false;
+
+	m_model = dlg.GetModel();
+	m_slideData.SetCurrentIndex( dlg.GetCurrentIndex() );
+
+	ClearAutoDropContext();			// clear auto-drop context since the drop directory may have changed
+	SetModifiedFlag( IsStorageAlbum() ? DirtyMustRecreate : Dirty );	// will prompt for saving; if catalog, force storage recreation to collect garbage (deleted images)
+
+	OnAlbumModelChanged();
+	OnAutoDropRecipientChanged();
+	return true;
+}
+
+bool CAlbumDoc::AddExplicitFiles( const std::vector< fs::CPath >& filePaths, bool doUpdate /*= true*/ )
+{
+	if ( m_model.IsAutoDropRecipient( false ) )
+		return false;
+
+	// add search attributes for each explicit file or directory
+	for ( std::vector< fs::CPath >::const_iterator itFilePath = filePaths.begin(); itFilePath != filePaths.end(); ++itFilePath )
+		m_model.RefSearchModel()->AddSearchPath( *itFilePath );
+
+	try
+	{
+		m_model.SearchForFiles( NULL );
+	}
+	catch ( CException* pExc )
+	{
+		app::HandleReportException( pExc );
+		return false;
+	}
+
+	m_slideData.SetCurrentIndex( 0 );
+	SetModifiedFlag( Dirty );			// mark document as modified in order to prompt for saving.
+
+	if ( doUpdate )
+		OnAlbumModelChanged();
+	return true;
+}
+
+TCurrImagePos CAlbumDoc::DeleteFromAlbum( const std::vector< fs::CFlexPath >& selFilePaths )
+{
+	TCurrImagePos newCurrentIndex = m_model.DeleteFromAlbum( selFilePaths );
+	m_slideData.SetCurrentIndex( newCurrentIndex );
+
+	SetModifiedFlag( IsStorageAlbum() ? DirtyMustRecreate : Dirty );		// mark document as modified in order to prompt for saving - force storage recreation to collect garbage (deleted images)
+	OnAlbumModelChanged();
+	return newCurrentIndex;
+}
+
+
 void CAlbumDoc::RegenerateModel( AlbumModelChange reason /*= FM_Init*/ )
 {
 	if ( FM_Regeneration == reason )
@@ -416,24 +502,6 @@ void CAlbumDoc::RegenerateModel( AlbumModelChange reason /*= FM_Init*/ )
 	// belonging to this document, which is just updated.
 	if ( FM_AutoDropOp == reason )
 		app::GetApp()->UpdateAllViews( Hint_FileChanged, this );
-}
-
-bool CAlbumDoc::EditAlbum( CAlbumImageView* pActiveView )
-{
-	CAlbumSettingsDialog dlg( m_model, pActiveView->GetSlideData().GetCurrentIndex(), pActiveView );
-	if ( dlg.DoModal() != IDOK )
-		return false;
-
-	m_model = dlg.GetModel();
-	m_slideData.SetCurrentIndex( dlg.GetCurrentIndex() );
-	// clear auto-drop context since the drop directory may have changed
-	ClearAutoDropContext();
-
-	SetModifiedFlag( Dirty );		// mark document as modified in order to prompt for saving
-
-	OnAlbumModelChanged();
-	OnAutoDropRecipientChanged();
-	return true;
 }
 
 void CAlbumDoc::ClearCustomOrder( custom_order::ClearMode clearMode /*= custom_order::CM_ClearAll*/ )
@@ -564,6 +632,7 @@ bool CAlbumDoc::HandleDropRecipientFiles( HDROP hDropInfo, CAlbumImageView* pTar
 {
 	ASSERT_PTR( pTargetAlbumView );
 	ASSERT( m_model.IsAutoDropRecipient( false ) && pTargetAlbumView->IsDropTargetEnabled() );
+
 	if ( !m_model.IsAutoDropRecipient( true /*with validity check*/ ) )
 	{
 		AfxMessageBox( IDS_ERROR_INVALID_DEST_DIR );
@@ -601,51 +670,11 @@ bool CAlbumDoc::ExecuteAutoDrop( void )
 	return true;
 }
 
-void CAlbumDoc::OnAlbumModelChanged( AlbumModelChange reason /*= FM_Init*/ )
-{
-	InitAutoDropRecipient();
-
-	if ( FM_AutoDropOp == reason )
-	{	// also clear the thumb and image caches
-		app::GetThumbnailer()->Clear();
-
-		CWicImageCache::Instance().DiscardWithPrefix( m_autoDropContext.GetDestSearchPath().GetPtr() );
-	}
-
-	UpdateAllViews( NULL, Hint_AlbumModelChanged, app::ToHintPtr( reason ) );
-}
-
 void CAlbumDoc::OnAutoDropRecipientChanged( void )
 {
 	GetAlbumImageView()->OnAutoDropRecipientChanged();
 }
 
-bool CAlbumDoc::AddExplicitFiles( const std::vector< std::tstring >& files, bool doUpdate /*= true*/ )
-{
-	if ( m_model.IsAutoDropRecipient( false ) )
-		return false;
-
-	// add search attributes for each explicit file or directory
-	for ( std::vector< std::tstring >::const_iterator it = files.begin(); it != files.end(); ++it )
-		m_model.RefSearchModel()->AddSearchPath( *it );
-
-	try
-	{
-		m_model.SearchForFiles( NULL );
-	}
-	catch ( CException* pExc )
-	{
-		app::HandleReportException( pExc );
-		return false;
-	}
-
-	m_slideData.SetCurrentIndex( 0 );
-	SetModifiedFlag( Dirty );			// mark document as modified in order to prompt for saving.
-
-	if ( doUpdate )
-		OnAlbumModelChanged();
-	return true;
-}
 
 CWicImage* CAlbumDoc::GetCurrentImage( void ) const
 {
@@ -711,16 +740,14 @@ BOOL CAlbumDoc::OnSaveDocument( LPCTSTR pPathName )
 BEGIN_MESSAGE_MAP( CAlbumDoc, CDocumentBase )
 	ON_COMMAND( ID_FILE_EXTRACT_CATALOG, OnExtractCatalog )
 	ON_UPDATE_COMMAND_UI( ID_FILE_EXTRACT_CATALOG, OnUpdate_IsCatalogStorage )
-
 	ON_COMMAND( ID_IMAGE_SAVE_AS, On_ImageSaveAs )
 	ON_UPDATE_COMMAND_UI( ID_IMAGE_SAVE_AS, OnUpdate_AnyCurrImage )
-
 	ON_COMMAND( ID_IMAGE_OPEN, On_ImageOpen )
-	ON_UPDATE_COMMAND_UI( ID_IMAGE_OPEN, OnUpdate_ImageFilesAllReadOp )
+	ON_UPDATE_COMMAND_UI( ID_IMAGE_OPEN, OnUpdate_AllSelImagesRead )
 	ON_COMMAND( ID_IMAGE_DELETE, On_ImageDelete )
-	ON_UPDATE_COMMAND_UI( ID_IMAGE_DELETE, OnUpdate_ImageFilesAllWriteOp )
+	ON_UPDATE_COMMAND_UI( ID_IMAGE_DELETE, OnUpdate_AllSelImagesModify )
 	ON_COMMAND( ID_IMAGE_MOVE, On_ImageMove )
-	ON_UPDATE_COMMAND_UI( ID_IMAGE_MOVE, OnUpdate_ImageFilesAllWriteOp )
+	ON_UPDATE_COMMAND_UI( ID_IMAGE_MOVE, OnUpdate_AllSelImagesModify )
 
 	ON_COMMAND( CM_AUTO_DROP_DEFRAGMENT, CmAutoDropDefragment )
 	ON_UPDATE_COMMAND_UI( CM_AUTO_DROP_DEFRAGMENT, OnUpdateAutoDropDefragment )
@@ -790,16 +817,16 @@ void CAlbumDoc::OnUpdate_AnyCurrImage( CCmdUI* pCmdUI )
 	pCmdUI->Enable( pCurrImage != NULL && pCurrImage->IsValidFile() );
 }
 
-void CAlbumDoc::OnUpdate_ImageFilesAllReadOp( CCmdUI* pCmdUI )
+void CAlbumDoc::OnUpdate_AllSelImagesRead( CCmdUI* pCmdUI )
 {
 	std::vector< fs::CFlexPath > selImagePaths;
 	pCmdUI->Enable( QuerySelectedImagePaths( selImagePaths ) && utl::All( selImagePaths, pred::FlexFileExist() ) );
 }
 
-void CAlbumDoc::OnUpdate_ImageFilesAllWriteOp( CCmdUI* pCmdUI )
+void CAlbumDoc::OnUpdate_AllSelImagesModify( CCmdUI* pCmdUI )
 {
 	std::vector< fs::CFlexPath > selImagePaths;
-	pCmdUI->Enable( QuerySelectedImagePaths( selImagePaths ) && utl::All( selImagePaths, pred::FlexFileExist( fs::ReadWrite ) ) );
+	pCmdUI->Enable( QuerySelectedImagePaths( selImagePaths ) && utl::All( selImagePaths, pred::CanAlterPhysicalImage() ) );
 }
 
 void CAlbumDoc::On_ImageOpen( void )
@@ -816,35 +843,17 @@ void CAlbumDoc::On_ImageDelete( void )
 	std::vector< fs::CFlexPath > selFilePaths;
 	QuerySelectedImagePaths( selFilePaths );
 
-	std::vector< fs::CPath > physicalPaths;
-	if ( path::QueryPhysicalPaths( physicalPaths, selFilePaths ) )
-		shell::DeleteFiles( physicalPaths );
-
-	TCurrImagePos newCurrentIndex = m_model.DeleteFromAlbum( selFilePaths );
-	m_slideData.SetCurrentIndex( newCurrentIndex );
-
-	SetModifiedFlag( IsStorageAlbum() ? DirtyMustRecreate : Dirty );		// mark document as modified in order to prompt for saving - force storage recreation to collect garbage (deleted images)
-	OnAlbumModelChanged();
+	if ( HandleDeleteImages( selFilePaths ) )
+		DeleteFromAlbum( selFilePaths );
 }
 
 void CAlbumDoc::On_ImageMove( void )
 {
-	fs::CPath destFolderPath;
-	if ( !shell::PickFolder( destFolderPath, NULL, 0, _T("Select Destination Folder") ) )
-		return;
+	std::vector< fs::CFlexPath > selFilePaths;
+	QuerySelectedImagePaths( selFilePaths );
 
-	std::vector< fs::CFlexPath > srcFilePaths;
-	QuerySelectedImagePaths( srcFilePaths );
-
-	std::vector< fs::CPath > destFilePaths;
-	svc::MakeDestFilePaths( destFilePaths, srcFilePaths, destFolderPath, Shallow );
-
-	// move a mix of physical (MOVE) and complex (COPY) paths
-	size_t count = svc::RelocateFiles( srcFilePaths, destFilePaths, Shallow );
-	if ( count != srcFilePaths.size() )
-		ui::ReportError( str::Format( _T("%d out of %d files encountered a move issue!"), srcFilePaths.size() - count, srcFilePaths.size() ), MB_ICONWARNING );
-
-	On_ImageDelete();			// delete from the album the moved source files
+	if ( HandleMoveImages( selFilePaths ) )
+		DeleteFromAlbum( selFilePaths );		// delete from the album the moved source files
 }
 
 

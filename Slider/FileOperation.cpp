@@ -29,10 +29,8 @@ namespace svc
 
 		for ( size_t i = 0; i != srcFilePaths.size(); ++i )
 			if ( Shallow == destDepth || fs::CreateDirPath( destFilePaths[ i ].GetParentPath().GetPtr() ) )
-			{
 				if ( fileOp.Copy( srcFilePaths[ i ], fs::CastFlexPath( destFilePaths[ i ] ) ) )
 					++count;
-			}
 
 		return count;
 	}

@@ -35,7 +35,7 @@ protected:
 	afx_msg void OnUpdateFileSaveAs( CCmdUI* pCmdUI );
 	afx_msg void On_ImageDelete( void );
 	afx_msg void On_ImageMove( void );
-	afx_msg void OnUpdate_ImagePhysicalFileWriteOp( CCmdUI* pCmdUI );
+	afx_msg void OnUpdate_AlterPhysicalImageFile( CCmdUI* pCmdUI );
 
 	DECLARE_MESSAGE_MAP()
 };

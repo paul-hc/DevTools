@@ -17,9 +17,9 @@ interface ICatalogStorage;
 
 class CAlbumDoc : public CDocumentBase
 {
-	DECLARE_DYNCREATE( CAlbumDoc )
-
 	friend class CCatalogStorageTests;
+
+	DECLARE_DYNCREATE( CAlbumDoc )
 
 	CAlbumDoc( void );
 public:
@@ -49,9 +49,13 @@ public:
 	ICatalogStorage* GetCatalogStorage( void );				// opened storage if album based on a catalog storage (compound document)
 
 	static std::auto_ptr< CAlbumDoc > LoadAlbumDocument( const fs::CPath& docPath );			// load a new image album (slide or catalog storage)
+
+	// events
+	void OnAlbumModelChanged( AlbumModelChange reason = FM_Init );
 public:
 	bool EditAlbum( CAlbumImageView* pActiveView );
-	bool AddExplicitFiles( const std::vector< std::tstring >& files, bool doUpdate = true );
+	bool AddExplicitFiles( const std::vector< fs::CPath >& filePaths, bool doUpdate = true );
+	TCurrImagePos DeleteFromAlbum( const std::vector< fs::CFlexPath >& selFilePaths );
 
 	// custom order support
 	bool DropCustomOrder( int& rDropIndex, std::vector< int >& rSelIndexes );
@@ -62,28 +66,25 @@ public:
 
 	bool HandleDropRecipientFiles( HDROP hDropInfo, CAlbumImageView* pTargetAlbumView );
 	bool ExecuteAutoDrop( void );
-
-	// events
-	void OnAlbumModelChanged( AlbumModelChange reason = FM_Init );
 protected:
 	// base overrides
 	virtual CWicImage* GetCurrentImage( void ) const;
 	virtual bool QuerySelectedImagePaths( std::vector< fs::CFlexPath >& rSelImagePaths ) const;
 private:
-	void OnAutoDropRecipientChanged( void );
-
 	bool BuildAlbum( const fs::CPath& searchPath );
 
 	bool LoadCatalogStorage( const fs::CPath& docStgPath );
 	bool SaveAsCatalogStorage( const fs::CPath& newDocStgPath );			// save .sld -> .ias, .ias -> .ias
+
+	void PrepareToSave( const fs::CPath& docPath );
+	bool PromptSaveConvertModelSchema( void ) const;
 
 	void RegenerateModel( AlbumModelChange reason = FM_Init );
 
 	bool UndoRedoCustomOrder( custom_order::COpStack& rFromStack, custom_order::COpStack& rToStack, bool isUndoOp );
 	void ClearCustomOrder( custom_order::ClearMode clearMode = custom_order::CM_ClearAll );
 
-	void PrepareToSave( const fs::CPath& docPath );
-	bool PromptSaveConvertModelSchema( void ) const;
+	void OnAutoDropRecipientChanged( void );
 private:
 	CAlbumImageView* GetAlbumImageView( void ) const;
 	CSlideData* GetActiveSlideData( void );
@@ -121,8 +122,8 @@ protected:
 
 	afx_msg void On_ImageSaveAs( void );
 	afx_msg void OnUpdate_AnyCurrImage( CCmdUI* pCmdUI );
-	afx_msg void OnUpdate_ImageFilesAllReadOp( CCmdUI* pCmdUI );
-	afx_msg void OnUpdate_ImageFilesAllWriteOp( CCmdUI* pCmdUI );
+	afx_msg void OnUpdate_AllSelImagesRead( CCmdUI* pCmdUI );
+	afx_msg void OnUpdate_AllSelImagesModify( CCmdUI* pCmdUI );
 
 	afx_msg void On_ImageOpen( void );
 	afx_msg void On_ImageDelete( void );

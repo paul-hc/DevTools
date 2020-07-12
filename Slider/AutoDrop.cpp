@@ -154,7 +154,7 @@ namespace auto_drop
 		else if ( ui::IsKeyPressed( VK_SHIFT ) )
 			m_dropOperation = FileMove;
 
-		int fileCount =::DragQueryFile( hDropInfo, ( UINT )-1, NULL, 0 );
+		int fileCount = ::DragQueryFile( hDropInfo, ( UINT )-1, NULL, 0 );
 		bool abortDrop = false;
 
 		for ( int i = 0; i < fileCount && !abortDrop; i++ )

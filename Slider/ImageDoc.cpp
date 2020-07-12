@@ -5,8 +5,6 @@
 #include "MainFrame.h"
 #include "Application.h"
 #include "resource.h"
-#include "utl/UI/ShellUtilities.h"
-#include "utl/UI/Utilities.h"
 #include "utl/UI/WicImage.h"
 
 #ifdef _DEBUG
@@ -110,9 +108,9 @@ BEGIN_MESSAGE_MAP( CImageDoc, CDocumentBase )
 	ON_UPDATE_COMMAND_UI( ID_FILE_SAVE_AS, OnUpdateFileSaveAs )
 
 	ON_COMMAND( ID_IMAGE_DELETE, On_ImageDelete )
-	ON_UPDATE_COMMAND_UI( ID_IMAGE_DELETE, OnUpdate_ImagePhysicalFileWriteOp )
+	ON_UPDATE_COMMAND_UI( ID_IMAGE_DELETE, OnUpdate_AlterPhysicalImageFile )
 	ON_COMMAND( ID_IMAGE_MOVE, On_ImageMove )
-	ON_UPDATE_COMMAND_UI( ID_IMAGE_MOVE, OnUpdate_ImagePhysicalFileWriteOp )
+	ON_UPDATE_COMMAND_UI( ID_IMAGE_MOVE, OnUpdate_AlterPhysicalImageFile )
 END_MESSAGE_MAP()
 
 BOOL CImageDoc::OnNewDocument( void )
@@ -133,28 +131,28 @@ void CImageDoc::OnUpdateFileSaveAs( CCmdUI* pCmdUI )
 	pCmdUI->Enable( pImage != NULL && pImage->IsValid() );
 }
 
-
 void CImageDoc::On_ImageDelete( void )
 {
-	std::vector< fs::CFlexPath > complexPaths;
-	std::vector< fs::CPath > physicalPaths;
+	std::vector< fs::CFlexPath > selFilePaths;
+	QuerySelectedImagePaths( selFilePaths );		// single selection
 
-	if ( QuerySelectedImagePaths( complexPaths ) )
-		if ( path::ExtractPhysicalPaths( physicalPaths, complexPaths ) )
-			shell::DeleteFiles( physicalPaths );
+	if ( HandleDeleteImages( selFilePaths ) )
+		OnCloseDocument();
 }
 
 void CImageDoc::On_ImageMove( void )
 {
-	std::vector< fs::CFlexPath > complexPaths;
-	std::vector< fs::CPath > physicalPaths;
+	std::vector< fs::CFlexPath > selFilePaths;
+	QuerySelectedImagePaths( selFilePaths );		// single selection
 
-	if ( QuerySelectedImagePaths( complexPaths ) )
-		if ( path::ExtractPhysicalPaths( physicalPaths, complexPaths ) )
-			app::MoveFiles( physicalPaths );
+	if ( !HandleMoveImages( selFilePaths ) )
+		return;			// cancelled picking dest folder
+
+	OnCloseDocument();
+	AfxGetApp()->OpenDocumentFile( s_destFilePaths.front().GetPtr() );		// re-open the destination image file
 }
 
-void CImageDoc::OnUpdate_ImagePhysicalFileWriteOp( CCmdUI* pCmdUI )
+void CImageDoc::OnUpdate_AlterPhysicalImageFile( CCmdUI* pCmdUI )
 {
 	CWicImage* pImage = GetCurrentImage();
 	pCmdUI->Enable( pImage != NULL && pImage->IsValidPhysicalFile( fs::Write ) );
