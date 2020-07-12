@@ -261,16 +261,16 @@ std::auto_ptr< CAlbumDoc > CAlbumDoc::LoadAlbumDocument( const fs::CPath& docPat
 {
 	std::auto_ptr< CAlbumDoc > pNewAlbumDoc( new CAlbumDoc() );
 
-	if ( app::IsSlideFile( docPath.GetPtr() ) || fs::IsValidDirectory( docPath.GetPtr() ) )
-	{
-		if ( !pNewAlbumDoc->OnOpenDocument( docPath.GetPtr() ) )
-			pNewAlbumDoc.reset();
-	}
-	else if ( app::IsCatalogFile( docPath.GetPtr() ) )
+	if ( app::IsCatalogFile( docPath.GetPtr() ) )
 	{
 		CComPtr< ICatalogStorage > pCatalogStorage = CCatalogStorageFactory::Instance()->AcquireStorage( docPath, STGM_READ );
 
 		if ( !pNewAlbumDoc->LoadCatalogStorage( docPath ) )
+			pNewAlbumDoc.reset();
+	}
+	else if ( app::IsSlideFile( docPath.GetPtr() ) || fs::IsValidDirectory( docPath.GetPtr() ) )
+	{
+		if ( !pNewAlbumDoc->OnOpenDocument( docPath.GetPtr() ) )
 			pNewAlbumDoc.reset();
 	}
 

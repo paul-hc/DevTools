@@ -125,22 +125,6 @@ namespace app
 		return CAlbumDocTemplate::IsSlideAlbumFile( pFilePath );
 	}
 
-	bool MoveFiles( const std::vector< fs::CPath >& filePaths, CWnd* pParentWnd /*= AfxGetMainWnd()*/ )
-	{
-		CMoveFileDialog moveToDialog( filePaths, pParentWnd );
-		if ( moveToDialog.DoModal() != IDOK )
-			return false;
-
-		CTempCloneFileSet tempClone( filePaths );		// make temporary copies for logical files (if any)
-
-		return shell::MoveFiles( tempClone.GetPhysicalFilePaths(), moveToDialog.m_destFolderPath, pParentWnd );
-	}
-
-	bool DeleteFiles( const std::vector< fs::CPath >& filePaths, bool allowUndo /*= true*/ )
-	{
-		return shell::DeleteFiles( filePaths, AfxGetMainWnd(), allowUndo ? FOF_ALLOWUNDO : 0 );
-	}
-
 	fs::CPath GetActiveDirPath( void )
 	{
 		fs::CPath activePath;
