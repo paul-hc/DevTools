@@ -1040,7 +1040,8 @@ END
 STRINGTABLE 
 BEGIN
     IDR_MAINFRAME           "Slider"
-    IDR_ALBUMTYPE           "\nAlbum\nAlbum\nAlbums (*.sld;*.ias)\n.sld;.ias\nSliderAlbum.Document\nSlider Album Document"
+///    IDR_ALBUMTYPE           "\nAlbum\nAlbum\nAlbums (*.sld;*.ias)\n.sld;.ias\nSliderAlbum5+.Document\nSlider Album5+ Document"
+    IDR_ALBUMTYPE           "\nAlbum\nAlbum\nAlbums (*.sld)\n.sld\nSliderAlbum5+.Document\nSlider Album5+ Document"
     IDR_IMAGETYPE           "\nImage\nImage\nImages (*.bmp)\n.bmp\nSliderImage.Document\nSlider Image Document"
 END
 

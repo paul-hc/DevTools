@@ -43,17 +43,17 @@ public:
 	bool HasForceFlag( int forceFlag ) const { ASSERT( HasForceMask( forceFlag ) ); return HasFlag( m_forceFlags, forceFlag ); }
 
 	// operations
-	bool OpenQueuedAlbum( void );
+	bool _OpenQueuedAlbum( void );
 
-	void SetStatusBarMessage( const TCHAR* pMessage );
+///	void SetStatusBarMessage( const TCHAR* pMessage );
 
 	void UpdateAllViews( UpdateViewHint hint = Hint_ViewUpdate, CDocument* pSenderDoc = NULL, CView* pSenderView = NULL );
 private:
 	enum RunFlags
 	{
-		ShowHelp			= BIT_FLAG( 0 ),
-		RunTests			= BIT_FLAG( 8 ),
-		SkipUiTests			= BIT_FLAG( 9 )
+		ShowHelp	= BIT_FLAG( 0 ),
+		RunTests	= BIT_FLAG( 8 ),
+		SkipUiTests	= BIT_FLAG( 9 )
 	};
 
 	bool HandleAppTests( void );
@@ -67,7 +67,7 @@ private:
 		void ParseAppSwitches( void );
 
 		// base overrides
-		virtual void ParseParam( const TCHAR* pParam, BOOL isFlag, BOOL isLast );
+//		virtual void ParseParam( const TCHAR* pParam, BOOL isFlag, BOOL isLast );
 
 		static std::tstring GetHelpMsg( void );
 	private:
@@ -143,7 +143,7 @@ namespace app
 
 	// shared app progress bar support
 
-	class CScopedProgress : private utl::noncopyable
+/**	class CScopedProgress : private utl::noncopyable
 	{
 	public:
 		enum AutoClearDelay
@@ -179,7 +179,7 @@ namespace app
 		UINT m_pbStepIndex;
 		UINT m_pbStepDivider;
 		std::auto_ptr< CScopedPumpMessage > m_pMessagePump;
-	};
+	}; **/
 
 } //namespace app
 

@@ -72,7 +72,7 @@ namespace app
 		if ( !CMultiDocTemplate::GetDocString( rString, index ) )
 			return false;
 
-		if ( filterExt == index )
+		if ( CDocTemplate::filterExt == index )
 			if ( s_useSingleFilterExt )
 				rString = m_allExts.front().c_str();		// use just the first (default) extension
 			else
@@ -203,8 +203,8 @@ namespace app
 
 	CDocManager::CDocManager( void )
 	{
+		AddDocTemplate( CAlbumDocTemplate::Instance() );		// the main application template
 		AddDocTemplate( CImageDocTemplate::Instance() );
-		AddDocTemplate( CAlbumDocTemplate::Instance() );
 	}
 
 	void CDocManager::OnFileNew( void )
@@ -229,13 +229,13 @@ namespace app
 	void CDocManager::RegisterShellFileTypes( BOOL compatMode )
 	{
 		{
-			CScopedValue< bool > scopedSingleExt( &CSharedDocTemplate::s_useSingleFilterExt, true );		// prevent creating ".sld;.ias;.cid;.icf" registry key
-			::CDocManager::RegisterShellFileTypes( compatMode );
+			CScopedValue< bool > scopedSingleExt( &CSharedDocTemplate::s_useSingleFilterExt, true );		// return just ".sld" in GetDocString() - prevent creating ".sld;.ias;.cid;.icf" registry key
+			__super::RegisterShellFileTypes( compatMode );
 		}
 
-		CAlbumDocTemplate* pAlbumTemplate = CAlbumDocTemplate::Instance();
+/**		CAlbumDocTemplate* pAlbumTemplate = CAlbumDocTemplate::Instance();
 		pAlbumTemplate->RegisterAdditionalDocExtensions();
-		pAlbumTemplate->RegisterAlbumShellDirectory( true );
+		pAlbumTemplate->RegisterAlbumShellDirectory( true ); **/
 	}
 
 	void CDocManager::RegisterImageAdditionalShellExt( bool doRegister )

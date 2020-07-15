@@ -114,7 +114,7 @@ app::ModelSchema CWorkspaceData::Load( CArchive& archive )
 
 CWorkspace::CWorkspace( void )
 	: CCmdTarget()
-	, m_pMainFrame( app::GetMainFrame() )
+	, m_pMainFrame( NULL /*app::GetMainFrame()*/ )
 	, m_isLoaded( false )
 	, m_delayFullScreen( false )
 	, m_pLoadingImageState( NULL )
@@ -136,8 +136,17 @@ CWorkspace::~CWorkspace()
 
 CWorkspace& CWorkspace::Instance( void )
 {
-	static CWorkspace appWorkspace;
-	return appWorkspace;
+	static CWorkspace s_workspace;
+	return s_workspace;
+}
+
+void CWorkspace::StoreMainWnd( CMainFrame* pMainFrame )
+{
+	REQUIRE( !IsLoaded() );
+	ASSERT_NULL( m_pMainFrame );
+
+	m_pMainFrame = pMainFrame;
+	ASSERT_PTR( m_pMainFrame );
 }
 
 void CWorkspace::Serialize( CArchive& archive )
@@ -181,11 +190,11 @@ void CWorkspace::Serialize( CArchive& archive )
 
 		// workspace loaded: will use SW_HIDE on 1st show (CommitWnd), then pass the final mode from placement on 2nd step for MFC to show
 		m_isLoaded = true;
-		AfxGetApp()->m_nCmdShow = m_mainPlacement.ChangeMaximizedShowCmd( SW_HIDE );
+///		AfxGetApp()->m_nCmdShow = m_mainPlacement.ChangeMaximizedShowCmd( SW_HIDE );
 		shell::s_useVistaStyle = HasFlag( m_data.m_wkspFlags, wf::UseVistaStyleFileDialog );
 
-		if ( app::GetThumbnailer()->SetBoundsSize( m_data.GetThumbBoundsSize() ) )
-			app::GetApp()->UpdateAllViews( Hint_ThumbBoundsResized );			// notify thumb bounds change
+///		if ( app::GetThumbnailer()->SetBoundsSize( m_data.GetThumbBoundsSize() ) )
+///			app::GetApp()->UpdateAllViews( Hint_ThumbBoundsResized );			// notify thumb bounds change
 
 		if ( savedModelSchema < app::Slider_v3_2 )
 			return;									// skip loading old m_imageStates that were using DECLARE_SERIAL( CImageState )
@@ -279,11 +288,12 @@ void CWorkspace::FetchSettings( void )
 
 bool CWorkspace::LoadDocuments( void )
 {
+ASSERT(0);
 	if ( m_delayFullScreen && m_delayFullScreen != m_isFullScreen )
 		ToggleFullScreen();		// if was de-persisted with full-screen mode, now is the right time to actually commit the switch
 
 	// (!) next time, show the window as default in order to properly handle CFrameWnd::OnDDEExecute ShowWindow calls
-	AfxGetApp()->m_nCmdShow = -1;
+///	AfxGetApp()->m_nCmdShow = -1;
 
 	if ( !m_pMainFrame->GetToolbar()->IsVisible() == HasFlag( m_data.m_wkspFlags, wf::ShowToolBar ) )
 		m_pMainFrame->ShowControlBar( m_pMainFrame->GetToolbar(), HasFlag( m_data.m_wkspFlags, wf::ShowToolBar ), FALSE );

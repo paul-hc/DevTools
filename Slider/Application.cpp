@@ -27,6 +27,11 @@
 #include "utl/UI/test/WicImageTests.h"
 #include <io.h>
 
+///
+#include "AlbumChildFrame.h"
+#include "AlbumImageView.h"
+
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
@@ -165,75 +170,75 @@ namespace app
 
 	// CScopedProgress implementation
 
-	CScopedProgress::CScopedProgress( int autoClearDelay /*= 250*/ )
-		: m_pSharedProgressBar( app::GetMainFrame()->GetProgressCtrl() )
-		, m_autoClearDelay( autoClearDelay )
-		, m_pbStepIndex( 0 )
-		, m_pbStepDivider( 1 )
-	{
-	}
-
-	CScopedProgress::CScopedProgress( int valueMin, int count, int stepCount, const TCHAR* pCaption /*= NULL*/, int autoClearDelay /*= 250*/ )
-		: m_pSharedProgressBar( app::GetMainFrame()->GetProgressCtrl() )
-		, m_autoClearDelay( autoClearDelay )
-		, m_pbStepIndex( 0 )
-		, m_pbStepDivider( 1 )
-		, m_pMessagePump( new CScopedPumpMessage( 5, CWnd::GetActiveWindow() ) )
-	{
-		Begin( valueMin, count, stepCount, pCaption );
-	}
-
-	CScopedProgress::~CScopedProgress()
-	{
-		if ( m_autoClearDelay != ACD_NoClear )
-			End();
-	}
-
-	bool CScopedProgress::IsActive( void ) const
-	{
-		return app::GetMainFrame()->InProgress();
-	}
-
-	void CScopedProgress::Begin( int valueMin, int count, int stepCount, const TCHAR* pCaption /*= NULL*/ )
-	{
-		app::GetMainFrame()->BeginProgress( valueMin, count, stepCount, pCaption );
-	}
-
-	void CScopedProgress::End( int clearDelay /*= ACD_NoClear*/ )
-	{
-		app::GetMainFrame()->EndProgress( clearDelay == ACD_NoClear ? m_autoClearDelay : clearDelay );
-	}
-
-	void CScopedProgress::SetPos( int value )
-	{
-		app::GetMainFrame()->SetPosProgress( value );
-	}
-
-	void CScopedProgress::StepIt( void )
-	{
-		// if m_pbStepDivider > 1 divide StepIt calls by m_pbStepDivider
-		if ( m_pbStepDivider <= 1 || !( ++m_pbStepIndex % m_pbStepDivider ) )
-			app::GetMainFrame()->StepItProgress();
-
-		if ( m_pMessagePump.get() != NULL )
-			m_pMessagePump->CheckPump();
-	}
-
-	void CScopedProgress::GotoBegin( void )
-	{
-		int valueMin, valueMax;
-		ASSERT( IsActive() );
-		m_pSharedProgressBar->GetRange( valueMin, valueMax );
-		m_pSharedProgressBar->SetPos( valueMin );
-	}
-
-	void CScopedProgress::GotoEnd( void )
-	{
-		int valueMin, valueMax;
-		ASSERT( IsActive() );
-		m_pSharedProgressBar->GetRange( valueMin, valueMax );
-		m_pSharedProgressBar->SetPos( valueMax - 1 );
-	}
+///	CScopedProgress::CScopedProgress( int autoClearDelay /*= 250*/ )
+///		: m_pSharedProgressBar( app::GetMainFrame()->GetProgressCtrl() )
+///		, m_autoClearDelay( autoClearDelay )
+///		, m_pbStepIndex( 0 )
+///		, m_pbStepDivider( 1 )
+///	{
+///	}
+///
+///	CScopedProgress::CScopedProgress( int valueMin, int count, int stepCount, const TCHAR* pCaption /*= NULL*/, int autoClearDelay /*= 250*/ )
+///		: m_pSharedProgressBar( app::GetMainFrame()->GetProgressCtrl() )
+///		, m_autoClearDelay( autoClearDelay )
+///		, m_pbStepIndex( 0 )
+///		, m_pbStepDivider( 1 )
+///		, m_pMessagePump( new CScopedPumpMessage( 5, CWnd::GetActiveWindow() ) )
+///	{
+///		Begin( valueMin, count, stepCount, pCaption );
+///	}
+///
+///	CScopedProgress::~CScopedProgress()
+///	{
+///		if ( m_autoClearDelay != ACD_NoClear )
+///			End();
+///	}
+///
+///	bool CScopedProgress::IsActive( void ) const
+///	{
+///		return app::GetMainFrame()->InProgress();
+///	}
+///
+///	void CScopedProgress::Begin( int valueMin, int count, int stepCount, const TCHAR* pCaption /*= NULL*/ )
+///	{
+///		app::GetMainFrame()->BeginProgress( valueMin, count, stepCount, pCaption );
+///	}
+///
+///	void CScopedProgress::End( int clearDelay /*= ACD_NoClear*/ )
+///	{
+///		app::GetMainFrame()->EndProgress( clearDelay == ACD_NoClear ? m_autoClearDelay : clearDelay );
+///	}
+///
+///	void CScopedProgress::SetPos( int value )
+///	{
+///		app::GetMainFrame()->SetPosProgress( value );
+///	}
+///
+///	void CScopedProgress::StepIt( void )
+///	{
+///		// if m_pbStepDivider > 1 divide StepIt calls by m_pbStepDivider
+///		if ( m_pbStepDivider <= 1 || !( ++m_pbStepIndex % m_pbStepDivider ) )
+///			app::GetMainFrame()->StepItProgress();
+///
+///		if ( m_pMessagePump.get() != NULL )
+///			m_pMessagePump->CheckPump();
+///	}
+///
+///	void CScopedProgress::GotoBegin( void )
+///	{
+///		int valueMin, valueMax;
+///		ASSERT( IsActive() );
+///		m_pSharedProgressBar->GetRange( valueMin, valueMax );
+///		m_pSharedProgressBar->SetPos( valueMin );
+///	}
+///
+///	void CScopedProgress::GotoEnd( void )
+///	{
+///		int valueMin, valueMax;
+///		ASSERT( IsActive() );
+///		m_pSharedProgressBar->GetRange( valueMin, valueMax );
+///		m_pSharedProgressBar->SetPos( valueMax - 1 );
+///	}
 
 } //namespace app
 
@@ -295,12 +300,12 @@ CApplication::~CApplication()
 
 BOOL CApplication::InitInstance( void )
 {
-	m_pGdiPlusInit.reset( new CScopedGdiPlusInit );
+//	m_pGdiPlusInit.reset( new CScopedGdiPlusInit );
 
 	if ( !CBaseApp< CWinApp >::InitInstance() )
 		return FALSE;
 
-	LoadStdProfileSettings( 10 );		// load standard INI file options (including MRU)
+LoadStdProfileSettings( _AFX_MRU_MAX_COUNT );		// load standard INI file options (including MRU)
 
 	serial::CScopedLoadingArchive::SetLatestModelSchema( app::Slider_LatestModelSchema );			// set up the latest model schema version (assumed by default for in-memory serialization)
 
@@ -327,51 +332,66 @@ BOOL CApplication::InitInstance( void )
 	CToolStrip::RegisterStripButtons( IDR_APP_TOOL_STRIP );
 	CImageStore::SharedStore()->RegisterAliases( cmdAliases, COUNT_OF( cmdAliases ) );
 
-	app::CDocManager* pAppDocManager = new app::CDocManager;
+/**	app::CDocManager* pAppDocManager = new app::CDocManager;
 	ASSERT_NULL( m_pDocManager );
-	m_pDocManager = pAppDocManager;	// register document templates
+	m_pDocManager = pAppDocManager;		// register document templates
+**/
+// Register the application's document templates.
+CMultiDocTemplate* pDocTemplate;
+pDocTemplate = new CMultiDocTemplate(IDR_ALBUMTYPE,
+	RUNTIME_CLASS( CAlbumDoc ),
+	RUNTIME_CLASS( CAlbumChildFrame ),		// custom MDI child frame
+	RUNTIME_CLASS( CAlbumImageView )
+);
+AddDocTemplate(pDocTemplate);
 
-	CCmdLineInfo cmdInfo( this );
-	cmdInfo.ParseAppSwitches();				// just our switches (ignore MFC arguments)
+///	CCmdLineInfo cmdInfo( this );
+///	cmdInfo.ParseAppSwitches();				// just our switches (ignore MFC arguments)
 
-	if ( ui::IsKeyPressed( VK_SHIFT ) )
-		cmdInfo.SetForceFlag( app::FullScreen | app::DocMaximize, true );
+///	if ( ui::IsKeyPressed( VK_SHIFT ) )
+///		cmdInfo.SetForceFlag( app::FullScreen | app::DocMaximize, true );
 
-	if ( HasFlag( m_runFlags, ShowHelp ) )
-	{
-		AfxMessageBox( CCmdLineInfo::GetHelpMsg().c_str() );
-		return FALSE;
-	}
+///	if ( HasFlag( m_runFlags, ShowHelp ) )
+///	{
+///		AfxMessageBox( CCmdLineInfo::GetHelpMsg().c_str() );
+///		return FALSE;
+///	}
 
 	// create main MDI Frame window
-	m_pMainFrame = new CMainFrame;
-	m_pMainWnd = m_pMainFrame;
+	m_pMainFrame = new CMainFrame();
+	CWorkspace::Instance().StoreMainWnd( m_pMainFrame );
+
 	if ( !m_pMainFrame->LoadFrame( IDR_MAINFRAME ) )
 		return FALSE;
 
+	m_pMainWnd = m_pMainFrame;
+
 	// check and adjust application's forced flags
-	CWorkspace::Instance().AdjustForcedBehaviour();
+///	CWorkspace::Instance().AdjustForcedBehaviour();
 
 	// adjust the MRU list max count
-	delete m_pRecentFileList;
-	m_pRecentFileList = NULL;
-	LoadStdProfileSettings( CWorkspace::GetData().m_mruCount );
+///	delete m_pRecentFileList;
+///	m_pRecentFileList = NULL;
+///	LoadStdProfileSettings( CWorkspace::GetData().m_mruCount );
 
-	ParseCommandLine( cmdInfo );			// parse command line for standard shell commands, DDE, file open
+///	ParseCommandLine( cmdInfo );			// parse command line for standard shell commands, DDE, file open
 
 	EnableShellOpen();						// enable DDE Execute open
 	RegisterShellFileTypes( TRUE );			// register image and album extensions and document types
 
-	if ( HasForceMask( app::RegAdditionalExt ) )
-		pAppDocManager->RegisterImageAdditionalShellExt( HasForceFlag( app::RegAdditionalExt ) );
+CCommandLineInfo cmdInfo; // MFC-STD
+	ParseCommandLine( cmdInfo );			// parse command line for standard shell commands, DDE, file open
 
-	// Dispatch commands specified on the command line.  Will return FALSE if app was launched with /RegServer, /Register, /Unregserver or /Unregister.
-	if ( !cmdInfo.m_strFileName.IsEmpty() )
+///	if ( HasForceMask( app::RegAdditionalExt ) )
+///		pAppDocManager->RegisterImageAdditionalShellExt( HasForceFlag( app::RegAdditionalExt ) );
+
+///	if ( !cmdInfo.m_strFileName.IsEmpty() )
+		// Dispatch commands specified on the command line.  Will return FALSE if app was launched with /RegServer, /Register, /Unregserver or /Unregister.
 		if ( !ProcessShellCommand( cmdInfo ) )
 			return FALSE;
 
-	if ( -1 == m_nCmdShow || SW_HIDE == m_nCmdShow )				// PHC 2019-01: in case we no longer use WM_DDE_EXECUTE command
-		m_nCmdShow = SW_SHOWNORMAL;		// make the main frame visible
+///	if ( -1 == m_nCmdShow || SW_HIDE == m_nCmdShow )				// PHC 2019-01: in case we no longer use WM_DDE_EXECUTE command
+///		m_nCmdShow = SW_SHOWNORMAL;		// make the main frame visible
 
 	// the main window has been initialized, so show and update it
 	m_pMainFrame->ShowWindow( m_nCmdShow );
@@ -404,7 +424,7 @@ int CApplication::ExitInstance( void )
 	return CBaseApp< CWinApp >::ExitInstance();
 }
 
-bool CApplication::OpenQueuedAlbum( void )
+bool CApplication::_OpenQueuedAlbum( void )
 {
 	CAlbumDoc* pAlbumDoc = NULL;
 	if ( m_pDocManager != NULL )
@@ -450,11 +470,11 @@ bool CApplication::HandleAppTests( void )
 #endif
 	return false;
 }
-
+/**
 void CApplication::SetStatusBarMessage( const TCHAR* pMessage )
 {
 	m_pMainFrame->SetMessageText( pMessage );
-}
+} **/
 
 void CApplication::UpdateAllViews( UpdateViewHint hint /*= Hint_ViewUpdate*/, CDocument* pSenderDoc /*= NULL*/, CView* pSenderView /*= NULL*/ )
 {
@@ -472,7 +492,10 @@ void CApplication::UpdateAllViews( UpdateViewHint hint /*= Hint_ViewUpdate*/, CD
 //	[queue("D:\WINNT\Background\Tiles\JPGs\blue.jpg")]
 BOOL CApplication::OnDDECommand( LPTSTR pCommand )
 {
-	std::tstring command = pCommand;
+///	ASSERT(0);
+
+/**	std::tstring command = pCommand;
+
 	if ( str::StripPrefix( command, _T("[queue(") ) )
 		if ( str::StripSuffix( command, _T(")]") ) )
 		{	// process each DDE "queue" request for explicit albums
@@ -482,7 +505,7 @@ BOOL CApplication::OnDDECommand( LPTSTR pCommand )
 			m_queuedAlbumFilePaths.push_back( command );
 			app::GetMainFrame()->StartQueuedAlbumTimer();
 			return TRUE;
-		}
+		} **/
 
 	return CBaseApp< CWinApp >::OnDDECommand( pCommand );
 }
@@ -538,7 +561,7 @@ void CApplication::CCmdLineInfo::ParseAppSwitches( void )
 			ParseSwitch( arg::GetSwitch( pParam ) );
 	}
 }
-
+/**
 void CApplication::CCmdLineInfo::ParseParam( const TCHAR* pParam, BOOL isFlag, BOOL isLast )
 {
 	if ( isFlag )
@@ -549,7 +572,7 @@ void CApplication::CCmdLineInfo::ParseParam( const TCHAR* pParam, BOOL isFlag, B
 		}
 
 	CCommandLineInfo::ParseParam( pParam, isFlag, isLast );
-}
+} **/
 
 bool CApplication::CCmdLineInfo::ParseSwitch( const TCHAR* pSwitch )
 {

@@ -72,6 +72,8 @@ public:
 	static CWorkspaceData& RefData( void ) { return Instance().m_data; }
 	static int GetFlags( void ) { return Instance().m_data.m_wkspFlags; }
 
+	void StoreMainWnd( CMainFrame* pMainFrame );
+
 	virtual void Serialize( CArchive& archive );
 
 	bool LoadSettings( void );

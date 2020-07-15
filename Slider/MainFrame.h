@@ -26,45 +26,43 @@ public:
 
 	CMainToolbar* GetToolbar( void ) { return m_pToolbar.get(); }
 	CStatusBar* GetStatusBar( void ) { return &m_statusBar; }
-	CProgressCtrl* GetProgressCtrl( void ) { return &m_progressCtrl; }
+///	CProgressCtrl* GetProgressCtrl( void ) { return &m_progressCtrl; }
 
 	// status bar temporary messages
-	bool IsStatusBarAutoClear( void ) const { return m_messageClearTimer.IsStarted(); }
-	bool CancelStatusBarAutoClear( UINT idleMessageID = AFX_IDS_IDLEMESSAGE );
-	void SetStatusBarMessage( const TCHAR* pMessage, UINT elapseMs = UINT_MAX );
-	void SetIdleStatusBarMessage( UINT idleMessageID = AFX_IDS_IDLEMESSAGE );
+///	bool IsStatusBarAutoClear( void ) const { return m_messageClearTimer.IsStarted(); }
+///	bool CancelStatusBarAutoClear( UINT idleMessageID = AFX_IDS_IDLEMESSAGE );
+///	void SetStatusBarMessage( const TCHAR* pMessage, UINT elapseMs = UINT_MAX );
+///	void SetIdleStatusBarMessage( UINT idleMessageID = AFX_IDS_IDLEMESSAGE );
 
-	void StartQueuedAlbumTimer( UINT timerDelay = 750 );
+///	void StartQueuedAlbumTimer( UINT timerDelay = 750 );
 
 	// shared progress bar
-	bool InProgress( void ) const { return m_inProgress.IsInternalChange(); }
-	void BeginProgress( int valueMin, int count, int stepCount, const TCHAR* pCaption = NULL );
-	void EndProgress( int clearDelay );
-	void SetPosProgress( int value );
-	void StepItProgress( void );
+///	bool InProgress( void ) const { return m_inProgress.IsInternalChange(); }
+///	void BeginProgress( int valueMin, int count, int stepCount, const TCHAR* pCaption = NULL );
+///	void EndProgress( int clearDelay );
+///	void SetPosProgress( int value );
+///	void StepItProgress( void );
 
 	bool ResizeViewToFit( CScrollView* pScrollView );
-protected:
-	void CleanupWindow( void );
 private:
-	bool CreateProgressCtrl( void );
-	void SetProgressCaptionText( const TCHAR* pCaption );
-	bool DoClearProgressCtrl( void );
+///	bool CreateProgressCtrl( void );
+///	void SetProgressCaptionText( const TCHAR* pCaption );
+///	bool DoClearProgressCtrl( void );
 private:
 	std::auto_ptr< CMainToolbar > m_pToolbar;
 	CStatusBar m_statusBar;
-	CProgressCtrl m_progressCtrl;
+//	CProgressCtrl m_progressCtrl;
 
-	CWindowTimer m_messageClearTimer;
-	CWindowTimer m_queueTimer;
-	CWindowTimer m_progBarResetTimer;
+///	CWindowTimer m_messageClearTimer;
+///	CWindowTimer m_queueTimer;
+///	CWindowTimer m_progBarResetTimer;
 	CInternalChange m_inProgress;
 
 	enum Metrics { ProgressBarWidth = 150 };
 	enum TimerIds { MessageTimerId = 2000, QueueTimerId, ProgressResetTimerId };
-public:
+
 	// generated stuff
-	public:
+public:
 	virtual BOOL PreCreateWindow( CREATESTRUCT& rCS );
 	virtual BOOL OnCmdMsg( UINT cmdId, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo );
 protected:

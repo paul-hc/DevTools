@@ -15,7 +15,7 @@
 #include "utl/UI/WindowPlacement.h"
 #include "utl/UI/resource.h"
 #include <afxpriv.h>		// for WM_SETMESSAGESTRING
-#include <dde.h>
+///#include <dde.h>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -35,9 +35,9 @@ IMPLEMENT_DYNAMIC( CMainFrame, CMDIFrameWnd )
 CMainFrame::CMainFrame( void )
 	: CMDIFrameWnd()
 	, m_pToolbar( new CMainToolbar() )
-	, m_messageClearTimer( this, MessageTimerId, 5000 )
-	, m_queueTimer( this, QueueTimerId, 750 )
-	, m_progBarResetTimer( this, ProgressResetTimerId, 250 )
+///	, m_messageClearTimer( this, MessageTimerId, 5000 )
+///	, m_queueTimer( this, QueueTimerId, 750 )
+///	, m_progBarResetTimer( this, ProgressResetTimerId, 250 )
 {
 	// TODO: add member initialization code here
 	// Create the combo font as the small caption system font:
@@ -75,22 +75,24 @@ bool CMainFrame::IsMdiRestored( void ) const
 	return MDIGetActive( &isMaximized ) != NULL && !isMaximized;
 }
 
-void CMainFrame::StartQueuedAlbumTimer( UINT timerDelay /*= 750*/ )
-{
-	m_queueTimer.SetElapsed( timerDelay );
-}
+///void CMainFrame::StartQueuedAlbumTimer( UINT timerDelay /*= 750*/ )
+///{
+///	m_queueTimer.SetElapsed( timerDelay );
+///}
 
-bool CMainFrame::CancelStatusBarAutoClear( UINT idleMessageID /*= AFX_IDS_IDLEMESSAGE*/ )
-{
+///bool CMainFrame::CancelStatusBarAutoClear( UINT idleMessageID /*= AFX_IDS_IDLEMESSAGE*/ )
+/** {
 	if ( !IsStatusBarAutoClear() )
 		return false;
+
 	SetIdleStatusBarMessage( idleMessageID );
 	return true;
-}
+} **/
 
 // if elapseMs is UINT_MAX, the message won't be cleared automatically
-void CMainFrame::SetStatusBarMessage( const TCHAR* pMessage, UINT elapseMs /*= UINT_MAX*/ )
-{
+/// void CMainFrame::SetStatusBarMessage( const TCHAR* pMessage, UINT elapseMs /*= UINT_MAX*/ )
+/** {
+if (1) return;
 	m_messageClearTimer.Stop();
 
 	static std::tstring message;
@@ -102,10 +104,11 @@ void CMainFrame::SetStatusBarMessage( const TCHAR* pMessage, UINT elapseMs /*= U
 		m_messageClearTimer.SetElapsed( elapseMs );
 		m_messageClearTimer.Start();
 	}
-}
+} **/
 
-void CMainFrame::SetIdleStatusBarMessage( UINT idleMessageID /*= AFX_IDS_IDLEMESSAGE*/ )
-{
+/// void CMainFrame::SetIdleStatusBarMessage( UINT idleMessageID /*= AFX_IDS_IDLEMESSAGE*/ )
+/** {
+if (1) return;
 	m_messageClearTimer.Stop();
 
 	// switch the status-bar text to default
@@ -117,14 +120,6 @@ void CMainFrame::SetIdleStatusBarMessage( UINT idleMessageID /*= AFX_IDS_IDLEMES
 	// update the status-bar right away
 	if ( CWnd* pMessageBar = GetMessageBar() )
 		pMessageBar->UpdateWindow();
-}
-
-void CMainFrame::CleanupWindow( void )
-{
-	if ( CWorkspace::GetData().m_autoSave )
-		CWorkspace::Instance().SaveSettings();
-	else
-		CWorkspace::Instance().SaveRegSettings();		// registry settings always get saved
 }
 
 bool CMainFrame::CreateProgressCtrl( void )
@@ -149,6 +144,7 @@ bool CMainFrame::CreateProgressCtrl( void )
 
 void CMainFrame::SetProgressCaptionText( const TCHAR* pCaption )
 {
+if (1) return;
 	int progCaptionIndex = m_statusBar.CommandToIndex( IDW_SB_PROGRESS_CAPTION );
 
 	if ( m_statusBar.GetPaneText( progCaptionIndex ) != pCaption )
@@ -160,13 +156,14 @@ void CMainFrame::SetProgressCaptionText( const TCHAR* pCaption )
 			textExtent = ui::GetTextSize( &clientDC, pCaption );
 			clientDC.SelectObject( orgFont );
 		}
-		m_statusBar.SetPaneInfo( progCaptionIndex, IDW_SB_PROGRESS_CAPTION, SBPS_NOBORDERS, textExtent.cx /*- 5*/ );
+		m_statusBar.SetPaneInfo( progCaptionIndex, IDW_SB_PROGRESS_CAPTION, SBPS_NOBORDERS, textExtent.cx );
 		m_statusBar.SetPaneText( progCaptionIndex, pCaption );
 	}
 }
 
 bool CMainFrame::DoClearProgressCtrl( void )
 {
+if (1) return true;
 	m_progBarResetTimer.Stop();
 
 	// IMP: in order to clear the progress-bar, it must be "logically" turned OFF already, otherwise remains ON.
@@ -185,10 +182,11 @@ bool CMainFrame::DoClearProgressCtrl( void )
 
 	SetProgressCaptionText( _T("") );
 	return true;
-}
+} **/
 
-void CMainFrame::BeginProgress( int valueMin, int count, int stepCount, const TCHAR* pCaption /*= NULL*/ )
-{
+/// void CMainFrame::BeginProgress( int valueMin, int count, int stepCount, const TCHAR* pCaption /*= NULL*/ )
+/** {
+if (1) return;
 	m_progressCtrl.SetRange32( valueMin, valueMin + count );	// note that valueMax is out of range (100% is valMax - 1)
 	m_progressCtrl.SetPos( valueMin );
 	m_progressCtrl.SetStep( stepCount );
@@ -198,10 +196,11 @@ void CMainFrame::BeginProgress( int valueMin, int count, int stepCount, const TC
 	SetProgressCaptionText( pCaption );
 
 	m_inProgress.AddInternalChange();
-}
+} **/
 
-void CMainFrame::EndProgress( int clearDelay )
+/** void CMainFrame::EndProgress( int clearDelay )
 {
+if (1) return;
 	bool wasInProgress = InProgress();
 
 	m_inProgress.ReleaseInternalChange();		// turn off the progress bar (logically)
@@ -217,18 +216,21 @@ void CMainFrame::EndProgress( int clearDelay )
 
 void CMainFrame::SetPosProgress( int value )
 {
+if (1) return;
 	ASSERT( InProgress() );
 	m_progressCtrl.SetPos( value );
 }
 
 void CMainFrame::StepItProgress( void )
 {
+if (1) return;
 	ASSERT( InProgress() );
 	m_progressCtrl.StepIt();
-}
+} **/
 
 bool CMainFrame::ResizeViewToFit( CScrollView* pScrollView )
 {
+if (1) return true;
 	ASSERT_PTR( pScrollView->GetSafeHwnd() );
 
 	BOOL isMaximized;
@@ -265,18 +267,18 @@ BOOL CMainFrame::PreCreateWindow( CREATESTRUCT& rCS )
 	if ( !CMDIFrameWnd::PreCreateWindow( rCS ) )
 		return FALSE;
 
-	if ( !CWorkspace::Instance().IsLoaded() )			// create and load once
-		CWorkspace::Instance().LoadSettings();
+///	if ( !CWorkspace::Instance().IsLoaded() )			// create and load once
+///		CWorkspace::Instance().LoadSettings();
 
 	return TRUE;
 }
 
 BOOL CMainFrame::OnCmdMsg( UINT cmdId, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo )
 {
-	CPushRoutingFrame push( this );
+///	CPushRoutingFrame push( this );
 
 	return
-		CWorkspace::Instance().OnCmdMsg( cmdId, code, pExtra, pHandlerInfo ) ||
+///		CWorkspace::Instance().OnCmdMsg( cmdId, code, pExtra, pHandlerInfo ) ||
 		m_pToolbar->HandleCmdMsg( cmdId, code, pExtra, pHandlerInfo ) ||
 		CMDIFrameWnd::OnCmdMsg( cmdId, code, pExtra, pHandlerInfo );
 }
@@ -288,12 +290,12 @@ BEGIN_MESSAGE_MAP( CMainFrame, CMDIFrameWnd )
 	ON_WM_CREATE()
 	ON_WM_DESTROY()
 	ON_WM_CLOSE()
-	ON_WM_GETMINMAXINFO()
+///	ON_WM_GETMINMAXINFO()
 	ON_WM_SIZE()
-	ON_WM_WINDOWPOSCHANGING()
-	ON_WM_SHOWWINDOW()
+///	ON_WM_WINDOWPOSCHANGING()
+///	ON_WM_SHOWWINDOW()
 	ON_WM_DROPFILES()
-	ON_WM_TIMER()
+///	ON_WM_TIMER()
 	ON_COMMAND( ID_CM_ESCAPE_KEY, On_MdiClose )
 	ON_COMMAND( ID_CM_MDI_CLOSE_ALL, On_MdiCloseAll )
 	ON_UPDATE_COMMAND_UI( ID_CM_MDI_CLOSE_ALL, OnUpdateAnyMDIChild )
@@ -321,8 +323,8 @@ int CMainFrame::OnCreate( CREATESTRUCT* pCS )
 
 	DragAcceptFiles();			// enable drag/drop open
 
-	if ( CWindowPlacement* pLoadedPlacement = CWorkspace::Instance().GetLoadedPlacement() )
-		pLoadedPlacement->CommitWnd( this );						// 1st step: restore persistent placement, but with SW_HIDE; 2nd step will use the persisted AfxGetApp()->m_nCmdShow in app InitInstance()
+///	if ( CWindowPlacement* pLoadedPlacement = CWorkspace::Instance().GetLoadedPlacement() )
+///		pLoadedPlacement->CommitWnd( this );						// 1st step: restore persistent placement, but with SW_HIDE; 2nd step will use the persisted AfxGetApp()->m_nCmdShow in app InitInstance()
 
 	if ( !m_pToolbar->CreateEx( this, TBSTYLE_FLAT | TBSTYLE_TRANSPARENT,
 								WS_CHILD | WS_VISIBLE |
@@ -330,41 +332,45 @@ int CMainFrame::OnCreate( CREATESTRUCT* pCS )
 								CRect( 0, 2, 0, 2 ) ) ||
 		 !m_pToolbar->InitToolbar() )
 	{
-		TRACE0("Failed to create toolbar\n");
+		TRACE("Failed to create toolbar\n");
 		return -1;	  // fail to create
 	}
 
 	if ( !m_statusBar.Create( this ) || !m_statusBar.SetIndicators( g_sbIndicators, COUNT_OF( g_sbIndicators ) ) )
 	{
-		TRACE0("Failed to create status bar\n");
+		TRACE("Failed to create status bar\n");
 		return -1;	  // fail to create
 	}
-	CreateProgressCtrl();
+///	CreateProgressCtrl();
 
 	// TODO: delete these three lines if you don't want the toolbar to be dockable
 	m_pToolbar->EnableDocking( CBRS_ALIGN_ANY );
 	EnableDocking( CBRS_ALIGN_ANY );
 	DockControlBar( m_pToolbar.get() );
 
-	PostMessage( WM_COMMAND, CM_LOAD_WORKSPACE_DOCS );			// delayed load the documents saved in workspace
+///	PostMessage( WM_COMMAND, CM_LOAD_WORKSPACE_DOCS );			// delayed load the documents saved in workspace
 	return 0;
 }
 
 void CMainFrame::OnDestroy( void )
 {
-	CleanupWindow();
+	if ( CWorkspace::GetData().m_autoSave )
+		CWorkspace::Instance().SaveSettings();
+	else
+		CWorkspace::Instance().SaveRegSettings();		// registry settings always get saved
+
 	CMDIFrameWnd::OnDestroy();
 }
 
 void CMainFrame::OnClose( void )
 {
-	CWorkspace::Instance().FetchSettings();
+///	CWorkspace::Instance().FetchSettings();
 	CMDIFrameWnd::OnClose();
 }
 
 void CMainFrame::OnGetMinMaxInfo( MINMAXINFO* mmi )
 {
-	if ( !CWorkspace::Instance().IsFullScreen() )
+///	if ( !CWorkspace::Instance().IsFullScreen() )
 		CMDIFrameWnd::OnGetMinMaxInfo( mmi );
 }
 
@@ -372,19 +378,19 @@ void CMainFrame::OnSize( UINT sizeType, int cx, int cy )
 {
 	CMDIFrameWnd::OnSize( sizeType, cx, cy );
 
-	if ( m_progressCtrl.m_hWnd != NULL )
+/**	if ( m_progressCtrl.m_hWnd != NULL )
 	{	// move the progress bar on top of the associated statusbar item
 		CRect ctrlRect;
 		int progBarIndex = m_statusBar.CommandToIndex( IDW_SB_PROGRESS_BAR );
 
 		m_statusBar.GetItemRect( progBarIndex, &ctrlRect );
 		m_progressCtrl.MoveWindow( &ctrlRect );
-	}
+	} **/
 }
 
 void CMainFrame::OnWindowPosChanging( WINDOWPOS* wndPos )
 {
-	if ( !CWorkspace::Instance().IsFullScreen() )
+///	if ( !CWorkspace::Instance().IsFullScreen() )
 		CMDIFrameWnd::OnWindowPosChanging( wndPos );
 }
 
@@ -402,12 +408,13 @@ void CMainFrame::OnDropFiles( HDROP hDropInfo )
 
 void CMainFrame::OnTimer( UINT_PTR eventId )
 {
-	if ( m_messageClearTimer.IsHit( eventId ) )
-	{
-		m_messageClearTimer.Stop();
-		SetIdleStatusBarMessage();
-	}
-	else if ( m_queueTimer.IsHit( eventId ) )
+///	if ( m_messageClearTimer.IsHit( eventId ) )
+///	{
+///		m_messageClearTimer.Stop();
+///		SetIdleStatusBarMessage();
+///	}
+
+/**	else if ( m_queueTimer.IsHit( eventId ) )
 	{
 		MSG msg;
 
@@ -415,21 +422,23 @@ void CMainFrame::OnTimer( UINT_PTR eventId )
 		if ( !::PeekMessage( &msg, m_hWnd, WM_DDE_FIRST, WM_DDE_LAST, PM_NOREMOVE ) )
 		{
 			m_queueTimer.Stop();
-			app::GetApp()->OpenQueuedAlbum();
+			app::GetApp()->_OpenQueuedAlbum();
 		}
-	}
-	else if ( m_progBarResetTimer.IsHit( eventId ) )
-		DoClearProgressCtrl();
-	else
+	} **/
+
+///	else if ( m_progBarResetTimer.IsHit( eventId ) )
+///		DoClearProgressCtrl();
+///	else
 		CMDIFrameWnd::OnTimer( eventId );
 }
 
 void CMainFrame::On_MdiClose( void )
 {
-	CFrameWnd* pActiveFrame = MDIGetActive();
-	if ( NULL == pActiveFrame )
-		pActiveFrame = this;
-	pActiveFrame->SendMessage( WM_SYSCOMMAND, SC_CLOSE );
+	CFrameWnd* pActiveMdiFrame = MDIGetActive();
+	if ( NULL == pActiveMdiFrame )
+		pActiveMdiFrame = this;
+
+	pActiveMdiFrame->SendMessage( WM_SYSCOMMAND, SC_CLOSE );
 }
 
 void CMainFrame::On_MdiCloseAll( void )

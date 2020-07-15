@@ -148,14 +148,14 @@ bool CAlbumImageView::UpdateImage( void )
 
 	if ( IsValidIndex( currIndex ) )
 	{
-		CMainFrame* pMainFrame = app::GetMainFrame();
+///		CMainFrame* pMainFrame = app::GetMainFrame();
 
 		try
 		{
 			CWaitCursor wait;
 			CScopedErrorHandling scopedThrow( &CWicImageCache::Instance(), utl::ThrowMode );
 
-			pMainFrame->CancelStatusBarAutoClear();
+///			pMainFrame->CancelStatusBarAutoClear();
 
 			if ( GetImage() != NULL )
 			{
@@ -168,7 +168,7 @@ bool CAlbumImageView::UpdateImage( void )
 		}
 		catch ( CException* pExc )
 		{
-			pMainFrame->SetStatusBarMessage( str::FormatException( pExc, _T("Loading Error: %s") ).c_str(), 5000 );		// report modelessly the exception
+///			pMainFrame->SetStatusBarMessage( str::FormatException( pExc, _T("Loading Error: %s") ).c_str(), 5000 );		// report modelessly the exception
 			app::HandleException( pExc, MB_ICONWARNING );
 		}
 	}
