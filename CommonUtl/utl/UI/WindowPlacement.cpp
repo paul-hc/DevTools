@@ -10,12 +10,21 @@
 
 CWindowPlacement::CWindowPlacement( void )
 {
+	Reset();
+}
+
+void CWindowPlacement::Reset( void )
+{
 	memset( (tagWINDOWPLACEMENT*)this, 0, sizeof( tagWINDOWPLACEMENT ) );
 	this->length = sizeof( WINDOWPLACEMENT );
 }
 
-CWindowPlacement::~CWindowPlacement()
+bool CWindowPlacement::IsEmpty( void ) const
 {
+	return
+		0 == ptMinPosition.x && 0 == ptMinPosition.y &&
+		0 == ptMaxPosition.x && 0 == ptMaxPosition.y &&
+		0 == rcNormalPosition.left && 0 == rcNormalPosition.top && 0 == rcNormalPosition.right && 0 == rcNormalPosition.bottom;
 }
 
 bool CWindowPlacement::ReadWnd( const CWnd* pWnd )
@@ -26,7 +35,7 @@ bool CWindowPlacement::ReadWnd( const CWnd* pWnd )
 
 bool CWindowPlacement::CommitWnd( CWnd* pWnd, bool restoreToMax /*= false*/, bool setMinPos /*= false*/ )
 {
-	ASSERT_PTR( pWnd );
+	ASSERT_PTR( pWnd->GetSafeHwnd() );
 	CWindowPlacement* pThis = const_cast< CWindowPlacement* >( this );
 
 	if ( restoreToMax )

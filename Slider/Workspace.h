@@ -74,6 +74,7 @@ public:
 
 	virtual void Serialize( CArchive& archive );
 
+	// all settings (registry + binary file)
 	bool LoadSettings( void );
 	bool SaveSettings( void );
 
@@ -81,32 +82,32 @@ public:
 	void LoadRegSettings( void );
 	void SaveRegSettings( void );
 
-	bool IsLoaded( void ) const { return m_isLoaded; }
 	bool IsFullScreen( void ) const { return m_isFullScreen; }
 
-	CWindowPlacement* GetLoadedPlacement( void ) { return IsLoaded() ? &m_mainPlacement : NULL; }
+	CWindowPlacement* GetLoadedPlacement( void ) { return !m_mainPlacement.IsEmpty() ? &m_mainPlacement : NULL; }		// valid placement if it was loaded
 
 	COLORREF GetImageSelTextColor( void ) const { return m_data.GetImageSelTextColor(); }
 	COLORREF GetImageSelColor( void ) const { return m_data.GetImageSelColor(); }
 	CBrush& GetImageSelColorBrush( void ) const { return const_cast< CBrush& >( m_imageSelColorBrush ); }
 
-	CImageState* GetLoadingImageState( void ) { return m_pLoadingImageState; }
+	CImageState* RefLoadingImageState( void ) { return m_pLoadingImageState; }
 
 	UINT GetDefaultSlideDelay( void ) const { return m_defaultSlideDelay; }
 
 	// operations
+	void StoreMainFrame( CMainFrame* pMainFrame );
+	void ApplySettings( void );
 	void FetchSettings( void );
 	bool LoadDocuments( void );
-	void AdjustForcedBehaviour( void );
 
 	void ToggleFullScreen( void );
 private:
 	void SetImageSelColor( COLORREF imageSelColor );
 private:
-	CMainFrame* m_pMainFrame;
 	fs::CPath m_filePath;
-	bool m_isLoaded;								// workspace loaded from an existing .slw file
 	bool m_delayFullScreen;							// intermediate mirror flag for m_isFullScreen
+
+	CMainFrame* m_pMainFrame;
 	CImageState* m_pLoadingImageState;
 	CBrush m_imageSelColorBrush;
 

@@ -104,9 +104,15 @@ namespace app
 	}
 
 
+	bool IsStartingUp( void );
 	ui::IUserReport& GetUserReport( void )
 	{
 		return app::CInteractiveMode::Instance();
+	}
+
+	bool IsStartingUp( void )
+	{
+		return GetApp()->IsStartingUp();
 	}
 
 	ui::CIssueStore& GetIssueStore( void )
@@ -275,6 +281,7 @@ CApplication theApp;
 CApplication::CApplication( void )
 	: CBaseApp< CWinApp >()
 	, m_pMainFrame( NULL )
+	, m_startingUp( true )
 	, m_runFlags( 0 )
 	, m_forceMask( 0 )
 	, m_forceFlags( 0 )
@@ -298,38 +305,19 @@ BOOL CApplication::InitInstance( void )
 	if ( !CBaseApp< CWinApp >::InitInstance() )
 		return FALSE;
 
-	LoadStdProfileSettings( 10 );		// load standard INI file options (including MRU)
+	InitGlobals();
 
-	serial::CScopedLoadingArchive::SetLatestModelSchema( app::Slider_LatestModelSchema );			// set up the latest model schema version (assumed by default for in-memory serialization)
+	CWorkspace* pWorkspace = &CWorkspace::Instance();
 
-	GetLogger().m_enabled = GetProfileInt( reg::section_Settings, _T("FileLogger_Enabled"), false ) != FALSE;			// disable logging by default
-	GetLogger().m_prependTimestamp = GetProfileInt( reg::section_Settings, _T("FileLogger_PrependTimestamp"), GetLogger().m_prependTimestamp ) != FALSE;
-	GetEventLogger().m_enabled = GetProfileInt( reg::section_Settings, _T("EventLogger_Enabled"), false ) != FALSE;		// disable logging by default
-	GetEventLogger().m_prependTimestamp = GetProfileInt( reg::section_Settings, _T("EventLogger_PrependTimestamp"), GetEventLogger().m_prependTimestamp ) != FALSE;
-
-	std::vector< COLORREF > customColors;
-	if ( app::GetProfileVector( customColors, reg::section_Settings, reg::entry_CustomColors ) )
-	{
-		ASSERT( 16 == customColors.size() );
-		memcpy( CColorDialog::GetSavedCustomColors(), &customColors.front(), customColors.size() * sizeof( COLORREF ) );
-	}
-
-	m_pThumbnailer.reset( new CThumbnailer );
-	GetSharedResources().AddAutoPtr( &m_pThumbnailer );
-	GetSharedResources().AddAutoClear( &CWicImageCache::Instance() );
-	m_pThumbnailer->SetExternalProducer( CCatalogStorageFactory::Instance() );		// add as producer of storage-based thumbnails
-
-	CAboutBox::s_appIconId = IDR_MAINFRAME;
-	m_sharedAccel.Load( IDR_COMMAND_BAR_ACCEL );
-	CToolStrip::RegisterStripButtons( IDR_MAINFRAME );
-	CToolStrip::RegisterStripButtons( IDR_APP_TOOL_STRIP );
-	CImageStore::SharedStore()->RegisterAliases( ARRAY_PAIR( s_cmdAliases ) );
+	pWorkspace->LoadSettings();
+	pWorkspace->ApplySettings();
+	LoadStdProfileSettings( CWorkspace::GetData().m_mruCount );		// load standard INI file options (including MRU)
 
 	CAppDocManager* pAppDocManager = new CAppDocManager();			// will register all document templates
 	ASSERT_NULL( m_pDocManager );
 	m_pDocManager = pAppDocManager;
 
-	m_pGdiPlusInit.reset( new CScopedGdiPlusInit );		/// NOTE: this should not be called earlier, otherwise it breaks DDE open!
+	m_pGdiPlusInit.reset( new CScopedGdiPlusInit );		/// NOTE: this should not be called earlier, otherwise it breaks DDE open (on Explorer side)!
 
 	CCmdLineInfo cmdInfo( this );
 	cmdInfo.ParseAppSwitches();				// just our switches (ignore MFC arguments)
@@ -344,31 +332,23 @@ BOOL CApplication::InitInstance( void )
 	}
 
 	// create main MDI Frame window
-	m_pMainFrame = new CMainFrame();
-	m_pMainWnd = m_pMainFrame;
+	m_pMainWnd = m_pMainFrame = new CMainFrame();
+	pWorkspace->StoreMainFrame( m_pMainFrame );
+
 	if ( !m_pMainFrame->LoadFrame( IDR_MAINFRAME ) )
 		return FALSE;
-
-	// check and adjust application's forced flags
-	CWorkspace::Instance().AdjustForcedBehaviour();
-
-	// adjust the MRU list max count
-	delete m_pRecentFileList;
-	m_pRecentFileList = NULL;
-	LoadStdProfileSettings( CWorkspace::GetData().m_mruCount );
-
-	ParseCommandLine( cmdInfo );			// parse command line for standard shell commands, DDE, file open
 
 	EnableShellOpen();						// enable DDE Execute open
 	RegisterShellFileTypes( TRUE );			// register image and album extensions and document types
 
-	if ( HasForceMask( app::RegAdditionalExt ) )
-		pAppDocManager->RegisterImageAdditionalShellExt( HasForceFlag( app::RegAdditionalExt ) );
+	if ( HasForceMask( app::RegImgAdditionalExt ) )
+		pAppDocManager->RegisterImageAdditionalShellExt( HasForceFlag( app::RegImgAdditionalExt ) );
+
+	ParseCommandLine( cmdInfo );			// parse command line for standard shell commands, DDE, file open
 
 	// Dispatch commands specified on the command line.  Will return FALSE if app was launched with /RegServer, /Register, /Unregserver or /Unregister.
-	if ( !cmdInfo.m_strFileName.IsEmpty() )
-		if ( !ProcessShellCommand( cmdInfo ) )
-			return FALSE;
+	if ( !ProcessShellCommand( cmdInfo ) )
+		return FALSE;
 
 	if ( -1 == m_nCmdShow || SW_HIDE == m_nCmdShow )				// PHC 2019-01: in case we no longer use WM_DDE_EXECUTE command
 		StoreCmdShow( SW_SHOWNORMAL );		// make the main frame visible
@@ -380,6 +360,9 @@ BOOL CApplication::InitInstance( void )
 	if ( HandleAppTests() )
 		return FALSE;
 
+	pWorkspace->LoadDocuments();			// load the documents saved in workspace
+
+	// DDE open messages execution will follow, when entering the application message loop
 	return TRUE;
 }
 
@@ -402,6 +385,34 @@ int CApplication::ExitInstance( void )
 	m_pEventLogger.reset();
 
 	return CBaseApp< CWinApp >::ExitInstance();
+}
+
+void CApplication::InitGlobals( void )
+{
+	serial::CScopedLoadingArchive::SetLatestModelSchema( app::Slider_LatestModelSchema );			// set up the latest model schema version (assumed by default for in-memory serialization)
+
+	GetLogger().m_enabled = GetProfileInt( reg::section_Settings, _T("FileLogger_Enabled"), false ) != FALSE;			// disable logging by default
+	GetLogger().m_prependTimestamp = GetProfileInt( reg::section_Settings, _T("FileLogger_PrependTimestamp"), GetLogger().m_prependTimestamp ) != FALSE;
+	GetEventLogger().m_enabled = GetProfileInt( reg::section_Settings, _T("EventLogger_Enabled"), false ) != FALSE;		// disable logging by default
+	GetEventLogger().m_prependTimestamp = GetProfileInt( reg::section_Settings, _T("EventLogger_PrependTimestamp"), GetEventLogger().m_prependTimestamp ) != FALSE;
+
+	std::vector< COLORREF > customColors;
+	if ( app::GetProfileVector( customColors, reg::section_Settings, reg::entry_CustomColors ) )
+	{
+		ASSERT( 16 == customColors.size() );
+		utl::Copy( customColors.begin(), customColors.end(), CColorDialog::GetSavedCustomColors() );
+	}
+
+	m_pThumbnailer.reset( new CThumbnailer );
+	GetSharedResources().AddAutoPtr( &m_pThumbnailer );
+	GetSharedResources().AddAutoClear( &CWicImageCache::Instance() );
+	m_pThumbnailer->SetExternalProducer( CCatalogStorageFactory::Instance() );		// add as producer of storage-based thumbnails
+
+	CAboutBox::s_appIconId = IDR_MAINFRAME;
+	m_sharedAccel.Load( IDR_COMMAND_BAR_ACCEL );
+	CToolStrip::RegisterStripButtons( IDR_MAINFRAME );
+	CToolStrip::RegisterStripButtons( IDR_APP_TOOL_STRIP );
+	CImageStore::SharedStore()->RegisterAliases( ARRAY_PAIR( s_cmdAliases ) );
 }
 
 bool CApplication::OpenQueuedAlbum( void )
@@ -480,11 +491,20 @@ BOOL CApplication::OnDDECommand( LPTSTR pCommand )
 			str::StripSuffix( command, _T("\"") );
 
 			m_queuedAlbumFilePaths.push_back( command );
-			app::GetMainFrame()->StartQueuedAlbumTimer();
+
+			app::GetMainFrame()->StartEnqueuedAlbumTimer();
 			return TRUE;
 		}
 
 	return CBaseApp< CWinApp >::OnDDECommand( pCommand );
+}
+
+BOOL CApplication::OnIdle( LONG count )
+{
+	if ( m_startingUp )
+		m_startingUp = false;
+
+	return __super::OnIdle( count );
 }
 
 BOOL CApplication::PreTranslateMessage( MSG* pMsg )
@@ -503,8 +523,8 @@ BOOL CApplication::PreTranslateMessage( MSG* pMsg )
 BEGIN_MESSAGE_MAP( CApplication, CBaseApp< CWinApp > )
 	ON_COMMAND( ID_FILE_NEW, CBaseApp< CWinApp >::OnFileNew )
 	ON_COMMAND( ID_FILE_OPEN, CBaseApp< CWinApp >::OnFileOpen )
-	ON_COMMAND( ID_FILE_PRINT_SETUP, CBaseApp< CWinApp >::OnFilePrintSetup )
 	ON_COMMAND( ID_FILE_OPEN_ALBUM_FOLDER, OnFileOpenAlbumFolder )
+	ON_COMMAND( ID_FILE_PRINT_SETUP, CBaseApp< CWinApp >::OnFilePrintSetup )
 	ON_COMMAND( CM_CLEAR_TEMP_EMBEDDED_CLONES, OnClearTempEmbeddedClones )
 END_MESSAGE_MAP()
 
@@ -515,7 +535,7 @@ void CApplication::OnFileOpenAlbumFolder( void )
 	if ( s_folderPath.IsEmpty() || !fs::IsValidDirectory( s_folderPath.GetPtr() ) )
 		s_folderPath = app::GetActiveDirPath();
 
-	if ( shell::BrowseForFolder( s_folderPath, AfxGetMainWnd(), NULL, shell::BF_FileSystem, _T("Browse Folder Images"), false ) )
+	if ( shell::PickFolder( s_folderPath, AfxGetMainWnd(), 0, _T("Open Images Folder") ) )
 		OpenDocumentFile( s_folderPath.GetPtr() );
 }
 
@@ -526,6 +546,13 @@ void CApplication::OnClearTempEmbeddedClones( void )
 
 
 // CApplication::CCmdLineInfo implementation
+
+CApplication::CCmdLineInfo::CCmdLineInfo( CApplication* pApp )
+	: m_pApp( pApp )
+{
+	ASSERT_PTR( m_pApp );
+	m_nShellCommand = FileNothing;
+}
 
 void CApplication::CCmdLineInfo::ParseAppSwitches( void )
 {
@@ -562,7 +589,7 @@ bool CApplication::CCmdLineInfo::ParseSwitch( const TCHAR* pSwitch )
 	else
 		switch ( func::ToUpper()( pSwitch[ 0 ] ) )
 		{
-			case _T('R'):	SetForceFlag( app::RegAdditionalExt, pSwitch[ 1 ] != _T('-') ); break;
+			case _T('R'):	SetForceFlag( app::RegImgAdditionalExt, pSwitch[ 1 ] != _T('-') ); break;
 			case _T('F'):	SetForceFlag( app::FullScreen, pSwitch[ 1 ] != _T('-') ); break;
 			case _T('X'):	SetForceFlag( app::DocMaximize, pSwitch[ 1 ] != _T('-') ); break;
 			case _T('T'):	SetForceFlag( app::ShowToolbar, pSwitch[ 1 ] != _T('-') ); break;
@@ -590,7 +617,7 @@ std::tstring CApplication::CCmdLineInfo::GetHelpMsg( void )
 		"\n"
 		"slider [/R[-]] [/F[-]] [/X[-]] [/T[-]] [/S[-]] [/?] [image_file] [image_folder]\n"
 		"\n"
-		"    /R   Register slider additional shell extensions.\n"
+		"    /R   Register slider additional shell extensions for images.\n"
 		"    /F   Open slider window in full screen mode.\n"
 		"    /X   Open slider window maximized.\n"
 		"    /T   Open slider window with toolbar displayed.\n"

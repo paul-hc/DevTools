@@ -24,6 +24,9 @@ namespace app
 	void HandleException( CException* pExc, UINT mbType = MB_ICONWARNING, bool doDelete = true );
 	int HandleReportException( CException* pExc, UINT mbType = MB_ICONERROR, UINT msgId = 0, bool doDelete = true );
 
+	bool IsStartingUp( void );
+	inline bool IsInteractive( void ) { return !IsStartingUp(); }
+
 	ui::IUserReport& GetUserReport( void );		// app::CInteractiveMode
 
 	bool IsSlideFile( const TCHAR* pFilePath );

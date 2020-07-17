@@ -14,8 +14,6 @@ class CScopedPumpMessage;
 
 namespace app
 {
-	class CCommandLineInfo;
-
 	enum ForceFlags
 	{
 		FullScreen			= BIT_FLAG( 0 ),
@@ -24,7 +22,7 @@ namespace app
 		ShowStatusBar		= BIT_FLAG( 3 ),
 
 		// handled by CApplication
-		RegAdditionalExt	= BIT_FLAG( 8 )
+		RegImgAdditionalExt	= BIT_FLAG( 8 )
 	};
 }
 
@@ -39,6 +37,8 @@ public:
 	CLogger& GetEventLogger( void ) const { ASSERT_PTR( m_pEventLogger.get() ); return *m_pEventLogger; }
 	CThumbnailer* GetThumbnailer( void ) const { return safe_ptr( m_pThumbnailer.get() ); }
 
+	bool IsStartingUp( void ) const { return m_startingUp; }
+
 	bool HasForceMask( int maskFlag ) const { return HasFlag( m_forceMask, maskFlag ); }
 	bool HasForceFlag( int forceFlag ) const { ASSERT( HasForceMask( forceFlag ) ); return HasFlag( m_forceFlags, forceFlag ); }
 
@@ -49,6 +49,8 @@ public:
 
 	void UpdateAllViews( UpdateViewHint hint = Hint_ViewUpdate, CDocument* pSenderDoc = NULL, CView* pSenderView = NULL );
 private:
+	void InitGlobals( void );
+
 	enum RunFlags
 	{
 		ShowHelp			= BIT_FLAG( 0 ),
@@ -61,7 +63,7 @@ private:
 	class CCmdLineInfo : public CCommandLineInfo
 	{
 	public:
-		CCmdLineInfo( CApplication* pApp ) : m_pApp( pApp ) { ASSERT_PTR( m_pApp ); }
+		CCmdLineInfo( CApplication* pApp );
 
 		void SetForceFlag( int forceFlag, bool on );
 		void ParseAppSwitches( void );
@@ -85,6 +87,7 @@ private:
 
 	CMainFrame* m_pMainFrame;
 private:
+	bool m_startingUp;
 	int m_runFlags;
 	int m_forceMask;
 	int m_forceFlags;
@@ -97,6 +100,7 @@ public:
 	virtual int ExitInstance( void );
 	virtual BOOL PreTranslateMessage( MSG* pMsg );
 	virtual BOOL OnDDECommand( LPTSTR pCommand );
+	virtual BOOL OnIdle( LONG count );
 private:
 	afx_msg void OnFileOpenAlbumFolder( void );
 	afx_msg void OnClearTempEmbeddedClones( void );

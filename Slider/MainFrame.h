@@ -7,7 +7,6 @@
 
 
 interface IImageView;
-class CAlbumImageView;
 class CMainToolbar;
 
 
@@ -34,7 +33,7 @@ public:
 	void SetStatusBarMessage( const TCHAR* pMessage, UINT elapseMs = UINT_MAX );
 	void SetIdleStatusBarMessage( UINT idleMessageID = AFX_IDS_IDLEMESSAGE );
 
-	void StartQueuedAlbumTimer( UINT timerDelay = 750 );
+	void StartEnqueuedAlbumTimer( UINT timerDelay = 750 );
 
 	// shared progress bar
 	bool InProgress( void ) const { return m_inProgress.IsInternalChange(); }
@@ -56,16 +55,15 @@ private:
 	CProgressCtrl m_progressCtrl;
 
 	CWindowTimer m_messageClearTimer;
-	CWindowTimer m_queueTimer;
+	CWindowTimer m_ddeEnqueuedTimer;				// monitors enqueued image paths
 	CWindowTimer m_progBarResetTimer;
 	CInternalChange m_inProgress;
 
 	enum Metrics { ProgressBarWidth = 150 };
 	enum TimerIds { MessageTimerId = 2000, QueueTimerId, ProgressResetTimerId };
-public:
+
 	// generated stuff
-	public:
-	virtual BOOL PreCreateWindow( CREATESTRUCT& rCS );
+public:
 	virtual BOOL OnCmdMsg( UINT cmdId, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo );
 protected:
 	afx_msg int OnCreate( CREATESTRUCT* pCS );

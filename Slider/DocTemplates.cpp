@@ -84,6 +84,7 @@ void CAppDocManager::RegisterImageAdditionalShellExt( bool doRegister )
 {
 	// process known registered image files extensions
 	const std::vector< std::tstring >& imageExts = app::CImageDocTemplate::Instance()->GetAllExts();
+
 	for ( std::vector< std::tstring >::const_iterator itImageExt = imageExts.begin(); itImageExt != imageExts.end(); ++itImageExt )
 	{
 		std::tstring handlerName;

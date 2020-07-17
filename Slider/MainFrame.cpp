@@ -22,7 +22,7 @@
 #endif
 
 
-static UINT g_sbIndicators[] =
+static UINT s_sbIndicators[] =
 {
 	ID_SEPARATOR,					// status line indicator
 	IDW_SB_PROGRESS_CAPTION,		// caption of the shared progress bar
@@ -36,11 +36,9 @@ CMainFrame::CMainFrame( void )
 	: CMDIFrameWnd()
 	, m_pToolbar( new CMainToolbar() )
 	, m_messageClearTimer( this, MessageTimerId, 5000 )
-	, m_queueTimer( this, QueueTimerId, 750 )
+	, m_ddeEnqueuedTimer( this, QueueTimerId, 750 )
 	, m_progBarResetTimer( this, ProgressResetTimerId, 250 )
 {
-	// TODO: add member initialization code here
-	// Create the combo font as the small caption system font:
 }
 
 CMainFrame::~CMainFrame()
@@ -75,9 +73,10 @@ bool CMainFrame::IsMdiRestored( void ) const
 	return MDIGetActive( &isMaximized ) != NULL && !isMaximized;
 }
 
-void CMainFrame::StartQueuedAlbumTimer( UINT timerDelay /*= 750*/ )
+void CMainFrame::StartEnqueuedAlbumTimer( UINT timerDelay /*= 750*/ )
 {
-	m_queueTimer.SetElapsed( timerDelay );
+	m_ddeEnqueuedTimer.SetElapsed( timerDelay );
+	m_ddeEnqueuedTimer.Start();
 }
 
 bool CMainFrame::CancelStatusBarAutoClear( UINT idleMessageID /*= AFX_IDS_IDLEMESSAGE*/ )
@@ -137,11 +136,12 @@ bool CMainFrame::CreateProgressCtrl( void )
 
 	if ( ProgressBarWidth != -1 )
 		m_statusBar.SetPaneInfo( progBarIndex, IDW_SB_PROGRESS_BAR, SBPS_NOBORDERS, ProgressBarWidth );
+
 	m_statusBar.SetPaneText( progBarIndex, _T("") );
 
 	if ( !m_progressCtrl.Create( WS_CHILD | PBS_SMOOTH, CRect( 0, 0, 0, 0 ), &m_statusBar, IDW_SB_PROGRESS_BAR ) )
 	{
-		TRACE0("Failed to create the progress bar\n");
+		TRACE( "Failed to create the progress bar\n" );
 		return false;
 	}
 	return true;
@@ -260,17 +260,6 @@ bool CMainFrame::ResizeViewToFit( CScrollView* pScrollView )
 	return true;
 }
 
-BOOL CMainFrame::PreCreateWindow( CREATESTRUCT& rCS )
-{
-	if ( !CMDIFrameWnd::PreCreateWindow( rCS ) )
-		return FALSE;
-
-	if ( !CWorkspace::Instance().IsLoaded() )			// create and load once
-		CWorkspace::Instance().LoadSettings();
-
-	return TRUE;
-}
-
 BOOL CMainFrame::OnCmdMsg( UINT cmdId, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo )
 {
 	CPushRoutingFrame push( this );
@@ -319,7 +308,7 @@ int CMainFrame::OnCreate( CREATESTRUCT* pCS )
 	ASSERT_PTR( pCS->hMenu );
 	ui::SetMenuImages( *CMenu::FromHandle( pCS->hMenu ) );			// m_hMenuDefault not initialized yet, but will
 
-	DragAcceptFiles();			// enable drag/drop open
+	DragAcceptFiles();			// enable drag&drop open
 
 	if ( CWindowPlacement* pLoadedPlacement = CWorkspace::Instance().GetLoadedPlacement() )
 		pLoadedPlacement->CommitWnd( this );						// 1st step: restore persistent placement, but with SW_HIDE; 2nd step will use the persisted AfxGetApp()->m_nCmdShow in app InitInstance()
@@ -330,13 +319,13 @@ int CMainFrame::OnCreate( CREATESTRUCT* pCS )
 								CRect( 0, 2, 0, 2 ) ) ||
 		 !m_pToolbar->InitToolbar() )
 	{
-		TRACE0("Failed to create toolbar\n");
+		TRACE( "Failed to create toolbar\n" );
 		return -1;	  // fail to create
 	}
 
-	if ( !m_statusBar.Create( this ) || !m_statusBar.SetIndicators( g_sbIndicators, COUNT_OF( g_sbIndicators ) ) )
+	if ( !m_statusBar.Create( this ) || !m_statusBar.SetIndicators( ARRAY_PAIR( s_sbIndicators ) ) )
 	{
-		TRACE0("Failed to create status bar\n");
+		TRACE( "Failed to create status bar\n" );
 		return -1;	  // fail to create
 	}
 	CreateProgressCtrl();
@@ -345,8 +334,6 @@ int CMainFrame::OnCreate( CREATESTRUCT* pCS )
 	m_pToolbar->EnableDocking( CBRS_ALIGN_ANY );
 	EnableDocking( CBRS_ALIGN_ANY );
 	DockControlBar( m_pToolbar.get() );
-
-	PostMessage( WM_COMMAND, CM_LOAD_WORKSPACE_DOCS );			// delayed load the documents saved in workspace
 	return 0;
 }
 
@@ -407,14 +394,14 @@ void CMainFrame::OnTimer( UINT_PTR eventId )
 		m_messageClearTimer.Stop();
 		SetIdleStatusBarMessage();
 	}
-	else if ( m_queueTimer.IsHit( eventId ) )
+	else if ( m_ddeEnqueuedTimer.IsHit( eventId ) )
 	{
 		MSG msg;
 
 		// postpone queue processing if there are pending DDE messages for this window
 		if ( !::PeekMessage( &msg, m_hWnd, WM_DDE_FIRST, WM_DDE_LAST, PM_NOREMOVE ) )
 		{
-			m_queueTimer.Stop();
+			m_ddeEnqueuedTimer.Stop();
 			app::GetApp()->OpenQueuedAlbum();
 		}
 	}

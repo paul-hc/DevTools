@@ -45,7 +45,7 @@ namespace ui
 	// Null Pattern: placeholder for a valid ui::IProgressService interface with empty implementation
 	//
 	class CNoProgressService : private ui::IProgressHeader
-							   , public ui::IProgressService
+							 , public ui::IProgressService
 	{
 		CNoProgressService( void ) {}
 

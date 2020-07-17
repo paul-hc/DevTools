@@ -7,7 +7,10 @@ class CWindowPlacement : public tagWINDOWPLACEMENT
 {
 public:
 	CWindowPlacement( void );
-	~CWindowPlacement();
+
+	void Reset( void );
+
+	bool IsEmpty( void ) const;
 
 	bool ReadWnd( const CWnd* pWnd );
 	bool CommitWnd( CWnd* pWnd, bool restoreToMax = false, bool setMinPos = false );

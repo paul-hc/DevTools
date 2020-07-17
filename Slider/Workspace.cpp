@@ -114,10 +114,9 @@ app::ModelSchema CWorkspaceData::Load( CArchive& archive )
 
 CWorkspace::CWorkspace( void )
 	: CCmdTarget()
-	, m_pMainFrame( app::GetMainFrame() )
 	, m_filePath( app::GetModulePath() )
-	, m_isLoaded( false )
 	, m_delayFullScreen( false )
+	, m_pMainFrame( NULL )
 	, m_pLoadingImageState( NULL )
 	, m_isFullScreen( false )
 	, m_reserved( 0 )
@@ -179,14 +178,6 @@ void CWorkspace::Serialize( CArchive& archive )
 		SetImageSelColor( m_data.m_imageSelColor );
 
 		// workspace loaded: will use SW_HIDE on 1st show (CommitWnd), then pass the final mode from placement on 2nd step for MFC to show
-		m_isLoaded = true;
-
-		app::GetApp()->StoreCmdShow( m_mainPlacement.ChangeMaximizedShowCmd( SW_HIDE ) );
-		shell::s_useVistaStyle = HasFlag( m_data.m_wkspFlags, wf::UseVistaStyleFileDialog );
-
-		if ( app::GetThumbnailer()->SetBoundsSize( m_data.GetThumbBoundsSize() ) )
-			app::GetApp()->UpdateAllViews( Hint_ThumbBoundsResized );			// notify thumb bounds change
-
 		if ( savedModelSchema < app::Slider_v3_2 )
 			return;									// skip loading old m_imageStates that were using DECLARE_SERIAL( CImageState )
 	}
@@ -198,7 +189,6 @@ bool CWorkspace::LoadSettings( void )
 {
 	LoadRegSettings();
 
-	ASSERT( !m_isLoaded );		// load once
 	ui::CAdapterDocument doc( this, m_filePath );
 	return doc.Load();			// load the workspace file
 }
@@ -225,9 +215,25 @@ void CWorkspace::SaveRegSettings( void )
 	AfxGetApp()->WriteProfileInt( reg::section_Workspace, reg::entry_enlargeInterpolationMode, d2d::CDrawBitmapTraits::s_enlargeInterpolationMode );
 }
 
-// check and adjust application's forced flags
-void CWorkspace::AdjustForcedBehaviour( void )
+
+void CWorkspace::StoreMainFrame( CMainFrame* pMainFrame )
 {
+	ASSERT_NULL( m_pMainFrame );
+
+	m_pMainFrame = pMainFrame;
+	ASSERT_PTR( m_pMainFrame );
+}
+
+void CWorkspace::ApplySettings( void )
+{
+	// OUTPUT:
+	app::GetApp()->StoreCmdShow( m_mainPlacement.ChangeMaximizedShowCmd( SW_HIDE ) );
+	shell::s_useVistaStyle = HasFlag( m_data.m_wkspFlags, wf::UseVistaStyleFileDialog );
+
+	if ( app::GetThumbnailer()->SetBoundsSize( m_data.GetThumbBoundsSize() ) )
+		app::GetApp()->UpdateAllViews( Hint_ThumbBoundsResized );			// notify thumb bounds change
+
+	// INPUT: check and adjust application's forced flags (passed via command line switches)
 	const CApplication* pApp = app::GetApp();
 
 	if ( pApp->HasForceMask( app::FullScreen ) )
@@ -245,6 +251,8 @@ void CWorkspace::AdjustForcedBehaviour( void )
 
 void CWorkspace::FetchSettings( void )
 {
+	ASSERT_PTR( m_pMainFrame );
+
 	// re-read main window placement only if not in full-screen mode;
 	// if it is in full-screen, we assume that m_mainPlacement is already fetched (on switch time) with appropriate info.
 	if ( !m_isFullScreen )
@@ -279,10 +287,12 @@ void CWorkspace::FetchSettings( void )
 
 bool CWorkspace::LoadDocuments( void )
 {
+	ASSERT_PTR( m_pMainFrame );
+
 	if ( m_delayFullScreen && m_delayFullScreen != m_isFullScreen )
 		ToggleFullScreen();		// if was de-persisted with full-screen mode, now is the right time to actually commit the switch
 
-	// (!) next time, show the window as default in order to properly handle CFrameWnd::OnDDEExecute ShowWindow calls
+	// (!) next time, show the window as default in order to properly handle in CFrameWnd::OnDDEExecute the ShowWindow calls
 	app::GetApp()->StoreCmdShow( -1 );
 
 	if ( !m_pMainFrame->GetToolbar()->IsVisible() == HasFlag( m_data.m_wkspFlags, wf::ShowToolBar ) )
@@ -336,16 +346,14 @@ void CWorkspace::ToggleFullScreen( void )
 		deltaRect.bottom = mainWndRect.bottom - mdiClientScreenRect.bottom;
 
 		mainWndRect = ui::FindMonitorRect( m_pMainFrame->m_hWnd, ui::Monitor );
-		//::GetWindowRect( ::GetDesktopWindow(), &mainWndRect );
 		mainWndRect.InflateRect( &deltaRect );
 
 		CSize borderSize( GetSystemMetrics( SM_CXEDGE ), GetSystemMetrics( SM_CYEDGE ) );
 
 		mainWndRect.InflateRect( borderSize );
 
-		// note that SWP_NOSENDCHANGING flag is mandatory since WM_WINDOWPOSCHANGING limits main frame's position
-		m_pMainFrame->SetWindowPos( &CWnd::wndTop, mainWndRect.left, mainWndRect.top, mainWndRect.Width(), mainWndRect.Height(),
-			/*SWP_NOOWNERZORDER | SWP_NOZORDER |*/ SWP_SHOWWINDOW | SWP_NOSENDCHANGING );
+		// note: flag SWP_NOSENDCHANGING is mandatory since WM_WINDOWPOSCHANGING limits main frame's position
+		m_pMainFrame->SetWindowPos( &CWnd::wndTop, mainWndRect.left, mainWndRect.top, mainWndRect.Width(), mainWndRect.Height(), SWP_SHOWWINDOW | SWP_NOSENDCHANGING );
 	}
 
 	// notify all views that full screen mode has changed

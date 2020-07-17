@@ -3,7 +3,10 @@
 #pragma once
 
 #include "utl/FileSystem_fwd.h"
-#include "utl/UI/ProgressDialog.h"
+#include "utl/UI/IProgressService.h"
+
+
+class CProgressDialog;
 
 
 class CProgressService : private fs::IEnumerator
@@ -13,9 +16,11 @@ public:
 	CProgressService( CWnd* pParentWnd, const std::tstring& operationLabel = s_searching );
 	~CProgressService();
 
-	ui::IProgressService* GetService( void ) { return m_dlg.GetService(); }
+	ui::IProgressService* GetService( void );
 	ui::IProgressHeader* GetHeader( void ) { return GetService()->GetHeader(); }
 	fs::IEnumerator* GetProgressEnumerator( void ) { return this; }
+
+	bool IsInteractive( void ) const { return m_pDlg.get() != NULL; }
 
 	void DestroyDialog( void );
 private:
@@ -23,7 +28,7 @@ private:
 	virtual void AddFoundFile( const TCHAR* pFilePath ) throws_( CUserAbortedException );
 	virtual bool AddFoundSubDir( const TCHAR* pSubDirPath ) throws_( CUserAbortedException );
 private:
-	CProgressDialog m_dlg;
+	std::auto_ptr< CProgressDialog > m_pDlg;
 public:
 	static const std::tstring s_searching;
 };

@@ -135,7 +135,7 @@ void CImageView::EventNavigSliderPosChanged( bool thumbTracking )
 
 CImageState* CImageView::GetLoadingImageState( void ) const
 {
-	return CWorkspace::Instance().GetLoadingImageState();
+	return CWorkspace::Instance().RefLoadingImageState();
 }
 
 void CImageView::MakeImageState( CImageState* pImageState ) const

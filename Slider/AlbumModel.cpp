@@ -98,7 +98,7 @@ bool CAlbumModel::SetupSingleSearchPattern( CSearchPattern* pSearchPattern )
 	return true;
 }
 
-void CAlbumModel::SearchForFiles( CWnd* pParentWnd, bool reportEmpty /*= true*/ ) throws_( CException* )
+void CAlbumModel::SearchForFiles( CWnd* pParentWnd ) throws_( CException* )
 {
 	std::auto_ptr< fattr::CRetainFileOrder > pRetainCustomOrder;
 
@@ -127,9 +127,6 @@ void CAlbumModel::SearchForFiles( CWnd* pParentWnd, bool reportEmpty /*= true*/ 
 		}
 
 		imageEnum.SwapFoundImages( foundImagesModel );
-
-		if ( reportEmpty && !imageEnum.GetIssueStore().IsEmpty() )
-			app::GetUserReport().ReportIssues( imageEnum.GetIssueStore(), MB_OK | MB_ICONEXCLAMATION );
 	}
 
 	ui::IProgressService* pProgressSvc = progress.GetService();
@@ -214,7 +211,7 @@ void CAlbumModel::Stream( CArchive& archive )
 		if ( MustAutoRegenerate() )
 			try
 			{
-				SearchForFiles( NULL, false );			// regenerate the file list on archive load
+				SearchForFiles( NULL );			// regenerate the file list on archive load
 			}
 			catch ( CException* pExc )
 			{

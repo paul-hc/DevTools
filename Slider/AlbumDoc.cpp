@@ -218,7 +218,7 @@ bool CAlbumDoc::PromptSaveConvertModelSchema( void ) const
 
 CImageState* CAlbumDoc::GetImageState( void ) const
 {
-	if ( CImageState* pLoadingState = CWorkspace::Instance().GetLoadingImageState() )		// loading workspace saved image states?
+	if ( CImageState* pLoadingState = CWorkspace::Instance().RefLoadingImageState() )		// loading workspace saved image states?
 		return pLoadingState;					// workspace image states takes precedence, so we'll ignore album's image state
 
 	return m_pImageState.get();
@@ -483,7 +483,7 @@ void CAlbumDoc::RegenerateModel( AlbumModelChange reason /*= FM_Init*/ )
 	try
 	{
 		CWaitCursor	wait;
-		m_model.SearchForFiles( NULL, false );
+		m_model.SearchForFiles( NULL );
 	}
 	catch ( CException* pExc )
 	{

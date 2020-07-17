@@ -40,7 +40,7 @@ public:
 	CImagesModel& RefImagesModel( void ) { return m_imagesModel; }
 
 	bool SetupSingleSearchPattern( CSearchPattern* pSearchPattern );
-	void SearchForFiles( CWnd* pParentWnd, bool reportEmpty = true ) throws_( CException* );
+	void SearchForFiles( CWnd* pParentWnd ) throws_( CException* );
 
 	void OpenAllStorages( void );
 	void CloseAllStorages( void );
