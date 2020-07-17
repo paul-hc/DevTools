@@ -34,7 +34,7 @@
 #include "utl/UI/BaseApp.hxx"
 
 
-static const CImageStore::CCmdAlias cmdAliases[] =
+static const CImageStore::CCmdAlias s_cmdAliases[] =
 {
 	{ ID_IMAGE_OPEN, ID_FILE_OPEN },
 	{ ID_IMAGE_SAVE_AS, ID_FILE_SAVE },
@@ -295,8 +295,6 @@ CApplication::~CApplication()
 
 BOOL CApplication::InitInstance( void )
 {
-	m_pGdiPlusInit.reset( new CScopedGdiPlusInit );
-
 	if ( !CBaseApp< CWinApp >::InitInstance() )
 		return FALSE;
 
@@ -321,15 +319,17 @@ BOOL CApplication::InitInstance( void )
 	GetSharedResources().AddAutoClear( &CWicImageCache::Instance() );
 	m_pThumbnailer->SetExternalProducer( CCatalogStorageFactory::Instance() );		// add as producer of storage-based thumbnails
 
-	CAboutBox::m_appIconId = IDR_MAINFRAME;
+	CAboutBox::s_appIconId = IDR_MAINFRAME;
 	m_sharedAccel.Load( IDR_COMMAND_BAR_ACCEL );
 	CToolStrip::RegisterStripButtons( IDR_MAINFRAME );
 	CToolStrip::RegisterStripButtons( IDR_APP_TOOL_STRIP );
-	CImageStore::SharedStore()->RegisterAliases( cmdAliases, COUNT_OF( cmdAliases ) );
+	CImageStore::SharedStore()->RegisterAliases( ARRAY_PAIR( s_cmdAliases ) );
 
-	app::CDocManager* pAppDocManager = new app::CDocManager;
+	CAppDocManager* pAppDocManager = new CAppDocManager();			// will register all document templates
 	ASSERT_NULL( m_pDocManager );
-	m_pDocManager = pAppDocManager;	// register document templates
+	m_pDocManager = pAppDocManager;
+
+	m_pGdiPlusInit.reset( new CScopedGdiPlusInit );		/// NOTE: this should not be called earlier, otherwise it breaks DDE open!
 
 	CCmdLineInfo cmdInfo( this );
 	cmdInfo.ParseAppSwitches();				// just our switches (ignore MFC arguments)
@@ -344,7 +344,7 @@ BOOL CApplication::InitInstance( void )
 	}
 
 	// create main MDI Frame window
-	m_pMainFrame = new CMainFrame;
+	m_pMainFrame = new CMainFrame();
 	m_pMainWnd = m_pMainFrame;
 	if ( !m_pMainFrame->LoadFrame( IDR_MAINFRAME ) )
 		return FALSE;
@@ -371,7 +371,7 @@ BOOL CApplication::InitInstance( void )
 			return FALSE;
 
 	if ( -1 == m_nCmdShow || SW_HIDE == m_nCmdShow )				// PHC 2019-01: in case we no longer use WM_DDE_EXECUTE command
-		m_nCmdShow = SW_SHOWNORMAL;		// make the main frame visible
+		StoreCmdShow( SW_SHOWNORMAL );		// make the main frame visible
 
 	// the main window has been initialized, so show and update it
 	m_pMainFrame->ShowWindow( m_nCmdShow );
@@ -419,7 +419,7 @@ bool CApplication::OpenQueuedAlbum( void )
 	m_pMainWnd->ShowWindow( cmdShow );
 	if ( cmdShow != SW_MINIMIZE )
 		m_pMainWnd->SetForegroundWindow();
-	m_nCmdShow = -1;		// next time, show the window as default
+	StoreCmdShow( -1 );		// next time, show the window as default
 
 	// add the queued files to the album
 	pAlbumDoc->AddExplicitFiles( m_queuedAlbumFilePaths );

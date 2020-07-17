@@ -37,8 +37,78 @@ namespace app
 		rFilePath = filePath.GetPtr();
 		return true;
 	}
+}
 
 
+// CAppDocManager implementation
+
+CAppDocManager::CAppDocManager( void )
+	: CDocManager()
+	, m_pAlbumTemplate( app::CAlbumDocTemplate::Instance() )
+{
+	AddDocTemplate( m_pAlbumTemplate );
+	AddDocTemplate( app::CImageDocTemplate::Instance() );
+}
+
+CAppDocManager::~CAppDocManager()
+{
+}
+
+void CAppDocManager::OnFileNew( void )
+{
+	ASSERT_PTR( m_pAlbumTemplate );
+
+	m_pAlbumTemplate->OpenDocumentFile( NULL );
+}
+
+BOOL CAppDocManager::DoPromptFileName( CString& rFilePath, UINT titleId, DWORD flags, BOOL openDlg, CDocTemplate* pTemplate )
+{
+	if ( app::CSharedDocTemplate* pSharedTemplate = dynamic_cast< app::CSharedDocTemplate* >( pTemplate ) )
+		return pSharedTemplate->PromptFileDialog( rFilePath, titleId, flags, static_cast< shell::BrowseMode >( openDlg ) );
+
+	return app::PromptFileDialogImpl( rFilePath, app::CSliderFilters::Instance(), titleId, flags, openDlg );
+}
+
+void CAppDocManager::RegisterShellFileTypes( BOOL compatMode )
+{
+	{
+		CScopedValue< bool > scopedSingleExt( &app::CSharedDocTemplate::s_useSingleFilterExt, true );		// prevent creating ".sld;.ias;.cid;.icf" registry key
+		__super::RegisterShellFileTypes( compatMode );
+	}
+
+	m_pAlbumTemplate->RegisterAdditionalDocExtensions();
+	m_pAlbumTemplate->RegisterAlbumShellDirectory( true );
+}
+
+void CAppDocManager::RegisterImageAdditionalShellExt( bool doRegister )
+{
+	// process known registered image files extensions
+	const std::vector< std::tstring >& imageExts = app::CImageDocTemplate::Instance()->GetAllExts();
+	for ( std::vector< std::tstring >::const_iterator itImageExt = imageExts.begin(); itImageExt != imageExts.end(); ++itImageExt )
+	{
+		std::tstring handlerName;
+		if ( shell::QueryHandlerName( handlerName, itImageExt->c_str() ) )			// valid indirect shell extension handler?
+		{
+			reg::TKeyPath openPath = shell::MakeShellHandlerVerbPath( handlerName.c_str(), _T("OpenWithSlider") );				// "<handler>\\shell\\OpenWithSlider"
+			reg::TKeyPath enqueuePath = shell::MakeShellHandlerVerbPath( handlerName.c_str(), _T("EnqueueInSlider") );			// "<handler>\\shell\\EnqueueInSlider"
+
+			if ( doRegister )
+			{
+				shell::RegisterShellVerb( openPath, app::GetModulePath(), _T("Open with &Slider"), shell::GetDdeOpenCmd() );
+				shell::RegisterShellVerb( enqueuePath, app::GetModulePath(), _T("Enque&ue in Slider"), _T("[queue(\"%1\")]") );
+			}
+			else
+			{	// remove slider entries for shell
+				shell::UnregisterShellVerb( openPath );
+				shell::UnregisterShellVerb( enqueuePath );
+			}
+		}
+	}
+}
+
+
+namespace app
+{
 	// CSharedDocTemplate implementation
 
 	bool CSharedDocTemplate::s_useSingleFilterExt = false;
@@ -139,8 +209,8 @@ namespace app
 
 	CImageDocTemplate* CImageDocTemplate::Instance( void )
 	{
-		static CImageDocTemplate* pImageDocTemplate = new CImageDocTemplate;		// owned by doc manager
-		return pImageDocTemplate;
+		static CImageDocTemplate* s_pImageDocTemplate = new CImageDocTemplate;		// owned by the doc manager
+		return s_pImageDocTemplate;
 	}
 
 
@@ -155,8 +225,8 @@ namespace app
 
 	CAlbumDocTemplate* CAlbumDocTemplate::Instance( void )
 	{
-		static CAlbumDocTemplate* pAlbumDocTemplate = new CAlbumDocTemplate;		// owned by doc manager
-		return pAlbumDocTemplate;
+		static CAlbumDocTemplate* s_pAlbumDocTemplate = new CAlbumDocTemplate;		// owned by the doc manager
+		return s_pAlbumDocTemplate;
 	}
 
 	CAlbumDocTemplate::OpenPathType CAlbumDocTemplate::GetOpenPathType( const TCHAR* pPath )
@@ -189,81 +259,18 @@ namespace app
 
 	void CAlbumDocTemplate::RegisterAlbumShellDirectory( bool doRegister )
 	{
+		// unregister any old Slider version 'Directory' entry - that's necessary since otherwise Explorer gets confused and invokes the old handler
+		reg::TKeyPath oldVerbPath = shell::MakeShellHandlerVerbPath( _T("Directory"), _T("Slide &View") );		// "Directory\\shell\\Slide &View"
+		if ( shell::UnregisterShellVerb( oldVerbPath ) )
+			TRACE( _T(" Note: cleaned-up the old Slider shell registration: %s\n"), oldVerbPath.GetPtr() );
+
 		// register Slider as view for sliding images in 'Directory' file type handler:
-		fs::CPath verbPath = shell::MakeShellHandlerVerbPath( _T("Directory"), _T("SlideView") );		// "Directory\\shell\\SlideView"
+		reg::TKeyPath verbPath = shell::MakeShellHandlerVerbPath( _T("Directory"), _T("SlideView") );		// "Directory\\shell\\SlideView"
 
 		if ( doRegister )
 			shell::RegisterShellVerb( verbPath, app::GetModulePath(), _T("Slide &View"), shell::GetDdeOpenCmd() );		// e.g. command="C:\My\Tools\mine\Slider.exe" "%1"
 		else
 			shell::UnregisterShellVerb( verbPath );
-	}
-
-
-	// CDocManager implementation
-
-	CDocManager::CDocManager( void )
-	{
-		AddDocTemplate( CImageDocTemplate::Instance() );
-		AddDocTemplate( CAlbumDocTemplate::Instance() );
-	}
-
-	void CDocManager::OnFileNew( void )
-	{
-		if ( m_templateList.IsEmpty() )
-		{
-			TRACE( "Error: no document templates registered with CWinApp.\n" );
-			AfxMessageBox( AFX_IDP_FAILED_TO_CREATE_DOC );
-		}
-		else
-			CAlbumDocTemplate::Instance()->OpenDocumentFile( NULL );
-	}
-
-	BOOL CDocManager::DoPromptFileName( CString& rFilePath, UINT titleId, DWORD flags, BOOL openDlg, CDocTemplate* pTemplate )
-	{
-		if ( CSharedDocTemplate* pSharedTemplate = dynamic_cast< CSharedDocTemplate* >( pTemplate ) )
-			return pSharedTemplate->PromptFileDialog( rFilePath, titleId, flags, static_cast< shell::BrowseMode >( openDlg ) );
-
-		return app::PromptFileDialogImpl( rFilePath, CSliderFilters::Instance(), titleId, flags, openDlg );
-	}
-
-	void CDocManager::RegisterShellFileTypes( BOOL compatMode )
-	{
-		{
-			CScopedValue< bool > scopedSingleExt( &CSharedDocTemplate::s_useSingleFilterExt, true );		// prevent creating ".sld;.ias;.cid;.icf" registry key
-			::CDocManager::RegisterShellFileTypes( compatMode );
-		}
-
-		CAlbumDocTemplate* pAlbumTemplate = CAlbumDocTemplate::Instance();
-		pAlbumTemplate->RegisterAdditionalDocExtensions();
-		pAlbumTemplate->RegisterAlbumShellDirectory( true );
-	}
-
-	void CDocManager::RegisterImageAdditionalShellExt( bool doRegister )
-	{
-		const fs::CPath sliderExePath = app::GetModulePath();
-
-		// process known registered image files extensions
-		const std::vector< std::tstring >& imageExts = CImageDocTemplate::Instance()->GetAllExts();
-		for ( std::vector< std::tstring >::const_iterator itImageExt = imageExts.begin(); itImageExt != imageExts.end(); ++itImageExt )
-		{
-			std::tstring handlerName;
-			if ( shell::QueryHandlerName( handlerName, itImageExt->c_str() ) )			// valid indirect shell extension handler?
-			{
-				fs::CPath openPath = shell::MakeShellHandlerVerbPath( handlerName.c_str(), _T("OpenWithSlider") );				// "<handler>\\shell\\OpenWithSlider"
-				fs::CPath enqueuePath = shell::MakeShellHandlerVerbPath( handlerName.c_str(), _T("EnqueueInSlider") );			// "<handler>\\shell\\EnqueueInSlider"
-
-				if ( doRegister )
-				{
-					shell::RegisterShellVerb( openPath, app::GetModulePath(), _T("Open with &Slider"), shell::GetDdeOpenCmd() );
-					shell::RegisterShellVerb( enqueuePath, app::GetModulePath(), _T("Enque&ue in Slider"), _T("[queue(\"%1\")]") );
-				}
-				else
-				{	// remove slider entries for shell
-					shell::UnregisterShellVerb( openPath );
-					shell::UnregisterShellVerb( enqueuePath );
-				}
-			}
-		}
 	}
 
 } //namespace app

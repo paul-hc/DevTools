@@ -84,7 +84,7 @@ public:
 	bool IsLoaded( void ) const { return m_isLoaded; }
 	bool IsFullScreen( void ) const { return m_isFullScreen; }
 
-	CWindowPlacement* GetLoadedPlacement( void ) { return m_isLoaded ? &m_mainPlacement : NULL; }
+	CWindowPlacement* GetLoadedPlacement( void ) { return IsLoaded() ? &m_mainPlacement : NULL; }
 
 	COLORREF GetImageSelTextColor( void ) const { return m_data.GetImageSelTextColor(); }
 	COLORREF GetImageSelColor( void ) const { return m_data.GetImageSelColor(); }

@@ -45,6 +45,11 @@ public:
 	virtual int ReportException( const std::exception& exc );
 	virtual int ReportException( const CException* pExc );
 
+	void StoreCmdShow( int cmdShow )
+	{
+		m_nCmdShow = cmdShow;
+	}
+
 	bool LazyInitAppResources( void );
 	void RunUnitTests( void ) { OnRunUnitTests(); }
 protected:

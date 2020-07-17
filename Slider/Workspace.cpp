@@ -37,7 +37,7 @@ CWorkspaceData::CWorkspaceData( void )
 	, m_wkspFlags( wf::DefaultFlags )
 	, m_scalingMode( ui::AutoFitLargeOnly )
 	, m_albumViewFlags( af::DefaultFlags )
-	, m_mruCount( 10 )
+	, m_mruCount( 16 )
 	, m_defBkColor( color::VeryDarkGrey )
 	, m_imageSelColor( color::Null )
 	, m_imageSelTextColor( color::Null )
@@ -115,6 +115,7 @@ app::ModelSchema CWorkspaceData::Load( CArchive& archive )
 CWorkspace::CWorkspace( void )
 	: CCmdTarget()
 	, m_pMainFrame( app::GetMainFrame() )
+	, m_filePath( app::GetModulePath() )
 	, m_isLoaded( false )
 	, m_delayFullScreen( false )
 	, m_pLoadingImageState( NULL )
@@ -122,9 +123,7 @@ CWorkspace::CWorkspace( void )
 	, m_reserved( 0 )
 	, m_defaultSlideDelay( 5000 )
 {
-	fs::CPathParts parts( app::GetModulePath().Get() );
-	parts.m_ext = _T(".slw");
-	m_filePath = parts.MakePath();
+	m_filePath.ReplaceExt( _T(".slw") );
 
 	SetImageSelColor( color::Null );	// also create the associated brush
 }
@@ -136,8 +135,8 @@ CWorkspace::~CWorkspace()
 
 CWorkspace& CWorkspace::Instance( void )
 {
-	static CWorkspace appWorkspace;
-	return appWorkspace;
+	static CWorkspace s_appWorkspace;
+	return s_appWorkspace;
 }
 
 void CWorkspace::Serialize( CArchive& archive )
@@ -173,7 +172,7 @@ void CWorkspace::Serialize( CArchive& archive )
 			archive >> m_data.m_imageSelTextColor;
 			archive >> m_data.m_thumbListColumnCount;
 			archive >> m_mainPlacement;
-			archive >> (int&)savedModelSchema;			// the real saved old version
+			archive >> (int&)savedModelSchema;		// the real saved old version
 			archive >> m_reserved;
 		}
 
@@ -181,7 +180,8 @@ void CWorkspace::Serialize( CArchive& archive )
 
 		// workspace loaded: will use SW_HIDE on 1st show (CommitWnd), then pass the final mode from placement on 2nd step for MFC to show
 		m_isLoaded = true;
-		AfxGetApp()->m_nCmdShow = m_mainPlacement.ChangeMaximizedShowCmd( SW_HIDE );
+
+		app::GetApp()->StoreCmdShow( m_mainPlacement.ChangeMaximizedShowCmd( SW_HIDE ) );
 		shell::s_useVistaStyle = HasFlag( m_data.m_wkspFlags, wf::UseVistaStyleFileDialog );
 
 		if ( app::GetThumbnailer()->SetBoundsSize( m_data.GetThumbBoundsSize() ) )
@@ -283,7 +283,7 @@ bool CWorkspace::LoadDocuments( void )
 		ToggleFullScreen();		// if was de-persisted with full-screen mode, now is the right time to actually commit the switch
 
 	// (!) next time, show the window as default in order to properly handle CFrameWnd::OnDDEExecute ShowWindow calls
-	AfxGetApp()->m_nCmdShow = -1;
+	app::GetApp()->StoreCmdShow( -1 );
 
 	if ( !m_pMainFrame->GetToolbar()->IsVisible() == HasFlag( m_data.m_wkspFlags, wf::ShowToolBar ) )
 		m_pMainFrame->ShowControlBar( m_pMainFrame->GetToolbar(), HasFlag( m_data.m_wkspFlags, wf::ShowToolBar ), FALSE );

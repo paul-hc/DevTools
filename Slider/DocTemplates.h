@@ -6,9 +6,24 @@
 #include "utl/UI/FilterStore.h"
 
 
-class CAlbumDoc;
-class CSearchPattern;
-namespace fs { class CPath; }
+namespace app { class CAlbumDocTemplate; }
+
+
+class CAppDocManager : public CDocManager
+{
+public:
+	CAppDocManager( void );
+	~CAppDocManager();
+
+	// base overrides
+	virtual void OnFileNew( void );
+	virtual BOOL DoPromptFileName( CString& rFilePath, UINT titleId, DWORD flags, BOOL openDlg, CDocTemplate* pTemplate );
+	virtual void RegisterShellFileTypes( BOOL compatMode );
+
+	void RegisterImageAdditionalShellExt( bool doRegister );
+private:
+	app::CAlbumDocTemplate* m_pAlbumTemplate;
+};
 
 
 namespace app
@@ -72,21 +87,6 @@ namespace app
 		// base overrides
 		virtual void AlterSaveAsPath( CString& rFilePath ) const;
 	};
-
-
-	class CDocManager : public ::CDocManager
-	{
-	public:
-		CDocManager( void );
-
-		// base overrides
-		virtual void OnFileNew( void );
-		virtual BOOL DoPromptFileName( CString& rFilePath, UINT titleId, DWORD flags, BOOL openDlg, CDocTemplate* pTemplate );
-		virtual void RegisterShellFileTypes( BOOL compatMode );
-
-		void RegisterImageAdditionalShellExt( bool doRegister );
-	};
-
 }
 
 
