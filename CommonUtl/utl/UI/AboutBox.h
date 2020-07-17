@@ -22,7 +22,7 @@ private:
 	const fs::CPath* GetSelPath( void ) const;
 	void SetupBuildInfoList( void );
 public:
-	static UINT m_appIconId;
+	static UINT s_appIconId;
 private:
 	st::CScopedInitializeOle m_scopedOle;		// enable clipboard support
 

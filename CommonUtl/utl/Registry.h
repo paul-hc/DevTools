@@ -3,14 +3,14 @@
 #pragma once
 
 #include <atlbase.h>
-#include "Path.h"
+#include "Registry_fwd.h"
 
 
 namespace reg
 {
-	bool WriteStringValue( HKEY hParentKey, const fs::CPath& keySubPath, const TCHAR* pValueName, const std::tstring& text );
+	bool WriteStringValue( HKEY hParentKey, const TKeyPath& keySubPath, const TCHAR* pValueName, const std::tstring& text );
 
-	bool DeleteKey( HKEY hParentKey, const fs::CPath& keySubPath, RecursionDepth depth = Deep );		// deletes the rightmost key (identified by 'filename')
+	bool DeleteKey( HKEY hParentKey, const TKeyPath& keySubPath, RecursionDepth depth = Deep );		// deletes the rightmost key (identified by 'filename')
 
 
 	class CKey;
@@ -34,7 +34,7 @@ namespace reg
 			return ERROR_SUCCESS == m_key.Open( hParentKey, pSubKeyPath, samDesired );
 		}
 
-		bool Open( HKEY hParentKey, const fs::CPath& subKeyPath, REGSAM samDesired = KEY_READ | KEY_WRITE ) throw()
+		bool Open( HKEY hParentKey, const TKeyPath& subKeyPath, REGSAM samDesired = KEY_READ | KEY_WRITE ) throw()
 		{
 			return ERROR_SUCCESS == m_key.Open( hParentKey, subKeyPath.GetPtr(), samDesired );
 		}
@@ -45,7 +45,7 @@ namespace reg
 			return ERROR_SUCCESS == m_key.Create( hParentKey, pSubKeyPath, pClass, dwOptions, samDesired, pSecAttr, pDisposition );
 		}
 
-		bool Create( HKEY hParentKey, const fs::CPath& subKeyPath, LPTSTR pClass = REG_NONE,
+		bool Create( HKEY hParentKey, const TKeyPath& subKeyPath, LPTSTR pClass = REG_NONE,
 					 DWORD dwOptions = REG_OPTION_NON_VOLATILE, REGSAM samDesired = KEY_READ | KEY_WRITE, SECURITY_ATTRIBUTES* pSecAttr = NULL, DWORD* pDisposition = NULL ) throw()
 		{
 			return ERROR_SUCCESS == m_key.Create( hParentKey, subKeyPath.GetPtr(), pClass, dwOptions, samDesired, pSecAttr, pDisposition );
@@ -62,7 +62,7 @@ namespace reg
 
 		bool Flush( void ) { return ERROR_SUCCESS == m_key.Flush(); }		// flush the key's data to disk
 
-		static bool ParseFullPath( HKEY& rhHive, fs::CPath& rSubPath, const TCHAR* pKeyFullPath );		// full path includes registry hive (the root)
+		static bool ParseFullPath( HKEY& rhHive, TKeyPath& rSubPath, const TCHAR* pKeyFullPath );		// full path includes registry hive (the root)
 
 		void DeleteAll( void ) { DeleteAllValues(); DeleteAllSubKeys(); }
 

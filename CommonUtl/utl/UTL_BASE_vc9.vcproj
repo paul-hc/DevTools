@@ -847,6 +847,10 @@
 					RelativePath=".\Registry.h"
 					>
 				</File>
+				<File
+					RelativePath=".\Registry_fwd.h"
+					>
+				</File>
 			</Filter>
 		</Filter>
 		<Filter

@@ -62,7 +62,7 @@ BOOL CApplication::InitInstance( void )
 	app::GetOptions()->LoadAll();
 	ui::CCmdInfoStore::m_autoPopDuration = 30000;			// 30 sec popup display time for MFC tooltips
 
-	CAboutBox::m_appIconId = IDD_MAIN_DIALOG;
+	CAboutBox::s_appIconId = IDD_MAIN_DIALOG;
 	m_sharedAccel.Load( IDR_MAIN_SHARED_ACCEL );
 	CToolStrip::RegisterStripButtons( IDR_IMAGE_STRIP );
 	CImageStore::SharedStore()->RegisterAliases( cmdAliases, COUNT_OF( cmdAliases ) );

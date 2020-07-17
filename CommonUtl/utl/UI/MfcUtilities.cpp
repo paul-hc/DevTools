@@ -168,11 +168,13 @@ namespace ui
 
 	bool CAdapterDocument::Save( void ) throws_()
 	{
-		if ( OnSaveDocument( GetPathName() ) )
-			return true;
+		if ( !OnSaveDocument( GetPathName() ) )
+		{
+			TRACE( _T(" * Error saving document adapter file: %s\n"), GetPathName().GetString() );
+			return false;
+		}
 
-		TRACE( _T(" * Error saving document adapter file: %s\n"), GetPathName().GetString() );
-		return false;
+		return true;
 	}
 
 	void CAdapterDocument::ReportSaveLoadException( const TCHAR* pFilePath, CException* pExc, BOOL isSaving, UINT idDefaultPrompt )

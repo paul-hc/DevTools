@@ -80,7 +80,7 @@ BOOL CApplication::InitInstance( void )
 	if ( !CBaseApp< CWinApp >::InitInstance() )
 		return FALSE;
 
-	CAboutBox::m_appIconId = IDR_MAINFRAME;
+	CAboutBox::s_appIconId = IDR_MAINFRAME;
 	CToolStrip::RegisterStripButtons( IDR_IMAGE_STRIP );
 	CToolStrip::RegisterStripButtons( IDR_LOW_COLOR_STRIP, color::Magenta );		// low color images
 	CImageStore::SharedStore()->RegisterAliases( cmdAliases, COUNT_OF( cmdAliases ) );

@@ -86,7 +86,7 @@ void CApplication::OnInitAppResources( void )
 
 	app::GetLogger()->m_logFileMaxSize = -1;					// unlimited log size
 
-	CAboutBox::m_appIconId = IDD_RENAME_FILES_DIALOG;			// will use HugeIcon_48
+	CAboutBox::s_appIconId = IDD_RENAME_FILES_DIALOG;			// will use HugeIcon_48
 	CToolStrip::RegisterStripButtons( IDR_IMAGE_STRIP );		// register stock images
 	CToolStrip::RegisterStripButtons( IDR_TOOL_STRIP );			// register additional tool images
 	CImageStore::SharedStore()->RegisterAlias( ID_EDIT_CLEAR, ID_REMOVE_ITEM );

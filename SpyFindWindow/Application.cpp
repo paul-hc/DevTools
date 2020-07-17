@@ -78,7 +78,7 @@ BOOL CApplication::InitInstance( void )
 	if ( !CBaseApp< CWinApp >::InitInstance() )
 		return FALSE;
 
-	CAboutBox::m_appIconId = IDD_MAIN_DIALOG;
+	CAboutBox::s_appIconId = IDD_MAIN_DIALOG;
 	m_options.Load();
 
 	CMainDialog dlg;

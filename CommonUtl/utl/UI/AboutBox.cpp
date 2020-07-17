@@ -109,7 +109,7 @@ namespace layout
 }
 
 
-UINT CAboutBox::m_appIconId = 0;
+UINT CAboutBox::s_appIconId = 0;
 
 CAboutBox::CAboutBox( CWnd* pParent )
 	: CLayoutDialog( IDD_ABOUT_BOX, pParent )
@@ -198,8 +198,8 @@ void CAboutBox::DoDataExchange( CDataExchange* pDX )
 
 	if ( DialogOutput == pDX->m_bSaveAndValidate )
 	{
-		if ( m_appIconId != 0 && CImageStore::HasSharedStore() )
-			if ( const CIcon* pAppIcon = CImageStore::GetSharedStore()->RetrieveLargestIcon( m_appIconId ) )
+		if ( s_appIconId != 0 && CImageStore::HasSharedStore() )
+			if ( const CIcon* pAppIcon = CImageStore::GetSharedStore()->RetrieveLargestIcon( s_appIconId ) )
 				m_appIconStatic.SetIcon( pAppIcon->GetHandle() );
 
 		SetupBuildInfoList();

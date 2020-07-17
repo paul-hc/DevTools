@@ -9,7 +9,7 @@
 
 namespace reg
 {
-	bool WriteStringValue( HKEY hParentKey, const fs::CPath& keySubPath, const TCHAR* pValueName, const std::tstring& text )
+	bool WriteStringValue( HKEY hParentKey, const TKeyPath& keySubPath, const TCHAR* pValueName, const std::tstring& text )
 	{
 		CKey key;
 		return
@@ -18,7 +18,7 @@ namespace reg
 	}
 
 
-	bool DeleteKey( HKEY hParentKey, const fs::CPath& keySubPath, RecursionDepth depth /*= Deep*/ )
+	bool DeleteKey( HKEY hParentKey, const TKeyPath& keySubPath, RecursionDepth depth /*= Deep*/ )
 	{
 		ASSERT( !keySubPath.GetParentPath().IsEmpty() );		// must have a parent path to delete its sub-key
 
@@ -32,7 +32,7 @@ namespace reg
 	{
 		ASSERT_PTR( pKey );
 		HKEY hHive;
-		fs::CPath subPath;
+		TKeyPath subPath;
 
 		if ( CKey::ParseFullPath( hHive, subPath, pKeyFullPath ) )
 			return pKey->Open( hHive, subPath, samDesired );
@@ -45,7 +45,7 @@ namespace reg
 	{
 		ASSERT_PTR( pKey );
 		HKEY hHive;
-		fs::CPath subPath;
+		TKeyPath subPath;
 
 		if ( CKey::ParseFullPath( hHive, subPath, pKeyFullPath ) )
 			return pKey->Create( hHive, subPath );
@@ -58,7 +58,7 @@ namespace reg
 
 	// CKey implementation
 
-	bool CKey::ParseFullPath( HKEY& rhHive, fs::CPath& rSubPath, const TCHAR* pKeyFullPath )
+	bool CKey::ParseFullPath( HKEY& rhHive, TKeyPath& rSubPath, const TCHAR* pKeyFullPath )
 	{
 		ASSERT( !str::IsEmpty( pKeyFullPath ) );
 		rhHive = NULL;
@@ -67,7 +67,7 @@ namespace reg
 		size_t sepPos = str::Find< str::Case >( pKeyFullPath, _T('\\') );
 		if ( sepPos != utl::npos )
 		{
-			rSubPath = fs::CPath( pKeyFullPath + sepPos + 1 );
+			rSubPath = TKeyPath( pKeyFullPath + sepPos + 1 );
 
 			if ( str::EqualsN( pKeyFullPath, _T("HKEY_CLASSES_ROOT"), sepPos ) )
 				rhHive = HKEY_CLASSES_ROOT;

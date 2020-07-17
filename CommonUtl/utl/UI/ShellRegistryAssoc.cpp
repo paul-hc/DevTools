@@ -11,11 +11,11 @@
 
 namespace shell
 {
-	fs::CPath MakeShellHandlerVerbPath( const TCHAR handlerName[], const TCHAR verb[] )
+	reg::TKeyPath MakeShellHandlerVerbPath( const TCHAR handlerName[], const TCHAR verb[] )
 	{
 		// returns "Directory\\shell\\SlideView" for handlerName="Directory", verb="SlideView"
 		ASSERT( !str::IsEmpty( verb ) );
-		return fs::CPath( handlerName ) / _T("shell") / verb;
+		return reg::TKeyPath( handlerName ) / _T("shell") / verb;
 	}
 
 	bool QueryHandlerName( std::tstring& rHandlerName, const TCHAR ext[] )
@@ -45,7 +45,7 @@ namespace shell
 	//	pVerbTag="Slide &View" (optional display text in shell context menu)
 	//	pDdeCmd="[open(\"%1\")]" (optional DDE command)
 	//
-	bool RegisterShellVerb( const fs::CPath& verbPath, const fs::CPath& modulePath,
+	bool RegisterShellVerb( const reg::TKeyPath& verbPath, const reg::TKeyPath& modulePath,
 							const TCHAR* pVerbTag /*= NULL*/, const TCHAR* pDdeCmd /*= NULL*/,
 							const std::tstring extraParams /*= str::GetEmpty()*/ )
 	{
@@ -91,13 +91,13 @@ namespace shell
 		return true;
 	}
 
-	bool UnregisterShellVerb( const fs::CPath& verbPath )
+	bool UnregisterShellVerb( const reg::TKeyPath& verbPath )
 	{
-		return reg::DeleteKey( HKEY_CLASSES_ROOT, verbPath );				// delete verb key
+		return reg::DeleteKey( HKEY_CLASSES_ROOT, verbPath, Deep );			// deep-delete verb key
 	}
 
 
-	bool RegisterAdditionalDocumentExt( const fs::CPath& docExt, const std::tstring& docTypeId )
+	bool RegisterAdditionalDocumentExt( const reg::TKeyPath& docExt, const std::tstring& docTypeId )
 	{
 		ASSERT( !docExt.IsEmpty() && _T('.') == docExt.Get()[ 0 ] );
 

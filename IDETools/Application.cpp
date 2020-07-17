@@ -58,7 +58,7 @@ BOOL CApplication::InitInstance( void )
 		return FALSE;
 
 	CToolStrip::RegisterStripButtons( IDR_IMAGE_STRIP );		// register command images
-	CAboutBox::m_appIconId = IDR_IDE_TOOLS_APP;
+	CAboutBox::s_appIconId = IDR_IDE_TOOLS_APP;
 
 	fs::CExtCustomOrder::Instance().RegisterCustomOrder();
 

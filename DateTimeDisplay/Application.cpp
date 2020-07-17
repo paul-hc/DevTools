@@ -25,16 +25,14 @@ BOOL CApplication::InitInstance( void )
 	if ( !CBaseApp< CWinApp >::InitInstance() )
 		return FALSE;
 
-	CAboutBox::m_appIconId = IDD_MAIN_DIALOG;
+	CAboutBox::s_appIconId = IDD_MAIN_DIALOG;
 
 	// create the shell manager, in case the dialog contains any shell tree view or shell list view controls
 	std::auto_ptr< CShellManager > pShellManager( new CShellManager );
 
 	CMainDialog dialog;
 	m_pMainWnd = &dialog;
-	if ( IDOK == dialog.DoModal() )
-	{
-	}
+	dialog.DoModal();
 	return FALSE;			// skip the application's message pump
 }
 
