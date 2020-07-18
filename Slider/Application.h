@@ -53,9 +53,9 @@ private:
 
 	enum RunFlags
 	{
-		ShowHelp			= BIT_FLAG( 0 ),
-		RunTests			= BIT_FLAG( 8 ),
-		SkipUiTests			= BIT_FLAG( 9 )
+		ShowHelp	= BIT_FLAG( 0 ),
+		RunTests	= BIT_FLAG( 8 ),
+		SkipUiTests	= BIT_FLAG( 9 )
 	};
 
 	bool HandleAppTests( void );

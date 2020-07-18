@@ -8,6 +8,7 @@
 #include "ChildFrame.h"
 #include "Application.h"
 #include "resource.h"
+#include "utl/UI/BaseZoomView.h"
 #include "utl/UI/MenuUtilities.h"
 #include "utl/UI/Utilities.h"
 #include "utl/UI/Thumbnailer.h"
@@ -227,9 +228,9 @@ void CMainFrame::StepItProgress( void )
 	m_progressCtrl.StepIt();
 }
 
-bool CMainFrame::ResizeViewToFit( CScrollView* pScrollView )
+bool CMainFrame::ResizeViewToFit( CBaseZoomView* pZoomScrollView )
 {
-	ASSERT_PTR( pScrollView->GetSafeHwnd() );
+	ASSERT_PTR( pZoomScrollView->GetSafeHwnd() );
 
 	BOOL isMaximized;
 	CMDIChildWnd* pActiveMdiChild = MDIGetActive( &isMaximized );
@@ -239,9 +240,9 @@ bool CMainFrame::ResizeViewToFit( CScrollView* pScrollView )
 		::ShowWindow( m_hWndMDIClient, SW_HIDE );
 		MDIRestore( pActiveMdiChild );
 	}
-	pScrollView->ResizeParentToFit( false );
+	pZoomScrollView->ResizeParentToFit( false );
 
-	CFrameWnd* pParentFrame = pScrollView->GetParentFrame();		// may be different than pActiveMdiChild
+	CFrameWnd* pParentFrame = pZoomScrollView->GetParentFrame();		// may be different than pActiveMdiChild
 	CRect rectFrame, rectMdiClient;
 
 	pParentFrame->GetWindowRect( rectFrame );
@@ -265,9 +266,9 @@ BOOL CMainFrame::OnCmdMsg( UINT cmdId, int code, void* pExtra, AFX_CMDHANDLERINF
 	CPushRoutingFrame push( this );
 
 	return
+		CMDIFrameWnd::OnCmdMsg( cmdId, code, pExtra, pHandlerInfo ) ||				// first allow the active view/doc to override central command handlers
 		CWorkspace::Instance().OnCmdMsg( cmdId, code, pExtra, pHandlerInfo ) ||
-		m_pToolbar->HandleCmdMsg( cmdId, code, pExtra, pHandlerInfo ) ||
-		CMDIFrameWnd::OnCmdMsg( cmdId, code, pExtra, pHandlerInfo );
+		m_pToolbar->HandleCmdMsg( cmdId, code, pExtra, pHandlerInfo );
 }
 
 

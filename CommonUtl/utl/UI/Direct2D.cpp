@@ -93,3 +93,20 @@ namespace d2d
 		coords;
 	}
 }
+
+
+namespace d2d
+{
+	// CSharedTraits implementation
+
+	CSharedTraits::CSharedTraits( void )
+		: m_pixelSmoothEnlarge( true )
+	{
+	}
+
+	CSharedTraits& CSharedTraits::Instance( void )
+	{
+		static CSharedTraits s_sharedTraits;
+		return s_sharedTraits;
+	}
+}

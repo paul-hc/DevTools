@@ -15,7 +15,7 @@ public:
 public:
 	CWorkspaceData m_data;
 	int m_thumbnailerFlags;
-	bool m_enlargeSmoothing;
+	bool m_smoothingMode;
 	UINT m_defaultSlideDelay;			// in miliseconds
 private:
 	// enum { IDD = IDD_WORKSPACE_DIALOG };

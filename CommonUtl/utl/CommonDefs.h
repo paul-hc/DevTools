@@ -218,7 +218,6 @@ inline bool SetMaskedValue( FieldType& rField, unsigned int mask, unsigned int v
 
 
 // bit flags are bitfield values based on power of 2 exponent - simplifies bit field enum definitions
-
 #define BIT_FLAG( exponent2 ) ( 1 << (exponent2) )
 
 inline unsigned int ToBitFlag( int exponent2 )
@@ -243,6 +242,16 @@ template< typename FieldType >
 inline void SetBitFlag( FieldType& rField, int exponent2, bool on = true )
 {
 	SetFlag( rField, ToBitFlag( exponent2 ), on );
+}
+
+
+namespace utl
+{
+	enum Ternary { False, True, Default };
+
+	inline bool EvalTernary( Ternary value, bool defaultValue ) { return True == value || ( Default == value && defaultValue ); }
+	inline Ternary GetNextTernary( Ternary value ) { return Default == value ? False : static_cast<Ternary>( value + 1 ); }
+	inline bool ToggleTernary( Ternary& rValue ) { rValue = static_cast<Ternary>( False == rValue ); return True == rValue; }
 }
 
 

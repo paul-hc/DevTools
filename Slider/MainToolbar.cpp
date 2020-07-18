@@ -82,7 +82,7 @@ bool CMainToolbar::InitToolbar( void )
 
 	CreateBarCtrl( (CComboBox*)m_pScalingCombo.get(), IDW_IMAGE_SCALING_COMBO, CBS_DROPDOWNLIST | CBS_DISABLENOSCROLL, ScalingModeComboWidth );
 	CreateBarCtrl( (CComboBox*)m_pZoomCombo.get(), IDW_ZOOM_COMBO, CBS_DROPDOWN | CBS_DISABLENOSCROLL, ZoomComboWidth );
-	CreateBarCtrl( &m_smoothCheck, IDW_SMOOTHING_MODE_CHECK, BS_CHECKBOX, SmoothCheckWidth, PadLeft + 6 );		// push right to avoid overlap on background separator button
+	CreateBarCtrl( &m_smoothCheck, IDW_SMOOTHING_MODE_CHECK, BS_3STATE, SmoothCheckWidth, PadLeft + 6 );		// push right to avoid overlap on background separator button
 	CreateBarCtrl( &m_navigSliderCtrl, IDW_NAVIG_SLIDER_CTRL, TBS_HORZ | TBS_AUTOTICKS | TBS_TRANSPARENTBKGND | TBS_TOOLTIPS, NavigSliderCtrlWidth, 0, 0 );		// no padding
 
 	m_smoothCheck.SetWindowText( _T("Smooth") );

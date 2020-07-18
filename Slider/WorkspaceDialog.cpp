@@ -7,7 +7,7 @@
 #include "utl/EnumTags.h"
 #include "utl/FileSystem.h"
 #include "utl/UI/Dialog_fwd.h"
-#include "utl/UI/ImagingDirect2D.h"
+#include "utl/UI/Direct2D.h"
 #include "utl/UI/ShellUtilities.h"
 #include "utl/UI/Utilities.h"
 #include "utl/UI/Thumbnailer.h"
@@ -23,7 +23,7 @@ CWorkspaceDialog::CWorkspaceDialog( CWnd* pParent /*= NULL*/ )
 	: CDialog( IDD_WORKSPACE_DIALOG, pParent )
 	, m_data( CWorkspace::GetData() )
 	, m_thumbnailerFlags( app::GetThumbnailer()->m_flags )
-	, m_enlargeSmoothing( d2d::CDrawBitmapTraits::IsSmoothingMode() )
+	, m_smoothingMode( d2d::CSharedTraits::Instance().IsSmoothingMode() )
 	, m_defaultSlideDelay( CWorkspace::Instance().GetDefaultSlideDelay() )
 {
 	m_mruCountEdit.SetValidRange( Range< int >( 0, 16 ) );
@@ -39,7 +39,7 @@ void CWorkspaceDialog::DoDataExchange( CDataExchange* pDX )
 	bool firstInit = NULL == m_mruCountEdit.m_hWnd;
 
 	ui::DDX_Bool( pDX, IDC_AUTOSAVE_CHECK, m_data.m_autoSave );
-	ui::DDX_Bool( pDX, IDC_ENLARGE_SMOOTHING_CHECK, m_enlargeSmoothing );
+	ui::DDX_Bool( pDX, IDC_ENLARGE_SMOOTHING_CHECK, m_smoothingMode );
 
 	ui::DDX_Flag( pDX, IDC_PERSIST_OPEN_DOCS_CHECK, m_data.m_wkspFlags, wf::PersistOpenDocs );
 	ui::DDX_Flag( pDX, IDC_PERSIST_ALBUM_IMAGE_STATE_CHECK, m_data.m_wkspFlags, wf::PersistAlbumImageState );

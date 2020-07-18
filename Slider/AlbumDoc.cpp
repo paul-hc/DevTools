@@ -53,6 +53,7 @@ CAlbumDoc::CAlbumDoc( void )
 	: CDocumentBase()
 	, m_bkColor( CLR_DEFAULT )
 	, m_docFlags( 0 )
+	, m_smoothingMode( utl::Default )
 {
 }
 
@@ -77,6 +78,7 @@ void CAlbumDoc::CopyAlbumState( const CAlbumDoc* pSrcDoc )
 
 	m_slideData = pSrcDoc->m_slideData;
 	m_bkColor = pSrcDoc->m_bkColor;
+	m_smoothingMode = pSrcDoc->m_smoothingMode;
 	m_pImageState.reset( pSrcDoc->m_pImageState.get() != NULL ? new CImageState( *pSrcDoc->m_pImageState ) : NULL );
 	m_password = pSrcDoc->m_password;
 }
@@ -144,11 +146,15 @@ void CAlbumDoc::Serialize( CArchive& archive )
 	{
 		archive << m_bkColor;
 		archive << m_docFlags;
+		archive << (int&)m_smoothingMode;
 	}
 	else
 	{
 		archive >> m_bkColor;
 		archive >> m_docFlags;
+
+		if ( m_model.GetModelSchema() >= app::Slider_v5_7 )
+			archive >> (int&)m_smoothingMode;
 	}
 
 	m_model.Stream( archive );
@@ -179,6 +185,7 @@ void CAlbumDoc::Serialize( CArchive& archive )
 void CAlbumDoc::PrepareToSave( const fs::CPath& docPath )
 {
 	SetFlag( m_docFlags, PresistImageState, HasFlag( CWorkspace::GetFlags(), wf::PersistAlbumImageState ) );
+
 	FetchViewState( docPath );
 
 	if ( GetModelSchema() != app::Slider_LatestModelSchema )
@@ -738,6 +745,8 @@ BOOL CAlbumDoc::OnSaveDocument( LPCTSTR pPathName )
 // message handlers
 
 BEGIN_MESSAGE_MAP( CAlbumDoc, CDocumentBase )
+	ON_COMMAND( IDW_SMOOTHING_MODE_CHECK, OnToggle_SmoothingMode )
+	ON_UPDATE_COMMAND_UI( IDW_SMOOTHING_MODE_CHECK, OnUpdate_SmoothingMode )
 	ON_COMMAND( ID_FILE_EXTRACT_CATALOG, OnExtractCatalog )
 	ON_UPDATE_COMMAND_UI( ID_FILE_EXTRACT_CATALOG, OnUpdate_IsCatalogStorage )
 	ON_COMMAND( ID_IMAGE_SAVE_AS, On_ImageSaveAs )
@@ -776,6 +785,21 @@ BEGIN_MESSAGE_MAP( CAlbumDoc, CDocumentBase )
 	ON_COMMAND( CM_SELECT_ALL_THUMBS, CmSelectAllThumbs )
 	ON_UPDATE_COMMAND_UI( CM_SELECT_ALL_THUMBS, OnUpdateSelectAllThumbs )
 END_MESSAGE_MAP()
+
+void CAlbumDoc::OnToggle_SmoothingMode( void )
+{
+	m_smoothingMode = utl::GetNextTernary( m_smoothingMode );
+
+	if ( CAlbumImageView* pAlbumView = GetAlbumImageView() )
+		pAlbumView->RefDrawParams()->SetSmoothingMode( m_smoothingMode );
+
+	UpdateAllViewsOfType<CAlbumImageView>( NULL, Hint_RedrawAll );
+}
+
+void CAlbumDoc::OnUpdate_SmoothingMode( CCmdUI* pCmdUI )
+{
+	pCmdUI->SetCheck( m_smoothingMode );
+}
 
 void CAlbumDoc::OnExtractCatalog( void )
 {

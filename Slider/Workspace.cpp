@@ -11,7 +11,7 @@
 #include "resource.h"
 #include "utl/Serialization.h"
 #include "utl/SerializeStdTypes.h"
-#include "utl/UI/ImagingDirect2D.h"
+#include "utl/UI/Direct2D.h"
 #include "utl/UI/MfcUtilities.h"
 #include "utl/UI/ShellUtilities.h"
 #include "utl/UI/Utilities.h"
@@ -25,7 +25,7 @@
 namespace reg
 {
 	const TCHAR section_Workspace[] = _T("Settings\\Workspace");
-	const TCHAR entry_enlargeInterpolationMode[] = _T("EnlargeImageSmoothing");
+	const TCHAR entry_enlargeImageSmoothing[] = _T("EnlargeImageSmoothing");
 	const TCHAR entry_defaultSlideDelay[] = _T("DefaultSlideDelay");
 }
 
@@ -205,14 +205,13 @@ void CWorkspace::LoadRegSettings( void )
 {
 	m_defaultSlideDelay = AfxGetApp()->GetProfileInt( reg::section_Workspace, reg::entry_defaultSlideDelay, m_defaultSlideDelay );
 
-	d2d::CDrawBitmapTraits::s_enlargeInterpolationMode =
-		static_cast< D2D1_BITMAP_INTERPOLATION_MODE >( AfxGetApp()->GetProfileInt( reg::section_Workspace, reg::entry_enlargeInterpolationMode, d2d::CDrawBitmapTraits::s_enlargeInterpolationMode ) );
+	d2d::CSharedTraits::Instance().SetSmoothingMode( AfxGetApp()->GetProfileInt( reg::section_Workspace, reg::entry_enlargeImageSmoothing, d2d::CSharedTraits::Instance().IsSmoothingMode() ) != FALSE );
 }
 
 void CWorkspace::SaveRegSettings( void )
 {
 	AfxGetApp()->WriteProfileInt( reg::section_Workspace, reg::entry_defaultSlideDelay, m_defaultSlideDelay );
-	AfxGetApp()->WriteProfileInt( reg::section_Workspace, reg::entry_enlargeInterpolationMode, d2d::CDrawBitmapTraits::s_enlargeInterpolationMode );
+	AfxGetApp()->WriteProfileInt( reg::section_Workspace, reg::entry_enlargeImageSmoothing, d2d::CSharedTraits::Instance().IsSmoothingMode() );
 }
 
 
@@ -409,7 +408,7 @@ void CWorkspace::CmEditWorkspace( void )
 
 			changed = std::make_pair( Hint_ViewUpdate, true );
 		}
-		if ( d2d::CDrawBitmapTraits::SetSmoothingMode( dlg.m_enlargeSmoothing ) )
+		if ( d2d::CSharedTraits::Instance().SetSmoothingMode( dlg.m_smoothingMode ) )
 		{
 			SaveRegSettings();
 			changed.first = Hint_ViewUpdate;
@@ -443,12 +442,12 @@ void CWorkspace::CmEditWorkspace( void )
 
 void CWorkspace::OnToggle_SmoothingMode( void )
 {
-	d2d::CDrawBitmapTraits::SetSmoothingMode( !d2d::CDrawBitmapTraits::IsSmoothingMode() );
+	d2d::CSharedTraits::Instance().SetSmoothingMode( !d2d::CSharedTraits::Instance().IsSmoothingMode() );
 
 	app::GetApp()->UpdateAllViews( Hint_RedrawAll );
 }
 
 void CWorkspace::OnUpdate_SmoothingMode( CCmdUI* pCmdUI )
 {
-	pCmdUI->SetCheck( d2d::CDrawBitmapTraits::IsSmoothingMode() );
+	pCmdUI->SetCheck( d2d::CSharedTraits::Instance().IsSmoothingMode() );
 }

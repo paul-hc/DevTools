@@ -22,6 +22,8 @@ protected:
 public:
 	using CScrollView::CenterOnPoint;
 
+	void ResizeParentToFit( BOOL shrinkOnly = true );		// "overrides" base version (non-virtual)
+
 	// ui::IZoomView interface (partial)
 	virtual CScrollView* GetScrollView( void );
 	virtual ui::ImageScalingMode GetScalingMode( void ) const;
@@ -76,6 +78,8 @@ protected:
 	ui::TViewStatusFlag& RefViewStatusFlags( void ) { return m_viewStatusFlags; }
 	virtual void OnViewStatusChanged( ui::TViewStatusFlag flag );
 private:
+	using CScrollView::ResizeParentToFit;
+private:
 	ui::ImageScalingMode m_scalingMode;		// default auto image size (app::Slider_v4_0+)
 	UINT m_zoomPct;
 	ui::IZoomBar* m_pZoomBar;
@@ -83,6 +87,8 @@ private:
 
 	CRect m_clientRect;
 	CRect m_contentRect;
+protected:
+	CSize m_minContentSize;					// used when resizing parent to fit
 
 	// generated stuff
 protected:

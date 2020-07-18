@@ -317,7 +317,7 @@ BOOL CApplication::InitInstance( void )
 	ASSERT_NULL( m_pDocManager );
 	m_pDocManager = pAppDocManager;
 
-	m_pGdiPlusInit.reset( new CScopedGdiPlusInit );		/// NOTE: this should not be called earlier, otherwise it breaks DDE open (on Explorer side)!
+	m_pGdiPlusInit.reset( new CScopedGdiPlusInit );		/// CRITICAL: this should not be called earlier, otherwise it breaks DDE open on Explorer side!
 
 	CCmdLineInfo cmdInfo( this );
 	cmdInfo.ParseAppSwitches();				// just our switches (ignore MFC arguments)

@@ -23,9 +23,10 @@ namespace app
 		Slider_v5_4 = 0x54,				// CImageArchiveStg: store album streams under the "Album" sub-storage
 		Slider_v5_5 = 0x55,				// major redesign of catalog storage (no schema change); rename CImageArchiveStg to CImageCatalogStg
 		Slider_v5_6 = 0x56,				// replace CFileAttr::m_fileType with CFileAttr::m_imageFormat
+		Slider_v5_7 = 0x57,				// CAlbumDoc::m_smoothingMode
 
 			// * always update to the LATEST VERSION *
-			Slider_LatestModelSchema = Slider_v5_6
+			Slider_LatestModelSchema = Slider_v5_7
 	};
 
 

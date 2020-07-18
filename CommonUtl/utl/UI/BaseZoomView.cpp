@@ -18,6 +18,7 @@ CBaseZoomView::CBaseZoomView( ui::ImageScalingMode scalingMode, UINT zoomPct )
 	, m_zoomPct( zoomPct )
 	, m_pZoomBar( NULL )
 	, m_viewStatusFlags( 0 )
+	, m_minContentSize( 0, 0 )
 {
 }
 
@@ -214,6 +215,17 @@ void CBaseZoomView::StoreScrollExtent( void )
 
 	SetScrollSizes( MM_TEXT, m_contentRect.Size(), sizePage, sizeLine );		// calculate the total size of this view
 	CenterOnPoint( m_contentRect.CenterPoint() );			// zoom on image's centre point
+}
+
+void CBaseZoomView::ResizeParentToFit( BOOL shrinkOnly /*= true*/ )
+{
+	CSize oldTotalDev = m_totalDev;
+
+	m_totalDev = ui::MaxSize( m_totalDev, m_minContentSize );		// impose a minimum size limit temporarily
+	
+	__super::ResizeParentToFit( shrinkOnly );
+
+	m_totalDev = oldTotalDev;			// restore original value
 }
 
 DWORD CBaseZoomView::GetScrollStyle( void ) const

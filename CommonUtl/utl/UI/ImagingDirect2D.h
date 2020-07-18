@@ -12,28 +12,22 @@ namespace d2d
 	//
 	struct CDrawBitmapTraits
 	{
-		CDrawBitmapTraits( COLORREF bkColor = CLR_NONE, bool smoothing = true, UINT opacityPct = 100 );
+		CDrawBitmapTraits( COLORREF bkColor = CLR_NONE, UINT opacityPct = 100 );
+
+		bool IsSmoothingMode( void ) const { return utl::EvalTernary( m_smoothingMode, CSharedTraits::Instance().IsSmoothingMode() ); }
+		utl::Ternary GetSmoothingMode( void ) const { return m_smoothingMode; }
+		void SetSmoothingMode( utl::Ternary smoothingMode = utl::True ) { m_smoothingMode = smoothingMode; }
 
 		void SetScrollPos( const POINT& scrollPos );
-		void SetAutoInterpolationMode( const SIZE& destBoundsSize, const SIZE& bmpSize );
 
 		void Draw( ID2D1RenderTarget* pRenderTarget, ID2D1Bitmap* pBitmap, const CRect& destRect, const CRect* pSrcRect = NULL ) const;
-
-		static bool IsSmoothingMode( void ) { return s_enlargeInterpolationMode != D2D1_BITMAP_INTERPOLATION_MODE_NEAREST_NEIGHBOR; }
-		static bool SetSmoothingMode( bool smoothingMode = true );
+	private:
+		utl::Ternary m_smoothingMode;			// bitmap drawing strategy for enlarging (scaling up) - could override CSharedTraits::m_pixelSmoothEnlarge
 	public:
 		COLORREF m_bkColor;
 		float m_opacity;
-		D2D1_BITMAP_INTERPOLATION_MODE m_interpolationMode;
 		D2D1::Matrix3x2F m_transform;			// Identity, Scale, Translation, Rotation, etc
 		COLORREF m_frameColor;					// useful for debugging
-
-		static D2D1_BITMAP_INTERPOLATION_MODE s_enlargeInterpolationMode;		// by default no smoothing when enlarging images (friendly for raster images)
-
-		/**
-			D2D1_BITMAP_INTERPOLATION_MODE_LINEAR: pixel smoothing (default)
-			D2D1_BITMAP_INTERPOLATION_MODE_NEAREST_NEIGHBOR: no dithering (accurate pixel scaling)
-		 */
 	};
 
 

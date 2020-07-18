@@ -7,6 +7,7 @@
 
 
 interface IImageView;
+class CBaseZoomView;
 class CMainToolbar;
 
 
@@ -42,7 +43,7 @@ public:
 	void SetPosProgress( int value );
 	void StepItProgress( void );
 
-	bool ResizeViewToFit( CScrollView* pScrollView );
+	bool ResizeViewToFit( CBaseZoomView* pZoomScrollView );
 protected:
 	void CleanupWindow( void );
 private:

@@ -34,6 +34,7 @@ public:
 	CAlbumModel* RefModel( void ) { return &m_model; }
 
 	COLORREF GetBkColor( void ) const { return m_bkColor; }
+	utl::Ternary GetSmoothingMode( void ) const { return m_smoothingMode; }
 
 	bool HasImages( void ) const { return m_model.AnyFoundFiles(); }
 	size_t GetImageCount( void ) const { return m_model.GetFileAttrCount(); }
@@ -94,6 +95,7 @@ private:
 	persist CAlbumModel m_model;						// image file list (search patterns + found files)
 	persist COLORREF m_bkColor;							// album background color
 	persist int m_docFlags;								// persistent document flags
+	persist utl::Ternary m_smoothingMode;				// Slider_v5_7 (+)
 	persist custom_order::COpStack m_customOrderUndoStack;	
 	persist custom_order::COpStack m_customOrderRedoStack;
 	persist auto_drop::COpStack m_dropUndoStack;		// contains the stack of performed move/copy operations to be undone on demand
@@ -117,14 +119,14 @@ public:
 	virtual BOOL OnOpenDocument( LPCTSTR pPathName );
 	virtual BOOL OnSaveDocument( LPCTSTR pPathName );
 protected:
+	afx_msg void OnToggle_SmoothingMode( void );
+	afx_msg void OnUpdate_SmoothingMode( CCmdUI* pCmdUI );
 	afx_msg void OnExtractCatalog( void );
 	afx_msg void OnUpdate_IsCatalogStorage( CCmdUI* pCmdUI );
-
 	afx_msg void On_ImageSaveAs( void );
 	afx_msg void OnUpdate_AnyCurrImage( CCmdUI* pCmdUI );
 	afx_msg void OnUpdate_AllSelImagesRead( CCmdUI* pCmdUI );
 	afx_msg void OnUpdate_AllSelImagesModify( CCmdUI* pCmdUI );
-
 	afx_msg void On_ImageOpen( void );
 	afx_msg void On_ImageDelete( void );
 	afx_msg void On_ImageMove( void );

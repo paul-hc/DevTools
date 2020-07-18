@@ -44,6 +44,9 @@ CImageView::CImageView( void )
 	s_imageAccel.LoadOnce( IDR_IMAGEVIEW );
 	SetTrackMenuTarget( app::GetMainFrame() );
 
+	m_minContentSize.cx = 145;		// avoid very small view sizes (for icons, etc)
+	m_minContentSize.cy = 64;
+
 	SetZoomBar( app::GetMainFrame()->GetToolbar() );
 	SetScaleZoom( CWorkspace::GetData().m_scalingMode, 100 );
 	SetFlag( RefViewStatusFlags(), ui::FullScreen, app::GetMainFrame()->IsFullScreen() );			// copy the actual FullScreen status
@@ -61,10 +64,12 @@ HICON CImageView::GetDocTypeIcon( void ) const
 
 CMenu& CImageView::GetDocContextMenu( void ) const
 {
-	static CMenu contextMenu;
-	if ( NULL == (HMENU)contextMenu )
-		ui::LoadPopupMenu( contextMenu, IDR_CONTEXT_MENU, app::ImagePopup );
-	return contextMenu;
+	static CMenu s_contextMenu;
+
+	if ( NULL == (HMENU)s_contextMenu )
+		ui::LoadPopupMenu( s_contextMenu, IDR_CONTEXT_MENU, app::ImagePopup );
+
+	return s_contextMenu;
 }
 
 CImageDoc* CImageView::GetDocument( void ) const

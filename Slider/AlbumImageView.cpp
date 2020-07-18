@@ -220,8 +220,12 @@ void CAlbumImageView::HandleNavTick( void )
 	if ( ui::IsKeyPressed( VK_CONTROL ) )
 		return;				// temporarily freeze navigation
 
+	bool dirForward = m_slideData.m_dirForward;
+	if ( ui::IsKeyPressed( VK_SHIFT ) )
+		dirForward = !dirForward;
+
 	CAlbumNavigator navigator( this );
-	nav::TIndexFramePosPair newNavigInfo = navigator.GetNavigateInfo( !ui::IsKeyPressed( VK_SHIFT ) ? nav::Next : nav::Previous );
+	nav::TIndexFramePosPair newNavigInfo = navigator.GetNavigateInfo( dirForward ? nav::Next : nav::Previous );
 
 	m_slideData.SetCurrentNavPos( newNavigInfo );
 	UpdateImage();
@@ -460,6 +464,7 @@ void CAlbumImageView::OnInitialUpdate( void )
 	// at first time update, copy de-persisted navigation attributes and background color
 	m_slideData = pDoc->m_slideData;
 	SetBkColor( pDoc->GetBkColor(), false );
+	RefDrawParams()->SetSmoothingMode( pDoc->GetSmoothingMode() );
 
 	m_pAlbumDialogBar->InitAlbumImageView( this );
 	UpdateChildBarsState( true );		// info bar and thumb pane are hidden in full screen mode

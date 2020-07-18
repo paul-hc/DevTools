@@ -241,8 +241,7 @@ void CImageZoomViewD2D::OnDraw( CDC* pDC )
 		{
 			CPoint scrollPos = GetScrollPosition();
 
-			m_drawTraits.SetScrollPos( scrollPos );													// apply translation transform according to view's scroll position
-			m_drawTraits.SetAutoInterpolationMode( GetContentRect().Size(), GetSourceSize() );		// force smooth mode when shrinking bitmap
+			m_drawTraits.SetScrollPos( scrollPos );				// apply translation transform according to view's scroll position
 
 			d2d::CViewCoords viewCoords( _GetClientRect(), GetContentRect() );
 			d2d::CBitmapCoords bmpCoords( m_drawTraits );

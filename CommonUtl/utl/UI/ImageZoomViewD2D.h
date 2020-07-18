@@ -66,7 +66,7 @@ protected:
 	CImageZoomViewD2D( void );
 	virtual ~CImageZoomViewD2D();
 public:
-	d2d::CDrawBitmapTraits& GetDrawParams( void ) { return m_drawTraits; }
+	d2d::CDrawBitmapTraits* RefDrawParams( void ) { return &m_drawTraits; }
 	d2d::CImageRenderTarget* GetImageRenderTarget( void ) { return m_pImageRT.get(); }
 protected:
 	// ui::IZoomView interface (partial)

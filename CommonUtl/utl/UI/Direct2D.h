@@ -169,4 +169,32 @@ namespace d2d
 }
 
 
+namespace d2d
+{
+	class CSharedTraits
+	{
+		CSharedTraits( void );
+	public:
+		static CSharedTraits& Instance( void );
+
+		bool IsSmoothingMode( void ) const { return m_pixelSmoothEnlarge; }
+		bool SetSmoothingMode( bool pixelSmoothEnlarge = true ) { return utl::ModifyValue( m_pixelSmoothEnlarge, pixelSmoothEnlarge ); }
+
+		D2D1_BITMAP_INTERPOLATION_MODE GetInterpolationMode( void ) const { return ToInterpolationMode( m_pixelSmoothEnlarge ); }
+
+		static D2D1_BITMAP_INTERPOLATION_MODE ToInterpolationMode( bool pixelSmoothEnlarge )
+		{
+			return pixelSmoothEnlarge ? D2D1_BITMAP_INTERPOLATION_MODE_LINEAR : D2D1_BITMAP_INTERPOLATION_MODE_NEAREST_NEIGHBOR;
+		}
+	private:
+		bool m_pixelSmoothEnlarge;		// true by default: smooth when enlarging images, friendly for pictures; flip to false for raster images accurate pixel scaling
+
+		/**
+			D2D1_BITMAP_INTERPOLATION_MODE_LINEAR: pixel smoothing (default)
+			D2D1_BITMAP_INTERPOLATION_MODE_NEAREST_NEIGHBOR: no dithering (accurate pixel scaling)
+		 */
+	};
+}
+
+
 #endif // Direct2D_h

@@ -14,34 +14,19 @@ namespace d2d
 {
 	// CDrawBitmapTraits implementation
 
-	D2D1_BITMAP_INTERPOLATION_MODE CDrawBitmapTraits::s_enlargeInterpolationMode = D2D1_BITMAP_INTERPOLATION_MODE_NEAREST_NEIGHBOR;		// by default no smoothing
-
-	CDrawBitmapTraits::CDrawBitmapTraits( COLORREF bkColor /*= CLR_NONE*/, bool smoothing /*= true*/, UINT opacityPct /*= 100*/ )
-		: m_bkColor( bkColor )
+	CDrawBitmapTraits::CDrawBitmapTraits( COLORREF bkColor /*= CLR_NONE*/, UINT opacityPct /*= 100*/ )
+		: m_smoothingMode( utl::Default )
+		, m_bkColor( bkColor )
 		, m_opacity( static_cast< float >( opacityPct ) / 100.f )
-		, m_interpolationMode( smoothing ? D2D1_BITMAP_INTERPOLATION_MODE_LINEAR : D2D1_BITMAP_INTERPOLATION_MODE_NEAREST_NEIGHBOR )
 		, m_transform( D2D1::Matrix3x2F::Identity() )
 		, m_frameColor( CLR_NONE )
 	{
-	}
-
-	bool CDrawBitmapTraits::SetSmoothingMode( bool smoothingMode /*= true*/ )
-	{
-		return utl::ModifyValue( s_enlargeInterpolationMode,
-			smoothingMode ? D2D1_BITMAP_INTERPOLATION_MODE_LINEAR : D2D1_BITMAP_INTERPOLATION_MODE_NEAREST_NEIGHBOR );
 	}
 
 	void CDrawBitmapTraits::SetScrollPos( const POINT& scrollPos )
 	{
 		// apply translation transform according to view's scroll position
 		m_transform = D2D1::Matrix3x2F::Translation( (float)-scrollPos.x, (float)-scrollPos.y );
-	}
-
-	void CDrawBitmapTraits::SetAutoInterpolationMode( const SIZE& destBoundsSize, const SIZE& bmpSize )
-	{
-		m_interpolationMode = ui::FitsInside( destBoundsSize, bmpSize )
-			? s_enlargeInterpolationMode							// no smoothing on stretching (by default, user configurable)
-			: D2D1_BITMAP_INTERPOLATION_MODE_LINEAR;				// force using smooting (dithering) when shrinking
 	}
 
 	void CDrawBitmapTraits::Draw( ID2D1RenderTarget* pRenderTarget, ID2D1Bitmap* pBitmap, const CRect& destRect, const CRect* pSrcRect /*= NULL*/ ) const
@@ -61,11 +46,13 @@ namespace d2d
 
 		if ( pBitmap != NULL )
 		{
-			D2D_RECT_F srcRect = pSrcRect != NULL
-				? d2d::ToRectF( *pSrcRect )
-				: d2d::ToRectF( CRect( CPoint( 0, 0 ), FromSizeU( pBitmap->GetPixelSize() ) ) );
+			CRect bmpRect = pSrcRect != NULL ? *pSrcRect : CRect( CPoint( 0, 0 ), FromSizeU( pBitmap->GetPixelSize() ) );
+			D2D_RECT_F srcRect = d2d::ToRectF( bmpRect );
+			D2D1_BITMAP_INTERPOLATION_MODE interpolationMode = ui::FitsInside( destRect.Size(), bmpRect.Size() )		// enlarge scaling?
+				? CSharedTraits::ToInterpolationMode( IsSmoothingMode() )		// use current enlarge scaling mode
+				: D2D1_BITMAP_INTERPOLATION_MODE_LINEAR;						// shrinking: always use smooting (dithering)
 
-			pRenderTarget->DrawBitmap( pBitmap, destRectF, m_opacity, m_interpolationMode, pSrcRect != NULL ? &srcRect : NULL );
+			pRenderTarget->DrawBitmap( pBitmap, destRectF, m_opacity, interpolationMode, pSrcRect != NULL ? &srcRect : NULL );
 		}
 
 		if ( m_frameColor != CLR_NONE )
