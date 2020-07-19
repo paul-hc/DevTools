@@ -16,6 +16,9 @@ public:
 	void DDX_Placeholder( CDataExchange* pDX, int placeholderId,
 						  int alignToPlaceholder = H_AlignLeft | V_AlignBottom, UINT toolbarResId = 0 );
 
+	void CreateReplacePlaceholder( CWnd* pParent, int placeholderId, int alignToPlaceholder = H_AlignLeft | V_AlignBottom,
+								   UINT toolbarResId = 0 );
+
 	// creates a toolbar with id AFX_IDW_TOOLBAR
 	void CreateToolbar( CWnd* pParent, const CRect* pAlignScreenRect = NULL,
 						int alignment = H_AlignRight | V_AlignCenter, UINT toolbarResId = 0 );

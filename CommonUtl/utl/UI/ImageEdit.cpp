@@ -53,7 +53,8 @@ void CImageEdit::DrawImage( CDC* pDC, const CRect& imageRect )
 
 void CImageEdit::PreSubclassWindow( void )
 {
-	CTextEdit::PreSubclassWindow();
+	__super::PreSubclassWindow();
+
 	if ( m_pImageList != NULL )
 		ResizeNonClient();
 }
@@ -69,7 +70,7 @@ END_MESSAGE_MAP()
 
 void CImageEdit::OnNcCalcSize( BOOL calcValidRects, NCCALCSIZE_PARAMS* pNcSp )
 {
-	CTextEdit::OnNcCalcSize( calcValidRects, pNcSp );
+	__super::OnNcCalcSize( calcValidRects, pNcSp );
 
 	if ( calcValidRects )
 		if ( HasValidImage() )
@@ -86,7 +87,7 @@ void CImageEdit::OnNcCalcSize( BOOL calcValidRects, NCCALCSIZE_PARAMS* pNcSp )
 
 void CImageEdit::OnNcPaint( void )
 {
-	CTextEdit::OnNcPaint();
+	__super::OnNcPaint();
 
 	if ( HasValidImage() && !m_imageNcRect.IsRectEmpty() )
 	{
@@ -118,17 +119,17 @@ LRESULT CImageEdit::OnNcHitTest( CPoint point )
 			return HTOBJECT; // so that it will send a WM_NCLBUTTONDBLCLK
 	}
 
-	return CTextEdit::OnNcHitTest( point );
+	return __super::OnNcHitTest( point );
 }
 
 void CImageEdit::OnNcLButtonDown( UINT hitTest, CPoint point )
 {
 	ui::TakeFocus( m_hWnd );
-	CTextEdit::OnNcLButtonDown( hitTest, point );
+	__super::OnNcLButtonDown( hitTest, point );
 }
 
 void CImageEdit::OnMove( int x, int y )
 {
-	CTextEdit::OnMove( x, y );
+	__super::OnMove( x, y );
 	ResizeNonClient();
 }

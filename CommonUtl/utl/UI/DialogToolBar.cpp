@@ -22,16 +22,25 @@ void CDialogToolBar::DDX_Placeholder( CDataExchange* pDX, int placeholderId,
 	{
 		ASSERT( DialogOutput == pDX->m_bSaveAndValidate );
 
-		CreateToolbar( pDX->m_pDlgWnd, toolbarResId );
-
-		// adjust the size of the toolbar
-		CSize idealBarSize;
-		GetToolBarCtrl().GetMaxSize( &idealBarSize );
-
-		CWnd* pPlaceholder = ui::AlignToPlaceholder( placeholderId, *this, &idealBarSize, alignToPlaceholder );
-		pPlaceholder->DestroyWindow();
-		SetDlgCtrlID( placeholderId );
+		CreateReplacePlaceholder( pDX->m_pDlgWnd, placeholderId, alignToPlaceholder, toolbarResId );
 	}
+}
+
+void CDialogToolBar::CreateReplacePlaceholder( CWnd* pParent, int placeholderId, int alignToPlaceholder /*= H_AlignLeft | V_AlignBottom*/,
+											   UINT toolbarResId /*= 0*/ )
+{
+	ASSERT_NULL( m_hWnd );
+	ASSERT_PTR( pParent->GetSafeHwnd() );
+
+	CreateToolbar( pParent, toolbarResId );
+
+	// adjust the size of the toolbar
+	CSize idealBarSize;
+	GetToolBarCtrl().GetMaxSize( &idealBarSize );
+
+	CWnd* pPlaceholder = ui::AlignToPlaceholder( placeholderId, *this, &idealBarSize, alignToPlaceholder );
+	pPlaceholder->DestroyWindow();
+	SetDlgCtrlID( placeholderId );
 }
 
 void CDialogToolBar::CreateToolbar( CWnd* pParent, const CRect* pAlignScreenRect /*= NULL*/,

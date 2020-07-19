@@ -7,8 +7,11 @@
 #include "resource.h"
 #include "utl/StringUtilities.h"
 #include "utl/UI/CmdInfoStore.h"
+#include "utl/UI/DialogToolBar.h"
 #include "utl/UI/StockValuesComboBox.h"
+#include "utl/UI/TextEdit.h"
 #include "utl/UI/Utilities.h"
+#include "utl/UI/resource.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -19,9 +22,13 @@
 
 CAlbumDialogBar::CAlbumDialogBar( void )
 	: CDialogBar()
+	, m_pToolbar( new CDialogToolBar() )
 	, m_pSlideDelayCombo( new CDurationComboBox() )
+	, m_pImagePathEdit( new CTextEdit( false ) )
 	, m_pAlbumView( NULL )
 {
+	m_pToolbar->GetStrip()
+		.AddButton( ID_EDIT_ALBUM );
 }
 
 CAlbumDialogBar::~CAlbumDialogBar()
@@ -73,7 +80,7 @@ void CAlbumDialogBar::OnNavRangeChanged( void )
 {
 	int imageCount = (int)m_pAlbumView->GetDocument()->GetImageCount();
 	m_scrollSpin.SetRange32( 1, imageCount );
-	ui::SetDlgItemText( m_hWnd, IDC_NAV_COUNT_STATIC, str::Format( _T("%d image(s)"), imageCount ) );
+	ui::SetDlgItemText( m_hWnd, IDC_NAV_COUNT_STATIC, str::Format( _T("/ %s"), num::FormatNumber( imageCount, str::GetUserLocale() ).c_str() ) );
 }
 
 void CAlbumDialogBar::OnCurrPosChanged( void )
@@ -84,7 +91,7 @@ void CAlbumDialogBar::OnCurrPosChanged( void )
 
 	if ( valid )
 		if ( const CFileAttr* pFileAttr = m_pAlbumView->GetDocument()->GetModel()->GetFileAttr( currIndex ) )
-			imageFileInfo = str::Format( _T("%s (%s)"), pFileAttr->GetPath().FormatPretty().c_str(), pFileAttr->FormatFileSize( 1, _T("%s B") ).c_str() );
+			imageFileInfo = pFileAttr->GetPath().FormatPretty();
 
 	ui::EnableWindow( m_navEdit, valid );
 
@@ -97,7 +104,7 @@ void CAlbumDialogBar::OnCurrPosChanged( void )
 	else
 		ui::SetWindowText( m_navEdit, std::tstring() );
 
-	ui::SetWindowText( m_fileNameEdit, imageFileInfo );
+	m_pImagePathEdit->SetText( imageFileInfo );
 }
 
 void CAlbumDialogBar::OnSlideDelayChanged( void )
@@ -107,26 +114,15 @@ void CAlbumDialogBar::OnSlideDelayChanged( void )
 
 void CAlbumDialogBar::LayoutControls( void )
 {
-	CRect rectBar, rectEdit;
-	if ( NULL == m_fileNameEdit.m_hWnd )
+	if ( NULL == m_pImagePathEdit->m_hWnd )
 		return;
 
-	// layout the image file name edit to right bound of the dialog-bar
-	GetWindowRect( rectBar );
-	m_fileNameEdit.GetWindowRect( rectEdit );
-	rectEdit.right = rectBar.right - 2;
-	ScreenToClient( rectEdit );
-	m_fileNameEdit.MoveWindow( rectEdit );
-}
+	// layout the image path edit to right bound of the dialog-bar
+	CRect barRect, pathEditRect = ui::GetControlRect( *m_pImagePathEdit );
 
-BOOL CAlbumDialogBar::PreTranslateMessage( MSG* pMsg )
-{
-// it doesn't hit here
-//	if ( CAccelTable::IsKeyMessage( pMsg ) )
-//		if ( app::GetApp()->m_sharedAccel.TranslateIfOwnsFocus( pMsg, m_hWnd, m_hWnd ) )
-//			return TRUE;
-
-	return CDialogBar::PreTranslateMessage( pMsg );
+	GetClientRect( &barRect );
+	pathEditRect.right = barRect.right - 2;
+	m_pImagePathEdit->MoveWindow( &pathEditRect );
 }
 
 
@@ -152,11 +148,14 @@ LRESULT CAlbumDialogBar::HandleInitDialog( WPARAM wParam, LPARAM lParam )
 {
 	CDialogBar::HandleInitDialog( wParam, lParam );
 
+	m_pToolbar->CreateReplacePlaceholder( this, IDC_STRIP_BAR_1, H_AlignLeft | V_AlignCenter );
+	m_pToolbar->SetOwner( AfxGetMainWnd() );
+
 	VERIFY( m_pSlideDelayCombo->SubclassDlgItem( IDC_PLAY_DELAY_COMBO, this ) );
 	VERIFY( m_navEdit.SubclassDlgItem( IDC_SEEK_CURR_POS_EDIT, this ) );
 	VERIFY( m_scrollSpin.SubclassDlgItem( IDC_SCROLL_POS_SPIN, this ) );
 	VERIFY( m_infoStatic.SubclassDlgItem( IDC_NAV_COUNT_STATIC, this ) );
-	VERIFY( m_fileNameEdit.SubclassDlgItem( IDC_CURR_FILE_EDIT, this ) );
+	VERIFY( m_pImagePathEdit->SubclassDlgItem( IDC_CURR_FILE_EDIT, this ) );
 
 	LOGFONT logFont;
 	if ( GetFont()->GetLogFont( &logFont ) )
@@ -164,8 +163,8 @@ LRESULT CAlbumDialogBar::HandleInitDialog( WPARAM wParam, LPARAM lParam )
 		logFont.lfWeight = FW_BOLD;
 		if ( m_boldFont.CreateFontIndirect( &logFont ) )
 		{
-			m_infoStatic.SetFont( &m_boldFont );
-			m_fileNameEdit.SetFont( &m_boldFont );
+			//m_infoStatic.SetFont( &m_boldFont );
+			m_pImagePathEdit->SetFont( &m_boldFont );
 		}
 	}
 	LayoutControls();
@@ -185,7 +184,7 @@ HBRUSH CAlbumDialogBar::OnCtlColor( CDC* pDC, CWnd* pWnd, UINT ctlColor )
 	if ( CTLCOLOR_STATIC == ctlColor )
 		if ( pWnd->m_hWnd == m_infoStatic.m_hWnd )
 			pDC->SetTextColor( RGB( 0, 0, 255 ) );
-		else if ( pWnd->m_hWnd == m_fileNameEdit.m_hWnd )
+		else if ( pWnd->m_hWnd == m_pImagePathEdit->m_hWnd )
 			pDC->SetTextColor( RGB( 128, 0, 0 ) );
 
 	return hBrush;
@@ -270,6 +269,7 @@ BOOL CAlbumDialogBar::OnToolTipText( UINT, NMHDR* pNmHdr, LRESULT* pResult )
 
 	if ( !message.AssignTooltipText( m_pAlbumView->GetImagePathKey().first.Get() ) )
 		return FALSE;
+
 	*pResult = 0;
 	return TRUE;	// message was handled
 }

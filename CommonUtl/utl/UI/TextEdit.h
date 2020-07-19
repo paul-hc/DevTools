@@ -111,6 +111,11 @@ protected:
 	afx_msg BOOL OnEnKillFocus_Reflect( void );
 	afx_msg BOOL OnEnHScroll_Reflect( void );
 	afx_msg BOOL OnEnVScroll_Reflect( void );
+	afx_msg void OnEditCopy( void );
+	afx_msg void OnEditCut( void );
+	afx_msg void OnUpdateEditCut( CCmdUI* pCmdUI );
+	afx_msg void OnEditPaste( void );
+	afx_msg void OnUpdateEditPaste( CCmdUI* pCmdUI );
 	afx_msg void OnSelectAll( void );
 
 	DECLARE_MESSAGE_MAP()

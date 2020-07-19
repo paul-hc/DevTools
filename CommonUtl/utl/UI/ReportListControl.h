@@ -227,7 +227,7 @@ public:
 	virtual void SetCustomFileGlyphDraw( bool showGlyphs = true );
 
 	// To prevent icon scaling dithering when displaying shell item icon thumbnails, specify small/large image bounds size from the image list.
-	// Otherwise when displaying only image file thumbs, let the thumbnailer drives bounds sizes.
+	// Otherwise when displaying only image file thumbs, let the thumbnailer drive bounds sizes.
 	// Remove LVS_EX_DOUBLEBUFFER for accurate image scaling, especially for transparent PNGs.
 	//
 	void SetCustomImageDraw( ui::ICustomImageDraw* pCustomImageDraw, const CSize& smallImageSize = CSize( 0, 0 ), const CSize& largeImageSize = CSize( 0, 0 ) );

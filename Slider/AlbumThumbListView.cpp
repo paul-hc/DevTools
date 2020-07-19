@@ -1185,7 +1185,7 @@ void CAlbumThumbListView::OnToggleShowThumbView( void )
 
 void CAlbumThumbListView::OnUpdateShowThumbView( CCmdUI* pCmdUI )
 {
-	pCmdUI->Enable( !app::GetMainFrame()->IsFullScreen() );
+//	pCmdUI->Enable( !app::GetMainFrame()->IsFullScreen() );
 	pCmdUI->SetCheck( HasFlag( m_pPeerImageView->GetSlideData().m_viewFlags, af::ShowThumbView ) );
 }
 

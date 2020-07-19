@@ -6,7 +6,9 @@
 
 
 class CAlbumImageView;
+class CDialogToolBar;
 class CDurationComboBox;
+class CTextEdit;
 
 
 class CAlbumDialogBar : public CDialogBar
@@ -25,21 +27,20 @@ public:
 	void OnCurrPosChanged( void );
 	void OnNavRangeChanged( void );
 	void OnSlideDelayChanged( void );
-protected:
+private:
 	void LayoutControls( void );
 private:
+	std::auto_ptr< CDialogToolBar > m_pToolbar;
 	std::auto_ptr< CDurationComboBox > m_pSlideDelayCombo;
 	CEdit m_navEdit;
 	CSpinButtonCtrl m_scrollSpin;
 	CStatic m_infoStatic;
-	CEdit m_fileNameEdit;
+	std::auto_ptr< CTextEdit > m_pImagePathEdit;
 
 	CFont m_boldFont;
 	CAlbumImageView* m_pAlbumView;
 
 	// generated stuff
-public:
-	virtual BOOL PreTranslateMessage( MSG* pMsg );
 protected:
 	afx_msg void OnOk( void );
 	afx_msg void On_EscapeKey( void );

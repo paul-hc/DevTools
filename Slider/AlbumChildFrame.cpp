@@ -45,9 +45,9 @@ int CAlbumChildFrame::OnCreate( CREATESTRUCT* pCS )
 	if ( -1 == CChildFrame::OnCreate( pCS ) )
 		return -1;
 
-	// initialize dialog bar
+	// initialize album dialog-bar
 	VERIFY( m_albumInfoBar.Create( this, IDD_ALBUMDIALOGBAR, CBRS_TOP | CBRS_TOOLTIPS | CBRS_FLYBY | CBRS_HIDE_INPLACE, ID_VIEW_ALBUMDIALOGBAR ) );
-	m_albumInfoBar.EnableWindow( FALSE );		// by default disable the navigation bar
+	//m_albumInfoBar.EnableWindow( FALSE );		// by default disable the navigation bar
 	ShowControlBar( &m_albumInfoBar, FALSE, FALSE );
 	return 0;
 }

@@ -29,14 +29,14 @@ private:
 	CRect m_imageNcRect;
 
 	enum { ImageSpacing = 0, ImageToTextGap = 2 };
-public:
+
 	// generated overrides
-	public:
+public:
 	virtual void PreSubclassWindow( void );
 protected:
 	afx_msg void OnNcCalcSize( BOOL calcValidRects, NCCALCSIZE_PARAMS* pNcSp );
 	afx_msg void OnNcPaint( void );
-	afx_msg LRESULT OnNcHitTest(CPoint point);
+	afx_msg LRESULT OnNcHitTest( CPoint point );
 	afx_msg void OnNcLButtonDown( UINT hitTest, CPoint point );
 	afx_msg void OnMove( int x, int y );
 

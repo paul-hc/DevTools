@@ -1,6 +1,7 @@
 
 #include "stdafx.h"
 #include "TextEdit.h"
+#include "Clipboard.h"
 #include "Dialog_fwd.h"
 #include "Icon.h"
 #include "SyncScrolling.h"
@@ -14,6 +15,12 @@
 
 static ACCEL s_editKeys[] =
 {
+	{ FVIRTKEY | FCONTROL, _T('C'), ID_EDIT_COPY },
+	{ FVIRTKEY | FCONTROL, VK_INSERT, ID_EDIT_COPY },
+	{ FVIRTKEY | FCONTROL, _T('X'), ID_EDIT_CUT },
+	{ FVIRTKEY | FSHIFT, VK_DELETE, ID_EDIT_CUT },
+	{ FVIRTKEY | FCONTROL, _T('V'), ID_EDIT_PASTE },
+	{ FVIRTKEY | FSHIFT, VK_INSERT, ID_EDIT_PASTE },
 	{ FVIRTKEY | FCONTROL, _T('A'), ID_EDIT_SELECT_ALL }
 };
 
@@ -222,7 +229,9 @@ BOOL CTextEdit::PreTranslateMessage( MSG* pMsg )
 			}
 		}
 
-	return m_accel.Translate( pMsg, m_hWnd ) || CEdit::PreTranslateMessage( pMsg );
+	return
+		m_accel.Translate( pMsg, m_hWnd ) ||
+		CEdit::PreTranslateMessage( pMsg );
 }
 
 
@@ -238,6 +247,11 @@ BEGIN_MESSAGE_MAP( CTextEdit, BaseClass )
 	ON_CONTROL_REFLECT_EX( EN_KILLFOCUS, OnEnKillFocus_Reflect )
 	ON_CONTROL_REFLECT_EX( EN_HSCROLL, OnEnHScroll_Reflect )
 	ON_CONTROL_REFLECT_EX( EN_VSCROLL, OnEnVScroll_Reflect )
+	ON_COMMAND( ID_EDIT_COPY, OnEditCopy )
+	ON_COMMAND( ID_EDIT_CUT, OnEditCut )
+	ON_UPDATE_COMMAND_UI( ID_EDIT_CUT, OnUpdateEditCut )
+	ON_COMMAND( ID_EDIT_PASTE, OnEditPaste )
+	ON_UPDATE_COMMAND_UI( ID_EDIT_PASTE, OnUpdateEditPaste )
 	ON_COMMAND( ID_EDIT_SELECT_ALL, OnSelectAll )
 END_MESSAGE_MAP()
 
@@ -311,6 +325,36 @@ BOOL CTextEdit::OnEnVScroll_Reflect( void )
 		m_pSyncScrolling->Synchronize( this );
 
 	return FALSE;					// continue routing
+}
+
+void CTextEdit::OnEditCopy( void )
+{
+	Range<int> selRange = GetSelRange<int>();
+
+	if ( !selRange.IsEmpty() )
+		Copy();										// WM_COPY: copy the selected text
+	else
+		CClipboard::CopyText( GetText(), this );	// copy the entire text
+}
+
+void CTextEdit::OnEditCut( void )
+{
+	Cut();
+}
+
+void CTextEdit::OnUpdateEditCut( CCmdUI* pCmdUI )
+{
+	pCmdUI->Enable( IsWritable() && !GetSelRange<int>().IsEmpty() );
+}
+
+void CTextEdit::OnEditPaste( void )
+{
+	Paste();
+}
+
+void CTextEdit::OnUpdateEditPaste( CCmdUI* pCmdUI )
+{
+	pCmdUI->Enable( IsWritable() && CClipboard::CanPasteText() );
 }
 
 void CTextEdit::OnSelectAll( void )
