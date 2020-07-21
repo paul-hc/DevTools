@@ -43,6 +43,8 @@ private:
 	virtual bool SavePasswordStream( void );
 	virtual bool LoadPasswordStream( void );
 
+	virtual bool LoadAlbumMap( std::tstring* pAlbumMapText );				// pass NULL to find out if the catalog has an "_AlbumMap.txt" stream
+
 	virtual bool SaveAlbumStream( CObject* pAlbumDoc );		// "_Album.sld" stream (with .sld file format)
 	virtual bool LoadAlbumStream( CObject* pAlbumDoc );
 	virtual bool EnumerateImages( CImagesModel& rImagesModel );
@@ -70,6 +72,7 @@ private:
 private:
 	app::ModelSchema m_docModelSchema;			// transient: loaded model schema from file, stored by the album doc
 	std::tstring m_password;					// allow password edititng of any document (including .sld), in preparation for SaveAs .ias
+	utl::Ternary m_hasAlbumMap;
 private:
 	enum Alternates { CurrentVer };				// first entry in an array of alternates
 

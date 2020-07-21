@@ -51,6 +51,7 @@ const TCHAR* CImageCatalogStg::s_passwordStreamNames[] =
 CImageCatalogStg::CImageCatalogStg( void )
 	: fs::CStructuredStorage()
 	, m_docModelSchema( app::Slider_LatestModelSchema )
+	, m_hasAlbumMap( utl::Default )
 {
 	SetUseFlatStreamNames( true );		// store deep image stream paths as flattened encoded root streams
 }
@@ -671,6 +672,34 @@ bool CImageCatalogStg::LoadPasswordStream( void )
 	//pwdFile.Close();
 
 	return succeeded;
+}
+
+bool CImageCatalogStg::LoadAlbumMap( std::tstring* pAlbumMapText )
+{
+	if ( m_hasAlbumMap != utl::Default && NULL == pAlbumMapText )
+		return utl::True == m_hasAlbumMap;
+
+	CScopedCurrentDir scopedAlbumFolder( this, s_pAlbumFolderName );
+
+	if ( utl::Default == m_hasAlbumMap )
+		utl::SetTernary( m_hasAlbumMap, StreamExist( s_pAlbumMapStreamName ) );
+
+	if ( pAlbumMapText != NULL )
+		if ( utl::True == m_hasAlbumMap )
+		{
+			std::auto_ptr< COleStreamFile > pTextFile = OpenStreamFile( s_pAlbumMapStreamName );
+			ASSERT_PTR( pTextFile.get() );
+
+			UINT totalLength = static_cast<UINT>( pTextFile->GetLength() );
+			std::vector< char > buffer( totalLength + 1, _T('\0') );
+			pTextFile->Read( &buffer.front(), totalLength );
+
+			*pAlbumMapText = str::FromUtf8( &buffer.front() );
+		}
+		else
+			pAlbumMapText->clear();
+
+	return utl::True == m_hasAlbumMap;
 }
 
 

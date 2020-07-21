@@ -272,16 +272,16 @@ void CAlbumImageView::UpdateChildBarsState( bool onInit /*= false*/ )
 	m_pPeerThumbView->CheckListLayout( onInit ? CAlbumThumbListView::AlbumViewInit : CAlbumThumbListView::ShowCommand );
 }
 
-void CAlbumImageView::OnAlbumModelChanged( AlbumModelChange reason /*= FM_Init*/ )
+void CAlbumImageView::OnAlbumModelChanged( AlbumModelChange reason /*= AM_Init*/ )
 {
 	CAlbumDoc* pDoc = GetDocument();
 
 	switch ( reason )
 	{
-		case FM_Init:
+		case AM_Init:
 			m_slideData = pDoc->m_slideData;
 			break;
-		case FM_AutoDropOp:
+		case AM_AutoDropOp:
 			if ( !pDoc->m_autoDropContext.m_droppedDestFiles.empty() )
 				m_slideData.SetCurrentIndex( pDoc->GetModel()->FindIndexFileAttrWithPath( fs::CFlexPath( pDoc->m_autoDropContext.m_droppedDestFiles[ 0 ] ) ) );		// that'd be the caret selected index
 
@@ -295,21 +295,21 @@ void CAlbumImageView::OnAlbumModelChanged( AlbumModelChange reason /*= FM_Init*/
 
 	switch ( reason )
 	{
-		case FM_Init:
-		case FM_Regeneration:
-		case FM_AutoDropOp:
+		case AM_Init:
+		case AM_Regeneration:
+		case AM_AutoDropOp:
 			m_pAlbumDialogBar->OnNavRangeChanged();
 			OutputNavigSlider();
 			break;
 	}
 
-	// FM_Regeneration: navigation range may have changed, and UpdateImage() will be called later when the selection backup is restored
-	// FM_CustomOrderChanged: navigation range is not changed for sure, and UpdateImage() will be called later when the selection backup is restored
+	// AM_Regeneration: navigation range may have changed, and UpdateImage() will be called later when the selection backup is restored
+	// AM_CustomOrderChanged: navigation range is not changed for sure, and UpdateImage() will be called later when the selection backup is restored
 	//
-	if ( FM_Init == reason || FM_AutoDropOp == reason )
+	if ( AM_Init == reason || AM_AutoDropOp == reason )
 		UpdateImage();
 
-	if ( FM_AutoDropOp == reason )
+	if ( AM_AutoDropOp == reason )
 	{
 		CListViewState autoDropSelState( pDoc->m_autoDropContext.m_droppedDestFiles );
 		m_pPeerThumbView->SetListViewState( autoDropSelState, true );

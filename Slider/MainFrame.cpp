@@ -289,8 +289,6 @@ BEGIN_MESSAGE_MAP( CMainFrame, CMDIFrameWnd )
 	ON_UPDATE_COMMAND_UI( ID_CM_MDI_CLOSE_ALL, OnUpdateAnyMDIChild )
 	ON_COMMAND( CM_TOGGLE_MAXIMIZE, OnToggleMaximize )
 	ON_UPDATE_COMMAND_UI( CM_TOGGLE_MAXIMIZE, OnUpdateMaximize )
-	ON_COMMAND( CK_FULL_SCREEN, OnToggleFullScreen )
-	ON_UPDATE_COMMAND_UI( CK_FULL_SCREEN, OnUpdateFullScreen )
 	ON_UPDATE_COMMAND_UI( IDW_ZOOM_COMBO, OnUpdateAnyMDIChild )
 	ON_COMMAND( CM_LOGGER_OPTIONS, CmLoggerOptions )
 	ON_UPDATE_COMMAND_UI( CM_LOGGER_OPTIONS, OnUpdateAlwaysEnabled )
@@ -447,16 +445,6 @@ void CMainFrame::OnUpdateMaximize( CCmdUI* pCmdUI )
 
 	pCmdUI->Enable( pActiveChild != NULL );
 	pCmdUI->SetCheck( isMaximized );
-}
-
-void CMainFrame::OnToggleFullScreen( void )
-{
-	CWorkspace::Instance().ToggleFullScreen();
-}
-
-void CMainFrame::OnUpdateFullScreen( CCmdUI* pCmdUI )
-{
-	pCmdUI->SetCheck( CWorkspace::Instance().IsFullScreen() );
 }
 
 void CMainFrame::CmLoggerOptions( void )

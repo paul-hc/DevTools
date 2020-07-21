@@ -64,7 +64,7 @@ public:
 	void NavigateBy( int deltaPos ) { NavigateTo( deltaPos, true ); }
 
 	// events
-	void OnAlbumModelChanged( AlbumModelChange reason = FM_Init );
+	void OnAlbumModelChanged( AlbumModelChange reason = AM_Init );
 	void OnAutoDropRecipientChanged( void );
 	void OnCurrPosChanged( bool alsoSliderCtrl = true );
 	void OnSlideDataChanged( bool setToModified = true );

@@ -34,6 +34,8 @@ public:
 	virtual bool SavePasswordStream( void ) = 0;
 	virtual bool LoadPasswordStream( void ) = 0;
 
+	virtual bool LoadAlbumMap( std::tstring* pAlbumMapText ) = 0;
+
 	// "_Album.sld" stream (with .sld file format)
 	virtual bool SaveAlbumStream( CObject* pAlbumDoc ) = 0;
 	virtual bool LoadAlbumStream( CObject* pAlbumDoc ) = 0;

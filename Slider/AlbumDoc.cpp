@@ -17,6 +17,7 @@
 #include "resource.h"
 #include "utl/MemLeakCheck.h"
 #include "utl/Serialization.h"
+#include "utl/UI/Clipboard.h"
 #include "utl/UI/MfcUtilities.h"
 #include "utl/UI/IconButton.h"
 #include "utl/UI/PasswordDialog.h"
@@ -409,11 +410,11 @@ bool CAlbumDoc::BuildAlbum( const fs::CPath& searchPath )
 	return true;		// keep it open regardless of m_model.AnyFoundFiles();
 }
 
-void CAlbumDoc::OnAlbumModelChanged( AlbumModelChange reason /*= FM_Init*/ )
+void CAlbumDoc::OnAlbumModelChanged( AlbumModelChange reason /*= AM_Init*/ )
 {
 	InitAutoDropRecipient();
 
-	if ( FM_AutoDropOp == reason )
+	if ( AM_AutoDropOp == reason )
 	{	// also clear the thumb and image caches
 		app::GetThumbnailer()->Clear();
 
@@ -479,9 +480,9 @@ TCurrImagePos CAlbumDoc::DeleteFromAlbum( const std::vector< fs::CFlexPath >& se
 }
 
 
-void CAlbumDoc::RegenerateModel( AlbumModelChange reason /*= FM_Init*/ )
+void CAlbumDoc::RegenerateModel( AlbumModelChange reason /*= AM_Init*/ )
 {
-	if ( FM_Regeneration == reason )
+	if ( AM_Regeneration == reason )
 		UpdateAllViewsOfType< CAlbumImageView >( NULL, Hint_BackupCurrSelection );		// backup current selection for all the owned views before re-generating the m_model member
 
 	// We can't rely on reordering information since there might be new or removed files.
@@ -501,13 +502,13 @@ void CAlbumDoc::RegenerateModel( AlbumModelChange reason /*= FM_Init*/ )
 	// update UI
 	OnAlbumModelChanged( reason );
 
-	if ( FM_Regeneration == reason )
+	if ( AM_Regeneration == reason )
 		UpdateAllViewsOfType< CAlbumImageView >( NULL, Hint_RestoreSelection );		// restore backed-up selection for all the views
 
 	// since auto-drop operation is usually done from opened albums (as well as Windows Explorer),
 	// also redraw any of the opened views that may be affected by this, except for those views
 	// belonging to this document, which is just updated.
-	if ( FM_AutoDropOp == reason )
+	if ( AM_AutoDropOp == reason )
 		app::GetApp()->UpdateAllViews( Hint_FileChanged, this );
 }
 
@@ -574,7 +575,7 @@ bool CAlbumDoc::UndoRedoCustomOrder( custom_order::COpStack& rFromStack, custom_
 		rFromStack.pop_front();
 
 		if ( IDOK == AfxMessageBox( IDS_PROMPT_REGENERATE_ALBUM, MB_OKCANCEL | MB_ICONQUESTION ) )
-			RegenerateModel( FM_Regeneration );
+			RegenerateModel( AM_Regeneration );
 	}
 	else
 	{	// undo operation from FROM to TO stacks
@@ -601,7 +602,7 @@ bool CAlbumDoc::UndoRedoCustomOrder( custom_order::COpStack& rFromStack, custom_
 		else
 			SetModifiedFlag( Dirty );
 
-		OnAlbumModelChanged( FM_CustomOrderChanged );
+		OnAlbumModelChanged( AM_CustomOrderChanged );
 
 		UpdateAllViewsOfType< CAlbumImageView >( pAlbumViewTarget, Hint_RestoreSelection );
 
@@ -673,7 +674,7 @@ bool CAlbumDoc::ExecuteAutoDrop( void )
 	if ( !m_autoDropContext.MakeAutoDrop( m_dropUndoStack ) )
 		return false;
 
-	RegenerateModel( FM_AutoDropOp );
+	RegenerateModel( AM_AutoDropOp );
 	return true;
 }
 
@@ -780,6 +781,8 @@ BEGIN_MESSAGE_MAP( CAlbumDoc, CDocumentBase )
 	ON_UPDATE_COMMAND_UI( CM_ARCHIVE_IMAGES, OnUpdateArchiveImages )
 	ON_COMMAND( ID_EDIT_ARCHIVE_PASSWORD, OnEditArchivePassword )
 	ON_UPDATE_COMMAND_UI( ID_EDIT_ARCHIVE_PASSWORD, OnUpdateEditArchivePassword )
+	ON_COMMAND( ID_EDIT_COPY_ALBUM_MAP, OnEditCopyAlbumMap )
+	ON_UPDATE_COMMAND_UI( ID_EDIT_COPY_ALBUM_MAP, OnUpdateEditCopyAlbumMap )
 	ON_COMMAND( CK_SAVE_CU_UNDO_REDO_BUFFER, OnToggleSaveCOUndoRedoBuffer )
 	ON_UPDATE_COMMAND_UI( CK_SAVE_CU_UNDO_REDO_BUFFER, OnUpdateSaveCOUndoRedoBuffer )
 	ON_COMMAND( CM_SELECT_ALL_THUMBS, CmSelectAllThumbs )
@@ -884,7 +887,7 @@ void CAlbumDoc::On_ImageMove( void )
 void CAlbumDoc::CmAutoDropDefragment( void )
 {
 	if ( m_autoDropContext.DefragmentFiles( m_dropUndoStack ) )
-		RegenerateModel( FM_AutoDropOp );
+		RegenerateModel( AM_AutoDropOp );
 }
 
 void CAlbumDoc::OnUpdateAutoDropDefragment( CCmdUI* pCmdUI )
@@ -896,7 +899,7 @@ void CAlbumDoc::CmAutoDropUndo( void )
 {
 	// undo operation from UNDO to REDO staks
 	if ( m_autoDropContext.UndoRedoOperation( m_dropUndoStack, m_dropRedoStack, true ) )
-		RegenerateModel( FM_AutoDropOp );
+		RegenerateModel( AM_AutoDropOp );
 }
 
 void CAlbumDoc::OnUpdateAutoDropUndo( CCmdUI* pCmdUI )
@@ -908,7 +911,7 @@ void CAlbumDoc::CmAutoDropRedo( void )
 {
 	// redo operation from REDO to UNDO stacks
 	if ( m_autoDropContext.UndoRedoOperation( m_dropRedoStack, m_dropUndoStack, false ) )
-		RegenerateModel( FM_AutoDropOp );
+		RegenerateModel( AM_AutoDropOp );
 }
 
 void CAlbumDoc::OnUpdateAutoDropRedo( CCmdUI* pCmdUI )
@@ -928,7 +931,7 @@ void CAlbumDoc::OnUpdateAutoDropClearUndoRedoStacks( CCmdUI* pCmdUI )
 
 void CAlbumDoc::CmRegenerateAlbum( void )
 {
-	RegenerateModel( FM_Regeneration );
+	RegenerateModel( AM_Regeneration );
 }
 
 void CAlbumDoc::OnUpdateRegenerateAlbum( CCmdUI* pCmdUI )
@@ -1046,7 +1049,7 @@ void CAlbumDoc::CmArchiveImages( void )
 
 		if ( FOP_FileMove == dialog.m_fileOp )			// current file set may have changed?
 			if ( IDOK == AfxMessageBox( IDS_PROMPT_REGENERATE_ALBUM, MB_OKCANCEL | MB_ICONQUESTION ) )
-				RegenerateModel( FM_Regeneration );
+				RegenerateModel( AM_Regeneration );
 	}
 }
 
@@ -1080,6 +1083,21 @@ void CAlbumDoc::OnUpdateEditArchivePassword( CCmdUI* pCmdUI )
 
 	if ( CButton* pButton = (CButton*)pCmdUI->m_pOther )		// check-box button in album settings dialog?
 		CIconButton::SetButtonIcon( pButton, CIconId( !m_password.empty() ? pCmdUI->m_nID : 0 ) );
+}
+
+void CAlbumDoc::OnEditCopyAlbumMap( void )
+{
+	std::tstring albumMapText;
+	ICatalogStorage* pCatalogStorage = GetCatalogStorage();
+	pCatalogStorage->LoadAlbumMap( &albumMapText );
+	CClipboard::CopyText( albumMapText );
+}
+
+void CAlbumDoc::OnUpdateEditCopyAlbumMap( CCmdUI* pCmdUI )
+{
+	ICatalogStorage* pCatalogStorage = GetCatalogStorage();
+
+	pCmdUI->Enable( pCatalogStorage != NULL && pCatalogStorage->LoadAlbumMap( NULL ) );
 }
 
 void CAlbumDoc::OnToggleSaveCOUndoRedoBuffer( void )

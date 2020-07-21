@@ -52,7 +52,7 @@ public:
 	static std::auto_ptr< CAlbumDoc > LoadAlbumDocument( const fs::CPath& docPath );			// load a new image album (slide or catalog storage)
 
 	// events
-	void OnAlbumModelChanged( AlbumModelChange reason = FM_Init );
+	void OnAlbumModelChanged( AlbumModelChange reason = AM_Init );
 public:
 	bool EditAlbum( CAlbumImageView* pActiveView );
 	bool AddExplicitFiles( const std::vector< fs::CPath >& filePaths, bool doUpdate = true );
@@ -80,7 +80,7 @@ private:
 	void PrepareToSave( const fs::CPath& docPath );
 	bool PromptSaveConvertModelSchema( void ) const;
 
-	void RegenerateModel( AlbumModelChange reason = FM_Init );
+	void RegenerateModel( AlbumModelChange reason = AM_Init );
 
 	bool UndoRedoCustomOrder( custom_order::COpStack& rFromStack, custom_order::COpStack& rToStack, bool isUndoOp );
 	void ClearCustomOrder( custom_order::ClearMode clearMode = custom_order::CM_ClearAll );
@@ -153,6 +153,8 @@ protected:
 	afx_msg void OnUpdateArchiveImages( CCmdUI* pCmdUI );
 	afx_msg void OnEditArchivePassword( void );
 	afx_msg void OnUpdateEditArchivePassword( CCmdUI* pCmdUI );
+	afx_msg void OnEditCopyAlbumMap( void );
+	afx_msg void OnUpdateEditCopyAlbumMap( CCmdUI* pCmdUI );
 	afx_msg void OnToggleSaveCOUndoRedoBuffer( void );
 	afx_msg void OnUpdateSaveCOUndoRedoBuffer( CCmdUI* pCmdUI );
 	afx_msg void CmSelectAllThumbs( void );

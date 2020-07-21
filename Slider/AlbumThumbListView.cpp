@@ -863,7 +863,7 @@ BOOL CAlbumThumbListView::OnDrop( COleDataObject* pDataObject, DROPEFFECT dropEf
 	{
 		// after the drop, display indexes have changed - update the view
 		pAlbumDoc->SetModifiedFlag();
-		pAlbumDoc->OnAlbumModelChanged( FM_CustomOrderChanged );
+		pAlbumDoc->OnAlbumModelChanged( AM_CustomOrderChanged );
 
 		pAlbumDoc->UpdateAllViewsOfType( m_pPeerImageView, Hint_RestoreSelection );
 

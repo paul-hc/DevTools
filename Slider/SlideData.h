@@ -22,10 +22,10 @@ namespace af
 // used as argument for CAlbumImageView::OnAlbumModelChanged(0 and CAlbumDoc::OnAlbumModelChanged()
 enum AlbumModelChange
 {
-	FM_Init,				// normal initialization
-	FM_Regeneration,		// file list was regenerated
-	FM_CustomOrderChanged,	// file list was changed as a result of a custom order drag&drop operation
-	FM_AutoDropOp			// file list was regenerated as a result of an auto-drop operation
+	AM_Init,				// normal initialization
+	AM_Regeneration,		// file list was regenerated
+	AM_CustomOrderChanged,	// file list was changed as a result of a custom order drag&drop operation
+	AM_AutoDropOp			// file list was regenerated as a result of an auto-drop operation
 };
 
 

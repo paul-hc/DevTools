@@ -250,6 +250,7 @@ namespace utl
 	enum Ternary { False, True, Default };
 
 	inline bool EvalTernary( Ternary value, bool defaultValue ) { return True == value || ( Default == value && defaultValue ); }
+	inline bool SetTernary( Ternary& rValue, bool value ) { Ternary oldValue = rValue; rValue = value ? True : False; return rValue != oldValue; }
 	inline Ternary GetNextTernary( Ternary value ) { return Default == value ? False : static_cast<Ternary>( value + 1 ); }
 	inline bool ToggleTernary( Ternary& rValue ) { rValue = static_cast<Ternary>( False == rValue ); return True == rValue; }
 }

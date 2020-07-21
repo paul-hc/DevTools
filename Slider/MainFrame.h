@@ -81,8 +81,6 @@ protected:
 	afx_msg void OnUpdateAnyMDIChild( CCmdUI* pCmdUI );
 	afx_msg void OnToggleMaximize( void );
 	afx_msg void OnUpdateMaximize( CCmdUI* pCmdUI );
-	afx_msg void OnToggleFullScreen( void );
-	afx_msg void OnUpdateFullScreen( CCmdUI* pCmdUI );
 	afx_msg void CmLoggerOptions( void );
 	afx_msg void CmRefreshContent( void );
 	afx_msg void CmClearImageCache( void );
