@@ -15,10 +15,12 @@ CSlideData::CSlideData( void )
 	, m_dirForward( true )
 	, m_wrapMode( false )
 	, m_currListState( StoreByIndex )
-	, m_viewFlags( CWorkspace::GetData().m_albumViewFlags )
+	, m_saveCustomOrderUndoRedo( HasFlag( CWorkspace::GetData().m_albumViewFlags, af::SaveCustomOrderUndoRedo ) )
 	, m_thumbListColumnCount( CWorkspace::GetData().m_thumbListColumnCount )
 	, m_imageFramePos( 0 )
 {
+	m_showFlags[ Normal ] = ( CWorkspace::GetData().m_albumViewFlags & af::ShowMask );
+	m_showFlags[ FullScreen ] = 0;
 }
 
 CSlideData::~CSlideData()
@@ -31,18 +33,36 @@ void CSlideData::Stream( CArchive& archive )
 	{
 		archive << m_slideDelay;
 		archive & m_dirForward & m_wrapMode;
-		archive << m_viewFlags;
+		archive & m_saveCustomOrderUndoRedo;
+		archive << m_showFlags[ Normal ] << m_showFlags[ FullScreen ];
 		archive << m_thumbListColumnCount;
 		archive << m_imageFramePos;
 	}
 	else
 	{	// check version backwards compatibility hack
+		app::ModelSchema docModelSchema = app::GetLoadingSchema( archive );
+
 		archive >> m_slideDelay;
 		archive & m_dirForward & m_wrapMode;
-		archive >> m_viewFlags;
+
+		if ( docModelSchema >= app::Slider_v5_8 )
+		{
+			archive & m_saveCustomOrderUndoRedo;
+			archive >> m_showFlags[ Normal ] >> m_showFlags[ FullScreen ];
+		}
+		else
+		{
+			int oldViewFlags;
+			archive >> oldViewFlags;
+
+			m_saveCustomOrderUndoRedo = ::HasFlag( oldViewFlags, af::SaveCustomOrderUndoRedo );
+			m_showFlags[ Normal ] = ( oldViewFlags & af::ShowMask );
+			m_showFlags[ FullScreen ] = 0;
+		}
+
 		archive >> m_thumbListColumnCount;
 
-		if ( app::GetLoadingSchema( archive ) >= app::Slider_v5_1 )
+		if ( docModelSchema >= app::Slider_v5_1 )
 			archive >> m_imageFramePos;
 		else
 			m_imageFramePos = 0;
@@ -75,4 +95,27 @@ bool CSlideData::SetCurrentNavPos( const nav::TIndexFramePosPair& currentPos )
 	if ( utl::ModifyValue( m_imageFramePos, currentPos.second ) )
 		changed = true;
 	return changed;
+}
+
+
+af::TAlbumFlags& CSlideData::RefShowFlags( void )
+{
+	return m_showFlags[ CWorkspace::Instance().IsFullScreen() ];
+}
+
+UINT CSlideData::GetActualThumbListColumnCount( void ) const
+{
+	ASSERT( m_thumbListColumnCount != 0 );
+
+	if ( !HasShowFlag( af::ShowThumbView ) )
+		return 0;			// will hide the thumb view
+
+	return m_thumbListColumnCount;
+}
+
+void CSlideData::SetThumbListColumnCount( UINT thumbListColumnCount )
+{
+	ASSERT( m_thumbListColumnCount != 0 );		// to hide flip the af::ShowThumbView flag
+
+	m_thumbListColumnCount = thumbListColumnCount;
 }

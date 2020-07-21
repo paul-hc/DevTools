@@ -21,7 +21,6 @@ public:
 	size_t GetMdiChildCount( void ) const;
 	IImageView* GetActiveImageView( void ) const;
 	bool IsViewActive( IImageView* pImageView ) const { return GetActiveImageView() == pImageView; }
-	bool IsFullScreen( void ) const;
 	bool IsMdiRestored( void ) const;			// current document not maximized?
 
 	CMainToolbar* GetToolbar( void ) { return m_pToolbar.get(); }

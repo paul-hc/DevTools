@@ -1,7 +1,7 @@
 
 #include "stdafx.h"
 #include "WorkspaceDialog.h"
-#include "SlideData.h"				// af::ShowAlbumDialogBar
+#include "Album_fwd.h"
 #include "Application.h"
 #include "resource.h"
 #include "utl/EnumTags.h"

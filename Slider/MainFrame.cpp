@@ -63,11 +63,6 @@ IImageView* CMainFrame::GetActiveImageView( void ) const
 	return NULL;
 }
 
-bool CMainFrame::IsFullScreen( void ) const
-{
-	return CWorkspace::Instance().IsFullScreen() != false;
-}
-
 bool CMainFrame::IsMdiRestored( void ) const
 {
 	BOOL isMaximized;

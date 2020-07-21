@@ -24,9 +24,10 @@ namespace app
 		Slider_v5_5 = 0x55,				// major redesign of catalog storage (no schema change); rename CImageArchiveStg to CImageCatalogStg
 		Slider_v5_6 = 0x56,				// replace CFileAttr::m_fileType with CFileAttr::m_imageFormat
 		Slider_v5_7 = 0x57,				// CAlbumDoc::m_smoothingMode
+		Slider_v5_8 = 0x58,				// CSlideData::m_showFlags[2] dual perspective (Normal/FullScreen), CSlideData::m_saveCustomOrderUndoRedo
 
 			// * always update to the LATEST VERSION *
-			Slider_LatestModelSchema = Slider_v5_7
+			Slider_LatestModelSchema = Slider_v5_8
 	};
 
 

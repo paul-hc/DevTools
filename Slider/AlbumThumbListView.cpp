@@ -614,53 +614,52 @@ int CAlbumThumbListView::GetListClientWidth( int listWidth )
 		switch ( int( double( listWidth ) / GetInitialSize().cx + 0.5 ) )
 		{
 			case 1:				// zero or one column -> we have verticall scroll-bar
-				ncWidth = GetSystemMetrics( SM_CXVSCROLL );
+				ncWidth = ::GetSystemMetrics( SM_CXVSCROLL );
 			default:
-				ncWidth += 2 * GetSystemMetrics( SM_CXBORDER );
+				ncWidth += 2 * ::GetSystemMetrics( SM_CXBORDER );
 				break;
 		}
+
 	return listWidth - ncWidth;
 }
 
 bool CAlbumThumbListView::CheckListLayout( CheckLayoutMode checkMode /*= SplitterTrack*/ )
 {
-	bool isFullScreen = app::GetMainFrame()->IsFullScreen();
 	int columnCount = 0;
+	CSlideData* pSlideData = m_pPeerImageView->RefSlideData();
 
 	// first determine the column count
 	switch ( checkMode )
 	{
 		case SplitterTrack:
-		{
+		{	// input column layout & visibility
 			CRect clientRect;
 			GetClientRect( &clientRect );
 			columnCount = clientRect.Width() / GetInitialSize().cx;
+			ENSURE( columnCount >= 0 );
+
+			if ( columnCount != 0 )
+			{
+				pSlideData->SetShowFlag( af::ShowThumbView );				// corelate the thumb list visible flag with the actual visibility
+				pSlideData->SetThumbListColumnCount( columnCount );			// input the current column count
+			}
+			else
+				pSlideData->SetShowFlag( af::ShowThumbView, false );		// hide the thumbs view
 			break;
 		}
 		case AlbumViewInit:
 		case ShowCommand:
-			columnCount = m_pPeerImageView->GetSlideData().m_thumbListColumnCount;
-			if ( isFullScreen || !HasFlag( m_pPeerImageView->GetSlideData().m_viewFlags, af::ShowThumbView ) )
-				columnCount = 0;		// This thumb view is to be made invisible!
+			columnCount = pSlideData->GetActualThumbListColumnCount();
 			break;
 		default:
 			ASSERT( false );
 	}
 
-	ASSERT( columnCount >= 0 );
-	// corelate the thumb list visible flag with the actual visibility
-	if ( !isFullScreen )
-		SetFlag( m_pPeerImageView->RefSlideData().m_viewFlags, af::ShowThumbView, columnCount > 0 );
-
-	if ( columnCount > 0 )
-		m_pPeerImageView->RefSlideData().m_thumbListColumnCount = columnCount;		// store the current column count
-	else
-		GetParentFrame()->SetActiveView( m_pPeerImageView );					// make the album view active (focused)
+	if ( 0 == columnCount )
+		GetParentFrame()->SetActiveView( m_pPeerImageView );	// make the album view active (focused)
 
 	// must recreate view if single column and has LBS_MULTICOLUMN, or multiple column and hasn't LBS_MULTICOLUMN
-	bool recreate = ( 1 == columnCount ) == HasFlag( GetStyle(), LBS_MULTICOLUMN );
-
-	if ( !recreate )
+	if ( !HasFlag( GetStyle(), LBS_MULTICOLUMN ) == ( 1 == columnCount ) )
 	{
 		if ( ShowCommand == checkMode )
 			m_pSplitterWnd->MoveColumnToPos( GetListWindowRect( columnCount ).right, 0 );		// set column width
@@ -1179,14 +1178,13 @@ void CAlbumThumbListView::OnTimer( UINT_PTR eventId )
 
 void CAlbumThumbListView::OnToggleShowThumbView( void )
 {
-	ToggleFlag( m_pPeerImageView->RefSlideData().m_viewFlags, af::ShowThumbView );
+	m_pPeerImageView->RefSlideData()->ToggleShowFlag( af::ShowThumbView );
 	CheckListLayout( ShowCommand );
 }
 
 void CAlbumThumbListView::OnUpdateShowThumbView( CCmdUI* pCmdUI )
 {
-//	pCmdUI->Enable( !app::GetMainFrame()->IsFullScreen() );
-	pCmdUI->SetCheck( HasFlag( m_pPeerImageView->GetSlideData().m_viewFlags, af::ShowThumbView ) );
+	pCmdUI->SetCheck( m_pPeerImageView->GetSlideData().HasShowFlag( af::ShowThumbView ) );
 }
 
 void CAlbumThumbListView::OnLBnSelChange( void )

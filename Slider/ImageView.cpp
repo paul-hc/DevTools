@@ -49,7 +49,7 @@ CImageView::CImageView( void )
 
 	SetZoomBar( app::GetMainFrame()->GetToolbar() );
 	SetScaleZoom( CWorkspace::GetData().m_scalingMode, 100 );
-	SetFlag( RefViewStatusFlags(), ui::FullScreen, app::GetMainFrame()->IsFullScreen() );			// copy the actual FullScreen status
+	SetFlag( RefViewStatusFlags(), ui::FullScreen, CWorkspace::Instance().IsFullScreen() );			// copy the actual FullScreen status
 }
 
 CImageView::~CImageView()

@@ -54,7 +54,7 @@ bool CAlbumDialogBar::SetCurrentPos( int currIndex, bool forceLoad /*= false*/ )
 
 	if ( currIndex != m_pAlbumView->GetSlideData().GetCurrentIndex() || forceLoad )
 	{
-		m_pAlbumView->RefSlideData().SetCurrentIndex( currIndex, true );
+		m_pAlbumView->RefSlideData()->SetCurrentIndex( currIndex, true );
 		m_pAlbumView->UpdateImage();		// this will also feedback on OnCurrPosChanged()
 	}
 	else if ( m_scrollSpin.GetPos() - 1 != currIndex )
@@ -198,7 +198,7 @@ void CAlbumDialogBar::OnVScroll( UINT sbCode, UINT pos, CScrollBar* pScrollBar )
 		switch ( sbCode )
 		{
 			case SB_THUMBPOSITION:
-				m_pAlbumView->RefSlideData().SetCurrentIndex( pos - 1 );
+				m_pAlbumView->RefSlideData()->SetCurrentIndex( pos - 1 );
 				OnCurrPosChanged();
 				break;
 			case SB_ENDSCROLL:

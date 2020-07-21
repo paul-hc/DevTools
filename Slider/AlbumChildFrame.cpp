@@ -1,10 +1,8 @@
 
 #include "stdafx.h"
 #include "AlbumChildFrame.h"
-#include "MainFrame.h"
 #include "AlbumImageView.h"
 #include "AlbumThumbListView.h"
-#include "Application.h"
 #include "resource.h"
 
 #ifdef _DEBUG
@@ -75,12 +73,13 @@ BOOL CAlbumChildFrame::OnCreateClient( CREATESTRUCT* pCS, CCreateContext* pConte
 
 BOOL CAlbumChildFrame::OnBarCheck( UINT dlgBarId )
 {
-	ToggleFlag( GetAlbumImageView()->RefSlideData().m_viewFlags, af::ShowAlbumDialogBar );
-	return CChildFrame::OnBarCheck( dlgBarId );	// toggle the visibility of the album dialog bar
+	GetAlbumImageView()->RefSlideData()->ToggleShowFlag( af::ShowAlbumDialogBar );		// toggle visibility flag
+
+	return CChildFrame::OnBarCheck( dlgBarId );		// toggle the visibility of the album dialog bar
 }
 
 void CAlbumChildFrame::OnUpdateBarCheck( CCmdUI* pCmdUI )
 {
-	pCmdUI->Enable( !app::GetMainFrame()->IsFullScreen() );
+	pCmdUI->Enable();
 	CFrameWnd::OnUpdateControlBarMenu( pCmdUI );
 }

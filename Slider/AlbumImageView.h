@@ -25,7 +25,7 @@ public:
 	CAlbumDoc* GetDocument( void ) const;
 
 	const CSlideData& GetSlideData( void ) const { return m_slideData; }
-	CSlideData& RefSlideData( void ) { return m_slideData; }
+	CSlideData* RefSlideData( void ) { return &m_slideData; }
 
 	CAlbumThumbListView* GetPeerThumbView( void ) const { return safe_ptr( m_pPeerThumbView ); }
 

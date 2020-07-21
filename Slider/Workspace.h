@@ -112,7 +112,7 @@ private:
 	CBrush m_imageSelColorBrush;
 
 	persist CWorkspaceData m_data;					// data subset edited in CWorkspaceDialog
-	persist bool m_isFullScreen;					// if TRUE open main frame in full-screen mode
+	persist bool m_isFullScreen;					// if true switch main frame in full-screen mode
 	persist CWindowPlacement m_mainPlacement;		// placement of the main frame
 	persist DWORD m_reserved;
 	persist std::vector< CImageState > m_imageStates;

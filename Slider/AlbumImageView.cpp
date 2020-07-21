@@ -259,7 +259,7 @@ void CAlbumImageView::LateInitialUpdate( void )
 		m_pPeerThumbView->SetListViewState( currListState );		// restore the persistent selection
 	m_pPeerThumbView->ShowWindow( SW_SHOW );
 
-	CView* pViewToActivate = HasFlag( m_slideData.m_viewFlags, af::ShowThumbView ) ? static_cast< CView* >( m_pPeerThumbView ) : this;
+	CView* pViewToActivate = m_slideData.HasShowFlag( af::ShowThumbView ) ? static_cast< CView* >( m_pPeerThumbView ) : this;
 
 	// activate the target pane view (works only late)
 	m_pMdiChildFrame->SetActiveView( pViewToActivate );
@@ -268,7 +268,7 @@ void CAlbumImageView::LateInitialUpdate( void )
 
 void CAlbumImageView::UpdateChildBarsState( bool onInit /*= false*/ )
 {
-	m_pAlbumDialogBar->ShowBar( HasFlag( m_slideData.m_viewFlags, af::ShowAlbumDialogBar ) && !app::GetMainFrame()->IsFullScreen() );
+	m_pAlbumDialogBar->ShowBar( m_slideData.HasShowFlag( af::ShowAlbumDialogBar ) );
 	m_pPeerThumbView->CheckListLayout( onInit ? CAlbumThumbListView::AlbumViewInit : CAlbumThumbListView::ShowCommand );
 }
 
@@ -551,7 +551,7 @@ void CAlbumImageView::OnToggleSiblingView( void )
 
 void CAlbumImageView::OnUpdateSiblingView( CCmdUI* pCmdUI )
 {
-	pCmdUI->Enable( HasFlag( m_slideData.m_viewFlags, af::ShowThumbView ) );
+	pCmdUI->Enable( m_slideData.HasShowFlag( af::ShowThumbView ) );
 }
 
 void CAlbumImageView::OnToggle_NavigPlay( void )

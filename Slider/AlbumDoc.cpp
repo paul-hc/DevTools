@@ -164,7 +164,7 @@ void CAlbumDoc::Serialize( CArchive& archive )
 	serial::StreamItems( archive, m_dropRedoStack );
 	InitAutoDropRecipient();
 
-	if ( HasFlag( m_slideData.m_viewFlags, af::SaveCustomOrderUndoRedo ) )
+	if ( m_slideData.m_saveCustomOrderUndoRedo )
 	{
 		serial::StreamItems( archive, m_customOrderUndoStack );
 		serial::StreamItems( archive, m_customOrderRedoStack );
@@ -248,7 +248,7 @@ CAlbumImageView* CAlbumDoc::GetAlbumImageView( void ) const
 CSlideData* CAlbumDoc::GetActiveSlideData( void )
 {
 	CAlbumImageView* pAlbumView = GetAlbumImageView();
-	return pAlbumView != NULL ? &pAlbumView->RefSlideData() : &m_slideData;
+	return pAlbumView != NULL ? pAlbumView->RefSlideData() : &m_slideData;
 }
 
 
@@ -1103,15 +1103,15 @@ void CAlbumDoc::OnUpdateEditCopyAlbumMap( CCmdUI* pCmdUI )
 void CAlbumDoc::OnToggleSaveCOUndoRedoBuffer( void )
 {
 	CSlideData* pSlideData = GetActiveSlideData();
-	ToggleFlag( pSlideData->m_viewFlags, af::SaveCustomOrderUndoRedo );
+	pSlideData->m_saveCustomOrderUndoRedo = !pSlideData->m_saveCustomOrderUndoRedo;
 }
 
 void CAlbumDoc::OnUpdateSaveCOUndoRedoBuffer( CCmdUI* pCmdUI )
 {
 	const CSlideData* pSlideData = GetActiveSlideData();
 
-	pCmdUI->Enable( TRUE );
-	pCmdUI->SetCheck( HasFlag( pSlideData->m_viewFlags, af::SaveCustomOrderUndoRedo ) );
+	pCmdUI->Enable();
+	pCmdUI->SetCheck( pSlideData->m_saveCustomOrderUndoRedo );
 }
 
 void CAlbumDoc::CmSelectAllThumbs( void )
@@ -1123,5 +1123,5 @@ void CAlbumDoc::CmSelectAllThumbs( void )
 void CAlbumDoc::OnUpdateSelectAllThumbs( CCmdUI* pCmdUI )
 {
 	CAlbumImageView* pAlbumView = GetAlbumImageView();
-	pCmdUI->Enable( pAlbumView != NULL && HasFlag( pAlbumView->GetSlideData().m_viewFlags, af::ShowThumbView ) );
+	pCmdUI->Enable( pAlbumView != NULL && pAlbumView->GetSlideData().HasShowFlag( af::ShowThumbView ) );
 }
