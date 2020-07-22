@@ -8,6 +8,51 @@
 #endif
 
 
+// verbatim from <src/mfc/afximpl.h>
+class AFX_COM
+{
+public:
+	HRESULT CreateInstance( REFCLSID rclsid, LPUNKNOWN pUnkOuter, REFIID riid, LPVOID* ppv );
+	HRESULT GetClassObject( REFCLSID rclsid, REFIID riid, LPVOID* ppv );
+};
+
+
+namespace shell
+{
+	bool ResolveShortcut( fs::CPath& rDestPath, const TCHAR* pShortcutLnkPath, CWnd* pWnd /*= NULL*/ )
+	{
+		if ( NULL == pWnd )
+			pWnd = AfxGetMainWnd();
+
+		SHFILEINFO linkInfo;
+
+		if ( 0 == ::SHGetFileInfo( pShortcutLnkPath, 0, &linkInfo, sizeof( linkInfo ), SHGFI_ATTRIBUTES ) ||
+			 !::HasFlag( linkInfo.dwAttributes, SFGAO_LINK ) ||
+			 NULL == pWnd->GetSafeHwnd() )
+			return false;
+
+		AFX_COM com;
+		CComPtr< IShellLink > pShellLink;
+
+		if ( !HR_OK( com.CreateInstance( CLSID_ShellLink, NULL, IID_IShellLink, (LPVOID*)&pShellLink ) ) || pShellLink == NULL )
+			return false;
+
+		if ( CComQIPtr< IPersistFile > pPersistFile = pShellLink )
+			if ( HR_OK( pPersistFile->Load( pShortcutLnkPath, STGM_READ ) ) )
+				if ( HR_OK( pShellLink->Resolve( pWnd->GetSafeHwnd(), SLR_ANY_MATCH ) ) )		// resolve the link; this may post UI to find the link
+				{
+					TCHAR destPath[ MAX_PATH ];
+
+					pShellLink->GetPath( ARRAY_PAIR( destPath ), NULL, 0 );
+					rDestPath.Set( destPath );
+					return true;
+				}
+
+		return false;
+	}
+}
+
+
 namespace shell
 {
 	CComPtr< IShellFolder > GetDesktopFolder( void )

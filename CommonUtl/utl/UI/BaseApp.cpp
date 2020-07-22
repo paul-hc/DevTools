@@ -4,7 +4,9 @@
 #include "EnumTags.h"
 #include "MenuUtilities.h"
 #include "RuntimeException.h"
+#include "ShellTypes.h"
 #include "resource.h"
+#include "utl/FileEnumerator.h"
 
 #ifdef _DEBUG
 #include "utl/test/Test.h"
@@ -20,6 +22,12 @@
 
 namespace app
 {
+	void InitUtlBase( void )
+	{
+		// inject UTL_UI.lib code into UTL_BASE.lib:
+		fs::StoreResolveShortcutProc( &shell::ResolveShortcut );
+	}
+
 	void TrackUnitTestMenu( CWnd* pTargetWnd, const CPoint& screenPos )
 	{
 		ui::StdPopup popup = ui::AppMainPopup;
@@ -48,6 +56,7 @@ namespace app
 	{
 		TRACE( _T(" > Running on OS: %s\n"), win::GetTags_OsVersion().FormatUi( win::GetOsVersion() ).c_str() );
 	}
+
 
 #ifdef _DEBUG
 	void RunAllTests( void )

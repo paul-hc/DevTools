@@ -60,6 +60,8 @@ BOOL CBaseApp< BaseClass >::InitInstance( void )
 
 	SetRegistryKey( m_appRegistryKeyName.c_str() );			// change the registry key under which our settings are stored
 
+	app::InitUtlBase();
+
 	if ( !m_appNameSuffix.empty() )
 		AfxGetAppModuleState()->m_lpszCurrentAppName = AssignStringCopy( m_pszAppName, m_pszAppName + m_appNameSuffix );
 

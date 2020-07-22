@@ -12,6 +12,7 @@ namespace fs
 	bool IsValidDirectory( const TCHAR* pDirPath );
 	bool IsValidEmptyDirectory( const TCHAR* pDirPath );
 
+	bool IsValidShellLink( const TCHAR* pFilePath );
 	bool IsValidStructuredStorage( const TCHAR* pDocFilePath );			// a compound document file that exists?
 
 	bool IsReadOnlyFile( const TCHAR* pFilePath );

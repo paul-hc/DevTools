@@ -13,6 +13,13 @@
 
 namespace fs
 {
+	static ResolveShortcutProc s_resolveShortcutProc = NULL;
+
+	void StoreResolveShortcutProc( ResolveShortcutProc resolveShortcutProc )
+	{
+		s_resolveShortcutProc = resolveShortcutProc;
+	}
+
 	void EnumFiles( IEnumerator* pEnumerator, const fs::CPath& dirPath, const TCHAR* pWildSpec /*= _T("*.*")*/, RecursionDepth depth /*= Shallow*/ )
 	{
 		ASSERT_PTR( pEnumerator );
@@ -32,6 +39,20 @@ namespace fs
 		{
 			found = finder.FindNextFile();
 			std::tstring foundPath = finder.GetFilePath().GetString();
+
+			if ( s_resolveShortcutProc != NULL )				// links with UTL_UI.lib?
+				if ( fs::IsValidShellLink( foundPath.c_str() ) )
+				{
+					fs::CPath linkTargetPath;
+
+					if ( s_resolveShortcutProc( linkTargetPath, foundPath.c_str(), NULL ) )
+					{
+						foundPath = linkTargetPath.Get();		// resolve the link to taget path
+
+						if ( fs::IsValidDirectory( foundPath.c_str() ) )
+							subDirPaths.push_back( fs::CPath( foundPath ) );
+					}
+				}
 
 			if ( finder.IsDirectory() )
 			{

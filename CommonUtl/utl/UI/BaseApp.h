@@ -72,7 +72,7 @@ protected:
 	virtual void OnInitAppResources( void );
 
 	// generated overrides
-	public:
+public:
 	virtual BOOL InitInstance( void );
 	virtual int ExitInstance( void );
 	virtual BOOL PreTranslateMessage( MSG* pMsg );
@@ -89,6 +89,7 @@ protected:
 
 namespace app
 {
+	void InitUtlBase( void );
 	void TrackUnitTestMenu( CWnd* pTargetWnd, const CPoint& screenPos );
 	UINT ToMsgBoxFlags( app::MsgType msgType );
 

@@ -34,6 +34,11 @@ namespace fs
 		return ::PathIsDirectoryEmpty( pDirPath ) != FALSE;
 	}
 
+	bool IsValidShellLink( const TCHAR* pFilePath )
+	{
+		return IsValidFile( pFilePath ) && path::MatchExt( pFilePath, _T(".lnk") );
+	}
+
 	bool IsValidStructuredStorage( const TCHAR* pDocFilePath )
 	{
 		HRESULT hResult = ::StgIsStorageFile( pDocFilePath );

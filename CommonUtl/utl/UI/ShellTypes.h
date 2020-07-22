@@ -10,6 +10,12 @@
 
 namespace shell
 {
+	bool ResolveShortcut( fs::CPath& rDestPath, const TCHAR* pShortcutLnkPath, CWnd* pWnd = NULL );
+}
+
+
+namespace shell
+{
 	// shell folder
 	CComPtr< IShellFolder > GetDesktopFolder( void );
 	CComPtr< IShellFolder > FindShellFolder( const TCHAR* pDirPath );
