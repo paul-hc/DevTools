@@ -14,6 +14,7 @@ class CProgressService : private fs::IEnumerator
 {
 public:
 	CProgressService( CWnd* pParentWnd, const std::tstring& operationLabel = s_searching );
+	CProgressService( void );			// null progress
 	~CProgressService();
 
 	ui::IProgressService* GetService( void );

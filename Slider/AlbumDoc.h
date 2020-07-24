@@ -12,6 +12,7 @@
 
 class CAlbumImageView;
 class CImageState;
+class CProgressService;
 interface ICatalogStorage;
 
 
@@ -76,6 +77,7 @@ private:
 
 	bool LoadCatalogStorage( const fs::CPath& docStgPath );
 	bool SaveAsCatalogStorage( const fs::CPath& newDocStgPath );			// save .sld -> .ias, .ias -> .ias
+	std::auto_ptr< CProgressService > MakeProgress( const TCHAR* pOperationLabel ) const;
 
 	void PrepareToSave( const fs::CPath& docPath );
 	bool PromptSaveConvertModelSchema( void ) const;

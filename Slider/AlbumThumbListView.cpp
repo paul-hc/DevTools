@@ -67,6 +67,7 @@ CAlbumThumbListView::CAlbumThumbListView( void )
 	, m_pAlbumModel( NULL )
 	, m_pPeerImageView( NULL )
 	, m_pSplitterWnd( NULL )
+	, m_selBkThemeItem( L"LISTVIEW", LVP_GROUPHEADER, LVGH_CLOSESELECTED )
 	, m_beginDragTimer( this, ID_BEGIN_DRAG_TIMER, 350 )
 	, m_userChangeSel( 0 )
 	, m_startDragRect( 0, 0, 0, 0 )
@@ -74,6 +75,7 @@ CAlbumThumbListView::CAlbumThumbListView( void )
 	, m_selectionBackup( StoreByString )
 {
 	SetTrackMenuTarget( app::GetMainFrame() );
+	m_selBkThemeItem.SetStateId( CThemeItem::Hot, LVGH_CLOSESELECTEDHOT );
 
 	EnsureCaptionFontCreated();
 }
@@ -443,7 +445,8 @@ void CAlbumThumbListView::DrawItem( DRAWITEMSTRUCT* pDIS )
 		case ODA_SELECT:
 		{
 			const fs::CFlexPath* pFilePath = GetItemPath( pDIS->itemID );
-			bool validFile = pFilePath->FileExist();
+			bool validFile = pFilePath->FlexFileExist();		// go deep to detect stray catalog references
+			bool listFocused = this == GetFocus();
 			CWicDibSection* pThumbDib = GetItemThumb( pDIS->itemID );
 
 			CDC dc;
@@ -464,7 +467,15 @@ void CAlbumThumbListView::DrawItem( DRAWITEMSTRUCT* pDIS )
 
 			if ( HasFlag( pDIS->itemState, ODS_SELECTED ) )
 			{
-				FillRgn( dc, bkRegion, CWorkspace::Instance().GetImageSelColorBrush() );
+				dc.SelectClipRgn( &bkRegion );		// clip the thumb rect out of background drawing
+
+				if ( m_selBkThemeItem.DrawStatusBackground( listFocused ? CThemeItem::Hot : CThemeItem::Normal, dc, pDIS->rcItem ) )
+					pDIS->itemAction |= ODA_DRAWENTIRE;		// force thumb draw
+				else
+					FillRgn( dc, bkRegion, CWorkspace::Instance().GetImageSelColorBrush() );
+
+				dc.SelectClipRgn( NULL );			// un-clip the thumb rect
+
 				itemRect.DeflateRect( 1, 1 );
 				::FrameRect( dc, &itemRect, GetSysColorBrush( COLOR_WINDOW ) );
 			}
@@ -490,9 +501,9 @@ void CAlbumThumbListView::DrawItem( DRAWITEMSTRUCT* pDIS )
 			int bkModeOld = dc.SetBkMode( TRANSPARENT );
 
 			if ( validFile )
-				if ( HasFlag( pDIS->itemState, ODS_SELECTED ) )
+				/** if ( HasFlag( pDIS->itemState, ODS_SELECTED ) )
 					textColorOld = dc.SetTextColor( CWorkspace::Instance().GetImageSelTextColor() );
-				else
+				else **/
 					textColorOld = dc.SetTextColor( GetSysColor( COLOR_BTNTEXT ) );
 			else
 				textColorOld = dc.SetTextColor( app::ColorErrorText );

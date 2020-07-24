@@ -32,7 +32,7 @@ private:
 private:
 	std::auto_ptr< CDialogToolBar > m_pToolbar;
 	std::auto_ptr< CDurationComboBox > m_pSlideDelayCombo;
-	CEdit m_navEdit;
+	CEdit m_navPosEdit;
 	CSpinButtonCtrl m_scrollSpin;
 	CStatic m_infoStatic;
 	std::auto_ptr< CTextEdit > m_pImagePathEdit;

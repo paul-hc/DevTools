@@ -93,7 +93,7 @@ void CAlbumDialogBar::OnCurrPosChanged( void )
 		if ( const CFileAttr* pFileAttr = m_pAlbumView->GetDocument()->GetModel()->GetFileAttr( currIndex ) )
 			imageFileInfo = pFileAttr->GetPath().FormatPretty();
 
-	ui::EnableWindow( m_navEdit, valid );
+	ui::EnableWindow( m_navPosEdit, valid );
 
 	if ( valid )
 	{
@@ -102,7 +102,7 @@ void CAlbumDialogBar::OnCurrPosChanged( void )
 			m_scrollSpin.SetPos( currIndex + 1 );
 	}
 	else
-		ui::SetWindowText( m_navEdit, std::tstring() );
+		ui::SetWindowText( m_navPosEdit, std::tstring() );
 
 	m_pImagePathEdit->SetText( imageFileInfo );
 }
@@ -152,10 +152,10 @@ LRESULT CAlbumDialogBar::HandleInitDialog( WPARAM wParam, LPARAM lParam )
 	m_pToolbar->SetOwner( AfxGetMainWnd() );
 
 	VERIFY( m_pSlideDelayCombo->SubclassDlgItem( IDC_PLAY_DELAY_COMBO, this ) );
-	VERIFY( m_navEdit.SubclassDlgItem( IDC_SEEK_CURR_POS_EDIT, this ) );
+	VERIFY( m_navPosEdit.SubclassDlgItem( IDC_SEEK_CURR_POS_EDIT, this ) );
 	VERIFY( m_scrollSpin.SubclassDlgItem( IDC_SCROLL_POS_SPIN, this ) );
 	VERIFY( m_infoStatic.SubclassDlgItem( IDC_NAV_COUNT_STATIC, this ) );
-	VERIFY( m_pImagePathEdit->SubclassDlgItem( IDC_CURR_FILE_EDIT, this ) );
+	VERIFY( m_pImagePathEdit->SubclassDlgItem( IDC_CURR_IMAGE_PATH_EDIT, this ) );
 
 	LOGFONT logFont;
 	if ( GetFont()->GetLogFont( &logFont ) )
@@ -219,7 +219,7 @@ void CAlbumDialogBar::OnOk( void )
 		else
 			ui::BeepSignal();
 	}
-	else if ( ui::OwnsFocus( m_navEdit ) )
+	else if ( ui::OwnsFocus( m_navPosEdit ) )
 	{
 		if ( !SetCurrentPos( m_scrollSpin.GetPos() - 1, true ) )
 			ui::BeepSignal();
@@ -264,7 +264,7 @@ void CAlbumDialogBar::OnUpdate_SlideDelay( CCmdUI* pCmdUI )
 BOOL CAlbumDialogBar::OnToolTipText( UINT, NMHDR* pNmHdr, LRESULT* pResult )
 {
 	ui::CTooltipTextMessage message( pNmHdr );
-	if ( !message.IsValidNotification() || message.m_cmdId != IDC_CURR_FILE_EDIT )
+	if ( !message.IsValidNotification() || message.m_cmdId != IDC_CURR_IMAGE_PATH_EDIT )
 		return FALSE;		// not handled
 
 	if ( !message.AssignTooltipText( m_pAlbumView->GetImagePathKey().first.Get() ) )

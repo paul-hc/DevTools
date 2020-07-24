@@ -29,7 +29,7 @@
 #define IDC_AUTOSAVE_CHECK              1007
 #define IDC_PERSIST_OPEN_DOCS_CHECK     1008
 #define IDC_SEEK_CURR_POS_EDIT          1009
-#define IDC_CURR_FILE_EDIT              1010
+#define IDC_CURR_IMAGE_PATH_EDIT        1010
 #define IDC_SCROLL_POS_SPIN             1011
 #define IDC_NAV_COUNT_STATIC            1013
 #define IDC_PLAY_DELAY_COMBO            1014

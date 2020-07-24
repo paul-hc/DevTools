@@ -311,15 +311,6 @@ bool CAlbumDoc::SaveAsCatalogStorage( const fs::CPath& newDocStgPath )
 {
 	REQUIRE( app::IsCatalogFile( newDocStgPath.GetPtr() ) );
 
-	ui::IProgressService* pProgressSvc = ui::CNoProgressService::Instance();		// default for unit testing
-	std::auto_ptr< CProgressService > pProgress;
-
-	if ( GetAlbumImageView() != NULL )				// normal interactive mode?
-	{
-		pProgress.reset( new CProgressService( NULL, _T("Creating image archive storage file") ) );
-		pProgressSvc = pProgress->GetService();
-	}
-
 	try
 	{
 		fs::CPath oldDocStgPath = GetDocFilePath();
@@ -330,8 +321,9 @@ bool CAlbumDoc::SaveAsCatalogStorage( const fs::CPath& newDocStgPath )
 			 newDocStgPath != oldDocStgPath ||								// SaveAs
 			 GetModelSchema() < app::Slider_LatestModelSchema )				// loaded catalog with older model schema -> must be converted to LATEST
 		{
+			std::auto_ptr< CProgressService > pProgress = MakeProgress( _T("Creating image catalog storage file") );
 			{
-				CCatalogStorageService storageSvc( pProgressSvc, &app::GetUserReport() );		// catalog storage metadata
+				CCatalogStorageService storageSvc( pProgress->GetService(), &app::GetUserReport() );		// catalog storage metadata
 
 				storageSvc.BuildFromAlbumSaveAs( this );
 
@@ -369,6 +361,14 @@ bool CAlbumDoc::SaveAsCatalogStorage( const fs::CPath& newDocStgPath )
 	}
 
 	return true;
+}
+
+std::auto_ptr< CProgressService > CAlbumDoc::MakeProgress( const TCHAR* pOperationLabel ) const
+{
+	return std::auto_ptr< CProgressService >( !str::IsEmpty( pOperationLabel ) && GetAlbumImageView() != NULL
+		? new CProgressService( NULL, pOperationLabel )
+		: new CProgressService()		// null progress (for non-interactive mode or unit testing)
+	);
 }
 
 bool CAlbumDoc::BuildAlbum( const fs::CPath& searchPath )

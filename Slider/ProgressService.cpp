@@ -28,6 +28,10 @@ CProgressService::CProgressService( CWnd* pParentWnd, const std::tstring& operat
 	}
 }
 
+CProgressService::CProgressService( void )
+{
+}
+
 CProgressService::~CProgressService()
 {
 	DestroyDialog();

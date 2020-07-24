@@ -7,6 +7,7 @@
 #include "utl/UI/ObjectCtrlBase.h"
 #include "utl/UI/OleDragDrop_fwd.h"
 #include "utl/UI/OleDropTarget.h"
+#include "utl/UI/ThemeItem.h"
 #include "utl/UI/WindowTimer.h"
 
 
@@ -90,6 +91,7 @@ private:
 
 	CAlbumImageView* m_pPeerImageView;
 	CSplitterWindow* m_pSplitterWnd;
+	CThemeItem m_selBkThemeItem;
 	CWindowTimer m_beginDragTimer;
 	int m_userChangeSel;							// true during user selection operation
 	CRect m_startDragRect;
@@ -126,15 +128,15 @@ protected:
 	virtual DROPEFFECT OnDragOver( COleDataObject* pDataObject, DWORD keyState, CPoint point );
 	virtual BOOL OnDrop( COleDataObject* pDataObject, DROPEFFECT dropEffect, CPoint point );
 	virtual void OnDragLeave( void );
-public:
+
 	// generated stuff
-	public:
+public:
 	virtual BOOL OnChildNotify( UINT message, WPARAM wParam, LPARAM lParam, LRESULT* pResult );
 	virtual BOOL OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo );
 	virtual BOOL OnScroll( UINT scrollCode, UINT pos, BOOL doScroll = TRUE );
 	virtual void MeasureItem( MEASUREITEMSTRUCT* pMIS );
 	virtual void DrawItem( DRAWITEMSTRUCT* pDIS );
-	protected:
+protected:
 	virtual BOOL PreCreateWindow( CREATESTRUCT& rCS );
 	virtual void PostNcDestroy( void );
 	virtual void OnActivateView( BOOL activate, CView* pActivateView, CView* pDeactiveView );
