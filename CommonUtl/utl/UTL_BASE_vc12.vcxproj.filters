@@ -22,12 +22,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="stdafx.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="targetver.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
     <ClInclude Include="CommonDefs.h">
       <Filter>utl</Filter>
     </ClInclude>
@@ -87,36 +81,6 @@
     </ClInclude>
     <ClInclude Include="FlexPath.h">
       <Filter>utl\File System</Filter>
-    </ClInclude>
-    <ClInclude Include="ThrowMode.h">
-      <Filter>utl</Filter>
-    </ClInclude>
-    <ClInclude Include="ut\FileSystemTests.h">
-      <Filter>Tests</Filter>
-    </ClInclude>
-    <ClInclude Include="ut\LcsTests.h">
-      <Filter>Tests</Filter>
-    </ClInclude>
-    <ClInclude Include="ut\PathGeneratorTests.h">
-      <Filter>Tests</Filter>
-    </ClInclude>
-    <ClInclude Include="ut\PathTests.h">
-      <Filter>Tests</Filter>
-    </ClInclude>
-    <ClInclude Include="ut\ResequenceTests.h">
-      <Filter>Tests</Filter>
-    </ClInclude>
-    <ClInclude Include="ut\StringTests.h">
-      <Filter>Tests</Filter>
-    </ClInclude>
-    <ClInclude Include="ut\ThreadingTests.h">
-      <Filter>Tests</Filter>
-    </ClInclude>
-    <ClInclude Include="ut\UnitTest.h">
-      <Filter>Tests</Filter>
-    </ClInclude>
-    <ClInclude Include="ut\UtlConsoleTests.h">
-      <Filter>Tests</Filter>
     </ClInclude>
     <ClInclude Include="CacheLoader.h">
       <Filter>utl\File System</Filter>
@@ -178,15 +142,6 @@
     <ClInclude Include="vector_map.h">
       <Filter>utl</Filter>
     </ClInclude>
-    <ClInclude Include="ut\FmtUtilsTests.h">
-      <Filter>Tests</Filter>
-    </ClInclude>
-    <ClInclude Include="ut\NumericTests.h">
-      <Filter>Tests</Filter>
-    </ClInclude>
-    <ClInclude Include="ut\StringRangeTests.h">
-      <Filter>Tests</Filter>
-    </ClInclude>
     <ClInclude Include="Registry.h">
       <Filter>utl\Registry</Filter>
     </ClInclude>
@@ -232,9 +187,6 @@
     <ClInclude Include="MatchSequence.h">
       <Filter>utl</Filter>
     </ClInclude>
-    <ClInclude Include="StdStl.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
     <ClInclude Include="StringRange.h">
       <Filter>utl</Filter>
     </ClInclude>
@@ -243,9 +195,6 @@
     </ClInclude>
     <ClInclude Include="TimeUtils.h">
       <Filter>utl</Filter>
-    </ClInclude>
-    <ClInclude Include="ut\Test.h">
-      <Filter>Tests</Filter>
     </ClInclude>
     <ClInclude Include="AppTools.h">
       <Filter>utl</Filter>
@@ -277,17 +226,98 @@
     <ClInclude Include="StructuredStorage.h">
       <Filter>utl\File System</Filter>
     </ClInclude>
-    <ClInclude Include="ut\RegistryTests.h">
-      <Filter>Tests</Filter>
-    </ClInclude>
     <ClInclude Include="NumericProcessor.h">
       <Filter>utl</Filter>
     </ClInclude>
+    <ClInclude Include="ErrorHandler.h">
+      <Filter>utl</Filter>
+    </ClInclude>
+    <ClInclude Include="FileEnumerator.h">
+      <Filter>utl\File System</Filter>
+    </ClInclude>
+    <ClInclude Include="IUnknownImpl.h">
+      <Filter>utl</Filter>
+    </ClInclude>
+    <ClInclude Include="IUnknownImpl.hxx">
+      <Filter>utl</Filter>
+    </ClInclude>
+    <ClInclude Include="PathMap.h">
+      <Filter>utl\File System</Filter>
+    </ClInclude>
+    <ClInclude Include="PathUniqueMaker.h">
+      <Filter>utl\File System</Filter>
+    </ClInclude>
+    <ClInclude Include="Registry_fwd.h">
+      <Filter>utl\Registry</Filter>
+    </ClInclude>
+    <ClInclude Include="Serialization_fwd.h">
+      <Filter>utl</Filter>
+    </ClInclude>
+    <ClInclude Include="test\AlgorithmsTests.h">
+      <Filter>Tests</Filter>
+    </ClInclude>
+    <ClInclude Include="test\FileSystemTests.h">
+      <Filter>Tests</Filter>
+    </ClInclude>
+    <ClInclude Include="test\FmtUtilsTests.h">
+      <Filter>Tests</Filter>
+    </ClInclude>
+    <ClInclude Include="test\LcsTests.h">
+      <Filter>Tests</Filter>
+    </ClInclude>
+    <ClInclude Include="test\MockObject.h">
+      <Filter>Tests</Filter>
+    </ClInclude>
+    <ClInclude Include="test\NumericTests.h">
+      <Filter>Tests</Filter>
+    </ClInclude>
+    <ClInclude Include="test\PathGeneratorTests.h">
+      <Filter>Tests</Filter>
+    </ClInclude>
+    <ClInclude Include="test\PathTests.h">
+      <Filter>Tests</Filter>
+    </ClInclude>
+    <ClInclude Include="test\RegistryTests.h">
+      <Filter>Tests</Filter>
+    </ClInclude>
+    <ClInclude Include="test\ResequenceTests.h">
+      <Filter>Tests</Filter>
+    </ClInclude>
+    <ClInclude Include="test\StringRangeTests.h">
+      <Filter>Tests</Filter>
+    </ClInclude>
+    <ClInclude Include="test\StringTests.h">
+      <Filter>Tests</Filter>
+    </ClInclude>
+    <ClInclude Include="test\StructuredStorageTest.h">
+      <Filter>Tests</Filter>
+    </ClInclude>
+    <ClInclude Include="test\Test.h">
+      <Filter>Tests</Filter>
+    </ClInclude>
+    <ClInclude Include="test\ThreadingTests.h">
+      <Filter>Tests</Filter>
+    </ClInclude>
+    <ClInclude Include="test\UnitTest.h">
+      <Filter>Tests</Filter>
+    </ClInclude>
+    <ClInclude Include="test\UtlConsoleTests.h">
+      <Filter>Tests</Filter>
+    </ClInclude>
+    <ClInclude Include="stdafx.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="StdHashValue.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="StdStl.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="targetver.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="stdafx.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="EnumTags.cpp">
       <Filter>utl</Filter>
     </ClCompile>
@@ -327,33 +357,6 @@
     <ClCompile Include="FlexPath.cpp">
       <Filter>utl\File System</Filter>
     </ClCompile>
-    <ClCompile Include="ThrowMode.cpp">
-      <Filter>utl</Filter>
-    </ClCompile>
-    <ClCompile Include="ut\FileSystemTests.cpp">
-      <Filter>Tests</Filter>
-    </ClCompile>
-    <ClCompile Include="ut\LcsTests.cpp">
-      <Filter>Tests</Filter>
-    </ClCompile>
-    <ClCompile Include="ut\PathGeneratorTests.cpp">
-      <Filter>Tests</Filter>
-    </ClCompile>
-    <ClCompile Include="ut\PathTests.cpp">
-      <Filter>Tests</Filter>
-    </ClCompile>
-    <ClCompile Include="ut\ResequenceTests.cpp">
-      <Filter>Tests</Filter>
-    </ClCompile>
-    <ClCompile Include="ut\StringTests.cpp">
-      <Filter>Tests</Filter>
-    </ClCompile>
-    <ClCompile Include="ut\ThreadingTests.cpp">
-      <Filter>Tests</Filter>
-    </ClCompile>
-    <ClCompile Include="ut\UnitTest.cpp">
-      <Filter>Tests</Filter>
-    </ClCompile>
     <ClCompile Include="FileObjectCache.cpp">
       <Filter>utl\File System</Filter>
     </ClCompile>
@@ -368,15 +371,6 @@
     </ClCompile>
     <ClCompile Include="StringCompare.cpp">
       <Filter>utl</Filter>
-    </ClCompile>
-    <ClCompile Include="ut\FmtUtilsTests.cpp">
-      <Filter>Tests</Filter>
-    </ClCompile>
-    <ClCompile Include="ut\NumericTests.cpp">
-      <Filter>Tests</Filter>
-    </ClCompile>
-    <ClCompile Include="ut\StringRangeTests.cpp">
-      <Filter>Tests</Filter>
     </ClCompile>
     <ClCompile Include="Registry.cpp">
       <Filter>utl\Registry</Filter>
@@ -420,9 +414,6 @@
     <ClCompile Include="TimeUtils.cpp">
       <Filter>utl</Filter>
     </ClCompile>
-    <ClCompile Include="ut\Test.cpp">
-      <Filter>Tests</Filter>
-    </ClCompile>
     <ClCompile Include="AppTools.cpp">
       <Filter>utl</Filter>
     </ClCompile>
@@ -447,14 +438,71 @@
     <ClCompile Include="StructuredStorage.cpp">
       <Filter>utl\File System</Filter>
     </ClCompile>
-    <ClCompile Include="ut\RegistryTests.cpp">
-      <Filter>Tests</Filter>
-    </ClCompile>
-    <ClCompile Include="ut\UtlConsoleTests.cpp">
-      <Filter>Tests</Filter>
-    </ClCompile>
     <ClCompile Include="NumericProcessor.cpp">
       <Filter>utl</Filter>
+    </ClCompile>
+    <ClCompile Include="ErrorHandler.cpp">
+      <Filter>utl</Filter>
+    </ClCompile>
+    <ClCompile Include="FileEnumerator.cpp">
+      <Filter>utl\File System</Filter>
+    </ClCompile>
+    <ClCompile Include="PathUniqueMaker.cpp">
+      <Filter>utl\File System</Filter>
+    </ClCompile>
+    <ClCompile Include="test\AlgorithmsTests.cpp">
+      <Filter>Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="test\FileSystemTests.cpp">
+      <Filter>Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="test\FmtUtilsTests.cpp">
+      <Filter>Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="test\LcsTests.cpp">
+      <Filter>Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="test\MockObject.cpp">
+      <Filter>Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="test\NumericTests.cpp">
+      <Filter>Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="test\PathGeneratorTests.cpp">
+      <Filter>Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="test\PathTests.cpp">
+      <Filter>Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="test\RegistryTests.cpp">
+      <Filter>Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="test\ResequenceTests.cpp">
+      <Filter>Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="test\StringRangeTests.cpp">
+      <Filter>Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="test\StringTests.cpp">
+      <Filter>Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="test\StructuredStorageTest.cpp">
+      <Filter>Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="test\Test.cpp">
+      <Filter>Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="test\ThreadingTests.cpp">
+      <Filter>Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="test\UnitTest.cpp">
+      <Filter>Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="test\UtlConsoleTests.cpp">
+      <Filter>Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="stdafx.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

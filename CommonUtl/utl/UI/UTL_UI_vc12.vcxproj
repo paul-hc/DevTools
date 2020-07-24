@@ -206,6 +206,7 @@
     <ClInclude Include="Color.h" />
     <ClInclude Include="CommonWinDefs.h" />
     <ClInclude Include="ContentFitBase.h" />
+    <ClInclude Include="CtrlInterfaces.h" />
     <ClInclude Include="CtrlUiState.h" />
     <ClInclude Include="CustomDrawImager.h" />
     <ClInclude Include="CustomDrawImager_fwd.h" />
@@ -217,6 +218,8 @@
     <ClInclude Include="DibDraw_fwd.h" />
     <ClInclude Include="DibPixels.h" />
     <ClInclude Include="DibSection.h" />
+    <ClInclude Include="Direct2D.h" />
+    <ClInclude Include="DirectWrite.h" />
     <ClInclude Include="DragListCtrl.h" />
     <ClInclude Include="DragListCtrl.hxx" />
     <ClInclude Include="EnumComboBox.h" />
@@ -224,7 +227,9 @@
     <ClInclude Include="FilterStore.h" />
     <ClInclude Include="GdiCoords.h" />
     <ClInclude Include="GdiPlus_fwd.h" />
+    <ClInclude Include="IImageZoomView.h" />
     <ClInclude Include="ImageEdit.h" />
+    <ClInclude Include="ImageInfoGadget.h" />
     <ClInclude Include="ImagePathKey.h" />
     <ClInclude Include="ImageZoomViewD2D.h" />
     <ClInclude Include="Image_fwd.h" />
@@ -241,7 +246,7 @@
     <ClInclude Include="ImagingWic.h" />
     <ClInclude Include="ImagingWic_fwd.h" />
     <ClInclude Include="InternalChange.h" />
-    <ClInclude Include="IProgressCallback.h" />
+    <ClInclude Include="IProgressService.h" />
     <ClInclude Include="ItemContent.h" />
     <ClInclude Include="ItemContentEdit.h" />
     <ClInclude Include="ItemContentHistoryCombo.h" />
@@ -255,6 +260,7 @@
     <ClInclude Include="LayoutMetrics.h" />
     <ClInclude Include="LayoutPropertyPage.h" />
     <ClInclude Include="LayoutPropertySheet.h" />
+    <ClInclude Include="ListCtrlEditorFrame.h" />
     <ClInclude Include="ListLikeCtrlBase.h" />
     <ClInclude Include="LogPalette.h" />
     <ClInclude Include="MemoryDC.h" />
@@ -268,6 +274,7 @@
     <ClInclude Include="OleDropSource.h" />
     <ClInclude Include="OleDropTarget.h" />
     <ClInclude Include="OleUtils.h" />
+    <ClInclude Include="PasswordDialog.h" />
     <ClInclude Include="PathItemListCtrl.h" />
     <ClInclude Include="Pixel.h" />
     <ClInclude Include="PopupDlgBase.h" />
@@ -280,6 +287,7 @@
     <ClInclude Include="RegistrySection.h" />
     <ClInclude Include="RenderingDirect2D.h" />
     <ClInclude Include="ReportListControl.h" />
+    <ClInclude Include="ReportListControl.hxx" />
     <ClInclude Include="ReportListCustomDraw.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="ResourceData.h" />
@@ -306,6 +314,13 @@
     <ClInclude Include="StockValuesComboBox.hxx" />
     <ClInclude Include="SyncScrolling.h" />
     <ClInclude Include="TaskDialog.h" />
+    <ClInclude Include="test\BaseImageTestCase.h" />
+    <ClInclude Include="test\ColorTests.h" />
+    <ClInclude Include="test\SerializationTests.h" />
+    <ClInclude Include="test\ShellFileSystemTests.h" />
+    <ClInclude Include="test\TestToolWnd.h" />
+    <ClInclude Include="test\UtlUserInterfaceTests.h" />
+    <ClInclude Include="test\WicImageTests.h" />
     <ClInclude Include="TextEdit.h" />
     <ClInclude Include="TextEditor.h" />
     <ClInclude Include="TextEffect.h" />
@@ -325,13 +340,6 @@
     <ClInclude Include="Utilities.h" />
     <ClInclude Include="UtilitiesEx.h" />
     <ClInclude Include="utl_ui.h" />
-    <ClInclude Include="ut\BaseImageTestCase.h" />
-    <ClInclude Include="ut\ColorTests.h" />
-    <ClInclude Include="ut\SerializationTests.h" />
-    <ClInclude Include="ut\ShellFileSystemTests.h" />
-    <ClInclude Include="ut\TestToolWnd.h" />
-    <ClInclude Include="ut\UtlUserInterfaceTests.h" />
-    <ClInclude Include="ut\WicImageTests.h" />
     <ClInclude Include="VersionInfo.h" />
     <ClInclude Include="VisualTheme.h" />
     <ClInclude Include="VisualThemeFallback.h" />
@@ -342,6 +350,7 @@
     <ClInclude Include="WicImage.h" />
     <ClInclude Include="WicImageCache.h" />
     <ClInclude Include="WindowHook.h" />
+    <ClInclude Include="WindowPlacement.h" />
     <ClInclude Include="WindowTimer.h" />
     <ClInclude Include="WinExplorer.h" />
   </ItemGroup>
@@ -372,12 +381,15 @@
     <ClCompile Include="DibDraw.cpp" />
     <ClCompile Include="DibPixels.cpp" />
     <ClCompile Include="DibSection.cpp" />
+    <ClCompile Include="Direct2D.cpp" />
+    <ClCompile Include="DirectWrite.cpp" />
     <ClCompile Include="DragListCtrl.cpp" />
     <ClCompile Include="EnumComboBox.cpp" />
     <ClCompile Include="EnumSplitButton.cpp" />
     <ClCompile Include="FilterStore.cpp" />
     <ClCompile Include="GdiCoords.cpp" />
     <ClCompile Include="ImageEdit.cpp" />
+    <ClCompile Include="ImageInfoGadget.cpp" />
     <ClCompile Include="ImageZoomViewD2D.cpp" />
     <ClCompile Include="Image_fwd.cpp" />
     <ClCompile Include="GroupIcon.cpp" />
@@ -390,6 +402,7 @@
     <ClCompile Include="ImagingDirect2D.cpp" />
     <ClCompile Include="ImagingGdiPlus.cpp" />
     <ClCompile Include="ImagingWic.cpp" />
+    <ClCompile Include="IProgressService.cpp" />
     <ClCompile Include="ItemContent.cpp" />
     <ClCompile Include="ItemContentEdit.cpp" />
     <ClCompile Include="ItemContentHistoryCombo.cpp" />
@@ -403,6 +416,7 @@
     <ClCompile Include="LayoutMetrics.cpp" />
     <ClCompile Include="LayoutPropertyPage.cpp" />
     <ClCompile Include="LayoutPropertySheet.cpp" />
+    <ClCompile Include="ListCtrlEditorFrame.cpp" />
     <ClCompile Include="ListLikeCtrlBase.cpp" />
     <ClCompile Include="LogPalette.cpp" />
     <ClCompile Include="MemoryDC.cpp" />
@@ -415,6 +429,7 @@
     <ClCompile Include="OleDropSource.cpp" />
     <ClCompile Include="OleDropTarget.cpp" />
     <ClCompile Include="OleUtils.cpp" />
+    <ClCompile Include="PasswordDialog.cpp" />
     <ClCompile Include="PathItemListCtrl.cpp" />
     <ClCompile Include="PopupDlgBase.cpp" />
     <ClCompile Include="PopupSplitButton.cpp" />
@@ -450,6 +465,13 @@
     <ClCompile Include="StockValuesComboBox.cpp" />
     <ClCompile Include="SyncScrolling.cpp" />
     <ClCompile Include="TaskDialog.cpp" />
+    <ClCompile Include="test\BaseImageTestCase.cpp" />
+    <ClCompile Include="test\ColorTests.cpp" />
+    <ClCompile Include="test\SerializationTests.cpp" />
+    <ClCompile Include="test\ShellFileSystemTests.cpp" />
+    <ClCompile Include="test\TestToolWnd.cpp" />
+    <ClCompile Include="test\UtlUserInterfaceTests.cpp" />
+    <ClCompile Include="test\WicImageTests.cpp" />
     <ClCompile Include="TextEdit.cpp" />
     <ClCompile Include="TextEditor.cpp" />
     <ClCompile Include="TextEffect.cpp" />
@@ -466,13 +488,6 @@
     <ClCompile Include="UserReport.cpp" />
     <ClCompile Include="Utilities.cpp" />
     <ClCompile Include="UtilitiesEx.cpp" />
-    <ClCompile Include="ut\BaseImageTestCase.cpp" />
-    <ClCompile Include="ut\ColorTests.cpp" />
-    <ClCompile Include="ut\SerializationTests.cpp" />
-    <ClCompile Include="ut\ShellFileSystemTests.cpp" />
-    <ClCompile Include="ut\TestToolWnd.cpp" />
-    <ClCompile Include="ut\UtlUserInterfaceTests.cpp" />
-    <ClCompile Include="ut\WicImageTests.cpp" />
     <ClCompile Include="VersionInfo.cpp" />
     <ClCompile Include="VisualTheme.cpp" />
     <ClCompile Include="VisualThemeFallback.cpp" />
@@ -481,6 +496,7 @@
     <ClCompile Include="WicImage.cpp" />
     <ClCompile Include="WicImageCache.cpp" />
     <ClCompile Include="WindowHook.cpp" />
+    <ClCompile Include="WindowPlacement.cpp" />
     <ClCompile Include="WindowTimer.cpp" />
     <ClCompile Include="WinExplorer.cpp" />
   </ItemGroup>
