@@ -180,7 +180,7 @@ bool CArchivingModel::GenerateDestPaths( const fs::CPath& destPath, const std::t
 
 	bool generated = false;
 	if ( ToArchiveStg == destType )
-		if ( HasFlag( CWorkspace::GetFlags(), wf::PrefixDeepStreamNames ) && !forceShallowStreamNames )
+		if ( HasFlag( CWorkspace::GetFlags(), wf::DeepStreamPaths ) && !forceShallowStreamNames )
 			if ( generator.MakeDestStripCommonPrefix() )					// prefix with subpaths from the common prefix of SRC image paths
 			{
 				generated = true;

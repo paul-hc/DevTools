@@ -739,15 +739,17 @@ BEGIN
     RTEXT           "Image selection text colour:",IDC_STATIC,188,50,90,8
     CONTROL         "Selection Text Color",CM_EDIT_IMAGE_SEL_TEXT_COLOR,
                     "Button",BS_OWNERDRAW,282,48,36,14,WS_EX_DLGMODALFRAME | WS_EX_CLIENTEDGE
-    GROUPBOX        "Thumbnails",IDC_STATIC,186,77,153,92
+    GROUPBOX        "Thumbnails",IDC_STATIC,186,77,153,112
     LTEXT           "Thumbnail size:",IDC_STATIC,217,89,50,8
     COMBOBOX        IDC_THUMB_BOUNDS_SIZE_COMBO,268,87,46,30,CBS_DROPDOWN | WS_VSCROLL | WS_GROUP | WS_TABSTOP
     LTEXT           "Thumbnail list columns:",IDC_STATIC,193,105,74,8
     EDITTEXT        IDC_THUMB_COL_COUNT_EDIT,268,103,36,12,ES_AUTOHSCROLL | ES_NUMBER
     CONTROL         "Display thumbnails list",CK_SHOW_THUMB_VIEW,"Button",BS_AUTOCHECKBOX | WS_GROUP | WS_TABSTOP,193,121,82,10
+    CONTROL         "Use &themed thumbnail list drawing",IDC_USE_THEMED_THUMB_LIST_DRAW_CHECK,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,193,134,123,10
     CONTROL         "Regenerate small archived thumbnails",IDC_AUTO_REGEN_SMALL_STG_THUMBS_CHECK,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,193,134,135,10
-    PUSHBUTTON      "Clear Thumbnail Cache...",IDC_CLEAR_THUMB_CACHE_BUTTON,192,148,89,14,BS_CENTER | BS_VCENTER | BS_MULTILINE | WS_GROUP
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,193,154,135,10
+    PUSHBUTTON      "Clear Thumbnail Cache...",IDC_CLEAR_THUMB_CACHE_BUTTON,192,168,89,14,BS_CENTER | BS_VCENTER | BS_MULTILINE | WS_GROUP
     PUSHBUTTON      "&Save",CM_SAVE_WORKSPACE,7,198,50,14
     DEFPUSHBUTTON   "OK",IDOK,235,198,50,14,WS_GROUP
     PUSHBUTTON      "Cancel",IDCANCEL,289,198,50,14
@@ -1287,7 +1289,8 @@ END
 STRINGTABLE 
 BEGIN
     IDC_SEEK_CURR_POS_EDIT  "Position of the current slide image\nSlide Image Position"
-    IDC_CURR_IMAGE_PATH_EDIT "Full path name of the current image file\nImage File Path"
+    IDC_CURR_IMAGE_PATH_EDIT 
+                            "Full path name of the current image file\nImage File Path"
     IDC_NAV_COUNT_STATIC    "The total number of images in this album\nTotal Image Count"
     IDC_PLAY_DELAY_COMBO    "Set the delay in seconds for animated album play\nPlay Animation Delay (seconds)"
     IDC_PATTERNS_LISTVIEW   "Path=-1|Type=100|Depth=75"

@@ -64,17 +64,16 @@ private:
 protected:
 	bool m_idleUpdateDeep;			// send WM_IDLEUPDATECMDUI to all descendants
 	CAccelPool m_accelPool;
-private:
-	// virtual function overrides
-	public:
+
+	// generated stuff
+public:
 	virtual BOOL PreTranslateMessage( MSG* pMsg );
 	virtual BOOL OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo );
 	virtual BOOL OnSetActive( void );
 	virtual BOOL OnKillActive( void );
-	protected:
+protected:
 	virtual void DoDataExchange( CDataExchange* pDX );
 protected:
-	// message map functions
 	afx_msg int OnCreate( CREATESTRUCT* pCreateStruct );
 	afx_msg void OnSize( UINT sizeType, int cx, int cy );
 	afx_msg void OnGetMinMaxInfo( MINMAXINFO* pMinMaxInfo );

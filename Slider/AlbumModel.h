@@ -49,7 +49,7 @@ public:
 	enum PersistFlag
 	{
 		AutoRegenerate		= BIT_FLAG( 0 ),		// auto re-generates after loading (de-serialization)
-		UseDeepStreamPaths	= BIT_FLAG( 1 )			// in an archive doc m_fileAttributes has been encoded with flag wf::PrefixDeepStreamNames on
+		UseDeepStreamPaths	= BIT_FLAG( 1 )			// in an archive doc m_fileAttributes has been encoded with flag wf::DeepStreamPaths on
 	};
 
 	bool HasPersistFlag( PersistFlag persistFlag ) const { return HasFlag( m_persistFlags, persistFlag ); }

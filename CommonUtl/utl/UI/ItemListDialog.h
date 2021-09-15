@@ -55,9 +55,9 @@ private:
 	CDialogToolBar m_toolbar;
 	CLayoutChildPropertySheet m_childSheet;
 	enum Page { ListPage, EditPage };
-public:
+
 	// generated stuff
-	protected:
+protected:
 	virtual void DoDataExchange( CDataExchange* pDX );
 protected:
 	afx_msg void OnAddItem( void );

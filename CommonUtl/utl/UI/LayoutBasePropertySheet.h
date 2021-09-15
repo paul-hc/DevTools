@@ -85,14 +85,13 @@ protected:
 	enum { TabItem_BaseToolId = 0xDFF0 };			// base id used to encode tool ids for tab item (page) indexes
 public:
 	std::tstring m_regSection;
-private:
-	// virtual function overrides
-	public:
+
+	// generated stuff
+public:
 	virtual void BuildPropPageArray( void );
 	virtual BOOL PreTranslateMessage( MSG* pMsg );
 	virtual BOOL OnInitDialog( void );
 protected:
-	// message map functions
 	virtual void OnDestroy( void );
 	virtual void OnSize( UINT sizeType, int cx, int cy );
 	virtual BOOL OnTtnNeedText( UINT cmdId, NMHDR* pNmHdr, LRESULT* pResult );

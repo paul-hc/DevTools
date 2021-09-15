@@ -121,6 +121,7 @@ CWorkspace::CWorkspace( void )
 	, m_isFullScreen( false )
 	, m_reserved( 0 )
 	, m_defaultSlideDelay( 5000 )
+	, m_pEditingData( NULL )
 {
 	m_filePath.ReplaceExt( _T(".slw") );
 
@@ -397,7 +398,13 @@ void CWorkspace::CmSaveWorkspace( void )
 void CWorkspace::CmEditWorkspace( void )
 {
 	CWorkspaceDialog dlg( m_pMainFrame );
+
+	ASSERT_NULL( m_pEditingData );
+	m_pEditingData = &dlg.m_data;
+
 	INT_PTR result = dlg.DoModal();
+
+	m_pEditingData = NULL;
 
 	if ( result != IDCANCEL )
 	{

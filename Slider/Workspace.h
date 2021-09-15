@@ -14,7 +14,7 @@ class CMainFrame;
 
 namespace wf
 {
-	enum WorkspaceFlags
+	enum WorkspaceFlag
 	{
 		PersistOpenDocs				= BIT_FLAG( 0 ),		// automatic workspace save
 		MdiMaximized				= BIT_FLAG( 1 ),		// open MDI childred maximized
@@ -23,13 +23,20 @@ namespace wf
 		Old_InitStretchToFit		= BIT_FLAG( 4 ),		// opens each image in stretch to fit mode (obsolete, relaced by m_scalingMode)
 		AllowEmbeddedFileTransfers	= BIT_FLAG( 7 ),		// allows logical files to be temporary backed-up to physical files on file operations
 		PersistAlbumImageState		= BIT_FLAG( 8 ),		// save zoom/scroll info in albums
-		PrefixDeepStreamNames		= BIT_FLAG( 9 ),		// prefix image stream names with the relative path to original reference folder
+		DeepStreamPaths				= BIT_FLAG( 9 ),		// prefix image stream names with the relative path to original reference folder
 		UseVistaStyleFileDialog		= BIT_FLAG( 16 ),		// Vista-style vs classic file open/save dialog
+		UseThemedThumbListDraw		= BIT_FLAG( 17 ),		// display thumbs list selection using the "LISTVIEW" theme
 
-			DefaultFlags = ShowToolBar | ShowStatusBar | AllowEmbeddedFileTransfers |
-						   PersistAlbumImageState | PrefixDeepStreamNames | UseVistaStyleFileDialog,
-			WkspDialogMask = PersistOpenDocs | AllowEmbeddedFileTransfers
+			DefaultFlags =
+				ShowToolBar | ShowStatusBar | AllowEmbeddedFileTransfers |
+				PersistAlbumImageState | DeepStreamPaths |
+				UseVistaStyleFileDialog | UseThemedThumbListDraw,
+
+			WkspDialogMask =
+				PersistOpenDocs | AllowEmbeddedFileTransfers
 	};
+
+	typedef int TWorkspaceFlags;
 }
 
 
@@ -48,7 +55,7 @@ struct CWorkspaceData
 	COLORREF GetImageSelTextColor( void ) const { return m_imageSelTextColor != color::Null ? m_imageSelTextColor : GetSysColor( COLOR_HIGHLIGHTTEXT ); }
 public:
 	persist bool m_autoSave;						// automatic saving the workspace
-	persist int m_wkspFlags;						// workspace flags
+	persist wf::TWorkspaceFlags m_wkspFlags;		// workspace flags
 	persist int m_albumViewFlags;					// albume view inherited flags
 	persist int m_mruCount;							// maximum count of files in the MRU list [0-10]
 	persist int m_thumbListColumnCount;				// default count of columns in the thumb list
@@ -71,6 +78,8 @@ public:
 	static const CWorkspaceData& GetData( void ) { return Instance().m_data; }
 	static CWorkspaceData& RefData( void ) { return Instance().m_data; }
 	static int GetFlags( void ) { return Instance().m_data.m_wkspFlags; }
+
+	static const CWorkspaceData& GetLiveData( void ) { return Instance().m_pEditingData != NULL ? *Instance().m_pEditingData : Instance().m_data; }
 
 	virtual void Serialize( CArchive& archive );
 
@@ -119,6 +128,9 @@ private:
 
 	// registry-based options
 	persist UINT m_defaultSlideDelay;				// in miliseconds
+private:
+	// transient
+	const CWorkspaceData* m_pEditingData;			// temporary data while running CWorkspaceDialog
 protected:
 	// generated stuff
 	afx_msg void CmSaveWorkspace( void );

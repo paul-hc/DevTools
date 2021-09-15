@@ -39,11 +39,10 @@ protected:
 private:
 	CAccelTable m_accel;				// page navigation for modeless child sheet
 
-	// generated overrides
-	public:
+	// generated stuff
+public:
 	virtual BOOL PreTranslateMessage( MSG* pMsg );
 protected:
-	// message map functions
 	afx_msg LRESULT OnPageChanged( WPARAM wParam, LPARAM lParam );
 	afx_msg void OnNavigatePage( UINT cmdId );
 

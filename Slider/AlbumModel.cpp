@@ -25,7 +25,7 @@ CAlbumModel::CAlbumModel( void )
 	, m_randomSeed( ::GetTickCount() )
 	, m_fileOrder( fattr::OriginalOrder )
 {
-	SetPersistFlag( UseDeepStreamPaths, HasFlag( CWorkspace::GetFlags(), wf::PrefixDeepStreamNames ) );		// copy flag from worksoace to keep track of storage saving structure
+	SetPersistFlag( UseDeepStreamPaths, HasFlag( CWorkspace::GetFlags(), wf::DeepStreamPaths ) );		// copy flag from worksoace to keep track of storage saving structure
 }
 
 CAlbumModel::~CAlbumModel()
@@ -222,7 +222,7 @@ void CAlbumModel::Stream( CArchive& archive )
 
 bool CAlbumModel::ShouldUseDeepStreamPaths( void )
 {
-	return HasFlag( CWorkspace::GetFlags(), wf::PrefixDeepStreamNames );
+	return HasFlag( CWorkspace::GetFlags(), wf::DeepStreamPaths );
 }
 
 bool CAlbumModel::IsAutoDropRecipient( bool checkValidPath /*= true*/ ) const

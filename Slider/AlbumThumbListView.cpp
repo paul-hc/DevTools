@@ -447,6 +447,7 @@ void CAlbumThumbListView::DrawItem( DRAWITEMSTRUCT* pDIS )
 			const fs::CFlexPath* pFilePath = GetItemPath( pDIS->itemID );
 			bool validFile = pFilePath->FlexFileExist();		// go deep to detect stray catalog references
 			bool listFocused = this == GetFocus();
+			bool themedSel = ::HasFlag( CWorkspace::GetLiveData().m_wkspFlags, wf::UseThemedThumbListDraw );
 			CWicDibSection* pThumbDib = GetItemThumb( pDIS->itemID );
 
 			CDC dc;
@@ -467,22 +468,24 @@ void CAlbumThumbListView::DrawItem( DRAWITEMSTRUCT* pDIS )
 
 			if ( HasFlag( pDIS->itemState, ODS_SELECTED ) )
 			{
-				dc.SelectClipRgn( &bkRegion );		// clip the thumb rect out of background drawing
+				if ( themedSel )
+				{
+					dc.SelectClipRgn( &bkRegion );		// clip the thumb rect out of background drawing
+					themedSel = m_selBkThemeItem.DrawStatusBackground( listFocused ? CThemeItem::Hot : CThemeItem::Normal, dc, pDIS->rcItem );
+					dc.SelectClipRgn( NULL );			// un-clip the thumb rect
+				}
 
-				if ( m_selBkThemeItem.DrawStatusBackground( listFocused ? CThemeItem::Hot : CThemeItem::Normal, dc, pDIS->rcItem ) )
-					pDIS->itemAction |= ODA_DRAWENTIRE;		// force thumb draw
-				else
-					FillRgn( dc, bkRegion, CWorkspace::Instance().GetImageSelColorBrush() );
-
-				dc.SelectClipRgn( NULL );			// un-clip the thumb rect
-
-				itemRect.DeflateRect( 1, 1 );
-				::FrameRect( dc, &itemRect, GetSysColorBrush( COLOR_WINDOW ) );
+				if ( !themedSel )
+				{
+					::FillRgn( dc, bkRegion, CWorkspace::Instance().GetImageSelColorBrush() );
+					itemRect.DeflateRect( 1, 1 );
+					::FrameRect( dc, &itemRect, GetSysColorBrush( COLOR_WINDOW ) );
+				}
 			}
 			else
 			{
 				CBrush bkBrush( validFile ? ::GetSysColor( COLOR_BTNFACE ) : app::ColorErrorBk );
-				FillRgn( dc, bkRegion, bkBrush );
+				::FillRgn( dc, bkRegion, bkBrush );
 			}
 
 			if ( ODA_DRAWENTIRE == pDIS->itemAction )
@@ -494,23 +497,23 @@ void CAlbumThumbListView::DrawItem( DRAWITEMSTRUCT* pDIS )
 
 			rectText.top = rectText.bottom - ( 2 * cyTextSpace + s_fontHeight + 2 );
 			rectText.DeflateRect( cxSide, cyTextSpace );
-			rectText.OffsetRect( 1, -1 );		// Extra step: fine adjust text position
+			rectText.OffsetRect( 1, -1 );		// extra step: fine adjustment of text position
 
-			HGDIOBJ hFontOld = SelectObject( dc, HGDIOBJ( s_fontCaption ) );
+			HGDIOBJ hFontOld = ::SelectObject( dc, HGDIOBJ( s_fontCaption ) );
 			COLORREF textColorOld;
 			int bkModeOld = dc.SetBkMode( TRANSPARENT );
 
 			if ( validFile )
-				/** if ( HasFlag( pDIS->itemState, ODS_SELECTED ) )
+				if ( !themedSel && HasFlag( pDIS->itemState, ODS_SELECTED ) )
 					textColorOld = dc.SetTextColor( CWorkspace::Instance().GetImageSelTextColor() );
-				else **/
+				else
 					textColorOld = dc.SetTextColor( GetSysColor( COLOR_BTNTEXT ) );
 			else
 				textColorOld = dc.SetTextColor( app::ColorErrorText );
 
 			dc.DrawText( pFileName, -1, rectText, DT_CENTER | DT_VCENTER | DT_WORD_ELLIPSIS | DT_NOCLIP | DT_NOPREFIX | DT_SINGLELINE );
 
-			SelectObject( dc, hFontOld );
+			::SelectObject( dc, hFontOld );
 			dc.SetTextColor( textColorOld );
 			dc.SetBkMode( bkModeOld );
 

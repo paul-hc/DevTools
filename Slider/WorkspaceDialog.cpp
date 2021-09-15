@@ -45,9 +45,10 @@ void CWorkspaceDialog::DoDataExchange( CDataExchange* pDX )
 	ui::DDX_Flag( pDX, IDC_PERSIST_ALBUM_IMAGE_STATE_CHECK, m_data.m_wkspFlags, wf::PersistAlbumImageState );
 	ui::DDX_Flag( pDX, ID_VIEW_ALBUMDIALOGBAR, m_data.m_albumViewFlags, af::ShowAlbumDialogBar );
 	ui::DDX_Flag( pDX, IDC_SAVECUSTOMORDERUNDOREDO_CHECK, m_data.m_albumViewFlags, af::SaveCustomOrderUndoRedo );
-	ui::DDX_Flag( pDX, IDC_PREFIX_DEEP_STREAM_NAMES_CHECK, m_data.m_wkspFlags, wf::PrefixDeepStreamNames );
+	ui::DDX_Flag( pDX, IDC_PREFIX_DEEP_STREAM_NAMES_CHECK, m_data.m_wkspFlags, wf::DeepStreamPaths );
 	ui::DDX_Flag( pDX, IDC_ALLOW_EMBEDDED_FILE_TRANFERS_CHECK, m_data.m_wkspFlags, wf::AllowEmbeddedFileTransfers );
 	ui::DDX_Flag( pDX, IDC_VISTA_STYLE_FILE_DLG_CHECK, m_data.m_wkspFlags, wf::UseVistaStyleFileDialog );
+	ui::DDX_Flag( pDX, IDC_USE_THEMED_THUMB_LIST_DRAW_CHECK, m_data.m_wkspFlags, wf::UseThemedThumbListDraw );
 
 	ui::DDX_Flag( pDX, CK_SHOW_THUMB_VIEW, m_data.m_albumViewFlags, af::ShowThumbView );
 
@@ -79,6 +80,7 @@ BEGIN_MESSAGE_MAP( CWorkspaceDialog, CDialog )
 	ON_WM_DRAWITEM()
 	ON_BN_CLICKED( ID_EDIT_BK_COLOR, On_EditBkColor )
 	ON_BN_CLICKED( CM_SAVE_WORKSPACE, OnSaveAndClose )
+	ON_BN_CLICKED( IDC_USE_THEMED_THUMB_LIST_DRAW_CHECK, OnToggle_UseThemedThumbListDraw )
 	ON_BN_CLICKED( IDC_CLEAR_THUMB_CACHE_BUTTON, CmClearThumbCache )
 	ON_BN_CLICKED( CM_EDIT_IMAGE_SEL_COLOR, CmEditImageSelColor )
 	ON_BN_CLICKED( CM_EDIT_IMAGE_SEL_TEXT_COLOR, CmEditImageSelTextColor )
@@ -136,8 +138,14 @@ void CWorkspaceDialog::CmEditImageSelTextColor( void )
 
 void CWorkspaceDialog::OnSaveAndClose( void )
 {
-	if ( UpdateData( TRUE ) )
+	if ( UpdateData( DialogSaveChanges ) )
 		EndDialog( CM_SAVE_WORKSPACE );
+}
+
+void CWorkspaceDialog::OnToggle_UseThemedThumbListDraw( void )
+{
+	SetFlag( m_data.m_wkspFlags, wf::UseThemedThumbListDraw, IsDlgButtonChecked( IDC_USE_THEMED_THUMB_LIST_DRAW_CHECK ) != FALSE );
+	app::GetApp()->UpdateAllViews( Hint_ViewUpdate );
 }
 
 void CWorkspaceDialog::CmClearThumbCache( void )
