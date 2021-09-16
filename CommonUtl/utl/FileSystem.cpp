@@ -349,7 +349,7 @@ namespace fs
 	void CTextFileWriter::WriteText( const std::tstring& text )
 	{
 		std::string textUtf8 = str::ToUtf8( text.c_str() );
-		m_pDestFile->Write( textUtf8.c_str(), textUtf8.length() );
+		m_pDestFile->Write( textUtf8.c_str(), static_cast<UINT>( textUtf8.length() ) );
 	}
 
 } //namespace fs

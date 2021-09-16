@@ -156,7 +156,7 @@ bool CDisplayFilenameAdapter::IsExtensionChange( const fs::CPath& referencePath,
 {
 	switch ( referencePath.GetExtensionMatch( destPath ) )
 	{
-		case fs::MismatchDotsExt:
+		//case fs::MismatchDotsExt:
 		case fs::MismatchExt:
 			return true;
 	}
