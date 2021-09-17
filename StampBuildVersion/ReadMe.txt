@@ -12,8 +12,34 @@ New Solution Creation Steps (in VC 2008):
 - Search and replace in StampBuildVersion\.sln,.vcproj the original ProjectGUID with the newly generated ProjectGUID="{F8FC3A4A-D533-41CE-8AEC-FFDFBC98F327}".
 - Remove in StampBuildVersion.vcproj under section Name="VCLinkerTool" the entries OutputFile="$(OutDir)\xFer.exe" - this defaults output file to StampBuildVersion.exe
 4) Build and run the new solution, which inherits the project dependency to UTL_BASE and standard precompiled headers.
-5) DONE: start customizing the new project.
+5) DONE! Do initial commit to Git. Start customizing the new project.
 
+6) Remove dependency to MFC library, as it will not not used:
+Select StampBuildVersion project in Solution Explorer, choose Properties:
+	select Configuration=All Configurations
+	select Configuration Properties > General, and change:
+		Use of MFC=Use Standard Windows Libraries
+* Note: UTL_BASE actually links to MFC statically, so MFC dependencies are properly resolved when linking,
+
+
+HOW TO USE:
+==========
+1) In a Visual C++ project with GUI that has the VS_VERSION_INFO resource in the .rc file, add the "BuildTimestamp" line to:
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904b0"
+        BEGIN
+            VALUE "BuildTimestamp", "-"
+
+2) Select the project in Solution Explorer, right click "Properties":
+	- select Configuration=All Configurations
+	- select Configuration Properties > Build Events > Pre-Build Event and assign:
+		Command Line: StampBuildVersion.exe $(ProjectDir)$(ProjectName).rc
+		Description: Stamping build time in resource file...
+	- click OK.
+
+Now the project will embed a "BuildTimestamp" value in version info, that will get updated to the latest build time on each new build.
+Open the About Box (F1) to check the "Built on: " field is displayed (will be hidden if the .rc file has no "BuildTimestamp" entry).
 
 
 ========================================================================

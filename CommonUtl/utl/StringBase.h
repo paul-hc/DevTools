@@ -25,6 +25,7 @@ namespace str
 
 	const std::tstring& GetEmpty( void );
 
+	std::string Format( const char* pFormat, ... );
 	std::tstring Format( const TCHAR* pFormat, ... );
 	std::tstring Format( UINT formatId, ... );
 

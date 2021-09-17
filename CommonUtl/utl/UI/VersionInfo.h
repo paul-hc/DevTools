@@ -32,6 +32,7 @@ public:
 	std::tstring GetTrademarks( void ) const { return GetValue( _T("LegalTrademarks") ); }
 	std::tstring GetComments( void ) const { return GetValue( _T("Comments") ); }
 	std::tstring GetCompanyName( void ) const { return GetValue( _T("CompanyName") ); }
+	std::tstring GetBuildTimestamp( void ) const { return GetValue( _T("BuildTimestamp") ); }
 private:
 	std::tstring FormatVersion( DWORD ms, DWORD ls ) const;
 private:

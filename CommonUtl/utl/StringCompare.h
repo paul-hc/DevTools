@@ -132,6 +132,12 @@ namespace str
 			: EqualsIN( pLeft, pRight, count );
 	}
 
+	template< typename CharType >
+	inline bool EqualsPart( const CharType* pLeft, const CPart< CharType >& rightPart, str::CaseType caseType = str::Case )
+	{
+		return EqualsN_ByCase( caseType, pLeft, rightPart.m_pString, rightPart.m_count );
+	}
+
 
 	template< typename CharType >
 	bool IsUpperMatch( const CharType* pText, size_t count, const std::locale& loc = str::GetUserLocale() )

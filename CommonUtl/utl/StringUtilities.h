@@ -140,12 +140,14 @@ namespace str
 
 		const size_t sepStartLen = str::GetLength( pSepStart ), sepEndLen = str::GetLength( pSepEnd );
 
-		for ( str::const_iterator itStart = str::begin( pSource ), itEnd = str::end( pSource ); ; )
+		typedef const CharType* const_iterator;
+
+		for ( const_iterator itStart = str::begin( pSource ), itEnd = str::end( pSource ); ; )
 		{
-			str::const_iterator itItemStart = std::search( itStart, itEnd, pSepStart, pSepStart + sepStartLen );
+			const_iterator itItemStart = std::search( itStart, itEnd, pSepStart, pSepStart + sepStartLen );
 			if ( itItemStart == itEnd )
 				break;					// no more substrings
-			str::const_iterator itItemEnd = std::search( itItemStart + sepStartLen, itEnd, pSepEnd, pSepEnd + sepEndLen );
+			const_iterator itItemEnd = std::search( itItemStart + sepStartLen, itEnd, pSepEnd, pSepEnd + sepEndLen );
 			if ( itItemEnd == itEnd )
 				break;					// substring not enclosed
 

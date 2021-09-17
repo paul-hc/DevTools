@@ -53,9 +53,11 @@ namespace time_utl
 	extern const TCHAR s_outFormat[];			// example: "27-12-2017 19:54:20"
 	extern const TCHAR s_outFormatUi[];			// example: "3-Dec-2017 17:30:00"
 	extern const TCHAR s_parseFormat[];			// example: "27-12-2017 19:54:20"
+	extern const TCHAR s_parseFormatAlt[];		// example: "27/12/2017 19:54:20"
 
 	std::tstring FormatTimestamp( const CTime& dt, const TCHAR format[] = s_outFormat );
 	CTime ParseTimestamp( const std::tstring& text, const TCHAR format[] = s_parseFormat );
+	CTime ParseStdTimestamp( const std::tstring& text );
 }
 
 

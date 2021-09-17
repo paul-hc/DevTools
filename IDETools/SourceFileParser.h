@@ -3,7 +3,7 @@
 #pragma once
 
 #include "utl/Path.h"
-#include "utl/TextFileParser.h"
+#include "utl/TextFileUtils.h"
 #include "FileType.h"
 #include "IncludeTag.h"
 
@@ -11,7 +11,7 @@
 struct CIncludeNode;
 
 
-struct CSourceFileParser : private ILineParserCallback
+struct CSourceFileParser : private ILineParserCallback< std::tstring >
 {
 	CSourceFileParser( const fs::CPath& rootFilePath );
 	~CSourceFileParser();

@@ -182,8 +182,9 @@ namespace time_utl
 namespace time_utl
 {
 	const TCHAR s_outFormat[] = _T("%d-%m-%Y %H:%M:%S");				// example: "27-12-2017 19:54:20"
-	const TCHAR s_outFormatUi[] = _T("%#d-%b-%Y %#H:%M:%S");			// example: "3-Dec-2017 17:30:00"
+	const TCHAR s_outFormatUi[] = _T("%#d-%b-%Y %#H:%M:%S");			// example: "3-Dec-2017 7:30:00"
 	const TCHAR s_parseFormat[] = _T("%2u-%2u-%4u %2u:%2u:%2u");		// example: "27-12-2017 19:54:20"
+	const TCHAR s_parseFormatAlt[] = _T("%2u/%2u/%4u %2u:%2u:%2u");		// example: "27-12-2017 19:54:20"
 
 	std::tstring FormatTimestamp( const CTime& dt, const TCHAR format[] /*= s_outFormat*/ )
 	{
@@ -215,5 +216,15 @@ namespace time_utl
 		}
 
 		return CTime();
+	}
+
+	CTime ParseStdTimestamp( const std::tstring& text )
+	{
+		CTime timestamp = ParseTimestamp( text, s_parseFormat );
+
+		if ( !time_utl::IsValid( timestamp ) )
+			timestamp = ParseTimestamp( text, s_parseFormatAlt );
+
+		return timestamp;
 	}
 }

@@ -22,7 +22,7 @@
 			IntermediateDirectory="bin\$(PlatformName)_$(ConfigurationName)"
 			ConfigurationType="1"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC60.vsprops"
-			UseOfMFC="1"
+			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
 			CharacterSet="1"
 			>
@@ -121,7 +121,7 @@
 			IntermediateDirectory="bin\$(PlatformName)_$(ConfigurationName)"
 			ConfigurationType="1"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC60.vsprops"
-			UseOfMFC="1"
+			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
 			CharacterSet="1"
 			>
@@ -239,6 +239,30 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\CmdLineOptions.cpp"
+				>
+				<FileConfiguration
+					Name="ReleaseU|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						PreprocessorDefinitions=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="DebugU|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						PreprocessorDefinitions=""
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\CmdLineOptions.h"
+				>
+			</File>
+			<File
 				RelativePath="FileInfo.cpp"
 				>
 				<FileConfiguration
@@ -263,31 +287,11 @@
 				>
 			</File>
 			<File
-				RelativePath="FileTransfer.cpp"
-				>
-				<FileConfiguration
-					Name="ReleaseU|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="DebugU|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="FileTransfer.h"
+				RelativePath=".\ResourceFile.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\resource.h"
+				RelativePath=".\ResourceFile.h"
 				>
 			</File>
 			<File
@@ -316,59 +320,15 @@
 				RelativePath=".\stdafx.h"
 				>
 			</File>
-			<File
-				RelativePath=".\TransferItem.cpp"
-				>
-				<FileConfiguration
-					Name="ReleaseU|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="DebugU|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath=".\TransferItem.h"
-				>
-			</File>
-			<File
-				RelativePath=".\XferOptions.cpp"
-				>
-				<FileConfiguration
-					Name="ReleaseU|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="DebugU|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath=".\XferOptions.h"
-				>
-			</File>
 		</Filter>
 		<Filter
 			Name="Resource Files"
 			Filter="ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe"
 			>
+			<File
+				RelativePath=".\resource.h"
+				>
+			</File>
 			<File
 				RelativePath="StampBuildVersion.rc"
 				>

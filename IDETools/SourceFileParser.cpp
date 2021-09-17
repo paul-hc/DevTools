@@ -10,6 +10,8 @@
 #define new DEBUG_NEW
 #endif
 
+#include "utl/TextFileUtils.hxx"
+
 
 CSourceFileParser::CSourceFileParser( const fs::CPath& rootFilePath )
 	: m_rootFilePath( path::MakeCanonical( rootFilePath.GetPtr() ) )
@@ -50,9 +52,9 @@ void CSourceFileParser::ParseRootFile( int maxParseLines /*= 1000*/ )
 
 	try
 	{
-		CTextFileParser parser( this );
+		CTextFileParser< std::tstring > parser( this );
 		parser.SetMaxLineCount( maxParseLines );
-		parser.ParseFile( m_rootFilePath.Get() );
+		parser.ParseFile( m_rootFilePath );
 	}
 	catch ( std::exception& exc )
 	{

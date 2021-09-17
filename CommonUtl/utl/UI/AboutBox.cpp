@@ -206,9 +206,10 @@ void CAboutBox::DoDataExchange( CDataExchange* pDX )
 
 		CVersionInfo version;
 		ui::SetWindowText( m_hWnd, version.ExpandValues( ui::GetWindowText( m_hWnd ).c_str() ) );		// expand dialog title
+		ui::ShowControl( m_hWnd, IDC_ABOUT_BUILD_TIMESTAMP_STATIC, !version.GetBuildTimestamp().empty() );
 
 		// expand static fields
-		static const UINT fieldIds[] = { IDC_ABOUT_NAME_VERSION_STATIC, IDC_ABOUT_COPYRIGHT_STATIC, IDC_ABOUT_WRITTEN_BY_STATIC, IDC_ABOUT_EMAIL_STATIC };
+		static const UINT fieldIds[] = { IDC_ABOUT_NAME_VERSION_STATIC, IDC_ABOUT_BUILD_TIMESTAMP_STATIC, IDC_ABOUT_COPYRIGHT_STATIC, IDC_ABOUT_WRITTEN_BY_STATIC, IDC_ABOUT_EMAIL_STATIC };
 		for ( unsigned int i = 0; i != COUNT_OF( fieldIds ); ++i )
 			ui::SetDlgItemText( this, fieldIds[ i ], version.ExpandValues( ui::GetDlgItemText( this, fieldIds[ i ] ).c_str() ) );
 

@@ -1,17 +1,23 @@
 // Defines the entry point for the console application.
 
 #include "stdafx.h"
-#include "XferOptions.h"
-#include "FileTransfer.h"
+#include "CmdLineOptions.h"
+#include "ResourceFile.h"
 #include "utl/ConsoleApplication.h"
-#include "utl/MultiThreading.h"
 #include "utl/StringUtilities.h"
+#include "utl/TimeUtils.h"
 #include <iostream>
 
 #ifdef _DEBUG
-//#include "utl/test/UtlConsoleTests.h"
-//#include "test/TransferFuncTests.h"
-#endif
+//#define USE_UT
+
+#ifdef USE_UT
+	#include "utl/MultiThreading.h"
+	#include "utl/test/UtlConsoleTests.h"
+	#include "test/TransferFuncTests.h"
+#endif // USE_UT
+
+#endif // _DEBUG
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -22,10 +28,9 @@ namespace ut
 {
 	void RegisterAppUnitTests( bool debugChildProcs )
 	{
-	#ifdef _DEBUG
-		//ut::RegisterUtlConsoleTests();
-		//CTransferFuncTests::Instance().SetDebugChildProcs( debugChildProcs );		// register TransferFiles tests
-		debugChildProcs;
+	#ifdef USE_UT
+		ut::RegisterUtlConsoleTests();
+		CTransferFuncTests::Instance().SetDebugChildProcs( debugChildProcs );		// register TransferFiles tests
 	#else
 		debugChildProcs;
 	#endif
@@ -34,122 +39,84 @@ namespace ut
 
 
 static const char s_helpMessage[] =
-	"Copies files recursively in target directory tree (Unicode paths).\n"
-	"    Written by Paul Cocoveanu, 2004-2019.\n"
+	// 80 chars limit on the right mark                                            |
+	"Stamps the VS_VERSION_INFO resource in an .rc file that contains the entry\n"
+	"VALUE \"BuildTimestamp\" with the current date-time, preserving the original\n"
+	".rc file timestamps (last modification time, access time).\n"
 	"\n"
-	"xFer source_filter [target_dir]\n"
-	"     [/transfer=action]\n"
-	"     [/bk[=bk_dir]]\n"
-	"     [/ch[=CRC32]]\n"
-	"     [/a[=attributes]] [/d[=date]]\n"
-	"     [/exclude=file1[+file2][+file3]...]\n"
-	"     [/ew=spec1[+spec2][+spec3]...]\n"
-	"     [/q] [/jd] [/r] [/u] [/ud] [/ls or /lt] [/s[-]] [/y[-]]\n"
+    "Written by Paul Cocoveanu, 2021.\n"
 	"\n"
-	"  source_filter\n"
-	"      Specifies the source file(s) to transfer. Examples:\n"
-	"        'C:\\Tools', 'C:\\Tools\\*.*', 'C:\\Tools\\*.bat;*.cmd'\n"
-	"  target_dir\n"
-	"      Specifies the relative location of the transfered files.\n"
-	"  /transfer\n"
-	"      Specifies the file transfer action:\n"
-	"        /t=c    /transfer=copy    Copy source files to target (default).\n"
-	"        /t=m    /transfer=move    Move source files to target.\n"
-	"        /t=r    /transfer=remove  Remove target files matching source files.\n"
-	"  /bk[=bk_dir]\n"
-	"      Backup destination files about to be overwritten using a numeric suffix.\n"
-	"      If bk_dir is specified, all backups go in that directory,\n"
-	"      relative to target_dir, otherwise uses target_dir.\n"
-	"  /ch[=size|crc32]\n"
-	"      Transfer only source files that are newer, or optionally have a different\n"
-	"      content than the existing target file:\n"
-	"        size    compared by file size;\n"
-	"        crc32   compared by file size and CRC32 checksum (slower).\n"
-	"  /a[=attributes]\n"
-	"      Filter files with specified attributes:\n"
-	"        D  Directories       R  Read-only files\n"
-	"        H  Hidden files      A  Files ready for archiving\n"
-	"        S  System files      -  Prefix meaning not\n"
-	"  /d=m-d-y\n"
-	"      Copies files changed on or after the specified date.\n"
-	"      If no date is given, transfers only those files whose\n"
-	"      source time is newer than the destination time.\n"
-	"  /exclude=file1[,file2][,file3]...\n"
-	"      Specifies a list of files containing strings. When any of the\n"
-	"      strings match any part of the absolute path of the file to be\n"
-	"      transfered, that file will be excluded from being transfered.\n"
-	"      For example, specifying a string like \\obj\\ or .obj will\n"
-	"      exclude all files underneath the directory obj or all files\n"
-	"      with the .obj extension respectively.\n"
-	"  /ew=spec1[,spec2][,spec3]...\n"
-	"      Specifies a list of file wildcard specs.\n"
-	"      Matching files will be excluded from transfer.\n"
-	"  /q  Quiet mode, does not display file names while transfering.\n"
-	"  /jd Just creates directory structure, but does not transfer files.\n"
-	"  /r  Overwrites read-only files.\n"
-	"  /u  Copies only files that already exist in destination.\n"
-	"  /ud Copies only files for which the destination directory exists.\n"
-	"  /ls Just displays source files, i.e. files that would be transfered.\n"
-	"  /lt Just displays target files, i.e. files that would be transfered to.\n"
-	"  /s- Does not transfer sub-directories.\n"
-	"  /y  Non-interactive mode: suppress prompting to confirm you want to overwrite\n"
-	"      an existing destination file.\n"
-	"  /y- Causes prompting to confirm you want to overwrite an\n"
-	"      existing destination file.\n"
-	"  /?  Display this help screen.\n"
-#ifdef _DEBUG
+	"StampBuildVersion rc_file_path [timestamp]\n"
+	"\n"
+	"  rc_file_path\n"
+	"      Path to the destination resource file in a Visual C++ project.\n"
+	"      Examples:\n"
+	"        'C:\\dev\\DevTools\\Wintruder\\Wintruder.rc'\n"
+	"  timestamp\n"
+	"      Optional, the timestamp to be stamped to the .rc file,\n"
+	"      in 'DD-MM-YYYY H:mm:ss' format.\n"
+	"      Examples:\n"
+	"        '16-09-2021 17:30:00\n"
+	"  /? or /h\n"
+	"      Display this help screen.\n"
+#ifdef USE_UT
 	"\n"
 	"DEBUG BUILD:\n"
-	"  /ut[=debug]\n"
+	"  /ut\n"
 	"      Run unit tests.\n"
-	"      Break the child processes in the debugger if '=debug' is specified.\n"
-	"  /debug\n"
-	"      Break the program in debugger.\n"
-	"  /ndebug [/nodebug]\n"
-	"      Ignore, no debugging (for testing).\n"
 #endif
 	;
 
 
 int _tmain( int argc, TCHAR* argv[] )
 {
-	CConsoleApplication app;
+	CConsoleApplication application;
 
-#ifdef _DEBUG
+#ifdef USE_UT
 	// options to check outside the try block (debugging)
 	ASSERT( !app::HasCommandLineOption( _T("debug") ) );
 
 	std::tstring value;
 	if ( app::HasCommandLineOption( _T("ut"), &value ) )
 	{
-		/*
 		st::CScopedInitializeOle scopedOle;		// some unit tests require OLE ()
 
 		ut::RegisterAppUnitTests( value == _T("debug") );
 		ut::RunAllTests();
-		*/
 		return 0;
 	}
 #endif
 
 	try
 	{
-		CXferOptions options;
+		CCmdLineOptions options;
 		options.ParseCommandLine( argc, argv );
 
 		if ( options.m_helpMode )
 			std::cout << s_helpMessage << std::endl;
 		else
 		{
-			CFileTransfer transfer( &options );
-			transfer.Run();
-			transfer.PrintStatistics( std::cout );
+			CResourceFile rcFile( options.m_targetRcPath );
+
+			if ( rcFile.HasBuildTimestamp() )
+			{
+				rcFile.StampBuildTime( options.m_buildTimestamp );
+				rcFile.Save();
+
+				rcFile.Report( std::cout );
+			}
 		}
 		return 0;
 	}
 	catch ( const std::exception& exc )
 	{
 		app::ReportException( exc );
+		return 1;
+	}
+	catch ( CException* pExc )
+	{
+		app::ReportException( pExc );
+		pExc->Delete();
 		return 1;
 	}
 }

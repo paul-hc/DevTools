@@ -191,6 +191,20 @@ namespace str
 	}
 
 
+	std::string Format( const char* pFormat, ... )
+	{
+		va_list argList;
+
+		va_start( argList, pFormat );
+
+		CStringA message;
+		message.FormatV( pFormat, argList );
+
+		va_end( argList );
+
+		return message.GetString();
+	}
+
 	std::tstring Format( const TCHAR* pFormat, ... )
 	{
 		va_list argList;
