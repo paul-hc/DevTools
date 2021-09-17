@@ -32,7 +32,8 @@ HOW TO USE:
             VALUE "BuildTimestamp", "-"
 
 2) Select the project in Solution Explorer, right click "Properties":
-	- select Configuration=All Configurations
+	- select Configuration=ReleaseU
+		(it's best to avoid Configuration=All Configurations to minimize .rc file updates in debug builds)
 	- select Configuration Properties > Build Events > Pre-Build Event and assign:
 		Command Line: StampBuildVersion.exe $(ProjectDir)$(ProjectName).rc
 		Description: Stamping build time in resource file...
