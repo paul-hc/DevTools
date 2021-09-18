@@ -4,6 +4,7 @@
 
 #include <vector>
 #include "utl/Path.h"
+#include "CmdLineOptions_fwd.h"
 
 
 class CRuntimeException;
@@ -27,6 +28,7 @@ private:
 private:
 	const TCHAR* m_pArg;								// current argument parsed
 public:
+	app::TOption m_optionFlags;
 	bool m_helpMode;
 	fs::CPath m_targetRcPath;
 	CTime m_buildTimestamp;

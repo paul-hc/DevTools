@@ -16,6 +16,10 @@ namespace utl
 	template< typename StringT >
 	void WriteTextLine( std::ostream& os, const StringT& line, size_t* pLinePos = NULL );
 
+
+	template< typename StringT >
+	void ReadText( std::istream& is, StringT& rText );
+
 	template< typename StringT >
 	void WriteText( std::ostream& os, const StringT& text );
 
@@ -32,6 +36,9 @@ namespace utl
 	// write string to UTF8 text file
 
 	template< typename StringT >
+	void ReadStringFromFile( StringT& rText, const fs::CPath& srcFilePath ) throws_( CRuntimeException );
+
+	template< typename StringT >
 	void WriteStringToFile( const fs::CPath& targetFilePath, const StringT& text ) throws_( CRuntimeException );
 }
 
@@ -40,6 +47,9 @@ template< typename StringT >
 interface ILineParserCallback
 {
 	virtual bool OnParseLine( const StringT& line, unsigned int lineNo ) = 0;		// return false to stop parsing
+
+	virtual void OnBeginParsing( void ) {}
+	virtual void OnEndParsing( void ) {}
 };
 
 

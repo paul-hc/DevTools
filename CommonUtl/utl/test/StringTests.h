@@ -24,6 +24,7 @@ private:
 	void TestIntuitiveSortPunctuation( void );
 	void TestIgnoreCase( void );
 	void TestTrim( void );
+	void TestEnquote( void );
 	void TestStringSplit( void );
 	void TestStringTokenize( void );
 	void TestStringPrefixSuffix( void );

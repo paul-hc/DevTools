@@ -2,6 +2,7 @@
 #include "stdafx.h"
 #include "VersionInfo.h"
 #include "StringUtilities.h"
+#include "TimeUtils.h"
 #include <sstream>
 
 #pragma comment( lib, "version.lib" )			// link to version.dll API
@@ -73,6 +74,10 @@ std::tstring CVersionInfo::FormatValue( const std::tstring& keyName ) const
 		return FormatFileVersion();
 	else if ( keyName == _T("Comments") )
 		return FormatComments();
+	else if ( keyName == _T("BuildDate") )
+		return FormatBuildDate();
+	else if ( keyName == _T("BuildTime") )
+		return FormatBuildTime();
 
 	return GetValue( keyName.c_str() );
 }
@@ -113,6 +118,28 @@ std::tstring CVersionInfo::FormatComments( void ) const
 	}
 
 	return str::Join( items, _T("\r\n") );
+}
+
+std::tstring CVersionInfo::FormatBuildDate( void ) const
+{
+	CTime timestamp = time_utl::ParseStdTimestamp( GetBuildTimestamp() );
+	std::tstring buildDate;
+
+	if ( time_utl::IsValid( timestamp ) )
+		buildDate = time_utl::FormatTimestamp( timestamp, _T("%d %b %Y") );
+
+	return buildDate;
+}
+
+std::tstring CVersionInfo::FormatBuildTime( void ) const
+{
+	CTime timestamp = time_utl::ParseStdTimestamp( GetBuildTimestamp() );
+	std::tstring buildTime;
+
+	if ( time_utl::IsValid( timestamp ) )
+		buildTime = time_utl::FormatTimestamp( timestamp, _T("%#H:%M:%S") );
+
+	return buildTime;
 }
 
 

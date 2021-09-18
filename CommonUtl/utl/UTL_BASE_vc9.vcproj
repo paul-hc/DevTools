@@ -748,6 +748,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\TextFileUtils.cpp"
+					>
+				</File>
+				<File
 					RelativePath=".\TextFileUtils.h"
 					>
 				</File>

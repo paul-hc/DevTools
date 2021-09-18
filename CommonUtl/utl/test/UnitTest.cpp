@@ -122,17 +122,28 @@ namespace ut
 		return s_stdImagesDirPath;
 	}
 
+	const fs::CPath& GetStdTestFilesDirPath( void )
+	{
+		static fs::CPath s_stdImagesDirPath = GetTestDataDirPath() / fs::CPath( _T("std_test_files") );
+		if ( !s_stdImagesDirPath.IsEmpty() && !fs::IsValidDirectory( s_stdImagesDirPath.GetPtr() ) )
+		{
+			TRACE( _T("\n # Cannot find unit test standard test files dir path: %s #\nTODO: create directory %UTL_STD_SRC_IMAGE_PATH%\\std_test_files"), s_stdImagesDirPath.GetPtr() );
+			s_stdImagesDirPath.Clear();
+		}
+		return s_stdImagesDirPath;
+	}
+
 
 	const fs::CPath& GetTempUt_DirPath( void ) throws_( CRuntimeException )
 	{
-		static fs::CPath tempUtDirPath;
+		static fs::CPath s_tempUtDirPath;
 
-		if ( tempUtDirPath.IsEmpty() )
+		if ( s_tempUtDirPath.IsEmpty() )
 		{
-			tempUtDirPath = GetTestDataDirPath() / fs::CPath( _T("temp_ut") );
-			fs::thr::CreateDirPath( tempUtDirPath.GetPtr() );
+			s_tempUtDirPath = GetTestDataDirPath() / fs::CPath( _T("temp_ut") );
+			fs::thr::CreateDirPath( s_tempUtDirPath.GetPtr() );
 		}
-		return tempUtDirPath;
+		return s_tempUtDirPath;
 	}
 
 	fs::CPath MakeTempUt_DirPath( const fs::CPath& subPath, bool createDir ) throws_( CRuntimeException )

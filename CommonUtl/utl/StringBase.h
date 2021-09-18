@@ -159,26 +159,84 @@ namespace str
 
 namespace str
 {
+	template< typename CharType >
+	void EnquoteImpl( std::basic_string< CharType >& rOutText, const CharType* pText, const CharType leading[], const CharType trailing[], bool skipIfEmpty )
+	{
+		ASSERT_PTR( pText );
+		rOutText = pText;
+		if ( !skipIfEmpty || !rOutText.empty() )
+		{
+			rOutText.reserve( rOutText.length() + GetLength( leading ) + GetLength( trailing ) );
+			rOutText.insert( 0, leading );
+			rOutText.append( trailing );
+		}
+	}
+
+	template< typename CharType >
+	std::basic_string< CharType > Enquote( const CharType* pText, const CharType leading[], const CharType trailing[], bool skipIfEmpty = false )
+	{
+		std::basic_string< CharType > outText;
+		EnquoteImpl( outText, pText, leading, trailing, skipIfEmpty );
+		return outText;
+	}
+
+
+	// enquoting (by default with double-quotes)
+
+	template< typename CharType >
+	std::basic_string< CharType > Enquote( const CharType* pText, CharType quote = '"', bool skipIfEmpty = false )
+	{
+		const CharType quoteArray[] = { quote, '\0' };
+		std::basic_string< CharType > outText;
+
+		EnquoteImpl( outText, pText, quoteArray, quoteArray, skipIfEmpty );
+		return outText;
+	}
+
+	template< typename StringT >
+	inline StringT EnquoteStr( const StringT& value, typename StringT::value_type quote = '"', bool skipIfEmpty = false )
+	{
+		return Enquote( str::traits::GetCharPtr( value ), quote, skipIfEmpty );
+	}
+
+	inline std::tstring EnquoteStr( const fs::CPath& value, wchar_t quote = L'"', bool skipIfEmpty = false )
+	{
+		return Enquote( str::traits::GetCharPtr( value ), quote, skipIfEmpty );
+	}
+
+
+	namespace sq
+	{
+		// single-quote enquoting
+
+		template< typename CharType >
+		inline std::basic_string< CharType > Enquote( const CharType* pText, bool skipIfEmpty = false )
+		{
+			return ::str::Enquote<CharType>( pText, '\'', skipIfEmpty );
+		}
+
+		template< typename StringT >
+		inline StringT EnquoteStr( const StringT& value, bool skipIfEmpty = false )
+		{
+			return ::str::EnquoteStr( value, '\'', skipIfEmpty );
+		}
+
+		inline std::tstring EnquoteStr( const fs::CPath& value, bool skipIfEmpty = false )
+		{
+			return ::str::EnquoteStr( value, '\'', skipIfEmpty );
+		}
+	}
+}
+
+
+namespace str
+{
 	template< typename StringT, typename ValueT >
 	StringT ValueToString( const ValueT& value )
 	{
 		std::basic_ostringstream< typename StringT::value_type > oss;
 		oss << value;
 		return oss.str();
-	}
-
-
-	template< typename StringT, typename ValueT >
-	StringT Enquote( const ValueT& value, typename StringT::value_type quote = '\'' )
-	{
-		StringT text = ValueToString< StringT >( value );
-		if ( !text.empty() )
-		{
-			text.reserve( text.length() + 2 );
-			text.insert( 0, 1, quote );
-			text.append( 1, quote );
-		}
-		return text;
 	}
 
 

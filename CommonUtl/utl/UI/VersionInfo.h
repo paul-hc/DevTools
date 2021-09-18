@@ -33,6 +33,9 @@ public:
 	std::tstring GetComments( void ) const { return GetValue( _T("Comments") ); }
 	std::tstring GetCompanyName( void ) const { return GetValue( _T("CompanyName") ); }
 	std::tstring GetBuildTimestamp( void ) const { return GetValue( _T("BuildTimestamp") ); }
+
+	std::tstring FormatBuildDate( void ) const;
+	std::tstring FormatBuildTime( void ) const;
 private:
 	std::tstring FormatVersion( DWORD ms, DWORD ls ) const;
 private:

@@ -11,65 +11,6 @@
 
 namespace utl
 {
-	template<>
-	void ReadTextLine< std::string >( std::istream& is, std::string& rLineUtf8 )
-	{
-		std::getline( is, rLineUtf8 );
-	}
-
-	template<>
-	void ReadTextLine< std::wstring >( std::istream& is, std::wstring& rLineWide )
-	{
-		std::string lineUtf8;
-		std::getline( is, lineUtf8 );
-
-		rLineWide = str::FromUtf8( lineUtf8.c_str() );
-	}
-
-
-	bool WriteLineEnd( std::ostream& os, size_t& rLinePos )
-	{	// prepend a line end if not the first line
-		if ( 0 == rLinePos++ )
-			return false;			// skip newline for the first added line
-
-		os << std::endl;
-		return true;
-	}
-
-
-	template<>
-	void WriteTextLine< std::string >( std::ostream& os, const std::string& lineUtf8, size_t* pLinePos /*= NULL*/ )
-	{
-		if ( pLinePos != NULL )
-			WriteLineEnd( os, *pLinePos );
-
-		os << lineUtf8.c_str();
-	}
-
-	template<>
-	void WriteTextLine< std::wstring >( std::ostream& os, const std::wstring& lineWide, size_t* pLinePos /*= NULL*/ )
-	{
-		if ( pLinePos != NULL )
-			WriteLineEnd( os, *pLinePos );
-
-		os << str::ToUtf8( lineWide.c_str() );
-	}
-
-
-	template<>
-	void WriteText< std::string >( std::ostream& os, const std::string& textUtf8 )
-	{
-		os << textUtf8.c_str();
-	}
-
-
-	template<>
-	void WriteText< std::wstring >( std::ostream& os, const std::wstring& textWide )
-	{
-		os << str::ToUtf8( textWide.c_str() );
-	}
-
-
 	// write container of lines to UTF8 text file
 
 	template< typename LinesT >
@@ -92,7 +33,18 @@ namespace utl
 	}
 
 
-	// write string to UTF8 text file
+	// string read/write in UTF8 text file
+
+	template< typename StringT >
+	void ReadStringFromFile( StringT& rText, const fs::CPath& srcFilePath ) throws_( CRuntimeException )
+	{
+		std::ifstream input( srcFilePath.GetUtf8().c_str() );
+		if ( !input.is_open() )
+			throw CRuntimeException( str::Format( _T("Cannot read from text file: %s"), srcFilePath.GetPtr() ) );
+
+		ReadText( input, rText );		// verbatim text string in text mode: with line-end translation
+		input.close();
+	}
 
 	template< typename StringT >
 	void WriteStringToFile( const fs::CPath& targetFilePath, const StringT& text ) throws_( CRuntimeException )
@@ -126,6 +78,9 @@ void CTextFileParser< StringT >::ParseStream( std::istream& is )
 {
 	Clear();
 
+	if ( m_pLineParserCallback != NULL )
+		m_pLineParserCallback->OnBeginParsing();
+
 	for ( unsigned int lineNo = 1; !is.eof() && lineNo <= m_maxLineCount; ++lineNo )
 	{
 		StringT line;
@@ -137,6 +92,9 @@ void CTextFileParser< StringT >::ParseStream( std::istream& is )
 		else if ( !m_pLineParserCallback->OnParseLine( line, lineNo ) )
 			break;
 	}
+
+	if ( m_pLineParserCallback != NULL )
+		m_pLineParserCallback->OnEndParsing();
 }
 
 

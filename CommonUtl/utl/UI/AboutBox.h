@@ -19,6 +19,9 @@ public:
 	CAboutBox( CWnd* pParent );
 	virtual ~CAboutBox();
 private:
+	// ui::ICustomCmdInfo interface
+	virtual void QueryTooltipText( std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const;
+
 	const fs::CPath* GetSelPath( void ) const;
 	void SetupBuildInfoList( void );
 public:
@@ -28,6 +31,7 @@ private:
 
 	fs::CPath m_modulePath;
 	fs::CPath m_exePath;
+	std::tstring m_buildTime;
 
 	// enum { IDD = IDD_ABOUT_BOX };
 	CStatic m_appIconStatic;

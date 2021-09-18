@@ -1,5 +1,8 @@
 // Microsoft Visual C++ generated resource script.
 //
+// [PHC]
+// Source file to clone and test the StampBuildVersion.exe compilation tool
+//
 #include "resource.h"
 
 #define APSTUDIO_READONLY_SYMBOLS
@@ -69,12 +72,12 @@ BEGIN
     BEGIN
         BLOCK "080904b0"
         BEGIN
-            VALUE "FileDescription", "StampBuildVersion Application"
+            VALUE "FileDescription", "MyTool Application"
             VALUE "FileVersion", "1, 0, 0, 1"
-            VALUE "InternalName", "StampBuildVersion"
+            VALUE "InternalName", "MyTool"
             VALUE "LegalCopyright", "Copyright (C) 2021"
-            VALUE "OriginalFilename", "StampBuildVersion.exe"
-            VALUE "ProductName", "StampBuildVersion Application"
+            VALUE "OriginalFilename", "MyTool.exe"
+            VALUE "ProductName", "MyTool Application"
             VALUE "ProductVersion", "1, 0, 0, 1"
         END
     END
@@ -92,7 +95,7 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_APP_TITLE           "StampBuildVersion"
+    IDS_APP_TITLE           "MyTool"
 END
 
 #endif    // English (U.S.) resources

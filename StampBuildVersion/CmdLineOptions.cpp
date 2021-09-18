@@ -10,6 +10,7 @@
 
 CCmdLineOptions::CCmdLineOptions( void )
 	: m_pArg( NULL )
+	, m_optionFlags( 0 )
 	, m_helpMode( false )
 {
 }
@@ -41,7 +42,9 @@ void CCmdLineOptions::ParseCommandLine( int argc, TCHAR* argv[] ) throws_( CRunt
 			const TCHAR* pSwitch = m_pArg + 1;
 			std::tstring value;
 
-			if ( arg::EqualsAnyOf( pSwitch, _T("?|H") ) )
+			if ( arg::EqualsAnyOf( pSwitch, _T("A") ) )
+				SetFlag( m_optionFlags, app::Add_BuildTimestamp );
+			else if ( arg::EqualsAnyOf( pSwitch, _T("?|H") ) )
 			{
 				m_helpMode = true;
 				return;

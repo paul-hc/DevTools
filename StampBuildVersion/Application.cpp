@@ -1,6 +1,7 @@
 // Defines the entry point for the console application.
 
 #include "stdafx.h"
+#include "Application.h"
 #include "CmdLineOptions.h"
 #include "ResourceFile.h"
 #include "utl/ConsoleApplication.h"
@@ -9,12 +10,12 @@
 #include <iostream>
 
 #ifdef _DEBUG
-//#define USE_UT
+#define USE_UT
 
 #ifdef USE_UT
 	#include "utl/MultiThreading.h"
 	#include "utl/test/UtlConsoleTests.h"
-	#include "test/TransferFuncTests.h"
+	#include "test/ResourceFileTests.h"
 #endif // USE_UT
 
 #endif // _DEBUG
@@ -30,7 +31,7 @@ namespace ut
 	{
 	#ifdef USE_UT
 		ut::RegisterUtlConsoleTests();
-		CTransferFuncTests::Instance().SetDebugChildProcs( debugChildProcs );		// register TransferFiles tests
+		CResourceFileTests::Instance().SetDebugChildProcs( debugChildProcs );		// register TransferFiles tests
 	#else
 		debugChildProcs;
 	#endif
@@ -39,24 +40,26 @@ namespace ut
 
 
 static const char s_helpMessage[] =
-	// 80 chars limit on the right mark                                            |
+//	 |                       80 chars limit on the right mark                      |
 	"Stamps the VS_VERSION_INFO resource in an .rc file that contains the entry\n"
 	"VALUE \"BuildTimestamp\" with the current date-time, preserving the original\n"
 	".rc file timestamps (last modification time, access time).\n"
 	"\n"
-    "Written by Paul Cocoveanu, 2021.\n"
+	"Written by Paul Cocoveanu, 2021.\n"
 	"\n"
-	"StampBuildVersion rc_file_path [timestamp]\n"
+	"StampBuildVersion rc_file_path [timestamp] [/a]\n"
 	"\n"
 	"  rc_file_path\n"
 	"      Path to the destination resource file in a Visual C++ project.\n"
-	"      Examples:\n"
+	"      example:\n"
 	"        'C:\\dev\\DevTools\\Wintruder\\Wintruder.rc'\n"
 	"  timestamp\n"
 	"      Optional, the timestamp to be stamped to the .rc file,\n"
 	"      in 'DD-MM-YYYY H:mm:ss' format.\n"
-	"      Examples:\n"
-	"        '16-09-2021 17:30:00\n"
+	"      Example:\n"
+	"        '16-09-2021 17:30:00'\n"
+	"  /a\n"
+	"      Force adding the \"BuildTimestamp\" entry into the VS_VERSION_INFO.\n"
 	"  /? or /h\n"
 	"      Display this help screen.\n"
 #ifdef USE_UT
@@ -66,6 +69,23 @@ static const char s_helpMessage[] =
 	"      Run unit tests.\n"
 #endif
 	;
+
+
+namespace app
+{
+	void RunMain( const CCmdLineOptions& options ) throws_( std::exception, CException* )
+	{
+		CResourceFile rcFile( options.m_targetRcPath, options.m_optionFlags );
+
+		if ( rcFile.HasBuildTimestamp() )
+		{
+			rcFile.StampBuildTime( options.m_buildTimestamp );
+			rcFile.Save();
+
+			rcFile.Report( std::cout );
+		}
+	}
+};
 
 
 int _tmain( int argc, TCHAR* argv[] )
@@ -93,19 +113,10 @@ int _tmain( int argc, TCHAR* argv[] )
 		options.ParseCommandLine( argc, argv );
 
 		if ( options.m_helpMode )
-			std::cout << s_helpMessage << std::endl;
+			std::cout << std::endl << s_helpMessage << std::endl;
 		else
-		{
-			CResourceFile rcFile( options.m_targetRcPath );
+			app::RunMain( options );
 
-			if ( rcFile.HasBuildTimestamp() )
-			{
-				rcFile.StampBuildTime( options.m_buildTimestamp );
-				rcFile.Save();
-
-				rcFile.Report( std::cout );
-			}
-		}
 		return 0;
 	}
 	catch ( const std::exception& exc )

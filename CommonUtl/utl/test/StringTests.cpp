@@ -405,6 +405,74 @@ void CStringTests::TestTrim( void )
 	}
 }
 
+void CStringTests::TestEnquote( void )
+{
+	// NARROW:
+	{
+		// base enquoting
+		ASSERT_EQUAL( "{ abc }", str::Enquote( "abc", "{ ", " }" ) );
+		ASSERT_EQUAL( "{  }", str::Enquote( "", "{ ", " }" ) );
+		ASSERT_EQUAL( "", str::Enquote( "", "{ ", " }", true ) );
+
+		// empty source
+		ASSERT_EQUAL( "\"\"", str::Enquote( "" ) );
+		ASSERT_EQUAL( "", str::Enquote( "", '"', true ) );
+
+		// text source
+		ASSERT_EQUAL( "\"abc\"", str::Enquote( "abc" ) );
+		ASSERT_EQUAL( "\"abc\"", str::Enquote( "abc", '"' ) );
+
+		// string source
+		static const std::string s_abc( "abc" );
+		ASSERT_EQUAL( "\"abc\"", str::EnquoteStr( s_abc ) );
+		ASSERT_EQUAL( "'abc'", str::EnquoteStr( s_abc, '\'' ) );
+	}
+
+	// WIDE:
+	{
+		// empty source
+		ASSERT_EQUAL( L"\"\"", str::Enquote( L"" ) );
+		ASSERT_EQUAL( L"", str::Enquote( L"", L'"', true ) );
+
+		// text source
+		ASSERT_EQUAL( L"\"abc\"", str::Enquote( L"abc" ) );
+		ASSERT_EQUAL( L"\"abc\"", str::Enquote( L"abc", L'"' ) );
+
+		// string source
+		static const std::wstring s_abc( L"abc" );
+		ASSERT_EQUAL( L"\"abc\"", str::EnquoteStr( s_abc ) );
+		ASSERT_EQUAL( L"'abc'", str::EnquoteStr( s_abc, L'\'' ) );
+
+		// path source
+		static const fs::CPath s_path( L"abc" );
+		ASSERT_EQUAL( L"\"abc\"", str::EnquoteStr( s_path ) );
+		ASSERT_EQUAL( L"'abc'", str::EnquoteStr( s_path, L'\'' ) );
+	}
+
+	// SINGLE QUOTES:
+	{
+		// empty source
+		ASSERT_EQUAL( "''", str::sq::Enquote( "" ) );
+		ASSERT_EQUAL( L"''", str::sq::Enquote( L"" ) );
+		ASSERT_EQUAL( "", str::sq::Enquote( "", true ) );
+		ASSERT_EQUAL( L"", str::sq::Enquote( L"", true ) );
+
+		// text source
+		ASSERT_EQUAL( "'abc'", str::sq::Enquote( "abc" ) );
+		ASSERT_EQUAL( L"'abc'", str::sq::Enquote( L"abc" ) );
+
+		// string source
+		ASSERT_EQUAL( "'abc'", str::sq::EnquoteStr( std::string( "abc" ) ) );
+		ASSERT_EQUAL( L"'abc'", str::sq::EnquoteStr( std::wstring( L"abc" ) ) );
+
+		// path source
+		ASSERT_EQUAL( L"''", str::sq::EnquoteStr( fs::CPath() ) );
+		ASSERT_EQUAL( L"", str::sq::EnquoteStr( fs::CPath(), true ) );
+		ASSERT_EQUAL( L"'abc'", str::sq::EnquoteStr( fs::CPath( _T("abc") ) ) );
+		ASSERT_EQUAL( L"'abc'", str::sq::EnquoteStr( fs::CPath( _T("abc") ), true ) );
+	}
+}
+
 void CStringTests::TestStringSplit( void )
 {
 	{	// WIDE strings
@@ -953,6 +1021,7 @@ void CStringTests::Run( void )
 	TestIntuitiveSortPunctuation();
 	TestIgnoreCase();
 	TestTrim();
+	TestEnquote();
 	TestStringSplit();
 	TestStringTokenize();
 	TestStringPrefixSuffix();

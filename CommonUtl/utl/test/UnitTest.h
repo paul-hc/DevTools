@@ -219,6 +219,7 @@ namespace ut
 	const fs::CPath& GetImageSourceDirPath( void );									// %UTL_THUMB_SRC_IMAGE_PATH%
 	const fs::CPath& GetDestImagesDirPath( void );									// %UTL_TESTDATA_PATH%\images
 	const fs::CPath& GetStdImageDirPath( void );									// %UTL_TESTDATA_PATH%\std_test_images
+	const fs::CPath& GetStdTestFilesDirPath( void );								// %UTL_TESTDATA_PATH%\std_test_files
 
 	const fs::CPath& GetTempUt_DirPath( void ) throws_( CRuntimeException );
 	fs::CPath MakeTempUt_DirPath( const fs::CPath& subPath, bool createDir ) throws_( CRuntimeException );

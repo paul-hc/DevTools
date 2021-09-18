@@ -239,6 +239,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\Application.h"
+				>
+			</File>
+			<File
 				RelativePath=".\CmdLineOptions.cpp"
 				>
 				<FileConfiguration
@@ -260,6 +264,10 @@
 			</File>
 			<File
 				RelativePath=".\CmdLineOptions.h"
+				>
+			</File>
+			<File
+				RelativePath=".\CmdLineOptions_fwd.h"
 				>
 			</File>
 			<File
@@ -354,15 +362,15 @@
 			Name="Tests"
 			>
 			<File
+				RelativePath=".\test\ResourceFileTests.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\test\ResourceFileTests.h"
+				>
+			</File>
+			<File
 				RelativePath=".\test\test.bat"
-				>
-			</File>
-			<File
-				RelativePath=".\test\TransferFuncTests.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\test\TransferFuncTests.h"
 				>
 			</File>
 		</Filter>

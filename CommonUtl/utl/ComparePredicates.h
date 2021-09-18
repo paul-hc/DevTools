@@ -219,6 +219,12 @@ namespace pred
 		CompareValues m_cmpValues;
 	};
 
+	template< typename CompareValues >
+	inline IsEqual< CompareValues > MakeIsEqual( CompareValues cmpValues )
+	{
+		return IsEqual< CompareValues >( cmpValues );
+	}
+
 
 	// adapts Compare defined for an object to a new object via Adapter functor; example CompareAdapter< CompareRequestDate, func::ToWorkOrder >
 

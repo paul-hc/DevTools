@@ -190,6 +190,19 @@ void CAboutBox::SetupBuildInfoList( void )
 	m_pBuildInfoList->SetItemText( pos, Value, m_exePath.GetPtr() );
 }
 
+void CAboutBox::QueryTooltipText( std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const
+{
+	switch ( cmdId )
+	{
+		case IDC_ABOUT_BUILD_DATE_STATIC:
+			rText = m_buildTime;
+			break;
+	}
+
+	if ( rText.empty() )
+		__super::QueryTooltipText( rText, cmdId, pTooltip );
+}
+
 void CAboutBox::DoDataExchange( CDataExchange* pDX )
 {
 	DDX_Control( pDX, IDC_ABOUT_ICON_STATIC, m_appIconStatic );
@@ -205,11 +218,16 @@ void CAboutBox::DoDataExchange( CDataExchange* pDX )
 		SetupBuildInfoList();
 
 		CVersionInfo version;
+
+		m_buildTime = version.FormatBuildTime();
+		if ( !m_buildTime.empty() )
+			m_buildTime.insert( 0, _T("at ") );
+
 		ui::SetWindowText( m_hWnd, version.ExpandValues( ui::GetWindowText( m_hWnd ).c_str() ) );		// expand dialog title
-		ui::ShowControl( m_hWnd, IDC_ABOUT_BUILD_TIMESTAMP_STATIC, !version.GetBuildTimestamp().empty() );
+		ui::ShowControl( m_hWnd, IDC_ABOUT_BUILD_DATE_STATIC, !version.GetBuildTimestamp().empty() );
 
 		// expand static fields
-		static const UINT fieldIds[] = { IDC_ABOUT_NAME_VERSION_STATIC, IDC_ABOUT_BUILD_TIMESTAMP_STATIC, IDC_ABOUT_COPYRIGHT_STATIC, IDC_ABOUT_WRITTEN_BY_STATIC, IDC_ABOUT_EMAIL_STATIC };
+		static const UINT fieldIds[] = { IDC_ABOUT_NAME_VERSION_STATIC, IDC_ABOUT_BUILD_DATE_STATIC, IDC_ABOUT_COPYRIGHT_STATIC, IDC_ABOUT_WRITTEN_BY_STATIC, IDC_ABOUT_EMAIL_STATIC };
 		for ( unsigned int i = 0; i != COUNT_OF( fieldIds ); ++i )
 			ui::SetDlgItemText( this, fieldIds[ i ], version.ExpandValues( ui::GetDlgItemText( this, fieldIds[ i ] ).c_str() ) );
 

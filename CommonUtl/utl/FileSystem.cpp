@@ -537,7 +537,7 @@ namespace fs
 				switch ( policy )
 				{
 					case RuntimeExc:
-						throw CRuntimeException( str::Enquote< std::tstring >( std::auto_ptr< CFileException >( pExc ).get()->m_strFileName ) );	// pExc will be deleted
+						throw CRuntimeException( str::sq::Enquote( std::auto_ptr< CFileException >( pExc ).get()->m_strFileName.GetString() ) );	// pExc will be deleted
 					case MfcExc:
 						throw pExc;
 					default: ASSERT( false );
@@ -547,7 +547,7 @@ namespace fs
 		void __declspec( noreturn ) ThrowFileException( const std::tstring& description, const TCHAR* pFilePath, const TCHAR sep[] /*= _T(": ")*/ ) throws_( CRuntimeException )
 		{
 			std::tstring message = description;
-			stream::Tag( message, str::Enquote< std::tstring >( pFilePath ), sep );
+			stream::Tag( message, str::sq::Enquote( pFilePath ), sep );
 
 			throw CRuntimeException( message );
 		}
@@ -568,7 +568,7 @@ namespace fs
 				if ( !::SetFileAttributes( m_pFilePath, m_origAttr & ~FILE_ATTRIBUTE_READONLY ) )		// temporarily allow changing file times for a read-only file/directory
 				{
 					m_origAttr = INVALID_FILE_ATTRIBUTES;												// failed removing FILE_ATTRIBUTE_READONLY
-					TRACE( _T("* fs::CScopedWriteableFile::CScopedWriteableFile - SetFileAttributes() failed for %s\n"), str::Enquote< std::tstring >( m_pFilePath ).c_str() );
+					TRACE( _T("* fs::CScopedWriteableFile::CScopedWriteableFile - SetFileAttributes() failed for %s\n"), str::sq::Enquote( m_pFilePath ).c_str() );
 				}
 	}
 
@@ -577,7 +577,7 @@ namespace fs
 		if ( m_origAttr != INVALID_FILE_ATTRIBUTES )
 			if ( HasFlag( m_origAttr, FILE_ATTRIBUTE_READONLY ) )			// was readonly?
 				if ( !::SetFileAttributes( m_pFilePath, m_origAttr ) )		// restore original FILE_ATTRIBUTE_READONLY
-					TRACE( _T("* fs::CScopedWriteableFile::~CScopedWriteableFile - SetFileAttributes() failed for %s\n"), str::Enquote< std::tstring >( m_pFilePath ).c_str() );
+					TRACE( _T("* fs::CScopedWriteableFile::~CScopedWriteableFile - SetFileAttributes() failed for %s\n"), str::sq::Enquote( m_pFilePath ).c_str() );
 	}
 
 
@@ -589,7 +589,7 @@ namespace fs
 		, m_origFileTime( fs::ReadFileTime( m_filePath, m_timeField ) )
 	{
 		if ( !time_utl::IsValid( m_origFileTime ) )
-			TRACE( _T("* fs::CScopedFileTime::CScopedFileTime - ReadFileTime() failed for %s\n"), str::Enquote< std::tstring >( m_filePath ).c_str() );
+			TRACE( _T("* fs::CScopedFileTime::CScopedFileTime - ReadFileTime() failed for %s\n"), str::sq::EnquoteStr( m_filePath ).c_str() );
 	}
 
 	CScopedFileTime::~CScopedFileTime()

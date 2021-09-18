@@ -482,19 +482,19 @@ namespace arg
 	// command line
 
 	template< typename ValueT >
-	inline std::tstring Enquote( const ValueT& value, TCHAR quote = _T('\"') ) { return str::Enquote< std::tstring >( value, quote ); }
+	inline std::tstring Enquote( const ValueT& value, TCHAR quote = _T('\"') )
+	{
+		return str::EnquoteStr( str::ValueToString<std::tstring>( value ), quote, true );
+	}
 
 	template< typename ValueT >
 	std::tstring AutoEnquote( const ValueT& value, TCHAR quote = _T('\"') )		// enquote only if it contains spaces
 	{
-		std::tstring text = str::ValueToString< std::tstring >( value );
-		if ( text.find( _T(' ') ) != std::tstring::npos )
-		{
-			text.reserve( text.length() + 2 );
-			text.insert( 0, 1, quote );
-			text.append( 1, quote );
-		}
-		return text;
+		std::tstring text = str::ValueToString<std::tstring>( value );
+		if ( std::tstring::npos == text.find( _T(' ') ) )
+			return text;
+
+		return str::EnquoteStr( text, quote, true );
 	}
 
 	template< typename ValueT >
