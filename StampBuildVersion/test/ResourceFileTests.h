@@ -3,7 +3,7 @@
 #pragma once
 
 
-#ifdef _DEBUG		// no UT code in release builds
+#ifdef USE_UT		// no UT code in release builds
 
 #include "utl/test/UnitTest.h"
 
@@ -19,7 +19,6 @@ class CResourceFileTests : public ut::CConsoleTestCase
 public:
 	static CResourceFileTests& Instance( void );
 
-	void SetDebugChildProcs( bool debugChildProcs ) { m_debugChildProcs = debugChildProcs; }
 	int ExecuteProcess( utl::CProcessCmd& rProcess );
 
 	// ut::ITestCase interface
@@ -32,18 +31,17 @@ private:
 	void FuncTest_StampRcFile( void );
 
 	// impl
+	void testEach_StampRcFile( const TCHAR* pRcFilePath );
 	void testRcFile_CurrentTimestamp( const std::string& newText, const CTime& baselineTimestamp );
 	void testRcFile_RefTimestamp( const std::string& newText );
 private:
-	bool m_debugChildProcs;
-
 	static const TCHAR s_rcFile[];
 	static const std::string s_refTimestamp;
 	static const char s_doubleQuote[];
 };
 
 
-#endif //_DEBUG
+#endif //USE_UT
 
 
 #endif // ResourceFileTests_h

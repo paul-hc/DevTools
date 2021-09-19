@@ -7,7 +7,9 @@ namespace app
 {
 	enum Option
 	{
-		Add_BuildTimestamp = BIT_FLAG( 0 )
+		HelpMode			= BIT_FLAG( 0 ),
+		UnitTestMode		= BIT_FLAG( 1 ),
+		Add_BuildTimestamp	= BIT_FLAG( 2 )
 	};
 	typedef int TOption;
 }

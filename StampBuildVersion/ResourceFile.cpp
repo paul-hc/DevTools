@@ -22,11 +22,12 @@ namespace rc
 			return false;
 
 		if ( rIt.Matches( "//" ) )
-			return false;								// ignore commented line
-		else if ( rIt.Matches( "/*" ) )					// skip "/* some comment */"
+			return false;								// ignore single-line comment
+		else if ( rIt.Matches( "/*" ) )					// skip "/*...*/" comment
 		{
 			if ( !rIt.FindToken( "*/" ) )
 				return false;							// comment not ended on current line
+
 			if ( rIt.SkipWhiteSpace().AtEnd() )
 				return false;
 		}

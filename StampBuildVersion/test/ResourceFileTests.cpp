@@ -1,5 +1,8 @@
 
 #include "stdafx.h"
+
+#ifdef USE_UT		// no UT code in release builds
+
 #include "ResourceFileTests.h"
 #include "Application.h"
 #include "CmdLineOptions.h"
@@ -19,31 +22,8 @@
 #include "utl/TextFileUtils.hxx"
 
 
-#ifdef _DEBUG		// no UT code in release builds
-
-
 namespace ut
 {
-	bool RunApp( const CCmdLineOptions& options )
-	{
-		try
-		{
-			app::RunMain( options );
-			return true;
-		}
-		catch ( const std::exception& exc )
-		{
-			app::ReportException( exc );
-			return false;
-		}
-		catch ( CException* pExc )
-		{
-			app::ReportException( pExc );
-			pExc->Delete();
-			return false;
-		}
-	}
-
 	bool AproxEquals( const CTime& left, const CTime& right )
 	{
 		ASSERT( time_utl::IsValid( left ) );
@@ -59,7 +39,6 @@ const std::string CResourceFileTests::s_refTimestamp = "10-11-2022 10:11:22";
 const char CResourceFileTests::s_doubleQuote[] = "\"";
 
 CResourceFileTests::CResourceFileTests( void )
-	: m_debugChildProcs( false )
 {
 	ut::CTestSuite::Instance().RegisterTestCase( this );		// self-registration
 }
@@ -72,62 +51,12 @@ CResourceFileTests& CResourceFileTests::Instance( void )
 
 int CResourceFileTests::ExecuteProcess( utl::CProcessCmd& rProcess )
 {
-	if ( m_debugChildProcs )
-		rProcess.AddParam( _T("-debug") );		// to debug command line parsing
-
 	return rProcess.Execute();
 }
 
 void CResourceFileTests::TestStampRcFile( void )
 {
-	ut::CTempFilePool pool( s_rcFile );
-	fs::CPath poolDirPath = pool.GetPoolDirPath();
-
-	ASSERT_EQUAL( 1, pool.GetFilePaths().size() );
-	ASSERT_EQUAL( s_rcFile, ut::EnumJoinFiles( poolDirPath ) );
-
-	const fs::CPath& targetRcFilePath = pool.GetFilePaths()[ 0 ];
-
-	fs::thr::CopyFile( (ut::GetStdTestFilesDirPath() / s_rcFile).GetPtr(), targetRcFilePath.GetPtr(), false );
-
-	std::string srcText;
-	utl::ReadStringFromFile( srcText, targetRcFilePath );
-
-	std::string newText;
-
-	CCmdLineOptions options;
-
-	// equivalent command line: "StampBuildVersion.exe <targetRcFilePath>"
-	options.m_targetRcPath = targetRcFilePath;
-	ASSERT( ut::RunApp( options ) );
-	{
-		utl::ReadStringFromFile( newText, targetRcFilePath );
-		ASSERT_EQUAL( srcText, newText );			// ensure no change since "BuildTimestamp" is missing
-	}
-
-	// equivalent command line: "StampBuildVersion.exe <targetRcFilePath> -a"
-	options.m_buildTimestamp = CTime::GetCurrentTime();
-	SetFlag( options.m_optionFlags, app::Add_BuildTimestamp );
-
-	ASSERT( ut::RunApp( options ) );
-	{
-		utl::ReadStringFromFile( newText, targetRcFilePath );
-		ASSERT( newText != srcText );
-
-		testRcFile_CurrentTimestamp( newText, options.m_buildTimestamp );
-	}
-
-	// equivalent command line: "StampBuildVersion.exe <targetRcFilePath> "10-11-2022 10:11:22" -a"
-	ClearFlag( options.m_optionFlags, app::Add_BuildTimestamp );
-	options.m_buildTimestamp = time_utl::ParseStdTimestamp( str::FromUtf8( s_refTimestamp.c_str() ) );
-
-	ASSERT( ut::RunApp( options ) );
-	{
-		utl::ReadStringFromFile( newText, targetRcFilePath );
-		ASSERT( newText != srcText );
-
-		testRcFile_RefTimestamp( newText );
-	}
+	testEach_StampRcFile( s_rcFile );
 }
 
 void CResourceFileTests::FuncTest_StampRcFile( void )
@@ -193,6 +122,58 @@ void CResourceFileTests::FuncTest_StampRcFile( void )
 }
 
 
+void CResourceFileTests::testEach_StampRcFile( const TCHAR* pRcFilePath )
+{
+	ut::CTempFilePool pool( pRcFilePath );
+	fs::CPath poolDirPath = pool.GetPoolDirPath();
+
+	ASSERT_EQUAL( 1, pool.GetFilePaths().size() );
+	ASSERT_EQUAL( pRcFilePath, ut::EnumJoinFiles( poolDirPath ) );
+
+	const fs::CPath& targetRcFilePath = pool.GetFilePaths()[ 0 ];
+
+	fs::thr::CopyFile( (ut::GetStdTestFilesDirPath() / pRcFilePath).GetPtr(), targetRcFilePath.GetPtr(), false );
+
+	std::string srcText;
+	utl::ReadStringFromFile( srcText, targetRcFilePath );
+
+	std::string newText;
+
+	CCmdLineOptions options;
+
+	// equivalent command line: "StampBuildVersion.exe <targetRcFilePath>"
+	options.m_targetRcPath = targetRcFilePath;
+	app::RunMain( options );
+	{
+		utl::ReadStringFromFile( newText, targetRcFilePath );
+		ASSERT_EQUAL( srcText, newText );			// ensure no change since "BuildTimestamp" is missing
+	}
+
+	// equivalent command line: "StampBuildVersion.exe <targetRcFilePath> -a"
+	options.m_buildTimestamp = CTime::GetCurrentTime();
+	SetFlag( options.m_optionFlags, app::Add_BuildTimestamp );
+
+	app::RunMain( options );
+	{
+		utl::ReadStringFromFile( newText, targetRcFilePath );
+		ASSERT( newText != srcText );
+
+		testRcFile_CurrentTimestamp( newText, options.m_buildTimestamp );
+	}
+
+	// equivalent command line: "StampBuildVersion.exe <targetRcFilePath> "10-11-2022 10:11:22" -a"
+	ClearFlag( options.m_optionFlags, app::Add_BuildTimestamp );
+	options.m_buildTimestamp = time_utl::ParseStdTimestamp( str::FromUtf8( s_refTimestamp.c_str() ) );
+
+	app::RunMain( options );
+	{
+		utl::ReadStringFromFile( newText, targetRcFilePath );
+		ASSERT( newText != srcText );
+
+		testRcFile_RefTimestamp( newText );
+	}
+}
+
 void CResourceFileTests::testRcFile_CurrentTimestamp( const std::string& newText, const CTime& baselineTimestamp )
 {
 	rc::TTokenIterator it( newText );
@@ -228,4 +209,4 @@ void CResourceFileTests::Run( void )
 }
 
 
-#endif //_DEBUG
+#endif //USE_UT

@@ -9,16 +9,11 @@
 #include "utl/TimeUtils.h"
 #include <iostream>
 
-#ifdef _DEBUG
-#define USE_UT
-
 #ifdef USE_UT
 	#include "utl/MultiThreading.h"
 	#include "utl/test/UtlConsoleTests.h"
 	#include "test/ResourceFileTests.h"
 #endif // USE_UT
-
-#endif // _DEBUG
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -27,13 +22,11 @@
 
 namespace ut
 {
-	void RegisterAppUnitTests( bool debugChildProcs )
+	void RegisterAppUnitTests( void )
 	{
 	#ifdef USE_UT
-		ut::RegisterUtlConsoleTests();
-		CResourceFileTests::Instance().SetDebugChildProcs( debugChildProcs );		// register TransferFiles tests
-	#else
-		debugChildProcs;
+		ut::RegisterUtlConsoleTests();		// register all UTL console tests
+		CResourceFileTests::Instance();		// register application's tests
 	#endif
 	}
 }
@@ -47,7 +40,7 @@ static const char s_helpMessage[] =
 	"\n"
 	"Written by Paul Cocoveanu, 2021.\n"
 	"\n"
-	"StampBuildVersion rc_file_path [timestamp] [/a]\n"
+	"StampBuildVersion rc_file_path [timestamp] [-a]\n"
 	"\n"
 	"  rc_file_path\n"
 	"      Path to the destination resource file in a Visual C++ project.\n"
@@ -58,15 +51,15 @@ static const char s_helpMessage[] =
 	"      in 'DD-MM-YYYY H:mm:ss' format.\n"
 	"      Example:\n"
 	"        '16-09-2021 17:30:00'\n"
-	"  /a\n"
+	"  -a\n"
 	"      Force adding the \"BuildTimestamp\" entry into the VS_VERSION_INFO.\n"
-	"  /? or /h\n"
+	"  -? or -h\n"
 	"      Display this help screen.\n"
 #ifdef USE_UT
 	"\n"
 	"DEBUG BUILD:\n"
-	"  /ut\n"
-	"      Run unit tests.\n"
+	"  -ut\n"
+	"      Run the unit tests.\n"
 #endif
 	;
 
@@ -92,28 +85,24 @@ int _tmain( int argc, TCHAR* argv[] )
 {
 	CConsoleApplication application;
 
-#ifdef USE_UT
-	// options to check outside the try block (debugging)
-	ASSERT( !app::HasCommandLineOption( _T("debug") ) );
-
-	std::tstring value;
-	if ( app::HasCommandLineOption( _T("ut"), &value ) )
-	{
-		st::CScopedInitializeOle scopedOle;		// some unit tests require OLE ()
-
-		ut::RegisterAppUnitTests( value == _T("debug") );
-		ut::RunAllTests();
-		return 0;
-	}
-#endif
-
 	try
 	{
 		CCmdLineOptions options;
 		options.ParseCommandLine( argc, argv );
 
-		if ( options.m_helpMode )
+		if ( HasFlag( options.m_optionFlags, app::HelpMode ) )
 			std::cout << std::endl << s_helpMessage << std::endl;
+		else if ( HasFlag( options.m_optionFlags, app::UnitTestMode ) )
+		{
+		#ifdef USE_UT
+			st::CScopedInitializeOle scopedOle;		// some unit tests require OLE ()
+
+			ut::RegisterAppUnitTests();
+			ut::RunAllTests();
+		#else
+			ASSERT( false );		// no unit tests available
+		#endif
+		}
 		else
 			app::RunMain( options );
 
