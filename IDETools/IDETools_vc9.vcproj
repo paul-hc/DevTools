@@ -28,6 +28,8 @@
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
+				Description="Stamping build time in resource file..."
+				CommandLine="StampBuildVersion.exe $(ProjectDir)$(ProjectName).rc"
 			/>
 			<Tool
 				Name="VCCustomBuildTool"

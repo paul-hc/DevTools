@@ -595,6 +595,7 @@ BEGIN
     BEGIN
         BLOCK "040904e4"
         BEGIN
+            VALUE "BuildTimestamp", "18-09-2021 22:00:28"
             VALUE "Comments", "Split UTL_BASE/UTL_UI projects"
             VALUE "CompanyName", "Paul Cocoveanu"
             VALUE "Email", "phc.2nd@gmail.com"

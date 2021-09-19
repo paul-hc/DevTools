@@ -274,7 +274,8 @@
     <ClInclude Include="test\ThreadingTests.h" />
     <ClInclude Include="test\UnitTest.h" />
     <ClInclude Include="test\UtlConsoleTests.h" />
-    <ClInclude Include="TextFileParser.h" />
+    <ClInclude Include="TextFileUtils.h" />
+    <ClInclude Include="TextFileUtils.hxx" />
     <ClInclude Include="Timer.h" />
     <ClInclude Include="TimeUtils.h" />
     <ClInclude Include="TokenIterator.h" />
@@ -344,7 +345,7 @@
     <ClCompile Include="test\ThreadingTests.cpp" />
     <ClCompile Include="test\UnitTest.cpp" />
     <ClCompile Include="test\UtlConsoleTests.cpp" />
-    <ClCompile Include="TextFileParser.cpp" />
+    <ClCompile Include="TextFileUtils.cpp" />
     <ClCompile Include="Timer.cpp" />
     <ClCompile Include="TimeUtils.cpp" />
     <ClCompile Include="TokenIterator.cpp" />

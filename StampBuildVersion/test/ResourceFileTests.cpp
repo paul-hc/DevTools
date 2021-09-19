@@ -54,7 +54,7 @@ namespace ut
 }
 
 
-const TCHAR CResourceFileTests::s_rcFile[] = _T("MyTool_clean.rc");
+const TCHAR CResourceFileTests::s_rcFile[] = _T("MyTool_ANSI.rc");
 const std::string CResourceFileTests::s_refTimestamp = "10-11-2022 10:11:22";
 const char CResourceFileTests::s_doubleQuote[] = "\"";
 

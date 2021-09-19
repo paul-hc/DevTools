@@ -55,9 +55,6 @@
     <ClInclude Include="SubjectPredicates.h">
       <Filter>utl</Filter>
     </ClInclude>
-    <ClInclude Include="TextFileParser.h">
-      <Filter>utl</Filter>
-    </ClInclude>
     <ClInclude Include="Timer.h">
       <Filter>utl</Filter>
     </ClInclude>
@@ -316,6 +313,12 @@
     <ClInclude Include="targetver.h">
       <Filter>Source Files</Filter>
     </ClInclude>
+    <ClInclude Include="TextFileUtils.h">
+      <Filter>utl\File System</Filter>
+    </ClInclude>
+    <ClInclude Include="TextFileUtils.hxx">
+      <Filter>utl\File System</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="EnumTags.cpp">
@@ -331,9 +334,6 @@
       <Filter>utl</Filter>
     </ClCompile>
     <ClCompile Include="StringUtilities.cpp">
-      <Filter>utl</Filter>
-    </ClCompile>
-    <ClCompile Include="TextFileParser.cpp">
       <Filter>utl</Filter>
     </ClCompile>
     <ClCompile Include="TokenIterator.cpp">
@@ -503,6 +503,9 @@
     </ClCompile>
     <ClCompile Include="stdafx.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TextFileUtils.cpp">
+      <Filter>utl\File System</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

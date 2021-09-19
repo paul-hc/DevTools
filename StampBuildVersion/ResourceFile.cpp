@@ -117,7 +117,7 @@ void CResourceFile::Report( std::ostream& os ) const
 	os << m_rcFilePath << "(" << GetBuildTimestampLineNum() << ") : stamped build time to '" << time_utl::FormatTimestamp( m_newBuildTimestamp ) << "'";
 
 	if ( time_utl::IsValid( m_origBuildTimestamp ) )
-		os << "  (last was '" << time_utl::FormatTimestamp( m_origBuildTimestamp ) << "')";
+		os << "  (was '" << time_utl::FormatTimestamp( m_origBuildTimestamp ) << "')";
 
 	os << "." << std::endl;
 }
@@ -188,11 +188,12 @@ namespace rc
 			if ( rc::SkipTrivial( rIt ) )
 				if ( *s_doubleQuote == *rIt )
 				{
-					if ( ParseEntry_BuildTimestamp( rIt ) )
-						m_pOwner->m_pos.m_buildTimestamp = m_lineNo - 1;
-					else if ( !m_pOwner->FoundFirstValue() )
+					if ( !m_pOwner->FoundFirstValue() )
 						if ( InStringValuesBlock() )
 							m_pOwner->m_pos.m_firstValue = m_lineNo - 1;
+
+					if ( ParseEntry_BuildTimestamp( rIt ) )
+						m_pOwner->m_pos.m_buildTimestamp = m_lineNo - 1;
 
 					return true;
 				}

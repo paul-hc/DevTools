@@ -110,6 +110,12 @@
       <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(IntDir);../CommonUtl;../CommonUtl/utl/UI;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
+    <PreBuildEvent>
+      <Command>StampBuildVersion.exe -a $(ProjectDir)$(ProjectName).rc -a</Command>
+    </PreBuildEvent>
+    <PreBuildEvent>
+      <Message>Stamping build time in resource file...</Message>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="BrowseThemesDialog.h" />
