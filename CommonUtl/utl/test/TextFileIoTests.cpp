@@ -46,9 +46,16 @@ namespace ut
 		return rBuffer;
 	}
 
+	std::tstring FormatTextFilename( fs::Encoding encoding, const TCHAR fmt[] = _T("tf_%s.txt") )
+	{
+		return str::Format( fmt, fs::GetTags_Encoding().FormatKey( encoding ).c_str() );
+	}
+
+
 	// test implementation
 	void test_TextFile_Narrow( fs::Encoding encoding, const fs::CPath& textPath, const std::string& content, const char pExpected[], size_t expectedSize = std::string::npos );
-	void test_FileBom_NarrowIo( fs::Encoding encoding, const ut::CTempFilePool& pool );
+	void test_WriteParse_Narrow( fs::Encoding encoding );
+	void test_WriteParse_Wide( fs::Encoding encoding );
 }
 
 
@@ -69,7 +76,7 @@ void CTextFileIoTests::TestByteOrderMark( void )
 	{
 		fs::CByteOrderMark bomAnsi( fs::ANSI );
 
-		ASSERT( !bomAnsi.HasBom() );
+		ASSERT( bomAnsi.IsEmpty() );
 	}
 	{
 		fs::CByteOrderMark bomUTF8( fs::UTF8_bom );
@@ -119,7 +126,7 @@ void CTextFileIoTests::TestTextFileWithEncoding( void )
 	{
 		fs::Encoding encoding = fs::ANSI;
 
-		ut::CTempFilePool pool( str::Format( _T("tf_%s.txt"), fs::GetTags_Encoding().FormatKey( encoding ).c_str() ).c_str() );
+		ut::CTempFilePool pool( ut::FormatTextFilename( encoding ).c_str() );
 		const fs::CPath& textPath = pool.GetFilePaths().front();
 
 		// check empty file
@@ -137,7 +144,7 @@ void CTextFileIoTests::TestTextFileWithEncoding( void )
 	{
 		fs::Encoding encoding = fs::UTF8_bom;
 
-		ut::CTempFilePool pool( str::Format( _T("tf_%s.txt"), fs::GetTags_Encoding().FormatKey( encoding ).c_str() ).c_str() );
+		ut::CTempFilePool pool( ut::FormatTextFilename( encoding ).c_str() );
 		const fs::CPath& textPath = pool.GetFilePaths().front();
 
 		// check empty file
@@ -155,7 +162,7 @@ void CTextFileIoTests::TestTextFileWithEncoding( void )
 	{
 		fs::Encoding encoding = fs::UTF16_LE_bom;
 
-		ut::CTempFilePool pool( str::Format( _T("tf_%s.txt"), fs::GetTags_Encoding().FormatKey( encoding ).c_str() ).c_str() );
+		ut::CTempFilePool pool( ut::FormatTextFilename( encoding ).c_str() );
 		const fs::CPath& textPath = pool.GetFilePaths().front();
 
 		// check empty file
@@ -175,7 +182,7 @@ void CTextFileIoTests::TestTextFileWithEncoding( void )
 	{
 		fs::Encoding encoding = fs::UTF16_be_bom;
 
-		ut::CTempFilePool pool( str::Format( _T("tf_%s.txt"), fs::GetTags_Encoding().FormatKey( encoding ).c_str() ).c_str() );
+		ut::CTempFilePool pool( ut::FormatTextFilename( encoding ).c_str() );
 		const fs::CPath& textPath = pool.GetFilePaths().front();
 
 		// check empty file
@@ -213,19 +220,23 @@ void ut::test_TextFile_Narrow( fs::Encoding encoding, const fs::CPath& textPath,
 }
 
 
-void CTextFileIoTests::TestFileBom_NarrowIo( void )
+void CTextFileIoTests::TestWriteParse( void )
 {
-	ut::CTempFilePool pool( _T("tf_ANSI.txt|tf_UTF8.txt|tf_UTF16_LE.txt|tf_UTF16_le.txt|tf_UTF32_LE.txt|tf_UTF32_be.txt") );
+	ut::test_WriteParse_Narrow( fs::ANSI );
+	ut::test_WriteParse_Narrow( fs::UTF8_bom );
+	ut::test_WriteParse_Narrow( fs::UTF16_LE_bom );
+	ut::test_WriteParse_Narrow( fs::UTF16_be_bom );
 
-	ut::test_FileBom_NarrowIo( fs::ANSI, pool );
-	ut::test_FileBom_NarrowIo( fs::UTF8_bom, pool );
-	ut::test_FileBom_NarrowIo( fs::UTF16_LE_bom, pool );
-	ut::test_FileBom_NarrowIo( fs::UTF16_be_bom, pool );
+	ut::test_WriteParse_Wide( fs::ANSI );
+	ut::test_WriteParse_Wide( fs::UTF8_bom );
+	ut::test_WriteParse_Wide( fs::UTF16_LE_bom );
+	ut::test_WriteParse_Wide( fs::UTF16_be_bom );
 }
 
-void ut::test_FileBom_NarrowIo( fs::Encoding encoding, const ut::CTempFilePool& pool )
+void ut::test_WriteParse_Narrow( fs::Encoding encoding )
 {
-	const fs::CPath& textPath = pool.GetFilePaths()[ encoding ];
+	ut::CTempFilePool pool( ut::FormatTextFilename( encoding ).c_str() );
+	const fs::CPath& textPath = pool.GetFilePaths()[ 0 ];
 
 	CTextFileParser< std::string > narrowParser;
 	const std::vector< std::string >& narrowLines = narrowParser.GetParsedLines();
@@ -259,6 +270,45 @@ void ut::test_FileBom_NarrowIo( fs::Encoding encoding, const ut::CTempFilePool& 
 	ASSERT_EQUAL( "C3", narrowLines[ 2 ] );
 	ASSERT_EQUAL( "D4", narrowLines[ 3 ] );
 }
+
+void ut::test_WriteParse_Wide( fs::Encoding encoding )
+{
+	ut::CTempFilePool pool( ut::FormatTextFilename( encoding ).c_str() );
+	const fs::CPath& textPath = pool.GetFilePaths()[ 0 ];
+
+	CTextFileParser< std::wstring > narrowParser;
+	const std::vector< std::wstring >& narrowLines = narrowParser.GetParsedLines();
+
+	// check empty file
+	io::WriteStringToFile( textPath, std::wstring(), encoding );
+	narrowParser.ParseFile( textPath );
+	ASSERT_EQUAL( 1, narrowLines.size() );
+	ASSERT_EQUAL( L"", narrowLines[ 0 ] );
+
+	// check single-line file (no line-end)
+	static const std::wstring s_singleText( L"ABC" );
+	io::WriteStringToFile( textPath, s_singleText, encoding );
+	narrowParser.ParseFile( textPath );
+	ASSERT_EQUAL( 1, narrowLines.size() );
+	ASSERT_EQUAL( s_singleText, narrowLines[ 0 ] );
+
+	// check 2-lines file (1 line-end)
+	io::WriteStringToFile( textPath, s_singleText + L"\n", encoding );
+	narrowParser.ParseFile( textPath );
+	ASSERT_EQUAL( 2, narrowLines.size() );
+	ASSERT_EQUAL( s_singleText, narrowLines[ 0 ] );
+	ASSERT_EQUAL( L"", narrowLines[ 1 ] );
+
+	// check multiple-lines file
+	io::WriteStringToFile( textPath, std::wstring( L"A1\nB2\nC3\nD4" ), encoding );
+	narrowParser.ParseFile( textPath );
+	ASSERT_EQUAL( 4, narrowLines.size() );
+	ASSERT_EQUAL( L"A1", narrowLines[ 0 ] );
+	ASSERT_EQUAL( L"B2", narrowLines[ 1 ] );
+	ASSERT_EQUAL( L"C3", narrowLines[ 2 ] );
+	ASSERT_EQUAL( L"D4", narrowLines[ 3 ] );
+}
+
 
 void CTextFileIoTests::TestFileBom_WideIo( void )
 {
@@ -325,78 +375,15 @@ void CTextFileIoTests::TestFileIo( void )
 }
 
 
-int myTest();
 void CTextFileIoTests::Run( void )
 {
 	__super::Run();
-myTest();
+
 	TestByteOrderMark();
 	TestTextFileWithEncoding();
-	TestFileBom_NarrowIo();
+	TestWriteParse();
 	TestFileBom_WideIo();
 	TestFileIo();
-}
-
-// unicode_basic_filebuf.cpp
-// compile with: /EHsc
-
-#include <iostream>
-#include <string>
-#include <fstream>
-#include <iomanip>
-#include <memory.h>
-#include <string.h>
-
-
-int myTest()
-{
-	ut::CTempFilePool pool;
-	fs::CPath dirPath = pool.GetPoolDirPath();
-	fs::CPath ansiPath = dirPath / L"wcHello.txt.bin";
-	fs::CPath widePath = dirPath / L"wwHello.txt.bin";
-
-	const wchar_t* wszHello = L"\nHello World";
-
-	std::basic_filebuf< wchar_t > file;
-
-	// Open a file, wcHello.txt, then write to it, then dump the
-	// file's contents in hex
-	file.open( ansiPath.GetPtr(),							// "wcHello.txt"
-		std::ios::out | std::ios::trunc | std::ios::binary);
-	if(!file.is_open())
-	{
-		std::cout << "Error Opening wcHello.txt\n";
-		return -1;
-	}
-
-	file.sputn(wszHello, (std::streamsize)wcslen(wszHello));
-
-	file.close();
-	std::cout << "Hex Dump of wcHello.txt - note that output is ANSI chars:" << std::endl;
-	ut::HexDump( std::cout, ansiPath );
-
-	// Open a file, wwHello.txt, then set the internal buffer of
-	// the basic_filebuf object to be of type wchar_t, then write
-	// to the file and dump the file's contents in hex
-	file.open( widePath.GetPtr(),							// "wwHello.txt"
-		std::ios::out | std::ios::trunc | std::ios::binary );
-
-	if ( !file.is_open() )
-	{
-		std::cout << "Error Opening wwHello.txt\n";
-		return -1;
-	}
-
-	wchar_t wBuffer[ 128 ];
-	file.pubsetbuf(wBuffer, (std::streamsize)128);		// prevent UTF8 char output conversion: to store wchar_t strings in the buffer
-
-	file.sputn( wszHello, (std::streamsize)wcslen( wszHello ) );
-
-	file.close();
-	std::cout << "\nHex Dump of wwHello.txt - note that output is wchar_t chars:\n";
-	ut::HexDump( std::cout, widePath );
-
-	return 0;
 }
 
 

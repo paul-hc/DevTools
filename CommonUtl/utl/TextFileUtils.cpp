@@ -24,6 +24,11 @@ namespace io
 		throw CRuntimeException( str::Format( _T("Cannot open text file for writing: %s"), filePath.GetPtr() ) );
 	}
 
+	void __declspec( noreturn ) ThrowUnsupportedEncoding( fs::Encoding encoding ) throws_( CRuntimeException )
+	{
+		throw CRuntimeException( str::Format( _T("Support for %s text file encoding not implemented"), fs::GetTags_Encoding().FormatUi( encoding ).c_str() ) );
+	}
+
 
 	namespace bin
 	{
@@ -35,7 +40,6 @@ namespace io
 			io::CheckOpenForReading( ifs, srcFilePath );
 
 			rBuffer.assign( std::istreambuf_iterator<char>( ifs ),  std::istreambuf_iterator<char>() );		// verbatim buffer of chars
-			ifs.close();
 		}
 	}
 }
@@ -86,43 +90,6 @@ namespace io
 				++prevPos;
 			}
 		}
-
-
-		template< typename CharT >
-		void DoWriteStringToFile( const fs::CPath& targetFilePath, const std::basic_string< CharT >& text ) throws_( CRuntimeException )
-		{
-			std::basic_ofstream< CharT > ofs( targetFilePath.GetPtr(), std::ios::out | std::ios::app );		// append mode: skip the BOM
-			io::CheckOpenForWriting( ofs, targetFilePath );
-
-			ofs << text;			// verbatim text string in text mode: with line-end translation
-		}
-
-		template< typename CharT, typename ChEncodeFunc >
-		void DoWriteStringToFile_UtfWide( const fs::CPath& targetFilePath, const std::basic_string<CharT>& text, ChEncodeFunc chEncodeFunc ) throws_( CRuntimeException )
-		{
-			// open for writting in binary/appending mode
-			std::basic_filebuf< CharT > file;
-
-			file.open( targetFilePath.GetPtr(), std::ios::out | std::ios::binary | std::ios::app );
-			io::CheckOpenForWriting( file, targetFilePath );
-
-			CharT writeBuffer[ KiloByte ];
-			file.pubsetbuf( writeBuffer, COUNT_OF( writeBuffer ) );		// prevent UTF8 char output conversion: to store wchar_t strings in the buffer
-
-			// insert the string doing text-mode transations
-			typedef const CharT* const_iterator;
-
-			if ( !text.empty() )
-				for ( const_iterator pCh = &text[ 0 ], pPrevCh = NULL; *pCh != L'\0'; ++pCh )
-				{
-					if ( '\n' == *pCh )
-						if ( NULL == pPrevCh || *pPrevCh != '\r' )		// we don't have an "\r\n" explicit sequence?
-							file.sputc( chEncodeFunc( '\r' ) );			// translate sequence '\n' -> "\r\n"
-
-					file.sputc( chEncodeFunc( *pCh ) );
-					pPrevCh = pCh;
-				}
-		}
 	}
 
 
@@ -151,7 +118,7 @@ namespace io
 			case fs::UTF32_LE_bom:
 			case fs::UTF32_be_bom:
 			default:
-				throw CRuntimeException( str::Format( _T("Support for %s text file encoding not implemented"), fs::GetTags_Encoding().FormatUi( bom.GetEncoding() ) ) );
+				ThrowUnsupportedEncoding( bom.GetEncoding() );
 		}
 
 		return bom.GetEncoding();
@@ -180,65 +147,35 @@ namespace io
 			case fs::UTF32_LE_bom:
 			case fs::UTF32_be_bom:
 			default:
-				throw CRuntimeException( str::Format( _T("Support for %s text file encoding not implemented"), fs::GetTags_Encoding().FormatUi( bom.GetEncoding() ) ) );
+				ThrowUnsupportedEncoding( bom.GetEncoding() );
 		}
 
 		return bom.GetEncoding();
 	}
 
-
-	void WriteStringToFile( const fs::CPath& targetFilePath, const std::string& text, fs::Encoding encoding /*= fs::ANSI*/ ) throws_( CRuntimeException )
+	fs::Encoding ReadStringFromFile( str::wstring4& rText, const fs::CPath& srcFilePath ) throws_( CRuntimeException )
 	{
-		const fs::CByteOrderMark bom( encoding );
-		bom.WriteToFile( targetFilePath );
+		fs::CByteOrderMark bom;
 
-		switch ( encoding )
+		switch ( bom.ReadFromFile( srcFilePath ) )
 		{
 			case fs::ANSI:
 			case fs::UTF8_bom:
-				impl::DoWriteStringToFile( targetFilePath, text );
-				break;
 			case fs::UTF16_LE_bom:
 			case fs::UTF16_be_bom:
 			{
-				std::wstring wideText = str::FromUtf8( text.c_str() );
-				fs::UTF16_LE_bom == encoding
-					? impl::DoWriteStringToFile_UtfWide( targetFilePath, wideText, func::CharConvert<fs::UTF16_LE_bom>() )
-					: impl::DoWriteStringToFile_UtfWide( targetFilePath, wideText, func::CharConvert<fs::UTF16_be_bom>() );
+				std::wstring wideText;
+				ReadStringFromFile( wideText, srcFilePath );
+				rText = str::FromWide( wideText.c_str() );
 				break;
 			}
 			case fs::UTF32_LE_bom:
 			case fs::UTF32_be_bom:
 			default:
-				throw CRuntimeException( str::Format( _T("Support for %s text file encoding not implemented"), fs::GetTags_Encoding().FormatUi( encoding ) ) );
+				ThrowUnsupportedEncoding( bom.GetEncoding() );
 		}
-	}
 
-	void WriteStringToFile( const fs::CPath& targetFilePath, const std::wstring& text, fs::Encoding encoding /*= fs::UTF16_LE_bom*/ ) throws_( CRuntimeException )
-	{
-		const fs::CByteOrderMark bom( encoding );
-		bom.WriteToFile( targetFilePath );
-
-		switch ( encoding )
-		{
-			case fs::ANSI:
-			case fs::UTF8_bom:
-			{
-				std::string narrowText = str::ToUtf8( text.c_str() );
-				impl::DoWriteStringToFile( targetFilePath, narrowText );
-				break;
-			}
-			case fs::UTF16_LE_bom:
-				impl::DoWriteStringToFile_UtfWide( targetFilePath, text, func::CharConvert<fs::UTF16_LE_bom>() );
-				break;
-			case fs::UTF16_be_bom:
-				impl::DoWriteStringToFile_UtfWide( targetFilePath, text, func::CharConvert<fs::UTF16_be_bom>() );
-				break;
-			case fs::UTF32_LE_bom:
-			case fs::UTF32_be_bom:
-			default:
-				throw CRuntimeException( str::Format( _T("Support for %s text file encoding not implemented"), fs::GetTags_Encoding().FormatUi( encoding ) ) );
-		}
+		return bom.GetEncoding();
 	}
 }
 

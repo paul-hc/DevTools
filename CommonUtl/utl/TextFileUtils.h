@@ -3,7 +3,7 @@
 #pragma once
 
 #include "RuntimeException.h"
-#include "Encoding.h"
+#include "TextEncoding.h"
 
 
 namespace fs { class CPath; }
@@ -13,6 +13,7 @@ namespace io
 {
 	void __declspec( noreturn ) ThrowOpenForReading( const fs::CPath& filePath ) throws_( CRuntimeException );
 	void __declspec( noreturn ) ThrowOpenForWriting( const fs::CPath& filePath ) throws_( CRuntimeException );
+	void __declspec( noreturn ) ThrowUnsupportedEncoding( fs::Encoding encoding ) throws_( CRuntimeException );
 
 
 	template< typename FileStreamT >
@@ -49,13 +50,117 @@ namespace io
 
 namespace io
 {
-	// string read/write with entire text file
+	// Interface that provides a tight (restricted) API for writing encoded text files.
+	//
+	template< typename CharT >
+	interface ITight_ostream : public utl::IMemoryManaged
+	{
+		typedef std::basic_ofstream< CharT > TBaseStream;
 
-	fs::Encoding ReadStringFromFile( std::string& rText, const fs::CPath& srcFilePath ) throws_( CRuntimeException );
-	fs::Encoding ReadStringFromFile( std::wstring& rText, const fs::CPath& srcFilePath ) throws_( CRuntimeException );
+		virtual TBaseStream& GetStream( void ) = 0;			// for text-mode standard output: use it with care (just for ANSI/UTF8 encodings)
+		virtual void Append( CharT chr ) = 0;
 
-	void WriteStringToFile( const fs::CPath& targetFilePath, const std::string& text, fs::Encoding encoding = fs::ANSI ) throws_( CRuntimeException );
-	void WriteStringToFile( const fs::CPath& targetFilePath, const std::wstring& text, fs::Encoding encoding = fs::UTF16_LE_bom ) throws_( CRuntimeException );
+		virtual void Append( const CharT* pText )
+		{
+			ASSERT_PTR( pText );
+			for ( ; *pText != 0; ++pText )
+				Append( *pText );
+		}
+
+		virtual void AppendStr( const std::basic_string< CharT >& text ) { Append( text.c_str() ); }
+	};
+
+
+	// File output stream with BOM (Byte Order Mark) support that opens for writing in binary/append mode.
+	// The public API is very restricted to limit support for unformated char/string output with text-mode translation and byte-swapping.
+	//
+	template< typename CharT, fs::Encoding encoding = fs::ANSI >
+	class CEncoded_ofstream : protected std::basic_ofstream< CharT >, public ITight_ostream< CharT >
+	{
+	public:
+		CEncoded_ofstream( void )
+			: m_bom( encoding )
+			, m_isBinary( true )
+			, m_lastCh( 0 )
+		{
+		}
+
+		CEncoded_ofstream( const fs::CPath& filePath ) throws_( CRuntimeException )
+			: m_bom( encoding )
+			, m_isBinary( true )
+			, m_lastCh( 0 )
+		{
+			Open( filePath );
+		}
+
+		CEncoded_ofstream& Open( const fs::CPath& filePath ) throws_( CRuntimeException )
+		{
+			m_filePath = filePath;
+			m_isBinary = true;
+			m_lastCh = 0;
+
+			// open in binary mode (with translation and byte-swapping)
+			open( m_filePath.GetPtr(), std::ios::out | std::ios::binary, std::ios::_Openprot );
+			io::CheckOpenForReading( *this, m_filePath );
+
+			rdbuf()->pubsetbuf( m_writeBuffer, COUNT_OF( m_writeBuffer ) );			// prevent UTF8 char input conversion: to store wchar_t strings in the buffer
+
+			if ( !m_bom.IsEmpty() )
+				write( (const CharT*)&m_bom.Get().front(), m_bom.GetCharCount() );	// write the BOM at the beginning of file
+
+			switch ( encoding )
+			{
+				case fs::ANSI:
+				case fs::UTF8_bom:
+					// re-open in text/append mode
+					close();
+					open( filePath.GetPtr(), std::ios::out | std::ios::app, (int)std::ios::_Openprot );	// re-open in text mode (no translation required)
+					io::CheckOpenForReading( *this, m_filePath );
+					m_isBinary = false;
+					break;
+			}
+			return *this;
+		}
+
+		// ITight_ostream<CharT> interface
+		virtual TBaseStream& GetStream( void ) { ASSERT( !m_isBinary ); return *this; }		// for text-mode standard output
+
+		virtual void Append( CharT chr )
+		{
+			ASSERT( is_open() );
+
+			if ( m_isBinary && '\n' == chr )
+				if ( 0 == m_lastCh || m_lastCh != '\r' )		// not an "\r\n" explicit sequence?
+					put( m_encodeFunc( '\r' ) );				// translate sequence "\n" -> "\r\n"
+
+			put( m_encodeFunc( chr ) );
+			m_lastCh = chr;
+		}
+	private:
+		fs::CPath m_filePath;				// destination file path
+		const fs::CByteOrderMark m_bom;
+		bool m_isBinary;					// only when open in binary mode
+		CharT m_writeBuffer[ KiloByte ];
+		func::CharConvert< encoding > m_encodeFunc;
+
+		CharT m_lastCh;
+	public:
+		// from basic_ofstream
+		using TBaseStream::is_open;
+		using TBaseStream::close;
+		// from basic_ostream
+		using TBaseStream::flush;
+		using TBaseStream::tellp;
+		// from basic_ios
+		using TBaseStream::imbue;
+		// from ios_base
+		using TBaseStream::good;
+		using TBaseStream::eof;
+		using TBaseStream::fail;
+		using TBaseStream::bad;
+		using TBaseStream::operator void*;
+		using TBaseStream::operator!;
+	};
 }
 
 
@@ -65,9 +170,20 @@ namespace io
 
 	template< typename CharT >
 	std::auto_ptr< std::basic_istream<CharT> > OpenEncodedInputStream( fs::Encoding& rEncoding, const fs::CPath& srcFilePath ) throws_( CRuntimeException );
+}
 
-	template< typename CharT >
-	std::auto_ptr< std::basic_istream<CharT> > OpenEncodedOutputStream( fs::Encoding& rEncoding, const fs::CPath& srcFilePath ) throws_( CRuntimeException );
+
+namespace io
+{
+	// string read/write with entire text file
+
+	fs::Encoding ReadStringFromFile( std::string& rText, const fs::CPath& srcFilePath ) throws_( CRuntimeException );
+	fs::Encoding ReadStringFromFile( std::wstring& rText, const fs::CPath& srcFilePath ) throws_( CRuntimeException );
+	fs::Encoding ReadStringFromFile( str::wstring4& rText, const fs::CPath& srcFilePath ) throws_( CRuntimeException );
+
+
+	template< typename StringT >
+	bool WriteStringToFile( const fs::CPath& targetFilePath, const StringT& StringT, fs::Encoding encoding = fs::ANSI ) throws_( CRuntimeException );
 }
 
 
@@ -83,6 +199,10 @@ namespace io
 
 
 	// write container of lines to text file
+
+	template< typename LinesT >
+	void WriteLinesToFile( const fs::CPath& targetFilePath, const LinesT& srcLines, fs::Encoding encoding ) throws_( CRuntimeException );
+
 
 	template< typename LinesT >
 	void WriteLinesToFile( const fs::CPath& targetFilePath, const LinesT& srcLines ) throws_( CRuntimeException );

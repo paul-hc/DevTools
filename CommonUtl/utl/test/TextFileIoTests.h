@@ -22,7 +22,7 @@ public:
 private:
 	void TestByteOrderMark( void );
 	void TestTextFileWithEncoding( void );
-	void TestFileBom_NarrowIo( void );
+	void TestWriteParse( void );
 	void TestFileBom_WideIo( void );
 	void TestFileIo( void );
 };

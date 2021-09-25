@@ -29,7 +29,7 @@ namespace fs
 		Encoding GetEncoding( void ) const { return m_encoding; }
 		void SetEncoding( Encoding encoding );
 
-		bool HasBom( void ) const { return !m_bom.empty(); }
+		bool IsEmpty( void ) const { return m_bom.empty(); }
 		const std::vector< char >& Get( void ) const { return m_bom; }
 		size_t GetCharCount( void ) const { return m_bom.size() / fs::GetCharByteCount( m_encoding ); }		// count of BOM in encoding_chars (not BYTES for wide encodings)
 

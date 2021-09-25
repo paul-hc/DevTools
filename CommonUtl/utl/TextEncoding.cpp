@@ -126,7 +126,7 @@ namespace fs
 		std::ofstream ofs( targetFilePath.GetPtr(), std::ios::out | std::ios::trunc | std::ios::binary );
 		io::CheckOpenForWriting( ofs, targetFilePath );
 
-		if ( HasBom() )	// has BOM?
+		if ( !IsEmpty() )
 			ofs.write( &m_bom.front(), m_bom.size() );
 	}
 
