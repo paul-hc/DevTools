@@ -7,14 +7,16 @@
 #include "StringTests.h"
 #include "StringRangeTests.h"
 #include "NumericTests.h"
+#include "EndiannessTests.h"
 #include "LcsTests.h"
 #include "RegistryTests.h"
 #include "ResequenceTests.h"
 #include "FmtUtilsTests.h"
-#include "FileSystemTests.h"
-#include "StructuredStorageTest.h"
 #include "PathTests.h"
 #include "PathGeneratorTests.h"
+#include "FileSystemTests.h"
+#include "TextFileIoTests.h"
+#include "StructuredStorageTest.h"
 #include "ThreadingTests.h"
 
 #define new DEBUG_NEW
@@ -29,14 +31,17 @@ namespace ut
 		CStringTests::Instance();
 		CStringRangeTests::Instance();
 		CNumericTests::Instance();
+		CEndiannessTests::Instance();
 		CLcsTests::Instance();
 		CRegistryTests::Instance();
 		CResequenceTests::Instance();
 		CFmtUtilsTests::Instance();
-		CFileSystemTests::Instance();
-		CStructuredStorageTest::Instance();
+
 		CPathTests::Instance();
 		CPathGeneratorTests::Instance();
+		CFileSystemTests::Instance();
+		CTextFileIoTests::Instance();
+		CStructuredStorageTest::Instance();
 		CThreadingTests::Instance();
 	}
 }

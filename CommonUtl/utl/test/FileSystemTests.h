@@ -25,7 +25,6 @@ private:
 	void TestTouchFile( void );
 	void TestFileTransferMatch( void );
 	void TestBackupFile( void );
-	void TestTextFileIo( void );
 };
 
 

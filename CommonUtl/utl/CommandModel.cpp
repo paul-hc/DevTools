@@ -14,8 +14,8 @@ namespace utl
 {
 	const CEnumTags& GetTags_ExecMode( void )
 	{
-		static const CEnumTags tags( _T("|Undo|Redo"), _T("|UNDO|REDO") );
-		return tags;
+		static const CEnumTags s_tags( _T("|Undo|Redo"), _T("|UNDO|REDO") );
+		return s_tags;
 	}
 }
 

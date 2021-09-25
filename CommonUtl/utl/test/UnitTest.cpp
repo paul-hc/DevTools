@@ -4,6 +4,7 @@
 #ifdef _DEBUG		// no UT code in release builds
 #include "test/UnitTest.h"
 #include "ContainerUtilities.h"
+#include "TextFileUtils.h"
 #include "FileEnumerator.h"
 #include "Logger.h"
 #include "Path.h"
@@ -12,6 +13,7 @@
 #include <math.h>
 #include <hash_set>
 #include <fstream>
+#include <iomanip>
 
 #define new DEBUG_NEW
 
@@ -35,7 +37,7 @@ namespace ut
 		if ( NULL == pText )
 			pText = filePath.GetFilenamePtr();		// use the filename as text content
 
-		std::ofstream output( filePath.GetUtf8().c_str(), std::ios_base::out | std::ios_base::trunc );
+		std::ofstream output( filePath.GetUtf8().c_str(), std::ios::out | std::ios::trunc );
 		output
 			<< "Unit-test file: " << std::endl
 			<< pText << std::endl;
@@ -57,11 +59,61 @@ namespace ut
 			pText = filePath.GetFilenamePtr();		// use the filename as text content
 
 		{
-			std::ofstream output( filePath.GetUtf8().c_str(), std::ios_base::out | std::ios_base::app );
+			std::ofstream output( filePath.GetPtr(), std::ios::out | std::ios::app );
 			output << pText << std::endl;
 		}
 
 		return true;
+	}
+
+
+	void HexDump( std::ostream& os, const fs::CPath& textPath, size_t rowByteCount /*= DefaultRowByteCount*/ ) throws_( CRuntimeException )
+	{	// dump contents of filename to stdout in hex
+		std::fstream is( textPath.GetPtr(), std::ios::in | std::ios::binary );
+		io::CheckOpenForReading( is, textPath );
+
+		static const char s_unprintableCh = '.';
+		static const char s_blankCh = ' ';
+		static const char s_columnSep[] = "  ";
+
+		std::vector< char > inputRowBuff( rowByteCount );
+		std::string charRow;
+
+		for ( size_t i; !is.eof(); )
+		{
+			inputRowBuff.assign( rowByteCount, '\0' );
+
+			is.read( &inputRowBuff[ 0 ], rowByteCount );
+			inputRowBuff.resize( is.gcount() );		// cut to the actual read chars
+
+			if ( !inputRowBuff.empty() )
+			{
+				charRow.clear();
+
+				for ( i = 0; i != rowByteCount; ++i )
+					if ( i < inputRowBuff.size() )
+					{
+						char inChar = inputRowBuff[ i ];
+
+						charRow.push_back( inChar >= ' ' ? inChar : s_unprintableCh );
+						os << std::setfill('0') << std::setw(2) << std::uppercase << std::hex << (int)(unsigned char)inChar << ' ';
+					}
+					else
+						os << "   ";		// 2 digits + 1 space
+
+				os << s_columnSep << charRow << std::endl;
+			}
+		}
+		is.close();
+
+		/* Sample outputs:
+			Hex Dump of wcHello.txt - note that output is ANSI chars:
+			48 65 6C 6C 6F 20 57 6F 72 6C 64 00 00 00 00 00   Hello World.....
+
+			Hex Dump of wwHello.txt - note that output is wchar_t chars:
+			48 00 65 00 6c 00 6c 00 6f 00 20 00 57 00 6f 00   H.e.l.l.o. .W.o.
+			72 00 6c 00 64 00                                 r.l.d.
+		*/
 	}
 }
 

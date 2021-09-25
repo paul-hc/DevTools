@@ -78,7 +78,6 @@ namespace rc
 	};
 }
 
-
 CResourceFile::CResourceFile( const fs::CPath& rcFilePath, app::TOption optionFlags ) throws_( CRuntimeException )
 	: m_rcFilePath( rcFilePath )
 	, m_optionFlags( optionFlags )
@@ -87,7 +86,7 @@ CResourceFile::CResourceFile( const fs::CPath& rcFilePath, app::TOption optionFl
 	rc::CVersionInfoParser parserCallback( this );
 	CTextFileParser<std::string> parser( &parserCallback );
 
-	parser.ParseFile( m_rcFilePath );
+	m_encoding = parser.ParseFile( m_rcFilePath );
 }
 
 CResourceFile::~CResourceFile()
@@ -105,7 +104,7 @@ CTime CResourceFile::StampBuildTime( const CTime& buildTimestamp )
 
 void CResourceFile::Save( void ) const throws_( std::exception, CException* )
 {
-	utl::WriteLinesToFile( m_rcFilePath, m_lines );		// save all lines
+	io::WriteLinesToFile( m_rcFilePath, m_lines );		// save all lines
 	m_origFileState.WriteToFile();						// restore the original file access times
 }
 

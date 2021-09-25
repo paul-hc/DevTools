@@ -36,7 +36,7 @@ std::wostream& operator<<( std::wostream& os, const char* pUtf8 )
 
 std::ostream& operator<<( std::ostream& os, wchar_t chWide )
 {
-	const wchar_t strWide[] = { chWide, _T('\0') };
+	const wchar_t strWide[] = { chWide, L'\0' };
 	return os << strWide;
 }
 
@@ -49,30 +49,36 @@ std::wostream& operator<<( std::wostream& os, char chUtf8 )
 
 namespace hlp
 {
-	std::string ToNarrow( const wchar_t* pWide, UINT codePage )
+	std::string& ToNarrow( std::string& rNarrow, const wchar_t* pWide, UINT codePage )
 	{	// codePage: CP_UTF8/CP_ACP
-		if ( str::IsEmpty( pWide ) )
-			return std::string();
+		if ( !str::IsEmpty( pWide ) )
+		{
+			int wideLength = (int)wcslen( pWide );
+			int requiredSize = ::WideCharToMultiByte( codePage, 0, pWide, wideLength, NULL, 0, NULL, NULL );
 
-		int wideLength = (int)wcslen( pWide );
-		int requiredSize = ::WideCharToMultiByte( codePage, 0, pWide, wideLength, NULL, 0, NULL, NULL );
+			rNarrow.resize( requiredSize, '\0' );
+			::WideCharToMultiByte( codePage, 0, pWide, wideLength, &rNarrow[ 0 ], requiredSize, NULL, NULL );
+		}
+		else
+			rNarrow.clear();
 
-		std::string narrow( requiredSize, '\0' );
-		::WideCharToMultiByte( codePage, 0, pWide, wideLength, &narrow[ 0 ], requiredSize, NULL, NULL );
-		return narrow;
+		return rNarrow;
 	}
 
-	std::wstring ToWide( const char* pNarrow, UINT codePage )
+	std::wstring& ToWide( std::wstring& rWide, const char* pNarrow, UINT codePage )
 	{	// codePage: CP_UTF8/CP_ACP
-		if ( str::IsEmpty( pNarrow ) )
-			return std::wstring();
+		if ( !str::IsEmpty( pNarrow ) )
+		{
+			int narrowLength = (int)strlen( pNarrow );
+			int requiredSize = ::MultiByteToWideChar( codePage, 0, pNarrow, narrowLength, NULL, 0 );
 
-		int narrowLength = (int)strlen( pNarrow );
-		int requiredSize = ::MultiByteToWideChar( codePage, 0, pNarrow, narrowLength, NULL, 0 );
+			rWide.resize( requiredSize, L'\0' );
+			::MultiByteToWideChar( codePage, 0, pNarrow, narrowLength, &rWide[ 0 ], requiredSize );
+		}
+		else
+			rWide.clear();
 
-		std::wstring wide( requiredSize, L'\0' );
-		::MultiByteToWideChar( codePage, 0, pNarrow, narrowLength, &wide[ 0 ], requiredSize );
-		return wide;
+		return rWide;
 	}
 }
 
@@ -97,22 +103,26 @@ namespace str
 
 	std::string ToAnsi( const wchar_t* pWide )
 	{
-		return hlp::ToNarrow( pWide, CP_ACP );
+		std::string narrow;
+		return hlp::ToNarrow( narrow, pWide, CP_ACP );
 	}
 
 	std::wstring FromAnsi( const char* pAnsi )
 	{
-		return hlp::ToWide( pAnsi, CP_ACP );
+		std::wstring wide;
+		return hlp::ToWide( wide, pAnsi, CP_ACP );
 	}
 
 	std::string ToUtf8( const wchar_t* pWide )
 	{
-		return hlp::ToNarrow( pWide, CP_UTF8 );
+		std::string narrow;
+		return hlp::ToNarrow( narrow, pWide, CP_UTF8 );
 	}
 
 	std::wstring FromUtf8( const char* pUtf8 )
 	{
-		return hlp::ToWide( pUtf8, CP_UTF8 );
+		std::wstring wide;
+		return hlp::ToWide( wide, pUtf8, CP_UTF8 );
 	}
 
 

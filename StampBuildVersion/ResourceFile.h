@@ -28,6 +28,8 @@ public:
 	CResourceFile( const fs::CPath& rcFilePath, app::TOption optionFlags ) throws_( CRuntimeException );
 	~CResourceFile();
 
+	fs::Encoding GetEncoding( void ) { return m_encoding; }
+
 	bool HasBuildTimestamp( void ) const { return m_pos.m_buildTimestamp != utl::npos; }
 	CTime StampBuildTime( const CTime& buildTimestamp ) throws_( CRuntimeException );
 	void Save( void ) const throws_( std::exception, CException* );
@@ -53,6 +55,7 @@ private:
 	app::TOption m_optionFlags;
 	fs::CFileState m_origFileState;
 
+	fs::Encoding m_encoding;
 	std::vector< std::string > m_lines;
 	CParsePos m_pos;							// index in m_lines where the BuildTimestamp value is located
 	CTime m_origBuildTimestamp;					// IN

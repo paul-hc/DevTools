@@ -24,6 +24,18 @@
 
 namespace ut
 {
+	const TCHAR* s_rcFiles[] =
+	{
+		_T("MyTool_ANSI.rc"),
+		_T("MyTool_UTF8_bom.rc"),
+		_T("MyTool_UTF16_LE_bom.rc"),
+		_T("MyTool_UTF16_be_bom.rc")
+	};
+	const std::string s_refTimestamp = "10-11-2022 10:11:22";
+	const char s_doubleQuote[] = "\"";
+
+	enum FileEncoding { RC_ANSI, RC_UTF8_bom, RC_UTF16_LE_bom, RC_UTF16_be_bom };
+
 	bool AproxEquals( const CTime& left, const CTime& right )
 	{
 		ASSERT( time_utl::IsValid( left ) );
@@ -31,12 +43,14 @@ namespace ut
 		CTimeSpan delta = right - left;
 		return abs( static_cast<long>( delta.GetTimeSpan() ) ) < 2;
 	}
+
+
+	// impl
+	void testEach_StampRcFile( const TCHAR* pRcFilePath );
+	void testRcFile_CurrentTimestamp( const std::string& newText, const CTime& baselineTimestamp );
+	void testRcFile_RefTimestamp( const std::string& newText );
 }
 
-
-const TCHAR CResourceFileTests::s_rcFile[] = _T("MyTool_ANSI.rc");
-const std::string CResourceFileTests::s_refTimestamp = "10-11-2022 10:11:22";
-const char CResourceFileTests::s_doubleQuote[] = "\"";
 
 CResourceFileTests::CResourceFileTests( void )
 {
@@ -49,30 +63,28 @@ CResourceFileTests& CResourceFileTests::Instance( void )
 	return s_testCase;
 }
 
-int CResourceFileTests::ExecuteProcess( utl::CProcessCmd& rProcess )
-{
-	return rProcess.Execute();
-}
-
 void CResourceFileTests::TestStampRcFile( void )
 {
-	testEach_StampRcFile( s_rcFile );
+	ut::testEach_StampRcFile( ut::s_rcFiles[ ut::RC_ANSI ] );
+	ut::testEach_StampRcFile( ut::s_rcFiles[ ut::RC_UTF8_bom ] );
+	ut::testEach_StampRcFile( ut::s_rcFiles[ ut::RC_UTF16_LE_bom ] );
+	ut::testEach_StampRcFile( ut::s_rcFiles[ ut::RC_UTF16_be_bom ] );
 }
 
 void CResourceFileTests::FuncTest_StampRcFile( void )
 {
-	ut::CTempFilePool pool( s_rcFile );
+	ut::CTempFilePool pool( ut::s_rcFiles[ ut::RC_ANSI ] );
 	fs::CPath poolDirPath = pool.GetPoolDirPath();
 
 	ASSERT_EQUAL( 1, pool.GetFilePaths().size() );
-	ASSERT_EQUAL( s_rcFile, ut::EnumJoinFiles( poolDirPath ) );
+	ASSERT_EQUAL( ut::s_rcFiles[ ut::RC_ANSI ], ut::EnumJoinFiles( poolDirPath ) );
 
 	const fs::CPath& targetRcFilePath = pool.GetFilePaths()[ 0 ];
 
-	fs::thr::CopyFile( (ut::GetStdTestFilesDirPath() / s_rcFile).GetPtr(), targetRcFilePath.GetPtr(), false );
+	fs::thr::CopyFile( (ut::GetStdTestFilesDirPath() / ut::s_rcFiles[ ut::RC_ANSI ]).GetPtr(), targetRcFilePath.GetPtr(), false );
 
 	std::string srcText;
-	utl::ReadStringFromFile( srcText, targetRcFilePath );
+	io::ReadStringFromFile( srcText, targetRcFilePath );
 
 	std::string newText;
 
@@ -81,9 +93,9 @@ void CResourceFileTests::FuncTest_StampRcFile( void )
 		utl::CProcessCmd cmd( __targv[ 0 ] );
 		cmd.AddParam( targetRcFilePath );
 
-		ASSERT_EQUAL( 0, ExecuteProcess( cmd ) );		// no execution errors?
+		ASSERT_EQUAL( 0, cmd.Execute() );		// no execution errors?
 		{
-			utl::ReadStringFromFile( newText, targetRcFilePath );
+			io::ReadStringFromFile( newText, targetRcFilePath );
 			ASSERT_EQUAL( srcText, newText );			// ensure no change since "BuildTimestamp" is missing
 		}
 	}
@@ -95,12 +107,12 @@ void CResourceFileTests::FuncTest_StampRcFile( void )
 		cmd.AddParam( targetRcFilePath );
 		cmd.AddParam( _T("-a") );						// force add the "BuildTimestamp" entry
 
-		ASSERT_EQUAL( 0, ExecuteProcess( cmd ) );		// no execution errors?
+		ASSERT_EQUAL( 0, cmd.Execute() );		// no execution errors?
 		{
-			utl::ReadStringFromFile( newText, targetRcFilePath );
+			io::ReadStringFromFile( newText, targetRcFilePath );
 			ASSERT( newText != srcText );
 
-			testRcFile_CurrentTimestamp( newText, baselineTimestamp );
+			ut::testRcFile_CurrentTimestamp( newText, baselineTimestamp );
 		}
 	}
 
@@ -108,21 +120,21 @@ void CResourceFileTests::FuncTest_StampRcFile( void )
 	{
 		utl::CProcessCmd cmd( __targv[ 0 ] );
 		cmd.AddParam( targetRcFilePath );
-		cmd.AddParam( s_refTimestamp );
+		cmd.AddParam( ut::s_refTimestamp );
 		cmd.AddParam( _T("-a") );						// force add the "BuildTimestamp" entry
 
-		ASSERT_EQUAL( 0, ExecuteProcess( cmd ) );		// no execution errors?
+		ASSERT_EQUAL( 0, cmd.Execute() );		// no execution errors?
 		{
-			utl::ReadStringFromFile( newText, targetRcFilePath );
+			io::ReadStringFromFile( newText, targetRcFilePath );
 			ASSERT( newText != srcText );
 
-			testRcFile_RefTimestamp( newText );
+			ut::testRcFile_RefTimestamp( newText );
 		}
 	}
 }
 
 
-void CResourceFileTests::testEach_StampRcFile( const TCHAR* pRcFilePath )
+void ut::testEach_StampRcFile( const TCHAR* pRcFilePath )
 {
 	ut::CTempFilePool pool( pRcFilePath );
 	fs::CPath poolDirPath = pool.GetPoolDirPath();
@@ -135,7 +147,7 @@ void CResourceFileTests::testEach_StampRcFile( const TCHAR* pRcFilePath )
 	fs::thr::CopyFile( (ut::GetStdTestFilesDirPath() / pRcFilePath).GetPtr(), targetRcFilePath.GetPtr(), false );
 
 	std::string srcText;
-	utl::ReadStringFromFile( srcText, targetRcFilePath );
+	io::ReadStringFromFile( srcText, targetRcFilePath );
 
 	std::string newText;
 
@@ -145,7 +157,7 @@ void CResourceFileTests::testEach_StampRcFile( const TCHAR* pRcFilePath )
 	options.m_targetRcPath = targetRcFilePath;
 	app::RunMain( options );
 	{
-		utl::ReadStringFromFile( newText, targetRcFilePath );
+		io::ReadStringFromFile( newText, targetRcFilePath );
 		ASSERT_EQUAL( srcText, newText );			// ensure no change since "BuildTimestamp" is missing
 	}
 
@@ -155,7 +167,7 @@ void CResourceFileTests::testEach_StampRcFile( const TCHAR* pRcFilePath )
 
 	app::RunMain( options );
 	{
-		utl::ReadStringFromFile( newText, targetRcFilePath );
+		io::ReadStringFromFile( newText, targetRcFilePath );
 		ASSERT( newText != srcText );
 
 		testRcFile_CurrentTimestamp( newText, options.m_buildTimestamp );
@@ -163,18 +175,18 @@ void CResourceFileTests::testEach_StampRcFile( const TCHAR* pRcFilePath )
 
 	// equivalent command line: "StampBuildVersion.exe <targetRcFilePath> "10-11-2022 10:11:22" -a"
 	ClearFlag( options.m_optionFlags, app::Add_BuildTimestamp );
-	options.m_buildTimestamp = time_utl::ParseStdTimestamp( str::FromUtf8( s_refTimestamp.c_str() ) );
+	options.m_buildTimestamp = time_utl::ParseStdTimestamp( str::FromUtf8( ut::s_refTimestamp.c_str() ) );
 
 	app::RunMain( options );
 	{
-		utl::ReadStringFromFile( newText, targetRcFilePath );
+		io::ReadStringFromFile( newText, targetRcFilePath );
 		ASSERT( newText != srcText );
 
 		testRcFile_RefTimestamp( newText );
 	}
 }
 
-void CResourceFileTests::testRcFile_CurrentTimestamp( const std::string& newText, const CTime& baselineTimestamp )
+void ut::testRcFile_CurrentTimestamp( const std::string& newText, const CTime& baselineTimestamp )
 {
 	rc::TTokenIterator it( newText );
 	ASSERT( it.FindToken( "VALUE \"BuildTimestamp\"" ) );
@@ -187,7 +199,7 @@ void CResourceFileTests::testRcFile_CurrentTimestamp( const std::string& newText
 	ASSERT( ut::AproxEquals( baselineTimestamp, parsedTimestamp ) );
 }
 
-void CResourceFileTests::testRcFile_RefTimestamp( const std::string& newText )
+void ut::testRcFile_RefTimestamp( const std::string& newText )
 {
 	rc::TTokenIterator it( newText );
 	ASSERT( it.FindToken( "VALUE \"BuildTimestamp\"" ) );
@@ -196,7 +208,7 @@ void CResourceFileTests::testRcFile_RefTimestamp( const std::string& newText )
 	std::string tsValue;
 	ASSERT( it.ExtractEnclosedText( tsValue, s_doubleQuote ) );
 
-	ASSERT_EQUAL( s_refTimestamp, tsValue );
+	ASSERT_EQUAL( ut::s_refTimestamp, tsValue );
 }
 
 

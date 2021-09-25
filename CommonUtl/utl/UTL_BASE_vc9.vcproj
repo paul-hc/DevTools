@@ -521,22 +521,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\Serialization.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\Serialization.h"
-				>
-			</File>
-			<File
-				RelativePath=".\Serialization_fwd.h"
-				>
-			</File>
-			<File
-				RelativePath=".\SerializeStdTypes.h"
-				>
-			</File>
-			<File
 				RelativePath=".\StreamStdTypes.h"
 				>
 			</File>
@@ -629,6 +613,10 @@
 				</File>
 				<File
 					RelativePath=".\Crc32.h"
+					>
+				</File>
+				<File
+					RelativePath=".\Encoding.h"
 					>
 				</File>
 				<File
@@ -748,6 +736,14 @@
 					>
 				</File>
 				<File
+					RelativePath=".\TextEncoding.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\TextEncoding.h"
+					>
+				</File>
+				<File
 					RelativePath=".\TextFileUtils.cpp"
 					>
 				</File>
@@ -856,6 +852,30 @@
 					>
 				</File>
 			</Filter>
+			<Filter
+				Name="Serialize"
+				>
+				<File
+					RelativePath=".\Endianness.h"
+					>
+				</File>
+				<File
+					RelativePath=".\Serialization.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Serialization.h"
+					>
+				</File>
+				<File
+					RelativePath=".\Serialization_fwd.h"
+					>
+				</File>
+				<File
+					RelativePath=".\SerializeStdTypes.h"
+					>
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="Tests"
@@ -866,6 +886,14 @@
 			</File>
 			<File
 				RelativePath=".\test\AlgorithmsTests.h"
+				>
+			</File>
+			<File
+				RelativePath=".\test\EndiannessTests.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\test\EndiannessTests.h"
 				>
 			</File>
 			<File
@@ -970,6 +998,14 @@
 			</File>
 			<File
 				RelativePath=".\test\Test.h"
+				>
+			</File>
+			<File
+				RelativePath=".\test\TextFileIoTests.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\test\TextFileIoTests.h"
 				>
 			</File>
 			<File

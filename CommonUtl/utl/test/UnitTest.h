@@ -3,6 +3,7 @@
 #pragma once
 
 #include "Test.h"
+#include <iosfwd>
 
 
 #ifdef _DEBUG		// no UT code in release builds
@@ -204,6 +205,11 @@ namespace ut
 {
 	bool SetFileText( const fs::CPath& filePath, const TCHAR* pText = NULL );				// set a line of thext (pass NULL for using "name.ext")
 	bool ModifyFileText( const fs::CPath& filePath, const TCHAR* pAddText = NULL, bool retainModifyTime = false );	// add another line of thext (pass NULL for using "name.ext")
+
+
+	enum { DefaultRowByteCount = 16 };
+
+	void HexDump( std::ostream& os, const fs::CPath& textPath, size_t rowByteCount = DefaultRowByteCount ) throws_( CRuntimeException );		// dump file binary contents
 }
 
 

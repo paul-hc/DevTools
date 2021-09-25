@@ -14,8 +14,8 @@ namespace svc
 {
 	const CEnumTags& GetTags_StackType( void )
 	{
-		static const CEnumTags tags( _T("Undo|Redo"), _T("undo|redo") );
-		return tags;
+		static const CEnumTags s_tags( _T("Undo|Redo"), _T("undo|redo") );
+		return s_tags;
 	}
 }
 

@@ -9,12 +9,10 @@
 #include "FileEnumerator.h"
 #include "TimeUtils.h"
 #include "StringUtilities.h"
-#include "TextFileUtils.h"
 
 #define new DEBUG_NEW
 
 #include "Resequence.hxx"
-#include "TextFileUtils.hxx"
 
 
 namespace ut
@@ -310,69 +308,9 @@ void CFileSystemTests::TestBackupFile( void )
 		ASSERT_EQUAL( fs::Created, backup.CreateBackupFile( bkFilePath ) );
 		ASSERT_EQUAL( _T("SubDirA\\SubDirB\\src.txt"), fs::StripDirPrefix( bkFilePath, pool.GetPoolDirPath() ) );
 
-		ut::ModifyFileText( srcPath );			// change SRC content
+		ut::ModifyFileText( srcPath, _T("Some new content.") );			// change SRC content
 		ASSERT_EQUAL( fs::Created, backup.CreateBackupFile( bkFilePath ) );
 		ASSERT_EQUAL( _T("SubDirA\\SubDirB\\src-[2].txt"), fs::StripDirPrefix( bkFilePath, pool.GetPoolDirPath() ) );
-	}
-}
-
-void CFileSystemTests::TestTextFileIo( void )
-{
-	ut::CTempFilePool pool( _T("textFile.txt") );
-	const fs::CPath& filePath = pool.GetFilePaths()[ 0 ];
-
-	{
-		CTextFileParser< std::string > narrowParser;
-		const std::vector< std::string >& narrowLines = narrowParser.GetParsedLines();
-
-		// check empty file
-		utl::WriteStringToFile( filePath, std::string() );
-		narrowParser.ParseFile( filePath );
-		ASSERT_EQUAL( 1, narrowLines.size() );
-		ASSERT_EQUAL( "", narrowLines[ 0 ] );
-
-		// check single-line file (no line-end)
-		static const std::string s_singleText( "ABC" );
-		utl::WriteStringToFile( filePath, s_singleText );
-		narrowParser.ParseFile( filePath );
-		ASSERT_EQUAL( 1, narrowLines.size() );
-		ASSERT_EQUAL( s_singleText, narrowLines[ 0 ] );
-
-		// check 2-lines file (1 line-end)
-		utl::WriteStringToFile( filePath, s_singleText + "\n" );
-		narrowParser.ParseFile( filePath );
-		ASSERT_EQUAL( 2, narrowLines.size() );
-		ASSERT_EQUAL( s_singleText, narrowLines[ 0 ] );
-		ASSERT_EQUAL( "", narrowLines[ 1 ] );
-
-		// check multiple-lines file
-		utl::WriteStringToFile( filePath, std::string( "A\nB\nC\nD" ) );
-		narrowParser.ParseFile( filePath );
-		ASSERT_EQUAL( 4, narrowLines.size() );
-		ASSERT_EQUAL( "A", narrowLines[ 0 ] );
-		ASSERT_EQUAL( "B", narrowLines[ 1 ] );
-		ASSERT_EQUAL( "C", narrowLines[ 2 ] );
-		ASSERT_EQUAL( "D", narrowLines[ 3 ] );
-	}
-
-	{
-		CTextFileParser< std::wstring > wideParser;
-		const std::vector< std::wstring >& wideLines = wideParser.GetParsedLines();
-
-		// check empty file
-		utl::WriteStringToFile( filePath, std::wstring() );
-		wideParser.ParseFile( filePath );
-		ASSERT_EQUAL( 1, wideLines.size() );
-		ASSERT_EQUAL( L"", wideLines[ 0 ] );
-
-		// check multiple-lines file
-		utl::WriteStringToFile( filePath, std::wstring( L"A\nB\nC\nD" ) );
-		wideParser.ParseFile( filePath );
-		ASSERT_EQUAL( 4, wideLines.size() );
-		ASSERT_EQUAL( L"A", wideLines[ 0 ] );
-		ASSERT_EQUAL( L"B", wideLines[ 1 ] );
-		ASSERT_EQUAL( L"C", wideLines[ 2 ] );
-		ASSERT_EQUAL( L"D", wideLines[ 3 ] );
 	}
 }
 
@@ -389,7 +327,6 @@ void CFileSystemTests::Run( void )
 	TestTouchFile();
 	TestFileTransferMatch();
 	TestBackupFile();
-	TestTextFileIo();
 }
 
 
