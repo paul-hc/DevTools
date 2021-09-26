@@ -439,7 +439,7 @@ void CTextFileIoTests::TestParseSaveVerbatimContent( void )
 
 	for ( size_t i = 0; i != COUNT_OF( s_contents ); ++i )
 	{
-		std::string content( s_contents[ i ] );
+		std::string content = s_contents[ i ];
 
 		ut::test_ParseSaveVerbatimContent( fs::ANSI, content );
 		ut::test_ParseSaveVerbatimContent( fs::UTF8_bom, content );
