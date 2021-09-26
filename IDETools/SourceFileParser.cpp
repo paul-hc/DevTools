@@ -10,7 +10,7 @@
 #define new DEBUG_NEW
 #endif
 
-#include "utl/TextFileUtils.hxx"
+#include "utl/TextFileIo.hxx"
 
 
 CSourceFileParser::CSourceFileParser( const fs::CPath& rootFilePath )

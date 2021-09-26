@@ -1,7 +1,7 @@
 
 #include "stdafx.h"
 #include "TextEncoding.h"
-#include "TextFileUtils.h"
+#include "TextFileIo.h"
 #include "Path.h"
 #include "RuntimeException.h"
 #include "EnumTags.h"

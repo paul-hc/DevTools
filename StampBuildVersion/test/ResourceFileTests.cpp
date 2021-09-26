@@ -11,7 +11,7 @@
 #include "utl/FileSystem.h"
 #include "utl/ProcessCmd.h"
 #include "utl/StringUtilities.h"
-#include "utl/TextFileUtils.h"
+#include "utl/TextFileIo.h"
 #include "utl/TimeUtils.h"
 #include "utl/TokenIterator.h"
 
@@ -19,7 +19,7 @@
 #define new DEBUG_NEW
 #endif
 
-#include "utl/TextFileUtils.hxx"
+#include "utl/TextFileIo.hxx"
 
 
 namespace ut

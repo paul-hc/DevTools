@@ -1,8 +1,8 @@
-#ifndef TextFileUtils_hxx
-#define TextFileUtils_hxx
+#ifndef TextFileIo_hxx
+#define TextFileIo_hxx
 
 #include "stdafx.h"
-#include "TextFileUtils.h"
+#include "TextFileIo.h"
 #include "TextEncoding.h"
 #include "Path.h"
 #include "Endianness.h"
@@ -327,4 +327,4 @@ namespace io
 }
 
 
-#endif // TextFileUtils_hxx
+#endif // TextFileIo_hxx

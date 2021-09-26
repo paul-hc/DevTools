@@ -1,6 +1,6 @@
 
 #include "stdafx.h"
-#include "TextFileUtils.h"
+#include "TextFileIo.h"
 #include "Path.h"
 #include "EnumTags.h"
 #include <fstream>
@@ -9,7 +9,7 @@
 #define new DEBUG_NEW
 #endif
 
-#include "TextFileUtils.hxx"
+#include "TextFileIo.hxx"
 
 
 namespace io

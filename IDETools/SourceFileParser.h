@@ -3,7 +3,7 @@
 #pragma once
 
 #include "utl/Path.h"
-#include "utl/TextFileUtils.h"
+#include "utl/TextFileIo.h"
 #include "FileType.h"
 #include "IncludeTag.h"
 

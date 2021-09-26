@@ -6,12 +6,12 @@
 #include "Path.h"
 #include "StringUtilities.h"
 #include "TextEncoding.h"
-#include "TextFileUtils.h"
+#include "TextFileIo.h"
 #include "EnumTags.h"
 
 #define new DEBUG_NEW
 
-#include "TextFileUtils.hxx"
+#include "TextFileIo.hxx"
 
 
 std::wostream& operator<<( std::wostream& os, const std::vector< char >& buffer )

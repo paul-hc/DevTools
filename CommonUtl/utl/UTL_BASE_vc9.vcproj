@@ -752,15 +752,15 @@
 					>
 				</File>
 				<File
-					RelativePath=".\TextFileUtils.cpp"
+					RelativePath=".\TextFileIo.cpp"
 					>
 				</File>
 				<File
-					RelativePath=".\TextFileUtils.h"
+					RelativePath=".\TextFileIo.h"
 					>
 				</File>
 				<File
-					RelativePath=".\TextFileUtils.hxx"
+					RelativePath=".\TextFileIo.hxx"
 					>
 				</File>
 			</Filter>

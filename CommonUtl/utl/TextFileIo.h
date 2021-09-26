@@ -1,5 +1,5 @@
-#ifndef TextFileUtils_h
-#define TextFileUtils_h
+#ifndef TextFileIo_h
+#define TextFileIo_h
 #pragma once
 
 #include "Encoding.h"
@@ -89,4 +89,4 @@ namespace io
 }
 
 
-#endif // TextFileUtils_h
+#endif // TextFileIo_h

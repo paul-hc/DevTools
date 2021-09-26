@@ -8,7 +8,7 @@
 #define new DEBUG_NEW
 #endif
 
-#include "utl/TextFileUtils.hxx"
+#include "utl/TextFileIo.hxx"
 
 
 namespace rc

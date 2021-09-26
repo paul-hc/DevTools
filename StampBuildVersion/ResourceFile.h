@@ -6,7 +6,7 @@
 #include <stack>
 #include "utl/Path.h"
 #include "utl/FileState.h"
-#include "utl/TextFileUtils.h"
+#include "utl/TextFileIo.h"
 #include "utl/TokenIterator.h"
 #include "CmdLineOptions_fwd.h"
 

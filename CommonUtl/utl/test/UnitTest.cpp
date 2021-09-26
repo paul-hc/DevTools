@@ -4,7 +4,7 @@
 #ifdef _DEBUG		// no UT code in release builds
 #include "test/UnitTest.h"
 #include "ContainerUtilities.h"
-#include "TextFileUtils.h"
+#include "TextFileIo.h"
 #include "FileEnumerator.h"
 #include "Logger.h"
 #include "Path.h"
