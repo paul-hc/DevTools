@@ -6,7 +6,6 @@
 #include "TextEncoding.h"
 #include "Path.h"
 #include "Endianness.h"
-#include "EnumTags.h"
 #include <fstream>
 
 
@@ -14,21 +13,6 @@
 
 namespace io
 {
-	template< typename istream_T >
-	size_t GetStreamSize( istream_T& is )
-	{
-		ASSERT( is.is_open() );
-
-		typename istream_T::pos_type origPos = is.tellg();
-
-		is.seekg( 0, std::ios::end );
-		size_t streamCount = is.tellg();
-
-		is.seekg( origPos, std::ios::beg );			// restore original reading position
-		return streamCount;
-	}
-
-
 	template< typename CharT >
 	std::auto_ptr< std::basic_istream<CharT> > OpenEncodedInputStream( fs::Encoding& rEncoding, const fs::CPath& srcFilePath ) throws_( CRuntimeException )
 	{	// at exit the stream will be positioned at the start of the file content (after BOM, if any)
@@ -51,7 +35,7 @@ namespace io
 				return std::auto_ptr< std::basic_istream<CharT> >( new std::basic_istringstream<CharT>( text, std::ios::in ) );
 			}
 			default:
-				throw CRuntimeException( str::Format( _T("Support for %s text file encoding not implemented"), fs::GetTags_Encoding().FormatUi( bom.GetEncoding() ) ) );
+				ThrowUnsupportedEncoding( bom.GetEncoding() );
 		}
 	}
 }
@@ -60,6 +44,62 @@ namespace io
 namespace io
 {
 	// write container of lines to text file
+
+	namespace impl
+	{
+		template< typename CharT, typename StringT >
+		void GetString( ITight_istream<CharT>& tis, StringT& rText )
+		{
+			tis.GetStr( rText );
+		}
+
+		template<>
+		inline void GetString( ITight_istream<char>& tis, std::wstring& rText )
+		{
+			std::string narrowText;
+			tis.GetStr( narrowText );
+			rText = str::FromUtf8( narrowText.c_str() );
+		}
+
+		template<>
+		inline void GetString( ITight_istream<wchar_t>& tis, std::string& rText )
+		{
+			std::wstring wideText;
+			tis.GetStr( wideText );
+			rText = str::ToUtf8( wideText.c_str() );
+		}
+
+
+		template< fs::Encoding encoding, typename CharT, typename StringT >
+		bool DoReadStringFromFile( StringT& rText, const fs::CPath& srcFilePath ) throws_( CRuntimeException )
+		{
+			CEncoded_ifstream< CharT, encoding > tifs( srcFilePath );
+
+			GetString( tifs, rText );
+			return !tifs.fail();
+		}
+	}
+
+
+	template< typename StringT >
+	fs::Encoding ReadStringFromFile( StringT& rText, const fs::CPath& srcFilePath ) throws_( CRuntimeException )
+	{
+		fs::CByteOrderMark bom;
+		switch ( bom.ReadFromFile( srcFilePath ) )
+		{
+			case fs::ANSI:			impl::DoReadStringFromFile< fs::ANSI, char >( rText, srcFilePath ); break;
+			case fs::UTF8_bom:		impl::DoReadStringFromFile< fs::UTF8_bom, char >( rText, srcFilePath ); break;
+			case fs::UTF16_LE_bom:	impl::DoReadStringFromFile< fs::UTF16_LE_bom, wchar_t >( rText, srcFilePath ); break;
+			case fs::UTF16_be_bom:	impl::DoReadStringFromFile< fs::UTF16_be_bom, wchar_t >( rText, srcFilePath ); break;
+			case fs::UTF32_LE_bom:	//return impl::DoReadStringFromFile< fs::UTF32_LE_bom, str::char32_t >( rText, srcFilePath ); break;
+			case fs::UTF32_be_bom:	//return impl::DoReadStringFromFile< fs::UTF32_be_bom, str::char32_t >( rText, srcFilePath ); break;
+			default:
+				ThrowUnsupportedEncoding( bom.GetEncoding() );
+		}
+
+		return bom.GetEncoding();
+	}
+
 
 	namespace impl
 	{
@@ -85,28 +125,29 @@ namespace io
 		template< fs::Encoding encoding, typename CharT, typename StringT >
 		bool DoWriteStringToFile( const fs::CPath& targetFilePath, const StringT& text ) throws_( CRuntimeException )
 		{
-			CEncoded_ofstream< CharT, encoding > tos( targetFilePath );
+			CEncoded_ofstream< CharT, encoding > tofs( targetFilePath );
 
-			AppendText( tos, text );
-			return !tos.fail();
+			AppendText( tofs, text );
+			return !tofs.fail();
 		}
 
 		template< fs::Encoding encoding, typename CharT, typename LinesT >
 		bool DoWriteLinesToFile( const fs::CPath& targetFilePath, const LinesT& textLines ) throws_( CRuntimeException )
 		{
-			CEncoded_ofstream< CharT, encoding > tos( targetFilePath );
+			CEncoded_ofstream< CharT, encoding > tofs( targetFilePath );
 
 			size_t linePos = 0;
 			for ( typename LinesT::const_iterator itLine = textLines.begin(); itLine != textLines.end(); ++itLine )
 			{
 				if ( linePos++ != 0 )
-					tos.Append( '\n' );
+					tofs.Append( '\n' );
 
-				AppendText( tos, *itLine );
+				AppendText( tofs, *itLine );
 			}
-			return !tos.fail();
+			return !tofs.fail();
 		}
 	}
+
 
 	template< typename StringT >
 	bool WriteStringToFile( const fs::CPath& targetFilePath, const StringT& text, fs::Encoding encoding /*= fs::ANSI*/ ) throws_( CRuntimeException )
