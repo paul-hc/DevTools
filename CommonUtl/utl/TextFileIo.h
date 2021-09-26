@@ -70,6 +70,9 @@ namespace io
 
 		fs::Encoding ParseFile( const fs::CPath& srcFilePath ) throws_( CRuntimeException );
 
+		template< typename CharT >
+		void ParseStream( ITight_istream<CharT>& tis );
+
 		bool UseCallback( void ) const { return m_pLineParserCallback != NULL; }
 
 		const std::vector< StringT >& GetParsedLines( void ) const { ASSERT( !UseCallback() ); return m_parsedLines; }

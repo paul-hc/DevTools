@@ -268,8 +268,12 @@ namespace io
 	template< typename StringT >
 	fs::Encoding CTextFileParser< StringT >::ParseFile( const fs::CPath& srcFilePath ) throws_( CRuntimeException )
 	{
+		Clear();
+
 		fs::CByteOrderMark bom;
-		switch ( bom.ReadFromFile( srcFilePath ) )
+		m_encoding = bom.ReadFromFile( srcFilePath );
+
+		switch ( m_encoding )
 		{
 			case fs::ANSI:			ParseLinesFromFile< fs::ANSI, char >( srcFilePath ); break;
 			case fs::UTF8_bom:		ParseLinesFromFile< fs::UTF8_bom, char >( srcFilePath ); break;
@@ -281,39 +285,42 @@ namespace io
 				ThrowUnsupportedEncoding( bom.GetEncoding() );
 		}
 
-		return bom.GetEncoding();
+		return m_encoding;
 	}
 
 	template< typename StringT >
 	template< fs::Encoding encoding, typename CharT >
 	bool CTextFileParser< StringT >::ParseLinesFromFile( const fs::CPath& srcFilePath ) throws_( CRuntimeException )
 	{
-		Clear();
-		m_encoding = encoding;
-
 		CEncoded_ifstream< CharT, encoding > tifs( srcFilePath );
 
+		ParseStream( tifs );
+		return !tifs.fail();
+	}
+
+	template< typename StringT >
+	template< typename CharT >
+	void CTextFileParser< StringT >::ParseStream( ITight_istream<CharT>& tis )
+	{
 		if ( m_pLineParserCallback != NULL )
 			m_pLineParserCallback->OnBeginParsing();
 
 		size_t lineNo = 1;
 		bool stopped = false;
-		for ( ; !tifs.AtEnd() && !stopped && lineNo <= m_maxLineCount; ++lineNo )
+		for ( ; !tis.AtEnd() && !stopped && lineNo <= m_maxLineCount; ++lineNo )
 		{
 			StringT line;
-			impl::GetTextLine( tifs, line );
+			impl::GetTextLine( tis, line );
 
 			stopped = !PushLine( line, lineNo );
 		}
 
 		if ( !stopped && lineNo <= m_maxLineCount )
-			if ( tifs.AtEnd() && tifs.PeekLast() == '\n' )
+			if ( tis.AtEnd() && tis.PeekLast() == '\n' )
 				PushLine( StringT(), lineNo );			// IMP: add the last empty line, since it gets skipped by AtEnd() returning false
 
 		if ( m_pLineParserCallback != NULL )
 			m_pLineParserCallback->OnEndParsing();
-
-		return !tifs.fail();
 	}
 
 	template< typename StringT >

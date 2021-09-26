@@ -54,6 +54,8 @@ namespace io
 		typedef std::basic_ifstream< CharT > TBaseStream;
 
 		virtual TBaseStream& GetStream( void ) = 0;			// for text-mode standard output: use it with care (just for ANSI/UTF8 encodings)
+		virtual bool AtEnd( void ) const = 0;				// finished iterating?
+		virtual CharT PeekLast( void ) const = 0;			// get last read character without incrementing
 		virtual CharT GetNext( void ) = 0;
 		virtual void GetStr( std::basic_string< CharT >& rText, CharT delim = 0 ) = 0;
 
@@ -147,11 +149,11 @@ namespace io
 			std::advance( m_itChar, bomCount );			// skip the BOM
 		}
 
-		bool AtEnd( void ) const { return m_itChar == m_itEnd; }
-		CharT PeekLast( void ) const { return m_lastCh; }
-
 		// ITight_istream<CharT> interface
 		virtual TBaseStream& GetStream( void ) { ASSERT( !m_isBinary ); return *this; }		// for text-mode standard output
+
+		virtual bool AtEnd( void ) const { return m_itChar == m_itEnd; }
+		virtual CharT PeekLast( void ) const { return m_lastCh; }
 
 		virtual CharT GetNext( void )
 		{
