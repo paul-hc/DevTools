@@ -92,9 +92,9 @@ namespace endian
 
 	enum Endianness
 	{
-		LittleEndian,
-		BigEndian,
-		NetworkEndian = BigEndian
+		Little,
+		Big,
+		Network = Big
 	};
 
 
@@ -111,14 +111,14 @@ namespace endian
 	// specialisations when attempting to swap to the same endianess
 
 	template<>
-	struct GetBytesSwapped< LittleEndian, LittleEndian >
+	struct GetBytesSwapped< Little, Little >
 	{
 		template< class NumericT >
 		NumericT operator()( NumericT value ) const { return value; }
 	};
 
 	template<>
-	struct GetBytesSwapped< BigEndian, BigEndian >
+	struct GetBytesSwapped< Big, Big >
 	{
 		template< class NumericT >
 		NumericT operator()( NumericT value ) const { return value; }

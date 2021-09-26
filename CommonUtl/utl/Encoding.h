@@ -58,8 +58,7 @@ namespace func
 	{
 		wchar_t operator()( wchar_t chr ) const
 		{
-			using namespace endian;
-			return GetBytesSwapped<LittleEndian, BigEndian>()( chr );			// for decoding the equivalent is <BigEndian, LittleEndian>
+			return endian::GetBytesSwapped<endian::Little, endian::Big>()( chr );			// for decoding the equivalent is <Big, Little>
 		}
 	};
 
@@ -68,8 +67,7 @@ namespace func
 	{
 		str::char32_t operator()( str::char32_t chr ) const
 		{
-			using namespace endian;
-			return GetBytesSwapped<LittleEndian, BigEndian>()( chr );			// for decoding the equivalent is <BigEndian, LittleEndian>
+			return endian::GetBytesSwapped<endian::Little, endian::Big>()( chr );			// for decoding the equivalent is <Big, Little>
 		}
 	};
 }
