@@ -76,6 +76,9 @@ namespace ut
 	void test_WriteReadLines_W( fs::Encoding encoding );
 	void test_WriteParseLines_A( fs::Encoding encoding );
 	void test_WriteParseLines_W( fs::Encoding encoding );
+
+	template< typename StringT >
+	void test_ParseSaveVerbatimContent( fs::Encoding encoding, const StringT& content );
 }
 
 
@@ -140,7 +143,7 @@ void CTextFileIoTests::TestByteOrderMark( void )
 	}
 }
 
-void CTextFileIoTests::TestTextFile( void )
+void CTextFileIoTests::TestWriteReadText( void )
 {
 	std::string content;
 	{
@@ -422,15 +425,69 @@ void CTextFileIoTests::TestWriteParseLines( void )
 		ASSERT_EQUAL( L"D4", parsedLines[ 3 ] );
 	}
 
+void CTextFileIoTests::TestParseSaveVerbatimContent( void )
+{
+	static const char* s_contents[] =
+	{
+		"",
+		"ABC",
+		"\n",
+		"\nABC",
+		"ABC\n",
+		"Line 1\nLine 2\nLine 3\nLine 4"
+	};
+
+	for ( size_t i = 0; i != COUNT_OF( s_contents ); ++i )
+	{
+		std::string content( s_contents[ i ] );
+
+		ut::test_ParseSaveVerbatimContent( fs::ANSI, content );
+		ut::test_ParseSaveVerbatimContent( fs::UTF8_bom, content );
+		ut::test_ParseSaveVerbatimContent( fs::UTF16_LE_bom, content );
+		ut::test_ParseSaveVerbatimContent( fs::UTF16_be_bom, content );
+	}
+
+	for ( size_t i = 0; i != COUNT_OF( s_contents ); ++i )
+	{
+		std::wstring content = str::FromUtf8( s_contents[ i ] );
+
+		ut::test_ParseSaveVerbatimContent( fs::ANSI, content );
+		ut::test_ParseSaveVerbatimContent( fs::UTF8_bom, content );
+		ut::test_ParseSaveVerbatimContent( fs::UTF16_LE_bom, content );
+		ut::test_ParseSaveVerbatimContent( fs::UTF16_be_bom, content );
+	}
+}
+
+	template< typename StringT >
+	void ut::test_ParseSaveVerbatimContent( fs::Encoding encoding, const StringT& content )
+	{
+		ut::CTempFilePool pool( ut::FormatTextFilename( encoding ).c_str() );
+		const fs::CPath& textPath = pool.GetFilePaths()[ 0 ];
+
+		io::WriteStringToFile( textPath, content, encoding );
+
+		{	// do the round-trip: parse & save
+			io::CTextFileParser< StringT > parser;
+
+			parser.ParseFile( textPath );
+			io::WriteLinesToFile( textPath, parser.GetParsedLines(), parser.GetEncoding() );		// save all lines
+		}
+
+		StringT inContent;
+		ASSERT_EQUAL( encoding, io::ReadStringFromFile( inContent, textPath ) );
+		ASSERT_EQUAL( content, inContent );
+	}
+
 
 void CTextFileIoTests::Run( void )
 {
 	__super::Run();
 
 	TestByteOrderMark();
-	TestTextFile();
+	TestWriteReadText();
 	TestWriteReadLines();
 	TestWriteParseLines();
+	TestParseSaveVerbatimContent();
 }
 
 

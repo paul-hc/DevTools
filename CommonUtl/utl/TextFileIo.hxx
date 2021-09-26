@@ -289,6 +289,7 @@ namespace io
 	bool CTextFileParser< StringT >::ParseLinesFromFile( const fs::CPath& srcFilePath ) throws_( CRuntimeException )
 	{
 		Clear();
+		m_encoding = encoding;
 
 		CEncoded_ifstream< CharT, encoding > tifs( srcFilePath );
 
