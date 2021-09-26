@@ -27,7 +27,24 @@ std::wostream& operator<<( std::wostream& os, const std::vector< char >& buffer 
 	return os;
 }
 
-#define LAST_OF( array ) ( END_OF( array ) - 1 )	// excluding the EOS
+template< typename StringT >
+std::wostream& operator<<( std::wostream& os, const std::vector< StringT >& strings )
+{
+	os << L"{";
+	size_t linePos = 0;
+	for ( typename std::vector< StringT >::const_iterator itString = strings.begin(); itString != strings.end(); ++itString )
+	{
+		if ( linePos++ != 0 )
+			os << L' ';
+
+		os << L'"';
+		os << *itString;
+		os << L'"';
+	}
+	os << L"}";
+	return os;
+}
+
 
 namespace ut
 {
@@ -54,9 +71,11 @@ namespace ut
 
 
 	// test implementation
-	void test_TextFile_Narrow( fs::Encoding encoding, const fs::CPath& textPath, const std::string& content, const char pExpected[], size_t expectedSize = std::string::npos );
-	void test_WriteParse_Narrow( fs::Encoding encoding );
-	void test_WriteParse_Wide( fs::Encoding encoding );
+	void test_TextFile_A( fs::Encoding encoding, const fs::CPath& textPath, const std::string& content, const char pExpected[], size_t expectedSize = std::string::npos );
+	void test_WriteReadLines_A( fs::Encoding encoding );
+	void test_WriteReadLines_W( fs::Encoding encoding );
+	void test_WriteParseLines_A( fs::Encoding encoding );
+	void test_WriteParseLines_W( fs::Encoding encoding );
 }
 
 
@@ -121,7 +140,7 @@ void CTextFileIoTests::TestByteOrderMark( void )
 	}
 }
 
-void CTextFileIoTests::TestTextFileWithEncoding( void )
+void CTextFileIoTests::TestTextFile( void )
 {
 	std::string content;
 	{
@@ -132,15 +151,15 @@ void CTextFileIoTests::TestTextFileWithEncoding( void )
 
 		// check empty file
 		content = "";
-		ut::test_TextFile_Narrow( encoding, textPath, content, NULL );
+		ut::test_TextFile_A( encoding, textPath, content, NULL );
 
 		// single-line file
 		content = "xyz";
-		ut::test_TextFile_Narrow( encoding, textPath, content, "xyz" );
+		ut::test_TextFile_A( encoding, textPath, content, "xyz" );
 
 		// check multiple-lines file
 		content = "A1\nB2";
-		ut::test_TextFile_Narrow( encoding, textPath, content, "A1\r\nB2" );
+		ut::test_TextFile_A( encoding, textPath, content, "A1\r\nB2" );
 	}
 	{
 		fs::Encoding encoding = fs::UTF8_bom;
@@ -150,15 +169,15 @@ void CTextFileIoTests::TestTextFileWithEncoding( void )
 
 		// check empty file
 		content = "";
-		ut::test_TextFile_Narrow( encoding, textPath, content, "\xEF\xBB\xBF" );
+		ut::test_TextFile_A( encoding, textPath, content, "\xEF\xBB\xBF" );
 
 		// single-line file
 		content = "xyz";
-		ut::test_TextFile_Narrow( encoding, textPath, content, "\xEF\xBB\xBF" "xyz" );
+		ut::test_TextFile_A( encoding, textPath, content, "\xEF\xBB\xBF" "xyz" );
 
 		// check multiple-lines file
 		content = "A1\nB2";
-		ut::test_TextFile_Narrow( encoding, textPath, content, "\xEF\xBB\xBF" "A1\r\nB2" );
+		ut::test_TextFile_A( encoding, textPath, content, "\xEF\xBB\xBF" "A1\r\nB2" );
 	}
 	{
 		fs::Encoding encoding = fs::UTF16_LE_bom;
@@ -168,17 +187,17 @@ void CTextFileIoTests::TestTextFileWithEncoding( void )
 
 		// check empty file
 		content = "";
-		ut::test_TextFile_Narrow( encoding, textPath, content, "\xFF\xFE" );
+		ut::test_TextFile_A( encoding, textPath, content, "\xFF\xFE" );
 
 		// single-line file
 		content = "xyz";
 		static const char s_slExpected[] = { '\xFF', '\xFE', 'x', 0, 'y', 0, 'z', 0 };
-		ut::test_TextFile_Narrow( encoding, textPath, content, s_slExpected, COUNT_OF( s_slExpected ) );
+		ut::test_TextFile_A( encoding, textPath, content, s_slExpected, COUNT_OF( s_slExpected ) );
 
 		// check multiple-lines file
 		content = "A1\nB2";
 		static const char s_mlExpected[] = { '\xFF', '\xFE', 'A', 0, '1', 0, '\r', 0, '\n', 0, 'B', 0, '2', 0 };
-		ut::test_TextFile_Narrow( encoding, textPath, content, s_mlExpected, COUNT_OF( s_mlExpected ) );
+		ut::test_TextFile_A( encoding, textPath, content, s_mlExpected, COUNT_OF( s_mlExpected ) );
 	}
 	{
 		fs::Encoding encoding = fs::UTF16_be_bom;
@@ -188,21 +207,21 @@ void CTextFileIoTests::TestTextFileWithEncoding( void )
 
 		// check empty file
 		content = "";
-		ut::test_TextFile_Narrow( encoding, textPath, content, "\xFE\xFF" );
+		ut::test_TextFile_A( encoding, textPath, content, "\xFE\xFF" );
 
 		// single-line file
 		content = "xyz";
 		static const char s_slExpected[] = { '\xFE', '\xFF', 0, 'x', 0, 'y', 0, 'z' };
-		ut::test_TextFile_Narrow( encoding, textPath, content, s_slExpected, COUNT_OF( s_slExpected ) );
+		ut::test_TextFile_A( encoding, textPath, content, s_slExpected, COUNT_OF( s_slExpected ) );
 
 		// check multiple-lines file
 		content = "A1\nB2";
 		static const char s_mlExpected[] = { '\xFE', '\xFF', 0, 'A', 0, '1', 0, '\r', 0, '\n', 0, 'B', 0, '2' };
-		ut::test_TextFile_Narrow( encoding, textPath, content, s_mlExpected, COUNT_OF( s_mlExpected ) );
+		ut::test_TextFile_A( encoding, textPath, content, s_mlExpected, COUNT_OF( s_mlExpected ) );
 	}
 }
 
-	void ut::test_TextFile_Narrow( fs::Encoding encoding, const fs::CPath& textPath, const std::string& content, const char pExpected[], size_t expectedSize /*= std::string::npos*/ )
+	void ut::test_TextFile_A( fs::Encoding encoding, const fs::CPath& textPath, const std::string& content, const char pExpected[], size_t expectedSize /*= std::string::npos*/ )
 	{
 		std::vector< char > expectedBuffer;
 		AssignText( expectedBuffer, pExpected, expectedSize );
@@ -221,155 +240,187 @@ void CTextFileIoTests::TestTextFileWithEncoding( void )
 	}
 
 
-void CTextFileIoTests::TestWriteParse( void )
+void CTextFileIoTests::TestWriteReadLines( void )
 {
-	ut::test_WriteParse_Narrow( fs::ANSI );
-	ut::test_WriteParse_Narrow( fs::UTF8_bom );
-	ut::test_WriteParse_Narrow( fs::UTF16_LE_bom );
-	ut::test_WriteParse_Narrow( fs::UTF16_be_bom );
+	ut::test_WriteReadLines_A( fs::ANSI );
+	ut::test_WriteReadLines_A( fs::UTF8_bom );
+	ut::test_WriteReadLines_A( fs::UTF16_LE_bom );
+	ut::test_WriteReadLines_A( fs::UTF16_be_bom );
 
-	ut::test_WriteParse_Wide( fs::ANSI );
-	ut::test_WriteParse_Wide( fs::UTF8_bom );
-	ut::test_WriteParse_Wide( fs::UTF16_LE_bom );
-	ut::test_WriteParse_Wide( fs::UTF16_be_bom );
+	ut::test_WriteReadLines_W( fs::ANSI );
+	ut::test_WriteReadLines_W( fs::UTF8_bom );
+	ut::test_WriteReadLines_W( fs::UTF16_LE_bom );
+	ut::test_WriteReadLines_W( fs::UTF16_be_bom );
 }
 
-	void ut::test_WriteParse_Narrow( fs::Encoding encoding )
+	void ut::test_WriteReadLines_A( fs::Encoding encoding )
 	{
 		ut::CTempFilePool pool( ut::FormatTextFilename( encoding ).c_str() );
 		const fs::CPath& textPath = pool.GetFilePaths()[ 0 ];
 
-		CTextFileParser< std::string > narrowParser;
-		const std::vector< std::string >& narrowLines = narrowParser.GetParsedLines();
+		std::vector< std::string > srcLines, outLines;
+
+		// check empty file
+		io::WriteLinesToFile( textPath, srcLines, encoding );
+		ASSERT_EQUAL( encoding, io::ReadLinesFromFile( outLines, textPath ) );
+		ASSERT_EQUAL( srcLines, outLines );
+
+		// check single-line file (no line-end)
+		srcLines.push_back( "ABC" );
+		io::WriteLinesToFile( textPath, srcLines, encoding );
+		ASSERT_EQUAL( encoding, io::ReadLinesFromFile( outLines, textPath ) );
+		ASSERT_EQUAL( srcLines, outLines );
+
+		// check 2-lines file (1 line-end)
+		ut::SplitValues( srcLines, "\n", "\n" );
+		io::WriteLinesToFile( textPath, srcLines, encoding );
+		ASSERT_EQUAL( encoding, io::ReadLinesFromFile( outLines, textPath ) );
+		ASSERT_EQUAL( srcLines, outLines );
+
+		ut::SplitValues( srcLines, "A1\n", "\n" );
+		io::WriteLinesToFile( textPath, srcLines, encoding );
+		ASSERT_EQUAL( encoding, io::ReadLinesFromFile( outLines, textPath ) );
+		ASSERT_EQUAL( srcLines, outLines );
+
+		ut::SplitValues( srcLines, "\nA1", "\n" );
+		io::WriteLinesToFile( textPath, srcLines, encoding );
+		ASSERT_EQUAL( encoding, io::ReadLinesFromFile( outLines, textPath ) );
+		ASSERT_EQUAL( srcLines, outLines );
+
+		// check multiple-lines file
+		ut::SplitValues( srcLines, "A1\nB2\nC3\nD4", "\n" );
+		io::WriteLinesToFile( textPath, srcLines, encoding );
+		ASSERT_EQUAL( encoding, io::ReadLinesFromFile( outLines, textPath ) );
+		ASSERT_EQUAL( srcLines, outLines );
+	}
+
+	void ut::test_WriteReadLines_W( fs::Encoding encoding )
+	{
+		ut::CTempFilePool pool( ut::FormatTextFilename( encoding ).c_str() );
+		const fs::CPath& textPath = pool.GetFilePaths()[ 0 ];
+
+		std::vector< std::wstring > srcLines, outLines;
+
+		// check empty file
+		io::WriteLinesToFile( textPath, srcLines, encoding );
+		ASSERT_EQUAL( encoding, io::ReadLinesFromFile( outLines, textPath ) );
+		ASSERT_EQUAL( srcLines, outLines );
+
+		// check single-line file (no line-end)
+		srcLines.push_back( L"ABC" );
+		io::WriteLinesToFile( textPath, srcLines, encoding );
+		ASSERT_EQUAL( encoding, io::ReadLinesFromFile( outLines, textPath ) );
+		ASSERT_EQUAL( srcLines, outLines );
+
+		// check 2-lines file (1 line-end)
+		ut::SplitValues( srcLines, L"\n", L"\n" );
+		io::WriteLinesToFile( textPath, srcLines, encoding );
+		ASSERT_EQUAL( encoding, io::ReadLinesFromFile( outLines, textPath ) );
+		ASSERT_EQUAL( srcLines, outLines );
+
+		ut::SplitValues( srcLines, L"A1\n", L"\n" );
+		io::WriteLinesToFile( textPath, srcLines, encoding );
+		ASSERT_EQUAL( encoding, io::ReadLinesFromFile( outLines, textPath ) );
+		ASSERT_EQUAL( srcLines, outLines );
+
+		ut::SplitValues( srcLines, L"\nA1", L"\n" );
+		io::WriteLinesToFile( textPath, srcLines, encoding );
+		ASSERT_EQUAL( encoding, io::ReadLinesFromFile( outLines, textPath ) );
+		ASSERT_EQUAL( srcLines, outLines );
+
+		// check multiple-lines file
+		ut::SplitValues( srcLines, L"A1\nB2\nC3\nD4", L"\n" );
+		io::WriteLinesToFile( textPath, srcLines, encoding );
+		ASSERT_EQUAL( encoding, io::ReadLinesFromFile( outLines, textPath ) );
+		ASSERT_EQUAL( srcLines, outLines );
+	}
+
+void CTextFileIoTests::TestWriteParseLines( void )
+{
+	ut::test_WriteParseLines_A( fs::ANSI );
+	ut::test_WriteParseLines_A( fs::UTF8_bom );
+	ut::test_WriteParseLines_A( fs::UTF16_LE_bom );
+	ut::test_WriteParseLines_A( fs::UTF16_be_bom );
+
+	ut::test_WriteParseLines_W( fs::ANSI );
+	ut::test_WriteParseLines_W( fs::UTF8_bom );
+	ut::test_WriteParseLines_W( fs::UTF16_LE_bom );
+	ut::test_WriteParseLines_W( fs::UTF16_be_bom );
+}
+
+	void ut::test_WriteParseLines_A( fs::Encoding encoding )
+	{
+		ut::CTempFilePool pool( ut::FormatTextFilename( encoding ).c_str() );
+		const fs::CPath& textPath = pool.GetFilePaths()[ 0 ];
+
+		io::CTextFileParser< std::string > narrowParser;
+		const std::vector< std::string >& parsedLines = narrowParser.GetParsedLines();
 
 		// check empty file
 		io::WriteStringToFile( textPath, std::string(), encoding );
 		narrowParser.ParseFile( textPath );
-		ASSERT_EQUAL( 1, narrowLines.size() );
-		ASSERT_EQUAL( "", narrowLines[ 0 ] );
+		ASSERT( parsedLines.empty() );
 
 		// check single-line file (no line-end)
 		static const std::string s_singleText( "ABC" );
 		io::WriteStringToFile( textPath, s_singleText, encoding );
 		narrowParser.ParseFile( textPath );
-		ASSERT_EQUAL( 1, narrowLines.size() );
-		ASSERT_EQUAL( s_singleText, narrowLines[ 0 ] );
+		ASSERT_EQUAL( 1, parsedLines.size() );
+		ASSERT_EQUAL( s_singleText, parsedLines[ 0 ] );
 
 		// check 2-lines file (1 line-end)
 		io::WriteStringToFile( textPath, s_singleText + "\n", encoding );
 		narrowParser.ParseFile( textPath );
-		ASSERT_EQUAL( 2, narrowLines.size() );
-		ASSERT_EQUAL( s_singleText, narrowLines[ 0 ] );
-		ASSERT_EQUAL( "", narrowLines[ 1 ] );
+		ASSERT_EQUAL( 2, parsedLines.size() );
+		ASSERT_EQUAL( s_singleText, parsedLines[ 0 ] );
+		ASSERT_EQUAL( "", parsedLines[ 1 ] );
 
 		// check multiple-lines file
 		io::WriteStringToFile( textPath, std::string( "A1\nB2\nC3\nD4" ), encoding );
 		narrowParser.ParseFile( textPath );
-		ASSERT_EQUAL( 4, narrowLines.size() );
-		ASSERT_EQUAL( "A1", narrowLines[ 0 ] );
-		ASSERT_EQUAL( "B2", narrowLines[ 1 ] );
-		ASSERT_EQUAL( "C3", narrowLines[ 2 ] );
-		ASSERT_EQUAL( "D4", narrowLines[ 3 ] );
+		ASSERT_EQUAL( 4, parsedLines.size() );
+		ASSERT_EQUAL( "A1", parsedLines[ 0 ] );
+		ASSERT_EQUAL( "B2", parsedLines[ 1 ] );
+		ASSERT_EQUAL( "C3", parsedLines[ 2 ] );
+		ASSERT_EQUAL( "D4", parsedLines[ 3 ] );
 	}
 
-	void ut::test_WriteParse_Wide( fs::Encoding encoding )
+	void ut::test_WriteParseLines_W( fs::Encoding encoding )
 	{
 		ut::CTempFilePool pool( ut::FormatTextFilename( encoding ).c_str() );
 		const fs::CPath& textPath = pool.GetFilePaths()[ 0 ];
 
-		CTextFileParser< std::wstring > narrowParser;
-		const std::vector< std::wstring >& narrowLines = narrowParser.GetParsedLines();
+		io::CTextFileParser< std::wstring > wideParser;
+		const std::vector< std::wstring >& parsedLines = wideParser.GetParsedLines();
 
 		// check empty file
 		io::WriteStringToFile( textPath, std::wstring(), encoding );
-		narrowParser.ParseFile( textPath );
-		ASSERT_EQUAL( 1, narrowLines.size() );
-		ASSERT_EQUAL( L"", narrowLines[ 0 ] );
+		wideParser.ParseFile( textPath );
+		ASSERT( parsedLines.empty() );
 
 		// check single-line file (no line-end)
 		static const std::wstring s_singleText( L"ABC" );
 		io::WriteStringToFile( textPath, s_singleText, encoding );
-		narrowParser.ParseFile( textPath );
-		ASSERT_EQUAL( 1, narrowLines.size() );
-		ASSERT_EQUAL( s_singleText, narrowLines[ 0 ] );
+		wideParser.ParseFile( textPath );
+		ASSERT_EQUAL( 1, parsedLines.size() );
+		ASSERT_EQUAL( s_singleText, parsedLines[ 0 ] );
 
 		// check 2-lines file (1 line-end)
 		io::WriteStringToFile( textPath, s_singleText + L"\n", encoding );
-		narrowParser.ParseFile( textPath );
-		ASSERT_EQUAL( 2, narrowLines.size() );
-		ASSERT_EQUAL( s_singleText, narrowLines[ 0 ] );
-		ASSERT_EQUAL( L"", narrowLines[ 1 ] );
+		wideParser.ParseFile( textPath );
+		ASSERT_EQUAL( 2, parsedLines.size() );
+		ASSERT_EQUAL( s_singleText, parsedLines[ 0 ] );
+		ASSERT_EQUAL( L"", parsedLines[ 1 ] );
 
 		// check multiple-lines file
 		io::WriteStringToFile( textPath, std::wstring( L"A1\nB2\nC3\nD4" ), encoding );
-		narrowParser.ParseFile( textPath );
-		ASSERT_EQUAL( 4, narrowLines.size() );
-		ASSERT_EQUAL( L"A1", narrowLines[ 0 ] );
-		ASSERT_EQUAL( L"B2", narrowLines[ 1 ] );
-		ASSERT_EQUAL( L"C3", narrowLines[ 2 ] );
-		ASSERT_EQUAL( L"D4", narrowLines[ 3 ] );
-	}
-
-
-void CTextFileIoTests::TestFileIo( void )
-{
-	ut::CTempFilePool pool( _T("textFile.txt") );
-	const fs::CPath& textPath = pool.GetFilePaths()[ 0 ];
-
-	{
-		CTextFileParser< std::string > narrowParser;
-		const std::vector< std::string >& narrowLines = narrowParser.GetParsedLines();
-
-		// check empty file
-		io::WriteStringToFile( textPath, std::string() );
-		narrowParser.ParseFile( textPath );
-		ASSERT_EQUAL( 1, narrowLines.size() );
-		ASSERT_EQUAL( "", narrowLines[ 0 ] );
-
-		// check single-line file (no line-end)
-		static const std::string s_singleText( "ABC" );
-		io::WriteStringToFile( textPath, s_singleText );
-		narrowParser.ParseFile( textPath );
-		ASSERT_EQUAL( 1, narrowLines.size() );
-		ASSERT_EQUAL( s_singleText, narrowLines[ 0 ] );
-
-		// check 2-lines file (1 line-end)
-		io::WriteStringToFile( textPath, s_singleText + "\n" );
-		narrowParser.ParseFile( textPath );
-		ASSERT_EQUAL( 2, narrowLines.size() );
-		ASSERT_EQUAL( s_singleText, narrowLines[ 0 ] );
-		ASSERT_EQUAL( "", narrowLines[ 1 ] );
-
-		// check multiple-lines file
-		io::WriteStringToFile( textPath, std::string( "A\nB\nC\nD" ) );
-		narrowParser.ParseFile( textPath );
-		ASSERT_EQUAL( 4, narrowLines.size() );
-		ASSERT_EQUAL( "A", narrowLines[ 0 ] );
-		ASSERT_EQUAL( "B", narrowLines[ 1 ] );
-		ASSERT_EQUAL( "C", narrowLines[ 2 ] );
-		ASSERT_EQUAL( "D", narrowLines[ 3 ] );
-	}
-
-	{
-		CTextFileParser< std::wstring > wideParser;
-		const std::vector< std::wstring >& wideLines = wideParser.GetParsedLines();
-
-		// check empty file
-		io::WriteStringToFile( textPath, std::wstring() );
 		wideParser.ParseFile( textPath );
-		ASSERT_EQUAL( 1, wideLines.size() );
-		ASSERT_EQUAL( L"", wideLines[ 0 ] );
-
-		// check multiple-lines file
-		io::WriteStringToFile( textPath, std::wstring( L"A\nB\nC\nD" ) );
-		wideParser.ParseFile( textPath );
-		ASSERT_EQUAL( 4, wideLines.size() );
-		ASSERT_EQUAL( L"A", wideLines[ 0 ] );
-		ASSERT_EQUAL( L"B", wideLines[ 1 ] );
-		ASSERT_EQUAL( L"C", wideLines[ 2 ] );
-		ASSERT_EQUAL( L"D", wideLines[ 3 ] );
+		ASSERT_EQUAL( 4, parsedLines.size() );
+		ASSERT_EQUAL( L"A1", parsedLines[ 0 ] );
+		ASSERT_EQUAL( L"B2", parsedLines[ 1 ] );
+		ASSERT_EQUAL( L"C3", parsedLines[ 2 ] );
+		ASSERT_EQUAL( L"D4", parsedLines[ 3 ] );
 	}
-}
 
 
 void CTextFileIoTests::Run( void )
@@ -377,9 +428,9 @@ void CTextFileIoTests::Run( void )
 	__super::Run();
 
 	TestByteOrderMark();
-	TestTextFileWithEncoding();
-	TestWriteParse();
-	TestFileIo();
+	TestTextFile();
+	TestWriteReadLines();
+	TestWriteParseLines();
 }
 
 

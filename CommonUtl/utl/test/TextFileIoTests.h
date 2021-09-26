@@ -21,9 +21,9 @@ public:
 	virtual void Run( void );
 private:
 	void TestByteOrderMark( void );
-	void TestTextFileWithEncoding( void );
-	void TestWriteParse( void );
-	void TestFileIo( void );
+	void TestTextFile( void );
+	void TestWriteReadLines( void );
+	void TestWriteParseLines( void );
 };
 
 

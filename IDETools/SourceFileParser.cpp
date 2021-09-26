@@ -52,7 +52,7 @@ void CSourceFileParser::ParseRootFile( int maxParseLines /*= 1000*/ )
 
 	try
 	{
-		CTextFileParser< std::tstring > parser( this );
+		io::CTextFileParser< std::tstring > parser( this );
 		parser.SetMaxLineCount( maxParseLines );
 		parser.ParseFile( m_rootFilePath );
 	}

@@ -45,7 +45,7 @@ namespace rc
 	}
 
 	
-	class CVersionInfoParser : public ILineParserCallback<std::string>
+	class CVersionInfoParser : public io::ILineParserCallback<std::string>
 	{
 	public:
 		CVersionInfoParser( CResourceFile* pOwner ) : m_pOwner( pOwner ), m_lineNo( utl::npos ), m_viFlags( 0 ) {}
@@ -53,7 +53,7 @@ namespace rc
 		static bool ReplaceEntry_VALUE( std::string& rValueLine, const char* pName, const char* pValue );
 		static bool ReplaceEntry_BuildTimestamp( std::string& rValueLine, const CTime& buildTimestamp );
 	private:
-		// ILineParserCallback<std::string> interface
+		// io::ILineParserCallback<std::string> interface
 		virtual bool OnParseLine( const std::string& line, unsigned int lineNo );
 		virtual void OnEndParsing( void ) { m_pOwner->OnEndParsing(); }
 
@@ -84,7 +84,7 @@ CResourceFile::CResourceFile( const fs::CPath& rcFilePath, app::TOption optionFl
 	, m_origFileState( fs::CFileState::ReadFromFile( m_rcFilePath ) )
 {
 	rc::CVersionInfoParser parserCallback( this );
-	CTextFileParser<std::string> parser( &parserCallback );
+	io::CTextFileParser<std::string> parser( &parserCallback );
 
 	m_encoding = parser.ParseFile( m_rcFilePath );
 }

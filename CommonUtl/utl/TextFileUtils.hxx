@@ -43,7 +43,7 @@ namespace io
 
 namespace io
 {
-	// write container of lines to text file
+	// read entire string from encoded text file
 
 	namespace impl
 	{
@@ -91,8 +91,8 @@ namespace io
 			case fs::UTF8_bom:		impl::DoReadStringFromFile< fs::UTF8_bom, char >( rText, srcFilePath ); break;
 			case fs::UTF16_LE_bom:	impl::DoReadStringFromFile< fs::UTF16_LE_bom, wchar_t >( rText, srcFilePath ); break;
 			case fs::UTF16_be_bom:	impl::DoReadStringFromFile< fs::UTF16_be_bom, wchar_t >( rText, srcFilePath ); break;
-			case fs::UTF32_LE_bom:	//return impl::DoReadStringFromFile< fs::UTF32_LE_bom, str::char32_t >( rText, srcFilePath ); break;
-			case fs::UTF32_be_bom:	//return impl::DoReadStringFromFile< fs::UTF32_be_bom, str::char32_t >( rText, srcFilePath ); break;
+			case fs::UTF32_LE_bom:	//impl::DoReadStringFromFile< fs::UTF32_LE_bom, str::char32_t >( rText, srcFilePath ); break;
+			case fs::UTF32_be_bom:	//impl::DoReadStringFromFile< fs::UTF32_be_bom, str::char32_t >( rText, srcFilePath ); break;
 			default:
 				ThrowUnsupportedEncoding( bom.GetEncoding() );
 		}
@@ -100,6 +100,8 @@ namespace io
 		return bom.GetEncoding();
 	}
 
+
+	// write entire string to encoded text file
 
 	namespace impl
 	{
@@ -130,22 +132,6 @@ namespace io
 			AppendText( tofs, text );
 			return !tofs.fail();
 		}
-
-		template< fs::Encoding encoding, typename CharT, typename LinesT >
-		bool DoWriteLinesToFile( const fs::CPath& targetFilePath, const LinesT& textLines ) throws_( CRuntimeException )
-		{
-			CEncoded_ofstream< CharT, encoding > tofs( targetFilePath );
-
-			size_t linePos = 0;
-			for ( typename LinesT::const_iterator itLine = textLines.begin(); itLine != textLines.end(); ++itLine )
-			{
-				if ( linePos++ != 0 )
-					tofs.Append( '\n' );
-
-				AppendText( tofs, *itLine );
-			}
-			return !tofs.fail();
-		}
 	}
 
 
@@ -165,8 +151,30 @@ namespace io
 		}
 	}
 
+
+	// write entire string to encoded text file
+
+	namespace impl
+	{
+		template< fs::Encoding encoding, typename CharT, typename LinesT >
+		bool DoWriteLinesToFile( const fs::CPath& targetFilePath, const LinesT& textLines ) throws_( CRuntimeException )
+		{
+			CEncoded_ofstream< CharT, encoding > tofs( targetFilePath );
+
+			size_t linePos = 0;
+			for ( typename LinesT::const_iterator itLine = textLines.begin(); itLine != textLines.end(); ++itLine )
+			{
+				if ( linePos++ != 0 )
+					tofs.Append( '\n' );
+
+				AppendText( tofs, *itLine );
+			}
+			return !tofs.fail();
+		}
+	}
+
 	template< typename LinesT >
-	void WriteLinesToFile( const fs::CPath& targetFilePath, const LinesT& textLines, fs::Encoding encoding ) throws_( CRuntimeException )
+	void WriteLinesToFile( const fs::CPath& targetFilePath, const LinesT& textLines, fs::Encoding encoding /*= fs::ANSI*/ ) throws_( CRuntimeException )
 	{
 		switch ( encoding )
 		{
@@ -182,59 +190,140 @@ namespace io
 	}
 
 
+	// read container of lines from encoded text file
 
-	template< typename LinesT >
-	void WriteLinesToFile( const fs::CPath& targetFilePath, const LinesT& srcLines ) throws_( CRuntimeException )
+	namespace impl
 	{
-		std::ofstream ofs( targetFilePath.GetPtr() );
-		io::CheckOpenForWriting( ofs, targetFilePath );
+		template< typename CharT, typename StringT >
+		void GetTextLine( ITight_istream<CharT>& tis, StringT& rLine )
+		{
+			tis.GetLine( rLine );
+		}
 
-		WriteLinesToStream( ofs, srcLines );		// save all lines
-		ofs.close();
+		template<>
+		inline void GetTextLine( ITight_istream<char>& tis, std::wstring& rLine )
+		{
+			std::string narrowLine;
+			tis.GetLine( narrowLine );
+			rLine = str::FromUtf8( narrowLine.c_str() );
+		}
+
+		template<>
+		inline void GetTextLine( ITight_istream<wchar_t>& tis, std::string& rLine )
+		{
+			std::wstring wideLine;
+			tis.GetLine( wideLine );
+			rLine = str::ToUtf8( wideLine.c_str() );
+		}
+
+
+		template< fs::Encoding encoding, typename CharT, typename LinesT >
+		bool DoReadLinesFromFile( LinesT& rLines, const fs::CPath& srcFilePath ) throws_( CRuntimeException )
+		{
+			typedef typename LinesT::value_type TString;
+
+			CEncoded_ifstream< CharT, encoding > tifs( srcFilePath );
+
+			rLines.clear();
+			for ( size_t lineNo = 1; !tifs.AtEnd(); ++lineNo )
+			{
+				TString line;
+				impl::GetTextLine( tifs, line );
+
+				rLines.insert( rLines.end(), line );
+			}
+
+			if ( tifs.PeekLast() == '\n' )
+				rLines.insert( rLines.end(), TString() );		// IMP: add the last empty line, since it gets skipped by AtEnd() returning false
+
+			return !tifs.fail();
+		}
 	}
 
 	template< typename LinesT >
-	void WriteLinesToStream( std::ostream& os, const LinesT& srcLines )
+	fs::Encoding ReadLinesFromFile( LinesT& rLines, const fs::CPath& srcFilePath ) throws_( CRuntimeException )
 	{
-		size_t linePos = 0;
-		for ( typename LinesT::const_iterator itLine = srcLines.begin(); itLine != srcLines.end(); ++itLine )
-			WriteTextLine( os, *itLine, &linePos );
+		fs::CByteOrderMark bom;
+		switch ( bom.ReadFromFile( srcFilePath ) )
+		{
+			case fs::ANSI:			impl::DoReadLinesFromFile< fs::ANSI, char >( rLines, srcFilePath ); break;
+			case fs::UTF8_bom:		impl::DoReadLinesFromFile< fs::UTF8_bom, char >( rLines, srcFilePath ); break;
+			case fs::UTF16_LE_bom:	impl::DoReadLinesFromFile< fs::UTF16_LE_bom, wchar_t >( rLines, srcFilePath ); break;
+			case fs::UTF16_be_bom:	impl::DoReadLinesFromFile< fs::UTF16_be_bom, wchar_t >( rLines, srcFilePath ); break;
+			case fs::UTF32_LE_bom:	//impl::DoReadLinesFromFile< fs::UTF32_LE_bom, str::char32_t >( rLines, srcFilePath ); break;
+			case fs::UTF32_be_bom:	//impl::DoReadLinesFromFile< fs::UTF32_be_bom, str::char32_t >( rLines, srcFilePath ); break;
+			default:
+				ThrowUnsupportedEncoding( bom.GetEncoding() );
+		}
+
+		return bom.GetEncoding();
 	}
 }
 
 
-// CTextFileParser template code
-
-template< typename StringT >
-fs::Encoding CTextFileParser< StringT >::ParseFile( const fs::CPath& srcFilePath ) throws_( CRuntimeException )
+namespace io
 {
-	std::auto_ptr< std::istream > pis = io::OpenEncodedInputStream< char >( m_encoding, srcFilePath );		// assume the text file is encoded
+	// CTextFileParser template code
 
-	ParseStream( *pis );
-	return m_encoding;
-}
-
-template< typename StringT >
-void CTextFileParser< StringT >::ParseStream( std::istream& is )
-{
-	Clear();
-
-	if ( m_pLineParserCallback != NULL )
-		m_pLineParserCallback->OnBeginParsing();
-
-	for ( unsigned int lineNo = 1; !is.eof() && lineNo <= m_maxLineCount; ++lineNo )
+	template< typename StringT >
+	fs::Encoding CTextFileParser< StringT >::ParseFile( const fs::CPath& srcFilePath ) throws_( CRuntimeException )
 	{
-		StringT line;
-		io::ReadTextLine( is, line );
+		fs::CByteOrderMark bom;
+		switch ( bom.ReadFromFile( srcFilePath ) )
+		{
+			case fs::ANSI:			ParseLinesFromFile< fs::ANSI, char >( srcFilePath ); break;
+			case fs::UTF8_bom:		ParseLinesFromFile< fs::UTF8_bom, char >( srcFilePath ); break;
+			case fs::UTF16_LE_bom:	ParseLinesFromFile< fs::UTF16_LE_bom, wchar_t >( srcFilePath ); break;
+			case fs::UTF16_be_bom:	ParseLinesFromFile< fs::UTF16_be_bom, wchar_t >( srcFilePath ); break;
+			case fs::UTF32_LE_bom:	//ParseLinesFromFile< fs::UTF32_LE_bom, str::char32_t >( srcFilePath ); break;
+			case fs::UTF32_be_bom:	//ParseLinesFromFile< fs::UTF32_be_bom, str::char32_t >( srcFilePath ); break;
+			default:
+				ThrowUnsupportedEncoding( bom.GetEncoding() );
+		}
 
+		return bom.GetEncoding();
+	}
+
+	template< typename StringT >
+	template< fs::Encoding encoding, typename CharT >
+	bool CTextFileParser< StringT >::ParseLinesFromFile( const fs::CPath& srcFilePath ) throws_( CRuntimeException )
+	{
+		Clear();
+
+		CEncoded_ifstream< CharT, encoding > tifs( srcFilePath );
+
+		if ( m_pLineParserCallback != NULL )
+			m_pLineParserCallback->OnBeginParsing();
+
+		size_t lineNo = 1;
+		bool stopped = false;
+		for ( ; !tifs.AtEnd() && !stopped && lineNo <= m_maxLineCount; ++lineNo )
+		{
+			StringT line;
+			impl::GetTextLine( tifs, line );
+
+			stopped = !PushLine( line, lineNo );
+		}
+
+		if ( !stopped && lineNo <= m_maxLineCount )
+			if ( tifs.AtEnd() && tifs.PeekLast() == '\n' )
+				PushLine( StringT(), lineNo );			// IMP: add the last empty line, since it gets skipped by AtEnd() returning false
+
+		if ( m_pLineParserCallback != NULL )
+			m_pLineParserCallback->OnEndParsing();
+
+		return !tifs.fail();
+	}
+
+	template< typename StringT >
+	bool CTextFileParser< StringT >::PushLine( const StringT& line, unsigned int lineNo )
+	{
 		if ( NULL == m_pLineParserCallback )
 			m_parsedLines.push_back( line );
 		else if ( !m_pLineParserCallback->OnParseLine( line, lineNo ) )
-			break;
+			return false;
+		return true;
 	}
-
-	if ( m_pLineParserCallback != NULL )
-		m_pLineParserCallback->OnEndParsing();
 }
 
 

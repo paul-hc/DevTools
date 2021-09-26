@@ -59,7 +59,7 @@ namespace io
 
 		void GetLine( std::basic_string< CharT >& rLine )
 		{
-			GetStr( rText, '\n' );
+			GetStr( rLine, '\n' );
 		}
 	};
 
@@ -148,6 +148,7 @@ namespace io
 		}
 
 		bool AtEnd( void ) const { return m_itChar == m_itEnd; }
+		CharT PeekLast( void ) const { return m_lastCh; }
 
 		// ITight_istream<CharT> interface
 		virtual TBaseStream& GetStream( void ) { ASSERT( !m_isBinary ); return *this; }		// for text-mode standard output

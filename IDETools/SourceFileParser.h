@@ -11,7 +11,7 @@
 struct CIncludeNode;
 
 
-struct CSourceFileParser : private ILineParserCallback< std::tstring >
+struct CSourceFileParser : private io::ILineParserCallback< std::tstring >
 {
 	CSourceFileParser( const fs::CPath& rootFilePath );
 	~CSourceFileParser();
@@ -31,7 +31,7 @@ struct CSourceFileParser : private ILineParserCallback< std::tstring >
 	void SwapIncludeNodes( std::vector< CIncludeNode* >& rIncludeNodes ) { rIncludeNodes.swap( m_includeNodes ); }		// called gets ownership
 	void ClearIncludeNodes( void );
 private:
-	// ILineParserCallback interface
+	// io::ILineParserCallback interface
 	virtual bool OnParseLine( const std::tstring& line, unsigned int lineNo );
 
 	bool ParseIncludeStatement( CIncludeTag* pIncludeTag, const std::tstring& line );
