@@ -105,7 +105,9 @@ CTime CResourceFile::StampBuildTime( const CTime& buildTimestamp )
 void CResourceFile::Save( void ) const throws_( std::exception, CException* )
 {
 	io::WriteLinesToFile( m_rcFilePath, m_lines, m_encoding );		// save all lines
-	m_origFileState.WriteToFile();									// restore the original file access times
+
+	if ( !HasFlag( m_optionFlags, app::TouchRcFile ) )
+		m_origFileState.WriteToFile();								// restore the original file access times
 }
 
 void CResourceFile::Report( std::ostream& os ) const

@@ -43,6 +43,8 @@ void CCmdLineOptions::ParseCommandLine( int argc, TCHAR* argv[] ) throws_( CRunt
 
 			if ( arg::Equals( pSwitch, _T("a") ) )
 				SetFlag( m_optionFlags, app::Add_BuildTimestamp );
+			else if ( arg::Equals( pSwitch, _T("t") ) )
+				SetFlag( m_optionFlags, app::TouchRcFile );
 			else if ( arg::EqualsAnyOf( pSwitch, _T("?|h") ) )
 			{
 				SetFlag( m_optionFlags, app::HelpMode );

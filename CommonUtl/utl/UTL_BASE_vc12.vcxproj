@@ -193,6 +193,8 @@
     <ClInclude Include="ConsoleApplication.h" />
     <ClInclude Include="ContainerUtilities.h" />
     <ClInclude Include="CRC32.h" />
+    <ClInclude Include="Encoding.h" />
+    <ClInclude Include="Endianness.h" />
     <ClInclude Include="EnumTags.h" />
     <ClInclude Include="ErrorHandler.h" />
     <ClInclude Include="FileContent.h" />
@@ -258,6 +260,7 @@
     <ClInclude Include="SubjectPredicates.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="test\AlgorithmsTests.h" />
+    <ClInclude Include="test\EndiannessTests.h" />
     <ClInclude Include="test\FileSystemTests.h" />
     <ClInclude Include="test\FmtUtilsTests.h" />
     <ClInclude Include="test\LcsTests.h" />
@@ -271,11 +274,14 @@
     <ClInclude Include="test\StringTests.h" />
     <ClInclude Include="test\StructuredStorageTest.h" />
     <ClInclude Include="test\Test.h" />
+    <ClInclude Include="test\TextFileIoTests.h" />
     <ClInclude Include="test\ThreadingTests.h" />
     <ClInclude Include="test\UnitTest.h" />
     <ClInclude Include="test\UtlConsoleTests.h" />
-    <ClInclude Include="TextFileUtils.h" />
-    <ClInclude Include="TextFileUtils.hxx" />
+    <ClInclude Include="TextEncodedFileStreams.h" />
+    <ClInclude Include="TextEncoding.h" />
+    <ClInclude Include="TextFileIo.h" />
+    <ClInclude Include="TextFileIo.hxx" />
     <ClInclude Include="Timer.h" />
     <ClInclude Include="TimeUtils.h" />
     <ClInclude Include="TokenIterator.h" />
@@ -329,6 +335,7 @@
     <ClCompile Include="StructuredStorage.cpp" />
     <ClCompile Include="Subject.cpp" />
     <ClCompile Include="test\AlgorithmsTests.cpp" />
+    <ClCompile Include="test\EndiannessTests.cpp" />
     <ClCompile Include="test\FileSystemTests.cpp" />
     <ClCompile Include="test\FmtUtilsTests.cpp" />
     <ClCompile Include="test\LcsTests.cpp" />
@@ -342,10 +349,13 @@
     <ClCompile Include="test\StringTests.cpp" />
     <ClCompile Include="test\StructuredStorageTest.cpp" />
     <ClCompile Include="test\Test.cpp" />
+    <ClCompile Include="test\TextFileIoTests.cpp" />
     <ClCompile Include="test\ThreadingTests.cpp" />
     <ClCompile Include="test\UnitTest.cpp" />
     <ClCompile Include="test\UtlConsoleTests.cpp" />
-    <ClCompile Include="TextFileUtils.cpp" />
+    <ClCompile Include="TextEncodedFileStreams.cpp" />
+    <ClCompile Include="TextEncoding.cpp" />
+    <ClCompile Include="TextFileIo.cpp" />
     <ClCompile Include="Timer.cpp" />
     <ClCompile Include="TimeUtils.cpp" />
     <ClCompile Include="TokenIterator.cpp" />

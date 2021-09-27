@@ -521,10 +521,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\StreamStdTypes.h"
-				>
-			</File>
-			<File
 				RelativePath=".\StringBase.cpp"
 				>
 			</File>
@@ -728,6 +724,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\StreamStdTypes.h"
+					>
+				</File>
+				<File
 					RelativePath=".\StructuredStorage.cpp"
 					>
 				</File>
@@ -765,7 +765,7 @@
 				</File>
 			</Filter>
 			<Filter
-				Name="Design Patterns"
+				Name="Pattern"
 				>
 				<File
 					RelativePath=".\Command.cpp"

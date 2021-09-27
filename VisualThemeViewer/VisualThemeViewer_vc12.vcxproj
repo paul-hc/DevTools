@@ -111,7 +111,7 @@
       <AdditionalIncludeDirectories>$(IntDir);../CommonUtl;../CommonUtl/utl/UI;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <PreBuildEvent>
-      <Command>StampBuildVersion.exe -a $(ProjectDir)$(ProjectName).rc -a</Command>
+      <Command>StampBuildVersion.exe -a -t $(ProjectDir)$(ProjectName).rc -a</Command>
     </PreBuildEvent>
     <PreBuildEvent>
       <Message>Stamping build time in resource file...</Message>

@@ -9,7 +9,8 @@ namespace app
 	{
 		HelpMode			= BIT_FLAG( 0 ),
 		UnitTestMode		= BIT_FLAG( 1 ),
-		Add_BuildTimestamp	= BIT_FLAG( 2 )
+		Add_BuildTimestamp	= BIT_FLAG( 2 ),
+		TouchRcFile			= BIT_FLAG( 3 )
 	};
 	typedef int TOption;
 }

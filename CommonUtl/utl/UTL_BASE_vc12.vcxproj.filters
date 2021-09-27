@@ -20,6 +20,9 @@
     <Filter Include="Tests">
       <UniqueIdentifier>{024ac24f-2026-4af9-8be8-1b2e0e607b41}</UniqueIdentifier>
     </Filter>
+    <Filter Include="utl\Serialize">
+      <UniqueIdentifier>{e65620dd-5ca7-408b-a8d0-c4c9d10aa97b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CommonDefs.h">
@@ -119,15 +122,6 @@
       <Filter>utl</Filter>
     </ClInclude>
     <ClInclude Include="ResourcePool.h">
-      <Filter>utl</Filter>
-    </ClInclude>
-    <ClInclude Include="Serialization.h">
-      <Filter>utl</Filter>
-    </ClInclude>
-    <ClInclude Include="SerializeStdTypes.h">
-      <Filter>utl</Filter>
-    </ClInclude>
-    <ClInclude Include="StreamStdTypes.h">
       <Filter>utl</Filter>
     </ClInclude>
     <ClInclude Include="StringCompare.h">
@@ -247,9 +241,6 @@
     <ClInclude Include="Registry_fwd.h">
       <Filter>utl\Registry</Filter>
     </ClInclude>
-    <ClInclude Include="Serialization_fwd.h">
-      <Filter>utl</Filter>
-    </ClInclude>
     <ClInclude Include="test\AlgorithmsTests.h">
       <Filter>Tests</Filter>
     </ClInclude>
@@ -313,10 +304,40 @@
     <ClInclude Include="targetver.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="TextFileUtils.h">
+    <ClInclude Include="Endianness.h">
+      <Filter>utl\Serialize</Filter>
+    </ClInclude>
+    <ClInclude Include="Serialization.h">
+      <Filter>utl\Serialize</Filter>
+    </ClInclude>
+    <ClInclude Include="Serialization_fwd.h">
+      <Filter>utl\Serialize</Filter>
+    </ClInclude>
+    <ClInclude Include="SerializeStdTypes.h">
+      <Filter>utl\Serialize</Filter>
+    </ClInclude>
+    <ClInclude Include="StreamStdTypes.h">
       <Filter>utl\File System</Filter>
     </ClInclude>
-    <ClInclude Include="TextFileUtils.hxx">
+    <ClInclude Include="test\EndiannessTests.h">
+      <Filter>Tests</Filter>
+    </ClInclude>
+    <ClInclude Include="test\TextFileIoTests.h">
+      <Filter>Tests</Filter>
+    </ClInclude>
+    <ClInclude Include="Encoding.h">
+      <Filter>utl\File System</Filter>
+    </ClInclude>
+    <ClInclude Include="TextEncodedFileStreams.h">
+      <Filter>utl\File System</Filter>
+    </ClInclude>
+    <ClInclude Include="TextEncoding.h">
+      <Filter>utl\File System</Filter>
+    </ClInclude>
+    <ClInclude Include="TextFileIo.h">
+      <Filter>utl\File System</Filter>
+    </ClInclude>
+    <ClInclude Include="TextFileIo.hxx">
       <Filter>utl\File System</Filter>
     </ClInclude>
   </ItemGroup>
@@ -404,9 +425,6 @@
     </ClCompile>
     <ClCompile Include="PropertyLineReader.cpp">
       <Filter>utl\Registry</Filter>
-    </ClCompile>
-    <ClCompile Include="Serialization.cpp">
-      <Filter>utl</Filter>
     </ClCompile>
     <ClCompile Include="Timer.cpp">
       <Filter>utl</Filter>
@@ -504,7 +522,22 @@
     <ClCompile Include="stdafx.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="TextFileUtils.cpp">
+    <ClCompile Include="Serialization.cpp">
+      <Filter>utl\Serialize</Filter>
+    </ClCompile>
+    <ClCompile Include="test\EndiannessTests.cpp">
+      <Filter>Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="test\TextFileIoTests.cpp">
+      <Filter>Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="TextEncodedFileStreams.cpp">
+      <Filter>utl\File System</Filter>
+    </ClCompile>
+    <ClCompile Include="TextEncoding.cpp">
+      <Filter>utl\File System</Filter>
+    </ClCompile>
+    <ClCompile Include="TextFileIo.cpp">
       <Filter>utl\File System</Filter>
     </ClCompile>
   </ItemGroup>

@@ -112,7 +112,7 @@ namespace fs
 		std::vector< char > filePrefix( BomMaxSize );
 
 		ifs.read( &filePrefix.front(), BomMaxSize );
-		filePrefix.resize( ifs.gcount() );
+		filePrefix.resize( static_cast<size_t>( ifs.gcount() ) );
 
 		if ( ifs.eof() )			// file smaller in size than BomMaxSize?
 			ifs.clear();			// allow seeking past the BOM - otherwise seekg() fails
