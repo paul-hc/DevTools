@@ -372,7 +372,7 @@ BEGIN
     BEGIN
         BLOCK "040904b0"
         BEGIN
-            VALUE "BuildTimestamp", "18-09-2021 21:57:02"
+            VALUE "BuildTimestamp", "27-09-2021 12:23:29"
             VALUE "Comments", "Baloon Tips|Ignore Extention|New Replace Dialog|Command Dashboard|Deep Paste|Split UTL_BASE/UTL_UI|Rename edit page|Highlight text diffs|Edit commands|Text/Binary undo log|Undo log text/binary|Replace dialog auto-fill common prefix|Report list uses callback text for diff items text"
             VALUE "CompanyName", "Paul Cocoveanu"
             VALUE "Email", "phc.2nd@gmail.com"
