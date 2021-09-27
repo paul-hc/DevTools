@@ -51,9 +51,9 @@ namespace io
 	template< typename CharT >
 	interface ITight_istream : public utl::IMemoryManaged
 	{
-		typedef std::basic_ifstream< CharT > TBaseStream;
+		typedef std::basic_ifstream< CharT > TBaseIStream;
 
-		virtual TBaseStream& GetStream( void ) = 0;			// for text-mode standard output: use it with care (just for ANSI/UTF8 encodings)
+		virtual TBaseIStream& GetStream( void ) = 0;		// for text-mode standard output: use it with care (just for ANSI/UTF8 encodings)
 		virtual bool AtEnd( void ) const = 0;				// finished iterating?
 		virtual CharT PeekLast( void ) const = 0;			// get last read character without incrementing
 		virtual CharT GetNext( void ) = 0;
@@ -70,19 +70,16 @@ namespace io
 	template< typename CharT >
 	interface ITight_ostream : public utl::IMemoryManaged
 	{
-		typedef std::basic_ofstream< CharT > TBaseStream;
+		typedef std::basic_ofstream< CharT > TBaseOStream;
 
-		virtual TBaseStream& GetStream( void ) = 0;			// for text-mode standard output: use it with care (just for ANSI/UTF8 encodings)
+		virtual TBaseOStream& GetStream( void ) = 0;			// for text-mode standard output: use it with care (just for ANSI/UTF8 encodings)
 		virtual void Append( CharT chr ) = 0;
+		virtual void Append( const CharT* pText, size_t count = utl::npos ) = 0;
 
-		virtual void Append( const CharT* pText )
+		void AppendStr( const std::basic_string< CharT >& text )
 		{
-			ASSERT_PTR( pText );
-			for ( ; *pText != 0; ++pText )
-				Append( *pText );
+			Append( text.c_str(), text.length() );
 		}
-
-		virtual void AppendStr( const std::basic_string< CharT >& text ) { Append( text.c_str() ); }
 	};
 }
 
@@ -128,7 +125,7 @@ namespace io
 			if ( fs::ANSI == encoding || fs::UTF8_bom == encoding )
 			{
 				// open in text mode (no translation/byte-swapping required)
-				open( filePath.GetPtr(), std::ios::in, (int)std::ios::_Openprot );
+				open( filePath.GetPtr(), std::ios::in, std::ios::_Openprot );
 				m_isBinary = false;
 			}
 			else
@@ -143,14 +140,14 @@ namespace io
 			io::CheckOpenForWriting( *this, m_filePath );
 
 			size_t bomCount = m_bom.GetCharCount();
-			m_streamCount = io::GetStreamSize( (TBaseStream&)*this ) - bomCount;
+			m_streamCount = io::GetStreamSize( (TBaseIStream&)*this ) - bomCount;
 
 			m_itChar = std::istreambuf_iterator< CharT >( *this );
 			std::advance( m_itChar, bomCount );			// skip the BOM
 		}
 
 		// ITight_istream<CharT> interface
-		virtual TBaseStream& GetStream( void ) { ASSERT( !m_isBinary ); return *this; }		// for text-mode standard output
+		virtual TBaseIStream& GetStream( void ) { ASSERT( !m_isBinary ); return *this; }		// only for text-mode standard output
 
 		virtual bool AtEnd( void ) const { return m_itChar == m_itEnd; }
 		virtual CharT PeekLast( void ) const { return m_lastCh; }
@@ -212,19 +209,19 @@ namespace io
 		CharT m_lastCh;
 	public:
 		// from basic_ifstream
-		using TBaseStream::is_open;
-		using TBaseStream::close;
+		using TBaseIStream::is_open;
+		using TBaseIStream::close;
 		// from basic_istream
-		using TBaseStream::tellg;
+		using TBaseIStream::tellg;
 		// from basic_ios
-		using TBaseStream::imbue;
+		using TBaseIStream::imbue;
 		// from ios_base
-		using TBaseStream::good;
-		using TBaseStream::eof;
-		using TBaseStream::fail;
-		using TBaseStream::bad;
-		using TBaseStream::operator void*;
-		using TBaseStream::operator!;
+		using TBaseIStream::good;
+		using TBaseIStream::eof;
+		using TBaseIStream::fail;
+		using TBaseIStream::bad;
+		using TBaseIStream::operator void*;
+		using TBaseIStream::operator!;
 	};
 
 
@@ -262,7 +259,7 @@ namespace io
 
 			if ( fs::ANSI == encoding || fs::UTF8_bom == encoding )
 			{	// open in text/append mode (no translation required)
-				open( filePath.GetPtr(), std::ios::out | std::ios::app, (int)std::ios::_Openprot );
+				open( m_filePath.GetPtr(), std::ios::out | std::ios::app, std::ios::_Openprot );
 				io::CheckOpenForReading( *this, m_filePath );
 				m_isBinary = false;
 			}
@@ -278,7 +275,7 @@ namespace io
 		}
 
 		// ITight_ostream<CharT> interface
-		virtual TBaseStream& GetStream( void ) { ASSERT( !m_isBinary ); return *this; }		// for text-mode standard output
+		virtual TBaseOStream& GetStream( void ) { ASSERT( !m_isBinary ); return *this; }		// only for text-mode standard output
 
 		virtual void Append( CharT chr )
 		{
@@ -291,6 +288,30 @@ namespace io
 			put( m_encodeFunc( chr ) );
 			m_lastCh = chr;
 		}
+
+		virtual void Append( const CharT* pText, size_t count = utl::npos )
+		{
+			ASSERT_PTR( pText );
+
+			if ( m_isBinary )
+			{
+				while ( *pText != 0 )
+					Append( *pText++ );
+			}
+			else
+			{
+				REQUIRE( sizeof( CharT ) == sizeof( char ) );	// only ANSI/UTF8?
+
+				if ( utl::npos == count )
+					count = str::GetLength( pText );
+
+				if ( *pText != 0 && count != 0 )
+				{
+					write( pText, count );						// unformatted output
+					m_lastCh = pText[ count - 1 ];				// keep track of the last character
+				}
+			}
+		}
 	private:
 		fs::CPath m_filePath;				// destination file path
 		const fs::CByteOrderMark m_bom;
@@ -301,20 +322,20 @@ namespace io
 		CharT m_lastCh;
 	public:
 		// from basic_ofstream
-		using TBaseStream::is_open;
-		using TBaseStream::close;
+		using TBaseOStream::is_open;
+		using TBaseOStream::close;
 		// from basic_ostream
-		using TBaseStream::flush;
-		using TBaseStream::tellp;
+		using TBaseOStream::flush;
+		using TBaseOStream::tellp;
 		// from basic_ios
-		using TBaseStream::imbue;
+		using TBaseOStream::imbue;
 		// from ios_base
-		using TBaseStream::good;
-		using TBaseStream::eof;
-		using TBaseStream::fail;
-		using TBaseStream::bad;
-		using TBaseStream::operator void*;
-		using TBaseStream::operator!;
+		using TBaseOStream::good;
+		using TBaseOStream::eof;
+		using TBaseOStream::fail;
+		using TBaseOStream::bad;
+		using TBaseOStream::operator void*;
+		using TBaseOStream::operator!;
 	};
 }
 

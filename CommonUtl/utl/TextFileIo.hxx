@@ -11,35 +11,6 @@
 
 // text streaming template code
 
-namespace io
-{
-	template< typename CharT >
-	std::auto_ptr< std::basic_istream<CharT> > OpenEncodedInputStream( fs::Encoding& rEncoding, const fs::CPath& srcFilePath ) throws_( CRuntimeException )
-	{	// at exit the stream will be positioned at the start of the file content (after BOM, if any)
-		fs::CByteOrderMark bom;
-		switch ( bom.ReadFromFile( srcFilePath ) )
-		{
-			case fs::ANSI:
-			case fs::UTF8_bom:
-			{
-				std::basic_ifstream< CharT >* pIfs = new std::basic_ifstream< CharT >( srcFilePath.GetPtr() );
-				io::CheckOpenForReading( *pIfs, srcFilePath );
-				bom.SeekAfterBom( *pIfs );			// skip the BOM
-				return std::auto_ptr< std::basic_istream<CharT> >( pIfs );
-			}
-			case fs::UTF16_LE_bom:
-			case fs::UTF16_be_bom:
-			{
-				std::basic_string< CharT > text;
-				rEncoding = ReadStringFromFile( text, srcFilePath );
-				return std::auto_ptr< std::basic_istream<CharT> >( new std::basic_istringstream<CharT>( text, std::ios::in ) );
-			}
-			default:
-				ThrowUnsupportedEncoding( bom.GetEncoding() );
-		}
-	}
-}
-
 
 namespace io
 {
@@ -91,6 +62,7 @@ namespace io
 			case fs::UTF8_bom:		impl::DoReadStringFromFile< fs::UTF8_bom, char >( rText, srcFilePath ); break;
 			case fs::UTF16_LE_bom:	impl::DoReadStringFromFile< fs::UTF16_LE_bom, wchar_t >( rText, srcFilePath ); break;
 			case fs::UTF16_be_bom:	impl::DoReadStringFromFile< fs::UTF16_be_bom, wchar_t >( rText, srcFilePath ); break;
+			// not useful in any meaningful way!
 			case fs::UTF32_LE_bom:	//impl::DoReadStringFromFile< fs::UTF32_LE_bom, str::char32_t >( rText, srcFilePath ); break;
 			case fs::UTF32_be_bom:	//impl::DoReadStringFromFile< fs::UTF32_be_bom, str::char32_t >( rText, srcFilePath ); break;
 			default:
