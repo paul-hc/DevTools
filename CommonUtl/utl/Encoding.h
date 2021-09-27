@@ -44,7 +44,7 @@ namespace func
 	// encoding/decoding with byte swapping for UTF16_be_bom/UTF32_be_bom
 
 	template< fs::Encoding encoding >
-	struct CharConvert
+	struct CharEncoder
 	{
 		template< typename CharT >
 		CharT operator()( CharT chr ) const
@@ -54,20 +54,49 @@ namespace func
 	};
 
 	template<>
-	struct CharConvert< fs::UTF16_be_bom >
+	struct CharEncoder< fs::UTF16_be_bom >
 	{
 		wchar_t operator()( wchar_t chr ) const
 		{
-			return endian::GetBytesSwapped<endian::Little, endian::Big>()( chr );			// for decoding the equivalent is <Big, Little>
+			return endian::GetBytesSwapped<endian::Little, endian::Big>()( chr );
 		}
 	};
 
 	template<>
-	struct CharConvert< fs::UTF32_be_bom >
+	struct CharEncoder< fs::UTF32_be_bom >
 	{
 		str::char32_t operator()( str::char32_t chr ) const
 		{
-			return endian::GetBytesSwapped<endian::Little, endian::Big>()( chr );			// for decoding the equivalent is <Big, Little>
+			return endian::GetBytesSwapped<endian::Little, endian::Big>()( chr );
+		}
+	};
+
+
+	template< fs::Encoding encoding >
+	struct CharDecoder
+	{
+		template< typename CharT >
+		CharT operator()( CharT chr ) const
+		{
+			return chr;
+		}
+	};
+
+	template<>
+	struct CharDecoder< fs::UTF16_be_bom >
+	{
+		wchar_t operator()( wchar_t beChr ) const
+		{
+			return endian::GetBytesSwapped<endian::Big, endian::Little>()( beChr );
+		}
+	};
+
+	template<>
+	struct CharDecoder< fs::UTF32_be_bom >
+	{
+		str::char32_t operator()( str::char32_t beChr ) const
+		{
+			return endian::GetBytesSwapped<endian::Big, endian::Little>()( beChr );
 		}
 	};
 }

@@ -37,7 +37,7 @@ namespace io
 		typename istream_T::pos_type currPos = is.tellg();
 
 		is.seekg( 0, std::ios::end );
-		size_t streamCount = is.tellg();
+		size_t streamCount = static_cast<size_t>( is.tellg() );
 
 		is.seekg( currPos );			// restore original reading position
 		return streamCount;
@@ -215,7 +215,6 @@ namespace io
 		using TBaseIStream::eof;
 		using TBaseIStream::fail;
 		using TBaseIStream::bad;
-		using TBaseIStream::operator void*;
 		using TBaseIStream::operator!;
 	};
 
@@ -237,7 +236,7 @@ namespace io
 			return m_decodeFunc( chr );
 		}
 	private:
-		func::CharConvert< encoding > m_decodeFunc;
+		func::CharDecoder< encoding > m_decodeFunc;
 	};
 
 
@@ -324,7 +323,6 @@ namespace io
 		using TBaseOStream::eof;
 		using TBaseOStream::fail;
 		using TBaseOStream::bad;
-		using TBaseOStream::operator void*;
 		using TBaseOStream::operator!;
 	};
 
@@ -346,7 +344,7 @@ namespace io
 			return m_encodeFunc( chr );
 		}
 	private:
-		func::CharConvert< encoding > m_encodeFunc;
+		func::CharEncoder< encoding > m_encodeFunc;
 	};
 }
 
