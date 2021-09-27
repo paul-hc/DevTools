@@ -2,9 +2,9 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9.00"
-	Name="StampBuildVersion"
-	ProjectGUID="{F8FC3A4A-D533-41CE-8AEC-FFDFBC98F327}"
-	RootNamespace="StampBuildVersion"
+	Name="TransferFiles"
+	ProjectGUID="{60F0F8FB-DFCE-4931-9403-2F17F333765C}"
+	RootNamespace="TransferFiles"
 	Keyword="MFCProj"
 	TargetFrameworkVersion="0"
 	>
@@ -22,7 +22,7 @@
 			IntermediateDirectory="bin\$(PlatformName)_$(ConfigurationName)"
 			ConfigurationType="1"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC60.vsprops"
-			UseOfMFC="0"
+			UseOfMFC="1"
 			ATLMinimizesCRunTimeLibraryUsage="false"
 			CharacterSet="1"
 			>
@@ -40,7 +40,7 @@
 			/>
 			<Tool
 				Name="VCMIDLTool"
-				TypeLibraryName=".\Release/StampBuildVersion.tlb"
+				TypeLibraryName=".\Release/TransferFiles.tlb"
 				HeaderFileName=""
 			/>
 			<Tool
@@ -48,7 +48,7 @@
 				Optimization="2"
 				InlineFunctionExpansion="2"
 				WholeProgramOptimization="true"
-				AdditionalIncludeDirectories=".;../CommonUtl;$(UTL_INCLUDE)"
+				AdditionalIncludeDirectories=".;../../CommonUtl;$(UTL_INCLUDE)"
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
 				StringPooling="true"
 				RuntimeLibrary="0"
@@ -71,13 +71,14 @@
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="NDEBUG"
 				Culture="1033"
-				AdditionalIncludeDirectories="$(IntDir);../CommonUtl"
+				AdditionalIncludeDirectories="$(IntDir);../../CommonUtl"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
 				Name="VCLinkerTool"
+				OutputFile="$(OutDir)\xFer.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
 				AdditionalLibraryDirectories="$(UTL_INCLUDE)\lib\32"
@@ -121,7 +122,7 @@
 			IntermediateDirectory="bin\$(PlatformName)_$(ConfigurationName)"
 			ConfigurationType="1"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC60.vsprops"
-			UseOfMFC="0"
+			UseOfMFC="1"
 			ATLMinimizesCRunTimeLibraryUsage="false"
 			CharacterSet="1"
 			>
@@ -139,13 +140,13 @@
 			/>
 			<Tool
 				Name="VCMIDLTool"
-				TypeLibraryName=".\Debug/StampBuildVersion.tlb"
+				TypeLibraryName=".\Debug/TransferFiles.tlb"
 				HeaderFileName=""
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories=".;../CommonUtl;$(UTL_INCLUDE)"
+				AdditionalIncludeDirectories=".;../../CommonUtl;$(UTL_INCLUDE)"
 				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -168,13 +169,14 @@
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="_DEBUG"
 				Culture="1033"
-				AdditionalIncludeDirectories="$(IntDir);../CommonUtl"
+				AdditionalIncludeDirectories="$(IntDir);../../CommonUtl"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
 				Name="VCLinkerTool"
+				OutputFile="$(OutDir)\xFer.exe"
 				LinkIncremental="2"
 				SuppressStartupBanner="true"
 				AdditionalLibraryDirectories="$(UTL_INCLUDE)\lib\32"
@@ -239,11 +241,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath=".\Application.h"
-				>
-			</File>
-			<File
-				RelativePath=".\CmdLineOptions.cpp"
+				RelativePath="FileInfo.cpp"
 				>
 				<FileConfiguration
 					Name="ReleaseU|Win32"
@@ -263,19 +261,35 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath=".\CmdLineOptions.h"
+				RelativePath="FileInfo.h"
 				>
 			</File>
 			<File
-				RelativePath=".\CmdLineOptions_fwd.h"
+				RelativePath="FileTransfer.cpp"
+				>
+				<FileConfiguration
+					Name="ReleaseU|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						PreprocessorDefinitions=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="DebugU|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						PreprocessorDefinitions=""
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="FileTransfer.h"
 				>
 			</File>
 			<File
-				RelativePath=".\ResourceFile.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\ResourceFile.h"
+				RelativePath=".\resource.h"
 				>
 			</File>
 			<File
@@ -304,17 +318,61 @@
 				RelativePath=".\stdafx.h"
 				>
 			</File>
+			<File
+				RelativePath=".\TransferItem.cpp"
+				>
+				<FileConfiguration
+					Name="ReleaseU|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						PreprocessorDefinitions=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="DebugU|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						PreprocessorDefinitions=""
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\TransferItem.h"
+				>
+			</File>
+			<File
+				RelativePath=".\XferOptions.cpp"
+				>
+				<FileConfiguration
+					Name="ReleaseU|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						PreprocessorDefinitions=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="DebugU|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						PreprocessorDefinitions=""
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\XferOptions.h"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Resource Files"
 			Filter="ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe"
 			>
 			<File
-				RelativePath=".\resource.h"
-				>
-			</File>
-			<File
-				RelativePath="StampBuildVersion.rc"
+				RelativePath="TransferFiles.rc"
 				>
 				<FileConfiguration
 					Name="ReleaseU|Win32"
@@ -338,11 +396,15 @@
 			Name="Tests"
 			>
 			<File
-				RelativePath=".\test\ResourceFileTests.cpp"
+				RelativePath=".\test\test.bat"
 				>
 			</File>
 			<File
-				RelativePath=".\test\ResourceFileTests.h"
+				RelativePath=".\test\TransferFuncTests.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\test\TransferFuncTests.h"
 				>
 			</File>
 		</Filter>
