@@ -20,6 +20,7 @@ namespace fs
 
 	void QueryFolderPaths( std::vector< fs::CPath >& rFolderPaths, const std::vector< fs::CPath >& filePaths, bool uniqueOnly = true );
 
+	fs::CPath GetCurrentDirectory( void );					// current working directory
 	fs::CPath GetModuleFilePath( HINSTANCE hInstance );		// pass AfxGetApp()->m_hInstance in GUI apps, or NULL for the .exe
 	fs::CPath GetTempDirPath( void );
 

@@ -95,6 +95,14 @@ namespace io
 		return keyPos != std::tstring::npos ? (char)toupper( userKeyAnswer[ keyPos ] ) : '\0';
 	}
 
+	char PressAnyKey( const char* pMessage /*= "Press any key to continue..."*/ )
+	{
+		if ( pMessage != NULL )
+			std::cout << pMessage << std::endl;
+
+		return io::InputUserKey( false );
+	}
+
 
 	// CUserQuery implementation
 

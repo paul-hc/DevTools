@@ -79,6 +79,17 @@ namespace fs
 	}
 
 
+	fs::CPath GetCurrentDirectory( void )
+	{
+		TCHAR buffer[ MAX_PATH * 2 ];
+		CPath cwd;
+
+		if ( _tgetcwd( buffer, COUNT_OF( buffer ) ) != NULL )
+			cwd.Set( buffer );
+
+		return cwd;
+	}
+
 	fs::CPath GetModuleFilePath( HINSTANCE hInstance )
 	{
 		TCHAR modulePath[ MAX_PATH ];

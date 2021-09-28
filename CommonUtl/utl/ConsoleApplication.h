@@ -30,6 +30,7 @@ private:
 namespace io
 {
 	char InputUserKey( bool skipWhitespace = true );
+	char PressAnyKey( const char* pMessage = "Press any key to continue..." );
 
 
 	enum UserChoices { YesNo, YesNoAll };
