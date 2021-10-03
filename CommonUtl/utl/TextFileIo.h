@@ -29,7 +29,7 @@ namespace io
 	fs::Encoding ReadStringFromFile( StringT& rText, const fs::CPath& srcFilePath ) throws_( CRuntimeException );
 
 	template< typename StringT >
-	bool WriteStringToFile( const fs::CPath& targetFilePath, const StringT& StringT, fs::Encoding encoding = fs::ANSI ) throws_( CRuntimeException );
+	bool WriteStringToFile( const fs::CPath& targetFilePath, const StringT& StringT, fs::Encoding encoding = fs::ANSI_UTF8 ) throws_( CRuntimeException );
 }
 
 
@@ -41,7 +41,7 @@ namespace io
 	fs::Encoding ReadLinesFromFile( LinesT& rLines, const fs::CPath& srcFilePath ) throws_( CRuntimeException );
 
 	template< typename LinesT >
-	void WriteLinesToFile( const fs::CPath& targetFilePath, const LinesT& srcLines, fs::Encoding encoding = fs::ANSI ) throws_( CRuntimeException );
+	void WriteLinesToFile( const fs::CPath& targetFilePath, const LinesT& srcLines, fs::Encoding encoding = fs::ANSI_UTF8 ) throws_( CRuntimeException );
 }
 
 
@@ -61,9 +61,9 @@ namespace io
 	class CTextFileParser
 	{
 	public:
-		CTextFileParser( ILineParserCallback<StringT>* pLineParserCallback = NULL ) : m_pLineParserCallback( pLineParserCallback ), m_maxLineCount( UINT_MAX ), m_encoding( fs::ANSI ) {}
+		CTextFileParser( ILineParserCallback<StringT>* pLineParserCallback = NULL ) : m_pLineParserCallback( pLineParserCallback ), m_maxLineCount( UINT_MAX ), m_encoding( fs::ANSI_UTF8 ) {}
 
-		void Clear( void ) { m_encoding = fs::ANSI; m_parsedLines.clear(); }
+		void Clear( void ) { m_encoding = fs::ANSI_UTF8; m_parsedLines.clear(); }
 		void SetMaxLineCount( unsigned int maxLineCount ) { m_maxLineCount = maxLineCount; }
 
 		fs::Encoding GetEncoding( void ) { return m_encoding; }

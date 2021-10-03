@@ -112,7 +112,7 @@ static const char s_helpMessage[] =
 
 int _tmain( int argc, TCHAR* argv[] )
 {
-	CConsoleApplication app;
+	CConsoleApplication application( io::Ansi );		// output only to std::cout, std::err
 
 #ifdef _DEBUG
 	// options to check outside the try block (debugging)

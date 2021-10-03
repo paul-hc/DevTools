@@ -58,7 +58,7 @@ namespace io
 		fs::CByteOrderMark bom;
 		switch ( bom.ReadFromFile( srcFilePath ) )
 		{
-			case fs::ANSI:			impl::DoReadStringFromFile< fs::ANSI, char >( rText, srcFilePath ); break;
+			case fs::ANSI_UTF8:		impl::DoReadStringFromFile< fs::ANSI_UTF8, char >( rText, srcFilePath ); break;
 			case fs::UTF8_bom:		impl::DoReadStringFromFile< fs::UTF8_bom, char >( rText, srcFilePath ); break;
 			case fs::UTF16_LE_bom:	impl::DoReadStringFromFile< fs::UTF16_LE_bom, wchar_t >( rText, srcFilePath ); break;
 			case fs::UTF16_be_bom:	impl::DoReadStringFromFile< fs::UTF16_be_bom, wchar_t >( rText, srcFilePath ); break;
@@ -108,11 +108,11 @@ namespace io
 
 
 	template< typename StringT >
-	bool WriteStringToFile( const fs::CPath& targetFilePath, const StringT& text, fs::Encoding encoding /*= fs::ANSI*/ ) throws_( CRuntimeException )
+	bool WriteStringToFile( const fs::CPath& targetFilePath, const StringT& text, fs::Encoding encoding /*= fs::ANSI_UTF8*/ ) throws_( CRuntimeException )
 	{
 		switch ( encoding )
 		{
-			case fs::ANSI:			return impl::DoWriteStringToFile< fs::ANSI, char >( targetFilePath, text );
+			case fs::ANSI_UTF8:		return impl::DoWriteStringToFile< fs::ANSI_UTF8, char >( targetFilePath, text );
 			case fs::UTF8_bom:		return impl::DoWriteStringToFile< fs::UTF8_bom, char >( targetFilePath, text );
 			case fs::UTF16_LE_bom:	return impl::DoWriteStringToFile< fs::UTF16_LE_bom, wchar_t >( targetFilePath, text );
 			case fs::UTF16_be_bom:	return impl::DoWriteStringToFile< fs::UTF16_be_bom, wchar_t >( targetFilePath, text );
@@ -146,11 +146,11 @@ namespace io
 	}
 
 	template< typename LinesT >
-	void WriteLinesToFile( const fs::CPath& targetFilePath, const LinesT& textLines, fs::Encoding encoding /*= fs::ANSI*/ ) throws_( CRuntimeException )
+	void WriteLinesToFile( const fs::CPath& targetFilePath, const LinesT& textLines, fs::Encoding encoding /*= fs::ANSI_UTF8*/ ) throws_( CRuntimeException )
 	{
 		switch ( encoding )
 		{
-			case fs::ANSI:			impl::DoWriteLinesToFile< fs::ANSI, char >( targetFilePath, textLines ); break;
+			case fs::ANSI_UTF8:		impl::DoWriteLinesToFile< fs::ANSI_UTF8, char >( targetFilePath, textLines ); break;
 			case fs::UTF8_bom:		impl::DoWriteLinesToFile< fs::UTF8_bom, char >( targetFilePath, textLines ); break;
 			case fs::UTF16_LE_bom:	impl::DoWriteLinesToFile< fs::UTF16_LE_bom, wchar_t >( targetFilePath, textLines ); break;
 			case fs::UTF16_be_bom:	impl::DoWriteLinesToFile< fs::UTF16_be_bom, wchar_t >( targetFilePath, textLines ); break;
@@ -218,7 +218,7 @@ namespace io
 		fs::CByteOrderMark bom;
 		switch ( bom.ReadFromFile( srcFilePath ) )
 		{
-			case fs::ANSI:			impl::DoReadLinesFromFile< fs::ANSI, char >( rLines, srcFilePath ); break;
+			case fs::ANSI_UTF8:		impl::DoReadLinesFromFile< fs::ANSI_UTF8, char >( rLines, srcFilePath ); break;
 			case fs::UTF8_bom:		impl::DoReadLinesFromFile< fs::UTF8_bom, char >( rLines, srcFilePath ); break;
 			case fs::UTF16_LE_bom:	impl::DoReadLinesFromFile< fs::UTF16_LE_bom, wchar_t >( rLines, srcFilePath ); break;
 			case fs::UTF16_be_bom:	impl::DoReadLinesFromFile< fs::UTF16_be_bom, wchar_t >( rLines, srcFilePath ); break;
@@ -247,7 +247,7 @@ namespace io
 
 		switch ( m_encoding )
 		{
-			case fs::ANSI:			ParseLinesFromFile< fs::ANSI, char >( srcFilePath ); break;
+			case fs::ANSI_UTF8:		ParseLinesFromFile< fs::ANSI_UTF8, char >( srcFilePath ); break;
 			case fs::UTF8_bom:		ParseLinesFromFile< fs::UTF8_bom, char >( srcFilePath ); break;
 			case fs::UTF16_LE_bom:	ParseLinesFromFile< fs::UTF16_LE_bom, wchar_t >( srcFilePath ); break;
 			case fs::UTF16_be_bom:	ParseLinesFromFile< fs::UTF16_be_bom, wchar_t >( srcFilePath ); break;

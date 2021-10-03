@@ -24,7 +24,7 @@ namespace fs
 	class CByteOrderMark		// BOM object for UTF encoding
 	{
 	public:
-		explicit CByteOrderMark( Encoding encoding = ANSI ) { SetEncoding( encoding ); }
+		explicit CByteOrderMark( Encoding encoding = ANSI_UTF8 ) { SetEncoding( encoding ); }
 
 		Encoding GetEncoding( void ) const { return m_encoding; }
 		void SetEncoding( Encoding encoding );

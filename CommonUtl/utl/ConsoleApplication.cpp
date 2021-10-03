@@ -6,6 +6,7 @@
 #include "RuntimeException.h"
 #include "StringUtilities.h"
 #include <iostream>
+#include <fcntl.h>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -14,9 +15,14 @@
 
 // CConsoleApplication implementation
 
-CConsoleApplication::CConsoleApplication( void )
+io::TranslationMode CConsoleApplication::s_translationMode = io::Ansi;
+
+CConsoleApplication::CConsoleApplication( io::TranslationMode translationMode )
 	: CAppTools()
+	, m_stdOutput( STD_OUTPUT_HANDLE )
 {
+	SetTranslationMode( translationMode );
+
 	// facilitate Unicode output - in a console that has a Unicode font defined!
 	::setlocale( LC_ALL, "" );		// sets the locale to the default, which is obtained from the operating system
 
@@ -26,6 +32,38 @@ CConsoleApplication::CConsoleApplication( void )
 
 CConsoleApplication::~CConsoleApplication()
 {
+}
+
+void CConsoleApplication::SetTranslationMode( io::TranslationMode translationMode )
+{
+	s_translationMode = translationMode;
+
+	// flush standard output/error streams before changing the global text mode
+	std::cout.flush();
+	std::cerr.flush();
+
+	std::wcout.flush();
+	std::wcerr.flush();
+
+	::fflush( stdout );
+	::fflush( stderr );
+
+	switch ( s_translationMode )
+	{
+		case io::Ansi:
+			::_setmode( _fileno( stdout ), _O_TEXT );
+			::_setmode( _fileno( stderr ), _O_TEXT );
+			break;
+		case io::Utf8:
+			//SetConsoleOutputCP( CP_UTF8 );		// doesn't seem to have an effect
+			::_setmode( _fileno( stdout ), _O_U8TEXT );
+			::_setmode( _fileno( stderr ), _O_U8TEXT );
+			break;
+		case io::Utf16:
+			::_setmode( _fileno( stdout ), _O_U16TEXT );
+			::_setmode( _fileno( stderr ), _O_U16TEXT );
+			break;
+	}
 }
 
 utl::CResourcePool& CConsoleApplication::GetSharedResources( void )
@@ -52,12 +90,16 @@ bool CConsoleApplication::BeepSignal( app::MsgType msgType /*= app::Info*/ )
 
 bool CConsoleApplication::ReportError( const std::tstring& message, app::MsgType msgType /*= app::Error*/ )
 {
+	io::CScopedRedirectStream scopedRedirect( std::cerr );
+
 	std::cerr << app::FormatMsg( message, msgType ) << std::endl;
 	return false;
 }
 
 int CConsoleApplication::ReportException( const std::exception& exc )
 {
+	io::CScopedRedirectStream scopedRedirect( std::cerr );
+
 	app::TraceException( exc );
 	std::cerr << app::FormatMsg( CRuntimeException::MessageOf( exc ), app::Error ) << std::endl;
 	return 1;		// i.e. IDOK
@@ -65,11 +107,42 @@ int CConsoleApplication::ReportException( const std::exception& exc )
 
 int CConsoleApplication::ReportException( const CException* pExc )
 {
+	io::CScopedRedirectStream scopedRedirect( std::cerr );
+
 	app::TraceException( pExc );
 	std::cerr << app::FormatMsg( mfc::CRuntimeException::MessageOf( *pExc ), app::Error ) << std::endl;
 	return 1;		// i.e. IDOK
 }
 
+
+namespace io
+{
+	CScopedRedirectStream::CScopedRedirectStream( std::ostream& rStdOutStream )
+	{
+		if ( io::Utf16 == CConsoleApplication::GetTranslationMode() )
+			if ( &rStdOutStream == &std::cout )
+				m_pRedirector.reset( new CRedirectStream< std::ostream, std::wostream >( std::cout, std::wcout ) );		// redirect std::cout => std::wcout
+			else if ( &rStdOutStream == &std::cerr )
+				m_pRedirector.reset( new CRedirectStream< std::ostream, std::wostream >( std::cerr, std::wcerr ) );		// redirect std::cerr => std::wcerr
+			//else if ( &rStdOutStream == &std::clog )
+			//	m_pRedirector.reset( new CRedirectStream< std::ostream, std::wostream >( std::clog, std::wclog ) );		// redirect std::clog => std::wclog
+			else
+				ASSERT( false );		// unknown standard output stream?
+	}
+
+	CScopedRedirectStream::CScopedRedirectStream( std::wostream& rStdOutStream )
+	{
+		if ( io::Utf8 == CConsoleApplication::GetTranslationMode() )
+			if ( &rStdOutStream == &std::wcout )
+				m_pRedirector.reset( new CRedirectStream< std::wostream, std::ostream >( std::wcout, std::cout ) );		// redirect std::wcout => std::cout
+			else if ( &rStdOutStream == &std::wcerr )
+				m_pRedirector.reset( new CRedirectStream< std::wostream, std::ostream >( std::wcerr, std::cerr ) );		// redirect std::wcerr => std::cerr
+			//else if ( &rStdOutStream == &std::wclog )
+			//	m_pRedirector.reset( new CRedirectStream< std::wostream, std::ostream >( std::wclog, std::clog ) );		// redirect std::wclog => std::clog
+			else
+				ASSERT( false );		// unknown standard output stream?
+	}
+}
 
 
 namespace io
@@ -98,7 +171,10 @@ namespace io
 	char PressAnyKey( const char* pMessage /*= "Press any key to continue..."*/ )
 	{
 		if ( pMessage != NULL )
+		{
+			CScopedRedirectStream scopedRedirect( std::cout );
 			std::cout << pMessage << std::endl;
+		}
 
 		return io::InputUserKey( false );
 	}
@@ -108,6 +184,8 @@ namespace io
 
 	bool CUserQuery::Ask( const std::tstring& assetName )
 	{
+		CScopedRedirectStream scopedRedirect( std::cout );
+
 		ASSERT( MustAsk() );
 
 		if ( !m_promptPrefix.empty() )

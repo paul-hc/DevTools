@@ -20,7 +20,7 @@ namespace fs
 		s_resolveShortcutProc = resolveShortcutProc;
 	}
 
-	void EnumFiles( IEnumerator* pEnumerator, const fs::CPath& dirPath, const TCHAR* pWildSpec /*= _T("*.*")*/, RecursionDepth depth /*= Shallow*/ )
+	void EnumFiles( IEnumerator* pEnumerator, const fs::CPath& dirPath, const TCHAR* pWildSpec /*= _T("*.*")*/, RecursionDepth depth /*= Shallow*/, bool sortSubDirs /*= true*/ )
 	{
 		ASSERT_PTR( pEnumerator );
 
@@ -66,7 +66,8 @@ namespace fs
 			}
 		}
 
-		fs::SortPaths( subDirPaths );		// natural path order
+		if ( sortSubDirs )
+			fs::SortPaths( subDirPaths );		// natural path order
 
 		// progress reporting: ensure the sub-directory (stage) is always displayed first, then the files (items) under it
 		for ( std::vector< fs::CPath >::const_iterator itSubDirPath = subDirPaths.begin(); itSubDirPath != subDirPaths.end(); ++itSubDirPath )

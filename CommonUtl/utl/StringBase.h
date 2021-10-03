@@ -151,7 +151,7 @@ namespace str
 	template< typename CharType >
 	inline const CharType* FindTokenEnd( const CharType* pText, const CharType delims[] )
 	{
-		const TCHAR* pTextEnd = str::end( pText );
+		const CharType* pTextEnd = str::end( pText );
 		return std::find_first_of( pText, pTextEnd, delims, str::end( delims ) );
 	}
 }

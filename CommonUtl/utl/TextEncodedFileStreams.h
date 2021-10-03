@@ -52,9 +52,10 @@ namespace io
 	template< typename CharT >
 	interface ITight_istream : public utl::IMemoryManaged
 	{
+		typedef CharT char_type;
 		typedef std::basic_ifstream< CharT > TBaseIStream;
 
-		virtual TBaseIStream& GetStream( void ) = 0;		// for text-mode standard output: use it with care (just for ANSI/UTF8 encodings)
+		virtual TBaseIStream& GetStream( void ) = 0;		// for text-mode standard output: use it with care (just for ANSI_UTF8 encodings)
 		virtual bool AtEnd( void ) const = 0;				// finished iterating?
 		virtual CharT PeekLast( void ) const = 0;			// get last read character without incrementing
 		virtual CharT GetNext( void ) = 0;
@@ -71,9 +72,10 @@ namespace io
 	template< typename CharT >
 	interface ITight_ostream : public utl::IMemoryManaged
 	{
+		typedef CharT char_type;
 		typedef std::basic_ofstream< CharT > TBaseOStream;
 
-		virtual TBaseOStream& GetStream( void ) = 0;			// for text-mode standard output: use it with care (just for ANSI/UTF8 encodings)
+		virtual TBaseOStream& GetStream( void ) = 0;			// for text-mode standard output: use it with care (just for ANSI_UTF8 encodings)
 		virtual void Append( CharT chr ) = 0;
 		virtual void Append( const CharT* pText, size_t count = utl::npos ) = 0;
 
@@ -92,7 +94,7 @@ namespace io
 
 	// Input stream for text files with BOM (Byte Order Mark) support that opens for reading in binary/append mode.
 	// The public API is very restricted to limit support for unformated char/string input with text-mode translation and byte-swapping.
-	// Default implementation is for binary input streams (assumes wchar_t for CharT), with explicit method specializations for text mode char ANSI/UTF8 encoding.
+	// Default implementation is for binary input streams (assumes wchar_t for CharT), with explicit method specializations for text mode char ANSI_UTF8 encoding.
 	//
 
 	template< typename CharT >
@@ -242,7 +244,7 @@ namespace io
 
 	// File output stream with BOM (Byte Order Mark) support that opens for writing in binary/append mode.
 	// The public API is very restricted to limit support for unformated char/string output with text-mode translation and byte-swapping.
-	// Default implementation is for binary output streams (assumes wchar_t for CharT), with explicit method specializations for text mode char ANSI/UTF8 encoding.
+	// Default implementation is for binary output streams (assumes wchar_t for CharT), with explicit method specializations for text mode char ANSI_UTF8 encoding.
 	//
 
 	template< typename CharT >

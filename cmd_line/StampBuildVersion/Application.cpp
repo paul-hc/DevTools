@@ -86,7 +86,7 @@ namespace app
 
 int _tmain( int argc, TCHAR* argv[] )
 {
-	CConsoleApplication application;
+	CConsoleApplication application( io::Ansi );		// output only to std::cout, std::err
 
 	try
 	{

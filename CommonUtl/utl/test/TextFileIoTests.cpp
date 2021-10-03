@@ -97,7 +97,7 @@ CTextFileIoTests& CTextFileIoTests::Instance( void )
 void CTextFileIoTests::TestByteOrderMark( void )
 {
 	{
-		fs::CByteOrderMark bomAnsi( fs::ANSI );
+		fs::CByteOrderMark bomAnsi( fs::ANSI_UTF8 );
 
 		ASSERT( bomAnsi.IsEmpty() );
 	}
@@ -147,7 +147,7 @@ void CTextFileIoTests::TestWriteReadText( void )
 {
 	std::string content;
 	{
-		fs::Encoding encoding = fs::ANSI;
+		fs::Encoding encoding = fs::ANSI_UTF8;
 
 		ut::CTempFilePool pool( ut::FormatTextFilename( encoding ).c_str() );
 		const fs::CPath& textPath = pool.GetFilePaths().front();
@@ -245,12 +245,12 @@ void CTextFileIoTests::TestWriteReadText( void )
 
 void CTextFileIoTests::TestWriteReadLines( void )
 {
-	ut::test_WriteReadLines_A( fs::ANSI );
+	ut::test_WriteReadLines_A( fs::ANSI_UTF8 );
 	ut::test_WriteReadLines_A( fs::UTF8_bom );
 	ut::test_WriteReadLines_A( fs::UTF16_LE_bom );
 	ut::test_WriteReadLines_A( fs::UTF16_be_bom );
 
-	ut::test_WriteReadLines_W( fs::ANSI );
+	ut::test_WriteReadLines_W( fs::ANSI_UTF8 );
 	ut::test_WriteReadLines_W( fs::UTF8_bom );
 	ut::test_WriteReadLines_W( fs::UTF16_LE_bom );
 	ut::test_WriteReadLines_W( fs::UTF16_be_bom );
@@ -340,12 +340,12 @@ void CTextFileIoTests::TestWriteReadLines( void )
 
 void CTextFileIoTests::TestWriteParseLines( void )
 {
-	ut::test_WriteParseLines_A( fs::ANSI );
+	ut::test_WriteParseLines_A( fs::ANSI_UTF8 );
 	ut::test_WriteParseLines_A( fs::UTF8_bom );
 	ut::test_WriteParseLines_A( fs::UTF16_LE_bom );
 	ut::test_WriteParseLines_A( fs::UTF16_be_bom );
 
-	ut::test_WriteParseLines_W( fs::ANSI );
+	ut::test_WriteParseLines_W( fs::ANSI_UTF8 );
 	ut::test_WriteParseLines_W( fs::UTF8_bom );
 	ut::test_WriteParseLines_W( fs::UTF16_LE_bom );
 	ut::test_WriteParseLines_W( fs::UTF16_be_bom );
@@ -441,7 +441,7 @@ void CTextFileIoTests::TestParseSaveVerbatimContent( void )
 	{
 		std::string content = s_contents[ i ];
 
-		ut::test_ParseSaveVerbatimContent( fs::ANSI, content );
+		ut::test_ParseSaveVerbatimContent( fs::ANSI_UTF8, content );
 		ut::test_ParseSaveVerbatimContent( fs::UTF8_bom, content );
 		ut::test_ParseSaveVerbatimContent( fs::UTF16_LE_bom, content );
 		ut::test_ParseSaveVerbatimContent( fs::UTF16_be_bom, content );
@@ -451,7 +451,7 @@ void CTextFileIoTests::TestParseSaveVerbatimContent( void )
 	{
 		std::wstring content = str::FromUtf8( s_contents[ i ] );
 
-		ut::test_ParseSaveVerbatimContent( fs::ANSI, content );
+		ut::test_ParseSaveVerbatimContent( fs::ANSI_UTF8, content );
 		ut::test_ParseSaveVerbatimContent( fs::UTF8_bom, content );
 		ut::test_ParseSaveVerbatimContent( fs::UTF16_LE_bom, content );
 		ut::test_ParseSaveVerbatimContent( fs::UTF16_be_bom, content );

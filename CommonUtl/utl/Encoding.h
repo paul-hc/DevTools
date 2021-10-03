@@ -10,14 +10,14 @@ namespace fs
 {
 	enum Encoding
 	{
-		ANSI,			// no BOM - could be UTF8 with no-BOM as well (hard to speculate)
-		UTF8_bom,		// BOM: {EF BB BF}
-		UTF16_LE_bom,	// BOM: {FF FE} - aka UCS2 (little-endian) MS default UTF-16; e.g. first char {2F 00}
-		UTF16_be_bom,	// BOM: {FE FF} - aka UCS2 (big-endian); e.g. first char {00 2F}
-		UTF32_LE_bom,	// BOM: {FF FE 00 00} - aka UCS4 (little-endian) - MS default UTF-32; e.g. first char {2F 00 00 00}
-		UTF32_be_bom,	// BOM: {00 00 FE FF} - aka UCS4 (big-endian); e.g. first char {00 00 00 2F}
+		ANSI_UTF8,			// no BOM - could be UTF8 with no-BOM as well (hard to speculate)
+		UTF8_bom,			// BOM: {EF BB BF}
+		UTF16_LE_bom,		// BOM: {FF FE} - aka UCS2 (little-endian) MS default UTF-16; e.g. first char {2F 00}
+		UTF16_be_bom,		// BOM: {FE FF} - aka UCS2 (big-endian); e.g. first char {00 2F}
+		UTF32_LE_bom,		// BOM: {FF FE 00 00} - aka UCS4 (little-endian) - MS default UTF-32; e.g. first char {2F 00 00 00}
+		UTF32_be_bom,		// BOM: {00 00 FE FF} - aka UCS4 (big-endian); e.g. first char {00 00 00 2F}
 
-			_Encoding_Count
+			_Encoding_Count,
 	};
 
 	const CEnumTags& GetTags_Encoding( void );

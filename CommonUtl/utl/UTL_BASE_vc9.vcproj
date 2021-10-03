@@ -377,6 +377,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Console_fwd.h"
+				>
+			</File>
+			<File
 				RelativePath=".\ConsoleApplication.cpp"
 				>
 			</File>
@@ -721,6 +725,14 @@
 				</File>
 				<File
 					RelativePath=".\PathUniqueMaker.h"
+					>
+				</File>
+				<File
+					RelativePath=".\StdOutput.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\StdOutput.h"
 					>
 				</File>
 				<File

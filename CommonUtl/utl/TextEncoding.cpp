@@ -33,7 +33,7 @@ namespace fs
 	{
 		static const size_t s_byteCounts[] =
 		{
-			sizeof( char ), sizeof( char ),			// ANSI, UTF8_bom
+			sizeof( char ), sizeof( char ),			// ANSI_UTF8, UTF8_bom
 			sizeof( wchar_t ), sizeof( wchar_t ),	// UTF16_LE_bom, UTF16_be_bom
 			sizeof( wchar_t ), sizeof( wchar_t )	// UTF32_LE_bom, UTF32_be_bom
 		};
@@ -75,7 +75,7 @@ namespace fs
 {
 	const CEnumTags& GetTags_Encoding( void )
 	{
-		static const CEnumTags s_tags( _T("ANSI|UTF8|UTF16 LE (UCS2 LE)|UTF16 be (UCS2 BE)|UTF32 LE|UTF32 be"), _T("ANSI|UTF8_bom|UTF16_LE_bom|UTF16_be_bom|UTF32_LE_bom|UTF32_be_bom") );
+		static const CEnumTags s_tags( _T("ANSI/UTF8|UTF8|UTF16 LE (UCS2 LE)|UTF16 be (UCS2 BE)|UTF32 LE|UTF32 be"), _T("ANSI_UTF8|UTF8_bom|UTF16_LE_bom|UTF16_be_bom|UTF32_LE_bom|UTF32_be_bom") );
 		return s_tags;
 	}
 
@@ -95,7 +95,7 @@ namespace fs
 		switch ( encoding )
 		{
 			default:			ASSERT( false );
-			case ANSI:			m_bom.clear(); break;
+			case ANSI_UTF8:			m_bom.clear(); break;
 			case UTF8_bom:		m_bom.assign( s_bom_UTF8, END_OF( s_bom_UTF8 ) ); break;
 			case UTF16_LE_bom:	m_bom.assign( s_bom_UTF16_LE, END_OF( s_bom_UTF16_LE ) ); break;
 			case UTF16_be_bom:	m_bom.assign( s_bom_UTF16_be, END_OF( s_bom_UTF16_be ) ); break;
@@ -145,7 +145,7 @@ namespace fs
 			else if ( BomMatches( filePrefix, ARRAY_PAIR( s_bom_UTF16_be ) ) )
 				return UTF16_be_bom;
 
-		return ANSI;
+		return ANSI_UTF8;
 	}
 
 	bool CByteOrderMark::BomMatches( const std::vector< char >& filePrefix, const BYTE bom[], size_t bomCount )

@@ -108,6 +108,14 @@ namespace path
 
 	inline bool MatchExt( const TCHAR* pPath, const TCHAR* pExt ) { return EquivalentPtr( FindExt( pPath ), pExt ); }		// pExt: ".txt"
 
+
+	// huge prefix syntax: path prefixed with "\\?\"
+	const std::tstring& GetHugePrefix( void );
+	bool HasHugePrefix( const TCHAR* pPath );			// uses path syntax with "\\?\" prefix?
+	const TCHAR* SkipHugePrefix( const TCHAR* pPath );
+	bool SetHugePrefix( std::tstring& rPath, bool useHugePrefixSyntax = true );		// return true if modified
+
+
 	// complex path
 	inline bool IsComplex( const TCHAR* pPath ) { return pPath != NULL && _tcschr( pPath, s_complexPathSep ) != NULL; }
 	bool IsWellFormed( const TCHAR* pFilePath );
@@ -251,6 +259,9 @@ namespace fs
 
 		void Normalize( void ) { path::Normalize( m_filePath ); }
 		void Canonicalize( void ) { path::Canonicalize( m_filePath ); }
+
+		bool HasHugePrefix( void ) const { return path::HasHugePrefix( m_filePath.c_str() ); }
+		bool SetHugePrefix( bool useHugePrefixSyntax = true ) { return path::SetHugePrefix( m_filePath, useHugePrefixSyntax ); }
 
 		CPath operator/( const CPath& right ) const { return CPath( path::Combine( GetPtr(), right.GetPtr() ) ); }
 		CPath operator/( const TCHAR* pRight ) const { return CPath( path::Combine( GetPtr(), pRight ) ); }

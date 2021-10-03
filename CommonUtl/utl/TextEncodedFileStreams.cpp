@@ -27,7 +27,7 @@ namespace io
 	}
 
 
-	// CBase_ifstream template specialization for reading char-s in text mode - only for ANSI/UTF8 encoding
+	// CBase_ifstream template specialization for reading char-s in text mode - only for ANSI_UTF8 encoding
 
 	template<>
 	void CBase_ifstream<char>::Open( const fs::CPath& filePath ) throws_( CRuntimeException )
@@ -84,7 +84,7 @@ namespace io
 	}
 
 
-	// CBase_ofstream template specialization for writing char-s in text mode - only for ANSI/UTF8 encoding
+	// CBase_ofstream template specialization for writing char-s in text mode - only for ANSI_UTF8 encoding
 
 	template<>
 	void CBase_ofstream<char>::Open( const fs::CPath& filePath ) throws_( CRuntimeException )

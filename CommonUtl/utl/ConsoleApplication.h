@@ -4,6 +4,8 @@
 
 #include "AppTools.h"
 #include "FileSystem_fwd.h"
+#include "Console_fwd.h"
+#include "StdOutput.h"
 #include "Logger.h"
 #include "ResourcePool.h"
 
@@ -11,8 +13,13 @@
 class CConsoleApplication : public CAppTools
 {
 public:
-	CConsoleApplication( void );
+	CConsoleApplication( io::TranslationMode translationMode );
 	~CConsoleApplication();
+
+	bool IsConsoleOutput( void ) const { return m_stdOutput.IsConsoleOutput(); }
+	io::OutputMode GetOutputMode( void ) const { return m_stdOutput.GetOutputMode(); }
+
+	io::CStdOutput& GetStdOutput( void ) { return m_stdOutput; }
 
 	// IAppTools interface
 	virtual utl::CResourcePool& GetSharedResources( void );
@@ -21,9 +28,16 @@ public:
 	virtual bool ReportError( const std::tstring& message, app::MsgType msgType = app::Error );
 	virtual int ReportException( const std::exception& exc );
 	virtual int ReportException( const CException* pExc );
+
+	static io::TranslationMode GetTranslationMode( void ) { return s_translationMode; }
 private:
+	static void SetTranslationMode( io::TranslationMode translationMode );
+private:
+	io::CStdOutput m_stdOutput;								// wrapper for fast output to console or redirected file
 	utl::CResourcePool m_resourcePool;
 	std::auto_ptr< CLogger > m_pLogger;
+
+	static io::TranslationMode s_translationMode;		// global text mode of standard output/error streams
 };
 
 

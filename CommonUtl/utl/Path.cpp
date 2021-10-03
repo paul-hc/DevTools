@@ -435,6 +435,40 @@ namespace path
 	}
 
 
+	// huge prefix syntax: path prefixed with "\\?\"
+
+	const std::tstring& GetHugePrefix( void )
+	{
+		static const std::tstring s_hugePrefix( _T("\\\\?\\") );		// "\\?\" without the C escape sequences
+		return s_hugePrefix;
+	}
+
+	bool HasHugePrefix( const TCHAR* pPath )
+	{
+		return pred::Equal == str::CharTraits::CompareN( pPath, GetHugePrefix().c_str(), GetHugePrefix().length() );
+	}
+
+	const TCHAR* SkipHugePrefix( const TCHAR* pPath )
+	{
+		if ( HasHugePrefix( pPath ) )
+			return pPath + GetHugePrefix().length();
+
+		return pPath;
+	}
+
+	bool SetHugePrefix( std::tstring& rPath, bool useHugePrefixSyntax /*= true*/ )
+	{
+		if ( !useHugePrefixSyntax )
+			return str::StripPrefix( rPath, GetHugePrefix().c_str(), GetHugePrefix().length() );
+
+		if ( HasHugePrefix( rPath.c_str() ) )
+			return false;
+
+		rPath.insert( 0, GetHugePrefix() );
+		return true;
+	}
+
+
 	// complex path
 
 	const TCHAR s_complexPathSep = _T('>');
