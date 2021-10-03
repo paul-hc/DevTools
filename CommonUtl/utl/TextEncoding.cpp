@@ -164,3 +164,70 @@ namespace fs
 			pred::Equal == std::memcmp( &filePrefix.front(), bom, bomCount );
 	}
 }
+
+
+namespace io
+{
+	void __declspec(noreturn) ThrowUnsupportedEncoding( fs::Encoding encoding ) throws_( CRuntimeException )
+	{
+		throw CRuntimeException( str::Format( _T("Support for %s text file encoding not implemented"), fs::GetTags_Encoding().FormatUi( encoding ).c_str() ) );
+	}
+
+
+	ITextEncoder* MakeTextEncoder( io::IWriter* pWriter, fs::Encoding fileEncoding )
+	{
+		switch ( fileEncoding )
+		{
+			case fs::ANSI_UTF8:
+			case fs::UTF8_bom:
+				return new CUtf8Encoder( pWriter );
+			case fs::UTF16_LE_bom:
+				return new CStraightTextEncoder( pWriter );
+			case fs::UTF16_be_bom:
+				return new CSwapBytesTextEncoder( pWriter );
+			default:
+				io::ThrowUnsupportedEncoding( fileEncoding );
+		}
+	}
+
+
+	// CStraightTextEncoder implementation
+
+	io::IWriter* CStraightTextEncoder::GetWriter( void )
+	{
+		return m_pWriter;
+	}
+
+	void CStraightTextEncoder::WriteEncoded( const char* pText, size_t charCount )
+	{
+		m_pWriter->WriteString( pText, charCount );
+	}
+
+	void CStraightTextEncoder::WriteEncoded( const wchar_t* pText, size_t charCount )
+	{
+		m_pWriter->WriteString( pText, charCount );
+	}
+
+
+	// CSwapBytesTextEncoder implementation
+
+	void CSwapBytesTextEncoder::WriteEncoded( const wchar_t* pText, size_t charCount )
+	{	// make a copy, and swap bytes
+		if ( charCount != 0 )
+		{
+			m_buffer.assign( pText, pText + charCount );
+			std::for_each( m_buffer.begin(), m_buffer.end(), func::SwapBytes<endian::Little, endian::Big>() );
+			__super::WriteEncoded( &m_buffer.front(), charCount );
+		}
+	}
+
+
+	void CUtf8Encoder::WriteEncoded( const wchar_t* pText, size_t charCount )
+	{	// make a UTF8 copy conversion
+		if ( charCount != 0 )
+		{
+			m_utf8 = str::ToUtf8( pText, charCount );
+			__super::WriteEncoded( &m_utf8[ 0 ], m_utf8.size() );
+		}
+	}
+}

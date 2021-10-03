@@ -49,15 +49,17 @@ std::wostream& operator<<( std::wostream& os, char chUtf8 )
 
 namespace hlp
 {
-	std::string& ToNarrow( std::string& rNarrow, const wchar_t* pWide, UINT codePage )
+	std::string& ToNarrow( std::string& rNarrow, UINT codePage, const wchar_t* pWide, size_t charCount )
 	{	// codePage: CP_UTF8/CP_ACP
+		str::SettleLength( charCount, pWide );
+
 		if ( !str::IsEmpty( pWide ) )
 		{
-			int wideLength = (int)wcslen( pWide );
-			int requiredSize = ::WideCharToMultiByte( codePage, 0, pWide, wideLength, NULL, 0, NULL, NULL );
+			int wideCount = static_cast<int>( charCount );
+			int requiredSize = ::WideCharToMultiByte( codePage, 0, pWide, wideCount, NULL, 0, NULL, NULL );
 
 			rNarrow.resize( requiredSize, '\0' );
-			::WideCharToMultiByte( codePage, 0, pWide, wideLength, &rNarrow[ 0 ], requiredSize, NULL, NULL );
+			::WideCharToMultiByte( codePage, 0, pWide, wideCount, &rNarrow[ 0 ], requiredSize, NULL, NULL );
 		}
 		else
 			rNarrow.clear();
@@ -65,15 +67,17 @@ namespace hlp
 		return rNarrow;
 	}
 
-	std::wstring& ToWide( std::wstring& rWide, const char* pNarrow, UINT codePage )
+	std::wstring& ToWide( std::wstring& rWide, UINT codePage, const char* pNarrow, size_t charCount )
 	{	// codePage: CP_UTF8/CP_ACP
+		str::SettleLength( charCount, pNarrow );
+
 		if ( !str::IsEmpty( pNarrow ) )
 		{
-			int narrowLength = (int)strlen( pNarrow );
-			int requiredSize = ::MultiByteToWideChar( codePage, 0, pNarrow, narrowLength, NULL, 0 );
+			int narrowCount = static_cast<int>( charCount );
+			int requiredSize = ::MultiByteToWideChar( codePage, 0, pNarrow, narrowCount, NULL, 0 );
 
 			rWide.resize( requiredSize, L'\0' );
-			::MultiByteToWideChar( codePage, 0, pNarrow, narrowLength, &rWide[ 0 ], requiredSize );
+			::MultiByteToWideChar( codePage, 0, pNarrow, narrowCount, &rWide[ 0 ], requiredSize );
 		}
 		else
 			rWide.clear();
@@ -101,28 +105,28 @@ namespace str
 		return s_empty;
 	}
 
-	std::string ToAnsi( const wchar_t* pWide )
+	std::string ToAnsi( const wchar_t* pWide, size_t charCount /*= std::wstring::npos*/ )
 	{
 		std::string narrow;
-		return hlp::ToNarrow( narrow, pWide, CP_ACP );
+		return hlp::ToNarrow( narrow, CP_ACP, pWide, charCount );
 	}
 
-	std::wstring FromAnsi( const char* pAnsi )
+	std::wstring FromAnsi( const char* pAnsi, size_t charCount /*= std::string::npos*/ )
 	{
 		std::wstring wide;
-		return hlp::ToWide( wide, pAnsi, CP_ACP );
+		return hlp::ToWide( wide, CP_ACP, pAnsi, charCount );
 	}
 
-	std::string ToUtf8( const wchar_t* pWide )
+	std::string ToUtf8( const wchar_t* pWide, size_t charCount /*= std::wstring::npos*/ )
 	{
 		std::string narrow;
-		return hlp::ToNarrow( narrow, pWide, CP_UTF8 );
+		return hlp::ToNarrow( narrow, CP_UTF8, pWide, charCount );
 	}
 
-	std::wstring FromUtf8( const char* pUtf8 )
+	std::wstring FromUtf8( const char* pUtf8, size_t charCount /*= std::string::npos*/ )
 	{
 		std::wstring wide;
-		return hlp::ToWide( wide, pUtf8, CP_UTF8 );
+		return hlp::ToWide( wide, CP_UTF8, pUtf8, charCount );
 	}
 
 

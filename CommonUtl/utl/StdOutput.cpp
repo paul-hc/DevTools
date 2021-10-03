@@ -13,49 +13,34 @@
 
 namespace io
 {
-	void __declspec( noreturn ) ThrowWriteConsole( size_t charCount ) throws_( CRuntimeException )
+	void __declspec(noreturn) ThrowWriteToConsole( size_t charCount ) throws_( CRuntimeException )
 	{
 		throw CRuntimeException( str::Format( "Error writing %d characters to console", charCount ) );
 	}
 
-	void __declspec( noreturn ) ThrowWriteFile( const fs::CPath& filePath, size_t charCount ) throws_( CRuntimeException )
+	void __declspec(noreturn) ThrowWriteToFile( const fs::CPath& filePath, size_t charCount ) throws_( CRuntimeException )
 	{
 		throw CRuntimeException( str::Format( _T("Error writing %d characters to redirected stdout file:  %s"), charCount, filePath.GetPtr() ) );
-	}
-
-
-	template< typename CharT >
-	inline const CharT* SkipLineEnd( const CharT* pText )
-	{
-		ASSERT_PTR( pText );
-
-		if ( '\r' == *pText )
-			++pText;
-
-		if ( '\n' == *pText )
-			++pText;
-
-		return pText;
 	}
 }
 
 
 namespace io
 {
-	struct CConsoleWriter
+	struct CConsoleWriter : public IWriter
 	{
 		CConsoleWriter( HANDLE hConsoleOutput ) : m_hConsoleOutput( hConsoleOutput ), m_writtenChars( 0 ) { ASSERT_PTR( m_hConsoleOutput ); }
 
-		void Write( const void* pText, size_t charCount ) throws_( CRuntimeException )
+		virtual void WriteString( const char* pText, size_t charCount ) throws_( CRuntimeException )
 		{
 			if ( !::WriteConsoleA( m_hConsoleOutput, (const void*)pText, static_cast<DWORD>( charCount ), &m_writtenChars, NULL ) )
-				io::ThrowWriteConsole( charCount );
+				io::ThrowWriteToConsole( charCount );
 		}
 
-		void Write( const wchar_t* pText, size_t charCount ) throws_( CRuntimeException )
+		virtual void WriteString( const wchar_t* pText, size_t charCount ) throws_( CRuntimeException )
 		{
 			if ( !::WriteConsoleW( m_hConsoleOutput, (const void*)pText, static_cast<DWORD>( charCount ), &m_writtenChars, NULL ) )
-				io::ThrowWriteConsole( charCount );
+				io::ThrowWriteToConsole( charCount );
 		}
 	public:
 		HANDLE m_hConsoleOutput;
@@ -63,107 +48,26 @@ namespace io
 	};
 
 
-	struct CFileWriter
+	struct CFileWriter : public IWriter
 	{
 		CFileWriter( HANDLE hFile, const fs::CPath& filePath ) : m_hFile( hFile ), m_filePath( filePath ), m_writtenBytes( 0 ) { ASSERT_PTR( m_hFile ); }
 
-		void Write( const char* pText, size_t charCount ) throws_( CRuntimeException )
+		virtual void WriteString( const char* pText, size_t charCount ) throws_( CRuntimeException )
 		{
 			if ( !::WriteFile( m_hFile, pText, static_cast<DWORD>( charCount ), &m_writtenBytes, NULL ) )
-				io::ThrowWriteFile( m_filePath, charCount );
+				io::ThrowWriteToFile( m_filePath, charCount );
 		}
 
-		void Write( const wchar_t* pWideText, size_t charCount ) throws_( CRuntimeException )
+		virtual void WriteString( const wchar_t* pWideText, size_t charCount ) throws_( CRuntimeException )
 		{
 			if ( !::WriteFile( m_hFile, pWideText, static_cast<DWORD>( charCount * sizeof(wchar_t) ), &m_writtenBytes, NULL ) )
-				io::ThrowWriteFile( m_filePath, charCount );
+				io::ThrowWriteToFile( m_filePath, charCount );
 		}
 	public:
 		HANDLE m_hFile;
 		const fs::CPath& m_filePath;
 		DWORD m_writtenBytes;
 	};
-}
-
-
-namespace io
-{
-	interface IFileEncoder : public utl::IMemoryManaged
-	{
-		virtual void Write( const char* pText, size_t length ) = 0;
-		virtual void Write( const wchar_t* pText, size_t length ) = 0;
-	};
-
-
-	struct CStraightFileEncoder : public IFileEncoder
-	{
-		CStraightFileEncoder( io::CFileWriter* pWriteFunc ) : m_pWriteFunc( pWriteFunc ) { ASSERT_PTR( m_pWriteFunc ); }
-
-		virtual void Write( const char* pText, size_t length )
-		{
-			m_pWriteFunc->Write( pText, length );
-		}
-
-		virtual void Write( const wchar_t* pText, size_t length )
-		{
-			m_pWriteFunc->Write( pText, length );
-		}
-	private:
-		io::CFileWriter* m_pWriteFunc;
-	};
-
-
-	struct CSwapBytesFileEncoder : public CStraightFileEncoder
-	{
-		CSwapBytesFileEncoder( io::CFileWriter* pWriteFunc ) : CStraightFileEncoder( pWriteFunc ) {}
-
-		virtual void Write( const wchar_t* pText, size_t length )
-		{	// make a copy, and swap bytes
-			if ( length != 0 )
-			{
-				m_buffer.assign( pText, pText + length );
-				std::for_each( m_buffer.begin(), m_buffer.end(), func::SwapBytes<endian::Little, endian::Big>() );
-				__super::Write( &m_buffer.front(), length );
-			}
-		}
-	private:
-		std::vector< wchar_t > m_buffer;		// excluding the EOS
-	};
-
-	struct CUtf8Encoder : public CStraightFileEncoder
-	{
-		CUtf8Encoder( io::CFileWriter* pWriteFunc ) : CStraightFileEncoder( pWriteFunc ) {}
-
-		virtual void Write( const wchar_t* pText, size_t length )
-		{	// make a UTF8 copy conversion
-			if ( length != 0 )
-			{
-				m_utf8 = str::ToUtf8( std::wstring( pText, pText + length ).c_str() );
-				__super::Write( &m_utf8[ 0 ], m_utf8.size() );
-			}
-		}
-	private:
-		std::string m_utf8;		// excluding the EOS
-	};
-
-
-	IFileEncoder* MakeFileEncoder( io::CFileWriter* pWriteFunc, fs::Encoding fileEncoding )
-	{
-		switch ( fileEncoding )
-		{
-			case fs::ANSI_UTF8:
-			case fs::UTF8_bom:
-				return new CUtf8Encoder( pWriteFunc );
-			case fs::UTF16_LE_bom:
-				return new CStraightFileEncoder( pWriteFunc );
-			case fs::UTF16_be_bom:
-				return new CSwapBytesFileEncoder( pWriteFunc );
-			case fs::UTF32_LE_bom:
-			case fs::UTF32_be_bom:
-			default:
-				io::ThrowUnsupportedEncoding( fileEncoding );
-		}
-	}
 }
 
 
@@ -213,8 +117,11 @@ namespace io
 			StoreLastError();
 	}
 
-	CStdOutput::~CStdOutput()
+	bool CStdOutput::Flush( void )
 	{
+		return
+			IsValid() &&
+			StoreLastError( ::FlushFileBuffers( m_hStdOutput ) != FALSE );
 	}
 
 	bool CStdOutput::StoreLastError( bool exprResult /*= false*/ )
@@ -248,56 +155,28 @@ namespace io
 	// template methods
 
 	template< typename CharT >
-	void CStdOutput::WriteToConsole( const CharT* pText, size_t length ) throws_( CRuntimeException )
+	void CStdOutput::WriteToConsole( const CharT* pText, size_t charCount ) throws_( CRuntimeException )
 	{
 		size_t totalWrittenChars = 0;
 		io::CConsoleWriter writer( m_hStdOutput );
 
-		for ( size_t leftCount = length; leftCount != 0; )
+		for ( size_t leftCount = charCount; leftCount != 0; )
 		{
 			size_t batchCharCount = std::min( leftCount, s_maxBatchSize );
 
-			writer.Write( pText, batchCharCount );
+			writer.WriteString( pText, batchCharCount );
 
 			pText += writer.m_writtenChars;
 			leftCount -= writer.m_writtenChars;
 			totalWrittenChars += writer.m_writtenChars;
 		}
-		ENSURE( totalWrittenChars == length );
+		ENSURE( totalWrittenChars == charCount );
 	}
 
 	template< typename CharT >
-	void CStdOutput::WriteToFile( const CharT* pText, size_t length, fs::Encoding fileEncoding ) throws_( CRuntimeException )
+	void CStdOutput::WriteToFile( const CharT* pText, size_t charCount, fs::Encoding fileEncoding ) throws_( CRuntimeException )
 	{
-		fs::CByteOrderMark bom( fileEncoding );
 		io::CFileWriter writer( m_hStdOutput, m_fileRedirectPath );
-
-		if ( !bom.IsEmpty() )
-			writer.Write( &bom.Get().front(), bom.Get().size() );		// write the BOM (Byte Order Mark)
-
-		std::auto_ptr<io::IFileEncoder> pFileEncoder( io::MakeFileEncoder( &writer, fileEncoding ) );		// handles the line-end translation and byte swapping
-
-		// translate text to binary mode
-		const CharT eol[] = { '\r', '\n', 0 };
-		size_t lineCount = 0;
-
-		for ( const CharT* pEnd = pText + length; pText != pEnd; ++lineCount )
-		{
-			const CharT* pEol = str::FindTokenEnd( pText, eol );
-
-			ASSERT_PTR( pEol );
-			pEol = std::min( pEol, pEnd );			// limit to specified length
-
-			size_t lineLength = std::distance( pText, pEol );
-
-			pFileEncoder->Write( pText, lineLength );
-
-			pText = pEol;
-			if ( pText != pEnd )					// not the last line?
-			{
-				pFileEncoder->Write( eol, COUNT_OF( eol ) - 1 );		// write the translated line-end (exclude the EOS)
-				pText = io::SkipLineEnd( pText );	// skip this EOL
-			}
-		}
+		io::WriteEncodedContents( &writer, fileEncoding, pText, charCount );
 	}
 }

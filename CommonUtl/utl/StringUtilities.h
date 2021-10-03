@@ -11,21 +11,21 @@ namespace str
 	extern const TCHAR g_ellipsis[];
 	extern const TCHAR g_paragraph[];
 
-	template< typename CharType > const CharType* StdDelimiters( void );	// " \t"
+	template< typename CharT > const CharT* StdDelimiters( void );	// " \t"
 
 
-	template< typename CharType, typename ContainerType >
-	size_t Tokenize( ContainerType& rTokens, const CharType* pSource, const CharType delims[] = StdDelimiters< CharType >() )
+	template< typename CharT, typename ContainerT >
+	size_t Tokenize( ContainerT& rTokens, const CharT* pSource, const CharT delims[] = StdDelimiters<CharT>() )
 	{
 		ASSERT( pSource != NULL && delims != NULL );
 		rTokens.clear();
 
-		const CharType* pDelimsEnd = str::end( delims );
+		const CharT* pDelimsEnd = str::end( delims );
 		size_t tokenCount = 0;
 		bool inQuotes = false;
 		std::tstring token;
 
-		for ( const CharType* pChr = pSource; *pChr != '\0'; ++pChr )
+		for ( const CharT* pChr = pSource; *pChr != '\0'; ++pChr )
 		{
 			if ( '\"' == *pChr )
 				inQuotes = !inQuotes;
@@ -50,8 +50,8 @@ namespace str
 	}
 
 
-	template< typename CharType >
-	bool StripPrefix( std::basic_string< CharType >& rText, const CharType prefix[], size_t prefixLen = std::string::npos )
+	template< typename CharT >
+	bool StripPrefix( std::basic_string<CharT>& rText, const CharT prefix[], size_t prefixLen = std::string::npos )
 	{
 		if ( std::string::npos == prefixLen )
 			prefixLen = GetLength( prefix );
@@ -66,8 +66,8 @@ namespace str
 		return false;
 	}
 
-	template< typename CharType >
-	bool StripSuffix( std::basic_string< CharType >& rText, const CharType suffix[], size_t suffixLen = std::string::npos )
+	template< typename CharT >
+	bool StripSuffix( std::basic_string<CharT>& rText, const CharT suffix[], size_t suffixLen = std::string::npos )
 	{
 		if ( std::string::npos == suffixLen )
 			suffixLen = GetLength( suffix );
@@ -129,9 +129,9 @@ namespace str
 {
 	// ex: query quoted sub-strings, or environment variables "abc%VAR1%ijk%VAR2%xyz"
 
-	template< typename CharType >
-	void QueryEnclosedItems( std::vector< std::basic_string< CharType > >& rItems, const CharType* pSource,
-							 const CharType* pSepStart, const CharType* pSepEnd, bool keepSeps = true )
+	template< typename CharT >
+	void QueryEnclosedItems( std::vector< std::basic_string<CharT> >& rItems, const CharT* pSource,
+							 const CharT* pSepStart, const CharT* pSepEnd, bool keepSeps = true )
 	{
 		ASSERT_PTR( pSource );
 		ASSERT_PTR( pSepStart );
@@ -140,7 +140,7 @@ namespace str
 
 		const size_t sepStartLen = str::GetLength( pSepStart ), sepEndLen = str::GetLength( pSepEnd );
 
-		typedef const CharType* const_iterator;
+		typedef const CharT* const_iterator;
 
 		for ( const_iterator itStart = str::begin( pSource ), itEnd = str::end( pSource ); ; )
 		{
@@ -158,23 +158,23 @@ namespace str
 			else
 				itItemStart += sepStartLen;
 
-			rItems.push_back( std::basic_string< CharType >( itItemStart, std::distance( itItemStart, itItemEnd ) ) );
+			rItems.push_back( std::basic_string<CharT>( itItemStart, std::distance( itItemStart, itItemEnd ) ) );
 		}
 	}
 
 
 	// ex: query quoted sub-strings, or environment variables "abc%VAR1%ijk%VAR2%xyz"
 
-	template< typename CharType, typename KeyToValueFunc >
-	std::basic_string< CharType > ExpandKeysToValues( const CharType* pSource, const CharType* pSepStart, const CharType* pSepEnd,
-													  KeyToValueFunc func, bool keepSeps = false )
+	template< typename CharT, typename KeyToValueFunc >
+	std::basic_string<CharT> ExpandKeysToValues( const CharT* pSource, const CharT* pSepStart, const CharT* pSepEnd,
+												 KeyToValueFunc func, bool keepSeps = false )
 	{
 		ASSERT_PTR( pSource );
 		ASSERT_PTR( pSepStart );
 		if ( NULL == pSepEnd )
 			pSepEnd = pSepStart;
 
-		std::basic_string< CharType > output; output.reserve( str::GetLength( pSource ) * 2 );
+		std::basic_string<CharT> output; output.reserve( str::GetLength( pSource ) * 2 );
 		const size_t sepStartLen = str::GetLength( pSepStart ), sepEndLen = str::GetLength( pSepEnd );
 
 		for ( str::const_iterator itStart = str::begin( pSource ), itEnd = str::end( pSource ); ; )
@@ -185,13 +185,13 @@ namespace str
 
 			if ( itKeyStart != itEnd && itKeyEnd != itEnd )
 			{
-				output += std::basic_string< CharType >( itStart, std::distance( itStart, itKeyStart ) );		// add leading text
+				output += std::basic_string<CharT>( itStart, std::distance( itStart, itKeyStart ) );		// add leading text
 				output += func( keepSeps
-					? std::basic_string< CharType >( itKeyStart, itKeyEnd + sepEndLen )
-					: std::basic_string< CharType >( itKeyStart + sepStartLen, itKeyEnd ) );
+					? std::basic_string<CharT>( itKeyStart, itKeyEnd + sepEndLen )
+					: std::basic_string<CharT>( itKeyStart + sepStartLen, itKeyEnd ) );
 			}
 			else
-				output += std::basic_string< CharType >( itStart, std::distance( itStart, itKeyEnd ) );
+				output += std::basic_string<CharT>( itStart, std::distance( itStart, itKeyEnd ) );
 
 			itStart = itKeyEnd + sepEndLen;
 			if ( itStart >= itEnd )
@@ -208,18 +208,18 @@ namespace str
 
 namespace str
 {
-	template< typename CharType, typename ValueType >
-	std::basic_string< CharType > FormatValue( const ValueType& value )
+	template< typename CharT, typename ValueT >
+	std::basic_string<CharT> FormatValue( const ValueT& value )
 	{
-		std::basic_ostringstream< CharType > oss;
+		std::basic_ostringstream<CharT> oss;
 		oss << value;
 		return oss.str();
 	}
 
-	template< typename CharType, typename ValueType >
-	bool ParseValue( ValueType& rValue, const std::basic_string< CharType >& text )
+	template< typename CharT, typename ValueT >
+	bool ParseValue( ValueT& rValue, const std::basic_string<CharT>& text )
 	{
-		std::basic_istringstream< CharType > iss( text );
+		std::basic_istringstream<CharT> iss( text );
 		iss >> std::noskipws >> rValue;		// read the entire string, including whitespaces
 		return !iss.fail();
 	}
@@ -227,35 +227,35 @@ namespace str
 
 	// specializations
 
-	template< typename CharType >
-	inline std::basic_string< CharType > FormatValue( const std::basic_string< CharType >& value )
+	template< typename CharT >
+	inline std::basic_string<CharT> FormatValue( const std::basic_string<CharT>& value )
 	{
 		return value;
 	}
 
-	template< typename CharType >
-	inline bool ParseValue( std::basic_string< CharType >& rValue, const std::basic_string< CharType >& text )
+	template< typename CharT >
+	inline bool ParseValue( std::basic_string<CharT>& rValue, const std::basic_string<CharT>& text )
 	{
 		rValue = text;
 		return true;
 	}
 
 
-	template< typename CharType, typename ValueType >
-	inline std::basic_string< CharType > FormatNameValue( const std::basic_string< CharType >& name, const ValueType& value, CharType sep = '=' )
+	template< typename CharT, typename ValueT >
+	inline std::basic_string<CharT> FormatNameValue( const std::basic_string<CharT>& name, const ValueT& value, CharT sep = '=' )
 	{
-		return FormatNameValueSpec< CharType >( name, FormatValue< CharType >( value ), sep );
+		return FormatNameValueSpec<CharT>( name, FormatValue<CharT>( value ), sep );
 	}
 
-	template< typename CharType, typename ValueType >
-	bool ParseNameValue( std::basic_string< CharType >& rName, ValueType& rValue, const std::basic_string< CharType >& spec, CharType sep = '=' )
+	template< typename CharT, typename ValueT >
+	bool ParseNameValue( std::basic_string<CharT>& rName, ValueT& rValue, const std::basic_string<CharT>& spec, CharT sep = '=' )
 	{
-		std::pair< CPart< CharType >, CPart< CharType > > partsPair;
-		if ( !ParseNameValuePair< CharType >( partsPair, spec, sep ) )
+		std::pair< CPart<CharT>, CPart<CharT> > partsPair;
+		if ( !ParseNameValuePair<CharT>( partsPair, spec, sep ) )
 			return false;
 
 		rName = partsPair.first.ToString();
-		return ParseValue< CharType >( rValue, partsPair.second.ToString() );
+		return ParseValue<CharT>( rValue, partsPair.second.ToString() );
 	}
 }
 
@@ -265,29 +265,29 @@ namespace num
 	const std::locale& GetEmptyLocale( void );		// empty locale (devoid of facets)
 
 
-	template< typename ValueType >
-	inline ValueType MinValue( void ) { return (std::numeric_limits< ValueType >::min)(); }
+	template< typename ValueT >
+	inline ValueT MinValue( void ) { return (std::numeric_limits< ValueT >::min)(); }
 
 	// for double doesn't work (DBL_MIN is minimal positive value); in C++ 11 use lowest()
 	template<>
 	inline double MinValue< double >( void ) { return -(std::numeric_limits< double >::max)(); }	// min doesn't work (DBL_MIN is minimal positive value)
 
-	template< typename ValueType >
-	inline ValueType MaxValue( void ) { return (std::numeric_limits< ValueType >::max)(); }
+	template< typename ValueT >
+	inline ValueT MaxValue( void ) { return (std::numeric_limits< ValueT >::max)(); }
 
 
-	template< typename ValueType >		// [0, MAX]
-	inline Range< ValueType > PositiveRange( void ) { return Range< ValueType >( 0, MaxValue< ValueType >() ); }
+	template< typename ValueT >		// [0, MAX]
+	inline Range< ValueT > PositiveRange( void ) { return Range< ValueT >( 0, MaxValue< ValueT >() ); }
 
-	template< typename ValueType >		// [MIN, 0]
-	inline Range< ValueType > NegativeRange( void ) { return Range< ValueType >( MinValue< ValueType >(), 0 ); }
+	template< typename ValueT >		// [MIN, 0]
+	inline Range< ValueT > NegativeRange( void ) { return Range< ValueT >( MinValue< ValueT >(), 0 ); }
 
-	template< typename ValueType >		// [MIN, MAX]
-	inline Range< ValueType > FullRange( void ) { return Range< ValueType >( MinValue< ValueType >(), MaxValue< ValueType >() ); }
+	template< typename ValueT >		// [MIN, MAX]
+	inline Range< ValueT > FullRange( void ) { return Range< ValueT >( MinValue< ValueT >(), MaxValue< ValueT >() ); }
 
 
-	template< typename ValueType >
-	std::tstring FormatNumber( ValueType value, const std::locale& loc = GetEmptyLocale() )
+	template< typename ValueT >
+	std::tstring FormatNumber( ValueT value, const std::locale& loc = GetEmptyLocale() )
 	{
 		std::tostringstream oss;
 		oss.imbue( loc );
@@ -304,8 +304,8 @@ namespace num
 	inline std::tstring FormatDouble( double value, unsigned int precision, const std::locale& loc = GetEmptyLocale() ) { return FormatNumber( GetRounded( value, precision ), loc ); }
 
 
-	template< typename ValueType >
-	bool ParseNumber( ValueType& rNumber, const std::tstring& text, size_t* pSkipLength = NULL, const std::locale& loc = GetEmptyLocale() )
+	template< typename ValueT >
+	bool ParseNumber( ValueT& rNumber, const std::tstring& text, size_t* pSkipLength = NULL, const std::locale& loc = GetEmptyLocale() )
 	{
 		std::tistringstream iss( text );
 		iss.imbue( loc );
@@ -325,14 +325,14 @@ namespace num
 	bool ParseNumber< signed char >( signed char& rNumber, const std::tstring& text, size_t* pSkipLength, const std::locale& loc );
 
 
-	template< typename ValueType >
-	std::tstring FormatHexNumber( ValueType value, const TCHAR* pFormat = _T("0x%X") )
+	template< typename ValueT >
+	std::tstring FormatHexNumber( ValueT value, const TCHAR* pFormat = _T("0x%X") )
 	{
 		return str::Format( pFormat, value );
 	}
 
-	template< typename ValueType >
-	bool ParseHexNumber( ValueType& rNumber, const std::tstring& text, size_t* pSkipLength = NULL )
+	template< typename ValueT >
+	bool ParseHexNumber( ValueT& rNumber, const std::tstring& text, size_t* pSkipLength = NULL )
 	{
 		std::tistringstream iss( str::SkipHexPrefix( text.c_str(), str::IgnoreCase ) );
 		size_t number;
@@ -340,7 +340,7 @@ namespace num
 		if ( iss.fail() )
 			return false;
 
-		rNumber = static_cast< ValueType >( number );
+		rNumber = static_cast< ValueT >( number );
 		if ( pSkipLength != NULL )
 			*pSkipLength = static_cast< size_t >( iss.tellg() );
 		return true;
@@ -372,10 +372,10 @@ namespace num
 {
 	// advanced numeric algorithms
 
-	template< typename IntType, typename StringT >
-	bool EnwrapNumericSequence( Range< IntType >& rRange, const StringT& text )
+	template< typename IntT, typename StringT >
+	bool EnwrapNumericSequence( Range< IntT >& rRange, const StringT& text )
 	{
-		IntType len = static_cast< IntType >( text.length() );
+		IntT len = static_cast< IntT >( text.length() );
 		if ( text.empty() || rRange.m_start >= len || !str::CharTraits::IsDigit( text[ rRange.m_start ] ) )
 			return false;						// no text to modify
 
@@ -405,8 +405,8 @@ namespace str
 	std::wstring& ToUnixLineEnds( std::wstring& rText );
 
 
-	template< typename CharType, typename StringT >
-	inline void SplitLines( std::vector< StringT >& rItems, const CharType* pSource, const CharType* pLineEnd )
+	template< typename CharT, typename StringT >
+	inline void SplitLines( std::vector< StringT >& rItems, const CharT* pSource, const CharT* pLineEnd )
 	{
 		Split( rItems, pSource, pLineEnd );
 
@@ -414,10 +414,10 @@ namespace str
 			rItems.pop_back();
 	}
 
-	template< typename CharType, typename ContainerType >
-	inline std::basic_string< CharType > JoinLines( const ContainerType& items, const CharType* pLineEnd )
+	template< typename CharT, typename ContainerT >
+	inline std::basic_string<CharT> JoinLines( const ContainerT& items, const CharT* pLineEnd )
 	{
-		std::basic_string< CharType > text = Join( items, pLineEnd );
+		std::basic_string<CharT> text = Join( items, pLineEnd );
 		if ( items.size() > 1 )								// multiple lines
 			text += pLineEnd;								// add a final line-end terminator to have a set of complete lines
 		return text;

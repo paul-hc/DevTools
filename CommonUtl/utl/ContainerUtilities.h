@@ -37,18 +37,18 @@ namespace utl
 		return itDest;
 	}
 
-	template< typename SrcType >
-	inline void* WriteBuffer( void* pBuffer, const SrcType* pSrc, size_t size = 1 )
+	template< typename SrcT >
+	inline void* WriteBuffer( void* pBuffer, const SrcT* pSrc, size_t size = 1 )
 	{
-		memcpy( pBuffer, pSrc, size * sizeof( SrcType ) );
-		return reinterpret_cast< SrcType* >( pBuffer ) + size;				// pointer arithmetic: next insert position in the DEST buffer
+		memcpy( pBuffer, pSrc, size * sizeof( SrcT ) );
+		return reinterpret_cast< SrcT* >( pBuffer ) + size;				// pointer arithmetic: next insert position in the DEST buffer
 	}
 
-	template< typename DestType >
-	inline const void* ReadBuffer( DestType* pDest, const void* pBuffer, size_t size = 1 )
+	template< typename DestT >
+	inline const void* ReadBuffer( DestT* pDest, const void* pBuffer, size_t size = 1 )
 	{
-		memcpy( pDest, pBuffer, size * sizeof( DestType ) );
-		return reinterpret_cast< const DestType* >( pBuffer ) + size;		// pointer arithmetic: next extract position in the SRC buffer
+		memcpy( pDest, pBuffer, size * sizeof( DestT ) );
+		return reinterpret_cast< const DestT* >( pBuffer ) + size;		// pointer arithmetic: next extract position in the SRC buffer
 	}
 }
 
@@ -149,8 +149,8 @@ namespace func
 
 	struct ReleaseCom
 	{
-		template< typename InterfaceType >
-		void operator()( InterfaceType* pInterface ) const
+		template< typename InterfaceT >
+		void operator()( InterfaceT* pInterface ) const
 		{
 			pInterface->Release();
 		}
@@ -197,11 +197,11 @@ namespace utl
 	{
 		ClearOwningContainer( rItemPtrs );		// delete existing items
 
-		typedef typename std::tr1::remove_pointer< typename PtrContainerT::value_type >::type ItemType;
+		typedef typename std::tr1::remove_pointer< typename PtrContainerT::value_type >::type TItem;
 
 		rItemPtrs.reserve( count );
 		for ( size_t i = 0; i != count; ++i )
-			rItemPtrs.push_back( new ItemType() );
+			rItemPtrs.push_back( new TItem() );
 	}
 
 	template< typename PtrContainerT >
@@ -209,11 +209,11 @@ namespace utl
 	{
 		ClearOwningContainer( rItemPtrs );		// delete existing items
 
-		typedef typename std::tr1::remove_pointer< typename PtrContainerT::value_type >::type ItemType;
+		typedef typename std::tr1::remove_pointer< typename PtrContainerT::value_type >::type TItem;
 
 		rItemPtrs.reserve( srcItemPtrs.size() );
 		for ( PtrContainerT::const_iterator itSrcItem = srcItemPtrs.begin(); itSrcItem != srcItemPtrs.end(); ++itSrcItem )
-			rItemPtrs.push_back( new ItemType( **itSrcItem ) );
+			rItemPtrs.push_back( new TItem( **itSrcItem ) );
 	}
 
 
@@ -257,16 +257,16 @@ namespace utl
 
 	// exception-safe owning container of pointers; use swap() at the end to exchange safely the new items (old items will be deleted by this).
 	//
-	template< typename ContainerType, typename DeleteFunc = func::Delete >
-	class COwningContainer : public ContainerType
+	template< typename ContainerT, typename DeleteFunc = func::Delete >
+	class COwningContainer : public ContainerT
 	{
-		using ContainerType::clear;
+		using ContainerT::clear;
 	public:
-		COwningContainer( void ) : ContainerType() {}
+		COwningContainer( void ) : ContainerT() {}
 		~COwningContainer() { clear(); }
 
 		void clear( void ) { std::for_each( begin(), end(), DeleteFunc() ); Release(); }
-		void Release( void ) { ContainerType::clear(); }
+		void Release( void ) { ContainerT::clear(); }
 	};
 }
 
@@ -308,40 +308,40 @@ namespace utl
 	}
 
 
-	template< typename ContainerT, typename ValueType >
-	inline bool Contains( const ContainerT& container, const ValueType& value )
+	template< typename ContainerT, typename ValueT >
+	inline bool Contains( const ContainerT& container, const ValueT& value )
 	{
 		return std::find( container.begin(), container.end(), value ) != container.end();
 	}
 
-	template< typename IteratorT, typename ValueType >
-	inline bool Contains( IteratorT itStart, IteratorT itEnd, const ValueType& value )
+	template< typename IteratorT, typename ValueT >
+	inline bool Contains( IteratorT itStart, IteratorT itEnd, const ValueT& value )
 	{
 		IteratorT itFound = std::find( itStart, itEnd, value );
 		return itFound != itEnd;
 	}
 
-	template< typename DiffType, typename IteratorT >
-	inline DiffType Distance( IteratorT itFirst, IteratorT itLast )
+	template< typename DiffT, typename IteratorT >
+	inline DiffT Distance( IteratorT itFirst, IteratorT itLast )
 	{
-		return static_cast< DiffType >( std::distance( itFirst, itLast ) );
+		return static_cast< DiffT >( std::distance( itFirst, itLast ) );
 	}
 
-	template< typename IteratorT, typename ValueType >
-	inline size_t FindPos( IteratorT itStart, IteratorT itEnd, const ValueType& value )
+	template< typename IteratorT, typename ValueT >
+	inline size_t FindPos( IteratorT itStart, IteratorT itEnd, const ValueT& value )
 	{
 		IteratorT itFound = std::find( itStart, itEnd, value );
 		return itFound != itEnd ? std::distance( itStart, itFound ) : size_t( -1 );
 	}
 
-	template< typename ContainerT, typename ValueType >
-	inline size_t FindPos( const ContainerT& container, const ValueType& value )
+	template< typename ContainerT, typename ValueT >
+	inline size_t FindPos( const ContainerT& container, const ValueT& value )
 	{
 		return FindPos( container.begin(), container.end(), value );
 	}
 
-	template< typename IteratorT, typename ValueType >
-	inline size_t LookupPos( IteratorT itStart, IteratorT itEnd, const ValueType& value )
+	template< typename IteratorT, typename ValueT >
+	inline size_t LookupPos( IteratorT itStart, IteratorT itEnd, const ValueT& value )
 	{
 		IteratorT itFound = std::find( itStart, itEnd, value );
 
@@ -349,8 +349,8 @@ namespace utl
 		return std::distance( itStart, itFound );
 	}
 
-	template< typename ContainerT, typename ValueType >
-	inline size_t LookupPos( const ContainerT& container, const ValueType& value )
+	template< typename ContainerT, typename ValueT >
+	inline size_t LookupPos( const ContainerT& container, const ValueT& value )
 	{
 		return LookupPos( container.begin(), container.end(), value );
 	}
@@ -369,8 +369,8 @@ namespace utl
 
 	// vector of pairs
 
-	template< typename IteratorT, typename KeyType >
-	IteratorT FindPair( IteratorT itStart, IteratorT itEnd, const KeyType& key )
+	template< typename IteratorT, typename KeyT >
+	IteratorT FindPair( IteratorT itStart, IteratorT itEnd, const KeyT& key )
 	{
 		for ( ; itStart != itEnd; ++itStart )
 			if ( key == itStart->first )
@@ -381,8 +381,8 @@ namespace utl
 
 
 	// find first satisfying binary predicate equalPred
-	template< typename IteratorT, typename ValueType, typename BinaryPred >
-	inline IteratorT FindIfEqual( IteratorT iter, IteratorT itEnd, const ValueType& value, BinaryPred equalPred )
+	template< typename IteratorT, typename ValueT, typename BinaryPred >
+	inline IteratorT FindIfEqual( IteratorT iter, IteratorT itEnd, const ValueT& value, BinaryPred equalPred )
 	{
 		for ( ; iter != itEnd; ++iter )
 			if ( equalPred( *iter, value ) )
@@ -397,8 +397,8 @@ namespace utl
 {
 	// binary search for ordered containers
 
-	template< typename IteratorT, typename KeyType, typename ToKeyFunc >
-	IteratorT BinaryFind( IteratorT itStart, IteratorT itEnd, const KeyType& key, ToKeyFunc toKeyFunc )
+	template< typename IteratorT, typename KeyT, typename ToKeyFunc >
+	IteratorT BinaryFind( IteratorT itStart, IteratorT itEnd, const KeyT& key, ToKeyFunc toKeyFunc )
 	{
 		IteratorT itFound = std::lower_bound( itStart, itEnd, key, pred::MakeLessKey( toKeyFunc ) );
 		if ( itFound != itEnd )						// loose match?
@@ -408,27 +408,27 @@ namespace utl
 		return itEnd;
 	}
 
-	template< typename ContainerT, typename KeyType, typename ToKeyFunc >
-	inline typename ContainerT::const_iterator BinaryFind( const ContainerT& container, const KeyType& key, ToKeyFunc toKeyFunc )
+	template< typename ContainerT, typename KeyT, typename ToKeyFunc >
+	inline typename ContainerT::const_iterator BinaryFind( const ContainerT& container, const KeyT& key, ToKeyFunc toKeyFunc )
 	{
 		return BinaryFind( container.begin(), container.end(), key, toKeyFunc );
 	}
 
-	template< typename ContainerT, typename KeyType, typename ToKeyFunc >
-	inline typename ContainerT::iterator BinaryFind( ContainerT& container, const KeyType& key, ToKeyFunc toKeyFunc )
+	template< typename ContainerT, typename KeyT, typename ToKeyFunc >
+	inline typename ContainerT::iterator BinaryFind( ContainerT& container, const KeyT& key, ToKeyFunc toKeyFunc )
 	{
 		return BinaryFind( container.begin(), container.end(), key, toKeyFunc );
 	}
 
-	template< typename ContainerT, typename KeyType, typename ToKeyFunc >
-	inline typename size_t BinaryFindPos( const ContainerT& container, const KeyType& key, ToKeyFunc toKeyFunc )
+	template< typename ContainerT, typename KeyT, typename ToKeyFunc >
+	inline typename size_t BinaryFindPos( const ContainerT& container, const KeyT& key, ToKeyFunc toKeyFunc )
 	{
 		typename ContainerT::const_iterator itFound = BinaryFind( container.begin(), container.end(), key, toKeyFunc );
 		return itFound != container.end() ? std::distance( container.begin(), itFound ) : std::tstring::npos;
 	}
 
-	template< typename ContainerT, typename KeyType, typename ToKeyFunc >
-	inline typename bool BinaryContains( const ContainerT& container, const KeyType& key, ToKeyFunc toKeyFunc )
+	template< typename ContainerT, typename KeyT, typename ToKeyFunc >
+	inline typename bool BinaryContains( const ContainerT& container, const KeyT& key, ToKeyFunc toKeyFunc )
 	{
 		return BinaryFind( container.begin(), container.end(), key, toKeyFunc ) != container.end();
 	}
@@ -548,14 +548,14 @@ namespace utl
 	}
 
 
-	template< typename Type, typename ItemType >
-	inline void AddSorted( std::vector< Type >& rDest, ItemType item )
+	template< typename Type, typename ItemT >
+	inline void AddSorted( std::vector< Type >& rDest, ItemT item )
 	{
 		rDest.insert( std::upper_bound( rDest.begin(), rDest.end(), item ), item );
 	}
 
-	template< typename Type, typename ItemType, typename OrderBinaryPred >
-	inline void AddSorted( std::vector< Type >& rDest, ItemType item, OrderBinaryPred orderPred )		// predicate version
+	template< typename Type, typename ItemT, typename OrderBinaryPred >
+	inline void AddSorted( std::vector< Type >& rDest, ItemT item, OrderBinaryPred orderPred )		// predicate version
 	{
 		rDest.insert( std::upper_bound( rDest.begin(), rDest.end(), item, orderPred ), item );
 	}
@@ -567,8 +567,8 @@ namespace utl
 			AddSorted( rDest, *itFirst, orderPred );
 	}
 
-	template< typename ContainerT, typename ItemType >
-	inline bool AddUnique( ContainerT& rDest, ItemType item )
+	template< typename ContainerT, typename ItemT >
+	inline bool AddUnique( ContainerT& rDest, ItemT item )
 	{
 		if ( std::find( rDest.begin(), rDest.end(), item ) != rDest.end() )
 			return false;
@@ -588,8 +588,8 @@ namespace utl
 		return rDest.size() - oldCount;		// added count
 	}
 
-	template< typename ContainerT, typename ItemType >
-	inline void PushUnique( ContainerT& rContainer, ItemType item, size_t pos = std::tstring::npos )
+	template< typename ContainerT, typename ItemT >
+	inline void PushUnique( ContainerT& rContainer, ItemT item, size_t pos = std::tstring::npos )
 	{
 		ASSERT( !Contains( rContainer, item ) );
 		rContainer.insert( std::tstring::npos == pos ? rContainer.end() : ( rContainer.begin() + pos ), item );
@@ -680,43 +680,43 @@ namespace utl
 {
 	// specific type
 
-	template< typename DesiredType, typename SourceType >
-	void QueryWithType( std::vector< DesiredType* >& rOutObjects, const std::vector< SourceType* >& rSource )
+	template< typename DesiredT, typename SourceT >
+	void QueryWithType( std::vector< DesiredT* >& rOutObjects, const std::vector< SourceT* >& rSource )
 	{
 		rOutObjects.reserve( rOutObjects.size() + rSource.size() );
 
-		for ( typename std::vector< SourceType* >::const_iterator itSource = rSource.begin(); itSource != rSource.end(); ++itSource )
-			if ( DesiredType* pDesired = dynamic_cast< DesiredType* >( *itSource ) )
+		for ( typename std::vector< SourceT* >::const_iterator itSource = rSource.begin(); itSource != rSource.end(); ++itSource )
+			if ( DesiredT* pDesired = dynamic_cast< DesiredT* >( *itSource ) )
 				rOutObjects.push_back( pDesired );
 	}
 
-	template< typename TargetType, typename DestType, typename SourceType >
-	void AddWithType( std::vector< DestType* >& rDestObjects, const std::vector< SourceType* >& rSourceObjects )
+	template< typename TargetT, typename DestT, typename SourceT >
+	void AddWithType( std::vector< DestT* >& rDestObjects, const std::vector< SourceT* >& rSourceObjects )
 	{
 		rDestObjects.reserve( rDestObjects.size() + rSourceObjects.size() );
 
-		for ( typename std::vector< SourceType* >::const_iterator itObject = rSourceObjects.begin(); itObject != rSourceObjects.end(); ++itObject )
-			if ( is_a< TargetType >( *itObject ) )
-				rDestObjects.push_back( checked_static_cast< DestType* >( *itObject ) );
+		for ( typename std::vector< SourceT* >::const_iterator itObject = rSourceObjects.begin(); itObject != rSourceObjects.end(); ++itObject )
+			if ( is_a< TargetT >( *itObject ) )
+				rDestObjects.push_back( checked_static_cast< DestT* >( *itObject ) );
 	}
 
-	template< typename TargetType, typename DestType, typename SourceType >
-	void AddWithoutType( std::vector< DestType* >& rDestObjects, const std::vector< SourceType* >& rSourceObjects )
+	template< typename TargetT, typename DestT, typename SourceT >
+	void AddWithoutType( std::vector< DestT* >& rDestObjects, const std::vector< SourceT* >& rSourceObjects )
 	{
 		rDestObjects.reserve( rDestObjects.size() + rSourceObjects.size() );
 
-		for ( typename std::vector< SourceType* >::const_iterator itObject = rSourceObjects.begin(); itObject != rSourceObjects.end(); ++itObject )
-			if ( !is_a< TargetType >( *itObject ) )
-				rDestObjects.push_back( checked_static_cast< DestType* >( *itObject ) );
+		for ( typename std::vector< SourceT* >::const_iterator itObject = rSourceObjects.begin(); itObject != rSourceObjects.end(); ++itObject )
+			if ( !is_a< TargetT >( *itObject ) )
+				rDestObjects.push_back( checked_static_cast< DestT* >( *itObject ) );
 	}
 
-	template< typename ToRemoveType, typename ObjectType >
-	size_t RemoveWithType( std::vector< ObjectType* >& rObjects )
+	template< typename ToRemoveT, typename ObjectT >
+	size_t RemoveWithType( std::vector< ObjectT* >& rObjects )
 	{
 		size_t removedCount = 0;
 
-		for ( typename std::vector< ObjectType* >::iterator it = rObjects.begin(); it != rObjects.end(); )
-			if ( is_a< ToRemoveType >( *it ) )
+		for ( typename std::vector< ObjectT* >::iterator it = rObjects.begin(); it != rObjects.end(); )
+			if ( is_a< ToRemoveT >( *it ) )
 			{
 				it = rObjects.erase( it );
 				++removedCount;
@@ -727,13 +727,13 @@ namespace utl
 		return removedCount;
 	}
 
-	template< typename PreserveType, typename ObjectType >
-	size_t RemoveWithoutType( std::vector< ObjectType* >& rObjects )
+	template< typename PreserveT, typename ObjectT >
+	size_t RemoveWithoutType( std::vector< ObjectT* >& rObjects )
 	{
 		size_t removedCount = 0;
 
-		for ( typename std::vector< ObjectType* >::iterator it = rObjects.begin(); it != rObjects.end(); )
-			if ( is_a< PreserveType >( *it ) )
+		for ( typename std::vector< ObjectT* >::iterator it = rObjects.begin(); it != rObjects.end(); )
+			if ( is_a< PreserveT >( *it ) )
 				++it;
 			else
 			{
@@ -788,26 +788,26 @@ namespace utl
 	}
 
 
-	template< typename IndexType, typename Type >
-	void QuerySubSequenceFromIndexes( std::vector< Type >& rSubSequence, const std::vector< Type >& source, const std::vector< IndexType >& selIndexes )
+	template< typename IndexT, typename Type >
+	void QuerySubSequenceFromIndexes( std::vector< Type >& rSubSequence, const std::vector< Type >& source, const std::vector< IndexT >& selIndexes )
 	{
 		REQUIRE( selIndexes.size() <= source.size() );
 
 		rSubSequence.clear();
 		rSubSequence.reserve( selIndexes.size() );
 
-		for ( typename std::vector< IndexType >::const_iterator itSelIndex = selIndexes.begin(); itSelIndex != selIndexes.end(); ++itSelIndex )
+		for ( typename std::vector< IndexT >::const_iterator itSelIndex = selIndexes.begin(); itSelIndex != selIndexes.end(); ++itSelIndex )
 			rSubSequence.push_back( source[ *itSelIndex ] );
 	}
 
-	template< typename IndexType, typename ContainerT >
-	void QuerySubSequenceIndexes( std::vector< IndexType >& rIndexes, const ContainerT& source, const ContainerT& subSequence )
+	template< typename IndexT, typename ContainerT >
+	void QuerySubSequenceIndexes( std::vector< IndexT >& rIndexes, const ContainerT& source, const ContainerT& subSequence )
 	{	// note: N-squared complexity
 		rIndexes.clear();
 		rIndexes.reserve( subSequence.size() );
 
 		for ( typename ContainerT::const_iterator itSubItem = subSequence.begin(); itSubItem != subSequence.end(); ++itSubItem )
-			rIndexes.push_back( static_cast< IndexType >( utl::LookupPos( source.begin(), source.end(), *itSubItem ) ) );
+			rIndexes.push_back( static_cast< IndexT >( utl::LookupPos( source.begin(), source.end(), *itSubItem ) ) );
 	}
 
 
@@ -872,8 +872,8 @@ namespace utl
 {
 	// position navigation
 
-	template< typename PosType >
-	PosType CircularAdvance( PosType pos, PosType count, bool forward = true )
+	template< typename PosT >
+	PosT CircularAdvance( PosT pos, PosT count, bool forward = true )
 	{
 		ASSERT( pos < count );
 		if ( forward )
@@ -883,7 +883,7 @@ namespace utl
 		}
 		else
 		{	// circular previous
-			if ( --pos == PosType( -1 ) )
+			if ( --pos == PosT( -1 ) )
 				pos = count - 1;
 		}
 		return pos;
@@ -906,8 +906,8 @@ namespace utl
 	}
 
 
-	template< typename PosType >
-	bool AdvancePos( PosType& rPos, PosType count, bool wrap, bool next, PosType step = 1 )
+	template< typename PosT >
+	bool AdvancePos( PosT& rPos, PosT count, bool wrap, bool next, PosT step = 1 )
 	{
 		ASSERT( rPos < count );
 		ASSERT( count > 0 );

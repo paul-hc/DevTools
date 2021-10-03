@@ -74,4 +74,125 @@ namespace fs
 }
 
 
+namespace io
+{
+	void __declspec(noreturn) ThrowUnsupportedEncoding( fs::Encoding encoding ) throws_( CRuntimeException );
+	void __declspec(noreturn) ThrowOpenForReading( const fs::CPath& filePath ) throws_( CRuntimeException );
+	void __declspec(noreturn) ThrowOpenForWriting( const fs::CPath& filePath ) throws_( CRuntimeException );
+
+
+	// does low-level writing to output; implemented by text writers (e.g. console, files, output streams)
+	//
+	interface IWriter : public utl::IMemoryManaged
+	{
+		virtual void WriteString( const char* pText, size_t charCount ) = 0;
+		virtual void WriteString( const wchar_t* pText, size_t charCount ) = 0;
+	};
+}
+
+
+namespace io
+{
+	// writes encoded strings to an IWriter-based output; handles UTF conversions (multi-byte, wide) and byte-swapping
+	//
+	interface ITextEncoder : public utl::IMemoryManaged
+	{
+		virtual io::IWriter* GetWriter( void ) = 0;
+		virtual void WriteEncoded( const char* pText, size_t charCount ) = 0;
+		virtual void WriteEncoded( const wchar_t* pText, size_t charCount ) = 0;
+	};
+
+
+	ITextEncoder* MakeTextEncoder( io::IWriter* pWriter, fs::Encoding fileEncoding );
+
+
+	class CStraightTextEncoder : public ITextEncoder
+	{	// no encoding, just invokes the writer
+	public:
+		CStraightTextEncoder( io::IWriter* pWriter ) : m_pWriter( pWriter ) { ASSERT_PTR( m_pWriter ); }
+
+		// ITextEncoder interface
+		virtual io::IWriter* GetWriter( void );
+		virtual void WriteEncoded( const char* pText, size_t charCount );
+		virtual void WriteEncoded( const wchar_t* pText, size_t charCount );
+	private:
+		io::IWriter* m_pWriter;
+	};
+
+
+	class CSwapBytesTextEncoder : public CStraightTextEncoder
+	{	// does wchar_t byte-swapping for UTF16_be_bom
+	public:
+		CSwapBytesTextEncoder( io::IWriter* pWriter ) : CStraightTextEncoder( pWriter ) {}
+
+		// base overrides
+		virtual void WriteEncoded( const wchar_t* pText, size_t charCount );
+	private:
+		std::vector< wchar_t > m_buffer;		// excluding the EOS
+	};
+
+
+	class CUtf8Encoder : public CStraightTextEncoder
+	{	// does wchar_t conversion to UTF8
+	public:
+		CUtf8Encoder( io::IWriter* pWriter ) : CStraightTextEncoder( pWriter ) {}
+
+		// base overrides
+		virtual void WriteEncoded( const wchar_t* pText, size_t charCount );
+	private:
+		std::string m_utf8;
+	};
+}
+
+
+namespace io
+{
+	template< typename CharT >
+	size_t WriteTranslatedText( io::ITextEncoder* pTextEncoder, const CharT* pText, size_t charCount ) throws_( CRuntimeException )
+	{	// translate text to binary mode line by line; returns the number of translated lines
+		ASSERT_PTR( pTextEncoder );
+
+		const CharT eol[] = { '\r', '\n', 0 };		// binary mode line-end
+		size_t lineCount = 0;
+
+		for ( const CharT* pEnd = pText + charCount; pText != pEnd; ++lineCount )
+		{
+			const CharT* pEol = str::FindTokenEnd( pText, eol );
+
+			ASSERT_PTR( pEol );
+			pEol = std::min( pEol, pEnd );			// limit to specified length
+
+			size_t lineLength = std::distance( pText, pEol );
+
+			pTextEncoder->WriteEncoded( pText, lineLength );
+
+			pText = pEol;
+			if ( pText != pEnd )					// not the last line?
+			{
+				pTextEncoder->WriteEncoded( eol, COUNT_OF( eol ) - 1 );			// write the translated line-end (excluding the EOS)
+				pText = str::SkipLineEnd( pText );
+			}
+		}
+
+		return lineCount;
+	}
+
+	template< typename CharT >
+	void WriteEncodedContents( io::IWriter* pWriter, fs::Encoding fileEncoding, const CharT* pText, size_t charCount = utl::npos ) throws_( CRuntimeException )
+	{	// writes the entire contents to a file, including the required BOM, also performing line-end translation "\n" -> "\r\n"
+		ASSERT_PTR( pWriter );
+
+		fs::CByteOrderMark bom( fileEncoding );
+
+		if ( !bom.IsEmpty() )
+			pWriter->WriteString( &bom.Get().front(), bom.Get().size() );		// write the BOM (Byte Order Mark)
+
+		std::auto_ptr<io::ITextEncoder> pTextEncoder( io::MakeTextEncoder( pWriter, fileEncoding ) );		// handles the line-end translation and byte swapping
+
+		str::SettleLength( charCount, pText );
+		io::WriteTranslatedText( pTextEncoder.get(), pText, charCount );
+	}
+}
+
+
 #endif // TextEncoding_h

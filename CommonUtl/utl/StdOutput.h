@@ -17,7 +17,7 @@ namespace io
 	{
 	public:
 		CStdOutput( DWORD stdHandle = STD_OUTPUT_HANDLE );		// STD_OUTPUT_HANDLE or STD_ERROR_HANDLE
-		~CStdOutput();
+		~CStdOutput() { Flush(); }
 
 		bool IsValid( void ) const { return m_hStdOutput != INVALID_HANDLE_VALUE; }
 		bool IsConsoleOutput( void ) const { return m_isConsoleOutput; }
@@ -25,6 +25,8 @@ namespace io
 
 		void Write( const std::string& allText, fs::Encoding fileEncoding = fs::UTF8_bom ) throws_( CRuntimeException );
 		void Write( const std::wstring& allText, fs::Encoding fileEncoding = fs::UTF16_LE_bom ) throws_( CRuntimeException );
+
+		bool Flush( void );
 	private:
 		bool StoreLastError( bool exprResult = false );
 

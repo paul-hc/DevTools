@@ -28,8 +28,8 @@ namespace func
 
 	struct ToChar
 	{
-		template< typename CharType >
-		CharType operator()( CharType ch ) const
+		template< typename CharT >
+		CharT operator()( CharT ch ) const
 		{
 			return ch;
 		}
@@ -56,8 +56,8 @@ namespace pred
 
 	struct CompareIntuitiveCharPtr
 	{
-		template< typename CharType >
-		pred::CompareResult operator()( const CharType* pLeft, const CharType* pRight ) const
+		template< typename CharT >
+		pred::CompareResult operator()( const CharT* pLeft, const CharT* pRight ) const
 		{
 			return str::IntuitiveCompare( pLeft, pRight );
 		}
@@ -71,8 +71,8 @@ namespace str
 {
 	// comparison with character translation (low-level)
 
-	template< typename CharType, typename ToCharFunc >
-	std::pair< int, size_t > _BaseCompareDiff( const CharType* pLeft, const CharType* pRight, ToCharFunc toCharFunc, size_t count = std::tstring::npos )
+	template< typename CharT, typename ToCharFunc >
+	std::pair< int, size_t > _BaseCompareDiff( const CharT* pLeft, const CharT* pRight, ToCharFunc toCharFunc, size_t count = std::tstring::npos )
 	{
 		ASSERT_PTR( pLeft );
 		ASSERT_PTR( pRight );
@@ -98,15 +98,15 @@ namespace str
 		return std::pair< int, size_t >( firstMismatch, matchLen );
 	}
 
-	template< typename CharType, typename ToCharFunc >
-	inline std::pair< pred::CompareResult, size_t > _BaseCompare( const CharType* pLeft, const CharType* pRight, ToCharFunc toCharFunc, size_t count = std::tstring::npos )
+	template< typename CharT, typename ToCharFunc >
+	inline std::pair< pred::CompareResult, size_t > _BaseCompare( const CharT* pLeft, const CharT* pRight, ToCharFunc toCharFunc, size_t count = std::tstring::npos )
 	{
 		std::pair< int, size_t > diffPair = _BaseCompareDiff( pLeft, pRight, toCharFunc, count );
 		return std::pair< pred::CompareResult, size_t >( pred::ToCompareResult( diffPair.first ), diffPair.second );
 	}
 
-	template< typename CharType, typename ToCharFunc >
-	inline pred::CompareResult _CompareN( const CharType* pLeft, const CharType* pRight, ToCharFunc toCharFunc, size_t count = std::tstring::npos )
+	template< typename CharT, typename ToCharFunc >
+	inline pred::CompareResult _CompareN( const CharT* pLeft, const CharT* pRight, ToCharFunc toCharFunc, size_t count = std::tstring::npos )
 	{
 		return _BaseCompare( pLeft, pRight, toCharFunc, count ).first;
 	}
@@ -114,33 +114,33 @@ namespace str
 
 	// comparison interface (high-level)
 
-	template< typename CharType >
-	inline pred::CompareResult CompareIN( const CharType* pLeft, const CharType* pRight, size_t count ) { return str::_CompareN( pLeft, pRight, &::toupper, count ); }
+	template< typename CharT >
+	inline pred::CompareResult CompareIN( const CharT* pLeft, const CharT* pRight, size_t count ) { return str::_CompareN( pLeft, pRight, &::toupper, count ); }
 
 
-	template< typename CharType >
-	inline bool EqualsN( const CharType* pLeft, const CharType* pRight, size_t count ) { return pred::Equal == CharTraits::CompareN( pLeft, pRight, count ); }
+	template< typename CharT >
+	inline bool EqualsN( const CharT* pLeft, const CharT* pRight, size_t count ) { return pred::Equal == CharTraits::CompareN( pLeft, pRight, count ); }
 
-	template< typename CharType >
-	inline bool EqualsIN( const CharType* pLeft, const CharType* pRight, size_t count ) { return pred::Equal == str::CompareIN( pLeft, pRight, count ); }
+	template< typename CharT >
+	inline bool EqualsIN( const CharT* pLeft, const CharT* pRight, size_t count ) { return pred::Equal == str::CompareIN( pLeft, pRight, count ); }
 
-	template< typename CharType >
-	inline bool EqualsN_ByCase( str::CaseType caseType, const CharType* pLeft, const CharType* pRight, size_t count )
+	template< typename CharT >
+	inline bool EqualsN_ByCase( str::CaseType caseType, const CharT* pLeft, const CharT* pRight, size_t count )
 	{
 		return str::Case == caseType
 			? EqualsN( pLeft, pRight, count )
 			: EqualsIN( pLeft, pRight, count );
 	}
 
-	template< typename CharType >
-	inline bool EqualsPart( const CharType* pLeft, const CPart< CharType >& rightPart, str::CaseType caseType = str::Case )
+	template< typename CharT >
+	inline bool EqualsPart( const CharT* pLeft, const CPart<CharT>& rightPart, str::CaseType caseType = str::Case )
 	{
 		return EqualsN_ByCase( caseType, pLeft, rightPart.m_pString, rightPart.m_count );
 	}
 
 
-	template< typename CharType >
-	bool IsUpperMatch( const CharType* pText, size_t count, const std::locale& loc = str::GetUserLocale() )
+	template< typename CharT >
+	bool IsUpperMatch( const CharT* pText, size_t count, const std::locale& loc = str::GetUserLocale() )
 	{
 		ASSERT_PTR( pText );
 
@@ -151,8 +151,8 @@ namespace str
 		return count != 0;
 	}
 
-	template< typename CharType >
-	bool IsLowerMatch( const CharType* pText, size_t count, const std::locale& loc = str::GetUserLocale() )
+	template< typename CharT >
+	bool IsLowerMatch( const CharT* pText, size_t count, const std::locale& loc = str::GetUserLocale() )
 	{
 		ASSERT_PTR( pText );
 
@@ -167,21 +167,21 @@ namespace str
 
 namespace str
 {
-	template< typename CharType >
-	inline bool HasPrefix( const CharType* pText, const CharType prefix[], size_t prefixLen = std::string::npos )		// empty prefix is always a match
+	template< typename CharT >
+	inline bool HasPrefix( const CharT* pText, const CharT prefix[], size_t prefixLen = std::string::npos )		// empty prefix is always a match
 	{
 		return EqualsN( pText, prefix, prefixLen != std::string::npos ? prefixLen : GetLength( prefix ) );
 	}
 
-	template< typename CharType >
-	inline bool HasPrefixI( const CharType* pText, const CharType prefix[], size_t prefixLen = std::string::npos )		// empty prefix is always a match
+	template< typename CharT >
+	inline bool HasPrefixI( const CharT* pText, const CharT prefix[], size_t prefixLen = std::string::npos )		// empty prefix is always a match
 	{
 		return EqualsIN( pText, prefix, prefixLen != std::string::npos ? prefixLen : GetLength( prefix ) );
 	}
 
 
-	template< typename CharType >
-	bool HasSuffixN_ByCase( str::CaseType caseType, const CharType* pText, const CharType suffix[], size_t suffixLen )
+	template< typename CharT >
+	bool HasSuffixN_ByCase( str::CaseType caseType, const CharT* pText, const CharT suffix[], size_t suffixLen )
 	{	// empty suffix is always a match
 		size_t textLength = GetLength( pText );
 		return
@@ -189,14 +189,14 @@ namespace str
 			EqualsN_ByCase( caseType, pText + textLength - suffixLen, suffix, suffixLen );
 	}
 
-	template< typename CharType >
-	inline bool HasSuffix( const CharType* pText, const CharType suffix[], size_t suffixLen = std::string::npos )
+	template< typename CharT >
+	inline bool HasSuffix( const CharT* pText, const CharT suffix[], size_t suffixLen = std::string::npos )
 	{
 		return HasSuffixN_ByCase( str::Case, pText, suffix, suffixLen != std::string::npos ? suffixLen : GetLength( suffix ) );
 	}
 
-	template< typename CharType >
-	inline bool HasSuffixI( const CharType* pText, const CharType suffix[], size_t suffixLen = std::string::npos )
+	template< typename CharT >
+	inline bool HasSuffixI( const CharT* pText, const CharT suffix[], size_t suffixLen = std::string::npos )
 	{
 		return HasSuffixN_ByCase( str::IgnoreCase, pText, suffix, suffixLen != std::string::npos ? suffixLen : GetLength( suffix ) );
 	}
@@ -207,24 +207,24 @@ namespace str
 {
 	namespace ignore_case
 	{
-		template< typename CharType >
-		inline bool operator==( const std::basic_string< CharType >& left, const std::basic_string< CharType >& right ) { return str::Equals< IgnoreCase >( left.c_str(), right.c_str() ); }
+		template< typename CharT >
+		inline bool operator==( const std::basic_string<CharT>& left, const std::basic_string<CharT>& right ) { return str::Equals< IgnoreCase >( left.c_str(), right.c_str() ); }
 
-		template< typename CharType >
-		inline bool operator==( const CharType* pLeft, const std::basic_string< CharType >& right ) { return str::Equals< IgnoreCase >( pLeft, right.c_str() ); }
+		template< typename CharT >
+		inline bool operator==( const CharT* pLeft, const std::basic_string<CharT>& right ) { return str::Equals< IgnoreCase >( pLeft, right.c_str() ); }
 
-		template< typename CharType >
-		inline bool operator==( const std::basic_string< CharType >& left, const CharType* pRight ) { return str::Equals< IgnoreCase >( left.c_str(), pRight ); }
+		template< typename CharT >
+		inline bool operator==( const std::basic_string<CharT>& left, const CharT* pRight ) { return str::Equals< IgnoreCase >( left.c_str(), pRight ); }
 
 
-		template< typename CharType >
-		inline bool operator!=( const std::basic_string< CharType >& left, const std::basic_string< CharType >& right ) { return !operator==( left, right ); }
+		template< typename CharT >
+		inline bool operator!=( const std::basic_string<CharT>& left, const std::basic_string<CharT>& right ) { return !operator==( left, right ); }
 
-		template< typename CharType >
-		inline bool operator!=( const CharType* pLeft, const std::basic_string< CharType >& right ) { return !operator==( pLeft, right ); }
+		template< typename CharT >
+		inline bool operator!=( const CharT* pLeft, const std::basic_string<CharT>& right ) { return !operator==( pLeft, right ); }
 
-		template< typename CharType >
-		inline bool operator!=( const std::basic_string< CharType >& left, const CharType* pRight ) { return !operator==( left, pRight ); }
+		template< typename CharT >
+		inline bool operator!=( const std::basic_string<CharT>& left, const CharT* pRight ) { return !operator==( left, pRight ); }
 
 		// don't bother defining operator<, it's not picked up by sorting algorithms due to Koenig lookup
 	}
@@ -233,8 +233,8 @@ namespace str
 
 namespace str
 {
-	template< typename CharType >
-	const CharType* SkipWhitespace( const CharType* pText, const CharType* pWhiteSpace = StdWhitespace< CharType >() )
+	template< typename CharT >
+	const CharT* SkipWhitespace( const CharT* pText, const CharT* pWhiteSpace = StdWhitespace<CharT>() )
 	{
 		ASSERT_PTR( pText );
 		while ( ContainsAnyOf( pWhiteSpace, *pText ) )
@@ -243,12 +243,12 @@ namespace str
 		return pText;
 	}
 
-	template< typename CharType >
-	const CharType* SkipHexPrefix( const CharType* pText, CaseType caseType = str::Case )
+	template< typename CharT >
+	const CharT* SkipHexPrefix( const CharT* pText, CaseType caseType = str::Case )
 	{
 		pText = SkipWhitespace( pText );
 
-		const CharType hexPrefix[] = { '0', 'x', 0 };
+		const CharT hexPrefix[] = { '0', 'x', 0 };
 		enum { HexPrefixLen = 2 };
 
 		if ( str::EqualsN_ByCase( caseType, pText, hexPrefix, HexPrefixLen ) )
@@ -266,14 +266,14 @@ namespace pred
 	template< typename CharCasePolicy >
 	struct CompareCharPtr		// rename to avoid collision with CompareStringW/A (<WinNls.h>)
 	{
-		template< typename CharType >
-		CompareResult operator()( CharType left, CharType right ) const
+		template< typename CharT >
+		CompareResult operator()( CharT left, CharT right ) const
 		{
 			return Compare_Scalar( m_casePolicy( left ), m_casePolicy( right ) );
 		}
 
-		template< typename CharType >
-		CompareResult operator()( const CharType* pLeft, const CharType* pRight, size_t count = std::string::npos ) const
+		template< typename CharT >
+		CompareResult operator()( const CharT* pLeft, const CharT* pRight, size_t count = std::string::npos ) const
 		{
 			return str::_CompareN( pLeft, pRight, m_casePolicy, count );
 		}
@@ -294,31 +294,31 @@ namespace pred
 
 namespace pred
 {
-	template< typename CharType, str::CaseType caseType >
+	template< typename CharT, str::CaseType caseType >
 	struct CharMatch
 	{
-		CharMatch( CharType chMatch ) : m_chMatch( str::Case == caseType ? chMatch : func::toupper( chMatch ) ) {}
+		CharMatch( CharT chMatch ) : m_chMatch( str::Case == caseType ? chMatch : func::toupper( chMatch ) ) {}
 
-		bool operator()( CharType chr ) const
+		bool operator()( CharT chr ) const
 		{
 			return m_chMatch == ( str::Case == caseType ? chr : func::toupper( chr ) );
 		}
 	public:
-		CharType m_chMatch;
+		CharT m_chMatch;
 	};
 
 
 	template< str::CaseType caseType >
 	struct CharEqual
 	{
-		template< typename CharType >
-		bool operator()( CharType left, CharType right ) const
+		template< typename CharT >
+		bool operator()( CharT left, CharT right ) const
 		{
 			return str::Case == caseType ? ( left == right ) : ( func::toupper( left ) == func::toupper( right ) );
 		}
 
-		template< typename CharType >
-		bool operator()( const CharType* pLeft, const CharType* pRight ) const
+		template< typename CharT >
+		bool operator()( const CharT* pLeft, const CharT* pRight ) const
 		{
 			return str::Equals< caseType >( pLeft, pRight );
 		}
@@ -330,57 +330,57 @@ namespace str
 {
 	// part (sub-string) search
 
-	template< typename CharType >
-	size_t FindPart( const CharType* pText, const CPart< CharType >& part, size_t offset = 0 )
+	template< typename CharT >
+	size_t FindPart( const CharT* pText, const CPart<CharT>& part, size_t offset = 0 )
 	{
 		ASSERT( pText != 0 && offset <= GetLength( pText ) );
 		ASSERT( !part.IsEmpty() );
 
-		const CharType* pEnd = str::end( pText );
-		const CharType* pFound = std::search( pText + offset, pEnd, part.m_pString, part.m_pString + part.m_count );
+		const CharT* pEnd = str::end( pText );
+		const CharT* pFound = std::search( pText + offset, pEnd, part.m_pString, part.m_pString + part.m_count );
 		return pFound != pEnd ? std::distance( pText, pFound ) : std::tstring::npos;
 	}
 
-	template< typename CharType, typename Compare >
-	size_t FindPart( const CharType* pText, const CPart< CharType >& part, Compare compareStr, size_t offset = 0 )				// e.g. pred::TCompareNoCase
+	template< typename CharT, typename Compare >
+	size_t FindPart( const CharT* pText, const CPart<CharT>& part, Compare compareStr, size_t offset = 0 )				// e.g. pred::TCompareNoCase
 	{
 		ASSERT( pText != 0 && offset <= GetLength( pText ) );
 		ASSERT( !part.IsEmpty() );
 
-		const CharType* pEnd = str::end( pText );
-		const CharType* pFound = std::search( pText + offset, pEnd, part.m_pString, part.m_pString + part.m_count, pred::IsEqual< Compare >( compareStr ) );
+		const CharT* pEnd = str::end( pText );
+		const CharT* pFound = std::search( pText + offset, pEnd, part.m_pString, part.m_pString + part.m_count, pred::IsEqual< Compare >( compareStr ) );
 		return pFound != pEnd ? std::distance( pText, pFound ) : std::tstring::npos;
 	}
 
-	template< typename CharType >
-	inline bool ContainsPart( const CharType* pText, const CPart< CharType >& part ) { return FindPart( pText, part ) != std::tstring::npos; }
+	template< typename CharT >
+	inline bool ContainsPart( const CharT* pText, const CPart<CharT>& part ) { return FindPart( pText, part ) != std::tstring::npos; }
 
-	template< typename CharType, typename Compare >
-	inline bool ContainsPart( const CharType* pText, const CPart< CharType >& part, Compare compareStr ) { return FindPart( pText, part, compareStr ) != std::tstring::npos; }
+	template< typename CharT, typename Compare >
+	inline bool ContainsPart( const CharT* pText, const CPart<CharT>& part, Compare compareStr ) { return FindPart( pText, part, compareStr ) != std::tstring::npos; }
 
 
-	template< typename CharType, typename ContainerType >
-	bool AllContain( const ContainerType& items, const str::CPart< CharType >& part )
+	template< typename CharT, typename ContainerT >
+	bool AllContain( const ContainerT& items, const str::CPart<CharT>& part )
 	{
-		for ( typename ContainerType::const_iterator itItem = items.begin(); itItem != items.end(); ++itItem )
+		for ( typename ContainerT::const_iterator itItem = items.begin(); itItem != items.end(); ++itItem )
 			if ( std::tstring::npos == FindPart( itItem->c_str(), part ) )
 				return false;			// not a match for this item
 
 		return !items.empty();
 	}
 
-	template< typename CharType, typename ContainerType, typename Compare >
-	bool AllContain( const ContainerType& items, const str::CPart< CharType >& part, Compare compareStr )		// e.g. pred::TCompareNoCase
+	template< typename CharT, typename ContainerT, typename Compare >
+	bool AllContain( const ContainerT& items, const str::CPart<CharT>& part, Compare compareStr )		// e.g. pred::TCompareNoCase
 	{
-		for ( typename ContainerType::const_iterator itItem = items.begin(); itItem != items.end(); ++itItem )
+		for ( typename ContainerT::const_iterator itItem = items.begin(); itItem != items.end(); ++itItem )
 			if ( std::tstring::npos == FindPart( itItem->c_str(), part, compareStr ) )
 				return false;			// not a match for this item
 
 		return !items.empty();
 	}
 
-	template< typename CharType >
-	size_t GetPartCount( const CharType* pText, const CPart< CharType >& part )
+	template< typename CharT >
+	size_t GetPartCount( const CharT* pText, const CPart<CharT>& part )
 	{
 		size_t count = 0;
 
@@ -395,8 +395,8 @@ namespace str
 
 namespace str
 {
-	template< typename CharType, typename CompareFunc >
-	size_t GetCommonLength( const CharType* pLeft, const CharType* pRight, CompareFunc compareStr /*= pred::TCompareCase()*/ )
+	template< typename CharT, typename CompareFunc >
+	size_t GetCommonLength( const CharT* pLeft, const CharT* pRight, CompareFunc compareStr /*= pred::TCompareCase()*/ )
 	{
 		size_t len = 0;
 		while ( *pLeft != 0 && pred::Equal == compareStr( *pLeft++, *pRight++ ) )
@@ -408,12 +408,12 @@ namespace str
 
 	// custom case type
 
-	template< str::CaseType caseType, typename CharType >
-	const CharType* SkipPrefix( const CharType* pText, const CharType* pPrefix )
+	template< str::CaseType caseType, typename CharT >
+	const CharT* SkipPrefix( const CharT* pText, const CharT* pPrefix )
 	{
 		pred::CharEqual< caseType > eqChar;
 
-		for ( const CharType* pSkip = pText; ; )
+		for ( const CharT* pSkip = pText; ; )
 			if ( _T('\0') == *pPrefix )
 				return pSkip;
 			else if ( !eqChar( *pSkip++, *pPrefix++ ) )
@@ -422,29 +422,29 @@ namespace str
 		return pText;
 	}
 
-	template< str::CaseType caseType, typename CharType >
-	size_t Find( const CharType* pText, CharType chr, size_t offset = 0 )
+	template< str::CaseType caseType, typename CharT >
+	size_t Find( const CharT* pText, CharT chr, size_t offset = 0 )
 	{
 		ASSERT( pText != 0 && offset <= GetLength( pText ) );
 
-		const CharType* itEnd = end( pText );
-		const CharType* itFound = std::find_if( begin( pText ) + offset, itEnd, pred::CharMatch< CharType, caseType >( chr ) );
+		const CharT* itEnd = end( pText );
+		const CharT* itFound = std::find_if( begin( pText ) + offset, itEnd, pred::CharMatch< CharT, caseType >( chr ) );
 		return itFound != itEnd ? std::distance( begin( pText ), itFound ) : std::tstring::npos;
 	}
 
-	template< str::CaseType caseType, typename CharType >
-	size_t Find( const CharType* pText, const CharType* pPart, size_t offset = 0 )
+	template< str::CaseType caseType, typename CharT >
+	size_t Find( const CharT* pText, const CharT* pPart, size_t offset = 0 )
 	{
 		ASSERT( pText != 0 && offset <= GetLength( pText ) );
 		ASSERT( !str::IsEmpty( pPart ) );
 
-		const CharType* itEnd = end( pText );
-		const CharType* itFound = std::search( begin( pText ) + offset, itEnd, begin( pPart ), end( pPart ), pred::CharEqual< caseType >() );
+		const CharT* itEnd = end( pText );
+		const CharT* itFound = std::search( begin( pText ) + offset, itEnd, begin( pPart ), end( pPart ), pred::CharEqual< caseType >() );
 		return itFound != itEnd ? std::distance( begin( pText ), itFound ) : std::tstring::npos;
 	}
 
-	template< str::CaseType caseType, typename CharType >
-	size_t GetCountOf( const CharType* pText, const CharType* pPart )
+	template< str::CaseType caseType, typename CharT >
+	size_t GetCountOf( const CharT* pText, const CharT* pPart )
 	{
 		size_t count = 0, matchLen = str::GetLength( pPart );
 
@@ -455,8 +455,8 @@ namespace str
 		return count;
 	}
 
-	template< typename CharType >
-	bool Matches( const CharType* pText, const CharType* pPart, bool matchCase, bool matchWhole )
+	template< typename CharT >
+	bool Matches( const CharT* pText, const CharT* pPart, bool matchCase, bool matchWhole )
 	{
 		if ( matchWhole )
 			return matchCase
@@ -475,8 +475,8 @@ namespace str
 	template< typename ToNormalFunc, typename ToEquivFunc >
 	struct EvalMatch
 	{
-		template< typename CharType >
-		Match operator()( CharType leftCh, CharType rightCh ) const
+		template< typename CharT >
+		Match operator()( CharT leftCh, CharT rightCh ) const
 		{
 			if ( m_toNormalFunc( leftCh ) == m_toNormalFunc( rightCh ) )				// case sensitive match?
 				return MatchEqual;
@@ -485,8 +485,8 @@ namespace str
 			return MatchNotEqual;
 		}
 
-		template< typename CharType >
-		Match operator()( const CharType* pLeft, const CharType* pRight ) const
+		template< typename CharT >
+		Match operator()( const CharT* pLeft, const CharT* pRight ) const
 		{
 			if ( pred::Equal == str::_CompareN( pLeft, pRight, m_toNormalFunc ) )		// case sensitive match?
 				return MatchEqual;
@@ -506,22 +506,22 @@ namespace str
 namespace pred
 {
 	// to find most occurences in a string from an array of a parts
-	template< typename CharType >
+	template< typename CharT >
 	struct LessPartCount
 	{
-		LessPartCount( const CharType* pText ) : m_pText( pText ) { ASSERT_PTR( m_pText ); }
+		LessPartCount( const CharT* pText ) : m_pText( pText ) { ASSERT_PTR( m_pText ); }
 
-		bool operator()( const str::CPart< CharType >& left, const str::CPart< CharType >& right ) const
+		bool operator()( const str::CPart<CharT>& left, const str::CPart<CharT>& right ) const
 		{
 			return Less == Compare_Scalar( str::GetPartCount( m_pText, left ), str::GetPartCount( m_pText, right ) );
 		}
 
-		bool operator()( const CharType* pLeftPart, const CharType* pRightPart ) const
+		bool operator()( const CharT* pLeftPart, const CharT* pRightPart ) const
 		{
 			return operator()( str::MakePart( pLeftPart ), str::MakePart( pRightPart ) );
 		}
 	private:
-		const CharType* m_pText;
+		const CharT* m_pText;
 	};
 }
 

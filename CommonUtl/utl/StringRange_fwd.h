@@ -7,11 +7,11 @@ namespace str
 {
 	namespace range
 	{
-		template< typename CharType >
+		template< typename CharT >
 		class CStringRange;
 	}
 
-	typedef str::range::CStringRange< TCHAR > TStringRange;
+	typedef str::range::CStringRange<TCHAR> TStringRange;
 }
 
 

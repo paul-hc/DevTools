@@ -12,30 +12,30 @@ namespace str
 	{
 		// range based algorithms based on string position pair: for fast and efficient parsing of text content
 
-		template< typename CharType >
-		inline bool InBounds( const Range< size_t >& pos, const std::basic_string< CharType >& text )
+		template< typename CharT >
+		inline bool InBounds( const Range< size_t >& pos, const std::basic_string<CharT>& text )
 		{
 			return pos.IsNormalized() && pos.m_start <= text.length() && pos.m_end <= text.length();
 		}
 
-		template< typename CharType >
-		inline Range< size_t > MakeBounds( const std::basic_string< CharType >& text )
+		template< typename CharT >
+		inline Range< size_t > MakeBounds( const std::basic_string<CharT>& text )
 		{
 			return Range< size_t >( 0, text.length() );
 		}
 
-		template< typename CharType >
-		inline std::basic_string< CharType > Extract( const Range< size_t >& pos, const std::basic_string< CharType >& text )
+		template< typename CharT >
+		inline std::basic_string<CharT> Extract( const Range< size_t >& pos, const std::basic_string<CharT>& text )
 		{
 			ASSERT( range::InBounds( pos, text ) );
 			return text.substr( pos.m_start, pos.GetSpan< size_t >() );
 		}
 
 
-		template< typename CharType >
+		template< typename CharT >
 		class CStringRange
 		{
-			typedef typename std::basic_string< CharType > StringT;
+			typedef typename std::basic_string<CharT> StringT;
 		public:
 			explicit CStringRange( const StringT& text ) : m_text( text ), m_pos( MakeBounds( m_text ) ) {}
 			CStringRange( const StringT& text, const Range< size_t >& pos ) : m_text( text ), m_pos( pos ) { ENSURE( InBounds() ); }
@@ -49,9 +49,9 @@ namespace str
 			void SetPos( const Range< size_t >& pos ) { m_pos = pos; ENSURE( InBounds() ); }
 
 			const StringT& GetText( void ) const { return m_text; }
-			const CharType* GetStartPtr( void ) const { REQUIRE( InBounds() ); return m_text.c_str() + m_pos.m_start; }
-			const CharType* GetEndPtr( void ) const { REQUIRE( InBounds() ); return m_text.c_str() + m_pos.m_end; }
-			CharType GetStartCh( void ) const { return *GetStartPtr(); }
+			const CharT* GetStartPtr( void ) const { REQUIRE( InBounds() ); return m_text.c_str() + m_pos.m_start; }
+			const CharT* GetEndPtr( void ) const { REQUIRE( InBounds() ); return m_text.c_str() + m_pos.m_end; }
+			CharT GetStartCh( void ) const { return *GetStartPtr(); }
 
 			void Reset( void ) { m_pos = MakeBounds( m_text ); }
 
@@ -78,42 +78,42 @@ namespace str
 					CStringRange( m_text, utl::MakeRange( sepPos.m_end, m_pos.m_end ) ) );
 			}
 
-			bool HasPrefix( const CharType prefix[] ) const { return _HasPrefix( MakePart( prefix ) ); }
-			bool HasPrefix( CharType prefixCh ) const { return _HasPrefix( CPart< CharType >( &prefixCh, prefixCh != 0 ? 1 : 0 ) ); }
+			bool HasPrefix( const CharT prefix[] ) const { return _HasPrefix( MakePart( prefix ) ); }
+			bool HasPrefix( CharT prefixCh ) const { return _HasPrefix( CPart<CharT>( &prefixCh, prefixCh != 0 ? 1 : 0 ) ); }
 
-			bool HasSuffix( const CharType suffix[] ) const { return _HasSuffix( MakePart( suffix ) ); }
-			bool HasSuffix( CharType suffixCh ) const { return _HasSuffix( CPart< CharType >( &suffixCh, suffixCh != 0 ? 1 : 0 ) ); }
+			bool HasSuffix( const CharT suffix[] ) const { return _HasSuffix( MakePart( suffix ) ); }
+			bool HasSuffix( CharT suffixCh ) const { return _HasSuffix( CPart<CharT>( &suffixCh, suffixCh != 0 ? 1 : 0 ) ); }
 
-			bool StripPrefix( const CharType prefix[] ) { return _StripPrefix( MakePart( prefix ) ); }
-			bool StripPrefix( CharType prefixCh ) { return _StripPrefix( CPart< CharType >( &prefixCh, prefixCh != 0 ? 1 : 0 ) ); }
+			bool StripPrefix( const CharT prefix[] ) { return _StripPrefix( MakePart( prefix ) ); }
+			bool StripPrefix( CharT prefixCh ) { return _StripPrefix( CPart<CharT>( &prefixCh, prefixCh != 0 ? 1 : 0 ) ); }
 
-			bool StripSuffix( const CharType suffix[] ) { return _StripSuffix( MakePart( suffix ) ); }
-			bool StripSuffix( CharType suffixCh ) { return _StripSuffix( CPart< CharType >( &suffixCh, suffixCh != 0 ? 1 : 0 ) ); }
+			bool StripSuffix( const CharT suffix[] ) { return _StripSuffix( MakePart( suffix ) ); }
+			bool StripSuffix( CharT suffixCh ) { return _StripSuffix( CPart<CharT>( &suffixCh, suffixCh != 0 ? 1 : 0 ) ); }
 
-			bool Strip( const CharType prefix[], const CharType suffix[] ) { return _Strip( MakePart( prefix ), MakePart( suffix ) ); }
-			bool Strip( CharType prefixCh, CharType suffixCh ) { return _Strip( CPart< CharType >( &prefixCh, prefixCh != 0 ? 1 : 0 ), CPart< CharType >( &suffixCh, suffixCh != 0 ? 1 : 0 ) ); }
+			bool Strip( const CharT prefix[], const CharT suffix[] ) { return _Strip( MakePart( prefix ), MakePart( suffix ) ); }
+			bool Strip( CharT prefixCh, CharT suffixCh ) { return _Strip( CPart<CharT>( &prefixCh, prefixCh != 0 ? 1 : 0 ), CPart<CharT>( &suffixCh, suffixCh != 0 ? 1 : 0 ) ); }
 
-			bool Find( Range< size_t >& rFoundPos, const CharType part[], str::CaseType caseType = str::Case ) const
+			bool Find( Range< size_t >& rFoundPos, const CharT part[], str::CaseType caseType = str::Case ) const
 			{
 				return str::Case == caseType
 					? _Find< str::Case >( rFoundPos, MakePart( part ) )
 					: _Find< str::IgnoreCase >( rFoundPos, MakePart( part ) );
 			}
 
-			bool Find( Range< size_t >& rFoundPos, CharType ch, str::CaseType caseType = str::Case ) const
+			bool Find( Range< size_t >& rFoundPos, CharT ch, str::CaseType caseType = str::Case ) const
 			{
 				return str::Case == caseType
-					? _Find< str::Case >( rFoundPos, CPart< CharType >( &ch, ch != 0 ? 1 : 0 ) )
-					: _Find< str::IgnoreCase >( rFoundPos, CPart< CharType >( &ch, ch != 0 ? 1 : 0 ) );
+					? _Find< str::Case >( rFoundPos, CPart<CharT>( &ch, ch != 0 ? 1 : 0 ) )
+					: _Find< str::IgnoreCase >( rFoundPos, CPart<CharT>( &ch, ch != 0 ? 1 : 0 ) );
 			}
 
-			bool Equals( const CharType part[], str::CaseType caseType = str::Case )
+			bool Equals( const CharT part[], str::CaseType caseType = str::Case )
 			{
 				ASSERT( InBounds() );
 				return str::EqualsN_ByCase( caseType, m_text.c_str() + m_pos.m_start, part, GetLength() );
 			}
 
-			bool TrimLeft( const CharType* pWhiteSpace = StdWhitespace< CharType >() )
+			bool TrimLeft( const CharT* pWhiteSpace = StdWhitespace<CharT>() )
 			{
 				ASSERT( InBounds() );
 				// trim re-entrantly
@@ -126,7 +126,7 @@ namespace str
 				return m_pos.m_start != oldStart;		// any change?
 			}
 
-			bool TrimRight( const CharType* pWhiteSpace = StdWhitespace< CharType >() )
+			bool TrimRight( const CharT* pWhiteSpace = StdWhitespace<CharT>() )
 			{
 				ASSERT( InBounds() );
 				// trim re-entrantly
@@ -139,7 +139,7 @@ namespace str
 				return m_pos.m_end != oldEnd;		// any change?
 			}
 
-			bool Trim( const CharType* pWhiteSpace = StdWhitespace< CharType >() )
+			bool Trim( const CharT* pWhiteSpace = StdWhitespace<CharT>() )
 			{
 				Range< size_t > oldPos = m_pos;
 				TrimLeft( pWhiteSpace );
@@ -147,7 +147,7 @@ namespace str
 				return m_pos != oldPos;
 			}
 		private:
-			bool _HasPrefix( const CPart< CharType >& prefix ) const
+			bool _HasPrefix( const CPart<CharT>& prefix ) const
 			{
 				ASSERT( InBounds() );
 				return
@@ -155,7 +155,7 @@ namespace str
 					pred::Equal == CharTraits::CompareN( &m_text[ m_pos.m_start ], prefix.m_pString, prefix.m_count );
 			}
 
-			bool _HasSuffix( const CPart< CharType >& suffix ) const
+			bool _HasSuffix( const CPart<CharT>& suffix ) const
 			{
 				ASSERT( InBounds() );
 				if ( 0 == suffix.m_count )
@@ -166,7 +166,7 @@ namespace str
 					pred::Equal == CharTraits::CompareN( &m_text[ m_pos.m_end - suffix.m_count ], suffix.m_pString, suffix.m_count );
 			}
 
-			bool _StripPrefix( const CPart< CharType >& prefix )
+			bool _StripPrefix( const CPart<CharT>& prefix )
 			{
 				if ( !_HasPrefix( prefix ) )
 					return false;
@@ -175,7 +175,7 @@ namespace str
 				return true;		// changed
 			}
 
-			bool _StripSuffix( const CPart< CharType >& suffix )
+			bool _StripSuffix( const CPart<CharT>& suffix )
 			{
 				if ( !_HasSuffix( suffix ) )
 					return false;
@@ -184,18 +184,18 @@ namespace str
 				return true;		// changed
 			}
 
-			bool _Strip( const CPart< CharType >& prefix, const CPart< CharType >& suffix )
+			bool _Strip( const CPart<CharT>& prefix, const CPart<CharT>& suffix )
 			{
 				bool hasPrefix = _StripPrefix( prefix ), hasSuffix = _StripSuffix( suffix );
 				return hasPrefix && hasSuffix;
 			}
 
 			template< str::CaseType caseType >
-			bool _Find( Range< size_t >& rFoundPos, const CPart< CharType >& part ) const
+			bool _Find( Range< size_t >& rFoundPos, const CPart<CharT>& part ) const
 			{
 				ASSERT( InBounds() );
 
-				typedef typename const CharType* iterator;
+				typedef typename const CharT* iterator;
 
 				iterator itBegin = m_text.c_str() + m_pos.m_start, itEnd = m_text.c_str() + m_pos.m_end;
 				iterator itFound = std::search( itBegin, itEnd, part.m_pString, part.m_pString + part.m_count, pred::CharEqual< caseType >() );

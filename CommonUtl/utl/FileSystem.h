@@ -125,7 +125,7 @@ namespace fs
 namespace fs
 {
 	template< typename PathType >		// PathType could be any of: const char*, const TCHAR*, std::tstring, fs::CPath
-	void __declspec( noreturn ) ThrowFileException( const std::tstring& description, const PathType& filePath,
+	void __declspec(noreturn) ThrowFileException( const std::tstring& description, const PathType& filePath,
 													fs::ExcPolicy policy = fs::RuntimeExc ) throws_( CRuntimeException, CFileException* )
 	{
 		fs::RuntimeExc == policy
@@ -138,8 +138,8 @@ namespace fs
 		CFileException* NewLastErrorException( const TCHAR* pFilePath, LONG lastError = ::GetLastError() );
 		CFileException* NewErrnoException( const TCHAR* pFilePath, unsigned long errNo );	// pass _doserrno or the DOS function result
 
-		void __declspec( noreturn ) ThrowMfcErrorAs( ExcPolicy policy, CFileException* pExc ) throws_( CRuntimeException, CFileException* );
-		void __declspec( noreturn ) ThrowFileException( const std::tstring& description, const TCHAR* pFilePath, const TCHAR sep[] = _T(": ") ) throws_( CRuntimeException );
+		void __declspec(noreturn) ThrowMfcErrorAs( ExcPolicy policy, CFileException* pExc ) throws_( CRuntimeException, CFileException* );
+		void __declspec(noreturn) ThrowFileException( const std::tstring& description, const TCHAR* pFilePath, const TCHAR sep[] = _T(": ") ) throws_( CRuntimeException );
 	}
 }
 

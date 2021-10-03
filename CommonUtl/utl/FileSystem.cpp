@@ -542,7 +542,7 @@ namespace fs
 				: NULL;
 		}
 
-		void __declspec( noreturn ) ThrowMfcErrorAs( ExcPolicy policy, CFileException* pExc ) throws_( CRuntimeException, CFileException* )
+		void __declspec(noreturn) ThrowMfcErrorAs( ExcPolicy policy, CFileException* pExc ) throws_( CRuntimeException, CFileException* )
 		{
 			if ( pExc != NULL )
 				switch ( policy )
@@ -555,7 +555,7 @@ namespace fs
 				}
 		}
 
-		void __declspec( noreturn ) ThrowFileException( const std::tstring& description, const TCHAR* pFilePath, const TCHAR sep[] /*= _T(": ")*/ ) throws_( CRuntimeException )
+		void __declspec(noreturn) ThrowFileException( const std::tstring& description, const TCHAR* pFilePath, const TCHAR sep[] /*= _T(": ")*/ ) throws_( CRuntimeException )
 		{
 			std::tstring message = description;
 			stream::Tag( message, str::sq::Enquote( pFilePath ), sep );

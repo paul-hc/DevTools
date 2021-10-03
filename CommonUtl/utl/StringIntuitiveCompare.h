@@ -14,21 +14,21 @@ namespace pred
 	{
 		IntuitiveComparator( TranslateFunc translateFunc = TranslateFunc() ) : m_translateFunc( translateFunc ) {}
 
-		template< typename CharType >
-		CompareResult operator()( const CharType* pLeft, const CharType* pRight ) const
+		template< typename CharT >
+		CompareResult operator()( const CharT* pLeft, const CharT* pRight ) const
 		{
 			return Compare( pLeft, pRight );
 		}
 
-		template< typename CharType >
-		CompareResult Compare( const CharType* pLeft, const CharType* pRight ) const
+		template< typename CharT >
+		CompareResult Compare( const CharT* pLeft, const CharT* pRight ) const
 		{
 			REQUIRE( pLeft != NULL && pRight != NULL );
 
 			for ( size_t posLeft = 0, posRight = 0; ; ++posLeft, ++posRight )
 			{
-				CharType chLeft = pLeft[ posLeft ];
-				CharType chRight = pRight[ posRight ];
+				CharT chLeft = pLeft[ posLeft ];
+				CharT chRight = pRight[ posRight ];
 
 				if ( str::CharTraits::IsDigit( chLeft ) && str::CharTraits::IsDigit( chRight ) )			// a sequence of digits on both operands?
 				{
@@ -50,8 +50,8 @@ namespace pred
 			}
 		}
 	private:
-		template< typename CharType >
-		inline CompareResult CompareTieBreak( const CharType* pLeft, const CharType* pRight ) const
+		template< typename CharT >
+		inline CompareResult CompareTieBreak( const CharT* pLeft, const CharT* pRight ) const
 		{
 			CompareResult result = str::CharTraits::CompareI( pLeft, pRight );		// case-insensitive
 			if ( Equal == result )
@@ -60,8 +60,8 @@ namespace pred
 			return result;
 		}
 
-		template< typename CharType >
-		static CompareResult CompareNumericValues( const CharType* pLeft, const CharType* pRight )
+		template< typename CharT >
+		static CompareResult CompareNumericValues( const CharT* pLeft, const CharT* pRight )
 		{
 			REQUIRE( str::CharTraits::IsDigit( *pLeft ) && str::CharTraits::IsDigit( *pRight ) );
 

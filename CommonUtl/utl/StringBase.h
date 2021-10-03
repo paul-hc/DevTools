@@ -12,11 +12,11 @@ namespace str
 	const std::locale& GetUtf8CvtLocale( void );
 
 
-	std::string ToAnsi( const wchar_t* pWide );
-	std::wstring FromAnsi( const char* pAnsi );
+	std::string ToAnsi( const wchar_t* pWide, size_t charCount = std::wstring::npos );
+	std::wstring FromAnsi( const char* pAnsi, size_t charCount = std::string::npos );
 
-	std::string ToUtf8( const wchar_t* pWide );
-	std::wstring FromUtf8( const char* pUtf8 );
+	std::string ToUtf8( const wchar_t* pWide, size_t charCount = std::wstring::npos );
+	std::wstring FromUtf8( const char* pUtf8, size_t charCount = std::string::npos );
 
 
 	std::string AsNarrow( const std::tstring& text );
@@ -102,17 +102,29 @@ namespace str
 
 namespace str
 {
-	template< typename CharType >
-	inline bool IsEmpty( const CharType* pText ) { return NULL == pText || 0 == *pText; }
+	template< typename CharT >
+	inline bool IsEmpty( const CharT* pText ) { return NULL == pText || 0 == *pText; }
 
-	template< typename CharType >
-	inline size_t GetLength( const CharType* pText ) { return CharTraits::GetLength( pText ); }
+	template< typename CharT >
+	inline size_t GetLength( const CharT* pText ) { return CharTraits::GetLength( pText ); }
+
+
+	template< typename CharT >
+	size_t& SettleLength( size_t& rCount, const CharT* pText )
+	{
+		if ( std::basic_string<CharT>::npos == rCount )
+			rCount = str::GetLength( pText );
+		else
+			REQUIRE( rCount <= str::GetLength( pText ) );
+
+		return rCount;
+	}
 
 
 	enum CaseType { Case, IgnoreCase };
 
 
-	template< str::CaseType caseType, typename CharType > bool Equals( const CharType* pLeft, const CharType* pRight );
+	template< str::CaseType caseType, typename CharT > bool Equals( const CharT* pLeft, const CharT* pRight );
 
 	template<> inline bool Equals< Case, char >( const char* pLeft, const char* pRight ) { return pred::Equal == CharTraits::Compare( pLeft, pRight ); }
 	template<> inline bool Equals< Case, wchar_t >( const wchar_t* pLeft, const wchar_t* pRight ) { return pred::Equal == CharTraits::Compare( pLeft, pRight ); }
@@ -137,8 +149,8 @@ namespace str
 	inline wchar_t* Copy( wchar_t* pBuffer, const std::wstring& text ) { return wcscpy( pBuffer, text.c_str() ); }
 
 
-	template< typename CharType >
-	bool ContainsAnyOf( const CharType* pCharSet, CharType ch )
+	template< typename CharT >
+	bool ContainsAnyOf( const CharT* pCharSet, CharT ch )
 	{
 		ASSERT_PTR( pCharSet );
 		for ( ; *pCharSet != 0; ++pCharSet )
@@ -148,19 +160,33 @@ namespace str
 		return false;
 	}
 
-	template< typename CharType >
-	inline const CharType* FindTokenEnd( const CharType* pText, const CharType delims[] )
+	template< typename CharT >
+	inline const CharT* FindTokenEnd( const CharT* pText, const CharT delims[] )
 	{
-		const CharType* pTextEnd = str::end( pText );
+		const CharT* pTextEnd = str::end( pText );
 		return std::find_first_of( pText, pTextEnd, delims, str::end( delims ) );
+	}
+
+	template< typename CharT >
+	const CharT* SkipLineEnd( const CharT* pText )		// work for both text or binary mode: skips "\n" or "\r\n"
+	{
+		ASSERT_PTR( pText );
+
+		if ( '\r' == *pText )
+			++pText;
+
+		if ( '\n' == *pText )
+			++pText;
+
+		return pText;
 	}
 }
 
 
 namespace str
 {
-	template< typename CharType >
-	void EnquoteImpl( std::basic_string< CharType >& rOutText, const CharType* pText, const CharType leading[], const CharType trailing[], bool skipIfEmpty )
+	template< typename CharT >
+	void EnquoteImpl( std::basic_string<CharT>& rOutText, const CharT* pText, const CharT leading[], const CharT trailing[], bool skipIfEmpty )
 	{
 		ASSERT_PTR( pText );
 		rOutText = pText;
@@ -172,10 +198,10 @@ namespace str
 		}
 	}
 
-	template< typename CharType >
-	std::basic_string< CharType > Enquote( const CharType* pText, const CharType leading[], const CharType trailing[], bool skipIfEmpty = false )
+	template< typename CharT >
+	std::basic_string<CharT> Enquote( const CharT* pText, const CharT leading[], const CharT trailing[], bool skipIfEmpty = false )
 	{
-		std::basic_string< CharType > outText;
+		std::basic_string<CharT> outText;
 		EnquoteImpl( outText, pText, leading, trailing, skipIfEmpty );
 		return outText;
 	}
@@ -183,11 +209,11 @@ namespace str
 
 	// enquoting (by default with double-quotes)
 
-	template< typename CharType >
-	std::basic_string< CharType > Enquote( const CharType* pText, CharType quote = '"', bool skipIfEmpty = false )
+	template< typename CharT >
+	std::basic_string<CharT> Enquote( const CharT* pText, CharT quote = '"', bool skipIfEmpty = false )
 	{
-		const CharType quoteArray[] = { quote, '\0' };
-		std::basic_string< CharType > outText;
+		const CharT quoteArray[] = { quote, '\0' };
+		std::basic_string<CharT> outText;
 
 		EnquoteImpl( outText, pText, quoteArray, quoteArray, skipIfEmpty );
 		return outText;
@@ -209,10 +235,10 @@ namespace str
 	{
 		// single-quote enquoting
 
-		template< typename CharType >
-		inline std::basic_string< CharType > Enquote( const CharType* pText, bool skipIfEmpty = false )
+		template< typename CharT >
+		inline std::basic_string<CharT> Enquote( const CharT* pText, bool skipIfEmpty = false )
 		{
-			return ::str::Enquote<CharType>( pText, '\'', skipIfEmpty );
+			return ::str::Enquote<CharT>( pText, '\'', skipIfEmpty );
 		}
 
 		template< typename StringT >
@@ -276,35 +302,36 @@ namespace str
 
 namespace str
 {
-	template< typename CharType >
+	template< typename CharT >
 	struct CPart
 	{
-		CPart( const CharType* pString = NULL, size_t count = 0 ) : m_pString( pString ), m_count( count ) {}
+		CPart( const CharT* pString = NULL, size_t count = 0 ) : m_pString( pString ), m_count( count ) {}
+		explicit CPart( const std::basic_string<CharT>& text ) : m_pString( text.c_str() ), m_count( text.length() ) {}		// the whole string
 
 		bool IsEmpty( void ) const { return NULL == m_pString || 0 == m_count; }
-		std::basic_string< CharType > ToString( void ) const { return !IsEmpty() ? std::basic_string< CharType >( m_pString, m_count ) : std::basic_string< CharType >(); }
+		std::basic_string<CharT> ToString( void ) const { return !IsEmpty() ? std::basic_string<CharT>( m_pString, m_count ) : std::basic_string<CharT>(); }
 	public:
-		const CharType* m_pString;
+		const CharT* m_pString;
 		size_t m_count;
 	};
 
-	template< typename CharType >
-	inline CPart< CharType > MakePart( const CharType* pString, size_t count = std::tstring::npos )
+	template< typename CharT >
+	inline CPart<CharT> MakePart( const CharT* pString, size_t count = std::basic_string<CharT>::npos )
 	{
-		return CPart< CharType >( pString, count != std::tstring::npos ? count : GetLength( pString ) );
+		return CPart<CharT>( pString, SettleLength( count, pString ) );
 	}
 
-	template< typename CharType >
-	std::basic_string< CharType > FormatNameValueSpec( const std::basic_string< CharType >& tag, const std::basic_string< CharType >& value, CharType sep = '=' )
+	template< typename CharT >
+	std::basic_string<CharT> FormatNameValueSpec( const std::basic_string<CharT>& tag, const std::basic_string<CharT>& value, CharT sep = '=' )
 	{
 		return tag + sep + value;
 	}
 
-	template< typename CharType >
-	bool ParseNameValuePair( std::pair< CPart< CharType >, CPart< CharType > >& rPartsPair, const std::basic_string< CharType >& spec, CharType sep = '=' )
+	template< typename CharT >
+	bool ParseNameValuePair( std::pair< CPart<CharT>, CPart<CharT> >& rPartsPair, const std::basic_string<CharT>& spec, CharT sep = '=' )
 	{
 		size_t sepPos = spec.find( sep );
-		if ( std::tstring::npos == sepPos )
+		if ( std::basic_string<CharT>::npos == sepPos )
 			return false;
 
 		rPartsPair.first = MakePart( spec.c_str(), sepPos );
@@ -329,14 +356,14 @@ namespace func
 	}
 
 
-	template< typename CharType >
-	inline CharType toupper( CharType ch, const std::locale& loc = str::GetUserLocale() )
+	template< typename CharT >
+	inline CharT toupper( CharT ch, const std::locale& loc = str::GetUserLocale() )
 	{
 		return std::toupper( ch, loc );
 	}
 
-	template< typename CharType >
-	inline CharType tolower( CharType ch, const std::locale& loc = str::GetUserLocale() )
+	template< typename CharT >
+	inline CharT tolower( CharT ch, const std::locale& loc = str::GetUserLocale() )
 	{
 		return std::tolower( ch, loc );
 	}
@@ -346,8 +373,8 @@ namespace func
 	{
 		ToUpper( const std::locale& loc = str::GetUserLocale() ) : m_locale( loc ) {}
 
-		template< typename CharType >
-		CharType operator()( CharType ch ) const
+		template< typename CharT >
+		CharT operator()( CharT ch ) const
 		{
 			return std::toupper( ch, m_locale );
 		}
@@ -360,8 +387,8 @@ namespace func
 	{
 		ToLower( const std::locale& loc = str::GetUserLocale() ) : m_locale( loc ) {}
 
-		template< typename CharType >
-		CharType operator()( CharType ch ) const
+		template< typename CharT >
+		CharT operator()( CharT ch ) const
 		{
 			return std::tolower( ch, m_locale );
 		}
@@ -373,37 +400,37 @@ namespace func
 
 namespace str
 {
-	template< typename CharType > const CharType* StdWhitespace( void );	// " \t\r\n"
+	template< typename CharT > const CharT* StdWhitespace( void );	// " \t\r\n"
 
 
-	template< typename CharType >
-	std::basic_string< CharType >& Trim( std::basic_string< CharType >& rText, const CharType* pWhiteSpace = StdWhitespace< CharType >() )
+	template< typename CharT >
+	std::basic_string<CharT>& Trim( std::basic_string<CharT>& rText, const CharT* pWhiteSpace = StdWhitespace<CharT>() )
 	{
 		size_t startPos = rText.find_first_not_of( pWhiteSpace ), endPos = rText.find_last_not_of( pWhiteSpace );
 
-		if ( std::tstring::npos == startPos || std::tstring::npos == endPos || startPos > endPos )
+		if ( std::basic_string<CharT>::npos == startPos || std::basic_string<CharT>::npos == endPos || startPos > endPos )
 			rText.clear();
 		else
 			rText = rText.substr( startPos, endPos - startPos + 1 );
 		return rText;
 	}
 
-	template< typename CharType >
-	std::basic_string< CharType >& TrimRight( std::basic_string< CharType >& rText, const CharType* pWhiteSpace = StdWhitespace< CharType >() )
+	template< typename CharT >
+	std::basic_string<CharT>& TrimRight( std::basic_string<CharT>& rText, const CharT* pWhiteSpace = StdWhitespace<CharT>() )
 	{
 		size_t endPos = rText.find_last_not_of( pWhiteSpace );
-		if ( std::basic_string< CharType >::npos == endPos )
+		if ( std::basic_string<CharT>::npos == endPos )
 			rText.clear();
 		else
 			rText = rText.substr( 0, endPos + 1 );
 		return rText;
 	}
 
-	template< typename CharType >
-	std::basic_string< CharType >& TrimLeft( std::basic_string< CharType >& rText, const CharType* pWhiteSpace = StdWhitespace< CharType >() )
+	template< typename CharT >
+	std::basic_string<CharT>& TrimLeft( std::basic_string<CharT>& rText, const CharT* pWhiteSpace = StdWhitespace<CharT>() )
 	{
 		size_t startPos = rText.find_first_not_of( pWhiteSpace );
-		if ( std::basic_string< CharType >::npos == startPos )
+		if ( std::basic_string<CharT>::npos == startPos )
 			rText.clear();
 		else
 			rText = rText.substr( startPos );
@@ -418,8 +445,8 @@ namespace str
 #endif //_MFC_VER
 
 
-	template< typename CharType >
-	size_t Replace( std::basic_string< CharType >& rText, const CharType* pSearch, const CharType* pReplace, size_t maxCount = utl::npos )
+	template< typename CharT >
+	size_t Replace( std::basic_string<CharT>& rText, const CharT* pSearch, const CharT* pReplace, size_t maxCount = utl::npos )
 	{
 		ASSERT_PTR( pSearch );
 		ASSERT_PTR( pReplace );
@@ -430,7 +457,7 @@ namespace str
 			const size_t searchLen = str::GetLength( pSearch ), replaceLen = str::GetLength( pReplace );
 
 			for ( size_t pos = 0;
-				  count != maxCount && ( pos = rText.find( pSearch, pos ) ) != std::basic_string< CharType >::npos;
+				  count != maxCount && ( pos = rText.find( pSearch, pos ) ) != std::basic_string<CharT>::npos;
 				  ++count, pos += replaceLen )
 				rText.replace( pos, searchLen, pReplace );
 		}
@@ -439,66 +466,66 @@ namespace str
 	}
 
 
-	template< typename CharType, typename StringT >
-	void SplitAdd( std::vector< StringT >& rItems, const CharType* pSource, const CharType* pSep )
+	template< typename CharT, typename StringT >
+	void SplitAdd( std::vector< StringT >& rItems, const CharT* pSource, const CharT* pSep )
 	{
 		ASSERT( !str::IsEmpty( pSep ) );
 
 		if ( !str::IsEmpty( pSource ) )
 		{
 			const size_t sepLen = str::GetLength( pSep );
-			typedef const CharType* const_iterator;
+			typedef const CharT* const_iterator;
 
 			for ( const_iterator itItemStart = str::begin( pSource ), itEnd = str::end( pSource ); ; )
 			{
 				const_iterator itItemEnd = std::search( itItemStart, itEnd, pSep, pSep + sepLen );
 				if ( itItemEnd != itEnd )
 				{
-					rItems.push_back( std::basic_string< CharType >( itItemStart, std::distance( itItemStart, itItemEnd ) ) );
+					rItems.push_back( std::basic_string<CharT>( itItemStart, std::distance( itItemStart, itItemEnd ) ) );
 					itItemStart = itItemEnd + sepLen;
 				}
 				else
 				{
-					rItems.push_back( std::basic_string< CharType >( itItemStart ) );			// last item
+					rItems.push_back( std::basic_string<CharT>( itItemStart ) );			// last item
 					break;
 				}
 			}
 		}
 	}
 
-	template< typename CharType, typename StringT >
-	inline void Split( std::vector< StringT >& rItems, const CharType* pSource, const CharType* pSep )
+	template< typename CharT, typename StringT >
+	inline void Split( std::vector< StringT >& rItems, const CharT* pSource, const CharT* pSep )
 	{
 		rItems.clear();
 		SplitAdd( rItems, pSource, pSep );
 	}
 
-	template< typename CharType >
-	void QuickSplit( std::vector< CharType >& rItems, const CharType* pSource, CharType sepCh )
+	template< typename CharT >
+	void QuickSplit( std::vector<CharT>& rItems, const CharT* pSource, CharT sepCh )
 	{
 		// build a vector copy of source characters replacing all sepCh with '\0'
 		rItems.assign( str::begin( pSource ), str::end( pSource ) + 1 );			// copy the EOS char
-		for ( std::vector< CharType >::iterator itItem = rItems.begin(); itItem != rItems.end(); ++itItem )
+		for ( std::vector<CharT>::iterator itItem = rItems.begin(); itItem != rItems.end(); ++itItem )
 			if ( sepCh == *itItem )
 				*itItem = 0;
 	}
 
-	template< typename CharType >
-	void QuickTokenize( std::vector< CharType >& rItems, const CharType* pSource, const CharType* pSepTokens )
+	template< typename CharT >
+	void QuickTokenize( std::vector<CharT>& rItems, const CharT* pSource, const CharT* pSepTokens )
 	{
-		const CharType* pSepEnd = str::end( pSepTokens );
+		const CharT* pSepEnd = str::end( pSepTokens );
 		// build a vector copy of source characters replacing any chars in pSepTokens with '\0'
 		rItems.assign( str::begin( pSource ), str::end( pSource ) + 1 );			// copy the EOS char
-		for ( std::vector< CharType >::iterator itItem = rItems.begin(); itItem != rItems.end(); ++itItem )
+		for ( std::vector<CharT>::iterator itItem = rItems.begin(); itItem != rItems.end(); ++itItem )
 			if ( std::find( pSepTokens, pSepEnd, *itItem ) != pSepEnd )				// any sep token
 				*itItem = 0;
 	}
 
 
-	template< typename CharType, typename Iterator >
-	std::basic_string< CharType > Join( Iterator itFirstToken, Iterator itLastToken, const CharType* pSep )
+	template< typename CharT, typename Iterator >
+	std::basic_string<CharT> Join( Iterator itFirstToken, Iterator itLastToken, const CharT* pSep )
 	{	// works with any forward/reverse iterator
-		std::basic_ostringstream< CharType > oss;
+		std::basic_ostringstream<CharT> oss;
 		for ( Iterator itItem = itFirstToken; itItem != itLastToken; ++itItem )
 		{
 			if ( itItem != itFirstToken )
@@ -510,8 +537,8 @@ namespace str
 
 	// works with container of any value type that has stream insertor defined
 	//
-	template< typename CharType, typename ContainerType >
-	inline std::basic_string< CharType > Join( const ContainerType& items, const CharType* pSep )
+	template< typename CharT, typename ContainerT >
+	inline std::basic_string<CharT> Join( const ContainerT& items, const CharT* pSep )
 	{
 		return Join( items.begin(), items.end(), pSep );
 	}
@@ -519,8 +546,8 @@ namespace str
 
 	// works with container of any value type that has stream insertor defined
 	//
-	template< typename ContainerType >
-	inline std::tstring FormatSet( const ContainerType& items, const TCHAR* pSep = _T(",") )
+	template< typename ContainerT >
+	inline std::tstring FormatSet( const ContainerT& items, const TCHAR* pSep = _T(",") )
 	{
 		return str::Format( _T("{%s}:count=%d"), Join( items.begin(), items.end(), pSep ).c_str(), items.size() );
 	}
@@ -558,17 +585,17 @@ namespace pred
 
 namespace str
 {
-	template< typename ContainerType >
-	void RemoveEmptyItems( ContainerType& rItems )
+	template< typename ContainerT >
+	void RemoveEmptyItems( ContainerT& rItems )
 	{
 		rItems.erase( std::remove_if( rItems.begin(), rItems.end(), pred::IsEmpty() ), rItems.end() );
 	}
 
 
-	template< typename StrContainerType >
-	void TrimItems( StrContainerType& rItems )
+	template< typename StrContainerT >
+	void TrimItems( StrContainerT& rItems )
 	{
-		for ( typename StrContainerType::iterator itLine = rItems.begin(); itLine != rItems.end(); ++itLine )
+		for ( typename StrContainerT::iterator itLine = rItems.begin(); itLine != rItems.end(); ++itLine )
 			str::Trim( *itLine );
 	}
 }

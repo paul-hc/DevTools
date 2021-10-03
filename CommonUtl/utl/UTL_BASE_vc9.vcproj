@@ -616,10 +616,6 @@
 					>
 				</File>
 				<File
-					RelativePath=".\Encoding.h"
-					>
-				</File>
-				<File
 					RelativePath=".\FileContent.cpp"
 					>
 				</File>
@@ -728,14 +724,6 @@
 					>
 				</File>
 				<File
-					RelativePath=".\StdOutput.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\StdOutput.h"
-					>
-				</File>
-				<File
 					RelativePath=".\StreamStdTypes.h"
 					>
 				</File>
@@ -745,34 +733,6 @@
 				</File>
 				<File
 					RelativePath=".\StructuredStorage.h"
-					>
-				</File>
-				<File
-					RelativePath=".\TextEncodedFileStreams.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\TextEncodedFileStreams.h"
-					>
-				</File>
-				<File
-					RelativePath=".\TextEncoding.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\TextEncoding.h"
-					>
-				</File>
-				<File
-					RelativePath=".\TextFileIo.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\TextFileIo.h"
-					>
-				</File>
-				<File
-					RelativePath=".\TextFileIo.hxx"
 					>
 				</File>
 			</Filter>
@@ -893,6 +853,50 @@
 				</File>
 				<File
 					RelativePath=".\SerializeStdTypes.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="Input/Output"
+				>
+				<File
+					RelativePath=".\Encoding.h"
+					>
+				</File>
+				<File
+					RelativePath=".\StdOutput.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\StdOutput.h"
+					>
+				</File>
+				<File
+					RelativePath=".\TextEncodedFileStreams.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\TextEncodedFileStreams.h"
+					>
+				</File>
+				<File
+					RelativePath=".\TextEncoding.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\TextEncoding.h"
+					>
+				</File>
+				<File
+					RelativePath=".\TextFileIo.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\TextFileIo.h"
+					>
+				</File>
+				<File
+					RelativePath=".\TextFileIo.hxx"
 					>
 				</File>
 			</Filter>
