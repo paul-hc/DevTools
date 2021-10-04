@@ -100,8 +100,8 @@ void CDirectory::List( std::wostream& os, const CGuideParts& guideParts, const s
 					<< found.m_filePaths[ filePos.m_pos ].GetFilenamePtr()
 					<< std::endl;
 
-			str::TrimRight( fileFullPrefix );		// remove trailing spaces on empty line
-			os << fileFullPrefix << std::endl;
+			if ( !str::TrimRight( fileFullPrefix ).empty() )		// remove trailing spaces on empty line
+				os << fileFullPrefix << std::endl;
 		}
 
 	size_t deepLevel = m_level + 1;
