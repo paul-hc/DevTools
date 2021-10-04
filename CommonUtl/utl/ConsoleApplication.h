@@ -17,6 +17,8 @@ public:
 	~CConsoleApplication();
 
 	bool IsConsoleOutput( void ) const { return m_stdOutput.IsConsoleOutput(); }
+	bool IsFileRedirectOutput( void ) const { return io::FileRedirectedOutput == m_stdOutput.GetOutputMode(); }
+
 	io::OutputMode GetOutputMode( void ) const { return m_stdOutput.GetOutputMode(); }
 
 	io::CStdOutput& GetStdOutput( void ) { return m_stdOutput; }

@@ -31,16 +31,20 @@ namespace io
 	{
 		CConsoleWriter( HANDLE hConsoleOutput ) : m_hConsoleOutput( hConsoleOutput ), m_writtenChars( 0 ) { ASSERT_PTR( m_hConsoleOutput ); }
 
-		virtual void WriteString( const char* pText, size_t charCount ) throws_( CRuntimeException )
+		virtual TCharSize WriteString( const char* pText, TCharSize charCount ) throws_( CRuntimeException )
 		{
 			if ( !::WriteConsoleA( m_hConsoleOutput, (const void*)pText, static_cast<DWORD>( charCount ), &m_writtenChars, NULL ) )
 				io::ThrowWriteToConsole( charCount );
+
+			return m_writtenChars;
 		}
 
-		virtual void WriteString( const wchar_t* pText, size_t charCount ) throws_( CRuntimeException )
+		virtual TCharSize WriteString( const wchar_t* pText, TCharSize charCount ) throws_( CRuntimeException )
 		{
 			if ( !::WriteConsoleW( m_hConsoleOutput, (const void*)pText, static_cast<DWORD>( charCount ), &m_writtenChars, NULL ) )
 				io::ThrowWriteToConsole( charCount );
+
+			return m_writtenChars;
 		}
 	public:
 		HANDLE m_hConsoleOutput;
@@ -52,16 +56,20 @@ namespace io
 	{
 		CFileWriter( HANDLE hFile, const fs::CPath& filePath ) : m_hFile( hFile ), m_filePath( filePath ), m_writtenBytes( 0 ) { ASSERT_PTR( m_hFile ); }
 
-		virtual void WriteString( const char* pText, size_t charCount ) throws_( CRuntimeException )
+		virtual TCharSize WriteString( const char* pText, TCharSize charCount ) throws_( CRuntimeException )
 		{
 			if ( !::WriteFile( m_hFile, pText, static_cast<DWORD>( charCount ), &m_writtenBytes, NULL ) )
 				io::ThrowWriteToFile( m_filePath, charCount );
+
+			return m_writtenBytes;
 		}
 
-		virtual void WriteString( const wchar_t* pWideText, size_t charCount ) throws_( CRuntimeException )
+		virtual TCharSize WriteString( const wchar_t* pWideText, TCharSize charCount ) throws_( CRuntimeException )
 		{
 			if ( !::WriteFile( m_hFile, pWideText, static_cast<DWORD>( charCount * sizeof(wchar_t) ), &m_writtenBytes, NULL ) )
 				io::ThrowWriteToFile( m_filePath, charCount );
+
+			return m_writtenBytes / sizeof( wchar_t );
 		}
 	public:
 		HANDLE m_hFile;
@@ -157,20 +165,8 @@ namespace io
 	template< typename CharT >
 	void CStdOutput::WriteToConsole( const CharT* pText, size_t charCount ) throws_( CRuntimeException )
 	{
-		size_t totalWrittenChars = 0;
 		io::CConsoleWriter writer( m_hStdOutput );
-
-		for ( size_t leftCount = charCount; leftCount != 0; )
-		{
-			size_t batchCharCount = std::min( leftCount, s_maxBatchSize );
-
-			writer.WriteString( pText, batchCharCount );
-
-			pText += writer.m_writtenChars;
-			leftCount -= writer.m_writtenChars;
-			totalWrittenChars += writer.m_writtenChars;
-		}
-		ENSURE( totalWrittenChars == charCount );
+		io::BatchWriteText( &writer, s_maxBatchSize, pText, charCount );
 	}
 
 	template< typename CharT >

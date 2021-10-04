@@ -174,6 +174,71 @@ namespace io
 	}
 
 
+	// CVanillaTextEncoder implementation - no encoding, just invokes the writer
+
+	class CVanillaTextEncoder : public ITextEncoder
+	{
+	public:
+		CVanillaTextEncoder( io::IWriter* pWriter ) : m_pWriter( pWriter ) { ASSERT_PTR( m_pWriter ); }
+
+		// ITextEncoder interface
+		virtual TByteSize WriteEncoded( const char* pText, TCharSize charCount )
+		{
+			return m_pWriter->WriteString( pText, charCount );
+		}
+
+		virtual TByteSize WriteEncoded( const wchar_t* pText, TCharSize charCount )
+		{
+			return m_pWriter->WriteString( pText, charCount ) * sizeof( wchar_t );
+		}
+	private:
+		io::IWriter* m_pWriter;
+	};
+
+
+	// CSwapBytesTextEncoder implementation - does wchar_t byte-swapping for UTF16_be_bom
+
+	class CSwapBytesTextEncoder : public CVanillaTextEncoder
+	{
+	public:
+		CSwapBytesTextEncoder( io::IWriter* pWriter ) : CVanillaTextEncoder( pWriter ) {}
+
+		// base overrides
+		virtual TByteSize WriteEncoded( const wchar_t* pText, TCharSize charCount )
+		{	// make a copy, and swap bytes
+			if ( 0 == charCount )
+				return 0;
+
+			m_buffer.assign( pText, pText + charCount );
+			std::for_each( m_buffer.begin(), m_buffer.end(), func::SwapBytes<endian::Little, endian::Big>() );
+			return __super::WriteEncoded( &m_buffer.front(), charCount ) * sizeof( wchar_t );
+		}
+	private:
+		std::vector< wchar_t > m_buffer;		// excluding the EOS
+	};
+
+
+	// CUtf8Encoder implementation - does wchar_t conversion to UTF8
+
+	class CUtf8Encoder : public CVanillaTextEncoder
+	{
+	public:
+		CUtf8Encoder( io::IWriter* pWriter ) : CVanillaTextEncoder( pWriter ) {}
+
+		// base overrides
+		virtual TByteSize WriteEncoded( const wchar_t* pText, TCharSize charCount )
+		{	// make a UTF8 copy conversion
+			if ( 0 == charCount )
+				return 0;
+
+			m_utf8 = str::ToUtf8( pText, charCount );
+			return __super::WriteEncoded( &m_utf8[ 0 ], m_utf8.size() );
+		}
+	private:
+		std::string m_utf8;
+	};
+
+
 	ITextEncoder* MakeTextEncoder( io::IWriter* pWriter, fs::Encoding fileEncoding )
 	{
 		switch ( fileEncoding )
@@ -182,52 +247,11 @@ namespace io
 			case fs::UTF8_bom:
 				return new CUtf8Encoder( pWriter );
 			case fs::UTF16_LE_bom:
-				return new CStraightTextEncoder( pWriter );
+				return new CVanillaTextEncoder( pWriter );
 			case fs::UTF16_be_bom:
 				return new CSwapBytesTextEncoder( pWriter );
 			default:
 				io::ThrowUnsupportedEncoding( fileEncoding );
-		}
-	}
-
-
-	// CStraightTextEncoder implementation
-
-	io::IWriter* CStraightTextEncoder::GetWriter( void )
-	{
-		return m_pWriter;
-	}
-
-	void CStraightTextEncoder::WriteEncoded( const char* pText, size_t charCount )
-	{
-		m_pWriter->WriteString( pText, charCount );
-	}
-
-	void CStraightTextEncoder::WriteEncoded( const wchar_t* pText, size_t charCount )
-	{
-		m_pWriter->WriteString( pText, charCount );
-	}
-
-
-	// CSwapBytesTextEncoder implementation
-
-	void CSwapBytesTextEncoder::WriteEncoded( const wchar_t* pText, size_t charCount )
-	{	// make a copy, and swap bytes
-		if ( charCount != 0 )
-		{
-			m_buffer.assign( pText, pText + charCount );
-			std::for_each( m_buffer.begin(), m_buffer.end(), func::SwapBytes<endian::Little, endian::Big>() );
-			__super::WriteEncoded( &m_buffer.front(), charCount );
-		}
-	}
-
-
-	void CUtf8Encoder::WriteEncoded( const wchar_t* pText, size_t charCount )
-	{	// make a UTF8 copy conversion
-		if ( charCount != 0 )
-		{
-			m_utf8 = str::ToUtf8( pText, charCount );
-			__super::WriteEncoded( &m_utf8[ 0 ], m_utf8.size() );
 		}
 	}
 }

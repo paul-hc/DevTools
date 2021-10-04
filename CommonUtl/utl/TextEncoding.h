@@ -79,81 +79,51 @@ namespace io
 	void __declspec(noreturn) ThrowUnsupportedEncoding( fs::Encoding encoding ) throws_( CRuntimeException );
 	void __declspec(noreturn) ThrowOpenForReading( const fs::CPath& filePath ) throws_( CRuntimeException );
 	void __declspec(noreturn) ThrowOpenForWriting( const fs::CPath& filePath ) throws_( CRuntimeException );
-
-
-	// does low-level writing to output; implemented by text writers (e.g. console, files, output streams)
-	//
-	interface IWriter : public utl::IMemoryManaged
-	{
-		virtual void WriteString( const char* pText, size_t charCount ) = 0;
-		virtual void WriteString( const wchar_t* pText, size_t charCount ) = 0;
-	};
 }
 
 
 namespace io
 {
+	typedef size_t TByteSize;
+	typedef size_t TCharSize;
+
+
+	// Does low-level writing to output; implemented by text writers (e.g. console, files, output streams).
+	//
+	interface IWriter : public utl::IMemoryManaged
+	{
+		// return written char count
+		virtual TCharSize WriteString( const char* pText, TCharSize charCount ) = 0;
+		virtual TCharSize WriteString( const wchar_t* pText, TCharSize charCount ) = 0;
+	};
+
+
 	// writes encoded strings to an IWriter-based output; handles UTF conversions (multi-byte, wide) and byte-swapping
 	//
 	interface ITextEncoder : public utl::IMemoryManaged
 	{
-		virtual io::IWriter* GetWriter( void ) = 0;
-		virtual void WriteEncoded( const char* pText, size_t charCount ) = 0;
-		virtual void WriteEncoded( const wchar_t* pText, size_t charCount ) = 0;
+		// return written BYTE count (due to the assumed binary output)
+		virtual TByteSize WriteEncoded( const char* pText, TCharSize charCount ) = 0;
+		virtual TByteSize WriteEncoded( const wchar_t* pText, TCharSize charCount ) = 0;
 	};
 
 
 	ITextEncoder* MakeTextEncoder( io::IWriter* pWriter, fs::Encoding fileEncoding );
-
-
-	class CStraightTextEncoder : public ITextEncoder
-	{	// no encoding, just invokes the writer
-	public:
-		CStraightTextEncoder( io::IWriter* pWriter ) : m_pWriter( pWriter ) { ASSERT_PTR( m_pWriter ); }
-
-		// ITextEncoder interface
-		virtual io::IWriter* GetWriter( void );
-		virtual void WriteEncoded( const char* pText, size_t charCount );
-		virtual void WriteEncoded( const wchar_t* pText, size_t charCount );
-	private:
-		io::IWriter* m_pWriter;
-	};
-
-
-	class CSwapBytesTextEncoder : public CStraightTextEncoder
-	{	// does wchar_t byte-swapping for UTF16_be_bom
-	public:
-		CSwapBytesTextEncoder( io::IWriter* pWriter ) : CStraightTextEncoder( pWriter ) {}
-
-		// base overrides
-		virtual void WriteEncoded( const wchar_t* pText, size_t charCount );
-	private:
-		std::vector< wchar_t > m_buffer;		// excluding the EOS
-	};
-
-
-	class CUtf8Encoder : public CStraightTextEncoder
-	{	// does wchar_t conversion to UTF8
-	public:
-		CUtf8Encoder( io::IWriter* pWriter ) : CStraightTextEncoder( pWriter ) {}
-
-		// base overrides
-		virtual void WriteEncoded( const wchar_t* pText, size_t charCount );
-	private:
-		std::string m_utf8;
-	};
 }
 
 
 namespace io
 {
+	// output algorithms based on IWriter and ITextEncoder
+
 	template< typename CharT >
-	size_t WriteTranslatedText( io::ITextEncoder* pTextEncoder, const CharT* pText, size_t charCount ) throws_( CRuntimeException )
+	TByteSize WriteTranslatedText( io::ITextEncoder* pTextEncoder, const CharT* pText, TCharSize charCount ) throws_( CRuntimeException )
 	{	// translate text to binary mode line by line; returns the number of translated lines
 		ASSERT_PTR( pTextEncoder );
 
 		const CharT eol[] = { '\r', '\n', 0 };		// binary mode line-end
-		size_t lineCount = 0;
+		size_t eolLength = COUNT_OF( eol ) - 1, lineCount = 0;
+		TByteSize totalBytes = 0;
 
 		for ( const CharT* pEnd = pText + charCount; pText != pEnd; ++lineCount )
 		{
@@ -164,25 +134,26 @@ namespace io
 
 			size_t lineLength = std::distance( pText, pEol );
 
-			pTextEncoder->WriteEncoded( pText, lineLength );
+			totalBytes += pTextEncoder->WriteEncoded( pText, lineLength );
 
 			pText = pEol;
 			if ( pText != pEnd )					// not the last line?
 			{
-				pTextEncoder->WriteEncoded( eol, COUNT_OF( eol ) - 1 );			// write the translated line-end (excluding the EOS)
+				totalBytes += pTextEncoder->WriteEncoded( eol, eolLength );			// write the translated line-end (excluding the EOS)
 				pText = str::SkipLineEnd( pText );
 			}
 		}
 
-		return lineCount;
+		return totalBytes;
 	}
 
 	template< typename CharT >
-	void WriteEncodedContents( io::IWriter* pWriter, fs::Encoding fileEncoding, const CharT* pText, size_t charCount = utl::npos ) throws_( CRuntimeException )
+	TByteSize WriteEncodedContents( io::IWriter* pWriter, fs::Encoding fileEncoding, const CharT* pText, TCharSize charCount = utl::npos ) throws_( CRuntimeException )
 	{	// writes the entire contents to a file, including the required BOM, also performing line-end translation "\n" -> "\r\n"
 		ASSERT_PTR( pWriter );
 
 		fs::CByteOrderMark bom( fileEncoding );
+		TByteSize totalBytes = bom.Get().size();
 
 		if ( !bom.IsEmpty() )
 			pWriter->WriteString( &bom.Get().front(), bom.Get().size() );		// write the BOM (Byte Order Mark)
@@ -190,7 +161,31 @@ namespace io
 		std::auto_ptr<io::ITextEncoder> pTextEncoder( io::MakeTextEncoder( pWriter, fileEncoding ) );		// handles the line-end translation and byte swapping
 
 		str::SettleLength( charCount, pText );
-		io::WriteTranslatedText( pTextEncoder.get(), pText, charCount );
+		totalBytes += io::WriteTranslatedText( pTextEncoder.get(), pText, charCount );
+		return totalBytes;
+	}
+
+	template< typename CharT >
+	TCharSize BatchWriteText( io::IWriter* pWriter, size_t batchSize, const CharT* pText, TCharSize charCount = utl::npos ) throws_( CRuntimeException )
+	{	// writes large text to a console-like device that has limited output buffering (i.e. batchSize)
+		ASSERT_PTR( pWriter );
+
+		str::SettleLength( charCount, pText );
+
+		TCharSize totalChars = 0;
+		size_t totalBatches = 0;
+
+		for ( TCharSize leftCount = charCount; leftCount != 0; ++totalBatches )
+		{
+			TCharSize batchCharCount = std::min( leftCount, batchSize );
+			TCharSize writtenChars = pWriter->WriteString( pText, batchCharCount );
+
+			pText += writtenChars;
+			leftCount -= writtenChars;
+			totalChars += writtenChars;
+		}
+		ENSURE( totalChars == charCount );
+		return totalChars;
 	}
 }
 
