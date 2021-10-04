@@ -1,6 +1,8 @@
-#ifndef OutputProfile_h
-#define OutputProfile_h
+#ifndef GuidesOutput_h
+#define GuidesOutput_h
 #pragma once
+
+#include "CmdLineOptions_fwd.h"
 
 
 struct CPagePos
@@ -27,11 +29,7 @@ public:
 };
 
 
-class CDirectory;
-enum OutProfileType { NormalAscii, Graphical, BlankSpace,  _ProfileCount };
-
-
-struct COutputProfile
+struct CGuidesProfile
 {
 public:
 	wchar_t m_vertBar;
@@ -39,13 +37,13 @@ public:
 	wchar_t m_subDirLastSlash;
 	wchar_t m_subDirMinusFill;
 
-	static const COutputProfile s_outProfiles[ _ProfileCount ];
+	static const CGuidesProfile s_outProfiles[ _ProfileCount ];
 };
 
 
 struct CGuideParts
 {
-	CGuideParts( OutProfileType profileType, size_t tabSize );
+	CGuideParts( GuidesProfileType profileType, size_t tabSize );
 
 	const std::wstring& GetFilePrefix( bool hasMoreSubDirs ) const { return hasMoreSubDirs ? m_fileIndent : m_fileIndentLast; }
 	const std::wstring& GetSubDirPrefix( const CPagePos& subDirPos ) const { return subDirPos.IsLast() ? m_dirEntryLast : m_dirEntry; }
@@ -53,7 +51,7 @@ struct CGuideParts
 private:
 	std::wstring MakePart( size_t tabSize, wchar_t leadCh, wchar_t padCh ) const;
 private:
-	const COutputProfile& m_profile;
+	const CGuidesProfile& m_profile;
 public:
 	const std::wstring m_dirEntry;				// "+---"
 	const std::wstring m_dirEntryLast;			// "\---"
@@ -62,4 +60,4 @@ public:
 };
 
 
-#endif // OutputProfile_h
+#endif // GuidesOutput_h

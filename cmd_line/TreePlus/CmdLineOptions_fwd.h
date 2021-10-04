@@ -19,4 +19,7 @@ namespace app
 }
 
 
+enum GuidesProfileType { NormalAscii, Graphical, BlankSpace,  _ProfileCount };
+
+
 #endif // CmdLineOptions_fwd_h

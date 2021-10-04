@@ -67,7 +67,7 @@ CIniFileRegistrySection::CIniFileRegistrySection( const fs::CPath& iniFilePath, 
 	if ( iniFilePath.FileExist() )
 	{
 		// only support ANSI INI filenames
-		std::ifstream iniFileStream( iniFilePath.GetUtf8().c_str() );
+		std::ifstream iniFileStream( iniFilePath.GetPtr() );
 		if ( !iniFileStream.is_open() )
 			throw CRuntimeException( str::Format( _T("Unable to open configuration file %s."), iniFilePath.GetPtr() ) );
 

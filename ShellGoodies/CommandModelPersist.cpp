@@ -121,7 +121,7 @@ namespace cmd
 
 	bool CTextLogSerializer::Save( const fs::CPath& undoLogPath )
 	{
-		std::ofstream output( undoLogPath.GetUtf8().c_str(), std::ios_base::out | std::ios_base::trunc );
+		std::ofstream output( undoLogPath.GetPtr(), std::ios_base::out | std::ios_base::trunc );
 
 		if ( output.is_open() )
 		{
@@ -139,7 +139,7 @@ namespace cmd
 
 	bool CTextLogSerializer::Load( const fs::CPath& undoLogPath )
 	{
-		std::ifstream input( undoLogPath.GetUtf8().c_str() );
+		std::ifstream input( undoLogPath.GetPtr() );
 
 		if ( !input.is_open() )
 			return false;				// undo log file doesn't exist

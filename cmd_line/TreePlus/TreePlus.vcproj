@@ -252,11 +252,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\OutputProfile.cpp"
+				RelativePath=".\GuidesOutput.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\OutputProfile.h"
+				RelativePath=".\GuidesOutput.h"
 				>
 			</File>
 			<File

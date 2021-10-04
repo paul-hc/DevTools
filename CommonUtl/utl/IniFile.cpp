@@ -49,7 +49,7 @@ bool CIniFile::SwapSectionProperties( const std::tstring& sectionKey, SectionMap
 
 void CIniFile::Save( const fs::CPath& filePath ) const throws_( std::exception )
 {
-	std::ofstream output( filePath.GetUtf8().c_str() );
+	std::ofstream output( filePath.GetPtr() );
 	if ( !output.is_open() )
 		throw CRuntimeException( str::Format( _T("Unable to open properties file %s."), filePath ) );
 
@@ -59,7 +59,7 @@ void CIniFile::Save( const fs::CPath& filePath ) const throws_( std::exception )
 
 void CIniFile::Load( const fs::CPath& filePath ) throws_( std::exception )
 {
-	std::ifstream input( filePath.GetUtf8().c_str() );
+	std::ifstream input( filePath.GetPtr() );
 	if ( !input.is_open() )
 		throw CRuntimeException( str::Format( _T("Unable to open properties file %s."), filePath ) );
 

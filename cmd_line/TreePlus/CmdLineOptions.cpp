@@ -1,7 +1,6 @@
 
 #include "stdafx.h"
 #include "CmdLineOptions.h"
-#include "OutputProfile.h"
 #include "utl/EnumTags.h"
 #include "utl/FileSystem.h"
 #include "utl/RuntimeException.h"
@@ -20,8 +19,9 @@ namespace app
 CCmdLineOptions::CCmdLineOptions( void )
 	: m_pArg( NULL )
 	, m_optionFlags( 0 )
-	, m_outProfileType( Graphical )
+	, m_guidesProfileType( Graphical )
 	, m_maxDepthLevel( utl::npos )
+	, m_maxDirFiles( utl::npos )
 	, m_fileEncoding( fs::ANSI_UTF8 )
 {
 }
@@ -63,17 +63,22 @@ void CCmdLineOptions::ParseCommandLine( int argc, TCHAR* argv[] ) throws_( CRunt
 			else if ( ParseValue( value, pSwitch, _T("gs") ) )
 			{
 				if ( arg::Equals( value.c_str(), _T("G") ) )
-					m_outProfileType = Graphical;
+					m_guidesProfileType = Graphical;
 				else if ( arg::Equals( value.c_str(), _T("A") ) )
-					m_outProfileType = NormalAscii;
+					m_guidesProfileType = NormalAscii;
 				else if ( arg::Equals( value.c_str(), _T("B") ) )
-					m_outProfileType = BlankSpace;
+					m_guidesProfileType = BlankSpace;
 				else
 					ThrowInvalidArgument();
 			}
 			else if ( ParseValue( value, pSwitch, _T("l") ) )
 			{
 				if ( !num::ParseNumber( m_maxDepthLevel, value ) )
+					throw CRuntimeException( str::Format( _T("Invalid number in argument: '%s'"), m_pArg ) );
+			}
+			else if ( ParseValue( value, pSwitch, _T("max") ) )
+			{
+				if ( !num::ParseNumber( m_maxDirFiles, value ) )
 					throw CRuntimeException( str::Format( _T("Invalid number in argument: '%s'"), m_pArg ) );
 			}
 			else if ( ParseValue( value, pSwitch, _T("e") ) )

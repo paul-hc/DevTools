@@ -95,7 +95,7 @@ namespace fs
 		switch ( encoding )
 		{
 			default:			ASSERT( false );
-			case ANSI_UTF8:			m_bom.clear(); break;
+			case ANSI_UTF8:		m_bom.clear(); break;
 			case UTF8_bom:		m_bom.assign( s_bom_UTF8, END_OF( s_bom_UTF8 ) ); break;
 			case UTF16_LE_bom:	m_bom.assign( s_bom_UTF16_LE, END_OF( s_bom_UTF16_LE ) ); break;
 			case UTF16_be_bom:	m_bom.assign( s_bom_UTF16_be, END_OF( s_bom_UTF16_be ) ); break;

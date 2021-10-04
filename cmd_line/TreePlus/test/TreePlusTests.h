@@ -18,7 +18,8 @@ public:
 	virtual void Run( void );
 private:
 	// unit tests
-	void Test( void );
+	void TestOnlyDirectories( void );
+	void TestFilesAndDirectories( void );
 };
 
 

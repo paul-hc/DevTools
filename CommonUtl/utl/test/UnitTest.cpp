@@ -37,7 +37,7 @@ namespace ut
 		if ( NULL == pText )
 			pText = filePath.GetFilenamePtr();		// use the filename as text content
 
-		std::ofstream output( filePath.GetUtf8().c_str(), std::ios::out | std::ios::trunc );
+		std::ofstream output( filePath.GetPtr(), std::ios::out | std::ios::trunc );
 		output
 			<< "Unit-test file: " << std::endl
 			<< pText << std::endl;

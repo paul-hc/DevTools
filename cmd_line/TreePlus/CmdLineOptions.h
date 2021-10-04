@@ -8,13 +8,15 @@
 
 
 class CRuntimeException;
-enum OutProfileType;
+enum GuidesProfileType;
 
 
 struct CCmdLineOptions
 {
 	CCmdLineOptions( void );
 	~CCmdLineOptions();
+
+	bool HasOptionFlag( app::TOption flag ) const { return HasFlag( m_optionFlags, flag ); }
 
 	void ParseCommandLine( int argc, TCHAR* argv[] ) throws_( CRuntimeException );
 private:
@@ -30,8 +32,9 @@ private:
 public:
 	app::TOption m_optionFlags;
 	fs::CPath m_dirPath;
-	OutProfileType m_outProfileType;
+	GuidesProfileType m_guidesProfileType;
 	size_t m_maxDepthLevel;
+	size_t m_maxDirFiles;
 	fs::Encoding m_fileEncoding;
 };
 

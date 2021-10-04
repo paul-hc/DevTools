@@ -3,7 +3,6 @@
 #include "stdafx.h"
 #include "Application.h"
 #include "CmdLineOptions.h"
-#include "OutputProfile.h"
 #include "Directory.h"
 #include "utl/ConsoleApplication.h"
 #include "utl/StdOutput.h"
@@ -41,7 +40,8 @@ static const char s_helpMessage[] =
 	"\n"
 	"Written by Paul Cocoveanu, 2021.\n"
 	"\n"
-	"TreePlus [dir_path] [-f] [-ns] [-gs=G|A|B] [-l=N] [-e=ANSI|UTF8|UTF16] [-no]\n"
+	"TreePlus [dir_path] [-f] [-ns] [-gs=G|A|B] [-l=N] [-max=FN] [-no]\n"
+	"         [-e=ANSI|UTF8|UTF16]\n"
 	"\n"
 	"  dir_path\n"
 	"      [drive:][path] - directory path to display.\n"
@@ -58,6 +58,8 @@ static const char s_helpMessage[] =
 	"         B - Display no guides, just blank spaces.\n"
 	"  -l=N\n"
 	"      Maximum depth level of the sub-directories displayed.\n"
+	"  -max=FN\n"
+	"      Maximum number of files to display in a directory.\n"
 	"  -e=ANSI|UTF8|UTF16|UTF16-BE\n"
 	"      If output redirected to a text file, encode the text file accordingly.\n"
 	"        - ANSI encoding is the default.\n"
@@ -81,10 +83,13 @@ namespace app
 {
 	void RunMain( std::wostream& os, const CCmdLineOptions& options ) throws_( std::exception, CException* )
 	{
-		CDirectory topDirectory( options.m_dirPath );
-		CGuideParts guideParts( options.m_outProfileType, 4 );
+		CDirectory topDirectory( options );
 
-		topDirectory.List( os, options, guideParts, std::wstring() );
+		os << options.m_dirPath.GetPtr() << std::endl;			// print the root directory
+
+		CGuideParts guideParts( options.m_guidesProfileType, 4 );
+
+		topDirectory.List( os, guideParts, std::wstring() );
 		os.flush();			// just in case is using '\n' instead of std::endl
 	}
 
@@ -111,9 +116,9 @@ int _tmain( int argc, TCHAR* argv[] )
 		CCmdLineOptions options;
 		options.ParseCommandLine( argc, argv );
 
-		if ( HasFlag( options.m_optionFlags, app::HelpMode ) )
+		if ( options.HasOptionFlag( app::HelpMode ) )
 			std::wcout << std::endl << s_helpMessage << std::endl;
-		else if ( HasFlag( options.m_optionFlags, app::UnitTestMode ) )
+		else if ( options.HasOptionFlag( app::UnitTestMode ) )
 			app::RunTests();
 		else
 		{
@@ -124,7 +129,7 @@ int _tmain( int argc, TCHAR* argv[] )
 			rStdOutput.Write( os.str(), options.m_fileEncoding );
 		}
 
-		if ( HasFlag( options.m_optionFlags, app::PauseAtEnd ) )
+		if ( options.HasOptionFlag( app::PauseAtEnd ) )
 			io::PressAnyKey();
 
 		return 0;
