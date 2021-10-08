@@ -2,6 +2,7 @@
 #define EncodedFileBuffer_h
 #pragma once
 
+#include <fstream>
 #include "Path.h"
 #include "TextEncoding.h"
 #include "RuntimeException.h"
@@ -32,9 +33,6 @@ namespace io
 		std::ios_base::openmode m_openMode;
 	};
 }
-
-
-#include <fstream>
 
 
 namespace io

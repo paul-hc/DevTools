@@ -403,36 +403,36 @@ void CTextFileIoTests::TestWriteReadLines( void )
 		std::vector< std::string > srcLines, outLines;
 
 		// check empty file
-		io::WriteLinesToFile( textPath, srcLines, encoding );
-		ASSERT_EQUAL( encoding, io::ReadLinesFromFile( outLines, textPath ) );
+		io::nt::WriteLinesToFile( textPath, srcLines, encoding );
+		ASSERT_EQUAL( encoding, io::nt::ReadLinesFromFile( outLines, textPath ) );
 		ASSERT_EQUAL( srcLines, outLines );
 
 		// check single-line file (no line-end)
 		srcLines.push_back( "ABC" );
-		io::WriteLinesToFile( textPath, srcLines, encoding );
-		ASSERT_EQUAL( encoding, io::ReadLinesFromFile( outLines, textPath ) );
+		io::nt::WriteLinesToFile( textPath, srcLines, encoding );
+		ASSERT_EQUAL( encoding, io::nt::ReadLinesFromFile( outLines, textPath ) );
 		ASSERT_EQUAL( srcLines, outLines );
 
 		// check 2-lines file (1 line-end)
 		ut::SplitValues( srcLines, "\n", "\n" );
-		io::WriteLinesToFile( textPath, srcLines, encoding );
-		ASSERT_EQUAL( encoding, io::ReadLinesFromFile( outLines, textPath ) );
+		io::nt::WriteLinesToFile( textPath, srcLines, encoding );
+		ASSERT_EQUAL( encoding, io::nt::ReadLinesFromFile( outLines, textPath ) );
 		ASSERT_EQUAL( srcLines, outLines );
 
 		ut::SplitValues( srcLines, "A1\n", "\n" );
-		io::WriteLinesToFile( textPath, srcLines, encoding );
-		ASSERT_EQUAL( encoding, io::ReadLinesFromFile( outLines, textPath ) );
+		io::nt::WriteLinesToFile( textPath, srcLines, encoding );
+		ASSERT_EQUAL( encoding, io::nt::ReadLinesFromFile( outLines, textPath ) );
 		ASSERT_EQUAL( srcLines, outLines );
 
 		ut::SplitValues( srcLines, "\nA1", "\n" );
-		io::WriteLinesToFile( textPath, srcLines, encoding );
-		ASSERT_EQUAL( encoding, io::ReadLinesFromFile( outLines, textPath ) );
+		io::nt::WriteLinesToFile( textPath, srcLines, encoding );
+		ASSERT_EQUAL( encoding, io::nt::ReadLinesFromFile( outLines, textPath ) );
 		ASSERT_EQUAL( srcLines, outLines );
 
 		// check multiple-lines file
 		ut::SplitValues( srcLines, "A1\nB2\nC3\nD4", "\n" );
-		io::WriteLinesToFile( textPath, srcLines, encoding );
-		ASSERT_EQUAL( encoding, io::ReadLinesFromFile( outLines, textPath ) );
+		io::nt::WriteLinesToFile( textPath, srcLines, encoding );
+		ASSERT_EQUAL( encoding, io::nt::ReadLinesFromFile( outLines, textPath ) );
 		ASSERT_EQUAL( srcLines, outLines );
 	}
 
@@ -444,36 +444,36 @@ void CTextFileIoTests::TestWriteReadLines( void )
 		std::vector< std::wstring > srcLines, outLines;
 
 		// check empty file
-		io::WriteLinesToFile( textPath, srcLines, encoding );
-		ASSERT_EQUAL( encoding, io::ReadLinesFromFile( outLines, textPath ) );
+		io::nt::WriteLinesToFile( textPath, srcLines, encoding );
+		ASSERT_EQUAL( encoding, io::nt::ReadLinesFromFile( outLines, textPath ) );
 		ASSERT_EQUAL( srcLines, outLines );
 
 		// check single-line file (no line-end)
 		srcLines.push_back( L"ABC" );
-		io::WriteLinesToFile( textPath, srcLines, encoding );
-		ASSERT_EQUAL( encoding, io::ReadLinesFromFile( outLines, textPath ) );
+		io::nt::WriteLinesToFile( textPath, srcLines, encoding );
+		ASSERT_EQUAL( encoding, io::nt::ReadLinesFromFile( outLines, textPath ) );
 		ASSERT_EQUAL( srcLines, outLines );
 
 		// check 2-lines file (1 line-end)
 		ut::SplitValues( srcLines, L"\n", L"\n" );
-		io::WriteLinesToFile( textPath, srcLines, encoding );
-		ASSERT_EQUAL( encoding, io::ReadLinesFromFile( outLines, textPath ) );
+		io::nt::WriteLinesToFile( textPath, srcLines, encoding );
+		ASSERT_EQUAL( encoding, io::nt::ReadLinesFromFile( outLines, textPath ) );
 		ASSERT_EQUAL( srcLines, outLines );
 
 		ut::SplitValues( srcLines, L"A1\n", L"\n" );
-		io::WriteLinesToFile( textPath, srcLines, encoding );
-		ASSERT_EQUAL( encoding, io::ReadLinesFromFile( outLines, textPath ) );
+		io::nt::WriteLinesToFile( textPath, srcLines, encoding );
+		ASSERT_EQUAL( encoding, io::nt::ReadLinesFromFile( outLines, textPath ) );
 		ASSERT_EQUAL( srcLines, outLines );
 
 		ut::SplitValues( srcLines, L"\nA1", L"\n" );
-		io::WriteLinesToFile( textPath, srcLines, encoding );
-		ASSERT_EQUAL( encoding, io::ReadLinesFromFile( outLines, textPath ) );
+		io::nt::WriteLinesToFile( textPath, srcLines, encoding );
+		ASSERT_EQUAL( encoding, io::nt::ReadLinesFromFile( outLines, textPath ) );
 		ASSERT_EQUAL( srcLines, outLines );
 
 		// check multiple-lines file
 		ut::SplitValues( srcLines, L"A1\nB2\nC3\nD4", L"\n" );
-		io::WriteLinesToFile( textPath, srcLines, encoding );
-		ASSERT_EQUAL( encoding, io::ReadLinesFromFile( outLines, textPath ) );
+		io::nt::WriteLinesToFile( textPath, srcLines, encoding );
+		ASSERT_EQUAL( encoding, io::nt::ReadLinesFromFile( outLines, textPath ) );
 		ASSERT_EQUAL( srcLines, outLines );
 	}
 
