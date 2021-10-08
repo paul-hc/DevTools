@@ -9,10 +9,6 @@
 
 namespace io
 {
-	void __declspec(noreturn) ThrowOpenForReading( const fs::CPath& filePath ) throws_( CRuntimeException );
-	void __declspec(noreturn) ThrowOpenForWriting( const fs::CPath& filePath ) throws_( CRuntimeException );
-
-
 	template< typename FileStreamT >
 	void CheckOpenForReading( FileStreamT& ifs, const fs::CPath& filePath ) throws_( CRuntimeException )
 	{
@@ -35,7 +31,7 @@ namespace io
 
 		typename istream_T::pos_type currPos = is.tellg();
 
-		is.seekg( 0, std::ios::end );
+		is.seekg( 0, std::ios_base::end );
 		size_t streamCount = static_cast<size_t>( is.tellg() );
 
 		is.seekg( currPos );			// restore original reading position
@@ -58,11 +54,11 @@ namespace io
 		virtual bool AtEnd( void ) const = 0;				// finished iterating?
 		virtual CharT PeekLast( void ) const = 0;			// get last read character without incrementing
 		virtual CharT GetNext( void ) = 0;
-		virtual void GetStr( std::basic_string< CharT >& rText, CharT delim = 0 ) = 0;
+		virtual bool GetStr( std::basic_string< CharT >& rText, CharT delim = 0 ) = 0;		// returns false when EOF reached - i.e. AtEnd() == true
 
-		void GetLine( std::basic_string< CharT >& rLine )
+		bool GetLine( std::basic_string< CharT >& rLine )
 		{
-			GetStr( rLine, '\n' );
+			return GetStr( rLine, '\n' );
 		}
 	};
 
@@ -88,9 +84,6 @@ namespace io
 
 namespace io
 {
-	enum { BinaryBufferSize = 512 };
-
-
 	// Input stream for text files with BOM (Byte Order Mark) support that opens for reading in binary/append mode.
 	// The public API is very restricted to limit support for unformated char/string input with text-mode translation and byte-swapping.
 	// Default implementation is for binary input streams (assumes wchar_t for CharT), with explicit method specializations for text mode char ANSI_UTF8 encoding.
@@ -116,7 +109,7 @@ namespace io
 			m_lastCh = 0;
 
 			// open in binary mode - with translation and byte-swapping
-			open( m_filePath.GetPtr(), std::ios::in | std::ios::binary, std::ios::_Openprot );
+			open( m_filePath.GetPtr(), std::ios_base::in | std::ios_base::binary, std::ios_base::_Openprot );
 			io::CheckOpenForWriting( *this, m_filePath );
 
 			m_readBuffer.resize( BinaryBufferSize );
@@ -157,32 +150,32 @@ namespace io
 			return chr;
 		}
 
-		virtual void GetStr( std::basic_string< CharT >& rText, CharT delim = 0 )
+		virtual bool GetStr( std::basic_string< CharT >& rText, CharT delim = 0 )
 		{
 			rText.clear();
-			if ( delim != 0 )
+			if ( 0 == delim )
 				rText.reserve( m_streamCount );	// allocate space for the entire stream
 
-			while ( !AtEnd() )
+			for ( ;; )
 			{
-				CharT lastCh = m_lastCh;		// store before incrementing
+				if ( AtEnd() )
+				{	// reached EOF
+					if ( !rText.empty() )
+						return true;			// read at least a character
+					if ( delim != 0 && m_lastCh == delim )
+					{
+						m_lastCh = 0;			// avoid infinite GetStr() loop
+						return true;			// a trailing empty line
+					}
+					return false;				// EOF, no content
+				}
+
 				CharT chr = GetNext();
 
-				if ( '\n' == chr )
-					if ( '\r' == lastCh )
-					{	// translate output "\r\n" sequence -> "\n"
-						size_t lastPos = rText.size() - 1;
-						if ( chr == delim )
-						{
-							rText.erase( rText.begin() + lastPos, rText.end() );	// cut trailing '\r'
-							return;				// cut before the delimiter; current position after it
-						}
-						rText[ lastPos ] = chr;
-						continue;
-					}
-
 				if ( chr == delim )
-					return;						// cut before the delimiter; current position after it
+					return true;				// cut before the delimiter; current position after it
+				else if ( chr == '\r' )			// ignore '\r' to simulate text-mode behavior: translate output "\r\n" sequence -> "\n"
+					continue;
 
 				rText.push_back( chr );
 			}
@@ -218,6 +211,76 @@ namespace io
 		using TBaseIStream::bad;
 		using TBaseIStream::operator!;
 	};
+
+
+	// CBase_ifstream<char> template specialization for reading char-s in text mode - only for ANSI_UTF8 encoding
+
+	template<>
+	void CBase_ifstream<char>::Open( const fs::CPath& filePath ) throws_( CRuntimeException )
+	{
+		m_filePath = filePath;
+		m_lastCh = 0;
+
+		// open in text mode - no translation required
+		open( filePath.GetPtr(), std::ios_base::in, std::ios_base::_Openprot );
+		io::CheckOpenForWriting( *this, m_filePath );
+
+		Init();
+	}
+
+	template<>
+	CBase_ifstream<char>::TBaseIStream& CBase_ifstream<char>::GetStream( void )		// only for text-mode standard output
+	{
+		return *this;
+	}
+
+	template<>
+	char CBase_ifstream<char>::GetNext( void )
+	{
+		ASSERT( is_open() );
+		ASSERT( !AtEnd() );
+
+		char chr = 0;
+
+		if ( !AtEnd() )
+			chr = *m_itChar++;
+		else
+			ASSERT( false );		// at end?
+
+		m_lastCh = chr;
+		return chr;
+	}
+
+	template<>
+	bool CBase_ifstream<char>::GetStr( std::string& rText, char delim /*= 0*/ )
+	{
+		rText.clear();
+		if ( 0 == delim )
+			rText.reserve( m_streamCount );	// allocate space for the entire stream
+
+		for ( ;; )
+		{
+			if ( AtEnd() )
+			{	// reached EOF
+				if ( !rText.empty() )
+					return true;			// read at least a character
+				if ( delim != 0 && m_lastCh == delim )
+				{
+					m_lastCh = 0;			// avoid infinite GetStr() loop
+					return true;			// a trailing empty line
+				}
+				return false;				// EOF, no content
+			}
+
+			char chr = GetNext();
+
+			if ( chr == delim )
+				return true;				// cut before the delimiter; current position after it
+
+			ASSERT( chr != '\r' );			// no CR expected in text-mode
+			rText.push_back( chr );
+		}
+	}
 
 
 	// concrete input stream with character decoding
@@ -266,8 +329,8 @@ namespace io
 			m_lastCh = 0;
 			m_bom.WriteToFile( m_filePath );
 
-			// open in binary/append mode (with translation and byte-swapping)
-			open( m_filePath.GetPtr(), std::ios::out | std::ios::app | std::ios::binary, std::ios::_Openprot );
+			// open in binary/append mode - we handle custom translation and byte-swapping
+			open( m_filePath.GetPtr(), std::ios_base::out | std::ios_base::app | std::ios_base::binary, std::ios_base::_Openprot );
 			io::CheckOpenForReading( *this, m_filePath );
 
 			m_writeBuffer.resize( BinaryBufferSize );
@@ -326,6 +389,50 @@ namespace io
 		using TBaseOStream::bad;
 		using TBaseOStream::operator!;
 	};
+
+
+	// CBase_ofstream template specialization for writing char-s in text mode - only for ANSI_UTF8 encoding
+
+	template<>
+	void CBase_ofstream<char>::Open( const fs::CPath& filePath ) throws_( CRuntimeException )
+	{
+		m_filePath = filePath;
+		m_lastCh = 0;
+		m_bom.WriteToFile( m_filePath );
+
+		// open in text/append mode (no translation required)
+		open( m_filePath.GetPtr(), std::ios_base::out | std::ios_base::app, std::ios_base::_Openprot );
+		io::CheckOpenForReading( *this, m_filePath );
+	}
+
+	template<>
+	CBase_ofstream<char>::TBaseOStream& CBase_ofstream<char>::GetStream( void )
+	{	// only for text-mode standard output
+		return *this;
+	}
+
+	template<>
+	void CBase_ofstream<char>::Append( char chr )
+	{
+		ASSERT( is_open() );
+		put( chr );
+		m_lastCh = chr;
+	}
+
+	template<>
+	void CBase_ofstream<char>::Append( const char* pText, size_t count /*= utl::npos*/ )
+	{
+		ASSERT_PTR( pText );
+
+		if ( utl::npos == count )
+			count = str::GetLength( pText );
+
+		if ( *pText != 0 && count != 0 )
+		{
+			write( pText, count );						// unformatted output
+			m_lastCh = pText[ count - 1 ];				// keep track of the last character
+		}
+	}
 
 
 	// concrete output stream with character encoding

@@ -94,11 +94,9 @@ void CIniFile::Load( std::istream& rInStream ) throws_( std::exception )
 {
 	SectionMap* pCurrentSection = NULL;
 
-	for ( s_parseLineNo = 1; !rInStream.eof(); ++s_parseLineNo )
+	s_parseLineNo = 1;
+	for ( std::string line; std::getline( rInStream, line ); ++s_parseLineNo )
 	{
-		std::string line;
-		std::getline( rInStream, line );
-
 		std::tstring sectionKey;
 		if ( ParseSection( sectionKey, line ) )
 			pCurrentSection = &RetrieveSection( sectionKey );

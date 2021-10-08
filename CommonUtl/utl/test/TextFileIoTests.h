@@ -21,8 +21,10 @@ public:
 	virtual void Run( void );
 private:
 	void TestByteOrderMark( void );
-	void TestWriteReadText( void );
+	void TestWriteRead_FlatText( void );
+	void TestWriteRead_New( void );
 	void TestWriteReadLines( void );
+	void TestWriteReadLines_StreamGetLine( void );
 	void TestWriteParseLines( void );
 	void TestParseSaveVerbatimContent( void );
 };

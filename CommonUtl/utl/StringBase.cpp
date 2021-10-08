@@ -326,10 +326,11 @@ namespace stream
 		return true;
 	}
 
-	std::tstring InputLine( std::istream& is )
+	bool InputLine( std::istream& is, std::tstring& rLine )
 	{
 		std::string line;
-		std::getline( is, line );
-		return str::FromUtf8( line.c_str() );
+		bool eof = !std::getline( is, line );
+		rLine = str::FromUtf8( line.c_str() );
+		return !eof;
 	}
 }

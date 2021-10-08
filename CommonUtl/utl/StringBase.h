@@ -186,6 +186,27 @@ namespace str
 namespace str
 {
 	template< typename CharT >
+	inline std::basic_string<CharT>& PopBack( std::basic_string<CharT>& rText )
+	{	// placeholder for basic_string::pop_back() that's missing in earlier versions of STD C++
+		ASSERT( !rText.empty() );
+		rText.erase( --rText.end() );
+		return rText;
+	}
+
+	template< typename CharT >
+	inline bool PopBackDelim( std::basic_string<CharT>& rText, CharT delim )
+	{
+		std::basic_string<CharT>::iterator itLast = rText.end();
+
+		if ( rText.empty() || *--itLast != delim )
+			return false;
+
+		rText.erase( itLast );
+		return true;
+	}
+
+
+	template< typename CharT >
 	void EnquoteImpl( std::basic_string<CharT>& rOutText, const CharT* pText, const CharT leading[], const CharT trailing[], bool skipIfEmpty )
 	{
 		ASSERT_PTR( pText );
@@ -633,7 +654,7 @@ namespace stream
 {
 	bool Tag( std::tstring& rOutput, const std::tstring& tag, const TCHAR* pPrefixSep );
 
-	std::tstring InputLine( std::istream& is );
+	bool InputLine( std::istream& is, std::tstring& rLine );
 }
 
 

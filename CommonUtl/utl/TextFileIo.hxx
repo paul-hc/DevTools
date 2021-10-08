@@ -167,25 +167,27 @@ namespace io
 	namespace impl
 	{
 		template< typename CharT, typename StringT >
-		void GetTextLine( ITight_istream<CharT>& tis, StringT& rLine )
+		bool GetTextLine( ITight_istream<CharT>& tis, StringT& rLine )
 		{
-			tis.GetLine( rLine );
+			return tis.GetLine( rLine );
 		}
 
 		template<>
-		inline void GetTextLine( ITight_istream<char>& tis, std::wstring& rLine )
+		inline bool GetTextLine( ITight_istream<char>& tis, std::wstring& rLine )
 		{
 			std::string narrowLine;
-			tis.GetLine( narrowLine );
+			bool noEof = tis.GetLine( narrowLine );
 			rLine = str::FromUtf8( narrowLine.c_str() );
+			return noEof;
 		}
 
 		template<>
-		inline void GetTextLine( ITight_istream<wchar_t>& tis, std::string& rLine )
+		inline bool GetTextLine( ITight_istream<wchar_t>& tis, std::string& rLine )
 		{
 			std::wstring wideLine;
-			tis.GetLine( wideLine );
+			bool noEof = tis.GetLine( wideLine );
 			rLine = str::ToUtf8( wideLine.c_str() );
+			return noEof;
 		}
 
 
@@ -197,16 +199,10 @@ namespace io
 			CEncoded_ifstream< CharT, encoding > tifs( srcFilePath );
 
 			rLines.clear();
-			for ( size_t lineNo = 1; !tifs.AtEnd(); ++lineNo )
-			{
-				TString line;
-				impl::GetTextLine( tifs, line );
 
+			size_t lineNo = 1;
+			for ( TString line; impl::GetTextLine( tifs, line ); ++lineNo )
 				rLines.insert( rLines.end(), line );
-			}
-
-			if ( tifs.PeekLast() == '\n' )
-				rLines.insert( rLines.end(), TString() );		// IMP: add the last empty line, since it gets skipped by AtEnd() returning false
 
 			return !tifs.fail();
 		}
@@ -278,18 +274,9 @@ namespace io
 			m_pLineParserCallback->OnBeginParsing();
 
 		size_t lineNo = 1;
-		bool stopped = false;
-		for ( ; !tis.AtEnd() && !stopped && lineNo <= m_maxLineCount; ++lineNo )
-		{
-			StringT line;
-			impl::GetTextLine( tis, line );
-
-			stopped = !PushLine( line, lineNo );
-		}
-
-		if ( !stopped && lineNo <= m_maxLineCount )
-			if ( tis.AtEnd() && tis.PeekLast() == '\n' )
-				PushLine( StringT(), lineNo );			// IMP: add the last empty line, since it gets skipped by AtEnd() returning false
+		for ( StringT line; lineNo <= m_maxLineCount && impl::GetTextLine( tis, line ); ++lineNo )
+			if ( !PushLine( line, lineNo ) )
+				break;
 
 		if ( m_pLineParserCallback != NULL )
 			m_pLineParserCallback->OnEndParsing();

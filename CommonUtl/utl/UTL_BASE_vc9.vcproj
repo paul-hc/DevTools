@@ -860,6 +860,10 @@
 				Name="Input/Output"
 				>
 				<File
+					RelativePath=".\EncodedFileBuffer.h"
+					>
+				</File>
+				<File
 					RelativePath=".\Encoding.h"
 					>
 				</File>
@@ -869,10 +873,6 @@
 				</File>
 				<File
 					RelativePath=".\StdOutput.h"
-					>
-				</File>
-				<File
-					RelativePath=".\TextEncodedFileStreams.cpp"
 					>
 				</File>
 				<File

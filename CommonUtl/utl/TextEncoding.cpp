@@ -33,9 +33,9 @@ namespace fs
 	{
 		static const size_t s_byteCounts[] =
 		{
-			sizeof( char ), sizeof( char ),			// ANSI_UTF8, UTF8_bom
-			sizeof( wchar_t ), sizeof( wchar_t ),	// UTF16_LE_bom, UTF16_be_bom
-			sizeof( wchar_t ), sizeof( wchar_t )	// UTF32_LE_bom, UTF32_be_bom
+			sizeof( char ), sizeof( char ),						// ANSI_UTF8, UTF8_bom
+			sizeof( wchar_t ), sizeof( wchar_t ),				// UTF16_LE_bom, UTF16_be_bom
+			sizeof( str::char32_t ), sizeof( str::char32_t )	// UTF32_LE_bom, UTF32_be_bom
 		};
 
 		ASSERT( encoding < _Encoding_Count );
@@ -106,7 +106,7 @@ namespace fs
 
 	Encoding CByteOrderMark::ReadFromFile( const fs::CPath& srcFilePath ) throws_( CRuntimeException )
 	{
-		std::ifstream ifs( srcFilePath.GetPtr(), std::ios::in | std::ios::binary );
+		std::ifstream ifs( srcFilePath.GetPtr(), std::ios_base::in | std::ios_base::binary );
 		io::CheckOpenForReading( ifs, srcFilePath );
 
 		std::vector< char > filePrefix( BomMaxSize );
@@ -123,7 +123,7 @@ namespace fs
 
 	void CByteOrderMark::WriteToFile( const fs::CPath& targetFilePath ) const throws_( CRuntimeException )
 	{
-		std::ofstream ofs( targetFilePath.GetPtr(), std::ios::out | std::ios::trunc | std::ios::binary );
+		std::ofstream ofs( targetFilePath.GetPtr(), std::ios_base::out | std::ios_base::trunc | std::ios_base::binary );
 		io::CheckOpenForWriting( ofs, targetFilePath );
 
 		if ( !IsEmpty() )
@@ -171,6 +171,16 @@ namespace io
 	void __declspec(noreturn) ThrowUnsupportedEncoding( fs::Encoding encoding ) throws_( CRuntimeException )
 	{
 		throw CRuntimeException( str::Format( _T("Support for %s text file encoding not implemented"), fs::GetTags_Encoding().FormatUi( encoding ).c_str() ) );
+	}
+
+	void __declspec(noreturn) ThrowOpenForReading( const fs::CPath& filePath ) throws_( CRuntimeException )
+	{
+		throw CRuntimeException( str::Format( _T("Cannot open text file for reading: %s"), filePath.GetPtr() ) );
+	}
+
+	void __declspec(noreturn) ThrowOpenForWriting( const fs::CPath& filePath ) throws_( CRuntimeException )
+	{
+		throw CRuntimeException( str::Format( _T("Cannot open text file for writing: %s"), filePath.GetPtr() ) );
 	}
 
 
@@ -250,6 +260,84 @@ namespace io
 				return new CVanillaTextEncoder( pWriter );
 			case fs::UTF16_be_bom:
 				return new CSwapBytesTextEncoder( pWriter );
+			default:
+				io::ThrowUnsupportedEncoding( fileEncoding );
+		}
+	}
+}
+
+
+namespace io
+{
+	// CVanillaCharCodec implementation - no encoding, just invokes the writer
+
+	class CVanillaCharCodec : public ICharCodec
+	{
+	public:
+		CVanillaCharCodec( fs::Encoding encoding ) : m_encoding( encoding ) {}
+
+		// ICharCodec interface
+
+		virtual fs::Encoding GetEncoding( void ) const
+		{
+			return m_encoding;
+		}
+
+		virtual char Decode( const char& rawCh ) const
+		{
+			return rawCh;
+		}
+
+		virtual wchar_t Decode( const wchar_t& rawCh ) const
+		{
+			return rawCh;
+		}
+
+		virtual char Encode( const char& ch ) const
+		{
+			return ch;
+		}
+
+		virtual wchar_t Encode( const wchar_t& ch ) const
+		{
+			return ch;
+		}
+	private:
+		fs::Encoding m_encoding;
+	};
+
+
+	// CSwapBytesCharCodec implementation - does wchar_t byte-swapping for UTF16_be_bom
+
+	class CSwapBytesCharCodec : public CVanillaCharCodec
+	{
+	public:
+		CSwapBytesCharCodec( fs::Encoding encoding ) : CVanillaCharCodec( encoding ) {}
+
+		// base overrides
+
+		virtual wchar_t Decode( const wchar_t& rawCh ) const
+		{
+			return endian::GetBytesSwapped<endian::Big, endian::Little>()( rawCh );
+		}
+
+		virtual wchar_t Encode( const wchar_t& ch ) const
+		{
+			return endian::GetBytesSwapped<endian::Little, endian::Big>()( ch );		// just a formality: encoding and decoding are isomorphic (byte swapping is reversible)
+		}
+	};
+
+
+	ICharCodec* MakeCharCodec( fs::Encoding fileEncoding )
+	{
+		switch ( fileEncoding )
+		{
+			case fs::ANSI_UTF8:
+			case fs::UTF8_bom:
+			case fs::UTF16_LE_bom:
+				return new CVanillaCharCodec( fileEncoding );
+			case fs::UTF16_be_bom:
+				return new CSwapBytesCharCodec( fileEncoding );
 			default:
 				io::ThrowUnsupportedEncoding( fileEncoding );
 		}

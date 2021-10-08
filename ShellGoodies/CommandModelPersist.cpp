@@ -197,9 +197,8 @@ namespace cmd
 		CTimer timer;
 
 		m_parseLineNo = 1;
-		for ( ; !is.eof(); ++m_parseLineNo )
+		for ( std::tstring line; stream::InputLine( is, line ); ++m_parseLineNo )
 		{
-			std::tstring line = stream::InputLine( is );
 			str::TStringRange textRange( line );
 			textRange.Trim();
 
@@ -236,9 +235,8 @@ namespace cmd
 		{
 			std::auto_ptr< cmd::CFileMacroCmd > pMacroCmd( new cmd::CFileMacroCmd( cmdType, timestamp ) );
 
-			for ( ; !is.eof(); ++m_parseLineNo )
+			for ( std::tstring line; stream::InputLine( is, line ); ++m_parseLineNo )
 			{
-				std::tstring line = stream::InputLine( is );
 				str::TStringRange textRange( line );
 				textRange.Trim();
 				if ( textRange.IsEmpty() )

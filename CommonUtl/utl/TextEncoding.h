@@ -31,7 +31,11 @@ namespace fs
 
 		bool IsEmpty( void ) const { return m_bom.empty(); }
 		const std::vector< char >& Get( void ) const { return m_bom; }
+
 		size_t GetCharCount( void ) const { return m_bom.size() / fs::GetCharByteCount( m_encoding ); }		// count of BOM in encoding_chars (not BYTES for wide encodings)
+
+		template< typename CharT >
+		size_t GetScaledSize( void ) const { return m_bom.size() / sizeof( CharT ); }			// size of BOM in stream chars (or filebuf)
 
 		bool operator==( const CByteOrderMark& right ) const { return m_encoding == right.m_encoding && m_bom == right.m_bom; }
 
@@ -86,6 +90,7 @@ namespace io
 {
 	typedef size_t TByteSize;
 	typedef size_t TCharSize;
+	enum { BinaryBufferSize = 512 };
 
 
 	// Does low-level writing to output; implemented by text writers (e.g. console, files, output streams).
@@ -109,6 +114,34 @@ namespace io
 
 
 	ITextEncoder* MakeTextEncoder( io::IWriter* pWriter, fs::Encoding fileEncoding );
+
+
+	// decodes raw characters for input (e.g. istream); handles UTF conversions (multi-byte, wide) and byte-swapping
+	//
+	interface ICharCodec : public utl::IMemoryManaged
+	{
+		virtual fs::Encoding GetEncoding( void ) const = 0;
+
+		virtual char Decode( const char& rawCh ) const = 0;
+		virtual wchar_t Decode( const wchar_t& rawCh ) const = 0;
+
+		virtual char Encode( const char& ch ) const = 0;
+		virtual wchar_t Encode( const wchar_t& ch ) const = 0;
+
+		template< typename TraitsT >
+		typename TraitsT::int_type DecodeMeta( const typename TraitsT::int_type& metaRawCh ) const
+		{
+			if ( TraitsT::eq_int_type( TraitsT::eof(), metaRawCh ) )
+				return metaRawCh;		// IMP: avoid decoding EOF
+
+			typename TraitsT::char_type ch = Decode( TraitsT::to_char_type( metaRawCh ) );
+
+			return TraitsT::to_int_type( ch );
+		}
+	};
+
+
+	ICharCodec* MakeCharCodec( fs::Encoding fileEncoding );
 }
 
 

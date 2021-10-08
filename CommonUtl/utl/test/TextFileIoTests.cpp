@@ -1,10 +1,11 @@
-
+﻿
 #include "stdafx.h"
 
 #ifdef _DEBUG		// no UT code in release builds
 #include "test/TextFileIoTests.h"
 #include "Path.h"
 #include "StringUtilities.h"
+#include "EncodedFileBuffer.h"
 #include "TextEncoding.h"
 #include "TextFileIo.h"
 #include "EnumTags.h"
@@ -69,9 +70,43 @@ namespace ut
 		return str::Format( fmt, fs::GetTags_Encoding().FormatKey( encoding ).c_str() );
 	}
 
+	const std::vector< std::string >& ToUtf8Lines( const std::vector< std::wstring >& lines )
+	{
+		static std::vector< std::string > s_linesUtf8;
 
+		s_linesUtf8.clear();
+		for ( std::vector< std::wstring >::const_iterator itLine = lines.begin(); itLine != lines.end(); ++itLine )
+			s_linesUtf8.push_back( str::ToUtf8( itLine->c_str() ) );
+
+		return s_linesUtf8;
+	}
+
+	const std::vector< std::wstring >& FromUtf8Lines( const std::vector< std::string >& lines )
+	{
+		static std::vector< std::wstring > s_linesWide;
+
+		s_linesWide.clear();
+		for ( std::vector< std::string >::const_iterator itLine = lines.begin(); itLine != lines.end(); ++itLine )
+			s_linesWide.push_back( str::FromUtf8( itLine->c_str() ) );
+
+		return s_linesWide;
+	}
+}
+
+
+namespace ut
+{
 	// test implementation
-	void test_TextFile_A( fs::Encoding encoding, const fs::CPath& textPath, const std::string& content, const char pExpected[], size_t expectedSize = std::string::npos );
+	void test_WriteRead_FlatBuffer_A( fs::Encoding encoding, const fs::CPath& textPath, const std::string& content, const char pExpected[], size_t expectedSize = std::string::npos );
+
+	void testNew_WriteRead( fs::Encoding encoding );
+	void testNew_WriteReadContent( fs::Encoding encoding, const fs::CPath& textPath, const wchar_t* pContent );
+	void testNew_WriteReadFlat( fs::Encoding encoding, const fs::CPath& textPath, const wchar_t* pContent );
+	void testNew_WriteReadLines( fs::Encoding encoding, const fs::CPath& textPath, const wchar_t* pContent );
+
+	void test_WriteReadLines_Stream( fs::Encoding encoding );
+	void test_WriteReadLines_StreamImpl( fs::Encoding encoding, const fs::CPath& textPath, const wchar_t* pContent );
+
 	void test_WriteReadLines_A( fs::Encoding encoding );
 	void test_WriteReadLines_W( fs::Encoding encoding );
 	void test_WriteParseLines_A( fs::Encoding encoding );
@@ -143,7 +178,7 @@ void CTextFileIoTests::TestByteOrderMark( void )
 	}
 }
 
-void CTextFileIoTests::TestWriteReadText( void )
+void CTextFileIoTests::TestWriteRead_FlatText( void )
 {
 	std::string content;
 	{
@@ -154,15 +189,15 @@ void CTextFileIoTests::TestWriteReadText( void )
 
 		// check empty file
 		content = "";
-		ut::test_TextFile_A( encoding, textPath, content, NULL );
+		ut::test_WriteRead_FlatBuffer_A( encoding, textPath, content, NULL );
 
 		// single-line file
 		content = "xyz";
-		ut::test_TextFile_A( encoding, textPath, content, "xyz" );
+		ut::test_WriteRead_FlatBuffer_A( encoding, textPath, content, "xyz" );
 
 		// check multiple-lines file
 		content = "A1\nB2";
-		ut::test_TextFile_A( encoding, textPath, content, "A1\r\nB2" );
+		ut::test_WriteRead_FlatBuffer_A( encoding, textPath, content, "A1\r\nB2" );
 	}
 	{
 		fs::Encoding encoding = fs::UTF8_bom;
@@ -172,15 +207,15 @@ void CTextFileIoTests::TestWriteReadText( void )
 
 		// check empty file
 		content = "";
-		ut::test_TextFile_A( encoding, textPath, content, "\xEF\xBB\xBF" );
+		ut::test_WriteRead_FlatBuffer_A( encoding, textPath, content, "\xEF\xBB\xBF" );
 
 		// single-line file
 		content = "xyz";
-		ut::test_TextFile_A( encoding, textPath, content, "\xEF\xBB\xBF" "xyz" );
+		ut::test_WriteRead_FlatBuffer_A( encoding, textPath, content, "\xEF\xBB\xBF" "xyz" );
 
 		// check multiple-lines file
 		content = "A1\nB2";
-		ut::test_TextFile_A( encoding, textPath, content, "\xEF\xBB\xBF" "A1\r\nB2" );
+		ut::test_WriteRead_FlatBuffer_A( encoding, textPath, content, "\xEF\xBB\xBF" "A1\r\nB2" );
 	}
 	{
 		fs::Encoding encoding = fs::UTF16_LE_bom;
@@ -190,17 +225,17 @@ void CTextFileIoTests::TestWriteReadText( void )
 
 		// check empty file
 		content = "";
-		ut::test_TextFile_A( encoding, textPath, content, "\xFF\xFE" );
+		ut::test_WriteRead_FlatBuffer_A( encoding, textPath, content, "\xFF\xFE" );
 
 		// single-line file
 		content = "xyz";
 		static const char s_slExpected[] = { '\xFF', '\xFE', 'x', 0, 'y', 0, 'z', 0 };
-		ut::test_TextFile_A( encoding, textPath, content, s_slExpected, COUNT_OF( s_slExpected ) );
+		ut::test_WriteRead_FlatBuffer_A( encoding, textPath, content, s_slExpected, COUNT_OF( s_slExpected ) );
 
 		// check multiple-lines file
 		content = "A1\nB2";
 		static const char s_mlExpected[] = { '\xFF', '\xFE', 'A', 0, '1', 0, '\r', 0, '\n', 0, 'B', 0, '2', 0 };
-		ut::test_TextFile_A( encoding, textPath, content, s_mlExpected, COUNT_OF( s_mlExpected ) );
+		ut::test_WriteRead_FlatBuffer_A( encoding, textPath, content, s_mlExpected, COUNT_OF( s_mlExpected ) );
 	}
 	{
 		fs::Encoding encoding = fs::UTF16_be_bom;
@@ -210,26 +245,26 @@ void CTextFileIoTests::TestWriteReadText( void )
 
 		// check empty file
 		content = "";
-		ut::test_TextFile_A( encoding, textPath, content, "\xFE\xFF" );
+		ut::test_WriteRead_FlatBuffer_A( encoding, textPath, content, "\xFE\xFF" );
 
 		// single-line file
 		content = "xyz";
 		static const char s_slExpected[] = { '\xFE', '\xFF', 0, 'x', 0, 'y', 0, 'z' };
-		ut::test_TextFile_A( encoding, textPath, content, s_slExpected, COUNT_OF( s_slExpected ) );
+		ut::test_WriteRead_FlatBuffer_A( encoding, textPath, content, s_slExpected, COUNT_OF( s_slExpected ) );
 
 		// check multiple-lines file
 		content = "A1\nB2";
 		static const char s_mlExpected[] = { '\xFE', '\xFF', 0, 'A', 0, '1', 0, '\r', 0, '\n', 0, 'B', 0, '2' };
-		ut::test_TextFile_A( encoding, textPath, content, s_mlExpected, COUNT_OF( s_mlExpected ) );
+		ut::test_WriteRead_FlatBuffer_A( encoding, textPath, content, s_mlExpected, COUNT_OF( s_mlExpected ) );
 	}
 }
 
-	void ut::test_TextFile_A( fs::Encoding encoding, const fs::CPath& textPath, const std::string& content, const char pExpected[], size_t expectedSize /*= std::string::npos*/ )
+	void ut::test_WriteRead_FlatBuffer_A( fs::Encoding encoding, const fs::CPath& textPath, const std::string& content, const char pExpected[], size_t expectedSize /*= std::string::npos*/ )
 	{
 		std::vector< char > expectedBuffer;
 		AssignText( expectedBuffer, pExpected, expectedSize );
 
-		io::WriteStringToFile( textPath, content, encoding );
+		io::nt::WriteStringToFile( textPath, content, encoding );
 
 		// test input binary buffer
 		std::vector< char > inBuffer;
@@ -238,8 +273,112 @@ void CTextFileIoTests::TestWriteReadText( void )
 
 		// test input content
 		std::string inContent;
-		ASSERT_EQUAL( encoding, io::ReadStringFromFile( inContent, textPath ) );
+		ASSERT_EQUAL( encoding, io::nt::ReadStringFromFile( inContent, textPath ) );
 		ASSERT_EQUAL( content, inContent );
+	}
+
+
+void CTextFileIoTests::TestWriteRead_New( void )
+{
+	ut::testNew_WriteRead( fs::ANSI_UTF8 );
+	ut::testNew_WriteRead( fs::UTF8_bom );
+	ut::testNew_WriteRead( fs::UTF16_LE_bom );
+	ut::testNew_WriteRead( fs::UTF16_be_bom );
+}
+
+	void ut::testNew_WriteRead( fs::Encoding encoding )
+	{
+		ut::CTempFilePool pool( ut::FormatTextFilename( encoding ).c_str() );
+		const fs::CPath& textPath = pool.GetFilePaths()[ 0 ];
+
+		ut::testNew_WriteReadContent( encoding, textPath, L"" );				// empty file
+		ut::testNew_WriteReadContent( encoding, textPath, L"xyz_αβγ" );			// single-line file
+		ut::testNew_WriteReadContent( encoding, textPath, L"\n" );				// 2-lines file: empty
+		ut::testNew_WriteReadContent( encoding, textPath, L"\nAα1" );			// 2-lines file: first empty
+		ut::testNew_WriteReadContent( encoding, textPath, L"Aα1\n" );			// 2-lines file: second empty
+		ut::testNew_WriteReadContent( encoding, textPath, L"ABC\nαβγ\nXYZ" );	// multi-line file
+	}
+
+	void ut::testNew_WriteReadContent( fs::Encoding encoding, const fs::CPath& textPath, const wchar_t* pContent )
+	{
+		ut::testNew_WriteReadFlat( encoding, textPath, pContent );
+		ut::testNew_WriteReadLines( encoding, textPath, pContent );
+	}
+
+	void ut::testNew_WriteReadFlat( fs::Encoding encoding, const fs::CPath& textPath, const wchar_t* pContent )
+	{
+		{	// NARROW
+			std::string content( str::ToUtf8( pContent ) );
+			io::nt::WriteStringToFile( textPath, content, encoding );
+
+			{
+				std::string outText;
+				ASSERT_EQUAL( encoding, io::nt::ReadStringFromFile( outText, textPath ) );
+				ASSERT_EQUAL( content, outText );
+			}
+
+			{	// cross-read WIDE
+				std::wstring outText;
+				ASSERT_EQUAL( encoding, io::nt::ReadStringFromFile( outText, textPath ) );
+				ASSERT_EQUAL( content, str::ToUtf8( outText.c_str() ) );
+			}
+		}
+		{	// WIDE
+			std::wstring content( pContent );
+			io::nt::WriteStringToFile( textPath, content, encoding );
+
+			{
+				std::wstring outText;
+				ASSERT_EQUAL( encoding, io::nt::ReadStringFromFile( outText, textPath ) );
+				ASSERT_EQUAL( content, outText );
+			}
+
+			{	// cross-read NARROW
+				std::string outText;
+				ASSERT_EQUAL( encoding, io::nt::ReadStringFromFile( outText, textPath ) );
+				ASSERT_EQUAL( content, str::FromUtf8( outText.c_str() ) );
+			}
+		}
+	}
+
+	void ut::testNew_WriteReadLines( fs::Encoding encoding, const fs::CPath& textPath, const wchar_t* pContent )
+	{
+		{	// NARROW
+			std::string content( str::ToUtf8( pContent ) );
+			std::vector< std::string > contentLines;
+			str::Split( contentLines, str::ToUtf8( pContent ).c_str(), "\n" );
+
+			io::nt::WriteLinesToFile( textPath, contentLines, encoding );
+
+			{
+				std::vector< std::string > outLines;
+				ASSERT_EQUAL( encoding, io::nt::ReadLinesFromFile( outLines, textPath ) );
+				ASSERT_EQUAL( contentLines, outLines );
+			}
+
+			{	// cross-read lines WIDE
+				std::vector< std::wstring > outLines;
+				ASSERT_EQUAL( encoding, io::nt::ReadLinesFromFile( outLines, textPath ) );
+				ASSERT_EQUAL( contentLines, ut::ToUtf8Lines( outLines ) );
+			}
+		}
+		{	// WIDE
+			std::wstring content( pContent );
+			std::vector< std::wstring > contentLines;
+			str::Split( contentLines, pContent, L"\n" );
+
+			io::nt::WriteLinesToFile( textPath, contentLines, encoding );
+
+			std::vector< std::wstring > outLines;
+			ASSERT_EQUAL( encoding, io::nt::ReadLinesFromFile( outLines, textPath ) );
+			ASSERT_EQUAL( contentLines, outLines );
+
+			{	// cross-read lines NARROW
+				std::vector< std::string > outLines;
+				ASSERT_EQUAL( encoding, io::nt::ReadLinesFromFile( outLines, textPath ) );
+				ASSERT_EQUAL( contentLines, ut::FromUtf8Lines( outLines ) );
+			}
+		}
 	}
 
 
@@ -336,6 +475,86 @@ void CTextFileIoTests::TestWriteReadLines( void )
 		io::WriteLinesToFile( textPath, srcLines, encoding );
 		ASSERT_EQUAL( encoding, io::ReadLinesFromFile( outLines, textPath ) );
 		ASSERT_EQUAL( srcLines, outLines );
+	}
+
+
+void CTextFileIoTests::TestWriteReadLines_StreamGetLine( void )
+{
+	ut::test_WriteReadLines_Stream( fs::ANSI_UTF8 );
+	ut::test_WriteReadLines_Stream( fs::UTF8_bom );
+	ut::test_WriteReadLines_Stream( fs::UTF16_LE_bom );
+	ut::test_WriteReadLines_Stream( fs::UTF16_be_bom );
+}
+
+	void ut::test_WriteReadLines_Stream( fs::Encoding encoding )
+	{
+		ut::CTempFilePool pool( ut::FormatTextFilename( encoding ).c_str() );
+		const fs::CPath& textPath = pool.GetFilePaths()[ 0 ];
+
+		ut::test_WriteReadLines_StreamImpl( encoding, textPath, L"" );				// empty file
+		ut::test_WriteReadLines_StreamImpl( encoding, textPath, L"xyz_αβγ" );		// single-line file
+		ut::test_WriteReadLines_StreamImpl( encoding, textPath, L"\n" );			// 2-lines file: empty
+		ut::test_WriteReadLines_StreamImpl( encoding, textPath, L"\nAα1" );			// 2-lines file: first empty
+		ut::test_WriteReadLines_StreamImpl( encoding, textPath, L"Aα1\n" );			// 2-lines file: second empty
+		ut::test_WriteReadLines_StreamImpl( encoding, textPath, L"ABC\nαβγ\nXYZ" );	// multi-line file
+	}
+
+	void ut::test_WriteReadLines_StreamImpl( fs::Encoding encoding, const fs::CPath& textPath, const wchar_t* pContent )
+	{
+		std::string content( str::ToUtf8( pContent ) );
+		std::vector< std::string > contentLines;
+		str::Split( contentLines, str::ToUtf8( pContent ).c_str(), "\n" );
+
+		io::nt::WriteLinesToFile( textPath, contentLines, encoding );
+
+		if ( fs::GetCharByteCount( encoding ) == sizeof( char ) )
+		{	// NARROW stream
+			std::istream is( NULL );
+			io::CEncodedStreamFileBuffer<char> fileBuffer( is, encoding );
+			fileBuffer.Open( textPath, std::ios_base::in );
+			{
+				std::vector< std::string > outLines;
+
+				for ( std::string line; io::GetLine( is, line ); )
+					outLines.push_back( line );
+
+				ASSERT_EQUAL( contentLines, outLines );
+			}
+
+			{	// cross-read lines WIDE
+				fileBuffer.Reopen();
+				std::vector< std::wstring > outLines;
+
+				for ( std::wstring line; io::GetLine( is, line ); )
+					outLines.push_back( line );
+
+				ASSERT_EQUAL( contentLines, ut::ToUtf8Lines( outLines ) );
+			}
+		}
+		else if ( fs::GetCharByteCount( encoding ) == sizeof( wchar_t ) )
+		{	// WIDE
+			std::wistream is( NULL );
+			io::CEncodedStreamFileBuffer<wchar_t> fileBuffer( is, encoding );
+			fileBuffer.Open( textPath, std::ios_base::in );
+			{
+				std::vector< std::wstring > outLines;
+
+				for ( std::wstring line; io::GetLine( is, line ); )
+					outLines.push_back( line );
+
+				ASSERT_EQUAL( contentLines, ut::ToUtf8Lines( outLines ) );
+			}
+
+			{	// cross-read lines NARROW
+				fileBuffer.Reopen();
+				std::vector< std::string > outLines;
+
+				for ( std::string line; io::GetLine( is, line ); )
+					outLines.push_back( line );
+
+				ASSERT_EQUAL( contentLines, outLines );
+			}
+		}
 	}
 
 void CTextFileIoTests::TestWriteParseLines( void )
@@ -484,8 +703,10 @@ void CTextFileIoTests::Run( void )
 	__super::Run();
 
 	TestByteOrderMark();
-	TestWriteReadText();
+	TestWriteRead_FlatText();
+	TestWriteRead_New();
 	TestWriteReadLines();
+	TestWriteReadLines_StreamGetLine();
 	TestWriteParseLines();
 	TestParseSaveVerbatimContent();
 }
