@@ -9,17 +9,7 @@
 namespace io
 {
 	template< typename CharT >
-	size_t GetStreamSize( std::basic_istream<CharT>& is )
-	{
-		ASSERT( is.good() );
-		typename std::basic_istream<CharT>::pos_type currPos = is.tellg();
-
-		is.seekg( 0, std::ios_base::end );
-		size_t streamCount = static_cast<size_t>( is.tellg() );
-
-		is.seekg( currPos );			// restore original reading position
-		return streamCount;
-	}
+	size_t GetStreamSize( std::basic_istream<CharT>& is );
 }
 
 
@@ -56,6 +46,15 @@ namespace io
 
 	template< typename LinesT >
 	fs::Encoding ReadLinesFromFile( LinesT& rLines, const fs::CPath& srcFilePath ) throws_( CRuntimeException );
+
+
+	// istream version of reading lines (not the recommended method due to having to guess the CharT matching the encoding)
+
+	template< typename CharT, typename StringT >
+	std::basic_istream<CharT>& GetLine( std::basic_istream<CharT>& is, StringT& rLine, CharT delim );
+
+	template< typename CharT, typename StringT >
+	std::basic_istream<CharT>& GetLine( std::basic_istream<CharT>& is, StringT& rLine );
 }
 
 

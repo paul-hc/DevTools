@@ -9,99 +9,17 @@
 
 namespace io
 {
-	namespace impl
+	template< typename CharT >
+	size_t GetStreamSize( std::basic_istream<CharT>& is )
 	{
-		template< typename DestCharT, typename SrcCharT >
-		inline void SwapResult( std::basic_string<DestCharT>& rDest, std::basic_string<SrcCharT>& rSrc )
-		{
-			rDest.swap( rSrc );
-		}
+		ASSERT( is.good() );
+		typename std::basic_istream<CharT>::pos_type currPos = is.tellg();
 
-		template<>
-		inline void SwapResult( std::wstring& rDest, std::string& rSrc )
-		{
-			std::wstring src = str::FromUtf8( rSrc.c_str() );
-			rDest.swap( src );
-			rSrc.clear();
-		}
+		is.seekg( 0, std::ios_base::end );
+		size_t streamCount = static_cast<size_t>( is.tellg() );
 
-		template<>
-		inline void SwapResult( std::string& rDest, std::wstring& rSrc )
-		{
-			std::string src = str::ToUtf8( rSrc.c_str() );
-			rDest.swap( src );
-			rSrc.clear();
-		}
-	}
-
-
-	// istream version of reading lines (not the recommended method due to having to guess the CharT matching the encoding)
-
-	template< typename CharT, typename StringT >
-	std::basic_istream<CharT>& GetLine( std::basic_istream<CharT>& is, StringT& rLine, CharT delim )
-	{	// get characters into string, discard delimiter
-		CEncodedFileBuffer<CharT>* pInBuffer = dynamic_cast< CEncodedFileBuffer<CharT>* >( is.rdbuf() );
-		REQUIRE( pInBuffer != NULL );		// to be used only with encoded file buffers; otherwise use std::getline()
-
-		typedef std::basic_istream<CharT> TIStream;
-		typedef typename TIStream::traits_type TTraits;
-		using std::ios_base;
-
-		ios_base::iostate state = ios_base::goodbit;
-		bool changed = false;
-		std::basic_string<CharT> line;
-		const typename TIStream::sentry ok( is, true );
-
-		if ( ok )
-		{	// state okay, extract characters
-			const typename TTraits::int_type metaDelim = TTraits::to_int_type( delim ), metaCR = TTraits::to_int_type( '\r' );
-			const io::ICharCodec* pDecoder = pInBuffer->GetCodec();
-
-			for ( typename TTraits::int_type metaCh = pDecoder->DecodeMeta<TTraits>( pInBuffer->sgetc() ); ; metaCh = pDecoder->DecodeMeta<TTraits>( pInBuffer->snextc() ) )
-				if ( TTraits::eq_int_type( TTraits::eof(), metaCh ) )
-				{	// end of file, quit
-					state |= ios_base::eofbit;
-
-					if ( !changed )
-						if ( delim != 0 && pInBuffer->PopLast() == delim )		// last empty line? pop to avoid infinite GetString() loop
-							changed = true;
-					break;
-				}
-				else if ( TTraits::eq_int_type( metaCh, metaDelim ) )
-				{	// got a delimiter, discard it and quit
-					changed = true;
-					pInBuffer->sbumpc();
-					pInBuffer->PushLast( delim );
-					break;
-				}
-				else if ( line.size() >= line.max_size() )
-				{	// string too large, quit
-					state |= ios_base::failbit;
-					break;
-				}
-				else
-				{	// got a character, add it to string
-					if ( !TTraits::eq_int_type( metaCh, metaCR ) )		// skip the '\r' in binary mode (translate "\r\n" to "\n")
-					{
-						line += pInBuffer->PushLast( TTraits::to_char_type( metaCh ) );
-						changed = true;
-					}
-				}
-		}
-		impl::SwapResult( rLine, line );
-
-		if ( !changed )
-			state |= ios_base::failbit;
-
-		is.setstate( state );
-		return is;
-	}
-
-
-	template< typename CharT, typename StringT >
-	inline std::basic_istream<CharT>& GetLine( std::basic_istream<CharT>& is, StringT& rLine )
-	{
-		return GetLine( is, rLine, is.widen( '\n' ) );
+		is.seekg( currPos );			// restore original reading position
+		return streamCount;
 	}
 }
 
@@ -302,6 +220,105 @@ namespace io
 				ThrowUnsupportedEncoding( encoding );
 		}
 		return bom.GetEncoding();
+	}
+}
+
+
+namespace io
+{
+	namespace impl
+	{
+		template< typename DestCharT, typename SrcCharT >
+		inline void SwapResult( std::basic_string<DestCharT>& rDest, std::basic_string<SrcCharT>& rSrc )
+		{
+			rDest.swap( rSrc );
+		}
+
+		template<>
+		inline void SwapResult( std::wstring& rDest, std::string& rSrc )
+		{
+			std::wstring src = str::FromUtf8( rSrc.c_str() );
+			rDest.swap( src );
+			rSrc.clear();
+		}
+
+		template<>
+		inline void SwapResult( std::string& rDest, std::wstring& rSrc )
+		{
+			std::string src = str::ToUtf8( rSrc.c_str() );
+			rDest.swap( src );
+			rSrc.clear();
+		}
+	}
+
+
+	// istream version of reading lines (not the recommended method due to having to guess the CharT matching the encoding)
+
+	template< typename CharT, typename StringT >
+	std::basic_istream<CharT>& GetLine( std::basic_istream<CharT>& is, StringT& rLine, CharT delim )
+	{	// get characters into string, discard delimiter
+		CEncodedFileBuffer<CharT>* pInBuffer = dynamic_cast< CEncodedFileBuffer<CharT>* >( is.rdbuf() );
+		REQUIRE( pInBuffer != NULL );		// to be used only with encoded file buffers; otherwise use std::getline()
+
+		typedef std::basic_istream<CharT> TIStream;
+		typedef typename TIStream::traits_type TTraits;
+		using std::ios_base;
+
+		ios_base::iostate state = ios_base::goodbit;
+		bool changed = false;
+		std::basic_string<CharT> line;
+		const typename TIStream::sentry ok( is, true );
+
+		if ( ok )
+		{	// state okay, extract characters
+			const typename TTraits::int_type metaDelim = TTraits::to_int_type( delim ), metaCR = TTraits::to_int_type( '\r' );
+			const io::ICharCodec* pDecoder = pInBuffer->GetCodec();
+
+			for ( typename TTraits::int_type metaCh = pDecoder->DecodeMeta<TTraits>( pInBuffer->sgetc() ); ; metaCh = pDecoder->DecodeMeta<TTraits>( pInBuffer->snextc() ) )
+				if ( TTraits::eq_int_type( TTraits::eof(), metaCh ) )
+				{	// end of file, quit
+					state |= ios_base::eofbit;
+
+					if ( !changed )
+						if ( delim != 0 && pInBuffer->PopLast() == delim )		// last empty line? pop to avoid infinite GetString() loop
+							changed = true;
+					break;
+				}
+				else if ( TTraits::eq_int_type( metaCh, metaDelim ) )
+				{	// got a delimiter, discard it and quit
+					changed = true;
+					pInBuffer->sbumpc();
+					pInBuffer->PushLast( delim );
+					break;
+				}
+				else if ( line.size() >= line.max_size() )
+				{	// string too large, quit
+					state |= ios_base::failbit;
+					break;
+				}
+				else
+				{	// got a character, add it to string
+					if ( !TTraits::eq_int_type( metaCh, metaCR ) )		// skip the '\r' in binary mode (translate "\r\n" to "\n")
+					{
+						line += pInBuffer->PushLast( TTraits::to_char_type( metaCh ) );
+						changed = true;
+					}
+				}
+		}
+		impl::SwapResult( rLine, line );
+
+		if ( !changed )
+			state |= ios_base::failbit;
+
+		is.setstate( state );
+		return is;
+	}
+
+
+	template< typename CharT, typename StringT >
+	inline std::basic_istream<CharT>& GetLine( std::basic_istream<CharT>& is, StringT& rLine )
+	{
+		return GetLine( is, rLine, is.widen( '\n' ) );
 	}
 }
 
