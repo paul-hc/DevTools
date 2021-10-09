@@ -90,13 +90,14 @@ namespace io
 {
 	typedef size_t TByteSize;
 	typedef size_t TCharSize;
-	enum { BinaryBufferSize = 512 };
 
 
 	// Does low-level writing to output; implemented by text writers (e.g. console, files, output streams).
 	//
 	interface IWriter : public utl::IMemoryManaged
 	{
+		virtual bool IsAppendMode( void ) const = 0;			// appending content to an existing file?
+
 		// return written char count
 		virtual TCharSize WriteString( const char* pText, TCharSize charCount ) = 0;
 		virtual TCharSize WriteString( const wchar_t* pText, TCharSize charCount ) = 0;
@@ -116,7 +117,7 @@ namespace io
 	ITextEncoder* MakeTextEncoder( io::IWriter* pWriter, fs::Encoding fileEncoding );
 
 
-	// decodes raw characters for input (e.g. istream); handles UTF conversions (multi-byte, wide) and byte-swapping
+	// decodes raw characters for input (e.g. istream) - handles byte-swapping for big-endian encodings
 	//
 	interface ICharCodec : public utl::IMemoryManaged
 	{
@@ -185,11 +186,15 @@ namespace io
 	{	// writes the entire contents to a file, including the required BOM, also performing line-end translation "\n" -> "\r\n"
 		ASSERT_PTR( pWriter );
 
-		fs::CByteOrderMark bom( fileEncoding );
-		TByteSize totalBytes = bom.Get().size();
+		TByteSize totalBytes = 0;
 
-		if ( !bom.IsEmpty() )
-			pWriter->WriteString( &bom.Get().front(), bom.Get().size() );		// write the BOM (Byte Order Mark)
+		if ( !pWriter->IsAppendMode() )		// write the BOM only the first time
+		{
+			const fs::CByteOrderMark bom( fileEncoding );
+
+			if ( !bom.IsEmpty() )
+				totalBytes += pWriter->WriteString( &bom.Get().front(), bom.Get().size() );		// write the BOM (Byte Order Mark)
+		}
 
 		std::auto_ptr<io::ITextEncoder> pTextEncoder( io::MakeTextEncoder( pWriter, fileEncoding ) );		// handles the line-end translation and byte swapping
 

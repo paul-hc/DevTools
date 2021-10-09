@@ -22,14 +22,13 @@ namespace io
 		bool IsValid( void ) const { return m_hStdOutput != INVALID_HANDLE_VALUE; }
 		bool IsConsoleOutput( void ) const { return m_isConsoleOutput; }
 		OutputMode GetOutputMode( void ) const { ASSERT( IsValid() ); return m_outputMode; }
+		const fs::CPath& GetFileRedirectPath( void ) const { return m_fileRedirectPath; }
 
 		void Write( const std::string& allText, fs::Encoding fileEncoding = fs::UTF8_bom ) throws_( CRuntimeException );
 		void Write( const std::wstring& allText, fs::Encoding fileEncoding = fs::UTF16_LE_bom ) throws_( CRuntimeException );
 
 		bool Flush( void );
 	private:
-		bool StoreLastError( bool exprResult = false );
-
 		template< typename CharT >
 		void WriteToConsole( const CharT* pText, size_t length ) throws_( CRuntimeException );
 
@@ -41,8 +40,6 @@ namespace io
 		bool m_isConsoleOutput;
 		OutputMode m_outputMode;
 		fs::CPath m_fileRedirectPath;
-
-		DWORD m_lastErrorCode;
 	public:
 		static size_t s_maxBatchSize;		// 8 KB by default (large-enough for high speed output)
 	};

@@ -21,6 +21,33 @@ namespace io
 	{
 		throw CRuntimeException( str::Format( _T("Error writing %d characters to redirected stdout file:  %s"), charCount, filePath.GetPtr() ) );
 	}
+
+
+	size_t GetFilePointer( HANDLE hFile )
+	{
+		ASSERT_PTR( hFile );
+		DWORD currPos = ::SetFilePointer( hFile, 0, NULL, FILE_CURRENT );
+		return currPos != INVALID_SET_FILE_POINTER ? currPos : 0;
+	}
+
+	fs::CPath GetFilePath( HANDLE hFile )
+	{
+		fs::CPath filePath;
+		TCHAR pathBuffer[ MAX_PATH * 2 ];
+
+		if ( ::GetFinalPathNameByHandle( hFile, pathBuffer, COUNT_OF( pathBuffer ), FILE_NAME_OPENED ) != 0 )
+			filePath.Set( path::SkipHugePrefix( pathBuffer ) );
+		return filePath;
+	}
+
+	bool StoreLastError( bool exprResult = false )
+	{
+		static DWORD s_lastErrorCode = 0;
+
+		if ( !exprResult )
+			s_lastErrorCode = ::GetLastError();
+		return exprResult;
+	}
 }
 
 
@@ -29,6 +56,12 @@ namespace io
 	struct CConsoleWriter : public IWriter
 	{
 		CConsoleWriter( HANDLE hConsoleOutput ) : m_hConsoleOutput( hConsoleOutput ), m_writtenChars( 0 ) { ASSERT_PTR( m_hConsoleOutput ); }
+
+		virtual bool IsAppendMode( void ) const
+		{
+			ASSERT( false );		// shouldn't be called
+			return false;
+		}
 
 		virtual TCharSize WriteString( const char* pText, TCharSize charCount ) throws_( CRuntimeException )
 		{
@@ -53,7 +86,19 @@ namespace io
 
 	struct CFileWriter : public IWriter
 	{
-		CFileWriter( HANDLE hFile, const fs::CPath& filePath ) : m_hFile( hFile ), m_filePath( filePath ), m_writtenBytes( 0 ) { ASSERT_PTR( m_hFile ); }
+		CFileWriter( HANDLE hFile )
+			: m_hFile( hFile )
+			, m_filePath( io::GetFilePath( m_hFile ) )
+			, m_isAppendMode( io::GetFilePointer( m_hFile ) != 0 )
+			, m_writtenBytes( 0 )
+		{
+			ASSERT_PTR( m_hFile );
+		}
+
+		virtual bool IsAppendMode( void ) const
+		{
+			return m_isAppendMode;
+		}
 
 		virtual TCharSize WriteString( const char* pText, TCharSize charCount ) throws_( CRuntimeException )
 		{
@@ -72,7 +117,8 @@ namespace io
 		}
 	public:
 		HANDLE m_hFile;
-		const fs::CPath& m_filePath;
+		fs::CPath m_filePath;
+		bool m_isAppendMode;
 		DWORD m_writtenBytes;
 	};
 }
@@ -87,15 +133,13 @@ namespace io
 		, m_fileType( 0 )
 		, m_isConsoleOutput( false )
 		, m_outputMode( OtherOutput )
-		, m_lastErrorCode( 0 )
 	{
 		m_hStdOutput = ::GetStdHandle( stdHandle );
 
 		if ( IsValid() )
 		{
 			m_fileType = ::GetFileType( m_hStdOutput );
-			if ( FILE_TYPE_UNKNOWN == m_fileType )
-				StoreLastError();
+			StoreLastError( FILE_TYPE_UNKNOWN == m_fileType );
 
 			switch ( m_fileType & ~FILE_TYPE_REMOTE )
 			{
@@ -110,14 +154,9 @@ namespace io
 					break;
 				}
 				case FILE_TYPE_DISK:
-				{
 					m_outputMode = FileRedirectedOutput;
-
-					TCHAR pathBuffer[ MAX_PATH * 2 ];
-					if ( StoreLastError( ::GetFinalPathNameByHandle( m_hStdOutput, pathBuffer, COUNT_OF( pathBuffer ), FILE_NAME_OPENED /*FILE_NAME_NORMALIZED*/ ) != 0 ) )
-						m_fileRedirectPath.Set( path::SkipHugePrefix( pathBuffer ) );
+					m_fileRedirectPath = io::GetFilePath( m_hStdOutput );
 					break;
-				}
 			}
 		}
 		else
@@ -129,13 +168,6 @@ namespace io
 		return
 			IsValid() &&
 			StoreLastError( ::FlushFileBuffers( m_hStdOutput ) != FALSE );
-	}
-
-	bool CStdOutput::StoreLastError( bool exprResult /*= false*/ )
-	{
-		if ( !exprResult )
-			m_lastErrorCode = ::GetLastError();
-		return exprResult;
 	}
 
 	void CStdOutput::Write( const std::string& allText, fs::Encoding fileEncoding /*= fs::UTF8_bom*/ ) throws_( CRuntimeException )
@@ -171,7 +203,7 @@ namespace io
 	template< typename CharT >
 	void CStdOutput::WriteToFile( const CharT* pText, size_t charCount, fs::Encoding fileEncoding ) throws_( CRuntimeException )
 	{
-		io::CFileWriter writer( m_hStdOutput, m_fileRedirectPath );
+		io::CFileWriter writer( m_hStdOutput );
 		io::WriteEncodedContents( &writer, fileEncoding, pText, charCount );
 	}
 }

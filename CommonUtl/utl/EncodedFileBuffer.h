@@ -32,11 +32,11 @@ namespace io
 		fs::CPath m_filePath;
 		std::ios_base::openmode m_openMode;
 	};
-}
 
 
-namespace io
-{
+	enum { BinaryBufferSize = 512 };
+
+
 	// Input/Output file buffer for text files with BOM (Byte Order Mark), with text-mode translation and byte-swapping.
 	// Intended to be used directly via the io:: template functions (not via a stream).
 	//
@@ -89,7 +89,7 @@ namespace io
 			if ( IsInput() )
 			{
 				m_itChar = std::istreambuf_iterator< CharT >( this );		// use iterator only for reading
-				std::advance( m_itChar, m_bom.GetCharCount() );				// skip the BOM
+				std::advance( m_itChar, m_bom.GetScaledSize<CharT>() );		// skip the BOM
 			}
 			return this;
 		}
