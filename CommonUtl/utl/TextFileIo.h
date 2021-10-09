@@ -3,7 +3,24 @@
 #pragma once
 
 #include "Encoding.h"
-#include "TextEncodedFileStreams.h"
+#include "EncodedFileBuffer.h"
+
+
+namespace io
+{
+	template< typename CharT >
+	size_t GetStreamSize( std::basic_istream<CharT>& is )
+	{
+		ASSERT( is.good() );
+		typename std::basic_istream<CharT>::pos_type currPos = is.tellg();
+
+		is.seekg( 0, std::ios_base::end );
+		size_t streamCount = static_cast<size_t>( is.tellg() );
+
+		is.seekg( currPos );			// restore original reading position
+		return streamCount;
+	}
+}
 
 
 namespace io
@@ -12,8 +29,8 @@ namespace io
 	{
 		// buffer I/O for binary files
 
-		void ReadAllFromFile( std::vector< char >& rBuffer, const fs::CPath& srcFilePath ) throws_( CRuntimeException );
 		void WriteAllToFile( const fs::CPath& targetFilePath, const std::vector< char >& buffer ) throws_( CRuntimeException );
+		void ReadAllFromFile( std::vector< char >& rBuffer, const fs::CPath& srcFilePath ) throws_( CRuntimeException );
 	}
 }
 
@@ -23,25 +40,22 @@ namespace io
 
 namespace io
 {
-	// string read/write with entire text file
+	// string read/write of entire text file with encoding
+
+	template< typename StringT >
+	void WriteStringToFile( const fs::CPath& targetFilePath, const StringT& text, fs::Encoding encoding ) throws_( CRuntimeException );
 
 	template< typename StringT >
 	fs::Encoding ReadStringFromFile( StringT& rText, const fs::CPath& srcFilePath ) throws_( CRuntimeException );
 
-	template< typename StringT >
-	bool WriteStringToFile( const fs::CPath& targetFilePath, const StringT& StringT, fs::Encoding encoding = fs::ANSI_UTF8 ) throws_( CRuntimeException );
-}
 
+	// line read/write with encoding
 
-namespace io
-{
-	// line I/O with encoding
+	template< typename LinesT >
+	void WriteLinesToFile( const fs::CPath& targetFilePath, const LinesT& lines, fs::Encoding encoding ) throws_( CRuntimeException );
 
 	template< typename LinesT >
 	fs::Encoding ReadLinesFromFile( LinesT& rLines, const fs::CPath& srcFilePath ) throws_( CRuntimeException );
-
-	template< typename LinesT >
-	void WriteLinesToFile( const fs::CPath& targetFilePath, const LinesT& srcLines, fs::Encoding encoding = fs::ANSI_UTF8 ) throws_( CRuntimeException );
 }
 
 
@@ -63,23 +77,20 @@ namespace io
 	public:
 		CTextFileParser( ILineParserCallback<StringT>* pLineParserCallback = NULL ) : m_pLineParserCallback( pLineParserCallback ), m_maxLineCount( UINT_MAX ), m_encoding( fs::ANSI_UTF8 ) {}
 
-		void Clear( void ) { m_encoding = fs::ANSI_UTF8; m_parsedLines.clear(); }
+		void Clear( void ) { m_parsedLines.clear(); }
 		void SetMaxLineCount( unsigned int maxLineCount ) { m_maxLineCount = maxLineCount; }
 
 		fs::Encoding GetEncoding( void ) { return m_encoding; }
 
 		fs::Encoding ParseFile( const fs::CPath& srcFilePath ) throws_( CRuntimeException );
 
-		template< typename CharT >
-		void ParseStream( ITight_istream<CharT>& tis );
-
 		bool UseCallback( void ) const { return m_pLineParserCallback != NULL; }
 
 		const std::vector< StringT >& GetParsedLines( void ) const { ASSERT( !UseCallback() ); return m_parsedLines; }
 		void SwapParsedLines( std::vector< StringT >& rParsedLines ) { ASSERT( !UseCallback() ); rParsedLines.swap( m_parsedLines ); }
 	protected:
-		template< fs::Encoding encoding, typename CharT >
-		bool ParseLinesFromFile( const fs::CPath& srcFilePath ) throws_( CRuntimeException );
+		template< typename EncCharT >
+		void ParseLinesFromFile( const fs::CPath& srcFilePath ) throws_( CRuntimeException );
 
 		bool PushLine( const StringT& line, unsigned int lineNo );
 	private:

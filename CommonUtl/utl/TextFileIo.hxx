@@ -1,12 +1,7 @@
 #ifndef TextFileIo_hxx
 #define TextFileIo_hxx
 
-#include "stdafx.h"
 #include "TextFileIo.h"
-#include "TextEncoding.h"
-#include "Path.h"
-#include "Endianness.h"
-#include <fstream>
 
 
 // text streaming template code
@@ -14,40 +9,186 @@
 
 namespace io
 {
+	namespace impl
+	{
+		template< typename DestCharT, typename SrcCharT >
+		inline void SwapResult( std::basic_string<DestCharT>& rDest, std::basic_string<SrcCharT>& rSrc )
+		{
+			rDest.swap( rSrc );
+		}
+
+		template<>
+		inline void SwapResult( std::wstring& rDest, std::string& rSrc )
+		{
+			std::wstring src = str::FromUtf8( rSrc.c_str() );
+			rDest.swap( src );
+			rSrc.clear();
+		}
+
+		template<>
+		inline void SwapResult( std::string& rDest, std::wstring& rSrc )
+		{
+			std::string src = str::ToUtf8( rSrc.c_str() );
+			rDest.swap( src );
+			rSrc.clear();
+		}
+	}
+
+
+	// istream version of reading lines (not the recommended method due to having to guess the CharT matching the encoding)
+
+	template< typename CharT, typename StringT >
+	std::basic_istream<CharT>& GetLine( std::basic_istream<CharT>& is, StringT& rLine, CharT delim )
+	{	// get characters into string, discard delimiter
+		CEncodedFileBuffer<CharT>* pInBuffer = dynamic_cast< CEncodedFileBuffer<CharT>* >( is.rdbuf() );
+		REQUIRE( pInBuffer != NULL );		// to be used only with encoded file buffers; otherwise use std::getline()
+
+		typedef std::basic_istream<CharT> TIStream;
+		typedef typename TIStream::traits_type TTraits;
+		using std::ios_base;
+
+		ios_base::iostate state = ios_base::goodbit;
+		bool changed = false;
+		std::basic_string<CharT> line;
+		const typename TIStream::sentry ok( is, true );
+
+		if ( ok )
+		{	// state okay, extract characters
+			const typename TTraits::int_type metaDelim = TTraits::to_int_type( delim ), metaCR = TTraits::to_int_type( '\r' );
+			const io::ICharCodec* pDecoder = pInBuffer->GetCodec();
+
+			for ( typename TTraits::int_type metaCh = pDecoder->DecodeMeta<TTraits>( pInBuffer->sgetc() ); ; metaCh = pDecoder->DecodeMeta<TTraits>( pInBuffer->snextc() ) )
+				if ( TTraits::eq_int_type( TTraits::eof(), metaCh ) )
+				{	// end of file, quit
+					state |= ios_base::eofbit;
+
+					if ( !changed )
+						if ( delim != 0 && pInBuffer->PopLast() == delim )		// last empty line? pop to avoid infinite GetString() loop
+							changed = true;
+					break;
+				}
+				else if ( TTraits::eq_int_type( metaCh, metaDelim ) )
+				{	// got a delimiter, discard it and quit
+					changed = true;
+					pInBuffer->sbumpc();
+					pInBuffer->PushLast( delim );
+					break;
+				}
+				else if ( line.size() >= line.max_size() )
+				{	// string too large, quit
+					state |= ios_base::failbit;
+					break;
+				}
+				else
+				{	// got a character, add it to string
+					if ( !TTraits::eq_int_type( metaCh, metaCR ) )		// skip the '\r' in binary mode (translate "\r\n" to "\n")
+					{
+						line += pInBuffer->PushLast( TTraits::to_char_type( metaCh ) );
+						changed = true;
+					}
+				}
+		}
+		impl::SwapResult( rLine, line );
+
+		if ( !changed )
+			state |= ios_base::failbit;
+
+		is.setstate( state );
+		return is;
+	}
+
+
+	template< typename CharT, typename StringT >
+	inline std::basic_istream<CharT>& GetLine( std::basic_istream<CharT>& is, StringT& rLine )
+	{
+		return GetLine( is, rLine, is.widen( '\n' ) );
+	}
+}
+
+
+namespace io
+{
+	// write entire string to encoded text file
+
+	namespace impl
+	{
+		template< typename CharT, typename StringT >
+		void AppendText( CEncodedFileBuffer<CharT>& rOutFile, const StringT& text )
+		{
+			rOutFile.AppendString( text );
+		}
+
+		template<>
+		inline void AppendText( CEncodedFileBuffer<char>& rOutFile, const std::wstring& text )
+		{
+			rOutFile.AppendString( str::ToUtf8( text.c_str() ) );
+		}
+
+		template<>
+		inline void AppendText( CEncodedFileBuffer<wchar_t>& rOutFile, const std::string& text )
+		{
+			rOutFile.AppendString( str::FromUtf8( text.c_str() ) );
+		}
+
+
+		template< typename CharT, typename StringT >
+		void DoWriteStringToFile( const fs::CPath& targetFilePath, const StringT& text, fs::Encoding encoding ) throws_( CRuntimeException )
+		{
+			CEncodedFileBuffer<CharT> outFile( encoding );
+			outFile.Open( targetFilePath, std::ios_base::out );
+
+			AppendText( outFile, text );
+		}
+	}
+
+
+	template< typename StringT >
+	void WriteStringToFile( const fs::CPath& targetFilePath, const StringT& text, fs::Encoding encoding ) throws_( CRuntimeException )
+	{
+		switch ( fs::GetCharByteCount( encoding ) )
+		{
+			case sizeof( char ):	impl::DoWriteStringToFile<char>( targetFilePath, text, encoding ); break;
+			case sizeof( wchar_t ):	impl::DoWriteStringToFile<wchar_t>( targetFilePath, text, encoding ); break;
+			default:
+				ThrowUnsupportedEncoding( encoding );
+		}
+	}
+
+
 	// read entire string from encoded text file
 
 	namespace impl
 	{
 		template< typename CharT, typename StringT >
-		void GetString( ITight_istream<CharT>& tis, StringT& rText )
+		void GetString( CEncodedFileBuffer<CharT>& rInFile, StringT& rText )
 		{
-			tis.GetStr( rText );
+			rInFile.GetString( rText );
 		}
 
 		template<>
-		inline void GetString( ITight_istream<char>& tis, std::wstring& rText )
+		inline void GetString( CEncodedFileBuffer<char>& rInFile, std::wstring& rText )
 		{
 			std::string narrowText;
-			tis.GetStr( narrowText );
+			rInFile.GetString( narrowText );
 			rText = str::FromUtf8( narrowText.c_str() );
 		}
 
 		template<>
-		inline void GetString( ITight_istream<wchar_t>& tis, std::string& rText )
+		inline void GetString( CEncodedFileBuffer<wchar_t>& rInFile, std::string& rText )
 		{
 			std::wstring wideText;
-			tis.GetStr( wideText );
+			rInFile.GetString( wideText );
 			rText = str::ToUtf8( wideText.c_str() );
 		}
 
 
-		template< fs::Encoding encoding, typename CharT, typename StringT >
-		bool DoReadStringFromFile( StringT& rText, const fs::CPath& srcFilePath ) throws_( CRuntimeException )
+		template< typename CharT, typename StringT >
+		void DoReadStringFromFile( StringT& rText, const fs::CPath& srcFilePath, fs::Encoding encoding ) throws_( CRuntimeException )
 		{
-			CEncoded_ifstream< CharT, encoding > tifs( srcFilePath );
+			CEncodedFileBuffer<CharT> inFile( encoding );
+			inFile.Open( srcFilePath, std::ios_base::in );
 
-			GetString( tifs, rText );
-			return !tifs.fail();
+			GetString( inFile, rText );
 		}
 	}
 
@@ -56,106 +197,48 @@ namespace io
 	fs::Encoding ReadStringFromFile( StringT& rText, const fs::CPath& srcFilePath ) throws_( CRuntimeException )
 	{
 		fs::CByteOrderMark bom;
-		switch ( bom.ReadFromFile( srcFilePath ) )
+		fs::Encoding encoding = bom.ReadFromFile( srcFilePath );
+
+		switch ( fs::GetCharByteCount( encoding ) )
 		{
-			case fs::ANSI_UTF8:		impl::DoReadStringFromFile< fs::ANSI_UTF8, char >( rText, srcFilePath ); break;
-			case fs::UTF8_bom:		impl::DoReadStringFromFile< fs::UTF8_bom, char >( rText, srcFilePath ); break;
-			case fs::UTF16_LE_bom:	impl::DoReadStringFromFile< fs::UTF16_LE_bom, wchar_t >( rText, srcFilePath ); break;
-			case fs::UTF16_be_bom:	impl::DoReadStringFromFile< fs::UTF16_be_bom, wchar_t >( rText, srcFilePath ); break;
-			// not useful in any meaningful way!
-			case fs::UTF32_LE_bom:	//impl::DoReadStringFromFile< fs::UTF32_LE_bom, str::char32_t >( rText, srcFilePath ); break;
-			case fs::UTF32_be_bom:	//impl::DoReadStringFromFile< fs::UTF32_be_bom, str::char32_t >( rText, srcFilePath ); break;
-			default:
-				ThrowUnsupportedEncoding( bom.GetEncoding() );
-		}
-
-		return bom.GetEncoding();
-	}
-
-
-	// write entire string to encoded text file
-
-	namespace impl
-	{
-		template< typename CharT, typename StringT >
-		void AppendText( ITight_ostream<CharT>& tos, const StringT& text )
-		{
-			tos.AppendStr( text );
-		}
-
-		template<>
-		inline void AppendText( ITight_ostream<char>& tos, const std::wstring& text )
-		{
-			tos.AppendStr( str::ToUtf8( text.c_str() ) );
-		}
-
-		template<>
-		inline void AppendText( ITight_ostream<wchar_t>& tos, const std::string& text )
-		{
-			tos.AppendStr( str::FromUtf8( text.c_str() ) );
-		}
-
-
-		template< fs::Encoding encoding, typename CharT, typename StringT >
-		bool DoWriteStringToFile( const fs::CPath& targetFilePath, const StringT& text ) throws_( CRuntimeException )
-		{
-			CEncoded_ofstream< CharT, encoding > tofs( targetFilePath );
-
-			AppendText( tofs, text );
-			return !tofs.fail();
-		}
-	}
-
-
-	template< typename StringT >
-	bool WriteStringToFile( const fs::CPath& targetFilePath, const StringT& text, fs::Encoding encoding /*= fs::ANSI_UTF8*/ ) throws_( CRuntimeException )
-	{
-		switch ( encoding )
-		{
-			case fs::ANSI_UTF8:		return impl::DoWriteStringToFile< fs::ANSI_UTF8, char >( targetFilePath, text );
-			case fs::UTF8_bom:		return impl::DoWriteStringToFile< fs::UTF8_bom, char >( targetFilePath, text );
-			case fs::UTF16_LE_bom:	return impl::DoWriteStringToFile< fs::UTF16_LE_bom, wchar_t >( targetFilePath, text );
-			case fs::UTF16_be_bom:	return impl::DoWriteStringToFile< fs::UTF16_be_bom, wchar_t >( targetFilePath, text );
-			case fs::UTF32_LE_bom:	//return impl::DoWriteStringToFile< fs::UTF32_LE_bom, str::char32_t >( targetFilePath, text );
-			case fs::UTF32_be_bom:	//return impl::DoWriteStringToFile< fs::UTF32_be_bom, str::char32_t >( targetFilePath, text );
+			case sizeof( char ):	impl::DoReadStringFromFile<char>( rText, srcFilePath, encoding ); break;
+			case sizeof( wchar_t ):	impl::DoReadStringFromFile<wchar_t>( rText, srcFilePath, encoding ); break;
 			default:
 				ThrowUnsupportedEncoding( encoding );
 		}
+		return encoding;
 	}
 
 
-	// write entire string to encoded text file
+	// write container of lines from encoded text file
 
 	namespace impl
 	{
-		template< fs::Encoding encoding, typename CharT, typename LinesT >
-		bool DoWriteLinesToFile( const fs::CPath& targetFilePath, const LinesT& textLines ) throws_( CRuntimeException )
+		template< typename CharT, typename LinesT >
+		void DoWriteLinesToFile( const fs::CPath& targetFilePath, const LinesT& lines, fs::Encoding encoding ) throws_( CRuntimeException )
 		{
-			CEncoded_ofstream< CharT, encoding > tofs( targetFilePath );
+			CEncodedFileBuffer<CharT> outFile( encoding );
+			outFile.Open( targetFilePath, std::ios_base::out );
 
-			size_t linePos = 0;
-			for ( typename LinesT::const_iterator itLine = textLines.begin(); itLine != textLines.end(); ++itLine )
+			size_t pos = 0;
+			for ( typename LinesT::const_iterator itLine = lines.begin(), itEnd = lines.end(); itLine != itEnd; ++itLine )
 			{
-				if ( linePos++ != 0 )
-					tofs.Append( '\n' );
+				if ( pos++ != 0 )
+					outFile.Append( '\n' );
 
-				AppendText( tofs, *itLine );
+				AppendText( outFile, *itLine );
 			}
-			return !tofs.fail();
 		}
 	}
 
+
 	template< typename LinesT >
-	void WriteLinesToFile( const fs::CPath& targetFilePath, const LinesT& textLines, fs::Encoding encoding /*= fs::ANSI_UTF8*/ ) throws_( CRuntimeException )
+	void WriteLinesToFile( const fs::CPath& targetFilePath, const LinesT& lines, fs::Encoding encoding ) throws_( CRuntimeException )
 	{
-		switch ( encoding )
+		switch ( fs::GetCharByteCount( encoding ) )
 		{
-			case fs::ANSI_UTF8:		impl::DoWriteLinesToFile< fs::ANSI_UTF8, char >( targetFilePath, textLines ); break;
-			case fs::UTF8_bom:		impl::DoWriteLinesToFile< fs::UTF8_bom, char >( targetFilePath, textLines ); break;
-			case fs::UTF16_LE_bom:	impl::DoWriteLinesToFile< fs::UTF16_LE_bom, wchar_t >( targetFilePath, textLines ); break;
-			case fs::UTF16_be_bom:	impl::DoWriteLinesToFile< fs::UTF16_be_bom, wchar_t >( targetFilePath, textLines ); break;
-			case fs::UTF32_LE_bom:	//impl::DoWriteLinesToFile< fs::UTF32_LE_bom, str::char32_t >( targetFilePath, textLines ); break;
-			case fs::UTF32_be_bom:	//impl::DoWriteLinesToFile< fs::UTF32_be_bom, str::char32_t >( targetFilePath, textLines ); break;
+			case sizeof( char ):	impl::DoWriteLinesToFile<char>( targetFilePath, lines, encoding ); break;
+			case sizeof( wchar_t ):	impl::DoWriteLinesToFile<wchar_t>( targetFilePath, lines, encoding ); break;
 			default:
 				ThrowUnsupportedEncoding( encoding );
 		}
@@ -167,44 +250,41 @@ namespace io
 	namespace impl
 	{
 		template< typename CharT, typename StringT >
-		bool GetTextLine( ITight_istream<CharT>& tis, StringT& rLine )
+		bool GetTextLine( CEncodedFileBuffer<CharT>& rInFile, StringT& rLine )
 		{
-			return tis.GetLine( rLine );
+			return rInFile.GetLine( rLine );
 		}
 
 		template<>
-		inline bool GetTextLine( ITight_istream<char>& tis, std::wstring& rLine )
+		inline bool GetTextLine( CEncodedFileBuffer<char>& rInFile, std::wstring& rLine )
 		{
 			std::string narrowLine;
-			bool noEof = tis.GetLine( narrowLine );
+			bool noEof = rInFile.GetLine( narrowLine );
 			rLine = str::FromUtf8( narrowLine.c_str() );
 			return noEof;
 		}
 
 		template<>
-		inline bool GetTextLine( ITight_istream<wchar_t>& tis, std::string& rLine )
+		inline bool GetTextLine( CEncodedFileBuffer<wchar_t>& rInFile, std::string& rLine )
 		{
 			std::wstring wideLine;
-			bool noEof = tis.GetLine( wideLine );
+			bool noEof = rInFile.GetLine( wideLine );
 			rLine = str::ToUtf8( wideLine.c_str() );
 			return noEof;
 		}
 
 
-		template< fs::Encoding encoding, typename CharT, typename LinesT >
-		bool DoReadLinesFromFile( LinesT& rLines, const fs::CPath& srcFilePath ) throws_( CRuntimeException )
+		template< typename CharT, typename LinesT >
+		void DoReadLinesFromFile( LinesT& rLines, const fs::CPath& srcFilePath, fs::Encoding encoding ) throws_( CRuntimeException )
 		{
+			CEncodedFileBuffer< CharT > inFile( encoding );
+			inFile.Open( srcFilePath, std::ios_base::in );
+
 			typedef typename LinesT::value_type TString;
 
-			CEncoded_ifstream< CharT, encoding > tifs( srcFilePath );
-
 			rLines.clear();
-
-			size_t lineNo = 1;
-			for ( TString line; impl::GetTextLine( tifs, line ); ++lineNo )
+			for ( TString line; impl::GetTextLine( inFile, line ); )
 				rLines.insert( rLines.end(), line );
-
-			return !tifs.fail();
 		}
 	}
 
@@ -212,18 +292,15 @@ namespace io
 	fs::Encoding ReadLinesFromFile( LinesT& rLines, const fs::CPath& srcFilePath ) throws_( CRuntimeException )
 	{
 		fs::CByteOrderMark bom;
-		switch ( bom.ReadFromFile( srcFilePath ) )
-		{
-			case fs::ANSI_UTF8:		impl::DoReadLinesFromFile< fs::ANSI_UTF8, char >( rLines, srcFilePath ); break;
-			case fs::UTF8_bom:		impl::DoReadLinesFromFile< fs::UTF8_bom, char >( rLines, srcFilePath ); break;
-			case fs::UTF16_LE_bom:	impl::DoReadLinesFromFile< fs::UTF16_LE_bom, wchar_t >( rLines, srcFilePath ); break;
-			case fs::UTF16_be_bom:	impl::DoReadLinesFromFile< fs::UTF16_be_bom, wchar_t >( rLines, srcFilePath ); break;
-			case fs::UTF32_LE_bom:	//impl::DoReadLinesFromFile< fs::UTF32_LE_bom, str::char32_t >( rLines, srcFilePath ); break;
-			case fs::UTF32_be_bom:	//impl::DoReadLinesFromFile< fs::UTF32_be_bom, str::char32_t >( rLines, srcFilePath ); break;
-			default:
-				ThrowUnsupportedEncoding( bom.GetEncoding() );
-		}
+		fs::Encoding encoding = bom.ReadFromFile( srcFilePath );
 
+		switch ( fs::GetCharByteCount( encoding ) )
+		{
+			case sizeof( char ):	impl::DoReadLinesFromFile<char>( rLines, srcFilePath, encoding ); break;
+			case sizeof( wchar_t ):	impl::DoReadLinesFromFile<wchar_t>( rLines, srcFilePath, encoding ); break;
+			default:
+				ThrowUnsupportedEncoding( encoding );
+		}
 		return bom.GetEncoding();
 	}
 }
@@ -241,40 +318,30 @@ namespace io
 		fs::CByteOrderMark bom;
 		m_encoding = bom.ReadFromFile( srcFilePath );
 
-		switch ( m_encoding )
+		switch ( fs::GetCharByteCount( m_encoding ) )
 		{
-			case fs::ANSI_UTF8:		ParseLinesFromFile< fs::ANSI_UTF8, char >( srcFilePath ); break;
-			case fs::UTF8_bom:		ParseLinesFromFile< fs::UTF8_bom, char >( srcFilePath ); break;
-			case fs::UTF16_LE_bom:	ParseLinesFromFile< fs::UTF16_LE_bom, wchar_t >( srcFilePath ); break;
-			case fs::UTF16_be_bom:	ParseLinesFromFile< fs::UTF16_be_bom, wchar_t >( srcFilePath ); break;
-			case fs::UTF32_LE_bom:	//ParseLinesFromFile< fs::UTF32_LE_bom, str::char32_t >( srcFilePath ); break;
-			case fs::UTF32_be_bom:	//ParseLinesFromFile< fs::UTF32_be_bom, str::char32_t >( srcFilePath ); break;
+			case sizeof( char ):	ParseLinesFromFile<char>( srcFilePath ); break;
+			case sizeof( wchar_t ):	ParseLinesFromFile<wchar_t>( srcFilePath ); break;
 			default:
-				ThrowUnsupportedEncoding( bom.GetEncoding() );
+				ThrowUnsupportedEncoding( m_encoding );
 		}
-
 		return m_encoding;
 	}
 
 	template< typename StringT >
-	template< fs::Encoding encoding, typename CharT >
-	bool CTextFileParser< StringT >::ParseLinesFromFile( const fs::CPath& srcFilePath ) throws_( CRuntimeException )
+	template< typename EncCharT >
+	void CTextFileParser< StringT >::ParseLinesFromFile( const fs::CPath& srcFilePath ) throws_( CRuntimeException )
 	{
-		CEncoded_ifstream< CharT, encoding > tifs( srcFilePath );
+		CEncodedFileBuffer<EncCharT> inFile( m_encoding );
+		inFile.Open( srcFilePath, std::ios_base::in );
 
-		ParseStream( tifs );
-		return !tifs.fail();
-	}
+		Clear();
 
-	template< typename StringT >
-	template< typename CharT >
-	void CTextFileParser< StringT >::ParseStream( ITight_istream<CharT>& tis )
-	{
 		if ( m_pLineParserCallback != NULL )
 			m_pLineParserCallback->OnBeginParsing();
 
 		size_t lineNo = 1;
-		for ( StringT line; lineNo <= m_maxLineCount && impl::GetTextLine( tis, line ); ++lineNo )
+		for ( StringT line; lineNo <= m_maxLineCount && impl::GetTextLine( inFile, line ); ++lineNo )
 			if ( !PushLine( line, lineNo ) )
 				break;
 

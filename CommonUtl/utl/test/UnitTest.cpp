@@ -70,7 +70,8 @@ namespace ut
 	void HexDump( std::ostream& os, const fs::CPath& textPath, size_t rowByteCount /*= DefaultRowByteCount*/ ) throws_( CRuntimeException )
 	{	// dump contents of filename to stdout in hex
 		std::fstream is( textPath.GetPtr(), std::ios::in | std::ios::binary );
-		io::CheckOpenForReading( is, textPath );
+		if ( !is.is_open() )
+			io::ThrowOpenForReading( textPath );
 
 		static const char s_unprintableCh = '.';
 		static const char s_blankCh = ' ';

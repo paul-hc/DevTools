@@ -1,7 +1,6 @@
 
 #include "stdafx.h"
 #include "TextEncoding.h"
-#include "TextFileIo.h"
 #include "Path.h"
 #include "RuntimeException.h"
 #include "EnumTags.h"
@@ -107,7 +106,8 @@ namespace fs
 	Encoding CByteOrderMark::ReadFromFile( const fs::CPath& srcFilePath ) throws_( CRuntimeException )
 	{
 		std::ifstream ifs( srcFilePath.GetPtr(), std::ios_base::in | std::ios_base::binary );
-		io::CheckOpenForReading( ifs, srcFilePath );
+		if ( !ifs.is_open() )
+			io::ThrowOpenForReading( srcFilePath );
 
 		std::vector< char > filePrefix( BomMaxSize );
 
@@ -124,7 +124,8 @@ namespace fs
 	void CByteOrderMark::WriteToFile( const fs::CPath& targetFilePath ) const throws_( CRuntimeException )
 	{
 		std::ofstream ofs( targetFilePath.GetPtr(), std::ios_base::out | std::ios_base::trunc | std::ios_base::binary );
-		io::CheckOpenForWriting( ofs, targetFilePath );
+		if ( !ofs.is_open() )
+			io::ThrowOpenForWriting( targetFilePath );
 
 		if ( !IsEmpty() )
 			ofs.write( &m_bom.front(), m_bom.size() );

@@ -264,7 +264,7 @@ void CTextFileIoTests::TestWriteRead_FlatText( void )
 		std::vector< char > expectedBuffer;
 		AssignText( expectedBuffer, pExpected, expectedSize );
 
-		io::nt::WriteStringToFile( textPath, content, encoding );
+		io::WriteStringToFile( textPath, content, encoding );
 
 		// test input binary buffer
 		std::vector< char > inBuffer;
@@ -273,7 +273,7 @@ void CTextFileIoTests::TestWriteRead_FlatText( void )
 
 		// test input content
 		std::string inContent;
-		ASSERT_EQUAL( encoding, io::nt::ReadStringFromFile( inContent, textPath ) );
+		ASSERT_EQUAL( encoding, io::ReadStringFromFile( inContent, textPath ) );
 		ASSERT_EQUAL( content, inContent );
 	}
 
@@ -309,33 +309,33 @@ void CTextFileIoTests::TestWriteRead_New( void )
 	{
 		{	// NARROW
 			std::string content( str::ToUtf8( pContent ) );
-			io::nt::WriteStringToFile( textPath, content, encoding );
+			io::WriteStringToFile( textPath, content, encoding );
 
 			{
 				std::string outText;
-				ASSERT_EQUAL( encoding, io::nt::ReadStringFromFile( outText, textPath ) );
+				ASSERT_EQUAL( encoding, io::ReadStringFromFile( outText, textPath ) );
 				ASSERT_EQUAL( content, outText );
 			}
 
 			{	// cross-read WIDE
 				std::wstring outText;
-				ASSERT_EQUAL( encoding, io::nt::ReadStringFromFile( outText, textPath ) );
+				ASSERT_EQUAL( encoding, io::ReadStringFromFile( outText, textPath ) );
 				ASSERT_EQUAL( content, str::ToUtf8( outText.c_str() ) );
 			}
 		}
 		{	// WIDE
 			std::wstring content( pContent );
-			io::nt::WriteStringToFile( textPath, content, encoding );
+			io::WriteStringToFile( textPath, content, encoding );
 
 			{
 				std::wstring outText;
-				ASSERT_EQUAL( encoding, io::nt::ReadStringFromFile( outText, textPath ) );
+				ASSERT_EQUAL( encoding, io::ReadStringFromFile( outText, textPath ) );
 				ASSERT_EQUAL( content, outText );
 			}
 
 			{	// cross-read NARROW
 				std::string outText;
-				ASSERT_EQUAL( encoding, io::nt::ReadStringFromFile( outText, textPath ) );
+				ASSERT_EQUAL( encoding, io::ReadStringFromFile( outText, textPath ) );
 				ASSERT_EQUAL( content, str::FromUtf8( outText.c_str() ) );
 			}
 		}
@@ -348,17 +348,17 @@ void CTextFileIoTests::TestWriteRead_New( void )
 			std::vector< std::string > contentLines;
 			str::Split( contentLines, str::ToUtf8( pContent ).c_str(), "\n" );
 
-			io::nt::WriteLinesToFile( textPath, contentLines, encoding );
+			io::WriteLinesToFile( textPath, contentLines, encoding );
 
 			{
 				std::vector< std::string > outLines;
-				ASSERT_EQUAL( encoding, io::nt::ReadLinesFromFile( outLines, textPath ) );
+				ASSERT_EQUAL( encoding, io::ReadLinesFromFile( outLines, textPath ) );
 				ASSERT_EQUAL( contentLines, outLines );
 			}
 
 			{	// cross-read lines WIDE
 				std::vector< std::wstring > outLines;
-				ASSERT_EQUAL( encoding, io::nt::ReadLinesFromFile( outLines, textPath ) );
+				ASSERT_EQUAL( encoding, io::ReadLinesFromFile( outLines, textPath ) );
 				ASSERT_EQUAL( contentLines, ut::ToUtf8Lines( outLines ) );
 			}
 		}
@@ -367,15 +367,15 @@ void CTextFileIoTests::TestWriteRead_New( void )
 			std::vector< std::wstring > contentLines;
 			str::Split( contentLines, pContent, L"\n" );
 
-			io::nt::WriteLinesToFile( textPath, contentLines, encoding );
+			io::WriteLinesToFile( textPath, contentLines, encoding );
 
 			std::vector< std::wstring > outLines;
-			ASSERT_EQUAL( encoding, io::nt::ReadLinesFromFile( outLines, textPath ) );
+			ASSERT_EQUAL( encoding, io::ReadLinesFromFile( outLines, textPath ) );
 			ASSERT_EQUAL( contentLines, outLines );
 
 			{	// cross-read lines NARROW
 				std::vector< std::string > outLines;
-				ASSERT_EQUAL( encoding, io::nt::ReadLinesFromFile( outLines, textPath ) );
+				ASSERT_EQUAL( encoding, io::ReadLinesFromFile( outLines, textPath ) );
 				ASSERT_EQUAL( contentLines, ut::FromUtf8Lines( outLines ) );
 			}
 		}
@@ -403,36 +403,36 @@ void CTextFileIoTests::TestWriteReadLines( void )
 		std::vector< std::string > srcLines, outLines;
 
 		// check empty file
-		io::nt::WriteLinesToFile( textPath, srcLines, encoding );
-		ASSERT_EQUAL( encoding, io::nt::ReadLinesFromFile( outLines, textPath ) );
+		io::WriteLinesToFile( textPath, srcLines, encoding );
+		ASSERT_EQUAL( encoding, io::ReadLinesFromFile( outLines, textPath ) );
 		ASSERT_EQUAL( srcLines, outLines );
 
 		// check single-line file (no line-end)
 		srcLines.push_back( "ABC" );
-		io::nt::WriteLinesToFile( textPath, srcLines, encoding );
-		ASSERT_EQUAL( encoding, io::nt::ReadLinesFromFile( outLines, textPath ) );
+		io::WriteLinesToFile( textPath, srcLines, encoding );
+		ASSERT_EQUAL( encoding, io::ReadLinesFromFile( outLines, textPath ) );
 		ASSERT_EQUAL( srcLines, outLines );
 
 		// check 2-lines file (1 line-end)
 		ut::SplitValues( srcLines, "\n", "\n" );
-		io::nt::WriteLinesToFile( textPath, srcLines, encoding );
-		ASSERT_EQUAL( encoding, io::nt::ReadLinesFromFile( outLines, textPath ) );
+		io::WriteLinesToFile( textPath, srcLines, encoding );
+		ASSERT_EQUAL( encoding, io::ReadLinesFromFile( outLines, textPath ) );
 		ASSERT_EQUAL( srcLines, outLines );
 
 		ut::SplitValues( srcLines, "A1\n", "\n" );
-		io::nt::WriteLinesToFile( textPath, srcLines, encoding );
-		ASSERT_EQUAL( encoding, io::nt::ReadLinesFromFile( outLines, textPath ) );
+		io::WriteLinesToFile( textPath, srcLines, encoding );
+		ASSERT_EQUAL( encoding, io::ReadLinesFromFile( outLines, textPath ) );
 		ASSERT_EQUAL( srcLines, outLines );
 
 		ut::SplitValues( srcLines, "\nA1", "\n" );
-		io::nt::WriteLinesToFile( textPath, srcLines, encoding );
-		ASSERT_EQUAL( encoding, io::nt::ReadLinesFromFile( outLines, textPath ) );
+		io::WriteLinesToFile( textPath, srcLines, encoding );
+		ASSERT_EQUAL( encoding, io::ReadLinesFromFile( outLines, textPath ) );
 		ASSERT_EQUAL( srcLines, outLines );
 
 		// check multiple-lines file
 		ut::SplitValues( srcLines, "A1\nB2\nC3\nD4", "\n" );
-		io::nt::WriteLinesToFile( textPath, srcLines, encoding );
-		ASSERT_EQUAL( encoding, io::nt::ReadLinesFromFile( outLines, textPath ) );
+		io::WriteLinesToFile( textPath, srcLines, encoding );
+		ASSERT_EQUAL( encoding, io::ReadLinesFromFile( outLines, textPath ) );
 		ASSERT_EQUAL( srcLines, outLines );
 	}
 
@@ -444,36 +444,36 @@ void CTextFileIoTests::TestWriteReadLines( void )
 		std::vector< std::wstring > srcLines, outLines;
 
 		// check empty file
-		io::nt::WriteLinesToFile( textPath, srcLines, encoding );
-		ASSERT_EQUAL( encoding, io::nt::ReadLinesFromFile( outLines, textPath ) );
+		io::WriteLinesToFile( textPath, srcLines, encoding );
+		ASSERT_EQUAL( encoding, io::ReadLinesFromFile( outLines, textPath ) );
 		ASSERT_EQUAL( srcLines, outLines );
 
 		// check single-line file (no line-end)
 		srcLines.push_back( L"ABC" );
-		io::nt::WriteLinesToFile( textPath, srcLines, encoding );
-		ASSERT_EQUAL( encoding, io::nt::ReadLinesFromFile( outLines, textPath ) );
+		io::WriteLinesToFile( textPath, srcLines, encoding );
+		ASSERT_EQUAL( encoding, io::ReadLinesFromFile( outLines, textPath ) );
 		ASSERT_EQUAL( srcLines, outLines );
 
 		// check 2-lines file (1 line-end)
 		ut::SplitValues( srcLines, L"\n", L"\n" );
-		io::nt::WriteLinesToFile( textPath, srcLines, encoding );
-		ASSERT_EQUAL( encoding, io::nt::ReadLinesFromFile( outLines, textPath ) );
+		io::WriteLinesToFile( textPath, srcLines, encoding );
+		ASSERT_EQUAL( encoding, io::ReadLinesFromFile( outLines, textPath ) );
 		ASSERT_EQUAL( srcLines, outLines );
 
 		ut::SplitValues( srcLines, L"A1\n", L"\n" );
-		io::nt::WriteLinesToFile( textPath, srcLines, encoding );
-		ASSERT_EQUAL( encoding, io::nt::ReadLinesFromFile( outLines, textPath ) );
+		io::WriteLinesToFile( textPath, srcLines, encoding );
+		ASSERT_EQUAL( encoding, io::ReadLinesFromFile( outLines, textPath ) );
 		ASSERT_EQUAL( srcLines, outLines );
 
 		ut::SplitValues( srcLines, L"\nA1", L"\n" );
-		io::nt::WriteLinesToFile( textPath, srcLines, encoding );
-		ASSERT_EQUAL( encoding, io::nt::ReadLinesFromFile( outLines, textPath ) );
+		io::WriteLinesToFile( textPath, srcLines, encoding );
+		ASSERT_EQUAL( encoding, io::ReadLinesFromFile( outLines, textPath ) );
 		ASSERT_EQUAL( srcLines, outLines );
 
 		// check multiple-lines file
 		ut::SplitValues( srcLines, L"A1\nB2\nC3\nD4", L"\n" );
-		io::nt::WriteLinesToFile( textPath, srcLines, encoding );
-		ASSERT_EQUAL( encoding, io::nt::ReadLinesFromFile( outLines, textPath ) );
+		io::WriteLinesToFile( textPath, srcLines, encoding );
+		ASSERT_EQUAL( encoding, io::ReadLinesFromFile( outLines, textPath ) );
 		ASSERT_EQUAL( srcLines, outLines );
 	}
 
@@ -505,7 +505,7 @@ void CTextFileIoTests::TestWriteReadLines_StreamGetLine( void )
 		std::vector< std::string > contentLines;
 		str::Split( contentLines, str::ToUtf8( pContent ).c_str(), "\n" );
 
-		io::nt::WriteLinesToFile( textPath, contentLines, encoding );
+		io::WriteLinesToFile( textPath, contentLines, encoding );
 
 		if ( fs::GetCharByteCount( encoding ) == sizeof( char ) )
 		{	// NARROW stream

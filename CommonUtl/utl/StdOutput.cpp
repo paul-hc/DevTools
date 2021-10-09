@@ -3,7 +3,6 @@
 #include "StdOutput.h"
 #include "TextEncoding.h"
 #include "Endianness.h"
-#include "TextEncodedFileStreams.h"
 #include "RuntimeException.h"
 
 #ifdef _DEBUG

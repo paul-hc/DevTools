@@ -876,10 +876,6 @@
 					>
 				</File>
 				<File
-					RelativePath=".\TextEncodedFileStreams.h"
-					>
-				</File>
-				<File
 					RelativePath=".\TextEncoding.cpp"
 					>
 				</File>

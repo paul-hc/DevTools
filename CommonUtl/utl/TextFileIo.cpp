@@ -1,8 +1,6 @@
 
 #include "stdafx.h"
 #include "TextFileIo.h"
-#include "Path.h"
-#include "EnumTags.h"
 #include <fstream>
 
 #ifdef _DEBUG
@@ -18,21 +16,23 @@ namespace io
 	{
 		// buffer I/O for binary files
 
-		void ReadAllFromFile( std::vector< char >& rBuffer, const fs::CPath& srcFilePath ) throws_( CRuntimeException )
-		{
-			std::ifstream ifs( srcFilePath.GetPtr(), std::ios_base::in | std::ios_base::binary );
-			io::CheckOpenForReading( ifs, srcFilePath );
-
-			rBuffer.assign( std::istreambuf_iterator<char>( ifs ),  std::istreambuf_iterator<char>() );		// verbatim buffer of chars
-		}
-
 		void WriteAllToFile( const fs::CPath& targetFilePath, const std::vector< char >& buffer ) throws_( CRuntimeException )
 		{
 			std::ofstream ofs( targetFilePath.GetPtr(), std::ios_base::out | std::ios_base::binary );
-			io::CheckOpenForWriting( ofs, targetFilePath );
+			if ( !ofs.is_open() )
+				ThrowOpenForWriting( targetFilePath );
 
 			if ( !buffer.empty() )
 				ofs.write( &buffer.front(), buffer.size() );												// verbatim buffer of chars
+		}
+
+		void ReadAllFromFile( std::vector< char >& rBuffer, const fs::CPath& srcFilePath ) throws_( CRuntimeException )
+		{
+			std::ifstream ifs( srcFilePath.GetPtr(), std::ios_base::in | std::ios_base::binary );
+			if ( !ifs.is_open() )
+				ThrowOpenForReading( srcFilePath );
+
+			rBuffer.assign( std::istreambuf_iterator<char>( ifs ),  std::istreambuf_iterator<char>() );		// verbatim buffer of chars
 		}
 	}
 }
