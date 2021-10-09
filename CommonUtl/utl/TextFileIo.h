@@ -54,7 +54,7 @@ namespace io
 	std::basic_istream<CharT>& GetLine( std::basic_istream<CharT>& is, StringT& rLine, CharT delim );
 
 	template< typename CharT, typename StringT >
-	std::basic_istream<CharT>& GetLine( std::basic_istream<CharT>& is, StringT& rLine );
+	inline std::basic_istream<CharT>& GetLine( std::basic_istream<CharT>& is, StringT& rLine ) { return GetLine( is, rLine, is.widen( '\n' ) ); }
 }
 
 

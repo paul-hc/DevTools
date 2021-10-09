@@ -313,13 +313,6 @@ namespace io
 		is.setstate( state );
 		return is;
 	}
-
-
-	template< typename CharT, typename StringT >
-	inline std::basic_istream<CharT>& GetLine( std::basic_istream<CharT>& is, StringT& rLine )
-	{
-		return GetLine( is, rLine, is.widen( '\n' ) );
-	}
 }
 
 
