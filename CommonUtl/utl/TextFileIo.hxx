@@ -360,11 +360,11 @@ namespace io
 	}
 
 	template< typename StringT >
-	bool CTextFileParser< StringT >::PushLine( const StringT& line, unsigned int lineNo )
+	bool CTextFileParser< StringT >::PushLine( const StringT& line, size_t lineNo )
 	{
 		if ( NULL == m_pLineParserCallback )
 			m_parsedLines.push_back( line );
-		else if ( !m_pLineParserCallback->OnParseLine( line, lineNo ) )
+		else if ( !m_pLineParserCallback->OnParseLine( line, static_cast<unsigned int>( lineNo ) ) )
 			return false;
 		return true;
 	}

@@ -91,7 +91,7 @@ namespace io
 		template< typename EncCharT >
 		void ParseLinesFromFile( const fs::CPath& srcFilePath ) throws_( CRuntimeException );
 
-		bool PushLine( const StringT& line, unsigned int lineNo );
+		bool PushLine( const StringT& line, size_t lineNo );
 	private:
 		ILineParserCallback< StringT >* m_pLineParserCallback;
 		unsigned int m_maxLineCount;
