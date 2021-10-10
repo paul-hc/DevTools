@@ -4,6 +4,7 @@
 #include "Application.h"
 #include "CmdLineOptions.h"
 #include "Directory.h"
+#include "GuidesOutput.h"
 #include "utl/ConsoleApplication.h"
 #include "utl/StdOutput.h"
 #include "utl/StringUtilities.h"

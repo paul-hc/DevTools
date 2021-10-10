@@ -21,10 +21,10 @@ public:
 	virtual void Run( void );
 private:
 	void TestByteOrderMark( void );
-	void TestWriteRead_FlatText( void );
-	void TestWriteRead_New( void );
-	void TestWriteReadLines( void );
+	void TestWriteRead_BinBuffer( void );
+	void TestWriteRead_Contents( void );			// test & lines
 	void TestWriteReadLines_StreamGetLine( void );
+	void TestWriteReadLines_Rewind( void );			// rewind the file buffer and re-read
 	void TestWriteParseLines( void );
 	void TestParseSaveVerbatimContent( void );
 };

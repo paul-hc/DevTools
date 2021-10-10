@@ -54,7 +54,10 @@ namespace io
 			: CBaseEncodedBuffer( encoding )
 			, m_lastCh( 0 )
 		{
-			ASSERT( fs::GetCharByteCount( encoding ) == sizeof( CharT ) );		// design assumption: the file buffer CharT has to match the byte count of the encoding
+			// Design assumption: the file buffer CharT has to match the byte count of the encoding.
+			// That is to ensure no UTF character conversion is involved (or necessary) during input/output.
+			// What's in the file is imported as is (eventually byte swapped for BigEndian).
+			ASSERT( fs::GetCharByteCount( encoding ) == sizeof( CharT ) );
 		}
 
 		virtual ~CEncodedFileBuffer()
@@ -69,11 +72,11 @@ namespace io
 
 			if ( isOutput )
 			{
-				m_bom.WriteToFile( filePath );								// write the BOM on output before opening
+				m_bom.WriteToFile( filePath );							// write the BOM on output before opening
 				openMode |= std::ios_base::app;
 			}
 			if ( GetEncoding() != fs::ANSI_UTF8 && GetEncoding() != fs::UTF8_bom )
-				openMode |= std::ios_base::binary;							// force binary mode for wide encodings
+				openMode |= std::ios_base::binary;						// force binary mode for wide encodings
 
 			if ( NULL == open( filePath.GetPtr(), openMode ) )
 				isOutput ? ThrowOpenForWriting( filePath ) : ThrowOpenForReading( filePath );
@@ -84,13 +87,10 @@ namespace io
 			if ( IsBinary() )
 			{
 				m_buffer.resize( BinaryBufferSize );
-				setbuf( &m_buffer[0], m_buffer.size() );					// prevent UTF8 char output conversion: to store wchar_t strings in the buffer
+				setbuf( &m_buffer[0], m_buffer.size() );				// prevent UTF8 char output conversion: to store wchar_t strings in the buffer
 			}
 			if ( IsInput() )
-			{
-				m_itChar = std::istreambuf_iterator< CharT >( this );		// use iterator only for reading
-				std::advance( m_itChar, m_bom.GetScaledSize<CharT>() );		// skip the BOM
-			}
+				Rewind();												// seek reading position just after the BOM
 			return this;
 		}
 
@@ -102,6 +102,24 @@ namespace io
 			m_openMode = 0;
 			m_lastCh = 0;
 			m_itChar = std::istreambuf_iterator< CharT >();
+		}
+
+		virtual void Rewind( void ) throws_( CRuntimeException )
+		{
+			SeekInput( m_bom.GetScaledSize<CharT>() );					// skip the BOM - equivalent to std::advance( m_itChar, m_bom.GetScaledSize<CharT>() )
+			m_itChar = std::istreambuf_iterator< CharT >( this );		// use iterator only for reading
+		}
+
+		TCharSize SeekInput( TCharSize charOffset ) throws_( CRuntimeException )
+		{
+			REQUIRE( is_open() && IsInput() );
+
+			off_type byteOffset = (off_type)pubseekpos( charOffset * sizeof(CharT), std::ios_base::in );		// NOTE: pubseekpos() takes a BYTE offset!
+			if ( std::_BADOFF == byteOffset )
+				throw CRuntimeException( str::Format( _T("Error seeking read position to byte offset %d in text file %s"), byteOffset, m_filePath.GetPtr() ) );
+
+			ENSURE( (size_t)byteOffset == charOffset * sizeof(CharT) );
+			return byteOffset / sizeof(CharT);		// convert back to character offset
 		}
 
 		CharT PeekLast( void ) const { return m_lastCh; }
@@ -243,19 +261,11 @@ namespace io
 			m_pOutStream != NULL && m_pOutStream->rdbuf( m_pOldStreamBuff );
 		}
 
-		CEncodedStreamFileBuffer* Reopen( void ) throws_( CRuntimeException )
+		virtual void Rewind( void ) throws_( CRuntimeException )
 		{
-			ASSERT_PTR( m_pInStream );		// works only with input streams
-			if ( !is_open() )
-				return NULL;
-
-			fs::CPath filePath = m_filePath;
-			std::ios_base::openmode openMode = m_openMode;
-			close();
-
-			__super::Open( filePath, openMode );
-			m_pInStream->clear();		// reset the stream state so that it can be read again
-			return this;
+			ASSERT( m_pInStream != NULL && is_open() );		// works only with input streams
+			m_pInStream->clear();			// clear the EOF state
+			__super::Rewind();
 		}
 	private:
 		std::basic_istream<CharT>* m_pInStream;
