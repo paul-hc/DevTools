@@ -142,7 +142,7 @@ namespace io
 			for ( typename LinesT::const_iterator itLine = lines.begin(), itEnd = lines.end(); itLine != itEnd; ++itLine )
 			{
 				if ( pos++ != 0 )
-					outFile.Append( '\n' );
+					outFile.Put( '\n' );
 
 				AppendText( outFile, *itLine );
 			}

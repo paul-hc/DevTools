@@ -34,11 +34,10 @@ namespace io
 	};
 
 
-	enum { BinaryBufferSize = 512 };
-
-
 	// Input/Output file buffer for text files with BOM (Byte Order Mark), with text-mode translation and byte-swapping.
-	// Intended to be used directly via the io:: template functions (not via a stream).
+	// Intended to be used directly via the io template functions (not via a stream, unformatted).
+	// CharT has to match the byte count of the encoding, to ensure no UTF character conversion is involved (or necessary) during input/output.
+	// The file content is handled as is (eventually byte swapped for BigEndian encodings).
 	//
 	template< typename CharT >
 	class CEncodedFileBuffer
@@ -48,6 +47,8 @@ namespace io
 		typedef std::basic_filebuf<CharT> TBaseFileBuf;
 		typedef typename TBaseFileBuf::traits_type TTraits;
 
+		enum { BinaryBufferSize = 512 };
+
 		using TBaseFileBuf::open;		// hidden
 	public:
 		CEncodedFileBuffer( fs::Encoding encoding )
@@ -55,8 +56,6 @@ namespace io
 			, m_lastCh( 0 )
 		{
 			// Design assumption: the file buffer CharT has to match the byte count of the encoding.
-			// That is to ensure no UTF character conversion is involved (or necessary) during input/output.
-			// What's in the file is imported as is (eventually byte swapped for BigEndian).
 			ASSERT( fs::GetCharByteCount( encoding ) == sizeof( CharT ) );
 		}
 
@@ -67,16 +66,16 @@ namespace io
 		}
 
 		CEncodedFileBuffer* Open( const fs::CPath& filePath, std::ios_base::openmode openMode ) throws_( CRuntimeException )
-		{
+		{	// open a file for output or input - the open mode specifics are handled internally, so openMode should be either ios::in or ios::out
 			bool isOutput = HasFlag( openMode, std::ios_base::out );
 
 			if ( isOutput )
 			{
-				m_bom.WriteToFile( filePath );							// write the BOM on output before opening
+				m_bom.WriteToFile( filePath );			// write the BOM on output before opening
 				openMode |= std::ios_base::app;
 			}
-			if ( GetEncoding() != fs::ANSI_UTF8 && GetEncoding() != fs::UTF8_bom )
-				openMode |= std::ios_base::binary;						// force binary mode for wide encodings
+			if ( fs::GetCharByteCount( GetEncoding() ) != sizeof( char ) )	// wide encoded file? (not fs::ANSI_UTF8 nor fs::UTF8_bom)
+				openMode |= std::ios_base::binary;		// force binary mode for wide encodings
 
 			if ( NULL == open( filePath.GetPtr(), openMode ) )
 				isOutput ? ThrowOpenForWriting( filePath ) : ThrowOpenForReading( filePath );
@@ -85,12 +84,12 @@ namespace io
 			m_openMode = openMode;
 
 			if ( IsBinary() )
-			{
+			{	// prevent UTF8 char in/out conversion: to store wchar_t strings in the buffer
 				m_buffer.resize( BinaryBufferSize );
-				setbuf( &m_buffer[0], m_buffer.size() );				// prevent UTF8 char output conversion: to store wchar_t strings in the buffer
+				setbuf( &m_buffer[0], m_buffer.size() );
 			}
 			if ( IsInput() )
-				Rewind();												// seek reading position just after the BOM
+				Rewind();								// seek reading position just after the BOM
 			return this;
 		}
 
@@ -125,10 +124,33 @@ namespace io
 		CharT PeekLast( void ) const { return m_lastCh; }
 
 
+		// writing - strictly file buffer based, not on an ostream
+
+		void Put( CharT chr ) throws_( CRuntimeException )
+		{	// put a character; translate line-end in binary mode
+			if ( IsBinary() && '\n' == chr )
+				if ( 0 == m_lastCh || m_lastCh != '\r' )	// not an "\r\n" explicit sequence?
+					DoPutChar( '\r' );			// translate sequence "\n" -> "\r\n"
+
+			DoPutChar( chr );
+			m_lastCh = chr;
+		}
+
+		void Append( const CharT* pText, size_t count = utl::npos ) throws_( CRuntimeException )
+		{	// append a sequence of characters
+			ASSERT_PTR( pText );
+
+			while ( *pText != 0 && count-- != 0 )
+				Put( *pText++ );
+		}
+
+		void AppendString( const std::basic_string< CharT >& text ) { Append( text.c_str(), text.length() ); }
+
+
 		// reading - strictly file buffer based, not on an istream
 
 		CharT GetNext( void )
-		{
+		{	// get next character and advance current position
 			ASSERT( IsInput() );
 
 			CharT chr = 0;
@@ -142,8 +164,8 @@ namespace io
 			return chr;
 		}
 
-		bool GetString( std::basic_string< CharT >& rText, CharT delim = 0 )
-		{
+		bool GetString( std::basic_string<CharT>& rText, CharT delim = 0 )
+		{	// get a string; optionally up to and excluding the delimiter, and advance current position past the delimiter
 			rText.clear();
 
 			for ( ;; )
@@ -167,7 +189,7 @@ namespace io
 			}
 		}
 
-		bool GetLine( std::basic_string< CharT >& rLine ) { return GetString( rLine, '\n' ); }
+		bool GetLine( std::basic_string<CharT>& rLine ) { return GetString( rLine, '\n' ); }
 
 		CharT PushLast( CharT lastCh )
 		{
@@ -181,31 +203,8 @@ namespace io
 			m_lastCh = 0;
 			return lastCh;
 		}
-
-
-		// writing - strictly file buffer based, not on an ostream
-
-		virtual void Append( CharT chr ) throws_( CRuntimeException )
-		{
-			if ( IsBinary() && '\n' == chr )
-				if ( 0 == m_lastCh || m_lastCh != '\r' )	// not an "\r\n" explicit sequence?
-					PutChar( '\r' );			// translate sequence "\n" -> "\r\n"
-
-			PutChar( chr );
-			m_lastCh = chr;
-		}
-
-		virtual void Append( const CharT* pText, size_t count = utl::npos ) throws_( CRuntimeException )
-		{
-			ASSERT_PTR( pText );
-
-			while ( *pText != 0 && count-- != 0 )
-				Append( *pText++ );
-		}
-
-		void AppendString( const std::basic_string< CharT >& text ) { Append( text.c_str(), text.length() ); }
 	private:
-		void PutChar( CharT chr ) throws_( CRuntimeException )
+		void DoPutChar( CharT chr ) throws_( CRuntimeException )
 		{
 			ASSERT( IsOutput() );
 
@@ -220,7 +219,7 @@ namespace io
 	};
 
 
-	// Stream version of encoded file buffer for text files with BOM (Byte Order Mark).
+	// Stream version of encoded file buffer for text files with BOM (Byte Order Mark), capable of formatted io.
 	// Limited use via io::GetLine() function with an istream; problematic due to having to pick the CharT matching the encoding.
 	//
 	template< typename CharT >
