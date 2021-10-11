@@ -41,7 +41,7 @@ static const char s_helpMessage[] =
 	"\n"
 	"Written by Paul Cocoveanu, 2021.\n"
 	"\n"
-	"TreePlus [dir_path] [-f] [-ns] [-gs=G|A|B] [-l=N] [-max=FN] [-no]\n"
+	"TreePlus [dir_path] [-f] [-ns] [-gs=G|A|B] [-l=N] [-max=FN] [-no] [-p]\n"
 	"         [-e=ANSI|UTF8|UTF16]\n"
 	"\n"
 	"  dir_path\n"
@@ -67,6 +67,8 @@ static const char s_helpMessage[] =
 	"        - UTF8, UTF16 and UTF16-BE uses BOM (Byte Order Mark).\n"
 	"  -no\n"
 	"      No output (for performance profiling).\n"
+	"  -p\n"
+	"      Pause at completion.\n"
 	"  -? or -h\n"
 	"      Display this help screen.\n"
 #ifdef USE_UT
@@ -74,8 +76,6 @@ static const char s_helpMessage[] =
 	"DEBUG BUILD:\n"
 	"  -ut\n"
 	"      Run the unit tests.\n"
-	"  -p\n"
-	"      Pause at completion (for debugging).\n"
 #endif
 	;
 

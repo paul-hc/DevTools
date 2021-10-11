@@ -171,9 +171,9 @@ namespace io
 	char PressAnyKey( const char* pMessage /*= "Press any key to continue..."*/ )
 	{
 		if ( pMessage != NULL )
-		{
-			CScopedRedirectStream scopedRedirect( std::cout );
-			std::cout << pMessage << std::endl;
+		{	// use std::cerr to avoid output when redirecting output to file
+			CScopedRedirectStream scopedRedirect( std::cerr );
+			std::cerr << pMessage << std::endl;
 		}
 
 		return io::InputUserKey( false );
@@ -184,19 +184,20 @@ namespace io
 
 	bool CUserQuery::Ask( const std::tstring& assetName )
 	{
-		CScopedRedirectStream scopedRedirect( std::cout );
+		CScopedRedirectStream scopedRedirect( std::cerr );
 
 		ASSERT( MustAsk() );
 
+		// use std::cerr to avoid output when redirecting output to file
 		if ( !m_promptPrefix.empty() )
 		{
-			std::cout << m_promptPrefix;
+			std::cerr << m_promptPrefix;
 
 			if ( !::_istspace( m_promptPrefix[ m_promptPrefix.length() - 1 ] ) )
-				std::cout << _T(' ');
+				std::cerr << _T(' ');
 		}
 
-		std::cout << assetName << " ? (" << GetTags_UserChoices().FormatUi( m_choices ) << "): ";
+		std::cerr << assetName << " ? (" << GetTags_UserChoices().FormatUi( m_choices ) << "): " << std::flush;
 
 		while ( m_ask )
 			switch ( io::InputUserKey() )
@@ -216,7 +217,7 @@ namespace io
 					}
 					// fall-through
 				default:
-					std::cout << '? ';			// ask again
+					std::cerr << '? ' << std::flush;		// ask again
 			}
 
 		ASSERT( false );
