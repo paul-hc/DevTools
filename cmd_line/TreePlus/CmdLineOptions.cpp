@@ -19,7 +19,7 @@ namespace app
 CCmdLineOptions::CCmdLineOptions( void )
 	: m_pArg( NULL )
 	, m_optionFlags( 0 )
-	, m_guidesProfileType( Graphical )
+	, m_guidesProfileType( GraphGuides )
 	, m_maxDepthLevel( utl::npos )
 	, m_maxDirFiles( utl::npos )
 	, m_fileEncoding( fs::ANSI_UTF8 )
@@ -58,16 +58,18 @@ void CCmdLineOptions::ParseCommandLine( int argc, TCHAR* argv[] ) throws_( CRunt
 
 			if ( arg::Equals( pSwitch, _T("f") ) )
 				SetFlag( m_optionFlags, app::DisplayFiles );
+			else if ( arg::Equals( pSwitch, _T("h") ) )
+				SetFlag( m_optionFlags, app::ShowHiddenNodes );
 			else if ( arg::Equals( pSwitch, _T("ns") ) )
 				SetFlag( m_optionFlags, app::NoSorting );
 			else if ( ParseValue( value, pSwitch, _T("gs") ) )
 			{
 				if ( arg::Equals( value.c_str(), _T("G") ) )
-					m_guidesProfileType = Graphical;
+					m_guidesProfileType = GraphGuides;
 				else if ( arg::Equals( value.c_str(), _T("A") ) )
-					m_guidesProfileType = NormalAscii;
+					m_guidesProfileType = AsciiGuides;
 				else if ( arg::Equals( value.c_str(), _T("B") ) )
-					m_guidesProfileType = BlankSpace;
+					m_guidesProfileType = BlankGuides;
 				else
 					ThrowInvalidArgument();
 			}

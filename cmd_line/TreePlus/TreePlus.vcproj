@@ -100,6 +100,87 @@
 			/>
 		</Configuration>
 		<Configuration
+			Name="DebugU|x64"
+			OutputDirectory="$(ProjectDir)bin\$(PlatformName)_$(ConfigurationName)"
+			IntermediateDirectory="bin\$(PlatformName)_$(ConfigurationName)"
+			ConfigurationType="1"
+			UseOfMFC="0"
+			ATLMinimizesCRunTimeLibraryUsage="false"
+			CharacterSet="1"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+				TargetEnvironment="3"
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				Optimization="0"
+				AdditionalIncludeDirectories=".;../../CommonUtl;$(UTL_INCLUDE)"
+				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE"
+				MinimalRebuild="true"
+				BasicRuntimeChecks="3"
+				RuntimeLibrary="1"
+				UsePrecompiledHeader="2"
+				PrecompiledHeaderThrough="stdafx.h"
+				PrecompiledHeaderFile="$(IntDir)\$(TargetName).pch"
+				BrowseInformation="0"
+				WarningLevel="4"
+				SuppressStartupBanner="true"
+				DebugInformationFormat="3"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLinkerTool"
+				LinkIncremental="2"
+				SuppressStartupBanner="true"
+				AdditionalLibraryDirectories="$(UTL_INCLUDE)\lib\64"
+				GenerateDebugInformation="true"
+				SubSystem="1"
+				TargetMachine="17"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
+		</Configuration>
+		<Configuration
 			Name="ReleaseU|Win32"
 			OutputDirectory="$(ProjectDir)bin\$(PlatformName)_$(ConfigurationName)"
 			IntermediateDirectory="bin\$(PlatformName)_$(ConfigurationName)"
@@ -163,87 +244,6 @@
 				LinkTimeCodeGeneration="1"
 				DataExecutionPrevention="0"
 				TargetMachine="1"
-			/>
-			<Tool
-				Name="VCALinkTool"
-			/>
-			<Tool
-				Name="VCManifestTool"
-			/>
-			<Tool
-				Name="VCXDCMakeTool"
-			/>
-			<Tool
-				Name="VCBscMakeTool"
-			/>
-			<Tool
-				Name="VCFxCopTool"
-			/>
-			<Tool
-				Name="VCAppVerifierTool"
-			/>
-			<Tool
-				Name="VCPostBuildEventTool"
-			/>
-		</Configuration>
-		<Configuration
-			Name="DebugU|x64"
-			OutputDirectory="$(ProjectDir)bin\$(PlatformName)_$(ConfigurationName)"
-			IntermediateDirectory="bin\$(PlatformName)_$(ConfigurationName)"
-			ConfigurationType="1"
-			UseOfMFC="0"
-			ATLMinimizesCRunTimeLibraryUsage="false"
-			CharacterSet="1"
-			>
-			<Tool
-				Name="VCPreBuildEventTool"
-			/>
-			<Tool
-				Name="VCCustomBuildTool"
-			/>
-			<Tool
-				Name="VCXMLDataGeneratorTool"
-			/>
-			<Tool
-				Name="VCWebServiceProxyGeneratorTool"
-			/>
-			<Tool
-				Name="VCMIDLTool"
-				TargetEnvironment="3"
-			/>
-			<Tool
-				Name="VCCLCompilerTool"
-				Optimization="0"
-				AdditionalIncludeDirectories=".;../../CommonUtl;$(UTL_INCLUDE)"
-				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE"
-				MinimalRebuild="true"
-				BasicRuntimeChecks="3"
-				RuntimeLibrary="1"
-				UsePrecompiledHeader="2"
-				PrecompiledHeaderThrough="stdafx.h"
-				PrecompiledHeaderFile="$(IntDir)\$(TargetName).pch"
-				BrowseInformation="0"
-				WarningLevel="4"
-				SuppressStartupBanner="true"
-				DebugInformationFormat="3"
-			/>
-			<Tool
-				Name="VCManagedResourceCompilerTool"
-			/>
-			<Tool
-				Name="VCResourceCompilerTool"
-			/>
-			<Tool
-				Name="VCPreLinkEventTool"
-			/>
-			<Tool
-				Name="VCLinkerTool"
-				LinkIncremental="2"
-				SuppressStartupBanner="true"
-				AdditionalLibraryDirectories="$(UTL_INCLUDE)\lib\64"
-				GenerateDebugInformation="true"
-				SubSystem="1"
-				TargetMachine="17"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -375,7 +375,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="ReleaseU|Win32"
+					Name="DebugU|x64"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -383,7 +383,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="DebugU|x64"
+					Name="ReleaseU|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -415,7 +415,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="ReleaseU|Win32"
+					Name="DebugU|x64"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -423,7 +423,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="DebugU|x64"
+					Name="ReleaseU|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -456,14 +456,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\GuidesOutput.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\GuidesOutput.h"
-				>
-			</File>
-			<File
 				RelativePath=".\stdafx.cpp"
 				>
 				<FileConfiguration
@@ -475,7 +467,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="ReleaseU|Win32"
+					Name="DebugU|x64"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -483,7 +475,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="DebugU|x64"
+					Name="ReleaseU|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -501,6 +493,14 @@
 			</File>
 			<File
 				RelativePath=".\stdafx.h"
+				>
+			</File>
+			<File
+				RelativePath=".\TreeGuides.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\TreeGuides.h"
 				>
 			</File>
 		</Filter>

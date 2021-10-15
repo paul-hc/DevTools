@@ -56,13 +56,15 @@ namespace fs
 
 			if ( finder.IsDirectory() )
 			{
-				if ( !finder.IsDots() )						// skip "." and ".." dir entries
-					subDirPaths.push_back( fs::CPath( foundPath ) );
+				if ( !finder.IsDots() )							// skip "." and ".." dir entries
+					if ( pEnumerator->IncludeNode( finder ) )	// pass found sub-dir filter?
+						subDirPaths.push_back( fs::CPath( foundPath ) );
 			}
 			else
 			{
-				if ( path::MatchWildcard( foundPath.c_str(), pWildSpec ) )
-					pEnumerator->AddFile( finder );
+				if ( pEnumerator->IncludeNode( finder ) )		// pass found file filter?
+					if ( path::MatchWildcard( foundPath.c_str(), pWildSpec ) )
+						pEnumerator->AddFile( finder );
 			}
 		}
 

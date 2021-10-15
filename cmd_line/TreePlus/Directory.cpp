@@ -2,10 +2,9 @@
 #include "stdafx.h"
 #include "Directory.h"
 #include "CmdLineOptions.h"
-#include "GuidesOutput.h"
+#include "TreeGuides.h"
 #include "utl/FileEnumerator.h"
 #include <iostream>
-#include <iomanip>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -19,8 +18,9 @@ namespace impl
 		CEnumerator( const CCmdLineOptions& options ) : m_options( options ), m_moreFilesCount( 0 ) {}
 
 		// IEnumerator interface
-		virtual void AddFoundFile( const TCHAR* pFilePath );
+		virtual bool IncludeNode( const CFileFind& foundNode );
 		virtual bool AddFoundSubDir( const TCHAR* pSubDirPath );
+		virtual void AddFoundFile( const TCHAR* pFilePath );
 
 		void OnCompleted( void );
 	private:
@@ -33,6 +33,15 @@ namespace impl
 
 
 	// CEnumerator implementation
+
+	bool CEnumerator::IncludeNode( const CFileFind& foundNode )
+	{
+		if ( foundNode.IsHidden() )
+			if ( !m_options.HasOptionFlag( app::ShowHiddenNodes ) )
+				return false;
+
+		return true;
+	}
 
 	void CEnumerator::AddFoundFile( const TCHAR* pFilePath )
 	{
@@ -69,20 +78,20 @@ namespace impl
 const TCHAR CDirectory::s_wildSpec[] = _T("*");
 
 CDirectory::CDirectory( const CCmdLineOptions& options )
-	: m_dirPath( options.m_dirPath )
-	, m_level( 0 )
-	, m_options( options )
+	: m_options( options )
+	, m_dirPath( m_options.m_dirPath )
+	, m_depth( 0 )
 {
 }
 
 CDirectory::CDirectory( const CDirectory* pParent, const fs::CPath& subDirPath )
-	: m_dirPath( subDirPath )
-	, m_level( pParent->m_level + 1 )
-	, m_options( pParent->m_options )
+	: m_options( pParent->m_options )
+	, m_dirPath( subDirPath )
+	, m_depth( pParent->m_depth + 1 )
 {
 }
 
-void CDirectory::List( std::wostream& os, const CGuideParts& guideParts, const std::wstring& parentNodePrefix )
+void CDirectory::List( std::wostream& os, const CTreeGuides& guideParts, const std::wstring& parentNodePrefix )
 {
 	impl::CEnumerator found( m_options );
 
@@ -92,19 +101,17 @@ void CDirectory::List( std::wostream& os, const CGuideParts& guideParts, const s
 	if ( m_options.HasOptionFlag( app::DisplayFiles ) && !m_options.HasOptionFlag( app::NoOutput ) )
 		if ( !found.m_filePaths.empty() )
 		{
-			std::tstring fileFullPrefix = parentNodePrefix + guideParts.GetFilePrefix( !found.m_subDirPaths.empty() );
+			std::wstring fullPrefix = parentNodePrefix + guideParts.GetFilePrefix( !found.m_subDirPaths.empty() );
 
-			for ( CPagePos filePos( found.m_filePaths ); !filePos.AtEnd(); ++filePos )
+			for ( size_t pos = 0; pos != found.m_filePaths.size(); ++pos )
 				os
-					<< fileFullPrefix
-					<< found.m_filePaths[ filePos.m_pos ].GetFilenamePtr()
+					<< fullPrefix
+					<< found.m_filePaths[ pos ].GetFilenamePtr()
 					<< std::endl;
 
-			if ( !str::TrimRight( fileFullPrefix ).empty() )		// remove trailing spaces on empty line
-				os << fileFullPrefix << std::endl;
+			if ( !str::TrimRight( fullPrefix ).empty() )		// remove trailing spaces on empty line
+				os << fullPrefix << std::endl;
 		}
-
-	size_t deepLevel = m_level + 1;
 
 	for ( CPagePos subDirPos( found.m_subDirPaths ); !subDirPos.AtEnd(); ++subDirPos )
 	{
@@ -116,8 +123,8 @@ void CDirectory::List( std::wostream& os, const CGuideParts& guideParts, const s
 				<< subDirPath.GetFilenamePtr()
 				<< std::endl;
 
-		if ( deepLevel < m_options.m_maxDepthLevel )
-		{
+		if ( m_depth + 1 < m_options.m_maxDepthLevel )
+		{	// recurse
 			CDirectory subDirectory( this, subDirPath );
 			subDirectory.List( os, guideParts, parentNodePrefix + guideParts.GetSubDirRecursePrefix( subDirPos ) );
 		}

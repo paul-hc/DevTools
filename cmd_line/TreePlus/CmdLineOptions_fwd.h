@@ -12,14 +12,15 @@ namespace app
 		PauseAtEnd			= BIT_FLAG( 2 ),
 
 		DisplayFiles		= BIT_FLAG( 8 ),
-		NoSorting			= BIT_FLAG( 9 ),		// display the files in the existing order
-		NoOutput			= BIT_FLAG( 10 )		// for timing just the file enumeration (no std output)
+		ShowHiddenNodes		= BIT_FLAG( 9 ),
+		NoSorting			= BIT_FLAG( 10 ),		// display the files in the existing order
+		NoOutput			= BIT_FLAG( 11 )		// for timing just the file enumeration (no std output)
 	};
 	typedef int TOption;
 }
 
 
-enum GuidesProfileType { NormalAscii, Graphical, BlankSpace,  _ProfileCount };
+enum GuidesProfileType { GraphGuides, AsciiGuides, BlankGuides,  _ProfileCount };
 
 
 #endif // CmdLineOptions_fwd_h

@@ -1,5 +1,5 @@
-#ifndef GuidesOutput_h
-#define GuidesOutput_h
+#ifndef TreeGuides_h
+#define TreeGuides_h
 #pragma once
 
 #include "CmdLineOptions_fwd.h"
@@ -41,18 +41,20 @@ public:
 };
 
 
-struct CGuideParts
+class CTreeGuides
 {
-	CGuideParts( GuidesProfileType profileType, size_t tabSize );
+public:
+	CTreeGuides( GuidesProfileType profileType, size_t indentSize );
 
 	const std::wstring& GetFilePrefix( bool hasMoreSubDirs ) const { return hasMoreSubDirs ? m_fileIndent : m_fileIndentLast; }
+
 	const std::wstring& GetSubDirPrefix( const CPagePos& subDirPos ) const { return subDirPos.IsLast() ? m_dirEntryLast : m_dirEntry; }
 	const std::wstring& GetSubDirRecursePrefix( const CPagePos& subDirPos ) const { return subDirPos.IsLast() ? m_fileIndentLast : m_fileIndent; }
 private:
-	std::wstring MakePart( size_t tabSize, wchar_t leadCh, wchar_t padCh ) const;
+	std::wstring MakePart( size_t indentSize, wchar_t leadCh, wchar_t padCh ) const;
 private:
 	const CGuidesProfile& m_profile;
-public:
+
 	const std::wstring m_dirEntry;				// "+---"
 	const std::wstring m_dirEntryLast;			// "\---"
 	const std::wstring m_fileIndent;			// "|   "
@@ -60,4 +62,4 @@ public:
 };
 
 
-#endif // GuidesOutput_h
+#endif // TreeGuides_h

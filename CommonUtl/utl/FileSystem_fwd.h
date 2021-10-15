@@ -34,6 +34,7 @@ namespace fs
 		virtual bool AddFoundSubDir( const TCHAR* pSubDirPath ) { pSubDirPath; return true; }
 
 		// advanced, provides extra info
+		virtual bool IncludeNode( const CFileFind& foundNode ) { foundNode; return true; }
 		virtual void AddFile( const CFileFind& foundFile ) { AddFoundFile( foundFile.GetFilePath() ); }
 
 		// override to find first file, then abort searching

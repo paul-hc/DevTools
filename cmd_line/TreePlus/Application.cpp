@@ -4,7 +4,7 @@
 #include "Application.h"
 #include "CmdLineOptions.h"
 #include "Directory.h"
-#include "GuidesOutput.h"
+#include "TreeGuides.h"
 #include "utl/ConsoleApplication.h"
 #include "utl/StdOutput.h"
 #include "utl/StringUtilities.h"
@@ -41,7 +41,7 @@ static const char s_helpMessage[] =
 	"\n"
 	"Written by Paul Cocoveanu, 2021.\n"
 	"\n"
-	"TreePlus [dir_path] [-f] [-ns] [-gs=G|A|B] [-l=N] [-max=FN] [-no] [-p]\n"
+	"TreePlus [dir_path] [-f] [-h] [-ns] [-gs=G|A|B] [-l=N] [-max=FN] [-no] [-p]\n"
 	"         [-e=ANSI|UTF8|UTF16]\n"
 	"\n"
 	"  dir_path\n"
@@ -50,6 +50,8 @@ static const char s_helpMessage[] =
 	"      Write output to text file using UTF8 encoding with BOM.\n"
 	"  -f\n"
 	"      Display the names of the files in each folder.\n"
+	"  -h\n"
+	"      Include hidden files.\n"
 	"  -ns\n"
 	"      No sorting of the directory and file names.\n"
 	"  -gs=G|A|B\n"
@@ -88,9 +90,9 @@ namespace app
 
 		os << options.m_dirPath.GetPtr() << std::endl;			// print the root directory
 
-		CGuideParts guideParts( options.m_guidesProfileType, 4 );
+		CTreeGuides guideParts( options.m_guidesProfileType, 4 );
 
-		topDirectory.List( os, guideParts, std::wstring() );
+		topDirectory.ListContents( os, guideParts );
 		os.flush();			// just in case is using '\n' instead of std::endl
 	}
 
