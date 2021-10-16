@@ -63,6 +63,7 @@ namespace std
 	typedef wifstream tifstream;
 	typedef wostream tostream;
 	typedef wostringstream tostringstream;
+	typedef wstringstream tstringstream;
 	typedef wofstream tofstream;
 
 	#define tcout wcout
@@ -77,6 +78,7 @@ namespace std
 	typedef ifstream tifstream;
 	typedef ostream tostream;
 	typedef ostringstream tostringstream;
+	typedef stringstream tstringstream;
 	typedef ofstream tofstream;
 
 	#define tcout cout

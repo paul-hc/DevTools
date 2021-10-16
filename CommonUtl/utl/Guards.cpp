@@ -64,4 +64,20 @@ namespace utl
 		m_timer.Restart();
 		return slow;
 	}
+
+
+	// CMultiStageTimer implementation
+
+	const TCHAR CMultiStageTimer::s_totalExecTag[] = _T("Total execution time");
+
+	void CMultiStageTimer::AddStage( const TCHAR tag[] )
+	{
+		AddCheckpoint( tag, m_stageTimer.ElapsedSeconds() );
+		m_stageTimer.Restart();
+	}
+
+	void CMultiStageTimer::AddCheckpoint( const TCHAR tag[], double externalElapsedSecs )
+	{
+		m_os << tag << _T(": ") << CTimer::FormatSeconds( externalElapsedSecs ) << std::endl;
+	}
 }

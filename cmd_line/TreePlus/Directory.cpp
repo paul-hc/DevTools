@@ -4,6 +4,7 @@
 #include "CmdLineOptions.h"
 #include "TreeGuides.h"
 #include "utl/FileEnumerator.h"
+#include "utl/Timer.h"
 #include <iostream>
 
 #ifdef _DEBUG
@@ -76,12 +77,14 @@ namespace impl
 
 
 const TCHAR CDirectory::s_wildSpec[] = _T("*");
+double CDirectory::s_totalElapsedEnum = 0.0;
 
 CDirectory::CDirectory( const CCmdLineOptions& options )
 	: m_options( options )
 	, m_dirPath( m_options.m_dirPath )
 	, m_depth( 0 )
 {
+	s_totalElapsedEnum = 0.0;
 }
 
 CDirectory::CDirectory( const CDirectory* pParent, const fs::CPath& subDirPath )
@@ -94,9 +97,11 @@ CDirectory::CDirectory( const CDirectory* pParent, const fs::CPath& subDirPath )
 void CDirectory::List( std::wostream& os, const CTreeGuides& guideParts, const std::wstring& parentNodePrefix )
 {
 	impl::CEnumerator found( m_options );
+	CTimer enumTimer;
 
 	fs::EnumFiles( &found, m_dirPath, s_wildSpec, Shallow, false );
 	found.OnCompleted();
+	s_totalElapsedEnum += enumTimer.ElapsedSeconds();
 
 	if ( m_options.HasOptionFlag( app::DisplayFiles ) && !m_options.HasOptionFlag( app::NoOutput ) )
 		if ( !found.m_filePaths.empty() )

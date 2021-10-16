@@ -6,6 +6,7 @@
 #include "Directory.h"
 #include "TreeGuides.h"
 #include "utl/ConsoleApplication.h"
+#include "utl/Guards.h"
 #include "utl/StdOutput.h"
 #include "utl/StringUtilities.h"
 #include "utl/TextEncoding.h"
@@ -42,7 +43,7 @@ static const char s_helpMessage[] =
 	"Written by Paul Cocoveanu, 2021.\n"
 	"\n"
 	"TreePlus [dir_path] [-f] [-h] [-ns] [-gs=G|A|B] [-l=N] [-max=FN] [-no] [-p]\n"
-	"         [-e=ANSI|UTF8|UTF16]\n"
+	"         [-e=ANSI|UTF8|UTF16] [-t]\n"
 	"\n"
 	"  dir_path\n"
 	"      [drive:][path] - directory path to display.\n"
@@ -69,6 +70,8 @@ static const char s_helpMessage[] =
 	"        - UTF8, UTF16 and UTF16-BE uses BOM (Byte Order Mark).\n"
 	"  -no\n"
 	"      No output (for performance profiling).\n"
+	"  -t\n"
+	"      Display execution timing statistics.\n"
 	"  -p\n"
 	"      Pause at completion.\n"
 	"  -? or -h\n"
@@ -125,11 +128,21 @@ int _tmain( int argc, TCHAR* argv[] )
 			app::RunTests();
 		else
 		{
+			utl::CMultiStageTimer timer;
+
 			std::wstringstream os;
 			app::RunMain( os, options );
+			timer.AddStage( _T("Main execution") );
 
 			io::CStdOutput& rStdOutput = application.GetStdOutput();
 			rStdOutput.Write( os.str(), options.m_fileEncoding );
+			timer.AddStage( _T("Output execution") );
+
+			if ( options.HasOptionFlag( app::ShowExecTimeStats ) )
+			{
+				timer.AddCheckpoint( _T("Search for files"), CDirectory::GetTotalElapsedEnum() );
+				timer.Report( std::wclog << std::endl );
+			}
 		}
 
 		if ( options.HasOptionFlag( app::PauseAtEnd ) )

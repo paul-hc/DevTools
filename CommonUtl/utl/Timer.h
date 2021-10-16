@@ -14,10 +14,10 @@ public:
 	void Restart( void ) { m_startTime = std::clock(); }
 	void SubtractByElapsed( const CTimer& nestedTimer ) { m_startTime += nestedTimer.Elapsed(); }		// e.g. for excluding from a timed operation the user prompt time (message-box)
 
-	std::tstring FormatElapsedSeconds( unsigned int precision = 3, const TCHAR fmtSeconds[] = s_fmtSeconds ) const { FormatSeconds( ElapsedSeconds(), precision, fmtSeconds ); }
+	std::tstring FormatElapsedSeconds( unsigned int precision = 3, const TCHAR fmtSeconds[] = s_fmtSeconds ) const { return FormatSeconds( ElapsedSeconds(), precision, fmtSeconds ); }
 	std::tstring FormatElapsedDuration( unsigned int precision = 0, const TCHAR* pFmtTimeSpan = s_fmtTimeSpan ) const { return FormatElapsedTimeSpan( ElapsedSeconds(), precision, pFmtTimeSpan ); }
 
-	static std::tstring FormatSeconds( double elapsedSeconds, unsigned int precision, const TCHAR fmtSeconds[] = s_fmtSeconds );
+	static std::tstring FormatSeconds( double elapsedSeconds, unsigned int precision = 3, const TCHAR fmtSeconds[] = s_fmtSeconds );
 	static std::tstring FormatElapsedTimeSpan( double elapsedSeconds, unsigned int precision = 0, const TCHAR* pFmtTimeSpan = s_fmtTimeSpan );		// "N seconds ([D days ][H:]M::SS)"
 	static std::tstring FormatTimeSpan( time_t elapsedSeconds );																					// "[D days ][H:]M::SS"
 private:

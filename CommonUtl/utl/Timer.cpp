@@ -11,7 +11,7 @@
 const TCHAR CTimer::s_fmtSeconds[] = _T("%s seconds");
 const TCHAR CTimer::s_fmtTimeSpan[] = _T(" (%s)");
 
-std::tstring CTimer::FormatSeconds( double elapsedSeconds, unsigned int precision, const TCHAR fmtSeconds[] /*= s_fmtSeconds*/ )
+std::tstring CTimer::FormatSeconds( double elapsedSeconds, unsigned int precision /*= 3*/, const TCHAR fmtSeconds[] /*= s_fmtSeconds*/ )
 {
 	return str::Format( fmtSeconds, num::FormatDouble( elapsedSeconds, precision, str::GetUserLocale() ).c_str() );
 }

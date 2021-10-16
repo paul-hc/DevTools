@@ -18,6 +18,8 @@ public:
 	CDirectory( const CCmdLineOptions& options );		// root node constructor
 
 	void ListContents( std::wostream& os, const CTreeGuides& guideParts ) { List( os, guideParts, std::wstring() ); }
+
+	static double GetTotalElapsedEnum( void ) { return s_totalElapsedEnum; }
 private:
 	const CCmdLineOptions& m_options;
 
@@ -25,6 +27,7 @@ private:
 	size_t m_depth;
 
 	static const TCHAR s_wildSpec[];
+	static double s_totalElapsedEnum;		// total elapsed time in seconds spent enumerating files
 };
 
 

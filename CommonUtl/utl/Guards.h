@@ -12,7 +12,7 @@ namespace utl
 {
 	// always displays elapsed time for a section scope
 	//
-	class CSectionGuard : public utl::noncopyable
+	class CSectionGuard : private utl::noncopyable
 	{
 	public:
 		CSectionGuard( const std::tstring& sectionName, bool logging = false );
@@ -27,7 +27,7 @@ namespace utl
 
 	// displays elapsed time for a section scope if timeout is exceeded
 	//
-	class CSlowSectionGuard : public utl::noncopyable
+	class CSlowSectionGuard : private utl::noncopyable
 	{
 	public:
 		CSlowSectionGuard( const std::tstring& context, double timeoutSecs = 1.0 ) : m_context( context ), m_timeoutSecs( timeoutSecs ) {}
@@ -41,7 +41,43 @@ namespace utl
 		double m_timeoutSecs;
 		CTimer m_timer;
 	};
+
+
+	// logs internally various stages and other checkpoints, and times the cummulative execution time in seconds in a given scope
+	//
+	class CMultiStageTimer : private utl::noncopyable
+	{
+	public:
+		CMultiStageTimer( const TCHAR* pTotalExecTag = s_totalExecTag ) : m_pTotalExecTag( pTotalExecTag ) {}
+
+		void AddStage( const TCHAR tag[] );
+		void AddCheckpoint( const TCHAR tag[], double elapsedSecs );
+
+		// output logging
+		std::tstring GetOutput( void ) const { return m_os.str(); }
+
+		template< typename OStreamT >
+		OStreamT& Report( OStreamT& os )
+		{
+			if ( !str::IsEmpty( m_pTotalExecTag ) )
+				AddCheckpoint( m_pTotalExecTag, m_totalTimer.ElapsedSeconds() );
+
+			return os << m_os.str();
+		}
+	private:
+		CTimer m_totalTimer;				// times overall execution time
+		CTimer m_stageTimer;				// times each stage
+		const TCHAR* m_pTotalExecTag;
+		std::tostringstream m_os;
+
+		static const TCHAR s_totalExecTag[];
+	};
 }
+
+
+#include <iosfwd>
+
+
 
 
 #endif // Guards_h

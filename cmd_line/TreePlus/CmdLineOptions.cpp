@@ -95,6 +95,8 @@ void CCmdLineOptions::ParseCommandLine( int argc, TCHAR* argv[] ) throws_( CRunt
 				SetFlag( m_optionFlags, app::HelpMode );
 				return;
 			}
+			else if ( arg::Equals( pSwitch, _T("t") ) )
+				SetFlag( m_optionFlags, app::ShowExecTimeStats );
 			else if ( arg::Equals( pSwitch, _T("p") ) )
 				SetFlag( m_optionFlags, app::PauseAtEnd );
 		#ifdef USE_UT

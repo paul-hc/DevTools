@@ -9,7 +9,8 @@ namespace app
 	{
 		HelpMode			= BIT_FLAG( 0 ),
 		UnitTestMode		= BIT_FLAG( 1 ),
-		PauseAtEnd			= BIT_FLAG( 2 ),
+		ShowExecTimeStats	= BIT_FLAG( 2 ),
+		PauseAtEnd			= BIT_FLAG( 3 ),
 
 		DisplayFiles		= BIT_FLAG( 8 ),
 		ShowHiddenNodes		= BIT_FLAG( 9 ),
