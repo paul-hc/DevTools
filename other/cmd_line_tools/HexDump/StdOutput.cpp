@@ -108,7 +108,7 @@ namespace io
 			const char* pEol = str::FindTokenEnd( pText, eol );
 
 			ASSERT_PTR( pEol );
-			pEol = (std::min)( pEol, pEnd );			// limit to specified length
+			pEol = std::min( pEol, pEnd );			// limit to specified length
 
 			size_t lineLength = std::distance( pText, pEol );
 
@@ -147,7 +147,7 @@ namespace io
 
 		for ( TCharSize leftCount = charCount; leftCount != 0; ++totalBatches )
 		{
-			TCharSize batchCharCount = (std::min)( leftCount, batchSize );
+			TCharSize batchCharCount = std::min( leftCount, batchSize );
 			TCharSize writtenChars = pWriter->WriteString( pText, batchCharCount );
 
 			pText += writtenChars;

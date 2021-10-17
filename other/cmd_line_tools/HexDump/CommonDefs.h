@@ -42,7 +42,7 @@
 #define final				// don't override a method/don't subclass a class
 #define persist				// persistent data-member
 #define throws_( ... )
-//#define interface struct
+#define interface struct
 
 #define COUNT_OF( array ) ( sizeof( array ) / sizeof( array[ 0 ] ) )
 
