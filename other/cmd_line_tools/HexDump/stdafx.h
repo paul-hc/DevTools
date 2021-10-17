@@ -9,9 +9,12 @@
 
 #include <stdio.h>
 #include <tchar.h>
+#include <algorithm>
 
+#include <crtdbg.h>
+#include <windows.h>
 
-#define throws_( ... )
+#include "CommonDefs.h"
 
 
 // TODO: reference additional headers your program requires here

@@ -2,8 +2,10 @@
 
 #include "stdafx.h"
 #include "HexDump.h"
+#include "StdOutput.h"
 #include <string>
 #include <iostream>
+#include <sstream>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -79,7 +81,13 @@ int main( int argc, char* argv[] )
 		if ( app::s_helpMode )
 			std::cout << std::endl << app::s_helpMessage << std::endl;
 		else
-			io::HexDump( std::cout, app::s_filePath.c_str() );
+		{	// optimize speed: bypass std::cout output, by writing to a string stream and efficiently writing the ouput to the console/redirected output
+			std::ostringstream os;
+			io::HexDump( os, app::s_filePath.c_str() );
+
+			io::CStdOutput stdOutput;
+			stdOutput.Write( os.str() );
+		}
 
 		return 0;
 	}

@@ -11,6 +11,30 @@
 #endif
 
 
+namespace hlp
+{
+	const char s_header[] =
+		"ADDRESS  0  1  2  3  4  5  6  7  8  9  A  B  C  D  E  F    DUMP\n"
+		"-------- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --   ----------------";
+	//  "00000000 23 69 66 6E 64 65 66 20 53 74 64 4F 75 74 70 75   #ifndef StdOutpu"
+
+	char s_hexText[ 20 ];
+
+
+	const char* FormatHex( char ch )
+	{
+		sprintf_s( s_hexText, _countof( s_hexText ), "%02X", (int)(unsigned char)ch );
+		return s_hexText;
+	}
+
+	const char* FormatHex( ULONGLONG address )
+	{
+		sprintf_s( s_hexText, _countof( s_hexText ), "%08I64X", address );
+		return s_hexText;
+	}
+}
+
+
 namespace io
 {
 	void HexDump( std::ostream& os, const std::string& textPath, size_t rowByteCount /*= DefaultRowByteCount*/ )
@@ -27,10 +51,10 @@ namespace io
 		std::vector< char > inputRowBuff( rowByteCount );
 		std::string charRow;
 
-		for ( size_t i; !is.eof(); )
-		{
-			inputRowBuff.assign( rowByteCount, '\0' );
+		os << hlp::s_header << std::endl;
 
+		for ( ULONGLONG address = 0; !is.eof(); address += rowByteCount )
+		{
 			is.read( &inputRowBuff[ 0 ], rowByteCount );
 			inputRowBuff.resize( is.gcount() );		// cut to the actual read chars
 
@@ -38,13 +62,16 @@ namespace io
 			{
 				charRow.clear();
 
-				for ( i = 0; i != rowByteCount; ++i )
+				os << hlp::FormatHex( address ) << ' ';
+
+				for ( size_t i = 0; i != rowByteCount; ++i )
 					if ( i < inputRowBuff.size() )
 					{
 						char inChar = inputRowBuff[ i ];
 
 						charRow.push_back( inChar >= ' ' ? inChar : s_unprintableCh );
-						os << std::setfill('0') << std::setw(2) << std::uppercase << std::hex << (int)(unsigned char)inChar << ' ';
+						os << hlp::FormatHex( inChar ) << ' ';
+						//os << std::setfill('0') << std::setw(2) << std::uppercase << std::hex << (int)(unsigned char)inChar << ' ';
 					}
 					else
 						os << "   ";		// 2 digits + 1 space

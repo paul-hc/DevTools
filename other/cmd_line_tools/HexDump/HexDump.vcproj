@@ -175,6 +175,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\CommonDefs.h"
+				>
+			</File>
+			<File
 				RelativePath=".\HexDump.cpp"
 				>
 			</File>
@@ -204,6 +208,14 @@
 			</File>
 			<File
 				RelativePath=".\stdafx.h"
+				>
+			</File>
+			<File
+				RelativePath=".\StdOutput.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\StdOutput.h"
 				>
 			</File>
 			<File
