@@ -5,6 +5,7 @@
 
 #include "StdAfx.h"
 #include "_CodeSamples.h"
+#include "C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\include\windows.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

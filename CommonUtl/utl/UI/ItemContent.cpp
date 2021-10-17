@@ -62,9 +62,9 @@ namespace ui
 
 		if ( HasFlag( m_itemsFlags, EnsureUnique ) )
 			if ( ui::String == m_type )
-				utl::Uniquify< pred::EqualString< std::tstring > >( rItems );
+				utl::Uniquify< pred::TStringyCompareIntuitive >( rItems );
 			else
-				utl::Uniquify< pred::IsEquivalentPathString >( rItems );
+				utl::Uniquify< pred::CompareNaturalPath >( rItems );
 	}
 
 	std::tstring CItemContent::EditItem( const TCHAR* pItem, CWnd* pParent ) const

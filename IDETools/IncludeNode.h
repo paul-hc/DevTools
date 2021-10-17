@@ -45,14 +45,16 @@ private:
 
 namespace pred
 {
-	struct EqualTreeItemPath
+	struct ToTreeItemPath
 	{
-		EqualTreeItemPath( const CIncludeNode* pTreeItem ) : m_pTreeItem( pTreeItem ) {}
-
-		bool operator()( const CIncludeNode* pTreeItem ) const { return m_pTreeItem->m_path.Equivalent( pTreeItem->m_path ); }
-	private:
-		const CIncludeNode* m_pTreeItem;
+		const fs::CPath operator()( const CIncludeNode* pTreeItem ) const
+		{
+			ASSERT_PTR( pTreeItem );
+			return pTreeItem->m_path;
+		}
 	};
+
+	typedef CompareAdapter< CompareNaturalPath, ToTreeItemPath > CompareTreeItemPath;
 }
 
 

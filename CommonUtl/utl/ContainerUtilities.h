@@ -625,32 +625,40 @@ namespace utl
 			{
 				typename ContainerT::iterator itRemove = std::remove( itNext, itEnd, *itItem );		// doesn't actually remove, just move items to be removed at the end
 
-				removedCount += std::distance( itRemove, itEnd );
-				itEnd = rItems.erase( itRemove, itEnd );
+				if ( itRemove != itEnd )
+				{
+					removedCount += std::distance( itRemove, itEnd );
+					itEnd = rItems.erase( itRemove, itEnd );
+				}
 			}
 
 		return removedCount;
 	}
 
-	template< typename UnaryPred, typename ContainerT >
-	size_t Uniquify( ContainerT& rItems, ContainerT* pOutRemovedDups = static_cast< ContainerT* >( NULL ) )
+
+	template< typename CompareT, typename ContainerT >
+	size_t Uniquify( ContainerT& rItems, ContainerT* pRemovedDups = static_cast< ContainerT* >( NULL ) )
 	{
-		size_t removedCount = 0;
+		typedef typename ContainerT::value_type TValue;
 
-		for ( typename ContainerT::iterator itItem = rItems.begin(), itNext = itItem, itEnd = rItems.end(); itItem != itEnd; itNext = ++itItem )
-			if ( itNext++ != itEnd )
+		std::set< TValue, pred::LessValue<CompareT> > uniqueIndex;
+		ContainerT tempItems;
+		size_t duplicateCount = 0;
+
+		tempItems.reserve( rItems.size() );
+		for ( typename ContainerT::const_iterator itItem = rItems.begin(), itEnd = rItems.end(); itItem != itEnd; ++itItem )
+			if ( uniqueIndex.insert( *itItem ).second )		// item is unique?
+				tempItems.push_back( *itItem );
+			else
 			{
-				typename ContainerT::iterator itRemove = std::remove_if( itNext, itEnd, UnaryPred( *itItem ) );	// doesn't actually remove, just move items to be removed at the end
+				++duplicateCount;
 
-				removedCount += std::distance( itRemove, itEnd );
-
-				if ( pOutRemovedDups != NULL )
-					pOutRemovedDups->insert( pOutRemovedDups->end(), itRemove, rItems.end() );		// for owning container of pointers: allow client to delete the removed duplicates
-
-				itEnd = rItems.erase( itRemove, itEnd );
+				if ( pRemovedDups != NULL )
+					pRemovedDups->insert( pRemovedDups->end(), *itItem );	// for owning container of pointers: allow client to delete the removed duplicates
 			}
 
-		return removedCount;
+		rItems.swap( tempItems );
+		return duplicateCount;
 	}
 
 

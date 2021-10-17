@@ -40,7 +40,7 @@ void CSourceFileParser::AddSourceFile( const fs::CPath& sourceFilePath )
 void CSourceFileParser::RemoveDuplicates( void )
 {
 	std::vector< CIncludeNode* > duplicates;
-	utl::Uniquify< pred::EqualTreeItemPath >( m_includeNodes, &duplicates );
+	utl::Uniquify< pred::CompareTreeItemPath >( m_includeNodes, &duplicates );
 	utl::ClearOwningContainer( duplicates );
 }
 

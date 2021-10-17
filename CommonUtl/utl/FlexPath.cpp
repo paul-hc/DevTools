@@ -123,6 +123,6 @@ namespace path
 			if ( itFlexPath->IsComplexPath() )
 				itFlexPath->Set( itFlexPath->GetPhysicalPath().Get() );
 
-		utl::Uniquify< pred::IsEquivalentPath >( rFlexPaths );		// remove duplicates that may have been created (multiple embedded patch with same storage path)
+		utl::Uniquify< pred::CompareNaturalPath >( rFlexPaths );		// remove duplicates that may have been created (multiple embedded patch with same storage path)
 	}
 }

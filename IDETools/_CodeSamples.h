@@ -5,6 +5,7 @@
 #include <vector>
 #include "FileType.h"
 #include "utl/Path.h"
+#include <vector>
 
 
 	CString GetWindowText( const CWnd* pWnd );			// comment
