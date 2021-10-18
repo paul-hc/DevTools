@@ -843,6 +843,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\WindowDebug.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\WindowDebug.h"
+				>
+			</File>
+			<File
 				RelativePath=".\WindowHook.cpp"
 				>
 			</File>

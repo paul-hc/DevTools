@@ -13,6 +13,10 @@
 #include "utl/StringUtilities.h"
 #include "utl/SubjectPredicates.h"
 
+#ifdef _DEBUG
+#define new DEBUG_NEW
+#endif
+
 
 namespace ui
 {
@@ -1434,6 +1438,7 @@ namespace ui
 
 		while ( ::PeekMessage( &msg, hWnd, minMessage, maxMessage, PM_REMOVE ) )
 			++msgCount;
+
 		return msgCount > 0;
 	}
 }
