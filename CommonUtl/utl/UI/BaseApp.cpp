@@ -5,6 +5,8 @@
 #include "MenuUtilities.h"
 #include "RuntimeException.h"
 #include "ShellTypes.h"
+#include "ProcessUtils.h"
+#include "WindowDebug.h"
 #include "resource.h"
 #include "utl/FileEnumerator.h"
 
@@ -59,22 +61,36 @@ namespace app
 
 
 #ifdef _DEBUG
+	void ReportTestResults( void );
+
 	void RunAllTests( void )
 	{
 		ui::RequestCloseAllBalloons();						// just in case running tests in quick succession
 
 		ut::RunAllTests();
+		ReportTestResults();
+	}
 
-		std::vector< std::tstring > testNames;
-		ut::CTestSuite::Instance().QueryTestNames( testNames );
+	void ReportTestResults( void )
+	{
+		CWnd* pForegroundWnd = CWnd::GetForegroundWindow();
 
-		static HICON s_hToolIcon = CImageStore::SharedStore()->RetrieveIcon( ID_RUN_TESTS )->GetHandle();
-		ui::ShowBalloonTip(
-			CWnd::GetForegroundWindow(),
-			str::Format( _T("Completed %d Unit Tests!"), testNames.size() ).c_str(),
-			str::Join( testNames, _T("\n") ).c_str(),
-			s_hToolIcon
-		);
+		if ( NULL == pForegroundWnd )
+			pForegroundWnd = AfxGetMainWnd();
+
+		if ( pForegroundWnd != NULL && proc::InCurrentThread( pForegroundWnd->GetSafeHwnd() ) )
+		{
+			static HICON s_hToolIcon = CImageStore::SharedStore()->RetrieveIcon( ID_RUN_TESTS )->GetHandle();
+			std::vector< std::tstring > testNames;
+			ut::CTestSuite::Instance().QueryTestNames( testNames );
+
+			ui::ShowBalloonTip(
+				pForegroundWnd,
+				str::Format( _T("Completed %d Unit Tests!"), testNames.size() ).c_str(),
+				str::Join( testNames, _T("\n") ).c_str(),
+				s_hToolIcon
+			);
+		}
 
 		ui::BeepSignal( MB_ICONWARNING );					// last in chain, signal the end
 	}
