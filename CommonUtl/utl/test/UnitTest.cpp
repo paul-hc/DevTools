@@ -333,10 +333,10 @@ namespace ut
 	// enumeration with relative paths
 
 	size_t EnumFilePaths( std::vector< fs::CPath >& rFilePaths, const fs::CPath& dirPath, SortType sortType /*= SortAscending*/,
-						  const TCHAR* pWildSpec /*= _T("*")*/, RecursionDepth depth /*= Deep*/ )
+						  const TCHAR* pWildSpec /*= _T("*")*/, fs::TEnumFlags flags /*= fs::EF_Recurse*/ )
 	{
 		fs::CRelativeEnumerator found( dirPath );
-		fs::EnumFiles( &found, dirPath, pWildSpec, depth );
+		fs::EnumFiles( &found, dirPath, pWildSpec, flags );
 
 		size_t addedCount = fs::JoinUniquePaths( rFilePaths, found.m_filePaths );
 
@@ -347,10 +347,10 @@ namespace ut
 	}
 
 	size_t EnumSubDirPaths( std::vector< fs::CPath >& rSubDirPaths, const fs::CPath& dirPath, SortType sortType /*= SortAscending*/,
-							RecursionDepth depth /*= Deep*/ )
+							fs::TEnumFlags flags /*= fs::EF_Recurse*/ )
 	{
 		fs::CRelativeEnumerator found( dirPath );
-		fs::EnumFiles( &found, dirPath, _T("*"), depth );
+		fs::EnumFiles( &found, dirPath, _T("*"), flags );
 
 		size_t addedCount = fs::JoinUniquePaths( rSubDirPaths, found.m_subDirPaths );
 
@@ -362,26 +362,26 @@ namespace ut
 
 
 	std::tstring EnumJoinFiles( const fs::CPath& dirPath, SortType sortType /*= SortAscending*/, const TCHAR* pWildSpec /*= _T("*")*/,
-								RecursionDepth depth /*= Deep*/ )
+								fs::TEnumFlags flags /*= fs::EF_Recurse*/ )
 	{
 		std::vector< fs::CPath > filePaths;
-		EnumFilePaths( filePaths, dirPath, sortType, pWildSpec, depth );
+		EnumFilePaths( filePaths, dirPath, sortType, pWildSpec, flags );
 
 		return str::Join( filePaths, CTempFilePool::m_sep );
 	}
 
-	std::tstring EnumJoinSubDirs( const fs::CPath& dirPath, SortType sortType /*= SortAscending*/, RecursionDepth depth /*= Deep*/ )
+	std::tstring EnumJoinSubDirs( const fs::CPath& dirPath, SortType sortType /*= SortAscending*/, fs::TEnumFlags flags /*= fs::EF_Recurse*/ )
 	{
 		std::vector< fs::CPath > subDirPaths;
-		EnumSubDirPaths( subDirPaths, dirPath, sortType, depth );
+		EnumSubDirPaths( subDirPaths, dirPath, sortType, flags );
 
 		return str::Join( subDirPaths, CTempFilePool::m_sep );
 	}
 
 
-	fs::CPath FindFirstFile( const fs::CPath& dirPath, const TCHAR* pWildSpec /*= _T("*.*")*/, RecursionDepth depth /*= Shallow*/ )
+	fs::CPath FindFirstFile( const fs::CPath& dirPath, const TCHAR* pWildSpec /*= _T("*.*")*/, fs::TEnumFlags flags /*= fs::TEnumFlags()*/ )
 	{
-		return fs::StripDirPrefix( fs::FindFirstFile( dirPath, pWildSpec, depth ), dirPath );
+		return fs::StripDirPrefix( fs::FindFirstFile( dirPath, pWildSpec, flags ), dirPath );
 	}
 }
 

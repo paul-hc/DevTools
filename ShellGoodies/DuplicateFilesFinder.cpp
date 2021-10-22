@@ -59,7 +59,7 @@ void CDuplicateFilesFinder::SearchForFiles( std::vector< fs::CPath >& rFoundPath
 			found.SetIgnorePathMatches( ignorePaths );
 
 			pProgressEnum->AddFoundSubDir( srcPath.GetPtr() );		// progress only: advance stage to the root directory
-			fs::EnumFiles( &found, srcPath, m_wildSpec.c_str(), Deep );
+			fs::EnumFiles( &found, srcPath, m_wildSpec.c_str(), fs::EF_Recurse );
 
 			fs::SortPaths( found.m_filePaths );
 

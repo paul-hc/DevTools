@@ -99,7 +99,7 @@ void CDirectory::List( std::wostream& os, const CTreeGuides& guideParts, const s
 	impl::CEnumerator found( m_options );
 	CTimer enumTimer;
 
-	fs::EnumFiles( &found, m_dirPath, s_wildSpec, Shallow, false );
+	fs::EnumFiles( &found, m_dirPath, s_wildSpec, fs::EF_NoSortSubDirs );
 	found.OnCompleted();
 	s_totalElapsedEnum += enumTimer.ElapsedSeconds();
 

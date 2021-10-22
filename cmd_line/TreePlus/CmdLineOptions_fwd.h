@@ -2,6 +2,8 @@
 #define CmdLineOptions_fwd_h
 #pragma once
 
+#include "utl/FlagSet.h"
+
 
 namespace app
 {
@@ -17,7 +19,8 @@ namespace app
 		NoSorting			= BIT_FLAG( 10 ),		// display the files in the existing order
 		NoOutput			= BIT_FLAG( 11 )		// for timing just the file enumeration (no std output)
 	};
-	typedef int TOption;
+
+	typedef utl::CFlagSet<Option> TOption;
 }
 
 

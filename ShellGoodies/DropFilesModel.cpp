@@ -96,7 +96,7 @@ void CDropFilesModel::InitSrcFolders( void )
 	{
 		m_srcDeepFolderPaths.push_back( *itSrcFolderPath );
 
-		fs::EnumSubDirPaths( m_srcDeepFolderPaths, *itSrcFolderPath, _T("*"), Deep );
+		fs::EnumSubDirPaths( m_srcDeepFolderPaths, *itSrcFolderPath, _T("*"), fs::EF_Recurse );
 	}
 	fs::SortPaths( m_srcDeepFolderPaths );
 }

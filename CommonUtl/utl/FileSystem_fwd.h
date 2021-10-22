@@ -2,6 +2,44 @@
 #define FileSystem_fwd_h
 #pragma once
 
+#include "FlagSet.h"
+
+
+namespace fs
+{
+	bool IsValidFile( const TCHAR* pFilePath );
+	bool IsValidDirectory( const TCHAR* pDirPath );
+	bool IsValidShellLink( const TCHAR* pFilePath );
+}
+
+
+namespace fs
+{
+	enum EnumFlags
+	{
+		EF_Recurse				= BIT_FLAG( 0 ),
+		EF_NoSortSubDirs		= BIT_FLAG( 1 ),
+		EF_ResolveShellLinks	= BIT_FLAG( 8 )
+	};
+
+	typedef utl::CFlagSet<EnumFlags> TEnumFlags;
+
+
+	interface IEnumerator
+	{
+		virtual void AddFoundFile( const TCHAR* pFilePath ) = 0;
+		virtual bool AddFoundSubDir( const TCHAR* pSubDirPath ) { pSubDirPath; return true; }
+
+		// advanced, provides extra info
+		virtual bool IncludeNode( const CFileFind& foundNode ) { foundNode; return true; }
+		virtual void AddFile( const CFileFind& foundFile ) { AddFoundFile( foundFile.GetFilePath() ); }
+
+		// override to find first file, then abort searching
+		virtual bool MustStop( void ) const { return false; }
+	};
+}
+
+
 #include "Path.h"
 
 
@@ -20,25 +58,6 @@ namespace fs
 	{
 		FileSize,				// quick and approximate
 		FileSizeAndCrc32		// slower but accurate
-	};
-
-
-	bool IsValidFile( const TCHAR* pFilePath );
-	bool IsValidDirectory( const TCHAR* pDirPath );
-	bool IsValidShellLink( const TCHAR* pFilePath );
-
-
-	interface IEnumerator
-	{
-		virtual void AddFoundFile( const TCHAR* pFilePath ) = 0;
-		virtual bool AddFoundSubDir( const TCHAR* pSubDirPath ) { pSubDirPath; return true; }
-
-		// advanced, provides extra info
-		virtual bool IncludeNode( const CFileFind& foundNode ) { foundNode; return true; }
-		virtual void AddFile( const CFileFind& foundFile ) { AddFoundFile( foundFile.GetFilePath() ); }
-
-		// override to find first file, then abort searching
-		virtual bool MustStop( void ) const { return false; }
 	};
 
 

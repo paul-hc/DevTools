@@ -55,63 +55,63 @@ void CFileSystemTests::TestFileEnum( void )
 
 	{
 		fs::CRelativeEnumerator found( poolDirPath );
-		fs::EnumFiles( &found, poolDirPath, _T("*.*"), Shallow );
+		fs::EnumFiles( &found, poolDirPath, _T("*.*") );
 		ASSERT_EQUAL( _T("a|a.doc|a.jpg|a.png|a.txt"), ut::JoinFiles( found ) );
 	}
 	{
 		fs::CRelativeEnumerator found( poolDirPath );
-		fs::EnumFiles( &found, poolDirPath, _T("*.*"), Deep );
+		fs::EnumFiles( &found, poolDirPath, _T("*.*"), fs::EF_Recurse );
 		ASSERT_EQUAL( _T("a|a.doc|a.jpg|a.png|a.txt|D1\\b|D1\\b.doc|D1\\b.txt|D1\\D2\\c|D1\\D2\\c.doc|D1\\D2\\c.png|D1\\D2\\c.txt"), ut::JoinFiles( found ) );
 	}
 	{
 		fs::CRelativeEnumerator found( poolDirPath );
-		fs::EnumFiles( &found, poolDirPath, _T("*."), Deep );			// filter files with no extension
+		fs::EnumFiles( &found, poolDirPath, _T("*."), fs::EF_Recurse );			// filter files with no extension
 		ASSERT_EQUAL( _T("a|D1\\b|D1\\D2\\c"), ut::JoinFiles( found ) );
 	}
 	{
 		fs::CRelativeEnumerator found( poolDirPath );
-		fs::EnumFiles( &found, poolDirPath, _T("*.doc"), Deep );
+		fs::EnumFiles( &found, poolDirPath, _T("*.doc"), fs::EF_Recurse );
 		ASSERT_EQUAL( _T("a.doc|D1\\b.doc|D1\\D2\\c.doc"), ut::JoinFiles( found ) );
 	}
 	{
 		fs::CRelativeEnumerator found( poolDirPath );
-		fs::EnumFiles( &found, poolDirPath, _T("*.doc;*.txt"), Deep );
+		fs::EnumFiles( &found, poolDirPath, _T("*.doc;*.txt"), fs::EF_Recurse );
 		ASSERT_EQUAL( _T("a.doc|a.txt|D1\\b.doc|D1\\b.txt|D1\\D2\\c.doc|D1\\D2\\c.txt"), ut::JoinFiles( found ) );
 		ASSERT_EQUAL( _T("D1|D1\\D2"), ut::JoinSubDirs( found ) );
 	}
 	{
 		fs::CRelativeEnumerator found( poolDirPath );
-		fs::EnumFiles( &found, poolDirPath, _T("*.?oc;*.t?t"), Deep );
+		fs::EnumFiles( &found, poolDirPath, _T("*.?oc;*.t?t"), fs::EF_Recurse );
 		ASSERT_EQUAL( _T("a.doc|a.txt|D1\\b.doc|D1\\b.txt|D1\\D2\\c.doc|D1\\D2\\c.txt"), ut::JoinFiles( found ) );
 	}
 	{
 		fs::CRelativeEnumerator found( poolDirPath );
-		fs::EnumFiles( &found, poolDirPath, _T("*.jpg;*.png"), Deep );
+		fs::EnumFiles( &found, poolDirPath, _T("*.jpg;*.png"), fs::EF_Recurse );
 		ASSERT_EQUAL( _T("a.jpg|a.png|D1\\D2\\c.png"), ut::JoinFiles( found ) );
 		ASSERT_EQUAL( _T("D1|D1\\D2"), ut::JoinSubDirs( found ) );
 	}
 	{
 		fs::CRelativeEnumerator found( poolDirPath );
-		fs::EnumFiles( &found, poolDirPath, _T("*.jpg;*.png"), Shallow );
+		fs::EnumFiles( &found, poolDirPath, _T("*.jpg;*.png") );
 		ASSERT_EQUAL( _T("a.jpg|a.png"), ut::JoinFiles( found ) );
 		ASSERT_EQUAL( _T("D1"), ut::JoinSubDirs( found ) );				// only the shallow subdirs
 	}
 	{
 		fs::CRelativeEnumerator found( poolDirPath );
-		fs::EnumFiles( &found, poolDirPath, _T("*.exe;*.bat"), Deep );
+		fs::EnumFiles( &found, poolDirPath, _T("*.exe;*.bat"), fs::EF_Recurse );
 		ASSERT_EQUAL( _T(""), ut::JoinFiles( found ) );
 	}
 
-	ASSERT_EQUAL( _T("a"), ut::FindFirstFile( poolDirPath, _T("*"), Deep ) );
-	ASSERT_EQUAL( _T("a"), ut::FindFirstFile( poolDirPath, _T("*.*"), Shallow ) );
-	ASSERT_EQUAL( _T("a"), ut::FindFirstFile( poolDirPath, _T("*."), Shallow ) );
-	ASSERT_EQUAL( _T("a.png"), ut::FindFirstFile( poolDirPath, _T("*.png"), Shallow ) );
-	ASSERT_EQUAL( _T("a.png"), ut::FindFirstFile( poolDirPath, _T("a*.png"), Shallow ) );
-	ASSERT_EQUAL( _T("a.png"), ut::FindFirstFile( poolDirPath, _T("*a*.png"), Shallow ) );
-	ASSERT_EQUAL( _T(""), ut::FindFirstFile( poolDirPath, _T("c.png"), Shallow ) );
-	ASSERT_EQUAL( _T("D1\\D2\\c.png"), ut::FindFirstFile( poolDirPath, _T("c.png"), Deep ) );
+	ASSERT_EQUAL( _T("a"), ut::FindFirstFile( poolDirPath, _T("*"), fs::EF_Recurse ) );
+	ASSERT_EQUAL( _T("a"), ut::FindFirstFile( poolDirPath, _T("*.*") ) );
+	ASSERT_EQUAL( _T("a"), ut::FindFirstFile( poolDirPath, _T("*.") ) );
+	ASSERT_EQUAL( _T("a.png"), ut::FindFirstFile( poolDirPath, _T("*.png") ) );
+	ASSERT_EQUAL( _T("a.png"), ut::FindFirstFile( poolDirPath, _T("a*.png") ) );
+	ASSERT_EQUAL( _T("a.png"), ut::FindFirstFile( poolDirPath, _T("*a*.png") ) );
+	ASSERT_EQUAL( _T(""), ut::FindFirstFile( poolDirPath, _T("c.png") ) );
+	ASSERT_EQUAL( _T("D1\\D2\\c.png"), ut::FindFirstFile( poolDirPath, _T("c.png"), fs::EF_Recurse ) );
 
-	ASSERT_EQUAL( _T(""), ut::FindFirstFile( poolDirPath, _T("*.exe"), Deep ) );
+	ASSERT_EQUAL( _T(""), ut::FindFirstFile( poolDirPath, _T("*.exe"), fs::EF_Recurse ) );
 }
 
 void CFileSystemTests::TestNumericFilename( void )

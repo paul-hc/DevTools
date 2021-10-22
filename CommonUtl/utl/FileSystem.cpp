@@ -212,7 +212,7 @@ namespace fs
 			return false;
 
 		fs::CEnumerator found;
-		fs::EnumFiles( &found, fs::CPath( pDirPath ), _T("*"), Shallow );
+		fs::EnumFiles( &found, fs::CPath( pDirPath ), _T("*") );
 
 		for ( std::vector< fs::CPath >::iterator itSubDirPath = found.m_subDirPaths.begin(); itSubDirPath != found.m_subDirPaths.end(); )
 			if ( fs::DeleteDir( itSubDirPath->GetPtr() ) )

@@ -20,7 +20,7 @@ namespace fs
 		s_resolveShortcutProc = resolveShortcutProc;
 	}
 
-	void EnumFiles( IEnumerator* pEnumerator, const fs::CPath& dirPath, const TCHAR* pWildSpec /*= _T("*.*")*/, RecursionDepth depth /*= Shallow*/, bool sortSubDirs /*= true*/ )
+	void EnumFiles( IEnumerator* pEnumerator, const fs::CPath& dirPath, const TCHAR* pWildSpec /*= _T("*.*")*/, fs::TEnumFlags flags /*= fs::TEnumFlags()*/ )
 	{
 		ASSERT_PTR( pEnumerator );
 
@@ -28,7 +28,7 @@ namespace fs
 			pWildSpec = _T("*");
 
 		fs::CPath dirPathFilter = dirPath /
-			fs::CPath( Deep == depth || path::IsMultipleWildcard( pWildSpec )
+			fs::CPath( flags.Has( fs::EF_Recurse ) || path::IsMultipleWildcard( pWildSpec )
 				? _T("*")			// need to relax filter to all so that it covers sub-directories
 				: pWildSpec );
 
@@ -40,19 +40,20 @@ namespace fs
 			found = finder.FindNextFile();
 			std::tstring foundPath = finder.GetFilePath().GetString();
 
-			if ( s_resolveShortcutProc != NULL )				// links with UTL_UI.lib?
-				if ( fs::IsValidShellLink( foundPath.c_str() ) )
-				{
-					fs::CPath linkTargetPath;
-
-					if ( s_resolveShortcutProc( linkTargetPath, foundPath.c_str(), NULL ) )
+			if ( flags.Has( fs::EF_ResolveShellLinks ) )
+				if ( s_resolveShortcutProc != NULL )				// links with UTL_UI.lib?
+					if ( fs::IsValidShellLink( foundPath.c_str() ) )
 					{
-						foundPath = linkTargetPath.Get();		// resolve the link to taget path
+						fs::CPath linkTargetPath;
 
-						if ( fs::IsValidDirectory( foundPath.c_str() ) )
-							subDirPaths.push_back( fs::CPath( foundPath ) );
+						if ( s_resolveShortcutProc( linkTargetPath, foundPath.c_str(), NULL ) )
+						{
+							foundPath = linkTargetPath.Get();		// resolve the link to taget path
+
+							if ( fs::IsValidDirectory( foundPath.c_str() ) )
+								subDirPaths.push_back( fs::CPath( foundPath ) );
+						}
 					}
-				}
 
 			if ( finder.IsDirectory() )
 			{
@@ -68,37 +69,37 @@ namespace fs
 			}
 		}
 
-		if ( sortSubDirs )
+		if ( !flags.Has( fs::EF_NoSortSubDirs ) )
 			fs::SortPaths( subDirPaths );		// natural path order
 
 		// progress reporting: ensure the sub-directory (stage) is always displayed first, then the files (items) under it
 		for ( std::vector< fs::CPath >::const_iterator itSubDirPath = subDirPaths.begin(); itSubDirPath != subDirPaths.end(); ++itSubDirPath )
 			if ( pEnumerator->AddFoundSubDir( itSubDirPath->GetPtr() ) )		// sub-directory is not ignored?
-				if ( Deep == depth && !pEnumerator->MustStop() )
-					EnumFiles( pEnumerator, *itSubDirPath, pWildSpec, Deep );
+				if ( flags.Has( fs::EF_Recurse ) && !pEnumerator->MustStop() )
+					EnumFiles( pEnumerator, *itSubDirPath, pWildSpec, flags );
 	}
 
-	size_t EnumFilePaths( std::vector< fs::CPath >& rFilePaths, const fs::CPath& dirPath, const TCHAR* pWildSpec /*= _T("*")*/, RecursionDepth depth /*= Shallow*/ )
+	size_t EnumFilePaths( std::vector< fs::CPath >& rFilePaths, const fs::CPath& dirPath, const TCHAR* pWildSpec /*= _T("*")*/, fs::TEnumFlags flags /*= fs::TEnumFlags()*/ )
 	{
 		CEnumerator found;
-		EnumFiles( &found, dirPath, pWildSpec, depth );
+		EnumFiles( &found, dirPath, pWildSpec, flags );
 
 		return fs::JoinUniquePaths( rFilePaths, found.m_filePaths );		// added count
 	}
 
-	size_t EnumSubDirPaths( std::vector< fs::CPath >& rSubDirPaths, const fs::CPath& dirPath, const TCHAR* pWildSpec /*= _T("*.*")*/, RecursionDepth depth /*= Shallow*/ )
+	size_t EnumSubDirPaths( std::vector< fs::CPath >& rSubDirPaths, const fs::CPath& dirPath, const TCHAR* pWildSpec /*= _T("*.*")*/, fs::TEnumFlags flags /*= fs::TEnumFlags()*/ )
 	{
 		CEnumerator found;
-		EnumFiles( &found, dirPath, pWildSpec, depth );
+		EnumFiles( &found, dirPath, pWildSpec, flags );
 
 		return fs::JoinUniquePaths( rSubDirPaths, found.m_subDirPaths );	// added count
 	}
 
 
-	fs::CPath FindFirstFile( const fs::CPath& dirPath, const TCHAR* pWildSpec /*= _T("*.*")*/, RecursionDepth depth /*= Shallow*/ )
+	fs::CPath FindFirstFile( const fs::CPath& dirPath, const TCHAR* pWildSpec /*= _T("*.*")*/, fs::TEnumFlags flags /*= fs::TEnumFlags()*/ )
 	{
 		CFirstFileEnumerator singleEnumer;
-		EnumFiles( &singleEnumer, dirPath, pWildSpec, depth );
+		EnumFiles( &singleEnumer, dirPath, pWildSpec, flags );
 		return singleEnumer.GetFoundPath();
 	}
 
@@ -296,9 +297,9 @@ namespace fs
 				std::tstring wildSpec = filePathParts.m_fname + _T("*") + filePathParts.m_ext;
 
 				if ( fs::IsValidDirectory( filePath.GetPtr() ) )
-					fs::EnumSubDirPaths( existingPaths, parentDirPath, wildSpec.c_str(), Shallow );		// sibling subdirs of the parent-dir-path
+					fs::EnumSubDirPaths( existingPaths, parentDirPath, wildSpec.c_str() );		// sibling subdirs of the parent-dir-path
 				else
-					fs::EnumFilePaths( existingPaths, parentDirPath, wildSpec.c_str(), Shallow );		// sibling file leafs
+					fs::EnumFilePaths( existingPaths, parentDirPath, wildSpec.c_str() );		// sibling file leafs
 
 				seqCount = static_cast< UINT >( existingPaths.size() );
 			}

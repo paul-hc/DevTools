@@ -16,7 +16,7 @@ struct CCmdLineOptions
 	CCmdLineOptions( void );
 	~CCmdLineOptions();
 
-	bool HasOptionFlag( app::TOption flag ) const { return HasFlag( m_optionFlags, flag ); }
+	bool HasOptionFlag( app::Option flag ) const { return m_optionFlags.Has( flag ); }
 
 	void ParseCommandLine( int argc, TCHAR* argv[] ) throws_( CRuntimeException );
 private:

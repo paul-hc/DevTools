@@ -175,8 +175,14 @@ void CSearchPattern::EnumImageFiles( fs::IEnumerator* pEnumerator ) const
 	switch ( m_type )
 	{
 		case DirPath:
-			fs::EnumFiles( pEnumerator, GetFilePath(), GetSafeWildFilters().c_str(), RecurseSubDirs == m_searchMode ? Deep : Shallow );
+		{
+			fs::TEnumFlags flags( fs::EF_ResolveShellLinks );
+			if ( RecurseSubDirs == m_searchMode )
+				flags |= fs::EF_Recurse;
+
+			fs::EnumFiles( pEnumerator, GetFilePath(), GetSafeWildFilters().c_str(), flags );
 			break;
+		}
 		case AlbumFile:
 		case SingleImage:
 			pEnumerator->AddFoundFile( GetFilePath().GetPtr() );

@@ -18,7 +18,7 @@ namespace app
 
 CCmdLineOptions::CCmdLineOptions( void )
 	: m_pArg( NULL )
-	, m_optionFlags( 0 )
+	, m_optionFlags()
 	, m_guidesProfileType( GraphGuides )
 	, m_maxDepthLevel( utl::npos )
 	, m_maxDirFiles( utl::npos )
@@ -57,11 +57,11 @@ void CCmdLineOptions::ParseCommandLine( int argc, TCHAR* argv[] ) throws_( CRunt
 			std::tstring value;
 
 			if ( arg::Equals( pSwitch, _T("f") ) )
-				SetFlag( m_optionFlags, app::DisplayFiles );
+				m_optionFlags.Set( app::DisplayFiles );
 			else if ( arg::Equals( pSwitch, _T("h") ) )
-				SetFlag( m_optionFlags, app::ShowHiddenNodes );
+				m_optionFlags.Set( app::ShowHiddenNodes );
 			else if ( arg::Equals( pSwitch, _T("ns") ) )
-				SetFlag( m_optionFlags, app::NoSorting );
+				m_optionFlags.Set( app::NoSorting );
 			else if ( ParseValue( value, pSwitch, _T("gs") ) )
 			{
 				if ( arg::Equals( value.c_str(), _T("G") ) )
@@ -89,19 +89,19 @@ void CCmdLineOptions::ParseCommandLine( int argc, TCHAR* argv[] ) throws_( CRunt
 					ThrowInvalidArgument();
 			}
 			else if ( arg::Equals( pSwitch, _T("no") ) )
-				SetFlag( m_optionFlags, app::NoOutput );
+				m_optionFlags.Set( app::NoOutput );
 			else if ( arg::EqualsAnyOf( pSwitch, _T("?|h") ) )
 			{
-				SetFlag( m_optionFlags, app::HelpMode );
+				m_optionFlags.Set( app::HelpMode );
 				return;
 			}
 			else if ( arg::Equals( pSwitch, _T("t") ) )
-				SetFlag( m_optionFlags, app::ShowExecTimeStats );
+				m_optionFlags.Set( app::ShowExecTimeStats );
 			else if ( arg::Equals( pSwitch, _T("p") ) )
-				SetFlag( m_optionFlags, app::PauseAtEnd );
+				m_optionFlags.Set( app::PauseAtEnd );
 		#ifdef USE_UT
 			else if ( arg::Equals( pSwitch, _T("ut") ) )
-				SetFlag( m_optionFlags, app::UnitTestMode );
+				m_optionFlags.Set( app::UnitTestMode );
 		#endif
 			else
 				ThrowInvalidArgument();

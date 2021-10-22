@@ -3,6 +3,7 @@
 #pragma once
 
 #include "Test.h"
+#include "utl/FileSystem_fwd.h"
 #include <iosfwd>
 
 
@@ -286,13 +287,13 @@ namespace ut
 	std::tstring JoinSubDirs( const fs::CEnumerator& enumerator );
 
 	// enumeration with relative paths
-	size_t EnumFilePaths( std::vector< fs::CPath >& rFilePaths, const fs::CPath& dirPath, SortType sortType = SortAscending, const TCHAR* pWildSpec = _T("*"), RecursionDepth depth = Deep );
-	size_t EnumSubDirPaths( std::vector< fs::CPath >& rSubDirPaths, const fs::CPath& dirPath, SortType sortType = SortAscending, RecursionDepth depth = Deep );
+	size_t EnumFilePaths( std::vector< fs::CPath >& rFilePaths, const fs::CPath& dirPath, SortType sortType = SortAscending, const TCHAR* pWildSpec = _T("*"), fs::TEnumFlags flags = fs::EF_Recurse );
+	size_t EnumSubDirPaths( std::vector< fs::CPath >& rSubDirPaths, const fs::CPath& dirPath, SortType sortType = SortAscending, fs::TEnumFlags flags = fs::EF_Recurse );
 
-	std::tstring EnumJoinFiles( const fs::CPath& dirPath, SortType sortType = SortAscending, const TCHAR* pWildSpec = _T("*"), RecursionDepth depth = Deep );
-	std::tstring EnumJoinSubDirs( const fs::CPath& dirPath, SortType sortType = SortAscending, RecursionDepth depth = Deep );
+	std::tstring EnumJoinFiles( const fs::CPath& dirPath, SortType sortType = SortAscending, const TCHAR* pWildSpec = _T("*"), fs::TEnumFlags flags = fs::EF_Recurse );
+	std::tstring EnumJoinSubDirs( const fs::CPath& dirPath, SortType sortType = SortAscending, fs::TEnumFlags flags = fs::EF_Recurse );
 
-	fs::CPath FindFirstFile( const fs::CPath& dirPath, const TCHAR* pWildSpec = _T("*.*"), RecursionDepth depth = Shallow );		// returns relative path
+	fs::CPath FindFirstFile( const fs::CPath& dirPath, const TCHAR* pWildSpec = _T("*.*"), fs::TEnumFlags flags = fs::TEnumFlags() );		// returns relative path
 
 } //namespace ut
 

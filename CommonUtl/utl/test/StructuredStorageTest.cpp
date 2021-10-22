@@ -126,7 +126,7 @@ void CStructuredStorageTest::TestStructuredStorage( void )
 		const fs::CPath& poolDirPath = pool.GetPoolDirPath();
 
 		fs::CRelativeEnumerator srcEnum( poolDirPath );
-		fs::EnumFiles( &srcEnum, poolDirPath, NULL, Deep );
+		fs::EnumFiles( &srcEnum, poolDirPath, NULL, fs::EF_Recurse );
 		ASSERT_EQUAL( _T("a1.txt|a2.txt|B1\\b1.txt|B1\\b2.txt|B1\\SD\\ThisIsASuperLongFilenameOfAnUnknownImageFileThatKeepsGoing.txt"), ut::JoinFiles( srcEnum ) );
 
 		fs::CStructuredStorage docStorage;

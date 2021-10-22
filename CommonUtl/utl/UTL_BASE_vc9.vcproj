@@ -409,6 +409,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\FlagSet.h"
+				>
+			</File>
+			<File
 				RelativePath=".\FlagTags.cpp"
 				>
 			</File>
