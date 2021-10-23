@@ -1,13 +1,12 @@
 
 #include "stdafx.h"
-#include "TextFileIo.h"
+#include "IoBin.h"
+#include "Path.h"
 #include <fstream>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
-
-#include "TextFileIo.hxx"
 
 
 namespace io

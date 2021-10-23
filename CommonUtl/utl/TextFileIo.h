@@ -4,25 +4,7 @@
 
 #include "Encoding.h"
 #include "EncodedFileBuffer.h"
-
-
-namespace io
-{
-	template< typename CharT >
-	size_t GetStreamSize( std::basic_istream<CharT>& is );
-}
-
-
-namespace io
-{
-	namespace bin
-	{
-		// buffer I/O for binary files
-
-		void WriteAllToFile( const fs::CPath& targetFilePath, const std::vector< char >& buffer ) throws_( CRuntimeException );
-		void ReadAllFromFile( std::vector< char >& rBuffer, const fs::CPath& srcFilePath ) throws_( CRuntimeException );
-	}
-}
+#include "Io_fwd.h"
 
 
 // IO for encoded files

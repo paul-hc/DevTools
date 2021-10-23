@@ -9,23 +9,6 @@
 
 namespace io
 {
-	template< typename CharT >
-	size_t GetStreamSize( std::basic_istream<CharT>& is )
-	{
-		ASSERT( is.good() );
-		typename std::basic_istream<CharT>::pos_type currPos = is.tellg();
-
-		is.seekg( 0, std::ios_base::end );
-		size_t streamCount = static_cast<size_t>( is.tellg() );
-
-		is.seekg( currPos );			// restore original reading position
-		return streamCount;
-	}
-}
-
-
-namespace io
-{
 	// write entire string to encoded text file
 
 	namespace impl

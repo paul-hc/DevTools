@@ -2,6 +2,7 @@
 #include "stdafx.h"
 #include "Crc32.h"
 #include "FileSystem.h"
+#include "IoBin.h"
 #include "AppTools.h"
 
 #ifdef _DEBUG
@@ -22,7 +23,7 @@ namespace utl
 		{
 			UINT crcValue = i;
 
-			for ( int j = 8; j != 0; j-- )
+			for ( int j = 8; j-- != 0; )
 			{
 				if ( crcValue & 1 )
 					crcValue = ( crcValue >> 1 ) ^ s_polynomial;
@@ -40,7 +41,7 @@ namespace utl
 		return s_table;
 	}
 
-	void CCrc32::AddBytes( ChecksumT& rChecksum, const void* pBuffer, size_t count ) const
+	void CCrc32::AddBytes( UnderlyingT& rChecksum, const void* pBuffer, size_t count ) const
 	{
 		ASSERT( 0 == count || pBuffer != NULL );
 
@@ -54,26 +55,9 @@ namespace crc32
 {
 	// CRC generator algorithms
 
-	UINT ComputeFileChecksum( const fs::CPath& filePath ) throws_( CFileException* )
+	UINT ComputeFileChecksum( const fs::CPath& filePath ) throws_( CRuntimeException )
 	{
-		utl::TCrc32Checksum checksum;
-
-		CFile file( filePath.GetPtr(), CFile::modeRead | CFile::shareDenyWrite );
-
-		std::vector< BYTE > buffer( crc32::FileBlockSize );
-		BYTE* pBuffer = &buffer.front();
-		UINT readCount;
-		
-		do
-		{
-			readCount = file.Read( pBuffer, crc32::FileBlockSize );
-			checksum.ProcessBytes( pBuffer, readCount );
-		}
-		while ( readCount > 0 );
-
-		file.Close();
-
-		return checksum.GetResult();
+		return io::bin::ReadCFile( filePath, func::ComputeChecksum<>() ).m_checksum.GetResult();
 	}
 }
 
@@ -128,10 +112,9 @@ namespace fs
 		{
 			return crc32::ComputeFileChecksum( filePath );
 		}
-		catch ( CFileException* pExc )
+		catch ( CRuntimeException& exc )
 		{
-			app::TraceException( pExc );
-			pExc->Delete();
+			app::TraceException( exc );
 			return 0;						// error
 		}
 	}

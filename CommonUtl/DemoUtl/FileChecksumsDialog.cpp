@@ -2,9 +2,10 @@
 #include "stdafx.h"
 #include "FileChecksumsDialog.h"
 #include "utl/AppTools.h"
+#include "utl/ContainerUtilities.h"
+#include "utl/IoBin.h"
 #include "utl/FileEnumerator.h"
 #include "utl/FileSystem.h"
-#include "utl/Crc32.h"
 #include "utl/PathItemBase.h"
 #include "utl/StringUtilities.h"
 #include "utl/Timer.h"
@@ -13,73 +14,30 @@
 #include "utl/UI/resource.h"
 #include "resource.h"
 #include <fstream>
-#include <numeric>
 
-#pragma warning( push, 3 )			// switch to warning level 3
-#pragma warning( disable: 4245 )	// identifier was truncated to 'number' characters in the debug information
-#include <boost/crc.hpp>	// for boost::crc_32_type
-#pragma warning( pop )				// restore to the initial warning level
+#define USE_BOOST_CRC
+#include "utl/Crc32.h"		// define func::ComputeBoostChecksum
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
 
-#include "utl/UI/ReportListControl.hxx"
 
-
-namespace utl
+namespace hlp
 {
-	UINT ComputeUtlFileCrc32( const fs::CPath& filePath ) throws_( std::exception )
+	UINT ComputeUtlFileCrc32( const fs::CPath& filePath ) throws_( CRuntimeException )
 	{
-		TCrc32Checksum checkSum;
-
-		char buffer[ crc32::FileBlockSize ];
-
-		std::ifstream ifs( filePath.GetPtr(), std::ios_base::binary );
-
-		while ( ifs )
-		{
-			ifs.read( buffer, COUNT_OF( buffer ) );
-			checkSum.ProcessBytes( buffer, ifs.gcount() );
-		}
-
-		return checkSum.GetResult();
+		return io::bin::ReadFileStream( filePath, func::ComputeChecksum<>() ).m_checksum.GetResult();
 	}
 
-	UINT ComputeBoostFileCrc32( const fs::CPath& filePath ) throws_( std::exception )
+	UINT ComputeBoostFileStreamCrc32( const fs::CPath& filePath ) throws_( CRuntimeException )
 	{
-		boost::crc_32_type result;
-		char buffer[ crc32::FileBlockSize ];
-
-		std::ifstream ifs( filePath.GetPtr(), std::ios_base::binary );
-
-		while ( ifs )
-		{
-			ifs.read( buffer, COUNT_OF( buffer ) );
-			result.process_bytes( buffer, ifs.gcount() );
-		}
-
-		return result.checksum();
+		return io::bin::ReadFileStream( filePath, func::ComputeBoostChecksum<>() ).m_checksum.checksum();
 	}
 
-	UINT ComputeBoostCFileCrc32( const fs::CPath& filePath ) throws_( CFileException* )
+	UINT ComputeBoostCFileCrc32( const fs::CPath& filePath ) throws_( CRuntimeException )
 	{
-		CFile file( filePath.GetPtr(), CFile::modeRead | CFile::shareDenyWrite );
-
-		boost::crc_32_type result;
-		std::vector< BYTE > buffer( crc32::FileBlockSize );
-		BYTE* pBuffer = &buffer.front();
-		UINT readCount;
-		
-		do
-		{
-			readCount = file.Read( pBuffer, crc32::FileBlockSize );
-			result.process_bytes( pBuffer, readCount );
-		}
-		while ( readCount > 0 );
-
-		file.Close();
-		return result.checksum();
+		return io::bin::ReadCFile( filePath, func::ComputeBoostChecksum<>() ).m_checksum.checksum();
 	}
 }
 
@@ -91,6 +49,7 @@ public:
 	UINT m_crc32;
 	double m_elapsedSecs;
 };
+
 
 class CFileChecksumItem : public CPathItemBase
 {
@@ -149,27 +108,33 @@ void CFileChecksumItem::ComputeChecksums( void )
 	{
 		m_utl.m_crc32 = crc32::ComputeFileChecksum( GetFilePath() );
 	}
-	catch ( CFileException* pExc )
+	catch ( CRuntimeException& exc )
 	{
-		app::TraceException( pExc );
-		pExc->Delete();
+		app::TraceException( exc );
 		m_utl.m_crc32 = UINT_MAX;
 	}
 	m_utl.m_elapsedSecs = timer.ElapsedSeconds();
 
 	timer.Restart();
-	m_utlIfs.m_crc32 = utl::ComputeUtlFileCrc32( GetFilePath() );
+	try
+	{
+		m_utlIfs.m_crc32 = hlp::ComputeUtlFileCrc32( GetFilePath() );
+	}
+	catch ( CRuntimeException& exc )
+	{
+		app::TraceException( exc );
+		m_utlIfs.m_crc32 = UINT_MAX;
+	}
 	m_utlIfs.m_elapsedSecs = timer.ElapsedSeconds();
 
 	timer.Restart();
 	try
 	{
-		m_boostCFile.m_crc32 = utl::ComputeBoostCFileCrc32( GetFilePath() );
+		m_boostCFile.m_crc32 = hlp::ComputeBoostCFileCrc32( GetFilePath() );
 	}
-	catch ( CFileException* pExc )
+	catch ( CRuntimeException& exc )
 	{
-		app::TraceException( pExc );
-		pExc->Delete();
+		app::TraceException( exc );
 		m_boostCFile.m_crc32 = UINT_MAX;
 	}
 	m_boostCFile.m_elapsedSecs = timer.ElapsedSeconds();
@@ -177,9 +142,9 @@ void CFileChecksumItem::ComputeChecksums( void )
 	timer.Restart();
 	try
 	{
-		m_boostIfs.m_crc32 = utl::ComputeBoostFileCrc32( GetFilePath() );
+		m_boostIfs.m_crc32 = hlp::ComputeBoostFileStreamCrc32( GetFilePath() );
 	}
-	catch ( std::exception exc )
+	catch ( CRuntimeException& exc )
 	{
 		app::TraceException( exc );
 		m_boostIfs.m_crc32 = UINT_MAX;

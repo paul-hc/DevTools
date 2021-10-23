@@ -43,7 +43,7 @@ std::tstring CRuntimeException::MessageOf( const std::exception& exc ) throw()
 	return str::FromUtf8( exc.what() );
 }
 
-void CRuntimeException::ThrowFromMfc( CException* pExc ) throws_( CRuntimeException )
+void __declspec(noreturn) CRuntimeException::ThrowFromMfc( CException* pExc ) throws_( CRuntimeException )
 {
 	ASSERT_PTR( pExc );
 

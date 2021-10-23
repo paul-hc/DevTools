@@ -126,7 +126,8 @@ namespace fs
 {
 	template< typename PathType >		// PathType could be any of: const char*, const TCHAR*, std::tstring, fs::CPath
 	void __declspec(noreturn) ThrowFileException( const std::tstring& description, const PathType& filePath,
-													fs::ExcPolicy policy = fs::RuntimeExc ) throws_( CRuntimeException, CFileException* )
+												  fs::ExcPolicy policy = fs::RuntimeExc )
+		throws_( CRuntimeException, CFileException* )
 	{
 		fs::RuntimeExc == policy
 			? impl::ThrowFileException( description, str::ValueToString< std::tstring >( filePath ).c_str() )

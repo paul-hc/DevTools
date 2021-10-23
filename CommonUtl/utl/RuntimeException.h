@@ -20,7 +20,7 @@ public:
 	void ReportError( void ) const throw();
 
 	static std::tstring MessageOf( const std::exception& exc ) throw();
-	static void ThrowFromMfc( CException* pExc ) throws_( CRuntimeException );
+	static void __declspec(noreturn) ThrowFromMfc( CException* pExc ) throws_( CRuntimeException );
 private:
 	std::string m_message;		// UTF8
 };

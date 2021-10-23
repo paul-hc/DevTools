@@ -4,7 +4,6 @@
 
 #include <limits>
 #include <hash_map>
-#include "Path.h"
 
 
 namespace utl
@@ -12,16 +11,16 @@ namespace utl
 	template< typename CrcT >
 	class CChecksum
 	{
-		typedef typename CrcT::ChecksumT ChecksumT;
+		typedef typename CrcT::UnderlyingT UnderlyingT;
 	public:
-		CChecksum( void ) : m_crcTable( CrcT::Instance() ), m_crc( std::numeric_limits<ChecksumT>::max() ) {}
+		CChecksum( void ) : m_crcTable( CrcT::Instance() ), m_crc( std::numeric_limits<UnderlyingT>::max() ) {}
 
 		void ProcessBytes( const void* pBuffer, size_t count ) { m_crcTable.AddBytes( m_crc, pBuffer, count ); }
 
-		ChecksumT GetResult( void ) const { return ~m_crc; }
+		UnderlyingT GetResult( void ) const { return ~m_crc; }
 	private:
 		CrcT m_crcTable;
-		ChecksumT m_crc;
+		UnderlyingT m_crc;
 	};
 
 
@@ -32,16 +31,16 @@ namespace utl
 	{
 		CCrc32( void );
 	public:
-		typedef UINT ChecksumT;
+		typedef UINT UnderlyingT;
 
 		static const CCrc32& Instance( void );
 
 		const std::vector< UINT >& GetLookupTable( void ) const { return m_lookupTable; }
 
 		// CRC32 incremental checksum (usually starting with UINT_MAX)
-		void AddBytes( ChecksumT& rChecksum, const void* pBuffer, size_t count ) const;
+		void AddBytes( UnderlyingT& rChecksum, const void* pBuffer, size_t count ) const;
 	private:
-		void AddByte( ChecksumT& rCrc32, const BYTE byteValue ) const { rCrc32 = ( rCrc32 >> 8 ) ^ m_lookupTable[ byteValue ^ ( rCrc32 & 0x000000FF )]; }
+		void AddByte( UnderlyingT& rCrc32, const BYTE byteValue ) const { rCrc32 = ( rCrc32 >> 8 ) ^ m_lookupTable[ byteValue ^ ( rCrc32 & 0x000000FF )]; }
 	private:
 		std::vector< UINT > m_lookupTable;		// the lookup table with constants generated based on s_polynomial, with entry for each byte value from 0 to 255
 		static const UINT s_polynomial;
@@ -52,12 +51,27 @@ namespace utl
 }
 
 
+namespace func
+{
+	template< typename ChecksumType = utl::TCrc32Checksum >
+	struct ComputeChecksum
+	{
+		void operator()( const void* pBuffer, size_t count )
+		{
+			m_checksum.ProcessBytes( pBuffer, count );
+		}
+	public:
+		ChecksumType m_checksum;
+	};
+}
+
+
+#include "Path.h"
+
+
 namespace crc32
 {
-	enum { FileBlockSize = 16 * KiloByte };		// read in 16384-byte (16KB) data blocks at a time; originally 4096-byte (4K) data blocks
-
-
-	// CRC32 generator algorithms
+	// CRC32 generator algorithms (32 bit Cyclic Redundancy Check)
 
 	template< typename ValueT >
 	UINT ComputeChecksum( const ValueT* pValues, size_t valueCount )
@@ -71,7 +85,7 @@ namespace crc32
 	template< typename CharT >
 	UINT ComputeStringChecksum( const CharT* pText ) { return ComputeChecksum( pText, str::GetLength( pText ) ); }
 
-	UINT ComputeFileChecksum( const fs::CPath& filePath ) throws_( CFileException* );
+	UINT ComputeFileChecksum( const fs::CPath& filePath ) throws_( CRuntimeException );
 }
 
 
@@ -95,6 +109,32 @@ namespace fs
 		stdext::hash_map< fs::CPath, ChecksumStampPair > m_cachedChecksums;
 	};
 }
+
+
+#ifdef USE_BOOST_CRC				// by default not defined to prevent Boost dependencies
+
+#pragma warning( push, 3 )			// switch to warning level 3
+#pragma warning( disable: 4245 )	// identifier was truncated to 'number' characters in the debug information
+#include <boost/crc.hpp>	// for boost::crc_32_type
+#pragma warning( pop )				// restore to the initial warning level
+
+
+namespace func
+{
+	template< typename ChecksumType = boost::crc_32_type >
+	struct ComputeBoostChecksum
+	{
+		void operator()( const void* pBuffer, size_t count )
+		{
+			m_checksum.process_bytes( pBuffer, count );
+		}
+	public:
+		ChecksumType m_checksum;
+	};
+}
+
+
+#endif //USE_BOOST_CRC
 
 
 #endif // utl_Crc32_h

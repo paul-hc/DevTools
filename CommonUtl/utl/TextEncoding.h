@@ -2,6 +2,7 @@
 #define TextEncoding_h
 #pragma once
 
+#include "Io_fwd.h"
 #include "Encoding.h"
 
 
@@ -81,8 +82,6 @@ namespace fs
 namespace io
 {
 	void __declspec(noreturn) ThrowUnsupportedEncoding( fs::Encoding encoding ) throws_( CRuntimeException );
-	void __declspec(noreturn) ThrowOpenForReading( const fs::CPath& filePath ) throws_( CRuntimeException );
-	void __declspec(noreturn) ThrowOpenForWriting( const fs::CPath& filePath ) throws_( CRuntimeException );
 }
 
 

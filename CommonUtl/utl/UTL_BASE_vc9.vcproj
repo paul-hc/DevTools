@@ -872,6 +872,22 @@
 					>
 				</File>
 				<File
+					RelativePath=".\Io_fwd.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Io_fwd.h"
+					>
+				</File>
+				<File
+					RelativePath=".\IoBin.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\IoBin.h"
+					>
+				</File>
+				<File
 					RelativePath=".\StdOutput.cpp"
 					>
 				</File>
@@ -885,10 +901,6 @@
 				</File>
 				<File
 					RelativePath=".\TextEncoding.h"
-					>
-				</File>
-				<File
-					RelativePath=".\TextFileIo.cpp"
 					>
 				</File>
 				<File

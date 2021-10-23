@@ -126,7 +126,7 @@ namespace io
 
 namespace io
 {
-	size_t CStdOutput::s_maxBatchSize = 8 * KiloByte;		// larger than 8 KB there are diminishing returns (even 4 KB is comparable)
+	size_t CStdOutput::s_maxBatchSize = FileBlockSize;		// larger than 8 KB there are diminishing returns (even 4 KB is comparable)
 
 	CStdOutput::CStdOutput( DWORD stdHandle /*= STD_OUTPUT_HANDLE*/ )
 		: m_hStdOutput( NULL )

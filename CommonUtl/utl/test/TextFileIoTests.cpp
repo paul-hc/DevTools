@@ -8,6 +8,7 @@
 #include "EncodedFileBuffer.h"
 #include "TextEncoding.h"
 #include "TextFileIo.h"
+#include "IoBin.h"
 #include "EnumTags.h"
 
 #define new DEBUG_NEW
