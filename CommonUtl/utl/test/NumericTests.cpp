@@ -448,30 +448,30 @@ void CNumericTests::TestCrc32( void )
 {
 	ASSERT( GetReferenceCrc32Table() == utl::CCrc32::Instance().GetLookupTable() );
 
-	ASSERT_EQUAL( 0, utl::CCrc32::Instance().ComputeCrc32( NULL, 0 ) );
+	ASSERT_EQUAL( 0, crc32::ComputeStringChecksum( (const char*)NULL ) );
 	{
 		static const BYTE bytes[] = { 0 };
-		ASSERT_EQUAL( 0xD202EF8D, utl::CCrc32::Instance().ComputeCrc32( bytes, COUNT_OF( bytes ) ) );
+		ASSERT_EQUAL( 0xD202EF8D, crc32::ComputeChecksum( bytes, COUNT_OF( bytes ) ) );
 	}
 
 	static const UINT s_crc32_abc = 0x352441C2;
 	{
 		static const BYTE bytes[] = { 'a', 'b', 'c' };
-		ASSERT_EQUAL( s_crc32_abc, utl::CCrc32::Instance().ComputeCrc32( bytes, COUNT_OF( bytes ) ) );
+		ASSERT_EQUAL( s_crc32_abc, crc32::ComputeChecksum( bytes, COUNT_OF( bytes ) ) );
 	}
 
-	ASSERT_EQUAL( s_crc32_abc, utl::CCrc32::Instance().ComputeCrc32( "abc" ) );
+	ASSERT_EQUAL( s_crc32_abc, crc32::ComputeStringChecksum( "abc" ) );
 
-	ASSERT_EQUAL( 0xAD957AB0, utl::CCrc32::Instance().ComputeCrc32( L"abc" ) );		// wide string
+	ASSERT_EQUAL( 0xAD957AB0, crc32::ComputeStringChecksum( L"abc" ) );		// wide string
 
-	ASSERT( utl::CCrc32::Instance().ComputeFileCrc32( app::GetModulePath() ) != 0 );				// exe file CRC32
+	ASSERT( crc32::ComputeFileChecksum( app::GetModulePath() ) != 0 );		// exe file CRC32
 
 	const fs::CPath& imagesDirPath = ut::GetDestImagesDirPath();
 	if ( !imagesDirPath.IsEmpty() )
 	{
 		fs::CPath gifPath = imagesDirPath / fs::CPath( _T("Animated.gif") );
 		if ( gifPath.FileExist() )
-			ASSERT_EQUAL( 0xA524D308, utl::CCrc32::Instance().ComputeFileCrc32( gifPath ) );		// gif file CRC32
+			ASSERT_EQUAL( 0xA524D308, crc32::ComputeFileChecksum( gifPath ) );	// gif file CRC32
 	}
 }
 

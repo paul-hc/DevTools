@@ -141,8 +141,9 @@ namespace ui
 
 	bool CItemContent::AutoBrowsePath( fs::CPath& rNewItem, CWnd* pParent ) const
 	{
-		if ( ui::FilePath == m_type || fs::IsValidFile( rNewItem.GetPtr() ) || path::ContainsWildcards( rNewItem.GetPtr() ) )
-			return shell::BrowseForFile( rNewItem, pParent, MixedPath == m_type ? shell::FileBrowse : shell::FileOpen, m_pFileFilter );
+		if ( !shell::IsValidDirectoryPattern( rNewItem ) )
+			if ( ui::FilePath == m_type || fs::IsValidFile( rNewItem.GetPtr() ) )
+				return shell::BrowseForFile( rNewItem, pParent, MixedPath == m_type ? shell::FileBrowse : shell::FileOpen, m_pFileFilter );
 
 		return shell::PickFolder( rNewItem, pParent );
 	}

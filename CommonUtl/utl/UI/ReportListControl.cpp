@@ -857,6 +857,7 @@ void CReportListControl::ParseColumnLayout( std::vector< CColumnInfo >& rColumnI
 			"Label=120" - 120 is the default column width;
 			"Label=-1" - stretchable column width;
 			"Label=-1/50" - stretchable column width, 50 minimum stretchable width;
+			"Label=120>" - 120 default column width, right align;
 			"Label=120<>" - 120 default column width, center align;
 		if -1 is used (just for one column), that column stretches to the available column space.
 	*/

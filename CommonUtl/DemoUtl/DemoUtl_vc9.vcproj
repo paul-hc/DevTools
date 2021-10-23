@@ -397,6 +397,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\FileChecksumsDialog.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\FileChecksumsDialog.h"
+				>
+			</File>
+			<File
 				RelativePath=".\FileListDialog.cpp"
 				>
 			</File>

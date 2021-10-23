@@ -25,6 +25,7 @@
 #define IDR_FLAG_STRIP_PNG              148
 #define IDD_TEST_TASK_DIALOG            149
 #define IDD_TEST_MISC_DIALOG            150
+#define IDD_FILE_CHECKSUMS_DIALOG       151
 #define IDC_OPEN_DIALOG_BUTTON          1000
 #define IDC_OPEN_PROPERTIES_BUTTON      1001
 #define IDC_CREATE_PROPERTIES_BUTTON    1002
@@ -114,6 +115,10 @@
 #define IDC_USE_DBG_GUIDES_CHECK        1093
 #define IDC_OUTCOME_STATIC              1093
 #define IDC_USE_DOUBLEBUFFER_CHECK      1094
+#define IDC_FILE_CHECKSUMS_LIST         1095
+#define IDC_CALC_CHECKSUMS_BUTTON       1096
+#define IDC_SEARCH_PATH_COMBO           1097
+#define IDC_FIND_FILES_BUTTON           1098
 #define ID_COMMAND_LINK1                2001
 #define ID_COMMAND_LINK2                2002
 #define ID_RADIO_BUTTON1                2101
@@ -144,6 +149,7 @@
 #define ID_AUTO_TRANSP_TOOL             32792
 #define ID_STUDY_TASK_DIALOG            32793
 #define ID_STUDY_MISC_DIALOG            32794
+#define ID_STUDY_FILE_CHECKSUM          32795
 
 // Next default values for new objects
 // 
@@ -151,7 +157,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        150
 #define _APS_NEXT_COMMAND_VALUE         32798
-#define _APS_NEXT_CONTROL_VALUE         1094
+#define _APS_NEXT_CONTROL_VALUE         1099
 #define _APS_NEXT_SYMED_VALUE           5002
 #endif
 #endif

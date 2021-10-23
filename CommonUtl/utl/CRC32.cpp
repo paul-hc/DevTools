@@ -40,47 +40,40 @@ namespace utl
 		return s_table;
 	}
 
-	void CCrc32::AddBytes( UINT& rCrc32, const BYTE* pBytes, size_t byteCount ) const
+	void CCrc32::AddBytes( ChecksumT& rChecksum, const void* pBuffer, size_t count ) const
 	{
-		ASSERT( 0 == byteCount || pBytes != NULL );
+		ASSERT( 0 == count || pBuffer != NULL );
 
-		for ( size_t i = 0; i != byteCount; ++i )
-			AddByte( rCrc32, pBytes[ i ] );
+		for ( const BYTE* pByte = reinterpret_cast<const BYTE*>( pBuffer ); count-- != 0; ++pByte )
+			AddByte( rChecksum, *pByte );
 	}
+}
 
-	UINT CCrc32::ComputeCrc32( const BYTE* pBytes, size_t byteCount ) const
+
+namespace crc32
+{
+	// CRC generator algorithms
+
+	UINT ComputeFileChecksum( const fs::CPath& filePath ) throws_( CFileException* )
 	{
-		UINT crc32CheckSum = UINT_MAX;
-
-		AddBytes( crc32CheckSum, pBytes, byteCount );
-
-		crc32CheckSum = ~crc32CheckSum;
-		return crc32CheckSum;
-	}
-
-	UINT CCrc32::ComputeFileCrc32( const fs::CPath& filePath ) const throws_( CFileException* )
-	{
-		UINT crc32CheckSum = UINT_MAX;
+		utl::TCrc32Checksum checksum;
 
 		CFile file( filePath.GetPtr(), CFile::modeRead | CFile::shareDenyWrite );
 
-		enum { BlockSize = 4096 * 4 };		// read in 16384-byte (16K) data blocks at a time; originally 4096-byte (4K) data blocks
-
-		std::vector< BYTE > buffer( BlockSize );
+		std::vector< BYTE > buffer( crc32::FileBlockSize );
 		BYTE* pBuffer = &buffer.front();
 		UINT readCount;
 		
 		do
 		{
-			readCount = file.Read( pBuffer, BlockSize );
-			AddBytes( crc32CheckSum, pBuffer, readCount );
+			readCount = file.Read( pBuffer, crc32::FileBlockSize );
+			checksum.ProcessBytes( pBuffer, readCount );
 		}
 		while ( readCount > 0 );
 
 		file.Close();
 
-		crc32CheckSum = ~crc32CheckSum;
-		return crc32CheckSum;
+		return checksum.GetResult();
 	}
 }
 
@@ -133,7 +126,7 @@ namespace fs
 	{
 		try
 		{
-			return utl::CCrc32::Instance().ComputeFileCrc32( filePath );
+			return crc32::ComputeFileChecksum( filePath );
 		}
 		catch ( CFileException* pExc )
 		{

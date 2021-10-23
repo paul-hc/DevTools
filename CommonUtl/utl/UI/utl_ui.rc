@@ -478,7 +478,11 @@ BEGIN
     ID_SHUTTLE_DOWN         "Shuttle down selected item\nShuttle Down"
     ID_SHUTTLE_TOP          "Shuttle to the top selected item\nShuttle Top"
     ID_SHUTTLE_BOTTOM       "Shuttle to the bottom selected item\nShuttle Bottom"
+    ID_EXPAND               "Expand"
+    ID_COLLAPSE             "Collapse"
     ID_EDIT_LIST_ITEMS      "Edit list of items\nEdit Items"
+    ID_BROWSE_FILE          "Browse File"
+    ID_BROWSE_FOLDER        "Browse Folder"
     ID_RESET_DEFAULT        "Reset to default"
 END
 
@@ -504,6 +508,11 @@ BEGIN
     ID_ITEM_COPY_FOLDERS    "Copy selected directory paths\nCopy Directory Path"
     ID_SHELL_SUBMENU        "Explorer system menu"
     ID_FILE_PROPERTIES      "Open property sheet for selected files\nEdit File Properties"
+END
+
+STRINGTABLE 
+BEGIN
+    IDD_PASSWORD_DIALOG     "Password"
 END
 
 #endif    // English (U.S.) resources

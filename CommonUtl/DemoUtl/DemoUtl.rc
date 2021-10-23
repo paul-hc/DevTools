@@ -42,7 +42,7 @@ END
 
 3 TEXTINCLUDE 
 BEGIN
-    "#include ""utl/utl_ui.rc""\r\n"
+    "#include ""utl/UI/utl_ui.rc""\r\n"
     "#include ""res\\DemoUtl.rc2""       // non-Microsoft Visual C++ edited resources\r\n"
     "\r\n"
     "#define _AFX_NO_OLE_RESOURCES\r\n"
@@ -306,6 +306,7 @@ BEGIN
     PUSHBUTTON      "&Study List Diffs...",ID_STUDY_LIST_DIFFS,250,17,74,14
     PUSHBUTTON      "Task Dialog...",ID_STUDY_TASK_DIALOG,13,36,74,14
     PUSHBUTTON      "Misc. Dialog...",ID_STUDY_MISC_DIALOG,92,36,74,14
+    PUSHBUTTON      "File Checksums...",ID_STUDY_FILE_CHECKSUM,171,36,74,14
     DEFPUSHBUTTON   "&Dialog...",IDC_OPEN_DIALOG_BUTTON,274,64,62,14,WS_GROUP
     PUSHBUTTON      "&Properties...",IDC_OPEN_PROPERTIES_BUTTON,274,80,62,14
     PUSHBUTTON      "&Modeless",IDC_CREATE_PROPERTIES_BUTTON,274,96,62,14
@@ -531,8 +532,8 @@ BEGIN
                     "Button",BS_AUTOCHECKBOX | WS_GROUP | WS_TABSTOP,7,7,113,10
     CONTROL         "&Alternate rows",IDC_USE_ALTERNATE_ROWS_CHECK,"Button",BS_AUTOCHECKBOX | WS_GROUP | WS_TABSTOP,126,7,63,10
     CONTROL         "&Text effects",IDC_USE_TEXT_EFFECTS_CHECK,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,207,7,55,10
-    CONTROL         "List Doble &Buffering",IDC_USE_DOUBLEBUFFER_CHECK,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,280,7,78,10
+    CONTROL         "List Double &Buffering",IDC_USE_DOUBLEBUFFER_CHECK,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,280,7,82,10
     CONTROL         "&Explorer Theme",IDC_USE_EXPLORER_THEME_CHECK,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,20,66,10
     CONTROL         "List &Default Draw",IDC_USE_DEFAULT_DRAW_CHECK,"Button",BS_AUTOCHECKBOX | WS_GROUP | WS_TABSTOP,7,156,71,10
     CONTROL         "Debug &Guides",IDC_USE_DBG_GUIDES_CHECK,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,79,156,60,10
@@ -572,6 +573,21 @@ BEGIN
     DEFPUSHBUTTON   "Close",IDOK,184,136,50,14
 END
 
+IDD_FILE_CHECKSUMS_DIALOG DIALOGEX 0, 0, 425, 154
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME
+CAPTION "Compute CRC32 Checksums"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    RTEXT           "Files &pattern:",IDC_STATIC,7,8,58,8
+    COMBOBOX        IDC_SEARCH_PATH_COMBO,68,7,262,139,CBS_DROPDOWN | WS_VSCROLL | WS_GROUP | WS_TABSTOP
+    LTEXT           "<tbar>",IDC_TOOLBAR_PLACEHOLDER,332,7,30,13,WS_BORDER
+    DEFPUSHBUTTON   "&Find Files",IDC_FIND_FILES_BUTTON,368,7,50,14,WS_GROUP
+    PUSHBUTTON      "&Calculate",IDC_CALC_CHECKSUMS_BUTTON,368,24,50,14,WS_GROUP
+    LTEXT           "File &checksums:",IDC_STATIC,7,35,50,8
+    CONTROL         "",IDC_FILE_CHECKSUMS_LIST,"SysListView32",LVS_REPORT | LVS_SINGLESEL | LVS_SHOWSELALWAYS | LVS_SHAREIMAGELISTS | LVS_EDITLABELS | WS_BORDER | WS_GROUP | WS_TABSTOP,7,46,411,102
+    PUSHBUTTON      "Cancel",IDCANCEL,451,8,50,14,NOT WS_TABSTOP
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -595,7 +611,7 @@ BEGIN
     BEGIN
         BLOCK "040904e4"
         BEGIN
-            VALUE "BuildTimestamp", "18-09-2021 22:00:28"
+            VALUE "BuildTimestamp", "23-10-2021 16:31:43"
             VALUE "Comments", "Split UTL_BASE/UTL_UI projects"
             VALUE "CompanyName", "Paul Cocoveanu"
             VALUE "Email", "phc.2nd@gmail.com"
@@ -742,6 +758,14 @@ BEGIN
         RIGHTMARGIN, 234
         TOPMARGIN, 7
         BOTTOMMARGIN, 150
+    END
+
+    IDD_FILE_CHECKSUMS_DIALOG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 418
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 147
     END
 END
 #endif    // APSTUDIO_INVOKED
@@ -937,11 +961,13 @@ STRINGTABLE
 BEGIN
     ID_SET_AUTO_TRANSP_COLOR "Set image auto-transparent color"
     ID_RESET_TRANSP_COLOR   "Reset image transparent color"
+    ID_STUDY_FILE_CHECKSUM  "Evaluate the performance of CRC32 file checksum calculation by comparing UTL_BASE vs Boost algorithms"
 END
 
 STRINGTABLE 
 BEGIN
     IDC_FILE_STATE_LIST     "File name=150|DEST File name=150|Attributes|DEST Attributes|Created Date=125|DEST Created Date=125|Notes=-1/150"
+    IDC_FILE_CHECKSUMS_LIST "File name=150|Directory=-1/150|File Size|UTL: CRC32=100>|UTL: Elapsed=100>|UTL-ifs: CRC32=100>|UTL-ifs: Elapsed=100>|BoostCFile: CRC32=100>|BoostCFile: Elapsed=100>|Boost-ifs: CRC32=100>|Boost-ifs: Elapsed=100>"
 END
 
 #endif    // English (U.S.) resources

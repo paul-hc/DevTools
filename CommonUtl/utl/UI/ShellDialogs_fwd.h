@@ -19,6 +19,9 @@ namespace shell
 
 
 	extern bool s_useVistaStyle;			// set to false to disable Vista style file dialog, which for certain apps is crashing; Vista style requires COM initialization
+
+
+	bool IsValidDirectoryPattern( const fs::CPath& dirPatternPath, fs::CPath* pDirPath = NULL, std::tstring* pWildSpec = NULL );	// a valid directory path with a wildcard pattern?
 }
 
 

@@ -2,6 +2,7 @@
 #include "stdafx.h"
 #include "ShellDialogs.h"
 #include "ShellTypes.h"
+#include "FileSystem_fwd.h"
 #include "TreeControl.h"
 #include "ContainerUtilities.h"
 #include <hash_map>
@@ -10,6 +11,26 @@
 #define new DEBUG_NEW
 #endif
 
+
+namespace shell
+{
+	bool IsValidDirectoryPattern( const fs::CPath& dirPatternPath, fs::CPath* pDirPath /*= NULL*/, std::tstring* pWildSpec /*= NULL*/ )
+	{	// a valid directory path with a wildcard pattern?
+		if ( !path::ContainsWildcards( dirPatternPath.GetFilenamePtr() ) )
+			return fs::IsValidDirectory( dirPatternPath.GetPtr() );
+		else if ( fs::IsValidFile( dirPatternPath.GetPtr() ) )
+			return false;
+
+		fs::CPath dirPath = dirPatternPath.GetParentPath();
+
+		if ( !fs::IsValidDirectory( dirPath.GetPtr() ) )
+			return false;
+
+		utl::AssignPtr( pDirPath, dirPath );
+		utl::AssignPtr( pWildSpec, dirPatternPath.GetFilename() );
+		return true;
+	}
+}
 
 namespace shell
 {
