@@ -8,7 +8,7 @@ namespace fs { class CPath; }
 
 namespace io
 {
-	enum { FileBlockSize = 8 * KiloByte };		// read in 8192-byte (8KB) data blocks at a time; originally 4096-byte (4K) data blocks; there are diminishing return beyond that
+	enum { FileBlockSize = 16 * KiloByte };		// read in 16KB data blocks at a time; originally 4096-byte (4K) data blocks
 
 
 	void __declspec(noreturn) ThrowOpenForReading( const fs::CPath& filePath ) throws_( CRuntimeException );

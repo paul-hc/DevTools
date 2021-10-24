@@ -25,19 +25,19 @@
 
 namespace hlp
 {
-	UINT ComputeUtlFileCrc32( const fs::CPath& filePath ) throws_( CRuntimeException )
+	UINT ComputeUtlFileStreamCrc32( const fs::CPath& filePath )
 	{
-		return io::bin::ReadFileStream( filePath, func::ComputeChecksum<>() ).m_checksum.GetResult();
+		return io::bin::ReadFileStream_NoThrow( filePath, func::ComputeChecksum<utl::TCrc32Checksum>() ).m_checksum.GetResult();
 	}
 
-	UINT ComputeBoostFileStreamCrc32( const fs::CPath& filePath ) throws_( CRuntimeException )
+	UINT ComputeBoostFileStreamCrc32( const fs::CPath& filePath )
 	{
-		return io::bin::ReadFileStream( filePath, func::ComputeBoostChecksum<>() ).m_checksum.checksum();
+		return io::bin::ReadFileStream_NoThrow( filePath, func::ComputeBoostChecksum<>() ).m_checksum.checksum();
 	}
 
-	UINT ComputeBoostCFileCrc32( const fs::CPath& filePath ) throws_( CRuntimeException )
+	UINT ComputeBoostCFileCrc32( const fs::CPath& filePath )
 	{
-		return io::bin::ReadCFile( filePath, func::ComputeBoostChecksum<>() ).m_checksum.checksum();
+		return io::bin::ReadCFile_NoThrow( filePath, func::ComputeBoostChecksum<>() ).m_checksum.checksum();
 	}
 }
 
@@ -103,53 +103,25 @@ void CFileChecksumItem::ComputeChecksums( void )
 		return;
 
 	CTimer timer;
-
-	try
 	{
 		m_utl.m_crc32 = crc32::ComputeFileChecksum( GetFilePath() );
+		m_utl.m_elapsedSecs = timer.ElapsedSeconds();
 	}
-	catch ( CRuntimeException& exc )
 	{
-		app::TraceException( exc );
-		m_utl.m_crc32 = UINT_MAX;
+		timer.Restart();
+		m_utlIfs.m_crc32 = hlp::ComputeUtlFileStreamCrc32( GetFilePath() );
+		m_utlIfs.m_elapsedSecs = timer.ElapsedSeconds();
 	}
-	m_utl.m_elapsedSecs = timer.ElapsedSeconds();
-
-	timer.Restart();
-	try
 	{
-		m_utlIfs.m_crc32 = hlp::ComputeUtlFileCrc32( GetFilePath() );
-	}
-	catch ( CRuntimeException& exc )
-	{
-		app::TraceException( exc );
-		m_utlIfs.m_crc32 = UINT_MAX;
-	}
-	m_utlIfs.m_elapsedSecs = timer.ElapsedSeconds();
-
-	timer.Restart();
-	try
-	{
+		timer.Restart();
 		m_boostCFile.m_crc32 = hlp::ComputeBoostCFileCrc32( GetFilePath() );
+		m_boostCFile.m_elapsedSecs = timer.ElapsedSeconds();
 	}
-	catch ( CRuntimeException& exc )
 	{
-		app::TraceException( exc );
-		m_boostCFile.m_crc32 = UINT_MAX;
-	}
-	m_boostCFile.m_elapsedSecs = timer.ElapsedSeconds();
-
-	timer.Restart();
-	try
-	{
+		timer.Restart();
 		m_boostIfs.m_crc32 = hlp::ComputeBoostFileStreamCrc32( GetFilePath() );
+		m_boostIfs.m_elapsedSecs = timer.ElapsedSeconds();
 	}
-	catch ( CRuntimeException& exc )
-	{
-		app::TraceException( exc );
-		m_boostIfs.m_crc32 = UINT_MAX;
-	}
-	m_boostIfs.m_elapsedSecs = timer.ElapsedSeconds();
 }
 
 
@@ -268,6 +240,7 @@ void CFileChecksumsDialog::SearchForFiles( void )
 	}
 
 	SetupFileListView();
+	m_fileListCtrl.UpdateWindow();		// display found files on the spot if continuing with CRC32 evaluation
 }
 
 void CFileChecksumsDialog::SetupFileListView( void )
@@ -385,8 +358,7 @@ void CFileChecksumsDialog::OnBnClicked_CalculateChecksums( void )
 
 	CWaitCursor wait;
 
-	for ( std::vector< CFileChecksumItem* >::const_iterator itFileItem = m_fileItems.begin(); itFileItem != m_fileItems.end(); ++itFileItem )
-		(*itFileItem)->ComputeChecksums();
+	utl::for_each( m_fileItems, std::mem_fun( &CFileChecksumItem::ComputeChecksums ) );
 
 	if ( !m_fileItems.empty() && m_fileItems.front()->HasChecksums() )
 	{	// insert/update the TOTALS proxy item
@@ -397,7 +369,7 @@ void CFileChecksumsDialog::OnBnClicked_CalculateChecksums( void )
 		else
 			m_fileItems.push_back( pTotalItem = new CFileChecksumItem( _T("TOTAL:") ) );
 
-		std::for_each( m_fileItems.begin(), m_fileItems.end(), func::SumElapsed( pTotalItem ) );
+		utl::for_each( m_fileItems, func::SumElapsed( pTotalItem ) );
 	}
 
 	SetupFileListView();

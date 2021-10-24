@@ -464,7 +464,8 @@ void CNumericTests::TestCrc32( void )
 
 	ASSERT_EQUAL( 0xAD957AB0, crc32::ComputeStringChecksum( L"abc" ) );		// wide string
 
-	ASSERT( crc32::ComputeFileChecksum( app::GetModulePath() ) != 0 );		// exe file CRC32
+	ASSERT_EQUAL( 0, crc32::ComputeFileChecksum( fs::CPath( _T("NoFile.xyz") ) ) );		// non-existing file CRC32
+	ASSERT( crc32::ComputeFileChecksum( app::GetModulePath() ) != 0 );					// exe file CRC32
 
 	const fs::CPath& imagesDirPath = ut::GetDestImagesDirPath();
 	if ( !imagesDirPath.IsEmpty() )

@@ -55,9 +55,9 @@ namespace crc32
 {
 	// CRC generator algorithms
 
-	UINT ComputeFileChecksum( const fs::CPath& filePath ) throws_( CRuntimeException )
+	UINT ComputeFileChecksum( const fs::CPath& filePath )
 	{
-		return io::bin::ReadCFile( filePath, func::ComputeChecksum<>() ).m_checksum.GetResult();
+		return io::bin::ReadCFile_NoThrow( filePath, func::ComputeChecksum<utl::TCrc32Checksum>() ).m_checksum.GetResult();
 	}
 }
 
@@ -80,7 +80,7 @@ namespace fs
 			switch ( fs::CheckExpireStatus( filePath, itFound->second.second ) )
 			{
 				case fs::ExpiredFileModified:
-					itFound->second.first = ComputeFileCrc32( filePath );
+					itFound->second.first = crc32::ComputeFileChecksum( filePath );
 					if ( 0 == itFound->second.first )		// error
 					{
 						m_cachedChecksums.erase( itFound );
@@ -96,7 +96,7 @@ namespace fs
 		}
 		else
 		{
-			if ( UINT crc32Checksum = ComputeFileCrc32( filePath ) )
+			if ( UINT crc32Checksum = crc32::ComputeFileChecksum( filePath ) )
 			{
 				m_cachedChecksums[ filePath ] = ChecksumStampPair( crc32Checksum, fs::ReadLastModifyTime( filePath ) );
 				return crc32Checksum;
@@ -104,18 +104,5 @@ namespace fs
 		}
 
 		return 0;
-	}
-
-	UINT CCrc32FileCache::ComputeFileCrc32( const fs::CPath& filePath ) const throws_()
-	{
-		try
-		{
-			return crc32::ComputeFileChecksum( filePath );
-		}
-		catch ( CRuntimeException& exc )
-		{
-			app::TraceException( exc );
-			return 0;						// error
-		}
 	}
 }

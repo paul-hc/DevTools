@@ -53,7 +53,7 @@ namespace utl
 
 namespace func
 {
-	template< typename ChecksumType = utl::TCrc32Checksum >
+	template< typename ChecksumT = utl::TCrc32Checksum >
 	struct ComputeChecksum
 	{
 		void operator()( const void* pBuffer, size_t count )
@@ -61,7 +61,7 @@ namespace func
 			m_checksum.ProcessBytes( pBuffer, count );
 		}
 	public:
-		ChecksumType m_checksum;
+		ChecksumT m_checksum;
 	};
 }
 
@@ -85,7 +85,7 @@ namespace crc32
 	template< typename CharT >
 	UINT ComputeStringChecksum( const CharT* pText ) { return ComputeChecksum( pText, str::GetLength( pText ) ); }
 
-	UINT ComputeFileChecksum( const fs::CPath& filePath ) throws_( CRuntimeException );
+	UINT ComputeFileChecksum( const fs::CPath& filePath );		// returns 0 checksum on file error
 }
 
 
@@ -101,8 +101,6 @@ namespace fs
 		void Clear( void ) { m_cachedChecksums.clear(); }
 
 		UINT AcquireCrc32( const fs::CPath& filePath );
-	private:
-		UINT ComputeFileCrc32( const fs::CPath& filePath ) const throws_();
 	private:
 		typedef std::pair< UINT, CTime > ChecksumStampPair;		// Crc32 checksum, lastModifyTime
 
@@ -121,7 +119,7 @@ namespace fs
 
 namespace func
 {
-	template< typename ChecksumType = boost::crc_32_type >
+	template< typename ChecksumT = boost::crc_32_type >
 	struct ComputeBoostChecksum
 	{
 		void operator()( const void* pBuffer, size_t count )
@@ -129,7 +127,7 @@ namespace func
 			m_checksum.process_bytes( pBuffer, count );
 		}
 	public:
-		ChecksumType m_checksum;
+		ChecksumT m_checksum;
 	};
 }
 
