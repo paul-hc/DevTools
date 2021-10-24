@@ -89,7 +89,7 @@ UINT CBaseItemContentCtrl< BaseCtrl >::GetStockButtonIconId( void ) const
 		case ui::String:	return ID_EDIT_DETAILS;
 		case ui::DirPath:	return ID_BROWSE_FOLDER;
 		case ui::FilePath:	return ID_BROWSE_FILE;
-		case ui::MixedPath:	return ID_BROWSE_FILE;
+		case ui::MixedPath:	return ID_BROWSE_FOLDER;	// +ID_BROWSE_FILE
 	}
 }
 

@@ -1,6 +1,7 @@
 
 #include "stdafx.h"
 #include "BaseDetailHostCtrl.h"
+#include "CmdInfoStore.h"
 #include "Utilities.h"
 #include "resource.h"
 
@@ -68,6 +69,16 @@ CRect CDetailButton::GetHostCtrlRect( void ) const
 			hostRect.bottom = hostRect.top + 21;			// magic combo height
 
 	return hostRect;
+}
+
+void CDetailButton::QueryTooltipText( std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const
+{
+	cmdId, pTooltip;
+
+	if ( UINT iconId = GetIconId().m_id )
+		if ( const ui::CCmdInfo* pFoundInfo = ui::CCmdInfoStore::Instance().RetrieveInfo( iconId ) )
+			if ( pFoundInfo->IsValid() )
+				rText = pFoundInfo->m_tooltipText;
 }
 
 BEGIN_MESSAGE_MAP( CDetailButton, CIconButton )

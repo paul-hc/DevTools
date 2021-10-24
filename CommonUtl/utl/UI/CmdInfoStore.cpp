@@ -105,6 +105,10 @@ namespace ui
 		if ( text.empty() && pCustomInfo != NULL )
 			pCustomInfo->QueryTooltipText( text, message.m_cmdId, message.m_pTooltip );
 
+		if ( text.empty() && message.m_hCtrl != NULL )
+			if ( const ui::ICustomCmdInfo* pCtrlCustomInfo = dynamic_cast<const ui::ICustomCmdInfo*>( CWnd::FromHandlePermanent( message.m_hCtrl ) ) )
+				pCtrlCustomInfo->QueryTooltipText( text, message.m_cmdId, message.m_pTooltip );		// redirect to the control object
+
 		if ( text.empty() && !message.IgnoreResourceString() )
 			if ( const CCmdInfo* pCmdInfo = FindInfo( message.m_cmdId ) )
 				text = pCmdInfo->m_tooltipText;

@@ -2,6 +2,7 @@
 #define BaseDetailHostCtrl_h
 #pragma once
 
+#include "Dialog_fwd.h"
 #include "IconButton.h"
 
 
@@ -16,7 +17,9 @@ namespace ui
 
 // works in tandem with a host control (e.g. an CEdit)
 
-class CDetailButton : public CIconButton
+class CDetailButton
+	: public CIconButton
+	, public ui::ICustomCmdInfo
 {
 public:
 	CDetailButton( ui::IBuddyCommand* pOwnerCallback, UINT iconId = 0 );
@@ -29,6 +32,9 @@ public:
 	void SetSpacing( int spacingToButton ) { m_spacingToButton = spacingToButton; }
 protected:
 	CRect GetHostCtrlRect( void ) const;
+
+	// ui::ICustomCmdInfo interface
+	virtual void QueryTooltipText( std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const;
 private:
 	ui::IBuddyCommand* m_pOwnerCallback;
 	CWnd* m_pHostCtrl;
