@@ -143,6 +143,15 @@ namespace shell
 		return impl::RunFileDialog( rFilePath, scopedDlg.m_pFileDlg.get() );
 	}
 
+	bool BrowseAutoPath( fs::CPath& rFilePath, CWnd* pParent, const TCHAR* pFileFilter /*= NULL*/ )
+	{
+		if ( !shell::IsValidDirectoryPattern( rFilePath ) )
+			if ( fs::IsValidFile( rFilePath.GetPtr() ) )
+				return BrowseForFile( rFilePath, pParent, FileBrowse, pFileFilter );
+
+		return PickFolder( rFilePath, pParent );
+	}
+
 
 	namespace impl
 	{

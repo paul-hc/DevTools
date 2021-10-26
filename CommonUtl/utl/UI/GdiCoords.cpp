@@ -31,7 +31,7 @@ namespace ui
 		return MaxSize( destSize, minSize );
 	}
 
-	CRect StretchToFit( const CRect& destBoundsRect, const SIZE& srcSize, CSize spacingSize /*= CSize( 0, 0 )*/, int alignment /*= H_AlignCenter | V_AlignCenter*/ )
+	CRect StretchToFit( const CRect& destBoundsRect, const SIZE& srcSize, CSize spacingSize /*= CSize( 0, 0 )*/, TAlignment alignment /*= H_AlignCenter | V_AlignCenter*/ )
 	{
 		// reduce spacing if greater that source or destination
 		spacingSize = MinSize( spacingSize, destBoundsRect.Size() );
@@ -58,7 +58,7 @@ namespace ui
 	}
 
 
-	CRect& AlignRect( CRect& rDest, const RECT& anchor, int alignment, bool limitDest /*= false*/ )
+	CRect& AlignRect( CRect& rDest, const RECT& anchor, TAlignment alignment, bool limitDest /*= false*/ )
 	{
 		CSize offset( 0, 0 );
 
@@ -101,6 +101,48 @@ namespace ui
 		if ( limitDest && !rDest.IsRectEmpty() )
 			rDest &= anchor;
 
+		return rDest;
+	}
+
+	CRect& AlignRectOutside( CRect& rDest, const RECT& anchor, TAlignment alignment, const CSize& spacing /*= CSize( 0, 0 )*/ )
+	{	// buddy or tile align: layout the rect outside the anchor (by the anchor)
+		CSize offset( 0, 0 );
+
+		switch ( alignment & HorizontalMask )
+		{
+			case H_AlignLeft:
+				rDest.MoveToX( anchor.left - rDest.Width() - spacing.cx );		// tile to the left
+				break;
+			case H_AlignCenter:
+				offset.cx = anchor.left - rDest.left + ( RectWidth( anchor ) - rDest.Width() ) / 2;
+				break;
+			case H_AlignRight:
+				rDest.MoveToX( anchor.right + spacing.cx );						// tile to the right
+				break;
+			case NoAlign:
+				break;
+			default:
+				ASSERT( false );
+		}
+
+		switch ( alignment & VerticalMask )
+		{
+			case V_AlignTop:
+				rDest.MoveToY( anchor.top - rDest.Height() - spacing.cy );		// tile to the top
+				break;
+			case V_AlignCenter:
+				offset.cy = anchor.top - rDest.top + ( RectHeight( anchor ) - rDest.Height() ) / 2;
+				break;
+			case V_AlignBottom:
+				rDest.MoveToY( anchor.bottom + spacing.cy );					// tile to the bottom
+				break;
+			case NoAlign:
+				break;
+			default:
+				ASSERT( false );
+		}
+
+		rDest.OffsetRect( offset );
 		return rDest;
 	}
 

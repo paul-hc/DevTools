@@ -6,6 +6,7 @@
 #include "FileSystem.h"
 #include "ShellDialogs.h"
 #include "StringUtilities.h"
+#include "resource.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -49,71 +50,6 @@ namespace ui
 		return true;
 	}
 
-	void CItemContent::FilterItems( std::vector< std::tstring >& rItems ) const
-	{
-		if ( HasFlag( m_itemsFlags, Trim ) )
-			str::TrimItems( rItems );
-
-		for ( std::vector< std::tstring >::const_iterator itItem = rItems.begin(); itItem != rItems.end(); )
-			if ( IsValidItem( *itItem ) )
-				++itItem;
-			else
-				itItem = rItems.erase( itItem );
-
-		if ( HasFlag( m_itemsFlags, EnsureUnique ) )
-			if ( ui::String == m_type )
-				utl::Uniquify< pred::TStringyCompareIntuitive >( rItems );
-			else
-				utl::Uniquify< pred::CompareNaturalPath >( rItems );
-	}
-
-	std::tstring CItemContent::EditItem( const TCHAR* pItem, CWnd* pParent ) const
-	{
-		ASSERT_PTR( pItem );
-
-		fs::CPath newItem;
-
-		switch ( m_type )
-		{
-			default: ASSERT( false );
-			case ui::String:
-				return str::GetEmpty();
-			case ui::DirPath:
-			case ui::MixedPath:
-				newItem.Set( str::ExpandEnvironmentStrings( pItem ) );
-				if ( !AutoBrowsePath( newItem, pParent ) )
-					return str::GetEmpty();
-				break;
-			case ui::FilePath:
-				newItem.Set( str::ExpandEnvironmentStrings( pItem ) );
-				if ( !shell::BrowseForFile( newItem, pParent, shell::FileOpen, m_pFileFilter ) )
-					return str::GetEmpty();
-				break;
-		}
-
-		switch ( m_type )
-		{
-			case ui::DirPath:
-			case ui::FilePath:
-			case ui::MixedPath:
-			{
-				std::vector< std::tstring > variables;
-				str::QueryEnvironmentVariables( variables, pItem );
-
-				std::vector< std::tstring > values;
-				str::ExpandEnvironmentVariables( values, variables );
-				ENSURE( variables.size() == values.size() );
-
-				for ( unsigned int i = 0; i != variables.size(); ++i )
-					str::Replace( newItem.Ref(), values[ i ].c_str(), variables[ i ].c_str() );
-				break;
-			}
-		}
-		if ( HasFlag( m_itemsFlags, Trim ) )
-			str::Trim( newItem.Ref() );
-		return newItem.Get();
-	}
-
 	bool CItemContent::IsValidPathItem( const std::tstring& pathItem ) const
 	{
 		ASSERT( ui::DirPath == m_type || ui::FilePath == m_type || ui::MixedPath == m_type );
@@ -139,13 +75,87 @@ namespace ui
 		return path::ContainsWildcards( path.c_str() );
 	}
 
-	bool CItemContent::AutoBrowsePath( fs::CPath& rNewItem, CWnd* pParent ) const
+	void CItemContent::FilterItems( std::vector< std::tstring >& rItems ) const
 	{
-		if ( !shell::IsValidDirectoryPattern( rNewItem ) )
-			if ( ui::FilePath == m_type || fs::IsValidFile( rNewItem.GetPtr() ) )
-				return shell::BrowseForFile( rNewItem, pParent, MixedPath == m_type ? shell::FileBrowse : shell::FileOpen, m_pFileFilter );
+		if ( HasFlag( m_itemsFlags, Trim ) )
+			str::TrimItems( rItems );
 
-		return shell::PickFolder( rNewItem, pParent );
+		for ( std::vector< std::tstring >::const_iterator itItem = rItems.begin(); itItem != rItems.end(); )
+			if ( IsValidItem( *itItem ) )
+				++itItem;
+			else
+				itItem = rItems.erase( itItem );
+
+		if ( HasFlag( m_itemsFlags, EnsureUnique ) )
+			if ( ui::String == m_type )
+				utl::Uniquify< pred::TStringyCompareIntuitive >( rItems );
+			else
+				utl::Uniquify< pred::CompareNaturalPath >( rItems );
+	}
+
+	std::tstring CItemContent::EditItem( const TCHAR* pItem, CWnd* pParent, UINT cmdId ) const
+	{
+		ASSERT_PTR( pItem );
+
+		fs::CPath newItem;
+
+		if ( ui::String == m_type )
+			return str::GetEmpty();
+
+		newItem.Set( str::ExpandEnvironmentStrings( pItem ) );
+
+		bool picked = false;
+
+		switch ( m_type )
+		{
+			case ui::DirPath:
+				picked = shell::PickFolder( newItem, pParent );
+				break;
+			case ui::FilePath:
+				picked = shell::BrowseForFile( newItem, pParent, shell::FileOpen, m_pFileFilter );
+				break;
+			case ui::MixedPath:
+				picked = BrowseMixedPath( newItem, pParent, cmdId );
+				break;
+			default:
+				ASSERT( false );
+		}
+		if ( !picked )
+			return str::GetEmpty();
+
+		switch ( m_type )
+		{
+			case ui::DirPath:
+			case ui::FilePath:
+			case ui::MixedPath:
+			{
+				std::vector< std::tstring > variables;
+				str::QueryEnvironmentVariables( variables, pItem );
+
+				std::vector< std::tstring > values;
+				str::ExpandEnvironmentVariables( values, variables );
+				ENSURE( variables.size() == values.size() );
+
+				for ( unsigned int i = 0; i != variables.size(); ++i )
+					str::Replace( newItem.Ref(), values[ i ].c_str(), variables[ i ].c_str() );
+				break;
+			}
+		}
+		if ( HasFlag( m_itemsFlags, Trim ) )
+			str::Trim( newItem.Ref() );
+		return newItem.Get();
+	}
+
+	bool CItemContent::BrowseMixedPath( fs::CPath& rNewItem, CWnd* pParent, UINT cmdId ) const
+	{
+		switch ( cmdId )
+		{
+			case ID_BROWSE_FILE:
+				return shell::BrowseForFile( rNewItem, pParent, shell::FileBrowse, m_pFileFilter );
+			case ID_BROWSE_FOLDER:
+				return shell::PickFolder( rNewItem, pParent );
+		}
+		return shell::BrowseAutoPath( rNewItem, pParent, m_pFileFilter );		// choose the browse file/folder based on current path
 	}
 
 } //namespace ui

@@ -15,7 +15,7 @@ CDialogToolBar::~CDialogToolBar()
 }
 
 void CDialogToolBar::DDX_Placeholder( CDataExchange* pDX, int placeholderId,
-									  int alignToPlaceholder /*= H_AlignLeft | V_AlignBottom*/,
+									  TAlignment alignToPlaceholder /*= H_AlignLeft | V_AlignBottom*/,
 									  UINT toolbarResId /*= 0*/ )
 {
 	if ( NULL == m_hWnd )
@@ -26,7 +26,21 @@ void CDialogToolBar::DDX_Placeholder( CDataExchange* pDX, int placeholderId,
 	}
 }
 
-void CDialogToolBar::CreateReplacePlaceholder( CWnd* pParent, int placeholderId, int alignToPlaceholder /*= H_AlignLeft | V_AlignBottom*/,
+void CDialogToolBar::DDX_ShrinkBuddy( CDataExchange* pDX, CWnd* pBuddyCtrl, int toolbarId, const ui::CBuddyLayout& buddyLayout /*= ui::CBuddyLayout::s_tileToRight*/,
+									  UINT toolbarResId /*= 0*/ )
+{
+	if ( NULL == m_hWnd )
+	{
+		ASSERT( DialogOutput == pDX->m_bSaveAndValidate );
+
+		CreateShrinkBuddy( pBuddyCtrl, buddyLayout, toolbarResId );
+
+		if ( toolbarId != 0 )
+			SetDlgCtrlID( toolbarId );
+	}
+}
+
+void CDialogToolBar::CreateReplacePlaceholder( CWnd* pParent, int placeholderId, TAlignment alignToPlaceholder /*= H_AlignLeft | V_AlignBottom*/,
 											   UINT toolbarResId /*= 0*/ )
 {
 	ASSERT_NULL( m_hWnd );
@@ -34,17 +48,30 @@ void CDialogToolBar::CreateReplacePlaceholder( CWnd* pParent, int placeholderId,
 
 	CreateToolbar( pParent, toolbarResId );
 
-	// adjust the size of the toolbar
 	CSize idealBarSize;
-	GetToolBarCtrl().GetMaxSize( &idealBarSize );
+	GetToolBarCtrl().GetMaxSize( &idealBarSize );		// adjust the size of the toolbar
 
-	CWnd* pPlaceholder = ui::AlignToPlaceholder( placeholderId, *this, &idealBarSize, alignToPlaceholder );
+	CWnd* pPlaceholder = ui::AlignToPlaceholder( this, placeholderId, &idealBarSize, alignToPlaceholder );
 	pPlaceholder->DestroyWindow();
 	SetDlgCtrlID( placeholderId );
 }
 
+void CDialogToolBar::CreateShrinkBuddy( CWnd* pBuddyCtrl, const ui::CBuddyLayout& buddyLayout /*= ui::CBuddyLayout::s_tileToRight*/, UINT toolbarResId /*= 0*/ )
+{
+	ASSERT_NULL( m_hWnd );
+	ASSERT_PTR( pBuddyCtrl->GetSafeHwnd() );
+
+	CreateToolbar( pBuddyCtrl->GetParent(), toolbarResId );
+
+	CSize idealBarSize;
+	GetToolBarCtrl().GetMaxSize( &idealBarSize );		// adjust the size of the toolbar
+
+	buddyLayout.LayoutCtrl( this, pBuddyCtrl, &idealBarSize );
+	buddyLayout.ShrinkBuddy( pBuddyCtrl, this );
+}
+
 void CDialogToolBar::CreateToolbar( CWnd* pParent, const CRect* pAlignScreenRect /*= NULL*/,
-									int alignment /*= H_AlignRight | V_AlignCenter*/, UINT toolbarResId /*= 0*/ )
+									TAlignment alignment /*= H_AlignRight | V_AlignCenter*/, UINT toolbarResId /*= 0*/ )
 {
 	ASSERT_NULL( m_hWnd );
 

@@ -2,6 +2,8 @@
 #define ThemeItem_h
 #pragma once
 
+#include "ui_fwd.h"
+
 
 class CIcon;
 
@@ -34,8 +36,8 @@ struct CThemeItem
 	bool DrawStatusText( Status status, HDC hdc, const RECT& rect, const wchar_t* pText, DWORD textFlags ) const;
 
 	// conversion to image
-	bool MakeBitmap( CBitmap& rBitmap, COLORREF bkColor, const CSize& imageSize, int alignment = 0 /*NoAlign*/, Status status = Normal ) const;
-	bool MakeIcon( CIcon& rIcon, const CSize& imageSize, int alignment = 0 /*NoAlign*/, Status status = Normal ) const;
+	bool MakeBitmap( CBitmap& rBitmap, COLORREF bkColor, const CSize& imageSize, TAlignment alignment = NoAlign, Status status = Normal ) const;
+	bool MakeIcon( CIcon& rIcon, const CSize& imageSize, TAlignment alignment = NoAlign, Status status = Normal ) const;
 public:
 	const wchar_t* m_pThemeClass;
 	int m_partId;

@@ -30,7 +30,7 @@ void CSampleView::DDX_Placeholder( CDataExchange* pDX, int placeholderId )
 		VERIFY( Create( NULL, NULL, WS_CHILD | WS_VISIBLE, CRect( 0, 0, 0, 0 ), pDX->m_pDlgWnd, (WORD)-1 ) );
 		ModifyStyleEx( 0, WS_EX_STATICEDGE );
 
-		ui::AlignToPlaceholder( placeholderId, *this )->DestroyWindow();
+		ui::AlignToPlaceholder( this, placeholderId )->DestroyWindow();
 		SetDlgCtrlID( placeholderId );
 		SendMessage( WM_INITIALUPDATE, 0, 0 );
 	}
@@ -45,7 +45,7 @@ CRect CSampleView::MakeDisplayRect( const CRect& clientRect, const CSize& displa
 {
 	CRect displayRect( 0, 0, displaySize.cx, displaySize.cy );
 
-	int alignment = NoAlign;
+	TAlignment alignment = NoAlign;
 	SetFlag( alignment, H_AlignCenter, displayRect.Width() < clientRect.Width() );
 	SetFlag( alignment, V_AlignCenter, displayRect.Height() < clientRect.Height() );
 

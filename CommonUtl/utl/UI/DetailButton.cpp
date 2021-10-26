@@ -1,6 +1,6 @@
 
 #include "stdafx.h"
-#include "BaseDetailHostCtrl.h"
+#include "DetailButton.h"
 #include "CmdInfoStore.h"
 #include "Utilities.h"
 #include "resource.h"
@@ -10,13 +10,13 @@
 #endif
 
 
-// CItemListEdit::CDetailButton implementation
+// CDetailButton implementation
 
 CDetailButton::CDetailButton( ui::IBuddyCommand* pOwnerCallback, UINT iconId /*= 0*/ )
 	: CIconButton( iconId, false )
 	, m_pOwnerCallback( pOwnerCallback )
 	, m_pHostCtrl( NULL )
-	, m_spacingToButton( SpacingToButton )
+	, m_buddyLayout( H_AlignRight | V_AlignCenter, Spacing )
 {
 	ASSERT_PTR( m_pOwnerCallback );
 	SetIconId( ID_EDIT_DETAILS );
@@ -27,48 +27,26 @@ void CDetailButton::Create( CWnd* pHostCtrl )
 	m_pHostCtrl = pHostCtrl;
 	ASSERT_PTR( m_pHostCtrl->GetSafeHwnd() );
 
-	CRect hostRect = GetHostCtrlRect();
-	CRect buttonRect = hostRect;
+	CRect hostRect = ui::GetControlRect( m_pHostCtrl->GetSafeHwnd() );
+	CRect buttonRect( 0, 0, hostRect.Height(), hostRect.Height() );		// square size of hostRect.Height()
 
-	buttonRect.left = buttonRect.right - buttonRect.Height();
-	hostRect.right = buttonRect.left - m_spacingToButton;
-	m_pHostCtrl->MoveWindow( &hostRect );
+	ui::AlignRect( buttonRect, hostRect, m_buddyLayout.m_alignment );
 
 	CWnd* pParentDialog = m_pHostCtrl->GetParent();
 	enum { ButtonStyle = WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON | BS_ICON | BS_CENTER | BS_VCENTER };
 	VERIFY( CIconButton::Create( _T("..."), ButtonStyle, buttonRect, pParentDialog, (UINT)ButtonId ) );
-	SetWindowPos( m_pHostCtrl, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE | SWP_NOACTIVATE );		// move in tab order after the host
+	ui::SetTabOrder( this, m_pHostCtrl );
 	SetFont( pParentDialog->GetFont() );
+
+	m_buddyLayout.ShrinkBuddy( m_pHostCtrl, this );				// shrink the host so both are side-by-side
 
 	// strangely the initial SetIcon call on PreSubclassWindow() doesn't stick -> set the icon again
 	UpdateIcon();
 }
 
-void CDetailButton::Layout( void )
+void CDetailButton::LayoutButton( void )
 {
-	// layout both: host & detail
-	CRect hostRect = GetHostCtrlRect();
-	CRect buttonRect;
-	GetWindowRect( &buttonRect );
-
-	CSize buttonSize = buttonRect.Size();
-
-	buttonRect.left = hostRect.right + m_spacingToButton;
-	buttonRect.top = hostRect.top;
-	buttonRect.right = buttonRect.left + buttonSize.cx;
-	buttonRect.bottom = buttonRect.top + buttonSize.cy;
-
-	MoveWindow( &buttonRect );
-}
-
-CRect CDetailButton::GetHostCtrlRect( void ) const
-{
-	CRect hostRect = ui::GetControlRect( *m_pHostCtrl );
-	if ( CComboBox* pComboBox = dynamic_cast< CComboBox* >( m_pHostCtrl ) )
-		if ( CBS_SIMPLE == ( pComboBox->GetStyle() & 0x0F ) )
-			hostRect.bottom = hostRect.top + 21;			// magic combo height
-
-	return hostRect;
+	m_buddyLayout.LayoutCtrl( this, m_pHostCtrl );		// layout this button
 }
 
 void CDetailButton::QueryTooltipText( std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const

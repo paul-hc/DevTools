@@ -8,9 +8,8 @@
 
 // edit for a string, dir-path or file-path with details button
 
-class CItemContentEdit : public CBaseItemContentCtrl< CTextEdit >
+class CItemContentEdit : public CBaseItemContentCtrl<CTextEdit>
 {
-	typedef CBaseItemContentCtrl< CTextEdit > BaseClass;
 public:
 	CItemContentEdit( ui::ContentType type = ui::String, const TCHAR* pFileFilter = NULL );
 	virtual ~CItemContentEdit();
@@ -22,12 +21,14 @@ protected:
 
 // edit for a separated list of items with details button
 
-class CItemListEdit : public CBaseItemContentCtrl< CTextEdit >
+class CItemListEdit : public CBaseItemContentCtrl<CTextEdit>
 {
-	typedef CBaseItemContentCtrl< CTextEdit > BaseClass;
 public:
 	CItemListEdit( const TCHAR* pSeparator = _T(";") );
 	virtual ~CItemListEdit();
+
+	// base overrides
+	virtual void SetContentType( ui::ContentType type );
 
 	enum ListEditor { ListDialog, Custom };
 
@@ -40,8 +41,6 @@ public:
 protected:
 	// interface IBuddyCommand
 	virtual void OnBuddyCommand( UINT cmdId );
-
-	virtual UINT GetStockButtonIconId( void ) const;
 private:
 	const TCHAR* m_pSeparator;
 	ListEditor m_listEditor;

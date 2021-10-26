@@ -22,6 +22,8 @@ namespace shell
 	bool PickFolder( fs::CPath& rFilePath, CWnd* pParentWnd,
 					 FILEOPENDIALOGOPTIONS options = 0, const TCHAR* pTitle = NULL );
 
+	bool BrowseAutoPath( fs::CPath& rFilePath, CWnd* pParent, const TCHAR* pFileFilter = NULL );	// choose the browse file/folder based on current path
+
 	namespace impl
 	{
 		CFileDialog* MakeFileDialog( const fs::CPath& filePath, CWnd* pParentWnd, BrowseMode browseMode, const std::tstring& fileFilter,

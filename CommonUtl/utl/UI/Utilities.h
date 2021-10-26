@@ -100,8 +100,14 @@ namespace ui
 	void StretchWindow( HWND hWnd, HWND hAnchor, Stretch stretch, const CSize& inflateBy = CSize( 0, 0 ) );
 	void OffsetWindow( HWND hWnd, int cx, int cy );
 	void MoveControlOver( HWND hDlg, UINT sourceCtrlId, UINT destCtrlId, bool hideDestCtrl = true );
-	CWnd* AlignToPlaceholder( int placeholderId, CWnd& rControl,
-							  const CSize* pCustomSize = NULL, int alignment = NoAlign, CSize addBottomRight = CSize( 0, 0 ) );
+
+	CWnd* AlignToPlaceholder( CWnd* pCtrl, int placeholderId,
+							  const CSize* pCustomSize = NULL, TAlignment alignment = NoAlign, CSize addBottomRight = CSize( 0, 0 ) );
+
+	inline bool SetTabOrder( CWnd* pCtrl, const CWnd* pPreviousCtrl )
+	{	// move in tab order after previous control
+		return pCtrl->SetWindowPos( pPreviousCtrl, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE | SWP_NOACTIVATE ) != FALSE;
+	}
 
 	void RecalculateScrollBars( HWND hWnd );				// recalculates scrollbars and internal layout by forcing a resize
 

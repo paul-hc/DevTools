@@ -11,8 +11,7 @@
 #include "resource.h"
 
 
-// CBaseDetailHostCtrl template code
-
+// CDragListCtrl template code
 
 template< typename BaseListCtrl >
 CDragListCtrl< BaseListCtrl >::CDragListCtrl( UINT columnLayoutId /*= 0*/, DWORD listStyleEx /*= lv::DefaultStyleEx*/ )

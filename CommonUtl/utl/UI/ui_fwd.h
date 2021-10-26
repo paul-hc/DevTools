@@ -19,6 +19,8 @@ enum Alignment
 		VerticalMask	= 0xF0
 };
 
+typedef int TAlignment;
+
 
 namespace ui
 {

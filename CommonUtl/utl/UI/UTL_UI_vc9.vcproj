@@ -1278,10 +1278,6 @@
 				Name="Controls"
 				>
 				<File
-					RelativePath=".\BaseDetailHostCtrl.cpp"
-					>
-				</File>
-				<File
 					RelativePath=".\BaseDetailHostCtrl.h"
 					>
 				</File>
@@ -1346,6 +1342,14 @@
 					>
 				</File>
 				<File
+					RelativePath=".\Control_fwd.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Control_fwd.h"
+					>
+				</File>
+				<File
 					RelativePath=".\CtrlInterfaces.h"
 					>
 				</File>
@@ -1363,6 +1367,14 @@
 				</File>
 				<File
 					RelativePath=".\DateTimeControl.h"
+					>
+				</File>
+				<File
+					RelativePath=".\DetailButton.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\DetailButton.h"
 					>
 				</File>
 				<File

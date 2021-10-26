@@ -2,73 +2,51 @@
 #define BaseDetailHostCtrl_h
 #pragma once
 
-#include "Dialog_fwd.h"
-#include "IconButton.h"
+#include "Control_fwd.h"
 
 
-namespace ui
-{
-	interface IBuddyCommand
-	{
-		virtual void OnBuddyCommand( UINT cmdId ) = 0;
-	};
-}
+class CDialogToolBar;
 
 
-// works in tandem with a host control (e.g. an CEdit)
-
-class CDetailButton
-	: public CIconButton
-	, public ui::ICustomCmdInfo
-{
-public:
-	CDetailButton( ui::IBuddyCommand* pOwnerCallback, UINT iconId = 0 );
-
-	void Create( CWnd* pHostCtrl );
-	void Layout( void );				// both host & detail
-
-	enum Metrics { SpacingToButton = 2 };
-
-	void SetSpacing( int spacingToButton ) { m_spacingToButton = spacingToButton; }
-protected:
-	CRect GetHostCtrlRect( void ) const;
-
-	// ui::ICustomCmdInfo interface
-	virtual void QueryTooltipText( std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const;
-private:
-	ui::IBuddyCommand* m_pOwnerCallback;
-	CWnd* m_pHostCtrl;
-	int m_spacingToButton;
-
-	enum { ButtonId = -1 };
-private:
-	// generated message map
-	afx_msg BOOL OnReflect_BnClicked( void );
-
-	DECLARE_MESSAGE_MAP()
-};
-
-
-// a control that has a detail button for editing
+// a control that has a buddy details toolbar with editing commands (possibly multiple)
 
 template< typename BaseCtrl >
-abstract class CBaseDetailHostCtrl : public BaseCtrl
-								   , protected ui::IBuddyCommand
+abstract class CBaseDetailHostCtrl
+	: public BaseCtrl
+	, protected ui::IBuddyCommand
 {
 protected:
-	CBaseDetailHostCtrl( void ) : BaseCtrl(), m_pDetailButton( new CDetailButton( this ) ), m_ignoreResize( false ) {}
+	CBaseDetailHostCtrl( void );
 public:
-	CDetailButton* GetDetailButton( void ) const { return m_pDetailButton.get(); }
-	void SetDetailButton( CDetailButton* pDetailButton ) { m_pDetailButton.reset( pDetailButton ); }
+	enum Metrics { Spacing = 2 };
+
+	const ui::CBuddyLayout& GetBuddyLayout( void ) const { return m_buddyLayout; }
+	ui::CBuddyLayout& RefBuddyLayout( void ) { return m_buddyLayout; }
+
+	bool HasDetailToolbar( void ) const { return m_pDetailToolbar.get() != NULL; }
+	CDialogToolBar* GetDetailToolbar( void ) const { return m_pDetailToolbar.get(); }
+	void SetDetailToolbar( CDialogToolBar* pDetailToolbar );
+
+	const std::vector< UINT >& GetDetailCommands( void ) const;
+	bool ContainsDetailCommand( UINT cmdId ) const;
 private:
-	std::auto_ptr< CDetailButton > m_pDetailButton;
+	enum { MinCmdId = 1, MaxCmdId = 0x7FFF };
+
+	void LayoutDetails( void );
+private:
+	CWnd* m_pParentWnd;
+	std::auto_ptr< CDialogToolBar > m_pDetailToolbar;
+	ui::CBuddyLayout m_buddyLayout;
 	bool m_ignoreResize;
 
 	// generated stuff
 public:
 	virtual void PreSubclassWindow( void );
+	virtual BOOL OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo );
 protected:
 	afx_msg void OnSize( UINT sizeType, int cx, int cy );
+	afx_msg void OnDetailCommand( UINT cmdId );
+	afx_msg void OnUpdateDetailCommand( CCmdUI* pCmdUI );
 
 	DECLARE_MESSAGE_MAP()
 };
@@ -101,15 +79,7 @@ public:
 	void SetFileFilter( const TCHAR* pFileFilter );
 	void SetEnsurePathExist( void ) { SetFlag( m_content.m_itemsFlags, ui::CItemContent::EnsurePathExist ); }
 
-	void SetStringContent( bool allowEmptyItem = true, bool noDetailsButton = true )		// by default allow a single empty item
-	{
-		SetFlag( m_content.m_itemsFlags, ui::CItemContent::RemoveEmpty, !allowEmptyItem );
-		if ( noDetailsButton )
-			SetDetailButton( NULL );
-	}
-protected:
-	bool UseStockButtonIcon( void ) const;
-	virtual UINT GetStockButtonIconId( void ) const;
+	void SetStringContent( bool allowEmptyItem = true, bool noDetailsButton = true );		// by default allow a single empty item
 protected:
 	ui::CItemContent m_content;
 };

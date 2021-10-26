@@ -14,7 +14,7 @@
 // CItemContentEdit implementation
 
 CItemContentEdit::CItemContentEdit( ui::ContentType type /*= ui::String*/, const TCHAR* pFileFilter /*= NULL*/ )
-	: CBaseItemContentCtrl< CTextEdit >( type, pFileFilter )
+	: CBaseItemContentCtrl<CTextEdit>( type, pFileFilter )
 {
 	SetUseFixedFont( false );
 	SetContentType( type );			// also switch the icon
@@ -28,12 +28,12 @@ void CItemContentEdit::OnBuddyCommand( UINT cmdId )
 {
 	if ( ui::String == m_content.m_type )					// not very useful
 	{
-		BaseClass::OnBuddyCommand( cmdId );
+		__super::OnBuddyCommand( cmdId );
 		return;
 	}
 	else
 	{
-		std::tstring newItem = m_content.EditItem( ui::GetWindowText( *this ).c_str(), GetParent() );
+		std::tstring newItem = m_content.EditItem( ui::GetWindowText( *this ).c_str(), GetParent(), cmdId );
 		if ( newItem.empty() )
 			return;					// cancelled by user
 
@@ -50,7 +50,7 @@ void CItemContentEdit::OnBuddyCommand( UINT cmdId )
 // CItemListEdit implementation
 
 CItemListEdit::CItemListEdit( const TCHAR* pSeparator /*= _T(";")*/ )
-	: CBaseItemContentCtrl< CTextEdit >()
+	: CBaseItemContentCtrl<CTextEdit>()
 	, m_pSeparator( pSeparator )
 	, m_listEditor( ListDialog )
 {
@@ -117,7 +117,7 @@ void CItemListEdit::OnBuddyCommand( UINT cmdId )
 {
 	if ( Custom == m_listEditor )
 	{
-		BaseClass::OnBuddyCommand( cmdId );
+		__super::OnBuddyCommand( cmdId );
 		return;
 	}
 
@@ -133,9 +133,11 @@ void CItemListEdit::OnBuddyCommand( UINT cmdId )
 	ui::SendCommandToParent( m_hWnd, CN_DETAILSCHANGED );
 }
 
-UINT CItemListEdit::GetStockButtonIconId( void ) const
+void CItemListEdit::SetContentType( ui::ContentType type )
 {
-	if ( ui::String == m_content.m_type )
-		return ID_EDIT_LIST_ITEMS;
-	return BaseClass::GetStockButtonIconId();
+	if ( ui::String == type )
+		if ( HasDetailToolbar() && GetDetailCommands().empty() )
+			GetDetailToolbar()->GetStrip().AddButton( ID_EDIT_LIST_ITEMS );
+
+	__super::SetContentType( type );
 }

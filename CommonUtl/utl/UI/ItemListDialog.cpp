@@ -353,7 +353,7 @@ bool CItemsListPage::EditSelItem( void )
 	}
 	else
 	{
-		newItem = m_rContent.EditItem( GetListItemText( selIndex ).c_str(), this );
+		newItem = m_rContent.EditItem( GetListItemText( selIndex ).c_str(), this, 0 );
 		if ( !newItem.empty() )
 			m_listCtrl.SetItemText( selIndex, Item, newItem.c_str() );
 		else
@@ -518,7 +518,7 @@ bool CItemsEditPage::EditSelItem( void )
 	if ( ui::String == m_rContent.m_type )
 		return true;
 
-	newItem = m_rContent.EditItem( currLine.c_str(), this );
+	newItem = m_rContent.EditItem( currLine.c_str(), this, 0 );
 	if ( newItem.empty() )
 		return false;			// canceled by user
 

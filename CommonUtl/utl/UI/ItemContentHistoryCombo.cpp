@@ -30,7 +30,7 @@ void CItemContentHistoryCombo::OnBuddyCommand( UINT cmdId )
 	}
 	else
 	{
-		std::tstring newItem = m_content.EditItem( GetCurrentText().c_str(), GetParent() );
+		std::tstring newItem = m_content.EditItem( GetCurrentText().c_str(), GetParent(), cmdId );
 		if ( newItem.empty() )
 			return;					// cancelled by user
 

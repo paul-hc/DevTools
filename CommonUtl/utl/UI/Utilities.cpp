@@ -1,7 +1,6 @@
 
 #include "stdafx.h"
 #include "Utilities.h"
-#include "Dialog_fwd.h"
 #include "LayoutEngine.h"
 #include "HistoryComboBox.h"
 #include "IconButton.h"
@@ -190,7 +189,7 @@ namespace ui
 
 		if ( HasFlag( GetStyle( hCtrl ), WS_CHILD ) )
 			if ( HWND hParent = ::GetParent( hCtrl ) )
-				ScreenToClient( hParent, controlRect );		// convert to parent's coords
+				ui::ScreenToClient( hParent, controlRect );		// convert to parent's coords
 
 		return controlRect;
 	}
@@ -258,10 +257,12 @@ namespace ui
 			ShowWindow( hDestCtrl, false );
 	}
 
-	CWnd* AlignToPlaceholder( int placeholderId, CWnd& rControl,
-							  const CSize* pCustomSize /*= NULL*/, int alignment /*= NoAlign*/, CSize addBottomRight /*= CSize( 0, 0 )*/ )
+	CWnd* AlignToPlaceholder( CWnd* pCtrl, int placeholderId,
+							  const CSize* pCustomSize /*= NULL*/, TAlignment alignment /*= NoAlign*/, CSize addBottomRight /*= CSize( 0, 0 )*/ )
 	{
-		CWnd* pParentWnd = rControl.GetParent();
+		ASSERT_PTR( pCtrl->GetSafeHwnd() );
+
+		CWnd* pParentWnd = pCtrl->GetParent();
 		CWnd* pPlaceHolderWnd = pParentWnd->GetDlgItem( placeholderId );
 
 		CRect placeholderRect;
@@ -277,9 +278,10 @@ namespace ui
 		if ( alignment != NoAlign )
 			ui::AlignRect( ctrlRect, placeholderRect, alignment );
 
-		rControl.SetWindowPos( pPlaceHolderWnd, ctrlRect.left, ctrlRect.top, ctrlRect.Width(), ctrlRect.Height(), SWP_NOACTIVATE );
+		pCtrl->SetWindowPos( pPlaceHolderWnd, ctrlRect.left, ctrlRect.top, ctrlRect.Width(), ctrlRect.Height(), SWP_NOACTIVATE );
 		return pPlaceHolderWnd;
 	}
+
 
 	void RecalculateScrollBars( HWND hWnd )
 	{

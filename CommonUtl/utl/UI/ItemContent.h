@@ -34,13 +34,14 @@ namespace ui
 			: m_type( type ), m_pFileFilter( pFileFilter ), m_itemsFlags( itemsFlags ) {}
 
 		bool IsValidItem( const std::tstring& item ) const;
-		std::tstring EditItem( const TCHAR* pItem, CWnd* pParent ) const;
+		std::tstring EditItem( const TCHAR* pItem, CWnd* pParent, UINT cmdId ) const;
 
 		void SplitItems( std::vector< std::tstring >& rItems, const std::tstring& source, const TCHAR sep[] ) const;
 		void FilterItems( std::vector< std::tstring >& rItems ) const;
 
 		bool IsValidPathItem( const std::tstring& pathItem ) const;
-		bool AutoBrowsePath( fs::CPath& rNewItem, CWnd* pParent ) const;
+	private:
+		bool BrowseMixedPath( fs::CPath& rNewItem, CWnd* pParent, UINT cmdId ) const;
 	public:
 		ui::ContentType m_type;
 		const TCHAR* m_pFileFilter;

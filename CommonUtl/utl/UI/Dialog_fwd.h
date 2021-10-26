@@ -5,7 +5,6 @@
 
 enum { DialogOutput, DialogSaveChanges };
 
-
 class CLayoutPropertyPage;
 
 

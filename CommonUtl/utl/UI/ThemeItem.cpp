@@ -104,7 +104,7 @@ bool CThemeItem::GetPartSize( CSize* pPartSize, HDC hdc, THEMESIZE themeSize /*=
 	return theme.IsValid() && theme.GetThemePartSize( pPartSize, hdc, m_partId, m_stateId[ Normal ], themeSize, pRect );
 }
 
-bool CThemeItem::MakeBitmap( CBitmap& rBitmap, COLORREF bkColor, const CSize& imageSize, int alignment /*= NoAlign*/, Status status /*= Normal*/ ) const
+bool CThemeItem::MakeBitmap( CBitmap& rBitmap, COLORREF bkColor, const CSize& imageSize, TAlignment alignment /*= NoAlign*/, Status status /*= Normal*/ ) const
 {
 	if ( rBitmap.GetSafeHandle() != NULL )
 		rBitmap.DeleteObject();
@@ -148,7 +148,7 @@ bool CThemeItem::MakeBitmap( CBitmap& rBitmap, COLORREF bkColor, const CSize& im
 	return success && rBitmap.GetSafeHandle() != NULL;
 }
 
-bool CThemeItem::MakeIcon( CIcon& rIcon, const CSize& imageSize, int alignment /*= NoAlign*/, Status status /*= Normal*/ ) const
+bool CThemeItem::MakeIcon( CIcon& rIcon, const CSize& imageSize, TAlignment alignment /*= NoAlign*/, Status status /*= Normal*/ ) const
 {
 	enum { TranspBkColor = RGB( 255, 255, 254 ) };	// almost white: so that themes that render with alpha blending don't show weird colours (such as radio button)
 	rIcon.Release();

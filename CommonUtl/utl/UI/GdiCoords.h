@@ -52,7 +52,7 @@ namespace ui
 	inline double GetAspectRatio( const SIZE& size ) { return (double)size.cx / size.cy; }
 	double GetDistFromSquareAspect( const SIZE& size );
 	CSize StretchToFit( const SIZE& destBoundsSize, const SIZE& srcSize );
-	CRect StretchToFit( const CRect& destBoundsRect, const SIZE& srcSize, CSize spacingSize = CSize( 0, 0 ), int alignment = H_AlignCenter | V_AlignCenter );
+	CRect StretchToFit( const CRect& destBoundsRect, const SIZE& srcSize, CSize spacingSize = CSize( 0, 0 ), TAlignment alignment = H_AlignCenter | V_AlignCenter );
 
 	inline CSize ShrinkToFit( const SIZE& destBoundsSize, const SIZE& srcSize )
 	{
@@ -74,12 +74,14 @@ namespace ui
 	inline int RectHeight( const RECT& rect ) { return rect.bottom - rect.top; }
 
 
-	CRect& AlignRect( CRect& rDest, const RECT& anchor, int alignment, bool limitDest = false );
+	CRect& AlignRect( CRect& rDest, const RECT& anchor, TAlignment alignment, bool limitDest = false );
 
 	inline CRect& AlignRectHV( CRect& rDest, const RECT& anchor, Alignment horz, Alignment vert, bool limitDest = false )
 	{
 		return AlignRect( rDest, anchor, horz | vert, limitDest );
 	}
+
+	CRect& AlignRectOutside( CRect& rDest, const RECT& anchor, TAlignment alignment, const CSize& spacing = CSize( 0, 0 ) );	// buddy or tile align: layout the rect outside the anchor (by the anchor)
 
 	CRect& CenterRect( CRect& rDest, const RECT& anchor, bool horiz = true, bool vert = true, bool limitDest = false, const CSize& offset = CSize( 0, 0 ) );
 
