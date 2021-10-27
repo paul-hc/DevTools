@@ -7,14 +7,14 @@
 // CBaseFrameHostCtrl template code
 
 template< typename BaseCtrl >
-void CBaseFrameHostCtrl< BaseCtrl >::Refresh( void )
+void CBaseFrameHostCtrl<BaseCtrl>::Refresh( void )
 {
 	if ( m_hWnd != NULL )
 		Invalidate();
 }
 
 template< typename BaseCtrl >
-bool CBaseFrameHostCtrl< BaseCtrl >::SetFrameColor( COLORREF frameColor )
+bool CBaseFrameHostCtrl<BaseCtrl>::SetFrameColor( COLORREF frameColor )
 {
 	if ( m_frameColor == frameColor )
 		return false;
@@ -25,7 +25,7 @@ bool CBaseFrameHostCtrl< BaseCtrl >::SetFrameColor( COLORREF frameColor )
 }
 
 template< typename BaseCtrl >
-bool CBaseFrameHostCtrl< BaseCtrl >::SetShowFocus( bool showFocus /*= true*/ )
+bool CBaseFrameHostCtrl<BaseCtrl>::SetShowFocus( bool showFocus /*= true*/ )
 {
 	if ( m_showFocus == showFocus )
 		return false;
@@ -36,7 +36,7 @@ bool CBaseFrameHostCtrl< BaseCtrl >::SetShowFocus( bool showFocus /*= true*/ )
 }
 
 template< typename BaseCtrl >
-CRect CBaseFrameHostCtrl< BaseCtrl >::GetFrameRect( FrameType frameType ) const
+CRect CBaseFrameHostCtrl<BaseCtrl>::GetFrameRect( FrameType frameType ) const
 {
 	CRect frameRect;
 	GetClientRect( &frameRect );
@@ -51,7 +51,7 @@ CRect CBaseFrameHostCtrl< BaseCtrl >::GetFrameRect( FrameType frameType ) const
 }
 
 template< typename BaseCtrl >
-void CBaseFrameHostCtrl< BaseCtrl >::InvalidateFrame( FrameType frameType )
+void CBaseFrameHostCtrl<BaseCtrl>::InvalidateFrame( FrameType frameType )
 {
 	CRect frameRect = GetFrameRect( frameType );
 	CRgn frameRgn;
@@ -70,7 +70,7 @@ BEGIN_TEMPLATE_MESSAGE_MAP( CBaseFrameHostCtrl, BaseCtrl, BaseCtrl )
 END_MESSAGE_MAP()
 
 template< typename BaseCtrl >
-void CBaseFrameHostCtrl< BaseCtrl >::OnPaint( void )
+void CBaseFrameHostCtrl<BaseCtrl>::OnPaint( void )
 {
 	BaseCtrl::OnPaint();
 
@@ -94,7 +94,7 @@ void CBaseFrameHostCtrl< BaseCtrl >::OnPaint( void )
 }
 
 template< typename BaseCtrl >
-void CBaseFrameHostCtrl< BaseCtrl >::OnSetFocus( CWnd* pOldWnd )
+void CBaseFrameHostCtrl<BaseCtrl>::OnSetFocus( CWnd* pOldWnd )
 {
 	BaseCtrl::OnSetFocus( pOldWnd );
 
@@ -103,7 +103,7 @@ void CBaseFrameHostCtrl< BaseCtrl >::OnSetFocus( CWnd* pOldWnd )
 }
 
 template< typename BaseCtrl >
-void CBaseFrameHostCtrl< BaseCtrl >::OnKillFocus( CWnd* pNewWnd )
+void CBaseFrameHostCtrl<BaseCtrl>::OnKillFocus( CWnd* pNewWnd )
 {
 	BaseCtrl::OnKillFocus( pNewWnd );
 

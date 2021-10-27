@@ -27,7 +27,7 @@ static ACCEL s_editKeys[] =
 const TCHAR CTextEdit::s_lineEnd[] = _T("\r\n");
 
 CTextEdit::CTextEdit( bool useFixedFont /*= true*/ )
-	: CBaseFrameHostCtrl< CEdit >()
+	: CBaseFrameHostCtrl<CEdit>()
 	, m_useFixedFont( useFixedFont )
 	, m_keepSelOnFocus( false )
 	, m_usePasteTransact( false )
@@ -138,14 +138,14 @@ bool CTextEdit::SetVisibleWhiteSpace( bool visibleWhiteSpace /*= true*/ )
 
 std::tstring CTextEdit::GetSelText( void ) const
 {
-	Range< int > sel;
+	Range<int> sel;
 	GetSel( sel.m_start, sel.m_end );
-	return ui::GetWindowText( this ).substr( sel.m_start, sel.GetSpan< size_t >() );
+	return ui::GetWindowText( this ).substr( sel.m_start, sel.GetSpan<size_t>() );
 }
 
-Range< CTextEdit::CharPos > CTextEdit::GetLineRange( Line linePos ) const
+Range<CTextEdit::CharPos> CTextEdit::GetLineRange( Line linePos ) const
 {
-	Range< int > lineRange( LineIndex( linePos ) );
+	Range<int> lineRange( LineIndex( linePos ) );
 	lineRange.m_end += LineLength( lineRange.m_start );
 	return lineRange;
 }
@@ -153,7 +153,7 @@ Range< CTextEdit::CharPos > CTextEdit::GetLineRange( Line linePos ) const
 std::tstring CTextEdit::GetLineText( Line linePos ) const
 {
 	// Note: careful with LineLength() - the 'nLine' parameter is the index of the first character on the line (CharPos), not the line index
-	size_t length = GetLineRange( linePos ).GetSpan< size_t >();
+	size_t length = GetLineRange( linePos ).GetSpan<size_t>();
 	std::vector< TCHAR > lineBuffer( length + 1 );
 
 	size_t newLength = GetLine( linePos, ARRAY_PAIR_V( lineBuffer ) );
@@ -173,7 +173,7 @@ CFont* CTextEdit::GetFixedFont( FontSize fontSize /*= Normal*/ )
 void CTextEdit::SetFixedFont( CWnd* pWnd )
 {
 	pWnd->SetFont( GetFixedFont() );
-	if ( CEdit* pEdit = dynamic_cast< CEdit* >( pWnd ) )
+	if ( CEdit* pEdit = dynamic_cast<CEdit*>( pWnd ) )
 		pEdit->SetTabStops( 16 );				// default tab stop is 32 dialog base units (8 chars), reduce it to half (4 chars)
 	pWnd->Invalidate();
 }
@@ -192,7 +192,7 @@ void CTextEdit::OnValueChanged( void )
 
 void CTextEdit::PreSubclassWindow( void )
 {
-	BaseClass::PreSubclassWindow();
+	__super::PreSubclassWindow();
 
 	if ( m_useFixedFont )
 		SetFixedFont( this );
@@ -203,7 +203,7 @@ BOOL CTextEdit::PreTranslateMessage( MSG* pMsg )
 	if ( WM_KEYDOWN == pMsg->message && m_hWnd == pMsg->hwnd )
 		if ( !ui::IsKeyPressed( VK_SHIFT ) )
 		{
-			Range< CharPos > selRange = GetSelRange< CharPos >();
+			Range<CharPos> selRange = GetSelRange<CharPos>();
 			if ( !selRange.IsEmpty() )
 
 			// collapse selection in the direction of the key
@@ -231,7 +231,7 @@ BOOL CTextEdit::PreTranslateMessage( MSG* pMsg )
 
 	return
 		m_accel.Translate( pMsg, m_hWnd ) ||
-		CEdit::PreTranslateMessage( pMsg );
+		__super::PreTranslateMessage( pMsg );
 }
 
 
@@ -257,7 +257,7 @@ END_MESSAGE_MAP()
 
 UINT CTextEdit::OnGetDlgCode( void )
 {
-	UINT code = BaseClass::OnGetDlgCode();
+	UINT code = __super::OnGetDlgCode();
 
 	if ( m_keepSelOnFocus )
 		ClearFlag( code, DLGC_HASSETSEL );

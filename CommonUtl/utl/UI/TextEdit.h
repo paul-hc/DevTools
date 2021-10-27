@@ -14,10 +14,10 @@ class CSyncScrolling;
 // inhibits EN_CHANGE notifications on internal changes;
 // resets the modify flag when setting text programatically.
 
-class CTextEdit : public CBaseFrameHostCtrl< CEdit >
+class CTextEdit : public CBaseFrameHostCtrl<CEdit>
 				, public CInternalChange
 {
-	typedef CBaseFrameHostCtrl< CEdit > BaseClass;
+	typedef CBaseFrameHostCtrl<CEdit> BaseClass;
 public:
 	CTextEdit( bool useFixedFont = true );
 	virtual ~CTextEdit();
@@ -55,23 +55,23 @@ public:
 	std::tstring GetSelText( void ) const;
 
 	// multi-line edit
-	typedef int CharPos;												// position of text character in edit's text
+	typedef int CharPos;											// position of text character in edit's text
 	typedef int Line;
 
-	Range< CharPos > GetLineRange( Line linePos ) const;				// line startPos and endPos
+	Range<CharPos> GetLineRange( Line linePos ) const;				// line startPos and endPos
 	std::tstring GetLineText( Line linePos ) const;
 
 	enum { CaretPos = -1 };
 
-	Range< CharPos > GetLineRangeAt( CharPos charPos = CaretPos ) const { return GetLineRange( LineFromChar( charPos ) ); }
+	Range<CharPos> GetLineRangeAt( CharPos charPos = CaretPos ) const { return GetLineRange( LineFromChar( charPos ) ); }
 	std::tstring GetLineTextAt( CharPos charPos = CaretPos ) const { return GetLineText( LineFromChar( charPos ) ); }		// by default: text of line with the caret
 
 	// selection
 	template< typename IntType >
-	Range< IntType > GetSelRange( void ) const;
+	Range<IntType> GetSelRange( void ) const;
 
 	template< typename IntType >
-	void SetSelRange( const Range< IntType >& sel ) { SetSel( static_cast< CharPos >( sel.m_start ), static_cast< CharPos >( sel.m_end ) ); }
+	void SetSelRange( const Range<IntType>& sel ) { SetSel( static_cast<CharPos>( sel.m_start ), static_cast<CharPos>( sel.m_end ) ); }
 
 	enum FontSize { Normal, Large };
 	static CFont* GetFixedFont( FontSize fontSize = Normal );
@@ -125,12 +125,12 @@ protected:
 // template code
 
 template< typename IntType >
-Range< IntType > CTextEdit::GetSelRange( void ) const
+Range<IntType> CTextEdit::GetSelRange( void ) const
 {
 	CharPos startPos, endPos;
 	GetSel( startPos, endPos );
 	ASSERT( startPos <= endPos && startPos >= 0 );
-	return Range< IntType >( static_cast< IntType >( startPos ), static_cast< IntType >( endPos ) );
+	return Range<IntType>( static_cast<IntType>( startPos ), static_cast<IntType>( endPos ) );
 }
 
 

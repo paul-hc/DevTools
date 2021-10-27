@@ -10,7 +10,7 @@ class CEnumTags;
 
 // works with enum types that have contiguous values, not necessarily zero based
 //
-class CEnumComboBox : public CBaseStockContentCtrl< CComboBox >
+class CEnumComboBox : public CBaseStockContentCtrl<CComboBox>
 {
 public:
 	CEnumComboBox( const CEnumTags* pEnumTags );

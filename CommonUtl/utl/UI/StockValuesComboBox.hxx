@@ -8,7 +8,7 @@
 namespace ui
 {
 	template< typename ValueT >
-	std::tstring FormatValidationMessage( const IValueSetAdapter< ValueT >* pAdapter, ui::TValueSetFlags flags, const Range< ValueT >& validRange )
+	std::tstring FormatValidationMessage( const IValueSetAdapter<ValueT>* pAdapter, ui::TValueSetFlags flags, const Range<ValueT>& validRange )
 	{
 		ASSERT_PTR( pAdapter );
 
@@ -26,11 +26,11 @@ namespace ui
 }
 
 
-// CStockValuesComboBox< ValueT > template code
+// CStockValuesComboBox template code
 
 template< typename ValueT >
-CStockValuesComboBox< ValueT >::CStockValuesComboBox( const ui::IValueSetAdapter< ValueT >* pStockAdapter, ui::TValueSetFlags flags /*= 0*/ )
-	: CBaseStockContentCtrl< CComboBox >()
+CStockValuesComboBox<ValueT>::CStockValuesComboBox( const ui::IValueSetAdapter<ValueT>* pStockAdapter, ui::TValueSetFlags flags /*= 0*/ )
+	: CBaseStockContentCtrl<CComboBox>()
 	, m_pStockAdapter( NULL )
 	, m_flags( flags )
 {
@@ -38,12 +38,12 @@ CStockValuesComboBox< ValueT >::CStockValuesComboBox( const ui::IValueSetAdapter
 }
 
 template< typename ValueT >
-inline void CStockValuesComboBox< ValueT >::SetAdapter( const ui::IValueSetAdapter< ValueT >* pStockAdapter )
+inline void CStockValuesComboBox<ValueT>::SetAdapter( const ui::IValueSetAdapter<ValueT>* pStockAdapter )
 {
 	m_pStockAdapter = pStockAdapter;
 	ASSERT_PTR( m_pStockAdapter );
 
-	const std::vector< ValueT >& stockValues = m_pStockAdapter->GetStockValues();
+	const std::vector<ValueT>& stockValues = m_pStockAdapter->GetStockValues();
 	if ( !stockValues.empty() )
 	{
 		m_validRange.m_start = *std::min_element( stockValues.begin(), stockValues.end() );
@@ -55,7 +55,7 @@ inline void CStockValuesComboBox< ValueT >::SetAdapter( const ui::IValueSetAdapt
 }
 
 template< typename ValueT >
-inline bool CStockValuesComboBox< ValueT >::OutputValue( ValueT value )
+inline bool CStockValuesComboBox<ValueT>::OutputValue( ValueT value )
 {
 	bool changed = ui::SetComboEditText( *this, m_pStockAdapter->OutputValue( value ), str::IgnoreCase ).first;
 
@@ -65,7 +65,7 @@ inline bool CStockValuesComboBox< ValueT >::OutputValue( ValueT value )
 }
 
 template< typename ValueT >
-inline bool CStockValuesComboBox< ValueT >::InputValue( ValueT* pOutValue, ui::ComboField byField, bool showErrors /*= false*/ ) const
+inline bool CStockValuesComboBox<ValueT>::InputValue( ValueT* pOutValue, ui::ComboField byField, bool showErrors /*= false*/ ) const
 {
 	if ( m_pStockAdapter->ParseValue( pOutValue, ui::GetComboSelText( *this, byField ) ) )
 		if ( IsValidValue( *pOutValue ) )
@@ -80,9 +80,9 @@ inline bool CStockValuesComboBox< ValueT >::InputValue( ValueT* pOutValue, ui::C
 }
 
 template< typename ValueT >
-bool CStockValuesComboBox< ValueT >::IsValidValue( ValueT value ) const
+bool CStockValuesComboBox<ValueT>::IsValidValue( ValueT value ) const
 {
-	const std::vector< ValueT >& stockValues = m_pStockAdapter->GetStockValues();
+	const std::vector<ValueT>& stockValues = m_pStockAdapter->GetStockValues();
 
 	if ( !stockValues.empty() )
 	{
@@ -101,19 +101,19 @@ bool CStockValuesComboBox< ValueT >::IsValidValue( ValueT value ) const
 }
 
 template< typename ValueT >
-void CStockValuesComboBox< ValueT >::InitStockContent( void )
+void CStockValuesComboBox<ValueT>::InitStockContent( void )
 {
 	ui::WriteComboItemValues( *this, m_pStockAdapter->GetStockValues(), OutputFormatter( m_pStockAdapter ) );
 }
 
 template< typename ValueT >
-inline std::tstring CStockValuesComboBox< ValueT >::FormatValidationError( void ) const
+inline std::tstring CStockValuesComboBox<ValueT>::FormatValidationError( void ) const
 {
 	return ui::FormatValidationMessage( m_pStockAdapter, m_flags, m_validRange );
 }
 
 template< typename ValueT >
-void CStockValuesComboBox< ValueT >::DDX_Value( CDataExchange* pDX, ValueT& rValue, int comboId )
+void CStockValuesComboBox<ValueT>::DDX_Value( CDataExchange* pDX, ValueT& rValue, int comboId )
 {
 	DDX_Control( pDX, comboId, *this );
 

@@ -22,14 +22,14 @@ namespace ui
 	{
 		typedef ValueT TValue;
 
-		virtual const std::vector< ValueT >& GetStockValues( void ) const = 0;
+		virtual const std::vector<ValueT>& GetStockValues( void ) const = 0;
 		virtual std::tstring OutputValue( const ValueT& value ) const = 0;
 		virtual bool ParseValue( ValueT* pOutValue, const std::tstring& text ) const = 0;
 	};
 
 
 	template< typename ValueT, typename DisplayValueT = ValueT >
-	interface IDisplayValueSetAdapter : public IValueSetAdapter< ValueT >
+	interface IDisplayValueSetAdapter : public IValueSetAdapter<ValueT>
 	{
 		typedef DisplayValueT TDisplayValue;
 
@@ -40,7 +40,7 @@ namespace ui
 
 
 	template< typename ValueT >
-	std::tstring FormatValidationMessage( const IValueSetAdapter< ValueT >* pAdapter, ui::TValueSetFlags flags, const Range< ValueT >& validRange );
+	std::tstring FormatValidationMessage( const IValueSetAdapter<ValueT>* pAdapter, ui::TValueSetFlags flags, const Range<ValueT>& validRange );
 
 
 	// timespan duration field (miliseconds) displayed as seconds (double)
@@ -97,19 +97,19 @@ namespace ui
 
 // edits a formatted predefined value set augmented with custom values
 template< typename ValueT >
-class CStockValuesComboBox : public CBaseStockContentCtrl< CComboBox >
+class CStockValuesComboBox : public CBaseStockContentCtrl<CComboBox>
 {
 public:
-	CStockValuesComboBox( const ui::IValueSetAdapter< ValueT >* pStockAdapter, ui::TValueSetFlags flags = 0 );
+	CStockValuesComboBox( const ui::IValueSetAdapter<ValueT>* pStockAdapter, ui::TValueSetFlags flags = 0 );
 
-	const ui::IValueSetAdapter< ValueT >* GetAdapter( void ) const { return m_pStockAdapter; }
-	void SetAdapter( const ui::IValueSetAdapter< ValueT >* pStockAdapter );
+	const ui::IValueSetAdapter<ValueT>* GetAdapter( void ) const { return m_pStockAdapter; }
+	void SetAdapter( const ui::IValueSetAdapter<ValueT>* pStockAdapter );
 
 	ui::TValueSetFlags GetFlags( void ) const { return m_flags; }
 	void SetFlags( ui::TValueSetFlags flags ) { m_flags = flags ; }
 
-	const Range< ValueT >& GetValidRange( void ) const { return m_validRange; }
-	void SetValidRange( const Range< ValueT >& validRange ) { m_validRange = validRange; }
+	const Range<ValueT>& GetValidRange( void ) const { return m_validRange; }
+	void SetValidRange( const Range<ValueT>& validRange ) { m_validRange = validRange; }
 
 	// input/output
 	bool OutputValue( ValueT value );
@@ -125,18 +125,18 @@ protected:
 
 	struct OutputFormatter
 	{
-		OutputFormatter( const ui::IValueSetAdapter< ValueT >* pStockAdapter ) : m_pStockAdapter( pStockAdapter ) { ASSERT_PTR( m_pStockAdapter ); }
+		OutputFormatter( const ui::IValueSetAdapter<ValueT>* pStockAdapter ) : m_pStockAdapter( pStockAdapter ) { ASSERT_PTR( m_pStockAdapter ); }
 
 		std::tstring operator()( ValueT value ) const { return m_pStockAdapter->OutputValue( value ); }
 	private:
-		const ui::IValueSetAdapter< ValueT >* m_pStockAdapter;
+		const ui::IValueSetAdapter<ValueT>* m_pStockAdapter;
 	};
 
 	// generated stuff
 private:
-	const ui::IValueSetAdapter< ValueT >* m_pStockAdapter;
+	const ui::IValueSetAdapter<ValueT>* m_pStockAdapter;
 	ui::TValueSetFlags m_flags;
-	Range< ValueT > m_validRange;
+	Range<ValueT> m_validRange;
 };
 
 

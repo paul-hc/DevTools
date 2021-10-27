@@ -5,14 +5,14 @@
 // CBaseStockContentCtrl template code
 
 template< typename BaseCtrl >
-inline CBaseStockContentCtrl< BaseCtrl >::CBaseStockContentCtrl( void )
+inline CBaseStockContentCtrl<BaseCtrl>::CBaseStockContentCtrl( void )
 	: BaseCtrl()
 	, m_duringCreation( false )
 {
 }
 
 template< typename BaseCtrl >
-BOOL CBaseStockContentCtrl< BaseCtrl >::PreCreateWindow( CREATESTRUCT& cs )
+BOOL CBaseStockContentCtrl<BaseCtrl>::PreCreateWindow( CREATESTRUCT& cs )
 {
 	m_duringCreation = true;		// skip stock content set up on pre-subclassing, do it later on WM_CREATE
 
@@ -20,7 +20,7 @@ BOOL CBaseStockContentCtrl< BaseCtrl >::PreCreateWindow( CREATESTRUCT& cs )
 }
 
 template< typename BaseCtrl >
-void CBaseStockContentCtrl< BaseCtrl >::PreSubclassWindow( void )
+void CBaseStockContentCtrl<BaseCtrl>::PreSubclassWindow( void )
 {
 	BaseCtrl::PreSubclassWindow();
 
@@ -36,7 +36,7 @@ BEGIN_TEMPLATE_MESSAGE_MAP( CBaseStockContentCtrl, BaseCtrl, BaseCtrl )
 END_MESSAGE_MAP()
 
 template< typename BaseCtrl >
-int CBaseStockContentCtrl< BaseCtrl >::OnCreate( CREATESTRUCT* pCS )
+int CBaseStockContentCtrl<BaseCtrl>::OnCreate( CREATESTRUCT* pCS )
 {
 	if ( -1 == BaseCtrl::OnCreate( pCS ) )
 		return -1;

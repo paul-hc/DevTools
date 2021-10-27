@@ -14,7 +14,7 @@
 // CDragListCtrl template code
 
 template< typename BaseListCtrl >
-CDragListCtrl< BaseListCtrl >::CDragListCtrl( UINT columnLayoutId /*= 0*/, DWORD listStyleEx /*= lv::DefaultStyleEx*/ )
+CDragListCtrl<BaseListCtrl>::CDragListCtrl( UINT columnLayoutId /*= 0*/, DWORD listStyleEx /*= lv::DefaultStyleEx*/ )
 	: BaseListCtrl( columnLayoutId, listStyleEx )
 	, m_draggingMode( NoDragging )
 	, m_pSrcDragging( NULL )
@@ -24,12 +24,12 @@ CDragListCtrl< BaseListCtrl >::CDragListCtrl( UINT columnLayoutId /*= 0*/, DWORD
 }
 
 template< typename BaseListCtrl >
-CDragListCtrl< BaseListCtrl >::~CDragListCtrl()
+CDragListCtrl<BaseListCtrl>::~CDragListCtrl()
 {
 }
 
 template< typename BaseListCtrl >
-void CDragListCtrl< BaseListCtrl >::SetupControl( void )
+void CDragListCtrl<BaseListCtrl>::SetupControl( void )
 {
 	BaseListCtrl::SetupControl();
 
@@ -38,7 +38,7 @@ void CDragListCtrl< BaseListCtrl >::SetupControl( void )
 }
 
 template< typename BaseListCtrl >
-void CDragListCtrl< BaseListCtrl >::SetDraggingMode( DraggingMode draggingMode )
+void CDragListCtrl<BaseListCtrl>::SetDraggingMode( DraggingMode draggingMode )
 {
 	if ( m_pDropTarget.get() != NULL )
 		m_pDropTarget->Revoke();					// unregister as drop target
@@ -57,8 +57,8 @@ void CDragListCtrl< BaseListCtrl >::SetDraggingMode( DraggingMode draggingMode )
 }
 
 template< typename BaseListCtrl >
-bool CDragListCtrl< BaseListCtrl >::DragSelection( CPoint dragPos, ole::CDataSource* pDataSource /*= NULL*/, int sourceFlags /*= ListSourcesMask*/,
-												   DROPEFFECT dropEffect /*= DROPEFFECT_COPY | DROPEFFECT_MOVE | DROPEFFECT_LINK*/ )
+bool CDragListCtrl<BaseListCtrl>::DragSelection( CPoint dragPos, ole::CDataSource* pDataSource /*= NULL*/, int sourceFlags /*= ListSourcesMask*/,
+												 DROPEFFECT dropEffect /*= DROPEFFECT_COPY | DROPEFFECT_MOVE | DROPEFFECT_LINK*/ )
 {
 	CListSelectionData selData( this );									// this will query the selected indexes
 	std::auto_ptr< ole::CDataSource > pNewDataSource;
@@ -85,7 +85,7 @@ bool CDragListCtrl< BaseListCtrl >::DragSelection( CPoint dragPos, ole::CDataSou
 }
 
 template< typename BaseListCtrl >
-void CDragListCtrl< BaseListCtrl >::EndDragging( void )
+void CDragListCtrl<BaseListCtrl>::EndDragging( void )
 {
 	if ( !IsDragging() )
 		return;
@@ -95,7 +95,7 @@ void CDragListCtrl< BaseListCtrl >::EndDragging( void )
 }
 
 template< typename BaseListCtrl >
-bool CDragListCtrl< BaseListCtrl >::DropSelection( void )
+bool CDragListCtrl<BaseListCtrl>::DropSelection( void )
 {
 	if ( !IsDragging() || !IsValidDropIndex() )
 		return false;
@@ -120,13 +120,13 @@ bool CDragListCtrl< BaseListCtrl >::DropSelection( void )
 }
 
 template< typename BaseListCtrl >
-void CDragListCtrl< BaseListCtrl >::HandleDragging( CPoint dragPos )
+void CDragListCtrl<BaseListCtrl>::HandleDragging( CPoint dragPos )
 {
 	HighlightDropMark( GetDropIndexAtPoint( dragPos ) );
 }
 
 template< typename BaseListCtrl >
-void CDragListCtrl< BaseListCtrl >::HighlightDropMark( int dropIndex )
+void CDragListCtrl<BaseListCtrl>::HighlightDropMark( int dropIndex )
 {
 	if ( dropIndex == m_dropIndex )
 		return;
@@ -155,7 +155,7 @@ void CDragListCtrl< BaseListCtrl >::HighlightDropMark( int dropIndex )
 }
 
 template< typename BaseListCtrl >
-bool CDragListCtrl< BaseListCtrl >::DrawDropMark( void )
+bool CDragListCtrl<BaseListCtrl>::DrawDropMark( void )
 {
 	if ( !IsValidDropIndex() )
 		return false;
@@ -167,7 +167,7 @@ bool CDragListCtrl< BaseListCtrl >::DrawDropMark( void )
 }
 
 template< typename BaseListCtrl >
-void CDragListCtrl< BaseListCtrl >::RedrawItem( int index )
+void CDragListCtrl<BaseListCtrl>::RedrawItem( int index )
 {
 	if ( index != -1 )
 	{
@@ -177,7 +177,7 @@ void CDragListCtrl< BaseListCtrl >::RedrawItem( int index )
 }
 
 template< typename BaseListCtrl >
-bool CDragListCtrl< BaseListCtrl >::IsValidDropIndex( void ) const
+bool CDragListCtrl<BaseListCtrl>::IsValidDropIndex( void ) const
 {
 	if ( m_pSrcDragging != NULL )
 		return seq::ChangesDropSequenceAt( GetItemCount(), m_dropIndex, m_pSrcDragging->m_selIndexes );
@@ -189,14 +189,14 @@ bool CDragListCtrl< BaseListCtrl >::IsValidDropIndex( void ) const
 // ole::IDropTargetEventsStub interface
 
 template< typename BaseListCtrl >
-DROPEFFECT CDragListCtrl< BaseListCtrl >::Event_OnDragEnter( COleDataObject* pDataObject, DWORD keyState, CPoint point )
+DROPEFFECT CDragListCtrl<BaseListCtrl>::Event_OnDragEnter( COleDataObject* pDataObject, DWORD keyState, CPoint point )
 {
 	// note: auto-scrolling drop targets call Event_OnDragEnter() and Event_OnDragLeave() repeatedly during the dragging operation
 	return Event_OnDragOver( pDataObject, keyState, point );
 }
 
 template< typename BaseListCtrl >
-DROPEFFECT CDragListCtrl< BaseListCtrl >::Event_OnDragOver( COleDataObject* pDataObject, DWORD keyState, CPoint point )
+DROPEFFECT CDragListCtrl<BaseListCtrl>::Event_OnDragOver( COleDataObject* pDataObject, DWORD keyState, CPoint point )
 {
 	pDataObject, keyState, point;
 
@@ -216,7 +216,7 @@ DROPEFFECT CDragListCtrl< BaseListCtrl >::Event_OnDragOver( COleDataObject* pDat
 }
 
 template< typename BaseListCtrl >
-DROPEFFECT CDragListCtrl< BaseListCtrl >::Event_OnDropEx( COleDataObject* pDataObject, DROPEFFECT dropEffect, DROPEFFECT dropList, CPoint point )
+DROPEFFECT CDragListCtrl<BaseListCtrl>::Event_OnDropEx( COleDataObject* pDataObject, DROPEFFECT dropEffect, DROPEFFECT dropList, CPoint point )
 {
 	pDataObject, dropList, point;
 
@@ -233,7 +233,7 @@ DROPEFFECT CDragListCtrl< BaseListCtrl >::Event_OnDropEx( COleDataObject* pDataO
 }
 
 template< typename BaseListCtrl >
-void CDragListCtrl< BaseListCtrl >::Event_OnDragLeave( void )
+void CDragListCtrl<BaseListCtrl>::Event_OnDragLeave( void )
 {
 	// don't call EndDragging() here, because auto-scroll drop targets call OnDragEnter() and OnDragLeave() repeatedly during the dragging operation
 }
@@ -247,7 +247,7 @@ BEGIN_TEMPLATE_MESSAGE_MAP( CDragListCtrl, BaseListCtrl, BaseListCtrl )
 END_MESSAGE_MAP()
 
 template< typename BaseListCtrl >
-BOOL CDragListCtrl< BaseListCtrl >::OnLvnBeginDrag_Reflect( NMHDR* pNmHdr, LRESULT* pResult )
+BOOL CDragListCtrl<BaseListCtrl>::OnLvnBeginDrag_Reflect( NMHDR* pNmHdr, LRESULT* pResult )
 {
 	NMLISTVIEW* pNmListView = (NMLISTVIEW*)pNmHdr;
 	pNmListView;
@@ -267,7 +267,7 @@ BOOL CDragListCtrl< BaseListCtrl >::OnLvnBeginDrag_Reflect( NMHDR* pNmHdr, LRESU
 }
 
 template< typename BaseListCtrl >
-LRESULT CDragListCtrl< BaseListCtrl >::OnLVmEnsureVisible( WPARAM wParam, LPARAM lParam )
+LRESULT CDragListCtrl<BaseListCtrl>::OnLVmEnsureVisible( WPARAM wParam, LPARAM lParam )
 {
 	int index = static_cast< int >( wParam );
 	bool partialOk = lParam != FALSE; partialOk;
