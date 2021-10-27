@@ -9,9 +9,9 @@ namespace ui
 {
 	// implemented by a control to receive commands from a buddy control (e.g. a buddy button)
 	//
-	interface IBuddyCommand
+	interface IBuddyCommandHandler
 	{
-		virtual void OnBuddyCommand( UINT cmdId ) = 0;
+		virtual bool OnBuddyCommand( UINT cmdId ) = 0;		// returns true if handled
 	};
 
 

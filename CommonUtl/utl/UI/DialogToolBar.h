@@ -12,6 +12,9 @@ public:
 	CDialogToolBar( gdi::DisabledStyle disabledStyle = gdi::DisabledGrayOut ) : m_disabledStyle( disabledStyle ) {}
 	virtual ~CDialogToolBar();
 
+	gdi::DisabledStyle GetDisabledStyle( void ) const { return m_disabledStyle; }
+	void SetDisabledStyle( gdi::DisabledStyle disabledStyle ) { m_disabledStyle = disabledStyle; }
+
 	// use a placeholder static (with the same id)
 	void DDX_Placeholder( CDataExchange* pDX, int placeholderId,
 						  TAlignment alignToPlaceholder = H_AlignLeft | V_AlignBottom, UINT toolbarResId = 0 );

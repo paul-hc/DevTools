@@ -27,17 +27,14 @@ CItemContentEdit::~CItemContentEdit()
 {
 }
 
-void CItemContentEdit::OnBuddyCommand( UINT cmdId )
+bool CItemContentEdit::OnBuddyCommand( UINT cmdId )
 {
 	if ( ui::String == m_content.m_type )					// not very useful
-	{
-		__super::OnBuddyCommand( cmdId );
-		return;
-	}
+		return __super::OnBuddyCommand( cmdId );
 
 	std::tstring newItem = m_content.EditItem( ui::GetWindowText( *this ).c_str(), GetParent(), cmdId );
 	if ( newItem.empty() )
-		return;					// cancelled by user
+		return true;				// cancelled by user
 
 	if ( IsWritable() )
 		ui::SetWindowText( *this, newItem );
@@ -45,6 +42,7 @@ void CItemContentEdit::OnBuddyCommand( UINT cmdId )
 	SetFocus();
 	SelectAll();
 	ui::SendCommandToParent( m_hWnd, CN_DETAILSCHANGED );
+	return true;
 }
 
 
@@ -114,32 +112,32 @@ void CItemListEdit::DDX_ItemsUiEscapeSeqs( CDataExchange* pDX, std::vector< std:
 		m_content.SplitItems( rItems, ui::ParseEscapeSeqs( GetText() ).c_str(), m_pSeparator );
 }
 
-void CItemListEdit::OnBuddyCommand( UINT cmdId )
+bool CItemListEdit::OnBuddyCommand( UINT cmdId )
 {
 	if ( Custom == m_listEditor )
-	{
-		__super::OnBuddyCommand( cmdId );
-		return;
-	}
+		return __super::OnBuddyCommand( cmdId );
 
 	CItemListDialog dialog( GetParent(), m_content );
 	str::Split( dialog.m_items, ui::GetWindowText( m_hWnd ).c_str(), m_pSeparator );
 	if ( !IsWritable() )
 		dialog.m_readOnly = true;
-	if ( dialog.DoModal() != IDOK )
-		return;
 
-	ui::SetWindowText( m_hWnd, str::Join( dialog.m_items, m_pSeparator ) );
+	if ( IDOK == dialog.DoModal() )
+	{
+		ui::SetWindowText( m_hWnd, str::Join( dialog.m_items, m_pSeparator ) );
 
-	SetFocus();
-	ui::SendCommandToParent( m_hWnd, CN_DETAILSCHANGED );
+		SetFocus();
+		ui::SendCommandToParent( m_hWnd, CN_DETAILSCHANGED );
+	}
+
+	return true;
 }
 
 void CItemListEdit::SetContentType( ui::ContentType type )
 {
 	if ( ui::String == type )
-		if ( HasDetailToolbar() && GetDetailCommands().empty() )
-			GetDetailToolbar()->GetStrip().AddButton( ID_EDIT_LIST_ITEMS );
+		if ( HasMateToolbar() && GetMateCommands().empty() )
+			GetMateToolbar()->GetStrip().AddButton( ID_EDIT_LIST_ITEMS );
 
 	__super::SetContentType( type );
 }

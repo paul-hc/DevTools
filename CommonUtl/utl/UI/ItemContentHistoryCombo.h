@@ -19,8 +19,8 @@ public:
 	// base overrides
 	virtual const ui::CItemContent& GetItemContent( void ) const { return m_content; }		// use CBaseItemContentCtrl::m_content rather than CHistoryComboBox::m_itemContent
 protected:
-	// interface IBuddyCommand (may be overridden)
-	virtual void OnBuddyCommand( UINT cmdId );
+	// interface IBuddyCommandHandler (may be overridden)
+	virtual bool OnBuddyCommand( UINT cmdId );
 };
 
 

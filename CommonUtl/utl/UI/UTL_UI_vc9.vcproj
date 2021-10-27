@@ -1370,11 +1370,19 @@
 					>
 				</File>
 				<File
-					RelativePath=".\DetailButton.cpp"
+					RelativePath=".\DetailIconButton.cpp"
 					>
 				</File>
 				<File
-					RelativePath=".\DetailButton.h"
+					RelativePath=".\DetailIconButton.h"
+					>
+				</File>
+				<File
+					RelativePath=".\DetailMateCtrl.h"
+					>
+				</File>
+				<File
+					RelativePath=".\DetailMateCtrl.hxx"
 					>
 				</File>
 				<File

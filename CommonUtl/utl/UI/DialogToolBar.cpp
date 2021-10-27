@@ -52,6 +52,8 @@ void CDialogToolBar::CreateReplacePlaceholder( CWnd* pParent, int placeholderId,
 	GetToolBarCtrl().GetMaxSize( &idealBarSize );		// adjust the size of the toolbar
 
 	CWnd* pPlaceholder = ui::AlignToPlaceholder( this, placeholderId, &idealBarSize, alignToPlaceholder );
+
+	ui::SetTabOrder( this, pPlaceholder );
 	pPlaceholder->DestroyWindow();
 	SetDlgCtrlID( placeholderId );
 }
@@ -62,6 +64,7 @@ void CDialogToolBar::CreateShrinkBuddy( CWnd* pBuddyCtrl, const ui::CBuddyLayout
 	ASSERT_PTR( pBuddyCtrl->GetSafeHwnd() );
 
 	CreateToolbar( pBuddyCtrl->GetParent(), toolbarResId );
+	ui::SetTabOrder( this, pBuddyCtrl );
 
 	CSize idealBarSize;
 	GetToolBarCtrl().GetMaxSize( &idealBarSize );		// adjust the size of the toolbar
