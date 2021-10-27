@@ -12,6 +12,7 @@
 
 CToolbarStrip::CToolbarStrip( void )
 	: CToolBar()
+	, m_enableUnhandledCmds( false )
 {
 }
 
@@ -63,7 +64,7 @@ void CToolbarStrip::SetCustomDisabledImageList( gdi::DisabledStyle style /*= gdi
 void CToolbarStrip::UpdateCmdUI( void )
 {
 	if ( m_hWnd != NULL )
-		SendMessage( WM_IDLEUPDATECMDUI, (WPARAM)TRUE );
+		SendMessage( WM_IDLEUPDATECMDUI, (WPARAM)!m_enableUnhandledCmds );
 }
 
 void CToolbarStrip::TrackButtonMenu( UINT buttonId, CWnd* pTargetWnd, CMenu* pPopupMenu, ui::PopupAlign popupAlign )

@@ -164,8 +164,16 @@ namespace shell
 
 			switch ( browseMode )
 			{
-				case FileSaveAs:	SetFlag( flags, OFN_OVERWRITEPROMPT ); break;
-				case FileOpen:		SetFlag( flags, OFN_FILEMUSTEXIST ); break;
+				case FileSaveAs:
+					SetFlag( flags, OFN_OVERWRITEPROMPT );
+					break;
+				case FileOpen:
+					SetFlag( flags, OFN_FILEMUSTEXIST );
+					break;
+				case FileBrowse:
+					if ( NULL == pTitle )
+						pTitle = _T("Browse File");
+					break;
 			}
 
 			CFileDialog* pDlg = new CFileDialog( browseMode != FileSaveAs, NULL, filePath.GetPtr(), flags, fileFilter.c_str(), pParentWnd, 0, s_useVistaStyle );

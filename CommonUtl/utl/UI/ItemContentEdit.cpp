@@ -4,11 +4,14 @@
 #include "ItemListDialog.h"
 #include "StringUtilities.h"
 #include "Utilities.h"
+#include "resource.h"
 #include "utl/ContainerUtilities.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
+
+#include "BaseDetailHostCtrl.hxx"
 
 
 // CItemContentEdit implementation
@@ -31,15 +34,13 @@ void CItemContentEdit::OnBuddyCommand( UINT cmdId )
 		__super::OnBuddyCommand( cmdId );
 		return;
 	}
-	else
-	{
-		std::tstring newItem = m_content.EditItem( ui::GetWindowText( *this ).c_str(), GetParent(), cmdId );
-		if ( newItem.empty() )
-			return;					// cancelled by user
 
-		if ( IsWritable() )
-			ui::SetWindowText( *this, newItem );
-	}
+	std::tstring newItem = m_content.EditItem( ui::GetWindowText( *this ).c_str(), GetParent(), cmdId );
+	if ( newItem.empty() )
+		return;					// cancelled by user
+
+	if ( IsWritable() )
+		ui::SetWindowText( *this, newItem );
 
 	SetFocus();
 	SelectAll();
@@ -127,6 +128,7 @@ void CItemListEdit::OnBuddyCommand( UINT cmdId )
 		dialog.m_readOnly = true;
 	if ( dialog.DoModal() != IDOK )
 		return;
+
 	ui::SetWindowText( m_hWnd, str::Join( dialog.m_items, m_pSeparator ) );
 
 	SetFocus();

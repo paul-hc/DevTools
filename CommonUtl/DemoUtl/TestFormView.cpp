@@ -10,6 +10,7 @@
 #include "FileChecksumsDialog.h"
 #include "test/ImageTests.h"
 #include "utl/UI/Utilities.h"
+#include "utl/UI/resource.h"
 #include "resource.h"
 
 #ifdef _DEBUG

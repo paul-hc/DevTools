@@ -24,11 +24,15 @@ public:
 	void UpdateCmdUI( void );
 
 	void TrackButtonMenu( UINT buttonId, CWnd* pTargetWnd, CMenu* pPopupMenu, ui::PopupAlign popupAlign );
+
+	bool GetEnableUnhandledCmds( void ) const { return m_enableUnhandledCmds; }
+	void SetEnableUnhandledCmds( bool enableUnhandledCmds = true ) { m_enableUnhandledCmds = enableUnhandledCmds; }
 protected:
 	CToolStrip m_strip;
 
 	enum Metrics { BtnEdgeWidth = 7, BtnEdgeHeight = 7 };
 private:
+	bool m_enableUnhandledCmds;
 	std::auto_ptr< CImageList > m_pDisabledImageList;
 
 	// generated overrides

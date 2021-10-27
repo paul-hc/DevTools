@@ -16,6 +16,7 @@
 #include "utl/UI/MenuUtilities.h"
 #include "utl/UI/Pixel.h"
 #include "utl/UI/UtilitiesEx.h"
+#include "utl/UI/resource.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

@@ -8,9 +8,8 @@
 
 // history combo for a string, dir-path or file-path with details button
 
-class CItemContentHistoryCombo : public CBaseItemContentCtrl< CHistoryComboBox >
+class CItemContentHistoryCombo : public CBaseItemContentCtrl<CHistoryComboBox>
 {
-	typedef CBaseItemContentCtrl< CHistoryComboBox > BaseClass;
 public:
 	CItemContentHistoryCombo( ui::ContentType type = ui::String, const TCHAR* pFileFilter = NULL );
 	virtual ~CItemContentHistoryCombo();

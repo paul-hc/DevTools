@@ -7,6 +7,8 @@
 #define new DEBUG_NEW
 #endif
 
+#include "BaseDetailHostCtrl.hxx"
+
 
 CItemContentHistoryCombo::CItemContentHistoryCombo( ui::ContentType type /*= ui::String*/, const TCHAR* pFileFilter /*= NULL*/ )
 	: CBaseItemContentCtrl< CHistoryComboBox >( type, pFileFilter )
@@ -25,7 +27,7 @@ void CItemContentHistoryCombo::OnBuddyCommand( UINT cmdId )
 {
 	if ( ui::String == m_content.m_type )					// not very useful
 	{
-		BaseClass::OnBuddyCommand( cmdId );
+		__super::OnBuddyCommand( cmdId );
 		return;
 	}
 	else

@@ -141,7 +141,7 @@ LRESULT CDialogToolBar::OnIdleUpdateCmdUI( WPARAM wParam, LPARAM lParam )
 	lParam;
 	if ( HasFlag( GetStyle(), WS_VISIBLE ) )
 		if ( CFrameWnd* pOwner = (CFrameWnd*)GetOwner() )		// important: the Owner may be different than the Parent - via SetOwner()
-			OnUpdateCmdUI( pOwner, (BOOL)wParam );
+			OnUpdateCmdUI( pOwner, (BOOL)( wParam != FALSE && !GetEnableUnhandledCmds() ) );
 
 	return 0L;
 }

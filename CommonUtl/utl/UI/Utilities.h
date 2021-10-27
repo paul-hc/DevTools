@@ -150,6 +150,7 @@ namespace ui
 	HWND GetTopLevelParent( HWND hWnd );				// find first top-level parent (non-child)
 	inline CWnd* GetTopLevelParent( const CWnd* pWnd ) { return CWnd::FromHandle( GetTopLevelParent( pWnd->GetSafeHwnd() ) ); }
 
+	inline CToolTipCtrl* GetThreadTooltipCtrl( void ) { return AfxGetModuleThreadState()->m_pToolTip; }					// use when CWnd::EnableToolTips() was called (for a given window/dialog)
 
 	void GetWindowText( std::tstring& rText, HWND hWnd );
 	inline std::tstring GetWindowText( HWND hWnd ) { std::tstring text; GetWindowText( text, hWnd ); return text; }		// no extra string copy
