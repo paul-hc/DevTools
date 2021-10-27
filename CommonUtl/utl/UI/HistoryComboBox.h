@@ -15,10 +15,10 @@ class CComboDropList;
 class CTextEditor;
 
 
-class CHistoryComboBox : public CBaseFrameHostCtrl< CComboBox >
+class CHistoryComboBox : public CBaseFrameHostCtrl<CComboBox>
 					   , public ui::IContentValidator
 {
-	typedef CBaseFrameHostCtrl< CComboBox > BaseClass;
+	typedef CBaseFrameHostCtrl<CComboBox> BaseClass;
 public:
 	enum NotifCode { HCN_VALIDATEITEMS = CBN_SELENDCANCEL + 10 };		// note: notifications are suppressed during parent's UpdateData()
 	enum InternalCmds { Cmd_ResetDropSelIndex = 350 };
@@ -63,7 +63,7 @@ private:
 	LPCTSTR m_pSection, m_pEntry;
 
 	// generated stuff
-	public:
+public:
 	virtual void PreSubclassWindow( void );
 	virtual BOOL PreTranslateMessage( MSG* pMsg );
 protected:

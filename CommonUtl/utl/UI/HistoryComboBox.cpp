@@ -16,25 +16,42 @@
 class CComboDropList : public CWnd		// can't inherit from CListBox
 {
 public:
-	CComboDropList( CComboBox* pParentCombo ) : m_pParentCombo( pParentCombo ) { ASSERT_PTR( m_pParentCombo->GetSafeHwnd() ); }
+	CComboDropList( CComboBox* pParentCombo )
+		: m_pParentCombo( pParentCombo )
+		, m_trackingContextMenu( false )
+	{
+		ASSERT_PTR( m_pParentCombo->GetSafeHwnd() );
+	}
 private:
 	CComboBox* m_pParentCombo;
+	bool m_trackingContextMenu;
 
 	// generated stuff
 private:
 	afx_msg void OnContextMenu( CWnd* pWnd, CPoint point );
+	afx_msg void OnCaptureChanged( CWnd* pWnd );
 
 	DECLARE_MESSAGE_MAP()
 };
 
 BEGIN_MESSAGE_MAP( CComboDropList, CWnd )
 	ON_WM_CONTEXTMENU()
+	ON_WM_CAPTURECHANGED()
 END_MESSAGE_MAP()
 
 void CComboDropList::OnContextMenu( CWnd* pWnd, CPoint point )
 {
 	CWnd::OnContextMenu( pWnd, point );
+
+	m_trackingContextMenu = true;
 	m_pParentCombo->SendMessage( WM_CONTEXTMENU, (WPARAM)pWnd->GetSafeHwnd(), MAKELPARAM( point.x, point.y ) );
+	m_trackingContextMenu = false;
+}
+
+void CComboDropList::OnCaptureChanged( CWnd* pWnd )
+{
+	if ( !m_trackingContextMenu )			// (!) prevent closing the dropdown list while tracking the context menu
+		__super::OnCaptureChanged( pWnd );
 }
 
 
@@ -42,22 +59,22 @@ void CComboDropList::OnContextMenu( CWnd* pWnd, CPoint point )
 
 static ACCEL s_keys[] =
 {
-	{ FVIRTKEY | FCONTROL, VK_RETURN, ID_ADD_ITEM }
+	{ FVIRTKEY | FCONTROL, VK_RETURN, ID_ADD_ITEM }		// Ctrl + Plus
 };
 
 static ACCEL s_dropDownKeys[] =
 {
-	{ FVIRTKEY, VK_DELETE, ID_REMOVE_ITEM }
+	{ FVIRTKEY | FCONTROL, VK_BACK, ID_REMOVE_ITEM }	// Ctrl + Backspace
 };
 
 
 CHistoryComboBox::CHistoryComboBox( unsigned int maxCount /*= ui::HistoryMaxSize*/, const TCHAR* pItemSep /*= _T(";")*/, str::CaseType caseType /*= str::Case*/ )
-	: CBaseFrameHostCtrl< CComboBox >()
+	: CBaseFrameHostCtrl<CComboBox>()
 	, m_maxCount( maxCount )
 	, m_pItemSep( pItemSep )
 	, m_caseType( caseType )
-	, m_accel( s_keys, COUNT_OF( s_keys ) )
-	, m_dropDownAccel( s_dropDownKeys, COUNT_OF( s_dropDownKeys ) )
+	, m_accel( ARRAY_PAIR( s_keys ) )
+	, m_dropDownAccel( ARRAY_PAIR( s_dropDownKeys ) )
 	, m_dropSelIndex( CB_ERR )
 	, m_pSection( NULL )
 	, m_pEntry( NULL )
