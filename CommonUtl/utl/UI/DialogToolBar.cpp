@@ -31,7 +31,7 @@ void CDialogToolBar::DDX_ShrinkBuddy( CDataExchange* pDX, CWnd* pBuddyCtrl, int 
 {
 	if ( NULL == m_hWnd )
 	{
-		ASSERT( DialogOutput == pDX->m_bSaveAndValidate );
+		ASSERT( DialogOutput == pDX->m_bSaveAndValidate ); pDX;
 
 		CreateShrinkBuddy( pBuddyCtrl, buddyLayout, toolbarResId );
 

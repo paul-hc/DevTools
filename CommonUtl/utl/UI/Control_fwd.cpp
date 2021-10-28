@@ -45,7 +45,7 @@ namespace ui
 
 	CRect CBuddyLayout::LayoutCtrl( CWnd* pCtrl, const CWnd* pBuddyCtrl, const CSize* pCustomSize /*= NULL*/ ) const
 	{
-		CRect buddyRect = ui::GetControlRect( pBuddyCtrl->GetSafeHwnd() );
+		const CRect buddyRect = ui::GetControlRect( pBuddyCtrl->GetSafeHwnd() );
 		CRect ctrlRect = ui::GetControlRect( pCtrl->GetSafeHwnd() );
 
 		if ( pCustomSize != NULL )

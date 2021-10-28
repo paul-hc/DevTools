@@ -77,6 +77,13 @@ public:
 	bool IsProxy( void ) const { return UINT_MAX == m_utlIfs.m_crc32; }
 	void ComputeChecksums( void );
 
+	void ResetProxy( void )
+	{
+		REQUIRE( IsProxy() );
+		m_fileSize = 0;
+		m_utl.m_elapsedSecs = m_utlIfs.m_elapsedSecs = m_boostCFile.m_elapsedSecs = m_boostIfs.m_elapsedSecs = 0.0;
+	}
+
 	CFileChecksumItem& operator+=( const CFileChecksumItem& right )
 	{
 		m_fileSize += right.m_fileSize;
@@ -84,6 +91,7 @@ public:
 		m_utlIfs.m_elapsedSecs += right.m_utlIfs.m_elapsedSecs;
 		m_boostCFile.m_elapsedSecs += right.m_boostCFile.m_elapsedSecs;
 		m_boostIfs.m_elapsedSecs += right.m_boostIfs.m_elapsedSecs;
+
 		return *this;
 	}
 public:
@@ -362,14 +370,17 @@ void CFileChecksumsDialog::OnBnClicked_CalculateChecksums( void )
 
 	if ( !m_fileItems.empty() && m_fileItems.front()->HasChecksums() )
 	{	// insert/update the TOTALS proxy item
-		CFileChecksumItem* pTotalItem = NULL;
+		CFileChecksumItem* pTotalItem;
 
 		if ( m_fileItems.back()->IsProxy() )
+		{	// clear existing proxy item
 			pTotalItem = m_fileItems.back();
+			pTotalItem->ResetProxy();
+		}
 		else
 			m_fileItems.push_back( pTotalItem = new CFileChecksumItem( _T("TOTAL:") ) );
 
-		utl::for_each( m_fileItems, func::SumElapsed( pTotalItem ) );
+		std::for_each( m_fileItems.begin(), --m_fileItems.end(), func::SumElapsed( pTotalItem ) );
 	}
 
 	SetupFileListView();
