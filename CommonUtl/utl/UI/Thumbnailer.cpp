@@ -321,7 +321,7 @@ bool CThumbnailer::DrawItemImage( CDC* pDC, const utl::ISubject* pSubject, const
 	ASSERT_PTR( pDC );
 	if ( pSubject != NULL )
 	{
-		fs::CFlexPath srcImagePath( pSubject->GetCode() );
+		fs::CFlexPath srcImagePath = fs::StripWildcards( pSubject->GetCode() ).Get();
 		if ( srcImagePath.FileExist() )
 			if ( CCachedThumbBitmap* pThumbnail = AcquireThumbnail( srcImagePath ) )
 			{

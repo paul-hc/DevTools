@@ -1054,6 +1054,14 @@ namespace fs
 
 		return fs::CPath( longPath );
 	}
+
+	fs::CPath StripWildcards( const fs::CPath& patternPath )
+	{
+		if ( path::ContainsWildcards( patternPath.GetFilenamePtr() ) )
+			return patternPath.GetParentPath();
+
+		return patternPath;
+	}
 }
 
 

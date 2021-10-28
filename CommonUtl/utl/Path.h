@@ -290,6 +290,8 @@ namespace fs
 	fs::CPath GetShortFilePath( const fs::CPath& filePath );
 	fs::CPath GetLongFilePath( const fs::CPath& filePath );
 
+	fs::CPath StripWildcards( const fs::CPath& patternPath );
+
 	inline fs::CPath StripDirPrefix( const fs::CPath& filePath, const fs::CPath& dirPath ) { return path::StripCommonPrefix( filePath.GetPtr(), dirPath.GetPtr() ); }
 }
 
