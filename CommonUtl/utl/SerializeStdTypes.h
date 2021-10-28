@@ -5,7 +5,6 @@
 #include "Serialization.h"
 #include "Range.h"
 #include "Path.h"
-#include "FileState.h"
 
 
 // custom types archive insertors/extractors
@@ -24,35 +23,14 @@ inline CArchive& operator>>( CArchive& archive, fs::CPath& rPath )
 }
 
 
-inline CArchive& operator<<( CArchive& archive, const fs::CFileState& fileState )
-{
-	return archive
-		<< fileState.m_fullPath
-		<< fileState.m_attributes
-		<< fileState.m_creationTime
-		<< fileState.m_modifTime
-		<< fileState.m_accessTime;
-}
-
-inline CArchive& operator>>( CArchive& archive, fs::CFileState& rFileState )
-{
-	return archive
-		>> rFileState.m_fullPath
-		>> rFileState.m_attributes
-		>> rFileState.m_creationTime
-		>> rFileState.m_modifTime
-		>> rFileState.m_accessTime;
-}
-
-
 template< typename Type >
-inline CArchive& operator<<( CArchive& archive, const Range< Type >& range )
+inline CArchive& operator<<( CArchive& archive, const Range<Type>& range )
 {
 	return archive << range.m_start << range.m_end;
 }
 
 template< typename Type >
-inline CArchive& operator>>( CArchive& archive, Range< Type >& rRange )
+inline CArchive& operator>>( CArchive& archive, Range<Type>& rRange )
 {
 	return archive >> rRange.m_start >> rRange.m_end;
 }

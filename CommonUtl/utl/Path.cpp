@@ -1023,6 +1023,15 @@ namespace fs
 		return *this;
 	}
 
+	bool CPath::LocateFile( CFileFind& rFindFile ) const
+	{
+		rFindFile.Close();
+
+		return
+			rFindFile.FindFile( GetPtr() ) != FALSE &&
+			rFindFile.FindNextFile() != FALSE;
+	}
+
 	CPath CPath::ExtractExistingFilePath( void ) const
 	{
 		ASSERT( FileExist() );
@@ -1053,6 +1062,23 @@ namespace fs
 		::GetLongPathName( filePath.GetPtr(), longPath, COUNT_OF( longPath ) );						// convert to long path
 
 		return fs::CPath( longPath );
+	}
+
+	bool IsValidDirectoryPattern( const fs::CPath& dirPatternPath, fs::CPath* pDirPath /*= NULL*/, std::tstring* pWildSpec /*= NULL*/ )
+	{	// a valid directory path with a wildcard pattern?
+		if ( !path::ContainsWildcards( dirPatternPath.GetFilenamePtr() ) )
+			return fs::IsValidDirectory( dirPatternPath.GetPtr() );
+		else if ( fs::IsValidFile( dirPatternPath.GetPtr() ) )
+			return false;
+
+		fs::CPath dirPath = dirPatternPath.GetParentPath();
+
+		if ( !fs::IsValidDirectory( dirPath.GetPtr() ) )
+			return false;
+
+		utl::AssignPtr( pDirPath, dirPath );
+		utl::AssignPtr( pWildSpec, dirPatternPath.GetFilename() );
+		return true;
 	}
 
 	fs::CPath StripWildcards( const fs::CPath& patternPath )

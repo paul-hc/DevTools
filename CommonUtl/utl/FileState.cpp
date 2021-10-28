@@ -2,9 +2,11 @@
 #include "stdafx.h"
 #include "FileState.h"
 #include "FileSystem.h"
+#include "Crc32.h"
 #include "EnumTags.h"
 #include "FlagTags.h"
 #include "RuntimeException.h"
+#include "SerializeStdTypes.h"
 #include "TimeUtils.h"
 
 #ifdef _DEBUG
@@ -26,7 +28,19 @@ namespace fs
 		, m_creationTime( pFileStatus->m_ctime )
 		, m_modifTime( pFileStatus->m_mtime )
 		, m_accessTime( pFileStatus->m_atime )
+		, m_crc32( 0 )
 	{
+	}
+
+	CFileState::CFileState( const CFileFind& foundFile )
+		: m_fullPath( foundFile.GetFilePath().GetString() )
+		, m_fileSize( foundFile.GetLength() )
+		, m_attributes( static_cast<BYTE>( fs::GetFileAttributes( foundFile ) ) )
+		, m_crc32( 0 )
+	{
+		foundFile.GetCreationTime( m_creationTime );
+		foundFile.GetLastWriteTime( m_modifTime );
+		foundFile.GetLastAccessTime( m_accessTime );
 	}
 
 	CFileState CFileState::ReadFromFile( const fs::CPath& path )
@@ -122,6 +136,63 @@ namespace fs
 				ThrowLastError();
 		}
 	}
+
+	UINT CFileState::GetCrc32( ChecksumEvaluation evaluation /*= Compute*/ ) const
+	{
+		if ( 0 == m_crc32 && evaluation != AsIs )
+			const_cast<CFileState*>( this )->ComputeCrc32( evaluation );
+
+		return m_crc32;
+	}
+
+	UINT CFileState::ComputeCrc32( ChecksumEvaluation evaluation )
+	{
+		switch ( evaluation )
+		{
+			case Compute:
+				m_crc32 = crc32::ComputeFileChecksum( m_fullPath );
+				break;
+			case CacheCompute:
+				m_crc32 = fs::CCrc32FileCache::Instance().AcquireCrc32( m_fullPath );
+				break;
+		}
+		return m_crc32;
+	}
+
+	void CFileState::Stream( CArchive& archive )
+	{
+		static const BYTE s_newBinFormat = 0xFE;	// distinct from s_invalidAttributes
+
+		if ( archive.IsStoring() )
+			archive
+				<< m_fullPath
+				<< s_newBinFormat		// save with the new binary format (including m_crc32)
+				<< m_attributes
+				<< m_creationTime
+				<< m_modifTime
+				<< m_accessTime
+				<< m_crc32;
+		else
+		{
+			archive >> m_fullPath;
+			archive >> m_attributes;
+
+			const bool isNewBinFormat = s_newBinFormat == m_attributes;
+			if ( isNewBinFormat )
+				archive >> m_attributes;	// the real m_attributes comes next in the stream
+
+			archive
+				>> m_creationTime
+				>> m_modifTime
+				>> m_accessTime;
+
+			if ( isNewBinFormat )
+				archive >> m_crc32;
+			else
+				m_crc32 = 0;
+		}
+	}
+
 
 	const CFlagTags& CFileState::GetTags_FileAttributes( void )
 	{

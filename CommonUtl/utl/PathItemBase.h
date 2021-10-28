@@ -64,6 +64,23 @@ public:
 };
 
 
+#include "FileState.h"
+
+
+class CFileStateItem : public CPathItemBase
+{
+public:
+	explicit CFileStateItem( const fs::CFileState& fileState );
+
+	const fs::CFileState& GetState( void ) const { return m_fileState; }
+	fs::CFileState& RefState( void ) { return m_fileState; }
+protected:
+	void Stream( CArchive& archive );
+protected:
+	persist fs::CFileState m_fileState;
+};
+
+
 namespace pred
 {
 	struct CompareItemPath

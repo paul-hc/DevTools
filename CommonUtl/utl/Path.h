@@ -279,6 +279,7 @@ namespace fs
 
 		bool FileExist( AccessMode accessMode = Exist ) const { return fs::FileExist( m_filePath.c_str(), accessMode ); }
 
+		bool LocateFile( CFileFind& rFindFile ) const;
 		CPath ExtractExistingFilePath( void ) const;
 
 		inline size_t GetHashValue( void ) const { return path::GetHashValue( m_filePath.c_str() ); }
@@ -290,6 +291,7 @@ namespace fs
 	fs::CPath GetShortFilePath( const fs::CPath& filePath );
 	fs::CPath GetLongFilePath( const fs::CPath& filePath );
 
+	bool IsValidDirectoryPattern( const fs::CPath& dirPatternPath, fs::CPath* pDirPath = NULL, std::tstring* pWildSpec = NULL );	// a valid directory path with a wildcard pattern?
 	fs::CPath StripWildcards( const fs::CPath& patternPath );
 
 	inline fs::CPath StripDirPrefix( const fs::CPath& filePath, const fs::CPath& dirPath ) { return path::StripCommonPrefix( filePath.GetPtr(), dirPath.GetPtr() ); }

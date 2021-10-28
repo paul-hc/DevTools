@@ -12,8 +12,9 @@ namespace fs
 {
 	struct CFileState
 	{
-		CFileState( void ) : m_fileSize( 0 ), m_attributes( s_invalidAttributes ) {}
+		CFileState( void ) : m_fileSize( 0 ), m_attributes( s_invalidAttributes ), m_crc32( 0 ) {}
 		CFileState( const ::CFileStatus* pFileStatus );
+		CFileState( const CFileFind& foundFile );
 
 		void Clear( void ) { *this = CFileState(); }
 
@@ -32,6 +33,18 @@ namespace fs
 		const CTime& GetTimeField( TimeField field ) const;
 		void SetTimeField( const CTime& time, TimeField field ) { const_cast< CTime& >( GetTimeField( field ) ) = time; }
 
+		enum ChecksumEvaluation { Compute, CacheCompute, AsIs };
+
+		UINT GetCrc32( ChecksumEvaluation evaluation = Compute ) const;
+		UINT ComputeCrc32( ChecksumEvaluation evaluation );
+		void ResetCrc32( void ) { m_crc32 = 0; }
+
+		// serialization
+		void Stream( CArchive& archive );
+
+		friend inline CArchive& operator>>( CArchive& archive, fs::CFileState& rFileState ) { rFileState.Stream( archive ); return archive; }
+		friend inline CArchive& operator<<( CArchive& archive, const fs::CFileState& fileState ) { const_cast< fs::CFileState& >( fileState ).Stream( archive ); return archive; }
+
 		static const CFlagTags& GetTags_FileAttributes( void );
 	private:
 		void ModifyFileStatus( const ::CFileStatus& newStatus ) const throws_( CFileException );
@@ -46,6 +59,8 @@ namespace fs
 		CTime m_modifTime;			// last modification time of file
 		CTime m_accessTime;			// last access time of file
 	private:
+		mutable UINT m_crc32;		// lazy computation of CRC32 checksum
+
 		static const BYTE s_invalidAttributes = 0xFF;
 	};
 

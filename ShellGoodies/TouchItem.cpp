@@ -12,9 +12,8 @@
 // CTouchItem implementation
 
 CTouchItem::CTouchItem( const fs::CFileState& srcState )
-	: CPathItemBase( srcState.m_fullPath )
-	, m_srcState( srcState )
-	, m_destState( m_srcState )
+	: CFileStateItem( srcState )
+	, m_destState( srcState )
 {
 }
 

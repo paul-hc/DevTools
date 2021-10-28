@@ -6,21 +6,20 @@
 #include "utl/PathItemBase.h"
 
 
-class CTouchItem : public CPathItemBase
+class CTouchItem : public CFileStateItem
 {
 public:
 	CTouchItem( const fs::CFileState& srcState );
 	virtual ~CTouchItem();
 
-	const fs::CFileState& GetSrcState( void ) const { return m_srcState; }
+	const fs::CFileState& GetSrcState( void ) const { return m_fileState; }
 	const fs::CFileState& GetDestState( void ) const { return m_destState; }
 
-	bool IsModified( void ) const { return m_destState.IsValid() && m_destState != m_srcState; }
+	bool IsModified( void ) const { return m_destState.IsValid() && m_destState != GetSrcState(); }
 
 	fs::CFileState& RefDestState( void ) { return m_destState; }
-	void Reset( void ) { m_destState = m_srcState; }
+	void Reset( void ) { m_destState = GetSrcState(); }
 private:
-	const fs::CFileState m_srcState;
 	fs::CFileState m_destState;
 };
 

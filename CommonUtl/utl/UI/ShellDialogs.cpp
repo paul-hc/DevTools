@@ -11,27 +11,6 @@
 #define new DEBUG_NEW
 #endif
 
-
-namespace shell
-{
-	bool IsValidDirectoryPattern( const fs::CPath& dirPatternPath, fs::CPath* pDirPath /*= NULL*/, std::tstring* pWildSpec /*= NULL*/ )
-	{	// a valid directory path with a wildcard pattern?
-		if ( !path::ContainsWildcards( dirPatternPath.GetFilenamePtr() ) )
-			return fs::IsValidDirectory( dirPatternPath.GetPtr() );
-		else if ( fs::IsValidFile( dirPatternPath.GetPtr() ) )
-			return false;
-
-		fs::CPath dirPath = dirPatternPath.GetParentPath();
-
-		if ( !fs::IsValidDirectory( dirPath.GetPtr() ) )
-			return false;
-
-		utl::AssignPtr( pDirPath, dirPath );
-		utl::AssignPtr( pWildSpec, dirPatternPath.GetFilename() );
-		return true;
-	}
-}
-
 namespace shell
 {
 	bool s_useVistaStyle = true;			// set to false to disable Vista style file dialog, which for certain apps is crashing; Vista style requires COM initialization
@@ -145,7 +124,7 @@ namespace shell
 
 	bool BrowseAutoPath( fs::CPath& rFilePath, CWnd* pParent, const TCHAR* pFileFilter /*= NULL*/ )
 	{
-		if ( !shell::IsValidDirectoryPattern( rFilePath ) )
+		if ( !fs::IsValidDirectoryPattern( rFilePath ) )
 			if ( fs::IsValidFile( rFilePath.GetPtr() ) )
 				return BrowseForFile( rFilePath, pParent, FileBrowse, pFileFilter );
 
