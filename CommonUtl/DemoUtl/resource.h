@@ -26,6 +26,7 @@
 #define IDD_TEST_TASK_DIALOG            149
 #define IDD_TEST_MISC_DIALOG            150
 #define IDD_FILE_CHECKSUMS_DIALOG       151
+#define IDD_BUDDY_CONTROLS_DIALOG       152
 #define IDC_OPEN_DIALOG_BUTTON          1000
 #define IDC_OPEN_PROPERTIES_BUTTON      1001
 #define IDC_CREATE_PROPERTIES_BUTTON    1002
@@ -108,6 +109,7 @@
 #define IDC_USE_TEXT_EFFECTS_CHECK      1088
 #define IDC_FILE_STATE_LIST             1089
 #define IDC_USE_DIFFS_CHECK             1090
+#define IDC_FILE_STATE_EX_LIST          1090
 #define IDC_USE_EXPLORER_THEME_CHECK    1091
 #define IDC_USE_DEFAULT_DRAW_CHECK      1092
 #define IDC_TASK_DIALOG_USAGE           1092
@@ -119,6 +121,7 @@
 #define IDC_CALC_CHECKSUMS_BUTTON       1096
 #define IDC_SEARCH_PATH_COMBO           1097
 #define IDC_FIND_FILES_BUTTON           1098
+#define IDC_FOLDER_PATH_COMBO           1099
 #define ID_COMMAND_LINK1                2001
 #define ID_COMMAND_LINK2                2002
 #define ID_RADIO_BUTTON1                2101
@@ -150,6 +153,7 @@
 #define ID_STUDY_TASK_DIALOG            32793
 #define ID_STUDY_MISC_DIALOG            32794
 #define ID_STUDY_FILE_CHECKSUM          32795
+#define ID_STUDY_BUDDY_CONTROLS         32796
 
 // Next default values for new objects
 // 

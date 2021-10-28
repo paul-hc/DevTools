@@ -10,58 +10,69 @@
 
 namespace ui
 {
-	// CBuddyLayout implementation
+	// CTandemLayout implementation
 
-	const CBuddyLayout CBuddyLayout::s_tileToRight( H_AlignRight | V_AlignCenter, Spacing );
+	const CTandemLayout CTandemLayout::s_mateOnRight( H_AlignRight | V_AlignCenter, Spacing );
 
-	CRect& CBuddyLayout::Align( CRect& rCtrlRect, const RECT& buddyAnchor ) const
+	void CTandemLayout::AlignTandem( CRect& rHostRect, CRect& rMateRect, const CSize* pMateCustomSize /*= NULL*/ ) const
 	{
-		return ui::AlignRectOutside( rCtrlRect, buddyAnchor, m_alignment, m_spacing );		// tile align to buddy: layout the rect outside the anchor (by the anchor)
+		if ( pMateCustomSize != NULL )
+			ui::SetRectSize( rMateRect, *pMateCustomSize );		// resize mate to ideal size
+
+		ui::AlignRect( rMateRect, rHostRect, m_alignment );
+		ShrinkHostRect( rHostRect, rMateRect.Size() );
 	}
 
-	CRect& CBuddyLayout::ShrinkBuddyRect( CRect& rBuddyRect, const CSize& anchorCtrlSize ) const
+	void CTandemLayout::AlignOutside( CRect& rMateRect, const RECT& hostRect ) const
+	{
+		ui::AlignRectOutside( rMateRect, hostRect, m_alignment, m_spacing );		// tile align to host: layout the rect outside the anchor (by the anchor)
+	}
+
+	void CTandemLayout::ShrinkHostRect( CRect& rHostRect, const CSize& mateSize ) const
 	{
 		switch ( m_alignment & HorizontalMask )
 		{
 			case H_AlignLeft:
-				rBuddyRect.left += anchorCtrlSize.cx + m_spacing.cx;
+				rHostRect.left += mateSize.cx + m_spacing.cx;
 				break;
 			case H_AlignRight:
-				rBuddyRect.right -= anchorCtrlSize.cx + m_spacing.cx;
+				rHostRect.right -= mateSize.cx + m_spacing.cx;
 				break;
 		}
 
 		switch ( m_alignment & VerticalMask )
 		{
 			case V_AlignTop:
-				rBuddyRect.top += anchorCtrlSize.cy + m_spacing.cy;
+				rHostRect.top += mateSize.cy + m_spacing.cy;
 				break;
 			case V_AlignBottom:
-				rBuddyRect.bottom -= anchorCtrlSize.cy + m_spacing.cy;
+				rHostRect.bottom -= mateSize.cy + m_spacing.cy;
 				break;
 		}
-		return rBuddyRect;
 	}
 
-	CRect CBuddyLayout::LayoutCtrl( CWnd* pCtrl, const CWnd* pBuddyCtrl, const CSize* pCustomSize /*= NULL*/ ) const
+	CRect CTandemLayout::LayoutMate( CWnd* pMateCtrl, const CWnd* pHostCtrl, const CSize* pCustomSize /*= NULL*/ ) const
 	{
-		const CRect buddyRect = ui::GetControlRect( pBuddyCtrl->GetSafeHwnd() );
-		CRect ctrlRect = ui::GetControlRect( pCtrl->GetSafeHwnd() );
+		const CRect hostRect = ui::GetControlRect( pHostCtrl->GetSafeHwnd() );
+		CRect ctrlRect = ui::GetControlRect( pMateCtrl->GetSafeHwnd() );
 
 		if ( pCustomSize != NULL )
 			ui::SetRectSize( ctrlRect, *pCustomSize );
 
-		Align( ctrlRect, buddyRect );
-		pCtrl->MoveWindow( &ctrlRect );
+		ui::AlignRect( ctrlRect, hostRect, m_alignment );
+		AlignOutside( ctrlRect, hostRect );
+		pMateCtrl->MoveWindow( &ctrlRect );
 		return ctrlRect;
 	}
 
-	void CBuddyLayout::ShrinkBuddy( CWnd* pBuddyCtrl, const CWnd* pCtrl ) const
+	void CTandemLayout::LayoutTandem( CWnd* pHostCtrl, CWnd* pMateCtrl, const CSize* pMateCustomSize /*= NULL*/ ) const
 	{
-		const CSize ctrlSize = ui::GetControlRect( pCtrl->GetSafeHwnd() ).Size();
-		CRect buddyRect = ui::GetControlRect( pBuddyCtrl->GetSafeHwnd() );
+		CRect hostRect = ui::GetControlRect( pHostCtrl->GetSafeHwnd() );
+		CRect mateRect = ui::GetControlRect( pMateCtrl->GetSafeHwnd() );
 
-		ShrinkBuddyRect( buddyRect, ctrlSize );
-		pBuddyCtrl->MoveWindow( &buddyRect );
+		AlignTandem( hostRect, mateRect, pMateCustomSize );
+
+		pHostCtrl->MoveWindow( &hostRect );
+		pMateCtrl->MoveWindow( &mateRect );
 	}
 }

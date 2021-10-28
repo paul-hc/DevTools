@@ -20,13 +20,13 @@ public:
 						  TAlignment alignToPlaceholder = H_AlignLeft | V_AlignBottom, UINT toolbarResId = 0 );
 
 	// use a placeholder static (with the same id)
-	void DDX_ShrinkBuddy( CDataExchange* pDX, CWnd* pBuddyCtrl, int toolbarId, const ui::CBuddyLayout& buddyLayout = ui::CBuddyLayout::s_tileToRight,
-						  UINT toolbarResId = 0 );
+	void DDX_Tandem( CDataExchange* pDX, CWnd* pHostCtrl, int toolbarId, const ui::CTandemLayout& tandemLayout = ui::CTandemLayout::s_mateOnRight,
+					 UINT toolbarResId = 0 );
 
 	void CreateReplacePlaceholder( CWnd* pParent, int placeholderId, TAlignment alignToPlaceholder = H_AlignLeft | V_AlignBottom,
 								   UINT toolbarResId = 0 );
 
-	void CreateShrinkBuddy( CWnd* pBuddyCtrl, const ui::CBuddyLayout& buddyLayout = ui::CBuddyLayout::s_tileToRight, UINT toolbarResId = 0 );
+	void CreateTandem( CWnd* pHostCtrl, const ui::CTandemLayout& tandemLayout = ui::CTandemLayout::s_mateOnRight, UINT toolbarResId = 0 );
 
 	// creates a toolbar with id AFX_IDW_TOOLBAR
 	void CreateToolbar( CWnd* pParent, const CRect* pAlignScreenRect = NULL,

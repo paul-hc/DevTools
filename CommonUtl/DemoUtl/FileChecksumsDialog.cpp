@@ -1,7 +1,6 @@
 
 #include "stdafx.h"
 #include "FileChecksumsDialog.h"
-#include "utl/AppTools.h"
 #include "utl/ContainerUtilities.h"
 #include "utl/IoBin.h"
 #include "utl/FileEnumerator.h"
@@ -166,7 +165,6 @@ namespace impl
 	private:
 		std::vector< CFileChecksumItem* >* m_pFileItems;
 	public:
-		std::vector< fs::CPath > m_filePaths;
 		std::vector< fs::CPath > m_subDirPaths;
 		size_t m_moreFilesCount;			// incremented when it reaches the limit
 	};
@@ -183,7 +181,7 @@ namespace layout
 {
 	static CLayoutStyle styles[] =
 	{
-		{ IDC_SEARCH_PATH_COMBO, SizeX },
+		{ IDC_SEARCH_PATH_COMBO, pctSizeX( 50 ) },
 		{ IDC_TOOLBAR_PLACEHOLDER, MoveX },
 		{ IDC_FIND_FILES_BUTTON, MoveX },
 		{ IDC_CALC_CHECKSUMS_BUTTON, MoveX },
@@ -224,21 +222,15 @@ void CFileChecksumsDialog::SearchForFiles( void )
 		m_fileItems.push_back( new CFileChecksumItem( m_searchPath ) );
 	else
 	{
-		fs::CPath dirPath = m_searchPath;
-		std::tstring pattern = _T("*");
+		fs::CPath dirPath;
+		std::tstring wildSpec = _T("*");
 
-		if ( path::ContainsWildcards( m_searchPath.GetPtr() ) )
-		{
-			dirPath = m_searchPath.GetParentPath();
-			pattern = m_searchPath.GetFilename();
-		}
-
-		if ( fs::IsValidDirectory( dirPath.GetPtr() ) )
+		if ( fs::IsValidDirectoryPattern( m_searchPath, &dirPath, &wildSpec ) )
 		{
 			CWaitCursor wait;
 			impl::CEnumerator found( &m_fileItems );
 
-			fs::EnumFiles( &found, dirPath, pattern.c_str(), fs::EF_Recurse );
+			fs::EnumFiles( &found, dirPath, wildSpec.c_str(), fs::EF_Recurse );
 
 			typedef pred::CompareAdapter< pred::CompareNaturalPath, CPathItemBase::ToFilePath > CompareFileItem;
 			typedef pred::LessValue< CompareFileItem > TLess_FileItem;

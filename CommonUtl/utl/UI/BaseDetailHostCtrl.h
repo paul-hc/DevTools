@@ -20,8 +20,8 @@ protected:
 public:
 	enum Metrics { Spacing = 2 };
 
-	const ui::CBuddyLayout& GetBuddyLayout( void ) const { return m_buddyLayout; }
-	ui::CBuddyLayout& RefBuddyLayout( void ) { return m_buddyLayout; }
+	const ui::CTandemLayout& GetTandemLayout( void ) const { return m_tandemLayout; }
+	ui::CTandemLayout& RefTandemLayout( void ) { return m_tandemLayout; }
 
 	bool HasMateToolbar( void ) const { return m_pMateToolbar.get() != NULL; }
 	CDialogToolBar* GetMateToolbar( void ) const { return m_pMateToolbar.get(); }
@@ -34,7 +34,7 @@ private:
 private:
 	CWnd* m_pParentWnd;
 	std::auto_ptr<CDialogToolBar> m_pMateToolbar;
-	ui::CBuddyLayout m_buddyLayout;
+	ui::CTandemLayout m_tandemLayout;
 	bool m_ignoreResize;
 
 	// generated stuff

@@ -14,7 +14,7 @@ class CDetailIconButton : public CDetailMateCtrl<CIconButton>
 public:
 	CDetailIconButton( ui::IBuddyCommandHandler* pHostCmdHandler, UINT iconId = 0 );
 
-	void CreateShrinkBuddy( const ui::CBuddyLayout& buddyLayout = ui::CBuddyLayout::s_tileToRight );
+	void CreateTandem( const ui::CTandemLayout& tandemLayout = ui::CTandemLayout::s_mateOnRight );
 
 	enum { ButtonId = -1 };
 };

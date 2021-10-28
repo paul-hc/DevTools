@@ -44,6 +44,13 @@ bool CToolbarStrip::InitToolbarButtons( void )
 	return true;
 }
 
+CSize CToolbarStrip::GetIdealBarSize( void ) const
+{
+	CSize idealBarSize;
+	GetToolBarCtrl().GetMaxSize( &idealBarSize );
+	return idealBarSize;
+}
+
 void CToolbarStrip::SetCustomDisabledImageList( gdi::DisabledStyle style /*= gdi::DisabledGrayOut*/ )
 {
 	if ( CImageList* pImageList = m_strip.EnsureImageList() )

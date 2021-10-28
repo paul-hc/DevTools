@@ -7,7 +7,7 @@
 
 namespace ui
 {
-	// implemented by a control to receive commands from a buddy control (e.g. a buddy button)
+	// implemented by a control to receive commands from a buddy host control (e.g. a buddy button)
 	//
 	interface IBuddyCommandHandler
 	{
@@ -15,24 +15,26 @@ namespace ui
 	};
 
 
-	struct CBuddyLayout
+	struct CTandemLayout
 	{
-		CBuddyLayout( void ) : m_alignment( NoAlign ), m_spacing( 0, 0 ) {}
-		explicit CBuddyLayout( TAlignment alignment, const CSize& spacing ) : m_alignment( alignment ), m_spacing( spacing ) {}
-		explicit CBuddyLayout( TAlignment alignment, int spacing ) : m_alignment( alignment ), m_spacing( spacing, spacing ) {}
+		CTandemLayout( void ) : m_alignment( NoAlign ), m_spacing( 0, 0 ) {}
+		explicit CTandemLayout( TAlignment alignment, const CSize& spacing ) : m_alignment( alignment ), m_spacing( spacing ) {}
+		explicit CTandemLayout( TAlignment alignment, int spacing ) : m_alignment( alignment ), m_spacing( spacing, spacing ) {}
 
-		CRect& Align( CRect& rCtrlRect, const RECT& buddyAnchor ) const;		// tile align to buddy: layout the rect outside the anchor (by the anchor)
-		CRect& ShrinkBuddyRect( CRect& rBuddyRect, const CSize& anchorCtrlSize ) const;
+		void AlignTandem( CRect& rHostRect, CRect& rMateRect, const CSize* pMateCustomSize = NULL ) const;	// align the mate control and shrink the host control
+		void AlignOutside( CRect& rMateRect, const RECT& hostRect ) const;									// tile align to host: layout the rect by the host
 
-		CRect LayoutCtrl( CWnd* pCtrl, const CWnd* pBuddyCtrl, const CSize* pCustomSize = NULL ) const;		// tile move control outside of buddy anchor
-		void ShrinkBuddy( CWnd* pBuddyCtrl, const CWnd* pCtrl ) const;										// shrink buddy control from the outer control
+		void ShrinkHostRect( CRect& rHostRect, const CSize& mateSize ) const;
+
+		CRect LayoutMate( CWnd* pMateCtrl, const CWnd* pHostCtrl, const CSize* pCustomSize = NULL ) const;	// tile move control outside of host anchor
+		void LayoutTandem( CWnd* pHostCtrl, CWnd* pMateCtrl, const CSize* pMateCustomSize = NULL ) const;
 	public:
 		TAlignment m_alignment;
 		CSize m_spacing;
 
 		enum Metrics { Spacing = 2 };
 
-		static const CBuddyLayout s_tileToRight;
+		static const CTandemLayout s_mateOnRight;
 	};
 }
 

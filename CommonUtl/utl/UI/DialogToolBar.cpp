@@ -26,14 +26,14 @@ void CDialogToolBar::DDX_Placeholder( CDataExchange* pDX, int placeholderId,
 	}
 }
 
-void CDialogToolBar::DDX_ShrinkBuddy( CDataExchange* pDX, CWnd* pBuddyCtrl, int toolbarId, const ui::CBuddyLayout& buddyLayout /*= ui::CBuddyLayout::s_tileToRight*/,
-									  UINT toolbarResId /*= 0*/ )
+void CDialogToolBar::DDX_Tandem( CDataExchange* pDX, CWnd* pHostCtrl, int toolbarId, const ui::CTandemLayout& tandemLayout /*= ui::CTandemLayout::s_mateOnRight*/,
+								 UINT toolbarResId /*= 0*/ )
 {
 	if ( NULL == m_hWnd )
 	{
 		ASSERT( DialogOutput == pDX->m_bSaveAndValidate ); pDX;
 
-		CreateShrinkBuddy( pBuddyCtrl, buddyLayout, toolbarResId );
+		CreateTandem( pHostCtrl, tandemLayout, toolbarResId );
 
 		if ( toolbarId != 0 )
 			SetDlgCtrlID( toolbarId );
@@ -58,19 +58,18 @@ void CDialogToolBar::CreateReplacePlaceholder( CWnd* pParent, int placeholderId,
 	SetDlgCtrlID( placeholderId );
 }
 
-void CDialogToolBar::CreateShrinkBuddy( CWnd* pBuddyCtrl, const ui::CBuddyLayout& buddyLayout /*= ui::CBuddyLayout::s_tileToRight*/, UINT toolbarResId /*= 0*/ )
+void CDialogToolBar::CreateTandem( CWnd* pHostCtrl, const ui::CTandemLayout& tandemLayout /*= ui::CTandemLayout::s_mateOnRight*/, UINT toolbarResId /*= 0*/ )
 {
 	ASSERT_NULL( m_hWnd );
-	ASSERT_PTR( pBuddyCtrl->GetSafeHwnd() );
+	ASSERT_PTR( pHostCtrl->GetSafeHwnd() );
 
-	CreateToolbar( pBuddyCtrl->GetParent(), toolbarResId );
-	ui::SetTabOrder( this, pBuddyCtrl );
+	CreateToolbar( pHostCtrl->GetParent(), toolbarResId );
 
 	CSize idealBarSize;
-	GetToolBarCtrl().GetMaxSize( &idealBarSize );		// adjust the size of the toolbar
+	GetToolBarCtrl().GetMaxSize( &idealBarSize );
 
-	buddyLayout.LayoutCtrl( this, pBuddyCtrl, &idealBarSize );
-	buddyLayout.ShrinkBuddy( pBuddyCtrl, this );
+	tandemLayout.LayoutTandem( pHostCtrl, this, &idealBarSize );	// also adjust the size of the toolbar
+	ui::SetTabOrder( this, pHostCtrl );
 }
 
 void CDialogToolBar::CreateToolbar( CWnd* pParent, const CRect* pAlignScreenRect /*= NULL*/,

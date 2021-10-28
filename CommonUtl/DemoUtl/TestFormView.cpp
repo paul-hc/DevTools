@@ -8,6 +8,7 @@
 #include "ImageDialog.h"
 #include "FileListDialog.h"
 #include "FileChecksumsDialog.h"
+#include "BuddyControlsDialog.h"
 #include "test/ImageTests.h"
 #include "utl/UI/Utilities.h"
 #include "utl/UI/resource.h"
@@ -74,9 +75,10 @@ BEGIN_MESSAGE_MAP( CTestFormView, CLayoutFormView )
 	ON_BN_CLICKED( IDC_RUN_IMAGE_TESTS, OnRunImageUnitTests )
 	ON_BN_CLICKED( ID_STUDY_IMAGE, OnStudyImage )
 	ON_BN_CLICKED( ID_STUDY_LIST_DIFFS, OnStudyListDiffs )
+	ON_BN_CLICKED( ID_STUDY_FILE_CHECKSUM, OnStudyFileChecksums )
+	ON_BN_CLICKED( ID_STUDY_BUDDY_CONTROLS, OnStudyBuddyControls )
 	ON_BN_CLICKED( ID_STUDY_TASK_DIALOG, OnStudyTaskDialog )
 	ON_BN_CLICKED( ID_STUDY_MISC_DIALOG, OnStudyMiscDialog )
-	ON_BN_CLICKED( ID_STUDY_FILE_CHECKSUM, OnStudyFileChecksums )
 END_MESSAGE_MAP()
 
 void CTestFormView::OnRunImageUnitTests( void )
@@ -101,6 +103,18 @@ void CTestFormView::OnStudyListDiffs( void )
 	}
 }
 
+void CTestFormView::OnStudyFileChecksums( void )
+{
+	CFileChecksumsDialog dlg( AfxGetMainWnd() );
+	dlg.DoModal();
+}
+
+void CTestFormView::OnStudyBuddyControls( void )
+{
+	CBuddyControlsDialog dlg( AfxGetMainWnd() );
+	dlg.DoModal();
+}
+
 void CTestFormView::OnStudyTaskDialog( void )
 {
 	CTestTaskDialog dlg( this );
@@ -110,11 +124,5 @@ void CTestFormView::OnStudyTaskDialog( void )
 void CTestFormView::OnStudyMiscDialog( void )
 {
 	CTestMiscDialog dlg( this );
-	dlg.DoModal();
-}
-
-void CTestFormView::OnStudyFileChecksums( void )
-{
-	CFileChecksumsDialog dlg( AfxGetMainWnd() );
 	dlg.DoModal();
 }

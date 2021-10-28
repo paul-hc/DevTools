@@ -377,6 +377,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\BuddyControlsDialog.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\BuddyControlsDialog.h"
+				>
+			</File>
+			<File
 				RelativePath=".\ChildFrame.cpp"
 				>
 			</File>

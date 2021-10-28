@@ -13,7 +13,7 @@ CBaseDetailHostCtrl<BaseCtrl>::CBaseDetailHostCtrl( void )
 	: BaseCtrl()
 	, m_pParentWnd( NULL )
 	, m_pMateToolbar( new CDialogToolBar() )
-	, m_buddyLayout( H_AlignRight | V_AlignCenter, Spacing )
+	, m_tandemLayout( H_AlignRight | V_AlignCenter, Spacing )
 	, m_ignoreResize( false )
 {
 	m_pMateToolbar->SetEnableUnhandledCmds();		// enable detail buttons by default
@@ -42,7 +42,7 @@ template< typename BaseCtrl >
 void CBaseDetailHostCtrl<BaseCtrl>::LayoutMates( void )
 {
 	if ( HasMateToolbar() )
-		m_buddyLayout.LayoutCtrl( m_pMateToolbar.get(), this );	// tile decorations toolbar
+		m_tandemLayout.LayoutMate( m_pMateToolbar.get(), this );	// tile decorations toolbar
 }
 
 template< typename BaseCtrl >
@@ -87,7 +87,7 @@ void CBaseDetailHostCtrl<BaseCtrl>::PreSubclassWindow( void )
 
 	if ( m_pMateToolbar.get() != NULL )
 	{
-		m_pMateToolbar->CreateShrinkBuddy( this, m_buddyLayout );
+		m_pMateToolbar->CreateTandem( this, m_tandemLayout );
 		m_pMateToolbar->SetOwner( this );		// host control handles WM_COMMAND for editing, and redirects WM_NOTIFY to parent dialog (for tooltips)
 	}
 

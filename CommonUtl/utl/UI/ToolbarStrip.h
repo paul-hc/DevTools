@@ -21,6 +21,8 @@ public:
 	bool InitToolbarButtons( void );						// use already set up strip to initialize toolbar buttons
 	void SetCustomDisabledImageList( gdi::DisabledStyle style = gdi::DisabledGrayOut );
 
+	CSize GetIdealBarSize( void ) const;
+
 	void UpdateCmdUI( void );
 
 	void TrackButtonMenu( UINT buttonId, CWnd* pTargetWnd, CMenu* pPopupMenu, ui::PopupAlign popupAlign );
