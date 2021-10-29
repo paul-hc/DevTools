@@ -1059,27 +1059,11 @@ namespace fs
 	fs::CPath GetLongFilePath( const fs::CPath& filePath )
 	{
 		TCHAR longPath[ MAX_PATH ];
-		::GetLongPathName( filePath.GetPtr(), longPath, COUNT_OF( longPath ) );						// convert to long path
+		::GetLongPathName( filePath.GetPtr(), longPath, COUNT_OF( longPath ) );				// convert to long path
 
 		return fs::CPath( longPath );
 	}
 
-	bool IsValidDirectoryPattern( const fs::CPath& dirPatternPath, fs::CPath* pDirPath /*= NULL*/, std::tstring* pWildSpec /*= NULL*/ )
-	{	// a valid directory path with a wildcard pattern?
-		if ( !path::ContainsWildcards( dirPatternPath.GetFilenamePtr() ) )
-			return fs::IsValidDirectory( dirPatternPath.GetPtr() );
-		else if ( fs::IsValidFile( dirPatternPath.GetPtr() ) )
-			return false;
-
-		fs::CPath dirPath = dirPatternPath.GetParentPath();
-
-		if ( !fs::IsValidDirectory( dirPath.GetPtr() ) )
-			return false;
-
-		utl::AssignPtr( pDirPath, dirPath );
-		utl::AssignPtr( pWildSpec, dirPatternPath.GetFilename() );
-		return true;
-	}
 
 	fs::CPath StripWildcards( const fs::CPath& patternPath )
 	{
@@ -1087,6 +1071,29 @@ namespace fs
 			return patternPath.GetParentPath();
 
 		return patternPath;
+	}
+
+	fs::PatternResult SplitPatternPath( fs::CPath* pPath, std::tstring* pWildSpec, const fs::CPath& patternPath )
+	{
+		REQUIRE( pPath != NULL && pWildSpec != NULL );
+
+		if ( path::ContainsWildcards( patternPath.GetFilenamePtr() ) )
+		{
+			*pPath = patternPath.GetParentPath();
+			*pWildSpec = patternPath.GetFilename();
+		}
+		else
+		{
+			*pPath = patternPath;
+			pWildSpec->clear();
+		}
+
+		if ( fs::IsValidFile( pPath->GetPtr() ) )
+			return fs::ValidFile;
+		else if ( fs::IsValidDirectory( pPath->GetPtr() ) )
+			return fs::ValidDirectory;
+
+		return fs::InvalidPattern;
 	}
 }
 

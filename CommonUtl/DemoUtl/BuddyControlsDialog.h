@@ -7,7 +7,7 @@
 #include "utl/UI/PathItemListCtrl.h"
 
 
-class CFileStateExItem;
+class CFileStateTimedItem;
 
 
 class CBuddyControlsDialog : public CLayoutDialog
@@ -23,10 +23,10 @@ private:
 private:
 	fs::CPath m_searchPath;
 
-	std::vector< CFileStateExItem* > m_fileItems;
+	std::vector< CFileStateTimedItem* > m_fileItems;
 private:
 	// enum { IDD = IDD_BUDDY_CONTROLS_DIALOG };
-	enum Column { FilePath, FileSize, Attributes, CRC32, ModifTime, ChecksumElapsed };
+	enum Column { FilePath, FileSize, Attributes, CRC32, ModifyTime, ChecksumElapsed };
 
 	CItemContentHistoryCombo m_searchPathCombo;
 	CItemContentHistoryCombo m_folderPathCombo;

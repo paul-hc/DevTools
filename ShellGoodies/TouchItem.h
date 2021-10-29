@@ -3,7 +3,7 @@
 #pragma once
 
 #include "utl/FileState.h"
-#include "utl/PathItemBase.h"
+#include "utl/FileStateItem.h"
 
 
 class CTouchItem : public CFileStateItem
@@ -12,7 +12,7 @@ public:
 	CTouchItem( const fs::CFileState& srcState );
 	virtual ~CTouchItem();
 
-	const fs::CFileState& GetSrcState( void ) const { return m_fileState; }
+	const fs::CFileState& GetSrcState( void ) const { return GetState(); }
 	const fs::CFileState& GetDestState( void ) const { return m_destState; }
 
 	bool IsModified( void ) const { return m_destState.IsValid() && m_destState != GetSrcState(); }
@@ -108,20 +108,9 @@ namespace multi
 
 namespace func
 {
-	struct AsSrcCreationTime
-	{
-		const CTime& operator()( const CTouchItem* pTouchItem ) const { return pTouchItem->GetSrcState().m_creationTime; }
-	};
-
-	struct AsSrcModifyTime
-	{
-		const CTime& operator()( const CTouchItem* pTouchItem ) const { return pTouchItem->GetSrcState().m_modifTime; }
-	};
-
-	struct AsSrcAccessTime
-	{
-		const CTime& operator()( const CTouchItem* pTouchItem ) const { return pTouchItem->GetSrcState().m_accessTime; }
-	};
+	typedef AsCreationTime TAsSrcCreationTime;
+	typedef AsModifyTime TAsSrcModifyTime;
+	typedef AsAccessTime TAsSrcAccessTime;
 
 
 	struct AsDestCreationTime

@@ -204,9 +204,10 @@ CFileChecksumsDialog::CFileChecksumsDialog( CWnd* pParent )
 	RegisterCtrlLayout( layout::styles, COUNT_OF( layout::styles ) );
 
 	m_searchPathCombo.SetEnsurePathExist();
+//	SetFlag( m_fileListCtrl.RefListStyleEx(), LVS_EX_DOUBLEBUFFER, false );
 	m_fileListCtrl.SetSection( m_regSection + _T("\\List") );
 	m_fileListCtrl.SetUseAlternateRowColoring();
-	SetFlag( m_fileListCtrl.RefListStyleEx(), LVS_EX_DOUBLEBUFFER, false );
+	m_fileListCtrl.AddRecordCompare( pred::NewComparator( pred::CompareCode() ) );		// default row item comparator
 }
 
 CFileChecksumsDialog::~CFileChecksumsDialog()
@@ -218,14 +219,15 @@ void CFileChecksumsDialog::SearchForFiles( void )
 {
 	utl::ClearOwningContainer( m_fileItems );
 
-	if ( fs::IsValidFile( m_searchPath.GetPtr() ) )
-		m_fileItems.push_back( new CFileChecksumItem( m_searchPath ) );
-	else
-	{
-		fs::CPath dirPath;
-		std::tstring wildSpec = _T("*");
+	fs::CPath dirPath;
+	std::tstring wildSpec = _T("*");
 
-		if ( fs::IsValidDirectoryPattern( m_searchPath, &dirPath, &wildSpec ) )
+	switch ( fs::SplitPatternPath( &dirPath, &wildSpec, m_searchPath ) )
+	{
+		case fs::ValidFile:
+			m_fileItems.push_back( new CFileChecksumItem( m_searchPath ) );
+			break;
+		case fs::ValidDirectory:
 		{
 			CWaitCursor wait;
 			impl::CEnumerator found( &m_fileItems );
@@ -236,7 +238,11 @@ void CFileChecksumsDialog::SearchForFiles( void )
 			typedef pred::LessValue< CompareFileItem > TLess_FileItem;
 
 			std::sort( m_fileItems.begin(), m_fileItems.end(), TLess_FileItem() );			// sort by full key and path
+			break;
 		}
+		default: ASSERT( false );
+		case fs::InvalidPattern:
+			ui::MessageBox( std::tstring( _T("Invalid path:\n\n") ) + m_searchPath.Get() );
 	}
 
 	SetupFileListView();

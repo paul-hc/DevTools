@@ -291,10 +291,16 @@ namespace fs
 	fs::CPath GetShortFilePath( const fs::CPath& filePath );
 	fs::CPath GetLongFilePath( const fs::CPath& filePath );
 
-	bool IsValidDirectoryPattern( const fs::CPath& dirPatternPath, fs::CPath* pDirPath = NULL, std::tstring* pWildSpec = NULL );	// a valid directory path with a wildcard pattern?
+	inline fs::CPath StripDirPrefix( const fs::CPath& filePath, const fs::CPath& dirPath ) { return path::StripCommonPrefix( filePath.GetPtr(), dirPath.GetPtr() ); }
+
+
+	// pattern path utils (potentially with wildcards):
+
 	fs::CPath StripWildcards( const fs::CPath& patternPath );
 
-	inline fs::CPath StripDirPrefix( const fs::CPath& filePath, const fs::CPath& dirPath ) { return path::StripCommonPrefix( filePath.GetPtr(), dirPath.GetPtr() ); }
+	enum PatternResult { ValidFile, ValidDirectory, InvalidPattern };
+
+	PatternResult SplitPatternPath( fs::CPath* pPath, std::tstring* pWildSpec, const fs::CPath& patternPath );		// a valid file or valid directory path with a wildcards?
 }
 
 

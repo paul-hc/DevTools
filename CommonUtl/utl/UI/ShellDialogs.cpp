@@ -124,9 +124,11 @@ namespace shell
 
 	bool BrowseAutoPath( fs::CPath& rFilePath, CWnd* pParent, const TCHAR* pFileFilter /*= NULL*/ )
 	{
-		if ( !fs::IsValidDirectoryPattern( rFilePath ) )
-			if ( fs::IsValidFile( rFilePath.GetPtr() ) )
-				return BrowseForFile( rFilePath, pParent, FileBrowse, pFileFilter );
+		fs::CPath dirPath;
+		std::tstring wildSpec;
+
+		if ( fs::ValidFile == fs::SplitPatternPath( &dirPath, &wildSpec, rFilePath ) )
+			return BrowseForFile( rFilePath, pParent, FileBrowse, pFileFilter );
 
 		return PickFolder( rFilePath, pParent );
 	}

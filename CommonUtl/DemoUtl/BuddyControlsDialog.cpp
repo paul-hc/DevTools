@@ -5,9 +5,10 @@
 #include "utl/FileEnumerator.h"
 #include "utl/FileSystem.h"
 #include "utl/FlagTags.h"
-#include "utl/PathItemBase.h"
+#include "utl/FileStateItem.h"
 #include "utl/StringUtilities.h"
 #include "utl/Timer.h"
+#include "utl/TimeUtils.h"
 #include "utl/UI/ShellUtilities.h"
 #include "utl/UI/UtilitiesEx.h"
 #include "utl/UI/resource.h"
@@ -18,20 +19,20 @@
 #endif
 
 
-class CFileStateExItem : public CFileStateItem
+class CFileStateTimedItem : public CFileStateItem
 {
 public:
-	CFileStateExItem( const CFileFind& foundFile )
+	CFileStateTimedItem( const CFileFind& foundFile )
 		: CFileStateItem( fs::CFileState( foundFile ) )
 		, m_checksumElapsed( 0.0 )
 	{
 	}
 
-	CFileStateExItem( const TCHAR tag[] )
+	CFileStateTimedItem( const TCHAR tag[] )
 		: CFileStateItem( fs::CFileState() )
 		, m_checksumElapsed( 0.0 )
 	{
-		m_fileState.m_fullPath.Set( tag );		// set the proxy item tag
+		SetFilePath( fs::CPath( tag ) );		// set the proxy item tag
 	}
 
 	bool IsProxy( void ) const { return !GetState().IsValid(); }
@@ -42,7 +43,7 @@ public:
 		if ( !IsProxy() )
 		{
 			CTimer timer;
-			m_fileState.ComputeCrc32( fs::CFileState::CacheCompute );
+			RefState().ComputeCrc32( fs::CFileState::CacheCompute );
 			m_checksumElapsed = timer.ElapsedSeconds();
 		}
 	}
@@ -50,13 +51,13 @@ public:
 	void ResetProxy( void )
 	{
 		REQUIRE( IsProxy() );
-		m_fileState.m_fileSize = 0;
+		RefState().m_fileSize = 0;
 		m_checksumElapsed = 0.0;
 	}
 
-	CFileStateExItem& operator+=( const CFileStateExItem& right )
+	CFileStateTimedItem& operator+=( const CFileStateTimedItem& right )
 	{
-		m_fileState.m_fileSize += right.GetState().m_fileSize;
+		RefState().m_fileSize += right.GetState().m_fileSize;
 		m_checksumElapsed += right.m_checksumElapsed;
 
 		return *this;
@@ -70,34 +71,34 @@ namespace func
 {
 	struct SumElapsed
 	{
-		SumElapsed( CFileStateExItem* pTotalProxy ) : m_pTotalProxy( pTotalProxy ) {}
+		SumElapsed( CFileStateTimedItem* pTotalProxy ) : m_pTotalProxy( pTotalProxy ) {}
 
-		void operator()( const CFileStateExItem* pItem )
+		void operator()( const CFileStateTimedItem* pItem )
 		{
 			if ( !pItem->IsProxy() )
 				*m_pTotalProxy += *pItem;
 		}
 	private:
-		CFileStateExItem* m_pTotalProxy;
+		CFileStateTimedItem* m_pTotalProxy;
 	};
 }
 
 
-namespace impl
+namespace impl2
 {
 	struct CEnumerator : public fs::IEnumerator
 	{
-		CEnumerator( std::vector< CFileStateExItem* >* pFileItems ) : m_pFileItems( pFileItems ) { ASSERT_PTR( m_pFileItems ); }
+		CEnumerator( std::vector< CFileStateTimedItem* >* pFileItems ) : m_pFileItems( pFileItems ) { ASSERT_PTR( m_pFileItems ); }
 
 		// IEnumerator interface
 		virtual void AddFile( const CFileFind& foundFile )
 		{
-			m_pFileItems->push_back( new CFileStateExItem( foundFile ) );
+			m_pFileItems->push_back( new CFileStateTimedItem( foundFile ) );
 		}
 
 		virtual void AddFoundFile( const TCHAR* pFilePath ) { pFilePath; }
 	private:
-		std::vector< CFileStateExItem* >* m_pFileItems;
+		std::vector< CFileStateTimedItem* >* m_pFileItems;
 	public:
 		std::vector< fs::CPath > m_subDirPaths;
 		size_t m_moreFilesCount;			// incremented when it reaches the limit
@@ -146,6 +147,9 @@ CBuddyControlsDialog::CBuddyControlsDialog( CWnd* pParent )
 	m_fileListCtrl.SetSection( m_regSection + _T("\\List") );
 	m_fileListCtrl.SetUseAlternateRowColoring();
 	m_fileListCtrl.SetSubjectAdapter( ui::GetFullPathAdapter() );		// display full paths
+
+	m_fileListCtrl.AddRecordCompare( pred::NewComparator( pred::CompareCode() ) );		// default row item comparator
+	m_fileListCtrl.AddColumnCompare( ModifyTime, pred::NewPropertyComparator<CFileStateTimedItem>( func::AsModifyTime() ), false );
 }
 
 CBuddyControlsDialog::~CBuddyControlsDialog()
@@ -157,22 +161,22 @@ void CBuddyControlsDialog::SearchForFiles( void )
 {
 	utl::ClearOwningContainer( m_fileItems );
 
-	if ( fs::IsValidFile( m_searchPath.GetPtr() ) )
-	{
-		CFileFind foundFile;
+	fs::CPath dirPath;
+	std::tstring wildSpec = _T("*");
 
-		if ( m_searchPath.LocateFile( foundFile ) )
-			m_fileItems.push_back( new CFileStateExItem( foundFile ) );
-	}
-	else
+	switch ( fs::SplitPatternPath( &dirPath, &wildSpec, m_searchPath ) )
 	{
-		fs::CPath dirPath;
-		std::tstring wildSpec = _T("*");
-
-		if ( fs::IsValidDirectoryPattern( m_searchPath, &dirPath, &wildSpec ) )
+		case fs::ValidFile:
+		{
+			CFileFind foundFile;
+			if ( m_searchPath.LocateFile( foundFile ) )
+				m_fileItems.push_back( new CFileStateTimedItem( foundFile ) );
+			break;
+		}
+		case fs::ValidDirectory:
 		{
 			CWaitCursor wait;
-			impl::CEnumerator found( &m_fileItems );
+			impl2::CEnumerator found( &m_fileItems );
 
 			fs::EnumFiles( &found, dirPath, wildSpec.c_str(), fs::EF_Recurse );
 
@@ -180,7 +184,11 @@ void CBuddyControlsDialog::SearchForFiles( void )
 			typedef pred::LessValue< CompareFileItem > TLess_FileItem;
 
 			std::sort( m_fileItems.begin(), m_fileItems.end(), TLess_FileItem() );			// sort by full key and path
+			break;
 		}
+		default: ASSERT( false );
+		case fs::InvalidPattern:
+			ui::MessageBox( std::tstring( _T("Invalid path:\n\n") ) + m_searchPath.Get() );
 	}
 
 	SetupFileListView();
@@ -197,19 +205,18 @@ void CBuddyControlsDialog::SetupFileListView( void )
 
 		m_fileListCtrl.DeleteAllItems();
 
-		unsigned int pos = 0;
-
-		for ( ; pos != m_fileItems.size(); ++pos )
+		for ( unsigned int pos = 0; pos != m_fileItems.size(); ++pos )
 		{
-			const CFileStateExItem* pFileItem = m_fileItems[ pos ];
+			const CFileStateTimedItem* pFileItem = m_fileItems[ pos ];
 			const fs::CFileState& fileState = pFileItem->GetState();
 
-			m_fileListCtrl.InsertObjectItem( pos, pFileItem );		// FileName
+			m_fileListCtrl.InsertObjectItem( pos, pFileItem );		// FilePath
 
 			if ( !pFileItem->IsProxy() )
 			{
 				m_fileListCtrl.SetSubItemText( pos, Attributes, fs::CFileState::GetTags_FileAttributes().FormatKey( fileState.m_attributes, _T("") ) );
 				m_fileListCtrl.SetSubItemText( pos, CRC32, str::Format( _T("%08X"), fileState.GetCrc32( fs::CFileState::AsIs ) ) );
+				m_fileListCtrl.SetSubItemText( pos, ModifyTime, time_utl::FormatTimestamp( fileState.m_modifTime ) );
 			}
 			else
 				m_fileListCtrl.MarkRowAt( pos, ui::CTextEffect( ui::Bold, color::Red ) );
@@ -299,11 +306,11 @@ void CBuddyControlsDialog::OnBnClicked_CalculateChecksums( void )
 
 	CWaitCursor wait;
 
-	utl::for_each( m_fileItems, std::mem_fun( &CFileStateExItem::ComputeChecksum ) );
+	utl::for_each( m_fileItems, std::mem_fun( &CFileStateTimedItem::ComputeChecksum ) );
 
 	if ( !m_fileItems.empty() )
 	{	// insert/update the TOTALS proxy item
-		CFileStateExItem* pTotalItem;
+		CFileStateTimedItem* pTotalItem;
 
 		if ( m_fileItems.back()->IsProxy() )
 		{	// clear existing proxy item
@@ -311,7 +318,7 @@ void CBuddyControlsDialog::OnBnClicked_CalculateChecksums( void )
 			pTotalItem->ResetProxy();
 		}
 		else
-			m_fileItems.push_back( pTotalItem = new CFileStateExItem( _T("TOTAL:") ) );
+			m_fileItems.push_back( pTotalItem = new CFileStateTimedItem( _T("TOTAL:") ) );
 
 		std::for_each( m_fileItems.begin(), --m_fileItems.end(), func::SumElapsed( pTotalItem ) );
 	}

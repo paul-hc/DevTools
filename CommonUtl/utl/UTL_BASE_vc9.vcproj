@@ -768,6 +768,14 @@
 					>
 				</File>
 				<File
+					RelativePath=".\FileStateItem.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\FileStateItem.h"
+					>
+				</File>
+				<File
 					RelativePath=".\ICommand.h"
 					>
 				</File>

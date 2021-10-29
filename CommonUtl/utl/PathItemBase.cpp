@@ -52,24 +52,3 @@ void CPathItemBase::Stream( CArchive& archive )
 		ResetFilePath( filePath );
 	}
 }
-
-
-// CFileStateItem implementation
-
-CFileStateItem::CFileStateItem( const fs::CFileState& fileState )
-	: CPathItemBase( fileState.m_fullPath )
-	, m_fileState( fileState )
-{
-}
-
-void CFileStateItem::Stream( CArchive& archive )
-{
-	// skip calling __super::Stream() since the file path is serialized with the m_fileState
-	if ( archive.IsStoring() )
-		archive << m_fileState;
-	else
-	{
-		archive >> m_fileState;
-		ResetFilePath( m_fileState.m_fullPath );
-	}
-}

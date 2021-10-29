@@ -78,12 +78,12 @@ CTouchFilesDialog::CTouchFilesDialog( CFileModel* pFileModel, CWnd* pParent )
 
 	m_fileListCtrl.AddRecordCompare( pred::NewComparator( pred::CompareCode() ) );		// default row item comparator
 	m_fileListCtrl.AddColumnCompare( PathName, pred::NewComparator( pred::CompareDisplayCode() ) );
-	m_fileListCtrl.AddColumnCompare( DestModifyTime, pred::NewPropertyComparator< CTouchItem >( func::AsDestModifyTime() ), false );		// order date-time descending by default
-	m_fileListCtrl.AddColumnCompare( DestCreationTime, pred::NewPropertyComparator< CTouchItem >( func::AsDestCreationTime() ), false );
-	m_fileListCtrl.AddColumnCompare( DestAccessTime, pred::NewPropertyComparator< CTouchItem >( func::AsDestAccessTime() ), false );
-	m_fileListCtrl.AddColumnCompare( SrcModifyTime, pred::NewPropertyComparator< CTouchItem >( func::AsSrcModifyTime() ), false );
-	m_fileListCtrl.AddColumnCompare( SrcCreationTime, pred::NewPropertyComparator< CTouchItem >( func::AsSrcCreationTime() ), false );
-	m_fileListCtrl.AddColumnCompare( SrcAccessTime, pred::NewPropertyComparator< CTouchItem >( func::AsSrcAccessTime() ), false );
+	m_fileListCtrl.AddColumnCompare( DestModifyTime, pred::NewPropertyComparator<CTouchItem>( func::AsDestModifyTime() ), false );		// order date-time descending by default
+	m_fileListCtrl.AddColumnCompare( DestCreationTime, pred::NewPropertyComparator<CTouchItem>( func::AsDestCreationTime() ), false );
+	m_fileListCtrl.AddColumnCompare( DestAccessTime, pred::NewPropertyComparator<CTouchItem>( func::AsDestAccessTime() ), false );
+	m_fileListCtrl.AddColumnCompare( SrcModifyTime, pred::NewPropertyComparator<CTouchItem>( func::TAsSrcModifyTime() ), false );
+	m_fileListCtrl.AddColumnCompare( SrcCreationTime, pred::NewPropertyComparator<CTouchItem>( func::TAsSrcCreationTime() ), false );
+	m_fileListCtrl.AddColumnCompare( SrcAccessTime, pred::NewPropertyComparator<CTouchItem>( func::TAsSrcAccessTime() ), false );
 
 	static const TCHAR s_mixedFormat[] = _T("'(multiple values)'");
 	m_modifiedDateCtrl.SetNullFormat( s_mixedFormat );
@@ -268,7 +268,7 @@ void CTouchFilesDialog::UpdateFieldsFromSel( int selIndex )
 		multi::SetInvalidAll( m_dateTimeStates );
 		multi::SetInvalidAll( m_attribCheckStates );
 
-		AccumulateItemStates( m_fileListCtrl.GetPtrAt< CTouchItem >( selIndex ) );
+		AccumulateItemStates( m_fileListCtrl.GetPtrAt<CTouchItem>( selIndex ) );
 	}
 	else
 	{
@@ -381,7 +381,7 @@ void CTouchFilesDialog::CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARA
 	static const ui::CTextEffect s_modSrc( ui::Regular, CReportListControl::s_deleteSrcTextColor );
 	static const ui::CTextEffect s_errorBk( ui::Regular, CLR_NONE, app::ColorErrorBk );
 
-	const CTouchItem* pTouchItem = CReportListControl::AsPtr< CTouchItem >( rowKey );
+	const CTouchItem* pTouchItem = CReportListControl::AsPtr<CTouchItem>( rowKey );
 	const ui::CTextEffect* pTextEffect = NULL;
 	bool isModified = false, isSrc = false;
 
@@ -478,7 +478,7 @@ void CTouchFilesDialog::MarkInvalidSrcItems( void )
 
 void CTouchFilesDialog::EnsureVisibleFirstError( void )
 {
-	if ( const CTouchItem* pFirstErrorItem = GetFirstErrorItem< CTouchItem >() )
+	if ( const CTouchItem* pFirstErrorItem = GetFirstErrorItem<CTouchItem>() )
 		m_fileListCtrl.EnsureVisibleObject( pFirstErrorItem );
 
 	m_fileListCtrl.Invalidate();				// trigger some highlighting
@@ -657,14 +657,14 @@ void CTouchFilesDialog::OnCopyDateCell( UINT cmdId )
 			return;
 	}
 
-	const CTouchItem* pTouchItem = m_fileListCtrl.GetPtrAt< CTouchItem >( m_fileListCtrl.GetCurSel() );
+	const CTouchItem* pTouchItem = m_fileListCtrl.GetPtrAt<CTouchItem>( m_fileListCtrl.GetCurSel() );
 	ASSERT_PTR( pTouchItem );
 	CClipboard::CopyText( time_utl::FormatTimestamp( pTouchItem->GetSrcState().GetTimeField( dateField ) ), this );
 }
 
 void CTouchFilesDialog::OnPushToAttributeFields( void )
 {
-	BYTE attributes = m_fileListCtrl.GetPtrAt< CTouchItem >( m_fileListCtrl.GetCurSel() )->GetSrcState().m_attributes;
+	BYTE attributes = m_fileListCtrl.GetPtrAt<CTouchItem>( m_fileListCtrl.GetCurSel() )->GetSrcState().m_attributes;
 
 	multi::SetInvalidAll( m_attribCheckStates );
 	for ( std::vector< multi::CAttribCheckState >::iterator itAttribState = m_attribCheckStates.begin(); itAttribState != m_attribCheckStates.end(); ++itAttribState )
