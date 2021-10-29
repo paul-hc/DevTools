@@ -39,7 +39,6 @@ protected:
 	virtual void OnOK( void );
 	virtual void OnCancel( void ) { OnOK(); }
 protected:
-	afx_msg void OnDropFiles( HDROP hDropInfo );
 	afx_msg void OnBnClicked_FindFiles( void );
 	afx_msg void OnBnClicked_CalculateChecksums( void );
 

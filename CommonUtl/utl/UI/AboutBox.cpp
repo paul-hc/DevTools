@@ -232,7 +232,7 @@ void CAboutBox::DoDataExchange( CDataExchange* pDX )
 			ui::SetDlgItemText( this, fieldIds[ i ], version.ExpandValues( ui::GetDlgItemText( this, fieldIds[ i ] ).c_str() ) );
 
 		ui::SetDlgItemText( this, IDC_ABOUT_COMMENTS_EDIT, version.ExpandValues( _T("[Comments]") ) );
-		ui::UpdateControlUI( GetDlgItem( IDC_ABOUT_EXPLORE_MODULE ) );
+		ui::UpdateControlUI( ::GetDlgItem( m_hWnd, IDC_ABOUT_EXPLORE_MODULE ) );
 	}
 
 	CLayoutDialog::DoDataExchange( pDX );
@@ -253,7 +253,7 @@ void CAboutBox::OnLvnItemChanged_ListItems( NMHDR* pNmHdr, LRESULT* pResult )
 	*pResult = 0;
 
 	if ( CReportListControl::IsSelectionChangeNotify( pNmList, LVIS_SELECTED | LVIS_FOCUSED ) )
-		ui::UpdateControlUI( GetDlgItem( IDC_ABOUT_EXPLORE_MODULE ) );
+		ui::UpdateControlUI( ::GetDlgItem( m_hWnd, IDC_ABOUT_EXPLORE_MODULE ) );
 }
 
 void CAboutBox::OnExploreModule( void )

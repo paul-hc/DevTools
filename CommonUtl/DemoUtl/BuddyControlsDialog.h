@@ -28,7 +28,7 @@ private:
 	// enum { IDD = IDD_BUDDY_CONTROLS_DIALOG };
 	enum Column { FilePath, FileSize, Attributes, CRC32, ModifyTime, ChecksumElapsed };
 
-	CItemContentHistoryCombo m_searchPathCombo;
+	CSearchPathHistoryCombo m_searchPathCombo;
 	CItemContentHistoryCombo m_folderPathCombo;
 	CPathItemListCtrl m_fileListCtrl;
 
@@ -40,7 +40,6 @@ protected:
 	virtual void OnOK( void );
 	virtual void OnCancel( void ) { OnOK(); }
 protected:
-	afx_msg void OnDropFiles( HDROP hDropInfo );
 	afx_msg void OnBnClicked_FindFiles( void );
 	afx_msg void OnBnClicked_CalculateChecksums( void );
 

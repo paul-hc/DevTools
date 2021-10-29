@@ -18,13 +18,13 @@ class CComboDropList : public CWnd		// can't inherit from CListBox
 public:
 	CComboDropList( CComboBox* pParentCombo )
 		: m_pParentCombo( pParentCombo )
-		, m_trackingContextMenu( false )
+		, m_trackingMenu( false )
 	{
 		ASSERT_PTR( m_pParentCombo->GetSafeHwnd() );
 	}
 private:
 	CComboBox* m_pParentCombo;
-	bool m_trackingContextMenu;
+	bool m_trackingMenu;
 
 	// generated stuff
 private:
@@ -43,14 +43,14 @@ void CComboDropList::OnContextMenu( CWnd* pWnd, CPoint point )
 {
 	CWnd::OnContextMenu( pWnd, point );
 
-	m_trackingContextMenu = true;
+	m_trackingMenu = true;
 	m_pParentCombo->SendMessage( WM_CONTEXTMENU, (WPARAM)pWnd->GetSafeHwnd(), MAKELPARAM( point.x, point.y ) );
-	m_trackingContextMenu = false;
+	m_trackingMenu = false;
 }
 
 void CComboDropList::OnCaptureChanged( CWnd* pWnd )
 {
-	if ( !m_trackingContextMenu )			// (!) prevent closing the dropdown list while tracking the context menu
+	if ( !m_trackingMenu )			// (!) prevent closing the dropdown list while tracking the context menu
 		__super::OnCaptureChanged( pWnd );
 }
 
@@ -190,6 +190,7 @@ BOOL CHistoryComboBox::PreTranslateMessage( MSG* pMsg )
 BEGIN_MESSAGE_MAP( CHistoryComboBox, BaseClass )
 	ON_WM_CONTEXTMENU()
 	ON_COMMAND( ID_ADD_ITEM, OnStoreEditItem )
+	ON_UPDATE_COMMAND_UI( ID_ADD_ITEM, OnUpdateSelectedListItem )
 	ON_COMMAND( ID_REMOVE_ITEM, OnDeleteListItem )
 	ON_UPDATE_COMMAND_UI( ID_REMOVE_ITEM, OnUpdateSelectedListItem )
 	ON_COMMAND( ID_REMOVE_ALL_ITEMS, OnDeleteAllListItems )

@@ -146,6 +146,7 @@ namespace fs
 
 		// base overrides
 		virtual void AddFoundFile( const TCHAR* pFilePath );
+		virtual bool AddFoundSubDir( const TCHAR* pSubDirPath ) { pSubDirPath; return true; }
 		virtual bool MustStop( void ) const { return !m_dupFilePaths.empty(); }
 	private:
 		const CFileBackup& m_backup;

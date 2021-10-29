@@ -10,12 +10,13 @@ class CFileStateItem : public CPathItemBase
 {
 public:
 	explicit CFileStateItem( const fs::CFileState& fileState );
+	explicit CFileStateItem( const CFileFind& foundFile );
 
 	const fs::CFileState& GetState( void ) const { return m_fileState; }
 	fs::CFileState& RefState( void ) { return m_fileState; }
 
 	// base overrides
-	virtual void SetFilePath( const fs::CPath& filePath );
+	virtual void SetFilePath( const fs::CPath& filePath );		// also update m_fileState
 protected:
 	void Stream( CArchive& archive );
 private:
@@ -25,6 +26,8 @@ private:
 
 namespace func
 {
+	// accessors for order predicates
+
 	struct AsCreationTime
 	{
 		const CTime& operator()( const CFileStateItem* pItem ) const { return pItem->GetState().m_creationTime; }

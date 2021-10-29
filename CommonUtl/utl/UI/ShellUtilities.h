@@ -2,7 +2,7 @@
 #define ShellUtilities_h
 #pragma once
 
-#include "Path.h"
+#include "FileSystem_fwd.h"
 
 
 namespace shell

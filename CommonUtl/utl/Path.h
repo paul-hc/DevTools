@@ -314,8 +314,8 @@ namespace fs
 
 		size_t duplicateCount = 0;
 
-		for ( std::vector< fs::CPath >::const_iterator itPath = rPaths.begin(); itPath != rPaths.end(); ++itPath )
-			if ( rUniquePathIndex.insert( *itPath ).second )		// path is unique?
+		for ( typename ContainerT::const_iterator itPath = rPaths.begin(); itPath != rPaths.end(); ++itPath )
+			if ( rUniquePathIndex.insert( func::PathOf( *itPath ) ).second )		// path is unique?
 				tempPaths.push_back( *itPath );
 			else
 				++duplicateCount;
@@ -557,6 +557,9 @@ namespace pred
 }
 
 
+namespace fs { struct CFileState; }
+
+
 namespace pred
 {
 	// path binary predicates
@@ -592,6 +595,8 @@ namespace pred
 
 			return path::CompareNaturalPtr( leftPath.GetPtr(), rightPath.GetPtr() );
 		}
+
+		pred::CompareResult operator()( const fs::CFileState& leftState, const fs::CFileState& rightState ) const;
 	};
 
 

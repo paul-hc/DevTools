@@ -1,6 +1,7 @@
 
 #include "stdafx.h"
 #include "Path.h"
+#include "FileState.h"
 #include "FileSystem.h"
 #include "Crc32.h"
 #include "ContainerUtilities.h"
@@ -1118,6 +1119,12 @@ namespace pred
 		const stdext::hash_map< fs::CPath, size_t >& m_rFilePathsToDepth;
 		pred::CompareNaturalPath m_comparePath;
 	};
+
+
+	pred::CompareResult CompareNaturalPath::operator()( const fs::CFileState& leftState, const fs::CFileState& rightState ) const
+	{
+		return operator()( leftState.m_fullPath, rightState.m_fullPath );
+	}
 }
 
 

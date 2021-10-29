@@ -10,13 +10,13 @@ namespace ui
 	void SetRadio( CCmdUI* pCmdUI, BOOL checked = BST_CHECKED );
 	bool ExpandVersionInfoTags( CCmdUI* pCmdUI );				// based on CVersionInfo
 
-	void UpdateMenuUI( CWnd* pWindow, CMenu* pPopupMenu, bool autoMenuEnable = true );
+	void UpdateMenuUI( CWnd* pWnd, CMenu* pPopupMenu, bool autoMenuEnable = true );
 
-	bool UpdateControlUI( CWnd* pCtrl, CWnd* pTargetWnd = NULL );
-	inline bool UpdateDlgItemUI( CWnd* pDlg, UINT ctrlId ) { return UpdateControlUI( pDlg->GetDlgItem( ctrlId ), pDlg ); }
+	void UpdateDlgControlsUI( HWND hDlg, CCmdTarget* pTarget = NULL, bool disableIfNoHandler = false );
+	void UpdateDlgControlsUI( HWND hDlg, const UINT ctrlIds[], size_t count, CCmdTarget* pTarget = NULL, bool disableIfNoHandler = false );
 
-	void UpdateControlsUI( CWnd* pParent, CWnd* pTargetWnd = NULL );
-	void UpdateControlsUI( CWnd* pParent, const UINT ctrlIds[], size_t count, CWnd* pTargetWnd = NULL );
+	bool UpdateControlUI( HWND hCtrl, CCmdTarget* pTarget = NULL, bool disableIfNoHandler = false );
+	inline bool UpdateDlgItemUI( CWnd* pDlg, UINT ctrlId ) { return UpdateControlUI( ::GetDlgItem( pDlg->GetSafeHwnd(), ctrlId ), pDlg ); }
 }
 
 

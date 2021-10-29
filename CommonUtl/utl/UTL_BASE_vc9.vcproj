@@ -656,6 +656,18 @@
 					>
 				</File>
 				<File
+					RelativePath=".\FileStateEnumerator.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\FileStateEnumerator.h"
+					>
+				</File>
+				<File
+					RelativePath=".\FileStateEnumerator.hxx"
+					>
+				</File>
+				<File
 					RelativePath=".\FileSystem.cpp"
 					>
 				</File>

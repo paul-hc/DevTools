@@ -28,15 +28,21 @@ namespace fs
 	interface IEnumerator
 	{
 		virtual void AddFoundFile( const TCHAR* pFilePath ) = 0;
-		virtual bool AddFoundSubDir( const TCHAR* pSubDirPath ) { pSubDirPath; return true; }
+		virtual bool AddFoundSubDir( const TCHAR* pSubDirPath ) = 0;
 
-		// advanced, provides extra info
+		// advanced overrideables
 		virtual bool IncludeNode( const CFileFind& foundNode ) { foundNode; return true; }
-		virtual void AddFile( const CFileFind& foundFile ) { AddFoundFile( foundFile.GetFilePath() ); }
+		virtual bool MustStop( void ) const { return false; }		// abort searching?
 
-		// override to find first file, then abort searching
-		virtual bool MustStop( void ) const { return false; }
+		virtual void OnAddFileInfo( const CFileFind& foundFile )	// override to access extra file state
+		{
+			AddFoundFile( foundFile.GetFilePath() );
+		}
 	};
+
+
+	template< typename PathContainerT >
+	void SortPathsDirsFirst( PathContainerT& rPaths, bool ascending = true );
 }
 
 

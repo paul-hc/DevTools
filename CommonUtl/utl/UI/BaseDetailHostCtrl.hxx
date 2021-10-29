@@ -2,7 +2,9 @@
 #define BaseDetailHostCtrl_hxx
 
 #include "CmdInfoStore.h"
+#include "CmdUpdate.h"
 #include "DialogToolBar.h"
+#include "ShellUtilities.h"
 #include "resource.h"
 
 
@@ -49,11 +51,11 @@ template< typename BaseCtrl >
 BOOL CBaseDetailHostCtrl<BaseCtrl>::OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo )
 {
 	if ( WM_NOTIFY == HIWORD( code ) )
-	{
+	{	// give parent dialog a chance to handle tooltip notification messages (since this is the owner of the toolbar)
 		static UINT s_tooltipId = 0;		// MFC: the tooltip is a popup window with ID of 0 shared by all windows in a UI thread
 
 		if ( s_tooltipId == id || (UINT)m_pMateToolbar->GetDlgCtrlID() == id )
-			if ( m_pParentWnd->OnCmdMsg( id, code, pExtra, pHandlerInfo ) )		// give parent dialog a chance to handle tooltip notification messages (since this is the owner of the toolbar)
+			if ( m_pParentWnd->OnCmdMsg( id, code, pExtra, pHandlerInfo ) )
 				return TRUE;
 	}
 
@@ -73,10 +75,6 @@ BOOL CBaseDetailHostCtrl<BaseCtrl>::OnCommand( WPARAM wParam, LPARAM lParam )
 	return BaseCtrl::OnCommand( wParam, lParam );
 }
 
-BEGIN_TEMPLATE_MESSAGE_MAP( CBaseDetailHostCtrl, BaseCtrl, BaseCtrl )
-	ON_WM_SIZE()
-END_MESSAGE_MAP()
-
 template< typename BaseCtrl >
 void CBaseDetailHostCtrl<BaseCtrl>::PreSubclassWindow( void )
 {
@@ -94,6 +92,14 @@ void CBaseDetailHostCtrl<BaseCtrl>::PreSubclassWindow( void )
 	m_ignoreResize = false;
 }
 
+
+// message handlers
+
+BEGIN_TEMPLATE_MESSAGE_MAP( CBaseDetailHostCtrl, BaseCtrl, BaseCtrl )
+	ON_WM_SIZE()
+	ON_WM_INITMENUPOPUP()
+END_MESSAGE_MAP()
+
 template< typename BaseCtrl >
 void CBaseDetailHostCtrl<BaseCtrl>::OnSize( UINT sizeType, int cx, int cy )
 {
@@ -102,6 +108,14 @@ void CBaseDetailHostCtrl<BaseCtrl>::OnSize( UINT sizeType, int cx, int cy )
 	if ( !m_ignoreResize )
 		if ( SIZE_MAXIMIZED == sizeType || SIZE_RESTORED == sizeType )
 			LayoutMates();
+}
+
+template< typename BaseCtrl >
+void CBaseDetailHostCtrl< BaseCtrl >::OnInitMenuPopup( CMenu* pPopupMenu, UINT index, BOOL isSysMenu )
+{
+	index;
+	if ( !isSysMenu )
+		ui::UpdateMenuUI( this, pPopupMenu );		// update tracking menu targeting this control
 }
 
 template< typename BaseCtrl >
@@ -145,8 +159,8 @@ void CBaseItemContentCtrl<BaseCtrl>::SetContentType( ui::ContentType type )
 					break;
 				case ui::MixedPath:
 					pMateToolbar->GetStrip()
-						.AddButton( ID_BROWSE_FILE )
-						.AddButton( ID_BROWSE_FOLDER );
+						.AddButton( ID_BROWSE_FOLDER )
+						.AddButton( ID_BROWSE_FILE );
 					break;
 			}
 }
@@ -168,6 +182,36 @@ void CBaseItemContentCtrl<BaseCtrl>::SetStringContent( bool allowEmptyItem /*= t
 
 	if ( noMateButton )
 		ResetMateToolbar();
+}
+
+template< typename BaseCtrl >
+void CBaseItemContentCtrl<BaseCtrl>::PreSubclassWindow( void )
+{
+	BaseCtrl::PreSubclassWindow();
+
+	DragAcceptFiles( m_content.IsPathContent() );
+}
+
+
+// message handlers
+
+BEGIN_TEMPLATE_MESSAGE_MAP( CBaseItemContentCtrl, BaseCtrl, BaseCtrl )
+	ON_WM_DROPFILES()
+END_MESSAGE_MAP()
+
+template< typename BaseCtrl >
+void CBaseItemContentCtrl<BaseCtrl>::OnDropFiles( HDROP hDropInfo )
+{
+	if ( m_content.IsPathContent() )
+	{
+		std::vector< fs::CPath > filePaths;
+		shell::QueryDroppedFiles( filePaths, hDropInfo );
+
+		if ( !filePaths.empty() )
+			OnDroppedFiles( filePaths );
+	}
+	else
+		__super::OnDropFiles( hDropInfo );
 }
 
 

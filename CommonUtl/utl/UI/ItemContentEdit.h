@@ -14,6 +14,9 @@ public:
 	CItemContentEdit( ui::ContentType type = ui::String, const TCHAR* pFileFilter = NULL );
 	virtual ~CItemContentEdit();
 protected:
+	// base overrides
+	virtual void OnDroppedFiles( const std::vector< fs::CPath >& filePaths );
+
 	// interface IBuddyCommandHandler (may be overridden)
 	virtual bool OnBuddyCommand( UINT cmdId );
 };
@@ -39,6 +42,9 @@ public:
 	void DDX_ItemsUiEscapeSeqs( CDataExchange* pDX, std::tstring& rFlatItems, int ctrlId = 0 );
 	void DDX_ItemsUiEscapeSeqs( CDataExchange* pDX, std::vector< std::tstring >& rItems, int ctrlId = 0 );
 protected:
+	// base overrides
+	virtual void OnDroppedFiles( const std::vector< fs::CPath >& filePaths );
+
 	// interface IBuddyCommandHandler
 	virtual bool OnBuddyCommand( UINT cmdId );
 private:

@@ -14,7 +14,7 @@ namespace fs
 	{
 		CFileState( void ) : m_fileSize( 0 ), m_attributes( s_invalidAttributes ), m_crc32( 0 ) {}
 		CFileState( const ::CFileStatus* pFileStatus );
-		CFileState( const CFileFind& foundFile );
+		explicit CFileState( const CFileFind& foundFile );
 
 		void Clear( void ) { *this = CFileState(); }
 

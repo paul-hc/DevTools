@@ -2,14 +2,13 @@
 #include "stdafx.h"
 #include "BuddyControlsDialog.h"
 #include "utl/ContainerUtilities.h"
-#include "utl/FileEnumerator.h"
+#include "utl/FileStateEnumerator.h"
 #include "utl/FileSystem.h"
 #include "utl/FlagTags.h"
 #include "utl/FileStateItem.h"
 #include "utl/StringUtilities.h"
 #include "utl/Timer.h"
 #include "utl/TimeUtils.h"
-#include "utl/UI/ShellUtilities.h"
 #include "utl/UI/UtilitiesEx.h"
 #include "utl/UI/resource.h"
 #include "resource.h"
@@ -18,12 +17,14 @@
 #define new DEBUG_NEW
 #endif
 
+#include "utl/FileStateEnumerator.hxx"
+
 
 class CFileStateTimedItem : public CFileStateItem
 {
 public:
 	CFileStateTimedItem( const CFileFind& foundFile )
-		: CFileStateItem( fs::CFileState( foundFile ) )
+		: CFileStateItem( foundFile )
 		, m_checksumElapsed( 0.0 )
 	{
 	}
@@ -84,28 +85,6 @@ namespace func
 }
 
 
-namespace impl2
-{
-	struct CEnumerator : public fs::IEnumerator
-	{
-		CEnumerator( std::vector< CFileStateTimedItem* >* pFileItems ) : m_pFileItems( pFileItems ) { ASSERT_PTR( m_pFileItems ); }
-
-		// IEnumerator interface
-		virtual void AddFile( const CFileFind& foundFile )
-		{
-			m_pFileItems->push_back( new CFileStateTimedItem( foundFile ) );
-		}
-
-		virtual void AddFoundFile( const TCHAR* pFilePath ) { pFilePath; }
-	private:
-		std::vector< CFileStateTimedItem* >* m_pFileItems;
-	public:
-		std::vector< fs::CPath > m_subDirPaths;
-		size_t m_moreFilesCount;			// incremented when it reaches the limit
-	};
-}
-
-
 namespace reg
 {
 	static const TCHAR section_dialog[] = _T("BuddyControlsDialog");
@@ -144,6 +123,7 @@ CBuddyControlsDialog::CBuddyControlsDialog( CWnd* pParent )
 	m_folderPathCombo.SetEnsurePathExist();
 	m_folderPathCombo.RefTandemLayout().m_alignment = H_AlignLeft | V_AlignCenter;
 
+	//SetFlag( m_fileListCtrl.RefListStyleEx(), LVS_EX_DOUBLEBUFFER, false );
 	m_fileListCtrl.SetSection( m_regSection + _T("\\List") );
 	m_fileListCtrl.SetUseAlternateRowColoring();
 	m_fileListCtrl.SetSubjectAdapter( ui::GetFullPathAdapter() );		// display full paths
@@ -176,14 +156,11 @@ void CBuddyControlsDialog::SearchForFiles( void )
 		case fs::ValidDirectory:
 		{
 			CWaitCursor wait;
-			impl2::CEnumerator found( &m_fileItems );
+			fs::CFileStateItemEnumerator<CFileStateTimedItem> found;
 
 			fs::EnumFiles( &found, dirPath, wildSpec.c_str(), fs::EF_Recurse );
-
-			typedef pred::CompareAdapter< pred::CompareNaturalPath, CPathItemBase::ToFilePath > CompareFileItem;
-			typedef pred::LessValue< CompareFileItem > TLess_FileItem;
-
-			std::sort( m_fileItems.begin(), m_fileItems.end(), TLess_FileItem() );			// sort by full key and path
+			found.SortItems();
+			m_fileItems.swap( found.m_fileItems );
 			break;
 		}
 		default: ASSERT( false );
@@ -252,7 +229,6 @@ void CBuddyControlsDialog::DoDataExchange( CDataExchange* pDX )
 	{
 		if ( firstInit )
 		{
-			DragAcceptFiles();
 			m_searchPathCombo.LoadHistory( reg::section_dialog, reg::entry_searchPathHistory );
 			m_folderPathCombo.LoadHistory( reg::section_dialog, reg::entry_searchPathHistory );
 		}
@@ -267,7 +243,6 @@ void CBuddyControlsDialog::DoDataExchange( CDataExchange* pDX )
 // message handlers
 
 BEGIN_MESSAGE_MAP( CBuddyControlsDialog, CLayoutDialog )
-	ON_WM_DROPFILES()
 	ON_BN_CLICKED( IDC_FIND_FILES_BUTTON, OnBnClicked_FindFiles )
 	ON_BN_CLICKED( IDC_CALC_CHECKSUMS_BUTTON, OnBnClicked_CalculateChecksums )
 END_MESSAGE_MAP()
@@ -279,18 +254,6 @@ void CBuddyControlsDialog::OnOK( void )
 	m_searchPathCombo.SaveHistory( reg::section_dialog, reg::entry_searchPathHistory );
 
 	__super::OnOK();
-}
-
-void CBuddyControlsDialog::OnDropFiles( HDROP hDropInfo )
-{
-	std::vector< fs::CPath > searchPaths;
-	shell::QueryDroppedFiles( searchPaths, hDropInfo );
-
-	if ( !searchPaths.empty() && searchPaths.front().FileExist() )
-	{
-		m_searchPath = searchPaths.front();
-		SearchForFiles();
-	}
 }
 
 void CBuddyControlsDialog::OnBnClicked_FindFiles( void )

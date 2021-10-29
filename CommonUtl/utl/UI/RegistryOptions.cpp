@@ -8,6 +8,7 @@
 #include "RuntimeException.h"
 #include "ContainerUtilities.h"
 #include "StringUtilities.h"
+#include "ui_fwd.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -126,12 +127,12 @@ reg::CBaseOption* CRegistryOptions::FindOptionByID( UINT ctrlId ) const
 
 void CRegistryOptions::UpdateControls( CWnd* pTargetWnd )
 {
-	ASSERT_PTR( pTargetWnd );
+	ASSERT_PTR( pTargetWnd->GetSafeHwnd() );
 
 	for ( std::vector< reg::CBaseOption* >::const_iterator itOption = m_options.begin(); itOption != m_options.end(); ++itOption )
 		if ( ( *itOption )->GetCtrlId() != 0 )
 			if ( CWnd* pCtrl = pTargetWnd->GetDlgItem( ( *itOption )->GetCtrlId() ) )
-				ui::UpdateControlUI( pCtrl, pTargetWnd );
+				ui::UpdateControlUI( pCtrl->GetSafeHwnd(), pTargetWnd );
 }
 
 void CRegistryOptions::OnOptionChanged( const void* pDataMember )
@@ -151,8 +152,8 @@ void CRegistryOptions::OnOptionChanged( const void* pDataMember )
 // message handlers
 
 BEGIN_MESSAGE_MAP( CRegistryOptions, CCmdTarget )
-	ON_COMMAND_EX_RANGE( 1, 0x8FFF, OnToggleOption )
-	ON_UPDATE_COMMAND_UI_RANGE( 1, 0x8FFF, OnUpdateOption )
+	ON_COMMAND_EX_RANGE( ui::MinCmdId, ui::MaxCmdId, OnToggleOption )
+	ON_UPDATE_COMMAND_UI_RANGE( ui::MinCmdId, ui::MaxCmdId, OnUpdateOption )
 END_MESSAGE_MAP()
 
 BOOL CRegistryOptions::OnToggleOption( UINT cmdId )

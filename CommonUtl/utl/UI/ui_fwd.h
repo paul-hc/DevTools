@@ -43,6 +43,8 @@ namespace ui
 	typedef int TFontEffect;
 
 
+	enum { MinCmdId = 1, MaxCmdId = 0x7FFF, AtEnd = -1 };
+
 	inline int ToCmdId( UINT uCmdId ) { return (short)(unsigned short)( uCmdId ); }
 
 

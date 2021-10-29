@@ -2,6 +2,7 @@
 #define ShellContextMenuHost_h
 #pragma once
 
+#include "ui_fwd.h"
 #include "ShellTypes.h"
 #include "CmdIdStore.h"
 
@@ -67,7 +68,7 @@ public:
 	void SetPopupMenu( HMENU hMenu, MenuOwnership ownership = InternalMenu );			// pass NULL for using internal popup menu
 	void DeletePopupMenu( void );
 
-	enum { MinCmdId = 1, MaxCmdId = 0x7FFF, AtEnd = -1 };
+	enum { AtEnd = -1 };
 
 	bool HasShellCmds( void ) { return !m_shellIdStore.IsEmpty(); }		// has it called QueryContextMenu(), are there common commands?
 	bool HasShellCmd( int cmdId ) const { return m_shellIdStore.ContainsId( cmdId ); }
@@ -83,7 +84,7 @@ public:
 	bool InvokeVerbIndex( int verbIndex );
 	bool InvokeDefaultVerb( void );
 
-	static int ToVerbIndex( int cmdId ) { return cmdId - MinCmdId; }		// fix the misalignment of the verb with its cmdId
+	static int ToVerbIndex( int cmdId ) { return cmdId - ui::MinCmdId; }		// fix the misalignment of the verb with its cmdId
 protected:
 	virtual bool IsLazyUninit( void ) const;			// for delayed IContextMenu query - kind of don't know if invalid
 	int DoTrackMenu( CMenu* pPopupMenu, const CPoint& screenPos, UINT trackFlags );

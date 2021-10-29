@@ -62,10 +62,12 @@ public:
 	void Section_GroupByCrc32( size_t itemCount );
 private:
 	// file enumerator callbacks
+	virtual void OnAddFileInfo( const CFileFind& foundFile ) throws_( CUserAbortedException );
 	virtual void AddFoundFile( const TCHAR* pFilePath ) throws_( CUserAbortedException );
 	virtual bool AddFoundSubDir( const TCHAR* pSubDirPath ) throws_( CUserAbortedException );
 private:
 	CProgressDialog m_dlg;
+	fs::CPath m_lastFilePath;
 };
 
 

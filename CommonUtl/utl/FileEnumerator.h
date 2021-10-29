@@ -50,6 +50,7 @@ namespace fs
 		size_t UniquifyAll( void );					// post-search
 
 		// IEnumerator interface
+		virtual void OnAddFileInfo( const CFileFind& foundFile );
 		virtual void AddFoundFile( const TCHAR* pFilePath );
 		virtual bool AddFoundSubDir( const TCHAR* pSubDirPath );
 		virtual bool MustStop( void ) const;

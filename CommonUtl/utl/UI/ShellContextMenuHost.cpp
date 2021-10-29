@@ -160,7 +160,7 @@ bool CShellContextMenuHost::MakePopupMenu( CMenu& rPopupMenu, int atIndex /*= At
 
 	ui::CCmdIdStore oldIdsStore( rPopupMenu );			// commands belonging to the original popup menu, if initialized by the client
 
-	if ( !HR_OK( m_pContextMenu->QueryContextMenu( rPopupMenu, atIndex, MinCmdId, MaxCmdId, queryFlags ) ) )
+	if ( !HR_OK( m_pContextMenu->QueryContextMenu( rPopupMenu, atIndex, ui::MinCmdId, ui::MaxCmdId, queryFlags ) ) )
 		return false;			// no common verbs for the given files
 
 	m_shellIdStore.RegisterCommands( rPopupMenu );
@@ -262,7 +262,7 @@ bool CShellContextMenuHost::InvokeDefaultVerb( void )
 	int defaultCmdId = ui::ToCmdId( pPopupMenu->GetDefaultItem( GMDI_GOINTOPOPUPS ) );
 
 	return
-		defaultCmdId >= MinCmdId &&
+		defaultCmdId >= ui::MinCmdId &&
 		InvokeVerbIndex( ToVerbIndex( defaultCmdId ) );
 }
 
@@ -270,7 +270,7 @@ bool CShellContextMenuHost::InvokeDefaultVerb( void )
 // command handlers
 
 BEGIN_MESSAGE_MAP( CShellContextMenuHost, CCmdTarget )
-	ON_COMMAND_RANGE( MinCmdId, MaxCmdId, OnShellCommand )
+	ON_COMMAND_RANGE( ui::MinCmdId, ui::MaxCmdId, OnShellCommand )
 END_MESSAGE_MAP()
 
 BOOL CShellContextMenuHost::OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo )

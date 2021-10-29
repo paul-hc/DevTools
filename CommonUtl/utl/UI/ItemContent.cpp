@@ -37,22 +37,16 @@ namespace ui
 				return false;
 
 		if ( HasFlag( m_itemsFlags, EnsurePathExist ) )
-			switch ( m_type )
-			{
-				case ui::DirPath:
-				case ui::FilePath:
-				case ui::MixedPath:
-					if ( !IsValidPathItem( item ) )
-						return false;
-					break;
-			}
+			if ( IsPathContent() )
+				if ( !IsValidPathItem( item ) )
+					return false;
 
 		return true;
 	}
 
 	bool CItemContent::IsValidPathItem( const std::tstring& pathItem ) const
 	{
-		ASSERT( ui::DirPath == m_type || ui::FilePath == m_type || ui::MixedPath == m_type );
+		REQUIRE( IsPathContent() );
 
 		std::tstring path = str::ExpandEnvironmentStrings( pathItem.c_str() );
 
@@ -123,26 +117,22 @@ namespace ui
 		if ( !picked )
 			return str::GetEmpty();
 
-		switch ( m_type )
+		if ( IsPathContent() )
 		{
-			case ui::DirPath:
-			case ui::FilePath:
-			case ui::MixedPath:
-			{
-				std::vector< std::tstring > variables;
-				str::QueryEnvironmentVariables( variables, pItem );
+			std::vector< std::tstring > variables;
+			str::QueryEnvironmentVariables( variables, pItem );
 
-				std::vector< std::tstring > values;
-				str::ExpandEnvironmentVariables( values, variables );
-				ENSURE( variables.size() == values.size() );
+			std::vector< std::tstring > values;
+			str::ExpandEnvironmentVariables( values, variables );
+			ENSURE( variables.size() == values.size() );
 
-				for ( unsigned int i = 0; i != variables.size(); ++i )
-					str::Replace( newItem.Ref(), values[ i ].c_str(), variables[ i ].c_str() );
-				break;
-			}
+			for ( unsigned int i = 0; i != variables.size(); ++i )
+				str::Replace( newItem.Ref(), values[ i ].c_str(), variables[ i ].c_str() );
 		}
+
 		if ( HasFlag( m_itemsFlags, Trim ) )
 			str::Trim( newItem.Ref() );
+
 		return newItem.Get();
 	}
 

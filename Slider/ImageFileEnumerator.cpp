@@ -180,7 +180,7 @@ bool CImageFileEnumerator::CanRecurse( void ) const
 	return true;
 }
 
-void CImageFileEnumerator::AddFile( const CFileFind& foundFile )
+void CImageFileEnumerator::OnAddFileInfo( const CFileFind& foundFile )
 {
 	fs::CPath filePath = foundFile.GetFilePath().GetString();
 

@@ -39,6 +39,7 @@ namespace ui
 		void SplitItems( std::vector< std::tstring >& rItems, const std::tstring& source, const TCHAR sep[] ) const;
 		void FilterItems( std::vector< std::tstring >& rItems ) const;
 
+		bool IsPathContent( void ) const { return ui::DirPath == m_type || ui::FilePath == m_type || ui::MixedPath == m_type; }
 		bool IsValidPathItem( const std::tstring& pathItem ) const;
 	private:
 		bool BrowseMixedPath( fs::CPath& rNewItem, CWnd* pParent, UINT cmdId ) const;

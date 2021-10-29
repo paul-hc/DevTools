@@ -152,9 +152,26 @@ void CDuplicatesProgressService::Section_GroupByCrc32( size_t itemCount )
 	GetService()->SetProgressState( PBST_PAUSED );			// yellow bar
 }
 
+void CDuplicatesProgressService::OnAddFileInfo( const CFileFind& foundFile ) throws_( CUserAbortedException )
+{
+	fs::CPath filePath( foundFile.GetFilePath().GetString() );
+
+	if ( m_lastFilePath == filePath )		// already reported in the chain of calls?
+		return;
+
+	m_lastFilePath = filePath;
+	GetService()->AdvanceItem( filePath.Get() );
+}
+
 void CDuplicatesProgressService::AddFoundFile( const TCHAR* pFilePath ) throws_( CUserAbortedException )
 {
-	GetService()->AdvanceItem( pFilePath );
+	fs::CPath filePath( pFilePath );
+
+	if ( m_lastFilePath == filePath )		// already reported in the chain of calls?
+		return;
+
+	m_lastFilePath = filePath;
+	GetService()->AdvanceItem( filePath.Get() );
 }
 
 bool CDuplicatesProgressService::AddFoundSubDir( const TCHAR* pSubDirPath ) throws_( CUserAbortedException )

@@ -27,6 +27,19 @@ CItemContentEdit::~CItemContentEdit()
 {
 }
 
+void CItemContentEdit::OnDroppedFiles( const std::vector< fs::CPath >& filePaths )
+{
+	REQUIRE( !filePaths.empty() );
+
+	if ( IsWritable() )
+	{
+		ui::SetWindowText( *this, filePaths.front().Get() );
+
+		SetFocus();
+		ui::SendCommandToParent( m_hWnd, CN_DETAILSCHANGED );
+	}
+}
+
 bool CItemContentEdit::OnBuddyCommand( UINT cmdId )
 {
 	if ( ui::String == m_content.m_type )					// not very useful
@@ -110,6 +123,19 @@ void CItemListEdit::DDX_ItemsUiEscapeSeqs( CDataExchange* pDX, std::vector< std:
 		SetText( ui::FormatEscapeSeq( str::Join( rItems, m_pSeparator ) ) );
 	else
 		m_content.SplitItems( rItems, ui::ParseEscapeSeqs( GetText() ).c_str(), m_pSeparator );
+}
+
+void CItemListEdit::OnDroppedFiles( const std::vector< fs::CPath >& filePaths )
+{
+	REQUIRE( !filePaths.empty() );
+
+	if ( IsWritable() )
+	{
+		ui::SetWindowText( m_hWnd, str::Join( filePaths, m_pSeparator ) );
+
+		SetFocus();
+		ui::SendCommandToParent( m_hWnd, CN_DETAILSCHANGED );
+	}
 }
 
 bool CItemListEdit::OnBuddyCommand( UINT cmdId )

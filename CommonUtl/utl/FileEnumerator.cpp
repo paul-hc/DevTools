@@ -65,7 +65,7 @@ namespace fs
 			{
 				if ( pEnumerator->IncludeNode( finder ) )		// pass found file filter?
 					if ( path::MatchWildcard( foundPath.c_str(), pWildSpec ) )
-						pEnumerator->AddFile( finder );
+						pEnumerator->OnAddFileInfo( finder );
 			}
 		}
 
@@ -173,6 +173,14 @@ namespace fs
 			m_pIgnorePathMatches.reset();
 	}
 
+	void CEnumerator::OnAddFileInfo( const CFileFind& foundFile )
+	{
+		__super::OnAddFileInfo( foundFile );
+
+		if ( m_pChainEnum != NULL )
+			m_pChainEnum->OnAddFileInfo( foundFile );
+	}
+
 	void CEnumerator::AddFoundFile( const TCHAR* pFilePath )
 	{
 		fs::CPath filePath( pFilePath );
@@ -191,7 +199,7 @@ namespace fs
 			m_filePaths.push_back( filePath );
 
 		if ( m_pChainEnum != NULL )
-			m_pChainEnum->AddFoundFile( pFilePath );
+			m_pChainEnum->AddFoundFile( filePath.GetPtr() );
 	}
 
 	bool CEnumerator::AddFoundSubDir( const TCHAR* pSubDirPath )
@@ -226,7 +234,9 @@ namespace fs
 	{
 		stdext::hash_set< fs::CPath > uniquePaths;
 
-		return fs::UniquifyPaths( m_subDirPaths, uniquePaths ) + fs::UniquifyPaths( m_filePaths, uniquePaths );
+		return
+			fs::UniquifyPaths( m_filePaths, uniquePaths ) +
+			fs::UniquifyPaths( m_subDirPaths, uniquePaths );
 	}
 
 } //namespace fs

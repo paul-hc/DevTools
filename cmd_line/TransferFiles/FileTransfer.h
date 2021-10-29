@@ -34,7 +34,7 @@ private:
 	// fs::IEnumerator interface (files only)
 	virtual void AddFoundFile( const TCHAR* pFilePath ) { pFilePath; ASSERT( false ); }
 	virtual bool AddFoundSubDir( const TCHAR* pSubDirPath );
-	virtual void AddFile( const CFileFind& foundFile );
+	virtual void OnAddFileInfo( const CFileFind& foundFile );
 
 	bool AddTransferItem( CTransferItem* pTransferItem );
 

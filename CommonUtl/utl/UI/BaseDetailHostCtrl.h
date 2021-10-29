@@ -46,6 +46,7 @@ protected:
 	virtual bool OnMateCommand( UINT cmdId );
 protected:
 	afx_msg void OnSize( UINT sizeType, int cx, int cy );
+	afx_msg void OnInitMenuPopup( CMenu* pPopupMenu, UINT index, BOOL isSysMenu );
 
 	DECLARE_MESSAGE_MAP()
 };
@@ -79,8 +80,18 @@ public:
 	void SetEnsurePathExist( void ) { SetFlag( m_content.m_itemsFlags, ui::CItemContent::EnsurePathExist ); }
 
 	void SetStringContent( bool allowEmptyItem = true, bool noMateButton = true );		// by default allow a single empty item
+public:
+	virtual void PreSubclassWindow( void );
+protected:
+	virtual void OnDroppedFiles( const std::vector< fs::CPath >& filePaths ) = 0;
 protected:
 	ui::CItemContent m_content;
+
+	// generated stuff
+protected:
+	afx_msg void OnDropFiles( HDROP hDropInfo );
+
+	DECLARE_MESSAGE_MAP()
 };
 
 

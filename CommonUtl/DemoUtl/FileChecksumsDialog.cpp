@@ -4,6 +4,7 @@
 #include "utl/ContainerUtilities.h"
 #include "utl/IoBin.h"
 #include "utl/FileEnumerator.h"
+#include "utl/FileStateEnumerator.h"
 #include "utl/FileSystem.h"
 #include "utl/PathItemBase.h"
 #include "utl/StringUtilities.h"
@@ -20,6 +21,8 @@
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
+
+#include "utl/FileStateEnumerator.hxx"
 
 
 namespace hlp
@@ -56,12 +59,6 @@ public:
 	CFileChecksumItem( const CFileFind& foundFile )
 		: CPathItemBase( fs::CPath( foundFile.GetFilePath().GetString() ) )
 		, m_fileSize( foundFile.GetLength() )
-	{
-	}
-
-	CFileChecksumItem( const fs::CPath& filePath )
-		: CPathItemBase( filePath )
-		, m_fileSize( fs::GetFileSize( filePath.GetPtr() ) )
 	{
 	}
 
@@ -149,28 +146,6 @@ namespace func
 }
 
 
-namespace impl
-{
-	struct CEnumerator : public fs::IEnumerator
-	{
-		CEnumerator( std::vector< CFileChecksumItem* >* pFileItems ) : m_pFileItems( pFileItems ) { ASSERT_PTR( m_pFileItems ); }
-
-		// IEnumerator interface
-		virtual void AddFile( const CFileFind& foundFile )
-		{
-			m_pFileItems->push_back( new CFileChecksumItem( foundFile ) );
-		}
-
-		virtual void AddFoundFile( const TCHAR* pFilePath ) { pFilePath; }
-	private:
-		std::vector< CFileChecksumItem* >* m_pFileItems;
-	public:
-		std::vector< fs::CPath > m_subDirPaths;
-		size_t m_moreFilesCount;			// incremented when it reaches the limit
-	};
-}
-
-
 namespace reg
 {
 	static const TCHAR section_dialog[] = _T("FileChecksumsDialog");
@@ -204,7 +179,7 @@ CFileChecksumsDialog::CFileChecksumsDialog( CWnd* pParent )
 	RegisterCtrlLayout( layout::styles, COUNT_OF( layout::styles ) );
 
 	m_searchPathCombo.SetEnsurePathExist();
-//	SetFlag( m_fileListCtrl.RefListStyleEx(), LVS_EX_DOUBLEBUFFER, false );
+	//SetFlag( m_fileListCtrl.RefListStyleEx(), LVS_EX_DOUBLEBUFFER, false );
 	m_fileListCtrl.SetSection( m_regSection + _T("\\List") );
 	m_fileListCtrl.SetUseAlternateRowColoring();
 	m_fileListCtrl.AddRecordCompare( pred::NewComparator( pred::CompareCode() ) );		// default row item comparator
@@ -225,19 +200,20 @@ void CFileChecksumsDialog::SearchForFiles( void )
 	switch ( fs::SplitPatternPath( &dirPath, &wildSpec, m_searchPath ) )
 	{
 		case fs::ValidFile:
-			m_fileItems.push_back( new CFileChecksumItem( m_searchPath ) );
+		{
+			CFileFind foundFile;
+			if ( m_searchPath.LocateFile( foundFile ) )
+				m_fileItems.push_back( new CFileChecksumItem( foundFile ) );
 			break;
+		}
 		case fs::ValidDirectory:
 		{
 			CWaitCursor wait;
-			impl::CEnumerator found( &m_fileItems );
+			fs::CFileStateItemEnumerator<CFileChecksumItem> found;
 
 			fs::EnumFiles( &found, dirPath, wildSpec.c_str(), fs::EF_Recurse );
-
-			typedef pred::CompareAdapter< pred::CompareNaturalPath, CPathItemBase::ToFilePath > CompareFileItem;
-			typedef pred::LessValue< CompareFileItem > TLess_FileItem;
-
-			std::sort( m_fileItems.begin(), m_fileItems.end(), TLess_FileItem() );			// sort by full key and path
+			found.SortItems();
+			m_fileItems.swap( found.m_fileItems );
 			break;
 		}
 		default: ASSERT( false );
@@ -311,7 +287,6 @@ void CFileChecksumsDialog::DoDataExchange( CDataExchange* pDX )
 	{
 		if ( firstInit )
 		{
-			DragAcceptFiles();
 			m_searchPathCombo.LoadHistory( reg::section_dialog, reg::entry_searchPathHistory );
 		}
 
@@ -325,7 +300,6 @@ void CFileChecksumsDialog::DoDataExchange( CDataExchange* pDX )
 // message handlers
 
 BEGIN_MESSAGE_MAP( CFileChecksumsDialog, CLayoutDialog )
-	ON_WM_DROPFILES()
 	ON_BN_CLICKED( IDC_FIND_FILES_BUTTON, OnBnClicked_FindFiles )
 	ON_BN_CLICKED( IDC_CALC_CHECKSUMS_BUTTON, OnBnClicked_CalculateChecksums )
 END_MESSAGE_MAP()
@@ -337,18 +311,6 @@ void CFileChecksumsDialog::OnOK( void )
 	m_searchPathCombo.SaveHistory( reg::section_dialog, reg::entry_searchPathHistory );
 
 	__super::OnOK();
-}
-
-void CFileChecksumsDialog::OnDropFiles( HDROP hDropInfo )
-{
-	std::vector< fs::CPath > searchPaths;
-	shell::QueryDroppedFiles( searchPaths, hDropInfo );
-
-	if ( !searchPaths.empty() && searchPaths.front().FileExist() )
-	{
-		m_searchPath = searchPaths.front();
-		SearchForFiles();
-	}
 }
 
 void CFileChecksumsDialog::OnBnClicked_FindFiles( void )

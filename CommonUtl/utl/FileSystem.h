@@ -197,7 +197,7 @@ namespace fs
 	}
 
 	template< typename PathContainerT >
-	void SortPathsDirsFirst( PathContainerT& rPaths, bool ascending = true )
+	void SortPathsDirsFirst( PathContainerT& rPaths, bool ascending /*= true*/ )
 	{
 		typename PathContainerT::iterator itFirstFile = GroupDirectoriesFirst( rPaths );
 

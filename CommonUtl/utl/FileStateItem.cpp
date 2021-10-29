@@ -16,6 +16,12 @@ CFileStateItem::CFileStateItem( const fs::CFileState& fileState )
 {
 }
 
+CFileStateItem::CFileStateItem( const CFileFind& foundFile )
+	: CPathItemBase( fs::CPath( foundFile.GetFilePath().GetString() ) )
+	, m_fileState( foundFile )
+{
+}
+
 void CFileStateItem::SetFilePath( const fs::CPath& filePath )
 {
 	__super::SetFilePath( filePath );
