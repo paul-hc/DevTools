@@ -1278,19 +1278,19 @@
 				Name="Controls"
 				>
 				<File
-					RelativePath=".\BaseDetailHostCtrl.h"
-					>
-				</File>
-				<File
-					RelativePath=".\BaseDetailHostCtrl.hxx"
-					>
-				</File>
-				<File
 					RelativePath=".\BaseFrameHostCtrl.h"
 					>
 				</File>
 				<File
 					RelativePath=".\BaseFrameHostCtrl.hxx"
+					>
+				</File>
+				<File
+					RelativePath=".\BaseItemContentCtrl.h"
+					>
+				</File>
+				<File
+					RelativePath=".\BaseItemContentCtrl.hxx"
 					>
 				</File>
 				<File

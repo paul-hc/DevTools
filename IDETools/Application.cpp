@@ -9,6 +9,7 @@
 #include "resource.h"
 #include "utl/AppTools.h"
 #include "utl/FileSystem.h"
+#include "utl/UI/ShellDialogs_fwd.h"
 #include "utl/UI/VersionInfo.h"
 #include "utl/UI/resource.h"
 
@@ -40,7 +41,8 @@
 CApplication theApp;
 
 CApplication::CApplication( void )
-	: CBaseApp< CWinApp >()
+	: CBaseApp<CWinApp>()
+	, m_isVisualStudio6( false )
 {
 }
 
@@ -54,8 +56,10 @@ BOOL CApplication::InitInstance( void )
 	// modify profile name from "IDETools" to "IDETools_v7"
 	StoreProfileSuffix( str::Format( _T("_v%d"), HIWORD( CVersionInfo().GetFileInfo().dwProductVersionMS ) ) );
 
-	if ( !CBaseApp< CWinApp >::InitInstance() )
+	if ( !CBaseApp<CWinApp>::InitInstance() )
 		return FALSE;
+
+	StoreVisualStudioVersion();
 
 	CToolStrip::RegisterStripButtons( IDR_IMAGE_STRIP );		// register command images
 	CAboutBox::s_appIconId = IDR_IDE_TOOLS_APP;
@@ -78,7 +82,7 @@ int CApplication::ExitInstance( void )
 	m_pModuleSession->SaveToRegistry();
 	m_pModuleSession.reset();
 
-	return CBaseApp< CWinApp >::ExitInstance();
+	return CBaseApp<CWinApp>::ExitInstance();
 }
 
 BOOL CApplication::OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo )
@@ -86,13 +90,26 @@ BOOL CApplication::OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO
 	if ( m_pModuleSession.get() != NULL && m_pModuleSession->OnCmdMsg( id, code, pExtra, pHandlerInfo ) )
 		return TRUE;
 
-	return CBaseApp< CWinApp >::OnCmdMsg( id, code, pExtra, pHandlerInfo );
+	return CBaseApp<CWinApp>::OnCmdMsg( id, code, pExtra, pHandlerInfo );
+}
+
+void CApplication::StoreVisualStudioVersion( void )
+{
+	static const fs::CPath s_filenameVS6( _T("MSDEV.EXE") );
+	fs::CPath exePath = fs::GetModuleFilePath( NULL );
+
+	m_isVisualStudio6 = s_filenameVS6 == exePath.GetFilename();
+
+	if ( m_isVisualStudio6 )
+	{
+		shell::s_useVistaStyle = false;		// switch to legacy file dialogs to prevent problems with using Vista-style file dialogs in VS6
+	}
 }
 
 
 // command handlers
 
-BEGIN_MESSAGE_MAP( CApplication, CBaseApp< CWinApp > )
+BEGIN_MESSAGE_MAP( CApplication, CBaseApp<CWinApp> )
 END_MESSAGE_MAP()
 
 

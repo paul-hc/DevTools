@@ -1,5 +1,5 @@
-#ifndef BaseDetailHostCtrl_h
-#define BaseDetailHostCtrl_h
+#ifndef BaseItemContentCtrl_h
+#define BaseItemContentCtrl_h
 #pragma once
 
 #include "Control_fwd.h"
@@ -15,6 +15,7 @@ abstract class CBaseDetailHostCtrl
 	: public BaseCtrl
 	, protected ui::IBuddyCommandHandler
 {
+	typedef BaseCtrl TBaseClass;
 protected:
 	CBaseDetailHostCtrl( void );
 public:
@@ -64,6 +65,7 @@ protected:
 template< typename BaseCtrl >
 abstract class CBaseItemContentCtrl : public CBaseDetailHostCtrl<BaseCtrl>
 {
+	typedef CBaseDetailHostCtrl<BaseCtrl> TBaseClass;
 protected:
 	CBaseItemContentCtrl( ui::ContentType type = ui::String, const TCHAR* pFileFilter = NULL ) : m_content( type, pFileFilter ) {}
 
@@ -95,4 +97,4 @@ protected:
 };
 
 
-#endif // BaseDetailHostCtrl_h
+#endif // BaseItemContentCtrl_h

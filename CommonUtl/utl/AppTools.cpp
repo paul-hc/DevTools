@@ -36,7 +36,9 @@ namespace app
 	{
 		pExc;
 		ASSERT_PTR( pExc );
-		TRACE( _T("* MFC exception: %s\n"), mfc::CRuntimeException::MessageOf( *pExc ).c_str() );
+
+		if ( !CAppTools::Instance()->IsConsoleApp() )		// avoid console applications, since usually they don't include MFC resource strings required to format the exception message
+			TRACE( _T("* MFC exception: %s\n"), mfc::CRuntimeException::MessageOf( *pExc ).c_str() );
 	}
 }
 

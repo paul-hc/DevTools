@@ -51,26 +51,9 @@ ui::IProgressService* CProgressService::GetService( void )
 	return m_pDlg->GetService();
 }
 
-void CProgressService::OnAddFileInfo( const CFileFind& foundFile ) throws_( CUserAbortedException )
-{
-	fs::CPath filePath( foundFile.GetFilePath().GetString() );
-
-	if ( m_lastFilePath == filePath )		// already reported in the chain of calls?
-		return;
-
-	m_lastFilePath = filePath;
-	GetService()->AdvanceItem( filePath.Get() );
-}
-
 void CProgressService::AddFoundFile( const TCHAR* pFilePath ) throws_( CUserAbortedException )
 {
-	fs::CPath filePath( pFilePath );
-
-	if ( m_lastFilePath == filePath )		// already reported in the chain of calls?
-		return;
-
-	m_lastFilePath = filePath;
-	GetService()->AdvanceItem( filePath.Get() );
+	GetService()->AdvanceItem( pFilePath );
 }
 
 bool CProgressService::AddFoundSubDir( const TCHAR* pSubDirPath ) throws_( CUserAbortedException )

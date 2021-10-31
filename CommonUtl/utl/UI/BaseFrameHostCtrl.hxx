@@ -72,7 +72,7 @@ END_MESSAGE_MAP()
 template< typename BaseCtrl >
 void CBaseFrameHostCtrl<BaseCtrl>::OnPaint( void )
 {
-	BaseCtrl::OnPaint();
+	__super::OnPaint();
 
 	if ( m_frameColor != CLR_NONE || m_showFocus )
 	{
@@ -96,7 +96,7 @@ void CBaseFrameHostCtrl<BaseCtrl>::OnPaint( void )
 template< typename BaseCtrl >
 void CBaseFrameHostCtrl<BaseCtrl>::OnSetFocus( CWnd* pOldWnd )
 {
-	BaseCtrl::OnSetFocus( pOldWnd );
+	__super::OnSetFocus( pOldWnd );
 
 	if ( m_showFocus )
 		Invalidate();
@@ -105,7 +105,7 @@ void CBaseFrameHostCtrl<BaseCtrl>::OnSetFocus( CWnd* pOldWnd )
 template< typename BaseCtrl >
 void CBaseFrameHostCtrl<BaseCtrl>::OnKillFocus( CWnd* pNewWnd )
 {
-	BaseCtrl::OnKillFocus( pNewWnd );
+	__super::OnKillFocus( pNewWnd );
 
 	if ( m_showFocus )
 		Invalidate();

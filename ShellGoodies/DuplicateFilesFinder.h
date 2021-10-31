@@ -2,7 +2,6 @@
 #define DuplicateFilesFinder_h
 #pragma once
 
-#include "utl/FileSystem_fwd.h"
 #include "utl/Timer.h"
 #include "DuplicateFileItem.h"
 
@@ -44,11 +43,11 @@ private:
 };
 
 
+#include "utl/FileSystem_fwd.h"
 #include "utl/UI/ProgressDialog.h"
 
 
-class CDuplicatesProgressService : private fs::IEnumerator
-								 , private utl::noncopyable
+class CDuplicatesProgressService : protected fs::IEnumeratorImpl
 {
 public:
 	CDuplicatesProgressService( CWnd* pParent );
@@ -62,12 +61,10 @@ public:
 	void Section_GroupByCrc32( size_t itemCount );
 private:
 	// file enumerator callbacks
-	virtual void OnAddFileInfo( const CFileFind& foundFile ) throws_( CUserAbortedException );
 	virtual void AddFoundFile( const TCHAR* pFilePath ) throws_( CUserAbortedException );
 	virtual bool AddFoundSubDir( const TCHAR* pSubDirPath ) throws_( CUserAbortedException );
 private:
 	CProgressDialog m_dlg;
-	fs::CPath m_lastFilePath;
 };
 
 

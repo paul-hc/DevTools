@@ -86,15 +86,15 @@ void CFileTransfer::SearchSourceFiles( const fs::CPath& dirPath )
 		fs::EnumFiles( this, dirPath, m_pOptions->m_searchSpecs.c_str(), m_pOptions->m_recurseSubDirectories ? fs::EF_Recurse : fs::TEnumFlags() );
 }
 
+void CFileTransfer::OnAddFileInfo( const CFileFind& foundFile )
+{
+	AddTransferItem( new CTransferItem( foundFile, m_pOptions->m_sourceDirPath, m_pOptions->m_targetDirPath ) );
+}
+
 bool CFileTransfer::AddFoundSubDir( const TCHAR* pSubDirPath )
 {
 	pSubDirPath;
 	return true;
-}
-
-void CFileTransfer::OnAddFileInfo( const CFileFind& foundFile )
-{
-	AddTransferItem( new CTransferItem( foundFile, m_pOptions->m_sourceDirPath, m_pOptions->m_targetDirPath ) );
 }
 
 bool CFileTransfer::AddTransferItem( CTransferItem* pTransferItem )

@@ -76,4 +76,23 @@ namespace pred
 }
 
 
+namespace pred
+{
+	abstract class BasePredicate				// abstract base for any predicate, i.e. that evaluates to bool result
+	{
+	public:
+		// used in assertions in algorithms requiring a boolean predicate
+		static bool IsBoolPred( void ) { return true; }
+	};
+
+
+	abstract class BaseComparator				// abstract base for any comparator function, i.e. that evaluates to CompareResult
+	{
+	public:
+		// used in assertions in algorithms requiring a comparator functor
+		static bool IsComparator( void ) { return true; }
+	};
+}
+
+
 #endif // Compare_fwd_h

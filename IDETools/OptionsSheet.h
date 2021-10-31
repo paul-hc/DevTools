@@ -46,7 +46,7 @@ private:
 	CItemContentEdit m_templateFileEdit;
 
 	// generated stuff
-	protected:
+protected:
 	virtual void DoDataExchange( CDataExchange* pDX );
 protected:
 	DECLARE_MESSAGE_MAP()
@@ -75,7 +75,7 @@ private:
 	static const TCHAR m_breakSep[];
 
 	// generated stuff
-	protected:
+protected:
 	virtual void DoDataExchange( CDataExchange* pDX );
 protected:
 	afx_msg void CBnSelChange_BraceRules( void );
@@ -100,7 +100,7 @@ public:
 	CSpinButtonCtrl m_linesBetweenFunctionImplsSpin;
 
 	// generated stuff
-	protected:
+protected:
 	virtual void DoDataExchange( CDataExchange* pDX );
 protected:
 	DECLARE_MESSAGE_MAP()
@@ -114,12 +114,9 @@ public:
 	virtual ~CBscPathPage();
 
 	int MoveItemTo( int srcIndex, int destIndex, bool isDropped = false );
-
-	static bool CheckSearchFilter( fs::CPath& rPath );
 private:
-	void LoadPathListBox( int selIndex = LB_ERR );
+	void SetupPathListBox( int selIndex = LB_ERR );
 	void UpdateToolBarCmdUI( void );
-	int FindPathItemPos( std::tstring& rFolderPath ) const;
 
 
 	class CDragListBoxEx : public CDragListBox
@@ -141,18 +138,22 @@ private:
 	};
 
 
-	struct CDirPathItem
+	struct CSearchPathItem
 	{
-		std::tstring GetAsString( void );
-		void SetFromString( const std::tstring& itemText );
+		bool operator==( const fs::CPath& rightSearchInfo ) const { return m_searchPath == rightSearchInfo; }		// for std::find() with a search path
+
+		fs::CPath& AugmentWildSpec( void );
+
+		std::tstring Format( void );
+		void Parse( const std::tstring& itemText );
 	public:
-		fs::CPath m_searchInfo;
+		fs::CPath m_searchPath;
 		std::tstring m_displayName;
 	};
 public:
 	fs::CPath m_browseInfoPath;
 private:
-	std::vector< CDirPathItem > m_pathItems;
+	std::vector< CSearchPathItem > m_pathItems;
 	ui::CItemContent m_folderContent;
 	bool m_isUserUpdate;
 
@@ -164,7 +165,7 @@ public:
 	CEdit m_displayTagEdit;
 
 	// generated stuff
-	protected:
+protected:
 	virtual void DoDataExchange( CDataExchange* pDX );
 protected:
 	afx_msg void LBnSelChange_BrowseFilesPath( void );
@@ -194,7 +195,7 @@ public:
 	CDirectoriesPage( void );
 	virtual ~CDirectoriesPage();
 
-	// base overrides
+// base overrides
 	virtual void ApplyPageChanges( void ) throws_( CRuntimeException );
 private:
 	std::tstring MakeNewUniqueName( void ) const;
@@ -210,7 +211,7 @@ private:
 	CDialogToolBar m_toolbar;
 
 	// generated stuff
-	protected:
+protected:
 	virtual void DoDataExchange( CDataExchange* pDX );
 protected:
 	afx_msg void CBnSelChange_DirSets( void );

@@ -5,6 +5,7 @@
 #include "ModuleSession.h"
 #include "Application.h"
 #include "resource.h"
+#include "utl/ContainerUtilities.h"
 #include "utl/FileSystem.h"
 #include "utl/UI/Clipboard.h"
 #include "utl/UI/UtilitiesEx.h"
@@ -273,14 +274,14 @@ CBscPathPage::~CBscPathPage()
 {
 }
 
-void CBscPathPage::LoadPathListBox( int selIndex /*= LB_ERR*/ )
+void CBscPathPage::SetupPathListBox( int selIndex /*= LB_ERR*/ )
 {
 	{
 		CScopedLockRedraw freeze( &m_pathsListBox );
 		m_pathsListBox.ResetContent();
 
 		for ( unsigned int i = 0; i != m_pathItems.size(); ++i )
-			m_pathsListBox.AddString( m_pathItems[ i ].m_searchInfo.GetParentPath().GetPtr() );
+			m_pathsListBox.AddString( m_pathItems[ i ].m_searchPath.GetPtr() );
 	}
 
 	if ( selIndex != LB_ERR )
@@ -293,7 +294,7 @@ int CBscPathPage::MoveItemTo( int srcIndex, int destIndex, bool isDropped /*= fa
 {
 	TRACE( _T(" # Dropped(): srcIndex=%d, destIndex=%d\n"), srcIndex, destIndex );
 
-	CDirPathItem movedItem = m_pathItems[ srcIndex ];
+	CSearchPathItem movedItem = m_pathItems[ srcIndex ];
 
 	m_pathItems.erase( m_pathItems.begin() + srcIndex );
 
@@ -306,28 +307,9 @@ int CBscPathPage::MoveItemTo( int srcIndex, int destIndex, bool isDropped /*= fa
 	return destIndex;
 }
 
-bool CBscPathPage::CheckSearchFilter( fs::CPath& rPath )
-{
-	if ( !str::IsEmpty( rPath.GetFilenamePtr() ) )
-		return true;
-
-	rPath.SetFilename( _T("*.bsc") );
-	return false;
-}
-
 void CBscPathPage::UpdateToolBarCmdUI( void )
 {
 	m_toolBar.SendMessage( WM_IDLEUPDATECMDUI, (WPARAM)TRUE );
-}
-
-int CBscPathPage::FindPathItemPos( std::tstring& rFolderPath ) const
-{
-	path::SetBackslash( rFolderPath, false );
-	for ( unsigned int pos = 0; pos != m_pathItems.size(); ++pos )
-		if ( path::Equivalent( m_pathItems[ pos ].m_searchInfo.GetParentPath().Get(), rFolderPath ) )
-			return pos;
-
-	return -1;
 }
 
 void CBscPathPage::DoDataExchange( CDataExchange* pDX )
@@ -345,16 +327,16 @@ void CBscPathPage::DoDataExchange( CDataExchange* pDX )
 
 		m_pathItems.resize( items.size() );
 		for ( unsigned int i = 0; i != items.size(); ++i )
-			m_pathItems[ i ].SetFromString( items[ i ] );
+			m_pathItems[ i ].Parse( items[ i ] );
 
-		LoadPathListBox( 0 );
+		SetupPathListBox( 0 );
 	}
 	else
 	{	// save controls
 		std::vector< fs::CPath > uniqueDirs;
 		for ( unsigned int i = 0; i != m_pathItems.size(); ++i )
-			if ( utl::AddUnique( uniqueDirs, m_pathItems[ i ].m_searchInfo.GetParentPath() ) )
-				items.push_back( m_pathItems[ i ].GetAsString() );
+			if ( utl::AddUnique( uniqueDirs, m_pathItems[ i ].m_searchPath ) )
+				items.push_back( m_pathItems[ i ].Format() );
 
 		m_folderContent.FilterItems( items );
 		m_browseInfoPath.Set( str::Join( items, EDIT_SEP ) );
@@ -386,7 +368,7 @@ void CBscPathPage::LBnSelChange_BrowseFilesPath( void )
 	int selIndex = m_pathsListBox.GetCurSel();
 	if ( selIndex != LB_ERR )
 	{
-		searchFilter = m_pathItems[ selIndex ].m_searchInfo.GetFilename();
+		searchFilter = m_pathItems[ selIndex ].m_searchPath.GetFilename();
 		m_displayName = m_pathItems[ selIndex ].m_displayName;
 	}
 
@@ -415,7 +397,7 @@ void CBscPathPage::EnChange_SearchFilter( void )
 	{
 		int selIndex = m_pathsListBox.GetCurSel();
 		if ( selIndex != LB_ERR )
-			m_pathItems[ selIndex ].m_searchInfo.SetFilename( ui::GetWindowText( m_searchFilterEdit ) );
+			m_pathItems[ selIndex ].m_searchPath.SetFilename( ui::GetWindowText( m_searchFilterEdit ) );
 	}
 }
 
@@ -431,31 +413,33 @@ void CBscPathPage::EnChange_DisplayTag( void )
 
 void CBscPathPage::CmAddBscPath( void )
 {
-	CDirPathItem newItem;
+	CSearchPathItem newItem;
 	int selIndex = m_pathsListBox.GetCurSel();
 
 	if ( selIndex != LB_ERR )
-		newItem.m_searchInfo = m_pathItems[ selIndex ].m_searchInfo;
+		newItem.m_searchPath = m_pathItems[ selIndex ].m_searchPath;
 
-	std::tstring folderPath = m_folderContent.EditItem( newItem.m_searchInfo.GetParentPath().GetPtr(), this );
-	if ( !folderPath.empty() )
+	fs::CPath searchPath = m_folderContent.EditItem( newItem.m_searchPath.GetPtr(), this );
+	if ( !searchPath.IsEmpty() )
 	{
+		searchPath.SetBackslash( false );
+
 		std::tstring error;
-		int pos = FindPathItemPos( folderPath );
-		if ( pos != -1 )
-			error = str::Format( _T("Path is not unique:\r\n%s"), folderPath.c_str() );
+		size_t pos = utl::FindPos( m_pathItems, searchPath );
+		if ( pos != utl::npos )
+			error = str::Format( _T("Path is not unique:\r\n%s"), searchPath.GetPtr() );
 		else
 		{
-			pos = (int)m_pathItems.size();
+			pos = m_pathItems.size();
 
-			newItem.m_searchInfo.SetDirPath( folderPath );
-			CheckSearchFilter( newItem.m_searchInfo );
+			newItem.m_searchPath = searchPath;
+			newItem.AugmentWildSpec();
 
 			m_pathItems.push_back( newItem );
-			m_pathsListBox.AddString( m_pathItems[ pos ].m_searchInfo.GetParentPath().GetPtr() );
+			pos = m_pathsListBox.AddString( m_pathItems[ pos ].m_searchPath.GetPtr() );
 		}
 
-		m_pathsListBox.SetCurSel( pos );
+		m_pathsListBox.SetCurSel( static_cast<int>( pos ) );
 		LBnSelChange_BrowseFilesPath();
 
 		if ( !error.empty() )
@@ -490,14 +474,16 @@ void CBscPathPage::CmEditBscPath( void )
 	int selIndex = m_pathsListBox.GetCurSel();
 	ASSERT( selIndex != LB_ERR );
 
-	std::tstring folderPath = m_pathItems[ selIndex ].m_searchInfo.GetParentPath( false ).Get();
+	CSearchPathItem* pSearchItem = &m_pathItems[ selIndex ];
+	fs::CPath searchPath = m_folderContent.EditItem( pSearchItem->m_searchPath.GetPtr(), this );
 
-	folderPath = m_folderContent.EditItem( folderPath.c_str(), this );
-	if ( !folderPath.empty() )
+	if ( !searchPath.IsEmpty() )
 	{
-		m_pathItems[ selIndex ].m_searchInfo.SetDirPath( folderPath.c_str() );
+		pSearchItem->m_searchPath = searchPath;
+		pSearchItem->AugmentWildSpec();
+
 		m_pathsListBox.DeleteString( selIndex );
-		m_pathsListBox.InsertString( selIndex, m_pathItems[ selIndex ].m_searchInfo.GetParentPath().GetPtr() );
+		m_pathsListBox.InsertString( selIndex, pSearchItem->m_searchPath.GetPtr() );
 		m_pathsListBox.SetCurSel( selIndex );
 		LBnSelChange_BrowseFilesPath();
 	}
@@ -513,7 +499,7 @@ void CBscPathPage::CmMoveUpBscPath( void )
 	int srcIndex = m_pathsListBox.GetCurSel(), destIndex = srcIndex - 1;
 
 	destIndex = MoveItemTo( srcIndex, destIndex );
-	LoadPathListBox( destIndex );
+	SetupPathListBox( destIndex );
 }
 
 void CBscPathPage::UUI_MoveUpBscPath( CCmdUI* pCmdUI )
@@ -527,7 +513,7 @@ void CBscPathPage::CmMoveDownBscPath( void )
 	int srcIndex = m_pathsListBox.GetCurSel(), destIndex = srcIndex + 1;
 
 	destIndex = MoveItemTo( srcIndex, destIndex );
-	LoadPathListBox( destIndex );
+	SetupPathListBox( destIndex );
 }
 
 void CBscPathPage::UUI_MoveDownBscPath( CCmdUI* pCmdUI )
@@ -537,29 +523,37 @@ void CBscPathPage::UUI_MoveDownBscPath( CCmdUI* pCmdUI )
 }
 
 
-// CBscPathPage::CDirPathItem implementation
+// CBscPathPage::CSearchPathItem implementation
 
-std::tstring CBscPathPage::CDirPathItem::GetAsString( void )
+fs::CPath& CBscPathPage::CSearchPathItem::AugmentWildSpec( void )
 {
-	CBscPathPage::CheckSearchFilter( m_searchInfo );
+	if ( str::IsEmpty( m_searchPath.GetFilenamePtr() ) || fs::IsValidDirectory( m_searchPath.GetPtr() ) )
+		m_searchPath.SetFilename( _T("*.bsc") );
 
-	std::tstring itemText = m_searchInfo.Get();
+	return m_searchPath;
+}
+
+std::tstring CBscPathPage::CSearchPathItem::Format( void )
+{
+	AugmentWildSpec();
+
+	std::tstring itemText = m_searchPath.Get();
 	if ( !m_displayName.empty() )
 		itemText += PROF_SEP + m_displayName;
 	return itemText;
 }
 
-void CBscPathPage::CDirPathItem::SetFromString( const std::tstring& itemText )
+void CBscPathPage::CSearchPathItem::Parse( const std::tstring& itemText )
 {
 	size_t sepPos = itemText.find( PROF_SEP );
 	if ( sepPos != std::tstring::npos )
 	{
-		m_searchInfo.Set( itemText.substr( 0, sepPos ) );
+		m_searchPath.Set( itemText.substr( 0, sepPos ) );
 		m_displayName = itemText.substr( sepPos + 1 );
 	}
 	else
 	{
-		m_searchInfo.Set( itemText );
+		m_searchPath.Set( itemText );
 		m_displayName.clear();
 	}
 }

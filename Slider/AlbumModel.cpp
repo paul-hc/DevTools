@@ -111,8 +111,8 @@ void CAlbumModel::SearchForFiles( CWnd* pParentWnd ) throws_( CException* )
 	{	// scope for "Searching..." progress
 		CImageFileEnumerator imageEnum( progress.GetProgressEnumerator() );
 
-		imageEnum.SetMaxFiles( m_searchModel.GetMaxFileCount() );
-		imageEnum.SetFileSizeFilter( m_searchModel.GetFileSizeRange() );
+		imageEnum.RefOptions().m_maxFiles = m_searchModel.GetMaxFileCount();
+		imageEnum.RefOptions().SetFileSizeRange( m_searchModel.GetFileSizeRange() );
 
 		try
 		{

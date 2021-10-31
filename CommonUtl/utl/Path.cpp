@@ -312,7 +312,7 @@ namespace path
 		if ( ::PathMatchSpec( pFilename, pWildSpec ) )
 			return true;
 
-		if ( str::Equals< str::Case >( _T("*"), pWildSpec ) )
+		if ( str::Equals<str::Case>( _T("*"), pWildSpec ) )
 			return !str::IsEmpty( pFilename );
 
 		// take care for special cases not covered by PathMatchSpecEx, such as "*." when must match only without extension
@@ -949,7 +949,7 @@ namespace fs
 		return depth;
 	}
 
-	CPath CPath::GetParentPath( bool trailSlash /*= false*/ ) const
+	TDirPath CPath::GetParentPath( bool trailSlash /*= false*/ ) const
 	{
 		ASSERT( !IsEmpty() );
 		return path::GetParentPath( GetPtr(), trailSlash ? path::AddSlash : path::RemoveSlash );
@@ -1066,14 +1066,6 @@ namespace fs
 	}
 
 
-	fs::CPath StripWildcards( const fs::CPath& patternPath )
-	{
-		if ( path::ContainsWildcards( patternPath.GetFilenamePtr() ) )
-			return patternPath.GetParentPath();
-
-		return patternPath;
-	}
-
 	fs::PatternResult SplitPatternPath( fs::CPath* pPath, std::tstring* pWildSpec, const fs::CPath& patternPath )
 	{
 		REQUIRE( pPath != NULL && pWildSpec != NULL );
@@ -1095,6 +1087,18 @@ namespace fs
 			return fs::ValidDirectory;
 
 		return fs::InvalidPattern;
+	}
+}
+
+
+namespace path
+{
+	fs::CPath StripWildcards( const fs::CPath& patternPath )
+	{
+		if ( path::ContainsWildcards( patternPath.GetFilenamePtr() ) )
+			return patternPath.GetParentPath();
+
+		return patternPath;
 	}
 }
 

@@ -1,5 +1,5 @@
-#ifndef BaseDetailHostCtrl_hxx
-#define BaseDetailHostCtrl_hxx
+#ifndef BaseItemContentCtrl_h_hxx
+#define BaseItemContentCtrl_h_hxx
 
 #include "CmdInfoStore.h"
 #include "CmdUpdate.h"
@@ -59,7 +59,7 @@ BOOL CBaseDetailHostCtrl<BaseCtrl>::OnCmdMsg( UINT id, int code, void* pExtra, A
 				return TRUE;
 	}
 
-	return BaseCtrl::OnCmdMsg( id, code, pExtra, pHandlerInfo );
+	return __super::OnCmdMsg( id, code, pExtra, pHandlerInfo );
 }
 
 template< typename BaseCtrl >
@@ -72,13 +72,13 @@ BOOL CBaseDetailHostCtrl<BaseCtrl>::OnCommand( WPARAM wParam, LPARAM lParam )
 	if ( CN_COMMAND == notifCode && OnMateCommand( cmdId ) )
 		return TRUE;	// handled
 
-	return BaseCtrl::OnCommand( wParam, lParam );
+	return __super::OnCommand( wParam, lParam );
 }
 
 template< typename BaseCtrl >
 void CBaseDetailHostCtrl<BaseCtrl>::PreSubclassWindow( void )
 {
-	BaseCtrl::PreSubclassWindow();
+	__super::PreSubclassWindow();
 	m_pParentWnd = GetParent();
 
 	m_ignoreResize = true;
@@ -95,7 +95,7 @@ void CBaseDetailHostCtrl<BaseCtrl>::PreSubclassWindow( void )
 
 // message handlers
 
-BEGIN_TEMPLATE_MESSAGE_MAP( CBaseDetailHostCtrl, BaseCtrl, BaseCtrl )
+BEGIN_TEMPLATE_MESSAGE_MAP( CBaseDetailHostCtrl, BaseCtrl, TBaseClass )
 	ON_WM_SIZE()
 	ON_WM_INITMENUPOPUP()
 END_MESSAGE_MAP()
@@ -103,7 +103,7 @@ END_MESSAGE_MAP()
 template< typename BaseCtrl >
 void CBaseDetailHostCtrl<BaseCtrl>::OnSize( UINT sizeType, int cx, int cy )
 {
-	BaseCtrl::OnSize( sizeType, cx, cy );
+	__super::OnSize( sizeType, cx, cy );
 
 	if ( !m_ignoreResize )
 		if ( SIZE_MAXIMIZED == sizeType || SIZE_RESTORED == sizeType )
@@ -111,7 +111,7 @@ void CBaseDetailHostCtrl<BaseCtrl>::OnSize( UINT sizeType, int cx, int cy )
 }
 
 template< typename BaseCtrl >
-void CBaseDetailHostCtrl< BaseCtrl >::OnInitMenuPopup( CMenu* pPopupMenu, UINT index, BOOL isSysMenu )
+void CBaseDetailHostCtrl<BaseCtrl>::OnInitMenuPopup( CMenu* pPopupMenu, UINT index, BOOL isSysMenu )
 {
 	index;
 	if ( !isSysMenu )
@@ -151,11 +151,11 @@ void CBaseItemContentCtrl<BaseCtrl>::SetContentType( ui::ContentType type )
 				case ui::String:
 					pMateToolbar->GetStrip().AddButton( ID_EDIT_DETAILS );
 					break;
-				case ui::DirPath:
-					pMateToolbar->GetStrip().AddButton( ID_BROWSE_FOLDER );
-					break;
 				case ui::FilePath:
 					pMateToolbar->GetStrip().AddButton( ID_BROWSE_FILE );
+					break;
+				case ui::DirPath:
+					pMateToolbar->GetStrip().AddButton( ID_BROWSE_FOLDER );
 					break;
 				case ui::MixedPath:
 					pMateToolbar->GetStrip()
@@ -187,7 +187,7 @@ void CBaseItemContentCtrl<BaseCtrl>::SetStringContent( bool allowEmptyItem /*= t
 template< typename BaseCtrl >
 void CBaseItemContentCtrl<BaseCtrl>::PreSubclassWindow( void )
 {
-	BaseCtrl::PreSubclassWindow();
+	__super::PreSubclassWindow();
 
 	DragAcceptFiles( m_content.IsPathContent() );
 }
@@ -195,7 +195,7 @@ void CBaseItemContentCtrl<BaseCtrl>::PreSubclassWindow( void )
 
 // message handlers
 
-BEGIN_TEMPLATE_MESSAGE_MAP( CBaseItemContentCtrl, BaseCtrl, BaseCtrl )
+BEGIN_TEMPLATE_MESSAGE_MAP( CBaseItemContentCtrl, BaseCtrl, TBaseClass )
 	ON_WM_DROPFILES()
 END_MESSAGE_MAP()
 
@@ -215,4 +215,4 @@ void CBaseItemContentCtrl<BaseCtrl>::OnDropFiles( HDROP hDropInfo )
 }
 
 
-#endif // BaseDetailHostCtrl_hxx
+#endif // BaseItemContentCtrl_h_hxx

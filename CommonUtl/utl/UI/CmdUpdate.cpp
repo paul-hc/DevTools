@@ -138,8 +138,9 @@ namespace ui
 	}
 
 
-	inline CCmdTarget* ResolveCmdTarget( CCmdTarget*& rpTarget, HWND hDlg )
+	CCmdTarget* ResolveDlgTarget( CCmdTarget*& rpTarget, HWND hDlg )
 	{
+		REQUIRE( ::IsWindow( hDlg ) );
 		if ( NULL == rpTarget )
 			rpTarget = CWnd::FromHandlePermanent( hDlg );
 
@@ -147,10 +148,20 @@ namespace ui
 		return rpTarget;
 	}
 
+	CCmdTarget* ResolveCtrlTarget( CCmdTarget*& rpTarget, HWND hCtrl )
+	{
+		REQUIRE( ::IsWindow( hCtrl ) );
+		if ( NULL == rpTarget )
+			rpTarget = CWnd::FromHandlePermanent( ::GetParent( hCtrl ) );
+
+		ASSERT_PTR( rpTarget );
+		return rpTarget;
+	}
+
+
 	void UpdateDlgControlsUI( HWND hDlg, CCmdTarget* pTarget /*= NULL*/, bool disableIfNoHandler /*= false*/ )
 	{
-		REQUIRE( ::IsWindow( hDlg ) );
-		ui::ResolveCmdTarget( pTarget, hDlg );
+		ui::ResolveDlgTarget( pTarget, hDlg );
 
 		for ( HWND hCtrl = ::GetTopWindow( hDlg ); hCtrl != NULL; hCtrl = ::GetNextWindow( hCtrl, GW_HWNDNEXT ) )
 			UpdateControlUI( hCtrl, pTarget, disableIfNoHandler );
@@ -158,8 +169,7 @@ namespace ui
 
 	void UpdateDlgControlsUI( HWND hDlg, const UINT ctrlIds[], size_t count, CCmdTarget* pTarget /*= NULL*/, bool disableIfNoHandler /*= false*/ )
 	{
-		REQUIRE( ::IsWindow( hDlg ) );
-		ui::ResolveCmdTarget( pTarget, hDlg );
+		ui::ResolveDlgTarget( pTarget, hDlg );
 
 		for ( size_t i = 0; i != count; ++i )
 			if ( HWND hCtrl = ::GetDlgItem( hDlg, ctrlIds[ i ] ) )
@@ -168,6 +178,8 @@ namespace ui
 
 	bool UpdateControlUI( HWND hCtrl, CCmdTarget* pTarget /*= NULL*/, bool disableIfNoHandler /*= false*/ )
 	{	// inspired from CWnd::UpdateDialogControls() MFC implementation
+		ui::ResolveCtrlTarget( pTarget, hCtrl );
+
 		CCmdUI ctrlState;
 		CWnd tempWnd;		// temporary window just for CmdUI update
 

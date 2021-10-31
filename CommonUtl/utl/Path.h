@@ -211,6 +211,13 @@ namespace fs
 	enum ExtensionMatch { MatchExt, MatchDiffCaseExt, MismatchDotsExt, MismatchExt };
 
 
+	class CPath;
+
+	typedef CPath TFilePath;		// alias for file paths
+	typedef CPath TDirPath;			// alias for directory paths
+	typedef CPath TPatternPath;		// alias for file path or directory paths with wildcards
+
+
 	class CPath
 	{
 	public:
@@ -235,7 +242,7 @@ namespace fs
 		size_t GetDepth( void ) const;		// count of path elements up to the root
 
 		bool HasParentPath( void ) const { return GetFilenamePtr() != GetPtr(); }		// has a directory path?
-		CPath GetParentPath( bool trailSlash = false ) const;						// always a directory path
+		TDirPath GetParentPath( bool trailSlash = false ) const;						// always a directory path
 		CPath& SetBackslash( bool trailSlash = true );
 
 		std::tstring GetFilename( void ) const { return GetFilenamePtr(); }
@@ -291,12 +298,7 @@ namespace fs
 	fs::CPath GetShortFilePath( const fs::CPath& filePath );
 	fs::CPath GetLongFilePath( const fs::CPath& filePath );
 
-	inline fs::CPath StripDirPrefix( const fs::CPath& filePath, const fs::CPath& dirPath ) { return path::StripCommonPrefix( filePath.GetPtr(), dirPath.GetPtr() ); }
-
-
 	// pattern path utils (potentially with wildcards):
-
-	fs::CPath StripWildcards( const fs::CPath& patternPath );
 
 	enum PatternResult { ValidFile, ValidDirectory, InvalidPattern };
 
@@ -304,8 +306,13 @@ namespace fs
 }
 
 
-namespace fs
+namespace path
 {
+	fs::CPath StripWildcards( const fs::TPatternPath& patternPath );
+
+	inline fs::CPath StripDirPrefix( const fs::CPath& filePath, const fs::TDirPath& dirPath ) { return path::StripCommonPrefix( filePath.GetPtr(), dirPath.GetPtr() ); }
+
+
 	template< typename ContainerT, typename SetT >
 	size_t UniquifyPaths( ContainerT& rPaths, SetT& rUniquePathIndex )
 	{
@@ -348,7 +355,7 @@ namespace fs
 		return rDestPaths.size() - oldCount;		// added count
 	}
 
-} // namespace fs
+} // namespace path
 
 
 namespace fs
@@ -564,7 +571,7 @@ namespace pred
 {
 	// path binary predicates
 
-	struct CompareEquivPath			// equivalent
+	struct CompareEquivPath : public BaseComparator			// equivalent
 	{
 		pred::CompareResult operator()( const std::tstring& leftPath, const std::tstring& rightPath ) const
 		{
@@ -573,7 +580,7 @@ namespace pred
 	};
 
 
-	struct CompareNaturalPath		// equivalent | natural-intuitive
+	struct CompareNaturalPath : public BaseComparator		// equivalent | natural-intuitive
 	{
 		pred::CompareResult operator()( const TCHAR* pLeftPath, const TCHAR* pRightPath ) const
 		{
@@ -603,6 +610,7 @@ namespace pred
 	typedef CompareAdapter< CompareNaturalPath, func::ToNameExt > _CompareNameExt;		// filename | fullpath
 	typedef JoinCompare< _CompareNameExt, CompareNaturalPath > TCompareNameExt;
 
+	typedef LessValue< CompareEquivPath > TLess_EquivPath;
 	typedef LessValue< CompareNaturalPath > TLess_NaturalPath;
 }
 
@@ -679,7 +687,7 @@ namespace path
 
 
 	template< typename ContainerT >
-	inline size_t StripDirPrefix( ContainerT& rPaths, const TCHAR* pDirPrefix )
+	inline size_t StripDirPrefixes( ContainerT& rPaths, const TCHAR* pDirPrefix )
 	{
 		return std::for_each( rPaths.begin(), rPaths.end(), func::StripPathCommonPrefix( pDirPrefix ) ).m_count;		// count of stripped prefixes
 	}
@@ -688,12 +696,12 @@ namespace path
 	inline size_t StripCommonParentPath( ContainerT& rPaths )
 	{
 		fs::CPath commonDirPath = ExtractCommonParentPath( rPaths );
-		return !commonDirPath.IsEmpty() ? StripDirPrefix( rPaths, commonDirPath.GetPtr() ) : 0;
+		return !commonDirPath.IsEmpty() ? StripDirPrefixes( rPaths, commonDirPath.GetPtr() ) : 0;
 	}
 
 
 	template< typename ContainerT >
-	inline void StripRootPrefix( ContainerT& rPaths )		// cut the drive letter or UNC server/share
+	inline void StripRootPrefixes( ContainerT& rPaths )		// cut the drive letter or UNC server/share
 	{
 		std::for_each( rPaths.begin(), rPaths.end(), func::StripRootPrefix() );
 	}
@@ -703,11 +711,11 @@ namespace path
 	{
 		std::for_each( rPaths.begin(), rPaths.end(), func::StripToFilename() );
 	}
-
 }
 
 
 #include <iosfwd>
+
 
 inline std::ostream& operator<<( std::ostream& os, const fs::CPath& path )
 {

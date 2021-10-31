@@ -66,8 +66,8 @@ public:
 
 namespace pred
 {
-	typedef pred::CompareAdapter< pred::CompareNaturalPath, CPathItemBase::ToFilePath > ComparePathItem;
-	typedef pred::LessValue< ComparePathItem > TLess_PathItem;
+	typedef pred::CompareAdapter<pred::CompareNaturalPath, CPathItemBase::ToFilePath> ComparePathItem;
+	typedef pred::LessValue<ComparePathItem> TLess_PathItem;
 
 
 	struct CompareItemPath

@@ -163,7 +163,7 @@ namespace reg
 
 	class CEnumOption : public COption< int >
 	{
-		typedef COption< int > TBaseClass;
+		typedef COption<int> TBaseClass;
 	public:
 		template< typename EnumType >
 		CEnumOption( EnumType* pValue, const TCHAR* pEntry ) : COption< int >( (int*)pValue, pEntry ), m_pTags( NULL ), m_radioIds( 0 ) {}

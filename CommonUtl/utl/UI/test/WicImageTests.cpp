@@ -49,7 +49,7 @@ void CWicImageTests::TestImageCache( ut::CTestDevice* pTestDev )
 	if ( ut::GetImageSourceDirPath().IsEmpty() )
 		return;
 
-	fs::CEnumerator imageEnum;
+	fs::CPathEnumerator imageEnum;
 	fs::EnumFiles( &imageEnum, ut::GetImageSourceDirPath(), _T("*.*") );
 
 	fs::SortPaths( imageEnum.m_filePaths );

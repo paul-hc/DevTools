@@ -18,7 +18,7 @@ class CTextEditor;
 class CHistoryComboBox : public CBaseFrameHostCtrl<CComboBox>
 					   , public ui::IContentValidator
 {
-	typedef CBaseFrameHostCtrl<CComboBox> BaseClass;
+	typedef CBaseFrameHostCtrl<CComboBox> TBaseClass;
 public:
 	enum NotifCode { HCN_VALIDATEITEMS = CBN_SELENDCANCEL + 10 };		// note: notifications are suppressed during parent's UpdateData()
 	enum InternalCmds { Cmd_ResetDropSelIndex = 350 };

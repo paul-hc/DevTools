@@ -115,9 +115,9 @@ namespace cvt
 		{
 			fs::CPath commonDirPath = path::ExtractCommonParentPath( rDestStreamPaths );
 			if ( !commonDirPath.IsEmpty() )
-				path::StripDirPrefix( rDestStreamPaths, commonDirPath.GetPtr() );
+				path::StripDirPrefixes( rDestStreamPaths, commonDirPath.GetPtr() );
 			else
-				path::StripRootPrefix( rDestStreamPaths );		// ignore drive letter
+				path::StripRootPrefixes( rDestStreamPaths );		// ignore drive letter
 
 			// convert any deep embedded storage paths to directory paths (so that '>' appears only once in the final embedded path)
 			utl::for_each( rDestStreamPaths, func::NormalizeComplexPath() );

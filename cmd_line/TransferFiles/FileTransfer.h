@@ -12,7 +12,7 @@ struct CXferOptions;
 
 
 class CFileTransfer
-	: private fs::IEnumerator
+	: private fs::IEnumeratorImpl
 {
 public:
 	CFileTransfer( const CXferOptions* pOptions );
@@ -32,9 +32,9 @@ private:
 	static std::tstring FormatProtectedFileAttr( DWORD fileAttr );
 private:
 	// fs::IEnumerator interface (files only)
+	virtual void OnAddFileInfo( const CFileFind& foundFile );
 	virtual void AddFoundFile( const TCHAR* pFilePath ) { pFilePath; ASSERT( false ); }
 	virtual bool AddFoundSubDir( const TCHAR* pSubDirPath );
-	virtual void OnAddFileInfo( const CFileFind& foundFile );
 
 	bool AddTransferItem( CTransferItem* pTransferItem );
 

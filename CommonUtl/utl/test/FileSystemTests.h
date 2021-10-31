@@ -19,6 +19,8 @@ public:
 private:
 	void TestFileSystem( void );
 	void TestFileEnum( void );
+	void TestFileEnumFilter( void );
+	void TestFileEnumHidden( void );
 	void TestNumericFilename( void );
 	void TestTempFilePool( void );
 	void TestFileAndDirectoryState( void );

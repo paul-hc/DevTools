@@ -792,6 +792,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\ICounter.h"
+					>
+				</File>
+				<File
 					RelativePath=".\ISubject.h"
 					>
 				</File>

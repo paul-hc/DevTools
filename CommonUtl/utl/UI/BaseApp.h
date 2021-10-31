@@ -38,8 +38,9 @@ public:
 	const std::tstring& GetAppNameSuffix( void ) const { return m_appNameSuffix; }
 
 	// IAppTools interface
-	virtual utl::CResourcePool& GetSharedResources( void );
+	virtual bool IsConsoleApp( void ) const;
 	virtual CLogger& GetLogger( void );
+	virtual utl::CResourcePool& GetSharedResources( void );
 	virtual bool BeepSignal( app::MsgType msgType = app::Info );
 	virtual bool ReportError( const std::tstring& message, app::MsgType msgType = app::Error );
 	virtual int ReportException( const std::exception& exc );

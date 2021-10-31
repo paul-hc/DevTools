@@ -242,7 +242,7 @@ void CAlgorithmsTests::TestInsert( void )
 		std::vector< fs::CPath > paths, dups;
 		str::Split( paths, _T("a,b,c,B,A,A,B"), s_sep );
 
-		utl::Uniquify< pred::CompareNaturalPath >( paths, &dups );
+		utl::Uniquify<pred::TLess_NaturalPath>( paths, &dups );
 		ASSERT_EQUAL( "a,b,c", str::Join( paths, "," ) );
 		ASSERT_EQUAL( "B,A,A,B", str::Join( dups, "," ) );
 	}
@@ -251,7 +251,7 @@ void CAlgorithmsTests::TestInsert( void )
 		std::vector< fs::CPath > paths, dups;
 		str::Split( paths, _T("ole.h,ole2.h,commdlg.h,OLE2.H,OLE2.h,winsvc.h,imm.h,Ole2.h"), s_sep );
 
-		utl::Uniquify< pred::CompareNaturalPath >( paths, &dups );
+		utl::Uniquify<pred::TLess_NaturalPath>( paths, &dups );
 		ASSERT_EQUAL( "ole.h,ole2.h,commdlg.h,winsvc.h,imm.h", str::Join( paths, "," ) );
 		ASSERT_EQUAL( "OLE2.H,OLE2.h,Ole2.h", str::Join( dups, "," ) );
 	}

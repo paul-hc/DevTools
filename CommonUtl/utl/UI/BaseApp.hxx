@@ -20,7 +20,7 @@
 // CBaseApp template code
 
 template< typename BaseClass >
-CBaseApp< BaseClass >::CBaseApp( const TCHAR* pAppName /*= NULL*/ )
+CBaseApp<BaseClass>::CBaseApp( const TCHAR* pAppName /*= NULL*/ )
 	: BaseClass( pAppName )
 	, CAppTools()
 	, m_appRegistryKeyName( _T("Paul Cocoveanu") )
@@ -32,14 +32,14 @@ CBaseApp< BaseClass >::CBaseApp( const TCHAR* pAppName /*= NULL*/ )
 }
 
 template< typename BaseClass >
-CBaseApp< BaseClass >::~CBaseApp()
+CBaseApp<BaseClass>::~CBaseApp()
 {
 	ASSERT_NULL( m_pLogger.get() );			// should've been released on ExitInstance
 	ASSERT_NULL( m_pImageStore.get() );
 }
 
 template< typename BaseClass >
-BOOL CBaseApp< BaseClass >::InitInstance( void )
+BOOL CBaseApp<BaseClass>::InitInstance( void )
 {
 	app::TraceOsVersion();
 	m_modulePath = fs::GetModuleFilePath( m_hInstance );
@@ -75,14 +75,14 @@ BOOL CBaseApp< BaseClass >::InitInstance( void )
 }
 
 template< typename BaseClass >
-int CBaseApp< BaseClass >::ExitInstance( void )
+int CBaseApp<BaseClass>::ExitInstance( void )
 {
 	m_pSharedResources.reset();					// release all shared resource
 	return BaseClass::ExitInstance();
 }
 
 template< typename BaseClass >
-void CBaseApp< BaseClass >::OnInitAppResources( void )
+void CBaseApp<BaseClass>::OnInitAppResources( void )
 {
 	ASSERT_NULL( m_pSharedResources.get() );		// init once
 
@@ -110,7 +110,7 @@ void CBaseApp< BaseClass >::OnInitAppResources( void )
 }
 
 template< typename BaseClass >
-bool CBaseApp< BaseClass >::LazyInitAppResources( void )
+bool CBaseApp<BaseClass>::LazyInitAppResources( void )
 {
 	if ( m_lazyInitAppResources )
 	{
@@ -128,43 +128,49 @@ bool CBaseApp< BaseClass >::LazyInitAppResources( void )
 }
 
 template< typename BaseClass >
-inline utl::CResourcePool& CBaseApp< BaseClass >::GetSharedResources( void )
+inline bool CBaseApp<BaseClass>::IsConsoleApp( void ) const
 {
-	return *safe_ptr( m_pSharedResources.get() );
+	return NULL == m_pMainWnd;
 }
 
 template< typename BaseClass >
-inline CLogger& CBaseApp< BaseClass >::GetLogger( void )
+inline CLogger& CBaseApp<BaseClass>::GetLogger( void )
 {
 	return *safe_ptr( m_pLogger.get() );
 }
 
 template< typename BaseClass >
-bool CBaseApp< BaseClass >::BeepSignal( app::MsgType msgType /*= app::Info*/ )
+inline utl::CResourcePool& CBaseApp<BaseClass>::GetSharedResources( void )
+{
+	return *safe_ptr( m_pSharedResources.get() );
+}
+
+template< typename BaseClass >
+bool CBaseApp<BaseClass>::BeepSignal( app::MsgType msgType /*= app::Info*/ )
 {
 	return ui::BeepSignal( app::ToMsgBoxFlags( msgType ) );
 }
 
 template< typename BaseClass >
-bool CBaseApp< BaseClass >::ReportError( const std::tstring& message, app::MsgType msgType /*= app::Error*/ )
+bool CBaseApp<BaseClass>::ReportError( const std::tstring& message, app::MsgType msgType /*= app::Error*/ )
 {
 	return ui::ReportError( message, app::ToMsgBoxFlags( msgType ) );
 }
 
 template< typename BaseClass >
-int CBaseApp< BaseClass >::ReportException( const std::exception& exc )
+int CBaseApp<BaseClass>::ReportException( const std::exception& exc )
 {
 	return ui::ReportException( exc );
 }
 
 template< typename BaseClass >
-int CBaseApp< BaseClass >::ReportException( const CException* pExc )
+int CBaseApp<BaseClass>::ReportException( const CException* pExc )
 {
 	return ui::ReportException( pExc );
 }
 
 template< typename BaseClass >
-BOOL CBaseApp< BaseClass >::PreTranslateMessage( MSG* pMsg )
+BOOL CBaseApp<BaseClass>::PreTranslateMessage( MSG* pMsg )
 {
 	if ( CAccelTable::IsKeyMessage( pMsg ) )
 		if ( CWnd* pActiveWnd = CWnd::FromHandlePermanent( ::GetForegroundWindow() ) )		// prevent crash in ShellGoodies due to Explorer.exe being multi-threaded
@@ -185,14 +191,14 @@ BEGIN_TEMPLATE_MESSAGE_MAP( CBaseApp, BaseClass, BaseClass )
 END_MESSAGE_MAP()
 
 template< typename BaseClass >
-void CBaseApp< BaseClass >::OnAppAbout( void )
+void CBaseApp<BaseClass>::OnAppAbout( void )
 {
 	CAboutBox dialog( CWnd::GetForegroundWindow() );
 	dialog.DoModal();
 }
 
 template< typename BaseClass >
-void CBaseApp< BaseClass >::OnUpdateAppAbout( CCmdUI* pCmdUI )
+void CBaseApp<BaseClass>::OnUpdateAppAbout( CCmdUI* pCmdUI )
 {
 	CWnd* pForegroundWnd = CWnd::GetForegroundWindow();
 	pCmdUI->Enable( pForegroundWnd != NULL && !is_a< CAboutBox >( pForegroundWnd ) );
@@ -200,7 +206,7 @@ void CBaseApp< BaseClass >::OnUpdateAppAbout( CCmdUI* pCmdUI )
 }
 
 template< typename BaseClass >
-void CBaseApp< BaseClass >::OnRunUnitTests( void )
+void CBaseApp<BaseClass>::OnRunUnitTests( void )
 {
 #ifdef _DEBUG
 	app::RunAllTests();
@@ -208,7 +214,7 @@ void CBaseApp< BaseClass >::OnRunUnitTests( void )
 }
 
 template< typename BaseClass >
-void CBaseApp< BaseClass >::OnUpdateRunUnitTests( CCmdUI* pCmdUI )
+void CBaseApp<BaseClass>::OnUpdateRunUnitTests( CCmdUI* pCmdUI )
 {
 #ifdef _DEBUG
 	pCmdUI->Enable( !ut::CTestSuite::Instance().IsEmpty() );

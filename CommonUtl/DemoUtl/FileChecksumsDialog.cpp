@@ -192,37 +192,17 @@ CFileChecksumsDialog::~CFileChecksumsDialog()
 
 void CFileChecksumsDialog::SearchForFiles( void )
 {
-	utl::ClearOwningContainer( m_fileItems );
+	CWaitCursor wait;
+	fs::CFileStateItemEnumerator<CFileChecksumItem> found;
 
-	fs::CPath dirPath;
-	std::tstring wildSpec = _T("*");
+	if ( fs::InvalidPattern == fs::SearchEnumFiles( &found, m_searchPath, fs::EF_Recurse ) )
+		ui::MessageBox( std::tstring( _T("Invalid path:\n\n") ) + m_searchPath.Get() );
 
-	switch ( fs::SplitPatternPath( &dirPath, &wildSpec, m_searchPath ) )
-	{
-		case fs::ValidFile:
-		{
-			CFileFind foundFile;
-			if ( m_searchPath.LocateFile( foundFile ) )
-				m_fileItems.push_back( new CFileChecksumItem( foundFile ) );
-			break;
-		}
-		case fs::ValidDirectory:
-		{
-			CWaitCursor wait;
-			fs::CFileStateItemEnumerator<CFileChecksumItem> found;
-
-			fs::EnumFiles( &found, dirPath, wildSpec.c_str(), fs::EF_Recurse );
-			found.SortItems();
-			m_fileItems.swap( found.m_fileItems );
-			break;
-		}
-		default: ASSERT( false );
-		case fs::InvalidPattern:
-			ui::MessageBox( std::tstring( _T("Invalid path:\n\n") ) + m_searchPath.Get() );
-	}
+	found.SortItems();
+	m_fileItems.swap( found.m_fileItems );		// (!) enumerator destructor deletes the old swapped items
 
 	SetupFileListView();
-	m_fileListCtrl.UpdateWindow();		// display found files on the spot if continuing with CRC32 evaluation
+	m_fileListCtrl.UpdateWindow();				// display found files on the spot if continuing with CRC32 evaluation
 }
 
 void CFileChecksumsDialog::SetupFileListView( void )
@@ -315,6 +295,8 @@ void CFileChecksumsDialog::OnOK( void )
 
 void CFileChecksumsDialog::OnBnClicked_FindFiles( void )
 {
+	CWaitCursor wait;
+
 	m_searchPath = ui::GetComboSelText( m_searchPathCombo );
 	SearchForFiles();
 }

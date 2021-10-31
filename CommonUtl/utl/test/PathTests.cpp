@@ -395,7 +395,7 @@ void CPathTests::TestPathSortExisting( void )
 		std::vector< fs::CPath >::const_iterator itPath;
 
 		fs::SortPathsDirsFirst( paths );
-		path::StripDirPrefix( paths, poolDirPath.GetPtr() );		// left with just relative paths (post physical dir/file grouping)
+		path::StripDirPrefixes( paths, poolDirPath.GetPtr() );		// left with just relative paths (post physical dir/file grouping)
 
 		itPath = paths.begin();
 		// dirs first
@@ -423,7 +423,7 @@ void CPathTests::TestPathSortExisting( void )
 		std::vector< fs::CPath >::const_iterator itPath;
 
 		fs::SortPathsDirsFirst( paths, false );					// sort descending
-		path::StripDirPrefix( paths, poolDirPath.GetPtr() );		// left with just relative paths (post physical dir/file grouping)
+		path::StripDirPrefixes( paths, poolDirPath.GetPtr() );		// left with just relative paths (post physical dir/file grouping)
 
 		itPath = paths.begin();
 		// dirs first
@@ -454,7 +454,7 @@ void CPathTests::TestPathSortExisting( void )
 		std::vector< std::tstring >::const_iterator itPath;
 
 		fs::SortPathsDirsFirst( stringPaths );
-		path::StripDirPrefix( stringPaths, poolDirPath.GetPtr() );		// left with just relative paths (post physical dir/file grouping)
+		path::StripDirPrefixes( stringPaths, poolDirPath.GetPtr() );		// left with just relative paths (post physical dir/file grouping)
 
 		itPath = stringPaths.begin();
 		// dirs first

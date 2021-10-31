@@ -10,14 +10,13 @@ namespace fs
 {
 	// file states and sub-dirs in existing file-system order
 	//
-	struct CFileStateEnumerator : public IEnumerator, private utl::noncopyable
+	struct CFileStateEnumerator : public CBaseEnumerator
 	{
-		CFileStateEnumerator( IEnumerator* pChainEnum = NULL ) : m_pChainEnum( pChainEnum ), m_maxFiles( utl::npos ) {}
+		CFileStateEnumerator( IEnumerator* pChainEnum = NULL ) : CBaseEnumerator( pChainEnum ) {}
 
-		bool IsEmpty( void ) const { return m_fileStates.empty() && m_subDirPaths.empty(); }
-		void Clear( void );
-
-		void SetMaxFiles( size_t maxFiles ) { ASSERT( IsEmpty() ); m_maxFiles = maxFiles; }
+		// base overrides
+		virtual void Clear( void ) { m_fileStates.clear(); __super::Clear(); }
+		virtual size_t GetFileCount( void ) const { return m_fileStates.size(); }
 
 		// post-search
 		void SortFileStates( void ) { fs::SortPaths( m_fileStates ); }
@@ -25,15 +24,9 @@ namespace fs
 	protected:
 		// IEnumerator interface
 		virtual void OnAddFileInfo( const CFileFind& foundFile );
-		virtual void AddFoundFile( const TCHAR* pFilePath );
-		virtual bool AddFoundSubDir( const TCHAR* pSubDirPath );
-		virtual bool MustStop( void ) const;
-	protected:
-		IEnumerator* m_pChainEnum;				// allows chaining for progress reporting
-		size_t m_maxFiles;
+		virtual void AddFoundFile( const TCHAR* pFilePath ) { __super::AddFoundFile( pFilePath ); }		// base method is pure & implemented
 	public:
 		std::vector< fs::CFileState > m_fileStates;
-		std::vector< fs::CPath > m_subDirPaths;
 	};
 }
 
@@ -41,26 +34,51 @@ namespace fs
 class CFileStateItem;
 
 
+namespace func
+{
+	template< typename FileStateItemT >
+	struct CreateFoundItem
+	{
+		FileStateItemT* operator()( const CFileFind& foundFile ) const
+		{
+			return new FileStateItemT( foundFile );
+		}
+	};
+}
+
+
 namespace fs
 {
 	// Enumerates CFileStateItem objects, and sub-dirs from the base class.
 	// FileStateItemT may be a subclass of either CFileStateItem, or any other class that defines a constructor of FileStateItemT( const CFileFind& ).
 	//
-	template< typename FileStateItemT >
+	template< typename FileStateItemT = CFileStateItem, typename CreateFuncT = func::CreateFoundItem<FileStateItemT> >
 	struct CFileStateItemEnumerator : public CFileStateEnumerator
 	{
-		CFileStateItemEnumerator( IEnumerator* pChainEnum = NULL ) : CFileStateEnumerator( pChainEnum ) {}
+		CFileStateItemEnumerator( CreateFuncT createFunc = CreateFuncT(), IEnumerator* pChainEnum = NULL )
+			: CFileStateEnumerator( pChainEnum )
+			, m_createFunc( createFunc )
+		{
+		}
 
-		void Clear( void );
+		~CFileStateItemEnumerator() { Clear(); }
 
-		void SortItems( void ) { std::sort( m_fileItems.begin(), m_fileItems.end(), pred::TLess_PathItem() ); }		// sort by path key
+		// base overrides
+		virtual void Clear( void );
+		virtual size_t GetFileCount( void ) const { return m_fileStates.size(); }
+
+		void SortItems( void ); 		// sort by path key
+		size_t UniquifyAll( void );
 	protected:
 		// IEnumerator interface overrides
 		virtual void OnAddFileInfo( const CFileFind& foundFile );
 	private:
+		CreateFuncT m_createFunc;
+
 		// hidden base data-member and methods
 		using CFileStateEnumerator::m_fileStates;
 		using CFileStateEnumerator::SortFileStates;
+		using CFileStateEnumerator::UniquifyAll;
 	public:
 		std::vector< FileStateItemT* > m_fileItems;
 	};

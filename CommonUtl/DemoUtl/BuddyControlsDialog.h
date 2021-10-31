@@ -21,7 +21,7 @@ private:
 	// output
 	void SetupFileListView( void );
 private:
-	fs::CPath m_searchPath;
+	fs::TPatternPath m_searchPath;
 
 	std::vector< CFileStateTimedItem* > m_fileItems;
 private:

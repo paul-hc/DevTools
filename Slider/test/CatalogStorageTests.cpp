@@ -58,7 +58,7 @@ void CCatalogStorageTests::TestBuildImageArchive( void )
 	{
 		// create image archive storage
 		{
-			fs::CEnumerator srcFound;
+			fs::CPathEnumerator srcFound;
 			fs::EnumFiles( &srcFound, imageDirPath, NULL, fs::TEnumFlags::Make( fs::EF_Recurse | fs::EF_ResolveShellLinks ) );
 			srcImageCount = srcFound.m_filePaths.size();
 

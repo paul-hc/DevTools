@@ -15,7 +15,7 @@ namespace io
 	// string read/write of entire text file with encoding
 
 	template< typename StringT >
-	void WriteStringToFile( const fs::CPath& targetFilePath, const StringT& text, fs::Encoding encoding ) throws_( CRuntimeException );
+	void WriteStringToFile( const fs::CPath& targetFilePath, const StringT& text, fs::Encoding encoding = fs::ANSI_UTF8 ) throws_( CRuntimeException );
 
 	template< typename StringT >
 	fs::Encoding ReadStringFromFile( StringT& rText, const fs::CPath& srcFilePath ) throws_( CRuntimeException );

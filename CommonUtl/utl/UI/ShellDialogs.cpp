@@ -113,11 +113,12 @@ namespace shell
 
 		scopedDlg.StoreDialog( impl::MakeFileDialog( rFilePath, pParentWnd, FileOpen, std::tstring(), 0, pTitle ) );		// no filter for picking folders
 
-		if ( IFileOpenDialog* pFileOpenDialog = scopedDlg.m_pFileDlg->GetIFileOpenDialog() )
-		{
-			pFileOpenDialog->SetOptions( FOS_PICKFOLDERS | options );
-			pFileOpenDialog->Release();			// ** cannot use CComPtr< IFileOpenDialog > here since CFileDialog::~CFileDialog() fires an assertion any way, shape or form
-		}
+		if ( shell::s_useVistaStyle )				// prevent MFC assertion in CFileDialog
+			if ( IFileOpenDialog* pFileOpenDialog = scopedDlg.m_pFileDlg->GetIFileOpenDialog() )
+			{
+				pFileOpenDialog->SetOptions( FOS_PICKFOLDERS | options );
+				pFileOpenDialog->Release();			// ** cannot use CComPtr< IFileOpenDialog > here since CFileDialog::~CFileDialog() fires an assertion any way, shape or form
+			}
 
 		return impl::RunFileDialog( rFilePath, scopedDlg.m_pFileDlg.get() );
 	}
@@ -149,7 +150,17 @@ namespace shell
 					SetFlag( flags, OFN_OVERWRITEPROMPT );
 					break;
 				case FileOpen:
-					SetFlag( flags, OFN_FILEMUSTEXIST );
+					if ( path::ContainsWildcards( filePath.GetFilenamePtr() ) )
+					{
+						ClearFlag( flags, OFN_FILEMUSTEXIST );
+						SetFlag( flags, OFN_PATHMUSTEXIST );
+						SetFlag( flags, OFN_NOVALIDATE );			// allow wildcards in return string
+
+						if ( NULL == pTitle )
+							pTitle = _T("Select Folder Search Pattern");
+					}
+					else
+						SetFlag( flags, OFN_FILEMUSTEXIST );
 					break;
 				case FileBrowse:
 					if ( NULL == pTitle )

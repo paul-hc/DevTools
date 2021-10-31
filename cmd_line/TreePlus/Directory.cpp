@@ -12,61 +12,53 @@
 #endif
 
 
-namespace impl
+namespace app
 {
-	struct CEnumerator : public fs::IEnumerator
+	struct CDirEnumerator : public fs::CPathEnumerator
 	{
-		CEnumerator( const CCmdLineOptions& options ) : m_options( options ), m_moreFilesCount( 0 ) {}
+		CDirEnumerator( const CCmdLineOptions& appOptions );
 
 		// IEnumerator interface
-		virtual bool IncludeNode( const CFileFind& foundNode );
-		virtual bool AddFoundSubDir( const TCHAR* pSubDirPath );
 		virtual void AddFoundFile( const TCHAR* pFilePath );
+		virtual bool AddFoundSubDir( const TCHAR* pSubDirPath );
 
 		void OnCompleted( void );
 	private:
-		const CCmdLineOptions& m_options;
+		const CCmdLineOptions& m_appOptions;
 	public:
-		std::vector< fs::CPath > m_filePaths;
-		std::vector< fs::CPath > m_subDirPaths;
 		size_t m_moreFilesCount;			// incremented when it reaches the limit
 	};
 
 
-	// CEnumerator implementation
+	// CDirEnumerator implementation
 
-	bool CEnumerator::IncludeNode( const CFileFind& foundNode )
+	CDirEnumerator::CDirEnumerator( const CCmdLineOptions& appOptions )
+		: m_appOptions( appOptions )
+		, m_moreFilesCount( 0 )
 	{
-		if ( foundNode.IsHidden() )
-			if ( !m_options.HasOptionFlag( app::ShowHiddenNodes ) )
-				return false;
-
-		return true;
+		m_options.m_ignoreFiles = !m_appOptions.HasOptionFlag( app::DisplayFiles );
+		m_options.m_ignoreHiddenNodes = !m_appOptions.HasOptionFlag( app::ShowHiddenNodes );
 	}
 
-	void CEnumerator::AddFoundFile( const TCHAR* pFilePath )
+	void CDirEnumerator::AddFoundFile( const TCHAR* pFilePath )
 	{
-		if ( m_options.HasOptionFlag( app::DisplayFiles ) )
-			if ( m_filePaths.size() < m_options.m_maxDirFiles )
-				m_filePaths.push_back( fs::CPath( pFilePath ) );
-			else
-				++m_moreFilesCount;
+		if ( m_filePaths.size() < m_appOptions.m_maxDirFiles )
+			m_filePaths.push_back( fs::CPath( pFilePath ) );
+		else
+			++m_moreFilesCount;
 	}
 
-	bool CEnumerator::AddFoundSubDir( const TCHAR* pSubDirPath )
+	bool CDirEnumerator::AddFoundSubDir( const TCHAR* pSubDirPath )
 	{
 		m_subDirPaths.push_back( fs::CPath( pSubDirPath ) );
 		return true;
 	}
 
-	void CEnumerator::OnCompleted( void )
+	void CDirEnumerator::OnCompleted( void )
 	{
-		if ( !m_options.HasOptionFlag( app::NoSorting ) )
-			fs::SortPaths( m_subDirPaths );
-
-		if ( m_options.HasOptionFlag( app::DisplayFiles ) && !m_options.HasOptionFlag( app::NoOutput ) )
+		if ( m_appOptions.HasOptionFlag( app::DisplayFiles ) && !m_appOptions.HasOptionFlag( app::NoOutput ) )
 		{
-			if ( !m_options.HasOptionFlag( app::NoSorting ) )
+			if ( !m_appOptions.HasOptionFlag( app::NoSorting ) )
 				fs::SortPaths( m_filePaths );
 
 			if ( m_moreFilesCount != 0 )
@@ -96,10 +88,10 @@ CDirectory::CDirectory( const CDirectory* pParent, const fs::CPath& subDirPath )
 
 void CDirectory::List( std::wostream& os, const CTreeGuides& guideParts, const std::wstring& parentNodePrefix )
 {
-	impl::CEnumerator found( m_options );
+	app::CDirEnumerator found( m_options );
 	CTimer enumTimer;
 
-	fs::EnumFiles( &found, m_dirPath, s_wildSpec, fs::EF_NoSortSubDirs );
+	fs::EnumFiles( &found, m_dirPath, s_wildSpec, m_options.HasOptionFlag( app::NoSorting ) ? fs::TEnumFlags() : fs::EF_NoSortSubDirs );
 	found.OnCompleted();
 	s_totalElapsedEnum += enumTimer.ElapsedSeconds();
 

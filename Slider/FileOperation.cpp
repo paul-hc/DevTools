@@ -138,9 +138,9 @@ namespace svc
 		{
 			fs::CPath commonDirPath = path::ExtractCommonParentPath( rDestFilePaths );
 			if ( !commonDirPath.IsEmpty() )
-				path::StripDirPrefix( rDestFilePaths, commonDirPath.GetPtr() );
+				path::StripDirPrefixes( rDestFilePaths, commonDirPath.GetPtr() );
 			else
-				path::StripRootPrefix( rDestFilePaths );		// ignore drive letter
+				path::StripRootPrefixes( rDestFilePaths );		// ignore drive letter
 		}
 
 		utl::for_each( rDestFilePaths, func::PrefixPath( destFolderPath ) );

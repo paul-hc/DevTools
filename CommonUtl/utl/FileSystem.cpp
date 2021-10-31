@@ -211,7 +211,9 @@ namespace fs
 		if ( !fs::IsValidDirectory( pDirPath ) )
 			return false;
 
-		fs::CEnumerator found;
+		fs::CPathEnumerator found;
+		found.RefOptions().m_ignoreHiddenNodes = false;		// also delete hidden files & directories
+
 		fs::EnumFiles( &found, fs::CPath( pDirPath ), _T("*") );
 
 		for ( std::vector< fs::CPath >::iterator itSubDirPath = found.m_subDirPaths.begin(); itSubDirPath != found.m_subDirPaths.end(); )

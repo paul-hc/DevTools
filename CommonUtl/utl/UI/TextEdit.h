@@ -17,7 +17,7 @@ class CSyncScrolling;
 class CTextEdit : public CBaseFrameHostCtrl<CEdit>
 				, public CInternalChange
 {
-	typedef CBaseFrameHostCtrl<CEdit> BaseClass;
+	typedef CBaseFrameHostCtrl<CEdit> TBaseClass;
 public:
 	CTextEdit( bool useFixedFont = true );
 	virtual ~CTextEdit();

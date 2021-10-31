@@ -511,7 +511,7 @@ bool CImageCatalogStg::EnumerateImages( CImagesModel& rImagesModel )
 	rImagesModel.Clear();
 
 	CScopedCurrentDir scopedAlbumFolder( this, s_rootFolderName );
-	fs::CEnumerator imagesEnum;
+	fs::CPathEnumerator imagesEnum;
 
 	if ( !EnumElements( &imagesEnum, Shallow ) )			// enumerate root files
 		return false;

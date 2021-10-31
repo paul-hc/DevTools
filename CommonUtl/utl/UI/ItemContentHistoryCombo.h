@@ -3,13 +3,14 @@
 #pragma once
 
 #include "HistoryComboBox.h"
-#include "BaseDetailHostCtrl.h"
+#include "BaseItemContentCtrl.h"
 
 
 // history combo for a string, dir-path or file-path with details button
 
 class CItemContentHistoryCombo : public CBaseItemContentCtrl<CHistoryComboBox>
 {
+	typedef CBaseFrameHostCtrl<CComboBox> TBaseClass;
 public:
 	CItemContentHistoryCombo( ui::ContentType type = ui::String, const TCHAR* pFileFilter = NULL );
 	virtual ~CItemContentHistoryCombo();

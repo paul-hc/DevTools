@@ -112,9 +112,9 @@ namespace fs
 	class CPathComPtrMap : public CPathMap< PathT, CAdapt< CComPtr< InterfaceT > > >
 	{
 	public:
-		typedef CComPtr< InterfaceT > TComPtr;
-		typedef CAdapt< TComPtr > TValue;
-		typedef CPathMap< PathT, TValue > TBaseClass;
+		typedef CComPtr<InterfaceT> TComPtr;
+		typedef CAdapt<TComPtr> TValue;
+		typedef CPathMap<PathT, TValue> TBaseClass;
 
 		typedef typename stdext::hash_map< PathT, TValue >::const_iterator const_iterator;
 	private:

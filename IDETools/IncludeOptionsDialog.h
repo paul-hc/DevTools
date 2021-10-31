@@ -26,7 +26,8 @@ private:
 	CItemListEdit m_addedEdit;					// CIncludeOptions::m_fnAdded
 	CItemListEdit m_additionalIncPathEdit;		// CIncludeOptions::m_additionalIncludePath
 
-	protected:
+	// generated stuff
+protected:
 	virtual void DoDataExchange( CDataExchange* pDX );
 	virtual void OnOK( void );
 protected:

@@ -7,7 +7,7 @@
 #define new DEBUG_NEW
 #endif
 
-#include "BaseDetailHostCtrl.hxx"
+#include "BaseItemContentCtrl.hxx"
 
 
 // CItemContentHistoryCombo implementation

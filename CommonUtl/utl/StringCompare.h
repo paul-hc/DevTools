@@ -42,13 +42,13 @@ namespace pred
 	// natural string compare
 
 	template<>
-	inline CompareResult Compare_Scalar< std::string >( const std::string& left, const std::string& right )			// by default sort std::string in natural order
+	inline CompareResult Compare_Scalar<std::string>( const std::string& left, const std::string& right )			// by default sort std::string in natural order
 	{
 		return str::IntuitiveCompare( str::traits::GetCharPtr( left ), str::traits::GetCharPtr( right ) );
 	}
 
 	template<>
-	inline CompareResult Compare_Scalar< std::wstring >( const std::wstring& left, const std::wstring& right )		// by default sort std::wstring in natural order
+	inline CompareResult Compare_Scalar<std::wstring>( const std::wstring& left, const std::wstring& right )		// by default sort std::wstring in natural order
 	{
 		return str::IntuitiveCompare( str::traits::GetCharPtr( left ), str::traits::GetCharPtr( right ) );
 	}
@@ -63,7 +63,8 @@ namespace pred
 		}
 	};
 
-	typedef CompareAdapter< CompareIntuitiveCharPtr, func::ToCharPtr > TStringyCompareIntuitive;		// for string-like objects
+	typedef CompareAdapter<CompareIntuitiveCharPtr, func::ToCharPtr> TStringyCompareIntuitive;		// for string-like objects
+	typedef LessValue<TStringyCompareIntuitive> TLess_StringyIntuitive;
 }
 
 
@@ -283,12 +284,15 @@ namespace pred
 
 
 	// character-ptr comparators
-	typedef CompareCharPtr< func::ToChar > TCompareCase;
-	typedef CompareCharPtr< func::ToUpper > TCompareNoCase;
+	typedef CompareCharPtr<func::ToChar> TCompareCase;
+	typedef CompareCharPtr<func::ToUpper> TCompareNoCase;
 
 	// stringy comparators for string-like objects
-	typedef CompareAdapter< TCompareCase, func::ToCharPtr > TStringyCompareCase;
-	typedef CompareAdapter< TCompareNoCase, func::ToCharPtr > TStringyCompareNoCase;
+	typedef CompareAdapter<TCompareCase, func::ToCharPtr> TStringyCompareCase;
+	typedef CompareAdapter<TCompareNoCase, func::ToCharPtr> TStringyCompareNoCase;
+
+	typedef LessValue<TStringyCompareCase> TLess_StringyCase;
+	typedef LessValue<TStringyCompareNoCase> TLess_StringyNoCase;
 }
 
 

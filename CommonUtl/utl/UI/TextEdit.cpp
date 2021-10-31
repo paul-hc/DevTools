@@ -237,7 +237,7 @@ BOOL CTextEdit::PreTranslateMessage( MSG* pMsg )
 
 // message handlers
 
-BEGIN_MESSAGE_MAP( CTextEdit, BaseClass )
+BEGIN_MESSAGE_MAP( CTextEdit, TBaseClass )
 	ON_WM_GETDLGCODE()
 	ON_WM_HSCROLL()
 	ON_WM_VSCROLL()

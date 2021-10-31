@@ -43,6 +43,9 @@ private:
 };
 
 
+#include "ComparePredicates.h"
+
+
 namespace pred
 {
 	struct ToTreeItemPath
@@ -54,7 +57,8 @@ namespace pred
 		}
 	};
 
-	typedef CompareAdapter< CompareNaturalPath, ToTreeItemPath > CompareTreeItemPath;
+	typedef CompareAdapter<CompareNaturalPath, ToTreeItemPath> TCompareTreeItemPath;
+	typedef LessPtr<TCompareTreeItemPath> TLess_TreeItemPath;
 }
 
 

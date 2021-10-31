@@ -189,23 +189,23 @@ void CStringTests::TestStringSorting( void )
 
 	std::vector< std::string > items;
 	str::Split( items, s_src, "," );
-	ASSERT_EQUAL( "A-,AB-,ABC-,ABCD-,a,ab,abc,abcd", ut::ShuffleSortJoin( items, ",", pred::LessValue< pred::TStringyCompareCase >() ) );
-	ASSERT_EQUAL( "a,A-,ab,AB-,abc,ABC-,abcd,ABCD-", ut::ShuffleSortJoin( items, ",", pred::LessValue< pred::TStringyCompareNoCase >() ) );
+	ASSERT_EQUAL( "A-,AB-,ABC-,ABCD-,a,ab,abc,abcd", ut::ShuffleSortJoin( items, ",", pred::TLess_StringyCase() ) );
+	ASSERT_EQUAL( "a,A-,ab,AB-,abc,ABC-,abcd,ABCD-", ut::ShuffleSortJoin( items, ",", pred::TLess_StringyNoCase() ) );
 
 	std::vector< std::wstring > wItems;
 	str::Split( wItems, str::FromAnsi( s_src ).c_str(), L"," );
-	ASSERT_EQUAL( L"A-,AB-,ABC-,ABCD-,a,ab,abc,abcd", ut::ShuffleSortJoin( wItems, L",", pred::LessValue< pred::TStringyCompareCase >() ) );
-	ASSERT_EQUAL( L"a,A-,ab,AB-,abc,ABC-,abcd,ABCD-", ut::ShuffleSortJoin( wItems, L",", pred::LessValue< pred::TStringyCompareNoCase >() ) );
+	ASSERT_EQUAL( L"A-,AB-,ABC-,ABCD-,a,ab,abc,abcd", ut::ShuffleSortJoin( wItems, L",", pred::TLess_StringyCase() ) );
+	ASSERT_EQUAL( L"a,A-,ab,AB-,abc,ABC-,abcd,ABCD-", ut::ShuffleSortJoin( wItems, L",", pred::TLess_StringyNoCase() ) );
 
 	std::vector< fs::CPath > paths;
 	str::Split( paths, str::FromAnsi( s_src ).c_str(), L"," );
-	ASSERT_EQUAL( _T("A-,AB-,ABC-,ABCD-,a,ab,abc,abcd"), ut::ShuffleSortJoin( paths, _T(","), pred::LessValue< pred::TStringyCompareCase >() ) );
-	ASSERT_EQUAL( _T("a,A-,ab,AB-,abc,ABC-,abcd,ABCD-"), ut::ShuffleSortJoin( paths, _T(","), pred::LessValue< pred::TStringyCompareNoCase >() ) );
+	ASSERT_EQUAL( _T("A-,AB-,ABC-,ABCD-,a,ab,abc,abcd"), ut::ShuffleSortJoin( paths, _T(","), pred::TLess_StringyCase() ) );
+	ASSERT_EQUAL( _T("a,A-,ab,AB-,abc,ABC-,abcd,ABCD-"), ut::ShuffleSortJoin( paths, _T(","), pred::TLess_StringyNoCase() ) );
 
 	std::vector< fs::CFlexPath > flexPaths;
 	str::Split( flexPaths, str::FromAnsi( s_src ).c_str(), L"," );
-	ASSERT_EQUAL( _T("A-,AB-,ABC-,ABCD-,a,ab,abc,abcd"), ut::ShuffleSortJoin( flexPaths, _T(","), pred::LessValue< pred::TStringyCompareCase >() ) );
-	ASSERT_EQUAL( _T("a,A-,ab,AB-,abc,ABC-,abcd,ABCD-"), ut::ShuffleSortJoin( flexPaths, _T(","), pred::LessValue< pred::TStringyCompareNoCase >() ) );
+	ASSERT_EQUAL( _T("A-,AB-,ABC-,ABCD-,a,ab,abc,abcd"), ut::ShuffleSortJoin( flexPaths, _T(","), pred::TLess_StringyCase() ) );
+	ASSERT_EQUAL( _T("a,A-,ab,AB-,abc,ABC-,abcd,ABCD-"), ut::ShuffleSortJoin( flexPaths, _T(","), pred::TLess_StringyNoCase() ) );
 
 	// vector of pointers
 	{
@@ -239,20 +239,20 @@ void CStringTests::TestIntuitiveSort( void )
 			"2string,3String,20STRING,st2ring,st3Ring,st20RING,string2,String3,STRING20",
 			ut::ShuffleSortJoin( items, ",", pred::LessValue< pred::CompareValue >() ) );
 
-		// sort intuitive via pred::TStringyCompareIntuitive (equivalent with pred::CompareValue)
+		// sort intuitive via pred::TLess_StringyIntuitive (equivalent with pred::CompareValue)
 		ASSERT_EQUAL(
 			"2string,3String,20STRING,st2ring,st3Ring,st20RING,string2,String3,STRING20",
-			ut::ShuffleSortJoin( items, ",", pred::LessValue< pred::TStringyCompareIntuitive >() ) );
+			ut::ShuffleSortJoin( items, ",", pred::TLess_StringyIntuitive() ) );
 
 		// sort case-insensitive
 		ASSERT_EQUAL(
 			"20STRING,2string,3String,st20RING,st2ring,st3Ring,string2,STRING20,String3",
-			ut::ShuffleSortJoin( items, ",", pred::LessValue< pred::TStringyCompareNoCase >() ) );
+			ut::ShuffleSortJoin( items, ",", pred::TLess_StringyNoCase() ) );
 
 		// sort case-sensitive
 		ASSERT_EQUAL(
 			"20STRING,2string,3String,STRING20,String3,st20RING,st2ring,st3Ring,string2",
-			ut::ShuffleSortJoin( items, ",", pred::LessValue< pred::TStringyCompareCase >() ) );
+			ut::ShuffleSortJoin( items, ",", pred::TLess_StringyCase() ) );
 	}
 
 	{	// WIDE
@@ -273,12 +273,12 @@ void CStringTests::TestIntuitiveSort( void )
 		// sort case-insensitive
 		ASSERT_EQUAL(
 			L"20STRING,2string,3String,st20RING,st2ring,st3Ring,string2,STRING20,String3",
-			ut::ShuffleSortJoin( items, L",", pred::LessValue< pred::TStringyCompareNoCase >() ) );
+			ut::ShuffleSortJoin( items, L",", pred::TLess_StringyNoCase() ) );
 
 		// sort case-sensitive
 		ASSERT_EQUAL(
 			L"20STRING,2string,3String,STRING20,String3,st20RING,st2ring,st3Ring,string2",
-			ut::ShuffleSortJoin( items, L",", pred::LessValue< pred::TStringyCompareCase >() ) );
+			ut::ShuffleSortJoin( items, L",", pred::TLess_StringyCase() ) );
 	}
 }
 

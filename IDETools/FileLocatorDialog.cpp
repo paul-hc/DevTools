@@ -18,6 +18,8 @@
 #define new DEBUG_NEW
 #endif
 
+#include "utl/UI/BaseItemContentCtrl.hxx"
+
 
 namespace reg
 {

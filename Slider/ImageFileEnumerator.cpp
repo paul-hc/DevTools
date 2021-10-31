@@ -16,11 +16,8 @@
 #endif
 
 
-const Range< size_t > CImageFileEnumerator::s_allFileSizesRange( 0, UINT_MAX );
-
 CImageFileEnumerator::CImageFileEnumerator( IEnumerator* pProgressEnum /*= NULL*/ )
-	: fs::CEnumerator( pProgressEnum )
-	, m_fileSizeRange( s_allFileSizesRange )
+	: fs::CPathEnumerator( pProgressEnum )
 	, m_issueStore( _T("Searching for images") )
 	, m_pCurrPattern( NULL )
 {
@@ -39,6 +36,7 @@ void CImageFileEnumerator::Search( const std::vector< CSearchPattern* >& searchP
 	for ( std::vector< CSearchPattern* >::const_iterator itPattern = searchPatterns.begin(); itPattern != searchPatterns.end(); )
 	{
 		m_pCurrPattern = *itPattern;
+
 		try
 		{
 			const size_t oldFoundSize = m_foundImages.GetFileAttrs().size();
@@ -98,7 +96,7 @@ void CImageFileEnumerator::SwapFoundImages( CImagesModel& rImagesModel )
 
 bool CImageFileEnumerator::PassFilter( const CFileAttr& fileAttr ) const
 {
-	if ( !m_fileSizeRange.Contains( fileAttr.GetFileSize() ) )
+	if ( !PassFileFilter( fileAttr.GetFileSize() ) )
 		return false;
 
 	if ( m_pCurrPattern != NULL )
@@ -132,6 +130,19 @@ void CImageFileEnumerator::PushMany( const std::vector< CFileAttr* >& fileAttrs 
 	// go via filtering
 	for ( std::vector< CFileAttr* >::const_iterator itFileAttr = fileAttrs.begin(); itFileAttr != fileAttrs.end() && !MustStop(); ++itFileAttr )
 		Push( *itFileAttr );
+}
+
+void CImageFileEnumerator::OnAddFileInfo( const CFileFind& foundFile )
+{
+	fs::CPath filePath = foundFile.GetFilePath().GetString();
+
+	if ( app::IsAlbumFile( filePath.GetPtr() ) )		// found a catalog storage?
+	{
+		if ( CanRecurse() )		// treat found storages as sub-directories
+			AddFoundFile( filePath.GetPtr() );
+	}
+	else
+		Push( new CFileAttr( foundFile ) );
 }
 
 void CImageFileEnumerator::AddFoundFile( const TCHAR* pFilePath )
@@ -170,30 +181,4 @@ void CImageFileEnumerator::AddFoundFile( const TCHAR* pFilePath )
 	}
 	else if ( wic::IsValidFileImageFormat( filePath.GetPtr() ) && filePath.FileExist() )
 		Push( new CFileAttr( filePath ) );
-}
-
-bool CImageFileEnumerator::CanRecurse( void ) const
-{
-	if ( m_pCurrPattern != NULL && m_pCurrPattern->IsDirPath() )
-		return CSearchPattern::RecurseSubDirs == m_pCurrPattern->GetSearchMode();
-
-	return true;
-}
-
-void CImageFileEnumerator::OnAddFileInfo( const CFileFind& foundFile )
-{
-	fs::CPath filePath = foundFile.GetFilePath().GetString();
-
-	if ( app::IsAlbumFile( filePath.GetPtr() ) )		// found a catalog storage?
-	{
-		if ( CanRecurse() )		// treat found storages as sub-directories
-			AddFoundFile( filePath.GetPtr() );
-	}
-	else
-		Push( new CFileAttr( foundFile ) );
-}
-
-bool CImageFileEnumerator::MustStop( void ) const
-{
-	return m_foundImages.GetFileAttrs().size() >= m_maxFiles;
 }

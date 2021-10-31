@@ -117,9 +117,10 @@ public:
 
 	CAccelTable m_accelTreeFocus;
 
-	public:
+	// generated stuff
+public:
 	virtual BOOL PreTranslateMessage( MSG* pMsg );
-	protected:
+protected:
 	virtual void DoDataExchange( CDataExchange* pDX );
 protected:
 	virtual void OnOK( void );

@@ -5,6 +5,9 @@
 #include "FlagSet.h"
 
 
+namespace utl { interface ICounter; }
+
+
 namespace fs
 {
 	bool IsValidFile( const TCHAR* pFilePath );
@@ -31,13 +34,28 @@ namespace fs
 		virtual bool AddFoundSubDir( const TCHAR* pSubDirPath ) = 0;
 
 		// advanced overrideables
-		virtual bool IncludeNode( const CFileFind& foundNode ) { foundNode; return true; }
-		virtual bool MustStop( void ) const { return false; }		// abort searching?
+		virtual bool IncludeNode( const CFileFind& foundNode ) = 0;
+		virtual bool CanRecurse( void ) const = 0;
+		virtual bool MustStop( void ) const = 0;					// abort searching?
+		virtual utl::ICounter* GetDepthCounter( void ) = 0;			// supports recursion depth
 
 		virtual void OnAddFileInfo( const CFileFind& foundFile )	// override to access extra file state
 		{
 			AddFoundFile( foundFile.GetFilePath() );
 		}
+	};
+
+
+	abstract class IEnumeratorImpl : public IEnumerator, private utl::noncopyable		// default implementation for advanced overrideables
+	{
+	protected:
+		IEnumeratorImpl( void ) {}
+	public:
+		// IEnumerator interface (partial)
+		virtual bool IncludeNode( const CFileFind& foundNode ) { foundNode; return true; }
+		virtual bool CanRecurse( void ) const { return true; }
+		virtual bool MustStop( void ) const { return false; }
+		virtual utl::ICounter* GetDepthCounter( void ) { return NULL; }
 	};
 
 

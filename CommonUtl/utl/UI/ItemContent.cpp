@@ -48,25 +48,21 @@ namespace ui
 	{
 		REQUIRE( IsPathContent() );
 
-		std::tstring path = str::ExpandEnvironmentStrings( pathItem.c_str() );
+		fs::CPath path = str::ExpandEnvironmentStrings( pathItem.c_str() );
+		fs::CPath actualPath = path::StripWildcards( path );
 
 		switch ( m_type )
 		{
-			case ui::DirPath:
-				if ( fs::IsValidDirectory( path.c_str() ) )
-					return true;
-				break;
 			case ui::FilePath:
-				if ( fs::IsValidFile( path.c_str() ) )
-					return true;
-				break;
+				return fs::IsValidFile( path.GetPtr() );
+			case ui::DirPath:
+				return fs::IsValidDirectory( actualPath.GetPtr() );
 			case ui::MixedPath:
-				if ( fs::FileExist( path.c_str() ) )
-					return true;
-				break;
+				return fs::FileExist( actualPath.GetPtr() );
+			default:
+				ASSERT( false );
+				return false;
 		}
-
-		return path::ContainsWildcards( path.c_str() );
 	}
 
 	void CItemContent::FilterItems( std::vector< std::tstring >& rItems ) const
@@ -82,31 +78,28 @@ namespace ui
 
 		if ( HasFlag( m_itemsFlags, EnsureUnique ) )
 			if ( ui::String == m_type )
-				utl::Uniquify< pred::TStringyCompareIntuitive >( rItems );
+				utl::Uniquify<pred::TLess_StringyIntuitive>( rItems );
 			else
-				utl::Uniquify< pred::CompareNaturalPath >( rItems );
+				utl::Uniquify<pred::TLess_NaturalPath>( rItems );
 	}
 
-	std::tstring CItemContent::EditItem( const TCHAR* pItem, CWnd* pParent, UINT cmdId ) const
+	std::tstring CItemContent::EditItem( const TCHAR* pItem, CWnd* pParent, UINT cmdId /*= 0*/ ) const
 	{
 		ASSERT_PTR( pItem );
-
-		fs::CPath newItem;
 
 		if ( ui::String == m_type )
 			return str::GetEmpty();
 
-		newItem.Set( str::ExpandEnvironmentStrings( pItem ) );
-
+		fs::CPath newItem( str::ExpandEnvironmentStrings( pItem ) );
 		bool picked = false;
 
 		switch ( m_type )
 		{
-			case ui::DirPath:
-				picked = shell::PickFolder( newItem, pParent );
-				break;
 			case ui::FilePath:
 				picked = shell::BrowseForFile( newItem, pParent, shell::FileOpen, m_pFileFilter );
+				break;
+			case ui::DirPath:
+				picked = shell::PickFolder( newItem, pParent );
 				break;
 			case ui::MixedPath:
 				picked = BrowseMixedPath( newItem, pParent, cmdId );

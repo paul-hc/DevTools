@@ -3,13 +3,16 @@
 #pragma once
 
 #include "FileSystem_fwd.h"
+#include "ICounter.h"
+#include "Range.h"
 
 
 namespace fs
 {
 	// pWildSpec can be multiple: "*.*", "*.doc;*.txt"
 
-	void EnumFiles( IEnumerator* pEnumerator, const fs::CPath& dirPath, const TCHAR* pWildSpec = _T("*.*"), fs::TEnumFlags flags = fs::TEnumFlags() );
+	void EnumFiles( IEnumerator* pEnumerator, const fs::TDirPath& dirPath, const TCHAR* pWildSpec = _T("*.*"), fs::TEnumFlags flags = fs::TEnumFlags() );
+	fs::PatternResult SearchEnumFiles( IEnumerator* pEnumerator, const fs::TPatternPath& searchPath, fs::TEnumFlags flags = fs::TEnumFlags() );
 
 	size_t EnumFilePaths( std::vector< fs::CPath >& rFilePaths, const fs::CPath& dirPath, const TCHAR* pWildSpec = _T("*.*"), fs::TEnumFlags flags = fs::TEnumFlags() );
 	size_t EnumSubDirPaths( std::vector< fs::CPath >& rSubDirPaths, const fs::CPath& dirPath, const TCHAR* pWildSpec = _T("*.*"), fs::TEnumFlags flags = fs::TEnumFlags() );
@@ -30,64 +33,14 @@ namespace fs
 
 namespace fs
 {
-	class CPathMatches;
-
-
-	// files and sub-dirs in existing file-system order; stored paths are relative to m_relativeDirPath (if specified).
-	//
-	struct CEnumerator : public IEnumerator, private utl::noncopyable
+	class CPathMatchLookup
 	{
-		CEnumerator( IEnumerator* pChainEnum = NULL ) : m_pChainEnum( pChainEnum ), m_maxFiles( utl::npos ) {}
+	public:
+		CPathMatchLookup( void ) {}
+		CPathMatchLookup( const std::vector< fs::CPath >& paths ) { Reset( paths ); }
 
-		const fs::CPath& GetRelativeDirPath( void ) const { return m_relativeDirPath; }
-		void SetRelativeDirPath( const fs::CPath& relativeDirPath ) { ASSERT( IsEmpty() ); m_relativeDirPath = relativeDirPath; }
-
-		void SetMaxFiles( size_t maxFiles ) { ASSERT( IsEmpty() ); m_maxFiles = maxFiles; }
-		void SetIgnorePathMatches( const std::vector< fs::CPath >& ignorePaths );
-
-		bool IsEmpty( void ) const { return m_filePaths.empty() && m_subDirPaths.empty(); }
 		void Clear( void );
-		size_t UniquifyAll( void );					// post-search
-
-		// IEnumerator interface
-		virtual void OnAddFileInfo( const CFileFind& foundFile );
-		virtual void AddFoundFile( const TCHAR* pFilePath );
-		virtual bool AddFoundSubDir( const TCHAR* pSubDirPath );
-		virtual bool MustStop( void ) const;
-	protected:
-		IEnumerator* m_pChainEnum;					// allows chaining for progress reporting
-		fs::CPath m_relativeDirPath;				// to remove if it's common prefix
-		size_t m_maxFiles;
-	private:
-		std::auto_ptr< CPathMatches > m_pIgnorePathMatches;
-	public:
-		std::vector< fs::CPath > m_filePaths;
-		std::vector< fs::CPath > m_subDirPaths;
-	};
-
-
-	struct CRelativeEnumerator : public CEnumerator
-	{
-		CRelativeEnumerator( const fs::CPath& relativeDirPath ) : CEnumerator( NULL ) { SetRelativeDirPath( relativeDirPath ); }
-	};
-
-
-	struct CFirstFileEnumerator : public CEnumerator
-	{
-		CFirstFileEnumerator( void ) : CEnumerator() { SetMaxFiles( 1 ); }
-
-		fs::CPath GetFoundPath( void ) const { return !m_filePaths.empty() ? m_filePaths.front() : fs::CPath(); }
-	};
-}
-
-
-namespace fs
-{
-	class CPathMatches : private utl::noncopyable
-	{
-	public:
-		CPathMatches( const std::vector< fs::CPath >& paths );
-		~CPathMatches();
+		void Reset( const std::vector< fs::CPath >& paths );
 
 		bool IsEmpty( void ) const { return m_dirPaths.empty() && m_filePaths.empty() && m_wildSpecs.empty(); }
 
@@ -99,6 +52,102 @@ namespace fs
 		std::vector< fs::CPath > m_dirPaths;			// deep matching (including subdirectories)
 		std::vector< fs::CPath > m_filePaths;
 		std::vector< std::tstring > m_wildSpecs;
+	};
+
+
+	struct CEnumOptions
+	{
+		CEnumOptions( void );
+
+		template< typename SizeT >
+		void SetFileSizeRange( const Range<SizeT>& fileSizeRange ) { m_fileSizeRange = fileSizeRange; ENSURE( m_fileSizeRange.IsNormalized() ); }
+	public:
+		bool m_ignoreFiles;
+		bool m_ignoreHiddenNodes;
+		size_t m_maxFiles;
+		size_t m_maxDepthLevel;
+		Range<UINT64> m_fileSizeRange;
+		fs::CPathMatchLookup m_ignorePathMatches;
+
+		static const Range<UINT64> s_fullFileSizesRange;
+	};
+
+
+	// Base for concrete file leafs enumerator classes, provides the heavy duty functionality of filtering, etc.
+	//
+	abstract class CBaseEnumerator : public IEnumerator, private utl::noncopyable
+	{
+	protected:
+		CBaseEnumerator( IEnumerator* pChainEnum = NULL );
+
+		// IEnumerator interface (partial)
+		virtual void OnAddFileInfo( const CFileFind& foundFile );
+		virtual void AddFoundFile( const TCHAR* pFilePath ) = 0;		// has implementation
+		virtual bool AddFoundSubDir( const TCHAR* pSubDirPath );
+		virtual bool IncludeNode( const CFileFind& foundNode );
+		virtual bool CanRecurse( void ) const;
+		virtual bool MustStop( void ) const;
+		virtual utl::ICounter* GetDepthCounter( void ) { return &m_depthCounter; }
+
+		bool PassFileFilter( UINT64 fileSize ) const;
+	public:
+		bool IsEmpty( void ) const { return m_subDirPaths.empty() && 0 == GetFileCount(); }
+
+		// overridables
+		virtual size_t GetFileCount( void ) const = 0;
+		virtual void Clear( void ) = 0 { m_subDirPaths.clear(); }
+
+		const fs::CEnumOptions& GetOptions( void ) const { return m_options; }
+		fs::CEnumOptions& RefOptions( void ) { REQUIRE( IsEmpty() ); return m_options; }
+
+		const fs::CPath& GetRelativeDirPath( void ) const { return m_relativeDirPath; }
+		void SetRelativeDirPath( const fs::CPath& relativeDirPath ) { ASSERT( IsEmpty() ); m_relativeDirPath = relativeDirPath; }
+
+		void SetIgnorePathMatches( const std::vector< fs::CPath >& ignorePaths );
+	protected:
+		IEnumerator* m_pChainEnum;					// allows chaining for progress reporting
+		CEnumOptions m_options;
+		fs::CPath m_relativeDirPath;				// to remove if it's common prefix
+
+		utl::CCounter m_depthCounter;				// counts recursion depth
+	public:
+		std::vector< fs::CPath > m_subDirPaths;		// found sub-directories
+	};
+}
+
+
+namespace fs
+{
+	// files and sub-dirs in existing file-system order; stored paths are relative to m_relativeDirPath (if specified).
+	//
+	struct CPathEnumerator : public CBaseEnumerator
+	{
+		CPathEnumerator( IEnumerator* pChainEnum = NULL ) : CBaseEnumerator( pChainEnum ) {}
+
+		// base overrides
+		virtual size_t GetFileCount( void ) const { return m_filePaths.size(); }
+		virtual void Clear( void );
+
+		size_t UniquifyAll( void );					// post-search
+	protected:
+		// IEnumerator interface
+		virtual void AddFoundFile( const TCHAR* pFilePath );
+	public:
+		std::vector< fs::CPath > m_filePaths;
+	};
+
+
+	struct CRelativePathEnumerator : public CPathEnumerator
+	{
+		CRelativePathEnumerator( const fs::CPath& relativeDirPath ) : CPathEnumerator( NULL ) { SetRelativeDirPath( relativeDirPath ); }
+	};
+
+
+	struct CFirstFileEnumerator : public CPathEnumerator
+	{
+		CFirstFileEnumerator( void ) : CPathEnumerator() { RefOptions().m_maxFiles = 1; }
+
+		fs::CPath GetFoundPath( void ) const { return !m_filePaths.empty() ? m_filePaths.front() : fs::CPath(); }
 	};
 }
 

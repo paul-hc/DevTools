@@ -139,7 +139,7 @@ namespace fs
 
 	// CDupFileEnumerator class
 
-	class CDupFileEnumerator : public IEnumerator
+	class CDupFileEnumerator : public fs::IEnumeratorImpl
 	{
 	public:
 		CDupFileEnumerator( const CFileBackup& backup );

@@ -12,6 +12,7 @@
 #include "utl/UI/Clipboard.h"
 #include "utl/UI/CtrlUiState.h"
 #include "utl/UI/CmdUpdate.h"
+#include "utl/UI/DialogToolBar.h"
 #include "utl/UI/MenuUtilities.h"
 #include "utl/UI/ShellDialogs.h"
 #include "utl/UI/ShellUtilities.h"
@@ -21,6 +22,8 @@
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
+
+#include "utl/UI/BaseItemContentCtrl.hxx"
 
 
 namespace layout
@@ -66,7 +69,7 @@ CFileTreeDialog::CFileTreeDialog( const std::tstring& rootPath, CWnd* pParent )
 	LoadDlgIcon( IDI_INCBROWSER_ICON );
 	m_accelPool.AddAccelTable( new CAccelTable( IDR_FILETREE_ACCEL ) );
 
-	m_selFilePathEdit.GetDetailButton()->SetIconId( IDC_FULLPATH_EDIT );
+	m_selFilePathEdit.GetMateToolbar()->GetStrip().AddButton( IDC_FULLPATH_EDIT );
 
 	m_rOpt.m_lastBrowsedFile = m_rootPath.Get();
 }

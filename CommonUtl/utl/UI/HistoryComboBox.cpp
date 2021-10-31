@@ -187,7 +187,7 @@ BOOL CHistoryComboBox::PreTranslateMessage( MSG* pMsg )
 
 // message handlers
 
-BEGIN_MESSAGE_MAP( CHistoryComboBox, BaseClass )
+BEGIN_MESSAGE_MAP( CHistoryComboBox, TBaseClass )
 	ON_WM_CONTEXTMENU()
 	ON_COMMAND( ID_ADD_ITEM, OnStoreEditItem )
 	ON_UPDATE_COMMAND_UI( ID_ADD_ITEM, OnUpdateSelectedListItem )

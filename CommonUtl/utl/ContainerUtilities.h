@@ -636,12 +636,14 @@ namespace utl
 	}
 
 
-	template< typename CompareT, typename ContainerT >
+	template< typename PredT, typename ContainerT >
 	size_t Uniquify( ContainerT& rItems, ContainerT* pRemovedDups = static_cast< ContainerT* >( NULL ) )
 	{
+		REQUIRE( PredT::IsBoolPred() );
+
 		typedef typename ContainerT::value_type TValue;
 
-		std::set< TValue, pred::LessValue<CompareT> > uniqueIndex;
+		std::set<TValue, PredT> uniqueIndex;
 		ContainerT tempItems;
 		size_t duplicateCount = 0;
 

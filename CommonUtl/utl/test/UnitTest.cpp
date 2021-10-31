@@ -319,12 +319,12 @@ namespace ut
 
 	// file enumeration
 
-	std::tstring JoinFiles( const fs::CEnumerator& enumerator )
+	std::tstring JoinFiles( const fs::CPathEnumerator& enumerator )
 	{
 		return str::Join( enumerator.m_filePaths, ut::CTempFilePool::m_sep );
 	}
 
-	std::tstring JoinSubDirs( const fs::CEnumerator& enumerator )
+	std::tstring JoinSubDirs( const fs::CPathEnumerator& enumerator )
 	{
 		return str::Join( enumerator.m_subDirPaths, ut::CTempFilePool::m_sep );
 	}
@@ -335,10 +335,10 @@ namespace ut
 	size_t EnumFilePaths( std::vector< fs::CPath >& rFilePaths, const fs::CPath& dirPath, SortType sortType /*= SortAscending*/,
 						  const TCHAR* pWildSpec /*= _T("*")*/, fs::TEnumFlags flags /*= fs::EF_Recurse*/ )
 	{
-		fs::CRelativeEnumerator found( dirPath );
+		fs::CRelativePathEnumerator found( dirPath );
 		fs::EnumFiles( &found, dirPath, pWildSpec, flags );
 
-		size_t addedCount = fs::JoinUniquePaths( rFilePaths, found.m_filePaths );
+		size_t addedCount = path::JoinUniquePaths( rFilePaths, found.m_filePaths );
 
 		if ( sortType != NoSort )
 			fs::SortPaths( rFilePaths, SortAscending == sortType );
@@ -349,10 +349,10 @@ namespace ut
 	size_t EnumSubDirPaths( std::vector< fs::CPath >& rSubDirPaths, const fs::CPath& dirPath, SortType sortType /*= SortAscending*/,
 							fs::TEnumFlags flags /*= fs::EF_Recurse*/ )
 	{
-		fs::CRelativeEnumerator found( dirPath );
+		fs::CRelativePathEnumerator found( dirPath );
 		fs::EnumFiles( &found, dirPath, _T("*"), flags );
 
-		size_t addedCount = fs::JoinUniquePaths( rSubDirPaths, found.m_subDirPaths );
+		size_t addedCount = path::JoinUniquePaths( rSubDirPaths, found.m_subDirPaths );
 
 		if ( sortType != NoSort )
 			fs::SortPaths( rSubDirPaths, SortAscending == sortType );
@@ -381,7 +381,7 @@ namespace ut
 
 	fs::CPath FindFirstFile( const fs::CPath& dirPath, const TCHAR* pWildSpec /*= _T("*.*")*/, fs::TEnumFlags flags /*= fs::TEnumFlags()*/ )
 	{
-		return fs::StripDirPrefix( fs::FindFirstFile( dirPath, pWildSpec, flags ), dirPath );
+		return path::StripDirPrefix( fs::FindFirstFile( dirPath, pWildSpec, flags ), dirPath );
 	}
 }
 

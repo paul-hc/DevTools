@@ -56,6 +56,9 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "UTL_BASE", "..\utl\UTL_BASE_vc9.vcproj", "{8B2AA3E4-1B23-48B6-AD2B-838FF7A5D89C}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "StampBuildVersion", "..\..\cmd_line\StampBuildVersion\StampBuildVersion.vcproj", "{F8FC3A4A-D533-41CE-8AEC-FFDFBC98F327}"
+	ProjectSection(ProjectDependencies) = postProject
+		{8B2AA3E4-1B23-48B6-AD2B-838FF7A5D89C} = {8B2AA3E4-1B23-48B6-AD2B-838FF7A5D89C}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TreePlus", "..\..\cmd_line\TreePlus\TreePlus.vcproj", "{1650995D-2259-426E-A835-12405E2E201E}"
 	ProjectSection(ProjectDependencies) = postProject

@@ -3,6 +3,12 @@
 #pragma once
 
 
+// This automation object gets created in the VC++ macro initialization via the SetupMacroParameters() function, which is called on script startup.
+// Macro file locations example:
+//	Visual Studio 6		C:\Program Files (x86)\Microsoft Visual Studio\Common\MSDev98\Macros\C++ Macros.dsm
+//	Visual Studio 2008	C:\Users\Paul\Documents\Visual Studio 2008\Projects\VSMacros80\CppMacros\CppMacros.vsmacros
+
+
 class ModuleOptions : public CCmdTarget
 {
 	DECLARE_DYNCREATE( ModuleOptions )

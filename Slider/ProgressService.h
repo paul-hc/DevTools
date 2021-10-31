@@ -9,8 +9,7 @@
 class CProgressDialog;
 
 
-class CProgressService : private fs::IEnumerator
-					   , private utl::noncopyable
+class CProgressService : private fs::IEnumeratorImpl
 {
 public:
 	CProgressService( CWnd* pParentWnd, const std::tstring& operationLabel = s_searching );
@@ -26,12 +25,10 @@ public:
 	void DestroyDialog( void );
 private:
 	// file enumerator callbacks
-	virtual void OnAddFileInfo( const CFileFind& foundFile ) throws_( CUserAbortedException );
 	virtual void AddFoundFile( const TCHAR* pFilePath ) throws_( CUserAbortedException );
 	virtual bool AddFoundSubDir( const TCHAR* pSubDirPath ) throws_( CUserAbortedException );
 private:
 	std::auto_ptr< CProgressDialog > m_pDlg;
-	fs::CPath m_lastFilePath;
 public:
 	static const std::tstring s_searching;
 };

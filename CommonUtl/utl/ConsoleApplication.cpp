@@ -66,15 +66,20 @@ void CConsoleApplication::SetTranslationMode( io::TranslationMode translationMod
 	}
 }
 
-utl::CResourcePool& CConsoleApplication::GetSharedResources( void )
+bool CConsoleApplication::IsConsoleApp( void ) const
 {
-	return m_resourcePool;
+	return true;
 }
 
 CLogger& CConsoleApplication::GetLogger( void )
 {
 	ASSERT_PTR( m_pLogger.get() );
 	return *m_pLogger;
+}
+
+utl::CResourcePool& CConsoleApplication::GetSharedResources( void )
+{
+	return m_resourcePool;
 }
 
 bool CConsoleApplication::BeepSignal( app::MsgType msgType /*= app::Info*/ )

@@ -6,7 +6,7 @@
 template< typename ValueT >
 struct Range
 {
-	typedef ValueT Value_Type;
+	typedef ValueT TValue;
 public:
 	Range( void ) {}
 	Range( ValueT start, ValueT end ) : m_start( start ), m_end( end ) {}

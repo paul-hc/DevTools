@@ -24,6 +24,7 @@ namespace app
 
 	interface IAppTools
 	{
+		virtual bool IsConsoleApp( void ) const = 0;
 		virtual CLogger& GetLogger( void ) = 0;
 		virtual utl::CResourcePool& GetSharedResources( void ) = 0;
 

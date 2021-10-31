@@ -44,7 +44,7 @@ namespace io
 
 
 	template< typename StringT >
-	void WriteStringToFile( const fs::CPath& targetFilePath, const StringT& text, fs::Encoding encoding ) throws_( CRuntimeException )
+	void WriteStringToFile( const fs::CPath& targetFilePath, const StringT& text, fs::Encoding encoding /*= fs::ANSI_UTF8*/ ) throws_( CRuntimeException )
 	{
 		switch ( fs::GetCharByteCount( encoding ) )
 		{

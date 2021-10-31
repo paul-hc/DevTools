@@ -18,13 +18,17 @@ public:
 	virtual ~CApplication();
 
 	CModuleSession& GetModuleSession( void ) { ASSERT_PTR( m_pModuleSession.get() ); return *m_pModuleSession; }
+	bool IsVisualStudio6( void ) const { return m_isVisualStudio6; }
 
-	static CApplication* GetApp( void ) { return checked_static_cast< CApplication* >( AfxGetApp() ); }
+	static CApplication* GetApp( void ) { return checked_static_cast<CApplication*>( AfxGetApp() ); }
+private:
+	void StoreVisualStudioVersion( void );
 private:
 	std::auto_ptr< CModuleSession > m_pModuleSession;
-public:
+	bool m_isVisualStudio6;
+
 	// generated overrides
-	public:
+public:
 	virtual BOOL InitInstance( void );
 	virtual int ExitInstance( void );
 	virtual BOOL OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo );
