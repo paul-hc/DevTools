@@ -5,6 +5,7 @@
 #include "utl/UI/LayoutDialog.h"
 #include "utl/UI/ItemContentHistoryCombo.h"
 #include "utl/UI/PathItemListCtrl.h"
+#include "utl/UI/DetailHostControls.h"
 
 
 class CFileStateTimedItem;
@@ -30,7 +31,7 @@ private:
 
 	CSearchPathHistoryCombo m_searchPathCombo;
 	CItemContentHistoryCombo m_folderPathCombo;
-	CPathItemListCtrl m_fileListCtrl;
+	CDetailHostCtrl<CPathItemListCtrl> m_fileListCtrl;
 
 	// generated stuff
 public:

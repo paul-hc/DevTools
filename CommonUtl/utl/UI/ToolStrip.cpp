@@ -46,7 +46,7 @@ int CToolStrip::GetImageCount( void ) const
 CImageList* CToolStrip::EnsureImageList( void )
 {
 	if ( !HasImages() )
-		if ( CImageStore::HasSharedStore() )
+		if ( !m_buttonIds.empty() && CImageStore::HasSharedStore() )
 		{
 			std::auto_ptr< CImageList > pImageList( new CImageList );
 			int imageCount = CImageStore::GetSharedStore()->AddToImageList( *pImageList, ARRAY_PAIR_V( m_buttonIds ), m_imageSize );

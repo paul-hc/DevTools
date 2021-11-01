@@ -18,6 +18,7 @@
 #endif
 
 #include "utl/FileStateEnumerator.hxx"
+#include "utl/UI/DetailHostControls.hxx"
 
 
 class CFileStateTimedItem : public CFileStateItem
@@ -111,9 +112,9 @@ namespace layout
 
 CBuddyControlsDialog::CBuddyControlsDialog( CWnd* pParent )
 	: CLayoutDialog( IDD_BUDDY_CONTROLS_DIALOG, pParent )
-	, m_fileListCtrl( IDC_FILE_STATE_EX_LIST, LVS_EX_GRIDLINES | lv::DefaultStyleEx )
 	, m_searchPathCombo( ui::MixedPath )
 	, m_folderPathCombo( ui::DirPath )
+	, m_fileListCtrl( /*IDC_FILE_STATE_EX_LIST, LVS_EX_GRIDLINES | lv::DefaultStyleEx*/ )
 {
 	m_regSection = reg::section_dialog;
 	RegisterCtrlLayout( layout::styles, COUNT_OF( layout::styles ) );
@@ -125,11 +126,22 @@ CBuddyControlsDialog::CBuddyControlsDialog( CWnd* pParent )
 
 	//SetFlag( m_fileListCtrl.RefListStyleEx(), LVS_EX_DOUBLEBUFFER, false );
 	m_fileListCtrl.SetSection( m_regSection + _T("\\List") );
+	m_fileListCtrl.SetLayoutInfo( IDC_FILE_STATE_EX_LIST );
+	m_fileListCtrl.ModifyListStyleEx( 0, LVS_EX_GRIDLINES );
 	m_fileListCtrl.SetUseAlternateRowColoring();
 	m_fileListCtrl.SetSubjectAdapter( ui::GetFullPathAdapter() );		// display full paths
 
 	m_fileListCtrl.AddRecordCompare( pred::NewComparator( pred::CompareCode() ) );		// default row item comparator
 	m_fileListCtrl.AddColumnCompare( ModifyTime, pred::NewPropertyComparator<CFileStateTimedItem>( func::AsModifyTime() ), false );
+
+	m_fileListCtrl.RefTandemLayout().m_alignment = H_AlignRight | V_AlignTop;
+	m_fileListCtrl.GetMateToolbar()->GetStrip()
+		.AddButton( ID_LIST_VIEW_REPORT )
+		.AddButton( ID_LIST_VIEW_TILE )
+		.AddSeparator()
+		.AddButton( ID_LIST_VIEW_ICON_LARGE )
+		.AddButton( ID_LIST_VIEW_ICON_SMALL )
+		.AddButton( ID_LIST_VIEW_LIST );
 }
 
 CBuddyControlsDialog::~CBuddyControlsDialog()

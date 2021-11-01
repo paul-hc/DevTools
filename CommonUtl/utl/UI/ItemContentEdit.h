@@ -2,7 +2,7 @@
 #define ItemContentEdit_h
 #pragma once
 
-#include "BaseItemContentCtrl.h"
+#include "DetailHostControls.h"
 #include "TextEdit.h"
 
 

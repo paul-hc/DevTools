@@ -11,7 +11,7 @@
 #define new DEBUG_NEW
 #endif
 
-#include "BaseItemContentCtrl.hxx"
+#include "DetailHostControls.hxx"
 
 
 // CItemContentEdit implementation

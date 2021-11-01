@@ -1286,14 +1286,6 @@
 					>
 				</File>
 				<File
-					RelativePath=".\BaseItemContentCtrl.h"
-					>
-				</File>
-				<File
-					RelativePath=".\BaseItemContentCtrl.hxx"
-					>
-				</File>
-				<File
 					RelativePath=".\BaseSplitButton.cpp"
 					>
 				</File>
@@ -1367,6 +1359,14 @@
 				</File>
 				<File
 					RelativePath=".\DateTimeControl.h"
+					>
+				</File>
+				<File
+					RelativePath=".\DetailHostControls.h"
+					>
+				</File>
+				<File
+					RelativePath=".\DetailHostControls.hxx"
 					>
 				</File>
 				<File
