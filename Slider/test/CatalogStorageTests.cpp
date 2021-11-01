@@ -58,8 +58,8 @@ void CCatalogStorageTests::TestBuildImageArchive( void )
 	{
 		// create image archive storage
 		{
-			fs::CPathEnumerator srcFound;
-			fs::EnumFiles( &srcFound, imageDirPath, NULL, fs::TEnumFlags::Make( fs::EF_Recurse | fs::EF_ResolveShellLinks ) );
+			fs::CPathEnumerator srcFound( fs::TEnumFlags::Make( fs::EF_Recurse | fs::EF_ResolveShellLinks ) );
+			fs::EnumFiles( &srcFound, imageDirPath, NULL );
 			srcImageCount = srcFound.m_filePaths.size();
 
 			CComPtr< ICatalogStorage > pCatalogStorage = ut::CreateArchiveStorageFile( docStgPath, srcFound.m_filePaths );

@@ -12,7 +12,7 @@ namespace fs
 	//
 	struct CFileStateEnumerator : public CBaseEnumerator
 	{
-		CFileStateEnumerator( IEnumerator* pChainEnum = NULL ) : CBaseEnumerator( pChainEnum ) {}
+		CFileStateEnumerator( fs::TEnumFlags enumFlags = fs::TEnumFlags(), IEnumerator* pChainEnum = NULL ) : CBaseEnumerator( enumFlags, pChainEnum ) {}
 
 		// base overrides
 		virtual void Clear( void ) { m_fileStates.clear(); __super::Clear(); }
@@ -55,8 +55,8 @@ namespace fs
 	template< typename FileStateItemT = CFileStateItem, typename CreateFuncT = func::CreateFoundItem<FileStateItemT> >
 	struct CFileStateItemEnumerator : public CFileStateEnumerator
 	{
-		CFileStateItemEnumerator( CreateFuncT createFunc = CreateFuncT(), IEnumerator* pChainEnum = NULL )
-			: CFileStateEnumerator( pChainEnum )
+		CFileStateItemEnumerator( fs::TEnumFlags enumFlags = fs::TEnumFlags(), CreateFuncT createFunc = CreateFuncT(), IEnumerator* pChainEnum = NULL )
+			: CFileStateEnumerator( enumFlags, pChainEnum )
 			, m_createFunc( createFunc )
 		{
 		}

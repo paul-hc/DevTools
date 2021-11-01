@@ -12,7 +12,8 @@
 
 
 CFileTransfer::CFileTransfer( const CXferOptions* pOptions )
-	: m_pOptions( pOptions )
+	: fs::IEnumeratorImpl( pOptions->m_recurseSubDirectories ? fs::EF_Recurse : fs::TEnumFlags() )
+	, m_pOptions( pOptions )
 	, m_fileCount( 0 )
 	, m_createdDirCount( 0 )
 
@@ -83,7 +84,7 @@ void CFileTransfer::SearchSourceFiles( const fs::CPath& dirPath )
 	if ( m_pOptions->m_justCreateTargetDirs )
 		AddTransferItem( new CTransferItem( dirPath, m_pOptions->m_sourceDirPath, m_pOptions->m_targetDirPath ) );
 	else
-		fs::EnumFiles( this, dirPath, m_pOptions->m_searchSpecs.c_str(), m_pOptions->m_recurseSubDirectories ? fs::EF_Recurse : fs::TEnumFlags() );
+		fs::EnumFiles( this, dirPath, m_pOptions->m_searchSpecs.c_str() );
 }
 
 void CFileTransfer::OnAddFileInfo( const CFileFind& foundFile )

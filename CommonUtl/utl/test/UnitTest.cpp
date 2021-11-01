@@ -335,8 +335,8 @@ namespace ut
 	size_t EnumFilePaths( std::vector< fs::CPath >& rFilePaths, const fs::CPath& dirPath, SortType sortType /*= SortAscending*/,
 						  const TCHAR* pWildSpec /*= _T("*")*/, fs::TEnumFlags flags /*= fs::EF_Recurse*/ )
 	{
-		fs::CRelativePathEnumerator found( dirPath );
-		fs::EnumFiles( &found, dirPath, pWildSpec, flags );
+		fs::CRelativePathEnumerator found( dirPath, flags );
+		fs::EnumFiles( &found, dirPath, pWildSpec );
 
 		size_t addedCount = path::JoinUniquePaths( rFilePaths, found.m_filePaths );
 
@@ -349,8 +349,8 @@ namespace ut
 	size_t EnumSubDirPaths( std::vector< fs::CPath >& rSubDirPaths, const fs::CPath& dirPath, SortType sortType /*= SortAscending*/,
 							fs::TEnumFlags flags /*= fs::EF_Recurse*/ )
 	{
-		fs::CRelativePathEnumerator found( dirPath );
-		fs::EnumFiles( &found, dirPath, _T("*"), flags );
+		fs::CRelativePathEnumerator found( dirPath, flags );
+		fs::EnumFiles( &found, dirPath, _T("*") );
 
 		size_t addedCount = path::JoinUniquePaths( rSubDirPaths, found.m_subDirPaths );
 

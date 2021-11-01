@@ -18,6 +18,7 @@
 
 namespace ut
 {
+	static const fs::TEnumFlags s_recurse( fs::EF_Recurse );
 	static const CTime s_ct( 2017, 7, 1, 14, 10, 0 );
 	static const CTime s_mt( 2017, 7, 1, 14, 20, 0 );
 	static const CTime s_at( 2017, 7, 1, 14, 30, 0 );
@@ -66,34 +67,34 @@ void CFileSystemTests::TestFileEnum( void )
 		ASSERT_EQUAL( _T("a|a.doc|a.jpg|a.png|a.txt"), ut::JoinFiles( found ) );
 	}
 	{
-		fs::CRelativePathEnumerator found( poolDirPath );
-		fs::EnumFiles( &found, poolDirPath, _T("*.*"), fs::EF_Recurse );
+		fs::CRelativePathEnumerator found( poolDirPath, ut::s_recurse );
+		fs::EnumFiles( &found, poolDirPath, _T("*.*") );
 		ASSERT_EQUAL( _T("a|a.doc|a.jpg|a.png|a.txt|D1\\b|D1\\b.doc|D1\\b.txt|D1\\D2\\c|D1\\D2\\c.doc|D1\\D2\\c.png|D1\\D2\\c.txt"), ut::JoinFiles( found ) );
 	}
 	{
-		fs::CRelativePathEnumerator found( poolDirPath );
-		fs::EnumFiles( &found, poolDirPath, _T("*."), fs::EF_Recurse );			// filter files with no extension
+		fs::CRelativePathEnumerator found( poolDirPath, ut::s_recurse );
+		fs::EnumFiles( &found, poolDirPath, _T("*.") );						// filter files with no extension
 		ASSERT_EQUAL( _T("a|D1\\b|D1\\D2\\c"), ut::JoinFiles( found ) );
 	}
 	{
-		fs::CRelativePathEnumerator found( poolDirPath );
-		fs::EnumFiles( &found, poolDirPath, _T("*.doc"), fs::EF_Recurse );
+		fs::CRelativePathEnumerator found( poolDirPath, ut::s_recurse );
+		fs::EnumFiles( &found, poolDirPath, _T("*.doc") );
 		ASSERT_EQUAL( _T("a.doc|D1\\b.doc|D1\\D2\\c.doc"), ut::JoinFiles( found ) );
 	}
 	{
-		fs::CRelativePathEnumerator found( poolDirPath );
-		fs::EnumFiles( &found, poolDirPath, _T("*.doc;*.txt"), fs::EF_Recurse );
+		fs::CRelativePathEnumerator found( poolDirPath, ut::s_recurse );
+		fs::EnumFiles( &found, poolDirPath, _T("*.doc;*.txt") );
 		ASSERT_EQUAL( _T("a.doc|a.txt|D1\\b.doc|D1\\b.txt|D1\\D2\\c.doc|D1\\D2\\c.txt"), ut::JoinFiles( found ) );
 		ASSERT_EQUAL( _T("D1|D1\\D2"), ut::JoinSubDirs( found ) );
 	}
 	{
-		fs::CRelativePathEnumerator found( poolDirPath );
-		fs::EnumFiles( &found, poolDirPath, _T("*.?oc;*.t?t"), fs::EF_Recurse );
+		fs::CRelativePathEnumerator found( poolDirPath, ut::s_recurse );
+		fs::EnumFiles( &found, poolDirPath, _T("*.?oc;*.t?t") );
 		ASSERT_EQUAL( _T("a.doc|a.txt|D1\\b.doc|D1\\b.txt|D1\\D2\\c.doc|D1\\D2\\c.txt"), ut::JoinFiles( found ) );
 	}
 	{
-		fs::CRelativePathEnumerator found( poolDirPath );
-		fs::EnumFiles( &found, poolDirPath, _T("*.jpg;*.png"), fs::EF_Recurse );
+		fs::CRelativePathEnumerator found( poolDirPath, ut::s_recurse );
+		fs::EnumFiles( &found, poolDirPath, _T("*.jpg;*.png") );
 		ASSERT_EQUAL( _T("a.jpg|a.png|D1\\D2\\c.png"), ut::JoinFiles( found ) );
 		ASSERT_EQUAL( _T("D1|D1\\D2"), ut::JoinSubDirs( found ) );
 	}
@@ -101,11 +102,11 @@ void CFileSystemTests::TestFileEnum( void )
 		fs::CRelativePathEnumerator found( poolDirPath );
 		fs::EnumFiles( &found, poolDirPath, _T("*.jpg;*.png") );
 		ASSERT_EQUAL( _T("a.jpg|a.png"), ut::JoinFiles( found ) );
-		ASSERT_EQUAL( _T("D1"), ut::JoinSubDirs( found ) );				// only the shallow subdirs
+		ASSERT_EQUAL( _T("D1"), ut::JoinSubDirs( found ) );				// only shallow subdirs
 	}
 	{
-		fs::CRelativePathEnumerator found( poolDirPath );
-		fs::EnumFiles( &found, poolDirPath, _T("*.exe;*.bat"), fs::EF_Recurse );
+		fs::CRelativePathEnumerator found( poolDirPath, ut::s_recurse );
+		fs::EnumFiles( &found, poolDirPath, _T("*.exe;*.bat") );
 		ASSERT_EQUAL( _T(""), ut::JoinFiles( found ) );
 	}
 
@@ -129,38 +130,37 @@ void CFileSystemTests::TestFileEnumFilter( void )
 
 	// ignore files
 	{
-		fs::CRelativePathEnumerator found( poolDirPath );
-		found.RefOptions().m_ignoreFiles = true;
-		fs::SearchEnumFiles( &found, poolDirPath, fs::EF_Recurse );
+		fs::CRelativePathEnumerator found( poolDirPath, ut::s_recurse | fs::EF_IgnoreFiles );
+		fs::SearchEnumFiles( &found, poolDirPath );
 		ASSERT_EQUAL( _T(""), ut::JoinFiles( found ) );
 		ASSERT_EQUAL( _T("D1|D1\\D2"), ut::JoinSubDirs( found ) );
 	}
 
 	// recursion depth level
 	{
-		fs::CRelativePathEnumerator found( poolDirPath );
+		fs::CRelativePathEnumerator found( poolDirPath, ut::s_recurse );
 		found.RefOptions().m_maxDepthLevel = 0;
-		fs::SearchEnumFiles( &found, poolDirPath, fs::EF_Recurse );
+		fs::SearchEnumFiles( &found, poolDirPath );
 		ASSERT_EQUAL( _T("a|a.doc|a.jpg|a.png|a.txt"), ut::JoinFiles( found ) );		// root files
 	}
 	{
-		fs::CRelativePathEnumerator found( poolDirPath );
+		fs::CRelativePathEnumerator found( poolDirPath, ut::s_recurse );
 		found.RefOptions().m_maxDepthLevel = 1;
-		fs::SearchEnumFiles( &found, poolDirPath, fs::EF_Recurse );
+		fs::SearchEnumFiles( &found, poolDirPath );
 		ASSERT_EQUAL( _T("a|a.doc|a.jpg|a.png|a.txt|D1\\b|D1\\b.doc|D1\\b.txt"), ut::JoinFiles( found ) );		// root and D1/ files
 	}
 	{
-		fs::CRelativePathEnumerator found( poolDirPath );
+		fs::CRelativePathEnumerator found( poolDirPath, ut::s_recurse );
 		found.RefOptions().m_maxDepthLevel = 2;
-		fs::SearchEnumFiles( &found, poolDirPath, fs::EF_Recurse );
+		fs::SearchEnumFiles( &found, poolDirPath );
 		ASSERT_EQUAL( _T("a|a.doc|a.jpg|a.png|a.txt|D1\\b|D1\\b.doc|D1\\b.txt|D1\\D2\\c|D1\\D2\\c.doc|D1\\D2\\c.png|D1\\D2\\c.txt"), ut::JoinFiles( found ) );	// all files
 	}
 
 	// maximum number of files
 	{
-		fs::CRelativePathEnumerator found( poolDirPath );
+		fs::CRelativePathEnumerator found( poolDirPath, ut::s_recurse );
 		found.RefOptions().m_maxFiles = 6;
-		fs::SearchEnumFiles( &found, poolDirPath, fs::EF_Recurse );
+		fs::SearchEnumFiles( &found, poolDirPath );
 		ASSERT_EQUAL( _T("a|a.doc|a.jpg|a.png|a.txt|D1\\b"), ut::JoinFiles( found ) );		// root files
 	}
 
@@ -170,30 +170,30 @@ void CFileSystemTests::TestFileEnumFilter( void )
 		ignorePaths.push_back( poolDirPath / _T("D1\\D2") );
 		ignorePaths.push_back( fs::CPath( _T("*.doc;*.jpg;*.png") ) );
 
-		fs::CRelativePathEnumerator found( poolDirPath );
+		fs::CRelativePathEnumerator found( poolDirPath, ut::s_recurse );
 		found.RefOptions().m_ignorePathMatches.Reset( ignorePaths );
-		fs::SearchEnumFiles( &found, poolDirPath, fs::EF_Recurse );
+		fs::SearchEnumFiles( &found, poolDirPath );
 		ASSERT_EQUAL( _T("a|a.txt|D1\\b|D1\\b.txt"), ut::JoinFiles( found ) );		// root files
 	}
 
 	// filter by file size
 	{
 		{	// max size limit
-			fs::CRelativePathEnumerator found( poolDirPath );
+			fs::CRelativePathEnumerator found( poolDirPath, ut::s_recurse );
 			found.RefOptions().m_fileSizeRange.m_end = 5;
-			fs::SearchEnumFiles( &found, poolDirPath, fs::EF_Recurse );
+			fs::SearchEnumFiles( &found, poolDirPath );
 			ASSERT_EQUAL( _T(""), ut::JoinFiles( found ) );
 
 			ut::StoreFileSize( poolDirPath / _T("a.doc"), 3 );		// lower the size to pass the filter
 
 			found.Clear();
-			fs::SearchEnumFiles( &found, poolDirPath, fs::EF_Recurse );
+			fs::SearchEnumFiles( &found, poolDirPath );
 			ASSERT_EQUAL( _T("a.doc"), ut::JoinFiles( found ) );
 		}
 		{	// min size limit
-			fs::CRelativePathEnumerator found( poolDirPath );
+			fs::CRelativePathEnumerator found( poolDirPath, ut::s_recurse );
 			found.RefOptions().m_fileSizeRange.m_start = 100;
-			fs::SearchEnumFiles( &found, poolDirPath, fs::EF_Recurse );
+			fs::SearchEnumFiles( &found, poolDirPath );
 			ASSERT_EQUAL( _T(""), ut::JoinFiles( found ) );
 
 			// increase the sizes to pass the filter of min 100 bytes
@@ -201,7 +201,7 @@ void CFileSystemTests::TestFileEnumFilter( void )
 			ut::StoreFileSize( poolDirPath / _T("D1\\D2\\c.txt"), 128 );
 
 			found.Clear();
-			fs::SearchEnumFiles( &found, poolDirPath, fs::EF_Recurse );
+			fs::SearchEnumFiles( &found, poolDirPath );
 			ASSERT_EQUAL( _T("a.txt|D1\\D2\\c.txt"), ut::JoinFiles( found ) );
 		}
 	}
@@ -217,18 +217,16 @@ void CFileSystemTests::TestFileEnumHidden( void )
 
 	// include hidden nodes
 	{
-		fs::CRelativePathEnumerator found( poolDirPath );
-		ASSERT( !found.RefOptions().m_ignoreHiddenNodes );		// this is the default: ignore hidden files & folders
-		fs::SearchEnumFiles( &found, poolDirPath, fs::EF_Recurse );
+		fs::CRelativePathEnumerator found( poolDirPath, ut::s_recurse );
+		fs::SearchEnumFiles( &found, poolDirPath );
 		ASSERT_EQUAL( _T("a.doc|a.txt|D1\\b.txt|D1\\D2\\c.txt"), ut::JoinFiles( found ) );
 		ASSERT_EQUAL( _T("D1|D1\\D2"), ut::JoinSubDirs( found ) );
 	}
 
 	// ignore hidden nodes
 	{
-		fs::CRelativePathEnumerator found( poolDirPath );
-		found.RefOptions().m_ignoreHiddenNodes = true;			// ignore hidden files & folders
-		fs::SearchEnumFiles( &found, poolDirPath, fs::EF_Recurse );
+		fs::CRelativePathEnumerator found( poolDirPath, ut::s_recurse | fs::EF_IgnoreHiddenNodes );
+		fs::SearchEnumFiles( &found, poolDirPath );
 		ASSERT_EQUAL( _T("a.doc|D1\\b.txt"), ut::JoinFiles( found ) );
 		ASSERT_EQUAL( _T("D1"), ut::JoinSubDirs( found ) );
 	}

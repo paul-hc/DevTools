@@ -17,7 +17,7 @@
 
 
 CImageFileEnumerator::CImageFileEnumerator( IEnumerator* pProgressEnum /*= NULL*/ )
-	: fs::CPathEnumerator( pProgressEnum )
+	: fs::CPathEnumerator( fs::TEnumFlags::Make( fs::EF_Recurse | fs::EF_IgnoreHiddenNodes | fs::EF_ResolveShellLinks ), pProgressEnum )
 	, m_issueStore( _T("Searching for images") )
 	, m_pCurrPattern( NULL )
 {

@@ -33,11 +33,13 @@ namespace app
 	// CDirEnumerator implementation
 
 	CDirEnumerator::CDirEnumerator( const CCmdLineOptions& appOptions )
-		: m_appOptions( appOptions )
+		: fs::CPathEnumerator()
+		, m_appOptions( appOptions )
 		, m_moreFilesCount( 0 )
 	{
-		m_options.m_ignoreFiles = !m_appOptions.HasOptionFlag( app::DisplayFiles );
-		m_options.m_ignoreHiddenNodes = !m_appOptions.HasOptionFlag( app::ShowHiddenNodes );
+		RefFlags().Set( fs::EF_IgnoreFiles, !m_appOptions.HasOptionFlag( app::DisplayFiles ) );
+		RefFlags().Set( fs::EF_IgnoreHiddenNodes, !m_appOptions.HasOptionFlag( app::ShowHiddenNodes ) );
+		RefFlags().Set( fs::EF_NoSortSubDirs, m_appOptions.HasOptionFlag( app::NoSorting ) );
 	}
 
 	void CDirEnumerator::AddFoundFile( const TCHAR* pFilePath )
@@ -91,7 +93,7 @@ void CDirectory::List( std::wostream& os, const CTreeGuides& guideParts, const s
 	app::CDirEnumerator found( m_options );
 	CTimer enumTimer;
 
-	fs::EnumFiles( &found, m_dirPath, s_wildSpec, m_options.HasOptionFlag( app::NoSorting ) ? fs::TEnumFlags() : fs::EF_NoSortSubDirs );
+	fs::EnumFiles( &found, m_dirPath, s_wildSpec );
 	found.OnCompleted();
 	s_totalElapsedEnum += enumTimer.ElapsedSeconds();
 

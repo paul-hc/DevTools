@@ -11,8 +11,8 @@ namespace fs
 {
 	// pWildSpec can be multiple: "*.*", "*.doc;*.txt"
 
-	void EnumFiles( IEnumerator* pEnumerator, const fs::TDirPath& dirPath, const TCHAR* pWildSpec = _T("*.*"), fs::TEnumFlags flags = fs::TEnumFlags() );
-	fs::PatternResult SearchEnumFiles( IEnumerator* pEnumerator, const fs::TPatternPath& searchPath, fs::TEnumFlags flags = fs::TEnumFlags() );
+	void EnumFiles( IEnumerator* pEnumerator, const fs::TDirPath& dirPath, const TCHAR* pWildSpec = _T("*.*") );
+	fs::PatternResult SearchEnumFiles( IEnumerator* pEnumerator, const fs::TPatternPath& searchPath );
 
 	size_t EnumFilePaths( std::vector< fs::CPath >& rFilePaths, const fs::CPath& dirPath, const TCHAR* pWildSpec = _T("*.*"), fs::TEnumFlags flags = fs::TEnumFlags() );
 	size_t EnumSubDirPaths( std::vector< fs::CPath >& rSubDirPaths, const fs::CPath& dirPath, const TCHAR* pWildSpec = _T("*.*"), fs::TEnumFlags flags = fs::TEnumFlags() );
@@ -57,13 +57,12 @@ namespace fs
 
 	struct CEnumOptions
 	{
-		CEnumOptions( void );
+		CEnumOptions( fs::TEnumFlags enumFlags );
 
 		template< typename SizeT >
 		void SetFileSizeRange( const Range<SizeT>& fileSizeRange ) { m_fileSizeRange = fileSizeRange; ENSURE( m_fileSizeRange.IsNormalized() ); }
 	public:
-		bool m_ignoreFiles;
-		bool m_ignoreHiddenNodes;		// false by default so that UTL_BASE file system utilities check collisions with existing hidden files
+		fs::TEnumFlags m_enumFlags;
 		size_t m_maxFiles;
 		size_t m_maxDepthLevel;
 		Range<UINT64> m_fileSizeRange;
@@ -78,9 +77,11 @@ namespace fs
 	abstract class CBaseEnumerator : public IEnumerator, private utl::noncopyable
 	{
 	protected:
-		CBaseEnumerator( IEnumerator* pChainEnum = NULL );
-
+		CBaseEnumerator( fs::TEnumFlags enumFlags, IEnumerator* pChainEnum = NULL );
+	public:
 		// IEnumerator interface (partial)
+		virtual const TEnumFlags& GetFlags( void ) const { return m_options.m_enumFlags; }
+	protected:
 		virtual void OnAddFileInfo( const CFileFind& foundFile );		// no chaining via m_pChainEnum
 		virtual void AddFoundFile( const TCHAR* pFilePath ) = 0;		// has implementation
 		virtual bool AddFoundSubDir( const TCHAR* pSubDirPath );
@@ -96,6 +97,8 @@ namespace fs
 		// overridables
 		virtual size_t GetFileCount( void ) const = 0;
 		virtual void Clear( void ) = 0 { m_subDirPaths.clear(); }
+
+		fs::TEnumFlags& RefFlags( void ) { REQUIRE( IsEmpty() ); return m_options.m_enumFlags; }
 
 		const fs::CEnumOptions& GetOptions( void ) const { return m_options; }
 		fs::CEnumOptions& RefOptions( void ) { REQUIRE( IsEmpty() ); return m_options; }
@@ -122,7 +125,7 @@ namespace fs
 	//
 	struct CPathEnumerator : public CBaseEnumerator
 	{
-		CPathEnumerator( IEnumerator* pChainEnum = NULL ) : CBaseEnumerator( pChainEnum ) {}
+		CPathEnumerator( fs::TEnumFlags enumFlags = fs::TEnumFlags(), IEnumerator* pChainEnum = NULL ) : CBaseEnumerator( enumFlags, pChainEnum ) {}
 
 		// base overrides
 		virtual size_t GetFileCount( void ) const { return m_filePaths.size(); }
@@ -139,13 +142,17 @@ namespace fs
 
 	struct CRelativePathEnumerator : public CPathEnumerator
 	{
-		CRelativePathEnumerator( const fs::CPath& relativeDirPath ) : CPathEnumerator( NULL ) { SetRelativeDirPath( relativeDirPath ); }
+		CRelativePathEnumerator( const fs::CPath& relativeDirPath, fs::TEnumFlags enumFlags = fs::TEnumFlags(), IEnumerator* pChainEnum = NULL )
+			: CPathEnumerator( enumFlags, pChainEnum )
+		{
+			SetRelativeDirPath( relativeDirPath );
+		}
 	};
 
 
 	struct CFirstFileEnumerator : public CPathEnumerator
 	{
-		CFirstFileEnumerator( void ) : CPathEnumerator() { RefOptions().m_maxFiles = 1; }
+		CFirstFileEnumerator( fs::TEnumFlags enumFlags = fs::TEnumFlags() ) : CPathEnumerator( enumFlags ) { RefOptions().m_maxFiles = 1; }
 
 		fs::CPath GetFoundPath( void ) const { return !m_filePaths.empty() ? m_filePaths.front() : fs::CPath(); }
 	};

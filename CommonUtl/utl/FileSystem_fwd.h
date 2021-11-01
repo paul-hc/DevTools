@@ -21,7 +21,10 @@ namespace fs
 	enum EnumFlags
 	{
 		EF_Recurse				= BIT_FLAG( 0 ),
-		EF_NoSortSubDirs		= BIT_FLAG( 1 ),
+		EF_IgnoreFiles			= BIT_FLAG( 1 ),
+		EF_IgnoreHiddenNodes	= BIT_FLAG( 2 ),
+		EF_NoSortSubDirs		= BIT_FLAG( 3 ),
+
 		EF_ResolveShellLinks	= BIT_FLAG( 8 )
 	};
 
@@ -30,6 +33,8 @@ namespace fs
 
 	interface IEnumerator
 	{
+		virtual const TEnumFlags& GetFlags( void ) const = 0;
+
 		virtual void AddFoundFile( const TCHAR* pFilePath ) = 0;
 		virtual bool AddFoundSubDir( const TCHAR* pSubDirPath ) = 0;
 
@@ -39,7 +44,12 @@ namespace fs
 		virtual bool MustStop( void ) const = 0;					// abort searching?
 		virtual utl::ICounter* GetDepthCounter( void ) = 0;			// supports recursion depth
 
-		virtual void OnAddFileInfo( const CFileFind& foundFile )	// override to access extra file state
+
+		// default implementation
+
+		bool HasFlag( EnumFlags enumFlag ) const { return GetFlags().Has( enumFlag ); }
+
+		virtual void OnAddFileInfo( const CFileFind& foundFile )	// override to get access to extra file state
 		{
 			AddFoundFile( foundFile.GetFilePath() );
 		}
@@ -49,13 +59,16 @@ namespace fs
 	abstract class IEnumeratorImpl : public IEnumerator, private utl::noncopyable		// default implementation for advanced overrideables
 	{
 	protected:
-		IEnumeratorImpl( void ) {}
+		IEnumeratorImpl( fs::TEnumFlags enumFlags = fs::TEnumFlags() ) : m_enumFlags( enumFlags ) {}
 	public:
 		// IEnumerator interface (partial)
+		virtual const TEnumFlags& GetFlags( void ) const { return m_enumFlags; }
 		virtual bool IncludeNode( const CFileFind& foundNode ) { foundNode; return true; }
-		virtual bool CanRecurse( void ) const { return true; }
+		virtual bool CanRecurse( void ) const { return HasFlag( fs::EF_Recurse ); }
 		virtual bool MustStop( void ) const { return false; }
 		virtual utl::ICounter* GetDepthCounter( void ) { return NULL; }
+	private:
+		fs::TEnumFlags m_enumFlags;
 	};
 
 

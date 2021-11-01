@@ -140,9 +140,9 @@ CBuddyControlsDialog::~CBuddyControlsDialog()
 void CBuddyControlsDialog::SearchForFiles( void )
 {
 	CWaitCursor wait;
-	fs::CFileStateItemEnumerator<CFileStateTimedItem> found;
+	fs::CFileStateItemEnumerator<CFileStateTimedItem> found( fs::EF_Recurse );
 
-	if ( fs::InvalidPattern == fs::SearchEnumFiles( &found, m_searchPath, fs::EF_Recurse ) )
+	if ( fs::InvalidPattern == fs::SearchEnumFiles( &found, m_searchPath ) )
 		ui::MessageBox( std::tstring( _T("Invalid path:\n\n") ) + m_searchPath.Get() );
 
 	found.SortItems();

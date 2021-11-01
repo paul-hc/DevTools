@@ -193,9 +193,9 @@ CFileChecksumsDialog::~CFileChecksumsDialog()
 void CFileChecksumsDialog::SearchForFiles( void )
 {
 	CWaitCursor wait;
-	fs::CFileStateItemEnumerator<CFileChecksumItem> found;
+	fs::CFileStateItemEnumerator<CFileChecksumItem> found( fs::EF_Recurse );
 
-	if ( fs::InvalidPattern == fs::SearchEnumFiles( &found, m_searchPath, fs::EF_Recurse ) )
+	if ( fs::InvalidPattern == fs::SearchEnumFiles( &found, m_searchPath ) )
 		ui::MessageBox( std::tstring( _T("Invalid path:\n\n") ) + m_searchPath.Get() );
 
 	found.SortItems();

@@ -176,11 +176,13 @@ void CSearchPattern::EnumImageFiles( fs::IEnumerator* pEnumerator ) const
 	{
 		case DirPath:
 		{
-			fs::TEnumFlags flags( fs::EF_ResolveShellLinks );
-			if ( RecurseSubDirs == m_searchMode )
-				flags |= fs::EF_Recurse;
+			fs::TEnumFlags origFlags = pEnumerator->GetFlags();
+			fs::TEnumFlags& rEnumFlags = checked_static_cast<fs::CBaseEnumerator*>( pEnumerator )->RefFlags();
 
-			fs::EnumFiles( pEnumerator, GetFilePath(), GetSafeWildFilters().c_str(), flags );
+			rEnumFlags.Set( fs::EF_Recurse, RecurseSubDirs == m_searchMode );
+			fs::EnumFiles( pEnumerator, GetFilePath(), GetSafeWildFilters().c_str() );
+
+			rEnumFlags = origFlags;		// restore original enum flags
 			break;
 		}
 		case AlbumFile:
