@@ -63,7 +63,7 @@ namespace fs
 		void SetFileSizeRange( const Range<SizeT>& fileSizeRange ) { m_fileSizeRange = fileSizeRange; ENSURE( m_fileSizeRange.IsNormalized() ); }
 	public:
 		bool m_ignoreFiles;
-		bool m_ignoreHiddenNodes;
+		bool m_ignoreHiddenNodes;		// false by default so that UTL_BASE file system utilities check collisions with existing hidden files
 		size_t m_maxFiles;
 		size_t m_maxDepthLevel;
 		Range<UINT64> m_fileSizeRange;
@@ -81,7 +81,7 @@ namespace fs
 		CBaseEnumerator( IEnumerator* pChainEnum = NULL );
 
 		// IEnumerator interface (partial)
-		virtual void OnAddFileInfo( const CFileFind& foundFile );
+		virtual void OnAddFileInfo( const CFileFind& foundFile );		// no chaining via m_pChainEnum
 		virtual void AddFoundFile( const TCHAR* pFilePath ) = 0;		// has implementation
 		virtual bool AddFoundSubDir( const TCHAR* pSubDirPath );
 		virtual bool IncludeNode( const CFileFind& foundNode );

@@ -212,8 +212,6 @@ namespace fs
 			return false;
 
 		fs::CPathEnumerator found;
-		found.RefOptions().m_ignoreHiddenNodes = false;		// also delete hidden files & directories
-
 		fs::EnumFiles( &found, fs::CPath( pDirPath ), _T("*") );
 
 		for ( std::vector< fs::CPath >::iterator itSubDirPath = found.m_subDirPaths.begin(); itSubDirPath != found.m_subDirPaths.end(); )
@@ -379,6 +377,19 @@ namespace fs
 		return reinterpret_cast< const WIN32_FIND_DATA* >( pFriendlyFileFinder->m_pFoundInfo );
 	}
 
+
+	bool ModifyFileAttributes( const fs::CPath& filePath, DWORD removeAttributes, DWORD addAttributes )
+	{
+		DWORD attributes = ::GetFileAttributes( filePath.GetPtr() );
+
+		if ( INVALID_FILE_ATTRIBUTES == attributes )
+			return false;
+
+		attributes &= ~removeAttributes;
+		attributes |= addAttributes;
+
+		return ::SetFileAttributes( filePath.GetPtr(), attributes ) != FALSE;
+	}
 
 	UINT64 GetFileSize( const TCHAR* pFilePath )
 	{

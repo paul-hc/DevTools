@@ -250,7 +250,7 @@ namespace fs
 
 	CEnumOptions::CEnumOptions( void )
 		: m_ignoreFiles( false )
-		, m_ignoreHiddenNodes( true )
+		, m_ignoreHiddenNodes( false )
 		, m_maxFiles( utl::npos )
 		, m_maxDepthLevel( utl::npos )
 		, m_fileSizeRange( s_fullFileSizesRange )

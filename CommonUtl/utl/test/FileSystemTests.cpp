@@ -22,23 +22,6 @@ namespace ut
 	static const CTime s_mt( 2017, 7, 1, 14, 20, 0 );
 	static const CTime s_at( 2017, 7, 1, 14, 30, 0 );
 
-
-	bool ModifyFileAttributes( const fs::CPath& filePath, DWORD removeAttributes, DWORD addAttributes )
-	{
-		DWORD attributes = ::GetFileAttributes( filePath.GetPtr() );
-
-		if ( INVALID_FILE_ATTRIBUTES == attributes )
-			return false;
-
-		attributes &= ~removeAttributes;
-		attributes |= addAttributes;
-
-		return ::SetFileAttributes( filePath.GetPtr(), attributes ) != FALSE;
-	}
-
-	inline bool AddFileAttributes( const fs::CPath& filePath, DWORD addAttributes ) { return ModifyFileAttributes( filePath, 0, addAttributes ); }
-	inline bool RemoveFileAttributes( const fs::CPath& filePath, DWORD removeAttributes ) { return ModifyFileAttributes( filePath, removeAttributes, 0 ); }
-
 	void StoreFileSize( const fs::CPath& targetFilePath, size_t fileSize )
 	{
 		std::vector< char > buffer( fileSize, '@' );
@@ -229,25 +212,25 @@ void CFileSystemTests::TestFileEnumHidden( void )
 	ut::CTempFilePool pool( _T("a.doc|a.txt|D1\\b.txt|D1\\D2\\c.txt") );
 	const fs::CPath& poolDirPath = pool.GetPoolDirPath();
 
-	ut::AddFileAttributes( poolDirPath / _T("a.txt"), FILE_ATTRIBUTE_HIDDEN );		// hide file
-	ut::AddFileAttributes( poolDirPath / _T("D1\\D2"), FILE_ATTRIBUTE_HIDDEN );		// hide subdirectory
-
-	// ignore hidden nodes
-	{
-		fs::CRelativePathEnumerator found( poolDirPath );
-		found.RefOptions().m_ignoreHiddenNodes = true;			// this is the default: ignore hidden files & folders
-		fs::SearchEnumFiles( &found, poolDirPath, fs::EF_Recurse );
-		ASSERT_EQUAL( _T("a.doc|D1\\b.txt"), ut::JoinFiles( found ) );
-		ASSERT_EQUAL( _T("D1"), ut::JoinSubDirs( found ) );
-	}
+	fs::AddFileAttributes( poolDirPath / _T("a.txt"), FILE_ATTRIBUTE_HIDDEN );		// hide file
+	fs::AddFileAttributes( poolDirPath / _T("D1\\D2"), FILE_ATTRIBUTE_HIDDEN );		// hide subdirectory
 
 	// include hidden nodes
 	{
 		fs::CRelativePathEnumerator found( poolDirPath );
-		found.RefOptions().m_ignoreHiddenNodes = false;			// this is the default: ignore hidden files & folders
+		ASSERT( !found.RefOptions().m_ignoreHiddenNodes );		// this is the default: ignore hidden files & folders
 		fs::SearchEnumFiles( &found, poolDirPath, fs::EF_Recurse );
 		ASSERT_EQUAL( _T("a.doc|a.txt|D1\\b.txt|D1\\D2\\c.txt"), ut::JoinFiles( found ) );
 		ASSERT_EQUAL( _T("D1|D1\\D2"), ut::JoinSubDirs( found ) );
+	}
+
+	// ignore hidden nodes
+	{
+		fs::CRelativePathEnumerator found( poolDirPath );
+		found.RefOptions().m_ignoreHiddenNodes = true;			// ignore hidden files & folders
+		fs::SearchEnumFiles( &found, poolDirPath, fs::EF_Recurse );
+		ASSERT_EQUAL( _T("a.doc|D1\\b.txt"), ut::JoinFiles( found ) );
+		ASSERT_EQUAL( _T("D1"), ut::JoinSubDirs( found ) );
 	}
 }
 

@@ -88,6 +88,12 @@ namespace fs
 	const WIN32_FIND_DATA* GetFindData( const CFileFind& foundFile );
 	inline DWORD GetFileAttributes( const CFileFind& foundFile ) { return GetFindData( foundFile )->dwFileAttributes; }
 
+
+	bool ModifyFileAttributes( const fs::CPath& filePath, DWORD removeAttributes, DWORD addAttributes );
+	inline bool AddFileAttributes( const fs::CPath& filePath, DWORD addAttributes ) { return ModifyFileAttributes( filePath, 0, addAttributes ); }
+	inline bool RemoveFileAttributes( const fs::CPath& filePath, DWORD removeAttributes ) { return ModifyFileAttributes( filePath, removeAttributes, 0 ); }
+
+
 	UINT64 GetFileSize( const TCHAR* pFilePath );
 
 	CTime ReadFileTime( const fs::CPath& filePath, TimeField timeField );
