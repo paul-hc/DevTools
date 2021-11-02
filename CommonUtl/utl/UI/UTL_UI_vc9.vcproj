@@ -1362,14 +1362,6 @@
 					>
 				</File>
 				<File
-					RelativePath=".\DetailHostControls.h"
-					>
-				</File>
-				<File
-					RelativePath=".\DetailHostControls.hxx"
-					>
-				</File>
-				<File
 					RelativePath=".\DetailIconButton.cpp"
 					>
 				</File>
@@ -1571,6 +1563,14 @@
 				</File>
 				<File
 					RelativePath=".\StockValuesComboBox.hxx"
+					>
+				</File>
+				<File
+					RelativePath=".\TandemControls.h"
+					>
+				</File>
+				<File
+					RelativePath=".\TandemControls.hxx"
 					>
 				</File>
 				<File

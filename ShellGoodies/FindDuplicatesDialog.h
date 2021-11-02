@@ -4,7 +4,7 @@
 
 #include "utl/ISubject.h"
 #include "utl/FileSystem_fwd.h"
-#include "utl/UI/DialogToolBar.h"
+#include "utl/UI/TandemControls.h"
 #include "utl/UI/EnumComboBox.h"
 #include "utl/UI/HistoryComboBox.h"
 #include "utl/UI/PathItemListCtrl.h"
@@ -103,16 +103,13 @@ private:
 	enum DupFileColumn { FileName, FolderPath, Size, Crc32, DateModified, DuplicateCount };
 	enum SubPopup { DupListNowhere, DupListOnSelection };
 
-	CPathItemListCtrl m_searchPathsListCtrl;
-	CPathItemListCtrl m_ignorePathsListCtrl;
-	CDialogToolBar m_searchPathsToolbar;
-	CDialogToolBar m_ignorePathsToolbar;
+	CHostToolbarCtrl<CPathItemListCtrl> m_searchPathsListCtrl;
+	CHostToolbarCtrl<CPathItemListCtrl> m_ignorePathsListCtrl;
 	CEnumComboBox m_fileTypeCombo;
 	CTextEdit m_fileSpecEdit;
 	CHistoryComboBox m_minFileSizeCombo;
 
-	CPathItemListCtrl m_dupsListCtrl;
-	CDialogToolBar m_dupsToolbar;
+	CHostToolbarCtrl<CPathItemListCtrl> m_dupsListCtrl;
 	CStatusStatic m_outcomeStatic;
 	CRegularStatic m_commitInfoStatic;
 	CAccelTable m_accel;

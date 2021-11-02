@@ -23,7 +23,7 @@
 #define new DEBUG_NEW
 #endif
 
-#include "utl/UI/DetailHostControls.hxx"
+#include "utl/UI/TandemControls.hxx"
 
 
 namespace layout

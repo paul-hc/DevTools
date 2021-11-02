@@ -7,7 +7,7 @@
 
 
 // Works in tandem with a host control (e.g. a CEdit).
-// Formerly used as details button in CBaseDetailHostCtrl, currently replaced by a toolbar with multiple command buttons.
+// Formerly used as details button in CBaseHostToolbarCtrl, currently replaced by a toolbar with multiple command buttons.
 
 class CDetailIconButton : public CDetailMateCtrl<CIconButton>
 {

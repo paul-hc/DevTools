@@ -100,7 +100,7 @@ bool CTextEdit::SetText( const std::tstring& text )
 void CTextEdit::DDX_Text( CDataExchange* pDX, std::tstring& rValue, int ctrlId /*= 0*/ )
 {
 	if ( NULL == m_hWnd && ctrlId != 0 )
-		DDX_Control( pDX, ctrlId, *this );
+		::DDX_Control( pDX, ctrlId, *this );
 
 	if ( DialogOutput == pDX->m_bSaveAndValidate )
 		SetText( rValue );

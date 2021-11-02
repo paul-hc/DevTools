@@ -34,6 +34,7 @@
 #endif
 
 #include "utl/UI/ReportListControl.hxx"
+#include "utl/UI/TandemControls.hxx"
 
 
 struct CheckDup : public ui::ICheckStatePolicy
@@ -181,8 +182,6 @@ namespace layout
 		{ IDC_SEARCH_PATHS_LIST, SizeX | pctSizeY( TopUpPct ) },
 		{ IDC_IGNORE_PATHS_STATIC, pctMoveY( TopUpPct ) },
 		{ IDC_IGNORE_PATHS_LIST, SizeX | pctSizeY( TopDownPct ) | pctMoveY( TopUpPct ) },
-		{ IDC_STRIP_BAR_1, MoveX },
-		{ IDC_STRIP_BAR_2, MoveX | pctMoveY( TopUpPct ) },
 
 		{ IDC_FILE_TYPE_STATIC, pctMoveY( TopPct ) },
 		{ IDC_FILE_TYPE_COMBO, pctMoveY( TopPct ) },
@@ -193,7 +192,6 @@ namespace layout
 
 		{ IDC_DUPLICATE_FILES_STATIC, pctMoveY( TopPct ) },
 		{ IDC_DUPLICATE_FILES_LIST, SizeX | pctMoveY( TopPct ) | pctSizeY( BottomPct ) },
-		{ IDC_STRIP_BAR_3, MoveX | pctMoveY( TopPct ) },
 		{ IDC_OUTCOME_INFO_STATUS, SizeX | MoveY },
 
 		{ IDC_GROUP_BOX_2, SizeX | MoveY },
@@ -212,10 +210,10 @@ const ui::CItemContent CFindDuplicatesDialog::s_pathItemsContent( ui::MixedPath,
 
 CFindDuplicatesDialog::CFindDuplicatesDialog( CFileModel* pFileModel, CWnd* pParent )
 	: CFileEditorBaseDialog( pFileModel, cmd::FindDuplicates, IDD_FIND_DUPLICATES_DIALOG, pParent )
-	, m_searchPathsListCtrl( IDC_SEARCH_PATHS_LIST )
-	, m_ignorePathsListCtrl( IDC_IGNORE_PATHS_LIST )
+	, m_searchPathsListCtrl( ui::ListHost_TileMateOnTopRight )	// IDC_SEARCH_PATHS_LIST
+	, m_ignorePathsListCtrl( ui::ListHost_TileMateOnTopRight )	// IDC_IGNORE_PATHS_LIST
 	, m_fileTypeCombo( &GetTags_FileType() )
-	, m_dupsListCtrl( IDC_DUPLICATE_FILES_LIST )
+	, m_dupsListCtrl( ui::ListHost_TileMateOnTopRight )			// IDC_DUPLICATE_FILES_LIST
 	, m_commitInfoStatic( CRegularStatic::Bold )
 	, m_accel( IDC_DUPLICATE_FILES_LIST )
 	, m_highlightDuplicates( AfxGetApp()->GetProfileInt( reg::section_dialog, reg::entry_highlightDuplicates, true ) != FALSE )
@@ -229,14 +227,21 @@ CFindDuplicatesDialog::CFindDuplicatesDialog( CFileModel* pFileModel, CWnd* pPar
 	RegisterCtrlLayout( layout::styles, COUNT_OF( layout::styles ) );
 	LoadDlgIcon( ID_FIND_DUPLICATE_FILES );
 
+	m_searchPathsListCtrl.SetLayoutInfo( IDC_SEARCH_PATHS_LIST );
 	m_searchPathsListCtrl.SetAcceptDropFiles();
 	m_searchPathsListCtrl.SetSubjectAdapter( ui::GetFullPathAdapter() );			// display full paths
+	m_searchPathsListCtrl.GetMateToolbar()->GetStrip()
+		.AddButton( ID_EDIT_SEARCH_PATHS_LIST );
 	CGeneralOptions::Instance().ApplyToListCtrl( &m_searchPathsListCtrl );
 
+	m_ignorePathsListCtrl.SetLayoutInfo( IDC_IGNORE_PATHS_LIST );
 	m_ignorePathsListCtrl.SetAcceptDropFiles();
 	m_ignorePathsListCtrl.SetSubjectAdapter( ui::GetFullPathAdapter() );			// display full paths
+	m_ignorePathsListCtrl.GetMateToolbar()->GetStrip()
+		.AddButton( ID_EDIT_INGORE_PATHS_LIST );
 	CGeneralOptions::Instance().ApplyToListCtrl( &m_ignorePathsListCtrl );
 
+	m_dupsListCtrl.SetLayoutInfo( IDC_DUPLICATE_FILES_LIST );
 	m_dupsListCtrl.ModifyListStyleEx( 0, LVS_EX_CHECKBOXES );
 	m_dupsListCtrl.SetSection( m_regSection + _T("\\List") );
 	m_dupsListCtrl.SetTextEffectCallback( this );
@@ -252,10 +257,7 @@ CFindDuplicatesDialog::CFindDuplicatesDialog( CFileModel* pFileModel, CWnd* pPar
 	m_dupsListCtrl.AddColumnCompare( DateModified, pred::NewPropertyComparator< CDuplicateFileItem >( CDuplicateFileItem::AsModifyTime() ), false );		// order date-time descending by default
 	m_dupsListCtrl.AddColumnCompare( DuplicateCount, NULL, false );		// order by duplicate count descending by default; NULL comparator since uses only group ordering
 
-	m_searchPathsToolbar.GetStrip().AddButton( ID_EDIT_SEARCH_PATHS_LIST );
-	m_ignorePathsToolbar.GetStrip().AddButton( ID_EDIT_INGORE_PATHS_LIST );
-
-	m_dupsToolbar.GetStrip()
+	m_dupsListCtrl.GetMateToolbar()->GetStrip()
 		.AddButton( ID_CHECK_ALL_DUPLICATES )
 		.AddButton( ID_UNCHECK_ALL_DUPLICATES )
 		.AddSeparator()
@@ -794,7 +796,7 @@ BOOL CFindDuplicatesDialog::OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHA
 {
 	return
 		__super::OnCmdMsg( id, code, pExtra, pHandlerInfo ) ||
-		m_dupsListCtrl.OnCmdMsg( id, code, pExtra, pHandlerInfo );		// allow handling list std commands (Copy, Select All)
+		m_dupsListCtrl.CPathItemListCtrl::OnCmdMsg( id, code, pExtra, pHandlerInfo );		// allow handling list std commands (Copy, Select All)
 }
 
 BOOL CFindDuplicatesDialog::PreTranslateMessage( MSG* pMsg )
@@ -812,15 +814,12 @@ void CFindDuplicatesDialog::DoDataExchange( CDataExchange* pDX )
 
 	DDX_Control( pDX, IDC_SEARCH_PATHS_LIST, m_searchPathsListCtrl );
 	DDX_Control( pDX, IDC_IGNORE_PATHS_LIST, m_ignorePathsListCtrl );
-	DDX_Control( pDX, IDC_DUPLICATE_FILES_LIST, m_dupsListCtrl );
+	m_dupsListCtrl.DDX_Tandem( pDX, IDC_DUPLICATE_FILES_LIST, this );		// this dialog handles the detail toolbar commands
 	DDX_Control( pDX, IDC_FILE_TYPE_COMBO, m_fileTypeCombo );
 	DDX_Control( pDX, IDC_FILE_SPEC_EDIT, m_fileSpecEdit );
 	DDX_Control( pDX, IDC_MIN_FILE_SIZE_COMBO, m_minFileSizeCombo );
 	DDX_Control( pDX, IDC_OUTCOME_INFO_STATUS, m_outcomeStatic );
 	DDX_Control( pDX, IDC_COMMIT_INFO_STATUS, m_commitInfoStatic );
-	m_searchPathsToolbar.DDX_Placeholder( pDX, IDC_STRIP_BAR_1, H_AlignRight | V_AlignBottom );
-	m_ignorePathsToolbar.DDX_Placeholder( pDX, IDC_STRIP_BAR_2, H_AlignRight | V_AlignBottom );
-	m_dupsToolbar.DDX_Placeholder( pDX, IDC_STRIP_BAR_3, H_AlignRight | V_AlignBottom );
 	ui::DDX_ButtonIcon( pDX, ID_DELETE_DUPLICATES );
 	ui::DDX_ButtonIcon( pDX, ID_MOVE_DUPLICATES );
 

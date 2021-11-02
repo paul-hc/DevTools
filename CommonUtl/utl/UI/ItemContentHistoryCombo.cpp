@@ -7,7 +7,7 @@
 #define new DEBUG_NEW
 #endif
 
-#include "DetailHostControls.hxx"
+#include "TandemControls.hxx"
 
 
 // CItemContentHistoryCombo implementation

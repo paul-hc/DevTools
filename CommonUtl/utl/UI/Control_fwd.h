@@ -15,26 +15,54 @@ namespace ui
 	};
 
 
-	struct CTandemLayout
+	enum TandemAlign		// works in combination with enum ::Alignment values
 	{
-		CTandemLayout( void ) : m_alignment( NoAlign ), m_spacing( 0, 0 ) {}
-		explicit CTandemLayout( TAlignment alignment, const CSize& spacing ) : m_alignment( alignment ), m_spacing( spacing ) {}
-		explicit CTandemLayout( TAlignment alignment, int spacing ) : m_alignment( alignment ), m_spacing( spacing, spacing ) {}
+		H_ShrinkHost	= BIT_FLAG( 16 ),
+		V_ShrinkHost	= BIT_FLAG( 17 ),
 
-		void AlignTandem( CRect& rHostRect, CRect& rMateRect, const CSize* pMateCustomSize = NULL ) const;	// align the mate control and shrink the host control
-		void AlignOutside( CRect& rMateRect, const RECT& hostRect ) const;									// tile align to host: layout the rect by the host
+		H_TileMate		= BIT_FLAG( 18 ),
+		V_TileMate		= BIT_FLAG( 19 ),
+
+			HostShrinkMask	= H_ShrinkHost | V_ShrinkHost,
+			TileMateMask	= H_TileMate | V_TileMate,
+
+			// predefined alignments
+			EditShinkHost_MateOnRight = H_AlignRight | V_AlignCenter | ui::H_ShrinkHost,	// tile to right, vertical centre, shrink host horizontally (typical edit/combobox alignment)
+			ListHost_TileMateOnTopRight = H_AlignRight | V_AlignTop | ui::V_TileMate		// tile to right, top, no host shrinking (typical list control alignment)
+	};
+	typedef int TTandemAlign;		// combined values of ::Alignment and ui::TandemAlign
+
+
+	class CTandemLayout
+	{
+	public:
+		CTandemLayout( void ) : m_tandemAlign( NoAlign ), m_spacing( 0, 0 ) { ENSURE( IsValidAlignment() ); }
+		explicit CTandemLayout( TTandemAlign tandemAlign, const CSize& spacing ) : m_tandemAlign( tandemAlign ), m_spacing( spacing ) { ENSURE( IsValidAlignment() ); }
+		explicit CTandemLayout( TTandemAlign tandemAlign, int spacing ) : m_tandemAlign( tandemAlign ), m_spacing( spacing, spacing ) { ENSURE( IsValidAlignment() ); }
+
+		bool IsValidAlignment( void ) const;		// TTandemAlign flags leads to host not covering the mate?
+
+		TTandemAlign GetTandemAlign( void ) const { return m_tandemAlign; }
+		void SetTandemAlign( TTandemAlign tandemAlign ) { m_tandemAlign = tandemAlign; ENSURE( IsValidAlignment() ); }
+
+		const CSize& GetSpacing( void ) const { return m_spacing; }
+		CSize& RefSpacing( void ) { return m_spacing; }
+
+		// operations
+		void AlignTandem( CRect& rHostRect, CRect& rMateRect, const CSize* pMateCustomSize = NULL ) const;		// align rects of both host and mate controls
+		void AlignMate( CRect& rMateRect, const RECT& hostRect, bool inTandem ) const;							// align mate rect relative to the host rect
 
 		void ShrinkHostRect( CRect& rHostRect, const CSize& mateSize ) const;
 
-		CRect LayoutMate( CWnd* pMateCtrl, const CWnd* pHostCtrl, const CSize* pCustomSize = NULL ) const;	// tile move control outside of host anchor
+		CRect LayoutMate( CWnd* pMateCtrl, const CWnd* pHostCtrl ) const;										// move mate control relative to host anchor rect (host was repositioned)
 		void LayoutTandem( CWnd* pHostCtrl, CWnd* pMateCtrl, const CSize* pMateCustomSize = NULL ) const;
-	public:
-		TAlignment m_alignment;
+	private:
+		TTandemAlign m_tandemAlign;
 		CSize m_spacing;
 
 		enum Metrics { Spacing = 2 };
-
-		static const CTandemLayout s_mateOnRight;
+	public:
+		static const CTandemLayout s_mateOnRight;		// typical edit/combobox alignment
 	};
 }
 

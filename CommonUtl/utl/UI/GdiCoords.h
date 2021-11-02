@@ -74,6 +74,8 @@ namespace ui
 	inline int RectHeight( const RECT& rect ) { return rect.bottom - rect.top; }
 
 
+	bool IsValidAlignment( TAlignment alignment );
+
 	CRect& AlignRect( CRect& rDest, const RECT& anchor, TAlignment alignment, bool limitDest = false );
 
 	inline CRect& AlignRectHV( CRect& rDest, const RECT& anchor, Alignment horz, Alignment vert, bool limitDest = false )

@@ -3,7 +3,7 @@
 #pragma once
 
 #include "HistoryComboBox.h"
-#include "DetailHostControls.h"
+#include "TandemControls.h"
 
 
 // history combo for a string, dir-path or file-path with details button

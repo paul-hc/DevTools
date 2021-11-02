@@ -58,6 +58,32 @@ namespace ui
 	}
 
 
+	bool IsValidAlignment( TAlignment alignment )
+	{
+		switch ( alignment & HorizontalMask )
+		{
+			case H_AlignLeft:
+			case H_AlignCenter:
+			case H_AlignRight:
+			case NoAlign:
+				break;
+			default:
+				return false;		// conflicting horizontal alignment values
+		}
+
+		switch ( alignment & VerticalMask )
+		{
+			case V_AlignTop:
+			case V_AlignCenter:
+			case V_AlignBottom:
+			case NoAlign:
+				break;
+			default:
+				return false;		// conflicting vertical alignment values
+		}
+		return true;		// no alignment conflicts
+	}
+
 	CRect& AlignRect( CRect& rDest, const RECT& anchor, TAlignment alignment, bool limitDest /*= false*/ )
 	{
 		CSize offset( 0, 0 );

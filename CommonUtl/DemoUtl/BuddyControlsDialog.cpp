@@ -18,7 +18,7 @@
 #endif
 
 #include "utl/FileStateEnumerator.hxx"
-#include "utl/UI/DetailHostControls.hxx"
+#include "utl/UI/TandemControls.hxx"
 
 
 class CFileStateTimedItem : public CFileStateItem
@@ -114,7 +114,7 @@ CBuddyControlsDialog::CBuddyControlsDialog( CWnd* pParent )
 	: CLayoutDialog( IDD_BUDDY_CONTROLS_DIALOG, pParent )
 	, m_searchPathCombo( ui::MixedPath )
 	, m_folderPathCombo( ui::DirPath )
-	, m_fileListCtrl( /*IDC_FILE_STATE_EX_LIST, LVS_EX_GRIDLINES | lv::DefaultStyleEx*/ )
+	, m_fileListCtrl( ui::ListHost_TileMateOnTopRight /*IDC_FILE_STATE_EX_LIST, LVS_EX_GRIDLINES | lv::DefaultStyleEx*/ )
 {
 	m_regSection = reg::section_dialog;
 	RegisterCtrlLayout( layout::styles, COUNT_OF( layout::styles ) );
@@ -122,7 +122,7 @@ CBuddyControlsDialog::CBuddyControlsDialog( CWnd* pParent )
 	m_searchPathCombo.SetEnsurePathExist();
 
 	m_folderPathCombo.SetEnsurePathExist();
-	m_folderPathCombo.RefTandemLayout().m_alignment = H_AlignLeft | V_AlignCenter;
+	m_folderPathCombo.RefTandemLayout().SetTandemAlign( H_AlignLeft | V_AlignCenter | ui::H_ShrinkHost );
 
 	//SetFlag( m_fileListCtrl.RefListStyleEx(), LVS_EX_DOUBLEBUFFER, false );
 	m_fileListCtrl.SetSection( m_regSection + _T("\\List") );
@@ -134,7 +134,6 @@ CBuddyControlsDialog::CBuddyControlsDialog( CWnd* pParent )
 	m_fileListCtrl.AddRecordCompare( pred::NewComparator( pred::CompareCode() ) );		// default row item comparator
 	m_fileListCtrl.AddColumnCompare( ModifyTime, pred::NewPropertyComparator<CFileStateTimedItem>( func::AsModifyTime() ), false );
 
-	m_fileListCtrl.RefTandemLayout().m_alignment = H_AlignRight | V_AlignTop;
 	m_fileListCtrl.GetMateToolbar()->GetStrip()
 		.AddButton( ID_LIST_VIEW_REPORT )
 		.AddButton( ID_LIST_VIEW_TILE )
