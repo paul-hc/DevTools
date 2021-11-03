@@ -1,7 +1,7 @@
 
 #include "stdafx.h"
 
-#ifdef _DEBUG		// no UT code in release builds
+#ifdef USE_UT		// no UT code in release builds
 #include "test/TestToolWnd.h"
 #include "test/UnitTest.h"
 #include "GpUtilities.h"
@@ -12,7 +12,9 @@
 #include "ScopedGdi.h"
 #include "UtilitiesEx.h"
 
+#ifdef _DEBUG
 #define new DEBUG_NEW
+#endif
 
 
 namespace ut
@@ -449,4 +451,4 @@ namespace ut
 } //namespace ut
 
 
-#endif //_DEBUG
+#endif //USE_UT

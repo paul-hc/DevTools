@@ -3,7 +3,7 @@
 #include "GeneralOptions.h"
 #include "utl/ScopedValue.h"
 
-#ifdef _DEBUG		// no UT code in release builds
+#ifdef USE_UT		// no UT code in release builds
 #include "TextAlgorithmsTests.h"
 #include "TextAlgorithms.h"
 
@@ -29,8 +29,8 @@ CTextAlgorithmsTests::CTextAlgorithmsTests( void )
 
 CTextAlgorithmsTests& CTextAlgorithmsTests::Instance( void )
 {
-	static CTextAlgorithmsTests testCase;
-	return testCase;
+	static CTextAlgorithmsTests s_testCase;
+	return s_testCase;
 }
 
 void CTextAlgorithmsTests::TestMakeCase( void )
@@ -91,4 +91,4 @@ void CTextAlgorithmsTests::Run( void )
 }
 
 
-#endif //_DEBUG
+#endif //USE_UT

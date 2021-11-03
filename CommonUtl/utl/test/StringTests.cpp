@@ -1,7 +1,7 @@
 
 #include "stdafx.h"
 
-#ifdef _DEBUG		// no UT code in release builds
+#ifdef USE_UT		// no UT code in release builds
 #include "test/StringTests.h"
 #include "EnumTags.h"
 #include "FlagTags.h"
@@ -10,7 +10,9 @@
 #include "StringUtilities.h"
 #include "TimeUtils.h"
 
+#ifdef _DEBUG
 #define new DEBUG_NEW
+#endif
 
 
 namespace func
@@ -1043,4 +1045,4 @@ void CStringTests::Run( void )
 }
 
 
-#endif //_DEBUG
+#endif //USE_UT

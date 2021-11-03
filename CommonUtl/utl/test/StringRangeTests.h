@@ -3,7 +3,7 @@
 #pragma once
 
 
-#ifdef _DEBUG		// no UT code in release builds
+#ifdef USE_UT		// no UT code in release builds
 
 #include "UnitTest.h"
 
@@ -25,7 +25,7 @@ private:
 };
 
 
-#endif //_DEBUG
+#endif //USE_UT
 
 
 #endif // StringRangeTests_h

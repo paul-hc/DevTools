@@ -3,14 +3,14 @@
 #pragma once
 
 
-#ifdef _DEBUG
+#ifdef USE_UT
 
 namespace ut
 {
 	void RegisterUtlConsoleTests( void );
 }
 
-#endif
+#endif //USE_UT
 
 
 #endif // UtlConsoleTests_h

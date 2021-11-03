@@ -1,7 +1,7 @@
 
 #include "stdafx.h"
 
-#ifdef _DEBUG		// no UT code in release builds
+#ifdef USE_UT		// no UT code in release builds
 #include "RenameFilesTests.h"
 #include "RenameItem.h"
 #include "FileService.h"
@@ -44,8 +44,8 @@ CRenameFilesTests::CRenameFilesTests( void )
 
 CRenameFilesTests& CRenameFilesTests::Instance( void )
 {
-	static CRenameFilesTests testCase;
-	return testCase;
+	static CRenameFilesTests s_testCase;
+	return s_testCase;
 }
 
 void CRenameFilesTests::TestRenameSimple( void )
@@ -133,4 +133,4 @@ void CRenameFilesTests::Run( void )
 }
 
 
-#endif //_DEBUG
+#endif //USE_UT

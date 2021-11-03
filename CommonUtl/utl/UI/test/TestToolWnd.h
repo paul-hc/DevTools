@@ -2,7 +2,7 @@
 #define TestToolWnd_h
 #pragma once
 
-#ifdef _DEBUG		// no UT code in release builds
+#ifdef USE_UT		// no UT code in release builds
 
 #include "UI/ui_fwd.h"
 #include "UI/WindowTimer.h"
@@ -115,7 +115,7 @@ namespace ut
 }
 
 
-#endif //_DEBUG
+#endif //USE_UT
 
 
 #endif // TestToolWnd_h

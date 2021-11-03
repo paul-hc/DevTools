@@ -1,11 +1,13 @@
 
 #include "stdafx.h"
 
-#ifdef _DEBUG		// no UT code in release builds
+#ifdef USE_UT		// no UT code in release builds
 #include "test/BaseImageTestCase.h"
 #include "StringUtilities.h"
 
+#ifdef _DEBUG
 #define new DEBUG_NEW
+#endif
 
 
 const TCHAR* CBaseImageTestCase::GetImageFilename( SrcImage srcImage )
@@ -31,4 +33,4 @@ fs::CFlexPath CBaseImageTestCase::MakeTestImageFilePath( SrcImage srcImage )
 }
 
 
-#endif //_DEBUG
+#endif //USE_UT

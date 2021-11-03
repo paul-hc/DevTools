@@ -1,7 +1,7 @@
 
 #include "stdafx.h"
 
-#ifdef _DEBUG		// no UT code in release builds
+#ifdef USE_UT		// no UT code in release builds
 #include "test/StructuredStorageTest.h"
 #include "FlexPath.h"
 #include "FileState.h"
@@ -10,7 +10,9 @@
 #include "StructuredStorage.h"
 #include <hash_set>
 
+#ifdef _DEBUG
 #define new DEBUG_NEW
+#endif
 
 
 namespace ut
@@ -322,4 +324,4 @@ void CStructuredStorageTest::Run( void )
 }
 
 
-#endif //_DEBUG
+#endif //USE_UT

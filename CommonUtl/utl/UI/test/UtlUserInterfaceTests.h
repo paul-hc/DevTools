@@ -2,14 +2,15 @@
 #define UtlUserInterfaceTests_h
 #pragma once
 
-#ifdef _DEBUG
+
+#ifdef USE_UT
 
 namespace ut
 {
 	void RegisterUtlUserInterfaceTests( void );
 }
 
-#endif
+#endif //USE_UT
 
 
 #endif // UtlUserInterfaceTests_h

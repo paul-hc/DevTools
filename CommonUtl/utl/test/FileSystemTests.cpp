@@ -1,7 +1,7 @@
 
 #include "stdafx.h"
 
-#ifdef _DEBUG		// no UT code in release builds
+#ifdef USE_UT		// no UT code in release builds
 #include "test/FileSystemTests.h"
 #include "Path.h"
 #include "FileState.h"
@@ -11,7 +11,9 @@
 #include "IoBin.h"
 #include "TimeUtils.h"
 
+#ifdef _DEBUG
 #define new DEBUG_NEW
+#endif
 
 #include "Resequence.hxx"
 
@@ -22,12 +24,6 @@ namespace ut
 	static const CTime s_ct( 2017, 7, 1, 14, 10, 0 );
 	static const CTime s_mt( 2017, 7, 1, 14, 20, 0 );
 	static const CTime s_at( 2017, 7, 1, 14, 30, 0 );
-
-	void StoreFileSize( const fs::CPath& targetFilePath, size_t fileSize )
-	{
-		std::vector< char > buffer( fileSize, '@' );
-		io::bin::WriteAllToFile( targetFilePath, buffer );
-	}
 }
 
 
@@ -184,7 +180,7 @@ void CFileSystemTests::TestFileEnumFilter( void )
 			fs::SearchEnumFiles( &found, poolDirPath );
 			ASSERT_EQUAL( _T(""), ut::JoinFiles( found ) );
 
-			ut::StoreFileSize( poolDirPath / _T("a.doc"), 3 );		// lower the size to pass the filter
+			ut::StoreFileTextSize( poolDirPath / _T("a.doc"), 3 );		// lower the size to pass the filter
 
 			found.Clear();
 			fs::SearchEnumFiles( &found, poolDirPath );
@@ -197,8 +193,8 @@ void CFileSystemTests::TestFileEnumFilter( void )
 			ASSERT_EQUAL( _T(""), ut::JoinFiles( found ) );
 
 			// increase the sizes to pass the filter of min 100 bytes
-			ut::StoreFileSize( poolDirPath / _T("a.txt"), 110 );
-			ut::StoreFileSize( poolDirPath / _T("D1\\D2\\c.txt"), 128 );
+			ut::StoreFileTextSize( poolDirPath / _T("a.txt"), 110 );
+			ut::StoreFileTextSize( poolDirPath / _T("D1\\D2\\c.txt"), 128 );
 
 			found.Clear();
 			fs::SearchEnumFiles( &found, poolDirPath );
@@ -450,4 +446,4 @@ void CFileSystemTests::Run( void )
 }
 
 
-#endif //_DEBUG
+#endif //USE_UT

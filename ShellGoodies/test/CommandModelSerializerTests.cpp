@@ -1,7 +1,7 @@
 
 #include "stdafx.h"
 
-#ifdef _DEBUG		// no UT code in release builds
+#ifdef USE_UT		// no UT code in release builds
 #include "CommandModelSerializerTests.h"
 #include "CommandModelPersist.h"
 #include "FileMacroCommands.h"
@@ -12,7 +12,9 @@
 #include "utl/TimeUtils.h"
 #include <fstream>
 
+#ifdef _DEBUG
 #define new DEBUG_NEW
+#endif
 
 
 namespace ut
@@ -130,8 +132,8 @@ CCommandModelSerializerTests::CCommandModelSerializerTests( void )
 
 CCommandModelSerializerTests& CCommandModelSerializerTests::Instance( void )
 {
-	static CCommandModelSerializerTests testCase;
-	return testCase;
+	static CCommandModelSerializerTests s_testCase;
+	return s_testCase;
 }
 
 void CCommandModelSerializerTests::TestLoadLog( void )
@@ -347,4 +349,4 @@ void CCommandModelSerializerTests::Run( void )
 }
 
 
-#endif //_DEBUG
+#endif //USE_UT

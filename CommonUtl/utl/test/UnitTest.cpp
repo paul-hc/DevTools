@@ -1,11 +1,12 @@
 
 #include "stdafx.h"
 
-#ifdef _DEBUG		// no UT code in release builds
+#ifdef USE_UT		// no UT code in release builds
 #include "test/UnitTest.h"
 #include "ContainerUtilities.h"
 #include "TextFileIo.h"
 #include "FileEnumerator.h"
+#include "IoBin.h"
 #include "Logger.h"
 #include "Path.h"
 #include "RuntimeException.h"
@@ -15,7 +16,9 @@
 #include <fstream>
 #include <iomanip>
 
+#ifdef _DEBUG
 #define new DEBUG_NEW
+#endif
 
 
 namespace numeric
@@ -64,6 +67,12 @@ namespace ut
 		}
 
 		return true;
+	}
+
+	void StoreFileTextSize( const fs::CPath& filePath, size_t fileSize )
+	{
+		std::vector< char > buffer( fileSize, '#' );
+		io::bin::WriteAllToFile( filePath, buffer );
 	}
 
 
@@ -386,4 +395,4 @@ namespace ut
 }
 
 
-#endif //_DEBUG
+#endif //USE_UT

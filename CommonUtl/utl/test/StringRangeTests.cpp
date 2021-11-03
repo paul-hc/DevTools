@@ -1,11 +1,13 @@
 
 #include "stdafx.h"
 
-#ifdef _DEBUG		// no UT code in release builds
+#ifdef USE_UT		// no UT code in release builds
 #include "test/StringRangeTests.h"
 #include "StringRange.h"
 
+#ifdef _DEBUG
 #define new DEBUG_NEW
+#endif
 
 
 CStringRangeTests::CStringRangeTests( void )
@@ -188,4 +190,4 @@ void CStringRangeTests::Run( void )
 }
 
 
-#endif //_DEBUG
+#endif //USE_UT

@@ -1,11 +1,13 @@
 
 #include "stdafx.h"
 
-#ifdef _DEBUG		// no UT code in release builds
+#ifdef USE_UT		// no UT code in release builds
 #include "test/ResequenceTests.h"
 #include "StringUtilities.h"
 
+#ifdef _DEBUG
 #define new DEBUG_NEW
+#endif
 
 #include "Resequence.hxx"
 
@@ -141,4 +143,4 @@ void CResequenceTests::Run( void )
 }
 
 
-#endif //_DEBUG
+#endif //USE_UT

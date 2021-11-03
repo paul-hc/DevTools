@@ -1,12 +1,14 @@
 
 #include "stdafx.h"
 
-#ifdef _DEBUG		// no UT code in release builds
+#ifdef USE_UT		// no UT code in release builds
 #include "test/ThreadingTests.h"
 #include "MultiThreading.h"
 #include <boost/thread.hpp>
 
+#ifdef _DEBUG
 #define new DEBUG_NEW
+#endif
 
 
 CThreadingTests::CThreadingTests( void )
@@ -49,4 +51,4 @@ void CThreadingTests::Run( void )
 }
 
 
-#endif //_DEBUG
+#endif //USE_UT

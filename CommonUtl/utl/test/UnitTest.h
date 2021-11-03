@@ -7,7 +7,7 @@
 #include <iosfwd>
 
 
-#ifdef _DEBUG		// no UT code in release builds
+#ifdef USE_UT		// no UT code in release builds
 
 
 namespace numeric
@@ -207,6 +207,8 @@ namespace ut
 	bool SetFileText( const fs::CPath& filePath, const TCHAR* pText = NULL );				// set a line of thext (pass NULL for using "name.ext")
 	bool ModifyFileText( const fs::CPath& filePath, const TCHAR* pAddText = NULL, bool retainModifyTime = false );	// add another line of thext (pass NULL for using "name.ext")
 
+	void StoreFileTextSize( const fs::CPath& filePath, size_t fileSize );
+
 
 	enum { DefaultRowByteCount = 16 };
 
@@ -298,7 +300,7 @@ namespace ut
 } //namespace ut
 
 
-#endif //_DEBUG
+#endif //USE_UT
 
 
 #endif // UnitTest_h

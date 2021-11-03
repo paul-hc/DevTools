@@ -1,13 +1,15 @@
 
 #include "stdafx.h"
 
-#ifdef _DEBUG		// no UT code in release builds
+#ifdef USE_UT		// no UT code in release builds
 #include "test/PathGeneratorTests.h"
 #include "PathUniqueMaker.h"
 #include "PathGenerator.h"
 #include "FlexPath.h"
 
+#ifdef _DEBUG
 #define new DEBUG_NEW
+#endif
 
 
 namespace ut
@@ -317,4 +319,4 @@ void CPathGeneratorTests::Run( void )
 }
 
 
-#endif //_DEBUG
+#endif //USE_UT

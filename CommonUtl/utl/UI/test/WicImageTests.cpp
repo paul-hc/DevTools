@@ -1,14 +1,16 @@
 
 #include "stdafx.h"
 
-#ifdef _DEBUG		// no UT code in release builds
+#ifdef USE_UT		// no UT code in release builds
 #include "utl/FileEnumerator.h"
 #include "test/WicImageTests.h"
 #include "test/TestToolWnd.h"
 #include "WicImage.h"
 #include "WicImageCache.h"
 
+#ifdef _DEBUG
 #define new DEBUG_NEW
+#endif
 
 #include "CacheLoader.hxx"		// WaitPendingQueue()
 
@@ -109,4 +111,4 @@ void CWicImageTests::Run( void )
 }
 
 
-#endif //_DEBUG
+#endif //USE_UT
