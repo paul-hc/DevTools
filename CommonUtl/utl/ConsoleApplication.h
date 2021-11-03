@@ -25,6 +25,7 @@ public:
 
 	// IAppTools interface
 	virtual bool IsConsoleApp( void ) const;
+	virtual bool IsInteractive( void ) const;
 	virtual CLogger& GetLogger( void );
 	virtual utl::CResourcePool& GetSharedResources( void );
 	virtual bool BeepSignal( app::MsgType msgType = app::Info );

@@ -4,7 +4,6 @@
 #include "SearchPattern.h"
 #include "FileAttr.h"
 #include "ImageFileEnumerator.h"
-#include "ProgressService.h"
 #include "Application_fwd.h"
 #include "resource.h"
 #include "utl/Serialization.h"
@@ -12,6 +11,7 @@
 #include "utl/UI/MenuUtilities.h"
 #include "utl/UI/ShellUtilities.h"
 #include "utl/UI/Utilities.h"
+#include "utl/UI/ProgressService.h"
 #include <map>
 
 #ifdef _DEBUG
@@ -195,7 +195,7 @@ namespace auto_drop
 	{
 		ASSERT_PTR( pFoundImagesModel );
 
-		CProgressService progress( AfxGetMainWnd() );
+		CProgressService progress( AfxGetMainWnd(), app::GetSearchingOpLabel() );
 
 		try
 		{

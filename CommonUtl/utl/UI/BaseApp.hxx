@@ -24,6 +24,7 @@ CBaseApp<BaseClass>::CBaseApp( const TCHAR* pAppName /*= NULL*/ )
 	: BaseClass( pAppName )
 	, CAppTools()
 	, m_appRegistryKeyName( _T("Paul Cocoveanu") )
+	, m_isInteractive( false )
 	, m_lazyInitAppResources( false )
 {
 #if _MSC_VER >= 1800	// Visual C++ 2013
@@ -134,6 +135,12 @@ inline bool CBaseApp<BaseClass>::IsConsoleApp( void ) const
 }
 
 template< typename BaseClass >
+bool CBaseApp<BaseClass>::IsInteractive( void ) const
+{
+	return m_isInteractive;
+}
+
+template< typename BaseClass >
 inline CLogger& CBaseApp<BaseClass>::GetLogger( void )
 {
 	return *safe_ptr( m_pLogger.get() );
@@ -178,6 +185,15 @@ BOOL CBaseApp<BaseClass>::PreTranslateMessage( MSG* pMsg )
 				return TRUE;
 
 	return BaseClass::PreTranslateMessage( pMsg );
+}
+
+template< typename BaseClass >
+BOOL CBaseApp<BaseClass>::OnIdle( LONG count )
+{
+	if ( !m_isInteractive )
+		m_isInteractive = true;
+
+	return __super::OnIdle( count );
 }
 
 

@@ -5,7 +5,7 @@
 #include "FileAttr_fwd.h"
 
 
-namespace ui { interface IProgressService; }
+namespace utl { interface IProgressService; }
 namespace fs
 {
 	class CFlexPath;
@@ -49,10 +49,10 @@ public:
 	bool AddStoragePath( const fs::CPath& storagePath );
 	void ClearInvalidStoragePaths( void );
 public:
-	void OrderFileAttrs( fattr::Order fileOrder, ui::IProgressService* pProgressSvc );
+	void OrderFileAttrs( fattr::Order fileOrder, utl::IProgressService* pProgressSvc );
 private:
-	void FilterFileDuplicates( fattr::Order fileOrder, ui::IProgressService* pProgressSvc, bool compareImageDim = false );
-	void FilterCorruptFiles( ui::IProgressService* pProgressSvc );
+	void FilterFileDuplicates( fattr::Order fileOrder, utl::IProgressService* pProgressSvc, bool compareImageDim = false );
+	void FilterCorruptFiles( utl::IProgressService* pProgressSvc );
 private:
 	persist std::vector< CFileAttr* > m_fileAttributes;			// owning container
 	persist std::vector< fs::CPath > m_storagePaths;			// such as .ias files, storages found during search - the catalogs are managed by parent album model

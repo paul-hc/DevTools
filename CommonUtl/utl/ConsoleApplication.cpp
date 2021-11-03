@@ -71,6 +71,11 @@ bool CConsoleApplication::IsConsoleApp( void ) const
 	return true;
 }
 
+bool CConsoleApplication::IsInteractive( void ) const
+{
+	return true;
+}
+
 CLogger& CConsoleApplication::GetLogger( void )
 {
 	ASSERT_PTR( m_pLogger.get() );

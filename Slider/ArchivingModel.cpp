@@ -7,7 +7,6 @@
 #include "FileAttr.h"
 #include "FileAttrAlgorithms.h"
 #include "FileOperation.h"
-#include "ProgressService.h"
 #include "Workspace.h"
 #include "Application.h"
 #include "resource.h"
@@ -19,6 +18,7 @@
 #include "utl/SerializeStdTypes.h"
 #include "utl/StructuredStorage.h"
 #include "utl/Timer.h"
+#include "utl/UI/ProgressService.h"
 #include <algorithm>
 
 #ifdef _DEBUG
@@ -204,7 +204,7 @@ bool CArchivingModel::BuildArchiveStorageFile( const fs::CPath& destStgPath, Fil
 	//
 		//pParentWnd;
 	CProgressService progress( pParentWnd, _T("Building image archive storage file") );
-	ui::IProgressService* pProgressSvc = /*ui::CNoProgressService::Instance()*/ progress.GetService();
+	utl::IProgressService* pProgressSvc = /*svc::CNoProgressService::Instance()*/ progress.GetService();
 
 	CCatalogStorageService catalogSvc( pProgressSvc, &app::GetUserReport() );		// image storage metadata - owning for exception safety
 

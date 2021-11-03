@@ -13,7 +13,7 @@
 #include "utl/RuntimeException.h"
 #include "utl/Serialization.h"
 #include "utl/StringUtilities.h"
-#include "utl/UI/IProgressService.h"
+#include "utl/IProgressService.h"
 #include "utl/UI/MfcUtilities.h"
 #include "utl/UI/ImagingWic.h"
 #include "utl/UI/Thumbnailer.h"

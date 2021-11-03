@@ -796,6 +796,14 @@
 					>
 				</File>
 				<File
+					RelativePath=".\IProgressService.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\IProgressService.h"
+					>
+				</File>
+				<File
 					RelativePath=".\ISubject.h"
 					>
 				</File>

@@ -18,14 +18,12 @@ namespace app
 
 	enum ContextPopup { ImagePopup, AlbumPopup, AlbumThumbsPopup, AlbumFoundListPopup, DropPopup };
 
+	const std::tstring& GetSearchingOpLabel( void );		// "Searching for Image Files"
 
 	void LogLine( const TCHAR* pFormat, ... );		// in normal runtime log
 	void LogEvent( const TCHAR* pFormat, ... );		// in the event log, that usually keeps track of major operations, detailed errors, etc.
 	void HandleException( CException* pExc, UINT mbType = MB_ICONWARNING, bool doDelete = true );
 	int HandleReportException( CException* pExc, UINT mbType = MB_ICONERROR, UINT msgId = 0, bool doDelete = true );
-
-	bool IsStartingUp( void );
-	inline bool IsInteractive( void ) { return !IsStartingUp(); }
 
 	ui::IUserReport& GetUserReport( void );		// app::CInteractiveMode
 

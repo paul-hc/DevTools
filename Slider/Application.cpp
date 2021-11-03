@@ -19,6 +19,7 @@
 #include "utl/UI/DragListCtrl.h"
 #include "utl/UI/GdiPlus_fwd.h"
 #include "utl/UI/MfcUtilities.h"
+#include "utl/UI/ProgressService.h"
 #include "utl/UI/ShellDialogs.h"
 #include "utl/UI/ShellUtilities.h"
 #include "utl/UI/UtilitiesEx.h"
@@ -55,6 +56,12 @@ static const CImageStore::CCmdAlias s_cmdAliases[] =
 
 namespace app
 {
+	const std::tstring& GetSearchingOpLabel( void )
+	{
+		static const std::tstring s_searching = _T("Searching for Image Files");
+		return s_searching;
+	}
+
 	void LogLine( const TCHAR* pFormat, ... )
 	{
 		va_list argList;
@@ -104,15 +111,9 @@ namespace app
 	}
 
 
-	bool IsStartingUp( void );
 	ui::IUserReport& GetUserReport( void )
 	{
 		return app::CInteractiveMode::Instance();
-	}
-
-	bool IsStartingUp( void )
-	{
-		return GetApp()->IsStartingUp();
 	}
 
 	ui::CIssueStore& GetIssueStore( void )
@@ -279,9 +280,8 @@ namespace reg
 CApplication theApp;
 
 CApplication::CApplication( void )
-	: CBaseApp< CWinApp >()
+	: CBaseApp<CWinApp>()
 	, m_pMainFrame( NULL )
-	, m_startingUp( true )
 	, m_runFlags( 0 )
 	, m_forceMask( 0 )
 	, m_forceFlags( 0 )
@@ -293,6 +293,9 @@ CApplication::CApplication( void )
 	for ( int i = 0; i != 16; ++i, component += increment, component = std::min( component, 0xFFu ) )
 		pCustomColors[ i ] = RGB( component, component, component );
 
+	CProgressService::s_dialogTitle = _T("Image Files");
+	CProgressService::s_itemLabel = _T("Found image");
+
 	// TODO: add construction code here; place all significant initialization in InitInstance
 }
 
@@ -302,7 +305,7 @@ CApplication::~CApplication()
 
 BOOL CApplication::InitInstance( void )
 {
-	if ( !CBaseApp< CWinApp >::InitInstance() )
+	if ( !CBaseApp<CWinApp>::InitInstance() )
 		return FALSE;
 
 	InitGlobals();
@@ -384,7 +387,7 @@ int CApplication::ExitInstance( void )
 
 	m_pEventLogger.reset();
 
-	return CBaseApp< CWinApp >::ExitInstance();
+	return CBaseApp<CWinApp>::ExitInstance();
 }
 
 void CApplication::InitGlobals( void )
@@ -496,15 +499,7 @@ BOOL CApplication::OnDDECommand( LPTSTR pCommand )
 			return TRUE;
 		}
 
-	return CBaseApp< CWinApp >::OnDDECommand( pCommand );
-}
-
-BOOL CApplication::OnIdle( LONG count )
-{
-	if ( m_startingUp )
-		m_startingUp = false;
-
-	return __super::OnIdle( count );
+	return CBaseApp<CWinApp>::OnDDECommand( pCommand );
 }
 
 BOOL CApplication::PreTranslateMessage( MSG* pMsg )
@@ -514,17 +509,17 @@ BOOL CApplication::PreTranslateMessage( MSG* pMsg )
 			if ( m_sharedAccel.Translate( pMsg, hMainWnd ) )
 				return TRUE;
 
-	return CBaseApp< CWinApp >::PreTranslateMessage( pMsg );
+	return CBaseApp<CWinApp>::PreTranslateMessage( pMsg );
 }
 
 
 // message handlers
 
-BEGIN_MESSAGE_MAP( CApplication, CBaseApp< CWinApp > )
-	ON_COMMAND( ID_FILE_NEW, CBaseApp< CWinApp >::OnFileNew )
-	ON_COMMAND( ID_FILE_OPEN, CBaseApp< CWinApp >::OnFileOpen )
+BEGIN_MESSAGE_MAP( CApplication, CBaseApp<CWinApp> )
+	ON_COMMAND( ID_FILE_NEW, CBaseApp<CWinApp>::OnFileNew )
+	ON_COMMAND( ID_FILE_OPEN, CBaseApp<CWinApp>::OnFileOpen )
 	ON_COMMAND( ID_FILE_OPEN_ALBUM_FOLDER, OnFileOpenAlbumFolder )
-	ON_COMMAND( ID_FILE_PRINT_SETUP, CBaseApp< CWinApp >::OnFilePrintSetup )
+	ON_COMMAND( ID_FILE_PRINT_SETUP, CBaseApp<CWinApp>::OnFilePrintSetup )
 	ON_COMMAND( CM_CLEAR_TEMP_EMBEDDED_CLONES, OnClearTempEmbeddedClones )
 END_MESSAGE_MAP()
 

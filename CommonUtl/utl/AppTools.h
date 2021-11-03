@@ -25,6 +25,7 @@ namespace app
 	interface IAppTools
 	{
 		virtual bool IsConsoleApp( void ) const = 0;
+		virtual bool IsInteractive( void ) const = 0;
 		virtual CLogger& GetLogger( void ) = 0;
 		virtual utl::CResourcePool& GetSharedResources( void ) = 0;
 
@@ -58,6 +59,7 @@ private:
 
 namespace app
 {
+	inline bool IsInteractive( void ) { return CAppTools::Instance()->IsInteractive(); }
 	inline const fs::CPath& GetModulePath( void ) { return CAppTools::Instance()->GetModulePath(); }
 	inline CLogger* GetLogger( void ) { return &CAppTools::Instance()->GetLogger(); }
 	inline utl::CResourcePool& GetSharedResources( void ) { return CAppTools::Instance()->GetSharedResources(); }

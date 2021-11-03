@@ -84,14 +84,6 @@ bool CProgressDialog::CheckRunning( void ) const throws_( CUserAbortedException 
 	return true;
 }
 
-void CProgressDialog::SetProgressStep( int step )
-{
-	if ( !IsRunning() )
-		return;				// use Null Pattern for this dialog
-
-	m_progressBar.SetStep( step );
-}
-
 bool CProgressDialog::SetProgressType( ProgressType progressType )
 {
 	if ( !IsRunning() )
@@ -135,7 +127,7 @@ void CProgressDialog::SetProgressRange( int lower, int upper, bool rewindPos )
 }
 
 
-// ui::IProgressHeader interface implementation
+// utl::IProgressHeader interface implementation
 
 void CProgressDialog::SetDialogTitle( const std::tstring& title )
 {
@@ -201,9 +193,9 @@ void CProgressDialog::SetItemLabel( const std::tstring& itemLabel )
 }
 
 
-// ui::IProgressService interface implementation
+// utl::IProgressService interface implementation
 
-ui::IProgressHeader* CProgressDialog::GetHeader( void )
+utl::IProgressHeader* CProgressDialog::GetHeader( void )
 {
 	return this;
 }
@@ -216,6 +208,14 @@ bool CProgressDialog::SetMarqueeProgress( void )
 void CProgressDialog::SetBoundedProgressCount( size_t itemCount, bool rewindPos /*= true*/ )
 {
 	SetProgressRange( 0, std::max( static_cast<int>( itemCount - 1 ), 0 ), rewindPos );
+}
+
+void CProgressDialog::SetProgressStep( int step )
+{
+	if ( !IsRunning() )
+		return;				// use Null Pattern for this dialog
+
+	m_progressBar.SetStep( step );
 }
 
 void CProgressDialog::SetProgressState( int barState /*= PBST_NORMAL*/ )

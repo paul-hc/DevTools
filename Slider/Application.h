@@ -27,7 +27,7 @@ namespace app
 }
 
 
-class CApplication : public CBaseApp< CWinApp >
+class CApplication : public CBaseApp<CWinApp>
 {
 public:
 	CApplication( void );
@@ -36,8 +36,6 @@ public:
 	CMainFrame* GetMainFrame( void ) const { return safe_ptr( m_pMainFrame ); }
 	CLogger& GetEventLogger( void ) const { ASSERT_PTR( m_pEventLogger.get() ); return *m_pEventLogger; }
 	CThumbnailer* GetThumbnailer( void ) const { return safe_ptr( m_pThumbnailer.get() ); }
-
-	bool IsStartingUp( void ) const { return m_startingUp; }
 
 	bool HasForceMask( int maskFlag ) const { return HasFlag( m_forceMask, maskFlag ); }
 	bool HasForceFlag( int forceFlag ) const { ASSERT( HasForceMask( forceFlag ) ); return HasFlag( m_forceFlags, forceFlag ); }
@@ -87,7 +85,6 @@ private:
 
 	CMainFrame* m_pMainFrame;
 private:
-	bool m_startingUp;
 	int m_runFlags;
 	int m_forceMask;
 	int m_forceFlags;
@@ -100,7 +97,6 @@ public:
 	virtual int ExitInstance( void );
 	virtual BOOL PreTranslateMessage( MSG* pMsg );
 	virtual BOOL OnDDECommand( LPTSTR pCommand );
-	virtual BOOL OnIdle( LONG count );
 private:
 	afx_msg void OnFileOpenAlbumFolder( void );
 	afx_msg void OnClearTempEmbeddedClones( void );

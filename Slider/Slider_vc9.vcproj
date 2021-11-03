@@ -818,14 +818,6 @@
 					RelativePath=".\ImageNavigator_fwd.h"
 					>
 				</File>
-				<File
-					RelativePath=".\ProgressService.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\ProgressService.h"
-					>
-				</File>
 			</Filter>
 		</Filter>
 		<Filter

@@ -5,7 +5,7 @@
 #include "AlbumDoc.h"
 #include "utl/ContainerUtilities.h"
 #include "utl/PathUniqueMaker.h"
-#include "utl/UI/IProgressService.h"
+#include "utl/IProgressService.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -56,12 +56,12 @@ CTransferFileAttr::~CTransferFileAttr()
 const TCHAR CTransferAlbumService::s_buildTag[] = _T("Building image file attributes");
 
 CTransferAlbumService::CTransferAlbumService( void )
-	: m_pProgressSvc( ui::CNoProgressService::Instance() )
+	: m_pProgressSvc( svc::CNoProgressService::Instance() )
 	, m_pUserReport( &ui::CSilentMode::Instance() )
 {
 }
 
-CTransferAlbumService::CTransferAlbumService( ui::IProgressService* pProgressSvc, ui::IUserReport* pUserReport )
+CTransferAlbumService::CTransferAlbumService( utl::IProgressService* pProgressSvc, ui::IUserReport* pUserReport )
 	: m_pProgressSvc( pProgressSvc )
 	, m_pUserReport( pUserReport )
 {

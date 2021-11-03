@@ -15,15 +15,11 @@
 
 void CDuplicateFilesFinder::FindDuplicates( std::vector< CDuplicateFilesGroup* >& rDuplicateGroups,
 											const std::vector< CPathItem* >& srcPathItems,
-											const std::vector< CPathItem* >& ignorePathItems,
-											CWnd* pParent ) throws_( CUserAbortedException )
+											const std::vector< CPathItem* >& ignorePathItems ) throws_( CUserAbortedException )
 {
-	CDuplicatesProgressService progress( pParent );
-	ui::IProgressService* pProgress = progress.GetService();
-
 	std::vector< fs::CPath > foundPaths;
 
-	SearchForFiles( foundPaths, srcPathItems, ignorePathItems, progress.GetProgressEnumerator() );
+	SearchForFiles( foundPaths, srcPathItems, ignorePathItems );
 
 	// optimize performance:
 	//	step 1: compute file-size part of the content key, grouping duplicate candidates by file-size only
@@ -31,17 +27,16 @@ void CDuplicateFilesFinder::FindDuplicates( std::vector< CDuplicateFilesGroup* >
 
 	CDuplicateGroupStore groupsStore;
 
-	progress.Section_GroupByFileSize( foundPaths.size() );
-	GroupByFileSize( &groupsStore, foundPaths, pProgress );
+	  ProgSection_GroupByFileSize( foundPaths.size() );
+	GroupByFileSize( &groupsStore, foundPaths );
 
-	progress.Section_GroupByCrc32( groupsStore.GetDuplicateItemCount() );			// count of duplicate candidates
-	GroupByCrc32( rDuplicateGroups, &groupsStore, pProgress );
+	  ProgSection_GroupByCrc32( groupsStore.GetDuplicateItemCount() );			// count of duplicate candidates
+	GroupByCrc32( rDuplicateGroups, &groupsStore );
 }
 
 void CDuplicateFilesFinder::SearchForFiles( std::vector< fs::CPath >& rFoundPaths,
 											const std::vector< CPathItem* >& srcPathItems,
-											const std::vector< CPathItem* >& ignorePathItems,
-											fs::IEnumerator* pProgressEnum )
+											const std::vector< CPathItem* >& ignorePathItems )
 {
 	utl::CSectionGuard section( _T("# SearchForFiles") );
 
@@ -55,10 +50,11 @@ void CDuplicateFilesFinder::SearchForFiles( std::vector< fs::CPath >& rFoundPath
 		const fs::CPath& srcPath = ( *itSrcPathItem )->GetFilePath();
 		if ( fs::IsValidDirectory( srcPath.GetPtr() ) )
 		{
-			fs::CPathEnumerator found( fs::EF_Recurse, pProgressEnum );
-			found.RefOptions().m_ignorePathMatches = ignorePaths;
+			fs::CPathEnumerator found( fs::EF_Recurse, m_pProgressEnum );
+			found.RefOptions().m_ignorePathMatches.Reset( ignorePaths );
 
-			pProgressEnum->AddFoundSubDir( srcPath.GetPtr() );		// progress only: advance stage to the root directory
+			if ( m_pProgressEnum != NULL )
+				m_pProgressEnum->AddFoundSubDir( srcPath.GetPtr() );		// progress only: advance stage to the root directory
 			fs::EnumFiles( &found, srcPath, m_wildSpec.c_str() );
 
 			fs::SortPaths( found.m_filePaths );
@@ -80,7 +76,7 @@ void CDuplicateFilesFinder::SearchForFiles( std::vector< fs::CPath >& rFoundPath
 	m_outcome.m_foundFileCount = rFoundPaths.size();
 }
 
-void CDuplicateFilesFinder::GroupByFileSize( CDuplicateGroupStore* pGroupsStore, const std::vector< fs::CPath >& foundPaths, ui::IProgressService* pProgress )
+void CDuplicateFilesFinder::GroupByFileSize( CDuplicateGroupStore* pGroupsStore, const std::vector< fs::CPath >& foundPaths )
 {
 	utl::CSectionGuard section( _T("# Grouping by duplicate file sizes") );
 
@@ -98,67 +94,43 @@ void CDuplicateFilesFinder::GroupByFileSize( CDuplicateGroupStore* pGroupsStore,
 		if ( !registered )
 			++m_outcome.m_ignoredCount;
 
-		pProgress->AdvanceItem( filePath.Get() );
+		m_pProgressSvc->AdvanceItem( filePath.Get() );
 	}
 }
 
-void CDuplicateFilesFinder::GroupByCrc32( std::vector< CDuplicateFilesGroup* >& rDuplicateGroups, CDuplicateGroupStore* pGroupsStore, ui::IProgressService* pProgress )
+void CDuplicateFilesFinder::GroupByCrc32( std::vector< CDuplicateFilesGroup* >& rDuplicateGroups, CDuplicateGroupStore* pGroupsStore )
 {
 	utl::CSectionGuard section( _T("# ExtractDuplicateGroups (CRC32)") );
 
 	utl::COwningContainer< std::vector< CDuplicateFilesGroup* > > newDuplicateGroups;
-	pGroupsStore->ExtractDuplicateGroups( newDuplicateGroups, m_outcome.m_ignoredCount, pProgress );
+	pGroupsStore->ExtractDuplicateGroups( newDuplicateGroups, m_outcome.m_ignoredCount, m_pProgressSvc );
 
 	rDuplicateGroups.swap( newDuplicateGroups );		// swap items and ownership
 }
 
-
-// CDuplicatesProgressService implementation
-
-CDuplicatesProgressService::CDuplicatesProgressService( CWnd* pParent )
-	: m_dlg( _T("Search for Duplicate Files"), CProgressDialog::StageLabelCount )
+void CDuplicateFilesFinder::ProgSection_GroupByFileSize( size_t fileCount ) const
 {
-	if ( m_dlg.Create( _T("Duplicate Files Search"), pParent ) )
+	if ( utl::IProgressHeader* pProgHeader = m_pProgressSvc->GetHeader() )
 	{
-		GetHeader()->SetStageLabel( _T("Search directory") );
-		GetHeader()->SetItemLabel( _T("Found file") );
-		GetService()->SetMarqueeProgress();
+		pProgHeader->SetOperationLabel( _T("Group Files by Size") );
+		pProgHeader->ShowStage( false );
+		pProgHeader->SetItemLabel( _T("Compute file size") );
 	}
+
+	m_pProgressSvc->SetBoundedProgressCount( fileCount );
 }
 
-CDuplicatesProgressService::~CDuplicatesProgressService()
+void CDuplicateFilesFinder::ProgSection_GroupByCrc32( size_t itemCount ) const
 {
-	m_dlg.DestroyWindow();
-}
+	if ( utl::IProgressHeader* pProgHeader = m_pProgressSvc->GetHeader() )
+	{
+		pProgHeader->SetOperationLabel( _T("Group Files by CRC32 Checksum") );
+		pProgHeader->SetStageLabel( _T("Group of duplicates") );
+		pProgHeader->SetItemLabel( _T("Compute file CRC32") );
+	}
 
-void CDuplicatesProgressService::Section_GroupByFileSize( size_t fileCount )
-{
-	GetHeader()->SetOperationLabel( _T("Group Files by Size") );
-	GetHeader()->ShowStage( false );
-	GetHeader()->SetItemLabel( _T("Compute file size") );
+	m_pProgressSvc->SetBoundedProgressCount( itemCount );
 
-	GetService()->SetBoundedProgressCount( fileCount );
-}
-
-void CDuplicatesProgressService::Section_GroupByCrc32( size_t itemCount )
-{
-	GetHeader()->SetOperationLabel( _T("Group Files by CRC32 Checksum") );
-	GetHeader()->SetStageLabel( _T("Group of duplicates") );
-	GetHeader()->SetItemLabel( _T("Compute file CRC32") );
-
-	GetService()->SetBoundedProgressCount( itemCount );
-
-	m_dlg.SetProgressStep( 1 );								// advance progress on each step since individual computations are slow
-	GetService()->SetProgressState( PBST_PAUSED );			// yellow bar
-}
-
-void CDuplicatesProgressService::AddFoundFile( const TCHAR* pFilePath ) throws_( CUserAbortedException )
-{
-	GetService()->AdvanceItem( pFilePath );
-}
-
-bool CDuplicatesProgressService::AddFoundSubDir( const TCHAR* pSubDirPath ) throws_( CUserAbortedException )
-{
-	GetService()->AdvanceStage( pSubDirPath );
-	return true;
+	m_pProgressSvc->SetProgressStep( 1 );						// fine granularity: advance progress on each step since individual computations are slow
+	m_pProgressSvc->SetProgressState( PBST_PAUSED );			// yellow bar
 }

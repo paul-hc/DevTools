@@ -495,14 +495,6 @@
 			Name="UI"
 			>
 			<File
-				RelativePath=".\AboutBox.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\AboutBox.h"
-				>
-			</File>
-			<File
 				RelativePath=".\AccelTable.cpp"
 				>
 			</File>
@@ -528,14 +520,6 @@
 			</File>
 			<File
 				RelativePath=".\BaseApp.hxx"
-				>
-			</File>
-			<File
-				RelativePath=".\BaseMainDialog.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\BaseMainDialog.h"
 				>
 			</File>
 			<File
@@ -619,22 +603,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\IProgressService.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\IProgressService.h"
-				>
-			</File>
-			<File
-				RelativePath=".\ItemListDialog.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\ItemListDialog.h"
-				>
-			</File>
-			<File
 				RelativePath=".\IZoomBar.cpp"
 				>
 			</File>
@@ -683,22 +651,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\PasswordDialog.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\PasswordDialog.h"
-				>
-			</File>
-			<File
-				RelativePath=".\PopupDlgBase.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\PopupDlgBase.h"
-				>
-			</File>
-			<File
 				RelativePath=".\PostCall.cpp"
 				>
 			</File>
@@ -712,14 +664,6 @@
 			</File>
 			<File
 				RelativePath=".\ProcessUtils.h"
-				>
-			</File>
-			<File
-				RelativePath=".\ProgressDialog.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\ProgressDialog.h"
 				>
 			</File>
 			<File
@@ -1715,6 +1659,70 @@
 				</File>
 				<File
 					RelativePath=".\RenderingDirect2D.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="Dialogs"
+				>
+				<File
+					RelativePath=".\AboutBox.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\AboutBox.h"
+					>
+				</File>
+				<File
+					RelativePath=".\BaseMainDialog.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\BaseMainDialog.h"
+					>
+				</File>
+				<File
+					RelativePath=".\ItemListDialog.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\ItemListDialog.h"
+					>
+				</File>
+				<File
+					RelativePath=".\PasswordDialog.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\PasswordDialog.h"
+					>
+				</File>
+				<File
+					RelativePath=".\PopupDlgBase.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\PopupDlgBase.h"
+					>
+				</File>
+				<File
+					RelativePath=".\ProgressDialog.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\ProgressDialog.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="Service"
+				>
+				<File
+					RelativePath=".\ProgressService.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\ProgressService.h"
 					>
 				</File>
 			</Filter>

@@ -10,7 +10,7 @@
 
 
 class CFileAttr;
-namespace ui { interface IProgressService; }
+namespace utl { interface IProgressService; }
 
 typedef int TCurrImagePos;
 
@@ -91,7 +91,7 @@ public:
 	bool DropCustomOrderIndexes( int& rDropIndex, std::vector< int >& rSelIndexes );
 	bool UndropCustomOrderIndexes( int droppedIndex, const std::vector< int >& origDragSelIndexes );
 private:
-	bool DoOrderImagesModel( CImagesModel* pImagesModel, ui::IProgressService* pProgressSvc );
+	bool DoOrderImagesModel( CImagesModel* pImagesModel, utl::IProgressService* pProgressSvc );
 private:
 	// transient
 	app::ModelSchema m_modelSchema;					// model schema of this album document (persisted by the album document)

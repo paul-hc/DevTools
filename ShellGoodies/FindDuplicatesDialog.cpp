@@ -23,6 +23,7 @@
 #include "utl/UI/ImageStore.h"
 #include "utl/UI/ItemListDialog.h"
 #include "utl/UI/MenuUtilities.h"
+#include "utl/UI/ProgressService.h"
 #include "utl/UI/ShellDialogs.h"
 #include "utl/UI/UtilitiesEx.h"
 #include "utl/UI/Thumbnailer.h"
@@ -320,10 +321,17 @@ bool CFindDuplicatesDialog::SearchForDuplicateFiles( void )
 	if ( num::ParseNumber( minFileSize, m_minFileSizeCombo.GetCurrentText() ) )
 		minFileSize *= 1024;		// to KB
 
+	CProgressService::s_dialogTitle = _T("Duplicate Files Search");
+	CProgressService progress( this, _T("Search for Duplicate Files") );
+
 	try
 	{
-		CDuplicateFilesFinder finder( m_fileSpecEdit.GetText(), minFileSize );
-		finder.FindDuplicates( m_duplicateGroups, m_searchPathItems, m_ignorePathItems, this );
+		CDuplicateFilesFinder finder( progress.GetService(), progress.GetProgressEnumerator() );
+
+		finder.SetWildSpec( m_fileSpecEdit.GetText() );
+		finder.SetMinFileSize( minFileSize );
+
+		finder.FindDuplicates( m_duplicateGroups, m_searchPathItems, m_ignorePathItems );
 
 		m_outcomeStatic.SetWindowText( FormatReport( finder.GetOutcome() ) );
 		SetupDuplicateFileList();

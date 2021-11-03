@@ -20,51 +20,39 @@ public:
 class CDuplicateFilesFinder
 {
 public:
-	CDuplicateFilesFinder( const std::tstring& wildSpec, UINT64 minFileSize ) : m_wildSpec( wildSpec ), m_minFileSize( minFileSize ) {}
+	CDuplicateFilesFinder( utl::IProgressService* pProgressSvc, fs::IEnumerator* pProgressEnum )
+		: m_pProgressSvc( pProgressSvc )
+		, m_pProgressEnum( pProgressEnum )
+		, m_minFileSize( 0 )
+	{
+		ASSERT_PTR( m_pProgressSvc );
+	}
+
+	void SetWildSpec( const std::tstring& wildSpec ) { m_wildSpec = wildSpec; }
+	void SetMinFileSize( UINT64 minFileSize ) { m_minFileSize = minFileSize; }
 
 	const CDupsOutcome& GetOutcome( void ) const { return m_outcome; }
 
 	void FindDuplicates( std::vector< CDuplicateFilesGroup* >& rDuplicateGroups,
 						 const std::vector< CPathItem* >& srcPathItems,
-						 const std::vector< CPathItem* >& ignorePathItems,
-						 CWnd* pParent ) throws_( CUserAbortedException );
+						 const std::vector< CPathItem* >& ignorePathItems ) throws_( CUserAbortedException );
 private:
 	void SearchForFiles( std::vector< fs::CPath >& rFoundPaths,
 						 const std::vector< CPathItem* >& srcPathItems,
-						 const std::vector< CPathItem* >& ignorePathItems,
-						 fs::IEnumerator* pProgressEnum );
-	void GroupByFileSize( CDuplicateGroupStore* pGroupsStore, const std::vector< fs::CPath >& foundPaths, ui::IProgressService* pProgress );
-	void GroupByCrc32( std::vector< CDuplicateFilesGroup* >& rDuplicateGroups, CDuplicateGroupStore* pGroupsStore, ui::IProgressService* pProgress );
+						 const std::vector< CPathItem* >& ignorePathItems );
+	void GroupByFileSize( CDuplicateGroupStore* pGroupsStore, const std::vector< fs::CPath >& foundPaths );
+	void GroupByCrc32( std::vector< CDuplicateFilesGroup* >& rDuplicateGroups, CDuplicateGroupStore* pGroupsStore );
+
+	void ProgSection_GroupByFileSize( size_t fileCount ) const;
+	void ProgSection_GroupByCrc32( size_t itemCount ) const;
 private:
+	utl::IProgressService* m_pProgressSvc;
+	fs::IEnumerator* m_pProgressEnum;
+
 	std::tstring m_wildSpec;
 	UINT64 m_minFileSize;
 
 	CDupsOutcome m_outcome;
-};
-
-
-#include "utl/FileSystem_fwd.h"
-#include "utl/UI/ProgressDialog.h"
-
-
-class CDuplicatesProgressService : protected fs::IEnumeratorImpl
-{
-public:
-	CDuplicatesProgressService( CWnd* pParent );
-	~CDuplicatesProgressService();
-
-	ui::IProgressService* GetService( void ) { return m_dlg.GetService(); }
-	ui::IProgressHeader* GetHeader( void ) { return GetService()->GetHeader(); }
-	fs::IEnumerator* GetProgressEnumerator( void ) { return this; }
-
-	void Section_GroupByFileSize( size_t fileCount );
-	void Section_GroupByCrc32( size_t itemCount );
-private:
-	// file enumerator callbacks
-	virtual void AddFoundFile( const TCHAR* pFilePath ) throws_( CUserAbortedException );
-	virtual bool AddFoundSubDir( const TCHAR* pSubDirPath ) throws_( CUserAbortedException );
-private:
-	CProgressDialog m_dlg;
 };
 
 

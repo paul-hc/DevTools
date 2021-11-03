@@ -2,7 +2,7 @@
 #define ProgressDialog_h
 #pragma once
 
-#include "IProgressService.h"
+#include "utl/IProgressService.h"
 #include "LayoutDialog.h"
 #include "ThemeStatic.h"
 
@@ -18,8 +18,8 @@ class CScopedPumpMessage;
 // Note: uses Null Pattern for convenience, so that the client can continue using the IProgressService interface even after the user closed the dialog.
 //
 class CProgressDialog : public CLayoutDialog
-					  , private ui::IProgressHeader
-					  , private ui::IProgressService
+					  , private utl::IProgressHeader
+					  , private utl::IProgressService
 {
 public:
 	enum OptionFlag
@@ -31,6 +31,7 @@ public:
 		MarqueeProgress	= 1 << 4,
 		StageLabelCount	= 1 << 5,
 		ItemLabelCount	= 1 << 6,
+
 			LabelsCount = StageLabelCount | ItemLabelCount,
 	};
 
@@ -45,16 +46,15 @@ public:
 
 	CProgressCtrl& GetProgressBar( void ) { return m_progressBar; }
 	bool IsMarqueeProgress( void ) const { return HasFlag( m_optionFlags, MarqueeProgress ); }
-	void SetProgressStep( int step );			// step divider for less granular progress updates (default is 10 for CProgressCtrl)
 
-	ui::IProgressService* GetService( void ) { return this; }
+	utl::IProgressService* GetService( void ) { return this; }
 protected:
 	enum ProgressType { Marquee, Bounded };
 
 	bool SetProgressType( ProgressType progressType );
 	void SetProgressRange( int lower, int upper, bool rewindPos );
 
-	// ui::IProgressHeader interface
+	// utl::IProgressHeader interface
 	virtual void SetDialogTitle( const std::tstring& title );
 	virtual void SetOperationLabel( const std::tstring& operationLabel );
 
@@ -64,10 +64,11 @@ protected:
 	virtual void ShowItem( bool show = true );
 	virtual void SetItemLabel( const std::tstring& itemLabel );
 private:
-	// ui::IProgressService interface
-	virtual ui::IProgressHeader* GetHeader( void );
+	// utl::IProgressService interface
+	virtual utl::IProgressHeader* GetHeader( void );
 	virtual bool SetMarqueeProgress( void );
 	virtual void SetBoundedProgressCount( size_t itemCount, bool rewindPos = true );
+	virtual void SetProgressStep( int step );			// step divider for less granular progress updates (default is 10 for CProgressCtrl)
 	virtual void SetProgressState( int barState = PBST_NORMAL );
 
 	virtual void AdvanceStage( const std::tstring& stageName ) throws_( CUserAbortedException );

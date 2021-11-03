@@ -10,7 +10,7 @@
 #include "utl/Serialization.h"
 #include "utl/SerializeStdTypes.h"
 #include "utl/Timer.h"
-#include "utl/UI/IProgressService.h"
+#include "utl/IProgressService.h"
 #include "utl/UI/WicImage.h"
 
 #ifdef _DEBUG
@@ -164,7 +164,7 @@ void CImagesModel::ClearInvalidStoragePaths( void )
 
 // file ordering implementation
 
-void CImagesModel::OrderFileAttrs( fattr::Order fileOrder, ui::IProgressService* pProgressSvc )
+void CImagesModel::OrderFileAttrs( fattr::Order fileOrder, utl::IProgressService* pProgressSvc )
 {
 	switch ( fileOrder )
 	{
@@ -204,7 +204,7 @@ void CImagesModel::OrderFileAttrs( fattr::Order fileOrder, ui::IProgressService*
 	}
 }
 
-void CImagesModel::FilterFileDuplicates( fattr::Order fileOrder, ui::IProgressService* pProgressSvc, bool compareImageDim /*= false*/ )
+void CImagesModel::FilterFileDuplicates( fattr::Order fileOrder, utl::IProgressService* pProgressSvc, bool compareImageDim /*= false*/ )
 {	// removes files with single occurences according to m_fileOrder criteria, leaving only multiple occurences (e.g. files with the same size)
 	size_t count = m_fileAttributes.size();
 
@@ -232,7 +232,7 @@ void CImagesModel::FilterFileDuplicates( fattr::Order fileOrder, ui::IProgressSe
 	}
 }
 
-void CImagesModel::FilterCorruptFiles( ui::IProgressService* pProgressSvc )
+void CImagesModel::FilterCorruptFiles( utl::IProgressService* pProgressSvc )
 {	// removes all invalid/non-existing files from this file list
 	pProgressSvc->AdvanceStage( _T("Checking for corrupted image files") );
 	pProgressSvc->SetBoundedProgressCount( m_fileAttributes.size() );

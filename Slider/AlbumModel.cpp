@@ -5,12 +5,12 @@
 #include "FileAttr.h"
 #include "FileAttrAlgorithms.h"
 #include "ImageFileEnumerator.h"
-#include "ProgressService.h"
 #include "Workspace.h"
 #include "Application_fwd.h"
 #include "resource.h"
 #include "utl/RuntimeException.h"
 #include "utl/SerializeStdTypes.h"
+#include "utl/UI/ProgressService.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -105,7 +105,7 @@ void CAlbumModel::SearchForFiles( CWnd* pParentWnd ) throws_( CException* )
 	if ( fattr::CustomOrder == m_fileOrder )
 		pRetainCustomOrder.reset( new fattr::CRetainFileOrder( m_imagesModel.GetFileAttrs() ) );
 
-	CProgressService progress( pParentWnd );
+	CProgressService progress( pParentWnd, app::GetSearchingOpLabel() );
 	CImagesModel foundImagesModel;
 
 	{	// scope for "Searching..." progress
@@ -129,7 +129,7 @@ void CAlbumModel::SearchForFiles( CWnd* pParentWnd ) throws_( CException* )
 		imageEnum.SwapFoundImages( foundImagesModel );
 	}
 
-	ui::IProgressService* pProgressSvc = progress.GetService();
+	utl::IProgressService* pProgressSvc = progress.GetService();
 	pProgressSvc->GetHeader()->SetOperationLabel( _T("Order Images") );
 	pProgressSvc->GetHeader()->SetStageLabel( str::GetEmpty() );
 	pProgressSvc->SetMarqueeProgress();
@@ -154,7 +154,7 @@ void CAlbumModel::SearchForFiles( CWnd* pParentWnd ) throws_( CException* )
 	m_storageHost.ModifyMultiple( m_imagesModel.GetStoragePaths(), oldStoragePaths );
 }
 
-bool CAlbumModel::DoOrderImagesModel( CImagesModel* pImagesModel, ui::IProgressService* pProgressSvc )
+bool CAlbumModel::DoOrderImagesModel( CImagesModel* pImagesModel, utl::IProgressService* pProgressSvc )
 {
 	ASSERT_PTR( pImagesModel );
 
@@ -251,7 +251,7 @@ int CAlbumModel::FindIndexFileAttrWithPath( const fs::CPath& filePath ) const
 bool CAlbumModel::ModifyFileOrder( fattr::Order fileOrder )
 {
 	StoreFileOrder( fileOrder );
-	return DoOrderImagesModel( &m_imagesModel, ui::CNoProgressService::Instance() );
+	return DoOrderImagesModel( &m_imagesModel, svc::CNoProgressService::Instance() );
 }
 
 void CAlbumModel::SetCustomOrderSequence( const std::vector< CFileAttr* >& customSequence )

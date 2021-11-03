@@ -11,11 +11,8 @@ class CAlbumDoc;
 class CAlbumModel;
 class CImagesModel;
 
-namespace ui
-{
-	interface IProgressService;
-	interface IUserReport;
-}
+namespace utl { interface IProgressService; }
+namespace ui { interface IUserReport; }
 
 
 namespace svc
@@ -44,7 +41,7 @@ abstract class CTransferAlbumService : private utl::noncopyable
 {
 protected:
 	CTransferAlbumService( void );			// uses null-pattern, for testing
-	CTransferAlbumService( ui::IProgressService* pProgressSvc, ui::IUserReport* pUserReport );
+	CTransferAlbumService( utl::IProgressService* pProgressSvc, ui::IUserReport* pUserReport );
 	~CTransferAlbumService();
 
 	// overridables
@@ -57,10 +54,10 @@ public:
 	const std::vector< CTransferFileAttr* >& GetTransferAttrs( void ) const { return m_transferAttrs; }
 	std::vector< CTransferFileAttr* >& RefTransferAttrs( void ) { return m_transferAttrs; }
 
-	ui::IProgressService* GetProgress( void ) const { return m_pProgressSvc; }
+	utl::IProgressService* GetProgress( void ) const { return m_pProgressSvc; }
 	ui::IUserReport* GetReport( void ) const { return m_pUserReport; }
 protected:
-	ui::IProgressService* m_pProgressSvc;
+	utl::IProgressService* m_pProgressSvc;
 	ui::IUserReport* m_pUserReport;
 
 	std::vector< CTransferFileAttr* > m_transferAttrs;
@@ -76,7 +73,7 @@ class CCatalogStorageService : public CTransferAlbumService
 {
 public:
 	CCatalogStorageService( void ) {}			// uses null-pattern, for testing
-	CCatalogStorageService( ui::IProgressService* pProgressSvc, ui::IUserReport* pUserReport ) : CTransferAlbumService( pProgressSvc, pUserReport ) {}
+	CCatalogStorageService( utl::IProgressService* pProgressSvc, ui::IUserReport* pUserReport ) : CTransferAlbumService( pProgressSvc, pUserReport ) {}
 
 	void BuildFromSrcPaths( const std::vector< fs::CPath >& srcImagePaths );				// for testing
 	void BuildFromTransferPairs( const std::vector< TTransferPathPair >& xferPairs );		// legacy archiving model
