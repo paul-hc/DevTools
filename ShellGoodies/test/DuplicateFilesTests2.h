@@ -8,11 +8,11 @@
 #include "utl/test/UnitTest.h"
 
 
-class CDuplicateFilesTests : public ut::CConsoleTestCase
+class CDuplicateFilesTests2 : public ut::CConsoleTestCase
 {
-	CDuplicateFilesTests( void );
+	CDuplicateFilesTests2( void );
 public:
-	static CDuplicateFilesTests& Instance( void );
+	static CDuplicateFilesTests2& Instance( void );
 
 	// ut::ITestCase interface
 	virtual void Run( void );

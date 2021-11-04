@@ -24,7 +24,7 @@ namespace func
 }
 
 
-namespace ut
+namespace ut2
 {
 	void SortDupGroups( std::vector< CDuplicateFilesGroup* >& rDupGroups )
 	{
@@ -46,18 +46,18 @@ namespace ut
 }
 
 
-CDuplicateFilesTests::CDuplicateFilesTests( void )
+CDuplicateFilesTests2::CDuplicateFilesTests2( void )
 {
 	ut::CTestSuite::Instance().RegisterTestCase( this );		// self-registration
 }
 
-CDuplicateFilesTests& CDuplicateFilesTests::Instance( void )
+CDuplicateFilesTests2& CDuplicateFilesTests2::Instance( void )
 {
-	static CDuplicateFilesTests s_testCase;
+	static CDuplicateFilesTests2 s_testCase;
 	return s_testCase;
 }
 
-void CDuplicateFilesTests::TestDuplicateFiles( void )
+void CDuplicateFilesTests2::TestDuplicateFiles( void )
 {
 	ut::CTempFilePool pool( _T("a.txt|b.txt|file1.txt|D1\\a.txt|D1\\file2.txt|D1\\D2\\a.txt|D1\\D2\\b.txt|D1\\D2\\file3.txt|D1\\D2\\file4.txt|D1\\IGNORE\\b.txt") );
 	const fs::CPath& poolDirPath = pool.GetPoolDirPath();
@@ -70,15 +70,15 @@ void CDuplicateFilesTests::TestDuplicateFiles( void )
 
 	finder.FindDuplicates( dupGroups, searchPathItems, ignorePathItems );
 
-	ut::SortDupGroups( dupGroups );		// by original item filename
+	ut2::SortDupGroups( dupGroups );		// by original item filename
 
 	ASSERT_EQUAL( 2, dupGroups.size() );
-	ASSERT_EQUAL( _T("a.txt|D1\\a.txt|D1\\D2\\a.txt"), ut::JoinRelativeDupPaths( dupGroups[0], poolDirPath ) );
-	ASSERT_EQUAL( _T("b.txt|D1\\D2\\b.txt"), ut::JoinRelativeDupPaths( dupGroups[1], poolDirPath ) );		// excluding D1\\IGNORE\\b.txt
+	ASSERT_EQUAL( _T("a.txt|D1\\a.txt|D1\\D2\\a.txt"), ut2::JoinRelativeDupPaths( dupGroups[0], poolDirPath ) );
+	ASSERT_EQUAL( _T("b.txt|D1\\D2\\b.txt"), ut2::JoinRelativeDupPaths( dupGroups[1], poolDirPath ) );		// excluding D1\\IGNORE\\b.txt
 }
 
 
-void CDuplicateFilesTests::Run( void )
+void CDuplicateFilesTests2::Run( void )
 {
 	__super::Run();
 

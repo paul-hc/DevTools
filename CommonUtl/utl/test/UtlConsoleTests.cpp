@@ -17,6 +17,7 @@
 #include "FileSystemTests.h"
 #include "TextFileIoTests.h"
 #include "StructuredStorageTest.h"
+#include "DuplicateFilesTests.h"
 #include "ThreadingTests.h"
 
 #ifdef _DEBUG
@@ -44,6 +45,7 @@ namespace ut
 		CFileSystemTests::Instance();
 		CTextFileIoTests::Instance();
 		CStructuredStorageTest::Instance();
+		CDuplicateFilesTests::Instance();
 		CThreadingTests::Instance();
 	}
 }
