@@ -977,6 +977,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\test\DuplicateFilesTests.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\test\DuplicateFilesTests.h"
+				>
+			</File>
+			<File
 				RelativePath=".\test\EndiannessTests.cpp"
 				>
 			</File>

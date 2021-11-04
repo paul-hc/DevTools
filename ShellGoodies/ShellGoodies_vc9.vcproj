@@ -859,11 +859,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\test\DuplicateFilesTests.cpp"
+				RelativePath=".\test\DuplicateFilesTests2.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\test\DuplicateFilesTests.h"
+				RelativePath=".\test\DuplicateFilesTests2.h"
 				>
 			</File>
 			<File
