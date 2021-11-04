@@ -25,6 +25,8 @@ public:
 
 	struct ToFilePath
 	{
+		typedef const fs::CPath& TReturn;
+
 		const fs::CPath& operator()( const fs::CPath& path ) const { return path; }
 		const fs::CPath& operator()( const CPathItemBase* pItem ) const { return pItem->GetFilePath(); }
 	};

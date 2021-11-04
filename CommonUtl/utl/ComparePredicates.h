@@ -72,13 +72,13 @@ namespace func
 	};
 
 
-	template< typename Functor, typename Adapter >
-	struct FuncAdapter
+	template< typename Functor, typename Adapter, typename FunctorReturnT = typename Functor::TReturn >
+	struct ValueAdapter
 	{
-		FuncAdapter( Functor functor = Functor(), Adapter adapter = Adapter() ) : m_functor( functor ), m_adapter( adapter ) {}
+		ValueAdapter( Functor functor = Functor(), Adapter adapter = Adapter() ) : m_functor( functor ), m_adapter( adapter ) {}
 
 		template< typename ValueT >
-		void operator()( ValueT& rValue )
+		FunctorReturnT operator()( const ValueT& rValue ) const
 		{
 			return m_functor( m_adapter( rValue ) );
 		}
@@ -398,7 +398,7 @@ namespace func
 	// make template functions for compare primitives that work stateful functors
 
 	template< typename Functor, typename Adapter >
-	inline FuncAdapter<Functor, Adapter> MakeFuncAdapter( Functor functor, Adapter adapter ) { return FuncAdapter<Functor, Adapter>( functor, adapter ); }
+	inline ValueAdapter<Functor, Adapter> MakeValueAdapter( Functor functor, Adapter adapter ) { return ValueAdapter<Functor, Adapter>( functor, adapter ); }
 }
 
 
