@@ -2,12 +2,12 @@
 #define DuplicateFileItem_h
 #pragma once
 
-#include "utl/IProgressService.h"
 #include "utl/FileContent.h"
 #include "utl/PathItemBase.h"
 #include <hash_map>
 
 
+namespace utl { interface IProgressService; }
 class CDuplicateFilesGroup;
 
 
@@ -60,8 +60,8 @@ public:
 	void AddItem( CDuplicateFileItem* pItem );
 
 	// step 2 CRC32 evaluation and regrouping
-	void ExtractCrc32Duplicates( std::vector< CDuplicateFilesGroup* >& rDuplicateGroups, size_t& rIgnoredCount, utl::IProgressService* pProgress = NULL ) throws_( CUserAbortedException );
-	void __ExtractCrc32Duplicates( std::vector< CDuplicateFilesGroup* >& rDuplicateGroups, size_t& rIgnoredCount, utl::IProgressService* pProgress = NULL ) throws_( CUserAbortedException );	// old version using group stores
+	void ExtractCrc32Duplicates( std::vector< CDuplicateFilesGroup* >& rDuplicateGroups, size_t& rIgnoredCount, utl::IProgressService* pProgressSvc = NULL ) throws_( CUserAbortedException );
+	void __ExtractCrc32Duplicates( std::vector< CDuplicateFilesGroup* >& rDuplicateGroups, size_t& rIgnoredCount, utl::IProgressService* pProgressSvc = NULL ) throws_( CUserAbortedException );	// old version using group stores
 
 	bool MakeOriginalItem( CDuplicateFileItem* pItem );
 	bool MakeDuplicateItem( CDuplicateFileItem* pItem );
@@ -90,7 +90,7 @@ public:
 	void RegisterItem( CDuplicateFileItem* pItem, const fs::CFileContentKey& contentKey );
 
 	// extract groups with more than 1 item
-	void ExtractDuplicateGroups( std::vector< CDuplicateFilesGroup* >& rDuplicateGroups, size_t& rIgnoredCount, utl::IProgressService* pProgress = NULL ) throws_( CUserAbortedException );
+	void ExtractDuplicateGroups( std::vector< CDuplicateFilesGroup* >& rDuplicateGroups, size_t& rIgnoredCount, utl::IProgressService* pProgressSvc = NULL ) throws_( CUserAbortedException );
 private:
 	stdext::hash_map< fs::CFileContentKey, CDuplicateFilesGroup* > m_groupsMap;
 	std::vector< CDuplicateFilesGroup* > m_groups;				// with ownership, in the order they were registered

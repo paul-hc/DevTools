@@ -5,6 +5,7 @@
 #include "utl/Crc32.h"
 #include "utl/ComparePredicates.h"
 #include "utl/FileSystem.h"
+#include "utl/IProgressService.h"
 #include "utl/StringUtilities.h"
 
 #ifdef _DEBUG
@@ -98,7 +99,7 @@ void CDuplicateFilesGroup::AddItem( CDuplicateFileItem* pItem )
 	pItem->SetParentGroup( this );
 }
 
-void CDuplicateFilesGroup::ExtractCrc32Duplicates( std::vector< CDuplicateFilesGroup* >& rDuplicateGroups, size_t& rIgnoredCount, utl::IProgressService* pProgress /*= NULL*/ ) throws_( CUserAbortedException )
+void CDuplicateFilesGroup::ExtractCrc32Duplicates( std::vector< CDuplicateFilesGroup* >& rDuplicateGroups, size_t& rIgnoredCount, utl::IProgressService* pProgressSvc /*= NULL*/ ) throws_( CUserAbortedException )
 {
 	REQUIRE( HasDuplicates() );
 	REQUIRE( 0 == m_contentKey.m_crc32 );			// CRC32 is yet to be computed
@@ -111,15 +112,15 @@ void CDuplicateFilesGroup::ExtractCrc32Duplicates( std::vector< CDuplicateFilesG
 
 	for ( std::vector< CDuplicateFileItem* >::iterator itItem = m_items.begin(); itItem != m_items.end(); ++itItem )
 	{
-		if ( pProgress != NULL )
-			pProgress->AdvanceItem( ( *itItem )->GetFilePath().Get() );
+		if ( pProgressSvc != NULL )
+			pProgressSvc->AdvanceItem( ( *itItem )->GetFilePath().Get() );
 
 		TKeyItemPair newItem( m_contentKey, *itItem );
 
 		if ( newItem.first.ComputeCrc32( newItem.second->GetFilePath() ) )
 		{
-			if ( pProgress != NULL )
-				pProgress->AdvanceStage( newItem.first.Format() );
+			if ( pProgressSvc != NULL )
+				pProgressSvc->AdvanceStage( newItem.first.Format() );
 
 			scopedKeyItems.push_back( newItem );
 			utl::ReleaseOwnership( *itItem );			// release detached item ownership to prevent being deleted when unwiding the stack
@@ -135,7 +136,7 @@ void CDuplicateFilesGroup::ExtractCrc32Duplicates( std::vector< CDuplicateFilesG
 
 	typedef pred::CompareFirstSecond< pred::CompareValue, pred::CompareItemPath > TCompareKeyItemPair;
 
-	std::sort( scopedKeyItems.begin(), scopedKeyItems.end(), pred::LessValue< TCompareKeyItemPair >() );			// sort by full key and path
+	std::sort( scopedKeyItems.begin(), scopedKeyItems.end(), pred::LessValue<TCompareKeyItemPair>() );			// sort by full key and path
 
 	typedef std::pair< TKeyItemContainer::iterator, TKeyItemContainer::iterator > IteratorPair;
 	typedef pred::CompareFirst< pred::CompareValue > TCompareKeyPair;
@@ -161,7 +162,7 @@ void CDuplicateFilesGroup::ExtractCrc32Duplicates( std::vector< CDuplicateFilesG
 	}
 }
 
-void CDuplicateFilesGroup::__ExtractCrc32Duplicates( std::vector< CDuplicateFilesGroup* >& rDuplicateGroups, size_t& rIgnoredCount, utl::IProgressService* pProgress /*= NULL*/ ) throws_( CUserAbortedException )
+void CDuplicateFilesGroup::__ExtractCrc32Duplicates( std::vector< CDuplicateFilesGroup* >& rDuplicateGroups, size_t& rIgnoredCount, utl::IProgressService* pProgressSvc /*= NULL*/ ) throws_( CUserAbortedException )
 {
 	// old version using group stores
 
@@ -175,8 +176,8 @@ void CDuplicateFilesGroup::__ExtractCrc32Duplicates( std::vector< CDuplicateFile
 
 	for ( std::vector< CDuplicateFileItem* >::iterator itItem = scopedItems.begin(); itItem != scopedItems.end(); ++itItem )
 	{
-		if ( pProgress != NULL )
-			pProgress->AdvanceItem( ( *itItem )->GetFilePath().Get() );
+		if ( pProgressSvc != NULL )
+			pProgressSvc->AdvanceItem( ( *itItem )->GetFilePath().Get() );
 
 		fs::CFileContentKey fullKey = m_contentKey;
 		if ( fullKey.ComputeCrc32( ( *itItem )->GetFilePath() ) )
@@ -240,7 +241,7 @@ void CDuplicateGroupStore::RegisterItem( CDuplicateFileItem* pItem, const fs::CF
 	rpGroup->AddItem( pItem );
 }
 
-void CDuplicateGroupStore::ExtractDuplicateGroups( std::vector< CDuplicateFilesGroup* >& rDuplicateGroups, size_t& rIgnoredCount, utl::IProgressService* pProgress /*= NULL*/ ) throws_( CUserAbortedException )
+void CDuplicateGroupStore::ExtractDuplicateGroups( std::vector< CDuplicateFilesGroup* >& rDuplicateGroups, size_t& rIgnoredCount, utl::IProgressService* pProgressSvc /*= NULL*/ ) throws_( CUserAbortedException )
 {
 	utl::COwningContainer< std::vector< CDuplicateFilesGroup* > > scopedGroups;
 	scopedGroups.swap( m_groups );			// take scoped ownership for exception safety
@@ -251,8 +252,8 @@ void CDuplicateGroupStore::ExtractDuplicateGroups( std::vector< CDuplicateFilesG
 		{
 			if ( ( *itGroup )->HasCrc32() )								// checksum computed?
 			{
-				if ( pProgress != NULL )
-					pProgress->AdvanceStage( ( *itGroup )->GetContentKey().Format() );
+				if ( pProgressSvc != NULL )
+					pProgressSvc->AdvanceStage( ( *itGroup )->GetContentKey().Format() );
 
 				rDuplicateGroups.push_back( *itGroup );
 				*itGroup = NULL;										// mark detached group as NULL to prevent being deleted when unwiding the stack
@@ -260,7 +261,7 @@ void CDuplicateGroupStore::ExtractDuplicateGroups( std::vector< CDuplicateFilesG
 			else
 			{
 				std::vector< CDuplicateFilesGroup* > subGroups;			// grouped by file-size *and* CRC32
-				( *itGroup )->ExtractCrc32Duplicates( subGroups, rIgnoredCount, pProgress );
+				( *itGroup )->ExtractCrc32Duplicates( subGroups, rIgnoredCount, pProgressSvc );
 				rDuplicateGroups.insert( rDuplicateGroups.end(), subGroups.begin(), subGroups.end() );
 			}
 

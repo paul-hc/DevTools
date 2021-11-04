@@ -117,4 +117,19 @@ namespace func
 }
 
 
+namespace cvt
+{
+	struct CQueryPaths
+	{
+		template< typename ItemContainerT >
+		CQueryPaths( const ItemContainerT& srcPathItems )
+		{
+			func::QueryItemsPaths( m_paths, srcPathItems );
+		}
+	public:
+		std::vector< fs::CPath > m_paths;
+	};
+}
+
+
 #endif // PathItemBase_h

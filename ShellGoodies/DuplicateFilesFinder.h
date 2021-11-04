@@ -20,13 +20,8 @@ public:
 class CDuplicateFilesFinder
 {
 public:
-	CDuplicateFilesFinder( utl::IProgressService* pProgressSvc, fs::IEnumerator* pProgressEnum )
-		: m_pProgressSvc( pProgressSvc )
-		, m_pProgressEnum( pProgressEnum )
-		, m_minFileSize( 0 )
-	{
-		ASSERT_PTR( m_pProgressSvc );
-	}
+	CDuplicateFilesFinder( void );		// for testing
+	CDuplicateFilesFinder( utl::IProgressService* pProgressSvc, fs::IEnumerator* pProgressEnum );
 
 	void SetWildSpec( const std::tstring& wildSpec ) { m_wildSpec = wildSpec; }
 	void SetMinFileSize( UINT64 minFileSize ) { m_minFileSize = minFileSize; }
@@ -34,12 +29,12 @@ public:
 	const CDupsOutcome& GetOutcome( void ) const { return m_outcome; }
 
 	void FindDuplicates( std::vector< CDuplicateFilesGroup* >& rDuplicateGroups,
-						 const std::vector< CPathItem* >& srcPathItems,
-						 const std::vector< CPathItem* >& ignorePathItems ) throws_( CUserAbortedException );
+						 const std::vector< fs::CPath >& searchPaths,
+						 const std::vector< fs::CPath >& ignorePaths ) throws_( CUserAbortedException );
 private:
 	void SearchForFiles( std::vector< fs::CPath >& rFoundPaths,
-						 const std::vector< CPathItem* >& srcPathItems,
-						 const std::vector< CPathItem* >& ignorePathItems );
+						 const std::vector< fs::CPath >& searchPaths,
+						 const std::vector< fs::CPath >& ignorePaths );
 	void GroupByFileSize( CDuplicateGroupStore* pGroupsStore, const std::vector< fs::CPath >& foundPaths );
 	void GroupByCrc32( std::vector< CDuplicateFilesGroup* >& rDuplicateGroups, CDuplicateGroupStore* pGroupsStore );
 

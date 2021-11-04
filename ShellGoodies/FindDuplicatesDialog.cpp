@@ -331,7 +331,7 @@ bool CFindDuplicatesDialog::SearchForDuplicateFiles( void )
 		finder.SetWildSpec( m_fileSpecEdit.GetText() );
 		finder.SetMinFileSize( minFileSize );
 
-		finder.FindDuplicates( m_duplicateGroups, m_searchPathItems, m_ignorePathItems );
+		finder.FindDuplicates( m_duplicateGroups, cvt::CQueryPaths( m_searchPathItems ).m_paths, cvt::CQueryPaths( m_ignorePathItems ).m_paths );
 
 		m_outcomeStatic.SetWindowText( FormatReport( finder.GetOutcome() ) );
 		SetupDuplicateFileList();

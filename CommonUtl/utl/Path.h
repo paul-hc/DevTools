@@ -612,6 +612,7 @@ namespace pred
 
 	typedef LessValue< CompareEquivPath > TLess_EquivPath;
 	typedef LessValue< CompareNaturalPath > TLess_NaturalPath;
+	typedef LessValue< TCompareNameExt > TLess_NameExt;
 }
 
 

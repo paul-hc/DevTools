@@ -4,6 +4,7 @@
 #include "utl/ContainerUtilities.h"
 #include "utl/FileEnumerator.h"
 #include "utl/Guards.h"
+#include "utl/IProgressService.h"
 #include <hash_set>
 
 #ifdef _DEBUG
@@ -13,13 +14,29 @@
 
 // CDuplicateFilesFinder implementation
 
+CDuplicateFilesFinder::CDuplicateFilesFinder( void )
+	: m_pProgressSvc( svc::CNoProgressService::Instance() )
+	, m_pProgressEnum( NULL )
+	, m_minFileSize( 0 )
+{
+	ASSERT_PTR( m_pProgressSvc );
+}
+
+CDuplicateFilesFinder::CDuplicateFilesFinder( utl::IProgressService* pProgressSvc, fs::IEnumerator* pProgressEnum )
+	: m_pProgressSvc( pProgressSvc )
+	, m_pProgressEnum( pProgressEnum )
+	, m_minFileSize( 0 )
+{
+	ASSERT_PTR( m_pProgressSvc );
+}
+
 void CDuplicateFilesFinder::FindDuplicates( std::vector< CDuplicateFilesGroup* >& rDuplicateGroups,
-											const std::vector< CPathItem* >& srcPathItems,
-											const std::vector< CPathItem* >& ignorePathItems ) throws_( CUserAbortedException )
+											const std::vector< fs::CPath >& searchPaths,
+											const std::vector< fs::CPath >& ignorePaths ) throws_( CUserAbortedException )
 {
 	std::vector< fs::CPath > foundPaths;
 
-	SearchForFiles( foundPaths, srcPathItems, ignorePathItems );
+	SearchForFiles( foundPaths, searchPaths, ignorePaths );
 
 	// optimize performance:
 	//	step 1: compute file-size part of the content key, grouping duplicate candidates by file-size only
@@ -35,27 +52,24 @@ void CDuplicateFilesFinder::FindDuplicates( std::vector< CDuplicateFilesGroup* >
 }
 
 void CDuplicateFilesFinder::SearchForFiles( std::vector< fs::CPath >& rFoundPaths,
-											const std::vector< CPathItem* >& srcPathItems,
-											const std::vector< CPathItem* >& ignorePathItems )
+											const std::vector< fs::CPath >& searchPaths,
+											const std::vector< fs::CPath >& ignorePaths )
 {
 	utl::CSectionGuard section( _T("# SearchForFiles") );
 
-	std::vector< fs::CPath > ignorePaths;
-	func::QueryItemsPaths( ignorePaths, ignorePathItems );
-
 	stdext::hash_set< fs::CPath > uniquePaths;
 
-	for ( std::vector< CPathItem* >::const_iterator itSrcPathItem = srcPathItems.begin(); itSrcPathItem != srcPathItems.end(); ++itSrcPathItem )
+	for ( std::vector< fs::CPath >::const_iterator itSearchPath = searchPaths.begin(); itSearchPath != searchPaths.end(); ++itSearchPath )
 	{
-		const fs::CPath& srcPath = ( *itSrcPathItem )->GetFilePath();
-		if ( fs::IsValidDirectory( srcPath.GetPtr() ) )
+		const fs::CPath& searchPath = *itSearchPath;
+		if ( fs::IsValidDirectory( searchPath.GetPtr() ) )
 		{
 			fs::CPathEnumerator found( fs::EF_Recurse, m_pProgressEnum );
 			found.RefOptions().m_ignorePathMatches.Reset( ignorePaths );
 
 			if ( m_pProgressEnum != NULL )
-				m_pProgressEnum->AddFoundSubDir( srcPath.GetPtr() );		// progress only: advance stage to the root directory
-			fs::EnumFiles( &found, srcPath, m_wildSpec.c_str() );
+				m_pProgressEnum->AddFoundSubDir( searchPath.GetPtr() );		// progress only: advance stage to the root directory
+			fs::EnumFiles( &found, searchPath, m_wildSpec.c_str() );
 
 			fs::SortPaths( found.m_filePaths );
 
@@ -68,9 +82,9 @@ void CDuplicateFilesFinder::SearchForFiles( std::vector< fs::CPath >& rFoundPath
 
 			m_outcome.m_searchedDirCount += 1 + found.m_subDirPaths.size();		// this directory + sub-directories
 		}
-		else if ( fs::IsValidFile( srcPath.GetPtr() ) )
-			if ( uniquePaths.insert( srcPath ).second )				// path is unique?
-				rFoundPaths.push_back( srcPath );
+		else if ( fs::IsValidFile( searchPath.GetPtr() ) )
+			if ( uniquePaths.insert( searchPath ).second )				// path is unique?
+				rFoundPaths.push_back( searchPath );
 	}
 
 	m_outcome.m_foundFileCount = rFoundPaths.size();
