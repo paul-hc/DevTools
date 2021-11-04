@@ -326,6 +326,7 @@ bool CFindDuplicatesDialog::SearchForDuplicateFiles( void )
 
 	try
 	{
+		CWaitCursor wait;			// could take a long time for directories with many subdirectories and files
 		CDuplicateFilesFinder finder( progress.GetService(), progress.GetProgressEnumerator() );
 
 		finder.SetWildSpec( m_fileSpecEdit.GetText() );

@@ -2,8 +2,8 @@
 #define DuplicateFilesFinder_h
 #pragma once
 
+#include "utl/DuplicateFileItem.h"
 #include "utl/Timer.h"
-#include "DuplicateFileItem.h"
 
 
 struct CDupsOutcome
