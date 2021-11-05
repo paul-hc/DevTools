@@ -58,7 +58,7 @@ void CDuplicateFilesEnumerator::SearchDuplicates( const std::vector< fs::TPatter
 	// lazy evaluate CRC32 checksums - real duplicates are within size-based duplicate groups
 	GroupByCrc32();
 
-	utl::SortDuplicateGroupItems( m_dupGroupItems );		// sort groups by original item path
+	func::SortDuplicateGroupItems( m_dupGroupItems );		// sort groups by original item path
 	m_pContext = NULL;
 }
 

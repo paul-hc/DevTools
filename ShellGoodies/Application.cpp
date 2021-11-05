@@ -4,7 +4,6 @@
 #include "AppCmdService.h"
 #include "GeneralOptions.h"
 #include "test/TextAlgorithmsTests.h"
-#include "test/DuplicateFilesTests2.h"
 #include "test/RenameFilesTests.h"
 #include "test/CommandModelSerializerTests.h"
 #include "utl/EnumTags.h"
@@ -23,7 +22,6 @@ namespace ut
 	#ifdef USE_UT
 		CTextAlgorithmsTests::Instance();
 		CRenameFilesTests::Instance();
-		CDuplicateFilesTests2::Instance();
 		CCommandModelSerializerTests::Instance();
 	#endif
 	}

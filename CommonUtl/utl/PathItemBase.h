@@ -73,22 +73,6 @@ namespace pred
 }
 
 
-namespace utl
-{
-	template< typename CompareItemT, typename ContainerT >
-	inline void SortPathItems( ContainerT& rPathItems, bool ascending = true )
-	{
-		std::sort( rPathItems.begin(), rPathItems.end(), pred::OrderByValue<CompareItemT>( ascending ) );
-	}
-
-	template< typename ContainerT >
-	inline void SortPathItems( ContainerT& rPathItems, bool ascending = true )
-	{
-		SortPathItems<pred::ComparePathItem>( rPathItems, ascending );
-	}
-}
-
-
 namespace func
 {
 	template< typename PathContainerT, typename ItemContainerT >
@@ -109,6 +93,19 @@ namespace func
 				return *itItem;
 
 		return ContainerT::value_type( NULL );
+	}
+
+
+	template< typename CompareItemT, typename ContainerT >
+	inline void SortPathItems( ContainerT& rPathItems, bool ascending = true )
+	{
+		std::sort( rPathItems.begin(), rPathItems.end(), pred::OrderByValue<CompareItemT>( ascending ) );
+	}
+
+	template< typename ContainerT >
+	inline void SortPathItems( ContainerT& rPathItems, bool ascending = true )
+	{
+		SortPathItems<pred::ComparePathItem>( rPathItems, ascending );
 	}
 
 

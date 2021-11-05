@@ -27,7 +27,7 @@ namespace fs
 	template< typename FileStateItemT, typename CreateFuncT >
 	inline void CFileStateItemEnumerator<FileStateItemT, CreateFuncT>::SortItems( void )
 	{
-		utl::SortPathItems( m_fileItems );			// by path key
+		func::SortPathItems( m_fileItems );			// by path key
 	}
 
 	template< typename FileStateItemT, typename CreateFuncT >

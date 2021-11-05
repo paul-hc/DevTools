@@ -15,7 +15,6 @@ class CDuplicateFileItem : public CFileStateItem
 {
 public:
 	CDuplicateFileItem( const CFileFind& foundFile );
-	CDuplicateFileItem( const fs::CPath& filePath, CDuplicateFilesGroup* pParentGroup );	// legacy
 
 	fs::CFileContentKey GetContentKey( void ) const { return fs::CFileContentKey( GetState() ); }
 
@@ -26,13 +25,6 @@ public:
 	bool IsDuplicateItem( void ) const { return !IsOriginalItem(); }
 	bool MakeOriginalItem( void );
 	bool MakeDuplicateItem( void );
-
-//	const CTime& GetModifyTime( void ) const { return GetState().m_modifTime; }
-
-//	struct AsModifyTime
-//	{
-//		const CTime& operator()( const CDuplicateFileItem* pItem ) const { return pItem->GetModifyTime(); }
-//	};
 private:
 	CDuplicateFilesGroup* m_pParentGroup;
 };
@@ -49,19 +41,19 @@ public:
 	fs::CFileContentKey GetContentKey( void ) const { return m_contentKey; }
 
 	bool HasDuplicates( void ) const { return m_items.size() > 1; }
-	bool HasCrc32( void ) const { return m_contentKey.m_crc32 != 0; }
+	bool HasCrc32( void ) const { return m_contentKey.HasCrc32(); }
 
 	const std::vector< CDuplicateFileItem* >& GetItems( void ) const { return m_items; }
 	size_t GetDuplicatesCount( void ) const { ASSERT( !m_items.empty() ); return m_items.size() - 1; }		// excluding the original item
 
 	CDuplicateFileItem* GetOriginalItem( void ) const { return !m_items.empty() ? m_items.front() : NULL; }
-	CDuplicateFileItem* FindItem( const fs::CPath& filePath ) const;
+	CDuplicateFileItem* FindItem( const fs::CPath& filePath ) const { return func::FindItemWithPath( m_items, filePath ); }
 	bool ContainsItem( const fs::CPath& filePath ) const { return FindItem( filePath ) != NULL; }
 
-/**/	void AddItem( const fs::CPath& filePath );
 	void AddItem( CDuplicateFileItem* pDupItem );
+	void SortDuplicates( void );		//  keep original first, sort duplicate items by path
 
-	// step 2 CRC32 evaluation and regrouping
+	// lazy CRC32 evaluation and regrouping
 	void ExtractChecksumDuplicates( std::vector< CDuplicateFilesGroup* >& rDuplicateGroups, size_t& rIgnoredCount, utl::IProgressService* pProgressSvc ) throws_( CUserAbortedException );
 
 	bool MakeOriginalItem( CDuplicateFileItem* pItem );
@@ -88,9 +80,6 @@ public:
 	static size_t GetDuplicateItemCount( const std::vector< CDuplicateFilesGroup* >& groups );
 
 	CDuplicateFilesGroup* RegisterItem( CDuplicateFileItem* pDupItem );
-
-/**/	bool RegisterPath( const fs::CPath& filePath, const fs::CFileContentKey& contentKey );
-/**/	void RegisterItem( CDuplicateFileItem* pItem, const fs::CFileContentKey& contentKey );
 
 	// extract groups with more than 1 item
 	void ExtractDuplicateGroups( std::vector< CDuplicateFilesGroup* >& rDuplicateGroups, size_t& rIgnoredCount, utl::IProgressService* pProgressSvc ) throws_( CUserAbortedException );
@@ -145,11 +134,21 @@ namespace pred
 }
 
 
-namespace utl
+namespace func
 {
+	struct SortGroupDuplicates
+	{
+		void operator()( CDuplicateFilesGroup* pDupGroup ) const
+		{
+			ASSERT_PTR( pDupGroup );
+			pDupGroup->SortDuplicates();
+		}
+	};
+
+
 	inline void SortDuplicateGroupItems( std::vector< CDuplicateFilesGroup* >& rDupGroupItems, bool ascending = true )
 	{
-		utl::SortPathItems<pred::TCompareOriginalItemPath>( rDupGroupItems, ascending );		// sort groups by original item path
+		func::SortPathItems<pred::TCompareOriginalItemPath>( rDupGroupItems, ascending );		// sort groups by original item path
 	}
 }
 

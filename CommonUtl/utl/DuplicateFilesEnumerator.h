@@ -51,7 +51,7 @@ private:
 	detail::CSearchContext* m_pContext;
 	CDupsOutcome m_outcome;
 public:
-	std::vector< CDuplicateFilesGroup* > m_dupGroupItems;
+	std::vector< CDuplicateFilesGroup* > m_dupGroupItems;		// results: groups sorted by path, each group's duplicate items sorted by path
 };
 
 

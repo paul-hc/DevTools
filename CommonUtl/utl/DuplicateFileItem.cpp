@@ -21,13 +21,6 @@ CDuplicateFileItem::CDuplicateFileItem( const CFileFind& foundFile )
 {
 }
 
-CDuplicateFileItem::CDuplicateFileItem( const fs::CPath& filePath, CDuplicateFilesGroup* pParentGroup )
-	: CFileStateItem( fs::CFileState::ReadFromFile( filePath ) )
-	, m_pParentGroup( pParentGroup )
-{
-	ASSERT_PTR( m_pParentGroup );
-}
-
 bool CDuplicateFileItem::IsOriginalItem( void ) const
 {
 	ASSERT_PTR( m_pParentGroup );
@@ -54,13 +47,19 @@ CDuplicateFilesGroup::~CDuplicateFilesGroup()
 	utl::ClearOwningContainer( m_items );
 }
 
-CDuplicateFileItem* CDuplicateFilesGroup::FindItem( const fs::CPath& filePath ) const
+void CDuplicateFilesGroup::SortDuplicates( void )
 {
-	for ( std::vector< CDuplicateFileItem* >::const_iterator itItem = m_items.begin(); itItem != m_items.end(); ++itItem )
-		if ( filePath == ( *itItem )->GetFilePath() )
-			return *itItem;
+	if ( HasDuplicates() )
+		std::sort( m_items.begin() + 1, m_items.end(), pred::TLess_PathItem() );
+}
 
-	return NULL;
+void CDuplicateFilesGroup::AddItem( CDuplicateFileItem* pDupItem )
+{
+	ASSERT_PTR( pDupItem );
+	ASSERT( !ContainsItem( pDupItem->GetFilePath() ) );
+
+	m_items.push_back( pDupItem );
+	pDupItem->SetParentGroup( this );
 }
 
 bool CDuplicateFilesGroup::MakeOriginalItem( CDuplicateFileItem* pItem )
@@ -74,6 +73,7 @@ bool CDuplicateFilesGroup::MakeOriginalItem( CDuplicateFileItem* pItem )
 
 	m_items.erase( itFountItem );
 	m_items.insert( m_items.begin(), pItem );
+	SortDuplicates();
 	return true;
 }
 
@@ -88,23 +88,8 @@ bool CDuplicateFilesGroup::MakeDuplicateItem( CDuplicateFileItem* pItem )
 
 	m_items.erase( itFountItem );
 	m_items.insert( m_items.end(), pItem );
+	SortDuplicates();
 	return true;
-}
-
-void CDuplicateFilesGroup::AddItem( const fs::CPath& filePath )
-{
-	ASSERT( !ContainsItem( filePath ) );
-
-	m_items.push_back( new CDuplicateFileItem( filePath, this ) );
-}
-
-void CDuplicateFilesGroup::AddItem( CDuplicateFileItem* pDupItem )
-{
-	ASSERT_PTR( pDupItem );
-	ASSERT( !ContainsItem( pDupItem->GetFilePath() ) );
-
-	m_items.push_back( pDupItem );
-	pDupItem->SetParentGroup( this );
 }
 
 void CDuplicateFilesGroup::ExtractChecksumDuplicates( std::vector< CDuplicateFilesGroup* >& rDuplicateGroups, size_t& rIgnoredCount, utl::IProgressService* pProgressSvc ) throws_( CUserAbortedException )
@@ -144,7 +129,7 @@ void CDuplicateFilesGroup::ExtractChecksumDuplicates( std::vector< CDuplicateFil
 
 	typedef pred::CompareFirstSecond< pred::CompareValue, pred::ComparePathItem > TCompareKeyItemPair;
 
-	utl::SortPathItems<TCompareKeyItemPair>( scopedKeyItems );
+	func::SortPathItems<TCompareKeyItemPair>( scopedKeyItems );
 
 	typedef std::pair< TKeyItemContainer::iterator, TKeyItemContainer::iterator > IteratorPair;
 	typedef pred::CompareFirst< pred::CompareValue > TCompareKeyPair;
@@ -187,38 +172,6 @@ size_t CDuplicateGroupStore::GetDuplicateItemCount( const std::vector< CDuplicat
 			dupItemCount += ( *itGroup )->GetItems().size();
 
 	return dupItemCount;
-}
-
-bool CDuplicateGroupStore::RegisterPath( const fs::CPath& filePath, const fs::CFileContentKey& contentKey )
-{
-	CDuplicateFilesGroup*& rpGroup = m_groupsMap[ contentKey ];
-
-	if ( NULL == rpGroup )
-	{
-		rpGroup = new CDuplicateFilesGroup( contentKey );
-		m_groups.push_back( rpGroup );
-	}
-	else if ( rpGroup->ContainsItem( filePath ) )		// already in the group?
-		return false;									// file path not unique: a secondary occurrence due to overlapping search directories
-
-	rpGroup->AddItem( filePath );
-	return true;
-}
-
-void CDuplicateGroupStore::RegisterItem( CDuplicateFileItem* pItem, const fs::CFileContentKey& contentKey )
-{
-	ASSERT_PTR( pItem );
-	ASSERT( contentKey.m_crc32 != 0 );
-
-	CDuplicateFilesGroup*& rpGroup = m_groupsMap[ contentKey ];
-
-	if ( NULL == rpGroup )
-	{
-		rpGroup = new CDuplicateFilesGroup( contentKey );
-		m_groups.push_back( rpGroup );
-	}
-
-	rpGroup->AddItem( pItem );
 }
 
 CDuplicateFilesGroup* CDuplicateGroupStore::RegisterItem( CDuplicateFileItem* pDupItem )
@@ -269,4 +222,6 @@ void CDuplicateGroupStore::ExtractDuplicateGroups( std::vector< CDuplicateFilesG
 	}
 
 	m_groupsMap.clear();		// cleanup the empty store
+
+	utl::for_each( rDuplicateGroups, func::SortGroupDuplicates() );		// sort each group's duplicate items by path
 }

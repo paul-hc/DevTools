@@ -734,14 +734,6 @@
 					>
 				</File>
 				<File
-					RelativePath=".\DuplicateFilesFinder.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\DuplicateFilesFinder.h"
-					>
-				</File>
-				<File
 					RelativePath=".\FileEditorBaseDialog.cpp"
 					>
 				</File>
@@ -856,14 +848,6 @@
 			</File>
 			<File
 				RelativePath=".\test\CommandModelSerializerTests.h"
-				>
-			</File>
-			<File
-				RelativePath=".\test\DuplicateFilesTests2.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\test\DuplicateFilesTests2.h"
 				>
 			</File>
 			<File
