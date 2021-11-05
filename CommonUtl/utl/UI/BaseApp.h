@@ -52,6 +52,11 @@ public:
 		m_nCmdShow = cmdShow;
 	}
 
+	void SetInteractive( bool isInteractive = true )
+	{
+		m_isInteractive = isInteractive;
+	}
+
 	bool LazyInitAppResources( void );
 	void RunUnitTests( void ) { OnRunUnitTests(); }
 protected:
@@ -66,7 +71,7 @@ private:
 	std::auto_ptr< CImageStore > m_pImageStore;					// control the lifetime of shared resources
 	CAccelTable m_appAccel;
 	std::tstring m_appNameSuffix, m_profileSuffix;				// could be set to "_v2" when required
-	bool m_isInteractive;										// false until application becomes idle for the first time
+	bool m_isInteractive;										// true by default; for apps with a message loop it starts false until application becomes idle for the first time
 	bool m_lazyInitAppResources;								// true for extension DLLs: prevent heavy resource initialization when the dll gets registered by regsvr32.exe
 protected:
 	std::tstring m_appRegistryKeyName;							// by default "Paul Cocoveanu"

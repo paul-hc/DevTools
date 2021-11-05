@@ -24,7 +24,7 @@ CBaseApp<BaseClass>::CBaseApp( const TCHAR* pAppName /*= NULL*/ )
 	: BaseClass( pAppName )
 	, CAppTools()
 	, m_appRegistryKeyName( _T("Paul Cocoveanu") )
-	, m_isInteractive( false )
+	, m_isInteractive( true )
 	, m_lazyInitAppResources( false )
 {
 #if _MSC_VER >= 1800	// Visual C++ 2013

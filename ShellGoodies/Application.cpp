@@ -62,7 +62,8 @@ BOOL CApplication::InitInstance( void )
 	app::InitModule( m_hInstance );
 	AfxSetResourceHandle( m_hInstance );
 
-	return CBaseApp< CWinApp >::InitInstance();
+	SetInteractive();		// this application is always interactive
+	return __super::InitInstance();
 }
 
 int CApplication::ExitInstance( void )
@@ -77,12 +78,12 @@ int CApplication::ExitInstance( void )
 	}
 
 	g_comModule.Term();
-	return CBaseApp< CWinApp >::ExitInstance();
+	return __super::ExitInstance();
 }
 
 void CApplication::OnInitAppResources( void )
 {
-	CBaseApp< CWinApp >::OnInitAppResources();
+	__super::OnInitAppResources();
 
 	app::GetLogger()->m_logFileMaxSize = -1;					// unlimited log size
 
@@ -111,7 +112,7 @@ const CCommandModel* CApplication::GetCommandModel( void ) const
 	return m_pCmdSvc->GetCommandModel();
 }
 
-BEGIN_MESSAGE_MAP( CApplication, CBaseApp< CWinApp > )
+BEGIN_MESSAGE_MAP( CApplication, CBaseApp<CWinApp> )
 END_MESSAGE_MAP()
 
 

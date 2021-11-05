@@ -67,6 +67,7 @@ CApplication theApp;	// the one and only CApplication object
 
 CApplication::CApplication( void )
 {
+	SetInteractive( false );		// using an app message loop
 }
 
 CApplication::~CApplication()

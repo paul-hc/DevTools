@@ -287,6 +287,8 @@ CApplication::CApplication( void )
 	, m_forceFlags( 0 )
 	, m_pEventLogger( new CLogger( _T("%s-events") ) )
 {
+	SetInteractive( false );		// using an app message loop
+
 	COLORREF* pCustomColors = CColorDialog::GetSavedCustomColors();
 	UINT component = 0x00, increment = 0xFF / 15;
 
