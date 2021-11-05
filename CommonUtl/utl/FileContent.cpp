@@ -1,6 +1,7 @@
 
 #include "stdafx.h"
 #include "FileContent.h"
+#include "FileState.h"
 #include "FileEnumerator.h"
 #include "FileSystem.h"
 #include "Crc32.h"
@@ -67,14 +68,27 @@ namespace fs
 
 	// CFileContentKey implementation
 
-	bool CFileContentKey::operator<( const CFileContentKey& right ) const
+	CFileContentKey::CFileContentKey( const fs::CFileState& fileState )
+		: m_fileSize( fileState.m_fileSize )
+		, m_crc32( fileState.GetCrc32( fs::CFileState::AsIs ) )
 	{
-		if ( m_fileSize < right.m_fileSize )
-			return true;
-		else if ( m_fileSize == right.m_fileSize )
-			return m_crc32 < right.m_crc32;
+	}
 
-		return false;
+	UINT CFileContentKey::StoreCrc32( const fs::CFileState& fileState, bool cacheCompute /*= true*/ )
+	{
+		return m_crc32 = fileState.GetCrc32( cacheCompute ? fs::CFileState::CacheCompute : fs::CFileState::Compute );
+	}
+
+	bool CFileContentKey::ComputeFileSize( const fs::CPath& filePath )
+	{
+		m_fileSize = fs::GetFileSize( filePath.GetPtr() );
+		return m_fileSize != ULLONG_MAX;
+	}
+
+	bool CFileContentKey::ComputeCrc32( const fs::CPath& filePath )
+	{
+		m_crc32 = fs::CCrc32FileCache::Instance().AcquireCrc32( filePath );
+		return m_crc32 != 0 || 0 == m_fileSize;		// true for valid checksum or empty file
 	}
 
 	std::tstring CFileContentKey::Format( void ) const
@@ -87,16 +101,14 @@ namespace fs
 		return text;
 	}
 
-	bool CFileContentKey::ComputeFileSize( const fs::CPath& filePath )
+	bool CFileContentKey::operator<( const CFileContentKey& right ) const
 	{
-		m_fileSize = fs::GetFileSize( filePath.GetPtr() );
-		return m_fileSize != ULLONG_MAX;
-	}
+		if ( m_fileSize < right.m_fileSize )
+			return true;
+		else if ( m_fileSize == right.m_fileSize )
+			return m_crc32 < right.m_crc32;
 
-	bool CFileContentKey::ComputeCrc32( const fs::CPath& filePath )
-	{
-		m_crc32 = fs::CCrc32FileCache::Instance().AcquireCrc32( filePath );
-		return m_crc32 != 0;
+		return false;
 	}
 
 

@@ -96,7 +96,7 @@ void CImageFileEnumerator::SwapFoundImages( CImagesModel& rImagesModel )
 
 bool CImageFileEnumerator::PassFilter( const CFileAttr& fileAttr ) const
 {
-	if ( !PassFileFilter( fileAttr.GetFileSize() ) )
+	if ( !PassFileFilter( fileAttr.GetPath(), fileAttr.GetFileSize() ) )
 		return false;
 
 	if ( m_pCurrPattern != NULL )

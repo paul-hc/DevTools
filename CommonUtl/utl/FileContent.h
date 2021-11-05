@@ -14,22 +14,27 @@ namespace fs
 	bool IsSrcFileMismatch( const fs::CPath& srcFilePath, const fs::CPath& destFilePath, bool checkTimestamp = true, FileContentMatch matchContentBy = FileSize );
 
 
+	struct CFileState;
+
+
 	struct CFileContentKey
 	{
 		CFileContentKey( void ) : m_fileSize( 0ull ), m_crc32( 0u ) {}
 		CFileContentKey( UINT64 fileSize, UINT crc32 ) : m_fileSize( fileSize ), m_crc32( crc32 ) { ASSERT( m_fileSize != 0ull && m_crc32 != 0u ); }
+		CFileContentKey( const fs::CFileState& fileState );		// lazy CRC32 evaluation
+
+		bool IsEmpty( void ) const { return 0 == m_fileSize && 0 == m_crc32; }
+		bool HasCrc32( void ) const { return m_crc32 != 0 || 0 == m_fileSize; }
+		UINT StoreCrc32( const fs::CFileState& fileState, bool cacheCompute = true );
 
 		bool ComputeFileSize( const fs::CPath& filePath );
 		bool ComputeCrc32( const fs::CPath& filePath );
 
-		bool IsEmpty( void ) const { return 0ull == m_fileSize && 0u == m_crc32; }
-		bool HasCrc32( void ) const { return m_crc32 != 0u; }
+		std::tstring Format( void ) const;
 
 		bool operator==( const CFileContentKey& right ) const { return m_fileSize == right.m_fileSize && m_crc32 == right.m_crc32; }
 		bool operator!=( const CFileContentKey& right ) const { return !operator==( right ); }
 		bool operator<( const CFileContentKey& right ) const;
-
-		std::tstring Format( void ) const;
 	public:
 		UINT64 m_fileSize;		// in bytes
 		UINT m_crc32;			// CRC32 checksum

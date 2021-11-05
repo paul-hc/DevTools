@@ -8,10 +8,10 @@
 
 struct CDupsOutcome
 {
-	CDupsOutcome( void ) : m_searchedDirCount( 0 ), m_foundFileCount( 0 ), m_ignoredCount( 0 ) {}
+	CDupsOutcome( void ) : m_foundSubDirCount( 0 ), m_foundFileCount( 0 ), m_ignoredCount( 0 ) {}
 public:
 	CTimer m_timer;
-	size_t m_searchedDirCount;
+	size_t m_foundSubDirCount;
 	size_t m_foundFileCount;
 	size_t m_ignoredCount;
 };

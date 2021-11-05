@@ -2,52 +2,56 @@
 #define DuplicateFilesEnumerator_h
 #pragma once
 
-#include "Timer.h"
 #include "DuplicateFileItem.h"
+#include "FileEnumerator.h"
+#include "IProgressService.h"
+#include "Timer.h"
+#include <hash_set>
 
 
 struct CDupsOutcome
 {
-	CDupsOutcome( void ) : m_searchedDirCount( 0 ), m_foundFileCount( 0 ), m_ignoredCount( 0 ) {}
+	CDupsOutcome( void ) : m_foundSubDirCount( 0 ), m_foundFileCount( 0 ), m_ignoredCount( 0 ) {}
 public:
 	CTimer m_timer;
-	size_t m_searchedDirCount;
+	size_t m_foundSubDirCount;
 	size_t m_foundFileCount;
 	size_t m_ignoredCount;
 };
 
 
-class CDuplicateFilesEnumerator
+namespace detail { struct CSearchContext; }
+
+
+class CDuplicateFilesEnumerator : public fs::CBaseEnumerator
 {
 public:
-	CDuplicateFilesEnumerator( void );		// for testing
-	CDuplicateFilesEnumerator( utl::IProgressService* pProgressSvc, fs::IEnumerator* pProgressEnum );
+	CDuplicateFilesEnumerator( fs::TEnumFlags enumFlags, IEnumerator* pChainEnum = NULL, utl::IProgressService* pProgressSvc = svc::CNoProgressService::Instance() );
+	~CDuplicateFilesEnumerator() { Clear(); }
 
-	void SetWildSpec( const std::tstring& wildSpec ) { m_wildSpec = wildSpec; }
-	void SetMinFileSize( UINT64 minFileSize ) { m_minFileSize = minFileSize; }
+	void SearchDuplicates( const std::vector< fs::TPatternPath >& searchPaths );
+	void SearchDuplicates( const fs::TPatternPath& searchPath ) { SearchDuplicates( std::vector< fs::TPatternPath >( 1, searchPath ) ); }
 
 	const CDupsOutcome& GetOutcome( void ) const { return m_outcome; }
 
-	void FindDuplicates( std::vector< CDuplicateFilesGroup* >& rDuplicateGroups,
-						 const std::vector< fs::CPath >& searchPaths,
-						 const std::vector< fs::CPath >& ignorePaths ) throws_( CUserAbortedException );
+	// base overrides
+	virtual void Clear( void );
+	virtual size_t GetFileCount( void ) const { return m_outcome.m_foundFileCount; }
+protected:
+	// IEnumerator interface overrides
+	virtual void OnAddFileInfo( const CFileFind& foundFile );
+	virtual bool CanIncludeNode( const CFileFind& foundNode ) const;
+	virtual void AddFoundFile( const TCHAR* pFilePath );
 private:
-	void SearchForFiles( std::vector< fs::CPath >& rFoundPaths,
-						 const std::vector< fs::CPath >& searchPaths,
-						 const std::vector< fs::CPath >& ignorePaths );
-	void GroupByFileSize( CDuplicateGroupStore* pGroupsStore, const std::vector< fs::CPath >& foundPaths );
-	void GroupByCrc32( std::vector< CDuplicateFilesGroup* >& rDuplicateGroups, CDuplicateGroupStore* pGroupsStore );
+	void GroupByCrc32( void );
 
-	void ProgSection_GroupByFileSize( size_t fileCount ) const;
-	void ProgSection_GroupByCrc32( size_t itemCount ) const;
+	void ProgSection_GroupByCrc32( void ) const;
 private:
 	utl::IProgressService* m_pProgressSvc;
-	fs::IEnumerator* m_pProgressEnum;
-
-	std::tstring m_wildSpec;
-	UINT64 m_minFileSize;
-
+	detail::CSearchContext* m_pContext;
 	CDupsOutcome m_outcome;
+public:
+	std::vector< CDuplicateFilesGroup* > m_dupGroupItems;
 };
 
 

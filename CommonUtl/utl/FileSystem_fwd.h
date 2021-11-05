@@ -39,7 +39,7 @@ namespace fs
 		virtual bool AddFoundSubDir( const TCHAR* pSubDirPath ) = 0;
 
 		// advanced overrideables
-		virtual bool IncludeNode( const CFileFind& foundNode ) = 0;
+		virtual bool CanIncludeNode( const CFileFind& foundNode ) const = 0;
 		virtual bool CanRecurse( void ) const = 0;
 		virtual bool MustStop( void ) const = 0;					// abort searching?
 		virtual utl::ICounter* GetDepthCounter( void ) = 0;			// supports recursion depth
@@ -63,7 +63,7 @@ namespace fs
 	public:
 		// IEnumerator interface (partial)
 		virtual const TEnumFlags& GetFlags( void ) const { return m_enumFlags; }
-		virtual bool IncludeNode( const CFileFind& foundNode ) { foundNode; return true; }
+		virtual bool CanIncludeNode( const CFileFind& foundNode ) const { foundNode; return true; }
 		virtual bool CanRecurse( void ) const { return HasFlag( fs::EF_Recurse ); }
 		virtual bool MustStop( void ) const { return false; }
 		virtual utl::ICounter* GetDepthCounter( void ) { return NULL; }

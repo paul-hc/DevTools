@@ -27,7 +27,7 @@ namespace fs
 	template< typename FileStateItemT, typename CreateFuncT >
 	inline void CFileStateItemEnumerator<FileStateItemT, CreateFuncT>::SortItems( void )
 	{
-		std::sort( m_fileItems.begin(), m_fileItems.end(), pred::TLess_PathItem() );		// sort by path key
+		utl::SortPathItems( m_fileItems );			// by path key
 	}
 
 	template< typename FileStateItemT, typename CreateFuncT >

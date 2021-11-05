@@ -5,6 +5,7 @@
 #include "FileSystem_fwd.h"
 #include "ICounter.h"
 #include "Range.h"
+#include <set>
 
 
 namespace fs
@@ -41,6 +42,7 @@ namespace fs
 
 		void Clear( void );
 		void Reset( const std::vector< fs::CPath >& paths );
+		void AddPath( const fs::CPath& path );
 
 		bool IsEmpty( void ) const { return m_dirPaths.empty() && m_filePaths.empty() && m_wildSpecs.empty(); }
 
@@ -85,18 +87,19 @@ namespace fs
 		virtual void OnAddFileInfo( const CFileFind& foundFile );		// no chaining via m_pChainEnum
 		virtual void AddFoundFile( const TCHAR* pFilePath ) = 0;		// has implementation
 		virtual bool AddFoundSubDir( const TCHAR* pSubDirPath );
-		virtual bool IncludeNode( const CFileFind& foundNode );
+		virtual bool CanIncludeNode( const CFileFind& foundNode ) const;
 		virtual bool CanRecurse( void ) const;
 		virtual bool MustStop( void ) const;
 		virtual utl::ICounter* GetDepthCounter( void ) { return &m_depthCounter; }
 
-		bool PassFileFilter( UINT64 fileSize ) const;
+		bool PassFileFilter( const fs::CPath& filePath, UINT64 fileSize ) const;
+		bool IgnorePath( const fs::CPath& ignoredPath ) const;			// returns false for convenience
 	public:
 		bool IsEmpty( void ) const { return m_subDirPaths.empty() && 0 == GetFileCount(); }
 
 		// overridables
 		virtual size_t GetFileCount( void ) const = 0;
-		virtual void Clear( void ) = 0 { m_subDirPaths.clear(); }
+		virtual void Clear( void ) = 0 { m_subDirPaths.clear(); m_ignoredPaths.clear(); }
 
 		fs::TEnumFlags& RefFlags( void ) { REQUIRE( IsEmpty() ); return m_options.m_enumFlags; }
 
@@ -107,12 +110,16 @@ namespace fs
 		void SetRelativeDirPath( const fs::CPath& relativeDirPath ) { ASSERT( IsEmpty() ); m_relativeDirPath = relativeDirPath; }
 
 		void SetIgnorePathMatches( const std::vector< fs::CPath >& ignorePaths );
+
+		const std::set< fs::CPath >& GetIgnoredPaths( void ) const { return m_ignoredPaths; }
 	protected:
 		IEnumerator* m_pChainEnum;					// allows chaining for progress reporting
 		CEnumOptions m_options;
 		fs::CPath m_relativeDirPath;				// to remove if it's common prefix
 
 		utl::CCounter m_depthCounter;				// counts recursion depth
+	private:
+		mutable std::set< fs::CPath > m_ignoredPaths;	// files + sub-dirs ignored or filtered-out
 	public:
 		std::vector< fs::CPath > m_subDirPaths;		// found sub-directories
 	};

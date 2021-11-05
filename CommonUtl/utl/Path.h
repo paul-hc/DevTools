@@ -401,6 +401,19 @@ namespace func
 	};
 
 
+	struct AppendPath		// e.g. used to append the same wildcard spec to some paths
+	{
+		AppendPath( const fs::CPath& childPath ) : m_childPath( childPath ) {}
+
+		void operator()( fs::CPath& rPath ) const
+		{
+			rPath /= m_childPath;
+		}
+	private:
+		const fs::CPath& m_childPath;
+	};
+
+
 	struct PrefixPath
 	{
 		PrefixPath( const fs::CPath& folderPath ) : m_folderPath( folderPath ) {}

@@ -15,26 +15,34 @@
 
 // CDuplicateFileItem implementation
 
+CDuplicateFileItem::CDuplicateFileItem( const CFileFind& foundFile )
+	: CFileStateItem( foundFile )
+	, m_pParentGroup( NULL )
+{
+}
+
 CDuplicateFileItem::CDuplicateFileItem( const fs::CPath& filePath, CDuplicateFilesGroup* pParentGroup )
-	: CPathItemBase( filePath )
+	: CFileStateItem( fs::CFileState::ReadFromFile( filePath ) )
 	, m_pParentGroup( pParentGroup )
-	, m_modifyTime( fs::ReadLastModifyTime( filePath ) )
 {
 	ASSERT_PTR( m_pParentGroup );
 }
 
 bool CDuplicateFileItem::IsOriginalItem( void ) const
 {
+	ASSERT_PTR( m_pParentGroup );
 	return this == m_pParentGroup->GetItems().front();
 }
 
 bool CDuplicateFileItem::MakeOriginalItem( void )
 {
+	ASSERT_PTR( m_pParentGroup );
 	return m_pParentGroup->MakeOriginalItem( this );
 }
 
 bool CDuplicateFileItem::MakeDuplicateItem( void )
 {
+	ASSERT_PTR( m_pParentGroup );
 	return m_pParentGroup->MakeDuplicateItem( this );
 }
 
@@ -90,40 +98,40 @@ void CDuplicateFilesGroup::AddItem( const fs::CPath& filePath )
 	m_items.push_back( new CDuplicateFileItem( filePath, this ) );
 }
 
-void CDuplicateFilesGroup::AddItem( CDuplicateFileItem* pItem )
+void CDuplicateFilesGroup::AddItem( CDuplicateFileItem* pDupItem )
 {
-	ASSERT_PTR( pItem );
-	ASSERT( !ContainsItem( pItem->GetFilePath() ) );
+	ASSERT_PTR( pDupItem );
+	ASSERT( !ContainsItem( pDupItem->GetFilePath() ) );
 
-	m_items.push_back( pItem );
-	pItem->SetParentGroup( this );
+	m_items.push_back( pDupItem );
+	pDupItem->SetParentGroup( this );
 }
 
-void CDuplicateFilesGroup::ExtractCrc32Duplicates( std::vector< CDuplicateFilesGroup* >& rDuplicateGroups, size_t& rIgnoredCount, utl::IProgressService* pProgressSvc /*= NULL*/ ) throws_( CUserAbortedException )
+void CDuplicateFilesGroup::ExtractChecksumDuplicates( std::vector< CDuplicateFilesGroup* >& rDuplicateGroups, size_t& rIgnoredCount, utl::IProgressService* pProgressSvc ) throws_( CUserAbortedException )
 {
 	REQUIRE( HasDuplicates() );
 	REQUIRE( 0 == m_contentKey.m_crc32 );			// CRC32 is yet to be computed
+	ASSERT_PTR( pProgressSvc );
 
 	typedef std::pair< fs::CFileContentKey, CDuplicateFileItem* > TKeyItemPair;
-	typedef utl::COwningContainer< std::vector< TKeyItemPair >, func::DeleteValue > TKeyItemContainer;
+	typedef utl::COwningContainer< std::vector<TKeyItemPair>, func::DeleteValue > TKeyItemContainer;
 
 	TKeyItemContainer scopedKeyItems;
 	scopedKeyItems.reserve( m_items.size() );
 
 	for ( std::vector< CDuplicateFileItem* >::iterator itItem = m_items.begin(); itItem != m_items.end(); ++itItem )
 	{
-		if ( pProgressSvc != NULL )
-			pProgressSvc->AdvanceItem( ( *itItem )->GetFilePath().Get() );
+		pProgressSvc->AdvanceItem( ( *itItem )->GetFilePath().Get() );
 
 		TKeyItemPair newItem( m_contentKey, *itItem );
 
-		if ( newItem.first.ComputeCrc32( newItem.second->GetFilePath() ) )
+		newItem.first.StoreCrc32( newItem.second->GetState(), true );		// lazy evaluate CRC32 with caching
+		if ( newItem.first.HasCrc32() )
 		{
-			if ( pProgressSvc != NULL )
-				pProgressSvc->AdvanceStage( newItem.first.Format() );
+			pProgressSvc->AdvanceStage( newItem.first.Format() );
 
 			scopedKeyItems.push_back( newItem );
-			utl::ReleaseOwnership( *itItem );			// release detached item ownership to prevent being deleted when unwiding the stack
+			utl::ReleaseOwnership( *itItem );		// release detached item ownership to prevent being deleted when unwiding the stack
 		}
 		else
 		{
@@ -134,9 +142,9 @@ void CDuplicateFilesGroup::ExtractCrc32Duplicates( std::vector< CDuplicateFilesG
 
 	m_items.clear();					// ownership was passed to scopedKeyItems
 
-	typedef pred::CompareFirstSecond< pred::CompareValue, pred::CompareItemPath > TCompareKeyItemPair;
+	typedef pred::CompareFirstSecond< pred::CompareValue, pred::ComparePathItem > TCompareKeyItemPair;
 
-	std::sort( scopedKeyItems.begin(), scopedKeyItems.end(), pred::LessValue<TCompareKeyItemPair>() );			// sort by full key and path
+	utl::SortPathItems<TCompareKeyItemPair>( scopedKeyItems );
 
 	typedef std::pair< TKeyItemContainer::iterator, TKeyItemContainer::iterator > IteratorPair;
 	typedef pred::CompareFirst< pred::CompareValue > TCompareKeyPair;
@@ -160,34 +168,6 @@ void CDuplicateFilesGroup::ExtractCrc32Duplicates( std::vector< CDuplicateFilesG
 		else
 			++itKeyItem;
 	}
-}
-
-void CDuplicateFilesGroup::__ExtractCrc32Duplicates( std::vector< CDuplicateFilesGroup* >& rDuplicateGroups, size_t& rIgnoredCount, utl::IProgressService* pProgressSvc /*= NULL*/ ) throws_( CUserAbortedException )
-{
-	// old version using group stores
-
-	REQUIRE( HasDuplicates() );
-	REQUIRE( 0 == m_contentKey.m_crc32 );			// CRC32 is yet to be computed
-
-	utl::COwningContainer< std::vector< CDuplicateFileItem* > > scopedItems;
-	scopedItems.swap( m_items );	// take scoped ownership for exception safety
-
-	CDuplicateGroupStore store;
-
-	for ( std::vector< CDuplicateFileItem* >::iterator itItem = scopedItems.begin(); itItem != scopedItems.end(); ++itItem )
-	{
-		if ( pProgressSvc != NULL )
-			pProgressSvc->AdvanceItem( ( *itItem )->GetFilePath().Get() );
-
-		fs::CFileContentKey fullKey = m_contentKey;
-		if ( fullKey.ComputeCrc32( ( *itItem )->GetFilePath() ) )
-			store.RegisterItem( utl::ReleaseOwnership( *itItem ), fullKey );		// release item ownership to prevent being deleted when unwiding the stack
-		else
-			++rIgnoredCount;		// remaining items will be deleted when unwiding the stack
-	}
-
-	ENSURE( m_items.empty() );		// all items will be detached in real duplicate groups or discarded
-	store.ExtractDuplicateGroups( rDuplicateGroups, rIgnoredCount, NULL );			// no progress reporting, it's fast once the slow CRC32 has been computed
 }
 
 
@@ -241,32 +221,52 @@ void CDuplicateGroupStore::RegisterItem( CDuplicateFileItem* pItem, const fs::CF
 	rpGroup->AddItem( pItem );
 }
 
-void CDuplicateGroupStore::ExtractDuplicateGroups( std::vector< CDuplicateFilesGroup* >& rDuplicateGroups, size_t& rIgnoredCount, utl::IProgressService* pProgressSvc /*= NULL*/ ) throws_( CUserAbortedException )
+CDuplicateFilesGroup* CDuplicateGroupStore::RegisterItem( CDuplicateFileItem* pDupItem )
 {
+	ASSERT_PTR( pDupItem );
+
+	fs::CFileContentKey contentKey = pDupItem->GetContentKey();
+	CDuplicateFilesGroup*& rpGroup = m_groupsMap[ contentKey ];
+
+	if ( NULL == rpGroup )
+	{
+		rpGroup = new CDuplicateFilesGroup( contentKey );
+		m_groups.push_back( rpGroup );
+	}
+
+	rpGroup->AddItem( pDupItem );
+	return rpGroup;
+}
+
+void CDuplicateGroupStore::ExtractDuplicateGroups( std::vector< CDuplicateFilesGroup* >& rDuplicateGroups, size_t& rIgnoredCount, utl::IProgressService* pProgressSvc ) throws_( CUserAbortedException )
+{
+	ASSERT_PTR( pProgressSvc );
+
 	utl::COwningContainer< std::vector< CDuplicateFilesGroup* > > scopedGroups;
 	scopedGroups.swap( m_groups );			// take scoped ownership for exception safety
 
-	size_t dupGroupIndex = 0;
-	for ( std::vector< CDuplicateFilesGroup* >::iterator itGroup = scopedGroups.begin(); itGroup != scopedGroups.end(); ++itGroup )
-		if ( ( *itGroup )->HasDuplicates() )
-		{
-			if ( ( *itGroup )->HasCrc32() )								// checksum computed?
-			{
-				if ( pProgressSvc != NULL )
-					pProgressSvc->AdvanceStage( ( *itGroup )->GetContentKey().Format() );
+	for ( size_t i = 0; i != scopedGroups.size(); ++i )
+	{
+		CDuplicateFilesGroup* pGroup = scopedGroups[ i ];
 
-				rDuplicateGroups.push_back( *itGroup );
-				*itGroup = NULL;										// mark detached group as NULL to prevent being deleted when unwiding the stack
+		if ( pGroup->HasDuplicates() )
+		{
+			if ( pGroup->HasCrc32() )								// checksum computed?
+			{
+				pProgressSvc->AdvanceStage( pGroup->GetContentKey().Format() );
+
+				rDuplicateGroups.push_back( pGroup );
+				scopedGroups[ i ] = NULL;							// mark detached group as NULL to prevent being deleted when unwiding the stack
 			}
 			else
 			{
-				std::vector< CDuplicateFilesGroup* > subGroups;			// grouped by file-size *and* CRC32
-				( *itGroup )->ExtractCrc32Duplicates( subGroups, rIgnoredCount, pProgressSvc );
+				std::vector< CDuplicateFilesGroup* > subGroups;		// grouped by file-size *and* CRC32
+
+				pGroup->ExtractChecksumDuplicates( subGroups, rIgnoredCount, pProgressSvc );
 				rDuplicateGroups.insert( rDuplicateGroups.end(), subGroups.begin(), subGroups.end() );
 			}
-
-			++dupGroupIndex;
 		}
+	}
 
 	m_groupsMap.clear();		// cleanup the empty store
 }

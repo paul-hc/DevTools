@@ -31,9 +31,6 @@ namespace fs
 }
 
 
-class CFileStateItem;
-
-
 namespace func
 {
 	template< typename FileStateItemT >
@@ -47,15 +44,19 @@ namespace func
 }
 
 
+class CFileStateItem;
+
+
 namespace fs
 {
 	// Enumerates CFileStateItem objects, and sub-dirs from the base class.
 	// FileStateItemT may be a subclass of either CFileStateItem, or any other class that defines a constructor of FileStateItemT( const CFileFind& ).
 	//
 	template< typename FileStateItemT = CFileStateItem, typename CreateFuncT = func::CreateFoundItem<FileStateItemT> >
-	struct CFileStateItemEnumerator : public CFileStateEnumerator
+	class CFileStateItemEnumerator : public CFileStateEnumerator
 	{
-		CFileStateItemEnumerator( fs::TEnumFlags enumFlags = fs::TEnumFlags(), CreateFuncT createFunc = CreateFuncT(), IEnumerator* pChainEnum = NULL )
+	public:
+		CFileStateItemEnumerator( fs::TEnumFlags enumFlags = fs::TEnumFlags(), IEnumerator* pChainEnum = NULL, CreateFuncT createFunc = CreateFuncT() )
 			: CFileStateEnumerator( enumFlags, pChainEnum )
 			, m_createFunc( createFunc )
 		{

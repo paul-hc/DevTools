@@ -139,13 +139,14 @@ namespace fs
 
 	UINT CFileState::GetCrc32( ChecksumEvaluation evaluation /*= Compute*/ ) const
 	{
-		if ( 0 == m_crc32 && evaluation != AsIs )
-			const_cast<CFileState*>( this )->ComputeCrc32( evaluation );
+		if ( evaluation != AsIs )
+			if ( 0 == m_crc32 && m_fileSize != 0 )		// not computed?
+				ComputeCrc32( evaluation );
 
 		return m_crc32;
 	}
 
-	UINT CFileState::ComputeCrc32( ChecksumEvaluation evaluation )
+	UINT CFileState::ComputeCrc32( ChecksumEvaluation evaluation ) const
 	{
 		switch ( evaluation )
 		{

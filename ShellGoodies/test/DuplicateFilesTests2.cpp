@@ -26,15 +26,6 @@ namespace func
 
 namespace ut2
 {
-	void SortDupGroups( std::vector< CDuplicateFilesGroup* >& rDupGroups )
-	{
-		typedef func::ValueAdapter< CPathItemBase::ToFilePath, func::ToOriginalItem > ToOriginalItemPath;
-		typedef pred::CompareAdapter< pred::TCompareNameExt, ToOriginalItemPath > CompareOriginalNameExt;
-		typedef pred::LessValue<CompareOriginalNameExt> TLess_OriginalNameExt;
-
-		std::sort( rDupGroups.begin(), rDupGroups.end(), TLess_OriginalNameExt() );
-	}
-
 	std::tstring JoinRelativeDupPaths( const CDuplicateFilesGroup* pDupGroup, const fs::CPath& rootDir )
 	{
 		std::vector< fs::CPath > dupPaths;
@@ -69,8 +60,7 @@ void CDuplicateFilesTests2::TestDuplicateFiles( void )
 	CDuplicateFilesFinder finder;
 
 	finder.FindDuplicates( dupGroups, searchPathItems, ignorePathItems );
-
-	ut2::SortDupGroups( dupGroups );		// by original item filename
+	utl::SortDuplicateGroupItems( dupGroups );		// sort groups by original item path
 
 	ASSERT_EQUAL( 2, dupGroups.size() );
 	ASSERT_EQUAL( _T("a.txt|D1\\a.txt|D1\\D2\\a.txt"), ut2::JoinRelativeDupPaths( dupGroups[0], poolDirPath ) );

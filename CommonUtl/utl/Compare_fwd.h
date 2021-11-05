@@ -49,6 +49,12 @@ namespace pred
 		{
 			return Compare_Scalar( left, right );
 		}
+
+		template< typename ValueT >
+		CompareResult operator()( const ValueT* pLeft, const ValueT* pRight ) const
+		{
+			return Compare_Scalar( *pLeft, *pRight );
+		}
 	};
 
 

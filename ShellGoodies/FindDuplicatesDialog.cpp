@@ -1,8 +1,6 @@
 
 #include "stdafx.h"
 #include "FindDuplicatesDialog.h"
-#include "DuplicateFileItem.h"
-#include "DuplicateFilesFinder.h"
 #include "FileModel.h"
 #include "FileGroupCommands.h"
 #include "GeneralOptions.h"
@@ -10,6 +8,8 @@
 #include "resource.h"
 #include "utl/ContainerUtilities.h"
 #include "utl/Crc32.h"
+#include "utl/DuplicateFileItem.h"
+#include "utl/DuplicateFilesEnumerator.h"
 #include "utl/EnumTags.h"
 #include "utl/FileSystem.h"
 #include "utl/FmtUtils.h"
@@ -68,21 +68,6 @@ int CheckDup::Toggle( int checkState ) const
 
 namespace hlp
 {
-	struct AsGroupFileSize
-	{
-		UINT64 operator()( const CDuplicateFilesGroup* pGroup ) const { return pGroup->GetContentKey().m_fileSize; }
-	};
-
-	struct AsGroupCrc32
-	{
-		UINT operator()( const CDuplicateFilesGroup* pGroup ) const { return pGroup->GetContentKey().m_crc32; }
-	};
-
-	struct AsGroupDuplicateCount
-	{
-		size_t operator()( const CDuplicateFilesGroup* pGroup ) const { return pGroup->GetItems().size() - 1; }
-	};
-
 	bool HasUniqueGroups( const std::vector< CDuplicateFileItem* >& dupItems )
 	{
 		std::set< CDuplicateFilesGroup* > groups;
@@ -254,8 +239,8 @@ CFindDuplicatesDialog::CFindDuplicatesDialog( CFileModel* pFileModel, CWnd* pPar
 	m_dupsListCtrl.SetTrackMenuTarget( this );
 	CGeneralOptions::Instance().ApplyToListCtrl( &m_dupsListCtrl );
 
-	m_dupsListCtrl.AddColumnCompare( FileName, pred::NewPropertyComparator< CDuplicateFileItem, pred::TCompareNameExt >( CDuplicateFileItem::ToNameExt() ) );
-	m_dupsListCtrl.AddColumnCompare( DateModified, pred::NewPropertyComparator< CDuplicateFileItem >( CDuplicateFileItem::AsModifyTime() ), false );		// order date-time descending by default
+	m_dupsListCtrl.AddColumnCompare( FileName, pred::NewPropertyComparator<CDuplicateFileItem, pred::TCompareNameExt>( CDuplicateFileItem::ToNameExt() ) );
+	m_dupsListCtrl.AddColumnCompare( DateModified, pred::NewPropertyComparator<CDuplicateFileItem>( func::AsModifyTime() ), false );		// order date-time descending by default
 	m_dupsListCtrl.AddColumnCompare( DuplicateCount, NULL, false );		// order by duplicate count descending by default; NULL comparator since uses only group ordering
 
 	m_dupsListCtrl.GetMateToolbar()->GetStrip()
@@ -327,14 +312,18 @@ bool CFindDuplicatesDialog::SearchForDuplicateFiles( void )
 	try
 	{
 		CWaitCursor wait;			// could take a long time for directories with many subdirectories and files
-		CDuplicateFilesFinder finder( progress.GetService(), progress.GetProgressEnumerator() );
+		CDuplicateFilesEnumerator enumer( fs::EF_Recurse, progress.GetProgressEnumerator(), progress.GetService() );
 
-		finder.SetWildSpec( m_fileSpecEdit.GetText() );
-		finder.SetMinFileSize( minFileSize );
+		enumer.RefOptions().m_fileSizeRange.m_start = minFileSize;
+		enumer.RefOptions().m_ignorePathMatches.Reset( cvt::CQueryPaths( m_ignorePathItems ).m_paths );
 
-		finder.FindDuplicates( m_duplicateGroups, cvt::CQueryPaths( m_searchPathItems ).m_paths, cvt::CQueryPaths( m_ignorePathItems ).m_paths );
+		cvt::CQueryPaths searchPaths( m_searchPathItems );
+		utl::for_each( searchPaths.m_paths, func::AppendPath( m_fileSpecEdit.GetText() ) );
 
-		m_outcomeStatic.SetWindowText( FormatReport( finder.GetOutcome() ) );
+		enumer.SearchDuplicates( searchPaths.m_paths );
+		m_duplicateGroups.swap( enumer.m_dupGroupItems );		// exchange ownership
+
+		m_outcomeStatic.SetWindowText( FormatReport( enumer.GetOutcome() ) );
 		SetupDuplicateFileList();
 		ClearFileErrors();
 		return true;
@@ -561,7 +550,7 @@ void CFindDuplicatesDialog::SetupDuplicateFileList( void )
 			m_dupsListCtrl.SetSubItemText( index, FolderPath, pDupItem->GetFilePath().GetParentPath().GetPtr() );
 			m_dupsListCtrl.SetSubItemText( index, Size, num::FormatFileSize( pGroup->GetContentKey().m_fileSize ) );
 			m_dupsListCtrl.SetSubItemText( index, Crc32, num::FormatHexNumber( pGroup->GetContentKey().m_crc32, _T("%X") ) );
-			m_dupsListCtrl.SetSubItemText( index, DateModified, time_utl::FormatTimestamp( pDupItem->GetModifyTime() ) );
+			m_dupsListCtrl.SetSubItemText( index, DateModified, time_utl::FormatTimestamp( pDupItem->GetState().m_modifTime ) );
 
 			if ( pDupItem->IsOriginalItem() )
 				m_dupsListCtrl.ModifyCheckState( index, CheckDup::OriginalItem );
@@ -577,16 +566,16 @@ void CFindDuplicatesDialog::SetupDuplicateFileList( void )
 
 std::tstring CFindDuplicatesDialog::FormatReport( const CDupsOutcome& outcome ) const
 {
-	std::tstring reportMessage = str::Format( _T("Detected: %d groups, %d duplicate files. Found %d files, %d directories"),
+	std::tstring reportMessage = str::Format( _T("Detected: %d groups, %d duplicate files.  Found %d files, %d directories"),
 		m_duplicateGroups.size(),
 		CDuplicateGroupStore::GetDuplicateItemCount( m_duplicateGroups ),
 		outcome.m_foundFileCount,
-		outcome.m_searchedDirCount );
+		outcome.m_foundSubDirCount );
 
 	if ( outcome.m_ignoredCount != 0 )
 		reportMessage += str::Format( _T(" (%d ignored)"), outcome.m_ignoredCount );
 
-	reportMessage += str::Format( _T(". Elapsed %s."), outcome.m_timer.FormatElapsedDuration( 2 ).c_str() );
+	reportMessage += str::Format( _T(".  Elapsed %s."), outcome.m_timer.FormatElapsedDuration( 2 ).c_str() );
 
 	if ( CLogger* pLogger = app::GetLogger() )
 		pLogger->LogString( str::Format( _T("Search for duplicates in {%s}  -  %s"), utl::MakeDisplayCodeList( m_searchPathItems, _T(", ") ).c_str(), reportMessage.c_str() ) );
@@ -758,7 +747,7 @@ void CFindDuplicatesDialog::ToggleCheckGroupDuplicates( unsigned int groupId )
 template< typename CompareGroupPtr >
 pred::CompareResult CFindDuplicatesDialog::CompareGroupsBy( int leftGroupId, int rightGroupId, CompareGroupPtr compareGroup ) const
 {
-	pred::CompareInOrder< CompareGroupPtr > compare( compareGroup, m_dupsListCtrl.GetSortByColumn().second );
+	pred::CompareInOrder<CompareGroupPtr> compare( compareGroup, m_dupsListCtrl.GetSortByColumn().second );
 
 	return compare( m_duplicateGroups[ leftGroupId ], m_duplicateGroups[ rightGroupId ] );
 }
@@ -766,39 +755,39 @@ pred::CompareResult CFindDuplicatesDialog::CompareGroupsBy( int leftGroupId, int
 template< typename CompareItemPtr >
 pred::CompareResult CFindDuplicatesDialog::CompareGroupsByItemField( int leftGroupId, int rightGroupId, CompareItemPtr compareItem ) const
 {
-	pred::CompareInOrder< CompareItemPtr > compare( compareItem, m_dupsListCtrl.GetSortByColumn().second );
+	pred::CompareInOrder<CompareItemPtr> compare( compareItem, m_dupsListCtrl.GetSortByColumn().second );
 
 	return compare( m_duplicateGroups[ leftGroupId ]->GetSortingItem( compare ), m_duplicateGroups[ rightGroupId ]->GetSortingItem( compare ) );
 }
 
 pred::CompareResult CALLBACK CFindDuplicatesDialog::CompareGroupFileName( int leftGroupId, int rightGroupId, const CFindDuplicatesDialog* pThis )
 {
-	return pThis->CompareGroupsByItemField( leftGroupId, rightGroupId, pred::CompareAdapterPtr< pred::CompareNaturalPath, CDuplicateFileItem::ToNameExt >() );
+	return pThis->CompareGroupsByItemField( leftGroupId, rightGroupId, pred::CompareAdapterPtr<pred::CompareNaturalPath, CDuplicateFileItem::ToNameExt>() );
 }
 
 pred::CompareResult CALLBACK CFindDuplicatesDialog::CompareGroupFolderPath( int leftGroupId, int rightGroupId, const CFindDuplicatesDialog* pThis )
 {
-	return pThis->CompareGroupsByItemField( leftGroupId, rightGroupId, pred::CompareAdapterPtr< pred::CompareNaturalPath, CDuplicateFileItem::ToParentFolderPath >() );
+	return pThis->CompareGroupsByItemField( leftGroupId, rightGroupId, pred::CompareAdapterPtr<pred::CompareNaturalPath, CDuplicateFileItem::ToParentFolderPath>() );
 }
 
 pred::CompareResult CALLBACK CFindDuplicatesDialog::CompareGroupFileSize( int leftGroupId, int rightGroupId, const CFindDuplicatesDialog* pThis )
 {
-	return pThis->CompareGroupsBy( leftGroupId, rightGroupId, pred::CompareScalarAdapterPtr< hlp::AsGroupFileSize >() );
+	return pThis->CompareGroupsBy( leftGroupId, rightGroupId, pred::CompareScalarAdapterPtr<func::AsGroupFileSize>() );
 }
 
 pred::CompareResult CALLBACK CFindDuplicatesDialog::CompareGroupFileCrc32( int leftGroupId, int rightGroupId, const CFindDuplicatesDialog* pThis )
 {
-	return pThis->CompareGroupsBy( leftGroupId, rightGroupId, pred::CompareScalarAdapterPtr< hlp::AsGroupCrc32 >() );
+	return pThis->CompareGroupsBy( leftGroupId, rightGroupId, pred::CompareScalarAdapterPtr<func::AsGroupCrc32>() );
 }
 
 pred::CompareResult CALLBACK CFindDuplicatesDialog::CompareGroupDateModified( int leftGroupId, int rightGroupId, const CFindDuplicatesDialog* pThis )
 {
-	return pThis->CompareGroupsByItemField( leftGroupId, rightGroupId, pred::CompareScalarAdapterPtr< CDuplicateFileItem::AsModifyTime >() );
+	return pThis->CompareGroupsByItemField( leftGroupId, rightGroupId, pred::CompareScalarAdapterPtr<func::AsModifyTime>() );
 }
 
 pred::CompareResult CALLBACK CFindDuplicatesDialog::CompareGroupDuplicateCount( int leftGroupId, int rightGroupId, const CFindDuplicatesDialog* pThis )
 {
-	return pThis->CompareGroupsBy( leftGroupId, rightGroupId, pred::CompareScalarAdapterPtr< hlp::AsGroupDuplicateCount >() );
+	return pThis->CompareGroupsBy( leftGroupId, rightGroupId, pred::CompareScalarAdapterPtr<func::AsGroupDuplicateCount>() );
 }
 
 BOOL CFindDuplicatesDialog::OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo )

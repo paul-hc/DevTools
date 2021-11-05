@@ -123,15 +123,9 @@ namespace pred
 		LessValue( CmpValuesT cmpValues = CmpValuesT() ) : m_cmpValues( cmpValues ) {}
 
 		template< typename ValueT >
-		bool operator()( const ValueT& left, const ValueT& right ) const			// containers of values
+		bool operator()( const ValueT& left, const ValueT& right ) const		// containers of values OR pointers - for pointers it generates 'const ValueT*& left'
 		{
 			return Less == m_cmpValues( left, right );
-		}
-
-		template< typename ObjectT >
-		bool operator()( const ObjectT* pLeft, const ObjectT* pRight ) const		// containers of pointers (non-const pointers to disambiguate)
-		{
-			return Less == m_cmpValues( *pLeft, *pRight );							// compare-by-value dereferenced pointers
 		}
 	private:
 		CmpValuesT m_cmpValues;
@@ -175,15 +169,9 @@ namespace pred
 		OrderByValue( CmpValuesT cmpValues, bool ascendingOrder = true ) : m_cmpValues( cmpValues ), m_ascendingOrder( ascendingOrder ) {}
 
 		template< typename ValueT >
-		bool operator()( const ValueT& left, const ValueT& right ) const		// containers of values
+		bool operator()( const ValueT& left, const ValueT& right ) const		// containers of values OR pointers - for pointers it generates 'const ValueT*& left'
 		{
 			return ( m_ascendingOrder ? Less : Greater ) == m_cmpValues( left, right );
-		}
-
-		template< typename ObjectT >
-		bool operator()( ObjectT* pLeft, ObjectT* pRight ) const				// containers of pointers (non-const pointers to disambiguate)
-		{
-			return ( m_ascendingOrder ? Less : Greater ) == m_cmpValues( *pLeft, *pRight );		// compare-by-value dereferenced pointers
 		}
 	private:
 		CmpValuesT m_cmpValues;

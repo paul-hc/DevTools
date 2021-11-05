@@ -11,30 +11,8 @@
 #endif
 
 
-namespace func
-{
-	struct ToOriginalItem
-	{
-		const CDuplicateFileItem* operator()( const CDuplicateFilesGroup* pDupGroup ) const
-		{
-			ASSERT_PTR( pDupGroup );
-			return pDupGroup->GetOriginalItem();
-		}
-	};
-}
-
-
 namespace ut
 {
-	void SortDupGroups( std::vector< CDuplicateFilesGroup* >& rDupGroups )
-	{
-		typedef func::ValueAdapter< CPathItemBase::ToFilePath, func::ToOriginalItem > ToOriginalItemPath;
-		typedef pred::CompareAdapter< pred::TCompareNameExt, ToOriginalItemPath > CompareOriginalNameExt;
-		typedef pred::LessValue<CompareOriginalNameExt> TLess_OriginalNameExt;
-
-		std::sort( rDupGroups.begin(), rDupGroups.end(), TLess_OriginalNameExt() );
-	}
-
 	std::tstring JoinRelativeDupPaths( const CDuplicateFilesGroup* pDupGroup, const fs::CPath& rootDir )
 	{
 		std::vector< fs::CPath > dupPaths;
@@ -62,15 +40,17 @@ void CDuplicateFilesTests::TestDuplicateFiles( void )
 	ut::CTempFilePool pool( _T("a.txt|b.txt|file1.txt|D1\\a.txt|D1\\file2.txt|D1\\D2\\a.txt|D1\\D2\\b.txt|D1\\D2\\file3.txt|D1\\D2\\file4.txt|D1\\IGNORE\\b.txt") );
 	const fs::CPath& poolDirPath = pool.GetPoolDirPath();
 
-	std::vector< fs::CPath > searchPathItems( 1, poolDirPath );
-	std::vector< fs::CPath > ignorePathItems( 1, poolDirPath / _T("D1\\IGNORE") );
+	CDuplicateFilesEnumerator enumer( fs::EF_Recurse );
+	enumer.RefOptions().m_ignorePathMatches.AddPath( poolDirPath / _T("D1\\IGNORE") );
 
-	std::vector< CDuplicateFilesGroup* > dupGroups;
-	CDuplicateFilesEnumerator finder;
+	enumer.SearchDuplicates( poolDirPath );
 
-	finder.FindDuplicates( dupGroups, searchPathItems, ignorePathItems );
+	const CDupsOutcome& outcome = enumer.GetOutcome();
+	ASSERT_EQUAL( 2, outcome.m_foundSubDirCount );		// D1, D1/D2
+	ASSERT_EQUAL( 9, outcome.m_foundFileCount );
+	ASSERT_EQUAL( 1, outcome.m_ignoredCount );			// D1/IGNORE
 
-	ut::SortDupGroups( dupGroups );		// by original item filename
+	const std::vector< CDuplicateFilesGroup* >& dupGroups = enumer.m_dupGroupItems;
 
 	ASSERT_EQUAL( 2, dupGroups.size() );
 	ASSERT_EQUAL( _T("a.txt|D1\\a.txt|D1\\D2\\a.txt"), ut::JoinRelativeDupPaths( dupGroups[0], poolDirPath ) );

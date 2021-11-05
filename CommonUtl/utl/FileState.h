@@ -14,7 +14,7 @@ namespace fs
 	{
 		CFileState( void ) : m_fileSize( 0 ), m_attributes( s_invalidAttributes ), m_crc32( 0 ) {}
 		CFileState( const ::CFileStatus* pFileStatus );
-		explicit CFileState( const CFileFind& foundFile );
+		CFileState( const CFileFind& foundFile );
 
 		void Clear( void ) { *this = CFileState(); }
 
@@ -36,7 +36,7 @@ namespace fs
 		enum ChecksumEvaluation { Compute, CacheCompute, AsIs };
 
 		UINT GetCrc32( ChecksumEvaluation evaluation = Compute ) const;
-		UINT ComputeCrc32( ChecksumEvaluation evaluation );
+		UINT ComputeCrc32( ChecksumEvaluation evaluation ) const;
 		void ResetCrc32( void ) { m_crc32 = 0; }
 
 		// serialization

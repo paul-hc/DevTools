@@ -80,7 +80,7 @@ void CDuplicateFilesFinder::SearchForFiles( std::vector< fs::CPath >& rFoundPath
 				if ( uniquePaths.insert( *itFilePath ).second )		// path is unique?
 					rFoundPaths.push_back( *itFilePath );
 
-			m_outcome.m_searchedDirCount += 1 + found.m_subDirPaths.size();		// this directory + sub-directories
+			m_outcome.m_foundSubDirCount += 1 + found.m_subDirPaths.size();		// this directory + sub-directories
 		}
 		else if ( fs::IsValidFile( searchPath.GetPtr() ) )
 			if ( uniquePaths.insert( searchPath ).second )				// path is unique?

@@ -65,12 +65,12 @@ namespace fs
 			if ( finder.IsDirectory() )
 			{
 				if ( !finder.IsDots() )							// skip "." and ".." dir entries
-					if ( pEnumerator->IncludeNode( finder ) )	// pass found sub-dir filter?
+					if ( pEnumerator->CanIncludeNode( finder ) )	// pass found sub-dir filter?
 						subDirPaths.push_back( fs::CPath( foundPath ) );
 			}
 			else
 			{
-				if ( pEnumerator->IncludeNode( finder ) )		// pass found file filter?
+				if ( pEnumerator->CanIncludeNode( finder ) )		// pass found file filter?
 					if ( path::MatchWildcard( foundPath.c_str(), pWildSpec ) )
 						pEnumerator->OnAddFileInfo( finder );
 			}
@@ -208,12 +208,17 @@ namespace fs
 		Clear();
 
 		for ( std::vector< fs::CPath >::const_iterator itPath = paths.begin(); itPath != paths.end(); ++itPath )
-			if ( path::ContainsWildcards( itPath->GetPtr() ) )
-				m_wildSpecs.push_back( itPath->Get() );
-			else if ( fs::IsValidDirectory( itPath->GetPtr() ) )
-				m_dirPaths.push_back( *itPath );
-			else if ( fs::IsValidFile( itPath->GetPtr() ) )
-				m_filePaths.push_back( *itPath );
+			AddPath( *itPath );
+	}
+
+	void CPathMatchLookup::AddPath( const fs::CPath& path )
+	{
+		if ( path::ContainsWildcards( path.GetPtr() ) )
+			m_wildSpecs.push_back( path.Get() );
+		else if ( fs::IsValidDirectory( path.GetPtr() ) )
+			m_dirPaths.push_back( path );
+		else if ( fs::IsValidFile( path.GetPtr() ) )
+			m_filePaths.push_back( path );
 	}
 
 	bool CPathMatchLookup::IsDirMatch( const fs::CPath& dirPath ) const
@@ -277,6 +282,26 @@ namespace fs
 		m_options.m_ignorePathMatches.Reset( ignorePaths );
 	}
 
+	bool CBaseEnumerator::IgnorePath( const fs::CPath& ignoredPath ) const
+	{
+		if ( m_ignoredPaths.insert( ignoredPath ).second )
+		{
+		#ifdef _DEBUG
+			static const TCHAR* s_typeTags[] = { _T("file"), _T("sub-directory"), _T("non-existent path") };
+			enum { File, SubDir, NonExistent } fileType = NonExistent;
+
+			if ( fs::IsValidFile( ignoredPath.GetPtr() ) )
+				fileType = File;
+			else if ( fs::IsValidDirectory( ignoredPath.GetPtr() ) )
+				fileType = SubDir;
+
+			TRACE( _T(" - CBaseEnumerator::IgnorePath(): ignoring %s #%d: %s\n"), s_typeTags[ fileType ], m_ignoredPaths.size(), ignoredPath.GetPtr() );
+		#endif //_DEBUG
+		}
+
+		return false;			// returns false for convenience
+	}
+
 
 	void CBaseEnumerator::OnAddFileInfo( const CFileFind& foundFile )
 	{	// note: we should not chain this method to m_pChainEnum!
@@ -297,12 +322,6 @@ namespace fs
 	{
 		fs::CPath subDirPath( pSubDirPath );
 
-		if ( m_options.m_ignorePathMatches.IsDirMatch( subDirPath ) )
-		{
-			TRACE( _T(" - CBaseEnumerator::AddFoundSubDir(): ignoring sub-directory: %s\n"), subDirPath.GetPtr() );
-			return false;
-		}
-
 		if ( !m_relativeDirPath.IsEmpty() )
 			subDirPath = path::StripDirPrefix( subDirPath, m_relativeDirPath );
 
@@ -315,25 +334,34 @@ namespace fs
 		return true;
 	}
 
-	bool CBaseEnumerator::IncludeNode( const CFileFind& foundNode )
+	bool CBaseEnumerator::CanIncludeNode( const CFileFind& foundNode ) const
 	{
-		if ( HasFlag( fs::EF_IgnoreHiddenNodes ) && foundNode.IsHidden() )
-			return false;
+		fs::CPath nodePath( foundNode.GetFilePath().GetString() );
 
-		if ( !foundNode.IsDirectory() )			// regular file?
-			if ( !PassFileFilter( foundNode.GetLength() ) )
-				return false;
+		if ( HasFlag( fs::EF_IgnoreHiddenNodes ) && foundNode.IsHidden() )
+			return IgnorePath( nodePath );
+
+		if ( foundNode.IsDirectory() )			// regular file?
+		{
+			if ( m_options.m_ignorePathMatches.IsDirMatch( nodePath ) )
+				return IgnorePath( nodePath );
+		}
+		else if ( !PassFileFilter( nodePath, foundNode.GetLength() ) )
+			return false;
 
 		return true;
 	}
 
-	bool CBaseEnumerator::PassFileFilter( UINT64 fileSize ) const
+	bool CBaseEnumerator::PassFileFilter( const fs::CPath& filePath, UINT64 fileSize ) const
 	{
 		if ( HasFlag( fs::EF_IgnoreFiles ) )
 			return false;
 
 		if ( !m_options.m_fileSizeRange.Contains( fileSize ) )
-			return false;
+			return IgnorePath( filePath );
+
+		if ( m_options.m_ignorePathMatches.IsFileMatch( filePath ) )
+			return IgnorePath( filePath );
 
 		return !MustStop();
 	}
@@ -362,12 +390,6 @@ namespace fs
 	void CPathEnumerator::AddFoundFile( const TCHAR* pFilePath )
 	{
 		fs::CPath filePath( pFilePath );
-
-		if ( m_options.m_ignorePathMatches.IsFileMatch( filePath ) )
-		{
-			TRACE( _T(" CPathEnumerator::AddFoundFile(): Ignoring file: %s\n"), filePath.GetPtr() );
-			return;
-		}
 
 		if ( !m_relativeDirPath.IsEmpty() )
 			filePath = path::StripDirPrefix( filePath, m_relativeDirPath );

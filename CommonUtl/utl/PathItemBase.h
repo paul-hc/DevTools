@@ -70,15 +70,22 @@ namespace pred
 {
 	typedef pred::CompareAdapter<pred::CompareNaturalPath, CPathItemBase::ToFilePath> ComparePathItem;
 	typedef pred::LessValue<ComparePathItem> TLess_PathItem;
+}
 
 
-	struct CompareItemPath
+namespace utl
+{
+	template< typename CompareItemT, typename ContainerT >
+	inline void SortPathItems( ContainerT& rPathItems, bool ascending = true )
 	{
-		CompareResult operator()( const CPathItemBase* pLeftItem, const CPathItemBase* pRightItem ) const
-		{
-			return CompareNaturalPath()( pLeftItem->GetFilePath(), pRightItem->GetFilePath() );
-		}
-	};
+		std::sort( rPathItems.begin(), rPathItems.end(), pred::OrderByValue<CompareItemT>( ascending ) );
+	}
+
+	template< typename ContainerT >
+	inline void SortPathItems( ContainerT& rPathItems, bool ascending = true )
+	{
+		SortPathItems<pred::ComparePathItem>( rPathItems, ascending );
+	}
 }
 
 
