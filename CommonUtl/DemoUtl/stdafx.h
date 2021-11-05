@@ -16,3 +16,8 @@
 #include "utl/CommonDefs.h"
 #include "utl/UI/CommonWinDefs.h"
 #include "utl/UI/StdManifest.h"		// include manifest for common controls
+
+
+#ifdef _DEBUG
+	#define USE_UT		// no UT code in release builds
+#endif // _DEBUG

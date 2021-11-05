@@ -1,8 +1,7 @@
 
 #include "stdafx.h"
 
-#ifdef _DEBUG		// no UT code in release builds
-
+#ifdef USE_UT		// no UT code in release builds
 #include "CatalogStorageTests.h"
 #include "CatalogStorageService.h"
 #include "ICatalogStorage.h"
@@ -15,7 +14,9 @@
 #include "utl/UI/Thumbnailer.h"
 #include "utl/UI/WicImage.h"
 
+#ifdef _DEBUG
 #define new DEBUG_NEW
+#endif
 
 
 namespace ut
@@ -163,4 +164,4 @@ void CCatalogStorageTests::Run( void )
 }
 
 
-#endif //_DEBUG
+#endif //USE_UT

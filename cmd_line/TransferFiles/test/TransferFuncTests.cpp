@@ -1,5 +1,7 @@
 
 #include "stdafx.h"
+
+#ifdef USE_UT		// no UT code in release builds
 #include "TransferFuncTests.h"
 #include "utl/FileSystem.h"
 #include "utl/ProcessCmd.h"
@@ -8,9 +10,6 @@
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
-
-
-#ifdef _DEBUG		// no UT code in release builds
 
 
 const TCHAR CTransferFuncTests::s_srcFiles[] =
@@ -310,4 +309,4 @@ void CTransferFuncTests::Run( void )
 }
 
 
-#endif //_DEBUG
+#endif //USE_UT

@@ -10,7 +10,7 @@
 #include "resource.h"
 #include <afxcontrolbars.h>			// MFC support for ribbons and control bars
 
-#ifdef _DEBUG
+#ifdef USE_UT
 #include "utl/test/Test.h"
 #include "utl/test/UtlConsoleTests.h"
 #include "test/UtlUserInterfaceTests.h"
@@ -104,7 +104,7 @@ void CBaseApp<BaseClass>::OnInitAppResources( void )
 	// activate "Windows Native" visual manager for enabling themes in MFC controls
 	CMFCVisualManager::SetDefaultManager( RUNTIME_CLASS( CMFCVisualManagerWindows ) );
 
-#ifdef _DEBUG
+#ifdef USE_UT
 	ut::RegisterUtlConsoleTests();
 	ut::RegisterUtlUserInterfaceTests();
 #endif
@@ -224,7 +224,7 @@ void CBaseApp<BaseClass>::OnUpdateAppAbout( CCmdUI* pCmdUI )
 template< typename BaseClass >
 void CBaseApp<BaseClass>::OnRunUnitTests( void )
 {
-#ifdef _DEBUG
+#ifdef USE_UT
 	app::RunAllTests();
 #endif
 }
@@ -232,7 +232,7 @@ void CBaseApp<BaseClass>::OnRunUnitTests( void )
 template< typename BaseClass >
 void CBaseApp<BaseClass>::OnUpdateRunUnitTests( CCmdUI* pCmdUI )
 {
-#ifdef _DEBUG
+#ifdef USE_UT
 	pCmdUI->Enable( !ut::CTestSuite::Instance().IsEmpty() );
 #else
 	pCmdUI->Enable( FALSE );

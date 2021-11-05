@@ -99,7 +99,7 @@ namespace app
 
 	void TraceOsVersion( void );
 
-#ifdef _DEBUG
+#ifdef USE_UT
 	void RunAllTests( void );
 #endif
 }

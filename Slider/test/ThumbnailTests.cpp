@@ -1,7 +1,7 @@
 
 #include "stdafx.h"
 
-#ifdef _DEBUG		// no UT code in release builds
+#ifdef USE_UT		// no UT code in release builds
 #include "ThumbnailTests.h"
 #include "Application.h"
 #include "utl/FileEnumerator.h"
@@ -9,7 +9,9 @@
 #include "utl/UI/Thumbnailer.h"
 #include "utl/UI/test/TestToolWnd.h"
 
+#ifdef _DEBUG
 #define new DEBUG_NEW
+#endif
 
 
 namespace ut
@@ -189,4 +191,4 @@ void CThumbnailTests::Run( void )
 }
 
 
-#endif //_DEBUG
+#endif //USE_UT

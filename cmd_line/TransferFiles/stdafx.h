@@ -8,3 +8,8 @@
 #include "utl/StdStl.h"
 
 #include "utl/CommonDefs.h"
+
+
+#ifdef _DEBUG
+	#define USE_UT		// no UT code in release builds
+#endif // _DEBUG

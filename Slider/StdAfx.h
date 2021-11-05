@@ -23,4 +23,9 @@
 #include "utl/UI/StdManifest.h"		// include manifest for common controls
 
 
+#ifdef _DEBUG
+	#define USE_UT		// no UT code in release builds
+#endif // _DEBUG
+
+
 #define PROF_SEP _T("|")

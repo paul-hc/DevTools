@@ -1,7 +1,7 @@
 
 #include "stdafx.h"
 
-#ifdef _DEBUG		// no UT code in release builds
+#ifdef USE_UT		// no UT code in release builds
 #include "ImageTests.h"
 #include "resource.h"
 #include "utl/UI/DibDraw.h"
@@ -15,7 +15,9 @@
 #include "utl/UI/test/TestToolWnd.h"
 #include <sstream>
 
+#ifdef _DEBUG
 #define new DEBUG_NEW
+#endif
 
 
 CImageTests::CImageTests( void )
@@ -25,8 +27,8 @@ CImageTests::CImageTests( void )
 
 CImageTests& CImageTests::Instance( void )
 {
-	static CImageTests testCase;
-	return testCase;
+	static CImageTests s_testCase;
+	return s_testCase;
 }
 
 void CImageTests::TestGroupIcon( void )
@@ -175,4 +177,4 @@ void CImageTests::Run( void )
 }
 
 
-#endif //_DEBUG
+#endif //USE_UT

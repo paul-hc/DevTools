@@ -2,7 +2,6 @@
 #include "stdafx.h"
 
 #ifdef USE_UT		// no UT code in release builds
-
 #include "ResourceFileTests.h"
 #include "Application.h"
 #include "CmdLineOptions.h"
