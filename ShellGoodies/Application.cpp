@@ -62,7 +62,6 @@ BOOL CApplication::InitInstance( void )
 	app::InitModule( m_hInstance );
 	AfxSetResourceHandle( m_hInstance );
 
-	SetInteractive();		// this application is always interactive
 	return __super::InitInstance();
 }
 
