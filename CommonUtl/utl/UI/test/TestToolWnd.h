@@ -28,6 +28,10 @@ namespace ut
 		virtual ~CTestToolWnd();
 	public:
 		static CTestToolWnd* AcquireWnd( UINT selfDestroySecs = 5 );
+		static void DisableEraseBk( void );
+
+		CDC* GetTestDC( void ) const { ASSERT_PTR( m_pTestDC.get() ); return m_pTestDC.get(); }
+		void ResetTestDC( void );
 
 		// drawing pos iteration
 		void ResetDrawPos( void );					// reset to origin
@@ -36,14 +40,19 @@ namespace ut
 		static const TCHAR* GetClassName( void );
 	private:
 		CWindowTimer m_destroyTimer;
+		std::auto_ptr< CDC > m_pTestDC;
+		bool m_disableEraseBk;						// hack
+
 		static CTestToolWnd* s_pWndTool;
 
 		enum { DestroyTimerId = 1000, Width = 500, Height = 900 };
 	public:
 		CPoint m_drawPos;							// drawing cursor position in the current strip
-	protected:
+
 		// generated stuff
+	protected:
 		afx_msg void OnTimer( UINT_PTR eventId );
+		afx_msg BOOL OnEraseBkgnd( CDC* pDC );
 
 		DECLARE_MESSAGE_MAP()
 	};
@@ -55,16 +64,18 @@ namespace ut
 	class CTestDevice
 	{
 	public:
-		CTestDevice( CTestToolWnd* pToolWnd, TileAlign tileAlign = TileDown );
-		CTestDevice( UINT selfDestroySecs, TileAlign tileAlign = TileDown );
+		CTestDevice( CTestToolWnd* pToolWnd, TileAlign tileAlign = ut::TileRight );
+		CTestDevice( UINT selfDestroySecs, TileAlign tileAlign = ut::TileRight );
 		~CTestDevice();
 
 		bool IsEnabled( void ) const { return m_pToolWnd != NULL; }
-		CDC* GetDC( void ) const { return m_pTestDC.get(); }
+		CDC* GetDC( void ) const { return m_pToolWnd->GetTestDC(); }
+
+		void SetSubTitle( const TCHAR* pSubTitle );		// augment test window title with the sub-title
 
 		// drawing cursor
 		const CPoint& GetDrawPos( void ) const { ASSERT( IsEnabled() ); return m_pToolWnd->m_drawPos; }
-		void GotoOrigin( void );
+		void ResetOrigin( void );
 		bool GotoNextTile( void );
 		bool GotoNextStrip( void );
 		bool CascadeNextTile( void );			// breaks to a new strip if the subsequent tile partially overflows; assumes next tile has the same size
@@ -87,6 +98,12 @@ namespace ut
 
 		void DrawTextInfo( const std::tstring& text );
 		void DrawBitmapInfo( HBITMAP hBitmap );
+
+		void DrawTileCaption( const std::tstring& text );		// draw text under the last drawn tile rect
+
+		enum { PauseTime = 500 };
+
+		void Await( DWORD milliseconds = PauseTime ) { ::Sleep( milliseconds ); }
 	private:
 		static COLORREF GetBitmapFrameColor( const CSize& bmpSize, const CSize& scaledBmpSize );
 	private:
@@ -94,11 +111,10 @@ namespace ut
 	private:
 		TileAlign m_tileAlign;
 		CTestToolWnd* m_pToolWnd;
-		std::auto_ptr< CDC > m_pTestDC;
 
 		CRect m_workAreaRect;					// client rect shrunk by edge
 		CRect m_stripRect;						// row of tiles
-		CRect m_tileRect;						// set by current draw method
+		CRect m_tileRect;						// last drawn cursor rect, set by current draw method
 	public:
 		static const CSize m_edgeSize;			// edge from the client rect
 	};

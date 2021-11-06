@@ -122,9 +122,11 @@ void CImageTests::TestImageList( void )
 	}
 
 	// drawing
-	ut::CTestDevice testDev( 5, ut::TileRight );
+	ut::CTestDevice testDev( 5 );
+	testDev.SetSubTitle( _T("CImageTests::TestImageList") );
 
 	testDev.DrawImage( &imageList, Image_Fill );
+	testDev.DrawTileCaption( _T("image-list IDR_IMAGE_STRIP") );
 	++testDev;
 
 	// NB: for some reason imageInfo.hbmImage cannot be selected into a DC - most likely is kept selected into a cached DC by the system...
@@ -136,6 +138,7 @@ void CImageTests::TestImageList( void )
 	dupDib.Draw( testDev.GetDC(), rect );
 	testDev.StoreTileRect( rect );
 	testDev.DrawTileFrame( color::AzureBlue );
+	testDev.DrawTileCaption( _T("dupDib IDR_IMAGE_STRIP") );
 	++testDev;
 
 
@@ -149,14 +152,17 @@ void CImageTests::TestImageList( void )
 	dupDib.Draw( testDev.GetDC(), rect );
 	testDev.StoreTileRect( rect );
 	testDev.DrawTileFrame( color::AzureBlue );
+	testDev.DrawTileCaption( _T("imageInfo.hbmImage IDR_IMAGE_STRIP") );
 	++testDev;
 
 	testDev.DrawImageList( &disabledImageList, true );
+	testDev.DrawTileCaption( _T("disabledImageList IDR_IMAGE_STRIP") );
 	++testDev;
 
 	// transparent icon
 	const CIcon* pTranspIcon = CImageStore::SharedStore()->RetrieveIcon( ID_TRANSPARENT );
 	testDev.DrawIcon( pTranspIcon->GetHandle(), pTranspIcon->GetSize() );		// there is one white pixel at right-bottom so that the icon is not completely black (GDI bug?)
+	testDev.DrawTileCaption( _T("icon IDR_IMAGE_STRIP") );
 	++testDev;
 
 	// image list transparent image
@@ -165,6 +171,9 @@ void CImageTests::TestImageList( void )
 	imageList.Add( pTranspIcon->GetHandle() );				// one white pixel at right-bottom
 	imageList.Add( NULL, CLR_NONE );						// another was to add an empty icon
 	testDev.DrawImageList( &imageList, true );
+	testDev.DrawTileCaption( _T("image-list IDR_IMAGE_STRIP") );
+
+	testDev.Await();
 }
 
 void CImageTests::Run( void )

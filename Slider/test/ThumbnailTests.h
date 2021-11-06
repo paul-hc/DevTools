@@ -8,6 +8,9 @@
 #include "utl/UI/test/BaseImageTestCase.h"
 
 
+namespace ut { class CTestDevice; }
+
+
 class CThumbnailTests : public CBaseImageTestCase
 {
 	CThumbnailTests( void );
@@ -21,11 +24,13 @@ public:
 private:
 	enum { MaxImageFiles = 50 };
 
-	static void DrawThumbs( const std::vector< CBitmap* >& thumbs );
+	typedef std::pair<CBitmap*, std::tstring> TBitmapPathPair;
+
+	static void DrawThumbs( ut::CTestDevice* pTestDev, const std::vector< TBitmapPathPair >& thumbs );
 private:
 	void TestThumbConversion( void );
-	void TestImageThumbs( void );
-	void TestThumbnailCache( void );
+	void TestImageThumbs( ut::CTestDevice* pTestDev );
+	void TestThumbnailCache( ut::CTestDevice* pTestDev );
 };
 
 

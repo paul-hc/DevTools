@@ -31,12 +31,16 @@ void CImagingD2DTests::TestImage( ut::CTestDevice* pTestDev, d2d::CDCRenderTarge
 	if ( imagePath.IsEmpty() )
 		return;
 
+	pTestDev->SetSubTitle( _T("CImagingD2DTests::TestImage") );
+
 	wic::CBitmapDecoder decoder( imagePath );
 	CComPtr< IWICBitmapSource > pWicBitmap = decoder.ConvertFrameAt( 0 );
 
 	pRenderTarget->SetWicBitmap( pWicBitmap );
 
 	pTestDev->DrawBitmap( pRenderTarget, d2d::CDrawBitmapTraits( color::directx::LavenderBlush ), CSize( 200, 200 ) );
+	pTestDev->DrawTileCaption( imagePath.GetFilename() );
+	pTestDev->Await();
 	++*pTestDev;
 }
 
@@ -47,13 +51,15 @@ void CImagingD2DTests::TestImageEffects( ut::CTestDevice* pTestDev, d2d::CDCRend
 	if ( imagePath.IsEmpty() )
 		return;
 
+	pTestDev->SetSubTitle( _T("CImagingD2DTests::TestImageEffects") );
+
 	pRenderTarget->SetWicBitmap( wic::CBitmapDecoder( imagePath ).ConvertFrameAt( 0 ) );
-	enum { PauseTime = 250 };
 
 	d2d::CDrawBitmapTraits traits( color::directx::LavenderBlush );
 	traits.m_opacity = .25f;
 	pTestDev->DrawBitmap( pRenderTarget, traits, CSize( 300, 300 ) );
-	::Sleep( PauseTime );
+	pTestDev->DrawTileCaption( imagePath.GetFilename() );
+	pTestDev->Await();
 
 	CPoint imageCenter = pTestDev->GetTileRect().CenterPoint();
 
@@ -61,12 +67,15 @@ void CImagingD2DTests::TestImageEffects( ut::CTestDevice* pTestDev, d2d::CDCRend
 	traits.m_opacity = .5f;
 	traits.m_bkColor = CLR_NONE;
 	pTestDev->DrawBitmap( pRenderTarget, traits, CSize( 300, 300 ) );
-	::Sleep( PauseTime );
+	pTestDev->DrawTileCaption( imagePath.GetFilename() );
+	pTestDev->Await();
 
 	traits.m_transform = D2D1::Matrix3x2F::Rotation( 60.f, d2d::ToPointF( imageCenter ) );
 	traits.m_opacity = 1.f;
 	pTestDev->DrawBitmap( pRenderTarget, traits, CSize( 300, 300 ) );
-	::Sleep( PauseTime );
+	pTestDev->DrawTileCaption( imagePath.GetFilename() );
+	pTestDev->Await();
+
 	++*pTestDev;
 }
 
@@ -76,14 +85,19 @@ void CImagingD2DTests::TestImageAnimation( ut::CTestDevice* pTestDev, d2d::CDCRe
 	if ( imagePath.IsEmpty() )
 		return;
 
+	pTestDev->SetSubTitle( _T("CImagingD2DTests::TestImageAnimation") );
+
 	wic::CBitmapDecoder decoder( imagePath );
 	d2d::CDrawBitmapTraits traits;
 
 	for ( UINT count = 0; count != 3; ++count )
-		for ( UINT framePos = 0; framePos != decoder.GetFrameCount(); ++framePos, ::Sleep( 20 ) )
+		for ( UINT framePos = 0; framePos != decoder.GetFrameCount(); ++framePos, pTestDev->Await( 20 ) )
 		{
 			pRenderTarget->SetWicBitmap( decoder.ConvertFrameAt( framePos ) );
 			pTestDev->DrawBitmap( pRenderTarget, traits, CSize( 300, 300 ) );
+
+			if ( 0 == count && 0 == framePos )
+				pTestDev->DrawTileCaption( imagePath.GetFilename() );		// draw caption once for the first frame
 		}
 
 	++*pTestDev;
@@ -93,13 +107,14 @@ void CImagingD2DTests::Run( void )
 {
 	__super::Run();
 
-	ut::CTestDevice testDev( ut::CTestToolWnd::AcquireWnd( 10 ) );
-	testDev.GotoOrigin();
+	ut::CTestDevice testDev( ut::CTestToolWnd::AcquireWnd( 10 ), ut::TileDown );
 	d2d::CDCRenderTarget renderTarget( testDev.GetDC() );
 
 	TestImage( &testDev, &renderTarget );
 	TestImageEffects( &testDev, &renderTarget );
 	TestImageAnimation( &testDev, &renderTarget );
+
+	ut::CTestToolWnd::DisableEraseBk();
 }
 
 

@@ -19,6 +19,33 @@
 
 namespace ut
 {
+	// CTestDC class (private)
+
+	class CTestDC : public CClientDC
+	{
+	public:
+		CTestDC( CTestToolWnd* pToolWnd )
+			: CClientDC( pToolWnd )
+			, m_scopedDrawText( this, pToolWnd, &GetCtrlFont() )
+			, m_noBatching( 1 )
+		{
+		}
+	private:
+		static CFont& GetCtrlFont( void );
+	private:
+		CScopedDrawText m_scopedDrawText;
+		CScopedGdiBatchLimit m_noBatching;
+	};
+
+	CFont& CTestDC::GetCtrlFont( void )
+	{
+		static CFont font;
+		if ( NULL == font.GetSafeHandle() )
+			ui::MakeStandardControlFont( font, ui::CFontInfo() );
+		return font;
+	}
+
+
 	bool Blit( CDC* pDC, const CRect& destRect, CDC* pSrcDC, const CRect& srcRect )
 	{
 		return pDC->StretchBlt( destRect.left, destRect.top, destRect.Width(), destRect.Height(), pSrcDC, srcRect.left, srcRect.top, srcRect.Width(), srcRect.Height(), SRCCOPY ) != FALSE;
@@ -46,6 +73,9 @@ namespace ut
 
 namespace ut
 {
+	static const TCHAR s_titleBase[] = _T("UI TEST Tool");
+
+
 	// CTestToolWnd implementation
 
 	CTestToolWnd* CTestToolWnd::s_pWndTool = NULL;
@@ -53,6 +83,7 @@ namespace ut
 	CTestToolWnd::CTestToolWnd( UINT elapseSelfDestroy )
 		: CFrameWnd()
 		, m_destroyTimer( this, DestroyTimerId, elapseSelfDestroy )
+		, m_disableEraseBk( false )
 		, m_drawPos( CTestDevice::m_edgeSize )
 	{
 		ASSERT_NULL( s_pWndTool );
@@ -73,7 +104,7 @@ namespace ut
 		{
 			pWndTool = new CTestToolWnd( selfDestroySecs );
 			CRect wndRect = MakeWindowRect();
-			if ( !pWndTool->Create( GetClassName(), _T("TEST Tool"), WS_POPUPWINDOW | WS_THICKFRAME | WS_CAPTION | WS_VISIBLE, wndRect, AfxGetMainWnd(), NULL, WS_EX_TOOLWINDOW ) )
+			if ( !pWndTool->Create( GetClassName(), s_titleBase, WS_POPUPWINDOW | WS_THICKFRAME | WS_CAPTION | WS_VISIBLE, wndRect, AfxGetMainWnd(), NULL, WS_EX_TOOLWINDOW ) )
 			{
 				ASSERT( false );
 				delete pWndTool;
@@ -93,6 +124,15 @@ namespace ut
 		return pWndTool;
 	}
 
+	void CTestToolWnd::DisableEraseBk( void )
+	{
+		// Hack: set to true to prevent erasing the background when a d2d::CDCRenderTarget goes out of scope - e.g. in CImagingD2DTests::Run(), and sends a WM_DWMNCRENDERINGCHANGED message.
+		//	This was difficult to debug and required extra code for debugging and capturing the cause of the window erase.
+
+		if ( s_pWndTool != NULL )
+			s_pWndTool->m_disableEraseBk = true;
+	}
+
 	CRect CTestToolWnd::MakeWindowRect( void )
 	{
 		CRect desktopRect = ui::FindMonitorRect( AfxGetMainWnd()->m_hWnd, ui::Workspace );
@@ -100,6 +140,11 @@ namespace ut
 		ui::AlignRect( wndRect, desktopRect, H_AlignRight | V_AlignTop );
 		wndRect.OffsetRect( -20, 30 );
 		return wndRect;
+	}
+
+	void CTestToolWnd::ResetTestDC( void )
+	{
+		m_pTestDC.reset( new CTestDC( this ) );
 	}
 
 	const TCHAR* CTestToolWnd::GetClassName( void )
@@ -122,6 +167,7 @@ namespace ut
 
 	BEGIN_MESSAGE_MAP( CTestToolWnd, CFrameWnd )
 		ON_WM_TIMER()
+		ON_WM_ERASEBKGND()
 	END_MESSAGE_MAP()
 
 	void CTestToolWnd::OnTimer( UINT_PTR eventId )
@@ -132,27 +178,12 @@ namespace ut
 			CFrameWnd::OnTimer( eventId );
 	}
 
-
-	// CTestDC class (private)
-
-	class CTestDC : public CClientDC
+	BOOL CTestToolWnd::OnEraseBkgnd( CDC* pDC )
 	{
-	public:
-		CTestDC( CTestToolWnd* pToolWnd ) : CClientDC( pToolWnd ), m_scopedDrawText( this, pToolWnd, &GetCtrlFont() ), m_noBatching( 1 ) {}
-	private:
-		static CFont& GetCtrlFont( void );
-	private:
-		CScopedDrawText m_scopedDrawText;
-		CScopedGdiBatchLimit m_noBatching;
-	};
+		if ( m_disableEraseBk )
+			return TRUE;
 
-
-	CFont& CTestDC::GetCtrlFont( void )
-	{
-		static CFont font;
-		if ( NULL == font.GetSafeHandle() )
-			ui::MakeStandardControlFont( font, ui::CFontInfo() );
-		return font;
+		return __super::OnEraseBkgnd( pDC );
 	}
 
 
@@ -160,14 +191,14 @@ namespace ut
 
 	const CSize CTestDevice::m_edgeSize( 10, 10 );
 
-	CTestDevice::CTestDevice( CTestToolWnd* pToolWnd, TileAlign tileAlign /*= TileDown*/ )
+	CTestDevice::CTestDevice( CTestToolWnd* pToolWnd, TileAlign tileAlign /*= ut::TileRight*/ )
 		: m_tileAlign( tileAlign )
 		, m_stripRect( 0, 0, 0, 0 )
 	{
 		Construct( pToolWnd );
 	}
 
-	CTestDevice::CTestDevice( UINT selfDestroySecs, TileAlign tileAlign /*= TileDown*/ )
+	CTestDevice::CTestDevice( UINT selfDestroySecs, TileAlign tileAlign /*= TileRight*/ )
 		: m_tileAlign( tileAlign )
 		, m_stripRect( 0, 0, 0, 0 )
 	{
@@ -184,17 +215,31 @@ namespace ut
 		m_pToolWnd = pToolWnd;
 		if ( m_pToolWnd != NULL )
 		{
-			m_pTestDC.reset( new CTestDC( m_pToolWnd ) );
-			m_stripRect.TopLeft() = m_stripRect.BottomRight() = m_pToolWnd->m_drawPos;
+			m_pToolWnd->ResetTestDC();
 			m_pToolWnd->GetClientRect( &m_workAreaRect );
 			m_workAreaRect.DeflateRect( m_edgeSize );
+
+			ResetOrigin();
 		}
 	}
 
-	void CTestDevice::GotoOrigin( void )
+	void CTestDevice::ResetOrigin( void )
 	{
 		if ( IsEnabled() )
+		{
 			m_pToolWnd->ResetDrawPos();
+			m_stripRect.TopLeft() = m_stripRect.BottomRight() = m_pToolWnd->m_drawPos;
+		}
+	}
+
+	void CTestDevice::SetSubTitle( const TCHAR* pSubTitle )
+	{
+		std::tstring title = s_titleBase;
+
+		if ( !str::IsEmpty( pSubTitle ) )
+			title += std::tstring( _T(" - ") ) + pSubTitle;
+
+		ui::SetWindowText( m_pToolWnd->GetSafeHwnd(), title );
 	}
 
 	// tileSize is the size of previously drawn area
@@ -244,6 +289,7 @@ namespace ut
 	{
 		if ( !IsEnabled() )
 			return false;
+
 		switch ( m_tileAlign )
 		{
 			case TileRight:
@@ -314,7 +360,7 @@ namespace ut
 		CSize bmpSize = CBitmapInfo( hBitmap ).GetBitmapSize();
 		CRect boundsRect( m_pToolWnd->m_drawPos, boundsSize != CSize( 0, 0 ) ? boundsSize : bmpSize );
 
-		CSize scaledBmpSize = ui::StretchToFit( boundsSize, bmpSize );
+		CSize scaledBmpSize = ui::ShrinkToFit( boundsSize, bmpSize );
 
 		CRect imageRect( boundsRect.TopLeft(), scaledBmpSize );
 		ui::CenterRect( imageRect, boundsRect );
@@ -438,6 +484,30 @@ namespace ut
 	{
 		DrawTextInfo( CBitmapInfo( hBitmap ).FormatDbg() );
 	}
+
+	void CTestDevice::DrawTileCaption( const std::tstring& text )
+	{
+		if ( !IsEnabled() || text.empty() )
+			return;
+
+		ASSERT( !m_tileRect.IsRectEmpty() );
+
+		enum { TextEdge = 3, dtFormat = DT_NOPREFIX | DT_SINGLELINE };
+
+		CDC* pDC = GetDC();
+		CSize textSize = ui::GetTextSize( pDC, text.c_str(), dtFormat );
+
+		textSize.cx = std::min( (long)m_tileRect.Width(), textSize.cx );
+		textSize.cy = std::max( pDC->GetTextExtent( text.c_str(), (int)text.length() ).cy, textSize.cy );	// compensate since ui::GetTextSize() not acurate with vertical size
+
+		CRect textRect( CPoint( 0, 0 ), textSize );
+
+		ui::AlignRectOutside( textRect, m_tileRect, H_AlignCenter | V_AlignBottom, CSize( 0, TextEdge ) );
+		m_stripRect.bottom = std::max( textRect.bottom, m_stripRect.bottom );
+
+		GetDC()->DrawText( text.c_str(), (int)text.length(), &textRect, DT_END_ELLIPSIS | dtFormat );
+	}
+
 
 	COLORREF CTestDevice::GetBitmapFrameColor( const CSize& bmpSize, const CSize& scaledBmpSize )
 	{

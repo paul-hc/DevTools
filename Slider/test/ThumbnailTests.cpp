@@ -60,7 +60,7 @@ namespace ut
 			parts.m_ext = extensions[ i ];
 
 			const GUID& containerFormatId = wic::CBitmapOrigin::FindContainerFormatId( parts.m_ext.c_str() );
-			CComPtr< IStream > pThumbStream = docStg.CreateStream( parts.MakePath().GetPtr() );
+			CComPtr<IStream> pThumbStream = docStg.CreateStream( parts.MakePath().GetPtr() );
 			
 			if ( !wic::SaveBitmapToStream( pThumbBitmap, pThumbStream, containerFormatId ) )
 				return false;
@@ -92,25 +92,29 @@ const fs::TDirPath& CThumbnailTests::GetThumbSaveDirPath( void )
 	return dirPath;
 }
 
-void CThumbnailTests::DrawThumbs( const std::vector< CBitmap* >& thumbs )
+void CThumbnailTests::DrawThumbs( ut::CTestDevice* pTestDev, const std::vector<TBitmapPathPair>& thumbs )
 {
-	ut::CTestDevice testDev( ut::CTestToolWnd::AcquireWnd(), ut::TileRight );
-	testDev.GotoOrigin();
+	pTestDev->ResetOrigin();
 
 	CDC memDC;
-	if ( !memDC.CreateCompatibleDC( testDev.GetDC() ) )
+	if ( !memDC.CreateCompatibleDC( pTestDev->GetDC() ) )
 		return;
 
 	for ( size_t i = 0; i != thumbs.size(); ++i )
 	{
-		CBitmap* pBitmap = thumbs[ i ];
+		CBitmap* pBitmap = thumbs[ i ].first;
 		CBitmapInfo bmpInfo( *pBitmap );
 		ASSERT( bmpInfo.IsDibSection() );
 
-		testDev.DrawBitmap( *pBitmap, ut::GetThumbnailer()->GetBoundsSize(), &memDC );
-		if ( !testDev.CascadeNextTile() )
+		pTestDev->DrawBitmap( *pBitmap, ut::GetThumbnailer()->GetBoundsSize(), &memDC );
+		pTestDev->DrawTileCaption( thumbs[ i ].second );
+
+		if ( !pTestDev->CascadeNextTile() )
 			break;
 	}
+
+	pTestDev->Await();
+	pTestDev->GotoNextStrip();
 }
 
 void CThumbnailTests::TestThumbConversion( void )
@@ -124,60 +128,74 @@ void CThumbnailTests::TestThumbConversion( void )
 		}
 }
 
-void CThumbnailTests::TestImageThumbs( void )
+void CThumbnailTests::TestImageThumbs( ut::CTestDevice* pTestDev )
 {
-	const fs::TDirPath& imageSrcPath = ut::GetImageSourceDirPath();
+	const fs::TDirPath& imageSrcPath = ut::GetStdImageDirPath();
 	if ( imageSrcPath.IsEmpty() )
 		return;
 
-	fs::CPathEnumerator imageEnum;
+	pTestDev->SetSubTitle( _T("CThumbnailTests::TestImageThumbs") );
+
+	fs::CPathEnumerator imageEnum( fs::EF_Recurse );
 	fs::EnumFiles( &imageEnum, imageSrcPath, _T("*.*") );
 
 	fs::SortPaths( imageEnum.m_filePaths );
 
-	std::vector< CBitmap* > thumbs;
+	std::vector<TBitmapPathPair> thumbs;
 	thumbs.reserve( MaxImageFiles );
 
 	shell::CWinExplorer explorer;
 	UINT count = 0;
 	for ( std::vector< fs::CPath >::const_iterator itFilePath = imageEnum.m_filePaths.begin(); itFilePath != imageEnum.m_filePaths.end() && count != MaxImageFiles; ++itFilePath, ++count )
 	{
-		if ( CComPtr< IShellItem > pShellItem = explorer.FindShellItem( *itFilePath ) )
+		if ( CComPtr<IShellItem> pShellItem = explorer.FindShellItem( *itFilePath ) )
 			if ( HBITMAP hThumbBitmap = explorer.ExtractThumbnail( pShellItem, ut::GetThumbnailer()->GetBoundsSize(), SIIGBF_BIGGERSIZEOK ) )		// SIIGBF_RESIZETOFIT, SIIGBF_BIGGERSIZEOK
 			{
-				thumbs.push_back( new CBitmap );
-				thumbs.back()->Attach( hThumbBitmap );
+				thumbs.push_back( TBitmapPathPair( new CBitmap(), itFilePath->GetFilename() ) );
+				thumbs.back().first->Attach( hThumbBitmap );
+				continue;
 			}
 
 		// or do forced extraction:
 		// HBITMAP hThumbBitmap = explorer.ExtractThumbnail( *itFilePath, ut::GetThumbnailer()->GetBoundsSize() )
+
+		ASSERT( false );		// failed thumbnail extraction?
 	}
 
-	DrawThumbs( thumbs );
-	utl::ClearOwningContainer( thumbs );
+	DrawThumbs( pTestDev, thumbs );
+	utl::ClearOwningAssocContainerKeys( thumbs );
 }
 
-void CThumbnailTests::TestThumbnailCache( void )
+void CThumbnailTests::TestThumbnailCache( ut::CTestDevice* pTestDev )
 {
-	const fs::TDirPath& imageSrcPath = ut::GetImageSourceDirPath();
+	const fs::TDirPath& imageSrcPath = ut::GetStdImageDirPath();
 	if ( imageSrcPath.IsEmpty() )
 		return;
 
-	fs::CPathEnumerator imageEnum;
+	pTestDev->SetSubTitle( _T("CThumbnailTests::TestThumbnailCache") );
+
+	fs::CPathEnumerator imageEnum( fs::EF_Recurse );
 	fs::EnumFiles( &imageEnum, imageSrcPath, _T("*.*") );
 
 	fs::SortPaths( imageEnum.m_filePaths );
 
-	std::vector< CBitmap* > thumbs;
+	std::vector<TBitmapPathPair> thumbs;
 	thumbs.reserve( MaxImageFiles );
 
 	shell::CWinExplorer explorer;
 	UINT count = 0;
 	for ( std::vector< fs::CPath >::const_iterator itFilePath = imageEnum.m_filePaths.begin(); itFilePath != imageEnum.m_filePaths.end() && count != MaxImageFiles; ++itFilePath, ++count )
+	{
 		if ( CCachedThumbBitmap* pThumbBitmap = ut::GetThumbnailer()->AcquireThumbnail( fs::ToFlexPath( *itFilePath ) ) )
-			thumbs.push_back( pThumbBitmap );
+		{
+			thumbs.push_back( TBitmapPathPair( pThumbBitmap, itFilePath->GetFilename() ) );
+			continue;
+		}
 
-	DrawThumbs( thumbs );
+		ASSERT( false );		// failed thumbnail extraction?
+	}
+
+	DrawThumbs( pTestDev, thumbs );
 	// thumbs are owned by the cache, don't delete them
 }
 
@@ -185,11 +203,11 @@ void CThumbnailTests::Run( void )
 {
 	__super::Run();
 
-	TestThumbConversion();
-	//TestImageThumbs();
-	TestThumbnailCache();
+	ut::CTestDevice testDev( ut::CTestToolWnd::AcquireWnd() );
 
-	::Sleep( 200 );				// display results for a little while
+	TestThumbConversion();
+	TestImageThumbs( &testDev );
+	TestThumbnailCache( &testDev );
 }
 
 

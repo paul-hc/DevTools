@@ -32,6 +32,8 @@ void CWicImageTests::TestImage( ut::CTestDevice* pTestDev )
 	if ( imagePath.IsEmpty() )
 		return;
 
+	pTestDev->SetSubTitle( _T("CWicImageTests::TestImage") );
+
 	CWicImage image;
 	UINT framePos = 0;
 	ASSERT( image.LoadFromFile( imagePath, framePos ) );
@@ -39,10 +41,12 @@ void CWicImageTests::TestImage( ut::CTestDevice* pTestDev )
 	do
 	{
 		pTestDev->DrawBitmap( image.GetWicBitmap(), image.GetBmpFmt().m_size );
+		pTestDev->DrawTileCaption( str::Format( _T("%d:%s"), framePos + 1, imagePath.GetFilenamePtr() ) );
 		++*pTestDev;
 	}
 	while ( image.IsValidFramePos( ++framePos ) && image.LoadFrame( framePos ) );
 
+	pTestDev->Await();
 	pTestDev->GotoNextStrip();
 }
 
@@ -51,6 +55,8 @@ void CWicImageTests::TestImageCache( ut::CTestDevice* pTestDev )
 	const fs::TDirPath& imageSrcPath = ut::GetImageSourceDirPath();
 	if ( imageSrcPath.IsEmpty() )
 		return;
+
+	pTestDev->SetSubTitle( _T("CWicImageTests::TestImageCache") );
 
 	fs::CPathEnumerator imageEnum;
 	fs::EnumFiles( &imageEnum, imageSrcPath, _T("*.*") );
@@ -73,7 +79,7 @@ void CWicImageTests::TestImageCache( ut::CTestDevice* pTestDev )
 
 	ASSERT_EQUAL( imagePaths.size(), cache.GetCount() );
 
-	std::pair< CWicImage*, int > imagePair;
+	std::pair<CWicImage*, int> imagePair;
 
 	for ( size_t i = 0; i != imagePaths.size(); ++i )
 	{
@@ -81,6 +87,7 @@ void CWicImageTests::TestImageCache( ut::CTestDevice* pTestDev )
 		ASSERT_PTR( imagePair.first );
 		ASSERT_EQUAL( fs::cache::CacheHit, imagePair.second );
 		pTestDev->DrawBitmap( imagePair.first->GetWicBitmap(), CSize( 150, 150 ) );
+		pTestDev->DrawTileCaption( imagePair.first->GetImagePath().GetFilename() );
 		++*pTestDev;
 	}
 
@@ -97,15 +104,16 @@ void CWicImageTests::TestImageCache( ut::CTestDevice* pTestDev )
 	cache.GetCache()->WaitPendingQueue();
 
 	ASSERT( cache.GetCount() <= MaxSize );			// ensure it doesn't overflow MaxSize
-	Sleep( 250 );
+
+	pTestDev->Await();
+	pTestDev->GotoNextStrip();
 }
 
 void CWicImageTests::Run( void )
 {
 	__super::Run();
 
-	ut::CTestDevice testDev( ut::CTestToolWnd::AcquireWnd( 10 ), ut::TileRight );
-	testDev.GotoOrigin();
+	ut::CTestDevice testDev( ut::CTestToolWnd::AcquireWnd( 10 ) );
 
 	TestImage( &testDev );
 	TestImageCache( &testDev );
