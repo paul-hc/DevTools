@@ -27,7 +27,7 @@ public:
 	virtual void CloseDocFile( void );
 
 	static void CreateObject( ICatalogStorage** ppCatalogStorage );
-	static size_t DiscardCachedImages( const fs::CPath& docStgPath );		// to avoid sharing violations on stream access
+	static size_t DiscardCachedImages( const fs::TStgDocPath& docStgPath );		// to avoid sharing violations on stream access
 private:
 	// ICatalogStorage interface
 	virtual fs::CStructuredStorage* GetDocStorage( void );
@@ -38,7 +38,7 @@ private:
 	virtual const std::tstring& GetPassword( void ) const { return m_password; }
 	virtual void StorePassword( const std::tstring& password );
 
-	virtual void CreateImageArchiveFile( const fs::CPath& docStgPath, CCatalogStorageService* pCatalogSvc ) throws_( CException* );
+	virtual void CreateImageArchiveFile( const fs::TStgDocPath& docStgPath, CCatalogStorageService* pCatalogSvc ) throws_( CException* );
 
 	virtual bool SavePasswordStream( void );
 	virtual bool LoadPasswordStream( void );

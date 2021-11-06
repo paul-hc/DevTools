@@ -64,7 +64,7 @@ bool CTempCloneFileSet::SetInputFilePaths( const std::vector< fs::CFlexPath >& i
 	if ( HasFlag( CWorkspace::GetFlags(), wf::AllowEmbeddedFileTransfers ) )
 		pProgress.reset( new app::CScopedProgress( 0, (int)inputFilePaths.size(), 1, _T("Create physical backup:") ) );
 
-	const fs::CPath& tempDirPath = GetTempDirPath();
+	const fs::TDirPath& tempDirPath = GetTempDirPath();
 
 	ASSERT( tempDirPath.FileExist() );
 	for ( std::vector< fs::CFlexPath >::const_iterator itInputPath = inputFilePaths.begin(); itInputPath != inputFilePaths.end(); ++itInputPath )
@@ -101,7 +101,7 @@ bool CTempCloneFileSet::SetInputFilePaths( const std::vector< fs::CFlexPath >& i
 
 void CTempCloneFileSet::DeleteClones( void )
 {
-	const fs::CPath& tempDirPath = GetTempDirPath();
+	const fs::TDirPath& tempDirPath = GetTempDirPath();
 	if ( !fs::IsValidDirectory( tempDirPath.GetPtr() ) )
 		return;
 
@@ -120,18 +120,19 @@ void CTempCloneFileSet::DeleteClones( void )
 	m_tempClonedImagePaths.clear();
 }
 
-const fs::CPath& CTempCloneFileSet::GetTempDirPath( void )
+const fs::TDirPath& CTempCloneFileSet::GetTempDirPath( void )
 {
-	static const fs::CPath s_cloneSubDir( _T("SliderTempClones") );
-	static fs::CPath dirPath;
+	static const TCHAR s_cloneSubDir[] =_T("SliderTempClones");
+	static fs::TDirPath s_dirPath;
 
-	if ( dirPath.IsEmpty() )
+	if ( s_dirPath.IsEmpty() )
 	{
-		dirPath = fs::GetTempDirPath() / s_cloneSubDir;
-		if ( !fs::IsValidDirectory( dirPath.GetPtr() ) )
+		s_dirPath = fs::GetTempDirPath() / s_cloneSubDir;
+
+		if ( !fs::IsValidDirectory( s_dirPath.GetPtr() ) )
 			try
 			{
-				fs::thr::CreateDirPath( dirPath.GetPtr(), fs::MfcExc );
+				fs::thr::CreateDirPath( s_dirPath.GetPtr(), fs::MfcExc );
 			}
 			catch ( CException* pExc )
 			{
@@ -139,7 +140,7 @@ const fs::CPath& CTempCloneFileSet::GetTempDirPath( void )
 			}
 	}
 
-	return dirPath;
+	return s_dirPath;
 }
 
 bool CTempCloneFileSet::ClearAllTempFiles( void )

@@ -696,6 +696,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\Path_fwd.h"
+					>
+				</File>
+				<File
 					RelativePath=".\PathFormatter.cpp"
 					>
 				</File>

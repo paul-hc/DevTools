@@ -120,7 +120,7 @@ namespace fs
 	}
 
 
-	size_t EnumFilePaths( std::vector< fs::CPath >& rFilePaths, const fs::CPath& dirPath, const TCHAR* pWildSpec /*= _T("*")*/, fs::TEnumFlags flags /*= fs::TEnumFlags()*/ )
+	size_t EnumFilePaths( std::vector< fs::CPath >& rFilePaths, const fs::TDirPath& dirPath, const TCHAR* pWildSpec /*= _T("*")*/, fs::TEnumFlags flags /*= fs::TEnumFlags()*/ )
 	{
 		CPathEnumerator found( flags );
 		EnumFiles( &found, dirPath, pWildSpec );
@@ -128,7 +128,7 @@ namespace fs
 		return path::JoinUniquePaths( rFilePaths, found.m_filePaths );		// added count
 	}
 
-	size_t EnumSubDirPaths( std::vector< fs::CPath >& rSubDirPaths, const fs::CPath& dirPath, const TCHAR* pWildSpec /*= _T("*.*")*/, fs::TEnumFlags flags /*= fs::TEnumFlags()*/ )
+	size_t EnumSubDirPaths( std::vector< fs::TDirPath >& rSubDirPaths, const fs::TDirPath& dirPath, const TCHAR* pWildSpec /*= _T("*.*")*/, fs::TEnumFlags flags /*= fs::TEnumFlags()*/ )
 	{
 		CPathEnumerator found( flags );
 		EnumFiles( &found, dirPath, pWildSpec );
@@ -137,7 +137,7 @@ namespace fs
 	}
 
 
-	fs::CPath FindFirstFile( const fs::CPath& dirPath, const TCHAR* pWildSpec /*= _T("*.*")*/, fs::TEnumFlags flags /*= fs::TEnumFlags()*/ )
+	fs::CPath FindFirstFile( const fs::TDirPath& dirPath, const TCHAR* pWildSpec /*= _T("*.*")*/, fs::TEnumFlags flags /*= fs::TEnumFlags()*/ )
 	{
 		CFirstFileEnumerator singleEnumer( flags );
 		EnumFiles( &singleEnumer, dirPath, pWildSpec );

@@ -55,7 +55,7 @@ void CFileSystemTests::TestFileSystem( void )
 void CFileSystemTests::TestFileEnum( void )
 {
 	ut::CTempFilePool pool( _T("a|a.txt|a.doc|a.jpg|a.png|D1\\b|D1\\b.doc|D1\\b.txt|D1\\D2\\c|D1/D2/c.doc|D1\\D2\\c.png|D1\\D2\\c.txt") );
-	const fs::CPath& poolDirPath = pool.GetPoolDirPath();
+	const fs::TDirPath& poolDirPath = pool.GetPoolDirPath();
 
 	{
 		fs::CRelativePathEnumerator found( poolDirPath );
@@ -122,7 +122,7 @@ void CFileSystemTests::TestFileEnum( void )
 void CFileSystemTests::TestFileEnumFilter( void )
 {
 	ut::CTempFilePool pool( _T("a|a.txt|a.doc|a.jpg|a.png|D1\\b|D1\\b.doc|D1\\b.txt|D1\\D2\\c|D1/D2/c.doc|D1\\D2\\c.png|D1\\D2\\c.txt") );
-	const fs::CPath& poolDirPath = pool.GetPoolDirPath();
+	const fs::TDirPath& poolDirPath = pool.GetPoolDirPath();
 
 	// ignore files
 	{
@@ -206,7 +206,7 @@ void CFileSystemTests::TestFileEnumFilter( void )
 void CFileSystemTests::TestFileEnumHidden( void )
 {
 	ut::CTempFilePool pool( _T("a.doc|a.txt|D1\\b.txt|D1\\D2\\c.txt") );
-	const fs::CPath& poolDirPath = pool.GetPoolDirPath();
+	const fs::TDirPath& poolDirPath = pool.GetPoolDirPath();
 
 	fs::AddFileAttributes( poolDirPath / _T("a.txt"), FILE_ATTRIBUTE_HIDDEN );		// hide file
 	fs::AddFileAttributes( poolDirPath / _T("D1\\D2"), FILE_ATTRIBUTE_HIDDEN );		// hide subdirectory
@@ -230,9 +230,9 @@ void CFileSystemTests::TestFileEnumHidden( void )
 
 void CFileSystemTests::TestNumericFilename( void )
 {
-	const fs::CPath& poolDirPath = ut::CTempFilePool::MakePoolDirPath();
+	const fs::TDirPath& poolDirPath = ut::CTempFilePool::MakePoolDirPath();
 
-	const fs::CPath seedFilePath = ut::CTempFilePool::MakePoolDirPath() / fs::CPath( _T("SeedFile.txt") );
+	const fs::CPath seedFilePath = ut::CTempFilePool::MakePoolDirPath() / _T("SeedFile.txt");
 	if ( seedFilePath.FileExist() )
 		fs::DeleteFile( seedFilePath.GetPtr() );
 
@@ -309,7 +309,7 @@ void CFileSystemTests::TestFileAndDirectoryState( void )
 	}
 
 	{
-		fs::CPath dirPath = pool.GetFilePaths()[ 1 ].GetParentPath();
+		fs::TDirPath dirPath = pool.GetFilePaths()[ 1 ].GetParentPath();
 		fs::CFileState dirState = fs::CFileState::ReadFromFile( dirPath );
 		ASSERT_EQUAL( CFile::directory, dirState.m_attributes );
 
@@ -348,7 +348,7 @@ void CFileSystemTests::TestFileAndDirectoryState( void )
 void CFileSystemTests::TestTouchFile( void )
 {
 	ut::CTempFilePool pool( _T("name.txt") );
-	const fs::CPath filePath = pool.GetPoolDirPath() / fs::CPath( _T("name.txt") );
+	const fs::TDirPath filePath = pool.GetPoolDirPath() / _T("name.txt");
 
 	CTime lastModifiedTime = fs::ReadLastModifyTime( filePath );
 	ASSERT_EQUAL( CTime::GetCurrentTime(), lastModifiedTime );
@@ -362,7 +362,7 @@ void CFileSystemTests::TestFileTransferMatch( void )
 {
 	ut::CTempFilePool pool( _T("file.txt|item.txt") );
 	const fs::CPath& filePath = pool.GetFilePaths()[ 0 ];
-	const fs::CPath destPath = pool.GetPoolDirPath() / fs::CPath( _T("fileX.txt") );		// non-existent file
+	const fs::CPath destPath = pool.GetPoolDirPath() / _T("fileX.txt");		// non-existent file
 
 	ASSERT_EQUAL( fs::NoDestFile, fs::EvalTransferMatch( filePath, destPath ) );
 	ASSERT_EQUAL( fs::NoSrcFile, fs::EvalTransferMatch( destPath, filePath ) );
@@ -391,7 +391,7 @@ void CFileSystemTests::TestFileTransferMatch( void )
 void CFileSystemTests::TestBackupFile( void )
 {
 	ut::CTempFilePool pool( _T("src.txt") );
-	const fs::CPath& srcPath = pool.GetFilePaths()[ 0 ];
+	const fs::TDirPath& srcPath = pool.GetFilePaths()[ 0 ];
 
 	fs::CPath bkFilePath;
 	{

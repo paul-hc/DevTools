@@ -469,10 +469,10 @@ void CNumericTests::TestCrc32( void )
 	ASSERT_EQUAL( 0, crc32::ComputeFileChecksum( fs::CPath( _T("NoFile.xyz") ) ) );		// non-existing file CRC32
 	ASSERT( crc32::ComputeFileChecksum( app::GetModulePath() ) != 0 );					// exe file CRC32
 
-	const fs::CPath& imagesDirPath = ut::GetDestImagesDirPath();
+	const fs::TDirPath& imagesDirPath = ut::GetDestImagesDirPath();
 	if ( !imagesDirPath.IsEmpty() )
 	{
-		fs::CPath gifPath = imagesDirPath / fs::CPath( _T("Animated.gif") );
+		fs::CPath gifPath = imagesDirPath / _T("Animated.gif");
 		if ( gifPath.FileExist() )
 			ASSERT_EQUAL( 0xA524D308, crc32::ComputeFileChecksum( gifPath ) );	// gif file CRC32
 	}

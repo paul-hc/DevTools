@@ -154,10 +154,10 @@ namespace auto_drop
 		else if ( ui::IsKeyPressed( VK_SHIFT ) )
 			m_dropOperation = FileMove;
 
-		int fileCount = ::DragQueryFile( hDropInfo, ( UINT )-1, NULL, 0 );
+		UINT fileCount = ::DragQueryFile( hDropInfo, ( UINT )-1, NULL, 0 );
 		bool abortDrop = false;
 
-		for ( int i = 0; i < fileCount && !abortDrop; i++ )
+		for ( UINT i = 0; i != fileCount && !abortDrop; ++i )
 		{
 			TCHAR buffer[ MAX_PATH ];
 			::DragQueryFile( hDropInfo, i, buffer, _MAX_PATH );
@@ -165,6 +165,7 @@ namespace auto_drop
 			fs::CPath imageFilePath( buffer );
 			if ( imageFilePath.FileExist() )
 				m_droppedSrcFiles.push_back( imageFilePath.GetPtr() );
+
 			if ( !m_insertBefore.IsEmpty() )
 				if ( m_insertBefore == imageFilePath )
 					abortDrop = true;		// one of the dropped files are the same as insertion point!

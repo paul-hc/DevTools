@@ -73,7 +73,7 @@ void CResourceFileTests::TestStampRcFile( void )
 void CResourceFileTests::FuncTest_StampRcFile( void )
 {
 	ut::CTempFilePool pool( ut::s_rcFiles[ ut::RC_ANSI ] );
-	fs::CPath poolDirPath = pool.GetPoolDirPath();
+	fs::TDirPath poolDirPath = pool.GetPoolDirPath();
 
 	ASSERT_EQUAL( 1, pool.GetFilePaths().size() );
 	ASSERT_EQUAL( ut::s_rcFiles[ ut::RC_ANSI ], ut::EnumJoinFiles( poolDirPath ) );
@@ -136,7 +136,7 @@ void CResourceFileTests::FuncTest_StampRcFile( void )
 void ut::testEach_StampRcFile( const TCHAR* pRcFilePath )
 {
 	ut::CTempFilePool pool( pRcFilePath );
-	fs::CPath poolDirPath = pool.GetPoolDirPath();
+	fs::TDirPath poolDirPath = pool.GetPoolDirPath();
 
 	ASSERT_EQUAL( 1, pool.GetFilePaths().size() );
 	ASSERT_EQUAL( pRcFilePath, ut::EnumJoinFiles( poolDirPath ) );

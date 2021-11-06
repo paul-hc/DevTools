@@ -2,15 +2,11 @@
 #define ImagesModel_h
 #pragma once
 
+#include "utl/Path_fwd.h"
 #include "FileAttr_fwd.h"
 
 
 namespace utl { interface IProgressService; }
-namespace fs
-{
-	class CFlexPath;
-	template< typename PathT > class CPathIndex;
-}
 
 
 class CImagesModel : private utl::noncopyable
@@ -44,9 +40,9 @@ public:
 	const CFileAttr* FindFileAttr( const fs::CFlexPath& filePath ) const;
 
 	// embedded storages
-	const std::vector< fs::CPath >& GetStoragePaths( void ) const { return m_storagePaths; }
-	std::vector< fs::CPath >& RefStoragePaths( void ) { return m_storagePaths; }
-	bool AddStoragePath( const fs::CPath& storagePath );
+	const std::vector< fs::TStgDocPath >& GetStoragePaths( void ) const { return m_storagePaths; }
+	std::vector< fs::TStgDocPath >& RefStoragePaths( void ) { return m_storagePaths; }
+	bool AddStoragePath( const fs::TStgDocPath& storagePath );
 	void ClearInvalidStoragePaths( void );
 public:
 	void OrderFileAttrs( fattr::Order fileOrder, utl::IProgressService* pProgressSvc );
@@ -55,7 +51,7 @@ private:
 	void FilterCorruptFiles( utl::IProgressService* pProgressSvc );
 private:
 	persist std::vector< CFileAttr* > m_fileAttributes;			// owning container
-	persist std::vector< fs::CPath > m_storagePaths;			// such as .ias files, storages found during search - the catalogs are managed by parent album model
+	persist std::vector< fs::TStgDocPath > m_storagePaths;		// such as .ias files, storages found during search - the catalogs are managed by parent album model
 
 	// transient
 	std::auto_ptr< fs::CPathIndex< fs::CFlexPath > > m_pIndexer;

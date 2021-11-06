@@ -2,6 +2,7 @@
 #define SearchModel_h
 #pragma once
 
+#include "utl/Path_fwd.h"
 #include "utl/Range.h"
 
 
@@ -21,7 +22,7 @@ public:
 
 	void Stream( CArchive& archive );
 
-	void AugmentStoragePaths( std::vector< fs::CPath >& rStoragePaths ) const;
+	void AugmentStoragePaths( std::vector< fs::TStgDocPath >& rStoragePaths ) const;
 
 	UINT GetMaxFileCount( void ) const { return m_maxFileCount; }
 	void SetMaxFileCount( UINT maxFileCount ) { m_maxFileCount = maxFileCount; }

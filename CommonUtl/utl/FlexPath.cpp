@@ -72,7 +72,7 @@ namespace fs
 		if ( IsPhysicalPath() )
 			return FileExist( accessMode );
 
-		fs::CPath docStgPath = GetPhysicalPath();
+		fs::TStgDocPath docStgPath = GetPhysicalPath();
 
 		if ( !fs::IsValidStructuredStorage( docStgPath.GetPtr() ) )
 			return false;

@@ -2,6 +2,7 @@
 #define ImageView_h
 #pragma once
 
+#include "utl/Path_fwd.h"
 #include "utl/UI/AccelTable.h"
 #include "utl/UI/ImageZoomViewD2D.h"
 #include "utl/UI/ObjectCtrlBase.h"
@@ -13,7 +14,6 @@ class CImageState;
 class CImageDoc;
 class CChildFrame;
 interface INavigationBar;
-namespace fs { class CPath; }
 
 
 class CImageView : public CImageZoomViewD2D

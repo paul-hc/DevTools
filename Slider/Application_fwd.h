@@ -34,7 +34,7 @@ namespace app
 
 	const std::tstring& GetAllSourcesWildSpecs( void );
 	bool BrowseAlbumFile( fs::CPath& rFullPath, CWnd* pParentWnd, shell::BrowseMode browseMode = shell::FileOpen, DWORD flags = 0 );
-	bool BrowseCatalogFile( fs::CPath& rFullPath, CWnd* pParentWnd, shell::BrowseMode browseMode = shell::FileOpen, DWORD flags = 0 );
+	bool BrowseCatalogFile( fs::TStgDocPath& rFullPath, CWnd* pParentWnd, shell::BrowseMode browseMode = shell::FileOpen, DWORD flags = 0 );
 }
 
 

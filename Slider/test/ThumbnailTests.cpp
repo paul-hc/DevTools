@@ -81,9 +81,9 @@ CThumbnailTests& CThumbnailTests::Instance( void )
 	return s_testCase;
 }
 
-const fs::CPath& CThumbnailTests::GetThumbSaveDirPath( void )
+const fs::TDirPath& CThumbnailTests::GetThumbSaveDirPath( void )
 {
-	static fs::CPath dirPath = ut::GetDestImagesDirPath() / fs::CPath( _T("thumbnails") );
+	static fs::TDirPath dirPath = ut::GetDestImagesDirPath() / fs::TDirPath( _T("thumbnails") );
 	if ( !dirPath.IsEmpty() && !fs::CreateDirPath( dirPath.GetPtr() ) )
 	{
 		TRACE( _T("\n * Cannot create the local save directory for thumbs: %s\n"), dirPath.GetPtr() );
@@ -126,11 +126,12 @@ void CThumbnailTests::TestThumbConversion( void )
 
 void CThumbnailTests::TestImageThumbs( void )
 {
-	if ( ut::GetImageSourceDirPath().IsEmpty() )
+	const fs::TDirPath& imageSrcPath = ut::GetImageSourceDirPath();
+	if ( imageSrcPath.IsEmpty() )
 		return;
 
 	fs::CPathEnumerator imageEnum;
-	fs::EnumFiles( &imageEnum, ut::GetImageSourceDirPath(), _T("*.*") );
+	fs::EnumFiles( &imageEnum, imageSrcPath, _T("*.*") );
 
 	fs::SortPaths( imageEnum.m_filePaths );
 
@@ -158,11 +159,12 @@ void CThumbnailTests::TestImageThumbs( void )
 
 void CThumbnailTests::TestThumbnailCache( void )
 {
-	if ( ut::GetImageSourceDirPath().IsEmpty() )
+	const fs::TDirPath& imageSrcPath = ut::GetImageSourceDirPath();
+	if ( imageSrcPath.IsEmpty() )
 		return;
 
 	fs::CPathEnumerator imageEnum;
-	fs::EnumFiles( &imageEnum, ut::GetImageSourceDirPath(), _T("*.*") );
+	fs::EnumFiles( &imageEnum, imageSrcPath, _T("*.*") );
 
 	fs::SortPaths( imageEnum.m_filePaths );
 
@@ -184,7 +186,7 @@ void CThumbnailTests::Run( void )
 	__super::Run();
 
 	TestThumbConversion();
-//	TestImageThumbs();
+	//TestImageThumbs();
 	TestThumbnailCache();
 
 	::Sleep( 200 );				// display results for a little while

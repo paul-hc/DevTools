@@ -224,14 +224,14 @@ namespace ut
 {
 	CLogger& GetTestLogger( void );
 
-	const fs::CPath& GetTestDataDirPath( void ) throws_( CRuntimeException );		// %UTL_TESTDATA_PATH%
-	const fs::CPath& GetImageSourceDirPath( void );									// %UTL_THUMB_SRC_IMAGE_PATH%
-	const fs::CPath& GetDestImagesDirPath( void );									// %UTL_TESTDATA_PATH%\images
-	const fs::CPath& GetStdImageDirPath( void );									// %UTL_TESTDATA_PATH%\std_test_images
-	const fs::CPath& GetStdTestFilesDirPath( void );								// %UTL_TESTDATA_PATH%\std_test_files
+	const fs::TDirPath& GetTestDataDirPath( void ) throws_( CRuntimeException );	// %UTL_TESTDATA_PATH%
+	const fs::TDirPath& GetImageSourceDirPath( void );								// %UTL_THUMB_SRC_IMAGE_PATH%
+	const fs::TDirPath& GetDestImagesDirPath( void );								// %UTL_TESTDATA_PATH%\images
+	const fs::TDirPath& GetStdImageDirPath( void );									// %UTL_TESTDATA_PATH%\std_test_images
+	const fs::TDirPath& GetStdTestFilesDirPath( void );								// %UTL_TESTDATA_PATH%\std_test_files
 
-	const fs::CPath& GetTempUt_DirPath( void ) throws_( CRuntimeException );
-	fs::CPath MakeTempUt_DirPath( const fs::CPath& subPath, bool createDir ) throws_( CRuntimeException );
+	const fs::TDirPath& GetTempUt_DirPath( void ) throws_( CRuntimeException );
+	fs::TDirPath MakeTempUt_DirPath( const fs::TDirPath& subDirPath, bool createDir ) throws_( CRuntimeException );
 
 
 	class CTempFilePool : private utl::noncopyable
@@ -242,7 +242,7 @@ namespace ut
 
 		bool IsValidDir( void ) const { return path::IsValid( m_poolDirPath.Get() ) && fs::IsValidDirectory( m_poolDirPath.GetPtr() ); }
 		bool IsValidPool( void ) const { return IsValidDir() && !m_filePaths.empty() && !m_hasFileErrors; }
-		const fs::CPath& GetPoolDirPath( void ) const { return m_poolDirPath; }
+		const fs::TDirPath& GetPoolDirPath( void ) const { return m_poolDirPath; }
 
 		const std::vector< fs::CPath >& GetFilePaths( void ) const { return m_filePaths; }
 		fs::CPath QualifyPath( const TCHAR* pRelativePath ) const { return m_poolDirPath / fs::CPath( pRelativePath ); }
@@ -252,9 +252,9 @@ namespace ut
 		bool DeleteAllFiles( void );
 		bool CreateFiles( const TCHAR* pFlatPaths = NULL );		// can contain subdirectories
 
-		static fs::CPath MakePoolDirPath( bool createDir = false );
+		static fs::TDirPath MakePoolDirPath( bool createDir = false );
 	private:
-		fs::CPath m_poolDirPath;								// temorary directory
+		fs::TDirPath m_poolDirPath;								// temorary directory
 		std::vector< fs::CPath > m_filePaths;
 		bool m_hasFileErrors;									// file creation errors
 	public:
@@ -289,13 +289,13 @@ namespace ut
 	std::tstring JoinSubDirs( const fs::CPathEnumerator& enumerator );
 
 	// enumeration with relative paths
-	size_t EnumFilePaths( std::vector< fs::CPath >& rFilePaths, const fs::CPath& dirPath, SortType sortType = SortAscending, const TCHAR* pWildSpec = _T("*"), fs::TEnumFlags flags = fs::EF_Recurse );
-	size_t EnumSubDirPaths( std::vector< fs::CPath >& rSubDirPaths, const fs::CPath& dirPath, SortType sortType = SortAscending, fs::TEnumFlags flags = fs::EF_Recurse );
+	size_t EnumFilePaths( std::vector< fs::CPath >& rFilePaths, const fs::TDirPath& dirPath, SortType sortType = SortAscending, const TCHAR* pWildSpec = _T("*"), fs::TEnumFlags flags = fs::EF_Recurse );
+	size_t EnumSubDirPaths( std::vector< fs::TDirPath >& rSubDirPaths, const fs::TDirPath& dirPath, SortType sortType = SortAscending, fs::TEnumFlags flags = fs::EF_Recurse );
 
-	std::tstring EnumJoinFiles( const fs::CPath& dirPath, SortType sortType = SortAscending, const TCHAR* pWildSpec = _T("*"), fs::TEnumFlags flags = fs::EF_Recurse );
-	std::tstring EnumJoinSubDirs( const fs::CPath& dirPath, SortType sortType = SortAscending, fs::TEnumFlags flags = fs::EF_Recurse );
+	std::tstring EnumJoinFiles( const fs::TDirPath& dirPath, SortType sortType = SortAscending, const TCHAR* pWildSpec = _T("*"), fs::TEnumFlags flags = fs::EF_Recurse );
+	std::tstring EnumJoinSubDirs( const fs::TDirPath& dirPath, SortType sortType = SortAscending, fs::TEnumFlags flags = fs::EF_Recurse );
 
-	fs::CPath FindFirstFile( const fs::CPath& dirPath, const TCHAR* pWildSpec = _T("*.*"), fs::TEnumFlags flags = fs::TEnumFlags() );		// returns relative path
+	fs::CPath FindFirstFile( const fs::TDirPath& dirPath, const TCHAR* pWildSpec = _T("*.*"), fs::TEnumFlags flags = fs::TEnumFlags() );		// returns relative path
 
 } //namespace ut
 

@@ -74,7 +74,7 @@ namespace fs
 		m_docFilePath.Clear();
 	}
 
-	bool CStructuredStorage::CreateDocFile( const fs::CPath& docFilePath, DWORD mode /*= STGM_CREATE | STGM_READWRITE*/ )
+	bool CStructuredStorage::CreateDocFile( const fs::TStgDocPath& docFilePath, DWORD mode /*= STGM_CREATE | STGM_READWRITE*/ )
 	{
 		if ( IsOpen() )
 			CloseDocFile();
@@ -93,7 +93,7 @@ namespace fs
 		return true;
 	}
 
-	bool CStructuredStorage::OpenDocFile( const fs::CPath& docFilePath, DWORD mode /*= STGM_READ*/ )
+	bool CStructuredStorage::OpenDocFile( const fs::TStgDocPath& docFilePath, DWORD mode /*= STGM_READ*/ )
 	{
 		if ( IsOpen() )
 			CloseDocFile();
@@ -537,7 +537,7 @@ namespace fs
 			return HandleError( hResult, embeddedPath.GetPtr() );
 
 		STATSTG stat;
-		std::vector< fs::CPath > subStgNames;
+		std::vector< fs::TStgSubDirPath > subStgNames;
 
 		for ( ;; )
 		{
@@ -550,7 +550,7 @@ namespace fs
 			switch ( stat.type )
 			{
 				case STGTY_STORAGE:
-					subStgNames.push_back( fs::CPath( stat.pwcsName ) );
+					subStgNames.push_back( fs::TStgSubDirPath( stat.pwcsName ) );
 					break;
 				case STGTY_STREAM:
 				{
@@ -566,7 +566,7 @@ namespace fs
 
 		bool succeeded = true;
 
-		for ( std::vector< fs::CPath >::const_iterator itSubStgName = subStgNames.begin(); itSubStgName != subStgNames.end(); ++itSubStgName )
+		for ( std::vector< fs::TStgSubDirPath >::const_iterator itSubStgName = subStgNames.begin(); itSubStgName != subStgNames.end(); ++itSubStgName )
 		{
 			fs::TEmbeddedPath subDirPath = embeddedPath / *itSubStgName;
 			if ( pEnumerator->AddFoundSubDir( subDirPath.GetPtr() ) )		// sub-storage is not ignored?
@@ -596,7 +596,7 @@ namespace fs
 			return HandleError( hResult, embeddedPath.GetPtr() );
 
 		STATSTG stat;
-		std::vector< fs::CPath > subStgNames;
+		std::vector< fs::TStgSubDirPath > subStgNames;
 		bool found = false;
 
 		do
@@ -616,7 +616,7 @@ namespace fs
 			}
 			else if ( STGTY_STORAGE == stat.type )
 				if ( Deep == depth )
-					subStgNames.push_back( fs::CPath( stat.pwcsName ) );
+					subStgNames.push_back( fs::TStgSubDirPath( stat.pwcsName ) );
 
 			::CoTaskMemFree( stat.pwcsName );
 		}
@@ -626,7 +626,7 @@ namespace fs
 		{
 			fs::SortPaths( subStgNames );		// natural path order
 
-			for ( std::vector< fs::CPath >::const_iterator itSubStgName = subStgNames.begin(); !found && itSubStgName != subStgNames.end(); ++itSubStgName )
+			for ( std::vector< fs::TStgSubDirPath >::const_iterator itSubStgName = subStgNames.begin(); !found && itSubStgName != subStgNames.end(); ++itSubStgName )
 			{
 				m_cwdTrail.Push( OpenDir( itSubStgName->GetPtr() ) );
 				found = FindFirstElementThat( rFoundElementPath, pElementPred, Deep );		// recurse in sub-storage
@@ -644,7 +644,7 @@ namespace fs
 		return s_openedStgs;
 	}
 
-	CStructuredStorage* CStructuredStorage::FindOpenedStorage( const fs::CPath& docStgPath )
+	CStructuredStorage* CStructuredStorage::FindOpenedStorage( const fs::TStgDocPath& docStgPath )
 	{
 		const TStorageMap& rOpenedStgs = GetOpenedDocStgs();
 		return rOpenedStgs.Find( docStgPath );
@@ -654,7 +654,7 @@ namespace fs
 	{
 		ASSERT_PTR( pDocStg );
 
-		const fs::CPath& docStgPath = pDocStg->GetDocFilePath();
+		const fs::TStgDocPath& docStgPath = pDocStg->GetDocFilePath();
 		TStorageMap& rOpenedStgs = GetOpenedDocStgs();
 
 		REQUIRE( !docStgPath.IsEmpty() );
@@ -665,7 +665,7 @@ namespace fs
 	{
 		ASSERT_PTR( pDocStg );
 
-		const fs::CPath& docStgPath = pDocStg->GetDocFilePath();
+		const fs::TStgDocPath& docStgPath = pDocStg->GetDocFilePath();
 		ASSERT( !docStgPath.IsEmpty() );
 
 		TStorageMap& rOpenedStgs = GetOpenedDocStgs();
@@ -836,7 +836,7 @@ namespace fs
 	{
 		// CScopedCreateDocMode implementation
 
-		CScopedCreateDocMode::CScopedCreateDocMode( CStructuredStorage* pDocStorage, const fs::CPath* pDocFilePath, const CErrorHandler* pSrcHandler /*= CErrorHandler::Thrower()*/ )
+		CScopedCreateDocMode::CScopedCreateDocMode( CStructuredStorage* pDocStorage, const fs::TStgDocPath* pDocFilePath, const CErrorHandler* pSrcHandler /*= CErrorHandler::Thrower()*/ )
 			: CScopedErrorHandling( pDocStorage, pSrcHandler )
 			, m_pDocStorage( pDocStorage )
 			, m_docFilePath( pDocFilePath != NULL ? *pDocFilePath : m_pDocStorage->GetDocFilePath() )
@@ -854,7 +854,7 @@ namespace fs
 
 		// CScopedWriteDocMode implementation
 
-		CScopedWriteDocMode::CScopedWriteDocMode( CStructuredStorage* pDocStorage, const fs::CPath* pDocFilePath, DWORD writeMode /*= STGM_READWRITE*/,
+		CScopedWriteDocMode::CScopedWriteDocMode( CStructuredStorage* pDocStorage, const fs::TStgDocPath* pDocFilePath, DWORD writeMode /*= STGM_READWRITE*/,
 												  const CErrorHandler* pSrcHandler /*= CErrorHandler::Thrower()*/ )
 			: CScopedCreateDocMode( pDocStorage, NULL /*avoid creation*/, pSrcHandler )
 			, m_origReadingMode( s_closedMode )
@@ -893,7 +893,7 @@ namespace fs
 
 		// CMirrorStorageSave implementation
 
-		CMirrorStorageSave::CMirrorStorageSave( const fs::CPath& docStgPath, const fs::CPath& oldDocStgPath )
+		CMirrorStorageSave::CMirrorStorageSave( const fs::TStgDocPath& docStgPath, const fs::TStgDocPath& oldDocStgPath )
 			: m_docStgPath( docStgPath )
 		{
 			if ( m_docStgPath == oldDocStgPath )

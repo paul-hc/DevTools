@@ -52,12 +52,12 @@ int CTransferFuncTests::ExecuteProcess( utl::CProcessCmd& rProcess )
 void CTransferFuncTests::TestCopy( void )
 {
 	ut::CTempFilePairPool pool( s_srcFiles );
-	fs::CPath poolDirPath = pool.GetPoolDirPath();
+	fs::TDirPath poolDirPath = pool.GetPoolDirPath();
 
 	ASSERT_EQUAL( s_srcFiles, ut::EnumJoinFiles( poolDirPath ) );
 
-	const fs::CPath srcDirPath = poolDirPath / fs::CPath( _T("SRC") );
-	const fs::CPath targetDirPath = poolDirPath / fs::CPath( _T("TARGET") );
+	const fs::TDirPath srcDirPath = poolDirPath / fs::TDirPath( _T("SRC") );
+	const fs::TDirPath targetDirPath = poolDirPath / fs::TDirPath( _T("TARGET") );
 
 	// build command line as: <exe_folder>\xFer.exe "<pool_dir>\SRC\*.mp3;*.m4?;*.mp4" "<pool_dir>\TARGET"
 	utl::CProcessCmd copyLossy( __targv[ 0 ] );
@@ -94,12 +94,12 @@ void CTransferFuncTests::TestCopy( void )
 void CTransferFuncTests::TestMove( void )
 {
 	ut::CTempFilePairPool pool( s_srcFiles );
-	fs::CPath poolDirPath = pool.GetPoolDirPath();
+	fs::TDirPath poolDirPath = pool.GetPoolDirPath();
 
 	ASSERT_EQUAL( s_srcFiles, ut::EnumJoinFiles( poolDirPath ) );
 
-	const fs::CPath srcDirPath = poolDirPath / fs::CPath( _T("SRC") );
-	const fs::CPath targetDirPath = poolDirPath / fs::CPath( _T("TARGET") );
+	const fs::TDirPath srcDirPath = poolDirPath / fs::TDirPath( _T("SRC") );
+	const fs::TDirPath targetDirPath = poolDirPath / fs::TDirPath( _T("TARGET") );
 
 	// build command line as: <exe_folder>\xFer.exe "<pool_dir>\SRC\*.mp3;*.m4?;*.mp4" "<pool_dir>\TARGET"
 	utl::CProcessCmd moveLossy( __targv[ 0 ] );
@@ -131,12 +131,12 @@ void CTransferFuncTests::TestMove( void )
 void CTransferFuncTests::TestBackup( void )
 {
 	ut::CTempFilePairPool pool( s_srcFiles );
-	fs::CPath poolDirPath = pool.GetPoolDirPath();
+	fs::TDirPath poolDirPath = pool.GetPoolDirPath();
 
 	ASSERT_EQUAL( s_srcFiles, ut::EnumJoinFiles( poolDirPath ) );
 
-	const fs::CPath srcDirPath = poolDirPath / fs::CPath( _T("SRC") );
-	const fs::CPath targetDirPath = poolDirPath / fs::CPath( _T("TARGET") );
+	const fs::TDirPath srcDirPath = poolDirPath / fs::TDirPath( _T("SRC") );
+	const fs::TDirPath targetDirPath = poolDirPath / fs::TDirPath( _T("TARGET") );
 
 	{	// build command line as: <exe_folder>\xFer.exe "<pool_dir>\SRC\*.mp3;*.m4?;*.mp4" "<pool_dir>\TARGET"
 		utl::CProcessCmd copyLossy( __targv[ 0 ] );
@@ -157,7 +157,7 @@ void CTransferFuncTests::TestBackup( void )
 
 	// *** copy with BACKUP
 
-	const fs::CPath b1_mp3Path = poolDirPath / fs::CPath( _T("SRC\\B\\b1.mp3") );
+	const fs::CPath b1_mp3Path = poolDirPath / _T("SRC\\B\\b1.mp3");
 
 	// backup with newer SRC timestamp
 	fs::thr::TouchFileBy( b1_mp3Path, 30 );					// change SRC timestamp by adding 30 seconds
@@ -208,7 +208,7 @@ void CTransferFuncTests::TestBackup( void )
 
 		// backup with changed SRC content (same timestamp) -> second time it should create a new backup 
 		ut::ModifyFileText( b1_mp3Path, NULL, true );								// one more content change to trigger a new backup "b1.mp3" -> "b1-[3].mp3"
-		ut::ModifyFileText( poolDirPath / fs::CPath( _T("SRC\\C\\c2.m4a") ) );		// trigger a backup "c2.m4a" -> "c2-[2].m4a"
+		ut::ModifyFileText( poolDirPath / _T("SRC\\C\\c2.m4a") );		// trigger a backup "c2.m4a" -> "c2-[2].m4a"
 
 		ASSERT_EQUAL( 0, ExecuteProcess( copyBackup ) );
 
@@ -226,7 +226,7 @@ void CTransferFuncTests::TestBackup( void )
 
 	// backup all to a different directory
 	{	// build command line as: <exe_folder>\xFer.exe "<pool_dir>\SRC\*.mp3;*.m4?;*.mp4" "<pool_dir>\TARGET"
-		const fs::CPath backupDirPath = poolDirPath / fs::CPath( _T("Backup/vault") );
+		const fs::TDirPath backupDirPath = poolDirPath / fs::TDirPath( _T("Backup/vault") );
 
 		utl::CProcessCmd transferBackup( __targv[ 0 ] );
 		transferBackup.AddParam( srcDirPath / s_lossyFilter );	// source_filter
@@ -252,10 +252,10 @@ void CTransferFuncTests::TestBackup( void )
 void CTransferFuncTests::TestPullLossy( void )
 {
 	ut::CTempFilePairPool pool( s_srcFiles );
-	fs::CPath poolDirPath = pool.GetPoolDirPath();
+	fs::TDirPath poolDirPath = pool.GetPoolDirPath();
 
-	const fs::CPath srcDirPath = poolDirPath / fs::CPath( _T("SRC") );
-	const fs::CPath targetDirPath = poolDirPath / fs::CPath( _T("TARGET") );
+	const fs::TDirPath srcDirPath = poolDirPath / fs::TDirPath( _T("SRC") );
+	const fs::TDirPath targetDirPath = poolDirPath / fs::TDirPath( _T("TARGET") );
 
 	{	// command: "<exe_folder>\xFer.exe <pool_dir>\SRC\*.mp3;*.m4?;*.mp4 <pool_dir>\TARGET /transfer:move"
 		utl::CProcessCmd moveLossy( __targv[ 0 ] );
@@ -268,7 +268,7 @@ void CTransferFuncTests::TestPullLossy( void )
 
 	{	// command: "<exe_folder>\xFer.exe <pool_dir>\SRC\f*.jp* <pool_dir>\TARGET -ud"
 		utl::CProcessCmd copyImages( __targv[ 0 ] );
-		copyImages.AddParam( srcDirPath / fs::CPath( _T("f*.jp*") ) );
+		copyImages.AddParam( srcDirPath / _T("f*.jp*") );
 		copyImages.AddParam( targetDirPath );
 		copyImages.AddParam( _T("-ud") );
 

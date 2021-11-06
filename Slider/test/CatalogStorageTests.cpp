@@ -21,7 +21,7 @@
 
 namespace ut
 {
-	CComPtr< ICatalogStorage > CreateArchiveStorageFile( const fs::CPath& docStgPath, const std::vector< fs::CPath >& srcImagePaths ) throws_( CException* )
+	CComPtr< ICatalogStorage > CreateArchiveStorageFile( const fs::TStgDocPath& docStgPath, const std::vector< fs::CPath >& srcImagePaths ) throws_( CException* )
 	{
 		CCatalogStorageService storageSvc;
 
@@ -48,11 +48,11 @@ CCatalogStorageTests& CCatalogStorageTests::Instance( void )
 
 void CCatalogStorageTests::TestBuildImageArchive( void )
 {
-	const fs::CPath& imageDirPath = ut::GetStdImageDirPath();
+	const fs::TDirPath& imageDirPath = ut::GetStdImageDirPath();
 	if ( imageDirPath.IsEmpty() )
 		return;
 
-	const fs::CPath docStgPath = ut::CTempFilePool::MakePoolDirPath().GetParentPath() / _T("ImageArchive.ias");
+	const fs::TStgDocPath docStgPath = ut::CTempFilePool::MakePoolDirPath().GetParentPath() / _T("ImageArchive.ias");
 	size_t srcImageCount = 0;
 
 	try
@@ -81,14 +81,16 @@ void CCatalogStorageTests::TestBuildImageArchive( void )
 void CCatalogStorageTests::TestAlbumSaveAs( void )
 {
 	CAlbumDoc albumDoc;
-	fs::CPath imagesDirPath = ut::GetDestImagesDirPath();
+	fs::TDirPath imagesDirPath = ut::GetDestImagesDirPath();
+	if ( imagesDirPath.IsEmpty() )
+		return;
 
 	ASSERT( albumDoc.BuildAlbum( imagesDirPath ) );				// search for test images
 	ASSERT( albumDoc.GetModel()->GetFileAttrCount() != 0 );		// has found files
 }
 
 
-void CCatalogStorageTests::_TestLoadImageArchive( const fs::CPath& docStgPath, size_t srcImageCount ) throws_( CException* )
+void CCatalogStorageTests::_TestLoadImageArchive( const fs::TStgDocPath& docStgPath, size_t srcImageCount ) throws_( CException* )
 {
 	// catalog not yet opened for reading
 	ASSERT_NULL( CCatalogStorageFactory::Instance()->FindStorage( docStgPath ) );

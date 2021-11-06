@@ -18,15 +18,15 @@ public:
 	~CCatalogStorageHost();
 
 	void Clear( void );
-	ICatalogStorage* Push( const fs::CPath& docStgPath, StorageType stgType );		// open catalog storage for reading
-	bool Remove( const fs::CPath& docStgPath );
+	ICatalogStorage* Push( const fs::TStgDocPath& docStgPath, StorageType stgType );		// open catalog storage for reading
+	bool Remove( const fs::TStgDocPath& docStgPath );
 
 	bool IsEmpty( void ) const { return 0 == m_imageStorages.size(); }
 	size_t GetCount( void ) const { return m_imageStorages.size(); }
 	ICatalogStorage* GetAt( size_t pos ) const;
-	ICatalogStorage* Find( const fs::CPath& docStgPath ) const;
+	ICatalogStorage* Find( const fs::TStgDocPath& docStgPath ) const;
 
-	const fs::CPath& GetDocFilePathAt( size_t pos ) const;
+	const fs::TStgDocPath& GetDocFilePathAt( size_t pos ) const;
 
 	template< typename PathContainerT >
 	void PushMultiple( const PathContainerT& docStgPaths, StorageType stgType = EmbeddedStorage )
@@ -42,12 +42,12 @@ public:
 			Remove( *itDocFilePath );
 	}
 
-	void ModifyMultiple( const std::vector< fs::CPath >& newStgPaths, const std::vector< fs::CPath >& oldStgPaths, StorageType stgType = EmbeddedStorage );
+	void ModifyMultiple( const std::vector< fs::TStgDocPath >& newStgPaths, const std::vector< fs::TStgDocPath >& oldStgPaths, StorageType stgType = EmbeddedStorage );
 private:
-	size_t FindPos( const fs::CPath& docStgPath ) const;
+	size_t FindPos( const fs::TStgDocPath& docStgPath ) const;
 	static bool RetrofitStreamEncodingSchema( ICatalogStorage* pEmbeddedCatalog );
 private:
-	std::vector< CComPtr< ICatalogStorage > > m_imageStorages;			// opened for reading
+	std::vector< CComPtr<ICatalogStorage> > m_imageStorages;			// opened for reading
 };
 
 

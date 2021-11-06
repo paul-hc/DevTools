@@ -13,12 +13,13 @@
 
 namespace ut
 {
-	std::tstring JoinRelativeDupPaths( const CDuplicateFilesGroup* pDupGroup, const fs::CPath& rootDir )
+	std::tstring JoinRelativeDupPaths( const CDuplicateFilesGroup* pDupGroup, const fs::TDirPath& rootDir )
 	{
 		std::vector< fs::CPath > dupPaths;
 
 		func::QueryItemsPaths( dupPaths, pDupGroup->GetItems() );
 		path::StripDirPrefixes( dupPaths, rootDir.GetPtr() );
+
 		return str::Join( dupPaths, ut::CTempFilePool::m_sep );
 	}
 }
@@ -38,7 +39,7 @@ CDuplicateFilesTests& CDuplicateFilesTests::Instance( void )
 void CDuplicateFilesTests::TestDuplicateFiles( void )
 {
 	ut::CTempFilePool pool( _T("a.txt|b.txt|file1.txt|D1\\a.txt|D1\\file2.txt|D1\\D2\\a.txt|D1\\D2\\b.txt|D1\\D2\\file3.txt|D1\\D2\\file4.txt|D1\\IGNORE\\b.txt") );
-	const fs::CPath& poolDirPath = pool.GetPoolDirPath();
+	const fs::TDirPath& poolDirPath = pool.GetPoolDirPath();
 
 	CDuplicateFilesEnumerator enumer( fs::EF_Recurse );
 	enumer.RefOptions().m_ignorePathMatches.AddPath( poolDirPath / _T("D1\\IGNORE") );

@@ -7,6 +7,7 @@
 #include "StringUtilities.h"
 #include <iostream>
 #include <fcntl.h>
+#include <io.h>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

@@ -20,9 +20,7 @@ const TCHAR* CBaseImageTestCase::GetImageFilename( SrcImage srcImage )
 
 fs::CFlexPath CBaseImageTestCase::MakeTestImageFilePath( SrcImage srcImage )
 {
-	fs::CFlexPath imagePath(
-		( ut::GetDestImagesDirPath() / fs::CPath( GetImageFilename( srcImage ) ) ).Get()
-	);
+	fs::CFlexPath imagePath( ( ut::GetDestImagesDirPath() / GetImageFilename( srcImage ) ).Get() );
 
 	if ( !imagePath.IsEmpty() && !imagePath.FileExist() )
 	{

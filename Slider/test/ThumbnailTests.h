@@ -14,7 +14,7 @@ class CThumbnailTests : public CBaseImageTestCase
 public:
 	static CThumbnailTests& Instance( void );
 
-	static const fs::CPath& GetThumbSaveDirPath( void );
+	static const fs::TDirPath& GetThumbSaveDirPath( void );
 
 	// ut::ITestCase interface
 	virtual void Run( void );

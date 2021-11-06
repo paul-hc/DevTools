@@ -116,7 +116,7 @@ namespace app
 
 	ui::CIssueStore& GetIssueStore( void );
 
-	fs::CPath GetActiveDirPath( void );
+	fs::TDirPath GetActiveDirPath( void );
 
 
 	class CInteractiveMode : public ui::CInteractiveMode

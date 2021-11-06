@@ -55,7 +55,7 @@ bool CCatalogStorageFactory::HasSameOpenMode( ICatalogStorage* pCatalogStorage, 
 	return pCatalogStorage->GetDocStorage()->IsOpenForReading() == fs::CStructuredStorage::IsReadingMode( mode );
 }
 
-ICatalogStorage* CCatalogStorageFactory::FindStorage( const fs::CPath& docStgPath ) const
+ICatalogStorage* CCatalogStorageFactory::FindStorage( const fs::TStgDocPath& docStgPath ) const
 {
 	if ( fs::CStructuredStorage* pOpenedStorage = fs::CStructuredStorage::FindOpenedStorage( docStgPath ) )		// opened in testing?
 		return checked_static_cast< CImageCatalogStg* >( pOpenedStorage );
@@ -63,7 +63,7 @@ ICatalogStorage* CCatalogStorageFactory::FindStorage( const fs::CPath& docStgPat
 	return NULL;
 }
 
-CComPtr< ICatalogStorage > CCatalogStorageFactory::AcquireStorage( const fs::CPath& docStgPath, DWORD mode /*= STGM_READ*/ )
+CComPtr< ICatalogStorage > CCatalogStorageFactory::AcquireStorage( const fs::TStgDocPath& docStgPath, DWORD mode /*= STGM_READ*/ )
 {
 	if ( ICatalogStorage* pFoundCatalogStorage = FindStorage( docStgPath ) )
 	{
@@ -93,7 +93,7 @@ std::auto_ptr< CFile > CCatalogStorageFactory::OpenFlexImageFile( const fs::CFle
 		pFile = fs::OpenFile( flexImagePath, IsThrowMode(), mode );			// open physical image file
 	else
 	{	// storage-based image file:
-		fs::CPath docStgPath = flexImagePath.GetPhysicalPath();
+		fs::TStgDocPath docStgPath = flexImagePath.GetPhysicalPath();
 
 		if ( IsPasswordVerified( docStgPath ) )
 			if ( ICatalogStorage* pCatalogStorage = FindStorage( docStgPath ) )
@@ -120,7 +120,7 @@ std::auto_ptr< CFile > CCatalogStorageFactory::OpenFlexImageFile( const fs::CFle
 	return pFile;
 }
 
-bool CCatalogStorageFactory::IsPasswordVerified( const fs::CPath& docStgPath )
+bool CCatalogStorageFactory::IsPasswordVerified( const fs::TStgDocPath& docStgPath )
 {
 	return CCatalogPasswordStore::Instance()->IsPasswordVerified( docStgPath );
 }
@@ -134,7 +134,7 @@ CCachedThumbBitmap* CCatalogStorageFactory::ExtractThumb( const fs::CFlexPath& s
 {
 	if ( srcImagePath.IsComplexPath() )
 	{
-		fs::CPath docStgPath = srcImagePath.GetPhysicalPath();
+		fs::TStgDocPath docStgPath = srcImagePath.GetPhysicalPath();
 
 		if ( ICatalogStorage* pCatalogStorage = FindStorage( docStgPath ) )
 		{
@@ -148,7 +148,7 @@ CCachedThumbBitmap* CCatalogStorageFactory::ExtractThumb( const fs::CFlexPath& s
 
 CCachedThumbBitmap* CCatalogStorageFactory::GenerateThumb( const fs::CFlexPath& srcImagePath )
 {
-	fs::CPath docStgPath( srcImagePath.GetPhysicalPath() );
+	fs::TStgDocPath docStgPath( srcImagePath.GetPhysicalPath() );
 	REQUIRE( srcImagePath.IsComplexPath() );
 
 	const CThumbnailer* pThumbnailer = safe_ptr( app::GetThumbnailer() );
@@ -224,7 +224,7 @@ bool CCatalogPasswordStore::CacheVerifiedPassword( const std::tstring& password 
 	return m_verifiedPasswords.insert( password ).second;
 }
 
-bool CCatalogPasswordStore::IsPasswordVerified( const fs::CPath& docStgPath ) const
+bool CCatalogPasswordStore::IsPasswordVerified( const fs::TStgDocPath& docStgPath ) const
 {
 	if ( ICatalogStorage* pCatalogStorage = CCatalogStorageFactory::Instance()->FindStorage( docStgPath ) )
 		if ( pCatalogStorage->GetPassword().empty() )

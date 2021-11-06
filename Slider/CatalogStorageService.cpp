@@ -114,6 +114,7 @@ namespace cvt
 		if ( useDeepStreamPaths )
 		{
 			fs::CPath commonDirPath = path::ExtractCommonParentPath( rDestStreamPaths );
+
 			if ( !commonDirPath.IsEmpty() )
 				path::StripDirPrefixes( rDestStreamPaths, commonDirPath.GetPtr() );
 			else

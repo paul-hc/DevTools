@@ -75,8 +75,8 @@ protected:
 private:
 	bool BuildAlbum( const fs::CPath& searchPath );
 
-	bool LoadCatalogStorage( const fs::CPath& docStgPath );
-	bool SaveAsCatalogStorage( const fs::CPath& newDocStgPath );			// save .sld -> .ias, .ias -> .ias
+	bool LoadCatalogStorage( const fs::TStgDocPath& docStgPath );
+	bool SaveAsCatalogStorage( const fs::TStgDocPath& newDocStgPath );			// save .sld -> .ias, .ias -> .ias
 	std::auto_ptr< CProgressService > MakeProgress( const TCHAR* pOperationLabel ) const;
 
 	void PrepareToSave( const fs::CPath& docPath );

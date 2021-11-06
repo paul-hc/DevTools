@@ -15,9 +15,6 @@ namespace path
 
 namespace fs
 {
-	typedef fs::CPath TEmbeddedPath;
-
-
 	// Path that works uniformly with normal paths or structured storage complex paths to embedded storages and streams.
 	// Complex path: "physical_path>stg_embedded_path".
 	// Examples:
@@ -30,7 +27,7 @@ namespace fs
 		CFlexPath( void ) {}
 		CFlexPath( const std::tstring& filePath ) : CPath( filePath ) { ASSERT( path::IsWellFormed( filePath.c_str() ) ); }
 
-		static CFlexPath MakeComplexPath( const fs::CPath& physicalPath, const fs::TEmbeddedPath& embeddedPath ) { return path::MakeComplex( physicalPath.Get(), embeddedPath.GetPtr() ); }
+		static CFlexPath MakeComplexPath( const fs::TStgDocPath& physicalPath, const fs::TEmbeddedPath& embeddedPath ) { return path::MakeComplex( physicalPath.Get(), embeddedPath.GetPtr() ); }
 		bool SplitComplexPath( fs::CPath& rPhysicalPath, TEmbeddedPath& rEmbeddedPath ) const { return path::SplitComplex( rPhysicalPath.Ref(), rEmbeddedPath.Ref(), Get() ); }
 
 		fs::CPath GetPhysicalPath( void ) const { return path::ExtractPhysical( Get() ); }

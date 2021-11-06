@@ -2,6 +2,7 @@
 #include "stdafx.h"
 #include "FileAssoc.h"
 #include "utl/FileSystem.h"
+#include <io.h>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

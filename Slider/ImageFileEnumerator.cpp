@@ -74,7 +74,7 @@ void CImageFileEnumerator::Search( const CSearchPattern& searchPattern ) throws_
 	Search( searchPatterns );
 }
 
-void CImageFileEnumerator::SearchCatalogStorage( const fs::CPath& docStgPath ) throws_( CException*, CUserAbortedException )
+void CImageFileEnumerator::SearchCatalogStorage( const fs::TStgDocPath& docStgPath ) throws_( CException*, CUserAbortedException )
 {
 	if ( !docStgPath.FileExist() )
 		AfxThrowFileException( CFileException::fileNotFound, -1, docStgPath.GetPtr() );			// storage file path does not exist
@@ -169,10 +169,10 @@ void CImageFileEnumerator::AddFoundFile( const TCHAR* pFilePath )
 					m_foundImages.AddStoragePath( filePath );
 				else
 				{	// augment embedded catalog storages in a .sld
-					std::vector< fs::CPath > subStoragePaths;
+					std::vector< fs::TStgDocPath > subStoragePaths;
 					pAlbumDoc->GetModel()->QueryEmbeddedStorages( subStoragePaths );
 
-					for ( std::vector< fs::CPath >::const_iterator itStoragePath = subStoragePaths.begin(); itStoragePath != subStoragePaths.end(); ++itStoragePath )
+					for ( std::vector< fs::TStgDocPath >::const_iterator itStoragePath = subStoragePaths.begin(); itStoragePath != subStoragePaths.end(); ++itStoragePath )
 						m_foundImages.AddStoragePath( *itStoragePath );
 				}
 			}

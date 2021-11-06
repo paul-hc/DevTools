@@ -146,7 +146,7 @@ std::auto_ptr< CFileAttr > CImagesModel::RemoveFileAttrAt( size_t pos )
 	return pRemovedFileAttr;
 }
 
-bool CImagesModel::AddStoragePath( const fs::CPath& storagePath )
+bool CImagesModel::AddStoragePath( const fs::TStgDocPath& storagePath )
 {
 	return utl::AddUnique( m_storagePaths, storagePath );
 }
@@ -154,7 +154,7 @@ bool CImagesModel::AddStoragePath( const fs::CPath& storagePath )
 void CImagesModel::ClearInvalidStoragePaths( void )
 {
 	// backwards compatibility: delete dangling embedded storages
-	for ( std::vector< fs::CPath >::iterator itStoragePath = m_storagePaths.begin(); itStoragePath != m_storagePaths.end(); )
+	for ( std::vector< fs::TStgDocPath >::iterator itStoragePath = m_storagePaths.begin(); itStoragePath != m_storagePaths.end(); )
 		if ( !fs::IsValidStructuredStorage( itStoragePath->GetPtr() ) )
 			itStoragePath = m_storagePaths.erase( itStoragePath );
 		else

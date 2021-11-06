@@ -40,7 +40,6 @@ namespace ui
 #include "InternalChange.h"
 
 
-namespace fs { class CPath; }
 class CShellContextMenuHost;
 
 

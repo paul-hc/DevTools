@@ -63,7 +63,7 @@ bool CDocumentBase::HandleMoveImages( const std::vector< fs::CFlexPath >& srcFil
 {
 	REQUIRE( !srcFilePaths.empty() );
 
-	fs::CPath destFolderPath;
+	fs::TDirPath destFolderPath;
 	if ( !shell::PickFolder( destFolderPath, NULL, 0, _T("Select Destination Folder") ) )
 		return false;
 

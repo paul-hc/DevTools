@@ -24,7 +24,7 @@ private:
 	void TestBuildImageArchive( void );
 	void TestAlbumSaveAs( void );
 
-	void _TestLoadImageArchive( const fs::CPath& docStgPath, size_t srcImageCount ) throws_( CException* );
+	void _TestLoadImageArchive( const fs::TStgDocPath& docStgPath, size_t srcImageCount ) throws_( CException* );
 	void _TestAlbumFileAttr( ICatalogStorage* pCatalogStorage, const CFileAttr* pFileAttr ) throws_( CException* );
 };
 

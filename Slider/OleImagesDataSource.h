@@ -36,7 +36,7 @@ public:
 
 	const std::vector< fs::CPath >& GetPhysicalFilePaths( void ) const { return m_physicalFilePaths; }
 
-	static const fs::CPath& GetTempDirPath( void );
+	static const fs::TDirPath& GetTempDirPath( void );
 	static bool ClearAllTempFiles( void );
 private:
 	std::vector< fs::CPath > m_physicalFilePaths;									// physical file set to be used as source in shell operations (drag&drop, move, copy, etc)

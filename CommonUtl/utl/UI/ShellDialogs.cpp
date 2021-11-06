@@ -44,7 +44,7 @@ namespace shell
 	}
 
 
-	bool BrowseForFolder( fs::CPath& rFolderPath, CWnd* pParentWnd, std::tstring* pDisplayedName /*= NULL*/,
+	bool BrowseForFolder( fs::TDirPath& rFolderPath, CWnd* pParentWnd, std::tstring* pDisplayedName /*= NULL*/,
 						  BrowseFlags flags /*= BF_FileSystem*/, const TCHAR* pTitle /*= NULL*/, bool useNetwork /*= false*/ )
 	{
 		bool isOk = false;
@@ -106,7 +106,7 @@ namespace shell
 		return impl::RunFileDialog( rFilePath, scopedDlg.m_pFileDlg.get() );
 	}
 
-	bool PickFolder( fs::CPath& rFilePath, CWnd* pParentWnd,
+	bool PickFolder( fs::TDirPath& rFilePath, CWnd* pParentWnd,
 					 FILEOPENDIALOGOPTIONS options /*= 0*/, const TCHAR* pTitle /*= NULL*/ )
 	{
 		impl::CScopedFileDialog scopedDlg( NULL );
@@ -125,10 +125,10 @@ namespace shell
 
 	bool BrowseAutoPath( fs::CPath& rFilePath, CWnd* pParent, const TCHAR* pFileFilter /*= NULL*/ )
 	{
-		fs::CPath dirPath;
+		fs::CPath path;
 		std::tstring wildSpec;
 
-		if ( fs::ValidFile == fs::SplitPatternPath( &dirPath, &wildSpec, rFilePath ) )
+		if ( fs::ValidFile == fs::SplitPatternPath( &path, &wildSpec, rFilePath ) )
 			return BrowseForFile( rFilePath, pParent, FileBrowse, pFileFilter );
 
 		return PickFolder( rFilePath, pParent );

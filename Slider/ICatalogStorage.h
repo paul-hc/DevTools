@@ -29,7 +29,7 @@ public:
 	virtual const std::tstring& GetPassword( void ) const = 0;
 	virtual void StorePassword( const std::tstring& password ) = 0;
 
-	virtual void CreateImageArchiveFile( const fs::CPath& docStgPath, CCatalogStorageService* pCatalogSvc ) throws_( CException* ) = 0;
+	virtual void CreateImageArchiveFile( const fs::TStgDocPath& docStgPath, CCatalogStorageService* pCatalogSvc ) throws_( CException* ) = 0;
 
 	virtual bool SavePasswordStream( void ) = 0;
 	virtual bool LoadPasswordStream( void ) = 0;
@@ -63,8 +63,8 @@ public:
 	static bool IsVintageCatalog( const TCHAR* pFilePath );
 	static const TCHAR* GetDefaultExtension( void ) { return s_imageStorageExts[ CatStg_ias ]; }
 
-	ICatalogStorage* FindStorage( const fs::CPath& docStgPath ) const;
-	CComPtr< ICatalogStorage > AcquireStorage( const fs::CPath& docStgPath, DWORD mode = STGM_READ );
+	ICatalogStorage* FindStorage( const fs::TStgDocPath& docStgPath ) const;
+	CComPtr< ICatalogStorage > AcquireStorage( const fs::TStgDocPath& docStgPath, DWORD mode = STGM_READ );
 		// for password-protected storage reading: also prompts user to verify password, returning NULL if not verified
 
 	std::auto_ptr< CFile > OpenFlexImageFile( const fs::CFlexPath& flexImagePath, DWORD mode = CFile::modeRead );		// either physical or storage-based image file
@@ -74,7 +74,7 @@ public:
 	virtual CCachedThumbBitmap* ExtractThumb( const fs::CFlexPath& srcImagePath );
 	virtual CCachedThumbBitmap* GenerateThumb( const fs::CFlexPath& srcImagePath );
 private:
-	static bool IsPasswordVerified( const fs::CPath& docStgPath );
+	static bool IsPasswordVerified( const fs::TStgDocPath& docStgPath );
 	static bool HasSameOpenMode( ICatalogStorage* pCatalogStorage, DWORD mode );
 private:
 	enum ExtensionType { CatStg_ias, CatStg_cid, CatStg_icf };
@@ -93,7 +93,7 @@ public:
 	bool LoadPasswordVerify( ICatalogStorage* pCatalogStorage, std::tstring* pOutPassword = NULL );
 	bool CacheVerifiedPassword( const std::tstring& password );
 
-	bool IsPasswordVerified( const fs::CPath& docStgPath ) const;
+	bool IsPasswordVerified( const fs::TStgDocPath& docStgPath ) const;
 private:
 	stdext::hash_set< std::tstring > m_verifiedPasswords;
 };
@@ -105,7 +105,7 @@ class CCatalogStorageHost;
 class CMirrorCatalogSave : public fs::stg::CMirrorStorageSave
 {
 public:
-	CMirrorCatalogSave( const fs::CPath& docStgPath, const fs::CPath& oldDocStgPath, CCatalogStorageHost* pStorageHost )
+	CMirrorCatalogSave( const fs::TStgDocPath& docStgPath, const fs::TStgDocPath& oldDocStgPath, CCatalogStorageHost* pStorageHost )
 		: fs::stg::CMirrorStorageSave( docStgPath, oldDocStgPath )
 		, m_pStorageHost( pStorageHost )
 	{

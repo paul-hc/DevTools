@@ -142,18 +142,18 @@ namespace ut
 		return str::Format( _T("* Equality Assertion Failed *\r\n\r\n  expect:\t'%s'\r\n  actual:\t'%s'\r\n"), expectedValue.c_str(), actualValue.c_str() );
 	}
 
-	const fs::CPath& GetTestDataDirPath( void ) throws_( CRuntimeException )
+	const fs::TDirPath& GetTestDataDirPath( void ) throws_( CRuntimeException )
 	{
-		static const fs::CPath s_dirPath = str::ExpandEnvironmentStrings( _T("%UTL_TESTDATA_PATH%") );
+		static const fs::TDirPath s_dirPath = str::ExpandEnvironmentStrings( _T("%UTL_TESTDATA_PATH%") );
 		if ( !s_dirPath.IsEmpty() && !fs::IsValidDirectory( s_dirPath.GetPtr() ) )
 			throw CRuntimeException( str::Format( _T("Cannot find the local test directory path: %s\n\nTODO: define envirnoment variable UTL_TESTDATA_PATH"), s_dirPath.GetPtr() ) );
 
 		return s_dirPath;
 	}
 
-	const fs::CPath& GetImageSourceDirPath( void )
+	const fs::TDirPath& GetImageSourceDirPath( void )
 	{
-		static fs::CPath s_imagesDirPath = str::ExpandEnvironmentStrings( _T("%UTL_THUMB_SRC_IMAGE_PATH%") );
+		static fs::TDirPath s_imagesDirPath = str::ExpandEnvironmentStrings( _T("%UTL_THUMB_SRC_IMAGE_PATH%") );
 		if ( !s_imagesDirPath.IsEmpty() && !fs::IsValidDirectory( s_imagesDirPath.GetPtr() ) )
 		{
 			TRACE( _T("\n # Cannot find unit test images dir path: %s #\nNo environment variable UTL_THUMB_SRC_IMAGE_PATH"), s_imagesDirPath.GetPtr() );
@@ -162,9 +162,9 @@ namespace ut
 		return s_imagesDirPath;
 	}
 
-	const fs::CPath& GetDestImagesDirPath( void )
+	const fs::TDirPath& GetDestImagesDirPath( void )
 	{
-		static fs::CPath s_dirPath = GetTestDataDirPath() / fs::CPath( _T("images") );
+		static fs::TDirPath s_dirPath = GetTestDataDirPath() / fs::TDirPath( _T("images") );
 		if ( !s_dirPath.IsEmpty() && !fs::IsValidDirectory( s_dirPath.GetPtr() ) )
 		{
 			TRACE( _T("\n * Cannot find the local test images dir path: %s\n"), s_dirPath.GetPtr() );
@@ -173,9 +173,9 @@ namespace ut
 		return s_dirPath;
 	}
 
-	const fs::CPath& GetStdImageDirPath( void )
+	const fs::TDirPath& GetStdImageDirPath( void )
 	{
-		static fs::CPath s_stdImagesDirPath = GetTestDataDirPath() / fs::CPath( _T("std_test_images") );
+		static fs::TDirPath s_stdImagesDirPath = GetTestDataDirPath() / fs::TDirPath( _T("std_test_images") );
 		if ( !s_stdImagesDirPath.IsEmpty() && !fs::IsValidDirectory( s_stdImagesDirPath.GetPtr() ) )
 		{
 			TRACE( _T("\n # Cannot find unit test standard images dir path: %s #\nTODO: create directory %UTL_STD_SRC_IMAGE_PATH%\\std_test_images"), s_stdImagesDirPath.GetPtr() );
@@ -184,9 +184,9 @@ namespace ut
 		return s_stdImagesDirPath;
 	}
 
-	const fs::CPath& GetStdTestFilesDirPath( void )
+	const fs::TDirPath& GetStdTestFilesDirPath( void )
 	{
-		static fs::CPath s_stdImagesDirPath = GetTestDataDirPath() / fs::CPath( _T("std_test_files") );
+		static fs::TDirPath s_stdImagesDirPath = GetTestDataDirPath() / fs::TDirPath( _T("std_test_files") );
 		if ( !s_stdImagesDirPath.IsEmpty() && !fs::IsValidDirectory( s_stdImagesDirPath.GetPtr() ) )
 		{
 			TRACE( _T("\n # Cannot find unit test standard test files dir path: %s #\nTODO: create directory %UTL_STD_SRC_IMAGE_PATH%\\std_test_files"), s_stdImagesDirPath.GetPtr() );
@@ -196,21 +196,21 @@ namespace ut
 	}
 
 
-	const fs::CPath& GetTempUt_DirPath( void ) throws_( CRuntimeException )
+	const fs::TDirPath& GetTempUt_DirPath( void ) throws_( CRuntimeException )
 	{
-		static fs::CPath s_tempUtDirPath;
+		static fs::TDirPath s_tempUtDirPath;
 
 		if ( s_tempUtDirPath.IsEmpty() )
 		{
-			s_tempUtDirPath = GetTestDataDirPath() / fs::CPath( _T("temp_ut") );
+			s_tempUtDirPath = GetTestDataDirPath() / fs::TDirPath( _T("temp_ut") );
 			fs::thr::CreateDirPath( s_tempUtDirPath.GetPtr() );
 		}
 		return s_tempUtDirPath;
 	}
 
-	fs::CPath MakeTempUt_DirPath( const fs::CPath& subPath, bool createDir ) throws_( CRuntimeException )
+	fs::TDirPath MakeTempUt_DirPath( const fs::TDirPath& subDirPath, bool createDir ) throws_( CRuntimeException )
 	{
-		fs::CPath fullPath = GetTempUt_DirPath() / subPath;
+		fs::TDirPath fullPath = GetTempUt_DirPath() / subDirPath;
 		if ( createDir )
 			fs::thr::CreateDirPath( fullPath.GetPtr() );
 		return fullPath;
@@ -239,9 +239,9 @@ namespace ut
 		fs::DeleteDir( m_poolDirPath.GetPtr() );
 	}
 
-	fs::CPath CTempFilePool::MakePoolDirPath( bool createDir /*= false*/ )
+	fs::TDirPath CTempFilePool::MakePoolDirPath( bool createDir /*= false*/ )
 	{
-		return MakeTempUt_DirPath( fs::CPath( _T("_UT") ), createDir );
+		return MakeTempUt_DirPath( fs::TDirPath( _T("_UT") ), createDir );
 	}
 
 	bool CTempFilePool::DeleteAllFiles( void )
@@ -294,7 +294,7 @@ namespace ut
 		std::vector< std::tstring > srcFilenames;
 		str::Split( srcFilenames, pSourceFilenames, ut::CTempFilePool::m_sep );
 		for ( std::vector< std::tstring >::const_iterator itSrc = srcFilenames.begin(); itSrc != srcFilenames.end(); ++itSrc )
-			m_pathPairs[ *itSrc ] = fs::CPath();
+			m_pathPairs[ *itSrc ].Clear();
 
 		ENSURE( m_pathPairs.size() == srcFilenames.size() );
 	}
@@ -322,7 +322,7 @@ namespace ut
 	{
 		if ( IsValidPool() )
 			for ( std::vector< fs::CPath >::const_iterator itSrcPath = GetFilePaths().begin(); itSrcPath != GetFilePaths().end(); ++itSrcPath )
-				m_pathPairs[ *itSrcPath ] = fs::CPath();
+				m_pathPairs[ *itSrcPath ].Clear();
 	}
 
 
@@ -341,7 +341,7 @@ namespace ut
 
 	// enumeration with relative paths
 
-	size_t EnumFilePaths( std::vector< fs::CPath >& rFilePaths, const fs::CPath& dirPath, SortType sortType /*= SortAscending*/,
+	size_t EnumFilePaths( std::vector< fs::CPath >& rFilePaths, const fs::TDirPath& dirPath, SortType sortType /*= SortAscending*/,
 						  const TCHAR* pWildSpec /*= _T("*")*/, fs::TEnumFlags flags /*= fs::EF_Recurse*/ )
 	{
 		fs::CRelativePathEnumerator found( dirPath, flags );
@@ -355,7 +355,7 @@ namespace ut
 		return addedCount;
 	}
 
-	size_t EnumSubDirPaths( std::vector< fs::CPath >& rSubDirPaths, const fs::CPath& dirPath, SortType sortType /*= SortAscending*/,
+	size_t EnumSubDirPaths( std::vector< fs::TDirPath >& rSubDirPaths, const fs::TDirPath& dirPath, SortType sortType /*= SortAscending*/,
 							fs::TEnumFlags flags /*= fs::EF_Recurse*/ )
 	{
 		fs::CRelativePathEnumerator found( dirPath, flags );
@@ -370,7 +370,7 @@ namespace ut
 	}
 
 
-	std::tstring EnumJoinFiles( const fs::CPath& dirPath, SortType sortType /*= SortAscending*/, const TCHAR* pWildSpec /*= _T("*")*/,
+	std::tstring EnumJoinFiles( const fs::TDirPath& dirPath, SortType sortType /*= SortAscending*/, const TCHAR* pWildSpec /*= _T("*")*/,
 								fs::TEnumFlags flags /*= fs::EF_Recurse*/ )
 	{
 		std::vector< fs::CPath > filePaths;
@@ -379,16 +379,16 @@ namespace ut
 		return str::Join( filePaths, CTempFilePool::m_sep );
 	}
 
-	std::tstring EnumJoinSubDirs( const fs::CPath& dirPath, SortType sortType /*= SortAscending*/, fs::TEnumFlags flags /*= fs::EF_Recurse*/ )
+	std::tstring EnumJoinSubDirs( const fs::TDirPath& dirPath, SortType sortType /*= SortAscending*/, fs::TEnumFlags flags /*= fs::EF_Recurse*/ )
 	{
-		std::vector< fs::CPath > subDirPaths;
+		std::vector< fs::TDirPath > subDirPaths;
 		EnumSubDirPaths( subDirPaths, dirPath, sortType, flags );
 
 		return str::Join( subDirPaths, CTempFilePool::m_sep );
 	}
 
 
-	fs::CPath FindFirstFile( const fs::CPath& dirPath, const TCHAR* pWildSpec /*= _T("*.*")*/, fs::TEnumFlags flags /*= fs::TEnumFlags()*/ )
+	fs::CPath FindFirstFile( const fs::TDirPath& dirPath, const TCHAR* pWildSpec /*= _T("*.*")*/, fs::TEnumFlags flags /*= fs::TEnumFlags()*/ )
 	{
 		return path::StripDirPrefix( fs::FindFirstFile( dirPath, pWildSpec, flags ), dirPath );
 	}

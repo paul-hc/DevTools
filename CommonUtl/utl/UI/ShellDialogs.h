@@ -2,24 +2,24 @@
 #define ShellDialogs_h
 #pragma once
 
+#include "Path_fwd.h"
 #include "ShellDialogs_fwd.h"
 
 
 class CFileDialog;
-namespace fs { class CPath; }
 
 
 namespace shell
 {
 	// classic browse folder tree dialog
-	bool BrowseForFolder( fs::CPath& rFolderPath, CWnd* pParentWnd, std::tstring* pDisplayedName = NULL,
+	bool BrowseForFolder( fs::TDirPath& rFolderPath, CWnd* pParentWnd, std::tstring* pDisplayedName = NULL,
 						  BrowseFlags flags = BF_FileSystem, const TCHAR* pTitle = NULL, bool useNetwork = false );
 
 	bool BrowseForFile( fs::CPath& rFilePath, CWnd* pParentWnd, BrowseMode browseMode = FileOpen,
 						const TCHAR* pFileFilter = NULL, DWORD flags = 0, const TCHAR* pTitle = NULL );
 
 	// new Vista+ File Dialog for folders
-	bool PickFolder( fs::CPath& rFilePath, CWnd* pParentWnd,
+	bool PickFolder( fs::TDirPath& rFilePath, CWnd* pParentWnd,
 					 FILEOPENDIALOGOPTIONS options = 0, const TCHAR* pTitle = NULL );
 
 	bool BrowseAutoPath( fs::CPath& rFilePath, CWnd* pParent, const TCHAR* pFileFilter = NULL );	// choose the browse file/folder based on current path

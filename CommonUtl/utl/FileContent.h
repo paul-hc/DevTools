@@ -75,14 +75,14 @@ namespace fs
 
 	struct CFileBackup
 	{
-		CFileBackup( const fs::CPath& srcFilePath, fs::CPath backupDirPath = fs::CPath(), FileContentMatch matchBy = FileSize, const TCHAR fmtNumSuffix[] = _T("-[%d]") );
+		CFileBackup( const fs::CPath& srcFilePath, fs::TDirPath backupDirPath = fs::CPath(), FileContentMatch matchBy = FileSize, const TCHAR fmtNumSuffix[] = _T("-[%d]") );
 
 		bool FindFirstDuplicateFile( fs::CPath& rDupFilePath ) const;
 
 		fs::AcquireResult CreateBackupFile( fs::CPath& rBackupFilePath ) throws_( CRuntimeException );	// create a backup copy of the original if none existing files matching "name*.ext" have identical content
 	public:
 		fs::CPath m_srcFilePath;			// converted to absolute
-		fs::CPath m_backupDirPath;
+		fs::TDirPath m_backupDirPath;
 		FileContentMatch m_matchBy;
 		const TCHAR* m_pFmtNumSuffix;
 	};

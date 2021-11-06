@@ -177,21 +177,6 @@ namespace func
 	};
 
 
-	struct StripDocPath
-	{
-		StripDocPath( const fs::CPath& docPath ) : m_stripFunc( docPath.GetPtr() ) {}
-
-		void operator()( fs::CPath& rPath )
-		{
-			m_stripFunc( rPath );
-		}
-
-		void operator()( CFileAttr* pFileAttr ) { ASSERT_PTR( pFileAttr ); operator()( pFileAttr->RefPath() ); }
-	private:
-		StripPathCommonPrefix m_stripFunc;
-	};
-
-
 	struct NormalizeComplexPath
 	{
 		void operator()( fs::CPath& rPath )
@@ -205,7 +190,7 @@ namespace func
 
 	struct MakeComplexPath
 	{
-		MakeComplexPath( const fs::CPath& stgDocPath, EmbeddedDepth depth ) : m_stgDocPath( stgDocPath ), m_depth( depth ) {}
+		MakeComplexPath( const fs::TStgDocPath& stgDocPath, EmbeddedDepth depth ) : m_stgDocPath( stgDocPath ), m_depth( depth ) {}
 
 		void operator()( fs::CFlexPath& rPath ) const
 		{
@@ -214,7 +199,7 @@ namespace func
 
 		void operator()( CFileAttr* pFileAttr ) const { ASSERT_PTR( pFileAttr ); operator()( pFileAttr->RefPath() ); }
 	private:
-		fs::CPath m_stgDocPath;
+		fs::TStgDocPath m_stgDocPath;
 		EmbeddedDepth m_depth;
 	};
 }

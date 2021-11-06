@@ -53,7 +53,7 @@ void CSearchModel::Stream( CArchive& archive )
 	serial::StreamOwningPtrs( archive, m_patterns );
 }
 
-void CSearchModel::AugmentStoragePaths( std::vector< fs::CPath >& rStoragePaths ) const
+void CSearchModel::AugmentStoragePaths( std::vector< fs::TStgDocPath >& rStoragePaths ) const
 {
 	for ( std::vector< CSearchPattern* >::const_iterator itPattern = m_patterns.begin(); itPattern != m_patterns.end(); ++itPattern )
 		if ( ( *itPattern )->IsStorageAlbumFile() )

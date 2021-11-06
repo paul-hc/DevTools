@@ -28,7 +28,7 @@ public:
 	bool GenerateDestPaths( const fs::CPath& destPath, const std::tstring& format, UINT* pSeqCount, bool forceShallowStreamNames = false );
 
 	// service
-	bool BuildArchiveStorageFile( const fs::CPath& destStgPath, FileOp fileOp, CWnd* pParentWnd = AfxGetMainWnd() ) const;
+	bool BuildArchiveStorageFile( const fs::TStgDocPath& destStgPath, FileOp fileOp, CWnd* pParentWnd = AfxGetMainWnd() ) const;
 
 	bool CanCommitOperations( std::vector< TTransferPathPair >& rErrorPairs, FileOp fileOp, bool isUndoOp ) const;
 	bool CommitOperations( FileOp fileOp, bool isUndoOp = false ) const;

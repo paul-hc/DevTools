@@ -7,6 +7,7 @@
 #include "ContainerUtilities.h"
 #include "StringUtilities.h"
 #include "StringIntuitiveCompare.h"
+#include <io.h>
 #include <xhash>
 #include <hash_map>
 #include <shlwapi.h>				// for PathCombine
@@ -815,6 +816,12 @@ namespace path
 
 namespace fs
 {
+	bool FileExist( const TCHAR* pFilePath, AccessMode accessMode /*= Exist*/ )
+	{
+		return !str::IsEmpty( pFilePath ) && 0 == ::_taccess( pFilePath, accessMode );
+	}
+
+
 	// CPathParts implementation
 
 	void CPathParts::Clear( void )
@@ -1066,7 +1073,7 @@ namespace fs
 	}
 
 
-	fs::PatternResult SplitPatternPath( fs::CPath* pPath, std::tstring* pWildSpec, const fs::CPath& patternPath )
+	fs::PatternResult SplitPatternPath( fs::CPath* pPath, std::tstring* pWildSpec, const fs::TPatternPath& patternPath )
 	{
 		REQUIRE( pPath != NULL && pWildSpec != NULL );
 

@@ -41,15 +41,15 @@ namespace fs
 		void SetUseFlatStreamNames( bool useFlatStreamNames = true ) { ::SetFlag( m_stgFlags, FlatStreamNames, useFlatStreamNames ); }
 
 		// document storage file
-		bool CreateDocFile( const fs::CPath& docFilePath, DWORD mode = STGM_CREATE | STGM_READWRITE );
-		bool OpenDocFile( const fs::CPath& docFilePath, DWORD mode = STGM_READ );
+		bool CreateDocFile( const fs::TStgDocPath& docFilePath, DWORD mode = STGM_CREATE | STGM_READWRITE );
+		bool OpenDocFile( const fs::TStgDocPath& docFilePath, DWORD mode = STGM_READ );
 		virtual void CloseDocFile( void );			// (!) if derived classes, call this in derived destructor so that virtual delivers the goods
 
 		bool IsOpen( void ) const { return m_pRootStorage != NULL; }
 		bool IsOpenForReading( void ) const { return IsOpen() && IsReadingMode( GetOpenMode() ); }
 		bool IsOpenForWriting( void ) const { return IsOpen() && IsWritingMode( GetOpenMode() ); }
 		DWORD GetOpenMode( void ) const { return m_openMode; }
-		const fs::CPath& GetDocFilePath( void ) const { return m_docFilePath; }
+		const fs::TStgDocPath& GetDocFilePath( void ) const { return m_docFilePath; }
 
 		IStorage* GetRootStorage( void ) const { return m_pRootStorage; }
 
@@ -108,7 +108,7 @@ namespace fs
 
 		enum { WriteableModeMask = STGM_CREATE | STGM_WRITE | STGM_READWRITE };
 
-		static CStructuredStorage* FindOpenedStorage( const fs::CPath& docStgPath );
+		static CStructuredStorage* FindOpenedStorage( const fs::TStgDocPath& docStgPath );
 	protected:
 		// overridables
 		virtual std::tstring EncodeStreamName( const TCHAR* pStreamName ) const;
@@ -133,7 +133,7 @@ namespace fs
 
 		typedef int TStorageFlags;
 	private:
-		typedef fs::CPathObjectMap< fs::CPath, CStructuredStorage > TStorageMap;		// document path to open root storage
+		typedef fs::CPathObjectMap< fs::TStgDocPath, CStructuredStorage > TStorageMap;		// document path to open root storage
 
 		static TStorageMap& GetOpenedDocStgs( void );			// singleton: opened document storages - only root storages!
 
@@ -185,7 +185,7 @@ namespace fs
 		CStorageTrail m_cwdTrail;				// current working directory: trail of currently opened storages (initially empty: pointing to the root storage)
 		TStorageFlags m_stgFlags;
 		DWORD m_openMode;
-		fs::CPath m_docFilePath;				// full path of the document storage file
+		fs::TStgDocPath m_docFilePath;				// full path of the document storage file
 
 		typedef fs::CPathMap< fs::TEmbeddedPath, fs::CStreamState > TStreamStates;		// keys are embedded encoded paths, whereas CFileState::m_fullPath is the storage name
 
@@ -264,11 +264,11 @@ namespace fs
 		class CScopedCreateDocMode : public CScopedErrorHandling
 		{
 		public:
-			CScopedCreateDocMode( CStructuredStorage* pDocStorage, const fs::CPath* pDocFilePath, const CErrorHandler* pSrcHandler = CErrorHandler::Thrower() );
+			CScopedCreateDocMode( CStructuredStorage* pDocStorage, const fs::TStgDocPath* pDocFilePath, const CErrorHandler* pSrcHandler = CErrorHandler::Thrower() );
 			~CScopedCreateDocMode();
 		protected:
 			CStructuredStorage* m_pDocStorage;
-			fs::CPath m_docFilePath;
+			fs::TStgDocPath m_docFilePath;
 		};
 
 
@@ -276,7 +276,7 @@ namespace fs
 		class CScopedWriteDocMode : public CScopedCreateDocMode
 		{
 		public:
-			CScopedWriteDocMode( CStructuredStorage* pDocStorage, const fs::CPath* pDocFilePath, DWORD writeMode = STGM_READWRITE, const CErrorHandler* pSrcHandler = CErrorHandler::Thrower() );
+			CScopedWriteDocMode( CStructuredStorage* pDocStorage, const fs::TStgDocPath* pDocFilePath, DWORD writeMode = STGM_READWRITE, const CErrorHandler* pSrcHandler = CErrorHandler::Thrower() );
 			~CScopedWriteDocMode();
 		private:
 			DWORD m_origReadingMode;
@@ -289,20 +289,20 @@ namespace fs
 		class CMirrorStorageSave
 		{
 		public:
-			CMirrorStorageSave( const fs::CPath& docStgPath, const fs::CPath& oldDocStgPath );
+			CMirrorStorageSave( const fs::TStgDocPath& docStgPath, const fs::TStgDocPath& oldDocStgPath );
 			~CMirrorStorageSave() { Rollback(); }
 
 			bool UseMirroring( void ) const { return !m_mirrorDocStgPath.IsEmpty(); }
-			const fs::CPath& GetDocStgPath( void ) const { return UseMirroring() ? m_mirrorDocStgPath : m_docStgPath; }
+			const fs::TStgDocPath& GetDocStgPath( void ) const { return UseMirroring() ? m_mirrorDocStgPath : m_docStgPath; }
 
 			void Commit( void ) throws_( CFileException* );		// call at the end of a successful transaction (may throw)
 			void Rollback( void );								// delete the temporary mirror file in case of errors
 		protected:
 			virtual bool CloseStorage( void );
 		protected:
-			const fs::CPath& m_docStgPath;
+			const fs::TStgDocPath& m_docStgPath;
 		private:
-			fs::CPath m_mirrorDocStgPath;
+			fs::TStgDocPath m_mirrorDocStgPath;
 		};
 	}
 }

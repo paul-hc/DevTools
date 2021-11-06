@@ -285,7 +285,7 @@ std::auto_ptr< CAlbumDoc > CAlbumDoc::LoadAlbumDocument( const fs::CPath& docPat
 	return pNewAlbumDoc;
 }
 
-bool CAlbumDoc::LoadCatalogStorage( const fs::CPath& docStgPath )
+bool CAlbumDoc::LoadCatalogStorage( const fs::TStgDocPath& docStgPath )
 {
 	ASSERT( app::IsCatalogFile( docStgPath.GetPtr() ) );
 
@@ -307,7 +307,7 @@ bool CAlbumDoc::LoadCatalogStorage( const fs::CPath& docStgPath )
 	return true;
 }
 
-bool CAlbumDoc::SaveAsCatalogStorage( const fs::CPath& newDocStgPath )
+bool CAlbumDoc::SaveAsCatalogStorage( const fs::TStgDocPath& newDocStgPath )
 {
 	REQUIRE( app::IsCatalogFile( newDocStgPath.GetPtr() ) );
 
@@ -806,7 +806,7 @@ void CAlbumDoc::OnUpdate_SmoothingMode( CCmdUI* pCmdUI )
 
 void CAlbumDoc::OnExtractCatalog( void )
 {
-	fs::CPath destFolderPath = GetDocFilePath().GetFname() + _T("_extract");
+	fs::TDirPath destFolderPath = GetDocFilePath().GetFname() + _T("_extract");
 
 	if ( shell::PickFolder( destFolderPath, NULL, 0, _T("Select Extract Folder") ) )
 	{

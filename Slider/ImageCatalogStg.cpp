@@ -82,7 +82,7 @@ void CImageCatalogStg::CloseDocFile( void )
 	__super::CloseDocFile();
 }
 
-size_t CImageCatalogStg::DiscardCachedImages( const fs::CPath& docStgPath )
+size_t CImageCatalogStg::DiscardCachedImages( const fs::TStgDocPath& docStgPath )
 {
 	REQUIRE( !docStgPath.IsEmpty() );
 
@@ -156,7 +156,7 @@ void CImageCatalogStg::StorePassword( const std::tstring& password )
 		CCatalogPasswordStore::Instance()->CacheVerifiedPassword( m_password );
 }
 
-void CImageCatalogStg::CreateImageArchiveFile( const fs::CPath& docStgPath, CCatalogStorageService* pCatalogSvc ) throws_( CException* )
+void CImageCatalogStg::CreateImageArchiveFile( const fs::TStgDocPath& docStgPath, CCatalogStorageService* pCatalogSvc ) throws_( CException* )
 {
 	ASSERT_PTR( pCatalogSvc );
 
@@ -516,7 +516,7 @@ bool CImageCatalogStg::EnumerateImages( CImagesModel& rImagesModel )
 	if ( !EnumElements( &imagesEnum, Shallow ) )			// enumerate root files
 		return false;
 
-	const fs::CPath& docStgPath = GetDocFilePath();
+	const fs::TStgDocPath& docStgPath = GetDocFilePath();
 
 	for ( std::vector< fs::TEmbeddedPath >::const_iterator itStreamPath = imagesEnum.m_filePaths.begin(); itStreamPath != imagesEnum.m_filePaths.end(); ++itStreamPath )
 		if ( wic::FindFileImageFormat( itStreamPath->GetPtr() ) != wic::UnknownImageFormat )		// an image file?

@@ -88,7 +88,7 @@ namespace svc
 		}
 		else
 		{
-			fs::CPath destFolderPath;		// leave empty to pick the previous selected folder
+			fs::TDirPath destFolderPath;		// leave empty to pick the previous selected folder
 			if ( !shell::PickFolder( destFolderPath, NULL ) )		// multiple files: pick destination folder
 				return false;
 
@@ -136,7 +136,7 @@ namespace svc
 		}
 		else
 		{
-			fs::CPath commonDirPath = path::ExtractCommonParentPath( rDestFilePaths );
+			fs::TDirPath commonDirPath = path::ExtractCommonParentPath( rDestFilePaths );
 			if ( !commonDirPath.IsEmpty() )
 				path::StripDirPrefixes( rDestFilePaths, commonDirPath.GetPtr() );
 			else

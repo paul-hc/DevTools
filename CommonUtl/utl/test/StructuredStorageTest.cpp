@@ -22,10 +22,10 @@ namespace ut
 		ASSERT_PTR( pDocStorage );
 		ASSERT( pDocStorage->IsOpen() );
 
-		for ( std::vector< fs::CPath >::const_iterator itSubDirPath = src.m_subDirPaths.begin(); itSubDirPath != src.m_subDirPaths.end(); ++itSubDirPath )
+		for ( std::vector< fs::TDirPath >::const_iterator itSubDirPath = src.m_subDirPaths.begin(); itSubDirPath != src.m_subDirPaths.end(); ++itSubDirPath )
 			ASSERT( pDocStorage->MakeDirPath( itSubDirPath->GetPtr(), false ) );
 
-		const fs::CPath& srcDirPath = src.GetRelativeDirPath();
+		const fs::TDirPath& srcDirPath = src.GetRelativeDirPath();
 
 		fs::CStructuredStorage::CScopedCurrentDir scopedCurrDir( pDocStorage, fs::CStructuredStorage::s_rootFolderName, STGM_READWRITE );
 		stdext::hash_set< fs::TEmbeddedPath > createdFolderPaths;
@@ -120,12 +120,12 @@ void CStructuredStorageTest::TestLongFilenames( void )
 
 void CStructuredStorageTest::TestStructuredStorage( void )
 {
-	const fs::CPath docStgPath = ut::CTempFilePool::MakePoolDirPath().GetParentPath() / _T("StorageDoc.bin");
+	const fs::TStgDocPath docStgPath = ut::CTempFilePool::MakePoolDirPath().GetParentPath() / _T("StorageDoc.bin");
 
 	// create storage document
 	{
 		ut::CTempFilePairPool pool( _T("a1.txt|a2.txt|B1\\b1.txt|B1\\b2.txt|B1\\SD\\ThisIsASuperLongFilenameOfAnUnknownImageFileThatKeepsGoing.txt") );
-		const fs::CPath& poolDirPath = pool.GetPoolDirPath();
+		const fs::TDirPath& poolDirPath = pool.GetPoolDirPath();
 
 		fs::CRelativePathEnumerator srcEnum( poolDirPath, fs::EF_Recurse );
 		fs::EnumFiles( &srcEnum, poolDirPath, NULL );

@@ -16,10 +16,10 @@ namespace fs
 	void EnumFiles( IEnumerator* pEnumerator, const fs::TDirPath& dirPath, const TCHAR* pWildSpec = _T("*.*") );
 	fs::PatternResult SearchEnumFiles( IEnumerator* pEnumerator, const fs::TPatternPath& searchPath );
 
-	size_t EnumFilePaths( std::vector< fs::CPath >& rFilePaths, const fs::CPath& dirPath, const TCHAR* pWildSpec = _T("*.*"), fs::TEnumFlags flags = fs::TEnumFlags() );
-	size_t EnumSubDirPaths( std::vector< fs::CPath >& rSubDirPaths, const fs::CPath& dirPath, const TCHAR* pWildSpec = _T("*.*"), fs::TEnumFlags flags = fs::TEnumFlags() );
+	size_t EnumFilePaths( std::vector< fs::CPath >& rFilePaths, const fs::TDirPath& dirPath, const TCHAR* pWildSpec = _T("*.*"), fs::TEnumFlags flags = fs::TEnumFlags() );
+	size_t EnumSubDirPaths( std::vector< fs::TDirPath >& rSubDirPaths, const fs::TDirPath& dirPath, const TCHAR* pWildSpec = _T("*.*"), fs::TEnumFlags flags = fs::TEnumFlags() );
 
-	fs::CPath FindFirstFile( const fs::CPath& dirPath, const TCHAR* pWildSpec = _T("*.*"), fs::TEnumFlags flags = fs::TEnumFlags() );
+	fs::CPath FindFirstFile( const fs::TDirPath& dirPath, const TCHAR* pWildSpec = _T("*.*"), fs::TEnumFlags flags = fs::TEnumFlags() );
 
 
 	// generate a path of a unique filename using a suffix, by avoiding collisions with existing files
@@ -109,8 +109,8 @@ namespace fs
 		const fs::CEnumOptions& GetOptions( void ) const { return m_options; }
 		fs::CEnumOptions& RefOptions( void ) { REQUIRE( IsEmpty() ); return m_options; }
 
-		const fs::CPath& GetRelativeDirPath( void ) const { return m_relativeDirPath; }
-		void SetRelativeDirPath( const fs::CPath& relativeDirPath ) { ASSERT( IsEmpty() ); m_relativeDirPath = relativeDirPath; }
+		const fs::TDirPath& GetRelativeDirPath( void ) const { return m_relativeDirPath; }
+		void SetRelativeDirPath( const fs::TDirPath& relativeDirPath ) { ASSERT( IsEmpty() ); m_relativeDirPath = relativeDirPath; }
 
 		void SetIgnorePathMatches( const std::vector< fs::CPath >& ignorePaths );
 
@@ -118,14 +118,14 @@ namespace fs
 	protected:
 		IEnumerator* m_pChainEnum;					// allows chaining for progress reporting
 		CEnumOptions m_options;
-		fs::CPath m_relativeDirPath;				// to remove if it's common prefix
+		fs::TDirPath m_relativeDirPath;				// to remove if it's common prefix
 
 		utl::CCounter m_depthCounter;				// counts recursion depth
 	private:
 		mutable stdext::hash_set< fs::CPath > m_uniquePaths;	// files + sub-directories found
-		mutable std::set< fs::CPath > m_ignoredPaths;	// files + sub-dirs ignored or filtered-out
+		mutable std::set< fs::CPath > m_ignoredPaths;			// files + sub-dirs ignored or filtered-out
 	public:
-		std::vector< fs::TDirPath > m_subDirPaths;		// found sub-directories
+		std::vector< fs::TDirPath > m_subDirPaths;	// found sub-directories
 	};
 }
 
@@ -151,7 +151,7 @@ namespace fs
 
 	struct CRelativePathEnumerator : public CPathEnumerator
 	{
-		CRelativePathEnumerator( const fs::CPath& relativeDirPath, fs::TEnumFlags enumFlags = fs::TEnumFlags(), IEnumerator* pChainEnum = NULL )
+		CRelativePathEnumerator( const fs::TDirPath& relativeDirPath, fs::TEnumFlags enumFlags = fs::TEnumFlags(), IEnumerator* pChainEnum = NULL )
 			: CPathEnumerator( enumFlags, pChainEnum )
 		{
 			SetRelativeDirPath( relativeDirPath );

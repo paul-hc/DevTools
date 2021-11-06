@@ -2,10 +2,7 @@
 #define Path_h
 #pragma once
 
-#include <io.h>
-#include <map>
-#include <set>
-#include <xhash>
+#include "Path_fwd.h"
 #include "ComparePredicates.h"
 #include "StringCompare.h"
 
@@ -175,10 +172,7 @@ namespace fs
 {
 	enum AccessMode { Exist = 0, Write = 2, Read = 4, ReadWrite = 6 };
 
-	inline bool FileExist( const TCHAR* pFilePath, AccessMode accessMode = Exist ) { return !str::IsEmpty( pFilePath ) && 0 == _taccess( pFilePath, accessMode ); }
-
-
-	class CPath;
+	bool FileExist( const TCHAR* pFilePath, AccessMode accessMode = Exist );
 
 
 	struct CPathParts
@@ -209,13 +203,6 @@ namespace fs
 
 
 	enum ExtensionMatch { MatchExt, MatchDiffCaseExt, MismatchDotsExt, MismatchExt };
-
-
-	class CPath;
-
-	typedef CPath TFilePath;		// alias for file paths
-	typedef CPath TDirPath;			// alias for directory paths
-	typedef CPath TPatternPath;		// alias for file path or directory paths with wildcards
 
 
 	class CPath
@@ -302,7 +289,7 @@ namespace fs
 
 	enum PatternResult { ValidFile, ValidDirectory, InvalidPattern };
 
-	PatternResult SplitPatternPath( fs::CPath* pPath, std::tstring* pWildSpec, const fs::CPath& patternPath );		// a valid file or valid directory path with a wildcards?
+	PatternResult SplitPatternPath( fs::CPath* pPath, std::tstring* pWildSpec, const fs::TPatternPath& patternPath );	// a valid file or valid directory path with a wildcards?
 }
 
 
@@ -403,27 +390,27 @@ namespace func
 
 	struct AppendPath		// e.g. used to append the same wildcard spec to some paths
 	{
-		AppendPath( const fs::CPath& childPath ) : m_childPath( childPath ) {}
+		AppendPath( const fs::CPath& subPath ) : m_subPath( subPath ) {}
 
-		void operator()( fs::CPath& rPath ) const
+		void operator()( fs::TDirPath& rPath ) const
 		{
-			rPath /= m_childPath;
+			rPath /= m_subPath;
 		}
 	private:
-		const fs::CPath& m_childPath;
+		const fs::CPath& m_subPath;
 	};
 
 
 	struct PrefixPath
 	{
-		PrefixPath( const fs::CPath& folderPath ) : m_folderPath( folderPath ) {}
+		PrefixPath( const fs::TDirPath& dirPath ) : m_dirPath( dirPath ) {}
 
 		void operator()( fs::CPath& rPath ) const
 		{
-			rPath = m_folderPath / rPath;
+			rPath = m_dirPath / rPath;
 		}
 	private:
-		fs::CPath m_folderPath;
+		const fs::TDirPath& m_dirPath;
 	};
 
 
@@ -492,7 +479,7 @@ namespace func
 			rFilePath = path::FindFilename( rFilePath.c_str() );
 		}
 
-		void operator()( fs::CPath& rPath ) { operator()( rPath.Ref() ); }
+		void operator()( fs::CPath& rPath ) { rPath.Set( rPath.GetFilenamePtr() ); }
 	};
 }
 
@@ -629,6 +616,11 @@ namespace pred
 }
 
 
+#include <map>
+#include <set>
+#include <xhash>
+
+
 namespace fs
 {
 	// forward declarations
@@ -669,7 +661,7 @@ namespace path
 		if ( !paths.empty() )
 		{
 			typename ContainerT::const_iterator it = paths.begin();
-			const fs::CPath dirPath = func::PathOf( *it ).GetParentPath();
+			const fs::TDirPath dirPath = func::PathOf( *it ).GetParentPath();
 
 			for ( ; it != paths.end(); ++it )
 				if ( func::PathOf( *it ).GetParentPath() != dirPath )
@@ -680,7 +672,7 @@ namespace path
 	}
 
 	template< typename ContainerT >
-	fs::CPath ExtractCommonParentPath( const ContainerT& paths )	// uses func::PathOf() to extract path of element - for container versatility (map, vector, etc)
+	fs::TDirPath ExtractCommonParentPath( const ContainerT& paths )	// uses func::PathOf() to extract path of element - for container versatility (map, vector, etc)
 	{
 		std::tstring commonPrefix;
 		if ( !paths.empty() )
@@ -709,7 +701,7 @@ namespace path
 	template< typename ContainerT >
 	inline size_t StripCommonParentPath( ContainerT& rPaths )
 	{
-		fs::CPath commonDirPath = ExtractCommonParentPath( rPaths );
+		fs::TDirPath commonDirPath = ExtractCommonParentPath( rPaths );
 		return !commonDirPath.IsEmpty() ? StripDirPrefixes( rPaths, commonDirPath.GetPtr() ) : 0;
 	}
 

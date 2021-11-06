@@ -132,9 +132,9 @@ namespace app
 		return CAlbumDocTemplate::IsSlideAlbumFile( pFilePath );
 	}
 
-	fs::CPath GetActiveDirPath( void )
+	fs::TDirPath GetActiveDirPath( void )
 	{
-		fs::CPath activePath;
+		fs::TDirPath activePath;
 
 		if ( IImageView* pActiveView = app::GetMainFrame()->GetActiveImageView() )
 		{
@@ -259,7 +259,7 @@ namespace app
 		return shell::BrowseForFile( rFullPath, pParentWnd, browseMode, stgFilters.c_str(), flags );
 	}
 
-	bool BrowseCatalogFile( fs::CPath& rFullPath, CWnd* pParentWnd, shell::BrowseMode browseMode /*= shell::FileOpen*/, DWORD flags /*= 0*/ )
+	bool BrowseCatalogFile( fs::TStgDocPath& rFullPath, CWnd* pParentWnd, shell::BrowseMode browseMode /*= shell::FileOpen*/, DWORD flags /*= 0*/ )
 	{
 		static const std::tstring stgFilters = CAlbumFilterStore::Instance().MakeCatalogStgFilters();
 		return shell::BrowseForFile( rFullPath, pParentWnd, browseMode, stgFilters.c_str(), flags );
@@ -447,7 +447,7 @@ bool CApplication::OpenQueuedAlbum( void )
 
 bool CApplication::HandleAppTests( void )
 {
-#ifdef _DEBUG
+#ifdef USE_UT
 	// register Slider application's tests
 	CCatalogStorageTests::Instance();
 
@@ -527,7 +527,7 @@ END_MESSAGE_MAP()
 
 void CApplication::OnFileOpenAlbumFolder( void )
 {
-	static fs::CPath s_folderPath;
+	static fs::TDirPath s_folderPath;
 
 	if ( s_folderPath.IsEmpty() || !fs::IsValidDirectory( s_folderPath.GetPtr() ) )
 		s_folderPath = app::GetActiveDirPath();
@@ -598,6 +598,7 @@ bool CApplication::CCmdLineInfo::ParseSwitch( const TCHAR* pSwitch )
 			default:
 				return false;
 		}
+
 	return true;
 }
 

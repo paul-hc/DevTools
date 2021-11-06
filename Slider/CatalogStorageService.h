@@ -86,7 +86,7 @@ protected:
 	// base overrides
 	virtual void BuildTransferAttrs( const CImagesModel* pImagesModel, bool useDeepStreamPaths = true );
 private:
-	std::vector< fs::CPath > m_srcDocStgPaths;
+	std::vector< fs::TStgDocPath > m_srcDocStgPaths;
 	CCatalogStorageHost m_srcStorageHost;			// open for reading during image archive construction
 };
 

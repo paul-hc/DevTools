@@ -383,7 +383,7 @@ void CPathTests::TestPathSort( void )
 void CPathTests::TestPathSortExisting( void )
 {
 	ut::CTempFilePairPool pool( _T("a|a.doc|a.txt|d3/some|d1\\b|d1\\b3.doc|d1\\b002.doc|d1\\b.txt|d1\\d2\\c|d1/d2/c.doc|d1\\d2\\c.txt") );
-	const fs::CPath& poolDirPath = pool.GetPoolDirPath();
+	const fs::TDirPath& poolDirPath = pool.GetPoolDirPath();
 
 	std::vector< fs::CPath > mixedPaths;	// files + directories
 	path::QueryParentPaths( mixedPaths, pool.GetFilePaths() );
@@ -716,7 +716,7 @@ void CPathTests::TestCommonSubpath( void )
 		paths.push_back( fs::CPath( _T("C:\\Images/Fruit/orange.jpg") ) );
 		paths.push_back( fs::CPath( _T("C:\\Images\\Drink\\coffee.jpg") ) );
 
-		fs::CPath commonDirPath = path::ExtractCommonParentPath( paths );
+		fs::TDirPath commonDirPath = path::ExtractCommonParentPath( paths );
 
 		for ( std::vector< fs::CPath >::iterator itPath = paths.begin(); itPath != paths.end(); ++itPath )
 		{
@@ -826,7 +826,7 @@ void CPathTests::TestFlexPath( void )
 
 		ASSERT( path.GetParentPath() == path.GetParentFlexPath() );
 
-		fs::CPath parentPath = path;
+		fs::TDirPath parentPath = path;
 		ASSERT_EQUAL( _T("C:\\Images\\fruit.stg>Europe"), parentPath = parentPath.GetParentPath() );
 		ASSERT_EQUAL( _T("C:\\Images\\fruit.stg"), parentPath = parentPath.GetParentPath() );
 		ASSERT_EQUAL( _T("C:\\Images"), parentPath = parentPath.GetParentPath() );

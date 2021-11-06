@@ -42,14 +42,14 @@ CShellFileSystemTests& CShellFileSystemTests::Instance( void )
 void CShellFileSystemTests::TestShellPidl( void )
 {
 	ut::CTempFilePool pool( _T("fa.txt|d1\\fb.txt") );
-	const fs::CPath& poolDirPath = pool.GetPoolDirPath();
+	const fs::TDirPath& poolDirPath = pool.GetPoolDirPath();
 
 	CComPtr< IShellFolder > pDesktopFolder = shell::GetDesktopFolder();
 	ASSERT_PTR( pDesktopFolder );
 
 	shell::CPidl desktopPidl;
 	ASSERT( desktopPidl.CreateFromFolder( pDesktopFolder ) );
-	fs::CPath desktopPath = desktopPidl.GetAbsolutePath();
+	fs::TDirPath desktopPath = desktopPidl.GetAbsolutePath();
 
 	shell::CPidl poolDirPidl;
 	ASSERT( poolDirPidl.IsEmpty() );
@@ -203,7 +203,7 @@ void CShellFileSystemTests::TestPathExplorerSort( void )
 void CShellFileSystemTests::TestRecycler( void )
 {
 	ut::CTempFilePool pool( _T("a.txt|B\\b1.txt|B\\b2.txt|B\\C\\c1.txt|B\\C\\c2.txt|B\\D\\d1.txt") );
-	const fs::CPath& poolDirPath = pool.GetPoolDirPath();
+	const fs::TDirPath& poolDirPath = pool.GetPoolDirPath();
 
 	ASSERT_EQUAL( _T("a.txt|B\\b1.txt|B\\b2.txt|B\\C\\c1.txt|B\\C\\c2.txt|B\\D\\d1.txt"), ut::EnumJoinFiles( poolDirPath ) );
 

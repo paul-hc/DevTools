@@ -170,7 +170,7 @@ namespace fs
 
 	// CFileBackup class
 
-	CFileBackup::CFileBackup( const fs::CPath& srcFilePath, fs::CPath backupDirPath /*= fs::CPath()*/, FileContentMatch matchBy /*= FileSize*/, const TCHAR fmtNumSuffix[] /*= _T("-[%d]")*/ )
+	CFileBackup::CFileBackup( const fs::CPath& srcFilePath, fs::TDirPath backupDirPath /*= fs::CPath()*/, FileContentMatch matchBy /*= FileSize*/, const TCHAR fmtNumSuffix[] /*= _T("-[%d]")*/ )
 		: m_srcFilePath( srcFilePath )
 		, m_backupDirPath( backupDirPath )
 		, m_matchBy( matchBy )

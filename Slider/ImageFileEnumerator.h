@@ -19,7 +19,7 @@ public:
 
 	void Search( const std::vector< CSearchPattern* >& searchPatterns ) throws_( CException*, CUserAbortedException );
 	void Search( const CSearchPattern& searchPattern ) throws_( CException*, CUserAbortedException );
-	void SearchCatalogStorage( const fs::CPath& docStgPath ) throws_( CException*, CUserAbortedException );
+	void SearchCatalogStorage( const fs::TStgDocPath& docStgPath ) throws_( CException*, CUserAbortedException );
 
 	// found files
 	bool AnyFound( void ) const { return !m_foundImages.IsEmpty(); }

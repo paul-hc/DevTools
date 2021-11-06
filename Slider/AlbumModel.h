@@ -28,7 +28,7 @@ public:
 	app::ModelSchema GetModelSchema( void ) const { return m_modelSchema; }
 	void StoreModelSchema( app::ModelSchema modelSchema ) { m_modelSchema = modelSchema; }
 
-	void StoreCatalogDocPath( const fs::CPath& docStgPath );
+	void StoreCatalogDocPath( const fs::TStgDocPath& docStgPath );
 
 	CCatalogStorageHost* GetStorageHost( void ) { return &m_storageHost; }
 	ICatalogStorage* GetCatalogStorage( void ) const;			// opened storage if model is based on a catalog storage
@@ -44,7 +44,7 @@ public:
 
 	void OpenAllStorages( void );
 	void CloseAllStorages( void );
-	void QueryEmbeddedStorages( std::vector< fs::CPath >& rSubStoragePaths ) const;
+	void QueryEmbeddedStorages( std::vector< fs::TStgDocPath >& rSubStoragePaths ) const;
 public:
 	enum PersistFlag
 	{
@@ -95,7 +95,7 @@ private:
 private:
 	// transient
 	app::ModelSchema m_modelSchema;					// model schema of this album document (persisted by the album document)
-	fs::CPath m_docStgPath;							// set only for image catalog docs, it replaces m_searchPatterns
+	fs::TStgDocPath m_docStgPath;					// set only for image catalog docs, it replaces m_searchPatterns
 	CCatalogStorageHost m_storageHost;				// for both album and single image documents that can open embedded images
 private:
 	typedef int TPersistFlags;

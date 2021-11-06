@@ -53,13 +53,13 @@ void CAlbumModel::OpenAllStorages( void )
 	if ( !m_docStgPath.IsEmpty() )										// catalog-based album?
 		m_storageHost.Push( m_docStgPath, MainStorage );
 
-	std::vector< fs::CPath > subStoragePaths;
+	std::vector< fs::TStgDocPath > subStoragePaths;
 	QueryEmbeddedStorages( subStoragePaths );
 
 	m_storageHost.PushMultiple( subStoragePaths, EmbeddedStorage );		// open embedded storages
 }
 
-void CAlbumModel::QueryEmbeddedStorages( std::vector< fs::CPath >& rSubStoragePaths ) const
+void CAlbumModel::QueryEmbeddedStorages( std::vector< fs::TStgDocPath >& rSubStoragePaths ) const
 {
 	rSubStoragePaths = m_imagesModel.GetStoragePaths();
 	m_searchModel.AugmentStoragePaths( rSubStoragePaths );		// add embedded storages in search model
@@ -70,7 +70,7 @@ void CAlbumModel::CloseAllStorages( void )
 	m_storageHost.Clear();
 }
 
-void CAlbumModel::StoreCatalogDocPath( const fs::CPath& docStgPath )
+void CAlbumModel::StoreCatalogDocPath( const fs::TStgDocPath& docStgPath )
 {
 	REQUIRE( app::IsCatalogFile( docStgPath.GetPtr() ) );
 	REQUIRE( fs::IsValidStructuredStorage( docStgPath.GetPtr() ) );
@@ -148,7 +148,7 @@ void CAlbumModel::SearchForFiles( CWnd* pParentWnd ) throws_( CException* )
 	progress.DestroyDialog();
 
 	// commit the transaction
-	std::vector< fs::CPath > oldStoragePaths = m_imagesModel.GetStoragePaths();		// baseline: store old embedded storages
+	std::vector< fs::TStgDocPath > oldStoragePaths = m_imagesModel.GetStoragePaths();		// baseline: store old embedded storages
 
 	m_imagesModel.Swap( foundImagesModel );
 	m_storageHost.ModifyMultiple( m_imagesModel.GetStoragePaths(), oldStoragePaths );

@@ -83,7 +83,7 @@ CTreePlusTests& CTreePlusTests::Instance( void )
 void CTreePlusTests::TestOnlyDirectories( void )
 {
 	ut::CTempFilePool pool( ut::s_flatPaths );
-	const fs::CPath& poolDirPath = pool.GetPoolDirPath();
+	const fs::TDirPath& poolDirPath = pool.GetPoolDirPath();
 
 	std::wstring result;
 	CCmdLineOptions options;
@@ -128,7 +128,7 @@ _UT|\
 void CTreePlusTests::TestFilesAndDirectories( void )
 {
 	ut::CTempFilePool pool( ut::s_flatPaths );
-	const fs::CPath& poolDirPath = pool.GetPoolDirPath();
+	const fs::TDirPath& poolDirPath = pool.GetPoolDirPath();
 
 	std::wstring result;
 

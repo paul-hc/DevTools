@@ -197,7 +197,7 @@ bool CArchivingModel::GenerateDestPaths( const fs::CPath& destPath, const std::t
 	return true;
 }
 
-bool CArchivingModel::BuildArchiveStorageFile( const fs::CPath& destStgPath, FileOp fileOp, CWnd* pParentWnd /*= AfxGetMainWnd()*/ ) const
+bool CArchivingModel::BuildArchiveStorageFile( const fs::TStgDocPath& destStgPath, FileOp fileOp, CWnd* pParentWnd /*= AfxGetMainWnd()*/ ) const
 {
 	// For now disable interactive progress since if current image is animated, it will acces its shared decoder, and the stream will be temporarily inaccessible.
 	// Still, error message boxes are still problematic... that should be non-interfactive too.

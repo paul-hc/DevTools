@@ -16,7 +16,7 @@ public:
 	CMoveFileDialog( const std::vector< fs::CPath >& filesToMove, CWnd* pParent = NULL );
 	virtual ~CMoveFileDialog();
 public:
-	fs::CPath m_destFolderPath;
+	fs::TDirPath m_destFolderPath;
 private:
 	std::vector< fs::CPath > m_filesToMove;
 private:
@@ -26,7 +26,7 @@ private:
 	CTextEdit m_srcFilesEdit;
 
 	// generated stuff
-	protected:
+protected:
 	virtual void DoDataExchange( CDataExchange* pDX );	// DDX/DDV support
 protected:
 	afx_msg void OnDropFiles( HDROP hDropInfo );

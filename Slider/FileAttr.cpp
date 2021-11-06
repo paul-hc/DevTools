@@ -28,7 +28,7 @@ namespace serial
 		return fs::ImagePathKey( fs::CFlexPath( path::GetSubPath( pathKey.first.GetPtr() ) ), pathKey.second );
 	}
 
-	void PostLoadAdjustComplexPath( fs::CFlexPath& rPath, const fs::CPath& docStgPath )
+	void PostLoadAdjustComplexPath( fs::CFlexPath& rPath, const fs::TStgDocPath& docStgPath )
 	{
 		if ( path::IsRelative( rPath.GetPtr() ) )				// was saved as relative path to storage root?
 			rPath = fs::CFlexPath::MakeComplexPath( docStgPath, rPath );	// convert to full flex image path
@@ -182,7 +182,7 @@ app::ModelSchema CFileAttr::EvalLoadingSchema( CArchive& rLoadArchive )
 
 				if ( path::IsComplex( rLoadArchive.m_strFileName.GetString() ) )	// loading from an image archive storage?
 				{
-					fs::CPath docStgPath = path::ExtractPhysical( rLoadArchive.m_strFileName.GetString() );
+					fs::TStgDocPath docStgPath = path::ExtractPhysical( rLoadArchive.m_strFileName.GetString() );
 
 					if ( CCatalogStorageFactory::IsVintageCatalog( docStgPath.GetPtr() ) )		// a .cid or .icf catalog?
 						docModelSchema = app::Slider_v3_1;							// assume the oldest Slider_v3_1 (-) document
