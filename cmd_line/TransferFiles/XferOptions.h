@@ -48,8 +48,8 @@ public:
 	std::vector< std::tstring > m_excludeFindSpecs;
 	std::auto_ptr< fs::CPath > m_pBackupDirPath;
 
-	DWORD m_mustHaveFileAttr;
-	DWORD m_mustNotHaveFileAttr;
+	BYTE m_mustHaveFileAttr;
+	BYTE m_mustNotHaveFileAttr;
 
 	CheckFileChanges m_filterBy;
 	CTime m_earliestTimestamp;

@@ -29,10 +29,10 @@ private:
 	bool CanAlterTargetFile( const CTransferItem& item );
 	bool CreateTargetDirectory( const CTransferItem& item );
 
-	static std::tstring FormatProtectedFileAttr( DWORD fileAttr );
+	static std::tstring FormatProtectedFileAttr( BYTE fileAttr );
 private:
 	// fs::IEnumerator interface (files only)
-	virtual void OnAddFileInfo( const CFileFind& foundFile );
+	virtual void OnAddFileInfo( const fs::CFileState& fileState );
 	virtual void AddFoundFile( const TCHAR* pFilePath ) { pFilePath; ASSERT( false ); }
 	virtual bool AddFoundSubDir( const TCHAR* pSubDirPath );
 

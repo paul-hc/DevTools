@@ -14,7 +14,7 @@ class CDuplicateFilesGroup;
 class CDuplicateFileItem : public CFileStateItem
 {
 public:
-	CDuplicateFileItem( const CFileFind& foundFile );
+	CDuplicateFileItem( const fs::CFileState& fileState );
 
 	fs::CFileContentKey GetContentKey( void ) const { return fs::CFileContentKey( GetState() ); }
 

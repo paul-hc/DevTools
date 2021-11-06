@@ -83,6 +83,7 @@ bool CThemeItem::DrawStatusText( Status status, HDC hdc, const RECT& rect, const
 		}
 		else
 			return theme.DrawThemeText( hdc, m_partId, GetStateId( status ), rect, pText, textFlags );
+
 	return false;
 }
 

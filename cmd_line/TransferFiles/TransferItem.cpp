@@ -28,15 +28,15 @@ CBackupInfo::CBackupInfo( const CXferOptions* pOptions )
 
 // CTransferItem implementation
 
-CTransferItem::CTransferItem( const CFileFind& sourceFinder, const fs::CPath& rootSourceDirPath, const fs::CPath& rootTargetDirPath )
-	: m_source( sourceFinder )
-	, m_target( MakeDeepTargetFilePath( m_source.m_filePath, rootSourceDirPath, rootTargetDirPath ) )
+CTransferItem::CTransferItem( const fs::CFileState& fileState, const fs::CPath& rootSourceDirPath, const fs::CPath& rootTargetDirPath )
+	: m_source( fileState )
+	, m_target( fs::CFileState::ReadFromFile( MakeDeepTargetFilePath( m_source.m_fullPath, rootSourceDirPath, rootTargetDirPath ) ) )
 {
 }
 
 CTransferItem::CTransferItem( const fs::CPath& srcFilePath, const fs::CPath& rootSourceDirPath, const fs::CPath& rootTargetDirPath )
-	: m_source( srcFilePath )
-	, m_target( MakeDeepTargetFilePath( m_source.m_filePath, rootSourceDirPath, rootTargetDirPath ) )
+	: m_source( fs::CFileState::ReadFromFile( srcFilePath ) )
+	, m_target( fs::CFileState::ReadFromFile( MakeDeepTargetFilePath( m_source.m_fullPath, rootSourceDirPath, rootTargetDirPath ) ) )
 {
 }
 
@@ -64,9 +64,9 @@ std::ostream& CTransferItem::Print( std::ostream& os, FileAction fileAction, boo
 		os << s_linePrefix;
 		if ( fileAction == FileMove )
 			os << "[-] ";
-		os << m_source.m_filePath.Get();
-		if ( showTimestamp && m_source.Exist() )
-			os << " (" << m_source.m_lastModifyTime.Format( s_fmtTimestamp ) << ")";
+		os << m_source.m_fullPath.Get();
+		if ( showTimestamp && m_source.IsValid() )
+			os << " (" << m_source.m_modifTime.Format( s_fmtTimestamp ) << ")";
 		os << " ->" << std::endl;
 	}
 
@@ -80,13 +80,13 @@ std::ostream& CTransferItem::Print( std::ostream& os, FileAction fileAction, boo
 			os << "[-] ";
 			break;
 	}
-	os << m_target.m_filePath;
-	if ( showTimestamp && m_target.Exist() )
-		os << " (" << m_target.m_lastModifyTime.Format( s_fmtTimestamp ) << ")";
+	os << m_target.m_fullPath;
+	if ( showTimestamp && m_target.IsValid() )
+		os << " (" << m_target.m_modifTime.Format( s_fmtTimestamp ) << ")";
 	os << std::endl;
 
 	if ( !m_targetBackupFilePath.IsEmpty() )
-		os << s_linePrefix << "[~] " << path::StripCommonPrefix( m_targetBackupFilePath.GetPtr(), m_target.m_filePath.GetParentPath().GetPtr() ) << std::endl;
+		os << s_linePrefix << "[~] " << path::StripCommonPrefix( m_targetBackupFilePath.GetPtr(), m_target.m_fullPath.GetParentPath().GetPtr() ) << std::endl;
 
 	return os;
 }
@@ -112,26 +112,26 @@ bool CTransferItem::IsSrcNewer( const CTime& earliestTimestamp ) const
 	{
 		TRACE( _T("<earliest: %s>  <source: %s>\n"),
 			time_utl::FormatTimestamp( earliestTimestamp ).c_str(),
-			time_utl::FormatTimestamp( m_source.m_lastModifyTime ).c_str() );
+			time_utl::FormatTimestamp( m_source.m_modifTime ).c_str() );
 
-		if ( m_source.m_lastModifyTime < earliestTimestamp )
+		if ( m_source.m_modifTime < earliestTimestamp )
 			return false;
 
-		TRACE( _T("  copy newer: %s\n"), m_source.m_filePath.GetPtr() );
+		TRACE( _T("  copy newer: %s\n"), m_source.m_fullPath.GetPtr() );
 	}
 
-	if ( m_target.Exist() )								// SRC vs TARGET timestamps
+	if ( m_target.IsValid() )								// SRC vs TARGET timestamps
 	{
 		TRACE( _T("<source: %s>  <target: %s>\n"),
-			time_utl::FormatTimestamp( m_source.m_lastModifyTime ).c_str(),
-			time_utl::FormatTimestamp( m_target.m_lastModifyTime ).c_str() );
+			time_utl::FormatTimestamp( m_source.m_modifTime ).c_str(),
+			time_utl::FormatTimestamp( m_target.m_modifTime ).c_str() );
 
-		if ( m_source.m_lastModifyTime <= m_target.m_lastModifyTime )
+		if ( m_source.m_modifTime <= m_target.m_modifTime )
 			return false;
 
 		TRACE( _T("  copy newer: %s\n  to:         %s\n"),
-			m_source.m_filePath.GetPtr(),
-			m_target.m_filePath.GetPtr() );
+			m_source.m_fullPath.GetPtr(),
+			m_target.m_fullPath.GetPtr() );
 	}
 
 	return true;
@@ -139,10 +139,10 @@ bool CTransferItem::IsSrcNewer( const CTime& earliestTimestamp ) const
 
 bool CTransferItem::HasDifferentContents( fs::FileContentMatch matchContentBy ) const
 {
-	if ( !m_target.Exist() )
+	if ( !m_target.IsValid() )
 		return true;			// TARGET missing, must transfer
 
-	switch ( fs::EvalTransferMatch( m_source.m_filePath, m_target.m_filePath, false, matchContentBy ) )
+	switch ( fs::EvalTransferMatch( m_source.m_fullPath, m_target.m_fullPath, false, matchContentBy ) )
 	{
 		case fs::SizeMismatch:
 		case fs::Crc32Mismatch:
@@ -158,7 +158,7 @@ bool CTransferItem::Transfer( FileAction fileAction, const CBackupInfo* pBackupI
 		try
 		{
 			if ( m_target.IsReadOnly() )
-				fs::thr::MakeFileWritable( m_target.m_filePath.GetPtr() );
+				fs::thr::MakeFileWritable( m_target.m_fullPath.GetPtr() );
 
 			if ( pBackupInfo != NULL )
 				BackupExistingTarget( *pBackupInfo );
@@ -166,15 +166,15 @@ bool CTransferItem::Transfer( FileAction fileAction, const CBackupInfo* pBackupI
 			switch ( fileAction )
 			{
 				case FileCopy:
-					fs::thr::CopyFile( m_source.m_filePath.GetPtr(), m_target.m_filePath.GetPtr(), false );
+					fs::thr::CopyFile( m_source.m_fullPath.GetPtr(), m_target.m_fullPath.GetPtr(), false );
 					return true;
 				case FileMove:
-					fs::thr::MoveFile( m_source.m_filePath.GetPtr(), m_target.m_filePath.GetPtr(), MOVEFILE_COPY_ALLOWED | MOVEFILE_REPLACE_EXISTING | MOVEFILE_WRITE_THROUGH );
+					fs::thr::MoveFile( m_source.m_fullPath.GetPtr(), m_target.m_fullPath.GetPtr(), MOVEFILE_COPY_ALLOWED | MOVEFILE_REPLACE_EXISTING | MOVEFILE_WRITE_THROUGH );
 					return true;
 				case TargetFileDelete:
-					if ( m_target.Exist() )
+					if ( m_target.IsValid() )
 					{
-						fs::thr::DeleteFile( m_target.m_filePath.GetPtr() );
+						fs::thr::DeleteFile( m_target.m_fullPath.GetPtr() );
 						return true;
 					}
 					break;
@@ -190,7 +190,7 @@ bool CTransferItem::Transfer( FileAction fileAction, const CBackupInfo* pBackupI
 
 bool CTransferItem::BackupExistingTarget( const CBackupInfo& backupInfo )
 {
-	const fs::CPath& srcFilePath = m_target.m_filePath;		// target file is the source for backup
+	const fs::CPath& srcFilePath = m_target.m_fullPath;		// target file is the source for backup
 
 	if ( !srcFilePath.FileExist() )
 		return false;			// no existing target file to backup

@@ -2,10 +2,10 @@
 #define TransferItem_h
 #pragma once
 
-#include "FileInfo.h"
 #include "utl/ConsoleApplication.h"
 #include "utl/EnumTags.h"
 #include "utl/FileSystem_fwd.h"
+#include "utl/FileState.h"
 
 
 struct CXferOptions;
@@ -28,7 +28,7 @@ public:
 
 struct CTransferItem
 {
-	CTransferItem( const CFileFind& sourceFinder, const fs::CPath& rootSourceDirPath, const fs::CPath& rootTargetDirPath );
+	CTransferItem( const fs::CFileState& fileState, const fs::CPath& rootSourceDirPath, const fs::CPath& rootTargetDirPath );
 	CTransferItem( const fs::CPath& srcFilePath, const fs::CPath& rootSourceDirPath, const fs::CPath& rootTargetDirPath );
 	~CTransferItem();
 
@@ -44,8 +44,8 @@ private:
 	static fs::CPath MakeDeepTargetFilePath( const fs::CPath& srcFilePath, const fs::CPath& rootSourceDirPath,
 											 const fs::CPath& rootTargetDirPath );
 public:
-	CFileInfo m_source;
-	CFileInfo m_target;
+	fs::CFileState m_source;
+	fs::CFileState m_target;
 	fs::CPath m_targetBackupFilePath;
 };
 

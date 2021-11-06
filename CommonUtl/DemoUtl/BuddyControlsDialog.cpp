@@ -24,8 +24,8 @@
 class CFileStateTimedItem : public CFileStateItem
 {
 public:
-	CFileStateTimedItem( const CFileFind& foundFile )
-		: CFileStateItem( foundFile )
+	CFileStateTimedItem( const fs::CFileState& fileState )
+		: CFileStateItem( fileState )
 		, m_checksumElapsed( 0.0 )
 	{
 	}

@@ -65,7 +65,6 @@ void CImageFileEnumerator::Search( const std::vector< CSearchPattern* >& searchP
 		++itPattern;
 	}
 
-	UniquifyAll();
 	m_pCurrPattern = NULL;
 }
 
@@ -96,7 +95,9 @@ void CImageFileEnumerator::SwapFoundImages( CImagesModel& rImagesModel )
 
 bool CImageFileEnumerator::PassFilter( const CFileAttr& fileAttr ) const
 {
-	if ( !PassFileFilter( fileAttr.GetPath(), fileAttr.GetFileSize() ) )
+	fs::CFileState fileState = fs::CFileState::ReadFromFile( fileAttr.GetPath() );
+
+	if ( !PassFileFilter( fileState ) )
 		return false;
 
 	if ( m_pCurrPattern != NULL )
@@ -132,17 +133,15 @@ void CImageFileEnumerator::PushMany( const std::vector< CFileAttr* >& fileAttrs 
 		Push( *itFileAttr );
 }
 
-void CImageFileEnumerator::OnAddFileInfo( const CFileFind& foundFile )
+void CImageFileEnumerator::OnAddFileInfo( const fs::CFileState& fileState )
 {
-	fs::CPath filePath = foundFile.GetFilePath().GetString();
-
-	if ( app::IsAlbumFile( filePath.GetPtr() ) )		// found a catalog storage?
+	if ( app::IsAlbumFile( fileState.m_fullPath.GetPtr() ) )		// found a catalog storage?
 	{
 		if ( CanRecurse() )		// treat found storages as sub-directories
-			AddFoundFile( filePath.GetPtr() );
+			AddFoundFile( fileState.m_fullPath.GetPtr() );
 	}
 	else
-		Push( new CFileAttr( foundFile ) );
+		Push( new CFileAttr( fileState ) );
 }
 
 void CImageFileEnumerator::AddFoundFile( const TCHAR* pFilePath )

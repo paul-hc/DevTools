@@ -37,8 +37,9 @@ CXferOptions::~CXferOptions()
 
 bool CXferOptions::PassFilter( const CTransferItem& transferNode ) const
 {
-	DWORD sourceAttributes = transferNode.m_source.m_attributes;
-	ASSERT( sourceAttributes != INVALID_FILE_ATTRIBUTES );
+	REQUIRE( transferNode.m_source.IsValid() );
+
+	BYTE sourceAttributes = transferNode.m_source.m_attributes;
 
 	if ( m_mustHaveFileAttr != 0 )
 		if ( ( sourceAttributes & m_mustHaveFileAttr ) != m_mustHaveFileAttr )
@@ -53,20 +54,20 @@ bool CXferOptions::PassFilter( const CTransferItem& transferNode ) const
 			return false;
 
 	if ( m_transferOnlyToExistentTargetDirs )
-		if ( !transferNode.m_target.DirPathExist() )
+		if ( !fs::IsValidDirectory( transferNode.m_target.m_fullPath.GetPtr() ) )
 			return false;
 
 	if ( m_transferOnlyExistentTargetFiles )
-		if ( !transferNode.m_target.Exist() )
+		if ( !transferNode.m_target.IsValid() )
 			return false;
 
 	if ( !m_excludeWildSpec.empty() )
-		if ( path::MatchWildcard( transferNode.m_source.m_filePath.GetPtr(), m_excludeWildSpec.c_str() ) != _T('\0') )
+		if ( path::MatchWildcard( transferNode.m_source.m_fullPath.GetPtr(), m_excludeWildSpec.c_str() ) != _T('\0') )
 			return false;
 
 	if ( !m_excludeFindSpecs.empty() )
 		for ( std::vector< std::tstring >::const_iterator itSubstrSpec = m_excludeFindSpecs.begin(); itSubstrSpec != m_excludeFindSpecs.end(); ++itSubstrSpec )
-			if ( *path::Find( transferNode.m_source.m_filePath.GetPtr(), itSubstrSpec->c_str() ) != _T('\0') )
+			if ( *path::Find( transferNode.m_source.m_fullPath.GetPtr(), itSubstrSpec->c_str() ) != _T('\0') )
 				return false;
 
 	return true;
@@ -189,7 +190,7 @@ void CXferOptions::ParseFileAttributes( const std::tstring& value ) throws_( CRu
 {
 	for ( std::tstring::const_iterator itCh = value.begin(); itCh != value.end(); ++itCh )
 	{
-		DWORD* pFileAttr = &m_mustHaveFileAttr;
+		BYTE* pFileAttr = &m_mustHaveFileAttr;
 		if ( _T('-') == *itCh )
 		{
 			pFileAttr = &m_mustNotHaveFileAttr;
@@ -198,11 +199,11 @@ void CXferOptions::ParseFileAttributes( const std::tstring& value ) throws_( CRu
 
 		switch ( *itCh )
 		{
-			case _T('A'): *pFileAttr |= FILE_ATTRIBUTE_ARCHIVE; break;
-			case _T('R'): *pFileAttr |= FILE_ATTRIBUTE_READONLY; break;
-			case _T('H'): *pFileAttr |= FILE_ATTRIBUTE_HIDDEN; break;
-			case _T('S'): *pFileAttr |= FILE_ATTRIBUTE_SYSTEM; break;
-			case _T('D'): *pFileAttr |= FILE_ATTRIBUTE_DIRECTORY; break;
+			case _T('A'): *pFileAttr |= CFile::archive; break;
+			case _T('R'): *pFileAttr |= CFile::readOnly; break;
+			case _T('H'): *pFileAttr |= CFile::hidden; break;
+			case _T('S'): *pFileAttr |= CFile::system; break;
+			case _T('D'): *pFileAttr |= CFile::directory; break;
 			default: ThrowInvalidArgument();
 		}
 	}

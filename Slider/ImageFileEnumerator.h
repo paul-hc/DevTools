@@ -28,7 +28,7 @@ public:
 	const ui::CIssueStore& GetIssueStore( void ) const { return m_issueStore; }
 private:
 	// fs::IEnumerator interface (files only)
-	virtual void OnAddFileInfo( const CFileFind& foundFile );
+	virtual void OnAddFileInfo( const fs::CFileState& fileState );
 	virtual void AddFoundFile( const TCHAR* pFilePath );
 
 	bool PassFilter( const CFileAttr& fileAttr ) const;

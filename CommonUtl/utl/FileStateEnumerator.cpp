@@ -10,19 +10,10 @@
 
 namespace fs
 {
-	void CFileStateEnumerator::OnAddFileInfo( const CFileFind& foundFile )
+	void CFileStateEnumerator::OnAddFileInfo( const fs::CFileState& fileState )
 	{
-		__super::OnAddFileInfo( foundFile );
+		__super::OnAddFileInfo( fileState );
 
-		m_fileStates.push_back( fs::CFileState( foundFile ) );
-	}
-
-	size_t CFileStateEnumerator::UniquifyAll( void )
-	{
-		stdext::hash_set< fs::CPath > uniquePaths;
-
-		return
-			path::UniquifyPaths( m_fileStates, uniquePaths ) +
-			path::UniquifyPaths( m_subDirPaths, uniquePaths );
+		m_fileStates.push_back( fileState );
 	}
 }

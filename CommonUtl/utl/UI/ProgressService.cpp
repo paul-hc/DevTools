@@ -53,9 +53,9 @@ utl::IProgressService* CProgressService::GetService( void )
 	return m_pDlg->GetService();
 }
 
-void CProgressService::OnAddFileInfo( const CFileFind& foundFile )
+void CProgressService::OnAddFileInfo( const fs::CFileState& fileState )
 {
-	foundFile;
+	&fileState;
 	ASSERT( false );		// normally should not be chained for progess; AddFoundFile() should be called instead
 }
 

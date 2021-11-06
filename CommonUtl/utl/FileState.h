@@ -20,6 +20,14 @@ namespace fs
 
 		bool IsEmpty( void ) const { return m_fullPath.IsEmpty(); }
 		bool IsValid( void ) const { return !IsEmpty() && m_attributes != s_invalidAttributes; }
+
+		bool IsReadOnly( void ) const { return IsValid() && HasFlag( m_attributes, CFile::readOnly ); }
+		bool IsHidden( void ) const { return IsValid() && HasFlag( m_attributes, CFile::hidden ); }
+		bool IsSystem( void ) const { return IsValid() && HasFlag( m_attributes, CFile::system ); }
+		bool IsDirectory( void ) const { return IsValid() && HasFlag( m_attributes, CFile::directory ); }
+		bool IsRegularFile( void ) const { return IsValid() && !HasFlag( m_attributes, CFile::directory ); }
+		bool IsProtected( void ) const { return IsValid() && HasFlag( m_attributes, CFile::readOnly | CFile::hidden | CFile::system ); }
+
 		bool FileExist( AccessMode accessMode = Exist ) const { return m_fullPath.FileExist( accessMode ); }
 
 		bool operator<( const CFileState& right ) const { return pred::Less == pred::CompareNaturalPath()( m_fullPath, right.m_fullPath ); }		// order by path

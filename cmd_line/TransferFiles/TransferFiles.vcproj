@@ -241,30 +241,6 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="FileInfo.cpp"
-				>
-				<FileConfiguration
-					Name="ReleaseU|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="DebugU|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="FileInfo.h"
-				>
-			</File>
-			<File
 				RelativePath="FileTransfer.cpp"
 				>
 				<FileConfiguration

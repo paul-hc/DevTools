@@ -6,6 +6,7 @@
 #include "ICounter.h"
 #include "Range.h"
 #include <set>
+#include <hash_set>
 
 
 namespace fs
@@ -51,7 +52,7 @@ namespace fs
 	private:
 		bool IsWildcardMatch( const fs::CPath& anyPath ) const;
 	private:
-		std::vector< fs::CPath > m_dirPaths;			// deep matching (including subdirectories)
+		std::vector< fs::TDirPath > m_dirPaths;			// deep matching (including subdirectories)
 		std::vector< fs::CPath > m_filePaths;
 		std::vector< std::tstring > m_wildSpecs;
 	};
@@ -84,22 +85,24 @@ namespace fs
 		// IEnumerator interface (partial)
 		virtual const TEnumFlags& GetFlags( void ) const { return m_options.m_enumFlags; }
 	protected:
-		virtual void OnAddFileInfo( const CFileFind& foundFile );		// no chaining via m_pChainEnum
+		virtual void OnAddFileInfo( const fs::CFileState& fileState );	// no chaining via m_pChainEnum
 		virtual void AddFoundFile( const TCHAR* pFilePath ) = 0;		// has implementation
 		virtual bool AddFoundSubDir( const TCHAR* pSubDirPath );
-		virtual bool CanIncludeNode( const CFileFind& foundNode ) const;
+		virtual bool CanIncludeNode( const fs::CFileState& nodeState ) const;
 		virtual bool CanRecurse( void ) const;
 		virtual bool MustStop( void ) const;
 		virtual utl::ICounter* GetDepthCounter( void ) { return &m_depthCounter; }
 
-		bool PassFileFilter( const fs::CPath& filePath, UINT64 fileSize ) const;
+		bool PassFileFilter( const fs::CFileState& fileState ) const;
+
+		bool RegisterUnique( const fs::CPath& nodePath ) const;
 		bool IgnorePath( const fs::CPath& ignoredPath ) const;			// returns false for convenience
 	public:
 		bool IsEmpty( void ) const { return m_subDirPaths.empty() && 0 == GetFileCount(); }
 
 		// overridables
 		virtual size_t GetFileCount( void ) const = 0;
-		virtual void Clear( void ) = 0 { m_subDirPaths.clear(); m_ignoredPaths.clear(); }
+		virtual void Clear( void ) = 0 { m_subDirPaths.clear(); m_uniquePaths.clear(); m_ignoredPaths.clear(); }
 
 		fs::TEnumFlags& RefFlags( void ) { REQUIRE( IsEmpty() ); return m_options.m_enumFlags; }
 
@@ -119,9 +122,10 @@ namespace fs
 
 		utl::CCounter m_depthCounter;				// counts recursion depth
 	private:
+		mutable stdext::hash_set< fs::CPath > m_uniquePaths;	// files + sub-directories found
 		mutable std::set< fs::CPath > m_ignoredPaths;	// files + sub-dirs ignored or filtered-out
 	public:
-		std::vector< fs::CPath > m_subDirPaths;		// found sub-directories
+		std::vector< fs::TDirPath > m_subDirPaths;		// found sub-directories
 	};
 }
 
@@ -137,8 +141,6 @@ namespace fs
 		// base overrides
 		virtual size_t GetFileCount( void ) const { return m_filePaths.size(); }
 		virtual void Clear( void );
-
-		size_t UniquifyAll( void );					// post-search
 	protected:
 		// IEnumerator interface
 		virtual void AddFoundFile( const TCHAR* pFilePath );

@@ -17,29 +17,17 @@ namespace fs
 	}
 
 	template< typename FileStateItemT, typename CreateFuncT >
-	void CFileStateItemEnumerator<FileStateItemT, CreateFuncT>::OnAddFileInfo( const CFileFind& foundFile )
+	void CFileStateItemEnumerator<FileStateItemT, CreateFuncT>::OnAddFileInfo( const fs::CFileState& fileState )
 	{
-		m_fileItems.push_back( m_createFunc( foundFile ) );
+		m_fileItems.push_back( m_createFunc( fileState ) );
 
-		__super::OnAddFileInfo( foundFile );		// take care of file progress chaining
+		__super::OnAddFileInfo( fileState );		// take care of file progress chaining
 	}
 
 	template< typename FileStateItemT, typename CreateFuncT >
 	inline void CFileStateItemEnumerator<FileStateItemT, CreateFuncT>::SortItems( void )
 	{
 		func::SortPathItems( m_fileItems );			// by path key
-	}
-
-	template< typename FileStateItemT, typename CreateFuncT >
-	size_t CFileStateItemEnumerator<FileStateItemT, CreateFuncT>::UniquifyAll( void )
-	{
-		size_t duplicateCount = __super::UniquifyAll();
-
-		std::vector< FileStateItemT* > duplicates;
-		duplicateCount += utl::Uniquify<pred::TLess_PathItem>( m_fileItems, &duplicates );
-		utl::ClearOwningContainer( duplicates );
-
-		return duplicateCount;
 	}
 }
 

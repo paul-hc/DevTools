@@ -23,7 +23,7 @@ public:
 	void DestroyDialog( void );
 private:
 	// file enumerator callbacks
-	virtual void OnAddFileInfo( const CFileFind& foundFile );
+	virtual void OnAddFileInfo( const fs::CFileState& fileState );
 	virtual void AddFoundFile( const TCHAR* pFilePath ) throws_( CUserAbortedException );
 	virtual bool AddFoundSubDir( const TCHAR* pSubDirPath ) throws_( CUserAbortedException );
 private:

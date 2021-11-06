@@ -20,10 +20,9 @@ namespace fs
 
 		// post-search
 		void SortFileStates( void ) { fs::SortPaths( m_fileStates ); }
-		size_t UniquifyAll( void );
 	protected:
 		// IEnumerator interface
-		virtual void OnAddFileInfo( const CFileFind& foundFile );
+		virtual void OnAddFileInfo( const fs::CFileState& fileState );
 		virtual void AddFoundFile( const TCHAR* pFilePath ) { __super::AddFoundFile( pFilePath ); }		// base method is pure & implemented
 	public:
 		std::vector< fs::CFileState > m_fileStates;
@@ -36,9 +35,9 @@ namespace func
 	template< typename FileStateItemT >
 	struct CreateFoundItem
 	{
-		FileStateItemT* operator()( const CFileFind& foundFile ) const
+		FileStateItemT* operator()( const fs::CFileState& fileState ) const
 		{
-			return new FileStateItemT( foundFile );
+			return new FileStateItemT( fileState );
 		}
 	};
 }
@@ -69,17 +68,15 @@ namespace fs
 		virtual size_t GetFileCount( void ) const { return m_fileStates.size(); }
 
 		void SortItems( void ); 		// sort by path key
-		size_t UniquifyAll( void );
 	protected:
 		// IEnumerator interface overrides
-		virtual void OnAddFileInfo( const CFileFind& foundFile );
+		virtual void OnAddFileInfo( const fs::CFileState& fileState );
 	private:
 		CreateFuncT m_createFunc;
 
 		// hidden base data-member and methods
 		using CFileStateEnumerator::m_fileStates;
 		using CFileStateEnumerator::SortFileStates;
-		using CFileStateEnumerator::UniquifyAll;
 	public:
 		std::vector< FileStateItemT* > m_fileItems;
 	};

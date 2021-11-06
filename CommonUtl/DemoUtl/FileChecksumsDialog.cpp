@@ -56,9 +56,9 @@ public:
 class CFileChecksumItem : public CPathItemBase
 {
 public:
-	CFileChecksumItem( const CFileFind& foundFile )
-		: CPathItemBase( fs::CPath( foundFile.GetFilePath().GetString() ) )
-		, m_fileSize( foundFile.GetLength() )
+	CFileChecksumItem( const fs::CFileState& fileState )
+		: CPathItemBase( fileState.m_fullPath )
+		, m_fileSize( fileState.m_fileSize )
 	{
 	}
 

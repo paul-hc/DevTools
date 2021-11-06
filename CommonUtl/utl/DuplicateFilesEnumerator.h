@@ -6,7 +6,6 @@
 #include "FileEnumerator.h"
 #include "IProgressService.h"
 #include "Timer.h"
-#include <hash_set>
 
 
 struct CDupsOutcome
@@ -18,9 +17,6 @@ public:
 	size_t m_foundFileCount;
 	size_t m_ignoredCount;
 };
-
-
-namespace detail { struct CSearchContext; }
 
 
 class CDuplicateFilesEnumerator : public fs::CBaseEnumerator
@@ -39,8 +35,7 @@ public:
 	virtual size_t GetFileCount( void ) const { return m_outcome.m_foundFileCount; }
 protected:
 	// IEnumerator interface overrides
-	virtual void OnAddFileInfo( const CFileFind& foundFile );
-	virtual bool CanIncludeNode( const CFileFind& foundNode ) const;
+	virtual void OnAddFileInfo( const fs::CFileState& fileState );
 	virtual void AddFoundFile( const TCHAR* pFilePath );
 private:
 	void GroupByCrc32( void );
@@ -48,8 +43,10 @@ private:
 	void ProgSection_GroupByCrc32( void ) const;
 private:
 	utl::IProgressService* m_pProgressSvc;
-	detail::CSearchContext* m_pContext;
 	CDupsOutcome m_outcome;
+
+	// transient during search
+	CDuplicateGroupStore* m_pGroupStore;
 public:
 	std::vector< CDuplicateFilesGroup* > m_dupGroupItems;		// results: groups sorted by path, each group's duplicate items sorted by path
 };

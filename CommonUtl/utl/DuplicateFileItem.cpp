@@ -15,8 +15,8 @@
 
 // CDuplicateFileItem implementation
 
-CDuplicateFileItem::CDuplicateFileItem( const CFileFind& foundFile )
-	: CFileStateItem( foundFile )
+CDuplicateFileItem::CDuplicateFileItem( const fs::CFileState& fileState )
+	: CFileStateItem( fileState )
 	, m_pParentGroup( NULL )
 {
 }

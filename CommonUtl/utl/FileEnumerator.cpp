@@ -1,6 +1,7 @@
 
 #include "stdafx.h"
 #include "FileEnumerator.h"
+#include "FileState.h"
 #include "RuntimeException.h"
 #include "ContainerUtilities.h"
 #include "StringUtilities.h"
@@ -18,6 +19,14 @@ namespace fs
 	void StoreResolveShortcutProc( ResolveShortcutProc resolveShortcutProc )
 	{
 		s_resolveShortcutProc = resolveShortcutProc;
+	}
+
+	bool IsDots( const fs::CPath& filePath )
+	{
+		const TCHAR* pFilename = filePath.GetFilenamePtr();
+
+		return
+			'.' == pFilename[0] && ( 0 == pFilename[1] || ( '.' == pFilename[1] && 0 == pFilename[2] ) );
 	}
 }
 
@@ -45,34 +54,29 @@ namespace fs
 		for ( BOOL found = finder.FindFile( dirPathFilter.GetPtr() ); found && !pEnumerator->MustStop(); )
 		{
 			found = finder.FindNextFile();
-			std::tstring foundPath = finder.GetFilePath().GetString();
+			fs::CFileState nodeState( finder );
 
 			if ( pEnumerator->HasFlag( fs::EF_ResolveShellLinks ) )
 				if ( s_resolveShortcutProc != NULL )				// links with UTL_UI.lib?
-					if ( fs::IsValidShellLink( foundPath.c_str() ) )
+					if ( fs::IsValidShellLink( nodeState.m_fullPath.GetPtr() ) )
 					{
 						fs::CPath linkTargetPath;
 
-						if ( s_resolveShortcutProc( linkTargetPath, foundPath.c_str(), NULL ) )
-						{
-							foundPath = linkTargetPath.Get();		// resolve the link to taget path
-
-							if ( fs::IsValidDirectory( foundPath.c_str() ) )
-								subDirPaths.push_back( fs::CPath( foundPath ) );
-						}
+						if ( s_resolveShortcutProc( linkTargetPath, nodeState.m_fullPath.GetPtr(), NULL ) )
+							nodeState = fs::CFileState::ReadFromFile( linkTargetPath );		// resolve the link to taget path
 					}
 
-			if ( finder.IsDirectory() )
+			if ( nodeState.IsDirectory() )
 			{
-				if ( !finder.IsDots() )							// skip "." and ".." dir entries
-					if ( pEnumerator->CanIncludeNode( finder ) )	// pass found sub-dir filter?
-						subDirPaths.push_back( fs::CPath( foundPath ) );
+				if ( !fs::IsDots( nodeState.m_fullPath ) )			// skip "." and ".." dir entries
+					if ( pEnumerator->CanIncludeNode( nodeState ) )	// pass found sub-dir filter?
+						subDirPaths.push_back( nodeState.m_fullPath );
 			}
 			else
 			{
-				if ( pEnumerator->CanIncludeNode( finder ) )		// pass found file filter?
-					if ( path::MatchWildcard( foundPath.c_str(), pWildSpec ) )
-						pEnumerator->OnAddFileInfo( finder );
+				if ( pEnumerator->CanIncludeNode( nodeState ) )		// pass found file filter?
+					if ( path::MatchWildcard( nodeState.m_fullPath.GetPtr(), pWildSpec ) )
+						pEnumerator->OnAddFileInfo( nodeState );
 			}
 		}
 
@@ -82,7 +86,7 @@ namespace fs
 		const bool canRecurse = pEnumerator->CanRecurse();
 
 		// progress reporting: ensure the sub-directory (stage) is always displayed first, then the files (items) under it
-		for ( std::vector< fs::CPath >::const_iterator itSubDirPath = subDirPaths.begin(); itSubDirPath != subDirPaths.end(); ++itSubDirPath )
+		for ( std::vector< fs::TDirPath >::const_iterator itSubDirPath = subDirPaths.begin(); itSubDirPath != subDirPaths.end(); ++itSubDirPath )
 			if ( pEnumerator->AddFoundSubDir( itSubDirPath->GetPtr() ) )		// sub-directory is not ignored?
 				if ( canRecurse && !pEnumerator->MustStop() )
 					EnumFiles( pEnumerator, *itSubDirPath, pWildSpec );
@@ -224,7 +228,7 @@ namespace fs
 	bool CPathMatchLookup::IsDirMatch( const fs::CPath& dirPath ) const
 	{
 		if ( !m_dirPaths.empty() )		// speed things up if empty - skip iterators creation
-			for ( std::vector< fs::CPath >::const_iterator itDirPath = m_dirPaths.begin(); itDirPath != m_dirPaths.end(); ++itDirPath )
+			for ( std::vector< fs::TDirPath >::const_iterator itDirPath = m_dirPaths.begin(); itDirPath != m_dirPaths.end(); ++itDirPath )
 				if ( path::HasPrefix( dirPath.GetPtr(), itDirPath->GetPtr() ) )
 					return true;
 
@@ -268,6 +272,28 @@ namespace fs
 
 namespace fs
 {
+	// IEnumerator implementation
+
+	void IEnumerator::OnAddFileInfo( const fs::CFileState& fileState )
+	{
+		AddFoundFile( fileState.m_fullPath.GetPtr() );
+	}
+
+
+	// IEnumeratorImpl implementation
+
+	bool IEnumeratorImpl::CanIncludeNode( const fs::CFileState& nodeState ) const
+	{
+		if ( HasFlag( fs::EF_IgnoreHiddenNodes ) && nodeState.IsHidden() )
+			return false;
+
+		if ( HasFlag( fs::EF_IgnoreFiles ) && nodeState.IsRegularFile() )
+			return false;
+
+		return true;
+	}
+
+
 	// CBaseEnumerator implementation
 
 	CBaseEnumerator::CBaseEnumerator( fs::TEnumFlags enumFlags, IEnumerator* pChainEnum /*= NULL*/ )
@@ -280,6 +306,11 @@ namespace fs
 	void CBaseEnumerator::SetIgnorePathMatches( const std::vector< fs::CPath >& ignorePaths )
 	{
 		m_options.m_ignorePathMatches.Reset( ignorePaths );
+	}
+
+	bool CBaseEnumerator::RegisterUnique( const fs::CPath& nodePath ) const
+	{
+		return m_uniquePaths.insert( nodePath ).second;			// is path unique?
 	}
 
 	bool CBaseEnumerator::IgnorePath( const fs::CPath& ignoredPath ) const
@@ -303,11 +334,11 @@ namespace fs
 	}
 
 
-	void CBaseEnumerator::OnAddFileInfo( const CFileFind& foundFile )
+	void CBaseEnumerator::OnAddFileInfo( const fs::CFileState& fileState )
 	{	// note: we should not chain this method to m_pChainEnum!
 		REQUIRE( !HasFlag( fs::EF_IgnoreFiles ) );	// should've been filtered by now
 
-		__super::OnAddFileInfo( foundFile );
+		__super::OnAddFileInfo( fileState );
 	}
 
 	void CBaseEnumerator::AddFoundFile( const TCHAR* pFilePath )
@@ -334,34 +365,35 @@ namespace fs
 		return true;
 	}
 
-	bool CBaseEnumerator::CanIncludeNode( const CFileFind& foundNode ) const
+	bool CBaseEnumerator::CanIncludeNode( const fs::CFileState& nodeState ) const
 	{
-		fs::CPath nodePath( foundNode.GetFilePath().GetString() );
-
-		if ( HasFlag( fs::EF_IgnoreHiddenNodes ) && foundNode.IsHidden() )
-			return IgnorePath( nodePath );
-
-		if ( foundNode.IsDirectory() )			// regular file?
+		if ( nodeState.IsDirectory() )			// regular file?
 		{
-			if ( m_options.m_ignorePathMatches.IsDirMatch( nodePath ) )
-				return IgnorePath( nodePath );
+			if ( HasFlag( fs::EF_IgnoreHiddenNodes ) && nodeState.IsHidden() )
+				return IgnorePath( nodeState.m_fullPath );
+
+			if ( m_options.m_ignorePathMatches.IsDirMatch( nodeState.m_fullPath ) )
+				return IgnorePath( nodeState.m_fullPath );
 		}
-		else if ( !PassFileFilter( nodePath, foundNode.GetLength() ) )
+		else if ( !PassFileFilter( nodeState ) )
 			return false;
 
-		return true;
+		return RegisterUnique( nodeState.m_fullPath );		// true if unique file added
 	}
 
-	bool CBaseEnumerator::PassFileFilter( const fs::CPath& filePath, UINT64 fileSize ) const
+	bool CBaseEnumerator::PassFileFilter( const fs::CFileState& fileState ) const
 	{
 		if ( HasFlag( fs::EF_IgnoreFiles ) )
 			return false;
 
-		if ( !m_options.m_fileSizeRange.Contains( fileSize ) )
-			return IgnorePath( filePath );
+		if ( HasFlag( fs::EF_IgnoreHiddenNodes ) && fileState.IsHidden() )
+			return IgnorePath( fileState.m_fullPath );
 
-		if ( m_options.m_ignorePathMatches.IsFileMatch( filePath ) )
-			return IgnorePath( filePath );
+		if ( !m_options.m_fileSizeRange.Contains( fileState.m_fileSize ) )
+			return IgnorePath( fileState.m_fullPath );
+
+		if ( m_options.m_ignorePathMatches.IsFileMatch( fileState.m_fullPath ) )
+			return IgnorePath( fileState.m_fullPath );
 
 		return !MustStop();
 	}
@@ -398,15 +430,6 @@ namespace fs
 			m_filePaths.push_back( filePath );
 
 		__super::AddFoundFile( filePath.GetPtr() );
-	}
-
-	size_t CPathEnumerator::UniquifyAll( void )
-	{
-		stdext::hash_set< fs::CPath > uniquePaths;
-
-		return
-			path::UniquifyPaths( m_filePaths, uniquePaths ) +
-			path::UniquifyPaths( m_subDirPaths, uniquePaths );
 	}
 
 } //namespace fs
