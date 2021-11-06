@@ -41,7 +41,7 @@ const CSize CShellThumbCache::s_defaultBoundsSize( thumb::DefaultBoundsSize, thu
 CShellThumbCache::CShellThumbCache( void )
 	: m_boundsSize( s_defaultBoundsSize )
 	, m_pThumbProducer( NULL )
-	, m_thumbExtractFlags( SIIGBF_BIGGERSIZEOK )
+	, m_thumbExtractFlags( SIIGBF_BIGGERSIZEOK )		// if an image has no thumbnail cached by Explorer
 {
 	// (*) COM must be initialized by now
 	m_pShellThumbCache.CoCreateInstance( CLSID_LocalThumbnailCache, NULL, CLSCTX_INPROC );
@@ -112,10 +112,15 @@ CCachedThumbBitmap* CShellThumbCache::GenerateThumb( const ShellItemPair& imageP
 		return m_pThumbProducer->GenerateThumb( imagePair.first );			// chain to external thumb producer
 
 	if ( imagePair.second != NULL )		// valid physical shell item?
+	{
 		// use IShellItemImageFactory to produce a usually larger thumb bitmap, which will be scaled
 		if ( HBITMAP hThumbBitmap = m_shellExplorer.ExtractThumbnail( imagePair.second, m_boundsSize, m_thumbExtractFlags ) )
 			if ( CComPtr< IWICBitmapSource > pUnscaledBitmap = wic::cvt::ToWicBitmap( hThumbBitmap ) )
 				return NewScaledThumb( pUnscaledBitmap, imagePair.first, NULL );
+
+		// thumbnail not cached by Explorer, extract it
+		return ExtractThumb( imagePair );
+	}
 
 	return NULL;
 }

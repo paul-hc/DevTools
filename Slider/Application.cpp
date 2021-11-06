@@ -412,6 +412,7 @@ void CApplication::InitGlobals( void )
 	GetSharedResources().AddAutoPtr( &m_pThumbnailer );
 	GetSharedResources().AddAutoClear( &CWicImageCache::Instance() );
 	m_pThumbnailer->SetExternalProducer( CCatalogStorageFactory::Instance() );		// add as producer of storage-based thumbnails
+	//m_pThumbnailer->SetThumbExtractFlags( SIIGBF_THUMBNAILONLY | SIIGBF_BIGGERSIZEOK );		// doesn't work satisfactory (blank icons instead of default app registered icon)
 
 	CAboutBox::s_appIconId = IDR_MAINFRAME;
 	m_sharedAccel.Load( IDR_COMMAND_BAR_ACCEL );

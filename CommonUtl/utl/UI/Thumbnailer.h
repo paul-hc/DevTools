@@ -14,7 +14,7 @@ class CFlagTags;
 namespace fs { enum FileExpireStatus; }
 
 
-typedef std::pair< fs::CFlexPath, CComPtr< IShellItem > > ShellItemPair;		// source image path with its shell item
+typedef std::pair< fs::CFlexPath, CComPtr<IShellItem> > ShellItemPair;		// source image path with its shell item
 
 
 namespace thumb
