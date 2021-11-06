@@ -10,7 +10,7 @@ namespace shell
 	template< typename PathType >
 	void QueryDroppedFiles( std::vector< PathType >& rFilePaths, HDROP hDropInfo, SortType sortType = NoSort );		// works with std::tstring, fs::CPath, fs::CFlexPath
 
-	CComPtr< IStream > DuplicateToMemoryStream( IStream* pSrcStream, bool autoDelete = true );
+	CComPtr<IStream> DuplicateToMemoryStream( IStream* pSrcStream, bool autoDelete = true );
 }
 
 

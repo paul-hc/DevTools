@@ -277,13 +277,13 @@ namespace num
 
 
 	template< typename ValueT >		// [0, MAX]
-	inline Range< ValueT > PositiveRange( void ) { return Range< ValueT >( 0, MaxValue< ValueT >() ); }
+	inline Range<ValueT> PositiveRange( void ) { return Range<ValueT>( 0, MaxValue< ValueT >() ); }
 
 	template< typename ValueT >		// [MIN, 0]
-	inline Range< ValueT > NegativeRange( void ) { return Range< ValueT >( MinValue< ValueT >(), 0 ); }
+	inline Range<ValueT> NegativeRange( void ) { return Range<ValueT>( MinValue< ValueT >(), 0 ); }
 
 	template< typename ValueT >		// [MIN, MAX]
-	inline Range< ValueT > FullRange( void ) { return Range< ValueT >( MinValue< ValueT >(), MaxValue< ValueT >() ); }
+	inline Range<ValueT> FullRange( void ) { return Range<ValueT>( MinValue< ValueT >(), MaxValue< ValueT >() ); }
 
 
 	template< typename ValueT >
@@ -314,7 +314,7 @@ namespace num
 			return false;
 
 		if ( pSkipLength != NULL )
-			*pSkipLength = static_cast< size_t >( iss.tellg() );
+			*pSkipLength = static_cast<size_t>( iss.tellg() );
 		return true;
 	}
 
@@ -340,9 +340,9 @@ namespace num
 		if ( iss.fail() )
 			return false;
 
-		rNumber = static_cast< ValueT >( number );
+		rNumber = static_cast<ValueT>( number );
 		if ( pSkipLength != NULL )
-			*pSkipLength = static_cast< size_t >( iss.tellg() );
+			*pSkipLength = static_cast<size_t>( iss.tellg() );
 		return true;
 	}
 
@@ -373,9 +373,9 @@ namespace num
 	// advanced numeric algorithms
 
 	template< typename IntT, typename StringT >
-	bool EnwrapNumericSequence( Range< IntT >& rRange, const StringT& text )
+	bool EnwrapNumericSequence( Range<IntT>& rRange, const StringT& text )
 	{
-		IntT len = static_cast< IntT >( text.length() );
+		IntT len = static_cast<IntT>( text.length() );
 		if ( text.empty() || rRange.m_start >= len || !str::CharTraits::IsDigit( text[ rRange.m_start ] ) )
 			return false;						// no text to modify
 
@@ -391,7 +391,7 @@ namespace num
 	}
 
 
-	Range< size_t > FindNumericSequence( const std::tstring& text, size_t pos = 0 );
+	Range<size_t> FindNumericSequence( const std::tstring& text, size_t pos = 0 );
 	size_t EnsureUniformZeroPadding( std::vector< std::tstring >& rItems );			// returns max count of numbers found for all items
 }
 

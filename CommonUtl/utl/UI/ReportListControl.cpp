@@ -686,7 +686,7 @@ pred::CompareResult CALLBACK CReportListControl::ObjectCompareProc( LPARAM leftP
 {
 	ASSERT_PTR( pListCtrl );
 	// called by SortItems() that passes item LPARAMs as left/right
-	return pListCtrl->CompareSubItems( AsPtr< utl::ISubject >( leftParam ), AsPtr< utl::ISubject >( rightParam ) );
+	return pListCtrl->CompareSubItems( AsPtr<utl::ISubject>( leftParam ), AsPtr<utl::ISubject>( rightParam ) );
 }
 
 pred::CompareResult CReportListControl::CompareSubItems( const utl::ISubject* pLeft, const utl::ISubject* pRight ) const
@@ -718,7 +718,7 @@ pred::CompareResult CALLBACK CReportListControl::InitialOrderCompareProc( LPARAM
 {
 	ASSERT_PTR( pListCtrl );
 	// called by SortItems() that passes item LPARAMs as left/right
-	return pListCtrl->CompareInitialOrder( static_cast< TRowKey >( leftParam ), static_cast< TRowKey >( rightParam ) );
+	return pListCtrl->CompareInitialOrder( static_cast<TRowKey>( leftParam ), static_cast<TRowKey>( rightParam ) );
 }
 
 pred::CompareResult CReportListControl::CompareInitialOrder( TRowKey leftKey, TRowKey rightKey ) const
@@ -741,7 +741,7 @@ pred::CompareResult CALLBACK CReportListControl::InitialGroupOrderCompareProc( i
 int CALLBACK CReportListControl::TextCompareProc( LPARAM leftParam, LPARAM rightParam, CReportListControl* pListCtrl )
 {
 	ASSERT_PTR( pListCtrl );
-	return pListCtrl->CompareSubItemsByIndex( static_cast< UINT >( leftParam ), static_cast< UINT >( rightParam ) );
+	return pListCtrl->CompareSubItemsByIndex( static_cast<UINT>( leftParam ), static_cast<UINT>( rightParam ) );
 }
 
 pred::CompareResult CReportListControl::CompareSubItemsByIndex( UINT leftIndex, UINT rightIndex ) const
@@ -871,7 +871,7 @@ void CReportListControl::ParseColumnLayout( std::vector< CColumnInfo >& rColumnI
 		CColumnInfo& rColInfo = rColumnInfos[ i ];
 
 		str::TStringRange specRange( columnSpec );
-		Range< size_t > sepPos;
+		Range<size_t> sepPos;
 		if ( specRange.Find( sepPos, _T('=') ) )
 		{
 			rColInfo.m_label = specRange.ExtractLead( sepPos.m_start );
@@ -1011,7 +1011,7 @@ void CReportListControl::PostColumnLayout( void )
 		LVTILEVIEWINFO tileViewInfo = { sizeof( LVTILEVIEWINFO ) };
 		tileViewInfo.dwMask = LVTVIM_COLUMNS;
 		tileViewInfo.dwFlags = LVTVIF_AUTOSIZE;
-		tileViewInfo.cLines = static_cast< int >( m_tileColumns.size() );		// besides the Code column
+		tileViewInfo.cLines = static_cast<int>( m_tileColumns.size() );		// besides the Code column
 
 		SetTileViewInfo( &tileViewInfo );
 	}
@@ -1182,7 +1182,7 @@ utl::ISubject* CReportListControl::GetSubjectAt( int index ) const
 			return NULL;
 		else
 		{
-			pObject = dynamic_cast< utl::ISubject* >( pObject );
+			pObject = dynamic_cast<utl::ISubject*>( pObject );
 			ASSERT_PTR( pObject );			// really a dynamic subject?
 			return pObject;
 		}
@@ -1208,11 +1208,11 @@ int CReportListControl::InsertObjectItem( int index, const utl::ISubject* pObjec
 	if ( ui::Transparent_Image == imageIndex )
 		imageIndex = m_pCustomImager.get() != NULL ? m_pCustomImager->GetTranspImageIndex() : 0;
 
-	int insertIndex = InsertItem( LVIF_TEXT | LVIF_IMAGE | LVIF_PARAM, index, pText, 0, 0, imageIndex, reinterpret_cast< LPARAM >( pObject ) );
+	int insertIndex = InsertItem( LVIF_TEXT | LVIF_IMAGE | LVIF_PARAM, index, pText, 0, 0, imageIndex, reinterpret_cast<LPARAM>( pObject ) );
 	ASSERT( insertIndex != -1 );
 
 	// set by InsertItem()
-	//SetItemData( insertIndex, reinterpret_cast< DWORD_PTR >( pObject ) );
+	//SetItemData( insertIndex, reinterpret_castDWORD_PTR >( pObject ) );
 	SetItemTileInfo( insertIndex );
 	return insertIndex;
 }
@@ -1241,7 +1241,7 @@ bool CReportListControl::SetItemTileInfo( int index )
 
 	LVTILEINFO tileInfo = { sizeof( LVTILEINFO ) };
 	tileInfo.iItem = index;
-	tileInfo.cColumns = static_cast< UINT >( m_tileColumns.size() );
+	tileInfo.cColumns = static_cast<UINT>( m_tileColumns.size() );
 	tileInfo.puColumns = &m_tileColumns.front();
 	tileInfo.piColFmt = NULL;
 
@@ -1625,9 +1625,9 @@ bool CReportListControl::GetSelIndexBounds( int* pMinSelIndex, int* pMaxSelIndex
 	return true;
 }
 
-Range< int > CReportListControl::GetSelIndexRange( void ) const
+Range<int> CReportListControl::GetSelIndexRange( void ) const
 {
-	Range< int > selRange;
+	Range<int> selRange;
 	GetSelIndexBounds( &selRange.m_start, &selRange.m_end );
 	return selRange;
 }
@@ -1729,7 +1729,7 @@ void CReportListControl::MoveSelectionTo( seq::MoveTo moveTo )
 		CListCtrlSequence sequence( this );
 		seq::Resequence( sequence, selIndexes, moveTo );
 
-		Range< int > maxSelIndex = GetSelIndexRange();
+		Range<int> maxSelIndex = GetSelIndexRange();
 		EnsureVisible( seq::MovePrev == moveTo || seq::MoveToStart == moveTo ? maxSelIndex.m_start : maxSelIndex.m_end, FALSE );
 	}
 
@@ -1795,7 +1795,7 @@ std::tstring CReportListControl::FormatItemLine( int index ) const
 bool CReportListControl::Copy( int sourceFlags /*= ListSourcesMask*/ )
 {
 	// inspired from COleServerItem::CopyToClipboard() in MFC
-	std::auto_ptr< ole::CDataSource > pDataSource( m_pDataSourceFactory->NewDataSource() );
+	std::auto_ptr<ole::CDataSource> pDataSource( m_pDataSourceFactory->NewDataSource() );
 	if ( CacheSelectionData( pDataSource.get(), sourceFlags ) )
 	{	// put it on the clipboard and let the clipboard manage (own) the data source
 		pDataSource->SetClipboard();
@@ -1805,9 +1805,9 @@ bool CReportListControl::Copy( int sourceFlags /*= ListSourcesMask*/ )
 	return false;
 }
 
-std::auto_ptr< CImageList > CReportListControl::CreateDragImageMulti( const std::vector< int >& indexes, CPoint* pFrameOrigin /*= NULL*/ )
+std::auto_ptr<CImageList> CReportListControl::CreateDragImageMulti( const std::vector< int >& indexes, CPoint* pFrameOrigin /*= NULL*/ )
 {
-	std::auto_ptr< CImageList > pDragImage;			// imagelist with the merged drag images
+	std::auto_ptr<CImageList> pDragImage;			// imagelist with the merged drag images
 	if ( !indexes.empty() )
 	{
 		SHDRAGIMAGE shDragImage;
@@ -1830,7 +1830,7 @@ std::auto_ptr< CImageList > CReportListControl::CreateDragImageMulti( const std:
 	return pDragImage;
 }
 
-std::auto_ptr< CImageList > CReportListControl::CreateDragImageSelection( CPoint* pFrameOrigin /*= NULL*/ )
+std::auto_ptr<CImageList> CReportListControl::CreateDragImageSelection( CPoint* pFrameOrigin /*= NULL*/ )
 {
 	std::vector< int > selIndexes;
 	GetSelection( selIndexes );
@@ -1955,7 +1955,7 @@ int CReportListControl::InsertGroupHeader( int groupIndex, int groupId, const st
 	group.iGroupId = groupId;
 	group.state = state;
 	group.uAlign = align;
-	group.pszHeader = const_cast< TCHAR* >( header.c_str() );
+	group.pszHeader = const_cast<TCHAR*>( header.c_str() );
 
 	return InsertGroup( groupIndex, &group );
 }
@@ -1965,7 +1965,7 @@ bool CReportListControl::SetGroupFooter( int groupId, const std::tstring& footer
 	LVGROUP group = { sizeof( LVGROUP ) };
 	group.mask = LVGF_FOOTER | LVGF_ALIGN;
 	group.uAlign = align;
-	group.pszFooter = const_cast< TCHAR* >( footer.c_str() );
+	group.pszFooter = const_cast<TCHAR*>( footer.c_str() );
 
 	return SetGroupInfo( groupId, &group ) != -1;
 }
@@ -1974,7 +1974,7 @@ bool CReportListControl::SetGroupTask( int groupId, const std::tstring& task )
 {
 	LVGROUP group = { sizeof( LVGROUP ) };
 	group.mask = LVGF_TASK;
-	group.pszTask = const_cast< TCHAR* >( task.c_str() );
+	group.pszTask = const_cast<TCHAR*>( task.c_str() );
 
 	return SetGroupInfo( groupId, &group ) != -1;
 }
@@ -1983,7 +1983,7 @@ bool CReportListControl::SetGroupSubtitle( int groupId, const std::tstring& subt
 {
 	LVGROUP group = { sizeof( LVGROUP ) };
 	group.mask = LVGF_SUBTITLE;
-	group.pszSubtitle = const_cast< TCHAR* >( subtitle.c_str() );
+	group.pszSubtitle = const_cast<TCHAR*>( subtitle.c_str() );
 
 	return SetGroupInfo( groupId, &group ) != -1;
 }
@@ -1997,12 +1997,12 @@ bool CReportListControl::SetGroupTitleImage( int groupId, int image, const std::
 	if ( !topDescr.empty() )
 	{	// top description is drawn opposite the title image when there is a title image, no extended image, and uAlign==LVGA_HEADER_CENTER
 		group.mask |= LVGF_DESCRIPTIONTOP;
-		group.pszDescriptionTop = const_cast< TCHAR* >( topDescr.c_str() );
+		group.pszDescriptionTop = const_cast<TCHAR*>( topDescr.c_str() );
 	}
 	if ( !bottomDescr.empty() )
 	{	// bottom description is drawn under the top description text when there is a title image, no extended image, and uAlign==LVGA_HEADER_CENTER
 		group.mask |= LVGF_DESCRIPTIONBOTTOM;
-		group.pszDescriptionBottom = const_cast< TCHAR* >( bottomDescr.c_str() );
+		group.pszDescriptionBottom = const_cast<TCHAR*>( bottomDescr.c_str() );
 	}
 
 	return SetGroupInfo( groupId, &group ) != -1;
@@ -2167,7 +2167,7 @@ void CReportListControl::OnWindowPosChanged( WINDOWPOS* pWndPos )
 
 void CReportListControl::OnKeyDown( UINT chr, UINT repCnt, UINT vkFlags )
 {
-	std::auto_ptr< CSelFlowSequence > pSelFlow = CSelFlowSequence::MakeFlow( this );
+	std::auto_ptr<CSelFlowSequence> pSelFlow = CSelFlowSequence::MakeFlow( this );
 
 	if ( NULL == pSelFlow.get() || pSelFlow->HandleKeyDown( chr ) )
 	{
@@ -2337,7 +2337,7 @@ BOOL CReportListControl::OnLvnGetDispInfo_Reflect( NMHDR* pNmHdr, LRESULT* pResu
 		if ( !m_painting )					// supress sub-item draw by the list (default list painting)
 			if ( const CDiffColumnPair* pDiffPair = FindDiffColumnPair( pDispInfo->item.iSubItem ) )
 				if ( const str::TMatchSequence* pMatchSeq = utl::FindValuePtr( pDiffPair->m_rowSequences, MakeRowKeyAt( pDispInfo->item.iItem ) ) )
-					pDispInfo->item.pszText = const_cast< TCHAR* >( SrcDiff == pDiffPair->GetDiffSide( pDispInfo->item.iSubItem )
+					pDispInfo->item.pszText = const_cast<TCHAR*>( SrcDiff == pDiffPair->GetDiffSide( pDispInfo->item.iSubItem )
 						? pMatchSeq->m_textPair.first.c_str()
 						: pMatchSeq->m_textPair.second.c_str() );
 
@@ -2606,9 +2606,9 @@ CSelFlowSequence::CSelFlowSequence( CReportListControl* pListCtrl )
 #endif
 }
 
-std::auto_ptr< CSelFlowSequence > CSelFlowSequence::MakeFlow( CReportListControl* pListCtrl )
+std::auto_ptr<CSelFlowSequence> CSelFlowSequence::MakeFlow( CReportListControl* pListCtrl )
 {
-	std::auto_ptr< CSelFlowSequence > pSelFlow;
+	std::auto_ptr<CSelFlowSequence> pSelFlow;
 	if ( pListCtrl->GetItemCount() > 1 )
 		switch ( pListCtrl->GetView() )
 		{
@@ -2681,7 +2681,7 @@ bool CSelFlowSequence::PostKeyDown( UINT chr )
 bool CSelFlowSequence::NavigateCaret( int newCaretIndex )
 {
 	if ( newCaretIndex == m_caretIndex ||											// no new caret (not a key of interest)
-		 Range< int >( 0, m_itemCount - 1 ).Constrain( newCaretIndex ) )			// nowhere to go
+		 Range<int>( 0, m_itemCount - 1 ).Constrain( newCaretIndex ) )			// nowhere to go
 		return false;			// caret changed, navigation done by the list ctrl
 
 	if ( !ui::IsKeyPressed( VK_SHIFT ) && !ui::IsKeyPressed( VK_CONTROL ) )
@@ -2719,7 +2719,7 @@ CListSelectionData::CListSelectionData( CReportListControl* pSrcListCtrl )
 
 CLIPFORMAT CListSelectionData::GetClipFormat( void )
 {
-	static const CLIPFORMAT clipFormat = static_cast< CLIPFORMAT >( ::RegisterClipboardFormat( _T("cfListSelIndexes") ) );
+	static const CLIPFORMAT clipFormat = static_cast<CLIPFORMAT>( ::RegisterClipboardFormat( _T("cfListSelIndexes") ) );
 	return clipFormat;
 }
 
@@ -2736,5 +2736,5 @@ void CListSelectionData::Load( CArchive& archive ) throws_( CException* )
 	serial::SerializeValues( archive, m_selIndexes );
 
 	// will work with windows within the same process
-	m_pSrcWnd = CWnd::FromHandlePermanent( reinterpret_cast< HWND >( hSrcWnd ) );
+	m_pSrcWnd = CWnd::FromHandlePermanent( reinterpret_cast<HWND>( hSrcWnd ) );
 }

@@ -253,8 +253,8 @@ public:
 public:
 	TRowKey MakeRowKeyAt( int index ) const			// favour item data (LPARAM), or fall back to index (int)
 	{
-		TRowKey rowKey = static_cast< TRowKey >( GetItemData( index ) );
-		return rowKey != 0 ? rowKey : static_cast< TRowKey >( index );
+		TRowKey rowKey = static_cast<TRowKey>( GetItemData( index ) );
+		return rowKey != 0 ? rowKey : static_cast<TRowKey>( index );
 	}
 
 	// sorting
@@ -359,14 +359,14 @@ protected:
 public:
 	// items and sub-items
 	template< typename Type >
-	Type* GetPtrAt( int index ) const { ASSERT( IsValidIndex( index ) ); return AsPtr< Type >( GetItemData( index ) ); }
+	Type* GetPtrAt( int index ) const { ASSERT( IsValidIndex( index ) ); return AsPtr<Type>( GetItemData( index ) ); }
 
 	bool SetPtrAt( int index, const void* pData ) { return SetItemData( index, (DWORD_PTR)pData ) != FALSE; }
 
 	utl::ISubject* GetSubjectAt( int index ) const;
 
 	template< typename ObjectT >
-	ObjectT* GetObjectAt( int index ) const { return checked_static_cast< ObjectT* >( GetSubjectAt( index ) ); }
+	ObjectT* GetObjectAt( int index ) const { return checked_static_cast<ObjectT*>( GetSubjectAt( index ) ); }
 
 	template< typename ObjectT >
 	void QueryObjectsSequence( std::vector< ObjectT* >& rObjects ) const;
@@ -488,7 +488,7 @@ public:
 	void SelectAll( void );
 
 	bool GetSelIndexBounds( int* pMinSelIndex, int* pMaxSelIndex ) const;
-	Range< int > GetSelIndexRange( void ) const;
+	Range<int> GetSelIndexRange( void ) const;
 
 	template< typename ObjectT >
 	ObjectT* GetSelected( void ) const;
@@ -511,8 +511,8 @@ public:
 	bool CacheSelectionData( ole::CDataSource* pDataSource, int sourceFlags = ListSourcesMask ) const;		// for drag-drop or clipboard transfers
 	bool Copy( int sourceFlags = ListSourcesMask );						// creates a new COleDataSource object owned by the cliboard
 
-	std::auto_ptr< CImageList > CreateDragImageMulti( const std::vector< int >& indexes, CPoint* pFrameOrigin = NULL );
-	std::auto_ptr< CImageList > CreateDragImageSelection( CPoint* pFrameOrigin = NULL );
+	std::auto_ptr<CImageList> CreateDragImageMulti( const std::vector< int >& indexes, CPoint* pFrameOrigin = NULL );
+	std::auto_ptr<CImageList> CreateDragImageSelection( CPoint* pFrameOrigin = NULL );
 
 	CRect GetFrameBounds( const std::vector< int >& indexes ) const;
 public:
@@ -633,14 +633,14 @@ private:
 	std::list< CDiffColumnPair > m_diffColumnPairs;
 
 	CMenu* m_pPopupMenu[ _ListPopupCount ];					// used when right clicking nowhere - on header or no list item
-	std::auto_ptr< CLabelEdit > m_pLabelEdit;				// stores the label info during inline editing
+	std::auto_ptr<CLabelEdit> m_pLabelEdit;				// stores the label info during inline editing
 
 	ui::ICommandFrame* m_pFrameEditor;						// for frame editor command handling mode
 	ole::IDataSourceFactory* m_pDataSourceFactory;			// creates ole::CDataSource for clipboard and drag-drop
 private:
 	bool m_painting;										// true during OnPaint() - supresses item text callback for diff columns to prevent default list sub-item draw (diffs are custom drawn)
 	mutable CSize m_stateIconSize;							// self-encapsulated, call GetStateIconSize(): cached size of an icon in the StateImageList
-	std::auto_ptr< lv::CNmCheckStatesChanged > m_pNmToggling;	// set during OnLvnItemChanging_Reflect() - user toggling check-state with extended states
+	std::auto_ptr<lv::CNmCheckStatesChanged> m_pNmToggling;	// set during OnLvnItemChanging_Reflect() - user toggling check-state with extended states
 public:
 	ui::CTextEffect m_deleteSrc_DiffEffect;					// text diffs: text removed from SRC (red)
 	ui::CTextEffect m_mismatchDest_DiffEffect;				// text diffs: text mismatched in DEST (blue)
@@ -763,7 +763,7 @@ class CSelFlowSequence
 {
 	CSelFlowSequence( CReportListControl* pListCtrl );
 public:
-	static std::auto_ptr< CSelFlowSequence > MakeFlow( CReportListControl* pListCtrl );
+	static std::auto_ptr<CSelFlowSequence> MakeFlow( CReportListControl* pListCtrl );
 
 	bool HandleKeyDown( UINT chr );
 	bool PostKeyDown( UINT chr );
@@ -806,7 +806,7 @@ public:
 
 inline bool CReportListControl::CacheSelectionData( ole::CDataSource* pDataSource, int sourceFlags /*= ListSourcesMask*/ ) const
 {
-	CListSelectionData selData( const_cast< CReportListControl* >( this ) );
+	CListSelectionData selData( const_cast<CReportListControl*>( this ) );
 	return CacheSelectionData( pDataSource, sourceFlags, selData );
 }
 

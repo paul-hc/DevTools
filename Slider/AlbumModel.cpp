@@ -100,7 +100,7 @@ bool CAlbumModel::SetupSingleSearchPattern( CSearchPattern* pSearchPattern )
 
 void CAlbumModel::SearchForFiles( CWnd* pParentWnd ) throws_( CException* )
 {
-	std::auto_ptr< fattr::CRetainFileOrder > pRetainCustomOrder;
+	std::auto_ptr<fattr::CRetainFileOrder> pRetainCustomOrder;
 
 	if ( fattr::CustomOrder == m_fileOrder )
 		pRetainCustomOrder.reset( new fattr::CRetainFileOrder( m_imagesModel.GetFileAttrs() ) );
@@ -239,7 +239,7 @@ void CAlbumModel::QueryFileAttrsSequence( std::vector< CFileAttr* >& rSequence, 
 	rSequence.reserve( selIndexes.size() );
 
 	for ( std::vector< int >::const_iterator itSelIndex = selIndexes.begin(); itSelIndex != selIndexes.end(); ++itSelIndex )
-		rSequence.push_back( const_cast< CFileAttr* >( GetFileAttr( *itSelIndex ) ) );
+		rSequence.push_back( const_cast<CFileAttr*>( GetFileAttr( *itSelIndex ) ) );
 }
 
 // returns the display index of the found file
@@ -290,7 +290,7 @@ TCurrImagePos CAlbumModel::DeleteFromAlbum( const std::vector< fs::CFlexPath >& 
 	StoreFileOrder( fattr::OriginalOrder );
 
 	size_t newSelPos = std::min( indexes.front(), m_imagesModel.GetFileAttrs().size() - 1 );
-	return static_cast< TCurrImagePos >( newSelPos );
+	return static_cast<TCurrImagePos>( newSelPos );
 }
 
 

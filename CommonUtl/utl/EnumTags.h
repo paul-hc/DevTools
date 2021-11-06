@@ -39,7 +39,7 @@ public:
 	template< typename EnumType >
 	EnumType GetDefaultValue( void ) const
 	{
-		return static_cast< EnumType >( m_defaultValue );
+		return static_cast<EnumType>( m_defaultValue );
 	}
 
 	// offset by base value
@@ -49,7 +49,7 @@ public:
 	unsigned int GetTagIndex( int value ) const { return value - m_baseValue; }
 
 	template< typename EnumType >
-	EnumType GetSelValue( int selTagIndex ) const { return static_cast< EnumType >( selTagIndex + m_baseValue ); }
+	EnumType GetSelValue( int selTagIndex ) const { return static_cast<EnumType>( selTagIndex + m_baseValue ); }
 private:
 	void Construct( const std::tstring& uiTags, const TCHAR* pKeyTags );
 	size_t TagIndex( int value, const std::vector< std::tstring >& tags ) const;

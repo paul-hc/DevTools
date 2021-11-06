@@ -115,7 +115,7 @@ namespace fs
 		const std::tstring& GetKey( void ) const;
 
 		static std::tstring FormatHashKey( const std::tstring& key );
-		static UINT HashKey( const std::tstring& key ) { return static_cast< UINT >( stdext::hash_value( key.c_str() ) ); }
+		static UINT HashKey( const std::tstring& key ) { return static_cast<UINT>( stdext::hash_value( key.c_str() ) ); }
 	private:
 		std::vector< std::tstring > m_classTags;		// for filters
 		mutable std::tstring m_key;						// self-encapsulated concatenation of class tags

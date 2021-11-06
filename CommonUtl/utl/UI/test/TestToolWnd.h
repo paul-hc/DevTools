@@ -40,7 +40,7 @@ namespace ut
 		static const TCHAR* GetClassName( void );
 	private:
 		CWindowTimer m_destroyTimer;
-		std::auto_ptr< CDC > m_pTestDC;
+		std::auto_ptr<CDC> m_pTestDC;
 		bool m_disableEraseBk;						// hack
 
 		static CTestToolWnd* s_pWndTool;

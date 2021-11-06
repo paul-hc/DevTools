@@ -59,7 +59,7 @@ CReplaceDialog::CReplaceDialog( IFileEditor* pParentEditor, const CRenameService
 	, m_findWhat( !findWhat.empty() ? findWhat : LoadFindWhat() )
 	, m_replaceWith( LoadReplaceWith() )
 	, m_matchCase( AfxGetApp()->GetProfileInt( reg::section, reg::entry_matchCase, true ) != FALSE )
-	, m_findType( static_cast< FindType >( AfxGetApp()->GetProfileInt( reg::section, reg::entry_findType, Find_Text ) ) )
+	, m_findType( static_cast<FindType>( AfxGetApp()->GetProfileInt( reg::section, reg::entry_findType, Find_Text ) ) )
 	, m_externalFindWhat( !findWhat.empty() )
 	, m_autoFillCommonSequence( AfxGetApp()->GetProfileInt( reg::section, reg::entry_autoFillCommonSequence, true ) != FALSE )
 	, m_findWhatCombo( ui::HistoryMaxSize, specialSep, m_matchCase ? str::Case : str::IgnoreCase )
@@ -133,7 +133,7 @@ void CReplaceDialog::StoreFindWhatText( const std::tstring& text, const std::tst
 	m_findWhatCombo.SetEditText( text );
 
 	if ( !commonSequence.empty() )
-		m_findWhatCombo.SetEditSel( static_cast< int >( commonSequence.length() ), -1 );
+		m_findWhatCombo.SetEditSel( static_cast<int>( commonSequence.length() ), -1 );
 
 	OnChanged_FindWhat();
 }
@@ -153,7 +153,7 @@ bool CReplaceDialog::ReplaceItems( bool commit /*= true*/ ) const
 		return false;				// no pattern to search for
 
 	CFileModel* pFileModel = m_pParentEditor->GetFileModel();
-	std::auto_ptr< utl::ICommand > pReplaceCmd;
+	std::auto_ptr<utl::ICommand> pReplaceCmd;
 
 	if ( Find_Text == m_findType )
 	{
@@ -182,7 +182,7 @@ bool CReplaceDialog::ReplaceItems( bool commit /*= true*/ ) const
 
 bool CReplaceDialog::FillCommonSequence( void )
 {
-	std::auto_ptr< CPickDataset > pPickDataset = m_pRenSvc->MakeFnamePickDataset();
+	std::auto_ptr<CPickDataset> pPickDataset = m_pRenSvc->MakeFnamePickDataset();
 
 	if ( !pPickDataset->HasCommonSequence() )
 	{

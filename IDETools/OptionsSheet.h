@@ -200,7 +200,7 @@ public:
 private:
 	std::tstring MakeNewUniqueName( void ) const;
 private:
-	std::auto_ptr< CIncludeDirectories > m_pDirSets;			// a working copy, so user can cancel with no modification
+	std::auto_ptr<CIncludeDirectories> m_pDirSets;			// a working copy, so user can cancel with no modification
 
 	// enum { IDD = IDD_OPTIONS_DIRECTORIES_PAGE };
 	CComboBox m_dirSetsCombo;

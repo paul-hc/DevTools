@@ -50,7 +50,7 @@ CDibPixels::~CDibPixels()
 CDibSection* CDibPixels::MakeLocalDibSection( HBITMAP hDib )
 {
 	ASSERT_PTR( hDib );
-	if ( is_a< CDibSection >( CGdiObject::FromHandle( hDib ) ) != NULL )
+	if ( is_a<CDibSection>( CGdiObject::FromHandle( hDib ) ) != NULL )
 		return NULL;				// should've called the overloaded constructor
 	return new CDibSection( hDib );
 }
@@ -60,7 +60,7 @@ void CDibPixels::Init( const CDibSection& dibSection )
 	if ( IsValid() )
 		Reset();
 
-	m_pDibSection = const_cast< CDibSection* >( &dibSection );
+	m_pDibSection = const_cast<CDibSection*>( &dibSection );
 	m_ownsDib = false;
 
 	CDibSectionInfo dibInfo( dibSection.GetHandle() );

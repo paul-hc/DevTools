@@ -21,13 +21,13 @@
 
 namespace ut
 {
-	CComPtr< ICatalogStorage > CreateArchiveStorageFile( const fs::TStgDocPath& docStgPath, const std::vector< fs::CPath >& srcImagePaths ) throws_( CException* )
+	CComPtr<ICatalogStorage> CreateArchiveStorageFile( const fs::TStgDocPath& docStgPath, const std::vector< fs::CPath >& srcImagePaths ) throws_( CException* )
 	{
 		CCatalogStorageService storageSvc;
 
 		storageSvc.BuildFromSrcPaths( srcImagePaths );			// will create an ad-hoc album based on the transfer attributes, to save to "_Album.sld" stream
 
-		CComPtr< ICatalogStorage > pCatalogStorage = CCatalogStorageFactory::CreateStorageObject();
+		CComPtr<ICatalogStorage> pCatalogStorage = CCatalogStorageFactory::CreateStorageObject();
 
 		pCatalogStorage->CreateImageArchiveFile( docStgPath, &storageSvc );					// create the entire image archive: works internally in utl::ThrowMode
 		return pCatalogStorage;
@@ -63,7 +63,7 @@ void CCatalogStorageTests::TestBuildImageArchive( void )
 			fs::EnumFiles( &srcFound, imageDirPath, NULL );
 			srcImageCount = srcFound.m_filePaths.size();
 
-			CComPtr< ICatalogStorage > pCatalogStorage = ut::CreateArchiveStorageFile( docStgPath, srcFound.m_filePaths );
+			CComPtr<ICatalogStorage> pCatalogStorage = ut::CreateArchiveStorageFile( docStgPath, srcFound.m_filePaths );
 			ASSERT_PTR( pCatalogStorage );
 
 			ENSURE( fs::IsValidStructuredStorage( docStgPath.GetPtr() ) );
@@ -97,7 +97,7 @@ void CCatalogStorageTests::_TestLoadImageArchive( const fs::TStgDocPath& docStgP
 
 	// load the image archive storage
 	{
-		CComPtr< ICatalogStorage > pCatalogStorage = CCatalogStorageFactory::CreateStorageObject();
+		CComPtr<ICatalogStorage> pCatalogStorage = CCatalogStorageFactory::CreateStorageObject();
 
 		ASSERT( pCatalogStorage->GetDocStorage()->OpenDocFile( docStgPath, STGM_READ ) );
 
@@ -107,7 +107,7 @@ void CCatalogStorageTests::_TestLoadImageArchive( const fs::TStgDocPath& docStgP
 			ASSERT( pOpenCatalogStorage->GetDocStorage()->IsOpenForReading() );
 		}
 
-		std::auto_ptr< CAlbumDoc > pAlbumDoc = CAlbumDoc::LoadAlbumDocument( docStgPath );
+		std::auto_ptr<CAlbumDoc> pAlbumDoc = CAlbumDoc::LoadAlbumDocument( docStgPath );
 		ASSERT_PTR( pAlbumDoc.get() );
 
 		const CImagesModel* pImagesModel = &pAlbumDoc->GetModel()->GetImagesModel();
@@ -144,14 +144,14 @@ void CCatalogStorageTests::_TestAlbumFileAttr( ICatalogStorage* pCatalogStorage,
 
 			ASSERT( !CWicImage::IsCorruptFrame( frameKey ) );
 
-			std::auto_ptr< CWicImage > pFrameImage( CWicImage::CreateFromFile( frameKey, utl::ThrowMode ) );
+			std::auto_ptr<CWicImage> pFrameImage( CWicImage::CreateFromFile( frameKey, utl::ThrowMode ) );
 			ASSERT_PTR( pFrameImage.get() );
 		}
 	}
 
 	// test loading embedded thumbnails
 	{
-		std::auto_ptr< CCachedThumbBitmap > pThumbnail( pCatalogStorage->LoadThumbnail( pFileAttr->GetPath() ) );		// loaded, not cached
+		std::auto_ptr<CCachedThumbBitmap> pThumbnail( pCatalogStorage->LoadThumbnail( pFileAttr->GetPath() ) );		// loaded, not cached
 		ASSERT_PTR( pThumbnail.get() );
 	}
 }

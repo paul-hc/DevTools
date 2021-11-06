@@ -18,10 +18,10 @@ namespace utl
 		virtual ~CResourcePool() { std::for_each( m_pResources.rbegin(), m_pResources.rend(), func::Delete() ); }		// delete in reverse order of registration
 
 		template< typename Type >
-		void AddPointer( Type* pointer ) { m_pResources.push_back( new std::auto_ptr< Type >( pointer ) ); }
+		void AddPointer( Type* pointer ) { m_pResources.push_back( new std::auto_ptr<Type>( pointer ) ); }
 
 		template< typename Type >
-		void AddAutoPtr( std::auto_ptr< Type >* pPtr ) { m_pResources.push_back( new CAutoPtrResource< Type >( pPtr ) ); }
+		void AddAutoPtr( std::auto_ptr<Type>* pPtr ) { m_pResources.push_back( new CAutoPtrResource< Type >( pPtr ) ); }
 
 		template< typename ComPtrType >
 		void AddComPtr( ComPtrType& rComPtr ) { m_pResources.push_back( new CComPtrResource< ComPtrType >( rComPtr ) ); }
@@ -37,10 +37,10 @@ namespace utl
 	class CAutoPtrResource : public utl::IMemoryManaged
 	{
 	public:
-		CAutoPtrResource( std::auto_ptr< Type >* pPtr ) : m_pPtr( pPtr ) { ASSERT_PTR( m_pPtr ); }
+		CAutoPtrResource( std::auto_ptr<Type>* pPtr ) : m_pPtr( pPtr ) { ASSERT_PTR( m_pPtr ); }
 		virtual ~CAutoPtrResource() { m_pPtr->reset(); }
 	private:
-		std::auto_ptr< Type >* m_pPtr;
+		std::auto_ptr<Type>* m_pPtr;
 	};
 
 

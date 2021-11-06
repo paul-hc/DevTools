@@ -15,9 +15,9 @@ CFileService::CFileService( void )
 {
 }
 
-std::auto_ptr< CMacroCommand > CFileService::MakeRenameCmds( const std::vector< CRenameItem* >& renameItems ) const
+std::auto_ptr<CMacroCommand> CFileService::MakeRenameCmds( const std::vector< CRenameItem* >& renameItems ) const
 {
-	std::auto_ptr< CMacroCommand > pBatchMacro;
+	std::auto_ptr<CMacroCommand> pBatchMacro;
 	if ( !IsDistinctWorkingSet( renameItems ) )			// all SRC and DEST paths must be a distinct working set (pre-validated)?
 		return pBatchMacro;
 
@@ -56,9 +56,9 @@ std::auto_ptr< CMacroCommand > CFileService::MakeRenameCmds( const std::vector< 
 	return pBatchMacro;
 }
 
-std::auto_ptr< CMacroCommand > CFileService::MakeTouchCmds( const std::vector< CTouchItem* >& touchItems ) const
+std::auto_ptr<CMacroCommand> CFileService::MakeTouchCmds( const std::vector< CTouchItem* >& touchItems ) const
 {
-	std::auto_ptr< CMacroCommand > pBatchMacro( new cmd::CFileMacroCmd( cmd::TouchFile ) );
+	std::auto_ptr<CMacroCommand> pBatchMacro( new cmd::CFileMacroCmd( cmd::TouchFile ) );
 
 	for ( std::vector< CTouchItem* >::const_iterator itItem = touchItems.begin(); itItem != touchItems.end(); ++itItem )
 		if ( ( *itItem )->IsModified() )

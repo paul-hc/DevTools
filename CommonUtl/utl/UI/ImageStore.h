@@ -67,8 +67,8 @@ private:
 
 	stdext::hash_map< UINT, std::pair< CBitmap*, CBitmap* > > m_menuBitmapMap;		// <iconId, <unchecked, checked> >
 
-	std::auto_ptr< CThemeItem > m_pMenuItemBkTheme;
-	std::auto_ptr< CThemeItem > m_pCheckedMenuItemBkTheme;
+	std::auto_ptr<CThemeItem> m_pMenuItemBkTheme;
+	std::auto_ptr<CThemeItem> m_pCheckedMenuItemBkTheme;
 };
 
 

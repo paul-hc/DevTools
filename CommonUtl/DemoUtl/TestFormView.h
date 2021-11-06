@@ -19,11 +19,11 @@ public:
 	// ui::ICustomCmdInfo interface
 	virtual void QueryTooltipText( std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const;
 
-	CTestDoc* GetDocument( void ) const { return reinterpret_cast< CTestDoc* >( m_pDocument ); }
+	CTestDoc* GetDocument( void ) const { return reinterpret_cast<CTestDoc*>( m_pDocument ); }
 private:
 	// enum { IDD = IDD_DEMO_FORM };
 
-	std::auto_ptr< CDemoTemplate > m_pDemo;
+	std::auto_ptr<CDemoTemplate> m_pDemo;
 public:
 	// generated overrides
 	virtual BOOL PreCreateWindow( CREATESTRUCT& cs );

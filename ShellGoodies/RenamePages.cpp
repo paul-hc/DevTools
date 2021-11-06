@@ -116,7 +116,7 @@ void CRenameListPage::CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARAM 
 	subItem, pCtrl;
 
 	static const ui::CTextEffect s_errorBk( ui::Regular, CLR_NONE, app::ColorErrorBk );
-	const CRenameItem* pRenameItem = CReportListControl::AsPtr< CRenameItem >( rowKey );
+	const CRenameItem* pRenameItem = CReportListControl::AsPtr<CRenameItem>( rowKey );
 
 	if ( m_pParentDlg->IsErrorItem( pRenameItem ) )
 		rTextEffect.Combine( s_errorBk );
@@ -194,8 +194,8 @@ void CRenameEditPage::EnsureVisibleItem( const CRenameItem* pRenameItem )
 		size_t linePos = utl::FindPos( m_pParentDlg->GetRenameItems(), pRenameItem );
 		if ( linePos != utl::npos )
 		{
-			m_srcEdit.SetSelRange( m_srcEdit.GetLineRange( static_cast< CTextEdit::Line >( linePos ) ) );
-			m_destEditor.SetSelRange( m_destEditor.GetLineRange( static_cast< CTextEdit::Line >( linePos ) ) );
+			m_srcEdit.SetSelRange( m_srcEdit.GetLineRange( static_cast<CTextEdit::Line>( linePos ) ) );
+			m_destEditor.SetSelRange( m_destEditor.GetLineRange( static_cast<CTextEdit::Line>( linePos ) ) );
 		}
 	}
 }

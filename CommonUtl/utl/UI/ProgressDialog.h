@@ -89,7 +89,7 @@ private:
 	std::tstring m_stageLabel;
 	std::tstring m_itemLabel;
 	int m_optionFlags;
-	std::auto_ptr< CScopedPumpMessage > m_pMsgPump;
+	std::auto_ptr<CScopedPumpMessage> m_pMsgPump;
 	mutable bool m_isAborted;
 
 	// internal counters, correlated yet independent of m_progressBar.GetPos()
@@ -102,7 +102,7 @@ private:
 	CRegularStatic m_stageLabelStatic, m_stageStatic;
 	CRegularStatic m_itemLabelStatic, m_itemStatic;
 	CRegularStatic m_itemCountStatic;
-	std::auto_ptr< CClockStatic > m_pClockStatic;
+	std::auto_ptr<CClockStatic> m_pClockStatic;
 
 	CProgressCtrl m_progressBar;
 

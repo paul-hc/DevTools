@@ -25,9 +25,9 @@ namespace ui
 		const double srcAspect = GetAspectRatio( srcSize ), destAspect = GetAspectRatio( destSize );
 
 		if ( destAspect > srcAspect )
-			destSize.cx = static_cast< long >( (double)destSize.cy * srcAspect );
+			destSize.cx = static_cast<long>( (double)destSize.cy * srcAspect );
 		else
-			destSize.cy = static_cast< long >( (double)destSize.cx / srcAspect );
+			destSize.cy = static_cast<long>( (double)destSize.cx / srcAspect );
 		return MaxSize( destSize, minSize );
 	}
 

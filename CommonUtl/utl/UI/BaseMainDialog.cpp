@@ -115,7 +115,7 @@ END_MESSAGE_MAP()
 
 BOOL CBaseMainDialog::OnInitDialog( void )
 {
-	const std::tstring& appNameSuffix = checked_static_cast< CBaseApp< CWinApp >* >( AfxGetApp() )->GetAppNameSuffix();
+	const std::tstring& appNameSuffix = checked_static_cast< CBaseApp<CWinApp>* >( AfxGetApp() )->GetAppNameSuffix();
 	if ( !appNameSuffix.empty() )
 		ui::SetWindowText( m_hWnd, ui::GetWindowText( m_hWnd ) + appNameSuffix );
 
@@ -162,7 +162,7 @@ void CBaseMainDialog::OnPaint( void )
 	if ( IsIconic() )
 	{
 		CPaintDC dc( this );		// device context for painting
-		SendMessage( WM_ICONERASEBKGND, reinterpret_cast< WPARAM >( dc.GetSafeHdc() ), 0 );
+		SendMessage( WM_ICONERASEBKGND, reinterpret_cast<WPARAM>( dc.GetSafeHdc() ), 0 );
 
 		if ( const CIcon* pSmallIcon = GetDlgIcon( DlgSmallIcon ) )
 		{

@@ -36,7 +36,7 @@ bool CWindowPlacement::ReadWnd( const CWnd* pWnd )
 bool CWindowPlacement::CommitWnd( CWnd* pWnd, bool restoreToMax /*= false*/, bool setMinPos /*= false*/ )
 {
 	ASSERT_PTR( pWnd->GetSafeHwnd() );
-	CWindowPlacement* pThis = const_cast< CWindowPlacement* >( this );
+	CWindowPlacement* pThis = const_cast<CWindowPlacement*>( this );
 
 	if ( restoreToMax )
 		pThis->flags |= WPF_RESTORETOMAXIMIZED;

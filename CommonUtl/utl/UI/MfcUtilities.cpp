@@ -21,7 +21,7 @@ namespace utl
 				if ( BYTE* pSrcBuffer = (BYTE*)::GlobalLock( hSrcBuffer ) )
 				{
 					m_hLockedSrcBuffer = hSrcBuffer;
-					Attach( pSrcBuffer, static_cast< UINT >( bufferSize ) );
+					Attach( pSrcBuffer, static_cast<UINT>( bufferSize ) );
 				}
 
 		if ( NULL == m_hLockedSrcBuffer )
@@ -29,7 +29,7 @@ namespace utl
 	}
 
 	CGlobalMemFile::CGlobalMemFile( size_t growBytes /*= KiloByte*/ )
-		: CMemFile( static_cast< UINT >( growBytes ) )
+		: CMemFile( static_cast<UINT>( growBytes ) )
 		, m_hLockedSrcBuffer( NULL )
 	{
 	}
@@ -43,7 +43,7 @@ namespace utl
 	HGLOBAL CGlobalMemFile::MakeGlobalData( UINT flags /*= GMEM_MOVEABLE*/ )
 	{
 		HGLOBAL hGlobal = NULL;
-		if ( size_t bufferSize = static_cast< size_t >( GetLength() ) )
+		if ( size_t bufferSize = static_cast<size_t>( GetLength() ) )
 		{
 			ASSERT_PTR( m_lpBuffer );
 			hGlobal = ::GlobalAlloc( flags, bufferSize );
@@ -179,7 +179,7 @@ namespace ui
 
 	void CAdapterDocument::ReportSaveLoadException( const TCHAR* pFilePath, CException* pExc, BOOL isSaving, UINT idDefaultPrompt )
 	{
-		if ( const CArchiveException* pArchiveExc = dynamic_cast< const CArchiveException* >( pExc ) )
+		if ( const CArchiveException* pArchiveExc = dynamic_cast<const CArchiveException*>( pExc ) )
 			switch ( pArchiveExc->m_cause )
 			{
 				case CArchiveException::badSchema:

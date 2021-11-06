@@ -32,12 +32,12 @@ public:
 	size_t GetSelItemPos( void ) const { return m_selItemPos; }
 	void SetSelItemPos( size_t selItemPos );
 
-	int GetSelItemIndex( void ) const { return static_cast< int >( m_selItemPos ); }
+	int GetSelItemIndex( void ) const { return static_cast<int>( m_selItemPos ); }
 
 	bool InputItem( size_t itemPos, const std::tstring& newItem );
 	bool InputAllItems( const std::vector< std::tstring >& items );
 private:
-	detail::IContentPage* GetActivePage( void ) const { return dynamic_cast< detail::IContentPage* >( m_childSheet.GetActivePage() ); }
+	detail::IContentPage* GetActivePage( void ) const { return dynamic_cast<detail::IContentPage*>( m_childSheet.GetActivePage() ); }
 	bool InEditMode( void ) const;
 	bool EditSelItem( void );
 
@@ -133,8 +133,8 @@ public:
 	virtual bool InEditMode( void ) const;
 	virtual bool EditSelItem( void );
 private:
-	Range< int > GetLineRange( int linePos ) const;
-	Range< int > SelectLine( int linePos );
+	Range<int> GetLineRange( int linePos ) const;
+	Range<int> SelectLine( int linePos );
 
 	void QueryEditItems( std::vector< std::tstring >& rItems ) const;
 	void OutputEdit( void );
@@ -142,7 +142,7 @@ private:
 private:
 	CItemListDialog* m_pDialog;
 	const ui::CItemContent& m_rContent;
-	Range< int > m_selLineRange;
+	Range<int> m_selLineRange;
 	static const TCHAR s_lineEnd[];
 private:
 	CTextEdit m_mlEdit;

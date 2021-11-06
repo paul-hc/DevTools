@@ -61,7 +61,7 @@ protected:
 	ui::IUserReport* m_pUserReport;
 
 	std::vector< CTransferFileAttr* > m_transferAttrs;
-	std::auto_ptr< CAlbumDoc > m_pDestAlbumDoc;		// created ad-hoc as destination model conversion album
+	std::auto_ptr<CAlbumDoc> m_pDestAlbumDoc;		// created ad-hoc as destination model conversion album
 	std::tstring m_password;						// used in catalog storages only
 
 	static const TCHAR s_buildTag[];

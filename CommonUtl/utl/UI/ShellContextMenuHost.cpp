@@ -13,47 +13,47 @@
 
 namespace shell
 {
-	CComPtr< IContextMenu > MakeAbsoluteContextMenu( PCIDLIST_ABSOLUTE pidlAbs, HWND hWndOwner )
+	CComPtr<IContextMenu> MakeAbsoluteContextMenu( PCIDLIST_ABSOLUTE pidlAbs, HWND hWndOwner )
 	{
-		CComPtr< IShellFolder > pParentFolder;
+		CComPtr<IShellFolder> pParentFolder;
 		PCUITEMID_CHILD pidlItem;			// no ownership (no allocation)
 		::SHBindToParent( pidlAbs, IID_IShellFolder, (void**)&pParentFolder, &pidlItem );		// absolute pidl: get its parent folder and its relative PIDL
 
 		return MakeFolderItemContextMenu( pParentFolder, pidlItem, hWndOwner );
 	}
 
-	CComPtr< IContextMenu > MakeFilePathContextMenu( const std::tstring& filePath, HWND hWndOwner )
+	CComPtr<IContextMenu> MakeFilePathContextMenu( const std::tstring& filePath, HWND hWndOwner )
 	{
-		CComHeapPtr< ITEMIDLIST_ABSOLUTE > pidlItem( static_cast< ITEMIDLIST_ABSOLUTE* >( ::ILCreateFromPath( filePath.c_str() ) ) );	// 64 bit: prevent warning C4090: 'argument' : different '__unaligned' qualifiers
+		CComHeapPtr<ITEMIDLIST_ABSOLUTE> pidlItem( static_cast<ITEMIDLIST_ABSOLUTE*>( ::ILCreateFromPath( filePath.c_str() ) ) );	// 64 bit: prevent warning C4090: 'argument' : different '__unaligned' qualifiers
 		return MakeAbsoluteContextMenu( pidlItem, hWndOwner );
 	}
 
-	CComPtr< IContextMenu > MakeFolderItemContextMenu( IShellFolder* pParentFolder, PCITEMID_CHILD pidlItem, HWND hWndOwner )
+	CComPtr<IContextMenu> MakeFolderItemContextMenu( IShellFolder* pParentFolder, PCITEMID_CHILD pidlItem, HWND hWndOwner )
 	{
 		ASSERT_PTR( pParentFolder );
 
-		CComPtr< IContextMenu > pCtxMenu;
+		CComPtr<IContextMenu> pCtxMenu;
 		HR_AUDIT( pParentFolder->GetUIObjectOf( hWndOwner, 1, &pidlItem, __uuidof( IContextMenu ), NULL, (void**)&pCtxMenu ) );
 		return pCtxMenu;
 	}
 
-	CComPtr< IContextMenu > MakeItemContextMenu( IShellItem* pItem, HWND hWndOwner )
+	CComPtr<IContextMenu> MakeItemContextMenu( IShellItem* pItem, HWND hWndOwner )
 	{
 		ASSERT_PTR( pItem );
 
-		CComHeapPtr< ITEMID_CHILD > childPidl;
-		if ( CComPtr< IShellFolder2 > pParentFolder = GetParentFolderAndPidl( &childPidl, pItem ) )
+		CComHeapPtr<ITEMID_CHILD> childPidl;
+		if ( CComPtr<IShellFolder2> pParentFolder = GetParentFolderAndPidl( &childPidl, pItem ) )
 			return MakeFolderItemContextMenu( pParentFolder, childPidl, hWndOwner );
 
 		return NULL;
 	}
 
-	CComPtr< IContextMenu > MakeFolderItemsContextMenu( IShellFolder* pParentFolder, PCUITEMID_CHILD_ARRAY pidlItemsArray, size_t itemCount, HWND hWndOwner )
+	CComPtr<IContextMenu> MakeFolderItemsContextMenu( IShellFolder* pParentFolder, PCUITEMID_CHILD_ARRAY pidlItemsArray, size_t itemCount, HWND hWndOwner )
 	{
 		ASSERT_PTR( pParentFolder );
 
-		CComPtr< IContextMenu > pCtxMenu;
-		HR_AUDIT( pParentFolder->GetUIObjectOf( hWndOwner, static_cast< unsigned int >( itemCount ), pidlItemsArray, __uuidof( IContextMenu ), NULL, (void**)&pCtxMenu ) );
+		CComPtr<IContextMenu> pCtxMenu;
+		HR_AUDIT( pParentFolder->GetUIObjectOf( hWndOwner, static_cast<unsigned int>( itemCount ), pidlItemsArray, __uuidof( IContextMenu ), NULL, (void**)&pCtxMenu ) );
 		return pCtxMenu;
 	}
 
@@ -81,7 +81,7 @@ namespace shell
 	{
 		ASSERT_PTR( pShellItem );
 
-		CComHeapPtr< ITEMIDLIST_ABSOLUTE > pidl;
+		CComHeapPtr<ITEMIDLIST_ABSOLUTE> pidl;
 		if ( !HR_OK( ::SHGetIDListFromObject( pShellItem, &pidl ) ) )
 			return false;
 
@@ -449,7 +449,7 @@ bool CShellLazyContextMenuHost::LazyInit( void )
 
 	TRACE( _T(" (!) LazyInit() on Explorer sub-menu.\n") );
 	CWaitCursor wait;
-	if ( CComPtr< IContextMenu > pContextMenu = shell::MakeFilePathsContextMenu( m_filePaths, m_pWndOwner->GetSafeHwnd() ) )
+	if ( CComPtr<IContextMenu> pContextMenu = shell::MakeFilePathsContextMenu( m_filePaths, m_pWndOwner->GetSafeHwnd() ) )
 	{
 		Reset( pContextMenu );
 

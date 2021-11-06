@@ -52,7 +52,7 @@ namespace wt
 		DWORD style = ui::GetStyle( hWnd );
 
 		m_item.state = HasFlag( style, WS_DISABLED ) ? TVIS_CUT : 0;
-		m_item.pszText = const_cast< TCHAR* >( m_text.c_str() );
+		m_item.pszText = const_cast<TCHAR*>( m_text.c_str() );
 		m_item.iImage = m_item.iSelectedImage = image;
 		m_item.lParam = (LPARAM)hWnd;
 	}
@@ -196,7 +196,7 @@ void CTreeWndPage::CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARAM row
 {
 	subItem, pCtrl;
 
-	HTREEITEM hItem = reinterpret_cast< HTREEITEM >( rowKey );
+	HTREEITEM hItem = reinterpret_cast<HTREEITEM>( rowKey );
 	HWND hWnd = m_treeCtrl.GetItemDataAs< HWND >( hItem );
 
 	if ( !ui::IsValidWindow( hWnd ) )
@@ -380,7 +380,7 @@ void CTreeWndPage::OnTvnSerFocus_WndTree( NMHDR* pNmHdr, LRESULT* pResult )
 void CTreeWndPage::OnTvnCustomDraw_WndTree( NMHDR* pNmHdr, LRESULT* pResult )
 {
 	NMTVCUSTOMDRAW* pDraw = (NMTVCUSTOMDRAW*)pNmHdr;
-	HWND hWnd = reinterpret_cast< HWND >( pDraw->nmcd.lItemlParam );
+	HWND hWnd = reinterpret_cast<HWND>( pDraw->nmcd.lItemlParam );
 
 	*pResult = CDRF_DODEFAULT;
 	switch ( pDraw->nmcd.dwDrawStage )

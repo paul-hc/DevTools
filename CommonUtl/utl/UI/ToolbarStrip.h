@@ -35,7 +35,7 @@ protected:
 	enum Metrics { BtnEdgeWidth = 7, BtnEdgeHeight = 7 };
 private:
 	bool m_enableUnhandledCmds;
-	std::auto_ptr< CImageList > m_pDisabledImageList;
+	std::auto_ptr<CImageList> m_pDisabledImageList;
 
 	// generated overrides
 protected:

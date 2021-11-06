@@ -30,7 +30,7 @@ private:
 	static const std::tstring GetDefaultInputText( const CTime& dateTime = CTime::GetCurrentTime() );		// CTime( 1446294619 ): "Oct 31, 2015 - 12:30:19"
 private:
 	std::tstring m_inputText;
-	Range< int > m_inputSel;
+	Range<int> m_inputSel;
 	std::vector< CDateTimeInfo > m_infos;
 
 	std::tstring m_inputCaretLineText;

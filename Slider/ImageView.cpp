@@ -74,7 +74,7 @@ CMenu& CImageView::GetDocContextMenu( void ) const
 
 CImageDoc* CImageView::GetDocument( void ) const
 {
-	return checked_static_cast< CImageDoc* >( m_pDocument );
+	return checked_static_cast<CImageDoc*>( m_pDocument );
 }
 
 COLORREF CImageView::GetBkColor( void ) const
@@ -163,7 +163,7 @@ void CImageView::MakeImageState( CImageState* pImageState ) const
 void CImageView::RestoreState( const CImageState& loadingImageState )
 {
 	if ( !HasFlag( loadingImageState.m_polyFlags, CImageState::IgnorePlacement ) )
-		const_cast< CImageState& >( loadingImageState ).RefFramePlacement().CommitWnd( m_pMdiChildFrame );
+		const_cast<CImageState&>( loadingImageState ).RefFramePlacement().CommitWnd( m_pMdiChildFrame );
 
 	SetScaleZoom( loadingImageState.m_scalingMode, loadingImageState.m_zoomPct );
 	m_bkColor = loadingImageState.m_bkColor;
@@ -303,7 +303,7 @@ int CImageView::OnCreate( CREATESTRUCT* pCS )
 	if ( -1 == __super::OnCreate( pCS ) )
 		return -1;
 
-	m_pMdiChildFrame = checked_static_cast< CChildFrame* >( GetParentFrame() );
+	m_pMdiChildFrame = checked_static_cast<CChildFrame*>( GetParentFrame() );
 	ASSERT_PTR( m_pMdiChildFrame );
 	return 0;
 }
@@ -479,12 +479,12 @@ void CImageView::OnUpdate_NavigSliderCtrl( CCmdUI* pCmdUI )
 
 void CImageView::OnRadio_ImageScalingMode( UINT cmdId )
 {
-	ModifyScalingMode( static_cast< ui::ImageScalingMode >( cmdId - ID_TOGGLE_SCALING_AUTO_FIT_LARGE ) );
+	ModifyScalingMode( static_cast<ui::ImageScalingMode>( cmdId - ID_TOGGLE_SCALING_AUTO_FIT_LARGE ) );
 }
 
 void CImageView::OnUpdate_ImageScalingMode( CCmdUI* pCmdUI )
 {
-	ui::SetRadio( pCmdUI, GetScalingMode() == static_cast< ui::ImageScalingMode >( pCmdUI->m_nID - ID_TOGGLE_SCALING_AUTO_FIT_LARGE ) );
+	ui::SetRadio( pCmdUI, GetScalingMode() == static_cast<ui::ImageScalingMode>( pCmdUI->m_nID - ID_TOGGLE_SCALING_AUTO_FIT_LARGE ) );
 }
 
 void CImageView::On_ZoomNormal100( void )

@@ -50,8 +50,8 @@ namespace fs
 	inline CFlexPath ToFlexPath( const CPath& path ) { return CFlexPath( path.Get() ); }									// convenience downcast
 
 	// convenience reference downcasts
-	inline const CFlexPath& CastFlexPath( const CPath& path ) { return reinterpret_cast< const CFlexPath& >( path ); }
-	inline const std::vector< CFlexPath >& CastFlexPaths( const std::vector< CPath >& paths ) { return reinterpret_cast< const std::vector< CFlexPath >& >( paths ); }
+	inline const CFlexPath& CastFlexPath( const CPath& path ) { return reinterpret_cast<const CFlexPath&>( path ); }
+	inline const std::vector< CFlexPath >& CastFlexPaths( const std::vector< CPath >& paths ) { return reinterpret_cast<const std::vector< CFlexPath >&>( paths ); }
 }
 
 

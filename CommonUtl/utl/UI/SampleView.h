@@ -33,7 +33,7 @@ public:
 	bool IsScrollable( DWORD scrollStyle = WS_HSCROLL | WS_VSCROLL ) const { return HasFlag( GetStyle(), scrollStyle ); };
 	void SetNotScrollable( void ) { SetContentSize( CSize( 0, 0 ) ); }
 
-	template< typename T > Range< T > GetScrollRangeAs( int bar ) const;
+	template< typename T > Range<T> GetScrollRangeAs( int bar ) const;
 
 	CRect MakeDisplayRect( const CRect& clientRect, const CSize& displaySize ) const;
 
@@ -70,11 +70,11 @@ protected:
 // template code
 
 template< typename T >
-Range< T > CSampleView::GetScrollRangeAs( int bar ) const
+Range<T> CSampleView::GetScrollRangeAs( int bar ) const
 {
 	int minPos, maxPos;
 	GetScrollRange( bar, &minPos, &maxPos );
-	return Range< T >( minPos, maxPos );
+	return Range<T>( minPos, maxPos );
 }
 
 

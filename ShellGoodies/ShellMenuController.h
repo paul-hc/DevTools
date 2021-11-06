@@ -71,7 +71,7 @@ private:
 private:
 	IContextMenu* m_pContextMenu;
 	CFileModel m_fileModel;									// files selected in Explorer
-	std::auto_ptr< CDropFilesModel > m_pDropFilesModel;		// files cached (copied or cut) to clipboard (CF_HDROP)
+	std::auto_ptr<CDropFilesModel> m_pDropFilesModel;		// files cached (copied or cut) to clipboard (CF_HDROP)
 
 	static const CMenuCmdInfo s_commands[];
 	static const CMenuCmdInfo s_moreCommands[];

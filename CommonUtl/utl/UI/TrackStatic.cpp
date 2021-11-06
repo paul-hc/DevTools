@@ -34,7 +34,7 @@ void CTrackStatic::BeginTracking( void )
 
 	CTrackData* pTrackData = new CTrackData( ui::GetCursorPos() );
 
-	if ( ITrackToolCallback* pCallback = dynamic_cast< ITrackToolCallback* >( GetParent() ) )
+	if ( ITrackToolCallback* pCallback = dynamic_cast<ITrackToolCallback*>( GetParent() ) )
 		if ( pCallback->OnPreTrackMoveCursor( this ) )
 		{
 			pTrackData->m_cursorPos = ui::GetCursorPos();

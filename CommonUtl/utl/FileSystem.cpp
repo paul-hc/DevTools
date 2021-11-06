@@ -313,14 +313,14 @@ namespace fs
 
 namespace fs
 {
-	std::auto_ptr< CFile > OpenFile( const fs::CPath& filePath, bool throwMode /*= false*/, DWORD mode /*= CFile::modeRead | CFile::typeBinary*/ ) throws_( CFileException* )
+	std::auto_ptr<CFile> OpenFile( const fs::CPath& filePath, bool throwMode /*= false*/, DWORD mode /*= CFile::modeRead | CFile::typeBinary*/ ) throws_( CFileException* )
 	{
 		ASSERT( !filePath.IsComplexPath() );
 
 		static mfc::CAutoException< CFileException > s_fileError;
 		s_fileError.m_strFileName = filePath.GetPtr();
 
-		std::auto_ptr< CFile > pFile( new CFile );
+		std::auto_ptr<CFile> pFile( new CFile );
 		if ( !pFile->Open( filePath.GetPtr(), mode | CFile::shareDenyWrite, &s_fileError ) )		// note: CFile::shareExclusive causes sharing violation
 			if ( throwMode )
 				throw &s_fileError;
@@ -334,11 +334,11 @@ namespace fs
 	{
 		UINT64 fileSize = srcFile.GetLength();
 		std::vector< BYTE > buffer;
-		buffer.resize( (std::min)( chunkSize, static_cast< size_t >( fileSize ) ) );		// grow the size of the copy buffer as needed
+		buffer.resize( (std::min)( chunkSize, static_cast<size_t>( fileSize ) ) );		// grow the size of the copy buffer as needed
 
 		for ( UINT64 bytesLeft = fileSize; bytesLeft != 0; )
 		{
-			UINT bytesRead = srcFile.Read( &buffer.front(), static_cast< UINT >( buffer.size() ) );
+			UINT bytesRead = srcFile.Read( &buffer.front(), static_cast<UINT>( buffer.size() ) );
 			rDestFile.Write( &buffer.front(), bytesRead );
 			bytesLeft -= bytesRead;
 
@@ -372,9 +372,9 @@ namespace fs
 
 	const WIN32_FIND_DATA* GetFindData( const CFileFind& foundFile )
 	{
-		const FriendlyFileFind* pFriendlyFileFinder = reinterpret_cast< const FriendlyFileFind* >( &foundFile );
+		const FriendlyFileFind* pFriendlyFileFinder = reinterpret_cast<const FriendlyFileFind*>( &foundFile );
 		ASSERT_PTR( pFriendlyFileFinder->m_pFoundInfo );				// must have already found have a file (current file)
-		return reinterpret_cast< const WIN32_FIND_DATA* >( pFriendlyFileFinder->m_pFoundInfo );
+		return reinterpret_cast<const WIN32_FIND_DATA*>( pFriendlyFileFinder->m_pFoundInfo );
 	}
 
 
@@ -397,7 +397,7 @@ namespace fs
 
 		_stat64 fileStatus;
 		if ( 0 == _tstat64( pFilePath, &fileStatus ) )
-			return static_cast< UINT64 >( fileStatus.st_size );
+			return static_cast<UINT64>( fileStatus.st_size );
 
 		return ULLONG_MAX;			// error, could use errno to find out more
 	}
@@ -561,7 +561,7 @@ namespace fs
 				switch ( policy )
 				{
 					case RuntimeExc:
-						throw CRuntimeException( str::sq::Enquote( std::auto_ptr< CFileException >( pExc ).get()->m_strFileName.GetString() ) );	// pExc will be deleted
+						throw CRuntimeException( str::sq::Enquote( std::auto_ptr<CFileException>( pExc ).get()->m_strFileName.GetString() ) );	// pExc will be deleted
 					case MfcExc:
 						throw pExc;
 					default: ASSERT( false );

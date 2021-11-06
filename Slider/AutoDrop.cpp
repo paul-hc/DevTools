@@ -256,7 +256,7 @@ namespace auto_drop
 		if ( fileNumberDrop == 0 )
 			fileNumberDrop = fileNumber;		// no insertion point -> set to the next number (append)
 
-		int groupID = static_cast< int >( CTime::GetCurrentTime().GetTime() );	// use current timestamp as group ID
+		int groupID = static_cast<int>( CTime::GetCurrentTime().GetTime() );	// use current timestamp as group ID
 
 		// push to the undo stack the group of dropped files
 		dropUndoStack.push_front( COpGroup( COpGroup::Dropped, groupID ) );
@@ -324,7 +324,7 @@ namespace auto_drop
 			return false;			// no files found -> skip reorder
 
 		// push to the undo stack the group of entries for the shifted existing files
-		dropUndoStack.push_front( COpGroup( COpGroup::Existing, static_cast< int >( CTime::GetCurrentTime().GetTime() ) ) );
+		dropUndoStack.push_front( COpGroup( COpGroup::Existing, static_cast<int>( CTime::GetCurrentTime().GetTime() ) ) );
 
 		COpGroup& rShiftedGroup = dropUndoStack.front();
 
@@ -335,7 +335,7 @@ namespace auto_drop
 		for ( size_t i = 0; i != existingFiles.size(); ++i )
 		{
 			const std::tstring& filePath = existingFiles[ i ]->GetPath().Get();
-			const int fileNumber = 1 + static_cast< int >( i );
+			const int fileNumber = 1 + static_cast<int>( i );
 
 			if ( CSearchPattern::ParseNumFileNameNumber( filePath.c_str() ) != fileNumber )
 			{	// different new number, so push it to the shifted existing group

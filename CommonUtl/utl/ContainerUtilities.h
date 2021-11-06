@@ -41,14 +41,14 @@ namespace utl
 	inline void* WriteBuffer( void* pBuffer, const SrcT* pSrc, size_t size = 1 )
 	{
 		memcpy( pBuffer, pSrc, size * sizeof( SrcT ) );
-		return reinterpret_cast< SrcT* >( pBuffer ) + size;				// pointer arithmetic: next insert position in the DEST buffer
+		return reinterpret_cast<SrcT*>( pBuffer ) + size;				// pointer arithmetic: next insert position in the DEST buffer
 	}
 
 	template< typename DestT >
 	inline const void* ReadBuffer( DestT* pDest, const void* pBuffer, size_t size = 1 )
 	{
 		memcpy( pDest, pBuffer, size * sizeof( DestT ) );
-		return reinterpret_cast< const DestT* >( pBuffer ) + size;		// pointer arithmetic: next extract position in the SRC buffer
+		return reinterpret_cast<const DestT*>( pBuffer ) + size;		// pointer arithmetic: next extract position in the SRC buffer
 	}
 }
 
@@ -133,7 +133,7 @@ namespace func
 		template< typename PairType >
 		void operator()( const PairType& rPair ) const
 		{
-			delete const_cast< typename PairType::first_type >( rPair.first );
+			delete const_cast<typename PairType::first_type>( rPair.first );
 		}
 	};
 
@@ -324,7 +324,7 @@ namespace utl
 	template< typename DiffT, typename IteratorT >
 	inline DiffT Distance( IteratorT itFirst, IteratorT itLast )
 	{
-		return static_cast< DiffT >( std::distance( itFirst, itLast ) );
+		return static_cast<DiffT>( std::distance( itFirst, itLast ) );
 	}
 
 	template< typename IteratorT, typename ValueT >
@@ -637,7 +637,7 @@ namespace utl
 
 
 	template< typename PredT, typename ContainerT >
-	size_t Uniquify( ContainerT& rItems, ContainerT* pRemovedDups = static_cast< ContainerT* >( NULL ) )
+	size_t Uniquify( ContainerT& rItems, ContainerT* pRemovedDups = static_cast<ContainerT*>( NULL ) )
 	{
 		REQUIRE( PredT::IsBoolPred() );
 
@@ -696,7 +696,7 @@ namespace utl
 		rOutObjects.reserve( rOutObjects.size() + rSource.size() );
 
 		for ( typename std::vector< SourceT* >::const_iterator itSource = rSource.begin(); itSource != rSource.end(); ++itSource )
-			if ( DesiredT* pDesired = dynamic_cast< DesiredT* >( *itSource ) )
+			if ( DesiredT* pDesired = dynamic_cast<DesiredT*>( *itSource ) )
 				rOutObjects.push_back( pDesired );
 	}
 
@@ -706,8 +706,8 @@ namespace utl
 		rDestObjects.reserve( rDestObjects.size() + rSourceObjects.size() );
 
 		for ( typename std::vector< SourceT* >::const_iterator itObject = rSourceObjects.begin(); itObject != rSourceObjects.end(); ++itObject )
-			if ( is_a< TargetT >( *itObject ) )
-				rDestObjects.push_back( checked_static_cast< DestT* >( *itObject ) );
+			if ( is_a<TargetT>( *itObject ) )
+				rDestObjects.push_back( checked_static_cast<DestT*>( *itObject ) );
 	}
 
 	template< typename TargetT, typename DestT, typename SourceT >
@@ -716,8 +716,8 @@ namespace utl
 		rDestObjects.reserve( rDestObjects.size() + rSourceObjects.size() );
 
 		for ( typename std::vector< SourceT* >::const_iterator itObject = rSourceObjects.begin(); itObject != rSourceObjects.end(); ++itObject )
-			if ( !is_a< TargetT >( *itObject ) )
-				rDestObjects.push_back( checked_static_cast< DestT* >( *itObject ) );
+			if ( !is_a<TargetT>( *itObject ) )
+				rDestObjects.push_back( checked_static_cast<DestT*>( *itObject ) );
 	}
 
 	template< typename ToRemoveT, typename ObjectT >
@@ -726,7 +726,7 @@ namespace utl
 		size_t removedCount = 0;
 
 		for ( typename std::vector< ObjectT* >::iterator it = rObjects.begin(); it != rObjects.end(); )
-			if ( is_a< ToRemoveT >( *it ) )
+			if ( is_a<ToRemoveT>( *it ) )
 			{
 				it = rObjects.erase( it );
 				++removedCount;
@@ -743,7 +743,7 @@ namespace utl
 		size_t removedCount = 0;
 
 		for ( typename std::vector< ObjectT* >::iterator it = rObjects.begin(); it != rObjects.end(); )
-			if ( is_a< PreserveT >( *it ) )
+			if ( is_a<PreserveT>( *it ) )
 				++it;
 			else
 			{
@@ -817,7 +817,7 @@ namespace utl
 		rIndexes.reserve( subSequence.size() );
 
 		for ( typename ContainerT::const_iterator itSubItem = subSequence.begin(); itSubItem != subSequence.end(); ++itSubItem )
-			rIndexes.push_back( static_cast< IndexT >( utl::LookupPos( source.begin(), source.end(), *itSubItem ) ) );
+			rIndexes.push_back( static_cast<IndexT>( utl::LookupPos( source.begin(), source.end(), *itSubItem ) ) );
 	}
 
 

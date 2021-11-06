@@ -78,7 +78,7 @@ namespace ole
 
 	BOOL CDropTarget::Register( CWnd* pWnd )
 	{
-		m_pTargetEvents = dynamic_cast< ole::IDropTargetEventsStub* >( pWnd );
+		m_pTargetEvents = dynamic_cast<ole::IDropTargetEventsStub*>( pWnd );
 		return COleDropTarget::Register( pWnd );
 	}
 
@@ -186,7 +186,7 @@ namespace ole
 		if ( m_cachedDropTipText )						// drag image present, Vista or later, visual styles enabled, and text enabled
 		{
 			// filtering should have been already done by the window class
-			DROPIMAGETYPE type = static_cast< DROPIMAGETYPE >( FilterDropEffect( effect & ~DROPEFFECT_SCROLL ) );
+			DROPIMAGETYPE type = static_cast<DROPIMAGETYPE>( FilterDropEffect( effect & ~DROPEFFECT_SCROLL ) );
 			if ( const wchar_t* pText = m_dropTip.GetTypeField( type ) )		// text is present (even if empty)
 				hasDescription = SetDropTip( type, pText, true );
 			else

@@ -271,7 +271,7 @@ BSTR FileSearch::GetRoot()
 
 long FileSearch::GetLength()
 {
-	return static_cast< long >( m_fileFind.GetLength() );
+	return static_cast<long>( m_fileFind.GetLength() );
 }
 
 BOOL FileSearch::GetIsDots()

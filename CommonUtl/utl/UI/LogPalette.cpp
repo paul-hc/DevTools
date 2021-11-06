@@ -9,10 +9,10 @@
 
 CLogPalette::CLogPalette( const COLORREF colors[], size_t count )
 	: m_pBuffer( new BYTE[ sizeof( LOGPALETTE ) + count * sizeof( PALETTEENTRY ) ] )
-	, m_pLogPalette( reinterpret_cast< LOGPALETTE* >( m_pBuffer ) )
+	, m_pLogPalette( reinterpret_cast<LOGPALETTE*>( m_pBuffer ) )
 {
 	m_pLogPalette->palVersion = 0x300;				// Windows 3.0?
-	m_pLogPalette->palNumEntries = static_cast< WORD >( count );
+	m_pLogPalette->palNumEntries = static_cast<WORD>( count );
 	for ( size_t i = 0; i != count; ++i )
 		SetAt( i, colors[ i ] );
 }

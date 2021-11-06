@@ -51,7 +51,7 @@ inline CArchive& operator&( CArchive& archive, bool& rBoolean )
 {
 	// backwards compatibility: serialize bool as BOOL
 	if ( archive.IsStoring() )
-		archive << static_cast< BOOL >( rBoolean );
+		archive << static_cast<BOOL>( rBoolean );
 	else
 	{
 		BOOL boolean;

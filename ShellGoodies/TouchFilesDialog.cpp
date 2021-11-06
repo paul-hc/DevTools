@@ -113,7 +113,7 @@ void CTouchFilesDialog::Construct( void )
 bool CTouchFilesDialog::TouchFiles( void )
 {
 	CFileService svc;
-	std::auto_ptr< CMacroCommand > pTouchMacroCmd = svc.MakeTouchCmds( m_rTouchItems );
+	std::auto_ptr<CMacroCommand> pTouchMacroCmd = svc.MakeTouchCmds( m_rTouchItems );
 	if ( pTouchMacroCmd.get() != NULL )
 		if ( !pTouchMacroCmd->IsEmpty() )
 		{
@@ -717,12 +717,12 @@ void CTouchFilesDialog::OnDtnDateTimeChange( NMHDR* pNmHdr, LRESULT* pResult )
 	// Cannot break into the debugger due to a mouse hook set in CDateTimeCtrl implementation (Windows).
 	//	https://stackoverflow.com/questions/18621575/are-there-issues-with-dtn-datetimechange-breakpoints-and-the-date-time-picker-co
 
-	fs::TimeField field = GetTimeField( static_cast< UINT >( pNmHdr->idFrom ) );
-	CDateTimeControl* pCtrl = checked_static_cast< CDateTimeControl* >( FromHandle( pNmHdr->hwndFrom ) );
+	fs::TimeField field = GetTimeField( static_cast<UINT>( pNmHdr->idFrom ) );
+	CDateTimeControl* pCtrl = checked_static_cast<CDateTimeControl*>( FromHandle( pNmHdr->hwndFrom ) );
 	TRACE( _T(" - CTouchFilesDialog::OnDtnDateTimeChange for: %s = <%s>\n"), fs::GetTags_TimeField().FormatUi( field ).c_str(), time_utl::FormatTimestamp( pCtrl->GetDateTime() ).c_str() );
 #endif
 
-	if ( multi::CDateTimeState* pDateTimeState = multi::FindWithCtrlId( m_dateTimeStates, static_cast< UINT >( pNmHdr->idFrom ) ) )
+	if ( multi::CDateTimeState* pDateTimeState = multi::FindWithCtrlId( m_dateTimeStates, static_cast<UINT>( pNmHdr->idFrom ) ) )
 		if ( pDateTimeState->InputCtrl( this ) )			// input the checked state so that custom draw can evaluate would-modify
 			OnFieldChanged();
 		else

@@ -53,7 +53,7 @@ private:
 	bool IsValidDropIndex( void ) const;
 private:
 	DraggingMode m_draggingMode;
-	std::auto_ptr< ole::CDropTarget > m_pDropTarget;	// list ctrl is registered as drop target to this data-member
+	std::auto_ptr<ole::CDropTarget> m_pDropTarget;	// list ctrl is registered as drop target to this data-member
 	CScopedGdiPlusInit m_gdiPlus;						// used to render the drop marker
 
 	struct CDragInfo;

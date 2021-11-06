@@ -46,7 +46,7 @@ std::tstring CTimer::FormatElapsedTimeSpan( double elapsedSeconds, unsigned int 
 	std::tstring text = FormatSeconds( elapsedSeconds, precision );
 
 	if ( elapsedSeconds >= 60.0 && !str::IsEmpty( pFmtTimeSpan ) )
-		text += str::Format( pFmtTimeSpan, FormatTimeSpan( static_cast< time_t >( elapsedSeconds ) ).c_str() );
+		text += str::Format( pFmtTimeSpan, FormatTimeSpan( static_cast<time_t>( elapsedSeconds ) ).c_str() );
 
 	return text;
 }

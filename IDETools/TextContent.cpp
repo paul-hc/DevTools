@@ -223,7 +223,7 @@ long TextContent::MultiLinesToSingleParagraph( LPCTSTR multiLinesText, BOOL doTr
 
 	if ( multiLinesText != NULL && multiLinesText[ 0 ] != _T('\0') )
 	{
-		std::auto_ptr< TCHAR >	textBuffer( new TCHAR[ _tcslen( multiLinesText ) + 1 ] );
+		std::auto_ptr<TCHAR> textBuffer( new TCHAR[ _tcslen( multiLinesText ) + 1 ] );
 
 		if ( textBuffer.get() != NULL )
 		{
@@ -231,8 +231,8 @@ long TextContent::MultiLinesToSingleParagraph( LPCTSTR multiLinesText, BOOL doTr
 
 			static const TCHAR* trimSeps = _T(" \t");
 			static const TCHAR* seps = _T("\r\n");
-			TCHAR*			lineToken = _tcstok( textBuffer.get(), seps );
-			CString			line;
+			TCHAR* lineToken = _tcstok( textBuffer.get(), seps );
+			CString line;
 
 			while ( lineToken != NULL )
 			{

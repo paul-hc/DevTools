@@ -99,7 +99,7 @@ namespace ole
 		s_traceCount = 0;
 		TRACE_DD( _T(">DD(%d) OnDragEnter: %s\n"), s_traceCount++, str::mfc::GetTypeName( pWnd ).GetString() );
 
-		if ( IDropTargetEventsStub* pEventsWnd = dynamic_cast< IDropTargetEventsStub* >( pWnd ) )
+		if ( IDropTargetEventsStub* pEventsWnd = dynamic_cast<IDropTargetEventsStub*>( pWnd ) )
 			return pEventsWnd->Event_OnDragEnter( pDataObject, keyState, point );
 
 		return COleDropTarget::OnDragEnter( pWnd, pDataObject, keyState, point );
@@ -109,7 +109,7 @@ namespace ole
 	{
 		TRACE_DD( _T(">DD(%d) OnDragOver: %s\n"), s_traceCount++, str::mfc::GetTypeName( pWnd ).GetString() );
 
-		if ( IDropTargetEventsStub* pEventsWnd = dynamic_cast< IDropTargetEventsStub* >( pWnd ) )
+		if ( IDropTargetEventsStub* pEventsWnd = dynamic_cast<IDropTargetEventsStub*>( pWnd ) )
 			return pEventsWnd->Event_OnDragOver( pDataObject, keyState, point );
 
 		return COleDropTarget::OnDragOver( pWnd, pDataObject, keyState, point );
@@ -119,7 +119,7 @@ namespace ole
 	{
 		TRACE_DD( _T(">DD(%d) OnDrop: %s\n"), s_traceCount++, str::mfc::GetTypeName( pWnd ).GetString() );
 
-		if ( IDropTargetEventsStub* pEventsWnd = dynamic_cast< IDropTargetEventsStub* >( pWnd ) )
+		if ( IDropTargetEventsStub* pEventsWnd = dynamic_cast<IDropTargetEventsStub*>( pWnd ) )
 			return pEventsWnd->Event_OnDrop( pDataObject, dropEffect, point );
 
 		return COleDropTarget::OnDrop( pWnd, pDataObject, dropEffect, point );
@@ -129,7 +129,7 @@ namespace ole
 	{
 		TRACE_DD( _T(">DD(%d) OnDropEx: %s\n"), s_traceCount++, str::mfc::GetTypeName( pWnd ).GetString() );
 
-		if ( IDropTargetEventsStub* pEventsWnd = dynamic_cast< IDropTargetEventsStub* >( pWnd ) )
+		if ( IDropTargetEventsStub* pEventsWnd = dynamic_cast<IDropTargetEventsStub*>( pWnd ) )
 			return pEventsWnd->Event_OnDropEx( pDataObject, dropDefault, dropList, point );
 
 		return COleDropTarget::OnDropEx( pWnd, pDataObject, dropDefault, dropList, point );
@@ -139,7 +139,7 @@ namespace ole
 	{
 		TRACE_DD( _T(">DD(%d) OnDropLeave: %s\n"), s_traceCount++, str::mfc::GetTypeName( pWnd ).GetString() );
 
-		if ( IDropTargetEventsStub* pEventsWnd = dynamic_cast< IDropTargetEventsStub* >( pWnd ) )
+		if ( IDropTargetEventsStub* pEventsWnd = dynamic_cast<IDropTargetEventsStub*>( pWnd ) )
 			pEventsWnd->Event_OnDragLeave();
 		else
 			COleDropTarget::OnDragLeave( pWnd );

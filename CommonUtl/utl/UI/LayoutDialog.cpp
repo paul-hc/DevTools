@@ -140,7 +140,7 @@ void CLayoutDialog::LoadFromRegistry( void )
 	if ( m_regSection.empty() )
 		return;
 
-	std::auto_ptr< CLayoutPlacement > pPlacement( new CLayoutPlacement( UseWindowPlacement() ) );
+	std::auto_ptr<CLayoutPlacement> pPlacement( new CLayoutPlacement( UseWindowPlacement() ) );
 	CWinApp* pApp = AfxGetApp();
 	std::tstring spec;
 

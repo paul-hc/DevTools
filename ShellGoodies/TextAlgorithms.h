@@ -128,7 +128,7 @@ namespace func
 			, m_replaceWith( replaceWith )
 			, m_caseType( matchCase ? str::Case : str::IgnoreCase )
 			, m_commit( commit )
-			, m_patternLen( static_cast< unsigned int >( m_pattern.size() ) )
+			, m_patternLen( static_cast<unsigned int>( m_pattern.size() ) )
 			, m_matchCount( 0 )
 		{
 		}

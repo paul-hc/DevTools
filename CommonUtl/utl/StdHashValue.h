@@ -12,7 +12,7 @@
 	{
 		inline size_t HashValue( const void* pFirst, size_t count )
 		{
-			return std::_Hash_seq( static_cast< const BYTE* >( pFirst ), count );
+			return std::_Hash_seq( static_cast<const BYTE*>( pFirst ), count );
 		}
 	}
 
@@ -23,7 +23,7 @@
 	{
 		inline size_t HashValue( const void* pFirst, size_t count )
 		{
-			const BYTE* pFirstByte = static_cast< const BYTE* >( pFirst );
+			const BYTE* pFirstByte = static_cast<const BYTE*>( pFirst );
 			return stdext::_Hash_value( pFirstByte, pFirstByte + count );
 		}
 	}

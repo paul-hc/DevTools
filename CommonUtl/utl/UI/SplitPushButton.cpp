@@ -69,7 +69,7 @@ CRect CSplitPushButton::GetRhsPartRect( const CRect* pClientRect /*= NULL*/ ) co
 			contentWidth += pRhsIcon->GetSize().cx + 2 * IconSpacing;
 		if ( !m_rhsText.empty() )
 		{
-			CClientDC dc( const_cast< CSplitPushButton* >( this ) );
+			CClientDC dc( const_cast<CSplitPushButton*>( this ) );
 			CScopedGdi< CFont > scopedFont( &dc, GetFont() );
 			contentWidth += ui::GetTextSize( &dc, m_rhsText.c_str() ).cx + 2 * TextSpacing;
 		}
@@ -106,7 +106,7 @@ void CSplitPushButton::DrawRhsPart( CDC* pDC, const CRect& clientRect )
 		COLORREF textColor = pDC->SetTextColor( GetSysColor( enabled ? COLOR_BTNTEXT : COLOR_GRAYTEXT ) );
 		int oldBkMode = pDC->SetBkMode( TRANSPARENT );
 
-		pDC->DrawText( m_rhsText.c_str(), static_cast< int >( m_rhsText.length() ), &rect, DT_SINGLELINE | DT_LEFT | DT_VCENTER );
+		pDC->DrawText( m_rhsText.c_str(), static_cast<int>( m_rhsText.length() ), &rect, DT_SINGLELINE | DT_LEFT | DT_VCENTER );
 
 		pDC->SetTextColor( textColor );
 		pDC->SetBkMode( oldBkMode );

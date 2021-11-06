@@ -14,7 +14,7 @@
 
 CString readLineFromStream( std::istream& rIs, int maxLineSize /*= 2000*/ )
 {
-	std::auto_ptr< char > buffer( new char[ maxLineSize ] );
+	std::auto_ptr<char> buffer( new char[ maxLineSize ] );
 
 	rIs.getline( buffer.get(), maxLineSize );
 
@@ -53,7 +53,7 @@ std::ostream& operator<<( std::ostream& rOs, const CString& rString )
 std::wostream& operator<<( std::wostream& rOs, const CString& rString )
 {
 	const size_t bufferSize = rString.GetLength() + 1;
-	std::auto_ptr< wchar_t > wideBuffer( new wchar_t[ bufferSize ] );
+	std::auto_ptr<wchar_t> wideBuffer( new wchar_t[ bufferSize ] );
 
 	AtlA2WHelper( wideBuffer.get(), rString, bufferSize );
 	return rOs << wideBuffer.get();
@@ -73,7 +73,7 @@ CString readLineFromStream( std::istream& rIs, int maxLineSize /*= 2000*/ )
 
 CString readLineFromStream( std::wistream& rIs, int maxLineSize /*= 2000*/ )
 {
-	std::auto_ptr< wchar_t > buffer( new wchar_t[ maxLineSize ] );
+	std::auto_ptr<wchar_t> buffer( new wchar_t[ maxLineSize ] );
 
 	rIs.getline( buffer.get(), maxLineSize );
 

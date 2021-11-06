@@ -217,7 +217,7 @@ template< typename BaseClass >
 void CBaseApp<BaseClass>::OnUpdateAppAbout( CCmdUI* pCmdUI )
 {
 	CWnd* pForegroundWnd = CWnd::GetForegroundWindow();
-	pCmdUI->Enable( pForegroundWnd != NULL && !is_a< CAboutBox >( pForegroundWnd ) );
+	pCmdUI->Enable( pForegroundWnd != NULL && !is_a<CAboutBox>( pForegroundWnd ) );
 	ui::ExpandVersionInfoTags( pCmdUI );		// expand "[InternalName]"
 }
 

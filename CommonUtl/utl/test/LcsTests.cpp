@@ -30,7 +30,7 @@ namespace ut
 	}
 
 	template< typename CharType >
-	void MakeRandomItems( std::vector< std::basic_string< CharType > >& rItems, const CharType fragment[], size_t minItems, size_t maxItems, size_t maxLen, const Range< CharType >& charRange )
+	void MakeRandomItems( std::vector< std::basic_string< CharType > >& rItems, const CharType fragment[], size_t minItems, size_t maxItems, size_t maxLen, const Range<CharType>& charRange )
 	{
 		utl::GenerateRandomStrings( rItems, utl::GetRandomValue( minItems, maxItems ), maxLen - str::GetLength( fragment ), charRange );
 		utl::InsertFragmentRandomly( rItems, fragment );
@@ -293,7 +293,7 @@ void CLcsTests::TestFindLongestCommonSubstring( void )
 
 void CLcsTests::TestRandomLongestCommonSubstring( void )
 {
-	const Range< wchar_t > charRange = utl::GetRangeLowerLetters< wchar_t >();
+	const Range<wchar_t> charRange = utl::GetRangeLowerLetters< wchar_t >();
 	static const wchar_t fragment[] = L" XYZ ";
 
 	for ( size_t i = 0; i != 5; ++i )

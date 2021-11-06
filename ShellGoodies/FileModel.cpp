@@ -90,7 +90,7 @@ void CFileModel::FetchFromStack( svc::StackType stackType )
 	ASSERT( m_pCmdSvc->CanUndoRedo( stackType ) );
 
 	utl::ICommand* pTopCmd = m_pCmdSvc->PeekCmd( stackType );
-	if ( const cmd::CFileMacroCmd* pFileMacroCmd = dynamic_cast< const cmd::CFileMacroCmd* >( pTopCmd ) )
+	if ( const cmd::CFileMacroCmd* pFileMacroCmd = dynamic_cast<const cmd::CFileMacroCmd*>( pTopCmd ) )
 	{
 		Clear();
 
@@ -320,7 +320,7 @@ utl::ICommand* CFileModel::MakeClipPasteDestFileStatesCmd( CWnd* pWnd ) throws_(
 
 void CFileModel::AddRenameItemFromCmd::operator()( const utl::ICommand* pCmd )
 {
-	const CRenameFileCmd* pRenameCmd = checked_static_cast< const CRenameFileCmd* >( pCmd );
+	const CRenameFileCmd* pRenameCmd = checked_static_cast<const CRenameFileCmd*>( pCmd );
 
 	fs::CPath srcPath = pRenameCmd->m_srcPath, destPath = pRenameCmd->m_destPath;
 	if ( svc::Undo == m_stackType )
@@ -338,7 +338,7 @@ void CFileModel::AddRenameItemFromCmd::operator()( const utl::ICommand* pCmd )
 
 void CFileModel::AddTouchItemFromCmd::operator()( const utl::ICommand* pCmd )
 {
-	const CTouchFileCmd* pTouchCmd = checked_static_cast< const CTouchFileCmd* >( pCmd );
+	const CTouchFileCmd* pTouchCmd = checked_static_cast<const CTouchFileCmd*>( pCmd );
 
 	fs::CFileState srcState = pTouchCmd->m_srcState, destState = pTouchCmd->m_destState;
 	if ( svc::Undo == m_stackType )
@@ -389,7 +389,7 @@ std::pair< IFileEditor*, bool > CFileModel::HandleUndoRedo( svc::StackType stack
 	if ( utl::ICommand* pTopCmd = m_pCmdSvc->PeekCmd( stackType ) )
 	{
 		if ( !ui::IsKeyPressed( VK_CONTROL ) )			// force the dashboard dialog (even on editor-based commands)?
-			if ( IFileEditor* pEditor = MakeFileEditor( static_cast< cmd::CommandType >( pTopCmd->GetTypeID() ), pParent ) )
+			if ( IFileEditor* pEditor = MakeFileEditor( static_cast<cmd::CommandType>( pTopCmd->GetTypeID() ), pParent ) )
 			{
 				resultPair.first = pEditor;				// have an editor, not handled yet
 				return resultPair;

@@ -15,7 +15,7 @@ namespace serial
 
 	void CPolicy::ToUtf8String( CStringA& rUtf8Str, const std::wstring& wideStr )
 	{
-		if ( const int wideLength = static_cast< int >( wideStr.length() ) )
+		if ( const int wideLength = static_cast<int>( wideStr.length() ) )
 			if ( int length = ::WideCharToMultiByte( CP_UTF8, 0, wideStr.c_str(), wideLength, NULL, 0, NULL, NULL ) )		// get length of the new multibyte string (excluding EOS)
 			{
 				if ( char* pBuffer = rUtf8Str.GetBuffer( length ) )
@@ -77,19 +77,19 @@ namespace serial
 
 	const BYTE* GetLoadingCursor( const ::CArchive& rLoadArchive )
 	{
-		const CArchiveGuts* pArchiveGuts = reinterpret_cast< const CArchiveGuts* >( &rLoadArchive );
+		const CArchiveGuts* pArchiveGuts = reinterpret_cast<const CArchiveGuts*>( &rLoadArchive );
 		return pArchiveGuts->GetCursor();
 	}
 
 	void UnreadBytes( ::CArchive& rLoadArchive, size_t bytes )
 	{
-		CArchiveGuts* pArchiveGuts = reinterpret_cast< CArchiveGuts* >( &rLoadArchive );
+		CArchiveGuts* pArchiveGuts = reinterpret_cast<CArchiveGuts*>( &rLoadArchive );
 		pArchiveGuts->Rewind( bytes );
 	}
 
 	UnicodeEncoding InspectSavedStringEncoding( ::CArchive& rLoadArchive, size_t* pLength /*= NULL*/ )
 	{
-		CArchiveGuts* pArchiveGuts = reinterpret_cast< CArchiveGuts* >( &rLoadArchive );
+		CArchiveGuts* pArchiveGuts = reinterpret_cast<CArchiveGuts*>( &rLoadArchive );
 		return pArchiveGuts->InspectSavedStringEncoding( pLength );
 	}
 }

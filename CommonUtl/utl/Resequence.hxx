@@ -24,7 +24,7 @@ namespace seq
 
 	inline bool CanMoveIndexBy( size_t itemCount, size_t index, Direction direction )
 	{
-		return CanMoveIndex( itemCount, index, static_cast< MoveTo >( direction ) );
+		return CanMoveIndex( itemCount, index, static_cast<MoveTo>( direction ) );
 	}
 
 	template< typename IndexT >
@@ -215,12 +215,12 @@ namespace seq
 		REQUIRE( !selIndexes.empty() );
 		REQUIRE( selIndexes.size() < rSequence.GetSize() );
 
-		IndexT lastIndex = static_cast< IndexT >( rSequence.GetSize() - 1 );
+		IndexT lastIndex = static_cast<IndexT>( rSequence.GetSize() - 1 );
 		switch ( moveTo )
 		{
 			case MovePrev:
 			case MoveNext:
-				MoveBy( rSequence, selIndexes, static_cast< Direction >( moveTo ) );
+				MoveBy( rSequence, selIndexes, static_cast<Direction>( moveTo ) );
 				break;
 			case MoveToStart:
 				// shift selected one step back at a time, working on a copy of selected indexes which gets decremented each time
@@ -249,7 +249,7 @@ namespace seq
 	struct ModifyBy
 	{
 		template< typename IndexT >
-		void operator()( IndexT& rIndex ) { rIndex += static_cast< IndexT >( direction ); }
+		void operator()( IndexT& rIndex ) { rIndex += static_cast<IndexT>( direction ); }
 	};
 
 

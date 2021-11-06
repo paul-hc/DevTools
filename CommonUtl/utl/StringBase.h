@@ -57,7 +57,7 @@ namespace str
 		static size_t GetLength( const wchar_t* pText ) { return pText != NULL ? ::wcslen( pText ) : 0; }
 
 		static char ToUpper( char ch ) { return (char)(unsigned char)::toupper( (unsigned char)ch ); }
-		static wchar_t ToUpper( wchar_t ch ) { return static_cast< wchar_t >( ::towupper( ch ) ); }
+		static wchar_t ToUpper( wchar_t ch ) { return static_cast<wchar_t>( ::towupper( ch ) ); }
 
 		static bool IsDigit( char ch ) { return ::isdigit( (unsigned char)ch ) != 0; }
 		static bool IsDigit( wchar_t ch ) { return ::iswdigit( ch ) != 0; }

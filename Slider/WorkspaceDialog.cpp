@@ -26,8 +26,8 @@ CWorkspaceDialog::CWorkspaceDialog( CWnd* pParent /*= NULL*/ )
 	, m_smoothingMode( d2d::CSharedTraits::Instance().IsSmoothingMode() )
 	, m_defaultSlideDelay( CWorkspace::Instance().GetDefaultSlideDelay() )
 {
-	m_mruCountEdit.SetValidRange( Range< int >( 0, 16 ) );
-	m_thumbListColumnCountEdit.SetValidRange( Range< int >( 1, 25 ) );
+	m_mruCountEdit.SetValidRange( Range<int>( 0, 16 ) );
+	m_thumbListColumnCountEdit.SetValidRange( Range<int>( 1, 25 ) );
 }
 
 CWorkspaceDialog::~CWorkspaceDialog()

@@ -40,7 +40,7 @@ private:
 
 	CImagesModel m_foundImages;
 public:
-	static const Range< size_t > s_allFileSizesRange;
+	static const Range<size_t> s_allFileSizesRange;
 };
 
 

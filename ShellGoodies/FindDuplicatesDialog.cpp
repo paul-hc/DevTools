@@ -1217,7 +1217,7 @@ void CFindDuplicatesDialog::OnLvnEndLabelEdit_PathsList( NMHDR* pNmHdr, LRESULT*
 
 	if ( pDispInfo->item.pszText != NULL )
 	{
-		CPathItem* pTargetItem = CListLikeCtrlBase::AsPtr< CPathItem >( pDispInfo->item.lParam );
+		CPathItem* pTargetItem = CListLikeCtrlBase::AsPtr<CPathItem>( pDispInfo->item.lParam );
 		fs::CPath newPath( pDispInfo->item.pszText );
 		std::vector< CPathItem* >* pPathItems = NULL;
 

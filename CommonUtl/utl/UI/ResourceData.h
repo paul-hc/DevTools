@@ -15,9 +15,9 @@ public:
 	DWORD GetSize( void ) const { return m_pResource != NULL ? ::SizeofResource( m_hInst, m_hResource ) : 0; }
 
 	template< typename ResourceType >
-	const ResourceType* GetResource( void ) const { return static_cast< const ResourceType* >( m_pResource ); }
+	const ResourceType* GetResource( void ) const { return static_cast<const ResourceType*>( m_pResource ); }
 
-	CComPtr< IStream > CreateStreamCopy( void ) const;		// delete on Release()
+	CComPtr<IStream> CreateStreamCopy( void ) const;		// delete on Release()
 private:
 	HINSTANCE m_hInst;
 	HRSRC m_hResource;

@@ -13,13 +13,13 @@ namespace shell
 	public:
 		CRecycler( void ) : m_pRecyclerItem( GetRecycleBinShellItem() ) { ASSERT_PTR( m_pRecyclerItem ); }
 
-		static CComPtr< IShellItem2 > GetRecycleBinShellItem( void );
-		static CComPtr< IShellFolder2 > GetRecycleBinFolder( void );
+		static CComPtr<IShellItem2> GetRecycleBinShellItem( void );
+		static CComPtr<IShellFolder2> GetRecycleBinFolder( void );
 
 		IShellItem2* GetItem( void ) const { return m_pRecyclerItem; }
 		IShellFolder2* GetFolder( void ) const { return ToShellFolder( m_pRecyclerItem ); }
 
-		CComPtr< IEnumShellItems > GetEnumItems( void ) const;
+		CComPtr<IEnumShellItems> GetEnumItems( void ) const;
 
 		// caller must release the IShellItem2 item interfaces returned
 		void QueryRecycledItems( std::vector< IShellItem2* >& rRecycledItems, const TCHAR* pOrigPrefixOrSpec, path::SpecMatch minMatch = path::Match_Any ) const;
@@ -47,7 +47,7 @@ namespace shell
 		static bool QueryRecycleBin( const TCHAR* pRootPath, size_t& rItemCount, ULONGLONG* pTotalSize = NULL );
 		static size_t FindRecycledItemCount( const TCHAR* pRootPath );
 	private:
-		CComPtr< IShellItem2 > m_pRecyclerItem;
+		CComPtr<IShellItem2> m_pRecyclerItem;
 	public:
 		static const PROPERTYKEY PK_Name;
 		static const PROPERTYKEY PK_Type;

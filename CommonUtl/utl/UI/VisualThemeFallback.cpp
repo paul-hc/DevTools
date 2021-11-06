@@ -42,7 +42,7 @@ bool CVisualThemeFallback::DrawBackground( const wchar_t* pClass, int partId, in
 			CtrlType ctrlType = itFound->second.m_ctrlType;
 			State state = itState->second;
 
-			return ::DrawFrameControl( hdc, const_cast< RECT* >( &rect ), ctrlType, state ) != FALSE;
+			return ::DrawFrameControl( hdc, const_cast<RECT*>( &rect ), ctrlType, state ) != FALSE;
 		}
 	}
 
@@ -55,7 +55,7 @@ bool CVisualThemeFallback::DrawBackground( const wchar_t* pClass, int partId, in
 
 bool CVisualThemeFallback::DrawEdge( HDC hdc, const RECT& rect, UINT edge, UINT flags )
 {
-	return ::DrawEdge( hdc, const_cast< RECT* >( &rect ), edge, flags ) != FALSE;
+	return ::DrawEdge( hdc, const_cast<RECT*>( &rect ), edge, flags ) != FALSE;
 }
 
 CVisualThemeFallback::StateSet* CVisualThemeFallback::AddClassPart( const ClassKey& classKey, CtrlType ctrlType )
@@ -91,7 +91,7 @@ bool CVisualThemeFallback::CustomDrawBk_MenuItem( int stateId, HDC hdc, const RE
 
 bool CVisualThemeFallback::CustomDrawBk_MenuChecked( int stateId, HDC hdc, const RECT& rect )
 {
-	return ::DrawEdge( hdc, const_cast< RECT* >( &rect ), stateId != MCB_DISABLED ? BDR_SUNKENOUTER : BDR_SUNKENINNER, BF_RECT | BF_SOFT ) != FALSE;
+	return ::DrawEdge( hdc, const_cast<RECT*>( &rect ), stateId != MCB_DISABLED ? BDR_SUNKENOUTER : BDR_SUNKENINNER, BF_RECT | BF_SOFT ) != FALSE;
 }
 
 void CVisualThemeFallback::RegisterButtonClass( void )

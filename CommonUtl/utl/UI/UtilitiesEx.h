@@ -52,7 +52,7 @@ struct CScopedLockRedraw
 private:
 	CWnd* m_pWnd;
 	bool m_doRedraw;
-	std::auto_ptr< CScopedWindowBorder > m_pBorder;		// temporary border; used for long operations to signal "busy"
+	std::auto_ptr<CScopedWindowBorder> m_pBorder;		// temporary border; used for long operations to signal "busy"
 };
 
 
@@ -280,7 +280,7 @@ namespace app
 
 		typedef const Type* const_iterator;
 		const size_t savedCount = byteCount / sizeof( Type );
-		const_iterator pStart = reinterpret_cast< const_iterator >( pData ), pEnd = pStart + savedCount;
+		const_iterator pStart = reinterpret_cast<const_iterator>( pData ), pEnd = pStart + savedCount;
 		rOutVector.assign( pStart, pEnd );
 
 		delete[] pData;
@@ -291,7 +291,7 @@ namespace app
 	bool WriteProfileVector( const std::vector< Type >& rVector, const TCHAR* pSection, const TCHAR* pEntry )
 	{
 		BYTE* pData = !rVector.empty() ? (BYTE*)( &rVector.front() ) : NULL;
-		UINT byteCount = static_cast< UINT >( rVector.size() * sizeof( Type ) );
+		UINT byteCount = static_cast<UINT>( rVector.size() * sizeof( Type ) );
 		return AfxGetApp()->WriteProfileBinary( pSection, pEntry, pData, byteCount ) != FALSE;
 	}
 }

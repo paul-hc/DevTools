@@ -23,7 +23,7 @@ public:
 	bool IsErrorItem( const CPathItemBase* pItem ) const;
 
 	template< typename ItemType >
-	ItemType* GetFirstErrorItem( void ) const { return !m_errorItems.empty() ? checked_static_cast< ItemType* >( m_errorItems.front() ) : NULL; }
+	ItemType* GetFirstErrorItem( void ) const { return !m_errorItems.empty() ? checked_static_cast<ItemType*>( m_errorItems.front() ) : NULL; }
 
 	bool SafeExecuteCmd( utl::ICommand* pCmd );
 

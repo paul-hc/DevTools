@@ -447,7 +447,7 @@ namespace code
 
 		typeChoiceMenu.SetDefaultItem( cmdUseDocQualifier );
 
-		MenuCommand command = static_cast< MenuCommand >( scopedIDE.TrackPopupMenu( typeChoiceMenu, ide::GetMouseScreenPos() ) );
+		MenuCommand command = static_cast<MenuCommand>( scopedIDE.TrackPopupMenu( typeChoiceMenu, ide::GetMouseScreenPos() ) );
 
 		switch ( command )
 		{

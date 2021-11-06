@@ -42,10 +42,10 @@ namespace d2d
 		UINT m_framePos;
 		CWicAnimatedImage::CFrameMetadata m_frameMetadata;			// metadata of current frame
 
-		CComPtr< ID2D1BitmapRenderTarget > m_pFrameComposeRT;
-		CComPtr< ID2D1Bitmap > m_pRawFrame;
-		CComPtr< ID2D1Bitmap > m_pSavedFrame;						// the temporary bitmap used for DM_PREVIOUS
-		CComPtr< ID2D1Bitmap > m_pFrameToRender;					// cached frame bitmap to be rendered
+		CComPtr<ID2D1BitmapRenderTarget> m_pFrameComposeRT;
+		CComPtr<ID2D1Bitmap> m_pRawFrame;
+		CComPtr<ID2D1Bitmap> m_pSavedFrame;						// the temporary bitmap used for DM_PREVIOUS
+		CComPtr<ID2D1Bitmap> m_pFrameToRender;					// cached frame bitmap to be rendered
 	};
 }
 

@@ -61,12 +61,12 @@ namespace d2d
 	int GetCeiling( float number )
 	{
 		float ceiling = ::ceil( number );
-		return static_cast< int >( ceiling );
+		return static_cast<int>( ceiling );
 	}
 
 	int GetRounded( float number )
 	{
-		return static_cast< int >( number + 0.5f );
+		return static_cast<int>( number + 0.5f );
 	}
 }
 

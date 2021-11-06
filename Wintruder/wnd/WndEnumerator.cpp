@@ -29,9 +29,9 @@ void CWndEnumBase::Build( HWND hRootWnd )
 	AddWndItem( hRootWnd );
 
 	if ( ::GetDesktopWindow() == hRootWnd )
-		::EnumWindows( (WNDENUMPROC)&EnumWindowProc, reinterpret_cast< LPARAM >( this ) );
+		::EnumWindows( (WNDENUMPROC)&EnumWindowProc, reinterpret_cast<LPARAM>( this ) );
 	else
-		::EnumChildWindows( hRootWnd, (WNDENUMPROC)&EnumChildWindowProc, reinterpret_cast< LPARAM >( this ) );
+		::EnumChildWindows( hRootWnd, (WNDENUMPROC)&EnumChildWindowProc, reinterpret_cast<LPARAM>( this ) );
 }
 
 BOOL CALLBACK CWndEnumBase::EnumWindowProc( HWND hTopLevel, CWndEnumBase* pEnumerator )
@@ -40,7 +40,7 @@ BOOL CALLBACK CWndEnumBase::EnumWindowProc( HWND hTopLevel, CWndEnumBase* pEnume
 		if ( wc::GetClassName( hTopLevel ) != _T("SysFader") )		// avoid this annoying temporary system window
 		{
 			pEnumerator->AddWndItem( hTopLevel );
-			::EnumChildWindows( hTopLevel, (WNDENUMPROC)&EnumChildWindowProc, reinterpret_cast< LPARAM >( pEnumerator ) );
+			::EnumChildWindows( hTopLevel, (WNDENUMPROC)&EnumChildWindowProc, reinterpret_cast<LPARAM>( pEnumerator ) );
 		}
 
 	return TRUE;			// continue enumeration

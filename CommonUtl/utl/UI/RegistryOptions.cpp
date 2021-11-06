@@ -160,9 +160,9 @@ BOOL CRegistryOptions::OnToggleOption( UINT cmdId )
 {
 	if ( reg::CBaseOption* pOption = FindOptionByID( cmdId ) )
 	{
-		if ( reg::TBoolOption* pBoolOption = dynamic_cast< reg::TBoolOption* >( pOption ) )
+		if ( reg::TBoolOption* pBoolOption = dynamic_cast<reg::TBoolOption*>( pOption ) )
 			ToggleOption( &pBoolOption->RefValue() );
-		else if ( reg::CEnumOption* pEnumOption = dynamic_cast< reg::CEnumOption* >( pOption ) )
+		else if ( reg::CEnumOption* pEnumOption = dynamic_cast<reg::CEnumOption*>( pOption ) )
 			ModifyOption( &pEnumOption->RefValue(), pEnumOption->GetValueFromRadioId( cmdId ) );
 		else
 			return FALSE;		// continue routing (to derived class handlers)
@@ -176,9 +176,9 @@ void CRegistryOptions::OnUpdateOption( CCmdUI* pCmdUI )
 {
 	if ( const reg::CBaseOption* pOption = FindOptionByID( pCmdUI->m_nID ) )
 	{
-		if ( const reg::TBoolOption* pBoolOption = dynamic_cast< const reg::TBoolOption* >( pOption ) )
+		if ( const reg::TBoolOption* pBoolOption = dynamic_cast<const reg::TBoolOption*>( pOption ) )
 			pCmdUI->SetCheck( pBoolOption->GetValue() );
-		else if ( const reg::CEnumOption* pEnumOption = dynamic_cast< const reg::CEnumOption* >( pOption ) )
+		else if ( const reg::CEnumOption* pEnumOption = dynamic_cast<const reg::CEnumOption*>( pOption ) )
 			ui::SetRadio( pCmdUI, pEnumOption->GetValueFromRadioId( pCmdUI->m_nID ) == pEnumOption->GetValue() );
 		else
 			pCmdUI->ContinueRouting();		// continue routing (to derived class handlers)

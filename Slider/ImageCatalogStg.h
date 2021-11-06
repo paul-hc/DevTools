@@ -58,7 +58,7 @@ private:
 	void CreateImageFiles( CCatalogStorageService* pCatalogSvc ) throws_( CException* );
 	void CreateThumbnailsSubStorage( const CCatalogStorageService* pCatalogSvc ) throws_( CException* );
 
-	CComPtr< IStream > OpenThumbnailImageStream( const TCHAR* pImageEmbeddedPath );
+	CComPtr<IStream> OpenThumbnailImageStream( const TCHAR* pImageEmbeddedPath );
 	static wic::ImageFormat MakeThumbStreamName( fs::TEmbeddedPath& rThumbStreamName, const TCHAR* pSrcImagePath );
 	static bool IsSpecialStreamName( const TCHAR* pStreamName );
 
@@ -86,7 +86,7 @@ private:
 	class CAlbumMapWriter : public fs::CTextFileWriter
 	{
 	public:
-		CAlbumMapWriter( std::auto_ptr< COleStreamFile > pAlbumMapFile );
+		CAlbumMapWriter( std::auto_ptr<COleStreamFile> pAlbumMapFile );
 
 		void WriteHeader( void );
 		void WriteEntry( const std::tstring& streamName, const TCHAR* pImageEmbeddedPath );
@@ -95,7 +95,7 @@ private:
 	private:
 		enum { StreamNoPadding = 5, StreamNamePadding = 34 };
 
-		std::auto_ptr< COleStreamFile > m_pAlbumMapFile;
+		std::auto_ptr<COleStreamFile> m_pAlbumMapFile;
 		size_t m_imageCount;
 		static const TCHAR s_lineFmt[];
 	};

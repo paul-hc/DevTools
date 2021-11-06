@@ -111,7 +111,7 @@ CCodingStandardPage::CCodingStandardPage( void )
 	: CLayoutPropertyPage( IDD_OPTIONS_CODE_FORMATTING_PAGE )
 	, m_splitSeparatorsEdit( m_breakSep )
 {
-	m_splitMaxColumnEdit.SetValidRange( Range< int >( 1, 250 ) );
+	m_splitMaxColumnEdit.SetValidRange( Range<int>( 1, 250 ) );
 
 	const code::CFormatterOptions& formatterOptions = app::GetModuleSession().GetCodeFormatterOptions();
 

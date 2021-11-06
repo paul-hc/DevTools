@@ -57,8 +57,8 @@ private:
 	enum Flag { Modeless = 1 << 0 };
 
 	DWORD m_dlgFlags;
-	std::auto_ptr< CLayoutEngine > m_pLayoutEngine;
-	std::auto_ptr< CLayoutPlacement > m_pPlacement;		// persistent
+	std::auto_ptr<CLayoutEngine> m_pLayoutEngine;
+	std::auto_ptr<CLayoutPlacement> m_pPlacement;		// persistent
 protected:
 	std::tstring m_regSection;
 

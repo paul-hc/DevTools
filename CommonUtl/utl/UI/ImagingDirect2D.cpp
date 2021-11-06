@@ -17,7 +17,7 @@ namespace d2d
 	CDrawBitmapTraits::CDrawBitmapTraits( COLORREF bkColor /*= CLR_NONE*/, UINT opacityPct /*= 100*/ )
 		: m_smoothingMode( utl::Default )
 		, m_bkColor( bkColor )
-		, m_opacity( static_cast< float >( opacityPct ) / 100.f )
+		, m_opacity( static_cast<float>( opacityPct ) / 100.f )
 		, m_transform( D2D1::Matrix3x2F::Identity() )
 		, m_frameColor( CLR_NONE )
 	{
@@ -39,7 +39,7 @@ namespace d2d
 		D2D_RECT_F destRectF = d2d::ToRectF( destRect );
 		if ( m_bkColor != CLR_NONE )
 		{
-			CComPtr< ID2D1SolidColorBrush > pBrush;
+			CComPtr<ID2D1SolidColorBrush> pBrush;
 			if ( HR_OK( pRenderTarget->CreateSolidColorBrush( ToColor( m_bkColor ), &pBrush ) ) )
 				pRenderTarget->FillRectangle( &destRectF, pBrush );				// clear the image background (not the entire client rect)
 		}
@@ -57,7 +57,7 @@ namespace d2d
 
 		if ( m_frameColor != CLR_NONE )
 		{
-			CComPtr< ID2D1SolidColorBrush > pBrush;
+			CComPtr<ID2D1SolidColorBrush> pBrush;
 			if ( HR_OK( pRenderTarget->CreateSolidColorBrush( ToColor( m_frameColor ), &pBrush ) ) )
 				pRenderTarget->DrawRectangle( &destRectF, pBrush );				// draw a frame around the image
 		}
@@ -75,7 +75,7 @@ namespace d2d
 	{
 		ASSERT_PTR( pGadget );
 		utl::PushUnique( m_gadgets, pGadget );
-		checked_static_cast< CGadgetBase* >( pGadget )->SetRenderHost( this );
+		checked_static_cast<CGadgetBase*>( pGadget )->SetRenderHost( this );
 	}
 
 	bool CRenderTarget::IsGadgetVisible( const IGadgetComponent* pGadget ) const

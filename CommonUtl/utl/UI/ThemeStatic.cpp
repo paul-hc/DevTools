@@ -77,7 +77,7 @@ void CThemeStatic::Draw( CDC* pDC, const CRect& clientRect )
 		bkDrawn = true;
 
 	if ( !bkDrawn )			// draw a raised frame fallback background
-		pDC->DrawEdge( const_cast< CRect* >( &clientRect ), BDR_RAISEDINNER, BF_RECT | BF_SOFT );
+		pDC->DrawEdge( const_cast<CRect*>( &clientRect ), BDR_RAISEDINNER, BF_RECT | BF_SOFT );
 
 	CRect textBounds = clientRect;
 	textBounds.DeflateRect( m_textSpacing );
@@ -87,7 +87,7 @@ void CThemeStatic::Draw( CDC* pDC, const CRect& clientRect )
 void CThemeStatic::DrawTextContent( CDC* pDC, const CRect& textBounds, CThemeItem::Status drawStatus )
 {
 	if ( m_useText )
-		DrawFallbackText( GetTextThemeItem(), drawStatus, pDC, const_cast< CRect& >( textBounds ), ui::GetWindowText( this ), GetDrawTextFlags() );
+		DrawFallbackText( GetTextThemeItem(), drawStatus, pDC, const_cast<CRect&>( textBounds ), ui::GetWindowText( this ), GetDrawTextFlags() );
 }
 
 void CThemeStatic::DrawFallbackText( const CThemeItem* pTextTheme, CThemeItem::Status drawStatus, CDC* pDC, CRect& rRect,

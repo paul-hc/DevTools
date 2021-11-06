@@ -24,7 +24,7 @@ namespace ole
 	void CDropSource::SetDataSource( COleDataSource* pDataSource )
 	{
 		if ( pDataSource != NULL )
-			m_pDataObject = static_cast< IDataObject* >( pDataSource->GetInterface( &IID_IDataObject ) );
+			m_pDataObject = static_cast<IDataObject*>( pDataSource->GetInterface( &IID_IDataObject ) );
 		else
 			m_pDataObject = NULL;
 	}
@@ -96,7 +96,7 @@ namespace ole
 				if ( ole_utl::ExtractData( &formatEtc, &stgMedium, m_pDataObject, CFSTR_DROPDESCRIPTION ) )		// drop tip data present?
 				{
 					bool changeDropTip = false;
-					DROPDESCRIPTION* pDropTip = static_cast< DROPDESCRIPTION* >( ::GlobalLock( stgMedium.hGlobal ) );
+					DROPDESCRIPTION* pDropTip = static_cast<DROPDESCRIPTION*>( ::GlobalLock( stgMedium.hGlobal ) );
 
 					if ( oldStyle )
 						changeDropTip = shell::CDropTip::Clear( pDropTip );

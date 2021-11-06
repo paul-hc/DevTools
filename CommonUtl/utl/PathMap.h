@@ -40,7 +40,7 @@ namespace fs
 		size_t GetCount( void ) const { return m_pathMap.size(); }
 		bool Contains( const PathT& pathKey ) const { return Find( pathKey ) != NULL; }
 
-		const ValueT* Find( const PathT& pathKey ) const { return const_cast< CPathMap* >( this )->Find( pathKey ); }
+		const ValueT* Find( const PathT& pathKey ) const { return const_cast<CPathMap*>( this )->Find( pathKey ); }
 
 		ValueT* Find( const PathT& pathKey )
 		{
@@ -109,7 +109,7 @@ namespace fs
 	// Simple map of PathT keys to file-based COM interfaces with shared ownership, not thread-safe.
 	//
 	template< typename PathT, typename InterfaceT >
-	class CPathComPtrMap : public CPathMap< PathT, CAdapt< CComPtr< InterfaceT > > >
+	class CPathComPtrMap : public CPathMap< PathT, CAdapt< CComPtr<InterfaceT> > >
 	{
 	public:
 		typedef CComPtr<InterfaceT> TComPtr;
@@ -262,7 +262,7 @@ namespace fs
 		bool StoreParam( const PathT& pathKey, const ParamT& param )
 		{
 			mt::CAutoLock lock( &m_cs );		// nested locks works fine (no deadlock) within the same calling thread
-			TEntry* pFoundEntry = const_cast< TEntry* >( _FindEntry( pathKey ) );
+			TEntry* pFoundEntry = const_cast<TEntry*>( _FindEntry( pathKey ) );
 			if ( NULL == pFoundEntry )
 				return false;
 

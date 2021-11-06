@@ -32,7 +32,7 @@ namespace ut
 
 		for ( std::vector< fs::CPath >::const_iterator itFilePath = src.m_filePaths.begin(); itFilePath != src.m_filePaths.end(); ++itFilePath )
 		{
-			std::auto_ptr< CFile > pSrcFile = fs::OpenFile( srcDirPath / *itFilePath, false );
+			std::auto_ptr<CFile> pSrcFile = fs::OpenFile( srcDirPath / *itFilePath, false );
 			ASSERT_PTR( pSrcFile.get() );
 
 			fs::TEmbeddedPath parentFolderPath = itFilePath->GetParentPath();
@@ -41,7 +41,7 @@ namespace ut
 
 			const TCHAR* pStreamName = itFilePath->GetFilenamePtr();
 
-			std::auto_ptr< COleStreamFile > pDestStreamFile( pDocStorage->CreateStreamFile( pStreamName ) );
+			std::auto_ptr<COleStreamFile> pDestStreamFile( pDocStorage->CreateStreamFile( pStreamName ) );
 			ASSERT_PTR( pDestStreamFile.get() );
 
 			fs::BufferedCopy( *pDestStreamFile, *pSrcFile );
@@ -163,7 +163,7 @@ void CStructuredStorageTest::TestStructuredStorage( void )
 			ASSERT( !docStorage.UseStreamSharing() );
 			ASSERT( !docStorage.IsStreamOpen( streamPath ) );		// was not cached
 			{
-				CComPtr< IStream > pStream_a1 = docStorage.OpenStream( streamPath.GetFilenamePtr() );
+				CComPtr<IStream> pStream_a1 = docStorage.OpenStream( streamPath.GetFilenamePtr() );
 				ASSERT_PTR( pStream_a1 );
 			}
 			ASSERT( docStorage.IsStreamOpen( streamPath ) );						// was cached
@@ -285,7 +285,7 @@ void CStructuredStorageTest::_TestOpenSharedStreams( fs::CStructuredStorage* pDo
 	fs::CStructuredStorage::CScopedCurrentDir scopedDir( pDocStorage, streamFolderPath.GetPtr() );
 
 	// stream origin
-	CComPtr< IStream > pStream_1 = pDocStorage->OpenStream( pStreamName );
+	CComPtr<IStream> pStream_1 = pDocStorage->OpenStream( pStreamName );
 	ASSERT_EQUAL( 2, dbg::GetRefCount( pStream_1 ) );		// 1 in CStreamState::m_pStreamOrigin + 1 local
 	ASSERT( pDocStorage->IsStreamOpen( streamPath ) );
 
@@ -300,14 +300,14 @@ void CStructuredStorageTest::_TestOpenSharedStreams( fs::CStructuredStorage* pDo
 	}
 
 	// #2 shared duplicate stream
-	CComPtr< IStream > pStream_2 = pDocStorage->OpenStream( pStreamName );
+	CComPtr<IStream> pStream_2 = pDocStorage->OpenStream( pStreamName );
 	ASSERT_EQUAL( 1, dbg::GetRefCount( pStream_2 ) );
 	ASSERT_EQUAL( content, ut::ReadTextFromStream( pDocStorage, pStream_2 ) );
 
 	ASSERT_EQUAL( 2, dbg::GetRefCount( pStream_1 ) );			// origin refCount invariant to cloning
 
 	// #3 shared duplicate stream
-	CComPtr< IStream > pStream_3 = pDocStorage->OpenStream( pStreamName );
+	CComPtr<IStream> pStream_3 = pDocStorage->OpenStream( pStreamName );
 	ASSERT_EQUAL( 1, dbg::GetRefCount( pStream_3 ) );
 	ASSERT_EQUAL( content, ut::ReadTextFromStream( pDocStorage, pStream_3 ) );
 

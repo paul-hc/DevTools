@@ -26,7 +26,7 @@ protected:
 	virtual void EndTracking( void );
 	virtual void OnTrack( void );
 private:
-	std::auto_ptr< CWndHighlighter > m_pWndHighlighter;
+	std::auto_ptr<CWndHighlighter> m_pWndHighlighter;
 };
 
 

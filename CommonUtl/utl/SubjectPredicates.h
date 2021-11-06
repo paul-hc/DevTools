@@ -8,11 +8,11 @@
 
 namespace pred
 {
-	typedef CompareScalarAdapterPtr< func::AsCode > CompareCode;
-	typedef CompareScalarAdapterPtr< func::AsDisplayCode > CompareDisplayCode;
-	typedef CompareAdapterPtr< CompareCode, func::DynamicAs< utl::ISubject > > CompareSubjectCode;
+	typedef CompareScalarAdapterPtr<func::AsCode> CompareCode;
+	typedef CompareScalarAdapterPtr<func::AsDisplayCode> CompareDisplayCode;
+	typedef CompareAdapterPtr< CompareCode, func::DynamicAs<utl::ISubject > > CompareSubjectCode;
 
-	typedef LessPtr< CompareCode > LessCode;
+	typedef LessPtr<CompareCode> LessCode;
 
 
 	// for implementing stateful object comparators
@@ -80,7 +80,7 @@ namespace pred
 			return m_compare( m_getPropFunc( AsObject( pLeft ) ), m_getPropFunc( AsObject( pRight ) ) );
 		}
 	private:
-		static const ObjectType* AsObject( const utl::ISubject* pSubject ) { return checked_static_cast< const ObjectType* >( pSubject ); }
+		static const ObjectType* AsObject( const utl::ISubject* pSubject ) { return checked_static_cast<const ObjectType*>( pSubject ); }
 	private:
 		GetPropFunc m_getPropFunc;
 		Compare m_compare;

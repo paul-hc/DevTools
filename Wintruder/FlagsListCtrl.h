@@ -26,7 +26,7 @@ private:
 	void AddFlagItem( int itemIndex, const CFlagInfo* pFlag );
 
 	const CFlagInfo* GetFlagInfoAt( int pos ) const { return GetPtrAt< CFlagInfo >( pos ); }
-	void SetFlagInfoAt( int pos, const CFlagInfo* pFlagInfo ) { VERIFY( SetPtrAt( pos, const_cast< CFlagInfo* >( pFlagInfo ) ) ); }
+	void SetFlagInfoAt( int pos, const CFlagInfo* pFlagInfo ) { VERIFY( SetPtrAt( pos, const_cast<CFlagInfo*>( pFlagInfo ) ) ); }
 
 	CFlagGroup* GetFlagGroup( int groupId ) const;
 	int FindGroupIdWithFlag( const CFlagInfo* pFlag ) const;

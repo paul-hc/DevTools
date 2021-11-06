@@ -64,7 +64,7 @@ private:
 		HWND m_hOldFocus;
 	};
 
-	std::auto_ptr< CTrackData > m_pTrackData;
+	std::auto_ptr<CTrackData> m_pTrackData;
 public:
 	// generated overrides
 	virtual void PreSubclassWindow( void );

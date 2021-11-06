@@ -90,7 +90,7 @@ namespace ui
 
 		m_pCtrl->MoveWindow( &ctrlRect );
 
-		if ( ui::ILayoutEngine* pParentLayout = dynamic_cast< ui::ILayoutEngine* >( m_pCtrl->GetParent() ) )
+		if ( ui::ILayoutEngine* pParentLayout = dynamic_cast<ui::ILayoutEngine*>( m_pCtrl->GetParent() ) )
 		{	// adjust layout for this control so that it will reposition as expected on parent dialog resize
 			CLayoutEngine& rLayoutEngine = pParentLayout->GetLayoutEngine();
 			UINT ctrlId = m_pCtrl->GetDlgCtrlID();

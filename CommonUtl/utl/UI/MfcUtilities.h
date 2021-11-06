@@ -26,7 +26,7 @@ namespace com
 		{
 			if ( m_value.vt != VT_UI1 )
 				return false;
-			*pValue = static_cast< ValueType >( m_value.bVal );
+			*pValue = static_cast<ValueType>( m_value.bVal );
 			return true;
 		}
 
@@ -35,7 +35,7 @@ namespace com
 		{
 			if ( m_value.vt != VT_UI2 )
 				return false;
-			*pValue = static_cast< ValueType >( m_value.uiVal );
+			*pValue = static_cast<ValueType>( m_value.uiVal );
 			return true;
 		}
 
@@ -119,9 +119,9 @@ namespace serial
 			ASSERT( IsValidLoadingArchive( rArchive ) );				// if a file archive, ensure CScopedLoadingArchive is created in the scope of loading
 
 			if ( &rArchive == s_pLoadingArchive )
-				return static_cast< EnumType >( s_docLoadingModelSchema );
+				return static_cast<EnumType>( s_docLoadingModelSchema );
 
-			return static_cast< EnumType >( s_latestModelSchema );
+			return static_cast<EnumType>( s_latestModelSchema );
 		}
 	private:
 		enum { UnitializedVersion = -1 };
@@ -193,7 +193,7 @@ namespace ui
 		ASSERT_PTR( pDoc );
 
 		for ( POSITION pos = pDoc->GetFirstViewPosition(); pos != NULL; )
-			if ( ViewT* pView = dynamic_cast< ViewT* >( pDoc->GetNextView( pos ) ) )
+			if ( ViewT* pView = dynamic_cast<ViewT*>( pDoc->GetNextView( pos ) ) )
 				return pView;
 
 		return NULL;

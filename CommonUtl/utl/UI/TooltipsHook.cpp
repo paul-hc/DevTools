@@ -20,7 +20,7 @@ CTooltipsHook::CTooltipsHook( HWND hWndToHook /*= NULL*/ )
 void CTooltipsHook::HookControl( CWnd* pCtrlToHook )
 {
 	HookWindow( pCtrlToHook->GetSafeHwnd() );
-	m_pCustomCmdInfo = dynamic_cast< ui::ICustomCmdInfo* >( pCtrlToHook->GetParent() );
+	m_pCustomCmdInfo = dynamic_cast<ui::ICustomCmdInfo*>( pCtrlToHook->GetParent() );
 }
 
 LRESULT CTooltipsHook::WindowProc( UINT message, WPARAM wParam, LPARAM lParam )

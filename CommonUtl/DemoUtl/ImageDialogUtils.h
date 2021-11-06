@@ -116,9 +116,9 @@ struct CModeData
 	CModeData( const TCHAR* pLabels );		// use "|" as separator
 	~CModeData() { Clear(); }
 
-	unsigned int GetZoneCount( void ) const { return static_cast< unsigned int >( m_labels.size() ); }
+	unsigned int GetZoneCount( void ) const { return static_cast<unsigned int>( m_labels.size() ); }
 	void Clear( void );
-	void PushDib( std::auto_ptr< CDibSection >& rpDib ) { m_dibs.push_back( rpDib.release() ); ENSURE( m_dibs.size() < m_labels.size() ); }
+	void PushDib( std::auto_ptr<CDibSection>& rpDib ) { m_dibs.push_back( rpDib.release() ); ENSURE( m_dibs.size() < m_labels.size() ); }
 public:
 	std::vector< std::tstring > m_labels;
 	std::vector< CDibSection* > m_dibs;
@@ -132,7 +132,7 @@ class CColorChannelEdit : public CSpinEdit
 {
 public:
 	CColorChannelEdit( UINT editId, BYTE* pChannel, bool pixelChannel = false )
-		: m_editId( editId ), m_pChannel( pChannel ), m_pixelChannel( pixelChannel ) { ASSERT_PTR( m_pChannel ); SetFullRange< BYTE >(); }
+		: m_editId( editId ), m_pChannel( pChannel ), m_pixelChannel( pixelChannel ) { ASSERT_PTR( m_pChannel ); SetFullRange<BYTE>(); }
 
 	bool IsPixelChannel( void ) const { return m_pixelChannel; }		// must regenerate effect DIBs
 	void DDX_Channel( CDataExchange* pDX ) { DDX_Number( pDX, *m_pChannel, m_editId ); }

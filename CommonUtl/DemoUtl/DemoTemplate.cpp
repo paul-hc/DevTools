@@ -57,7 +57,7 @@ ResizeStyle CDemoTemplate::m_dialogResizeStyle = ResizeHV;
 CDemoTemplate::CDemoTemplate( CWnd* pOwner )
 	: CCmdTarget()
 	, m_pOwner( pOwner )
-	, m_pLayoutEngine( dynamic_cast< ui::ILayoutEngine* >( m_pOwner ) )
+	, m_pLayoutEngine( dynamic_cast<ui::ILayoutEngine*>( m_pOwner ) )
 	, m_selRadio( 0 )
 	, m_dialogButton( &GetTags_ResizeStyle() )
 	, m_pickFormatCheckedStatic( ui::DropDown )
@@ -133,7 +133,7 @@ void CDemoTemplate::DoDataExchange( CDataExchange* pDX )
 {
 	bool firstInit = NULL == m_formatCombo.m_hWnd;
 	if ( firstInit )
-		if ( GetMarkupDepth( dynamic_cast< CDemoPage* >( m_pOwner ) ) <= MaxDemoDepth )
+		if ( GetMarkupDepth( dynamic_cast<CDemoPage*>( m_pOwner ) ) <= MaxDemoDepth )
 			m_detailSheet.AddPage( new CDemoPage );
 
 	DDX_Control( pDX, IDC_OPEN_DIALOG_BUTTON, m_dialogButton );
@@ -259,13 +259,13 @@ void CDemoTemplate::OnUpdateNumSequence( CCmdUI* pCmdUI )
 
 void CDemoTemplate::OnDropAlignCheckedPicker( UINT cmdId )
 {
-	ui::PopupAlign dropAlign = static_cast< ui::PopupAlign >( cmdId - ID_DROP_RIGHT );
+	ui::PopupAlign dropAlign = static_cast<ui::PopupAlign>( cmdId - ID_DROP_RIGHT );
 	m_pickFormatCheckedStatic.SetPopupAlign( dropAlign );
 }
 
 void CDemoTemplate::OnUpdateDropAlignCheckedPicker( CCmdUI* pCmdUI )
 {
-	ui::PopupAlign dropAlign = static_cast< ui::PopupAlign >( pCmdUI->m_nID - ID_DROP_RIGHT );
+	ui::PopupAlign dropAlign = static_cast<ui::PopupAlign>( pCmdUI->m_nID - ID_DROP_RIGHT );
 	ui::SetRadio( pCmdUI, m_pickFormatCheckedStatic.GetPopupAlign() == dropAlign );				// keep the nice radio checkmark
 }
 

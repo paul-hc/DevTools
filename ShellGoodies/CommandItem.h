@@ -18,7 +18,7 @@ public:
 	void SetCmd( utl::ICommand* pCmd );
 
 	template< typename Cmd_T >
-	Cmd_T* GetCmdAs( void ) const { return dynamic_cast< Cmd_T* >( m_pCmd ); }
+	Cmd_T* GetCmdAs( void ) const { return dynamic_cast<Cmd_T*>( m_pCmd ); }
 
 	int GetImageIndex( void ) const { return m_imageIndex; }
 

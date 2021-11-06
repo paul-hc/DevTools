@@ -38,21 +38,21 @@ namespace shell
 	const PROPERTYKEY CRecycler::PK_OriginalLocation = { PSGUID_DISPLACED, PID_DISPLACED_FROM };
 	const PROPERTYKEY CRecycler::PK_DateDeleted = { PSGUID_DISPLACED, PID_DISPLACED_DATE };
 
-	CComPtr< IShellItem2 > CRecycler::GetRecycleBinShellItem( void )
+	CComPtr<IShellItem2> CRecycler::GetRecycleBinShellItem( void )
 	{
-		CComPtr< IShellItem2 > pRecycleBinItem;
+		CComPtr<IShellItem2> pRecycleBinItem;
 		if ( HR_OK( ::SHGetKnownFolderItem( FOLDERID_RecycleBinFolder, KF_FLAG_DEFAULT, NULL, IID_PPV_ARGS( &pRecycleBinItem ) ) ) )
 			return pRecycleBinItem;
 
 		return NULL;
 	}
 
-	CComPtr< IShellFolder2 > CRecycler::GetRecycleBinFolder( void )
+	CComPtr<IShellFolder2> CRecycler::GetRecycleBinFolder( void )
 	{
-		CComPtr< IShellFolder2 > pRecycleBinFolder;
-		if ( CComPtr< IShellFolder > pDesktop = GetDesktopFolder() )
+		CComPtr<IShellFolder2> pRecycleBinFolder;
+		if ( CComPtr<IShellFolder> pDesktop = GetDesktopFolder() )
 		{
-			CComHeapPtr< ITEMIDLIST_ABSOLUTE > pidlRecycleBin;
+			CComHeapPtr<ITEMIDLIST_ABSOLUTE> pidlRecycleBin;
 			if ( HR_OK( ::SHGetSpecialFolderLocation( NULL /*m_hWnd*/, CSIDL_BITBUCKET, &pidlRecycleBin ) ) )
 				if ( HR_OK( pDesktop->BindToObject( pidlRecycleBin, NULL, IID_PPV_ARGS( &pRecycleBinFolder ) ) ) )
 					return pRecycleBinFolder;
@@ -61,9 +61,9 @@ namespace shell
 		return NULL;
 	}
 
-	CComPtr< IEnumShellItems > CRecycler::GetEnumItems( void ) const
+	CComPtr<IEnumShellItems> CRecycler::GetEnumItems( void ) const
 	{
-		CComPtr< IEnumShellItems > pEnumItems;
+		CComPtr<IEnumShellItems> pEnumItems;
 		if ( HR_OK( m_pRecyclerItem->BindToHandler( NULL, BHID_EnumItems, IID_PPV_ARGS( &pEnumItems ) ) ) )
 			return pEnumItems;
 
@@ -80,9 +80,9 @@ namespace shell
 		//
 		std::vector< std::pair< IShellItem2*, CTime > > items;
 
-		if ( CComPtr< IEnumShellItems > pEnumItems = GetEnumItems() )
-			for ( CComPtr< IShellItem > pItem; S_OK == pEnumItems->Next( 1, &pItem, NULL ); pItem = NULL )
-				if ( CComQIPtr< IShellItem2 > pItem2 = pItem )
+		if ( CComPtr<IEnumShellItems> pEnumItems = GetEnumItems() )
+			for ( CComPtr<IShellItem> pItem; S_OK == pEnumItems->Next( 1, &pItem, NULL ); pItem = NULL )
+				if ( CComQIPtr<IShellItem2> pItem2 = pItem )
 				{
 					path::SpecMatch foundMatch = OriginalPathMatchesPrefix( pItem2, pOrigPrefixOrSpec );
 					if ( foundMatch >= minMatch )
@@ -108,9 +108,9 @@ namespace shell
 
 		fileRecycledItems.resize( delFilePaths.size() );
 
-		if ( CComPtr< IEnumShellItems > pEnumItems = GetEnumItems() )
-			for ( CComPtr< IShellItem > pItem; S_OK == pEnumItems->Next( 1, &pItem, NULL ); pItem = NULL )
-				if ( CComQIPtr< IShellItem2 > pRecycledItem = pItem )
+		if ( CComPtr<IEnumShellItems> pEnumItems = GetEnumItems() )
+			for ( CComPtr<IShellItem> pItem; S_OK == pEnumItems->Next( 1, &pItem, NULL ); pItem = NULL )
+				if ( CComQIPtr<IShellItem2> pRecycledItem = pItem )
 				{
 					fs::CPath origFilePath = GetOriginalFilePath( pRecycledItem );
 					size_t fileEntryPos = utl::FindPos( delFilePaths, origFilePath );
@@ -183,7 +183,7 @@ namespace shell
 		size_t undeletedCount = 0;
 
 		if ( !recycledItems.empty() )
-			if ( CComPtr< IContextMenu > pContextMenu = shell::MakeItemsContextMenu( recycledItems, pWndOwner->GetSafeHwnd() ) )
+			if ( CComPtr<IContextMenu> pContextMenu = shell::MakeItemsContextMenu( recycledItems, pWndOwner->GetSafeHwnd() ) )
 				if ( Undelete( pContextMenu, pWndOwner ) )
 					undeletedCount = recycledItems.size();
 
@@ -235,7 +235,7 @@ namespace shell
 	bool CRecycler::UndeleteItem( IShellItem2* pRecycledItem, CWnd* pWndOwner )
 	{
 		ASSERT_PTR( pRecycledItem );
-		if ( CComPtr< IContextMenu > pContextMenu = shell::MakeItemContextMenu( pRecycledItem, pWndOwner->GetSafeHwnd() ) )
+		if ( CComPtr<IContextMenu> pContextMenu = shell::MakeItemContextMenu( pRecycledItem, pWndOwner->GetSafeHwnd() ) )
 			return Undelete( pContextMenu, pWndOwner );
 		return false;
 	}
@@ -256,7 +256,7 @@ namespace shell
 		std::vector< TCHAR > drivesBuffer( ::GetLogicalDriveStrings( 0, NULL ) + 1 );
 		if ( TCHAR* pDrivesList = &drivesBuffer.front() )
 		{
-			::GetLogicalDriveStrings( static_cast< DWORD >( drivesBuffer.size() ), pDrivesList );
+			::GetLogicalDriveStrings( static_cast<DWORD>( drivesBuffer.size() ), pDrivesList );
 
 			for ( const TCHAR* pDrive = pDrivesList; *pDrive != _T('\0'); pDrive += str::GetLength( pDrive ) + 1 )
 				rDriveRootPaths.push_back( pDrive );
@@ -282,9 +282,9 @@ namespace shell
 
 		bool succeeded = HR_OK( ::SHQueryRecycleBin( pRootPath, &rbInfo ) );
 
-		rItemCount = static_cast< size_t >( rbInfo.i64NumItems );
+		rItemCount = static_cast<size_t>( rbInfo.i64NumItems );
 		if ( pTotalSize != NULL )
-			*pTotalSize = static_cast< ULONGLONG >( rbInfo.i64Size );
+			*pTotalSize = static_cast<ULONGLONG>( rbInfo.i64Size );
 		return succeeded;
 	}
 

@@ -76,10 +76,10 @@ void CAppService::AddObserver( CWnd* pObserver )
 {
 	ASSERT_PTR( pObserver );
 
-	if ( IWndObserver* pWndObserver = dynamic_cast< IWndObserver* >( pObserver ) )
+	if ( IWndObserver* pWndObserver = dynamic_cast<IWndObserver*>( pObserver ) )
 		utl::PushUnique( m_wndObservers, pWndObserver );
 
-	if ( IEventObserver* pEventObserver = dynamic_cast< IEventObserver* >( pObserver ) )
+	if ( IEventObserver* pEventObserver = dynamic_cast<IEventObserver*>( pObserver ) )
 		utl::PushUnique( m_eventObservers, pEventObserver );
 }
 
@@ -87,10 +87,10 @@ void CAppService::RemoveObserver( CWnd* pObserver )
 {
 	ASSERT_PTR( pObserver );
 
-	if ( IWndObserver* pWndObserver = dynamic_cast< IWndObserver* >( pObserver ) )
+	if ( IWndObserver* pWndObserver = dynamic_cast<IWndObserver*>( pObserver ) )
 		utl::RemoveExisting( m_wndObservers, pWndObserver );
 
-	if ( IEventObserver* pEventObserver = dynamic_cast< IEventObserver* >( pObserver ) )
+	if ( IEventObserver* pEventObserver = dynamic_cast<IEventObserver*>( pObserver ) )
 		utl::RemoveExisting( m_eventObservers, pEventObserver );
 }
 

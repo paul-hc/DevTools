@@ -11,7 +11,7 @@ class CClipboard;
 
 namespace ole_utl
 {
-	inline CLIPFORMAT RegisterFormat( const TCHAR* pFormat ) { return static_cast< CLIPFORMAT >( ::RegisterClipboardFormat( pFormat ) ); }
+	inline CLIPFORMAT RegisterFormat( const TCHAR* pFormat ) { return static_cast<CLIPFORMAT>( ::RegisterClipboardFormat( pFormat ) ); }
 	bool IsFormatRegistered( CLIPFORMAT cfFormat, const TCHAR* pFormat );
 
 

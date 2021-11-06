@@ -19,7 +19,7 @@ public:
 private:
 	void ValidatePattern( ui::ComboField byField = ui::BySel );
 public:
-	std::auto_ptr< CSearchPattern > m_pSearchPattern;
+	std::auto_ptr<CSearchPattern> m_pSearchPattern;
 private:
 	// enum { IDD = IDD_SEARCH_PATTERN_DIALOG };
 

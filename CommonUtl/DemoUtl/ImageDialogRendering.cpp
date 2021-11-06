@@ -26,7 +26,7 @@ void CImageDialog::CreateEffectDibs( void )
 	CScopedFlag< int > scopedSkipCopyImage( &CDibSection::m_testFlags, m_convertFlags & CDibSection::ForceCvtEqualBpp );
 	WORD bitsPerPixel = m_pDibSection->GetBitsPerPixel();
 	COLORREF bkColor = GetBkColor();
-	std::auto_ptr< CDibSection > pNewDib;
+	std::auto_ptr<CDibSection> pNewDib;
 
 	pModeData->m_dibs.clear();			// allow push-backs
 	switch ( m_sampleMode )
@@ -38,7 +38,7 @@ void CImageDialog::CreateEffectDibs( void )
 			ASSERT( COUNT_OF( bpp ) == pModeData->GetZoneCount() - 1 );
 			for ( unsigned int i = 0; i != COUNT_OF( bpp ); ++i )
 			{
-				std::auto_ptr< CDibSection > pCvtDib( new CDibSection );
+				std::auto_ptr<CDibSection> pCvtDib( new CDibSection );
 				if ( !pCvtDib->Convert( *m_pDibSection, bpp[ i ] ) )
 					pCvtDib.reset();
 
@@ -309,7 +309,7 @@ bool CImageDialog::Render_RectsAlphaBlend( CDC* pDC, const CRect& clientRect )
 
 CDibSection* CImageDialog::CloneSourceDib( void ) const
 {
-	std::auto_ptr< CDibSection > pNewDib( new CDibSection );
+	std::auto_ptr<CDibSection> pNewDib( new CDibSection );
 	if ( !pNewDib->Copy( m_pDibSection.get() ) )
 		pNewDib.reset();
 	return pNewDib.release();

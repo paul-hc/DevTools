@@ -13,11 +13,11 @@
 
 namespace hlp
 {
-	Range< size_t > GetSelectWordRange( const std::tstring& text, const Range< size_t >& sel )
+	Range<size_t> GetSelectWordRange( const std::tstring& text, const Range<size_t>& sel )
 	{
 		ASSERT( sel.IsNormalized() );
 		ASSERT( sel.m_end <= text.length() );
-		Range< size_t > wordRange = sel;
+		Range<size_t> wordRange = sel;
 
 		const std::locale& loc = str::GetUserLocale();
 
@@ -84,7 +84,7 @@ CTextEditor::~CTextEditor()
 
 CTextEditor::SelType CTextEditor::GetSelType( void ) const
 {
-	Range< int > sel = GetSelRange< int >();
+	Range<int> sel = GetSelRange<int>();
 	if ( sel.IsEmpty() )
 		return SelEmpty;
 
@@ -129,7 +129,7 @@ void CTextEditor::OnLButtonDblClk( UINT flags, CPoint point )
 {
 	CTextEdit::OnLButtonDblClk( flags, point );
 
-	Range< size_t > sel = GetSelRange< int >();
+	Range<size_t> sel = GetSelRange<int>();
 	std::tstring selText = GetSelText();
 	str::TrimRight( selText );						// exclude trailing whitespace on word selection
 
@@ -139,7 +139,7 @@ void CTextEditor::OnLButtonDblClk( UINT flags, CPoint point )
 
 void CTextEditor::OnWordSelection( UINT cmdId )
 {
-	Range< size_t > sel = GetSelRange< int >();
+	Range<size_t> sel = GetSelRange<int>();
 	std::tstring text = ui::GetWindowText( this );
 	if ( text.empty() )
 		return;
@@ -167,7 +167,7 @@ void CTextEditor::OnWordSelection( UINT cmdId )
 
 void CTextEditor::OnChangeCase( UINT cmdId )
 {
-	Range< size_t > sel = GetSelRange< int >();
+	Range<size_t> sel = GetSelRange<int>();
 	std::tstring text = ui::GetWindowText( this );
 	if ( text.empty() || sel.m_start == text.length() )
 	{
@@ -199,7 +199,7 @@ void CTextEditor::OnChangeCase( UINT cmdId )
 
 void CTextEditor::OnChangeNumber( UINT cmdId )
 {
-	Range< size_t > sel = GetSelRange< int >();
+	Range<size_t> sel = GetSelRange<int>();
 	std::tstring text = ui::GetWindowText( this );
 
 	if ( num::EnwrapNumericSequence( sel, text ) )							// find the entire digit sequence in the vicinity of selection

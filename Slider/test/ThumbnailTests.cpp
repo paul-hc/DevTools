@@ -18,7 +18,7 @@ namespace ut
 {
 	static CThumbnailer* GetThumbnailer( void )
 	{
-		static std::auto_ptr< CThumbnailer > pThumbnailer;
+		static std::auto_ptr<CThumbnailer> pThumbnailer;
 		if ( NULL == pThumbnailer.get() )
 		{
 			pThumbnailer.reset( new CThumbnailer );

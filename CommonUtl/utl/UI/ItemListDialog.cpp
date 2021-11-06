@@ -510,7 +510,7 @@ bool CItemsEditPage::EditSelItem( void )
 	std::tstring currLine = m_mlEdit.GetLineTextAt();
 	int startPos = m_mlEdit.LineIndex();
 	if ( startPos != -1 )
-		m_mlEdit.SetSel( startPos, startPos + static_cast< int >( currLine.length() ) );
+		m_mlEdit.SetSel( startPos, startPos + static_cast<int>( currLine.length() ) );
 
 	int selIndex = m_pDialog->GetSelItemIndex();
 	std::tstring newItem;
@@ -526,21 +526,21 @@ bool CItemsEditPage::EditSelItem( void )
 	m_mlEdit.SetFocus();
 
 	if ( startPos != -1 )
-		m_mlEdit.SetSel( startPos, startPos + static_cast< int >( newItem.length() ) );
+		m_mlEdit.SetSel( startPos, startPos + static_cast<int>( newItem.length() ) );
 
 	return m_pDialog->InputItem( selIndex, newItem );
 }
 
-Range< int > CItemsEditPage::GetLineRange( int linePos ) const
+Range<int> CItemsEditPage::GetLineRange( int linePos ) const
 {
-	Range< int > lineRange( m_mlEdit.LineIndex( linePos ) );
+	Range<int> lineRange( m_mlEdit.LineIndex( linePos ) );
 	lineRange.m_end += m_mlEdit.LineLength( lineRange.m_start );
 	return lineRange;
 }
 
-Range< int > CItemsEditPage::SelectLine( int linePos )
+Range<int> CItemsEditPage::SelectLine( int linePos )
 {
-	Range< int > lineRange = GetLineRange( linePos );
+	Range<int> lineRange = GetLineRange( linePos );
 	if ( lineRange.m_start != -1 )
 		m_mlEdit.SetSel( lineRange.m_start, lineRange.m_end );
 	return lineRange;
@@ -612,7 +612,7 @@ BOOL CItemsEditPage::PreTranslateMessage( MSG* pMsg )
 LRESULT CItemsEditPage::OnIdleUpdateCmdUI( WPARAM wParam, LPARAM lParam )
 {
 	wParam, lParam;
-	Range< int > selLineRange = m_mlEdit.GetLineRangeAt();
+	Range<int> selLineRange = m_mlEdit.GetLineRangeAt();
 	if ( selLineRange != m_selLineRange )
 	{
 		m_selLineRange = selLineRange;

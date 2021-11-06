@@ -22,12 +22,12 @@ int CFileListDisplayPaths::GetPos( size_t pos ) const
 {
 	if ( pos < m_paths.size() )
 		if ( !m_filesMustExist || m_paths[ pos ]->FileExist() )
-			return static_cast< int >( pos );
+			return static_cast<int>( pos );
 
 	return -1;
 }
 
-void CFileListDisplayPaths::SetListState( CListViewState& rLvState, std::auto_ptr< CListViewState::CImpl< int > >& pIndexState )
+void CFileListDisplayPaths::SetListState( CListViewState& rLvState, std::auto_ptr< CListViewState::CImpl<int> >& pIndexState )
 {
 	ASSERT( rLvState.IsConsistent() );
 	rLvState.Clear();

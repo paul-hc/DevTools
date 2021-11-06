@@ -40,7 +40,7 @@ void CToolStrip::Clear( void )
 int CToolStrip::GetImageCount( void ) const
 {
 	// image count: (buttons-separators)
-	return static_cast< int >( m_buttonIds.size() - std::count( m_buttonIds.begin(), m_buttonIds.end(), ID_SEPARATOR ) );
+	return static_cast<int>( m_buttonIds.size() - std::count( m_buttonIds.begin(), m_buttonIds.end(), ID_SEPARATOR ) );
 }
 
 CImageList* CToolStrip::EnsureImageList( void )
@@ -48,7 +48,7 @@ CImageList* CToolStrip::EnsureImageList( void )
 	if ( !HasImages() )
 		if ( !m_buttonIds.empty() && CImageStore::HasSharedStore() )
 		{
-			std::auto_ptr< CImageList > pImageList( new CImageList );
+			std::auto_ptr<CImageList> pImageList( new CImageList );
 			int imageCount = CImageStore::GetSharedStore()->AddToImageList( *pImageList, ARRAY_PAIR_V( m_buttonIds ), m_imageSize );
 			if ( imageCount == GetImageCount() )			// all buttons images found
 				m_pImageList.reset( pImageList.release() );
@@ -74,7 +74,7 @@ bool CToolStrip::LoadStrip( UINT toolStripId, COLORREF transpColor /*= color::Au
 	int imageCount = GetImageCount();
 	if ( imageCount != 0 )
 	{
-		std::auto_ptr< CImageList > pImageList( new CImageList );
+		std::auto_ptr<CImageList> pImageList( new CImageList );
 		if ( res::LoadImageList( *pImageList, toolStripId, imageCount, m_imageSize, transpColor ) )
 			m_pImageList.reset( pImageList.release() );
 	}

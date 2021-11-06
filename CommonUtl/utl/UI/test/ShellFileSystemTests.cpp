@@ -44,7 +44,7 @@ void CShellFileSystemTests::TestShellPidl( void )
 	ut::CTempFilePool pool( _T("fa.txt|d1\\fb.txt") );
 	const fs::TDirPath& poolDirPath = pool.GetPoolDirPath();
 
-	CComPtr< IShellFolder > pDesktopFolder = shell::GetDesktopFolder();
+	CComPtr<IShellFolder> pDesktopFolder = shell::GetDesktopFolder();
 	ASSERT_PTR( pDesktopFolder );
 
 	shell::CPidl desktopPidl;
@@ -63,7 +63,7 @@ void CShellFileSystemTests::TestShellPidl( void )
 		ASSERT( poolDirPidl == poolDirPidl2 );				// absolute compare
 	}
 
-	CComPtr< IShellFolder > pPoolFolder = poolDirPidl.FindFolder();
+	CComPtr<IShellFolder> pPoolFolder = poolDirPidl.FindFolder();
 	ASSERT_PTR( pPoolFolder );
 
 	shell::CPidl pidl;
@@ -98,7 +98,7 @@ void CShellFileSystemTests::TestShellPidl( void )
 			ASSERT_EQUAL( _T("fa.txt"), itemPidl.GetName() );		// filePath.GetFilename()
 
 			// shell item from child PIDL relative to parent folder
-			CComPtr< IShellItem > pChildFileItem = itemPidl.FindItem( pPoolFolder );
+			CComPtr<IShellItem> pChildFileItem = itemPidl.FindItem( pPoolFolder );
 			ASSERT_PTR( pChildFileItem );
 			ASSERT_EQUAL( filePath, shell::CWinExplorer().GetItemPath( pChildFileItem ) );
 
@@ -107,7 +107,7 @@ void CShellFileSystemTests::TestShellPidl( void )
 		}
 
 		{	// shell item
-			CComPtr< IShellItem > pFileItem = filePidl.FindItem();
+			CComPtr<IShellItem> pFileItem = filePidl.FindItem();
 			ASSERT_PTR( pFileItem );
 			fs::CPath itemPath = shell::CWinExplorer().GetItemPath( pFileItem );
 			ASSERT_EQUAL( filePath, itemPath );
@@ -138,7 +138,7 @@ void CShellFileSystemTests::TestShellRelativePidl( void )
 	ut::CTempFilePool pool( _T("a.txt|d1\\b.txt|d2\\sub3\\c.txt") );
 
 	std::vector< PIDLIST_RELATIVE > pidlItemsArray;
-	CComPtr< IShellFolder > pCommonFolder = shell::MakeRelativePidlArray( pidlItemsArray, pool.GetFilePaths() );
+	CComPtr<IShellFolder> pCommonFolder = shell::MakeRelativePidlArray( pidlItemsArray, pool.GetFilePaths() );
 	ASSERT_PTR( pCommonFolder );
 
 	ASSERT_EQUAL( 3, pidlItemsArray.size() );
@@ -232,7 +232,7 @@ void CShellFileSystemTests::TestMultiFileContextMenu( void )
 	ut::CTempFilePool pool( _T("file1.txt|file2.txt|DIR\\file3.txt") );
 	const std::vector< fs::CPath >& filePaths = pool.GetFilePaths();
 
-	std::vector< CComPtr< IShellItem > > shellItems; shellItems.reserve( filePaths.size() );
+	std::vector< CComPtr<IShellItem> > shellItems; shellItems.reserve( filePaths.size() );
 
 	for ( std::vector< fs::CPath >::const_iterator itFilePath = filePaths.begin(); itFilePath != filePaths.end(); ++itFilePath )
 	{
@@ -240,12 +240,12 @@ void CShellFileSystemTests::TestMultiFileContextMenu( void )
 		ASSERT( shellItems.back() != NULL );
 	}
 
-	CComPtr< IContextMenu > pContextMenu;
+	CComPtr<IContextMenu> pContextMenu;
 	if ( true )
 		pContextMenu = shell::MakeItemsContextMenu( shellItems, NULL );
 	else	//	for files in same folder - fails for DIR\\file3.txt
 	{
-		CComPtr< IShellItemArray > pShellItemArray = shell::MakeShellItemArray( shellItems );
+		CComPtr<IShellItemArray> pShellItemArray = shell::MakeShellItemArray( shellItems );
 		ASSERT( HR_OK( pShellItemArray->BindToHandler( NULL, BHID_SFUIObject, IID_PPV_ARGS( &pContextMenu ) ) ) );
 	}
 	ASSERT_PTR( pContextMenu );

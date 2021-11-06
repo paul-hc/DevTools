@@ -89,7 +89,7 @@ void CAlbumThumbListView::StorePeerView( CAlbumImageView* pPeerImageView )
 	// called just after creation, before initial update
 	ASSERT_NULL( m_pPeerImageView );
 	m_pPeerImageView = pPeerImageView;
-	m_pSplitterWnd = checked_static_cast< CSplitterWindow* >( GetParent() );
+	m_pSplitterWnd = checked_static_cast<CSplitterWindow*>( GetParent() );
 }
 
 CAlbumDoc* CAlbumThumbListView::GetAlbumDoc( void ) const
@@ -118,13 +118,13 @@ void CAlbumThumbListView::SetupAlbumModel( const CAlbumModel* pAlbumModel, bool 
 
 	// remove extra trailing items
 	while ( countOld > countNew )
-		pListBox->DeleteString( static_cast< UINT >( --countOld ) );
+		pListBox->DeleteString( static_cast<UINT>( --countOld ) );
 
 	// append missing items
 	for ( ; countOld < countNew; ++countOld )
 		pListBox->AddString( _T("") );
 
-	ASSERT( pListBox->GetCount() == static_cast< int >( m_pAlbumModel != NULL ? m_pAlbumModel->GetFileAttrCount() : 0 ) );
+	ASSERT( pListBox->GetCount() == static_cast<int>( m_pAlbumModel != NULL ? m_pAlbumModel->GetFileAttrCount() : 0 ) );
 
 	SetRedraw( TRUE );
 	if ( doRedraw )
@@ -208,7 +208,7 @@ void CAlbumThumbListView::GetListViewState( CListViewState& rLvState, bool files
 	CFileListDisplayPaths displayPaths( *m_pAlbumModel, filesMustExist );
 
 	// work on an index state for simplicity
-	std::auto_ptr< CListViewState::CImpl< int > > pIndexState( new CListViewState::CImpl< int > );
+	std::auto_ptr<CListViewState::CImpl< int >> pIndexState( new CListViewState::CImpl< int > );
 	pIndexState->m_top = displayPaths.GetPos( pListBox->GetTopIndex() );
 
 	if ( IsMultiSelection() )
@@ -239,7 +239,7 @@ void CAlbumThumbListView::SetListViewState( const CListViewState& lvState, bool 
 	CListBox* pListBox = AsListBox();
 
 	// work on an index state for simplicity
-	std::auto_ptr< CListViewState::CImpl< int > > pIndexState( CFileListDisplayPaths::MakeIndexState( lvState, *m_pAlbumModel ) );
+	std::auto_ptr< CListViewState::CImpl<int> > pIndexState( CFileListDisplayPaths::MakeIndexState( lvState, *m_pAlbumModel ) );
 
 	for ( ; *pDoRestore != _T('\0'); ++pDoRestore )
 	{
@@ -849,7 +849,7 @@ BOOL CAlbumThumbListView::OnDrop( COleDataObject* pDataObject, DROPEFFECT dropEf
 	int dropIndex = GetImageIndexFromPoint( point );
 
 	// custom order drag&drop was allowed only between views of the same document... TODO
-	if ( CAlbumThumbListView* pThumbView = dynamic_cast< CAlbumThumbListView* >( selData.m_pSrcWnd ) )
+	if ( CAlbumThumbListView* pThumbView = dynamic_cast<CAlbumThumbListView*>( selData.m_pSrcWnd ) )
 		if ( pThumbView->GetAlbumDoc() != pAlbumDoc )
 		{
 			ASSERT( false );	// TODO: drag&drop between albums
@@ -858,7 +858,7 @@ BOOL CAlbumThumbListView::OnDrop( COleDataObject* pDataObject, DROPEFFECT dropEf
 	m_dragSelIndexes.swap( selData.m_selIndexes );			// used for temporary storing display indexes to drop
 
 	if ( LB_ERR == dropIndex )
-		dropIndex = static_cast< int >( m_pAlbumModel->GetFileAttrCount() );		// if dropIndex is -1, then move at back selected indexes
+		dropIndex = static_cast<int>( m_pAlbumModel->GetFileAttrCount() );		// if dropIndex is -1, then move at back selected indexes
 
 	if ( !pAlbumDoc->GetModel()->IsCustomOrder() )			// not yet in custom order: prompt the user to switch to custom order
 		if ( IDOK == AfxMessageBox( IDS_PROMPT_SWITCHTOCUSTOMORDER, MB_OKCANCEL | MB_ICONQUESTION ) )

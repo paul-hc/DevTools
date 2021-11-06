@@ -368,7 +368,7 @@ bool CDibSection::CreateDIBSection( CDibPixels& rPixels, int width, int height, 
 	dibInfo.bmiHeader.biWidth = width;
 	dibInfo.bmiHeader.biHeight = height;			// negative height will create a top-down DIB
 	dibInfo.bmiHeader.biPlanes = 1;
-	dibInfo.bmiHeader.biBitCount = static_cast< WORD >( bitsPerPixel );
+	dibInfo.bmiHeader.biBitCount = static_cast<WORD>( bitsPerPixel );
 	dibInfo.bmiHeader.biCompression = BI_RGB;
 
 	return CreateDIBSection( rPixels, dibInfo );

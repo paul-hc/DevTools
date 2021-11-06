@@ -75,7 +75,7 @@ namespace num
 		ASSERT( textRange.InBounds() );
 
 		str::TStringRange numberRange( textRange );
-		Range< size_t >& rNumPos = numberRange.RefPos();
+		Range<size_t>& rNumPos = numberRange.RefPos();
 
 		// skip non-numeric chars
 		while ( !numberRange.IsEmpty() && !IsDecimalChar( numberRange.GetStartCh() ) )

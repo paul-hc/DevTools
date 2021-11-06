@@ -32,12 +32,12 @@ namespace shell
 			return false;
 
 		AFX_COM com;
-		CComPtr< IShellLink > pShellLink;
+		CComPtr<IShellLink> pShellLink;
 
 		if ( !HR_OK( com.CreateInstance( CLSID_ShellLink, NULL, IID_IShellLink, (LPVOID*)&pShellLink ) ) || pShellLink == NULL )
 			return false;
 
-		if ( CComQIPtr< IPersistFile > pPersistFile = pShellLink )
+		if ( CComQIPtr<IPersistFile> pPersistFile = pShellLink )
 			if ( HR_OK( pPersistFile->Load( pShortcutLnkPath, STGM_READ ) ) )
 				if ( HR_OK( pShellLink->Resolve( pWnd->GetSafeHwnd(), SLR_ANY_MATCH ) ) )		// resolve the link; this may post UI to find the link
 				{
@@ -55,22 +55,22 @@ namespace shell
 
 namespace shell
 {
-	CComPtr< IShellFolder > GetDesktopFolder( void )
+	CComPtr<IShellFolder> GetDesktopFolder( void )
 	{
-		CComPtr< IShellFolder > pDesktopFolder;
+		CComPtr<IShellFolder> pDesktopFolder;
 		if ( HR_OK( ::SHGetDesktopFolder( &pDesktopFolder ) ) )
 			return pDesktopFolder;
 
 		return NULL;
 	}
 
-	CComPtr< IShellFolder > FindShellFolder( const TCHAR* pDirPath )
+	CComPtr<IShellFolder> FindShellFolder( const TCHAR* pDirPath )
 	{
-		CComPtr< IShellFolder > pDirFolder;
+		CComPtr<IShellFolder> pDirFolder;
 
-		if ( CComPtr< IShellFolder > pDesktopFolder = GetDesktopFolder() )
+		if ( CComPtr<IShellFolder> pDesktopFolder = GetDesktopFolder() )
 		{
-			CComHeapPtr< ITEMIDLIST > pidlFolder( static_cast< ITEMIDLIST_RELATIVE* >( pidl::GetRelativeItem( pDesktopFolder, pDirPath ) ) );
+			CComHeapPtr<ITEMIDLIST> pidlFolder( static_cast<ITEMIDLIST_RELATIVE*>( pidl::GetRelativeItem( pDesktopFolder, pDirPath ) ) );
 			if ( pidlFolder.m_pData != NULL )
 				HR_AUDIT( pDesktopFolder->BindToObject( pidlFolder, NULL, IID_PPV_ARGS( &pDirFolder ) ) );
 		}
@@ -79,36 +79,36 @@ namespace shell
 	}
 
 
-	CComPtr< IShellItem > FindShellItem( const fs::CPath& fullPath )
+	CComPtr<IShellItem> FindShellItem( const fs::CPath& fullPath )
 	{
-		CComPtr< IShellItem > pShellItem;
+		CComPtr<IShellItem> pShellItem;
 		if ( HR_OK( ::SHCreateItemFromParsingName( fullPath.GetPtr(), NULL, IID_PPV_ARGS( &pShellItem ) ) ) )
 			return pShellItem;
 		return NULL;
 	}
 
-	CComPtr< IShellFolder2 > ToShellFolder( IShellItem* pFolderItem )
+	CComPtr<IShellFolder2> ToShellFolder( IShellItem* pFolderItem )
 	{
 		ASSERT_PTR( pFolderItem );
 
-		CComPtr< IShellFolder2 > pShellFolder;
+		CComPtr<IShellFolder2> pShellFolder;
 
-		CComHeapPtr< ITEMIDLIST_ABSOLUTE > pidlFolder;
+		CComHeapPtr<ITEMIDLIST_ABSOLUTE> pidlFolder;
 		if ( HR_OK( ::SHGetIDListFromObject( pFolderItem, &pidlFolder ) ) )
-			if ( CComPtr< IShellFolder > pDesktopFolder = GetDesktopFolder() )
+			if ( CComPtr<IShellFolder> pDesktopFolder = GetDesktopFolder() )
 				if ( HR_OK( pDesktopFolder->BindToObject( pidlFolder, NULL, IID_PPV_ARGS( &pShellFolder ) ) ) )
 					return pShellFolder;
 
 		return pShellFolder;
 	}
 
-	CComPtr< IShellFolder2 > GetParentFolderAndPidl( ITEMID_CHILD** pPidlItem, IShellItem* pShellItem )
+	CComPtr<IShellFolder2> GetParentFolderAndPidl( ITEMID_CHILD** pPidlItem, IShellItem* pShellItem )
 	{
-		if ( CComQIPtr< IParentAndItem > pParentAndItem = pShellItem )
+		if ( CComQIPtr<IParentAndItem> pParentAndItem = pShellItem )
 		{
-			CComPtr< IShellFolder > pParentFolder;
+			CComPtr<IShellFolder> pParentFolder;
 			if ( SUCCEEDED( pParentAndItem->GetParentAndItem( NULL, &pParentFolder, pPidlItem ) ) )
-				return CComQIPtr< IShellFolder2 >( pParentFolder );
+				return CComQIPtr<IShellFolder2>( pParentFolder );
 		}
 
 		return NULL;
@@ -122,7 +122,7 @@ namespace shell
 	{
 		ASSERT_PTR( pStrRet );
 
-		CComHeapPtr< TCHAR > text;
+		CComHeapPtr<TCHAR> text;
 		if ( SUCCEEDED( ::StrRetToStr( pStrRet, pidl, &text ) ) )
 			return text.m_pData;
 
@@ -171,7 +171,7 @@ namespace shell
 
 	std::tstring GetDisplayName( IShellItem* pItem, SIGDN sigdn )
 	{
-		CComHeapPtr< wchar_t > name;
+		CComHeapPtr<wchar_t> name;
 		if ( SUCCEEDED( pItem->GetDisplayName( sigdn, &name ) ) )
 			return name.m_pData;
 
@@ -180,7 +180,7 @@ namespace shell
 
 	std::tstring GetStringProperty( IShellItem2* pItem, const PROPERTYKEY& propKey )
 	{
-		CComHeapPtr< wchar_t > value;
+		CComHeapPtr<wchar_t> value;
 		if ( SUCCEEDED( pItem->GetString( propKey, &value ) ) )
 			return value.m_pData;
 
@@ -220,10 +220,10 @@ namespace shell
 {
 	// obsolete, kept just for reference on using SHBindToParent
 	//
-	CComPtr< IShellFolder > _MakeChildPidlArray( std::vector< PITEMID_CHILD >& rPidlItemsArray, const std::vector< std::tstring >& filePaths )
+	CComPtr<IShellFolder> _MakeChildPidlArray( std::vector< PITEMID_CHILD >& rPidlItemsArray, const std::vector< std::tstring >& filePaths )
 	{
 		// MSDN: we assume that all objects are in the same folder
-		CComPtr< IShellFolder > pFirstParentFolder;
+		CComPtr<IShellFolder> pFirstParentFolder;
 
 		ASSERT( !filePaths.empty() );
 
@@ -231,10 +231,10 @@ namespace shell
 
 		for ( size_t i = 0; i != filePaths.size(); ++i )
 		{
-			CComHeapPtr< ITEMIDLIST_ABSOLUTE > pidlAbs( static_cast< ITEMIDLIST_ABSOLUTE* >( ::ILCreateFromPath( filePaths[ i ].c_str() ) ) );
+			CComHeapPtr<ITEMIDLIST_ABSOLUTE> pidlAbs( static_cast<ITEMIDLIST_ABSOLUTE*>( ::ILCreateFromPath( filePaths[ i ].c_str() ) ) );
 				// on 64 bit: the cast prevents warning C4090: 'argument' : different '__unaligned' qualifiers
 
-			CComPtr< IShellFolder > pParentFolder;
+			CComPtr<IShellFolder> pParentFolder;
 			PCUITEMID_CHILD pidlItem;				// pidl relative to parent folder (not allocated)
 
 			if ( HR_OK( ::SHBindToParent( pidlAbs, IID_IShellFolder, (void**)&pParentFolder, &pidlItem ) ) )
@@ -446,7 +446,7 @@ namespace shell
 
 	void CPidl::RemoveLast( void )
 	{
-		if ( LPITEMIDLIST lastPidl = const_cast< LPITEMIDLIST >( pidl::GetLastItem( m_pidl ) ) )
+		if ( LPITEMIDLIST lastPidl = const_cast<LPITEMIDLIST>( pidl::GetLastItem( m_pidl ) ) )
 			lastPidl->mkid.cb = 0;
 	}
 
@@ -460,7 +460,7 @@ namespace shell
 		return !IsNull();
 
 		/*	equivalent implementation:
-		if ( HR_OK( GetDesktopFolder()->ParseDisplayName( NULL, NULL, const_cast< TCHAR* >( fullPath ), NULL, &m_pidl, NULL ) ) )
+		if ( HR_OK( GetDesktopFolder()->ParseDisplayName( NULL, NULL, const_cast<TCHAR* >( fullPath ), NULL, &m_pidl, NULL ) ) )
 			return true;
 		Delete();
 		return false; */
@@ -481,7 +481,7 @@ namespace shell
 
 	bool CPidl::CreateFromFolder( IShellFolder* pShellFolder )
 	{
-		CComQIPtr< IPersistFolder2 > pFolder( pShellFolder );
+		CComQIPtr<IPersistFolder2> pFolder( pShellFolder );
 		if ( pFolder != NULL )
 			if ( HR_OK( pFolder->GetCurFolder( &*this ) ) )
 				return true;
@@ -490,9 +490,9 @@ namespace shell
 		return false;
 	}
 
-	CComPtr< IShellItem > CPidl::FindItem( IShellFolder* pParentFolder ) const
+	CComPtr<IShellItem> CPidl::FindItem( IShellFolder* pParentFolder ) const
 	{
-		CComPtr< IShellItem > pShellItem;
+		CComPtr<IShellItem> pShellItem;
 
 		if ( pParentFolder != NULL )
 		{
@@ -508,11 +508,11 @@ namespace shell
 		return NULL;
 	}
 
-	CComPtr< IShellFolder > CPidl::FindFolder( IShellFolder* pParentFolder /*= GetDesktopFolder()*/ ) const
+	CComPtr<IShellFolder> CPidl::FindFolder( IShellFolder* pParentFolder /*= GetDesktopFolder()*/ ) const
 	{
 		ASSERT_PTR( pParentFolder );
 
-		CComPtr< IShellFolder > pShellFolder;
+		CComPtr<IShellFolder> pShellFolder;
 		if ( HR_OK( pParentFolder->BindToObject( m_pidl, NULL, IID_PPV_ARGS( &pShellFolder ) ) ) )
 			return pShellFolder;
 
@@ -522,7 +522,7 @@ namespace shell
 	bool CPidl::WriteToStream( IStream* pStream ) const
 	{
 		ULONG bytesWritten = 0;
-		UINT size = static_cast< UINT >( GetByteSize() );
+		UINT size = static_cast<UINT>( GetByteSize() );
 
 		if ( HR_OK( pStream->Write( &size, sizeof( size ), &bytesWritten ) ) )
 			if ( HR_OK( pStream->Write( Get(), size, &bytesWritten ) ) )

@@ -34,7 +34,7 @@ void CImagingD2DTests::TestImage( ut::CTestDevice* pTestDev, d2d::CDCRenderTarge
 	pTestDev->SetSubTitle( _T("CImagingD2DTests::TestImage") );
 
 	wic::CBitmapDecoder decoder( imagePath );
-	CComPtr< IWICBitmapSource > pWicBitmap = decoder.ConvertFrameAt( 0 );
+	CComPtr<IWICBitmapSource> pWicBitmap = decoder.ConvertFrameAt( 0 );
 
 	pRenderTarget->SetWicBitmap( pWicBitmap );
 

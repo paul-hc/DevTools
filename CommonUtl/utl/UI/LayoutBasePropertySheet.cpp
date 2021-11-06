@@ -42,7 +42,7 @@ CLayoutBasePropertySheet::~CLayoutBasePropertySheet()
 
 CLayoutPropertyPage* CLayoutBasePropertySheet::GetPage( int pageIndex ) const
 {
-	return checked_static_cast< CLayoutPropertyPage* >( CPropertySheet::GetPage( pageIndex ) );
+	return checked_static_cast<CLayoutPropertyPage*>( CPropertySheet::GetPage( pageIndex ) );
 }
 
 CLayoutPropertyPage* CLayoutBasePropertySheet::GetActivePage( void ) const
@@ -50,7 +50,7 @@ CLayoutPropertyPage* CLayoutBasePropertySheet::GetActivePage( void ) const
 	if ( 0 == GetPageCount() )
 		return NULL;
 
-	return checked_static_cast< CLayoutPropertyPage* >( CPropertySheet::GetActivePage() );
+	return checked_static_cast<CLayoutPropertyPage*>( CPropertySheet::GetActivePage() );
 }
 
 std::tstring CLayoutBasePropertySheet::GetPageTitle( int pageIndex ) const
@@ -87,7 +87,7 @@ void CLayoutBasePropertySheet::SetPageTitle( int pageIndex, const std::tstring& 
 
 	if ( pageTitle != textBuffer )
 	{
-		tabItem.pszText = const_cast< TCHAR* >( pageTitle.c_str() );
+		tabItem.pszText = const_cast<TCHAR*>( pageTitle.c_str() );
 		VERIFY( pTabCtrl->SetItem( pageIndex, &tabItem ) );				// update tab item caption
 
 		if ( HasFlag( pTabCtrl->GetStyle(), TCS_MULTILINE ) )

@@ -32,7 +32,7 @@ class CPostCall : public CBasePostCall
 {
 public:
 	CPostCall( HostType* pHost, HostMethod pMethod )
-		: CBasePostCall( dynamic_cast< CWnd* >( pHost ) ), m_pHost( pHost ), m_pMethod( pMethod )		// use dynamic_cast so that HostType could be a different base of the host object
+		: CBasePostCall( dynamic_cast<CWnd*>( pHost ) ), m_pHost( pHost ), m_pMethod( pMethod )		// use dynamic_cast so that HostType could be a different base of the host object
 	{
 	}
 protected:
@@ -53,7 +53,7 @@ class CPostCallArg1 : public CBasePostCall
 {
 public:
 	CPostCallArg1( HostType* pHost, HostMethod pMethod, Arg1 arg1 )
-		: CBasePostCall( dynamic_cast< CWnd* >( pHost ) ), m_pHost( pHost ), m_pMethod( pMethod ), m_arg1( arg1 )
+		: CBasePostCall( dynamic_cast<CWnd*>( pHost ) ), m_pHost( pHost ), m_pMethod( pMethod ), m_arg1( arg1 )
 	{
 	}
 protected:
@@ -75,7 +75,7 @@ class CPostCallArg2 : public CBasePostCall
 {
 public:
 	CPostCallArg2( HostType* pHost, HostMethod pMethod, Arg1 arg1, Arg2 arg2 )
-		: CBasePostCall( dynamic_cast< CWnd* >( pHost ) ), m_pHost( pHost ), m_pMethod( pMethod ), m_arg1( arg1 ), m_arg2( arg2 )
+		: CBasePostCall( dynamic_cast<CWnd*>( pHost ) ), m_pHost( pHost ), m_pMethod( pMethod ), m_arg1( arg1 ), m_arg2( arg2 )
 	{
 	}
 protected:
@@ -98,7 +98,7 @@ class CPostCallArg3 : public CBasePostCall
 {
 public:
 	CPostCallArg3( HostType* pHost, HostMethod pMethod, Arg1 arg1, Arg2 arg2, Arg3 arg3 )
-		: CBasePostCall( dynamic_cast< CWnd* >( pHost ) ), m_pHost( pHost ), m_pMethod( pMethod ), m_arg1( arg1 ), m_arg2( arg2 ), m_arg3( arg3 )
+		: CBasePostCall( dynamic_cast<CWnd*>( pHost ) ), m_pHost( pHost ), m_pMethod( pMethod ), m_arg1( arg1 ), m_arg2( arg2 ), m_arg3( arg3 )
 	{
 	}
 protected:

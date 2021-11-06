@@ -85,8 +85,8 @@ private:
 	CRegularStatic m_docVersionStatic;
 	CIconButton m_okButton;					// overloaded text/icon, depending on dirtyness
 
-	std::auto_ptr< CListCtrlEditorFrame > m_pPatternsEditor;		// lazy instantiation, after lists & toolbars are created
-	std::auto_ptr< CListCtrlEditorFrame > m_pImagesEditor;
+	std::auto_ptr<CListCtrlEditorFrame> m_pPatternsEditor;		// lazy instantiation, after lists & toolbars are created
+	std::auto_ptr<CListCtrlEditorFrame> m_pImagesEditor;
 
 	// generated stuff
 public:

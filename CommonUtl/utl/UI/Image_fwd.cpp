@@ -215,7 +215,7 @@ namespace gdi
 	bool HasAlphaTransparency( const CImageList& imageList, int imagePos /*= 0*/ )
 	{
 		ASSERT_PTR( imageList.GetSafeHandle() );
-		CComPtr< IImageList > ipImageList;
+		CComPtr<IImageList> ipImageList;
 		if ( HR_OK( HIMAGELIST_QueryInterface( imageList.GetSafeHandle(), IID_PPV_ARGS( &ipImageList ) ) ) )
 		{
 			DWORD dwFlags;
@@ -423,14 +423,14 @@ CPalette* CDibSectionInfo::MakeColorPalette( const CDC* pDC )
 	{
 		m_pPalette.reset( new CPalette );
 		if ( m_colorTable.size() > 256 )
-			m_pPalette->CreateHalftonePalette( const_cast< CDC* >( pDC ) );
+			m_pPalette->CreateHalftonePalette( const_cast<CDC*>( pDC ) );
 		else
 		{
 			std::vector< BYTE > buffer( sizeof( LOGPALETTE ) + ( sizeof( PALETTEENTRY ) * m_colorTable.size() ) );
-			LOGPALETTE* pLogPalette = reinterpret_cast< LOGPALETTE* >(  &buffer.front() );
+			LOGPALETTE* pLogPalette = reinterpret_cast<LOGPALETTE*>(  &buffer.front() );
 
 			pLogPalette->palVersion = 0x300;
-			pLogPalette->palNumEntries = static_cast< WORD >( m_colorTable.size() );
+			pLogPalette->palNumEntries = static_cast<WORD>( m_colorTable.size() );
 
 			for( size_t i = 0; i != m_colorTable.size(); ++i )
 				pLogPalette->palPalEntry[ i ] = gdi::ToPaletteEntry( m_colorTable[ i ] );
@@ -467,14 +467,14 @@ BITMAPINFO* CBitmapInfoBuffer::CreateDibInfo( int width, int height, UINT bitsPe
 
 	m_buffer.resize( sizeof( BITMAPINFOHEADER ) + rgbTable.size() * sizeof( RGBQUAD ) );
 
-	BITMAPINFO* pBitmapInfo = reinterpret_cast< BITMAPINFO* >( &m_buffer.front() );
+	BITMAPINFO* pBitmapInfo = reinterpret_cast<BITMAPINFO*>( &m_buffer.front() );
 	ZeroMemory( &pBitmapInfo->bmiHeader, sizeof( BITMAPINFOHEADER ) );
 
 	pBitmapInfo->bmiHeader.biSize = sizeof( BITMAPINFOHEADER );
 	pBitmapInfo->bmiHeader.biWidth = width;
 	pBitmapInfo->bmiHeader.biHeight = height;			// negative height will create a top-down DIB
 	pBitmapInfo->bmiHeader.biPlanes = 1;
-	pBitmapInfo->bmiHeader.biBitCount = static_cast< WORD >( bitsPerPixel );
+	pBitmapInfo->bmiHeader.biBitCount = static_cast<WORD>( bitsPerPixel );
 	pBitmapInfo->bmiHeader.biCompression = BI_RGB;
 	pBitmapInfo->bmiHeader.biClrUsed = pBitmapInfo->bmiHeader.biClrImportant = (DWORD)rgbTable.size();
 
@@ -497,7 +497,7 @@ const std::vector< RGBQUAD >& CSysColorTable::GetSysRgbTable( void )
 	static std::vector< RGBQUAD > rgbTable;
 	if ( rgbTable.empty() )
 	{
-		std::auto_ptr< CPalette > pPalette( new CPalette );
+		std::auto_ptr<CPalette> pPalette( new CPalette );
 		{
 			CWindowDC screenDC( NULL );
 			pPalette->CreateHalftonePalette( &screenDC );

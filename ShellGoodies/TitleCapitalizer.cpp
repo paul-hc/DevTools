@@ -59,7 +59,7 @@ namespace cap
 				if ( caseModify >= Preserve && caseModify <= LowerCase )
 				{
 					SetFlatList( tokens[ Words ].c_str() );
-					m_caseModify = static_cast< CaseModify >( caseModify );
+					m_caseModify = static_cast<CaseModify>( caseModify );
 					return true;
 				}
 		}

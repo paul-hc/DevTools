@@ -71,5 +71,5 @@ int CCommandItem::LookupImageIndex( utl::ICommand* pCmd )
 		imagePos = strip.FindButtonPos( UINT_MAX );
 
 	ENSURE( imagePos < strip.m_buttonIds.size() );
-	return static_cast< int >( imagePos );
+	return static_cast<int>( imagePos );
 }

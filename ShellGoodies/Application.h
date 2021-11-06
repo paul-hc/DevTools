@@ -20,7 +20,7 @@ public:
 	svc::ICommandService* GetCommandService( void ) const;
 	const CCommandModel* GetCommandModel( void ) const;
 private:
-	std::auto_ptr< CAppCmdService > m_pCmdSvc;
+	std::auto_ptr<CAppCmdService> m_pCmdSvc;
 
 	// generated stuff
 public:

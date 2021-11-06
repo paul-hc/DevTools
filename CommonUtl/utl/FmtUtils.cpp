@@ -42,7 +42,7 @@ namespace fmt
 
 	bool ParseFromTo( std::tstring& rSrc, std::tstring& rDest, const str::TStringRange& textRange )
 	{
-		Range< size_t > sepPos;
+		Range<size_t> sepPos;
 		if ( textRange.Find( sepPos, s_pairSep ) )
 		{
 			str::TStringRange srcRange = textRange.MakeLead( sepPos.m_start );
@@ -85,11 +85,11 @@ namespace fmt
 
 		if ( !parsedHex )
 			if ( uiFormat )
-				fs::CFileState::GetTags_FileAttributes().ParseUi( reinterpret_cast< int* >( &fileAttr ), text, _T(", ") );
+				fs::CFileState::GetTags_FileAttributes().ParseUi( reinterpret_cast<int*>( &fileAttr ), text, _T(", ") );
 			else
-				fs::CFileState::GetTags_FileAttributes().ParseKey( reinterpret_cast< int* >( &fileAttr ), text, _T("") );
+				fs::CFileState::GetTags_FileAttributes().ParseKey( reinterpret_cast<int*>( &fileAttr ), text, _T("") );
 
-		return static_cast< DWORD >( fileAttr );
+		return static_cast<DWORD>( fileAttr );
 	}
 
 
@@ -115,7 +115,7 @@ namespace fmt
 	{
 		str::TStringRange textRange( text );
 
-		Range< size_t > sepPos;
+		Range<size_t> sepPos;
 		if ( textRange.Find( sepPos, s_clipSep ) )
 		{
 			rFileState.m_fullPath = textRange.ExtractLead( sepPos.m_start );
@@ -146,7 +146,7 @@ namespace fmt
 
 	bool ParseRenameEntry( fs::CPath& rSrcPath, fs::CPath& rDestPath, const str::TStringRange& textRange )
 	{
-		Range< size_t > sepPos;
+		Range<size_t> sepPos;
 		if ( textRange.Find( sepPos, s_pairSep ) )
 		{
 			str::TStringRange srcRange = textRange.MakeLead( sepPos.m_start );
@@ -187,7 +187,7 @@ namespace fmt
 
 	bool ParseTouchEntry( fs::CFileState& rSrcState, fs::CFileState& rDestState, const str::TStringRange& textRange )
 	{
-		Range< size_t > sepPos;
+		Range<size_t> sepPos;
 		if ( textRange.Find( sepPos, s_touchSep ) )
 		{
 			rSrcState.m_fullPath = rDestState.m_fullPath = textRange.ExtractLead( sepPos.m_start );
@@ -252,7 +252,7 @@ namespace fmt
 			if ( pathFormat != NoPath )
 				rFileState.m_fullPath.Set( parts[ pos++ ] );
 
-			rFileState.m_attributes = static_cast< BYTE >( ParseFileAttributes( parts[ pos++ ], false ) );
+			rFileState.m_attributes = static_cast<BYTE>( ParseFileAttributes( parts[ pos++ ], false ) );
 			rFileState.m_creationTime = time_utl::ParseTimestamp( parts[ pos++ ] );
 			rFileState.m_modifTime = time_utl::ParseTimestamp( parts[ pos++ ] );
 			rFileState.m_accessTime = time_utl::ParseTimestamp( parts[ pos++ ] );
@@ -268,7 +268,7 @@ namespace fmt
 		bool _ParseTaggedTimeField( CTime& rTime, fs::TimeField& rField, const std::tstring& text )
 		{
 			str::TStringRange textRange( text );
-			Range< size_t > sepPos;
+			Range<size_t> sepPos;
 			if ( textRange.Find( sepPos, s_tagPrefixSep ) )
 			{
 				str::TStringRange tagRange = textRange.MakeLead( sepPos.m_start );
@@ -320,7 +320,7 @@ namespace fmt
 			if ( itPart == parts.end() )
 				return false;
 
-			rFileState.m_attributes = static_cast< BYTE >( ParseFileAttributes( *itPart++, false ) );
+			rFileState.m_attributes = static_cast<BYTE>( ParseFileAttributes( *itPart++, false ) );
 
 			if ( 3 == std::distance( itPart, parts.end() ) && std::tstring::npos == itPart->find( s_tagPrefixSep ) )	// 3 time fields not tagged?
 			{	// backwards compatibility: parse untagged time fields (mandatory)

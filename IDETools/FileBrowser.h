@@ -252,11 +252,11 @@ private:
 public:
 	CFolderOptions m_options;
 private:
-	std::auto_ptr< CFolderItem > m_pRootFolderItem;
+	std::auto_ptr<CFolderItem> m_pRootFolderItem;
 	fs::CPath m_currFilePath;
-	std::auto_ptr< CPathIndex > m_pPathIndex;
+	std::auto_ptr<CPathIndex> m_pPathIndex;
 
-	std::auto_ptr< CTrackInfo > m_pTrackInfo;
+	std::auto_ptr<CTrackInfo> m_pTrackInfo;
 
 	// generated overrides
 public:
@@ -280,7 +280,7 @@ namespace func
 
 namespace pred
 {
-	typedef CompareAdapterPtr< CompareNaturalPath, func::ToFolderAlias > TCompareFolderItem;
+	typedef CompareAdapterPtr<CompareNaturalPath, func::ToFolderAlias> TCompareFolderItem;
 
 	struct CompareFileItem
 	{

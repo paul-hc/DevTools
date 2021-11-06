@@ -58,7 +58,7 @@ void CPopupDlgBase::LoadDlgIcon( UINT dlgIconId )
 void CPopupDlgBase::SetupDlgIcons( void )
 {
 	// main dialogs need to manage both small and large icons at once
-	CWnd* pWnd = dynamic_cast< CWnd* >( this );
+	CWnd* pWnd = dynamic_cast<CWnd*>( this );
 
 	if ( const CIcon* pSmallIcon = GetDlgIcon( DlgSmallIcon ) )
 		pWnd->SetIcon( pSmallIcon->GetHandle(), DlgSmallIcon );
@@ -72,9 +72,9 @@ bool CPopupDlgBase::CanAddAboutMenuItem( void ) const
 	if ( m_noAboutMenuItem )
 		return false;
 
-	const CWnd* pWnd = dynamic_cast< const CWnd* >( this );
+	const CWnd* pWnd = dynamic_cast<const CWnd*>( this );
 	ASSERT_PTR( pWnd->GetSafeHwnd() );
-	return !is_a< CAboutBox >( pWnd ) && !is_a< CDialog >( pWnd->GetParent() );
+	return !is_a<CAboutBox>( pWnd ) && !is_a<CDialog>( pWnd->GetParent() );
 }
 
 void CPopupDlgBase::AddAboutMenuItem( CMenu* pMenu )

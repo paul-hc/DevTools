@@ -27,7 +27,7 @@ namespace ui
 		static CStdZoom& Instance( void );
 	public:
 		std::vector< UINT > m_zoomPcts;
-		Range< UINT > m_limits;
+		Range<UINT> m_limits;
 	};
 }
 

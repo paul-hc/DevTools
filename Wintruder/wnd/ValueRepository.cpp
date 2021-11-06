@@ -8,8 +8,8 @@
 #endif
 
 
-#define VALUE_INFO( value ) { static_cast< short >( value ), _T(#value), NULL }
-#define MFC_VALUE_INFO( value ) { static_cast< unsigned short >( value ), _T(#value), NULL }
+#define VALUE_INFO( value ) { static_cast<short>( value ), _T(#value), NULL }
+#define MFC_VALUE_INFO( value ) { static_cast<unsigned short>( value ), _T(#value), NULL }
 
 
 // IDENTIFIER DEFINITIONS

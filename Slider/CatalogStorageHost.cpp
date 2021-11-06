@@ -28,7 +28,7 @@ ICatalogStorage* CCatalogStorageHost::Push( const fs::TStgDocPath& docStgPath, S
 {
 	ASSERT_NULL( Find( docStgPath ) );			// add only once
 
-	CComPtr< ICatalogStorage > pCatalogStorage = CCatalogStorageFactory::Instance()->AcquireStorage( docStgPath, STGM_READ );
+	CComPtr<ICatalogStorage> pCatalogStorage = CCatalogStorageFactory::Instance()->AcquireStorage( docStgPath, STGM_READ );
 	if ( pCatalogStorage != NULL )
 	{
 		ENSURE( pCatalogStorage->GetDocStorage()->IsOpenForReading() );

@@ -93,10 +93,10 @@ namespace std
 namespace utl
 {
 	template< typename LeftT, typename RightT >
-	LeftT max( const LeftT& left, const RightT& right ) { return ( left < static_cast< LeftT >( right ) ) ? static_cast< LeftT >( right ) : left; }
+	LeftT max( const LeftT& left, const RightT& right ) { return ( left < static_cast<LeftT>( right ) ) ? static_cast<LeftT>( right ) : left; }
 
 	template< typename LeftT, typename RightT >
-	LeftT min( const LeftT& left, const RightT& right ) { return ( static_cast< LeftT >( right ) < left ) ? static_cast< LeftT >( right ) : left; }
+	LeftT min( const LeftT& left, const RightT& right ) { return ( static_cast<LeftT>( right ) < left ) ? static_cast<LeftT>( right ) : left; }
 }
 
 

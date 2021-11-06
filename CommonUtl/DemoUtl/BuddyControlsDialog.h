@@ -24,7 +24,7 @@ private:
 private:
 	fs::TPatternPath m_searchPath;
 
-	std::vector< CFileStateTimedItem* > m_fileItems;
+	std::vector<CFileStateTimedItem*> m_fileItems;
 private:
 	// enum { IDD = IDD_BUDDY_CONTROLS_DIALOG };
 	enum Column { FilePath, FileSize, Attributes, CRC32, ModifyTime, ChecksumElapsed };

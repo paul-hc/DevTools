@@ -77,7 +77,7 @@ bool CThemeItem::DrawStatusText( Status status, HDC hdc, const RECT& rect, const
 			CRect extentRect;
 			if ( theme.GetThemeTextExtent( extentRect, hdc, m_partId, GetStateId( status ), pText, textFlags, &rect ) )
 			{
-				const_cast< RECT& >( rect ) = extentRect;
+				const_cast<RECT&>( rect ) = extentRect;
 				return true;
 			}
 		}

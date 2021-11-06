@@ -28,7 +28,7 @@ bool CCommandModelPersist::SaveUndoLog( const CCommandModel& commandModel, cmd::
 {
 	//utl::CSlowSectionGuard slow( _T("CCommandModelPersist::SaveUndoLog"), 0.01 );
 
-	std::auto_ptr< cmd::CLogSerializer > pSerializer( CreateSerializer( const_cast< CCommandModel* >( &commandModel ), fileFormat ) );
+	std::auto_ptr<cmd::CLogSerializer> pSerializer( CreateSerializer( const_cast<CCommandModel*>( &commandModel ), fileFormat ) );
 	return pSerializer->Save( GetUndoLogPath( fileFormat ) );
 }
 
@@ -42,7 +42,7 @@ bool CCommandModelPersist::LoadUndoLog( CCommandModel* pOutCommandModel, cmd::Fi
 		*pOutFileFormat = fileFormat;
 
 	//utl::CSlowSectionGuard slow( _T("CCommandModelPersist::LoadUndoLog()"), 0.01 );
-	std::auto_ptr< cmd::CLogSerializer > pSerializer( CreateSerializer( pOutCommandModel, fileFormat ) );
+	std::auto_ptr<cmd::CLogSerializer> pSerializer( CreateSerializer( pOutCommandModel, fileFormat ) );
 	return pSerializer->Load( GetUndoLogPath( fileFormat ) );
 }
 
@@ -171,7 +171,7 @@ namespace cmd
 				if ( i != 0 )
 					os << std::endl;		// inner batch extra line-end separator
 
-				if ( const CMacroCommand* pMacroCmd = dynamic_cast< const CMacroCommand* >( cmdStack[ i ] ) )
+				if ( const CMacroCommand* pMacroCmd = dynamic_cast<const CMacroCommand*>( cmdStack[ i ] ) )
 				{
 					if ( !pMacroCmd->IsEmpty() )
 					{
@@ -233,7 +233,7 @@ namespace cmd
 
 		if ( ParseCommandTag( cmdType, timestamp, tagRange ) )
 		{
-			std::auto_ptr< cmd::CFileMacroCmd > pMacroCmd( new cmd::CFileMacroCmd( cmdType, timestamp ) );
+			std::auto_ptr<cmd::CFileMacroCmd> pMacroCmd( new cmd::CFileMacroCmd( cmdType, timestamp ) );
 
 			for ( std::tstring line; stream::InputLine( is, line ); ++m_parseLineNo )
 			{
@@ -294,7 +294,7 @@ namespace cmd
 		{
 			std::tstring cmdTypeTag, timestampText;
 
-			Range< size_t > sepPos;
+			Range<size_t> sepPos;
 			if ( tagRange.Find( sepPos, _T(' ') ) )
 				tagRange.SplitPair( cmdTypeTag, timestampText, sepPos );
 			else

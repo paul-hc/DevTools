@@ -211,7 +211,7 @@ void CEditPlacementPage::OnTsnBeginTracking( UINT toolId )
 	if ( NULL == app::GetValidTargetWnd() )
 	{
 		ui::BeepSignal( MB_ICONWARNING );
-		static_cast< CTrackStatic* >( GetDlgItem( toolId ) )->CancelTracking();
+		static_cast<CTrackStatic*>( GetDlgItem( toolId ) )->CancelTracking();
 	}
 	else
 		m_trackingOldWndRect = m_wndRect;
@@ -219,7 +219,7 @@ void CEditPlacementPage::OnTsnBeginTracking( UINT toolId )
 
 void CEditPlacementPage::OnTsnEndTracking( UINT toolId )
 {
-	CTrackStatic* pTool = static_cast< CTrackStatic* >( GetDlgItem( toolId ) );
+	CTrackStatic* pTool = static_cast<CTrackStatic*>( GetDlgItem( toolId ) );
 	ASSERT_PTR( pTool );
 
 	bool commit = CTrackStatic::Commit == pTool->GetTrackingResult();

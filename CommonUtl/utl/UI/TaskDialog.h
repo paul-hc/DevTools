@@ -97,7 +97,7 @@ public:
 	bool IsVerificationChecked( void ) const { return m_verificationChecked != FALSE; }
 	void SetVerificationChecked( bool verificationChecked = true );
 
-	const Range< int >& GetProgressBarRange( void ) const { return m_progressRange; }
+	const Range<int>& GetProgressBarRange( void ) const { return m_progressRange; }
 	void SetProgressBarRange( int rangeMin, int rangeMax );
 	void SetProgressBarPosition( int progressPos );
 	void SetProgressBarState( int state = PBST_NORMAL );
@@ -173,7 +173,7 @@ private:
 	int m_defaultRadioButton;
 
 	// progress bar
-	Range< int > m_progressRange;
+	Range<int> m_progressRange;
 	int m_progressState;			// ProgressBar or Marquee state
 	int m_progressPos;				// ProgressBar pos or Marquee speed
 

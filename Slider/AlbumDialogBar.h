@@ -30,12 +30,12 @@ public:
 private:
 	void LayoutControls( void );
 private:
-	std::auto_ptr< CDialogToolBar > m_pToolbar;
-	std::auto_ptr< CDurationComboBox > m_pSlideDelayCombo;
+	std::auto_ptr<CDialogToolBar> m_pToolbar;
+	std::auto_ptr<CDurationComboBox> m_pSlideDelayCombo;
 	CEdit m_navPosEdit;
 	CSpinButtonCtrl m_scrollSpin;
 	CStatic m_infoStatic;
-	std::auto_ptr< CTextEdit > m_pImagePathEdit;
+	std::auto_ptr<CTextEdit> m_pImagePathEdit;
 
 	CFont m_boldFont;
 	CAlbumImageView* m_pAlbumView;

@@ -39,7 +39,7 @@ private:
 private:
 	io::CStdOutput m_stdOutput;								// wrapper for fast output to console or redirected file
 	utl::CResourcePool m_resourcePool;
-	std::auto_ptr< CLogger > m_pLogger;
+	std::auto_ptr<CLogger> m_pLogger;
 
 	static io::TranslationMode s_translationMode;		// global text mode of standard output/error streams
 };

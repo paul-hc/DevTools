@@ -57,17 +57,17 @@ class CCatalogStorageFactory : public CErrorHandler
 public:
 	static CCatalogStorageFactory* Instance( void );
 
-	static CComPtr< ICatalogStorage > CreateStorageObject( void );
+	static CComPtr<ICatalogStorage> CreateStorageObject( void );
 
 	static bool HasCatalogExt( const TCHAR* pFilePath );
 	static bool IsVintageCatalog( const TCHAR* pFilePath );
 	static const TCHAR* GetDefaultExtension( void ) { return s_imageStorageExts[ CatStg_ias ]; }
 
 	ICatalogStorage* FindStorage( const fs::TStgDocPath& docStgPath ) const;
-	CComPtr< ICatalogStorage > AcquireStorage( const fs::TStgDocPath& docStgPath, DWORD mode = STGM_READ );
+	CComPtr<ICatalogStorage> AcquireStorage( const fs::TStgDocPath& docStgPath, DWORD mode = STGM_READ );
 		// for password-protected storage reading: also prompts user to verify password, returning NULL if not verified
 
-	std::auto_ptr< CFile > OpenFlexImageFile( const fs::CFlexPath& flexImagePath, DWORD mode = CFile::modeRead );		// either physical or storage-based image file
+	std::auto_ptr<CFile> OpenFlexImageFile( const fs::CFlexPath& flexImagePath, DWORD mode = CFile::modeRead );		// either physical or storage-based image file
 
 	// fs::IThumbProducer interface
 	virtual bool ProducesThumbFor( const fs::CFlexPath& srcImagePath ) const;

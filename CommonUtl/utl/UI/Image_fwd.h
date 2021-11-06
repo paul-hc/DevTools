@@ -53,7 +53,7 @@ namespace ui
 		{
 			// pDraw could point to NMLVCUSTOMDRAW, NMTVCUSTOMDRAW, etc
 			ASSERT_PTR( pDraw );
-			return DrawItemImage( CDC::FromHandle( pDraw->hdc ), checked_static_cast< const utl::ISubject* >( (const utl::ISubject*)pDraw->lItemlParam ), itemImageRect );
+			return DrawItemImage( CDC::FromHandle( pDraw->hdc ), checked_static_cast<const utl::ISubject*>( (const utl::ISubject*)pDraw->lItemlParam ), itemImageRect );
 		}
 	};
 }
@@ -239,7 +239,7 @@ struct CBitmapInfo : public tagDIBSECTION		// DIB & DDB bitmap info
 	CSize GetBitmapSize( void ) const { return CSize( dsBm.bmWidth, dsBm.bmHeight ); }
 
 	WORD GetBitsPerPixel( void ) const { return dsBm.bmBitsPixel; }
-	BYTE* GetPixelBuffer( void ) const { return static_cast< BYTE* >( dsBm.bmBits ); }
+	BYTE* GetPixelBuffer( void ) const { return static_cast<BYTE*>( dsBm.bmBits ); }
 
 	std::tstring FormatDbg( void ) const;
 private:
@@ -280,7 +280,7 @@ private:
 private:
 	HBITMAP m_hDib;								// no ownership
 	std::vector< RGBQUAD > m_colorTable;		// self-encapsulated
-	std::auto_ptr< CPalette > m_pPalette;		// self-encapsulated, owned
+	std::auto_ptr<CPalette> m_pPalette;		// self-encapsulated, owned
 };
 
 
@@ -312,7 +312,7 @@ public:
 	CBitmapInfoBuffer( void ) {}
 
 	bool IsValid( void ) const { return !m_buffer.empty(); }
-	const BITMAPINFO* GetBitmapInfo( void ) const { ASSERT( IsValid() ); return reinterpret_cast< const BITMAPINFO* >( &m_buffer.front() ); }
+	const BITMAPINFO* GetBitmapInfo( void ) const { ASSERT( IsValid() ); return reinterpret_cast<const BITMAPINFO*>( &m_buffer.front() ); }
 
 	BITMAPINFO* CreateDibInfo( int width, int height, UINT bitsPerPixel, const bmp::CSharedAccess* pSrcDib = NULL );
 	BITMAPINFO* CreateDibInfo( UINT bitsPerPixel, const bmp::CSharedAccess& sourceDib );

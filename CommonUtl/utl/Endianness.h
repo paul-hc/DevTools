@@ -57,8 +57,8 @@ namespace endian
 			template<>
 			float operator()( float value ) const
 			{
-				UINT integer = operator()( reinterpret_cast< const UINT& >( value ) );
-				return reinterpret_cast< const float& >( integer );
+				UINT integer = operator()( reinterpret_cast<const UINT&>( value ) );
+				return reinterpret_cast<const float&>( integer );
 			}
 		};
 
@@ -82,8 +82,8 @@ namespace endian
 			template<>
 			double operator()( double value ) const
 			{
-				ULONGLONG integer = operator()( reinterpret_cast< const ULONGLONG& >( value ) );
-				return reinterpret_cast< const double& >( integer );
+				ULONGLONG integer = operator()( reinterpret_cast<const ULONGLONG&>( value ) );
+				return reinterpret_cast<const double&>( integer );
 			}
 		};
 

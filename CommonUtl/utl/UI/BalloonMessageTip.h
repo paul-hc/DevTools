@@ -61,7 +61,7 @@ private:
 	CToolTipCtrl m_toolTipCtrl;
 	CWindowTimer m_timer;
 	UINT m_eventCount;
-	std::auto_ptr< CGuiThreadInfo > m_pThreadInfo;			// to check for changes in the main thread
+	std::auto_ptr<CGuiThreadInfo> m_pThreadInfo;			// to check for changes in the main thread
 
 	enum { TimerEventId = 100, EllapseMs = 50, ToolId = 10 };
 public:

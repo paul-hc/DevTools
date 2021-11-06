@@ -38,20 +38,20 @@ public:
 
 	// 32/24 bpp style iteration (BGRA, BGR and BYTE)
 
-	template< typename PixelType > PixelType* Begin( void ) { ASSERT( ValidType< PixelType >() ); return reinterpret_cast< PixelType* >( m_pPixels ); }
-	template< typename PixelType > PixelType* End( void ) { ASSERT( ValidLinearIteration< PixelType >() ); return reinterpret_cast< PixelType* >( m_pPixels + m_bufferSize ); }
+	template< typename PixelType > PixelType* Begin( void ) { ASSERT( ValidType< PixelType >() ); return reinterpret_cast<PixelType*>( m_pPixels ); }
+	template< typename PixelType > PixelType* End( void ) { ASSERT( ValidLinearIteration< PixelType >() ); return reinterpret_cast<PixelType*>( m_pPixels + m_bufferSize ); }
 
-	template< typename PixelType > const PixelType* Begin( void ) const { return const_cast< CDibPixels* >( this )->Begin< PixelType >(); }
-	template< typename PixelType > const PixelType* End( void ) const { return const_cast< CDibPixels* >( this )->End< PixelType >(); }
+	template< typename PixelType > const PixelType* Begin( void ) const { return const_cast<CDibPixels*>( this )->Begin< PixelType >(); }
+	template< typename PixelType > const PixelType* End( void ) const { return const_cast<CDibPixels*>( this )->End< PixelType >(); }
 
 	template< typename PixelType >
 	PixelType& GetPixel( UINT x, UINT y )
 	{
 		ASSERT( sizeof( PixelType ) == ( m_bitsPerPixel / 8 ) || sizeof( PixelType ) == sizeof( BYTE ) );
-		return *static_cast< PixelType* >( GetPixelPtr( x, y ) );
+		return *static_cast<PixelType*>( GetPixelPtr( x, y ) );
 	}
 
-	template< typename PixelType > const PixelType& GetPixel( UINT x, UINT y ) const { return const_cast< CDibPixels* >( this )->GetPixel< PixelType >( x, y ); }
+	template< typename PixelType > const PixelType& GetPixel( UINT x, UINT y ) const { return const_cast<CDibPixels*>( this )->GetPixel< PixelType >( x, y ); }
 
 	template< typename PixelType, typename PixelFunc > void ForEach( PixelFunc func );
 	template< typename PixelFunc > bool ForEach( PixelFunc func );

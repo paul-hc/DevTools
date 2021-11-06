@@ -59,7 +59,7 @@ std::tstring CVersionInfo::GetValue( const TCHAR* pKeyName ) const
 		std::tstring subBlock = str::Format( _T("\\StringFileInfo\\%04x%04x\\%s"), (int)m_translation.m_langId, (int)m_translation.m_codePage, pKeyName );
 		void* ptr;
 		UINT size = 0;
-		if ( ::VerQueryValue( GetPtr(), const_cast< TCHAR* >( subBlock.c_str() ), &ptr, &size ) )
+		if ( ::VerQueryValue( GetPtr(), const_cast<TCHAR*>( subBlock.c_str() ), &ptr, &size ) )
 			value = (const TCHAR*)ptr;
 	}
 

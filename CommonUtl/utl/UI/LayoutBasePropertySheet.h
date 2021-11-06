@@ -27,7 +27,7 @@ public:
 	CLayoutPropertyPage* GetPage( int pageIndex ) const;
 
 	template< typename PageType >
-	PageType* GetPageAs( int pageIndex ) const { return dynamic_cast< PageType* >( GetPage( pageIndex ) ); }	// dynamic so that it works with interfaces
+	PageType* GetPageAs( int pageIndex ) const { return dynamic_cast<PageType*>( GetPage( pageIndex ) ); }	// dynamic so that it works with interfaces
 
 	template< typename PageType >
 	PageType* GetCreatedPageAs( int pageIndex ) const;			// only if page created (pPage->m_hWnd != NULL); useful for selective UI updates
@@ -75,13 +75,13 @@ protected:
 private:
 	UINT m_initialPageIndex;						// force initial page activation (otherwise uses the one saved in registry, or default)
 protected:
-	std::auto_ptr< CMacroCommand > m_pApplyMacroCmd;	// used optionally for Apply
+	std::auto_ptr<CMacroCommand> m_pApplyMacroCmd;	// used optionally for Apply
 	utl::ICommandExecutor* m_pCommandExecutor;		// to execute Apply macro
 
 	bool m_manageOkButtonState;						// enable OK button when modified, disable it when not modified
 
 	CImageList m_tabImageList;
-	std::auto_ptr< CToolTipCtrl > m_pTooltipCtrl;
+	std::auto_ptr<CToolTipCtrl> m_pTooltipCtrl;
 	enum { TabItem_BaseToolId = 0xDFF0 };			// base id used to encode tool ids for tab item (page) indexes
 public:
 	std::tstring m_regSection;
@@ -106,7 +106,7 @@ template< typename PageType >
 PageType* CLayoutBasePropertySheet::GetCreatedPageAs( int pageIndex ) const
 {
 	CLayoutPropertyPage* pPage = GetPage( pageIndex );
-	return pPage->GetSafeHwnd() != NULL ? dynamic_cast< PageType* >( pPage ) : NULL;
+	return pPage->GetSafeHwnd() != NULL ? dynamic_cast<PageType*>( pPage ) : NULL;
 }
 
 

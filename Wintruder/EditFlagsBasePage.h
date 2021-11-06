@@ -45,7 +45,7 @@ protected:
 	const CFlagStore* m_pSpecificStore;
 
 	DWORD m_flags;
-	std::auto_ptr< DWORD > m_pSpecificFlags;		// for extended styles class specific is separate from m_flags
+	std::auto_ptr<DWORD> m_pSpecificFlags;		// for extended styles class specific is separate from m_flags
 
 	HWND m_hWndLastTarget;
 	ui::CCmdInfo m_pageInfo;						// caption, tooltip

@@ -25,7 +25,7 @@ public:
 	// ui::ICustomCmdInfo interface
 	virtual void QueryTooltipText( std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const;
 private:
-	std::auto_ptr< CLayoutEngine > m_pLayoutEngine;
+	std::auto_ptr<CLayoutEngine> m_pLayoutEngine;
 protected:
 	// generated overrides
 	protected:

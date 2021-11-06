@@ -30,7 +30,7 @@ CPathGenerator::CPathGenerator( fs::TPathPairMap* pOutRenamePairs, const CPathFo
 }
 
 CPathGenerator::CPathGenerator( const fs::TPathPairMap& renamePairs, const CPathFormatter& formatter, UINT seqCount /*= 1*/, bool avoidDups /*= true*/ )
-	: CPathMaker( const_cast< fs::TPathPairMap* >( &renamePairs ) )
+	: CPathMaker( const_cast<fs::TPathPairMap*>( &renamePairs ) )
 	, m_formatter( formatter )
 	, m_seqCount( seqCount )
 	, m_avoidDups( avoidDups )

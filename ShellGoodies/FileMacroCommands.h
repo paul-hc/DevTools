@@ -59,7 +59,7 @@ namespace cmd
 
 		// base overrides
 		virtual bool Unexecute( void );
-		virtual std::auto_ptr< CBaseFileCmd > MakeUnexecuteCmd( void ) const = 0;
+		virtual std::auto_ptr<CBaseFileCmd> MakeUnexecuteCmd( void ) const = 0;
 	private:
 		UserFeedback HandleFileError( CException* pExc, const fs::CPath& srcPath ) const;
 		static std::tstring ExtractMessage( CException* pExc, const fs::CPath& srcPath );
@@ -84,7 +84,7 @@ public:
 	virtual std::tstring Format( utl::Verbosity verbosity ) const;
 	virtual bool Execute( void );
 	virtual bool IsUndoable( void ) const;
-	virtual std::auto_ptr< CBaseFileCmd > MakeUnexecuteCmd( void ) const;
+	virtual std::auto_ptr<CBaseFileCmd> MakeUnexecuteCmd( void ) const;
 
 	// base overrides
 	virtual void Serialize( CArchive& archive );
@@ -109,7 +109,7 @@ public:
 	virtual std::tstring Format( utl::Verbosity verbosity ) const;
 	virtual bool Execute( void );
 	virtual bool IsUndoable( void ) const;
-	virtual std::auto_ptr< CBaseFileCmd > MakeUnexecuteCmd( void ) const;
+	virtual std::auto_ptr<CBaseFileCmd> MakeUnexecuteCmd( void ) const;
 
 	// base overrides
 	virtual void Serialize( CArchive& archive );

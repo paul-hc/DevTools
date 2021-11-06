@@ -21,9 +21,9 @@ namespace time_utl
 		return s_null;
 	}
 
-	const Range< COleDateTime > GetNullOleDateTimeRange( void )
+	const Range<COleDateTime> GetNullOleDateTimeRange( void )
 	{
-		const Range< COleDateTime > s_nullRange( GetNullOleDateTime(), GetNullOleDateTime() );
+		const Range<COleDateTime> s_nullRange( GetNullOleDateTime(), GetNullOleDateTime() );
 		return s_nullRange;
 	}
 }

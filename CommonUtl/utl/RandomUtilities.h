@@ -18,7 +18,7 @@ namespace utl
 	ValueType GetRandomValue( ValueType minValue, ValueType maxValue )
 	{
 		ASSERT( minValue <= maxValue );
-		return minValue + static_cast< ValueType >( (double)rand() * ( 1.0 / ( RAND_MAX + 1.0 ) ) * ( maxValue - minValue ) );
+		return minValue + static_cast<ValueType>( (double)rand() * ( 1.0 / ( RAND_MAX + 1.0 ) ) * ( maxValue - minValue ) );
 	}
 
 	template< typename ValueType >
@@ -34,7 +34,7 @@ namespace func
 	template< typename CharType >
 	struct RandomChar
 	{
-		RandomChar( const Range< CharType >& charRange ) : m_charRange( charRange ) { ASSERT( m_charRange.IsNormalized() ); }
+		RandomChar( const Range<CharType>& charRange ) : m_charRange( charRange ) { ASSERT( m_charRange.IsNormalized() ); }
 		RandomChar( CharType minChar, CharType maxChar ) : m_charRange( minChar, maxChar ) { ASSERT( m_charRange.IsNormalized() ); }
 
 		CharType operator()( void ) const
@@ -42,7 +42,7 @@ namespace func
 			return utl::GetRandomValue< CharType >( m_charRange.m_start, m_charRange.m_end + 1 );		// add 1 to include maxChar
 		}
 	private:
-		Range< CharType > m_charRange;
+		Range<CharType> m_charRange;
 	};
 }
 
@@ -50,10 +50,10 @@ namespace func
 namespace utl
 {
 	template< typename CharType >
-	inline Range< CharType > GetRangeLowerLetters( void ) { return Range< CharType >( 'a', 'z' ); }
+	inline Range<CharType> GetRangeLowerLetters( void ) { return Range<CharType>( 'a', 'z' ); }
 
 	template< typename CharType >
-	std::basic_string< CharType > MakeRandomString( size_t length, const Range< CharType >& charRange = GetRangeLowerLetters() )
+	std::basic_string< CharType > MakeRandomString( size_t length, const Range<CharType>& charRange = GetRangeLowerLetters() )
 	{
 		#pragma warning( disable: 4996 )	// warning C4996: 'std::generate_n': Function call with parameters that may be unsafe
 
@@ -64,7 +64,7 @@ namespace utl
 	}
 
 	template< typename CharType >
-	void GenerateRandomStrings( std::vector< std::basic_string< CharType > >& rItems, size_t count, size_t maxLen, const Range< CharType >& charRange = GetRangeLowerLetters() )
+	void GenerateRandomStrings( std::vector< std::basic_string< CharType > >& rItems, size_t count, size_t maxLen, const Range<CharType>& charRange = GetRangeLowerLetters() )
 	{
 		rItems.resize( count );
 

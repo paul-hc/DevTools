@@ -19,7 +19,7 @@
 
 HRESULT CALLBACK TaskDialogCallback( HWND hWnd, UINT uNotification, WPARAM wParam, LPARAM lParam, LONG_PTR dwRefData)
 {
-	CTaskDialog *pTaskDialog = reinterpret_cast< CTaskDialog* >( dwRefData );
+	CTaskDialog *pTaskDialog = reinterpret_cast<CTaskDialog*>( dwRefData );
 	ASSERT_PTR( pTaskDialog );
 
 	HRESULT hRes = S_OK;
@@ -34,7 +34,7 @@ HRESULT CALLBACK TaskDialogCallback( HWND hWnd, UINT uNotification, WPARAM wPara
 
 		case TDN_HYPERLINK_CLICKED:
 			// lParam = (LPCWSTR)pszHREF
-			hRes = pTaskDialog->OnHyperlinkClick( reinterpret_cast< LPCWSTR >( lParam ) );
+			hRes = pTaskDialog->OnHyperlinkClick( reinterpret_cast<LPCWSTR>( lParam ) );
 			break;
 
 		case TDN_TIMER:
@@ -70,13 +70,13 @@ HRESULT CALLBACK TaskDialogCallback( HWND hWnd, UINT uNotification, WPARAM wPara
 				if ( HasFlag( pTaskDialog->m_optionFlags, TDF_SHOW_MARQUEE_PROGRESS_BAR ) )
 				{
 					SendMessage( hWnd, TDM_SET_PROGRESS_BAR_MARQUEE,
-						static_cast< WPARAM >( pTaskDialog->m_progressState ), static_cast< LPARAM >( pTaskDialog->m_progressPos ) );
+						static_cast<WPARAM>( pTaskDialog->m_progressState ), static_cast<LPARAM>( pTaskDialog->m_progressPos ) );
 				}
 				else
 				{
 					SendMessage( hWnd, TDM_SET_PROGRESS_BAR_RANGE, 0, MAKELPARAM( pTaskDialog->m_progressRange.m_start, pTaskDialog->m_progressRange.m_end ) );
-					SendMessage( hWnd, TDM_SET_PROGRESS_BAR_POS, static_cast< WPARAM >( pTaskDialog->m_progressPos ), 0 );
-					SendMessage( hWnd, TDM_SET_PROGRESS_BAR_STATE, static_cast< WPARAM >( pTaskDialog->m_progressState ), 0 );
+					SendMessage( hWnd, TDM_SET_PROGRESS_BAR_POS, static_cast<WPARAM>( pTaskDialog->m_progressPos ), 0 );
+					SendMessage( hWnd, TDM_SET_PROGRESS_BAR_STATE, static_cast<WPARAM>( pTaskDialog->m_progressState ), 0 );
 				}
 			}
 
@@ -85,7 +85,7 @@ HRESULT CALLBACK TaskDialogCallback( HWND hWnd, UINT uNotification, WPARAM wPara
 				for ( size_t i = 0; i != pTaskDialog->m_radioButtons.size(); ++i )
 					if ( !HasFlag( pTaskDialog->m_radioButtons[ i ].m_state, CTaskDialog::BUTTON_ENABLED ) )
 						SendMessage( hWnd, TDM_ENABLE_RADIO_BUTTON,
-							static_cast< WPARAM >( pTaskDialog->m_radioButtons[ i ].m_buttonId ), static_cast< LPARAM >( FALSE ) );
+							static_cast<WPARAM>( pTaskDialog->m_radioButtons[ i ].m_buttonId ), static_cast<LPARAM>( FALSE ) );
 			}
 
 			if ( !pTaskDialog->m_buttons.empty() )
@@ -94,11 +94,11 @@ HRESULT CALLBACK TaskDialogCallback( HWND hWnd, UINT uNotification, WPARAM wPara
 				{
 					if ( !HasFlag( pTaskDialog->m_buttons[i].m_state, CTaskDialog::BUTTON_ENABLED ) )
 						SendMessage( hWnd, TDM_ENABLE_BUTTON,
-							static_cast< WPARAM >( pTaskDialog->m_buttons[ i ].m_buttonId ), static_cast< LPARAM >( FALSE ) );
+							static_cast<WPARAM>( pTaskDialog->m_buttons[ i ].m_buttonId ), static_cast<LPARAM>( FALSE ) );
 
 					if ( HasFlag( pTaskDialog->m_buttons[ i ].m_state, CTaskDialog::BUTTON_ELEVATION ) )
 						SendMessage( hWnd, TDM_SET_BUTTON_ELEVATION_REQUIRED_STATE,
-							static_cast< WPARAM >( pTaskDialog->m_buttons[ i ].m_buttonId ), static_cast< LPARAM >( TRUE ) );
+							static_cast<WPARAM>( pTaskDialog->m_buttons[ i ].m_buttonId ), static_cast<LPARAM>( TRUE ) );
 				}
 			}
 
@@ -275,13 +275,13 @@ void CTaskDialog::SetTitle( const std::tstring& title )
 void CTaskDialog::SetMainInstructionText( const std::tstring& mainInstructionText )
 {
 	m_mainInstructionText = mainInstructionText;
-	Notify( TDM_SET_ELEMENT_TEXT, TDE_MAIN_INSTRUCTION, reinterpret_cast< LPARAM >( m_mainInstructionText.c_str() ) );
+	Notify( TDM_SET_ELEMENT_TEXT, TDE_MAIN_INSTRUCTION, reinterpret_cast<LPARAM>( m_mainInstructionText.c_str() ) );
 }
 
 void CTaskDialog::SetContentText( const std::tstring& contentText )
 {
 	m_contentText = contentText;
-	Notify( TDM_SET_ELEMENT_TEXT, TDE_CONTENT, reinterpret_cast< LPARAM >( m_contentText.c_str() ) );
+	Notify( TDM_SET_ELEMENT_TEXT, TDE_CONTENT, reinterpret_cast<LPARAM>( m_contentText.c_str() ) );
 }
 
 void CTaskDialog::SetMainIcon(HICON hMainIcon)
@@ -339,7 +339,7 @@ void CTaskDialog::SetFooterIcon( LPCWSTR lpszFooterIcon )
 void CTaskDialog::SetFooterText( const std::tstring& footerText )
 {
 	m_footerText = footerText;
-	Notify( TDM_SET_ELEMENT_TEXT, TDE_FOOTER, reinterpret_cast< LPARAM >( m_footerText.c_str() ) );
+	Notify( TDM_SET_ELEMENT_TEXT, TDE_FOOTER, reinterpret_cast<LPARAM>( m_footerText.c_str() ) );
 }
 
 void CTaskDialog::SetExpansionArea( const std::tstring& expandedInfoText, const std::tstring& collapsedLabel /*= s_empty*/, const std::tstring& expandedLabel /*= s_empty*/ )
@@ -348,7 +348,7 @@ void CTaskDialog::SetExpansionArea( const std::tstring& expandedInfoText, const 
 	m_collapsedLabel = collapsedLabel;
 	m_expandedLabel = expandedLabel;
 
-	Notify( TDM_SET_ELEMENT_TEXT, TDE_EXPANDED_INFORMATION, reinterpret_cast< LPARAM >( m_expandedInfoText.c_str() ) );
+	Notify( TDM_SET_ELEMENT_TEXT, TDE_EXPANDED_INFORMATION, reinterpret_cast<LPARAM>( m_expandedInfoText.c_str() ) );
 }
 
 void CTaskDialog::SetCommonButtons( int buttonMask, int disabledButtonMask /* = 0 */, int elevationButtonMask /* = 0 */ )
@@ -388,8 +388,8 @@ void CTaskDialog::SetCommonButtonOptions( int disabledButtonMask, int elevationB
 				SetFlag( m_buttons[ buttonIndex ].m_state, BUTTON_ELEVATION, requiresElevation );
 			}
 
-			Notify( TDM_ENABLE_BUTTON, static_cast< WPARAM >( buttonId ), static_cast< LPARAM >( enabled ) );
-			Notify( TDM_SET_BUTTON_ELEVATION_REQUIRED_STATE, static_cast< WPARAM >( buttonId ), static_cast< LPARAM >( requiresElevation ) );
+			Notify( TDM_ENABLE_BUTTON, static_cast<WPARAM>( buttonId ), static_cast<LPARAM>( enabled ) );
+			Notify( TDM_SET_BUTTON_ELEVATION_REQUIRED_STATE, static_cast<WPARAM>( buttonId ), static_cast<LPARAM>( requiresElevation ) );
 		}
 		else
 		{
@@ -449,7 +449,7 @@ void CTaskDialog::SetProgressBarPosition( int progressPos )
 	SetFlag( m_optionFlags, TDF_SHOW_PROGRESS_BAR );
 	ClearFlag( m_optionFlags, TDF_SHOW_MARQUEE_PROGRESS_BAR );
 
-	Notify( TDM_SET_PROGRESS_BAR_POS, static_cast< WPARAM >( m_progressPos ), 0 );
+	Notify( TDM_SET_PROGRESS_BAR_POS, static_cast<WPARAM>( m_progressPos ), 0 );
 }
 
 void CTaskDialog::SetProgressBarState( int state /*= PBST_NORMAL*/ )
@@ -460,7 +460,7 @@ void CTaskDialog::SetProgressBarState( int state /*= PBST_NORMAL*/ )
 	SetFlag( m_optionFlags, TDF_SHOW_PROGRESS_BAR );
 	ClearFlag( m_optionFlags, TDF_SHOW_MARQUEE_PROGRESS_BAR );
 
-	Notify( TDM_SET_PROGRESS_BAR_STATE, static_cast< WPARAM >( m_progressState ), 0 );
+	Notify( TDM_SET_PROGRESS_BAR_STATE, static_cast<WPARAM>( m_progressState ), 0 );
 }
 
 void CTaskDialog::SetProgressBarMarquee( bool enabled /*= true*/, int marqueeSpeed /*= 0*/ )
@@ -474,7 +474,7 @@ void CTaskDialog::SetProgressBarMarquee( bool enabled /*= true*/, int marqueeSpe
 
 	SetFlag( m_optionFlags, TDF_SHOW_PROGRESS_BAR | TDF_SHOW_MARQUEE_PROGRESS_BAR );
 
-	Notify( TDM_SET_PROGRESS_BAR_MARQUEE, static_cast< WPARAM >( m_progressState ), static_cast< LPARAM >( m_progressPos ) );
+	Notify( TDM_SET_PROGRESS_BAR_MARQUEE, static_cast<WPARAM>( m_progressState ), static_cast<LPARAM>( m_progressPos ) );
 }
 
 void CTaskDialog::SetOptions( int optionFlags )
@@ -504,8 +504,8 @@ void CTaskDialog::SetButtonOptions( int commandControlId, bool enabled, bool req
 		SetFlag( m_buttonElevation, BUTTON_ELEVATION, requiresElevation );
 	}
 
-	Notify( TDM_ENABLE_BUTTON, static_cast< WPARAM >( commandControlId ), static_cast< LPARAM >( enabled ) );
-	Notify( TDM_SET_BUTTON_ELEVATION_REQUIRED_STATE, static_cast< WPARAM >( commandControlId ), static_cast< LPARAM >( requiresElevation ) );
+	Notify( TDM_ENABLE_BUTTON, static_cast<WPARAM>( commandControlId ), static_cast<LPARAM>( enabled ) );
+	Notify( TDM_SET_BUTTON_ELEVATION_REQUIRED_STATE, static_cast<WPARAM>( commandControlId ), static_cast<LPARAM>( requiresElevation ) );
 }
 
 bool CTaskDialog::IsButtonEnabled( int commandControlId ) const
@@ -525,7 +525,7 @@ void CTaskDialog::ClickButton( int commandControlId ) const
 {
 	ASSERT( FindButtonIndex( m_buttons, commandControlId ) != -1 || HasFlag( GetCommonButtonFlag( commandControlId ), m_commonButtonFlags ) );
 
-	Notify( TDM_CLICK_BUTTON, static_cast< WPARAM >( commandControlId ), 0 );
+	Notify( TDM_CLICK_BUTTON, static_cast<WPARAM>( commandControlId ), 0 );
 }
 
 void CTaskDialog::SetDefaultButton( int commandControlId )
@@ -543,14 +543,14 @@ void CTaskDialog::SetRadioButtonOptions( int radioButtonId, bool enabled )
 
 	SetFlag( m_radioButtons[ index ].m_state, BUTTON_ENABLED, enabled );
 
-	Notify( TDM_ENABLE_RADIO_BUTTON, static_cast< WPARAM >( radioButtonId ), static_cast< LPARAM >( enabled ) );
+	Notify( TDM_ENABLE_RADIO_BUTTON, static_cast<WPARAM>( radioButtonId ), static_cast<LPARAM>( enabled ) );
 }
 
 void CTaskDialog::ClickRadioButton( int radioButtonId ) const
 {
 	ASSERT( FindButtonIndex( m_radioButtons, radioButtonId ) != -1 );
 
-	Notify( TDM_CLICK_RADIO_BUTTON, static_cast< WPARAM >( radioButtonId ), 0 );
+	Notify( TDM_CLICK_RADIO_BUTTON, static_cast<WPARAM>( radioButtonId ), 0 );
 }
 
 bool CTaskDialog::IsRadioButtonEnabled( int radioButtonId ) const
@@ -590,7 +590,7 @@ void CTaskDialog::SetVerificationChecked( bool verificationChecked /*= true*/ )
 	m_verificationChecked = verificationChecked;
 
 	SetFlag( m_optionFlags, TDF_VERIFICATION_FLAG_CHECKED, verificationChecked );
-	Notify( TDM_CLICK_VERIFICATION, static_cast< WPARAM >( m_verificationChecked ), 0 );
+	Notify( TDM_CLICK_VERIFICATION, static_cast<WPARAM>( m_verificationChecked ), 0 );
 }
 
 
@@ -599,7 +599,7 @@ void CTaskDialog::NavigateTo( CTaskDialog& rTaskDialog ) const
 	TASKDIALOGCONFIG config = { 0 };
 
 	rTaskDialog.FillStruct( config );
-	Notify( TDM_NAVIGATE_PAGE, 0, reinterpret_cast< LPARAM >( &config ) );
+	Notify( TDM_NAVIGATE_PAGE, 0, reinterpret_cast<LPARAM>( &config ) );
 	rTaskDialog.FreeStruct( config );
 }
 
@@ -658,13 +658,13 @@ void CTaskDialog::FillStruct( TASKDIALOGCONFIG& rConfig )
 	if ( !m_radioButtons.empty() )
 	{
 		rConfig.pRadioButtons = MakeButtonData(m_radioButtons);
-		rConfig.cRadioButtons = static_cast< UINT >( m_radioButtons.size() );
+		rConfig.cRadioButtons = static_cast<UINT>( m_radioButtons.size() );
 	}
 
 	if ( !m_buttons.empty() )
 	{
 		rConfig.pButtons = MakeButtonData(m_buttons);
-		rConfig.cButtons = static_cast< UINT >( m_buttons.size() );
+		rConfig.cButtons = static_cast<UINT>( m_buttons.size() );
 	}
 
 	rConfig.lpCallbackData = reinterpret_cast<LONG_PTR>(this);
@@ -751,7 +751,7 @@ TASKDIALOG_BUTTON* CTaskDialog::MakeButtonData( const std::vector< CButtonInfo >
 
 INT_PTR CTaskDialog::FindButtonIndex( const std::vector< CButtonInfo >& buttons, int buttonId )
 {
-	for ( INT_PTR i = 0; i != static_cast< INT_PTR >( buttons.size() ); ++i )
+	for ( INT_PTR i = 0; i != static_cast<INT_PTR>( buttons.size() ); ++i )
 		if ( buttons[ i ].m_buttonId == buttonId )
 			return i;
 
@@ -776,7 +776,7 @@ INT_PTR CTaskDialog::DoModal( CWnd* pParent )
 	FreeStruct( config );
 
 	if ( S_OK == hResult )
-		return static_cast< INT_PTR >( m_buttonId );
+		return static_cast<INT_PTR>( m_buttonId );
 	else
 		return -1;
 }

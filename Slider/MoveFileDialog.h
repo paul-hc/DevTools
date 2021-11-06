@@ -22,7 +22,7 @@ private:
 private:
 	// enum { IDD = IDD_FILE_MOVE_DIALOG };
 
-	std::auto_ptr< CItemContentHistoryCombo > m_pDestFolderCombo;
+	std::auto_ptr<CItemContentHistoryCombo> m_pDestFolderCombo;
 	CTextEdit m_srcFilesEdit;
 
 	// generated stuff

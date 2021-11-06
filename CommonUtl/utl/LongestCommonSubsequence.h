@@ -103,7 +103,7 @@ namespace lcs
 		explicit Comparator( const StringT& src, const StringT& dest ) : m_src( src.c_str(), src.length() ), m_dest( dest.c_str(), dest.length() ) {}
 
 		void Process( std::vector< CResult< T > >& rOutSeq );
-		size_t GetLcsLength( void ) const { return static_cast< size_t >( GetLcsAt( 0, 0 ) ); }
+		size_t GetLcsLength( void ) const { return static_cast<size_t>( GetLcsAt( 0, 0 ) ); }
 	private:
 		size_t GetLcsIndex( size_t col, size_t row ) const;
 

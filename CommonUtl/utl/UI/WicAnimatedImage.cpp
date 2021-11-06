@@ -40,7 +40,7 @@ const CSize& CWicAnimatedImage::GetBmpSize( void ) const
 
 bool CWicAnimatedImage::StoreGlobalMetadata( void )
 {
-	CComPtr< IWICMetadataQueryReader > pDecoderMetadata = m_decoder.GetDecoderMetadata();
+	CComPtr<IWICMetadataQueryReader> pDecoderMetadata = m_decoder.GetDecoderMetadata();
 	if ( NULL == pDecoderMetadata )
 		return false;
 
@@ -65,11 +65,11 @@ bool CWicAnimatedImage::StoreGlobalMetadata( void )
 		if ( pixelAspectRatioF > 1.f )
 		{
 			m_gifPixelSize.cx = m_gifSize.cx;
-			m_gifPixelSize.cy = static_cast< long >( m_gifSize.cy / pixelAspectRatioF );
+			m_gifPixelSize.cy = static_cast<long>( m_gifSize.cy / pixelAspectRatioF );
 		}
 		else
 		{
-			m_gifPixelSize.cx = static_cast< long >( m_gifSize.cx * pixelAspectRatioF );
+			m_gifPixelSize.cx = static_cast<long>( m_gifSize.cx * pixelAspectRatioF );
 			m_gifPixelSize.cy = m_gifSize.cy;
 		}
 	}
@@ -103,13 +103,13 @@ bool CWicAnimatedImage::StoreBkgndColor( IWICMetadataQueryReader* pDecoderMetada
 		value.GetByteAs( &bkgndIndex );
 
 	// get the color from the palette
-	CComPtr< IWICPalette > pPalette;
+	CComPtr<IWICPalette> pPalette;
 	if ( SUCCEEDED( wic::CImagingFactory::Factory()->CreatePalette( &pPalette ) ) )
 		if ( SUCCEEDED( m_decoder.GetDecoder()->CopyPalette( pPalette ) ) )
 		{
 			std::vector< WICColor > colors( 256 );
 			UINT colorCount = 0;
-			if ( SUCCEEDED( pPalette->GetColors( static_cast< UINT >( colors.size() ), &colors.front(), &colorCount ) ) )
+			if ( SUCCEEDED( pPalette->GetColors( static_cast<UINT>( colors.size() ), &colors.front(), &colorCount ) ) )
 			{
 				colors.resize( colorCount );
 				if ( bkgndIndex < colors.size() )					// valid background color index?

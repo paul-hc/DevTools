@@ -13,7 +13,7 @@
 CSpinEdit::CSpinEdit( bool useSpin /*= true*/, const std::locale& loc /*= num::GetEmptyLocale()*/ )
 	: CTextEdit( false )
 	, m_locale( loc )
-	, m_validRange( num::PositiveRange< int >() )
+	, m_validRange( num::PositiveRange<int>() )
 {
 	SetUseSpin( useSpin );
 }

@@ -46,7 +46,7 @@ private:
 	bool m_externalFindWhat;
 	bool m_autoFillCommonSequence;
 
-	std::auto_ptr< CPickDataset > m_pPickDataset;
+	std::auto_ptr<CPickDataset> m_pPickDataset;
 private:
 	// enum { IDD = IDD_REPLACE_DIALOG };
 

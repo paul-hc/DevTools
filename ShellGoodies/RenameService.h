@@ -22,8 +22,8 @@ public:
 
 	bool CheckPathCollisions( cmd::IErrorObserver* pErrorObserver );
 
-	std::auto_ptr< CPickDataset > MakeFnamePickDataset( void ) const;
-	std::auto_ptr< CPickDataset > MakeDirPickDataset( void ) const;
+	std::auto_ptr<CPickDataset> MakeFnamePickDataset( void ) const;
+	std::auto_ptr<CPickDataset> MakeDirPickDataset( void ) const;
 public:
 	void QueryDestFilenames( std::vector< std::tstring >& rDestFnames ) const;
 	bool FileExistOutsideWorkingSet( const fs::CPath& filePath ) const;		// collision with an existing file/dir outside working set (selected files)

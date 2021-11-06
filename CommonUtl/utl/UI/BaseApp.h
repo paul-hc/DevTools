@@ -66,9 +66,9 @@ protected:
 		return rpAppString = _tcsdup( value.c_str() );
 	}
 private:
-	std::auto_ptr< utl::CResourcePool > m_pSharedResources;		// application shared resources, released on ExitInstance()
-	std::auto_ptr< CLogger > m_pLogger;
-	std::auto_ptr< CImageStore > m_pImageStore;					// control the lifetime of shared resources
+	std::auto_ptr<utl::CResourcePool> m_pSharedResources;		// application shared resources, released on ExitInstance()
+	std::auto_ptr<CLogger> m_pLogger;
+	std::auto_ptr<CImageStore> m_pImageStore;					// control the lifetime of shared resources
 	CAccelTable m_appAccel;
 	std::tstring m_appNameSuffix, m_profileSuffix;				// could be set to "_v2" when required
 	bool m_isInteractive;										// true by default; for apps with a message loop it starts false until application becomes idle for the first time

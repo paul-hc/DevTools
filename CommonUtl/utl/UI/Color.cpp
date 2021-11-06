@@ -19,7 +19,7 @@ namespace hlp
 		iss >> value;
 		if ( iss.fail() || value < 0 || value > 0xFF )
 			return false;
-		*pValue = static_cast< BYTE >( value );
+		*pValue = static_cast<BYTE>( value );
 		return true;
 	}
 
@@ -32,7 +32,7 @@ namespace hlp
 		iss >> std::hex >> value;
 		if ( iss.fail() || value < 0 || value > 0xFF )
 			return false;
-		*pValue = static_cast< BYTE >( value );
+		*pValue = static_cast<BYTE>( value );
 		return true;
 	}
 }
@@ -49,7 +49,7 @@ namespace ui
 			luminance = ( red * 30 + green * 59 + blue * 11 ) / 100;
 
 		ASSERT( luminance <= 255 );
-		return static_cast< BYTE >( luminance );
+		return static_cast<BYTE>( luminance );
 	}
 }
 
@@ -124,7 +124,7 @@ namespace ui
 		if ( posTag != std::tstring::npos )
 		{	// HTML color format: "#FF0000" for bright red
 			enum { PosR = 0, PosG = 2, PosB = 4, MinLength = 6 };
-			int pos = static_cast< int >( posTag + 1 );
+			int pos = static_cast<int>( posTag + 1 );
 			BYTE r, g, b;
 
 			if ( str::GetLength( &text[ pos ] ) >= MinLength &&
@@ -168,9 +168,9 @@ namespace ui
 
 namespace ui
 {
-	inline double Square( UINT comp ) { ASSERT( comp >= 0 && comp <= 255 ); return static_cast< double >( comp * comp ); }
-	inline double PercentToFactor( int pct ) { ASSERT( pct >= 0 && pct <= 100 ); return static_cast< double >( pct ) / 100.0; }
-	inline BYTE AsComponent( double component ) { ASSERT( component >= 0.0 && component < 256.0 ); return static_cast< BYTE >( component ); }
+	inline double Square( UINT comp ) { ASSERT( comp >= 0 && comp <= 255 ); return static_cast<double>( comp * comp ); }
+	inline double PercentToFactor( int pct ) { ASSERT( pct >= 0 && pct <= 100 ); return static_cast<double>( pct ) / 100.0; }
+	inline BYTE AsComponent( double component ) { ASSERT( component >= 0.0 && component < 256.0 ); return static_cast<BYTE>( component ); }
 
 
 	// accurate colour algorithms
@@ -244,7 +244,7 @@ namespace ui
 
 	// CHslColor implementation
 
-	const Range< WORD > CHslColor::s_validRange( 0, 240 );
+	const Range<WORD> CHslColor::s_validRange( 0, 240 );
 
 	CHslColor::CHslColor( COLORREF rgbColor )
 	{
@@ -269,9 +269,9 @@ namespace ui
 		else if ( byFactor < 0.0 )
 			newComponent *= ( 1.0 + byFactor );
 
-		static const Range< double > s_dValidRange( s_validRange );
+		static const Range<double> s_dValidRange( s_validRange );
 		s_dValidRange.Constrain( newComponent );
 
-		return static_cast< WORD >( newComponent );
+		return static_cast<WORD>( newComponent );
 	}
 }

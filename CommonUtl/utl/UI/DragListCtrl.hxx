@@ -61,7 +61,7 @@ bool CDragListCtrl<BaseListCtrl>::DragSelection( CPoint dragPos, ole::CDataSourc
 												 DROPEFFECT dropEffect /*= DROPEFFECT_COPY | DROPEFFECT_MOVE | DROPEFFECT_LINK*/ )
 {
 	CListSelectionData selData( this );									// this will query the selected indexes
-	std::auto_ptr< ole::CDataSource > pNewDataSource;
+	std::auto_ptr<ole::CDataSource> pNewDataSource;
 	if ( NULL == pDataSource )
 	{
 		pNewDataSource.reset( GetDataSourceFactory()->NewDataSource() );
@@ -135,7 +135,7 @@ void CDragListCtrl<BaseListCtrl>::HighlightDropMark( int dropIndex )
 
 	m_dropIndex = dropIndex;
 
-	const Range< int > indexRange( 0, GetItemCount() - 1 );
+	const Range<int> indexRange( 0, GetItemCount() - 1 );
 
 	if ( indexRange.IsNormalized() )					// list not empty?
 		if ( indexRange.Contains( dropIndex ) )
@@ -269,7 +269,7 @@ BOOL CDragListCtrl<BaseListCtrl>::OnLvnBeginDrag_Reflect( NMHDR* pNmHdr, LRESULT
 template< typename BaseListCtrl >
 LRESULT CDragListCtrl<BaseListCtrl>::OnLVmEnsureVisible( WPARAM wParam, LPARAM lParam )
 {
-	int index = static_cast< int >( wParam );
+	int index = static_cast<int>( wParam );
 	bool partialOk = lParam != FALSE; partialOk;
 
 	if ( IsDragging() && !ui::IsKeyPressed( VK_CONTROL ) )

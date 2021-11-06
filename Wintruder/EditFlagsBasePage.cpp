@@ -175,7 +175,7 @@ void CEditFlagsBasePage::OnChildPageNotify( CLayoutPropertyPage* pEmbeddedPage, 
 	pEmbeddedPage;
 	if ( CBaseFlagsCtrl::FN_FLAGSCHANGED == notifCode )
 	{
-		CBaseFlagsCtrl* pFlagsCtrl = dynamic_cast< CBaseFlagsCtrl* >( pCtrl );
+		CBaseFlagsCtrl* pFlagsCtrl = dynamic_cast<CBaseFlagsCtrl*>( pCtrl );
 		if ( m_pGeneralList == pFlagsCtrl )
 			OnFnFlagsChanged_GeneralList();
 		else if ( m_pSpecificList == pFlagsCtrl )
@@ -286,7 +286,7 @@ BOOL CEditFlagsBasePage::OnTtnNeedText( UINT cmdId, NMHDR* pNmHdr, LRESULT* pRes
 		{
 			case GeneralPage:
 			case SpecificPage:
-				pTooltipInfo->lpszText = const_cast< TCHAR* >( m_childPageTipText[ pTooltipInfo->hdr.idFrom ].c_str() ); break;
+				pTooltipInfo->lpszText = const_cast<TCHAR*>( m_childPageTipText[ pTooltipInfo->hdr.idFrom ].c_str() ); break;
 				break;
 		}
 

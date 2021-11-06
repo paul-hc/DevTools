@@ -130,10 +130,10 @@ namespace ui
 	// CTooltipTextMessage implementation
 
 	CTooltipTextMessage::CTooltipTextMessage( NMHDR* pNmHdr )
-		: m_pTooltip( static_cast< CToolTipCtrl* >( CWnd::FromHandlePermanent( pNmHdr->hwndFrom ) ) )
-		, m_pTttA( TTN_NEEDTEXTA == pNmHdr->code ? reinterpret_cast< TOOLTIPTEXTA* >( pNmHdr ) : NULL )
-		, m_pTttW( TTN_NEEDTEXTW == pNmHdr->code ? reinterpret_cast< TOOLTIPTEXTW* >( pNmHdr ) : NULL )
-		, m_cmdId( static_cast< UINT >( pNmHdr->idFrom ) )
+		: m_pTooltip( static_cast<CToolTipCtrl*>( CWnd::FromHandlePermanent( pNmHdr->hwndFrom ) ) )
+		, m_pTttA( TTN_NEEDTEXTA == pNmHdr->code ? reinterpret_cast<TOOLTIPTEXTA*>( pNmHdr ) : NULL )
+		, m_pTttW( TTN_NEEDTEXTW == pNmHdr->code ? reinterpret_cast<TOOLTIPTEXTW*>( pNmHdr ) : NULL )
+		, m_cmdId( static_cast<UINT>( pNmHdr->idFrom ) )
 		, m_hCtrl( NULL )
 	{
 		ASSERT( m_pTttA != NULL || m_pTttW != NULL );
@@ -160,13 +160,13 @@ namespace ui
 		{
 			static std::string narrowText;				// static buffer
 			narrowText = str::AsNarrow( text );
-			m_pTttA->lpszText = const_cast< char* >( narrowText.c_str() );
+			m_pTttA->lpszText = const_cast<char*>( narrowText.c_str() );
 		}
 		else if ( m_pTttW != NULL )
 		{
 			static std::wstring wideText;				// static buffer
 			wideText = str::AsWide( text );
-			m_pTttW->lpszText = const_cast< wchar_t* >( wideText.c_str() );
+			m_pTttW->lpszText = const_cast<wchar_t*>( wideText.c_str() );
 		}
 		else
 			ASSERT( false );
@@ -187,8 +187,8 @@ namespace ui
 	{
 		if ( CWnd* pCtrl = CWnd::FromHandlePermanent( hCtrl ) )
 			return		// ignore column layout descriptors (list controls, grids, etc)
-				is_a< CReportListControl >( pCtrl ) ||
-				is_a< CStatusStatic >( pCtrl );
+				is_a<CReportListControl>( pCtrl ) ||
+				is_a<CStatusStatic>( pCtrl );
 
 		return false;
 	}

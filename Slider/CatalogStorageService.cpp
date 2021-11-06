@@ -16,7 +16,7 @@ namespace svc
 {
 	CAlbumModel* ToAlbumModel( CObject* pAlbumDoc )
 	{
-		CAlbumDoc* pDestAlbumDoc = checked_static_cast< CAlbumDoc* >( pAlbumDoc );
+		CAlbumDoc* pDestAlbumDoc = checked_static_cast<CAlbumDoc*>( pAlbumDoc );
 		ASSERT_PTR( pDestAlbumDoc );
 		return pDestAlbumDoc->RefModel();
 	}
@@ -91,7 +91,7 @@ void CTransferAlbumService::CloneDestAlbumDoc( const CAlbumDoc* pSrcAlbumDoc )
 	if ( m_transferAttrs.empty() )
 		TRACE( _T(" # Warning: creating an empty catalog storage for document '%s'\n"), pSrcAlbumDoc->GetDocFilePath().GetPtr() );
 
-	m_pDestAlbumDoc.reset( checked_static_cast< CAlbumDoc* >( RUNTIME_CLASS( CAlbumDoc )->CreateObject() ) );	// new temporary DEST album to build and SaveAs
+	m_pDestAlbumDoc.reset( checked_static_cast<CAlbumDoc*>( RUNTIME_CLASS( CAlbumDoc )->CreateObject() ) );	// new temporary DEST album to build and SaveAs
 
 	m_password = pSrcAlbumDoc->m_password;
 	m_pDestAlbumDoc->CopyAlbumState( pSrcAlbumDoc );		// copy album state (slide data, background color, etc)
@@ -224,7 +224,7 @@ void CCatalogStorageService::BuildFromSrcPaths( const std::vector< fs::CPath >& 
 	BuildFromTransferPairs( xferPairs );
 
 	// create an ad-hoc album based on the transfer attributes, to save to "_Album.sld" stream
-	m_pDestAlbumDoc.reset( checked_static_cast< CAlbumDoc* >( RUNTIME_CLASS( CAlbumDoc )->CreateObject() ) );
+	m_pDestAlbumDoc.reset( checked_static_cast<CAlbumDoc*>( RUNTIME_CLASS( CAlbumDoc )->CreateObject() ) );
 
 	CImagesModel* pImagesModel = &m_pDestAlbumDoc->RefModel()->RefImagesModel();
 

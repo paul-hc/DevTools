@@ -50,7 +50,7 @@
 
 // pass the pair of "array, arrayCount" in functions
 #define ARRAY_PAIR( array ) (array), COUNT_OF( (array) )
-#define ARRAY_PAIR_V( vect ) &(vect).front(), static_cast< unsigned int >( (vect).size() )
+#define ARRAY_PAIR_V( vect ) &(vect).front(), static_cast<unsigned int>( (vect).size() )
 
 
 #ifdef _DEBUG
@@ -132,20 +132,20 @@ inline const Type* safe_ptr( const Type* ptr )
 template< typename Type, typename BaseType >
 inline bool is_a( const BaseType* pObject )
 {
-	return dynamic_cast< const Type* >( pObject ) != NULL;
+	return dynamic_cast<const Type*>( pObject ) != NULL;
 }
 
 template< typename ToPtrType, typename FromPtrType >
 inline ToPtrType checked_static_cast( FromPtrType fromPtr )
 {
-	ASSERT( dynamic_cast< ToPtrType >( fromPtr ) == static_cast< ToPtrType >( fromPtr ) );		// checked in debug builds
-	return static_cast< ToPtrType >( fromPtr );
+	ASSERT( dynamic_cast<ToPtrType>( fromPtr ) == static_cast<ToPtrType>( fromPtr ) );		// checked in debug builds
+	return static_cast<ToPtrType>( fromPtr );
 }
 
 template< typename ToPtrType, typename FromPtrType >
 inline ToPtrType safe_static_cast( FromPtrType fromPtr )
 {
-	return safe_ptr( checked_static_cast< ToPtrType >( fromPtr ) );
+	return safe_ptr( checked_static_cast<ToPtrType>( fromPtr ) );
 }
 
 

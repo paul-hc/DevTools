@@ -39,22 +39,22 @@ public:
 	bool IsWrap( void ) const { return HasFlag( GetStyle(), UDS_WRAP ); }
 	void SetWrap( bool wrap = true ) { wrap ? ModifyStyle( 0, UDS_WRAP ) : ModifyStyle( UDS_WRAP, 0 ); }
 
-	Range< int > GetValidRange( void ) const { return m_validRange; }
-	void SetValidRange( const Range< int >& validRange ) { ASSERT( validRange.IsNormalized() ); m_validRange = validRange; }
+	Range<int> GetValidRange( void ) const { return m_validRange; }
+	void SetValidRange( const Range<int>& validRange ) { ASSERT( validRange.IsNormalized() ); m_validRange = validRange; }
 
-	template< typename NumericT > void SetFullRange( void ) { m_validRange = num::FullRange< NumericT >(); }
+	template< typename NumericT > void SetFullRange( void ) { m_validRange = num::FullRange<NumericT>(); }
 
 	int GetNumericValue( bool* pValid = NULL ) const;
 	void SetNumericValue( int value );
 
 	template< typename NumericT >
-	NumericT GetNumber( bool* pValid = NULL ) const { return static_cast< NumericT >( GetNumericValue( pValid ) ); }
+	NumericT GetNumber( bool* pValid = NULL ) const { return static_cast<NumericT>( GetNumericValue( pValid ) ); }
 
 	template< typename NumericT >
 	bool ParseNumber( NumericT* pNumber ) const;
 
 	template< typename NumericT >
-	void SetNumber( NumericT value ) { SetNumericValue( static_cast< int >( value ) ); }
+	void SetNumber( NumericT value ) { SetNumericValue( static_cast<int>( value ) ); }
 
 	template< typename NumericT >
 	void DDX_Number( CDataExchange* pDX, NumericT& rValue, int ctrlId = 0 );
@@ -69,8 +69,8 @@ protected:
 	virtual bool SpinBy( int delta );
 private:
 	std::locale m_locale;
-	Range< int > m_validRange;
-	std::auto_ptr< CSpinTargetButton > m_pSpinButton;
+	Range<int> m_validRange;
+	std::auto_ptr<CSpinTargetButton> m_pSpinButton;
 public:
 	// generated overrides
 	virtual void PreSubclassWindow( void );

@@ -10,7 +10,7 @@ interface IBaseObserver
 {
 	virtual bool CanNotify( void ) const
 	{
-		const CWnd* pObserverWnd = dynamic_cast< const CWnd* >( this );
+		const CWnd* pObserverWnd = dynamic_cast<const CWnd*>( this );
 		return NULL == pObserverWnd || pObserverWnd->GetSafeHwnd() != NULL;		// observer is not a window or window is initialized
 	}
 };

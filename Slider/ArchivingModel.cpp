@@ -221,7 +221,7 @@ bool CArchivingModel::BuildArchiveStorageFile( const fs::TStgDocPath& destStgPat
 
 		CTimer timer;
 
-		CComPtr< ICatalogStorage > pCatalogStorage = CCatalogStorageFactory::CreateStorageObject();
+		CComPtr<ICatalogStorage> pCatalogStorage = CCatalogStorageFactory::CreateStorageObject();
 
 		pCatalogStorage->CreateImageArchiveFile( destStgPath, &catalogSvc );
 

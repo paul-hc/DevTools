@@ -38,7 +38,7 @@ namespace hlp
 
 		fs::CFileState fileState;
 		fileState.m_fullPath = s_dirPath / nameExt;
-		fileState.m_attributes = static_cast< BYTE >( fmt::ParseFileAttributes( attrsText, false ) );
+		fileState.m_attributes = static_cast<BYTE>( fmt::ParseFileAttributes( attrsText, false ) );
 		fileState.m_creationTime = time_utl::ParseTimestamp( creationDateText );
 		return fileState;
 	}
@@ -218,7 +218,7 @@ void CFileListDialog::CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARAM 
 	static const ui::CTextEffect s_modSrc( ui::Regular, CReportListControl::s_deleteSrcTextColor );
 	static const ui::CTextEffect s_errorBk( ui::Regular, CLR_NONE, ColorErrorBk );
 
-	const CDisplayObject* pObject = CReportListControl::AsPtr< CDisplayObject >( rowKey );
+	const CDisplayObject* pObject = CReportListControl::AsPtr<CDisplayObject>( rowKey );
 	const ui::CTextEffect* pTextEffect = NULL;
 	bool isModified = false, isSrc = false;
 

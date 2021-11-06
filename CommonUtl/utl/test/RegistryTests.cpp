@@ -149,18 +149,18 @@ void CRegistryTests::Test_NumericValues( reg::CKey& rKey )
 	int number;
 	ASSERT( !rKey.QueryNumberValue( _T("Integer"), number ) );
 
-	ASSERT_EQUAL( -1, rKey.ReadNumberValue( _T("Int16"), static_cast< short >( -1 ) ) );
-	ASSERT( rKey.WriteNumberValue( _T("Int16"), static_cast< short >( 55 ) ) );
-	ASSERT_EQUAL( 55, rKey.ReadNumberValue( _T("Int16"), static_cast< short >( -1 ) ) );
+	ASSERT_EQUAL( -1, rKey.ReadNumberValue( _T("Int16"), static_cast<short>( -1 ) ) );
+	ASSERT( rKey.WriteNumberValue( _T("Int16"), static_cast<short>( 55 ) ) );
+	ASSERT_EQUAL( 55, rKey.ReadNumberValue( _T("Int16"), static_cast<short>( -1 ) ) );
 	ASSERT_EQUAL( REG_MULTI_SZ, rKey.GetValueType( _T("MultiPaths") ) );
 
-	ASSERT_EQUAL( -1, rKey.ReadNumberValue( _T("Int32"), static_cast< int >( -1 ) ) );
-	ASSERT( rKey.WriteNumberValue( _T("Int32"), static_cast< int >( 55 ) ) );
-	ASSERT_EQUAL( 55, rKey.ReadNumberValue( _T("Int32"), static_cast< int >( -1 ) ) );
+	ASSERT_EQUAL( -1, rKey.ReadNumberValue( _T("Int32"), static_cast<int>( -1 ) ) );
+	ASSERT( rKey.WriteNumberValue( _T("Int32"), static_cast<int>( 55 ) ) );
+	ASSERT_EQUAL( 55, rKey.ReadNumberValue( _T("Int32"), static_cast<int>( -1 ) ) );
 
-	ASSERT_EQUAL( 1000, rKey.ReadNumberValue( _T("UInt64"), static_cast< ULONGLONG >( 1000 ) ) );
-	ASSERT( rKey.WriteNumberValue( _T("UInt64"), static_cast< ULONGLONG >( 55 ) ) );
-	ASSERT_EQUAL( 55, rKey.ReadNumberValue( _T("UInt64"), static_cast< ULONGLONG >( 1000 ) ) );
+	ASSERT_EQUAL( 1000, rKey.ReadNumberValue( _T("UInt64"), static_cast<ULONGLONG>( 1000 ) ) );
+	ASSERT( rKey.WriteNumberValue( _T("UInt64"), static_cast<ULONGLONG>( 55 ) ) );
+	ASSERT_EQUAL( 55, rKey.ReadNumberValue( _T("UInt64"), static_cast<ULONGLONG>( 1000 ) ) );
 }
 
 void CRegistryTests::Test_GuidValue( reg::CKey& rKey )

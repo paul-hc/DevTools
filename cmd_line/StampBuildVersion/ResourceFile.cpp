@@ -234,7 +234,7 @@ namespace rc
 					if ( *s_doubleQuote == *it )		// on 1st quoted token: value name
 					{
 						std::string text;
-						Range< size_t > tokenRange;
+						Range<size_t> tokenRange;
 
 						if ( it.ExtractEnclosedText( text, s_doubleQuote, &tokenRange ) )
 						{
@@ -248,7 +248,7 @@ namespace rc
 								if ( it.ExtractEnclosedText( text, s_doubleQuote, &tokenRange ) )
 									it.ReplaceToken( tokenRange, pValue );
 								else
-									it.ReplaceToken( Range< size_t >( offset, rValueLine.length() ), str::Enquote( pValue, *s_doubleQuote ).c_str() );		// best guess: add the trailing part
+									it.ReplaceToken( Range<size_t>( offset, rValueLine.length() ), str::Enquote( pValue, *s_doubleQuote ).c_str() );		// best guess: add the trailing part
 
 								return true;
 							}

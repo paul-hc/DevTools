@@ -32,7 +32,7 @@ namespace shell
 			m_pDragSourceHelper.QueryInterface( &m_pDragSourceHelper2 );
 
 		if ( pDataSource != NULL )
-			m_pDataObject = static_cast< IDataObject* >( pDataSource->GetInterface( &IID_IDataObject ) );
+			m_pDataObject = static_cast<IDataObject*>( pDataSource->GetInterface( &IID_IDataObject ) );
 	}
 
 	/*
@@ -94,7 +94,7 @@ namespace shell
 
 	bool CDragImager::SetFromBitmap( CBitmap& rBitmap, COLORREF transpColor, const POINT* pOrigin /*= NULL*/ )
 	{
-		return SetFromBitmap( static_cast< HBITMAP >( rBitmap.Detach() ), transpColor, pOrigin );		// detach the HBITMAP handle
+		return SetFromBitmap( static_cast<HBITMAP>( rBitmap.Detach() ), transpColor, pOrigin );		// detach the HBITMAP handle
 	}
 
 } //namespace shell

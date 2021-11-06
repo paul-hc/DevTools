@@ -11,7 +11,7 @@
 #endif
 
 
-const CLIPFORMAT CClipboard::s_cfPreferredDropEffect = static_cast< CLIPFORMAT >( ::RegisterClipboardFormat( CFSTR_PREFERREDDROPEFFECT ) );
+const CLIPFORMAT CClipboard::s_cfPreferredDropEffect = static_cast<CLIPFORMAT>( ::RegisterClipboardFormat( CFSTR_PREFERREDDROPEFFECT ) );
 const TCHAR CClipboard::s_lineEnd[] = _T("\r\n");
 
 CClipboard::CClipboard( CWnd* pWnd )
@@ -108,7 +108,7 @@ bool CClipboard::CopyText( const std::tstring& text, CWnd* pWnd /*= AfxGetMainWn
 {
 	std::string utf8Text = str::ToUtf8( text.c_str() );
 
-	std::auto_ptr< CClipboard > pClipboard( Open( pWnd ) );
+	std::auto_ptr<CClipboard> pClipboard( Open( pWnd ) );
 	if ( NULL == pClipboard.get() )
 		return false;
 
@@ -127,7 +127,7 @@ bool CClipboard::CanPasteText( void )
 
 bool CClipboard::PasteText( std::tstring& rText, CWnd* pWnd /*= AfxGetMainWnd()*/ )
 {
-	std::auto_ptr< CClipboard > pClipboard( Open( pWnd ) );
+	std::auto_ptr<CClipboard> pClipboard( Open( pWnd ) );
 	return pClipboard.get() != NULL && pClipboard->ReadString( rText );
 }
 
@@ -139,7 +139,7 @@ bool CClipboard::HasDropFiles( void )
 
 DROPEFFECT CClipboard::QueryDropFilePaths( std::vector< fs::CPath >& rSrcPaths )
 {
-	CComPtr< IDataObject > pDataObject;
+	CComPtr<IDataObject> pDataObject;
 
 	if ( ::IsClipboardFormatAvailable( CF_HDROP ) )
 		if ( SUCCEEDED( ::OleGetClipboard( &pDataObject ) ) )

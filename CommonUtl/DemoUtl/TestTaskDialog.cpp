@@ -157,7 +157,7 @@ void CTestTaskDialog::DoDataExchange( CDataExchange* pDX )
 
 	if ( firstInit )
 	{
-		m_usageButton.SetSelValue( static_cast< TaskDialogUsage >( AfxGetApp()->GetProfileInt( reg::section_dialog, reg::entry_dialogUsage, TD_Basic ) ) );
+		m_usageButton.SetSelValue( static_cast<TaskDialogUsage>( AfxGetApp()->GetProfileInt( reg::section_dialog, reg::entry_dialogUsage, TD_Basic ) ) );
 		ui::EnableWindow( m_usageButton, CTaskDialog::IsSupported() );
 	}
 
@@ -178,7 +178,7 @@ void CTestTaskDialog::OnDestroy( void )
 
 void CTestTaskDialog::OnBnClicked_TaskUsage( void )
 {
-	std::auto_ptr< CTaskDialog > pDlg;
+	std::auto_ptr<CTaskDialog> pDlg;
 
 	switch ( m_usageButton.GetSelEnum< TaskDialogUsage >() )
 	{

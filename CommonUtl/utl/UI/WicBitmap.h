@@ -39,7 +39,7 @@ public:
 	wic::CBitmapOrigin& GetOrigin( void ) const { return *m_pBitmapOrigin; }
 	const wic::CBitmapFormat& GetBmpFmt( void ) const { return GetOrigin().GetBmpFmt(); }
 private:
-	std::auto_ptr< wic::CBitmapOrigin > m_pBitmapOrigin;			// keeps track of the source bitmap for saving with metadata
+	std::auto_ptr<wic::CBitmapOrigin> m_pBitmapOrigin;			// keeps track of the source bitmap for saving with metadata
 };
 
 

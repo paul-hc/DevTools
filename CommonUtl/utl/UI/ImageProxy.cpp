@@ -54,7 +54,7 @@ void CImageProxy::Draw( CDC* pDC, const CPoint& pos, UINT style /*= ILD_TRANSPAR
 {
 	ASSERT( !IsEmpty() );
 
-	VERIFY( const_cast< CImageList* >( m_pImageList )->Draw( pDC, m_index, pos, style | INDEXTOOVERLAYMASK( m_overlayMask ) ) );
+	VERIFY( const_cast<CImageList*>( m_pImageList )->Draw( pDC, m_index, pos, style | INDEXTOOVERLAYMASK( m_overlayMask ) ) );
 
 	if ( HasExternalOverlay() )
 		m_pExternalOverlay->Draw( pDC, pos, style );

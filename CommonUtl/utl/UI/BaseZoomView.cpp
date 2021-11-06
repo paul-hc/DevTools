@@ -66,7 +66,7 @@ void CBaseZoomView::ModifyScalingMode( ui::ImageScalingMode scalingMode )
 
 bool CBaseZoomView::ModifyZoomPct( UINT zoomPct )
 {
-	const Range< UINT >& zoomLimits = ui::CStdZoom::Instance().m_limits;
+	const Range<UINT>& zoomLimits = ui::CStdZoom::Instance().m_limits;
 	if ( !zoomLimits.Contains( zoomPct ) )			// zoom out of range?
 	{
 		OutputZoomPct();

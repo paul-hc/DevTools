@@ -40,7 +40,7 @@ namespace cmd
 
 	bool IsPersistentCmd( const utl::ICommand* pCmd )
 	{
-		if ( const IPersistentCmd* pPersistCmd = dynamic_cast< const IPersistentCmd* >( pCmd ) )
+		if ( const IPersistentCmd* pPersistCmd = dynamic_cast<const IPersistentCmd*>( pCmd ) )
 			return pPersistCmd->IsValid();
 
 		return false;
@@ -48,10 +48,10 @@ namespace cmd
 
 	bool IsZombieCmd( const utl::ICommand* pCmd )
 	{
-		if ( const IPersistentCmd* pPersistCmd = dynamic_cast< const IPersistentCmd* >( pCmd ) )
+		if ( const IPersistentCmd* pPersistCmd = dynamic_cast<const IPersistentCmd*>( pCmd ) )
 			return !pPersistCmd->IsValid();
 
-		if ( const CMacroCommand* pMacroCmd = dynamic_cast< const CMacroCommand* >( pCmd ) )
+		if ( const CMacroCommand* pMacroCmd = dynamic_cast<const CMacroCommand*>( pCmd ) )
 			return pMacroCmd->IsEmpty();
 
 		return NULL == pCmd;

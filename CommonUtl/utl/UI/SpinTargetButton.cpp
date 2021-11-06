@@ -25,7 +25,7 @@ bool CSpinTargetButton::IsBuddyEditable( void ) const
 	ASSERT_PTR( m_pBuddyCtrl->GetSafeHwnd() );
 	if ( !m_pBuddyCtrl->IsWindowEnabled() )
 		return false;
-	if ( is_a< CEdit >( m_pBuddyCtrl ) && HasFlag( m_pBuddyCtrl->GetStyle(), ES_READONLY ) )
+	if ( is_a<CEdit>( m_pBuddyCtrl ) && HasFlag( m_pBuddyCtrl->GetStyle(), ES_READONLY ) )
 		return false;
 	return true;
 }

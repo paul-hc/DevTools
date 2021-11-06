@@ -27,9 +27,9 @@ CCatalogStorageFactory* CCatalogStorageFactory::Instance( void )
 	return &s_factory;
 }
 
-CComPtr< ICatalogStorage > CCatalogStorageFactory::CreateStorageObject( void )
+CComPtr<ICatalogStorage> CCatalogStorageFactory::CreateStorageObject( void )
 {
-	CComPtr< ICatalogStorage > pNewCatalogStorage;
+	CComPtr<ICatalogStorage> pNewCatalogStorage;
 
 	CImageCatalogStg::CreateObject( &pNewCatalogStorage );
 	return pNewCatalogStorage;
@@ -58,12 +58,12 @@ bool CCatalogStorageFactory::HasSameOpenMode( ICatalogStorage* pCatalogStorage, 
 ICatalogStorage* CCatalogStorageFactory::FindStorage( const fs::TStgDocPath& docStgPath ) const
 {
 	if ( fs::CStructuredStorage* pOpenedStorage = fs::CStructuredStorage::FindOpenedStorage( docStgPath ) )		// opened in testing?
-		return checked_static_cast< CImageCatalogStg* >( pOpenedStorage );
+		return checked_static_cast<CImageCatalogStg*>( pOpenedStorage );
 
 	return NULL;
 }
 
-CComPtr< ICatalogStorage > CCatalogStorageFactory::AcquireStorage( const fs::TStgDocPath& docStgPath, DWORD mode /*= STGM_READ*/ )
+CComPtr<ICatalogStorage> CCatalogStorageFactory::AcquireStorage( const fs::TStgDocPath& docStgPath, DWORD mode /*= STGM_READ*/ )
 {
 	if ( ICatalogStorage* pFoundCatalogStorage = FindStorage( docStgPath ) )
 	{
@@ -71,7 +71,7 @@ CComPtr< ICatalogStorage > CCatalogStorageFactory::AcquireStorage( const fs::TSt
 		return pFoundCatalogStorage;			// cache hit
 	}
 
-	CComPtr< ICatalogStorage > pNewCatalogStorage = CreateStorageObject();
+	CComPtr<ICatalogStorage> pNewCatalogStorage = CreateStorageObject();
 	fs::CStructuredStorage* pDocStorage = pNewCatalogStorage->GetDocStorage();
 	CScopedErrorHandling scopedHandling( pDocStorage, this );		// pass current factory throw mode to the storage
 
@@ -85,9 +85,9 @@ CComPtr< ICatalogStorage > CCatalogStorageFactory::AcquireStorage( const fs::TSt
 	return pNewCatalogStorage;
 }
 
-std::auto_ptr< CFile > CCatalogStorageFactory::OpenFlexImageFile( const fs::CFlexPath& flexImagePath, DWORD mode /*= CFile::modeRead*/ )
+std::auto_ptr<CFile> CCatalogStorageFactory::OpenFlexImageFile( const fs::CFlexPath& flexImagePath, DWORD mode /*= CFile::modeRead*/ )
 {
-	std::auto_ptr< CFile > pFile;
+	std::auto_ptr<CFile> pFile;
 
 	if ( !flexImagePath.IsComplexPath() )
 		pFile = fs::OpenFile( flexImagePath, IsThrowMode(), mode );			// open physical image file
@@ -103,7 +103,7 @@ std::auto_ptr< CFile > CCatalogStorageFactory::OpenFlexImageFile( const fs::CFle
 
 				ASSERT( pDocStorage->IsOpenForWriting() == fs::CStructuredStorage::IsWritingMode( mode ) );		// IMP: the storage must be in compatible open mode for the type of file access
 
-				std::auto_ptr< fs::CStreamLocation > pStreamLocation;
+				std::auto_ptr<fs::CStreamLocation> pStreamLocation;
 
 				if ( fs::CStructuredStorage::IsReadingMode( mode ) )
 					pStreamLocation = pDocStorage->LocateReadStream( flexImagePath.GetEmbeddedPath(), mode );
@@ -153,7 +153,7 @@ CCachedThumbBitmap* CCatalogStorageFactory::GenerateThumb( const fs::CFlexPath& 
 
 	const CThumbnailer* pThumbnailer = safe_ptr( app::GetThumbnailer() );
 
-	if ( CComPtr< IWICBitmapSource > pBitmapSource = CWicImageCache::Instance().LookupBitmapSource( fs::ImagePathKey( srcImagePath, 0 ) ) )		// use frame 0 for the thumbnail
+	if ( CComPtr<IWICBitmapSource> pBitmapSource = CWicImageCache::Instance().LookupBitmapSource( fs::ImagePathKey( srcImagePath, 0 ) ) )		// use frame 0 for the thumbnail
 		if ( CCachedThumbBitmap* pThumbBitmap = pThumbnailer->NewScaledThumb( pBitmapSource, srcImagePath ) )
 		{
 			// IMP: the resulting bitmap, even the scaled bitmap will keep the stream alive for the lifetime of the bitmap; same if we scale the bitmap;

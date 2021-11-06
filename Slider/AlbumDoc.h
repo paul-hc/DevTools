@@ -50,7 +50,7 @@ public:
 	bool IsStorageAlbum( void ) const;
 	ICatalogStorage* GetCatalogStorage( void );				// opened storage if album based on a catalog storage (compound document)
 
-	static std::auto_ptr< CAlbumDoc > LoadAlbumDocument( const fs::CPath& docPath );			// load a new image album (slide or catalog storage)
+	static std::auto_ptr<CAlbumDoc> LoadAlbumDocument( const fs::CPath& docPath );			// load a new image album (slide or catalog storage)
 
 	// events
 	void OnAlbumModelChanged( AlbumModelChange reason = AM_Init );
@@ -77,7 +77,7 @@ private:
 
 	bool LoadCatalogStorage( const fs::TStgDocPath& docStgPath );
 	bool SaveAsCatalogStorage( const fs::TStgDocPath& newDocStgPath );			// save .sld -> .ias, .ias -> .ias
-	std::auto_ptr< CProgressService > MakeProgress( const TCHAR* pOperationLabel ) const;
+	std::auto_ptr<CProgressService> MakeProgress( const TCHAR* pOperationLabel ) const;
 
 	void PrepareToSave( const fs::CPath& docPath );
 	bool PromptSaveConvertModelSchema( void ) const;
@@ -102,7 +102,7 @@ private:
 	persist custom_order::COpStack m_customOrderRedoStack;
 	persist auto_drop::COpStack m_dropUndoStack;		// contains the stack of performed move/copy operations to be undone on demand
 	persist auto_drop::COpStack m_dropRedoStack;		// contains the stack of undone move/copy operations to be redone on demand
-	persist std::auto_ptr< CImageState > m_pImageState;	// conditional on PresistImageState from v3.2+
+	persist std::auto_ptr<CImageState> m_pImageState;	// conditional on PresistImageState from v3.2+
 
 	enum DocFlags
 	{

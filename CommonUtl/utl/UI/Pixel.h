@@ -44,7 +44,7 @@ struct CPixelBGRA				// the pixel color format for ILC_COLOR32: 0xaarrggbb
 
 	void PreMultiplyAlpha( BYTE& rChannel ) const
 	{
-		rChannel = static_cast< BYTE >( rChannel * m_alpha / 255 );
+		rChannel = static_cast<BYTE>( rChannel * m_alpha / 255 );
 	}
 public:
 	BYTE m_blue, m_green, m_red;
@@ -61,28 +61,28 @@ namespace pixel
 
 	inline void FactorMultiplyChannel( BYTE& rChannel, double factor )
 	{
-		rChannel = static_cast< BYTE >( factor * rChannel );
+		rChannel = static_cast<BYTE>( factor * rChannel );
 	}
 
 	template< typename ChannelType >
 	inline void MultiplyChannel( ChannelType& rChannel, BYTE by )
 	{
-		rChannel = static_cast< ChannelType >( (UINT)rChannel * by / 255 );
+		rChannel = static_cast<ChannelType>( (UINT)rChannel * by / 255 );
 	}
 
 	inline BYTE GetMultiplyChannel( UINT channel, BYTE by )
 	{
-		return static_cast< BYTE >( channel * by / 255 );
+		return static_cast<BYTE>( channel * by / 255 );
 	}
 
 	inline BYTE GetAverageChannel( UINT channel1, UINT channel2 )
 	{
-		return static_cast< BYTE >( ( channel1 + channel2 ) / 2 );
+		return static_cast<BYTE>( ( channel1 + channel2 ) / 2 );
 	}
 
 	inline void BlendChannel( BYTE& rFromChannel, BYTE toChannel, BYTE toAlpha )	// toAlpha=0 -> rFromChannel, toAlpha=255 -> toChannel
 	{
-		rFromChannel = static_cast< BYTE >( GetMultiplyChannel( rFromChannel, 255 - toAlpha ) + GetMultiplyChannel( toChannel, toAlpha ) );
+		rFromChannel = static_cast<BYTE>( GetMultiplyChannel( rFromChannel, 255 - toAlpha ) + GetMultiplyChannel( toChannel, toAlpha ) );
 	}
 
 

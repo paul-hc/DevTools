@@ -203,7 +203,7 @@ CBitmap* CShellMenuController::MakeCmdInfo( std::tstring& rItemText, const CMenu
 
 bool CShellMenuController::FindStatusBarInfo( std::tstring& rInfoText, UINT_PTR cmdId ) const
 {
-	MenuCommand menuCmd = static_cast< MenuCommand >( cmdId );
+	MenuCommand menuCmd = static_cast<MenuCommand>( cmdId );
 
 	if ( const CMenuCmdInfo* pCmdInfo = FindCmd( menuCmd ) )
 	{
@@ -237,7 +237,7 @@ void CShellMenuController::AddCmd( CBaseMenuBuilder* pMenuBuilder, MenuCommand c
 
 bool CShellMenuController::ExecuteCommand( UINT cmdId, HWND hWnd )
 {
-	MenuCommand menuCmd = static_cast< MenuCommand >( cmdId );
+	MenuCommand menuCmd = static_cast<MenuCommand>( cmdId );
 	CScopedMainWnd scopedMainWnd( hWnd );
 
 	if ( !scopedMainWnd.HasValidParentOwner() )
@@ -259,7 +259,7 @@ bool CShellMenuController::HandleCommand( MenuCommand menuCmd, CWnd* pParentOwne
 	}
 
 	// file operations commands
-	std::auto_ptr< IFileEditor > pFileEditor;
+	std::auto_ptr<IFileEditor> pFileEditor;
 	switch ( menuCmd )
 	{
 		case Cmd_RenameFiles:
@@ -319,7 +319,7 @@ bool CShellMenuController::HandleCommand( MenuCommand menuCmd, CWnd* pParentOwne
 	if ( pFileEditor.get() != NULL )
 	{
 		// Note: CPathItemListCtrl::ResetShellContextMenu() that releases the hosted context menu (and this instance), leaving the UI with dangling pointers into m_pFileModel.
-		CComPtr< IContextMenu > pThisAlive( m_pContextMenu );		// keep this shell extension COM object alive to make the UI code re-entrant
+		CComPtr<IContextMenu> pThisAlive( m_pContextMenu );		// keep this shell extension COM object alive to make the UI code re-entrant
 
 		pFileEditor->GetDialog()->DoModal();
 		pFileEditor.reset();							// delete the dialog here, before pThis goes out of scope

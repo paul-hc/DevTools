@@ -66,7 +66,7 @@ private:
 	std::tstring m_additionalAssocFolders;
 private:
 	// code formatting options (lazy registry)
-	std::auto_ptr< code::CFormatterOptions > m_pCodeFormatterOptions;
+	std::auto_ptr<code::CFormatterOptions> m_pCodeFormatterOptions;
 
 	// generated stuff
 protected:

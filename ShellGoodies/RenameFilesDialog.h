@@ -69,15 +69,15 @@ private:
 	void ReplaceFormatEditText( const std::tstring& text );
 private:
 	const std::vector< CRenameItem* >& m_rRenameItems;
-	std::auto_ptr< CRenameService > m_pRenSvc;
+	std::auto_ptr<CRenameService> m_pRenSvc;
 	bool m_isInitialized;
 
 	bool m_autoGenerate;
 	bool m_seqCountAutoAdvance;
 	bool m_ignoreExtension;				// "Show Extension" checkbox has inverted logic
 
-	std::auto_ptr< CDisplayFilenameAdapter > m_pDisplayFilenameAdapter;
-	std::auto_ptr< CPickDataset > m_pPickDataset;
+	std::auto_ptr<CDisplayFilenameAdapter> m_pDisplayFilenameAdapter;
+	std::auto_ptr<CPickDataset> m_pPickDataset;
 private:
 	// enum { IDD = IDD_RENAME_FILES_DIALOG };
 	enum Page { ListPage, EditPage };

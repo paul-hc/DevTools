@@ -32,12 +32,12 @@ public:
 	}
 
 	// mutable acces (for special cases)
-	std::deque< utl::ICommand* >& RefUndoStack( void ) { return const_cast< std::deque< utl::ICommand* >& >( GetCommandModel()->GetUndoStack() ); }
-	std::deque< utl::ICommand* >& RefRedoStack( void ) { return const_cast< std::deque< utl::ICommand* >& >( GetCommandModel()->GetRedoStack() ); }
+	std::deque< utl::ICommand* >& RefUndoStack( void ) { return const_cast<std::deque< utl::ICommand* >&>( GetCommandModel()->GetUndoStack() ); }
+	std::deque< utl::ICommand* >& RefRedoStack( void ) { return const_cast<std::deque< utl::ICommand* >&>( GetCommandModel()->GetRedoStack() ); }
 protected:
 	void SetDirty( bool dirty = true ) { m_dirty = dirty; }
 protected:
-	std::auto_ptr< CCommandModel > m_pCommandModel;		// self-encapsulated
+	std::auto_ptr<CCommandModel> m_pCommandModel;		// self-encapsulated
 private:
 	bool m_dirty;
 };

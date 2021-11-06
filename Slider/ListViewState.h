@@ -75,8 +75,8 @@ public:
 		persist Type m_top;
 	};
 public:
-	persist std::auto_ptr< CImpl< int > > m_pIndexImpl;
-	persist std::auto_ptr< CImpl< std::tstring > > m_pStringImpl;
+	persist std::auto_ptr< CImpl<int> > m_pIndexImpl;
+	persist std::auto_ptr< CImpl<std::tstring> > m_pStringImpl;
 };
 
 

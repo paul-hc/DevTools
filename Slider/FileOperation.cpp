@@ -166,8 +166,8 @@ bool CFileOperation::Copy( const fs::CFlexPath& srcFilePath, const fs::CFlexPath
 		{	// source file is an embedded file in a compound file
 			try
 			{
-				std::auto_ptr< CFile > pSrcFile = CCatalogStorageFactory::Instance()->OpenFlexImageFile( srcFilePath, CFile::modeRead );
-				std::auto_ptr< CFile > pDestFile = CCatalogStorageFactory::Instance()->OpenFlexImageFile( destFilePath, CFile::modeCreate | CFile::modeWrite );
+				std::auto_ptr<CFile> pSrcFile = CCatalogStorageFactory::Instance()->OpenFlexImageFile( srcFilePath, CFile::modeRead );
+				std::auto_ptr<CFile> pDestFile = CCatalogStorageFactory::Instance()->OpenFlexImageFile( destFilePath, CFile::modeCreate | CFile::modeWrite );
 
 				if ( pSrcFile.get() != NULL && pDestFile.get() != NULL )
 					fs::BufferedCopy( *pDestFile, *pSrcFile );
@@ -210,7 +210,7 @@ bool CFileOperation::Delete( const fs::CFlexPath& filePath ) throws_( CException
 	if ( filePath.FileExist() )
 		if ( filePath.IsComplexPath() )
 		{
-			CComPtr< ICatalogStorage > pCatalogStorage = CCatalogStorageFactory::Instance()->AcquireStorage( filePath.GetPhysicalPath(), STGM_READWRITE );
+			CComPtr<ICatalogStorage> pCatalogStorage = CCatalogStorageFactory::Instance()->AcquireStorage( filePath.GetPhysicalPath(), STGM_READWRITE );
 
 			if ( NULL == pCatalogStorage || !pCatalogStorage->GetDocStorage()->DeleteStream( filePath.GetEmbeddedPathPtr() ) )
 				return HandleError( str::Format( _T("Cannot delete the embedded file '%s'"), filePath.GetPtr() ) );

@@ -33,17 +33,17 @@ namespace d2d
 		UINT m_zoomPct;
 
 		// device-independent
-		CComPtr< IDWriteTextFormat > m_pInfoFont;
+		CComPtr<IDWriteTextFormat> m_pInfoFont;
 
 		// text rendering resources
-		CComPtr< ID2D1Brush > m_pBkBrush;
-		CComPtr< ID2D1Brush > m_pTextBrush;
-		CComPtr< ID2D1Brush > m_pDimensionsBrush;
-		CComPtr< ID2D1Brush > m_pNavigBrush;
-		CComPtr< ID2D1Brush > m_pFrameTextBrush;
+		CComPtr<ID2D1Brush> m_pBkBrush;
+		CComPtr<ID2D1Brush> m_pTextBrush;
+		CComPtr<ID2D1Brush> m_pDimensionsBrush;
+		CComPtr<ID2D1Brush> m_pNavigBrush;
+		CComPtr<ID2D1Brush> m_pFrameTextBrush;
 
-		CComPtr< IDWriteTextLayout > m_pInfoTextLayout;
-		CComPtr< IDWriteTextLayout > m_pFrameTextLayout;		// displayed on top of the info, only for multi-frame images (not animated)
+		CComPtr<IDWriteTextLayout> m_pInfoTextLayout;
+		CComPtr<IDWriteTextLayout> m_pFrameTextLayout;		// displayed on top of the info, only for multi-frame images (not animated)
 	};
 }
 

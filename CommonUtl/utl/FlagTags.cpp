@@ -63,7 +63,7 @@ int CFlagTags::GetFlagsMask( void ) const
 		if ( !m_uiTags[ pos ].empty() )			// flag is defined if tag is not empty
 			mask |= ( 1 << pos );
 
-	return static_cast< int >( mask );
+	return static_cast<int>( mask );
 }
 
 std::tstring CFlagTags::Format( int flags, const std::vector< std::tstring >& tags, const TCHAR* pSep )
@@ -74,7 +74,7 @@ std::tstring CFlagTags::Format( int flags, const std::vector< std::tstring >& ta
 
 	for ( size_t pos = 0; pos != tags.size(); ++pos )
 		if ( !tags[ pos ].empty() )					// flag is defined
-			if ( HasBitFlag( flags, static_cast< int >( pos ) ) )
+			if ( HasBitFlag( flags, static_cast<int>( pos ) ) )
 				flagsOn.push_back( tags[ pos ] );
 
 	return str::Join( flagsOn, pSep );
@@ -100,7 +100,7 @@ void CFlagTags::Parse( int* pFlags, const std::tstring& text, const std::vector<
 	// preserve unknown bits: set each known flag individually
 	for ( size_t pos = 0; pos != tags.size(); ++pos )
 		if ( !tags[ pos ].empty() )					// flag is defined
-			SetBitFlag( *pFlags, static_cast< int >( pos ), Contains( flagsOn, tags[ pos ], caseType ) );
+			SetBitFlag( *pFlags, static_cast<int>( pos ), Contains( flagsOn, tags[ pos ], caseType ) );
 }
 
 bool CFlagTags::Contains( const std::vector< std::tstring >& strings, const std::tstring& value, str::CaseType caseType )
@@ -133,7 +133,7 @@ int CFlagTags::FindFlag( TagType tag, const std::tstring& flagOn ) const
 
 	for ( size_t i = 0; i != tags.size(); ++i )
 		if ( str::EqualString< str::IgnoreCase >( tags[ i ], flagOn ) )
-			return ToBitFlag( static_cast< int >( i ) );
+			return ToBitFlag( static_cast<int>( i ) );
 
 	return -1;
 }

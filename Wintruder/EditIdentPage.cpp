@@ -64,7 +64,7 @@ void CEditIdentPage::OnTargetWndChanged( const CWndSpot& targetWnd )
 
 	if ( validId )
 	{
-		m_id = static_cast< short >( targetWnd.GetDlgCtrlID() );
+		m_id = static_cast<short>( targetWnd.GetDlgCtrlID() );
 		m_decIdentEdit.SetValue( m_id );
 		m_hexIdentEdit.SetValue( m_id );
 		m_literalCombo.SetCurSel( FindLiteralPos( m_id ) );
@@ -90,7 +90,7 @@ void CEditIdentPage::ApplyPageChanges( void ) throws_( CRuntimeException )
 int CEditIdentPage::FindLiteralPos( int id ) const
 {
 	for ( int i = 0, count = m_literalCombo.GetCount(); i != count; ++i )
-		if ( const CValueInfo* pValueInfo = reinterpret_cast< const CValueInfo* >( m_literalCombo.GetItemDataPtr( i ) ) )
+		if ( const CValueInfo* pValueInfo = reinterpret_cast<const CValueInfo*>( m_literalCombo.GetItemDataPtr( i ) ) )
 			if ( pValueInfo->m_value == id )
 				return i;
 
@@ -155,7 +155,7 @@ void CEditIdentPage::OnEnChange_HexEdit( void )
 			unsigned short id;
 			if ( m_hexIdentEdit.GetValue( &id ) )
 			{
-				m_id = static_cast< short >( id );
+				m_id = static_cast<short>( id );
 				m_decIdentEdit.SetValue( m_id );
 				m_literalCombo.SetCurSel( FindLiteralPos( m_id ) );
 
@@ -171,7 +171,7 @@ void CEditIdentPage::OnCbnSelChange_Literal( void )
 		{
 			int selIndex = m_literalCombo.GetCurSel();
 			if ( selIndex != CB_ERR )
-				if ( const CValueInfo* pValueInfo = reinterpret_cast< const CValueInfo* >( m_literalCombo.GetItemDataPtr( selIndex ) ) )
+				if ( const CValueInfo* pValueInfo = reinterpret_cast<const CValueInfo*>( m_literalCombo.GetItemDataPtr( selIndex ) ) )
 				{
 					m_id = pValueInfo->m_value;
 					m_decIdentEdit.SetValue( m_id );

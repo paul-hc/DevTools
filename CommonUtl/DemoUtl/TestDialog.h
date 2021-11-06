@@ -16,7 +16,7 @@ public:
 private:
 	// enum { IDD = IDD_DEMO_DIALOG };
 
-	std::auto_ptr< CDemoTemplate > m_pDemo;
+	std::auto_ptr<CDemoTemplate> m_pDemo;
 public:
 	// overrides
 	virtual BOOL OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo );

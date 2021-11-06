@@ -39,7 +39,7 @@ public:
 
 	TCacheLoader* GetCache( void ) { return &m_imageCache; }
 
-	CComPtr< IWICBitmapSource > LookupBitmapSource( const fs::ImagePathKey& imageKey ) const;		// fast load if not cached, no bitmap copy
+	CComPtr<IWICBitmapSource> LookupBitmapSource( const fs::ImagePathKey& imageKey ) const;		// fast load if not cached, no bitmap copy
 	CSize LookupImageDim( const fs::ImagePathKey& imageKey ) const;
 
 	size_t DiscardWithPrefix( const TCHAR* pDirPrefix );

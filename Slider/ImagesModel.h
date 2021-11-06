@@ -32,7 +32,7 @@ public:
 	std::vector< CFileAttr* >& RefFileAttrs( void ) { return m_fileAttributes; }
 	const CFileAttr* GetFileAttrAt( size_t pos ) const { ASSERT( pos < m_fileAttributes.size() ); return m_fileAttributes[ pos ]; }
 	bool AddFileAttr( CFileAttr* pFileAttr );
-	std::auto_ptr< CFileAttr > RemoveFileAttrAt( size_t pos );
+	std::auto_ptr<CFileAttr> RemoveFileAttrAt( size_t pos );
 
 	// file-path key lookup
 	bool ContainsFileAttr( const fs::CFlexPath& filePath ) const;

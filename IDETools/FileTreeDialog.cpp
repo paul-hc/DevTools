@@ -616,7 +616,7 @@ void CFileTreeDialog::TVnItemExpanding_FileTree( NMHDR* pNmHdr, LRESULT* pResult
 	if ( m_rOpt.m_lazyParsing )
 		if ( m_treeCtrl.IsExpandLazyChildren( pNmTreeView ) )
 		{
-			SafeBindItem( pNmTreeView->itemNew.hItem, reinterpret_cast< CIncludeNode* >( pNmTreeView->itemNew.lParam ) );
+			SafeBindItem( pNmTreeView->itemNew.hItem, reinterpret_cast<CIncludeNode*>( pNmTreeView->itemNew.lParam ) );
 			m_treeCtrl.SetItemState( pNmTreeView->itemNew.hItem, TVIS_EXPANDEDONCE, TVIS_EXPANDEDONCE );
 		}
 }
@@ -624,7 +624,7 @@ void CFileTreeDialog::TVnItemExpanding_FileTree( NMHDR* pNmHdr, LRESULT* pResult
 void CFileTreeDialog::TVnGetDispInfo_FileTree( NMHDR* pNmHdr, LRESULT* pResult )
 {
 	NMTVDISPINFO* pDispInfo = (NMTVDISPINFO*)pNmHdr;
-	const CIncludeNode* pTreeItem = reinterpret_cast< CIncludeNode* >( pDispInfo->item.lParam );
+	const CIncludeNode* pTreeItem = reinterpret_cast<CIncludeNode*>( pDispInfo->item.lParam );
 
 	if ( HasFlag( pDispInfo->item.mask, TVIF_CHILDREN ) )
 		pDispInfo->item.cChildren = pTreeItem->IsParsed() ? pTreeItem->GetParsedChildrenCount() : 1;
@@ -635,8 +635,8 @@ void CFileTreeDialog::TVnGetDispInfo_FileTree( NMHDR* pNmHdr, LRESULT* pResult )
 void CFileTreeDialog::TVnCustomDraw_FileTree( NMHDR* pNmHdr, LRESULT* pResult )
 {
 	NMTVCUSTOMDRAW* pDraw = (NMTVCUSTOMDRAW*)pNmHdr;
-	HTREEITEM hItem = reinterpret_cast< HTREEITEM >( pDraw->nmcd.dwItemSpec );
-	const CIncludeNode* pTreeItem = reinterpret_cast< CIncludeNode* >( pDraw->nmcd.lItemlParam );
+	HTREEITEM hItem = reinterpret_cast<HTREEITEM>( pDraw->nmcd.dwItemSpec );
+	const CIncludeNode* pTreeItem = reinterpret_cast<CIncludeNode*>( pDraw->nmcd.lItemlParam );
 
 	*pResult = CDRF_DODEFAULT;
 	switch ( pDraw->nmcd.dwDrawStage )

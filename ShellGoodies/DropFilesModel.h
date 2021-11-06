@@ -56,7 +56,7 @@ private:
 	std::vector< fs::CPath > m_srcDeepFolderPaths;		// drop source folders and their sub-folders
 	std::vector< fs::CPath > m_relFolderPathSeq;		// sequence of relative folders from the original source parent path
 
-	std::auto_ptr< CImageStore > m_pImageStore;			// for folder images
+	std::auto_ptr<CImageStore> m_pImageStore;			// for folder images
 	enum { BaseImageId = 100 };
 };
 

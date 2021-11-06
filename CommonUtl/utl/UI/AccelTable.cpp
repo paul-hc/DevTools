@@ -77,7 +77,7 @@ void CAccelTable::QueryKeys( std::vector< ACCEL >& rKeys ) const
 	if ( m_hAccel != NULL )
 	{
 		int count = ::CopyAcceleratorTable( m_hAccel, NULL, 0 );
-		int oldCount = static_cast< int >( rKeys.size() );
+		int oldCount = static_cast<int>( rKeys.size() );
 
 		rKeys.resize( rKeys.size() + count );			// allocate stoarge keys
 		VERIFY( count == ::CopyAcceleratorTable( m_hAccel, &rKeys[ oldCount ], count ) );
@@ -107,7 +107,7 @@ void CAccelTable::Create( ACCEL keys[], int count )
 	if ( m_hAccel != NULL )
 		::DestroyAcceleratorTable( m_hAccel );
 
-	m_hAccel = ::CreateAcceleratorTable( const_cast< ACCEL* >( keys ), count );
+	m_hAccel = ::CreateAcceleratorTable( const_cast<ACCEL*>( keys ), count );
 	ASSERT_PTR( m_hAccel );
 }
 

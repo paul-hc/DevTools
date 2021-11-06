@@ -44,7 +44,7 @@ public:
 	bool IsValidShellCache( void ) const { return m_pShellThumbCache != NULL; }
 	void ReleaseShellCache( void );
 
-	CComPtr< IShellItem > FindShellItem( const fs::CFlexPath& filePath ) const;
+	CComPtr<IShellItem> FindShellItem( const fs::CFlexPath& filePath ) const;
 
 	CCachedThumbBitmap* ExtractThumb( const ShellItemPair& imagePair );
 	CCachedThumbBitmap* GenerateThumb( const ShellItemPair& imagePair );
@@ -53,10 +53,10 @@ public:
 
 	// create new thumbnail scale to m_boundsSize
 	CCachedThumbBitmap* NewScaledThumb( IWICBitmapSource* pUnscaledBitmap, const fs::CFlexPath& srcImagePath, const CThumbKey* pCachedKey = NULL ) const;
-	CComPtr< IWICBitmapSource > ScaleToThumbBitmap( IWICBitmapSource* pSrcBitmap ) const;
+	CComPtr<IWICBitmapSource> ScaleToThumbBitmap( IWICBitmapSource* pSrcBitmap ) const;
 private:
 	CSize m_boundsSize;
-	CComPtr< IThumbnailCache > m_pShellThumbCache;		// provides access to Windows system-wide thumbnail cache
+	CComPtr<IThumbnailCache> m_pShellThumbCache;		// provides access to Windows system-wide thumbnail cache
 	fs::IThumbProducer* m_pThumbProducer;				// chains to external thumb producer
 	shell::CWinExplorer m_shellExplorer;
 	SIIGBF m_thumbExtractFlags;							// optimize for thumbnails or icons extraction (default for thumbnails)

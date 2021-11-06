@@ -20,7 +20,7 @@ public:
 	void SetSubject( utl::ISubject* pSubject ) { m_pSubject = pSubject; }		// for serializable commands
 
 	template< typename ObjectType >
-	ObjectType* GetSubjectAs( void ) const { return dynamic_cast< ObjectType* >( m_pSubject ); }
+	ObjectType* GetSubjectAs( void ) const { return dynamic_cast<ObjectType*>( m_pSubject ); }
 
 	// utl::IMessage interface (partial)
 	virtual int GetTypeID( void ) const;

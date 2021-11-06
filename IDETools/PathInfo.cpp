@@ -369,11 +369,11 @@ CString PathInfo::makeAbsolute( const TCHAR* pathToConvert )
 TCHAR* PathInfo::findSubString( const TCHAR* pathString, const TCHAR* subString )
 {
 	if ( *subString == _T('\0') )
-		return const_cast< TCHAR* >( pathString );
+		return const_cast<TCHAR*>( pathString );
 
-	for ( TCHAR *cmp = const_cast< TCHAR* >( pathString ); *cmp; cmp++ )
+	for ( TCHAR *cmp = const_cast<TCHAR*>( pathString ); *cmp; cmp++ )
 	{
-		TCHAR* pStr = cmp, *subStr = const_cast< TCHAR* >( subString );
+		TCHAR* pStr = cmp, *subStr = const_cast<TCHAR*>( subString );
 
 		while ( *pStr && *subStr && !( path::ToEquivalentChar( *pStr ) - path::ToEquivalentChar( *subStr ) ) )
 			++pStr, ++subStr;

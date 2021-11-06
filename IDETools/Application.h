@@ -24,7 +24,7 @@ public:
 private:
 	void StoreVisualStudioVersion( void );
 private:
-	std::auto_ptr< CModuleSession > m_pModuleSession;
+	std::auto_ptr<CModuleSession> m_pModuleSession;
 	bool m_isVisualStudio6;
 
 	// generated overrides

@@ -37,7 +37,7 @@ namespace serial
 	template< typename ObjectType >
 	void Save_CObject_Dynamic( CArchive& archive, const ObjectType* pObject )
 	{
-		const CObject* pSerialObject = dynamic_cast< const CObject* >( pObject );
+		const CObject* pSerialObject = dynamic_cast<const CObject*>( pObject );
 		archive << pSerialObject;
 	}
 
@@ -47,7 +47,7 @@ namespace serial
 		CObject* pSerialObject = NULL;
 		archive >> pSerialObject;
 
-		rpObject = dynamic_cast< ObjectType* >( pSerialObject );
+		rpObject = dynamic_cast<ObjectType*>( pSerialObject );
 	}
 
 	template< typename ObjectType >
@@ -66,7 +66,7 @@ namespace serial
 	template< typename PtrContainerT >
 	void Save_CObjects_Dynamic( CArchive& archive, const PtrContainerT& objects )
 	{
-		archive.WriteCount( static_cast< DWORD_PTR >( rObjects.size() ) );			// WriteCount() for backwards compatibility
+		archive.WriteCount( static_cast<DWORD_PTR>( rObjects.size() ) );			// WriteCount() for backwards compatibility
 
 		for ( typename PtrContainerT::iterator itPtr = objects.begin(); itPtr != objects.end(); ++itPtr )
 			archive << *itPtr;
@@ -101,10 +101,10 @@ namespace serial
 	void Save_CObjects_Mixed( CArchive& archive, const PtrContainerT& objects )
 	{
 		size_t mfcSerialCount = std::count_if( objects.begin(), objects.end(), pred::IsA< CObject >() );
-		archive.WriteCount( static_cast< DWORD_PTR >( mfcSerialCount ) );			// WriteCount() for backwards compatibility
+		archive.WriteCount( static_cast<DWORD_PTR>( mfcSerialCount ) );			// WriteCount() for backwards compatibility
 
 		for ( typename PtrContainerT::const_iterator itPtr = objects.begin(); itPtr != objects.end(); ++itPtr )
-			if ( CObject* pSerialObject = dynamic_cast< CObject* >( *itPtr ) )
+			if ( CObject* pSerialObject = dynamic_cast<CObject*>( *itPtr ) )
 				archive << pSerialObject;
 	}
 
@@ -119,7 +119,7 @@ namespace serial
 			CObject* pSerialObject = NULL;
 			archive >> pSerialObject;
 
-			*itPtr = dynamic_cast< typename PtrContainerT::value_type >( pSerialObject );
+			*itPtr = dynamic_cast<typename PtrContainerT::value_type>( pSerialObject );
 		}
 	}
 
@@ -142,7 +142,7 @@ namespace serial
 	template< typename ContainerT >
 	void SaveValues( CArchive& archive, const ContainerT& items )
 	{
-		archive << static_cast< ::portable::size_t >( items.size() );
+		archive << static_cast<::portable::size_t>( items.size() );
 		for ( typename ContainerT::const_iterator it = items.begin(); it != items.end(); ++it )
 			archive << *it;			// save by value
 	}
@@ -177,7 +177,7 @@ namespace serial
 	void StreamItems( CArchive& archive, ContainerT& rItems )
 	{
 		if ( archive.IsStoring() )
-			archive << static_cast< ::portable::size_t >( rItems.size() );
+			archive << static_cast<::portable::size_t>( rItems.size() );
 		else
 		{
 			::portable::size_t count = 0;
@@ -195,7 +195,7 @@ namespace serial
 	template< typename PtrContainerT >
 	void SaveOwningPtrs( CArchive& archive, const PtrContainerT& rItemPtrs )
 	{
-		archive << static_cast< ::portable::size_t >( rItemPtrs.size() );
+		archive << static_cast<::portable::size_t>( rItemPtrs.size() );
 
 		// store each item in container
 		for ( typename PtrContainerT::const_iterator itItemPtr = rItemPtrs.begin(); itItemPtr != rItemPtrs.end(); ++itItemPtr )
@@ -233,7 +233,7 @@ namespace serial
 	// serialize a container of scalar objects with method: void Type::Stream( CArchive& archive )
 	//
 	template< typename Type >
-	void StreamPtr( CArchive& archive, std::auto_ptr< Type >& rPtr )
+	void StreamPtr( CArchive& archive, std::auto_ptr<Type>& rPtr )
 	{
 		if ( archive.IsStoring() )
 		{

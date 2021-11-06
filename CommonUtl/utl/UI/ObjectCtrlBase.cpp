@@ -112,7 +112,7 @@ CMenu* CObjectCtrlBase::MakeContextMenuHost( CMenu* pSrcPopupMenu, const std::ve
 	if ( ExplorerSubMenu == m_shCtxStyle && NULL == pSrcPopupMenu )
 		m_shCtxStyle = ShellMenuLast;
 
-	CComPtr< IContextMenu > pContextMenu = shell::MakeFilePathsContextMenu( filePaths, m_pCtrl->m_hWnd );
+	CComPtr<IContextMenu> pContextMenu = shell::MakeFilePathsContextMenu( filePaths, m_pCtrl->m_hWnd );
 	if ( pContextMenu == NULL )
 		return NULL;
 

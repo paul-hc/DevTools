@@ -119,7 +119,7 @@ namespace ui
 
 CGuiThreadInfo::CGuiThreadInfo( DWORD threadId /*= 0*/ )
 {
-	utl::ZeroWinStruct( static_cast< tagGUITHREADINFO* >( this ) );
+	utl::ZeroWinStruct( static_cast<tagGUITHREADINFO*>( this ) );
 
 	if ( threadId != 0 )
 		ReadInfo( threadId );
@@ -127,7 +127,7 @@ CGuiThreadInfo::CGuiThreadInfo( DWORD threadId /*= 0*/ )
 
 void CGuiThreadInfo::ReadInfo( DWORD threadId )
 {
-	utl::ZeroWinStruct( static_cast< tagGUITHREADINFO* >( this ) );
+	utl::ZeroWinStruct( static_cast<tagGUITHREADINFO*>( this ) );
 	VERIFY( ::GetGUIThreadInfo( threadId, this ) );
 }
 
@@ -178,7 +178,7 @@ CBalloonHostWnd::~CBalloonHostWnd()
 CBalloonHostWnd* CBalloonHostWnd::Display( const TCHAR* pTitle, const std::tstring& message, HICON hToolIcon /*= TTI_NONE*/, const CPoint& screenPos /*= ui::GetNullPos()*/ )
 {
 	// create the thread and initialise the thread and its transparent balloon parent window
-	CBalloonUiThread* pNewThread = checked_static_cast< CBalloonUiThread* >( ::AfxBeginThread( RUNTIME_CLASS( CBalloonUiThread ), THREAD_PRIORITY_NORMAL, 0, CREATE_SUSPENDED ) );
+	CBalloonUiThread* pNewThread = checked_static_cast<CBalloonUiThread*>( ::AfxBeginThread( RUNTIME_CLASS( CBalloonUiThread ), THREAD_PRIORITY_NORMAL, 0, CREATE_SUSPENDED ) );
 	CBalloonHostWnd* pHostWnd = pNewThread->GetHostWnd();
 
 	pHostWnd->m_title = pTitle;
@@ -220,7 +220,7 @@ bool CBalloonHostWnd::CreateToolTip( void )
 	// add a tool that covers this whole window
 	toolInfo.uFlags = TTF_TRACK;
 	toolInfo.hwnd = m_hWnd;
-	toolInfo.lpszText = const_cast< TCHAR* >( m_message.c_str() ); //LPSTR_TEXTCALLBACK;
+	toolInfo.lpszText = const_cast<TCHAR*>( m_message.c_str() ); //LPSTR_TEXTCALLBACK;
 	toolInfo.uId = ToolId;
 	GetClientRect( &toolInfo.rect );
 

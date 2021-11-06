@@ -240,7 +240,7 @@ void CAlbumSettingsDialog::SetupFoundImagesListView( void )
 		{
 			const CFileAttr* pFileAttr = m_model.GetFileAttr( i );
 
-			m_imagesListCtrl.InsertObjectItem( i, const_cast< CFileAttr* >( pFileAttr ), ui::Transparent_Image );
+			m_imagesListCtrl.InsertObjectItem( i, const_cast<CFileAttr*>( pFileAttr ), ui::Transparent_Image );
 			m_imagesListCtrl.SetSubItemText( i, Folder, pFileAttr->GetPath().GetOriginParentPath().Get() );
 			m_imagesListCtrl.SetItemText( i, Dimensions, LPSTR_TEXTCALLBACK );			// defer CPU-intensive dimensions evaluation
 
@@ -269,7 +269,7 @@ void CAlbumSettingsDialog::CombineTextEffectAt( ui::CTextEffect& rTextEffect, LP
 
 	if ( pCtrl == &m_patternsListCtrl )
 	{
-		const CSearchPattern* pPattern = CReportListControl::AsPtr< CSearchPattern >( rowKey );
+		const CSearchPattern* pPattern = CReportListControl::AsPtr<CSearchPattern>( rowKey );
 
 		if ( PatternPath == subItem && pPattern->IsStorageAlbumFile() )
 			rTextEffect |= s_stgFileEffect;						// highlight storage item
@@ -282,7 +282,7 @@ void CAlbumSettingsDialog::CombineTextEffectAt( ui::CTextEffect& rTextEffect, LP
 	}
 	else if ( pCtrl == &m_imagesListCtrl )
 	{
-		const CFileAttr* pFileAttr = CReportListControl::AsPtr< CFileAttr >( rowKey );
+		const CFileAttr* pFileAttr = CReportListControl::AsPtr<CFileAttr>( rowKey );
 
 		if ( Folder == subItem && CCatalogStorageFactory::HasCatalogExt( pFileAttr->GetPath().GetOriginParentPath().GetPtr() ) )
 			rTextEffect |= s_stgFileEffect;						// highlight storage item
@@ -424,7 +424,7 @@ void CAlbumSettingsDialog::InputAll( void )
 
 	pSearchModel->SetMaxFileCount( maxFileCount );
 
-	Range< UINT > fileSizeRange = CSearchModel::s_anyFileSizeRange;
+	Range<UINT> fileSizeRange = CSearchModel::s_anyFileSizeRange;
 
 	if ( IsDlgButtonChecked( IDC_MIN_FILE_SIZE_CHECK ) )
 		if ( m_minSizeEdit.ParseNumber( &fileSizeRange.m_start ) )
@@ -636,7 +636,7 @@ void CAlbumSettingsDialog::OnLVnItemsRemoved_Patterns( NMHDR* pNmHdr, LRESULT* p
 	else
 		for ( std::vector< utl::ISubject* >::const_iterator itObject = pNmItemsRemoved->m_removedObjects.begin(); itObject != pNmItemsRemoved->m_removedObjects.end(); ++itObject )
 		{
-			utl::RemoveExisting( rSearchPatterns, checked_static_cast< CSearchPattern* >( *itObject ) );
+			utl::RemoveExisting( rSearchPatterns, checked_static_cast<CSearchPattern*>( *itObject ) );
 			delete *itObject;
 		}
 
@@ -839,7 +839,7 @@ void CAlbumSettingsDialog::OnLVnGetDispInfo_FoundImages( NMHDR* pNmHdr, LRESULT*
 		{
 			case Dimensions:
 			{
-				const CFileAttr* pFileAttr = CReportListControl::AsPtr< CFileAttr >( pDisplayInfo->item.lParam );
+				const CFileAttr* pFileAttr = CReportListControl::AsPtr<CFileAttr>( pDisplayInfo->item.lParam );
 				const CSize& dim = pFileAttr->GetImageDim();
 				std::tstring text = str::Format( _T("%dx%d"), dim.cx, dim.cy );
 				_tcsncpy( pDisplayInfo->item.pszText, text.c_str(), pDisplayInfo->item.cchTextMax );

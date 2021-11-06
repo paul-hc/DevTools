@@ -68,7 +68,7 @@ namespace path
 
 		bool IsNormal( void ) const { return m_normalizedPath.empty() == str::IsEmpty( m_pRawPath ); }
 
-		TCHAR* Ref( void ) { return const_cast< TCHAR* >( EnsureBuffer().c_str() ); }
+		TCHAR* Ref( void ) { return const_cast<TCHAR*>( EnsureBuffer().c_str() ); }
 
 		std::tstring& EnsureBuffer( void )
 		{
@@ -177,7 +177,7 @@ namespace path
 		size_t hashValue = 2166136261U;
 
 		for ( const TCHAR* pCh = pPath; *pCh != _T('\0'); ++pCh )
-			hashValue = 16777619U * hashValue ^ static_cast< size_t >( ToEquivalentChar( *pCh ) );
+			hashValue = 16777619U * hashValue ^ static_cast<size_t>( ToEquivalentChar( *pCh ) );
 
 		return hashValue;
 	}
@@ -219,7 +219,7 @@ namespace path
 			if ( !HasSameRoot( pPath, pSegment ) )
 				return false;
 
-		utl::AssignPtr( pMatchLength, Range< const TCHAR* >( pPath, SkipRoot( pPath ) ).GetSpan< size_t >() );
+		utl::AssignPtr( pMatchLength, Range<const TCHAR*>( pPath, SkipRoot( pPath ) ).GetSpan< size_t >() );
 		return true;
 	}
 
@@ -718,7 +718,7 @@ namespace path
 		str::const_iterator itPath = path.c_str();
 		str::const_iterator itPrefix = prefix.c_str();
 
-		Range< const TCHAR* > commonRange( itPath );
+		Range<const TCHAR*> commonRange( itPath );
 
 		size_t segmentLen;
 

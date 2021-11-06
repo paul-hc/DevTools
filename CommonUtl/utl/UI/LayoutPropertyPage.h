@@ -57,7 +57,7 @@ private:
 	using CPropertyPage::SetModified;
 private:
 	UINT m_templateId;
-	std::auto_ptr< CLayoutEngine > m_pLayoutEngine;
+	std::auto_ptr<CLayoutEngine> m_pLayoutEngine;
 	bool m_useLazyUpdateData;		// call UpdateData on page activation change
 
 	HWND m_hCtrlFocus;

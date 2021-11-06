@@ -20,7 +20,7 @@ namespace reg
 
 
 	template< typename IntType >
-	void SaveRange( const Range< IntType >& range, const TCHAR* pSection, const TCHAR* pEntry )
+	void SaveRange( const Range<IntType>& range, const TCHAR* pSection, const TCHAR* pEntry )
 	{
 		std::tostringstream oss;
 		oss << range.m_start << _T(" ") << range.m_end;
@@ -28,13 +28,13 @@ namespace reg
 	}
 
 	template< typename IntType >
-	bool LoadRange( Range< IntType >& rRange, const TCHAR* pSection, const TCHAR* pEntry )
+	bool LoadRange( Range<IntType>& rRange, const TCHAR* pSection, const TCHAR* pEntry )
 	{
 		std::tstring text = (LPCTSTR)AfxGetApp()->GetProfileString( pSection, pEntry );
 		if ( text.empty() )
 			return false;
 
-		Range< IntType > range;
+		Range<IntType> range;
 		std::tistringstream iss( text );
 		iss >> range.m_start >> std::skipws >> range.m_end;
 		if ( iss.fail() )

@@ -130,7 +130,7 @@ HTREEITEM CTreeControl::InsertObjectItem( HTREEITEM hParent, const utl::ISubject
 	if ( imageIndex != ui::No_Image )
 		SetFlag( mask, TVIF_IMAGE );
 
-	return InsertItem( mask, pText, imageIndex, imageIndex, state, state, reinterpret_cast< LPARAM >( pObject ),
+	return InsertItem( mask, pText, imageIndex, imageIndex, state, state, reinterpret_cast<LPARAM>( pObject ),
 		hParent, hInsertAfter );
 }
 
@@ -204,7 +204,7 @@ const ui::CTextEffect* CTreeControl::FindTextEffect( HTREEITEM hItem ) const
 bool CTreeControl::IsRealItem( HTREEITEM hItem ) const
 {
 	ASSERT_PTR( hItem );
-	switch ( reinterpret_cast< size_t >( hItem ) )
+	switch ( reinterpret_cast<size_t>( hItem ) )
 	{
 		case TVI_ROOT:
 		case TVI_FIRST:

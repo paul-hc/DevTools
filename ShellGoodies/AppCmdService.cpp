@@ -73,7 +73,7 @@ bool CAppCmdService::UndoAt( size_t topPos )
 	CScopedExecMode scopedExec( utl::ExecUndo );
 
 	std::deque< utl::ICommand* >::iterator itCmd = rUndoStack.begin() + pos;
-	std::auto_ptr< utl::ICommand > pCmd( *itCmd );
+	std::auto_ptr<utl::ICommand> pCmd( *itCmd );
 	itCmd = rUndoStack.erase( itCmd );
 
 	try
@@ -109,7 +109,7 @@ bool CAppCmdService::RedoAt( size_t topPos )
 	CScopedExecMode scopedExec( utl::ExecUndo );
 
 	std::deque< utl::ICommand* >::iterator itCmd = rRedoStack.begin() + pos;
-	std::auto_ptr< utl::ICommand > pCmd( *itCmd );
+	std::auto_ptr<utl::ICommand> pCmd( *itCmd );
 	itCmd = rRedoStack.erase( itCmd );
 
 	try

@@ -57,7 +57,7 @@ CScopedLockRedraw::~CScopedLockRedraw()
 
 CNonClientDraw::CNonClientDraw( CWnd* pWnd, INonClientRender* pCallback /*= NULL*/ )
 	: m_pWnd( pWnd )
-	, m_pCallback( pCallback != NULL ? pCallback : dynamic_cast< INonClientRender* >( m_pWnd ) )
+	, m_pCallback( pCallback != NULL ? pCallback : dynamic_cast<INonClientRender*>( m_pWnd ) )
 {
 	ASSERT_PTR( m_pWnd->GetSafeHwnd() );
 	HookWindow( *m_pWnd );

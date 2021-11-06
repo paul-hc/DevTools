@@ -39,7 +39,7 @@ struct CToolStrip
 public:
 	CSize m_imageSize;
 	std::vector< UINT > m_buttonIds;
-	std::auto_ptr< CImageList > m_pImageList;
+	std::auto_ptr<CImageList> m_pImageList;
 };
 
 

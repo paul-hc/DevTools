@@ -41,6 +41,6 @@ extern CApplication theApp;
 
 namespace app
 {
-	inline CApplication& GetSvc( void ) { return *static_cast< CApplication* >( AfxGetApp() ); }
+	inline CApplication& GetSvc( void ) { return *static_cast<CApplication*>( AfxGetApp() ); }
 	inline COptions* GetOptions( void ) { return GetSvc().GetOptions(); }
 }

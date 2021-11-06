@@ -308,7 +308,7 @@ namespace ui
 
 	bool RepositionControls( const std::vector< CCtrlPlace >& ctrlPlaces, bool invalidate /*= true*/, UINT swpFlags /*= 0*/ )
 	{
-		HDWP hdwp = ::BeginDeferWindowPos( static_cast< int >( ctrlPlaces.size() ) );
+		HDWP hdwp = ::BeginDeferWindowPos( static_cast<int>( ctrlPlaces.size() ) );
 		std::vector< CCtrlPlace >::const_iterator itCtrl, itEnd = ctrlPlaces.end();
 
 		for ( itCtrl = ctrlPlaces.begin(); itCtrl != itEnd && hdwp != NULL; ++itCtrl )
@@ -381,7 +381,7 @@ namespace ui
 		// note: GetWindowTextLength() and GetWindowText() fail for edits running in a different process
 		// we use WM_GETTEXTLENGTH and WM_GETTEXT instead
 
-		int length = static_cast< int >( ::SendMessage( hWnd, WM_GETTEXTLENGTH, 0, 0 ) );	// ::GetWindowTextLength( hWnd );
+		int length = static_cast<int>( ::SendMessage( hWnd, WM_GETTEXTLENGTH, 0, 0 ) );	// ::GetWindowTextLength( hWnd );
 		std::vector< TCHAR > buffer( length + 1 );
 		TCHAR* pBuffer = &buffer.front();
 
@@ -420,7 +420,7 @@ namespace ui
 	int GetDlgItemInt( HWND hDlg, UINT ctrlId, bool* pValid /*= NULL*/ )
 	{
 		BOOL valid;
-		int result = static_cast< int >( ::GetDlgItemInt( hDlg, ctrlId, &valid, TRUE ) );
+		int result = static_cast<int>( ::GetDlgItemInt( hDlg, ctrlId, &valid, TRUE ) );
 		if ( pValid != NULL )
 			*pValid = valid != FALSE;
 		return result;
@@ -516,7 +516,7 @@ namespace ui
 
 	BOOL CALLBACK EnumWindowProc( HWND hWnd, LPARAM lParam )
 	{
-		CWindowEnumParam* pParam = reinterpret_cast< CWindowEnumParam* >( lParam );
+		CWindowEnumParam* pParam = reinterpret_cast<CWindowEnumParam*>( lParam );
 		ASSERT_PTR( pParam );
 
 		if ( 0 == pParam->m_styleFilter || EqFlag( GetStyle( hWnd ), pParam->m_styleFilter ) )
@@ -529,7 +529,7 @@ namespace ui
 	bool QueryTopLevelWindows( std::vector< HWND >& rTopWindows, DWORD styleFilter /*= WS_VISIBLE*/, DWORD dwThreadId /*= GetCurrentThreadId()*/ )
 	{
 		CWindowEnumParam param( &rTopWindows, styleFilter );
-		return EnumThreadWindows( dwThreadId, &EnumWindowProc, reinterpret_cast< LPARAM >( &param ) ) != FALSE;
+		return EnumThreadWindows( dwThreadId, &EnumWindowProc, reinterpret_cast<LPARAM>( &param ) ) != FALSE;
 	}
 
 
@@ -570,7 +570,7 @@ namespace ui
 		if ( hParent != NULL && ui::OwnsFocus( hParent ) )
 			if ( CWnd* pFocusCtrl = CWnd::GetFocus() )
 				if ( ( (CEdit*)pFocusCtrl )->GetModify() )
-					if ( is_a< CEdit >( pFocusCtrl ) ||
+					if ( is_a<CEdit>( pFocusCtrl ) ||
 						 IsEditLikeCtrl( pFocusCtrl->m_hWnd ) )
 					{
 						::SetFocus( NULL );			// this will eventually trigger input on EN_KILLFOCUS
@@ -592,12 +592,12 @@ namespace ui
 
 	bool SelectAllText( CWnd* pCtrl )
 	{
-		if ( CEdit* pEdit = dynamic_cast< CEdit* >( pCtrl ) )
+		if ( CEdit* pEdit = dynamic_cast<CEdit*>( pCtrl ) )
 		{
 			pEdit->SetSel( 0, -1 );
 			return true;
 		}
-		else if ( CComboBox* pComboBox = dynamic_cast< CComboBox* >( pCtrl ) )
+		else if ( CComboBox* pComboBox = dynamic_cast<CComboBox*>( pCtrl ) )
 			return pComboBox->SetEditSel( 0, -1 ) != FALSE;
 
 		return false;
@@ -629,7 +629,7 @@ namespace ui
 		pCtrl->SetFont( pCtrlFont );		// note: it doesn't work for CEdit with ES_PASSWORD
 		pCtrl->SetWindowPos( pPrevCtrl != NULL ? pPrevCtrl : &CWnd::wndBottom, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE | SWP_NOACTIVATE );		// move in tab order after the previous control
 
-		if ( ui::ILayoutEngine* pParentLayout = dynamic_cast< ui::ILayoutEngine* >( pParentDlg ) )		// a layout dialog?
+		if ( ui::ILayoutEngine* pParentLayout = dynamic_cast<ui::ILayoutEngine*>( pParentDlg ) )		// a layout dialog?
 			pParentLayout->GetLayoutEngine().RefreshControlHandle( ctrlId );						// we have a new m_hControl
 
 		return true;
@@ -758,7 +758,7 @@ namespace ui
 
 	bool IsEditBox( HWND hCtrl )
 	{
-		if ( CEdit* pEdit = dynamic_cast< CEdit* >( CWnd::FromHandlePermanent( hCtrl ) ) )
+		if ( CEdit* pEdit = dynamic_cast<CEdit*>( CWnd::FromHandlePermanent( hCtrl ) ) )
 			return true;
 
 		std::tstring className = GetClassName( hCtrl );
@@ -773,7 +773,7 @@ namespace ui
 	{
 		DWORD comboStyle = 0;
 
-		if ( CComboBox* pComboBox = dynamic_cast< CComboBox* >( CWnd::FromHandlePermanent( hCtrl ) ) )
+		if ( CComboBox* pComboBox = dynamic_cast<CComboBox*>( CWnd::FromHandlePermanent( hCtrl ) ) )
 			comboStyle = pComboBox->GetStyle();
 		else
 		{
@@ -891,7 +891,7 @@ namespace ui
 			default: ASSERT( false );
 		}
 
-		if ( CEdit* pEdit = dynamic_cast< CEdit* >( pCtrl ) )
+		if ( CEdit* pEdit = dynamic_cast<CEdit*>( pCtrl ) )
 			pEdit->ShowBalloonTip( s_title,  message.c_str(), ttiIcon );
 		else
 			ui::ShowBalloonTip( pCtrl, s_title,  message.c_str(), (HICON)ttiIcon );
@@ -926,7 +926,7 @@ namespace ui
 			CWnd* pCtrl = pDX->m_pDlgWnd->GetDlgItem( ctrlId );
 			ASSERT_PTR( pCtrl );
 
-			if ( CComboBox* pCombo = dynamic_cast< CComboBox* >( pCtrl ) )
+			if ( CComboBox* pCombo = dynamic_cast<CComboBox*>( pCtrl ) )
 				return GetComboSelText( *pCombo );
 
 			return GetWindowText( pCtrl );
@@ -938,10 +938,10 @@ namespace ui
 			ASSERT_PTR( pCtrl );
 
 			str::CaseType caseType = str::Case;
-			if ( CHistoryComboBox* pHistoryCombo = dynamic_cast< CHistoryComboBox* >( pCtrl ) )
+			if ( CHistoryComboBox* pHistoryCombo = dynamic_cast<CHistoryComboBox*>( pCtrl ) )
 				caseType = pHistoryCombo->GetCaseType();
 
-			if ( CComboBox* pCombo = dynamic_cast< CComboBox* >( pCtrl ) )
+			if ( CComboBox* pCombo = dynamic_cast<CComboBox*>( pCtrl ) )
 				return SetComboEditText( *pCombo, text, caseType ).first;
 
 			return SetWindowText( pCtrl->m_hWnd, text );
@@ -963,7 +963,7 @@ namespace ui
 
 	void DDX_Path( CDataExchange* pDX, int ctrlId, fs::CPath& rValue )
 	{
-		DDX_Text( pDX, ctrlId, const_cast< std::tstring& >( rValue.Get() ), true );
+		DDX_Text( pDX, ctrlId, const_cast<std::tstring&>( rValue.Get() ), true );
 	}
 
 	void DDX_PathItem( CDataExchange* pDX, int ctrlId, CPathItemBase* pPathItem )
@@ -1072,7 +1072,7 @@ namespace ui
 
 	void SetSpinRange( CWnd* pDlg, int ctrlId, int minValue, int maxValue )
 	{
-		if ( CSpinButtonCtrl* pSpinButton = static_cast< CSpinButtonCtrl* >( pDlg->GetDlgItem( ctrlId ) ) )
+		if ( CSpinButtonCtrl* pSpinButton = static_cast<CSpinButtonCtrl*>( pDlg->GetDlgItem( ctrlId ) ) )
 			pSpinButton->SetRange32( minValue, maxValue );
 		else
 			ASSERT( false );		// spin button not found
@@ -1091,11 +1091,11 @@ namespace ui
 
 	static pred::CompareResult CALLBACK CompareSubjectProc( LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort )
 	{
-		const pred::IComparator* pComparator = reinterpret_cast< const pred::IComparator* >( lParamSort );
+		const pred::IComparator* pComparator = reinterpret_cast<const pred::IComparator*>( lParamSort );
 		ASSERT_PTR( pComparator );
 
-		const utl::ISubject* pLeft = reinterpret_cast< const utl::ISubject* >( lParam1 );
-		const utl::ISubject* pRight = reinterpret_cast< const utl::ISubject* >( lParam2 );
+		const utl::ISubject* pLeft = reinterpret_cast<const utl::ISubject*>( lParam1 );
+		const utl::ISubject* pRight = reinterpret_cast<const utl::ISubject*>( lParam2 );
 
 		return pComparator->CompareObjects( pLeft, pRight );
 	}
@@ -1112,8 +1112,8 @@ namespace ui
 
 		TVSORTCB sortInfo;
 		sortInfo.hParent = hParent;
-		sortInfo.lpfnCompare = reinterpret_cast< PFNTVCOMPARE >( CompareSubjectProc );
-		sortInfo.lParam = reinterpret_cast< LPARAM >( pComparator );
+		sortInfo.lpfnCompare = reinterpret_cast<PFNTVCOMPARE>( CompareSubjectProc );
+		sortInfo.lParam = reinterpret_cast<LPARAM>( pComparator );
 		return rTreeCtrl.SortChildrenCB( &sortInfo ) != FALSE;
 	}
 
@@ -1243,7 +1243,7 @@ namespace ui
 		entireText.replace( startPos, endPos - startPos, currText.c_str() );
 
 		std::pair< bool, ComboField > result = ui::SetComboEditText( rCombo, entireText.c_str(), caseType );		// clears current sel if item isn't in the LBox
-		rCombo.SetEditSel( startPos, startPos + static_cast< int >( currText.length() ) );							// select the new substring
+		rCombo.SetEditSel( startPos, startPos + static_cast<int>( currText.length() ) );							// select the new substring
 		return result;
 	}
 
@@ -1272,7 +1272,7 @@ namespace ui
 				rCombo.InsertString( 0, currText );
 			}
 
-		if ( ui::IContentValidator* pContentValidator = dynamic_cast< ui::IContentValidator* >( &rCombo ) )
+		if ( ui::IContentValidator* pContentValidator = dynamic_cast<ui::IContentValidator*>( &rCombo ) )
 			pContentValidator->ValidateContent();
 		else
 			ui::SendCommandToParent( rCombo, CHistoryComboBox::HCN_VALIDATEITEMS );		// give parent a chance to cleanup invalid items

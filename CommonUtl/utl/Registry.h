@@ -169,7 +169,7 @@ namespace reg
 		if ( buffer.empty() )
 			return false;
 
-		ULONG count = static_cast< ULONG >( buffer.size() );
+		ULONG count = static_cast<ULONG>( buffer.size() );
 		LONG result = m_key.QueryMultiStringValue( pValueName, &buffer.front(), &count );
 		ASSERT( result != ERROR_MORE_DATA );		// GetValueBufferSize() sized the buffer properly?
 		if ( result != ERROR_SUCCESS )
@@ -187,9 +187,9 @@ namespace reg
 	{
 		ASSERT( IsOpen() );
 		if ( sizeof( ULONGLONG ) == sizeof( NumericT ) )
-			return ERROR_SUCCESS == m_key.SetQWORDValue( pValueName, static_cast< ULONGLONG >( value ) );
+			return ERROR_SUCCESS == m_key.SetQWORDValue( pValueName, static_cast<ULONGLONG>( value ) );
 		else
-			return ERROR_SUCCESS == m_key.SetDWORDValue( pValueName, static_cast< DWORD >( value ) );
+			return ERROR_SUCCESS == m_key.SetDWORDValue( pValueName, static_cast<DWORD>( value ) );
 	}
 
 	template< typename NumericT >
@@ -202,7 +202,7 @@ namespace reg
 			if ( m_key.QueryQWORDValue( pValueName, value ) != ERROR_SUCCESS )
 				return false;
 
-			rNumber = static_cast< NumericT >( value );
+			rNumber = static_cast<NumericT>( value );
 		}
 		else
 		{
@@ -210,7 +210,7 @@ namespace reg
 			if ( m_key.QueryDWORDValue( pValueName, value ) != ERROR_SUCCESS )
 				return false;
 
-			rNumber = static_cast< NumericT >( value );
+			rNumber = static_cast<NumericT>( value );
 		}
 		return true;
 	}
@@ -220,7 +220,7 @@ namespace reg
 	bool CKey::WriteBinaryValue( const TCHAR* pValueName, const ValueT& value )
 	{
 		ASSERT( IsOpen() );
-		return ERROR_SUCCESS == m_key.SetBinaryValue( pValueName, &value, static_cast< ULONG >( sizeof( value ) ) );
+		return ERROR_SUCCESS == m_key.SetBinaryValue( pValueName, &value, static_cast<ULONG>( sizeof( value ) ) );
 	}
 
 	template< typename ValueT >
@@ -233,7 +233,7 @@ namespace reg
 		if ( 0 == byteSize || byteSize != sizeof( ValueT ) )
 			return false;				// bad size or it doesn't line up with ValueT's storage size
 
-		ULONG count = static_cast< ULONG >( byteSize );
+		ULONG count = static_cast<ULONG>( byteSize );
 		return ERROR_SUCCESS == m_key.QueryBinaryValue( pValueName, pValue, &count );
 	}
 
@@ -241,7 +241,7 @@ namespace reg
 	template< typename ValueT >
 	bool CKey::WriteBinaryBuffer( const TCHAR* pValueName, const std::vector< ValueT >& bufferValue )
 	{
-		return ERROR_SUCCESS == m_key.SetBinaryValue( pValueName, &bufferValue.front(), static_cast< ULONG >( utl::ByteSize( bufferValue ) ) );
+		return ERROR_SUCCESS == m_key.SetBinaryValue( pValueName, &bufferValue.front(), static_cast<ULONG>( utl::ByteSize( bufferValue ) ) );
 	}
 
 	template< typename ValueT >
@@ -255,7 +255,7 @@ namespace reg
 
 		rBufferValue.resize( byteSize / sizeof( ValueT ) );
 
-		ULONG count = static_cast< ULONG >( byteSize );
+		ULONG count = static_cast<ULONG>( byteSize );
 		return ERROR_SUCCESS == m_key.QueryBinaryValue( pValueName, &rBufferValue.front(), &count );
 	}
 }

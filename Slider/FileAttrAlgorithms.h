@@ -32,7 +32,7 @@ namespace fattr
 		pDisplaySequence->resize( fileAttributes.size() );
 
 		for ( size_t pos = 0; pos != fileAttributes.size(); ++pos )
-			pDisplaySequence->at( pos ) = static_cast< IndexT >( fileAttributes[ pos ]->GetBaselinePos() );
+			pDisplaySequence->at( pos ) = static_cast<IndexT>( fileAttributes[ pos ]->GetBaselinePos() );
 	}
 
 
@@ -79,7 +79,7 @@ namespace func
 			if ( imageDim.cx < 0 || imageDim.cy < 0 )		// error accessing the image file
 				return 0;
 
-			return static_cast< size_t >( imageDim.cx ) * static_cast< size_t >( imageDim.cy );
+			return static_cast<size_t>( imageDim.cx ) * static_cast<size_t>( imageDim.cy );
 		}
 	};
 

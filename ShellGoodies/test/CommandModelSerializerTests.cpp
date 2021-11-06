@@ -155,41 +155,41 @@ void CCommandModelSerializerTests::TestLoadLog( void )
 	const CTouchFileCmd* pTouchCmd;
 
 	{
-		pMacro = checked_static_cast< const cmd::CFileMacroCmd* >( *itStackCmd++ );
+		pMacro = checked_static_cast<const cmd::CFileMacroCmd*>( *itStackCmd++ );
 		itSubCmd = pMacro->GetSubCommands().begin();
 		ASSERT_EQUAL( cmd::RenameFile, pMacro->GetTypeID() );
 		ASSERT_EQUAL( CTime(), pMacro->GetTimestamp() );
 		ASSERT_EQUAL( 2, pMacro->GetSubCommands().size() );
 
-		pRenameCmd = checked_static_cast< const CRenameFileCmd* >( *itSubCmd++ );
+		pRenameCmd = checked_static_cast<const CRenameFileCmd*>( *itSubCmd++ );
 		ASSERT_EQUAL( cmd::RenameFile, pRenameCmd->GetTypeID() );
 		ASSERT_EQUAL( _T("C:\\my\\download\\scan\\doctor.pdf"), pRenameCmd->m_srcPath );
 		ASSERT_EQUAL( _T("C:\\my\\download\\scan\\Dr. Metz.pdf"), pRenameCmd->m_destPath );
 
-		pRenameCmd = checked_static_cast< const CRenameFileCmd* >( *itSubCmd++ );
+		pRenameCmd = checked_static_cast<const CRenameFileCmd*>( *itSubCmd++ );
 		ASSERT_EQUAL( _T("C:\\my\\download\\scan\\doctor2.pdf"), pRenameCmd->m_srcPath );
 		ASSERT_EQUAL( _T("C:\\my\\download\\scan\\Dr. Metz2.pdf"), pRenameCmd->m_destPath );
 	}
 	{
-		pMacro = checked_static_cast< const cmd::CFileMacroCmd* >( *itStackCmd++ );
+		pMacro = checked_static_cast<const cmd::CFileMacroCmd*>( *itStackCmd++ );
 		itSubCmd = pMacro->GetSubCommands().begin();
 		ASSERT_EQUAL( cmd::RenameFile, pMacro->GetTypeID() );
 		ASSERT_EQUAL( CTime(), pMacro->GetTimestamp() );
 		ASSERT_EQUAL( 1, pMacro->GetSubCommands().size() );
 
-		pRenameCmd = checked_static_cast< const CRenameFileCmd* >( *itSubCmd++ );
+		pRenameCmd = checked_static_cast<const CRenameFileCmd*>( *itSubCmd++ );
 		ASSERT_EQUAL( _T("C:\\my\\download\\scan\\doctor3.pdf"), pRenameCmd->m_srcPath );
 		ASSERT_EQUAL( _T("C:\\my\\download\\scan\\Dr. Metz3.pdf"), pRenameCmd->m_destPath );
 	}
 	{
-		pMacro = checked_static_cast< const cmd::CFileMacroCmd* >( *itStackCmd++ );
+		pMacro = checked_static_cast<const cmd::CFileMacroCmd*>( *itStackCmd++ );
 		itSubCmd = pMacro->GetSubCommands().begin();
 		ASSERT_EQUAL( cmd::TouchFile, pMacro->GetTypeID() );
 		ASSERT_EQUAL( CTime( 2005, 10, 17, 8, 0, 0 ), pMacro->GetTimestamp() );
 		ASSERT_EQUAL( 2, pMacro->GetSubCommands().size() );
 
 		{
-			pTouchCmd = checked_static_cast< const CTouchFileCmd* >( *itSubCmd++ );
+			pTouchCmd = checked_static_cast<const CTouchFileCmd*>( *itSubCmd++ );
 
 			ASSERT_EQUAL( _T("C:\\my\\download\\file.txt"), pTouchCmd->m_srcPath );
 			ASSERT_EQUAL( pTouchCmd->m_srcPath, pTouchCmd->m_srcState.m_fullPath );
@@ -207,7 +207,7 @@ void CCommandModelSerializerTests::TestLoadLog( void )
 		}
 
 		{
-			pTouchCmd = checked_static_cast< const CTouchFileCmd* >( *itSubCmd++ );
+			pTouchCmd = checked_static_cast<const CTouchFileCmd*>( *itSubCmd++ );
 
 			ASSERT_EQUAL( _T("C:\\my\\download\\info.txt"), pTouchCmd->m_srcPath );
 			ASSERT_EQUAL( pTouchCmd->m_srcPath, pTouchCmd->m_srcState.m_fullPath );
@@ -225,51 +225,51 @@ void CCommandModelSerializerTests::TestLoadLog( void )
 		}
 	}
 	{
-		pMacro = checked_static_cast< const cmd::CFileMacroCmd* >( *itStackCmd++ );
+		pMacro = checked_static_cast<const cmd::CFileMacroCmd*>( *itStackCmd++ );
 		itSubCmd = pMacro->GetSubCommands().begin();
 		ASSERT_EQUAL( cmd::RenameFile, pMacro->GetTypeID() );
 		ASSERT_EQUAL( CTime( 2008, 10, 3, 13, 0, 0 ), pMacro->GetTimestamp() );
 		ASSERT_EQUAL( 2, pMacro->GetSubCommands().size() );
 
-		pRenameCmd = checked_static_cast< const CRenameFileCmd* >( *itSubCmd++ );
+		pRenameCmd = checked_static_cast<const CRenameFileCmd*>( *itSubCmd++ );
 		ASSERT_EQUAL( _T("C:\\my\\download\\kierkegaard_works.PDF"), pRenameCmd->m_srcPath );
 		ASSERT_EQUAL( _T("C:\\my\\download\\Kierkegaard Works.pdf"), pRenameCmd->m_destPath );
 
-		pRenameCmd = checked_static_cast< const CRenameFileCmd* >( *itSubCmd++ );
+		pRenameCmd = checked_static_cast<const CRenameFileCmd*>( *itSubCmd++ );
 		ASSERT_EQUAL( _T("C:\\my\\download\\water-tax.Doc"), pRenameCmd->m_srcPath );
 		ASSERT_EQUAL( _T("C:\\my\\download\\Water Tax.Doc"), pRenameCmd->m_destPath );
 	}
 	{
-		pMacro = checked_static_cast< const cmd::CFileMacroCmd* >( *itStackCmd++ );
+		pMacro = checked_static_cast<const cmd::CFileMacroCmd*>( *itStackCmd++ );
 		itSubCmd = pMacro->GetSubCommands().begin();
 		ASSERT_EQUAL( cmd::RenameFile, pMacro->GetTypeID() );
 		ASSERT_EQUAL( CTime( 2010, 6, 8, 14, 30, 0 ), pMacro->GetTimestamp() );
 		ASSERT_EQUAL( 1, pMacro->GetSubCommands().size() );
 
-		pRenameCmd = checked_static_cast< const CRenameFileCmd* >( *itSubCmd++ );
+		pRenameCmd = checked_static_cast<const CRenameFileCmd*>( *itSubCmd++ );
 		ASSERT_EQUAL( _T("C:\\my\\download\\Apt Barbu.PDF"), pRenameCmd->m_srcPath );
 		ASSERT_EQUAL( _T("C:\\my\\download\\Apt Barbu - confirmation.pdf"), pRenameCmd->m_destPath );
 	}
 	{
-		pMacro = checked_static_cast< const cmd::CFileMacroCmd* >( *itStackCmd++ );
+		pMacro = checked_static_cast<const cmd::CFileMacroCmd*>( *itStackCmd++ );
 		itSubCmd = pMacro->GetSubCommands().begin();
 		ASSERT_EQUAL( cmd::RenameFile, pMacro->GetTypeID() );
 		ASSERT_EQUAL( CTime( 2012, 5, 16, 19, 21, 2 ), pMacro->GetTimestamp() );
 		ASSERT_EQUAL( 1, pMacro->GetSubCommands().size() );
 
-		pRenameCmd = checked_static_cast< const CRenameFileCmd* >( *itSubCmd++ );
+		pRenameCmd = checked_static_cast<const CRenameFileCmd*>( *itSubCmd++ );
 		ASSERT_EQUAL( _T("C:\\my\\download\\BA Itinerary.pdf"), pRenameCmd->m_srcPath );
 		ASSERT_EQUAL( _T("C:\\my\\download\\BA My Itinerary.pdf"), pRenameCmd->m_destPath );
 	}
 	{
-		pMacro = checked_static_cast< const cmd::CFileMacroCmd* >( *itStackCmd++ );
+		pMacro = checked_static_cast<const cmd::CFileMacroCmd*>( *itStackCmd++ );
 		itSubCmd = pMacro->GetSubCommands().begin();
 		ASSERT_EQUAL( cmd::TouchFile, pMacro->GetTypeID() );
 		ASSERT_EQUAL( CTime( 2018, 7, 1, 8, 0, 0 ), pMacro->GetTimestamp() );
 		ASSERT_EQUAL( 1, pMacro->GetSubCommands().size() );
 
 		{
-			pTouchCmd = checked_static_cast< const CTouchFileCmd* >( *itSubCmd++ );
+			pTouchCmd = checked_static_cast<const CTouchFileCmd*>( *itSubCmd++ );
 
 			ASSERT_EQUAL( _T("C:\\my\\download\\exams.png"), pTouchCmd->m_srcPath );
 			ASSERT_EQUAL( pTouchCmd->m_srcPath, pTouchCmd->m_srcState.m_fullPath );
@@ -293,13 +293,13 @@ void CCommandModelSerializerTests::TestLoadLog( void )
 	itStackCmd = model.GetRedoStack().begin();
 
 	{
-		pMacro = checked_static_cast< const cmd::CFileMacroCmd* >( *itStackCmd++ );
+		pMacro = checked_static_cast<const cmd::CFileMacroCmd*>( *itStackCmd++ );
 		itSubCmd = pMacro->GetSubCommands().begin();
 		ASSERT_EQUAL( cmd::RenameFile, pMacro->GetTypeID() );
 		ASSERT_EQUAL( CTime( 2018, 7, 17, 17, 17, 17 ), pMacro->GetTimestamp() );
 		ASSERT_EQUAL( 1, pMacro->GetSubCommands().size() );
 
-		pRenameCmd = checked_static_cast< const CRenameFileCmd* >( *itSubCmd++ );
+		pRenameCmd = checked_static_cast<const CRenameFileCmd*>( *itSubCmd++ );
 		ASSERT_EQUAL( cmd::RenameFile, pRenameCmd->GetTypeID() );
 		ASSERT_EQUAL( _T("C:\\my\\download\\How to Talk.pdf"), pRenameCmd->m_srcPath );
 		ASSERT_EQUAL( _T("How to Talk to Anyone.pdf"), pRenameCmd->m_destPath.GetFilename() );

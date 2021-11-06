@@ -185,7 +185,7 @@ namespace fs
 
 		fs::CPathParts parts( filePath.Get() );
 
-		const UINT hashKey = static_cast< UINT >( path::GetHashValue( filePath.GetPtr() ) );		// hash key is unique for the whole path
+		const UINT hashKey = static_cast<UINT>( path::GetHashValue( filePath.GetPtr() ) );		// hash key is unique for the whole path
 		parts.m_fname += str::Format( fmtHashSuffix, hashKey );		// e.g. "fname_hexHashKey"
 		fs::CPath uniqueFilePath = parts.MakePath();
 
@@ -456,7 +456,7 @@ namespace fs
 				else
 					fs::EnumFilePaths( existingPaths, parentDirPath, wildSpec.c_str() );		// sibling file leafs
 
-				seqCount = static_cast< UINT >( existingPaths.size() );
+				seqCount = static_cast<UINT>( existingPaths.size() );
 			}
 
 			const size_t prefixLen = filePathParts.m_fname.length();

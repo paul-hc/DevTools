@@ -116,7 +116,7 @@ void CAlgorithmsTests::TestIsOrdered( void )
 
 	{	// objects by value
 		std::deque< fs::CPath* > files;
-		pred::CompareAdapterPtr< pred::CompareNaturalPath, func::PtrToReference > pathPtrCompare;
+		pred::CompareAdapterPtr<pred::CompareNaturalPath, func::PtrToReference> pathPtrCompare;
 
 		ASSERT( utl::IsOrdered( files, pathPtrCompare ) );
 
@@ -223,7 +223,7 @@ void CAlgorithmsTests::TestInsert( void )
 
 	{
 		std::vector< ut::TMockInt* > numbers;
-		pred::LessPtr< pred::CompareMockItemPtr > lessPtr;
+		pred::LessPtr<pred::CompareMockItemPtr> lessPtr;
 
 		utl::AddSorted( numbers, new ut::TMockInt( 5 ), lessPtr ); ASSERT_EQUAL( "5", ut::JoinPtrs( numbers, s_sep ) );
 		utl::AddSorted( numbers, new ut::TMockInt( 9 ), lessPtr ); ASSERT_EQUAL( "5,9", ut::JoinPtrs( numbers, s_sep ) );

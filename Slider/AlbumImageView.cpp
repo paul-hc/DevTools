@@ -55,7 +55,7 @@ void CAlbumImageView::StorePeerView( CAlbumThumbListView* pPeerThumbView, CAlbum
 
 CAlbumDoc* CAlbumImageView::GetDocument( void ) const
 {
-	return checked_static_cast< CAlbumDoc* >( m_pDocument );
+	return checked_static_cast<CAlbumDoc*>( m_pDocument );
 }
 
 HICON CAlbumImageView::GetDocTypeIcon( void ) const
@@ -118,7 +118,7 @@ bool CAlbumImageView::OutputNavigSlider( void )
 
 	CAlbumDoc* pAlbumDoc = GetDocument();
 
-	m_pNavigBar->OutputNavigRange( static_cast< UINT >( pAlbumDoc->GetImageCount() ) );
+	m_pNavigBar->OutputNavigRange( static_cast<UINT>( pAlbumDoc->GetImageCount() ) );
 	m_pNavigBar->OutputNavigPos( GetSlideData().GetCurrentIndex() );
 	return true;
 }
@@ -259,7 +259,7 @@ void CAlbumImageView::LateInitialUpdate( void )
 		m_pPeerThumbView->SetListViewState( currListState );		// restore the persistent selection
 	m_pPeerThumbView->ShowWindow( SW_SHOW );
 
-	CView* pViewToActivate = m_slideData.HasShowFlag( af::ShowThumbView ) ? static_cast< CView* >( m_pPeerThumbView ) : this;
+	CView* pViewToActivate = m_slideData.HasShowFlag( af::ShowThumbView ) ? static_cast<CView*>( m_pPeerThumbView ) : this;
 
 	// activate the target pane view (works only late)
 	m_pMdiChildFrame->SetActiveView( pViewToActivate );
@@ -398,7 +398,7 @@ void CAlbumImageView::OnUpdate( CView* pSender, LPARAM lHint, CObject* pHint )
 			UpdateChildBarsState();
 			break;
 		case Hint_AlbumModelChanged:
-			OnAlbumModelChanged( app::FromHintPtr< AlbumModelChange >( pHint ) );
+			OnAlbumModelChanged( app::FromHintPtr<AlbumModelChange>( pHint ) );
 			break;
 		case Hint_ReloadImage:
 			m_pPeerThumbView->Invalidate();		// also invalidate the peer thumb view
@@ -524,7 +524,7 @@ BOOL CAlbumImageView::OnMouseWheel( UINT mkFlags, short zDelta, CPoint point )
 			size_t step = HasFlag( mkFlags, MK_SHIFT ) ? m_pPeerThumbView->GetPageItemCounts().cy : 1;		// advance by vert-page is SHIFT pressed
 
 			utl::AdvancePos( currPos, GetDocument()->GetImageCount(), false, delta < 0, step );		// forward for wheel forward
-			m_slideData.SetCurrentIndex( static_cast< int >( currPos ) );
+			m_slideData.SetCurrentIndex( static_cast<int>( currPos ) );
 			UpdateImage();
 		}
 		return TRUE;		// message processed

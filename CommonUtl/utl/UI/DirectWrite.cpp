@@ -17,7 +17,7 @@ namespace dw
 
 	CTextFactory::CTextFactory( void )
 	{
-		HR_OK( ::DWriteCreateFactory( DWRITE_FACTORY_TYPE_SHARED, __uuidof( m_pDirectWriteFactory ), reinterpret_cast< IUnknown** >( &m_pDirectWriteFactory ) ) );
+		HR_OK( ::DWriteCreateFactory( DWRITE_FACTORY_TYPE_SHARED, __uuidof( m_pDirectWriteFactory ), reinterpret_cast<IUnknown**>( &m_pDirectWriteFactory ) ) );
 
 		app::GetSharedResources().AddComPtr( m_pDirectWriteFactory );			// will release the factory singleton in ExitInstance()
 	}
@@ -38,7 +38,7 @@ namespace dw
 {
 	float ConvertPointToDipExtent( int pointExtent, float dpiHeight /*= d2d::GetScreenDpi().height*/ )
 	{
-		return static_cast< float >( pointExtent < 0 ? ( -pointExtent ) : pointExtent ) * dpiHeight / 72.0f;
+		return static_cast<float>( pointExtent < 0 ? ( -pointExtent ) : pointExtent ) * dpiHeight / 72.0f;
 	}
 
 	int ConvertDipToPointExtent( float dipExtent, float dpiHeight /*= d2d::GetScreenDpi().height*/ )
@@ -58,13 +58,13 @@ namespace dw
 	}
 
 
-	CComPtr< IDWriteTextFormat > CreateTextFormat( const wchar_t fontName[], long height,
+	CComPtr<IDWriteTextFormat> CreateTextFormat( const wchar_t fontName[], long height,
 												   DWRITE_FONT_WEIGHT weight /*= DWRITE_FONT_WEIGHT_REGULAR*/,
 												   DWRITE_FONT_STYLE style /*= DWRITE_FONT_STYLE_NORMAL*/,
 												   DWRITE_FONT_STRETCH stretch /*= DWRITE_FONT_STRETCH_NORMAL*/,
 												   const wchar_t localeName[] /*= L"en-us"*/ )
 	{
-		CComPtr< IDWriteTextFormat > pTextFormat;			// new font
+		CComPtr<IDWriteTextFormat> pTextFormat;			// new font
 		float fontSize = ConvertPointToDipExtent( height );
 
 		if ( HR_OK( CTextFactory::Factory()->CreateTextFormat( fontName, NULL, weight, style, stretch, fontSize, localeName, &pTextFormat ) ) )
@@ -77,9 +77,9 @@ namespace dw
 		return NULL;
 	}
 
-    CComPtr< IDWriteTextLayout > CreateTextLayout( const std::tstring& text, IDWriteTextFormat* pFont, D2D_SIZE_F maxSize /*= d2d::GetScreenSize()*/ )
+    CComPtr<IDWriteTextLayout> CreateTextLayout( const std::tstring& text, IDWriteTextFormat* pFont, D2D_SIZE_F maxSize /*= d2d::GetScreenSize()*/ )
     {
-		CComPtr< IDWriteTextLayout > pTextLayout;
+		CComPtr<IDWriteTextLayout> pTextLayout;
 		if ( HR_OK( CTextFactory::Factory()->CreateTextLayout( text.c_str(), static_cast<UINT32>( text.length() ), pFont, maxSize.width, maxSize.height, &pTextLayout ) ) )
 			return pTextLayout;
 		return NULL;
@@ -128,7 +128,7 @@ namespace dw
 	{
 		D2D_SIZE_F screenSize = d2d::ToSizeF( ui::GetScreenSize() );
 
-		CComPtr< IDWriteTextLayout > pTextLayout;
+		CComPtr<IDWriteTextLayout> pTextLayout;
 		if ( HR_OK( CTextFactory::Factory()->CreateTextLayout( text, static_cast<UINT32>( length ), pFont, screenSize.width, screenSize.height, &pTextLayout ) ) )
 			return ComputeTextSize( pTextLayout );
 

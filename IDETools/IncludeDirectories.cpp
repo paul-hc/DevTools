@@ -171,7 +171,7 @@ void CIncludeDirectories::Load( void )
 			Add( *itSubKeyName )->Load( reg::section / *itSubKeyName );
 	}
 
-	m_currSetPos = pApp->GetProfileInt( reg::section.GetPtr(), reg::entry_currSetPos, static_cast< int >( m_currSetPos ) );
+	m_currSetPos = pApp->GetProfileInt( reg::section.GetPtr(), reg::entry_currSetPos, static_cast<int>( m_currSetPos ) );
 	m_currSetPos = std::min( m_currSetPos, m_includePaths.size() - 1 );
 
 	m_searchSpecs.clear();
@@ -194,5 +194,5 @@ void CIncludeDirectories::Save( void ) const
 	for ( utl::vector_map< std::tstring, CIncludePaths* >::const_iterator itIncludePath = m_includePaths.begin(); itIncludePath != m_includePaths.end(); ++itIncludePath )
 		itIncludePath->second->Save( reg::section / itIncludePath->first );
 
-	pApp->WriteProfileInt( reg::section.GetPtr(), reg::entry_currSetPos, static_cast< int >( m_currSetPos ) );
+	pApp->WriteProfileInt( reg::section.GetPtr(), reg::entry_currSetPos, static_cast<int>( m_currSetPos ) );
 }

@@ -60,7 +60,7 @@ namespace str
 		StringT MakePrevToken( size_t tokenLen ) const { ASSERT( tokenLen <= m_pos ); return m_text.substr( m_pos - tokenLen, tokenLen ); }
 		StringT MakeToken( size_t tokenLen ) const { ASSERT( tokenLen <= m_pos ); return m_text.substr( m_pos, tokenLen ); }
 
-		bool ExtractEnclosedText( StringT& rText, const CharType openSep[], const CharType closeSep[], Range< size_t >* pTextRange = &s_posRange )
+		bool ExtractEnclosedText( StringT& rText, const CharType openSep[], const CharType closeSep[], Range<size_t>* pTextRange = &s_posRange )
 		{
 			ASSERT_PTR( pTextRange );
 			if ( Matches( openSep ) )
@@ -76,9 +76,9 @@ namespace str
 			return false;
 		}
 
-		bool ExtractEnclosedText( StringT& rText, const CharType sep[], Range< size_t >* pTextRange = &s_posRange ) { return ExtractEnclosedText( rText, sep, sep, pTextRange ); }
+		bool ExtractEnclosedText( StringT& rText, const CharType sep[], Range<size_t>* pTextRange = &s_posRange ) { return ExtractEnclosedText( rText, sep, sep, pTextRange ); }
 
-		void ReplaceToken( const Range< size_t >& tokenRange, const CharType* pNewText )
+		void ReplaceToken( const Range<size_t>& tokenRange, const CharType* pNewText )
 		{
 			REQUIRE( tokenRange.m_start <= m_length );
 			REQUIRE( tokenRange.m_end <= m_length );
@@ -232,9 +232,9 @@ namespace str
 		const CharType* m_pCurrent;				// self-encapsulated
 		size_t m_pos;							// self-encapsulated
 		size_t m_length;
-		Range< const CharType* > m_whiteSpace;
+		Range<const CharType*> m_whiteSpace;
 
-		static Range< size_t > s_posRange;		// default parameter for extract methods
+		static Range<size_t> s_posRange;		// default parameter for extract methods
 	public:
 		CompareT m_compare;
 		pred::IsEqual< CompareT > m_equals;
@@ -244,7 +244,7 @@ namespace str
 	// CTokenIterator template code
 
 	template< typename CompareT, typename CharType >
-	Range< size_t > CTokenIterator< CompareT, CharType >::s_posRange( 0 );		// static s_posRange object definition
+	Range<size_t> CTokenIterator< CompareT, CharType >::s_posRange( 0 );		// static s_posRange object definition
 }
 
 

@@ -101,9 +101,9 @@ void CWicImageCache::Enqueue( const std::vector< fs::ImagePathKey >& imageKeys )
 	m_imageCache.Enqueue( imageKeys );
 }
 
-CComPtr< IWICBitmapSource > CWicImageCache::LookupBitmapSource( const fs::ImagePathKey& imageKey ) const
+CComPtr<IWICBitmapSource> CWicImageCache::LookupBitmapSource( const fs::ImagePathKey& imageKey ) const
 {
-	CComPtr< IWICBitmapSource > pBitmap;
+	CComPtr<IWICBitmapSource> pBitmap;
 
 	if ( const CWicImage* pFoundImage = m_imageCache.Find( imageKey, true ) )		// already cached?
 		pBitmap = pFoundImage->GetWicBitmap();

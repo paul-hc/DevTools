@@ -26,7 +26,7 @@ public:
 	bool SetCurrentNavPos( const nav::TIndexFramePosPair& currentPos );
 
 	// Perspective-dependent visibility flags
-	bool HasShowFlag( af::AlbumFlags flag ) const { return ::HasFlag( const_cast< CSlideData* >( this )->RefShowFlags(), flag ); }
+	bool HasShowFlag( af::AlbumFlags flag ) const { return ::HasFlag( const_cast<CSlideData*>( this )->RefShowFlags(), flag ); }
 	void SetShowFlag( af::AlbumFlags flag, bool on = true ) { ::SetFlag( RefShowFlags(), flag, on ); }
 	void ToggleShowFlag( af::AlbumFlags flag ) { ::ToggleFlag( RefShowFlags(), flag ); }
 

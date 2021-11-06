@@ -22,7 +22,7 @@ namespace ui
 
 	inline CSize ScaleSize( const SIZE& size, double factor )
 	{
-		return CSize( static_cast< long >( factor * size.cx ), static_cast< long >( factor * size.cy ) );
+		return CSize( static_cast<long>( factor * size.cx ), static_cast<long>( factor * size.cy ) );
 	}
 
 	inline CRect& SetRectSize( CRect& rRect, const SIZE& size )

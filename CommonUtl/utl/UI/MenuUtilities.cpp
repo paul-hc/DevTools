@@ -230,7 +230,7 @@ namespace ui
 
 	MENUITEMINFO_BUFF::MENUITEMINFO_BUFF( void )
 	{
-		utl::ZeroWinStruct( static_cast< MENUITEMINFO* >( this ) );
+		utl::ZeroWinStruct( static_cast<MENUITEMINFO*>( this ) );
 	}
 
 	void MENUITEMINFO_BUFF::ClearTextBuffer( void )
@@ -248,7 +248,7 @@ namespace ui
 		ASSERT_PTR( ::IsMenu( hMenu ) );
 
 		ClearTextBuffer();
-		utl::ZeroWinStruct( static_cast< MENUITEMINFO* >( this ) );
+		utl::ZeroWinStruct( static_cast<MENUITEMINFO*>( this ) );
 
 		fMask = mask;					// MIIM_TYPE replaced by MIIM_FTYPE | MIIM_STRING | MIIM_BITMAP
 

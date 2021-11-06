@@ -132,7 +132,7 @@ CRenameFilesDialog::~CRenameFilesDialog()
 bool CRenameFilesDialog::RenameFiles( void )
 {
 	CFileService svc;
-	std::auto_ptr< CMacroCommand > pRenameMacroCmd = svc.MakeRenameCmds( m_rRenameItems );
+	std::auto_ptr<CMacroCommand> pRenameMacroCmd = svc.MakeRenameCmds( m_rRenameItems );
 	if ( pRenameMacroCmd.get() != NULL )
 		if ( !pRenameMacroCmd->IsEmpty() )
 		{
@@ -316,14 +316,14 @@ std::tstring CRenameFilesDialog::JoinErrorDestPaths( void ) const
 	std::vector< fs::CPath > destPaths; destPaths.reserve( m_errorItems.size() );
 
 	for ( std::vector< CPathItemBase* >::const_iterator itErrorItem = m_errorItems.begin(); itErrorItem != m_errorItems.end(); ++itErrorItem )
-		destPaths.push_back( checked_static_cast< const CRenameItem* >( *itErrorItem )->GetDestPath() );
+		destPaths.push_back( checked_static_cast<const CRenameItem*>( *itErrorItem )->GetDestPath() );
 
 	return str::Join( destPaths, _T("\r\n") );
 }
 
 std::tstring CRenameFilesDialog::GetSelFindWhat( void ) const
 {
-	if ( CTextEdit* pFocusEdit = dynamic_cast< CTextEdit* >( GetFocus() ) )
+	if ( CTextEdit* pFocusEdit = dynamic_cast<CTextEdit*>( GetFocus() ) )
 	{
 		std::tstring selText = pFocusEdit->GetSelText();
 		if ( !selText.empty() && std::tstring::npos == selText.find( _T('\n') ) )

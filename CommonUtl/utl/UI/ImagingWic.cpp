@@ -62,7 +62,7 @@ namespace wic
 
 	bool CBitmapDecoder::CreateFromFile( const fs::CFlexPath& flexPath )
 	{
-		if ( CComPtr< IStream > pStream = fs::flex::OpenStreamOnFile( flexPath ) )
+		if ( CComPtr<IStream> pStream = fs::flex::OpenStreamOnFile( flexPath ) )
 			return CreateFromStream( pStream );
 
 		return false;
@@ -92,7 +92,7 @@ namespace wic
 	{
 		ASSERT_PTR( m_pDecoder );
 
-		CComPtr< IWICBitmapDecoderInfo > pDecoderInfo;
+		CComPtr<IWICBitmapDecoderInfo> pDecoderInfo;
         UINT formatCount = 0;
 
 		if ( HR_OK( m_pDecoder->GetDecoderInfo( &pDecoderInfo ) ) )
@@ -106,18 +106,18 @@ namespace wic
 		return false;
 	}
 
-	CComPtr< IWICBitmapFrameDecode > CBitmapDecoder::GetFrameAt( UINT framePos ) const
+	CComPtr<IWICBitmapFrameDecode> CBitmapDecoder::GetFrameAt( UINT framePos ) const
 	{
 		ASSERT_PTR( m_pDecoder );
-		CComPtr< IWICBitmapFrameDecode > pFrame;
+		CComPtr<IWICBitmapFrameDecode> pFrame;
 		if ( Handle( m_pDecoder->GetFrame( framePos, &pFrame ) ) )
 			return pFrame;
 		return NULL;
 	}
 
-	CComPtr< IWICBitmapSource > CBitmapDecoder::ConvertFrameAt( UINT framePos, const WICPixelFormatGUID* pPixelFormat /*= &GUID_WICPixelFormat32bppPBGRA*/ ) const
+	CComPtr<IWICBitmapSource> CBitmapDecoder::ConvertFrameAt( UINT framePos, const WICPixelFormatGUID* pPixelFormat /*= &GUID_WICPixelFormat32bppPBGRA*/ ) const
 	{
-		if ( CComPtr< IWICBitmapFrameDecode > pSrcBitmap = GetFrameAt( framePos ) )
+		if ( CComPtr<IWICBitmapFrameDecode> pSrcBitmap = GetFrameAt( framePos ) )
 		{
 			if ( NULL == pPixelFormat )			// auto-format: find the best fitting destination format
 			{
@@ -131,26 +131,26 @@ namespace wic
 					pPixelFormat = &GUID_WICPixelFormat24bppBGR;		// 24bpp BGR
 			}
 
-			CComPtr< IWICBitmapSource > pDestBitmap;
+			CComPtr<IWICBitmapSource> pDestBitmap;
 			if ( Handle( ::WICConvertBitmapSource( *pPixelFormat, pSrcBitmap, &pDestBitmap ) ) )
 				return pDestBitmap;
 		}
 		return NULL;
 	}
 
-	CComPtr< IWICMetadataQueryReader > CBitmapDecoder::GetDecoderMetadata( void ) const
+	CComPtr<IWICMetadataQueryReader> CBitmapDecoder::GetDecoderMetadata( void ) const
 	{
-		CComPtr< IWICMetadataQueryReader > pGlobalMetadata;
+		CComPtr<IWICMetadataQueryReader> pGlobalMetadata;
 		if ( HR_OK( m_pDecoder->GetMetadataQueryReader( &pGlobalMetadata ) ) )
 			return pGlobalMetadata;
 
 		return NULL;
 	}
 
-	CComPtr< IWICMetadataQueryReader > CBitmapDecoder::GetFrameMetadataAt( UINT framePos ) const
+	CComPtr<IWICMetadataQueryReader> CBitmapDecoder::GetFrameMetadataAt( UINT framePos ) const
 	{
-		CComPtr< IWICMetadataQueryReader > pFrameMetadata;
-		if ( CComPtr< IWICBitmapFrameDecode > pFrame = GetFrameAt( framePos ) )
+		CComPtr<IWICMetadataQueryReader> pFrameMetadata;
+		if ( CComPtr<IWICBitmapFrameDecode> pFrame = GetFrameAt( framePos ) )
 			if ( HR_OK( pFrame->GetMetadataQueryReader( &pFrameMetadata ) ) )
 				return pFrameMetadata;
 
@@ -162,7 +162,7 @@ namespace wic
 		ASSERT_PTR( m_pDecoder );
 
 		TDecoderFlags decoderFlags = 0;
-		CComPtr< IWICBitmapDecoderInfo > pDecoderInfo;
+		CComPtr<IWICBitmapDecoderInfo> pDecoderInfo;
 
 		if ( HR_OK( m_pDecoder->GetDecoderInfo( &pDecoderInfo ) ) )
 		{
@@ -198,7 +198,7 @@ namespace wic
 		if ( pBitmap != NULL )
 		{
 			m_size = wic::GetBitmapSize( pBitmap );
-			CComPtr< IWICPixelFormatInfo > pPixelFormatInfo = wic::GetPixelFormatInfo( pBitmap );
+			CComPtr<IWICPixelFormatInfo> pPixelFormatInfo = wic::GetPixelFormatInfo( pBitmap );
 			ASSERT_PTR( pPixelFormatInfo );
 
 			const CErrorHandler* pChecker = CErrorHandler::Checker();
@@ -207,7 +207,7 @@ namespace wic
 			pChecker->Handle( pPixelFormatInfo->GetBitsPerPixel( &m_bitsPerPixel ), &allGood );
 			pChecker->Handle( pPixelFormatInfo->GetChannelCount( &m_channelCount ), &allGood );
 
-			if ( CComQIPtr< IWICPixelFormatInfo2 > pPixelFormatInfo2 = pPixelFormatInfo )
+			if ( CComQIPtr<IWICPixelFormatInfo2> pPixelFormatInfo2 = pPixelFormatInfo )
 			{
 				BOOL supportsTransparency = FALSE;
 				if ( pChecker->Handle( pPixelFormatInfo2->SupportsTransparency( &supportsTransparency ) ) )
@@ -276,7 +276,7 @@ namespace wic
 
 	bool CBitmapOrigin::IsSourceTrueBitmap( void ) const
 	{
-		CComQIPtr< IWICBitmap > pFullBitmap = m_pSrcBitmap;
+		CComQIPtr<IWICBitmap> pFullBitmap = m_pSrcBitmap;
 		return pFullBitmap != NULL;
 	}
 
@@ -287,7 +287,7 @@ namespace wic
 			ASSERT( false );				// detach once
 			return false;					// already a true bitmap, no detaching
 		}
-		if ( CComPtr< IWICBitmap > pDetachedBitmap = wic::CreateBitmapFromSource( m_pSrcBitmap, detachOption ) )
+		if ( CComPtr<IWICBitmap> pDetachedBitmap = wic::CreateBitmapFromSource( m_pSrcBitmap, detachOption ) )
 		{
 			CBitmapFormat newFormat( pDetachedBitmap );
 			ASSERT( m_bmpFmt.Equals( newFormat ) );			// format should be invariant
@@ -302,7 +302,7 @@ namespace wic
 
 	bool CBitmapOrigin::SaveBitmapToFile( const TCHAR* pDestFilePath, const GUID* pContainerFormatId /*= NULL*/ )
 	{
-		CComPtr< IWICStream > pDestWicStream;
+		CComPtr<IWICStream> pDestWicStream;
 		return
 			Handle( CImagingFactory::Factory()->CreateStream( &pDestWicStream ) ) &&
 			Handle( pDestWicStream->InitializeFromFilename( pDestFilePath, GENERIC_WRITE ) ) &&
@@ -311,7 +311,7 @@ namespace wic
 
 	bool CBitmapOrigin::SaveBitmapToStream( IStream* pDestStream, const GUID& containerFormatId )
 	{
-		CComPtr< IWICStream > pDestWicStream;
+		CComPtr<IWICStream> pDestWicStream;
 		return
 			Handle( CImagingFactory::Factory()->CreateStream( &pDestWicStream ) ) &&
 			Handle( pDestWicStream->InitializeFromIStream( pDestStream ) ) &&
@@ -322,14 +322,14 @@ namespace wic
 	{
 		ASSERT_PTR( pDestWicStream );
 
-		CComPtr< IWICBitmapEncoder > pEncoder;
+		CComPtr<IWICBitmapEncoder> pEncoder;
 		if ( !Handle( CImagingFactory::Factory()->CreateEncoder( containerFormatId, NULL, &pEncoder ) ) )			// create the encoder for the corresponding format
 			return false;
 
 		if ( !Handle( pEncoder->Initialize( pDestWicStream, WICBitmapEncoderNoCache ) ) )
 			return false;
 
-		CComPtr< IWICBitmapFrameEncode > pDestFrameEncode = CreateDestFrameEncode( pEncoder );
+		CComPtr<IWICBitmapFrameEncode> pDestFrameEncode = CreateDestFrameEncode( pEncoder );
 
 		if ( !Handle( ConvertToFrameEncode( pDestFrameEncode ) ) )
 			return false;
@@ -365,10 +365,10 @@ namespace wic
 		return pFormatId != NULL ? *pFormatId : FindContainerFormatId( pDestFilePath );
 	}
 
-	CComPtr< IWICBitmapFrameEncode > CBitmapOrigin::CreateDestFrameEncode( IWICBitmapEncoder* pEncoder )
+	CComPtr<IWICBitmapFrameEncode> CBitmapOrigin::CreateDestFrameEncode( IWICBitmapEncoder* pEncoder )
 	{
-		CComPtr< IWICBitmapFrameEncode > pDestFrameEncode;
-		CComPtr< IPropertyBag2 > pPropertyBag;
+		CComPtr<IWICBitmapFrameEncode> pDestFrameEncode;
+		CComPtr<IPropertyBag2> pPropertyBag;
 		if ( Handle( pEncoder->CreateNewFrame( &pDestFrameEncode, &pPropertyBag ) ) )
 			if ( Handle( pDestFrameEncode->Initialize( pPropertyBag ) ) )
 				if ( Handle( pDestFrameEncode->SetPixelFormat( &m_bmpFmt.m_pixelFormatId ) ) )
@@ -389,7 +389,7 @@ namespace wic
 
 		if ( Handle( pDestFrameEncode->SetSize( m_bmpFmt.m_size.cx, m_bmpFmt.m_size.cy ) ) )
 		{
-			CComPtr< IWICPalette > pPalette = ClonePalette();
+			CComPtr<IWICPalette> pPalette = ClonePalette();
 			if ( pPalette != NULL )								// indexed?
 				pDestFrameEncode->SetPalette( pPalette );
 
@@ -400,9 +400,9 @@ namespace wic
 		return false;
 	}
 
-	CComPtr< IWICPalette > CBitmapOrigin::ClonePalette( void ) const
+	CComPtr<IWICPalette> CBitmapOrigin::ClonePalette( void ) const
 	{
-		CComPtr< IWICPalette > pPalette;
+		CComPtr<IWICPalette> pPalette;
 		if ( UINT paletteCount = m_bmpFmt.GetPaletteColorCount() )
 			if ( Handle( CImagingFactory::Factory()->CreatePalette( &pPalette ) ) )
 				if ( Handle( m_pSrcBitmap->CopyPalette( pPalette ) ) )		// may fail if not indexed
@@ -429,11 +429,11 @@ namespace wic
 				return dibMeta;
 		}
 
-		CComPtr< IWICBitmapDecoder > pDecoder;					// create a decoder for the given image file
+		CComPtr<IWICBitmapDecoder> pDecoder;					// create a decoder for the given image file
 		if ( HR_OK( CImagingFactory::Factory()->CreateDecoderFromFilename( pFilePath, NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pDecoder ) ) )
 		{
 			// load the desired frame as WIC bitmap
-			CComPtr< IWICBitmapSource > pBitmap = ExtractFrameBitmap( dibMeta, pDecoder, framePos );
+			CComPtr<IWICBitmapSource> pBitmap = ExtractFrameBitmap( dibMeta, pDecoder, framePos );
 			if ( pBitmap != NULL )
 				CreateDibSection( dibMeta, pBitmap );			// create a top-down DIB section containing the image
 		}
@@ -444,7 +444,7 @@ namespace wic
 	UINT QueryImageFrameCount( const TCHAR* pFilePath )
 	{
 		UINT frameCount = 0;
-		CComPtr< IWICBitmapDecoder > pDecoder;		// create a decoder for the given image file
+		CComPtr<IWICBitmapDecoder> pDecoder;		// create a decoder for the given image file
 		if ( HR_OK( CImagingFactory::Factory()->CreateDecoderFromFilename( pFilePath, NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pDecoder ) ) )
 			frameCount = GetFrameCount( pDecoder );
 		return frameCount;
@@ -477,12 +477,12 @@ namespace wic
 		if ( const IID* pDecoderClsId = FindDecoderIdFromResource( pResType ) )
 		{
 			CResourceData imageResource( pResImageName, pResType );
-			CComPtr< IStream > pImageStream = imageResource.CreateStreamCopy();
+			CComPtr<IStream> pImageStream = imageResource.CreateStreamCopy();
 
 			if ( pImageStream != NULL )											// loaded the image data into stream?
 			{
 				// load the WIC bitmap
-				CComPtr< IWICBitmapSource > pBitmap = LoadBitmapFromStream( dibMeta, pImageStream, pDecoderClsId );
+				CComPtr<IWICBitmapSource> pBitmap = LoadBitmapFromStream( dibMeta, pImageStream, pDecoderClsId );
 				if ( pBitmap != NULL )
 					CreateDibSection( dibMeta, pBitmap );				// create a DIB section containing the image
 			}
@@ -622,7 +622,7 @@ namespace wic
 	}
 
 
-	CComPtr< IWICBitmapSource > LoadBitmapFromStream( IStream* pImageStream, UINT framePos /*= 0*/ )
+	CComPtr<IWICBitmapSource> LoadBitmapFromStream( IStream* pImageStream, UINT framePos /*= 0*/ )
 	{	// using auto-decoder
 		CBitmapDecoder decoder;
 		if ( decoder.CreateFromStream( pImageStream ) )
@@ -635,14 +635,14 @@ namespace wic
 	}
 
 	// load a PNG image from the specified stream (using Windows Imaging Component)
-	CComPtr< IWICBitmapSource > LoadBitmapFromStream( CDibMeta& rDibMeta, IStream* pImageStream, const IID* pDecoderId )
+	CComPtr<IWICBitmapSource> LoadBitmapFromStream( CDibMeta& rDibMeta, IStream* pImageStream, const IID* pDecoderId )
 	{
 		ASSERT_PTR( pImageStream );
 		ASSERT_PTR( pDecoderId );
 
-		CComPtr< IWICBitmapSource > pBitmap;
+		CComPtr<IWICBitmapSource> pBitmap;
 
-		CComPtr< IWICBitmapDecoder > pDecoder;
+		CComPtr<IWICBitmapDecoder> pDecoder;
 		if ( HR_OK( pDecoder.CoCreateInstance( *pDecoderId, NULL, CLSCTX_INPROC_SERVER ) ) )		// create WIC's image decoder (PNG, JPG, etc)
 			if ( HR_OK( pDecoder->Initialize( pImageStream, WICDecodeMetadataCacheOnLoad ) ) )		// load the image
 				pBitmap = ExtractFrameBitmap( rDibMeta, pDecoder, 0 );
@@ -660,11 +660,11 @@ namespace wic
 	}
 
 	// load a bitmap frame from the decoder
-	CComPtr< IWICBitmapSource > ExtractFrameBitmap( CDibMeta& rDibMeta, IWICBitmapDecoder* pDecoder, UINT framePos /*= 0*/ )
+	CComPtr<IWICBitmapSource> ExtractFrameBitmap( CDibMeta& rDibMeta, IWICBitmapDecoder* pDecoder, UINT framePos /*= 0*/ )
 	{
 		ASSERT_PTR( pDecoder );
 
-		CComPtr< IWICBitmapSource > pBitmap;
+		CComPtr<IWICBitmapSource> pBitmap;
 
 		// check for the presence of the first frame in the bitmap
 		UINT frameCount = 0;
@@ -673,7 +673,7 @@ namespace wic
 			framePos = std::min( frameCount - 1, framePos );		// limit frame pos to an existing one
 
 			// load the first frame (i.e. the image)
-			CComPtr< IWICBitmapFrameDecode > pFrame;
+			CComPtr<IWICBitmapFrameDecode> pFrame;
 			if ( HR_OK( pDecoder->GetFrame( framePos, &pFrame ) ) )
 			{
 				// store SOURCE pixel format because the returned DIB is 32 bit regardless of having an alpha channel
@@ -696,9 +696,9 @@ namespace wic
 
 	// WIC types
 
-	CComPtr< IWICBitmapSource > LoadBitmapFromFile( const TCHAR* pFilePath, UINT framePos /*= 0*/ )
+	CComPtr<IWICBitmapSource> LoadBitmapFromFile( const TCHAR* pFilePath, UINT framePos /*= 0*/ )
 	{
-		CComPtr< IWICBitmapDecoder > pDecoder;					// create a decoder for the given image file
+		CComPtr<IWICBitmapDecoder> pDecoder;					// create a decoder for the given image file
 		if ( HR_OK( CImagingFactory::Factory()->CreateDecoderFromFilename( pFilePath, NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pDecoder ) ) )
 		{
 			CDibMeta dibMeta;
@@ -707,7 +707,7 @@ namespace wic
 		return NULL;
 	}
 
-	CComPtr< IWICBitmapSource > LoadBitmapFromStream( IStream* pImageStream, const IID* pDecoderId )
+	CComPtr<IWICBitmapSource> LoadBitmapFromStream( IStream* pImageStream, const IID* pDecoderId )
 	{
 		CDibMeta dibMeta;
 		return LoadBitmapFromStream( dibMeta, pImageStream, pDecoderId );
@@ -722,17 +722,17 @@ namespace wic
 		return CSize( width, height );
 	}
 
-	CComPtr< IWICPixelFormatInfo > GetPixelFormatInfo( IWICBitmapSource* pBitmap )
+	CComPtr<IWICPixelFormatInfo> GetPixelFormatInfo( IWICBitmapSource* pBitmap )
 	{
 		ASSERT_PTR( pBitmap );
 
 		WICPixelFormatGUID pixelFormatClsId;
 		if ( HR_OK( pBitmap->GetPixelFormat( &pixelFormatClsId ) ) )
 		{
-			CComPtr< IWICComponentInfo > pBitmapInfo;
+			CComPtr<IWICComponentInfo> pBitmapInfo;
 			if ( HR_OK( CImagingFactory::Factory()->CreateComponentInfo( pixelFormatClsId, &pBitmapInfo ) ) )
 			{
-				CComQIPtr< IWICPixelFormatInfo > pPixelFormatInfo( pBitmapInfo );
+				CComQIPtr<IWICPixelFormatInfo> pPixelFormatInfo( pBitmapInfo );
 				return pPixelFormatInfo;
 			}
 		}
@@ -742,7 +742,7 @@ namespace wic
 
 	bool GetPixelFormat( UINT& rBitsPerPixel, UINT& rChannelCount, IWICBitmapSource* pBitmap )
 	{
-		CComPtr< IWICPixelFormatInfo > pPixelFormatInfo = GetPixelFormatInfo( pBitmap );
+		CComPtr<IWICPixelFormatInfo> pPixelFormatInfo = GetPixelFormatInfo( pBitmap );
 		return
 			pPixelFormatInfo != NULL &&
 			HR_OK( pPixelFormatInfo->GetBitsPerPixel( &rBitsPerPixel ) ) &&
@@ -819,19 +819,19 @@ namespace wic
 
 	// transformations
 
-	CComPtr< IWICBitmap > CreateBitmapFromSource( IWICBitmapSource* pBitmapSource, WICBitmapCreateCacheOption createOption /*= WICBitmapCacheOnDemand*/ )
+	CComPtr<IWICBitmap> CreateBitmapFromSource( IWICBitmapSource* pBitmapSource, WICBitmapCreateCacheOption createOption /*= WICBitmapCacheOnDemand*/ )
 	{
 		// after convertion it releases any dependencies to pBitmapSource (IStream, HFILE, etc)
-		CComPtr< IWICBitmap > pBitmapCopy;
+		CComPtr<IWICBitmap> pBitmapCopy;
 		HR_OK( CImagingFactory::Factory()->CreateBitmapFromSource( pBitmapSource, createOption, &pBitmapCopy ) );
 		return pBitmapCopy;
 	}
 
-	CComPtr< IWICBitmapScaler > ScaleBitmap( IWICBitmapSource* pWicBitmap, const CSize& newSize, WICBitmapInterpolationMode interpolationMode /*= WICBitmapInterpolationModeFant*/ )
+	CComPtr<IWICBitmapScaler> ScaleBitmap( IWICBitmapSource* pWicBitmap, const CSize& newSize, WICBitmapInterpolationMode interpolationMode /*= WICBitmapInterpolationModeFant*/ )
 	{
 		ASSERT_PTR( pWicBitmap );
 
-		CComPtr< IWICBitmapScaler > pScaledBitmap;
+		CComPtr<IWICBitmapScaler> pScaledBitmap;
 		if ( HR_OK( CImagingFactory::Factory()->CreateBitmapScaler( &pScaledBitmap ) ) )
 			if ( HR_OK( pScaledBitmap->Initialize( pWicBitmap, newSize.cx, newSize.cy, interpolationMode ) ) )
 				return &*pScaledBitmap;			// up-cast
@@ -839,7 +839,7 @@ namespace wic
 		return NULL;
 	}
 
-	CComPtr< IWICBitmapScaler > ScaleBitmapToBounds( IWICBitmapSource* pWicBitmap, const CSize& boundsSize,
+	CComPtr<IWICBitmapScaler> ScaleBitmapToBounds( IWICBitmapSource* pWicBitmap, const CSize& boundsSize,
 													 WICBitmapInterpolationMode interpolationMode /*= WICBitmapInterpolationModeFant*/ )
 	{
 		// WICBitmapInterpolationModeFant: smoother, less sharp edges; good for shrinking
@@ -854,10 +854,10 @@ namespace wic
 	{
 		// bitmap type conversion
 
-		CComPtr< IWICBitmapSource > ToWicBitmap( HBITMAP hBitmap, WICBitmapAlphaChannelOption alphaChannel /*= WICBitmapUsePremultipliedAlpha*/ )
+		CComPtr<IWICBitmapSource> ToWicBitmap( HBITMAP hBitmap, WICBitmapAlphaChannelOption alphaChannel /*= WICBitmapUsePremultipliedAlpha*/ )
 		{
 			ASSERT_PTR( hBitmap );
-			CComPtr< IWICBitmap > pWicBitmap;
+			CComPtr<IWICBitmap> pWicBitmap;
 			if ( HR_OK( CImagingFactory::Factory()->CreateBitmapFromHBITMAP( hBitmap, NULL, alphaChannel, &pWicBitmap ) ) )
 				return &*pWicBitmap;				// up-cast
 			return NULL;
@@ -874,7 +874,7 @@ namespace wic
 
 		bool InspectPixelFormatInfo( IWICBitmapSource* pBitmap )
 		{
-			CComPtr< IWICPixelFormatInfo > pPixelFormatInfo = GetPixelFormatInfo( pBitmap );
+			CComPtr<IWICPixelFormatInfo> pPixelFormatInfo = GetPixelFormatInfo( pBitmap );
 			if ( NULL == pPixelFormatInfo )
 				return false;
 

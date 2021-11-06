@@ -62,7 +62,7 @@ namespace str
 	{
 		ASSERT_PTR( pSource );
 		std::vector< TCHAR > expanded( ::ExpandEnvironmentStrings( pSource, NULL, 0 ) + 1 );						// allocate dest
-		::ExpandEnvironmentStrings( pSource, &expanded.front(), static_cast< DWORD >( expanded.size() ) );			// expand vars
+		::ExpandEnvironmentStrings( pSource, &expanded.front(), static_cast<DWORD>( expanded.size() ) );			// expand vars
 		return &expanded.front();
 	}
 
@@ -129,7 +129,7 @@ namespace num
 		unsigned int number;
 		if ( !ParseNumber( number, text, pSkipLength, loc ) || number > 255 )
 			return false;
-		rNumber = static_cast< BYTE >( number );
+		rNumber = static_cast<BYTE>( number );
 		return true;
 	}
 
@@ -139,12 +139,12 @@ namespace num
 		int number;
 		if ( !ParseNumber( number, text, pSkipLength, loc ) || number > 255 )
 			return false;
-		rNumber = static_cast< signed char >( number );
+		rNumber = static_cast<signed char>( number );
 		return true;
 	}
 
 
-	Range< size_t > FindNumericSequence( const std::tstring& text, size_t pos /*= 0*/ )
+	Range<size_t> FindNumericSequence( const std::tstring& text, size_t pos /*= 0*/ )
 	{
 		std::tstring::const_iterator itStart = text.begin() + pos;
 		ASSERT( itStart < text.end() );
@@ -152,12 +152,12 @@ namespace num
 		while ( itStart != text.end() && !str::CharTraits::IsDigit( *itStart ) )
 			++itStart;
 
-		Range< size_t > range( std::distance( text.begin(), itStart ) );
+		Range<size_t> range( std::distance( text.begin(), itStart ) );
 
 		if ( EnwrapNumericSequence( range, text ) )
 			return range;
 		else
-			return Range< size_t >( std::tstring::npos );
+			return Range<size_t>( std::tstring::npos );
 	}
 
 	size_t EnsureUniformZeroPadding( std::vector< std::tstring >& rItems )
@@ -172,7 +172,7 @@ namespace num
 
 			for ( size_t pos = 0; pos != itItem->length(); )
 			{
-				Range< size_t > numRange = FindNumericSequence( *itItem, pos );
+				Range<size_t> numRange = FindNumericSequence( *itItem, pos );
 				if ( std::tstring::npos == numRange.m_start )
 					break;
 
@@ -202,7 +202,7 @@ namespace num
 				size_t pos = 0;
 				for ( std::vector< size_t >::const_iterator itWidth = digitWidths.begin(); itWidth != digitWidths.end() && pos != itItem->length(); ++itWidth )
 				{
-					Range< size_t > numRange = FindNumericSequence( *itItem, pos );
+					Range<size_t> numRange = FindNumericSequence( *itItem, pos );
 					if ( std::tstring::npos == numRange.m_start )
 						break;
 
@@ -254,10 +254,10 @@ namespace num
 		const double factor = GetRoundingFactor( fractDigits );
 		double roundedNumber = number * factor;
 		__int64 integer = fractDigits != 0
-			? static_cast< __int64 >( roundedNumber + 0.5 )
-			: static_cast< __int64 >( roundedNumber );			// no rounding
+			? static_cast<__int64>( roundedNumber + 0.5 )
+			: static_cast<__int64>( roundedNumber );			// no rounding
 
-		roundedNumber = static_cast< double >( integer ) / factor;
+		roundedNumber = static_cast<double>( integer ) / factor;
 		return roundedNumber;
 	}
 
@@ -267,9 +267,9 @@ namespace num
 
 		const double factor = GetRoundingFactor( fractDigits );
 		double newNumber = number * factor;
-		__int64 integer = static_cast< __int64 >( newNumber );
+		__int64 integer = static_cast<__int64>( newNumber );
 
-		newNumber = static_cast< double >( integer ) / factor;
+		newNumber = static_cast<double>( integer ) / factor;
 		return newNumber;
 	}
 

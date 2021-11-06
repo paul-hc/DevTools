@@ -255,8 +255,8 @@ namespace hlp
 	{
 		if ( HasFlag( ui::GetStyle( hWnd ), WS_CHILD ) )
 		{
-			short ctrlId = static_cast< short >( ::GetDlgCtrlID( hWnd ) );
-			return str::Format( _T("%d (0x%X)"), ctrlId, static_cast< unsigned short >( ctrlId ) );
+			short ctrlId = static_cast<short>( ::GetDlgCtrlID( hWnd ) );
+			return str::Format( _T("%d (0x%X)"), ctrlId, static_cast<unsigned short>( ctrlId ) );
 		}
 		else
 			return str::Format( _T("Menu Handle=0x%X"), ::GetMenu( hWnd ) );

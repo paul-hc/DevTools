@@ -48,7 +48,7 @@ private:
 
 public:
 	// image factory methods
-	static std::auto_ptr< CWicImage > CreateFromFile( const fs::ImagePathKey& imageKey, utl::ErrorHandling handlingMode = utl::CheckMode );
+	static std::auto_ptr<CWicImage> CreateFromFile( const fs::ImagePathKey& imageKey, utl::ErrorHandling handlingMode = utl::CheckMode );
 	static std::pair< UINT, wic::TDecoderFlags > LookupImageFileFrameCount( const fs::CFlexPath& imagePath );
 
 	static bool IsCorruptFile( const fs::CFlexPath& imagePath );
@@ -70,7 +70,7 @@ private:
 		const wic::CBitmapDecoder& GetDecoder( void ) const { return m_decoder; }
 		bool AnyFramesLoaded( void ) const { return !m_loadedFrames.empty(); }
 
-		std::auto_ptr< CWicImage > LoadFrame( const fs::ImagePathKey& imageKey );
+		std::auto_ptr<CWicImage> LoadFrame( const fs::ImagePathKey& imageKey );
 		bool UnloadFrame( CWicImage* pFrameImage );
 	private:
 		size_t FindPosLoaded( UINT framePos ) const;

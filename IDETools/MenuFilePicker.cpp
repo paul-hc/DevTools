@@ -169,7 +169,7 @@ void MenuFilePicker::AddSortOrder( long pathField, BOOL exclusive )
 	if ( exclusive )
 		m_browser.m_options.m_fileSortOrder.Clear();
 
-	m_browser.m_options.m_fileSortOrder.Add( static_cast< PathField >( pathField ) );
+	m_browser.m_options.m_fileSortOrder.Add( static_cast<PathField>( pathField ) );
 }
 
 void MenuFilePicker::ClearSortOrder( void )

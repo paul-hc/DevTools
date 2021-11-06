@@ -121,7 +121,7 @@ namespace code
 	{
 		for ( std::vector< CBraceRule >::const_iterator itBrace = m_braceRules.begin(); itBrace != m_braceRules.end(); ++itBrace )
 			if ( chr == itBrace->m_braceOpen || chr == itBrace->m_braceClose )
-				return const_cast< CBraceRule* >( &*itBrace );
+				return const_cast<CBraceRule*>( &*itBrace );
 
 		return NULL;
 	}
@@ -143,7 +143,7 @@ namespace code
 	{
 		for ( std::vector< COperatorRule >::const_iterator itOpRule = m_operatorRules.begin(); itOpRule != m_operatorRules.end(); ++itOpRule )
 			if ( 0 == _tcsnicmp( itOpRule->m_pOperator, pOpStart, _tcslen( itOpRule->m_pOperator ) ) )
-				return const_cast< COperatorRule* >( &*itOpRule );
+				return const_cast<COperatorRule*>( &*itOpRule );
 
 		return NULL;
 	}

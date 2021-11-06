@@ -78,7 +78,7 @@ CFileAttr::CFileAttr( const fs::CFileState& streamState )
 CFileAttr::CFileAttr( const CFileFind& foundFile )
 	: m_pathKey( fs::CFlexPath( foundFile.GetFilePath().GetString() ), 0 )
 	, m_imageFormat( wic::FindFileImageFormat( GetPath().GetPtr() ) )
-	, m_fileSize( static_cast< UINT >( foundFile.GetLength() ) )
+	, m_fileSize( static_cast<UINT>( foundFile.GetLength() ) )
 	, m_imageDim( 0, 0 )
 	, m_baselinePos( utl::npos )
 {

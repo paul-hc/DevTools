@@ -108,7 +108,7 @@ private:
 	CSize m_collapsedDelta;
 	bool m_collapsed;
 
-	std::auto_ptr< layout::CResizeGripper > m_pGripper;		// bottom-right resize box
+	std::auto_ptr<layout::CResizeGripper> m_pGripper;		// bottom-right resize box
 	std::vector< HWND > m_hiddenGroups;						// hidden groups, drawn smoothly on WM_ERASEBKGND
 public:
 	static int m_defaultFlags;								// for debugging, testing

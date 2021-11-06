@@ -84,7 +84,7 @@ namespace app
 	{
 		ASSERT_PTR( pExc );
 
-		if ( is_a< mfc::CUserAbortedException >( pExc ) )
+		if ( is_a<mfc::CUserAbortedException>( pExc ) )
 			return;					// already reported, skip logging
 
 		std::tstring message = _T("* C++ MFC exception: ");

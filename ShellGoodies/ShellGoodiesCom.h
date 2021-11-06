@@ -22,7 +22,7 @@ private:
 	bool IsInit( void ) const { return m_pController.get() != NULL; }
 	size_t ExtractDropInfo( IDataObject* pSelFileObjects );
 private:
-	std::auto_ptr< CShellMenuController > m_pController;	// controller for handling the selected files in Explorer
+	std::auto_ptr<CShellMenuController> m_pController;	// controller for handling the selected files in Explorer
 
 	// generated COM stuff
 public:

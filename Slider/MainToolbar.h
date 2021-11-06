@@ -42,8 +42,8 @@ private:
 	template< typename CtrlType >
 	bool CreateControl( CtrlType* pCtrl, UINT ctrlId, DWORD style, const CRect& ctrlRect );
 private:
-	std::auto_ptr< CEnumComboBox > m_pScalingCombo;
-	std::auto_ptr< CZoomComboBox > m_pZoomCombo;
+	std::auto_ptr<CEnumComboBox> m_pScalingCombo;
+	std::auto_ptr<CZoomComboBox> m_pZoomCombo;
 	CButton m_smoothCheck;
 	CSliderCtrl m_navigSliderCtrl;
 	CFont m_ctrlFont;

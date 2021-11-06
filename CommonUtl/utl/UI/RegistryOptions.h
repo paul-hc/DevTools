@@ -50,7 +50,7 @@ public:
 	reg::CBaseOption& LookupOption( const void* pDataMember ) const;
 
 	template< typename OptionT >
-	OptionT* LookupOptionAs( const void* pDataMember ) const { return checked_static_cast< OptionT* >( &LookupOption( pDataMember ) ); }
+	OptionT* LookupOptionAs( const void* pDataMember ) const { return checked_static_cast<OptionT*>( &LookupOption( pDataMember ) ); }
 
 	reg::CBaseOption* FindOptionByID( UINT ctrlId ) const;
 
@@ -78,7 +78,7 @@ protected:
 	// overrideables
 	virtual void OnOptionChanged( const void* pDataMember );
 protected:
-	std::auto_ptr< IRegistrySection > m_pRegSection;
+	std::auto_ptr<IRegistrySection> m_pRegSection;
 	AutoSave m_autoSave;
 	std::vector< reg::CBaseOption* > m_options;
 
@@ -141,12 +141,12 @@ namespace reg
 		// base overrides
 		virtual void Load( void )
 		{
-			*m_pValue = static_cast< ValueT >( GetSection()->GetIntParameter( m_entry.c_str(), (int)*m_pValue ) );
+			*m_pValue = static_cast<ValueT>( GetSection()->GetIntParameter( m_entry.c_str(), (int)*m_pValue ) );
 		}
 
 		virtual void Save( void ) const
 		{
-			GetSection()->SaveParameter( m_entry.c_str(), static_cast< int >( *m_pValue ) );
+			GetSection()->SaveParameter( m_entry.c_str(), static_cast<int>( *m_pValue ) );
 		}
 
 		virtual const void* GetDataMember( void ) const { return m_pValue; }
@@ -180,7 +180,7 @@ namespace reg
 		virtual void Save( void ) const;
 	private:
 		const CEnumTags* m_pTags;
-		Range< UINT > m_radioIds;
+		Range<UINT> m_radioIds;
 	};
 
 

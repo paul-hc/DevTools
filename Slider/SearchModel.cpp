@@ -11,7 +11,7 @@
 #endif
 
 
-const Range< UINT > CSearchModel::s_anyFileSizeRange( 0, UINT_MAX );
+const Range<UINT> CSearchModel::s_anyFileSizeRange( 0, UINT_MAX );
 
 CSearchModel::CSearchModel( void )
 	: m_maxFileCount( UINT_MAX )
@@ -95,11 +95,11 @@ std::pair< CSearchPattern*, bool > CSearchModel::AddSearchPath( const fs::CPath&
 	return std::pair< CSearchPattern*, bool >( pNewPattern, true );							// new pattern
 }
 
-std::auto_ptr< CSearchPattern > CSearchModel::RemovePatternAt( size_t pos )
+std::auto_ptr<CSearchPattern> CSearchModel::RemovePatternAt( size_t pos )
 {
 	ASSERT( pos < m_patterns.size() );
 
-	std::auto_ptr< CSearchPattern > pPattern( m_patterns[ pos ] );
+	std::auto_ptr<CSearchPattern> pPattern( m_patterns[ pos ] );
 
 	m_patterns.erase( m_patterns.begin() + pos );
 	return pPattern;

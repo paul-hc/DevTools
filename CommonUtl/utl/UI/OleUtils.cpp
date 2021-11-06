@@ -66,7 +66,7 @@ namespace ole_utl
 		if ( ExtractData( &formatEtc, &stgMedium, pDataObject, pFormat ) )
 		{
 			ASSERT( ::GlobalSize( stgMedium.hGlobal ) >= sizeof( DWORD ) );
-			value = *static_cast< DWORD* >( ::GlobalLock( stgMedium.hGlobal ) );
+			value = *static_cast<DWORD*>( ::GlobalLock( stgMedium.hGlobal ) );
 			::GlobalUnlock( stgMedium.hGlobal );
 			::ReleaseStgMedium( &stgMedium );
 		}
@@ -83,7 +83,7 @@ namespace ole_utl
 		// check if object exists already
 		if ( ExtractData( &formatEtc, &stgMedium, pDataObject, pFormat ) )
 		{
-			DWORD* pValue = static_cast< DWORD* >( ::GlobalLock( stgMedium.hGlobal ) );
+			DWORD* pValue = static_cast<DWORD*>( ::GlobalLock( stgMedium.hGlobal ) );
 			succeeded = ( *pValue != value );
 			*pValue = value;
 			::GlobalUnlock( stgMedium.hGlobal );
@@ -97,7 +97,7 @@ namespace ole_utl
 			stgMedium.hGlobal = ::GlobalAlloc( GMEM_MOVEABLE, sizeof( DWORD ) );
 			if ( stgMedium.hGlobal )
 			{
-				DWORD* pValue = static_cast< DWORD* >( ::GlobalLock( stgMedium.hGlobal ) );
+				DWORD* pValue = static_cast<DWORD*>( ::GlobalLock( stgMedium.hGlobal ) );
 				*pValue = value;
 				::GlobalUnlock( stgMedium.hGlobal );
 				stgMedium.tymed = TYMED_HGLOBAL;
@@ -175,7 +175,7 @@ namespace ole
 			CArchive archive( &destMemFile, CArchive::store );
 			archive.m_bForceFlat = FALSE;
 
-			const_cast< CTransferBlob* >( this )->Save( archive );
+			const_cast<CTransferBlob*>( this )->Save( archive );
 			archive.Close();		// flushes the data so that we can copy the buffer
 
 			return destMemFile.MakeGlobalData( GMEM_MOVEABLE );			// allocate and copy buffer contents

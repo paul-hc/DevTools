@@ -53,7 +53,7 @@ struct CRegistryEntry
 		: m_type( REG_SZ )
 	{
 		typedef const BYTE* Iterator;
-		Iterator itStart = reinterpret_cast< const BYTE* >( value.c_str() ), itEnd = itStart + utl::ByteSize( value ) + 1;
+		Iterator itStart = reinterpret_cast<const BYTE*>( value.c_str() ), itEnd = itStart + utl::ByteSize( value ) + 1;
 
 		m_valueBuffer.assign( itStart, itEnd );
 	}
@@ -66,11 +66,11 @@ struct CRegistryEntry
 	}
 
 	bool IsNone( void ) const { return REG_NONE == m_type && m_valueBuffer.empty(); }
-	DWORD GetSize( void ) const { return static_cast< DWORD >( m_valueBuffer.size() ); }
+	DWORD GetSize( void ) const { return static_cast<DWORD>( m_valueBuffer.size() ); }
 	void Clear( void ) { m_type = REG_NONE; m_valueBuffer.clear(); }
 
-	const TCHAR* ValueAsString( void ) { ASSERT( REG_SZ == m_type ); return reinterpret_cast< const TCHAR* >( &m_valueBuffer.front() ); }
-	DWORD& ValueAsDWORD( void ) { ASSERT( REG_DWORD == m_type ); return *reinterpret_cast< DWORD* >( &m_valueBuffer.front() ); }
+	const TCHAR* ValueAsString( void ) { ASSERT( REG_SZ == m_type ); return reinterpret_cast<const TCHAR*>( &m_valueBuffer.front() ); }
+	DWORD& ValueAsDWORD( void ) { ASSERT( REG_DWORD == m_type ); return *reinterpret_cast<DWORD*>( &m_valueBuffer.front() ); }
 public:
 	DWORD m_type;
 	std::vector< BYTE > m_valueBuffer;

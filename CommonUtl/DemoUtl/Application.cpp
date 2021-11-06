@@ -78,7 +78,7 @@ BOOL CApplication::InitInstance( void )
 {
 	m_pGdiPlusInit.reset( new CScopedGdiPlusInit );
 
-	if ( !CBaseApp< CWinApp >::InitInstance() )
+	if ( !CBaseApp<CWinApp>::InitInstance() )
 		return FALSE;
 
 	CAboutBox::s_appIconId = IDR_MAINFRAME;
@@ -133,7 +133,7 @@ BOOL CApplication::InitInstance( void )
 	m_nCmdShow = SW_SHOWMAXIMIZED;
 	// create main MDI Frame window
 	m_pMainWnd = new CMainFrame;
-	if ( !static_cast< CMainFrame* >( m_pMainWnd )->LoadFrame( IDR_MAINFRAME ) )
+	if ( !static_cast<CMainFrame*>( m_pMainWnd )->LoadFrame( IDR_MAINFRAME ) )
 	{
 		delete m_pMainWnd;
 		return FALSE;
@@ -165,12 +165,12 @@ int CApplication::ExitInstance( void )
 	WriteProfileInt( reg::section, reg::entry_disableSmooth, !HasFlag( CLayoutEngine::m_defaultFlags, CLayoutEngine::SmoothGroups ) );
 	WriteProfileInt( reg::section, reg::entry_disableThemes, CVisualTheme::IsDisabled() );
 
-	return CBaseApp< CWinApp >::ExitInstance();
+	return CBaseApp<CWinApp>::ExitInstance();
 }
 
-BEGIN_MESSAGE_MAP( CApplication, CBaseApp< CWinApp > )
-	ON_COMMAND( ID_FILE_NEW, &CBaseApp< CWinApp >::OnFileNew )
-	ON_COMMAND( ID_FILE_OPEN, &CBaseApp< CWinApp >::OnFileOpen )
+BEGIN_MESSAGE_MAP( CApplication, CBaseApp<CWinApp> )
+	ON_COMMAND( ID_FILE_NEW, &CBaseApp<CWinApp>::OnFileNew )
+	ON_COMMAND( ID_FILE_OPEN, &CBaseApp<CWinApp>::OnFileOpen )
 END_MESSAGE_MAP()
 
 

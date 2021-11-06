@@ -41,7 +41,7 @@ void DspProject::OnFinalRelease( void )
 
 void DspProject::clear( void )
 {
-	m_parserPtr = std::auto_ptr< DspParser >();
+	m_parserPtr = std::auto_ptr<DspParser>();
 
 	m_projectFiles.clear();
 	m_diskSourceFiles.clear();
@@ -184,7 +184,7 @@ void DspProject::SetDspProjectFilePath( LPCTSTR dspProjectFilePath )
 
 	try
 	{
-		m_parserPtr = std::auto_ptr< DspParser >( new DspParser( dspProjectFilePath ) );
+		m_parserPtr = std::auto_ptr<DspParser>( new DspParser( dspProjectFilePath ) );
 		m_parserPtr->querySourceFiles( m_projectFiles );
 
 		lookupSourceFiles();

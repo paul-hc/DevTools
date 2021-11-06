@@ -76,15 +76,15 @@ namespace ui
 	inline bool ScreenToClient( HWND hWnd, RECT& rRect )
 	{
 		return
-			::ScreenToClient( safe_ptr( hWnd ), reinterpret_cast< POINT* >( &rRect ) ) &&
-			::ScreenToClient( hWnd, reinterpret_cast< POINT* >( &rRect ) + 1 );
+			::ScreenToClient( safe_ptr( hWnd ), reinterpret_cast<POINT*>( &rRect ) ) &&
+			::ScreenToClient( hWnd, reinterpret_cast<POINT*>( &rRect ) + 1 );
 	}
 
 	inline bool ClientToScreen( HWND hWnd, RECT& rRect )
 	{
 		return
-			::ClientToScreen( safe_ptr( hWnd ), reinterpret_cast< POINT* >( &rRect ) ) &&
-			::ClientToScreen( hWnd, reinterpret_cast< POINT* >( &rRect ) + 1 );
+			::ClientToScreen( safe_ptr( hWnd ), reinterpret_cast<POINT*>( &rRect ) ) &&
+			::ClientToScreen( hWnd, reinterpret_cast<POINT*>( &rRect ) + 1 );
 	}
 
 	void ScreenToNonClient( HWND hWnd, CRect& rRect );		// IN: screen coordiantes, OUT: non-client coordiantes, relative to CWindowDC( pWnd )
@@ -172,7 +172,7 @@ namespace ui
 	{
 		CWnd* pCtrl = pDlg->GetDlgItem( ctrlId );
 		ASSERT_PTR( pCtrl );
-		return static_cast< CtrlType* >( pCtrl );
+		return static_cast<CtrlType*>( pCtrl );
 	}
 
 	inline void GotoDlgItem( CDialog* pDlg, UINT ctrlId ) { pDlg->GotoDlgCtrl( pDlg->GetDlgItem( ctrlId ) ); }
@@ -276,8 +276,8 @@ namespace ui
 	{
 		ASSERT_PTR( pWnd );
 
-		for ( CWnd* pParent = const_cast< CWnd* >( pWnd ); ( pParent = pParent->GetParent() ) != NULL; )
-			if ( WndType* pParentAsType = dynamic_cast< WndType* >( pParent ) )
+		for ( CWnd* pParent = const_cast<CWnd*>( pWnd ); ( pParent = pParent->GetParent() ) != NULL; )
+			if ( WndType* pParentAsType = dynamic_cast<WndType*>( pParent ) )
 				return pParentAsType;
 
 		return NULL;
@@ -351,7 +351,7 @@ namespace ui
 		{
 			int selIndex;
 			::DDX_Radio( pDX, radioFirstId, selIndex );
-			rValue = static_cast< EnumType >( selIndex + baseValue );
+			rValue = static_cast<EnumType>( selIndex + baseValue );
 		}
 	}
 
@@ -368,14 +368,14 @@ namespace ui
 	{
 		if ( DialogOutput == pDX->m_bSaveAndValidate )
 		{
-			int selIndex = static_cast< int >( rSelPos );
+			int selIndex = static_cast<int>( rSelPos );
 			DDX_CBIndex( pDX, comboId, selIndex );
 		}
 		else
 		{
 			int selIndex;
 			DDX_CBIndex( pDX, comboId, selIndex );
-			rSelPos = static_cast< size_t >( selIndex );
+			rSelPos = static_cast<size_t>( selIndex );
 		}
 	}
 
@@ -411,7 +411,7 @@ namespace ui
 	}
 
 	template< typename IntType >
-	void DDX_EditSel( CDataExchange* pDX, int ctrlId, Range< IntType >& rValue )
+	void DDX_EditSel( CDataExchange* pDX, int ctrlId, Range<IntType>& rValue )
 	{
 		CEdit* pEdit = GetDlgItemAs< CEdit >( pDX->m_pDlgWnd, ctrlId );
 		ASSERT_PTR( pEdit );
@@ -429,7 +429,7 @@ namespace ui
 	// DDV: dialog data validation
 
 	template< typename NumericType >
-	void DDV_NumberRange( CDataExchange* pDX, int ctrlId, NumericType& rValue, const Range< NumericType >& validRange )
+	void DDV_NumberRange( CDataExchange* pDX, int ctrlId, NumericType& rValue, const Range<NumericType>& validRange )
 	{
 		if ( DialogOutput == pDX->m_bSaveAndValidate )
 			return;
@@ -438,7 +438,7 @@ namespace ui
 
 		if ( CWnd* pCtrl = pDX->m_pDlgWnd->GetDlgItem( ctrlId ) )
 		{
-			checked_static_cast< CDialog* >( pDX->m_pDlgWnd )->GotoDlgCtrl( pCtrl );
+			checked_static_cast<CDialog*>( pDX->m_pDlgWnd )->GotoDlgCtrl( pCtrl );
 			pDX->m_idLastControl = 0;
 		}
 		else
@@ -454,7 +454,7 @@ namespace ui
 	template< typename NumericType, typename MinMaxType >
 	inline void DDV_NumberMinMax( CDataExchange* pDX, int ctrlId, NumericType& rValue, MinMaxType minValue, MinMaxType maxValue )		// MinMaxType is enum friendly
 	{
-		DDV_NumberRange( pDX, ctrlId, rValue, Range< NumericType >( minValue, maxValue ) );
+		DDV_NumberRange( pDX, ctrlId, rValue, Range<NumericType>( minValue, maxValue ) );
 	}
 
 

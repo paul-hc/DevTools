@@ -26,7 +26,7 @@ public:
 		ui::ReadListBoxItems( m_items, *pListBox );
 	}
 
-	int Find( const std::tstring& item ) const { return static_cast< int >( utl::FindPos( m_items, item ) ); }
+	int Find( const std::tstring& item ) const { return static_cast<int>( utl::FindPos( m_items, item ) ); }
 
 	void QueryIndexes( std::vector< int >& rIndexes, const std::vector< std::tstring >& items ) const
 	{

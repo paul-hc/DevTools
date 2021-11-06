@@ -39,7 +39,7 @@ private:
 	bool m_finalRedraw;
 	CWndSpot m_wndSpot;
 	std::vector< HWND > m_dirtyWnds;		// keeps track of highlighted windows (to be repainted at the end)
-	std::auto_ptr< CDC > m_pScreenDC;		// lazy create
+	std::auto_ptr<CDC> m_pScreenDC;			// lazy create
 	unsigned int m_drawCount;
 public:
 	static bool m_cacheDesktopDC;			// keep desktop DC alive during a tracking transaction

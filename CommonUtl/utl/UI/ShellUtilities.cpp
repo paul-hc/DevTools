@@ -16,9 +16,9 @@
 
 namespace shell
 {
-	CComPtr< IStream > DuplicateToMemoryStream( IStream* pSrcStream, bool autoDelete /*= true*/ )
+	CComPtr<IStream> DuplicateToMemoryStream( IStream* pSrcStream, bool autoDelete /*= true*/ )
 	{
-		CComPtr< IStream > pDestStream;
+		CComPtr<IStream> pDestStream;
 		ULARGE_INTEGER size;
 		if ( HR_OK( ::IStream_Size( pSrcStream, &size ) ) )
 		{
@@ -258,7 +258,7 @@ namespace shell
 	namespace xfer
 	{
 		CLIPFORMAT cfHDROP = CF_HDROP;
-		CLIPFORMAT cfFileGroupDescriptor = static_cast< CLIPFORMAT >( RegisterClipboardFormat( CFSTR_FILEDESCRIPTOR ) );
+		CLIPFORMAT cfFileGroupDescriptor = static_cast<CLIPFORMAT>( RegisterClipboardFormat( CFSTR_FILEDESCRIPTOR ) );
 
 
 		bool IsValidClipFormat( UINT cfFormat )
@@ -287,7 +287,7 @@ namespace shell
 					pDropFiles->pFiles = sizeof( DROPFILES );					// set the offset where the starting point of the file start
 					pDropFiles->fWide = sizeof( TCHAR ) != sizeof( char );		// false for ANSI, true for WIDE
 
-					TCHAR* pDestFileBuffer = reinterpret_cast< TCHAR* >( pDropFiles + 1 );			// p + 1 means past DROPFILES header
+					TCHAR* pDestFileBuffer = reinterpret_cast<TCHAR*>( pDropFiles + 1 );			// p + 1 means past DROPFILES header
 
 					utl::Copy( srcBuffer.begin(), srcBuffer.end(), pDestFileBuffer );
 
@@ -309,7 +309,7 @@ namespace shell
 				{
 					if ( FILEGROUPDESCRIPTOR* pFileGroupDescr = (FILEGROUPDESCRIPTOR*)::GlobalLock( hGlobal ) )
 					{
-						pFileGroupDescr->cItems = static_cast< UINT >( fileCount );
+						pFileGroupDescr->cItems = static_cast<UINT>( fileCount );
 						for ( size_t i = 0; i != fileCount; ++i )
 						{
 							pFileGroupDescr->fgd[ i ].dwFlags = FD_ATTRIBUTES;

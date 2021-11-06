@@ -30,9 +30,9 @@ CWicImage::~CWicImage()
 			VERIFY( SharedMultiFrameDecoders().Remove( m_key.first ) );		// removed the registered shared decoder
 }
 
-std::auto_ptr< CWicImage > CWicImage::CreateFromFile( const fs::ImagePathKey& imageKey, utl::ErrorHandling handlingMode /*= utl::CheckMode*/ )
+std::auto_ptr<CWicImage> CWicImage::CreateFromFile( const fs::ImagePathKey& imageKey, utl::ErrorHandling handlingMode /*= utl::CheckMode*/ )
 {
-	std::auto_ptr< CWicImage > pNewImage;
+	std::auto_ptr<CWicImage> pNewImage;
 
 	TMultiFrameDecoderMap& rSharedDecoders = SharedMultiFrameDecoders();
 
@@ -85,7 +85,7 @@ bool CWicImage::LoadDecoderFrame( wic::CBitmapDecoder& decoder, const fs::ImageP
 	m_frameCount = decoder.GetFrameCount();
 
 	if ( GetFramePos() < m_frameCount )
-		if ( CComPtr< IWICBitmapSource > pFrameBitmap = decoder.ConvertFrameAt( GetFramePos(), m_pCvtPixelFormat ) )
+		if ( CComPtr<IWICBitmapSource> pFrameBitmap = decoder.ConvertFrameAt( GetFramePos(), m_pCvtPixelFormat ) )
 			if ( StoreFrame( pFrameBitmap, GetFramePos() ) )
 			{
 				GetOrigin().SetOriginalPath( m_key.first );
@@ -224,11 +224,11 @@ size_t CWicImage::CMultiFrameDecoder::FindPosLoaded( UINT framePos ) const
 	return utl::npos;
 }
 
-std::auto_ptr< CWicImage > CWicImage::CMultiFrameDecoder::LoadFrame( const fs::ImagePathKey& imageKey )
+std::auto_ptr<CWicImage> CWicImage::CMultiFrameDecoder::LoadFrame( const fs::ImagePathKey& imageKey )
 {
 	REQUIRE( !IsLoaded( imageKey.second ) );
 
-	std::auto_ptr< CWicImage > pNewFrameImage( new CWicImage() );
+	std::auto_ptr<CWicImage> pNewFrameImage( new CWicImage() );
 
 	if ( !pNewFrameImage->LoadDecoderFrame( m_decoder, imageKey ) )
 		pNewFrameImage.reset();			// invalid framePos?
@@ -273,7 +273,7 @@ namespace ui
 			m_filePath = pImage->GetImagePath();
 			m_isAnimated = pImage->IsAnimated();
 
-			m_fileSize = static_cast< UINT >( fs::flex::GetFileSize( m_filePath ) );
+			m_fileSize = static_cast<UINT>( fs::flex::GetFileSize( m_filePath ) );
 
 			m_framePos = pImage->GetFramePos();
 			m_frameCount = pImage->GetFrameCount();
@@ -323,14 +323,14 @@ namespace fs
 
 	void CImageFilterStore::Enumerate( WICComponentType codec )
 	{
-		CComPtr< IEnumUnknown > pEnum;
+		CComPtr<IEnumUnknown> pEnum;
 		if ( !HR_OK( wic::CImagingFactory::Factory()->CreateComponentEnumerator( codec, WICComponentEnumerateDefault, &pEnum ) ) )
 			return;
 
 		ULONG elemCount = 0;
-		for ( CComPtr< IUnknown > pElement; S_OK == pEnum->Next( 1, &pElement, &elemCount ); pElement = NULL )
+		for ( CComPtr<IUnknown> pElement; S_OK == pEnum->Next( 1, &pElement, &elemCount ); pElement = NULL )
 		{
-			CComQIPtr< IWICBitmapCodecInfo > pDecoderInfo = pElement;	// IWICBitmapCodecInfo is common base of IWICBitmapDecoderInfo, IWICBitmapEncoderInfo
+			CComQIPtr<IWICBitmapCodecInfo> pDecoderInfo = pElement;	// IWICBitmapCodecInfo is common base of IWICBitmapDecoderInfo, IWICBitmapEncoderInfo
 			std::tstring name, specs;
 			{
 				UINT nameLen = 0, extsLen = 0;

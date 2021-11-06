@@ -23,7 +23,7 @@ public:
 	template< typename EnumType >
 	EnumType GetSelEnum( void ) const
 	{
-		return static_cast< EnumType >( GetSelValue() );
+		return static_cast<EnumType>( GetSelValue() );
 	}
 private:
 	enum { IdFirstCommand = 1000, IdLastCommand = IdFirstCommand + 100 };

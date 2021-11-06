@@ -112,7 +112,7 @@ namespace reg
 
 		for ( DWORD i = 0; i != info.m_subKeyCount; ++i )
 		{
-			DWORD nameLen = static_cast< DWORD >( buffer.size() );
+			DWORD nameLen = static_cast<DWORD>( buffer.size() );
 
 			if ( ERROR_SUCCESS == m_key.EnumKey( i, &buffer.front(), &nameLen ) )
 				rSubKeyNames.push_back( &buffer.front() );
@@ -141,7 +141,7 @@ namespace reg
 
 		for ( DWORD i = 0; i != info.m_valueCount; ++i )
 		{
-			DWORD nameLen = static_cast< DWORD >( buffer.size() );
+			DWORD nameLen = static_cast<DWORD>( buffer.size() );
 
 			if ( ERROR_SUCCESS == ::RegEnumValue( Get(), i, &buffer.front(), &nameLen, NULL, NULL, NULL, NULL ) )
 				rValueNames.push_back( &buffer.front() );
@@ -162,7 +162,7 @@ namespace reg
 	{
 		DWORD type, bufferSize;
 		if ( ERROR_SUCCESS == ::RegQueryValueEx( Get(), pValueName, NULL, &type, NULL, &bufferSize ) )
-			return std::pair< DWORD, size_t >( type, static_cast< size_t >( bufferSize ) );
+			return std::pair< DWORD, size_t >( type, static_cast<size_t>( bufferSize ) );
 
 		return std::pair< DWORD, size_t >( REG_NONE, 0 );
 	}
@@ -181,7 +181,7 @@ namespace reg
 		if ( buffer.empty() )
 			return false;
 
-		ULONG count = static_cast< ULONG >( buffer.size() );
+		ULONG count = static_cast<ULONG>( buffer.size() );
 		LONG result = m_key.QueryStringValue( pValueName, &buffer.front(), &count );
 		ASSERT( result != ERROR_MORE_DATA );		// GetValueBufferSize() sized the buffer properly?
 

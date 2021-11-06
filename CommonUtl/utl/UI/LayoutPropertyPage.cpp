@@ -51,7 +51,7 @@ void CLayoutPropertyPage::QueryTooltipText( std::tstring& rText, UINT cmdId, CTo
 
 CLayoutBasePropertySheet* CLayoutPropertyPage::GetParentSheet( void ) const
 {
-	CLayoutBasePropertySheet* pParentSheet = checked_static_cast< CLayoutBasePropertySheet* >( GetParent() );
+	CLayoutBasePropertySheet* pParentSheet = checked_static_cast<CLayoutBasePropertySheet*>( GetParent() );
 	ASSERT_PTR( pParentSheet );
 	return pParentSheet;
 }
@@ -263,7 +263,7 @@ bool CPageValidationException::FocusErrorCtrl( void ) const
 {
 	if ( IsWindow( m_pErrorCtrl->GetSafeHwnd() ) )
 	{
-		CLayoutPropertyPage* pParentPage = checked_static_cast< CLayoutPropertyPage* >( m_pErrorCtrl->GetParent() );
+		CLayoutPropertyPage* pParentPage = checked_static_cast<CLayoutPropertyPage*>( m_pErrorCtrl->GetParent() );
 		ASSERT_PTR( pParentPage );
 
 		CLayoutBasePropertySheet* pSheet = pParentPage->GetParentSheet();

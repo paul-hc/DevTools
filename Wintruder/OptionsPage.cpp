@@ -54,8 +54,8 @@ void COptionsPage::DoDataExchange( CDataExchange* pDX )
 	{
 		EnableToolTips( TRUE );
 
-		m_frameSizeEdit.SetValidRange( Range< int >( 1, 50 ) );
-		m_auTimeoutEdit.SetValidRange( Range< int >( 1, 60 ) );
+		m_frameSizeEdit.SetValidRange( Range<int>( 1, 50 ) );
+		m_auTimeoutEdit.SetValidRange( Range<int>( 1, 60 ) );
 	}
 
 	if ( DialogOutput == pDX->m_bSaveAndValidate )

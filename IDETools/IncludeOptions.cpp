@@ -46,8 +46,8 @@ void CIncludeOptions::Load( void )
 {
 	CWinApp* pApp = AfxGetApp();
 
-	m_viewMode = static_cast< ViewMode >( pApp->GetProfileInt( reg::section, ENTRY_MEMBER( m_viewMode ), m_viewMode ) );
-	m_ordering = static_cast< Ordering >( pApp->GetProfileInt( reg::section, ENTRY_MEMBER( m_ordering ), m_ordering ) );
+	m_viewMode = static_cast<ViewMode>( pApp->GetProfileInt( reg::section, ENTRY_MEMBER( m_viewMode ), m_viewMode ) );
+	m_ordering = static_cast<Ordering>( pApp->GetProfileInt( reg::section, ENTRY_MEMBER( m_ordering ), m_ordering ) );
 	m_maxNestingLevel = pApp->GetProfileInt( reg::section, ENTRY_MEMBER( m_maxNestingLevel ), m_maxNestingLevel );
 	m_maxParseLines = pApp->GetProfileInt( reg::section, ENTRY_MEMBER( m_maxParseLines ), m_maxParseLines );
 	m_noDuplicates = pApp->GetProfileInt( reg::section, ENTRY_MEMBER( m_noDuplicates ), m_noDuplicates ) != FALSE;

@@ -91,10 +91,10 @@ private:
 	BYTE m_statusAlpha;
 	std::tstring m_imagePath;
 	std::tstring m_bkColorText;
-	std::auto_ptr< CDibSection > m_pDibSection;
+	std::auto_ptr<CDibSection> m_pDibSection;
 	CColorTable m_colorTable;
 	CImageTranspColors m_transpColorCache;
-	std::auto_ptr< CImageList > m_pImageList;
+	std::auto_ptr<CImageList> m_pImageList;
 
 	CMultiZone m_multiZone;
 	std::vector< CModeData* > m_modeData;
@@ -111,10 +111,10 @@ private:
 	CEnumComboBox m_colorTableModeCombo;
 	CSpinEdit m_spacingEdit;
 	CColorSample m_transpColorSample;
-	std::auto_ptr< CDialogToolBar > m_pImageToolbar;
+	std::auto_ptr<CDialogToolBar> m_pImageToolbar;
 	CSampleView m_sampleView;
-	std::auto_ptr< CPixelInfoSample > m_pPixelInfoSample;
-	std::auto_ptr< CColorTableSample > m_pColorTableSample;
+	std::auto_ptr<CPixelInfoSample> m_pPixelInfoSample;
+	std::auto_ptr<CColorTableSample> m_pColorTableSample;
 	CColorChannelEdit m_statusAlphaEdit;
 	CLayoutChildPropertySheet m_modeSheet;
 public:

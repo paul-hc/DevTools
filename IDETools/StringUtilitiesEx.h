@@ -19,7 +19,7 @@ namespace str
 	CString formatString( const TCHAR* format, ... );
 	CString formatString( UINT formatResId, ... );
 
-	inline int Length( const TCHAR* pString ) { return static_cast< int >( GetLength( pString ) ); }	// return int for convenience
+	inline int Length( const TCHAR* pString ) { return static_cast<int>( GetLength( pString ) ); }	// return int for convenience
 
 
 	// tokenize/untokenize
@@ -301,14 +301,14 @@ namespace str
 	{
 		size_t foundPos = findStringPos( pString, subString, 0, caseType ).m_start;
 
-		return foundPos != -1 ? const_cast< TCHAR* >( pString + foundPos ) : NULL;
+		return foundPos != -1 ? const_cast<TCHAR*>( pString + foundPos ) : NULL;
 	}
 
 	inline TCHAR* reverseFindString( const TCHAR* pString, const TCHAR* subString, str::CaseType caseType /*= str::Case*/ )
 	{
 		size_t foundPos = reverseFindStringPos( pString, subString, -1, caseType ).m_start;
 
-		return foundPos != -1 ? const_cast< TCHAR* >( pString + foundPos ) : NULL;
+		return foundPos != -1 ? const_cast<TCHAR*>( pString + foundPos ) : NULL;
 	}
 
 	inline const TCHAR* ptrAt( const TCHAR* pString, int pos )

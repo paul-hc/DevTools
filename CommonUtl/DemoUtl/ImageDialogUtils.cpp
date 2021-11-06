@@ -59,7 +59,7 @@ namespace utl
 				if ( 24 == bitsPerPixel && rPixels.GetDib()->HasTranspColor() )
 					isTranspColor = rPixels.GetPixel< CPixelBGR >( x, y ).GetColor() == rPixels.GetDib()->GetTranspColor();
 
-				BYTE alpha = isTranspColor ? 0 : static_cast< BYTE >( (double)x / bitmapSize.cx * 255 );	// simple horizontal gradient
+				BYTE alpha = isTranspColor ? 0 : static_cast<BYTE>( (double)x / bitmapSize.cx * 255 );	// simple horizontal gradient
 
 				func::AlphaBlend ma( alpha, bkColor );
 				if ( 32 == bitsPerPixel )
@@ -161,7 +161,7 @@ void CColorTable::Draw( CDC* pDC, const CRect& clientRect ) const
 	{
 		::FillRect( *pDC, &clientRect, GetSysColorBrush( COLOR_BTNFACE ) );
 		pDC->SetTextColor( GetSysColor( COLOR_GRAYTEXT ) );
-		pDC->DrawText( _T("No color table"), -1, const_cast< CRect* >( &clientRect ), DT_SINGLELINE | DT_NOPREFIX | DT_CENTER | DT_VCENTER );
+		pDC->DrawText( _T("No color table"), -1, const_cast<CRect*>( &clientRect ), DT_SINGLELINE | DT_NOPREFIX | DT_CENTER | DT_VCENTER );
 	}
 	else
 	{
@@ -217,11 +217,11 @@ CSize CColorTableRenderer::ComputeCellLayout( const CRect& rect )
 	}
 	else
 	{
-		m_columns = static_cast< UINT >( sqrt( (double)m_pColorTable->m_colors.size() ) );
+		m_columns = static_cast<UINT>( sqrt( (double)m_pColorTable->m_colors.size() ) );
 
 		for ( ; ; ++m_columns )
 		{
-			m_rows = static_cast< UINT >( m_pColorTable->m_colors.size() ) / m_columns;
+			m_rows = static_cast<UINT>( m_pColorTable->m_colors.size() ) / m_columns;
 			CSize cellSize( rect.Width() / m_columns, rect.Height() / m_rows );
 			if ( ui::GetAspectRatio( cellSize ) <= 1.5 )
 				break;
@@ -274,7 +274,7 @@ void CColorTableRenderer::Draw( CDC* pDC ) const
 			{
 				pDC->SetTextColor( ui::GetContrastColor( m_pColorTable->m_colors[ pos ] ) );
 				std::tstring label = num::FormatNumber( pos );
-				pDC->DrawText( label.c_str(), static_cast< int >( label.length() ), &cellRect, DT_SINGLELINE | DT_NOPREFIX | DT_CENTER | DT_VCENTER );
+				pDC->DrawText( label.c_str(), static_cast<int>( label.length() ), &cellRect, DT_SINGLELINE | DT_NOPREFIX | DT_CENTER | DT_VCENTER );
 			}
 
 			if ( m_pColorTable->IsDuplicateAt( pos ) )
@@ -410,7 +410,7 @@ bool CColorSample::RenderSample( CDC* pDC, const CRect& clientRect )
 	{
 		::FillRect( *pDC, &clientRect, GetSysColorBrush( COLOR_BTNFACE ) );
 		CScopedDrawText scopedDrawText( pDC, this, GetParent()->GetFont(), GetSysColor( COLOR_GRAYTEXT ) );
-		pDC->DrawText( _T("None"), -1, const_cast< CRect* >( &clientRect ), DT_SINGLELINE | DT_NOPREFIX | DT_CENTER | DT_VCENTER );
+		pDC->DrawText( _T("None"), -1, const_cast<CRect*>( &clientRect ), DT_SINGLELINE | DT_NOPREFIX | DT_CENTER | DT_VCENTER );
 	}
 
 	return true;

@@ -15,8 +15,8 @@ namespace utl
 		template< typename ValueT >
 		void AddParam( const ValueT& value ) { m_params.push_back( arg::AutoEnquote( value ) ); }
 
-		int Execute( void ) { return static_cast< int >( ExecuteProcess( _P_WAIT ) ); }			// waits for completion
-		HANDLE Spawn( int mode = _P_NOWAIT ) { return reinterpret_cast< HANDLE >( ExecuteProcess( mode ) ); }
+		int Execute( void ) { return static_cast<int>( ExecuteProcess( _P_WAIT ) ); }			// waits for completion
+		HANDLE Spawn( int mode = _P_NOWAIT ) { return reinterpret_cast<HANDLE>( ExecuteProcess( mode ) ); }
 	private:
 		intptr_t ExecuteProcess( int mode );
 		const TCHAR* const* MakeArgList( std::vector< const TCHAR* >& rArgList ) const;

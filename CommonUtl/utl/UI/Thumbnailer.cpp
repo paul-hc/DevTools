@@ -64,7 +64,7 @@ bool CShellThumbCache::SetBoundsSize( const CSize& boundsSize )
 	return true;
 }
 
-CComPtr< IShellItem > CShellThumbCache::FindShellItem( const fs::CFlexPath& filePath ) const
+CComPtr<IShellItem> CShellThumbCache::FindShellItem( const fs::CFlexPath& filePath ) const
 {
 	if ( !filePath.IsComplexPath() )
 		return m_shellExplorer.FindShellItem( filePath );
@@ -84,7 +84,7 @@ CCachedThumbBitmap* CShellThumbCache::ExtractThumb( const ShellItemPair& imagePa
 				break;
 			default:
 			{
-				CComPtr< ISharedBitmap > pSharedThumb;
+				CComPtr<ISharedBitmap> pSharedThumb;
 				WTS_CACHEFLAGS cacheFlags;
 				CThumbKey thumbKey;
 
@@ -115,7 +115,7 @@ CCachedThumbBitmap* CShellThumbCache::GenerateThumb( const ShellItemPair& imageP
 	{
 		// use IShellItemImageFactory to produce a usually larger thumb bitmap, which will be scaled
 		if ( HBITMAP hThumbBitmap = m_shellExplorer.ExtractThumbnail( imagePair.second, m_boundsSize, m_thumbExtractFlags ) )
-			if ( CComPtr< IWICBitmapSource > pUnscaledBitmap = wic::cvt::ToWicBitmap( hThumbBitmap ) )
+			if ( CComPtr<IWICBitmapSource> pUnscaledBitmap = wic::cvt::ToWicBitmap( hThumbBitmap ) )
 				return NewScaledThumb( pUnscaledBitmap, imagePair.first, NULL );
 
 		// thumbnail not cached by Explorer, extract it
@@ -128,7 +128,7 @@ CCachedThumbBitmap* CShellThumbCache::GenerateThumb( const ShellItemPair& imageP
 CCachedThumbBitmap* CShellThumbCache::NewScaledThumb( IWICBitmapSource* pUnscaledBitmap, const fs::CFlexPath& srcImagePath, const CThumbKey* pCachedKey /*= NULL*/ ) const
 {
 	if ( pUnscaledBitmap != NULL )
-		if ( CComPtr< IWICBitmapSource > pScaledBitmap = ScaleToThumbBitmap( pUnscaledBitmap ) )			// scale to m_boundsSize
+		if ( CComPtr<IWICBitmapSource> pScaledBitmap = ScaleToThumbBitmap( pUnscaledBitmap ) )			// scale to m_boundsSize
 			return new CCachedThumbBitmap( pUnscaledBitmap, pScaledBitmap, srcImagePath, pCachedKey );
 
 	return NULL;
@@ -141,7 +141,7 @@ fs::FileExpireStatus CShellThumbCache::CheckThumbExpired( const CCachedThumbBitm
 #if 0		// disable this code since it doesn't work: GetThumbnailByID() returns an old cached image even when image has changed
 	if ( pThumb->IsCachedByShell() && IsValidShellCache() )
 	{
-		CComPtr< ISharedBitmap > pSharedThumb;
+		CComPtr<ISharedBitmap> pSharedThumb;
 		WTS_CACHEFLAGS cacheFlags;
 
 		if ( HR_OK( m_pShellThumbCache->GetThumbnailByID( pThumb->GetKey(), m_boundsSize.cx, &pSharedThumb, &cacheFlags ) ) )
@@ -157,7 +157,7 @@ fs::FileExpireStatus CShellThumbCache::CheckThumbExpired( const CCachedThumbBitm
 	return expired;							// thumb has expired
 }
 
-CComPtr< IWICBitmapSource > CShellThumbCache::ScaleToThumbBitmap( IWICBitmapSource* pSrcBitmap ) const
+CComPtr<IWICBitmapSource> CShellThumbCache::ScaleToThumbBitmap( IWICBitmapSource* pSrcBitmap ) const
 {
 	ASSERT_PTR( pSrcBitmap );
 
@@ -169,7 +169,7 @@ CComPtr< IWICBitmapSource > CShellThumbCache::ScaleToThumbBitmap( IWICBitmapSour
 		return pSrcBitmap;									// optimization: image smaller than the thumb size -> avoid scaling, since the thumb looks "smeared"
 
 	// convert to WIC bitmap and scale to m_boundsSize
-	CComPtr< IWICBitmapSource > pScaledThumbBitmap = wic::ScaleBitmapToBounds( pSrcBitmap, m_boundsSize, WICBitmapInterpolationModeFant );		// or WICBitmapInterpolationModeHighQualityCubic
+	CComPtr<IWICBitmapSource> pScaledThumbBitmap = wic::ScaleBitmapToBounds( pSrcBitmap, m_boundsSize, WICBitmapInterpolationModeFant );		// or WICBitmapInterpolationModeHighQualityCubic
 	return pScaledThumbBitmap;
 }
 

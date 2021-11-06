@@ -68,7 +68,7 @@ void CGeneralOptions::LoadFromRegistry( void )
 	m_useListDoubleBuffer = pApp->GetProfileInt( reg::section, reg::entry_useListDoubleBuffer, m_useListDoubleBuffer ) != FALSE;
 	m_highlightTextDiffsFrame = pApp->GetProfileInt( reg::section, reg::entry_highlightTextDiffsFrame, m_highlightTextDiffsFrame ) != FALSE;
 	m_undoLogPersist = pApp->GetProfileInt( reg::section, reg::entry_undoLogPersist, m_undoLogPersist ) != FALSE;
-	m_undoLogFormat = static_cast< cmd::FileFormat >( pApp->GetProfileInt( reg::section, reg::entry_undoLogFormat, m_undoLogFormat ) );
+	m_undoLogFormat = static_cast<cmd::FileFormat>( pApp->GetProfileInt( reg::section, reg::entry_undoLogFormat, m_undoLogFormat ) );
 	m_undoEditingCmds = pApp->GetProfileInt( reg::section, reg::entry_undoEditingCmds, m_undoEditingCmds ) != FALSE;
 	m_trimFname = pApp->GetProfileInt( reg::section, reg::entry_trimFname, m_trimFname ) != FALSE;
 	m_normalizeWhitespace = pApp->GetProfileInt( reg::section, reg::entry_normalizeWhitespace, m_normalizeWhitespace ) != FALSE;

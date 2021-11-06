@@ -48,7 +48,7 @@ namespace svc
 		virtual bool SafeExecuteCmd( utl::ICommand* pCmd, bool execInline = false ) = 0;
 
 		template< typename CmdType >
-		CmdType* PeekCmdAs( svc::StackType stackType ) const { return dynamic_cast< CmdType* >( PeekCmd( stackType ) ); }
+		CmdType* PeekCmdAs( svc::StackType stackType ) const { return dynamic_cast<CmdType*>( PeekCmd( stackType ) ); }
 	};
 }
 

@@ -63,8 +63,8 @@ BOOL CAlbumChildFrame::OnCreateClient( CREATESTRUCT* pCS, CCreateContext* pConte
 	m_splitterWnd.SetColumnInfo( PictureView, 0, 30 );
 	VERIFY( m_splitterWnd.CreateView( 0, PictureView, RUNTIME_CLASS( CAlbumImageView ), CSize( 0, 0 ), pContext ) );		// pass pContext so it won't send premature WM_INITIALUPDATE
 
-	m_pThumbsListView = checked_static_cast< CAlbumThumbListView* >( m_splitterWnd.GetPane( 0, ThumbView ) );
-	m_pAlbumImageView = checked_static_cast< CAlbumImageView* >( m_splitterWnd.GetPane( 0, PictureView ) );
+	m_pThumbsListView = checked_static_cast<CAlbumThumbListView*>( m_splitterWnd.GetPane( 0, ThumbView ) );
+	m_pAlbumImageView = checked_static_cast<CAlbumImageView*>( m_splitterWnd.GetPane( 0, PictureView ) );
 
 	m_pThumbsListView->StorePeerView( m_pAlbumImageView );
 	m_pAlbumImageView->StorePeerView( m_pThumbsListView, &m_albumInfoBar );

@@ -108,7 +108,7 @@ namespace code
 		std::vector< BraceCounter >::const_iterator itFound = std::find_if( braceCounters.begin(), braceCounters.end(),
 																			MatchesBrace( brace ) );
 
-		return itFound != braceCounters.end() ? const_cast< BraceCounter* >( &*itFound ) : NULL;
+		return itFound != braceCounters.end() ? const_cast<BraceCounter*>( &*itFound ) : NULL;
 	}
 
 	inline bool BraceParityStatus::hasBrace( TCHAR brace ) const

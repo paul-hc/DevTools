@@ -90,17 +90,17 @@ void CRenameService::QueryDestFilenames( std::vector< std::tstring >& rDestFname
 	ENSURE( !rDestFnames.empty() );
 }
 
-std::auto_ptr< CPickDataset > CRenameService::MakeFnamePickDataset( void ) const
+std::auto_ptr<CPickDataset> CRenameService::MakeFnamePickDataset( void ) const
 {
 	std::vector< std::tstring > destFnames;
 	QueryDestFilenames( destFnames );
 
-	return std::auto_ptr< CPickDataset >( new CPickDataset( &destFnames ) );
+	return std::auto_ptr<CPickDataset>( new CPickDataset( &destFnames ) );
 }
 
-std::auto_ptr< CPickDataset > CRenameService::MakeDirPickDataset( void ) const
+std::auto_ptr<CPickDataset> CRenameService::MakeDirPickDataset( void ) const
 {
-	return std::auto_ptr< CPickDataset >( new CPickDataset( GetDestPath( m_renamePairs.begin() ) ) );
+	return std::auto_ptr<CPickDataset>( new CPickDataset( GetDestPath( m_renamePairs.begin() ) ) );
 }
 
 fs::CPath CRenameService::GetDestPath( fs::TPathPairMap::const_iterator itPair )

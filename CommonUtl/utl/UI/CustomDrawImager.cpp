@@ -56,7 +56,7 @@ CSize CFileItemsThumbnailStore::GetGlyphSize( ui::GlyphGauge glyphGauge ) const
 
 CGlyphThumbnailer* CFileItemsThumbnailStore::GetThumbnailer( ui::GlyphGauge glyphGauge )
 {
-	std::auto_ptr< CGlyphThumbnailer >& rpThumbnailer = m_pThumbnailer[ glyphGauge ];
+	std::auto_ptr<CGlyphThumbnailer>& rpThumbnailer = m_pThumbnailer[ glyphGauge ];
 
 	if ( NULL == rpThumbnailer.get() )
 	{

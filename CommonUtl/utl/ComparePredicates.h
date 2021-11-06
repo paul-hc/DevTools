@@ -49,7 +49,7 @@ namespace func
 		template< typename ObjectT >
 		const SubType* operator()( const ObjectT* pObject ) const
 		{
-			return checked_static_cast< const SubType* >( pObject );
+			return checked_static_cast<const SubType*>( pObject );
 		}
 	};
 
@@ -60,7 +60,7 @@ namespace func
 		template< typename ObjectT >
 		const SubType* operator()( const ObjectT* pObject ) const
 		{
-			return dynamic_cast< const SubType* >( pObject );
+			return dynamic_cast<const SubType*>( pObject );
 		}
 	};
 

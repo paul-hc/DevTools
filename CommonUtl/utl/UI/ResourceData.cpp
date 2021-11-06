@@ -26,9 +26,9 @@ CResourceData::~CResourceData()
 	}
 }
 
-CComPtr< IStream > CResourceData::CreateStreamCopy( void ) const
+CComPtr<IStream> CResourceData::CreateStreamCopy( void ) const
 {
-	CComPtr< IStream > pStream;
+	CComPtr<IStream> pStream;
 	DWORD resSize = GetSize();
 
 	if ( resSize != 0 )

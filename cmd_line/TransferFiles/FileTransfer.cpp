@@ -39,7 +39,7 @@ int CFileTransfer::Transfer( void )
 {
 	m_fileCount = 0;
 
-	std::auto_ptr< CBackupInfo > pBackupInfo;
+	std::auto_ptr<CBackupInfo> pBackupInfo;
 	if ( m_pOptions->m_pBackupDirPath.get() != NULL )
 		pBackupInfo.reset( new CBackupInfo( m_pOptions ) );
 
@@ -101,7 +101,7 @@ bool CFileTransfer::AddFoundSubDir( const TCHAR* pSubDirPath )
 bool CFileTransfer::AddTransferItem( CTransferItem* pTransferItem )
 {
 	ASSERT_PTR( pTransferItem );
-	std::auto_ptr< CTransferItem > itemPtr( pTransferItem );			// take ownership of the new item
+	std::auto_ptr<CTransferItem> itemPtr( pTransferItem );			// take ownership of the new item
 
 	if ( !m_pOptions->PassFilter( *pTransferItem ) )
 		return false;

@@ -63,7 +63,7 @@ private:
 
 	CWndSearchPattern m_searchPattern;
 	CWindowTimer m_autoUpdateTimer, m_refreshTimer;
-	std::auto_ptr< CWndHighlighter > m_pFlashHighlighter;
+	std::auto_ptr<CWndHighlighter> m_pFlashHighlighter;
 private:
 	// enum { IDD = IDD_MAIN_DIALOG };
 

@@ -31,7 +31,7 @@ namespace app
 		fs::CPath filePath( rFilePath.GetString() );
 		std::tstring title = str::Load( titleId );
 
-		if ( !filterJoiner.BrowseFile( filePath, static_cast< shell::BrowseMode >( openDlg ), flags, NULL, NULL, !title.empty() ? title.c_str() : NULL ) )
+		if ( !filterJoiner.BrowseFile( filePath, static_cast<shell::BrowseMode>( openDlg ), flags, NULL, NULL, !title.empty() ? title.c_str() : NULL ) )
 			return false;
 
 		rFilePath = filePath.GetPtr();
@@ -63,8 +63,8 @@ void CAppDocManager::OnFileNew( void )
 
 BOOL CAppDocManager::DoPromptFileName( CString& rFilePath, UINT titleId, DWORD flags, BOOL openDlg, CDocTemplate* pTemplate )
 {
-	if ( app::CSharedDocTemplate* pSharedTemplate = dynamic_cast< app::CSharedDocTemplate* >( pTemplate ) )
-		return pSharedTemplate->PromptFileDialog( rFilePath, titleId, flags, static_cast< shell::BrowseMode >( openDlg ) );
+	if ( app::CSharedDocTemplate* pSharedTemplate = dynamic_cast<app::CSharedDocTemplate*>( pTemplate ) )
+		return pSharedTemplate->PromptFileDialog( rFilePath, titleId, flags, static_cast<shell::BrowseMode>( openDlg ) );
 
 	return app::PromptFileDialogImpl( rFilePath, app::CSliderFilters::Instance(), titleId, flags, openDlg );
 }

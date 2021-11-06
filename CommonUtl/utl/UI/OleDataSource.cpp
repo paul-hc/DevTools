@@ -57,7 +57,7 @@ namespace ole
 				if ( HGLOBAL hGlobal = ::GlobalAlloc( GMEM_MOVEABLE | GMEM_ZEROINIT, sizeof( DROPDESCRIPTION ) ) )
 				{
 					// create a DropTip data object with image type DROPIMAGE_INVALID
-					DROPDESCRIPTION* pDropTip = static_cast< DROPDESCRIPTION* >( ::GlobalLock( hGlobal ) );
+					DROPDESCRIPTION* pDropTip = static_cast<DROPDESCRIPTION*>( ::GlobalLock( hGlobal ) );
 					pDropTip->type = DROPIMAGE_INVALID;
 					::GlobalUnlock( hGlobal );
 					CacheGlobalData( s_cfDropDescription, hGlobal );
@@ -72,7 +72,7 @@ namespace ole
 				dropSource.SetDropTip( &m_dropTip );
 		}
 
-		dropEffect = DoDragDrop( dropEffect, pStartDragRect, static_cast< COleDropSource* >( &dropSource ) );	// perform the drag operation (modal)
+		dropEffect = DoDragDrop( dropEffect, pStartDragRect, static_cast<COleDropSource*>( &dropSource ) );	// perform the drag operation (modal)
 		m_dragResult = dropSource.GetDragResult();
 		if ( dropEffect & ~DROPEFFECT_SCROLL )
 			m_dragResult |= ole::DragDropped;			// indicate that data has been successfully dropped

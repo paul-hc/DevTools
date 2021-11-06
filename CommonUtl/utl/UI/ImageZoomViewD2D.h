@@ -47,12 +47,12 @@ namespace d2d
 	private:
 		ui::IImageZoomView* m_pImageView;
 		COLORREF m_accentFrameColor;
-		std::auto_ptr< CAnimatedFrameComposer > m_pAnimComposer;	// animated frame composition
+		std::auto_ptr<CAnimatedFrameComposer> m_pAnimComposer;	// animated frame composition
 		CWindowTimer m_animTimer;
 
 		// additional drawing resources
-		std::auto_ptr< CImageInfoGadget > m_pImageInfoGadget;		// drawn at the bottom
-		std::auto_ptr< CFrameGadget > m_pAccentFrameGadget;			// frame drawn when view is focused
+		std::auto_ptr<CImageInfoGadget> m_pImageInfoGadget;		// drawn at the bottom
+		std::auto_ptr<CFrameGadget> m_pAccentFrameGadget;			// frame drawn when view is focused
 	};
 }
 
@@ -79,7 +79,7 @@ protected:
 	bool IsValidRenderTarget( void ) const { return m_pImageRT.get() != NULL && m_pImageRT->IsValidTarget(); }
 	void PrintImageGdi( CDC* pPrintDC, CWicImage* pImage );
 private:
-	std::auto_ptr< d2d::CImageRenderTarget > m_pImageRT;
+	std::auto_ptr<d2d::CImageRenderTarget> m_pImageRT;
 	d2d::CDrawBitmapTraits m_drawTraits;
 
 	// generated stuff

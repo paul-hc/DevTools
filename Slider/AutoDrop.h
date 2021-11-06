@@ -112,7 +112,7 @@ namespace auto_drop
 		}
 	private:
 		DropOperation m_dropOperation;
-		std::auto_ptr< CSearchPattern > m_pDestSearchPattern;		// search pattern containing the destination folder for dropped files
+		std::auto_ptr<CSearchPattern> m_pDestSearchPattern;		// search pattern containing the destination folder for dropped files
 	public:
 		std::vector< std::tstring > m_droppedSrcFiles;
 		std::vector< std::tstring > m_droppedDestFiles;		// drop source and destionation files

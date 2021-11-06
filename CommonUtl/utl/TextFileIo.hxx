@@ -240,7 +240,7 @@ namespace io
 	template< typename CharT, typename StringT >
 	std::basic_istream<CharT>& GetLine( std::basic_istream<CharT>& is, StringT& rLine, CharT delim )
 	{	// get characters into string, discard delimiter
-		CEncodedFileBuffer<CharT>* pInBuffer = dynamic_cast< CEncodedFileBuffer<CharT>* >( is.rdbuf() );
+		CEncodedFileBuffer<CharT>* pInBuffer = dynamic_cast<CEncodedFileBuffer<CharT>*>( is.rdbuf() );
 		REQUIRE( pInBuffer != NULL );		// to be used only with encoded file buffers; otherwise use std::getline()
 
 		typedef std::basic_istream<CharT> TIStream;

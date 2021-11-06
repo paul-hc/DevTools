@@ -56,7 +56,7 @@ namespace ut
 			return false;
 		}
 
-		std::auto_ptr< fs::CScopedFileTime > pScopedFileTime( retainModifyTime ? new fs::CScopedFileTime( filePath ) : NULL );
+		std::auto_ptr<fs::CScopedFileTime> pScopedFileTime( retainModifyTime ? new fs::CScopedFileTime( filePath ) : NULL );
 
 		if ( NULL == pText )
 			pText = filePath.GetFilenamePtr();		// use the filename as text content

@@ -35,8 +35,8 @@ private:
 
 	// enum { IDD = IDD_ABOUT_BOX };
 	CStatic m_appIconStatic;
-	std::auto_ptr< CLinkStatic > m_pEmailStatic;
-	std::auto_ptr< CReportListControl > m_pBuildInfoList;
+	std::auto_ptr<CLinkStatic> m_pEmailStatic;
+	std::auto_ptr<CReportListControl> m_pBuildInfoList;
 
 	// generated overrides
 protected:

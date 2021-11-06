@@ -75,7 +75,7 @@ void CAlbumDoc::CopyAlbumState( const CAlbumDoc* pSrcDoc )
 	REQUIRE( this != pSrcDoc );
 	ASSERT_PTR( pSrcDoc );
 
-	const_cast< CAlbumDoc* >( pSrcDoc )->FetchViewState( pSrcDoc->GetDocFilePath() );		// input image state from its current view
+	const_cast<CAlbumDoc*>( pSrcDoc )->FetchViewState( pSrcDoc->GetDocFilePath() );		// input image state from its current view
 
 	m_slideData = pSrcDoc->m_slideData;
 	m_bkColor = pSrcDoc->m_bkColor;
@@ -110,7 +110,7 @@ void CAlbumDoc::Serialize( CArchive& archive )
 	serial::CStreamingGuard timeGuard( archive );
 	CWaitCursor wait;
 
-	std::auto_ptr< serial::CScopedLoadingArchive > pLoadingArchive;
+	std::auto_ptr<serial::CScopedLoadingArchive> pLoadingArchive;
 
 	if ( archive.IsLoading() )
 	{
@@ -121,7 +121,7 @@ void CAlbumDoc::Serialize( CArchive& archive )
 		app::ModelSchema docModelSchema;
 
 		if ( firstValue >= app::Slider_v3_2 && firstValue <= app::Slider_LatestModelSchema )	// valid version saved?
-			docModelSchema = static_cast< app::ModelSchema >( firstValue );						// use it as the original document model schema
+			docModelSchema = static_cast<app::ModelSchema>( firstValue );						// use it as the original document model schema
 		else
 		{
 			docModelSchema = app::Slider_v3_1;					// assume an old backwards-compatible model schema (not saved back in the day)
@@ -265,13 +265,13 @@ ICatalogStorage* CAlbumDoc::GetCatalogStorage( void )
 	return NULL;
 }
 
-std::auto_ptr< CAlbumDoc > CAlbumDoc::LoadAlbumDocument( const fs::CPath& docPath )
+std::auto_ptr<CAlbumDoc> CAlbumDoc::LoadAlbumDocument( const fs::CPath& docPath )
 {
-	std::auto_ptr< CAlbumDoc > pNewAlbumDoc( new CAlbumDoc() );
+	std::auto_ptr<CAlbumDoc> pNewAlbumDoc( new CAlbumDoc() );
 
 	if ( app::IsCatalogFile( docPath.GetPtr() ) )
 	{
-		CComPtr< ICatalogStorage > pCatalogStorage = CCatalogStorageFactory::Instance()->AcquireStorage( docPath, STGM_READ );
+		CComPtr<ICatalogStorage> pCatalogStorage = CCatalogStorageFactory::Instance()->AcquireStorage( docPath, STGM_READ );
 
 		if ( !pNewAlbumDoc->LoadCatalogStorage( docPath ) )
 			pNewAlbumDoc.reset();
@@ -289,7 +289,7 @@ bool CAlbumDoc::LoadCatalogStorage( const fs::TStgDocPath& docStgPath )
 {
 	ASSERT( app::IsCatalogFile( docStgPath.GetPtr() ) );
 
-	CComPtr< ICatalogStorage > pCatalogStorage = CCatalogStorageFactory::Instance()->AcquireStorage( docStgPath, STGM_READ );		// also prompts user to verify password (if password-protected)
+	CComPtr<ICatalogStorage> pCatalogStorage = CCatalogStorageFactory::Instance()->AcquireStorage( docStgPath, STGM_READ );		// also prompts user to verify password (if password-protected)
 
 	if ( NULL == pCatalogStorage )
 		return false;
@@ -321,14 +321,14 @@ bool CAlbumDoc::SaveAsCatalogStorage( const fs::TStgDocPath& newDocStgPath )
 			 newDocStgPath != oldDocStgPath ||								// SaveAs
 			 GetModelSchema() < app::Slider_LatestModelSchema )				// loaded catalog with older model schema -> must be converted to LATEST
 		{
-			std::auto_ptr< CProgressService > pProgress = MakeProgress( _T("Creating image catalog storage file") );
+			std::auto_ptr<CProgressService> pProgress = MakeProgress( _T("Creating image catalog storage file") );
 			{
 				CCatalogStorageService storageSvc( pProgress->GetService(), &app::GetUserReport() );		// catalog storage metadata
 
 				storageSvc.BuildFromAlbumSaveAs( this );
 
 				CMirrorCatalogSave mirrorSaving( newDocStgPath, oldDocStgPath, m_model.GetStorageHost() );		// use storage mirroring on Save (storage to itself), or no mirroring on SaveAs
-				CComPtr< ICatalogStorage > pCatalogStorage = CCatalogStorageFactory::CreateStorageObject();
+				CComPtr<ICatalogStorage> pCatalogStorage = CCatalogStorageFactory::CreateStorageObject();
 
 				pCatalogStorage->CreateImageArchiveFile( mirrorSaving.GetDocStgPath(), &storageSvc );			// SaveAs: create the entire image catalog - works internally in utl::ThrowMode
 				mirrorSaving.Commit();			// rename temporary mirror file back to the storage file
@@ -363,9 +363,9 @@ bool CAlbumDoc::SaveAsCatalogStorage( const fs::TStgDocPath& newDocStgPath )
 	return true;
 }
 
-std::auto_ptr< CProgressService > CAlbumDoc::MakeProgress( const TCHAR* pOperationLabel ) const
+std::auto_ptr<CProgressService> CAlbumDoc::MakeProgress( const TCHAR* pOperationLabel ) const
 {
-	return std::auto_ptr< CProgressService >( !str::IsEmpty( pOperationLabel ) && GetAlbumImageView() != NULL
+	return std::auto_ptr<CProgressService>( !str::IsEmpty( pOperationLabel ) && GetAlbumImageView() != NULL
 		? new CProgressService( NULL, pOperationLabel )
 		: new CProgressService()		// null progress (for non-interactive mode or unit testing)
 	);
@@ -648,7 +648,7 @@ bool CAlbumDoc::HandleDropRecipientFiles( HDROP hDropInfo, CAlbumImageView* pTar
 	}
 
 	AfxGetMainWnd()->SetActiveWindow();							// activate the main frame first
-	checked_static_cast< CMDIChildWnd* >( pTargetAlbumView->GetParentFrame() )->MDIActivate();
+	checked_static_cast<CMDIChildWnd*>( pTargetAlbumView->GetParentFrame() )->MDIActivate();
 
 	int insertBeforeIndex = pTargetAlbumView->GetPeerThumbView()->GetPointedImageIndex();
 	fs::CFlexPath insertBefore;

@@ -136,11 +136,11 @@ bool CImagesModel::AddFileAttr( CFileAttr* pFileAttr )
 	return true;
 }
 
-std::auto_ptr< CFileAttr > CImagesModel::RemoveFileAttrAt( size_t pos )
+std::auto_ptr<CFileAttr> CImagesModel::RemoveFileAttrAt( size_t pos )
 {
 	REQUIRE( pos < m_fileAttributes.size() );
 
-	std::auto_ptr< CFileAttr > pRemovedFileAttr( m_fileAttributes[ pos ] );
+	std::auto_ptr<CFileAttr> pRemovedFileAttr( m_fileAttributes[ pos ] );
 
 	m_fileAttributes.erase( m_fileAttributes.begin() + pos );
 	return pRemovedFileAttr;

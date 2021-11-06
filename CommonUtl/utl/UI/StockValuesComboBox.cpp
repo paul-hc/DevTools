@@ -52,12 +52,12 @@ namespace ui
 
 	double CDurationInSecondsAdapter::ToDisplayValue( const UINT& miliseconds ) const
 	{
-		return static_cast< double >( miliseconds ) / 1000.0;
+		return static_cast<double>( miliseconds ) / 1000.0;
 	}
 
 	UINT CDurationInSecondsAdapter::FromDisplayValue( const double& seconds ) const
 	{
-		return static_cast< UINT >( seconds * 1000.0 );
+		return static_cast<UINT>( seconds * 1000.0 );
 	}
 
 

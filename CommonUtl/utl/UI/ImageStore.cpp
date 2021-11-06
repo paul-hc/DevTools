@@ -160,7 +160,7 @@ CBitmap* CImageStore::RenderMenuBitmap( const CIcon& icon, bool checked ) const
 	CSize iconSize = icon.GetSize();
 	CSize bitmapSize = iconSize + CSize( Edge * 2, Edge * 2 );
 
-	std::auto_ptr< CBitmap > pMenuBitmap( new CBitmap );
+	std::auto_ptr<CBitmap> pMenuBitmap( new CBitmap );
 	CWindowDC screenDC( NULL );
 	CDC memDC;
 	if ( memDC.CreateCompatibleDC( &screenDC ) )
@@ -209,7 +209,7 @@ void CImageStore::RegisterButtonImages( const CImageList& imageList, const UINT 
 			stdext::hash_map< IconKey, CIcon* >::const_iterator itFound = m_iconMap.find( iconKey );
 			if ( itFound == m_iconMap.end() )
 			{
-				HICON hIcon = const_cast< CImageList& >( imageList ).ExtractIcon( imagePos );
+				HICON hIcon = const_cast<CImageList&>( imageList ).ExtractIcon( imagePos );
 				ASSERT_PTR( hIcon );
 				CIcon* pIcon = new CIcon( hIcon, imageSize );
 				pIcon->SetHasAlpha( hasAlpha );

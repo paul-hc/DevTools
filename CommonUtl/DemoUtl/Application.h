@@ -6,13 +6,13 @@
 class CScopedGdiPlusInit;
 
 
-class CApplication : public CBaseApp< CWinApp >
+class CApplication : public CBaseApp<CWinApp>
 {
 public:
 	CApplication( void );
 	virtual ~CApplication();
 private:
-	std::auto_ptr< CScopedGdiPlusInit > m_pGdiPlusInit;
+	std::auto_ptr<CScopedGdiPlusInit> m_pGdiPlusInit;
 public:
 	virtual BOOL InitInstance( void );
 	virtual int ExitInstance( void );

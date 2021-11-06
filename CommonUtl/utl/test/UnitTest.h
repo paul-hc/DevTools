@@ -56,10 +56,10 @@ namespace ut
 	template< typename ExpectedType, typename ActualType >
 	bool AssertEquals( const ExpectedType& expected, const ActualType& actual, std::tstring& rMsg )
 	{
-		if ( Equals( static_cast< ActualType >( expected ), actual ) )
+		if ( Equals( static_cast<ActualType>( expected ), actual ) )
 			return true;
 
-		rMsg = MakeNotEqualMessage( ToString( static_cast< ActualType >( expected ) ), ToString( actual ) );
+		rMsg = MakeNotEqualMessage( ToString( static_cast<ActualType>( expected ) ), ToString( actual ) );
 		TRACE( _T("%s\n"), rMsg.c_str() );
 		return false;
 	}
@@ -68,10 +68,10 @@ namespace ut
 	template< typename ExpectedType, typename ActualType >
 	bool AssertEqualsIgnoreCase( const ExpectedType& expected, const ActualType& actual, std::tstring& rMsg )
 	{
-		if ( str::EqualString< str::IgnoreCase >( static_cast< ActualType >( expected ), actual ) )
+		if ( str::EqualString< str::IgnoreCase >( static_cast<ActualType>( expected ), actual ) )
 			return true;
 
-		rMsg = MakeNotEqualMessage( ToString( static_cast< ActualType >( expected ) ), ToString( actual ) );
+		rMsg = MakeNotEqualMessage( ToString( static_cast<ActualType>( expected ) ), ToString( actual ) );
 		TRACE( _T("%s\n"), rMsg.c_str() );
 		return false;
 	}

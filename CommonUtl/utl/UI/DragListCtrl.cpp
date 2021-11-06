@@ -49,7 +49,7 @@ void CDropMark::Draw( CDC* pDC )
 
 	GraphicsPath path( FillModeWinding );
 	CPoint center = m_markRect.CenterPoint();
-	Range< Point > core;						// the core line
+	Range<Point> core;						// the core line
 
 	if ( HorizMark == m_orientation )
 	{
@@ -113,7 +113,7 @@ void CDropMark::DrawLine( CDC* pDC )
 
 	CPoint center = m_markRect.CenterPoint();
 
-	Range< Point > line;
+	Range<Point> line;
 	if ( HorizMark == m_orientation )
 	{
 		UINT edgeX = m_markRect.Width() * EdgePct / 100;

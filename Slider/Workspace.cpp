@@ -52,7 +52,7 @@ void CWorkspaceData::Save( CArchive& archive )
 
 	// note: bool serializes as BOOL with streaming operator&()
 
-	BOOL versionAsBool = static_cast< BOOL >( app::Slider_LatestModelSchema );
+	BOOL versionAsBool = static_cast<BOOL>( app::Slider_LatestModelSchema );
 
 	archive << versionAsBool;				// save as BOOL for backwards compat: could be CWorkspace::m_autoSave (bool) or (slider::ModelSchema)
 
@@ -80,7 +80,7 @@ app::ModelSchema CWorkspaceData::Load( CArchive& archive )
 	BOOL versionAsBool;
 	archive >> versionAsBool;						// save as BOOL for backwards compat: could be CWorkspace::m_autoSave
 
-	app::ModelSchema savedModelSchema = static_cast< app::ModelSchema >( versionAsBool );
+	app::ModelSchema savedModelSchema = static_cast<app::ModelSchema>( versionAsBool );
 
 	if ( FALSE == versionAsBool || TRUE == versionAsBool )		// old workspace format?
 		m_autoSave = versionAsBool != FALSE;		// used to be streamed first; skip loading, will load with the old format
@@ -259,7 +259,7 @@ void CWorkspace::FetchSettings( void )
 		m_mainPlacement.ReadWnd( m_pMainFrame );
 
 	BOOL isMaximized;
-	CChildFrame* pActiveChildFrame = checked_static_cast< CChildFrame* >( m_pMainFrame->MDIGetActive( &isMaximized ) );
+	CChildFrame* pActiveChildFrame = checked_static_cast<CChildFrame*>( m_pMainFrame->MDIGetActive( &isMaximized ) );
 	if ( pActiveChildFrame != NULL )				// any MDI child available
 		SetFlag( m_data.m_wkspFlags, wf::MdiMaximized, isMaximized != FALSE );		// save MDI maximize state
 
@@ -273,14 +273,14 @@ void CWorkspace::FetchSettings( void )
 		if ( pActiveChildFrame != NULL )
 			for ( CWnd* pChild = pActiveChildFrame->GetNextWindow( GW_HWNDLAST ); pChild != NULL; pChild = pChild->GetNextWindow( GW_HWNDPREV ) )
 			{
-				CChildFrame* pChildFrame = checked_static_cast< CChildFrame* >( pChild );
+				CChildFrame* pChildFrame = checked_static_cast<CChildFrame*>( pChild );
 				fs::CPath docFilePath( pChildFrame->GetActiveDocument()->GetPathName().GetString() );
 
 				if ( !docFilePath.IsEmpty() )
 					if ( IImageView* pImageView = pChildFrame->GetImageView() )			// ensure not a print preview, etc
 					{
 						m_imageStates.push_back( CImageState() );
-						dynamic_cast< const CImageView* >( pChildFrame->GetImageView()->GetScrollView() )->MakeImageState( &m_imageStates.back() );
+						dynamic_cast<const CImageView*>( pChildFrame->GetImageView()->GetScrollView() )->MakeImageState( &m_imageStates.back() );
 					}
 			}
 }
@@ -305,7 +305,7 @@ bool CWorkspace::LoadDocuments( void )
 	{
 		// newly created view will initialize it's visual state (frame placement, zoom, etc) on initial update based on m_pLoadingImageState
 		//
-		m_pLoadingImageState = const_cast< CImageState* >( &*itImageState );
+		m_pLoadingImageState = const_cast<CImageState*>( &*itImageState );
 
 		if ( NULL == AfxGetApp()->OpenDocumentFile( m_pLoadingImageState->GetDocFilePath().c_str() ) )
 			TRACE( " * Failed loading document %s on workspace load!\n", m_pLoadingImageState->GetDocFilePath().c_str() );

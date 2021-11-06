@@ -57,7 +57,7 @@ namespace io
 			DestStreamT& m_rDestOStream;			// where the output has to be redirected to
 		};
 	private:
-		std::auto_ptr< utl::IMemoryManaged > m_pRedirector;
+		std::auto_ptr<utl::IMemoryManaged> m_pRedirector;
 	};
 }
 

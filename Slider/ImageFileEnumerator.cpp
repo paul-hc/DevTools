@@ -70,7 +70,7 @@ void CImageFileEnumerator::Search( const std::vector< CSearchPattern* >& searchP
 
 void CImageFileEnumerator::Search( const CSearchPattern& searchPattern ) throws_( CException*, CUserAbortedException )
 {
-	std::vector< CSearchPattern* > searchPatterns( 1, const_cast< CSearchPattern* >( &searchPattern ) );
+	std::vector< CSearchPattern* > searchPatterns( 1, const_cast<CSearchPattern*>( &searchPattern ) );
 	Search( searchPatterns );
 }
 
@@ -153,7 +153,7 @@ void CImageFileEnumerator::AddFoundFile( const TCHAR* pFilePath )
 		// found an album (slide file or compound image catalog storage): load its metadata as found images
 		// note: we need to load as CAlbumDoc since its document schema may be older (backwards compatibility)
 
-		std::auto_ptr< CAlbumDoc > pAlbumDoc = CAlbumDoc::LoadAlbumDocument( filePath );
+		std::auto_ptr<CAlbumDoc> pAlbumDoc = CAlbumDoc::LoadAlbumDocument( filePath );
 		if ( pAlbumDoc.get() != NULL )
 		{
 			AddFoundSubDir( filePath.GetPtr() );							// an album counts as a sub-directory

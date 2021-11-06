@@ -101,7 +101,7 @@ void CReportListControl::QueryGroupItems( std::vector< ObjectT* >& rObjectItems,
 	std::pair< GroupMapIterator, GroupMapIterator > itPair = m_groupIdToItemsMap.equal_range( groupId );
 
 	for ( GroupMapIterator it = itPair.first; it != itPair.second; ++it )
-		rObjectItems.push_back( AsPtr< ObjectT >( it->second ) );
+		rObjectItems.push_back( AsPtr<ObjectT>( it->second ) );
 }
 
 template< typename MatchFunc >

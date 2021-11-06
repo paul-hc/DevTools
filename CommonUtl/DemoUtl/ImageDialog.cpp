@@ -129,7 +129,7 @@ CImageDialog::CImageDialog( CWnd* pParent )
 	m_transpColorCache.Load( reg::section );
 
 	m_imagePathCombo.SetEnsurePathExist();
-	m_spacingEdit.SetValidRange( Range< int >( 0, 500 ) );
+	m_spacingEdit.SetValidRange( Range<int>( 0, 500 ) );
 	m_pImageToolbar->GetStrip()
 		.AddButton( ID_SET_AUTO_TRANSP_COLOR, ID_AUTO_TRANSP_TOOL )
 		.AddButton( ID_RESET_TRANSP_COLOR, ID_REMOVE_ITEM );
@@ -259,7 +259,7 @@ void CImageDialog::LoadSampleImage( void )
 					 HasFlag( m_convertFlags, CDibSection::ForceCvtEqualBpp ) )
 				{
 					CScopedFlag< int > scopedSkipCopyImage( &CDibSection::m_testFlags, m_convertFlags & CDibSection::ForceCvtEqualBpp );
-					std::auto_ptr< CDibSection > pCvtDib( new CDibSection );
+					std::auto_ptr<CDibSection> pCvtDib( new CDibSection );
 					pCvtDib->Convert( *m_pDibSection, forceBpp );
 					m_pDibSection.reset( pCvtDib.release() );
 				}
@@ -267,7 +267,7 @@ void CImageDialog::LoadSampleImage( void )
 	else
 		m_pDibSection.reset();
 
-	m_framePosEdit.SetValidRange( Range< int >( 1, m_frameCount ) );
+	m_framePosEdit.SetValidRange( Range<int>( 1, m_frameCount ) );
 	m_framePosEdit.SetNumber< UINT >( m_framePos );
 	UpdateImage();
 }
@@ -524,7 +524,7 @@ void CImageDialog::DoDataExchange( CDataExchange* pDX )
 	{
 		m_modeSheet.SetSheetModified();
 		m_modeSheet.ApplyChanges();
-		m_sampleMode = static_cast< SampleMode >( m_modeSheet.GetActiveIndex() );
+		m_sampleMode = static_cast<SampleMode>( m_modeSheet.GetActiveIndex() );
 	}
 
 	CLayoutDialog::DoDataExchange( pDX );
@@ -658,7 +658,7 @@ void CImageDialog::OnChange_BkColor( void )
 
 void CImageDialog::OnChange_SampleMode( void )
 {
-	m_sampleMode = static_cast< SampleMode >( m_modeSheet.GetActiveIndex() );
+	m_sampleMode = static_cast<SampleMode>( m_modeSheet.GetActiveIndex() );
 	CreateEffectDibs();
 	RedrawSample();
 }
@@ -813,7 +813,7 @@ CModePage* CModePage::NewEmptyPage( CImageDialog* pDialog, CImageDialog::SampleM
 
 bool CModePage::IsPixelCtrl( UINT ctrlId ) const
 {
-	if ( const CColorChannelEdit* pChannelEdit = dynamic_cast< const CColorChannelEdit* >( GetDlgItem( ctrlId ) ) )
+	if ( const CColorChannelEdit* pChannelEdit = dynamic_cast<const CColorChannelEdit*>( GetDlgItem( ctrlId ) ) )
 		return pChannelEdit->IsPixelChannel();
 	return false;
 }
@@ -855,7 +855,7 @@ END_MESSAGE_MAP()
 
 void CModePage::OnChangeField( UINT ctrlId )
 {
-	SyncEditValues( checked_static_cast< const CColorChannelEdit* >( GetDlgItem( ctrlId ) ) );
+	SyncEditValues( checked_static_cast<const CColorChannelEdit*>( GetDlgItem( ctrlId ) ) );
 
 	// input is done by the edit
 	if ( IsPixelCtrl( ctrlId ) )
@@ -867,7 +867,7 @@ void CModePage::OnChangeField( UINT ctrlId )
 void CModePage::OnToggle_KeepEqual( void )
 {
 	if ( !m_keepEqualEdits.empty() && IsDlgButtonChecked( IDC_KEEP_EQUAL_CHECK ) )
-		SyncEditValues( dynamic_cast< CColorChannelEdit* >( GetFocus() ) );
+		SyncEditValues( dynamic_cast<CColorChannelEdit*>( GetFocus() ) );
 }
 
 void CModePage::OnPageInput( UINT checkId )

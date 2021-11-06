@@ -209,7 +209,7 @@ int CFlagStore::CheckFlagsTransition( DWORD newFlags, DWORD oldFlags ) const
 // checks the validity of a bit-field transition, taking care of mutual exclusive and read-only fields;
 // returns -1 if no error detected, else the index of element that generates the error
 {
-	const int count = static_cast< int >( m_flagInfos.size() );
+	const int count = static_cast<int>( m_flagInfos.size() );
 	std::vector< CFlagInfo* >::const_iterator itFlag = m_flagInfos.begin();
 
 	DWORD roMask = GetReadOnlyMask();

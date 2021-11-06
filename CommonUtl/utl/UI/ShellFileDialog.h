@@ -48,7 +48,7 @@ private:
 	COMDLG_FILTERSPEC LookupFilter( DWORD filterIndex ) const;
 
 	// Vista style
-	CComPtr< IFileDialog > GetFileDialog( void );
+	CComPtr<IFileDialog> GetFileDialog( void );
 	bool ReplaceExt( std::tstring& rFilePath, const COMDLG_FILTERSPEC& filterSpec ) const;
 
 	static bool IsValidFilterSpec( const COMDLG_FILTERSPEC& filterSpec ) { return filterSpec.pszName != NULL && filterSpec.pszSpec != NULL; }

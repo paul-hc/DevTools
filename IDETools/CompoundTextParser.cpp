@@ -295,7 +295,7 @@ CString CompoundTextParser::Section::extractContent( const TCHAR* insertorReplac
 	{
 		// Replace embedded insertion point with referredContent
 		const TCHAR* contentPtr = outcomeContent;
-		int insertorEnd = insertorStart + static_cast< int >( str::GetLength( embeddedInsertPoint ) );
+		int insertorEnd = insertorStart + static_cast<int>( str::GetLength( embeddedInsertPoint ) );
 
 		// If post token tag line remover exists, extend the token after the next "\r\n"
 		if ( contentPtr[ insertorEnd ] == chNoEndOfLineIfEmpty )

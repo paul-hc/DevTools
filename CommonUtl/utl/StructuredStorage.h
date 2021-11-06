@@ -71,31 +71,31 @@ namespace fs
 		bool FindFirstElementThat( fs::TEmbeddedPath& rFoundElementPath, TElementPred pElementPred, RecursionDepth depth = Shallow );		// find the first stream that satisfies the predicate
 
 		// embedded storages (sub-directories) in current storage trail
-		CComPtr< IStorage > CreateDir( const TCHAR* pDirName, DWORD mode = STGM_CREATE | STGM_READWRITE );
-		CComPtr< IStorage > OpenDir( const TCHAR* pDirName, DWORD mode = STGM_READ );		// for writing use STGM_READWRITE (!)
+		CComPtr<IStorage> CreateDir( const TCHAR* pDirName, DWORD mode = STGM_CREATE | STGM_READWRITE );
+		CComPtr<IStorage> OpenDir( const TCHAR* pDirName, DWORD mode = STGM_READ );		// for writing use STGM_READWRITE (!)
 		bool DeleteDir( const TCHAR* pDirName );			// storage
 		bool StorageExist( const TCHAR* pStorageName );
 
 		// embedded streams (files) in current storage trail
-		CComPtr< IStream > CreateStream( const TCHAR* pStreamName, DWORD mode = STGM_CREATE | STGM_READWRITE );
-		CComPtr< IStream > OpenStream( const TCHAR* pStreamName, DWORD mode = STGM_READ );
+		CComPtr<IStream> CreateStream( const TCHAR* pStreamName, DWORD mode = STGM_CREATE | STGM_READWRITE );
+		CComPtr<IStream> OpenStream( const TCHAR* pStreamName, DWORD mode = STGM_READ );
 		bool DeleteStream( const TCHAR* pStreamName );
 		bool CloseStream( const TCHAR* pStreamName );		// logical closing, to unload all references to the cached stream and stream clones
 
 		bool StreamExist( const TCHAR* pStreamSubPath );
 
-		std::auto_ptr< fs::CStreamLocation > LocateReadStream( const fs::TEmbeddedPath& streamEmbeddedPath, DWORD mode = STGM_READ );		// try in root storage for flat representation, or deep sub-dir otherwise
-		std::auto_ptr< fs::CStreamLocation > LocateWriteStream( const fs::TEmbeddedPath& streamEmbeddedPath, DWORD mode = STGM_CREATE | STGM_READWRITE );	// write or create stream in root or embedded folder path, depending on flat representation mode
+		std::auto_ptr<fs::CStreamLocation> LocateReadStream( const fs::TEmbeddedPath& streamEmbeddedPath, DWORD mode = STGM_READ );		// try in root storage for flat representation, or deep sub-dir otherwise
+		std::auto_ptr<fs::CStreamLocation> LocateWriteStream( const fs::TEmbeddedPath& streamEmbeddedPath, DWORD mode = STGM_CREATE | STGM_READWRITE );	// write or create stream in root or embedded folder path, depending on flat representation mode
 
 		// streams states opened for reading
 		bool IsStreamOpen( const fs::TEmbeddedPath& streamPath ) const { return m_openedStreamStates.Contains( streamPath ); }
 		const fs::CStreamState* FindOpenedStream( const fs::TEmbeddedPath& streamPath ) const { return m_openedStreamStates.Find( streamPath ); }
 
 		// embedded files (on streams) in current storage trail
-		std::auto_ptr< COleStreamFile > CreateStreamFile( const TCHAR* pStreamName, DWORD mode = CFile::modeCreate | CFile::modeWrite );
-		std::auto_ptr< COleStreamFile > OpenStreamFile( const TCHAR* pStreamName, DWORD mode = CFile::modeRead );
+		std::auto_ptr<COleStreamFile> CreateStreamFile( const TCHAR* pStreamName, DWORD mode = CFile::modeCreate | CFile::modeWrite );
+		std::auto_ptr<COleStreamFile> OpenStreamFile( const TCHAR* pStreamName, DWORD mode = CFile::modeRead );
 
-		std::auto_ptr< COleStreamFile > MakeOleStreamFile( const TCHAR* pStreamName, IStream* pStream = NULL ) const;
+		std::auto_ptr<COleStreamFile> MakeOleStreamFile( const TCHAR* pStreamName, IStream* pStream = NULL ) const;
 
 		// backwards compatibility: find existing object based on possible alternates (in current storage trail)
 		std::pair< const TCHAR*, size_t > FindAlternate_DirName( const TCHAR* altDirNames[], size_t altCount );
@@ -121,7 +121,7 @@ namespace fs
 		bool CacheStreamState( const fs::TEmbeddedPath& streamPath, IStream* pStreamOrigin );
 		size_t CloseStreamsWithPrefix( const TCHAR* pSubDirPrefix ) { return m_openedStreamStates.RemoveWithPrefix( pSubDirPrefix ); }
 
-		CComPtr< IStream > CloneStream( const fs::CStreamState* pStreamState, const fs::TEmbeddedPath& streamPath );		// for stream logical re-opening
+		CComPtr<IStream> CloneStream( const fs::CStreamState* pStreamState, const fs::TEmbeddedPath& streamPath );		// for stream logical re-opening
 
 		fs::TEmbeddedPath MakeElementSubPath( const std::tstring& encodedElementName ) const { return GetCurrentDirPath() / encodedElementName; }
 
@@ -152,7 +152,7 @@ namespace fs
 
 			void Reset( const CStorageTrail* pTrail = NULL );
 			void Push( IStorage* pSubStorage );				// go to sub-storage
-			CComPtr< IStorage > Pop( void );				// go to parent storage
+			CComPtr<IStorage> Pop( void );				// go to parent storage
 
 			IStorage* GetCurrent( void ) const { return !IsEmpty() ? m_openSubStorages.back() : GetRoot(); }
 			const fs::TEmbeddedPath& GetCurrentPath( void ) const { return m_trailPath; }
@@ -161,7 +161,7 @@ namespace fs
 			IStorage* GetStorageAtLevel( size_t depthLevel ) const { ASSERT( depthLevel < GetDepth() ); return m_openSubStorages[ depthLevel ]; }
 		private:
 			CStructuredStorage* m_pDocStorage;
-			std::vector< CComPtr< IStorage > > m_openSubStorages;		// opened embedded storages: sub-directory path to the current (deepest) storage
+			std::vector< CComPtr<IStorage> > m_openSubStorages;		// opened embedded storages: sub-directory path to the current (deepest) storage
 			fs::TEmbeddedPath m_trailPath;
 		};
 
@@ -181,7 +181,7 @@ namespace fs
 			bool m_validDirPath;
 		};
 	private:
-		CComPtr< IStorage > m_pRootStorage;		// root storage in a compound document file
+		CComPtr<IStorage> m_pRootStorage;		// root storage in a compound document file
 		CStorageTrail m_cwdTrail;				// current working directory: trail of currently opened storages (initially empty: pointing to the root storage)
 		TStorageFlags m_stgFlags;
 		DWORD m_openMode;
@@ -222,7 +222,7 @@ namespace fs
 		void ReleaseStream( void ) { m_pStreamOrigin = NULL; }
 		HRESULT CloneStream( IStream** ppStreamDuplicate ) const;
 	private:
-		CComPtr< IStream > m_pStreamOrigin;			// for stream sharing: optional, keeps the original opened stream, that can be cloned for subsequent stream reading
+		CComPtr<IStream> m_pStreamOrigin;			// for stream sharing: optional, keeps the original opened stream, that can be cloned for subsequent stream reading
 	};
 
 
@@ -236,8 +236,8 @@ namespace fs
 		fs::CStructuredStorage::CStorageTrail* GetLocation( void ) const { return GetDocStorage()->RefCwd(); }
 		fs::CStructuredStorage* GetDocStorage( void ) const { ASSERT_PTR( m_pCurrDir.get() ); return m_pCurrDir->m_pDocStorage; }
 	public:
-		std::auto_ptr< fs::CStructuredStorage::CScopedCurrentDir > m_pCurrDir;		// temporary CWD
-		CComPtr< IStream > m_pStream;
+		std::auto_ptr<fs::CStructuredStorage::CScopedCurrentDir> m_pCurrDir;		// temporary CWD
+		CComPtr<IStream> m_pStream;
 	};
 
 
@@ -246,12 +246,12 @@ namespace fs
 	{
 	public:
 		CManagedOleStreamFile( IStream* pStreamOpened, const fs::CFlexPath& streamFullPath );
-		CManagedOleStreamFile( std::auto_ptr< fs::CStreamLocation > pStreamLocation, const fs::CFlexPath& streamFullPath );
+		CManagedOleStreamFile( std::auto_ptr<fs::CStreamLocation> pStreamLocation, const fs::CFlexPath& streamFullPath );
 		virtual ~CManagedOleStreamFile();
 	private:
 		void Init( IStream* pStreamOpened, const fs::CFlexPath& streamFullPath );
 	private:
-		std::auto_ptr< fs::CStreamLocation > m_pStreamLocation;
+		std::auto_ptr<fs::CStreamLocation> m_pStreamLocation;
 	};
 }
 
@@ -313,7 +313,7 @@ namespace fs
 	namespace flex
 	{
 		// API for file streams and embedded file streams
-		CComPtr< IStream > OpenStreamOnFile( const fs::CFlexPath& filePath, DWORD mode = STGM_READ, DWORD createAttributes = 0 );
+		CComPtr<IStream> OpenStreamOnFile( const fs::CFlexPath& filePath, DWORD mode = STGM_READ, DWORD createAttributes = 0 );
 
 		UINT64 GetFileSize( const fs::CFlexPath& filePath );
 		CTime ReadLastModifyTime( const fs::CFlexPath& filePath );			// for embedded images use the stg doc time
@@ -358,7 +358,7 @@ namespace fs
 		template< typename StgInterfaceT >
 		inline UINT64 GetStreamSize( StgInterfaceT* pInterface )
 		{
-			ASSERT( is_a< IStream >( pInterface ) || is_a< ILockBytes >( pInterface ) );		// it reports 0 size on sub-storages
+			ASSERT( is_a<IStream>( pInterface ) || is_a<ILockBytes>( pInterface ) );		// it reports 0 size on sub-storages
 			fs::CFileState state;
 			GetElementState( state, pInterface, STATFLAG_DEFAULT );
 			return state.m_fileSize;

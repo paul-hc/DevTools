@@ -39,7 +39,7 @@ CIncludeOptionsDialog::CIncludeOptionsDialog( CIncludeOptions* pOptions, CWnd* p
 	GetLayoutEngine().DisableResizeVertically();
 	LoadDlgIcon( ID_OPTIONS );
 
-	m_maxParseLinesEdit.SetValidRange( Range< int >( 5, 50000 ) );
+	m_maxParseLinesEdit.SetValidRange( Range<int>( 5, 50000 ) );
 	m_ignoredEdit.SetContentType( ui::FilePath );
 	m_addedEdit.SetContentType( ui::FilePath );
 	m_additionalIncPathEdit.SetContentType( ui::DirPath );

@@ -41,9 +41,9 @@
 
 namespace shell
 {
-	CComPtr< IShellFolder > CWinExplorer::GetDesktopFolder( void ) const
+	CComPtr<IShellFolder> CWinExplorer::GetDesktopFolder( void ) const
 	{
-		CComPtr< IShellFolder > pDesktopFolder;
+		CComPtr<IShellFolder> pDesktopFolder;
 		Handle( ::SHGetDesktopFolder( &pDesktopFolder ) );
 		return pDesktopFolder;
 	}
@@ -60,13 +60,13 @@ namespace shell
 		return Handle( pFolder->ParseDisplayName( NULL, NULL, displayName, NULL, pPidl, NULL ) );
 	}
 
-	CComPtr< IShellFolder > CWinExplorer::FindShellFolder( const TCHAR* pDirPath ) const
+	CComPtr<IShellFolder> CWinExplorer::FindShellFolder( const TCHAR* pDirPath ) const
 	{
-		CComPtr< IShellFolder > pDirFolder;
+		CComPtr<IShellFolder> pDirFolder;
 		if ( fs::IsValidDirectory( pDirPath ) )
-			if ( CComPtr< IShellFolder > pDesktopFolder = GetDesktopFolder() )
+			if ( CComPtr<IShellFolder> pDesktopFolder = GetDesktopFolder() )
 			{
-				CComHeapPtr< ITEMIDLIST > workDirPidl;
+				CComHeapPtr<ITEMIDLIST> workDirPidl;
 				if ( ParsePidl( &workDirPidl, pDesktopFolder, pDirPath ) )
 					Handle( pDesktopFolder->BindToObject( workDirPidl, NULL, IID_PPV_ARGS( &pDirFolder ) ) );
 			}
@@ -75,9 +75,9 @@ namespace shell
 	}
 
 
-	CComPtr< IShellItem > CWinExplorer::FindShellItem( const fs::CPath& fullPath ) const
+	CComPtr<IShellItem> CWinExplorer::FindShellItem( const fs::CPath& fullPath ) const
 	{
-		CComPtr< IShellItem > pShellItem;
+		CComPtr<IShellItem> pShellItem;
 		Handle( ::SHCreateItemFromParsingName( fullPath.GetPtr(), NULL, IID_PPV_ARGS( &pShellItem ) ) );
 		return pShellItem;
 	}
@@ -86,7 +86,7 @@ namespace shell
 	{
 		ASSERT_PTR( pShellItem );
 
-		CComHeapPtr< wchar_t > pDisplayName;
+		CComHeapPtr<wchar_t> pDisplayName;
 
 		if ( HR_OK( pShellItem->GetDisplayName( nameType, &pDisplayName ) ) )
 			return (const wchar_t*)pDisplayName;
@@ -96,10 +96,10 @@ namespace shell
 
 	HBITMAP CWinExplorer::ExtractThumbnail( const fs::CPath& filePath, const CSize& boundsSize, DWORD flags /*= 0*/ ) const
 	{
-		CComPtr< IShellFolder > pDirFolder = FindShellFolder( filePath.GetParentPath().GetPtr() );
+		CComPtr<IShellFolder> pDirFolder = FindShellFolder( filePath.GetParentPath().GetPtr() );
 		if ( pDirFolder != NULL )
 		{
-			CComPtr< IExtractImage > pExtractImage = BindFileTo< IExtractImage >( pDirFolder, filePath.GetFilenamePtr() );
+			CComPtr<IExtractImage> pExtractImage = BindFileTo< IExtractImage >( pDirFolder, filePath.GetFilenamePtr() );
 			if ( pExtractImage != NULL )
 			{
 				// define thumbnail properties
@@ -120,7 +120,7 @@ namespace shell
 	HBITMAP CWinExplorer::ExtractThumbnail( IShellItem* pShellItem, const CSize& boundsSize, SIIGBF flags /*= SIIGBF_RESIZETOFIT*/ ) const
 	{
 		HBITMAP hBitmap = NULL;
-		CComQIPtr< IShellItemImageFactory > pImageFactory( pShellItem );
+		CComQIPtr<IShellItemImageFactory> pImageFactory( pShellItem );
 		if ( pImageFactory != NULL )
 			Handle( pImageFactory->GetImage( boundsSize, flags, &hBitmap ) );
 
@@ -147,7 +147,7 @@ namespace shell
 							itemPidls.push_back( itemPidl.Release() );
 					}
 
-				HR_OK( ::SHOpenFolderAndSelectItems( folderPidl.Get(), static_cast< UINT >( itemPidls.size() ), (LPCITEMIDLIST*)&itemPidls.front(), 0 ) );
+				HR_OK( ::SHOpenFolderAndSelectItems( folderPidl.Get(), static_cast<UINT>( itemPidls.size() ), (LPCITEMIDLIST*)&itemPidls.front(), 0 ) );
 
 				selCount = itemPidls.size();
 				shell::ClearOwningPidls( itemPidls );

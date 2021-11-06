@@ -63,10 +63,10 @@ namespace d2d
 		m_frameMetadata.Reset();
 
 		// create a D2DBitmap from IWICBitmapSource
-		if ( CComPtr< IWICBitmapSource > pWicFrame = m_pAnimImage->GetDecoder().ConvertFrameAt( m_framePos ) )			// raw WIC frame
+		if ( CComPtr<IWICBitmapSource> pWicFrame = m_pAnimImage->GetDecoder().ConvertFrameAt( m_framePos ) )			// raw WIC frame
 			if ( HR_OK( GetWndRenderTarget()->CreateBitmapFromWicBitmap( pWicFrame, NULL, &m_pRawFrame ) ) )			// raw D2D bitmap
 			{
-				if ( CComPtr< IWICMetadataQueryReader > pMetadataReader = m_pAnimImage->GetDecoder().GetFrameMetadataAt( m_framePos ) )
+				if ( CComPtr<IWICMetadataQueryReader> pMetadataReader = m_pAnimImage->GetDecoder().GetFrameMetadataAt( m_framePos ) )
 					m_frameMetadata.Store( pMetadataReader );		// store the Metadata for the current frame
 
 				return true;
@@ -150,7 +150,7 @@ namespace d2d
 	bool CAnimatedFrameComposer::SaveComposedFrame( void )
 	{
 		// save the current composed frame (in bitmap render target) into a temporary bitmap
-		CComPtr< ID2D1Bitmap > pComposedFrame;
+		CComPtr<ID2D1Bitmap> pComposedFrame;
 		if ( HR_OK( m_pFrameComposeRT->GetBitmap( &pComposedFrame ) ) )
 		{
 			// create the temporary bitmap if it hasn't been created yet
@@ -171,7 +171,7 @@ namespace d2d
 
 	bool CAnimatedFrameComposer::RestoreSavedFrame( void )
 	{
-		CComPtr< ID2D1Bitmap > pFrameToCopyTo;
+		CComPtr<ID2D1Bitmap> pFrameToCopyTo;
 		if ( m_pSavedFrame != NULL )
 			if ( HR_OK( m_pFrameComposeRT->GetBitmap( &pFrameToCopyTo ) ) )
 				if ( HR_OK( pFrameToCopyTo->CopyFromBitmap( NULL, m_pSavedFrame, NULL ) ) )		// copy the whole bitmap

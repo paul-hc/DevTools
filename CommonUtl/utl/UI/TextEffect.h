@@ -17,7 +17,7 @@ namespace ui
 		bool IsNull( void ) const { return CLR_NONE == m_color || IsDefault(); }
 		bool IsDefault( void ) const { return CLR_DEFAULT == m_color; }
 	private:
-		static BYTE FromPercentage( UINT percentage ) { ASSERT( percentage <= 100 ); return static_cast< BYTE >( (double)percentage * 255 / 100 ); }
+		static BYTE FromPercentage( UINT percentage ) { ASSERT( percentage <= 100 ); return static_cast<BYTE>( (double)percentage * 255 / 100 ); }
 		static BYTE MakeOpaqueAlpha( UINT opacityPct ) { return FromPercentage( opacityPct ); }
 	public:
 		COLORREF m_color;

@@ -93,7 +93,7 @@ protected:
 	// shell context menu hosting/tracking
 	ShellContextMenuStyle m_shCtxStyle;
 	UINT m_shCtxQueryFlags;
-	std::auto_ptr< CShellContextMenuHost > m_pShellMenuHost;
+	std::auto_ptr<CShellContextMenuHost> m_pShellMenuHost;
 };
 
 

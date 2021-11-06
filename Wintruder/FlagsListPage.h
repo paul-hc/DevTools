@@ -25,7 +25,7 @@ private:
 private:
 	// enum { IDD = IDD_FLAG_LIST_PAGE };
 
-	std::auto_ptr< CFlagsListCtrl > m_pFlagsListCtrl;
+	std::auto_ptr<CFlagsListCtrl> m_pFlagsListCtrl;
 protected:
 	virtual void DoDataExchange( CDataExchange* pDX );
 protected:

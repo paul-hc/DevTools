@@ -29,7 +29,7 @@ protected:
 		CMenu m_popupMenu;
 	};
 
-	std::auto_ptr< CSysTrayInfo > m_pSystemTrayInfo;
+	std::auto_ptr<CSysTrayInfo> m_pSystemTrayInfo;
 public:
 	enum { ShellIconId = 100 };
 

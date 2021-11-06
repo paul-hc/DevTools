@@ -51,7 +51,7 @@ void CSearchPattern::Stream( CArchive& archive )
 
 		if ( savedModelSchema < app::Slider_v4_1 )
 		{
-			enum OldType { old_Invalid, old_DirPath, old_AlbumFile, old_SingleImage } oldType = static_cast< OldType >( m_type );
+			enum OldType { old_Invalid, old_DirPath, old_AlbumFile, old_SingleImage } oldType = static_cast<OldType>( m_type );
 
 			(int&)m_type = oldType != old_Invalid ? ( m_type - 1 ) : BestGuessType( GetFilePath() );		// old_Invalid was removed in v4.1
 		}
@@ -195,14 +195,14 @@ void CSearchPattern::EnumImageFiles( fs::IEnumerator* pEnumerator ) const
 bool CSearchPattern::IsNumFileName( const TCHAR* pFullPath )
 {
 	std::tstring fname( path::FindFilename( pFullPath ), path::FindExt( pFullPath ) );
-	Range< size_t > numSeq = num::FindNumericSequence( fname );
+	Range<size_t> numSeq = num::FindNumericSequence( fname );
 	return numSeq.IsNonEmpty();
 }
 
 int CSearchPattern::ParseNumFileNameNumber( const TCHAR* pFullPath )
 {
 	std::tstring fname( path::FindFilename( pFullPath ), path::FindExt( pFullPath ) );
-	Range< size_t > numSeq = num::FindNumericSequence( fname );
+	Range<size_t> numSeq = num::FindNumericSequence( fname );
 
 	int number = -1;
 	if ( numSeq.IsNonEmpty() )

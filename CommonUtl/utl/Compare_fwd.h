@@ -25,7 +25,7 @@ namespace pred
 
 	inline CompareResult GetResultInOrder( CompareResult result, bool ascendingOrder )
 	{	// controls the direction of the compare result (for ascending/descending sorting)
-		return ascendingOrder ? result : static_cast< CompareResult >( -(int)result );
+		return ascendingOrder ? result : static_cast<CompareResult>( -(int)result );
 	}
 
 
@@ -66,7 +66,7 @@ namespace pred
 		template< typename AnyType >
 		bool operator()( const AnyType* pObject ) const
 		{
-			return is_a< ObjectT >( pObject );
+			return is_a<ObjectT>( pObject );
 		}
 	};
 
@@ -76,7 +76,7 @@ namespace pred
 		template< typename AnyType >
 		bool operator()( const AnyType* pObject ) const
 		{
-			return !is_a< ObjectT >( pObject );
+			return !is_a<ObjectT>( pObject );
 		}
 	};
 }

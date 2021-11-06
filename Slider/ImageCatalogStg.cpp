@@ -205,8 +205,8 @@ void CImageCatalogStg::CreateImageFiles( CCatalogStorageService* pCatalogSvc ) t
 		{
 			const fs::TEmbeddedPath& streamPath = pXferAttr->GetPath();
 
-			std::auto_ptr< CFile > pSrcImageFile = pFactory->OpenFlexImageFile( pXferAttr->GetSrcImagePath() );
-			std::auto_ptr< COleStreamFile > pDestStreamFile( CreateStreamFile( streamPath.GetPtr() ) );
+			std::auto_ptr<CFile> pSrcImageFile = pFactory->OpenFlexImageFile( pXferAttr->GetSrcImagePath() );
+			std::auto_ptr<COleStreamFile> pDestStreamFile( CreateStreamFile( streamPath.GetPtr() ) );
 
 			fs::BufferedCopy( *pDestStreamFile, *pSrcImageFile );
 
@@ -258,7 +258,7 @@ void CImageCatalogStg::CreateThumbnailsSubStorage( const CCatalogStorageService*
 				fs::TEmbeddedPath thumbStreamName;
 				if ( const GUID* pContainerFormatId = wic::GetContainerFormatId( MakeThumbStreamName( thumbStreamName, ( *itXferAttr )->GetPath().GetPtr() ) ) )	// good to save thumbnail?
 				{
-					CComPtr< IStream > pThumbStream = CreateStream( thumbStreamName.GetPtr() );
+					CComPtr<IStream> pThumbStream = CreateStream( thumbStreamName.GetPtr() );
 					CScopedErrorHandling scopedThrow( &pThumbBitmap->GetOrigin(), utl::ThrowMode );
 
 					pThumbBitmap->GetOrigin().SaveBitmapToStream( pThumbStream, *pContainerFormatId );
@@ -299,7 +299,7 @@ CCachedThumbBitmap* CImageCatalogStg::LoadThumbnail( const fs::CFlexPath& imageC
 
 	try
 	{
-		CComPtr< IStorage > pThumbsStorage;
+		CComPtr<IStorage> pThumbsStorage;
 		if ( const TCHAR* pThumbsFolderName = FindAlternate_DirName( ARRAY_PAIR( s_thumbsFolderNames ) ).first )
 			pThumbsStorage = OpenDir( pThumbsFolderName );
 
@@ -307,8 +307,8 @@ CCachedThumbBitmap* CImageCatalogStg::LoadThumbnail( const fs::CFlexPath& imageC
 		{
 			CScopedCurrentDir scopedThumbsFolder( this, pThumbsStorage );
 
-			if ( CComPtr< IStream > pThumbStream = OpenThumbnailImageStream( imageComplexPath.GetEmbeddedPathPtr() ) )
-				if ( CComPtr< IWICBitmapSource > pSavedBitmap = wic::LoadBitmapFromStream( pThumbStream ) )
+			if ( CComPtr<IStream> pThumbStream = OpenThumbnailImageStream( imageComplexPath.GetEmbeddedPathPtr() ) )
+				if ( CComPtr<IWICBitmapSource> pSavedBitmap = wic::LoadBitmapFromStream( pThumbStream ) )
 					if ( CCachedThumbBitmap* pThumbnail = app::GetThumbnailer()->NewScaledThumb( pSavedBitmap, imageComplexPath ) )
 					{
 						// IMP: the resulting bitmap, even the scaled bitmap will keep the stream alive for the lifetime of the bitmap; same if we scale the bitmap;
@@ -327,7 +327,7 @@ CCachedThumbBitmap* CImageCatalogStg::LoadThumbnail( const fs::CFlexPath& imageC
 	return NULL;
 }
 
-CComPtr< IStream > CImageCatalogStg::OpenThumbnailImageStream( const TCHAR* pImageEmbeddedPath )
+CComPtr<IStream> CImageCatalogStg::OpenThumbnailImageStream( const TCHAR* pImageEmbeddedPath )
 {
 	fs::TEmbeddedPath thumbStreamName;
 	MakeThumbStreamName( thumbStreamName, pImageEmbeddedPath );
@@ -407,7 +407,7 @@ bool CImageCatalogStg::SaveAlbumStream( CObject* pAlbumDoc )
 	DeleteOldVersionStream( s_pAlbumStreamName );		// File Save: delete old root stream - album files have been moved to "Album" folder
 
 	CScopedCurrentDir scopedAlbumFolder( this, s_pAlbumFolderName, STGM_READWRITE );
-	std::auto_ptr< COleStreamFile > pAlbumFile( CreateStreamFile( s_pAlbumStreamName ) );
+	std::auto_ptr<COleStreamFile> pAlbumFile( CreateStreamFile( s_pAlbumStreamName ) );
 
 	if ( NULL == pAlbumFile.get() )
 		return false;
@@ -427,14 +427,14 @@ bool CImageCatalogStg::LoadAlbumStream( CObject* pAlbumDoc )
 
 	if ( StreamExist( s_pAlbumStreamName ) )							// older catalogs may not contain the album stream (not an error)
 	{
-		std::auto_ptr< COleStreamFile > pAlbumFile = OpenStreamFile( s_pAlbumStreamName );		// load stream "_Album.sld"
+		std::auto_ptr<COleStreamFile> pAlbumFile = OpenStreamFile( s_pAlbumStreamName );		// load stream "_Album.sld"
 
 		if ( NULL == pAlbumFile.get() )
 			return false;
 
 		CArchive loadArchive( pAlbumFile.get(), CArchive::load );
 		loadArchive.m_bForceFlat = FALSE;			// same as CDocument::OnOpenDocument()
-		loadArchive.m_pDocument = reinterpret_cast< CDocument* >( pAlbumDoc );
+		loadArchive.m_pDocument = reinterpret_cast<CDocument*>( pAlbumDoc );
 
 		pAlbumDoc->Serialize( loadArchive );
 
@@ -465,7 +465,7 @@ bool CImageCatalogStg::bkw_LoadAlbumMetadataStream( CObject* pAlbumDoc )
 
 	if ( StreamExist( s_metadataStreamName ) )
 	{
-		std::auto_ptr< COleStreamFile > pMetadataFile = OpenStreamFile( s_metadataStreamName );
+		std::auto_ptr<COleStreamFile> pMetadataFile = OpenStreamFile( s_metadataStreamName );
 
 		if ( pMetadataFile.get() != NULL )
 		{
@@ -473,7 +473,7 @@ bool CImageCatalogStg::bkw_LoadAlbumMetadataStream( CObject* pAlbumDoc )
 			loadArchive.m_bForceFlat = FALSE;			// same as CDocument::OnOpenDocument()
 
 			// needed for backwards compatibility
-			loadArchive.m_pDocument = reinterpret_cast< CDocument* >( pAlbumDoc );
+			loadArchive.m_pDocument = reinterpret_cast<CDocument*>( pAlbumDoc );
 
 			// bug fix: speculate less, and let the CFileAttr::EvalLoadingSchema() do the finer model schema evaluation (from the binary stream)
 			//bkw_AlterOlderDocModelSchema( app::Slider_v4_0 );		// arbitrarily set to an older version
@@ -520,7 +520,7 @@ bool CImageCatalogStg::EnumerateImages( CImagesModel& rImagesModel )
 
 	for ( std::vector< fs::TEmbeddedPath >::const_iterator itStreamPath = imagesEnum.m_filePaths.begin(); itStreamPath != imagesEnum.m_filePaths.end(); ++itStreamPath )
 		if ( wic::FindFileImageFormat( itStreamPath->GetPtr() ) != wic::UnknownImageFormat )		// an image file?
-			if ( CComPtr< IStream > pImageStream = OpenStream( itStreamPath->GetPtr() ) )
+			if ( CComPtr<IStream> pImageStream = OpenStream( itStreamPath->GetPtr() ) )
 				if ( const fs::CStreamState* pSrcStreamState = FindOpenedStream( *itStreamPath ) )
 				{
 					fs::CFileState streamState = *pSrcStreamState;
@@ -579,7 +579,7 @@ bool CImageCatalogStg::SavePasswordStream( void )
 			return true;			// no password, done
 
 		CScopedCurrentDir scopedAlbumFolder( this, s_pAlbumFolderName, STGM_READWRITE );
-		std::auto_ptr< COleStreamFile > pPwdFile( CreateStreamFile( s_passwordStreamNames[ CurrentVer ] ) );
+		std::auto_ptr<COleStreamFile> pPwdFile( CreateStreamFile( s_passwordStreamNames[ CurrentVer ] ) );
 
 		if ( NULL == pPwdFile.get() )
 			return false;
@@ -635,7 +635,7 @@ bool CImageCatalogStg::LoadPasswordStream( void )
 
 	std::tstring password;
 	bool succeeded = true;
-	std::auto_ptr< COleStreamFile > pPwdFile = OpenStreamFile( pPasswordStreamName );
+	std::auto_ptr<COleStreamFile> pPwdFile = OpenStreamFile( pPasswordStreamName );
 	ASSERT_PTR( pPwdFile.get() );
 
 	CArchive loadArchive( pPwdFile.get(), CArchive::load );
@@ -687,7 +687,7 @@ bool CImageCatalogStg::LoadAlbumMap( std::tstring* pAlbumMapText )
 	if ( pAlbumMapText != NULL )
 		if ( utl::True == m_hasAlbumMap )
 		{
-			std::auto_ptr< COleStreamFile > pTextFile = OpenStreamFile( s_pAlbumMapStreamName );
+			std::auto_ptr<COleStreamFile> pTextFile = OpenStreamFile( s_pAlbumMapStreamName );
 			ASSERT_PTR( pTextFile.get() );
 
 			UINT totalLength = static_cast<UINT>( pTextFile->GetLength() );
@@ -707,7 +707,7 @@ bool CImageCatalogStg::LoadAlbumMap( std::tstring* pAlbumMapText )
 
 const TCHAR CImageCatalogStg::CAlbumMapWriter::s_lineFmt[] = _T("%-*s  %-*s%s");
 
-CImageCatalogStg::CAlbumMapWriter::CAlbumMapWriter( std::auto_ptr< COleStreamFile > pAlbumMapFile )
+CImageCatalogStg::CAlbumMapWriter::CAlbumMapWriter( std::auto_ptr<COleStreamFile> pAlbumMapFile )
 	: fs::CTextFileWriter( pAlbumMapFile.get() )
 	, m_pAlbumMapFile( pAlbumMapFile )
 	, m_imageCount( 0 )

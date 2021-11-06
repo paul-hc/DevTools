@@ -78,9 +78,9 @@ private:
 
 	friend class CCmdLineInfo;
 private:
-	std::auto_ptr< CScopedGdiPlusInit > m_pGdiPlusInit;
-	std::auto_ptr< CThumbnailer > m_pThumbnailer;
-	std::auto_ptr< CLogger > m_pEventLogger;
+	std::auto_ptr<CScopedGdiPlusInit> m_pGdiPlusInit;
+	std::auto_ptr<CThumbnailer> m_pThumbnailer;
+	std::auto_ptr<CLogger> m_pEventLogger;
 	CAccelTable m_sharedAccel;
 
 	CMainFrame* m_pMainFrame;
@@ -178,7 +178,7 @@ namespace app
 		int m_autoClearDelay;			// remove delay for the progress bar in mili-secs, 0 for immediate or ACD_NoClear for no reset
 		UINT m_pbStepIndex;
 		UINT m_pbStepDivider;
-		std::auto_ptr< CScopedPumpMessage > m_pMessagePump;
+		std::auto_ptr<CScopedPumpMessage> m_pMessagePump;
 	};
 
 } //namespace app

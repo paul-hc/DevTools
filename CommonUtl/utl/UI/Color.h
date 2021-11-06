@@ -99,7 +99,7 @@ namespace ui
 		WORD m_saturation;
 		WORD m_luminance;
 
-		static const Range< WORD > s_validRange;		// [0, 240]
+		static const Range<WORD> s_validRange;		// [0, 240]
 	};
 }
 
@@ -119,7 +119,7 @@ namespace ui
 		static CColorAlpha MakeTransparent( COLORREF color, UINT transpPct ) { return CColorAlpha( color, MakeAlpha( transpPct ) ); }
 		static CColorAlpha MakeOpaqueColor( COLORREF color, UINT opacityPct ) { return CColorAlpha( color, MakeAlpha( 100 - opacityPct ) ); }
 
-		static BYTE FromPercentage( UINT percentage ) { ASSERT( percentage <= 100 ); return static_cast< BYTE >( (double)percentage * 255 / 100 ); }
+		static BYTE FromPercentage( UINT percentage ) { ASSERT( percentage <= 100 ); return static_cast<BYTE>( (double)percentage * 255 / 100 ); }
 		static BYTE MakeAlpha( UINT transpPct ) { return FromPercentage( 100 - transpPct ); }
 	public:
 		COLORREF m_color;

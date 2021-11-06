@@ -41,7 +41,7 @@ namespace multi
 	{
 		REQUIRE( m_dateTimeState != s_invalid );		// accumulated?
 
-		CDateTimeControl* pDateTimeCtrl = checked_static_cast< CDateTimeControl* >( pDlg->GetDlgItem( m_ctrlId ) );
+		CDateTimeControl* pDateTimeCtrl = checked_static_cast<CDateTimeControl*>( pDlg->GetDlgItem( m_ctrlId ) );
 		ASSERT_PTR( pDateTimeCtrl );
 
 		CScopedInternalChange internalChange( pDateTimeCtrl );
@@ -50,7 +50,7 @@ namespace multi
 
 	bool CDateTimeState::InputCtrl( CWnd* pDlg )
 	{
-		CDateTimeControl* pDateTimeCtrl = checked_static_cast< CDateTimeControl* >( pDlg->GetDlgItem( m_ctrlId ) );
+		CDateTimeControl* pDateTimeCtrl = checked_static_cast<CDateTimeControl*>( pDlg->GetDlgItem( m_ctrlId ) );
 		ASSERT_PTR( pDateTimeCtrl );
 
 		m_dateTimeState = pDateTimeCtrl->GetDateTime();

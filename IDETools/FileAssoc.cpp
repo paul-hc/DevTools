@@ -102,7 +102,7 @@ bool CFileAssoc::SetPath( const fs::CPath& path )
 	for ( unsigned int i = 0; i != COUNT_OF( s_circularExt ); ++i )
 		if ( path::EqualsPtr( m_parts.m_ext.c_str(), s_circularExt[ i ] ) )
 		{
-			m_circularIndex = static_cast< CircularIndex >( i );
+			m_circularIndex = static_cast<CircularIndex>( i );
 			break;
 		}
 

@@ -59,7 +59,7 @@ bool CTempCloneFileSet::SetInputFilePaths( const std::vector< fs::CFlexPath >& i
 {
 	ClearAllTempFiles();			// delete all previously cloned files to avoid renames due to collisions
 
-	std::auto_ptr< app::CScopedProgress > pProgress;
+	std::auto_ptr<app::CScopedProgress> pProgress;
 
 	if ( HasFlag( CWorkspace::GetFlags(), wf::AllowEmbeddedFileTransfers ) )
 		pProgress.reset( new app::CScopedProgress( 0, (int)inputFilePaths.size(), 1, _T("Create physical backup:") ) );

@@ -20,7 +20,7 @@ namespace d2d
 	public:
 		static ::ID2D1Factory* Factory( void );
 	private:
-		CComPtr< ::ID2D1Factory > m_pFactory;
+		CComPtr<::ID2D1Factory> m_pFactory;
 	};
 }
 
@@ -61,10 +61,10 @@ namespace d2d
 	{
 		D2D1_COLOR_F colorValue =		// RGBA
 		{
-			static_cast< float >( GetRValue( color ) ) / 255.f,
-			static_cast< float >( GetGValue( color ) ) / 255.f,
-			static_cast< float >( GetBValue( color ) ) / 255.f,
-			static_cast< float >( opacityPct ) / 100.f
+			static_cast<float>( GetRValue( color ) ) / 255.f,
+			static_cast<float>( GetGValue( color ) ) / 255.f,
+			static_cast<float>( GetBValue( color ) ) / 255.f,
+			static_cast<float>( opacityPct ) / 100.f
 		};
 		return colorValue;
 	}
@@ -73,10 +73,10 @@ namespace d2d
 	{
 		D2D1_COLOR_F colorValue =		// RGBA
 		{
-			static_cast< float >( GetRValue( color ) ) / 255.f,
-			static_cast< float >( GetGValue( color ) ) / 255.f,
-			static_cast< float >( GetBValue( color ) ) / 255.f,
-			static_cast< float >( alpha ) / 255.f
+			static_cast<float>( GetRValue( color ) ) / 255.f,
+			static_cast<float>( GetGValue( color ) ) / 255.f,
+			static_cast<float>( GetBValue( color ) ) / 255.f,
+			static_cast<float>( alpha ) / 255.f
 		};
 		return colorValue;
 	}

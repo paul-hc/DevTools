@@ -18,7 +18,7 @@ namespace func
 		template< typename CharType >
 		CharType operator()( CharType ch ) const
 		{
-			return static_cast< CharType >( Translate( ch ) );
+			return static_cast<CharType>( Translate( ch ) );
 		}
 
 		static int Translate( int charCode );

@@ -44,7 +44,7 @@ public:
 	bool ClampScrollPos( CPoint& rScrollPos );								// limit to valid H/V scroll range
 
 	template< typename Type >
-	Range< Type > GetScrollRange( int bar ) const { int lower, upper; CScrollView::GetScrollRange( bar, &lower, &upper ); return Range< Type >( lower, upper ); }
+	Range<Type> GetScrollRange( int bar ) const { int lower, upper; CScrollView::GetScrollRange( bar, &lower, &upper ); return Range<Type>( lower, upper ); }
 
 	// coords translation
 	CSize GetContentPointedPct( const CPoint* pClientPoint = NULL ) const;			// use mouse cursor if NULL
@@ -123,7 +123,7 @@ protected:
 private:
 	CBaseZoomView* m_pZoomView;
 	TrackOperation m_trackOp;
-	std::auto_ptr< CScopedScaleZoom > m_pZoomNormal;		// must be created before storing original data-members (if OpZoomNormal)
+	std::auto_ptr<CScopedScaleZoom> m_pZoomNormal;		// must be created before storing original data-members (if OpZoomNormal)
 
 	// original data
 	const CPoint m_origPoint;

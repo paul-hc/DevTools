@@ -88,7 +88,7 @@ CCmdDashboardDialog::~CCmdDashboardDialog()
 
 CCommandModel* CCmdDashboardDialog::GetCommandModel( void )
 {
-	return const_cast< CCommandModel* >( app::GetApp().GetCommandModel() );
+	return const_cast<CCommandModel*>( app::GetApp().GetCommandModel() );
 }
 
 const std::deque< utl::ICommand* >& CCmdDashboardDialog::GetStack( void ) const
@@ -160,7 +160,7 @@ bool CCmdDashboardDialog::IsSelContiguousToTop( const std::vector< int >& selInd
 		return false;
 
 	for ( size_t i = 0; i != selIndexes.size(); ++i )
-		if ( selIndexes[ i ] != static_cast< int >( i ) )
+		if ( selIndexes[ i ] != static_cast<int>( i ) )
 			return false;
 
 	return true;
@@ -168,7 +168,7 @@ bool CCmdDashboardDialog::IsSelContiguousToTop( const std::vector< int >& selInd
 
 bool CCmdDashboardDialog::SelectCommandList( int selIndex )
 {
-	selIndex = std::min( selIndex, static_cast< int >( m_cmdItems.size() - 1 ) );
+	selIndex = std::min( selIndex, static_cast<int>( m_cmdItems.size() - 1 ) );
 
 	m_commandsList.SetCurSel( selIndex );
 	UpdateSelCommand();
@@ -191,7 +191,7 @@ void CCmdDashboardDialog::UpdateSelCommand( void )
 
 		headerText = str::Join( fields, _T(" ") );
 
-		if ( const cmd::IFileDetailsCmd* pDetailsCmd = dynamic_cast< const cmd::IFileDetailsCmd* >( pSelectedCmd ) )
+		if ( const cmd::IFileDetailsCmd* pDetailsCmd = dynamic_cast<const cmd::IFileDetailsCmd*>( pSelectedCmd ) )
 		{
 			std::vector< std::tstring > lines;
 			pDetailsCmd->QueryDetailLines( lines );
@@ -228,7 +228,7 @@ void CCmdDashboardDialog::CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPA
 	subItem, pCtrl;
 
 	static const ui::CTextEffect s_editorCmd( ui::Regular, color::Grey40, CLR_NONE );
-	const cmd::IPersistentCmd* pPersistCmd = CReportListControl::AsPtr< CCommandItem >( rowKey )->GetCmdAs< cmd::IPersistentCmd >();
+	const cmd::IPersistentCmd* pPersistCmd = CReportListControl::AsPtr<CCommandItem>( rowKey )->GetCmdAs< cmd::IPersistentCmd >();
 
 	if ( NULL == pPersistCmd )
 		rTextEffect.Combine( s_editorCmd );
@@ -313,7 +313,7 @@ void CCmdDashboardDialog::OnOK( void )
 								 svc::GetTags_StackType().FormatKey( m_stackType ).c_str() ), MB_YESNO | MB_DEFBUTTON2 ) != IDYES )
 				return;
 
-		CAppCmdService* m_pAppCmdSvc = checked_static_cast< CAppCmdService* >( m_pCmdSvc );
+		CAppCmdService* m_pAppCmdSvc = checked_static_cast<CAppCmdService*>( m_pCmdSvc );
 		bool done = false;
 
 		std::vector< CCommandItem* > selCmdItems;

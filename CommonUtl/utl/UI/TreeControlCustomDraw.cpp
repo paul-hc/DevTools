@@ -15,7 +15,7 @@ CTreeControlCustomDraw::CTreeControlCustomDraw( NMTVCUSTOMDRAW* pDraw, CTreeCont
 	: CListLikeCustomDrawBase( &pDraw->nmcd )
 	, m_pDraw( pDraw )
 	, m_pTree( safe_ptr( pTree ) )
-	, m_hItem( reinterpret_cast< HTREEITEM >( m_pDraw->nmcd.dwItemSpec ) )
+	, m_hItem( reinterpret_cast<HTREEITEM>( m_pDraw->nmcd.dwItemSpec ) )
 	, m_pObject( CTreeControl::ToSubject( m_pDraw->nmcd.lItemlParam ) )
 {
 }

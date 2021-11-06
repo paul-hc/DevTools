@@ -47,9 +47,9 @@ public:
 	void SetTextEffectCallback( ui::ITextEffectCallback* pTextEffectCallback ) { m_pTextEffectCallback = pTextEffectCallback; }
 
 	template< typename Type >
-	static Type* AsPtr( LPARAM data ) { return reinterpret_cast< Type* >( data ); }
+	static Type* AsPtr( LPARAM data ) { return reinterpret_cast<Type*>( data ); }
 
-	static inline utl::ISubject* ToSubject( LPARAM data ) { return checked_static_cast< utl::ISubject* >( (utl::ISubject*)data ); }
+	static inline utl::ISubject* ToSubject( LPARAM data ) { return checked_static_cast<utl::ISubject*>( (utl::ISubject*)data ); }
 
 	// ICustomDrawControl interface
 	virtual CBaseCustomDrawImager* GetCustomDrawImager( void ) const;
@@ -69,11 +69,11 @@ private:
 	bool ParentHandles( UINT cmdMessage, UINT notifyCode );
 private:
 	bool m_useExplorerTheme;
-	std::auto_ptr< ui::CHandledNotificationsCache > m_pParentHandlesCache;
+	std::auto_ptr<ui::CHandledNotificationsCache> m_pParentHandlesCache;
 protected:
-	std::auto_ptr< ui::CFontEffectCache > m_pFontCache;			// self-encapsulated
+	std::auto_ptr<ui::CFontEffectCache> m_pFontCache;			// self-encapsulated
 	ui::ITextEffectCallback* m_pTextEffectCallback;
-	std::auto_ptr< CBaseCustomDrawImager > m_pCustomImager;
+	std::auto_ptr<CBaseCustomDrawImager> m_pCustomImager;
 public:
 	ui::CTextEffect m_ctrlTextEffect;							// for all items in the list
 };

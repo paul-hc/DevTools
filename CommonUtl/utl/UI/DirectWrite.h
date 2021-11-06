@@ -19,7 +19,7 @@ namespace dw
 	public:
 		static ::IDWriteFactory* Factory( void );
 	private:
-		CComPtr< ::IDWriteFactory > m_pDirectWriteFactory;
+		CComPtr<::IDWriteFactory> m_pDirectWriteFactory;
 	};
 }
 
@@ -34,13 +34,13 @@ namespace dw
 
 
 	// text format is similar to font in GDI, used for rendering text (device-independent)
-	CComPtr< IDWriteTextFormat > CreateTextFormat( const wchar_t fontName[], long height,
+	CComPtr<IDWriteTextFormat> CreateTextFormat( const wchar_t fontName[], long height,
 												   DWRITE_FONT_WEIGHT weight = DWRITE_FONT_WEIGHT_REGULAR,
 												   DWRITE_FONT_STYLE style = DWRITE_FONT_STYLE_NORMAL,
 												   DWRITE_FONT_STRETCH stretch = DWRITE_FONT_STRETCH_NORMAL,
 												   const wchar_t localeName[] = L"en-us" );
 
-    CComPtr< IDWriteTextLayout > CreateTextLayout( const std::tstring& text, IDWriteTextFormat* pFont, D2D_SIZE_F maxSize = d2d::GetScreenSize() );
+    CComPtr<IDWriteTextLayout> CreateTextLayout( const std::tstring& text, IDWriteTextFormat* pFont, D2D_SIZE_F maxSize = d2d::GetScreenSize() );
 
 
 	D2D_SIZE_F GetBoundsSize( IDWriteTextLayout* pTextLayout );

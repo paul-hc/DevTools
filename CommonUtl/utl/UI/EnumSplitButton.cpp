@@ -31,7 +31,7 @@ void CEnumSplitButton::SetEnumTags( const CEnumTags* pEnumTags )
 	m_popupMenu.CreatePopupMenu();
 
 	ASSERT( !m_pEnumTags->GetUiTags().empty() );
-	unsigned int count = static_cast< UINT >( m_pEnumTags->GetUiTags().size() );
+	unsigned int count = static_cast<UINT>( m_pEnumTags->GetUiTags().size() );
 
 	for ( unsigned int i = 0; i != count; ++i )
 		m_popupMenu.AppendMenu( MF_STRING, IdFirstCommand + i, m_pEnumTags->FormatUi( i ).c_str() );
@@ -42,9 +42,9 @@ void CEnumSplitButton::SetEnumTags( const CEnumTags* pEnumTags )
 void CEnumSplitButton::SetSelValue( int selValue )
 {
 	ASSERT( m_pEnumTags != NULL && !m_pEnumTags->GetUiTags().empty() );
-	unsigned int count = static_cast< UINT >( m_pEnumTags->GetUiTags().size() );
+	unsigned int count = static_cast<UINT>( m_pEnumTags->GetUiTags().size() );
 
-	ASSERT( selValue >= 0 && selValue < static_cast< int >( count ) );
+	ASSERT( selValue >= 0 && selValue < static_cast<int>( count ) );
 	m_selValue = selValue;
 	m_popupMenu.CheckMenuRadioItem( 0, count - 1, m_selValue, MF_BYPOSITION );
 

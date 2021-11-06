@@ -17,13 +17,13 @@ namespace shell
 namespace shell
 {
 	// shell folder
-	CComPtr< IShellFolder > GetDesktopFolder( void );
-	CComPtr< IShellFolder > FindShellFolder( const TCHAR* pDirPath );
+	CComPtr<IShellFolder> GetDesktopFolder( void );
+	CComPtr<IShellFolder> FindShellFolder( const TCHAR* pDirPath );
 
 	// shell item
-	CComPtr< IShellItem > FindShellItem( const fs::CPath& fullPath );
-	CComPtr< IShellFolder2 > ToShellFolder( IShellItem* pFolderItem );
-	CComPtr< IShellFolder2 > GetParentFolderAndPidl( ITEMID_CHILD** pPidlItem, IShellItem* pShellItem );
+	CComPtr<IShellItem> FindShellItem( const fs::CPath& fullPath );
+	CComPtr<IShellFolder2> ToShellFolder( IShellItem* pFolderItem );
+	CComPtr<IShellFolder2> GetParentFolderAndPidl( ITEMID_CHILD** pPidlItem, IShellItem* pShellItem );
 }
 
 
@@ -73,9 +73,9 @@ namespace func
 namespace shell
 {
 	template< typename PathContainerT >
-	CComPtr< IShellFolder > MakeRelativePidlArray( std::vector< PIDLIST_RELATIVE >& rPidlItemsArray, const PathContainerT& filePaths );		// for mixed files having a common ancestor folder; caller must delete the PIDLs
+	CComPtr<IShellFolder> MakeRelativePidlArray( std::vector< PIDLIST_RELATIVE >& rPidlItemsArray, const PathContainerT& filePaths );		// for mixed files having a common ancestor folder; caller must delete the PIDLs
 
-	template< typename ShellItemContainerT >		// ShellItemContainerT examples: std::vector< CComPtr< IShellItem2 > >, std::vector< IShellItem* >, etc
+	template< typename ShellItemContainerT >		// ShellItemContainerT examples: std::vector< CComPtrIShellItem2 > >, std::vector< IShellItem* >, etc
 	void MakeAbsolutePidlArray( std::vector< PIDLIST_ABSOLUTE >& rPidlVector, const ShellItemContainerT& shellItems );
 
 	template< typename ContainerT >
@@ -95,7 +95,7 @@ namespace shell
 	}
 
 	template< typename ShellItemContainerT >
-	CComPtr< IShellItemArray > MakeShellItemArray( const ShellItemContainerT& shellItems );
+	CComPtr<IShellItemArray> MakeShellItemArray( const ShellItemContainerT& shellItems );
 }
 
 
@@ -104,7 +104,7 @@ namespace shell
 	namespace pidl
 	{
 		// MSDN doc - Windows 2000+: CoTaskMemAlloc()/CoTaskMemFree() are preferred over SHAlloc()/ILFree()
-		inline LPITEMIDLIST Allocate( size_t size ) { return static_cast< LPITEMIDLIST >( ::CoTaskMemAlloc( static_cast< ULONG >( size ) ) ); }
+		inline LPITEMIDLIST Allocate( size_t size ) { return static_cast<LPITEMIDLIST>( ::CoTaskMemAlloc( static_cast<ULONG>( size ) ) ); }
 		inline void Delete( LPITEMIDLIST pidl ) { ::CoTaskMemFree( pidl ); }
 
 		PIDLIST_RELATIVE GetRelativeItem( IShellFolder* pFolder, const TCHAR itemFilename[] );		// itemFilename is normally a fname.ext; also works with a sub-path
@@ -128,10 +128,10 @@ namespace shell
 
 		namespace impl
 		{
-			inline BYTE* GetBuffer( LPITEMIDLIST pidl ) { ASSERT( !IsNull( pidl ) ); return reinterpret_cast< BYTE* >( pidl ); }
-			inline const BYTE* GetBuffer( LPCITEMIDLIST pidl ) { ASSERT( !IsNull( pidl ) ); return reinterpret_cast< const BYTE* >( pidl ); }
+			inline BYTE* GetBuffer( LPITEMIDLIST pidl ) { ASSERT( !IsNull( pidl ) ); return reinterpret_cast<BYTE*>( pidl ); }
+			inline const BYTE* GetBuffer( LPCITEMIDLIST pidl ) { ASSERT( !IsNull( pidl ) ); return reinterpret_cast<const BYTE*>( pidl ); }
 
-			inline WORD* GetTerminator( LPITEMIDLIST pidl, size_t size ) { ASSERT( !IsNull( pidl ) ); return reinterpret_cast< WORD* >( GetBuffer( pidl ) + size ); }
+			inline WORD* GetTerminator( LPITEMIDLIST pidl, size_t size ) { ASSERT( !IsNull( pidl ) ); return reinterpret_cast<WORD*>( GetBuffer( pidl ) + size ); }
 			inline void SetTerminator( LPITEMIDLIST pidl, size_t size ) { *GetTerminator( pidl, size ) = 0; }
 		}
 	}
@@ -140,7 +140,7 @@ namespace shell
 
 namespace shell
 {
-	// manages memory for a PIDL used in shell API; similar to CComHeapPtr< ITEMIDLIST > with PIDL specific functionality.
+	// manages memory for a PIDL used in shell API; similar to CComHeapPtr<ITEMIDLIST> with PIDL specific functionality.
 	//
 	class CPidl
 	{
@@ -207,8 +207,8 @@ namespace shell
 		bool CreateFrom( IUnknown* pUnknown );										// ABSOLUTE pidl - most general, works for any compatible interface passed (IShellItem, IShellFolder, IPersistFolder2, etc)
 		bool CreateFromFolder( IShellFolder* pShellFolder );						// ABSOLUTE pidl - superseeded by CreateFrom()
 
-		CComPtr< IShellItem > FindItem( IShellFolder* pParentFolder = NULL ) const;			// pass pParentFolder if PIDL is relative/child
-		CComPtr< IShellFolder > FindFolder( IShellFolder* pParentFolder = GetDesktopFolder() ) const;
+		CComPtr<IShellItem> FindItem( IShellFolder* pParentFolder = NULL ) const;			// pass pParentFolder if PIDL is relative/child
+		CComPtr<IShellFolder> FindFolder( IShellFolder* pParentFolder = GetDesktopFolder() ) const;
 
 		fs::CPath GetAbsolutePath( GPFIDL_FLAGS optFlags = GPFIDL_DEFAULT ) const { return pidl::GetAbsolutePath( m_pidl, optFlags ); }
 		std::tstring GetName( SIGDN nameType = SIGDN_NORMALDISPLAY ) const { return pidl::GetName( m_pidl, nameType ); }
@@ -257,9 +257,9 @@ namespace shell
 	// template code
 
 	template< typename PathContainerT >
-	CComPtr< IShellFolder > MakeRelativePidlArray( std::vector< PIDLIST_RELATIVE >& rPidlItemsArray, const PathContainerT& filePaths )
+	CComPtr<IShellFolder> MakeRelativePidlArray( std::vector< PIDLIST_RELATIVE >& rPidlItemsArray, const PathContainerT& filePaths )
 	{	// for mixed files having a common ancestor folder
-		CComPtr< IShellFolder > pCommonFolder;
+		CComPtr<IShellFolder> pCommonFolder;
 		fs::CPath commonDirPath = path::ExtractCommonParentPath( filePaths );
 
 		rPidlItemsArray.reserve( filePaths.size() );
@@ -280,7 +280,7 @@ namespace shell
 		return pCommonFolder;
 	}
 
-	template< typename ShellItemContainerT >		// ShellItemContainerT examples: std::vector< CComPtr< IShellItem2 > >, std::vector< IShellItem* >, etc
+	template< typename ShellItemContainerT >		// ShellItemContainerT examples: std::vector< CComPtrIShellItem2 > >, std::vector< IShellItem* >, etc
 	void MakeAbsolutePidlArray( std::vector< PIDLIST_ABSOLUTE >& rPidlVector, const ShellItemContainerT& shellItems )
 	{
 		REQUIRE( rPidlVector.empty() );
@@ -302,13 +302,13 @@ namespace shell
 	}
 
 	template< typename ShellItemContainerT >
-	CComPtr< IShellItemArray > MakeShellItemArray( const ShellItemContainerT& shellItems )
+	CComPtr<IShellItemArray> MakeShellItemArray( const ShellItemContainerT& shellItems )
 	{
 		std::vector< PIDLIST_ABSOLUTE > pidlVector;
 		MakeAbsolutePidlArray( pidlVector, shellItems );
 
-		CComPtr< IShellItemArray > pShellItemArray;
-		ASSERT( HR_OK( ::SHCreateShellItemArrayFromIDLists( static_cast< UINT >( pidlVector.size() ), (PCIDLIST_ABSOLUTE_ARRAY)&pidlVector.front(), &pShellItemArray ) ) );
+		CComPtr<IShellItemArray> pShellItemArray;
+		ASSERT( HR_OK( ::SHCreateShellItemArrayFromIDLists( static_cast<UINT>( pidlVector.size() ), (PCIDLIST_ABSOLUTE_ARRAY)&pidlVector.front(), &pShellItemArray ) ) );
 
 		ClearOwningPidls( pidlVector );
 		return pShellItemArray;

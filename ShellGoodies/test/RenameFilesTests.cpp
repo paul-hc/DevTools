@@ -60,7 +60,7 @@ void CRenameFilesTests::TestRenameSimple( void )
 	ren::MakePairsToItems( renameItems, pool.m_pathPairs );
 
 	CFileService svc;
-	std::auto_ptr< CMacroCommand > pRenameMacroCmd( svc.MakeRenameCmds( renameItems ) );
+	std::auto_ptr<CMacroCommand> pRenameMacroCmd( svc.MakeRenameCmds( renameItems ) );
 	ASSERT_PTR( pRenameMacroCmd.get() );
 	ASSERT_EQUAL( 3, pRenameMacroCmd->GetSubCommands().size() );
 
@@ -88,7 +88,7 @@ void CRenameFilesTests::TestRenameCollisionExisting( void )
 	ren::MakePairsToItems( renameItems, pool.m_pathPairs );
 
 	CFileService svc;
-	std::auto_ptr< CMacroCommand > pRenameMacroCmd( svc.MakeRenameCmds( renameItems ) );
+	std::auto_ptr<CMacroCommand> pRenameMacroCmd( svc.MakeRenameCmds( renameItems ) );
 	ASSERT_PTR( pRenameMacroCmd.get() );
 	ASSERT_EQUAL( 9, pRenameMacroCmd->GetSubCommands().size() );		// plenty of intermediate paths
 
@@ -110,7 +110,7 @@ void CRenameFilesTests::TestRenameChangeCase( void )
 	ut::ForEachDestination( renameItems, func::MakeCase( UpperCase ) );
 
 	CFileService svc;
-	std::auto_ptr< CMacroCommand > pRenameMacroCmd( svc.MakeRenameCmds( renameItems ) );
+	std::auto_ptr<CMacroCommand> pRenameMacroCmd( svc.MakeRenameCmds( renameItems ) );
 	ASSERT_PTR( pRenameMacroCmd.get() );
 	ASSERT_EQUAL( 3, pRenameMacroCmd->GetSubCommands().size() );
 

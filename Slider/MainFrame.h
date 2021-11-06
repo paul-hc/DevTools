@@ -50,7 +50,7 @@ private:
 	void SetProgressCaptionText( const TCHAR* pCaption );
 	bool DoClearProgressCtrl( void );
 private:
-	std::auto_ptr< CMainToolbar > m_pToolbar;
+	std::auto_ptr<CMainToolbar> m_pToolbar;
 	CStatusBar m_statusBar;
 	CProgressCtrl m_progressCtrl;
 

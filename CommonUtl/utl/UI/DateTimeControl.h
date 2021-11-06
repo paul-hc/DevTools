@@ -26,8 +26,8 @@ public:
 	bool IsNullDateTime( void ) const;
 	bool SetNullDateTime( void ) { return SetDateTime( CTime() ); }
 
-	Range< CTime > GetDateRange( void ) const;
-	bool SetDateRange( const Range< CTime >& dateTimeRange );
+	Range<CTime> GetDateRange( void ) const;
+	bool SetDateRange( const Range<CTime>& dateTimeRange );
 
 	static bool IsNullDateTime( const CTime& dateTime ) { return 0 == dateTime.GetTime(); }
 protected:

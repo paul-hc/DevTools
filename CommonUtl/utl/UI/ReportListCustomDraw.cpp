@@ -15,7 +15,7 @@ CReportListCustomDraw::CReportListCustomDraw( NMLVCUSTOMDRAW* pDraw, CReportList
 	: CListLikeCustomDrawBase( &pDraw->nmcd )
 	, m_pDraw( pDraw )
 	, m_pList( safe_ptr( pList ) )
-	, m_index( static_cast< int >( m_pDraw->nmcd.dwItemSpec ) )
+	, m_index( static_cast<int>( m_pDraw->nmcd.dwItemSpec ) )
 	, m_subItem( m_pDraw->iSubItem )
 	, m_rowKey( m_pDraw->nmcd.lItemlParam != 0 ? m_pDraw->nmcd.lItemlParam : m_index )
 	, m_pObject( CReportListControl::ToSubject( m_pDraw->nmcd.lItemlParam ) )
@@ -138,7 +138,7 @@ void CReportListCustomDraw::DrawCellTextDiffs( DiffSide diffSide, const str::TMa
 
 	for ( size_t pos = 0; pos != matchSeq.size() && itemRect.left < itemRect.right; )
 	{
-		unsigned int matchLen = static_cast< unsigned int >( utl::GetMatchingLength( matchSeq.begin() + pos, matchSeq.end() ) );
+		unsigned int matchLen = static_cast<unsigned int>( utl::GetMatchingLength( matchSeq.begin() + pos, matchSeq.end() ) );
 		const ui::CTextEffect& effect = matchEffects[ matchSeq[ pos ] ];
 
 		SelectTextEffect( effect );

@@ -45,8 +45,8 @@ private:
 
 	CPoint GetCascadeByOffset( void ) const;
 private:
-	std::auto_ptr< CLayoutEngine > m_pLayoutEngine;
-	std::auto_ptr< CLayoutPlacement > m_pSheetPlacement;		// persistent
+	std::auto_ptr<CLayoutEngine> m_pLayoutEngine;
+	std::auto_ptr<CLayoutPlacement> m_pSheetPlacement;		// persistent
 public:
 	enum RestorePos { PosNoRestore, PosRestore, PosAutoCascade };
 

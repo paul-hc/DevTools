@@ -9,18 +9,18 @@ namespace d2d
 {
 	// object creation
 
-	CComPtr< ID2D1SolidColorBrush > CreateSolidBrush( ID2D1RenderTarget* pRenderTarget, const D2D1_COLOR_F& solidColor );
-	bool CreateAsSolidBrush( CComPtr< ID2D1Brush >& rpBrush, ID2D1RenderTarget* pRenderTarget, const D2D1_COLOR_F& solidColor );
+	CComPtr<ID2D1SolidColorBrush> CreateSolidBrush( ID2D1RenderTarget* pRenderTarget, const D2D1_COLOR_F& solidColor );
+	bool CreateAsSolidBrush( CComPtr<ID2D1Brush>& rpBrush, ID2D1RenderTarget* pRenderTarget, const D2D1_COLOR_F& solidColor );
 
-	CComPtr< ID2D1GradientStopCollection > CreateGradientStops( ID2D1RenderTarget* pRenderTarget, const D2D1_COLOR_F& fromColor, const D2D1_COLOR_F& toColor );
-	CComPtr< ID2D1GradientStopCollection > CreateGradientStops( ID2D1RenderTarget* pRenderTarget, const D2D1_COLOR_F colors[], size_t count );
-	CComPtr< ID2D1GradientStopCollection > CreateReverseGradientStops( ID2D1RenderTarget* pRenderTarget, const ID2D1GradientStopCollection* pSrcGradientStops );
+	CComPtr<ID2D1GradientStopCollection> CreateGradientStops( ID2D1RenderTarget* pRenderTarget, const D2D1_COLOR_F& fromColor, const D2D1_COLOR_F& toColor );
+	CComPtr<ID2D1GradientStopCollection> CreateGradientStops( ID2D1RenderTarget* pRenderTarget, const D2D1_COLOR_F colors[], size_t count );
+	CComPtr<ID2D1GradientStopCollection> CreateReverseGradientStops( ID2D1RenderTarget* pRenderTarget, const ID2D1GradientStopCollection* pSrcGradientStops );
 
-	CComPtr< ID2D1LinearGradientBrush > CreateLinearGradientBrush( ID2D1RenderTarget* pRenderTarget, ID2D1GradientStopCollection* pGradientStops );
-	CComPtr< ID2D1RadialGradientBrush > CreateRadialGradientBrush( ID2D1RenderTarget* pRenderTarget, ID2D1GradientStopCollection* pGradientStops );
+	CComPtr<ID2D1LinearGradientBrush> CreateLinearGradientBrush( ID2D1RenderTarget* pRenderTarget, ID2D1GradientStopCollection* pGradientStops );
+	CComPtr<ID2D1RadialGradientBrush> CreateRadialGradientBrush( ID2D1RenderTarget* pRenderTarget, ID2D1GradientStopCollection* pGradientStops );
 
-	CComPtr< ID2D1LinearGradientBrush > CreateLinearGradientBrush( ID2D1RenderTarget* pRenderTarget, const D2D1_COLOR_F& fromColor, const D2D1_COLOR_F& toColor );
-	CComPtr< ID2D1RadialGradientBrush > CreateRadialGradientBrush( ID2D1RenderTarget* pRenderTarget, const D2D1_COLOR_F& fromColor, const D2D1_COLOR_F& toColor );
+	CComPtr<ID2D1LinearGradientBrush> CreateLinearGradientBrush( ID2D1RenderTarget* pRenderTarget, const D2D1_COLOR_F& fromColor, const D2D1_COLOR_F& toColor );
+	CComPtr<ID2D1RadialGradientBrush> CreateRadialGradientBrush( ID2D1RenderTarget* pRenderTarget, const D2D1_COLOR_F& fromColor, const D2D1_COLOR_F& toColor );
 
 
 	template< typename Iterator >
@@ -36,13 +36,13 @@ namespace d2d
 {
 	// geometry
 
-	CComPtr< ID2D1PathGeometry > CreatePolygonGeometry( const POINT points[], size_t count, bool filled = true );
-	CComPtr< ID2D1PathGeometry > CreateTriangleGeometry( const POINT& point1, const POINT& point2, const POINT& point3 );
+	CComPtr<ID2D1PathGeometry> CreatePolygonGeometry( const POINT points[], size_t count, bool filled = true );
+	CComPtr<ID2D1PathGeometry> CreateTriangleGeometry( const POINT& point1, const POINT& point2, const POINT& point3 );
 
-	CComPtr< ID2D1PathGeometry > CreateCombinedGeometries( ID2D1Geometry* geometries[], size_t count, D2D1_COMBINE_MODE combineMode );
-	CComPtr< ID2D1PathGeometry > CreateCombinedGeometries( ID2D1Geometry* pGeometry1, ID2D1Geometry* pGeometry2, D2D1_COMBINE_MODE combineMode );
+	CComPtr<ID2D1PathGeometry> CreateCombinedGeometries( ID2D1Geometry* geometries[], size_t count, D2D1_COMBINE_MODE combineMode );
+	CComPtr<ID2D1PathGeometry> CreateCombinedGeometries( ID2D1Geometry* pGeometry1, ID2D1Geometry* pGeometry2, D2D1_COMBINE_MODE combineMode );
 
-	CComPtr< ID2D1PathGeometry > CreateFrameGeometry( ID2D1RenderTarget* pRenderTarget, const RECT& boundsRect, int frameSize );
+	CComPtr<ID2D1PathGeometry> CreateFrameGeometry( ID2D1RenderTarget* pRenderTarget, const RECT& boundsRect, int frameSize );
 }
 
 
@@ -126,7 +126,7 @@ namespace d2d
 		IRenderFrame* GetRenderFrame( void ) const { return m_pRenderFrame.get(); }
 
 		template< typename RenderFrameT >
-		RenderFrameT* GetRenderFrameAs( void ) const { return checked_static_cast< RenderFrameT* >( m_pRenderFrame.get() ); }
+		RenderFrameT* GetRenderFrameAs( void ) const { return checked_static_cast<RenderFrameT*>( m_pRenderFrame.get() ); }
 	private:
 		CRect MakeFrameRect( const CViewCoords& coords ) const;
 	protected:
@@ -134,7 +134,7 @@ namespace d2d
 		std::vector< D2D1_COLOR_F > m_colors;
 		FrameStyle m_frameStyle;
 	private:
-		std::auto_ptr< IRenderFrame > m_pRenderFrame;
+		std::auto_ptr<IRenderFrame> m_pRenderFrame;
 	};
 
 
@@ -155,7 +155,7 @@ namespace d2d
 		void CreateSolidBrush( ID2D1RenderTarget* pRenderTarget, const D2D1_COLOR_F& solidColor );
 
 		// gradient outline
-		static CComPtr< ID2D1GradientStopCollection > MakeMirrorGradientStops( ID2D1RenderTarget* pRenderTarget, const std::vector< D2D1_COLOR_F >& srcColors );
+		static CComPtr<ID2D1GradientStopCollection> MakeMirrorGradientStops( ID2D1RenderTarget* pRenderTarget, const std::vector< D2D1_COLOR_F >& srcColors );
 
 		Direction GetGradientDirection( void ) const { return m_gradientDirection; }
 		void SetGradientDirection( Direction gradientDirection ) { m_gradientDirection = gradientDirection; }
@@ -166,7 +166,7 @@ namespace d2d
 		virtual void Draw( ID2D1RenderTarget* pRenderTarget, const RECT& boundsRect );
 	private:
 		Direction m_gradientDirection;
-		CComPtr< ID2D1Brush > m_pFrameBrush;
+		CComPtr<ID2D1Brush> m_pFrameBrush;
 	};
 
 
@@ -180,7 +180,7 @@ namespace d2d
 		virtual void Create( ID2D1RenderTarget* pRenderTarget, ID2D1GradientStopCollection* pGradientStops );
 		virtual void Draw( ID2D1RenderTarget* pRenderTarget, const RECT& boundsRect );
 	private:
-		CComPtr< ID2D1LinearGradientBrush > m_pGradientBrush;
+		CComPtr<ID2D1LinearGradientBrush> m_pGradientBrush;
 	};
 
 
@@ -194,8 +194,8 @@ namespace d2d
 		virtual void Create( ID2D1RenderTarget* pRenderTarget, ID2D1GradientStopCollection* pGradientStops );
 		virtual void Draw( ID2D1RenderTarget* pRenderTarget, const RECT& boundsRect );
 	private:
-		CComPtr< ID2D1LinearGradientBrush > m_pEdgeBrush;			// for edges
-		CComPtr< ID2D1RadialGradientBrush > m_pCornerBrush;			// for corners (inverted colours)
+		CComPtr<ID2D1LinearGradientBrush> m_pEdgeBrush;			// for edges
+		CComPtr<ID2D1RadialGradientBrush> m_pCornerBrush;			// for corners (inverted colours)
 	};
 }
 

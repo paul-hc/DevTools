@@ -93,7 +93,7 @@ CTokenizeTextDialog::~CTokenizeTextDialog()
 void CTokenizeTextDialog::RegistryLoad( void )
 {
 	CWinApp* pApp = AfxGetApp();
-	m_action = static_cast< Action >( pApp->GetProfileInt( reg::section_dialog, reg::entry_action, m_action ) );
+	m_action = static_cast<Action>( pApp->GetProfileInt( reg::section_dialog, reg::entry_action, m_action ) );
 
 	for ( unsigned int i = 0; i != SepActionCount; ++i )
 	{
@@ -356,7 +356,7 @@ void CTokenizeTextDialog::OnActionChanged( UINT radioId )
 		m_separators[ m_action ].m_output = ui::GetWindowText( m_outputSepsEdit );
 	}
 
-	m_action = static_cast< Action >( radioId - IDC_SPLIT_ACTION_RADIO );
+	m_action = static_cast<Action>( radioId - IDC_SPLIT_ACTION_RADIO );
 	OnFieldChanged();
 }
 

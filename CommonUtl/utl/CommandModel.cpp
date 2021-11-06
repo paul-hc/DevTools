@@ -111,7 +111,7 @@ bool CCommandModel::Undo( size_t stepCount /*= 1*/ )
 
 	while ( stepCount-- != 0 && !m_undoStack.empty() )
 	{
-		std::auto_ptr< utl::ICommand > pCmd( m_undoStack.back() );
+		std::auto_ptr<utl::ICommand> pCmd( m_undoStack.back() );
 		m_undoStack.pop_back();
 
 		try
@@ -140,7 +140,7 @@ bool CCommandModel::Redo( size_t stepCount /*= 1*/ )
 
 	while ( stepCount-- != 0 && !m_redoStack.empty() )
 	{
-		std::auto_ptr< utl::ICommand > pCmd( m_redoStack.back() );
+		std::auto_ptr<utl::ICommand> pCmd( m_redoStack.back() );
 		m_redoStack.pop_back();
 
 		try

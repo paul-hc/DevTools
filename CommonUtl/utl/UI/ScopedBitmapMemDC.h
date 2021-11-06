@@ -16,7 +16,7 @@ namespace bmp
 	protected:
 		CSharedAccess( void ) : m_pMemDC( NULL ) {}
 
-		virtual CSharedAccess* GetTarget( void ) const { return const_cast< CSharedAccess* >( this ); }		// overridden for proxy access redirection
+		virtual CSharedAccess* GetTarget( void ) const { return const_cast<CSharedAccess*>( this ); }		// overridden for proxy access redirection
 	public:
 		virtual HBITMAP GetHandle( void ) const = 0;
 
@@ -78,7 +78,7 @@ public:
 			m_pSharedMemDC.reset( new bmp::CMemDC( pAccess, pTemplateDC ) );
 	}
 private:
-	std::auto_ptr< bmp::CMemDC > m_pSharedMemDC;
+	std::auto_ptr<bmp::CMemDC> m_pSharedMemDC;
 };
 
 

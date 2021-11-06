@@ -77,7 +77,7 @@ namespace d2d
 		{
 			if ( NULL == m_pAnimComposer.get() || !m_pAnimComposer->UsesImage( pImage ) )
 			{
-				m_pAnimComposer.reset( new CAnimatedFrameComposer( this, checked_static_cast< CWicAnimatedImage* >( pImage ) ) );
+				m_pAnimComposer.reset( new CAnimatedFrameComposer( this, checked_static_cast<CWicAnimatedImage*>( pImage ) ) );
 				m_pAnimComposer->Create();
 			}
 		}

@@ -97,7 +97,7 @@ public:
 
 	COLORREF GetImageSelTextColor( void ) const { return m_data.GetImageSelTextColor(); }
 	COLORREF GetImageSelColor( void ) const { return m_data.GetImageSelColor(); }
-	CBrush& GetImageSelColorBrush( void ) const { return const_cast< CBrush& >( m_imageSelColorBrush ); }
+	CBrush& GetImageSelColorBrush( void ) const { return const_cast<CBrush&>( m_imageSelColorBrush ); }
 
 	CImageState* RefLoadingImageState( void ) { return m_pLoadingImageState; }
 

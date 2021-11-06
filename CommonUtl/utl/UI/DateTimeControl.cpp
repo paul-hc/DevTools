@@ -107,9 +107,9 @@ bool CDateTimeControl::UserSetDateTime( const CTime& dateTime )
 	return succeeded;
 }
 
-Range< CTime > CDateTimeControl::GetDateRange( void ) const
+Range<CTime> CDateTimeControl::GetDateRange( void ) const
 {
-	Range< CTime > dtRange;
+	Range<CTime> dtRange;
 	DWORD result = GetRange( &dtRange.m_start, &dtRange.m_end );
 
 	if ( !HasFlag( result, GDTR_MIN ) )
@@ -121,7 +121,7 @@ Range< CTime > CDateTimeControl::GetDateRange( void ) const
 	return dtRange;
 }
 
-bool CDateTimeControl::SetDateRange( const Range< CTime >& dateTimeRange )
+bool CDateTimeControl::SetDateRange( const Range<CTime>& dateTimeRange )
 {
 	return SetRange( &dateTimeRange.m_start, &dateTimeRange.m_end ) != FALSE;
 }

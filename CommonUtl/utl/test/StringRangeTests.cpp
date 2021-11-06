@@ -25,7 +25,7 @@ void CStringRangeTests::TestInit( void )
 {
 	{
 		static const std::tstring text;
-		str::range::CStringRange< wchar_t > textRange( text );
+		str::range::CStringRange<wchar_t> textRange( text );
 		ASSERT( textRange.InBounds() );
 		ASSERT( textRange.IsEmpty() );
 		ASSERT_EQUAL( 0, textRange.GetLength() );
@@ -39,7 +39,7 @@ void CStringRangeTests::TestInit( void )
 
 	{
 		static const std::tstring text = _T("abcd");
-		str::range::CStringRange< wchar_t > textRange( text );
+		str::range::CStringRange<wchar_t> textRange( text );
 		ASSERT( textRange.InBounds() );
 		ASSERT( !textRange.IsEmpty() );
 		ASSERT_EQUAL( 4, textRange.GetLength() );
@@ -64,9 +64,9 @@ void CStringRangeTests::TestInit( void )
 void CStringRangeTests::TestFind( void )
 {
 	static const std::string s_text = "of the people, by the People, for the PEOPLE,";
-	str::range::CStringRange< char > textRange( s_text );
+	str::range::CStringRange<char> textRange( s_text );
 
-	Range< size_t > foundPos;
+	Range<size_t> foundPos;
 	ASSERT( !textRange.Find( foundPos, 'F' ) );
 	ASSERT( textRange.Find( foundPos, 'F', str::IgnoreCase ) );
 	ASSERT_EQUAL( "f", str::range::Extract( foundPos, s_text ) );
@@ -91,7 +91,7 @@ void CStringRangeTests::TestTrim( void )
 {
 	{
 		static const std::string text = " \t  abcd  \t ";
-		str::range::CStringRange< char > textRange( text );
+		str::range::CStringRange<char> textRange( text );
 
 		ASSERT( textRange.Trim() );
 		ASSERT_EQUAL( "abcd", textRange.Extract() );
@@ -103,7 +103,7 @@ void CStringRangeTests::TestTrim( void )
 	// nested trim
 	{
 		static const std::tstring text = _T(" \t  -_-abcd__-  \t ");
-		str::range::CStringRange< wchar_t > textRange( text );
+		str::range::CStringRange<wchar_t> textRange( text );
 
 		ASSERT( textRange.Trim() );
 		ASSERT_EQUAL( _T("-_-abcd__-"), textRange.Extract() );
@@ -122,7 +122,7 @@ void CStringRangeTests::TestTrim( void )
 void CStringRangeTests::TestStrip( void )
 {
 	static const std::string text = "preABCDpost";
-	str::range::CStringRange< char > textRange( text );
+	str::range::CStringRange<char> textRange( text );
 
 	ASSERT( textRange.HasPrefix( "" ) );
 	ASSERT( textRange.HasPrefix( '\0' ) );
@@ -163,11 +163,11 @@ void CStringRangeTests::TestStrip( void )
 void CStringRangeTests::TestSplit( void )
 {
 	static const std::string s_text = " \t  item A  \t";
-	str::range::CStringRange< char > textRange( s_text );
+	str::range::CStringRange<char> textRange( s_text );
 	ASSERT( textRange.Trim() );
 	ASSERT_EQUAL( "item A", textRange.Extract() );
 
-	Range< size_t > sepPos;
+	Range<size_t> sepPos;
 	ASSERT( !textRange.Find( sepPos, _T('\t') ) );
 	ASSERT( textRange.Find( sepPos, _T(' ') ) );
 

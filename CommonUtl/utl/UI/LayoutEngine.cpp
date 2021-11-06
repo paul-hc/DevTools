@@ -267,7 +267,7 @@ bool CLayoutEngine::SetCollapsed( bool collapsed )
 
 	ui::RedrawDialog( m_pDialog->m_hWnd, 0 );
 
-	if ( ui::ILayoutEngine* pDialogCallback = dynamic_cast< ui::ILayoutEngine* >( m_pDialog ) )
+	if ( ui::ILayoutEngine* pDialogCallback = dynamic_cast<ui::ILayoutEngine*>( m_pDialog ) )
 		pDialogCallback->OnCollapseChanged( m_collapsed );
 	return true;
 }
@@ -426,7 +426,7 @@ ui::ILayoutFrame* CLayoutEngine::FindControlLayoutFrame( HWND hCtrl ) const
 {
 	ASSERT_PTR( hCtrl );
 
-	if ( ui::ILayoutFrame* pControlLayoutFrame = dynamic_cast< ui::ILayoutFrame* >( CWnd::FromHandlePermanent( hCtrl ) ) )
+	if ( ui::ILayoutFrame* pControlLayoutFrame = dynamic_cast<ui::ILayoutFrame*>( CWnd::FromHandlePermanent( hCtrl ) ) )
 		return pControlLayoutFrame;
 
 	stdext::hash_map< UINT, ui::ILayoutFrame* >::const_iterator itFound = m_buddyCallbacks.find( ::GetDlgCtrlID( hCtrl ) );
@@ -527,7 +527,7 @@ void CLayoutEngine::DrawBackground( CDC* pDC, const CRect& clientRect )
 		clientRegion.CreateRectRgnIndirect( &clientRect );
 
 		// clip other controls from the background erase region
-		if ( !is_a< CFormView >( m_pDialog ) )					// prevent background erase issues with checkboxes, etc
+		if ( !is_a<CFormView>( m_pDialog ) )					// prevent background erase issues with checkboxes, etc
 			for ( HWND hCtrl = ::GetWindow( m_pDialog->m_hWnd, GW_CHILD ); hCtrl != NULL; hCtrl = ::GetWindow( hCtrl, GW_HWNDNEXT ) )
 				if ( CanClip( hCtrl ) )
 				{

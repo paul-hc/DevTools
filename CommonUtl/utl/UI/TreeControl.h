@@ -69,7 +69,7 @@ public:
 										HTREEITEM hInsertAfter = TVI_LAST, const TCHAR* pText = NULL );		// pText could be LPSTR_TEXTCALLBACK
 
 	template< typename ObjectT >
-	ObjectT* GetItemObject( HTREEITEM hItem ) const { return AsPtr< ObjectT >( GetItemData( hItem ) ); }
+	ObjectT* GetItemObject( HTREEITEM hItem ) const { return AsPtr<ObjectT>( GetItemData( hItem ) ); }
 
 	template< typename ObjectT >
 	void SetItemObject( HTREEITEM hItem, ObjectT* pObject ) { VERIFY( SetItemData( hItem, (DWORD_PTR)pObject ) != FALSE ); }

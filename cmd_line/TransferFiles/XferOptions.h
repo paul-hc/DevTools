@@ -46,7 +46,7 @@ public:
 	std::tstring m_searchSpecs;
 	std::tstring m_excludeWildSpec;						// multiple list separated by ';' or ','
 	std::vector< std::tstring > m_excludeFindSpecs;
-	std::auto_ptr< fs::CPath > m_pBackupDirPath;
+	std::auto_ptr<fs::CPath> m_pBackupDirPath;
 
 	BYTE m_mustHaveFileAttr;
 	BYTE m_mustNotHaveFileAttr;

@@ -26,7 +26,7 @@
 COptionsSheet::COptionsSheet( CFileModel* pFileModel, CWnd* pParent, UINT initialPageIndex /*= UINT_MAX*/ )
 	: CLayoutPropertySheet( _T("Options"), pParent )
 	, m_pFileModel( pFileModel )
-	, m_pFileEditor( dynamic_cast< IFileEditor* >( pParent ) )
+	, m_pFileEditor( dynamic_cast<IFileEditor*>( pParent ) )
 {
 	m_regSection = _T("OptionsSheet");
 	SetTopDlg();
@@ -43,7 +43,7 @@ void COptionsSheet::OnChangesApplied( void )
 		m_pFileModel->SafeExecuteCmd( m_pFileEditor, m_pApplyMacroCmd.release() );
 
 	if ( !CGeneralOptions::Instance().m_undoEditingCmds )
-		checked_static_cast< CCommandService* >( app::GetCmdSvc() )->RemoveCommandsThat( std::not1( pred::IsPersistentCmd() ) );		// was pred::IsNotA< cmd::CFileMacroCmd >()
+		checked_static_cast<CCommandService*>( app::GetCmdSvc() )->RemoveCommandsThat( std::not1( pred::IsPersistentCmd() ) );		// was pred::IsNotA< cmd::CFileMacroCmd >()
 }
 
 
@@ -166,7 +166,7 @@ void CGeneralOptionsPage::OnBnClicked_ResetDefaultAll( void )
 
 void CGeneralOptionsPage::OnBnClicked_OpenCmdDashboard( void )
 {
-	CCmdDashboardDialog dlg( checked_static_cast< const COptionsSheet* >( GetParent() )->GetFileModel(), svc::Undo, this );
+	CCmdDashboardDialog dlg( checked_static_cast<const COptionsSheet*>( GetParent() )->GetFileModel(), svc::Undo, this );
 	dlg.DoModal();
 }
 

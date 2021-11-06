@@ -59,10 +59,10 @@ enum UpdateViewHint
 namespace app
 {
 	template< typename ValueType >
-	inline CObject* ToHintPtr( ValueType pHint ) { return reinterpret_cast< CObject* >( pHint ); }
+	inline CObject* ToHintPtr( ValueType pHint ) { return reinterpret_cast<CObject*>( pHint ); }
 
 	template< typename ValueType >
-	inline ValueType FromHintPtr( CObject* pHint ) { return static_cast< ValueType >( (UINT_PTR)pHint ); }
+	inline ValueType FromHintPtr( CObject* pHint ) { return static_cast<ValueType>( (UINT_PTR)pHint ); }
 }
 
 

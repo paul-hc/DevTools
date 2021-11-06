@@ -78,7 +78,7 @@ bool CCommandService::SafeExecuteCmd( utl::ICommand* pCmd, bool execInline /*= f
 
 	if ( execInline )
 	{
-		std::auto_ptr< utl::ICommand > pEditCmd( pCmd );		// take ownership
+		std::auto_ptr<utl::ICommand> pEditCmd( pCmd );		// take ownership
 		return pEditCmd->Execute();
 	}
 

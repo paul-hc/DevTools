@@ -99,7 +99,7 @@ void CFileEditorBaseDialog::UpdateOkButton( const std::tstring& caption, UINT ic
 int CFileEditorBaseDialog::PopStackRunCrossEditor( svc::StackType stackType )
 {
 	// end this dialog and spawn the foreign dialog editor
-	cmd::CommandType foreignCmdType = static_cast< cmd::CommandType >( m_pCmdSvc->PeekCmd( stackType )->GetTypeID() );
+	cmd::CommandType foreignCmdType = static_cast<cmd::CommandType>( m_pCmdSvc->PeekCmd( stackType )->GetTypeID() );
 	ASSERT( foreignCmdType != m_nativeCmdTypes.front() ); foreignCmdType;
 	ASSERT( m_pCmdSvc->CanUndoRedo( stackType, foreignCmdType ) );
 
@@ -114,14 +114,14 @@ int CFileEditorBaseDialog::PopStackRunCrossEditor( svc::StackType stackType )
 	}
 
 	// we've got a foreign editor to undo/redo
-	std::auto_ptr< IFileEditor > pFileEditor( editorPair.first );
+	std::auto_ptr<IFileEditor> pFileEditor( editorPair.first );
 
 	m_pFileModel->RemoveObserver( this );		// reject further updates
 	OnCancel();									// end this dialog
 
 	pFileEditor->PopStackTop( stackType );
 
-	m_nModalResult = static_cast< int >( pFileEditor->GetDialog()->DoModal() );		// pass the modal result from the spawned editor dialog
+	m_nModalResult = static_cast<int>( pFileEditor->GetDialog()->DoModal() );		// pass the modal result from the spawned editor dialog
 	return m_nModalResult;
 }
 

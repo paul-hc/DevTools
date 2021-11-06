@@ -68,7 +68,7 @@ namespace cmd
 
 		for ( std::vector< utl::ICommand* >::const_iterator itCmd = m_subCommands.begin(); itCmd != m_subCommands.end(); ++itCmd )
 		{
-			CBaseFileCmd* pCmd = checked_static_cast< CBaseFileCmd* >( *itCmd );
+			CBaseFileCmd* pCmd = checked_static_cast<CBaseFileCmd*>( *itCmd );
 			rLines.push_back( pCmd->Format( utl::Detailed ) );
 		}
 	}
@@ -103,7 +103,7 @@ namespace cmd
 	{
 		for ( std::vector< utl::ICommand* >::iterator itCmd = m_subCommands.begin(); itCmd != m_subCommands.end(); )
 		{
-			CBaseFileCmd* pCmd = checked_static_cast< CBaseFileCmd* >( *itCmd );
+			CBaseFileCmd* pCmd = checked_static_cast<CBaseFileCmd*>( *itCmd );
 
 			try
 			{
@@ -169,7 +169,7 @@ namespace cmd
 
 	bool CBaseFileCmd::Unexecute( void )
 	{
-		std::auto_ptr< CBaseFileCmd > pUndoCmd( MakeUnexecuteCmd() );
+		std::auto_ptr<CBaseFileCmd> pUndoCmd( MakeUnexecuteCmd() );
 
 		return pUndoCmd.get() != NULL && pUndoCmd->Execute();
 	}
@@ -237,9 +237,9 @@ bool CRenameFileCmd::Execute( void )
 	return true;
 }
 
-std::auto_ptr< cmd::CBaseFileCmd > CRenameFileCmd::MakeUnexecuteCmd( void ) const
+std::auto_ptr<cmd::CBaseFileCmd> CRenameFileCmd::MakeUnexecuteCmd( void ) const
 {
-	return std::auto_ptr< cmd::CBaseFileCmd >( new CRenameFileCmd( m_destPath, m_srcPath ) );
+	return std::auto_ptr<cmd::CBaseFileCmd>( new CRenameFileCmd( m_destPath, m_srcPath ) );
 }
 
 bool CRenameFileCmd::IsUndoable( void ) const
@@ -293,9 +293,9 @@ bool CTouchFileCmd::Execute( void )
 	return true;
 }
 
-std::auto_ptr< cmd::CBaseFileCmd > CTouchFileCmd::MakeUnexecuteCmd( void ) const
+std::auto_ptr<cmd::CBaseFileCmd> CTouchFileCmd::MakeUnexecuteCmd( void ) const
 {
-	return std::auto_ptr< cmd::CBaseFileCmd >( new CTouchFileCmd( m_destState, m_srcState ) );
+	return std::auto_ptr<cmd::CBaseFileCmd>( new CTouchFileCmd( m_destState, m_srcState ) );
 }
 
 bool CTouchFileCmd::IsUndoable( void ) const

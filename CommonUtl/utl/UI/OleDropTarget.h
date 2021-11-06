@@ -69,7 +69,7 @@ namespace ole
 		void SetScrollPos( CWnd* pWnd, int step, int barId ) const;
 	private:
 		int m_autoScrollFlags;								// auto scroll handling
-		CComPtr< IDropTargetHelper > m_pDropTargetHelper;	// drag image helper (different interface than in shell::CDragImager)
+		CComPtr<IDropTargetHelper> m_pDropTargetHelper;		// drag image helper (different interface than in shell::CDragImager)
 		shell::CDropTip m_dropTip;							// user defined default drop description text
 		ole::IDropTargetEventsStub* m_pTargetEvents;
 

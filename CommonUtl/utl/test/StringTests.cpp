@@ -214,16 +214,16 @@ void CStringTests::TestStringSorting( void )
 		std::vector< const char* > ptrItems;
 		utl::Assign( ptrItems, items, func::ToCharPtr() );
 
-		ASSERT_EQUAL( "A-,AB-,ABC-,ABCD-,a,ab,abc,abcd", ut::ShuffleSortJoin( ptrItems, ",", pred::LessPtr< pred::TCompareCase >() ) );
-		ASSERT_EQUAL( "a,A-,ab,AB-,abc,ABC-,abcd,ABCD-", ut::ShuffleSortJoin( ptrItems, ",", pred::LessPtr< pred::TCompareNoCase >() ) );
+		ASSERT_EQUAL( "A-,AB-,ABC-,ABCD-,a,ab,abc,abcd", ut::ShuffleSortJoin( ptrItems, ",", pred::LessPtr<pred::TCompareCase>() ) );
+		ASSERT_EQUAL( "a,A-,ab,AB-,abc,ABC-,abcd,ABCD-", ut::ShuffleSortJoin( ptrItems, ",", pred::LessPtr<pred::TCompareNoCase>() ) );
 	}
 
 	{
 		std::vector< const wchar_t* > wPtrItems;
 		utl::Assign( wPtrItems, wItems, func::ToCharPtr() );
 
-		ASSERT_EQUAL( L"A-,AB-,ABC-,ABCD-,a,ab,abc,abcd", ut::ShuffleSortJoin( wPtrItems, L",", pred::LessPtr< pred::TCompareCase >() ) );
-		ASSERT_EQUAL( L"a,A-,ab,AB-,abc,ABC-,abcd,ABCD-", ut::ShuffleSortJoin( wPtrItems, L",", pred::LessPtr< pred::TCompareNoCase >() ) );
+		ASSERT_EQUAL( L"A-,AB-,ABC-,ABCD-,a,ab,abc,abcd", ut::ShuffleSortJoin( wPtrItems, L",", pred::LessPtr<pred::TCompareCase>() ) );
+		ASSERT_EQUAL( L"a,A-,ab,AB-,abc,ABC-,abcd,ABCD-", ut::ShuffleSortJoin( wPtrItems, L",", pred::LessPtr<pred::TCompareNoCase>() ) );
 	}
 }
 

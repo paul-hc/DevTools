@@ -29,9 +29,9 @@ public:
 	void UnregisterControl( ICustomDrawControl* pCustomDrawCtrl );
 	void UpdateControls( void );
 private:
-	const CGlyphThumbnailer* GetThumbnailer( ui::GlyphGauge glyphGauge ) const { return const_cast< CFileItemsThumbnailStore* >( this )->GetThumbnailer( glyphGauge ); }
+	const CGlyphThumbnailer* GetThumbnailer( ui::GlyphGauge glyphGauge ) const { return const_cast<CFileItemsThumbnailStore*>( this )->GetThumbnailer( glyphGauge ); }
 private:
-	std::auto_ptr< CGlyphThumbnailer > m_pThumbnailer[ ui::_GlyphGaugeCount ];		// self-encapsulated
+	std::auto_ptr<CGlyphThumbnailer> m_pThumbnailer[ ui::_GlyphGaugeCount ];		// self-encapsulated
 	std::vector< ICustomDrawControl* > m_customDrawCtrls;							// to notify controls of changed glyph metrics
 };
 

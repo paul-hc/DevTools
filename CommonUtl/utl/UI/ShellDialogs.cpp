@@ -28,7 +28,7 @@ namespace shell
 			void StoreDialog( CFileDialog* pFileDlg );
 		public:
 			std::tstring m_fileFilter;
-			std::auto_ptr< CFileDialog > m_pFileDlg;							// Vista style dialog requires COM initialization (done in CFileDialog)
+			std::auto_ptr<CFileDialog> m_pFileDlg;							// Vista style dialog requires COM initialization (done in CFileDialog)
 
 			static const TCHAR s_allFilesFilter[];
 			static stdext::hash_map< std::tstring, int > s_selFilterMap;		// filter text to selected filter index
@@ -117,7 +117,7 @@ namespace shell
 			if ( IFileOpenDialog* pFileOpenDialog = scopedDlg.m_pFileDlg->GetIFileOpenDialog() )
 			{
 				pFileOpenDialog->SetOptions( FOS_PICKFOLDERS | options );
-				pFileOpenDialog->Release();			// ** cannot use CComPtr< IFileOpenDialog > here since CFileDialog::~CFileDialog() fires an assertion any way, shape or form
+				pFileOpenDialog->Release();			// ** cannot use CComPtrIFileOpenDialog > here since CFileDialog::~CFileDialog() fires an assertion any way, shape or form
 			}
 
 		return impl::RunFileDialog( rFilePath, scopedDlg.m_pFileDlg.get() );
@@ -235,7 +235,7 @@ namespace shell
 		CTreeControl* FindBrowseFolderTree( HWND hDlg )
 		{
 			HWND hCtrl = NULL;
-			::EnumChildWindows( hDlg, (WNDENUMPROC)&FindChildTreeCtrlProc, reinterpret_cast< LPARAM >( &hCtrl ) );
+			::EnumChildWindows( hDlg, (WNDENUMPROC)&FindChildTreeCtrlProc, reinterpret_cast<LPARAM>( &hCtrl ) );
 			return hCtrl != NULL ? (CTreeControl*)CWnd::FromHandle( hCtrl ) : NULL;
 		}
 

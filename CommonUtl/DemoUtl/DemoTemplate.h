@@ -116,7 +116,7 @@ protected:
 	virtual void DoDataExchange( CDataExchange* pDX );
 private:
 	enum { MaxDepth = 3 };
-	std::auto_ptr< CDemoTemplate > m_pDemo;
+	std::auto_ptr<CDemoTemplate> m_pDemo;
 };
 
 

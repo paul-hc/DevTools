@@ -23,8 +23,8 @@ namespace fs
 
 	CFileState::CFileState( const ::CFileStatus* pFileStatus )
 		: m_fullPath( pFileStatus->m_szFullName )
-		, m_fileSize( static_cast< UINT64 >( pFileStatus->m_size ) )
-		, m_attributes( static_cast< BYTE >( pFileStatus->m_attribute ) )
+		, m_fileSize( static_cast<UINT64>( pFileStatus->m_size ) )
+		, m_attributes( static_cast<BYTE>( pFileStatus->m_attribute ) )
 		, m_creationTime( pFileStatus->m_ctime )
 		, m_modifTime( pFileStatus->m_mtime )
 		, m_accessTime( pFileStatus->m_atime )
@@ -107,7 +107,7 @@ namespace fs
 		ModifyFileTimes( newStatus, HasFlag( currentAttr, FILE_ATTRIBUTE_DIRECTORY ) );
 
 		DWORD newAttr = currentAttr;
-		SetMaskedValue( newAttr, EDITABLE_ATTRIBUTE_MASK, static_cast< DWORD >( newStatus.m_attribute ) );
+		SetMaskedValue( newAttr, EDITABLE_ATTRIBUTE_MASK, static_cast<DWORD>( newStatus.m_attribute ) );
 
 		if ( newAttr != currentAttr )
 			if ( !::SetFileAttributes( m_fullPath.GetPtr(), newAttr ) )

@@ -150,9 +150,9 @@ bool CShellFileDialog::ReplaceExt( std::tstring& rFilePath, const COMDLG_FILTERS
 	return false;
 }
 
-CComPtr< IFileDialog > CShellFileDialog::GetFileDialog( void )
+CComPtr<IFileDialog> CShellFileDialog::GetFileDialog( void )
 {
-	CComPtr< IFileDialog > pFileDialog;
+	CComPtr<IFileDialog> pFileDialog;
 	pFileDialog.Attach( GetIFileOpenDialog() );			// no additional AddRef on ptr ctor
 
 	if ( NULL == pFileDialog )

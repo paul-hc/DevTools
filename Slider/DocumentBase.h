@@ -50,7 +50,7 @@ void CDocumentBase::UpdateAllViewsOfType( ViewT* pSenderView, int hint /*= 0*/, 
 	ASSERT( NULL == pSenderView || !m_viewList.IsEmpty() );
 	for ( POSITION pos = GetFirstViewPosition(); pos != NULL; )
 	{
-		if ( ViewT* pView = dynamic_cast< ViewT* >( GetNextView( pos ) ) )
+		if ( ViewT* pView = dynamic_cast<ViewT*>( GetNextView( pos ) ) )
 			if ( pView != pSenderView )
 				pView->OnUpdate( pSenderView, hint, pHintObject );
 	}

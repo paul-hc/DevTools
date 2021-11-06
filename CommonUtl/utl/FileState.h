@@ -39,7 +39,7 @@ namespace fs
 
 		// time fields
 		const CTime& GetTimeField( TimeField field ) const;
-		void SetTimeField( const CTime& time, TimeField field ) { const_cast< CTime& >( GetTimeField( field ) ) = time; }
+		void SetTimeField( const CTime& time, TimeField field ) { const_cast<CTime&>( GetTimeField( field ) ) = time; }
 
 		enum ChecksumEvaluation { Compute, CacheCompute, AsIs };
 
@@ -51,7 +51,7 @@ namespace fs
 		void Stream( CArchive& archive );
 
 		friend inline CArchive& operator>>( CArchive& archive, fs::CFileState& rFileState ) { rFileState.Stream( archive ); return archive; }
-		friend inline CArchive& operator<<( CArchive& archive, const fs::CFileState& fileState ) { const_cast< fs::CFileState& >( fileState ).Stream( archive ); return archive; }
+		friend inline CArchive& operator<<( CArchive& archive, const fs::CFileState& fileState ) { const_cast<fs::CFileState&>( fileState ).Stream( archive ); return archive; }
 
 		static const CFlagTags& GetTags_FileAttributes( void );
 	private:

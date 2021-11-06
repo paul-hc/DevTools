@@ -98,8 +98,8 @@ namespace d2d
 		virtual void PostDraw( const CViewCoords& coords );
 	private:
 		std::vector< IGadgetComponent* > m_gadgets;		// composite of gadgets (no ownership)
-		CComPtr< IWICBitmapSource > m_pWicBitmap;		// source bitmap
-		CComPtr< ID2D1Bitmap > m_pBitmap;				// self-encapsulated, released on device loss
+		CComPtr<IWICBitmapSource> m_pWicBitmap;		// source bitmap
+		CComPtr<ID2D1Bitmap> m_pBitmap;				// self-encapsulated, released on device loss
 	};
 
 
@@ -126,7 +126,7 @@ namespace d2d
 		virtual bool CreateDeviceResources( void );
 	private:
 		CWnd* m_pWnd;
-		CComPtr< ID2D1HwndRenderTarget > m_pWndRenderTarget;		// self-encapsulated, released on device loss
+		CComPtr<ID2D1HwndRenderTarget> m_pWndRenderTarget;		// self-encapsulated, released on device loss
 	};
 
 
@@ -154,7 +154,7 @@ namespace d2d
 		virtual bool CreateDeviceResources( void );
 	private:
 		CDC* m_pDC;
-		CComPtr< ID2D1DCRenderTarget > m_pDcRenderTarget;			// self-encapsulated, released on device loss
+		CComPtr<ID2D1DCRenderTarget> m_pDcRenderTarget;			// self-encapsulated, released on device loss
 	};
 }
 

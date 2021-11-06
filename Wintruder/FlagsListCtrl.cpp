@@ -140,7 +140,7 @@ void CFlagsListCtrl::AddFlagItem( int itemIndex, const CFlagInfo* pFlag )
 CFlagGroup* CFlagsListCtrl::GetFlagGroup( int groupId ) const
 {
 	if ( const CFlagStore* pFlagStore = GetFlagStore() )
-		if ( groupId >= 0 && groupId < static_cast< int >( pFlagStore->m_groups.size() ) )
+		if ( groupId >= 0 && groupId < static_cast<int>( pFlagStore->m_groups.size() ) )
 			return pFlagStore->m_groups[ groupId ];
 
 	return NULL;
@@ -155,7 +155,7 @@ int CFlagsListCtrl::FindGroupIdWithFlag( const CFlagInfo* pFlag ) const
 			const std::vector< CFlagGroup* >& groups = pFlagStore->m_groups;
 			std::vector< CFlagGroup* >::const_iterator itGroup = std::find( groups.begin(), groups.end(), pFlag->m_pGroup );
 			if ( itGroup != groups.end() )
-				return static_cast< int >( std::distance( groups.begin(), itGroup ) );
+				return static_cast<int>( std::distance( groups.begin(), itGroup ) );
 		}
 	return -1;
 }
@@ -236,7 +236,7 @@ DWORD CFlagsListCtrl::InputFlags( void ) const
 
 void CFlagsListCtrl::CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARAM rowKey, int subItem, CListLikeCtrlBase* pCtrl ) const
 {
-	const CFlagInfo* pFlag = CReportListControl::AsPtr< CFlagInfo >( rowKey );
+	const CFlagInfo* pFlag = CReportListControl::AsPtr<CFlagInfo>( rowKey );
 	if ( pFlag->IsReadOnly() || pFlag->IsSeparator() )
 		rTextEffect.m_textColor = color::Grey60;
 	else if ( pFlag->IsOn( GetFlags() ) )
@@ -329,8 +329,8 @@ BOOL CFlagsListCtrl::OnLvnLinkClick_Reflect( NMHDR* pNmHdr, LRESULT* pResult )
 		{
 			if ( const CFlagInfo* pValueOn = pFlagGroup->FindOnValue( flags ) )
 			{	// toggle to next value (previous if SHIFT is down)
-				int pos = static_cast< int >( utl::LookupPos( pFlagGroup->GetFlags(), pValueOn ) );
-				pos = utl::CircularAdvance( pos, static_cast< int >( pFlagGroup->GetFlags().size() ), !ui::IsKeyPressed( VK_SHIFT ) );
+				int pos = static_cast<int>( utl::LookupPos( pFlagGroup->GetFlags(), pValueOn ) );
+				pos = utl::CircularAdvance( pos, static_cast<int>( pFlagGroup->GetFlags().size() ), !ui::IsKeyPressed( VK_SHIFT ) );
 				pFlagGroup->GetFlags()[ pos ]->SetTo( &flags, true );
 			}
 		}

@@ -30,7 +30,7 @@ private:
 	PromptField m_promptField;
 private:
 	// enum { IDD = IDD_GENERAL_PAGE };
-	std::auto_ptr< CInfoEditBox > m_pInfoEdit;
+	std::auto_ptr<CInfoEditBox> m_pInfoEdit;
 	CButton m_drillButton;
 protected:
 	virtual void DoDataExchange( CDataExchange* pDX );

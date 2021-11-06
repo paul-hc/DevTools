@@ -35,8 +35,8 @@ namespace shell
 		bool SetFromBitmap( CBitmap& rBitmap, COLORREF transpColor, const POINT* pOrigin = NULL );
 	private:
 		IDataObject* m_pDataObject;								// has the cached data formats (for selection), coming from COleDataSource back-pointer
-		CComPtr< IDragSourceHelper > m_pDragSourceHelper;		// drag image helper
-		CComPtr< IDragSourceHelper2 > m_pDragSourceHelper2;		// drag image helper 2 (SetFlags method, Vista+)
+		CComPtr<IDragSourceHelper> m_pDragSourceHelper;		// drag image helper
+		CComPtr<IDragSourceHelper2> m_pDragSourceHelper2;		// drag image helper 2 (SetFlags method, Vista+)
 	};
 }
 

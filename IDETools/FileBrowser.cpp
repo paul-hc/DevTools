@@ -103,7 +103,7 @@ void CFolderItem::SearchForFiles( RecursionDepth depth, CPathIndex* pPathIndex )
 		for ( std::vector< fs::CPath >::const_iterator itSubDirPath = found.m_subDirPaths.begin(); itSubDirPath != found.m_subDirPaths.end(); ++itSubDirPath )
 			if ( NULL == pPathIndex || pPathIndex->RegisterUnique( *itSubDirPath ) )
 			{
-				std::auto_ptr< CFolderItem > pNewFolder( new CFolderItem( this, *itSubDirPath ) );
+				std::auto_ptr<CFolderItem> pNewFolder( new CFolderItem( this, *itSubDirPath ) );
 
 				pNewFolder->SearchForFiles( Deep, pPathIndex );
 				if ( pNewFolder->HasAnyLeafs() )
@@ -618,7 +618,7 @@ bool CFileBrowser::AddFolder( const fs::CPath& folderPathFilter, const std::tstr
 	if ( m_pPathIndex.get() != NULL && !m_pPathIndex->RegisterUnique( folderPathFilter ) )
 		return false;
 
-	std::auto_ptr< CFolderItem > pNewFolder( new CFolderItem( m_pRootFolderItem.get(), folderPath, folderPathFilter.GetFilename(), folderAlias ) );
+	std::auto_ptr<CFolderItem> pNewFolder( new CFolderItem( m_pRootFolderItem.get(), folderPath, folderPathFilter.GetFilename(), folderAlias ) );
 
 	pNewFolder->SearchForFiles( m_options.m_recurseFolders ? Deep : Shallow, m_pPathIndex.get() );
 	if ( !pNewFolder->HasAnyLeafs() )

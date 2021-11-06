@@ -17,7 +17,7 @@ public:
 	virtual ~CMainDialog();
 private:
 	CWndSpot m_selWnd;
-	std::auto_ptr< CWndHighlighter > m_pHighlighter;
+	std::auto_ptr<CWndHighlighter> m_pHighlighter;
 private:
 	// enum { IDD = IDD_MAIN_DIALOG };
 
