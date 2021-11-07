@@ -23,6 +23,7 @@
 #endif
 
 #include "utl/Resequence.hxx"
+#include "utl/UI/BaseItemTooltipsCtrl.hxx"
 
 
 namespace dbg
@@ -61,7 +62,7 @@ CSize CAlbumThumbListView::scrollTimerDivider( 3, 2 );
 IMPLEMENT_DYNCREATE( CAlbumThumbListView, CCtrlView )
 
 CAlbumThumbListView::CAlbumThumbListView( void )
-	: CCtrlView( _T("LISTBOX"), AFX_WS_DEFAULT_VIEW )
+	: CBaseItemTooltipsCtrl<CBaseCtrlView>()
 	, CObjectCtrlBase( this )
 	, m_autoDelete( true )
 	, m_pAlbumModel( NULL )
@@ -74,6 +75,8 @@ CAlbumThumbListView::CAlbumThumbListView( void )
 	, m_scrollTimerCounter( 0, 0 )
 	, m_selectionBackup( StoreByString )
 {
+	ConstructView( _T("LISTBOX"), AFX_WS_DEFAULT_VIEW );
+
 	SetTrackMenuTarget( app::GetMainFrame() );
 	m_selBkThemeItem.SetStateId( CThemeItem::Hot, LVGH_CLOSESELECTEDHOT );
 
@@ -82,6 +85,35 @@ CAlbumThumbListView::CAlbumThumbListView( void )
 
 CAlbumThumbListView::~CAlbumThumbListView()
 {
+}
+
+utl::ISubject* CAlbumThumbListView::GetItemSubjectAt( int index ) const
+{
+	if ( !IsValidImageIndex( index ) )
+		return NULL;					// index violation, could happen in transient draws
+
+	return const_cast<CFileAttr*>( m_pAlbumModel->GetFileAttr( index ) );
+}
+
+CRect CAlbumThumbListView::GetItemRectAt( int index ) const
+{
+	CListBox* pListBox = AsListBox();
+	CRect itemRect;
+
+	if ( LB_ERR == pListBox->GetItemRect( index, &itemRect ) )
+		itemRect.SetRectEmpty();
+
+	return itemRect;
+}
+
+int CAlbumThumbListView::GetItemFromPoint( const CPoint& clientPos ) const
+{
+	BOOL isOutside = FALSE;
+	int hitIndex = AsListBox()->ItemFromPoint( clientPos, isOutside );
+
+	if ( isOutside )
+		hitIndex = LB_ERR;
+	return hitIndex;
 }
 
 void CAlbumThumbListView::StorePeerView( CAlbumImageView* pPeerImageView )
@@ -307,6 +339,7 @@ bool CAlbumThumbListView::NotifySelChange( void )
 
 bool CAlbumThumbListView::BackupSelection( bool currentSelection /*= true*/ )
 {
+	const CFileAttr* pFirstFileAttr = GetItemObjectAt<CFileAttr>( 0 );
 	bool hasSel = false;
 
 	m_selectionBackup.Clear();
@@ -316,7 +349,7 @@ bool CAlbumThumbListView::BackupSelection( bool currentSelection /*= true*/ )
 		if ( !m_selectionBackup.IsEmpty() )
 			hasSel = true;
 		else if ( m_pAlbumModel->AnyFoundFiles() )
-			m_selectionBackup.m_pStringImpl->m_selItems.push_back( m_pAlbumModel->GetFileAttr( 0 )->GetPath().Get() ), hasSel = true;
+			m_selectionBackup.m_pStringImpl->m_selItems.push_back( pFirstFileAttr->GetPath().Get() ), hasSel = true;
 	}
 	else
 	{	// backup the OUTER selection lvState
@@ -328,19 +361,19 @@ bool CAlbumThumbListView::BackupSelection( bool currentSelection /*= true*/ )
 
 		if ( indexesState.IsEmpty() )
 		{	// no selection: assume first item selected
-			if ( m_pAlbumModel->GetFileAttrCount() > 0 && m_pAlbumModel->GetFileAttr( 0 )->IsValid() )
-				m_selectionBackup.m_pStringImpl->m_selItems.push_back( m_pAlbumModel->GetFileAttr( 0 )->GetPath().Get() ), hasSel = true;
+			if ( m_pAlbumModel->GetFileAttrCount() > 0 && pFirstFileAttr->IsValid() )
+				m_selectionBackup.m_pStringImpl->m_selItems.push_back( pFirstFileAttr->GetPath().Get() ), hasSel = true;
 		}
 		else
 		{	// search for a valid file next to selection
 			for ( nextSelIndex = selIndexes.back() + 1; !hasSel && nextSelIndex < m_pAlbumModel->GetFileAttrCount(); ++nextSelIndex )
-				if ( m_pAlbumModel->GetFileAttr( nextSelIndex )->IsValid() )
-					m_selectionBackup.m_pStringImpl->m_selItems.push_back( m_pAlbumModel->GetFileAttr( nextSelIndex )->GetPath().Get() ), hasSel = true;
+				if ( GetItemObjectAt<CFileAttr>( nextSelIndex )->IsValid() )
+					m_selectionBackup.m_pStringImpl->m_selItems.push_back( GetItemObjectAt<CFileAttr>( nextSelIndex )->GetPath().Get() ), hasSel = true;
 
 			// Search for a valid file prior to selection
 			for ( nextSelIndex = selIndexes.front() - 1; !hasSel && nextSelIndex >= 0; --nextSelIndex )
-				if ( m_pAlbumModel->GetFileAttr( nextSelIndex )->IsValid() )
-					m_selectionBackup.m_pStringImpl->m_selItems.push_back( m_pAlbumModel->GetFileAttr( nextSelIndex )->GetPath().Get() ), hasSel = true;
+				if ( GetItemObjectAt<CFileAttr>( nextSelIndex )->IsValid() )
+					m_selectionBackup.m_pStringImpl->m_selItems.push_back( GetItemObjectAt<CFileAttr>( nextSelIndex )->GetPath().Get() ), hasSel = true;
 		}
 
 		// set caret to the selected item (outer selection)
@@ -349,7 +382,7 @@ bool CAlbumThumbListView::BackupSelection( bool currentSelection /*= true*/ )
 
 		// copy top from index to string
 		if ( indexesState.m_pIndexImpl->m_top != -1 )
-			m_selectionBackup.m_pStringImpl->m_top = m_pAlbumModel->GetFileAttr( indexesState.m_pIndexImpl->m_top )->GetPath().Get();
+			m_selectionBackup.m_pStringImpl->m_top = GetItemObjectAt<CFileAttr>( indexesState.m_pIndexImpl->m_top )->GetPath().Get();
 	}
 
 	TRACE( _T(" ** Backup %s Selection for: %s **\nm_selectionBackup=%s\n"),
@@ -363,7 +396,7 @@ void CAlbumThumbListView::RestoreSelection( void )
 	// Last chance: select the first file if no selection backup
 	if ( m_selectionBackup.IsEmpty() )
 		if ( m_pAlbumModel->AnyFoundFiles() )
-			m_selectionBackup.m_pStringImpl->m_selItems.push_back( m_pAlbumModel->GetFileAttr( 0 )->GetPath().Get() );
+			m_selectionBackup.m_pStringImpl->m_selItems.push_back( GetItemObjectAt<CFileAttr>( 0 )->GetPath().Get() );
 
 	TRACE( _T(" ** Restore Selection for frame: %s **\nm_selectionBackup=%s\n"),
 		ui::GetWindowText( GetParentFrame()->m_hWnd ).c_str(), m_selectionBackup.dbgFormat().c_str() );
@@ -382,28 +415,18 @@ bool CAlbumThumbListView::SelectionOverlapsWith( const std::vector< int >& displ
 
 	if ( !currSelection.IsEmpty() && !displayIndexes.empty() )
 		for ( size_t i = 0; i != displayIndexes.size(); ++i )
-			if ( utl::Contains( currSelection.m_pStringImpl->m_selItems, m_pAlbumModel->GetFileAttr( displayIndexes[ i ] )->GetPath().Get() ) )
+			if ( utl::Contains( currSelection.m_pStringImpl->m_selItems, GetItemObjectAt<CFileAttr>( displayIndexes[ i ] )->GetPath().Get() ) )
 				return true;
 
 	return false;
 }
 
-int CAlbumThumbListView::GetImageIndexFromPoint( CPoint& clientPos ) const
-{
-	BOOL isOutside = TRUE;
-	int hitIndex = AsListBox()->ItemFromPoint( clientPos, isOutside );
-
-	if ( isOutside )
-		hitIndex = LB_ERR;
-	return hitIndex;
-}
-
 bool CAlbumThumbListView::IsValidFileAt( size_t displayIndex ) const
 {
-	if ( !IsValidImageIndex( displayIndex ) )
-		return false;
+	if ( const CFileAttr* pFileAttr = GetItemObjectAt<CFileAttr>( displayIndex ) )
+		return pFileAttr->GetPath().FileExist();
 
-	return m_pAlbumModel->GetFileAttr( displayIndex )->GetPath().FileExist();
+	return false;
 }
 
 int CAlbumThumbListView::GetPointedImageIndex( void ) const
@@ -411,7 +434,7 @@ int CAlbumThumbListView::GetPointedImageIndex( void ) const
 	CPoint pos;
 	GetCursorPos( &pos );
 	ScreenToClient( &pos );
-	return GetImageIndexFromPoint( pos );
+	return GetItemFromPoint( pos );
 }
 
 void CAlbumThumbListView::MeasureItem( MEASUREITEMSTRUCT* pMIS )
@@ -720,8 +743,7 @@ void CAlbumThumbListView::EnsureCaptionFontCreated( void )
 	{
 		NONCLIENTMETRICS ncMetrics;
 
-		ZeroMemory( &ncMetrics, sizeof( NONCLIENTMETRICS ) );
-		ncMetrics.cbSize = sizeof( NONCLIENTMETRICS );
+		utl::ZeroWinStruct( &ncMetrics );
 		::SystemParametersInfo( SPI_GETNONCLIENTMETRICS, 0, &ncMetrics, 0 );
 		s_fontCaption.CreateFontIndirect( &ncMetrics.lfStatusFont );
 		s_fontHeight = abs( ncMetrics.lfStatusFont.lfHeight );
@@ -730,22 +752,19 @@ void CAlbumThumbListView::EnsureCaptionFontCreated( void )
 
 CWicDibSection* CAlbumThumbListView::GetItemThumb( int displayIndex ) const throws_()
 {
-	if ( !IsValidImageIndex( displayIndex ) )
-		return NULL;					// index violation, could happen in transient draws
+	if ( const fs::CFlexPath* pItemPath = GetItemPath( displayIndex ) )
+		if ( !pItemPath->IsEmpty() )
+			return app::GetThumbnailer()->AcquireThumbnailNoThrow( *pItemPath );
 
-	const fs::CFlexPath& imageFilePath = m_pAlbumModel->GetFileAttr( displayIndex )->GetPath();
-	if ( imageFilePath.IsEmpty() )
-		return NULL;
-
-	return app::GetThumbnailer()->AcquireThumbnailNoThrow( imageFilePath );
+	return NULL;
 }
 
 const fs::CFlexPath* CAlbumThumbListView::GetItemPath( int displayIndex ) const
 {
-	if ( !IsValidImageIndex( displayIndex ) )
-		return NULL;					// Index violation, could happen in transient draws
+	if ( const CFileAttr* pFileAttr = GetItemObjectAt<CFileAttr>( displayIndex ) )
+		return &pFileAttr->GetPath();
 
-	return &m_pAlbumModel->GetFileAttr( displayIndex )->GetPath();
+	return NULL;
 }
 
 CSize CAlbumThumbListView::GetPageItemCounts( void ) const
@@ -824,7 +843,7 @@ DROPEFFECT CAlbumThumbListView::OnDragOver( COleDataObject* pDataObject, DWORD k
 	if ( selData.ExtractFrom( pDataObject ) && selData.IsValid() )
 		if ( selData.m_pSrcWnd != NULL /*&& selData.m_pThumbView->GetAlbumDoc() == GetAlbumDoc()*/ )		// custom order D&D is allowed only between views of the same document
 		{
-			int dropIndex = GetImageIndexFromPoint( point );
+			int dropIndex = GetItemFromPoint( point );
 			if ( -1 == dropIndex )
 				dropIndex = static_cast<int>( m_pAlbumModel->GetFileAttrCount() );			// drop append to end
 
@@ -846,7 +865,7 @@ BOOL CAlbumThumbListView::OnDrop( COleDataObject* pDataObject, DROPEFFECT dropEf
 		return FALSE;
 
 	CAlbumDoc* pAlbumDoc = GetAlbumDoc();
-	int dropIndex = GetImageIndexFromPoint( point );
+	int dropIndex = GetItemFromPoint( point );
 
 	// custom order drag&drop was allowed only between views of the same document... TODO
 	if ( CAlbumThumbListView* pThumbView = dynamic_cast<CAlbumThumbListView*>( selData.m_pSrcWnd ) )
@@ -1014,7 +1033,7 @@ BOOL CAlbumThumbListView::OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHAND
 
 // message handlers
 
-BEGIN_MESSAGE_MAP( CAlbumThumbListView, CCtrlView )
+BEGIN_MESSAGE_MAP( CAlbumThumbListView, TBaseClass )
 	ON_WM_CREATE()
 	ON_WM_CTLCOLOR_REFLECT()
 	ON_WM_DROPFILES()
@@ -1036,11 +1055,15 @@ BOOL CAlbumThumbListView::OnChildNotify( UINT message, WPARAM wParam, LPARAM lPa
 	UNUSED( pResult );
 	switch ( message )
 	{
-		case WM_MEASUREITEM: MeasureItem( (MEASUREITEMSTRUCT*)lParam ); break;
-		case WM_DRAWITEM: DrawItem( (DRAWITEMSTRUCT*)lParam ); break;
-		default: return __super::OnChildNotify( message, wParam, lParam, pResult );
+		case WM_MEASUREITEM:
+			MeasureItem( (MEASUREITEMSTRUCT*)lParam );
+			return TRUE;
+		case WM_DRAWITEM:
+			DrawItem( (DRAWITEMSTRUCT*)lParam );
+			return TRUE;
+		default:
+			return __super::OnChildNotify( message, wParam, lParam, pResult );
 	}
-	return TRUE;
 }
 
 int CAlbumThumbListView::OnCreate( CREATESTRUCT* pCS )
@@ -1083,7 +1106,7 @@ void CAlbumThumbListView::OnLButtonDown( UINT mkFlags, CPoint point )
 	__super::OnLButtonDown( mkFlags, point );
 
 	// prepare the drag rect
-	int dragDropIndex = GetImageIndexFromPoint( point );
+	int dragDropIndex = GetItemFromPoint( point );
 	if ( dragDropIndex != LB_ERR )
 	{	// enter the drag-capture lvState
 		ASSERT( m_startDragRect.IsRectNull() && !m_beginDragTimer.IsStarted() );
@@ -1103,7 +1126,7 @@ void CAlbumThumbListView::OnLButtonUp( UINT mkFlags, CPoint point )
 
 void CAlbumThumbListView::OnRButtonDown( UINT mkFlags, CPoint point )
 {
-	int hitIndex = GetImageIndexFromPoint( point );
+	int hitIndex = GetItemFromPoint( point );
 	CListBox* pListBox = AsListBox();
 	if ( hitIndex != LB_ERR )
 		if ( !pListBox->GetSel( hitIndex ) )

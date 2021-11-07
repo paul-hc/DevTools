@@ -4,6 +4,7 @@
 #include "LayoutEngine.h"
 #include "CmdInfoStore.h"
 #include "CmdUpdate.h"
+#include "ui_fwd.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -69,8 +70,8 @@ BEGIN_MESSAGE_MAP( CLayoutFormView, CFormView )
 	ON_WM_SIZE()
 	ON_WM_INITMENUPOPUP()
 	ON_WM_ERASEBKGND()
-	ON_NOTIFY_EX_RANGE( TTN_NEEDTEXTW, 0, 0xFFFF, OnTtnNeedText )
-	ON_NOTIFY_EX_RANGE( TTN_NEEDTEXTA, 0, 0xFFFF, OnTtnNeedText )
+	ON_NOTIFY_EX_RANGE( TTN_NEEDTEXTW, ui::MinCmdId, ui::MaxCmdId, OnTtnNeedText )
+	ON_NOTIFY_EX_RANGE( TTN_NEEDTEXTA, ui::MinCmdId, ui::MaxCmdId, OnTtnNeedText )
 END_MESSAGE_MAP()
 
 BOOL CLayoutFormView::OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo )

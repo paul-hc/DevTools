@@ -1230,6 +1230,14 @@
 					>
 				</File>
 				<File
+					RelativePath=".\BaseItemTooltipsCtrl.h"
+					>
+				</File>
+				<File
+					RelativePath=".\BaseItemTooltipsCtrl.hxx"
+					>
+				</File>
+				<File
 					RelativePath=".\BaseSplitButton.cpp"
 					>
 				</File>

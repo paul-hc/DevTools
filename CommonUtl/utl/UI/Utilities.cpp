@@ -330,6 +330,26 @@ namespace ui
 
 namespace ui
 {
+	void SetThreadTooltipCtrl( CToolTipCtrl* pTooltipCtrl )
+	{
+		CToolTipCtrl* pOldTooltipCtrl = ui::GetThreadTooltipCtrl();
+
+		if ( pTooltipCtrl != pOldTooltipCtrl && pOldTooltipCtrl != NULL )
+		{
+			pOldTooltipCtrl->DestroyWindow();
+			delete pOldTooltipCtrl;
+		}
+
+		if ( pTooltipCtrl->GetSafeHwnd() != NULL )
+			pTooltipCtrl->SendMessage( TTM_ACTIVATE, false );
+
+		AfxGetModuleThreadState()->m_pToolTip = pTooltipCtrl;
+	}
+}
+
+
+namespace ui
+{
 	HWND GetTopLevelParent( HWND hWnd )
 	{
 		while ( hWnd != NULL )

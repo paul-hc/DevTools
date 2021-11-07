@@ -2,7 +2,7 @@
 #define FileAttr_h
 #pragma once
 
-#include "utl/Subject.h"
+#include "utl/PathItemBase.h"
 #include "utl/UI/ImagePathKey.h"
 #include "FileAttr_fwd.h"
 
@@ -13,13 +13,12 @@ namespace wic { enum ImageFormat; }
 namespace app { enum ModelSchema; }
 
 
-class CFileAttr : public CSubject
+class CFileAttr : public CPathItemBase
 {
 public:
 	CFileAttr( void );
 	CFileAttr( const fs::CPath& filePath );				// only for concrete files
 	CFileAttr( const fs::CFileState& streamState );
-	CFileAttr( const CFileFind& foundFile );			// get file attributes
 	virtual ~CFileAttr();
 
 	// utl::ISubject interface

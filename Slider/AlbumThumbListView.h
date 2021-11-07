@@ -4,6 +4,7 @@
 
 #include "AlbumModel.h"
 #include "ListViewState.h"
+#include "utl/UI/BaseItemTooltipsCtrl.h"
 #include "utl/UI/ObjectCtrlBase.h"
 #include "utl/UI/OleDragDrop_fwd.h"
 #include "utl/UI/OleDropTarget.h"
@@ -17,13 +18,20 @@ class CSplitterWindow;
 class CWicDibSection;
 
 
-class CAlbumThumbListView : public CCtrlView
+class CAlbumThumbListView : public CBaseItemTooltipsCtrl<CBaseCtrlView>
 						  , public CObjectCtrlBase
 {
+	typedef CBaseItemTooltipsCtrl<CBaseCtrlView> TBaseClass;
+
 	DECLARE_DYNCREATE( CAlbumThumbListView )
 protected:
 	CAlbumThumbListView( void );
 	virtual ~CAlbumThumbListView();
+private:
+	// CBaseItemTooltipsCtrl item interface
+	virtual utl::ISubject* GetItemSubjectAt( int index ) const;
+	virtual CRect GetItemRectAt( int index ) const;
+	virtual int GetItemFromPoint( const CPoint& clientPos ) const;
 public:
 	void StorePeerView( CAlbumImageView* pPeerImageView );
 
@@ -69,7 +77,6 @@ private:
 	bool DoDragDrop( void );
 	void CancelDragCapture( void );
 
-	int GetImageIndexFromPoint( CPoint& clientPos ) const;
 	bool IsValidImageIndex( size_t displayIndex ) const { return m_pAlbumModel != NULL && displayIndex < m_pAlbumModel->GetFileAttrCount(); }
 	bool IsValidFileAt( size_t displayIndex ) const;
 

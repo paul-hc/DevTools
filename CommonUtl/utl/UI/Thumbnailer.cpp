@@ -118,8 +118,9 @@ CCachedThumbBitmap* CShellThumbCache::GenerateThumb( const ShellItemPair& imageP
 			if ( CComPtr<IWICBitmapSource> pUnscaledBitmap = wic::cvt::ToWicBitmap( hThumbBitmap ) )
 				return NewScaledThumb( pUnscaledBitmap, imagePair.first, NULL );
 
-		// thumbnail not cached by Explorer, extract it
-		return ExtractThumb( imagePair );
+		// Note: even with SIIGBF_THUMBNAILONLY flag set in m_thumbExtractFlags, it doesn't force Explorer to generate the thumb!
+		// This may be caused to UAC user elevation issues.
+		TRACE( _T(" (!) Thumbnail not yet cached by Explorer for: %s"), imagePair.first.GetPtr() );
 	}
 
 	return NULL;

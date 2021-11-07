@@ -44,7 +44,8 @@ namespace serial
 // CFileAttr implementation
 
 CFileAttr::CFileAttr( void )
-	: m_imageFormat( wic::UnknownImageFormat )
+	: CPathItemBase( fs::CPath() )
+	, m_imageFormat( wic::UnknownImageFormat )
 	, m_lastModifTime( CFileTime() )		// { 0, 0 }
 	, m_fileSize( 0 )
 	, m_imageDim( 0, 0 )
@@ -53,7 +54,8 @@ CFileAttr::CFileAttr( void )
 }
 
 CFileAttr::CFileAttr( const fs::CPath& filePath )
-	: m_pathKey( filePath.Get(), 0 )
+	: CPathItemBase( filePath )
+	, m_pathKey( filePath.Get(), 0 )
 	, m_imageFormat( wic::FindFileImageFormat( GetPath().GetPtr() ) )
 	, m_lastModifTime( CFileTime() )		// { 0, 0 }
 	, m_fileSize( 0 )
@@ -66,23 +68,14 @@ CFileAttr::CFileAttr( const fs::CPath& filePath )
 }
 
 CFileAttr::CFileAttr( const fs::CFileState& streamState )
-	: m_pathKey( streamState.m_fullPath.Get(), 0 )
+	: CPathItemBase( streamState.m_fullPath )
+	, m_pathKey( streamState.m_fullPath.Get(), 0 )
 	, m_imageFormat( wic::FindFileImageFormat( GetPath().GetPtr() ) )
 	, m_lastModifTime( CFileTime( streamState.m_modifTime.GetTime() ) )
 	, m_fileSize( static_cast<UINT>( streamState.m_fileSize ) )
 	, m_imageDim( 0, 0 )
 	, m_baselinePos( utl::npos )
 {
-}
-
-CFileAttr::CFileAttr( const CFileFind& foundFile )
-	: m_pathKey( fs::CFlexPath( foundFile.GetFilePath().GetString() ), 0 )
-	, m_imageFormat( wic::FindFileImageFormat( GetPath().GetPtr() ) )
-	, m_fileSize( static_cast<UINT>( foundFile.GetLength() ) )
-	, m_imageDim( 0, 0 )
-	, m_baselinePos( utl::npos )
-{
-	foundFile.GetLastWriteTime( &m_lastModifTime );
 }
 
 CFileAttr::~CFileAttr()

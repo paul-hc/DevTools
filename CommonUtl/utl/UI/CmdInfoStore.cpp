@@ -142,7 +142,7 @@ namespace ui
 			 ( m_pTttW != NULL && HasFlag( m_pTttW->uFlags, TTF_IDISHWND ) ) )
 		{
 			m_hCtrl = (HWND)pNmHdr->idFrom;						// idFrom is actually the HWND of the tool
-			m_cmdId = (UINT)(WORD)::GetDlgCtrlID( m_hCtrl );
+			m_cmdId = ui::ToCmdId( ::GetDlgCtrlID( m_hCtrl ) );
 		}
 	}
 
