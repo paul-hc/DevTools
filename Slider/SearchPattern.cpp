@@ -176,7 +176,7 @@ void CSearchPattern::EnumImageFiles( fs::IEnumerator* pEnumerator ) const
 	{
 		case DirPath:
 		{
-			fs::TEnumFlags origFlags = pEnumerator->GetFlags();
+			fs::TEnumFlags origFlags = pEnumerator->GetEnumFlags();
 			fs::TEnumFlags& rEnumFlags = checked_static_cast<fs::CBaseEnumerator*>( pEnumerator )->RefFlags();
 
 			rEnumFlags.Set( fs::EF_Recurse, RecurseSubDirs == m_searchMode );
@@ -187,7 +187,7 @@ void CSearchPattern::EnumImageFiles( fs::IEnumerator* pEnumerator ) const
 		}
 		case AlbumFile:
 		case SingleImage:
-			pEnumerator->AddFoundFile( GetFilePath().GetPtr() );
+			pEnumerator->AddFoundFile( GetFilePath() );
 			break;
 	}
 }

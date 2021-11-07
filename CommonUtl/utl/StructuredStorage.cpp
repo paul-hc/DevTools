@@ -555,7 +555,7 @@ namespace fs
 				case STGTY_STREAM:
 				{
 					fs::TEmbeddedPath streamPath = embeddedPath / stat.pwcsName;
-					pEnumerator->AddFoundFile( streamPath.GetPtr() );
+					pEnumerator->AddFoundFile( streamPath );
 					break;
 				}
 			}
@@ -569,7 +569,7 @@ namespace fs
 		for ( std::vector< fs::TStgSubDirPath >::const_iterator itSubStgName = subStgNames.begin(); itSubStgName != subStgNames.end(); ++itSubStgName )
 		{
 			fs::TEmbeddedPath subDirPath = embeddedPath / *itSubStgName;
-			if ( pEnumerator->AddFoundSubDir( subDirPath.GetPtr() ) )		// sub-storage is not ignored?
+			if ( pEnumerator->AddFoundSubDir( subDirPath ) )		// sub-storage is not ignored?
 				if ( Deep == depth && !pEnumerator->MustStop() )
 				{
 					m_cwdTrail.Push( OpenDir( itSubStgName->GetPtr() ) );

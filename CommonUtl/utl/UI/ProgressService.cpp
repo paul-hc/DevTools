@@ -59,13 +59,13 @@ void CProgressService::OnAddFileInfo( const fs::CFileState& fileState )
 	ASSERT( false );		// normally should not be chained for progess; AddFoundFile() should be called instead
 }
 
-void CProgressService::AddFoundFile( const TCHAR* pFilePath ) throws_( CUserAbortedException )
+void CProgressService::AddFoundFile( const fs::CPath& filePath ) throws_( CUserAbortedException )
 {
-	GetService()->AdvanceItem( pFilePath );
+	GetService()->AdvanceItem( filePath.GetPtr() );
 }
 
-bool CProgressService::AddFoundSubDir( const TCHAR* pSubDirPath ) throws_( CUserAbortedException )
+bool CProgressService::AddFoundSubDir( const fs::CPath& subDirPath ) throws_( CUserAbortedException )
 {
-	GetService()->AdvanceStage( pSubDirPath );
+	GetService()->AdvanceStage( subDirPath.GetPtr() );
 	return true;
 }

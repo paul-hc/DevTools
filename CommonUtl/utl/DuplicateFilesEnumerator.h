@@ -36,7 +36,7 @@ public:
 protected:
 	// IEnumerator interface overrides
 	virtual void OnAddFileInfo( const fs::CFileState& fileState );
-	virtual void AddFoundFile( const TCHAR* pFilePath );
+	virtual void AddFoundFile( const fs::CPath& filePath );
 private:
 	void GroupByCrc32( void );
 

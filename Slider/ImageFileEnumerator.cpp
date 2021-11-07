@@ -42,7 +42,7 @@ void CImageFileEnumerator::Search( const std::vector< CSearchPattern* >& searchP
 			const size_t oldFoundSize = m_foundImages.GetFileAttrs().size();
 
 			if ( m_pChainEnum != NULL && m_pCurrPattern->IsDirPath() )
-				m_pChainEnum->AddFoundSubDir( m_pCurrPattern->GetFilePath().GetPtr() );		// progress only: advance stage to the root directory
+				m_pChainEnum->AddFoundSubDir( m_pCurrPattern->GetFilePath() );		// progress only: advance stage to the root directory
 
 			m_pCurrPattern->EnumImageFiles( this );
 
@@ -84,7 +84,7 @@ void CImageFileEnumerator::SearchCatalogStorage( const fs::TStgDocPath& docStgPa
 
 	m_issueStore.Reset( _T("Querying storage for images") );
 
-	AddFoundFile( docStgPath.GetPtr() );
+	AddFoundFile( docStgPath );
 }
 
 void CImageFileEnumerator::SwapFoundImages( CImagesModel& rImagesModel )
@@ -120,7 +120,7 @@ bool CImageFileEnumerator::Push( CFileAttr* pFileAttr )
 		return false;			// found duplicate image path (could happen with multiple embedded albums referencing the same image)
 
 	if ( m_pChainEnum != NULL )
-		m_pChainEnum->AddFoundFile( pFileAttr->GetPath().GetPtr() );
+		m_pChainEnum->AddFoundFile( pFileAttr->GetPath() );
 
 //Sleep( 100 );			// debug progress bar
 	return true;
@@ -138,16 +138,14 @@ void CImageFileEnumerator::OnAddFileInfo( const fs::CFileState& fileState )
 	if ( app::IsAlbumFile( fileState.m_fullPath.GetPtr() ) )		// found a catalog storage?
 	{
 		if ( CanRecurse() )		// treat found storages as sub-directories
-			AddFoundFile( fileState.m_fullPath.GetPtr() );
+			AddFoundFile( fileState.m_fullPath );
 	}
 	else
 		Push( new CFileAttr( fileState ) );
 }
 
-void CImageFileEnumerator::AddFoundFile( const TCHAR* pFilePath )
+void CImageFileEnumerator::AddFoundFile( const fs::CPath& filePath )
 {
-	fs::CPath filePath( pFilePath );
-
 	if ( app::IsAlbumFile( filePath.GetPtr() ) )
 	{
 		// found an album (slide file or compound image catalog storage): load its metadata as found images
@@ -156,10 +154,10 @@ void CImageFileEnumerator::AddFoundFile( const TCHAR* pFilePath )
 		std::auto_ptr<CAlbumDoc> pAlbumDoc = CAlbumDoc::LoadAlbumDocument( filePath );
 		if ( pAlbumDoc.get() != NULL )
 		{
-			AddFoundSubDir( filePath.GetPtr() );							// an album counts as a sub-directory
+			AddFoundSubDir( filePath );									// an album counts as a sub-directory
 
 			std::vector< CFileAttr* > albumFileAttrs;
-			pAlbumDoc->RefModel()->SwapFileAttrs( albumFileAttrs );			// take ownership of found image attributes
+			pAlbumDoc->RefModel()->SwapFileAttrs( albumFileAttrs );		// take ownership of found image attributes
 
 			if ( !albumFileAttrs.empty() )
 			{

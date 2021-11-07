@@ -36,10 +36,10 @@ namespace fs
 
 	interface IEnumerator
 	{
-		virtual const TEnumFlags& GetFlags( void ) const = 0;
+		virtual const TEnumFlags& GetEnumFlags( void ) const = 0;
 
-		virtual void AddFoundFile( const TCHAR* pFilePath ) = 0;
-		virtual bool AddFoundSubDir( const TCHAR* pSubDirPath ) = 0;
+		virtual void AddFoundFile( const fs::CPath& filePath ) = 0;
+		virtual bool AddFoundSubDir( const fs::CPath& subDirPath ) = 0;
 
 		// advanced overrideables
 		virtual bool CanIncludeNode( const fs::CFileState& nodeState ) const = 0;
@@ -50,7 +50,7 @@ namespace fs
 
 		// default implementation
 
-		bool HasFlag( EnumFlags enumFlag ) const { return GetFlags().Has( enumFlag ); }
+		bool HasEnumFlag( EnumFlags enumFlag ) const { return GetEnumFlags().Has( enumFlag ); }
 
 		virtual void OnAddFileInfo( const fs::CFileState& fileState );	// override to get access to extra file state
 	};
@@ -62,7 +62,7 @@ namespace fs
 		IEnumeratorImpl( fs::TEnumFlags enumFlags = fs::TEnumFlags() ) : m_enumFlags( enumFlags ) {}
 	public:
 		// IEnumerator interface (partial)
-		virtual const TEnumFlags& GetFlags( void ) const { return m_enumFlags; }
+		virtual const TEnumFlags& GetEnumFlags( void ) const { return m_enumFlags; }
 		virtual bool CanIncludeNode( const fs::CFileState& nodeState ) const;
 		virtual bool CanRecurse( void ) const { return m_enumFlags.Has( fs::EF_Recurse ); }
 		virtual bool MustStop( void ) const { return false; }

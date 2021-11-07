@@ -23,7 +23,7 @@ namespace fs
 	protected:
 		// IEnumerator interface
 		virtual void OnAddFileInfo( const fs::CFileState& fileState );
-		virtual void AddFoundFile( const TCHAR* pFilePath ) { __super::AddFoundFile( pFilePath ); }		// base method is pure & implemented
+		virtual void AddFoundFile( const fs::CPath& filePath ) { __super::AddFoundFile( filePath ); }		// base method is pure & implemented
 	public:
 		std::vector< fs::CFileState > m_fileStates;
 	};

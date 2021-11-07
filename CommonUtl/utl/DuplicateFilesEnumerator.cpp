@@ -65,9 +65,9 @@ void CDuplicateFilesEnumerator::OnAddFileInfo( const fs::CFileState& fileState )
 	__super::OnAddFileInfo( fileState );
 }
 
-void CDuplicateFilesEnumerator::AddFoundFile( const TCHAR* pFilePath )
+void CDuplicateFilesEnumerator::AddFoundFile( const fs::CPath& filePath )
 {
-	__super::AddFoundFile( pFilePath );		// base method is pure but implemented
+	__super::AddFoundFile( filePath );		// base method is pure but implemented
 }
 
 void CDuplicateFilesEnumerator::GroupByCrc32( void )

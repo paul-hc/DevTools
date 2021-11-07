@@ -19,8 +19,8 @@ namespace app
 		CDirEnumerator( const CCmdLineOptions& appOptions );
 
 		// IEnumerator interface
-		virtual void AddFoundFile( const TCHAR* pFilePath );
-		virtual bool AddFoundSubDir( const TCHAR* pSubDirPath );
+		virtual void AddFoundFile( const fs::CPath& filePath );
+		virtual bool AddFoundSubDir( const fs::CPath& subDirPath );
 
 		void OnCompleted( void );
 	private:
@@ -42,17 +42,17 @@ namespace app
 		RefFlags().Set( fs::EF_NoSortSubDirs, m_appOptions.HasOptionFlag( app::NoSorting ) );
 	}
 
-	void CDirEnumerator::AddFoundFile( const TCHAR* pFilePath )
+	void CDirEnumerator::AddFoundFile( const fs::CPath& filePath )
 	{
 		if ( m_filePaths.size() < m_appOptions.m_maxDirFiles )
-			m_filePaths.push_back( fs::CPath( pFilePath ) );
+			m_filePaths.push_back( filePath );
 		else
 			++m_moreFilesCount;
 	}
 
-	bool CDirEnumerator::AddFoundSubDir( const TCHAR* pSubDirPath )
+	bool CDirEnumerator::AddFoundSubDir( const fs::CPath& subDirPath )
 	{
-		m_subDirPaths.push_back( fs::CPath( pSubDirPath ) );
+		m_subDirPaths.push_back( subDirPath );
 		return true;
 	}
 

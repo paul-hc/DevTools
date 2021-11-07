@@ -83,11 +83,11 @@ namespace fs
 		CBaseEnumerator( fs::TEnumFlags enumFlags, IEnumerator* pChainEnum = NULL );
 	public:
 		// IEnumerator interface (partial)
-		virtual const TEnumFlags& GetFlags( void ) const { return m_options.m_enumFlags; }
+		virtual const TEnumFlags& GetEnumFlags( void ) const { return m_options.m_enumFlags; }
 	protected:
 		virtual void OnAddFileInfo( const fs::CFileState& fileState );	// no chaining via m_pChainEnum
-		virtual void AddFoundFile( const TCHAR* pFilePath ) = 0;		// has implementation
-		virtual bool AddFoundSubDir( const TCHAR* pSubDirPath );
+		virtual void AddFoundFile( const fs::CPath& filePath ) = 0;		// has implementation
+		virtual bool AddFoundSubDir( const fs::CPath& subDirPath );
 		virtual bool CanIncludeNode( const fs::CFileState& nodeState ) const;
 		virtual bool CanRecurse( void ) const;
 		virtual bool MustStop( void ) const;
@@ -143,7 +143,7 @@ namespace fs
 		virtual void Clear( void );
 	protected:
 		// IEnumerator interface
-		virtual void AddFoundFile( const TCHAR* pFilePath );
+		virtual void AddFoundFile( const fs::CPath& filePath );
 	public:
 		std::vector< fs::CPath > m_filePaths;
 	};

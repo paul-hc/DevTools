@@ -157,8 +157,8 @@ namespace fs
 		CDupFileEnumerator( const CFileBackup& backup );
 
 		// base overrides
-		virtual void AddFoundFile( const TCHAR* pFilePath );
-		virtual bool AddFoundSubDir( const TCHAR* pSubDirPath ) { pSubDirPath; return true; }
+		virtual void AddFoundFile( const fs::CPath& filePath );
+		virtual bool AddFoundSubDir( const fs::CPath& subDirPath ) { subDirPath; return true; }
 		virtual bool MustStop( void ) const { return !m_dupFilePaths.empty(); }
 	private:
 		const CFileBackup& m_backup;
@@ -229,10 +229,8 @@ namespace fs
 	{
 	}
 
-	void CDupFileEnumerator::AddFoundFile( const TCHAR* pFilePath )
+	void CDupFileEnumerator::AddFoundFile( const fs::CPath& filePath )
 	{
-		fs::CPath filePath( pFilePath );
-
 		if ( filePath != m_backup.m_srcFilePath )		// different than source file?
 			if ( m_srcContent.IsContentMatch( filePath ) )
 				m_dupFilePaths.push_back( filePath );
