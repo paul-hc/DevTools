@@ -30,9 +30,6 @@ namespace ut
 		static CTestToolWnd* AcquireWnd( UINT selfDestroySecs = 5 );
 		static void DisableEraseBk( void );
 
-		CDC* GetTestDC( void ) const { ASSERT_PTR( m_pTestDC.get() ); return m_pTestDC.get(); }
-		void ResetTestDC( void );
-
 		// drawing pos iteration
 		void ResetDrawPos( void );					// reset to origin
 	private:
@@ -40,7 +37,6 @@ namespace ut
 		static const TCHAR* GetClassName( void );
 	private:
 		CWindowTimer m_destroyTimer;
-		std::auto_ptr<CDC> m_pTestDC;
 		bool m_disableEraseBk;						// hack
 
 		static CTestToolWnd* s_pWndTool;
@@ -69,7 +65,7 @@ namespace ut
 		~CTestDevice();
 
 		bool IsEnabled( void ) const { return m_pToolWnd != NULL; }
-		CDC* GetDC( void ) const { return m_pToolWnd->GetTestDC(); }
+		CDC* GetDC( void ) const { ASSERT_PTR( m_pTestDC.get() ); return m_pTestDC.get(); }
 
 		void SetSubTitle( const TCHAR* pSubTitle );		// augment test window title with the sub-title
 
@@ -111,6 +107,7 @@ namespace ut
 	private:
 		TileAlign m_tileAlign;
 		CTestToolWnd* m_pToolWnd;
+		std::auto_ptr<CDC> m_pTestDC;
 
 		CRect m_workAreaRect;					// client rect shrunk by edge
 		CRect m_stripRect;						// row of tiles

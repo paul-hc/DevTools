@@ -142,11 +142,6 @@ namespace ut
 		return wndRect;
 	}
 
-	void CTestToolWnd::ResetTestDC( void )
-	{
-		m_pTestDC.reset( new CTestDC( this ) );
-	}
-
 	const TCHAR* CTestToolWnd::GetClassName( void )
 	{
 		static const CBrush fillBrush( color::html::LavenderBlush );
@@ -215,7 +210,7 @@ namespace ut
 		m_pToolWnd = pToolWnd;
 		if ( m_pToolWnd != NULL )
 		{
-			m_pToolWnd->ResetTestDC();
+			m_pTestDC.reset( new CTestDC( m_pToolWnd ) );
 			m_pToolWnd->GetClientRect( &m_workAreaRect );
 			m_workAreaRect.DeflateRect( m_edgeSize );
 
