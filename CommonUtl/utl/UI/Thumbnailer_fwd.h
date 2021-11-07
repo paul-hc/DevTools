@@ -46,9 +46,9 @@ struct CThumbKey : public WTS_THUMBNAILID
 
 	bool operator<( const WTS_THUMBNAILID& right ) const { return pred::Less == pred::CompareThumbId()( *this, right ); }
 
-	std::tstring Format( void ) const { std::pair< UINT64, UINT64 > idPair = ToPair( *this ); return str::Format( _T("{%llx,%llx}"), idPair.first, idPair.second ); }
+	std::tstring Format( void ) const { std::pair<UINT64, UINT64> idPair = ToPair( *this ); return str::Format( _T("{%llx,%llx}"), idPair.first, idPair.second ); }
 
-	static std::pair< UINT64, UINT64 > ToPair( const WTS_THUMBNAILID& id ) { return std::make_pair( *(const UINT64*)&id.rgbKey[ 0 ], *(const UINT64*)&id.rgbKey[ 8 ] ); }
+	static std::pair<UINT64, UINT64> ToPair( const WTS_THUMBNAILID& id ) { return std::make_pair( *(const UINT64*)&id.rgbKey[ 0 ], *(const UINT64*)&id.rgbKey[ 8 ] ); }
 };
 
 

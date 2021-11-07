@@ -158,13 +158,13 @@ namespace reg
 			DeleteValue( itValueName->c_str() );
 	}
 
-	std::pair< DWORD, size_t > CKey::GetValueInfo( const TCHAR* pValueName ) const
+	std::pair<DWORD, size_t> CKey::GetValueInfo( const TCHAR* pValueName ) const
 	{
 		DWORD type, bufferSize;
 		if ( ERROR_SUCCESS == ::RegQueryValueEx( Get(), pValueName, NULL, &type, NULL, &bufferSize ) )
-			return std::pair< DWORD, size_t >( type, static_cast<size_t>( bufferSize ) );
+			return std::pair<DWORD, size_t>( type, static_cast<size_t>( bufferSize ) );
 
-		return std::pair< DWORD, size_t >( REG_NONE, 0 );
+		return std::pair<DWORD, size_t>( REG_NONE, 0 );
 	}
 
 	bool CKey::WriteStringValue( const TCHAR* pValueName, const std::tstring& text )

@@ -40,7 +40,7 @@ public:
 	static bool ClearAllTempFiles( void );
 private:
 	std::vector< fs::CPath > m_physicalFilePaths;									// physical file set to be used as source in shell operations (drag&drop, move, copy, etc)
-	std::vector< std::pair< fs::CFlexPath, fs::CPath > > m_tempClonedImagePaths;	// map embedded path to physical clone path
+	std::vector< std::pair<fs::CFlexPath, fs::CPath> > m_tempClonedImagePaths;	// map embedded path to physical clone path
 };
 
 

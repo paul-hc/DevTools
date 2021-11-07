@@ -9,7 +9,7 @@
 
 namespace fs
 {
-	typedef std::pair< std::tstring, std::tstring > FilterPair;		// <tag, specs> - e.g. <"BMP Decoder", "*.bmp;*.dib;*.rle">
+	typedef std::pair<std::tstring, std::tstring> TFilterPair;		// <tag, specs> - e.g. <"BMP Decoder", "*.bmp;*.dib;*.rle">
 
 
 	// repository of extensions mapped to filter entries
@@ -60,19 +60,19 @@ namespace fs
 		const std::tstring& GetClassTag( void ) const { return m_classTag; }						// name of all known file types
 		const std::tstring& GetClassSpecs( void ) const { return m_knownExts.GetAllSpecs(); }		// specs for all known extensions
 
-		const std::vector< FilterPair >& GetFilters( void ) const { return m_filters; }
+		const std::vector< TFilterPair >& GetFilters( void ) const { return m_filters; }
 		const CKnownExtensions& GetKnownExtensions( void ) const { return m_knownExts; }
 
-		void AddFilter( const FilterPair& filter );
-		void AddFilter( const COMDLG_FILTERSPEC& filterSpec ) { AddFilter( FilterPair( filterSpec.pszName, filterSpec.pszSpec ) ); }
+		void AddFilter( const TFilterPair& filter );
+		void AddFilter( const COMDLG_FILTERSPEC& filterSpec ) { AddFilter( TFilterPair( filterSpec.pszName, filterSpec.pszSpec ) ); }
 
 		// file dialog formatting
 		void StreamFilters( std::tostringstream& oss ) const;
 		void StreamFilters( std::tostringstream& oss, const UINT positions[], size_t count ) const;
-		void StreamClassFilter( std::tostringstream& oss ) const { StreamFilter( oss, FilterPair( m_classTag, GetClassSpecs() ) ); }
+		void StreamClassFilter( std::tostringstream& oss ) const { StreamFilter( oss, TFilterPair( m_classTag, GetClassSpecs() ) ); }
 		static void StreamAllFiles( std::tostringstream& oss ) { StreamFilter( oss, s_allFiles ); }
 		static void StreamArrayEnd( std::tostringstream& oss ) { oss << s_filterSep; }
-		static void StreamFilter( std::tostringstream& oss, const FilterPair& filter );
+		static void StreamFilter( std::tostringstream& oss, const TFilterPair& filter );
 
 		// file dialog filters
 		std::tstring MakeFilters( void ) const;
@@ -80,10 +80,10 @@ namespace fs
 	private:
 		std::tstring m_classTag;					// unique tag of this filter class (displayed as all known file types)
 		BrowseFlags m_browseFlags;
-		std::vector< FilterPair > m_filters;
+		std::vector< TFilterPair > m_filters;
 		CKnownExtensions m_knownExts;
 	public:
-		static const FilterPair s_allFiles;
+		static const TFilterPair s_allFiles;
 		static const TCHAR s_specSep[];
 		static const TCHAR s_filterSep[];
 	};
@@ -134,9 +134,9 @@ namespace fs
 		void Register( CFilterStore* pFilterStore, BrowseFlags browseFlags );
 		void Unregister( CFilterStore* pFilterStore, BrowseFlags browseFlags );
 	private:
-		typedef std::pair< CFilterStore*, CFilterStore* > OpenSavePair;			// <filter_open, filter_save>
+		typedef std::pair<CFilterStore*, CFilterStore*> TOpenSavePair;			// <filter_open, filter_save>
 
-		stdext::hash_map< std::tstring, OpenSavePair > m_stores;				// <class_tag, OpenSavePair>
+		stdext::hash_map< std::tstring, TOpenSavePair > m_stores;				// <class_tag, TOpenSavePair>
 	};
 
 } //namespace fs

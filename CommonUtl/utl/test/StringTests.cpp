@@ -653,7 +653,7 @@ void CStringTests::TestStringMatch( void )
 	ASSERT_EQUAL_STR( _T("Text"), str::SkipPrefix< str::IgnoreCase >( _T("abcText"), _T("abc") ) );
 	ASSERT_EQUAL_STR( _T("Text"), str::SkipPrefix< str::IgnoreCase >( _T("ABcText"), _T("aBC") ) );
 
-	str::GetMatch getMatchFunc;
+	str::TGetMatch getMatchFunc;
 	ASSERT_EQUAL( str::MatchEqual, getMatchFunc( _T(""), _T("") ) );
 	ASSERT_EQUAL( str::MatchEqual, getMatchFunc( _T("SomeText"), _T("SomeText") ) );
 	ASSERT_EQUAL( str::MatchEqualDiffCase, getMatchFunc( _T("SomeText"), _T("sometext") ) );

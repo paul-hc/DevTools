@@ -149,7 +149,7 @@ void CLayoutEngine::SetupControlStates( void )
 		}
 }
 
-void CLayoutEngine::SetupCollapsedState( UINT ctrlId, layout::Style style )
+void CLayoutEngine::SetupCollapsedState( UINT ctrlId, layout::TStyle style )
 {
 	CRect clientRect;
 	m_pDialog->GetClientRect( &clientRect );
@@ -379,7 +379,7 @@ bool CLayoutEngine::LayoutNormal( const CSize& delta )
 	return !changedCtrls.empty();
 }
 
-layout::Style CLayoutEngine::FindLayoutStyle( UINT ctrlId ) const
+layout::TStyle CLayoutEngine::FindLayoutStyle( UINT ctrlId ) const
 {
 	stdext::hash_map< UINT, layout::CControlState >::const_iterator itFound = m_controlStates.find( ctrlId );
 	return itFound != m_controlStates.end() ? itFound->second.GetLayoutStyle( false ) : layout::None;

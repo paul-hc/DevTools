@@ -25,14 +25,14 @@ namespace reg
 
 
 CLayoutDialog::CLayoutDialog( void )
-	: MfcBaseDialog()
+	: TMfcBaseDialog()
 	, m_dlgFlags( Modeless )
 {
 	Construct();
 }
 
 CLayoutDialog::CLayoutDialog( UINT templateId, CWnd* pParent /*= NULL*/ )
-	: MfcBaseDialog( templateId, pParent )
+	: TMfcBaseDialog( templateId, pParent )
 	, m_dlgFlags( 0 )
 {
 	Construct();
@@ -40,7 +40,7 @@ CLayoutDialog::CLayoutDialog( UINT templateId, CWnd* pParent /*= NULL*/ )
 }
 
 CLayoutDialog::CLayoutDialog( const TCHAR* pTemplateName, CWnd* pParent /*= NULL*/ )
-	: MfcBaseDialog( pTemplateName, pParent )
+	: TMfcBaseDialog( pTemplateName, pParent )
 	, m_dlgFlags( 0 )
 {
 	Construct();
@@ -316,7 +316,7 @@ void CLayoutDialog::DoDataExchange( CDataExchange* pDX )
 
 // message handlers
 
-BEGIN_MESSAGE_MAP( CLayoutDialog, MfcBaseDialog )
+BEGIN_MESSAGE_MAP( CLayoutDialog, TMfcBaseDialog )
 	ON_WM_DESTROY()
 	ON_WM_SIZE()
 	ON_WM_GETMINMAXINFO()

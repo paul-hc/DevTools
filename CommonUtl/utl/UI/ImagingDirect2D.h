@@ -103,7 +103,7 @@ namespace d2d
 	};
 
 
-	typedef CScopedInternalChange CScopedDraw;
+	typedef CScopedInternalChange TScopedDraw;
 
 
 	// D2D window render target paired with a bitmap (base class) that get recreated after a device loss

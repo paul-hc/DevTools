@@ -13,9 +13,9 @@ namespace ui
 {
 	// CCmdIdStore implementation
 
-	std::pair< int, int > CCmdIdStore::GetMinMaxIds( void ) const
+	std::pair<int, int> CCmdIdStore::GetMinMaxIds( void ) const
 	{
-		std::pair< int, int > minMaxPair( 0, 0 );
+		std::pair<int, int> minMaxPair( 0, 0 );
 		if ( !IsEmpty() )
 		{
 			std::set< int >::const_iterator itLast = m_cmdIds.end();

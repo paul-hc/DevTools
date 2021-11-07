@@ -66,7 +66,7 @@ private:
 	enum { TextSpacingX = 3, TextSpacingY = 2 };
 	enum LabelLayout { Outside, Inside, Above };
 
-	std::pair< LabelLayout, UINT > FindLabelLayout( CDC* pDC, const CRect& clientRect, const std::vector< std::tstring >& labels ) const;
+	std::pair<LabelLayout, UINT> FindLabelLayout( CDC* pDC, const CRect& clientRect, const std::vector< std::tstring >& labels ) const;
 	CRect MakeLabelRect( LabelLayout layout, const CRect& zoneRect, const CRect& clientRect ) const;
 	CSize FindWidestSize( CDC* pDC, const std::vector< std::tstring >& labels ) const;
 public:

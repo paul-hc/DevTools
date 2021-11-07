@@ -131,7 +131,7 @@ CBuddyControlsDialog::CBuddyControlsDialog( CWnd* pParent )
 	m_fileListCtrl.SetUseAlternateRowColoring();
 	m_fileListCtrl.SetSubjectAdapter( ui::GetFullPathAdapter() );		// display full paths
 
-	m_fileListCtrl.AddRecordCompare( pred::NewComparator( pred::CompareCode() ) );		// default row item comparator
+	m_fileListCtrl.AddRecordCompare( pred::NewComparator( pred::TCompareCode() ) );		// default row item comparator
 	m_fileListCtrl.AddColumnCompare( ModifyTime, pred::NewPropertyComparator<CFileStateTimedItem>( func::AsModifyTime() ), false );
 
 	m_fileListCtrl.GetMateToolbar()->GetStrip()

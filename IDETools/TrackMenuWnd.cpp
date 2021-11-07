@@ -70,7 +70,7 @@ bool CTrackMenuWnd::HighlightMenuItem( HMENU hHoverPopup )
 		ui::ScrollVisibleMenuItem( m_hWnd, hHoverPopup, m_hilightId );
 }
 
-std::pair< HMENU, UINT > CTrackMenuWnd::FindMenuItemFromPoint( const CPoint& screenPos ) const
+std::pair<HMENU, UINT> CTrackMenuWnd::FindMenuItemFromPoint( const CPoint& screenPos ) const
 {
 	if ( HWND hMenuWnd = ui::FindMenuWindowFromPoint( screenPos ) )
 		for ( std::vector< HMENU >::const_iterator itSubMenu = m_subMenus.begin(); itSubMenu != m_subMenus.end(); ++itSubMenu )
@@ -83,13 +83,13 @@ std::pair< HMENU, UINT > CTrackMenuWnd::FindMenuItemFromPoint( const CPoint& scr
 				{
 					int cmdId = ::GetMenuItemID( hSubMenu, itemPos );
 					if ( cmdId != 0 && cmdId != UINT_MAX )
-						return std::pair< HMENU, UINT >( hSubMenu, cmdId );
+						return std::pair<HMENU, UINT>( hSubMenu, cmdId );
 					else
 						break;
 				}
 		}
 
-	return std::pair< HMENU, UINT >( NULL, 0 );
+	return std::pair<HMENU, UINT>( NULL, 0 );
 }
 
 BOOL CTrackMenuWnd::OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo )
@@ -135,7 +135,7 @@ void CTrackMenuWnd::OnRButtonUp( UINT vkFlags, CPoint point )
 	if ( m_rightClickRepeat )
 	{
 		// point is in screen coordinates when modal tracking a menu
-		std::pair< HMENU, UINT > clickedItem = FindMenuItemFromPoint( point );
+		std::pair<HMENU, UINT> clickedItem = FindMenuItemFromPoint( point );
 		if ( clickedItem.second != 0 )
 		{
 			DEBUG_LOG( _T("Right-clicked command %d"), clickedItem.second );

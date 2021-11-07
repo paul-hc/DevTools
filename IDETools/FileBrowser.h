@@ -209,7 +209,7 @@ private:
 private:
 	typedef stdext::hash_map< UINT, const CFileItem* > TMapIdToItem;
 
-	typedef std::pair< HMENU, fs::CPath > TMenuPathKey;
+	typedef std::pair<HMENU, fs::CPath> TMenuPathKey;
 	typedef stdext::hash_map< TMenuPathKey, const CFileItem* > TMapMenuPathToItem;
 private:
 	const CFolderOptions* m_pOptions;

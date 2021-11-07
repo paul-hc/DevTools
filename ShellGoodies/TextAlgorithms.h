@@ -34,8 +34,8 @@ public:
 
 namespace text_tool
 {
-	const std::vector< std::pair< std::tstring, std::tstring > >& GetStdUnicodeToAnsiPairs( void );
-	std::pair< std::tstring, std::tstring > MakeStdDelimsPair( const std::tstring& delimSet );		// note: first char is the replacement, the rest are to be replaced
+	const std::vector< std::pair<std::tstring, std::tstring> >& GetStdUnicodeToAnsiPairs( void );
+	std::pair<std::tstring, std::tstring> MakeStdDelimsPair( const std::tstring& delimSet );		// note: first char is the replacement, the rest are to be replaced
 
 	template< typename FuncType >
 	inline void ExecuteTextTool( std::tstring& rText, const FuncType& toolFunc ) { toolFunc( rText ); }
@@ -103,7 +103,7 @@ namespace func
 
 	struct ReplaceMultiDelimiterSets
 	{
-		ReplaceMultiDelimiterSets( const std::vector< std::pair< std::tstring, std::tstring > >* pDelimsToNewPairs )
+		ReplaceMultiDelimiterSets( const std::vector< std::pair<std::tstring, std::tstring> >* pDelimsToNewPairs )
 			: m_pDelimsToNewPairs( pDelimsToNewPairs )
 		{
 			ASSERT( m_pDelimsToNewPairs != NULL && !m_pDelimsToNewPairs->empty() );
@@ -117,7 +117,7 @@ namespace func
 			str::ToLower( rDestParts.m_ext );
 		}
 	private:
-		const std::vector< std::pair< std::tstring, std::tstring > >* m_pDelimsToNewPairs;				// delimiters to replacement pairs
+		const std::vector< std::pair<std::tstring, std::tstring> >* m_pDelimsToNewPairs;				// delimiters to replacement pairs
 	};
 
 

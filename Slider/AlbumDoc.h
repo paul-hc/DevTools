@@ -40,7 +40,7 @@ public:
 	bool HasImages( void ) const { return m_model.AnyFoundFiles(); }
 	size_t GetImageCount( void ) const { return m_model.GetFileAttrCount(); }
 	bool IsValidIndex( size_t index ) const { return index < GetImageCount(); }
-	const fs::ImagePathKey& GetImageFilePathAt( int index ) const;
+	const fs::TImagePathKey& GetImageFilePathAt( int index ) const;
 
 	CImageState* GetImageState( void ) const;
 

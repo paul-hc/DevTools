@@ -14,7 +14,7 @@ class CFlagTags;
 namespace fs { enum FileExpireStatus; }
 
 
-typedef std::pair< fs::CFlexPath, CComPtr<IShellItem> > ShellItemPair;		// source image path with its shell item
+typedef std::pair< fs::CFlexPath, CComPtr<IShellItem> > TShellItemPair;		// source image path with its shell item
 
 
 namespace thumb
@@ -46,8 +46,8 @@ public:
 
 	CComPtr<IShellItem> FindShellItem( const fs::CFlexPath& filePath ) const;
 
-	CCachedThumbBitmap* ExtractThumb( const ShellItemPair& imagePair );
-	CCachedThumbBitmap* GenerateThumb( const ShellItemPair& imagePair );
+	CCachedThumbBitmap* ExtractThumb( const TShellItemPair& imagePair );
+	CCachedThumbBitmap* GenerateThumb( const TShellItemPair& imagePair );
 
 	fs::FileExpireStatus CheckThumbExpired( const CCachedThumbBitmap* pThumb ) const;
 

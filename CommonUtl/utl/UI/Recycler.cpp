@@ -78,7 +78,7 @@ namespace shell
 		//	"C:\dev\Samples/xrecycled" - ancestor the original directory path
 		//	"C:\dev\Samples\xrecycled\*.txt" - original directory path with wildcard spec
 		//
-		std::vector< std::pair< IShellItem2*, CTime > > items;
+		std::vector< std::pair<IShellItem2*, CTime> > items;
 
 		if ( CComPtr<IEnumShellItems> pEnumItems = GetEnumItems() )
 			for ( CComPtr<IShellItem> pItem; S_OK == pEnumItems->Next( 1, &pItem, NULL ); pItem = NULL )
@@ -94,7 +94,7 @@ namespace shell
 
 		std::sort( items.begin(), items.end(), pred::OrderByValue< pred::CompareSecond< pred::CompareValue > >( false ) );		// sort by Deleted Time descending: most recently deleted first
 
-		for ( std::vector< std::pair< IShellItem2*, CTime > >::const_iterator itItem = items.begin(); itItem != items.end(); ++itItem )
+		for ( std::vector< std::pair<IShellItem2*, CTime> >::const_iterator itItem = items.begin(); itItem != items.end(); ++itItem )
 			rRecycledItems.push_back( itItem->first );
 	}
 
@@ -103,8 +103,8 @@ namespace shell
 		REQUIRE( rRecycledItems.empty() );						// any previous items must have been released by caller
 		rRecycledItems.resize( delFilePaths.size() );			// reset to NULL all recycled items (corresponding to each file in delFilePaths)
 
-		typedef std::vector< std::pair< IShellItem2*, CTime > > FileRecycledItems;
-		std::vector< FileRecycledItems > fileRecycledItems;		// indexed in sync with delFilePaths
+		typedef std::vector< std::pair<IShellItem2*, CTime> > TFileRecycledItems;
+		std::vector< TFileRecycledItems > fileRecycledItems;		// indexed in sync with delFilePaths
 
 		fileRecycledItems.resize( delFilePaths.size() );
 
@@ -119,7 +119,7 @@ namespace shell
 					{
 						pRecycledItem.p->AddRef();		// will be released by the caller
 
-						FileRecycledItems& rMultiRecycledItems = fileRecycledItems[ fileEntryPos ];
+						TFileRecycledItems& rMultiRecycledItems = fileRecycledItems[ fileEntryPos ];
 						rMultiRecycledItems.push_back( std::make_pair( pRecycledItem.p, GetDateDeleted( pRecycledItem ) ) );
 					}
 				}
@@ -127,7 +127,7 @@ namespace shell
 		// sort each sequence by Deleted Time descending: most recently deleted comes first
 		for ( size_t entryPos = 0; entryPos != fileRecycledItems.size(); ++entryPos )
 		{
-			FileRecycledItems& rMultiRecycledItems = fileRecycledItems[ entryPos ];
+			TFileRecycledItems& rMultiRecycledItems = fileRecycledItems[ entryPos ];
 
 			if ( !rMultiRecycledItems.empty() )
 			{

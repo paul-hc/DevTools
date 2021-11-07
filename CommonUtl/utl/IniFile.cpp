@@ -23,13 +23,13 @@ namespace sep
 
 unsigned int CIniFile::s_parseLineNo = 1;
 
-const CIniFile::SectionMap* CIniFile::FindSection( const std::tstring& sectionKey ) const
+const CIniFile::TSectionMap* CIniFile::FindSection( const std::tstring& sectionKey ) const
 {
-	std::map< std::tstring, SectionMap >::const_iterator itFound = m_sectionMap.find( sectionKey );
+	std::map< std::tstring, TSectionMap >::const_iterator itFound = m_sectionMap.find( sectionKey );
 	return itFound != m_sectionMap.end() ? &itFound->second : NULL;
 }
 
-CIniFile::SectionMap& CIniFile::RetrieveSection( const std::tstring& sectionKey )
+CIniFile::TSectionMap& CIniFile::RetrieveSection( const std::tstring& sectionKey )
 {
 	ASSERT( !utl::Contains( sectionKey, sep::sectionBegin ) || !utl::Contains( sectionKey, sep::sectionEnd ) );
 	ASSERT( !utl::Contains( m_orderedSections, sectionKey ) );
@@ -37,7 +37,7 @@ CIniFile::SectionMap& CIniFile::RetrieveSection( const std::tstring& sectionKey 
 	return m_sectionMap[ sectionKey ];
 }
 
-bool CIniFile::SwapSectionProperties( const std::tstring& sectionKey, SectionMap& rProperties )
+bool CIniFile::SwapSectionProperties( const std::tstring& sectionKey, TSectionMap& rProperties )
 {
 	if ( rProperties.empty() )
 		return false;
@@ -74,14 +74,14 @@ void CIniFile::Save( std::ostream& rOutStream ) const throws_( std::exception )
 	for ( std::vector< std::tstring >::const_iterator itSectionKey = m_orderedSections.begin();
 		  itSectionKey != m_orderedSections.end(); ++itSectionKey )
 	{
-		const SectionMap* pSection = FindSection( *itSectionKey );
+		const TSectionMap* pSection = FindSection( *itSectionKey );
 		ASSERT_PTR( pSection );
 
 		if ( !pSection->empty() )
 		{
 			rOutStream << sep::sectionBegin << ConvertToUtf8( itSectionKey->c_str() ) << sep::sectionEnd << std::endl;
 
-			for ( SectionMap::const_iterator itEntry = pSection->begin();
+			for ( TSectionMap::const_iterator itEntry = pSection->begin();
 				  itEntry != pSection->end(); ++itEntry )
 				rOutStream << ConvertToUtf8( itEntry->first ) << sep::entryValue << ConvertToUtf8( itEntry->second ) << std::endl;
 
@@ -92,7 +92,7 @@ void CIniFile::Save( std::ostream& rOutStream ) const throws_( std::exception )
 
 void CIniFile::Load( std::istream& rInStream ) throws_( std::exception )
 {
-	SectionMap* pCurrentSection = NULL;
+	TSectionMap* pCurrentSection = NULL;
 
 	s_parseLineNo = 1;
 	for ( std::string line; std::getline( rInStream, line ); ++s_parseLineNo )

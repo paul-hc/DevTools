@@ -6,7 +6,7 @@
 #include "Path.h"
 
 
-abstract class CPathItemBase : public CSubject
+abstract class CPathItemBase : public TSubject
 {
 protected:
 	CPathItemBase( const fs::CPath& filePath ) { ResetFilePath( filePath ); }
@@ -68,8 +68,8 @@ public:
 
 namespace pred
 {
-	typedef pred::CompareAdapter<pred::CompareNaturalPath, CPathItemBase::ToFilePath> ComparePathItem;
-	typedef pred::LessValue<ComparePathItem> TLess_PathItem;
+	typedef pred::CompareAdapter<pred::CompareNaturalPath, CPathItemBase::ToFilePath> TComparePathItem;
+	typedef pred::LessValue<TComparePathItem> TLess_PathItem;
 }
 
 
@@ -105,7 +105,7 @@ namespace func
 	template< typename ContainerT >
 	inline void SortPathItems( ContainerT& rPathItems, bool ascending = true )
 	{
-		SortPathItems<pred::ComparePathItem>( rPathItems, ascending );
+		SortPathItems<pred::TComparePathItem>( rPathItems, ascending );
 	}
 
 

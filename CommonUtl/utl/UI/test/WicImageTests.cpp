@@ -68,9 +68,9 @@ void CWicImageTests::TestImageCache( ut::CTestDevice* pTestDev )
 	enum { MaxSize = 10u, N5 = 5u, N15 = 15u };
 
 	// enqueue 5 images files
-	std::vector< fs::ImagePathKey > imagePaths;
+	std::vector< fs::TImagePathKey > imagePaths;
 	for ( UINT count = 0; itFilePath != imageEnum.m_filePaths.end() && count != N5; ++itFilePath, ++count )
-		imagePaths.push_back( fs::ImagePathKey( itFilePath->Get(), 0 ) );
+		imagePaths.push_back( fs::TImagePathKey( itFilePath->Get(), 0 ) );
 
 	CWicImageCache cache( MaxSize );
 
@@ -92,13 +92,13 @@ void CWicImageTests::TestImageCache( ut::CTestDevice* pTestDev )
 	}
 
 	// acquire 1 more image file
-	ASSERT_EQUAL( fs::cache::Load, cache.Acquire( fs::ImagePathKey( itFilePath->Get(), 0 ) ).second );
+	ASSERT_EQUAL( fs::cache::Load, cache.Acquire( fs::TImagePathKey( itFilePath->Get(), 0 ) ).second );
 	++itFilePath;
 
 	// enqueue 15 more images files
 	imagePaths.clear();
 	for ( UINT count = 0; itFilePath != imageEnum.m_filePaths.end() && count != N15; ++itFilePath, ++count )
-		imagePaths.push_back( fs::ImagePathKey( itFilePath->Get(), 0 ) );
+		imagePaths.push_back( fs::TImagePathKey( itFilePath->Get(), 0 ) );
 
 	cache.Enqueue( imagePaths );
 	cache.GetCache()->WaitPendingQueue();

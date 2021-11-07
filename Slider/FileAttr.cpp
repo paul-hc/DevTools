@@ -23,9 +23,9 @@
 
 namespace serial
 {
-	fs::ImagePathKey ToStorageRelativePathKey( const fs::ImagePathKey& pathKey )
+	fs::TImagePathKey ToStorageRelativePathKey( const fs::TImagePathKey& pathKey )
 	{
-		return fs::ImagePathKey( fs::CFlexPath( path::GetSubPath( pathKey.first.GetPtr() ) ), pathKey.second );
+		return fs::TImagePathKey( fs::CFlexPath( path::GetSubPath( pathKey.first.GetPtr() ) ), pathKey.second );
 	}
 
 	void PostLoadAdjustComplexPath( fs::CFlexPath& rPath, const fs::TStgDocPath& docStgPath )
@@ -161,7 +161,7 @@ app::ModelSchema CFileAttr::EvalLoadingSchema( CArchive& rLoadArchive )
 
 			// check whether is older than app::Slider_v3_8 (having saved just the path, not the framePos)
 			const BYTE* pOldCursor = serial::GetLoadingCursor( rLoadArchive );
-			persist fs::ImagePathKey pathKey;
+			persist fs::TImagePathKey pathKey;
 			persist int imageFormat;
 
 			rLoadArchive >> pathKey;

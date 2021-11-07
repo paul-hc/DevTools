@@ -12,7 +12,7 @@ namespace utl
 	// To be used as a replacement for std::map for containers of small number of items, i.e. for which map insertion/deletion/iteration overhead is not justified.
 	// It uses binary search assuming the container is ordered by KeyPred.
 
-	template< typename Key, typename Value, typename KeyPred = std::less< Key >, typename Container = std::vector< std::pair< Key, Value > > >
+	template< typename Key, typename Value, typename KeyPred = std::less< Key >, typename Container = std::vector< std::pair<Key, Value> > >
 	class vector_map : public Container
 	{
 	public:
@@ -22,7 +22,7 @@ namespace utl
 
 		typedef Key key_type;
 		typedef Value mapped_type;
-		typedef std::pair< Key, Value > value_type;
+		typedef std::pair<Key, Value> value_type;
 		typedef KeyPred key_compare;
 
 		vector_map( void ) {}

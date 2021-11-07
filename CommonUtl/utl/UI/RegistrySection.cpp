@@ -52,8 +52,8 @@ struct CRegistryEntry
 	explicit CRegistryEntry::CRegistryEntry( const std::tstring& value )
 		: m_type( REG_SZ )
 	{
-		typedef const BYTE* Iterator;
-		Iterator itStart = reinterpret_cast<const BYTE*>( value.c_str() ), itEnd = itStart + utl::ByteSize( value ) + 1;
+		typedef const BYTE* TIterator;
+		TIterator itStart = reinterpret_cast<const BYTE*>( value.c_str() ), itEnd = itStart + utl::ByteSize( value ) + 1;
 
 		m_valueBuffer.assign( itStart, itEnd );
 	}

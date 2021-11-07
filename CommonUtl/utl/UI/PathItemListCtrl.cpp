@@ -23,7 +23,7 @@ CPathItemListCtrl::CPathItemListCtrl( UINT columnLayoutId /*= 0*/, DWORD listSty
 	SetPopupMenu( Nowhere, &GetStdPathListPopupMenu( Nowhere ) );
 	SetPopupMenu( OnSelection, &GetStdPathListPopupMenu( OnSelection ) );
 
-	AddRecordCompare( pred::NewComparator( pred::CompareCode() ) );		// default row item comparator
+	AddRecordCompare( pred::NewComparator( pred::TCompareCode() ) );		// default row item comparator
 }
 
 CPathItemListCtrl::~CPathItemListCtrl()

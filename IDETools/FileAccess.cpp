@@ -207,7 +207,7 @@ BOOL FileAccess::OutputWndActivateTab( LPCTSTR tabCaption )
 
 BSTR FileAccess::GetIDECurrentBrowseFile( void )
 {
-	std::pair< HMENU, int > foundPopup = ide::FindPopupMenuWithCommand( ide::GetMainWindow()->GetSafeHwnd(), CM_IDE_CLOSEBROWSEFILE );
+	std::pair<HMENU, int> foundPopup = ide::FindPopupMenuWithCommand( ide::GetMainWindow()->GetSafeHwnd(), CM_IDE_CLOSEBROWSEFILE );
 
 	if ( foundPopup.first == NULL )
 		return NULL;
@@ -242,7 +242,7 @@ BOOL FileAccess::UpdateIDECurrentBrowseFile( BOOL doItNow )
 	if ( app::GetModuleSession().m_vsUseStandardWindowsMenu )
 	{	// This feature is supported only for Visual C++ using "screen reader compatible menus".
 		HWND hWndIde = ide::GetMainWindow()->GetSafeHwnd();
-		std::pair< HMENU, int > foundPopup = ide::FindPopupMenuWithCommand( hWndIde, CM_IDE_CLOSEBROWSEFILE );
+		std::pair<HMENU, int> foundPopup = ide::FindPopupMenuWithCommand( hWndIde, CM_IDE_CLOSEBROWSEFILE );
 
 		if ( foundPopup.first != NULL )
 		{

@@ -7,7 +7,7 @@
 #include "ResourceData.h"
 
 
-typedef WORD BitsPerPixel;
+typedef WORD TBitsPerPixel;
 
 
 #pragma pack( push )
@@ -20,7 +20,7 @@ namespace res
 	struct CGroupIconEntry			// GRPICONDIRENTRY
 	{
 		CSize GetSize( void ) const { return CSize( m_width, m_height ); }
-		BitsPerPixel GetBitsPerPixel( void ) const { return m_colorPlanes * m_bitCount; }
+		TBitsPerPixel GetBitsPerPixel( void ) const { return m_colorPlanes * m_bitCount; }
 	public:
 		BYTE m_width;				// width of the image (pixels)
 		BYTE m_height;				// height of the image (pixels)
@@ -59,12 +59,12 @@ namespace pred
 
 	struct CompareIcon_Size
 	{
-		CompareResult operator()( const std::pair< BitsPerPixel, CSize >& left, const std::pair< BitsPerPixel, CSize >& right ) const
+		CompareResult operator()( const std::pair<TBitsPerPixel, CSize>& left, const std::pair<TBitsPerPixel, CSize>& right ) const
 		{
 			return CompareWidth( left.second, right.second );
 		}
 
-		CompareResult operator()( const std::pair< BitsPerPixel, IconStdSize >& left, const std::pair< BitsPerPixel, IconStdSize >& right ) const
+		CompareResult operator()( const std::pair<TBitsPerPixel, IconStdSize>& left, const std::pair<TBitsPerPixel, IconStdSize>& right ) const
 		{
 			return Compare_Scalar( left.second, right.second );
 		}
@@ -78,7 +78,7 @@ namespace pred
 
 	struct CompareIcon_BppSize
 	{
-		CompareResult operator()( const std::pair< BitsPerPixel, CSize >& left, const std::pair< BitsPerPixel, CSize >& right ) const
+		CompareResult operator()( const std::pair<TBitsPerPixel, CSize>& left, const std::pair<TBitsPerPixel, CSize>& right ) const
 		{
 			CompareResult result = Compare_Scalar( left.first, right.first );
 			if ( Equal == result )
@@ -86,7 +86,7 @@ namespace pred
 			return result;
 		}
 
-		CompareResult operator()( const std::pair< BitsPerPixel, IconStdSize >& left, const std::pair< BitsPerPixel, IconStdSize >& right ) const
+		CompareResult operator()( const std::pair<TBitsPerPixel, IconStdSize>& left, const std::pair<TBitsPerPixel, IconStdSize>& right ) const
 		{
 			CompareResult result = Compare_Scalar( left.first, right.first );
 			if ( Equal == result )
@@ -115,22 +115,22 @@ public:
 
 	enum { AnyBpp = 0 };
 
-	const res::CGroupIconEntry* FindMatch( BitsPerPixel bitsPerPixel, IconStdSize iconStdSize ) const;
+	const res::CGroupIconEntry* FindMatch( TBitsPerPixel bitsPerPixel, IconStdSize iconStdSize ) const;
 
-	bool Contains( BitsPerPixel bitsPerPixel, IconStdSize iconStdSize ) const { return FindMatch( bitsPerPixel, iconStdSize ) != NULL; }
-	bool ContainsSize( IconStdSize iconStdSize, BitsPerPixel* pBitsPerPixel = NULL ) const;
-	bool ContainsBpp( BitsPerPixel bitsPerPixel, IconStdSize* pIconStdSize = NULL ) const;
+	bool Contains( TBitsPerPixel bitsPerPixel, IconStdSize iconStdSize ) const { return FindMatch( bitsPerPixel, iconStdSize ) != NULL; }
+	bool ContainsSize( IconStdSize iconStdSize, TBitsPerPixel* pBitsPerPixel = NULL ) const;
+	bool ContainsBpp( TBitsPerPixel bitsPerPixel, IconStdSize* pIconStdSize = NULL ) const;
 
-	std::pair< BitsPerPixel, IconStdSize > Front( void ) const { return IsValid() ? ToBppSize( m_pGroupIconDir->Begin() ) : m_nullBppStdSize; }
-	std::pair< BitsPerPixel, IconStdSize > Back( void ) const { return IsValid() ? ToBppSize( m_pGroupIconDir->Last() ) : m_nullBppStdSize; }
+	std::pair<TBitsPerPixel, IconStdSize> Front( void ) const { return IsValid() ? ToBppSize( m_pGroupIconDir->Begin() ) : m_nullBppStdSize; }
+	std::pair<TBitsPerPixel, IconStdSize> Back( void ) const { return IsValid() ? ToBppSize( m_pGroupIconDir->Last() ) : m_nullBppStdSize; }
 
-	std::pair< BitsPerPixel, IconStdSize > FindSmallest( void ) const;
-	std::pair< BitsPerPixel, IconStdSize > FindLargest( void ) const;
+	std::pair<TBitsPerPixel, IconStdSize> FindSmallest( void ) const;
+	std::pair<TBitsPerPixel, IconStdSize> FindLargest( void ) const;
 
-	void QueryAvailableSizes( std::vector< std::pair< BitsPerPixel, IconStdSize > >& rIconPairs ) const;
-	void QueryAvailableSizes( std::vector< std::pair< BitsPerPixel, CSize > >& rIconPairs ) const;
+	void QueryAvailableSizes( std::vector< std::pair<TBitsPerPixel, IconStdSize> >& rIconPairs ) const;
+	void QueryAvailableSizes( std::vector< std::pair<TBitsPerPixel, CSize> >& rIconPairs ) const;
 private:
-	static std::pair< BitsPerPixel, IconStdSize > ToBppSize( const res::CGroupIconEntry* pIconEntry )
+	static std::pair<TBitsPerPixel, IconStdSize> ToBppSize( const res::CGroupIconEntry* pIconEntry )
 	{
 		ASSERT_PTR( pIconEntry );
 		return std::make_pair( pIconEntry->GetBitsPerPixel(), CIconId::FindStdSize( pIconEntry->GetSize() ) );
@@ -138,7 +138,7 @@ private:
 private:
 	CResourceData m_resGroupIcon;
 	const res::CGroupIconDir* m_pGroupIconDir;
-	static const std::pair< BitsPerPixel, IconStdSize > m_nullBppStdSize;
+	static const std::pair<TBitsPerPixel, IconStdSize> m_nullBppStdSize;
 };
 
 

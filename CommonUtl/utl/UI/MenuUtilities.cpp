@@ -77,7 +77,7 @@ namespace ui
 				UINT itemId = rMenu.GetMenuItemID( i );
 				ASSERT( itemId != 0 && itemId != UINT_MAX );
 
-				std::pair< CBitmap*, CBitmap* > bitmaps = pImageStore->RetrieveMenuBitmaps( itemId, useCheckedBitmaps );
+				std::pair<CBitmap*, CBitmap*> bitmaps = pImageStore->RetrieveMenuBitmaps( itemId, useCheckedBitmaps );
 				if ( bitmaps.first != NULL || bitmaps.second != NULL )
 					rMenu.SetMenuItemBitmaps( i, MF_BYPOSITION, bitmaps.first, bitmaps.second );
 			}
@@ -92,7 +92,7 @@ namespace ui
 
 		if ( pImageStore != NULL )
 		{
-			std::pair< CBitmap*, CBitmap* > bitmaps = pImageStore->RetrieveMenuBitmaps( 0 == iconId ? itemRef.GetCmdId() : iconId, useCheckedBitmaps );
+			std::pair<CBitmap*, CBitmap*> bitmaps = pImageStore->RetrieveMenuBitmaps( 0 == iconId ? itemRef.GetCmdId() : iconId, useCheckedBitmaps );
 			if ( bitmaps.first != NULL || bitmaps.second != NULL )
 			{
 				rMenu.SetMenuItemBitmaps( itemRef.m_itemRef, itemRef.m_refFlags, bitmaps.first, bitmaps.second );

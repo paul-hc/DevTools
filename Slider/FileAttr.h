@@ -32,8 +32,8 @@ public:
 
 	bool IsValid( void ) const { return GetPath().FileExist(); }
 
-	const fs::ImagePathKey& GetPathKey( void ) const { return m_pathKey; }
-	void SetPathKey( const fs::ImagePathKey& pathKey ) { m_pathKey = pathKey; }
+	const fs::TImagePathKey& GetPathKey( void ) const { return m_pathKey; }
+	void SetPathKey( const fs::TImagePathKey& pathKey ) { m_pathKey = pathKey; }
 
 	const fs::CFlexPath& GetPath( void ) const { return m_pathKey.first; }
 	fs::CFlexPath& RefPath( void ) { return m_pathKey.first; }
@@ -63,7 +63,7 @@ private:
 	static bool PromptedSpeedUpSaving( CTimer& rSavingTimer );
 	static app::ModelSchema EvalLoadingSchema( CArchive& rLoadArchive );
 private:
-	persist fs::ImagePathKey m_pathKey;
+	persist fs::TImagePathKey m_pathKey;
 	persist wic::ImageFormat m_imageFormat;		// formerly FileType in Slider_v5_5- (no longer needed, really)
 	persist FILETIME m_lastModifTime;
 	persist UINT m_fileSize;

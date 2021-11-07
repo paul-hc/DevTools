@@ -1927,7 +1927,7 @@ bool CReportListControl::SetItemGroupId( int itemIndex, int groupId )
 	return true;
 }
 
-std::pair< int, UINT > CReportListControl::_GetGroupItemsRange( int groupId ) const
+std::pair<int, UINT> CReportListControl::_GetGroupItemsRange( int groupId ) const
 {
 	LVGROUP group;
 	utl::ZeroWinStruct( &group );

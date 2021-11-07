@@ -250,7 +250,7 @@ namespace str
 	template< typename CharT, typename ValueT >
 	bool ParseNameValue( std::basic_string<CharT>& rName, ValueT& rValue, const std::basic_string<CharT>& spec, CharT sep = '=' )
 	{
-		std::pair< CPart<CharT>, CPart<CharT> > partsPair;
+		std::pair<CPart<CharT>, CPart<CharT>> partsPair;
 		if ( !ParseNameValuePair<CharT>( partsPair, spec, sep ) )
 			return false;
 
@@ -364,7 +364,7 @@ namespace num
 	std::tstring FormatFileSize( UINT64 byteFileSize, BytesUnit unit = AutoBytes, bool longUnitTag = false, const std::locale& loc = str::GetUserLocale() );		// use num::GetEmptyLocale() for no commas
 	std::tstring FormatFileSizeAsPair( UINT64 byteFileSize, bool longUnitTag = false );					// e.g. "6.89 MB (7,224,287 bytes)"
 
-	std::pair< double, BytesUnit > ConvertFileSize( UINT64 fileSize, BytesUnit toUnit = AutoBytes );
+	std::pair<double, BytesUnit> ConvertFileSize( UINT64 fileSize, BytesUnit toUnit = AutoBytes );
 }
 
 

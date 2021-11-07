@@ -55,23 +55,23 @@ public:
 	std::tstring GetSelText( void ) const;
 
 	// multi-line edit
-	typedef int CharPos;											// position of text character in edit's text
-	typedef int Line;
+	typedef int TCharPos;											// position of text character in edit's text
+	typedef int TLine;
 
-	Range<CharPos> GetLineRange( Line linePos ) const;				// line startPos and endPos
-	std::tstring GetLineText( Line linePos ) const;
+	Range<TCharPos> GetLineRange( TLine linePos ) const;				// line startPos and endPos
+	std::tstring GetLineText( TLine linePos ) const;
 
 	enum { CaretPos = -1 };
 
-	Range<CharPos> GetLineRangeAt( CharPos charPos = CaretPos ) const { return GetLineRange( LineFromChar( charPos ) ); }
-	std::tstring GetLineTextAt( CharPos charPos = CaretPos ) const { return GetLineText( LineFromChar( charPos ) ); }		// by default: text of line with the caret
+	Range<TCharPos> GetLineRangeAt( TCharPos charPos = CaretPos ) const { return GetLineRange( LineFromChar( charPos ) ); }
+	std::tstring GetLineTextAt( TCharPos charPos = CaretPos ) const { return GetLineText( LineFromChar( charPos ) ); }		// by default: text of line with the caret
 
 	// selection
 	template< typename IntType >
 	Range<IntType> GetSelRange( void ) const;
 
 	template< typename IntType >
-	void SetSelRange( const Range<IntType>& sel ) { SetSel( static_cast<CharPos>( sel.m_start ), static_cast<CharPos>( sel.m_end ) ); }
+	void SetSelRange( const Range<IntType>& sel ) { SetSel( static_cast<TCharPos>( sel.m_start ), static_cast<TCharPos>( sel.m_end ) ); }
 
 	enum FontSize { Normal, Large };
 	static CFont* GetFixedFont( FontSize fontSize = Normal );
@@ -127,7 +127,7 @@ protected:
 template< typename IntType >
 Range<IntType> CTextEdit::GetSelRange( void ) const
 {
-	CharPos startPos, endPos;
+	TCharPos startPos, endPos;
 	GetSel( startPos, endPos );
 	ASSERT( startPos <= endPos && startPos >= 0 );
 	return Range<IntType>( static_cast<IntType>( startPos ), static_cast<IntType>( endPos ) );

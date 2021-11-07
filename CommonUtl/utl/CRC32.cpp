@@ -41,7 +41,7 @@ namespace utl
 		return s_table;
 	}
 
-	void CCrc32::AddBytes( UnderlyingT& rChecksum, const void* pBuffer, size_t count ) const
+	void CCrc32::AddBytes( TUnderlying& rChecksum, const void* pBuffer, size_t count ) const
 	{
 		ASSERT( 0 == count || pBuffer != NULL );
 
@@ -74,7 +74,7 @@ namespace fs
 
 	UINT CCrc32FileCache::AcquireCrc32( const fs::CPath& filePath )
 	{
-		stdext::hash_map< fs::CPath, ChecksumStampPair >::iterator itFound = m_cachedChecksums.find( filePath );
+		stdext::hash_map< fs::CPath, TChecksumStampPair >::iterator itFound = m_cachedChecksums.find( filePath );
 		if ( itFound != m_cachedChecksums.end() )		// found cached?
 		{
 			switch ( fs::CheckExpireStatus( filePath, itFound->second.second ) )
@@ -98,7 +98,7 @@ namespace fs
 		{
 			if ( UINT crc32Checksum = crc32::ComputeFileChecksum( filePath ) )
 			{
-				m_cachedChecksums[ filePath ] = ChecksumStampPair( crc32Checksum, fs::ReadLastModifyTime( filePath ) );
+				m_cachedChecksums[ filePath ] = TChecksumStampPair( crc32Checksum, fs::ReadLastModifyTime( filePath ) );
 				return crc32Checksum;
 			}
 		}

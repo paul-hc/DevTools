@@ -575,7 +575,7 @@ void CPathTests::TestPathCompareFind( void )
 		ASSERT( !windowsPath.HasExt( _T(".extx") ) );
 	}
 	{
-		path::GetMatch getMatchFunc;
+		path::TGetMatch getMatchFunc;
 		ASSERT_EQUAL( str::MatchEqual, getMatchFunc( _T("x:\\dir\\sub\\name.ext"), _T("x:/dir/sub/name.ext") ) );
 		ASSERT_EQUAL( str::MatchEqualDiffCase, getMatchFunc( _T("X:\\dir\\sub\\NAME.ext"), _T("x:/dir/sub/name.ext") ) );
 		ASSERT_EQUAL( str::MatchNotEqual, getMatchFunc( _T("X:\\dir\\sub\\NAME.txt"), _T("x:/dir/sub/name.jpg") ) );
@@ -653,7 +653,7 @@ namespace ut
 
 namespace func
 {
-	inline const fs::CPath& PathOf( const std::pair< const ut::CPathItem*, std::string >& mapItem ) { return mapItem.first->m_path; }
+	inline const fs::CPath& PathOf( const std::pair<const ut::CPathItem*, std::string>& mapItem ) { return mapItem.first->m_path; }
 }
 
 void CPathTests::TestHasMultipleDirPaths( void )

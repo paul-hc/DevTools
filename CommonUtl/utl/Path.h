@@ -63,7 +63,7 @@ namespace path
 		return str::_CompareN( pLeftPath, pRightPath, path::ToEquivalent(), count );
 	}
 
-	typedef str::EvalMatch< ToNormal, ToEquivalent > GetMatch;
+	typedef str::EvalMatch< ToNormal, ToEquivalent > TGetMatch;
 
 
 	// path breaks and segment matching
@@ -607,12 +607,12 @@ namespace pred
 	};
 
 
-	typedef CompareAdapter< CompareNaturalPath, func::ToNameExt > _CompareNameExt;		// filename | fullpath
-	typedef JoinCompare< _CompareNameExt, CompareNaturalPath > TCompareNameExt;
+	typedef CompareAdapter<CompareNaturalPath, func::ToNameExt> _CompareNameExt;		// filename | fullpath
+	typedef JoinCompare<_CompareNameExt, CompareNaturalPath> TCompareNameExt;
 
-	typedef LessValue< CompareEquivPath > TLess_EquivPath;
-	typedef LessValue< CompareNaturalPath > TLess_NaturalPath;
-	typedef LessValue< TCompareNameExt > TLess_NameExt;
+	typedef LessValue<CompareEquivPath> TLess_EquivPath;
+	typedef LessValue<CompareNaturalPath> TLess_NaturalPath;
+	typedef LessValue<TCompareNameExt> TLess_NameExt;
 }
 
 

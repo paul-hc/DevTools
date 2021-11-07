@@ -56,10 +56,10 @@ namespace ui
 
 
 	// conversion to/from state (0-based index); raw state (UINT) uses is 1-based indexes - works for list control, tree control
-	typedef UINT RawCheckState;
+	typedef UINT TRawCheckState;
 
-	inline RawCheckState CheckStateToRaw( int checkState ) { return INDEXTOSTATEIMAGEMASK( checkState + 1 ); }
-	inline int CheckStateFromRaw( RawCheckState rawCheckState )	{ return ( rawCheckState >> 12 ) - 1; }
+	inline TRawCheckState CheckStateToRaw( int checkState ) { return INDEXTOSTATEIMAGEMASK( checkState + 1 ); }
+	inline int CheckStateFromRaw( TRawCheckState rawCheckState )	{ return ( rawCheckState >> 12 ) - 1; }
 
 
 	// standard notifications

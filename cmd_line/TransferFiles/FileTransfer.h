@@ -38,10 +38,10 @@ private:
 
 	bool AddTransferItem( CTransferItem* pTransferItem );
 
-	typedef std::map< fs::CPath, CTransferItem* > TransferItemMap;		// uses pred::TLess_NaturalPath
+	typedef std::map< fs::CPath, CTransferItem* > TTransferItemMap;		// uses pred::TLess_NaturalPath
 private:
 	const CXferOptions* m_pOptions;
-	TransferItemMap m_transferItems;
+	TTransferItemMap m_transferItems;
 	size_t m_fileCount;
 	size_t m_createdDirCount;
 

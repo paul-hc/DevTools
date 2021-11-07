@@ -38,7 +38,7 @@ public:
 	virtual CWicImage* QueryImageFileDetails( ui::CImageFileDetails& rFileDetails ) const;
 
 	// IImageView overrides
-	virtual fs::ImagePathKey GetImagePathKey( void ) const;
+	virtual fs::TImagePathKey GetImagePathKey( void ) const;
 	virtual void EventChildFrameActivated( void );
 	virtual void EventNavigSliderPosChanged( bool thumbTracking );
 
@@ -77,7 +77,7 @@ private:
 	void UpdateChildBarsState( bool onInit = false );
 	void RestartPlayTimer( void );
 
-	void QueryNeighbouringPathKeys( std::vector< fs::ImagePathKey >& rNeighbourKeys ) const;
+	void QueryNeighbouringPathKeys( std::vector< fs::TImagePathKey >& rNeighbourKeys ) const;
 private:
 	CSlideData m_slideData;
 	CWindowTimer m_navTimer;

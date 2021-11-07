@@ -35,7 +35,7 @@ CTransferFileAttr::CTransferFileAttr( const TTransferPathPair& pathPair )
 	, m_srcImagePath( pathPair.first )
 {
 	GetImageDim();						// cache dimensions via image loading
-	SetPathKey( fs::ImagePathKey( pathPair.second, 0 ) );		// change to DEST path for transfer
+	SetPathKey( fs::TImagePathKey( pathPair.second, 0 ) );		// change to DEST path for transfer
 }
 
 CTransferFileAttr::CTransferFileAttr( const CFileAttr& srcFileAttr, const fs::TEmbeddedPath& destImagePath )
@@ -43,7 +43,7 @@ CTransferFileAttr::CTransferFileAttr( const CFileAttr& srcFileAttr, const fs::TE
 	, m_srcImagePath( GetPath() )
 {
 	GetImageDim();						// cache dimensions
-	SetPathKey( fs::ImagePathKey( fs::CastFlexPath( destImagePath ), 0 ) );		// change to DEST path for transfer
+	SetPathKey( fs::TImagePathKey( fs::CastFlexPath( destImagePath ), 0 ) );		// change to DEST path for transfer
 }
 
 CTransferFileAttr::~CTransferFileAttr()

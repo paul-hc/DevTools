@@ -98,8 +98,8 @@ void CDuplicateFilesGroup::ExtractChecksumDuplicates( std::vector< CDuplicateFil
 	REQUIRE( 0 == m_contentKey.m_crc32 );			// CRC32 is yet to be computed
 	ASSERT_PTR( pProgressSvc );
 
-	typedef std::pair< fs::CFileContentKey, CDuplicateFileItem* > TKeyItemPair;
-	typedef utl::COwningContainer< std::vector<TKeyItemPair>, func::DeleteValue > TKeyItemContainer;
+	typedef std::pair<fs::CFileContentKey, CDuplicateFileItem*> TKeyItemPair;
+	typedef utl::COwningContainer< std::vector<TKeyItemPair>, func::TDeleteValue > TKeyItemContainer;
 
 	TKeyItemContainer scopedKeyItems;
 	scopedKeyItems.reserve( m_items.size() );
@@ -127,16 +127,16 @@ void CDuplicateFilesGroup::ExtractChecksumDuplicates( std::vector< CDuplicateFil
 
 	m_items.clear();					// ownership was passed to scopedKeyItems
 
-	typedef pred::CompareFirstSecond< pred::CompareValue, pred::ComparePathItem > TCompareKeyItemPair;
+	typedef pred::CompareFirstSecond< pred::CompareValue, pred::TComparePathItem > TCompareKeyItemPair;
 
 	func::SortPathItems<TCompareKeyItemPair>( scopedKeyItems );
 
-	typedef std::pair< TKeyItemContainer::iterator, TKeyItemContainer::iterator > IteratorPair;
+	typedef std::pair<TKeyItemContainer::iterator, TKeyItemContainer::iterator> TIteratorPair;
 	typedef pred::CompareFirst< pred::CompareValue > TCompareKeyPair;
 
 	for ( TKeyItemContainer::iterator itKeyItem = scopedKeyItems.begin(), itEnd = scopedKeyItems.end(); itKeyItem != itEnd; )
 	{
-		IteratorPair itPair = std::equal_range( itKeyItem, itEnd, *itKeyItem, pred::LessValue< TCompareKeyPair >() );		// range of items with same content key -> make new group if more than 1 item
+		TIteratorPair itPair = std::equal_range( itKeyItem, itEnd, *itKeyItem, pred::LessValue< TCompareKeyPair >() );		// range of items with same content key -> make new group if more than 1 item
 		ASSERT( itPair.first == itKeyItem );
 		size_t itemCount = std::distance( itPair.first, itPair.second );
 

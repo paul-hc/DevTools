@@ -73,7 +73,7 @@ namespace str
 	// comparison with character translation (low-level)
 
 	template< typename CharT, typename ToCharFunc >
-	std::pair< int, size_t > _BaseCompareDiff( const CharT* pLeft, const CharT* pRight, ToCharFunc toCharFunc, size_t count = std::tstring::npos )
+	std::pair<int, size_t> _BaseCompareDiff( const CharT* pLeft, const CharT* pRight, ToCharFunc toCharFunc, size_t count = std::tstring::npos )
 	{
 		ASSERT_PTR( pLeft );
 		ASSERT_PTR( pRight );
@@ -96,14 +96,14 @@ namespace str
 			else
 				matchLen = str::GetLength( pLeft );
 
-		return std::pair< int, size_t >( firstMismatch, matchLen );
+		return std::pair<int, size_t>( firstMismatch, matchLen );
 	}
 
 	template< typename CharT, typename ToCharFunc >
-	inline std::pair< pred::CompareResult, size_t > _BaseCompare( const CharT* pLeft, const CharT* pRight, ToCharFunc toCharFunc, size_t count = std::tstring::npos )
+	inline std::pair<pred::CompareResult, size_t> _BaseCompare( const CharT* pLeft, const CharT* pRight, ToCharFunc toCharFunc, size_t count = std::tstring::npos )
 	{
-		std::pair< int, size_t > diffPair = _BaseCompareDiff( pLeft, pRight, toCharFunc, count );
-		return std::pair< pred::CompareResult, size_t >( pred::ToCompareResult( diffPair.first ), diffPair.second );
+		std::pair<int, size_t> diffPair = _BaseCompareDiff( pLeft, pRight, toCharFunc, count );
+		return std::pair<pred::CompareResult, size_t>( pred::ToCompareResult( diffPair.first ), diffPair.second );
 	}
 
 	template< typename CharT, typename ToCharFunc >
@@ -503,7 +503,7 @@ namespace str
 		ToEquivFunc m_toEquivFunc;			// for case-insensitive matching (with specialization for paths)
 	};
 
-	typedef EvalMatch< func::ToChar, func::ToUpper > GetMatch;
+	typedef EvalMatch<func::ToChar, func::ToUpper> TGetMatch;
 }
 
 

@@ -31,8 +31,8 @@ public:
 	CBitmap* RetrieveBitmap( const CIconId& cmdId, COLORREF transpColor );
 	CBitmap* RetrieveMenuBitmap( const CIconId& cmdId ) { return RetrieveBitmap( cmdId, ::GetSysColor( COLOR_MENU ) ); }
 
-	std::pair< CBitmap*, CBitmap* > RetrieveMenuBitmaps( const CIconId& cmdId );
-	std::pair< CBitmap*, CBitmap* > RetrieveMenuBitmaps( const CIconId& cmdId, bool useCheckedBitmaps );
+	std::pair<CBitmap*, CBitmap*> RetrieveMenuBitmaps( const CIconId& cmdId );
+	std::pair<CBitmap*, CBitmap*> RetrieveMenuBitmaps( const CIconId& cmdId, bool useCheckedBitmaps );
 
 	void RegisterButtonImages( const CImageList& imageList, const UINT buttonIds[], size_t buttonCount, const CSize* pImageSize = NULL );
 	void RegisterIcon( UINT cmdId, CIcon* pIcon );		// takes ownership of pIcon
@@ -59,13 +59,13 @@ private:
 
 	stdext::hash_map< UINT, UINT > m_cmdAliasMap;		// cmdId -> iconId: multiple commands sharing the same icon
 
-	typedef std::pair< UINT, IconStdSize > IconKey;		// <iconId, IconStdSize> - synonym with CIconId with hash value convenience
-	stdext::hash_map< IconKey, CIcon* > m_iconMap;
+	typedef std::pair<UINT, IconStdSize> TIconKey;		// <iconId, IconStdSize> - synonym with CIconId with hash value convenience
+	stdext::hash_map< TIconKey, CIcon* > m_iconMap;
 
-	typedef std::pair< UINT, COLORREF > BitmapKey;		// <iconId, transpColor>
-	stdext::hash_map< BitmapKey, CBitmap* > m_bitmapMap;	// regular bitmaps look better than menu bitmaps because they retain the alpha channel
+	typedef std::pair<UINT, COLORREF> TBitmapKey;		// <iconId, transpColor>
+	stdext::hash_map< TBitmapKey, CBitmap* > m_bitmapMap;	// regular bitmaps look better than menu bitmaps because they retain the alpha channel
 
-	stdext::hash_map< UINT, std::pair< CBitmap*, CBitmap* > > m_menuBitmapMap;		// <iconId, <unchecked, checked> >
+	stdext::hash_map< UINT, std::pair<CBitmap*, CBitmap*> > m_menuBitmapMap;		// <iconId, <unchecked, checked> >
 
 	std::auto_ptr<CThemeItem> m_pMenuItemBkTheme;
 	std::auto_ptr<CThemeItem> m_pCheckedMenuItemBkTheme;

@@ -82,13 +82,13 @@ private:
 };
 
 
-typedef	DWORD (*GetWindowFieldFunc)( HWND hSrc );
-typedef	DWORD (*SetWindowFieldFunc)( HWND hDest, DWORD flags );
+typedef	DWORD (*TGetWindowFieldFunc)( HWND hSrc );
+typedef	DWORD (*TSetWindowFieldFunc)( HWND hDest, DWORD flags );
 
 
 struct CFlagStore
 {
-	CFlagStore( const TCHAR* pWndClassAliases, CFlagInfo flagInfos[], unsigned int count, GetWindowFieldFunc pGetFunc, SetWindowFieldFunc pSetFunc );
+	CFlagStore( const TCHAR* pWndClassAliases, CFlagInfo flagInfos[], unsigned int count, TGetWindowFieldFunc pGetFunc, TSetWindowFieldFunc pSetFunc );
 	~CFlagStore();
 
 	const std::tstring& GetWndClass( void ) const { return m_wndClasses.front(); }
@@ -124,8 +124,8 @@ public:
 private:
 	DWORD m_mask;
 	DWORD m_editableMask;
-	GetWindowFieldFunc m_pGetFunc;
-	SetWindowFieldFunc m_pSetFunc;
+	TGetWindowFieldFunc m_pGetFunc;
+	TSetWindowFieldFunc m_pSetFunc;
 };
 
 

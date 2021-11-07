@@ -42,7 +42,7 @@ public:
 		tok_MaxCount,
 	};
 
-	typedef std::map< CString, TokenSemantic >	MapTokenToSemantic;
+	typedef std::map< CString, TokenSemantic > TMapTokenToSemantic;
 public:
 	DspParser( const CString& _dspFilePath );
 	virtual ~DspParser();
@@ -92,7 +92,7 @@ protected:
 	int m_lineNo, m_tokenNo;		// 1 based indexes of line and token in line
 	int m_tokenStart, m_tokenEnd;	// Current token start and end
 	TokenSemantic m_currTokenSemantic;
-	MapTokenToSemantic m_registeredTokens;		// Tokens recognized in current parsing (fill it only if necessary since will decrease performance)
+	TMapTokenToSemantic m_registeredTokens;		// Tokens recognized in current parsing (fill it only if necessary since will decrease performance)
 	int m_minRegTokenLen;
 public:
 	// DSP syntax
@@ -138,7 +138,7 @@ inline bool DspParser::registerToken( TokenSemantic tokenSemantic )
 
 inline DspParser::TokenSemantic DspParser::findToken( const CString& token ) const
 {
-	MapTokenToSemantic::const_iterator itToken = m_registeredTokens.find( token );
+	TMapTokenToSemantic::const_iterator itToken = m_registeredTokens.find( token );
 
 	if ( itToken == m_registeredTokens.end() )
 		return tok_Invalid;

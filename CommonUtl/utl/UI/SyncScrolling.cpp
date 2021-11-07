@@ -93,14 +93,14 @@ bool CSyncScrolling::Synchronize( CWnd* pRefCtrl )
 	if ( !utl::Contains( m_ctrls, pRefCtrl ) )
 		return false;
 
-	std::vector< std::pair< UINT, int > > scrollPoses;
+	std::vector< std::pair<UINT, int> > scrollPoses;
 	scrollPoses.reserve( m_scrollTypes.size() );
 	for ( std::vector< int >::const_iterator itScrollType = m_scrollTypes.begin(); itScrollType != m_scrollTypes.end(); ++itScrollType )
 		scrollPoses.push_back( std::make_pair( SB_VERT == *itScrollType ? WM_VSCROLL : WM_HSCROLL, pRefCtrl->GetScrollPos( *itScrollType ) ) );
 
 	for ( std::vector< CWnd* >::const_iterator itCtrl = m_ctrls.begin(); itCtrl != m_ctrls.end(); ++itCtrl )
 		if ( *itCtrl != pRefCtrl )
-			for ( std::vector< std::pair< UINT, int > >::const_iterator itScrollPos = scrollPoses.begin(); itScrollPos != scrollPoses.end(); ++itScrollPos )
+			for ( std::vector< std::pair<UINT, int> >::const_iterator itScrollPos = scrollPoses.begin(); itScrollPos != scrollPoses.end(); ++itScrollPos )
 				( *itCtrl )->SendMessage( itScrollPos->first, MAKEWPARAM( SB_THUMBPOSITION, itScrollPos->second ) );
 
 	return true;

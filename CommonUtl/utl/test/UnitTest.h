@@ -27,7 +27,7 @@ namespace ut
 	}
 
 	template< typename T1, typename T2 >
-	bool Equals( const std::pair< T1, T2 >& x, const std::pair< T1, T2 >& y )
+	bool Equals( const std::pair<T1, T2>& x, const std::pair<T1, T2>& y )
 	{
 		return
 			Equals( x.first, y.first ) &&
@@ -193,7 +193,7 @@ namespace ut
 
 
 template< typename Type1, typename Type2 >
-std::wostream& operator<<( std::wostream& os, const std::pair< Type1, Type2 >& rPair )
+std::wostream& operator<<( std::wostream& os, const std::pair<Type1, Type2>& rPair )
 {
 	return os << L"pair<" << rPair.first << L", " << rPair.second << L">";
 }

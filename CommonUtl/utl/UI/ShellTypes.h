@@ -66,7 +66,7 @@ namespace func
 		}
 	};
 
-	typedef DeleteComHeap DeletePidl;
+	typedef DeleteComHeap TDeletePidl;
 }
 
 
@@ -81,7 +81,7 @@ namespace shell
 	template< typename ContainerT >
 	void ClearOwningPidls( ContainerT& rPidls )			// container of pointers to PIDLs, such as std::vector< LPITEMIDLIST >
 	{
-		std::for_each( rPidls.begin(), rPidls.end(), func::DeletePidl() );
+		std::for_each( rPidls.begin(), rPidls.end(), func::TDeletePidl() );
 		rPidls.clear();
 	}
 

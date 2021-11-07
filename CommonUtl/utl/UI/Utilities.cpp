@@ -1122,7 +1122,7 @@ namespace ui
 
 	bool SortTreeChildren( const pred::IComparator* pComparator, CTreeCtrl& rTreeCtrl, HTREEITEM hParent /*= TVI_ROOT*/, RecursionDepth depth /*= Shallow*/ )
 	{
-		static const pred::Comparator< pred::CompareCode > compareCodeAsc;
+		static const pred::Comparator< pred::TCompareCode > compareCodeAsc;
 		if ( NULL == pComparator )
 			pComparator = &compareCodeAsc;
 
@@ -1219,7 +1219,7 @@ namespace ui
 			return GetComboItemText( rCombo, selIndex );
 	}
 
-	std::pair< bool, ComboField > SetComboEditText( CComboBox& rCombo, const std::tstring& currText, str::CaseType caseType /*= str::Case*/ )
+	std::pair<bool, ComboField> SetComboEditText( CComboBox& rCombo, const std::tstring& currText, str::CaseType caseType /*= str::Case*/ )
 	{
 		int oldSelPos = rCombo.GetCurSel();
 		int foundListPos = ui::FindListItem( rCombo, currText.c_str(), caseType );
@@ -1249,7 +1249,7 @@ namespace ui
 		return std::make_pair( true, ByEdit );					// changed edit text
 	}
 
-	std::pair< bool, ComboField > ReplaceComboEditText( CComboBox& rCombo, const std::tstring& currText, str::CaseType caseType /*= str::Case*/ )
+	std::pair<bool, ComboField> ReplaceComboEditText( CComboBox& rCombo, const std::tstring& currText, str::CaseType caseType /*= str::Case*/ )
 	{
 		DWORD sel = rCombo.GetEditSel();
 		int startPos = LOWORD( sel ), endPos = HIWORD( sel );
@@ -1262,7 +1262,7 @@ namespace ui
 		std::tstring entireText = ui::GetWindowText( rCombo );
 		entireText.replace( startPos, endPos - startPos, currText.c_str() );
 
-		std::pair< bool, ComboField > result = ui::SetComboEditText( rCombo, entireText.c_str(), caseType );		// clears current sel if item isn't in the LBox
+		std::pair<bool, ComboField> result = ui::SetComboEditText( rCombo, entireText.c_str(), caseType );		// clears current sel if item isn't in the LBox
 		rCombo.SetEditSel( startPos, startPos + static_cast<int>( currText.length() ) );							// select the new substring
 		return result;
 	}

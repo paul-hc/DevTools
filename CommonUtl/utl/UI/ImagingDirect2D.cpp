@@ -149,7 +149,7 @@ namespace d2d
 		if ( !CanRender() )
 			return RenderError;			// window is occluded
 
-		CScopedDraw scopedDraw( this );
+		TScopedDraw scopedDraw( this );
 
 		PreDraw( coords );
 		DrawBitmap( coords, bmpCoords );

@@ -192,7 +192,7 @@ namespace ide
 		return mouseScreenPos;
 	}
 
-	std::pair< HMENU, int > FindPopupMenuWithCommand( HWND hWnd, UINT commandID )
+	std::pair<HMENU, int> FindPopupMenuWithCommand( HWND hWnd, UINT commandID )
 	{
 		ASSERT_PTR( hWnd );
 

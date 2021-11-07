@@ -258,7 +258,7 @@ public:
 	}
 
 	// sorting
-	std::pair< TColumn, bool > GetSortByColumn( void ) const { return std::make_pair( m_sortByColumn, m_sortAscending ); }
+	std::pair<TColumn, bool> GetSortByColumn( void ) const { return std::make_pair( m_sortByColumn, m_sortAscending ); }
 	void SetSortByColumn( TColumn sortByColumn, bool sortAscending = true );
 
 	bool GetSortInternally( void ) const { return HasFlag( m_optionFlags, SortInternally ); }
@@ -453,10 +453,10 @@ public:
 	template< typename ObjectT >
 	void SetObjectsCheckedState( const std::vector< ObjectT* >* pObjects, int checkState = BST_CHECKED, bool uncheckOthers = true );
 private:
-	ui::RawCheckState GetRawCheckState( int index ) const { return GetItemState( index, LVIS_STATEIMAGEMASK ); }
-	bool SetRawCheckState( int index, ui::RawCheckState rawCheckState ) { return SetItemState( index, rawCheckState, LVIS_STATEIMAGEMASK ) != FALSE; }
+	ui::TRawCheckState GetRawCheckState( int index ) const { return GetItemState( index, LVIS_STATEIMAGEMASK ); }
+	bool SetRawCheckState( int index, ui::TRawCheckState rawCheckState ) { return SetItemState( index, rawCheckState, LVIS_STATEIMAGEMASK ) != FALSE; }
 
-	static bool HasRawCheckState( ui::RawCheckState state ) { return HasFlag( state, LVIS_STATEIMAGEMASK ); }
+	static bool HasRawCheckState( ui::TRawCheckState state ) { return HasFlag( state, LVIS_STATEIMAGEMASK ); }
 
 	void ToggleCheckState( int index, int newCheckState );
 	void SetItemCheckState( int index, int checkState );
@@ -526,7 +526,7 @@ public:
 
 	// diff columns
 	template< typename MatchFunc >
-	void SetupDiffColumnPair( TColumn srcColumn, TColumn destColumn, MatchFunc getMatchFunc );		// call after the list items are set up; by default pass str::GetMatch()
+	void SetupDiffColumnPair( TColumn srcColumn, TColumn destColumn, MatchFunc getMatchFunc );		// call after the list items are set up; by default pass str::TGetMatch()
 protected:
 	const CDiffColumnPair* FindDiffColumnPair( TColumn column ) const;
 	bool IsDiffColumn( TColumn column ) const { return FindDiffColumnPair( column ) != NULL; }
@@ -537,7 +537,7 @@ public:
 	{
 		CItemData( void ) : m_state( 0 ), m_lParam( 0 ) {}
 	public:
-		std::vector< std::pair< std::tstring, int > > m_subItems;		// text + imageIndex
+		std::vector< std::pair<std::tstring, int> > m_subItems;		// text + imageIndex
 		UINT m_state;
 		LPARAM m_lParam;
 	};
@@ -573,7 +573,7 @@ public:
 	template< typename ObjectT >
 	void QueryGroupItems( std::vector< ObjectT* >& rObjectItems, int groupId ) const;
 
-	std::pair< int, UINT > _GetGroupItemsRange( int groupId ) const;		// <firstItemIndex, itemCount> - not reliable with groups/items custom sorting, use QueryGroupItems instead (just the first item index is accurate)
+	std::pair<int, UINT> _GetGroupItemsRange( int groupId ) const;		// <firstItemIndex, itemCount> - not reliable with groups/items custom sorting, use QueryGroupItems instead (just the first item index is accurate)
 
 	std::tstring GetGroupHeaderText( int groupId ) const;
 	int InsertGroupHeader( int groupIndex, int groupId, const std::tstring& header, DWORD state = LVGS_NORMAL, DWORD align = LVGA_HEADER_LEFT );
@@ -627,7 +627,7 @@ private:
 	CImageList* m_pLargeImageList;
 	const ui::ICheckStatePolicy* m_pCheckStatePolicy;		// for extended check states
 
-	typedef std::pair< TRowKey, TColumn > TCellPair;		// invariant to sorting: favour LPARAMs instead of indexes
+	typedef std::pair<TRowKey, TColumn> TCellPair;			// invariant to sorting: favour LPARAMs instead of indexes
 	stdext::hash_map< TCellPair, ui::CTextEffect > m_markedCells;
 
 	std::list< CDiffColumnPair > m_diffColumnPairs;

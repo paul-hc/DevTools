@@ -163,7 +163,7 @@ namespace pred
 {
 	struct AsWidth { int operator()( const CSize& size ) const { return size.cx; } };
 
-	typedef CompareAdapter< pred::CompareValue, AsWidth > CompareWidth;
+	typedef CompareAdapter< pred::CompareValue, AsWidth > TCompareWidth;
 }
 
 CSize CMultiZoneIterator::FindWidestSize( CDC* pDC, const std::vector< std::tstring >& labels ) const
@@ -175,10 +175,10 @@ CSize CMultiZoneIterator::FindWidestSize( CDC* pDC, const std::vector< std::tstr
 	for ( unsigned int i = 0; i != m_zoneCount; ++i )
 		textSizes.push_back( ui::GetTextSize( pDC, labels[ i ].c_str() ) );
 
-	return *std::max_element( textSizes.begin(), textSizes.end(), pred::LessValue< pred::CompareWidth >() );
+	return *std::max_element( textSizes.begin(), textSizes.end(), pred::LessValue< pred::TCompareWidth >() );
 }
 
-std::pair< CMultiZoneIterator::LabelLayout, UINT >
+std::pair<CMultiZoneIterator::LabelLayout, UINT>
 CMultiZoneIterator::FindLabelLayout( CDC* pDC, const CRect& clientRect, const std::vector< std::tstring >& labels ) const
 {
 	CSize labelSize = FindWidestSize( pDC, labels ) + CSize( TextSpacingX, TextSpacingY );
@@ -220,7 +220,7 @@ void CMultiZoneIterator::DrawLabels( CDC* pDC, const CRect& clientRect, const st
 	ASSERT( IsValid() );
 	ASSERT( m_zoneCount == labels.size() );
 
-	std::pair< LabelLayout, UINT > layoutAlign = FindLabelLayout( pDC, clientRect, labels );		// find best fitting text layout
+	std::pair<LabelLayout, UINT> layoutAlign = FindLabelLayout( pDC, clientRect, labels );		// find best fitting text layout
 
 	for ( unsigned int i = 0; i != m_zoneCount; ++i )
 	{

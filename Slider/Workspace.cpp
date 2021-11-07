@@ -408,7 +408,7 @@ void CWorkspace::CmEditWorkspace( void )
 
 	if ( result != IDCANCEL )
 	{
-		std::pair< UpdateViewHint, bool > changed( Hint_Null, false );		// <hint, save>
+		std::pair<UpdateViewHint, bool> changed( Hint_Null, false );		// <hint, save>
 		if ( dlg.m_data != m_data )
 		{
 			m_data = dlg.m_data;

@@ -98,8 +98,8 @@ namespace fs
 		std::auto_ptr<COleStreamFile> MakeOleStreamFile( const TCHAR* pStreamName, IStream* pStream = NULL ) const;
 
 		// backwards compatibility: find existing object based on possible alternates (in current storage trail)
-		std::pair< const TCHAR*, size_t > FindAlternate_DirName( const TCHAR* altDirNames[], size_t altCount );
-		std::pair< const TCHAR*, size_t > FindAlternate_StreamName( const TCHAR* altStreamNames[], size_t altCount );
+		std::pair<const TCHAR*, size_t> FindAlternate_DirName( const TCHAR* altDirNames[], size_t altCount );
+		std::pair<const TCHAR*, size_t> FindAlternate_StreamName( const TCHAR* altStreamNames[], size_t altCount );
 
 		static std::tstring MakeShortFilename( const TCHAR* pElementName );		// make short file name with length limited to MaxFilenameLen
 		static DWORD ToMode( DWORD mode );										// augment mode with default STGM_SHARE_EXCLUSIVE (if no STGM_SHARE_DENY_* flag is present)

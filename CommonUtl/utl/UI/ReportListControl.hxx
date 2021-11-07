@@ -97,10 +97,10 @@ void CReportListControl::QueryGroupItems( std::vector< ObjectT* >& rObjectItems,
 {
 	REQUIRE( IsGroupViewEnabled() );
 
-	typedef std::multimap< int, TRowKey >::const_iterator GroupMapIterator;
-	std::pair< GroupMapIterator, GroupMapIterator > itPair = m_groupIdToItemsMap.equal_range( groupId );
+	typedef std::multimap< int, TRowKey >::const_iterator TGroupMapIterator;
+	std::pair<TGroupMapIterator, TGroupMapIterator> itPair = m_groupIdToItemsMap.equal_range( groupId );
 
-	for ( GroupMapIterator it = itPair.first; it != itPair.second; ++it )
+	for ( TGroupMapIterator it = itPair.first; it != itPair.second; ++it )
 		rObjectItems.push_back( AsPtr<ObjectT>( it->second ) );
 }
 

@@ -52,7 +52,7 @@ private:
 	void SetupPatternsListView( void );
 
 	enum ImagesColumn { FileName, Folder, Dimensions, Size, Date, Unordered = -1 };
-	static std::pair< ImagesColumn, bool > ToListSortOrder( fattr::Order fileOrder );		// < sortByColumn, sortAscending >
+	static std::pair<ImagesColumn, bool> ToListSortOrder( fattr::Order fileOrder );		// < sortByColumn, sortAscending >
 
 	void SetupFoundImagesListView( void );
 

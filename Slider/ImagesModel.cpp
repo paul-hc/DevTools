@@ -191,7 +191,7 @@ void CImagesModel::OrderFileAttrs( fattr::Order fileOrder, utl::IProgressService
 	switch ( fileOrder )
 	{
 		case fattr::OriginalOrder:
-			std::sort( m_fileAttributes.begin(), m_fileAttributes.end(), pred::MakeOrderByPtr( pred::CompareBaselinePos() ) );
+			std::sort( m_fileAttributes.begin(), m_fileAttributes.end(), pred::MakeOrderByPtr( pred::TCompareBaselinePos() ) );
 			break;
 		case fattr::Shuffle:
 		case fattr::ShuffleSameSeed:

@@ -70,7 +70,7 @@ namespace pred
 		}
 	};
 
-	typedef CompareAdapter< CompareMockItem, func::PtrToReference > CompareMockItemPtr;
+	typedef CompareAdapter< CompareMockItem, func::PtrToReference > TCompareMockItemPtr;
 }
 
 

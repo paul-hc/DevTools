@@ -71,8 +71,8 @@ public:
 
 	CPoint GetMinWindowSize( void ) const { return GetMinClientSize() + m_nonClientSize; }
 
-	layout::Style FindLayoutStyle( UINT ctrlId ) const;
-	layout::Style FindLayoutStyle( HWND hCtrl ) const { ASSERT( IsWindow( hCtrl ) ); return FindLayoutStyle( ::GetDlgCtrlID( hCtrl ) ); }
+	layout::TStyle FindLayoutStyle( UINT ctrlId ) const;
+	layout::TStyle FindLayoutStyle( HWND hCtrl ) const { ASSERT( IsWindow( hCtrl ) ); return FindLayoutStyle( ::GetDlgCtrlID( hCtrl ) ); }
 
 	ui::ILayoutFrame* FindControlLayoutFrame( HWND hCtrl ) const;
 	void RegisterBuddyCallback( UINT buddyId, ui::ILayoutFrame* pCallback );
@@ -84,7 +84,7 @@ public:
 	void AdjustControlInitialPosition( UINT ctrlId, const CSize& deltaOrigin, const CSize& deltaSize );		// when stretching content to fit: to retain original layout behaviour
 private:
 	void SetupControlStates( void );
-	void SetupCollapsedState( UINT ctrlId, layout::Style style );
+	void SetupCollapsedState( UINT ctrlId, layout::TStyle style );
 	void SetupGroupBoxState( HWND hGroupBox, layout::CControlState* pControlState );
 	bool AnyRepaintCtrl( void ) const;
 	bool LayoutSmoothly( const CSize& delta );

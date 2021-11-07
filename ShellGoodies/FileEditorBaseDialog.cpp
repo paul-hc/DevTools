@@ -105,7 +105,7 @@ int CFileEditorBaseDialog::PopStackRunCrossEditor( svc::StackType stackType )
 
 	CWnd* pParent = GetParent();
 
-	std::pair< IFileEditor*, bool > editorPair = m_pFileModel->HandleUndoRedo( stackType, pParent );
+	std::pair<IFileEditor*, bool> editorPair = m_pFileModel->HandleUndoRedo( stackType, pParent );
 	if ( NULL == editorPair.first )				// we've got no editor to undo/redo?
 	{
 		if ( editorPair.second )				// command handled?

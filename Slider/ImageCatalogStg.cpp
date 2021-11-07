@@ -611,7 +611,7 @@ bool CImageCatalogStg::LoadPasswordStream( void )
 	CScopedCurrentDir scopedAlbumFolder( this, s_rootFolderName );			// start lookup in root (for backwards compatibility)
 
 	{
-		std::pair< const TCHAR*, size_t > streamName = FindAlternate_StreamName( ARRAY_PAIR( s_passwordStreamNames ) );
+		std::pair<const TCHAR*, size_t> streamName = FindAlternate_StreamName( ARRAY_PAIR( s_passwordStreamNames ) );
 		pPasswordStreamName = streamName.first;
 
 		if ( streamName.first != NULL )			// password stream found in the root?

@@ -11,16 +11,16 @@ namespace utl
 	template< typename CrcT >
 	class CChecksum
 	{
-		typedef typename CrcT::UnderlyingT UnderlyingT;
+		typedef typename CrcT::TUnderlying TUnderlying;
 	public:
-		CChecksum( void ) : m_crcTable( CrcT::Instance() ), m_crc( std::numeric_limits<UnderlyingT>::max() ) {}
+		CChecksum( void ) : m_crcTable( CrcT::Instance() ), m_crc( std::numeric_limits<TUnderlying>::max() ) {}
 
 		void ProcessBytes( const void* pBuffer, size_t count ) { m_crcTable.AddBytes( m_crc, pBuffer, count ); }
 
-		UnderlyingT GetResult( void ) const { return ~m_crc; }
+		TUnderlying GetResult( void ) const { return ~m_crc; }
 	private:
 		CrcT m_crcTable;
-		UnderlyingT m_crc;
+		TUnderlying m_crc;
 	};
 
 
@@ -31,16 +31,16 @@ namespace utl
 	{
 		CCrc32( void );
 	public:
-		typedef UINT UnderlyingT;
+		typedef UINT TUnderlying;
 
 		static const CCrc32& Instance( void );
 
 		const std::vector< UINT >& GetLookupTable( void ) const { return m_lookupTable; }
 
 		// CRC32 incremental checksum (usually starting with UINT_MAX)
-		void AddBytes( UnderlyingT& rChecksum, const void* pBuffer, size_t count ) const;
+		void AddBytes( TUnderlying& rChecksum, const void* pBuffer, size_t count ) const;
 	private:
-		void AddByte( UnderlyingT& rCrc32, const BYTE byteValue ) const { rCrc32 = ( rCrc32 >> 8 ) ^ m_lookupTable[ byteValue ^ ( rCrc32 & 0x000000FF )]; }
+		void AddByte( TUnderlying& rCrc32, const BYTE byteValue ) const { rCrc32 = ( rCrc32 >> 8 ) ^ m_lookupTable[ byteValue ^ ( rCrc32 & 0x000000FF )]; }
 	private:
 		std::vector< UINT > m_lookupTable;		// the lookup table with constants generated based on s_polynomial, with entry for each byte value from 0 to 255
 		static const UINT s_polynomial;
@@ -102,9 +102,9 @@ namespace fs
 
 		UINT AcquireCrc32( const fs::CPath& filePath );
 	private:
-		typedef std::pair< UINT, CTime > ChecksumStampPair;		// Crc32 checksum, lastModifyTime
+		typedef std::pair<UINT, CTime> TChecksumStampPair;		// Crc32 checksum, lastModifyTime
 
-		stdext::hash_map< fs::CPath, ChecksumStampPair > m_cachedChecksums;
+		stdext::hash_map< fs::CPath, TChecksumStampPair > m_cachedChecksums;
 	};
 }
 

@@ -259,7 +259,7 @@ namespace seq
 	class CSequenceAdapter
 	{
 	public:
-		typedef Type Type;
+		typedef Type TType;
 
 		template< typename Container >
 		CSequenceAdapter( Container* pSequence ) : m_pSequence( &pSequence->front() ), m_count( pSequence->size() ) { ASSERT_PTR( m_pSequence ); }

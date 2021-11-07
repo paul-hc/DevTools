@@ -17,7 +17,7 @@ namespace ui
 
 		bool ContainsId( int cmdId ) const { return m_cmdIds.find( cmdId ) != m_cmdIds.end(); }
 		const std::set< int >& GetIds( void ) const { return m_cmdIds; }
-		std::pair< int, int > GetMinMaxIds( void ) const;
+		std::pair<int, int> GetMinMaxIds( void ) const;
 
 		void RegisterCommands( HMENU hMenu, RecursionDepth depth = Deep );
 

@@ -153,7 +153,7 @@ CCachedThumbBitmap* CCatalogStorageFactory::GenerateThumb( const fs::CFlexPath& 
 
 	const CThumbnailer* pThumbnailer = safe_ptr( app::GetThumbnailer() );
 
-	if ( CComPtr<IWICBitmapSource> pBitmapSource = CWicImageCache::Instance().LookupBitmapSource( fs::ImagePathKey( srcImagePath, 0 ) ) )		// use frame 0 for the thumbnail
+	if ( CComPtr<IWICBitmapSource> pBitmapSource = CWicImageCache::Instance().LookupBitmapSource( fs::TImagePathKey( srcImagePath, 0 ) ) )		// use frame 0 for the thumbnail
 		if ( CCachedThumbBitmap* pThumbBitmap = pThumbnailer->NewScaledThumb( pBitmapSource, srcImagePath ) )
 		{
 			// IMP: the resulting bitmap, even the scaled bitmap will keep the stream alive for the lifetime of the bitmap; same if we scale the bitmap;

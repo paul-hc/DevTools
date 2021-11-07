@@ -260,8 +260,8 @@ namespace ui
 	template< typename Handle >
 	inline void DDX_Handle( CDataExchange* pDX, int ctrlId, Handle& rHandle, const Handle* pNullHandle = NULL )
 	{
-		typedef DWORD_PTR HandleValue;
-		DDX_HexValue< HandleValue >( pDX, ctrlId, (HandleValue&)rHandle, _T("%08X"), (const HandleValue*)pNullHandle );
+		typedef DWORD_PTR THandleValue;
+		DDX_HexValue< THandleValue >( pDX, ctrlId, (THandleValue&)rHandle, _T("%08X"), (const THandleValue*)pNullHandle );
 	}
 }
 

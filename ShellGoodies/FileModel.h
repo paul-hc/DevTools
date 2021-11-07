@@ -28,7 +28,7 @@ namespace func
 
 
 class CFileModel : public CCmdTarget
-				 , public CSubject
+				 , public TSubject
 				 , public CInternalChange
 				 , private utl::noncopyable
 {
@@ -58,7 +58,7 @@ public:
 	void ResetDestinations( void );
 
 	IFileEditor* MakeFileEditor( cmd::CommandType cmdType, CWnd* pParent );
-	std::pair< IFileEditor*, bool > HandleUndoRedo( svc::StackType stackType, CWnd* pParent );			// from the corresponding stack top: if an editor-based cmd, return editor; otherwise execute it
+	std::pair<IFileEditor*, bool> HandleUndoRedo( svc::StackType stackType, CWnd* pParent );			// from the corresponding stack top: if an editor-based cmd, return editor; otherwise execute it
 	static bool HasFileEditor( cmd::CommandType cmdType );
 
 	// RENAME

@@ -35,7 +35,7 @@ public:
 
 	CSearchPattern* GetPatternAt( size_t pos ) const { ASSERT( pos < m_patterns.size() ); return m_patterns[ pos ]; }
 	size_t AddPattern( CSearchPattern* pPattern, size_t pos = utl::npos );
-	std::pair< CSearchPattern*, bool > AddSearchPath( const fs::CPath& searchPath, size_t pos = utl::npos );		// returns the existing pattern if already exists
+	std::pair<CSearchPattern*, bool> AddSearchPath( const fs::CPath& searchPath, size_t pos = utl::npos );		// returns the existing pattern if already exists
 	std::auto_ptr<CSearchPattern> RemovePatternAt( size_t pos );
 	void ClearPatterns( void );
 	size_t FindPatternPos( const fs::CPath& searchPath, size_t ignorePos = utl::npos ) const;

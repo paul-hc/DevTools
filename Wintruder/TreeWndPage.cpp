@@ -89,14 +89,14 @@ namespace wt
 		ASSERT( ::IsWindow( hWnd ) );
 
 		HWND hParentWnd = ::GetAncestor( hWnd, GA_PARENT );			// real parent, NULL if desktop - GetParent( hWnd ) may return the owner
-		const std::pair< HTREEITEM, int >* pParentPair = NULL;
+		const std::pair<HTREEITEM, int>* pParentPair = NULL;
 		if ( hParentWnd != NULL )
 			pParentPair = FindWndItem( hParentWnd );
 
 		CItemInfo info( hWnd, NULL == hParentWnd ? Image_Desktop : -1 );
 		HTREEITEM hItemParent = pParentPair != NULL ? pParentPair->first : TVI_ROOT;
 
-		std::pair< HTREEITEM, int >& rPair = m_wndToItemMap[ hWnd ];
+		std::pair<HTREEITEM, int>& rPair = m_wndToItemMap[ hWnd ];
 		rPair.first = m_pTreeCtrl->InsertItem( info.m_item.mask, info.m_item.pszText,
 											   info.m_item.iImage, info.m_item.iSelectedImage, info.m_item.state, info.m_item.stateMask,
 											   info.m_item.lParam, hItemParent, TVI_LAST );
@@ -105,9 +105,9 @@ namespace wt
 		LogWnd( hWnd, rPair.second );
 	}
 
-	const std::pair< HTREEITEM, int >* CWndTreeBuilder::FindWndItem( HWND hWnd ) const
+	const std::pair<HTREEITEM, int>* CWndTreeBuilder::FindWndItem( HWND hWnd ) const
 	{
-		stdext::hash_map< HWND, std::pair< HTREEITEM, int > >::const_iterator itFound = m_wndToItemMap.find( hWnd );
+		stdext::hash_map< HWND, std::pair<HTREEITEM, int> >::const_iterator itFound = m_wndToItemMap.find( hWnd );
 		return itFound != m_wndToItemMap.end() ? &itFound->second : NULL;
 	}
 

@@ -36,7 +36,7 @@ public:
 	void LoadHistory( const TCHAR* pSection, const TCHAR* pEntry, const TCHAR* pDefaultText = NULL );
 
 	std::tstring GetCurrentText( void ) const;
-	std::pair< bool, ui::ComboField > SetEditText( const std::tstring& currText );
+	std::pair<bool, ui::ComboField> SetEditText( const std::tstring& currText );
 	void StoreCurrentEditItem( void );
 
 	virtual const ui::CItemContent& GetItemContent( void ) const { return m_itemContent; }

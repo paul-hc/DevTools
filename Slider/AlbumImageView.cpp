@@ -73,9 +73,9 @@ CMenu& CAlbumImageView::GetDocContextMenu( void ) const
 	return s_contextMenu;
 }
 
-fs::ImagePathKey CAlbumImageView::GetImagePathKey( void ) const
+fs::TImagePathKey CAlbumImageView::GetImagePathKey( void ) const
 {
-	fs::ImagePathKey imagePathKey = GetDocument()->GetImageFilePathAt( m_slideData.GetCurrentIndex() );
+	fs::TImagePathKey imagePathKey = GetDocument()->GetImageFilePathAt( m_slideData.GetCurrentIndex() );
 
 	imagePathKey.second = m_slideData.GetCurrentNavPos().second;
 	return imagePathKey;
@@ -161,7 +161,7 @@ bool CAlbumImageView::UpdateImage( void )
 			{
 				success = true;
 
-				std::vector< fs::ImagePathKey > neighbours;
+				std::vector< fs::TImagePathKey > neighbours;
 				QueryNeighbouringPathKeys( neighbours );
 				CWicImageCache::Instance().Enqueue( neighbours );			// pre-emptively load the neighboring images - enqueue and load on queue listener thread
 			}
@@ -178,7 +178,7 @@ bool CAlbumImageView::UpdateImage( void )
 	return success;
 }
 
-void CAlbumImageView::QueryNeighbouringPathKeys( std::vector< fs::ImagePathKey >& rNeighbourKeys ) const
+void CAlbumImageView::QueryNeighbouringPathKeys( std::vector< fs::TImagePathKey >& rNeighbourKeys ) const
 {
 	CAlbumNavigator navigator( this );
 	nav::TIndexFramePosPair prevNavigInfo = navigator.GetNavigateInfo( nav::Previous );

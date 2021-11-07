@@ -118,7 +118,7 @@ bool CFlagGroup::IsReadOnlyGroup( void ) const
 
 // CFlagStore implementation
 
-CFlagStore::CFlagStore( const TCHAR* pWndClassAliases, CFlagInfo flagInfos[], unsigned int count, GetWindowFieldFunc pGetFunc, SetWindowFieldFunc pSetFunc )
+CFlagStore::CFlagStore( const TCHAR* pWndClassAliases, CFlagInfo flagInfos[], unsigned int count, TGetWindowFieldFunc pGetFunc, TSetWindowFieldFunc pSetFunc )
 	: m_mask( 0 )
 	, m_editableMask( 0 )
 	, m_pGetFunc( pGetFunc )

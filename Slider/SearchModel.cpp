@@ -77,22 +77,22 @@ size_t CSearchModel::AddPattern( CSearchPattern* pPattern, size_t atPos /*= utl:
 	return atPos;
 }
 
-std::pair< CSearchPattern*, bool > CSearchModel::AddSearchPath( const fs::CPath& searchPath, size_t pos /*= utl::npos*/ )
+std::pair<CSearchPattern*, bool> CSearchModel::AddSearchPath( const fs::CPath& searchPath, size_t pos /*= utl::npos*/ )
 {
 	size_t foundPos = FindPatternPos( searchPath );
 	if ( foundPos != utl::npos )
-		return std::pair< CSearchPattern*, bool >( m_patterns[ foundPos ], false );			// pattern with path key already exists
+		return std::pair<CSearchPattern*, bool>( m_patterns[ foundPos ], false );			// pattern with path key already exists
 
 	CSearchPattern* pNewPattern = new CSearchPattern( searchPath );
 
 	if ( !pNewPattern->IsValidPath() )
 	{
 		delete pNewPattern;
-		return std::pair< CSearchPattern*, bool >( NULL, false );			// could be a stray file of incompatible type
+		return std::pair<CSearchPattern*, bool>( NULL, false );			// could be a stray file of incompatible type
 	}
 
 	AddPattern( pNewPattern, pos );
-	return std::pair< CSearchPattern*, bool >( pNewPattern, true );							// new pattern
+	return std::pair<CSearchPattern*, bool>( pNewPattern, true );							// new pattern
 }
 
 std::auto_ptr<CSearchPattern> CSearchModel::RemovePatternAt( size_t pos )

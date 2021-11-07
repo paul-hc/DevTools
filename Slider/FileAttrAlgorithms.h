@@ -126,18 +126,18 @@ namespace func
 
 namespace pred
 {
-	typedef CompareAdapter< CompareNaturalPath, func::ToFilePath > CompareFileAttrPath;
+	typedef CompareAdapter<CompareNaturalPath, func::ToFilePath> TCompareFileAttrPath;
 
-	typedef CompareAdapter< CompareValue, func::ToFileSize > CompareFileAttrSize;
+	typedef CompareAdapter<CompareValue, func::ToFileSize> TCompareFileAttrSize;
 
-	typedef CompareAdapter< CompareValue, func::ToImageArea > CompareImageArea;
-	typedef CompareAdapter< CompareValue, func::ToImageWidth > CompareImageWidth;
-	typedef CompareAdapter< CompareValue, func::ToImageHeight > CompareImageHeight;
+	typedef CompareAdapter<CompareValue, func::ToImageArea> TCompareImageArea;
+	typedef CompareAdapter<CompareValue, func::ToImageWidth> TCompareImageWidth;
+	typedef CompareAdapter<CompareValue, func::ToImageHeight> TCompareImageHeight;
 	
-	typedef JoinCompare< CompareImageArea, JoinCompare< CompareImageWidth, CompareImageHeight > > CompareImageDimensions;		// area | width | height
-	typedef JoinCompare< CompareImageDimensions, CompareFileAttrPath > Compare_ImageDimensions;									// area | width | height | path
+	typedef JoinCompare< TCompareImageArea, JoinCompare<TCompareImageWidth, TCompareImageHeight> > TCompareImageDimensions;		// area | width | height
+	typedef JoinCompare<TCompareImageDimensions, TCompareFileAttrPath> TCompare_ImageDimensions;								// area | width | height | path
 
-	typedef CompareAdapter< CompareValue, func::ToBaselinePos > CompareBaselinePos;
+	typedef CompareAdapter<CompareValue, func::ToBaselinePos> TCompareBaselinePos;
 
 
 	inline CompareResult CompareFileTime( const FILETIME& left, const FILETIME& right )

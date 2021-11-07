@@ -25,7 +25,7 @@ namespace fs
 	}
 
 	template< typename PathType, typename ObjectType >
-	std::pair< ObjectType*, cache::TStatusFlags > CCacheLoader< PathType, ObjectType >::Acquire( const PathType& pathKey )
+	std::pair<ObjectType*, cache::TStatusFlags> CCacheLoader< PathType, ObjectType >::Acquire( const PathType& pathKey )
 	{
 		mt::CAutoLock lock( &m_cs );
 
@@ -56,7 +56,7 @@ namespace fs
 		if ( pObject != NULL && !HasFlag( cacheStatus, cache::CacheHit ) )
 			_Add( pathKey, pObject );
 
-		std::pair< ObjectType*, cache::TStatusFlags > objectPair( pObject, cacheStatus );
+		std::pair<ObjectType*, cache::TStatusFlags> objectPair( pObject, cacheStatus );
 
 		m_pCacheOwner->TraceObject( pathKey, objectPair.first, objectPair.second );
 		return objectPair;
@@ -89,7 +89,7 @@ namespace fs
 	// CCacheLoader template code
 
 	template< typename PathType >
-	CQueueListener< PathType >::CQueueListener( AcquireFunc acquireFunc )
+	CQueueListener< PathType >::CQueueListener( TAcquireFunc acquireFunc )
 		: m_acquireFunc( acquireFunc )
 		, m_wantExit( false )
 		, m_thread( std::bind( &CQueueListener::ListenLoop, this ) )

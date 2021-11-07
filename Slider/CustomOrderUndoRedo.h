@@ -38,13 +38,13 @@ namespace custom_order
 
 	struct COpStack : public std::deque< COpStep >, private utl::noncopyable
 	{
-		typedef std::deque< COpStep > Base;
+		typedef std::deque< COpStep > TBase;
 
 		COpStack( void ) {}
 
 		void ClearStack( ClearMode clearMode = CM_ClearAll );
 	protected:
-		using Base::clear;
+		using TBase::clear;
 	};
 
 } //namespace custom_order

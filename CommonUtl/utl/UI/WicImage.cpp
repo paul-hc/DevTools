@@ -12,7 +12,7 @@
 #endif
 
 
-const fs::ImagePathKey CWicImage::s_nullKey( fs::CFlexPath(), UINT_MAX );
+const fs::TImagePathKey CWicImage::s_nullKey( fs::CFlexPath(), UINT_MAX );
 
 CWicImage::CWicImage( const WICPixelFormatGUID* pCvtPixelFormat /*= &GUID_WICPixelFormat32bppPBGRA*/ )
 	: CWicBitmap()
@@ -30,7 +30,7 @@ CWicImage::~CWicImage()
 			VERIFY( SharedMultiFrameDecoders().Remove( m_key.first ) );		// removed the registered shared decoder
 }
 
-std::auto_ptr<CWicImage> CWicImage::CreateFromFile( const fs::ImagePathKey& imageKey, utl::ErrorHandling handlingMode /*= utl::CheckMode*/ )
+std::auto_ptr<CWicImage> CWicImage::CreateFromFile( const fs::TImagePathKey& imageKey, utl::ErrorHandling handlingMode /*= utl::CheckMode*/ )
 {
 	std::auto_ptr<CWicImage> pNewImage;
 
@@ -64,10 +64,10 @@ std::auto_ptr<CWicImage> CWicImage::CreateFromFile( const fs::ImagePathKey& imag
 	return pNewImage;
 }
 
-std::pair< UINT, wic::TDecoderFlags > CWicImage::LookupImageFileFrameCount( const fs::CFlexPath& imagePath )
+std::pair<UINT, wic::TDecoderFlags> CWicImage::LookupImageFileFrameCount( const fs::CFlexPath& imagePath )
 {
 	wic::CBitmapDecoder decoder = AcquireDecoder( imagePath, utl::CheckMode );
-	return std::pair< UINT, wic::TDecoderFlags >( decoder.GetFrameCount(), decoder.GetDecoderFlags() );
+	return std::pair<UINT, wic::TDecoderFlags>( decoder.GetFrameCount(), decoder.GetDecoderFlags() );
 }
 
 void CWicImage::Clear( void )
@@ -77,7 +77,7 @@ void CWicImage::Clear( void )
 	m_key = s_nullKey;
 }
 
-bool CWicImage::LoadDecoderFrame( wic::CBitmapDecoder& decoder, const fs::ImagePathKey& imageKey )
+bool CWicImage::LoadDecoderFrame( wic::CBitmapDecoder& decoder, const fs::TImagePathKey& imageKey )
 {
 	Clear();
 	m_key = imageKey;
@@ -95,7 +95,7 @@ bool CWicImage::LoadDecoderFrame( wic::CBitmapDecoder& decoder, const fs::ImageP
 	return false;
 }
 
-bool CWicImage::LoadFromFile( const fs::ImagePathKey& imageKey )
+bool CWicImage::LoadFromFile( const fs::TImagePathKey& imageKey )
 {
 	wic::CBitmapDecoder decoder = AcquireDecoder( imageKey.first, GetHandlingMode() );
 	return LoadDecoderFrame( decoder, imageKey );
@@ -146,7 +146,7 @@ bool CWicImage::IsCorruptFile( const fs::CFlexPath& imagePath )
 	return true;
 }
 
-bool CWicImage::IsCorruptFrame( const fs::ImagePathKey& imageKey )
+bool CWicImage::IsCorruptFrame( const fs::TImagePathKey& imageKey )
 {
 	if ( imageKey.first.IsEmpty() || !imageKey.first.FileExist( fs::Read ) )
 		return false;				// file doesn't exist -> doesn't mean is corrupt!
@@ -224,7 +224,7 @@ size_t CWicImage::CMultiFrameDecoder::FindPosLoaded( UINT framePos ) const
 	return utl::npos;
 }
 
-std::auto_ptr<CWicImage> CWicImage::CMultiFrameDecoder::LoadFrame( const fs::ImagePathKey& imageKey )
+std::auto_ptr<CWicImage> CWicImage::CMultiFrameDecoder::LoadFrame( const fs::TImagePathKey& imageKey )
 {
 	REQUIRE( !IsLoaded( imageKey.second ) );
 
@@ -348,7 +348,7 @@ namespace fs
 				str::Replace( specs, _T("."), _T("*.") );		// "*.bmp;*.dib;*.rle"
 			}
 
-			AddFilter( fs::FilterPair( name, specs ) );
+			AddFilter( fs::TFilterPair( name, specs ) );
 		}
 	}
 

@@ -1254,7 +1254,7 @@ void CFindDuplicatesDialog::OnLvnCustomSortList_DuplicateList( NMHDR* pNmHdr, LR
 {
 	pNmHdr;
 	*pResult = FALSE;
-	std::pair< int, bool > currSort = m_dupsListCtrl.GetSortByColumn();	// <sortByColumn, sortAscending>
+	std::pair<int, bool> currSort = m_dupsListCtrl.GetSortByColumn();	// <sortByColumn, sortAscending>
 
 	switch ( currSort.first )
 	{

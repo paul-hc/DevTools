@@ -24,7 +24,7 @@ CDocumentBase::~CDocumentBase()
 {
 }
 
-CWicImage* CDocumentBase::AcquireImage( const fs::ImagePathKey& imageKey )
+CWicImage* CDocumentBase::AcquireImage( const fs::TImagePathKey& imageKey )
 {
 	if ( !imageKey.first.IsEmpty() )
 		return CWicImageCache::Instance().Acquire( imageKey ).first;

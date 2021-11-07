@@ -79,7 +79,7 @@ namespace reg
 		bool DeleteValue( const TCHAR* pValueName ) { return ERROR_SUCCESS == m_key.DeleteValue( pValueName ); }
 		void DeleteAllValues( void );
 
-		std::pair< DWORD, size_t > GetValueInfo( const TCHAR* pValueName ) const;		// <Type, BufferSize>
+		std::pair<DWORD, size_t> GetValueInfo( const TCHAR* pValueName ) const;		// <Type, BufferSize>
 		DWORD GetValueType( const TCHAR* pValueName ) const { return GetValueInfo( pValueName ).first; }
 		size_t GetValueBufferSize( const TCHAR* pValueName ) const { return GetValueInfo( pValueName ).second; }
 

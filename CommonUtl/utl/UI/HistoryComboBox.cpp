@@ -106,7 +106,7 @@ std::tstring CHistoryComboBox::GetCurrentText( void ) const
 	return ui::GetComboSelText( *this );
 }
 
-std::pair< bool, ui::ComboField > CHistoryComboBox::SetEditText( const std::tstring& currText )
+std::pair<bool, ui::ComboField> CHistoryComboBox::SetEditText( const std::tstring& currText )
 {
 	return ui::SetComboEditText( *this, currText, m_caseType );
 }

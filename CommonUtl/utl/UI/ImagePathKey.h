@@ -7,7 +7,7 @@
 
 namespace fs
 {
-	typedef std::pair< fs::CFlexPath, UINT > ImagePathKey;		// <path, frame pos>
+	typedef std::pair<fs::CFlexPath, UINT> TImagePathKey;		// <path, frame pos>
 }
 
 

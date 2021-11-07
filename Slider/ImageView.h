@@ -20,7 +20,7 @@ class CImageView : public CImageZoomViewD2D
 				 , public CObjectCtrlBase
 				 , public IImageView
 {
-	typedef CImageZoomViewD2D BaseClass;
+	typedef CImageZoomViewD2D TBaseClass;
 protected:
 	DECLARE_DYNCREATE( CImageView )
 
@@ -44,7 +44,7 @@ public:
 	virtual CWicImage* QueryImageFileDetails( ui::CImageFileDetails& rFileDetails ) const;
 
 	// IImageView interface
-	virtual fs::ImagePathKey GetImagePathKey( void ) const;
+	virtual fs::TImagePathKey GetImagePathKey( void ) const;
 	virtual CScrollView* GetScrollView( void );
 	virtual void RegainFocus( RegainAction regainAction, int ctrlId = 0 );
 	virtual void EventChildFrameActivated( void );

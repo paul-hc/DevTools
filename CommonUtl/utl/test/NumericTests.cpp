@@ -210,9 +210,9 @@ void CNumericTests::TestFormatNumberUserLocale( void )
 namespace ut
 {
 	template< typename ValueType >
-	std::pair< bool, ValueType > ParseNumber( const std::tstring& text, size_t* pSkipLength = NULL, const std::locale& loc = num::GetEmptyLocale() )
+	std::pair<bool, ValueType> ParseNumber( const std::tstring& text, size_t* pSkipLength = NULL, const std::locale& loc = num::GetEmptyLocale() )
 	{
-		std::pair< bool, ValueType > result;
+		std::pair<bool, ValueType> result;
 		result.first = num::ParseNumber( result.second, text, pSkipLength, loc );
 		return result;
 	}

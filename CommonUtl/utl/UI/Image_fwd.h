@@ -133,9 +133,9 @@ namespace res
 						COLORREF transpColor = color::Auto, bool disabledEffect = false );
 
 
-	typedef CIconId CStripId;
+	typedef CIconId TStripId;
 
-	inline bool LoadImageList( CImageList& rOutImageList, const CStripId& stripId, int imageCount, COLORREF transpColor = color::Auto )
+	inline bool LoadImageList( CImageList& rOutImageList, const TStripId& stripId, int imageCount, COLORREF transpColor = color::Auto )
 	{
 		return LoadImageList( rOutImageList, stripId.m_id, imageCount, CIconId::GetStdSize( stripId.m_stdSize ), transpColor );
 	}

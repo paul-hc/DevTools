@@ -11,7 +11,7 @@ class CDisplayObject;
 class CLogger;
 
 namespace fs { typedef std::map< fs::CFileState, fs::CFileState > TFileStatePairMap; }
-typedef std::pair< const fs::CFileState, fs::CFileState > TFileStatePair;
+typedef std::pair<const fs::CFileState, fs::CFileState> TFileStatePair;
 
 
 class CFileListDialog : public CLayoutDialog
@@ -66,7 +66,7 @@ protected:
 #include "utl/Subject.h"
 
 
-class CDisplayObject : public CSubject
+class CDisplayObject : public TSubject
 {
 public:
 	CDisplayObject( const TFileStatePair* pStatePair ) : m_pStatePair( safe_ptr( pStatePair ) ), m_displayPath( pStatePair->first.m_fullPath.GetFilename() ) {}

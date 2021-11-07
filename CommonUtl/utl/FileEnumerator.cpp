@@ -14,9 +14,9 @@
 
 namespace fs
 {
-	static ResolveShortcutProc s_resolveShortcutProc = NULL;
+	static TResolveShortcutProc s_resolveShortcutProc = NULL;
 
-	void StoreResolveShortcutProc( ResolveShortcutProc resolveShortcutProc )
+	void StoreResolveShortcutProc( TResolveShortcutProc resolveShortcutProc )
 	{
 		s_resolveShortcutProc = resolveShortcutProc;
 	}

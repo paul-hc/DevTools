@@ -140,7 +140,7 @@ void CCatalogStorageTests::_TestAlbumFileAttr( ICatalogStorage* pCatalogStorage,
 		// verify each frame
 		for ( UINT framePos = 0; framePos != frameCount; ++framePos )
 		{
-			fs::ImagePathKey frameKey( pFileAttr->GetPath(), framePos );
+			fs::TImagePathKey frameKey( pFileAttr->GetPath(), framePos );
 
 			ASSERT( !CWicImage::IsCorruptFrame( frameKey ) );
 

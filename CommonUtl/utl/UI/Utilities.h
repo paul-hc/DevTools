@@ -518,8 +518,8 @@ namespace ui
 	CWnd* GetComboDropList( const CComboBox& rCombo );
 
 	std::tstring GetComboSelText( const CComboBox& rCombo, ComboField byField = BySel );
-	std::pair< bool, ComboField > SetComboEditText( CComboBox& rCombo, const std::tstring& currText, str::CaseType caseType = str::Case );		// <changed, by_field>
-	std::pair< bool, ComboField > ReplaceComboEditText( CComboBox& rCombo, const std::tstring& currText, str::CaseType caseType = str::Case );
+	std::pair<bool, ComboField> SetComboEditText( CComboBox& rCombo, const std::tstring& currText, str::CaseType caseType = str::Case );		// <changed, by_field>
+	std::pair<bool, ComboField> ReplaceComboEditText( CComboBox& rCombo, const std::tstring& currText, str::CaseType caseType = str::Case );
 
 	void UpdateHistoryCombo( CComboBox& rCombo, size_t maxCount, str::CaseType caseType = str::Case );
 

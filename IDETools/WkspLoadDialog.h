@@ -28,7 +28,7 @@ private:
 	bool readProjectName( void );
 	CFileItem* GetListFileItem( int listIndex ) const { return (CFileItem*)m_fileList.GetItemDataPtr( listIndex ); }
 
-	void handleSelection( Ternary operation );
+	void handleSelection( TTernary operation );
 private:
 	CString m_section, m_currProjectName;
 	WorkspaceProfile& m_rWkspProfile;

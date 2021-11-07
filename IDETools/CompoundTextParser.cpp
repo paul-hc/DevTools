@@ -195,7 +195,7 @@ bool CompoundTextParser::parseFile( void )
 
 void CompoundTextParser::makeFieldReplacements( void )
 {
-	for ( MapSectionToContent::iterator sectionIt = mapSections.begin(); sectionIt != mapSections.end(); ++sectionIt )
+	for ( TMapSectionToContent::iterator sectionIt = mapSections.begin(); sectionIt != mapSections.end(); ++sectionIt )
 		for ( std::map< CString, CString >::const_iterator fieldIt = fieldReplacements.begin();
 			  fieldIt != fieldReplacements.end(); ++fieldIt )
 			( *sectionIt ).second.Replace( ( *fieldIt ).first, ( *fieldIt ).second );
@@ -203,12 +203,12 @@ void CompoundTextParser::makeFieldReplacements( void )
 
 CString CompoundTextParser::getSectionContent( const CString& sectionName )
 {
-	CString			textContent;
-	MapSectionToContent::const_iterator itSection = mapSections.find( sectionName );
+	CString textContent;
+	TMapSectionToContent::const_iterator itSection = mapSections.find( sectionName );
 
 	if ( itSection != mapSections.end() )
 	{
-		Section			section( *this, itSection );
+		Section section( *this, itSection );
 
 		try
 		{
@@ -232,7 +232,7 @@ CompoundTextParser::TokenSemantic CompoundTextParser::getNextLine( void ) throws
 	{	// read a new line string from the file
 		if ( textFile.ReadString( line ) )
 		{
-			static std::pair< int, int > tokenSectionLen( str::GetLength( tokenSection.first ), str::GetLength( tokenSection.second ) );
+			static std::pair<int, int> tokenSectionLen( str::GetLength( tokenSection.first ), str::GetLength( tokenSection.second ) );
 			int tokenStart = 0, tokenEnd = 0;
 
 			if ( !line.IsEmpty() )
@@ -274,7 +274,7 @@ bool CompoundTextParser::isCharOneOf( TCHAR chr, const TCHAR* stringSet )
 
 // CompoundTextParser::Section implementation
 
-CompoundTextParser::Section::Section( CompoundTextParser& _parser, CompoundTextParser::MapSectionToContent::const_iterator itSection )
+CompoundTextParser::Section::Section( CompoundTextParser& _parser, CompoundTextParser::TMapSectionToContent::const_iterator itSection )
 	: parser( _parser )
 	, name( ( *itSection ).first )
 	, content( ( *itSection ).second )
@@ -316,8 +316,8 @@ CString CompoundTextParser::Section::extractContent( const TCHAR* insertorReplac
 
 int CompoundTextParser::Section::bindAllReferences( void ) throws_( CString )
 {
-	static std::pair< int, int > tokenPairLen( str::GetLength( CompoundTextParser::tokenSectionRef.first ),
-											   str::GetLength( CompoundTextParser::tokenSectionRef.second ) );
+	static std::pair<int, int> tokenPairLen( str::GetLength( CompoundTextParser::tokenSectionRef.first ),
+											 str::GetLength( CompoundTextParser::tokenSectionRef.second ) );
 	int tokenStart = 0, tokenEnd = 0, boundCount = 0;
 	CString errMessage;
 
@@ -338,7 +338,7 @@ int CompoundTextParser::Section::bindAllReferences( void ) throws_( CString )
 					if ( isConditional )
 						refSectionName = refSectionName.Mid( 1 );
 
-					MapSectionToContent::const_iterator itRefSection = parser.mapSections.find( refSectionName );
+					TMapSectionToContent::const_iterator itRefSection = parser.mapSections.find( refSectionName );
 
 					if ( itRefSection != parser.mapSections.end() )
 					{	// Bind the referred section as well (if not already)

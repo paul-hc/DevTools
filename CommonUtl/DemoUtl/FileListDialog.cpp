@@ -25,7 +25,7 @@ namespace hlp
 {
 	struct ResetDest
 	{
-		void operator()( std::pair< const fs::CFileState, fs::CFileState >& rFileStatePair )
+		void operator()( std::pair<const fs::CFileState, fs::CFileState>& rFileStatePair )
 		{
 			rFileStatePair.second = rFileStatePair.first;
 		}
@@ -195,9 +195,9 @@ void CFileListDialog::SetupFileListView( void )
 			m_fileListCtrl.SetSubItemText( pos, Notes, hlp::GetNotesAt( pos ) );
 		}
 
-		m_fileListCtrl.SetupDiffColumnPair( SrcFileName, DestFileName, path::GetMatch() );
-		m_fileListCtrl.SetupDiffColumnPair( SrcAttributes, DestAttributes, str::GetMatch() );
-		m_fileListCtrl.SetupDiffColumnPair( SrcCreationDate, DestCreationDate, str::GetMatch() );
+		m_fileListCtrl.SetupDiffColumnPair( SrcFileName, DestFileName, path::TGetMatch() );
+		m_fileListCtrl.SetupDiffColumnPair( SrcAttributes, DestAttributes, str::TGetMatch() );
+		m_fileListCtrl.SetupDiffColumnPair( SrcCreationDate, DestCreationDate, str::TGetMatch() );
 	}
 
 	if ( orgSel != -1 )		// restore selection?

@@ -174,7 +174,7 @@ bool CWkspLoadDialog::readProjectName( void )
 	return false;
 }
 
-void CWkspLoadDialog::handleSelection( Ternary operation )
+void CWkspLoadDialog::handleSelection( TTernary operation )
 {
 	if ( operation != Toggle )
 		m_fileList.SetSel( -1, operation );

@@ -264,7 +264,7 @@ namespace str
 		return items;
 	}
 
-	std::pair< std::tstring, std::tstring > LoadPair( UINT strId, const TCHAR* pSep /*= _T("|")*/, bool* pLoaded /*= NULL*/ )
+	std::pair<std::tstring, std::tstring> LoadPair( UINT strId, const TCHAR* pSep /*= _T("|")*/, bool* pLoaded /*= NULL*/ )
 	{
 		std::tstring text = Load( strId, pLoaded );
 		size_t sepPos = text.find( pSep );

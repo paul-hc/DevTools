@@ -199,7 +199,7 @@ namespace fs
 	class CPathObjectMap : private utl::noncopyable
 	{
 	public:
-		typedef std::pair< ObjectT*, ParamT > TEntry;		// object, param
+		typedef std::pair<ObjectT*, ParamT> TEntry;		// object, param
 
 		CPathObjectMap( void ) {}
 		~CPathObjectMap() { Clear(); }

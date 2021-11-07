@@ -154,7 +154,7 @@ const std::tstring& CFileModel::GetCode( void ) const
 void CFileModel::UpdateAllObservers( utl::IMessage* pMessage )
 {
 	if ( !IsInternalChange() )
-		CSubject::UpdateAllObservers( pMessage );
+		TSubject::UpdateAllObservers( pMessage );
 }
 
 void CFileModel::ResetDestinations( void )
@@ -382,9 +382,9 @@ IFileEditor* CFileModel::MakeFileEditor( cmd::CommandType cmdType, CWnd* pParent
 	return NULL;			// assume is a persistent command
 }
 
-std::pair< IFileEditor*, bool > CFileModel::HandleUndoRedo( svc::StackType stackType, CWnd* pParent )
+std::pair<IFileEditor*, bool> CFileModel::HandleUndoRedo( svc::StackType stackType, CWnd* pParent )
 {
-	std::pair< IFileEditor*, bool > resultPair( NULL, false );
+	std::pair<IFileEditor*, bool> resultPair( NULL, false );
 
 	if ( utl::ICommand* pTopCmd = m_pCmdSvc->PeekCmd( stackType ) )
 	{

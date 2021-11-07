@@ -17,22 +17,22 @@ public:
 	bool DrawBackground( const wchar_t* pClass, int partId, int stateId, HDC hdc, const RECT& rect );			// DrawFrameControl
 	bool DrawEdge( HDC hdc, const RECT& rect, UINT edge, UINT flags );
 private:
-	typedef int PartId;			// vt::BP_PUSHBUTTON
-	typedef int StateId;		// vt::PBS_HOT
-	typedef UINT CtrlType;		// DFC_BUTTON
-	typedef UINT State;			// DFCS_BUTTONPUSH | DFCS_HOT
+	typedef int TPartId;		// vt::BP_PUSHBUTTON
+	typedef int TStateId;		// vt::PBS_HOT
+	typedef UINT TCtrlType;		// DFC_BUTTON
+	typedef UINT TState;		// DFCS_BUTTONPUSH | DFCS_HOT
 
-	typedef std::pair< std::wstring, PartId > ClassKey;
-	typedef std::pair< StateId, State > StatePair;
-	typedef std::vector< StatePair > StateSet;
+	typedef std::pair<std::wstring, TPartId> TClassKey;
+	typedef std::pair<TStateId, TState> TStatePair;
+	typedef std::vector< TStatePair > TStateSet;
 
 	struct CCtrlStates
 	{
-		CtrlType m_ctrlType;
-		StateSet m_stateSet;
+		TCtrlType m_ctrlType;
+		TStateSet m_stateSet;
 	};
 
-	StateSet* AddClassPart( const ClassKey& classKey, CtrlType ctrlType );
+	TStateSet* AddClassPart( const TClassKey& classKey, TCtrlType ctrlType );
 
 	void RegisterButtonClass( void );
 	void RegisterMenuClass( void );
@@ -41,14 +41,14 @@ private:
 	void RegisterCaptionClass( void );
 
 	// custom draw background fallback functions
-	typedef bool (*CustomDrawBkFunc)( int stateId, HDC hdc, const RECT& rect );
+	typedef bool (*TCustomDrawBkFunc)( int stateId, HDC hdc, const RECT& rect );
 
 	static bool CustomDrawBk_MenuBackground( int stateId, HDC hdc, const RECT& rect );
 	static bool CustomDrawBk_MenuItem( int stateId, HDC hdc, const RECT& rect );
 	static bool CustomDrawBk_MenuChecked( int stateId, HDC hdc, const RECT& rect );
 private:
-	stdext::hash_map< ClassKey, CCtrlStates > m_classToStateMap;
-	stdext::hash_map< ClassKey, CustomDrawBkFunc > m_classToCustomBkMap;
+	stdext::hash_map< TClassKey, CCtrlStates > m_classToStateMap;
+	stdext::hash_map< TClassKey, TCustomDrawBkFunc > m_classToCustomBkMap;
 };
 
 

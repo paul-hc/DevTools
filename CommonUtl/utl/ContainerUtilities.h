@@ -158,8 +158,8 @@ namespace func
 
 
 	// std::map aliases
-	typedef DeleteFirst DeleteKey;
-	typedef DeleteSecond DeleteValue;
+	typedef DeleteFirst TDeleteKey;
+	typedef DeleteSecond TDeleteValue;
 }
 
 

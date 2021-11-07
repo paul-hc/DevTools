@@ -13,15 +13,15 @@ namespace fs { class CPath; }
 class CIniFile
 {
 public:
-	typedef std::map< std::tstring, std::tstring > SectionMap;
+	typedef std::map< std::tstring, std::tstring > TSectionMap;
 
 	CIniFile( void ) {}
 
-	const SectionMap* FindSection( const std::tstring& sectionKey ) const;
-	SectionMap& RetrieveSection( const std::tstring& sectionKey );
-	SectionMap& operator[]( const std::tstring& sectionKey ) { return RetrieveSection( sectionKey ); }
+	const TSectionMap* FindSection( const std::tstring& sectionKey ) const;
+	TSectionMap& RetrieveSection( const std::tstring& sectionKey );
+	TSectionMap& operator[]( const std::tstring& sectionKey ) { return RetrieveSection( sectionKey ); }
 
-	bool SwapSectionProperties( const std::tstring& sectionKey, SectionMap& rProperties );
+	bool SwapSectionProperties( const std::tstring& sectionKey, TSectionMap& rProperties );
 
 	void Save( const fs::CPath& filePath ) const throws_( std::exception );
 	void Load( const fs::CPath& filePath ) throws_( std::exception );
@@ -37,7 +37,7 @@ private:
 	static bool ParseSection( std::tstring& rSectionKey, const std::string& line );
 	static bool ParseProperty( std::tstring& rPropKey, std::tstring& rPropValue, const std::string& line );
 private:
-	std::map< std::tstring, SectionMap > m_sectionMap;		// section name to property bag
+	std::map< std::tstring, TSectionMap > m_sectionMap;		// section name to property bag
 	std::vector< std::tstring > m_orderedSections;			// order in which sections get saved
 
 	static unsigned int s_parseLineNo;

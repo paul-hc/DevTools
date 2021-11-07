@@ -75,9 +75,9 @@ UINT CImageFrameNavigator::GetNavigateFramePos( nav::Navigate navigate, UINT ste
 	return newFramePos;
 }
 
-fs::ImagePathKey CImageFrameNavigator::MakePathKey( UINT framePos ) const
+fs::TImagePathKey CImageFrameNavigator::MakePathKey( UINT framePos ) const
 {
-	return fs::ImagePathKey( m_pCurrImage->GetImagePath(), framePos );
+	return fs::TImagePathKey( m_pCurrImage->GetImagePath(), framePos );
 }
 
 
@@ -152,9 +152,9 @@ nav::TIndexFramePosPair CAlbumNavigator::GetNavigateInfo( nav::Navigate navigate
 	return navigInfo;
 }
 
-fs::ImagePathKey CAlbumNavigator::MakePathKey( const nav::TIndexFramePosPair& infoPair ) const
+fs::TImagePathKey CAlbumNavigator::MakePathKey( const nav::TIndexFramePosPair& infoPair ) const
 {
-	return fs::ImagePathKey( m_pImagesModel->GetFileAttrAt( infoPair.first )->GetPathKey().first, infoPair.second );
+	return fs::TImagePathKey( m_pImagesModel->GetFileAttrAt( infoPair.first )->GetPathKey().first, infoPair.second );
 }
 
 CWicImage* CAlbumNavigator::AcquireImageAt( size_t index ) const

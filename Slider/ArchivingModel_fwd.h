@@ -5,7 +5,7 @@
 #include "utl/FlexPath.h"
 
 
-typedef std::pair< fs::CFlexPath, fs::CFlexPath > TTransferPathPair;		// SRC file path -> DEST file path
+typedef std::pair<fs::CFlexPath, fs::CFlexPath> TTransferPathPair;		// SRC file path -> DEST file path
 
 
 class CFileAttr;

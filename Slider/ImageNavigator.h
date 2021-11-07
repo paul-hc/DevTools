@@ -41,7 +41,7 @@ public:
 	bool CanNavigate( nav::Navigate navigate, UINT step = 1 ) const;
 	UINT GetNavigateFramePos( nav::Navigate navigate, UINT step = 1 ) const;
 
-	fs::ImagePathKey MakePathKey( UINT framePos ) const;
+	fs::TImagePathKey MakePathKey( UINT framePos ) const;
 private:
 	const CWicImage* m_pCurrImage;		// local scope object, ok to store the image
 };
@@ -62,7 +62,7 @@ public:
 	nav::TIndexFramePosPair GetNavigateInfo( nav::Navigate navigate, UINT step = 1 ) const;
 
 	nav::TIndexFramePosPair GetCurrentInfo( void ) const { return nav::TIndexFramePosPair( m_navigPos, m_imageInfo.m_framePos ); }
-	fs::ImagePathKey MakePathKey( const nav::TIndexFramePosPair& infoPair ) const;
+	fs::TImagePathKey MakePathKey( const nav::TIndexFramePosPair& infoPair ) const;
 
 	static bool IsAtLimit( const CAlbumImageView* pAlbumView );
 protected:

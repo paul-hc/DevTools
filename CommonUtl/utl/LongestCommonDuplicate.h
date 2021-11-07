@@ -14,24 +14,24 @@ namespace lcs
 	template< typename CharType, typename Compare = pred::TCompareCase >
 	class CSuffixTree
 	{
-		typedef std::basic_string< CharType > StringT;
+		typedef std::basic_string< CharType > TString;
 	public:
 		CSuffixTree( Compare compareStr = Compare() ) : m_compareStr( compareStr ) {}
 
-		CSuffixTree( const StringT& source, Compare compareStr = Compare() )
+		CSuffixTree( const TString& source, Compare compareStr = Compare() )
 			: m_compareStr( compareStr )
 			, m_source( source )
 		{
 			BuildSuffixTree();
 		}
 
-		StringT FindLongestDuplicate( size_t dupTimes = 1 ) const
+		TString FindLongestDuplicate( size_t dupTimes = 1 ) const
 		{
 			ASSERT( dupTimes != 0 );
 			ENSURE( m_source.size() == m_suffixes.size() );
 
 			if ( m_source.empty() || dupTimes >= m_suffixes.size() )
-				return StringT();
+				return TString();
 
 			size_t maxPos = 0, maxLen = 0;
 
@@ -44,15 +44,15 @@ namespace lcs
 					maxPos = i;
 				}
 			}
-			return StringT( m_suffixes[ maxPos ], maxLen );
+			return TString( m_suffixes[ maxPos ], maxLen );
 		}
 
-		StringT FindLongestCommonSubstring( const std::vector< std::basic_string< CharType > >& items )
+		TString FindLongestCommonSubstring( const std::vector< std::basic_string< CharType > >& items )
 		{
 			ASSERT( m_source.empty() && m_suffixes.empty() );		// instantiated with default constructor
 			switch ( items.size() )
 			{
-				case 0:	return StringT();							// no common substring
+				case 0:	return TString();							// no common substring
 				case 1:	return items.front();						// single item: the entire string is common
 			}
 
@@ -108,7 +108,7 @@ namespace lcs
 		};
 	private:
 		Compare m_compareStr;
-		StringT m_source;								// keep a copy of source
+		TString m_source;								// keep a copy of source
 		std::vector< const CharType* > m_suffixes;		// suffix tree as sorted array: pointers to each character in the source string
 
 		friend class CLcsTests;

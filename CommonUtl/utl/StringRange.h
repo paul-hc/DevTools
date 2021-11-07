@@ -35,10 +35,10 @@ namespace str
 		template< typename CharT >
 		class CStringRange
 		{
-			typedef typename std::basic_string<CharT> StringT;
+			typedef typename std::basic_string<CharT> TString;
 		public:
-			explicit CStringRange( const StringT& text ) : m_text( text ), m_pos( MakeBounds( m_text ) ) {}
-			CStringRange( const StringT& text, const Range<size_t>& pos ) : m_text( text ), m_pos( pos ) { ENSURE( InBounds() ); }
+			explicit CStringRange( const TString& text ) : m_text( text ), m_pos( MakeBounds( m_text ) ) {}
+			CStringRange( const TString& text, const Range<size_t>& pos ) : m_text( text ), m_pos( pos ) { ENSURE( InBounds() ); }
 
 			bool InBounds( void ) const { return range::InBounds( m_pos, m_text ); }
 			bool IsEmpty( void ) const { return 0 == GetLength(); }
@@ -48,32 +48,32 @@ namespace str
 			Range<size_t>& RefPos( void ) { return m_pos; }
 			void SetPos( const Range<size_t>& pos ) { m_pos = pos; ENSURE( InBounds() ); }
 
-			const StringT& GetText( void ) const { return m_text; }
+			const TString& GetText( void ) const { return m_text; }
 			const CharT* GetStartPtr( void ) const { REQUIRE( InBounds() ); return m_text.c_str() + m_pos.m_start; }
 			const CharT* GetEndPtr( void ) const { REQUIRE( InBounds() ); return m_text.c_str() + m_pos.m_end; }
 			CharT GetStartCh( void ) const { return *GetStartPtr(); }
 
 			void Reset( void ) { m_pos = MakeBounds( m_text ); }
 
-			StringT Extract( void ) const { return Extract( m_pos ); }
-			StringT Extract( const Range<size_t>& pos ) const { return range::Extract( pos, m_text ); }
-			StringT ExtractPrefix( void ) const { return range::Extract( utl::MakeRange( static_cast<size_t>( 0 ), m_pos.m_start ), m_text ); }
-			StringT ExtractSuffix( void ) const { return range::Extract( utl::MakeRange( m_pos.m_end, m_text.length() ), m_text ); }
-			StringT ExtractLead( size_t endPos ) const { return range::Extract( utl::MakeRange( m_pos.m_start, endPos ), m_text ); }
-			StringT ExtractTrail( size_t startPos ) const { return range::Extract( utl::MakeRange( startPos, m_pos.m_end ), m_text ); }
+			TString Extract( void ) const { return Extract( m_pos ); }
+			TString Extract( const Range<size_t>& pos ) const { return range::Extract( pos, m_text ); }
+			TString ExtractPrefix( void ) const { return range::Extract( utl::MakeRange( static_cast<size_t>( 0 ), m_pos.m_start ), m_text ); }
+			TString ExtractSuffix( void ) const { return range::Extract( utl::MakeRange( m_pos.m_end, m_text.length() ), m_text ); }
+			TString ExtractLead( size_t endPos ) const { return range::Extract( utl::MakeRange( m_pos.m_start, endPos ), m_text ); }
+			TString ExtractTrail( size_t startPos ) const { return range::Extract( utl::MakeRange( startPos, m_pos.m_end ), m_text ); }
 
 			CStringRange MakeLead( size_t endPos ) const { return CStringRange( m_text, utl::MakeRange( m_pos.m_start, endPos ) ); }
 			CStringRange MakeTrail( size_t startPos ) const { return CStringRange( m_text, utl::MakeRange( startPos, m_pos.m_end ) ); }
 
-			void SplitPair( StringT& rLeading, StringT& rTrailing, const Range<size_t>& sepPos ) const
+			void SplitPair( TString& rLeading, TString& rTrailing, const Range<size_t>& sepPos ) const
 			{
 				rLeading = ExtractLead( sepPos.m_start );
 				rTrailing = ExtractTrail( sepPos.m_end );
 			}
 
-			std::pair< CStringRange, CStringRange > GetSplitPair( const Range<size_t>& sepPos ) const
+			std::pair<CStringRange, CStringRange> GetSplitPair( const Range<size_t>& sepPos ) const
 			{
-				return std::pair< CStringRange, CStringRange >(
+				return std::pair<CStringRange, CStringRange>(
 					CStringRange( m_text, utl::MakeRange( m_pos.m_start, sepPos.m_start ) ),
 					CStringRange( m_text, utl::MakeRange( sepPos.m_end, m_pos.m_end ) ) );
 			}
@@ -207,7 +207,7 @@ namespace str
 				return true;
 			}
 		private:
-			const StringT& m_text;
+			const TString& m_text;
 			Range<size_t> m_pos;
 		};
 	}

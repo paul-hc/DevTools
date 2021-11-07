@@ -9,7 +9,7 @@
 class CReportListControl;
 
 
-struct CGeneralOptions : public CSubject
+struct CGeneralOptions : public TSubject
 {
 	CGeneralOptions( void );
 	~CGeneralOptions();

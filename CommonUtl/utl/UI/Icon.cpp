@@ -64,7 +64,7 @@ CIcon* CIcon::NewIcon( const CIconId& iconId )
 
 CIcon* CIcon::NewExactIcon( const CIconId& iconId )
 {
-	BitsPerPixel bitsPerPixel;
+	TBitsPerPixel bitsPerPixel;
 	if ( CGroupIcon( iconId.m_id ).ContainsSize( iconId.m_stdSize, &bitsPerPixel ) )
 		if ( HICON hIcon = res::LoadIcon( iconId ) )
 			return SetHasAlpha( new CIcon( hIcon, iconId.GetStdSize() ), 32 == bitsPerPixel );

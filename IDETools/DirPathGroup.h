@@ -24,7 +24,7 @@ namespace inc
 	const CEnumTags& GetTags_Location( void );
 
 
-	typedef std::pair< fs::CPath, Location > TPathLocPair;
+	typedef std::pair<fs::CPath, Location> TPathLocPair;
 
 
 	class CDirPathGroup : public fs::CPathGroup
@@ -59,7 +59,7 @@ namespace inc
 
 	typedef int TSearchFlags;
 
-	typedef std::pair< const CDirPathGroup*, SearchFlag > TDirSearchPair;
+	typedef std::pair<const CDirPathGroup*, SearchFlag> TDirSearchPair;
 }
 
 

@@ -43,7 +43,7 @@ int CFileTransfer::Transfer( void )
 	if ( m_pOptions->m_pBackupDirPath.get() != NULL )
 		pBackupInfo.reset( new CBackupInfo( m_pOptions ) );
 
-	for ( TransferItemMap::const_iterator itItem = m_transferItems.begin(); itItem != m_transferItems.end(); ++itItem )
+	for ( TTransferItemMap::const_iterator itItem = m_transferItems.begin(); itItem != m_transferItems.end(); ++itItem )
 	{
 		CTransferItem* pItem = itItem->second;
 
@@ -106,7 +106,7 @@ bool CFileTransfer::AddTransferItem( CTransferItem* pTransferItem )
 	if ( !m_pOptions->PassFilter( *pTransferItem ) )
 		return false;
 
-	TransferItemMap::const_iterator itFoundItem = m_transferItems.find( pTransferItem->m_source.m_fullPath );
+	TTransferItemMap::const_iterator itFoundItem = m_transferItems.find( pTransferItem->m_source.m_fullPath );
 	if ( itFoundItem != m_transferItems.end() )
 		return false;			// reject duplicates
 

@@ -314,14 +314,14 @@ CArchive& operator<<( CArchive& archive, const std::wstring* pWideStr );		// Uni
 CArchive& operator>>( CArchive& archive, std::wstring* pOutWideStr );			// Unicode string as UTF8 (for better readability in archive stream)
 
 
-template< typename Type1, typename Type2 >
-inline CArchive& operator<<( CArchive& archive, const std::pair< Type1, Type2 >& srcPair )
+template< typename FirstT, typename SecondT >
+inline CArchive& operator<<( CArchive& archive, const std::pair<FirstT, SecondT>& srcPair )
 {
 	return archive << srcPair.first << srcPair.second;
 }
 
-template< typename Type1, typename Type2 >
-inline CArchive& operator>>( CArchive& archive, std::pair< Type1, Type2 >& destPair )
+template< typename FirstT, typename SecondT >
+inline CArchive& operator>>( CArchive& archive, std::pair<FirstT, SecondT>& destPair )
 {
 	return archive >> destPair.first >> destPair.second;
 }

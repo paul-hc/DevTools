@@ -111,16 +111,16 @@ LRESULT CALLBACK CWindowHook::HookedWindowsProc( HWND hWnd, UINT message, WPARAM
 	return result;
 }
 
-CWindowHook::HookMap& CWindowHook::GetHookMap( void )
+CWindowHook::THookMap& CWindowHook::GetHookMap( void )
 {
-	static HookMap mapOfWindowHooks;
+	static THookMap mapOfWindowHooks;
 
 	return mapOfWindowHooks;
 }
 
 CWindowHook* CWindowHook::FindHook( HWND hWndHooked )
 {
-	HookMap::const_iterator itHook = GetHookMap().find( hWndHooked );
+	THookMap::const_iterator itHook = GetHookMap().find( hWndHooked );
 	return itHook != GetHookMap().end() ? itHook->second : NULL;
 }
 

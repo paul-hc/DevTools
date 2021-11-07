@@ -9,15 +9,15 @@
 
 #if _MSC_VER >= 1500	// MSVC++ 9.0 (Visual Studio 2008)
 	#include <afxdialogex.h>
-	typedef CDialogEx MfcBaseDialog;
+	typedef CDialogEx TMfcBaseDialog;
 #else
-	typedef CDialog MfcBaseDialog;
+	typedef CDialog TMfcBaseDialog;
 #endif
 
 
 // base class for resizable dialogs with dynamic control layout
 
-class CLayoutDialog : public MfcBaseDialog
+class CLayoutDialog : public TMfcBaseDialog
 					, public CPopupDlgBase
 					, public ui::ILayoutEngine
 					, public ui::ICustomCmdInfo

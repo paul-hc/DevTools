@@ -97,12 +97,12 @@ namespace wt
 		// base overrides
 		virtual void AddWndItem( HWND hWnd );
 	private:
-		const std::pair< HTREEITEM, int >* FindWndItem( HWND hWnd ) const;
+		const std::pair<HTREEITEM, int>* FindWndItem( HWND hWnd ) const;
 		void LogWnd( HWND hWnd, int indent ) const;
 	private:
 		CTreeControl* m_pTreeCtrl;
 		CLogger* m_pLogger;
-		stdext::hash_map< HWND, std::pair< HTREEITEM, int > > m_wndToItemMap;		// HWND -> [item, indent]
+		stdext::hash_map< HWND, std::pair<HTREEITEM, int> > m_wndToItemMap;		// HWND -> [item, indent]
 	};
 }
 

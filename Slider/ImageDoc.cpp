@@ -25,7 +25,7 @@ CImageDoc::~CImageDoc()
 
 CWicImage* CImageDoc::GetImage( UINT framePos ) const
 {
-	return AcquireImage( fs::ImagePathKey( m_imagePath, framePos ) );
+	return AcquireImage( fs::TImagePathKey( m_imagePath, framePos ) );
 }
 
 CWicImage* CImageDoc::GetCurrentImage( void ) const

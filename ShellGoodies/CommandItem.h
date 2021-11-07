@@ -9,7 +9,7 @@
 struct CToolStrip;
 
 
-class CCommandItem : public CSubject		// proxy items to be inserted into the list control
+class CCommandItem : public TSubject		// proxy items to be inserted into the list control
 {
 public:
 	CCommandItem( utl::ICommand* pCmd = NULL ) { SetCmd( pCmd ); }

@@ -310,7 +310,7 @@ void CLcsTests::TestMatchingSequenceSimple( void )
 {
 	static const std::string src = "what ABC around", dest = "what XY around";
 
-	lcs::Comparator< char, str::GetMatch > comparator( src, dest );
+	lcs::Comparator<char, str::TGetMatch> comparator( src, dest );
 
 	std::vector< lcs::CResult< char > > results;
 	comparator.Process( results );
@@ -330,7 +330,7 @@ void CLcsTests::TestMatchingSequenceDiffCase( void )
 {
 	static const std::string src = "what ABC around", dest = "what abc around";
 
-	lcs::Comparator< char, str::GetMatch > comparator( src, dest );
+	lcs::Comparator<char, str::TGetMatch> comparator( src, dest );
 
 	std::vector< lcs::CResult< char > > results;
 	comparator.Process( results );
@@ -350,7 +350,7 @@ void CLcsTests::TestMatchingSequenceMidCommon( void )
 {
 	static const std::string src = "what goes around", dest = "what comes around";
 
-	lcs::Comparator< char, str::GetMatch > comparator( src, dest );
+	lcs::Comparator<char, str::TGetMatch> comparator( src, dest );
 
 	std::vector< lcs::CResult< char > > results;
 	comparator.Process( results );

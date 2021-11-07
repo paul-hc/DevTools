@@ -75,7 +75,7 @@ namespace ut
 
 	namespace pred
 	{
-		typedef std::pair< STGTY, fs::CPath > TTypeFilenamePair;
+		typedef std::pair<STGTY, fs::CPath> TTypeFilenamePair;
 
 		static TTypeFilenamePair s_match( STGTY_STREAM, fs::CPath() );
 

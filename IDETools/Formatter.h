@@ -11,7 +11,7 @@ namespace code
 	enum TokenSpacing;
 	struct CFormatterOptions;
 
-	typedef unsigned int EditorColumn;
+	typedef unsigned int TEditorColumn;
 
 	enum LineBreakTokenMatch { LBT_NoMatch, LBT_OpenBrace, LBT_CloseBrace, LBT_BreakSeparator };
 
@@ -44,7 +44,7 @@ namespace code
 
 		CString tabifyLineOfCode( const TCHAR* lineOfCode, bool doTabify = true );
 
-		CString splitArgumentList( const TCHAR* pCodeText, EditorColumn maxColumn = UINT_MAX, int targetBracketLevel = -1 );
+		CString splitArgumentList( const TCHAR* pCodeText, TEditorColumn maxColumn = UINT_MAX, int targetBracketLevel = -1 );
 
 		CString toggleComment( const TCHAR* pCodeText );
 
@@ -78,7 +78,7 @@ namespace code
 		CString transformTrailingSingleLineComment( const TCHAR* lineOfCode, HandleSingleLineComments handleComments = ToMultiLineComment );
 		int doSplitArgumentList( std::vector< CString >& brokenLines, const TokenRange& openBraceRange, int maxEditorColIndex );
 
-		EditorColumn computeVisualEditorColumn( const TCHAR* pCodeText, int index ) const;
+		TEditorColumn computeVisualEditorColumn( const TCHAR* pCodeText, int index ) const;
 		int computeVisualEditorIndex( const TCHAR* pCodeText, int index ) const { return (int)computeVisualEditorColumn( pCodeText, index ) - 1; }
 		CString makeLineIndentWhiteSpace( int editorColIndex ) const;
 		CString makeLineIndentWhiteSpace( int editorColIndex, bool doUseTabs ) const;

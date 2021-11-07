@@ -134,14 +134,14 @@ namespace lcs
 	template< typename StringT, typename MatchFunc >
 	void CompareStrings( std::vector< CResult< typename StringT::value_type > >& rLcsSequence, const StringT& srcText, const StringT& destText, MatchFunc getMatchFunc )
 	{
-		typedef typename StringT::value_type CharType;
+		typedef typename StringT::value_type TChar;
 
-		Comparator< CharType, MatchFunc > comparator( srcText.c_str(), srcText.size(), destText.c_str(), destText.size(), getMatchFunc );
+		Comparator<TChar, MatchFunc> comparator( srcText.c_str(), srcText.size(), destText.c_str(), destText.size(), getMatchFunc );
 		comparator.Process( rLcsSequence );
 	}
 
 	template< typename StringT, typename MatchFunc >
-	inline void CompareStringPair( std::vector< CResult< typename StringT::value_type > >& rLcsSequence, const std::pair< StringT, StringT >& textPair, MatchFunc getMatchFunc )
+	inline void CompareStringPair( std::vector< CResult< typename StringT::value_type > >& rLcsSequence, const std::pair<StringT, StringT>& textPair, MatchFunc getMatchFunc )
 	{
 		CompareStrings( rLcsSequence, textPair.first, textPair.second, getMatchFunc );
 	}

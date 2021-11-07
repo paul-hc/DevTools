@@ -43,7 +43,7 @@ namespace utl
 namespace stdext
 {
 	template< typename T, typename U >
-	inline size_t hash_value( const std::pair< T, U >& p )
+	inline size_t hash_value( const std::pair<T, U>& p )
 	{
 		size_t value = stdext::hash_value( p.first );
 		utl::hash_combine( value, p.second );

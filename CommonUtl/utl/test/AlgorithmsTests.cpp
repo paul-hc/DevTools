@@ -223,7 +223,7 @@ void CAlgorithmsTests::TestInsert( void )
 
 	{
 		std::vector< ut::TMockInt* > numbers;
-		pred::LessPtr<pred::CompareMockItemPtr> lessPtr;
+		pred::LessPtr<pred::TCompareMockItemPtr> lessPtr;
 
 		utl::AddSorted( numbers, new ut::TMockInt( 5 ), lessPtr ); ASSERT_EQUAL( "5", ut::JoinPtrs( numbers, s_sep ) );
 		utl::AddSorted( numbers, new ut::TMockInt( 9 ), lessPtr ); ASSERT_EQUAL( "5,9", ut::JoinPtrs( numbers, s_sep ) );

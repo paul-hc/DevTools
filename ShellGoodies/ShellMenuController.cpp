@@ -275,7 +275,7 @@ bool CShellMenuController::HandleCommand( MenuCommand menuCmd, CWnd* pParentOwne
 		case Cmd_Redo:
 		{
 			svc::StackType stackType = Cmd_Undo == menuCmd ? svc::Undo : svc::Redo;
-			std::pair< IFileEditor*, bool > editorPair = m_fileModel.HandleUndoRedo( stackType, pParentOwner );
+			std::pair<IFileEditor*, bool> editorPair = m_fileModel.HandleUndoRedo( stackType, pParentOwner );
 			if ( editorPair.second )				// command handled?
 				return true;
 

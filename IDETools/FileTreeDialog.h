@@ -15,7 +15,7 @@
 
 
 struct CIncludeNode;
-typedef std::pair< HTREEITEM, CIncludeNode* > TreeItemPair;
+typedef std::pair<HTREEITEM, CIncludeNode*> TTreeItemPair;
 
 
 struct CMatchingItems
@@ -35,14 +35,14 @@ public:
 	HTREEITEM m_hStartItem;
 	std::tstring m_fullPath;
 	size_t m_startPos;
-	std::vector< TreeItemPair > m_matches;
+	std::vector< TTreeItemPair > m_matches;
 };
 
 
 class CFileTreeDialog : public CLayoutDialog
 {
 public:
-	typedef void (*IterFunc)( CTreeControl* pTreeCtrl, HTREEITEM hItem, void* pArgs, int nestingLevel );
+	typedef void (*TIterFunc)( CTreeControl* pTreeCtrl, HTREEITEM hItem, void* pArgs, int nestingLevel );
 
 	CFileTreeDialog( const std::tstring& rootPath, CWnd* pParent );
 	virtual ~CFileTreeDialog();
@@ -61,14 +61,14 @@ private:
 	void Clear( void );
 	void BuildIncludeTree( void );
 	bool UpdateCurrentSelection( void );
-	bool AddIncludedChildren( TreeItemPair& rParentPair, bool doRecurse = true, bool avoidCircularDependency = false );
+	bool AddIncludedChildren( TTreeItemPair& rParentPair, bool doRecurse = true, bool avoidCircularDependency = false );
 
-	TreeItemPair AddTreeItem( HTREEITEM hParent, CIncludeNode* pItemInfo, int& rOrderIndex, bool& rOriginalItem );
+	TTreeItemPair AddTreeItem( HTREEITEM hParent, CIncludeNode* pItemInfo, int& rOrderIndex, bool& rOriginalItem );
 	std::tstring BuildItemText( const CIncludeNode* pItemInfo, ViewMode viewMode = vmDefaultMode ) const;
 	void RefreshItemsText( HTREEITEM hItem = TVI_ROOT );
 	CIncludeNode* GetItemInfo( HTREEITEM hItem ) const { return m_treeCtrl.GetItemDataAs< CIncludeNode* >( hItem ); }
 
-	void ForEach( IterFunc pIterFunc, HTREEITEM hItem = TVI_ROOT, void* pArgs = NULL, int nestingLevel = -1 );
+	void ForEach( TIterFunc pIterFunc, HTREEITEM hItem = TVI_ROOT, void* pArgs = NULL, int nestingLevel = -1 );
 
 	bool ReorderChildren( HTREEITEM hParent = TVI_ROOT );
 	HTREEITEM FindNextItem( HTREEITEM hStartItem, bool forward = true );
@@ -79,15 +79,15 @@ private:
 
 	friend int CALLBACK SortCallback( const CIncludeNode* pLeft, const CIncludeNode* pRight, CFileTreeDialog* pDialog );
 private:
-	bool IsCircularDependency( const TreeItemPair& currItem ) const;
+	bool IsCircularDependency( const TTreeItemPair& currItem ) const;
 	bool SafeBindItem( HTREEITEM hItem, CIncludeNode* pTreeItem );
-	void BindAllItems( void ) { ForEach( (IterFunc)_SafeBindItem, TVI_ROOT, this ); }
+	void BindAllItems( void ) { ForEach( (TIterFunc)_SafeBindItem, TVI_ROOT, this ); }
 
 	bool IsRootItem( HTREEITEM hItem ) const { return hItem != NULL && NULL == m_treeCtrl.GetParentItem( hItem ); }
 	bool IsOriginalItem( HTREEITEM hItem ) const;
 	bool IsFileExcluded( const fs::CPath& path ) const;
 	bool HasValidComplementary( void ) const;
-	TreeItemPair GetSelectedItem( void ) const;
+	TTreeItemPair GetSelectedItem( void ) const;
 
 	void UpdateOptionCtrl( void );
 private:
@@ -98,8 +98,8 @@ private:
 	int m_sourceLineNo;
 
 	typedef pred::LessValue< pred::CompareEquivPath > TLessPath;
-	typedef std::map< std::tstring, HTREEITEM, TLessPath > PathToItemMap;
-	PathToItemMap m_originalItems;
+	typedef std::map< std::tstring, HTREEITEM, TLessPath > TPathToItemMap;
+	TPathToItemMap m_originalItems;
 
 	CFileAssoc m_fileAssoc;
 	fs::CPath m_complemFilePath;

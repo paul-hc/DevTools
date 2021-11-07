@@ -143,16 +143,16 @@ std::tstring CTextEdit::GetSelText( void ) const
 	return ui::GetWindowText( this ).substr( sel.m_start, sel.GetSpan<size_t>() );
 }
 
-Range<CTextEdit::CharPos> CTextEdit::GetLineRange( Line linePos ) const
+Range<CTextEdit::TCharPos> CTextEdit::GetLineRange( TLine linePos ) const
 {
 	Range<int> lineRange( LineIndex( linePos ) );
 	lineRange.m_end += LineLength( lineRange.m_start );
 	return lineRange;
 }
 
-std::tstring CTextEdit::GetLineText( Line linePos ) const
+std::tstring CTextEdit::GetLineText( TLine linePos ) const
 {
-	// Note: careful with LineLength() - the 'nLine' parameter is the index of the first character on the line (CharPos), not the line index
+	// Note: careful with LineLength() - the 'nLine' parameter is the index of the first character on the line (TCharPos), not the line index
 	size_t length = GetLineRange( linePos ).GetSpan<size_t>();
 	std::vector< TCHAR > lineBuffer( length + 1 );
 
@@ -203,7 +203,7 @@ BOOL CTextEdit::PreTranslateMessage( MSG* pMsg )
 	if ( WM_KEYDOWN == pMsg->message && m_hWnd == pMsg->hwnd )
 		if ( !ui::IsKeyPressed( VK_SHIFT ) )
 		{
-			Range<CharPos> selRange = GetSelRange<CharPos>();
+			Range<TCharPos> selRange = GetSelRange<TCharPos>();
 			if ( !selRange.IsEmpty() )
 
 			// collapse selection in the direction of the key

@@ -73,7 +73,7 @@ namespace fs
 				_Remove( *itPathKeyStart );
 		}
 
-		typedef std::pair< ObjectType*, CTime > TCachedEntry;		// object, lastModifyTime
+		typedef std::pair<ObjectType*, CTime> TCachedEntry;		// object, lastModifyTime
 
 		const TCachedEntry* FindEntry( const PathType& pathKey, bool checkValid = false ) const
 		{

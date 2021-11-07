@@ -306,7 +306,7 @@ void CAlbumSettingsDialog::CombineTextEffectAt( ui::CTextEffect& rTextEffect, LP
 	}
 }
 
-std::pair< CAlbumSettingsDialog::ImagesColumn, bool > CAlbumSettingsDialog::ToListSortOrder( fattr::Order fileOrder )
+std::pair<CAlbumSettingsDialog::ImagesColumn, bool> CAlbumSettingsDialog::ToListSortOrder( fattr::Order fileOrder )
 {
 	switch ( fileOrder )
 	{
@@ -401,7 +401,7 @@ void CAlbumSettingsDialog::OutputAll( void )
 	m_patternsListCtrl.SetCurSel( 0 );
 
 	// setup list-control
-	std::pair< ImagesColumn, bool > sortPair = ToListSortOrder( m_model.GetFileOrder() );
+	std::pair<ImagesColumn, bool> sortPair = ToListSortOrder( m_model.GetFileOrder() );
 	m_imagesListCtrl.SetSortByColumn( sortPair.first, sortPair.second );
 
 	SetupFoundImagesListView();
@@ -608,7 +608,7 @@ void CAlbumSettingsDialog::OnLVnDropFiles_Patterns( NMHDR* pNmHdr, LRESULT* pRes
 	size_t dropPos = pNmDropFiles->m_dropItemIndex;
 	for ( std::vector< fs::CPath >::const_iterator itSearchPath = pNmDropFiles->m_filePaths.begin(); itSearchPath != pNmDropFiles->m_filePaths.end(); ++itSearchPath )
 	{
-		std::pair< CSearchPattern*, bool > patternPair = pSearchModel->AddSearchPath( *itSearchPath, dropPos );
+		std::pair<CSearchPattern*, bool> patternPair = pSearchModel->AddSearchPath( *itSearchPath, dropPos );
 		if ( patternPair.first != NULL )
 		{
 			droppedPatterns.push_back( patternPair.first );
@@ -863,7 +863,7 @@ void CAlbumSettingsDialog::OnLVnItemsReorder_FoundImages( void )
 	// update UI
 	fattr::Order fileOrder = m_model.GetFileOrder();
 	m_sortOrderCombo.SetValue( fileOrder );
-	std::pair< ImagesColumn, bool > sortPair = ToListSortOrder( fileOrder );
+	std::pair<ImagesColumn, bool> sortPair = ToListSortOrder( fileOrder );
 	m_imagesListCtrl.SetSortByColumn( sortPair.first, sortPair.second );
 }
 
@@ -892,7 +892,7 @@ void CAlbumSettingsDialog::OnCBnSelChange_ImageOrder( void )
 {
 	fattr::Order selFileOrder = m_sortOrderCombo.GetEnum< fattr::Order >();
 
-	std::pair< ImagesColumn, bool > sortPair = ToListSortOrder( selFileOrder );
+	std::pair<ImagesColumn, bool> sortPair = ToListSortOrder( selFileOrder );
 	m_imagesListCtrl.SetSortByColumn( sortPair.first, sortPair.second );
 
 	m_model.ModifyFileOrder( selFileOrder );

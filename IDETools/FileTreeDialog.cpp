@@ -125,7 +125,7 @@ void CFileTreeDialog::BuildIncludeTree( void )
 	{
 		int orderIndex = 0;							// keep root items unsorted
 		bool originalItem;
-		TreeItemPair itemPair = AddTreeItem( TVI_ROOT, *itItem, orderIndex, originalItem );
+		TTreeItemPair itemPair = AddTreeItem( TVI_ROOT, *itItem, orderIndex, originalItem );
 		if ( itemPair.first != NULL )
 		{
 			if ( originalItem )
@@ -145,7 +145,7 @@ void CFileTreeDialog::BuildIncludeTree( void )
 	CmUpdateDialogTitle();
 }
 
-bool CFileTreeDialog::AddIncludedChildren( TreeItemPair& rParentPair, bool doRecurse /*= true*/, bool avoidCircularDependency /*= false*/ )
+bool CFileTreeDialog::AddIncludedChildren( TTreeItemPair& rParentPair, bool doRecurse /*= true*/, bool avoidCircularDependency /*= false*/ )
 {
 	// check for nesting level overflow if we make full (non-delayed) parsing
 	if ( !m_rOpt.m_lazyParsing && ( m_rOpt.m_maxNestingLevel > 0 && ( m_nestingLevel + 1 ) >= m_rOpt.m_maxNestingLevel ) )
@@ -169,7 +169,7 @@ bool CFileTreeDialog::AddIncludedChildren( TreeItemPair& rParentPair, bool doRec
 	for ( std::vector< CIncludeNode* >::const_iterator itItem = treeItems.begin(); itItem != treeItems.end(); ++itItem )
 	{
 		bool originalItem;
-		TreeItemPair itemPair = AddTreeItem( rParentPair.first, *itItem, orderIndex, originalItem );
+		TTreeItemPair itemPair = AddTreeItem( rParentPair.first, *itItem, orderIndex, originalItem );
 		if ( itemPair.first != NULL )
 		{
 			++addedCount;
@@ -185,18 +185,18 @@ bool CFileTreeDialog::AddIncludedChildren( TreeItemPair& rParentPair, bool doRec
 	return addedCount != 0;
 }
 
-TreeItemPair CFileTreeDialog::AddTreeItem( HTREEITEM hParent, CIncludeNode* pItemInfo, int& rOrderIndex, bool& rOriginalItem )
+TTreeItemPair CFileTreeDialog::AddTreeItem( HTREEITEM hParent, CIncludeNode* pItemInfo, int& rOrderIndex, bool& rOriginalItem )
 {
 	ASSERT_PTR( pItemInfo );
 	ASSERT( pItemInfo->IsValidFile() );
-	static const TreeItemPair nullPair( NULL, NULL );
+	static const TTreeItemPair nullPair( NULL, NULL );
 
 	if ( IsFileExcluded( pItemInfo->m_path ) )
 		return nullPair;
 
 	std::tstring uniqueFilePath = path::MakeCanonical( pItemInfo->m_path.GetPtr() );
 
-	PathToItemMap::const_iterator itFound = m_originalItems.find( uniqueFilePath );
+	TPathToItemMap::const_iterator itFound = m_originalItems.find( uniqueFilePath );
 	rOriginalItem = itFound == m_originalItems.end();
 
 	if ( m_rOpt.m_noDuplicates && !rOriginalItem )
@@ -231,12 +231,12 @@ TreeItemPair CFileTreeDialog::AddTreeItem( HTREEITEM hParent, CIncludeNode* pIte
 	ASSERT_PTR( hItem );
 	if ( rOriginalItem )
 		m_originalItems[ uniqueFilePath ] = hItem;
-	return TreeItemPair( hItem, pItemInfo );
+	return TTreeItemPair( hItem, pItemInfo );
 }
 
 // checks for circular dependencies between the current specified file and the parent nodes
 
-bool CFileTreeDialog::IsCircularDependency( const TreeItemPair& currItem ) const
+bool CFileTreeDialog::IsCircularDependency( const TTreeItemPair& currItem ) const
 {
 	for ( HTREEITEM hParent = currItem.first; ( hParent = m_treeCtrl.GetParentItem( hParent ) ) != NULL; )
 		if ( const CIncludeNode* pParentItem = GetItemInfo( hParent) )
@@ -256,7 +256,7 @@ bool CFileTreeDialog::SafeBindItem( HTREEITEM hItem, CIncludeNode* pTreeItem )
 	if ( pTreeItem->IsParsed() )
 		return false;
 
-	TreeItemPair itemToBindPair( hItem, pTreeItem );
+	TTreeItemPair itemToBindPair( hItem, pTreeItem );
 	PostMessage( WM_COMMAND, CM_UPDATE_DIALOG_TITLE );				// delayed update the dialog title (for file count statistics)
 	return AddIncludedChildren( itemToBindPair, false, true );
 }
@@ -297,7 +297,7 @@ void _RefreshItemText( CTreeControl* pTreeCtrl, HTREEITEM hItem, CFileTreeDialog
 
 void CFileTreeDialog::RefreshItemsText( HTREEITEM hItem /*= TVI_ROOT*/ )
 {
-	ForEach( (IterFunc)_RefreshItemText, hItem, this );
+	ForEach( (TIterFunc)_RefreshItemText, hItem, this );
 }
 
 std::tstring CFileTreeDialog::BuildItemText( const CIncludeNode* pItemInfo, ViewMode viewMode /*= vmDefaultMode*/ ) const
@@ -321,7 +321,7 @@ std::tstring CFileTreeDialog::BuildItemText( const CIncludeNode* pItemInfo, View
 	return _T("???");
 }
 
-void CFileTreeDialog::ForEach( IterFunc pIterFunc, HTREEITEM hItem /*= TVI_ROOT*/, void* pArgs /*= NULL*/, int nestingLevel /*= -1*/ )
+void CFileTreeDialog::ForEach( TIterFunc pIterFunc, HTREEITEM hItem /*= TVI_ROOT*/, void* pArgs /*= NULL*/, int nestingLevel /*= -1*/ )
 {
 	ASSERT_PTR( pIterFunc );
 
@@ -358,7 +358,7 @@ HTREEITEM CFileTreeDialog::FindNextItem( HTREEITEM hStartItem, bool forward /*= 
 	BindAllItems();			// force binding all items
 
 	CMatchingItems args( hStartItem, GetItemInfo( hStartItem )->m_path.Get() );
-	ForEach( (IterFunc)_AddMatchingPath, TVI_ROOT, &args );
+	ForEach( (TIterFunc)_AddMatchingPath, TVI_ROOT, &args );
 
 	ASSERT( args.m_startPos < args.m_matches.size() );
 	if ( 1 == args.m_matches.size() )
@@ -376,7 +376,7 @@ HTREEITEM CFileTreeDialog::FindOriginalItem( HTREEITEM hStartItem )
 	const CIncludeNode* pStartInfo = GetItemInfo( hStartItem );
 	std::tstring fullPath = path::MakeCanonical( pStartInfo->m_path.GetPtr() );
 
-	PathToItemMap::const_iterator itFound = m_originalItems.find( fullPath );
+	TPathToItemMap::const_iterator itFound = m_originalItems.find( fullPath );
 	if ( itFound == m_originalItems.end() )
 		return NULL;
 	return itFound->second;
@@ -431,7 +431,7 @@ bool CFileTreeDialog::ReorderChildren( HTREEITEM hParent /*= TVI_ROOT*/ )
 bool CFileTreeDialog::IsOriginalItem( HTREEITEM hItem ) const
 {
 	const CIncludeNode* pTreeItem = GetItemInfo( hItem );
-	PathToItemMap::const_iterator itFound = m_originalItems.find( pTreeItem->m_path.Get() );
+	TPathToItemMap::const_iterator itFound = m_originalItems.find( pTreeItem->m_path.Get() );
 	return itFound != m_originalItems.end() && hItem == itFound->second;
 }
 
@@ -453,9 +453,9 @@ bool CFileTreeDialog::HasValidComplementary( void ) const		// true if the select
 	return false;
 }
 
-TreeItemPair CFileTreeDialog::GetSelectedItem( void ) const
+TTreeItemPair CFileTreeDialog::GetSelectedItem( void ) const
 {
-	TreeItemPair itemPair( m_treeCtrl.GetSelectedItem(), NULL );
+	TTreeItemPair itemPair( m_treeCtrl.GetSelectedItem(), NULL );
 	if ( itemPair.first != NULL )
 		itemPair.second = GetItemInfo( itemPair.first );
 	return itemPair;
@@ -942,14 +942,14 @@ void CFileTreeDialog::CmOpenIncludeLine( void )
 
 void CFileTreeDialog::CmExploreFile( void )
 {
-	TreeItemPair itemPair = GetSelectedItem();
+	TTreeItemPair itemPair = GetSelectedItem();
 	if ( itemPair.first != NULL && itemPair.second->m_path.FileExist() )
 		shell::ExploreAndSelectFile( itemPair.second->m_path.GetPtr() );
 }
 
 void CFileTreeDialog::CmViewFile( UINT cmdId )
 {
-	TreeItemPair itemPair = GetSelectedItem();
+	TTreeItemPair itemPair = GetSelectedItem();
 	if ( itemPair.first != NULL && itemPair.second->m_path.FileExist() )
 	{	// use text key (.txt) for text view, or the default for run
 		shell::Execute( this, itemPair.second->m_path.GetPtr(), NULL, SEE_MASK_FLAG_DDEWAIT, NULL, NULL, cmdId == CM_TEXT_VIEW_FILE ? _T(".txt") : NULL );
@@ -958,7 +958,7 @@ void CFileTreeDialog::CmViewFile( UINT cmdId )
 
 void CFileTreeDialog::CmCopyFullPath( void )
 {
-	TreeItemPair itemPair = GetSelectedItem();
+	TTreeItemPair itemPair = GetSelectedItem();
 	if ( itemPair.first != NULL && itemPair.second->m_path.FileExist() )
 		CClipboard::CopyText( itemPair.second->m_path.Get() );
 }
@@ -1050,6 +1050,6 @@ void _appendItemTextLine( CTreeControl* pTreeCtrl, HTREEITEM hItem, std::tstring
 void CFileTreeDialog::CmCopyToClipboard( void )
 {
 	std::tstring allItemsText;
-	ForEach( (IterFunc)_appendItemTextLine, TVI_ROOT, &allItemsText );
+	ForEach( (TIterFunc)_appendItemTextLine, TVI_ROOT, &allItemsText );
 	CClipboard::CopyText( allItemsText );
 }

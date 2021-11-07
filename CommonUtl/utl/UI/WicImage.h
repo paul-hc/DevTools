@@ -18,10 +18,10 @@ public:
 
 	void Clear( void );
 
-	const fs::ImagePathKey& GetKey( void ) const { return m_key; }
+	const fs::TImagePathKey& GetKey( void ) const { return m_key; }
 
-	bool LoadFromFile( const fs::ImagePathKey& imageKey );
-	inline bool LoadFromFile( const fs::CFlexPath& imagePath, UINT framePos ) { return LoadFromFile( fs::ImagePathKey( imagePath, framePos ) ); }
+	bool LoadFromFile( const fs::TImagePathKey& imageKey );
+	inline bool LoadFromFile( const fs::CFlexPath& imagePath, UINT framePos ) { return LoadFromFile( fs::TImagePathKey( imagePath, framePos ) ); }
 	bool LoadFrame( UINT framePos );
 
 	const fs::CFlexPath& GetImagePath( void ) const { return m_key.first; }
@@ -48,11 +48,11 @@ private:
 
 public:
 	// image factory methods
-	static std::auto_ptr<CWicImage> CreateFromFile( const fs::ImagePathKey& imageKey, utl::ErrorHandling handlingMode = utl::CheckMode );
-	static std::pair< UINT, wic::TDecoderFlags > LookupImageFileFrameCount( const fs::CFlexPath& imagePath );
+	static std::auto_ptr<CWicImage> CreateFromFile( const fs::TImagePathKey& imageKey, utl::ErrorHandling handlingMode = utl::CheckMode );
+	static std::pair<UINT, wic::TDecoderFlags> LookupImageFileFrameCount( const fs::CFlexPath& imagePath );
 
 	static bool IsCorruptFile( const fs::CFlexPath& imagePath );
-	static bool IsCorruptFrame( const fs::ImagePathKey& imageKey );
+	static bool IsCorruptFrame( const fs::TImagePathKey& imageKey );
 
 	static wic::CBitmapDecoder AcquireDecoder( const fs::CFlexPath& imagePath, utl::ErrorHandling handlingMode = utl::CheckMode );
 		// used in static methods that don't create a CWicImage object - wic::CBitmapDecoder is efficient to copy
@@ -70,7 +70,7 @@ private:
 		const wic::CBitmapDecoder& GetDecoder( void ) const { return m_decoder; }
 		bool AnyFramesLoaded( void ) const { return !m_loadedFrames.empty(); }
 
-		std::auto_ptr<CWicImage> LoadFrame( const fs::ImagePathKey& imageKey );
+		std::auto_ptr<CWicImage> LoadFrame( const fs::TImagePathKey& imageKey );
 		bool UnloadFrame( CWicImage* pFrameImage );
 	private:
 		size_t FindPosLoaded( UINT framePos ) const;
@@ -86,14 +86,14 @@ private:
 	static TMultiFrameDecoderMap& SharedMultiFrameDecoders( void );
 
 	void SetSharedDecoder( CMultiFrameDecoder* pSharedDecoder );
-	bool LoadDecoderFrame( wic::CBitmapDecoder& decoder, const fs::ImagePathKey& imageKey );
+	bool LoadDecoderFrame( wic::CBitmapDecoder& decoder, const fs::TImagePathKey& imageKey );
 private:
-	fs::ImagePathKey m_key;								// path and frame pos
+	fs::TImagePathKey m_key;								// path and frame pos
 	UINT m_frameCount;									// count of frames in a multiple image format
 	const WICPixelFormatGUID* m_pCvtPixelFormat;		// format to which the loaded frame bitmap is converted to (NULL for auto)
 	CMultiFrameDecoder* m_pSharedDecoder;				// only for multi-frame images, otherwise NULL
 public:
-	static const fs::ImagePathKey s_nullKey;
+	static const fs::TImagePathKey s_nullKey;
 };
 
 
@@ -131,7 +131,7 @@ namespace ui
 
 namespace fs
 {
-	inline const CFlexPath& CastFlexPath( const fs::ImagePathKey& imageKey ) { return CastFlexPath( imageKey.first ); }
+	inline const CFlexPath& CastFlexPath( const fs::TImagePathKey& imageKey ) { return CastFlexPath( imageKey.first ); }
 
 
 	class CImageFilterStore : public CFilterStore

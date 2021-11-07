@@ -52,7 +52,7 @@ private:
 };
 
 
-typedef CSubjectImpl< utl::ISubject > CSubject;
+typedef CSubjectImpl<utl::ISubject> TSubject;
 
 
 #endif // Subject_h

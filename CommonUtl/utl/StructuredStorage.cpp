@@ -398,26 +398,26 @@ namespace fs
 	}
 
 
-	std::pair< const TCHAR*, size_t > CStructuredStorage::FindAlternate_DirName( const TCHAR* altDirNames[], size_t altCount )
+	std::pair<const TCHAR*, size_t> CStructuredStorage::FindAlternate_DirName( const TCHAR* altDirNames[], size_t altCount )
 	{
 		REQUIRE( altCount != 0 );
 
 		for ( size_t i = 0; i != altCount; ++i )
 			if ( StorageExist( altDirNames[ i ] ) )
-				return std::pair< const TCHAR*, size_t >( altDirNames[ i ], i );
+				return std::pair<const TCHAR*, size_t>( altDirNames[ i ], i );
 
-		return std::pair< const TCHAR*, size_t >( NULL, utl::npos );			// no storage found
+		return std::pair<const TCHAR*, size_t>( NULL, utl::npos );			// no storage found
 	}
 
-	std::pair< const TCHAR*, size_t > CStructuredStorage::FindAlternate_StreamName( const TCHAR* altStreamNames[], size_t altCount )
+	std::pair<const TCHAR*, size_t> CStructuredStorage::FindAlternate_StreamName( const TCHAR* altStreamNames[], size_t altCount )
 	{
 		REQUIRE( altCount != 0 );
 
 		for ( size_t i = 0; i != altCount; ++i )
 			if ( StreamExist( altStreamNames[ i ] ) )
-				return std::pair< const TCHAR*, size_t >( altStreamNames[ i ], i );
+				return std::pair<const TCHAR*, size_t>( altStreamNames[ i ], i );
 
-		return std::pair< const TCHAR*, size_t >( NULL, utl::npos );			// no stream found
+		return std::pair<const TCHAR*, size_t>( NULL, utl::npos );			// no stream found
 	}
 
 

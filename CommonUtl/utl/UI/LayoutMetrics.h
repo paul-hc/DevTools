@@ -3,21 +3,21 @@
 #pragma once
 
 
-namespace layout { typedef int Style; }
+namespace layout { typedef int TStyle; }
 
 
 struct CLayoutStyle
 {
 	UINT m_ctrlId;
-	layout::Style m_layoutStyle;
+	layout::TStyle m_layoutStyle;
 };
 
 
 struct CDualLayoutStyle
 {
 	UINT m_ctrlId;
-	layout::Style m_expandedStyle;
-	layout::Style m_collapsedStyle;
+	layout::TStyle m_expandedStyle;
+	layout::TStyle m_collapsedStyle;
 };
 
 
@@ -101,7 +101,7 @@ namespace layout
 			unsigned int m_collapsedTop : 1;				// control is a top edge collapsed marker
 		};
 	public:
-		Style m_layoutStyle;
+		TStyle m_layoutStyle;
 		Fields m_fields;
 	};
 
@@ -165,7 +165,7 @@ namespace layout
 		bool HasCollapsedState( void ) const { return m_collapsedMetrics.IsValid(); }
 		const Metrics& GetMetrics( bool collapsed ) const { return collapsed && HasCollapsedState() ? m_collapsedMetrics : m_metrics; }
 
-		layout::Style GetLayoutStyle( bool collapsed ) const { return GetMetrics( collapsed ).m_layoutStyle; }
+		layout::TStyle GetLayoutStyle( bool collapsed ) const { return GetMetrics( collapsed ).m_layoutStyle; }
 		void SetLayoutStyle( int layoutStyle, bool collapsed );
 		void ModifyLayoutStyle( int clearStyle, int setStyle );
 

@@ -105,7 +105,7 @@ void CTempCloneFileSet::DeleteClones( void )
 	if ( !fs::IsValidDirectory( tempDirPath.GetPtr() ) )
 		return;
 
-	for ( std::vector< std::pair< fs::CFlexPath, fs::CPath > >::const_iterator itLogical = m_tempClonedImagePaths.begin(); itLogical != m_tempClonedImagePaths.end(); ++itLogical )
+	for ( std::vector< std::pair<fs::CFlexPath, fs::CPath> >::const_iterator itLogical = m_tempClonedImagePaths.begin(); itLogical != m_tempClonedImagePaths.end(); ++itLogical )
 		if ( itLogical->second.FileExist() )
 			try
 			{

@@ -116,7 +116,7 @@ namespace fs
 
 	void CFileState::ModifyFileTimes( const ::CFileStatus& newStatus, bool isDirectory ) const throws_( CFileException )
 	{
-		std::vector< std::pair< FILETIME, const FILETIME* > > times( _TimeFieldCount );		// pair.second: ptr not NULL when time is defined (!= 0)
+		std::vector< std::pair<FILETIME, const FILETIME*> > times( _TimeFieldCount );		// pair.second: ptr not NULL when time is defined (!= 0)
 
 		times[ ModifiedDate ].second = fs::thr::MakeFileTime( times[ ModifiedDate ].first, newStatus.m_mtime, newStatus.m_szFullName, fs::MfcExc );			// last modification time
 		if ( times[ ModifiedDate ].second != NULL )

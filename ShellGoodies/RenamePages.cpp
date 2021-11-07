@@ -83,7 +83,7 @@ void CRenameListPage::SetupFileListView( void )
 		m_fileListCtrl.SetSubItemText( pos, Destination, pDisplayAdapter->FormatFilename( pRenameItem->GetDestPath() ) );
 	}
 
-	m_fileListCtrl.SetupDiffColumnPair( Source, Destination, path::GetMatch() );
+	m_fileListCtrl.SetupDiffColumnPair( Source, Destination, path::TGetMatch() );
 	m_fileListCtrl.InitialSortList();		// store original order and sort by current criteria
 }
 
@@ -194,8 +194,8 @@ void CRenameEditPage::EnsureVisibleItem( const CRenameItem* pRenameItem )
 		size_t linePos = utl::FindPos( m_pParentDlg->GetRenameItems(), pRenameItem );
 		if ( linePos != utl::npos )
 		{
-			m_srcEdit.SetSelRange( m_srcEdit.GetLineRange( static_cast<CTextEdit::Line>( linePos ) ) );
-			m_destEditor.SetSelRange( m_destEditor.GetLineRange( static_cast<CTextEdit::Line>( linePos ) ) );
+			m_srcEdit.SetSelRange( m_srcEdit.GetLineRange( static_cast<CTextEdit::TLine>( linePos ) ) );
+			m_destEditor.SetSelRange( m_destEditor.GetLineRange( static_cast<CTextEdit::TLine>( linePos ) ) );
 		}
 	}
 }

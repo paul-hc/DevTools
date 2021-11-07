@@ -38,10 +38,10 @@ private:
 	void UnregisterHook( void );
 	static void UnregisterAllHooksForWindow( HWND hWndHooked );
 private:
-	typedef stdext::hash_map< HWND, CWindowHook* > HookMap;
+	typedef stdext::hash_map< HWND, CWindowHook* > THookMap;
 
 	static CWindowHook* FindHook( HWND hWndHooked );
-	static HookMap& GetHookMap( void );
+	static THookMap& GetHookMap( void );
 public:
 	bool m_autoDelete;			// automatically deletes this when the window is unhooked
 protected:

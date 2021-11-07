@@ -10,26 +10,26 @@ namespace str
 	template< typename CharType >
 	struct CMatchSequence
 	{
-		typedef std::basic_string< CharType > StringT;
+		typedef std::basic_string< CharType > TString;
 
 		CMatchSequence( void ) : m_match( MatchEqual ) {}
-		CMatchSequence( const StringT& srcText, const StringT& destText ) : m_textPair( srcText, destText ), m_match( MatchNotEqual ) {}
+		CMatchSequence( const TString& srcText, const TString& destText ) : m_textPair( srcText, destText ), m_match( MatchNotEqual ) {}
 
-		template< typename MatchFunc >							// could use str::GetMatch(), path::GetMatch(), etc
-		void Init( const StringT& srcText, const StringT& destText, MatchFunc getMatchFunc )
+		template< typename MatchFunc >							// could use str::TGetMatch(), path::TGetMatch(), etc
+		void Init( const TString& srcText, const TString& destText, MatchFunc getMatchFunc )
 		{
 			 m_textPair.first = srcText;
 			 m_textPair.second = destText;
 			 ComputeMatchSeq( getMatchFunc );
 		}
 
-		template< typename MatchFunc >							// could use str::GetMatch(), path::GetMatch(), etc
+		template< typename MatchFunc >							// could use str::TGetMatch(), path::TGetMatch(), etc
 		void ComputeMatchSeq( MatchFunc getMatchFunc );
 	public:
-		std::pair< StringT, StringT > m_textPair;									// <SRC, DEST> text pair of subitems
+		std::pair<TString, TString> m_textPair;									// <SRC, DEST> text pair of subitems
 
 		Match m_match;
-		std::pair< std::vector< Match >, std::vector< Match > > m_matchSeqPair;		// <SRC, DEST> - same size with pair of subitems text
+		std::pair< std::vector<Match>, std::vector<Match> > m_matchSeqPair;		// <SRC, DEST> - same size with pair of subitems text
 	};
 
 

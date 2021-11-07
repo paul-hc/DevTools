@@ -31,7 +31,7 @@ namespace str
 
 	std::tstring Load( UINT strId, bool* pLoaded = NULL );
 	std::vector< std::tstring > LoadStrings( UINT strId, const TCHAR* pSep = _T("|"), bool* pLoaded = NULL );
-	std::pair< std::tstring, std::tstring > LoadPair( UINT strId, const TCHAR* pSep = _T("|"), bool* pLoaded = NULL );
+	std::pair<std::tstring, std::tstring> LoadPair( UINT strId, const TCHAR* pSep = _T("|"), bool* pLoaded = NULL );
 
 
 	namespace mfc

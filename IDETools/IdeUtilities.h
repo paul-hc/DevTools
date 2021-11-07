@@ -47,7 +47,7 @@ namespace ide
 
 
 	CPoint GetMouseScreenPos( void );
-	std::pair< HMENU, int > FindPopupMenuWithCommand( HWND hWnd, UINT commandID );
+	std::pair<HMENU, int> FindPopupMenuWithCommand( HWND hWnd, UINT commandID );
 
 
 	std::tstring GetRegistryPath_VC6( const TCHAR entry[] );

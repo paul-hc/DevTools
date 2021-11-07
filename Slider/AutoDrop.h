@@ -37,7 +37,7 @@ namespace auto_drop
 
 	class COpGroup : public std::deque< COpEntry >
 	{
-		typedef std::deque< COpEntry > BaseType;
+		typedef std::deque< COpEntry > TBase;
 	public:
 		enum GroupType
 		{
@@ -58,7 +58,7 @@ namespace auto_drop
 
 	class COpStack : public std::deque< COpGroup >
 	{
-		typedef std::deque< COpGroup > BaseType;
+		typedef std::deque< COpGroup > TBase;
 	public:
 		COpStack( void ) {}
 	};

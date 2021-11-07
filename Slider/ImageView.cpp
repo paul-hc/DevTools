@@ -33,7 +33,7 @@ CAccelTable CImageView::s_imageAccel;
 IMPLEMENT_DYNCREATE( CImageView, CScrollView )
 
 CImageView::CImageView( void )
-	: BaseClass()
+	: TBaseClass()
 	, CObjectCtrlBase( this )
 	, m_imageFramePos( 0 )
 	, m_bkColor( CLR_DEFAULT )
@@ -100,14 +100,14 @@ CWicImage* CImageView::QueryImageFileDetails( ui::CImageFileDetails& rFileDetail
 	return __super::QueryImageFileDetails( rFileDetails );		// TODO: make CImageView aware of multi-frame images, with frame navigation
 }
 
-fs::ImagePathKey CImageView::GetImagePathKey( void ) const
+fs::TImagePathKey CImageView::GetImagePathKey( void ) const
 {
-	return fs::ImagePathKey( GetDocument()->GetImagePath(), m_imageFramePos );
+	return fs::TImagePathKey( GetDocument()->GetImagePath(), m_imageFramePos );
 }
 
 CScrollView* CImageView::GetScrollView( void )
 {
-	return BaseClass::GetScrollView();
+	return TBaseClass::GetScrollView();
 }
 
 void CImageView::RegainFocus( RegainAction regainAction, int ctrlId /*= 0*/ )
@@ -268,7 +268,7 @@ BOOL CImageView::PreTranslateMessage( MSG* pMsg )
 
 // message handlers
 
-BEGIN_MESSAGE_MAP( CImageView, BaseClass )
+BEGIN_MESSAGE_MAP( CImageView, TBaseClass )
 	ON_WM_CREATE()
 	ON_WM_SETFOCUS()
 	ON_WM_KILLFOCUS()

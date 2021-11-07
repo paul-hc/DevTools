@@ -7,7 +7,7 @@ namespace nav
 {
 	enum Navigate { Previous, Next, First, Last };
 
-	typedef std::pair< int, UINT > TIndexFramePosPair;
+	typedef std::pair<int, UINT> TIndexFramePosPair;
 }
 
 

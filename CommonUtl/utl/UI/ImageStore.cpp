@@ -55,8 +55,8 @@ void CImageStore::Clear( void )
 
 CIcon* CImageStore::FindIcon( UINT cmdId, IconStdSize iconStdSize /*= SmallIcon*/ ) const
 {
-	const IconKey key( FindAliasIconId( cmdId ), iconStdSize );
-	stdext::hash_map< IconKey, CIcon* >::const_iterator itFound = m_iconMap.find( key );
+	const TIconKey key( FindAliasIconId( cmdId ), iconStdSize );
+	stdext::hash_map< TIconKey, CIcon* >::const_iterator itFound = m_iconMap.find( key );
 	if ( itFound == m_iconMap.end() )
 		return NULL;
 	return itFound->second;
@@ -79,7 +79,7 @@ const CIcon* CImageStore::RetrieveIcon( const CIconId& cmdId )
 	if ( CIcon* pFoundIcon = FindIcon( cmdId.m_id, cmdId.m_stdSize ) )
 		return pFoundIcon;
 
-	const IconKey iconKey( FindAliasIconId( cmdId.m_id ), cmdId.m_stdSize );		// try loading iconId always (not the command alias)
+	const TIconKey iconKey( FindAliasIconId( cmdId.m_id ), cmdId.m_stdSize );		// try loading iconId always (not the command alias)
 	if ( CIcon* pIcon = CIcon::NewExactIcon( CIconId( iconKey.first, cmdId.m_stdSize ) ) )
 	{
 		m_iconMap[ iconKey ] = pIcon;
@@ -106,8 +106,8 @@ const CIcon* CImageStore::RetrieveSharedIcon( const CIconId& cmdId )
 
 CBitmap* CImageStore::RetrieveBitmap( const CIconId& cmdId, COLORREF transpColor )
 {
-	const BitmapKey key( cmdId.m_id, transpColor );
-	stdext::hash_map< BitmapKey, CBitmap* >::const_iterator itFound = m_bitmapMap.find( key );
+	const TBitmapKey key( cmdId.m_id, transpColor );
+	stdext::hash_map< TBitmapKey, CBitmap* >::const_iterator itFound = m_bitmapMap.find( key );
 	if ( itFound != m_bitmapMap.end() )
 		return itFound->second;
 
@@ -123,9 +123,9 @@ CBitmap* CImageStore::RetrieveBitmap( const CIconId& cmdId, COLORREF transpColor
 	return NULL;
 }
 
-std::pair< CBitmap*, CBitmap* > CImageStore::RetrieveMenuBitmaps( const CIconId& cmdId )
+std::pair<CBitmap*, CBitmap*> CImageStore::RetrieveMenuBitmaps( const CIconId& cmdId )
 {
-	stdext::hash_map< UINT, std::pair< CBitmap*, CBitmap* > >::const_iterator itFound = m_menuBitmapMap.find( cmdId.m_id );
+	stdext::hash_map< UINT, std::pair<CBitmap*, CBitmap*> >::const_iterator itFound = m_menuBitmapMap.find( cmdId.m_id );
 	if ( itFound != m_menuBitmapMap.end() )
 		return itFound->second;
 
@@ -133,15 +133,15 @@ std::pair< CBitmap*, CBitmap* > CImageStore::RetrieveMenuBitmaps( const CIconId&
 	{
 		ASSERT( pIcon->IsValid() );
 
-		std::pair< CBitmap*, CBitmap* >& rBitmapPair = m_menuBitmapMap[ cmdId.m_id ];
+		std::pair<CBitmap*, CBitmap*>& rBitmapPair = m_menuBitmapMap[ cmdId.m_id ];
 		rBitmapPair.first = RenderMenuBitmap( *pIcon, false );		// unchecked state
 		rBitmapPair.second = RenderMenuBitmap( *pIcon, true );		// checked state
 		return rBitmapPair;
 	}
-	return std::pair< CBitmap*, CBitmap* >( NULL, NULL );
+	return std::pair<CBitmap*, CBitmap*>( NULL, NULL );
 }
 
-std::pair< CBitmap*, CBitmap* > CImageStore::RetrieveMenuBitmaps( const CIconId& cmdId, bool useCheckedBitmaps )
+std::pair<CBitmap*, CBitmap*> CImageStore::RetrieveMenuBitmaps( const CIconId& cmdId, bool useCheckedBitmaps )
 {
 	if ( useCheckedBitmaps )
 		return RetrieveMenuBitmaps( cmdId );		// use rendered DDBs
@@ -149,7 +149,7 @@ std::pair< CBitmap*, CBitmap* > CImageStore::RetrieveMenuBitmaps( const CIconId&
 	{
 		// straight bitmap looks better because the DIB section retains the alpha channel;
 		// no image for checked state (will use a check mark)
-		return std::pair< CBitmap*, CBitmap* >( RetrieveBitmap( cmdId, GetSysColor( COLOR_MENU ) ), NULL );
+		return std::pair<CBitmap*, CBitmap*>( RetrieveBitmap( cmdId, GetSysColor( COLOR_MENU ) ), NULL );
 	}
 }
 
@@ -190,7 +190,7 @@ void CImageStore::RegisterButtonImages( const CImageList& imageList, const UINT 
 
 	const bool hasAlpha = !gdi::HasMask( imageList, 0 );			// could also use ui::HasAlphaTransparency() - assume all images are the same
 	CSize imageSize = pImageSize != NULL ? *pImageSize : gdi::GetImageSize( imageList );
-	IconKey iconKey;
+	TIconKey iconKey;
 
 	switch ( imageSize.cx )
 	{
@@ -206,7 +206,7 @@ void CImageStore::RegisterButtonImages( const CImageList& imageList, const UINT 
 		{
 			iconKey.first = buttonIds[ i ];
 
-			stdext::hash_map< IconKey, CIcon* >::const_iterator itFound = m_iconMap.find( iconKey );
+			stdext::hash_map< TIconKey, CIcon* >::const_iterator itFound = m_iconMap.find( iconKey );
 			if ( itFound == m_iconMap.end() )
 			{
 				HICON hIcon = const_cast<CImageList&>( imageList ).ExtractIcon( imagePos );
@@ -225,7 +225,7 @@ void CImageStore::RegisterIcon( UINT cmdId, CIcon* pIcon )
 	ASSERT( cmdId != 0 );
 	ASSERT( pIcon != NULL && pIcon->IsValid() );
 
-	IconKey iconKey( cmdId, ui::LookupIconStdSize( pIcon->GetSize().cx ) );
+	TIconKey iconKey( cmdId, ui::LookupIconStdSize( pIcon->GetSize().cx ) );
 
 	CIcon*& rpIcon = m_iconMap[ iconKey ];
 	delete rpIcon;

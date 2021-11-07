@@ -11,9 +11,9 @@ namespace str
 	template< typename CompareT = pred::TCompareCase, typename CharType = TCHAR >
 	struct CTokenIterator
 	{
-		typedef std::basic_string< CharType > StringT;
+		typedef std::basic_string< CharType > TString;
 
-		explicit CTokenIterator( const StringT& text, size_t pos = 0, CompareT compare = CompareT() )
+		explicit CTokenIterator( const TString& text, size_t pos = 0, CompareT compare = CompareT() )
 			: m_text( text )
 			, m_pCurrent( m_text.c_str() )
 			, m_pos( 0 )
@@ -55,12 +55,12 @@ namespace str
 		void SetWhiteSpace( const CharType whiteSpace[] ) { ASSERT( !str::IsEmpty( whiteSpace ) ); m_whiteSpace.SetRange( whiteSpace, str::end( whiteSpace ) ); }
 
 
-		StringT GetLeadSubstr( void ) const { return m_text.substr( 0, m_pos ); }
-		StringT GetCurrentSubstr( void ) const { return m_text.substr( m_pos ); }
-		StringT MakePrevToken( size_t tokenLen ) const { ASSERT( tokenLen <= m_pos ); return m_text.substr( m_pos - tokenLen, tokenLen ); }
-		StringT MakeToken( size_t tokenLen ) const { ASSERT( tokenLen <= m_pos ); return m_text.substr( m_pos, tokenLen ); }
+		TString GetLeadSubstr( void ) const { return m_text.substr( 0, m_pos ); }
+		TString GetCurrentSubstr( void ) const { return m_text.substr( m_pos ); }
+		TString MakePrevToken( size_t tokenLen ) const { ASSERT( tokenLen <= m_pos ); return m_text.substr( m_pos - tokenLen, tokenLen ); }
+		TString MakeToken( size_t tokenLen ) const { ASSERT( tokenLen <= m_pos ); return m_text.substr( m_pos, tokenLen ); }
 
-		bool ExtractEnclosedText( StringT& rText, const CharType openSep[], const CharType closeSep[], Range<size_t>* pTextRange = &s_posRange )
+		bool ExtractEnclosedText( TString& rText, const CharType openSep[], const CharType closeSep[], Range<size_t>* pTextRange = &s_posRange )
 		{
 			ASSERT_PTR( pTextRange );
 			if ( Matches( openSep ) )
@@ -76,7 +76,7 @@ namespace str
 			return false;
 		}
 
-		bool ExtractEnclosedText( StringT& rText, const CharType sep[], Range<size_t>* pTextRange = &s_posRange ) { return ExtractEnclosedText( rText, sep, sep, pTextRange ); }
+		bool ExtractEnclosedText( TString& rText, const CharType sep[], Range<size_t>* pTextRange = &s_posRange ) { return ExtractEnclosedText( rText, sep, sep, pTextRange ); }
 
 		void ReplaceToken( const Range<size_t>& tokenRange, const CharType* pNewText )
 		{
@@ -87,7 +87,7 @@ namespace str
 			size_t tokenLen = tokenRange.GetSpan<size_t>();
 			ptrdiff_t deltaLen = str::GetLength( pNewText ) - tokenLen;
 
-			StringT& rText = const_cast<StringT&>( m_text );		// writeable string data-member
+			TString& rText = const_cast<TString&>( m_text );		// writeable string data-member
 
 			rText.replace( tokenRange.m_start, tokenLen, pNewText );
 			m_length = m_text.length();
@@ -141,7 +141,7 @@ namespace str
 			if ( !AtEnd() )
 			{
 				size_t tokenLen = str::GetLength( pToken );
-				typename StringT::const_iterator itFound = std::search( m_text.begin() + m_pos, m_text.end(), pToken, pToken + tokenLen, m_equals );
+				typename TString::const_iterator itFound = std::search( m_text.begin() + m_pos, m_text.end(), pToken, pToken + tokenLen, m_equals );
 				if ( itFound != m_text.end() )
 				{
 					size_t newPos = std::distance( m_text.begin(), itFound );
@@ -176,7 +176,7 @@ namespace str
 			return true;
 		}
 
-		bool Matches( const StringT& token )
+		bool Matches( const TString& token )
 		{
 			size_t tokenLen = token.length();
 			if ( 0 == tokenLen || m_compare( m_text.c_str() + m_pos, token.c_str(), tokenLen ) != pred::Equal )
@@ -193,20 +193,20 @@ namespace str
 				if ( Matches( tokens[ pos ] ) )
 					return pos;
 
-			return StringT::npos;
+			return TString::npos;
 		}
 
 		template< typename Container >
 		bool MatchesAny( const Container& tokens )
 		{
-			return FindMatch( tokens ) != StringT::npos;
+			return FindMatch( tokens ) != TString::npos;
 		}
 
 
 		// word matching
 
 		template< typename WordBreakPred >
-		bool MatchesWord( const StringT& token, WordBreakPred isWordBreak )
+		bool MatchesWord( const TString& token, WordBreakPred isWordBreak )
 		{
 			size_t tokenLen = token.length();
 			if ( 0 == tokenLen || m_compare( m_text.c_str() + m_pos, token.c_str(), tokenLen ) != pred::Equal )
@@ -225,10 +225,10 @@ namespace str
 				if ( MatchesWord( tokens[ pos ], isWordBreak ) )
 					return pos;
 
-			return StringT::npos;
+			return TString::npos;
 		}
 	private:
-		const StringT& m_text;
+		const TString& m_text;
 		const CharType* m_pCurrent;				// self-encapsulated
 		size_t m_pos;							// self-encapsulated
 		size_t m_length;

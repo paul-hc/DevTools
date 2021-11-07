@@ -68,7 +68,7 @@ namespace fs
 
 	// CFilterStore implementation
 
-	const FilterPair CFilterStore::s_allFiles( _T("All Files"), _T("*.*") );
+	const TFilterPair CFilterStore::s_allFiles( _T("All Files"), _T("*.*") );
 	const TCHAR CFilterStore::s_specSep[] = _T(";");
 	const TCHAR CFilterStore::s_filterSep[] = _T("|");
 
@@ -84,7 +84,7 @@ namespace fs
 		CFilterRepository::Instance().Unregister( this, m_browseFlags );
 	}
 
-	void CFilterStore::AddFilter( const FilterPair& filter )
+	void CFilterStore::AddFilter( const TFilterPair& filter )
 	{
 		std::vector< std::tstring > extensions;
 		str::Split( extensions, filter.second.c_str(), s_specSep );
@@ -95,7 +95,7 @@ namespace fs
 
 	void CFilterStore::StreamFilters( std::tostringstream& oss ) const
 	{
-		for ( std::vector< FilterPair >::const_iterator itFilter = m_filters.begin(); itFilter != m_filters.end(); ++itFilter )
+		for ( std::vector< TFilterPair >::const_iterator itFilter = m_filters.begin(); itFilter != m_filters.end(); ++itFilter )
 			StreamFilter( oss, *itFilter );
 	}
 
@@ -105,7 +105,7 @@ namespace fs
 			StreamFilter( oss, m_filters[ positions[ i ] ] );
 	}
 
-	void CFilterStore::StreamFilter( std::tostringstream& oss, const FilterPair& filter )
+	void CFilterStore::StreamFilter( std::tostringstream& oss, const TFilterPair& filter )
 	{
 		// example "BMP Decoder (*.bmp;*.dib;*.rle)|*.bmp;*.dib;*.rle|"
 		oss << filter.first << _T(" (") << filter.second << _T(")") << s_filterSep << _T(" ") << filter.second << s_filterSep;
@@ -150,7 +150,7 @@ namespace fs
 			}
 
 		if ( m_classTags.size() > 1 )					// "All File Types" makes sense only for multiple joiner; otherwise we already have the class filter
-			CFilterStore::StreamFilter( oss, FilterPair( _T("All File Types"), MakeSpecs( browseMode ) ) );
+			CFilterStore::StreamFilter( oss, TFilterPair( _T("All File Types"), MakeSpecs( browseMode ) ) );
 
 		CFilterStore::StreamAllFiles( oss );
 		CFilterStore::StreamArrayEnd( oss );				// end-of-array separator
@@ -210,7 +210,7 @@ namespace fs
 
 	CFilterStore* CFilterRepository::Lookup( const std::tstring& classTag, shell::BrowseMode browseMode ) const
 	{
-		stdext::hash_map< std::tstring, OpenSavePair >::const_iterator itFound = m_stores.find( classTag );
+		stdext::hash_map< std::tstring, TOpenSavePair >::const_iterator itFound = m_stores.find( classTag );
 		ASSERT( itFound != m_stores.end() );
 
 		if ( shell::FileSaveAs == browseMode && itFound->second.second != NULL )
@@ -226,7 +226,7 @@ namespace fs
 
 	void CFilterRepository::Register( CFilterStore* pFilterStore, BrowseFlags browseFlags )
 	{
-		OpenSavePair& rStorePair = m_stores[ pFilterStore->GetClassTag() ];
+		TOpenSavePair& rStorePair = m_stores[ pFilterStore->GetClassTag() ];
 		switch ( browseFlags )
 		{
 			case BrowseOpen:
@@ -247,16 +247,17 @@ namespace fs
 
 	void CFilterRepository::Unregister( CFilterStore* pFilterStore, BrowseFlags browseFlags )
 	{
-		stdext::hash_map< std::tstring, OpenSavePair >::iterator itFound = m_stores.find( pFilterStore->GetClassTag() );
+		stdext::hash_map< std::tstring, TOpenSavePair >::iterator itFound = m_stores.find( pFilterStore->GetClassTag() );
 		ASSERT( itFound != m_stores.end() );
-		OpenSavePair& rStorePair = itFound->second;
+		TOpenSavePair& rStorePair = itFound->second;
 		switch ( browseFlags )
 		{
 			case BrowseOpen:	rStorePair.first = NULL; break;
 			case BrowseSave:	rStorePair.second = NULL; break;
 			case BrowseBoth:	rStorePair.first = rStorePair.second = NULL; break;
 		}
-		static const OpenSavePair nullPair( NULL, NULL );
+
+		static const TOpenSavePair nullPair( NULL, NULL );
 		if ( nullPair == itFound->second )
 			m_stores.erase( itFound );
 	}

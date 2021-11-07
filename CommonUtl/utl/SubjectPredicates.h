@@ -8,11 +8,11 @@
 
 namespace pred
 {
-	typedef CompareScalarAdapterPtr<func::AsCode> CompareCode;
-	typedef CompareScalarAdapterPtr<func::AsDisplayCode> CompareDisplayCode;
-	typedef CompareAdapterPtr< CompareCode, func::DynamicAs<utl::ISubject > > CompareSubjectCode;
+	typedef CompareScalarAdapterPtr<func::AsCode> TCompareCode;
+	typedef CompareScalarAdapterPtr<func::AsDisplayCode> TCompareDisplayCode;
+	typedef CompareAdapterPtr< TCompareCode, func::DynamicAs<utl::ISubject > > TCompareSubjectCode;
 
-	typedef LessPtr<CompareCode> LessCode;
+	typedef LessPtr<TCompareCode> TLessCode;
 
 
 	// for implementing stateful object comparators

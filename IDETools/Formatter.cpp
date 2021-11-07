@@ -122,13 +122,13 @@ namespace code
 
 		TokenRange leadingWhiteSpaceRange = getWhiteSpaceRange( lineOfCode, 0, false );
 
-		EditorColumn editorColumn = computeVisualEditorColumn( lineOfCode, leadingWhiteSpaceRange.m_end );
+		TEditorColumn editorColumn = computeVisualEditorColumn( lineOfCode, leadingWhiteSpaceRange.m_end );
 		CString leadingWhiteSpace = makeLineIndentWhiteSpace( editorColumn - 1, doTabify );
 
 		return leadingWhiteSpace + leadingWhiteSpaceRange.getSuffixString( lineOfCode );
 	}
 
-	CString CFormatter::splitArgumentList( const TCHAR* pCodeText, EditorColumn maxColumn /*= UINT_MAX*/,
+	CString CFormatter::splitArgumentList( const TCHAR* pCodeText, TEditorColumn maxColumn /*= UINT_MAX*/,
 										  int targetBracketLevel /*= -1*/ )
 	{
 		UNUSED_ALWAYS( targetBracketLevel );
@@ -926,7 +926,7 @@ namespace code
 		return LBT_NoMatch;
 	}
 
-	EditorColumn CFormatter::computeVisualEditorColumn( const TCHAR* pCodeText, int index ) const
+	TEditorColumn CFormatter::computeVisualEditorColumn( const TCHAR* pCodeText, int index ) const
 	{
 		// search for the start of line that contains 'index' position
 		int pos = str::reverseFindStringPos( pCodeText, code::lineEnd, index ).m_end;
@@ -934,7 +934,7 @@ namespace code
 		if ( pos == -1 )
 			pos = 0; // 'index' belongs to the first line -> start at the beginning
 
-		EditorColumn visualEditorColumn = 1;
+		TEditorColumn visualEditorColumn = 1;
 
 		ASSERT( pos <= index );
 

@@ -18,7 +18,7 @@ protected:
 public:
 	fs::CPath GetDocFilePath( void ) const { return fs::CPath( GetPathName().GetString() ); }
 
-	static CWicImage* AcquireImage( const fs::ImagePathKey& imageKey );
+	static CWicImage* AcquireImage( const fs::TImagePathKey& imageKey );
 
 	template< typename ViewT >
 	void UpdateAllViewsOfType( ViewT* pSenderView, int hint = 0, CObject* pHintObject = NULL );

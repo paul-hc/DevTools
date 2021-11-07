@@ -76,7 +76,7 @@ namespace cap
 #include "utl/Subject.h"
 
 
-struct CCapitalizeOptions : public CSubject
+struct CCapitalizeOptions : public TSubject
 {
 	CCapitalizeOptions( void );
 

@@ -236,7 +236,7 @@ namespace num
 
 	std::tstring FormatFileSize( UINT64 byteFileSize, BytesUnit unit /*= AutoBytes*/, bool longUnitTag /*= false*/, const std::locale& loc /*= str::GetUserLocale()*/ )
 	{
-		std::pair< double, BytesUnit > sizeUnit = ConvertFileSize( byteFileSize, unit );
+		std::pair<double, BytesUnit> sizeUnit = ConvertFileSize( byteFileSize, unit );
 
 		return num::FormatNumber( sizeUnit.first, loc ) + _T(" ") + GetTags_BytesUnit().Format( sizeUnit.second, longUnitTag ? CEnumTags::UiTag : CEnumTags::KeyTag );
 	}
@@ -307,7 +307,7 @@ namespace num
 		return GetRounded( number, 0 );						// round to no fractional digits
 	}
 
-	std::pair< double, BytesUnit > ConvertFileSize( UINT64 fileSize, BytesUnit toUnit /*= AutoBytes*/ )
+	std::pair<double, BytesUnit> ConvertFileSize( UINT64 fileSize, BytesUnit toUnit /*= AutoBytes*/ )
 	{
 		UINT64 newFileSize = fileSize, remainderSize = 0;
 		static const size_t s_kiloSize = 1024;
@@ -327,7 +327,7 @@ namespace num
 		if ( unit != Bytes )
 			newSize = RoundOffFileSize( newSize );			// round off fractional part if not Bytes
 
-		return std::pair< double, BytesUnit >( newSize, unit );
+		return std::pair<double, BytesUnit>( newSize, unit );
 	}
 }
 

@@ -110,7 +110,7 @@ namespace pred
 		{
 			case fattr::ByFullPathAsc:
 			case fattr::ByFullPathDesc:
-				result = CompareFileAttrPath()( pLeft, pRight );
+				result = TCompareFileAttrPath()( pLeft, pRight );
 				break;
 			case fattr::ByFileNameAsc:
 			case fattr::ByFileNameDesc:
@@ -120,14 +120,14 @@ namespace pred
 			case fattr::BySizeDesc:
 			case fattr::FilterFileSameSize:
 			case fattr::FilterFileSameSizeAndDim:
-				result = CompareFileAttrSize()( pLeft, pRight );
+				result = TCompareFileAttrSize()( pLeft, pRight );
 				if ( Equal == result )
 					if ( fattr::FilterFileSameSizeAndDim == m_fileOrder && m_compareImageDim )
-						result = CompareImageDimensions()( pLeft, pRight );
+						result = TCompareImageDimensions()( pLeft, pRight );
 
 				// also ordonate by filepath (if secondary comparison not disabled)
 				if ( result == Equal && m_useSecondaryComparison )
-					result = CompareFileAttrPath()( pLeft, pRight );
+					result = TCompareFileAttrPath()( pLeft, pRight );
 				break;
 			case fattr::ByDateAsc:
 			case fattr::ByDateDesc:
@@ -135,7 +135,7 @@ namespace pred
 				break;
 			case fattr::ByDimensionAsc:
 			case fattr::ByDimensionDesc:
-				result = Compare_ImageDimensions()( pLeft, pRight );
+				result = TCompare_ImageDimensions()( pLeft, pRight );
 				break;
 			default:
 				ASSERT( false );

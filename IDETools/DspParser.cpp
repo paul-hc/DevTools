@@ -56,14 +56,14 @@ const TCHAR* DspParser::getTokenString( TokenSemantic tokenSemantic )
 
 bool DspParser::registerToken( const CString& token, TokenSemantic tokenSemantic /*= tok_Generic*/ )
 {
-	MapTokenToSemantic::const_iterator itToken = m_registeredTokens.find( token );
+	TMapTokenToSemantic::const_iterator itToken = m_registeredTokens.find( token );
 
 	ASSERT( !token.IsEmpty() );
 	if ( itToken != m_registeredTokens.end() )
 		return false;			// Token already registered
 	m_registeredTokens[ token ] = tokenSemantic;
 
-	int				tokenLen = token.GetLength();
+	int tokenLen = token.GetLength();
 
 	if ( tokenLen > 0 && tokenLen < m_minRegTokenLen )
 		m_minRegTokenLen = tokenLen;			// Set the minimum token length (for minimizing token hit tests)

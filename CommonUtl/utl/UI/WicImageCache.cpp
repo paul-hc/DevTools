@@ -35,13 +35,13 @@ CWicImageCache& CWicImageCache::Instance( void )
 	return s_imageCache;
 }
 
-CWicImage* CWicImageCache::LoadObject( const fs::ImagePathKey& imageKey )
+CWicImage* CWicImageCache::LoadObject( const fs::TImagePathKey& imageKey )
 {
 	// this method is already synchronized: could be called from both the main thread, or the cache loader thread (running in background)
 	return CWicImage::CreateFromFile( imageKey, GetHandlingMode() ).release();
 }
 
-void CWicImageCache::TraceObject( const fs::ImagePathKey& imageKey, CWicImage* pImage, fs::cache::TStatusFlags cacheFlags )
+void CWicImageCache::TraceObject( const fs::TImagePathKey& imageKey, CWicImage* pImage, fs::cache::TStatusFlags cacheFlags )
 {
 #ifdef _DEBUG
 	std::tstring flagsText = fs::cache::GetTags_StatusFlags().FormatUi( cacheFlags, _T(",") );
@@ -68,22 +68,22 @@ size_t CWicImageCache::GetCount( void ) const
 	return m_imageCache.GetCount();
 }
 
-std::pair< CWicImage*, fs::cache::TStatusFlags > CWicImageCache::Acquire( const fs::ImagePathKey& imageKey )
+std::pair<CWicImage*, fs::cache::TStatusFlags> CWicImageCache::Acquire( const fs::TImagePathKey& imageKey )
 {
 	return m_imageCache.Acquire( imageKey );
 }
 
-bool CWicImageCache::Discard( const fs::ImagePathKey& imageKey )
+bool CWicImageCache::Discard( const fs::TImagePathKey& imageKey )
 {
 	return m_imageCache.Remove( imageKey );
 }
 
 size_t CWicImageCache::DiscardFrames( const fs::CFlexPath& imagePath )
 {
-	std::vector< fs::ImagePathKey > discardedKeys;
+	std::vector< fs::TImagePathKey > discardedKeys;
 
-	const std::deque< fs::ImagePathKey >& pathKeys = m_imageCache.GetPathKeys();
-	for ( std::deque< fs::ImagePathKey >::const_iterator itPathKey = pathKeys.begin(); itPathKey != pathKeys.end(); ++itPathKey )
+	const std::deque< fs::TImagePathKey >& pathKeys = m_imageCache.GetPathKeys();
+	for ( std::deque< fs::TImagePathKey >::const_iterator itPathKey = pathKeys.begin(); itPathKey != pathKeys.end(); ++itPathKey )
 		if ( imagePath == itPathKey->first )
 			discardedKeys.push_back( *itPathKey );
 
@@ -91,17 +91,17 @@ size_t CWicImageCache::DiscardFrames( const fs::CFlexPath& imagePath )
 	return discardedKeys.size();
 }
 
-fs::cache::EnqueueResult CWicImageCache::Enqueue( const fs::ImagePathKey& imageKey )
+fs::cache::EnqueueResult CWicImageCache::Enqueue( const fs::TImagePathKey& imageKey )
 {
 	return m_imageCache.Enqueue( imageKey );
 }
 
-void CWicImageCache::Enqueue( const std::vector< fs::ImagePathKey >& imageKeys )
+void CWicImageCache::Enqueue( const std::vector< fs::TImagePathKey >& imageKeys )
 {
 	m_imageCache.Enqueue( imageKeys );
 }
 
-CComPtr<IWICBitmapSource> CWicImageCache::LookupBitmapSource( const fs::ImagePathKey& imageKey ) const
+CComPtr<IWICBitmapSource> CWicImageCache::LookupBitmapSource( const fs::TImagePathKey& imageKey ) const
 {
 	CComPtr<IWICBitmapSource> pBitmap;
 
@@ -117,17 +117,17 @@ CComPtr<IWICBitmapSource> CWicImageCache::LookupBitmapSource( const fs::ImagePat
 	return pBitmap;
 }
 
-CSize CWicImageCache::LookupImageDim( const fs::ImagePathKey& imageKey ) const
+CSize CWicImageCache::LookupImageDim( const fs::TImagePathKey& imageKey ) const
 {
 	return wic::GetBitmapSize( LookupBitmapSource( imageKey ) );					// get bitmap size efficiently, with no additional overhead
 }
 
 size_t CWicImageCache::DiscardWithPrefix( const TCHAR* pDirPrefix )
 {
-	std::vector< fs::ImagePathKey > discardedKeys;
+	std::vector< fs::TImagePathKey > discardedKeys;
 
-	const std::deque< fs::ImagePathKey >& pathKeys = m_imageCache.GetPathKeys();
-	for ( std::deque< fs::ImagePathKey >::const_iterator itPathKey = pathKeys.begin(); itPathKey != pathKeys.end(); ++itPathKey )
+	const std::deque< fs::TImagePathKey >& pathKeys = m_imageCache.GetPathKeys();
+	for ( std::deque< fs::TImagePathKey >::const_iterator itPathKey = pathKeys.begin(); itPathKey != pathKeys.end(); ++itPathKey )
 		if ( path::MatchPrefix( itPathKey->first.GetPtr(), pDirPrefix ) )
 			discardedKeys.push_back( *itPathKey );
 

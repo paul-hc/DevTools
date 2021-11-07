@@ -32,4 +32,4 @@
 
 enum ThreeState { False, True, Toggle = -1, };
 
-typedef int Ternary;
+typedef int TTernary;

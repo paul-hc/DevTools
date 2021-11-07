@@ -48,11 +48,8 @@ public:
 
 	enum Exception { EndOfFile, SyntaxError };
 
-	typedef
-		std::map< CString, CString > MapSectionToContent;
-
-	typedef
-		std::pair< const TCHAR*, const TCHAR* >	TokenDescr;
+	typedef std::map< CString, CString > TMapSectionToContent;
+	typedef std::pair<const TCHAR*, const TCHAR*> TokenDescr;
 public:
 	CompoundTextParser( const TCHAR* _textFilePath,
 						const std::map< CString, CString >& _fieldReplacements );
@@ -73,12 +70,12 @@ protected:
 	CString line;
 	int m_lineNo;
 	CString tokenCore;
-	MapSectionToContent mapSections;
+	TMapSectionToContent mapSections;
 public:
 	class Section
 	{
 	public:
-		Section( CompoundTextParser& _parser, MapSectionToContent::const_iterator itSection );
+		Section( CompoundTextParser& _parser, TMapSectionToContent::const_iterator itSection );
 		~Section();
 
 		CString extractContent( const TCHAR* insertorReplacer = NULL ) const;

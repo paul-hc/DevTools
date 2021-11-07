@@ -71,7 +71,7 @@ CComPtr<IShellItem> CShellThumbCache::FindShellItem( const fs::CFlexPath& filePa
 	return NULL;
 }
 
-CCachedThumbBitmap* CShellThumbCache::ExtractThumb( const ShellItemPair& imagePair )
+CCachedThumbBitmap* CShellThumbCache::ExtractThumb( const TShellItemPair& imagePair )
 {
 	if ( m_pThumbProducer != NULL && m_pThumbProducer->ProducesThumbFor( imagePair.first ) )
 		return m_pThumbProducer->ExtractThumb( imagePair.first );			// chain to external thumb producer
@@ -106,7 +106,7 @@ CCachedThumbBitmap* CShellThumbCache::ExtractThumb( const ShellItemPair& imagePa
 	return NULL;
 }
 
-CCachedThumbBitmap* CShellThumbCache::GenerateThumb( const ShellItemPair& imagePair )
+CCachedThumbBitmap* CShellThumbCache::GenerateThumb( const TShellItemPair& imagePair )
 {
 	if ( m_pThumbProducer != NULL && m_pThumbProducer->ProducesThumbFor( imagePair.first ) )
 		return m_pThumbProducer->GenerateThumb( imagePair.first );			// chain to external thumb producer
@@ -251,7 +251,7 @@ CCachedThumbBitmap* CThumbnailer::AcquireThumbnail( const fs::CFlexPath& srcImag
 			SetFlag( cacheStatus, CacheRemoveExpired );
 		}
 
-	ShellItemPair imagePair( srcImagePath, NULL );
+	TShellItemPair imagePair( srcImagePath, NULL );
 
 	if ( NULL == pThumb )
 	{

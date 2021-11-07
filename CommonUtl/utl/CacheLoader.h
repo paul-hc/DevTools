@@ -29,13 +29,13 @@ namespace fs
 	class CCacheLoader : public CFileObjectCache< PathType, ObjectType >
 	{
 	public:
-		typedef std::function< ObjectType*( const PathType& ) > LoadFunc;
-		typedef std::function< void( const std::pair< ObjectType*, cache::TStatusFlags >&, const PathType& ) > TraceFunc;
+		typedef std::function< ObjectType*( const PathType& ) > TLoadFunc;
+		typedef std::function< void( const std::pair<ObjectType*, cache::TStatusFlags>&, const PathType& ) > TTraceFunc;
 
 		CCacheLoader( size_t maxSize, ICacheOwner< PathType, ObjectType >* pCacheOwner );
 		~CCacheLoader();
 
-		std::pair< ObjectType*, cache::TStatusFlags > Acquire( const PathType& pathKey );		// object, cacheStatusFlags
+		std::pair<ObjectType*, cache::TStatusFlags> Acquire( const PathType& pathKey );		// object, cacheStatusFlags
 
 		cache::EnqueueResult Enqueue( const PathType& pathKey );
 		void Enqueue( const std::vector< PathType >& pathKeys );
@@ -58,9 +58,9 @@ namespace fs
 	class CQueueListener : private utl::noncopyable
 	{
 	public:
-		typedef std::function< void( const PathType& ) > AcquireFunc;
+		typedef std::function< void( const PathType& ) > TAcquireFunc;
 
-		CQueueListener( AcquireFunc acquireFunc );
+		CQueueListener( TAcquireFunc acquireFunc );
 		~CQueueListener();
 
 		void Enqueue( const PathType& pathKey );
@@ -71,7 +71,7 @@ namespace fs
 		bool WaitPred( void ) const { return m_wantExit || !m_queue.empty(); }
 		bool WaitProcessPred( void ) const { return m_wantExit || m_queue.empty(); }
 	private:
-		AcquireFunc m_acquireFunc;
+		TAcquireFunc m_acquireFunc;
 		bool m_wantExit;
 		boost::thread m_thread;
 		boost::mutex m_mutex;

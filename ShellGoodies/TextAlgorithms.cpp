@@ -43,9 +43,9 @@ const std::tstring& delim::GetAllDelimitersSet( void )
 
 namespace text_tool
 {
-	const std::vector< std::pair< std::tstring, std::tstring > >& GetStdUnicodeToAnsiPairs( void )
+	const std::vector< std::pair<std::tstring, std::tstring> >& GetStdUnicodeToAnsiPairs( void )
 	{
-		static std::vector< std::pair< std::tstring, std::tstring > > s_stdPairs;
+		static std::vector< std::pair<std::tstring, std::tstring> > s_stdPairs;
 
 		if ( s_stdPairs.empty() )
 		{
@@ -63,10 +63,10 @@ namespace text_tool
 		return  s_stdPairs;
 	}
 
-	std::pair< std::tstring, std::tstring > MakeStdDelimsPair( const std::tstring& delimSet )
+	std::pair<std::tstring, std::tstring> MakeStdDelimsPair( const std::tstring& delimSet )
 	{
 		ASSERT( delimSet.length() >= 2 );
-		return std::pair< std::tstring, std::tstring >( &delimSet[ 1 ], delimSet.substr( 0, 1 ) );
+		return std::pair<std::tstring, std::tstring>( &delimSet[ 1 ], delimSet.substr( 0, 1 ) );
 	}
 }
 
@@ -117,7 +117,7 @@ namespace func
 
 	void ReplaceMultiDelimiterSets::operator()( std::tstring& rDestText ) const
 	{
-		for ( std::vector< std::pair< std::tstring, std::tstring > >::const_iterator itPair = m_pDelimsToNewPairs->begin(); itPair != m_pDelimsToNewPairs->end(); ++itPair )
+		for ( std::vector< std::pair<std::tstring, std::tstring> >::const_iterator itPair = m_pDelimsToNewPairs->begin(); itPair != m_pDelimsToNewPairs->end(); ++itPair )
 			str::ReplaceDelimiters( rDestText, itPair->first.c_str(), itPair->second.c_str() );
 
 		TrimFname( rDestText );

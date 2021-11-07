@@ -76,8 +76,8 @@ CTouchFilesDialog::CTouchFilesDialog( CFileModel* pFileModel, CWnd* pParent )
 	m_fileListCtrl.SetPopupMenu( CReportListControl::OnSelection, NULL );				// let us track a custom menu
 	CGeneralOptions::Instance().ApplyToListCtrl( &m_fileListCtrl );
 
-	m_fileListCtrl.AddRecordCompare( pred::NewComparator( pred::CompareCode() ) );		// default row item comparator
-	m_fileListCtrl.AddColumnCompare( PathName, pred::NewComparator( pred::CompareDisplayCode() ) );
+	m_fileListCtrl.AddRecordCompare( pred::NewComparator( pred::TCompareCode() ) );		// default row item comparator
+	m_fileListCtrl.AddColumnCompare( PathName, pred::NewComparator( pred::TCompareDisplayCode() ) );
 	m_fileListCtrl.AddColumnCompare( DestModifyTime, pred::NewPropertyComparator<CTouchItem>( func::AsDestModifyTime() ), false );		// order date-time descending by default
 	m_fileListCtrl.AddColumnCompare( DestCreationTime, pred::NewPropertyComparator<CTouchItem>( func::AsDestCreationTime() ), false );
 	m_fileListCtrl.AddColumnCompare( DestAccessTime, pred::NewPropertyComparator<CTouchItem>( func::AsDestAccessTime() ), false );
@@ -219,10 +219,10 @@ void CTouchFilesDialog::SetupFileListView( void )
 		m_fileListCtrl.SetSubItemText( pos, SrcAccessTime, time_utl::FormatTimestamp( pTouchItem->GetSrcState().m_accessTime ) );
 	}
 
-	m_fileListCtrl.SetupDiffColumnPair( SrcAttributes, DestAttributes, str::GetMatch() );
-	m_fileListCtrl.SetupDiffColumnPair( SrcModifyTime, DestModifyTime, str::GetMatch() );
-	m_fileListCtrl.SetupDiffColumnPair( SrcCreationTime, DestCreationTime, str::GetMatch() );
-	m_fileListCtrl.SetupDiffColumnPair( SrcAccessTime, DestAccessTime, str::GetMatch() );
+	m_fileListCtrl.SetupDiffColumnPair( SrcAttributes, DestAttributes, str::TGetMatch() );
+	m_fileListCtrl.SetupDiffColumnPair( SrcModifyTime, DestModifyTime, str::TGetMatch() );
+	m_fileListCtrl.SetupDiffColumnPair( SrcCreationTime, DestCreationTime, str::TGetMatch() );
+	m_fileListCtrl.SetupDiffColumnPair( SrcAccessTime, DestAccessTime, str::TGetMatch() );
 
 	m_fileListCtrl.InitialSortList();		// store original order and sort by current criteria
 }

@@ -21,7 +21,7 @@ public:
 	UINT GetSelCmdId( void ) const { return m_selCmdId; }
 private:
 	bool HighlightMenuItem( HMENU hHoverPopup );
-	std::pair< HMENU, UINT > FindMenuItemFromPoint( const CPoint& screenPos ) const;
+	std::pair<HMENU, UINT> FindMenuItemFromPoint( const CPoint& screenPos ) const;
 private:
 	CCmdTarget* m_pCmdTarget;
 	bool m_rightClickRepeat;

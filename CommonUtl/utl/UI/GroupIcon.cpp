@@ -21,7 +21,7 @@ namespace pred
 
 // CGroupIcon implementation
 
-const std::pair< BitsPerPixel, IconStdSize > CGroupIcon::m_nullBppStdSize( 0, DefaultSize );
+const std::pair<TBitsPerPixel, IconStdSize> CGroupIcon::m_nullBppStdSize( 0, DefaultSize );
 
 CGroupIcon::CGroupIcon( UINT iconId )
 	: m_resGroupIcon( MAKEINTRESOURCE( iconId ), RT_GROUP_ICON )
@@ -29,7 +29,7 @@ CGroupIcon::CGroupIcon( UINT iconId )
 {
 }
 
-const res::CGroupIconEntry* CGroupIcon::FindMatch( BitsPerPixel bitsPerPixel, IconStdSize iconStdSize ) const
+const res::CGroupIconEntry* CGroupIcon::FindMatch( TBitsPerPixel bitsPerPixel, IconStdSize iconStdSize ) const
 {
 	if ( IsValid() )
 	{
@@ -44,7 +44,7 @@ const res::CGroupIconEntry* CGroupIcon::FindMatch( BitsPerPixel bitsPerPixel, Ic
 	return NULL;
 }
 
-bool CGroupIcon::ContainsSize( IconStdSize iconStdSize, BitsPerPixel* pBitsPerPixel /*= NULL*/ ) const
+bool CGroupIcon::ContainsSize( IconStdSize iconStdSize, TBitsPerPixel* pBitsPerPixel /*= NULL*/ ) const
 {
 	if ( const res::CGroupIconEntry* pFound = FindMatch( AnyBpp, iconStdSize ) )
 	{
@@ -55,7 +55,7 @@ bool CGroupIcon::ContainsSize( IconStdSize iconStdSize, BitsPerPixel* pBitsPerPi
 	return false;
 }
 
-bool CGroupIcon::ContainsBpp( BitsPerPixel bitsPerPixel, IconStdSize* pIconStdSize /*= NULL*/ ) const
+bool CGroupIcon::ContainsBpp( TBitsPerPixel bitsPerPixel, IconStdSize* pIconStdSize /*= NULL*/ ) const
 {
 	if ( const res::CGroupIconEntry* pFound = FindMatch( bitsPerPixel, static_cast< IconStdSize >( DefaultSize ) ) )
 	{
@@ -66,21 +66,21 @@ bool CGroupIcon::ContainsBpp( BitsPerPixel bitsPerPixel, IconStdSize* pIconStdSi
 	return false;
 }
 
-std::pair< BitsPerPixel, IconStdSize > CGroupIcon::FindSmallest( void ) const
+std::pair<TBitsPerPixel, IconStdSize> CGroupIcon::FindSmallest( void ) const
 {
 	if ( IsValid() )		// strictly minimum size
 		return ToBppSize( std::min_element( m_pGroupIconDir->Begin(), m_pGroupIconDir->End(), pred::LessValue< pred::CompareIcon_Size >() ) );
 	return m_nullBppStdSize;
 }
 
-std::pair< BitsPerPixel, IconStdSize > CGroupIcon::FindLargest( void ) const
+std::pair<TBitsPerPixel, IconStdSize> CGroupIcon::FindLargest( void ) const
 {
 	if ( IsValid() )		// max colour maximum size (I think max colour takes precedence by icon scaler)
 		return ToBppSize( std::max_element( m_pGroupIconDir->Begin(), m_pGroupIconDir->End(), pred::LessValue< pred::CompareIcon_BppSize >() ) );
 	return m_nullBppStdSize;
 }
 
-void CGroupIcon::QueryAvailableSizes( std::vector< std::pair< BitsPerPixel, IconStdSize > >& rIconPairs ) const
+void CGroupIcon::QueryAvailableSizes( std::vector< std::pair<TBitsPerPixel, IconStdSize> >& rIconPairs ) const
 {
 	rIconPairs.clear();
 
@@ -93,7 +93,7 @@ void CGroupIcon::QueryAvailableSizes( std::vector< std::pair< BitsPerPixel, Icon
 	}
 }
 
-void CGroupIcon::QueryAvailableSizes( std::vector< std::pair< BitsPerPixel, CSize > >& rIconPairs ) const
+void CGroupIcon::QueryAvailableSizes( std::vector< std::pair<TBitsPerPixel, CSize> >& rIconPairs ) const
 {
 	rIconPairs.clear();
 

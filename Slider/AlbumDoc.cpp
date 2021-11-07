@@ -232,7 +232,7 @@ CImageState* CAlbumDoc::GetImageState( void ) const
 	return m_pImageState.get();
 }
 
-const fs::ImagePathKey& CAlbumDoc::GetImageFilePathAt( int index ) const
+const fs::TImagePathKey& CAlbumDoc::GetImageFilePathAt( int index ) const
 {
 	if ( IsValidIndex( index ) )
 		return m_model.GetFileAttr( index )->GetPathKey();
