@@ -4,6 +4,7 @@
 #include "resource.h"
 #include "utl/Path.h"
 #include "utl/UI/LayoutEngine.h"
+#include "utl/UI/DialogToolBar.h"
 #include "utl/UI/ShellUtilities.h"
 #include "utl/UI/Utilities.h"
 #include "utl/UI/resource.h"
@@ -12,6 +13,8 @@
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
+
+#include "utl/UI/TandemControls.hxx"
 
 
 namespace reg
@@ -40,7 +43,7 @@ namespace layout
 CSearchPatternDialog::CSearchPatternDialog( const CSearchPattern* pSrcPattern, CWnd* pParent /*=NULL*/ )
 	: CLayoutDialog( IDD_SEARCH_PATTERN_DIALOG, pParent )
 	, m_pSearchPattern( pSrcPattern != NULL ? new CSearchPattern( *pSrcPattern ) : new CSearchPattern() )
-	, m_searchPathCombo( ui::HistoryMaxSize, PROF_SEP )
+	, m_searchPathCombo( ui::MixedPath )
 	, m_wildFiltersCombo( ui::HistoryMaxSize, PROF_SEP )
 	, m_searchModeCombo( &CSearchPattern::GetTags_SearchMode() )
 {
@@ -51,9 +54,7 @@ CSearchPatternDialog::CSearchPatternDialog( const CSearchPattern* pSrcPattern, C
 
 	ClearFlag( m_wildFiltersCombo.RefItemContent().m_itemsFlags, ui::CItemContent::RemoveEmpty );
 
-	m_browseToolbar.GetStrip()
-		.AddButton( ID_BROWSE_FOLDER )
-		.AddButton( ID_BROWSE_FILE );
+	m_searchPathCombo.SetItemSep( PROF_SEP );
 }
 
 CSearchPatternDialog::~CSearchPatternDialog()
@@ -64,9 +65,7 @@ void CSearchPatternDialog::DoDataExchange( CDataExchange* pDX )
 {
 	bool firstInit = NULL == m_searchPathCombo.m_hWnd;
 
-	DDX_Control( pDX, IDC_SEARCH_PATH_COMBO, m_searchPathCombo );
-	m_browseToolbar.DDX_Placeholder( pDX, IDC_STRIP_BAR_1, H_AlignRight | V_AlignCenter );
-
+	m_searchPathCombo.DDX_Tandem( pDX, IDC_SEARCH_PATH_COMBO, this );
 	DDX_Control( pDX, IDC_SEARCH_FILTERS_COMBO, m_wildFiltersCombo );
 	m_searchModeCombo.DDX_EnumValue( pDX, IDC_SEARCH_MODE_COMBO, m_pSearchPattern->RefSearchMode() );
 

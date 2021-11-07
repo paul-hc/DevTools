@@ -28,6 +28,20 @@ CBaseHostToolbarCtrl< BaseCtrl >::~CBaseHostToolbarCtrl()
 }
 
 template< typename BaseCtrl >
+void CBaseHostToolbarCtrl<BaseCtrl>::DDX_Tandem( CDataExchange* pDX, int ctrlId, CWnd* pWndTarget /*= NULL*/ )
+{
+	if ( NULL == m_hWnd )
+	{
+		ASSERT( DialogOutput == pDX->m_bSaveAndValidate );
+
+		::DDX_Control( pDX, ctrlId, *this );
+
+		if ( pWndTarget != NULL )
+			GetMateToolbar()->SetOwner( pWndTarget );		// host control handles WM_COMMAND for editing, and redirects WM_NOTIFY to parent dialog (for tooltips)
+	}
+}
+
+template< typename BaseCtrl >
 inline void CBaseHostToolbarCtrl<BaseCtrl>::ResetMateToolbar( void )
 {
 	m_pMateToolbar.reset();
@@ -141,20 +155,6 @@ CHostToolbarCtrl<BaseCtrl>::CHostToolbarCtrl( ui::TTandemAlign tandemAlign /*= u
 	: CBaseHostToolbarCtrl<BaseCtrl>()
 {
 	RefTandemLayout().SetTandemAlign( tandemAlign );
-}
-
-template< typename BaseCtrl >
-void CHostToolbarCtrl<BaseCtrl>::DDX_Tandem( CDataExchange* pDX, int ctrlId, CWnd* pWndTarget /*= NULL*/ )
-{
-	if ( NULL == m_hWnd )
-	{
-		ASSERT( DialogOutput == pDX->m_bSaveAndValidate );
-
-		::DDX_Control( pDX, ctrlId, *this );
-
-		if ( pWndTarget != NULL )
-			GetMateToolbar()->SetOwner( pWndTarget );		// host control handles WM_COMMAND for editing, and redirects WM_NOTIFY to parent dialog (for tooltips)
-	}
 }
 
 template< typename BaseCtrl >

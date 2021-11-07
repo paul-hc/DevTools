@@ -21,6 +21,8 @@ protected:
 public:
 	virtual ~CBaseHostToolbarCtrl();
 
+	void DDX_Tandem( CDataExchange* pDX, int ctrlId, CWnd* pWndTarget = NULL );
+
 	enum Metrics { Spacing = 2 };
 
 	const ui::CTandemLayout& GetTandemLayout( void ) const { return m_tandemLayout; }
@@ -63,8 +65,6 @@ class CHostToolbarCtrl : public CBaseHostToolbarCtrl<BaseCtrl>
 {
 public:
 	CHostToolbarCtrl( ui::TTandemAlign tandemAlign = ui::EditShinkHost_MateOnRight );
-
-	void DDX_Tandem( CDataExchange* pDX, int ctrlId, CWnd* pWndTarget = NULL );
 protected:
 	// interface IBuddyCommandHandler (may be overridden) - default implementation redirects handling to this host control
 	virtual bool OnBuddyCommand( UINT cmdId );

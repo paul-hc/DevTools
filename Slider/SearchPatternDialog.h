@@ -6,7 +6,7 @@
 #include "SearchPattern.h"
 #include "utl/UI/LayoutDialog.h"
 #include "utl/UI/HistoryComboBox.h"
-#include "utl/UI/DialogToolBar.h"
+#include "utl/UI/ItemContentHistoryCombo.h"
 #include "utl/UI/EnumComboBox.h"
 #include "utl/UI/ui_fwd.h"
 
@@ -23,8 +23,7 @@ public:
 private:
 	// enum { IDD = IDD_SEARCH_PATTERN_DIALOG };
 
-	CHistoryComboBox m_searchPathCombo;
-	CDialogToolBar m_browseToolbar;
+	CItemContentHistoryCombo m_searchPathCombo;
 	CHistoryComboBox m_wildFiltersCombo;
 	CEnumComboBox m_searchModeCombo;
 
