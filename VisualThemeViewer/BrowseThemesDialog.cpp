@@ -118,7 +118,7 @@ void CBrowseThemesDialog::SetupTree( void )
 					}
 			}
 
-		ui::SortCompareTreeChildren( pred::CompareRelevance(), m_themesTree, TVI_ROOT, Deep );
+		ui::SortCompareTreeChildren( pred::TCompareRelevance(), m_themesTree, TVI_ROOT, Deep );
 	}
 
 	if ( NULL == m_pSelNode || !m_themesTree.SetSelected( m_pSelNode ) )

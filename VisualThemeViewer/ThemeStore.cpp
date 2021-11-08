@@ -95,7 +95,7 @@ bool CThemePart::SetupNotImplemented( CVisualTheme& rTheme, HDC hDC )
 const CThemeState* CThemePart::GetPreviewState( void ) const
 {
 	if ( NULL == m_pPreviewState && !m_states.empty() )
-		m_pPreviewState = *std::min_element( m_states.begin(), m_states.end(), pred::LessValue< pred::CompareRelevance >() );
+		m_pPreviewState = *std::min_element( m_states.begin(), m_states.end(), pred::LessValue< pred::TCompareRelevance >() );
 
 	return m_pPreviewState;
 }
@@ -167,7 +167,7 @@ bool CThemeClass::SetupNotImplemented( CVisualTheme& rTheme, HDC hDC )
 const CThemePart* CThemeClass::GetPreviewPart( void ) const
 {
 	if ( NULL == m_pPreviewPart && !m_parts.empty() )
-		m_pPreviewPart = *std::min_element( m_parts.begin(), m_parts.end(), pred::LessValue< pred::CompareRelevance >() );
+		m_pPreviewPart = *std::min_element( m_parts.begin(), m_parts.end(), pred::LessValue< pred::TCompareRelevance >() );
 
 	return m_pPreviewPart;
 }

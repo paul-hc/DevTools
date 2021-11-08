@@ -81,8 +81,8 @@ CMainDialog::CMainDialog( COptions* pOptions, const CThemeStore* pThemeStore )
 
 	m_classList.SetSection( _T("MainDialog\\ClassList") );
 	m_classList.SetTextEffectCallback( this );
-	m_classList.AddRecordCompare( pred::NewComparator( pred::CompareCode() ) );							// default row item comparator
-	m_classList.AddColumnCompare( RelevanceTag, pred::NewComparator( pred::CompareRelevance() ) );		// order date-time descending by default
+	m_classList.AddRecordCompare( pred::NewComparator( pred::TCompareCode() ) );						// default row item comparator
+	m_classList.AddColumnCompare( RelevanceTag, pred::NewComparator( pred::TCompareRelevance() ) );		// order date-time descending by default
 
 	m_partStateTree.SetTextEffectCallback( this );
 	m_partStateTree.SetTrackMenuTarget( this );
@@ -226,7 +226,7 @@ void CMainDialog::SetupPartsAndStatesTree( void )
 				}
 			}
 
-		ui::SortCompareTreeChildren( pred::CompareRelevance(), m_partStateTree, TVI_ROOT, Deep );
+		ui::SortCompareTreeChildren( pred::TCompareRelevance(), m_partStateTree, TVI_ROOT, Deep );
 	}
 
 	if ( NULL == m_pSelNode || !m_partStateTree.SetSelected( m_pSelNode ) )

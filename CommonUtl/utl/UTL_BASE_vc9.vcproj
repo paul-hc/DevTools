@@ -656,18 +656,6 @@
 					>
 				</File>
 				<File
-					RelativePath=".\FileStateEnumerator.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\FileStateEnumerator.h"
-					>
-				</File>
-				<File
-					RelativePath=".\FileStateEnumerator.hxx"
-					>
-				</File>
-				<File
 					RelativePath=".\FileSystem.cpp"
 					>
 				</File>
@@ -781,14 +769,6 @@
 				</File>
 				<File
 					RelativePath=".\CommandService.h"
-					>
-				</File>
-				<File
-					RelativePath=".\FileStateItem.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\FileStateItem.h"
 					>
 				</File>
 				<File
@@ -957,6 +937,26 @@
 				</File>
 				<File
 					RelativePath=".\DuplicateFilesEnumerator.h"
+					>
+				</File>
+				<File
+					RelativePath=".\FileStateEnumerator.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\FileStateEnumerator.h"
+					>
+				</File>
+				<File
+					RelativePath=".\FileStateEnumerator.hxx"
+					>
+				</File>
+				<File
+					RelativePath=".\FileStateItem.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\FileStateItem.h"
 					>
 				</File>
 				<File

@@ -118,7 +118,7 @@ namespace io
 				throw CRuntimeException( str::Format( _T("Error seeking read position to byte offset %d in text file %s"), byteOffset, m_filePath.GetPtr() ) );
 
 			ENSURE( (size_t)byteOffset == charOffset * sizeof(CharT) );
-			return byteOffset / sizeof(CharT);		// convert back to character offset
+			return static_cast<TCharSize>( byteOffset ) / sizeof(CharT);		// convert back to character offset
 		}
 
 		CharT PeekLast( void ) const { return m_lastCh; }

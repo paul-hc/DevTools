@@ -187,10 +187,10 @@
     <ClInclude Include="BalloonMessageTip.h" />
     <ClInclude Include="BaseApp.h" />
     <ClInclude Include="BaseApp.hxx" />
-    <ClInclude Include="BaseDetailHostCtrl.h" />
-    <ClInclude Include="BaseDetailHostCtrl.hxx" />
     <ClInclude Include="BaseFrameHostCtrl.h" />
     <ClInclude Include="BaseFrameHostCtrl.hxx" />
+    <ClInclude Include="BaseItemTooltipsCtrl.h" />
+    <ClInclude Include="BaseItemTooltipsCtrl.hxx" />
     <ClInclude Include="BaseMainDialog.h" />
     <ClInclude Include="BaseSplitButton.h" />
     <ClInclude Include="BaseStockContentCtrl.h" />
@@ -206,12 +206,16 @@
     <ClInclude Include="Color.h" />
     <ClInclude Include="CommonWinDefs.h" />
     <ClInclude Include="ContentFitBase.h" />
+    <ClInclude Include="Control_fwd.h" />
     <ClInclude Include="CtrlInterfaces.h" />
     <ClInclude Include="CtrlUiState.h" />
     <ClInclude Include="CustomDrawImager.h" />
     <ClInclude Include="CustomDrawImager_fwd.h" />
     <ClInclude Include="DateTimeControl.h" />
     <ClInclude Include="DesktopDC.h" />
+    <ClInclude Include="DetailIconButton.h" />
+    <ClInclude Include="DetailMateCtrl.h" />
+    <ClInclude Include="DetailMateCtrl.hxx" />
     <ClInclude Include="DialogToolBar.h" />
     <ClInclude Include="Dialog_fwd.h" />
     <ClInclude Include="DibDraw.h" />
@@ -246,7 +250,6 @@
     <ClInclude Include="ImagingWic.h" />
     <ClInclude Include="ImagingWic_fwd.h" />
     <ClInclude Include="InternalChange.h" />
-    <ClInclude Include="IProgressService.h" />
     <ClInclude Include="ItemContent.h" />
     <ClInclude Include="ItemContentEdit.h" />
     <ClInclude Include="ItemContentHistoryCombo.h" />
@@ -282,6 +285,7 @@
     <ClInclude Include="PostCall.h" />
     <ClInclude Include="ProcessUtils.h" />
     <ClInclude Include="ProgressDialog.h" />
+    <ClInclude Include="ProgressService.h" />
     <ClInclude Include="Recycler.h" />
     <ClInclude Include="RegistryOptions.h" />
     <ClInclude Include="RegistrySection.h" />
@@ -313,6 +317,8 @@
     <ClInclude Include="StockValuesComboBox.h" />
     <ClInclude Include="StockValuesComboBox.hxx" />
     <ClInclude Include="SyncScrolling.h" />
+    <ClInclude Include="TandemControls.h" />
+    <ClInclude Include="TandemControls.hxx" />
     <ClInclude Include="TaskDialog.h" />
     <ClInclude Include="test\BaseImageTestCase.h" />
     <ClInclude Include="test\ColorTests.h" />
@@ -349,6 +355,7 @@
     <ClInclude Include="WicDibSection.h" />
     <ClInclude Include="WicImage.h" />
     <ClInclude Include="WicImageCache.h" />
+    <ClInclude Include="WindowDebug.h" />
     <ClInclude Include="WindowHook.h" />
     <ClInclude Include="WindowPlacement.h" />
     <ClInclude Include="WindowTimer.h" />
@@ -360,7 +367,6 @@
     <ClCompile Include="AnimatedFrameComposer.cpp" />
     <ClCompile Include="BalloonMessageTip.cpp" />
     <ClCompile Include="BaseApp.cpp" />
-    <ClCompile Include="BaseDetailHostCtrl.cpp" />
     <ClCompile Include="BaseMainDialog.cpp" />
     <ClCompile Include="BaseSplitButton.cpp" />
     <ClCompile Include="BaseZoomView.cpp" />
@@ -373,10 +379,12 @@
     <ClCompile Include="CmdUpdate.cpp" />
     <ClCompile Include="Color.cpp" />
     <ClCompile Include="ContentFitBase.cpp" />
+    <ClCompile Include="Control_fwd.cpp" />
     <ClCompile Include="CtrlUiState.cpp" />
     <ClCompile Include="CustomDrawImager.cpp" />
     <ClCompile Include="DateTimeControl.cpp" />
     <ClCompile Include="DesktopDC.cpp" />
+    <ClCompile Include="DetailIconButton.cpp" />
     <ClCompile Include="DialogToolBar.cpp" />
     <ClCompile Include="DibDraw.cpp" />
     <ClCompile Include="DibPixels.cpp" />
@@ -402,7 +410,6 @@
     <ClCompile Include="ImagingDirect2D.cpp" />
     <ClCompile Include="ImagingGdiPlus.cpp" />
     <ClCompile Include="ImagingWic.cpp" />
-    <ClCompile Include="IProgressService.cpp" />
     <ClCompile Include="ItemContent.cpp" />
     <ClCompile Include="ItemContentEdit.cpp" />
     <ClCompile Include="ItemContentHistoryCombo.cpp" />
@@ -436,6 +443,7 @@
     <ClCompile Include="PostCall.cpp" />
     <ClCompile Include="ProcessUtils.cpp" />
     <ClCompile Include="ProgressDialog.cpp" />
+    <ClCompile Include="ProgressService.cpp" />
     <ClCompile Include="Recycler.cpp" />
     <ClCompile Include="RegistryOptions.cpp" />
     <ClCompile Include="RegistrySection.cpp" />
@@ -495,6 +503,7 @@
     <ClCompile Include="WicDibSection.cpp" />
     <ClCompile Include="WicImage.cpp" />
     <ClCompile Include="WicImageCache.cpp" />
+    <ClCompile Include="WindowDebug.cpp" />
     <ClCompile Include="WindowHook.cpp" />
     <ClCompile Include="WindowPlacement.cpp" />
     <ClCompile Include="WindowTimer.cpp" />

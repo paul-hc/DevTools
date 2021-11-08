@@ -170,7 +170,7 @@ namespace func
 
 namespace pred
 {
-	typedef CompareScalarAdapterPtr< func::AsRelevance > CompareRelevance;
+	typedef CompareScalarAdapterPtr< func::AsRelevance > TCompareRelevance;
 }
 
 

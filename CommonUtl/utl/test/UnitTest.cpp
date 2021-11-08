@@ -94,7 +94,7 @@ namespace ut
 			inputRowBuff.assign( rowByteCount, '\0' );
 
 			is.read( &inputRowBuff[ 0 ], rowByteCount );
-			inputRowBuff.resize( is.gcount() );		// cut to the actual read chars
+			inputRowBuff.resize( static_cast<size_t>( is.gcount() ) );		// cut to the actual read chars
 
 			if ( !inputRowBuff.empty() )
 			{

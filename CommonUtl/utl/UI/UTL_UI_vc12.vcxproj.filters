@@ -39,6 +39,9 @@
     <Filter Include="UI\DirectX">
       <UniqueIdentifier>{b7082f0f-04aa-4b58-97ad-ebbc0ba543c4}</UniqueIdentifier>
     </Filter>
+    <Filter Include="UI\Service">
+      <UniqueIdentifier>{7e1dff07-69d3-4113-83b9-366e21fc2248}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AboutBox.h">
@@ -274,12 +277,6 @@
     </ClInclude>
     <ClInclude Include="PostCall.h">
       <Filter>UI</Filter>
-    </ClInclude>
-    <ClInclude Include="BaseDetailHostCtrl.h">
-      <Filter>UI\Controls</Filter>
-    </ClInclude>
-    <ClInclude Include="BaseDetailHostCtrl.hxx">
-      <Filter>UI\Controls</Filter>
     </ClInclude>
     <ClInclude Include="BaseSplitButton.h">
       <Filter>UI\Controls</Filter>
@@ -521,9 +518,6 @@
     <ClInclude Include="ImageInfoGadget.h">
       <Filter>UI\DirectX</Filter>
     </ClInclude>
-    <ClInclude Include="IProgressService.h">
-      <Filter>UI</Filter>
-    </ClInclude>
     <ClInclude Include="PasswordDialog.h">
       <Filter>UI</Filter>
     </ClInclude>
@@ -556,6 +550,36 @@
     </ClInclude>
     <ClInclude Include="RenderingDirect2D.h">
       <Filter>UI\DirectX</Filter>
+    </ClInclude>
+    <ClInclude Include="BaseItemTooltipsCtrl.h">
+      <Filter>UI\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="BaseItemTooltipsCtrl.hxx">
+      <Filter>UI\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="Control_fwd.h">
+      <Filter>UI\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="DetailIconButton.h">
+      <Filter>UI\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="DetailMateCtrl.h">
+      <Filter>UI\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="DetailMateCtrl.hxx">
+      <Filter>UI\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="ProgressService.h">
+      <Filter>UI\Service</Filter>
+    </ClInclude>
+    <ClInclude Include="TandemControls.h">
+      <Filter>UI\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="TandemControls.hxx">
+      <Filter>UI\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="WindowDebug.h">
+      <Filter>UI</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -747,9 +771,6 @@
     </ClCompile>
     <ClCompile Include="PostCall.cpp">
       <Filter>UI</Filter>
-    </ClCompile>
-    <ClCompile Include="BaseDetailHostCtrl.cpp">
-      <Filter>UI\Controls</Filter>
     </ClCompile>
     <ClCompile Include="BaseSplitButton.cpp">
       <Filter>UI\Controls</Filter>
@@ -952,9 +973,6 @@
     <ClCompile Include="ImageInfoGadget.cpp">
       <Filter>UI\DirectX</Filter>
     </ClCompile>
-    <ClCompile Include="IProgressService.cpp">
-      <Filter>UI</Filter>
-    </ClCompile>
     <ClCompile Include="PasswordDialog.cpp">
       <Filter>UI</Filter>
     </ClCompile>
@@ -975,6 +993,18 @@
     </ClCompile>
     <ClCompile Include="RenderingDirect2D.cpp">
       <Filter>UI\DirectX</Filter>
+    </ClCompile>
+    <ClCompile Include="Control_fwd.cpp">
+      <Filter>UI\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="DetailIconButton.cpp">
+      <Filter>UI\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="ProgressService.cpp">
+      <Filter>UI\Service</Filter>
+    </ClCompile>
+    <ClCompile Include="WindowDebug.cpp">
+      <Filter>UI</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

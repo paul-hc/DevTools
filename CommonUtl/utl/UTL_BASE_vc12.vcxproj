@@ -191,8 +191,12 @@
     <ClInclude Include="ComparePredicates.h" />
     <ClInclude Include="Compare_fwd.h" />
     <ClInclude Include="ConsoleApplication.h" />
+    <ClInclude Include="Console_fwd.h" />
     <ClInclude Include="ContainerUtilities.h" />
     <ClInclude Include="CRC32.h" />
+    <ClInclude Include="DuplicateFileItem.h" />
+    <ClInclude Include="DuplicateFilesEnumerator.h" />
+    <ClInclude Include="EncodedFileBuffer.h" />
     <ClInclude Include="Encoding.h" />
     <ClInclude Include="Endianness.h" />
     <ClInclude Include="EnumTags.h" />
@@ -202,15 +206,23 @@
     <ClInclude Include="FileObjectCache.h" />
     <ClInclude Include="FileObjectCache.hxx" />
     <ClInclude Include="FileState.h" />
+    <ClInclude Include="FileStateEnumerator.h" />
+    <ClInclude Include="FileStateEnumerator.hxx" />
+    <ClInclude Include="FileStateItem.h" />
     <ClInclude Include="FileSystem.h" />
     <ClInclude Include="FileSystem_fwd.h" />
+    <ClInclude Include="FlagSet.h" />
     <ClInclude Include="FlagTags.h" />
     <ClInclude Include="FlexPath.h" />
     <ClInclude Include="FmtUtils.h" />
     <ClInclude Include="Guards.h" />
     <ClInclude Include="ICommand.h" />
+    <ClInclude Include="ICounter.h" />
     <ClInclude Include="IniFile.h" />
     <ClInclude Include="IniFileRegistrySection.h" />
+    <ClInclude Include="IoBin.h" />
+    <ClInclude Include="Io_fwd.h" />
+    <ClInclude Include="IProgressService.h" />
     <ClInclude Include="IRegistrySection.h" />
     <ClInclude Include="ISubject.h" />
     <ClInclude Include="IUnknownImpl.h" />
@@ -230,6 +242,7 @@
     <ClInclude Include="PathMaker.h" />
     <ClInclude Include="PathMap.h" />
     <ClInclude Include="PathUniqueMaker.h" />
+    <ClInclude Include="Path_fwd.h" />
     <ClInclude Include="ProcessCmd.h" />
     <ClInclude Include="PropertyLineReader.h" />
     <ClInclude Include="RandomUtilities.h" />
@@ -246,6 +259,7 @@
     <ClInclude Include="SerializeStdTypes.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="StdHashValue.h" />
+    <ClInclude Include="StdOutput.h" />
     <ClInclude Include="StdStl.h" />
     <ClInclude Include="StreamStdTypes.h" />
     <ClInclude Include="StringBase.h" />
@@ -260,6 +274,7 @@
     <ClInclude Include="SubjectPredicates.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="test\AlgorithmsTests.h" />
+    <ClInclude Include="test\DuplicateFilesTests.h" />
     <ClInclude Include="test\EndiannessTests.h" />
     <ClInclude Include="test\FileSystemTests.h" />
     <ClInclude Include="test\FmtUtilsTests.h" />
@@ -278,7 +293,6 @@
     <ClInclude Include="test\ThreadingTests.h" />
     <ClInclude Include="test\UnitTest.h" />
     <ClInclude Include="test\UtlConsoleTests.h" />
-    <ClInclude Include="TextEncodedFileStreams.h" />
     <ClInclude Include="TextEncoding.h" />
     <ClInclude Include="TextFileIo.h" />
     <ClInclude Include="TextFileIo.hxx" />
@@ -294,12 +308,16 @@
     <ClCompile Include="CommandService.cpp" />
     <ClCompile Include="ConsoleApplication.cpp" />
     <ClCompile Include="CRC32.cpp" />
+    <ClCompile Include="DuplicateFileItem.cpp" />
+    <ClCompile Include="DuplicateFilesEnumerator.cpp" />
     <ClCompile Include="EnumTags.cpp" />
     <ClCompile Include="ErrorHandler.cpp" />
     <ClCompile Include="FileContent.cpp" />
     <ClCompile Include="FileEnumerator.cpp" />
     <ClCompile Include="FileObjectCache.cpp" />
     <ClCompile Include="FileState.cpp" />
+    <ClCompile Include="FileStateEnumerator.cpp" />
+    <ClCompile Include="FileStateItem.cpp" />
     <ClCompile Include="FileSystem.cpp" />
     <ClCompile Include="FlagTags.cpp" />
     <ClCompile Include="FlexPath.cpp" />
@@ -307,6 +325,9 @@
     <ClCompile Include="Guards.cpp" />
     <ClCompile Include="IniFile.cpp" />
     <ClCompile Include="IniFileRegistrySection.cpp" />
+    <ClCompile Include="IoBin.cpp" />
+    <ClCompile Include="Io_fwd.cpp" />
+    <ClCompile Include="IProgressService.cpp" />
     <ClCompile Include="Logger.cpp" />
     <ClCompile Include="MemLeakCheck.cpp" />
     <ClCompile Include="MultiThreading.cpp" />
@@ -329,12 +350,14 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='ReleaseU|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='ReleaseU|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="StdOutput.cpp" />
     <ClCompile Include="StringBase.cpp" />
     <ClCompile Include="StringCompare.cpp" />
     <ClCompile Include="StringUtilities.cpp" />
     <ClCompile Include="StructuredStorage.cpp" />
     <ClCompile Include="Subject.cpp" />
     <ClCompile Include="test\AlgorithmsTests.cpp" />
+    <ClCompile Include="test\DuplicateFilesTests.cpp" />
     <ClCompile Include="test\EndiannessTests.cpp" />
     <ClCompile Include="test\FileSystemTests.cpp" />
     <ClCompile Include="test\FmtUtilsTests.cpp" />
@@ -353,9 +376,7 @@
     <ClCompile Include="test\ThreadingTests.cpp" />
     <ClCompile Include="test\UnitTest.cpp" />
     <ClCompile Include="test\UtlConsoleTests.cpp" />
-    <ClCompile Include="TextEncodedFileStreams.cpp" />
     <ClCompile Include="TextEncoding.cpp" />
-    <ClCompile Include="TextFileIo.cpp" />
     <ClCompile Include="Timer.cpp" />
     <ClCompile Include="TimeUtils.cpp" />
     <ClCompile Include="TokenIterator.cpp" />
