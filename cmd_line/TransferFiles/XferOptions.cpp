@@ -75,14 +75,19 @@ bool CXferOptions::PassFilter( const CTransferItem& transferNode ) const
 
 bool CXferOptions::ParseValue( std::tstring& rValue, const TCHAR* pArg, const TCHAR* pNameList, CaseCvt caseCvt /*= AsIs*/ )
 {
-	if ( arg::ParseValuePair( rValue, pArg, pNameList ) )
-		switch ( caseCvt )
-		{
-			case UpperCase: str::ToUpper( rValue ); return true;
-			case LowerCase: str::ToLower( rValue ); return true;
-		}
+	if ( !arg::ParseValuePair( rValue, pArg, pNameList ) )
+		return false;
 
-	return false;
+	switch ( caseCvt )
+	{
+		case UpperCase:
+			str::ToUpper( rValue );
+			break;
+		case LowerCase:
+			str::ToLower( rValue );
+			break;
+	}
+	return true;
 }
 
 void CXferOptions::ParseCommandLine( int argc, TCHAR* argv[] ) throws_( CRuntimeException )
@@ -96,13 +101,13 @@ void CXferOptions::ParseCommandLine( int argc, TCHAR* argv[] ) throws_( CRuntime
 			const TCHAR* pSwitch = m_pArg + 1;
 			std::tstring value;
 
-			if ( ParseValue( value, pSwitch, _T("TRANSFER|T"), UpperCase ) )
+			if ( ParseValue( value, pSwitch, _T("T|TRANSFER"), UpperCase ) )
 				ParseFileAction( value );
 			else if ( arg::ParseOptionalValuePair( &value, pSwitch, _T("BK") ) )
 				m_pBackupDirPath.reset( new fs::CPath( value ) );
 			else if ( arg::ParseOptionalValuePair( &value, pSwitch, _T("CH") ) )
 				ParseFileChangesFilter( value );
-			else if ( ParseValue( value, pSwitch, _T("ATTRIBUTES|A"), UpperCase ) )
+			else if ( ParseValue( value, pSwitch, _T("A|ATTRIBUTES"), UpperCase ) )
 				ParseFileAttributes( value );
 			else if ( ParseValue( value, pSwitch, _T("D") ) )
 				ParseTimestamp( value );
