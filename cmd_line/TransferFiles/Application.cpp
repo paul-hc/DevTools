@@ -50,6 +50,7 @@ static const char s_helpMessage[] =
 	"        'C:\\Tools', 'C:\\Tools\\*.*', 'C:\\Tools\\*.bat;*.cmd'\n"
 	"  target_dir\n"
 	"      Specifies the relative location of the transfered files.\n"
+	"\n"
 	"  /transfer\n"
 	"      Specifies the file transfer action:\n"
 	"        /t=c    /transfer=copy    Copy source files to target (default).\n"
@@ -99,14 +100,16 @@ static const char s_helpMessage[] =
 #ifdef _DEBUG
 	"\n"
 	"DEBUG BUILD:\n"
+#ifdef USE_UT
 	"  /ut[=debug]\n"
 	"      Run unit tests.\n"
 	"      Break the child processes in the debugger if '=debug' is specified.\n"
+#endif //USE_UT
 	"  /debug\n"
 	"      Break the program in debugger.\n"
 	"  /ndebug [/nodebug]\n"
 	"      Ignore, no debugging (for testing).\n"
-#endif
+#endif //_DEBUG
 	;
 
 

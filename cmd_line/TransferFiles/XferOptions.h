@@ -26,8 +26,6 @@ struct CXferOptions
 private:
 	enum CaseCvt { AsIs, UpperCase, LowerCase };
 
-	static bool ParseValue( std::tstring& rValue, const TCHAR* pArg, const TCHAR* pNameList, CaseCvt caseCvt = AsIs );
-
 	void ParseFileAction( const std::tstring& value ) throws_( CRuntimeException );
 	void ParseFileChangesFilter( const std::tstring& value ) throws_( CRuntimeException );
 	void ParseFileAttributes( const std::tstring& value ) throws_( CRuntimeException );
