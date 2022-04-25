@@ -135,6 +135,9 @@ namespace str
 	template< str::CaseType caseType, typename StringT >
 	bool EqualString( const StringT& left, const StringT& right ) { return Equals< caseType >( left.c_str(), right.c_str() ); }
 
+	template<typename StringT>
+	bool EqualString( str::CaseType caseType, const StringT& left, const StringT& right ) { return str::Case == caseType ? Equals<str::Case>( left.c_str(), right.c_str() ) : Equals<str::IgnoreCase>( left.c_str(), right.c_str() ); }
+
 
 	// string to STL iterators conversions
 	typedef const TCHAR* const_iterator;

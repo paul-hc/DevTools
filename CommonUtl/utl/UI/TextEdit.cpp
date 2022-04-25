@@ -249,7 +249,11 @@ BEGIN_MESSAGE_MAP( CTextEdit, TBaseClass )
 	ON_CONTROL_REFLECT_EX( EN_VSCROLL, OnEnVScroll_Reflect )
 	ON_COMMAND( ID_EDIT_COPY, OnEditCopy )
 	ON_COMMAND( ID_EDIT_CUT, OnEditCut )
-	ON_UPDATE_COMMAND_UI( ID_EDIT_CUT, OnUpdateEditCut )
+	ON_UPDATE_COMMAND_UI( ID_EDIT_CUT, OnUpdate_WriteableHasSel )
+	ON_COMMAND( ID_EDIT_CLEAR, OnEditClear )
+	ON_UPDATE_COMMAND_UI( ID_EDIT_CLEAR, OnUpdate_WriteableHasSel )
+	ON_COMMAND( ID_EDIT_CLEAR_ALL, OnEditClearAll )
+	ON_UPDATE_COMMAND_UI( ID_EDIT_CLEAR_ALL, OnUpdate_Writeable )
 	ON_COMMAND( ID_EDIT_PASTE, OnEditPaste )
 	ON_UPDATE_COMMAND_UI( ID_EDIT_PASTE, OnUpdateEditPaste )
 	ON_COMMAND( ID_EDIT_SELECT_ALL, OnSelectAll )
@@ -342,11 +346,6 @@ void CTextEdit::OnEditCut( void )
 	Cut();
 }
 
-void CTextEdit::OnUpdateEditCut( CCmdUI* pCmdUI )
-{
-	pCmdUI->Enable( IsWritable() && !GetSelRange<int>().IsEmpty() );
-}
-
 void CTextEdit::OnEditPaste( void )
 {
 	Paste();
@@ -357,7 +356,33 @@ void CTextEdit::OnUpdateEditPaste( CCmdUI* pCmdUI )
 	pCmdUI->Enable( IsWritable() && CClipboard::CanPasteText() );
 }
 
+void CTextEdit::OnEditClear( void )
+{
+	Clear();
+}
+
+void CTextEdit::OnEditClearAll( void )
+{
+	SelectAll();
+	Clear();
+}
+
 void CTextEdit::OnSelectAll( void )
 {
 	SelectAll();
+}
+
+void CTextEdit::OnUpdate_HasSel( CCmdUI* pCmdUI )
+{
+	pCmdUI->Enable( !GetSelRange<int>().IsEmpty() );
+}
+
+void CTextEdit::OnUpdate_Writeable( CCmdUI* pCmdUI )
+{
+	pCmdUI->Enable( IsWritable() );
+}
+
+void CTextEdit::OnUpdate_WriteableHasSel( CCmdUI* pCmdUI )
+{
+	pCmdUI->Enable( IsWritable() && !GetSelRange<int>().IsEmpty() );
 }

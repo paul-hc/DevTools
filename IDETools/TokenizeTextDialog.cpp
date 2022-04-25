@@ -10,6 +10,8 @@
 #define new DEBUG_NEW
 #endif
 
+#include "utl/UI/TandemControls.hxx"
+
 
 namespace reg
 {
@@ -51,7 +53,6 @@ namespace layout
 		{ IDC_TRIM_CHARS_DEFAULT, MoveX },
 		{ IDC_OUTPUT_TEXT_LABEL, SizeX },
 		{ IDC_OUTPUT_TEXT_EDIT, Size },
-		{ IDC_COPY_OUTPUT_TO_SOURCE, MoveX },
 		{ IDC_SHOW_WHITESPACE_CHECK, MoveY },
 		{ IDOK, Move },
 		{ IDCANCEL, Move }
@@ -72,10 +73,12 @@ CTokenizeTextDialog::CTokenizeTextDialog( CWnd* pParent /*=NULL*/ )
 	: CLayoutDialog( IDD_TOKENIZE_TEXT_DIALOG, pParent )
 	, m_action( SplitAction )
 	, m_tokenCount( 0 )
+	, m_sourceEdit( ui::ListHost_TileMateOnTopRight )
+	, m_outputEdit( ui::ListHost_TileMateOnTopRight )
+	, m_outputStatic( CRegularStatic::Bold )
 	, m_defaultInputTokensButton( ID_RESET_DEFAULT, false )
 	, m_defaultOutputSepsButton( ID_RESET_DEFAULT, false )
 	, m_defaultTrimCharsButton( ID_RESET_DEFAULT, false )
-	, m_copyOutputToSourceButton( IDC_COPY_OUTPUT_TO_SOURCE )
 {
 	m_regSection = reg::section_dialog;
 	RegisterCtrlLayout( layout::styles, COUNT_OF( layout::styles ) );
@@ -84,6 +87,15 @@ CTokenizeTextDialog::CTokenizeTextDialog( CWnd* pParent /*=NULL*/ )
 		m_separators[ i ] = m_defaultSeparators[ i ];
 
 	RegistryLoad();
+
+	m_sourceEdit.GetMateToolbar()->GetStrip()
+		.AddButton( ID_EDIT_PASTE )
+		.AddButton( ID_EDIT_CLEAR_ALL );
+
+	m_outputEdit.GetMateToolbar()->GetStrip()
+		.AddButton( ID_EDIT_COPY )
+		.AddSeparator()
+		.AddButton( IDC_COPY_OUTPUT_TO_SOURCE );
 }
 
 CTokenizeTextDialog::~CTokenizeTextDialog()
@@ -124,57 +136,62 @@ void CTokenizeTextDialog::RegistrySave( void )
 std::tstring CTokenizeTextDialog::GenerateOutputText( void )
 {
 	std::tstring sourceText = GetSourceText();
+	str::CaseType caseType = IsDlgButtonChecked( IDC_CASE_SENSITIVE_CHECK ) ? str::Case : str::IgnoreCase;
+
 	m_tokenCount = 0;
 
-	if ( !m_separators[ m_action ].m_input.empty() )
+	if ( IsParseAction() )
 	{
-		std::tstring inputSeparator = code::ParseEscapeSeqs( m_separators[ m_action ].m_input.c_str() );
-		std::tstring outputSeparator = code::ParseEscapeSeqs( m_separators[ m_action ].m_output.c_str() );
-		str::ToWindowsLineEnds( inputSeparator );
-		str::ToWindowsLineEnds( outputSeparator );
-
-		std::vector< std::tstring > parts;
-
-		switch ( m_action )
+		if ( !m_separators[ m_action ].m_input.empty() )
 		{
-			default:
-				ASSERT( false );
-			case SplitAction:
-			{
-				str::Split( parts, sourceText.c_str(), inputSeparator.c_str() );
-				m_tokenCount = parts.size();
+			std::tstring inputSep = code::ParseEscapeSeqs( m_separators[ m_action ].m_input.c_str() );
+			std::tstring outputSep = code::ParseEscapeSeqs( m_separators[ m_action ].m_output.c_str() );
+			str::ToWindowsLineEnds( inputSep );
+			str::ToWindowsLineEnds( outputSep );
 
-				CLineSet lineSet( str::Join( parts, outputSeparator.c_str() ) );
-				return FormatOutputText( lineSet );
-			}
-			case TokenizeAction:
-			{
-				str::Tokenize( parts, sourceText.c_str(), inputSeparator.c_str() );
-				m_tokenCount = parts.size();
+			std::vector< std::tstring > parts;
 
-				CLineSet lineSet( str::Join( parts, outputSeparator.c_str() ) );
-				return FormatOutputText( lineSet );
-			}
-			case MergeAction:
+			switch ( m_action )
 			{
-				str::Split( parts, sourceText.c_str(), inputSeparator.c_str() );
-				m_tokenCount = parts.size();
-
-				// prevent last empty part from translating into an extra line-end (output separator)
-				std::tstring lastLineEnd;
-				if ( !parts.empty() && parts.back().empty() )
+				default:
+					ASSERT( false );
+				case SplitAction:
 				{
-					lastLineEnd = _T("\r\n");
-					parts.pop_back();
-					--m_tokenCount;
-				}
+					str::Split( parts, sourceText.c_str(), inputSep.c_str() );
+					m_tokenCount = parts.size();
 
-				CLineSet lineSet( str::Join( parts, outputSeparator.c_str() ) + lastLineEnd );
-				return FormatOutputText( lineSet );
+					CLineSet lineSet( str::Join( parts, outputSep.c_str() ) );
+					return FormatOutputText( lineSet );
+				}
+				case TokenizeAction:
+				{
+					str::Tokenize( parts, sourceText.c_str(), inputSep.c_str() );
+					m_tokenCount = parts.size();
+
+					CLineSet lineSet( str::Join( parts, outputSep.c_str() ) );
+					return FormatOutputText( lineSet );
+				}
+				case MergeAction:
+				{
+					str::Split( parts, sourceText.c_str(), inputSep.c_str() );
+					m_tokenCount = parts.size();
+
+					// prevent last empty part from translating into an extra line-end (output separator)
+					std::tstring lastLineEnd;
+					if ( !parts.empty() && parts.back().empty() )
+					{
+						lastLineEnd = _T("\r\n");
+						parts.pop_back();
+						--m_tokenCount;
+					}
+
+					CLineSet lineSet( str::Join( parts, outputSep.c_str() ) + lastLineEnd );
+					return FormatOutputText( lineSet );
+				}
 			}
 		}
 	}
-	else
+	else if ( IsLineAction() )
 	{
 		CLineSet lineSet( sourceText );
 		switch ( m_action )
@@ -189,12 +206,54 @@ std::tstring CTokenizeTextDialog::GenerateOutputText( void )
 				lineSet.SortDescending();
 				return FormatOutputText( lineSet );
 			case FilterUniqueAction:
-				lineSet.RemoveDuplicateLines( IsDlgButtonChecked( IDC_CASE_SENSITIVE_CHECK ) ? str::Case : str::IgnoreCase );
+				lineSet.RemoveDuplicateLines( caseType );
 				return FormatOutputText( lineSet );
+		}
+	}
+	else if ( IsTableAction() )
+	{
+		CTableSet tableSet( caseType );
+		tableSet.ParseText( sourceText );
+
+		switch ( m_action )
+		{
+			case TableToTreeAction:
+				tableSet.ResetDuplicateColumns();
+				return tableSet.FormatText();
 		}
 	}
 
 	return sourceText;
+}
+
+bool CTokenizeTextDialog::IsParseAction( void ) const
+{
+	switch ( m_action )
+	{
+		case SplitAction:
+		case TokenizeAction:
+		case MergeAction:
+			return true;
+	}
+	return false;
+}
+
+bool CTokenizeTextDialog::IsLineAction( void ) const
+{
+	switch ( m_action )
+	{
+		case ReverseAction:
+		case SortAscAction:
+		case SortDescAction:
+		case FilterUniqueAction:
+			return true;
+	}
+	return false;
+}
+
+bool CTokenizeTextDialog::IsTableAction( void ) const
+{
+	return TableToTreeAction == m_action;
 }
 
 std::tstring CTokenizeTextDialog::GetSourceText( void ) const
@@ -229,19 +288,30 @@ std::tstring CTokenizeTextDialog::FormatOutputText( CLineSet& rLineSet ) const
 	return rLineSet.FormatText();
 }
 
+std::tstring CTokenizeTextDialog::FormatResultsLabel( void ) const
+{
+	std::tstring text = str::Format( _T("&Output: %d lines"), m_outputEdit.GetLineCount() );
+
+	if ( IsParseAction() )
+		text += str::Format( _T(", %d components found"), m_tokenCount );
+
+	return text;
+}
+
 void CTokenizeTextDialog::DoDataExchange( CDataExchange* pDX )
 {
 	bool firstInit = NULL == m_sourceEdit.m_hWnd;
 
 	DDX_Control( pDX, IDC_SOURCE_TEXT_EDIT, m_sourceEdit );
 	DDX_Control( pDX, IDC_OUTPUT_TEXT_EDIT, m_outputEdit );
+	DDX_Control( pDX, IDC_OUTPUT_TEXT_LABEL, m_outputStatic );
+
 	DDX_Control( pDX, IDC_INPUT_TOKENS_EDIT, m_inputTokensEdit );
 	DDX_Control( pDX, IDC_OUTPUT_SEPARATOR_EDIT, m_outputSepsEdit );
 	DDX_Control( pDX, IDC_INPUT_TOKENS_DEFAULT, m_defaultInputTokensButton );
 	DDX_Control( pDX, IDC_OUTPUT_SEPARATOR_DEFAULT, m_defaultOutputSepsButton );
 	DDX_Control( pDX, IDC_TRIM_CHARS_EDIT, m_trimCharsEdit );
 	DDX_Control( pDX, IDC_TRIM_CHARS_DEFAULT, m_defaultTrimCharsButton );
-	DDX_Control( pDX, IDC_COPY_OUTPUT_TO_SOURCE, m_copyOutputToSourceButton );
 
 	if ( firstInit )
 	{
@@ -255,7 +325,9 @@ void CTokenizeTextDialog::DoDataExchange( CDataExchange* pDX )
 
 		bool visibleWhiteSpace = pApp->GetProfileInt( reg::section_dialog, reg::entry_showWhiteSpace, FALSE ) != FALSE;
 		CheckDlgButton( IDC_SHOW_WHITESPACE_CHECK, visibleWhiteSpace );
+		m_sourceEdit.SetLimitText( 0 );		// maximum text limit: 2147483646 (0x7FFFFFFE)
 		m_sourceEdit.SetVisibleWhiteSpace( visibleWhiteSpace );
+		m_outputEdit.SetLimitText( 0 );
 		m_outputEdit.SetVisibleWhiteSpace( visibleWhiteSpace );
 	}
 
@@ -271,13 +343,13 @@ void CTokenizeTextDialog::DoDataExchange( CDataExchange* pDX )
 	m_outputEdit.SetText( m_outputText );
 
 	ui::SetDlgItemText( this, IDC_SOURCE_TEXT_LABEL, str::Format( _T("So&urce: %d lines"), m_sourceEdit.GetLineCount() ) );
-	ui::SetDlgItemText( this, IDC_OUTPUT_TEXT_LABEL, str::Format( _T("&Output: %d lines, %d components found"), m_outputEdit.GetLineCount(), m_tokenCount ) );
+	m_outputStatic.SetWindowText( FormatResultsLabel() );
 	m_inputTokensEdit.Invalidate();
 
 	static const UINT sepIds[] = { IDC_INPUT_TOKENS_LABEL, IDC_INPUT_TOKENS_EDIT, IDC_INPUT_TOKENS_DEFAULT,
 		IDC_OUTPUT_SEPARATOR_LABEL, IDC_OUTPUT_SEPARATOR_EDIT, IDC_OUTPUT_SEPARATOR_DEFAULT };
 	ui::ShowControls( m_hWnd, sepIds, COUNT_OF( sepIds ), ActionUseSeps() );
-	ui::ShowControl( m_hWnd, IDC_CASE_SENSITIVE_CHECK, FilterUniqueAction == m_action );
+	ui::ShowControl( m_hWnd, IDC_CASE_SENSITIVE_CHECK, FilterUniqueAction == m_action || TableToTreeAction == m_action );
 	ui::EnableWindow( m_defaultInputTokensButton, m_separators[ m_action ].m_input != m_defaultSeparators[ m_action ].m_input );
 	ui::EnableWindow( m_defaultOutputSepsButton, m_separators[ m_action ].m_output != m_defaultSeparators[ m_action ].m_output );
 
@@ -296,7 +368,7 @@ BEGIN_MESSAGE_MAP( CTokenizeTextDialog, CLayoutDialog )
 	ON_BN_CLICKED( IDC_FILTER_SOURCE_LINES_CHECK, OnFieldChanged )
 	ON_BN_CLICKED( IDC_FILTER_OUTPUT_LINES_CHECK, OnFieldChanged )
 	ON_BN_CLICKED( IDC_COPY_OUTPUT_TO_SOURCE, OnCopyOutputToSource )
-	ON_COMMAND_RANGE( IDC_SPLIT_ACTION_RADIO, IDC_FILTER_UNIQUE_ACTION_RADIO, OnActionChanged )
+	ON_COMMAND_RANGE( IDC_SPLIT_ACTION_RADIO, IDC_TABLE_TO_TREE_ACTION_RADIO, OnActionChanged )
 	ON_COMMAND_RANGE( IDC_CASE_SENSITIVE_CHECK, IDC_TRIM_LINES_CHECK, OnActionOptionChanged )
 	ON_EN_CHANGE( IDC_SOURCE_TEXT_EDIT, OnEnChange_SourceText )
 	ON_EN_CHANGE( IDC_INPUT_TOKENS_EDIT, OnEnChange_InputTokens )

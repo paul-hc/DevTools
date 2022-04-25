@@ -7,8 +7,8 @@
 
 // flicker free painting using owner-draw
 //
-class CBufferedStatic : public CStatic
-					  , public ui::CContentFitBase
+abstract class CBufferedStatic : public CStatic
+							   , public ui::CContentFitBase
 {
 protected:
 	CBufferedStatic( void );
@@ -33,15 +33,13 @@ private:
 	void PaintImpl( CDC* pDC, const CRect& clientRect );
 private:
 	UINT m_dtFlags;
-protected:
-	// generated overrides
-	public:
+
+	// generated stuff
+public:
 	virtual void PreSubclassWindow( void );
-	protected:
+protected:
 	virtual void DrawItem( DRAWITEMSTRUCT* pDrawItem );
 protected:
-	// message map functions
-
 	DECLARE_MESSAGE_MAP()
 };
 

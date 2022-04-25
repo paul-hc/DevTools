@@ -113,10 +113,14 @@ protected:
 	afx_msg BOOL OnEnVScroll_Reflect( void );
 	afx_msg void OnEditCopy( void );
 	afx_msg void OnEditCut( void );
-	afx_msg void OnUpdateEditCut( CCmdUI* pCmdUI );
 	afx_msg void OnEditPaste( void );
 	afx_msg void OnUpdateEditPaste( CCmdUI* pCmdUI );
+	afx_msg void OnEditClear( void );
+	afx_msg void OnEditClearAll( void );
 	afx_msg void OnSelectAll( void );
+	afx_msg void OnUpdate_HasSel( CCmdUI* pCmdUI );
+	afx_msg void OnUpdate_Writeable( CCmdUI* pCmdUI );
+	afx_msg void OnUpdate_WriteableHasSel( CCmdUI* pCmdUI );
 
 	DECLARE_MESSAGE_MAP()
 };
