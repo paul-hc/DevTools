@@ -49,7 +49,7 @@ public:
 protected:
 	virtual bool UseWindowPlacement( void ) const;
 	virtual void PostRestorePlacement( int showCmd );
-	virtual void OnIdleUpdateControls( void );
+	virtual void OnIdleUpdateControls( void );			// override to update specific controls
 private:
 	void RestorePlacement( void );
 	void ModifySystemMenu( void );

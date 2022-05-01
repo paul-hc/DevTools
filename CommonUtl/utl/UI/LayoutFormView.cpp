@@ -5,6 +5,7 @@
 #include "CmdInfoStore.h"
 #include "CmdUpdate.h"
 #include "ui_fwd.h"
+#include <afxpriv.h>		// for WM_IDLEUPDATECMDUI
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -47,6 +48,11 @@ void CLayoutFormView::QueryTooltipText( std::tstring& rText, UINT cmdId, CToolTi
 	rText, cmdId, pTooltip;
 }
 
+void CLayoutFormView::OnIdleUpdateControls( void )
+{
+	// note: child toolbars receive WM_IDLEUPDATECMDUI from MFC by default
+}
+
 void CLayoutFormView::DoDataExchange( CDataExchange* pDX )
 {
 	if ( DialogOutput == pDX->m_bSaveAndValidate )
@@ -72,6 +78,7 @@ BEGIN_MESSAGE_MAP( CLayoutFormView, CFormView )
 	ON_WM_ERASEBKGND()
 	ON_NOTIFY_EX_RANGE( TTN_NEEDTEXTW, ui::MinCmdId, ui::MaxCmdId, OnTtnNeedText )
 	ON_NOTIFY_EX_RANGE( TTN_NEEDTEXTA, ui::MinCmdId, ui::MaxCmdId, OnTtnNeedText )
+	ON_MESSAGE_VOID( WM_IDLEUPDATECMDUI, OnIdleUpdateControls )
 END_MESSAGE_MAP()
 
 BOOL CLayoutFormView::OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo )

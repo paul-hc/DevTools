@@ -24,13 +24,15 @@ public:
 
 	// ui::ICustomCmdInfo interface
 	virtual void QueryTooltipText( std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const;
+protected:
+	virtual void OnIdleUpdateControls( void );			// override to update specific controls
 private:
 	std::auto_ptr<CLayoutEngine> m_pLayoutEngine;
+
+	// generated stuff
 protected:
-	// generated overrides
-	protected:
 	virtual void DoDataExchange( CDataExchange* pDX );
-	public:
+public:
 	virtual BOOL OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo );
 public:
 	afx_msg int OnCreate( CREATESTRUCT* pCreateStruct );
