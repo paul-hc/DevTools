@@ -6,6 +6,7 @@
 #include "utl/FileSystem.h"
 #include "utl/RuntimeException.h"
 #include "utl/StringUtilities.h"
+#include "utl/TextClipboard.h"
 
 
 namespace app
@@ -105,6 +106,19 @@ void CCmdLineOptions::ParseCommandLine( int argc, const TCHAR* const argv[] ) th
 				m_optionFlags.Set( app::ShowExecTimeStats );
 			else if ( arg::Equals( pSwitch, _T("p") ) )
 				m_optionFlags.Set( app::PauseAtEnd );
+			else if ( arg::Equals( pSwitch, _T("paste") ) )
+			{
+				CTextClipboard::CMessageWnd msgWnd;		// use a temporary message-only window for clipboard paste
+				std::vector< std::tstring > textRows;
+
+				if ( CTextClipboard::PasteFromLines( textRows, msgWnd.GetWnd() ) )
+				{
+					SetTableInputMode();
+					m_pTable->ParseRows( textRows );
+				}
+				else
+					throw CRuntimeException( str::Format( _T("Cannot paste any tabbed text from clipboard for argument '%s'"), m_pArg ) );
+			}
 		#ifdef USE_UT
 			else if ( arg::Equals( pSwitch, _T("ut") ) )
 				m_optionFlags.Set( app::UnitTestMode );
@@ -116,11 +130,8 @@ void CCmdLineOptions::ParseCommandLine( int argc, const TCHAR* const argv[] ) th
 		{
 			if ( ParseValue( value, m_pArg, _T("in") ) )
 			{
-				m_pTable.reset( new CTable() );
+				SetTableInputMode();
 				m_pTable->ParseTextFile( value );
-
-				m_optionFlags |= app::TOption::Make( app::TableInputMode | app::DisplayFiles | app::SkipFileGroupLine | app::NoSorting );
-				m_guidesProfileType = TabGuides;
 			}
 			else if ( ParseValue( value, m_pArg, _T("out") ) )
 				m_outputFilePath = value;
@@ -141,6 +152,13 @@ void CCmdLineOptions::PostProcessArguments( void ) throws_( CRuntimeException )
 			m_dirPath = fs::GetCurrentDirectory();			// use the current working directory
 		else if ( !fs::IsValidDirectory( m_dirPath.GetPtr() ) )
 			throw CRuntimeException( std::tstring( _T("Invalid dir_path specification: ") ) + m_dirPath.Get() );
+}
+
+void CCmdLineOptions::SetTableInputMode( void )
+{
+	m_pTable.reset( new CTable() );
+	m_optionFlags |= app::TOption::Make( app::TableInputMode | app::DisplayFiles | app::SkipFileGroupLine | app::NoSorting );
+	m_guidesProfileType = TabGuides;
 }
 
 void CCmdLineOptions::ThrowInvalidArgument( void ) throws_( CRuntimeException )

@@ -124,3 +124,20 @@ bool CTextClipboard::PasteText( std::tstring& rText, HWND hWnd )
 	std::auto_ptr<CTextClipboard> pClipboard( Open( hWnd ) );
 	return pClipboard.get() != NULL && pClipboard->ReadString( rText );
 }
+
+
+// CTextClipboard::CMessageWnd implementation
+
+CTextClipboard::CMessageWnd::CMessageWnd( void )
+	: m_hWnd( ::CreateWindowEx( 0, L"Message", _T("<my_msgs>"), WS_POPUP, 0, 0, 0, 0, HWND_MESSAGE, NULL, NULL, 0L ) )
+{
+}
+
+void CTextClipboard::CMessageWnd::Destroy( void )
+{
+	if ( m_hWnd != NULL )
+	{
+		::DestroyWindow( m_hWnd );
+		m_hWnd = NULL;
+	}
+}

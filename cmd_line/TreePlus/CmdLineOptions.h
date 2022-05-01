@@ -24,6 +24,7 @@ struct CCmdLineOptions
 	const CTable* GetTable( void ) const { return m_pTable.get(); }
 private:
 	void PostProcessArguments( void ) throws_( CRuntimeException );
+	void SetTableInputMode( void );
 
 	enum CaseCvt { AsIs, UpperCase, LowerCase };
 

@@ -44,6 +44,21 @@ public:
 
 	template< typename StringT >
 	static bool PasteFromLines( std::vector< StringT >& rTextItems, HWND hWnd, const TCHAR* pLineEnd = s_lineEnd );
+public:
+	class CMessageWnd : private utl::noncopyable		// lightweight message window wrapper for clipboard IO in console applications
+	{
+	public:
+		CMessageWnd( void );
+		~CMessageWnd() { Destroy(); }
+
+		HWND GetWnd( void ) const { return m_hWnd; }
+		bool IsValid( void ) const { return m_hWnd != NULL; }
+
+		void Destroy( void );
+	private:
+		HWND m_hWnd;
+	};
+
 private:
 	HWND m_hWnd;
 public:
