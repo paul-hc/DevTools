@@ -6,7 +6,7 @@
 #include "TestDialog.h"
 #include "TestPropertySheet.h"
 #include "utl/StringUtilities.h"
-#include "utl/UI/Clipboard.h"
+#include "utl/TextClipboard.h"
 #include "utl/UI/LayoutEngine.h"
 #include "utl/UI/CmdUpdate.h"
 #include "utl/UI/UtilitiesEx.h"
@@ -296,7 +296,7 @@ void CDemoTemplate::OnClipboardCopy( void )
 		filePaths.push_back( execDirPath / subItems.front() );
 	}
 
-	if ( CClipboard::CopyToLines( filePaths, m_pOwner ) )
+	if ( CTextClipboard::CopyToLines( filePaths, m_pOwner->GetSafeHwnd() ) )
 		ui::MessageBox( str::Format( _T("Copied %d file paths to clipboard."), filePaths.size() ) );
 	else
 		ui::MessageBox( _T("Error copying file paths to clipboard!") );
@@ -310,7 +310,7 @@ void CDemoTemplate::OnUpdateClipboardCopy( CCmdUI* pCmdUI )
 void CDemoTemplate::OnClipboardPaste( void )
 {
 	std::vector< fs::CPath > filePaths;
-	if ( CClipboard::PasteFromLines( filePaths, m_pOwner ) )
+	if ( CTextClipboard::PasteFromLines( filePaths, m_pOwner->GetSafeHwnd() ) )
 		ui::MessageBox( str::Format( _T("Pasted %d file paths from clipboard:\n\n%s"), filePaths.size(), str::JoinLines( filePaths, _T("\n") ).c_str() ) );
 	else
 		ui::MessageBox( _T("Error pasting file paths from clipboard!") );
@@ -318,7 +318,7 @@ void CDemoTemplate::OnClipboardPaste( void )
 
 void CDemoTemplate::OnUpdateClipboardPaste( CCmdUI* pCmdUI )
 {
-	pCmdUI->Enable( CClipboard::CanPasteText() );
+	pCmdUI->Enable( CTextClipboard::CanPasteText() );
 }
 
 

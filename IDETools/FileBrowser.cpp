@@ -5,10 +5,10 @@
 #include "TrackMenuWnd.h"
 #include "Application.h"
 #include "resource.h"
-#include "utl/FileEnumerator.h"
 #include "utl/ContainerUtilities.h"
+#include "utl/FileEnumerator.h"
+#include "utl/TextClipboard.h"
 #include "utl/UI/ProcessUtils.h"
-#include "utl/UI/Clipboard.h"
 #include "utl/UI/CmdUpdate.h"
 #include "utl/UI/MenuUtilities.h"
 #include "utl/UI/Utilities.h"
@@ -756,7 +756,7 @@ void CFileBrowser::OnCommand_FileItem( UINT cmdId )
 		if ( const CFileItem* pPickedFileItem = pMenuBuilder->FindFileItemWithId( cmdId ) )
 			if ( ui::IsKeyPressed( VK_CONTROL ) )
 			{	// final command with CTRL pressed -> sent selected file path to the clipboard
-				if ( CClipboard::CopyText( pPickedFileItem->GetFilePath().Get() ) )
+				if ( CTextClipboard::CopyText( pPickedFileItem->GetFilePath().Get(), AfxGetMainWnd()->GetSafeHwnd() ) )
 					SetCurrFilePath( fs::CPath() );			// reset the picked file path member in order to avoid the final execution
 			}
 			else

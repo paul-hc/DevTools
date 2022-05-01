@@ -16,7 +16,7 @@
 #include "resource.h"
 #include "utl/MemLeakCheck.h"
 #include "utl/Serialization.h"
-#include "utl/UI/Clipboard.h"
+#include "utl/TextClipboard.h"
 #include "utl/UI/MfcUtilities.h"
 #include "utl/UI/IconButton.h"
 #include "utl/UI/PasswordDialog.h"
@@ -1090,7 +1090,7 @@ void CAlbumDoc::OnEditCopyAlbumMap( void )
 	std::tstring albumMapText;
 	ICatalogStorage* pCatalogStorage = GetCatalogStorage();
 	pCatalogStorage->LoadAlbumMap( &albumMapText );
-	CClipboard::CopyText( albumMapText );
+	CTextClipboard::CopyText( albumMapText, AfxGetMainWnd()->GetSafeHwnd() );
 }
 
 void CAlbumDoc::OnUpdateEditCopyAlbumMap( CCmdUI* pCmdUI )

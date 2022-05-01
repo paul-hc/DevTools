@@ -573,6 +573,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\TextClipboard.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\TextClipboard.h"
+				>
+			</File>
+			<File
 				RelativePath=".\Timer.cpp"
 				>
 			</File>

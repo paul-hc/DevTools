@@ -8,7 +8,7 @@
 #include "ModuleSession.h"
 #include "resource.h"
 #include "utl/Registry.h"
-#include "utl/UI/Clipboard.h"
+#include "utl/TextClipboard.h"
 #include "utl/UI/Utilities.h"
 
 #ifdef _DEBUG
@@ -134,7 +134,7 @@ BSTR UserInterface::InputBox( LPCTSTR title, LPCTSTR prompt, LPCTSTR initialValu
 BSTR UserInterface::GetClipboardText( void )
 {
 	std::tstring text;
-	if ( !CClipboard::CanPasteText() || !CClipboard::PasteText( text ) )
+	if ( !CTextClipboard::CanPasteText() || !CTextClipboard::PasteText( text, AfxGetMainWnd()->GetSafeHwnd() ) )
 	{
 		ui::BeepSignal( MB_ICONERROR );
 		AfxThrowOleException( S_OK );
@@ -145,7 +145,7 @@ BSTR UserInterface::GetClipboardText( void )
 
 void UserInterface::SetClipboardText( LPCTSTR text )
 {
-	CClipboard::CopyText( text );
+	CTextClipboard::CopyText( text, AfxGetMainWnd()->GetSafeHwnd() );
 }
 
 BOOL UserInterface::IsClipFormatAvailable( long clipFormat )

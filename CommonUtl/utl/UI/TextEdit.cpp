@@ -1,12 +1,12 @@
 
 #include "stdafx.h"
 #include "TextEdit.h"
-#include "Clipboard.h"
 #include "Dialog_fwd.h"
 #include "Icon.h"
 #include "SyncScrolling.h"
 #include "StringUtilities.h"
 #include "Utilities.h"
+#include "utl/TextClipboard.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -338,7 +338,7 @@ void CTextEdit::OnEditCopy( void )
 	if ( !selRange.IsEmpty() )
 		Copy();										// WM_COPY: copy the selected text
 	else
-		CClipboard::CopyText( GetText(), this );	// copy the entire text
+		CTextClipboard::CopyText( GetText(), m_hWnd );	// copy the entire text
 }
 
 void CTextEdit::OnEditCut( void )
@@ -353,7 +353,7 @@ void CTextEdit::OnEditPaste( void )
 
 void CTextEdit::OnUpdateEditPaste( CCmdUI* pCmdUI )
 {
-	pCmdUI->Enable( IsWritable() && CClipboard::CanPasteText() );
+	pCmdUI->Enable( IsWritable() && CTextClipboard::CanPasteText() );
 }
 
 void CTextEdit::OnEditClear( void )

@@ -16,7 +16,7 @@
 #include "utl/RuntimeException.h"
 #include "utl/StringUtilities.h"
 #include "utl/TimeUtils.h"
-#include "utl/UI/Clipboard.h"
+#include "utl/TextClipboard.h"
 #include "utl/UI/Color.h"
 #include "utl/UI/CmdInfoStore.h"
 #include "utl/UI/MenuUtilities.h"
@@ -659,7 +659,7 @@ void CTouchFilesDialog::OnCopyDateCell( UINT cmdId )
 
 	const CTouchItem* pTouchItem = m_fileListCtrl.GetPtrAt<CTouchItem>( m_fileListCtrl.GetCurSel() );
 	ASSERT_PTR( pTouchItem );
-	CClipboard::CopyText( time_utl::FormatTimestamp( pTouchItem->GetSrcState().GetTimeField( dateField ) ), this );
+	CTextClipboard::CopyText( time_utl::FormatTimestamp( pTouchItem->GetSrcState().GetTimeField( dateField ) ), m_hWnd );
 }
 
 void CTouchFilesDialog::OnPushToAttributeFields( void )

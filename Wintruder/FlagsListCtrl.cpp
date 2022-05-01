@@ -6,7 +6,7 @@
 #include "resource.h"
 #include "utl/ContainerUtilities.h"
 #include "utl/StringUtilities.h"
-#include "utl/UI/Clipboard.h"
+#include "utl/TextClipboard.h"
 #include "utl/UI/CtrlUiState.h"
 #include "utl/UI/CheckStatePolicies.h"
 #include "utl/UI/MenuUtilities.h"
@@ -350,7 +350,7 @@ BOOL CFlagsListCtrl::OnLvnLinkClick_Reflect( NMHDR* pNmHdr, LRESULT* pResult )
 
 void CFlagsListCtrl::OnCopy( void )
 {
-	CClipboard::CopyText( Format(), this );
+	CTextClipboard::CopyText( Format(), m_hWnd );
 }
 
 void CFlagsListCtrl::OnUpdateCopy( CCmdUI* pCmdUI )
@@ -370,7 +370,7 @@ void CFlagsListCtrl::OnCopySelected( void )
 		for ( std::vector< CFlagInfo* >::const_iterator itSelFlag = selFlags.begin(); itSelFlag != selFlags.end(); ++itSelFlag )
 			lines.push_back( ( *itSelFlag )->GetName() );
 
-		CClipboard::CopyToLines( lines, this );
+		CTextClipboard::CopyToLines( lines, m_hWnd );
 	}
 }
 

@@ -9,7 +9,7 @@
 #include "resource.h"
 #include "utl/EnumTags.h"
 #include "utl/FileSystem.h"
-#include "utl/UI/Clipboard.h"
+#include "utl/TextClipboard.h"
 #include "utl/UI/MenuUtilities.h"
 #include "utl/UI/ShellUtilities.h"
 #include "utl/UI/UtilitiesEx.h"
@@ -642,6 +642,6 @@ void CFileLocatorDialog::OnStoreFullPath( void )
 			selFilesFlat += sep;
 		UpdateHistory( m_foundFiles[ selFiles[ 0 ] ].first.Get() );
 
-		CClipboard::CopyText( selFilesFlat );
+		CTextClipboard::CopyText( selFilesFlat, AfxGetMainWnd()->GetSafeHwnd() );
 	}
 }

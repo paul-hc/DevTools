@@ -2,13 +2,13 @@
 #include "stdafx.h"
 #include "ItemListDialog.h"
 #include "PathItemBase.h"
-#include "Clipboard.h"
 #include "EnumTags.h"
 #include "StringCompare.h"
 #include "TextEdit.h"
 #include "Utilities.h"
 #include "resource.h"
 #include "utl/ContainerUtilities.h"
+#include "utl/TextClipboard.h"
 #include <afxpriv.h>		// for WM_IDLEUPDATECMDUI
 
 #ifdef _DEBUG
@@ -274,7 +274,7 @@ void CItemListDialog::OnUpdateMoveDownItem( CCmdUI* pCmdUI )
 void CItemListDialog::OnCopyItems( void )
 {
 	std::tstring items = str::Join( m_items, _T("\r\n") );
-	CClipboard::CopyText( items, this );
+	CTextClipboard::CopyText( items, m_hWnd );
 }
 
 void CItemListDialog::OnUpdateCopyItems( CCmdUI* pCmdUI )
@@ -291,7 +291,7 @@ const TCHAR* CItemListDialog::FindSeparatorMostUsed( const std::tstring& text )
 void CItemListDialog::OnPasteItems( void )
 {
 	std::tstring text;
-	if ( CClipboard::PasteText( text, this ) )
+	if ( CTextClipboard::PasteText( text, m_hWnd ) )
 	{
 		m_content.SplitItems( m_items, text, FindSeparatorMostUsed( text ) );
 		m_selItemPos = std::min( m_selItemPos, m_items.size() - 1 );
@@ -301,7 +301,7 @@ void CItemListDialog::OnPasteItems( void )
 
 void CItemListDialog::OnUpdatePasteItems( CCmdUI* pCmdUI )
 {
-	pCmdUI->Enable( CClipboard::CanPasteText() && !InEditMode() );
+	pCmdUI->Enable( CTextClipboard::CanPasteText() && !InEditMode() );
 }
 
 

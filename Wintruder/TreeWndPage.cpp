@@ -9,8 +9,8 @@
 #include "utl/Logger.h"
 #include "utl/Timer.h"
 #include "utl/StringUtilities.h"
+#include "utl/TextClipboard.h"
 #include "utl/UI/AccelTable.h"
-#include "utl/UI/Clipboard.h"
 #include "utl/UI/Icon.h"
 #include "utl/UI/MenuUtilities.h"
 #include "utl/UI/UtilitiesEx.h"
@@ -433,7 +433,7 @@ void CTreeWndPage::OnCopyTreeAncestors( void )
 	if ( ancestors.size() > 1 )					// multi-line
 		itemsText += _T("\r\n");
 
-	CClipboard::CopyText( itemsText, this );
+	CTextClipboard::CopyText( itemsText, m_hWnd );
 }
 
 void CTreeWndPage::OnCopyTreeChildren( void )
@@ -446,7 +446,7 @@ void CTreeWndPage::OnCopyTreeChildren( void )
 		if ( itemCount > 1 )					// multi-line
 			itemsText += _T("\r\n");
 
-		CClipboard::CopyText( itemsText, this );
+		CTextClipboard::CopyText( itemsText, m_hWnd );
 	}
 }
 

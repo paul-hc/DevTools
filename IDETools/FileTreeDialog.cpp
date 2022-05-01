@@ -9,7 +9,7 @@
 #include "resource.h"
 #include "utl/ContainerUtilities.h"
 #include "utl/FileSystem.h"
-#include "utl/UI/Clipboard.h"
+#include "utl/TextClipboard.h"
 #include "utl/UI/CtrlUiState.h"
 #include "utl/UI/CmdUpdate.h"
 #include "utl/UI/DialogToolBar.h"
@@ -960,7 +960,7 @@ void CFileTreeDialog::CmCopyFullPath( void )
 {
 	TTreeItemPair itemPair = GetSelectedItem();
 	if ( itemPair.first != NULL && itemPair.second->m_path.FileExist() )
-		CClipboard::CopyText( itemPair.second->m_path.Get() );
+		CTextClipboard::CopyText( itemPair.second->m_path.Get(), m_hWnd );
 }
 
 void CFileTreeDialog::CmLocateFile( void )
@@ -1051,5 +1051,5 @@ void CFileTreeDialog::CmCopyToClipboard( void )
 {
 	std::tstring allItemsText;
 	ForEach( (TIterFunc)_appendItemTextLine, TVI_ROOT, &allItemsText );
-	CClipboard::CopyText( allItemsText );
+	CTextClipboard::CopyText( allItemsText, m_hWnd );
 }

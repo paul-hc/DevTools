@@ -15,7 +15,7 @@
 #include "Application.h"
 #include "resource.h"
 #include "utl/StringUtilities.h"
-#include "utl/UI/Clipboard.h"
+#include "utl/TextClipboard.h"
 #include "utl/UI/MenuUtilities.h"
 
 #ifdef _DEBUG
@@ -399,10 +399,10 @@ namespace code
 		}
 
 		std::tstring clipTypeQualifier;
-		if ( CClipboard::CanPasteText() )
+		if ( CTextClipboard::CanPasteText() )
 		{
 			std::tstring clipText;
-			if ( CClipboard::PasteText( clipText, scopedIDE.GetMainWnd() ) )
+			if ( CTextClipboard::PasteText( clipText, scopedIDE.GetMainWnd()->GetSafeHwnd() ) )
 			{
 				str::Trim( clipText );
 				if ( isCppTypeQualifier( clipText ) )

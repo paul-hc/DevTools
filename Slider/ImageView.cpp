@@ -14,7 +14,7 @@
 #include "Application.h"
 #include "resource.h"
 #include "utl/FileSystem.h"
-#include "utl/UI/Clipboard.h"
+#include "utl/TextClipboard.h"
 #include "utl/UI/CmdUpdate.h"
 #include "utl/UI/MenuUtilities.h"
 #include "utl/UI/PostCall.h"
@@ -462,7 +462,7 @@ void CImageView::OnEditCopy( void )
 	if ( CWicImage* pImage = GetImage() )
 		imageFileName = pImage->GetImagePath().Get();
 
-	CClipboard::CopyText( imageFileName, this );
+	CTextClipboard::CopyText( imageFileName, m_hWnd );
 }
 
 void CImageView::OnUpdateEditCopy( CCmdUI* pCmdUI )

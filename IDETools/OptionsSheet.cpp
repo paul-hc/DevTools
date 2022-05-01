@@ -7,7 +7,7 @@
 #include "resource.h"
 #include "utl/ContainerUtilities.h"
 #include "utl/FileSystem.h"
-#include "utl/UI/Clipboard.h"
+#include "utl/TextClipboard.h"
 #include "utl/UI/UtilitiesEx.h"
 #include "utl/UI/resource.h"
 #include <sstream>
@@ -729,7 +729,7 @@ void CDirectoriesPage::OnResetDefault( void )
 void CDirectoriesPage::OnCopyPaths( void )
 {
 	const CIncludePaths* pIncludePaths = m_pDirSets->GetCurrentPaths();
-	CClipboard::CopyText( pIncludePaths->FormatLines(), this );
+	CTextClipboard::CopyText( pIncludePaths->FormatLines(), m_hWnd );
 }
 
 void CDirectoriesPage::OnUpdateCopyPaths( CCmdUI* pCmdUI )
@@ -740,7 +740,7 @@ void CDirectoriesPage::OnUpdateCopyPaths( CCmdUI* pCmdUI )
 void CDirectoriesPage::OnPastePaths( void )
 {
 	std::tstring linesSpec;
-	if ( CClipboard::PasteText( linesSpec, this ) )
+	if ( CTextClipboard::PasteText( linesSpec, m_hWnd ) )
 	{
 		CIncludePaths* pIncludePaths = m_pDirSets->RefCurrentPaths();
 		if ( pIncludePaths->ParseLines( linesSpec ) )
@@ -752,5 +752,5 @@ void CDirectoriesPage::OnPastePaths( void )
 
 void CDirectoriesPage::OnUpdatePastePaths( CCmdUI* pCmdUI )
 {
-	pCmdUI->Enable( CClipboard::CanPasteText() && m_pDirSets->GetCurrentPaths() != NULL );
+	pCmdUI->Enable( CTextClipboard::CanPasteText() && m_pDirSets->GetCurrentPaths() != NULL );
 }

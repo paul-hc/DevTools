@@ -2,13 +2,13 @@
 #include "stdafx.h"
 #include "TreeControl.h"
 #include "TreeControlCustomDraw.h"
-#include "Clipboard.h"
 #include "Color.h"
 #include "CustomDrawImager.h"
 #include "Icon.h"
 #include "ContainerUtilities.h"
 #include "MenuUtilities.h"
 #include "UtilitiesEx.h"
+#include "utl/TextClipboard.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -58,7 +58,7 @@ bool CTreeControl::Copy( void )
 	HTREEITEM hSelItem = GetSelectedItem();
 	return
 		hSelItem != NULL &&
-		CClipboard::CopyText( FormatCode( GetItemObject< utl::ISubject >( hSelItem ) ), this );
+		CTextClipboard::CopyText( FormatCode( GetItemObject< utl::ISubject >( hSelItem ) ), m_hWnd );
 }
 
 void CTreeControl::StoreImageList( CImageList* pImageList )

@@ -203,7 +203,7 @@ bool CDropFilesModel::PasteDeep( const fs::CPath& relFolderPath, CWnd* pParentOw
 	std::vector< fs::CPath > newDropPaths;
 	DROPEFFECT newDropEffect = CClipboard::QueryDropFilePaths( newDropPaths );
 	if ( newDropEffect == m_dropEffect && newDropPaths == m_dropPaths )				// this was a long process: user did not do a new other copy & paste in the meantime?
-		CClipboard::CopyToLines( destPaths, pParentOwner );							// clear clipboard after Paste, and add the destination paths as text
+		CTextClipboard::CopyToLines( destPaths, pParentOwner->GetSafeHwnd() );		// clear clipboard after Paste, and add the destination paths as text
 
 	return true;
 }

@@ -2,12 +2,12 @@
 #include "stdafx.h"
 #include "PathItemListCtrl.h"
 #include "PathItemBase.h"
-#include "Clipboard.h"
 #include "MenuUtilities.h"
 #include "StringUtilities.h"
 #include "Utilities.h"
 #include "resource.h"
 #include "utl/ContainerUtilities.h"
+#include "utl/TextClipboard.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -119,7 +119,7 @@ void CPathItemListCtrl::OnCopyFilenames( void )
 		for ( std::vector< std::tstring >::iterator itFilePath = selFilePaths.begin(); itFilePath != selFilePaths.end(); ++itFilePath )
 			path::StripPrefix( *itFilePath, commonDirPath.GetPtr() );
 
-	if ( !CClipboard::CopyToLines( selFilePaths, this ) )
+	if ( !CTextClipboard::CopyToLines( selFilePaths, m_hWnd ) )
 		ui::BeepSignal( MB_ICONWARNING );
 }
 
@@ -132,7 +132,7 @@ void CPathItemListCtrl::OnCopyFolders( void )
 	std::vector< fs::CPath > parentDirPaths;
 	path::QueryParentPaths( parentDirPaths, selFilePaths );
 
-	if ( !CClipboard::CopyToLines( parentDirPaths, this ) )
+	if ( !CTextClipboard::CopyToLines( parentDirPaths, m_hWnd ) )
 		ui::BeepSignal( MB_ICONWARNING );
 }
 

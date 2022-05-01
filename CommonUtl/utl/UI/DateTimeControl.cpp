@@ -2,11 +2,11 @@
 #include "stdafx.h"
 #include "DateTimeControl.h"
 #include "AccelTable.h"
-#include "Clipboard.h"
 #include "CmdUpdate.h"
 #include "MenuUtilities.h"
 #include "Utilities.h"
 #include "TimeUtils.h"
+#include "utl/TextClipboard.h"
 #include "resource.h"
 
 #ifdef _DEBUG
@@ -239,13 +239,13 @@ void CDateTimeControl::OnCut( void )
 void CDateTimeControl::OnCopy( void )
 {
 	std::tstring text = time_utl::FormatTimestamp( GetDateTime() );
-	CClipboard::CopyText( text, this );
+	CTextClipboard::CopyText( text, m_hWnd );
 }
 
 void CDateTimeControl::OnPaste( void )
 {
 	std::tstring text;
-	if ( CClipboard::PasteText( text, this ) )
+	if ( CTextClipboard::PasteText( text, m_hWnd ) )
 		if ( !UserSetDateTime( time_utl::ParseTimestamp( text ) ) )
 			ui::BeepSignal( MB_ICONWARNING );
 }
@@ -254,7 +254,7 @@ void CDateTimeControl::OnUpdatePaste( CCmdUI* pCmdUI )
 {
 	bool enable = false;
 	std::tstring text;
-	if ( CClipboard::PasteText( text, this ) )
+	if ( CTextClipboard::PasteText( text, m_hWnd ) )
 		enable = !IsNullDateTime( time_utl::ParseTimestamp( text ) );
 
 	pCmdUI->Enable( enable );

@@ -14,7 +14,7 @@
 #include "utl/FmtUtils.h"
 #include "utl/RuntimeException.h"
 #include "utl/StringRange.h"
-#include "utl/UI/Clipboard.h"
+#include "utl/TextClipboard.h"
 #include "utl/UI/ObjectCtrlBase.h"
 #include "utl/UI/ShellUtilities.h"
 
@@ -181,7 +181,7 @@ bool CFileModel::CopyClipSourcePaths( fmt::PathFormat format, CWnd* pWnd, const 
 	for ( std::vector< fs::CPath >::const_iterator itSrcPath = m_sourcePaths.begin(); itSrcPath != m_sourcePaths.end(); ++itSrcPath )
 		sourcePaths.push_back( FormatPath( *itSrcPath, format, pDisplayAdapter ) );
 
-	return CClipboard::CopyToLines( sourcePaths, pWnd );
+	return CTextClipboard::CopyToLines( sourcePaths, pWnd->GetSafeHwnd() );
 }
 
 utl::ICommand* CFileModel::MakeClipPasteDestPathsCmd( CWnd* pWnd, const CDisplayFilenameAdapter* pDisplayAdapter ) throws_( CRuntimeException )
@@ -191,7 +191,7 @@ utl::ICommand* CFileModel::MakeClipPasteDestPathsCmd( CWnd* pWnd, const CDisplay
 	static const CRuntimeException s_noDestExc( _T("No destination file paths available to paste.") );
 
 	std::vector< std::tstring > textPaths;
-	if ( !CClipboard::CanPasteText() || !CClipboard::PasteFromLines( textPaths, pWnd ) )
+	if ( !CTextClipboard::CanPasteText() || !CTextClipboard::PasteFromLines( textPaths, pWnd->GetSafeHwnd() ) )
 		throw s_noDestExc;
 
 	for ( std::vector< std::tstring >::iterator itPath = textPaths.begin(); itPath != textPaths.end(); )
@@ -268,7 +268,7 @@ bool CFileModel::CopyClipSourceFileStates( CWnd* pWnd ) const
 	for ( std::vector< CTouchItem* >::const_iterator itTouchItem = m_touchItems.begin(); itTouchItem != m_touchItems.end(); ++itTouchItem )
 		sourcePaths.push_back( fmt::FormatClipFileState( ( *itTouchItem )->GetSrcState(), fmt::FilenameExt ) );
 
-	return CClipboard::CopyToLines( sourcePaths, pWnd );
+	return CTextClipboard::CopyToLines( sourcePaths, pWnd->GetSafeHwnd() );
 }
 
 utl::ICommand* CFileModel::MakeClipPasteDestFileStatesCmd( CWnd* pWnd ) throws_( CRuntimeException )
@@ -276,8 +276,8 @@ utl::ICommand* CFileModel::MakeClipPasteDestFileStatesCmd( CWnd* pWnd ) throws_(
 	REQUIRE( !m_touchItems.empty() );		// should be initialized
 
 	std::vector< std::tstring > lines;
-	if ( CClipboard::CanPasteText() )
-		CClipboard::PasteFromLines( lines, pWnd );
+	if ( CTextClipboard::CanPasteText() )
+		CTextClipboard::PasteFromLines( lines, pWnd->GetSafeHwnd() );
 
 	for ( std::vector< std::tstring >::iterator itLine = lines.begin(); itLine != lines.end(); )
 	{

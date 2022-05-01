@@ -2,7 +2,7 @@
 #include "stdafx.h"
 #include "FlagsEdit.h"
 #include "resource.h"
-#include "utl/UI/Clipboard.h"
+#include "utl/TextClipboard.h"
 #include "utl/UI/CtrlUiState.h"
 #include "utl/UI/TextEdit.h"
 
@@ -105,7 +105,7 @@ LRESULT CFlagsEdit::OnWmCopy( WPARAM, LPARAM )
 
 void CFlagsEdit::OnCopy( void )
 {
-	CClipboard::CopyText( Format(), this );
+	CTextClipboard::CopyText( Format(), m_hWnd );
 }
 
 void CFlagsEdit::OnUpdateCopy( CCmdUI* /*pCmdUI*/ )
