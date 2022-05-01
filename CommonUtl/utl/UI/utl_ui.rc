@@ -465,8 +465,9 @@ END
 
 STRINGTABLE 
 BEGIN
-    ID_EDIT_CLEAR           "Clear\nClear selected text (Del)"
-    ID_EDIT_CLEAR_ALL       "Clear All\nClear all text"
+    // avoid duplication defined in afxres.rc
+    //ID_EDIT_CLEAR           "Clear\nClear selected text (Del)"
+    //ID_EDIT_CLEAR_ALL       "Clear All\nClear all text"
     ID_EDIT_COPY            "Copy to clipboard\nCopy to Clipboard (Ctrl+C)"
     ID_EDIT_CUT             "Cut to clipboard\nCut to Clipboard (Ctrl+X)"
     ID_EDIT_PASTE           "Paste from clipboard\nPaste from Clipboard (Ctrl+V)"
