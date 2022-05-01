@@ -10,6 +10,7 @@
 #include "FileChecksumsDialog.h"
 #include "BuddyControlsDialog.h"
 #include "test/ImageTests.h"
+#include "utl/UI/CmdUpdate.h"
 #include "utl/UI/Utilities.h"
 #include "utl/UI/resource.h"
 #include "resource.h"
@@ -65,11 +66,18 @@ BOOL CTestFormView::OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINF
 		CLayoutFormView::OnCmdMsg( id, code, pExtra, pHandlerInfo );
 }
 
+void CTestFormView::OnIdleUpdateControls( void )
+{
+	__super::OnIdleUpdateControls();
+	ui::UpdateDlgItemUI( this, IDC_PASTE_FILES_BUTTON );
+}
+
 void CTestFormView::OnInitialUpdate( void )
 {
 	CLayoutFormView::OnInitialUpdate();
 	ResizeParentToFit();
 }
+
 
 BEGIN_MESSAGE_MAP( CTestFormView, CLayoutFormView )
 	ON_BN_CLICKED( IDC_RUN_IMAGE_TESTS, OnRunImageUnitTests )

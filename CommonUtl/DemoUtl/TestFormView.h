@@ -20,19 +20,22 @@ public:
 	virtual void QueryTooltipText( std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const;
 
 	CTestDoc* GetDocument( void ) const { return reinterpret_cast<CTestDoc*>( m_pDocument ); }
+protected:
+	// base overrides
+	virtual void OnIdleUpdateControls( void );
 private:
 	// enum { IDD = IDD_DEMO_FORM };
 
 	std::auto_ptr<CDemoTemplate> m_pDemo;
+
+	// generated stuff
 public:
-	// generated overrides
 	virtual BOOL PreCreateWindow( CREATESTRUCT& cs );
 	virtual BOOL OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo );
 protected:
 	virtual void DoDataExchange( CDataExchange* pDX );
 	virtual void OnInitialUpdate( void );
 protected:
-	// message map functions
 	afx_msg void OnRunImageUnitTests( void );
 	afx_msg void OnStudyImage( void );
 	afx_msg void OnStudyListDiffs( void );

@@ -947,6 +947,8 @@ STRINGTABLE
 BEGIN
     IDC_SEQ_COUNTER_RESET_BUTTON "Reset numeric sequence to 1"
     IDC_DETAIL_SHEET_STATIC "List control page|Edit, combo-boxes and button page|Embedded property sheet page|Embedded main demo page"
+    IDC_COPY_SOURCE_PATHS_BUTTON "Copy source file paths"
+    IDC_PASTE_FILES_BUTTON  "Paste destination file paths"
     IDC_CAPITALIZE_BUTTON   "Capitalize filename using sentence case, make extension lower case"
 END
 

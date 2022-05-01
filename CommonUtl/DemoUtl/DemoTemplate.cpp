@@ -6,6 +6,7 @@
 #include "TestDialog.h"
 #include "TestPropertySheet.h"
 #include "utl/StringUtilities.h"
+#include "utl/UI/Clipboard.h"
 #include "utl/UI/LayoutEngine.h"
 #include "utl/UI/CmdUpdate.h"
 #include "utl/UI/UtilitiesEx.h"
@@ -16,6 +17,8 @@
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
+
+#include "utl/UI/TandemControls.hxx"
 
 
 namespace layout
@@ -59,6 +62,7 @@ CDemoTemplate::CDemoTemplate( CWnd* pOwner )
 	, m_pOwner( pOwner )
 	, m_pLayoutEngine( dynamic_cast<ui::ILayoutEngine*>( m_pOwner ) )
 	, m_selRadio( 0 )
+	, m_seqCounterLabel( H_AlignLeft | V_AlignBottom | ui::V_TileMate )
 	, m_dialogButton( &GetTags_ResizeStyle() )
 	, m_pickFormatCheckedStatic( ui::DropDown )
 	, m_resetSeqCounterButton( ID_RESET_DEFAULT )
@@ -67,6 +71,10 @@ CDemoTemplate::CDemoTemplate( CWnd* pOwner )
 {
 	ASSERT_PTR( m_pLayoutEngine );
 	m_pLayoutEngine->RegisterCtrlLayout( layout::templateStyles, COUNT_OF( layout::templateStyles ) );
+
+	m_seqCounterLabel.GetMateToolbar()->GetStrip()
+		.AddButton( IDC_COPY_SOURCE_PATHS_BUTTON, ID_EDIT_COPY )
+		.AddButton( IDC_PASTE_FILES_BUTTON, ID_EDIT_PASTE );
 
 	m_pickFormatCheckedStatic.m_useText = true;
 	m_changeCaseButton.SetSelValue( ExtLowerCase );
@@ -134,8 +142,9 @@ void CDemoTemplate::DoDataExchange( CDataExchange* pDX )
 	bool firstInit = NULL == m_formatCombo.m_hWnd;
 	if ( firstInit )
 		if ( GetMarkupDepth( dynamic_cast<CDemoPage*>( m_pOwner ) ) <= MaxDemoDepth )
-			m_detailSheet.AddPage( new CDemoPage );
+			m_detailSheet.AddPage( new CDemoPage() );
 
+	DDX_Control( pDX, IDC_SEQ_COUNTER_LABEL, m_seqCounterLabel );
 	DDX_Control( pDX, IDC_OPEN_DIALOG_BUTTON, m_dialogButton );
 	DDX_Control( pDX, IDC_FORMAT_COMBO, m_formatCombo );
 	DDX_Control( pDX, IDC_DROP_RIGHT_ARROW_STATIC, m_pickFormatStatic );
@@ -183,6 +192,10 @@ BEGIN_MESSAGE_MAP( CDemoTemplate, CCmdTarget )
 	ON_UPDATE_COMMAND_UI_RANGE( ID_NUMERIC_SEQUENCE_2DIGITS, ID_NUMERIC_SEQUENCE_5DIGITS, OnUpdateNumSequence )
 	ON_COMMAND_RANGE( ID_DROP_RIGHT, ID_DROP_UP, OnDropAlignCheckedPicker )
 	ON_UPDATE_COMMAND_UI_RANGE( ID_DROP_RIGHT, ID_DROP_UP, OnUpdateDropAlignCheckedPicker )
+	ON_COMMAND( IDC_COPY_SOURCE_PATHS_BUTTON, OnClipboardCopy )
+	ON_UPDATE_COMMAND_UI( IDC_COPY_SOURCE_PATHS_BUTTON, OnUpdateClipboardCopy )
+	ON_COMMAND( IDC_PASTE_FILES_BUTTON, OnClipboardPaste )
+	ON_UPDATE_COMMAND_UI( IDC_PASTE_FILES_BUTTON, OnUpdateClipboardPaste )
 END_MESSAGE_MAP()
 
 void CDemoTemplate::OnToggle_DisableSmoothResize( void )
@@ -267,6 +280,45 @@ void CDemoTemplate::OnUpdateDropAlignCheckedPicker( CCmdUI* pCmdUI )
 {
 	ui::PopupAlign dropAlign = static_cast<ui::PopupAlign>( pCmdUI->m_nID - ID_DROP_RIGHT );
 	ui::SetRadio( pCmdUI, m_pickFormatCheckedStatic.GetPopupAlign() == dropAlign );				// keep the nice radio checkmark
+}
+
+void CDemoTemplate::OnClipboardCopy( void )
+{
+	fs::CPath execDirPath = app::GetModulePath().GetParentPath().GetParentPath();
+	const std::vector< std::tstring >& srcItems = GetTextItems();
+	std::vector< fs::CPath > filePaths;
+
+	for ( std::vector< std::tstring >::const_iterator itSrc = srcItems.begin(); itSrc != srcItems.end(); ++itSrc )
+	{
+		std::vector< std::tstring > subItems;
+		str::Split( subItems, itSrc->c_str(), _T("|") );
+
+		filePaths.push_back( execDirPath / subItems.front() );
+	}
+
+	if ( CClipboard::CopyToLines( filePaths, m_pOwner ) )
+		ui::MessageBox( str::Format( _T("Copied %d file paths to clipboard."), filePaths.size() ) );
+	else
+		ui::MessageBox( _T("Error copying file paths to clipboard!") );
+}
+
+void CDemoTemplate::OnUpdateClipboardCopy( CCmdUI* pCmdUI )
+{
+	pCmdUI;
+}
+
+void CDemoTemplate::OnClipboardPaste( void )
+{
+	std::vector< fs::CPath > filePaths;
+	if ( CClipboard::PasteFromLines( filePaths, m_pOwner ) )
+		ui::MessageBox( str::Format( _T("Pasted %d file paths from clipboard:\n\n%s"), filePaths.size(), str::JoinLines( filePaths, _T("\n") ).c_str() ) );
+	else
+		ui::MessageBox( _T("Error pasting file paths from clipboard!") );
+}
+
+void CDemoTemplate::OnUpdateClipboardPaste( CCmdUI* pCmdUI )
+{
+	pCmdUI->Enable( CClipboard::CanPasteText() );
 }
 
 

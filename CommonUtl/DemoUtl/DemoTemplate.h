@@ -9,6 +9,7 @@
 #include "utl/UI/SplitPushButton.h"
 #include "utl/UI/SpinEdit.h"
 #include "utl/UI/EnumSplitButton.h"
+#include "utl/UI/TandemControls.h"
 #include "utl/UI/ThemeStatic.h"
 
 
@@ -37,6 +38,7 @@ private:
 	ui::ILayoutEngine* m_pLayoutEngine;
 	UINT m_selRadio;
 public:
+	CHostToolbarCtrl<CStatic> m_seqCounterLabel;
 	CEnumSplitButton m_dialogButton;
 	CComboBox m_formatCombo;
 	CPickMenuStatic m_pickFormatStatic;
@@ -64,6 +66,10 @@ private:
 	afx_msg void OnUpdateNumSequence( CCmdUI* pCmdUI );
 	afx_msg void OnDropAlignCheckedPicker( UINT cmdId );
 	afx_msg void OnUpdateDropAlignCheckedPicker( CCmdUI* pCmdUI );
+	afx_msg void OnClipboardCopy( void );
+	afx_msg void OnUpdateClipboardCopy( CCmdUI* pCmdUI );
+	afx_msg void OnClipboardPaste( void );
+	afx_msg void OnUpdateClipboardPaste( CCmdUI* pCmdUI );
 
 	DECLARE_MESSAGE_MAP()
 };
