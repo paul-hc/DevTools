@@ -496,6 +496,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Table.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Table.h"
+				>
+			</File>
+			<File
 				RelativePath=".\TreeGuides.cpp"
 				>
 			</File>

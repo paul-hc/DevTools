@@ -2,6 +2,7 @@
 #include "stdafx.h"
 #include "Directory.h"
 #include "CmdLineOptions.h"
+#include "Table.h"
 #include "TreeGuides.h"
 #include "utl/FileEnumerator.h"
 #include "utl/Timer.h"
@@ -72,10 +73,12 @@ namespace app
 
 const TCHAR CDirectory::s_wildSpec[] = _T("*");
 double CDirectory::s_totalElapsedEnum = 0.0;
+fs::CPath CDirectory::s_nullPath;
 
 CDirectory::CDirectory( const CCmdLineOptions& options )
 	: m_options( options )
 	, m_dirPath( m_options.m_dirPath )
+	, m_pTableFolder( m_options.GetTable()->GetRoot() )
 	, m_depth( 0 )
 {
 	s_totalElapsedEnum = 0.0;
@@ -84,11 +87,30 @@ CDirectory::CDirectory( const CCmdLineOptions& options )
 CDirectory::CDirectory( const CDirectory* pParent, const fs::CPath& subDirPath )
 	: m_options( pParent->m_options )
 	, m_dirPath( subDirPath )
+	, m_pTableFolder( NULL )
 	, m_depth( pParent->m_depth + 1 )
 {
 }
 
-void CDirectory::List( std::wostream& os, const CTreeGuides& guideParts, const std::wstring& parentNodePrefix )
+CDirectory::CDirectory( const CDirectory* pParent, const CTextCell* pTableFolder )
+	: m_options( pParent->m_options )
+	, m_dirPath( s_nullPath )
+	, m_pTableFolder( pTableFolder )
+	, m_depth( pParent->m_depth + 1 )
+{
+}
+
+void CDirectory::ListContents( std::wostream& os, const CTreeGuides& guideParts )
+{
+	const std::wstring rootNodePrefix;
+
+	if ( m_options.HasOptionFlag( app::TableInputMode ) )
+		ListTableFolder( os, guideParts, rootNodePrefix );
+	else
+		ListDir( os, guideParts, rootNodePrefix );
+}
+
+void CDirectory::ListDir( std::wostream& os, const CTreeGuides& guideParts, const std::wstring& parentNodePrefix )
 {
 	app::CDirEnumerator found( m_options );
 	CTimer enumTimer;
@@ -108,8 +130,9 @@ void CDirectory::List( std::wostream& os, const CTreeGuides& guideParts, const s
 					<< found.m_filePaths[ pos ].GetFilenamePtr()
 					<< std::endl;
 
-			if ( !str::TrimRight( fullPrefix ).empty() )		// remove trailing spaces on empty line
-				os << fullPrefix << std::endl;
+			if ( !m_options.HasOptionFlag( app::SkipFileGroupLine ) )
+				if ( !str::TrimRight( fullPrefix ).empty() )		// remove trailing spaces on empty line
+					os << fullPrefix << std::endl;
 		}
 
 	for ( CPagePos subDirPos( found.m_subDirPaths ); !subDirPos.AtEnd(); ++subDirPos )
@@ -125,7 +148,57 @@ void CDirectory::List( std::wostream& os, const CTreeGuides& guideParts, const s
 		if ( m_depth + 1 < m_options.m_maxDepthLevel )
 		{	// recurse
 			CDirectory subDirectory( this, subDirPath );
-			subDirectory.List( os, guideParts, parentNodePrefix + guideParts.GetSubDirRecursePrefix( subDirPos ) );
+			subDirectory.ListDir( os, guideParts, parentNodePrefix + guideParts.GetSubDirRecursePrefix( subDirPos ) );
 		}
+	}
+}
+
+void CDirectory::ListTableFolder( std::wostream& os, const CTreeGuides& guideParts, const std::wstring& parentNodePrefix )
+{
+	ASSERT_PTR( m_pTableFolder );
+
+	std::vector< CTextCell* > subFolders;
+	m_pTableFolder->QuerySubFolders( subFolders );
+
+	if ( m_options.HasOptionFlag( app::DisplayFiles ) && !m_options.HasOptionFlag( app::NoOutput ) )
+	{
+		std::vector< CTextCell* > leafs;
+		m_pTableFolder->QueryLeafs( leafs );
+
+		if ( !leafs.empty() )
+		{
+			std::wstring fullPrefix = parentNodePrefix + guideParts.GetFilePrefix( !subFolders.empty() );
+
+			for ( size_t pos = 0; pos != leafs.size(); ++pos )
+				os
+					<< fullPrefix
+					<< leafs[ pos ]->GetName()
+					<< std::endl;
+
+			if ( !m_options.HasOptionFlag( app::SkipFileGroupLine ) )
+				if ( !str::TrimRight( fullPrefix ).empty() )		// remove trailing spaces on empty line
+					os << fullPrefix << std::endl;
+		}
+	}
+
+	for ( CPagePos subDirPos( subFolders ); !subDirPos.AtEnd(); ++subDirPos )
+	{
+		const CTextCell* pSubFolder = subFolders[ subDirPos.m_pos ];
+
+		if ( !m_options.HasOptionFlag( app::NoOutput ) )
+			os
+				<< parentNodePrefix << guideParts.GetTable_SubDirPrefix( m_depth, subDirPos )
+				<< pSubFolder->GetName()
+				<< std::endl;
+
+		if ( m_depth + 1 < m_options.m_maxDepthLevel )
+		{	// recurse
+			CDirectory subDirectory( this, pSubFolder );
+			subDirectory.ListTableFolder( os, guideParts, parentNodePrefix + guideParts.GetTable_SubDirRecursePrefix( m_depth, subDirPos ) );
+		}
+
+		if ( !m_options.HasOptionFlag( app::SkipFileGroupLine ) )
+			if ( !m_options.HasOptionFlag( app::NoOutput ) && 0 == m_depth && !subDirPos.IsLast() )
+				os << std::endl;		// print extra line as root cell separator
 	}
 }

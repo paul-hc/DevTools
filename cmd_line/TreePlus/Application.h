@@ -10,7 +10,7 @@ struct CCmdLineOptions;
 
 namespace app
 {
-	void RunMain( std::wostream& os, const CCmdLineOptions& options ) throws_( std::exception, CException* );
+	void RunMain( std::wstringstream& os, const CCmdLineOptions& options ) throws_( std::exception, CException* );
 };
 
 

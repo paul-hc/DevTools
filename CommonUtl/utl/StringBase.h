@@ -461,6 +461,31 @@ namespace str
 		return rText;
 	}
 
+
+	// trim copy
+
+	template< typename CharT >
+	std::basic_string<CharT> GetTrim( const std::basic_string<CharT>& rText, const CharT* pWhiteSpace = StdWhitespace<CharT>() )
+	{
+		std::basic_string<CharT> trimmed = rText;
+		return Trim( trimmed, pWhiteSpace );
+	}
+
+	template< typename CharT >
+	std::basic_string<CharT> GetTrimRight( const std::basic_string<CharT>& rText, const CharT* pWhiteSpace = StdWhitespace<CharT>() )
+	{
+		std::basic_string<CharT> trimmed = rText;
+		return TrimRight( trimmed, pWhiteSpace );
+	}
+
+	template< typename CharT >
+	std::basic_string<CharT> GetTrimLeft( const std::basic_string<CharT>& rText, const CharT* pWhiteSpace = StdWhitespace<CharT>() )
+	{
+		std::basic_string<CharT> trimmed = rText;
+		return TrimLeft( trimmed, pWhiteSpace );
+	}
+
+
 #ifdef _MFC_VER
 	inline CStringA& Trim( CStringA& rText ) { rText.TrimLeft(); rText.TrimRight(); return rText; }
 	inline CStringW& Trim( CStringW& rText ) { rText.TrimLeft(); rText.TrimRight(); return rText; }

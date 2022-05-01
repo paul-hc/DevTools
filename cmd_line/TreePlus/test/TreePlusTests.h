@@ -8,6 +8,9 @@
 #include "utl/test/UnitTest.h"
 
 
+class CTextCell;
+
+
 class CTreePlusTests : public ut::CConsoleTestCase
 {
 	CTreePlusTests( void );
@@ -17,9 +20,12 @@ public:
 	// ut::ITestCase interface
 	virtual void Run( void );
 private:
+	void testTable( const CTextCell* pTableRoot );
+
 	// unit tests
 	void TestOnlyDirectories( void );
 	void TestFilesAndDirectories( void );
+	void TestTableInput( void );
 };
 
 

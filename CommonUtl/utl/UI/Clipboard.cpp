@@ -2,9 +2,11 @@
 #include "stdafx.h"
 #include "Clipboard.h"
 #include "FileSystem.h"
+#include "utl/StringUtilities.h"
+
+// for CF_HDROP utils
 #include "OleUtils.h"
 #include "ShellUtilities.h"
-#include "utl/StringUtilities.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

@@ -1,6 +1,7 @@
 
 #include "stdafx.h"
 #include "CmdLineOptions.h"
+#include "Table.h"
 #include "utl/EnumTags.h"
 #include "utl/FileSystem.h"
 #include "utl/RuntimeException.h"
@@ -45,8 +46,10 @@ bool CCmdLineOptions::ParseValue( std::tstring& rValue, const TCHAR* pArg, const
 	return false;
 }
 
-void CCmdLineOptions::ParseCommandLine( int argc, TCHAR* argv[] ) throws_( CRuntimeException )
+void CCmdLineOptions::ParseCommandLine( int argc, const TCHAR* const argv[] ) throws_( CRuntimeException )
 {
+	std::tstring value;
+
 	for ( int i = 1; i != argc; ++i )
 	{
 		m_pArg = argv[ i ];
@@ -54,7 +57,6 @@ void CCmdLineOptions::ParseCommandLine( int argc, TCHAR* argv[] ) throws_( CRunt
 		if ( arg::IsSwitch( m_pArg ) )
 		{
 			const TCHAR* pSwitch = m_pArg + 1;
-			std::tstring value;
 
 			if ( arg::Equals( pSwitch, _T("f") ) )
 				m_optionFlags.Set( app::DisplayFiles );
@@ -64,14 +66,18 @@ void CCmdLineOptions::ParseCommandLine( int argc, TCHAR* argv[] ) throws_( CRunt
 				m_optionFlags.Set( app::NoSorting );
 			else if ( ParseValue( value, pSwitch, _T("gs") ) )
 			{
-				if ( arg::Equals( value.c_str(), _T("G") ) )
+				if ( arg::StartsWith( value.c_str(), _T("G") ) )
 					m_guidesProfileType = GraphGuides;
-				else if ( arg::Equals( value.c_str(), _T("A") ) )
+				else if ( arg::StartsWith( value.c_str(), _T("A") ) )
 					m_guidesProfileType = AsciiGuides;
-				else if ( arg::Equals( value.c_str(), _T("B") ) )
+				else if ( arg::StartsWith( value.c_str(), _T("B") ) )
 					m_guidesProfileType = BlankGuides;
+				else if ( arg::StartsWith( value.c_str(), _T("T") ) )
+					m_guidesProfileType = TabGuides;
 				else
 					ThrowInvalidArgument();
+
+				m_optionFlags.Set( app::SkipFileGroupLine, value.length() > 1 && _T('-') == value[ 1 ] );		// has '-' suffix
 			}
 			else if ( ParseValue( value, pSwitch, _T("l") ) )
 			{
@@ -108,7 +114,17 @@ void CCmdLineOptions::ParseCommandLine( int argc, TCHAR* argv[] ) throws_( CRunt
 		}
 		else
 		{
-			if ( m_dirPath.IsEmpty() )
+			if ( ParseValue( value, m_pArg, _T("in") ) )
+			{
+				m_pTable.reset( new CTable() );
+				m_pTable->ParseTextFile( value );
+
+				m_optionFlags |= app::TOption::Make( app::TableInputMode | app::DisplayFiles | app::SkipFileGroupLine | app::NoSorting );
+				m_guidesProfileType = TabGuides;
+			}
+			else if ( ParseValue( value, m_pArg, _T("out") ) )
+				m_outputFilePath = value;
+			else if ( m_dirPath.IsEmpty() )
 				m_dirPath.Set( m_pArg );
 			else
 				throw CRuntimeException( str::Format( _T("Unrecognized argument '%s'"), m_pArg ) );
@@ -120,10 +136,11 @@ void CCmdLineOptions::ParseCommandLine( int argc, TCHAR* argv[] ) throws_( CRunt
 
 void CCmdLineOptions::PostProcessArguments( void ) throws_( CRuntimeException )
 {
-	if ( m_dirPath.IsEmpty() )
-		m_dirPath = fs::GetCurrentDirectory();			// use the current working directory
-	else if ( !fs::IsValidDirectory( m_dirPath.GetPtr() ) )
-		throw CRuntimeException( std::tstring( _T("Invalid dir_path specification: ") ) + m_dirPath.Get() );
+	if ( !HasOptionFlag( app::TableInputMode ) )
+		if ( m_dirPath.IsEmpty() )
+			m_dirPath = fs::GetCurrentDirectory();			// use the current working directory
+		else if ( !fs::IsValidDirectory( m_dirPath.GetPtr() ) )
+			throw CRuntimeException( std::tstring( _T("Invalid dir_path specification: ") ) + m_dirPath.Get() );
 }
 
 void CCmdLineOptions::ThrowInvalidArgument( void ) throws_( CRuntimeException )

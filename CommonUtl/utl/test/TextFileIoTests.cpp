@@ -296,7 +296,7 @@ void CTextFileIoTests::TestWriteRead_Contents( void )
 		const fs::CPath& textPath = pool.GetFilePaths()[ 0 ];
 
 		ut::test_WriteReadContent( encoding, textPath, L"" );				// empty file
-		ut::test_WriteReadContent( encoding, textPath, L"xyz_αβγ" );			// single-line file
+		ut::test_WriteReadContent( encoding, textPath, L"xyz_αβγ" );		// single-line file
 		ut::test_WriteReadContent( encoding, textPath, L"\n" );				// 2-lines file: empty
 		ut::test_WriteReadContent( encoding, textPath, L"\nAα1" );			// 2-lines file: first empty
 		ut::test_WriteReadContent( encoding, textPath, L"Aα1\n" );			// 2-lines file: second empty

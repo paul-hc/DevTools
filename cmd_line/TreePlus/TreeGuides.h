@@ -50,15 +50,21 @@ public:
 
 	const std::wstring& GetSubDirPrefix( const CPagePos& subDirPos ) const { return subDirPos.IsLast() ? m_dirEntryLast : m_dirEntry; }
 	const std::wstring& GetSubDirRecursePrefix( const CPagePos& subDirPos ) const { return subDirPos.IsLast() ? m_fileIndentLast : m_fileIndent; }
+
+	// table-specific guides (using flat root guides)
+	const std::wstring& GetTable_SubDirPrefix( size_t depth, const CPagePos& subDirPos ) const { return depth != 0 ? GetSubDirPrefix( subDirPos ) : s_tableRootLead; }
+	const std::wstring& GetTable_SubDirRecursePrefix( size_t depth, const CPagePos& subDirPos ) const { return depth != 0 ? GetSubDirRecursePrefix( subDirPos ) : s_tableRootLead; }
 private:
 	std::wstring MakePart( size_t indentSize, wchar_t leadCh, wchar_t padCh ) const;
 private:
 	const CGuidesProfile& m_profile;
 
-	const std::wstring m_dirEntry;				// "+---"
-	const std::wstring m_dirEntryLast;			// "\---"
-	const std::wstring m_fileIndent;			// "|   "
-	const std::wstring m_fileIndentLast;		// "    "
+	std::wstring m_dirEntry;			// "+---"
+	std::wstring m_dirEntryLast;		// "\---"
+	std::wstring m_fileIndent;			// "|   "
+	std::wstring m_fileIndentLast;		// "    "
+
+	static const std::wstring s_tableRootLead;		// ""
 };
 
 

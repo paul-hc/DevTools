@@ -8,6 +8,7 @@
 
 
 class CRuntimeException;
+class CTable;
 enum GuidesProfileType;
 
 
@@ -18,7 +19,9 @@ struct CCmdLineOptions
 
 	bool HasOptionFlag( app::Option flag ) const { return m_optionFlags.Has( flag ); }
 
-	void ParseCommandLine( int argc, TCHAR* argv[] ) throws_( CRuntimeException );
+	void ParseCommandLine( int argc, const TCHAR* const argv[] ) throws_( CRuntimeException );
+
+	const CTable* GetTable( void ) const { return m_pTable.get(); }
 private:
 	void PostProcessArguments( void ) throws_( CRuntimeException );
 
@@ -32,10 +35,12 @@ private:
 public:
 	app::TOption m_optionFlags;
 	fs::CPath m_dirPath;
+	std::auto_ptr<CTable> m_pTable;
 	GuidesProfileType m_guidesProfileType;
 	size_t m_maxDepthLevel;
 	size_t m_maxDirFiles;
 	fs::Encoding m_fileEncoding;
+	fs::CPath m_outputFilePath;
 };
 
 

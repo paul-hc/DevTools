@@ -10,6 +10,7 @@
 #include "utl/StdOutput.h"
 #include "utl/StringUtilities.h"
 #include "utl/TextEncoding.h"
+#include "utl/TextFileIo.h"
 #include <iostream>
 
 #ifdef USE_UT
@@ -21,6 +22,8 @@
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
+
+#include "utl/TextFileIo.hxx"
 
 
 namespace ut
@@ -42,11 +45,14 @@ static const char s_helpMessage[] =
 	"\n"
 	"Written by Paul Cocoveanu, 2021.\n"
 	"\n"
-	"TreePlus [dir_path] [-f] [-h] [-ns] [-gs=G|A|B] [-l=N] [-max=FN] [-no] [-p]\n"
+	"TreePlus [dir_path] [-f] [-h] [-ns] [-gs=G|A|B|T[-]] [-l=N] [-max=FN] [-no] [-p]\n"
 	"         [-e=ANSI|UTF8|UTF16] [-t]\n"
 	"\n"
 	"  dir_path\n"
 	"      [drive:][path] - directory path to display.\n"
+	"  in=<table_input_file>\n"
+	"      Read tab-delimited text from the input file.\n"
+	"      No dir_path, use tab guides by default (option '-gs=T-').\n"
 	"  out=<output_file>\n"
 	"      Write output to text file using UTF8 encoding with BOM.\n"
 	"  -f\n"
@@ -55,11 +61,12 @@ static const char s_helpMessage[] =
 	"      Include hidden files.\n"
 	"  -ns\n"
 	"      No sorting of the directory and file names.\n"
-	"  -gs=G|A|B\n"
+	"  -gs=G|A|B|T\n"
 	"      Sub-directory guides style, which could be one of:\n"
 	"         G - Display graphical guides (default).\n"
 	"         A - Display ASCII instead of graphical guides.\n"
 	"         B - Display no guides, just blank spaces.\n"
+	"         T - Display tab guides.\n"
 	"  -l=N\n"
 	"      Maximum depth level of the sub-directories displayed.\n"
 	"  -max=FN\n"
@@ -87,16 +94,20 @@ static const char s_helpMessage[] =
 
 namespace app
 {
-	void RunMain( std::wostream& os, const CCmdLineOptions& options ) throws_( std::exception, CException* )
+	void RunMain( std::wstringstream& os, const CCmdLineOptions& options ) throws_( std::exception, CException* )
 	{
 		CDirectory topDirectory( options );
 
-		os << options.m_dirPath.GetPtr() << std::endl;			// print the root directory
+		if ( !options.HasOptionFlag( app::TableInputMode ) )
+			os << options.m_dirPath.GetPtr() << std::endl;			// print the root directory
 
 		CTreeGuides guideParts( options.m_guidesProfileType, 4 );
 
 		topDirectory.ListContents( os, guideParts );
 		os.flush();			// just in case is using '\n' instead of std::endl
+
+		if ( !options.m_outputFilePath.IsEmpty() )
+			io::WriteStringToFile( options.m_outputFilePath, os.str(), options.m_fileEncoding );
 	}
 
 	void RunTests( void )
@@ -134,8 +145,13 @@ int _tmain( int argc, TCHAR* argv[] )
 			app::RunMain( os, options );
 			timer.AddStage( _T("Main execution") );
 
+			std::wstring outcome = os.str();
+
+			if ( !options.m_outputFilePath.IsEmpty() )
+				outcome = str::Format( _T("Output written to text file: %s\n"), options.m_outputFilePath.GetPtr() );
+
 			io::CStdOutput& rStdOutput = application.GetStdOutput();
-			rStdOutput.Write( os.str(), options.m_fileEncoding );
+			rStdOutput.Write( outcome, options.m_fileEncoding );
 			timer.AddStage( _T("Output execution") );
 
 			if ( options.HasOptionFlag( app::ShowExecTimeStats ) )

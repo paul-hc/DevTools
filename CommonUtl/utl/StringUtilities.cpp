@@ -542,7 +542,7 @@ namespace arg
 
 	bool Equals( const TCHAR* pArg, const TCHAR* pMatch )
 	{
-		return str::Equals< str::IgnoreCase >( pArg, pMatch );
+		return str::Equals<str::IgnoreCase>( pArg, pMatch );
 	}
 
 	bool EqualsAnyOf( const TCHAR* pArg, const TCHAR* pMatchList, const TCHAR* pListDelims /*= _T("|")*/ )
