@@ -1,4 +1,3 @@
-
 #ifndef StdStl_h
 #define StdStl_h
 #pragma once
@@ -12,6 +11,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <tchar.h>
 
 
 #pragma warning( push, 3 )			// switch to warning level 3

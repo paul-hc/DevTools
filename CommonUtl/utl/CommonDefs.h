@@ -52,6 +52,7 @@
 #define ARRAY_PAIR( array ) (array), COUNT_OF( (array) )
 #define ARRAY_PAIR_V( vect ) &(vect).front(), static_cast<unsigned int>( (vect).size() )
 
+#include <unknwn.h>
 
 #ifdef _DEBUG
 	#define HR_AUDIT( expr ) utl::Audit( (expr), (#expr) )
