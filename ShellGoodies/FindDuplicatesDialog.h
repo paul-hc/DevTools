@@ -4,10 +4,10 @@
 
 #include "utl/ISubject.h"
 #include "utl/FileSystem_fwd.h"
-#include "utl/UI/TandemControls.h"
 #include "utl/UI/EnumComboBox.h"
 #include "utl/UI/HistoryComboBox.h"
 #include "utl/UI/PathItemListCtrl.h"
+#include "utl/UI/TandemControls.h"
 #include "utl/UI/TextEdit.h"
 #include "utl/UI/ThemeStatic.h"
 #include "FileEditorBaseDialog.h"

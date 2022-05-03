@@ -33,8 +33,7 @@ CAPTION "Rename Files"
 FONT 8, "MS Shell Dlg", 0, 0, 0x0
 BEGIN
     RTEXT           "Re&name format (fn.ext):",IDC_STATIC,5,9,74,8
-    COMBOBOX        IDC_FORMAT_COMBO,82,6,101,95,CBS_DROPDOWN | CBS_AUTOHSCROLL | WS_VSCROLL | WS_GROUP | WS_TABSTOP
-    LTEXT           "<strip1>",IDC_STRIP_BAR_1,185,6,33,12,SS_CENTERIMAGE | WS_CLIPSIBLINGS | WS_BORDER
+    COMBOBOX        IDC_FORMAT_COMBO,82,6,163,95,CBS_DROPDOWN | CBS_AUTOHSCROLL | WS_VSCROLL | WS_GROUP | WS_TABSTOP
     RTEXT           "&Sequence counter:",IDC_COUNTER_LABEL,17,25,62,8
     EDITTEXT        IDC_SEQ_COUNT_EDIT,82,24,61,12,ES_AUTOHSCROLL | ES_NUMBER | WS_GROUP
     LTEXT           "<strip2>",IDC_STRIP_BAR_2,145,24,46,12,SS_CENTERIMAGE | WS_CLIPSIBLINGS | WS_BORDER
@@ -353,8 +352,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 9,2,6,4
- PRODUCTVERSION 9,2,6,4
+ FILEVERSION 9,2,6,5
+ PRODUCTVERSION 9,2,6,5
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -370,16 +369,16 @@ BEGIN
         BLOCK "040904b0"
         BEGIN
             VALUE "BuildTimestamp", "08-11-2021 00:38:17"
-            VALUE "Comments", "Baloon Tips|Ignore Extention|New Replace Dialog|Command Dashboard|Deep Paste|Split UTL_BASE/UTL_UI|Rename edit page|Highlight text diffs|Edit commands|Text/Binary undo log|Undo log text/binary|Replace dialog auto-fill common prefix|Report list uses callback text for diff items text"
+            VALUE "Comments", "New Rename Files|Baloon Tips|Ignore Extention|New Replace Dialog|Command Dashboard|Deep Paste|Split UTL_BASE/UTL_UI|Rename edit page|Highlight text diffs|Edit commands|Text/Binary undo log|Undo log text/binary|Replace dialog auto-fill common prefix|Report list uses callback text for diff items text"
             VALUE "CompanyName", "Paul Cocoveanu"
             VALUE "Email", "phc.2nd@gmail.com"
             VALUE "FileDescription", "Shell extension for manipulating files and folders"
-            VALUE "FileVersion", "9, 2, 6, 4"
+            VALUE "FileVersion", "9, 2, 6, 5"
             VALUE "InternalName", "Shell Goodies"
-            VALUE "LegalCopyright", "Copyfright © 2001-2019"
+            VALUE "LegalCopyright", "Copyfright © 2001-2022"
             VALUE "OriginalFilename", "ShellGoodies64.dll"
             VALUE "ProductName", "ShellGoodies Shell Extension DLL"
-            VALUE "ProductVersion", "9, 2, 6, 4"
+            VALUE "ProductVersion", "9, 2, 6, 5"
             VALUE "WrittenBy", "Written by Paul Cocoveanu"
         END
     END

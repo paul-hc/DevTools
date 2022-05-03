@@ -29,6 +29,8 @@
 #define new DEBUG_NEW
 #endif
 
+#include "utl/UI/TandemControls.hxx"
+
 
 namespace reg
 {
@@ -88,7 +90,7 @@ CRenameFilesDialog::CRenameFilesDialog( CFileModel* pFileModel, CWnd* pParent )
 	, m_seqCountAutoAdvance( AfxGetApp()->GetProfileInt( reg::section_mainDialog, reg::entry_seqCountAutoAdvance, true ) != FALSE )
 	, m_ignoreExtension( AfxGetApp()->GetProfileInt( reg::section_mainDialog, reg::entry_ignoreExtension, true ) != FALSE )
 	, m_pDisplayFilenameAdapter( new CDisplayFilenameAdapter( m_ignoreExtension ) )
-	, m_formatCombo( ui::HistoryMaxSize, s_specialSep )
+	, m_formatCombo( ui::EditShinkHost_MateOnRight )
 	, m_changeCaseButton( &GetTags_ChangeCase() )
 	, m_delimiterSetCombo( ui::HistoryMaxSize, s_specialSep )
 	, m_delimStatic( CThemeItem( L"EXPLORERBAR", vt::EBP_IEBARMENU, vt::EBM_NORMAL ) )
@@ -110,7 +112,9 @@ CRenameFilesDialog::CRenameFilesDialog( CFileModel* pFileModel, CWnd* pParent )
 
 	m_accelPool.AddAccelTable( new CAccelTable( IDD_RENAME_FILES_DIALOG ) );
 
-	m_formatToolbar.GetStrip()
+	m_formatCombo.SetMaxCount( ui::HistoryMaxSize );
+	m_formatCombo.SetItemSep( s_specialSep );
+	m_formatCombo.GetMateToolbar()->GetStrip()
 		.AddButton( ID_PICK_FORMAT_TOKEN )
 		.AddSeparator()
 		.AddButton( ID_PICK_TEXT_TOOLS )
@@ -406,7 +410,6 @@ void CRenameFilesDialog::DoDataExchange( CDataExchange* pDX )
 	m_filesSheet.DDX_DetailSheet( pDX, IDC_FILES_SHEET );
 
 	DDX_Control( pDX, IDC_FORMAT_COMBO, m_formatCombo );
-	m_formatToolbar.DDX_Placeholder( pDX, IDC_STRIP_BAR_1, H_AlignLeft | V_AlignCenter );
 	DDX_Control( pDX, IDC_SEQ_COUNT_EDIT, m_seqCountEdit );
 	m_seqCountToolbar.DDX_Placeholder( pDX, IDC_STRIP_BAR_2, H_AlignLeft | V_AlignCenter );
 	DDX_Control( pDX, IDC_CAPITALIZE_BUTTON, m_capitalizeButton );
@@ -719,7 +722,7 @@ void CRenameFilesDialog::OnPickFormatToken( void )
 	CMenu popupMenu;
 	ui::LoadPopupMenu( popupMenu, IDR_CONTEXT_MENU, popup::FormatPicker );
 
-	m_formatToolbar.TrackButtonMenu( ID_PICK_FORMAT_TOKEN, this, &popupMenu, ui::DropDown );
+	m_formatCombo.GetMateToolbar()->TrackButtonMenu( ID_PICK_FORMAT_TOKEN, this, &popupMenu, ui::DropDown );
 }
 
 void CRenameFilesDialog::OnPickDirPath( void )
@@ -735,7 +738,7 @@ void CRenameFilesDialog::OnPickDirPath( void )
 		{
 			CMenu popupMenu;
 			m_pPickDataset->MakePickDirMenu( &popupMenu );
-			m_formatToolbar.TrackButtonMenu( ID_PICK_DIR_PATH, this, &popupMenu, ui::DropRight );
+			m_formatCombo.GetMateToolbar()->TrackButtonMenu( ID_PICK_DIR_PATH, this, &popupMenu, ui::DropRight );
 		}
 }
 
@@ -751,7 +754,7 @@ void CRenameFilesDialog::OnPickTextTools( void )
 	CMenu popupMenu;
 	ui::LoadPopupMenu( popupMenu, IDR_CONTEXT_MENU, popup::TextTools );
 
-	m_formatToolbar.TrackButtonMenu( ID_PICK_TEXT_TOOLS, this, &popupMenu, ui::DropDown );
+	m_formatCombo.GetMateToolbar()->TrackButtonMenu( ID_PICK_TEXT_TOOLS, this, &popupMenu, ui::DropDown );
 }
 
 void CRenameFilesDialog::OnFormatTextToolPicked( UINT menuId )

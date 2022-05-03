@@ -2283,7 +2283,7 @@ BOOL CReportListControl::OnLvnColumnClick_Reflect( NMHDR* pNmHdr, LRESULT* pResu
 	*pResult = 0;
 
 	if ( ui::IsKeyPressed( VK_CONTROL ) || ui::IsKeyPressed( VK_SHIFT ) )
-		SetSortByColumn( -1 );											// switch to no sorting
+		SetSortByColumn( -1 );											// switch to original order (no sorting)
 	else
 	{
 		TColumn sortByColumn = pNmListView->iSubItem;

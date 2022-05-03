@@ -11,6 +11,7 @@
 #include "utl/UI/HistoryComboBox.h"
 #include "utl/UI/SplitPushButton.h"
 #include "utl/UI/SpinEdit.h"
+#include "utl/UI/TandemControls.h"
 #include "utl/UI/TextEdit.h"
 #include "utl/UI/ThemeStatic.h"
 #include "Application_fwd.h"
@@ -84,8 +85,7 @@ private:
 
 	CLayoutChildPropertySheet m_filesSheet;
 
-	CHistoryComboBox m_formatCombo;
-	CDialogToolBar m_formatToolbar;
+	CHostToolbarCtrl<CHistoryComboBox> m_formatCombo;
 	CSpinEdit m_seqCountEdit;
 	CDialogToolBar m_seqCountToolbar;
 	CSplitPushButton m_capitalizeButton;
@@ -96,7 +96,7 @@ private:
 	CPickMenuStatic m_pickRenameActionsStatic;
 
 	// generated stuff
-	protected:
+protected:
 	virtual void DoDataExchange( CDataExchange* pDX );
 	virtual BOOL OnInitDialog( void );
 protected:
