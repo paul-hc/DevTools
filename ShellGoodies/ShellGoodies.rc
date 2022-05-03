@@ -519,6 +519,8 @@ BEGIN
     SEPARATOR
     BUTTON      ID_PICK_FORMAT_TOKEN
     BUTTON      ID_PICK_TEXT_TOOLS
+    SEPARATOR
+    BUTTON      ID_GENERATE_NOW
     BUTTON      ID_TOGGLE_AUTO_GENERATE
     SEPARATOR
     BUTTON      ID_SEQ_COUNT_RESET
@@ -641,6 +643,7 @@ BEGIN
     ID_COPY_FIND_TO_REPLACE "Copy pattern to replace"
     ID_PICK_FORMAT_TOKEN    "Pick a formatting token"
     ID_PICK_TEXT_TOOLS      "Pick a text tool"
+    ID_GENERATE_NOW         "Generate filenames now based on current format"
     ID_TOGGLE_AUTO_GENERATE "Make filenames automatically when changing format"
     ID_ENSURE_UNIFORM_ZERO_PADDING "Pad numbers with zeros uniformly"
     ID_GENERATE_NUMERIC_SEQUENCE "Generate numeric sequence"
@@ -677,16 +680,22 @@ BEGIN
     ID_PICK_AS_ORIGINAL_FOLDER 
                             "Select all files in the parent folder as original files"
     ID_HIGHLIGHT_DUPLICATES "Highlight original and duplicate files"
-    ID_CLEAR_CRC32_CACHE    "Clear all CRC32 checksums computed in previous searches"
 END
 
 STRINGTABLE 
 BEGIN
+    ID_CLEAR_CRC32_CACHE    "Clear all CRC32 checksums computed in previous searches"
     ID_DELETE_DUPLICATES    "Delete checked duplicate files to Recycle Bin"
     ID_MOVE_DUPLICATES      "Move checked duplicate files to the vault directory"
     ID_PASTE_DEEP_POPUP     "Paste deep folder image"
     ID_OPEN_CMD_DASHBOARD   "Open the command dashboard dialog"
+END
+
+STRINGTABLE 
+BEGIN
     ID_SELECT_TO_TOP        "Select all actions up to the top, starting with the current action"
+    ID_EDIT_SEARCH_PATHS_LIST "Edit search paths\nEdit Search Paths"
+    ID_EDIT_INGORE_PATHS_LIST "Edit paths to ignore\nEdit Ignore Paths"
 END
 
 STRINGTABLE 
@@ -716,12 +725,6 @@ END
 STRINGTABLE 
 BEGIN
     IDC_COMMANDS_LIST       "Name=180|Files|Timestamp"
-END
-
-STRINGTABLE 
-BEGIN
-    ID_EDIT_SEARCH_PATHS_LIST "Edit search paths\nEdit Search Paths"
-    ID_EDIT_INGORE_PATHS_LIST "Edit paths to ignore\nEdit Ignore Paths"
 END
 
 #endif    // English (U.S.) resources

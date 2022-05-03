@@ -120,6 +120,7 @@ CRenameFilesDialog::CRenameFilesDialog( CFileModel* pFileModel, CWnd* pParent )
 		.AddButton( ID_PICK_TEXT_TOOLS )
 		.AddButton( ID_PICK_DIR_PATH )
 		.AddSeparator()
+		.AddButton( ID_GENERATE_NOW )
 		.AddButton( ID_TOGGLE_AUTO_GENERATE );
 
 	m_seqCountToolbar.GetStrip()
@@ -228,8 +229,6 @@ void CRenameFilesDialog::PopStackTop( svc::StackType stackType )
 
 void CRenameFilesDialog::OnUpdate( utl::ISubject* pSubject, utl::IMessage* pMessage )
 {
-	pMessage;
-
 	if ( m_hWnd != NULL )
 	{
 		if ( m_pFileModel == pSubject )
@@ -461,6 +460,8 @@ BEGIN_MESSAGE_MAP( CRenameFilesDialog, CFileEditorBaseDialog )
 	ON_COMMAND_RANGE( IDC_PICK_DIR_PATH_BASE, IDC_PICK_DIR_PATH_MAX, OnDirPathPicked )
 	ON_COMMAND( ID_PICK_TEXT_TOOLS, OnPickTextTools )
 	ON_COMMAND_RANGE( ID_TEXT_TITLE_CASE, ID_TEXT_SPACE_TO_UNDERBAR, OnFormatTextToolPicked )		// format combo pick text tool
+	ON_COMMAND( ID_GENERATE_NOW, OnGenerateNow )
+	ON_UPDATE_COMMAND_UI( ID_GENERATE_NOW, OnUpdateGenerateNow )
 	ON_COMMAND( ID_TOGGLE_AUTO_GENERATE, OnToggleAutoGenerate )
 	ON_UPDATE_COMMAND_UI( ID_TOGGLE_AUTO_GENERATE, OnUpdateAutoGenerate )
 	ON_COMMAND_RANGE( ID_NUMERIC_SEQUENCE_2DIGITS, ID_EXTENSION_SEPARATOR, OnNumericSequence )
@@ -766,6 +767,23 @@ void CRenameFilesDialog::OnFormatTextToolPicked( UINT menuId )
 
 	if ( format != oldFormat )
 		ui::SetComboEditText( m_formatCombo, format, str::Case );
+}
+
+void CRenameFilesDialog::OnGenerateNow( void )
+{
+	AutoGenerateFiles();
+}
+
+void CRenameFilesDialog::OnUpdateGenerateNow( CCmdUI* pCmdUI )
+{
+	bool enable = false;
+
+	if ( !IsRollMode() )
+	{
+		CPathFormatter pathFormatter = InputRenameFormatter( false );
+		enable = pathFormatter.IsValidFormat();
+	}
+	pCmdUI->Enable( enable );
 }
 
 void CRenameFilesDialog::OnToggleAutoGenerate( void )

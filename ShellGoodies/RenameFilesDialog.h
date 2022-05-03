@@ -126,6 +126,8 @@ protected:
 	afx_msg void OnDirPathPicked( UINT cmdId );
 	afx_msg void OnPickTextTools( void );
 	afx_msg void OnFormatTextToolPicked( UINT menuId );
+	afx_msg void OnGenerateNow( void );
+	afx_msg void OnUpdateGenerateNow( CCmdUI* pCmdUI );
 	afx_msg void OnToggleAutoGenerate( void );
 	afx_msg void OnUpdateAutoGenerate( CCmdUI* pCmdUI );
 	afx_msg void OnNumericSequence( UINT cmdId );
