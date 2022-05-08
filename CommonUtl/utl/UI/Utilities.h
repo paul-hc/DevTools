@@ -202,6 +202,20 @@ namespace ui
 
 	inline void RedrawDesktop( void ) { ::InvalidateRect( NULL, NULL, TRUE ); }		// invalidate desktop & all windows; redraws top level windows - slow, but works
 
+
+	// Z-order
+
+	inline bool BringWndToTop( HWND hWnd, bool top = true )		// move window to the top/bottom of Z-order (above other popup windows)
+	{
+		return ::SetWindowPos( hWnd, top ? HWND_TOP : HWND_BOTTOM, 0, 0, 0, 0, SWP_NOACTIVATE | SWP_NOSIZE | SWP_NOMOVE | SWP_NOOWNERZORDER ) != FALSE;
+	}
+
+	inline bool BringWndToBottom( HWND hWnd ) { return BringWndToTop( hWnd, false ); }
+
+	bool BringWndUp( HWND hWnd );
+	bool BringWndDown( HWND hWnd );
+
+
 	inline bool IsTopMost( HWND hWnd ) { return HasFlag( GetStyleEx( hWnd ), WS_EX_TOPMOST ); }
 	bool SetTopMost( HWND hWnd, bool topMost = true );
 	bool QueryTopLevelWindows( std::vector< HWND >& rTopWindows, DWORD styleFilter = WS_VISIBLE, DWORD dwThreadId = GetCurrentThreadId() );

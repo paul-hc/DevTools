@@ -242,12 +242,33 @@ namespace ui
 	}
 
 
+	COLORREF GetAdjustLuminance( COLORREF color, int byPct )
+	{
+		CHslColor hslColor( color );
+		return hslColor.ScaleLuminance( byPct ).GetRGB();
+	}
+
+	COLORREF GetAdjustSaturation( COLORREF color, int byPct )
+	{
+		CHslColor hslColor( color );
+		return hslColor.ScaleSaturation( byPct ).GetRGB();
+	}
+
+	COLORREF GetAdjustHue( COLORREF color, int byPct )
+	{
+		CHslColor hslColor( color );
+		return hslColor.ScaleHue( byPct ).GetRGB();
+	}
+
+
 	// CHslColor implementation
 
 	const Range<WORD> CHslColor::s_validRange( 0, 240 );
 
 	CHslColor::CHslColor( COLORREF rgbColor )
 	{
+		REQUIRE( ui::IsActualColor( rgbColor ) );
+
 		::ColorRGBToHLS( rgbColor, &m_hue, &m_luminance, &m_saturation );	// note the difference: Hsl vs HLS - L and S position is swapped in shell API
 	}
 

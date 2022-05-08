@@ -75,6 +75,17 @@ namespace ui
 	inline COLORREF& WeightedMixWithColor( COLORREF& rColor1, COLORREF color2, int pct1 ) { return rColor1 = GetWeightedMixColor( rColor1, color2, pct1 ); }
 
 
+	// HSL adjustments
+
+	COLORREF GetAdjustLuminance( COLORREF color, int byPct );
+	COLORREF GetAdjustSaturation( COLORREF color, int byPct );
+	COLORREF GetAdjustHue( COLORREF color, int byPct );
+
+	inline COLORREF& AdjustLuminance( COLORREF& rColor, int byPct ) { return rColor = GetAdjustLuminance( rColor, byPct ); }
+	inline COLORREF& AdjustSaturation( COLORREF& rColor, int byPct ) { return rColor = GetAdjustSaturation( rColor, byPct ); }
+	inline COLORREF& AdjustHue( COLORREF& rColor, int byPct ) { return rColor = GetAdjustHue( rColor, byPct ); }
+
+
 	struct CHslColor
 	{
 	public:

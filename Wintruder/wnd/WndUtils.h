@@ -28,10 +28,6 @@ namespace wnd
 	// attached thread input
 	bool ShowWindow( HWND hWnd, int cmdShow );
 	bool Activate( HWND hWnd );
-	bool MoveWindowUp( HWND hWnd );
-	bool MoveWindowDown( HWND hWnd );
-	bool MoveWindowToTop( HWND hWnd );
-	bool MoveWindowToBottom( HWND hWnd );
 }
 
 

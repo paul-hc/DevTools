@@ -727,6 +727,12 @@ BEGIN
     IDC_COMMANDS_LIST       "Name=180|Files|Timestamp"
 END
 
+STRINGTABLE 
+BEGIN
+    IDC_SHOW_EXTENSION_CHECK 
+                            "Toggle file extension in the file list.  Note: the format string must be consistent with this!"
+END
+
 #endif    // English (U.S.) resources
 /////////////////////////////////////////////////////////////////////////////
 

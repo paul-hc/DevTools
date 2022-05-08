@@ -6,6 +6,7 @@
 #include "utl/StringUtilities.h"
 #include "utl/UI/BaseApp.h"
 #include "utl/UI/ProcessUtils.h"
+#include "utl/UI/Utilities.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -151,32 +152,5 @@ namespace wnd
 			return true;
 		}
 		return false;
-	}
-
-	bool MoveWindowUp( HWND hWnd )
-	{
-		if ( HWND hPrevious = ::GetWindow( hWnd, GW_HWNDPREV ) )
-			if ( ( hPrevious = ::GetWindow( hPrevious, GW_HWNDPREV ) ) != NULL )
-				return ::SetWindowPos( hWnd, hPrevious, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE | SWP_NOACTIVATE ) != FALSE;
-
-		return MoveWindowToTop( hWnd );
-	}
-
-	bool MoveWindowDown( HWND hWnd )
-	{
-		if ( HWND hNext = ::GetWindow( hWnd, GW_HWNDNEXT ) )
-			return ::SetWindowPos( hWnd, hNext, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE | SWP_NOACTIVATE ) != FALSE;
-
-		return false;
-	}
-
-	bool MoveWindowToTop( HWND hWnd )
-	{
-		return ::SetWindowPos( hWnd, HWND_TOP, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE | SWP_NOACTIVATE ) != FALSE;
-	}
-
-	bool MoveWindowToBottom( HWND hWnd )
-	{
-		return ::SetWindowPos( hWnd, HWND_BOTTOM, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE | SWP_NOACTIVATE ) != FALSE;
 	}
 }

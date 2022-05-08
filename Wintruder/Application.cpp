@@ -7,6 +7,7 @@
 #include "utl/UI/CmdInfoStore.h"
 #include "utl/UI/MenuUtilities.h"
 #include "utl/UI/ProcessUtils.h"
+#include "utl/UI/Utilities.h"
 #include "wnd/WndUtils.h"
 
 #ifdef _DEBUG
@@ -312,16 +313,16 @@ void CApplication::CmMoveWindow( UINT cmdId )
 	switch ( cmdId )
 	{
 		case CM_MOVE_WINDOW_UP:
-			wnd::MoveWindowUp( app::GetTargetWnd() );
+			ui::BringWndUp( app::GetTargetWnd() );
 			break;
 		case CM_MOVE_WINDOW_TO_TOP:
-			wnd::MoveWindowToTop( app::GetTargetWnd() );
+			ui::BringWndToTop( app::GetTargetWnd() );
 			break;
 		case CM_MOVE_WINDOW_DOWN:
-			wnd::MoveWindowDown( app::GetTargetWnd() );
+			ui::BringWndDown( app::GetTargetWnd() );
 			break;
 		case CM_MOVE_WINDOW_TO_BOTTOM:
-			wnd::MoveWindowToBottom( app::GetTargetWnd() );
+			ui::BringWndToBottom( app::GetTargetWnd() );
 			break;
 		default:
 			ASSERT( FALSE );

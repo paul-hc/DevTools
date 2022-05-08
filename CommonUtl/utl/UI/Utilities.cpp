@@ -511,6 +511,25 @@ namespace ui
 		return true;
 	}
 
+
+	bool BringWndUp( HWND hWnd )
+	{
+		if ( HWND hPrevious = ::GetWindow( hWnd, GW_HWNDPREV ) )
+			if ( ( hPrevious = ::GetWindow( hPrevious, GW_HWNDPREV ) ) != NULL )
+				return ::SetWindowPos( hWnd, hPrevious, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE | SWP_NOACTIVATE ) != FALSE;
+
+		return ui::BringWndToTop( hWnd );
+	}
+
+	bool BringWndDown( HWND hWnd )
+	{
+		if ( HWND hNext = ::GetWindow( hWnd, GW_HWNDNEXT ) )
+			return ::SetWindowPos( hWnd, hNext, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE | SWP_NOACTIVATE ) != FALSE;
+
+		return false;
+	}
+
+
 	bool SetTopMost( HWND hWnd, bool topMost /*= true*/ )
 	{
 		if ( topMost == IsTopMost( hWnd ) )

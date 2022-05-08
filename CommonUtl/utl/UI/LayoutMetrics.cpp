@@ -153,7 +153,7 @@ namespace layout
 		if ( !ComputeLayout( ctrlRect, swpFlags, delta, collapsed ) )
 			return false;		// hasn't moved or resized
 
-		::SetWindowPos( m_hControl, NULL, ctrlRect.left, ctrlRect.top, ctrlRect.Width(), ctrlRect.Height(), swpFlags );	// reposition changed control
+		::SetWindowPos( m_hControl, NULL, ctrlRect.left, ctrlRect.top, ctrlRect.Width(), ctrlRect.Height(), swpFlags );		// reposition changed control
 		return true;
 	}
 
@@ -189,8 +189,9 @@ namespace layout
 
 	void CResizeGripper::Draw( HDC hDC )
 	{
-		static CThemeItem resizeBoxItem( L"SCROLLBAR", SBP_SIZEBOX, SZB_RIGHTALIGN );
-		resizeBoxItem.DrawBackground( hDC, m_gripperRect );
+		static CThemeItem s_resizeBoxItem( L"SCROLLBAR", SBP_SIZEBOX, SZB_RIGHTALIGN );
+
+		s_resizeBoxItem.DrawBackground( hDC, m_gripperRect );
 	}
 
 } // namespace layout

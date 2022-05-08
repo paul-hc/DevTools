@@ -61,7 +61,7 @@ BOOL CBaseItemTooltipsCtrl<BaseCtrl>::OnTtnNeedText( UINT cmdId, NMHDR* pNmHdr, 
 		return FALSE;
 
 	*pResult = 0;
-	return TRUE;	// message was handled
+	return TRUE;			// message was handled
 }
 
 

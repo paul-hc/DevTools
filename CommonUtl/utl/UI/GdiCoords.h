@@ -25,10 +25,35 @@ namespace ui
 		return CSize( static_cast<long>( factor * size.cx ), static_cast<long>( factor * size.cy ) );
 	}
 
+
 	inline CRect& SetRectSize( CRect& rRect, const SIZE& size )
 	{
 		rRect.BottomRight() = rRect.TopLeft() + size;
 		return rRect;
+	}
+
+	inline bool IsNormalized( const RECT& rect )
+	{
+		return rect.left <= rect.right && rect.top <= rect.bottom;
+	}
+
+	template< typename RectT >
+	inline RectT& NormalizeRect( RectT& rRect )
+	{
+		if ( rRect.left > rRect.right )
+			std::swap( rRect.left, rRect.right );
+
+		if ( rRect.top > rRect.bottom )
+			std::swap( rRect.top, rRect.bottom );
+
+		return rRect;
+	}
+
+	inline CRect GetNormalizedRect( const RECT& rect )
+	{
+		CRect normalRect = rect;
+		NormalizeRect( normalRect );
+		return normalRect;
 	}
 
 

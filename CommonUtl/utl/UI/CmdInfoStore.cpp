@@ -4,6 +4,7 @@
 #include "CtrlInterfaces.h"
 #include "Dialog_fwd.h"
 #include "ReportListControl.h"
+#include "Utilities.h"
 #include "ThemeStatic.h"
 #include "utl/ContainerUtilities.h"
 
@@ -158,22 +159,22 @@ namespace ui
 
 		if ( m_pTttA != NULL )
 		{
-			static std::string narrowText;				// static buffer
-			narrowText = str::AsNarrow( text );
-			m_pTttA->lpszText = const_cast<char*>( narrowText.c_str() );
+			static std::string s_narrowText;			// static buffer (can be longer than 80 characters default limit)
+			s_narrowText = str::AsNarrow( text );
+			m_pTttA->lpszText = const_cast<char*>( s_narrowText.c_str() );
 		}
 		else if ( m_pTttW != NULL )
 		{
-			static std::wstring wideText;				// static buffer
-			wideText = str::AsWide( text );
-			m_pTttW->lpszText = const_cast<wchar_t*>( wideText.c_str() );
+			static std::wstring s_wideText;				// static buffer (can be longer than 80 characters default limit)
+			s_wideText = str::AsWide( text );
+			m_pTttW->lpszText = const_cast<wchar_t*>( s_wideText.c_str() );
 		}
 		else
 			ASSERT( false );
 
 		// bring the tooltip window above other popup windows
 		if ( m_pTooltip != NULL )
-			m_pTooltip->SetWindowPos( &CWnd::wndTop, 0, 0, 0, 0, SWP_NOACTIVATE | SWP_NOSIZE | SWP_NOMOVE | SWP_NOOWNERZORDER );
+			ui::BringToTop( *m_pTooltip );		// move window to the top/bottom of Z-order (above other popup windows)
 
 		return true;			// valid tooltip text
 	}
