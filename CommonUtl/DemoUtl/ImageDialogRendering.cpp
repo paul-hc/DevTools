@@ -177,7 +177,7 @@ void CImageDialog::Render_ImageList( CDC* pDC, CMultiZoneIterator* pMultiZone )
 void CImageDialog::DrawImageListEffect( CDC* pDC, gdi::Effect effect, COLORREF blendToColor, const CRect& boundsRect )
 {
 	int imageCount = m_pImageList->GetImageCount();
-	CSize imageSize = gdi::GetImageSize( *m_pImageList );
+	CSize imageSize = gdi::GetImageIconSize( *m_pImageList );
 	CSize scaledImageSize = ui::ScaleSize( imageSize, boundsRect.Height(), imageSize.cy );
 
 	CMultiZoneIterator imageZone( scaledImageSize, IL_SpacingX, imageCount, CMultiZone::HorizStacked, boundsRect );

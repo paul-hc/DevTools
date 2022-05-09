@@ -138,7 +138,7 @@ const CSize& CTreeControl::GetImageSize( void ) const
 {
 	if ( 0 == m_imageSize.cx && 0 == m_imageSize.cy )
 		if ( CImageList* pImageList = GetImageList( TVSIL_NORMAL ) )
-			m_imageSize = gdi::GetImageSize( *pImageList );
+			m_imageSize = gdi::GetImageIconSize( *pImageList );
 
 	return m_imageSize;
 }

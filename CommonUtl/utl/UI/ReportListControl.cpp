@@ -400,9 +400,9 @@ bool CReportListControl::SetCompactIconSpacing( int iconEdgeWidth /*= IconViewEd
 {
 	CSize spacing( iconEdgeWidth * 2, 0 );
 	if ( m_pLargeImageList != NULL )
-		spacing.cx += gdi::GetImageSize( *m_pLargeImageList ).cx;
+		spacing.cx += gdi::GetImageIconSize( *m_pLargeImageList ).cx;
 	else if ( m_pImageList != NULL )
-		spacing.cx += gdi::GetImageSize( *m_pImageList ).cx;
+		spacing.cx += gdi::GetImageIconSize( *m_pImageList ).cx;
 	else
 		return false;
 
@@ -609,9 +609,9 @@ bool CReportListControl::SortList( void )
 {
 	UpdateColumnSortHeader();
 
-	ui::CNmHdr nmHdr( this, lv::LVN_CustomSortList );
+	ui::CNmHdr nmCustomSort( this, lv::LVN_CustomSortList );
 
-	if ( 0L == nmHdr.NotifyParent() )			// give parent a chance to custom sort the list (or sort its groups); still sort items by default?
+	if ( 0L == nmCustomSort.NotifyParent() )			// give parent a chance to custom sort the list (or sort its groups); still sort items by default?
 		if ( -1 == m_sortByColumn )
 		{
 			if ( m_initialItemsOrder.empty() )
@@ -1398,7 +1398,7 @@ CSize CReportListControl::GetStateIconSize( void ) const
 	if ( 0 == m_stateIconSize.cx && 0 == m_stateIconSize.cy )
 		if ( HasFlag( GetExtendedStyle(), LVS_EX_CHECKBOXES ) )
 			if ( CImageList* pStateImageList = GetStateImageList() )
-				m_stateIconSize = gdi::GetImageSize( *pStateImageList );		// cache the size of an state image list icon, used to offset glyph rect in certain view modes
+				m_stateIconSize = gdi::GetImageIconSize( *pStateImageList );		// cache the size of an state image list icon, used to offset glyph rect in certain view modes
 
 	return m_stateIconSize;
 }
@@ -2280,7 +2280,29 @@ BOOL CReportListControl::OnLvnColumnClick_Reflect( NMHDR* pNmHdr, LRESULT* pResu
 {
 	NMLISTVIEW* pNmListView = (NMLISTVIEW*)pNmHdr;
 
-	*pResult = 0;
+	*pResult = 0L;
+
+	CNmCanSortByColumn nmCanSortBy( this, pNmListView->iSubItem );
+	if ( nmCanSortBy.m_nmHdr.NotifyParent() != 0L )
+	{
+		if ( CToolTipCtrl* pTooltip = GetToolTips() )
+		{
+			if ( CHeaderCtrl* pColumnHeader = GetHeaderCtrl() )
+			{
+				CRect columnRect;
+				if ( pColumnHeader->GetItemRect( pNmListView->iSubItem, &columnRect ) )
+				{
+				}
+			}
+
+			pTooltip->UpdateTipText( _T("Warning: cannot sort by this column!"), this );
+			pTooltip->Activate( TRUE );
+			pTooltip->Popup();
+		}
+
+		*pResult = 1L;		// parent rejected sorting by this column (sorting disabled)
+		return TRUE;		// handled, skip routing to parent
+	}
 
 	if ( ui::IsKeyPressed( VK_CONTROL ) || ui::IsKeyPressed( VK_SHIFT ) )
 		SetSortByColumn( -1 );											// switch to original order (no sorting)

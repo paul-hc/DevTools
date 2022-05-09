@@ -28,7 +28,7 @@ namespace ui
 	void AppendToStateImageList( CImageList* pStateImageList, const std::vector< CThemeItem >& themeItems, COLORREF transpBkColor )
 	{
 		ASSERT_PTR( pStateImageList->GetSafeHandle() );
-		CSize imageSize = gdi::GetImageSize( *pStateImageList );
+		CSize imageSize = gdi::GetImageIconSize( *pStateImageList );
 
 		for ( std::vector< CThemeItem >::const_iterator itThemeItem = themeItems.begin(); itThemeItem != themeItems.end(); ++itThemeItem )
 		{

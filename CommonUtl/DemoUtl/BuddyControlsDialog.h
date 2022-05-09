@@ -9,6 +9,7 @@
 
 
 class CFileStateTimedItem;
+class CResizeFrameStatic;
 
 
 class CBuddyControlsDialog : public CLayoutDialog
@@ -17,6 +18,7 @@ public:
 	CBuddyControlsDialog( CWnd* pParent );
 	virtual ~CBuddyControlsDialog();
 private:
+	void InitSplitters( void );
 	void SearchForFiles( void );
 
 	// output
@@ -32,6 +34,11 @@ private:
 	CSearchPathHistoryCombo m_searchPathCombo;
 	CItemContentHistoryCombo m_folderPathCombo;
 	CHostToolbarCtrl<CPathItemListCtrl> m_fileListCtrl;
+	CProgressCtrl m_progressCtrl;
+	CEdit m_selFileEdit;
+
+	std::auto_ptr<CResizeFrameStatic> m_pHorizSplitterFrame;		// embedded inside of vertical splitter
+	std::auto_ptr<CResizeFrameStatic> m_pVertSplitterFrame;
 
 	// generated stuff
 public:
@@ -43,6 +50,7 @@ protected:
 protected:
 	afx_msg void OnBnClicked_FindFiles( void );
 	afx_msg void OnBnClicked_CalculateChecksums( void );
+	afx_msg void OnLvnItemChanged_FileList( NMHDR* pNmHdr, LRESULT* pResult );
 
 	DECLARE_MESSAGE_MAP()
 };

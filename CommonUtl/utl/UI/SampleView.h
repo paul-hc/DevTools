@@ -49,14 +49,13 @@ private:
 	ISampleCallback* m_pSampleCallback;
 	HCURSOR m_hScrollableCursor, m_hScrollDragCursor;
 
-	// generated overrides
-	protected:
+	// generated stuff
+protected:
 	virtual void PostNcDestroy( void );
 	virtual void OnDraw( CDC* pDC );
-	public:
+public:
 	virtual void OnInitialUpdate( void );
 protected:
-	// message map
 	afx_msg BOOL OnEraseBkgnd( CDC* pDC );
 	afx_msg BOOL OnSetCursor( CWnd* pWnd, UINT hitTest, UINT message );
 	afx_msg void OnLButtonDown( UINT flags, CPoint point );

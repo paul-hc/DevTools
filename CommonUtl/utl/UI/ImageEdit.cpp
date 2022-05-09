@@ -24,7 +24,7 @@ void CImageEdit::SetImageList( CImageList* pImageList )
 {
 	m_pImageList = pImageList;
 	if ( m_pImageList != NULL )
-		m_imageSize = gdi::GetImageSize( *m_pImageList );
+		m_imageSize = gdi::GetImageIconSize( *m_pImageList );
 }
 
 bool CImageEdit::SetImageIndex( int imageIndex )

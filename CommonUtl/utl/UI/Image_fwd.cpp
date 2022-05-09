@@ -177,7 +177,7 @@ namespace gdi
 		return CSize( 0, 0 );
 	}
 
-	CSize GetImageSize( const CImageList& imageList )
+	CSize GetImageIconSize( const CImageList& imageList )
 	{
 		ASSERT_PTR( imageList.GetSafeHandle() );
 		int cx, cy;
@@ -280,6 +280,55 @@ namespace gdi
 	}
 
 } //namespace gdi
+
+
+namespace gdi
+{
+	namespace detail
+	{
+		bool Blit( CDC* pDC, const CRect& destRect, CDC* pSrcDC, const CRect& srcRect, DWORD rop )
+		{
+			return pDC->StretchBlt( destRect.left, destRect.top, destRect.Width(), destRect.Height(), pSrcDC, srcRect.left, srcRect.top, srcRect.Width(), srcRect.Height(), rop ) != FALSE;
+		}
+
+		bool AlphaBlend( CDC* pDC, const CRect& destRect, CDC* pSrcDC, const CRect& srcRect, BYTE srcAlpha = 255, BYTE blendOp = AC_SRC_OVER )
+		{
+			BLENDFUNCTION blendFunc;
+			blendFunc.BlendOp = blendOp;
+			blendFunc.BlendFlags = 0;
+			blendFunc.SourceConstantAlpha = srcAlpha;
+			blendFunc.AlphaFormat = AC_SRC_ALPHA;
+
+			return pDC->AlphaBlend( destRect.left, destRect.top, destRect.Width(), destRect.Height(), pSrcDC, srcRect.left, srcRect.top, srcRect.Width(), srcRect.Height(), blendFunc ) != FALSE;
+		}
+	}
+
+
+	bool DrawBitmap( CDC* pDC, HBITMAP hBitmap, const CPoint& pos, DWORD rop /*= SRCCOPY*/ )
+	{
+		CRect destRect( pos, gdi::GetBitmapSize( hBitmap ) );
+		return DrawBitmap( pDC, hBitmap, destRect, rop );
+	}
+
+	bool DrawBitmap( CDC* pDC, HBITMAP hBitmap, const CRect& destRect, DWORD rop /*= SRCCOPY*/ )
+	{
+		ASSERT_PTR( hBitmap );
+
+		CDC memDC;
+		bool succeeded = false;
+
+		if ( memDC.CreateCompatibleDC( pDC ) )
+		{
+			CScopedGdiObj scopedBitmap( &memDC, hBitmap );
+			CRect srcRect( CPoint( 0, 0 ), gdi::GetBitmapSize( hBitmap ) );
+			int oldStretchMode = pDC->SetStretchBltMode( COLORONCOLOR );
+
+			succeeded = detail::Blit( pDC, destRect, &memDC, srcRect, rop );
+			pDC->SetStretchBltMode( oldStretchMode );
+		}
+		return false;
+	}
+}
 
 
 // CDibMeta implementation

@@ -359,6 +359,14 @@
 			UniqueIdentifier="{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}"
 			>
 			<File
+				RelativePath=".\res\ArrowsDownUpStrip.bmp"
+				>
+			</File>
+			<File
+				RelativePath=".\res\ArrowsRightLeftStrip.bmp"
+				>
+			</File>
+			<File
 				RelativePath=".\res\DragDrop-Copy.cur"
 				>
 			</File>
@@ -376,6 +384,14 @@
 			</File>
 			<File
 				RelativePath=".\res\ListStrip.png"
+				>
+			</File>
+			<File
+				RelativePath=".\res\ResizeLeftRight.cur"
+				>
+			</File>
+			<File
+				RelativePath=".\res\ResizeUpDown.cur"
 				>
 			</File>
 			<File
@@ -494,6 +510,10 @@
 		<Filter
 			Name="UI"
 			>
+			<File
+				RelativePath=".\_traceGdi.h"
+				>
+			</File>
 			<File
 				RelativePath=".\AccelTable.cpp"
 				>
@@ -1479,6 +1499,22 @@
 				</File>
 				<File
 					RelativePath=".\ReportListCustomDraw.h"
+					>
+				</File>
+				<File
+					RelativePath=".\ResizeFrameStatic.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\ResizeFrameStatic.h"
+					>
+				</File>
+				<File
+					RelativePath=".\ResizeGripBar.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\ResizeGripBar.h"
 					>
 				</File>
 				<File

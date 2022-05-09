@@ -419,7 +419,7 @@ namespace ut
 		if ( !IsEnabled() )
 			return;
 
-		CRect imageRect( m_pToolWnd->m_drawPos, gdi::GetImageSize( *pImageList ) );
+		CRect imageRect( m_pToolWnd->m_drawPos, gdi::GetImageIconSize( *pImageList ) );
 
 		pImageList->Draw( GetDC(), index, imageRect.TopLeft(), style );
 		DrawTileFrame( imageRect );
@@ -433,7 +433,7 @@ namespace ut
 		ASSERT_PTR( pImageList );
 
 		UINT imageCount = pImageList->GetImageCount();
-		CSize imageSize = gdi::GetImageSize( *pImageList );
+		CSize imageSize = gdi::GetImageIconSize( *pImageList );
 
 		CRect imageRect = CRect( m_pToolWnd->m_drawPos, imageSize );
 		CRect boundsRect = imageRect;			// bounds drawn

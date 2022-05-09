@@ -174,7 +174,7 @@ namespace ui
 
 		// bring the tooltip window above other popup windows
 		if ( m_pTooltip != NULL )
-			ui::BringToTop( *m_pTooltip );		// move window to the top/bottom of Z-order (above other popup windows)
+			ui::BringWndToTop( *m_pTooltip );			// move window to the top/bottom of Z-order (above other popup windows)
 
 		return true;			// valid tooltip text
 	}

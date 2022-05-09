@@ -122,6 +122,10 @@
 #define IDC_SEARCH_PATH_COMBO           1097
 #define IDC_FIND_FILES_BUTTON           1098
 #define IDC_FOLDER_PATH_COMBO           1099
+#define IDC_VERT_SPLITTER_STATIC        1100
+#define IDC_HORIZ_SPLITTER_STATIC       1101
+#define IDC_SEL_FILE_EDIT               1102
+#define IDC_SEL_FILE_PROGRESS           1103
 #define ID_COMMAND_LINK1                2001
 #define ID_COMMAND_LINK2                2002
 #define ID_RADIO_BUTTON1                2101
@@ -161,7 +165,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        150
 #define _APS_NEXT_COMMAND_VALUE         32798
-#define _APS_NEXT_CONTROL_VALUE         1099
+#define _APS_NEXT_CONTROL_VALUE         1104
 #define _APS_NEXT_SYMED_VALUE           5002
 #endif
 #endif

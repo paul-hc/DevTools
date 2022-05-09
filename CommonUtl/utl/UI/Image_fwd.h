@@ -157,7 +157,7 @@ namespace gdi
 	bool IsDibSection( HBITMAP hBitmap );
 
 	CSize GetBitmapSize( HBITMAP hBitmap );
-	CSize GetImageSize( const CImageList& imageList );
+	CSize GetImageIconSize( const CImageList& imageList );
 
 	WORD GetBitsPerPixel( HBITMAP hBitmap, bool* pIsDibSection = NULL );
 	bool Is32BitBitmap( HBITMAP hBitmap );					// DIB/DDB
@@ -190,6 +190,15 @@ namespace gdi
 		PALETTEENTRY palEntry = { rgb.rgbRed, rgb.rgbGreen, rgb.rgbBlue, 0 };
 		return palEntry;
 	}
+}
+
+
+namespace gdi
+{
+	// drawing - transparent bitmaps are drawn transparently (only for SRCCOPY)
+
+	bool DrawBitmap( CDC* pDC, HBITMAP hBitmap, const CPoint& pos, DWORD rop = SRCCOPY );
+	bool DrawBitmap( CDC* pDC, HBITMAP hBitmap, const CRect& destRect, DWORD rop = SRCCOPY );		// stretch
 }
 
 

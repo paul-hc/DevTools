@@ -189,7 +189,7 @@ void CImageStore::RegisterButtonImages( const CImageList& imageList, const UINT 
 	ASSERT( imageList.GetImageCount() <= (int)buttonCount );		// give or take the separators
 
 	const bool hasAlpha = !gdi::HasMask( imageList, 0 );			// could also use ui::HasAlphaTransparency() - assume all images are the same
-	CSize imageSize = pImageSize != NULL ? *pImageSize : gdi::GetImageSize( imageList );
+	CSize imageSize = pImageSize != NULL ? *pImageSize : gdi::GetImageIconSize( imageList );
 	TIconKey iconKey;
 
 	switch ( imageSize.cx )

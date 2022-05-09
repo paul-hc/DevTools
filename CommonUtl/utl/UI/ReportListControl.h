@@ -55,7 +55,8 @@ namespace lv
 			_LastCmd,						// derived classes may define new WM_COMMAND notifications starting from this value
 
 		// via WM_NOTIFY:
-		LVN_CustomSortList = 1100,			// pass NMHDR; clients return TRUE if handled custom sorting, using current sorting criteria GetSortByColumn()
+		LVN_CanSortByColumn = 1100,			// pass NMHDR; clients return TRUE if sorting is disabled for the clicked column (by default sorting is enabled on all columns)
+		LVN_CustomSortList,					// pass NMHDR; clients return TRUE if handled custom sorting, using current sorting criteria GetSortByColumn()
 		LVN_ToggleCheckState,				// pass lv::CNmToggleCheckState; client could return TRUE to reject default toggle
 		LVN_CheckStatesChanged,				// pass lv::CNmCheckStatesChanged
 		LVN_DropFiles,						// pass lv::CNmDropFiles
@@ -147,6 +148,16 @@ public:
 	typedef int TGroupId;
 
 	enum StdColumn { Code, EntireRecord = (TColumn)-1 };
+
+
+	struct CNmCanSortByColumn
+	{
+		CNmCanSortByColumn( const CListCtrl* pListCtrl, TColumn sortByColumn )
+			: m_nmHdr( pListCtrl, lv::LVN_CanSortByColumn ), m_sortByColumn( sortByColumn ) {}
+	public:
+		ui::CNmHdr m_nmHdr;
+		TColumn m_sortByColumn;
+	};
 protected:
 	enum DiffSide { SrcDiff, DestDiff };
 
