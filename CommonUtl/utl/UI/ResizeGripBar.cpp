@@ -13,49 +13,27 @@
 #endif
 
 
-namespace ui
-{
-	static COLORREF GetHotArrowColor( void )
-	{
-		return ui::GetAdjustLuminance( ::GetSysColor( COLOR_HOTLIGHT ), 30 );					// contrast blue
-	}
-}
-
-
-enum GripperMetrics
-{
-	DepthSpacing = 1,
-	GripSpacing = 2			// so that 1 grip line is drawn
-};
-
-
 HCURSOR CResizeGripBar::s_hCursors[ 2 ] = { NULL, NULL };
 
 
-CResizeGripBar::CResizeGripBar( Orientation orientation, ToggleStyle toggleStyle /*= NoToggle*/, int windowExtent /*= -100*/ )
+CResizeGripBar::CResizeGripBar( CWnd* pFirstCtrl, CWnd* pSecondCtrl, resize::Orientation orientation, resize::ToggleStyle toggleStyle /*= resize::ToggleSecond*/ )
 	: CStatic()
-	, m_orientation( orientation )
+	, m_layout( orientation )
 	, m_toggleStyle( toggleStyle )
-	, m_arrowSize( 0, 0 )
-	, m_windowExtent( windowExtent )
-	, m_windowDepth( 0 )
-	, m_hasBorder( false )
+	, m_panelCtrls( pFirstCtrl, pSecondCtrl )
+
 	, m_pResizeFrame( NULL )
-	, m_pFirstCtrl( NULL )
-	, m_pSecondCtrl( NULL )
-	, m_firstMinExtent( 2 * GetSystemMetrics( ResizeUpDown == m_orientation ? SM_CYHSCROLL : SM_CXVSCROLL ) )
-	, m_secondMinExtent( m_firstMinExtent )
-	, m_isCollapsed( false )
-	, m_firstExtentPercentage( -1 )
+	, m_windowDepth( 0 )
+	, m_arrowSize( 0, 0 )
 	, m_hitOn( Nowhere )
 	, m_pTrackingInfo( NULL )
 {
-	CreateArrowsImageList();
+	REQUIRE( m_panelCtrls.first != NULL && m_panelCtrls.second != NULL );
 
-	if ( NULL == s_hCursors[ ResizeUpDown ] )
+	if ( NULL == s_hCursors[ resize::NorthSouth ] )
 	{
-		s_hCursors[ ResizeUpDown ] = ::LoadCursor( NULL, MAKEINTRESOURCE( IDC_SIZENS ) );
-		s_hCursors[ ResizeLeftRight ] = ::LoadCursor( NULL, MAKEINTRESOURCE( IDC_SIZEWE ) );
+		s_hCursors[ resize::NorthSouth ] = AfxGetApp()->LoadCursor( IDC_RESIZE_SPLITTER_NS_CURSOR );
+		s_hCursors[ resize::WestEast ] = AfxGetApp()->LoadCursor( IDC_RESIZE_SPLITTER_WE_CURSOR );
 	}
 }
 
@@ -69,10 +47,10 @@ void CResizeGripBar::CreateArrowsImageList( void )
 	ASSERT_NULL( m_arrowImageList.GetSafeHandle() );
 
 	CBitmap bitmapArrows;
-	UINT bitmapResId = ui::UpDown == m_orientation ? IDB_RESIZE_DOWN_UP_BITMAP : IDB_RESIZE_RIGHT_LEFT_BITMAP;
+	UINT bitmapResId = resize::NorthSouth == m_layout.m_orientation ? IDB_RESIZE_DOWN_UP_BITMAP : IDB_RESIZE_RIGHT_LEFT_BITMAP;
 
 	// load state: Normal (and compute arrow-dependent sizes)
-	m_arrowSize = LoadArrowsBitmap( &bitmapArrows, bitmapResId, ui::GetHotArrowColor() );
+	m_arrowSize = LoadArrowsBitmap( &bitmapArrows, bitmapResId, GetHotArrowColor() );
 	m_windowDepth = GetArrowDepth() + DepthSpacing * 2;
 	VERIFY( m_arrowImageList.Create( m_arrowSize.cx, m_arrowSize.cy, ILC_COLORDDB | ILC_MASK, 0, 2 ) );
 	m_arrowImageList.Add( &bitmapArrows, color::LightGrey );
@@ -100,23 +78,20 @@ CSize CResizeGripBar::LoadArrowsBitmap( CBitmap* pBitmap, UINT bitmapResId, COLO
 	return arrowSize;
 }
 
-bool CResizeGripBar::CreateGripper( CResizeFrameStatic* pResizeFrame, CWnd* pFirstCtrl, CWnd* pSecondCtrl,
-									UINT id /*= 0xFFFF*/, DWORD style /*= WS_CHILD | VS_VISIBLE | WS_CLIPSIBLINGS | SS_NOTIFY*/ )
+bool CResizeGripBar::CreateGripper( CResizeFrameStatic* pResizeFrame, UINT id /*= 0xFFFF*/ )
 {
-	// Note: WS_CLIPSIBLINGS style is important: it prevents dirty drawing when collapsing embedded resize frames
-
-	REQUIRE( pResizeFrame != NULL && pFirstCtrl != NULL && pSecondCtrl != NULL );
-	ASSERT( HasFlag( style, WS_CHILD ) );
-
 	m_pResizeFrame = pResizeFrame;
-	m_pFirstCtrl = pFirstCtrl;
-	m_pSecondCtrl = pSecondCtrl;
+	ASSERT_PTR( m_pResizeFrame->GetSafeHwnd() );
+	ASSERT_PTR( m_panelCtrls.first->GetSafeHwnd() );
+	ASSERT_PTR( m_panelCtrls.second->GetSafeHwnd() );
 
 	ComputeInitialMetrics();
 
-	static const TCHAR* pCaption[] = { _T("<UpDown gripper>"), _T("<LeftRight gripper>") };
+	static const TCHAR* s_caption[] = { _T("<UpDown grip-bar>"), _T("<LeftRight grip-bar>") };
 
-	if ( !Create( pCaption[ m_orientation ], style, CRect( 0, 0, 0, 0 ), m_pResizeFrame->GetParent(), id ) )
+	// Note: WS_CLIPSIBLINGS style is important: it prevents dirty drawing when collapsing embedded resize frames
+
+	if ( !Create( s_caption[ m_layout.m_orientation ], WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | SS_NOTIFY, CRect( 0, 0, 0, 0 ), m_pResizeFrame->GetParent(), id ) )
 		return false;
 
 	ASSERT_NULL( m_pTrackingInfo );
@@ -125,80 +100,79 @@ bool CResizeGripBar::CreateGripper( CResizeFrameStatic* pResizeFrame, CWnd* pFir
 	return true;
 }
 
+COLORREF CResizeGripBar::GetHotArrowColor( void )
+{
+	return ui::GetAdjustLuminance( ::GetSysColor( COLOR_HOTLIGHT ), 30 );					// contrast blue
+}
+
 void CResizeGripBar::ComputeInitialMetrics( void )
 {
-	// if minimum extents are percentages, evaluate them to the actual limits
-	if ( m_firstMinExtent < 0 )
-	{
-		CRect rectInitial;
-		m_pFirstCtrl->GetWindowRect( &rectInitial );
-		m_firstMinExtent = GetRectExtent( rectInitial ) * -m_firstMinExtent / 100;
-	}
+	std::pair<CRect, CRect> rectPair;
 
-	if ( m_secondMinExtent < 0 )
-	{
-		CRect rectInitial;
-		m_pSecondCtrl->GetWindowRect( &rectInitial );
-		m_secondMinExtent = GetRectExtent( rectInitial ) * -m_secondMinExtent / 100;
-	}
+	m_panelCtrls.first->GetWindowRect( &rectPair.first );
+	m_panelCtrls.second->GetWindowRect( &rectPair.second );
+
+	// if minimum extents are percentages, evaluate them to the actual limits
+	if ( gdi::IsPercentage( m_layout.m_minExtents.first ) )
+		m_layout.m_minExtents.first = gdi::EvalValueOrPercentage( m_layout.m_minExtents.first, GetRectExtent( rectPair.first ) );
+
+	if ( gdi::IsPercentage( m_layout.m_minExtents.second ) )
+		m_layout.m_minExtents.second = gdi::EvalValueOrPercentage( m_layout.m_minExtents.second, GetRectExtent( rectPair.second ) );
 
 	if ( 0 == m_windowDepth )
 	{	// default depth is the distance between first and second windows
-		CRect rectFirst, rectSecond;
-		m_pFirstCtrl->GetWindowRect( &rectFirst );
-		m_pSecondCtrl->GetWindowRect( &rectSecond );
-
-		if ( m_orientation == ResizeUpDown )
-			m_windowDepth = rectSecond.top - rectFirst.bottom;
+		if ( m_layout.m_orientation == resize::NorthSouth )
+			m_windowDepth = rectPair.second.top - rectPair.first.bottom;
 		else
-			m_windowDepth = rectSecond.left - rectFirst.right;
+			m_windowDepth = rectPair.second.left - rectPair.first.right;
 	}
 
-	if ( -1 == m_firstExtentPercentage )
+	if ( -1 == GetFirstExtentPercentage() )
 	{	// take it from the current size of the first window versus frame window
 		CFrameLayoutInfo info;
 		ReadLayoutInfo( info );
 
-		CRect rectFirst;
-		m_pFirstCtrl->GetWindowRect( &rectFirst );
-
-		int firstExtent = GetRectExtent( rectFirst );
+		int firstExtent = GetRectExtent( rectPair.first );
 
 		LimitFirstExtentToBounds( firstExtent, info.m_maxExtent );
 
-		m_firstExtentPercentage = 100 * firstExtent / info.m_maxExtent;
-		ENSURE( m_firstExtentPercentage >= 0 && m_firstExtentPercentage <= 100 );
+		m_layout.m_firstExtentPercentage = gdi::GetPercentageOf( firstExtent, info.m_maxExtent );
+		ENSURE( gdi::IsValidPercentage( m_layout.m_firstExtentPercentage ) );
 	}
 }
 
-void CResizeGripBar::SetFirstExtentPercentage( int firstExtentPercentage )
+CResizeGripBar& CResizeGripBar::SetFirstExtentPercentage( int firstExtentPercentage )
 {
-	REQUIRE( firstExtentPercentage >= 0 && firstExtentPercentage <= 100 );
+	REQUIRE( gdi::IsValidPercentage( firstExtentPercentage ) );
 
 	if ( m_hWnd != NULL )
 	{
 		CFrameLayoutInfo info;
 		ReadLayoutInfo( info );
 
-		int firstExtent = firstExtentPercentage * info.m_maxExtent / 100;		// convert to absolute extent
+		int firstExtent = gdi::ScaleValue( info.m_maxExtent, firstExtentPercentage );		// convert to absolute extent
 
 		LimitFirstExtentToBounds( firstExtent, info.m_maxExtent );
-		m_firstExtentPercentage = 100 * firstExtent / info.m_maxExtent;			// convert back to percentage
+		m_layout.m_firstExtentPercentage = gdi::GetPercentageOf( firstExtent, info.m_maxExtent );		// convert back to percentage
 
 		LayoutProportionally();
 	}
 	else
-		m_firstExtentPercentage = firstExtentPercentage;
+		m_layout.m_firstExtentPercentage = firstExtentPercentage;
+
+	return *this;
 }
 
-void CResizeGripBar::SetCollapsed( bool collapsed )
+CResizeGripBar& CResizeGripBar::SetCollapsed( bool collapsed )
 {
-	ASSERT( m_toggleStyle != NoToggle );
+	REQUIRE( m_toggleStyle != resize::NoToggle );
 
-	m_isCollapsed = collapsed;
+	m_layout.m_isCollapsed = collapsed;
 
 	if ( m_hWnd != NULL )
 		LayoutProportionally();
+
+	return *this;
 }
 
 void CResizeGripBar::LayoutProportionally( bool repaint /*= true*/ )
@@ -209,7 +183,7 @@ void CResizeGripBar::LayoutProportionally( bool repaint /*= true*/ )
 	ReadLayoutInfo( info );
 
 	// computation is driven from info.m_frameRect and preserves m_firstExtentPercentage
-	int firstExtent = m_firstExtentPercentage * info.m_maxExtent / 100;			// convert to absolute extent
+	int firstExtent = gdi::ScaleValue( info.m_maxExtent, m_layout.m_firstExtentPercentage );		// convert to absolute extent
 
 	LimitFirstExtentToBounds( firstExtent, info.m_maxExtent );
 
@@ -223,14 +197,14 @@ void CResizeGripBar::LayoutGripperTo( const CFrameLayoutInfo& info, const int fi
 	CRect gripperRect, firstRect, secondRect;
 	ComputeLayoutRects( gripperRect, firstRect, secondRect, info, firstExtent );
 
-	if ( ToggleFirst == m_toggleStyle )
-		ui::ShowWindow( *m_pFirstCtrl, !m_isCollapsed || ToggleSecond == m_toggleStyle );
+	if ( resize::ToggleFirst == m_toggleStyle )
+		ui::ShowWindow( *m_panelCtrls.first, !m_layout.m_isCollapsed || resize::ToggleSecond == m_toggleStyle );
 
-	if ( ToggleSecond == m_toggleStyle )
-		ui::ShowWindow( *m_pSecondCtrl, !m_isCollapsed || ToggleFirst == m_toggleStyle );
+	if ( resize::ToggleSecond == m_toggleStyle )
+		ui::ShowWindow( *m_panelCtrls.second, !m_layout.m_isCollapsed || resize::ToggleFirst == m_toggleStyle );
 
-	layout::MoveControl( *m_pFirstCtrl, firstRect, repaint );
-	layout::MoveControl( *m_pSecondCtrl, secondRect, repaint );
+	layout::MoveControl( *m_panelCtrls.first, firstRect, repaint );
+	layout::MoveControl( *m_panelCtrls.second, secondRect, repaint );
 
 	// move lastly to prevent dirty painting issues
 	this->MoveWindow( &gripperRect, false );
@@ -243,7 +217,7 @@ bool CResizeGripBar::TrackToPos( CPoint screenTrackPos )
 	ASSERT_PTR( m_pTrackingInfo );
 
 	CSize deltaPos = screenTrackPos - m_pTrackingInfo->m_trackPos;
-	int trackDelta = ResizeUpDown == m_orientation ? deltaPos.cy : deltaPos.cx;
+	int trackDelta = resize::NorthSouth == m_layout.m_orientation ? deltaPos.cy : deltaPos.cx;
 
 	if ( 0 == trackDelta )
 		return false;
@@ -255,7 +229,7 @@ bool CResizeGripBar::TrackToPos( CPoint screenTrackPos )
 	ReadLayoutInfo( info );
 
 	CRect rectFirst;
-	m_pFirstCtrl->GetWindowRect( &rectFirst );
+	m_panelCtrls.first->GetWindowRect( &rectFirst );
 
 	int firstExtent = GetRectExtent( rectFirst );
 
@@ -265,7 +239,7 @@ bool CResizeGripBar::TrackToPos( CPoint screenTrackPos )
 	if ( !LimitFirstExtentToBounds( firstExtent, info.m_maxExtent ) )
 		return false;
 
-	m_firstExtentPercentage = 100 * firstExtent / info.m_maxExtent;				// convert back to percentage
+	m_layout.m_firstExtentPercentage = gdi::GetPercentageOf( firstExtent, info.m_maxExtent );			// convert back to percentage
 
 	LayoutGripperTo( info, firstExtent, true );
 	return true;
@@ -283,15 +257,15 @@ bool CResizeGripBar::LimitFirstExtentToBounds( int& rFirstExtent, int maxExtent 
 {
 	int oldFirstExtent = rFirstExtent;
 
-	if ( rFirstExtent < m_firstMinExtent )
-		rFirstExtent = m_firstMinExtent;
+	if ( rFirstExtent < m_layout.m_minExtents.first )
+		rFirstExtent = m_layout.m_minExtents.first;
 
 	int secondExtent = maxExtent - rFirstExtent;
 
-	if ( secondExtent < m_secondMinExtent )
-		rFirstExtent -= ( m_secondMinExtent - secondExtent );
+	if ( secondExtent < m_layout.m_minExtents.second )
+		rFirstExtent -= ( m_layout.m_minExtents.second - secondExtent );
 
-	ENSURE( rFirstExtent >= m_firstMinExtent && rFirstExtent <= maxExtent );
+	ENSURE( rFirstExtent >= m_layout.m_minExtents.first && rFirstExtent <= maxExtent );
 
 	return rFirstExtent == oldFirstExtent;		// false if constrained
 }
@@ -305,17 +279,17 @@ void CResizeGripBar::ComputeLayoutRects( CRect& rGripperRect, CRect& rFirstRect,
 
 	CWnd* pHiddenWnd = NULL;
 
-	if ( m_isCollapsed )
-		pHiddenWnd = m_toggleStyle == ToggleFirst ? m_pFirstCtrl : m_pSecondCtrl;
+	if ( m_layout.m_isCollapsed )
+		pHiddenWnd = m_toggleStyle == resize::ToggleFirst ? m_panelCtrls.first : m_panelCtrls.second;
 
-	if ( ResizeUpDown == m_orientation )
-		if ( pHiddenWnd == m_pFirstCtrl )
+	if ( resize::NorthSouth == m_layout.m_orientation )
+		if ( pHiddenWnd == m_panelCtrls.first )
 		{	// first collapsed  - gripper at top
 			rFirstRect.bottom = rFirstRect.top + firstExtent;
 			rGripperRect.bottom = rGripperRect.top + m_windowDepth;
 			rSecondRect.top = rGripperRect.bottom;
 		}
-		else if ( pHiddenWnd == m_pSecondCtrl )
+		else if ( pHiddenWnd == m_panelCtrls.second )
 		{	// second collapsed  - gripper at bottom
 			int secondExtent = info.m_maxExtent - firstExtent;
 
@@ -331,13 +305,13 @@ void CResizeGripBar::ComputeLayoutRects( CRect& rGripperRect, CRect& rFirstRect,
 			rSecondRect.top = rGripperRect.bottom;
 		}
 	else
-		if ( pHiddenWnd == m_pFirstCtrl )
+		if ( pHiddenWnd == m_panelCtrls.first )
 		{	// first collapsed  - gripper at left
 			rFirstRect.right = rFirstRect.left + firstExtent;
 			rGripperRect.right = rGripperRect.left + m_windowDepth;
 			rSecondRect.left = rGripperRect.right;
 		}
-		else if ( pHiddenWnd == m_pSecondCtrl )
+		else if ( pHiddenWnd == m_panelCtrls.second )
 		{	// second collapsed  - gripper at right
 			int secondExtent = info.m_maxExtent - firstExtent;
 
@@ -361,22 +335,22 @@ void CResizeGripBar::ComputeLayoutRects( CRect& rGripperRect, CRect& rFirstRect,
 CRect CResizeGripBar::ComputeMouseTrapRect( const CSize& trackOffset ) const
 {
 	// percentages (negative) must have been evaluated by now
-	REQUIRE( m_firstMinExtent >= 0 && m_secondMinExtent >= 0 );
+	REQUIRE( m_layout.m_minExtents.first >= 0 && m_layout.m_minExtents.second >= 0 );
 
 	CRect mouseTrapRect;
 	m_pResizeFrame->GetWindowRect( &mouseTrapRect );
 
-	if ( ResizeUpDown == m_orientation )
+	if ( resize::NorthSouth == m_layout.m_orientation )
 	{
-		mouseTrapRect.top += m_firstMinExtent;
-		mouseTrapRect.bottom -= ( m_secondMinExtent + m_windowDepth );
+		mouseTrapRect.top += m_layout.m_minExtents.first;
+		mouseTrapRect.bottom -= ( m_layout.m_minExtents.second + m_windowDepth );
 
 		mouseTrapRect.OffsetRect( 0, trackOffset.cy );
 	}
 	else
 	{
-		mouseTrapRect.left += m_firstMinExtent;
-		mouseTrapRect.right -= ( m_secondMinExtent + m_windowDepth );
+		mouseTrapRect.left += m_layout.m_minExtents.first;
+		mouseTrapRect.right -= ( m_layout.m_minExtents.second + m_windowDepth );
 
 		mouseTrapRect.OffsetRect( trackOffset.cy, 0 );
 	}
@@ -394,10 +368,10 @@ CResizeGripBar::CDrawAreas CResizeGripBar::GetDrawAreas( void ) const
 
     int arrowExtent = GetArrowExtent(), arrowSpacing = arrowExtent;
 
-	if ( NoToggle == m_toggleStyle )
+	if ( resize::NoToggle == m_toggleStyle )
 		areas.m_arrowRect1 = areas.m_arrowRect2 = CRect( 0, 0, 0, 0 );
 	else
-		if ( ResizeUpDown == m_orientation )
+		if ( resize::NorthSouth == m_layout.m_orientation )
 		{
 			areas.m_gripRect.DeflateRect( arrowExtent + arrowSpacing * 2, 0 );
 
@@ -420,9 +394,9 @@ CResizeGripBar::CDrawAreas CResizeGripBar::GetDrawAreas( void ) const
 CResizeGripBar::HitTest CResizeGripBar::GetHitTest( const CDrawAreas& rAreas, const CPoint& clientPos ) const
 {
 	if ( rAreas.m_gripRect.PtInRect( clientPos ) )
-		return m_isCollapsed ? ToggleArrow : GripBar;
+		return IsCollapsed() ? ToggleArrow : GripBar;
 
-	if ( m_toggleStyle != NoToggle )
+	if ( m_toggleStyle != resize::NoToggle )
 		if ( rAreas.m_arrowRect1.PtInRect( clientPos ) || rAreas.m_arrowRect2.PtInRect( clientPos ) )
 			return ToggleArrow;
 
@@ -474,10 +448,10 @@ void CResizeGripBar::DrawArrow( CDC* pDC, const CRect& rect, ArrowPart part, Arr
 
 CResizeGripBar::ArrowPart CResizeGripBar::GetArrowPart( void ) const
 {
-	if ( ToggleSecond == m_toggleStyle )
-		return m_isCollapsed ? Collapsed : Expanded;
+	if ( resize::ToggleSecond == m_toggleStyle )
+		return m_layout.m_isCollapsed ? Collapsed : Expanded;
 	else
-		return m_isCollapsed ? Expanded : Collapsed;
+		return m_layout.m_isCollapsed ? Expanded : Collapsed;
 }
 
 CResizeGripBar::ArrowState CResizeGripBar::GetArrowState( HitTest hitOn ) const
@@ -492,6 +466,13 @@ int CResizeGripBar::GetImageIndex( ArrowPart part, ArrowState state ) const
 {
 	int imageIndex = ( 2 * state ) + part;
 	return imageIndex;
+}
+
+void CResizeGripBar::PreSubclassWindow( void )
+{
+	CreateArrowsImageList();
+
+	__super::PreSubclassWindow();
 }
 
 
@@ -510,7 +491,7 @@ BOOL CResizeGripBar::OnSetCursor( CWnd* pWnd, UINT hitTest, UINT message )
 	pWnd, hitTest, message;
 	if ( GripBar == m_hitOn )
 	{
-		::SetCursor( s_hCursors[ m_orientation ] );
+		::SetCursor( s_hCursors[ m_layout.m_orientation ] );
 		return TRUE;
 	}
 
@@ -550,7 +531,7 @@ void CResizeGripBar::OnLButtonUp( UINT flags, CPoint point )
 
 		if ( m_pTrackingInfo->m_wasDragged )
 			event = EndResize;
-		else if ( m_toggleStyle != NoToggle )
+		else if ( m_toggleStyle != resize::NoToggle )
 			event = Toggle;
 
 		delete m_pTrackingInfo;
@@ -567,7 +548,7 @@ void CResizeGripBar::OnLButtonUp( UINT flags, CPoint point )
 			m_pResizeFrame->NotifyParent( CResizeFrameStatic::RF_GRIPPER_RESIZED );
 			break;
 		case Toggle:
-			SetCollapsed( !m_isCollapsed );
+			SetCollapsed( !IsCollapsed() );
 			m_pResizeFrame->NotifyParent( CResizeFrameStatic::RF_GRIPPER_TOGGLE );
 			break;
 	}
@@ -605,9 +586,9 @@ BOOL CResizeGripBar::OnEraseBkgnd( CDC* pDC )
 	CRect clientRect;
 	GetClientRect( &clientRect );
 
-	CBrush brush( Nowhere == m_hitOn ? GetSysColor( COLOR_3DLIGHT ) : HotLightBlue );
+	CBrush brush( Nowhere == m_hitOn ? GetSysColor( COLOR_3DLIGHT ) : HotCyan );
 
-	if ( !m_isCollapsed )
+	if ( !IsCollapsed() )
 		pDC->FillRect( &clientRect, &brush );
 	else
 	{
@@ -627,10 +608,10 @@ void CResizeGripBar::OnPaint( void )
 	CDrawAreas areas = GetDrawAreas();
 	HitTest hitOn = GetMouseHitTest( areas );
 
-	if ( !m_isCollapsed )
+	if ( !IsCollapsed() )
 		DrawGripBar( &dc, areas.m_gripRect );
 
-	if ( m_toggleStyle != NoToggle )
+	if ( m_toggleStyle != resize::NoToggle )
 	{
 		ArrowPart part = GetArrowPart();
 		ArrowState state = GetArrowState( hitOn );
@@ -639,8 +620,8 @@ void CResizeGripBar::OnPaint( void )
 		DrawArrow( &dc, areas.m_arrowRect2, part, state );
 	}
 
-	if ( !m_isCollapsed )
-		if ( m_hasBorder )
+	if ( !IsCollapsed() )
+		if ( m_layout.m_hasBorder )
 			dc.Draw3dRect( &areas.m_clientRect, GetSysColor( COLOR_BTNHIGHLIGHT ), GetSysColor( COLOR_BTNSHADOW ) );
 }
 

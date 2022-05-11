@@ -83,6 +83,63 @@ namespace ui
 }
 
 
+namespace gdi
+{
+	// if negative is a percentage, otherwise a pozitive value
+
+	inline bool IsValidPercentage( int percentage ) { return percentage >= 0 && percentage <= 100; }
+	inline int ScaleValue( int value, int percentage ) { return MulDiv( value, percentage, 100 ); }
+	inline int GetPercentageOf( int value, int maxValue ) { return MulDiv( 100, value, maxValue ); }
+
+	inline bool IsPercentage( int valueOrNegativePct ) { return valueOrNegativePct < 0; }
+	inline int EvalValueOrPercentage( int valueOrNegativePct, int extent ) { return IsPercentage( valueOrNegativePct ) ? MulDiv( extent, -valueOrNegativePct, 100 ) : valueOrNegativePct; }
+
+
+	// Encalpsulates a raw value that can be either a value or a percentage (of en extent).
+
+	union UValuePct
+	{
+		UValuePct( void ) { m_valuePair.m_value = m_valuePair.m_percentage = SHRT_MAX; }
+		explicit UValuePct( int rawValue ) : m_rawValue( rawValue ) {}
+
+		static UValuePct MakeValue( int value ) { UValuePct valPct; valPct.SetValue( value ); return valPct; }
+		static UValuePct MakePercentage( int percentage ) { UValuePct valPct; valPct.SetPercentage( percentage ); return valPct; }
+
+		bool IsValid( void ) const { return m_valuePair.IsValid(); }
+
+		int GetRaw( void ) const { return m_rawValue; }
+		void SetRaw( int rawValue ) { m_rawValue = rawValue; }
+
+		bool HasValue( void ) const { return CPair::IsValidField( m_valuePair.m_value ); }
+		bool HasPercentage( void ) const { return CPair::IsValidField( m_valuePair.m_percentage ); }
+
+		int GetValue( void ) const { ASSERT( HasValue() ); return m_valuePair.m_value; }
+		void SetValue( int value ) { m_valuePair.SetValue( value ); }
+
+		int GetPercentage( void ) const { ASSERT( HasPercentage() ); return m_valuePair.m_percentage; }
+		void SetPercentage( int percentage ) { m_valuePair.SetPercentage( percentage ); }
+
+		int EvalValue( int extent ) const;
+		double EvalValue( double extent ) const;
+	private:
+		struct CPair
+		{
+			bool IsValid( void ) const { return IsValidField( m_value ) || IsValidField( m_percentage ); }
+			static bool IsValidField( short field ) { return field != SHRT_MAX; }
+
+			void SetValue( int value ) { m_value = static_cast<short>( value ); m_percentage = SHRT_MAX; }
+			void SetPercentage( int percentage ) { m_percentage = static_cast<short>( percentage ); m_value = SHRT_MAX; }
+		public:
+			short m_value;
+			short m_percentage;
+		};
+	private:
+		int m_rawValue;
+		CPair m_valuePair;
+	};
+}
+
+
 class CBalloonHostWnd;
 
 

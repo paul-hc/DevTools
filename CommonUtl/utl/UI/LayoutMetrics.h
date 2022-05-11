@@ -64,7 +64,7 @@ namespace layout
 {
 	union Metrics
 	{
-		explicit Metrics( int layoutStyle = 0 );
+		explicit Metrics( TStyle layoutStyle = 0 );
 		~Metrics( void );
 
 		bool IsValid( void ) const;

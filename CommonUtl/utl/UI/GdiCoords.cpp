@@ -7,6 +7,36 @@
 #endif
 
 
+// ui_fwd.h imlementation
+
+namespace gdi
+{
+	// UValuePct implementation
+
+	int UValuePct::EvalValue( int extent ) const
+	{
+		if ( HasValue() )
+			return GetValue();
+		else if ( HasPercentage() )
+			return MulDiv( extent, GetPercentage(), 100 );
+
+		ASSERT( false );		// invalid
+		return 0;
+	}
+
+	double UValuePct::EvalValue( double extent ) const
+	{
+		if ( HasValue() )
+			return GetValue();
+		else if ( HasPercentage() )
+			return extent * GetPercentage() / 100.0;
+
+		ASSERT( false );		// invalid
+		return 0;
+	}
+}
+
+
 namespace ui
 {
 	double GetDistFromSquareAspect( const SIZE& size )

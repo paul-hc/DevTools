@@ -10,7 +10,6 @@
 #include "utl/Timer.h"
 #include "utl/TimeUtils.h"
 #include "utl/UI/ResizeFrameStatic.h"
-#include "utl/UI/ResizeGripBar.h"
 #include "utl/UI/UtilitiesEx.h"
 #include "utl/UI/resource.h"
 #include "resource.h"
@@ -153,19 +152,17 @@ CBuddyControlsDialog::~CBuddyControlsDialog()
 
 void CBuddyControlsDialog::InitSplitters( void )
 {
-	CResizeGripBar* pResizeGripper = NULL;
-
-	m_pHorizSplitterFrame.reset( new CResizeFrameStatic( &m_fileListCtrl, &m_progressCtrl, new CResizeGripBar( CResizeGripBar::ResizeUpDown, CResizeGripBar::ToggleSecond ) ) );
+	m_pHorizSplitterFrame.reset( new CResizeFrameStatic( &m_fileListCtrl, &m_progressCtrl, resize::NorthSouth ) );
 	m_pHorizSplitterFrame->SetSection( m_regSection + _T("\\SplitterH") );
-	pResizeGripper = m_pHorizSplitterFrame->GetGripBar();
-	pResizeGripper->SetMinExtents( 50, 16 );
-	pResizeGripper->SetFirstExtentPercentage( 80 );
+	m_pHorizSplitterFrame->GetGripBar()
+		.SetMinExtents( 50, 16 )
+		.SetFirstExtentPercentage( 80 );
 
-	m_pVertSplitterFrame.reset( new CResizeFrameStatic( m_pHorizSplitterFrame.get(), &m_selFileEdit, new CResizeGripBar( CResizeGripBar::ResizeLeftRight, CResizeGripBar::ToggleSecond ) ) );
+	m_pVertSplitterFrame.reset( new CResizeFrameStatic( m_pHorizSplitterFrame.get(), &m_selFileEdit, resize::WestEast ) );
 	m_pVertSplitterFrame->SetSection( m_regSection + _T("\\SplitterV") );
-	pResizeGripper = m_pVertSplitterFrame->GetGripBar();
-	pResizeGripper->SetMinExtents( 40, 20 );
-	pResizeGripper->SetFirstExtentPercentage( 70 );
+	m_pVertSplitterFrame->GetGripBar()
+		.SetMinExtents( 40, 20 )
+		.SetFirstExtentPercentage( 70 );
 }
 
 void CBuddyControlsDialog::SearchForFiles( void )
@@ -250,8 +247,6 @@ void CBuddyControlsDialog::DoDataExchange( CDataExchange* pDX )
 		{
 			m_searchPathCombo.LoadHistory( reg::section_dialog, reg::entry_searchPathHistory );
 			m_folderPathCombo.LoadHistory( reg::section_dialog, reg::entry_searchPathHistory );
-//m_progressCtrl.ShowWindow( SW_HIDE );
-//m_selFileEdit.ShowWindow( SW_HIDE );
 		}
 
 		SetupFileListView();

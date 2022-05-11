@@ -1,7 +1,6 @@
 
 #include "StdAfx.h"
 #include "ResizeFrameStatic.h"
-#include "ResizeGripBar.h"
 #include "Utilities.h"
 
 #ifdef _DEBUG
@@ -16,15 +15,11 @@ namespace reg
 }
 
 
-CResizeFrameStatic::CResizeFrameStatic( CWnd* pFirstCtrl, CWnd* pSecondCtrl, CResizeGripBar* pGripper )
+CResizeFrameStatic::CResizeFrameStatic( CWnd* pFirstCtrl, CWnd* pSecondCtrl,
+										resize::Orientation orientation /*= resize::NorthSouth*/, resize::ToggleStyle toggleStyle /*= resize::ToggleSecond*/ )
 	: CStatic()
-	, m_pGripBar( pGripper )
-	, m_pFirstCtrl( pFirstCtrl )
-	, m_pSecondCtrl( pSecondCtrl )
+	, m_pGripBar( new CResizeGripBar( pFirstCtrl, pSecondCtrl, orientation, toggleStyle ) )
 {
-	ASSERT_PTR( m_pFirstCtrl );
-	ASSERT_PTR( m_pSecondCtrl );
-	ASSERT_PTR( m_pGripBar.get() );
 }
 
 CResizeFrameStatic::~CResizeFrameStatic()
@@ -45,9 +40,6 @@ void CResizeFrameStatic::NotifyParent( Notification notification )
 
 void CResizeFrameStatic::PreSubclassWindow( void )
 {
-	ASSERT_PTR( m_pFirstCtrl->GetSafeHwnd() );
-	ASSERT_PTR( m_pSecondCtrl->GetSafeHwnd() );
-
 	if ( !m_regSection.empty() )
 	{
 		m_pGripBar->SetFirstExtentPercentage( AfxGetApp()->GetProfileInt( m_regSection.c_str(), reg::entry_splitPct, m_pGripBar->GetFirstExtentPercentage() ) );
@@ -57,7 +49,7 @@ void CResizeFrameStatic::PreSubclassWindow( void )
 	__super::PreSubclassWindow();
 
 	if ( NULL == m_pGripBar->m_hWnd )
-		VERIFY( m_pGripBar->CreateGripper( this, m_pFirstCtrl, m_pSecondCtrl ) );
+		VERIFY( m_pGripBar->CreateGripper( this ) );
 }
 
 

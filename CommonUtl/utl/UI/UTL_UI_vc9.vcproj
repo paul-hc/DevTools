@@ -387,6 +387,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\res\ResizeSplitter-NS.cur"
+				>
+			</File>
+			<File
+				RelativePath=".\res\ResizeSplitter-WE.cur"
+				>
+			</File>
+			<File
 				RelativePath=".\resource.h"
 				>
 			</File>

@@ -25,7 +25,7 @@ namespace layout
 
 	// Metrics implementation
 
-	Metrics::Metrics( int layoutStyle /*= 0*/ )
+	Metrics::Metrics( TStyle layoutStyle /*= 0*/ )
 		: m_layoutStyle( layoutStyle )
 	{
 	}

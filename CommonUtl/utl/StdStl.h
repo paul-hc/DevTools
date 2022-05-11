@@ -97,6 +97,13 @@ namespace utl
 
 	template< typename LeftT, typename RightT >
 	LeftT min( const LeftT& left, const RightT& right ) { return ( static_cast<LeftT>( right ) < left ) ? static_cast<LeftT>( right ) : left; }
+
+
+	template< typename ValueT >
+	inline std::pair< ValueT, ValueT > make_pair_single( const ValueT& value )		// return pair composed from single value
+	{
+		return std::pair< ValueT, ValueT >( value, value );
+	}
 }
 
 

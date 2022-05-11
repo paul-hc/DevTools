@@ -3,48 +3,72 @@
 #pragma once
 
 
-class CResizeFrameStatic;
-
-
-namespace ui
+namespace resize
 {
-	enum Orientation { UpDown, LeftRight };
+	enum Orientation
+	{
+		NorthSouth,		// top & bottom panels: horizontal splitter grip-bar
+		WestEast		// left & right panels: vertical splitter grip-bar
+	};
+
+	enum ToggleStyle { NoToggle, ToggleFirst, ToggleSecond };
 }
+
+
+class CResizeFrameStatic;
 
 
 class CResizeGripBar : public CStatic
 {
 public:
-	enum Orientation { ResizeUpDown, ResizeLeftRight };
-	enum ToggleStyle { NoToggle, ToggleFirst, ToggleSecond };
+	CResizeGripBar( CWnd* pFirstCtrl, CWnd* pSecondCtrl, resize::Orientation orientation, resize::ToggleStyle toggleStyle = resize::ToggleSecond );
+	virtual ~CResizeGripBar();
 
-	CResizeGripBar( Orientation orientation, ToggleStyle toggleStyle = NoToggle, int windowExtent = -100 );
-	~CResizeGripBar();
+	CResizeGripBar& SetMinExtents( int firstMinExtent, int secondMinExtent ) { m_layout.m_minExtents = std::make_pair( firstMinExtent, secondMinExtent ); return *this; }
 
-	void SetMinExtents( int firstMinExtent, int secondMinExtent );
+	bool HasBorder( void ) const { return m_layout.m_hasBorder; }
+	bool SetBorder( bool hasBorder = true ) { return m_layout.m_hasBorder = hasBorder; }
+
+	int GetFirstExtentPercentage( void ) const { return m_layout.m_firstExtentPercentage; }
+	CResizeGripBar& SetFirstExtentPercentage( int firstExtentPercentage );
+
+	bool IsCollapsed( void ) const { return m_layout.m_isCollapsed; }
+	CResizeGripBar& SetCollapsed( bool collapsed );
 
 	// size of the small dimension (height for an up-down, width for an left-right)
 	int GetWindowDepth( void ) const { return m_windowDepth; }
 	void SetWindowDepth( int windowDepth ) { m_windowDepth = windowDepth; }
 	void IncreaseWindowDepth( int byWindowDepth ) { m_windowDepth += byWindowDepth; }
 
-	bool HasBorder( void ) const { return m_hasBorder; }
-	bool SetBorder( bool hasBorder = true ) { return m_hasBorder = hasBorder; }
-
-	int GetFirstExtentPercentage( void ) const { return m_firstExtentPercentage; }
-	void SetFirstExtentPercentage( int firstExtentPercentage );
-
-	bool IsCollapsed( void ) const { return m_isCollapsed; }
-	void SetCollapsed( bool collapsed );
-
-	// for state persistence
-	int& RefFirstExtentPercentage( void ) { return m_firstExtentPercentage; }
-	bool& RefCollapsed( void ) { return m_isCollapsed; }
-
-	bool CreateGripper( CResizeFrameStatic* pResizeFrame, CWnd* pFirstCtrl, CWnd* pSecondCtrl,
-						UINT id = 0xFFFF, DWORD style = WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | SS_NOTIFY );
+	bool CreateGripper( CResizeFrameStatic* pResizeFrame, UINT id = 0xFFFF );
 
 	void LayoutProportionally( bool repaint = true );		// preserves existing aspect ratio
+
+	static COLORREF GetHotArrowColor( void );
+public:
+	typedef std::pair<int, int> TPanelMinExtents;
+
+
+	struct CLayout
+	{
+		CLayout( resize::Orientation orientation )
+			: m_orientation( orientation )
+			, m_minExtents( utl::make_pair_single( 2 * ::GetSystemMetrics( resize::NorthSouth == m_orientation ? SM_CYHSCROLL : SM_CXVSCROLL ) ) )
+			, m_firstExtentPercentage( -1 )
+			, m_isCollapsed( false )
+			, m_hasBorder( false )
+		{
+		}
+	public:
+		const resize::Orientation m_orientation;
+		TPanelMinExtents m_minExtents;		// if negative, is percentage of the initial extent
+		int m_firstExtentPercentage;		// when not collapsed
+		bool m_isCollapsed;
+		bool m_hasBorder;					// for non-collapsed state
+	};
+
+
+	const CLayout& GetLayout( void ) const { return m_layout; }
 private:
 	void CreateArrowsImageList( void );
 	static CSize LoadArrowsBitmap( CBitmap* pBitmap, UINT bitmapResId, COLORREF arrowColor );	// returns the size of ONE arrow
@@ -52,6 +76,12 @@ private:
 	int GetArrowDepth( void ) const { ASSERT( m_arrowSize != CSize( 0, 0 ) ); return std::min( m_arrowSize.cx, m_arrowSize.cy ); }		// depth is the smaller arrow dimension
 	int GetArrowExtent( void ) const { ASSERT( m_arrowSize != CSize( 0, 0 ) ); return std::max( m_arrowSize.cx, m_arrowSize.cy ); }		// extent is the bigger arrow dimension
 protected:
+	enum GripperMetrics
+	{
+		DepthSpacing = 1,
+		GripSpacing = 2			// so that 1 grip line is drawn
+	};
+
 	struct CFrameLayoutInfo
 	{
 		CRect m_frameRect; // in parent coordinates
@@ -79,7 +109,7 @@ protected:
 		CRect m_arrowRect2;
 	};
 protected:
-	int GetRectExtent( const CRect& rect ) const { return ResizeUpDown == m_orientation ? rect.Height() : rect.Width(); }
+	int GetRectExtent( const CRect& rect ) const { return resize::NorthSouth == m_layout.m_orientation ? rect.Height() : rect.Width(); }
 
 	void ReadLayoutInfo( CFrameLayoutInfo& rInfo ) const;
 	bool LimitFirstExtentToBounds( int& rFirstExtent, int maxExtent ) const;
@@ -109,32 +139,27 @@ private:
 	void DrawGripBar( CDC* pDC, const CRect& rect );
 	void DrawArrow( CDC* pDC, const CRect& rect, ArrowPart part, ArrowState state );
 private:
-	const Orientation m_orientation;
-	const ToggleStyle m_toggleStyle;
-	const int m_windowExtent;
-	int m_windowDepth;
-	bool m_hasBorder;					// for non-collapsed state
+	typedef std::pair<CWnd*, CWnd*> TPanelCtrls;
 
+	CLayout m_layout;
+	const resize::ToggleStyle m_toggleStyle;
+	TPanelCtrls m_panelCtrls;
+
+	CResizeFrameStatic* m_pResizeFrame;		// sibling of this bar
+	int m_windowDepth;
 	CSize m_arrowSize;
 	CImageList m_arrowImageList;
-
-	CResizeFrameStatic* m_pResizeFrame;
-	CWnd* m_pFirstCtrl;
-	CWnd* m_pSecondCtrl;
-	int m_firstMinExtent;				// if negative, is percentage of the initial extent
-	int m_secondMinExtent;				// if negative, is percentage of the initial extent
-
-	bool m_isCollapsed;
-	int m_firstExtentPercentage;		// when not collapsed
 
 	HitTest m_hitOn;
 	CTrackingInfo* m_pTrackingInfo;
 
 	static HCURSOR s_hCursors[ 2 ];		// indexed by orientation
 
-	enum Colors { HotLightBlue = RGB( 189, 237, 255 ), MildGrey = RGB( 192, 192, 192 ), MildDarkerGrey = RGB( 173, 178, 181 ) };
+	enum Colors { HotCyan = RGB( 169, 219, 246 ), HotDeepCyan = RGB( 189, 237, 255 ), MildGrey = RGB( 192, 192, 192 ), MildDarkerGrey = RGB( 173, 178, 181 ) };
 
 	// generated stuff
+public:
+	virtual void PreSubclassWindow( void );
 protected:
 	afx_msg BOOL OnSetCursor( CWnd* pWnd, UINT hitTest, UINT message );
 	afx_msg void OnLButtonDown( UINT flags, CPoint point );
@@ -146,15 +171,6 @@ protected:
 
 	DECLARE_MESSAGE_MAP()
 };
-
-
-// inline code
-
-inline void CResizeGripBar::SetMinExtents( int firstMinExtent, int secondMinExtent )
-{
-	m_firstMinExtent = firstMinExtent;
-	m_secondMinExtent = secondMinExtent;
-}
 
 
 #endif // ResizeGripBar_h
