@@ -387,14 +387,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\res\ResizeLeftRight.cur"
-				>
-			</File>
-			<File
-				RelativePath=".\res\ResizeUpDown.cur"
-				>
-			</File>
-			<File
 				RelativePath=".\resource.h"
 				>
 			</File>

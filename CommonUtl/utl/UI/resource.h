@@ -24,8 +24,6 @@
 #define IDD_PASSWORD_DIALOG             28018
 #define IDB_RESIZE_DOWN_UP_BITMAP       28019
 #define IDB_RESIZE_RIGHT_LEFT_BITMAP    28020
-#define IDR_RESIZE_LEFTRIGHT_CURSOR     28021
-#define IDR_RESIZE_UPDOWN_CURSOR        28022
 #define UTL_MIN_COMMAND_VALUE           28200
 #define ID_ADD_ITEM                     28201
 #define ID_REMOVE_ITEM                  28202

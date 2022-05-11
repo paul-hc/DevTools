@@ -54,8 +54,8 @@ CResizeGripBar::CResizeGripBar( Orientation orientation, ToggleStyle toggleStyle
 
 	if ( NULL == s_hCursors[ ResizeUpDown ] )
 	{
-		s_hCursors[ ResizeUpDown ] = AfxGetApp()->LoadCursor( IDR_RESIZE_UPDOWN_CURSOR );
-		s_hCursors[ ResizeLeftRight ] = AfxGetApp()->LoadCursor( IDR_RESIZE_LEFTRIGHT_CURSOR );
+		s_hCursors[ ResizeUpDown ] = ::LoadCursor( NULL, MAKEINTRESOURCE( IDC_SIZENS ) );
+		s_hCursors[ ResizeLeftRight ] = ::LoadCursor( NULL, MAKEINTRESOURCE( IDC_SIZEWE ) );
 	}
 }
 

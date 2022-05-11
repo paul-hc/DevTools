@@ -341,8 +341,6 @@ IDR_DROP_MOVE_CURSOR    CURSOR                  "res\\DragDrop-Move.cur"
 IDR_DROP_COPY_CURSOR    CURSOR                  "res\\DragDrop-Copy.cur"
 IDR_TRACK_SCROLL_CURSOR CURSOR                  "res\\TrackScroll.cur"
 IDR_TRACK_ZOOM_CURSOR   CURSOR                  "res\\TrackZoom.cur"
-IDR_RESIZE_LEFTRIGHT_CURSOR CURSOR                  "res\\ResizeLeftRight.cur"
-IDR_RESIZE_UPDOWN_CURSOR CURSOR                  "res\\ResizeUpDown.cur"
 
 /////////////////////////////////////////////////////////////////////////////
 //
