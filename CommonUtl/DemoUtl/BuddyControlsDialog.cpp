@@ -20,6 +20,7 @@
 #endif
 
 #include "utl/FileStateEnumerator.hxx"
+#include "utl/UI/ReportListControl.hxx"
 #include "utl/UI/TandemControls.hxx"
 
 
@@ -102,11 +103,9 @@ namespace layout
 		{ IDC_FOLDER_PATH_COMBO, pctSizeX( 50 ) },
 		{ IDC_FIND_FILES_BUTTON, MoveX },
 		{ IDC_CALC_CHECKSUMS_BUTTON, MoveX },
+		{ IDC_VERT_SPLITTER_STATIC, Size },
 		{ IDOK, MoveX },
-		{ IDCANCEL, MoveX },
-
-		{ IDC_HORIZ_SPLITTER_STATIC /*IDC_VERT_SPLITTER_STATIC*/ /*IDC_FILE_STATE_EX_LIST*/, Size },
-		{ IDC_SEL_FILE_EDIT /*IDC_VERT_SPLITTER_STATIC*/ /*IDC_FILE_STATE_EX_LIST*/, MoveX | SizeY }
+		{ IDCANCEL, MoveX }
 	};
 }
 
@@ -120,14 +119,15 @@ CBuddyControlsDialog::CBuddyControlsDialog( CWnd* pParent )
 	, m_fileListCtrl( ui::ListHost_TileMateOnTopRight )
 {
 	m_regSection = reg::section_dialog;
-	RegisterCtrlLayout( layout::styles, COUNT_OF( layout::styles ) );
+	RegisterCtrlLayout( ARRAY_PAIR( layout::styles ) );
+	InitSplitters();
 
 	m_searchPathCombo.SetEnsurePathExist();
 
 	m_folderPathCombo.SetEnsurePathExist();
 	m_folderPathCombo.RefTandemLayout().SetTandemAlign( H_AlignLeft | V_AlignCenter | ui::H_ShrinkHost );
 
-	//SetFlag( m_fileListCtrl.RefListStyleEx(), LVS_EX_DOUBLEBUFFER, false );
+	SetFlag( m_fileListCtrl.RefListStyleEx(), LVS_EX_DOUBLEBUFFER, false );		// list repaint on resize issues
 	m_fileListCtrl.SetSection( m_regSection + _T("\\List") );
 	m_fileListCtrl.SetLayoutInfo( IDC_FILE_STATE_EX_LIST );
 	m_fileListCtrl.ModifyListStyleEx( 0, LVS_EX_GRIDLINES );
@@ -136,8 +136,6 @@ CBuddyControlsDialog::CBuddyControlsDialog( CWnd* pParent )
 
 	m_fileListCtrl.AddRecordCompare( pred::NewComparator( pred::TCompareCode() ) );		// default row item comparator
 	m_fileListCtrl.AddColumnCompare( ModifyTime, pred::NewPropertyComparator<CFileStateTimedItem>( func::AsModifyTime() ), false );
-
-	InitSplitters();
 
 	m_fileListCtrl.GetMateToolbar()->GetStrip()
 		.AddButton( ID_LIST_VIEW_REPORT )
@@ -159,16 +157,15 @@ void CBuddyControlsDialog::InitSplitters( void )
 
 	m_pHorizSplitterFrame.reset( new CResizeFrameStatic( &m_fileListCtrl, &m_progressCtrl, new CResizeGripBar( CResizeGripBar::ResizeUpDown, CResizeGripBar::ToggleSecond ) ) );
 	m_pHorizSplitterFrame->SetSection( m_regSection + _T("\\SplitterH") );
-
 	pResizeGripper = m_pHorizSplitterFrame->GetGripBar();
-	pResizeGripper->SetMinExtents( 100, 30 );
+	pResizeGripper->SetMinExtents( 50, 16 );
 	pResizeGripper->SetFirstExtentPercentage( 80 );
 
-//	m_pVertSplitterFrame.reset( new CResizeFrameStatic( m_pHorizSplitterFrame.get(), &m_selFileEdit, new CResizeGripBar( CResizeGripBar::ResizeLeftRight, CResizeGripBar::ToggleSecond ) ) );
-//	m_pHorizSplitterFrame->SetSection( m_regSection + _T("\\SplitterV") );
-//	pResizeGripper = m_pVertSplitterFrame->GetGripBar();
-//	pResizeGripper->SetMinExtents( 100, 30 );
-//	pResizeGripper->SetFirstExtentPercentage( 70 );
+	m_pVertSplitterFrame.reset( new CResizeFrameStatic( m_pHorizSplitterFrame.get(), &m_selFileEdit, new CResizeGripBar( CResizeGripBar::ResizeLeftRight, CResizeGripBar::ToggleSecond ) ) );
+	m_pVertSplitterFrame->SetSection( m_regSection + _T("\\SplitterV") );
+	pResizeGripper = m_pVertSplitterFrame->GetGripBar();
+	pResizeGripper->SetMinExtents( 40, 20 );
+	pResizeGripper->SetFirstExtentPercentage( 70 );
 }
 
 void CBuddyControlsDialog::SearchForFiles( void )
@@ -245,7 +242,7 @@ void CBuddyControlsDialog::DoDataExchange( CDataExchange* pDX )
 	DDX_Control( pDX, IDC_SEL_FILE_EDIT, m_selFileEdit );
 
 	DDX_Control( pDX, IDC_HORIZ_SPLITTER_STATIC, *m_pHorizSplitterFrame );
-//	DDX_Control( pDX, IDC_VERT_SPLITTER_STATIC, *m_pVertSplitterFrame );
+	DDX_Control( pDX, IDC_VERT_SPLITTER_STATIC, *m_pVertSplitterFrame );
 
 	if ( DialogOutput == pDX->m_bSaveAndValidate )
 	{
@@ -253,6 +250,8 @@ void CBuddyControlsDialog::DoDataExchange( CDataExchange* pDX )
 		{
 			m_searchPathCombo.LoadHistory( reg::section_dialog, reg::entry_searchPathHistory );
 			m_folderPathCombo.LoadHistory( reg::section_dialog, reg::entry_searchPathHistory );
+//m_progressCtrl.ShowWindow( SW_HIDE );
+//m_selFileEdit.ShowWindow( SW_HIDE );
 		}
 
 		SetupFileListView();
@@ -322,5 +321,11 @@ void CBuddyControlsDialog::OnLvnItemChanged_FileList( NMHDR* pNmHdr, LRESULT* pR
 	if ( CReportListControl::IsSelectionChangeNotify( pNmList, LVIS_SELECTED | LVIS_FOCUSED ) )
 	{
 		m_progressCtrl.SetPos( m_fileListCtrl.GetCurSel() );
+
+		std::tstring fileName;
+		if ( const CFileStateTimedItem* pSelFileItem = m_fileListCtrl.GetSelected<CFileStateTimedItem>() )
+			fileName = pSelFileItem->GetFilePath().GetFilenamePtr();
+
+		ui::SetWindowText( m_selFileEdit, fileName );
 	}
 }

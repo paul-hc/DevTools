@@ -12,6 +12,7 @@
 namespace reg
 {
 	static const TCHAR entry_splitPct[] = _T("SplitPct");
+	static const TCHAR entry_collapsed[] = _T("Collapsed");
 }
 
 
@@ -34,7 +35,7 @@ void CResizeFrameStatic::OnControlResized( UINT ctrlId )
 {
 	if ( GetDlgCtrlID() == ui::ToCmdId( ctrlId ) )
 		if ( m_pGripBar->m_hWnd != NULL )
-			m_pGripBar->LayoutProportionally( false );		// deferred repaint
+			m_pGripBar->LayoutProportionally();
 }
 
 void CResizeFrameStatic::NotifyParent( Notification notification )
@@ -48,7 +49,10 @@ void CResizeFrameStatic::PreSubclassWindow( void )
 	ASSERT_PTR( m_pSecondCtrl->GetSafeHwnd() );
 
 	if ( !m_regSection.empty() )
+	{
 		m_pGripBar->SetFirstExtentPercentage( AfxGetApp()->GetProfileInt( m_regSection.c_str(), reg::entry_splitPct, m_pGripBar->GetFirstExtentPercentage() ) );
+		m_pGripBar->SetCollapsed( AfxGetApp()->GetProfileInt( m_regSection.c_str(), reg::entry_collapsed, m_pGripBar->IsCollapsed() ) != FALSE );
+	}
 
 	__super::PreSubclassWindow();
 
@@ -66,7 +70,10 @@ END_MESSAGE_MAP()
 void CResizeFrameStatic::OnDestroy( void )
 {
 	if ( !m_regSection.empty() )
+	{
 		AfxGetApp()->WriteProfileInt( m_regSection.c_str(), reg::entry_splitPct, m_pGripBar->GetFirstExtentPercentage() );
+		AfxGetApp()->WriteProfileInt( m_regSection.c_str(), reg::entry_collapsed, m_pGripBar->IsCollapsed() );
+	}
 
 	__super::OnDestroy();
 }

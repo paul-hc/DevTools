@@ -19,11 +19,6 @@ namespace ui
 	{
 		return ui::GetAdjustLuminance( ::GetSysColor( COLOR_HOTLIGHT ), 30 );					// contrast blue
 	}
-
-	static COLORREF GetHotBkColor( void )
-	{
-		return ui::GetAdjustLuminance( ::GetSysColor( COLOR_GRADIENTINACTIVECAPTION ), 30 );	// light blueish (like scroll fill)
-	}
 }
 
 
@@ -106,8 +101,10 @@ CSize CResizeGripBar::LoadArrowsBitmap( CBitmap* pBitmap, UINT bitmapResId, COLO
 }
 
 bool CResizeGripBar::CreateGripper( CResizeFrameStatic* pResizeFrame, CWnd* pFirstCtrl, CWnd* pSecondCtrl,
-									UINT id /*= 0xFFFF*/, DWORD style /*= WS_CHILD | VS_VISIBLE | SS_NOTIFY*/ )
+									UINT id /*= 0xFFFF*/, DWORD style /*= WS_CHILD | VS_VISIBLE | WS_CLIPSIBLINGS | SS_NOTIFY*/ )
 {
+	// Note: WS_CLIPSIBLINGS style is important: it prevents dirty drawing when collapsing embedded resize frames
+
 	REQUIRE( pResizeFrame != NULL && pFirstCtrl != NULL && pSecondCtrl != NULL );
 	ASSERT( HasFlag( style, WS_CHILD ) );
 
@@ -201,10 +198,7 @@ void CResizeGripBar::SetCollapsed( bool collapsed )
 	m_isCollapsed = collapsed;
 
 	if ( m_hWnd != NULL )
-	{
 		LayoutProportionally();
-		Invalidate();
-	}
 }
 
 void CResizeGripBar::LayoutProportionally( bool repaint /*= true*/ )
@@ -235,9 +229,13 @@ void CResizeGripBar::LayoutGripperTo( const CFrameLayoutInfo& info, const int fi
 	if ( ToggleSecond == m_toggleStyle )
 		ui::ShowWindow( *m_pSecondCtrl, !m_isCollapsed || ToggleFirst == m_toggleStyle );
 
-	m_pFirstCtrl->MoveWindow( &firstRect, repaint );
-	MoveWindow( &gripperRect, repaint );
-	m_pSecondCtrl->MoveWindow( &secondRect, repaint );
+	layout::MoveControl( *m_pFirstCtrl, firstRect, repaint );
+	layout::MoveControl( *m_pSecondCtrl, secondRect, repaint );
+
+	// move lastly to prevent dirty painting issues
+	this->MoveWindow( &gripperRect, false );
+	if ( repaint )
+		ui::RedrawControl( m_hWnd );
 }
 
 bool CResizeGripBar::TrackToPos( CPoint screenTrackPos )
@@ -474,6 +472,28 @@ void CResizeGripBar::DrawArrow( CDC* pDC, const CRect& rect, ArrowPart part, Arr
 	m_arrowImageList.Draw( pDC, imageIndex, arrowRect.TopLeft(), ILD_TRANSPARENT );
 }
 
+CResizeGripBar::ArrowPart CResizeGripBar::GetArrowPart( void ) const
+{
+	if ( ToggleSecond == m_toggleStyle )
+		return m_isCollapsed ? Collapsed : Expanded;
+	else
+		return m_isCollapsed ? Expanded : Collapsed;
+}
+
+CResizeGripBar::ArrowState CResizeGripBar::GetArrowState( HitTest hitOn ) const
+{
+	if ( !IsWindowEnabled() )
+		return Disabled;
+
+	return hitOn == ToggleArrow ? Hot : Normal;
+}
+
+int CResizeGripBar::GetImageIndex( ArrowPart part, ArrowState state ) const
+{
+	int imageIndex = ( 2 * state ) + part;
+	return imageIndex;
+}
+
 
 BEGIN_MESSAGE_MAP( CResizeGripBar, CStatic )
 	ON_WM_SETCURSOR()
@@ -585,45 +605,19 @@ BOOL CResizeGripBar::OnEraseBkgnd( CDC* pDC )
 	CRect clientRect;
 	GetClientRect( &clientRect );
 
-	CBrush brush( Nowhere == m_hitOn ? GetSysColor( COLOR_3DLIGHT ) : ui::GetHotBkColor() );
+	CBrush brush( Nowhere == m_hitOn ? GetSysColor( COLOR_3DLIGHT ) : HotLightBlue );
 
 	if ( !m_isCollapsed )
 		pDC->FillRect( &clientRect, &brush );
 	else
 	{
-		pDC->DrawFrameControl( &clientRect, DFC_BUTTON, DFCS_BUTTONPUSH );
+		pDC->Draw3dRect( &clientRect, GetSysColor( COLOR_BTNHIGHLIGHT ), MildGrey );
 
-		if ( m_hitOn != Nowhere )
-		{
-			clientRect.DeflateRect( 1, 1 );
-			pDC->FillRect( &clientRect, &brush );
-		}
+		clientRect.DeflateRect( 1, 1 );
+		pDC->FillRect( &clientRect, &brush );
 	}
 
 	return TRUE;			// erased
-}
-
-
-CResizeGripBar::ArrowPart CResizeGripBar::GetArrowPart( void ) const
-{
-	if ( ToggleSecond == m_toggleStyle )
-		return m_isCollapsed ? Collapsed : Expanded;
-	else
-		return m_isCollapsed ? Expanded : Collapsed;
-}
-
-CResizeGripBar::ArrowState CResizeGripBar::GetArrowState( HitTest hitOn ) const
-{
-	if ( !IsWindowEnabled() )
-		return Disabled;
-
-	return hitOn == ToggleArrow ? Hot : Normal;
-}
-
-int CResizeGripBar::GetImageIndex( ArrowPart part, ArrowState state ) const
-{
-	int imageIndex = ( 2 * state ) + part;
-	return imageIndex;
 }
 
 void CResizeGripBar::OnPaint( void )

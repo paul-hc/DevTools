@@ -209,4 +209,13 @@ namespace layout
 }
 
 
+namespace layout
+{
+	// send frame notifications if control implements ui::ILayoutFrame interface
+
+	void SetControlPos( HWND hCtrl, const CRect& ctrlRect, UINT swpFlags );
+	void MoveControl( HWND hCtrl, const CRect& ctrlRect, bool repaint = true );
+}
+
+
 #endif // LayoutMetrics_h

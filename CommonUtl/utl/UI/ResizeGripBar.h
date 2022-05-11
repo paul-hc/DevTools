@@ -42,7 +42,7 @@ public:
 	bool& RefCollapsed( void ) { return m_isCollapsed; }
 
 	bool CreateGripper( CResizeFrameStatic* pResizeFrame, CWnd* pFirstCtrl, CWnd* pSecondCtrl,
-						UINT id = 0xFFFF, DWORD style = WS_CHILD | WS_VISIBLE | SS_NOTIFY );
+						UINT id = 0xFFFF, DWORD style = WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | SS_NOTIFY );
 
 	void LayoutProportionally( bool repaint = true );		// preserves existing aspect ratio
 private:
@@ -131,6 +131,8 @@ private:
 	CTrackingInfo* m_pTrackingInfo;
 
 	static HCURSOR s_hCursors[ 2 ];		// indexed by orientation
+
+	enum Colors { HotLightBlue = RGB( 189, 237, 255 ), MildGrey = RGB( 192, 192, 192 ), MildDarkerGrey = RGB( 173, 178, 181 ) };
 
 	// generated stuff
 protected:

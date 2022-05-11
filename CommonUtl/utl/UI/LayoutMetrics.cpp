@@ -1,6 +1,7 @@
 
 #include "stdafx.h"
 #include "LayoutMetrics.h"
+#include "CtrlInterfaces.h"
 #include "ThemeItem.h"
 #include "Utilities.h"
 
@@ -195,3 +196,25 @@ namespace layout
 	}
 
 } // namespace layout
+
+
+namespace layout
+{
+	void SetControlPos( HWND hCtrl, const CRect& ctrlRect, UINT swpFlags )
+	{
+		ASSERT_PTR( hCtrl );
+		::SetWindowPos( hCtrl, NULL, ctrlRect.left, ctrlRect.top, ctrlRect.Width(), ctrlRect.Height(), swpFlags );		// reposition changed control
+
+		if ( ui::ILayoutFrame* pCtrlFrame = dynamic_cast<ui::ILayoutFrame*>( CWnd::FromHandlePermanent( hCtrl ) ) )		// control is a frame?
+			pCtrlFrame->OnControlResized( ::GetDlgCtrlID( hCtrl ) );		// notify controls having dependent layout
+	}
+
+	void MoveControl( HWND hCtrl, const CRect& ctrlRect, bool repaint /*= true*/ )
+	{
+		ASSERT_PTR( hCtrl );
+		::MoveWindow( hCtrl, ctrlRect.left, ctrlRect.top, ctrlRect.Width(), ctrlRect.Height(), repaint );
+
+		if ( ui::ILayoutFrame* pCtrlFrame = dynamic_cast<ui::ILayoutFrame*>( CWnd::FromHandlePermanent( hCtrl ) ) )		// control is a frame?
+			pCtrlFrame->OnControlResized( ::GetDlgCtrlID( hCtrl ) );		// notify controls having dependent layout
+	}
+}
