@@ -511,10 +511,6 @@
 			Name="UI"
 			>
 			<File
-				RelativePath=".\_traceGdi.h"
-				>
-			</File>
-			<File
 				RelativePath=".\AccelTable.cpp"
 				>
 			</File>

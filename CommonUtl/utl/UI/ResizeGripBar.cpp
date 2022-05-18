@@ -113,11 +113,11 @@ void CResizeGripBar::ComputeInitialMetrics( void )
 	m_panelCtrls.second->GetWindowRect( &rectPair.second );
 
 	// if minimum extents are percentages, evaluate them to the actual limits
-	if ( gdi::IsPercentage( m_layout.m_minExtents.first ) )
-		m_layout.m_minExtents.first = gdi::EvalValueOrPercentage( m_layout.m_minExtents.first, GetRectExtent( rectPair.first ) );
+	if ( ui::IsPercentage( m_layout.m_minExtents.first ) )
+		m_layout.m_minExtents.first = ui::EvalValueOrPercentage( m_layout.m_minExtents.first, GetRectExtent( rectPair.first ) );
 
-	if ( gdi::IsPercentage( m_layout.m_minExtents.second ) )
-		m_layout.m_minExtents.second = gdi::EvalValueOrPercentage( m_layout.m_minExtents.second, GetRectExtent( rectPair.second ) );
+	if ( ui::IsPercentage( m_layout.m_minExtents.second ) )
+		m_layout.m_minExtents.second = ui::EvalValueOrPercentage( m_layout.m_minExtents.second, GetRectExtent( rectPair.second ) );
 
 	if ( 0 == m_windowDepth )
 	{	// default depth is the distance between first and second windows
@@ -136,24 +136,24 @@ void CResizeGripBar::ComputeInitialMetrics( void )
 
 		LimitFirstExtentToBounds( firstExtent, info.m_maxExtent );
 
-		m_layout.m_firstExtentPercentage = gdi::GetPercentageOf( firstExtent, info.m_maxExtent );
-		ENSURE( gdi::IsValidPercentage( m_layout.m_firstExtentPercentage ) );
+		m_layout.m_firstExtentPercentage = ui::GetPercentageOf( firstExtent, info.m_maxExtent );
+		ENSURE( ui::IsPercentage_0_100( m_layout.m_firstExtentPercentage ) );
 	}
 }
 
-CResizeGripBar& CResizeGripBar::SetFirstExtentPercentage( int firstExtentPercentage )
+CResizeGripBar& CResizeGripBar::SetFirstExtentPercentage( TPercent firstExtentPercentage )
 {
-	REQUIRE( gdi::IsValidPercentage( firstExtentPercentage ) );
+	REQUIRE( ui::IsPercentage_0_100( firstExtentPercentage ) );
 
 	if ( m_hWnd != NULL )
 	{
 		CFrameLayoutInfo info;
 		ReadLayoutInfo( info );
 
-		int firstExtent = gdi::ScaleValue( info.m_maxExtent, firstExtentPercentage );		// convert to absolute extent
+		int firstExtent = ui::ScaleValue( info.m_maxExtent, firstExtentPercentage );		// convert to absolute extent
 
 		LimitFirstExtentToBounds( firstExtent, info.m_maxExtent );
-		m_layout.m_firstExtentPercentage = gdi::GetPercentageOf( firstExtent, info.m_maxExtent );		// convert back to percentage
+		m_layout.m_firstExtentPercentage = ui::GetPercentageOf( firstExtent, info.m_maxExtent );		// convert back to percentage
 
 		LayoutProportionally();
 	}
@@ -183,7 +183,7 @@ void CResizeGripBar::LayoutProportionally( bool repaint /*= true*/ )
 	ReadLayoutInfo( info );
 
 	// computation is driven from info.m_frameRect and preserves m_firstExtentPercentage
-	int firstExtent = gdi::ScaleValue( info.m_maxExtent, m_layout.m_firstExtentPercentage );		// convert to absolute extent
+	int firstExtent = ui::ScaleValue( info.m_maxExtent, m_layout.m_firstExtentPercentage );		// convert to absolute extent
 
 	LimitFirstExtentToBounds( firstExtent, info.m_maxExtent );
 
@@ -239,7 +239,7 @@ bool CResizeGripBar::TrackToPos( CPoint screenTrackPos )
 	if ( !LimitFirstExtentToBounds( firstExtent, info.m_maxExtent ) )
 		return false;
 
-	m_layout.m_firstExtentPercentage = gdi::GetPercentageOf( firstExtent, info.m_maxExtent );			// convert back to percentage
+	m_layout.m_firstExtentPercentage = ui::GetPercentageOf( firstExtent, info.m_maxExtent );			// convert back to percentage
 
 	LayoutGripperTo( info, firstExtent, true );
 	return true;
@@ -255,6 +255,8 @@ void CResizeGripBar::ReadLayoutInfo( CFrameLayoutInfo& rInfo ) const
 
 bool CResizeGripBar::LimitFirstExtentToBounds( int& rFirstExtent, int maxExtent ) const
 {
+	REQUIRE( !ui::IsPercentage( m_layout.m_minExtents.first ) && !ui::IsPercentage( m_layout.m_minExtents.second ) );		// should be evaluated by now
+
 	int oldFirstExtent = rFirstExtent;
 
 	if ( rFirstExtent < m_layout.m_minExtents.first )

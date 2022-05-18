@@ -2,6 +2,8 @@
 #define ResizeGripBar_h
 #pragma once
 
+#include "ui_fwd.h"
+
 
 namespace resize
 {
@@ -24,13 +26,13 @@ public:
 	CResizeGripBar( CWnd* pFirstCtrl, CWnd* pSecondCtrl, resize::Orientation orientation, resize::ToggleStyle toggleStyle = resize::ToggleSecond );
 	virtual ~CResizeGripBar();
 
-	CResizeGripBar& SetMinExtents( int firstMinExtent, int secondMinExtent ) { m_layout.m_minExtents = std::make_pair( firstMinExtent, secondMinExtent ); return *this; }
+	CResizeGripBar& SetMinExtents( TValueOrPct firstMinExtent, TValueOrPct secondMinExtent ) { m_layout.m_minExtents = std::make_pair( firstMinExtent, secondMinExtent ); return *this; }
 
 	bool HasBorder( void ) const { return m_layout.m_hasBorder; }
 	bool SetBorder( bool hasBorder = true ) { return m_layout.m_hasBorder = hasBorder; }
 
-	int GetFirstExtentPercentage( void ) const { return m_layout.m_firstExtentPercentage; }
-	CResizeGripBar& SetFirstExtentPercentage( int firstExtentPercentage );
+	TPercent GetFirstExtentPercentage( void ) const { return m_layout.m_firstExtentPercentage; }
+	CResizeGripBar& SetFirstExtentPercentage( TPercent firstExtentPercentage );
 
 	bool IsCollapsed( void ) const { return m_layout.m_isCollapsed; }
 	CResizeGripBar& SetCollapsed( bool collapsed );
@@ -46,7 +48,7 @@ public:
 
 	static COLORREF GetHotArrowColor( void );
 public:
-	typedef std::pair<int, int> TPanelMinExtents;
+	typedef std::pair<TValueOrPct, TValueOrPct> TPanelMinExtents;
 
 
 	struct CLayout
@@ -62,7 +64,7 @@ public:
 	public:
 		const resize::Orientation m_orientation;
 		TPanelMinExtents m_minExtents;		// if negative, is percentage of the initial extent
-		int m_firstExtentPercentage;		// when not collapsed
+		TPercent m_firstExtentPercentage;	// when not collapsed
 		bool m_isCollapsed;
 		bool m_hasBorder;					// for non-collapsed state
 	};

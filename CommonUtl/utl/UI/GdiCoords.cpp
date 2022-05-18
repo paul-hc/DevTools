@@ -9,11 +9,11 @@
 
 // ui_fwd.h imlementation
 
-namespace gdi
+namespace ui
 {
-	// UValuePct implementation
+	// CValuePct implementation
 
-	int UValuePct::EvalValue( int extent ) const
+	int CValuePct::EvalValue( int extent ) const
 	{
 		if ( HasValue() )
 			return GetValue();
@@ -24,7 +24,7 @@ namespace gdi
 		return 0;
 	}
 
-	double UValuePct::EvalValue( double extent ) const
+	double CValuePct::EvalValue( double extent ) const
 	{
 		if ( HasValue() )
 			return GetValue();

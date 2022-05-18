@@ -48,8 +48,10 @@ void CResizeFrameStatic::PreSubclassWindow( void )
 
 	__super::PreSubclassWindow();
 
-	if ( NULL == m_pGripBar->m_hWnd )
-		VERIFY( m_pGripBar->CreateGripper( this ) );
+	ui::ShowWindow( m_hWnd, false );		// hide the frame just in case is visible in dialog resource
+
+	ASSERT_NULL( m_pGripBar->m_hWnd );
+	VERIFY( m_pGripBar->CreateGripper( this ) );
 }
 
 

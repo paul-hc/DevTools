@@ -22,7 +22,6 @@ namespace ui
 
 	bool ParseRgb( COLORREF* pColor, const std::tstring& text );
 	bool ParseHtml( COLORREF* pColor, const std::tstring& text );
-	bool ParseSys( COLORREF* pColor, const std::tstring& text );
 
 	std::tstring FormatColor( COLORREF color, const TCHAR* pSep = _T("  ") );
 	bool ParseColor( COLORREF* pColor, const std::tstring& text );
