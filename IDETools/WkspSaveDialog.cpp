@@ -40,7 +40,7 @@ CWkspSaveDialog::CWkspSaveDialog( WorkspaceProfile& rWkspProfile, const CString&
 	, m_fullPathEdit( ui::FilePath )
 {
 	m_regSection = ::sectionWorkspaceDialogs;
-	RegisterCtrlLayout( layout::styles, COUNT_OF( layout::styles ) );
+	RegisterCtrlLayout( ARRAY_PAIR( layout::styles ) );
 	LoadDlgIcon( IDD_WORKSPACE_SAVE_DIALOG );
 
 	if ( m_section.IsEmpty() )

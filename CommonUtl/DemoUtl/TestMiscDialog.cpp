@@ -29,7 +29,7 @@ CTestMiscDialog::CTestMiscDialog( CWnd* pParent )
 	: CLayoutDialog( IDD_TEST_MISC_DIALOG, pParent )
 {
 	m_regSection = reg::section_dialog;
-	RegisterCtrlLayout( layout::styles, COUNT_OF( layout::styles ) );
+	RegisterCtrlLayout( ARRAY_PAIR( layout::styles ) );
 
 	RegisterOwnCmds();
 

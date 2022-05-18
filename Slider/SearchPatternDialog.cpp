@@ -49,7 +49,7 @@ CSearchPatternDialog::CSearchPatternDialog( const CSearchPattern* pSrcPattern, C
 {
 	// base init
 	m_regSection = _T("SearchPatternDialog");
-	RegisterCtrlLayout( layout::styles, COUNT_OF( layout::styles ) );
+	RegisterCtrlLayout( ARRAY_PAIR( layout::styles ) );
 	GetLayoutEngine().DisableResizeVertically();
 
 	ClearFlag( m_wildFiltersCombo.RefItemContent().m_itemsFlags, ui::CItemContent::RemoveEmpty );

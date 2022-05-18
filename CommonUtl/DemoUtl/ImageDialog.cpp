@@ -118,7 +118,7 @@ CImageDialog::CImageDialog( CWnd* pParent )
 	, m_disabledAlpha( (BYTE)AfxGetApp()->GetProfileInt( reg::section, reg::entry_disabledAlpha, 127 ) )
 {
 	m_regSection = reg::section;
-	GetLayoutEngine().RegisterDualCtrlLayout( layout::dualStyles, COUNT_OF( layout::dualStyles ) );
+	GetLayoutEngine().RegisterDualCtrlLayout( ARRAY_PAIR( layout::dualStyles ) );
 	LoadDlgIcon( ID_STUDY_IMAGE );
 	m_accelPool.AddAccelTable( new CAccelTable( IDD_IMAGE_DIALOG ) );
 	m_initCentered = false;			// so that it uses WINDOWPLACEMENT

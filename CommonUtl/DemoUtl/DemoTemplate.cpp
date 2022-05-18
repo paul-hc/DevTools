@@ -70,7 +70,7 @@ CDemoTemplate::CDemoTemplate( CWnd* pOwner )
 	, m_delimStatic( CThemeItem::m_null, CThemeItem( L"HEADER", vt::HP_HEADEROVERFLOW, vt::HOFS_NORMAL ) )
 {
 	ASSERT_PTR( m_pLayoutEngine );
-	m_pLayoutEngine->RegisterCtrlLayout( layout::templateStyles, COUNT_OF( layout::templateStyles ) );
+	m_pLayoutEngine->RegisterCtrlLayout( ARRAY_PAIR( layout::templateStyles ) );
 
 	m_seqCounterLabel.GetMateToolbar()->GetStrip()
 		.AddButton( IDC_COPY_SOURCE_PATHS_BUTTON, ID_EDIT_COPY )
@@ -345,7 +345,7 @@ CListPage::CListPage( void )
 	: CLayoutPropertyPage( IDD_LIST_PAGE )
 	, m_fileListView( IDC_FILE_RENAME_LIST, LVS_EX_GRIDLINES | lv::DefaultStyleEx )
 {
-	RegisterCtrlLayout( layout::listPageStyles, COUNT_OF( layout::listPageStyles ) );
+	RegisterCtrlLayout( ARRAY_PAIR( layout::listPageStyles ) );
 }
 
 void CListPage::DoDataExchange( CDataExchange* pDX )
@@ -463,7 +463,7 @@ namespace layout
 CEditPage::CEditPage( void )
 	: CLayoutPropertyPage( IDD_EDIT_PAGE )
 {
-	RegisterCtrlLayout( layout::editPageStyles, COUNT_OF( layout::editPageStyles ) );
+	RegisterCtrlLayout( ARRAY_PAIR( layout::editPageStyles ) );
 }
 
 void CEditPage::QueryTooltipText( std::tstring& rText, UINT cmdId, CToolTipCtrl* pTooltip ) const
@@ -555,7 +555,7 @@ namespace layout
 CDetailsPage::CDetailsPage( void )
 	: CLayoutPropertyPage( IDD_DETAILS_PAGE )
 {
-	RegisterCtrlLayout( layout::detailsPageStyles, COUNT_OF( layout::detailsPageStyles ) );
+	RegisterCtrlLayout( ARRAY_PAIR( layout::detailsPageStyles ) );
 
 	m_detailSheet.AddPage( new CListPage );
 	m_detailSheet.AddPage( new CEditPage );

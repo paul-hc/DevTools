@@ -138,7 +138,7 @@ CFileListDialog::CFileListDialog( CWnd* pParent )
 	, m_useDoubleBuffer( AfxGetApp()->GetProfileInt( reg::section_dialog, reg::entry_useDoubleBuffer, true ) != FALSE )
 {
 	m_regSection = reg::section_dialog;
-	RegisterCtrlLayout( layout::styles, COUNT_OF( layout::styles ) );
+	RegisterCtrlLayout( ARRAY_PAIR( layout::styles ) );
 
 	m_fileListCtrl.SetSection( m_regSection + _T("\\List") );
 	m_fileListCtrl.SetTextEffectCallback( this );

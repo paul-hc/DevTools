@@ -65,7 +65,7 @@ CMainDialog::CMainDialog( void )
 	, m_autoUpdateTimer( this, TimerAutoUpdate, app::GetOptions()->m_autoUpdateTimeout * 1000 )
 	, m_refreshTimer( this, TimerResetRefreshButton, 150 )
 {
-	GetLayoutEngine().RegisterDualCtrlLayout( layout::dualLayoutStyles, COUNT_OF( layout::dualLayoutStyles ) );
+	GetLayoutEngine().RegisterDualCtrlLayout( ARRAY_PAIR( layout::dualLayoutStyles ) );
 	m_regSection = reg::section;
 	m_initCollapsed = true;
 	m_pSystemTrayInfo.reset( new CSysTrayInfo );

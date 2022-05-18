@@ -35,7 +35,7 @@ CEditFlagsBasePage::CEditFlagsBasePage( const std::tstring& section, UINT templa
 	, m_pSpecificList( NULL )
 {
 	if ( 0 == templateId )
-		RegisterCtrlLayout( layout::styles, COUNT_OF( layout::styles ) );
+		RegisterCtrlLayout( ARRAY_PAIR( layout::styles ) );
 
 	m_listSheet.m_regSection = section;
 	m_listSheet.AddPage( new CFlagsListPage( this, _T("General") ) );

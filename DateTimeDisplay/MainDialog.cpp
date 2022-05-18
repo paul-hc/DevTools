@@ -77,7 +77,7 @@ CMainDialog::CMainDialog( CWnd* pParent /*= NULL*/ )
 	, m_syncScrolling( SB_VERT )
 {
 	m_regSection = reg::section;
-	RegisterCtrlLayout( layout::styles, COUNT_OF( layout::styles ) );
+	RegisterCtrlLayout( ARRAY_PAIR( layout::styles ) );
 	reg::LoadRange( m_inputSel, reg::section, reg::entry_inputSel );
 
 	m_inputEdit.SetKeepSelOnFocus();

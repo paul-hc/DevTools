@@ -65,7 +65,7 @@ CGeneralOptionsPage::CGeneralOptionsPage( void )
 	: CLayoutPropertyPage( IDD_OPTIONS_GENERAL_PAGE )
 	, m_options( CGeneralOptions::Instance() )
 {
-	RegisterCtrlLayout( layout::stylesGen, COUNT_OF( layout::stylesGen ) );
+	RegisterCtrlLayout( ARRAY_PAIR( layout::stylesGen ) );
 }
 
 CGeneralOptionsPage::~CGeneralOptionsPage()
@@ -213,7 +213,7 @@ CCapitalizeOptionsPage::CCapitalizeOptionsPage( void )
 	, m_conjunctionsEdit( cap::CWordList::s_listSep )
 	, m_prepositionsEdit( cap::CWordList::s_listSep )
 {
-	RegisterCtrlLayout( layout::stylesCap, COUNT_OF( layout::stylesCap ) );
+	RegisterCtrlLayout( ARRAY_PAIR( layout::stylesCap ) );
 }
 
 CCapitalizeOptionsPage::~CCapitalizeOptionsPage()

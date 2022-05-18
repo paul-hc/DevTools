@@ -39,7 +39,7 @@ CWkspLoadDialog::CWkspLoadDialog( WorkspaceProfile& rWkspProfile, const CString&
 	, m_fullPathEdit( ui::FilePath )
 {
 	m_regSection = ::sectionWorkspaceDialogs;
-	RegisterCtrlLayout( layout::styles, COUNT_OF( layout::styles ) );
+	RegisterCtrlLayout( ARRAY_PAIR( layout::styles ) );
 	LoadDlgIcon( IDD_WORKSPACE_LOAD_DIALOG );
 	m_accelPool.AddAccelTable( new CAccelTable( IDR_WKSPLOAD_ACCEL ) );
 

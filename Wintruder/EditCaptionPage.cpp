@@ -26,7 +26,7 @@ CEditCaptionPage::CEditCaptionPage( void )
 	: CDetailBasePage( IDD_EDIT_CAPTION_PAGE )
 	, m_contentType( wc::CaptionText )
 {
-	RegisterCtrlLayout( layout::styles, COUNT_OF( layout::styles ) );
+	RegisterCtrlLayout( ARRAY_PAIR( layout::styles ) );
 }
 
 CEditCaptionPage::~CEditCaptionPage()

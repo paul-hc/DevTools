@@ -81,7 +81,7 @@ CTokenizeTextDialog::CTokenizeTextDialog( CWnd* pParent /*=NULL*/ )
 	, m_defaultTrimCharsButton( ID_RESET_DEFAULT, false )
 {
 	m_regSection = reg::section_dialog;
-	RegisterCtrlLayout( layout::styles, COUNT_OF( layout::styles ) );
+	RegisterCtrlLayout( ARRAY_PAIR( layout::styles ) );
 
 	for ( unsigned int i = 0; i != ActionCount; ++i )
 		m_separators[ i ] = m_defaultSeparators[ i ];

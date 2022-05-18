@@ -59,7 +59,7 @@ CCmdDashboardDialog::CCmdDashboardDialog( CFileModel* pFileModel, svc::StackType
 {
 	m_initCentered = false;
 	m_regSection = reg::section;
-	RegisterCtrlLayout( layout::styles, COUNT_OF( layout::styles ) );
+	RegisterCtrlLayout( ARRAY_PAIR( layout::styles ) );
 	LoadDlgIcon( svc::Undo == m_stackType ? ID_EDIT_UNDO : ID_EDIT_REDO );
 
 	m_commandsList.SetSection( m_regSection + _T("\\List") );
