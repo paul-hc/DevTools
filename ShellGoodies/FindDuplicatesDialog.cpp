@@ -210,7 +210,7 @@ CFindDuplicatesDialog::CFindDuplicatesDialog( CFileModel* pFileModel, CWnd* pPar
 	REQUIRE( !m_searchPathItems.empty() );
 
 	m_regSection = reg::section_dialog;
-	RegisterCtrlLayout( layout::styles, COUNT_OF( layout::styles ) );
+	RegisterCtrlLayout( ARRAY_PAIR( layout::styles ) );
 	LoadDlgIcon( ID_FIND_DUPLICATE_FILES );
 
 	m_searchPathsListCtrl.SetLayoutInfo( IDC_SEARCH_PATHS_LIST );

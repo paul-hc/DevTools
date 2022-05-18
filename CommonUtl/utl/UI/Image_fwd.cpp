@@ -155,6 +155,35 @@ namespace res
 		return true;
 	}
 
+	int LoadImageListFromIconStrip( CImageList* pOutImageList, CSize* pOutImageSize, UINT iconStripId, UINT ilFlags /*= ILC_COLOR32 | ILC_MASK*/ )
+	{
+		// load a strip from a custom size icon with multiple images; image count is inferred by strip_width/strip_height ratio.
+		ASSERT_PTR( pOutImageList );
+		ASSERT_PTR( pOutImageSize );
+
+		CIcon stripIcon( (HICON)::LoadImage( CScopedResInst::Get(), MAKEINTRESOURCE( iconStripId ), IMAGE_ICON, 0, 0, LR_DEFAULTCOLOR | LR_CREATEDIBSECTION ) );
+		CSize imageSize( 0, 0 );
+		int imageCount = 0;
+
+		if ( stripIcon.IsValid() )
+		{
+			CIconInfo info( stripIcon.GetHandle() );
+
+			imageSize = stripIcon.GetSize();
+			imageCount = imageSize.cx / imageSize.cy;
+			imageSize.cx /= imageCount;
+
+			if ( NULL == pOutImageList->GetSafeHandle() )
+				pOutImageList->Create( imageSize.cx, imageSize.cy, ilFlags, imageCount, 0 );		// note: if icon has alpha channel, then no ILC_MASK required (in practice it makes little difference)
+
+			VERIFY( pOutImageList->Add( &info.m_bitmapColor, &info.m_bitmapMask ) != -1 );			// add the strip bitmaps, which will amount to imageCount images
+		}
+
+		utl::AssignPtr( pOutImageSize, imageSize );
+
+		return imageCount;
+	}
+
 } //namespace res
 
 

@@ -26,7 +26,7 @@ CEditIdentPage::CEditIdentPage( void )
 	, m_decIdentEdit( num::Decimal )
 	, m_hexIdentEdit( num::Hexa )
 {
-	RegisterCtrlLayout( layout::styles, COUNT_OF( layout::styles ) );
+	RegisterCtrlLayout( ARRAY_PAIR( layout::styles ) );
 }
 
 CEditIdentPage::~CEditIdentPage()

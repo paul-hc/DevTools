@@ -37,7 +37,7 @@ CMoveFileDialog::CMoveFileDialog( const std::vector< fs::CPath >& filesToMove, C
 	, m_pDestFolderCombo( new CItemContentHistoryCombo( ui::DirPath ) )
 {
 	m_regSection = reg::section_dialog;
-	RegisterCtrlLayout( layout::styles, COUNT_OF( layout::styles ) );
+	RegisterCtrlLayout( ARRAY_PAIR( layout::styles ) );
 	m_pDestFolderCombo->GetContent().m_itemsFlags = ui::CItemContent::All | ui::CItemContent::EnsurePathExist;
 
 	m_srcFilesEdit.SetUseFixedFont( false );

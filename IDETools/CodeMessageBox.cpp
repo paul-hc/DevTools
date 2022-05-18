@@ -37,7 +37,7 @@ CCodeMessageBox::CCodeMessageBox( const CString& message, const CString& codeTex
 {
 	m_initCentered = true;
 	m_regSection = reg::section_dialog;
-	RegisterCtrlLayout( layout::styles, COUNT_OF( layout::styles ) );
+	RegisterCtrlLayout( ARRAY_PAIR( layout::styles ) );
 
 	m_codeText = code::convertTabsToSpaces( m_codeText );
 }

@@ -59,7 +59,7 @@ CArchiveImagesDialog::CArchiveImagesDialog( const CAlbumModel* pModel, const std
 {
 	// init base
 	m_regSection = reg::section;
-	RegisterCtrlLayout( layout::styles, COUNT_OF( layout::styles ) );
+	RegisterCtrlLayout( ARRAY_PAIR( layout::styles ) );
 	m_initCentered = false;
 
 	m_filesListCtrl.SetSection( m_regSection + _T("\\List") );

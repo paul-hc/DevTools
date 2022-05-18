@@ -58,7 +58,7 @@ private:
 enum IconColors;
 
 
-struct CIconInfo
+struct CIconInfo : private utl::noncopyable
 {
 	CIconInfo( HICON hIcon, bool isCursor = false );
 	~CIconInfo();
@@ -74,6 +74,10 @@ private:
 public:
 	ICONINFO m_info;			// colour and mask bitmaps are DDBs
 	CSize m_size;
+
+    // bitmaps with ownership (to prevent leaks)
+    CBitmap m_bitmapColor;
+    CBitmap m_bitmapMask;
 };
 
 

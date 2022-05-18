@@ -132,6 +132,9 @@ namespace res
 	bool LoadImageList( CImageList& rOutImageList, UINT bitmapId, int imageCount, const CSize& imageSize,
 						COLORREF transpColor = color::Auto, bool disabledEffect = false );
 
+	// icon-strip image-list: source icon is a custom size strip of images
+	int LoadImageListFromIconStrip( CImageList* pOutImageList, CSize* pOutImageSize, UINT iconStripId, UINT ilFlags = ILC_COLOR32 | ILC_MASK );
+
 
 	typedef CIconId TStripId;
 

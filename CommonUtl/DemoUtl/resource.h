@@ -25,6 +25,7 @@
 #define IDR_FLAG_STRIP_PNG              148
 #define IDD_TEST_TASK_DIALOG            149
 #define IDD_TEST_MISC_DIALOG            150
+#define IDI_MY_TOOL_STRIP_ICON          150
 #define IDD_FILE_CHECKSUMS_DIALOG       151
 #define IDD_BUDDY_CONTROLS_DIALOG       152
 #define IDC_OPEN_DIALOG_BUTTON          1000
@@ -163,7 +164,7 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        150
+#define _APS_NEXT_RESOURCE_VALUE        151
 #define _APS_NEXT_COMMAND_VALUE         32798
 #define _APS_NEXT_CONTROL_VALUE         1104
 #define _APS_NEXT_SYMED_VALUE           5002

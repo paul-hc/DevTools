@@ -160,7 +160,7 @@ private:
 	enum Colors { HotCyan = RGB( 169, 219, 246 ), HotDeepCyan = RGB( 189, 237, 255 ), MildGrey = RGB( 192, 192, 192 ), MildDarkerGrey = RGB( 173, 178, 181 ) };
 
 	// generated stuff
-public:
+protected:
 	virtual void PreSubclassWindow( void );
 protected:
 	afx_msg BOOL OnSetCursor( CWnd* pWnd, UINT hitTest, UINT message );

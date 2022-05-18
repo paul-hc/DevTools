@@ -25,7 +25,7 @@ CFlagsListPage::CFlagsListPage( ui::IEmbeddedPageCallback* pParentCallback, cons
 	, m_pParentCallback( pParentCallback )
 	, m_pFlagsListCtrl( new CFlagsListCtrl )
 {
-	RegisterCtrlLayout( layout::styles, COUNT_OF( layout::styles ) );
+	RegisterCtrlLayout( ARRAY_PAIR( layout::styles ) );
 
 	if ( pTitle != NULL )
 		SetTitle( pTitle );

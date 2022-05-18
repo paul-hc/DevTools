@@ -41,7 +41,7 @@ CItemListDialog::CItemListDialog( CWnd* pParent, const ui::CItemContent& content
 	, m_selItemPos( utl::npos )
 {
 	m_regSection = m_childSheet.m_regSection = reg::section_dialog;
-	RegisterCtrlLayout( layout::styles, COUNT_OF( layout::styles ) );
+	RegisterCtrlLayout( ARRAY_PAIR( layout::styles ) );
 	LoadDlgIcon( ID_EDIT_LIST_ITEMS );
 	m_idleUpdateDeep = true;				// for CItemsEditPage::OnSelectedLinesChanged
 
@@ -322,7 +322,7 @@ CItemsListPage::CItemsListPage( CItemListDialog* pDialog )
 	, m_listCtrl( IDC_ITEMS_LIST )
 	, m_accel( IDR_LIST_EDITOR_ACCEL )
 {
-	RegisterCtrlLayout( layout::listPageStyles, COUNT_OF( layout::listPageStyles ) );
+	RegisterCtrlLayout( ARRAY_PAIR( layout::listPageStyles ) );
 	SetUseLazyUpdateData();			// call UpdateData on page activation change
 
 	m_listCtrl.SetSection( reg::section_list );
@@ -495,7 +495,7 @@ CItemsEditPage::CItemsEditPage( CItemListDialog* pDialog )
 	, m_selLineRange( -1 )
 	, m_accel( IDD_ITEMS_EDIT_PAGE )
 {
-	RegisterCtrlLayout( layout::editPageStyles, COUNT_OF( layout::editPageStyles ) );
+	RegisterCtrlLayout( ARRAY_PAIR( layout::editPageStyles ) );
 	SetUseLazyUpdateData();			// call UpdateData on page activation change
 	m_mlEdit.SetKeepSelOnFocus();
 }

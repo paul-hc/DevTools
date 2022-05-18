@@ -35,7 +35,7 @@ private:
 	CItemContentHistoryCombo m_folderPathCombo;
 	CHostToolbarCtrl<CPathItemListCtrl> m_fileListCtrl;
 	CProgressCtrl m_progressCtrl;
-	CEdit m_selFileEdit;
+	CHostToolbarCtrl<CEdit> m_selFileEdit;
 
 	std::auto_ptr<CResizeFrameStatic> m_pHorizSplitterFrame;		// embedded inside of vertical splitter
 	std::auto_ptr<CResizeFrameStatic> m_pVertSplitterFrame;

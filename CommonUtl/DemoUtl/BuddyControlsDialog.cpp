@@ -10,6 +10,7 @@
 #include "utl/Timer.h"
 #include "utl/TimeUtils.h"
 #include "utl/UI/ResizeFrameStatic.h"
+#include "utl/UI/Icon.h"
 #include "utl/UI/UtilitiesEx.h"
 #include "utl/UI/resource.h"
 #include "resource.h"
@@ -116,6 +117,7 @@ CBuddyControlsDialog::CBuddyControlsDialog( CWnd* pParent )
 	, m_searchPathCombo( ui::MixedPath )
 	, m_folderPathCombo( ui::DirPath )
 	, m_fileListCtrl( ui::ListHost_TileMateOnTopRight )
+	, m_selFileEdit( H_AlignLeft | V_AlignTop | ui::V_TileMate )
 {
 	m_regSection = reg::section_dialog;
 	RegisterCtrlLayout( ARRAY_PAIR( layout::styles ) );
@@ -143,6 +145,14 @@ CBuddyControlsDialog::CBuddyControlsDialog( CWnd* pParent )
 		.AddButton( ID_LIST_VIEW_ICON_LARGE )
 		.AddButton( ID_LIST_VIEW_ICON_SMALL )
 		.AddButton( ID_LIST_VIEW_LIST );
+
+	CToolStrip& rStrip = m_selFileEdit.GetMateToolbar()->GetStrip();
+	rStrip.m_pImageList.reset( new CImageList() );
+
+	res::LoadImageListFromIconStrip( rStrip.m_pImageList.get(), &rStrip.m_imageSize, IDI_MY_TOOL_STRIP_ICON );
+
+	static const UINT s_buttonIds[] = { 50, 51, ID_SEPARATOR, 60, 61, 62, 63, ID_SEPARATOR, 70, 71, ID_SEPARATOR, 72, 73 };
+	rStrip.m_buttonIds.assign( s_buttonIds, END_OF( s_buttonIds ) );
 }
 
 CBuddyControlsDialog::~CBuddyControlsDialog()
