@@ -65,6 +65,7 @@ END
 // remains consistent on all systems.
 IDR_MAINFRAME           ICON                    "res\\DemoUtl.ico"
 IDR_TEST_DOC_TYPE       ICON                    "res\\TestDoc.ico"
+IDI_MY_TOOL_STRIP_ICON  ICON                    "res\\MyToolStrip.ico"
 
 /////////////////////////////////////////////////////////////////////////////
 //

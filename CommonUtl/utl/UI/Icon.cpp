@@ -217,12 +217,6 @@ CIconInfo::CIconInfo( HICON hIcon, bool isCursor /*= false*/ )
 
 CIconInfo::~CIconInfo()
 {
-	// prevent bitmap leaks
-	if ( m_info.hbmMask != NULL )
-		::DeleteObject( m_info.hbmMask );
-
-	if ( m_info.hbmColor != NULL )
-		::DeleteObject( m_info.hbmColor );
 }
 
 void CIconInfo::Init( HICON hIcon, bool isCursor )
@@ -238,6 +232,10 @@ void CIconInfo::Init( HICON hIcon, bool isCursor )
 		VERIFY( ::GetObject( m_info.hbmColor != NULL ? m_info.hbmColor : m_info.hbmMask, sizeof( bmp ), &bmp ) != 0 );
 		m_size.cx = bmp.bmWidth;
 		m_size.cy = bmp.bmHeight;
+
+		// pass ownership to bitmap data members
+		m_bitmapColor.Attach( m_info.hbmColor );
+		m_bitmapMask.Attach( m_info.hbmMask );
 	}
 	else
 		m_size.cx = m_size.cy = 0;
