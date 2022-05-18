@@ -149,7 +149,7 @@ CBuddyControlsDialog::CBuddyControlsDialog( CWnd* pParent )
 	CToolStrip& rStrip = m_selFileEdit.GetMateToolbar()->GetStrip();
 	rStrip.m_pImageList.reset( new CImageList() );
 
-	res::LoadImageListFromIconStrip( rStrip.m_pImageList.get(), &rStrip.m_imageSize, IDI_MY_TOOL_STRIP_ICON );
+	res::LoadImageListFromIconStrip( rStrip.m_pImageList.get(), &rStrip.m_imageSize, IDI_MY_TOOL_STRIP_ALPHA_ICON /*IDI_MY_TOOL_STRIP_ICON*/ );
 
 	static const UINT s_buttonIds[] = { 50, 51, ID_SEPARATOR, 60, 61, 62, 63, ID_SEPARATOR, 70, 71, ID_SEPARATOR, 72, 73 };
 	rStrip.m_buttonIds.assign( s_buttonIds, END_OF( s_buttonIds ) );
