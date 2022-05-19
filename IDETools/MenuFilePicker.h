@@ -2,10 +2,11 @@
 #define AFX_MENUFILEPICKER_H__4DFA7BE3_8484_11D2_A2C3_006097B8DD84__INCLUDED_
 #pragma once
 
+#include "AutomationBase.h"
 #include "FileBrowser.h"
 
 
-class MenuFilePicker : public CCmdTarget
+class MenuFilePicker : public CAutomationBase
 {
 	DECLARE_DYNCREATE( MenuFilePicker )
 protected:

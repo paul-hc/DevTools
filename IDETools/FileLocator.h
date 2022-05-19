@@ -2,11 +2,12 @@
 #define AFX_FILELOCATOR_H__A0580B97_3350_11D5_B5A4_00D0B74ECB52__INCLUDED_
 #pragma once
 
+#include "AutomationBase.h"
 #include "DirPathGroup.h"
 #include "ProjectContext.h"
 
 
-class FileLocator : public CCmdTarget
+class FileLocator : public CAutomationBase
 {
 	DECLARE_DYNCREATE(FileLocator)
 protected:

@@ -4,11 +4,13 @@
 
 #include <vector>
 #include "PathInfo.h"
+#include "AutomationBase.h"
+
 
 class DspParser;
 
 
-class DspProject : public CCmdTarget
+class DspProject : public CAutomationBase
 {
 	DECLARE_DYNCREATE(DspProject)
 protected:

@@ -2,10 +2,12 @@
 #define AFX_CODEFORMATTING_H__C841D2DA_1177_4AF1_A68C_3EA45D9166BC__INCLUDED_
 #pragma once
 
+#include "AutomationBase.h"
+
 /////////////////////////////////////////////////////////////////////////////
 // CCodeProcessor command target
 
-class CCodeProcessor : public CCmdTarget
+class CCodeProcessor : public CAutomationBase
 {
 	DECLARE_DYNCREATE(CCodeProcessor)
 protected:

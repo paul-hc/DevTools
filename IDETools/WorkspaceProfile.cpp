@@ -19,7 +19,7 @@ IMPLEMENT_DYNCREATE( WorkspaceProfile, CCmdTarget )
 
 
 WorkspaceProfile::WorkspaceProfile()
-	: CCmdTarget()
+	: CAutomationBase()
 	, m_options( NULL )		// No profile IO !
 	, projectNameArray()
 	, fileArray()
@@ -44,7 +44,7 @@ void WorkspaceProfile::OnFinalRelease( void )
 	// OnFinalRelease is called.  The base class will automatically
 	// deletes the object.  Add additional cleanup required for your
 	// object before calling the base class.
-	CCmdTarget::OnFinalRelease();
+	__super::OnFinalRelease();
 }
 
 int WorkspaceProfile::findProjectName( LPCTSTR projectName ) const

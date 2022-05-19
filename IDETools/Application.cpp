@@ -44,6 +44,9 @@ CApplication::CApplication( void )
 	: CBaseApp<CWinApp>()
 	, m_isVisualStudio6( false )
 {
+	// Extension DLLs: prevent heavy resource initialization when the dll gets registered by regsvr32.exe.
+	// Will initialize application resources later, when any automation object based on CAutomationBase gets instantiated.
+	SetLazyInitAppResources();
 }
 
 CApplication::~CApplication()
@@ -56,18 +59,8 @@ BOOL CApplication::InitInstance( void )
 	// modify profile name from "IDETools" to "IDETools_v7"
 	StoreProfileSuffix( str::Format( _T("_v%d"), HIWORD( CVersionInfo().GetFileInfo().dwProductVersionMS ) ) );
 
-	if ( !CBaseApp<CWinApp>::InitInstance() )
+	if ( !__super::InitInstance() )
 		return FALSE;
-
-	StoreVisualStudioVersion();
-
-	CToolStrip::RegisterStripButtons( IDR_IMAGE_STRIP );		// register command images
-	CAboutBox::s_appIconId = IDR_IDE_TOOLS_APP;
-
-	fs::CExtCustomOrder::Instance().RegisterCustomOrder();
-
-	m_pModuleSession.reset( new CModuleSession );
-	m_pModuleSession->LoadFromRegistry();
 
 	// register all OLE server (factories) as running; this enables the OLE libraries to create objects from other applications.
 	COleObjectFactory::RegisterAll();
@@ -79,10 +72,28 @@ int CApplication::ExitInstance( void )
 	if ( CIncludeDirectories::Created() )			// was it loaded?
 		CIncludeDirectories::Instance().Save();
 
-	m_pModuleSession->SaveToRegistry();
-	m_pModuleSession.reset();
+	if ( m_pModuleSession.get() != NULL )
+	{
+		m_pModuleSession->SaveToRegistry();
+		m_pModuleSession.reset();
+	}
 
-	return CBaseApp<CWinApp>::ExitInstance();
+	return __super::ExitInstance();
+}
+
+void CApplication::OnInitAppResources( void )
+{
+	__super::OnInitAppResources();
+
+	GetSharedImageStore()->RegisterToolbarImages( IDR_IMAGE_STRIP );		// register command images
+	CAboutBox::s_appIconId = IDR_IDE_TOOLS_APP;
+
+	fs::CExtCustomOrder::Instance().RegisterCustomOrder();
+
+	StoreVisualStudioVersion();
+
+	m_pModuleSession.reset( new CModuleSession() );
+	m_pModuleSession->LoadFromRegistry();
 }
 
 BOOL CApplication::OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo )
@@ -90,7 +101,7 @@ BOOL CApplication::OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO
 	if ( m_pModuleSession.get() != NULL && m_pModuleSession->OnCmdMsg( id, code, pExtra, pHandlerInfo ) )
 		return TRUE;
 
-	return CBaseApp<CWinApp>::OnCmdMsg( id, code, pExtra, pHandlerInfo );
+	return __super::OnCmdMsg( id, code, pExtra, pHandlerInfo );
 }
 
 void CApplication::StoreVisualStudioVersion( void )

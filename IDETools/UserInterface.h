@@ -2,10 +2,13 @@
 #define AFX_USERINTERFACE_H__216EF196_4C10_11D3_A3C8_006097B8DD84__INCLUDED_
 #pragma once
 
+#include "AutomationBase.h"
+
+
 /////////////////////////////////////////////////////////////////////////////
 // UserInterface command target
 
-class UserInterface : public CCmdTarget
+class UserInterface : public CAutomationBase
 {
 	DECLARE_DYNCREATE(UserInterface)
 

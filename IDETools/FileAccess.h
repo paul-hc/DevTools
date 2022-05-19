@@ -2,10 +2,13 @@
 #define AFX_FILEACCESS_H__1556FB26_22DB_11D2_A278_006097B8DD84__INCLUDED_
 #pragma once
 
+#include "AutomationBase.h"
+
+
 /////////////////////////////////////////////////////////////////////////////
 // FileAccess command target
 
-class FileAccess : public CCmdTarget
+class FileAccess : public CAutomationBase
 {
 	DECLARE_DYNCREATE(FileAccess)
 public:

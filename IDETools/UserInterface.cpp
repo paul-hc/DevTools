@@ -44,7 +44,7 @@ void UserInterface::OnFinalRelease()
 	// deletes the object.  Add additional cleanup required for your
 	// object before calling the base class.
 
-	CCmdTarget::OnFinalRelease();
+	__super::OnFinalRelease();
 }
 
 

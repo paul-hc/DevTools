@@ -2,6 +2,8 @@
 #define AFX_MODULEOPTIONS_H__9F8BBF8E_5AB9_400F_8C52_3CE4487806A7__INCLUDED_
 #pragma once
 
+#include "AutomationBase.h"
+
 
 // This automation object gets created in the VC++ macro initialization via the SetupMacroParameters() function, which is called on script startup.
 // Macro file locations example:
@@ -9,7 +11,7 @@
 //	Visual Studio 2008	C:\Users\Paul\Documents\Visual Studio 2008\Projects\VSMacros80\CppMacros\CppMacros.vsmacros
 
 
-class ModuleOptions : public CCmdTarget
+class ModuleOptions : public CAutomationBase
 {
 	DECLARE_DYNCREATE( ModuleOptions )
 protected:

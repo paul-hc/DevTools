@@ -36,7 +36,7 @@ void DspProject::OnFinalRelease( void )
 	// OnFinalRelease is called.  The base class will automatically
 	// deletes the object.  Add additional cleanup required for your
 	// object before calling the base class.
-	CCmdTarget::OnFinalRelease();
+	__super::OnFinalRelease();
 }
 
 void DspProject::clear( void )

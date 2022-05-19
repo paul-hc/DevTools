@@ -2,8 +2,10 @@
 #define AFX_INCLUDEFILETREE_H__1006E3E8_1F6F_11D2_A275_006097B8DD84__INCLUDED_
 #pragma once
 
+#include "AutomationBase.h"
 
-class IncludeFileTree : public CCmdTarget
+
+class IncludeFileTree : public CAutomationBase
 {
 	DECLARE_DYNCREATE(IncludeFileTree)
 

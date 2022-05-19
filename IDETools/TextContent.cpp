@@ -14,7 +14,7 @@ IMPLEMENT_DYNCREATE(TextContent, CCmdTarget)
 
 
 TextContent::TextContent( void )
-	: CCmdTarget()
+	: CAutomationBase()
 	, m_TextContent()
 	, m_showErrors( TRUE )
 {
@@ -37,7 +37,7 @@ void TextContent::OnFinalRelease( void )
 	// OnFinalRelease is called.  The base class will automatically
 	// deletes the object.  Add additional cleanup required for your
 	// object before calling the base class.
-	CCmdTarget::OnFinalRelease();
+	__super::OnFinalRelease();
 }
 
 

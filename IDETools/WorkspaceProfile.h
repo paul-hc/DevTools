@@ -2,13 +2,15 @@
 #define AFX_WORKSPACEPROFILE_H__0E44AB08_90E1_11D2_A2C9_006097B8DD84__INCLUDED_
 #pragma once
 
+#include "AutomationBase.h"
+
 
 extern LPCTSTR defaulWkspSection;
 extern LPCTSTR defaulProjectName;
 extern LPCTSTR sectionWorkspaceDialogs;
 
 
-class WorkspaceProfile : public CCmdTarget
+class WorkspaceProfile : public CAutomationBase
 {
 	DECLARE_DYNCREATE( WorkspaceProfile )
 public:

@@ -1,16 +1,14 @@
 #if !defined(AFX_FILEFIND_H__C722D0B7_1E2D_11D5_B59B_00D0B74ECB52__INCLUDED_)
 #define AFX_FILEFIND_H__C722D0B7_1E2D_11D5_B59B_00D0B74ECB52__INCLUDED_
-
-#if _MSC_VER > 1000
 #pragma once
-#endif // _MSC_VER > 1000
-// FileSearch.h : header file
-//
+
+#include "AutomationBase.h"
+
 
 /////////////////////////////////////////////////////////////////////////////
 // FileSearch command target
 
-class FileSearch : public CCmdTarget
+class FileSearch : public CAutomationBase
 {
 	DECLARE_DYNCREATE(FileSearch)
 

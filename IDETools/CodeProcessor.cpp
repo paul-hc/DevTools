@@ -68,7 +68,7 @@
 IMPLEMENT_DYNCREATE(CCodeProcessor, CCmdTarget)
 
 CCodeProcessor::CCodeProcessor()
-	: CCmdTarget()
+	: CAutomationBase()
 	, m_docLanguage( _T("C/C++") )
 	, m_tabSize( app::GetModuleSession().m_vsTabSizeCpp )
 	, m_useTabs( app::GetModuleSession().m_vsKeepTabsCpp )
@@ -94,7 +94,7 @@ void CCodeProcessor::OnFinalRelease()
 	// deletes the object.  Add additional cleanup required for your
 	// object before calling the base class.
 
-	CCmdTarget::OnFinalRelease();
+	__super::OnFinalRelease();
 }
 
 BEGIN_MESSAGE_MAP(CCodeProcessor, CCmdTarget)

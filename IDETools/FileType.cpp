@@ -80,7 +80,7 @@ namespace ft
 	{
 		static CImageList imageList;
 		if ( NULL == imageList.GetSafeHandle() )
-			res::LoadImageList( imageList, IDB_FILE_TYPE_STRIP, ft::_ImageCount, CIconId::GetStdSize( SmallIcon ), color::ToolStripPink );
+			res::LoadImageList( imageList, IDB_FILE_TYPE_STRIP, ft::_ImageCount, CIconSize::GetSizeOf( SmallIcon ), color::ToolStripPink );
 
 		return imageList;
 	}

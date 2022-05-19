@@ -15,7 +15,7 @@ IMPLEMENT_DYNCREATE(IncludeFileTree, CCmdTarget)
 
 
 IncludeFileTree::IncludeFileTree( void )
-	: CCmdTarget()
+	: CAutomationBase()
 {
 	EnableAutomation();
 	// To keep the application running as long as an OLE automation
@@ -36,7 +36,7 @@ void IncludeFileTree::OnFinalRelease( void )
 	// OnFinalRelease is called.  The base class will automatically
 	// deletes the object.  Add additional cleanup required for your
 	// object before calling the base class.
-	CCmdTarget::OnFinalRelease();
+	__super::OnFinalRelease();
 }
 
 

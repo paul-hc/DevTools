@@ -262,6 +262,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\AutomationBase.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\AutomationBase.h"
+				>
+			</File>
+			<File
 				RelativePath="CodeMessageBox.cpp"
 				>
 				<FileConfiguration

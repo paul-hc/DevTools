@@ -2,13 +2,13 @@
 #define AFX_TEXTCONTENT_H__E37FE178_CBB7_11D4_B57C_00D0B74ECB52__INCLUDED_
 #pragma once
 
-
+#include "AutomationBase.h"
 #include <vector>
 #include <map>
 
 
 // Automation object for text file IO, replacements, etc
-class TextContent : public CCmdTarget
+class TextContent : public CAutomationBase
 {
 	DECLARE_DYNCREATE( TextContent )
 public:
