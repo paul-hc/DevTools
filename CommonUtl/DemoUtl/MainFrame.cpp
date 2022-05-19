@@ -55,7 +55,6 @@ int CMainFrame::OnCreate( LPCREATESTRUCT lpCreateStruct )
 		TRACE("Failed to create toolbar\n");
 		return -1;	  // fail to create
 	}
-	m_wndToolBar.SetCustomDisabledImageList( gdi::DisabledGrayOut );
 
 	if (!m_wndStatusBar.Create(this) ||
 		!m_wndStatusBar.SetIndicators(indicators,

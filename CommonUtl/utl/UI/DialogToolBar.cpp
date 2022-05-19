@@ -108,18 +108,8 @@ void CDialogToolBar::CreateToolbar( CWnd* pParent, UINT toolbarResId )
 
 	if ( toolbarResId != 0 )
 		VERIFY( LoadToolStrip( toolbarResId ) );
-	else if ( m_strip.IsValid() )
-	{
-		VERIFY( SetButtons( ARRAY_PAIR_V( m_strip.m_buttonIds ) ) );
-		CSize buttonSize = m_strip.m_imageSize + CSize( BtnEdgeWidth, BtnEdgeHeight );
-		SetSizes( buttonSize, m_strip.m_imageSize );			// set new sizes of the buttons
-
-		if ( CImageList* pImageList = m_strip.EnsureImageList() )
-			GetToolBarCtrl().SetImageList( pImageList );
-	}
-
-	if ( m_disabledStyle != gdi::DisabledStd )
-		SetCustomDisabledImageList( m_disabledStyle );
+	else if ( m_strip.HasButtons() )
+		VERIFY( InitToolbarButtons() );
 }
 
 

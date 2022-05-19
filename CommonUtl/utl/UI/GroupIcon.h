@@ -133,7 +133,7 @@ private:
 	static std::pair<TBitsPerPixel, IconStdSize> ToBppSize( const res::CGroupIconEntry* pIconEntry )
 	{
 		ASSERT_PTR( pIconEntry );
-		return std::make_pair( pIconEntry->GetBitsPerPixel(), CIconId::FindStdSize( pIconEntry->GetSize() ) );
+		return std::make_pair( pIconEntry->GetBitsPerPixel(), CIconSize::FindStdSize( pIconEntry->GetSize() ) );
 	}
 private:
 	CResourceData m_resGroupIcon;

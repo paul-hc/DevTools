@@ -13,7 +13,7 @@ namespace pred
 	{
 		CompareResult operator()( const res::CGroupIconEntry& left, const res::CGroupIconEntry& right ) const
 		{
-			return Compare_Scalar( CIconId::FindStdSize( left.GetSize() ), CIconId::FindStdSize( right.GetSize() ) );
+			return Compare_Scalar( CIconSize::FindStdSize( left.GetSize() ), CIconSize::FindStdSize( right.GetSize() ) );
 		}
 	};
 }
@@ -36,7 +36,7 @@ const res::CGroupIconEntry* CGroupIcon::FindMatch( TBitsPerPixel bitsPerPixel, I
 		typedef std::reverse_iterator< const res::CGroupIconEntry* > const_reverse_iterator;
 
 		for ( const_reverse_iterator it( m_pGroupIconDir->End() ), itEnd( m_pGroupIconDir->Begin() ); it != itEnd; ++it )
-			if ( DefaultSize == iconStdSize || iconStdSize == CIconId::FindStdSize( it->GetSize() ) )		// size match
+			if ( DefaultSize == iconStdSize || iconStdSize == CIconSize::FindStdSize( it->GetSize() ) )		// size match
 				if ( AnyBpp == bitsPerPixel || bitsPerPixel == it->GetBitsPerPixel() )					// colour depth match
 					return &*it;
 	}
@@ -60,7 +60,7 @@ bool CGroupIcon::ContainsBpp( TBitsPerPixel bitsPerPixel, IconStdSize* pIconStdS
 	if ( const res::CGroupIconEntry* pFound = FindMatch( bitsPerPixel, static_cast< IconStdSize >( DefaultSize ) ) )
 	{
 		if ( pIconStdSize != NULL )
-			*pIconStdSize = CIconId::FindStdSize( pFound->GetSize() );
+			*pIconStdSize = CIconSize::FindStdSize( pFound->GetSize() );
 		return true;
 	}
 	return false;
@@ -87,7 +87,7 @@ void CGroupIcon::QueryAvailableSizes( std::vector< std::pair<TBitsPerPixel, Icon
 	if ( IsValid() )
 	{
 		for ( int i = 0; i != m_pGroupIconDir->m_count; ++i )
-			rIconPairs.push_back( std::make_pair( m_pGroupIconDir->m_images[ i ].GetBitsPerPixel(), CIconId::FindStdSize( m_pGroupIconDir->m_images[ i ].GetSize() ) ) );
+			rIconPairs.push_back( std::make_pair( m_pGroupIconDir->m_images[ i ].GetBitsPerPixel(), CIconSize::FindStdSize( m_pGroupIconDir->m_images[ i ].GetSize() ) ) );
 
 		std::sort( rIconPairs.begin(), rIconPairs.end(), pred::LessValue< pred::CompareIcon_BppSize >() );		// BitsPerPixel | Width
 	}

@@ -79,16 +79,45 @@ namespace ui
 }
 
 
+class CIconSize
+{
+public:
+	CIconSize( void ) : m_size( 0, 0 ), m_stdSize( DefaultSize ) {}
+	CIconSize( IconStdSize stdSize ) { Reset( stdSize ); }
+	CIconSize( const CSize& size ) { Reset( size ); }
+
+	void Reset( IconStdSize stdSize = DefaultSize )
+	{
+		m_stdSize = stdSize;
+		m_size = GetSizeOf( m_stdSize );
+	}
+
+	void Reset( const CSize& size )
+	{
+		m_size = size;
+		m_stdSize = FindStdSize( m_size );
+	}
+
+	const CSize& GetSize( void ) const { return m_size; }
+	IconStdSize GetStdSize( void ) const { return m_stdSize; }
+
+	static CSize GetSizeOf( IconStdSize iconStdSize ) { int iconDimension = ui::GetIconDimension( iconStdSize ); return CSize( iconDimension, iconDimension ); }
+	static IconStdSize FindStdSize( const CSize& iconSize, IconStdSize defaultStdSize = DefaultSize ) { return ui::LookupIconStdSize( iconSize.cx, defaultStdSize ); }
+private:
+	CSize m_size;
+	IconStdSize m_stdSize;
+public:
+	static const CIconSize s_small;
+};
+
+
 struct CIconId
 {
 	CIconId( UINT id = 0, IconStdSize stdSize = SmallIcon ) : m_id( id ), m_stdSize( stdSize ) {}
 
 	bool IsValid( void ) const { return m_id != 0; }
 
-	CSize GetStdSize( void ) const { return GetStdSize( m_stdSize ); }
-
-	static CSize GetStdSize( IconStdSize iconStdSize ) { int iconDimension = ui::GetIconDimension( iconStdSize ); return CSize( iconDimension, iconDimension ); }
-	static IconStdSize FindStdSize( const CSize& iconSize, IconStdSize defaultStdSize = DefaultSize ) { return ui::LookupIconStdSize( iconSize.cx, defaultStdSize ); }
+	CSize GetStdSize( void ) const { return CIconSize::GetSizeOf( m_stdSize ); }
 public:
 	UINT m_id;
 	IconStdSize m_stdSize;
@@ -120,11 +149,22 @@ private:
 };
 
 
+namespace gdi
+{
+	void CreateImageList( CImageList& rOutImageList, const CIconSize& imageSize, int countOrGrowBy, UINT flags = ILC_COLOR32 | ILC_MASK );	// if positive: actual count, if negative: growBy
+
+	inline void CreateEmptyImageList( CImageList& rOutImageList, const CIconSize& imageSize, int growBy = 5, UINT flags = ILC_COLOR32 | ILC_MASK )
+	{
+		CreateImageList( rOutImageList, imageSize, -growBy, flags );
+	}
+}
+
+
 namespace res
 {
 	HICON LoadIcon( const CIconId& iconId );
 
-	// icons image-list
+	// image-list from individual icons
 	void LoadImageList( CImageList& rOutImageList, const UINT* pIconIds, size_t iconCount, IconStdSize iconStdSize = SmallIcon,
 						UINT ilFlags = ILC_COLOR32 | ILC_MASK );
 
@@ -132,7 +172,7 @@ namespace res
 	bool LoadImageList( CImageList& rOutImageList, UINT bitmapId, int imageCount, const CSize& imageSize,
 						COLORREF transpColor = color::Auto, bool disabledEffect = false );
 
-	// icon-strip image-list: source icon is a custom size strip of images
+	// image-list from one icon-strip of custom size and multiple images
 	int LoadImageListFromIconStrip( CImageList* pOutImageList, CSize* pOutImageSize, UINT iconStripId, UINT ilFlags = ILC_COLOR32 | ILC_MASK );
 
 
@@ -140,8 +180,35 @@ namespace res
 
 	inline bool LoadImageList( CImageList& rOutImageList, const TStripId& stripId, int imageCount, COLORREF transpColor = color::Auto )
 	{
-		return LoadImageList( rOutImageList, stripId.m_id, imageCount, CIconId::GetStdSize( stripId.m_stdSize ), transpColor );
+		return LoadImageList( rOutImageList, stripId.m_id, imageCount, CIconSize::GetSizeOf( stripId.m_stdSize ), transpColor );
 	}
+}
+
+
+class CIcon;
+
+
+namespace ui
+{
+	interface IImageStore
+	{
+		virtual CIcon* FindIcon( UINT cmdId, IconStdSize iconStdSize = SmallIcon ) const = 0;
+		virtual const CIcon* RetrieveIcon( const CIconId& cmdId ) = 0;
+		virtual CBitmap* RetrieveBitmap( const CIconId& cmdId, COLORREF transpColor ) = 0;
+
+		typedef std::pair<CBitmap*, CBitmap*> TBitmapPair;		// <bmp_unchecked, bmp_checked>
+
+		virtual TBitmapPair RetrieveMenuBitmaps( const CIconId& cmdId ) = 0;
+		virtual TBitmapPair RetrieveMenuBitmaps( const CIconId& cmdId, bool useCheckedBitmaps ) = 0;
+
+		// utils
+		const CIcon* RetrieveLargestIcon( UINT cmdId, IconStdSize maxIconStdSize = HugeIcon_48 );
+		CBitmap* RetrieveMenuBitmap( const CIconId& cmdId ) { return RetrieveBitmap( cmdId, ::GetSysColor( COLOR_MENU ) ); }
+		int BuildImageList( CImageList* pDestImageList, const UINT buttonIds[], size_t buttonCount, const CSize& imageSize );
+	};
+
+
+	ui::IImageStore* GetImageStoresSvc( void );
 }
 
 

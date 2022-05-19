@@ -11,15 +11,18 @@
 class CToolbarStrip : public CToolBar
 {
 public:
-	CToolbarStrip( void );
+	CToolbarStrip( gdi::DisabledStyle disabledStyle = gdi::DisabledGrayOut );
 	virtual ~CToolbarStrip();
 
 	// button initialization (before DDX_ creation)
+	const CToolStrip& GetStrip( void ) const { return m_strip; }
 	CToolStrip& GetStrip( void ) { return m_strip; }
 
 	bool LoadToolStrip( UINT toolStripId, COLORREF transpColor = color::Auto );
-	bool InitToolbarButtons( void );						// use already set up strip to initialize toolbar buttons
-	void SetCustomDisabledImageList( gdi::DisabledStyle style = gdi::DisabledGrayOut );
+	bool InitToolbarButtons( void );						// use already set up strip buttons to initialize bar buttons and imagelist
+
+	gdi::DisabledStyle GetDisabledStyle( void ) const { return m_disabledStyle; }
+	void SetDisabledStyle( gdi::DisabledStyle disabledStyle );
 
 	CSize GetIdealBarSize( void ) const;
 
@@ -29,17 +32,19 @@ public:
 
 	bool GetEnableUnhandledCmds( void ) const { return m_enableUnhandledCmds; }
 	void SetEnableUnhandledCmds( bool enableUnhandledCmds = true ) { m_enableUnhandledCmds = enableUnhandledCmds; }
+private:
+	void SetCustomDisabledImageList( void );
 protected:
 	CToolStrip m_strip;
 
 	enum Metrics { BtnEdgeWidth = 7, BtnEdgeHeight = 7 };
 private:
 	bool m_enableUnhandledCmds;
+	gdi::DisabledStyle m_disabledStyle;
 	std::auto_ptr<CImageList> m_pDisabledImageList;
 
-	// generated overrides
+	// generated stuff
 protected:
-	// generated message map
 	DECLARE_MESSAGE_MAP()
 };
 

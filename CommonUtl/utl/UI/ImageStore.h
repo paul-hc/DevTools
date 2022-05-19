@@ -8,37 +8,30 @@
 
 
 struct CThemeItem;
+class CToolImageList;
 
 
-class CImageStore
+class CImageStore : public ui::IImageStore, private utl::noncopyable
 {
 public:
-	CImageStore( bool isShared = false );
+	CImageStore( void );
 	~CImageStore();
 
-	static bool HasSharedStore( void ) { return m_pSharedStore != NULL; }
-	static CImageStore* GetSharedStore( void ) { return m_pSharedStore; }
-	static CImageStore* SharedStore( void ) { ASSERT_PTR( m_pSharedStore ); return m_pSharedStore; }
-
 	void Clear( void );
+public:
+	// ui::IImageStore interface
+	virtual CIcon* FindIcon( UINT cmdId, IconStdSize iconStdSize = SmallIcon ) const;
+	virtual const CIcon* RetrieveIcon( const CIconId& cmdId );
+	virtual CBitmap* RetrieveBitmap( const CIconId& cmdId, COLORREF transpColor );
 
-	CIcon* FindIcon( UINT cmdId, IconStdSize iconStdSize = SmallIcon ) const;
-
-	const CIcon* RetrieveIcon( const CIconId& cmdId );
-	const CIcon* RetrieveLargestIcon( UINT cmdId, IconStdSize maxIconStdSize = HugeIcon_48 );
-	static const CIcon* RetrieveSharedIcon( const CIconId& cmdId );
-
-	CBitmap* RetrieveBitmap( const CIconId& cmdId, COLORREF transpColor );
-	CBitmap* RetrieveMenuBitmap( const CIconId& cmdId ) { return RetrieveBitmap( cmdId, ::GetSysColor( COLOR_MENU ) ); }
-
-	std::pair<CBitmap*, CBitmap*> RetrieveMenuBitmaps( const CIconId& cmdId );
-	std::pair<CBitmap*, CBitmap*> RetrieveMenuBitmaps( const CIconId& cmdId, bool useCheckedBitmaps );
-
+	virtual TBitmapPair RetrieveMenuBitmaps( const CIconId& cmdId );
+	virtual TBitmapPair RetrieveMenuBitmaps( const CIconId& cmdId, bool useCheckedBitmaps );
+public:
+	void RegisterToolbarImages( UINT toolBarId, COLORREF transpColor = color::Auto );
+	void RegisterButtonImages( const CToolImageList& toolImageList );
 	void RegisterButtonImages( const CImageList& imageList, const UINT buttonIds[], size_t buttonCount, const CSize* pImageSize = NULL );
 	void RegisterIcon( UINT cmdId, CIcon* pIcon );		// takes ownership of pIcon
 	void RegisterIcon( UINT cmdId, HICON hIcon ) { return RegisterIcon( cmdId, CIcon::NewIcon( hIcon ) ); }
-
-	int AddToImageList( CImageList& rImageList, const UINT buttonIds[], size_t buttonCount, const CSize& imageSize );
 
 	struct CCmdAlias { UINT m_cmdId, m_iconId; };
 
@@ -55,8 +48,6 @@ private:
 		return cmdId;
 	}
 private:
-	static CImageStore* m_pSharedStore;
-
 	stdext::hash_map< UINT, UINT > m_cmdAliasMap;		// cmdId -> iconId: multiple commands sharing the same icon
 
 	typedef std::pair<UINT, IconStdSize> TIconKey;		// <iconId, IconStdSize> - synonym with CIconId with hash value convenience
@@ -65,10 +56,37 @@ private:
 	typedef std::pair<UINT, COLORREF> TBitmapKey;		// <iconId, transpColor>
 	stdext::hash_map< TBitmapKey, CBitmap* > m_bitmapMap;	// regular bitmaps look better than menu bitmaps because they retain the alpha channel
 
-	stdext::hash_map< UINT, std::pair<CBitmap*, CBitmap*> > m_menuBitmapMap;		// <iconId, <unchecked, checked> >
+	stdext::hash_map< UINT, TBitmapPair > m_menuBitmapMap;		// <iconId, <unchecked, checked> >
 
 	std::auto_ptr<CThemeItem> m_pMenuItemBkTheme;
 	std::auto_ptr<CThemeItem> m_pCheckedMenuItemBkTheme;
+};
+
+
+// singleton for global image lookup in all created image stores
+
+class CImageStoresSvc : public ui::IImageStore, private utl::noncopyable
+{
+	CImageStoresSvc( void );
+
+	static CImageStoresSvc* GetInstance( void );
+
+	friend class CImageStore;
+
+	void PushStore( ui::IImageStore* pImageStore );
+	void PopStore( ui::IImageStore* pImageStore );
+public:
+	static ui::IImageStore* Instance( void ) { return GetInstance(); }
+
+	// ui::IImageStore interface
+	virtual CIcon* FindIcon( UINT cmdId, IconStdSize iconStdSize = SmallIcon ) const;
+	virtual const CIcon* RetrieveIcon( const CIconId& cmdId );
+	virtual CBitmap* RetrieveBitmap( const CIconId& cmdId, COLORREF transpColor );
+
+	virtual TBitmapPair RetrieveMenuBitmaps( const CIconId& cmdId );
+	virtual TBitmapPair RetrieveMenuBitmaps( const CIconId& cmdId, bool useCheckedBitmaps );
+private:
+	std::vector< ui::IImageStore* > m_imageStores;		// no ownership
 };
 
 

@@ -51,7 +51,7 @@ template< typename BaseCtrl >
 inline const std::vector< UINT >& CBaseHostToolbarCtrl<BaseCtrl>::GetMateCommands( void ) const
 {
 	REQUIRE( HasMateToolbar() );
-	return m_pMateToolbar->GetStrip().m_buttonIds;
+	return m_pMateToolbar->GetStrip().GetButtonIds();
 }
 
 template< typename BaseCtrl >

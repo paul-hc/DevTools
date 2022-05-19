@@ -9,11 +9,8 @@
 class CDialogToolBar : public CToolbarStrip
 {
 public:
-	CDialogToolBar( gdi::DisabledStyle disabledStyle = gdi::DisabledGrayOut ) : m_disabledStyle( disabledStyle ) {}
+	CDialogToolBar( gdi::DisabledStyle disabledStyle = gdi::DisabledGrayOut ) : CToolbarStrip( disabledStyle ) {}
 	virtual ~CDialogToolBar();
-
-	gdi::DisabledStyle GetDisabledStyle( void ) const { return m_disabledStyle; }
-	void SetDisabledStyle( gdi::DisabledStyle disabledStyle ) { m_disabledStyle = disabledStyle; }
 
 	// use a placeholder static (with the same id)
 	void DDX_Placeholder( CDataExchange* pDX, int placeholderId,
@@ -33,12 +30,9 @@ public:
 						TAlignment alignment = H_AlignRight | V_AlignCenter, UINT toolbarResId = 0 );
 private:
 	void CreateToolbar( CWnd* pParent, UINT toolbarResId );
-private:
-	gdi::DisabledStyle m_disabledStyle;
-public:
-	// generated overrides
+
+	// generated stuff
 protected:
-	// generated message map
 	afx_msg LRESULT OnIdleUpdateCmdUI( WPARAM wParam, LPARAM lParam );
 	afx_msg BOOL OnCustomDrawReflect( NMHDR* pNmHdr, LRESULT* pResult );
 

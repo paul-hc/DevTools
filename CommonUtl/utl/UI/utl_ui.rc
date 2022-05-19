@@ -448,6 +448,16 @@ END
 
 /////////////////////////////////////////////////////////////////////////////
 //
+// Icon
+//
+
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+IDI_UNKNOWN             ICON                    "res\\Unknown.ico"
+ID_TRANSPARENT          ICON                    "res\\Transparent.ico"
+
+/////////////////////////////////////////////////////////////////////////////
+//
 // String Table
 //
 
@@ -522,27 +532,6 @@ BEGIN
 END
 
 #endif    // English (U.S.) resources
-/////////////////////////////////////////////////////////////////////////////
-
-
-/////////////////////////////////////////////////////////////////////////////
-// English (U.K.) resources
-
-#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENG)
-#ifdef _WIN32
-LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_UK
-#pragma code_page(1252)
-#endif //_WIN32
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// Icon
-//
-
-// Icon with lowest ID value placed first to ensure application icon
-// remains consistent on all systems.
-ID_TRANSPARENT          ICON                    "res\\Transparent.ico"
-#endif    // English (U.K.) resources
 /////////////////////////////////////////////////////////////////////////////
 
 

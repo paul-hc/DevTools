@@ -1088,7 +1088,7 @@ namespace ui
 
 	void DDX_ButtonIcon( CDataExchange* pDX, int ctrlId, const CIconId& iconId /*= CIconId( 0 )*/, bool useText /*= true*/, bool useTextSpacing /*= true*/ )
 	{
-		if ( DialogOutput == pDX->m_bSaveAndValidate && CImageStore::HasSharedStore() )
+		if ( DialogOutput == pDX->m_bSaveAndValidate )
 			if ( CButton* pButton = (CButton*)pDX->m_pDlgWnd->GetDlgItem( ctrlId ) )
 				CIconButton::SetButtonIcon( pButton, CIconId( iconId.m_id != 0 ? iconId.m_id : ctrlId, iconId.m_stdSize ), useText, useTextSpacing );
 			else
@@ -1097,11 +1097,11 @@ namespace ui
 
 	void DDX_StaticIcon( CDataExchange* pDX, int ctrlId, const CIconId& iconId /*= CIconId( 0 )*/ )
 	{
-		if ( DialogOutput == pDX->m_bSaveAndValidate && CImageStore::HasSharedStore() )
+		if ( DialogOutput == pDX->m_bSaveAndValidate )
 			if ( CStatic* pStatic = (CStatic*)pDX->m_pDlgWnd->GetDlgItem( ctrlId ) )
 			{
 				if ( NULL == pStatic->GetIcon() )
-					if ( const CIcon* pIcon = CImageStore::GetSharedStore()->RetrieveIcon( CIconId( iconId.m_id != 0 ? iconId.m_id : ctrlId, iconId.m_stdSize ) ) )
+					if ( const CIcon* pIcon = ui::GetImageStoresSvc()->RetrieveIcon( CIconId( iconId.m_id != 0 ? iconId.m_id : ctrlId, iconId.m_stdSize ) ) )
 						pStatic->SetIcon( pIcon->GetHandle() );
 			}
 			else

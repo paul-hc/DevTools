@@ -427,6 +427,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\res\Unknown.ico"
+				>
+			</File>
+			<File
 				RelativePath=".\utl_ui.rc"
 				>
 				<FileConfiguration
@@ -959,6 +963,14 @@
 				</File>
 				<File
 					RelativePath=".\Thumbnailer_fwd.h"
+					>
+				</File>
+				<File
+					RelativePath=".\ToolImageList.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\ToolImageList.h"
 					>
 				</File>
 				<File

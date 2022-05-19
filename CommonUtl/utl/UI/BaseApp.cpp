@@ -80,7 +80,7 @@ namespace app
 
 		if ( pForegroundWnd != NULL && proc::InCurrentThread( pForegroundWnd->GetSafeHwnd() ) )
 		{
-			static HICON s_hToolIcon = CImageStore::SharedStore()->RetrieveIcon( ID_RUN_TESTS )->GetHandle();
+			static HICON s_hToolIcon = ui::GetImageStoresSvc()->RetrieveIcon( ID_RUN_TESTS )->GetHandle();
 			std::vector< std::tstring > testNames;
 			ut::CTestSuite::Instance().QueryTestNames( testNames );
 

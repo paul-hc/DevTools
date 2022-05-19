@@ -23,8 +23,8 @@ CSplitPushButton::~CSplitPushButton()
 
 const CIcon* CSplitPushButton::GetRhsIcon( void ) const
 {
-	if ( m_rhsIconId.IsValid() && CImageStore::HasSharedStore() )
-		return CImageStore::GetSharedStore()->RetrieveIcon( m_rhsIconId );
+	if ( m_rhsIconId.IsValid() )
+		return ui::GetImageStoresSvc()->RetrieveIcon( m_rhsIconId );
 
 	return NULL;
 }

@@ -1,6 +1,7 @@
 
 #include "stdafx.h"
 #include "TestMiscDialog.h"
+#include "utl/AppTools.h"
 #include "utl/UI/ImageStore.h"
 #include "utl/UI/Utilities.h"
 #include "utl/UI/resource.h"
@@ -27,6 +28,10 @@ namespace layout
 
 CTestMiscDialog::CTestMiscDialog( CWnd* pParent )
 	: CLayoutDialog( IDD_TEST_MISC_DIALOG, pParent )
+	, m_toolbarDisabledGrayScale( gdi::DisabledGrayScale )
+	, m_toolbarDisabledGray( gdi::DisabledGrayOut )
+	, m_toolbarDisabledEffect( gdi::DisabledEffect )
+	, m_toolbarDisabledBlendColor( gdi::DisabledBlendColor )
 {
 	m_regSection = reg::section_dialog;
 	RegisterCtrlLayout( ARRAY_PAIR( layout::styles ) );
@@ -64,13 +69,13 @@ void CTestMiscDialog::RegisterOwnCmds( void )
 		{ IdFilePrint, ID_FILE_PRINT },
 		{ IdAppAbout, ID_APP_ABOUT }
 	};
-	CImageStore::SharedStore()->RegisterAliases( ARRAY_PAIR( s_aliases ) );
+	app::GetSharedImageStore()->RegisterAliases( ARRAY_PAIR( s_aliases ) );
 	registered = true;
 }
 
 void CTestMiscDialog::DoDataExchange( CDataExchange* pDX )
 {
-	bool firstInit = NULL == m_toolbarStdEnabled.m_hWnd;
+//	bool firstInit = NULL == m_toolbarStdEnabled.m_hWnd;
 	enum Align { BarAlign = H_AlignLeft | V_AlignCenter };
 
 	m_toolbarStdEnabled.DDX_Placeholder( pDX, IDC_TOOLBAR_PLACEHOLDER, BarAlign );
@@ -80,14 +85,6 @@ void CTestMiscDialog::DoDataExchange( CDataExchange* pDX )
 	m_toolbarDisabledGray.DDX_Placeholder( pDX, IDC_STRIP_BAR_3, BarAlign );
 	m_toolbarDisabledEffect.DDX_Placeholder( pDX, IDC_STRIP_BAR_4, BarAlign );
 	m_toolbarDisabledBlendColor.DDX_Placeholder( pDX, IDC_STRIP_BAR_5, BarAlign );
-
-	if ( firstInit )
-	{
-		m_toolbarDisabledGrayScale.SetCustomDisabledImageList( gdi::DisabledGrayScale );
-		m_toolbarDisabledGray.SetCustomDisabledImageList( gdi::DisabledGrayOut );
-		m_toolbarDisabledEffect.SetCustomDisabledImageList( gdi::DisabledEffect );
-		m_toolbarDisabledBlendColor.SetCustomDisabledImageList( gdi::DisabledBlendColor );
-	}
 
 	CLayoutDialog::DoDataExchange( pDX );
 }

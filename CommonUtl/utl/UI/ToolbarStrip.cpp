@@ -10,9 +10,10 @@
 #endif
 
 
-CToolbarStrip::CToolbarStrip( void )
+CToolbarStrip::CToolbarStrip( gdi::DisabledStyle disabledStyle /*= gdi::DisabledGrayOut*/ )
 	: CToolBar()
 	, m_enableUnhandledCmds( false )
+	, m_disabledStyle( disabledStyle )
 {
 }
 
@@ -24,23 +25,27 @@ bool CToolbarStrip::LoadToolStrip( UINT toolStripId, COLORREF transpColor /*= co
 {
 	ASSERT_PTR( m_hWnd );
 	return
-		m_strip.LoadStrip( toolStripId, transpColor ) &&
+		m_strip.LoadToolbar( toolStripId, transpColor ) &&
 		InitToolbarButtons();
 }
 
 bool CToolbarStrip::InitToolbarButtons( void )
 {
 	ASSERT_PTR( m_hWnd );
-	ASSERT( m_strip.IsValid() );
+	ASSERT( m_strip.HasButtons() );
 
-	if ( !SetButtons( ARRAY_PAIR_V( m_strip.m_buttonIds ) ) )
+	if ( !SetButtons( ARRAY_PAIR_V( m_strip.GetButtonIds() ) ) )
 		return false;
 
-	CSize buttonSize = m_strip.m_imageSize + CSize( BtnEdgeWidth, BtnEdgeHeight );
-	SetSizes( buttonSize, m_strip.m_imageSize );			// set new sizes of the buttons
+	CSize buttonSize = m_strip.GetImageSize() + CSize( BtnEdgeWidth, BtnEdgeHeight );
+	SetSizes( buttonSize, m_strip.GetImageSize() );			// set new sizes of the buttons
 
 	if ( CImageList* pImageList = m_strip.EnsureImageList() )
 		GetToolBarCtrl().SetImageList( pImageList );
+
+	if ( m_disabledStyle != gdi::DisabledStd )
+		SetCustomDisabledImageList();
+
 	return true;
 }
 
@@ -51,12 +56,20 @@ CSize CToolbarStrip::GetIdealBarSize( void ) const
 	return idealBarSize;
 }
 
-void CToolbarStrip::SetCustomDisabledImageList( gdi::DisabledStyle style /*= gdi::DisabledGrayOut*/ )
+void CToolbarStrip::SetDisabledStyle( gdi::DisabledStyle disabledStyle )
+{
+	m_disabledStyle = disabledStyle;
+
+	if ( m_strip.HasButtons() && m_disabledStyle != gdi::DisabledStd )
+		SetCustomDisabledImageList();
+}
+
+void CToolbarStrip::SetCustomDisabledImageList( void )
 {
 	if ( CImageList* pImageList = m_strip.EnsureImageList() )
 	{
-		m_pDisabledImageList.reset( new CImageList );
-		if ( gdi::MakeDisabledImageList( *m_pDisabledImageList, *pImageList, style, GetSysColor( COLOR_BTNFACE ), 128 ) )	// was COLOR_3DLIGHT, 128
+		m_pDisabledImageList.reset( new CImageList() );
+		if ( gdi::MakeDisabledImageList( *m_pDisabledImageList, *pImageList, m_disabledStyle, GetSysColor( COLOR_BTNFACE ), 192 ) )	// was COLOR_3DLIGHT, 128; 192 looks better, more washed-out (hence disabled)
 			GetToolBarCtrl().SetDisabledImageList( m_pDisabledImageList.get() );
 		else
 		{

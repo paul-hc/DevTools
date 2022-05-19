@@ -312,7 +312,7 @@ CSize CThumbnailer::GetItemImageSize( ui::GlyphGauge glyphGauge /*= ui::SmallGly
 	switch ( glyphGauge )
 	{
 		default: ASSERT( false );
-		case ui::SmallGlyph:	return CIconId::GetStdSize( SmallIcon );
+		case ui::SmallGlyph:	return CIconSize::GetSizeOf( SmallIcon );
 		case ui::LargeGlyph:	return GetBoundsSize();
 	}
 }

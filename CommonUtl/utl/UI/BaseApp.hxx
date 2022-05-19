@@ -36,7 +36,7 @@ template< typename BaseClass >
 CBaseApp<BaseClass>::~CBaseApp()
 {
 	ASSERT_NULL( m_pLogger.get() );			// should've been released on ExitInstance
-	ASSERT_NULL( m_pImageStore.get() );
+	ASSERT_NULL( m_pSharedImageStore.get() );
 }
 
 template< typename BaseClass >
@@ -87,19 +87,18 @@ void CBaseApp<BaseClass>::OnInitAppResources( void )
 {
 	ASSERT_NULL( m_pSharedResources.get() );		// init once
 
-	m_pSharedResources.reset( new utl::CResourcePool );
-	m_pLogger.reset( new CLogger );
-	m_pImageStore.reset( new CImageStore( true ) );
+	m_pSharedResources.reset( new utl::CResourcePool() );
+	m_pLogger.reset( new CLogger() );
 	m_appAccel.Load( IDR_APP_SHARED_ACCEL );
 
 	m_pSharedResources->AddAutoPtr( &m_pLogger );
-	m_pSharedResources->AddAutoPtr( &m_pImageStore );
 
 	// Rely on CLogger::m_addSessionNewLine to add a delayed new line on first log entry
 	//GetLogger().LogLine( _T(""), false );					// new-line as session separator
 
-	CToolStrip::RegisterStripButtons( IDR_LIST_STRIP );		// register stock images
-	CToolStrip::RegisterStripButtons( IDR_STD_STRIP );		// register stock images
+	// register stock images
+	GetSharedImageStore()->RegisterToolbarImages( IDR_LIST_STRIP );
+	GetSharedImageStore()->RegisterToolbarImages( IDR_STD_STRIP );
 
 	// activate "Windows Native" visual manager for enabling themes in MFC controls
 	CMFCVisualManager::SetDefaultManager( RUNTIME_CLASS( CMFCVisualManagerWindows ) );
@@ -150,6 +149,18 @@ template< typename BaseClass >
 inline utl::CResourcePool& CBaseApp<BaseClass>::GetSharedResources( void )
 {
 	return *safe_ptr( m_pSharedResources.get() );
+}
+
+template< typename BaseClass >
+CImageStore* CBaseApp< BaseClass >::GetSharedImageStore( void )
+{
+	if ( NULL == m_pSharedImageStore.get() )
+	{	// lazy creation of the shared image store
+		m_pSharedImageStore.reset( new CImageStore() );
+		m_pSharedResources->AddAutoPtr( &m_pSharedImageStore );
+	}
+
+	return m_pSharedImageStore.get();
 }
 
 template< typename BaseClass >

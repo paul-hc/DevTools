@@ -9,7 +9,7 @@ enum MainPage { GeneralTopPage, WindowsTopPage, OptionsTopPage };
 enum DetailPage { CaptionDetail, IdMenuDetail, StyleDetail, ExtendedStyleDetail, PlacementDetail };
 
 
-class CApplication : public CBaseApp< CWinApp >
+class CApplication : public CBaseApp<CWinApp>
 {
 public:
 	CApplication( void );

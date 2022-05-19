@@ -72,18 +72,17 @@ CDemoTemplate::CDemoTemplate( CWnd* pOwner )
 	ASSERT_PTR( m_pLayoutEngine );
 	m_pLayoutEngine->RegisterCtrlLayout( ARRAY_PAIR( layout::templateStyles ) );
 
-	m_seqCounterLabel.GetMateToolbar()->GetStrip()
-		.AddButton( IDC_COPY_SOURCE_PATHS_BUTTON, ID_EDIT_COPY )
-		.AddButton( IDC_PASTE_FILES_BUTTON, ID_EDIT_PASTE );
+	const UINT buttonIds[] = { IDC_COPY_SOURCE_PATHS_BUTTON, IDC_PASTE_FILES_BUTTON };
+	m_seqCounterLabel.GetMateToolbar()->GetStrip().StoreButtonIds( ARRAY_PAIR( buttonIds ) );
 
 	m_pickFormatCheckedStatic.m_useText = true;
 	m_changeCaseButton.SetSelValue( ExtLowerCase );
 	m_resetSeqCounterButton.SetUseText( false );
 
 	m_detailSheet.m_regSection = _T("TestForm\\Details");
-	m_detailSheet.AddPage( new CListPage );
-	m_detailSheet.AddPage( new CEditPage );
-	m_detailSheet.AddPage( new CDetailsPage );
+	m_detailSheet.AddPage( new CListPage() );
+	m_detailSheet.AddPage( new CEditPage() );
+	m_detailSheet.AddPage( new CDetailsPage() );
 }
 
 CDemoTemplate::~CDemoTemplate()

@@ -12,9 +12,6 @@
 #include "ResourcePool.h"
 
 
-class CImageStore;
-
-
 // UTL global trace categories
 //DECLARE_AFX_TRACE_CATEGORY( traceThumbs )
 
@@ -42,6 +39,7 @@ public:
 	virtual bool IsInteractive( void ) const;
 	virtual CLogger& GetLogger( void );
 	virtual utl::CResourcePool& GetSharedResources( void );
+	virtual CImageStore* GetSharedImageStore( void );
 	virtual bool BeepSignal( app::MsgType msgType = app::Info );
 	virtual bool ReportError( const std::tstring& message, app::MsgType msgType = app::Error );
 	virtual int ReportException( const std::exception& exc );
@@ -68,7 +66,7 @@ protected:
 private:
 	std::auto_ptr<utl::CResourcePool> m_pSharedResources;		// application shared resources, released on ExitInstance()
 	std::auto_ptr<CLogger> m_pLogger;
-	std::auto_ptr<CImageStore> m_pImageStore;					// control the lifetime of shared resources
+	std::auto_ptr<CImageStore> m_pSharedImageStore;				// managed lifetime of shared resources (lazy initialized)
 	CAccelTable m_appAccel;
 	std::tstring m_appNameSuffix, m_profileSuffix;				// could be set to "_v2" when required
 	bool m_isInteractive;										// true by default; for apps with a message loop it starts false until application becomes idle for the first time
@@ -79,14 +77,13 @@ protected:
 	// overridables
 	virtual void OnInitAppResources( void );
 
-	// generated overrides
+	// generated stuff
 public:
 	virtual BOOL InitInstance( void );
 	virtual int ExitInstance( void );
 	virtual BOOL PreTranslateMessage( MSG* pMsg );
 	virtual BOOL OnIdle( LONG count );
 protected:
-	// generated message map
 	afx_msg void OnAppAbout( void );
 	afx_msg void OnUpdateAppAbout( CCmdUI* pCmdUI );
 	afx_msg void OnRunUnitTests( void );

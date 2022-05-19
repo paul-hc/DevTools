@@ -5,16 +5,20 @@
 #include "DibSection.h"
 #include "DibPixels.h"
 #include "Pixel.h"
-#include "EnumTags.h"
-#include "Path.h"
 #include "ScopedGdi.h"
-#include "StreamStdTypes.h"
-#include "ContainerUtilities.h"
+#include "ToolImageList.h"
+#include "utl/EnumTags.h"
+#include "utl/Path.h"
+#include "utl/StreamStdTypes.h"
+#include "utl/ContainerUtilities.h"
 #include <commoncontrols.h>						// IImageList
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
+
+
+const CIconSize CIconSize::s_small( SmallIcon );
 
 
 namespace ui
@@ -95,6 +99,22 @@ namespace ui
 }
 
 
+namespace gdi
+{
+	void CreateImageList( CImageList& rOutImageList, const CIconSize& imageSize, int countOrGrowBy, UINT flags /*= ILC_COLOR32 | ILC_MASK*/ )
+	{
+		int imageCount = 0, growBy = 0;
+
+		if ( countOrGrowBy > 0 )
+			imageCount = countOrGrowBy;
+		else
+			growBy = -countOrGrowBy;
+
+		VERIFY( rOutImageList.Create( imageSize.GetSize().cx, imageSize.GetSize().cy, flags, imageCount, growBy ) );
+	}
+}
+
+
 namespace res
 {
 	HICON LoadIcon( const CIconId& iconId )
@@ -108,7 +128,7 @@ namespace res
 	{
 		if ( NULL == rOutImageList.GetSafeHandle() )
 		{
-			const CSize iconSize = CIconId::GetStdSize( iconStdSize );
+			const CSize iconSize = CIconSize::GetSizeOf( iconStdSize );
 			VERIFY( rOutImageList.Create( iconSize.cx, iconSize.cy, ilFlags, 0, (int)iconCount ) );
 		}
 
@@ -117,7 +137,7 @@ namespace res
 			{
 				CIconId iconId( pIconIds[ i ], iconStdSize );
 
-				if ( const CIcon* pIcon = CImageStore::RetrieveSharedIcon( iconId ) )		// try exact icon size
+				if ( const CIcon* pIcon = ui::GetImageStoresSvc()->RetrieveIcon( iconId ) )		// try exact icon size
 					rOutImageList.Add( pIcon->GetHandle() );
 				else if ( HICON hIcon = LoadIcon( iconId ) )								// try to load a scaled icon
 				{
@@ -185,6 +205,54 @@ namespace res
 	}
 
 } //namespace res
+
+
+namespace ui
+{
+	const CIcon* IImageStore::RetrieveLargestIcon( UINT cmdId, IconStdSize maxIconStdSize /*= HugeIcon_48*/ )
+	{
+		for ( ; maxIconStdSize >= DefaultSize; --(int&)maxIconStdSize )
+			if ( const CIcon* pIcon = RetrieveIcon( CIconId( cmdId, maxIconStdSize ) ) )
+				return pIcon;
+
+		return NULL;
+	}
+
+	int IImageStore::BuildImageList( CImageList* pDestImageList, const UINT buttonIds[], size_t buttonCount, const CSize& imageSize )
+	{
+		ASSERT_PTR( pDestImageList );
+		ASSERT( buttonIds != NULL && buttonCount != 0 );
+
+		if ( NULL == pDestImageList->GetSafeHandle() )
+			gdi::CreateImageList( *pDestImageList, imageSize, CToolImageList::EvalButtonCount( buttonIds, buttonCount ) );
+
+		IconStdSize iconStdSize = CIconSize::FindStdSize( imageSize );
+		int imageCount = 0;
+
+		for ( size_t i = 0; i != buttonCount; ++i )
+			if ( buttonIds[ i ] != 0 )			// skip separators
+			{
+				const CIcon* pIcon = RetrieveIcon( CIconId( buttonIds[ i ], iconStdSize ) );
+
+				if ( NULL == pIcon )
+					pIcon = &CIcon::GetUnknownIcon();
+
+				pDestImageList->Add( pIcon->GetHandle() );
+				++imageCount;
+			}
+
+		if ( imageCount != pDestImageList->GetImageCount() )
+			TRACE( " IImageStore::BuildImageList(): buttonCount=%d  imageListCount=%d\n", buttonCount, pDestImageList->GetImageCount() );
+
+		return imageCount;
+	}
+
+
+	ui::IImageStore* GetImageStoresSvc( void )
+	{
+		return CImageStoresSvc::Instance();
+	}
+}
 
 
 namespace gdi

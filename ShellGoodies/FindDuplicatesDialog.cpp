@@ -827,7 +827,7 @@ void CFindDuplicatesDialog::DoDataExchange( CDataExchange* pDX )
 		m_fileSpecEdit.SetText( m_fileTypeSpecs[ m_fileTypeCombo.GetValue() ] );
 		m_minFileSizeCombo.LoadHistory( m_regSection.c_str(), reg::entry_minFileSize, _T("0|1|10|50|100|500|1000") );
 
-		m_dupsListCtrl.GetStateImageList()->Add( CImageStore::SharedStore()->RetrieveIcon( ID_ORIGINAL_FILE )->GetHandle() );		// OriginalItem
+		m_dupsListCtrl.GetStateImageList()->Add( ui::GetImageStoresSvc()->RetrieveIcon( ID_ORIGINAL_FILE )->GetHandle() );		// OriginalItem
 
 		OnUpdate( m_pFileModel, NULL );
 	}

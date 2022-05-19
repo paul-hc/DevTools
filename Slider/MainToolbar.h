@@ -49,7 +49,7 @@ private:
 	CFont m_ctrlFont;
 
 	static const UINT s_buttons[];
-public:
+
 	// generated stuff
 protected:
 	afx_msg void OnHScroll( UINT sbCode, UINT nPos, CScrollBar* pScrollBar );

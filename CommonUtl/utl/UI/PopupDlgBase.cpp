@@ -35,20 +35,20 @@ CPopupDlgBase::CPopupDlgBase( void )
 
 const CIcon* CPopupDlgBase::GetDlgIcon( DlgIcon dlgIcon /*= DlgSmallIcon*/ ) const
 {
-	if ( m_dlgIconId != 0 && CImageStore::HasSharedStore() )
-		return CImageStore::GetSharedStore()->RetrieveIcon( CIconId( m_dlgIconId, DlgSmallIcon == dlgIcon ? SmallIcon : LargeIcon ) );
+	if ( m_dlgIconId != 0 )
+		return ui::GetImageStoresSvc()->RetrieveIcon( CIconId( m_dlgIconId, DlgSmallIcon == dlgIcon ? SmallIcon : LargeIcon ) );
 	return NULL;
 }
 
 void CPopupDlgBase::LoadDlgIcon( UINT dlgIconId )
 {
 	// normally called prior to creation
-	CImageStore* pSharedStore = CImageStore::SharedStore();
-	if ( pSharedStore->RetrieveIcon( CIconId( dlgIconId, SmallIcon ) ) != NULL )
+	ui::IImageStore* pStoreSvc = ui::GetImageStoresSvc();
+	if ( pStoreSvc->RetrieveIcon( CIconId( dlgIconId, SmallIcon ) ) != NULL )
 		m_dlgIconId = dlgIconId;
 
 	// main dialogs need to manage both small and large icons at once
-	if ( pSharedStore->RetrieveIcon( CIconId( dlgIconId, LargeIcon ) ) != NULL )
+	if ( pStoreSvc->RetrieveIcon( CIconId( dlgIconId, LargeIcon ) ) != NULL )
 		m_dlgIconId = dlgIconId;
 
 	if ( m_dlgIconId != 0 )

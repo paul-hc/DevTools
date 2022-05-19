@@ -41,7 +41,7 @@ CApplication theApp;
 
 
 CApplication::CApplication( void )
-	: CBaseApp< CWinApp >()
+	: CBaseApp<CWinApp>()
 {
 	// use AFX_IDS_APP_TITLE="Wintruder" - use same app registry key for 32/64 bit executables
 
@@ -54,7 +54,7 @@ CApplication::~CApplication()
 
 BOOL CApplication::InitInstance( void )
 {
-	if ( !CBaseApp< CWinApp >::InitInstance() )
+	if ( !__super::InitInstance() )
 		return FALSE;
 
 	if ( proc::IsProcessElevated() )
@@ -65,8 +65,9 @@ BOOL CApplication::InitInstance( void )
 
 	CAboutBox::s_appIconId = IDD_MAIN_DIALOG;
 	m_sharedAccel.Load( IDR_MAIN_SHARED_ACCEL );
-	CToolStrip::RegisterStripButtons( IDR_IMAGE_STRIP );
-	CImageStore::SharedStore()->RegisterAliases( cmdAliases, COUNT_OF( cmdAliases ) );
+
+	GetSharedImageStore()->RegisterToolbarImages( IDR_IMAGE_STRIP );
+	GetSharedImageStore()->RegisterAliases( ARRAY_PAIR( cmdAliases ) );
 
 	CBaseMainDialog::ParseCommandLine( __argc, __targv );
 
@@ -81,7 +82,7 @@ BOOL CApplication::InitInstance( void )
 
 int CApplication::ExitInstance( void )
 {
-	CBaseApp< CWinApp >::ExitInstance();
+	__super::ExitInstance();
 	return 0;		// exit code
 }
 
@@ -162,7 +163,7 @@ BOOL CApplication::PreTranslateMessage( MSG* pMsg )
 				return TRUE;
 		}
 
-	return CBaseApp< CWinApp >::PreTranslateMessage( pMsg );
+	return __super::PreTranslateMessage( pMsg );
 }
 
 BOOL CApplication::OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo )
@@ -176,7 +177,7 @@ BOOL CApplication::OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO
 
 // command handlers
 
-BEGIN_MESSAGE_MAP( CApplication, CBaseApp< CWinApp > )
+BEGIN_MESSAGE_MAP( CApplication, CBaseApp<CWinApp> )
 	ON_COMMAND( ID_FILE_CLOSE, OnFileClose )
 	ON_COMMAND( CM_RESTORE, CmRestore )
 	ON_COMMAND( CM_MINIMIZE, CmMinimize )

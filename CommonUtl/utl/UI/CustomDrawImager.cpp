@@ -33,8 +33,8 @@ int CFileItemsThumbnailStore::GetDefaultGlyphDimension( ui::GlyphGauge glyphGaug
 	switch ( glyphGauge )
 	{
 		default: ASSERT( false );
-		case ui::SmallGlyph:	return CIconId::GetStdSize( SmallIcon ).cx;
-		case ui::LargeGlyph:	return CIconId::GetStdSize( HugeIcon_48 ).cx;
+		case ui::SmallGlyph:	return CIconSize::GetSizeOf( SmallIcon ).cx;
+		case ui::LargeGlyph:	return CIconSize::GetSizeOf( HugeIcon_48 ).cx;
 	}
 }
 
@@ -109,7 +109,7 @@ void CBaseCustomDrawImager::InitImageLists( const CSize& smallImageSize, const C
 	m_imageLists[ ui::LargeGlyph ].Create( largeImageSize.cx, largeImageSize.cy, ILC_COLOR32 | ILC_MASK, 0, 1 );
 
 	// add transparent image entry to image lists
-	const CIcon* pTranspIcon = CImageStore::SharedStore()->RetrieveIcon( ID_TRANSPARENT );
+	const CIcon* pTranspIcon = ui::GetImageStoresSvc()->RetrieveIcon( ID_TRANSPARENT );
 	ASSERT_PTR( pTranspIcon );
 
 	m_transpImageIndex = m_imageLists[ ui::SmallGlyph ].Add( pTranspIcon->GetHandle() );

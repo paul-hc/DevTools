@@ -211,8 +211,8 @@ void CAboutBox::DoDataExchange( CDataExchange* pDX )
 
 	if ( DialogOutput == pDX->m_bSaveAndValidate )
 	{
-		if ( s_appIconId != 0 && CImageStore::HasSharedStore() )
-			if ( const CIcon* pAppIcon = CImageStore::GetSharedStore()->RetrieveLargestIcon( s_appIconId ) )
+		if ( s_appIconId != 0 )
+			if ( const CIcon* pAppIcon = ui::GetImageStoresSvc()->RetrieveLargestIcon( s_appIconId ) )
 				m_appIconStatic.SetIcon( pAppIcon->GetHandle() );
 
 		SetupBuildInfoList();

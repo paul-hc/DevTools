@@ -57,7 +57,7 @@ void CTrackStatic::BeginTracking( void )
 	m_pTrackData.reset( pTrackData );		// only now enter tracking mode
 
 	if ( m_trackIconId.IsValid() )
-		if ( const CIcon* pTrackIcon = CImageStore::SharedStore()->RetrieveIcon( m_trackIconId ) )
+		if ( const CIcon* pTrackIcon = ui::GetImageStoresSvc()->RetrieveIcon( m_trackIconId ) )
 			m_pTrackData->m_hOldIcon = SetIcon( pTrackIcon->GetHandle() );		// display the tracking image (with no syringe)
 
 	if ( m_hTrackCursor != NULL )
@@ -138,7 +138,7 @@ void CTrackStatic::PreSubclassWindow( void )
 	CStatic::PreSubclassWindow();
 
 	if ( NULL == GetIcon() && m_toolIconId.IsValid() )
-		if ( const CIcon* pToolIcon = CImageStore::SharedStore()->RetrieveIcon( m_toolIconId ) )
+		if ( const CIcon* pToolIcon = ui::GetImageStoresSvc()->RetrieveIcon( m_toolIconId ) )
 		{
 			ModifyStyle( SS_TYPEMASK, SS_ICON | SS_REALSIZEIMAGE | SS_NOTIFY );
 			SetIcon( pToolIcon->GetHandle() );

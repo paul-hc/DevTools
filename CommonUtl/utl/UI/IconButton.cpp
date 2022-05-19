@@ -26,8 +26,8 @@ CIconButton::~CIconButton()
 
 const CIcon* CIconButton::GetIconPtr( void ) const
 {
-	if ( m_iconId.m_id != 0 && CImageStore::HasSharedStore() )
-		return CImageStore::GetSharedStore()->RetrieveIcon( m_iconId );
+	if ( m_iconId.m_id != 0 )
+		return ui::GetImageStoresSvc()->RetrieveIcon( m_iconId );
 
 	return NULL;
 }
@@ -71,7 +71,7 @@ void CIconButton::SetButtonIcon( CButton* pButton, const CIconId& iconId, bool u
 
 	HICON hOldIcon = pButton->GetIcon(), hNewIcon = NULL;
 
-	if ( const CIcon* pIcon = CImageStore::SharedStore()->RetrieveIcon( iconId ) )
+	if ( const CIcon* pIcon = ui::GetImageStoresSvc()->RetrieveIcon( iconId ) )
 		hNewIcon = pIcon->GetHandle();
 
 	if ( hNewIcon != hOldIcon )		// icon has changed?

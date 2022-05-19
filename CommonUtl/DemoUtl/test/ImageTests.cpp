@@ -87,7 +87,7 @@ void CImageTests::TestGroupIcon( void )
 
 void CImageTests::TestIcon( void )
 {
-	const CIcon* pIcon = CImageStore::GetSharedStore()->RetrieveIcon( ID_AUTO_TRANSP_TOOL );
+	const CIcon* pIcon = ui::GetImageStoresSvc()->RetrieveIcon( ID_AUTO_TRANSP_TOOL );
 	ASSERT_PTR( pIcon );
 	CIconInfo info( pIcon->GetHandle() );
 }
@@ -96,7 +96,7 @@ void CImageTests::TestImageList( void )
 {
 	enum { Image_Fill = 4, ImageCount };
 
-	const CSize imageSize = CIconId::GetStdSize( SmallIcon );
+	const CSize imageSize = CIconSize::GetSizeOf( SmallIcon );
 	CImageList imageList;
 	VERIFY( res::LoadImageList( imageList, IDR_IMAGE_STRIP, ImageCount, imageSize, color::Auto ) );
 	ASSERT_EQUAL( ImageCount, imageList.GetImageCount() );
@@ -160,7 +160,7 @@ void CImageTests::TestImageList( void )
 	++testDev;
 
 	// transparent icon
-	const CIcon* pTranspIcon = CImageStore::SharedStore()->RetrieveIcon( ID_TRANSPARENT );
+	const CIcon* pTranspIcon = ui::GetImageStoresSvc()->RetrieveIcon( ID_TRANSPARENT );
 	testDev.DrawIcon( pTranspIcon->GetHandle(), pTranspIcon->GetSize() );		// there is one white pixel at right-bottom so that the icon is not completely black (GDI bug?)
 	testDev.DrawTileCaption( _T("icon IDR_IMAGE_STRIP") );
 	++testDev;

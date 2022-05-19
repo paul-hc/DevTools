@@ -112,7 +112,7 @@ CMainDialog::~CMainDialog()
 const CIcon* CMainDialog::GetDlgIcon( DlgIcon dlgIcon /*= DlgSmallIcon*/ ) const
 {
 	if ( DlgSmallIcon == dlgIcon )			// custom 4 bit small icon for better contrast
-		return CImageStore::GetSharedStore()->RetrieveIcon( CIconId( IDI_APP_SMALL_ICON, SmallIcon ) );
+		return ui::GetImageStoresSvc()->RetrieveIcon( CIconId( IDI_APP_SMALL_ICON, SmallIcon ) );
 
 	return __super::GetDlgIcon( dlgIcon );
 }

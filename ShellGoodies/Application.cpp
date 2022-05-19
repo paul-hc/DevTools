@@ -42,6 +42,7 @@ CApplication g_app;
 
 
 CApplication::CApplication( void )
+	: CBaseApp<CWinApp>()
 {
 	// Extension DLLs: prevent heavy resource initialization when the dll gets registered by regsvr32.exe.
 	// Will initialize application resources later, when CShellGoodiesCom COM object gets instantiated.
@@ -85,11 +86,11 @@ void CApplication::OnInitAppResources( void )
 	__super::OnInitAppResources();
 
 	app::GetLogger()->m_logFileMaxSize = -1;					// unlimited log size
-
 	CAboutBox::s_appIconId = IDD_RENAME_FILES_DIALOG;			// will use HugeIcon_48
-	CToolStrip::RegisterStripButtons( IDR_IMAGE_STRIP );		// register stock images
-	CToolStrip::RegisterStripButtons( IDR_TOOL_STRIP );			// register additional tool images
-	CImageStore::SharedStore()->RegisterAlias( ID_EDIT_CLEAR, ID_REMOVE_ITEM );
+
+	GetSharedImageStore()->RegisterToolbarImages( IDR_IMAGE_STRIP );	// register stock images
+	GetSharedImageStore()->RegisterToolbarImages( IDR_TOOL_STRIP );	// register additional tool images
+	GetSharedImageStore()->RegisterAlias( ID_EDIT_CLEAR, ID_REMOVE_ITEM );
 
 	ut::RegisterAppUnitTests();
 

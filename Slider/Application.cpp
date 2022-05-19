@@ -408,7 +408,7 @@ void CApplication::InitGlobals( void )
 		utl::Copy( customColors.begin(), customColors.end(), CColorDialog::GetSavedCustomColors() );
 	}
 
-	m_pThumbnailer.reset( new CThumbnailer );
+	m_pThumbnailer.reset( new CThumbnailer() );
 	GetSharedResources().AddAutoPtr( &m_pThumbnailer );
 	GetSharedResources().AddAutoClear( &CWicImageCache::Instance() );
 	m_pThumbnailer->SetExternalProducer( CCatalogStorageFactory::Instance() );		// add as producer of storage-based thumbnails
@@ -416,9 +416,10 @@ void CApplication::InitGlobals( void )
 
 	CAboutBox::s_appIconId = IDR_MAINFRAME;
 	m_sharedAccel.Load( IDR_COMMAND_BAR_ACCEL );
-	CToolStrip::RegisterStripButtons( IDR_MAINFRAME );
-	CToolStrip::RegisterStripButtons( IDR_APP_TOOL_STRIP );
-	CImageStore::SharedStore()->RegisterAliases( ARRAY_PAIR( s_cmdAliases ) );
+
+	GetSharedImageStore()->RegisterToolbarImages( IDR_MAINFRAME );
+	GetSharedImageStore()->RegisterToolbarImages( IDR_APP_TOOL_STRIP );
+	GetSharedImageStore()->RegisterAliases( ARRAY_PAIR( s_cmdAliases ) );
 }
 
 bool CApplication::OpenQueuedAlbum( void )

@@ -3,6 +3,7 @@
 #include "Icon.h"
 #include "Imaging.h"
 #include "GroupIcon.h"
+#include "resource.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -155,6 +156,12 @@ void CIcon::DrawDisabled( HDC hDC, const CPoint& pos ) const
 		pos.x, pos.y, GetSize().cx, GetSize().cy, DST_ICON | DSS_UNION );				// DSS_DISABLED looks uglier
 }
 
+const CIcon& CIcon::GetUnknownIcon( void )
+{	// missing icon placeholder
+	static const CIcon s_unknownIcon( res::LoadIcon( IDI_UNKNOWN ) );
+
+	return s_unknownIcon;
+}
 bool CIcon::MakeBitmap( CBitmap& rBitmap, COLORREF transpColor ) const
 {
 	rBitmap.DeleteObject();
@@ -241,7 +248,7 @@ void CIconInfo::Init( HICON hIcon, bool isCursor )
 		m_size.cx = m_size.cy = 0;
 }
 
-bool CIconInfo::MakeDibSection( CBitmap& rDibSection )
+bool CIconInfo::MakeDibSection( CBitmap& rDibSection ) const
 {
 	rDibSection.DeleteObject();
 

@@ -20,6 +20,8 @@ public:
 
 	bool IsValid( void ) const { return m_hIcon != NULL; }
 
+	HICON GetSafeHandle( void ) const { return this != NULL ? m_hIcon : NULL; }
+
 	HICON GetHandle( void ) const { return m_hIcon; }
 	CIcon& SetHandle( HICON hIcon, bool hasAlpha );
 
@@ -47,6 +49,7 @@ public:
 	void CreateFromBitmap( HBITMAP hImageBitmap, COLORREF transpColor );
 
 	static CSize ComputeSize( HICON hIcon );
+	static const CIcon& GetUnknownIcon( void );		// IDI_UNKNOWN missing icon placeholder
 private:
 	HICON m_hIcon;
 	bool m_hasAlpha;				// based on a 32 bit per pixel image; need to store this since both colour and mask bitmaps are DDBs
@@ -68,14 +71,14 @@ struct CIconInfo : private utl::noncopyable
 	bool HasAlpha( void ) const { return IsValid() && NULL == m_info.hbmMask; }
 
 	CPoint GetHotSpot( void ) const { return CPoint( m_info.xHotspot, m_info.yHotspot ); }
-	bool MakeDibSection( CBitmap& rDibSection );				// uses hbmColor (ignores hbmMask)
+	bool MakeDibSection( CBitmap& rDibSection ) const;			// uses hbmColor (ignores hbmMask)
 private:
 	void Init( HICON hIcon, bool isCursor );
 public:
 	ICONINFO m_info;			// colour and mask bitmaps are DDBs
 	CSize m_size;
 
-    // bitmaps with ownership (to prevent leaks)
+    // DDB bitmaps with ownership (to prevent leaks)
     CBitmap m_bitmapColor;
     CBitmap m_bitmapMask;
 };

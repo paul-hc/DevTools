@@ -283,7 +283,7 @@ void CReportListControl::SetCustomImageDraw( ui::ICustomImageDraw* pCustomImageD
 
 void CReportListControl::SetCustomIconDraw( ui::ICustomImageDraw* pCustomIconDraw, IconStdSize smallIconStdSize /*= SmallIcon*/, IconStdSize largeIconStdSize /*= LargeIcon*/ )
 {
-	SetCustomImageDraw( pCustomIconDraw, CIconId::GetStdSize( smallIconStdSize ), CIconId::GetStdSize( largeIconStdSize ) );
+	SetCustomImageDraw( pCustomIconDraw, CIconSize::GetSizeOf( smallIconStdSize ), CIconSize::GetSizeOf( largeIconStdSize ) );
 }
 
 CMenu& CReportListControl::GetStdPopupMenu( ListPopup popupType )

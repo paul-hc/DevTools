@@ -2,44 +2,26 @@
 #define ToolStrip_h
 #pragma once
 
-#include "Image_fwd.h"
+#include "ToolImageList.h"
 
 
 class CImageStore;
 
 
-struct CToolStrip
+class CToolStrip : public CToolImageList
 {
-	CToolStrip( void ) : m_imageSize( 0, 0 ) {}
+public:
+	CToolStrip( IconStdSize iconStdSize = SmallIcon ) : CToolImageList( iconStdSize ) {}
+	CToolStrip( const UINT buttonIds[], size_t count, IconStdSize iconStdSize = SmallIcon ) : CToolImageList( buttonIds, count, iconStdSize ) {}
 	~CToolStrip();
 
-	bool IsValid( void ) const { return !m_buttonIds.empty(); }
-	void Clear( void );
+	enum { UseButtonId = -1, NullIconId };
 
-	int GetImageCount( void ) const;		// buttons - separators
-	bool HasImages( void ) const { return m_pImageList.get() != NULL; }
-
-	CImageList* EnsureImageList( void );
-
-	bool LoadStrip( UINT toolStripId, COLORREF transpColor = color::Auto );
-
-	enum { UseSharedImage = -2, UseButtonId, NullIconId };
-
-	bool ContainsButton( UINT buttonId ) const { return FindButtonPos( buttonId ) != utl::npos; }
-	size_t FindButtonPos( UINT buttonId ) const;
-
-	CToolStrip& AddButton( UINT buttonId, CIconId iconId = CIconId( (UINT)UseButtonId ) );
+	CToolStrip& AddButton( UINT buttonId, UINT iconId = (UINT)UseButtonId );
 	CToolStrip& AddButton( UINT buttonId, HICON hIcon );
 	CToolStrip& AddSeparator( void ) { return AddButton( 0 ); }
 
-	void AddButtons( const UINT buttonIds[], size_t buttonCount, IconStdSize iconStdSize = SmallIcon );		// same buttonId and iconId
-
-	void RegisterButtons( CImageStore* pImageStore );
-	static void RegisterStripButtons( UINT toolStripId, COLORREF transpColor = color::Auto, CImageStore* pImageStore = NULL );
-public:
-	CSize m_imageSize;
-	std::vector< UINT > m_buttonIds;
-	std::auto_ptr<CImageList> m_pImageList;
+	CToolStrip& AddButtons( const UINT buttonIds[], size_t buttonCount, IconStdSize iconStdSize = SmallIcon );		// same buttonId and iconId
 };
 
 

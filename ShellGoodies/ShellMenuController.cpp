@@ -196,7 +196,7 @@ CBitmap* CShellMenuController::MakeCmdInfo( std::tstring& rItemText, const CMenu
 		rItemText += _T('\t') + tabbedText;
 
 	if ( cmdInfo.m_iconId != 0 )
-		return CImageStore::SharedStore()->RetrieveMenuBitmap( cmdInfo.m_iconId );
+		return ui::GetImageStoresSvc()->RetrieveMenuBitmap( cmdInfo.m_iconId );
 
 	return NULL;
 }

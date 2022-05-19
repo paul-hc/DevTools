@@ -25,8 +25,8 @@
 #define IDB_RESIZE_DOWN_UP_BITMAP       28019
 #define IDB_RESIZE_RIGHT_LEFT_BITMAP    28020
 #define IDC_RESIZE_SPLITTER_NS_CURSOR   28023
-#define IDC_CURSOR2                     28024
 #define IDC_RESIZE_SPLITTER_WE_CURSOR   28024
+#define IDI_UNKNOWN                     28025
 #define UTL_MIN_COMMAND_VALUE           28200
 #define ID_ADD_ITEM                     28201
 #define ID_REMOVE_ITEM                  28202
@@ -116,7 +116,7 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        28025
+#define _APS_NEXT_RESOURCE_VALUE        28026
 #define _APS_NEXT_COMMAND_VALUE         28246
 #define _APS_NEXT_CONTROL_VALUE         28536
 #define _APS_NEXT_SYMED_VALUE           28801

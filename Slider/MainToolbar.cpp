@@ -74,7 +74,7 @@ CMainToolbar::~CMainToolbar()
 bool CMainToolbar::InitToolbar( void )
 {
 	//LoadToolStrip( IDR_MAINFRAME );		// replaced by GetStrip().AddButtons
-	GetStrip().AddButtons( s_buttons, COUNT_OF( s_buttons ) );
+	GetStrip().AddButtons( ARRAY_PAIR( s_buttons ) );
 	if ( !InitToolbarButtons() )
 		return false;
 

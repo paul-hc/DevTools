@@ -7,6 +7,7 @@
 
 class CEnumTags;
 class CLogger;
+class CImageStore;
 namespace utl { class CResourcePool; }
 
 
@@ -28,6 +29,7 @@ namespace app
 		virtual bool IsInteractive( void ) const = 0;
 		virtual CLogger& GetLogger( void ) = 0;
 		virtual utl::CResourcePool& GetSharedResources( void ) = 0;
+		virtual CImageStore* GetSharedImageStore( void ) = 0;
 
 		virtual bool BeepSignal( app::MsgType msgType = app::Info ) = 0;									// returns false for convenience
 		virtual bool ReportError( const std::tstring& message, app::MsgType msgType = app::Error ) = 0;		// returns false for convenience
@@ -63,6 +65,7 @@ namespace app
 	inline const fs::CPath& GetModulePath( void ) { return CAppTools::Instance()->GetModulePath(); }
 	inline CLogger* GetLogger( void ) { return &CAppTools::Instance()->GetLogger(); }
 	inline utl::CResourcePool& GetSharedResources( void ) { return CAppTools::Instance()->GetSharedResources(); }
+	inline CImageStore* GetSharedImageStore( void ) { return CAppTools::Instance()->GetSharedImageStore(); }
 
 	inline bool BeepSignal( app::MsgType msgType = app::Info ) { return CAppTools::Instance()->BeepSignal( msgType ); }
 	inline bool ReportError( const std::tstring& message, app::MsgType msgType = app::Error ) { return CAppTools::Instance()->ReportError( message, msgType ); }

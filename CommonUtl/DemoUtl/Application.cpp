@@ -33,9 +33,11 @@ namespace reg
 }
 
 
-static const CImageStore::CCmdAlias cmdAliases[] =
+static const CImageStore::CCmdAlias s_cmdAliases[] =
 {
 	{ IDC_CLEAR_FILES_BUTTON, ID_REMOVE_ALL_ITEMS },
+	{ IDC_COPY_SOURCE_PATHS_BUTTON, ID_EDIT_COPY },
+	{ IDC_PASTE_FILES_BUTTON, ID_EDIT_PASTE },
 	{ ID_NUMERIC_SEQUENCE_2DIGITS, ID_SHUTTLE_TOP },
 	{ ID_NUMERIC_SEQUENCE_3DIGITS, ID_SHUTTLE_BOTTOM },
 	{ ID_NUMERIC_SEQUENCE_4DIGITS, ID_RECORD_NEXT },
@@ -81,11 +83,11 @@ BOOL CApplication::InitInstance( void )
 	if ( !CBaseApp<CWinApp>::InitInstance() )
 		return FALSE;
 
-	CAboutBox::s_appIconId = IDR_MAINFRAME;
-	CToolStrip::RegisterStripButtons( IDR_IMAGE_STRIP );
-	CToolStrip::RegisterStripButtons( IDR_LOW_COLOR_STRIP, color::Magenta );		// low color images
-	CImageStore::SharedStore()->RegisterAliases( cmdAliases, COUNT_OF( cmdAliases ) );
+	GetSharedImageStore()->RegisterToolbarImages( IDR_IMAGE_STRIP );
+	GetSharedImageStore()->RegisterToolbarImages( IDR_LOW_COLOR_STRIP, color::Magenta );		// low color images
+	GetSharedImageStore()->RegisterAliases( ARRAY_PAIR( s_cmdAliases ) );
 
+	CAboutBox::s_appIconId = IDR_MAINFRAME;
 	CLayoutEngine::m_defaultFlags = GetProfileInt( reg::section, reg::entry_disableSmooth, FALSE ) ? CLayoutEngine::Normal : CLayoutEngine::Smooth;
 	CVisualTheme::SetEnabled( !GetProfileInt( reg::section, reg::entry_disableThemes, FALSE ) );
 

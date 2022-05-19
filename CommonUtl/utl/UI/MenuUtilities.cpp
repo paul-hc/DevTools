@@ -59,10 +59,10 @@ namespace ui
 	}
 
 
-	bool SetMenuImages( CMenu& rMenu, bool useCheckedBitmaps /*= false*/, CImageStore* pImageStore /*= NULL*/ )
+	bool SetMenuImages( CMenu& rMenu, bool useCheckedBitmaps /*= false*/, ui::IImageStore* pImageStore /*= NULL*/ )
 	{
 		if ( NULL == pImageStore )
-			pImageStore = CImageStore::GetSharedStore();
+			pImageStore = ui::GetImageStoresSvc();
 		if ( NULL == pImageStore )
 			return false;
 
@@ -85,19 +85,16 @@ namespace ui
 		return true;
 	}
 
-	bool SetMenuItemImage( CMenu& rMenu, const CMenuItemRef& itemRef, UINT iconId /*= 0*/, bool useCheckedBitmaps /*= false*/, CImageStore* pImageStore /*= NULL*/ )
+	bool SetMenuItemImage( CMenu& rMenu, const CMenuItemRef& itemRef, UINT iconId /*= 0*/, bool useCheckedBitmaps /*= false*/, ui::IImageStore* pImageStore /*= NULL*/ )
 	{
 		if ( NULL == pImageStore )
-			pImageStore = CImageStore::GetSharedStore();
+			pImageStore = ui::GetImageStoresSvc();
 
-		if ( pImageStore != NULL )
+		std::pair<CBitmap*, CBitmap*> bitmaps = pImageStore->RetrieveMenuBitmaps( 0 == iconId ? itemRef.GetCmdId() : iconId, useCheckedBitmaps );
+		if ( bitmaps.first != NULL || bitmaps.second != NULL )
 		{
-			std::pair<CBitmap*, CBitmap*> bitmaps = pImageStore->RetrieveMenuBitmaps( 0 == iconId ? itemRef.GetCmdId() : iconId, useCheckedBitmaps );
-			if ( bitmaps.first != NULL || bitmaps.second != NULL )
-			{
-				rMenu.SetMenuItemBitmaps( itemRef.m_itemRef, itemRef.m_refFlags, bitmaps.first, bitmaps.second );
-				return true;
-			}
+			rMenu.SetMenuItemBitmaps( itemRef.m_itemRef, itemRef.m_refFlags, bitmaps.first, bitmaps.second );
+			return true;
 		}
 
 		return false;
