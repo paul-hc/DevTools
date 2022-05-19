@@ -219,7 +219,6 @@ void CTreeWndPage::RefreshTreeContents( void )
 	CScopedInternalChange scopedChange( &m_treeCtrl );
 	CScopedLockRedraw freeze( &m_treeCtrl, new CScopedWindowBorder( &m_treeCtrl, color::Salmon ) );
 
-	m_treeCtrl.DeleteAllItems();
 	SetupTreeItems();		// insert all windows in the system starting from the root desktop window (all others windows are desktop's children)
 
 	if ( HTREEITEM hRootItem = m_treeCtrl.GetRootItem() )
@@ -234,6 +233,8 @@ void CTreeWndPage::RefreshTreeContents( void )
 
 void CTreeWndPage::SetupTreeItems( void )
 {
+	m_treeCtrl.DeleteAllItems();
+
 	enum BuildMethod { EnumWindows, LoopWindowsOld } buildMethod = EnumWindows;
 	CTimer timer;
 	CWaitCursor wait;
@@ -315,12 +316,12 @@ void CTreeWndPage::DoDataExchange( CDataExchange* pDX )
 	DDX_Control( pDX, IDC_WINDOW_TREE, m_treeCtrl );
 
 	if ( firstInit )
-		RefreshTreeContents();				// first init
+		RefreshTreeContents();
 
 	if ( DialogOutput == pDX->m_bSaveAndValidate )
 		OutputTargetWnd();
 
-	CLayoutPropertyPage::DoDataExchange( pDX );
+	__super::DoDataExchange( pDX );
 }
 
 
@@ -328,7 +329,6 @@ void CTreeWndPage::DoDataExchange( CDataExchange* pDX )
 
 BEGIN_MESSAGE_MAP( CTreeWndPage, CLayoutPropertyPage )
 	ON_WM_DESTROY()
-	ON_WM_CONTEXTMENU()
 	ON_NOTIFY( TVN_SELCHANGED, IDC_WINDOW_TREE, OnTvnSelChanged_WndTree )
 	ON_NOTIFY( NM_SETFOCUS, IDC_WINDOW_TREE, OnTvnSerFocus_WndTree )
 	ON_NOTIFY( NM_CUSTOMDRAW, IDC_WINDOW_TREE, OnTvnCustomDraw_WndTree )
@@ -343,21 +343,14 @@ END_MESSAGE_MAP()
 BOOL CTreeWndPage::OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo )
 {
 	return
-		CLayoutPropertyPage::OnCmdMsg( id, code, pExtra, pHandlerInfo ) ||
+		__super::OnCmdMsg( id, code, pExtra, pHandlerInfo ) ||
 		GetParentOwner()->OnCmdMsg( id, code, pExtra, pHandlerInfo );
 }
 
 void CTreeWndPage::OnDestroy( void )
 {
 	m_destroying = true;		// speed up destruction caused by CDDS_ITEMPOSTPAINT for slow windows
-	CLayoutPropertyPage::OnDestroy();
-}
-
-void CTreeWndPage::OnContextMenu( CWnd* pWnd, CPoint point )
-{
-	if ( &m_treeCtrl == pWnd )
-		if ( m_treeCtrl.GetContextMenu().GetSafeHmenu() != NULL )
-			m_treeCtrl.GetContextMenu().TrackPopupMenu( TPM_RIGHTBUTTON, point.x, point.y, this );
+	__super::OnDestroy();
 }
 
 void CTreeWndPage::OnTvnSelChanged_WndTree( NMHDR* pNmHdr, LRESULT* pResult )

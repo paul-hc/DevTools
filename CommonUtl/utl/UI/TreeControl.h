@@ -124,10 +124,11 @@ private:
 	UINT m_indentNoImages, m_indentWithImages;
 	mutable CSize m_imageSize;			// self-encapsulated
 
-	// generated overrides
+	// generated stuff
 public:
 	virtual void PreSubclassWindow( void );
 	virtual BOOL PreTranslateMessage( MSG* pMsg );
+	virtual BOOL OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo );
 protected:
 	afx_msg void OnNcLButtonDown( UINT hitTest, CPoint point );
 	afx_msg void OnContextMenu( CWnd* pWnd, CPoint screenPos );

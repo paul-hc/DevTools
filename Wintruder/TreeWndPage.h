@@ -40,14 +40,14 @@ private:
 
 	// enum { IDD = IDD_TREE_WND_PAGE };
 	CTreeControl m_treeCtrl;
+
+	// generated stuff
 public:
-	// generated overrides
 	virtual BOOL OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo );
 protected:
 	virtual void DoDataExchange( CDataExchange* pDX );
 protected:
 	afx_msg void OnDestroy( void );
-	afx_msg void OnContextMenu( CWnd* pWnd, CPoint point );
 	afx_msg void OnTvnSelChanged_WndTree( NMHDR* pNmHdr, LRESULT* pResult );
 	afx_msg void OnTvnSerFocus_WndTree( NMHDR* pNmHdr, LRESULT* pResult );
 	afx_msg void OnTvnCustomDraw_WndTree( NMHDR* pNmHdr, LRESULT* pResult );

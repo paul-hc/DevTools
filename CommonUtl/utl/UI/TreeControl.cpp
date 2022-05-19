@@ -312,6 +312,13 @@ BOOL CTreeControl::PreTranslateMessage( MSG* pMsg )
 		__super::PreTranslateMessage( pMsg );
 }
 
+BOOL CTreeControl::OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo )
+{
+	return
+		CTreeCtrl::OnCmdMsg( id, code, pExtra, pHandlerInfo ) ||
+		GetParent()->OnCmdMsg( id, code, pExtra, pHandlerInfo );		// route commands to parent dialog
+}
+
 
 // message handlers
 
