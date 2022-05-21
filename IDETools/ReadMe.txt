@@ -1,7 +1,14 @@
 
 ** DEBUGGING:
-	Use Visual Studio 6.0 as debug target - newer VS 2005+ uses a different arhitecture, so it doesn't hit the breakpoints.
-	Command: C:\Program Files (x86)\Microsoft Visual Studio\Common\MSDev98\Bin\MSDEV.EXE
+	Debug IDETools.dll:
+		Use Visual Studio 6.0 as debug target - newer VS 2005+ uses a different arhitecture, so it doesn't hit the breakpoints.
+		Command: C:\Program Files (x86)\Microsoft Visual Studio\Common\MSDev98\Bin\MSDEV.EXE
+
+	Debug IDETools.dll registration:
+		Command: C:\Windows\syswow64\regsvr32.exe	[on Win 64 bit]
+		Command Arguments: $(TargetDir)$(TargetFileName)
+		- set breakpoints in the code and start the debugger.
+	
 
 Registration:
 	regsvr32.exe
