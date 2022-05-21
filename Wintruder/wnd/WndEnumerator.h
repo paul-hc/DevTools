@@ -9,6 +9,7 @@ protected:
 	CWndEnumBase( void );
 public:
 	void Build( HWND hRootWnd );
+	void BuildChildren( HWND hWnd );
 
 	bool IsValidMatch( HWND hWnd ) const;
 protected:

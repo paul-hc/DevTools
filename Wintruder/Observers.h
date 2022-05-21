@@ -31,7 +31,16 @@ interface IWndDetailObserver : public IWndObserver
 
 namespace app
 {
-	enum Event { RefreshWndTree, UpdateTarget, DirtyChanged, OptionChanged, ToggleAutoUpdate, WndStateChanged };
+	enum Event
+	{
+		RefreshWndTree,			// refresh all windows
+		RefreshSiblings,		// refresh parent branch of the current node (all sibling windows)
+		UpdateTarget,
+		DirtyChanged,
+		OptionChanged,
+		ToggleAutoUpdate,
+		WndStateChanged			// selected window changed
+	};
 }
 
 

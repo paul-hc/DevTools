@@ -35,6 +35,12 @@ namespace wt
 		return itemCount;
 	}
 
+	void LogWindow( HWND hWnd, int indent )
+	{
+		app::GetLogger()->Log( _T("[%d] %swnd: %s"), indent, std::tstring( indent * 2, _T(' ') ).c_str(), wnd::FormatBriefWndInfo( hWnd ).c_str() );
+	}
+
+
 	// CItemInfo implementation
 
 	CItemInfo::CItemInfo( HWND hWnd, int image /*= -1*/ )
@@ -89,32 +95,49 @@ namespace wt
 		ASSERT( ::IsWindow( hWnd ) );
 
 		HWND hParentWnd = ::GetAncestor( hWnd, GA_PARENT );			// real parent, NULL if desktop - GetParent( hWnd ) may return the owner
-		const std::pair<HTREEITEM, int>* pParentPair = NULL;
+		const TTreeItemIndent* pParentPair = NULL;
+
 		if ( hParentWnd != NULL )
 			pParentPair = FindWndItem( hParentWnd );
 
 		CItemInfo info( hWnd, NULL == hParentWnd ? Image_Desktop : -1 );
 		HTREEITEM hItemParent = pParentPair != NULL ? pParentPair->first : TVI_ROOT;
 
-		std::pair<HTREEITEM, int>& rPair = m_wndToItemMap[ hWnd ];
+		TTreeItemIndent& rPair = m_wndToItemMap[ hWnd ];
+
 		rPair.first = m_pTreeCtrl->InsertItem( info.m_item.mask, info.m_item.pszText,
 											   info.m_item.iImage, info.m_item.iSelectedImage, info.m_item.state, info.m_item.stateMask,
 											   info.m_item.lParam, hItemParent, TVI_LAST );
+
 		rPair.second = pParentPair != NULL ? ( pParentPair->second + 1 ) : 0;
 
 		LogWnd( hWnd, rPair.second );
 	}
 
-	const std::pair<HTREEITEM, int>* CWndTreeBuilder::FindWndItem( HWND hWnd ) const
+	const CWndTreeBuilder::TTreeItemIndent* CWndTreeBuilder::FindWndItem( HWND hWnd ) const
 	{
-		stdext::hash_map< HWND, std::pair<HTREEITEM, int> >::const_iterator itFound = m_wndToItemMap.find( hWnd );
+		stdext::hash_map< HWND, TTreeItemIndent >::const_iterator itFound = m_wndToItemMap.find( hWnd );
 		return itFound != m_wndToItemMap.end() ? &itFound->second : NULL;
+	}
+
+	int CWndTreeBuilder::RegisterItemIndent( HTREEITEM hItem )
+	{
+		int indent = 0;
+
+		for ( HTREEITEM hParent = hItem; ( hParent = m_pTreeCtrl->GetParentItem( hParent ) ) != NULL; )
+			++indent;
+
+		HWND hWnd = m_pTreeCtrl->GetItemDataAs<HWND>( hItem );
+
+		m_wndToItemMap[ hWnd ] = TTreeItemIndent( hItem, indent );
+		LogWnd( hWnd, indent );
+		return indent;
 	}
 
 	void CWndTreeBuilder::LogWnd( HWND hWnd, int indent ) const
 	{
 		if ( m_pLogger != NULL )
-			app::GetLogger()->Log( _T("%swnd: %s"), std::tstring( indent * 2, _T(' ') ).c_str(), wnd::FormatBriefWndInfo( hWnd ).c_str() );
+			wt::LogWindow( hWnd, indent );
 	}
 }
 
@@ -165,7 +188,7 @@ void CTreeWndPage::OnTargetWndChanged( const CWndSpot& targetWnd )
 		if ( NULL == hTargetItem || !m_treeCtrl.RefreshItem( hTargetItem ) )		// refresh item text, state
 			ui::BeepSignal( MB_ICONWARNING );		// window not found or stale
 
-		bool stale = hTargetItem != NULL && !ui::IsValidWindow( m_treeCtrl.GetItemDataAs< HWND >( hTargetItem ) );
+		bool stale = hTargetItem != NULL && !ui::IsValidWindow( m_treeCtrl.GetItemDataAs<HWND>( hTargetItem ) );
 
 		if ( ( NULL == hTargetItem && !wnd::HasSlowWindows() ) ||
 			 ( stale && app::GetOptions()->m_autoUpdateRefresh ) )
@@ -189,6 +212,10 @@ void CTreeWndPage::OnAppEvent( app::Event appEvent )
 		case app::RefreshWndTree:
 			RefreshTreeContents();
 			break;
+		case app::RefreshSiblings:
+			if ( HTREEITEM hSelItem = m_treeCtrl.GetSelectedItem() )
+				RefreshTreeParentBranch( hSelItem );
+			break;
 	}
 }
 
@@ -197,7 +224,7 @@ void CTreeWndPage::CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARAM row
 	subItem, pCtrl;
 
 	HTREEITEM hItem = reinterpret_cast<HTREEITEM>( rowKey );
-	HWND hWnd = m_treeCtrl.GetItemDataAs< HWND >( hItem );
+	HWND hWnd = m_treeCtrl.GetItemDataAs<HWND>( hItem );
 
 	if ( !ui::IsValidWindow( hWnd ) )
 		rTextEffect.m_textColor = StaleWndColor;
@@ -231,6 +258,41 @@ void CTreeWndPage::RefreshTreeContents( void )
 	m_treeCtrl.SelectItem( hTargetItem );
 }
 
+void CTreeWndPage::RefreshTreeParentBranch( HTREEITEM hItem )
+{
+	ASSERT_PTR( hItem );
+
+	HWND hWndTarget = m_treeCtrl.GetItemDataAs<HWND>( hItem );
+	HTREEITEM hParentItem = m_treeCtrl.GetParentItem( hItem );
+	if ( NULL == hParentItem )
+		return;
+
+	{
+		CScopedInternalChange scopedChange( &m_treeCtrl );
+		CScopedLockRedraw freeze( &m_treeCtrl, new CScopedWindowBorder( &m_treeCtrl, color::Salmon ) );
+		CWaitCursor wait;
+		HWND hWndParent = m_treeCtrl.GetItemDataAs<HWND>( hParentItem );
+
+		m_treeCtrl.DeleteChildren( hParentItem );
+
+		wt::CWndTreeBuilder builder( &m_treeCtrl );
+		int indent = builder.RegisterItemIndent( hParentItem ); indent;
+
+		//app::GetLogger()->Log( _T("# Refresh siblings of:") ); wt::LogWindow( hWndTarget, indent );
+
+		builder.BuildChildren( hWndParent );
+
+		m_treeCtrl.Expand( hParentItem, TVE_EXPAND );
+
+		hItem = m_treeCtrl.FindItemWithData( hWndTarget );
+		if ( hItem != NULL )
+			m_treeCtrl.SelectItem( hItem );
+	}
+
+	if ( hItem != NULL )
+		m_treeCtrl.EnsureVisible( hItem );
+}
+
 void CTreeWndPage::SetupTreeItems( void )
 {
 	m_treeCtrl.DeleteAllItems();
@@ -241,8 +303,9 @@ void CTreeWndPage::SetupTreeItems( void )
 
 	if ( EnumWindows == buildMethod )
 	{	// enum windows
-		app::GetLogger()->Log( _T("# Enum Windows") );
-		wt::CWndTreeBuilder builder( &m_treeCtrl );
+		app::GetLogger()->Log( _T("# Enum All Windows") );
+		wt::CWndTreeBuilder builder( &m_treeCtrl/*, app::GetLogger()*/ );
+
 		builder.Build( ::GetDesktopWindow() );
 	}
 	else
@@ -257,7 +320,7 @@ void CTreeWndPage::SetupTreeItems( void )
 HTREEITEM CTreeWndPage::FindItemWithWnd( HWND hWnd ) const
 {
 	if ( HTREEITEM hSelItem = m_treeCtrl.GetSelectedItem() )		// is currently selected a match?
-		if ( hWnd == m_treeCtrl.GetItemDataAs< HWND >( hSelItem ) )
+		if ( hWnd == m_treeCtrl.GetItemDataAs<HWND>( hSelItem ) )
 			return hSelItem;
 
 	return m_treeCtrl.FindItemWithData( hWnd );
@@ -269,7 +332,7 @@ HWND CTreeWndPage::FindValidParentItem( HTREEITEM hItem ) const
 
 	// find first valid parent window if hItem refers to a stale window
 	for ( ; hItem != NULL; hItem = m_treeCtrl.GetParentItem( hItem ) )
-		if ( ui::IsValidWindow( hValidWnd = m_treeCtrl.GetItemDataAs< HWND >( hItem ) ) )
+		if ( ui::IsValidWindow( hValidWnd = m_treeCtrl.GetItemDataAs<HWND>( hItem ) ) )
 			break;
 
 	return hValidWnd;
@@ -277,7 +340,7 @@ HWND CTreeWndPage::FindValidParentItem( HTREEITEM hItem ) const
 
 HTREEITEM CTreeWndPage::InsertWndItem( HTREEITEM hItemParent, HWND hWnd, int indent, int image /*= -1*/ )
 {
-//	app::GetLogger()->Log( _T("%swnd: %s"), std::tstring( indent * 2, _T(' ') ).c_str(), wnd::FormatBriefWndInfo( hWnd ).c_str() );
+//	wt::LogWindow( hWnd, indent );
 
 	wt::CItemInfo info( hWnd, image );
 	HTREEITEM hItem = m_treeCtrl.InsertItem( info.m_item.mask, info.m_item.pszText,
@@ -294,7 +357,7 @@ bool CTreeWndPage::RefreshTreeItem( HTREEITEM hItem )
 {	// updates item contents if changed
 	ASSERT_PTR( hItem );
 
-	HWND hWnd = m_treeCtrl.GetItemDataAs< HWND >( hItem );
+	HWND hWnd = m_treeCtrl.GetItemDataAs<HWND>( hItem );
 	if ( !ui::IsValidWindow( hWnd ) )
 		return false;
 

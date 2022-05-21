@@ -329,7 +329,7 @@ void CApplication::CmMoveWindow( UINT cmdId )
 			ASSERT( FALSE );
 	}
 
-	app::GetSvc().PublishEvent( app::RefreshWndTree );		// z-order has changed
+	app::GetSvc().PublishEvent( app::RefreshSiblings /*app::RefreshWndTree*/ );		// z-order has changed
 	app::GetSvc().PublishEvent( app::WndStateChanged );
 }
 

@@ -30,8 +30,7 @@ namespace tv
 }
 
 
-class CTreeControl
-	: public CTreeCtrl
+class CTreeControl : public CTreeCtrl
 	, public CListLikeCtrlBase
 {
 	friend class CTreeControlCustomDraw;
@@ -68,6 +67,8 @@ public:
 	virtual HTREEITEM InsertObjectItem( HTREEITEM hParent, const utl::ISubject* pObject, int imageIndex = ui::No_Image, UINT state = TVIS_EXPANDED,
 										HTREEITEM hInsertAfter = TVI_LAST, const TCHAR* pText = NULL );		// pText could be LPSTR_TEXTCALLBACK
 
+	void DeleteChildren( HTREEITEM hItem );
+
 	template< typename ObjectT >
 	ObjectT* GetItemObject( HTREEITEM hItem ) const { return AsPtr<ObjectT>( GetItemData( hItem ) ); }
 
@@ -75,7 +76,7 @@ public:
 	void SetItemObject( HTREEITEM hItem, ObjectT* pObject ) { VERIFY( SetItemData( hItem, (DWORD_PTR)pObject ) != FALSE ); }
 
 	template< typename Type >
-	Type GetItemDataAs( HTREEITEM hItem ) const { return (Type)GetItemData( hItem ); }
+	Type GetItemDataAs( HTREEITEM hItem ) const { return AsValue<Type>( GetItemData( hItem ) ); }
 
 	template< typename Type >
 	void SetItemDataAs( HTREEITEM hItem, Type data ) { VERIFY( SetItemData( hItem, (DWORD_PTR)data ) != FALSE ); }
@@ -97,10 +98,10 @@ public:
 
 	// tree algorithms
 	template< typename Pred >
-	HTREEITEM FirstThat( Pred pred, HTREEITEM hItem = TVI_ROOT ) const;
+	HTREEITEM FirstThat( Pred pred, HTREEITEM hStart = TVI_ROOT ) const;
 
 	template< typename Func >
-	void ForEach( Func func, HTREEITEM hItem = TVI_ROOT );
+	void ForEach( Func func, HTREEITEM hStart = TVI_ROOT );
 
 	void ExpandBranch( HTREEITEM hItem, bool expand = true );
 
@@ -178,27 +179,27 @@ template< typename ObjectT >
 ObjectT* CTreeControl::GetSelected( void ) const
 {
 	HTREEITEM hSelItem = GetSelectedItem();
-	return hSelItem != NULL ? GetItemObject< ObjectT >( hSelItem ) : NULL;
+	return hSelItem != NULL ? GetItemObject<ObjectT>( hSelItem ) : NULL;
 }
 
 template< typename Func >
-void CTreeControl::ForEach( Func func, HTREEITEM hItem /*= TVI_ROOT*/ )
+void CTreeControl::ForEach( Func func, HTREEITEM hStart /*= TVI_ROOT*/ )
 {
-	if ( hItem != TVI_ROOT )			// could be TVI_ROOT to iterate multiple root items
-		func( this, hItem );
+	if ( hStart != TVI_ROOT )			// could be TVI_ROOT to iterate multiple root items
+		func( this, hStart );
 
-	for ( HTREEITEM hChild = GetChildItem( hItem ); hChild != NULL; hChild = GetNextSiblingItem( hChild ) )
+	for ( HTREEITEM hChild = GetChildItem( hStart ); hChild != NULL; hChild = GetNextSiblingItem( hChild ) )
 		ForEach( func, hChild );
 }
 
 template< typename Pred >
-HTREEITEM CTreeControl::FirstThat( Pred pred, HTREEITEM hItem /*= TVI_ROOT*/ ) const
+HTREEITEM CTreeControl::FirstThat( Pred pred, HTREEITEM hStart /*= TVI_ROOT*/ ) const
 {
-	if ( hItem != TVI_ROOT )			// could be TVI_ROOT to iterate multiple root items
-		if ( pred( this, hItem ) )
-			return hItem;
+	if ( hStart != TVI_ROOT )			// could be TVI_ROOT to iterate multiple root items
+		if ( pred( this, hStart ) )
+			return hStart;
 
-	for ( HTREEITEM hChild = GetChildItem( hItem ); hChild != NULL; hChild = GetNextSiblingItem( hChild ) )
+	for ( HTREEITEM hChild = GetChildItem( hStart ); hChild != NULL; hChild = GetNextSiblingItem( hChild ) )
 		if ( HTREEITEM hFound = FirstThat( pred, hChild ) )
 			return hFound;
 

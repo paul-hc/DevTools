@@ -9,7 +9,6 @@
 #endif
 
 
-
 // CWndEnumBase implementation
 
 CWndEnumBase::CWndEnumBase( void )
@@ -27,11 +26,15 @@ void CWndEnumBase::Build( HWND hRootWnd )
 	ASSERT( ::IsWindow( hRootWnd ) );
 
 	AddWndItem( hRootWnd );
+	BuildChildren( hRootWnd );
+}
 
-	if ( ::GetDesktopWindow() == hRootWnd )
+void CWndEnumBase::BuildChildren( HWND hWnd )
+{
+	if ( hWnd == ::GetDesktopWindow() )
 		::EnumWindows( (WNDENUMPROC)&EnumWindowProc, reinterpret_cast<LPARAM>( this ) );
 	else
-		::EnumChildWindows( hRootWnd, (WNDENUMPROC)&EnumChildWindowProc, reinterpret_cast<LPARAM>( this ) );
+		::EnumChildWindows( hWnd, (WNDENUMPROC)&EnumChildWindowProc, reinterpret_cast<LPARAM>( this ) );
 }
 
 BOOL CALLBACK CWndEnumBase::EnumWindowProc( HWND hTopLevel, CWndEnumBase* pEnumerator )

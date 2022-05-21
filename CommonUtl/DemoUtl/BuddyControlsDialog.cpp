@@ -152,7 +152,7 @@ CBuddyControlsDialog::CBuddyControlsDialog( CWnd* pParent )
 	static const UINT s_buttonIds[] = { 50, 51, ID_SEPARATOR, 60, 61, 62, 63, ID_SEPARATOR, 70, 71, ID_SEPARATOR, 72, 73 };
 
 	// create imagelist from icon strip (custom size multi-images) and stores button IDs
-	m_selFileEdit.GetMateToolbar()->GetStrip().LoadIconStrip( IDI_MY_TOOL_STRIP_ALPHA_ICON, ARRAY_PAIR( s_buttonIds ) );		// IDI_MY_TOOL_STRIP_ICON
+	VERIFY( m_selFileEdit.GetMateToolbar()->GetStrip().LoadIconStrip( IDI_MY_TOOL_STRIP_ALPHA_ICON, ARRAY_PAIR( s_buttonIds ) ) );		// IDI_MY_TOOL_STRIP_ICON
 }
 
 CBuddyControlsDialog::~CBuddyControlsDialog()

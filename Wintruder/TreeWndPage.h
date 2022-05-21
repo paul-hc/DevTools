@@ -9,8 +9,7 @@
 #include "Observers.h"
 
 
-class CTreeWndPage
-	: public CLayoutPropertyPage
+class CTreeWndPage : public CLayoutPropertyPage
 	, public IWndObserver
 	, public IEventObserver
 	, private ui::ITextEffectCallback
@@ -29,6 +28,7 @@ private:
 	virtual void CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARAM rowKey, int subItem, CListLikeCtrlBase* pCtrl ) const;
 private:
 	void RefreshTreeContents( void );
+	void RefreshTreeParentBranch( HTREEITEM hItem );
 	bool RefreshTreeItem( HTREEITEM hItem );
 
 	void SetupTreeItems( void );
@@ -82,7 +82,7 @@ namespace wt
 	private:
 		void Construct( void );
 	public:
-		TVITEM m_item;
+		TVITEM m_item;				// note: m_item.lParam stores the HWND window handle
 		std::tstring m_text;
 	};
 
@@ -93,16 +93,20 @@ namespace wt
 		CWndTreeBuilder( CTreeControl* pTreeCtrl, CLogger* pLogger = NULL );
 
 		size_t GetCount( void ) const { return m_wndToItemMap.size(); }
+
+		int RegisterItemIndent( HTREEITEM hItem );
 	protected:
 		// base overrides
 		virtual void AddWndItem( HWND hWnd );
 	private:
-		const std::pair<HTREEITEM, int>* FindWndItem( HWND hWnd ) const;
+		typedef std::pair<HTREEITEM, int> TTreeItemIndent;
+
+		const TTreeItemIndent* FindWndItem( HWND hWnd ) const;
 		void LogWnd( HWND hWnd, int indent ) const;
 	private:
 		CTreeControl* m_pTreeCtrl;
 		CLogger* m_pLogger;
-		stdext::hash_map< HWND, std::pair<HTREEITEM, int> > m_wndToItemMap;		// HWND -> [item, indent]
+		stdext::hash_map< HWND, TTreeItemIndent > m_wndToItemMap;		// HWND -> [item, indent]
 	};
 }
 

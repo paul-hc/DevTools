@@ -134,6 +134,7 @@ void CMainDialog::OnAppEvent( app::Event appEvent )
 	switch ( appEvent )
 	{
 		case app::RefreshWndTree:
+		case app::RefreshSiblings:
 			m_refreshButton.SetState( true );		// highlight refresh button
 			m_refreshButton.UpdateWindow();
 			m_refreshTimer.Start();

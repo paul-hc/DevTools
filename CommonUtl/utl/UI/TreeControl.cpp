@@ -134,6 +134,17 @@ HTREEITEM CTreeControl::InsertObjectItem( HTREEITEM hParent, const utl::ISubject
 		hParent, hInsertAfter );
 }
 
+void CTreeControl::DeleteChildren( HTREEITEM hItem )
+{
+	for ( HTREEITEM hChildItem = GetChildItem( hItem ); hChildItem != NULL; )
+	{
+		HTREEITEM hNextItem = GetNextSiblingItem( hChildItem );
+
+		DeleteItem( hChildItem );
+		hChildItem = hNextItem;
+	}
+}
+
 const CSize& CTreeControl::GetImageSize( void ) const
 {
 	if ( 0 == m_imageSize.cx && 0 == m_imageSize.cy )
