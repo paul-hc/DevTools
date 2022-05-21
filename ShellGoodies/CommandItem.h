@@ -6,7 +6,7 @@
 #include "utl/Subject.h"
 
 
-struct CToolStrip;
+class CToolStrip;
 
 
 class CCommandItem : public TSubject		// proxy items to be inserted into the list control

@@ -42,7 +42,7 @@ CLayoutBasePropertySheet::~CLayoutBasePropertySheet()
 
 CLayoutPropertyPage* CLayoutBasePropertySheet::GetPage( int pageIndex ) const
 {
-	return checked_static_cast<CLayoutPropertyPage*>( CPropertySheet::GetPage( pageIndex ) );
+	return checked_static_cast<CLayoutPropertyPage*>( __super::GetPage( pageIndex ) );
 }
 
 CLayoutPropertyPage* CLayoutBasePropertySheet::GetActivePage( void ) const
@@ -50,7 +50,7 @@ CLayoutPropertyPage* CLayoutBasePropertySheet::GetActivePage( void ) const
 	if ( 0 == GetPageCount() )
 		return NULL;
 
-	return checked_static_cast<CLayoutPropertyPage*>( CPropertySheet::GetActivePage() );
+	return checked_static_cast<CLayoutPropertyPage*>( __super::GetActivePage() );
 }
 
 std::tstring CLayoutBasePropertySheet::GetPageTitle( int pageIndex ) const
@@ -218,7 +218,7 @@ void CLayoutBasePropertySheet::LayoutPages( const CRect& rPageRect )
 void CLayoutBasePropertySheet::BuildPropPageArray( void )
 {
 	LoadFromRegistry();				// before window creation
-	CPropertySheet::BuildPropPageArray();
+	__super::BuildPropPageArray();
 }
 
 bool CLayoutBasePropertySheet::IsSheetModified( void ) const
@@ -342,6 +342,14 @@ void CLayoutBasePropertySheet::OnChangesApplied( void )
 {
 }
 
+BOOL CLayoutBasePropertySheet::PreTranslateMessage( MSG* pMsg )
+{
+	if ( GetSheetTooltip() != NULL )
+		m_pTooltipCtrl->RelayEvent( pMsg );
+
+	return __super::PreTranslateMessage( pMsg );
+}
+
 
 // message handlers
 
@@ -352,17 +360,9 @@ BEGIN_MESSAGE_MAP( CLayoutBasePropertySheet, CPropertySheet )
 	ON_NOTIFY_EX_RANGE( TTN_NEEDTEXTA, ui::MinCmdId, ui::MaxCmdId, OnTtnNeedText )
 END_MESSAGE_MAP()
 
-BOOL CLayoutBasePropertySheet::PreTranslateMessage( MSG* pMsg )
-{
-	if ( GetSheetTooltip() != NULL )
-		m_pTooltipCtrl->RelayEvent( pMsg );
-
-	return CPropertySheet::PreTranslateMessage( pMsg );
-}
-
 BOOL CLayoutBasePropertySheet::OnInitDialog( void )
 {
-	BOOL result = CPropertySheet::OnInitDialog();
+	BOOL result = __super::OnInitDialog();
 
 	CTabCtrl* pTabCtrl = GetTabControl();
 	ASSERT_PTR( pTabCtrl->GetSafeHwnd() );
@@ -398,12 +398,12 @@ void CLayoutBasePropertySheet::OnDestroy( void )
 		pTabCtrl->SetImageList( NULL );				// release image list ownership
 
 	SaveToRegistry();
-	CPropertySheet::OnDestroy();
+	__super::OnDestroy();
 }
 
 void CLayoutBasePropertySheet::OnSize( UINT sizeType, int cx, int cy )
 {
-	CPropertySheet::OnSize( sizeType, cx, cy );
+	__super::OnSize( sizeType, cx, cy );
 
 	if ( sizeType != SIZE_MINIMIZED )
 		LayoutSheet();

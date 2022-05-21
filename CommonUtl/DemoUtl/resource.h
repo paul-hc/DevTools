@@ -31,7 +31,7 @@
 #define IDD_BUDDY_CONTROLS_DIALOG       152
 #define IDC_OPEN_DIALOG_BUTTON          1000
 #define IDC_OPEN_PROPERTIES_BUTTON      1001
-#define IDC_CREATE_PROPERTIES_BUTTON    1002
+#define IDC_MODELESS_PROPERTIES_BUTTON  1002
 #define IDC_DISABLE_THEMES_TOGGLE       1003
 #define IDC_DISABLE_SMOOTH_RESIZE_TOGGLE 1004
 #define IDC_FORMAT_COMBO                1005
@@ -128,6 +128,8 @@
 #define IDC_HORIZ_SPLITTER_STATIC       1101
 #define IDC_SEL_FILE_EDIT               1102
 #define IDC_SEL_FILE_PROGRESS           1103
+#define IDC_CHECK1                      1104
+#define IDC_BUDDY_MODELESS_CHECK        1104
 #define ID_COMMAND_LINK1                2001
 #define ID_COMMAND_LINK2                2002
 #define ID_RADIO_BUTTON1                2101
@@ -167,7 +169,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        152
 #define _APS_NEXT_COMMAND_VALUE         32798
-#define _APS_NEXT_CONTROL_VALUE         1104
+#define _APS_NEXT_CONTROL_VALUE         1105
 #define _APS_NEXT_SYMED_VALUE           5002
 #endif
 #endif

@@ -38,7 +38,7 @@ CProgressDialog::CProgressDialog( const std::tstring& operationLabel, int option
 	, m_itemCount( 0 )
 	, m_stageLabelStatic( CRegularStatic::Instruction )
 	, m_itemLabelStatic( CRegularStatic::Instruction )
-	, m_pClockStatic( new CClockStatic )
+	, m_pClockStatic( new CClockStatic() )
 {
 	m_regSection = _T("utl\\ProgressDialog");
 	RegisterCtrlLayout( ARRAY_PAIR( layout::styles ) );
@@ -55,10 +55,10 @@ bool CProgressDialog::Create( const std::tstring& title, CWnd* pParentWnd /*= NU
 {
 	ASSERT( !IsRunning() );
 
-	if ( !__super::Create( IDD_PROGRESS_DIALOG, pParentWnd ) )
+	if ( !__super::CreateModeless( IDD_PROGRESS_DIALOG, pParentWnd ) )
 		return false;
 
-	ShowWindow( SW_SHOW );
+	m_autoDelete = false;						// this is managed by the progress service
 	ui::SetWindowText( m_hWnd, title );
 
 	m_pMsgPump.reset( new CScopedPumpMessage( 1, pParentWnd ) );		// disable the parent window during long operation to simulate a "modal-collaborative" long operation run

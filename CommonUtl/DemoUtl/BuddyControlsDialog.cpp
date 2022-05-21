@@ -7,6 +7,7 @@
 #include "utl/FlagTags.h"
 #include "utl/FileStateItem.h"
 #include "utl/StringUtilities.h"
+#include "utl/TextClipboard.h"
 #include "utl/Timer.h"
 #include "utl/TimeUtils.h"
 #include "utl/UI/ResizeFrameStatic.h"
@@ -139,6 +140,8 @@ CBuddyControlsDialog::CBuddyControlsDialog( CWnd* pParent )
 	m_fileListCtrl.AddColumnCompare( ModifyTime, pred::NewPropertyComparator<CFileStateTimedItem>( func::AsModifyTime() ), false );
 
 	m_fileListCtrl.GetMateToolbar()->GetStrip()
+		.AddButton( IDC_PASTE_FILES_BUTTON )
+		.AddSeparator()
 		.AddButton( ID_LIST_VIEW_REPORT )
 		.AddButton( ID_LIST_VIEW_TILE )
 		.AddSeparator()
@@ -149,7 +152,7 @@ CBuddyControlsDialog::CBuddyControlsDialog( CWnd* pParent )
 	static const UINT s_buttonIds[] = { 50, 51, ID_SEPARATOR, 60, 61, 62, 63, ID_SEPARATOR, 70, 71, ID_SEPARATOR, 72, 73 };
 
 	// create imagelist from icon strip (custom size multi-images) and stores button IDs
-	m_selFileEdit.GetMateToolbar()->GetStrip().LoadIconStrip( IDI_MY_TOOL_STRIP_ALPHA_ICON /*IDI_MY_TOOL_STRIP_ICON*/, ARRAY_PAIR( s_buttonIds ) );
+	m_selFileEdit.GetMateToolbar()->GetStrip().LoadIconStrip( IDI_MY_TOOL_STRIP_ALPHA_ICON, ARRAY_PAIR( s_buttonIds ) );		// IDI_MY_TOOL_STRIP_ICON
 }
 
 CBuddyControlsDialog::~CBuddyControlsDialog()
@@ -269,6 +272,8 @@ BEGIN_MESSAGE_MAP( CBuddyControlsDialog, CLayoutDialog )
 	ON_BN_CLICKED( IDC_FIND_FILES_BUTTON, OnBnClicked_FindFiles )
 	ON_BN_CLICKED( IDC_CALC_CHECKSUMS_BUTTON, OnBnClicked_CalculateChecksums )
 	ON_NOTIFY( LVN_ITEMCHANGED, IDC_FILE_STATE_EX_LIST, OnLvnItemChanged_FileList )
+	ON_COMMAND( IDC_PASTE_FILES_BUTTON, OnClipboardPaste )
+	ON_UPDATE_COMMAND_UI( IDC_PASTE_FILES_BUTTON, OnUpdateClipboardPaste )
 END_MESSAGE_MAP()
 
 void CBuddyControlsDialog::OnOK( void )
@@ -330,4 +335,18 @@ void CBuddyControlsDialog::OnLvnItemChanged_FileList( NMHDR* pNmHdr, LRESULT* pR
 
 		ui::SetWindowText( m_selFileEdit, fileName );
 	}
+}
+
+void CBuddyControlsDialog::OnClipboardPaste( void )
+{
+	std::tstring text;
+	if ( CTextClipboard::PasteText( text, m_hWnd ) )
+		ui::SetWindowText( m_selFileEdit, std::tstring( _T("Pasted:\r\n") ) + text );
+	else
+		ui::MessageBox( _T("Error pasting text from clipboard!") );
+}
+
+void CBuddyControlsDialog::OnUpdateClipboardPaste( CCmdUI* pCmdUI )
+{
+	pCmdUI->Enable( CTextClipboard::CanPasteText() );
 }

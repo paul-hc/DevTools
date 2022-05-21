@@ -26,14 +26,14 @@ namespace reg
 
 CLayoutDialog::CLayoutDialog( void )
 	: TMfcBaseDialog()
-	, m_dlgFlags( Modeless )
 {
 	Construct();
+
+	m_modeless = m_autoDelete = true;		// default constructor is for modeless dialog
 }
 
 CLayoutDialog::CLayoutDialog( UINT templateId, CWnd* pParent /*= NULL*/ )
 	: TMfcBaseDialog( templateId, pParent )
-	, m_dlgFlags( 0 )
 {
 	Construct();
 	m_initCentered = pParent != NULL;		// keep absolute position if main dialog
@@ -41,7 +41,6 @@ CLayoutDialog::CLayoutDialog( UINT templateId, CWnd* pParent /*= NULL*/ )
 
 CLayoutDialog::CLayoutDialog( const TCHAR* pTemplateName, CWnd* pParent /*= NULL*/ )
 	: TMfcBaseDialog( pTemplateName, pParent )
-	, m_dlgFlags( 0 )
 {
 	Construct();
 	m_initCentered = pParent != NULL;		// keep absolute position if main dialog
@@ -54,7 +53,24 @@ CLayoutDialog::~CLayoutDialog()
 void CLayoutDialog::Construct( void )
 {
 	m_initCollapsed = false;
-	m_pLayoutEngine.reset( new CLayoutEngine );
+	m_pLayoutEngine.reset( new CLayoutEngine() );
+}
+
+bool CLayoutDialog::CreateModeless( UINT templateId /*= 0*/, CWnd* pParentWnd /*= NULL*/, int cmdShow /*= SW_SHOW*/ )
+{
+	// works with both modal and modeless constructors:
+	//	pass templateId and pParentWnd if not initialized via modal constructor
+	//	if pParentWnd is NULL it uses the main wondow as parent
+	//
+	m_modeless = m_autoDelete = true;
+
+	if ( !__super::Create( templateId != 0 ? MAKEINTRESOURCE( templateId ) : m_lpszTemplateName, pParentWnd != NULL ? pParentWnd : m_pParentWnd ) )
+		return false;
+
+	if ( cmdShow != SW_HIDE )
+		ShowWindow( cmdShow );
+
+	return true;
 }
 
 CLayoutEngine& CLayoutDialog::GetLayoutEngine( void )
@@ -280,14 +296,20 @@ void CLayoutDialog::OnIdleUpdateControls( void )
 	SendMessageToDescendants( WM_IDLEUPDATECMDUI, (WPARAM)TRUE, 0, m_idleUpdateDeep, TRUE );			// update dialog toolbars
 }
 
-BOOL CLayoutDialog::DestroyWindow( void )
+void CLayoutDialog::PreSubclassWindow( void )
 {
-	// fix for app losing activation when destroying the modeless dialog: https://stackoverflow.com/questions/3144004/wpf-app-loses-completely-focus-on-window-close
-	if ( IsModeless() && m_hWnd != NULL )
-		if ( CWnd* pOwner = GetOwner() )
-			pOwner->SetActiveWindow();
+	TMfcBaseDialog::PreSubclassWindow();
 
-	return __super::DestroyWindow();
+	if ( m_modeless && ui::IsTopLevel( m_hWnd ) )
+		CPopupWndPool::Instance()->AddWindow( this );
+}
+
+void CLayoutDialog::PostNcDestroy( void )
+{
+	TMfcBaseDialog::PostNcDestroy();
+
+	if ( m_autoDelete )
+		delete this;
 }
 
 void CLayoutDialog::DoDataExchange( CDataExchange* pDX )
@@ -313,6 +335,30 @@ void CLayoutDialog::DoDataExchange( CDataExchange* pDX )
 	__super::DoDataExchange( pDX );
 }
 
+BOOL CLayoutDialog::DestroyWindow( void )
+{
+	// fix for app losing activation when destroying the modeless dialog: https://stackoverflow.com/questions/3144004/wpf-app-loses-completely-focus-on-window-close
+	if ( IsModeless() && m_hWnd != NULL )
+		if ( CWnd* pOwner = GetOwner() )
+			pOwner->SetActiveWindow();
+
+	return __super::DestroyWindow();
+}
+
+BOOL CLayoutDialog::PreTranslateMessage( MSG* pMsg )
+{
+	return
+		m_accelPool.TranslateAccels( pMsg, m_hWnd ) ||
+		__super::PreTranslateMessage( pMsg );
+}
+
+BOOL CLayoutDialog::OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo )
+{
+	return
+		__super::OnCmdMsg( id, code, pExtra, pHandlerInfo ) ||
+		HandleCmdMsg( id, code, pExtra, pHandlerInfo );							// some commands may handled by the CWinApp
+}
+
 
 // message handlers
 
@@ -330,24 +376,14 @@ BEGIN_MESSAGE_MAP( CLayoutDialog, TMfcBaseDialog )
 	ON_MESSAGE( WM_KICKIDLE, OnKickIdle )
 END_MESSAGE_MAP()
 
-BOOL CLayoutDialog::PreTranslateMessage( MSG* pMsg )
-{
-	return
-		m_accelPool.TranslateAccels( pMsg, m_hWnd ) ||
-		__super::PreTranslateMessage( pMsg );
-}
-
-BOOL CLayoutDialog::OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo )
-{
-	return
-		__super::OnCmdMsg( id, code, pExtra, pHandlerInfo ) ||
-		HandleCmdMsg( id, code, pExtra, pHandlerInfo );							// some commands may handled by the CWinApp
-}
-
 void CLayoutDialog::OnDestroy( void )
 {
 	SaveToRegistry();
-	__super::OnDestroy();
+
+	if ( m_modeless && ui::IsTopLevel( m_hWnd ) )
+		CPopupWndPool::Instance()->RemoveWindow( this );
+
+	TMfcBaseDialog::OnDestroy();
 }
 
 void CLayoutDialog::OnOK( void )

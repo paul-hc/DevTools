@@ -20,6 +20,13 @@
 #endif
 
 
+namespace reg
+{
+	static const TCHAR section_formView[] = _T("TestForm");
+	static const TCHAR entry_modelessBuddyDlg[] = _T("ModelessBuddyDlg");
+}
+
+
 IMPLEMENT_DYNCREATE( CTestFormView, CFormView )
 
 CTestFormView::CTestFormView( void )
@@ -42,9 +49,15 @@ void CTestFormView::QueryTooltipText( std::tstring& rText, UINT cmdId, CToolTipC
 
 void CTestFormView::DoDataExchange( CDataExchange* pDX )
 {
+	bool firstInit = NULL == m_pDemo->m_formatCombo.m_hWnd;
+
 	m_pDemo->DoDataExchange( pDX );
 	ui::DDX_ButtonIcon( pDX, IDC_RUN_IMAGE_TESTS, ID_RUN_TESTS );
 	ui::DDX_ButtonIcon( pDX, ID_STUDY_IMAGE );
+
+	if ( DialogOutput == pDX->m_bSaveAndValidate )
+		if ( firstInit )
+			CheckDlgButton( IDC_BUDDY_MODELESS_CHECK, AfxGetApp()->GetProfileInt( reg::section_formView, reg::entry_modelessBuddyDlg, BST_UNCHECKED ) );
 
 #ifndef _DEBUG
 	ui::EnableControl( m_hWnd, ID_RUN_TESTS, false );
@@ -87,6 +100,8 @@ BEGIN_MESSAGE_MAP( CTestFormView, CLayoutFormView )
 	ON_BN_CLICKED( ID_STUDY_BUDDY_CONTROLS, OnStudyBuddyControls )
 	ON_BN_CLICKED( ID_STUDY_TASK_DIALOG, OnStudyTaskDialog )
 	ON_BN_CLICKED( ID_STUDY_MISC_DIALOG, OnStudyMiscDialog )
+	ON_BN_CLICKED( IDC_BUDDY_MODELESS_CHECK, OnToggle_ModelessBuddyDlg )
+	ON_UPDATE_COMMAND_UI( IDC_BUDDY_MODELESS_CHECK, OnUpdate_ModelessBuddyDlg )
 END_MESSAGE_MAP()
 
 void CTestFormView::OnRunImageUnitTests( void )
@@ -119,8 +134,16 @@ void CTestFormView::OnStudyFileChecksums( void )
 
 void CTestFormView::OnStudyBuddyControls( void )
 {
-	CBuddyControlsDialog dlg( AfxGetMainWnd() );
-	dlg.DoModal();
+	if ( !IsDlgButtonChecked( IDC_BUDDY_MODELESS_CHECK ) )
+	{
+		CBuddyControlsDialog dlg( AfxGetMainWnd() );
+		dlg.DoModal();
+	}
+	else
+	{
+		CBuddyControlsDialog* pDlg = new CBuddyControlsDialog( NULL );
+		pDlg->CreateModeless();
+	}
 }
 
 void CTestFormView::OnStudyTaskDialog( void )
@@ -133,4 +156,14 @@ void CTestFormView::OnStudyMiscDialog( void )
 {
 	CTestMiscDialog dlg( this );
 	dlg.DoModal();
+}
+
+void CTestFormView::OnToggle_ModelessBuddyDlg( void )
+{
+	AfxGetApp()->WriteProfileInt( reg::section_formView, reg::entry_modelessBuddyDlg, IsDlgButtonChecked( IDC_BUDDY_MODELESS_CHECK ) );
+}
+
+void CTestFormView::OnUpdate_ModelessBuddyDlg( CCmdUI* pCmdUI )
+{
+	pCmdUI->Enable();
 }

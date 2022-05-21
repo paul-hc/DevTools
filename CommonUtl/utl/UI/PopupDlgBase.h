@@ -46,12 +46,38 @@ public:
 	bool m_hideSysMenuIcon;		// hide dialog sys-menu icon
 	bool m_noAboutMenuItem;		// avoid adding "About..." item to system menu icon
 protected:
+	bool m_modeless;			// true for top-level modeless dialogs or property sheets
+	bool m_autoDelete;			// 'delete this' after window destroyed
 	bool m_isTopDlg;			// if true, chain command handling to the application/thread object
 	bool m_idleUpdateDeep;		// send WM_IDLEUPDATECMDUI to all descendants
 	CAccelPool m_accelPool;
 private:
 	UINT m_dlgIconId;
+
+	// force implementing CWnd overrides on subclasses
+protected:
+	virtual void PreSubclassWindow( void ) = 0;
+	virtual void PostNcDestroy( void ) = 0;
 };
+
+
+class CPopupWndPool : private utl::noncopyable		// singleton that stores all opened popup dialogs, property sheets, windows
+{
+	CPopupWndPool( void ) {}
+public:
+	static CPopupWndPool* Instance( void );
+
+	const std::vector< CWnd* >& GetPopupWnds( void ) const { return m_popupWnds; }
+
+	bool AddWindow( CWnd* pPopupTopWnd );
+	bool RemoveWindow( CWnd* pPopupTopWnd );
+
+	void OnIdle( void );
+	static bool SendIdleUpdates( CWnd* pPopupWnd );
+private:
+	std::vector< CWnd* > m_popupWnds;		// all top-level windows (non-child)
+};
+
 
 
 #endif // PopupDlgBase_h

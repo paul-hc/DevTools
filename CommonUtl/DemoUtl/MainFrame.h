@@ -18,6 +18,7 @@ public:
 	virtual BOOL PreCreateWindow( CREATESTRUCT& cs );
 protected:
 	afx_msg int OnCreate( LPCREATESTRUCT lpCreateStruct );
+	afx_msg LRESULT OnIdleUpdateCmdUI( WPARAM wParam, LPARAM lParam );
 
 	DECLARE_MESSAGE_MAP()
 };

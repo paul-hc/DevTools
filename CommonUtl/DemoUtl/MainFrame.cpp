@@ -2,6 +2,7 @@
 #include "stdafx.h"
 #include "MainFrame.h"
 #include "resource.h"
+#include <afxpriv.h>		// for WM_IDLEUPDATECMDUI
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -42,6 +43,7 @@ BOOL CMainFrame::PreCreateWindow( CREATESTRUCT& cs )
 
 BEGIN_MESSAGE_MAP( CMainFrame, CMDIFrameWnd )
 	ON_WM_CREATE()
+	ON_MESSAGE( WM_IDLEUPDATECMDUI, OnIdleUpdateCmdUI )
 END_MESSAGE_MAP()
 
 int CMainFrame::OnCreate( LPCREATESTRUCT lpCreateStruct )
@@ -70,4 +72,11 @@ int CMainFrame::OnCreate( LPCREATESTRUCT lpCreateStruct )
 	DockControlBar(&m_wndToolBar);
 
 	return 0;
+}
+
+LRESULT CMainFrame::OnIdleUpdateCmdUI( WPARAM wParam, LPARAM lParam )
+{
+	wParam, lParam;
+	__super::OnIdleUpdateCmdUI();
+	return 0L;
 }

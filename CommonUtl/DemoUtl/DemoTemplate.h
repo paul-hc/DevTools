@@ -55,7 +55,7 @@ private:
 	// message map functions
 	afx_msg void OnBnClicked_OpenDialog( void );
 	afx_msg void OnBnClicked_OpenPropertySheet( void );
-	afx_msg void OnBnClicked_CreatePropertySheet( void );
+	afx_msg void OnBnClicked_ModelessPropertySheet( void );
 	afx_msg void OnToggle_DisableSmoothResize( void );
 	afx_msg void OnToggle_DisableThemes( void );
 	afx_msg void OnBnClicked_DropFormat( void );

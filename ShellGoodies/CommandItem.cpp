@@ -34,7 +34,7 @@ const std::tstring& CCommandItem::GetCode( void ) const
 
 CImageList* CCommandItem::GetImageList( void )
 {
-	return GetCmdTypeStrip().m_pImageList.get();
+	return GetCmdTypeStrip().GetImageList();
 }
 
 CToolStrip& CCommandItem::GetCmdTypeStrip( void )
@@ -70,6 +70,6 @@ int CCommandItem::LookupImageIndex( utl::ICommand* pCmd )
 	if ( utl::npos == imagePos )
 		imagePos = strip.FindButtonPos( UINT_MAX );
 
-	ENSURE( imagePos < strip.m_buttonIds.size() );
+	ENSURE( imagePos < strip.GetButtonIds().size() );
 	return static_cast<int>( imagePos );
 }

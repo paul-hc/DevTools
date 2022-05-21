@@ -104,7 +104,6 @@ bool CBaseMainDialog::NotifyTrayIcon( int notifyCode )
 // message handlers
 
 BEGIN_MESSAGE_MAP( CBaseMainDialog, CLayoutDialog )
-	ON_WM_DESTROY()
 	ON_WM_CONTEXTMENU()
 	ON_WM_SYSCOMMAND()
 	ON_WM_PAINT()

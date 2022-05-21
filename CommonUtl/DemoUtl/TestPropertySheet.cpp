@@ -34,8 +34,8 @@ void CTestPropertySheet::Construct( void )
 	m_regSection = _T("TestPropertySheet");
 	LoadDlgIcon( ID_SEND_TO_CLIPBOARD );
 
-	AddPage( new CListPage );
-	AddPage( new CEditPage );
-	AddPage( new CDetailsPage );
-	AddPage( new CDemoPage );
+	AddPage( new CListPage() );
+	AddPage( new CEditPage() );
+	AddPage( new CDetailsPage() );
+	AddPage( new CDemoPage() );
 }

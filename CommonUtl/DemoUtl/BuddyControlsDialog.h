@@ -51,6 +51,8 @@ protected:
 	afx_msg void OnBnClicked_FindFiles( void );
 	afx_msg void OnBnClicked_CalculateChecksums( void );
 	afx_msg void OnLvnItemChanged_FileList( NMHDR* pNmHdr, LRESULT* pResult );
+	afx_msg void OnClipboardPaste( void );
+	afx_msg void OnUpdateClipboardPaste( CCmdUI* pCmdUI );
 
 	DECLARE_MESSAGE_MAP()
 };

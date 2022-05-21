@@ -1170,6 +1170,14 @@
 				Name="Layout"
 				>
 				<File
+					RelativePath=".\BaseMainDialog.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\BaseMainDialog.h"
+					>
+				</File>
+				<File
 					RelativePath=".\LayoutBasePropertySheet.cpp"
 					>
 				</File>
@@ -1723,14 +1731,6 @@
 				</File>
 				<File
 					RelativePath=".\AboutBox.h"
-					>
-				</File>
-				<File
-					RelativePath=".\BaseMainDialog.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\BaseMainDialog.h"
 					>
 				</File>
 				<File

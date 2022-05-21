@@ -3,10 +3,12 @@
 #include "PopupDlgBase.h"
 #include "AboutBox.h"
 #include "AccelTable.h"
-#include "ContainerUtilities.h"
 #include "ImageStore.h"
 #include "MenuUtilities.h"
+#include "Utilities.h"
 #include "VersionInfo.h"
+#include "utl/ContainerUtilities.h"
+#include <afxpriv.h>		// for WM_IDLEUPDATECMDUI
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -26,6 +28,8 @@ CPopupDlgBase::CPopupDlgBase( void )
 	, m_initCentered( true )
 	, m_hideSysMenuIcon( true )
 	, m_noAboutMenuItem( false )
+	, m_modeless( false )
+	, m_autoDelete( false )
 	, m_isTopDlg( false )
 	, m_idleUpdateDeep( false )
 	, m_dlgIconId( 0 )
@@ -125,4 +129,60 @@ bool CAccelPool::TranslateAccels( MSG* pMsg, HWND hDialog )
 			return true;
 
 	return false;
+}
+
+
+// CPopupWndPool implementation
+
+CPopupWndPool* CPopupWndPool::Instance( void )
+{
+	static CPopupWndPool s_popupPool;
+	return &s_popupPool;
+}
+
+bool CPopupWndPool::AddWindow( CWnd* pPopupTopWnd )
+{
+	ASSERT_PTR( pPopupTopWnd );
+	ASSERT( !utl::Contains( m_popupWnds, pPopupTopWnd ) );
+	ASSERT( NULL == pPopupTopWnd->GetSafeHwnd() || ui::IsTopLevel( pPopupTopWnd->GetSafeHwnd() ) );		// a top-level window?
+
+	if ( pPopupTopWnd == AfxGetMainWnd() )
+		return false;			// we keep track of all top-level popups except the main application window
+
+	m_popupWnds.push_back( pPopupTopWnd );
+	return true;
+}
+
+bool CPopupWndPool::RemoveWindow( CWnd* pPopupTopWnd )
+{
+	ASSERT_PTR( pPopupTopWnd );
+
+	std::vector< CWnd* >::const_iterator itFound = std::find( m_popupWnds.begin(), m_popupWnds.end(), pPopupTopWnd );
+
+	if ( itFound == m_popupWnds.end() )
+		return false;
+
+	m_popupWnds.erase( itFound );
+	return true;
+}
+
+bool CPopupWndPool::SendIdleUpdates( CWnd* pPopupWnd )
+{
+	ASSERT_PTR( pPopupWnd );
+
+	if ( pPopupWnd->GetSafeHwnd() != NULL )
+		if ( pPopupWnd->IsWindowVisible() )
+		{
+			// send WM_IDLEUPDATECMDUI to the main window
+			AfxCallWndProc( pPopupWnd, pPopupWnd->m_hWnd, WM_IDLEUPDATECMDUI, (WPARAM)TRUE, 0 );
+			pPopupWnd->SendMessageToDescendants( WM_IDLEUPDATECMDUI, (WPARAM)TRUE, 0, TRUE, TRUE );
+			return true;
+		}
+
+	return false;
+}
+
+void CPopupWndPool::OnIdle( void )
+{
+	utl::for_each( m_popupWnds, CPopupWndPool::SendIdleUpdates );
 }

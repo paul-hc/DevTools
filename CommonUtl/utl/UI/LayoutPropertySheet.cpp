@@ -52,6 +52,24 @@ CLayoutPropertySheet::~CLayoutPropertySheet()
 {
 }
 
+bool CLayoutPropertySheet::CreateModeless( CWnd* pParent /*= NULL*/, DWORD style /*= UINT_MAX*/, DWORD styleEx /*= 0*/ )
+{
+	if ( UINT_MAX == style )
+	{
+		style = WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU | DS_3DLOOK | DS_CONTEXTHELP | DS_SETFONT;
+		if ( m_resizable )
+			style |= WS_THICKFRAME;
+		else
+			style |= DS_MODALFRAME;
+	}
+
+	m_modeless = m_autoDelete = true;
+	m_isTopDlg = true;
+	ENSURE( !HasFlag( style, WS_CHILD ) );		// for child property sheets must use CLayoutChildPropertySheet base class
+
+	return __super::Create( pParent, style, styleEx ) != FALSE;
+}
+
 CLayoutEngine& CLayoutPropertySheet::GetLayoutEngine( void )
 {
 	return *m_pLayoutEngine;
@@ -77,7 +95,7 @@ void CLayoutPropertySheet::BuildPropPageArray( void )
 
 void CLayoutPropertySheet::LoadFromRegistry( void )
 {
-	CLayoutBasePropertySheet::LoadFromRegistry();
+	__super::LoadFromRegistry();
 
 	ASSERT_NULL( m_pSheetPlacement.get() );
 
@@ -110,7 +128,7 @@ void CLayoutPropertySheet::LoadFromRegistry( void )
 
 void CLayoutPropertySheet::SaveToRegistry( void )
 {
-	CLayoutBasePropertySheet::SaveToRegistry();
+	__super::SaveToRegistry();
 
 	if ( m_regSection.empty() || !m_resizable )
 		return;
@@ -278,27 +296,12 @@ void CLayoutPropertySheet::OnIdleUpdateControls( void )
 {
 }
 
-BOOL CLayoutPropertySheet::Create( CWnd* pParent /*= NULL*/, DWORD style /*= UINT_MAX*/, DWORD styleEx /*= 0*/ )
-{
-	if ( UINT_MAX == style )
-	{
-		style = WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU | DS_3DLOOK | DS_CONTEXTHELP | DS_SETFONT;
-		if ( m_resizable )
-			style |= WS_THICKFRAME;
-		else
-			style |= DS_MODALFRAME;
-	}
-
-	ASSERT( !HasFlag( style, WS_CHILD ) );		// for child property sheets must use CLayoutChildPropertySheet base class
-
-	return CLayoutBasePropertySheet::Create( pParent, style, styleEx );
-}
-
 bool CLayoutPropertySheet::IsSheetModified( void ) const
 {
 	if ( NULL == m_hWnd )
 		return false;				// window not yet created
-	return m_alwaysModified || CLayoutBasePropertySheet::IsSheetModified();
+
+	return m_alwaysModified || __super::IsSheetModified();
 }
 
 void CLayoutPropertySheet::LayoutSheet( void )
@@ -309,7 +312,40 @@ void CLayoutPropertySheet::LayoutSheet( void )
 	if ( m_pLayoutEngine->IsInitialized() )
 		m_pLayoutEngine->LayoutControls();
 
-	CLayoutBasePropertySheet::LayoutSheet();
+	__super::LayoutSheet();
+}
+
+void CLayoutPropertySheet::PreSubclassWindow( void )
+{
+	CLayoutBasePropertySheet::PreSubclassWindow();
+
+	if ( IsModeless() )
+	{
+		m_modeless = m_autoDelete = true;
+		CPopupWndPool::Instance()->AddWindow( this );
+	}
+}
+
+void CLayoutPropertySheet::PostNcDestroy( void )
+{
+	CLayoutBasePropertySheet::PostNcDestroy();
+
+	if ( m_autoDelete )
+		delete this;
+}
+
+BOOL CLayoutPropertySheet::PreTranslateMessage( MSG* pMsg )
+{
+	return
+		__super::PreTranslateMessage( pMsg ) ||				// handle base first because it must relay tooltip events
+		m_accelPool.TranslateAccels( pMsg, m_hWnd );
+}
+
+BOOL CLayoutPropertySheet::OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo )
+{
+	return
+		__super::OnCmdMsg( id, code, pExtra, pHandlerInfo ) ||
+		HandleCmdMsg( id, code, pExtra, pHandlerInfo );							// some commands may handled by the CWinApp
 }
 
 
@@ -329,23 +365,17 @@ BEGIN_MESSAGE_MAP( CLayoutPropertySheet, CLayoutBasePropertySheet )
 	ON_MESSAGE( WM_KICKIDLE, OnKickIdle )
 END_MESSAGE_MAP()
 
-BOOL CLayoutPropertySheet::PreTranslateMessage( MSG* pMsg )
+void CLayoutPropertySheet::OnDestroy( void )
 {
-	return
-		CLayoutBasePropertySheet::PreTranslateMessage( pMsg ) ||				// handle base first because it must relay tooltip events
-		m_accelPool.TranslateAccels( pMsg, m_hWnd );
-}
+	if ( m_modeless )
+		CPopupWndPool::Instance()->RemoveWindow( this );
 
-BOOL CLayoutPropertySheet::OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo )
-{
-	return
-		CLayoutBasePropertySheet::OnCmdMsg( id, code, pExtra, pHandlerInfo ) ||
-		HandleCmdMsg( id, code, pExtra, pHandlerInfo );							// some commands may handled by the CWinApp
+	CLayoutBasePropertySheet::OnDestroy();
 }
 
 BOOL CLayoutPropertySheet::OnInitDialog( void )
 {
-	BOOL result = CLayoutBasePropertySheet::OnInitDialog();
+	BOOL result = __super::OnInitDialog();
 
 	if ( m_styleMinMax != 0 )
 		ModifyStyle( 0, m_styleMinMax, SWP_FRAMECHANGED );
@@ -378,20 +408,12 @@ BOOL CLayoutPropertySheet::OnNcCreate( CREATESTRUCT* pCreate )
 			MoveWindow( &windowRect, false );
 		}
 
-	return CLayoutBasePropertySheet::OnNcCreate( pCreate );
-}
-
-void CLayoutPropertySheet::PostNcDestroy( void )
-{
-	CLayoutBasePropertySheet::PostNcDestroy();
-
-	if ( m_bModeless )
-		delete this;
+	return __super::OnNcCreate( pCreate );
 }
 
 void CLayoutPropertySheet::OnGetMinMaxInfo( MINMAXINFO* pMinMaxInfo )
 {
-	CLayoutBasePropertySheet::OnGetMinMaxInfo( pMinMaxInfo );
+	__super::OnGetMinMaxInfo( pMinMaxInfo );
 
 	CPoint minWindowSize = m_pLayoutEngine->GetMinWindowSize();
 	pMinMaxInfo->ptMinTrackSize = minWindowSize;
@@ -411,12 +433,12 @@ void CLayoutPropertySheet::OnInitMenuPopup( CMenu* pPopupMenu, UINT index, BOOL 
 	if ( !isSysMenu )
 		ui::UpdateMenuUI( this, pPopupMenu );
 
-	CLayoutBasePropertySheet::OnInitMenuPopup( pPopupMenu, index, isSysMenu );
+	__super::OnInitMenuPopup( pPopupMenu, index, isSysMenu );
 }
 
 LRESULT CLayoutPropertySheet::OnNcHitTest( CPoint point )
 {
-	LRESULT hitTest = CLayoutBasePropertySheet::OnNcHitTest( point );
+	LRESULT hitTest = __super::OnNcHitTest( point );
 
 	if ( HTCLIENT == hitTest )
 		if ( layout::CResizeGripper* pResizeGripper = m_pLayoutEngine->GetResizeGripper() )
@@ -433,7 +455,7 @@ LRESULT CLayoutPropertySheet::OnNcHitTest( CPoint point )
 
 void CLayoutPropertySheet::OnPaint( void )
 {
-	CLayoutBasePropertySheet::OnPaint();
+	__super::OnPaint();
 	m_pLayoutEngine->HandlePostPaint();
 }
 
@@ -444,7 +466,7 @@ void CLayoutPropertySheet::OnSysCommand( UINT cmdId, LPARAM lParam )
 		OnCommand( ID_APP_ABOUT, 0 );
 		return;
 	}
-	CLayoutBasePropertySheet::OnSysCommand( cmdId, lParam );
+	__super::OnSysCommand( cmdId, lParam );
 }
 
 void CLayoutPropertySheet::OnApplyNow( void )
@@ -472,5 +494,5 @@ void CLayoutPropertySheet::OnCancel( void )
 LRESULT CLayoutPropertySheet::OnKickIdle( WPARAM wParam, LPARAM lParam )
 {
 	OnIdleUpdateControls();
-	return CLayoutBasePropertySheet::OnKickIdle( wParam, lParam );
+	return __super::OnKickIdle( wParam, lParam );
 }

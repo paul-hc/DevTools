@@ -10,13 +10,17 @@
 // base class for top level modeless or modal property sheets
 
 abstract class CLayoutPropertySheet : public CLayoutBasePropertySheet
-									, public CPopupDlgBase
-									, public ui::ILayoutEngine
+	, public CPopupDlgBase
+	, public ui::ILayoutEngine
 {
+	// hidden base methods
+	using CLayoutBasePropertySheet::Create;
 protected:
 	CLayoutPropertySheet( const std::tstring& title, CWnd* pParent, UINT selPageIndex = 0 );
 public:
 	virtual ~CLayoutPropertySheet();
+
+	bool CreateModeless( CWnd* pParent = NULL, DWORD style = UINT_MAX, DWORD styleEx = 0 );
 
 	enum SingleTransactionButtons { ShowOkCancel, ShowOnlyClose };
 
@@ -60,12 +64,14 @@ public:
 	// generated stuff
 public:
 	virtual void BuildPropPageArray( void );
-	virtual BOOL Create( CWnd* pParent = NULL, DWORD style = UINT_MAX, DWORD styleEx = 0 ); // for modeless creation
-	virtual void PostNcDestroy( void );
 	virtual BOOL PreTranslateMessage( MSG* pMsg );
 	virtual BOOL OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo );
 	virtual BOOL OnInitDialog( void );
 protected:
+	virtual void PreSubclassWindow( void );
+	virtual void PostNcDestroy( void );
+protected:
+	virtual void OnDestroy( void );
 	afx_msg BOOL OnNcCreate( CREATESTRUCT* pCreate );
 	afx_msg void OnGetMinMaxInfo( MINMAXINFO* pMinMaxInfo );
 	afx_msg void OnContextMenu( CWnd* pWnd, CPoint screenPos );

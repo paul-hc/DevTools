@@ -23,6 +23,10 @@ class CLayoutDialog : public TMfcBaseDialog
 					, public ui::ICustomCmdInfo
 {
 	void Construct( void );
+
+	// hidden base methods
+	using TMfcBaseDialog::Create;
+	using TMfcBaseDialog::CreateIndirect;
 protected:
 	CLayoutDialog( void );			// for modeless dialog
 public:
@@ -30,8 +34,10 @@ public:
 	CLayoutDialog( const TCHAR* pTemplateName, CWnd* pParent = NULL );
 	virtual ~CLayoutDialog();
 
+	bool CreateModeless( UINT templateId = 0, CWnd* pParentWnd = NULL, int cmdShow = SW_SHOW );		// works with both modal and modeless constructors
+	bool IsModeless( void ) const { return m_modeless; }
+
 	const std::tstring& GetSection( void ) const { return m_regSection; }
-	bool IsModeless( void ) const { return HasFlag( m_dlgFlags, Modeless ); }
 
 	// ui::ILayoutEngine interface
 	virtual CLayoutEngine& GetLayoutEngine( void );
@@ -54,9 +60,6 @@ private:
 	void RestorePlacement( void );
 	void ModifySystemMenu( void );
 private:
-	enum Flag { Modeless = 1 << 0 };
-
-	DWORD m_dlgFlags;
 	std::auto_ptr<CLayoutEngine> m_pLayoutEngine;
 	std::auto_ptr<CLayoutPlacement> m_pPlacement;		// persistent
 protected:
@@ -67,15 +70,17 @@ protected:
 
 	// generated stuff
 protected:
+	virtual void PreSubclassWindow( void );
+	virtual void PostNcDestroy( void );
+	virtual void DoDataExchange( CDataExchange* pDX );
 	virtual void OnOK( void );
 	virtual void OnCancel( void );
-	virtual void DoDataExchange( CDataExchange* pDX );
 public:
 	virtual BOOL DestroyWindow( void );
 	virtual BOOL PreTranslateMessage( MSG* pMsg );
 	virtual BOOL OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo );
 protected:
-	afx_msg void OnDestroy( void );
+	virtual void OnDestroy( void );
 	afx_msg void OnSize( UINT sizeType, int cx, int cy );
 	afx_msg void OnGetMinMaxInfo( MINMAXINFO* pMinMaxInfo );
 	afx_msg LRESULT OnNcHitTest( CPoint screenPoint );

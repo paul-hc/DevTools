@@ -27,7 +27,7 @@ namespace layout
 	{
 		{ IDC_OPEN_DIALOG_BUTTON, MoveX },
 		{ IDC_OPEN_PROPERTIES_BUTTON, MoveX },
-		{ IDC_CREATE_PROPERTIES_BUTTON, MoveX },
+		{ IDC_MODELESS_PROPERTIES_BUTTON, MoveX },
 		{ IDC_DISABLE_SMOOTH_RESIZE_TOGGLE, MoveX },
 		{ IDC_DISABLE_THEMES_TOGGLE, MoveX },
 
@@ -161,7 +161,7 @@ void CDemoTemplate::DoDataExchange( CDataExchange* pDX )
 	ui::DDX_ButtonIcon( pDX, IDC_REPLACE_FILES_BUTTON, ID_EDIT_REPLACE );
 	m_detailSheet.DDX_DetailSheet( pDX, IDC_DETAIL_SHEET_STATIC );
 
-	if ( !pDX->m_bSaveAndValidate )
+	if ( DialogOutput == pDX->m_bSaveAndValidate )
 	{
 		if ( firstInit )
 			ui::StretchWindow( m_pickFormatStatic, m_formatCombo, ui::Height, CSize( 0, 1 ) );
@@ -180,7 +180,7 @@ BOOL CDemoTemplate::OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINF
 BEGIN_MESSAGE_MAP( CDemoTemplate, CCmdTarget )
 	ON_BN_CLICKED( IDC_OPEN_DIALOG_BUTTON, OnBnClicked_OpenDialog )
 	ON_BN_CLICKED( IDC_OPEN_PROPERTIES_BUTTON, OnBnClicked_OpenPropertySheet )
-	ON_BN_CLICKED( IDC_CREATE_PROPERTIES_BUTTON, OnBnClicked_CreatePropertySheet )
+	ON_BN_CLICKED( IDC_MODELESS_PROPERTIES_BUTTON, OnBnClicked_ModelessPropertySheet )
 	ON_BN_CLICKED( IDC_DISABLE_SMOOTH_RESIZE_TOGGLE, OnToggle_DisableSmoothResize )
 	ON_BN_CLICKED( IDC_DISABLE_THEMES_TOGGLE, OnToggle_DisableThemes )
 	ON_BN_CLICKED( IDC_DROP_RIGHT_ARROW_STATIC, OnBnClicked_DropFormat )
@@ -233,10 +233,10 @@ void CDemoTemplate::OnBnClicked_OpenPropertySheet( void )
 	sheet.DoModal();
 }
 
-void CDemoTemplate::OnBnClicked_CreatePropertySheet( void )
+void CDemoTemplate::OnBnClicked_ModelessPropertySheet( void )
 {
-	CTestPropertySheet* pModelessSheet = new CTestPropertySheet;
-	VERIFY( pModelessSheet->Create( m_pOwner ) );
+	CTestPropertySheet* pModelessSheet = new CTestPropertySheet();
+	VERIFY( pModelessSheet->CreateModeless( m_pOwner ) );
 }
 
 void CDemoTemplate::OnBnClicked_DropFormat( void )
@@ -556,8 +556,8 @@ CDetailsPage::CDetailsPage( void )
 {
 	RegisterCtrlLayout( ARRAY_PAIR( layout::detailsPageStyles ) );
 
-	m_detailSheet.AddPage( new CListPage );
-	m_detailSheet.AddPage( new CEditPage );
+	m_detailSheet.AddPage( new CListPage() );
+	m_detailSheet.AddPage( new CEditPage() );
 }
 
 CDetailsPage::~CDetailsPage()
@@ -568,7 +568,7 @@ void CDetailsPage::DoDataExchange( CDataExchange* pDX )
 {
 	if ( NULL == m_detailSheet.m_hWnd )
 		if ( GetMarkupDepth( this ) <= MaxDepth )
-			m_detailSheet.AddPage( new CDetailsPage );
+			m_detailSheet.AddPage( new CDetailsPage() );
 
 	m_detailSheet.DDX_DetailSheet( pDX, IDC_DETAIL_SHEET_STATIC );
 	CLayoutPropertyPage::DoDataExchange( pDX );

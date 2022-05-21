@@ -5,6 +5,7 @@
 #include "AboutBox.h"
 #include "ImageStore.h"
 #include "CmdUpdate.h"
+#include "PopupDlgBase.h"
 #include "ToolStrip.h"
 #include "Utilities.h"
 #include "resource.h"
@@ -203,6 +204,9 @@ BOOL CBaseApp<BaseClass>::OnIdle( LONG count )
 {
 	if ( !m_isInteractive )
 		m_isInteractive = true;
+
+	if ( count <= 0 )
+		CPopupWndPool::Instance()->OnIdle();
 
 	return __super::OnIdle( count );
 }

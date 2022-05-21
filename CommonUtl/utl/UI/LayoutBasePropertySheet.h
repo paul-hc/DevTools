@@ -16,10 +16,15 @@ abstract class CLayoutBasePropertySheet : public CPropertySheet
 										, public ui::ICustomCmdInfo
 {
 	friend class CScopedApplyMacroCmd;
+
+	// hidden base methods
+	using CPropertySheet::IsModeless;		// hide the base version with BOOL return type
 protected:
 	CLayoutBasePropertySheet( const TCHAR* pTitle, CWnd* pParent, UINT selPageIndex );
 public:
 	virtual ~CLayoutBasePropertySheet();
+
+	bool IsModeless( void ) const { return CPropertySheet::IsModeless() != FALSE; }
 
 	const std::tstring& GetSection( void ) const { return m_regSection; }
 	CMacroCommand* GetApplyMacroCmd( void ) const { return m_pApplyMacroCmd.get(); }
