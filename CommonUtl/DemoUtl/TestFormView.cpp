@@ -101,7 +101,6 @@ BEGIN_MESSAGE_MAP( CTestFormView, CLayoutFormView )
 	ON_BN_CLICKED( ID_STUDY_TASK_DIALOG, OnStudyTaskDialog )
 	ON_BN_CLICKED( ID_STUDY_MISC_DIALOG, OnStudyMiscDialog )
 	ON_BN_CLICKED( IDC_BUDDY_MODELESS_CHECK, OnToggle_ModelessBuddyDlg )
-	ON_UPDATE_COMMAND_UI( IDC_BUDDY_MODELESS_CHECK, OnUpdate_ModelessBuddyDlg )
 END_MESSAGE_MAP()
 
 void CTestFormView::OnRunImageUnitTests( void )
@@ -161,9 +160,4 @@ void CTestFormView::OnStudyMiscDialog( void )
 void CTestFormView::OnToggle_ModelessBuddyDlg( void )
 {
 	AfxGetApp()->WriteProfileInt( reg::section_formView, reg::entry_modelessBuddyDlg, IsDlgButtonChecked( IDC_BUDDY_MODELESS_CHECK ) );
-}
-
-void CTestFormView::OnUpdate_ModelessBuddyDlg( CCmdUI* pCmdUI )
-{
-	pCmdUI->Enable();
 }

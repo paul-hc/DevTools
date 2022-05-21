@@ -44,7 +44,6 @@ protected:
 	afx_msg void OnStudyTaskDialog( void );
 	afx_msg void OnStudyMiscDialog( void );
 	afx_msg void OnToggle_ModelessBuddyDlg( void );
-	afx_msg void OnUpdate_ModelessBuddyDlg( CCmdUI* pCmdUI );
 
 	DECLARE_MESSAGE_MAP()
 };
