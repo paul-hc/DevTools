@@ -37,10 +37,9 @@ namespace wnd
 		return CWindowInfoStore::Instance().LookupCaption( hWnd );
 	}
 
-	std::tstring FormatWindowTextLine( HWND hWnd, size_t maxLen /*= 64*/ )
+	std::tstring GetWindowTextLine( HWND hWnd, size_t maxLen /*= 64*/ )
 	{
-		std::tstring text = wnd::GetWindowText( hWnd );
-		return str::SingleLine( text, maxLen );
+		return FormatWindowTextLine( wnd::GetWindowText( hWnd ), maxLen );
 	}
 
 	HICON GetWindowIcon( HWND hWnd )
@@ -48,37 +47,44 @@ namespace wnd
 		return CWindowInfoStore::Instance().LookupIcon( hWnd );
 	}
 
-	std::tstring FormatBriefWndInfo( HWND hWnd )
+	std::tstring FormatBriefWndInfo( HWND hWnd, const std::tstring& wndText )
 	{
 		std::tstring info; info.reserve( 128 );
-		static const TCHAR sep[] = _T(" "), commaSep[] = _T(", ");
+		static const TCHAR s_sep[] = _T(" "), s_commaSep[] = _T(", ");
 
-		stream::Tag( info, wnd::FormatWindowHandle( hWnd ), sep );
+		stream::Tag( info, wnd::FormatWindowHandle( hWnd ), s_sep );
 
 		if ( ui::IsValidWindow( hWnd ) )
 		{
-			stream::Tag( info, str::Format( _T("\"%s\" %s"), wnd::FormatWindowTextLine( hWnd ).c_str(), wc::FormatClassName( hWnd ).c_str() ), sep );
+			stream::Tag( info, str::Format( _T("\"%s\" %s"), wnd::FormatWindowTextLine( wndText ).c_str(), wc::FormatClassName( hWnd ).c_str() ), s_sep );
 
 			DWORD style = ui::GetStyle( hWnd );
 			std::tstring status;
 
 			if ( ui::IsTopMost( hWnd ) )
-				stream::Tag( status, _T("Top-most"), commaSep );
+				stream::Tag( status, _T("Top-most"), s_commaSep );
 			if ( !HasFlag( style, WS_VISIBLE ) )
-				stream::Tag( status, _T("Hidden"), commaSep );
+				stream::Tag( status, _T("Hidden"), s_commaSep );
 			if ( HasFlag( style, WS_DISABLED ) )
-				stream::Tag( status, _T("Disabled"), commaSep );
+				stream::Tag( status, _T("Disabled"), s_commaSep );
 			if ( IsSlowWindow( hWnd ) )
-				stream::Tag( status, _T("Slow Access"), commaSep );
+				stream::Tag( status, _T("Slow Access"), s_commaSep );
 
 			if ( !status.empty() )
-				stream::Tag( info, str::Format( _T("(%s)"), status.c_str() ), sep );
+				stream::Tag( info, str::Format( _T("(%s)"), status.c_str() ), s_sep );
 		}
 		else
-			stream::Tag( info, _T("<EXPIRED>"), sep );
+			stream::Tag( info, _T("<EXPIRED>"), s_sep );
 
 		return info;
 	}
+
+	std::tstring FormatWindowTextLine( const std::tstring& text, size_t maxLen /*= 64*/ )
+	{
+		std::tstring outText = text;
+		return str::SingleLine( outText, maxLen );
+	}
+
 
 	CRect GetCaptionRect( HWND hWnd )
 	{	// returns the caption rect in client coordinates

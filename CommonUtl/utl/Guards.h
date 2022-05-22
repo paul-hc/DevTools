@@ -34,6 +34,8 @@ namespace utl
 		~CSlowSectionGuard() { Commit(); }
 
 		bool IsTimeout( void ) const { return m_timer.ElapsedSeconds() > m_timeoutSecs; }
+		const CTimer& GetTimer( void ) const { return m_timer; }
+
 		bool Commit( void );
 		bool Restart( const std::tstring& context );
 	private:

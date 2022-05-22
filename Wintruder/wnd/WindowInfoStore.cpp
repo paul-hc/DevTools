@@ -12,18 +12,30 @@
 #endif
 
 
+// CWindowInfoStore::CWindowInfo implementation
+
+CWindowInfoStore::CWindowInfo::CWindowInfo( const std::tstring& caption, HWND hWnd, HICON hIcon )
+	: m_caption( caption )
+	, m_briefInfo( wnd::FormatBriefWndInfo( hWnd, m_caption ) )
+	, m_hIcon( hIcon )
+{
+}
+
+
+// CWindowInfoStore implementation
+
 double CWindowInfoStore::s_timeoutSecs = 0.5;
 
 CWindowInfoStore& CWindowInfoStore::Instance( void )
 {
-	static CWindowInfoStore store;
-	return store;
+	static CWindowInfoStore s_store;
+	return s_store;
 }
 
 const CWindowInfoStore::CWindowInfo* CWindowInfoStore::FindInfo( HWND hWnd ) const
 {
 	ASSERT_PTR( hWnd );
-	stdext::hash_map< HWND, CWindowInfo >::const_iterator itCached = m_slowCache.find( hWnd );
+	stdext::hash_map<HWND, CWindowInfo>::const_iterator itCached = m_slowCache.find( hWnd );
 	return itCached != m_slowCache.end() ? &itCached->second : NULL;
 }
 
@@ -39,7 +51,12 @@ std::tstring CWindowInfoStore::LookupCaption( HWND hWnd )
 	std::tstring caption = ui::GetWindowText( hWnd );
 
 	if ( slowGuard.IsTimeout() )		// slow window access?
-		m_slowCache[ hWnd ] = CWindowInfo( caption, QueryWndIcon( hWnd ) );				// cache the caption/icon (including NULL icon)
+	{
+		CWindowInfo info( caption, hWnd, QueryWndIcon( hWnd ) );
+
+		info.m_briefInfo += str::Format( _T("  GetWindowText<%.3f seconds>"), slowGuard.GetTimer().ElapsedSeconds() );
+		m_slowCache[ hWnd ] = info;		// cache the caption/icon (including NULL icon)
+	}
 
 	return caption;
 }
@@ -57,7 +74,12 @@ HICON CWindowInfoStore::LookupIcon( HWND hWnd )
 	HICON hIcon = QueryWndIcon( hWnd );
 
 	if ( slowGuard.IsTimeout() )			// slow window access?
-		m_slowCache[ hWnd ] = CWindowInfo( ui::GetWindowText( hWnd ), hIcon );			// cache the caption/icon (including NULL icon)
+	{
+		CWindowInfo info( ui::GetWindowText( hWnd ), hWnd, hIcon );
+
+		info.m_briefInfo += str::Format( _T("  GetIcon<%.3f seconds>=0x%08X"), slowGuard.GetTimer().ElapsedSeconds(), info.m_hIcon );
+		m_slowCache[ hWnd ] = info;			// cache the caption/icon (including NULL icon)
+	}
 
 	return hIcon;
 }
@@ -66,7 +88,7 @@ HICON CWindowInfoStore::CacheIcon( HWND hWnd )
 {
 	utl::CSlowSectionGuard slowGuard( FormatContext( hWnd, _T("LookupIcon()") ), s_timeoutSecs );
 	HICON hIcon = GetIcon( hWnd );
-	m_slowCache[ hWnd ] = CWindowInfo( ui::GetWindowText( hWnd ), hIcon );	// cache the caption/icon (including NULL icon)
+	m_slowCache[ hWnd ] = CWindowInfo( ui::GetWindowText( hWnd ), hWnd, hIcon );	// cache the caption/icon (including NULL icon)
 	return hIcon;
 }
 

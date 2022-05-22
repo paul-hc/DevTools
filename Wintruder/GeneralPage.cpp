@@ -289,7 +289,7 @@ void CGeneralPage::OnTargetWndChanged( const CWndSpot& targetWnd )
 			_T("(L=%d, T=%d) (R=%d, B=%d),  W=%d, H=%d"),
 			 targetWnd.m_hWnd,
 			 wc::FormatClassName( targetWnd ).c_str(),
-			 wnd::FormatWindowTextLine( targetWnd ).c_str(),
+			 wnd::GetWindowTextLine( targetWnd ).c_str(),
 			 hlp::FormatIdent( targetWnd ).c_str(),
 			 style,
 			 styleEx,

@@ -35,4 +35,10 @@ private:
 };
 
 
+namespace wnd
+{
+	void QueryAncestorBranchPath( std::vector<HWND>& rBranchPath, HWND hWnd, HWND hWndAncestor = ::GetDesktopWindow() );		// bottom-up ancestor path order from [hWnd, ..., hWndAncestor]
+}
+
+
 #endif // WndEnumerator_h

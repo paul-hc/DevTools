@@ -22,9 +22,10 @@ private:
 	struct CWindowInfo
 	{
 		CWindowInfo( void ) : m_hIcon( NULL ) {}
-		CWindowInfo( const std::tstring& caption, HICON hIcon ) : m_caption( caption ), m_hIcon( hIcon ) {}
+		CWindowInfo( const std::tstring& caption, HWND hWnd, HICON hIcon );
 	public:
 		std::tstring m_caption;
+		std::tstring m_briefInfo;
 		HICON m_hIcon;
 	};
 
@@ -36,7 +37,7 @@ private:
 	static HICON QueryWndIcon( HWND hWnd );
 	static HICON GetIcon( HWND hWnd );
 private:
-	stdext::hash_map< HWND, CWindowInfo > m_slowCache;			// caches icons for windows that react slowly to WM_GETICON, e.g. some elevated processes running in Windows 10
+	stdext::hash_map<HWND, CWindowInfo> m_slowCache;			// caches icons for windows that react slowly to WM_GETICON, e.g. some elevated processes running in Windows 10
 
 	static double s_timeoutSecs;			// threshold for slow windows (0.5 seconds)
 };

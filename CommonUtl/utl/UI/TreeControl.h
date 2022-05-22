@@ -87,6 +87,8 @@ public:
 
 	bool HasItemState( HTREEITEM hItem, UINT stateMask ) const { return ( GetItemState( hItem, stateMask ) & stateMask ) != 0; }
 
+	int GetItemIndentLevel( HTREEITEM hItem ) const;		// 0 for root item, etc
+
 	BOOL EnsureVisible( HTREEITEM hItem );				// including item icon
 	bool SelectItem( HTREEITEM hItem );					// select item and make it visible
 	bool RefreshItem( HTREEITEM hItem );				// notifies parent to refresh the item
@@ -107,9 +109,9 @@ public:
 	void ExpandBranch( HTREEITEM hItem, bool expand = true );
 
 	template< typename Type >
-	HTREEITEM FindItemWithData( Type data, HTREEITEM hStart = TVI_ROOT ) const;
+	HTREEITEM FindItemWithData( Type data, HTREEITEM hStart = TVI_ROOT, RecursionDepth depth = Deep ) const;
 
-	HTREEITEM FindItemWithObject( const utl::ISubject* pObject, HTREEITEM hStart = TVI_ROOT ) const { return FindItemWithData( pObject, hStart ); }
+	HTREEITEM FindItemWithObject( const utl::ISubject* pObject, HTREEITEM hStart = TVI_ROOT, RecursionDepth depth = Deep ) const { return FindItemWithData( pObject, hStart, depth ); }
 protected:
 	void ClearData( void );
 
@@ -158,7 +160,11 @@ namespace func
 	private:
 		UINT m_code;		// TVE_EXPAND/TVE_COLLAPSE
 	};
+}
 
+
+namespace pred
+{
 	struct HasItemData
 	{
 		template< typename Type >
@@ -208,12 +214,22 @@ HTREEITEM CTreeControl::FirstThat( Pred pred, HTREEITEM hStart /*= TVI_ROOT*/ ) 
 }
 
 template< typename Type >
-inline HTREEITEM CTreeControl::FindItemWithData( Type data, HTREEITEM hStart /*= TVI_ROOT*/ ) const
+inline HTREEITEM CTreeControl::FindItemWithData( Type data, HTREEITEM hStart /*= TVI_ROOT*/, RecursionDepth depth /*= Deep*/ ) const
 {
 	if ( NULL == hStart )
 		return NULL;
 
-	return FirstThat( func::HasItemData( data ), hStart );
+	pred::HasItemData hasDataPred( data );
+
+	if ( Deep == depth )
+		return FirstThat( hasDataPred, hStart );
+
+	// children shallow search
+	for ( HTREEITEM hChild = GetChildItem( hStart ); hChild != NULL; hChild = GetNextSiblingItem( hChild ) )
+		if ( hasDataPred( this, hChild ) )
+			return hChild;
+
+	return NULL;
 }
 
 

@@ -9,6 +9,21 @@
 #endif
 
 
+namespace wnd
+{
+	void QueryAncestorBranchPath( std::vector< HWND >& rBranchPath, HWND hWnd, HWND hWndAncestor /*= ::GetDesktopWindow()*/ )	// bottom-up ancestor path order from [hWnd, ..., hWndAncestor]
+	{
+		for ( ; hWnd != NULL; hWnd = ::GetAncestor( hWnd, GA_PARENT ) )		// real parent, NULL if desktop - GetParent( hWnd ) may return the owner
+		{
+			rBranchPath.push_back( hWnd );
+
+			if ( hWnd == hWndAncestor )
+				break;
+		}
+	}
+}
+
+
 // CWndEnumBase implementation
 
 CWndEnumBase::CWndEnumBase( void )

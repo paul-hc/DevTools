@@ -237,6 +237,21 @@ bool CTreeControl::IsExpandLazyChildren( const NMTREEVIEW* pNmTreeView ) const
 		( HasFlag( pNmTreeView->action, TVE_TOGGLE ) && !HasFlag( pNmTreeView->itemNew.state, TVIS_EXPANDED ) );
 }
 
+int CTreeControl::GetItemIndentLevel( HTREEITEM hItem ) const
+{
+	ASSERT_PTR( hItem );
+
+	if ( TVI_ROOT == hItem )
+		return -1;				// "above root" logical item
+
+	int indentLevel = 0;
+
+	while ( ( hItem = GetParentItem( hItem ) ) != NULL )
+		++indentLevel;
+
+	return indentLevel;
+}
+
 BOOL CTreeControl::EnsureVisible( HTREEITEM hItem )
 {
 	BOOL result = __super::EnsureVisible( hItem );

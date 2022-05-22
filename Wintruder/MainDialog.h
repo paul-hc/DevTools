@@ -21,9 +21,9 @@ enum DetailPage;
 
 
 class CMainDialog : public CBaseMainDialog
-				  , public IWndObserver
-				  , public IEventObserver
-				  , private CInternalChange
+	, public IWndObserver
+	, public IEventObserver
+	, private CInternalChange
 {
 public:
 	CMainDialog( void );

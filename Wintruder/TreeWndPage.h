@@ -5,6 +5,7 @@
 #include <hash_map>
 #include "utl/UI/LayoutPropertyPage.h"
 #include "utl/UI/TreeControl.h"
+#include "utl/UI/TextEffect.h"
 #include "wnd/WndEnumerator.h"
 #include "Observers.h"
 
@@ -28,13 +29,18 @@ private:
 	virtual void CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARAM rowKey, int subItem, CListLikeCtrlBase* pCtrl ) const;
 private:
 	void RefreshTreeContents( void );
-	void RefreshTreeParentBranch( HTREEITEM hItem );
 	bool RefreshTreeItem( HTREEITEM hItem );
 
+	// targeted refresh
+	void RefreshTreeParentBranch( HTREEITEM hItem );
+	HTREEITEM RefreshBranchOf( HWND hWndTarget );		// refresh branch under desktop window down to the hWndTarget item (merge existing, insert missing)
+
 	void SetupTreeItems( void );
-	HTREEITEM InsertWndItem( HTREEITEM hItemParent, HWND hWnd, int indent, int image = -1 );
+	HTREEITEM InsertWndItem_Old( HTREEITEM hItemParent, HWND hWnd, int indent, int image = -1 );
+
 	HTREEITEM FindItemWithWnd( HWND hWnd ) const;
 	HWND FindValidParentItem( HTREEITEM hItem ) const;
+	HTREEITEM FindValidTargetItem( void ) const;		// target refers to the current CWndSpot
 private:
 	bool m_destroying;
 
@@ -87,25 +93,36 @@ namespace wt
 	};
 
 
+	typedef std::pair<HTREEITEM, int> TTreeItemIndent;
+
+
 	class CWndTreeBuilder : public CWndEnumBase
 	{
 	public:
 		CWndTreeBuilder( CTreeControl* pTreeCtrl, CLogger* pLogger = NULL );
 
 		size_t GetCount( void ) const { return m_wndToItemMap.size(); }
+		void SetInsertedEffect( const ui::CTextEffect& insertedEffect ) { m_insertedEffect = insertedEffect; }
 
-		int RegisterItemIndent( HTREEITEM hItem );
+		const TTreeItemIndent& MapParentItem( HTREEITEM hParentItem );			// map insert, starting point for top-down insert/merge
+
+		template< typename IteratorT >
+		HTREEITEM MergeBranchPath( IteratorT itStartWnd, IteratorT itEndWnd );	// iterate in top-down order
 	protected:
 		// base overrides
 		virtual void AddWndItem( HWND hWnd );
 	private:
-		typedef std::pair<HTREEITEM, int> TTreeItemIndent;
+		const TTreeItemIndent& InsertWndItem( HWND hWnd, const TTreeItemIndent& parentPair, HTREEITEM hInsertAfter = TVI_LAST );
+		const TTreeItemIndent& MergeWndItem( HWND hWnd, const TTreeItemIndent& parentPair, HTREEITEM hInsertAfter = TVI_LAST );
 
 		const TTreeItemIndent* FindWndItem( HWND hWnd ) const;
 		void LogWnd( HWND hWnd, int indent ) const;
+
+		const TTreeItemIndent& RegisterParentWnd( HWND hWndParent );			// map lookup or insert
 	private:
 		CTreeControl* m_pTreeCtrl;
 		CLogger* m_pLogger;
+		ui::CTextEffect m_insertedEffect;
 		stdext::hash_map< HWND, TTreeItemIndent > m_wndToItemMap;		// HWND -> [item, indent]
 	};
 }

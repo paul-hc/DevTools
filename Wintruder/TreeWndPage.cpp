@@ -94,50 +94,105 @@ namespace wt
 	{
 		ASSERT( ::IsWindow( hWnd ) );
 
-		HWND hParentWnd = ::GetAncestor( hWnd, GA_PARENT );			// real parent, NULL if desktop - GetParent( hWnd ) may return the owner
-		const TTreeItemIndent* pParentPair = NULL;
+		HWND hParentWnd = wnd::GetRealParent( hWnd );
 
-		if ( hParentWnd != NULL )
-			pParentPair = FindWndItem( hParentWnd );
-
-		CItemInfo info( hWnd, NULL == hParentWnd ? Image_Desktop : -1 );
-		HTREEITEM hItemParent = pParentPair != NULL ? pParentPair->first : TVI_ROOT;
-
-		TTreeItemIndent& rPair = m_wndToItemMap[ hWnd ];
-
-		rPair.first = m_pTreeCtrl->InsertItem( info.m_item.mask, info.m_item.pszText,
-											   info.m_item.iImage, info.m_item.iSelectedImage, info.m_item.state, info.m_item.stateMask,
-											   info.m_item.lParam, hItemParent, TVI_LAST );
-
-		rPair.second = pParentPair != NULL ? ( pParentPair->second + 1 ) : 0;
-
-		LogWnd( hWnd, rPair.second );
+		InsertWndItem( hWnd, RegisterParentWnd( hParentWnd ) );
 	}
 
-	const CWndTreeBuilder::TTreeItemIndent* CWndTreeBuilder::FindWndItem( HWND hWnd ) const
+	const TTreeItemIndent& CWndTreeBuilder::InsertWndItem( HWND hWnd, const TTreeItemIndent& parentPair, HTREEITEM hInsertAfter /*= TVI_LAST*/ )
+	{
+		ASSERT_PTR( hWnd );
+
+		HTREEITEM hItemParent = parentPair.first;
+		CItemInfo info( hWnd, TVI_ROOT == hItemParent ? Image_Desktop : -1 );
+		TTreeItemIndent& rItemPair = m_wndToItemMap[ hWnd ];
+
+		rItemPair.first = m_pTreeCtrl->InsertItem( info.m_item.mask, info.m_item.pszText,
+												   info.m_item.iImage, info.m_item.iSelectedImage, info.m_item.state, info.m_item.stateMask,
+												   info.m_item.lParam, hItemParent, hInsertAfter );
+		rItemPair.second = parentPair.second + 1;
+
+		if ( !m_insertedEffect.IsNull() )
+			m_pTreeCtrl->MarkItem( rItemPair.first, m_insertedEffect );
+
+		LogWnd( hWnd, rItemPair.second );
+		return rItemPair;
+	}
+
+	const TTreeItemIndent& CWndTreeBuilder::MergeWndItem( HWND hWnd, const TTreeItemIndent& parentPair, HTREEITEM hInsertAfter /*= TVI_LAST*/ )
+	{
+		HTREEITEM hItem = m_pTreeCtrl->FindItemWithData( hWnd, parentPair.first, Shallow );
+
+		if ( NULL == hItem )
+			return InsertWndItem( hWnd, parentPair, hInsertAfter );
+		else
+		{
+			CItemInfo info( hWnd, TVI_ROOT == parentPair.first ? Image_Desktop : -1 );
+
+			VERIFY(
+				m_pTreeCtrl->SetItem( hItem, info.m_item.mask, info.m_item.pszText,
+									  info.m_item.iImage, info.m_item.iSelectedImage, info.m_item.state, info.m_item.stateMask,
+									  info.m_item.lParam )
+			);
+
+			return m_wndToItemMap[ hWnd ] = std::make_pair( hItem, parentPair.second + 1 );
+		}
+	}
+
+	const TTreeItemIndent& CWndTreeBuilder::MapParentItem( HTREEITEM hParentItem )
+	{
+		ASSERT_PTR( hParentItem );
+
+		HWND hWndParent = m_pTreeCtrl->GetItemDataAs<HWND>( hParentItem );
+		ASSERT_PTR( hWndParent );
+
+		TTreeItemIndent& rPair = m_wndToItemMap[ hWndParent ];
+
+		rPair.first = hParentItem;
+		rPair.second = m_pTreeCtrl->GetItemIndentLevel( hParentItem );
+		return rPair;
+	}
+
+	const TTreeItemIndent* CWndTreeBuilder::FindWndItem( HWND hWnd ) const
 	{
 		stdext::hash_map< HWND, TTreeItemIndent >::const_iterator itFound = m_wndToItemMap.find( hWnd );
 		return itFound != m_wndToItemMap.end() ? &itFound->second : NULL;
 	}
 
-	int CWndTreeBuilder::RegisterItemIndent( HTREEITEM hItem )
+	const TTreeItemIndent& CWndTreeBuilder::RegisterParentWnd( HWND hWndParent )
 	{
-		int indent = 0;
+		if ( const TTreeItemIndent* pFoundPair = FindWndItem( hWndParent ) )
+			return *pFoundPair;
 
-		for ( HTREEITEM hParent = hItem; ( hParent = m_pTreeCtrl->GetParentItem( hParent ) ) != NULL; )
-			++indent;
+		ENSURE( NULL == hWndParent );		// if a child window, should have already been registered by traversing from root via InsertWndItem()
 
-		HWND hWnd = m_pTreeCtrl->GetItemDataAs<HWND>( hItem );
+		TTreeItemIndent& rPair = m_wndToItemMap[ hWndParent ];	// include NULL hWnd for TVI_ROOT, indent level of -1
 
-		m_wndToItemMap[ hWnd ] = TTreeItemIndent( hItem, indent );
-		LogWnd( hWnd, indent );
-		return indent;
+		rPair.first = TVI_ROOT;
+		rPair.second = m_pTreeCtrl->GetItemIndentLevel( TVI_ROOT );
+		return rPair;
 	}
 
 	void CWndTreeBuilder::LogWnd( HWND hWnd, int indent ) const
 	{
 		if ( m_pLogger != NULL )
 			wt::LogWindow( hWnd, indent );
+	}
+
+	template< typename IteratorT >
+	HTREEITEM CWndTreeBuilder::MergeBranchPath( IteratorT itStartWnd, IteratorT itEndWnd )
+	{
+		REQUIRE( itStartWnd != itEndWnd );
+
+		TTreeItemIndent parentPair( TVI_ROOT, -1 );
+
+		if ( HWND hWndParent = wnd::GetRealParent( *itStartWnd ) )		// not starting at the destop window?
+			parentPair = MapParentItem( m_pTreeCtrl->FindItemWithData( hWndParent ) );
+
+		for ( ; itStartWnd != itEndWnd; ++itStartWnd )
+			parentPair = MergeWndItem( *itStartWnd, parentPair );
+
+		return parentPair.first;		// the deep item merged into the tree
 	}
 }
 
@@ -190,12 +245,17 @@ void CTreeWndPage::OnTargetWndChanged( const CWndSpot& targetWnd )
 
 		bool stale = hTargetItem != NULL && !ui::IsValidWindow( m_treeCtrl.GetItemDataAs<HWND>( hTargetItem ) );
 
-		if ( ( NULL == hTargetItem && !wnd::HasSlowWindows() ) ||
-			 ( stale && app::GetOptions()->m_autoUpdateRefresh ) )
-		{
-			app::GetSvc().PublishEvent( app::RefreshWndTree );		// content refresh and target selection
-			hTargetItem = m_treeCtrl.GetSelectedItem();				// should be the currently selected
-		}
+		if ( NULL == hTargetItem || stale )
+			if ( app::GetOptions()->m_autoUpdateRefresh )
+			{
+				app::GetSvc().PublishEvent( app::RefreshWndTree );		// content refresh and target selection
+				hTargetItem = m_treeCtrl.GetSelectedItem();				// should be the currently selected
+			}
+			else
+			{
+				const bool slowWindows = wnd::HasSlowWindows(); slowWindows;
+				hTargetItem = RefreshBranchOf( targetWnd.m_hWnd );
+			}
 	}
 
 	if ( hTargetItem != m_treeCtrl.GetSelectedItem() )
@@ -241,6 +301,7 @@ void CTreeWndPage::CombineTextEffectAt( ui::CTextEffect& rTextEffect, LPARAM row
 	}
 }
 
+
 void CTreeWndPage::RefreshTreeContents( void )
 {
 	CScopedInternalChange scopedChange( &m_treeCtrl );
@@ -251,11 +312,28 @@ void CTreeWndPage::RefreshTreeContents( void )
 	if ( HTREEITEM hRootItem = m_treeCtrl.GetRootItem() )
 		m_treeCtrl.Expand( hRootItem, TVE_EXPAND );
 
-	HTREEITEM hTargetItem = NULL;
-	if ( CWndSpot* pTargetWnd = app::GetValidTargetWnd() )
-		hTargetItem = m_treeCtrl.FindItemWithData( pTargetWnd->m_hWnd );
-
+	HTREEITEM hTargetItem = FindValidTargetItem();
 	m_treeCtrl.SelectItem( hTargetItem );
+}
+
+bool CTreeWndPage::RefreshTreeItem( HTREEITEM hItem )
+{	// updates item contents if changed
+	ASSERT_PTR( hItem );
+
+	HWND hWnd = m_treeCtrl.GetItemDataAs<HWND>( hItem );
+	if ( !ui::IsValidWindow( hWnd ) )
+		return false;
+
+	wt::CItemInfo oldInfo( &m_treeCtrl, hItem );
+	wt::CItemInfo newInfo( hWnd );
+
+	if ( newInfo != oldInfo )
+	{
+		CScopedInternalChange scopedChange( &m_treeCtrl );
+		newInfo.m_item.hItem = hItem;
+		m_treeCtrl.SetItem( &newInfo.m_item );			// refresh item
+	}
+	return true;
 }
 
 void CTreeWndPage::RefreshTreeParentBranch( HTREEITEM hItem )
@@ -275,8 +353,8 @@ void CTreeWndPage::RefreshTreeParentBranch( HTREEITEM hItem )
 
 		m_treeCtrl.DeleteChildren( hParentItem );
 
-		wt::CWndTreeBuilder builder( &m_treeCtrl );
-		int indent = builder.RegisterItemIndent( hParentItem ); indent;
+		wt::CWndTreeBuilder builder( &m_treeCtrl, NULL );
+		int indent = builder.MapParentItem( hParentItem ).second; indent;
 
 		//app::GetLogger()->Log( _T("# Refresh siblings of:") ); wt::LogWindow( hWndTarget, indent );
 
@@ -293,6 +371,41 @@ void CTreeWndPage::RefreshTreeParentBranch( HTREEITEM hItem )
 		m_treeCtrl.EnsureVisible( hItem );
 }
 
+HTREEITEM CTreeWndPage::RefreshBranchOf( HWND hWndTarget )	// refresh branch under desktop window down to the hWndTarget item
+{
+	std::vector<HWND> branchPath;
+	wnd::QueryAncestorBranchPath( branchPath, hWndTarget, ::GetDesktopWindow() );		// bottom-up ancestor path, excluding hWndEnd
+
+	HTREEITEM hTargetItem = NULL;
+
+	if ( !branchPath.empty() )
+	{
+		CScopedInternalChange scopedChange( &m_treeCtrl );
+		CScopedLockRedraw freeze( &m_treeCtrl, new CScopedWindowBorder( &m_treeCtrl, color::Salmon ) );
+		CWaitCursor wait;
+
+		app::GetLogger()->Log( _T("# Refresh missing window branch of:") );
+
+		wt::CWndTreeBuilder builder( &m_treeCtrl, app::GetLogger() );
+
+		builder.SetInsertedEffect( ui::CTextEffect::MakeColor( MergeInsertWndColor ) );
+
+		HTREEITEM hParentItem = builder.MergeBranchPath( branchPath.rbegin(), branchPath.rend() - 1 );	// excluding the deepest item
+		builder.BuildChildren( branchPath[ 1 ] );		// refresh entirely parent of the deepest item
+		hTargetItem = m_treeCtrl.FindItemWithData( branchPath[ 0 ], hParentItem, Shallow );
+		ENSURE( hTargetItem != NULL );
+
+		m_treeCtrl.Expand( m_treeCtrl.GetParentItem( hTargetItem ), TVE_EXPAND );		// expand parent so target item is in sight
+		m_treeCtrl.SelectItem( hTargetItem );
+	}
+
+	if ( hTargetItem != NULL )
+		m_treeCtrl.EnsureVisible( hTargetItem );
+
+	return hTargetItem;
+}
+
+
 void CTreeWndPage::SetupTreeItems( void )
 {
 	m_treeCtrl.DeleteAllItems();
@@ -304,14 +417,14 @@ void CTreeWndPage::SetupTreeItems( void )
 	if ( EnumWindows == buildMethod )
 	{	// enum windows
 		app::GetLogger()->Log( _T("# Enum All Windows") );
-		wt::CWndTreeBuilder builder( &m_treeCtrl/*, app::GetLogger()*/ );
+		wt::CWndTreeBuilder builder( &m_treeCtrl, NULL /*app::GetLogger()*/ );
 
 		builder.Build( ::GetDesktopWindow() );
 	}
 	else
 	{	// loop windows
 		app::GetLogger()->Log( _T("# Loop Windows (OLD)") );
-		InsertWndItem( TVI_ROOT, ::GetDesktopWindow(), 0, Image_Desktop );
+		InsertWndItem_Old( TVI_ROOT, ::GetDesktopWindow(), 0, Image_Desktop );
 	}
 
 	app::GetLogger()->Log( _T("Elapsed %.3f seconds (found %d windows)"), timer.ElapsedSeconds(), m_treeCtrl.GetCount() );
@@ -338,7 +451,15 @@ HWND CTreeWndPage::FindValidParentItem( HTREEITEM hItem ) const
 	return hValidWnd;
 }
 
-HTREEITEM CTreeWndPage::InsertWndItem( HTREEITEM hItemParent, HWND hWnd, int indent, int image /*= -1*/ )
+HTREEITEM CTreeWndPage::FindValidTargetItem( void ) const
+{
+	if ( CWndSpot* pTargetWnd = app::GetValidTargetWnd() )
+		return m_treeCtrl.FindItemWithData( pTargetWnd->m_hWnd );
+
+	return NULL;
+}
+
+HTREEITEM CTreeWndPage::InsertWndItem_Old( HTREEITEM hItemParent, HWND hWnd, int indent, int image /*= -1*/ )
 {
 //	wt::LogWindow( hWnd, indent );
 
@@ -348,29 +469,9 @@ HTREEITEM CTreeWndPage::InsertWndItem( HTREEITEM hItemParent, HWND hWnd, int ind
 											 info.m_item.lParam, hItemParent, TVI_LAST );
 
 	for ( HWND hChildWnd = ::GetWindow( hWnd, GW_CHILD ); hChildWnd != NULL; hChildWnd = ::GetWindow( hChildWnd, GW_HWNDNEXT ) )
-		InsertWndItem( hItem, hChildWnd, indent + 1 );
+		InsertWndItem_Old( hItem, hChildWnd, indent + 1 );
 
 	return hItem;
-}
-
-bool CTreeWndPage::RefreshTreeItem( HTREEITEM hItem )
-{	// updates item contents if changed
-	ASSERT_PTR( hItem );
-
-	HWND hWnd = m_treeCtrl.GetItemDataAs<HWND>( hItem );
-	if ( !ui::IsValidWindow( hWnd ) )
-		return false;
-
-	wt::CItemInfo oldInfo( &m_treeCtrl, hItem );
-	wt::CItemInfo newInfo( hWnd );
-
-	if ( newInfo != oldInfo )
-	{
-		CScopedInternalChange scopedChange( &m_treeCtrl );
-		newInfo.m_item.hItem = hItem;
-		m_treeCtrl.SetItem( &newInfo.m_item );				// refresh item
-	}
-	return true;
 }
 
 void CTreeWndPage::DoDataExchange( CDataExchange* pDX )

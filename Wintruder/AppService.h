@@ -14,7 +14,7 @@ class CLogger;
 namespace app { enum Event; }
 
 
-enum { HotFieldColor = color::Blue, StaleWndColor = color::Red, SlowWndColor = color::html::PaleVioletRed2 };
+enum { HotFieldColor = color::Blue, StaleWndColor = color::Red, MergeInsertWndColor = color::Green, SlowWndColor = color::html::PaleVioletRed2 };
 
 
 class CAppService
