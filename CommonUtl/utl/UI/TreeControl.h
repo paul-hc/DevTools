@@ -3,6 +3,7 @@
 #pragma once
 
 #include "ListLikeCtrlBase.h"
+#include "BaseTrackMenuWnd.h"
 #include "ui_fwd.h"				// ui::CNmHdr
 #include <hash_map>
 
@@ -30,7 +31,7 @@ namespace tv
 }
 
 
-class CTreeControl : public CTreeCtrl
+class CTreeControl : public CBaseTrackMenuWnd<CTreeCtrl>
 	, public CListLikeCtrlBase
 {
 	friend class CTreeControlCustomDraw;

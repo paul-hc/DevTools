@@ -1,6 +1,7 @@
 #ifndef TandemControls_hxx
 #define TandemControls_hxx
 
+#include "BaseTrackMenuWnd.hxx"
 #include "CmdInfoStore.h"
 #include "CmdUpdate.h"
 #include "Dialog_fwd.h"
@@ -11,9 +12,9 @@
 
 // CBaseHostToolbarCtrl template code
 
-template< typename BaseCtrl >
-CBaseHostToolbarCtrl<BaseCtrl>::CBaseHostToolbarCtrl( void )
-	: BaseCtrl()
+template< typename BaseCtrlT >
+CBaseHostToolbarCtrl<BaseCtrlT>::CBaseHostToolbarCtrl( void )
+	: TBaseClass()
 	, m_pParentWnd( NULL )
 	, m_pMateToolbar( new CDialogToolBar() )
 	, m_tandemLayout( ui::EditShinkHost_MateOnRight, Spacing )
@@ -22,13 +23,13 @@ CBaseHostToolbarCtrl<BaseCtrl>::CBaseHostToolbarCtrl( void )
 	m_pMateToolbar->SetEnableUnhandledCmds();		// enable detail buttons by default
 }
 
-template< typename BaseCtrl >
-CBaseHostToolbarCtrl< BaseCtrl >::~CBaseHostToolbarCtrl()
+template< typename BaseCtrlT >
+CBaseHostToolbarCtrl<BaseCtrlT>::~CBaseHostToolbarCtrl()
 {
 }
 
-template< typename BaseCtrl >
-void CBaseHostToolbarCtrl<BaseCtrl>::DDX_Tandem( CDataExchange* pDX, int ctrlId, CWnd* pWndTarget /*= NULL*/ )
+template< typename BaseCtrlT >
+void CBaseHostToolbarCtrl<BaseCtrlT>::DDX_Tandem( CDataExchange* pDX, int ctrlId, CWnd* pWndTarget /*= NULL*/ )
 {
 	if ( NULL == m_hWnd )
 	{
@@ -41,34 +42,34 @@ void CBaseHostToolbarCtrl<BaseCtrl>::DDX_Tandem( CDataExchange* pDX, int ctrlId,
 	}
 }
 
-template< typename BaseCtrl >
-inline void CBaseHostToolbarCtrl<BaseCtrl>::ResetMateToolbar( void )
+template< typename BaseCtrlT >
+inline void CBaseHostToolbarCtrl<BaseCtrlT>::ResetMateToolbar( void )
 {
 	m_pMateToolbar.reset();
 }
 
-template< typename BaseCtrl >
-inline const std::vector< UINT >& CBaseHostToolbarCtrl<BaseCtrl>::GetMateCommands( void ) const
+template< typename BaseCtrlT >
+inline const std::vector< UINT >& CBaseHostToolbarCtrl<BaseCtrlT>::GetMateCommands( void ) const
 {
 	REQUIRE( HasMateToolbar() );
 	return m_pMateToolbar->GetStrip().GetButtonIds();
 }
 
-template< typename BaseCtrl >
-inline bool CBaseHostToolbarCtrl<BaseCtrl>::ContainsMateCommand( UINT cmdId ) const
+template< typename BaseCtrlT >
+inline bool CBaseHostToolbarCtrl<BaseCtrlT>::ContainsMateCommand( UINT cmdId ) const
 {
 	return m_pMateToolbar.get() != NULL && m_pMateToolbar->GetStrip().ContainsButton( cmdId );
 }
 
-template< typename BaseCtrl >
-void CBaseHostToolbarCtrl<BaseCtrl>::LayoutMates( void )
+template< typename BaseCtrlT >
+void CBaseHostToolbarCtrl<BaseCtrlT>::LayoutMates( void )
 {
 	if ( HasMateToolbar() )
 		m_tandemLayout.LayoutMate( m_pMateToolbar.get(), this );	// tile decorations toolbar
 }
 
-template< typename BaseCtrl >
-BOOL CBaseHostToolbarCtrl<BaseCtrl>::OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo )
+template< typename BaseCtrlT >
+BOOL CBaseHostToolbarCtrl<BaseCtrlT>::OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo )
 {
 	if ( WM_NOTIFY == HIWORD( code ) )
 	{	// give parent dialog a chance to handle tooltip notification messages (since this is the owner of the toolbar)
@@ -82,8 +83,8 @@ BOOL CBaseHostToolbarCtrl<BaseCtrl>::OnCmdMsg( UINT id, int code, void* pExtra, 
 	return __super::OnCmdMsg( id, code, pExtra, pHandlerInfo );
 }
 
-template< typename BaseCtrl >
-BOOL CBaseHostToolbarCtrl<BaseCtrl>::OnCommand( WPARAM wParam, LPARAM lParam )
+template< typename BaseCtrlT >
+BOOL CBaseHostToolbarCtrl<BaseCtrlT>::OnCommand( WPARAM wParam, LPARAM lParam )
 {
 	UINT cmdId = LOWORD( wParam );
 	int notifCode = HIWORD( wParam );
@@ -95,8 +96,8 @@ BOOL CBaseHostToolbarCtrl<BaseCtrl>::OnCommand( WPARAM wParam, LPARAM lParam )
 	return __super::OnCommand( wParam, lParam );
 }
 
-template< typename BaseCtrl >
-void CBaseHostToolbarCtrl<BaseCtrl>::PreSubclassWindow( void )
+template< typename BaseCtrlT >
+void CBaseHostToolbarCtrl<BaseCtrlT>::PreSubclassWindow( void )
 {
 	__super::PreSubclassWindow();
 	m_pParentWnd = GetParent();
@@ -115,13 +116,12 @@ void CBaseHostToolbarCtrl<BaseCtrl>::PreSubclassWindow( void )
 
 // message handlers
 
-BEGIN_TEMPLATE_MESSAGE_MAP( CBaseHostToolbarCtrl, BaseCtrl, TBaseClass )
+BEGIN_TEMPLATE_MESSAGE_MAP( CBaseHostToolbarCtrl, BaseCtrlT, TBaseClass )
 	ON_WM_SIZE()
-	ON_WM_INITMENUPOPUP()
 END_MESSAGE_MAP()
 
-template< typename BaseCtrl >
-void CBaseHostToolbarCtrl<BaseCtrl>::OnSize( UINT sizeType, int cx, int cy )
+template< typename BaseCtrlT >
+void CBaseHostToolbarCtrl<BaseCtrlT>::OnSize( UINT sizeType, int cx, int cy )
 {
 	__super::OnSize( sizeType, cx, cy );
 
@@ -130,16 +130,8 @@ void CBaseHostToolbarCtrl<BaseCtrl>::OnSize( UINT sizeType, int cx, int cy )
 			LayoutMates();
 }
 
-template< typename BaseCtrl >
-void CBaseHostToolbarCtrl<BaseCtrl>::OnInitMenuPopup( CMenu* pPopupMenu, UINT index, BOOL isSysMenu )
-{
-	index;
-	if ( !isSysMenu )
-		ui::UpdateMenuUI( this, pPopupMenu );		// update tracking menu targeting this control
-}
-
-template< typename BaseCtrl >
-bool CBaseHostToolbarCtrl<BaseCtrl>::OnMateCommand( UINT cmdId )
+template< typename BaseCtrlT >
+bool CBaseHostToolbarCtrl<BaseCtrlT>::OnMateCommand( UINT cmdId )
 {
 	if ( ContainsMateCommand( cmdId ) )
 		return OnBuddyCommand( cmdId );		// true if handled
@@ -150,22 +142,22 @@ bool CBaseHostToolbarCtrl<BaseCtrl>::OnMateCommand( UINT cmdId )
 
 // CHostToolbarCtrl template code
 
-template< typename BaseCtrl >
-CHostToolbarCtrl<BaseCtrl>::CHostToolbarCtrl( ui::TTandemAlign tandemAlign /*= ui::EditShinkHost_MateOnRight*/ )
-	: CBaseHostToolbarCtrl<BaseCtrl>()
+template< typename BaseCtrlT >
+CHostToolbarCtrl<BaseCtrlT>::CHostToolbarCtrl( ui::TTandemAlign tandemAlign /*= ui::EditShinkHost_MateOnRight*/ )
+	: CBaseHostToolbarCtrl<BaseCtrlT>()
 {
 	RefTandemLayout().SetTandemAlign( tandemAlign );
 }
 
-template< typename BaseCtrl >
-bool CHostToolbarCtrl<BaseCtrl>::OnBuddyCommand( UINT cmdId )
+template< typename BaseCtrlT >
+bool CHostToolbarCtrl<BaseCtrlT>::OnBuddyCommand( UINT cmdId )
 {
 	cmdId;
 	return false;		// continue routing
 }
 
-template< typename BaseCtrl >
-BOOL CHostToolbarCtrl<BaseCtrl>::OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo )
+template< typename BaseCtrlT >
+BOOL CHostToolbarCtrl<BaseCtrlT>::OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo )
 {
 	if ( __super::OnCmdMsg( id, code, pExtra, pHandlerInfo ) )
 		return true;
@@ -180,16 +172,16 @@ BOOL CHostToolbarCtrl<BaseCtrl>::OnCmdMsg( UINT id, int code, void* pExtra, AFX_
 
 // CBaseItemContentCtrl template code
 
-template< typename BaseCtrl >
-bool CBaseItemContentCtrl<BaseCtrl>::OnBuddyCommand( UINT cmdId )
+template< typename BaseCtrlT >
+bool CBaseItemContentCtrl<BaseCtrlT>::OnBuddyCommand( UINT cmdId )
 {
 	cmdId;
 	ui::SendCommandToParent( m_hWnd, CN_EDITDETAILS );		// let the parent handle editing details
 	return true;		// handled
 }
 
-template< typename BaseCtrl >
-void CBaseItemContentCtrl<BaseCtrl>::SetContentType( ui::ContentType type )
+template< typename BaseCtrlT >
+void CBaseItemContentCtrl<BaseCtrlT>::SetContentType( ui::ContentType type )
 {
 	m_content.m_type = type;
 
@@ -215,8 +207,8 @@ void CBaseItemContentCtrl<BaseCtrl>::SetContentType( ui::ContentType type )
 			}
 }
 
-template< typename BaseCtrl >
-void CBaseItemContentCtrl<BaseCtrl>::SetFileFilter( const TCHAR* pFileFilter )
+template< typename BaseCtrlT >
+void CBaseItemContentCtrl<BaseCtrlT>::SetFileFilter( const TCHAR* pFileFilter )
 {
 	m_content.m_pFileFilter = pFileFilter;
 
@@ -224,8 +216,8 @@ void CBaseItemContentCtrl<BaseCtrl>::SetFileFilter( const TCHAR* pFileFilter )
 		SetContentType( ui::FilePath );
 }
 
-template< typename BaseCtrl >
-void CBaseItemContentCtrl<BaseCtrl>::SetStringContent( bool allowEmptyItem /*= true*/, bool noMateButton /*= true*/ )
+template< typename BaseCtrlT >
+void CBaseItemContentCtrl<BaseCtrlT>::SetStringContent( bool allowEmptyItem /*= true*/, bool noMateButton /*= true*/ )
 {
 	REQUIRE( NULL == m_hWnd );			// call before creation
 	SetFlag( m_content.m_itemsFlags, ui::CItemContent::RemoveEmpty, !allowEmptyItem );
@@ -234,8 +226,8 @@ void CBaseItemContentCtrl<BaseCtrl>::SetStringContent( bool allowEmptyItem /*= t
 		ResetMateToolbar();
 }
 
-template< typename BaseCtrl >
-void CBaseItemContentCtrl<BaseCtrl>::PreSubclassWindow( void )
+template< typename BaseCtrlT >
+void CBaseItemContentCtrl<BaseCtrlT>::PreSubclassWindow( void )
 {
 	__super::PreSubclassWindow();
 
@@ -245,12 +237,12 @@ void CBaseItemContentCtrl<BaseCtrl>::PreSubclassWindow( void )
 
 // message handlers
 
-BEGIN_TEMPLATE_MESSAGE_MAP( CBaseItemContentCtrl, BaseCtrl, TBaseClass )
+BEGIN_TEMPLATE_MESSAGE_MAP( CBaseItemContentCtrl, BaseCtrlT, TBaseClass )
 	ON_WM_DROPFILES()
 END_MESSAGE_MAP()
 
-template< typename BaseCtrl >
-void CBaseItemContentCtrl<BaseCtrl>::OnDropFiles( HDROP hDropInfo )
+template< typename BaseCtrlT >
+void CBaseItemContentCtrl<BaseCtrlT>::OnDropFiles( HDROP hDropInfo )
 {
 	if ( m_content.IsPathContent() )
 	{

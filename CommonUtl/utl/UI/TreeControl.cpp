@@ -14,6 +14,8 @@
 #define new DEBUG_NEW
 #endif
 
+#include "BaseTrackMenuWnd.hxx"
+
 
 namespace tv
 {
@@ -29,7 +31,7 @@ namespace tv
 
 
 CTreeControl::CTreeControl( void )
-	: CTreeCtrl()
+	: CBaseTrackMenuWnd<CTreeCtrl>()
 	, CListLikeCtrlBase( this )
 	, m_pImageList( NULL )
 	, m_indentNoImages( 0 )
@@ -237,7 +239,7 @@ bool CTreeControl::IsExpandLazyChildren( const NMTREEVIEW* pNmTreeView ) const
 
 BOOL CTreeControl::EnsureVisible( HTREEITEM hItem )
 {
-	BOOL result = CTreeCtrl::EnsureVisible( hItem );
+	BOOL result = __super::EnsureVisible( hItem );
 
 	CRect itemImageRect;
 	if ( GetIconItemRect( &itemImageRect, hItem ) )
@@ -258,7 +260,7 @@ BOOL CTreeControl::EnsureVisible( HTREEITEM hItem )
 
 bool CTreeControl::SelectItem( HTREEITEM hItem )
 {
-	if ( !CTreeCtrl::SelectItem( hItem ) )
+	if ( !__super::SelectItem( hItem ) )
 		return false;
 
 	if ( hItem != NULL )
@@ -326,14 +328,14 @@ BOOL CTreeControl::PreTranslateMessage( MSG* pMsg )
 BOOL CTreeControl::OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo )
 {
 	return
-		CTreeCtrl::OnCmdMsg( id, code, pExtra, pHandlerInfo ) ||
+		__super::OnCmdMsg( id, code, pExtra, pHandlerInfo ) ||
 		GetParent()->OnCmdMsg( id, code, pExtra, pHandlerInfo );		// route commands to parent dialog
 }
 
 
 // message handlers
 
-BEGIN_MESSAGE_MAP( CTreeControl, CTreeCtrl )
+BEGIN_MESSAGE_MAP( CTreeControl, CBaseTrackMenuWnd<CTreeCtrl> )
 	ON_WM_NCLBUTTONDOWN()
 	ON_WM_CONTEXTMENU()
 	ON_NOTIFY_REFLECT_EX( TVN_SELCHANGED, OnTvnSelChanged_Reflect )
@@ -347,7 +349,7 @@ END_MESSAGE_MAP()
 void CTreeControl::OnNcLButtonDown( UINT hitTest, CPoint point )
 {
 	ui::TakeFocus( m_hWnd );
-	CTreeCtrl::OnNcLButtonDown( hitTest, point );
+	__super::OnNcLButtonDown( hitTest, point );
 }
 
 void CTreeControl::OnContextMenu( CWnd* pWnd, CPoint screenPos )
@@ -377,7 +379,7 @@ BOOL CTreeControl::OnTvnRClick_Reflect( NMHDR* /*pNmHdr*/, LRESULT* pResult )
 	if ( HTREEITEM hHitItem = GetDropHilightItem() )					// item right clicked (temporary highlighted)
 		if ( RefreshItem( hHitItem ) )
 			if ( hHitItem != GetSelectedItem() )
-				CTreeCtrl::SelectItem( hHitItem );
+				__super::SelectItem( hHitItem );
 
 	SendMessage( WM_CONTEXTMENU, (WPARAM)m_hWnd, GetMessagePos() );		// send WM_CONTEXTMENU to self
   	*pResult = 1;			// mark message as handled and suppress default handling

@@ -3,6 +3,7 @@
 #pragma once
 
 #include "Control_fwd.h"
+#include "BaseTrackMenuWnd.h"
 
 
 class CDialogToolBar;
@@ -10,12 +11,12 @@ class CDialogToolBar;
 
 // A control that has a mate details toolbar with editing commands, that gets laid-out as a tandem.
 
-template< typename BaseCtrl >
+template< typename BaseCtrlT >
 abstract class CBaseHostToolbarCtrl
-	: public BaseCtrl
+	: public CBaseTrackMenuWnd<BaseCtrlT>
 	, protected ui::IBuddyCommandHandler
 {
-	typedef BaseCtrl TBaseClass;
+	typedef CBaseTrackMenuWnd<BaseCtrlT> TBaseClass;
 protected:
 	CBaseHostToolbarCtrl( void );
 public:
@@ -52,16 +53,15 @@ protected:
 	virtual bool OnMateCommand( UINT cmdId );
 protected:
 	afx_msg void OnSize( UINT sizeType, int cx, int cy );
-	afx_msg void OnInitMenuPopup( CMenu* pPopupMenu, UINT index, BOOL isSysMenu );
 
 	DECLARE_MESSAGE_MAP()
 };
 
 
-// Concrete control class with mate toolbar; buddy commands are handled by BaseCtrl.
+// Concrete control class with mate toolbar; buddy commands are handled by BaseCtrlT.
 
-template< typename BaseCtrl >
-class CHostToolbarCtrl : public CBaseHostToolbarCtrl<BaseCtrl>
+template< typename BaseCtrlT >
+class CHostToolbarCtrl : public CBaseHostToolbarCtrl<BaseCtrlT>
 {
 public:
 	CHostToolbarCtrl( ui::TTandemAlign tandemAlign = ui::EditShinkHost_MateOnRight );
@@ -84,10 +84,10 @@ public:
 
 // content control with details button
 
-template< typename BaseCtrl >
-abstract class CBaseItemContentCtrl : public CBaseHostToolbarCtrl<BaseCtrl>
+template< typename BaseCtrlT >
+abstract class CBaseItemContentCtrl : public CBaseHostToolbarCtrl<BaseCtrlT>
 {
-	typedef CBaseHostToolbarCtrl<BaseCtrl> TBaseClass;
+	typedef CBaseHostToolbarCtrl<BaseCtrlT> TBaseClass;
 protected:
 	CBaseItemContentCtrl( ui::ContentType type = ui::String, const TCHAR* pFileFilter = NULL ) : m_content( type, pFileFilter ) {}
 

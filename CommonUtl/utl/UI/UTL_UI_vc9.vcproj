@@ -1290,6 +1290,14 @@
 					>
 				</File>
 				<File
+					RelativePath=".\BaseTrackMenuWnd.h"
+					>
+				</File>
+				<File
+					RelativePath=".\BaseTrackMenuWnd.hxx"
+					>
+				</File>
+				<File
 					RelativePath=".\BufferedStatic.cpp"
 					>
 				</File>

@@ -24,6 +24,7 @@
 #define new DEBUG_NEW
 #endif
 
+#include "BaseTrackMenuWnd.hxx"
 #include "ReportListControl.hxx"
 #include "Resequence.hxx"
 
@@ -109,7 +110,7 @@ const TCHAR CReportListControl::s_fmtRegColumnLayout[] = _T("Width=%d, Order=%d"
 
 
 CReportListControl::CReportListControl( UINT columnLayoutId /*= 0*/, DWORD listStyleEx /*= lv::DefaultStyleEx*/ )
-	: CListCtrl()
+	: CBaseTrackMenuWnd<CListCtrl>()
 	, CListLikeCtrlBase( this )
 	, m_columnLayoutId( 0 )
 	, m_listStyleEx( listStyleEx )
@@ -2085,13 +2086,13 @@ BOOL CReportListControl::OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDL
 				return TRUE;			// handled by dialog custom handler, which take precedence over internal handler
 	}
 
-	return CListCtrl::OnCmdMsg( id, code, pExtra, pHandlerInfo );
+	return __super::OnCmdMsg( id, code, pExtra, pHandlerInfo );
 }
 
 
 // message handlers
 
-BEGIN_MESSAGE_MAP( CReportListControl, CListCtrl )
+BEGIN_MESSAGE_MAP( CReportListControl, CBaseTrackMenuWnd<CListCtrl> )
 	ON_WM_CREATE()
 	ON_WM_DESTROY()
 	ON_WM_DROPFILES()
@@ -2099,7 +2100,6 @@ BEGIN_MESSAGE_MAP( CReportListControl, CListCtrl )
 	ON_WM_KEYDOWN()
 	ON_WM_NCLBUTTONDOWN()
 	ON_WM_CONTEXTMENU()
-	ON_WM_INITMENUPOPUP()
 	ON_WM_PAINT()
 	ON_NOTIFY_REFLECT_EX( LVN_ITEMCHANGING, OnLvnItemChanging_Reflect )
 	ON_NOTIFY_REFLECT_EX( LVN_ITEMCHANGED, OnLvnItemChanged_Reflect )
@@ -2203,15 +2203,6 @@ void CReportListControl::OnContextMenu( CWnd* pWnd, CPoint screenPos )
 			return;					// supress rising WM_CONTEXTMENU to the parent
 
 	Default();
-}
-
-void CReportListControl::OnInitMenuPopup( CMenu* pPopupMenu, UINT index, BOOL isSysMenu )
-{
-	AfxCancelModes( m_hWnd );		// cancel any combobox popups that could be in toolbars or dialog bars
-	if ( !isSysMenu )
-		ui::UpdateMenuUI( this, pPopupMenu );
-
-	__super::OnInitMenuPopup( pPopupMenu, index, isSysMenu );
 }
 
 void CReportListControl::OnPaint( void )

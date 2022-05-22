@@ -4,6 +4,7 @@
 
 #include "utl/StdHashValue.h"
 #include "utl/Range.h"
+#include "BaseTrackMenuWnd.h"
 #include "CtrlInterfaces.h"
 #include "ListLikeCtrlBase.h"
 #include "Path.h"
@@ -178,7 +179,7 @@ protected:
 
 
 class CReportListControl
-	: public CListCtrl
+	: public CBaseTrackMenuWnd<CListCtrl>
 	, public CListLikeCtrlBase
 	, public CListTraits
 {
@@ -675,7 +676,6 @@ protected:
 	afx_msg void OnKeyDown( UINT chr, UINT repCnt, UINT vkFlags );
 	afx_msg void OnNcLButtonDown( UINT hitTest, CPoint point );
 	afx_msg void OnContextMenu( CWnd* pWnd, CPoint screenPos );
-	afx_msg void OnInitMenuPopup( CMenu* pPopupMenu, UINT index, BOOL isSysMenu );
 	afx_msg void OnPaint( void );
 	afx_msg BOOL OnLvnItemChanging_Reflect( NMHDR* pNmHdr, LRESULT* pResult );
 	afx_msg BOOL OnLvnItemChanged_Reflect( NMHDR* pNmHdr, LRESULT* pResult );

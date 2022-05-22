@@ -478,6 +478,14 @@ BEGIN
         MENUITEM "Move to &Top\tCtrl+Shift+Home", CM_MOVE_WINDOW_TO_TOP
         MENUITEM "Move to &Bottom\tCtrl+Shift+End", CM_MOVE_WINDOW_TO_BOTTOM
         MENUITEM SEPARATOR
+        MENUITEM "Activate Window\tCtrl+Shift+A", CM_ACTIVATE_WINDOW
+        MENUITEM SEPARATOR
+        MENUITEM "Show Window\tCtrl+Shift+S",   CM_SHOW_WINDOW
+        MENUITEM "Hide Window\tCtrl+Shift+H",   CM_HIDE_WINDOW
+        MENUITEM SEPARATOR
+        MENUITEM "&Enable|Disable| Window\tCtrl+Shift+E", CM_TOGGLE_ENABLE_WINDOW
+        MENUITEM "Toggle Top-&most Window\tCtrl+Shift+T", CM_TOGGLE_TOPMOST_WINDOW
+        MENUITEM SEPARATOR
         MENUITEM "Copy Ancestors\tCtrl+C",      ID_COPY_TREE_ANCESTORS
         MENUITEM "Copy Children\tCtrl+Shift+C", ID_COPY_TREE_CHILDREN
         MENUITEM SEPARATOR

@@ -13,6 +13,8 @@
 #define new DEBUG_NEW
 #endif
 
+#include "BaseTrackMenuWnd.hxx"
+
 
 const TCHAR CDateTimeControl::s_dateTimeFormat[] = _T("d'-'MM'-'yyy  H':'mm':'ss");
 const TCHAR CDateTimeControl::s_nullFormat[] = _T(" ");
@@ -20,7 +22,7 @@ static CAccelTable s_accel;
 
 
 CDateTimeControl::CDateTimeControl( const TCHAR* pValidFormat /*= s_dateTimeFormat*/, const TCHAR* pNullFormat /*= s_nullFormat*/ )
-	: CDateTimeCtrl()
+	: CBaseTrackMenuWnd<CDateTimeCtrl>()
 	, m_pValidFormat( pValidFormat )
 	, m_pNullFormat( pNullFormat )
 	, m_pLastFormat( NULL )
@@ -154,7 +156,7 @@ bool CDateTimeControl::SendNotifyDateTimeChange( void )
 
 void CDateTimeControl::PreSubclassWindow( void )
 {
-	CDateTimeCtrl::PreSubclassWindow();
+	__super::PreSubclassWindow();
 
 	CScopedInternalChange internalChange( this );
 	SetNullDateTime();			// reflect the initial unassigned state
@@ -166,15 +168,14 @@ BOOL CDateTimeControl::PreTranslateMessage( MSG* pMsg )
 		if ( GetAccelTable().Translate( pMsg, m_hWnd ) )
 			return true;
 
-	return CDateTimeCtrl::PreTranslateMessage( pMsg );
+	return __super::PreTranslateMessage( pMsg );
 }
 
 
 // message handlers
 
-BEGIN_MESSAGE_MAP( CDateTimeControl, CDateTimeCtrl )
+BEGIN_MESSAGE_MAP( CDateTimeControl, CBaseTrackMenuWnd<CDateTimeCtrl> )
 	ON_WM_CONTEXTMENU()
-	ON_WM_INITMENUPOPUP()
 	ON_COMMAND( ID_EDIT_CUT, OnCut )
 	ON_UPDATE_COMMAND_UI( ID_EDIT_CUT, OnUpdateValid )
 	ON_COMMAND( ID_EDIT_COPY, OnCopy )
@@ -199,15 +200,6 @@ void CDateTimeControl::OnContextMenu( CWnd* pWnd, CPoint screenPos )
 	}
 
 	Default();
-}
-
-void CDateTimeControl::OnInitMenuPopup( CMenu* pPopupMenu, UINT index, BOOL isSysMenu )
-{
-	AfxCancelModes( m_hWnd );
-	if ( !isSysMenu )
-		ui::UpdateMenuUI( this, pPopupMenu );
-
-	CDateTimeCtrl::OnInitMenuPopup( pPopupMenu, index, isSysMenu );
 }
 
 BOOL CDateTimeControl::OnDtnDateTimeChange_Reflect( NMHDR* pNmHdr, LRESULT* pResult )

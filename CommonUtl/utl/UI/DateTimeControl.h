@@ -3,6 +3,7 @@
 #pragma once
 
 #include <afxdtctl.h>
+#include "BaseTrackMenuWnd.h"
 #include "InternalChange.h"
 #include "Range.h"
 
@@ -10,8 +11,8 @@
 class CAccelTable;
 
 
-class CDateTimeControl : public CDateTimeCtrl
-					   , public CInternalChange
+class CDateTimeControl : public CBaseTrackMenuWnd<CDateTimeCtrl>
+	, public CInternalChange
 {
 public:
 	CDateTimeControl( const TCHAR* pValidFormat = s_dateTimeFormat, const TCHAR* pNullFormat = s_nullFormat );
@@ -52,7 +53,6 @@ public:
 	virtual BOOL PreTranslateMessage( MSG* pMsg );
 protected:
 	afx_msg void OnContextMenu( CWnd* pWnd, CPoint screenPos );
-	afx_msg void OnInitMenuPopup( CMenu* pPopupMenu, UINT index, BOOL isSysMenu );
 	virtual BOOL OnDtnDateTimeChange_Reflect( NMHDR* pNmHdr, LRESULT* pResult );
 	virtual BOOL OnDtnCloseup_Reflect( NMHDR* pNmHdr, LRESULT* pResult );
 	afx_msg void OnCut( void );
