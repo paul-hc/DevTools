@@ -49,12 +49,6 @@ void CTreeControl::ClearData( void )
 	m_markedItems.clear();
 }
 
-bool CTreeControl::DeleteAllItems( void )
-{
-	ClearData();
-	return __super::DeleteAllItems() != FALSE;
-}
-
 bool CTreeControl::Copy( void )
 {
 	HTREEITEM hSelItem = GetSelectedItem();
@@ -134,6 +128,18 @@ HTREEITEM CTreeControl::InsertObjectItem( HTREEITEM hParent, const utl::ISubject
 
 	return InsertItem( mask, pText, imageIndex, imageIndex, state, state, reinterpret_cast<LPARAM>( pObject ),
 		hParent, hInsertAfter );
+}
+
+bool CTreeControl::DeleteAllItems( void )
+{
+	ClearData();
+	return __super::DeleteAllItems() != FALSE;
+}
+
+bool CTreeControl::DeleteItem( HTREEITEM hItem )
+{
+	UnmarkItem( hItem );
+	return __super::DeleteItem( hItem ) != FALSE;
 }
 
 void CTreeControl::DeleteChildren( HTREEITEM hItem )

@@ -35,6 +35,7 @@ protected:
 	afx_msg void CmRestore( void );
 	afx_msg void CmMinimize( void );
 	afx_msg void CmRefresh( void );
+	afx_msg void CmRefreshBranch( void );
 	afx_msg void CmActivateWindow( void );
 	afx_msg void OnUpdateActivateWindow( CCmdUI* pCmdUI );
 	afx_msg void CmShowWindow( void );

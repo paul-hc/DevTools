@@ -418,7 +418,7 @@ BEGIN
     "S",            CM_SHOW_WINDOW,         VIRTKEY, SHIFT, CONTROL, NOINVERT
     "E",            CM_TOGGLE_ENABLE_WINDOW, VIRTKEY, SHIFT, CONTROL, NOINVERT
     "T",            CM_TOGGLE_TOPMOST_WINDOW, VIRTKEY, SHIFT, CONTROL, NOINVERT
-    VK_F5,          CM_UPDATE_TICK,         VIRTKEY, CONTROL, NOINVERT
+    VK_F5,          CM_UPDATE_TICK,         VIRTKEY, SHIFT, NOINVERT
     "1",            CM_VIEW_GENERAL,        VIRTKEY, ALT, NOINVERT
     VK_F2,          CM_VIEW_GENERAL,        VIRTKEY, CONTROL, NOINVERT
     "3",            CM_VIEW_OPTIONS,        VIRTKEY, ALT, NOINVERT
@@ -443,6 +443,7 @@ BEGIN
     "C",            ID_COPY_TREE_ANCESTORS, VIRTKEY, CONTROL, NOINVERT
     VK_INSERT,      ID_COPY_TREE_ANCESTORS, VIRTKEY, CONTROL, NOINVERT
     "C",            ID_COPY_TREE_CHILDREN,  VIRTKEY, SHIFT, CONTROL, NOINVERT
+    VK_F5,          CM_REFRESH_BRANCH,      VIRTKEY, CONTROL, NOINVERT
 END
 
 
@@ -471,6 +472,7 @@ BEGIN
         MENUITEM "&Colapse Branch\tCtrl+Minus", CM_COLAPSE_BRANCH
         MENUITEM SEPARATOR
         MENUITEM "&Refresh\tF5",                CM_REFRESH
+        MENUITEM "Refresh Branch\tCtrl+F5",     CM_REFRESH_BRANCH
         MENUITEM SEPARATOR
         MENUITEM "Move &Up\tCtrl+Shift+Up Arrow", CM_MOVE_WINDOW_UP
         MENUITEM "Move &Down\tCtrl+Shift+Down Arrow", CM_MOVE_WINDOW_DOWN
@@ -617,7 +619,7 @@ BEGIN
     CM_EDIT_STYLE_EX        "Edit Window Extended Style (Ctrl+4)"
     CM_EDIT_PLACE           "Edit Window Placement (Ctrl+5)"
     CM_HIGHLIGHT_WINDOW     "Highlight Current Window (F4)"
-    CM_REFRESH              "Refresh Window Tree (F5)"
+    CM_REFRESH              "Refresh Entire Window Tree (F5)"
     CM_FIND_WINDOW          "Find Window (Ctrl+F)"
 END
 
@@ -656,6 +658,7 @@ BEGIN
     ID_SIZE_TOOL            "Track size"
     ID_SIZE_TOP_LEFT_TOOL   "Track top-left corner"
     ID_SIZE_BOTTOM_RIGHT_TOOL "Track bottom-right corner"
+    CM_REFRESH_BRANCH       "Refresh Selected Window Branch (Ctrl+F5)"
 END
 
 STRINGTABLE 

@@ -35,6 +35,8 @@ class CTreeControl : public CBaseTrackMenuWnd<CTreeCtrl>
 	, public CListLikeCtrlBase
 {
 	friend class CTreeControlCustomDraw;
+
+	using CBaseTrackMenuWnd<CTreeCtrl>::DeleteItem;
 public:
 	CTreeControl( void );
 	virtual ~CTreeControl();
@@ -44,7 +46,6 @@ public:
 	void StoreImageList( CImageList* pImageList );
 	CImageList* SetImageList( CImageList* pImageList, int imageType );		// pseudo-override
 
-	bool DeleteAllItems( void );
 	bool Copy( void );
 
 	// custom imager
@@ -68,6 +69,8 @@ public:
 	virtual HTREEITEM InsertObjectItem( HTREEITEM hParent, const utl::ISubject* pObject, int imageIndex = ui::No_Image, UINT state = TVIS_EXPANDED,
 										HTREEITEM hInsertAfter = TVI_LAST, const TCHAR* pText = NULL );		// pText could be LPSTR_TEXTCALLBACK
 
+	bool DeleteAllItems( void );
+	bool DeleteItem( HTREEITEM hItem );
 	void DeleteChildren( HTREEITEM hItem );
 
 	template< typename ObjectT >

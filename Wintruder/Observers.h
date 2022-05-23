@@ -34,6 +34,7 @@ namespace app
 	enum Event
 	{
 		RefreshWndTree,			// refresh all windows
+		RefreshBranch,			// refresh branch of the current node + all child windows
 		RefreshSiblings,		// refresh parent branch of the current node (all sibling windows)
 		UpdateTarget,
 		DirtyChanged,

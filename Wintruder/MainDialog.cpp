@@ -172,6 +172,8 @@ void CMainDialog::QueryTooltipText( std::tstring& rText, UINT cmdId, CToolTipCtr
 				rText = _T("Apply Options...");
 			break;
 		}
+		default:
+			__super::QueryTooltipText( rText, cmdId, pTooltip );
 	}
 }
 

@@ -119,12 +119,12 @@ namespace wt
 		return rItemPair;
 	}
 
-	const TTreeItemIndent& CWndTreeBuilder::MergeWndItem( HWND hWnd, const TTreeItemIndent& parentPair, HTREEITEM hInsertAfter /*= TVI_LAST*/ )
+	const TTreeItemIndent& CWndTreeBuilder::MergeWndItem( HWND hWnd, const TTreeItemIndent& parentPair )
 	{
 		HTREEITEM hItem = m_pTreeCtrl->FindItemWithData( hWnd, parentPair.first, Shallow );
 
 		if ( NULL == hItem )
-			return InsertWndItem( hWnd, parentPair, hInsertAfter );
+			return InsertWndItem( hWnd, parentPair, FindInsertAfter( parentPair.first, hWnd ) );
 		else
 		{
 			CItemInfo info( hWnd, TVI_ROOT == parentPair.first ? Image_Desktop : -1 );
@@ -137,6 +137,15 @@ namespace wt
 
 			return m_wndToItemMap[ hWnd ] = std::make_pair( hItem, parentPair.second + 1 );
 		}
+	}
+
+	HTREEITEM CWndTreeBuilder::FindInsertAfter( HTREEITEM hParentItem, HWND hWnd ) const
+	{
+		if ( HWND hWndPrev = ::GetWindow( hWnd, GW_HWNDPREV ) )
+			if ( HTREEITEM hPrevItem = m_pTreeCtrl->FindItemWithData( hWndPrev, hParentItem, Shallow ) )
+				return hPrevItem;
+
+		return TVI_LAST;
 	}
 
 	const TTreeItemIndent& CWndTreeBuilder::MapParentItem( HTREEITEM hParentItem )
@@ -272,6 +281,10 @@ void CTreeWndPage::OnAppEvent( app::Event appEvent )
 		case app::RefreshWndTree:
 			RefreshTreeContents();
 			break;
+		case app::RefreshBranch:
+			if ( HTREEITEM hSelItem = m_treeCtrl.GetSelectedItem() )
+				RefreshTreeBranch( hSelItem );
+			break;
 		case app::RefreshSiblings:
 			if ( HTREEITEM hSelItem = m_treeCtrl.GetSelectedItem() )
 				RefreshTreeParentBranch( hSelItem );
@@ -336,6 +349,37 @@ bool CTreeWndPage::RefreshTreeItem( HTREEITEM hItem )
 	return true;
 }
 
+void CTreeWndPage::RefreshTreeBranch( HTREEITEM hItem )
+{
+	ASSERT_PTR( hItem );
+
+	if ( !RefreshTreeItem( hItem ) )
+	{
+		m_treeCtrl.DeleteItem( hItem );
+		return;
+	}
+
+	HWND hWndTarget = m_treeCtrl.GetItemDataAs<HWND>( hItem );
+
+	{
+		CScopedInternalChange scopedChange( &m_treeCtrl );
+		CScopedLockRedraw freeze( &m_treeCtrl, new CScopedWindowBorder( &m_treeCtrl, color::Salmon ) );
+		CWaitCursor wait;
+
+		m_treeCtrl.DeleteChildren( hItem );
+
+		wt::CWndTreeBuilder builder( &m_treeCtrl, NULL );
+
+		builder.MapParentItem( hItem );
+		builder.BuildChildren( hWndTarget );
+
+		m_treeCtrl.Expand( hItem, TVE_EXPAND );
+		m_treeCtrl.SelectItem( hItem );
+	}
+
+	m_treeCtrl.EnsureVisible( hItem );
+}
+
 void CTreeWndPage::RefreshTreeParentBranch( HTREEITEM hItem )
 {
 	ASSERT_PTR( hItem );
@@ -390,8 +434,8 @@ HTREEITEM CTreeWndPage::RefreshBranchOf( HWND hWndTarget )	// refresh branch und
 
 		builder.SetInsertedEffect( ui::CTextEffect::MakeColor( MergeInsertWndColor ) );
 
-		HTREEITEM hParentItem = builder.MergeBranchPath( branchPath.rbegin(), branchPath.rend() - 1 );	// excluding the deepest item
-		builder.BuildChildren( branchPath[ 1 ] );		// refresh entirely parent of the deepest item
+		HTREEITEM hParentItem = builder.MergeBranchPath( branchPath.rbegin(), branchPath.rend() - 1 );	// step 1: merge excluding the deepest item
+		builder.BuildChildren( branchPath[ 1 ] );														// step 2: refresh entirely the parent of deepest item, so that all siblings are inserted
 		hTargetItem = m_treeCtrl.FindItemWithData( branchPath[ 0 ], hParentItem, Shallow );
 		ENSURE( hTargetItem != NULL );
 

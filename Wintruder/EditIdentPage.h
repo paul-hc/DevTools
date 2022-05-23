@@ -21,14 +21,16 @@ protected:
 	bool UseWndId( void ) const;
 	int FindLiteralPos( int id ) const;
 private:
-	short m_id;
+	typedef short TCmdId;
+	TCmdId m_id;
 private:
 	// enum { IDD = IDD_EDIT_IDENT_PAGE };
-	CNumericEdit< short > m_decIdentEdit;
-	CNumericEdit< unsigned short > m_hexIdentEdit;
+	CNumericEdit<TCmdId> m_decIdentEdit;
+	CNumericEdit<unsigned short> m_hexIdentEdit;
 	CComboBox m_literalCombo;
 
-	protected:
+	// generated stuff
+protected:
 	virtual void DoDataExchange( CDataExchange* pDX );
 protected:
 	afx_msg void OnEnChange_DecimalEdit( void );

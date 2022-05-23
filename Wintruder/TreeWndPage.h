@@ -32,6 +32,7 @@ private:
 	bool RefreshTreeItem( HTREEITEM hItem );
 
 	// targeted refresh
+	void RefreshTreeBranch( HTREEITEM hItem );
 	void RefreshTreeParentBranch( HTREEITEM hItem );
 	HTREEITEM RefreshBranchOf( HWND hWndTarget );		// refresh branch under desktop window down to the hWndTarget item (merge existing, insert missing)
 
@@ -113,7 +114,8 @@ namespace wt
 		virtual void AddWndItem( HWND hWnd );
 	private:
 		const TTreeItemIndent& InsertWndItem( HWND hWnd, const TTreeItemIndent& parentPair, HTREEITEM hInsertAfter = TVI_LAST );
-		const TTreeItemIndent& MergeWndItem( HWND hWnd, const TTreeItemIndent& parentPair, HTREEITEM hInsertAfter = TVI_LAST );
+		const TTreeItemIndent& MergeWndItem( HWND hWnd, const TTreeItemIndent& parentPair );
+		HTREEITEM FindInsertAfter( HTREEITEM hParentItem, HWND hWnd ) const;
 
 		const TTreeItemIndent* FindWndItem( HWND hWnd ) const;
 		void LogWnd( HWND hWnd, int indent ) const;

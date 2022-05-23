@@ -182,6 +182,7 @@ BEGIN_MESSAGE_MAP( CApplication, CBaseApp<CWinApp> )
 	ON_COMMAND( CM_RESTORE, CmRestore )
 	ON_COMMAND( CM_MINIMIZE, CmMinimize )
 	ON_COMMAND( CM_REFRESH, CmRefresh )
+	ON_COMMAND( CM_REFRESH_BRANCH, CmRefreshBranch )
 	ON_COMMAND( CM_ACTIVATE_WINDOW, CmActivateWindow )
 	ON_UPDATE_COMMAND_UI( CM_ACTIVATE_WINDOW, OnUpdateActivateWindow )
 	ON_COMMAND( CM_SHOW_WINDOW, CmShowWindow )
@@ -215,6 +216,11 @@ void CApplication::CmMinimize( void )
 void CApplication::CmRefresh( void )
 {
 	app::GetSvc().PublishEvent( app::RefreshWndTree );
+}
+
+void CApplication::CmRefreshBranch( void )
+{
+	app::GetSvc().PublishEvent( app::RefreshBranch );
 }
 
 void CApplication::CmActivateWindow( void )
