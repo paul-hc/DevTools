@@ -203,7 +203,8 @@ CWndSpot CWndFinder::FindUpdateTarget( void ) const
 	}
 
 	if ( !IsValidMatch( foundWnd.m_hWnd ) )
-		CWndSpot();
+		foundWnd.SetWnd( NULL );
+
 	return foundWnd;
 }
 
