@@ -277,8 +277,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 5,2,0,2
- PRODUCTVERSION 5,2,0,2
+ FILEVERSION 5,3,0,1
+ PRODUCTVERSION 5,3,0,1
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -293,18 +293,18 @@ BEGIN
     BEGIN
         BLOCK "040904b0"
         BEGIN
-            VALUE "BuildTimestamp", "19-05-2022 14:08:45"
-            VALUE "Comments", "New Button Styles (split, link)|Split UTL_BASE/UTL_UI projects|Main dialog toolbar|Windows 10 fixes|Valuable hacking tool"
+            VALUE "BuildTimestamp", "23-05-2022 10:31:44"
+            VALUE "Comments", "Window Tree Enhancements|New Button Styles (split, link)|Split UTL_BASE/UTL_UI projects|Main dialog toolbar|Windows 10 fixes|Valuable hacking tool"
             VALUE "CompanyName", "Paul Cocoveanu"
             VALUE "Email", "phc.2nd@gmail.com"
             VALUE "FileDescription", "Wintruder Application"
-            VALUE "FileVersion", "5, 2, 0, 2"
+            VALUE "FileVersion", "5, 3, 0, 1"
             VALUE "InternalName", "Wintruder"
             VALUE "LegalCopyright", "Copyright © 1998-2022"
             VALUE "LegalTrademarks", "Use it freely."
             VALUE "OriginalFilename", "Wintruder64.exe"
             VALUE "ProductName", "Wintruder"
-            VALUE "ProductVersion", "5, 2, 0, 2"
+            VALUE "ProductVersion", "5, 3, 0, 1"
             VALUE "WrittenBy", "Written by Paul Cocoveanu"
         END
     END
@@ -617,19 +617,24 @@ BEGIN
     CM_EDIT_IDENT           "Edit Child Window Identifier (Ctrl+2)"
     CM_EDIT_STYLE           "Edit Window Style (Ctrl+3)"
     CM_EDIT_STYLE_EX        "Edit Window Extended Style (Ctrl+4)"
-    CM_EDIT_PLACE           "Edit Window Placement (Ctrl+5)"
-    CM_HIGHLIGHT_WINDOW     "Highlight Current Window (F4)"
-    CM_REFRESH              "Refresh Entire Window Tree (F5)"
-    CM_FIND_WINDOW          "Find Window (Ctrl+F)"
 END
 
 STRINGTABLE 
 BEGIN
+    CM_EDIT_PLACE           "Edit Window Placement (Ctrl+5)"
+    CM_HIGHLIGHT_WINDOW     "Highlight Current Window (F4)"
+    CM_REFRESH              "Refresh Entire Window Tree (F5)"
+    CM_REFRESH_BRANCH       "Refresh Selected Window Branch (Ctrl+F5)"
+    CM_FIND_WINDOW          "Find Window (Ctrl+F)"
     CM_UPDATE_TICK          "Update Tick (Ctrl+F5)"
     CM_COPY_WND_CLASS       "Copy the window class of selected window handle"
     CM_COPY_WND_CAPTION     "Copy the caption of selected window handle"
     CM_COPY_WND_IDENT       "Copy the identifier of selected window handle"
     CM_ACTIVATE_WINDOW      "Activate current window"
+END
+
+STRINGTABLE 
+BEGIN
     CM_SHOW_WINDOW          "Show current window"
     CM_HIDE_WINDOW          "Hide current window"
     CM_TOGGLE_TOPMOST_WINDOW "Toggle current window top-most state"
@@ -654,24 +659,11 @@ END
 
 STRINGTABLE 
 BEGIN
-    ID_MOVE_TOOL            "Track position"
-    ID_SIZE_TOOL            "Track size"
-    ID_SIZE_TOP_LEFT_TOOL   "Track top-left corner"
-    ID_SIZE_BOTTOM_RIGHT_TOOL "Track bottom-right corner"
-    CM_REFRESH_BRANCH       "Refresh Selected Window Branch (Ctrl+F5)"
-END
-
-STRINGTABLE 
-BEGIN
     ID_TOP_MOST_CHECK       "Keep Wintruder window on-top of other windows"
     ID_AUTO_HIDE_CHECK      "Hides Wintruder application when tracking"
     ID_AUTO_HILIGHT_CHECK   "Highlight current window each time a new one is selected"
     ID_FRAME_STYLE_COMBO    "Highlight style of the selected window"
     ID_IGNORE_HIDDEN_CHECK  "Ignore hidden windows when picking with track finder"
-END
-
-STRINGTABLE 
-BEGIN
     ID_IGNORE_DISABLED_CHECK 
                             "Ignore disabled windows when picking with track finder"
     ID_AUTO_UPDATE_CHECK    "Perform automatic updates with the specified timeout"
@@ -681,6 +673,14 @@ BEGIN
                             "Enter the auto-update timer timeout in seconds"
     ID_AUTO_UPDATE_TARGET_COMBO 
                             "Choose what actions to follow on auto-updates"
+    ID_MOVE_TOOL            "Track position"
+    ID_SIZE_TOOL            "Track size"
+    ID_SIZE_TOP_LEFT_TOOL   "Track top-left corner"
+END
+
+STRINGTABLE 
+BEGIN
+    ID_SIZE_BOTTOM_RIGHT_TOOL "Track bottom-right corner"
 END
 
 STRINGTABLE 
