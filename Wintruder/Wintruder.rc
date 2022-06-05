@@ -412,7 +412,7 @@ BEGIN
     "F",            CM_FIND_WINDOW,         VIRTKEY, CONTROL, NOINVERT
     "H",            CM_HIDE_WINDOW,         VIRTKEY, SHIFT, CONTROL, NOINVERT
     VK_F4,          CM_HIGHLIGHT_WINDOW,    VIRTKEY, NOINVERT
-    VK_ESCAPE,      CM_MINIMIZE,            VIRTKEY, NOINVERT
+    VK_ESCAPE,      ID_APP_MINIMIZE,        VIRTKEY, NOINVERT
     "R",            CM_REDRAW_DESKTOP,      VIRTKEY, SHIFT, CONTROL, NOINVERT
     VK_F5,          CM_REFRESH,             VIRTKEY, NOINVERT
     "S",            CM_SHOW_WINDOW,         VIRTKEY, SHIFT, CONTROL, NOINVERT
@@ -456,13 +456,15 @@ IDR_CONTEXT_MENU MENU
 BEGIN
     POPUP "<sys-tray icon>"
     BEGIN
-        MENUITEM "Always on Top",               ID_TOP_MOST_CHECK
-        MENUITEM "Highlight\tF4",               CM_HIGHLIGHT_WINDOW
+        MENUITEM "Always on &Top",              ID_TOP_MOST_CHECK
+        MENUITEM "&Highlight\tF4",              CM_HIGHLIGHT_WINDOW
         MENUITEM SEPARATOR
-        MENUITEM "Restore",                     CM_RESTORE
-        MENUITEM "Close",                       ID_FILE_CLOSE
+        MENUITEM "&Restore",                    ID_APP_RESTORE
+        MENUITEM "Mi&nimize",                   ID_APP_MINIMIZE
         MENUITEM SEPARATOR
-        MENUITEM "About Wintruder...\tF1",      ID_APP_ABOUT
+        MENUITEM "E&xit",                       ID_APP_EXIT
+        MENUITEM SEPARATOR
+        MENUITEM "&About Wintruder...\tF1",     ID_APP_ABOUT
     END
     POPUP "<tree>"
     BEGIN
@@ -508,7 +510,7 @@ BEGIN
         MENUITEM "&Hide Window\tCtrl+Shift+H",  CM_HIDE_WINDOW
         MENUITEM SEPARATOR
         MENUITEM "&Enable|Disable| Window\tCtrl+Shift+E", CM_TOGGLE_ENABLE_WINDOW
-        MENUITEM "Toggle Top-&most Window\tCtrl+Shift+T", CM_TOGGLE_TOPMOST_WINDOW
+        MENUITEM "Toggle Top-&Most Window\tCtrl+Shift+T", CM_TOGGLE_TOPMOST_WINDOW
         MENUITEM SEPARATOR
         MENUITEM "Move &Up",                    CM_MOVE_WINDOW_UP
         MENUITEM "Move &Down",                  CM_MOVE_WINDOW_DOWN
@@ -659,7 +661,7 @@ END
 
 STRINGTABLE 
 BEGIN
-    ID_TOP_MOST_CHECK       "Keep Wintruder window on-top of other windows"
+    ID_TOP_MOST_CHECK       "Keep Wintruder window on-top of other windows\tAlways on Top"
     ID_AUTO_HIDE_CHECK      "Hides Wintruder application when tracking"
     ID_AUTO_HILIGHT_CHECK   "Highlight current window each time a new one is selected"
     ID_FRAME_STYLE_COMBO    "Highlight style of the selected window"

@@ -3,9 +3,14 @@
 #pragma once
 
 #include "LayoutDialog.h"
+#include "ISystemTrayCallback.h"
+
+
+class CSystemTray;
 
 
 abstract class CBaseMainDialog : public CLayoutDialog
+	, private ui::ISystemTrayCallback
 {
 protected:
 	CBaseMainDialog( UINT templateId, CWnd* pParent = NULL );
@@ -15,13 +20,17 @@ public:
 	static void ParseCommandLine( int argc, TCHAR* argv[] );
 
 	bool UseSysTrayMinimize( void ) const { return m_pSystemTrayInfo.get() != NULL; }
-	bool NotifyTrayIcon( int notifyCode );
 
 	void ShowAll( bool show );
 protected:
 	// base overrides
 	virtual void PostRestorePlacement( int showCmd );
 private:
+	// ui::ISystemTrayCallback interface
+	virtual CWnd* GetOwnerWnd( void ) override;
+	virtual CMenu* GetTrayIconContextMenu( void ) override;
+	virtual bool OnTrayIconNotify( UINT msgNotifyCode, UINT iconId, const CPoint& screenPos ) override;
+
 	void _Minimize( void );
 protected:
 	struct CSysTrayInfo
@@ -30,22 +39,21 @@ protected:
 	};
 
 	std::auto_ptr<CSysTrayInfo> m_pSystemTrayInfo;
+	std::auto_ptr<CSystemTray> m_pSystemTray;
 public:
 	enum { ShellIconId = 100 };
 
-	static const UINT WM_TASKBARCREATED;
-	static const UINT WM_TRAYICONNOTIFY;
-public:
 	// generated stuff
 protected:
-	virtual BOOL OnInitDialog( void );
-	afx_msg void OnDestroy( void );
+	virtual BOOL OnInitDialog( void ) override;
 	afx_msg void OnContextMenu( CWnd* pWnd, CPoint screenPos );
-	afx_msg void OnSysCommand( UINT cmdId, LPARAM lParam );
 	afx_msg void OnPaint( void );
 	afx_msg HCURSOR OnQueryDragIcon( void );
-	afx_msg LRESULT OnTrayIconNotify( WPARAM wParam, LPARAM lParam );
-	LRESULT OnExplorerRestart( WPARAM, LPARAM );
+	afx_msg void OnSysCommand( UINT cmdId, LPARAM lParam );
+	afx_msg void OnAppRestore( void );
+	afx_msg void OnUpdateAppRestore( CCmdUI* pCmdUI );
+	afx_msg void OnAppMinimize( void );
+	afx_msg void OnUpdateAppMinimize( CCmdUI* pCmdUI );
 
 	DECLARE_MESSAGE_MAP()
 };

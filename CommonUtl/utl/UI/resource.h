@@ -73,6 +73,8 @@
 #define ID_ITEM_COPY_FOLDERS            28243
 #define ID_SHELL_SUBMENU                28244
 #define ID_FILE_PROPERTIES              28245
+#define ID_APP_RESTORE                  28246
+#define ID_APP_MINIMIZE                 28247
 #define UTL_MIN_CONTROL_VALUE           28500
 #define IDC_GROUP_BOX_1                 28501
 #define IDC_GROUP_BOX_2                 28502
@@ -117,7 +119,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        28026
-#define _APS_NEXT_COMMAND_VALUE         28246
+#define _APS_NEXT_COMMAND_VALUE         28248
 #define _APS_NEXT_CONTROL_VALUE         28536
 #define _APS_NEXT_SYMED_VALUE           28801
 #endif

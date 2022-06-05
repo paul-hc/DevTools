@@ -1,4 +1,3 @@
-
 #ifndef FindWndDialog_h
 #define FindWndDialog_h
 #pragma once

@@ -116,6 +116,7 @@ bool CApplication::RelayTooltipEvent( MSG* pMsg )
 {
 	if ( !IsWindow( m_mainTooltip.m_hWnd ) )
 		return false;
+
 	switch ( pMsg->message )
 	{
 		case WM_MOUSEMOVE:
@@ -178,9 +179,7 @@ BOOL CApplication::OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO
 // command handlers
 
 BEGIN_MESSAGE_MAP( CApplication, CBaseApp<CWinApp> )
-	ON_COMMAND( ID_FILE_CLOSE, OnFileClose )
-	ON_COMMAND( CM_RESTORE, CmRestore )
-	ON_COMMAND( CM_MINIMIZE, CmMinimize )
+	ON_COMMAND( ID_APP_EXIT, OnAppExit )
 	ON_COMMAND( CM_REFRESH, CmRefresh )
 	ON_COMMAND( CM_REFRESH_BRANCH, CmRefreshBranch )
 	ON_COMMAND( CM_ACTIVATE_WINDOW, CmActivateWindow )
@@ -198,19 +197,9 @@ BEGIN_MESSAGE_MAP( CApplication, CBaseApp<CWinApp> )
 	ON_COMMAND( CM_REDRAW_DESKTOP, CmRedrawDesktop )
 END_MESSAGE_MAP()
 
-void CApplication::OnFileClose( void )
+void CApplication::OnAppExit( void )
 {
 	AfxGetMainWnd()->SendMessage( WM_SYSCOMMAND, SC_CLOSE );
-}
-
-void CApplication::CmRestore( void )
-{
-	AfxGetMainWnd()->SendMessage( WM_SYSCOMMAND, SC_RESTORE );
-}
-
-void CApplication::CmMinimize( void )
-{
-	AfxGetMainWnd()->SendMessage( WM_SYSCOMMAND, SC_MINIMIZE );
 }
 
 void CApplication::CmRefresh( void )

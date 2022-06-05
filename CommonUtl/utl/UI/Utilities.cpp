@@ -5,6 +5,7 @@
 #include "HistoryComboBox.h"
 #include "IconButton.h"
 #include "ImageStore.h"
+#include "SystemTray.h"
 #include "utl/ContainerUtilities.h"
 #include "utl/Path.h"
 #include "utl/PathItemBase.h"
@@ -755,6 +756,36 @@ namespace ui
 			--green;
 
 		return RGB( GetRValue( bkColor ), green, GetBValue( bkColor ) );
+	}
+}
+
+
+namespace ui
+{
+	namespace sys_tray
+	{
+		void StoreAppInfo( UINT appIconId, const std::tstring& appTipText )
+		{
+			CSystemTraySingleton::StoreAppInfo( appIconId, appTipText );
+		}
+
+
+		bool ShowBalloonTip( const TCHAR text[], const TCHAR* pTitle /*= NULL*/, DWORD infoFlag /*= NIIF_INFO*/, UINT timeoutSecs /*= 30*/ )
+		{
+			CSystemTray* pSystemTray = CSystemTray::Instance();
+
+			if ( NULL == pSystemTray && !str::IsEmpty( text ) )
+				pSystemTray = new CSystemTraySingleton( AfxGetMainWnd() );		// self-destroying singleton
+
+			return pSystemTray != NULL && pSystemTray->ShowBalloonTip( text, pTitle, infoFlag, timeoutSecs );
+		}
+
+		bool HideBalloonTip( void )
+		{
+			CSystemTray* pSystemTray = CSystemTray::Instance();
+
+			return pSystemTray != NULL && pSystemTray->HideBalloonTip();
+		}
 	}
 }
 

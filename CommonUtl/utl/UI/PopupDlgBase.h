@@ -34,6 +34,7 @@ public:
 	enum DlgIcon { DlgSmallIcon = ICON_SMALL, DlgLargeIcon = ICON_BIG };
 
 	virtual const CIcon* GetDlgIcon( DlgIcon dlgIcon = DlgSmallIcon ) const;
+	const UINT GetDlgIconId( void ) const { return m_dlgIconId; }
 	void LoadDlgIcon( UINT dlgIconId );
 	void SetupDlgIcons( void );
 

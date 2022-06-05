@@ -124,7 +124,7 @@ namespace ui
 
 	enum PopupAlign { DropRight, DropDown, DropLeft, DropUp };
 	enum { HistoryMaxSize = 20 };
-	enum StdPopup { AppMainPopup, AppDebugPopup, TextEditorPopup, HistoryComboPopup, ListView, DateTimePopup };
+	enum StdPopup { AppMainPopup, AppSysTray, AppDebugPopup, TextEditorPopup, HistoryComboPopup, ListView, DateTimePopup };		// IDR_STD_CONTEXT_MENU
 
 	enum FontEffect { Regular = 0, Bold = 1 << 0, Italic = 1 << 1, Underline = 1 << 2 };
 	typedef int TFontEffect;

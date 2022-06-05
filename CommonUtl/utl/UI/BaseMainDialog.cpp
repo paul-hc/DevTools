@@ -3,6 +3,7 @@
 #include "BaseMainDialog.h"
 #include "BaseApp.h"
 #include "Icon.h"
+#include "SystemTray.h"
 #include "MenuUtilities.h"
 #include "StringUtilities.h"
 #include "Utilities.h"
@@ -12,10 +13,6 @@
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
-
-
-const UINT CBaseMainDialog::WM_TASKBARCREATED = ::RegisterWindowMessageA( "TaskbarCreated" );
-const UINT CBaseMainDialog::WM_TRAYICONNOTIFY = ::RegisterWindowMessageA( "utl:WM_TRAYICONNOTIFY" );
 
 
 CBaseMainDialog::CBaseMainDialog( UINT templateId, CWnd* pParent /*= NULL*/ )
@@ -68,36 +65,31 @@ void CBaseMainDialog::PostRestorePlacement( int showCmd )
 				case SW_SHOWMINNOACTIVE:
 				case SW_SHOWMINIMIZED:
 				case SW_MINIMIZE:
-					ModifyStyle( 0, WS_VISIBLE );			// prevents modal dialog loop to show this window, whithout actually showing the window (no startup flicker)
+					ModifyStyle( 0, WS_VISIBLE );			// prevents modal dialog loop to show this window, without actually showing the window (no startup flicker)
 					SendMessage( WM_SYSCOMMAND, SC_MINIMIZE );
 					break;
 			}
 }
 
-void CBaseMainDialog::_Minimize( void )
+CWnd* CBaseMainDialog::GetOwnerWnd( void ) override
 {
-	SendMessage( WM_SYSCOMMAND, SC_MINIMIZE );
+	return this;
 }
 
-bool CBaseMainDialog::NotifyTrayIcon( int notifyCode )
+CMenu* CBaseMainDialog::GetTrayIconContextMenu( void ) override
 {
-	NOTIFYICONDATA niData = { sizeof( NOTIFYICONDATA ) };
+	return m_pSystemTrayInfo.get() != NULL ? &m_pSystemTrayInfo->m_popupMenu : NULL;
+}
 
-	niData.hWnd = m_hWnd;
-	niData.uID = ShellIconId;
-	niData.uFlags = NIF_ICON;
-	niData.uCallbackMessage = WM_TRAYICONNOTIFY;
-	niData.hIcon = NULL;
-	niData.szTip[ 0 ] = _T('\0');
-	niData.uVersion = NOTIFYICON_VERSION;
+bool CBaseMainDialog::OnTrayIconNotify( UINT msgNotifyCode, UINT iconId, const CPoint& screenPos ) override
+{
+	msgNotifyCode, iconId, screenPos;
+	return false;
+}
 
-	if ( NIM_ADD == notifyCode || NIM_MODIFY == notifyCode )
-	{
-		niData.uFlags |= NIF_MESSAGE | NIF_TIP;
-		niData.hIcon = GetDlgIcon( DlgSmallIcon )->GetHandle();
-		GetWindowText( niData.szTip, COUNT_OF( niData.szTip ) );
-	}
-	return ::Shell_NotifyIcon( notifyCode, &niData ) != FALSE;
+void CBaseMainDialog::_Minimize( void )
+{
+	CSystemTray::MinimizeToTray( this );
 }
 
 
@@ -105,14 +97,16 @@ bool CBaseMainDialog::NotifyTrayIcon( int notifyCode )
 
 BEGIN_MESSAGE_MAP( CBaseMainDialog, CLayoutDialog )
 	ON_WM_CONTEXTMENU()
-	ON_WM_SYSCOMMAND()
 	ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
-	ON_REGISTERED_MESSAGE( WM_TRAYICONNOTIFY, OnTrayIconNotify )
-	ON_REGISTERED_MESSAGE( WM_TASKBARCREATED, OnExplorerRestart )
+	ON_WM_SYSCOMMAND()
+	ON_COMMAND( ID_APP_RESTORE, OnAppRestore )
+	ON_UPDATE_COMMAND_UI( ID_APP_RESTORE, OnUpdateAppRestore )
+	ON_COMMAND( ID_APP_MINIMIZE, OnAppMinimize )
+	ON_UPDATE_COMMAND_UI( ID_APP_MINIMIZE, OnUpdateAppMinimize )
 END_MESSAGE_MAP()
 
-BOOL CBaseMainDialog::OnInitDialog( void )
+BOOL CBaseMainDialog::OnInitDialog( void ) override
 {
 	const std::tstring& appNameSuffix = checked_static_cast< CBaseApp<CWinApp>* >( AfxGetApp() )->GetAppNameSuffix();
 	if ( !appNameSuffix.empty() )
@@ -125,15 +119,15 @@ BOOL CBaseMainDialog::OnInitDialog( void )
 		ModifyStyleEx( WS_EX_APPWINDOW, 0 );		// prevent excluding this application from taskbar
 
 	if ( UseSysTrayMinimize() )
-		NotifyTrayIcon( NIM_ADD );					// add shell tray icon
+	{	// add the shell tray icon
+		m_pSystemTray.reset( new CSystemTrayWndHook() );
+		m_pSystemTray->SetOwnerCallback( this );
+		m_pSystemTray->CreateTrayIcon( GetDlgIcon( DlgSmallIcon )->GetSafeHandle(), ShellIconId, ui::GetWindowText( this ).c_str() );
+	}
+	else
+		ui::sys_tray::StoreAppInfo( GetDlgIconId(), ui::GetWindowText( this ) );
 
-	return CLayoutDialog::OnInitDialog();
-}
-
-void CBaseMainDialog::OnDestroy( void )
-{
-	NotifyTrayIcon( NIM_DELETE );					// remove shell tray icon
-	CLayoutDialog::OnDestroy();
+	return __super::OnInitDialog();
 }
 
 void CBaseMainDialog::OnContextMenu( CWnd* pWnd, CPoint screenPos )
@@ -144,16 +138,7 @@ void CBaseMainDialog::OnContextMenu( CWnd* pWnd, CPoint screenPos )
 		return;
 	}
 
-	CLayoutDialog::OnContextMenu( pWnd, screenPos );
-}
-
-void CBaseMainDialog::OnSysCommand( UINT cmdId, LPARAM lParam )
-{
-	CLayoutDialog::OnSysCommand( cmdId, lParam );
-
-	if ( SC_MINIMIZE == GET_SC_WPARAM( cmdId ) )
-		if ( UseSysTrayMinimize() )
-			ShowWindow( SW_HIDE );			// IMP: hide window post-minimize so that it vanishes from the taskbar into the system tray
+	__super::OnContextMenu( pWnd, screenPos );
 }
 
 void CBaseMainDialog::OnPaint( void )
@@ -175,7 +160,7 @@ void CBaseMainDialog::OnPaint( void )
 		}
 	}
 	else
-		CLayoutDialog::OnPaint();
+		__super::OnPaint();
 }
 
 HCURSOR CBaseMainDialog::OnQueryDragIcon( void )
@@ -185,27 +170,38 @@ HCURSOR CBaseMainDialog::OnQueryDragIcon( void )
 	return NULL;
 }
 
-LRESULT CBaseMainDialog::OnTrayIconNotify( WPARAM wParam, LPARAM lParam )
+void CBaseMainDialog::OnSysCommand( UINT cmdId, LPARAM lParam )
 {
-	if ( ShellIconId == wParam )
-		switch ( lParam )
+	if ( UseSysTrayMinimize() )
+		switch ( GET_SC_WPARAM( cmdId ) )
 		{
-			case WM_LBUTTONDOWN:
-				SendMessage( WM_SYSCOMMAND, SC_RESTORE );
-				SetForegroundWindow();
-				break;
-			case WM_RBUTTONUP:
-				if ( m_pSystemTrayInfo->m_popupMenu.GetSafeHmenu() != NULL )
-					ui::TrackPopupMenu( m_pSystemTrayInfo->m_popupMenu, this, ui::GetCursorPos(), TPM_RIGHTBUTTON );
-				break;
+			case SC_RESTORE:
+				m_pSystemTray->RestorePopupWnd();
+				return;
+			case SC_MINIMIZE:
+				m_pSystemTray->MinimizePopupWnd();
+				return;
 		}
 
-	return 0L;
+	__super::OnSysCommand( cmdId, lParam );
 }
 
-// this is called whenever the taskbar is created, e.g. after Explorer crashes and restarts.
-LRESULT CBaseMainDialog::OnExplorerRestart( WPARAM, LPARAM )
+void CBaseMainDialog::OnAppRestore( void )
 {
-	NotifyTrayIcon( NIM_ADD );					// add shell tray icon
-	return 0L;
+	SendMessage( WM_SYSCOMMAND, SC_RESTORE );
+}
+
+void CBaseMainDialog::OnUpdateAppRestore( CCmdUI* pCmdUI )
+{
+	pCmdUI->Enable( CSystemTray::IsMinimizedToTray( this ) );
+}
+
+void CBaseMainDialog::OnAppMinimize( void )
+{
+	SendMessage( WM_SYSCOMMAND, SC_MINIMIZE );
+}
+
+void CBaseMainDialog::OnUpdateAppMinimize( CCmdUI* pCmdUI )
+{
+	pCmdUI->Enable( !CSystemTray::IsMinimizedToTray( AfxGetMainWnd() ) );
 }

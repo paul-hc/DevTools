@@ -623,6 +623,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\ISystemTrayCallback.h"
+				>
+			</File>
+			<File
 				RelativePath=".\IZoomBar.cpp"
 				>
 			</File>
@@ -716,6 +720,14 @@
 			</File>
 			<File
 				RelativePath=".\SyncScrolling.h"
+				>
+			</File>
+			<File
+				RelativePath=".\SystemTray.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\SystemTray.h"
 				>
 			</File>
 			<File

@@ -355,6 +355,15 @@ BEGIN
     BEGIN
         MENUITEM "&About [InternalName]...\tF1", ID_APP_ABOUT
     END
+    POPUP "<app-SysTray>"
+    BEGIN
+        MENUITEM "&Restore",                    ID_APP_RESTORE
+        MENUITEM "Mi&nimize",                   ID_APP_MINIMIZE
+        MENUITEM SEPARATOR
+        MENUITEM "E&xit",                       ID_APP_EXIT
+        MENUITEM SEPARATOR
+        MENUITEM "&About...\tF1",               ID_APP_ABOUT
+    END
     POPUP "<app-debug>"
     BEGIN
         MENUITEM "Run Unit Tests\tCtrl+T",      ID_RUN_TESTS
@@ -524,6 +533,8 @@ BEGIN
     ID_ITEM_COPY_FOLDERS    "Copy selected directory paths\nCopy Directory Path"
     ID_SHELL_SUBMENU        "Explorer system menu"
     ID_FILE_PROPERTIES      "Open property sheet for selected files\nEdit File Properties"
+    ID_APP_RESTORE          "Restore main window\tRestore"
+    ID_APP_MINIMIZE         "Minimize main window\tMinimize"
 END
 
 STRINGTABLE 

@@ -109,7 +109,6 @@
 #define ID_SIZE_BOTTOM_RIGHT_TOOL       10016
 #define ID_COPY_TREE_ANCESTORS          10017
 #define ID_COPY_TREE_CHILDREN           10018
-#define CM_MINIMIZE                     11000
 #define CM_VIEW_GENERAL                 11001
 #define CM_VIEW_WND_TREE                11002
 #define CM_VIEW_OPTIONS                 11003
@@ -127,7 +126,6 @@
 #define CM_UPDATE_TICK                  11015
 #define CM_EXPAND_BRANCH                11016
 #define CM_COLAPSE_BRANCH               11017
-#define CM_RESTORE                      11018
 #define CM_COPY_TARGET_WND              11019
 #define CM_COPY_WND_CLASS               11020
 #define CM_COPY_WND_CAPTION             11021
@@ -150,7 +148,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        141
-#define _APS_NEXT_COMMAND_VALUE         10019
+#define _APS_NEXT_COMMAND_VALUE         10021
 #define _APS_NEXT_CONTROL_VALUE         1080
 #define _APS_NEXT_SYMED_VALUE           5009
 #endif

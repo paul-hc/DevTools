@@ -81,10 +81,10 @@ LRESULT CALLBACK CWindowHook::HookedWindowsProc( HWND hWnd, UINT message, WPARAM
 	AFX_MANAGE_STATE( AfxGetStaticModuleState() );
 #endif
 
-	// Set up MFC message state just in case anyone wants it
-	// This is just like AfxCallWindowProc, but we can't use that because a CWindowHook is not a CWnd
+	// Set up MFC message state just in case anyone wants it.
+	// This is just like AfxCallWindowProc, but we can't use that because a CWindowHook is not a CWnd.
 	MSG& rLastMsg = AfxGetThreadState()->m_lastSentMsg;
-	MSG orgMsg = rLastMsg; // save it for nesting
+	MSG oldMsg = rLastMsg;		// save it for nesting
 
 	rLastMsg.hwnd = hWnd;
 	rLastMsg.message = message;
@@ -106,16 +106,15 @@ LRESULT CALLBACK CWindowHook::HookedWindowsProc( HWND hWnd, UINT message, WPARAM
 	else
 		result = pHookedWindow->WindowProc( message, wParam, lParam ); // call the message hook
 
-	// pop previous state
-	rLastMsg = orgMsg;
+	rLastMsg = oldMsg;			// pop previous state
 	return result;
 }
 
 CWindowHook::THookMap& CWindowHook::GetHookMap( void )
 {
-	static THookMap mapOfWindowHooks;
+	static THookMap s_mapOfWindowHooks;
 
-	return mapOfWindowHooks;
+	return s_mapOfWindowHooks;
 }
 
 CWindowHook* CWindowHook::FindHook( HWND hWndHooked )
@@ -131,11 +130,11 @@ void CWindowHook::RegisterHook( HWND hWndToHook )
 	m_pNextHook = FindHook( hWndToHook );
 
 	GetHookMap()[ hWndToHook ] = this;
-	if ( m_pNextHook == NULL )
+	if ( NULL == m_pNextHook )
 		// this is the first hook added -> subclass the window
 		m_pOrgWndProc = (WNDPROC)::SetWindowLongPtr( hWndToHook, GWLP_WNDPROC, (LONG_PTR)&CWindowHook::HookedWindowsProc );
 	else
-		m_pOrgWndProc = m_pNextHook->m_pOrgWndProc; // just copy window-proc from the next hook
+		m_pOrgWndProc = m_pNextHook->m_pOrgWndProc;		// just copy window-proc from the next hook
 
 	ASSERT_PTR( m_pOrgWndProc );
 	m_hWnd = hWndToHook;

@@ -31,9 +31,7 @@ public:
 	virtual BOOL PreTranslateMessage( MSG* pMsg );
 	virtual BOOL OnCmdMsg( UINT id, int code, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo );
 protected:
-	afx_msg void OnFileClose( void );
-	afx_msg void CmRestore( void );
-	afx_msg void CmMinimize( void );
+	afx_msg void OnAppExit( void );
 	afx_msg void CmRefresh( void );
 	afx_msg void CmRefreshBranch( void );
 	afx_msg void CmActivateWindow( void );
